@@ -1,6 +1,6 @@
 #**************************************************************
 #
-#	LSD 8.0 - December 2020
+#	LSD 8.0 - September 2021
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -16,7 +16,7 @@
 
 CC=g++	
 TARGET=lsd_getlimits
-SWITCH_CC=-DNW -DNP -Wno-unused-result -O3
+SWITCH_CC=-D_NW_ -D_NP_ -Wno-unused-result -O3
 
 # from here you should not need to modify anything
 
@@ -59,4 +59,5 @@ $(SRC_DIR)util.o: $(SRC_DIR)util.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 
 # remove compiled files
 clean:
-	$(RM) $(SRC_DIR)*.o $(TARGET)
+	$(RM) $(SRC_DIR)common.o $(SRC_DIR)getlimits.o $(SRC_DIR)file.o $(SRC_DIR)object.o \
+	$(SRC_DIR)variab.o $(SRC_DIR)nets.o $(SRC_DIR)util.o

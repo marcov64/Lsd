@@ -284,11 +284,13 @@ div.WordSection1
 
 </div>
 
-<p class=MsoNormal><span lang=EN-US style='color:white'>The main LSD Browser
-has two purposes: to show/edit th</span><span lang=EN-US>e contents of one <a
-href="LSD_faqs.html#object">Object type</a> (referred as the current Object) at
-a time and to serve as the control center for all LSD activities before and
-after a <a href="LSD_faqs.html#simulationrun">simulation run</a>.</span></p>
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>The main LSD Browser has two purposes: to
+show/edit the contents of one <a href="LSD_faqs.html#object">Object type</a>
+(referred as the current Object) at a time and to serve as the control center
+for all LSD activities before and after a <a href="LSD_faqs.html#simulationrun">simulation
+run</a>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The LSD Browser is the main window of an
 executing <a href="LSD_faqs.html#modelprogram">LSD model program</a>. The LSD
@@ -297,6 +299,11 @@ successful <a href="LSD_faqs.html#compiler">compilation</a> of the current <a
 href="LSD_faqs.html#model">LSD model</a>. Directly launching the LSD model
 program is also possible but may require previously setting up the operating
 system environment.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>The position and sizes of all LSD windows
+are preserved among Browser sessions, except if the computer display
+configuration changes. Also, the last model configuration file, if any, is
+automatically reopened at the same Object previously displayed.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -401,8 +408,8 @@ class=Cdigo><span lang=EN-US>_</span></span><span lang=EN-US>).</span></p>
 <p class=MsoNormal><span lang=EN-US>The Objects in the list can also be
 right-clicked to open the associated context menu. This menu offers shortcuts
 to the most common commands addressing the chosen Object. All the options
-available in the context menu are shortcuts to the most used options in the main
-menu (see <a href="#_Editing_Objects_1">below</a>).</span></p>
+available in the context menu are shortcuts to the most used options in the
+main menu (see <a href="#_Editing_Objects_1">below</a>).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Additionally to the names, the LSD Browser
 also shows the number of instances of each Object type as in </span><span
@@ -567,7 +574,8 @@ Objects</span></h1>
 class=Cdigo><span lang=EN-US>Descending Objects</span></span><span lang=EN-US>
 list box or the <a href="graphrep.html">LSD Model Structure</a> window and
 select the menu option </span><span class=Cdigo><span lang=EN-US>Model&gt;Change
-Object</span></span><span lang=EN-US>, or </span><span class=Cdigo><span
+Object</span></span><span class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;
+color:windowtext'>, or</span></span><span lang=EN-US> </span><span class=Cdigo><span
 lang=EN-US>Change</span></span><span lang=EN-US> in the (right-click) context
 menu, or press </span><span class=Cdigo><span lang=EN-US>Ctrl+Enter</span></span><span
 lang=EN-US>, or double-click in the LSD Model Structure to open the Change
@@ -579,7 +587,7 @@ border=0 width=358 height=290 src="image/object_options.png"></span></p>
 <p class=MsoNormal><span lang=EN-US>The top part of the Change Object window
 indicates the name of the <a href="LSD_faqs.html#object">Object</a>. </span></p>
 
-<p class=MsoNormal><span lang=EN-US>Next, there are three action buttons (and
+<p class=MsoNormal><span lang=EN-US>Next, there are four action buttons (and
 the respective shortcut keys):</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -600,10 +608,30 @@ of this Object (see details <a href="menudata_objn.html">here</a>).</span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Move</span></b></span><span
+lang=EN-US>: (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+M</span></span><span
+lang=EN-US>) Move the Object and its descendants to a different parent Object.
+The destination parent Object cannot be one of the descendants of this Object.
+When the total number of instances of the destination parent (all over the
+model) is smaller than the number of instances of the source parent,
+initialization data from the excess instances of this Object are lost.
+Conversely, if the number of instances of the destination parent is larger than
+the source parent, the missing Object instances will be cloned from the last
+available instance. In these case, please check the <a href="menudata_init.html">initial
+values</a> of the elements in the moved Option after this operation to make
+sure the desired values are still in place.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Delete</span></b></span><span
 lang=EN-US>: (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+D</span></span><span
 lang=EN-US>) After confirmation, deletes the object (all instances) from the <a
 href="LSD_faqs.html#modelsetting">model configuration</a>.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>These four actions can also be performed
+using the (right-click) context menu of the target Object on the Descending
+Objects list box and on the LSD Model Structure Window.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Below, there is one option: </span></p>
 
@@ -653,7 +681,8 @@ href="LSD_faqs.html#variable">Variables</a> and <a
 href="LSD_faqs.html#parameter">Parameters</a> list opens the Change Element
 window (example below). This window can be also launched using the main menu
 option </span><span class=Cdigo><span lang=EN-US>Model&gt;Change Element</span></span><span
-lang=EN-US>, or </span><span class=Cdigo><span lang=EN-US>Change</span></span><span
+class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;color:windowtext'>,
+or</span></span><span lang=EN-US> </span><span class=Cdigo><span lang=EN-US>Change</span></span><span
 lang=EN-US> in the (right-click) context menu, or yet pressing </span><span
 class=Cdigo><span lang=EN-US>Enter</span></span><span lang=EN-US> when the
 element name is already selected.</span></p>
@@ -665,7 +694,7 @@ border=0 width=356 height=485 src="image/variable_options.png"></span></p>
 name of the Variable or Parameter and the <a href="LSD_faqs.html#object">Object
 type</a> where it is contained. </span></p>
 
-<p class=MsoNormal><span lang=EN-US>Next, there are three action buttons (and
+<p class=MsoNormal><span lang=EN-US>Next, there are four action buttons (and
 the respective shortcut keys):</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -753,11 +782,11 @@ Settings</a></span></span><span lang=EN-US>.</span></p>
 lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Parallel</span></b></span><span
 lang=EN-US>: (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+P</span></span><span
-lang=EN-US>) (Variables only) Check to perform parallel processing when computing
-the <a href="LSD_faqs.html#equation">Equation</a> for multiple instances of
-this Variable in brother <a href="LSD_faqs.html#object">Object</a> copies.
-Beware that not all multi-instanced Variables can or should be processed in
-parallel, to avoid deadlocks because of the particular <a
+lang=EN-US>) (Variables only) Check to perform parallel processing when
+computing the <a href="LSD_faqs.html#equation">Equation</a> for multiple
+instances of this Variable in brother <a href="LSD_faqs.html#object">Object</a>
+copies. Beware that not all multi-instanced Variables can or should be
+processed in parallel, to avoid deadlocks because of the particular <a
 href="LSD_faqs.html#modelstructure">model structure</a> and to save the OS
 overhead of creating new processing threads for computationally-light
 Equations. To identify the Variables which may provide parallelization gains,
@@ -765,12 +794,12 @@ please check the </span><span class=Cdigo><span lang=EN-US>Show aggregated
 profiling times</span></span><span lang=EN-US> option in </span><span
 class=Cdigo><span lang=EN-US><a href="menurun.html#simsetting">Run&gt;Simulation
 Settings</a></span></span><span lang=EN-US>. It is recommended to enable
-parallel processing of one Variable at a time, starting with the computationally-heavy
-ones, to make sure that the variable can be (logically) computed in parallel.
-If, because of the model structure, changing one Variable instance affects the
-computation of another instance of the same Variable, directly or indirectly,
-such Variable calculation cannot be parallelized and will throw a deadlock
-error. <br>
+parallel processing of one Variable at a time, starting with the
+computationally-heavy ones, to make sure that the variable can be (logically)
+computed in parallel. If, because of the model structure, changing one Variable
+instance affects the computation of another instance of the same Variable,
+directly or indirectly, such Variable calculation cannot be parallelized and
+will throw a deadlock error. <br>
 WARNING: only Variables that are computationally intensive should have this
 option enabled or this may end up slowing down the <a
 href="LSD_faqs.html#simulationrun">simulation run</a>.</span></p>
@@ -806,8 +835,8 @@ the following options: </span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>View Code</span></b></span><span
-lang=EN-US>: (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+W</span></span><span
+</span></span><span class=Cdigo><b><span lang=EN-US>Equation</span></b></span><span
+lang=EN-US>: (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+Q</span></span><span
 lang=EN-US>)<b> </b>(Variables only) Show in a new window the <a
 href="LSD_faqs.html#equation">Equation</a> (actual code) used to compute the
 Variable.</span></p>
@@ -819,8 +848,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;color:windowtext'>:</span></span><span
 lang=EN-US> (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+A</span></span><span
 lang=EN-US>) Provide (or add) an automatic description text for the element,
-indication in which Variable Equations it is used. If the element is a Variable,
-LSD also scans the <a href="LSD_faqs.html#equationfile">equation file</a>
+indication in which Variable Equations it is used. If the element is a
+Variable, LSD also scans the <a href="LSD_faqs.html#equationfile">equation file</a>
 looking for a comment section in the beginning of the respective Equation. If
 found, this section is copied in the </span><span class=Cdigo><span lang=EN-US>Description</span></span><span
 lang=EN-US> box.</span></p>
@@ -842,7 +871,7 @@ the element.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>For <a href="LSD_faqs.html#variable">lagged
 Variables</a> and Parameters only, the next part of the Change Element window
-offers a text box for comments on the initialization values of the element,
+offers a text box for description on the initialization values of the element,
 which are used in the model <a href="LSD_faqs.html#modeldocumentation">documentation</a>.
 The filling of this box is optional (but recommended) and does not affect the
 simulation run. The box is automatically filled when the element initialization
@@ -852,7 +881,7 @@ href="menudata_init.html#setall"><span style='color:gray;text-decoration:none'>S
 All</span></a></span></span><span lang=EN-US> (in the <a
 href="menudata_init.html">Initial Values</a> window) buttons.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>Additionally to the comments box, lagged
+<p class=MsoNormal><span lang=EN-US>In addition to the description box, lagged
 Variables and Parameters offer two additional buttons:</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -861,8 +890,8 @@ lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"
 </span></span><span class=Cdigo><b><span lang=EN-US>Initial Values</span></b></span><span
 lang=EN-US>: (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+N</span></span><span
 lang=EN-US>)<b> </b>(lagged Variables and Parameters only) Open the <a
-href="menudata_init.html#setall">Set All Objects Initialization</a> window
-which allows setting the initial value for all instances of the element.</span></p>
+href="menudata_init.html#setall">Set All Objects Initialization</a> window which
+allows setting the initial value for all instances of the element.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
@@ -1040,7 +1069,7 @@ lang=EN-US> in the (right-click) context menu of the target <a
 href="LSD_faqs.html#variable">Variable</a> or <a href="LSD_faqs.html#parameter">Parameter</a>
 to move it to a different <a href="LSD_faqs.html#object">Object</a>. After
 moving the element to the new Object, the element is removed from the current
-Object. All initialization data and options associated with the element is
+Object. All initialization data and options associated with the element are
 moved together. </span></p>
 
 <p class=MsoNormal><i><span lang=EN-US>WARNING: </span></i><span lang=EN-US>changing

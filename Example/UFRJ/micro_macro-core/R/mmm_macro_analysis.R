@@ -10,15 +10,15 @@
 #
 #******************************************************************
 
-folder    <- "./External_Income"                  # data files folder
-baseName  <- "Sim_"                     # data files base name (same as .lsd file)
-nExp      <- 3                          # number of experiments (sensitivity/different cases)
+folder    <- "./Baseline"                  # data files folder
+baseName  <- "Sim1"                     # data files base name (same as .lsd file)
+nExp      <- 1                          # number of experiments (sensitivity/different cases)
 iniDrop   <- 0                          # initial time steps to drop from analysis (0=none)
 nKeep     <- -1                         # number of time steps to keep (-1=all)
 cores     <- 0                          # maximum number of cores to allocate (0=all)
 savDat    <- F                          # save processed data files and re-use if available?
 
-  expVal <- c( "Baseline", "Fixed=0.01", "Fixed=0.005" )                           # case parameter values
+  expVal <- c( "Baseline" )                           # case parameter values
 
 # Aggregated variables to use
 logVars <- c( "Real_GDP",               # Real GDP
@@ -32,9 +32,7 @@ logVars <- c( "Real_GDP",               # Real GDP
               "INVE_r",                 # Real Stock of Inventories
               "P",                      # Price Index
               "PROFITS",                # Real Profits
-              "WAGE",                   # Real Wages
-              "DEBT",                   # Private Stock of Debt
-              "PDEBT",                  # Public Stock of Debt
+              "WAGE",                   # Real Wage
               "PROD",                   # Average Labor Productivity
               "MK",                     # Average Markup
               "EMP"                     # Employment in Hours of Labor
@@ -53,8 +51,6 @@ aggrVars <- append( logVars,
                         "INVE_G",       # Real Stock of Inventories Growth
                         "PROFITS_G",    # Real Profits Growth
                         "WAGE_G",       # Real Wages Growth
-                        "DEBT_G",       # Private Stock of Debt Growth
-                        "PDEBT_G",      # Public Sotck of Debt Growth
                         "PROD_G",       # Labor Productivity Growth
                         "MK_G",         # Markup Growth
                         "U",            # Unemployment Rate
@@ -75,8 +71,6 @@ aggrVars <- append( logVars,
                         "INVE_G",       # Real Stock of Inventories Growth
                         "PROFITS_G",    # Real Profits Growth
                         "WAGE_G",       # Real Wages Growth
-                        "DEBT_G",       # Private Stock of Debt Growth
-                        "PDEBT_G",      # Public Sotck of Debt Growth
                         "PROD_G",       # Labor Productivity Growth
                         "MK_G",         # Markup Growth
                         "U",            # Unemployment Rate
@@ -408,10 +402,12 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
   time_plots( mcData, Adata, mdata, Mdata, Sdata, nExp, nSize, nTsteps, TmaskPlot,
               CI, legends, colors, lTypes, transMk, smoothing )
   
-  box_plots( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
-             nTstat, legends, legendList, sDigits, bPlotCoef,
-             bPlotNotc, folder, outDir, repName )
-  
+  if(nExp>1)
+  {
+    box_plots( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
+               nTstat, legends, legendList, sDigits, bPlotCoef,
+               bPlotNotc, folder, outDir, repName )
+  }
   
   #
   # ====== STATISTICS GENERATION ======
@@ -419,27 +415,27 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
   
   # Create vectors and lists to hold the Monte Carlo results
   gdp_gr <- infla <- prod_gr <- cr_gr <- ir_gr <- gr_gr <-
-    mr_gr <- profits_gr <- wage_gr <- debt_gr <- pdebt_gr <- 
+    mr_gr <- profits_gr <- wage_gr <- 
     mk_gr <- u_gr <- x_gr <- nx_gr <- pr_sh <- wg_sh <- k_gr <- inve_gr <- emp_gr <-
     vector( mode = "numeric", length = nSize )
   
   gdp_r_sd <- con_r_sd <- inv_r_sd <- gov_r_sd <- imp_r_sd <- 
-    p_sd <- profits_sd <- wage_sd <- debt_sd <- pdebt_sd <- prod_sd <- 
+    p_sd <- profits_sd <- wage_sd <- prod_sd <- 
     u_sd <- emp_sd <- pr_sh_sd <- wg_sh_sd <- mk_sd <- 
     inve_sd <- k_sd <- x_r_sd <- nx_r_sd <-
     vector( mode = 'numeric', length = nSize )
   
   gdp_gdp <- cr_gdp <- ir_gdp <- gov_gdp <- imp_gdp <- x_gdp <- nx_gdp <- 
-    p_gdp <- profits_gdp <- wage_gdp <- pr_sh_gdp <- wg_sh_gdp <- debt_gdp <- pdebt_gdp <- 
+    p_gdp <- profits_gdp <- wage_gdp <- pr_sh_gdp <- wg_sh_gdp <- 
     prod_gdp <- mk_gdp <- inve_gdp <- k_gdp <- u_gdp <- emp_gdp <-  list( )
   
   gdp_gdp_pval <- cr_gdp_pval <- ir_gdp_pval <- gov_gdp_pval <- imp_gdp_pval <- x_gdp_pval <- nx_gdp_pval <- 
-    p_gdp_pval <- profits_gdp_pval <- wage_gdp_pval <- pr_sh_gdp_pval <- wg_sh_gdp_pval <- debt_gdp_pval <- pdebt_gdp_pval <- 
+    p_gdp_pval <- profits_gdp_pval <- wage_gdp_pval <- pr_sh_gdp_pval <- wg_sh_gdp_pval <- 
     prod_gdp_pval <- mk_gdp_pval <- inve_gdp_pval <- k_gdp_pval <- u_gdp_pval <- emp_gdp_pval <- 
     vector( mode = "numeric", length = nExp )
   
   adf_gdp_r <- adf_con_r <- adf_inv_r <- adf_gov_r <- adf_imp_r <- adf_p <-
-    adf_profits <- adf_wage <- adf_debt <- adf_pdebt <- adf_prod <- adf_x <-
+    adf_profits <- adf_wage <- adf_prod <- adf_x <-
     adf_nx <- adf_k <- adf_inve <- adf_pr_sh <- adf_wg_sh <- adf_mk <- adf_emp <- adf_u <- list( )
   
   for(k in 1 : nExp){ # Experiment k
@@ -474,8 +470,6 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
       mr_gr[ j ]        <- mcData[[ k ]][ nTstat, "M_G", j ]
       profits_gr[ j ]   <- mcData[[ k ]][ nTstat, "PROFITS_G", j ]
       wage_gr[ j ]      <- mcData[[ k ]][ nTstat, "WAGE_G", j ]
-      debt_gr[ j ]      <- mcData[[ k ]][ nTstat, "DEBT_G", j ]
-      pdebt_gr[ j ]     <- mcData[[ k ]][ nTstat, "PDEBT_G", j ]
       x_gr [ j ]        <- mcData[[ k ]][ nTstat, "X_G", j ]
       nx_gr [ j ]       <- mcData[[ k ]][ nTstat, "NX_G", j ]
       inve_gr [ j ]     <- mcData[[ k ]][ nTstat, "INVE_G", j ]
@@ -496,8 +490,6 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
       p_bpf       <- bkfilter( log0( mcData[[ k ]][ TmaskStat, "P", j ] ), pl = lowP, pu = highP, nfix = bpfK )
       profits_bpf <- bkfilter( log0( mcData[[ k ]][ TmaskStat, "PROFITS", j ] ), pl = lowP, pu = highP, nfix = bpfK )
       wage_bpf    <- bkfilter( log0( mcData[[ k ]][ TmaskStat, "WAGE", j ] ), pl = lowP, pu = highP, nfix = bpfK )
-      debt_bpf    <- bkfilter( log0( mcData[[ k ]][ TmaskStat, "DEBT", j ] ), pl = lowP, pu = highP, nfix = bpfK )
-      pdebt_bpf   <- bkfilter( log0( mcData[[ k ]][ TmaskStat, "PDEBT", j ] ), pl = lowP, pu = highP, nfix = bpfK )
       prod_bpf    <- bkfilter( log0( mcData[[ k ]][ TmaskStat, "PROD", j ] ), pl = lowP, pu = highP, nfix = bpfK )
       u_bpf       <- bkfilter( mcData[[ k ]][ TmaskStat, "U", j ] , pl = lowP, pu = highP, nfix = bpfK )
       x_bpf       <- bkfilter( log0( mcData[[ k ]][ TmaskStat, "X_r", j ] ), pl = lowP, pu = highP, nfix = bpfK )
@@ -518,8 +510,6 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
       adf_p[[ j ]]        <- adf.test( log0( mcData[[ k ]][ TmaskStat, "P", j ] ) )
       adf_profits[[ j ]]  <- adf.test( log0( mcData[[ k ]][ TmaskStat, "PROFITS", j ] ) )
       adf_wage[[ j ]]     <- adf.test( log0( mcData[[ k ]][ TmaskStat, "WAGE", j ] ) )
-      adf_debt[[ j ]]     <- adf.test( log0( mcData[[ k ]][ TmaskStat, "DEBT", j ] ) )
-      adf_pdebt[[ j ]]    <- adf.test( log0( mcData[[ k ]][ TmaskStat, "PDEBT", j ] ) )
       adf_prod[[ j ]]     <- adf.test( log0( mcData[[ k ]][ TmaskStat, "PROD", j ] ) )
       adf_x[[ j ]]        <- adf.test( log0( mcData[[ k ]][ TmaskStat, "X_r", j ] ) )
       adf_nx[[ j ]]       <- adf.test( log0( mcData[[ k ]][ TmaskStat, "NX_r", j ] ) )
@@ -540,8 +530,6 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
       p_sd[ j ]           <- sd( p_bpf$cycle[ TmaskBpf, 1 ] )
       profits_sd[ j ]     <- sd( profits_bpf$cycle[ TmaskBpf, 1 ] )
       wage_sd[ j ]        <- sd( wage_bpf$cycle[ TmaskBpf, 1 ] )
-      debt_sd[ j ]        <- sd( debt_bpf$cycle[ TmaskBpf, 1 ] )
-      pdebt_sd[ j ]       <- sd( pdebt_bpf$cycle[ TmaskBpf, 1 ] )
       prod_sd[ j ]        <- sd( prod_bpf$cycle[ TmaskBpf, 1 ] )
       x_r_sd[ j ]         <- sd( x_bpf$cycle[ TmaskBpf, 1 ] )
       nx_r_sd[ j ]        <- sd( nx_bpf$cycle[ TmaskBpf, 1 ] )
@@ -590,12 +578,6 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
       wg_sh_gdp[[ j ]] <- ccf(gdp_bpf$cycle[ TmaskBpf, 1 ],
                                 wg_sh_bpf$cycle[ TmaskBpf, 1 ],
                                 lag.max = lags, plot = FALSE, na.action = na.pass )
-      debt_gdp[[ j ]] <- ccf(gdp_bpf$cycle[ TmaskBpf, 1 ],
-                              debt_bpf$cycle[ TmaskBpf, 1 ],
-                              lag.max = lags, plot = FALSE, na.action = na.pass )
-      pdebt_gdp[[ j ]] <- ccf(gdp_bpf$cycle[ TmaskBpf, 1 ],
-                              pdebt_bpf$cycle[ TmaskBpf, 1 ],
-                              lag.max = lags, plot = FALSE, na.action = na.pass )
       prod_gdp[[ j ]] <- ccf( gdp_bpf$cycle[ TmaskBpf, 1 ],
                               prod_bpf$cycle[ TmaskBpf, 1 ],
                               lag.max = lags, plot = FALSE, na.action = na.pass )
@@ -632,8 +614,6 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
       wage_gdp_pval[ i ]<- t.test0( abs( unname( sapply( wage_gdp, `[[`, "acf" ) )[ i, ] ), critCorr, CI )
       pr_sh_gdp_pval[ i ]<- t.test0( abs( unname( sapply( pr_sh_gdp, `[[`, "acf" ) )[ i, ] ), critCorr, CI )
       wg_sh_gdp_pval[ i ]<- t.test0( abs( unname( sapply( wg_sh_gdp, `[[`, "acf" ) )[ i, ] ), critCorr, CI )
-      debt_gdp_pval[ i ]<- t.test0( abs( unname( sapply( debt_gdp, `[[`, "acf" ) )[ i, ] ), critCorr, CI )
-      pdebt_gdp_pval[ i ]<- t.test0( abs( unname( sapply( pdebt_gdp, `[[`, "acf" ) )[ i, ] ), critCorr, CI )
       prod_gdp_pval[ i ]<- t.test0( abs( unname( sapply( prod_gdp, `[[`, "acf" ) )[ i, ] ), critCorr, CI )
       u_gdp_pval[ i ]   <- t.test0( abs( unname( sapply( u_gdp, `[[`, "acf" ) )[ i, ] ), critCorr, CI )
       emp_gdp_pval[ i ]   <- t.test0( abs( unname( sapply( emp_gdp, `[[`, "acf" ) )[ i, ] ), critCorr, CI )
@@ -769,8 +749,7 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
         mean( wage_gr ),
         mean( pr_sh ), 
         mean( wg_sh ), 
-        mean( debt_gr ), 
-        mean( pdebt_gr ), 
+       
         
         ## (s.e.)
         sd( infla ) / sqrt( nSize ), 
@@ -778,8 +757,7 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
         sd( wage_gr ) / sqrt( nSize ),
         sd( pr_sh ) / sqrt( nSize ),
         sd( wg_sh ) / sqrt( nSize ),
-        sd( debt_gr ) / sqrt( nSize ), 
-        sd( pdebt_gr ) / sqrt( nSize ),
+        
         
         ## ADF test (logs)
         mean( unname( sapply( adf_p, `[[`, "statistic" ) ) ),
@@ -787,8 +765,7 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
         mean( unname( sapply( adf_wage, `[[`, "statistic" ) ) ),
         mean( unname( sapply( adf_pr_sh, `[[`, "statistic" ) ) ),
         mean( unname( sapply( adf_wg_sh, `[[`, "statistic" ) ) ),
-        mean( unname( sapply( adf_debt, `[[`, "statistic" ) ) ),
-        mean( unname( sapply( adf_pdebt, `[[`, "statistic" ) ) ),
+        
         
         ## ADF test (logs) s.e.
         sd( unname( sapply( adf_p, `[[`, "statistic" ) ) ) / sqrt( nSize ),
@@ -796,8 +773,7 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
         sd( unname( sapply( adf_wage, `[[`, "statistic" ) ) ) / sqrt( nSize ),
         sd( unname( sapply( adf_pr_sh, `[[`, "statistic" ) ) ) / sqrt( nSize ),
         sd( unname( sapply( adf_wg_sh, `[[`, "statistic" ) ) ) / sqrt( nSize ),
-        sd( unname( sapply( adf_debt, `[[`, "statistic" ) ) ) / sqrt( nSize ),
-        sd( unname( sapply( adf_pdebt, `[[`, "statistic" ) ) ) / sqrt( nSize ),
+        
         
         ## ADF test (logs) p.value
         mean( unname( sapply( adf_p, `[[`, "p.value" ) ) ),
@@ -805,8 +781,7 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
         mean( unname( sapply( adf_wage, `[[`, "p.value" ) ) ),
         mean( unname( sapply( adf_pr_sh, `[[`, "p.value" ) ) ),
         mean( unname( sapply( adf_wg_sh, `[[`, "p.value" ) ) ),
-        mean( unname( sapply( adf_debt, `[[`, "p.value" ) ) ),
-        mean( unname( sapply( adf_pdebt, `[[`, "p.value" ) ) ),
+        
         
         ## ADF test (logs) p.value s.e.
         sd( unname( sapply( adf_p, `[[`, "p.value" ) ) ) / sqrt( nSize ),
@@ -814,8 +789,7 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
         sd( unname( sapply( adf_wage, `[[`, "p.value" ) ) ) / sqrt( nSize ),
         sd( unname( sapply( adf_pr_sh, `[[`, "p.value" ) ) ) / sqrt( nSize ),
         sd( unname( sapply( adf_wg_sh, `[[`, "p.value" ) ) ) / sqrt( nSize ),
-        sd( unname( sapply( adf_debt, `[[`, "p.value" ) ) ) / sqrt( nSize ),
-        sd( unname( sapply( adf_pdebt, `[[`, "p.value" ) ) ) / sqrt( nSize ),
+       
       
         ## S.d. of bpf series
         mean( p_sd ),
@@ -823,8 +797,7 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
         mean( wage_sd ),
         mean( pr_sh_sd ),
         mean( wg_sh_sd ),
-        mean( debt_sd ),
-        mean( pdebt_sd ), 
+        
         
         ## S.e. of bpf series s.d.
         se( p_sd ) / sqrt( nSize ),
@@ -832,8 +805,7 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
         se( wage_sd ) / sqrt( nSize ),
         se( pr_sh_sd ) / sqrt( nSize ),
         se( wg_sh_sd ) / sqrt( nSize ),
-        se( debt_sd ) / sqrt( nSize ), 
-        se( pdebt_sd ) / sqrt( nSize ), 
+        
         
         ## relative s.d. (to GDP)
         mean( p_sd ) / mean( gdp_r_sd ), 
@@ -841,8 +813,7 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
         mean( wage_sd ) / mean( gdp_r_sd ), 
         mean( pr_sh_sd ) / mean( gdp_r_sd ),
         mean( wg_sh_sd ) / mean( gdp_r_sd ),
-        mean( debt_sd ) / mean(gdp_r_sd ),
-        mean( pdebt_sd ) / mean( gdp_r_sd )
+        
         
       ),
       ncol = 7, byrow = T)
@@ -851,9 +822,7 @@ tryCatch({    # enter error handling mode so PDF can be closed in case of error/
                                   "Profit", 
                                   "Wages",
                                   "Profit Share",
-                                  "Wage Share",
-                                  "Debt", 
-                                  "Gov. Debt"
+                                  "Wage Share"
                                  )
     rownames( key.stats.2 ) <- c( "avg. growth rate", 
                                   " (s.e.)",

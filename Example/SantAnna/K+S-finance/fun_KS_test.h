@@ -102,24 +102,22 @@ for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 for ( i = 0; i < LEN_ARR( posit ); ++i )
 	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
-for ( itd = all.begin( ); itd != all.end( ); ++itd )
+for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 	
-check_error( A <= 0 || dA < - TOL, "INVALID-PRODUCTIVITY", 0, & errors );
+check_error( A <= 0 || dA < - 2 * TOL, "INVALID-PRODUCTIVITY", 0, & errors );
 
 check_error( A < min( A1, A2 ) || A > max( A1, A2 ), 
 			 "INCONSISTENT-PRODUCTIVITY", 0, & errors );
 			 
 check_error( GDPnom > ( 1 + TOL ) * ( Q1e * PPI + Q2e * CPI ) ||
-			 GDPnom < ( 1 - TOL ) * ( Q1e * PPI + Q2e * CPI ), 
+			 GDPnom < ( 1 - TOL ) * ( Q1e * PPI + Q2e * CPI ) || 
+			 GDPnom > ( 1 + TOL ) * ( C - Sav + Inom + G + dNnom ) ||
+			 GDPnom < ( 1 - TOL ) * ( C - Sav + Inom + G + dNnom ), 
 			 "INCONSISTENT-GDP", 0, & errors );
 			 
-check_error( GDP > ( 1 + TOL ) * ( C - Sav + Inom + G + dNnom ) / CPI ||
-			 GDP < ( 1 - TOL ) * ( C - Sav + Inom + G + dNnom ) / CPI, 
-			 "GDPnom-GAP", 0, & errors );
-			 
-check_error( GDP > ( 1 + 2 * TOL ) * GDI ||
-			 GDP < ( 1 - 2 * TOL ) * GDI, 
+check_error( GDPnom > ( 1 + 2 * TOL ) * GDI ||
+			 GDPnom < ( 1 - 2 * TOL ) * GDI, 
 			 "GDI-GAP", 0, & errors );
 
 check_error( Sav / GDPnom > 5 * TOL, "HIGH-SAVINGS", 0, & errors );
@@ -181,71 +179,126 @@ if ( T == v[1] )
 // scan banks for severe problems
 objVecT TCerr;									// vector to save TC error banks
 int errors = 0;									// error counter
-k = v[4] = v[5] = v[6] = v[7] = 0;				// accumulators
+k = v[4] = v[5] = v[6] = v[7] = v[8] = v[9] = 0;// accumulators
+v[10] = v[11] = v[12] = 0;
+
 CYCLES( FINSECL1, cur, "Bank" )
 {
 	v[4] += COUNTS( cur, "Cli1" );
 	v[5] += COUNTS( cur, "Cli2" );
 	v[6] += VS( cur, "_Cl" );
 	v[7] += VS( cur, "_fB" );
+	v[8] += VS( cur, "_Bonds" );
+	v[9] += VS( cur, "_Depo" );
+	v[10] += VS( cur, "_Loans" );
+	v[11] += VS( cur, "_LoansCB" );
+	v[12] += VS( cur, "_Res" );
 	
-	if ( VS( cur, "_TC" ) < VS( cur, "_TC1free" ) + VS( cur, "_TC2free" ) )
+	if ( VS( cur, "_TC1free" ) + VS( cur, "_TC2free" ) > 
+		 ( 1 + TOL / 10 ) * VS( cur, "_TC" ) )
 		TCerr.push_back( cur );
 	
 	++k;
 }
 
+double BD = VS( FINSECL1, "BD" );
+double BS = VS( FINSECL1, "BS" );
+double BadDeb = VS( FINSECL1, "BadDeb" );
+double Bonds = VS( FINSECL1, "Bonds" );
 double Cl = VS( FINSECL1, "Cl" );
 double Depo = VS( FINSECL1, "Depo" );
+double DepoG = VS( FINSECL1, "DepoG" );
 double DivB = VS( FINSECL1, "DivB" );
 double Gbail = VS( FINSECL1, "Gbail" );
 double Loans = VS( FINSECL1, "Loans" );
+double LoansCB = VS( FINSECL1, "LoansCB" );
 double NWb = VS( FINSECL1, "NWb" );
 double PiB = VS( FINSECL1, "PiB" );
+double Res = VS( FINSECL1, "Res" );
 double TaxB = VS( FINSECL1, "TaxB" );
-double phi = VS( FINSECL1, "phi" );
 double r = VS( FINSECL1, "r" );
+double rBonds = VS( FINSECL1, "rBonds" );
+double rD = VS( FINSECL1, "rD" );
 double rDeb = VS( FINSECL1, "rDeb" );
 double rRes = VS( FINSECL1, "rRes" );
-double rD = VS( FINSECL1, "rD" );
 
+double BS_1 = VLS( FINSECL1, "BS", 1 );
+double BD_1 = VLS( FINSECL1, "BD", 1 );
+
+double CD = VS( MACSTAL1, "CD" );
+double CDc = VS( MACSTAL1, "CDc" );
+double CS = VS( MACSTAL1, "CS" );
 double TC = VS( MACSTAL1, "TC" );
 double Bda = VS( SECSTAL1, "Bda" );
 double Bfail = VS( SECSTAL1, "Bfail" );
-double BadDeb = VS( SECSTAL1, "BadDeb" );
 double HHb = VS( SECSTAL1, "HHb" );
 double HPb = VS( SECSTAL1, "HPb" );
 
+double Deb = VS( PARENT, "Deb" );
+double Def = VS( PARENT, "Def" );
+double Def_1 = VLS( PARENT, "Def", 1 );
 double SavAcc = VS( PARENT, "SavAcc" );
 
+double Deb1 = VS( CAPSECL1, "Deb1" );
 double F1 = VS( CAPSECL1, "F1" );
 double NW1 = VS( CAPSECL1, "NW1" );
 
+double Deb2 = VS( CONSECL1, "Deb2" );
 double F2 = VS( CONSECL1, "F2" );
 double NW2 = VS( CONSECL1, "NW2" );
 
-double nonNeg[ ] = { Depo, DivB, Gbail, Loans, TaxB, phi, rRes, Bda, Bfail, 
-					 BadDeb, HHb, HPb, SavAcc, NW1, NW2 };
+double nonNeg[ ] = { BS, Bonds, CD, CDc, CS, Deb1, Deb2, Depo, DepoG, DivB, 
+					 Gbail, Loans, LoansCB, Res, TaxB, Bda, Bfail, BadDeb, 
+					 HHb, HPb, SavAcc, NW1, NW2, rBonds, rD, rRes };
 double posit[ ] = { Cl, r, rDeb, F1, F2 };
-double finite[ ] = { TC, PiB, NW1, NW2 };
+double finite[ ] = { BD, Deb, TC, PiB, NW1, NW2 };
 
 dblVecT all ( nonNeg, END_ARR( nonNeg ) ); 
 all.insert( all.end( ), posit, END_ARR( posit ) );
 all.insert( all.end( ), finite, END_ARR( finite ) );
 
-// bank customers and crisis/bail-outs
-LOG( "\n  $$$ (t=%g) #Bank=%d #Client1=%g #Client2=%g Bfail=%g Gbail=%.3g phi=%.2g", 
-	 T, k, v[4], v[5], Bfail, Gbail, phi );
-	 
+// interest rate structure
+LOG( "\n  $$$ (t=%g) rD=%.2g rRes=%.2g rBonds=%.2g r=%.2g rDeb=%.2g", 
+	 T, rD, rRes, rBonds, r, rDeb );
+
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
 	
 for ( i = 0; i < LEN_ARR( posit ); ++i )
 	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
-for ( itd = all.begin( ); itd != all.end( ); ++itd )
+for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
+check_error( rD > rRes || rD > rBonds || rRes > r || rBonds > r || r > rDeb, 
+			 "INCONSISTENT-INTEREST-STRUCTURE", 0, & errors );
+
+// central bank
+LOG( "\n   $$ Res=%.3g LoansCB=%.3g BondsCB=%.3g DepoG=%.3g Gbail=%.3g", 
+	 Res, LoansCB, BS - BD, DepoG, Gbail );
+
+check_error( Res > Depo || round( Res ) != round( v[12] ), 
+			 "INCONSISTENT-RESERVES", 0, & errors );
+
+check_error( round( LoansCB ) != round ( v[11] ), 
+			 "INCONSISTENT-CB-LOANS", 0, & errors );
+
+// government bonds and debt
+LOG( "\n   $$ BS=%.3g BD=%.3g BSnew=%.3g Def_1=%.3g Bonds=%.3g", 
+	 BS, BD, BS - BS_1 + BD_1, Def_1, Bonds );
+
+check_error( Deb < Bonds - DepoG + Def, "INCONSISTENT-GOV-DEBT", 0, & errors );
+
+check_error( floor( BS - BS_1 + BD_1 ) > max( Def_1, 0 ) || 
+			 floor( BD ) > BS || floor( BD ) > Bonds ||
+			 round( Bonds ) != round( v[8] ) || 
+			 ( BS - BS_1 + BD_1 > TOL && DepoG > TOL ), 
+			 "INCONSISTENT-BONDS", 0, & errors );
+
+// bank customers and crisis/bail-outs
+LOG( "\n   $$ #Bank=%d #Client1=%g #Client2=%g Bfail=%g", 
+	 k, v[4], v[5], Bfail );
+	 
 check_error( F1 != v[4], "INCONSISTENT-CLIENT1", 0, & errors );
 
 check_error( F2 != v[5], "INCONSISTENT-CLIENT2", 0, & errors );
@@ -256,17 +309,18 @@ check_error( F1 + F2 != Cl || v[6] != Cl,
 check_error( v[7] < 1 - TOL / 10 || v[7] > 1 + TOL / 10, 
 			 "INCONSISTENT-SHARES", 0, & errors );
 
-check_error( phi >= 1, "INCONSISTENT-PHI", 0, & errors );
+// bank assets and liabilities, credit dynamic
+LOG( "\n   $$ Depo=%.3g Loans=%.3g CD=%.3g CS=%.3g CDc=%.3g", 
+	 Depo, Loans, CD, CS, CDc );
 
-// interest rat structure and bank assets and liabilities
-LOG( "\n   $$ r=%.2g rDeb=%.2g rRes=%.2g Depo=%.3g Loans=%.3g", 
-	 r, rDeb, rRes, Depo, Loans );
+check_error( round( Depo ) != round( v[9] ) || round( Loans ) != round( v[10] ),
+			 "INCONSISTENT-BANK-ACCOUNTS", 0, & errors );
 
-check_error( rD > r || rRes > r || rDeb < r || rD > rRes || rRes > rDeb, 
-			 "INCONSISTENT-INTEREST-STRUCTURE", 0, & errors );
+// try to account for deposits from loans of entrant firms (very crude)
+check_error( abs( NW1 + NW2 + SavAcc - Depo - Deb1 - Deb2 + Loans ) / Depo > TOL, 
+			 "LARGE-DEPO-LOANS-GAP", 0, & errors );
 
-check_error( round( Depo ) > round( NW1 + NW2 + SavAcc ), 
-			 "INCONSISTENT-DEPOSITS", 0, & errors );
+check_error( CS > CD || CDc > CD, "INCONSISTENT-FINANCE", 0, & errors );
 
 // banks cash-flow
 LOG( "\n   $$ TC=%.3g BadDeb=%.3g TaxB=%.3g PiB=%.3g NWb=%.3g", 
@@ -335,14 +389,15 @@ for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 for ( i = 0; i < LEN_ARR( posit ); ++i )
 	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
-for ( itd = all.begin( ); itd != all.end( ); ++itd )
+for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 check_error( U > 1 || Vac > 1, "INCONSISTENT-LABOR-STATS", 0, & errors );
 
 check_error( L1 + L2 != L || Ls < L, "INCONSISTENT-LABOR", 0, & errors );
 
-check_error( round( W1 + W2 ) != round( L * w ), 
+check_error( W1 + W2 < ( 1 - TOL / 10 ) * L * w || 
+			 W1 + W2 > ( 1 + TOL / 10 ) * L * w, 
 			 "INCONSISTENT-WAGES", 0, & errors );
 
 if ( T == v[2] )
@@ -398,12 +453,12 @@ double A1 = VS( CAPSECL1, "A1" );
 double D1 = VS( CAPSECL1, "D1" );
 double Deb1 = VS( CAPSECL1, "Deb1" );
 double Div1 = VS( CAPSECL1, "Div1" );
+double F1 = VS( CAPSECL1, "F1" );
 double JO1 = VS( CAPSECL1, "JO1" );
 double L1 = VS( CAPSECL1, "L1" );
 double L1d = VS( CAPSECL1, "L1d" );
 double L1dRD = VS( CAPSECL1, "L1dRD" );
 double L1rd = VS( CAPSECL1, "L1rd" );
-double MC1 = VS( CAPSECL1, "MC1" );
 double NW1 = VS( CAPSECL1, "NW1" );
 double PPI = VS( CAPSECL1, "PPI" );
 double Pi1 = VS( CAPSECL1, "Pi1" );
@@ -416,15 +471,17 @@ double entry1exit = VS( CAPSECL1, "entry1exit" );
 double imi = VS( CAPSECL1, "imi" );
 double inn = VS( CAPSECL1, "inn" );
 
+double CD1 = VS( SECSTAL1, "CD1" );
+double CD1c = VS( SECSTAL1, "CD1c" );
+double CS1 = VS( SECSTAL1, "CS1" );
 double Ls = VS( LABSUPL1, "Ls" );
 double HH1 = VS( SECSTAL1, "HH1" );
 double HP1 = VS( SECSTAL1, "HP1" );
 double RD = VS( SECSTAL1, "RD" );
 double age1avg = VS( SECSTAL1, "age1avg" );
-double cred1c = VS( SECSTAL1, "cred1c" );
 
-double nonNeg[ ] = { D1, Deb1, Div1, JO1, L1, L1d, L1rd, L1dRD, Q1, Q1e, S1, 
-					 Tax1, W1, imi, inn, HH1, HP1, RD, age1avg, cred1c, 
+double nonNeg[ ] = { CD1, CD1c, CS1, D1, Deb1, Div1, JO1, L1, L1d, L1rd, L1dRD, 
+					 Q1, Q1e, S1, Tax1, W1, imi, inn, HH1, HP1, RD, age1avg, 
 					 entry1exit };
 double posit[ ] = { A1, PPI };
 double finite[ ] = { NW1, Pi1 };
@@ -434,7 +491,7 @@ all.insert( all.end( ), posit, END_ARR( posit ) );
 all.insert( all.end( ), finite, END_ARR( finite ) );
 
 // innovation, productivity
-LOG( "\n  ^^ (t=%g) inn=%.3g imi=%g A1=%.3g D1=%.3g Q1=%.3g Q1e=%.3g", 
+LOG( "\n  ^^ (t=%g) inn=%.3g imi=%.3g A1=%.3g D1=%.3g Q1=%.3g Q1e=%.3g", 
 	 T, inn, imi, A1, D1, Q1, Q1e );
 	 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
@@ -443,13 +500,13 @@ for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 for ( i = 0; i < LEN_ARR( posit ); ++i )
 	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
-for ( itd = all.begin( ); itd != all.end( ); ++itd )
+for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", 
 				 itd - all.begin( ) + 1, & errors );
 
-check_error( Aerr.size( ) > 0, "ZERO-PROD-FIRMS", Aerr.size( ), & errors ); 
+check_error( Aerr.size( ) > TOL * F1, "ZERO-PROD-FIRMS", Aerr.size( ), & errors ); 
 
-check_error( RDerr.size( ) > 0, "ZERO-RD-FIRMS", RDerr.size( ), & errors ); 
+check_error( RDerr.size( ) > TOL * F1, "ZERO-RD-FIRMS", RDerr.size( ), & errors ); 
 
 check_error( Q1e > Q1 || Q1 > D1, "INCONSISTENT-PRODUCTION", 0, & errors );
 
@@ -469,12 +526,14 @@ check_error( S1 + RD < ( 1 - TOL ) * W1, "INCONSISTENT-WAGES", 0, & errors );
 check_error( c1err.size( ) > 0, "ZERO-COST-FIRM", c1err.size( ), & errors ); 
 
 // finance
-LOG( "\n   ^ Deb1=%.3g cred1c=%.3g PPI=%.2g", 
-	 Deb1, cred1c, PPI );
+LOG( "\n   ^ Deb1=%.3g CD1=%.3g CS1=%.3g CD1c=%.3g PPI=%.2g", 
+	 Deb1, CD1, CS1, CD1c, PPI );
+	
+check_error( CS1 > CD1 || CD1c > CD1, "INCONSISTENT-FINANCE", 0, & errors );
 	
 // competition
-LOG( "\n   ^ age1avg=%.3g MC1=%.2g entry1exit=%.2g HH1=%.2g HP1=%.2g", 
-	 age1avg, MC1, entry1exit, HH1, HP1 );
+LOG( "\n   ^ age1avg=%.3g entry1exit=%.2g HH1=%.2g HP1=%.2g", 
+	 age1avg, entry1exit, HH1, HP1 );
 
 check_error( v[4] < 1 - TOL / 10 || v[4] >  1 + TOL / 10, 
 			 "INCONSISTENT-SHARES", 0, & errors );
@@ -560,7 +619,6 @@ double K = VS( CONSECL1, "K" );
 double Kd = VS( CONSECL1, "Kd" );
 double L2 = VS( CONSECL1, "L2" );
 double L2d = VS( CONSECL1, "L2d" );
-double MC2 = VS( CONSECL1, "MC2" );
 double NW2 = VS( CONSECL1, "NW2" );
 double Pi2 = VS( CONSECL1, "Pi2" );
 double Q2 = VS( CONSECL1, "Q2" );
@@ -581,16 +639,18 @@ double p2avg = VS( CONSECL1, "p2avg" );
 
 double Kavb = VLS( CONSECL1, "K", 1 );
 
+double CD2 = VS( SECSTAL1, "CD2" );
+double CD2c = VS( SECSTAL1, "CD2c" );
+double CS2 = VS( SECSTAL1, "CS2" );
 double Ls = VS( LABSUPL1, "Ls" );
 double HH2 = VS( SECSTAL1, "HH2" );
 double HP2 = VS( SECSTAL1, "HP2" );
 double age2avg = VS( SECSTAL1, "age2avg" );
-double cred2c = VS( SECSTAL1, "cred2c" );
 double mu2avg = VS( SECSTAL1, "mu2avg" );
 
-double nonNeg[ ] = { CPI, D2, D2d, D2e, Deb2, Div2, JO2, Kavb, L2, L2d, Q2, 
-					 Q2e, SI, Tax2, W2, l2avg, CI, EI, HH2, HP2, K, Kd, 
-					 Q2d, Q2u, S2, cred2c, entry2exit };
+double nonNeg[ ] = { CD2, CD2c, CS2, CPI, D2, D2d, D2e, Deb2, Div2, JO2, Kavb, 
+					 L2, L2d, Q2, Q2e, SI, Tax2, W2, l2avg, CI, EI, HH2, HP2, K, 
+					 Kd, Q2d, Q2u, S2, entry2exit };
 double posit[ ] = { A2, oldVint, p2avg, age2avg, mu2avg };
 double finite[ ] = { NW2, dCPI, Pi2 };
 
@@ -608,7 +668,7 @@ for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 for ( i = 0; i < LEN_ARR( posit ); ++i )
 	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
-for ( itd = all.begin( ); itd != all.end( ); ++itd )
+for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 check_error( Kerr.size( ) > 0, "NO-CAPITAL-FIRMS", Kerr.size( ), & errors ); 
@@ -640,7 +700,7 @@ check_error( Q2err.size( ) > 0, "NO-PROD-FIRMS", Q2err.size( ), & errors );
 LOG( "\n   & JO2=%g L2d=%g L2=%g", 
 	 JO2, L2d, L2 );
 
-check_error( L2d > L2 || L2d < JO2 || L2 > Ls, "INCONSISTENT-LABOR", 0, & errors );
+check_error( L2d < JO2 || L2 > Ls, "INCONSISTENT-LABOR", 0, & errors );
 
 check_error( L2err.size( ) > 0, "NO-LABOR-PRODUCING", L2err.size( ), & errors ); 
 
@@ -652,25 +712,27 @@ check_error( W2err.size( ) > 0, "WAGES-GAP", W2err.size( ), & errors );
 
 check_error( S2 < W2, "INCONSISTENT-WAGES", 0, & errors );
 
-// finance
-LOG( "\n   & NW2=%.3g Deb2=%.3g cred2c=%.3g CPI=%.2g", 
-	 NW2, Deb2, cred2c, CPI );
-	 
 check_error( v[5] / F2 > TOL, "MANY-NO-WORKER", 0, & errors );
+
+// finance
+LOG( "\n   & NW2=%.3g Deb2=%.3g CD2=%.3g CD2c=%.3g CPI=%.2g", 
+	 NW2, Deb2, CD2, CD2c, CPI );
+	 
+check_error( CS2 > CD2 || CD2c > CD2, "INCONSISTENT-FINANCE", 0, & errors );
 
 // market
 LOG( "\n   & mu2avg=%.2g p2avg=%.2g D2=%.3g D2e=%.3g S2=%.3g", 
 	 mu2avg, p2avg, D2, D2e, S2 );
 
-check_error( D2 > D2d, "INCONSISTENT-DEMAND", 0, & errors );
+check_error( floor( D2) > floor( D2d ), "INCONSISTENT-DEMAND", 0, & errors );
 	 
 check_error( D2err.size( ) > 0, "NO-DEMAND-FIRMS", D2err.size( ), & errors ); 
 
 check_error( mu2err.size( ) > 0, "BAD-MARKUP-FIRMS", mu2err.size( ), & errors ); 
 
 // competition
-LOG( "\n   & age2avg=%g MC2=%.2g entry2exit=%.2g HH2=%.2g HP2=%.2g", 
-	 age2avg, MC2, entry2exit, HH2, HP2 );
+LOG( "\n   & age2avg=%g entry2exit=%.2g HH2=%.2g HP2=%.2g", 
+	 age2avg, entry2exit, HH2, HP2 );
 LOG( "\n   & l2avg=%.2g", l2avg );
 
 check_error( v[4] < 1 - TOL / 10 || v[4] > 1 + TOL / 10, 
@@ -720,10 +782,10 @@ if ( T == v[1] )
 
 	if ( v[3] > 0 )
 		LOG( " (t=%g-%g, ID1=%g-%g, file=%s)", 
-			 v[1], v[2], v[3], v[4], TEST1FILE )
+			 v[1], v[2], v[3], v[4], TEST1FILE );
 	else
 		LOG( " (t=%g-%g, up to %g entrants, file=%s)", 
-			 v[1], v[2], v[4], TEST1FILE )
+			 v[1], v[2], v[4], TEST1FILE );
 	
 	if ( firms1 == NULL )						// don't reopen if already open
 	{
@@ -731,7 +793,7 @@ if ( T == v[1] )
 		fprintf( firms1, "%s,%s,%s,%s\n",		// file header
 				 "t,ID1,t1ent,Client",
 				 "RD,Atau,Btau,c1,D1,Q1,Q1e,L1d,L1",
-				 "Pi1,NW1,Deb1,Deb1max,cred1,cred1c",
+				 "Pi1,NW1,Deb1,Deb1max,CS1,CD1c",
 				 "HC,NC,BC,p1,S1,f1" );
 	}
 }
@@ -764,6 +826,9 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	double _Atau = VS( cur, "_Atau" );
 	double _Btau = VS( cur, "_Btau" );
 	double _BC = VS( cur, "_BC" );
+	double _CD1 = VS( cur, "_CD1" );
+	double _CD1c = VS( cur, "_CD1c" );
+	double _CS1 = VS( cur, "_CS1" );
 	double _D1 = VS( cur, "_D1" );
 	double _Deb1 = VS( cur, "_Deb1" );
 	double _Deb1max = VS( cur, "_Deb1max" );
@@ -778,13 +843,11 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	double _RD = VS( cur, "_RD" );
 	double _S1 = VS( cur, "_S1" );
 	double _c1 = VS( cur, "_c1" );
-	double _cred1 = VS( cur, "_cred1" );
-	double _cred1c = VS( cur, "_cred1c" );
 	double _f1 = VS( cur, "_f1" );
 	double _p1 = VS( cur, "_p1" );
 			  
-	double nonNeg[ ] = { _HC, _NC, _RD, _D1, _Q1, _Q1e, _BC, _L1d, _Deb1, _Deb1max, 
-						 _cred1, _cred1c, _S1, _f1 };
+	double nonNeg[ ] = { _CS1, _CD1, _CD1c, _HC, _NC, _RD, _D1, _Q1, _Q1e, _BC, 
+						 _L1d, _Deb1, _Deb1max, _S1, _f1 };
 	double posit[ ] = { _Atau, _Btau, _c1, _p1 };
 	double finite[ ] = { _NW1, _Pi1 };
 
@@ -808,7 +871,7 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	for ( i = 0; i < LEN_ARR( posit ); ++i )
 		check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
-	for ( itd = all.begin( ); itd != all.end( ); ++itd )
+	for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 		check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 	// innovation, productivity
@@ -819,14 +882,17 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 		 
 	check_error( _RD <= 0, "NO-R&D", 0, & errors );
 
-	check_error( _Atau < TOL || _Btau < TOL, "INCONSISTENT-PRODUCTIVITY", 0, & errors );
+	check_error( _Btau > _Atau || _Atau < TOL || _Btau < TOL / 4, 
+				 "INCONSISTENT-PRODUCTIVITY", 0, & errors );
 
 	// finance
-	LOG( "\n   * Pi1=%g NW1=%g Deb1=%g Deb1max=%g cred1=%g cred1c=%g", 
+	LOG( "\n   * Pi1=%g NW1=%g Deb1=%g Deb1max=%g CS1=%g CD1c=%g", 
 		 round( _Pi1 ), round( _NW1 ), round( _Deb1 ), round( _Deb1max ), 
-		 round( _cred1 ), round( _cred1c ) );
+		 round( _CS1 ), round( _CD1c ) );
 	fprintf( firms1, ",%g,%g,%g,%g,%g,%g", 
-			 _Pi1, _NW1, _Deb1, _Deb1max, _cred1, _cred1c );
+			 _Pi1, _NW1, _Deb1, _Deb1max, _CS1, _CD1c );
+	
+	check_error( _CS1 > _CD1 || _CD1c > _CD1, "INCONSISTENT-FINANCE", 0, & errors );
 	
 	// market and client dynamics
 	LOG( "\n   * HC=%g NC=%g BC=%g p1=%.2g S1=%g f1=%.2g", 
@@ -893,10 +959,10 @@ if ( T == v[1] )
 	
 	if ( v[3] > 0 )
 		LOG( " (t=%g-%g, ID2=%g-%g, file=%s)", 
-			 v[1], v[2], v[3], v[4], TEST2FILE )
+			 v[1], v[2], v[3], v[4], TEST2FILE );
 	else
 		LOG( " (t=%g-%g, up to %g entrants, file=%s)", 
-			 v[1], v[2], v[4], TEST2FILE )
+			 v[1], v[2], v[4], TEST2FILE );
 	
 	if ( firms2 == NULL )						// don't reopen if already open
 	{
@@ -904,7 +970,7 @@ if ( T == v[1] )
 		fprintf( firms2, "%s,%s,%s,%s,%s\n",	// file header
 				 "t,ID2,t2ent,life2cycle,Broch,Vint,pVint",
 				 "Kd,Kavb,EId,SId,EI,SI,CI,K", "D2e,Q2d,Q2,Q2e,L2d,L2,c2",
-				 "Pi2,NW2,Deb2,Deb2max,cred2,cred2c",
+				 "Pi2,NW2,Deb2,Deb2max,CS2,CD2c",
 				 "mu2,p2,D2,S2,W2,f2,N" );
 	}
 }
@@ -948,21 +1014,21 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	cur2 = NULL;								// last vintage
 	CYCLES( cur, cur1, "Vint" )
 	{
-		v[7] += VS( cur1, "_nVint" );
-		v[8] += VS( cur1, "_Qvint" );
+		v[7] += VS( cur1, "__nVint" );
+		v[8] += VS( cur1, "__Qvint" );
 		
-		if ( VS( cur1, "_IDvint" ) < h )
+		if ( VS( cur1, "__IDvint" ) < h )
 			IDerr.push_back( cur1 );
 		
-		if ( ( h == 1 && VS( cur1, "_tVint" ) < 1 - eta ) || 
-			 ( h > 1 && VS( cur1, "_tVint" ) < h ) || VS( cur1, "_tVint" ) > T )
+		if ( ( h == 1 && VS( cur1, "__tVint" ) < 1 - eta ) || 
+			 ( h > 1 && VS( cur1, "__tVint" ) < h ) || VS( cur1, "__tVint" ) > T )
 			tVintErr.push_back( cur1 );
 		
-		if ( VS( cur1, "_Qvint" ) < 0 )
+		if ( VS( cur1, "__Qvint" ) < 0 )
 			QvintErr.push_back( cur1 );
 			
-		if ( VS( cur1, "_toUseVint" ) == 0 && ( VS( cur1, "_LdVint" ) > 0 || 
-			 VS( cur1, "_Lvint" ) > 0 ) ) 
+		if ( VS( cur1, "__toUseVint" ) == 0 && ( VS( cur1, "__LdVint" ) > 0 || 
+			 VS( cur1, "__Lvint" ) > 0 ) ) 
 			LvintErr.push_back( cur1 );
 		
 		cur2 = cur1;
@@ -972,7 +1038,10 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	v[19] = COUNTS( cur, "Vint" );
 	cur1 = HOOKS( cur, TOPVINT );
 	
+	double _CD2 = VS( cur, "_CD2" );
+	double _CD2c = VS( cur, "_CD2c" );
 	double _CI = VS( cur, "_CI" );
+	double _CS2 = VS( cur, "_CS2" );
 	double _D2 = VS( cur, "_D2" );
 	double _D2e = VS( cur, "_D2e" );
 	double _Deb2 = VS( cur, "_Deb2" );
@@ -993,8 +1062,6 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	double _W2 = VS( cur, "_W2" );
 	double _c2 = VS( cur, "_c2" );
 	double _c2e = VS( cur, "_c2e" );
-	double _cred2 = VS( cur, "_cred2" );
-	double _cred2c = VS( cur, "_cred2c" );
 	double _f2 = VS( cur, "_f2" );
 	double _life2cycle = VS( cur, "_life2cycle" );
 	double _mu2 = VS( cur, "_mu2" );
@@ -1003,14 +1070,14 @@ CYCLES( CONSECL1, cur, "Firm2" )
 
 	double _Kavb = VLS( cur, "_K", 1 );
 	double _N_1 = VLS( cur, "_N", 1 );	
-	double _pVint = ( cur1 != NULL && VS( cur1, "_tVint" ) == T ) ? 
-					VS( cur1, "_pVint" ) : 0;
+	double __pVint = ( cur1 != NULL && VS( cur1, "__tVint" ) == T ) ? 
+					VS( cur1, "__pVint" ) : 0;
 	
-	double nonNeg[ ] = { _CI, _D2, _D2e, _Deb2, _Deb2max, _EI, _EId, _K, _Kavb, 
-						 _Kd, _L2, _L2d, _N, _Q2d, _Q2, _Q2e, _S2, _SI, _SId, 
-						 _W2, _cred2, _cred2c, _c2, _c2e, _f2, _life2cycle, 
-						 _pVint };
-	double posit[ ] = { _mu2, _p2, _t2ent };
+	double nonNeg[ ] = { _CD2, _CD2c, _CI, _CS2, _D2, _D2e, _Deb2, _Deb2max, 
+						 _EI, _EId, _K, _Kavb, _Kd, _L2, _L2d, _N, _Q2d, _Q2, 
+						 _Q2e, _S2, _SI, _SId, _W2, _c2, _c2e, _f2, 
+						 _life2cycle,  __pVint, _t2ent };
+	double posit[ ] = { _mu2, _p2 };
 	double finite[ ] = { _NW2, _Pi2 };
 
 	dblVecT all ( nonNeg, END_ARR( nonNeg ) ); 
@@ -1026,9 +1093,9 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	}
 	
 	LOG( "\n  ## (t=%g) ID2=%d t2ent=%d life2cycle=%g #Broch=%g #Vint=%g pVint=%g", 
-		 T, j, h, _life2cycle, v[18], v[19], round( _pVint ) );
+		 T, j, h, _life2cycle, v[18], v[19], round( __pVint ) );
 	fprintf( firms2, "%g,%d,%d,%g,%g,%g,%g", T, j, h, _life2cycle, v[18], 
-			 v[19], _pVint );
+			 v[19], __pVint );
 	
 	for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 		check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
@@ -1036,7 +1103,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	for ( i = 0; i < LEN_ARR( posit ); ++i )
 		check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
-	for ( itd = all.begin( ); itd != all.end( ); ++itd )
+	for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 		check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 	check_error( v[18] == 0, "NO-BROCHURE", 0, & errors ); 
@@ -1076,11 +1143,13 @@ CYCLES( CONSECL1, cur, "Firm2" )
 				 "INCONSISTENT-COST", 0, & errors );
 
 	// finance
-	LOG( "\n   # Pi2=%g NW2=%g Deb2=%g Deb2max=%g cred2=%g cred2c=%g", 
+	LOG( "\n   # Pi2=%g NW2=%g Deb2=%g Deb2max=%g CS2=%g CD2c=%g", 
 		 round( _Pi2 ), round( _NW2 ), round( _Deb2 ), round( _Deb2max ), 
-		 round( _cred2 ), round( _cred2c ) );
+		 round( _CS2 ), round( _CD2c ) );
 	fprintf( firms2, ",%g,%g,%g,%g,%g,%g", 
-			 _Pi2, _NW2, _Deb2, _Deb2max, _cred2, _cred2c );
+			 _Pi2, _NW2, _Deb2, _Deb2max, _CS2, _CD2c );
+	
+	check_error( _CS2 > _CD2 || _CD2c > _CD2, "INCONSISTENT-FINANCE", 0, & errors );
 	
 	// market
 	LOG( "\n   # mu2=%.2g p2=%.2g D2=%g S2=%g W2=%g f2=%.2g N=%g", _mu2, _p2, 

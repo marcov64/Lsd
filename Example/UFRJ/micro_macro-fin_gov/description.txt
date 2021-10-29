@@ -1,203 +1,9 @@
-MICRO-MACRO MULTISECTORAL MODEL (Finance-Augmented+Government) (ver. 3.8)
+MICRO-MACRO MULTISECTORAL MODEL (ver. 3.9)
 
-*************************************************************************
+*********************************************************************************************************************************************
 
 This is a (preliminary) new version of the model created by Dweck (2006) and used in Dweck, Vianna and Barbosa (2018). 
-Coded by Matheus Vianna.
-
-************
-Version 3.8:
-************
-
-WHAT'S NEW?
-
-Introduction of Complex Governement
-  - Four Types of government expenses composition.
-  - Four types of taxation structure.
-  - Two(Three) types of fiscal rules.
-  - Introduction of Gini Index for Analysis
-  
-Introduction of Gini Index for Analysis
-
-For more information on previous versions:
-
-https://thttnn.github.io/MMM_CORE
-
-https://thttnn.github.io/MMM_v.3
-
-GOVERNMENT EXPENSES:
-
-Control Parameter: "switch_government_composition": 
-
-Determines the composition and priority of government expenses, and initial distribution
-	0--> Government Wages(100%) [Only Public Workers]
-	1--> Government Wages(100%) + Unemployment Benefits(0%) [Public Workers and Unemployment Benefits]
-	2--> Government Wages(70%) + Unemployment Benefits(0%) + Government Consumption, Investment and Intermediate Demand(10% each) [Public Workers, Unemployment Benefits, and Demand to Sectors]
-
-Other Relevant Parameters (to be subjected to sensitivity):
-
-"government_productivity_passtrought": determines how desired goverment wages grow based on average productivity of the economy
-"government_demand_growth": determined desired real growth rate of government demand (consumption, investment and inputs)
-"government_benefit": determines the share of average wage to be paid as unemployment benefits
-"switch_unemployment_benefits": determines how unemployment benefits are distributed
-	0--> distributed by wage shares
-	1--> distributed to lowest income class only
-
-TAXATION STRUCTURE:
-
-Control Parameter: "taxation_structure": 
-
-Determines which types of taxes will be used
-	0--> Only Wages
-	1--> Wages and Profits
-	2--> Wages, Profits and Interest
-	3--> Wages, Profits, Interest and Wealth
-
-Other Relevant Parameters (to be subjected to sensitivity):
-
-"class_direct_tax": determines the tax rate on income, used in cases 1, 2 and 3
-"class_wealth_tax": determines the tax rate on wealth, used in case 4
-
-FISCAL RULES:
-
-Control Parameters:
-
-  - "begin_surplus_target_rule": determines WHEN the surplus target rule starts (-1 if inactive)
-  - "begin_expenses_ceiling_rule": determines WHEN the expenses ceiling rule starts (-1 if inactive)
-	
-Other Relevant Parameters (to be subjected to sensitivity):
-
-  - "government_surplus_rate_target": initial government surplus target
-  - "government_surplus_target_adjustment": marginal increase in surplus target if it is adjusted based on debt-to-GDP (0, if not adjusted)
-  - "government_max_debt": maximum accepted debt-to-GDP if surplus target is adjusted
-  - "government_min_debt": minimum accepted debt-to-GDP if surplus target is adjusted
-
-SOME CONFIGURATIONS:
-
-Sim1: 
-  - "begin_surplus_target_rule"        = -1 
-  - "begin_expenses_ceiling_rule"      = -1
-  - "taxation_structure"               = 1
-  - "switch_government_composition"    = 0
-  
-Sim2: 
-  - "begin_surplus_target_rule"        = -1 
-  - "begin_expenses_ceiling_rule"      = -1
-  - "taxation_structure"               = 1
-  - "switch_government_composition"    = 1
-  
-Sim3: 
-  - "begin_surplus_target_rule"        = 100
-  - "begin_expenses_ceiling_rule"      = -1
-  - "taxation_structure"               = 1
-  - "switch_government_composition"    = 1
-	
-Sim4: 
-  - "begin_surplus_target_rule"        = -1 
-  - "begin_expenses_ceiling_rule"      = 100
-  - "taxation_structure"               = 1
-  - "switch_government_composition"    = 1
-	
-Sim5: 
-  - "begin_surplus_target_rule"        = 100
-  - "begin_expenses_ceiling_rule"      = 100
-  - "taxation_structure"               = 1
-  - "switch_government_composition"    = 1
-
-
-************
-Version 3.6:
-************
---Repository.
-
-************
-Version 3.5:
-************
---Tests and bug fixes.
-
-************
-Version 3.4:
-************
---Changes in Credit Demand.
-
-************
-Version 3.4:
-************
---Multiple Banks.
-
-************
-Version 3.3:
-************
---Changes in initialization.
-
-************
-Version 3.2:
-************
---Changes in entry and exit.
-
-************
-Version 3.1:
-************
---Implemented modifications suggested by Morais Moereira (2010).
-1-Endogenous extra debt amortization.
-2-Endogenous desired debt rate.
-3-Endogenous desired financial rate.
-4-Two types of loans, short and long term.
-5-Possible overall credit restriction.
---The model assumes a single bank.
-
-************
-Version 3.0:
-************
---Loans implemented as objects to firms and income classes
---Some variables were added and others renamed.
---Creation of the financial sector, as a single bank.
---No more Functions
-This version is running assuming some hypothesis:
-1-Fixed Interest rate, just to test the dynamics of stock of debts as objects.
-2-No desired financial rate (liquidity preference). To be discussed.
-3-Delayed updtating of firm exit.
-4-No interest rate on deposits.
-
-******************
-Version 2.0_core: 
-******************
-Some simplifications and stylizations were made. 
-The goal was to reduce the code as much as possible, in term of lines, number of variable and parameters, without losing too much properties and main results of the 2.0 model.
-The idea was to turn the model more user friendly, so some names were changed and the code is as clear and descriptive as possible.
-
-Main simplifications and modifications of the "_core" version:
-
---A considerable number of parameters and variables were eliminated or incorporated into another variable, for not beeing in use. Also, many were renamed.
---The Government object was simplified: simple primary budget rule, two types of taxes (income and indirect) and only one type of expenditure (government wages). 
---One intermediate goods sector and one income classe wre eliminated . The model is running with 3 sectors, one of each type, and 3 income classes. 
---The Input object was eliminated since there is only one intermediate sector now. All Input variables were reorganized to Firm object or Sector object.
---All essential parameters are in the Sector object. Parameters in other objects are results of Sector parameters or they are rewritten during simulation.
---Creation of Analysis object. In this object there are only analysis variables, with short names for R analysis scripts.
---Calibration: a variable for initial demand calibration based only on essential parameters was created.
---Initialization: a variable for writting initial lagged values and parameters was created.
---R&D variables were simplificated and a few removed. 
---Product Innovation (Quality) does not require capital goods demand to be implemented in this version (simplification).
---Investment variables were revised and rewritten. Mainly the codes were generalized to changes in parameter "investment_period".
---Wage was moved to the Firm level.
---R&D expenses were incorporated to firm's wages, as it should be, and variables as Net_Revenue and Net_Profits were created.
---Entry and exit variables were revised, rewritten and most of them, eliminated.
-
-Version 2.9_core:
---All essential parameters were moved to MACRO object. (Strong hypothesis: all sectors are equal, except for specific differences already in the code. This is done for a initial sensitivity analysis on those parameters.)
---All variables and parameters were renamed to better organizations and identification.
---Minor Bug Fixes.
-
-*************
-Version 2.0:
-*************
---The intire code, including element names, was translated to english
---The intire code was translated to LSD Macros, instead of C++ writing
---The intire code was padronized (see below)
---Names are now descriptive and intuitive
---Income classes were transformed into objects
---Government and External Sector were transformed into objects
---Variables were grouped by objects in additional files
+Coded and copyright by Matheus Vianna.
 
 *********************************************************************************************************************************************
 
@@ -260,12 +66,13 @@ HOW TO READ THE CODE:
 --All variables begin with capital letters
 --All parameters begin with small letters (in this version most of them located at MACRO object).
 
---Most MACRO variable names begin with "Total_"
+--Most COUNTRY variable names begin with "Country_"
 --Most SECTOR variable names begin with "Sector_"
 --Most FIRM variable names begin with "Firm_"
 --Most CLASS variable names begin with "Class_"
 --Most GOVERNMENT variable names begin with "Government_"
 --Most FINANCIAL SECTOR variable names begin with "Financial_Sector_"
+--Most BANK variable names begin with "Bank_"
 
 --Variables are grouped in additional files. 
 --Most of the variables, except the trivial ones, have line-by-line description
@@ -273,109 +80,227 @@ HOW TO READ THE CODE:
 --Frequency Parameters: 
 There is a set of parameters that define the frequency of certain decisions or how many periods an agent takes in consideration into its decisions.
 All the code is generalized for changes in those parameters.
-"annual_period"
-"investment_period"
-"depreciation_period"
-"markup_period"
-"class_period"
-"government_period"
+	"annual_frequency"
+	"sector_investment_frequency"
+	"sector_price_frequency"
 
-*********************************************************************************************************************************************
+--Control Parameters:
+There is a set of parameters that changes some aspects of the model or defines when something begin. 
+These parameters usually begin their names with "begin_" or "switch_" and msot of them are located at COUNTRY object.
 
-MODEL PARAMETERS:
+--Support Functions
+There are some support functions used troughout the code. They are defined in the file "fun_support.h".
+	"ROUND"
+	"LAG_SUM"
+	"LAG_AVE"
+	"LAG_GROWTH"
 
-Macro:
-"annual_period":												determines how many time steps is an year 
-"antecipation": 												determines the payback calculus
-"aprop": 														determines how much firms want to apropriate gain in the desired markup
-"initial_avg_price": 											initial price, the same for all firms	
-"bargain_power_adjustment":										determines the rate of adjustment of bargain power
-"capital_output_ratio": 										determines the sector capital relation and the capital goods productive capacity
-"crisis_threshold": 											defines the limit to consider a crisis
-"depreciation_period":											number of period for the capital good to depreciate
-"desired_debt_rate": 											debt to capital ratio desired by the firms
-"desired_degree_capacity_utilization": 							firm's desired degree of capacity utilization"
-"desired_financial_rate": 										financial assets to capital ratio desired by the firms	
-"desired_inventories_proportion": 								desired inventories as proportion of sales
-"elasticicty_delay": 											delivery delay elasticity of competitiveness	
-"elasticicty_price": 											price elasticity of comeptitiveness
-"elasticicty_quality": 											quality elasticity of comeptitiveness
-"expand": 														determines how much firms want to expand market share in the desired markup
-"external_price_competitiveness": 								determines how much domestic price affects foreig price
-"external_price_growth": 										determines the growth of foreign price	
-"initial_external_price": 										determines the initial foreign price
-"initial_productivity":											initial capital goods productivity
-"expectations": 												expectation parameter
-"indirect_tax_rate": 											indirect tax share of the sector
-"innovation_proportion": 										share of revenue destinated to innovation
-"input_tech_coefficient": 										input teachnical relationship
-"investment_period": 											investment decistion period in terms of production periods (time steps)	
-"initial_markup": 												initial markup
-"markup_period": 												markup decision adjustment period in terms of production periods (time steps)
-"number_object_firms": 											initial number of firms of each sector. Will be use in the "Initialization" variable to create objects.
-"strategic_price_weight": 										kaleckian parameter in the price decision
-"basic_percent_spread": 										percent spread to be applied to specific firm's interest rate
-"exports_elasticicty_income": 									(external) income elasticicty of imports
-"exports_elasticicty_price": 									price (an exchange rate) elasticity of exports
-"profits_distribution_rate": 									determines the share of profits to be distributed to income classes
-"std_dev_innovation": 											determines the standad deviation of innovation distriution	
-"tech_opportunity": 											determines the technological opportunities of the sector and the success rate o innovation.	
+--Global Pointers
+There are some global pointers used to identify specific objects. They are defined in the main file and initialized in the initialization variable.
+	"consumption"
+	"capital"
+	"input"
+	"government"
+	"financial"
+	"external"
+	"country"
+	"centralbank"
+	"aclass"
+	"bclass"
+	"cclass"
 
-Sectors:
-"sector_passthrough_inflation": 								determines how much of inflation is adjusted to wage growth
-"sector_passthrough_productivity": 								determines how much of productivity is adjusted to wage growth	
-"sector_exports_coefficient": 									share of external income that will determine exports for the sector
-"sector_initial_demand": 										sector initial demand, calculated and written in the "Initial_Demand_Calculation" variable
-"id_capital_goods_sector": 										identifies capital goods sector	
-"id_consumption_goods_sector": 									identifies comsumption goods sector
-"id_intermediate_goods_sector": 								identifies intermediate goods sector
+*************************************************************************************************
 
-Firms:
-"capital_goods_effective_orders_firm_temporary":				stores temporary values during simulaton runs
-"capital_goods_production_temporary":							stores temporary values during simulaton runs
-"consumption_effective_orders_firm_temporary":					stores temporary values during simulaton runs	
-"firm_date_birth":												firm's date of birth
-"id_firm_number":												firm's overall number, used in "Investment_Period_Firm"
-"intermediate_effective_orders_firm_temporary"					stores temporary values during simulaton runs
-"intermediate_production_firm_temporary":						stores temporary values during simulaton runs
+MODEL CALIBRATION AND INITIALIZATION
 
-Capital:
-"capital_good_date_birth":										capital good's date of birth, used for depreciation	
-"capital_good_productive_capacity": 							capital good's productive capacity, inverse of the capital output ratio	
-"capital_good_productivity_initial":							capital goods's initial productivity, to be incremented by learning-by-doing	
-"capital_good_to_replace":										determines if the capital good should be replaced or not
+This version includes an automatic initialization and calibration procedures. Users do not need to define all parameters and lagged values manually since most of them are calculated and writen by the model itself at the first time period based only on a subset of parameters and some hypothesis (homogeneity among firms and stock-flow consistency norms).
+Most of the parameters that contains the word "initial" on their names are used only for this procedure.
+Additionally, multiple instances of objects are created in this proceadure. The initial number of objects are parameters controlled by the user.
 
-Income Classes:
-"class_period":													defines the frequency of certain class' decisions
-"class_direct_tax":												income tax rate of the class
-"class_interest_payment_share":									share of government interest paid to the class	
-"class_max_debt_ratio":											class' maximum debt to financial assets ratio	
-"class_profit_share":											class' share of distributed profits	
-"class_propensity_to_consume":									class' propensity to conume on average past income
-"class_propensity_to_import": 									class' propensity to import on average past income
-"class_wage_share":												class' share of wages	
+Hypothesis:
+1-All firms start homogeneouslly inside each sector. Heterogeneity among firms will be generated during the simulation.
+2-The economy starts in a non-growth steady-state position. Growth and cycles will be generated endogenouslly during the simulation.
+3-All stock-flows ratios must be constant.
+4-There are no expansion or replacement investment, so initial investment is only to replace physically depreciated capital goods.
 
-Government:
-"government_expectations":										government's expectation parameter
-"government_period":											government variables adjustment period in terms of production periods (time step)
-"government_surplus_rate_target":								surplus rate target, in terms of GDP
-"inflation_sensitivity":										taylor rule inflation sensitivity
-"inflation_target":												government inflation target
-"interest_rate":												initial basic interest rate
-"interest_rate_adjustment":										taylor rule adjustment parameter 	
-"unemployment_sensitivity":										taylor rule unemployment sensitivity
-"unemployment_target":											government unemployment target
+To better understand that procedure, see variable "init_2".
 
-External Sector:
-"exchange_rate_growth":											exchange rate growth	
-"external_income_growth":										external income growth
+Essential calibration parameters: these parameters must be defined by the user.
+-"country_initial_depreciation_share_GDP"							:defines the initial share of private investment on GDP, and initial GDP, given the initial private investment
+-"country_initial_exports_share_GDP"								:defines the initial share of exports on GDP, and initial exports, given GDP
+-"country_initial_government_share_GDP"								:defines the initial share of government expenses on GDP, and initial total government expenses, given GDP
+-"cb_annual_real_interest_rate"										:defines the initial nominal interest rate, given the target inflation
+-"cb_target_annual_inflation"										:defines the initial nominal interest rate, given the real interest rate
+-"government_initial_debt_gdp_ratio"								:defines the initial public debt to GDP ratio, and the initial stock of public debt given GDP
+-"government_initial_share_capital"									:defines the initial share of government investment on total government expenses, and real government capital demand given total expenses
+-"government_initial_share_consumption"								:defines the initial share of government consumption on total government expenses, and real government consumption demand given total expenses
+-"government_initial_share_input"									:defines the initial share of government inputs on total government expenses, and real government input demand given total expenses
+-"external_interest_rate"											:defines the external interest rate, and the initial capital flows given the nominal interest rate
+-"initial_exchange_rate"											:defines the initial exchange rate
+-"initial_reserves_ratio"											:defines the initial international reserves to GDP ratio, and initial stock of international reserves given GDP
+-"initial_external_income_scale"									:defines the scale of external income to domestic income, and defines the initial external income given initial GDP
+-"sector_number_object_firms"										:defines the initial number of firms in each sector, 
+-"sector_initial_depreciation_scale"								:defines the number of initial capital goods that will physically depreciate at each time period for each firm
+-"sector_investment_frequency"										:defines the investment frequency of the sector and the share of firms that will invest at each time period
+-"sector_initial_debt_rate"											:defines the initial debt rate of each sector, and the initial stock of loans of each sector given the initial capital of each sector
+-"sector_initial_liquidity_preference"								:defines the initial desired deposits to capital, and the initial stock of deposits of each sector given the initial capital
+-"sector_initial_exports_share"										:defines the share of total exports for each sector, and the external real demand of each sector given the initial total exports
+-"sector_initial_price"												:defines the initial price of each sector
+-"sector_initial_external_price"									:defines the initial external price of each sector
+-"sector_initial_productivity"										:defines the initial productivity of each sector
+-"sector_initial_profit_rate"										:defines the initial profit rate of each sector
+-"sector_indirect_tax_rate"											:defines the initial indirect tax rate of each sector
+-"sector_rnd_revenue_proportion"									:defines the share of revenue that will be allocated to R&d expenses for each sector
+-"sector_input_tech_coefficient"									:defines the technical coefficient of inputs of each sector
+-"sector_capital_output_ratio"										:defines the capital-output-ratio of each sector
+-"sector_desired_degree_capacity_utilization"						:defines the desitred degree of capacity utilization of each sector
 
-*********************************************************************************************************************************************
+*******************************************************************************************************
 
-Some Configurations:
-Sim1: baseline
-Sim2: no autonomous consumption
-Sim3: no autonomous consumption, higher technological opportunities (0.007)
+MODEL CONTROL PARAMETERS
+
+"begin_credit_rationing"											:defines when overall credit rationing of the banking sector begins. -1 = no credit rationing
+"begin_expenses_ceiling_rule"										:defines when the expenses ceiling fiscal rule begins. -1 = no expenses ceiling
+"begin_flexible_exchange_rate"										:defines when flexible exchange rate begins. -1 = fixed exchange rate
+"begin_flexible_surplus_target"										:defines when flexible surplus target fiscal rule begins. -1 = fixed suplus target
+"begin_monetary_policy"												:defines when reactive monetary policy begins. -1 = fixed basic interest rate
+"begin_surplus_target_rule"											:defines when surplus target fiscal rule begins. -1 = no surplus target
+
+"switch_class_tax_structure"										:defines different sources of direct taxation
+	0= No Income Taxation
+	1= Taxation on Wages Only
+	2= Taxation on Profits Only
+	3= Taxation on Wages and Profits
+	4= Taxation on Wages, Profits and Interest Gains
+	5= Taxation on Wages, Porfits, Interest and Stock of Wealth
+	
+"switch_creditworthness"											:defines how banks define the creditworthness rank	
+	1= Debt Rate
+	2= Date Birth, old to new
+	3= Date Birth, new to old
+									
+"switch_entry"														:defines if new firms can enter or not
+	0= No entry
+	1= Entry
+	
+"switch_extra_gov_expenses"											:defines if excess fiscal space is spent in government investment or not
+	0= No Extra Investment
+	1= Extra Investment
+	
+"switch_extra_imports"												:defines if demand not met by domestic production is supplied by the external sector as imports
+	0= No Extra Imports
+	1= Extra Imports
+	
+"switch_interest_investment"										:defines how interest rate affect firms replacement investment decisions
+	0= No effect
+	1= Firms use Basic Interest Rate 
+	2= Firm use own specific Interest Rate
+	
+"switch_interest_payment"											:defines if interest on loans are fixed or flexible
+	0= Fixed Interest Rate
+	1= Flexible Interest Rate
+	 
+"switch_monetary_policy"											:defines the monetary policy rule
+	0= Fixed Real Interest Rate, Nominal Rate is variable though
+	1= Taylor Rule, with several possible targets
+	2= Smithin Rule
+	3= Pasinetti Rule
+	4= Kansas City Rule
+
+*******************************************************************************************************
+
+OTHER RELEVANT PARAMETERS
+
+->Monetary Policy
+	"cb_target_annual_inflation"									:defines the inflation target for the Taylor Rule
+	"cb_target_capacity"											:defines the capacity utilizaton target for the Taylor Rule
+	"cb_target_credit_growth"										:defines the credit growth target for the Taylor Rule
+	"cb_target_debt_rate"											:defines the debt rate target for the Taylor Rule
+	"cb_sensitivity_inflation"										:defines the CB response to inflation gaps
+	"cb_sensitivity_capacity"										:defines the CB response to capacity utilization gaps
+	"cb_sensitivity_credit_growth"									:defines the CB response to credit growth gaps
+	"cb_sensitivity_debt_rate"										:defines the CB response to debt rate gaps
+	"cb_interest_rate_adjustment"									:smoothing parameters, defines maximum absolute effective change in basic interest rate
+	
+->Fiscal Policy
+	"government_benefit_rate"										:defines the percentage of average wage to be paid as unemployment benefits
+	"government_real_growth"										:defines the desired real growth of government expenses
+	"government_max_surplus_target"									:defines the maximum suplus target rate in case of flexible surplus target
+	"government_min_surplus_target"									:defines the minimum suplus target rate in case of flexible surplus target
+	"government_surplus_target_adjustment"							:defines the additive absolute adjustment to surplus target in case of flexible surplus target
+	"government_max_debt_ratio"										:defines the maximum accepted govenrment debt to GDP ratio
+	"government_min_debt_ratio"										:defines the minimum accepted government debt to GDP ratio
+	
+->Exchange Rate
+	"exchange_rate_adjustment"										:defines the addtive absolute change to exchange rate
+	"exchange_rate_max"												:defines the maximum exchange rate
+	"exchange_rate_min"												:defines the minimum exchnage rate
+	"external_capital_flow_adjustment"								:defines the share of capital flows to GDP
+	
+->Credit Rationing
+	"cb_minimum_capital_ratio"										:defines the capital adequacy ratio, regulatory rule
+	"fs_sensitivity_default"										:defines banks sensitivity to own default rate
+	"fs_sensitivity_debt_rate"										:defines banks sensitivity to overall debt rate
+	
+->Interest Rate Structure
+	"fs_spread_deposits"											:defines the negative spread applied over basic interest rate to determine deposits interest rate
+	"fs_spread_short_term"											:defines the positive spread applied over basic interest rate to determine short-term loans interest rate
+	"fs_spread_long_term"											:defines the positive spread applied over basic interest rate to determine long-term loans interest rate
+	"fs_risk_premium_class"											:defines the percentage of classes debt rate to be applied as risk premium to specific interest rates
+	"fs_risk_premium_short_term"									:defines the percentage of firms debt rate to be applied as risk premium to specific short-term interest rates
+	"fs_risk_premium_long_term"										:defines the percentage of firms debt rate to be applied as risk premium to specific long-term interest rates
+	
+->External Variables
+	"external_income_growth"										:defines an exogenous real growth rate for external real income
+	"external_income_adjustmnent"									:defines how domestic income growth can affect external real income growth
+	"external_income_sd"											:defines an exogenous standard deviation for real external income growth 
+	"sector_external_price_growth"									:defines an exogenous growth rate for sectoral external prices
+	"sector_external_price_competitiveness"							:defines how domestic prices can affect external prices growth
+	"sector_external_price_sd"										:defines an exogenous standard deviation for sectoral exernal prices growth
+	
+->Shocks
+	"external_shock_begin"											:defines when the shock on real external income will happen
+	"external_shock_duration"										:defines how many time period the real external income shock will last
+	"external_shock_size"											:defines the size of the real external income shock, in realtion to the expected growth rate
+	"sector_external_price_shock_begin"								:defines when the shock on sectoral external prices will happen
+	"sector_external_price_shock_duration"							:defines how many time periods the sectoral external price shock will last
+	"sector_external_price_shock_size"								:defines the size of the sectoral external price shock, in relation to the expected growth rate
+	
+
+*******************************************************************************************************
+
+SAMPLE CONFIGURATIONS:
+
+Sim_1
+--Single Mandate Taylor Rule
+--Flexible Surplus Target with Debt Rate Limits
+--Flexible Exchange Rate
+--Credit Rationing
+
+Sim_2
+--Single Mandate Taylor Rule
+--Flexible Surplus Target with Debt Rate Limits
+--Flexible Exchange Rate
+--No Credit Rationing
+
+Sim_3
+--Single Mandate Taylor Rule
+--Flexible Surplus Target with Debt Rate Limits
+--Fixed Exchange Rate
+--No Credit Rationing
+
+Sim_4
+--Fixed Interest Rates
+--Flexible Surplus Target with Debt Rate Limits
+--Fixed Exchange Rate
+--No Credit Rationing
+
+Sim_5
+--Fixed Interest Rates
+--Unconstrained Fiscal Policy
+--Simples Government (Only Wages)
+--Fixed Exchange Rate
+--No Credit Rationing
 
 
 

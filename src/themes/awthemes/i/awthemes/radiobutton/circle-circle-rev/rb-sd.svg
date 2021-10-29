@@ -52,24 +52,7 @@
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
         <dc:title></dc:title>
-        <cc:license
-           rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/" />
       </cc:Work>
-      <cc:License
-         rdf:about="http://creativecommons.org/licenses/by-sa/4.0/">
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#Reproduction" />
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#Distribution" />
-        <cc:requires
-           rdf:resource="http://creativecommons.org/ns#Notice" />
-        <cc:requires
-           rdf:resource="http://creativecommons.org/ns#Attribution" />
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
-        <cc:requires
-           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
-      </cc:License>
     </rdf:RDF>
   </metadata>
   <g
@@ -78,14 +61,14 @@
      inkscape:groupmode="layer"
      transform="translate(-0.24775696,-46.942946)">
     <ellipse
-       style="fill:_ACCENT_;fill-opacity:0.4;stroke:_CBBORD_;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.4"
+       style="fill:_GC_;fill-opacity:0.4;stroke:_CBBORD_;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.4"
        id="path4485"
        cx="8.747757"
        cy="55.442947"
        rx="8.0000896"
        ry="8.0000906" />
     <circle
-       style="fill:_GCARR_;fill-opacity:0.4;stroke-width:0"
+       style="fill:_ACCENT_;fill-opacity:0.4;stroke-width:0"
        id="path4500"
        cx="8.747757"
        cy="55.442947"

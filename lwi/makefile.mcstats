@@ -1,0 +1,45 @@
+#**************************************************************
+#
+#	LSD 8.0 - September 2021
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente and Marcelo Pereira
+#	LSD is distributed under the GNU General Public License
+#	
+#**************************************************************
+
+#**************************************************************
+# MAKEFILE.MCSTATS
+# Makefile for lsd_mcstats.
+#**************************************************************
+
+CC=g++	
+TARGET=lsd_mcstats
+SWITCH_CC=-D_NW_ -D_NP_ -Wno-unused-result -O3
+
+# from here you should not need to modify anything
+
+# using GCC in the OS
+LSDROOT=..
+SRC=src
+SRC_DIR=$(LSDROOT)/$(SRC)/
+LIB=-lz
+RM=rm -f
+
+# variable to search for the tcl and tk headers
+INCLUDE=-I$(LSDROOT)/$(SRC)
+
+$(TARGET): $(SRC_DIR)common.o $(SRC_DIR)mcstats.o 
+	$(CC) $(SWITCH_CC) $(SRC_DIR)common.o $(SRC_DIR)mcstats.o \
+	$(LIB) -o $(TARGET)
+
+$(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o $(INCLUDE)
+
+$(SRC_DIR)mcstats.o: $(SRC_DIR)mcstats.cpp $(SRC_DIR)common.h
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)mcstats.cpp -o $(SRC_DIR)mcstats.o $(INCLUDE)
+
+# remove compiled files
+clean:
+	$(RM) $(SRC_DIR)common.o $(SRC_DIR)mcstats.o

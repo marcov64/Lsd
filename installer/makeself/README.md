@@ -103,6 +103,7 @@ makeself.sh [args] archive_dir file_name label startup_script [script_args]
     * **`--nomd5`** and **`--nocrc`** : Disable the creation of a MD5 / CRC checksum for the archive. This speeds up the extraction process if integrity checking is not necessary.
     * **`--sha256`** : Adds a SHA256 checksum for the archive. This is in addition to the MD5 / CRC checksums unless `--nomd5` is also used.
     * **`--lsm` _file_** : Provide and LSM file to makeself, that will be embedded in the generated archive. LSM files are describing a software package in a way that is easily parseable. The LSM entry can then be later retrieved using the `--lsm` argument to the archive. An example of a LSM file is provided with Makeself.
+    * **`--tar-format opt`** : Specify the tar archive format (default is ustar); you may use any value accepted by your tar command (such as posix, v7, etc).
     * **`--tar-extra opt`** : Append more options to the tar command line.
 
         For instance, in order to exclude the `.git` directory from the packaged archive directory using the GNU `tar`, one can use `makeself.sh --tar-extra "--exclude=.git" ...`
@@ -111,12 +112,11 @@ makeself.sh [args] archive_dir file_name label startup_script [script_args]
     * **`--packaging-date date`** : Use provided string as the packaging date instead of the current date.
     * **`--license`** : Append a license file.
     * **`--nooverwrite`** : Do not extract the archive if the specified target directory already exists.
-    * **`--header file`** : Specify the location of the header script file (default `makeself-header.sh`)
     * **`--help-header file`** : Add a header to the archive's `--help` output.
   * `archive_dir` is the name of the directory that contains the files to be archived
   * `file_name` is the name of the archive to be created
   * `label` is an arbitrary text string describing the package. It will be displayed while extracting the files.
-  * `startup_script` is the command to be executed _from within_ the directory of extracted files. Thus, if you wish to execute a program contain in this directory, you must prefix your command with `./`. For example, `./program` will be fine. The `script_args` are additional arguments for this command.
+  * `startup_script` is the command to be executed _from within_ the directory of extracted files. Thus, if you wish to execute a program contained in this directory, you must prefix your command with `./`. For example, `./program` will be fine. The `script_args` are additional arguments for this command.
 
 Here is an example, assuming the user has a package image stored in a **/home/joe/mysoft**, and he wants to generate a self-extracting package named
 **mysoft.sh**, which will launch the "setup" script initially stored in /home/joe/mysoft :
@@ -200,11 +200,15 @@ The latest development version can be grabbed from [GitHub][10]. Feel free to su
   * **v2.1.3:** Bug fixes with the command line when spawning terminals. Added `--tar`, `--noexec` for archives. Added `--nomd5` and `--nocrc` to avoid creating checksums in archives. The embedded script is now run through "eval". The `--info` output now includes the command used to create the archive. A man page was contributed by Bartosz Fenski.
   * **v2.1.4:** Fixed `--info` output. Generate random directory name when extracting files to . to avoid problems. Better handling of errors with wrong permissions for the directory containing the files. Avoid some race conditions, Unset the $CDPATH variable to avoid problems if it is set. Better handling of dot files in the archive directory.
   * **v2.1.5:** Made the md5sum detection consistent with the header code. Check for the presence of the archive directory. Added `--encrypt` for symmetric encryption through gpg (Eric Windisch). Added support for the digest command on Solaris 10 for MD5 checksums. Check for available disk space before extracting to the target directory (Andreas Schweitzer). Allow extraction to run asynchronously (patch by Peter Hatch). Use file descriptors internally to avoid error messages (patch by Kay Tiong Khoo).
-  * **v2.1.6:** Replaced one dot per file progress with a realtime progress percentage and a spining cursor. Added `--noprogress` to prevent showing the progress during the decompression. Added `--target` dir to allow extracting directly to a target directory. (Guy Baconniere)
+  * **v2.1.6:** Replaced one dot per file progress with a realtime progress percentage and a spinning cursor. Added `--noprogress` to prevent showing the progress during the decompression. Added `--target` dir to allow extracting directly to a target directory. (Guy Baconniere)
   * **v2.2.0:** First major new release in years! Includes many bugfixes and user contributions. Please look at the [project page on Github][10] for all the details.
   * **v2.3.0:** Support for archive encryption via GPG or OpenSSL. Added LZO and LZ4 compression support. Options to set the packaging date and stop the umask from being overriden. Optionally ignore check for available disk space when extracting. New option to check for root permissions before extracting.
   * **v2.3.1:** Various compatibility updates. Added unit tests for Travis CI in the GitHub repo. New `--tar-extra`, `--untar-extra`, `--gpg-extra`, `--gpg-asymmetric-encrypt-sign` options.
   * **v2.4.0:** Added optional support for SHA256 archive integrity checksums.
+  * **v2.4.2:** New --cleanup and --cleanup-args arguments for cleanup scripts. Added threading support for supported compressors. Now supports zstd compression.
+  * **v2.4.3:** Make explicit POSIX tar archives for increased compatibility.
+  * **v2.4.4:** Fixed various compatibility issues (no longer use POSIX tar archives), Github Actions to check on Solaris and FreeBSD.
+  * **v2.4.5:** Added `--tar-format` option to set the tar archive format (default is ustar)
 
 ## Links
 
@@ -233,7 +237,7 @@ This project is now hosted on GitHub. Feel free to submit patches and bug report
    [6]: http://earth.google.com/
    [7]: http://www.virtualbox.org/
    [8]: http://www.gnu.org/copyleft/gpl.html
-   [9]: https://github.com/megastep/makeself/releases/download/release-2.4.2/makeself-2.4.2.run
+   [9]: https://github.com/megastep/makeself/releases/download/release-2.4.5/makeself-2.4.5.run
    [10]: https://github.com/megastep/makeself
    [11]: https://github.com/megastep/loki_setup/
    [12]: http://www.unrealtournament2003.com/

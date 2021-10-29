@@ -228,6 +228,10 @@ limitations in handling dllimport attribute.  */
 # endif
 #endif
 
+#if !defined(_UCRT) && ((__MSVCRT_VERSION__ >= 0x1400) || (__MSVCRT_VERSION__ >= 0xE00 && __MSVCRT_VERSION__ < 0x1000))
+/* Allow both 0x1400 and 0xE00 to identify UCRT */
+#define _UCRT
+#endif
 
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x601
@@ -367,7 +371,7 @@ typedef int __int128 __attribute__ ((__mode__ (TI)));
 
 #ifndef __WIDL__
 
-#if defined (_WIN32) && !defined (_WIN64) && !defined (__MINGW_USE_VC2005_COMPAT)
+#if defined (_WIN32) && !defined (_WIN64) && !defined (__MINGW_USE_VC2005_COMPAT) && !defined (_UCRT)
 #ifndef _USE_32BIT_TIME_T
 #define _USE_32BIT_TIME_T
 #endif
@@ -378,7 +382,7 @@ typedef int __int128 __attribute__ ((__mode__ (TI)));
 #endif
 
 #ifndef UNALIGNED
-#if defined(_M_IA64) || defined(_M_AMD64)
+#if defined(__ia64__) || defined(__x86_64__)
 #define UNALIGNED __unaligned
 #else
 #define UNALIGNED
@@ -580,7 +584,15 @@ extern "C" {
 void __cdecl __debugbreak(void);
 __MINGW_INTRIN_INLINE void __cdecl __debugbreak(void)
 {
+#if defined(__i386__) || defined(__x86_64__)
   __asm__ __volatile__("int {$}3":);
+#elif defined(__arm__)
+  __asm__ __volatile__("udf #0xfe");
+#elif defined(__aarch64__)
+  __asm__ __volatile__("brk #0xf000");
+#else
+  __asm__ __volatile__("unimplemented");
+#endif
 }
 #endif
 #endif

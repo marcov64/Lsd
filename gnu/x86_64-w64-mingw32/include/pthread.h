@@ -66,6 +66,7 @@
 #include <process.h>
 #include <limits.h>
 #include <signal.h>
+#include <time.h>
 
 #include <sys/timeb.h>
 
@@ -214,20 +215,6 @@ struct _pthread_cleanup
 #define pthread_cleanup_pop(E)\
     (*pthread_getclean() = _pthread_cup.next, ((E) ? (_pthread_cup.func((pthread_once_t *)_pthread_cup.arg)) : (void)0));}
 
-/* Windows doesn't have this, so declare it ourselves. */
-#ifndef _TIMESPEC_DEFINED
-#define _TIMESPEC_DEFINED
-struct timespec {
-  time_t  tv_sec;   /* Seconds */
-  long    tv_nsec;  /* Nanoseconds */
-};
-
-struct itimerspec {
-  struct timespec  it_interval;  /* Timer period */
-  struct timespec  it_value;     /* Timer expiration */
-};
-#endif
-
 #ifndef SCHED_OTHER
 /* Some POSIX realtime extensions, mostly stubbed */
 #define SCHED_OTHER     0
@@ -362,6 +349,8 @@ int WINPTHREAD_API pthread_attr_setinheritsched(pthread_attr_t *a, int flag);
 int WINPTHREAD_API pthread_attr_getinheritsched(const pthread_attr_t *a, int *flag);
 int WINPTHREAD_API pthread_attr_setscope(pthread_attr_t *a, int flag);
 int WINPTHREAD_API pthread_attr_getscope(const pthread_attr_t *a, int *flag);
+int WINPTHREAD_API pthread_attr_getstack(const pthread_attr_t *attr, void **stack, size_t *size);
+int WINPTHREAD_API pthread_attr_setstack(pthread_attr_t *attr, void *stack, size_t size);
 int WINPTHREAD_API pthread_attr_getstackaddr(const pthread_attr_t *attr, void **stack);
 int WINPTHREAD_API pthread_attr_setstackaddr(pthread_attr_t *attr, void *stack);
 int WINPTHREAD_API pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *size);

@@ -8,453 +8,259 @@
 # !diagnostics suppress = log0, colSds, na.remove, rec.stats, textplot
 
 
-box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
-                       nTstat, legends, legendList, sDigits, bPlotCoef,
-                       bPlotNotc, folder, repName ) {
+box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
+                       warmUpStat, nTstat, legends, legendList, sDigits,
+                       bPlotCoef, bPlotNotc, folder, repName ) {
 
   # ======= COMPARISON OF EXPERIMENTS =======
 
-  numStats <- 99
-  statsTb <- array( dim = c( numStats, 4, nExp ) )
-  statsBp <- array( dim = c( numStats, 5, nExp ) )
-  n <- array( dim = c( numStats, nExp ) )
-  conf <- array( dim = c( numStats, 2, nExp ) )
-  out <- array( list( ), dim = c( numStats, nExp ) )
+  maxStats <- 99
+  statsTb <- statsBp <- array( dim = c( maxStats, 5, nExp ) )
+  n <- array( dim = c( maxStats, nExp ) )
+  conf <- array( dim = c( maxStats, 2, nExp ) )
+  data <- out <- array( list( ), dim = c( maxStats, nExp ) )
+  temp <- matrix( nrow = TmaxStat, ncol = nSize )
   names <- units <- list( )
+
+  # function to add whiskerplots to the list of comparisons
+  addStat <- function( stat, exper, x, tit, ylab ) {
+
+    if( stat > maxStats ) {
+      warning( "Insufficient space for stats, discarding" )
+      return( )
+    }
+
+    data[[ stat, exper ]] <<- x
+    names[[ stat ]] <<- tit
+    units[[ stat ]] <<- ylab
+    statsTb[ stat, , exper ] <<- c( mean( x ), median( x ), sd( x ), min( x ), max( x ) )
+    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
+    statsBp[ stat, , exper ] <<- bPlotStats$stats
+    n[ stat, exper ] <<- bPlotStats$n
+    conf[ stat, , exper ] <<- bPlotStats$conf
+    out[[ stat, exper ]] <<- bPlotStats$out
+
+    return( stat + 1 )
+  }
 
   # ---- Collect the data for each experiment ----
 
   for( k in 1 : nExp ) {
-    stat <- 0
-    temp <- matrix( nrow = TmaxStat, ncol = nSize )
+    stat <- 1
 
-    stat <- stat + 1
-    names[[ stat ]] <- "GDP growth"
-    units[[ stat ]] <- "Average GDP growth rate"
     # Calculates periodic GDP growth rates for each MC series
     for( j in 1 : nSize )
       for( i in TmaskStat )
         if( i == 1 ) {
           temp[ i - warmUpStat, j ] <- 0
-        } else
+        } else {
           temp[ i - warmUpStat, j ] <- ( log0( mcData[[ k ]][ i, "GDP", j ] ) -
                                            log0( mcData[[ k ]][ i - 1, "GDP", j ] ) )
+        }
+
     # Remove +/-infinite values and replace by +/-1
     temp[ is.infinite( temp ) ] <- sign( temp[ is.infinite( temp ) ] )
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "GDP growth",
+                     ylab = "Average real GDP growth rate" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Volatility of GDP growth"
-    units[[ stat ]] <- "Standard deviation of GDP growth rate"
-    # Calculates periodic GDP growth rates for each MC series
-    for( j in 1 : nSize )
-      for( i in TmaskStat )
-        if( i == 1 ) {
-          temp[ i - warmUpStat, j ] <- 0
-        } else
-          temp[ i - warmUpStat, j ] <- ( log0( mcData[[ k ]][ i, "GDP", j ] ) -
-                                           log0( mcData[[ k ]][ i - 1, "GDP", j ] ) )
-    # Remove +/-infinite values and replace by +/-1
-    temp[ is.infinite( temp ) ] <- sign( temp[ is.infinite( temp ) ] )
-    x <- colSds( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colSds( temp, na.rm = TRUE ),
+                     tit = "Volatility of GDP growth",
+                     ylab = "Standard deviation of real GDP growth rate" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Likelihood of GDP crises"
-    units[[ stat ]] <- "Likelihood (probability) of GDP crises"
     # Mark crises periods (= 1) when GDP growth is less than -3%
-    for( j in 1 : nSize ){
-      for( i in TmaskStat ){
+    for( j in 1 : nSize ) {
+      for( i in TmaskStat ) {
         if( i == 1 ){
           temp[ i - warmUpStat, j ] <- 0
-        }
-        else{
+        } else {
           if( log0( mcData[[ k ]][ i, "GDP", j ] ) -
-              log0( mcData[[ k ]][ i - 1, "GDP", j ] ) < -0.03){
+              log0( mcData[[ k ]][ i - 1, "GDP", j ] ) < -0.03 ){
             temp[ i - warmUpStat, j ] <- 1
-          }
-          else{
+          } else {
             temp[ i - warmUpStat, j ] <- 0
           }
         }
       }
     }
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Inflation"
-    units[[ stat ]] <- "Consumer prices index average growth rate"
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "Likelihood of GDP crises",
+                     ylab = "Probability of GDP reductions over 3%" )
+
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "Q2u", ],
+                                        na.rm = TRUE ),
+                     tit = "Capacity utilization",
+                     ylab = "Average capacity utilization rate in Consumption-good sector" )
+
     temp <- mcData[[ k ]][ TmaskStat, "dCPI", ]
     temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "Inflation",
+                     ylab = "Consumer prices index average growth rate" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Tax"
-    units[[ stat ]] <- "Government tax income over GDP"
     temp <- mcData[[ k ]][ TmaskStat, "Tax", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "Government income",
+                     ylab = "Government tax income over GDP" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Government total expenditure"
-    units[[ stat ]] <- "Total government expenditure over GDP"
     temp <- mcData[[ k ]][ TmaskStat, "G", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "Government expenditure",
+                     ylab = "Total government expenditure over GDP" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Government deficit"
-    units[[ stat ]] <- "Government deficit over GDP"
+    temp <- mcData[[ k ]][ TmaskStat, "Gbail", ] / mcData[[k]][ TmaskStat, "GDPnom", ]
+    temp[ ! is.finite( temp ) ] <- NA
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "Government bank bail-out expenditure",
+                     ylab = "Government costs to bail-out banks over GDP" )
+
     temp <- mcData[[ k ]][ TmaskStat, "Def", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "Government deficit",
+                     ylab = "Government deficit over GDP" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Government debt"
-    units[[ stat ]] <- "Government debt over GDP"
     temp <- mcData[[ k ]][ TmaskStat, "Deb", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "Government debt",
+                     ylab = "Government debt over GDP" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Credit supply"
-    units[[ stat ]] <- "Total banks credit supply over GDP"
     temp <- mcData[[ k ]][ TmaskStat, "TC", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "Bank credit supply",
+                     ylab = "Total bank credit available over GDP" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Loans"
-    units[[ stat ]] <- "Total banks loans over GDP"
     temp <- mcData[[ k ]][ TmaskStat, "Loans", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "Firm loans",
+                     ylab = "Firm debt stock over GDP" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Capacity utilization"
-    units[[ stat ]] <- "Average capacity utilization rate in sector 2"
-    temp <- mcData[[ k ]][ TmaskStat, "Q2u", ]
+    temp <- mcData[[ k ]][ TmaskStat, "BadDeb", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "Bad debt",
+                     ylab = "Total bank bad debt over GDP" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Full employment frequency"
-    units[[ stat ]] <- "Frequency (probability) of full employment"
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "U", ],
+                                        na.rm = TRUE ),
+                     tit = "Unemployment",
+                     ylab = "Unemployment rate" )
+
     # Format full employment MC series (1 = full employment, 0 = otherwise)
     for( j in 1 : nSize )
       for( i in TmaskStat )
-        if( mcData[[ k ]][ i, "U", j ] == 0) {
+        if( mcData[[ k ]][ i, "U", j ] == 0 )
           temp[ i - warmUpStat, j ] <- 1
-        } else
+    else
           temp[ i - warmUpStat, j ] <- 0
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "Full employment frequency",
+                     ylab = "Probability of zero unemployment rate" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Unemployment"
-    units[[ stat ]] <- "Average unemployment rate"
-    temp <- mcData[[ k ]][ TmaskStat, "U", ]
-    temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "V", ],
+                                        na.rm = TRUE ),
+                     tit = "Vacancy",
+                     ylab = "Vacancy rate" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Vacancy"
-    units[[ stat ]] <- "Average net vacancy rate"
-    temp <- mcData[[ k ]][ TmaskStat, "V", ]
-    temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "wAvgReal", ],
+                                        na.rm = TRUE ),
+                     tit = "Real wage",
+                     ylab = "Average log real wage" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Workers tenure"
-    units[[ stat ]] <- "Average employment time in same firm (periods)"
-    temp <- mcData[[ k ]][ TmaskStat, "TeAvg", ]
-    temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "wLogSD", ],
+                                        na.rm = TRUE ),
+                     tit = "Wage spread",
+                     ylab = "Standard deviation of log wage" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Workers tenure skills"
-    units[[ stat ]] <- "Average workers skills level"
-    temp <- mcData[[ k ]][ TmaskStat, "sTavg", ]
-    temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
-
-    stat <- stat + 1
-    names[[ stat ]] <- "Workers vintage skills"
-    units[[ stat ]] <- "Average workers skills level"
-    temp <- mcData[[ k ]][ TmaskStat, "sVavg", ]
-    temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
-
-    stat <- stat + 1
-    names[[ stat ]] <- "Wages spread"
-    units[[ stat ]] <- "Standard deviation of log wages"
-    temp <- mcData[[ k ]][ TmaskStat, "wLogSD", ]
-    temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
-
-    stat <- stat + 1
-    names[[ stat ]] <- "Bonus to wage ratio"
-    units[[ stat ]] <- "Average bonuses over wages in sector 2"
     temp <- mcData[[ k ]][ TmaskStat, "B2", ] / mcData[[ k ]][ TmaskStat, "W2", ]
     temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "Bonus to wage ratio",
+                     ylab = "Average bonuses over wages in consumption-good sector" )
+    
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "wGini", ],
+                                        na.rm = TRUE ),
+                     tit = "Gini index",
+                     ylab = "Gini index on workers' income" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Income concentration"
-    units[[ stat ]] <- "Workers' income Gini index"
-    temp <- mcData[[ k ]][ TmaskStat, "wGini", ]
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "TeAvg", ],
+                                        na.rm = TRUE ),
+                     tit = "Worker tenure",
+                     ylab = "Average employment time" )
+
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "sTavg", ],
+                                        na.rm = TRUE ),
+                     tit = "Workers tenure skills",
+                     ylab = "Average worker tenure skills level" )
+
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "sVavg", ],
+                                        na.rm = TRUE ),
+                     tit = "Workers vintage skills",
+                     ylab = "Average worker vintage skills level" )
+
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "inn", ],
+                                        na.rm = TRUE ),
+                     tit = "Innovation",
+                     ylab = "Share of innovating firms in capital-good sector" )
+
+
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "imi", ],
+                                        na.rm = TRUE ),
+                     tit = "Imitation",
+                     ylab = "Share of imitating firms in capital-good sector" )
+
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "dA", ],
+                                        na.rm = TRUE ),
+                     tit = "Productivity growth",
+                     ylab = "Labor productivity growth rate" )
+
+    temp <- ( 1 - mcData[[ k ]][ TmaskStat, "f2posChg", ] ) * mcData[[ k ]][ TmaskStat, "A2sdPreChg", ] +
+            mcData[[ k ]][ TmaskStat, "f2posChg", ] * mcData[[ k ]][ TmaskStat, "A2sdPosChg", ]
     temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
+                     tit = "Productivity spread",
+                     ylab = "Standard deviation of log productivity in consumption-good sector" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Productivity growth"
-    units[[ stat ]] <- "Average productivity growth rate"
-    # Calculates periodic productivity growth rates for each MC series
-    for( j in 1 : nSize )
-      for( i in TmaskStat )
-        if( i == 1 ) {
-          temp[ i - warmUpStat, j ] <- 0
-        } else
-          temp[ i - warmUpStat, j ] <- ( log0( mcData[[ k ]][ i, "A", j ] ) -
-                                           log0( mcData[[ k ]][ i - 1, "A", j ] ) )
-    # Remove +/-infinite values and replace by +/-1
-    temp[ is.infinite( temp ) ] <- sign( temp[ is.infinite( temp ) ] )
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "q2avg", ],
+                                        na.rm = TRUE ),
+                     tit = "Quality",
+                     ylab = "Weighted average product quality in Consumption-good sector" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Productivity spread"
-    units[[ stat ]] <- "Standard deviation of log productivity in sector 2"
-    x <- mcData[[ k ]][ TmaskStat, "f2posChg", ]
-    temp <- ( 1 - x ) * mcData[[ k ]][ TmaskStat, "A2sdPreChg", ] +
-      x * mcData[[ k ]][ TmaskStat, "A2sdPosChg", ]
-    temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "HH2", ],
+                                        na.rm = TRUE ),
+                     tit = "Market concentration",
+                     ylab = "Standardized Herfindahl-Hirschman index in Consumption-good sector" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Quality"
-    units[[ stat ]] <- "Weighted average product quality in sector 2"
-    temp <- mcData[[ k ]][ TmaskStat, "q2avg", ]
-    temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "mu2avg", ],
+                                        na.rm = TRUE ),
+                     tit = "Mark-up",
+                     ylab = "Weighted average mark-up rate in Consumption-good sector" )
 
-    stat <- stat + 1
-    names[[ stat ]] <- "Innovation"
-    units[[ stat ]] <- "Innovating firms share in sector 1"
-    temp <- mcData[[ k ]][ TmaskStat, "inn", ]
-    temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
-
-    stat <- stat + 1
-    names[[ stat ]] <- "Imitation"
-    units[[ stat ]] <- "Imitating firms share in sector 1"
-    temp <- mcData[[ k ]][ TmaskStat, "imi", ]
-    temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
-
-    stat <- stat + 1
-    names[[ stat ]] <- "Market concentration"
-    units[[ stat ]] <- "Stadardized Herfindahl-Hirschman index in sector 2"
-    temp <- mcData[[ k ]][ TmaskStat, "HH2", ]
-    temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
-
-    stat <- stat + 1
-    names[[ stat ]] <- "Mark-ups"
-    units[[ stat ]] <- "Weighted average mark-up in sector 2"
-    temp <- mcData[[ k ]][ TmaskStat, "mu2avg", ]
-    temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
-
-    stat <- stat + 1
-    names[[ stat ]] <- "Net entry of firms"
-    units[[ stat ]] <- "Net entries in both markets"
-    temp <- mcData[[ k ]][ TmaskStat, "entry1", ] - mcData[[ k ]][ TmaskStat, "exit1", ] +
-      mcData[[ k ]][ TmaskStat, "entry2", ] - mcData[[ k ]][ TmaskStat, "exit2", ]
-    temp[ ! is.finite( temp ) ] <- NA
-    x <- colMeans( temp, na.rm = TRUE )
-    bPlotStats <- boxplot.stats( x, coef = bPlotCoef )
-    statsTb[ stat, , k ] <- c( mean( x ), sd( x ), min( x ), max( x ) )
-    statsBp[ stat, , k ] <- bPlotStats$stats
-    n[ stat, k ] <- bPlotStats$n
-    conf[ stat, , k ] <- bPlotStats$conf
-    out[[ stat, k ]] <- bPlotStats$out
+    stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "entry1exit", ] +
+                                          mcData[[ k ]][ TmaskStat, "entry2exit", ],
+                                        na.rm = TRUE ),
+                     tit = "Net entry of firms",
+                     ylab = "Number of net entrant firms in all sectors" )
   }
 
   # remove unused stats space
-  numStats <- stat
-  stat <- stat + 1
-  statsTb <- statsTb[ - ( stat : 99 ), , , drop = FALSE ]
-  statsBp <- statsBp[ - ( stat : 99 ), , , drop = FALSE ]
-  n <- n[ - ( stat : 99 ), , drop = FALSE ]
-  conf <- conf[ - ( stat : 99 ), , , drop = FALSE ]
-  out <- out[ - ( stat : 99 ), , drop = FALSE ]
-  rm( temp, x )
+  numStats <- stat - 1
+  statsTb <- statsTb[ - ( stat : maxStats ), , , drop = FALSE ]
+  statsBp <- statsBp[ - ( stat : maxStats ), , , drop = FALSE ]
+  n <- n[ - ( stat : maxStats ), , drop = FALSE ]
+  conf <- conf[ - ( stat : maxStats ), , , drop = FALSE ]
+  out <- out[ - ( stat : maxStats ), , drop = FALSE ]
+  rm( temp )
 
 
   # ---- Build experiments statistics table and performance comparison chart ----
 
-  table.stats <- statsTb[ , , 1 ]
-  table.names <- c( "Avg[1]", "SD[1]", "Min[1]", "Max[1]" )
   perf.comp <- statsTb[ , 1, 1 ]
   perf.names <- c( "Baseline[1]" )
 
@@ -500,9 +306,9 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
                       out = outVal, group = outGrp, names = legends )
 
     title <- names[[ stat ]]
-    subTitle <- as.expression(bquote(paste( "( bar: median / box: 2nd-3rd quartile / whiskers: max-min / points: outliers / MC runs = ",
-                                            .( nSize ), " / period = ", .( warmUpStat + 1 ), " - ",
-                                            .( nTstat ), " )" ) ) )
+    subTitle <- as.expression(bquote(paste(
+      "( bar: median / box: 2nd-3rd quartile / whiskers: max-min / points: outliers / MC runs = ",
+      .( nSize ), " / period = ", .( warmUpStat + 1 ), " - ", .( nTstat ), " )" ) ) )
     tryCatch( bxp( listBp, range = bPlotCoef, notch = bPlotNotc, main = title,
                    sub = subTitle, ylab = units[[ stat ]] ),
               error = function( e ) {
@@ -511,6 +317,21 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
               } )
   }
 
+  if( mcStat == "mean" ) {
+    scol <- 1
+    slab <- "Avg"
+    tlab <- "t-test"
+  } else {
+    scol <- 2
+    slab <- "Med"
+    tlab <- "U-test"
+  }
+
+  table.stats <- statsTb[ , c( scol, 3, 4, 5 ), 1 ]
+  table.names <- c( paste0( slab, "[1]" ), "SD[1]", "Min[1]", "Max[1]" )
+  perf.comp <- statsTb[ , 1, 1 ]
+  perf.names <- c( "Baseline[1]" )
+
   if( nExp > 1 ){
 
     # Create 2D stats table and performance comparison table
@@ -518,20 +339,36 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
     for( k in 2 : nExp ){
 
       # Stats table
-      table.stats <- cbind( table.stats, statsTb[ , , k ] )
-      table.names <- cbind( table.names, c( paste0( "Avg[", k, "]" ),
+      table.stats <- cbind( table.stats, statsTb[ , c( scol, 3, 4, 5 ), k ] )
+      table.names <- cbind( table.names, c( paste0( slab, "[", k, "]" ),
                                             paste0( "SD[", k, "]" ),
                                             paste0( "Min[", k, "]" ),
                                             paste0( "Max[", k, "]" ) ) )
 
       # Performance comparison table
+      if( mcStat == "mean" ) {
       perf.comp <- cbind( perf.comp, statsTb[ , 1, k ] / statsTb[ , 1, 1 ] )
+
+        # t-test
       t <- ( statsTb[ , 1, k ] - statsTb[ , 1, 1 ] ) /
         sqrt( ( statsTb[ , 2, k ] ^ 2 + statsTb[ , 2, 1 ] ^ 2 ) / nSize )
       df <- floor( ( ( statsTb[ , 2, k ] ^ 2 + statsTb[ , 2, 1 ] ^ 2 ) / nSize ) ^ 2 /
                      ( ( 1 / ( nSize - 1 ) ) * ( ( statsTb[ , 2, k ] ^ 2 / nSize ) ^ 2 +
                                                    ( statsTb[ , 2, 1 ] ^ 2 / nSize ) ^ 2 ) ) )
       pval <- 2 * pt( - abs ( t ), df )
+
+      } else {
+        perf.comp <- cbind( perf.comp, statsTb[ , 2, k ] / statsTb[ , 2, 1 ] )
+
+        # U-test (Mann-Whitney-Wilcoxon)
+        pval <- rep( NA, numStats )
+        for( stat in 1 : numStats ) {
+          pval[ stat ] <- suppressWarnings( wilcox.test( data[[ stat, k ]],
+                                                         data[[ stat, 1 ]],
+                                                         digits.rank = 7 )$p.value )
+        }
+      }
+
       perf.comp <- cbind( perf.comp, pval )
       perf.names <- cbind( perf.names, t( c( paste0( "Ratio[", k, "]" ),
                                              paste0( "p-val[", k, "]" ) ) ) )
@@ -558,7 +395,9 @@ box_plots <- function( mcData, nExp, nSize, TmaxStat, TmaskStat, warmUpStat,
 
     textplot( formatC( perf.comp, digits = sDigits, format = "g" ), cmar = 1 )
     title <- paste( "Performance comparison ( all experiments )" )
-    subTitle <- paste( "( numbers in brackets indicate the experiment number / H0: no difference with baseline / MC runs =",
+    subTitle <- paste(
+      "( experiment number in brackets /", tlab,
+      "H0: no difference with baseline / MC runs =",
                        nSize, "/ period =", warmUpStat + 1, "-", nTstat, ")" )
     title( main = title, sub = subTitle )
     mtext( legendList, side = 1, line = -2, outer = TRUE )

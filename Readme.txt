@@ -1,6 +1,6 @@
 **************************************************************
 
-	LSD 8.0 - December 2020
+	LSD 8.0 - September 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -19,12 +19,12 @@ LSD includes third party software under the license of the copyright owners:
 
 GCC 10.2 is copyrighted by the Free Software Foundation, Inc. under GPL 3, https://gcc.gnu.org
 Tcl/Tk 8.6 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
-MSYS2 2.0, https://www.msys2.org
-Cygwin 3.1.6 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
+MSYS2 3.1.7, https://www.msys2.org
+Cygwin 3.1.7 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
 7-Zip LZMA SDK 19.0 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
-Makeself is copyrighted by Stephane Peter under GPL2, https://makeself.io
-Gnuplot 5.2.8 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
-Eigen 3.3.7 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
+Makeself 2.4.3 is copyrighted by Stephane Peter under GPL2, https://makeself.io
+Gnuplot 5.4.1 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
+Eigen 3.3.9 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
 subbotools 1.3 is copyrighted by Giulio Bottazzi under GPL2, http://cafim.sssup.it/~giulio/software/subbotools
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
 NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under GPL 2.1, http://harvest.nps.edu
@@ -34,9 +34,11 @@ Silk icon set 1.3 is copyrighted by Mark James under CCA 2.5 license, http://www
 awthemes 9.2.2 is copyrighted by Brad Lanam, https://sourceforge.net/projects/tcl-awthemes
 BallroomDJ 3.29.20 is copyrighted by Brad Lanam, https://sourceforge.net/projects/ballroomdj
 ttkthemes 3.1.0 is copyrighted by RedFantom under GNU GPL 3+, https://github.com/TkinterEP/ttkthemes
+tksvg 0.7 is copyrighted by Harald Oehlmann, https://github.com/oehhar/tksvg
 dblclick.tcl is copyrighted by Wolf-Dieter Busch under OLL, https://wiki.tcl-lang.org/page/doubleclick
-tkcon 2.5 is copyrighted by Jeffrey Hobbs, https://wiki.tcl-lang.org/page/Tkcon
-tkdiff 4.2 is copyrighted by John M. Klassa and others GNU GPL 2+, https://sourceforge.net/projects/tkdiff
+tooltip.tcl 1.4.6 is copyrighted by Jeffrey Hobbs, https://wiki.tcl-lang.org/page/tklib
+tkcon.tcl 2.5 is copyrighted by Jeffrey Hobbs, https://wiki.tcl-lang.org/page/Tkcon
+tkdiff.tcl 4.2 is copyrighted by John M. Klassa and others GNU GPL 2+, https://sourceforge.net/projects/tkdiff
 
 
 ********
@@ -123,7 +125,7 @@ IMPORTANT: from version 8.0 and higher, LSD supports only Windows 64-bit. If you
 
 ANTIVIRUS BAD BEHAVIOR: many third-party anti-virus software consider LSD operation suspicious because it creates executable files and deals with tools, like compilers, which do not belong to the regular user universe. This wrong assumption can break LSD operation in many aspects and usually cannot be fixed reliably, so using LSD together with these tools is NOT SUPPORTED. LSD is tested and fully works with the embedded Windows Security anti-virus, which is unfortunately disabled when a third-party anti-virus is installed by the user. According to specialized media tests, Windows anti-virus is considered an excellent option, in particular when compared to the free alternatives, so using it instead should not create any problem. However, if you cannot remove your current third-party anti-virus (and enable Windows Security), you still have the option to run LSD inside a virtual machine like VirtualBox or VMware (but with reduced performance).
 
-To install LSD, the simplest alternative is to use the installer executable (e.g. LSD-installer-windows-8-0-stable-1.exe). Download it, double-click on the installer file, and follow the instructions. The installer executable can be deleted after the installation.
+To install LSD, the simplest alternative is to use the installer executable (e.g. LSD-installer-windows-8-0-stable-1.exe). Download it, double-click on the installer file, and follow the instructions. The installer executable can be deleted after the installation. According to your configuration, express authorization must be provided before downloading and running the LSD installer. This is normal.
  
 Alternatively, or in the case of problems using the installer, it is also possible to simply unzip a LSD distribution file archive on the desired folder. In most cases "C:\" (the root of the hard disk) is a good option. The steps to perform a manual installation are:
 
@@ -139,7 +141,7 @@ IMPORTANT: LSD cannot be installed within a folder (or having a parent folder) c
 
 To create a desktop link (icon) to run LSD/LMM, as well as an entry to the Windows Start Menu, you can simply double-click in Windows Explorer the following batch file available in the installation directory:
 
- add-shortcut-windows.bat
+ add-shortcut-windows[.bat]
 
 After the desktop icon is created, double-clicking it opens LMM (LSD Model Manager) which allows to create new models, or select existing models. If you cannot create the LSD icon on your desktop, or an entry in Start Menu, following the steps above, you may still run LSD by double-clicking the file "LMM.exe" inside the LSD installation directory.
 
@@ -156,6 +158,14 @@ It is recommended, but not required, to install the Gnuplot graphical plotting a
 4. In the "Select Additional Tasks", set the terminal type to "wxt", keep the proposed file associations, and MAKE SURE you select the "Add application directory to your PATH environment variable". If this option is not visible, you need to scroll down in the window to see it. Press "Next" and then "Install". When the installation is completed, press "Next" and "Finish".
 
 ATTENTION: If Gnuplot is not included in the Windows PATH environment variable, LSD may not be able to use Gnuplot. If this option is missing, Gnuplot must be installed again using the correct options as described above.
+
+FIXING COMPILATION ERRORS:
+
+Some free software packages have the bad habit of installing old copies of libraries required by LSD on the system PATH, which may prevent successful compilation and operation of LSD. The installer tries to detect and inform about possible sources of problems, which may have to be fixed before LSD can be run reliably. Alternatively, the user may force LSD libraries into the system PATH, which is NOT done by the installer. To do so, open Windows Explorer, navigate to the folder where LSD was installed, right-click on the file:
+
+ set-system-path-windows[.bat]
+ 
+and choose the "Run as administrator" option. This will force LSD libraries to be used system-wide, which may break other software which relies on older versions of the libraries.
 
 USING DIFFERENT COMPILERS (optional):
 
@@ -193,6 +203,10 @@ After Homebrew installation finishes (details at http://brew.sh), you can instal
 
  brew install multitail gnuplot
 
+INACTIVE TERMINAL WINDOWS:
+
+As LSD accesses external programs, inactive Terminal windows may be left open in the computer desktop. To prevent this default behavior, the user can change the Terminal aplication configuration. In Terminal, open menu "Preferences > Profiles > Shell" and set options "When the shell exists" to "Close if the shell exited cleanly", and "Ask before closing" to "Never".
+
 IN CASE OF PROBLEMS:
 
 LSD is only supported in mac computers as a native macOS (Aqua) application. There is no longer support for X11.
@@ -200,6 +214,14 @@ LSD is only supported in mac computers as a native macOS (Aqua) application. The
 If using macOS 10.12 (Sierra) or newer, you MUST use the "add-shortcut-mac.sh" command above to remove LMM and LSD from the system quarantine. Failing to do so will prevent from using LSD as a native macOS application.
 
 If you delete or cannot create the LSD shortcuts, you can still run the app named LMM located inside the LSD installation directory (double click it in Finder) to open LMM/LSD, or try to rerun the "add-shortcut-mac.sh" script to recreate the shortcut.
+
+AUTOMATION ACCESS:
+
+LSD needs to control external programs to automate operation. The first time it needs automation access, a macOS (10.14+) popup will request the user to allow it, please click on OK. If user denies automation access once, macOS will not ask again for authorization and will silently block all further LSD operations, curtailing LSD capabilities and preventing some operations. To force the system to ask again for authorization (all programs) please use the following command on the Terminal:
+
+ tccutil reset AppleEvents
+
+Authorized programs can be checked at System Preferences > Security & Privacy > Privacy > Automation.
 
 
 **********************
@@ -228,15 +250,17 @@ To use the LSD in Linux it is necessary to have the GNU gcc/g++ compiler (versio
 
 In Debian or Ubuntu, to make sure you have the correct libraries you can use:
 
- sudo apt-get install build-essential gdb gnuplot-qt multitail zlib1g-dev tcl-dev tk-dev
+ sudo apt-get install build-essential gdb gnuplot-qt multitail zlib1g-dev tcl-dev tk-dev xterm
 
 In Fedora, CentOS or Red Hat, the equivalent command is:
 
- sudo yum install gcc-c++ make gdb gnuplot multitail zlib-devel tcl tk tcl-devel tk-devel
+ sudo yum install gcc-c++ make gdb gnuplot multitail zlib-devel tcl tk tcl-devel tk-devel xterm
 
 In Mandriva or Mageia:
 
- sudo urpmi gcc-c++ make gdb gnuplot multitail lib64z-devel lib64tcl-devel lib64tk-devel
+ sudo urpmi gcc-c++ make gdb gnuplot multitail lib64z-devel lib64tcl-devel lib64tk-devel xterm
+
+If installing to a server (no desktop), please remove gnuplot/gnuplot-qt from the above commands to prevent the full desktop stack to be installed, which is not usually adequate for a server.
 
 IN CASE OF PROBLEMS:
 
@@ -274,7 +298,7 @@ Please note that MSYS2 compiler is NOT required (or recommended) if the above in
 
 Step-by-step procedure to install the MSYS2 64-bit compiler (an internet connection is required):
 
-1. Download and execute the MSYS2 64-bit installer from https://www.msys2.org.
+1. Download and execute the MSYS2 64-bit installer from https://www.msys2.org, accepting the default installation directory ("c:\msys64") to prevent warnings in LSD
 
 2. Open the MSYS2 shell (icon on Start Menu) and update MSYS2 using the command:
 
@@ -309,7 +333,7 @@ To define it, open "Control Panel", sequentially select "System and Security", "
 
 Please note that Cygwin compiler is NOT required (or recommended) if the above instructions for installing LSD were already performed, as LSD already embeds an up-to-date compiler for Windows. 
 
-The Windows Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Preferably, install Cygwin to the default directory ("C:\cygwin64") or to the existing Cygwin directory in case of an update. If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, five non-default packages are REQUIRED by LSD (mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make, gdb and multitail). Alternatively, the pure-Cygwin, non-MinGW 64-bit gcc compiler can be also used, if matched with the corresponding Tcl/Tk and zlib libraries. Lastly, Cygwin main and compiler binary subdirectories must be added to the PATH environment variable (not done by the installer).
+The Windows Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Install Cygwin to the default directory ("C:\cygwin64") to prevent warnings in LSD. If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, five non-default packages are REQUIRED by LSD (mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make, gdb and multitail). Alternatively, the pure-Cygwin, non-MinGW 64-bit gcc compiler can be also used, if matched with the corresponding Tcl/Tk and zlib libraries. Lastly, Cygwin main and compiler binary subdirectories must be added to the PATH environment variable (not done by the installer).
 
 Step-by-step procedure to install the Cygwing 64-bit compiler (an internet connection is required):
 

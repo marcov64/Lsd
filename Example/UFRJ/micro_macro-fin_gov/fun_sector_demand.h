@@ -1,221 +1,111 @@
 /*****PRODUCTION AND DEMAND*****/
 
 
-EQUATION("Domestic_Intermediate_Demand")
+EQUATION("Sector_External_Price")
 /*
-This stores the value of the "Dom_Intermediate_Demand_Function" for each sector.
+External price of the sector's goods. Defined after firms set their price and sector average price is calculated.
+It grows based on 3 parameters, in any combination.
+-"sector_external_price_growth" sets a fixed exogenous growth rate
+-"sector_external_price_competitiveness" sets how domestic sector influence external price. Is this parameter is 1, external price will grow exactly as the domestic price.
+-"sector_external_price_sd" sets the random variation, regardless of the two growth parameters.
+User can also define a external price shock:
+-"sector_external_price_shock_begin" defines when the shock begin
+-"sector_external_price_shock_duration" defines how many perio the shock will last
+-"sector_external_price_shock_size" defines the intensity and the direction of the shock. For instance, if this parameter is 1, the external price will grow twice as much as the "normal" growth.
 */
-	v[0]=V("id_intermediate_goods_sector");
-	if(v[0]==1)
-		v[1]=V("Total_Domestic_Intermediate_Demand");
-	else
-		v[1]=0;
-RESULT(v[1])
+	v[0]=CURRENT;											
+	v[1]=V("sector_external_price_growth");									
+	v[2]=V("sector_external_price_sd");										
+	v[3]=V("sector_external_price_competitiveness");			
+	v[4]=LAG_GROWTH(p, "Sector_Avg_Price", 1);
+	v[5]=norm((v[1]+v[3]*v[4]), v[2]);			
+
+	v[6]=V("sector_external_price_shock_begin");          				
+	v[7]=V("sector_external_price_shock_duration");       				
+	v[8]=V("sector_external_price_shock_size");           			
+		if(t>=v[6]&&t<v[6]+v[7])
+			v[9]=v[5]*(1+v[8]);
+		else
+			v[9]=v[5];
+	v[10]=v[0]*(1+v[9]);	
+RESULT(v[10])
 
 
-EQUATION("Domestic_Consumption_Demand") 
+EQUATION("Sector_Real_Exports")
 /*
-Stores the value of the Demand Function if it is a consumption goods sector
+Exports are defined for each sector based on the application of an export coefficient on external income. 
+This coefficient is endogenous calculated in the initialization. It represents the share of the external income that is allocated to the current sector as demand.
+The amount of exports will also depend on sector specific elasticities on relative prices and external income.
+The division by price observed in the past period allows to transform the value of exports into units of exported products.
+Both sector average price and external price must be calculated before.
 */
-	v[0]=V("id_consumption_goods_sector");                  	//identifies consumption goods sector
-	if(v[0]==1)                                             	//if it is a consumption good sector
-		v[1]=V("Total_Domestic_Consumption_Demand");       	//stores the value of the function  
-	else                                                    	//if it is not a consumption good sector 
-		v[1]=0;                                               	//domestic consumption is zero
-RESULT(v[1])
-
-
-EQUATION("Domestic_Capital_Demand")
-/*
-Calls the Capital_Goods_Demand Function and calculates the demand of other sectors.
-*/
-	v[0]=V("id_capital_goods_sector");
-	if(v[0]==1)
-		v[1]=V("Total_Domestic_Capital_Goods_Demand");
-	else
-		v[1]=0;
-RESULT(v[1])
+	v[0]=V("External_Real_Income");
+	v[1]=V("sector_exports_coefficient");
+	v[2]=V("Sector_Avg_Price");
+	v[3]=V("Sector_External_Price");
+	v[4]=V("sector_exports_elasticity_income");
+	v[5]=V("sector_exports_elasticity_price");
+	v[6]=V("Country_Exchange_Rate");
+	v[7]=v[1]*pow((v[3]*v[6])/v[2],v[5])*pow(v[0],v[4]);
+	v[8]=v[7]/v[2];
+RESULT(v[7])
 
 
 EQUATION("Sector_Effective_Orders")
 /*
-Effective orders are determined from total demand for the products in the sector. In the sum of consumption goods, capital goods and intermediate goods, only the factor referring to the sector that is calling this variable will asume positive values. In the case of the agricultural sector, effective orders also include exports.
+Effective orders are determined from total demand for the products in the sector.
+Depending on the type of sector, it will add total domestic demand for that type of good with real exports.
+This must be changed in the case of more than 1 sector of each type.
+This variable also writes an analysis variable that evaluates the relative weight of exports on sector's total demand.
 */
-	v[0]=V("Domestic_Consumption_Demand");                                                       //domestic demand of consumption goods
-	v[1]=V("Domestic_Capital_Demand");                                                           //domestic demand of capital goods
-	v[2]=V("Domestic_Intermediate_Demand");                                                      //domestic demand of intermediate goods
-	v[3]=v[0]+v[1]+v[2];                                                                         //sums up the domestic demands. For each sector, only the relevant demand will have a value and the others will be zero.
-	v[4]=V("Sector_Exports");                                                                    //external demand, exports of the sector (zero for the non-agricultural sector)
-	v[5]=v[3]+v[4];                                                                              //sums up domestic and external demand
+	if(V("id_intermediate_goods_sector")==1)
+		v[0]=V("Country_Domestic_Intermediate_Demand");                                                       
+	if(V("id_consumption_goods_sector")==1)
+		v[0]=V("Country_Domestic_Consumption_Demand");                                                          
+	if(V("id_capital_goods_sector")==1)
+		v[0]=V("Country_Domestic_Capital_Goods_Demand");                                                    
+	v[1]=V("Sector_Real_Exports");                                                              
+	v[2]=v[0]+v[1];   
+	v[4]=V("sector_initial_demand");
+	v[5]=max(v[2],v[4]);
+	v[3]= v[5]!=0? v[1]/v[5] : 0;
+	WRITE("Sector_Exports_Share", v[3]);
 RESULT(max(0,v[5]))
 
-
-EQUATION("Effective_Orders_Capital_Firm")
-/*
-Sector Variable
-*/
-	v[0]=V("id_capital_goods_sector");                                                        		//identifies capital goods sectors
-	v[1]=V("Sector_Sum_Market_Share");                                                              //
-	if (v[0]==1)                                                                              		//if it is capital goods sector
-		{
-		v[2]=V("Sector_Effective_Orders");                                                      	//value of effective orders of capital goods 
-		for(v[3]=0,v[4]=v[2],v[5]=0; (v[2]-v[3])>0&&v[5]<v[1]; v[4]=(v[2]-v[3]),v[5]=v[6])      	//
- 			{	
-			v[7]=v[5];                                                                            	//initializes v[7] for the CYCLE
-			v[8]=0;    														                        //initializes v[8] for the CYCLE                                                       
-			v[9]=0;                                                                               	//initializes v[9] for the CYCLE
-			v[10]=0;                                                                              	//initializes v[10] for the CYCLE
-			CYCLE(cur, "FIRMS")                                                                   	//begin CYCLE trought firms
-			{
-				v[11]=VS(cur, "Firm_Market_Share");                                                 //firm's market share
-				v[12]=VLS(cur, "Firm_Productive_Capacity", 1);                                      //firm's productive capacity in the last period
-				v[15]=VS(cur, "capital_goods_production_temporary");                                //firm's capital goods production
-					if (v[15]<v[12])                                                                //if firm's capital goods production is lower then the firm's maximum capacity
-					{
-					v[16]=VS(cur, "capital_goods_effective_orders_firm_temporary");                 //firm's effective orders temporary
-					v[17]=v[16]+v[4]*v[11]/(1-v[7]);                                                //firm effective orders will be the temporary value plus the total value of effective orders multiplied by firm's market share, divided by 
-					v[18]=max((min(v[17],v[12])),0);                                                //firm's effective production can never be more then the maximum capacity nor negative
-					}
-					else                                                                            //if firm's capital goods production is higher then the firm's maximum capacity             
-					{
-					v[17]=VS(cur, "capital_goods_effective_orders_firm_temporary");                 //firm's effective orders temporary      
-					v[18]=v[12];                                                                    //firm's effective production will be the maximum capacity
-					}
-				WRITES(cur, "capital_goods_effective_orders_firm_temporary", v[17]);                //writes the firm's capital goods effective orders
-				WRITES(cur, "capital_goods_production_temporary", v[18]);                           //writes the firm's capital goods production
-				v[10]=v[10]+v[18];                                                                  //sums up the production of each firm
-				v[19]=min(v[17],v[12]);                                                             //determines the firm's effecive orders, that can not be higher then the maximum capacity
-				v[9]=v[9]+v[19];                                                                    //sums up the effective orders of each firm
-					if (v[18]==v[12])                                                               //if firm's production is equal to maximum capacity	
-						v[20]=v[11];                                                                //effective orders will be equal to firm's market share
-					else                                                                            //if firm's production is not equal to maximum capacity
-						v[20]=0;                                                                    //effective orders will be equal to zero  
-				v[8]=v[8]+v[20];                                                                    //sums up the effective orders of each firm
-			}
-			v[3]=v[9];                                                                            	//new value for v[3]
-			v[6]=v[8];                                                                            	//new value for v[6]
-			}
-		}
-	else                                                                                      		//if it is not capital goods sector
-		v[20]=0;                                                                                	//result equals zero
-RESULT(v[20])
+EQUATION_DUMMY("Sector_Exports_Share", "Sector_Effective_Orders")
 
 
 EQUATION("Firm_Effective_Orders_Capital_Goods")
-/*
-Firm variable
-It is settled in a way that there will be no excess demand while there is still productive capacity in the sector. This distribution is done in this variable.
-*/
-	V("Effective_Orders_Capital_Firm");
-	v[0]=V("capital_goods_effective_orders_firm_temporary");
-	WRITE("capital_goods_production_temporary", 0);
-	WRITE("capital_goods_effective_orders_firm_temporary", 0);
-RESULT(v[0])
+RESULT(VS(capital,"Firm_Market_Share")*VS(capital,"Sector_Effective_Orders"))
 
 
-EQUATION("Intermediate_Production")
+EQUATION("Sector_Extra_Imports")
 /*
-Sector Variable
-Intermediate goods sector produces on demand. This variable calculates how much was demanded to the industries in this period in order to determine the effective production of the input producing sectors.
+The extra import, if the sector can not meet its internal demand, is determined by the difference between the actual orders of the sector and its actual production plus the available stock of products. The value of these imports is obtained by multiplying the previous result by the external price of the inputs of the sector in question.
 */
-	v[0]=V("id_intermediate_goods_sector");
-	v[1]=V("Sector_Sum_Market_Share");
-	if (v[0]==1) //intermediate goods sector
-	{
-	v[2]=V("Sector_Effective_Orders");
-	for(v[3]=0,v[4]=v[2],v[5]=0; (v[2]-v[3])>0&&v[5]<v[1]; v[4]=(v[2]-v[3]),v[5]=v[6])
- 		{	
-		v[7]=v[5];
-		v[8]=0;
-		v[9]=0;
-		v[10]=0;
-		CYCLE(cur, "FIRMS")
+	if(V("id_intermediate_goods_sector")==1)
+		v[0]=V("Country_Domestic_Intermediate_Demand");                                                       
+	if(V("id_consumption_goods_sector")==1)
+		v[0]=V("Country_Domestic_Consumption_Demand");                                                          
+	if(V("id_capital_goods_sector")==1)
+		v[0]=V("Country_Domestic_Capital_Goods_Demand");
+	v[3]=V("Sector_Demand_Met");
+	v[4]=v[0]*(1-v[3]);
+	v[1]=V("switch_extra_imports");
+	if(v[4]>0&&v[1]==1)
 		{
-			v[11]=VS(cur, "Firm_Market_Share");
-			v[21]=VS(cur, "desired_inventories_proportion");
-			v[22]=VLS(cur, "Firm_Stock_Inventories", 1);
-			v[12]=VLS(cur, "Firm_Productive_Capacity", 1);
-			v[15]=VS(cur, "intermediate_production_firm_temporary");
-			if (v[15]<v[12])
-				{
-				v[16]=VS(cur, "intermediate_effective_orders_firm_temporary");
-				v[17]=v[16]+v[4]*v[11]/(1-v[7]);
-				v[18]=max((min(v[17]*(1+v[21])-v[22],v[12])),0);
-				}
-				else
-				{
-				v[17]=VS(cur, "intermediate_effective_orders_firm_temporary");
-				v[18]=v[12];
-				}
-			WRITES(cur, "intermediate_effective_orders_firm_temporary", v[17]);
-			WRITES(cur, "intermediate_production_firm_temporary", v[18]);
-			v[10]=v[10]+v[18];
-			v[19]=min(v[17],v[12]+v[22]);
-			v[9]=v[9]+v[19];
-				if (v[18]==v[12])
-					v[20]=v[11];
-				else
-					v[20]=0;
-			v[8]=v[8]+v[20];
+		v[6]=v[4];
+		WRITE("Sector_Demand_Met_By_Imports", 1);
 		}
-		v[3]=v[9];
-		v[6]=v[8];
-		}
-	}
 	else
-		v[20]=0;
-RESULT(v[20])
-
-
-EQUATION("Firm_Intermediate_Production")
-/*
-Firm Variable
-*/
-	V("Intermediate_Production");
-	v[0]=V("intermediate_production_firm_temporary");
-	WRITE("intermediate_production_firm_temporary", 0);
-RESULT(v[0])
-
-
-EQUATION("Effective_Orders_Consumption_Firm")
-/*
-Sector Variable
-*/
-v[0]=V("id_consumption_goods_sector");
-v[1]=V("Sector_Sum_Market_Share");
-if (v[0]==1) //capital goods sector
-	{
-	v[2]=V("Sector_Effective_Orders");
-	for(v[3]=0,v[4]=v[2],v[5]=0; (v[2]-v[3])>0&&v[5]<v[1]; v[4]=(v[2]-v[3]),v[5]=v[6])
- 		{	
-		v[7]=v[5];
-		v[8]=0;
-		v[9]=0;
-		CYCLE(cur, "FIRMS")
 		{
-			v[11]=VS(cur, "Firm_Market_Share");
-			v[12]=VS(cur, "Firm_Effective_Production");
-			v[13]=VLS(cur, "Firm_Stock_Inventories", 1);
-			v[14]=v[12]+v[13];
-			v[15]=VS(cur, "consumption_effective_orders_firm_temporary");
-				if (v[15]<v[14])
-					v[17]=v[15]+v[4]*v[11]/(1-v[7]);
-				else
-					v[17]=v[15];
-			WRITES(cur, "consumption_effective_orders_firm_temporary", v[17]);
-			v[19]=min(v[17],v[14]);
-			v[9]=v[9]+v[19];
-				if (v[19]==v[14])
-					v[20]=v[11];
-				else
-					v[20]=0;
-			v[8]=v[8]+v[20];
+		v[6]=0;
+		WRITE("Sector_Demand_Met_By_Imports", 0);
 		}
-		v[3]=v[9];
-		v[6]=v[8];
-		}
-	}
-else
-	v[3]=0;
-RESULT(v[3])
+RESULT(v[6])
+
+EQUATION_DUMMY("Sector_Demand_Met_By_Imports", "Sector_Extra_Imports")
+
+
+
 

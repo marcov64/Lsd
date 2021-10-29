@@ -228,7 +228,7 @@ div.WordSection1
 
 </head>
 
-<body lang=PT-BR link=blue vlink=purple>
+<body lang=PT-BR link=blue vlink=purple style='word-wrap:break-word'>
 
 <div class=WordSection1>
 
@@ -242,8 +242,8 @@ div.WordSection1
  style='width:69.48%'>
  <tr>
   <td width=343 style='width:257.1pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
-  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><img width=321
-  height=397 src="image/menurun.png"></p>
+  <p class=MsoNormal style='margin:0cm'><img width=338 height=521
+  src="image/menurun.png"></p>
   </td>
   <td width=206 valign=top style='width:154.85pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
   <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
@@ -301,13 +301,12 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US><a href="#_Start_‘No_Window’">Start ‘No Window’
-Batch</a></span></p>
+</span></span><span lang=EN-US><a href="#_Start_‘No_Window’">Parallel Run</a></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US><a href="#parallel">Create/Start Parallel Batch</a></span></p>
+</span></span><span lang=EN-US><a href="#parallel">Parallel Batch</a></span></p>
 
 <h2><a name="_Run"></a><a name=run></a><span lang=EN-US>Run</span></h2>
 
@@ -340,12 +339,12 @@ lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>If there are multiple simulation runs
 configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
-Settings</span></span><span lang=EN-US> menu entry, LSD issues a confirmation
-message (see example below), telling how the results data will be handled and
-providing some options to the user. </span></p>
+Settings</span></span><span lang=EN-US> menu entry, LSD issues a confirmation message
+(see example below), telling how the results data will be stored and providing
+some options to the user. </span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=225 height=368 src="image/summary_run.png"></span></p>
+width=196 height=407 src="image/summary_run.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available checkbox options are (some
 may not be available according to the circumstance):</span></p>
@@ -357,7 +356,9 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 file</span></b></span><span lang=EN-US>: if checked, appends the new results to
 the existing </span><span class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span
 lang=EN-US> totals file (produced in a previous run). This entry is enabled
-only if a totals file exists for the current configuration file.</span></p>
+only if a totals file exists for the current configuration file. It is not
+possible to use it simultaneously with the </span><span class=Cdigo><span
+lang=EN-US>Clear output path before run</span></span><span lang=EN-US> option.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -365,7 +366,13 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><span class=Cdigo><b><span lang=EN-US>Skip generating results
 files</span></b></span><span lang=EN-US>: if enabled, LSD will not produce the
 time-series detailed </span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
-lang=EN-US> results files, generating only the summarized </span><span
+lang=EN-US> results files.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Skip generating totals file</span></b></span><span
+lang=EN-US>: if enabled, LSD will not produce the summarized </span><span
 class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span lang=EN-US> totals
 file.</span></p>
 
@@ -398,6 +405,17 @@ of Results</a> module. </span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Clear output path before
+run</span></b></span><span lang=EN-US>: if enabled, checking it deletes all
+previously-generated LSD files in the output subdirectory (user-created
+configuration files are preserved) before running the simulation again. This
+entry is enabled only if there are files to be deleted. It is not possible to
+use it simultaneously with the </span><span class=Cdigo><span lang=EN-US>Append
+to existing totals file</span></span><span lang=EN-US> option.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Update configuration file</span></b></span><span
 lang=EN-US>: if selected (default), the unsaved changes will be saved to the
 current </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
@@ -411,9 +429,14 @@ configured, at the end of each simulation run the results are saved to LSD
 results and totals files (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
 lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>.csv</span></span><span
-lang=EN-US> extension, according to the selected options) in the same
-subdirectory as the </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
-lang=EN-US> configuration file. The names of the produced files are composed by
+lang=EN-US> extension, according to the selected options). Output files are
+created in the same subdirectory as the </span><span class=Cdigo><span
+lang=EN-US>.lsd</span></span><span lang=EN-US> configuration file if it is
+located at a location without other uncorrelated files. Otherwise, a new
+subdirectory, with the same name and location as the configuration file, is
+created to hold the produced files. The effective </span><span class=Cdigo><span
+lang=EN-US>Output path</span></span><span lang=EN-US> is presented in the
+confirmation dialog (above). The names of the produced files are composed by
 the name of the current model configuration plus an integer number equal to the
 seed used for the pseudo-random number generator, separated by an underscore.</span></p>
 
@@ -436,91 +459,140 @@ command </span><span class=Cdigo><span lang=EN-US><a
 href="#_Close_Run-time_Plots">Run&gt;Close Run-time Plots</a></span></span><span
 lang=EN-US>, after the simulation is run, to close all the opened windows.</span></p>
 
-<h2><a name="_Start_‘No_Window’"></a><a name=batch></a><span lang=EN-US>Start
-‘No Window’ Batch</span></h2>
+<h2><a name="_Start_‘No_Window’"></a><a name=batch></a><span lang=EN-US>Parallel
+Run</span></h2>
 
 <p class=MsoNormal><a name="_Create/Start_Parallel_Batch"></a><span lang=EN-US>Start
-a <a href="LSD_faqs.html#simulationrun">simulation run</a> batch in which,
+a background <a href="LSD_faqs.html#simulationrun">simulation run</a> in which,
 differently from the </span><span class=Cdigo><span lang=EN-US><a href="#_Run">Run&gt;Run</a></span></span><span
-lang=EN-US> command above, the simulation is directly executed by the computer
-operating system in background. Because the no-window simulation run is performed
-independently from LSD, the execution progress is not shown in the <a
-href="log.html">Log</a> window and no <a href="runtime.html">Run-time Plot</a>
-window is created. This way, the user can continue to interact with LSD while
-the simulation is being executed, even to start additional no-window batches. </span></p>
+lang=EN-US> command above, the simulation is directly executed directly by the
+operating system. This option also allows the execution of multi-run
+simulations in parallel, producing faster results by using the full
+capabilities of your computer. </span></p>
 
-<p class=MsoNormal><span lang=EN-US>To use this command, the user must first
-create a no-window (command prompt) version of the model in <a href="LMM.html">LMM</a>
-by selecting menu </span><span class=Cdigo><span lang=EN-US><a href="LMM.html">Model&gt;Create
-'No Window' Version</a></span></span><span lang=EN-US>. This special version of
-the <a href="LSD_faqs.html#modelprogram">LSD model program</a> is required to
-process the no-window batch. Make sure to update (<a
+<p class=MsoNormal><span lang=EN-US>Because the background simulation run is
+performed independently from LSD, the execution progress is not shown in the <a
+href="log.html">Log</a> window during the processing and no <a
+href="runtime.html">Run-time Plot</a> window is created. However, the log
+information is presented in the Log window as soon as the processing finishes,
+if <a href="browser.html">LSD Browser</a> is kept open. This way, the user can
+continue to interact with LSD while the simulation is being executed, but it is
+not possible to start additional no-window batches. Quitting LSD Browser before
+the background runs finish may not abort them, and the requested result files
+may still be produced as usual, according to the user choice. In this case, no
+consolidated log is generated after closing the LSD browser, but partial log
+files would be available in the same directory as the remaining result files. </span></p>
+
+<p class=MsoNormal><span lang=EN-US>If aborting the background runs is
+required, before quitting LSD, choose the </span><span class=Cdigo><span
+lang=EN-US>Run&gt;Parallel Run</span></span><span lang=EN-US> option again and
+select </span><span class=Cdigo><span lang=EN-US>OK</span></span><span
+lang=EN-US> when the abort option appears. When exiting LSD before the
+background runs finish, the same option is also offered. In both cases, all the
+incomplete results and log files are automatically deleted. After quitting LSD,
+the only way to abort remaining background runs is using the operating system
+(end all the </span><span class=Cdigo><span lang=EN-US>lsdNW</span></span><span
+lang=EN-US> processes in Windows Task Manager, macOS Activity Monitor, or Linux
+System Monitor). In this case, partial results and log files are not deleted.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>This command automatically creates, as
+required, a no-window (command prompt) version of the model, equivalent to the
+one manually produced in <a href="LMM.html">LMM</a> by selecting menu </span><span
+lang=EN-US style='font-family:"Courier New";color:gray'><a href="LMM.html">Model&gt;Create
+'No Window' Version</a></span><span lang=EN-US>. This special version of the <a
+href="LSD_faqs.html#modelprogram">LSD model program</a> is required to process
+the background parallel runs. Make sure to accept the request to update (<a
 href="LSD_faqs.html#compiler">recompile</a>) the no-window version of your
-model every time you change your <a href="LSD_faqs.html#equationfile">equation
-file</a> (a warning box will show if do not do so).</span></p>
+model every time you change the <a href="LSD_faqs.html#equationfile">equation
+file</a> (a warning box will show if you have do so).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Irrespective of the number of simulation
 runs configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
 Settings</span></span><span lang=EN-US> menu entry, LSD will issue a
-confirmation message, telling how the results data will be handled and
-providing some options to the user. The confirmation dialog and the available
-options are similar to those available for the </span><span class=Cdigo><span
-lang=EN-US><a href="#_Run">Run&gt;Run</a></span></span><span lang=EN-US>
-command above.</span></p>
+confirmation message, telling how the results data will be stored and providing
+some options to the user. The confirmation dialog and the available options are
+similar to those available for the </span><span class=Cdigo><span lang=EN-US><a
+href="#_Run">Run&gt;Run</a></span></span><span lang=EN-US> command above.
+Additionally, the user can adjust the maximum number of parallel simulation
+runs to perform. <span class=Cdigo><span style='font-family:"Arial",sans-serif;
+color:windowtext'>The default is the number of CPU (logical) cores of the
+computer. This number can be reduced to prevent the full utilization of the
+computer CPUs. If this number is set to one, the simulation runs are processed
+sequentially. Parallel processing is only available if </span>Skip generating
+totals file</span><span class=Cdigo><span style='font-family:"Arial",sans-serif;
+color:windowtext'> is checked, otherwise processing must be sequential. Also,
+it is not possible to simultaneously select both </span>Skip generating results
+files</span><span class=Cdigo><span style='font-family:"Arial",sans-serif;
+color:windowtext'> and </span>Skip generating totals file</span><span
+class=Cdigo><span style='font-family:"Arial",sans-serif;color:windowtext'>
+options. Last, by default the </span>Show progress bar in logs</span><span
+class=Cdigo><span style='font-family:"Arial",sans-serif;color:windowtext'>
+option is checked, providing a way to follow simulation progress in logs, also
+presented in tail/multitail (see below), but slightly slowing down execution.</span></span></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The results are saved to LSD results and
 totals files (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
 lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>.csv</span></span><span
-lang=EN-US> extension, according to the selected options) in the same
-subdirectory as the </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
-lang=EN-US> <a href="LSD_faqs.html#modelsetting">configuration file</a>. The
-names of the produced files are composed by the name of the current model
+lang=EN-US> extension, according to the selected options). Output files are
+created in the same subdirectory as the </span><span class=Cdigo><span
+lang=EN-US>.lsd</span></span><span lang=EN-US> <a
+href="LSD_faqs.html#modelsetting">configuration file</a> if it is located at a
+location without other uncorrelated files. Otherwise, a new subdirectory, with
+the same name and location as the configuration file, is created to hold the
+produced files. The effective </span><span class=Cdigo><span lang=EN-US>Output
+path</span></span><span lang=EN-US> is presented in the confirmation dialog.
+The names of the produced files are composed by the name of the current model
 configuration plus an integer number equal to the seed used for the
-pseudo-random number generator, separated by an underscore. LSD creates one
-results file (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
+pseudo-random number generator, separated by an underscore character. LSD
+creates one results file (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
 lang=EN-US> extension) per run. A multi-run, single totals file (</span><span
 class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span lang=EN-US>
-extension) is also produced, including as many lines as the number of runs.
+extension) may be also produced, including as many lines as the number of runs.
 Each line of this file contains the values of the saved elements at the very
 last time step of each simulation.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>A log text file (</span><span class=Cdigo><span
-lang=EN-US>.log</span></span><span lang=EN-US> extension) is also created in
-the configuration file subdirectory. This file contains the output that is
-normally directed to the LSD Log window. Checking it the user can verify the
-status of the simulation running in background, any errors and warnings
-produced, and when the simulation execution is finished. After starting the
-background execution, LSD offers to launch the </span><span class=Cdigo><span
-lang=EN-US>tail</span></span><span lang=EN-US> application to follow up the
-simulation execution. Windows users need Cygwin or MSYS2 installed to access
-this application (see </span><span class=Cdigo><span lang=EN-US>readme.txt</span></span><span
-lang=EN-US> for installation instructions). Users can also follow up the log
-file in real time using the terminal command </span><span class=Cdigo><span
-lang=EN-US>tail -F YYYY/XXXX.log</span></span><span lang=EN-US>, where </span><span
-class=Cdigo><span lang=EN-US>YYYY</span></span><span lang=EN-US> is the
-configuration subdirectory and </span><span class=Cdigo><span lang=EN-US>XXXX</span></span><span
-lang=EN-US> is the configuration name. For the same purpose, Windows users can
-also manually execute the utility </span><span class=Cdigo><span lang=EN-US>Tail.exe</span></span><span
-lang=EN-US>, included in the subdirectory </span><span class=Cdigo><span
-lang=EN-US>gnu/bin</span></span><span lang=EN-US> in the <a
-href="LSD_manual.html#installation">LSD installation directory</a>, and open
-the log file using the </span><span class=Cdigo><span lang=EN-US>File&gt;Open</span></span><span
-lang=EN-US> menu command.</span></p>
+<p class=MsoNormal><span lang=EN-US>Log text files (</span><span class=Cdigo><span
+lang=EN-US>.log</span></span><span lang=EN-US> extension) are also temporarily
+created in the configuration file subdirectory. There is one log file per
+parallel thread. These files contain the output that is normally directed to
+the LSD Log window while the simulation is being execute and are presented at
+one in this window when processing is complete. After presentation in the Log
+window, the log files are deleted. Checking the logs the user can see any
+errors and warnings produced. After starting the background execution, LSD
+offers to launch the </span><span class=Cdigo><span lang=EN-US>tail</span></span><span
+lang=EN-US> (single/sequential runs) or </span><span class=Cdigo><span
+lang=EN-US>multitail</span></span><span lang=EN-US> (parallel runs)
+applications to follow up the simulation execution in real time. Users can also
+follow up the log file in real time using the terminal command </span><span
+class=Cdigo><span lang=EN-US>tail -F YYYY/XXXX[_Z].log</span></span><span
+lang=EN-US>, where </span><span class=Cdigo><span lang=EN-US>YYYY</span></span><span
+lang=EN-US> is the configuration subdirectory, </span><span class=Cdigo><span
+lang=EN-US>XXXX</span></span><span lang=EN-US> is the configuration name, and,
+for parallel runs only, </span><span class=Cdigo><span lang=EN-US>Z</span></span><span
+lang=EN-US> is the thread number. For the same purpose, Windows users can also
+manually execute the graphical utility </span><span class=Cdigo><span
+lang=EN-US>Tail.exe</span></span><span lang=EN-US>, included in the
+subdirectory </span><span class=Cdigo><span lang=EN-US>gnu/bin</span></span><span
+lang=EN-US> in the <a href="LSD_manual.html#installation">LSD installation
+directory</a>, and open the log file(s) using the </span><span class=Cdigo><span
+lang=EN-US>File&gt;Open</span></span><span lang=EN-US> menu command.</span></p>
 
-<h2><a name=parallel></a><span lang=EN-US>Create/Start Parallel Batch</span></h2>
+<h2><a name=parallel></a><span lang=EN-US>Parallel Batch</span></h2>
 
-<p class=MsoNormal><span lang=EN-US>Create and optionally start a multiple <a
-href="LSD_faqs.html#simulationrun">simulation runs</a> batch. The user has
+<p class=MsoNormal><span lang=EN-US>Create and optionally start a parallel <a
+href="LSD_faqs.html#simulationrun">simulation run</a> batch. The user has
 different alternatives to select the </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
 lang=EN-US> <a href="LSD_faqs.html#modelsetting">configuration files</a> to be
 used for the simulation execution (see below). Differently from the </span><span
 class=Cdigo><span lang=EN-US><a href="#_Run">Run&gt;Run</a></span></span><span
 lang=EN-US> command above, the simulation runs in the batch are configured to
-be executed in parallel by the computer operating system, in background. Also
+be executed in parallel by the computer operating system, in background. Also,
 differently from </span><span class=Cdigo><span lang=EN-US><a
-href="#_Start_‘No_Window’">Run&gt;Start 'No Window' Batch</a></span></span><span
-lang=EN-US>, this command may not automatically start the created batch job.</span></p>
+href="#_Start_‘No_Window’">Run&gt;Parallel Run</a></span></span><span
+lang=EN-US>, this command creates a batch job file that can be started directly
+using a terminal, without requiring LSD graphical interface to be installed, as
+it is frequently the case in high-performance servers.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Immediately after issuing this command, LSD
 offers three alternatives to select which configuration files to include in the
@@ -532,33 +604,33 @@ in the format </span><span class=Cdigo><span lang=EN-US>XXXX_NNN.lsd</span></spa
 lang=EN-US>, where </span><span class=Cdigo><span lang=EN-US>XXXX</span></span><span
 lang=EN-US> is the common configuration name and </span><span class=Cdigo><span
 lang=EN-US>NNN</span></span><span lang=EN-US> is the first sequential number to
-use, or (2) use the </span><span class=Cdigo><span lang=EN-US>Ctrl</span></span><span
+use, or (2) use the </span><span class=Cdigo><span lang=EN-US>Ctrl/Cmd</span></span><span
 lang=EN-US> key to pick multiple </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
 lang=EN-US> files with any name. All configuration files must be in the same
 subdirectory.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>This command creates an operating system
-batch/script file (</span><span class=Cdigo><span lang=EN-US>.bat</span></span><span
+script file (</span><span class=Cdigo><span lang=EN-US>.bat</span></span><span
 lang=EN-US> extension in Windows or </span><span class=Cdigo><span lang=EN-US>.sh</span></span><span
 lang=EN-US> in Linux/macOS) containing the required commands to run all the
 selected configuration files taking full advantage of the operating system
-multithreaded support. This means that multiple hardware CPU cores may be used
-in parallel, significantly accelerating the execution of multiple simulation
-runs, as in the case of sensitivity analysis processing. The batch file is
-saved to the subdirectory of the current configuration file (as indicated in
-the <a href="log.html">Log</a> window).</span></p>
+multithreading support. This means that multiple hardware CPU cores may be used
+in parallel, significantly accelerating the execution of the simulation runs,
+as in the case of sensitivity analysis processing. The batch file is saved to
+the subdirectory of the current configuration file (as indicated in the <a
+href="log.html">Log</a> window).</span></p>
 
-<p class=MsoNormal><span lang=EN-US>The possibility of not starting processing
-the batch job immediately is important when the user can use another computer
-(typically a high-capacity server) to run the simulations. If this is the case,
-the user must copy the entire <a href="LSD_faqs.html#modelhome">model home
-directory</a> (including subdirectories) to the new machine and execute the
-created </span><span class=Cdigo><span lang=EN-US>XXXX.bat</span></span><span
+<p class=MsoNormal><span lang=EN-US>The possibility of not start processing the
+batch job immediately is important when the user can use another computer
+(typically a high-performance server) to run the simulations. If this is the
+case, the user must copy the entire <a href="LSD_faqs.html#modelhome">model
+home directory</a> (including subdirectories) to the new machine and execute
+the created </span><span class=Cdigo><span lang=EN-US>XXXX.bat</span></span><span
 lang=EN-US> (Windows) or </span><span class=Cdigo><span lang=EN-US>XXXX.sh</span></span><span
 lang=EN-US> (Linux/macOS) in the same subdirectory as the selected
 configuration files. In Windows, a double click in this file on the file
 Explorer is sufficient to start the batch. In Linux/macOS the user typically
-has to open a terminal window and use the command </span><span class=Cdigo><span
+must open a terminal window and use the command </span><span class=Cdigo><span
 lang=EN-US>YYYY/XXXX.sh</span></span><span lang=EN-US>, where </span><span
 class=Cdigo><span lang=EN-US>YYYY</span></span><span lang=EN-US> is the
 configurations subdirectory and </span><span class=Cdigo><span lang=EN-US>XXXX</span></span><span
@@ -571,30 +643,31 @@ lang=EN-US> before usage.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Because the parallel simulation run is
 performed independently from LSD, the execution progress cannot be shown in the
-Log window and no <a href="runtime.html">Run-time Plot</a> window is created. This
-way, the user can continue to interact with LSD while the simulation is being
-executed or even close it. </span></p>
+Log window and no <a href="runtime.html">Run-time Plot</a> window is created.
+This way, the user can continue to interact with LSD while the simulation is
+being executed or even close it. </span></p>
 
-<p class=MsoNormal><span lang=EN-US>To use this command, the user must first
-create a no-window (command prompt) version of the model in <a href="LMM.html">LMM</a>
-by selecting menu </span><span class=Cdigo><span lang=EN-US><a href="LMM.html">Model&gt;Create
-'No Window' Version</a></span></span><span lang=EN-US>. This special version of
-the <a href="LSD_faqs.html#modelprogram">LSD model program</a> is required to
-process the no-window batch. Make sure to update (<a
+<p class=MsoNormal><span lang=EN-US>This command automatically creates, as
+required, a no-window (command prompt) version of the model, equivalent to the
+one manually produced in <a href="LMM.html">LMM</a> by selecting menu </span><span
+lang=EN-US style='font-family:"Courier New";color:gray'><a href="LMM.html">Model&gt;Create
+'No Window' Version</a></span><span lang=EN-US>. This special version of the <a
+href="LSD_faqs.html#modelprogram">LSD model program</a> is required to process
+the no-window batch. Make sure to accept the request to update (<a
 href="LSD_faqs.html#compiler">recompile</a>) the no-window version of your
-model every time you change your <a href="LSD_faqs.html#equationfile">equation
-file</a> (a warning box will show if do not do so). If the no-window version
+model every time you change the <a href="LSD_faqs.html#equationfile">equation
+file</a> (a warning box will show if you have do so). If the no-window version
 was created in a different operating system (including different Linux
-distributions), it has to be recompiled in the target machine. If the machine
+distributions), it must be recompiled in the target machine. If the machine
 offers a graphical interface environment, the simplest way to recompile is
 simply installing LSD on it and use LMM as usual. If a graphical interface is
 not available (like in a server environment), or otherwise installing LSD is
 not possible, the no-window version may be recompiled in a terminal window.
-Move to the model home directory (</span><span class=Cdigo><span lang=EN-US>cd
-YYYY</span></span><span lang=EN-US>) and use the command </span><span
-class=Cdigo><span lang=EN-US>make -f makefileNW</span></span><span lang=EN-US>
-to recreate a proper no-window executable version (GCC and make must be
-installed in the machine).</span></p>
+Move to the model home directory (</span><span lang=EN-US style='font-family:
+"Courier New";color:gray'>cd YYYY</span><span lang=EN-US>) and use the command </span><span
+lang=EN-US style='font-family:"Courier New";color:gray'>make -f makefileNW</span><span
+lang=EN-US> to recreate a proper no-window executable version (GCC and make
+must be installed in the machine).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Irrespective of the number of simulation
 runs configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
@@ -603,7 +676,7 @@ confirmation message, telling how the CPU cores and the results data will be
 handled and providing some options to the user, as shown below.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=225 height=372 src="image/parallel_run.png"></span></p>
+width=196 height=409 src="image/parallel_run.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available options are (some may not be
 available according to the circumstance):</span></p>
@@ -625,15 +698,15 @@ subdirectory as the configuration files.</span></span></p>
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span class=Cdigo><span
 lang=EN-US style='font-family:Symbol;color:windowtext'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><span class=Cdigo><b><span lang=EN-US>Number of parallel
-LSD processes</span></b></span><span class=Cdigo><span lang=EN-US
-style='font-family:"Arial",sans-serif;color:windowtext'>: sets the maximum
-number of LSD simulation runs to execute in parallel. The default is the number
-of CPU (logical) cores of the current computer. In general, this number should
-be less or equal to the number of (logical) cores available in the computer
-where the job is going to be executed (beware if it is a different machine from
-the current one). When running in a shared server, it may be sometimes useful
-to not allocate all the available cores to the batch job even if all executed
-LSD processes are started with the </span></span><span class=Cdigo><span
+LSD runs</span></b></span><span class=Cdigo><span lang=EN-US style='font-family:
+"Arial",sans-serif;color:windowtext'>: sets the maximum number of LSD
+simulation runs to execute in parallel. The default is the number of CPU
+(logical) cores of the current computer. In general, this number should be less
+or equal to the number of (logical) cores available in the computer where the
+job is going to be executed (beware if it is a different machine from the
+current one). When running in a shared server, it may be sometimes useful to
+not allocate all the available cores to the batch job even if all executed LSD
+processes are started with the </span></span><span class=Cdigo><span
 lang=EN-US>nice</span></span><span class=Cdigo><span lang=EN-US
 style='font-family:"Arial",sans-serif;color:windowtext'> job priority. </span></span></p>
 
@@ -641,7 +714,7 @@ style='font-family:"Arial",sans-serif;color:windowtext'> job priority. </span></
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span class=Cdigo><span
 lang=EN-US style='font-family:Symbol;color:windowtext'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><span class=Cdigo><b><span lang=EN-US>Number of threads
-per LSD process</span></b></span><span class=Cdigo><span lang=EN-US
+per LSD run</span></b></span><span class=Cdigo><span lang=EN-US
 style='font-family:"Arial",sans-serif;color:windowtext'>: defines how many
 threads each individual LSD simulation may spawn (the default is just one). If
 the </span></span><span class=Cdigo><span lang=EN-US>Number of parallel LSD
@@ -663,20 +736,29 @@ files</span></b></span><span lang=EN-US>: if enabled, LSD will not produce the
 time-series detailed </span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
 lang=EN-US> results files, generating only the summarized </span><span
 class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span lang=EN-US> totals
-file.</span></p>
+files. This option cannot be checked at the same time with the next one.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Skip generating totals
+files</span></b></span><span lang=EN-US>: if enabled, the default, LSD will not
+produce the summarized </span><span class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span
+lang=EN-US> totals files, generating only the time-series detailed </span><span
+class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span lang=EN-US> results
+files. This option cannot be checked at the same time with the previous one.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Native batch format</span></b></span><span
-lang=EN-US>: if checked (default), LSD will produce a batch/script file
-appropriate for the current operating system (</span><span class=Cdigo><span
-lang=EN-US>.bat</span></span><span lang=EN-US> batch in Windows or </span><span
-class=Cdigo><span lang=EN-US>.sh</span></span><span lang=EN-US> script in
-Linux/macOS). The user may uncheck this option to produce the batch/script in a
-format adequate to be executed in a different operating system (e.g.,
-generating a Linux/macOS script in a Windows computer, for later execution in a
-Linux server).</span></p>
+lang=EN-US>: if checked (default), LSD will produce a script file appropriate
+for the current operating system (</span><span class=Cdigo><span lang=EN-US>.bat</span></span><span
+lang=EN-US> batch in Windows or </span><span class=Cdigo><span lang=EN-US>.sh</span></span><span
+lang=EN-US> script in Linux/macOS). The user may uncheck this option to produce
+the batch/script in a format adequate to be executed in a different operating
+system (e.g., generating a Linux/macOS script in a Windows computer, for later
+execution in a Linux server).</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -696,8 +778,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><span class=Cdigo><b><span lang=EN-US>Comma-separated text format
 (.csv)</span></b></span><span lang=EN-US>: if checked, all produced files will
 be saved in comma-separated text format (extension </span><span class=Cdigo><span
-lang=EN-US>.csv</span></span><span lang=EN-US>), which can be imported by
-almost any data application. Please note that </span><span class=Cdigo><span
+lang=EN-US>.csv</span></span><span lang=EN-US>), which can be imported by almost
+any data application. Please note that </span><span class=Cdigo><span
 lang=EN-US>.csv</span></span><span lang=EN-US> files do not contain the same
 level of detail as native LSD </span><span class=Cdigo><span lang=EN-US>.res</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>.tot</span></span><span
@@ -709,14 +791,18 @@ saved to LSD results and totals files (</span><span class=Cdigo><span
 lang=EN-US>.res[.gz]</span></span><span lang=EN-US>, </span><span class=Cdigo><span
 lang=EN-US>.tot[.gz]</span></span><span lang=EN-US> or </span><span
 class=Cdigo><span lang=EN-US>.csv</span></span><span lang=EN-US> extension,
-according to the selected options) in the same subdirectory as the </span><span
-class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> <a
-href="LSD_faqs.html#modelsetting">configuration files</a>. The names of the
-produced files are composed by the name of the originating model configuration
-plus an integer number equal to the seed used for the pseudo-random number
-generator, separated by an underscore. LSD creates one results file (</span><span
-class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span lang=EN-US>
-extension) per run of each configuration file. A multi-run,
+according to the selected options). Output files are created in the same
+subdirectory as the </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
+lang=EN-US> <a href="LSD_faqs.html#modelsetting">configuration file</a> if it
+is located at a location without other uncorrelated files. Otherwise, a new
+subdirectory, with the same name and location as the configuration file, is
+created to hold the produced files. The effective </span><span class=Cdigo><span
+lang=EN-US>Output path</span></span><span lang=EN-US> is presented in the confirmation
+dialog. The names of the produced files are composed by the name of the
+originating model configuration plus an integer number equal to the seed used
+for the pseudo-random number generator, separated by an underscore. LSD creates
+one results file (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
+lang=EN-US> extension) per run of each configuration file. A multi-run,
 per-configuration-file, single totals file (</span><span class=Cdigo><span
 lang=EN-US>.tot[.gz]</span></span><span lang=EN-US> extension) is also
 produced, including as many lines as the number of runs of the corresponding
@@ -732,19 +818,17 @@ verify the status of the simulations running in background, any errors and
 warnings produced, and when each simulation execution is finished. After
 starting the background execution, LSD offers to launch the </span><span
 class=Cdigo><span lang=EN-US>multitail</span></span><span lang=EN-US>
-application to follow up the simulations execution. Users usually must install </span><span
-class=Cdigo><span lang=EN-US>multitail</span></span><span lang=EN-US> manually
-in their computers. Windows users also need Cygwin or MSYS2 installed to use
-this application. See </span><span class=Cdigo><span lang=EN-US>readme.txt</span></span><span
-lang=EN-US> for installation instructions on all platforms. Linux and macOS
-users can also follow up these files in real time using the terminal command </span><span
-class=Cdigo><span lang=EN-US>tail -F YYYY/XXXX.log</span></span><span
-lang=EN-US>, where </span><span class=Cdigo><span lang=EN-US>YYYY</span></span><span
-lang=EN-US> is the configuration subdirectory and </span><span class=Cdigo><span
-lang=EN-US>XXXX</span></span><span lang=EN-US> is the configuration name to
-follow up. The command should be issued for each log file (corresponding to a
-different model configuration file). For the same purpose, Windows users can
-execute the utility </span><span class=Cdigo><span lang=EN-US>Tail.exe</span></span><span
+application to follow up the simulations execution. Users can also follow up
+these files in real time using the terminal command </span><span class=Cdigo><span
+lang=EN-US>tail -F YYYY/XXXX_Z.log</span></span><span lang=EN-US>, where </span><span
+class=Cdigo><span lang=EN-US>YYYY</span></span><span lang=EN-US> is the
+configuration subdirectory, </span><span class=Cdigo><span lang=EN-US>XXXX</span></span><span
+lang=EN-US> is the configuration name, and </span><span class=Cdigo><span
+lang=EN-US>Z</span></span><span lang=EN-US> is the thread number</span><span
+class=Cdigo><span lang=EN-US> </span></span><span lang=EN-US>to follow up. The
+command should be issued for each log file (corresponding to a different model
+configuration file and parallel run thread). For the same purpose, Windows
+users can also execute the utility </span><span class=Cdigo><span lang=EN-US>Tail.exe</span></span><span
 lang=EN-US>, included in the subdirectory </span><span class=Cdigo><span
 lang=EN-US>gnu/bin</span></span><span lang=EN-US> in the <a
 href="LSD_manual.html#installation">LSD installation directory</a>, and open
@@ -766,7 +850,7 @@ times to process a <a href="LSD_faqs.html#simulationrun">simulation run</a>
 this approach may be inefficient, as it does not take advantage of all the
 resources (processing cores and memory) usually available in modern computers,
 particularly for high-capacity servers. In these situations, the </span><span
-class=Cdigo><span lang=EN-US>Run&gt;Create/Start Parallel Batch</span></span><span
+class=Cdigo><span lang=EN-US>Run&gt;Parallel Batch</span></span><span
 lang=EN-US> command offers two alternatives to reduce the total processing time
 required by using several cores (and more memory) simultaneously.</span></p>
 
@@ -774,15 +858,15 @@ required by using several cores (and more memory) simultaneously.</span></p>
 a certain number (say X) of similar </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
 lang=EN-US> configuration files, each one defining one or more simulation runs
 (say Y) starting from a different pseudorandom number generator seed. Next, use
-command </span><span class=Cdigo><span lang=EN-US>Run&gt;Create/Start Parallel
-Batch</span></span><span lang=EN-US> to create a batch file (or script, in
-Linux/macOS) for parallel execution, select the </span><span class=Cdigo><span
-lang=EN-US>.lsd</span></span><span lang=EN-US> configuration files you just
-created (you may use the </span><span class=Cdigo><span lang=EN-US>Ctrl</span></span><span
-lang=EN-US> key to select many configurations files) and press </span><span
-class=Cdigo><span lang=EN-US>OK</span></span><span lang=EN-US>. Please see
-below how to proceed from this point. This way, when all the configuration
-files are processed, a total of X×Y simulation runs will be performed.</span></p>
+command </span><span class=Cdigo><span lang=EN-US>Run&gt;Parallel Batch</span></span><span
+lang=EN-US> to create a batch file (or script, in Linux/macOS) for parallel
+execution, select the </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
+lang=EN-US> configuration files you just created (you may use the </span><span
+class=Cdigo><span lang=EN-US>Ctrl</span></span><span lang=EN-US> key to select
+many configurations files) and press </span><span class=Cdigo><span lang=EN-US>OK</span></span><span
+lang=EN-US>. Please see below how to proceed from this point. This way, when
+all the configuration files are processed, a total of X×Y simulation runs will
+be performed.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>An alternative approach, useful when the
 number of </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
@@ -804,9 +888,9 @@ Analysis&gt;Full (batch)</span></span><span lang=EN-US> so LSD produces </span><
 class=Cdigo><span lang=EN-US>NUM</span></span><span lang=EN-US> similar </span><span
 class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> configuration
 files, using a different pseudorandom number generator seed for each. Next
-select </span><span class=Cdigo><span lang=EN-US>Run&gt;Create/Start Parallel
-Batch</span></span><span lang=EN-US> and accept the suggestion to use the just
-created configuration files.</span></p>
+select </span><span class=Cdigo><span lang=EN-US>Run&gt;Parallel Batch</span></span><span
+lang=EN-US> and accept the suggestion to use the just created configuration
+files.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>In both approaches, then choose the batch
 name, select the number of desired cores to use (LSD suggests the maximum
@@ -819,8 +903,8 @@ when LSD ask if the script should be run. If you are creating the </span><span
 class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> files to be
 run in a Linux server, for instance, now copy the entire model folder to the
 server (including the </span><span class=Cdigo><span lang=EN-US>src</span></span><span
-lang=EN-US> subfolder), open a server terminal window in the copied model directory,
-recompile the LSD No Window executable (</span><span class=Cdigo><span
+lang=EN-US> subfolder), open a server terminal window in the copied model
+directory, recompile the LSD ‘No Window’ executable (</span><span class=Cdigo><span
 lang=EN-US>make -f makefileNW</span></span><span lang=EN-US>), adjust the
 script properties (</span><span class=Cdigo><span lang=EN-US>chmod +x SCRIPT.sh</span></span><span
 lang=EN-US>, replacing </span><span class=Cdigo><span lang=EN-US>SCRIPT</span></span><span
@@ -829,13 +913,13 @@ class=Cdigo><span lang=EN-US>./SCRIPT.sh</span></span><span lang=EN-US>). If
 the paths in the server are not exactly the same as in the computer you
 generated the script, you may have to edit the lines 4 and 5 of the script file
 (be careful to not remove the </span><span class=Cdigo><span lang=EN-US>nice</span></span><span
-lang=EN-US> prefix to the LSD No Window executable path) or pass the correct
+lang=EN-US> prefix to the LSD ‘No Window’ executable path) or pass the correct
 paths as parameters to the script </span><span class=Cdigo><span lang=EN-US>(./SCRIPT.sh
 'nice /FULL-PATH-TO-EXEC/lsd_gnuNW' /FULL-PATH-TO-CONFIGS</span></span><span
 lang=EN-US>).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>WARNING: In any case, do not forget to
-first create the LSD No Window version in <a href="LMM.html">LMM</a>!</span></p>
+first create the LSD ‘No Window’ version in <a href="LMM.html">LMM</a>!</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -871,7 +955,7 @@ wrench icon on the tool bar.</span></p>
 below.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=225 height=246 src="image/simsetting.png"></span></p>
+width=202 height=240 src="image/simsetting.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The option fields in the Simulation
 Settings window are:</span></p>
@@ -895,13 +979,11 @@ window</a>.</span></p>
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Number of simulation runs</span></b></span><span
 lang=EN-US>: the number of <a href="LSD_faqs.html#simulationrun">simulation
-runs</a> to be sequentially executed. Each run uses the same initial <a
-href="LSD_faqs.html#modelsetting">model configuration</a> with unit-increasing
-seeds for the pseudo-random number generator. When scheduling a large number of
-simulation runs, or even a few for a time-demanding model, it may be preferable
-to schedule multiple </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
-lang=EN-US> configuration files to be processed in parallel (see <a
-href="#_Scheduling_Monte_Carlo">above</a>).</span></p>
+runs</a> to be executed (sequentially or in parallel). Each run uses the same
+initial <a href="LSD_faqs.html#modelsetting">model configuration</a> with
+unit-increasing seeds for the pseudo-random number generator. When scheduling a
+large number of simulation runs, or even a few for a time-demanding model, it
+may be processed faster in a parallel run (see <a href="#_Start_‘No_Window’">above</a>).</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
@@ -941,22 +1023,21 @@ lang=EN-US>: the maximum stack level of Variables to profile in the <a
 href="LSD_windows.html#log">LSD Log</a>. The default value of 0 (zero) disables
 the profiler. The profiler is normally used to evaluate the Equations using
 most of the computation time during a simulation run, so the user can improve
-the simulation performance or even pinpoint the multi-instanced Variables
-important to enable parallel computation. Please note that any Variable
-requested to be computed cannot complete its calculation if it depends on the
-value of another Variable that still needs to be updated. In this case, the
-calculation of the first variable is interrupted while the second one finishes
-its computation, resuming thereafter. The computation of a Variable interrupted
-for this reason is said to be placed <i>on the stack</i>, to be later resumed
-used when the pending computation concludes. So, if you use this option for a
-stack level up to one, the Log will show only Variables updated because of LSD
-request, and not because any other Variable demand. As this value is increased,
-more Variables get profiled. Setting a high value almost certainly include all
-Variable computations in the simulation, more likely producing too much
-information. The profiler cannot be used if Variables are being computed in
-parallel or if simulation is running in Fast mode, please disable those
-features while using the profiler. See <a href="debug.html#crash">here</a> for
-more details.</span></p>
+the simulation performance or even pinpoint the multi-instanced Variables important
+to enable parallel computation. Please note that any Variable requested to be
+computed cannot complete its calculation if it depends on the value of another
+Variable that still needs to be updated. In this case, the calculation of the
+first variable is interrupted while the second one finishes its computation,
+resuming thereafter. The computation of a Variable interrupted for this reason
+is said to be placed <i>on the stack</i>, to be later resumed used when the
+pending computation concludes. So, if you use this option for a stack level up
+to one, the Log will show only Variables updated because of LSD request, and
+not because any other Variable demand. As this value is increased, more
+Variables get profiled. Setting a high value almost certainly include all Variable
+computations in the simulation, more likely producing too much information. The
+profiler cannot be used if Variables are being computed in parallel or if
+simulation is running in Fast mode, please disable those features while using
+the profiler. See <a href="debug.html#crash">here</a> for more details.</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
@@ -1007,8 +1088,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 computation</span></b></span><span lang=EN-US>: if checked, temporarily
 disables the Variables marked to be computed in parallel, if any (see <a
 href="browser.html#changeelement">here</a>). This option may be useful to
-disable parallel processing to allow for more details in simulation error messages
-or to permit the use of the profiler.</span></p>
+disable parallel processing to allow for more details in simulation error
+messages or to permit the use of the profiler.</span></p>
 
 <p class=MsoNormal><a name="_Frequent_Lattice_Updating"></a><span lang=EN-US>Only
 the first three option fields in the Simulation Settings window are saved in
@@ -1072,6 +1153,11 @@ Special Updating</a></span></p>
 lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span lang=EN-US><a href="#_Show_Elements_to_6">Show Elements to
 Sensitivity Analysis</a></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US><a href="#_Show_Elements_Unused">Show Elements
+Unused</a></span></p>
 
 <h2><a name=showsave></a><a name=sobs></a><a name="_Show_Elements_to"></a><a
 name=sinit></a><span lang=EN-US>Show Elements to Save</span></h2>
@@ -1157,6 +1243,17 @@ href="LSD_faqs.html#sa">sensitivity analysis</a> options. These are the
 elements with the <a href="browser.html#variables">option</a> </span><span
 class=Cdigo><span lang=EN-US>Sensitivity</span></span><span lang=EN-US>
 configured to define a set or a range of values for the sensitivity analysis.</span></p>
+
+<h2><a name="_Show_Elements_Unused"></a><span lang=EN-US>Show Elements Unused</span></h2>
+
+<p class=MsoNormal><span lang=EN-US>Print in the <a href="LSD_windows.html#log">LSD
+Log</a> the list of the <a href="LSD_faqs.html#variable">Variables</a>, <a
+href="LSD_faqs.html#parameter">Parameters</a> and <a href="LSD_faqs.html#object">Objects</a>
+which are apparently not used in the <a href="LSD_faqs.html#equationfile">equation
+file(s)</a>. Notice that only elements explicitly used in <a
+href="LSD_faqs.html#macro">LSD Macros</a> are considered, so elements whose
+names are indirectly passed to the Macros (using a C++ string variable, for
+instance) may be incorrectly detected as unused.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

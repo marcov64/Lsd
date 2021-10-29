@@ -8,338 +8,181 @@
 # !diagnostics suppress = log0, plot_lists, hpfilter, colSds, colMins, colMaxs
 
 
-time_plots <- function( mcData, Adata, mdata, Mdata, Sdata, nExp, nSize, nTsteps,
-                        TmaskPlot, CI, legends, colors, lTypes, smoothing ) {
+time_plots <- function( mcData, Pdata, mdata, Mdata, Sdata, cdata, Cdata,
+                        mcStat, nExp, nSize, nTsteps, TmaskPlot, CI, legends,
+                        colors, lTypes, smoothing ) {
 
   # ------ GDP, consumption and investment cases comparison charts ------
 
-  exps <- min <- max <- lo <- hi <- list( )
-  # select data to plot
-  for( k in 1 : nExp ){
-    # MC averages
-    exps[[ k ]] <- list( log0( Adata[[ k ]]$GDP[ TmaskPlot ] ),
-                         log0( Adata[[ k ]]$I[ TmaskPlot ] ),
-                         log0( Adata[[ k ]]$D2[ TmaskPlot ] ) )
-    # minimum and maximum MC runs
-    min[[ k ]] <- list( log0( mdata[[ k ]]$GDP[ TmaskPlot ] ),
-                        log0( mdata[[ k ]]$I[ TmaskPlot ] ),
-                        log0( mdata[[ k ]]$D2[ TmaskPlot ] ) )
-    max[[ k ]] <- list( log0( Mdata[[ k ]]$GDP[ TmaskPlot ] ),
-                        log0( Mdata[[ k ]]$I[ TmaskPlot ] ),
-                        log0( Mdata[[ k ]]$D2[ TmaskPlot ] ) )
-    # MC confidence interval
-    lo[[ k ]] <- list( log0( Adata[[ k ]]$GDP[ TmaskPlot ] -
-                               qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$GDP[ TmaskPlot ] / sqrt( nSize ) ),
-                       log0( Adata[[ k ]]$I[ TmaskPlot ] -
-                               qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$I[ TmaskPlot ] / sqrt( nSize ) ),
-                       log0( Adata[[ k ]]$D2[ TmaskPlot ] -
-                               qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$D2[ TmaskPlot ]  / sqrt( nSize ) ) )
-    hi[[ k ]] <- list( log0( Adata[[ k ]]$GDP[ TmaskPlot ] +
-                               qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$GDP[ TmaskPlot ] / sqrt( nSize ) ),
-                       log0( Adata[[ k ]]$I[ TmaskPlot ] +
-                               qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$I[ TmaskPlot ] / sqrt( nSize ) ),
-                       log0( Adata[[ k ]]$D2[ TmaskPlot ] +
-                               qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$D2[ TmaskPlot ]  / sqrt( nSize ) ) )
-  }
-
-  plot_lists( exps, min, max, lo, hi, leg = legends, col = colors,
-              lty = lTypes, xlab = "Time", ylab = "Logs",
+  plot_lists( c( "GDP", "I", "D2" ), Pdata, mdata, Mdata, cdata, Cdata,
+              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI, log0 = TRUE,
+              col = colors, lty = lTypes, xlab = "Time", ylab = "Logs",
               tit = "GDP, investment and consumption",
-              subtit = paste( "MC runs =", nSize ),
+              subtit = paste( "MC runs =", nSize, "/ MC", mcStat ),
               leg2 = c( "GDP", "Investment", "Consumption" ) )
 
 
   # ------ GDP Graphs ------
 
-  exps <- min <- max <- lo <- hi <- list( )
-  # select data to plot
+  # add the GDP @ 100% utilization series to dataset
   for( k in 1 : nExp ) {
-
-    # create the GDP @ 100% utilization series
-    Sgdp100 <- sqrt( Sdata[[ k ]]$GDP ^ 2 + Sdata[[ k ]]$Q2u ^ 2 ) # very crude approximation
-    Agdp100 <- vector( "numeric", length = nTsteps )
-    for( i in 1 : nTsteps ) {
-      if( is.finite( Adata[[ k ]]$Q2u[ i ] ) && Adata[[ k ]]$Q2u[ i ] != 0 )
-        Agdp100[ i ] <- Adata[[ k ]]$GDP[ i ] / Adata[[ k ]]$Q2u[ i ]
-      else
-        Agdp100[ i ] <- NA
-    }
-    # MC averages
-    exps[[ k ]] <- list( log0( Adata[[ k ]]$GDP[ TmaskPlot ] ),
-                         log0( Agdp100[ TmaskPlot ] ) )
-    # minimum and maximum MC runs
-    min[[ k ]] <- list( log0( mdata[[ k ]]$GDP[ TmaskPlot ] ),
-                        log0( mdata[[ k ]]$GDP[ TmaskPlot ] ) )
-    max[[ k ]] <- list( log0( Mdata[[ k ]]$GDP[ TmaskPlot ] ),
-                        log0( Mdata[[ k ]]$GDP[ TmaskPlot ] /
-                                min( Adata[[ k ]]$Q2u[ TmaskPlot ], na.rm = TRUE ) ) )
-    # MC confidence interval
-    lo[[ k ]] <- list( log0( Adata[[ k ]]$GDP[ TmaskPlot ] -
-                               qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$GDP[ TmaskPlot ] / sqrt( nSize ) ),
-                       log0( Agdp100[ TmaskPlot ] -
-                               qnorm( 1 - ( 1 - CI ) / 2 ) * Sgdp100[ TmaskPlot ] / sqrt( nSize ) ) )
-    hi[[ k ]] <- list( log0( Adata[[ k ]]$GDP[ TmaskPlot ] +
-                               qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$GDP[ TmaskPlot ] / sqrt( nSize ) ),
-                       log0( Agdp100[ TmaskPlot ] +
-                               qnorm( 1 - ( 1 - CI ) / 2 ) * Sgdp100[ TmaskPlot ] / sqrt( nSize ) ) )
+    Pdata[[ k ]][ "GDP100" ] <- Pdata[[ k ]]$GDP / Pdata[[ k ]]$Q2u
+    mdata[[ k ]][ "GDP100" ] <- mdata[[ k ]]$GDP / Pdata[[ k ]]$Q2u
+    Mdata[[ k ]][ "GDP100" ] <- Mdata[[ k ]]$GDP / Pdata[[ k ]]$Q2u
+    Sdata[[ k ]][ "GDP100" ] <- sqrt( Sdata[[ k ]]$GDP ^ 2 + Sdata[[ k ]]$Q2u ^ 2 )
   }
 
-  plot_lists( exps, min, max, lo, hi, leg = legends, col = colors,
-              lty = lTypes, xlab = "Time", ylab = "Log GDP",
-              tit = "GDP", subtit = paste( "MC runs =", nSize ),
+  plot_lists( c( "GDP", "GDP100" ), Pdata, mdata, Mdata, sdMC = Sdata,
+              statMC = mcStat, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, log0 = TRUE, col = colors, lty = lTypes,
+              xlab = "Time", ylab = "Log real GDP",
+              tit = "GDP", subtit = paste( "MC runs =", nSize, "/ MC", mcStat ),
               leg2 = c( "Effective GDP", "GDP @ 100% utilization" ) )
 
 
   # ------ Tax & government expenditures in GDP terms ------
 
-  exps <- min <- max <- lo <- hi <- list( )
-  # select data to plot
-  for( k in 1 : nExp ){
-    # MC averages
-    exps[[ k ]] <- list( Adata[[ k ]]$Tax[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ],
-                         Adata[[ k ]]$G[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
-    # minimum and maximum MC runs
-    min[[ k ]] <- list( mdata[[ k ]]$Tax[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ],
-                        mdata[[ k ]]$G[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
-    max[[ k ]] <- list( Mdata[[ k ]]$Tax[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ],
-                        Mdata[[ k ]]$G[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
-    # MC confidence interval
-    lo[[ k ]] <- list( Adata[[ k ]]$Tax[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] -
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$Tax[ TmaskPlot ] /
-                         Adata[[ k ]]$GDPnom[ TmaskPlot ] / sqrt( nSize ),
-                       Adata[[ k ]]$G[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] -
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$G[ TmaskPlot ] /
-                         Adata[[ k ]]$GDPnom[ TmaskPlot ] / sqrt( nSize ) )
-    hi[[ k ]] <- list( Adata[[ k ]]$Tax[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] +
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$Tax[ TmaskPlot ] /
-                         Adata[[ k ]]$GDPnom[ TmaskPlot ] / sqrt( nSize ),
-                       Adata[[ k ]]$G[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] +
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$G[ TmaskPlot ] /
-                         Adata[[ k ]]$GDPnom[ TmaskPlot ] / sqrt( nSize ) )
+  # add the series to dataset
+  for( k in 1 : nExp ) {
+    Pdata[[ k ]][ "TaxGDP" ] <- Pdata[[ k ]]$Tax / Pdata[[ k ]]$GDPnom
+    mdata[[ k ]][ "TaxGDP" ] <- mdata[[ k ]]$Tax / Pdata[[ k ]]$GDPnom
+    Mdata[[ k ]][ "TaxGDP" ] <- Mdata[[ k ]]$Tax / Pdata[[ k ]]$GDPnom
+    cdata[[ k ]][ "TaxGDP" ] <- cdata[[ k ]]$Tax / Pdata[[ k ]]$GDPnom
+    Cdata[[ k ]][ "TaxGDP" ] <- Cdata[[ k ]]$Tax / Pdata[[ k ]]$GDPnom
+    Pdata[[ k ]][ "GGDP" ] <- Pdata[[ k ]]$G / Pdata[[ k ]]$GDPnom
+    mdata[[ k ]][ "GGDP" ] <- mdata[[ k ]]$G / Pdata[[ k ]]$GDPnom
+    Mdata[[ k ]][ "GGDP" ] <- Mdata[[ k ]]$G / Pdata[[ k ]]$GDPnom
+    cdata[[ k ]][ "GGDP" ] <- cdata[[ k ]]$G / Pdata[[ k ]]$GDPnom
+    Cdata[[ k ]][ "GGDP" ] <- Cdata[[ k ]]$G / Pdata[[ k ]]$GDPnom
   }
 
-  plot_lists( exps, min, max, lo, hi, leg = legends, col = colors,
-              lty = lTypes, xlab = "Time", ylab = "Log government tax income and expenditure over GDP",
-              tit = "Government income and expenditure on GDP", subtit = paste( "MC runs =", nSize ),
-              leg2 = c( "Tax", "Total expenditure" ) )
+  plot_lists( c( "TaxGDP", "GGDP" ), Pdata, mdata, Mdata, cdata, Cdata,
+              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
+              col = colors, lty = lTypes, xlab = "Time",
+              ylab = "Government tax income and expenditure over GDP",
+              tit = "Government income and expenditure",
+              subtit = paste( "MC runs =", nSize, "/ MC", mcStat ),
+              leg2 = c( "Tax", "Gov. expenditure" ) )
 
 
   # ------ Government deficit in GDP terms------
 
-  exps <- min <- max <- lo <- hi <- list( )
-  # select data to plot
-  for( k in 1 : nExp ){
-    # MC averages
-    exps[[ k ]] <- list( Adata[[ k ]]$Def[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
-    # minimum and maximum MC runs
-    min[[ k ]] <- list( mdata[[ k ]]$Def[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
-    max[[ k ]] <- list( Mdata[[ k ]]$Def[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
-    # MC confidence interval
-    lo[[ k ]] <- list( Adata[[ k ]]$Def[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] -
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$Def[ TmaskPlot ] /
-                         Adata[[ k ]]$GDPnom[ TmaskPlot ] / sqrt( nSize ) )
-    hi[[ k ]] <- list( Adata[[ k ]]$Def[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] +
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$Def[ TmaskPlot ] /
-                         Adata[[ k ]]$GDPnom[ TmaskPlot ] / sqrt( nSize ) )
-  }
-
-  plot_lists( exps, min, max, lo, hi, leg = legends, col = colors,
+  plot_lists( "DefGDP", Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
+              mask = TmaskPlot, nMC = nSize, CI = CI, col = colors,
               lty = lTypes, xlab = "Time", ylab = "Government deficit over GDP",
-              tit = "Government deficit on GDP", subtit = paste( "MC runs =", nSize ),
-              leg2 = c( "Deficit" ) )
+              tit = "Government deficit",
+              subtit = paste( "MC runs =", nSize, "/ MC", mcStat ) )
 
 
   # ------ Government debt in GDP terms ------
 
-  exps <- min <- max <- lo <- hi <- list( )
-  # select data to plot
-  for( k in 1 : nExp ){
-    # MC averages
-    exps[[k]] <- list( Adata[[k]]$Deb[ TmaskPlot ] / Adata[[k]]$GDPnom[ TmaskPlot ] )
-    # minimum and maximum MC runs
-    min[[k]] <- list( mdata[[k]]$Deb[ TmaskPlot ] / Adata[[k]]$GDPnom[ TmaskPlot ] )
-    max[[k]] <- list( Mdata[[k]]$Deb[ TmaskPlot ] / Adata[[k]]$GDPnom[ TmaskPlot ] )
-    # MC confidence interval
-    lo[[k]] <- list( Adata[[k]]$Deb[ TmaskPlot ] / Adata[[k]]$GDPnom[ TmaskPlot ] -
-                       qnorm(1 - (1 - CI) / 2) * Sdata[[k]]$Deb[ TmaskPlot ] /
-                       Adata[[k]]$GDPnom[ TmaskPlot ] / sqrt( nSize ) )
-    hi[[k]] <- list( Adata[[k]]$Deb[ TmaskPlot ] / Adata[[k]]$GDPnom[ TmaskPlot ] +
-                       qnorm(1 - (1 - CI) / 2) * Sdata[[k]]$Deb[ TmaskPlot ] /
-                       Adata[[k]]$GDPnom[ TmaskPlot ] / sqrt( nSize ) )
+  plot_lists( "DebGDP", Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
+              mask = TmaskPlot, nMC = nSize, CI = CI, col = colors,
+              lty = lTypes, xlab = "Time", ylab = "Government debt over GDP",
+              tit = "Government debt",
+              subtit = paste( "MC runs =", nSize, "/ MC", mcStat ) )
+
+
+  # ------ Total loans in GDP terms ------
+
+  # add the series to dataset
+  for( k in 1 : nExp ) {
+    Pdata[[ k ]][ "LoansGDP" ] <- Pdata[[ k ]]$Loans / Pdata[[ k ]]$GDPnom
+    mdata[[ k ]][ "LoansGDP" ] <- mdata[[ k ]]$Loans / Pdata[[ k ]]$GDPnom
+    Mdata[[ k ]][ "LoansGDP" ] <- Mdata[[ k ]]$Loans / Pdata[[ k ]]$GDPnom
+    cdata[[ k ]][ "LoansGDP" ] <- cdata[[ k ]]$Loans / Pdata[[ k ]]$GDPnom
+    Cdata[[ k ]][ "LoansGDP" ] <- Cdata[[ k ]]$Loans / Pdata[[ k ]]$GDPnom
   }
 
-  plot_lists( exps, min, max, lo, hi, leg = legends, col = colors,
-              lty = lTypes, xlab = "Time", ylab = "Government debt over GDP",
-              tit = "Government debt on GDP", subtit = paste( "MC runs =", nSize ),
-              leg2 = c( "Gov. debt" ) )
+  plot_lists( "LoansGDP", Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
+              mask = TmaskPlot, nMC = nSize, CI = CI, col = colors,
+              lty = lTypes, xlab = "Time",
+              ylab = "Total firm debt stock over GDP",
+              tit = "Firm loans",
+              subtit = paste( "MC runs =", nSize, "/ MC", mcStat ) )
 
 
   # ------ Unemployment and vacancy rates ------
 
-  exps <- min <- max <- lo <- hi <- list( )
-  # select data to plot
-  for( k in 1 : nExp ){
-    # MC averages
-    exps[[ k ]] <- list( Adata[[ k ]]$U[ TmaskPlot ],
-                         Adata[[ k ]]$V[ TmaskPlot ] )
-    # minimum and maximum MC runs
-    min[[ k ]] <- list( mdata[[ k ]]$U[ TmaskPlot ],
-                        mdata[[ k ]]$V[ TmaskPlot ] )
-    max[[ k ]] <- list( Mdata[[ k ]]$U[ TmaskPlot ],
-                        Mdata[[ k ]]$V[ TmaskPlot ] )
-    # MC confidence interval
-    lo[[ k ]] <- list( Adata[[ k ]]$U[ TmaskPlot ] -
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$U[ TmaskPlot ] / sqrt( nSize ),
-                       Adata[[ k ]]$V[ TmaskPlot ] -
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$V[ TmaskPlot ]  / sqrt( nSize ) )
-    hi[[ k ]] <- list( Adata[[ k ]]$U[ TmaskPlot ] +
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$U[ TmaskPlot ] / sqrt( nSize ),
-                       Adata[[ k ]]$V[ TmaskPlot ] +
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$V[ TmaskPlot ]  / sqrt( nSize ) )
-  }
-
-  plot_lists( exps, min, max, lo, hi, leg = legends, col = colors,
-              lty = lTypes, xlab = "Time", ylab = "Rate",
-              tit = "Unemployment and vacancy rates",
-              subtit = paste( "MC runs =", nSize ),
+  plot_lists( c( "U", "V" ), Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
+              mask = TmaskPlot, nMC = nSize, CI = CI, col = colors,
+              lty = lTypes, xlab = "Time", ylab = "Unemployment and vacancy rates",
+              tit = "Unemployment and vacancy",
+              subtit = paste( "MC runs =", nSize, "/ MC", mcStat ),
               leg2 = c( "Unemployment", "Vacancy" ) )
 
 
   # ------ Real wages ------
 
-  exps <- min <- max <- lo <- hi <- list( )
-  # select data to plot
-  for( k in 1 : nExp ){
-    # MC averages
-    exps[[ k ]] <- list( log0( Adata[[ k ]]$wReal[ TmaskPlot ] ) )
-    # minimum and maximum MC runs
-    min[[ k ]] <- list( log0( mdata[[ k ]]$wReal[ TmaskPlot ] ) )
-    max[[ k ]] <- list( log0( Mdata[[ k ]]$wReal[ TmaskPlot ] ) )
-    # MC confidence interval
-    lo[[ k ]] <- list( log0( Adata[[ k ]]$wReal[ TmaskPlot ] -
-                               qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$wReal[ TmaskPlot ] / sqrt( nSize ) ) )
-    hi[[ k ]] <- list( log0( Adata[[ k ]]$wReal[ TmaskPlot ] +
-                               qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$wReal[ TmaskPlot ] / sqrt( nSize ) ) )
-  }
-
-  plot_lists( exps, min, max, lo, hi, leg = legends, col = colors,
-              lty = lTypes, xlab = "Time", ylab = "Log wages",
-              tit = "Real wages average",
-              subtit = paste( "MC runs =", nSize ) )
+  plot_lists( "wReal", Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
+              mask = TmaskPlot, nMC = nSize, CI = CI, log0 = TRUE, col = colors,
+              lty = lTypes, xlab = "Time", ylab = "Log real wage",
+              tit = "Real wage",
+              subtit = paste( "MC runs =", nSize, "/ MC", mcStat ) )
 
 
   # ------ Real wages share in GDP terms ------
 
-  exps <- min <- max <- lo <- hi <- list( )
-  # select data to plot
-  for( k in 1 : nExp ){
-    SWreal <- sqrt( Sdata[[ k ]]$W1 ^ 2 + Sdata[[ k ]]$W2 ^ 2 ) / Adata[[ k ]]$CPI # very crude approximation
-    AWreal <- MWreal <- mWreal <- vector( "numeric", length = nTsteps )
-    for( i in 1 : nTsteps ) {
-      if( is.finite( Adata[[ k ]]$CPI[ i ] ) && Adata[[ k ]]$CPI[ i ] != 0 ) {
-        AWreal[ i ] <- ( Adata[[ k ]]$W1[ i ] + Adata[[ k ]]$W2[ i ] ) / Adata[[ k ]]$CPI[ i ]
-        MWreal[ i ] <- ( Mdata[[ k ]]$W1[ i ] + Mdata[[ k ]]$W2[ i ] ) / Adata[[ k ]]$CPI[ i ]
-        mWreal[ i ] <- ( mdata[[ k ]]$W1[ i ] + mdata[[ k ]]$W2[ i ] ) / Adata[[ k ]]$CPI[ i ]
-      } else {
-        AWreal[ i ] <- NA
-        MWreal[ i ] <- NA
-        mWreal[ i ] <- NA
-      }
-    }
-    # MC averages
-    exps[[ k ]] <- list( AWreal[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
-    # minimum and maximum MC runs
-    min[[ k ]] <- list( mWreal[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
-    max[[ k ]] <- list( MWreal[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] )
-    # MC confidence interval
-    lo[[ k ]] <- list( AWreal[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] -
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * SWreal[ TmaskPlot ] /
-                         Adata[[ k ]]$GDPnom[ TmaskPlot ] / sqrt( nSize ) )
-    hi[[ k ]] <- list( AWreal[ TmaskPlot ] / Adata[[ k ]]$GDPnom[ TmaskPlot ] +
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * SWreal[ TmaskPlot ] /
-                         Adata[[ k ]]$GDPnom[ TmaskPlot ] / sqrt( nSize ) )
+  # add the series to dataset
+  for( k in 1 : nExp ) {
+    Pdata[[ k ]][ "WGDP" ] <- ( Pdata[[ k ]]$W1 + Pdata[[ k ]]$W2 ) /
+      Pdata[[ k ]]$GDPnom
+    mdata[[ k ]][ "WGDP" ] <- ( mdata[[ k ]]$W1 + mdata[[ k ]]$W2 ) /
+      Pdata[[ k ]]$GDPnom
+    Mdata[[ k ]][ "WGDP" ] <- ( Mdata[[ k ]]$W1 + Mdata[[ k ]]$W2 ) /
+      Pdata[[ k ]]$GDPnom
+    Sdata[[ k ]][ "WGDP" ] <- sqrt( Sdata[[ k ]]$W1 ^ 2 + Sdata[[ k ]]$W2 ^ 2 ) /
+      Pdata[[ k ]]$GDPnom
   }
 
-  plot_lists( exps, min, max, lo, hi, leg = legends, col = colors,
+  plot_lists( "WGDP", Pdata, mdata, Mdata, sdMC = Sdata, leg = legends,
+              statMC = mcStat, mask = TmaskPlot, nMC = nSize, CI = CI, col = colors,
               lty = lTypes, xlab = "Time", ylab = "Total real wages on GDP",
-              tit = "Wage share", subtit = paste( "MC runs =", nSize ) )
+              tit = "Wage share",
+              subtit = paste( "MC runs =", nSize, "/ MC", mcStat ) )
 
 
   # ------ Innovation and imitation in sector 1 ------
 
-  exps <- min <- max <- lo <- hi <- list( )
-  # select data to plot
-  for( k in 1 : nExp ){
-    # MC averages
-    exps[[ k ]] <- list( Adata[[ k ]]$inn[ TmaskPlot ],
-                         Adata[[ k ]]$imi[ TmaskPlot ] )
-    # minimum and maximum MC runs
-    min[[ k ]] <- list( mdata[[ k ]]$inn[ TmaskPlot ],
-                        mdata[[ k ]]$imi[ TmaskPlot ] )
-    max[[ k ]] <- list( Mdata[[ k ]]$inn[ TmaskPlot ],
-                        Mdata[[ k ]]$imi[ TmaskPlot ] )
-    # MC confidence interval
-    lo[[ k ]] <- list( Adata[[ k ]]$inn[ TmaskPlot ] -
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$inn[ TmaskPlot ] / sqrt( nSize ),
-                       Adata[[ k ]]$imi[ TmaskPlot ] -
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$imi[ TmaskPlot ] / sqrt( nSize ) )
-    hi[[ k ]] <- list( Adata[[ k ]]$inn[ TmaskPlot ] +
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$inn[ TmaskPlot ] / sqrt( nSize ),
-                       Adata[[ k ]]$imi[ TmaskPlot ] +
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$imi[ TmaskPlot ] / sqrt( nSize ) )
-  }
-
-  plot_lists( exps, min, max, lo, hi, leg = legends, col = colors,
-              lty = lTypes, xlab = "Time", ylab = "Share of innovating and imitating firms",
+  plot_lists( c( "inn", "imi" ), Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
+              mask = TmaskPlot, nMC = nSize, CI = CI, col = colors,
+              lty = lTypes, xlab = "Time",
+              ylab = "Share of innovating and imitating firms",
               tit = "Innovation and imitation",
-              subtit = paste( "sector 1 only / MC runs =", nSize ),
+              subtit = paste( "Capital-good sector only / MC runs =", nSize,
+                              "/ MC", mcStat ),
               leg2 = c( "Innovation", "Imitation" ) )
+
+
+  # ------ Productivity ------
+
+  plot_lists( c( "A", "A1", "A2" ), Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
+              mask = TmaskPlot, nMC = nSize, CI = CI, log = TRUE, col = colors,
+              lty = lTypes, xlab = "Time",
+              ylab = "Relative average log labor productivity",
+              tit = "Productivity",
+              subtit = paste( "MC runs =", nSize, "/ MC", mcStat ),
+              leg2 = c( "Overall", "Capital-good sector", "Consumption-good sector" ) )
 
 
   # ------ Concentration ------
 
-  exps <- min <- max <- lo <- hi <- list( )
-  # select data to plot
-  for( k in 1 : nExp ){
-    # MC averages
-    exps[[ k ]] <- list( Adata[[ k ]]$HH2[ TmaskPlot ] )
-    # minimum and maximum MC runs
-    min[[ k ]] <- list( mdata[[ k ]]$HH2[ TmaskPlot ] )
-    max[[ k ]] <- list( Mdata[[ k ]]$HH2[ TmaskPlot ] )
-    # MC confidence interval
-    lo[[ k ]] <- list( Adata[[ k ]]$HH2[ TmaskPlot ] -
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$HH2[ TmaskPlot ] / sqrt( nSize ) )
-    hi[[ k ]] <- list( Adata[[ k ]]$HH2[ TmaskPlot ] +
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$HH2[ TmaskPlot ] / sqrt( nSize ) )
-  }
-
-  plot_lists( exps, min, max, lo, hi, leg = legends, col = colors,
+  plot_lists( c( "HH1", "HH2" ), Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
+              mask = TmaskPlot, nMC = nSize, CI = CI, col = colors,
               lty = lTypes, xlab = "Time",
               ylab = "Standardized Herfindahl-Hirschman index",
               tit = "Market concentration",
-              subtit = paste( "Sector 2 only / MC runs =", nSize ) )
+              subtit = paste( "MC runs =", nSize, "/ MC", mcStat ),
+              leg2 = c( "Capital-good sector", "Consumption-good sector" ) )
 
 
   # ------ Markup ------
 
-  exps <- min <- max <- lo <- hi <- list( )
-  # select data to plot
-  for( k in 1 : nExp ){
-    # MC averages
-    exps[[ k ]] <- list( Adata[[ k ]]$mu2avg[ TmaskPlot ] )
-    # minimum and maximum MC runs
-    min[[ k ]] <- list( mdata[[ k ]]$mu2avg[ TmaskPlot ] )
-    max[[ k ]] <- list( Mdata[[ k ]]$mu2avg[ TmaskPlot ] )
-    # MC confidence interval
-    lo[[ k ]] <- list( Adata[[ k ]]$mu2avg[ TmaskPlot ] -
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$mu2avg[ TmaskPlot ] / sqrt( nSize ) )
-    hi[[ k ]] <- list( Adata[[ k ]]$mu2avg[ TmaskPlot ] +
-                         qnorm( 1 - ( 1 - CI ) / 2 ) * Sdata[[ k ]]$mu2avg[ TmaskPlot ] / sqrt( nSize ) )
-  }
-
-  plot_lists( exps, min, max, lo, hi, leg = legends, col = colors,
+  plot_lists( "mu2avg", Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
+              mask = TmaskPlot, nMC = nSize, CI = CI, col = colors,
               lty = lTypes, xlab = "Time", ylab = "Weighted average mark-up rate",
-              tit = "Mark-up average",
-              subtit = paste( "Sector 2 only / MC runs =", nSize ) )
+              tit = "Mark-up",
+              subtit = paste( "Consumption-good sector only / MC runs =", nSize,
+                              "/ MC", mcStat ) )
 
 }

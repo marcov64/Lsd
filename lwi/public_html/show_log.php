@@ -1,7 +1,7 @@
 <?php
 
 /* 
- * Copyright (C) 2017 Marcelo C. Pereira <mcper at unicamp.br>
+ * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,10 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+include '../defaults.php';
+
 $session_id = preg_replace( "/[^\da-z]/i", "", filter_input( INPUT_COOKIE, session_name( ), FILTER_SANITIZE_STRING ) );
 $session_short_id = substr( $session_id, -6 );
 
-$filename_log = "../tmp/run-" . $session_short_id . ".log";
+$filename_log = $output_pref . "run-" . $session_short_id . ".log";
 
 if ( file_exists( $filename_log ) ) {
     echo json_encode( file( $filename_log ) );    

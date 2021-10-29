@@ -228,7 +228,7 @@ div.WordSection1
 
 </head>
 
-<body lang=PT-BR link=blue vlink=purple>
+<body lang=PT-BR link=blue vlink=purple style='word-wrap:break-word'>
 
 <div class=WordSection1>
 
@@ -243,7 +243,7 @@ Manager – LMM</span></p>
  style='width:90.0%'>
  <tr>
   <td width=558 style='width:418.2pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
-  <p class=MsoNormal style='margin:0cm'><img width=551 height=379
+  <p class=MsoNormal style='margin:0cm'><img width=639 height=523
   src="image/lmm_main.png"></p>
   </td>
   <td width=196 valign=top style='width:146.8pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
@@ -336,21 +336,18 @@ shortcut executes the associated command. Hovering with the mouse over the
 icons shows the command name on the right part of the tool bar.</span></p>
 
 <p class=MsoNormal><a name=infobar></a><span lang=EN-US><img border=0
-width=683 height=23 src="image/lmm_statusbar.png"></span></p>
+width=794 height=22 src="image/lmm_statusbar.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The information bar, shown above,
 indicates: the current model group, the name of the selected model, if any, the
 selected model's version number, the name of the model file currently loaded in
-the editor area, and the text cursor current position in </span><span
-class=Cdigo><span lang=EN-US>line.column</span></span><span lang=EN-US> format
-(first line is 1 and first column is 0, to comply with the standard compiler
-convention). </span></p>
+the editor area, and the text cursor current line/column position. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>The editor area is available for the user
 to edit the currently loaded file (usually, the model’s description file or the
 <a href="LSD_faqs.html#equationfile">equation file</a>). The editor accepts the
 usual commands for browsing, selecting, deleting, etc. Also, the most
-frequently-used editing commands in <a href="#edit">menu Edit</a> have also
+frequently used editing commands in <a href="#edit">menu Edit</a> have also
 key-based shortcuts for faster access while typing (the shortcuts are indicated
 along the commands in the menu). Moreover, a context popup menu with commonly
 used commands is always available and it is activated the right mouse button. </span></p>
@@ -437,20 +434,20 @@ yellow folder icon on the tool bar.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Browse the <a href="LSD_faqs.html#model">LSD
 models</a> available on your computer using the <a
-href="LSD_windows.html#modelbrowser">LSD Model Browser</a>. The models are
-usually organized in groups containing related models. After installation,
-there are two main groups created: </span><span class=Cdigo><span lang=EN-US>Example
+href="LSD_windows.html#modelbrowser">LSD Model Browser</a>. The models are usually
+organized in groups containing related models. After installation, there are
+two main groups created: </span><span class=Cdigo><span lang=EN-US>Example
 Models</span></span><span lang=EN-US> and </span><span class=Cdigo><span
 lang=EN-US>Work in Progress</span></span><span lang=EN-US>. In the first group
 you find several ready-to-run example models (see the <a href="model_using.html">tutorial</a>
 on how to use them). You are encouraged to save your new models inside the
 second group.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>The LSD Model Browser window lists the models
-available in the current group. Models are organized in a tree of groups, like
-directory/folders in the file system. As the user scrolls through the list, a
-brief description of the model highlighted is shown. Navigation in and out of
-groups is also possible with the usual file browser commands. </span></p>
+<p class=MsoNormal><span lang=EN-US>The LSD Model Browser window lists the
+models available in the current group. Models are organized in a tree of
+groups, like directory/folders in the file system. As the user scrolls through
+the list, a brief description of the model highlighted is shown. Navigation in
+and out of groups is also possible with the usual file browser commands. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>When the desired model is highlighted
 (single click or arrow keys), selected it with a double click or pressing </span><span
@@ -1279,6 +1276,7 @@ name=run></a><a name="_Compile_and_Run"></a> </span></p>
 <h2><span lang=EN-US>Compile and Run </span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcuts</span></i><span lang=EN-US>: </span><span
+class=Cdigo><span lang=EN-US>F5</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>Ctrl+r</span></span><span lang=EN-US> or click the
 on the second yellow lightning icon on the tool bar, the one with the green
 arrow.</span></p>
@@ -1312,6 +1310,7 @@ Compilation Results</a>.</span></p>
 <h2><a name="_Recompile_Model"></a><span lang=EN-US>Recompile</span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcuts</span></i><span lang=EN-US>: </span><span
+class=Cdigo><span lang=EN-US>F6</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>Ctrl+p</span></span><span lang=EN-US> or click the
 on the first yellow lightning icon on the tool bar.</span></p>
 
@@ -1327,6 +1326,7 @@ irrespective to the usual LSD checks and/or defer its execution.</span></p>
 lang=EN-US>GDB/LLDB Debugger </span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcuts</span></i><span lang=EN-US>: </span><span
+class=Cdigo><span lang=EN-US>F7</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>Ctrl+g</span></span><span lang=EN-US> or click the
 on the white window with a green arrow icon on the tool bar.</span></p>
 
@@ -1347,13 +1347,13 @@ when explicitly directed to do so. </span></p>
 href="LSD_faqs.html#c">C++</a> debuggers. Therefore, they know nothing of LSD
 Equations, Objects, etc., except for their (complicate) technical
 representations. The debugger permits, for example, to investigate line by line
-the execution of an equation. However, this means that one has also to follow line-by-line
-a lot of non-interesting technical code. </span></p>
+the execution of an equation. However, this means that one has also to follow
+line-by-line a lot of non-interesting technical code. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>LSD modelers may find more useful the LSD
 Debugger: it follows the simulation at the level of individual Equations. When
-one Variable, marked to be debugged, is computed, the LSD debugger interrupts
-the simulation, shows the value produced in the equation, the values of the </span><span
+one Variable, marked to be debugged, is computed, the LSD debugger interrupts the
+simulation, shows the value produced in the equation, the values of the </span><span
 class=Cdigo><span lang=EN-US>v[n]</span></span><span lang=EN-US> temporary
 values, the model’s elements values, etc., permitting to find, most of times,
 the cause of an error. See the <a href="debug.html">LSD Debugger help page</a>.
@@ -1516,18 +1516,32 @@ graphical interface) of the <a href="LSD_faqs.html#modelprogram">LSD model
 program</a>, including the source code to recompile it in other computers and
 operating systems. This is useful to run the simulation in servers or computer
 clusters, allowing the processing of huge numbers of <a
-href="LSD_faqs.html#simulationrun">simulation runs</a> in parallel. </span></p>
+href="LSD_faqs.html#simulationrun">simulation runs</a> in parallel. </span><span
+lang=EN-US>This command is automatically executed whenever the options </span><span
+lang=EN-US style='font-family:"Courier New";color:gray'><a
+href="menurun.html#batch">Parallel Run</a></span><span lang=EN-US> or </span><span
+lang=EN-US style='font-family:"Courier New";color:gray'><a
+href="menurun.html#parallel">Parallel Batch</a></span><span lang=EN-US> are
+selected in menu </span><span lang=EN-US style='font-family:"Courier New";
+color:gray'>Run</span><span lang=EN-US> of <a href="browser.html">LSD Browser</a>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Since there is no graphical interface, the
 No Window version needs a <a href="LSD_faqs.html#modelsetting">model
 configuration file</a> (</span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
 lang=EN-US> extension) already prepared using the graphical <a
 href="LSD_windows.html#browser">LSD Browser</a>. The simulation results are
-automatically stored in files (</span><span class=Cdigo><span lang=EN-US>.res</span></span><span
-lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>.res.gz</span></span><span
-lang=EN-US> extension), to be loaded in the regular <a
+automatically stored in files (</span><span class=Cdigo><span lang=EN-US>.res.gz</span></span><span
+lang=EN-US> / </span><span class=Cdigo><span lang=EN-US>.tot.gz</span></span><span
+lang=EN-US> extensions), to be loaded in the regular <a
 href="LSD_windows.html#analysisofresults">LSD Analysis of Results</a> window or
-in R (using package <a href="LSD_faqs.html#r">LSDinterface</a>).</span></p>
+in R (using package <a href="LSD_faqs.html#r">LSDinterface</a>). Alternatively,
+simulation results can be saved to coma-separated CSV files (</span><span
+class=Cdigo><span lang=EN-US>.csv</span></span><span lang=EN-US> or </span><span
+class=Cdigo><span lang=EN-US>.csv.gz</span></span><span lang=EN-US> extension)
+which can be opened in any text editor, spreadsheet or statistical software
+(see the usage of options </span><span class=Cdigo><span lang=EN-US>-t</span></span><span
+lang=EN-US> and </span><span class=Cdigo><span lang=EN-US>-z</span></span><span
+lang=EN-US> below).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>To move the non-graphical LSD model program
 to another operating system (or sometimes a different version of the same
@@ -1570,10 +1584,10 @@ the non-graphical LSD model program:</span></p>
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><b><span
 lang=EN-US>Compile the LSD model program:</span></b><span lang=EN-US> at the
 command line (terminal) prompt, make sure the copied model home directory is
-the current one and use the command</span><span class=Cdigo><span lang=EN-US>
-make -f makefileNW </span></span><span lang=EN-US>to generate a new executable
-file. If you get an error and compilation fails, you may have to adjust some of
-the variables in the </span><span class=Cdigo><span lang=EN-US>makefileNW</span></span><span
+the current one and use the command</span><span class=Cdigo><span lang=EN-US> make
+-f makefileNW </span></span><span lang=EN-US>to generate a new executable file.
+If you get an error and compilation fails, you may have to adjust some of the
+variables in the </span><span class=Cdigo><span lang=EN-US>makefileNW</span></span><span
 lang=EN-US> file for the characteristics of your system.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -1596,22 +1610,32 @@ configuration file.</span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US>4)<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><b><span
 lang=EN-US>Analyze the results:</span></b><span lang=EN-US> use the produced
-results files in the desired program (LSD or R).</span></p>
+results files in the desired program (LSD, R etc.).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The non-graphical LSD model program can be
 run under two different setups: single or multiple configurations. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>The first setup uses a single configuration
-file, possibly executing many simulation runs under different pseudo-random
-generator seeds. The terminal command line (for a configuration named </span><span
-class=Cdigo><span lang=EN-US>XXXXX</span></span><span lang=EN-US> and the
-current directory set to the model home) is:</span></p>
+file possibly executing many simulation runs under different pseudo-random
+generator seeds, sequentially (the default) or in parallel. The terminal
+command line (for a configuration named </span><span class=Cdigo><span
+lang=EN-US>XXXXX</span></span><span lang=EN-US> and the current directory set
+to the model home) is:</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Windows:</span><span class=Cdigo><span
-lang=EN-US> lsd_gnuNW -f XXXXX.lsd</span></span></p>
+lang=EN-US> lsdNW -f XXXXX.lsd [-s YY] [-e ZZ]</span></span></p>
 
-<p class=MsoNormal><span lang=EN-US>Linux/macOS:</span><span class=Cdigo><span
-lang=EN-US> ./lsd_gnuNW -f XXXXX.lsd</span></span></p>
+<p class=MsoNormal>Linux/macOS:<span class=Cdigo> ./lsdNW -f XXXXX.lsd [-s YY]
+[-e ZZ]</span></p>
+
+<p class=MsoNormal><span lang=EN-US>Optionally, is possible to specify in the
+command line exactly which simulation runs are to be executed, by redefining
+the random generator initial seed (option </span><span class=Cdigo><span
+lang=EN-US>-s</span></span><span lang=EN-US>) and/or the number of execution
+runs (option </span><span class=Cdigo><span lang=EN-US>-e</span></span><span
+lang=EN-US>) from whatever values already configured in the configuration file.
+YY is the initial seed number to use (a positive integer) and ZZ is the number
+of runs (also a positive integer).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The second setup uses multiple,
 sequentially-numbered configuration files, typically produced using LSD <a
@@ -1621,20 +1645,120 @@ lang=EN-US>, the first sequential number set to </span><span class=Cdigo><span
 lang=EN-US>N</span></span><span lang=EN-US> and the current directory set to
 the model home) is:</span></p>
 
-<p class=MsoNormal><span lang=EN-US>Windows:</span><span class=Cdigo><span
-lang=EN-US> lsd_gnuNW -f XXXXX –s N</span></span></p>
+<p class=MsoNormal>Windows:<span class=Cdigo> lsdNW -f XXXXX –s N [-e M]</span></p>
 
-<p class=MsoNormal>Linux/macOS:<span class=Cdigo> ./lsd_gnuNW -f XXXXX –s N</span></p>
+<p class=MsoNormal>Linux/macOS:<span class=Cdigo> ./lsdNW -f XXXXX –s N [-e M]</span></p>
 
 <p class=MsoNormal><span class=Cdigo><span lang=EN-US>N</span></span><span
 lang=EN-US> is an integer used to choose the initial configuration file, which
-should be named according to the convention </span><span class=Cdigo><span
-lang=EN-US>XXXXX_N.lsd</span></span><span lang=EN-US>. The following
-configuration files are processed sequentially until the last one (or until the
-sequential number </span><span class=Cdigo><span lang=EN-US>M</span></span><span
-lang=EN-US> is reached, if the option </span><span class=Cdigo><span
-lang=EN-US>-e M</span></span><span lang=EN-US> is appended to the commands
-above).</span></p>
+must be named according to the convention </span><span class=Cdigo><span
+lang=EN-US>XXXXX_N.lsd</span></span><span lang=EN-US>. Notice that </span><span
+class=Cdigo><span lang=EN-US>XXXXX</span></span><span lang=EN-US> must <i>not</i>
+include the </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
+lang=EN-US> extension. The following configuration files are processed
+sequentially until the last one except if the optional </span><span
+class=Cdigo><span lang=EN-US>-e M</span></span><span lang=EN-US> option is
+used. In this case, processing stops after the sequential number </span><span
+class=Cdigo><span lang=EN-US>M</span></span><span lang=EN-US> is reached.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>The command-line version of LSD accepts
+other options, which can be provided in any order:</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>-o PATH</span></b></span><span
+lang=EN-US>: save the result file(s) to a different subdirectory given by </span><span
+class=Cdigo><span lang=EN-US>PATH</span></span><span lang=EN-US> (path must
+have no space in it).</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>-l FILE</span></b></span><span
+lang=EN-US>: save all </span><span class=Cdigo><span lang=EN-US>lsdNW</span></span><span
+lang=EN-US> output to a (log) file named by </span><span class=Cdigo><b><span
+lang=EN-US>FILE</span></b></span><span lang=EN-US> (name/path must have no
+space in it).</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>-t</span></b></span><span
+lang=EN-US>: produce compressed comma separated (</span><span class=Cdigo><span
+lang=EN-US>.csv[.gz]</span></span><span lang=EN-US>) text result file(s), use
+with </span><span class=Cdigo><span lang=EN-US>-z</span></span><span
+lang=EN-US> to produce uncompressed (</span><span class=Cdigo><span lang=EN-US>.csv</span></span><span
+lang=EN-US>) files.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>-r</span></b></span><span
+lang=EN-US>: skip the generation of single-run (</span><span class=Cdigo><span
+lang=EN-US>.res[.gz]</span></span><span lang=EN-US>) result file(s), so only
+the single totals (</span><span class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span
+lang=EN-US>) result file(s) is(are) produced (for each configuration file).</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>-p</span></b></span><span
+lang=EN-US>: skip the generation of totals (</span><span class=Cdigo><span
+lang=EN-US>.tot[.gz]</span></span><span lang=EN-US>) result file(s), so only
+the is single-run (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
+lang=EN-US>) result file(s) is(are) produced. This option is automatically
+assumed if option </span><span class=Cdigo><span lang=EN-US>-c</span></span><span
+lang=EN-US> is used </span><span class=Cdigo><b><span lang=EN-US>MAX_RUNS</span></b></span><span
+lang=EN-US> (see below) larger than one.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>-g</span></b></span><span
+lang=EN-US>: enable the generation of a single grand-total (</span><span
+class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span lang=EN-US>) result
+file when running multiple configurations (</span><span class=Cdigo><span
+lang=EN-US>-s</span></span><span lang=EN-US> option) is used, consolidating the
+results of all runs and configurations. This option is incompatible with option
+</span><span class=Cdigo><span lang=EN-US>-c</span></span><span lang=EN-US> if </span><span
+class=Cdigo><b><span lang=EN-US>MAX_RUNS</span></b></span><span lang=EN-US>
+(see below) is larger than one.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>-z</span></b></span><span
+lang=EN-US>: disable the generation of compressed (</span><span class=Cdigo><span
+lang=EN-US>.gz</span></span><span lang=EN-US>) result file(s), which produces
+larger (</span><span class=Cdigo><span lang=EN-US>.res</span></span><span
+lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>.tot</span></span><span
+lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>.csv</span></span><span
+lang=EN-US>) files that can be directly open in text editors and imported in
+legacy software which does not support smaller/faster compressed files (like
+some statistical packages).</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>-b</span></b></span><span
+lang=EN-US>: display a text progress bar showing the percentage of time steps
+completed on the standard output while simulation is running.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>-c MAX_THREADS[:MAX_RUNS]</span></b></span><span
+lang=EN-US>: define the maximum number of parallel threads to use by each
+simulation run, replacing the default of using one thread per available
+(virtual) core. It is also possible to define a maximum number of
+(simultaneous) parallel runs, other than the default (one). Do not use a number
+of total threads (</span><span class=Cdigo><b><span lang=EN-US>MAX_THREADS</span></b></span><span
+lang=EN-US> x </span><span class=Cdigo><b><span lang=EN-US>MAX_RUNS</span></b></span><span
+lang=EN-US>) larger than the real number of (virtual) cores of the computer, as
+this will just slow down processing.  Larger than one is incompatible with the
+generation of total file(s) (</span><span class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span
+lang=EN-US>), which will be disabled.</span></p>
 
 <h2><a name="_Model_Info"></a><span lang=EN-US>Model Info </span></h2>
 
@@ -1742,8 +1866,8 @@ problem, LSD allows the modeler to split the model’s code in as many separate
 files as needed (all stored in the <a href="LSD_faqs.html#modelhome">model home
 directory</a> or in a subdirectory of it). </span></p>
 
-<p class=MsoNormal><span lang=EN-US>Under a multi-source files model, the
-modeler is responsible to explicitly include all the extra source files at the
+<p class=MsoNormal><span lang=EN-US>Under a multi-source files model, the modeler
+is responsible to explicitly include all the extra source files at the
 beginning (just before </span><span class=Cdigo><span lang=EN-US>MODELBEGIN</span></span><span
 lang=EN-US>) of the main equation file (the one created by LSD) using the C++
 directive </span><span class=Cdigo><span lang=EN-US>#include
@@ -1924,9 +2048,9 @@ the table below. </span></p>
 
 </div>
 
-<p class=MsoNormal><span lang=EN-US style='color:white'>Other than manually </span><span
-lang=EN-US>modifying the model option entries, the dialog box offers options
-for quickly modify the configuration:</span></p>
+<p class=MsoNormal><span lang=EN-US style='color:white'>Other than manually
+modifying the model option entries, the dialog box offers options for quickly
+modify the configuration:</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
@@ -2141,8 +2265,8 @@ installed in case of Linux computers) </span></p>
   <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-ltcl$(TCL_VERSION)
   -ltk$(TCL_VERSION)</span></span><span lang=EN-US style='color:black'><br>
   (Windows/Linux)</span></p>
-  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-framework Tcl -framework
-  Tk</span></span><span lang=EN-US style='color:black'><br>
+  <p class=MsoNormal><span class=Cdigo><span lang=EN-US>-framework Tcl
+  -framework Tk</span></span><span lang=EN-US style='color:black'><br>
   (macOS)</span></p>
   </td>
   <td width="42%" style='width:42.3%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
@@ -2403,8 +2527,8 @@ web browser configuration.</span></p>
 <p class=MsoNormal><span lang=EN-US>The LSD documentation provides access to an
 extensive set of help pages, covering every aspect of <a
 href="LSD_faqs.html#model">LSD model</a> creation and usage. The help pages are
-necessary to fully exploit LSD, and users are encouraged to make use of the manual
-pages while learning and using LSD. </span></p>
+necessary to fully exploit LSD, and users are encouraged to make use of the
+manual pages while learning and using LSD. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Generally speaking, the LSD help pages are
 structured as a hyper-textual documents where each element related to LSD
@@ -2432,9 +2556,9 @@ Primer Tutorial</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>LSD absolute new users are strongly
 recommended to do this <a href="LMM_primer.html">first tutorial</a>, covering
-the very basic operations and concepts of <a href="LSD_faqs.html#lmm">LMM</a>
-and LSD. It guides first-time users to open LMM, explore its basic components
-and test the running of the example models available in the LSD installation. </span></p>
+the very basic operations and concepts of <a href="LSD_faqs.html#lmm">LMM</a> and
+LSD. It guides first-time users to open LMM, explore its basic components and
+test the running of the example models available in the LSD installation. </span></p>
 
 <h2><a name="_Using_LSD_Models"></a><span lang=EN-US>Using LSD Models Tutorial</span></h2>
 
@@ -2449,8 +2573,7 @@ Tutorial</span></h2>
 <p class=MsoNormal><span lang=EN-US>The <a href="model_writing.html">third
 tutorial</a> offers an introduction to users planning to develop their own <a
 href="LSD_faqs.html#model">LSD models</a> or modify existing ones. It is
-organized as a step-by-step guide on the creation of a simple LSD simulation
-model.</span></p>
+organized as a step-by-step guide on the creation of a simple LSD simulation model.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

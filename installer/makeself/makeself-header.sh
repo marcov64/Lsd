@@ -11,10 +11,11 @@ fi
 CRCsum="$CRCsum"
 MD5="$MD5sum"
 SHA="$SHAsum"
+SIGNATURE="$Signature"
 TMPROOT=\${TMPDIR:=/tmp}
 USER_PWD="\$PWD"
 export USER_PWD
-ARCHIVE_DIR=`dirname \$0`
+ARCHIVE_DIR=\`dirname "\$0"\`
 export ARCHIVE_DIR
 
 label="$LABEL"
@@ -25,6 +26,7 @@ licensetxt="$LICENSE"
 helpheader='$HELPHEADER'
 targetdir="$archdirname"
 filesizes="$filesizes"
+totalsize="$totalsize"
 keep="$KEEP"
 nooverwrite="$NOOVERWRITE"
 quiet="n"
@@ -62,11 +64,13 @@ MS_Printf()
 
 MS_PrintLicense()
 {
+  PAGER=\${PAGER:=more}
   if test x"\$licensetxt" != x; then
-    if test x"\$accept" = xy; then
-      echo "\$licensetxt"
+    PAGER_PATH=\`exec <&- 2>&-; which \$PAGER || command -v \$PAGER || type \$PAGER\`
+    if test -x "\$PAGER_PATH"; then
+      echo "\$licensetxt" | \$PAGER
     else
-      echo "\$licensetxt" | more
+      echo "\$licensetxt"
     fi
     if test x"\$accept" != xy; then
       while true
@@ -96,9 +100,14 @@ MS_dd()
 {
     blocks=\`expr \$3 / 1024\`
     bytes=\`expr \$3 % 1024\`
-    dd if="\$1" ibs=\$2 skip=1 obs=1024 conv=sync 2> /dev/null | \\
-    { test \$blocks -gt 0 && dd ibs=1024 obs=1024 count=\$blocks ; \\
-      test \$bytes  -gt 0 && dd ibs=1 obs=1024 count=\$bytes ; } 2> /dev/null
+    # Test for ibs, obs and conv feature
+    if dd if=/dev/zero of=/dev/null count=1 ibs=512 obs=512 conv=sync 2> /dev/null; then
+        dd if="\$1" ibs=\$2 skip=1 obs=1024 conv=sync 2> /dev/null | \\
+        { test \$blocks -gt 0 && dd ibs=1024 obs=1024 count=\$blocks ; \\
+          test \$bytes  -gt 0 && dd ibs=1 obs=1024 count=\$bytes ; } 2> /dev/null
+    else
+        dd if="\$1" bs=\$2 skip=1 2> /dev/null
+    fi
 }
 
 MS_dd_Progress()
@@ -155,6 +164,7 @@ MS_Help()
   \$0 --lsm    Print embedded lsm entry (or no LSM)
   \$0 --list   Print the list of files in the archive
   \$0 --check  Checks integrity of the archive
+  \$0 --verify-sig key Verify signature agains a provided key id
 
  2) Running \$0 :
   \$0 [options] [--] [additional arguments to embedded script]
@@ -184,6 +194,31 @@ MS_Help()
 EOH
 }
 
+MS_Verify_Sig()
+{
+    GPG_PATH=\`exec <&- 2>&-; which gpg || command -v gpg || type gpg\`
+    MKTEMP_PATH=\`exec <&- 2>&-; which mktemp || command -v mktemp || type mktemp\`
+    test -x "\$GPG_PATH" || GPG_PATH=\`exec <&- 2>&-; which gpg || command -v gpg || type gpg\`
+    test -x "\$MKTEMP_PATH" || MKTEMP_PATH=\`exec <&- 2>&-; which mktemp || command -v mktemp || type mktemp\`
+	offset=\`head -n "\$skip" "\$1" | wc -c | tr -d " "\`
+    temp_sig=\`mktemp -t XXXXX\`
+    echo \$SIGNATURE | base64 --decode > "\$temp_sig"
+    gpg_output=\`MS_dd "\$1" \$offset \$totalsize | LC_ALL=C "\$GPG_PATH" --verify "\$temp_sig" - 2>&1\`
+    gpg_res=\$?
+    rm -f "\$temp_sig"
+    if test \$gpg_res -eq 0 && test \`echo \$gpg_output | grep -c Good\` -eq 1; then
+        if test \`echo \$gpg_output | grep -c \$sig_key\` -eq 1; then
+            test x"\$quiet" = xn && echo "GPG signature is good" >&2
+        else
+            echo "GPG Signature key does not match" >&2
+            exit 2
+        fi
+    else
+        test x"\$quiet" = xn && echo "GPG signature failed to verify" >&2
+        exit 2
+    fi
+}
+
 MS_Check()
 {
     OLD_PATH="\$PATH"
@@ -201,6 +236,11 @@ MS_Check()
 		MS_Printf "Verifying archive integrity..."
     fi
     offset=\`head -n "\$skip" "\$1" | wc -c | tr -d " "\`
+    fsize=\`cat "\$1" | wc -c | tr -d " "\`
+    if test \$totalsize -ne \`expr \$fsize - \$offset\`; then
+        echo " Unexpected archive size." >&2
+        exit 2
+    fi
     verb=\$2
     i=1
     for s in \$filesizes
@@ -277,9 +317,9 @@ MS_Decompress()
 UnTAR()
 {
     if test x"\$quiet" = xn; then
-		tar \$1vf - $UNTAR_EXTRA 2>&1 || { echo " ... Extraction failed." > /dev/tty; kill -15 \$$; }
+		tar \$1vf - $UNTAR_EXTRA 2>&1 || { echo " ... Extraction failed." >&2; kill -15 \$$; }
     else
-		tar \$1f - $UNTAR_EXTRA 2>&1 || { echo Extraction failed. > /dev/tty; kill -15 \$$; }
+		tar \$1f - $UNTAR_EXTRA 2>&1 || { echo Extraction failed. >&2; kill -15 \$$; }
     fi
 }
 
@@ -309,6 +349,7 @@ ownership=$OWNERSHIP
 verbose=n
 cleanup=y
 cleanupargs=
+sig_key=
 
 initargs="\$@"
 
@@ -337,7 +378,7 @@ do
 	    echo Encryption: $ENCRYPT
 	fi
 	echo Date of packaging: $DATE
-	echo Built with Makeself version $MS_VERSION on $OSTYPE
+	echo Built with Makeself version $MS_VERSION
 	echo Build command was: "$MS_COMMAND"
 	if test x"\$script" != x; then
 	    echo Script run after extraction:
@@ -366,6 +407,7 @@ do
 	echo NOOVERWRITE=$NOOVERWRITE
 	echo COMPRESS=$COMPRESS
 	echo filesizes=\"\$filesizes\"
+    echo totalsize=\"\$totalsize\"
 	echo CRCsum=\"\$CRCsum\"
 	echo MD5sum=\"\$MD5sum\"
 	echo SHAsum=\"\$SHAsum\"
@@ -393,7 +435,7 @@ EOLSM
 	--tar)
 	offset=\`head -n "\$skip" "\$0" | wc -c | tr -d " "\`
 	arg1="\$2"
-    if ! shift 2; then MS_Help; exit 1; fi
+    shift 2 || { MS_Help; exit 1; }
 	for s in \$filesizes
 	do
 	    MS_dd "\$0" \$offset \$s | MS_Decompress | tar "\$arg1" - "\$@"
@@ -405,6 +447,11 @@ EOLSM
 	MS_Check "\$0" y
 	exit 0
 	;;
+    --verify-sig)
+    sig_key="\$2"
+    shift 2 || { MS_Help; exit 1; }
+    MS_Verify_Sig "\$0"
+    ;;
     --confirm)
 	verbose=y
 	shift
@@ -425,7 +472,7 @@ EOLSM
     --target)
 	keep=y
 	targetdir="\${2:-.}"
-    if ! shift 2; then MS_Help; exit 1; fi
+    shift 2 || { MS_Help; exit 1; }
 	;;
     --noprogress)
 	noprogress=y
@@ -464,11 +511,11 @@ EOLSM
 	    exit 1
 	fi
 	decrypt_cmd="\$decrypt_cmd -pass \$2"
-	if ! shift 2; then MS_Help; exit 1; fi
+    shift 2 || { MS_Help; exit 1; }
 	;;
     --cleanup-args)
     cleanupargs="\$2"
-    if ! shift 2; then MS_help; exit 1; fi
+    shift 2 || { MS_Help; exit 1; }
     ;;
     --)
 	shift

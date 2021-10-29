@@ -32,7 +32,9 @@ $(TARGET).app/Contents/Info.plist
 	touch -c -f $(TARGET).app
 
 # create macOS package
-$(TARGET).app/Contents/Info.plist: $(SRC_DIR)LSD.app/Contents/Info.plist
+$(TARGET).app/Contents/Info.plist: $(SRC_DIR)LSD.app/Contents/Info.plist \
+$(SRC_DIR)LSD.app/Contents/Frameworks/Tcl.framework/libtclstub8.6.a \
+$(SRC_DIR)LSD.app/Contents/Frameworks/Tk.framework/libtkstub8.6.a
 	$(RM) LSD-APP-DUMMY $(TARGET).app
 	cp -R $(SRC_DIR)LSD.app LSD-APP-DUMMY
 	mv LSD-APP-DUMMY $(TARGET).app
@@ -44,13 +46,14 @@ $(FUN).o: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)check.h \
 $(SRC_DIR)fun_head.h $(SRC_DIR)fun_head_fast.h $(COM_DEP) $(TARGET).app/Contents/Info.plist
 	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(INCLUDE) -c $(FUN).cpp
 	
-$(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h $(TARGET).app/Contents/Info.plist
+$(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h  $(SRC_DIR)system_options.txt \
+$(TARGET).app/Contents/Info.plist
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o
 
 $(SRC_DIR)lsdmain.o: $(SRC_DIR)lsdmain.cpp $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)lsdmain.cpp -o $(SRC_DIR)lsdmain.o
 
-$(SRC_DIR)analysis.o: $(SRC_DIR)analysis.cpp $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
+$(SRC_DIR)analysis.o: $(SRC_DIR)analysis.cpp $(SRC_DIR)tables.h $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)analysis.cpp -o $(SRC_DIR)analysis.o
 
 $(SRC_DIR)debug.o: $(SRC_DIR)debug.cpp $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
@@ -83,7 +86,7 @@ $(SRC_DIR)report.o: $(SRC_DIR)report.cpp $(COM_DEP_SYS) $(TARGET).app/Contents/I
 $(SRC_DIR)runtime.o: $(SRC_DIR)runtime.cpp $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)runtime.cpp -o $(SRC_DIR)runtime.o
 
-$(SRC_DIR)set_all.o: $(SRC_DIR)set_all.cpp $(SRC_DIR)nolh.h $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
+$(SRC_DIR)set_all.o: $(SRC_DIR)set_all.cpp $(SRC_DIR)tables.h $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)set_all.cpp -o $(SRC_DIR)set_all.o
 
 $(SRC_DIR)show_eq.o: $(SRC_DIR)show_eq.cpp $(COM_DEP_SYS) $(TARGET).app/Contents/Info.plist

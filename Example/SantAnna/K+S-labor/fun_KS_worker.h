@@ -12,10 +12,10 @@
 
 EQUATION( "_appl" )
 /*
-Number of job applications for firms in the period.
+Number of job applications for firms in the period
 Insert candidate in the corresponding sector 1 and 2 firms' queues.
 If 0 < omega/omegaU < 1, use the value to draw the probability to apply
-at least for one firm.
+at least for one firm
 */
 
 k = V( "_employed" );							// employment status
@@ -91,7 +91,7 @@ while ( ( int ) targetFirms.size( ) < h - 1 )
 {
 	// see which firm is in that position for accumulated market share
 	// in practice, it draws firms with probability proportional to m.s.
-	itd = upper_bound( weight->begin( ), weight->end( ), RND );
+	auto itd = upper_bound( weight->begin( ), weight->end( ), RND );
 
 	// target firm pointer
 	cur1 = V_EXTS( GRANDPARENT, countryE, firm2ptr[ itd - weight->begin( ) ] );
@@ -135,7 +135,7 @@ switch ( ( int ) VS( GRANDPARENT, "flagWorkerSkProd" ) )
 {
 	case 0:										// skills don't affect product.
 	default:
-		v[0] = 1;
+		v[0] = INISKILL;
 		break;
 		
 	case 1:										// only vintage skills count
@@ -156,13 +156,12 @@ RESULT( v[0] )
 
 EQUATION( "_sT" )
 /*
-Worker skills in last period, due to tenure learning-by-doing.
-Tenure skills are >= 1 and unbounded.
+Worker skills in last period, due to tenure learning-by-doing
+Tenure skills are >= INISKILL and unbounded
 */
 
-i = VS( GRANDPARENT, "flagWorkerLBU" );			// worker-level learning mode
-if ( i == 0 || i == 1 )							// no learning-by-tenure mode?
-	END_EQUATION( 1 );							// skills = 1
+if ( VS( GRANDPARENT, "flagWorkerLBU" ) <= 1 )	// no learning-by-tenure mode?
+	END_EQUATION( INISKILL );
 	
 if ( V( "_age" ) == 1 )							// just "born"?
 	END_EQUATION( VLS( PARENT, "sTmin", 1 ) );	// get minimum existing skills
@@ -205,13 +204,13 @@ RESULT( max( v[0], VLS( PARENT, "sTmin", 1 ) ) )// minimum skills is current min
 
 EQUATION( "_sV" )
 /*
-Worker skills in last period, due to technology vintage learning-by-using.
-Vintage skills are in the [0,1] range.
+Worker skills in last period, due to technology vintage learning-by-using
+Vintage skills are in the [0,INISKILL] range
 */
 
 i = VS( GRANDPARENT, "flagWorkerLBU" );			// worker-level learning mode
 if ( i == 0 || i == 2 )							// no learning-by-vintage mode?
-	END_EQUATION( 1 );							// skills = 1
+	END_EQUATION( INISKILL );
 
 if ( HOOK( FWRK ) == NULL || V( "_age" ) == 1 )	// discard unempl./sect.1
 	END_EQUATION( VS( PARENT, "sigma" ) );		// skills = public skills
@@ -249,8 +248,8 @@ RESULT( min( v[0], 1 ) )
 
 EQUATION( "_w" )
 /*
-Effective wage received.
-Adjust employed workers wages according to indexation rules.
+Effective wage received
+Adjust employed workers wages according to indexation rules
 */
 
 h = V( "_employed" );							// employment situation
@@ -325,9 +324,6 @@ else
 				v[8] = max( VL( "_dQb", 1 ), 0);// delta pot. prod. (worker)
 	}
 	
-	if ( VS( GRANDPARENT, "flagNegProdWage" ) == 1 ) // negative product. floor?
-		v[8] = max( 0, v[8] );					// apply limit if enabled
-
 	// make sure total productivity effect is bounded to 1
 	if ( ( v[2] + v[4] ) > 1 )
 		v[2] = max( 1 - v[4], 0 );				// adjust general prod. effect
@@ -417,11 +413,13 @@ j = VS( PARENT, "Ts" );							// wage memory
 if ( j == 0 )									// no memory?
 	END_EQUATION( V( "_wRes" ) )
 
-v[0] = 0;
-for ( i = 1; i <= j; ++i )
-	v[0] += VL( "_w", i );						// sum past wages
+for ( v[0] = 0, i = 1; i <= j; ++i )
+	if ( T - i >= 0 )							// just go to t=0
+		v[0] += VL( "_w", i );					// sum past wages
+	else
+		break;
 
-RESULT( v[0] / j )
+RESULT( v[0] / i )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
@@ -457,7 +455,7 @@ Production with current worker skills and vintage
 if ( HOOK( VWRK ) == NULL )						// disalloc., unempl. or sec. 1?
     END_EQUATION( 0 );							// no production
 	
-RESULT( V( "_s" ) * VS( PARENTS( HOOK( VWRK ) ), "_Avint" ) )
+RESULT( V( "_s" ) * VS( PARENTS( HOOK( VWRK ) ), "__Avint" ) )
 
 
 EQUATION( "_Te" )
@@ -500,26 +498,27 @@ EQUATION( "_dQb" )
 Notional production (bounded) rate of change of worker
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( THIS, "_Q", VS( GRANDPARENT, "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "_Q", VS( GRANDPARENT, "mLim" ), 
+					   VS( GRANDPARENT, "mPer" ) ) )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/
 
 EQUATION_DUMMY( "_Tc", "" )
 /*
-Number of periods of employment contract (can't be fired before end of contract).
-Updated in 'Ls'. 
+Number of periods of employment contract (can't be fired before end of contract)
+Updated in 'Ls'
 */
 
 EQUATION_DUMMY( "_discouraged", "_appl" )
 /*
-Flag to indicate if worker is discouraged to search for a job in the period.
-Updated in '_appl'. 
+Flag to indicate if worker is discouraged to search for a job in the period
+Updated in '_appl'
 */
 
 EQUATION_DUMMY( "_employed", "" )
 /*
 Flag to indicate if worker is employed at a firm in sector 1 (=1), 
-sector 2 (=2) or unemployed (=0).
-Updated in 'firing' and 'hiring'. 
+sector 2 (=2) or unemployed (=0)
+Updated in 'firing' and 'hiring'
 */

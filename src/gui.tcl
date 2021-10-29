@@ -1,6 +1,6 @@
 #*************************************************************
 #
-#	LSD 8.0 - December 2020
+#	LSD 8.0 - September 2021
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -9,7 +9,7 @@
 #
 #	See Readme.txt for copyright information of
 #	third parties' code used in LSD
-#	
+#
 #*************************************************************
 
 #*************************************************************
@@ -19,7 +19,7 @@
 # The module sets all the required variables, data structures
 # and code required to create and operate the LSD GUI over
 # Tk/ttk.
-# To ensure smooth operation of LSD GUI, all Tk/ttk new 
+# To ensure smooth operation of LSD GUI, all Tk/ttk new
 # windows should be created using the procedures defined
 # in WINDOW.TCL.
 #*************************************************************
@@ -35,7 +35,9 @@ package require Tk 8.6
 lappend auto_path "$RootLsd/$LsdSrc/themes"
 source "$RootLsd/$LsdSrc/defaults.tcl" ;	# load LSD defaults
 source "$RootLsd/$LsdSrc/window.tcl" ;		# load LSD gui management
+source "$RootLsd/$LsdSrc/wgtclone.tcl" ;	# load LSD widget cloning tools
 source "$RootLsd/$LsdSrc/theme.tcl" ;		# load LSD gui theming
+source "$RootLsd/$LsdSrc/tooltip.tcl" ;		# tklib tootip management
 source "$RootLsd/$LsdSrc/dblclick.tcl" ;	# enhancements to double-click in text widgets
 
 # optional development tools
@@ -61,8 +63,6 @@ if [ string equal $tcl_platform(platform) unix ] {
 # register static special, OS-dependent configurations
 if [ string equal $CurPlatform mac ] {
 	set DefaultSysTerm $sysTermMac
-	set systemTerm $sysTermMac
-	set gnuplotTerm $gnuplotTermMac
 	set DefaultExe $exeMac
 	set DefaultMakeExe $makeMac
 	set DefaultWish $wishMac
@@ -70,13 +70,18 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultHtmlBrowser $browserMac
 	set DefaultFont $fontMac
 	set DefaultFontSize $fontSizeMac
+	set gnuplotExe $gnuplotMac
 	set deltaSize $deltaSizeMac
+	set hsizeLmin $hsizeLminMac
+	set vsizeLmin $vsizeLminMac
 	set hsizeBmin $hsizeBminMac
 	set vsizeBmin $vsizeBminMac
 	set hsizeAmin $hsizeAminMac
 	set vsizeAmin $vsizeAminMac
 	set hsizeDmin $hsizeDminMac
 	set vsizeDmin $vsizeDminMac
+	set hsizePmin $hsizePminMac
+	set vsizePmin $vsizePminMac
 	set hsizeGmin $hsizeGminMac
 	set vsizeGmin $vsizeGminMac
 	set corrX $corrXmac
@@ -88,14 +93,17 @@ if [ string equal $CurPlatform mac ] {
 	set bvstepM $bvstepMac
 	set borderMadj $bborderMac
 
-	if { [ string equal [ info patchlevel ] 8.6.9 ] } {
-		set borderMadj $bborderLinux
+	# enable Ctrl+click as replacement for right-shift
+	bind all <Control-ButtonPress-1> {
+		event generate %W <ButtonPress-2> -x %x -y %y -rootx %X -rooty %Y -button 2
 	}
-	
+
+	# ensure homebrew local executables are on PATH
+	if { [ string first "/usr/local/bin" "$env(PATH)" ] < 0 } {
+		set env(PATH) "/usr/local/bin:$env(PATH)"
+	}
 } elseif [ string equal $CurPlatform linux ] {
 	set DefaultSysTerm $sysTermLinux
-	set systemTerm $sysTermLinux
-	set gnuplotTerm $gnuplotTermLinux
 	set DefaultExe $exeLinux
 	set DefaultMakeExe $makeLinux
 	set DefaultWish $wishLinux
@@ -103,13 +111,18 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultHtmlBrowser $browserLinux
 	set DefaultFont $fontLinux
 	set DefaultFontSize $fontSizeLinux
+	set gnuplotExe $gnuplotLinux
 	set deltaSize $deltaSizeLinux
+	set hsizeLmin $hsizeLminLinux
+	set vsizeLmin $vsizeLminLinux
 	set hsizeBmin $hsizeBminLinux
 	set vsizeBmin $vsizeBminLinux
 	set hsizeAmin $hsizeAminLinux
 	set vsizeAmin $vsizeAminLinux
 	set hsizeDmin $hsizeDminLinux
 	set vsizeDmin $vsizeDminLinux
+	set hsizePmin $hsizePminLinux
+	set vsizePmin $vsizePminLinux
 	set hsizeGmin $hsizeGminLinux
 	set vsizeGmin $vsizeGminLinux
 	set corrX $corrXlinux
@@ -120,26 +133,41 @@ if [ string equal $CurPlatform mac ] {
 	set bhstepM $bhstepLinux
 	set bvstepM $bvstepLinux
 	set borderMadj $bborderLinux
-	
+
+	# use xterm as alternative for missing default/alternative terminals
+	if { [ catch { exec which [ lindex $DefaultSysTerm 0 ] } ] } {
+		set DefaultSysTerm "xterm -e"
+		foreach term $sysTermLinuxAlt {
+			if { ! [ catch { exec which [ lindex $term 0 ] } ] } {
+				set DefaultSysTerm $term
+				break
+			}
+		}
+	}
+
 } elseif [ string equal $CurPlatform windows ] {
 	package require registry
 
 	set DefaultSysTerm $sysTermWindows
-	set systemTerm $sysTermWindows
-	set gnuplotTerm $gnuplotTermWindows
 	set DefaultExe $exeWindows
+	set DefaultMakeExe $makeWinCygwin
 	set DefaultWish $wishWindows
 	set DefaultDbgExe $dbgWindows
 	set DefaultHtmlBrowser $browserWindows
 	set DefaultFont $fontWindows
 	set DefaultFontSize $fontSizeWindows
+	set gnuplotExe $gnuplotWindows
 	set deltaSize $deltaSizeWindows
+	set hsizeLmin $hsizeLminWindows
+	set vsizeLmin $vsizeLminWindows
 	set hsizeBmin $hsizeBminWindows
 	set vsizeBmin $vsizeBminWindows
 	set hsizeAmin $hsizeAminWindows
 	set vsizeAmin $vsizeAminWindows
 	set hsizeDmin $hsizeDminWindows
 	set vsizeDmin $vsizeDminWindows
+	set hsizePmin $hsizePminWindows
+	set vsizePmin $vsizePminWindows
 	set hsizeGmin $hsizeGminWindows
 	set vsizeGmin $vsizeGminWindows
 	set corrX $corrXwindows
@@ -150,12 +178,11 @@ if [ string equal $CurPlatform mac ] {
 	set bhstepM $bhstepWindows
 	set bvstepM $bvstepWindows
 	set borderMadj $bborderWindows
-	
+
 	# inherit OS setting
 	set mouseWarp [ ismousesnapon $CurPlatform ]
-	
+
 	# Cygwin or MSYS2?
-	set DefaultMakeExe make.exe
 	if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } {
 		if { ! [ catch { exec where $makeWinMingw } ] } {
 			set DefaultMakeExe $makeWinMingw
@@ -165,14 +192,26 @@ if [ string equal $CurPlatform mac ] {
 			set DefaultMakeExe $makeWinCygwin
 		}
 	}
-	
+
 	# Gnuplot on path? if not, try default install folder
-	set gnuplotExe "wgnuplot.exe"
 	if [ catch { exec where $gnuplotExe } ] {
 		if [ file exists "C:/Program Files/gnuplot/bin/$gnuplotExe" ] {
-			set gnuplotExe "C:/Program Files/gnuplot/bin/$gnuplotExe"
+			set gnuplotExe "\"C:/Program Files/gnuplot/bin/$gnuplotExe\""
 		}
 	}
+}
+
+# check old incompatible options and fix with defaults
+if { ! [ info exists sysTerm ] || ( $CurPlatform in [ list linux windows ] && [ llength $sysTerm ] < 2 ) } { \
+	set sysTerm $DefaultSysTerm
+}
+
+if { $CurPlatform eq "mac" && ( ! [ info exists wish ] || $wish eq "wish8.6" ) } { \
+	set wish $wishMac
+}
+
+if { $CurPlatform eq "windows" && ( ! [ info exists HtmlBrowser ] || $HtmlBrowser eq "open" ) } { \
+	set HtmlBrowser $browserWindows
 }
 
 # detect and update OS-dependent current/default theme configurations
@@ -208,6 +247,7 @@ if { ! [ info exists lsdTheme ] || \
 # also use special aqua theme-automatic colors
 if { [ string equal $lsdTheme aqua ] } {
 	set darkTheme [ isDarkTheme ]
+
 	set colorsTheme(bg) systemWindowBackgroundColor					; # non-entry light/dark text background
 	set colorsTheme(fg) systemTextColor								; # entry/non-entry dark text foreground
 	set colorsTheme(dbg) systemTextBackgroundColor					; # entry dark text background
@@ -261,6 +301,7 @@ foreach color [ array names colorsTheme ] {
 if { $darkTheme } {
 	set defcolors $defcolorsD
 	set colorsTheme(hl) $hlcolorD
+	set colorsTheme(dhl) $dhlcolorD
 	set colorsTheme(comm) $commcolorD
 	set colorsTheme(str) $strcolorD
 	set colorsTheme(prep) $prepcolorD
@@ -276,9 +317,11 @@ if { $darkTheme } {
 	set colorsTheme(obj) $objcolorD
 	set colorsTheme(grp) $grpcolorD
 	set colorsTheme(mod) $modcolorD
+	set colorsTheme(ttip) $ttipcolorD
 } else {
 	set defcolors $defcolorsL
 	set colorsTheme(hl) $hlcolorL
+	set colorsTheme(dhl) $dhlcolorL
 	set colorsTheme(comm) $commcolorL
 	set colorsTheme(str) $strcolorL
 	set colorsTheme(prep) $prepcolorL
@@ -294,7 +337,20 @@ if { $darkTheme } {
 	set colorsTheme(obj) $objcolorL
 	set colorsTheme(grp) $grpcolorL
 	set colorsTheme(mod) $modcolorL
+	set colorsTheme(ttip) $ttipcolorL
 }
+
+# set tool tips (balloons)
+if { [ catch { set ttfam [ font actual [ ttk::style lookup TLabel -font ] -family ] } ] || [ catch { set ttsize [ expr { [ font actual [ ttk::style lookup TLabel -font ] -size ] - 1 } ] } ] } {
+	set ttfam [ font actual TkDefaultFont -family ]
+	set ttsize [ expr { [ font actual TkDefaultFont -size ] - 1 } ]
+}
+set ttfont [ font create -family "$ttfam" -size $ttsize ]
+set ttfontB [ font create -family "$ttfam" -size $ttsize -weight bold ]
+set tooltip::labelOpts [ list -background $colorsTheme(ttip) -foreground $colorsTheme(fg) \
+	 -borderwidth 0 -highlightthickness 1 -highlightbackground $colorsTheme(fg) ]
+tooltip::tooltip delay $ttipdelay
+tooltip::tooltip fade $ttipfade
 
 # Variable 'alignMode' configure special, per module (LMM, LSD), settings
 unset -nocomplain defaultPos defaultFocus
@@ -310,14 +366,14 @@ if [ info exists alignMode ] {
 # lists to hold the windows parents stacks and exceptions to the parent mgmt.
 set parWndLst [ list ]
 set grabLst [ list ]
-set noParLst [ list .log .str .plt .lat .tst ]
+set noParLst [ list .log .str .deb .lat .plt .dap .tst ]
 
 # list of windows with predefined sizes & positions
-set wndLst [ list .lmm .lsd .log .str .da .deb .lat ]
+set wndLst [ list .lmm .lsd .log .str .da .deb .lat .plt .dap ]
 set wndMenuHeight 0
 
 # text line default canvas height & minimum horizontal border width
-set lheightP [ expr int( [ font actual $fontP -size ] * [ tk scaling ] ) + $vtmarginP ]
+set lheightP [ expr { int( [ font actual $fontP -size ] * [ tk scaling ] ) + $vtmarginP } ]
 set hbordsizeP	$hmbordsizeP
 
 # current position of structure window

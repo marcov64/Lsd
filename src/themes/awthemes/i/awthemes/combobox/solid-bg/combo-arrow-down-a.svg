@@ -14,8 +14,8 @@
    viewBox="0 0 16 25"
    version="1.1"
    id="svg8"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   sodipodi:docname="combo-arrow-down-n.svg">
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   sodipodi:docname="combo-arrow-down-a.svg">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="15.625"
+     inkscape:zoom="16.52"
      inkscape:cx="8"
-     inkscape:cy="13.5"
+     inkscape:cy="12.5"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -53,7 +53,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -71,12 +71,12 @@
        y="105.80645" />
     <g
        aria-label="⏷"
-       transform="scale(0.99357554,1.006466)"
-       style="font-style:normal;font-weight:normal;font-size:12.5132246px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:_GCARR_;fill-opacity:1;stroke:none;stroke-width:0.31283066"
+       transform="scale(1.1028538,0.90673849)"
+       style="font-style:normal;font-weight:normal;font-size:11.27332878px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill-opacity:1;stroke:none;stroke-width:0.28183326"
        id="text817">
       <path
-         d="m -120.23374,114.02632 q 0.24025,0 0.24025,0.18686 0,0.0267 -0.0267,0.0801 l -4.32457,8.14194 q -0.0801,0.16017 -0.16017,0.16017 -0.0801,0 -0.16017,-0.16017 l -4.32457,-8.11525 q 0,-0.0534 0,-0.10678 0,-0.18686 0.26695,-0.18686 z"
-         style="font-size:26.69488335px;fill:_GCARR_;fill-opacity:1;stroke-width:0.31283066"
+         d="m -108.33449,126.3804 q 0.21645,0 0.21645,0.16835 0,0.0241 -0.0241,0.0722 l -3.89606,7.33518 q -0.0721,0.1443 -0.1443,0.1443 -0.0721,0 -0.1443,-0.1443 l -3.89606,-7.31113 q 0,-0.0481 0,-0.0962 0,-0.16835 0.24049,-0.16835 z"
+         style="font-size:24.04977226px;fill:_GCARR_;fill-opacity:1;stroke-width:0.28183326"
          id="path815" />
     </g>
   </g>

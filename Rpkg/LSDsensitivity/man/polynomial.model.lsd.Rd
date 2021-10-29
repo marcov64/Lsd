@@ -7,8 +7,8 @@ Fit a polynomial meta-model to a LSD model sample data
 This function fits a Polynomial meta-model of first or second order, with or without interactions, to the sampled data from a LSD simulation model. Polynomial meta-models are usually inadequate to fit nonlinear simulation models, please use the estimated meta-model carefully.
 }
 \usage{
-polynomial.model.lsd(data, ext.wgth = 0.5, ols.sig = 0.2,
-                     orderModel = 0, interactModel = 0, digits = 4)
+polynomial.model.lsd( data, ext.wgth = 0.5, ols.sig = 0.2,
+                      orderModel = 0, interactModel = 0, digits = 4 )
 }
 \arguments{
   \item{data}{
@@ -61,13 +61,11 @@ The function returns an object/list of class \code{polynomial-model} containing 
 See the note in \link[LSDsensitivity]{LSDsensitivity-package} for step-by-step instructions on how to perform the complete sensitivity analysis process using LSD and R.
 }
 \seealso{
-\code{\link{read.doe.lsd}}
+\code{\link{read.doe.lsd}()}
 }
 \examples{
-# Examples require the data files produced by LSD, please check the package
-# notes and LSD documentation on how to generate you simulation results files.
-# Please note that the full set of sensitivity analysis files must be available,
-# as detailed in the help page for the read.doe.lsd function.
+# get the example directory name
+path <- system.file( "extdata/sobol", package = "LSDsensitivity" )
 
 # Steps to use this function:
 # 1. define the variables you want to use in the analysis
@@ -76,12 +74,11 @@ See the note in \link[LSDsensitivity]{LSDsensitivity-package} for step-by-step i
 #    estimation and the other for out-of-sample (external) validation
 # 3. fit the polynomial meta-model using polynomial.model.lsd
 
-\donttest{
 lsdVars <- c( "var1", "var2", "var3" )         # the definition of existing variables
 
-dataSet <- read.doe.lsd( ".",                  # data files relative folder
-                         "Sim1",               # data files base name (same as .lsd file)
-                         "var1",               # variable name to perform the sensitivity analysis
+dataSet <- read.doe.lsd( path,                 # data files folder
+                         "Sim3",               # data files base name (same as .lsd file)
+                         "var3",               # variable name to perform the sensitivity analysis
                          does = 2,             # number of experiments (data + external validation)
                          saveVars = lsdVars )  # LSD variables to keep in dataset
 
@@ -90,7 +87,6 @@ model <- polynomial.model.lsd( dataSet )       # estimate best polynomial meta-m
 
 print( model$comparison )                      # model comparison table
 print( model$estimation.std )                  # model estimation (standardized) table
-}
 }
 \keyword{ methods }
 \keyword{ models }

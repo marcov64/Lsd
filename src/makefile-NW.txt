@@ -11,7 +11,7 @@ COM_DEP=$(SRC_DIR)decl.h $(SRC_DIR)common.h
 SUFFIX_NW=NW
 LIB_NW=$(LIB) -lpthread
 CC_NW=$(CC_CROSS)g++
-SWITCH_CC_NW=$(GLOBAL_CC) $(SWITCH_CC) -DNW -O3 -g0
+SWITCH_CC_NW=$(GLOBAL_CC) $(SWITCH_CC) -D_NW_ -O3 -g0
 TARGET_NW=lsd$(SUFFIX_NW)
 
 # OS command to delete files
@@ -54,4 +54,6 @@ $(SRC_DIR)variab.o: $(SRC_DIR)variab.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	
 # remove compiled files
 clean:
-	$(RM) $(SRC_DIR)*.o $(FUN)$(SUFFIX_NW).o $(TARGET_NW)*
+	$(RM) $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o $(SRC_DIR)file.o $(SRC_DIR)nets.o \
+	$(SRC_DIR)object.o $(SRC_DIR)util.o $(SRC_DIR)variab.o $(FUN)$(SUFFIX_NW).o \
+	$(TARGET_NW) $(TARGET_NW).exe

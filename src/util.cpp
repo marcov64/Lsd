@@ -1,25 +1,25 @@
 /*************************************************************
 
-	LSD 8.0 - December 2020
+	LSD 8.0 - September 2021
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
-	
+
 	See Readme.txt for copyright information of
 	third parties' code used in LSD
-	
+
  *************************************************************/
 
 /*************************************************************
-UTIL.CPP 
+UTIL.CPP
 Contains a set of utilities for different parts of the
 program.
 
 The main functions contained in this file are:
 
-- void cmd( char *cc );
+- void cmd( const char *cc );
 Standard routine to send the message string cc to the TCL interpreter in order
 to execute a command for the graphical interfaces.
 It should be enough to make a call to Tcl_Eval. But there are problems due to the
@@ -29,20 +29,20 @@ but not under unix. Instead, I use Tcl_VarEval, that allows to use pieces
 of strings (including the last terminating character NULL) and  it does not
 require a writable string.
 
-- void plog( char *m );
+- void plog( const char *m );
 print  message string m in the Log screen.
 
-- FILE *search_str( char *name, char *str )
+- FILE *search_str( const char *name, const char *str )
 given a string name, returns the file corresponding to name, and the current
 position of the file is just after str. Think I don't use any longer.
 
-- FILE *search_data_str( char *name, char *init, char *str )
+- FILE *search_data_str( const char *name, char *init, char *str )
 given a string name, returns the file with that name and the current position
 placed immediately after the string str found after the string init. Needed to
 not get confused managing the data files, where the same string appears twice,
 in the structure definition and in the data section.
 
-- FILE *search_data_ent( char *name, variable *v )
+- FILE *search_data_ent( const char *name, variable *v )
 given the file name name, the routine searches for the data line for the variable
 (or parameter) v. It is not messed up by same labels for variables and objects.
 
@@ -61,129 +61,211 @@ int fishErrCnt, studErrCnt, weibErrCnt, betaErrCnt, paretErrCnt, alaplErrCnt;
 double dimW = 0;						// lattice screen size
 double dimH = 0;
 
-#ifndef NP
+#ifndef _NP_
 mutex error;
-#endif	
+#endif
 
 
 /*********************************
 PLOG
+Print message on the log window
+*********************************/
+void plog( const char *cm, ... )
+{
+	static va_list argptr;
+
+	va_start( argptr, cm );
+	plog_backend( cm, "", argptr );
+	va_end( argptr );
+}
+
+
+/*********************************
+PLOG_TAG
 The optional tag parameter has to correspond to the log window existing tags
 *********************************/
-#define NUM_TAGS 6
-const char *tags[ NUM_TAGS ] = { "", "highlight", "tabel", "series", "prof1", "prof2" };
-
-void plog( char const *cm, char const *tag, ... )
+void plog_tag( const char *cm, const char *tag, ... )
 {
-	char buffer[ TCL_BUFF_STR ], *message;
-	bool tag_ok = false;
-	int i, j;
-	va_list argptr;
+	static va_list argptr;
 
-	for ( int i = 0; i < NUM_TAGS; ++i )
-		if ( ! strcmp( tag, tags[ i ] ) )
-			tag_ok = true;
-	
-#ifndef NP
+	va_start( argptr, tag );
+	plog_backend( cm, tag, argptr );
+	va_end( argptr );
+}
+
+
+/*********************************
+PLOG_BACKEND
+Back-end to plog and plog_tag
+*********************************/
+#define NUM_TAGS 7
+const char *tags[ NUM_TAGS ] = { "", "highlight", "table", "series", "prof1", "prof2", "bar" };
+
+void plog_backend( const char *cm, const char *tag, va_list arg )
+{
+	static bool bufdyn;
+	static char *buffer, *message, bufstat[ MAX_BUFF_SIZE ], msgstat[ MAX_BUFF_SIZE ];
+	static bool tag_ok;
+	static int i, j, reqsz, sz;
+	static va_list argcpy;
+
+#ifndef _NW_
+	if ( ! tk_ok || ! log_ok )
+		return;
+#endif
+
+#ifndef _NP_
 	// abort if not running in main LSD thread
 	if ( this_thread::get_id( ) != main_thread )
 		return;
 #endif
 
-	va_start( argptr, tag );
-	int maxSz = TCL_BUFF_STR - 40 - strlen( tag );
-	int reqSz = vsnprintf( buffer, maxSz, cm, argptr );
-	va_end( argptr );
-	
-	if ( reqSz >= maxSz )
-		plog( "\nWarning: message truncated\n" );
-	
+	buffer = bufstat;
+	message = msgstat;
+	va_copy( argcpy, arg );
+
+	reqsz = vsnprintf( buffer, MAX_BUFF_SIZE, cm, arg );
+
+	if ( reqsz < 0 )
+	{
+#ifndef _NW_
+		log_tcl_error( true, "Invalid text message", "Cannot expand message '%s...'", cm );
+#else
+		fprintf( stderr, "\nCannot expand message '%s...'\n", cm );
+#endif
+		return;
+	}
+
+	// handle very large messages
+	if ( reqsz >= MAX_BUFF_SIZE )
+	{
+		buffer = new char[ reqsz + 1 ];
+		sz = vsnprintf( buffer, reqsz + 1, cm, argcpy );
+
+		if ( reqsz < 0 || sz > reqsz )
+		{
+#ifndef _NW_
+			log_tcl_error( true, "Invalid text message", "Cannot expand message '%s...'", cm );
+#else
+			fprintf( stderr, "\nCannot expand message '%s...'\n", cm );
+#endif
+			delete [ ] buffer;
+			return;
+		}
+
+		message = new char[ reqsz + 1 ];
+		bufdyn = true;
+	}
+	else
+		bufdyn = false;
+
+	va_end( argcpy );
+
 	// remove invalid charaters and Tk control characters
-	message = new char[ strlen( buffer ) + 1 ];
-	for ( i = 0, j = 0; buffer[ i ] != '\0' ; ++i )
-		if ( ( isprint( buffer[ i ] ) || buffer[ i ] == '\n' || 
+	for ( i = 0, j = 0; buffer[ i ] != '\0' && j < reqsz; ++i )
+		if ( ( isprint( buffer[ i ] ) || buffer[ i ] == '\n' ||
 			   buffer[ i ] == '\r' || buffer[ i ] == '\t' ) &&
-			 ! ( buffer[ i ] == '\"' || 
+			 ! ( buffer[ i ] == '\"' ||
 				 ( buffer[ i ] == '$' && buffer[ i + 1 ] != '$' ) ) )
 			message[ j++ ] = buffer[ i ];
 	message[ j ] = '\0';
 
-#ifdef NW 
+#ifdef _NW_
 	printf( "%s", message );
 	fflush( stdout );
 #else
-	if ( ! tk_ok || ! log_ok )
-		return;
-	
+	for ( tag_ok = false, i = 0; i < NUM_TAGS; ++i )
+		if ( ! strcmp( tag, tags[ i ] ) )
+			tag_ok = true;
+
+	// handle the "bar" pseudo tag
+	if ( strcmp( tag, "bar" ) )
+		on_bar = false;
+
 	if ( tag_ok )
 	{
-		cmd( "set log_ok [ winfo exists .log ]" );
+		cmd( "set log_ok 0" );
+		cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { \
+				catch { set log_ok [ winfo exists .log ] } \
+			}" );
 		cmd( "if $log_ok { .log.text.text.internal see [ .log.text.text.internal index insert ] }" );
 		cmd( "if $log_ok { catch { .log.text.text.internal insert end \"%s\" %s } }", message, tag );
 		cmd( "if $log_ok { .log.text.text.internal see end }" );
 	}
 	else
-		plog( "\nError: invalid tag, message ignored:\n%s\n", "", message );
-#endif 
-	delete [ ] message;
-	
+		plog( "\nError: invalid tag, message ignored:\n%s\n", message );
+#endif
+
 	message_logged = true;
+
+	if ( bufdyn )
+	{
+		delete [ ] buffer;
+		delete [ ] message;
+	}
 }
 
 
 /***********
 ERROR_HARD
-Procedure called when an unrecoverable error occurs. 
-Information about the state of the simulation when the error 
-occured is provided. Users can abort the program or analyse 
+Procedure called when an unrecoverable error occurs.
+Information about the state of the simulation when the error
+occurred is provided. Users can abort the program or analyze
 the results collected up the latest time step available.
 *************/
-void error_hard( const char *logText, const char *boxTitle, const char *boxText, bool defQuit )
+void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const char *logFmt, ... )
 {
 	if ( quit == 2 )		// simulation already being stopped
 		return;
-		
-#ifndef NP
+
+	static char logText[ MAX_BUFF_SIZE ];
+	static va_list argptr;
+
+	va_start( argptr, logFmt );
+	vsnprintf( logText, MAX_BUFF_SIZE, logFmt, argptr );
+	va_end( argptr );
+
+#ifndef _NP_
 	// prevent concurrent use by more than one thread
 	lock_guard < mutex > lock( error );
-	
+
 	// abort worker and park message if not running in main LSD thread
 	if ( this_thread::get_id( ) != main_thread )
 	{
 		if ( ! error_hard_thread )	// handle just first error
 		{
 			error_hard_thread = true;
-			strcpy( error_hard_msg1, boxTitle );
-			strcpy( error_hard_msg2, logText );
-			strcpy( error_hard_msg3, boxText );
+			strcpyn( error_hard_msg1, boxTitle, MAX_BUFF_SIZE );
+			strcpyn( error_hard_msg2, logText, MAX_BUFF_SIZE );
+			strcpyn( error_hard_msg3, boxText, MAX_BUFF_SIZE );
 			throw 1;
 		}
 		else
 			return;
 	}
-#endif	
-		
-#ifndef NW
+#endif
+
+#ifndef _NW_
 	if ( running )			// handle running events differently
 	{
 		cmd( "if [ winfo exists .deb ] { destroytop .deb }" );
 		deb_log( false );	// close any open debug log file
-		reset_plot( cur_sim );	// allow closing run-time plot
+		reset_plot( );		// show & disable run-time plot
 		set_buttons_run( false );
 
-		plog( "\n\nError detected at time %d", "highlight", t );
-		plog( "\n\nError: %s\nDetails: %s", "", boxTitle, logText );
+		plog_tag( "\n\nError detected at time %d", "highlight", t );
+		plog( "\n\nError: %s\nDetails: %s", boxTitle, logText );
 		if ( ! parallel_mode && stacklog != NULL && stacklog->vs != NULL )
-			plog( "\nOffending code contained in the equation for variable: '%s'", "", stacklog->vs->label );
-		plog( "\nSuggestion: %s", "", boxText );
+			plog( "\nOffending code contained in the equation for variable: '%s'", stacklog->vs->label );
+		plog( "\nSuggestion: %s", boxText );
 		print_stack( );
 		cmd( "focustop .log" );
 		cmd( "ttk::messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\n\nSimulation cannot continue.\"", boxTitle, boxText  );
 	}
 	else
 	{
-		plog( "\n\nError: %s\nDetails: %s", "", boxTitle, logText );
-		plog( "\nSuggestion: %s\n", "", boxText );
+		plog( "\n\nError: %s\nDetails: %s", boxTitle, logText );
+		plog( "\nSuggestion: %s\n", boxText );
 		cmd( "ttk::messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\"", boxTitle, boxText  );
 	}
 #endif
@@ -193,7 +275,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 
 	quit = 2;				// do not continue simulation
 
-#ifndef NW
+#ifndef _NW_
 	uncover_browser( );
 	cmd( "focustop .log" );
 
@@ -224,7 +306,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 
 	cmd( "showtop .cazzo centerW" );
 	cmd( "mousewarpto .cazzo.b.ok" );
-	
+
 	if ( parallel_mode || fast_mode != 0 )
 		cmd( ".cazzo.e.b.d configure -state disabled" );
 
@@ -232,44 +314,45 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "set choice $err" );
 	cmd( "destroytop .cazzo" );
-	
-	if ( choice == 3 )
+
+	int err = get_int( "err" );
+
+	if ( err == 3 )
 	{
-		if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL && 
+		if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL &&
 			 stacklog->vs != NULL && stacklog->vs->label != NULL )
 		{
 			char err_msg[ MAX_LINE_SIZE ];
 			double useless = -1;
-			sprintf( err_msg, "%s (ERROR)", stacklog->vs->label );
-			deb( stacklog->vs->up, NULL, err_msg, &useless );
+			snprintf( err_msg, MAX_LINE_SIZE, "%s (ERROR)", stacklog->vs->label );
+			deb( stacklog->vs->up, NULL, err_msg, & useless );
 		}
-		
-		choice = 2;
+
+		err = 2;
 	}
 
-	if ( choice == 2 )
+	if ( err == 2 )
 	{
 		// do run( ) cleanup
 		empty_stack( );
 		unsavedData = true;				// flag unsaved simulation results
 		running = false;
-		
+
 		// run user closing function, reporting error appropriately
 		user_exception = true;
 		close_sim( );
 		user_exception = false;
-		
+
 		reset_end( root );
 		root->emptyturbo( );
 		uncover_browser( );
 
-#ifndef NP
+#ifndef _NP_
 		// stop multi-thread workers
 		delete [ ] workers;
 		workers = NULL;
-#endif	
+#endif
 		throw ( int ) 919293;			// force end of run() (in lsdmain.cpp)
 	}
 #else
@@ -283,8 +366,8 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 
 /****************************
 PRINT_STACK
-Print the state of the stack in the log window. 
-This tells the user which variable is computed 
+Print the state of the stack in the log window.
+This tells the user which variable is computed
 because of other equations' request.
 *****************************/
 void print_stack( void )
@@ -307,7 +390,7 @@ void print_stack( void )
 	plog( "\n\nLevel\tVariable Label" );
 
 	for ( app = stacklog; app != NULL; app = app->prev )
-		plog( "\n%d\t%s", "", app->ns, app->label );
+		plog( "\n%d\t%s", app->ns, app->label );
 
 	plog( "\n\n(the zero-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones\nbecause necessary for completing their computation)\n" );
 }
@@ -316,7 +399,7 @@ void print_stack( void )
 /****************************************************
 SEARCH_STR
 ****************************************************/
-FILE *search_str( char const *fname, char const *str )
+FILE *search_str( const char *fname, const char *str )
 {
 	FILE *f;
 	char got[ MAX_LINE_SIZE ];
@@ -340,7 +423,7 @@ FILE *search_str( char const *fname, char const *str )
 /****************************************************
 SEARCH_DATA_STR
 ****************************************************/
-FILE *search_data_str( char const *name, char const *init, char const *str )
+FILE *search_data_str( const char *name, const char *init, const char *str )
 {
 	FILE *f;
 	char got[ MAX_LINE_SIZE ];
@@ -371,13 +454,13 @@ FILE *search_data_str( char const *name, char const *init, char const *str )
 /****************************************************
 SEARCH_DATA_ENT
 ****************************************************/
-FILE *search_data_ent( char *name, variable *v )
+FILE *search_data_ent( const char *name, variable *v )
 {
 	FILE *f;
 	char got[ MAX_LINE_SIZE ];
-	char temp[ MAX_LINE_SIZE ];
+	char temp[ MAX_ELEM_LENGTH ];
 	char temp1[ MAX_LINE_SIZE ];
-	char typ[ 20 ];
+	char typ[ MAX_ELEM_LENGTH ];
 
 	f = fopen( name, "r" );
 	if ( f == NULL )
@@ -391,13 +474,13 @@ FILE *search_data_ent( char *name, variable *v )
 	if ( strcmp( got, "DATA" ) )
 		return NULL;
 
-	strcpy( temp, ( v->up )->label );	// search for the section of the Object
+	strcpyn( temp, ( v->up )->label, MAX_ELEM_LENGTH );	// search for the section of the Object
 	fscanf( f, "%999s", temp1 );
 	fscanf( f, "%999s", got );
 
 	for ( int i = 0; ( strcmp( got, temp ) || strcmp( temp1,"Object:" ) ) && i < MAX_FILE_TRY; ++i )
 	{
-		strcpy( temp1, got );
+		strcpyn( temp1, got, MAX_LINE_SIZE );
 		if ( fscanf( f, "%999s", got ) == EOF )
 			return NULL;
 	}
@@ -419,7 +502,7 @@ FILE *search_data_ent( char *name, variable *v )
 
 	for ( int i = 0; ( strcmp( got, v->label ) || strcmp( temp1, typ ) ) && i < MAX_FILE_TRY; ++i )
 	{
-		strcpy( temp1, got );
+		strcpyn( temp1, got, MAX_LINE_SIZE );
 		if ( fscanf( f, "%999s", got ) == EOF )
 			return NULL;
 	}
@@ -443,11 +526,11 @@ void set_counter( object *o )
 	if ( o->up == NULL )
 		return;
 
-	set_counter( o->up );  
+	set_counter( o->up );
 
 	// find the bridge which contains the object
 	cb = o->up->search_bridge( o->label );
-			
+
 	if ( cb->counter_updated )
 		return;
 
@@ -471,7 +554,7 @@ lab_tit indicates the position of the object containing the variables in the mod
 void set_lab_tit( variable *var )
 {
 	bool first = true;
-	char app[ 4 * MAX_PATH_LENGTH ], app1[ TCL_BUFF_STR ];
+	char app[ MAX_LINE_SIZE ], app1[ 2 * MAX_LINE_SIZE ];
 	object *cur;
 
 	if ( var->up->up == NULL )
@@ -479,10 +562,10 @@ void set_lab_tit( variable *var )
 		// this is the Root of the model
 		if ( var->lab_tit != NULL )
 			return; 					// already done in the past
-		
+
 		var->lab_tit = new char[ strlen( "R" ) + 1 ];
 		strcpy( var->lab_tit, "R" );
-		
+
 		return;
 	}
 
@@ -491,215 +574,477 @@ void set_lab_tit( variable *var )
 		// find the bridge containing the variable
 		set_counter( cur );
 		if ( ! first )
-			sprintf( app1, "%d_%s", cur->acounter, app );
+			snprintf( app1, 2 * MAX_LINE_SIZE, "%d_%s", cur->acounter, app );
 		else
 		{
 			first = false;
-			sprintf( app1, "%d", cur->acounter );
+			snprintf( app1, 2 * MAX_LINE_SIZE, "%d", cur->acounter );
 		}
-		strcpy( app, app1 );
-	} 
+
+		strcpyn( app, app1, MAX_LINE_SIZE );
+	}
 
 	if ( var->lab_tit != NULL )
 		delete [ ] var->lab_tit;
-	
+
 	var->lab_tit = new char[ strlen( app ) + 1 ];
-	strcpy( var->lab_tit, app );  
+	strcpy( var->lab_tit, app );
 }
 
+
+/*****************************************************************************
+SET_BLUEPRINT
+copy the naked structure of the model into another object, called blueprint,
+to be used for adding objects without example
+******************************************************************************/
+void set_blueprint( object *container, object *r )
+{
+	bridge *cb, *cb1;
+	object *cur, *cur1;
+	variable *cv;
+
+	if ( r == NULL )
+		return;
+
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+		container->add_var_from_example( cv );
+
+	delete [ ] container->label;
+
+	container->label = new char[ strlen( r->label ) + 1 ];
+	strcpy( container->label, r->label );
+
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			continue;
+
+		cur1 = cb->head;
+		container->add_obj( cur1->label, 1, 0 );
+
+		for ( cb1 = container->b; strcmp( cb1->blabel, cb->blabel ); cb1 = cb1->next );
+
+		cur = cb1->head;
+		set_blueprint( cur, cur1 );
+	}
+}
+
+
+/*****************************************************************************
+EMPTY_BLUEPRINT
+remove the current blueprint
+******************************************************************************/
+void empty_blueprint( void )
+{
+	if ( blueprint == NULL )
+		return;
+
+	blueprint->empty( );
+	blueprint->delete_obj( );
+	blueprint = NULL;
+}
+
+
+/*****************************************************************************
+RESET_BLUEPRINT
+reset the current blueprint
+******************************************************************************/
+void reset_blueprint( object *r )
+{
+	empty_blueprint( );
+	blueprint = new object;
+	blueprint->init( NULL, "Root" );
+	set_blueprint( blueprint, r );
+}
 
 /***************************************************
 SEARCH_DESCRIPTION
 ***************************************************/
-description *search_description( char *lab )
+description *search_description( const char *lab, bool add_missing )
 {
-	description *cur;
+	description *cd;
 	variable *cv;
 
-	for ( cur = descr; cur != NULL; cur = cur->next )
-	{
-		if ( ! strcmp( cur->label, lab ) )
-			return cur;
-	}
-	
-	cv = root->search_var( NULL, lab );
-	
-	if ( cv == NULL )
+	for ( cd = descr; cd != NULL; cd = cd->next )
+		if ( ! strcmp( cd->label, lab ) )
+			return cd;
+
+	if ( ! add_missing )
 		return NULL;
-	
-	if ( cv->param == 0 )
-		add_description( lab, "Variable", "(no description available )" );
-	if ( cv->param == 1 )
-		add_description( lab, "Parameter", "(no description available )" );  
-	if ( cv->param == 2 )
-		add_description( lab, "Function", "(no description available )" );  
 
-	return search_description( lab );
-} 
+	if ( root->search( lab ) != NULL )
+		return add_description( lab );
 
+	cv = root->search_var( NULL, lab );
+	if ( cv != NULL )
+		return add_description( lab, cv->param );
 
-/***************************************************
-AUTOFILL_DESCR
-generate recur. the descriptions of the model as it is
-***************************************************/
-void autofill_descr( object *o )
-{
-	int i;
-	bridge *cb;
-	description *cur;
-	variable *cv;
-
-	cur = search_description( o->label );
-	if ( cur == NULL )
-		add_description( o->label, "Object", "(no description available)" );
-
-	for ( cv = o->v; cv != NULL; cv = cv->next)
-	{
-		cur = search_description(cv->label);
-		if ( cur == NULL )
-		{
-			i = cv->param;
-			if ( i == 1 )
-				add_description( cv->label, "Parameter", "(no description available)" );
-			if ( i == 0 )
-				add_description( cv->label, "Variable", "(no description available)" );
-			if ( i == 2 )
-				add_description( cv->label, "Function", "(no description available)" );
-		} 
-	} 
-	 
-	for ( cb = o->b; cb != NULL; cb = cb->next )
-		if ( cb->head != NULL )
-			autofill_descr( cb->head );
-}
-
-
-/***************************************************
-CHANGE_DESCR_LAB
-***************************************************/
-void change_descr_lab( char const *lab_old, char const *lab, char const *type, char const *text, char const *init )
-{
-	description *cur, *cur1;
-
-	for ( cur = descr; cur != NULL; cur = cur->next )
-	{
-		if ( ! strcmp( cur->label, lab_old ) )
-		{
-
-			if ( ! strcmp( lab, "" ) && ! strcmp( type, "" ) && ! strcmp( text, "" ) && ! strcmp(init, "" ) )
-			{
-				delete [ ] cur->label;
-				delete [ ] cur->type;
-				delete [ ] cur->text;
-				delete [ ] cur->init;
-		  
-				if ( cur == descr )
-				{
-					descr = cur->next;	
-					delete cur;
-				}
-				else
-				{
-					for ( cur1 = descr; cur1->next != cur; cur1 = cur1->next );
-					
-					cur1->next = cur->next;
-					delete cur;
-				} 
-			}
-			
-			if ( strcmp( lab, "" ) )
-			{
-				delete [ ] cur->label;
-				cur->label = new char [ strlen( lab ) + 1 ];
-				strcpy( cur->label, lab );
-			}
-			
-			if ( strcmp( type, "" ) )
-			{
-				delete [ ] cur->type;
-				cur->type = new char [ strlen( type ) + 1 ];
-				strcpy( cur->type, type );
-			}
-			
-			if ( strcmp( text, "" ) )
-			{
-				delete [ ] cur->text;
-				cur->text = new char [ strlen( text ) + 1 ];
-				strcpy( cur->text, text );
-			} 
-			
-			if ( strcmp( init, "" ) )
-			{
-				delete [ ] cur->init;
-				cur->init = new char [ strlen( init ) + 1 ];
-				strcpy( cur->init, init );
-			} 
-
-		   return;
-		}
-	}
+	return NULL;
 }
 
 
 /***************************************************
 ADD_DESCRIPTION
 ***************************************************/
-void add_description( char const *lab, char const *type, char const *text )
+const char *kwords[ ] = { BEG_INIT, END_DESCR };
+
+description *add_description( const char *lab, int type, const char *text, const char *init, char initial, char observe )
 {
-	description *cur;
+	char *str, ltype[ MAX_ELEM_LENGTH ];
+	int i, j;
+	description *cd;
+
+	if ( search_description( lab, false ) != NULL )	// already exists?
+		return change_description( lab, NULL, type, text, init, initial, observe );
 
 	if ( descr == NULL )
-		cur = descr = new description;
+		cd = descr = new description;
 	else
-	{ 
-		for ( cur = descr; cur->next != NULL; cur = cur->next );
-	  
-		cur->next = new description;
-		cur = cur->next;
-	}  
+	{
+		for ( cd = descr; cd->next != NULL; cd = cd->next );
+		cd->next = new description;
+		cd = cd->next;
+	}
 
-	cur->next = NULL;
-	cur->label = new char [ strlen( lab ) + 1 ];
-	strcpy( cur->label, lab );
-	cur->type = new char [ strlen( type ) + 1 ];
-	strcpy( cur->type, type );
-	if ( text != NULL && strlen( text ) != 0 )
+	cd->next = NULL;
+	cd->label = new char [ strlen( lab ) + 1 ];
+	strcln( cd->label, lab, strlen( lab ) + 1 );
+
+	switch ( type )
 	{
-		cur->text = new char [ strlen( text ) + 1 ]; 
-		strcpy( cur->text, text );
+		case 0:
+		default:
+			strcpy( ltype, "Variable" );
+			break;
+		case 1:
+			strcpy( ltype, "Parameter" );
+			break;
+		case 2:
+			strcpy( ltype, "Function" );
+			break;
+		case 4:
+			strcpy( ltype, "Object" );
+	}
+
+	cd->type = new char [ strlen( ltype ) + 1 ];
+	strcpy( cd->type, ltype );
+
+	if ( ! strwsp( text ) && strstr( text, LEGACY_NO_DESCR ) == NULL && ( strlen( NO_DESCR ) == 0 || strstr( text, NO_DESCR ) == NULL ) )
+	{
+		for ( i = 0; i < 2; ++i )
+		{
+			str = ( char * ) strstr( text, kwords[ i ] );
+			if ( str != NULL )
+				for( j = 0; j < ( int ) strlen( kwords[ i ] ); ++j, ++str )
+					*str = tolower( *str );
+		}
+
+		cd->text = new char [ strlen( text ) + 1 ];
+		strcln( cd->text, text, strlen( text ) + 1 );
 	}
 	else
 	{
-		cur->text = new char[ 29 ]; 
-		strcpy( cur->text, "(no description available)" );
+		cd->text = new char[ strlen( NO_DESCR ) + 1 ];
+		strcln( cd->text, NO_DESCR, strlen( NO_DESCR ) + 1 );
 	}
-	   
-	cur->init = NULL;
+
+	if ( ! strwsp( init ) )
+	{
+		str = ( char * ) strstr( init, kwords[ 1 ] );
+		if ( str != NULL )
+			for( j = 0; j < ( int ) strlen( kwords[ 1 ] ); ++j, ++str )
+				*str = tolower( *str );
+
+		cd->init = new char [ strlen( init ) + 1 ];
+		strcln( cd->init, init, strlen( init ) + 1 );
+	}
+	else
+		cd->init = NULL;
+
+	cd->initial = initial;
+	cd->observe = observe;
+
+	return cd;
 }
 
 
-#ifndef NW
+/***************************************************
+CHANGE_DESCRIPTION
+***************************************************/
+description *change_description( const char *lab_old, const char *lab, int type, const char *text, const char *init, char initial, char observe )
+{
+	char *str, ltype[ MAX_ELEM_LENGTH ];
+	int i, j;
+	description *cd, *cd1;
+
+	for ( cd = descr; cd != NULL; cd = cd->next )
+	{
+		if ( ! strcmp( cd->label, lab_old ) )
+		{
+
+			if ( lab == NULL && type < 0 && text == NULL && init == NULL && initial == '\0' && observe == '\0' )
+			{
+				delete [ ] cd->label;
+				delete [ ] cd->type;
+				delete [ ] cd->text;
+				delete [ ] cd->init;
+
+				if ( cd == descr )
+					descr = cd->next;
+				else
+				{
+					for ( cd1 = descr; cd1->next != cd; cd1 = cd1->next );
+					cd1->next = cd->next;
+				}
+
+				delete cd;
+
+				return NULL;
+			}
+
+			if ( lab != NULL )
+			{
+				delete [ ] cd->label;
+				cd->label = new char [ strlen( lab ) + 1 ];
+				strcln( cd->label, lab, strlen( lab ) + 1 );
+			}
+
+			if ( type >= 0 )
+			{
+				delete [ ] cd->type;
+
+				switch ( type )
+				{
+					case 0:
+						strcpy( ltype, "Variable" );
+						break;
+					case 1:
+						strcpy( ltype, "Parameter" );
+						break;
+					case 2:
+						strcpy( ltype, "Function" );
+						break;
+					case 4:
+					default:
+						strcpy( ltype, "Object" );
+				}
+
+				cd->type = new char [ strlen( ltype ) + 1 ];
+				strcpy( cd->type, ltype );
+			}
+
+			if ( text != NULL )
+			{
+				delete [ ] cd->text;
+
+				if ( ! strwsp( text ) && strstr( text, LEGACY_NO_DESCR ) == NULL && ( strlen( NO_DESCR ) == 0 || strstr( text, NO_DESCR ) == NULL ) )
+				{
+					for ( i = 0; i < 2; ++i )
+					{
+						str = ( char * ) strstr( text, kwords[ i ] );
+						if ( str != NULL )
+							for( j = 0; j < ( int ) strlen( kwords[ i ] ); ++j, ++str )
+								*str = tolower( *str );
+					}
+
+					cd->text = new char [ strlen( text ) + 1 ];
+					strcln( cd->text, text, strlen( text ) + 1 );
+				}
+				else
+				{
+					cd->text = new char[ strlen( NO_DESCR ) + 1 ];
+					strcln( cd->text, NO_DESCR, strlen( NO_DESCR ) + 1 );
+				}
+			}
+
+			if ( init != NULL )
+			{
+				delete [ ] cd->init;
+
+				if ( ! strwsp( init ) )
+				{
+					str = ( char * ) strstr( init, kwords[ 1 ] );
+					if ( str != NULL )
+						for( j = 0; j < ( int ) strlen( kwords[ 1 ] ); ++j, ++str )
+							*str = tolower( *str );
+
+					cd->init = new char [ strlen( init ) + 1 ];
+					strcln( cd->init, init, strlen( init ) + 1 );
+				}
+				else
+					cd->init = NULL;
+			}
+
+			if ( initial != '\0' )
+				cd->initial = initial;
+
+			if ( observe != '\0' )
+				cd->observe = observe;
+
+			return cd;
+		}
+	}
+
+	return NULL;
+}
+
+
+/*****************************************************************************
+EMPTY_DESCRIPTION
+******************************************************************************/
+void empty_description( void )
+{
+	description *cd, *cd1;
+
+	for ( cd = descr; cd != NULL; cd = cd1 )
+	{
+		cd1 = cd->next;
+		delete [ ] cd->label;
+		delete [ ] cd->type;
+		delete [ ] cd->text;
+		delete [ ] cd->init;
+		delete cd;
+	}
+
+	descr = NULL;
+}
+
+
+/***************************************************
+RESET_DESCRIPTION
+regenerate recur. the descriptions of the model as it is
+***************************************************/
+void reset_description( object *r )
+{
+	bridge *cb;
+	variable *cv;
+
+	search_description( r->label );
+
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+		search_description( cv->label );
+
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		if ( cb->head != NULL )
+			reset_description( cb->head );
+}
+
+
+/***************************************************
+HAS_DESCR_TEXT
+***************************************************/
+bool has_descr_text( description *d )
+{
+	if ( d != NULL && d->text != NULL && strlen( d->text ) > 0 && strstr( d->text, LEGACY_NO_DESCR ) == NULL && ( strlen( NO_DESCR ) == 0 || strstr( d->text, NO_DESCR ) == NULL ) )
+		return true;
+
+	return false;
+}
+
+
+#ifndef _NW_
+
+/***************************************************
+FMT_TTIP_DESCR
+***************************************************/
+char *fmt_ttip_descr( char *out, description *d, int outSz, bool init )
+{
+	char out1[ outSz ];
+
+	if ( out == NULL || outSz <= 0 )
+		return NULL;
+
+	if ( has_descr_text ( d ) )
+		strcln( out, d->text, outSz );
+	else
+		out[ 0 ] = '\0';
+
+	if ( init && d != NULL && d->init != NULL && strlen( d->init ) > 0 )
+	{
+		if ( strlen( out ) > 0 )
+			strcatn( out, "\n\u2500\u2500\u2500\n", outSz );
+
+		strcln( out1, d->init, outSz );
+		strcatn( out, out1, outSz );
+	}
+
+	if ( strlen( out ) > 0 )
+	{
+		strwrap( out1, out, outSz - 1, 60 );
+		strtcl( out, out1, outSz - 1 );
+	}
+
+	return out;
+}
+
+
+/***************************************************
+SET_TTIP_DESCR
+***************************************************/
+void set_ttip_descr( const char *w, const char *lab, int it, bool init )
+{
+	char desc[ MAX_LINE_SIZE + 1 ];
+	description *cd;
+
+	// add tooltip only if element has description
+	cd = search_description( lab, false );
+	if ( cd != NULL && strlen( fmt_ttip_descr( desc, cd, MAX_LINE_SIZE + 1, init ) ) > 0 )
+	{
+		if ( it >= 0 )			// listbox/canvas?
+			cmd( "tooltip::tooltip %s -item %d \"%s\"", w, it, desc );
+		else
+			cmd( "tooltip::tooltip %s \"%s\"", w, desc );
+	}
+}
+
+
+/***************************************************
+TCL_SET_TTIP_DESCR
+***************************************************/
+int Tcl_set_ttip_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+{
+	int it, init;
+
+	if ( argc < 3 || argc > 5 )		// require 4 parameters: widget name, variable name text, item number (opt) and init text flag (opt)
+		return TCL_ERROR;
+
+	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL ||
+		 ! strcmp( argv[ 1 ], "" ) || ! strcmp( argv[ 2 ], "" ) )
+		return TCL_ERROR;
+
+	if ( argc < 4 || argv[ 3 ] == NULL || sscanf( argv[ 3 ], "%d", & it ) == 0 )
+		it = -1;
+
+	if ( argc < 5 || argv[ 4 ] == NULL || sscanf( argv[ 4 ], "%d", & init ) == 0 || init < 0 || init > 1 )
+		init = 1;
+
+	set_ttip_descr( argv[ 1 ], argv[ 2 ], it, init ? true : false );
+
+	return TCL_OK;
+}
+
 
 /****************************************************
 SEARCH_ALL_SOURCES
 ****************************************************/
 FILE *search_all_sources( char *str )
 {
-	char *fname, got[ MAX_LINE_SIZE ];
+	char got[ MAX_LINE_SIZE ];
+	const char *fname;
 	int i, j, nfiles;
 	FILE *f;
-	
+
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
 	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = get_int( "res" );
-	
+
 	for ( i = 0; i < nfiles; ++i )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", i );
 		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
-		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
+		fname = get_str( "brr" );
 		if ( ( f = fopen( fname, "r" ) ) == NULL )
 			continue;
 
@@ -709,132 +1054,84 @@ FILE *search_all_sources( char *str )
 		{
 			if ( fgets( got, MAX_LINE_SIZE, f ) == NULL )
 				break;
-			clean_spaces( got ); 
+			clean_spaces( got );
 		}
-		
+
 		if ( ! strncmp( got, str, strlen( str ) ) )
 			return f;
-		
+
 		fclose( f );
 	}
-	
+
 	return NULL;
 }
-	
-	
+
+
 /***************************************************
 RETURN_WHERE_USED
 ***************************************************/
-void return_where_used( char *lab, char s[ ] ) 
+void return_where_used( char *lab, char *s, int sz )
 {
-	char *r; 
-	int choice = -1;
+	const char *app;
 
-	scan_used_lab( lab, &choice );
-	r = ( char * ) Tcl_GetVar( inter, "list_used", 0 );
-	if ( r != NULL )
-		strcpy( s, r);
+	scan_used_lab( lab, "" );	// make scan without window
+	app = get_str( "list_used" );
+
+	if ( app != NULL )
+		strcpyn( s, app, sz );
 	else
 		strcpy( s, "" );
 }
 
 
 /***************************************************
-CHANGE_DESCR_TEXT
-***************************************************/
-void change_descr_text( char *lab )
-{
-	description *cur;
-	char *lab1;
-
-	for ( cur = descr; cur != NULL; cur = cur->next )
-	{
-		if ( ! strcmp( cur->label, lab ) )
-		{
-			delete [ ] cur->text;
-			lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
-			cur->text = new char[ strlen( lab1 ) + 1 ];
-			strcpy( cur->text, lab1 );
-			return;
-	   }
-	}
-}
-
-
-/***************************************************
-CHANGE_INIT_TEXT
-***************************************************/
-void change_init_text( char *lab )
-{
-	description *cur;
-	char *lab1;
-
-	for ( cur = descr; cur != NULL; cur = cur->next )
-	{
-		if ( ! strcmp( cur->label, lab ) )
-		{
-			lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
-			if ( strlen( lab1 ) > 0 )
-			{
-				if ( cur->init != NULL )
-				delete [ ] cur->init;
-				cur->init = new char[ strlen( lab1 ) + 1 ];
-				strcpy( cur->init, lab1 );
-			}
-			return;
-		}
-	}
-}
-
-
-/***************************************************
 GET_VAR_DESCR
 ***************************************************/
-void get_var_descr( char const *lab, char *descr, int descr_len )
+void get_var_descr( const char *lab, char *desc, int descr_len )
 {
-	char str[ 2 * MAX_ELEM_LENGTH ], str1[ MAX_LINE_SIZE ];
+	char str[ 2 * MAX_ELEM_LENGTH ], str1[ MAX_LINE_SIZE ], str2[ descr_len ];
 	int i, j = 0, done = -1;
 	FILE *f;
-	
-	sprintf( str, "EQUATION(\"%s\")", lab );
+
+	snprintf( str, 2 * MAX_ELEM_LENGTH, "EQUATION(\"%s\")", lab );
 	f = search_all_sources( str );
-	
+
 	if ( f == NULL )
 	{
-		sprintf( str, "EQUATION_DUMMY(\"%s\",", lab );
+		snprintf( str, 2 * MAX_ELEM_LENGTH, "EQUATION_DUMMY(\"%s\",", lab );
 		f = search_all_sources( str );
 	}
-	
+
 	if ( f == NULL )
 	{
-		sprintf( str, "FUNCTION(\"%s\")", lab );
+		snprintf( str, 2 * MAX_ELEM_LENGTH, "FUNCTION(\"%s\")", lab );
 		f = search_all_sources( str );
 	}
-	
+
 	if ( f == NULL )
 	{
-		sprintf( str, "if (!strcmp(label,\"%s\"))", lab );
+		snprintf( str, 2 * MAX_ELEM_LENGTH, "if (!strcmp(label,\"%s\"))", lab );
 		f = search_all_sources( str );
 	}
-	
+
 	if ( f != NULL )
 	{
 		while ( done != 1 )
 		{
 			fgets( str1, MAX_LINE_SIZE, f );
-			
+
 			for ( i = 0; str1[ i ] != '\0' && done != 1; ++i )
 			{
 				if ( done == -1 ) 		// no comment found yet
 				{
 					if ( isalpha( str1[ i ]) != 0 ) 	// no comment exists
 						done = 1;
-					  
+
 					if ( str1[ i ] == '/' && str1[ i + 1 ] == '*' )
-					{ 
+					{
 						done = 0; 		// beginning of a multiline comment
 						i += 2;
-						
+
 						// discard initial empty line
 						while ( str1[ i ] == '\r' && str1[ i + 1 ] == '\n' )
 							i += 2;
@@ -843,43 +1140,45 @@ void get_var_descr( char const *lab, char *descr, int descr_len )
 						if ( str1[ i ] == '\0' )
 							break;
 					}
-					
+
 					if ( str1[ i ] == '/' && str1[ i + 1 ] == '/' )
-					{ 
+					{
 						done = 2; 		// beginning of a single line comment
 						i += 2;
-					} 
+					}
 				}
-				
+
 				if ( done == 0 ) 		// we are in a comment
 					if ( str1[ i ] == '*' && str1[ i + 1 ] == '/' )
 						done = 1;
 
 				if ( done == 0 || done == 2 )
 					if ( str1[ i ] != '\r' )
-						descr[ j++ ] = str1[ i ];
+						str2[ j++ ] = str1[ i ];
 
 				if ( done == 2 && str1[ i ] == '\n' )
-					done = -1; 
-			 
+					done = -1;
+
 				if ( j >= descr_len - 2 )
 					done = 1;
 			}
 		}
-		
+
 		fclose( f );
 	}
-	descr[ j ] = '\0';
+
+	str2[ j ] = '\0';
+	strcln( desc, str2, descr_len );
 }
 
 
 /***************************************************
 AUTO_DOCUMENT
 ***************************************************/
-void auto_document( int *choice, char const *lab, char const *which, bool append )
+void auto_document( const char *lab, const char *which, bool append )
 {
 	bool var;
-	char str1[ MAX_LINE_SIZE ], app[ 10 * MAX_LINE_SIZE ];
+	char str1[ MAX_LINE_SIZE ], app[ 10 * MAX_LINE_SIZE ], text[ 2 * MAX_BUFF_SIZE ];
 	description *cd;
 
 	for ( cd = descr; cd != NULL; cd = cd->next )
@@ -894,19 +1193,19 @@ void auto_document( int *choice, char const *lab, char const *which, bool append
 			}
 			else
 				var = false;
-	  
-			return_where_used( cd->label, str1 ); 
-			if ( ( append || ! var ) && ! strstr( cd->text, "(no description available)" ) )
-				if ( strlen( cd->text ) == 0 || ! strcmp( cd->text, "\n" ) )
-					sprintf( msg, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+
+			return_where_used( cd->label, str1, MAX_LINE_SIZE );
+			if ( ( append || ! var ) && has_descr_text ( cd ) )
+				if ( strwsp( cd->text ) )
+					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
 				else
-					sprintf( msg, "%s\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
+					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
 			else
-				sprintf( msg, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+				snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
 
 			delete [ ] cd->text;
-			cd->text = new char[ strlen( msg ) + 1 ];
-			strcpy( cd->text, msg );
+			cd->text = new char[ strlen( text ) + 1 ];
+			strcpy( cd->text, text );
 		} 					// end of the label to document
 	}						// end of the for (desc)
 }
@@ -932,480 +1231,9 @@ void count_save( object *n, int *count )
 		if ( cb->head == NULL )
 			co = blueprint->search( cb->blabel );
 		else
-			co = cb->head; 
+			co = cb->head;
 		count_save( co, count );
 	}
-}
-
-
-/****************************************************
-GET_SAVED
-****************************************************/
-void get_saved( object *n, FILE *out, const char *sep, bool all_var )
-{
-	int i, sl;
-	char *lab;
-	bridge *cb;
-	description *cd;
-	object *co;
-	variable *cv;
-
-	for ( cv = n->v; cv != NULL; cv = cv->next )
-		if ( cv->save || all_var )
-		{
-			// get element description
-			cd = search_description( cv->label );
-			if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
-			{
-				// select just the first description line
-				lab = new char[ sl + 1 ];
-				strcpy( lab, cd->text );
-				for ( i = 0; i < sl; ++i )
-					if ( lab[ i ] == '\n' || lab[ i ] == '\r' )
-					{
-						lab[ i ] = '\0';
-						break;
-					}
-			}
-			else
-				lab = NULL;
-		
-			fprintf( out, "%s%s%s%s%s%s%s\n", cv->label, sep, cv->param ? "parameter" : "variable", sep, n->label, sep, lab != NULL ? lab : "" );
-		}
-
-	for ( cb = n->b; cb != NULL; cb = cb->next )
-	{
-		if ( cb->head == NULL )
-			co = blueprint->search( cb->blabel );
-		else
-			co = cb->head; 
-		get_saved( co, out, sep, all_var );
-	}
-}
-
-
-/****************************************************
-GET_SA_LIMITS
-****************************************************/
-void get_sa_limits( object *r, FILE *out, const char *sep )
-{
-	int i, sl;
-	char *lab;
-	variable *cv;
-	description *cd;
-	sense *cs;
-	
-	for ( cs = rsense; cs != NULL; cs = cs->next )
-	{
-		// get current value (first object)
-		cv = r->search_var( NULL, cs->label );
-		
-		// get element description
-		cd = search_description( cs->label );
-		if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
-		{
-			// select just the first description line
-			lab = new char[ sl + 1 ];
-			strcpy( lab, cd->text );
-			for ( i = 0; i < sl; ++i )
-				if ( lab[ i ] == '\n' || lab[ i ] == '\r' )
-				{
-					lab[ i ] = '\0';
-					break;
-				}
-		}
-		else
-			lab = NULL;
-		
-		// find max and min values
-		double min = HUGE_VAL, max = - HUGE_VAL;
-		for ( i = 0; cs->v != NULL &&  i < cs->nvalues; ++i )
-			if ( cs->v[ i ] < min )
-				min = cs->v[ i ];
-			else
-				if ( cs->v[ i ] > max )
-					max = cs->v[ i ];
-
-		fprintf( out, "%s%s%s%s%d%s%s%s%g%s%g%s%g%s\"%s\"\n", cs->label, sep, cs->param == 1 ? "parameter" : "variable", sep, cs->param == 1 ? 0 : cs->lag + 1, sep, cs->integer ? "integer" : "real", sep, cv != NULL ? cv->val[ cs->lag ] : NAN, sep, min, sep, max, sep, lab != NULL ? lab : "" );	
-		
-		delete [ ] lab;
-	}
-}
-
-
-/***************************************************
-SAVE_EQFILE
-***************************************************/
-void save_eqfile( FILE *f )
-{
-	if ( strlen( lsd_eq_file ) == 0 )
-		strcpy( lsd_eq_file, eq_file );
-	 
-	fprintf( f, "\nEQ_FILE\n" );
-	fprintf( f, "%s", lsd_eq_file );
-	fprintf( f, "\nEND_EQ_FILE\n" );
-}
-
-
-#ifndef NW
-
-/***************************************************
-READ_EQ_FILENAME
-***************************************************/
-void read_eq_filename( char *s )
-{
-	char lab[ MAX_PATH_LENGTH ];
-	FILE *f;
-
-	sprintf( lab, "%s/%s", exec_path, MODEL_OPTIONS );
-	f = fopen( lab, "r" );
-	
-	if ( f == NULL )
-	{
-		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"File not found\" -detail \"File '$MODEL_OPTIONS' missing, cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
-		return;
-	}
-	
-	fscanf( f, "%499s", lab );
-	for ( int i = 0; strncmp( lab, "FUN=", 4 ) && fscanf( f, "%499s", lab ) != EOF && i < MAX_FILE_TRY; ++i );    
-	fclose( f );
-	if ( strncmp( lab, "FUN=", 4 ) != 0 )
-	{
-		cmd( "ttk::messageBox -parent . -type ok -title -title Error -icon error -message \"File corrupted\" -detail \"File '$MODEL_OPTIONS' has invalid contents, cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
-		return;
-	}
-
-	strcpy( s, lab + 4 );
-	strcat( s, ".cpp" );
-
-	return;
-}
-
-
-/***************************************************
-COMPARE_EQFILE
-***************************************************/
-int compare_eqfile( void )
-{
-	char *s, lab[ MAX_PATH_LENGTH + 1 ];
-	int i = MAX_FILE_SIZE;
-	FILE *f;
-
-	read_eq_filename( lab );
-	f = fopen( lab, "r" );
-	s = new char[ i + 1 ];
-	while ( fgets( msg, MAX_LINE_SIZE, f ) != NULL )
-	{
-		i -= strlen( msg );
-		if ( i < 0 )
-			break;
-		strcat( s, msg );
-	}
-	fclose( f );  
-	
-	if ( strcmp( s, lsd_eq_file ) == 0 )
-		i = 0;
-	else
-		i = 1;
-	delete [ ] s;
-
-	return i;
-}
-
-
-/***************************************************
-UPLOAD_EQFILE
-***************************************************/
-char *upload_eqfile( void )
-{
-	//load into the string eq_file the equation file
-	char s[ MAX_PATH_LENGTH + 1 ], *eq;
-	int i;
-	FILE *f;
-
-	Tcl_LinkVar( inter, "eqfiledim", ( char * ) &i, TCL_LINK_INT );
-
-	read_eq_filename( s );
-	cmd( "set eqfiledim [ file size %s ]", s );
-
-	Tcl_UnlinkVar( inter, "eqfiledim" );
-
-	eq = new char[ i + 1 ];
-	eq[ 0 ] = '\0';
-	f = fopen( s, "r");
-	while ( fgets( msg, MAX_LINE_SIZE, f ) != NULL )
-	{
-		i -= strlen( msg );
-		if ( i < 0 )
-			break;
-		strcat( eq, msg );
-	}
-	
-	fclose( f );
-	return eq;
-}
-
-#endif
-
-
-/***************************************************
-RESULT
-Methods for results file saving (class result)
-***************************************************/
-
-// saves data to file in the specified period
-void result::data( object *root, int initstep, int endtstep )
-{
-	// don't include initialization (t=0) in .csv format
-	initstep = ( docsv && initstep < 1 ) ? 1 : initstep;
-	// adjust for 1 time step if needed
-	endtstep = ( endtstep == 0 ) ? initstep : endtstep;
-	
-	for ( int i = initstep; i <= endtstep; i++ )
-	{
-		firstCol = true;
-		
-		data_recursive( root, i );		// output one data line
-		
-		if ( dozip )					// and change line
-			gzprintf( fz, "\n" );
-		else
-			fprintf( f, "\n" );
-	}
-}
-
-void result::data_recursive( object *r, int i )
-{
-	bridge *cb;
-	object *cur;
-	variable *cv;
-
-	for ( cv = r->v; cv != NULL; cv = cv->next )
-	{
-		if ( cv->save == 1 )
-		{
-			if ( cv->start <= i && cv->end >= i && ! is_nan( cv->data[ i - cv->start ] ) )
-			{
-				if ( dozip )
-				{
-					if ( docsv )
-						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
-					else
-						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
-					else
-						fprintf( f, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
-				}
-			}
-			else
-			{
-				if ( dozip )		// save NaN as n/a
-				{
-					if ( docsv )
-						gzprintf( fz, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
-					else
-						gzprintf( fz, "%s\t", nonavail );
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
-					else
-						fprintf( f, "%s\t", nonavail );
-				}
-			}
-			
-			firstCol = false;
-		}
-	}
-	 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
-	{
-		if ( cb->head == NULL )
-			continue;
-		
-		cur = cb->head;
-		if ( cur->to_compute )
-			for ( ; cur != NULL; cur = cur->next )
-				data_recursive( cur, i );
-	}
-
-	if ( r->up == NULL )
-	{
-		for ( cv = cemetery; cv != NULL; cv = cv->next )
-		{
-			if ( cv->start <= i && cv->end >= i && ! is_nan( cv->data[ i - cv->start ] ) )
-			{
-				if ( dozip )
-				{
-					if ( docsv )
-						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
-					else
-						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
-					else
-						fprintf( f, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
-				}
-			}
-			else					// save NaN as n/a
-			{
-				if ( dozip )
-				{
-					if ( docsv )
-						gzprintf( fz, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
-					else
-						gzprintf( fz, "%s\t", nonavail );
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
-					else
-						fprintf(f, "%s\t", nonavail );
-				}
-			}
-						
-			firstCol = false;
-		}
-	}
-}
-
-// saves header to file
-void result::title( object *root, int flag )
-{
-	firstCol = true;
-	
-	title_recursive( root, flag );		// output header
-		
-	if ( dozip )						// and change line
-		gzprintf( fz, "\n" );
-	else
-		fprintf( f, "\n" );
-}
-
-void result::title_recursive( object *r, int header )
-{
-	bool single = false;
-	bridge *cb;
-	object *cur;
-	variable *cv;
-
-	for ( cv = r->v; cv != NULL; cv = cv->next )
-	{
-		if ( cv->save == 1 )
-		{
-			set_lab_tit( cv );
-			if ( ( ! strcmp( cv->lab_tit, "1" ) || ! strcmp( cv->lab_tit, "1_1" ) || ! strcmp( cv->lab_tit, "1_1_1" ) || ! strcmp( cv->lab_tit, "1_1_1_1" ) ) && cv->up->hyper_next( ) == NULL )
-				single = true;					// prevent adding suffix to single objects
-			
-			if ( header )
-			{
-				if ( dozip )
-				{
-					if ( docsv )
-						gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-					else
-						gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-					else
-						fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-				}
-			}
-			else
-			{
-				if ( dozip )
-				{
-					if ( docsv )
-						gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-					else
-						gzprintf( fz, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-					else
-						fprintf( f, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
-				}
-			}
-			
-			firstCol = false;
-		}
-	}
-	 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
-	{
-		if ( cb->head == NULL )
-			continue;
-		
-		cur = cb->head;
-		if ( cur->to_compute )
-		{
-			for ( ; cur != NULL; cur = cur->next )
-			title_recursive( cur, header );
-		} 
-	} 
-
-	if ( r->up == NULL )
-	{
-		for ( cv = cemetery; cv != NULL; cv = cv->next )
-		{
-			if ( dozip )
-			{
-				if ( docsv )
-					gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-				else
-					gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-			}
-			else
-			{
-				if ( docsv )
-					fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-				else
-					fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-			}
-			
-			firstCol = false;
-		}
-	}
-}
-
-// open the appropriate file for saving the results (constructor)
-result::result( char const *fname, char const *fmode, bool dozip, bool docsv )
-{
-	this->docsv = docsv;
-	this->dozip = dozip;		// save local class flag
-	if ( dozip )
-	{
-		char *fnamez = new char[ strlen( fname ) + 4 ];	// append .gz to the file name
-		strcpy( fnamez, fname );
-		strcat( fnamez, ".gz");
-		fz = gzopen( fnamez, fmode );
-		delete [ ] fnamez;
-	}
-	else
-		f = fopen( fname, fmode );
-}
-
-// close the appropriate results file (destructor)
-result::~result( void )
-{
-	if ( dozip )
-		gzclose( fz );
-	else
-		fclose( f );
 }
 
 
@@ -1419,12 +1247,13 @@ Create a new run time lattice having:
 - lcol= label of variable or parameter indicating the column value
 - lvar= label of variable or parameter from which to read the color of the cell
 - p= pointer of the object containing the initial color of the cell (if flag==-1)
-- init_color= indicate the type of initialization. 
+- init_color= indicate the type of initialization.
   If init_color < 0, the (positive) RGB equivalent to init_color is used.
   Otherwise, the lattice is homogeneously initialized to the palette color specified by init_color.
 ***************************************************/
-double init_lattice( double pixW, double pixH, double nrow, double ncol, char const lrow[ ], char const lcol[ ], char const lvar[ ], object *p, int init_color )
+double init_lattice( double pixW, double pixH, double nrow, double ncol, const char lrow[ ], const char lcol[ ], const char lvar[ ], object *p, int init_color )
 {
+	char init_color_string[ 32 ];	// the final string to be used to define tk color to use
 	int i, j, hsize, vsize, hsizeMax, vsizeMax;
 
 	// ignore invalid values
@@ -1433,7 +1262,7 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 		plog( "\nError: invalid lattice initialization values, ignoring.\n");
 		return -1;
 	}
-	
+
 	init_color = min( init_color, 1099 );	// limit to valid palette
 
 	// reset the LSD lattice, if any
@@ -1441,17 +1270,17 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 	rows = ( int ) max( 0, floor( nrow ) );
 	columns = ( int ) max( 0, floor( ncol ) );
 	error_count = 0;
-			
+
 	// create the color data matrix
 	lattice = new int *[ rows ];
 	for ( i = 0; i < rows; ++i )
 		lattice[ i ] = new int [ columns ];
-	
+
 	for ( i = 0; i < rows; ++i )
 		for ( j = 0; j < columns; ++j )
 			lattice[ i ][ j ] = init_color;
-		
-#ifndef NW
+
+#ifndef _NW_
 
 	hsize = get_int( "hsizeLat" );			// 400
 	vsize = get_int( "vsizeLat" );			// 400
@@ -1466,49 +1295,71 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 	dimH = pixH / rows;
 	dimW = pixW / columns;
 
-	// create the window with the lattice, roughly 600 pixels as maximum dimension
-	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" { destroytop .lat } \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
-
-	cmd( "bind .lat <Button-2> { .lat.b.ok invoke }" );
-	cmd( "bind .lat <Button-3> { event generate .lat <Button-2> -x %%x -y %%y }" );
-
-	char init_color_string[ 32 ];		// the final string to be used to define tk color to use
-
 	if ( init_color < 0 && ( - init_color ) <= 0xffffff )		// RGB mode selected?
-		sprintf( init_color_string, "#%06x", - init_color );	// yes: just use the positive RGB value
+		snprintf( init_color_string, 32, "#%06x", - init_color );	// yes: just use the positive RGB value
 	else
 	{
-		sprintf( init_color_string, "$c%d", init_color );		// no: use the positive RGB value
+		snprintf( init_color_string, 32, "$c%d", init_color );		// no: use the positive RGB value
 		// create (background color) pallete entry if invalid palette in init_color
 		cmd( "if { ! [ info exist c%d ] } { set c%d $colorsTheme(bg) }", init_color, init_color  );
 	}
-			
+
+	// create the window with the lattice, roughly 600 pixels as maximum dimension
+	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" { destroytop .lat } \"\"", unsaved_change() ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME, nrow, ncol );
+
 	cmd( "ttk::canvas .lat.c -height %d -width %d -entry 0 -dark $darkTheme", ( unsigned int ) pixH, ( unsigned int ) pixW );
-	
+
 	if ( init_color != 1001 )
 		cmd( ".lat.c configure -background %s", init_color_string );
 
 	cmd( "pack .lat.c" );
 
-	cmd( "save .lat b { set b \"%s.eps\"; set a [ tk_getSaveFile -parent .lat -title \"Save Lattice Image File\" -defaultextension .eps -initialfile $b -initialdir \"%s\" -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } } ]; if { $a != \"\" } { .lat.c postscript -colormode color -file \"$a\" } }", simul_name, path );
+	cmd( "save .lat b { \
+			if { ! [ info exists pltSavFmt ] } { \
+				set pltSavFmt svg \
+			}; \
+			if { [ string equal $pltSavFmt eps ] } { \
+				set c \"Encapsulated Postscript\" \
+			} else { \
+				set c \"Scalable Vector Graphics\" \
+			}; \
+			set a [ tk_getSaveFile -parent .lat -title \"Save Lattice to File\" -defaultextension .$pltSavFmt -initialfile %s.$pltSavFmt -initialdir \"%s\" -filetypes { { {Scalable Vector Graphics} {.svg} } { {Encapsulated Postscript} {.eps} } { {All files} {*} } } -typevariable c ]; \
+			if { [ string length $a ] != 0 } { \
+				set a [ file nativename $a ]; \
+				set b [ string trimleft [ file extension $a ] . ]; \
+				if { $b in [ list svg eps ] } { \
+					set pltSavFmt $b \
+				}; \
+				if [ string equal $pltSavFmt eps ] { \
+					.lat.c postscript -colormode color -file \"$a\" \
+				} else { \
+					canvas2svg .lat.c \"$a\" \
+				}; \
+				plog \"\nPlot saved: $a\n\" \
+			} \
+		}", strlen( simul_name ) > 0 ? simul_name : "plot", path );
 
 	cmd( "set rows %d", rows );
 	cmd( "set columns %d", columns );
 	cmd( "set dimH %.6g", dimH );
 	cmd( "set dimW %.6g", dimW );
-	
+
 	cmd( "for { set i 1 } { $i <= $rows } { incr i } { \
 			for { set j 1 } { $j <= $columns } { incr j } { \
-				set x1 [ expr ( $j - 1 ) * $dimW ]; \
-				set y1 [ expr ( $i - 1 ) * $dimH ]; \
-				set x2 [ expr $j * $dimW ]; \
-				set y2 [ expr $i * $dimH ]; \
+				set x1 [ expr { ( $j - 1 ) * $dimW } ]; \
+				set y1 [ expr { ( $i - 1 ) * $dimH } ]; \
+				set x2 [ expr { $j * $dimW } ]; \
+				set y2 [ expr { $i * $dimH } ]; \
 				.lat.c create rectangle $x1 $y1 $x2 $y2 -outline \"\" -tags c${i}_${j} \
 			} \
 		}" );
 
 	cmd( "showtop .lat centerS no no no" );
-	
+
+	cmd( "tooltip::tooltip .lat.b.ok \"Save plot to file\"" );
+
+	cmd( "bind .lat <Button-2> { .lat.b.ok invoke }" );
+	cmd( "bind .lat <Button-3> { event generate .lat <Button-2> -x %%x -y %%y }" );
 	cmd( "bind .lat <F1> { LsdHelp lattice.html }" );
 	set_shortcuts_run( ".lat" );
 
@@ -1533,10 +1384,10 @@ void empty_lattice( void )
 	{
 		for ( int i = 0; i < rows; ++i )
 			delete [ ] lattice[ i ];
-		
+
 		delete [ ] lattice;
-	}	
-	
+	}
+
 	lattice = NULL;
 	rows = columns = 0;
 }
@@ -1548,8 +1399,8 @@ CLOSE_LATTICE
 void close_lattice( void )
 {
 	empty_lattice( );
-	
-#ifndef NW
+
+#ifndef _NW_
 	cmd( "destroytop .lat" );
 #endif
 }
@@ -1562,15 +1413,15 @@ negative values of val prompt for the use of the (positive) RGB equivalent
 ***************************************************/
 double update_lattice( double line, double col, double val )
 {
-	char *latcanv, val_string[ 32 ];		// the final string to be used to define tk color to use
+	char val_string[ 32 ];		// the final string to be used to define tk color to use
 	int line_int, col_int, val_int;
-	
+
 	line_int = line - 1;
 	col_int = col - 1;
 	val_int = max( 0, floor( val ) );
-	
+
 	// ignore invalid values
-	if ( line_int < 0 || col_int < 0 || line_int >= rows || 
+	if ( line_int < 0 || col_int < 0 || line_int >= rows ||
 		 col_int >= columns || ( int ) fabs( val ) > INT_MAX )
 	{
 		if ( error_count == ERR_LIM )
@@ -1580,12 +1431,12 @@ double update_lattice( double line, double col, double val )
 				plog( "\nError: invalid lattice update values, ignoring." );
 
 		++error_count;
-		
+
 		return -1;
 	}
-	
+
 	// save lattice color data
-	
+
 	if ( lattice != NULL && rows > 0 && columns > 0 )
 	{
 		if ( val >= 0 && lattice[ line_int ][ col_int ] == val_int )
@@ -1593,28 +1444,26 @@ double update_lattice( double line, double col, double val )
 		else
 			lattice[ line_int ][ col_int ] = val_int;
 	}
-#ifndef NW
+#ifndef _NW_
 
 	// avoid operation if canvas was closed
-	cmd( "if [ winfo exists .lat.c ] { set latcanv 1 } { set latcanv 0 }" );
-	latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
-	if ( ! strcmp( latcanv, "0" ) )
+	if ( ! exists_window( ".lat.c" ) )
 		return -1;
-	
+
 	if ( val < 0 && ( - ( int )  val ) <= 0xffffff )	// RGB mode selected?
-		sprintf( val_string, "#%06x", - ( int ) val );	// yes: just use the positive RGB value
+		snprintf( val_string, 32, "#%06x", - ( int ) val );	// yes: just use the positive RGB value
 	else
 	{
-		sprintf( val_string, "$c%d", val_int );			// no: use the predefined Tk color
+		snprintf( val_string, 32, "$c%d", val_int );			// no: use the predefined Tk color
 		// create (background color) pallete entry if invalid palette in val
 		cmd( "if { ! [ info exist c%d ] } { set c%d $colorsTheme(bg) }", val_int, val_int  );
 	}
-		
+
 	cmd( ".lat.c itemconfigure c%d_%d -fill %s", line_int + 1, col_int + 1, val_string );
-		
+
 #endif
 
-	return 0;  
+	return 0;
 }
 
 
@@ -1638,35 +1487,29 @@ double read_lattice( double line, double col )
 
 		return -1;
 	}
-	
+
 	if ( lattice != NULL && rows > 0 && columns > 0 )
 		return lattice[ ( int ) line - 1 ][ ( int ) col - 1 ];
 	else
 		return 0;
 }
 
-	
+
 /***************************************************
 SAVE_LATTICE
 Save the existing lattice (if any) to the specified file name.
 ***************************************************/
 double save_lattice( const char *fname )
 {
-	char *latcanv;
-
-#ifndef NW
-
+#ifndef _NW_
 	// avoid operation if no canvas or no file name
-	cmd( "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
-	latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
-	if ( latcanv == NULL || strlen( fname ) == 0 )
+	if ( ! exists_window( ".lat.c" ) || fname == NULL || strlen( fname ) == 0 )
 		return -1;
-	
-	Tcl_SetVar( inter, "latname", fname, 0 );
-	cmd( "append latname \".eps\"; .lat.c postscript -colormode color -file $latname" );
 
+	cmd( "set latname \"%s\"", fname );
+	cmd( "append latname .eps" );
+	cmd( ".lat.c postscript -colormode color -file $latname" );
 #endif
-
 	return 0;
 }
 
@@ -1705,6 +1548,30 @@ double min ( double a, double b )
 }
 
 
+/****************************************************
+MEDIAN
+****************************************************/
+double median( vector < double > & v )
+{
+	int mid;
+	double midVal;
+
+	if ( v.empty( ) )
+		return NAN;
+
+	mid = v.size( ) / 2;
+
+	auto midPos = v.begin( ) + mid;
+	nth_element( v.begin( ), midPos, v.end( ) );
+	midVal = v[ mid ];
+
+	if ( v.size( ) % 2 != 0 )
+		return midVal;
+	else
+		return ( * max_element( v.begin( ), midPos ) + midVal ) / 2;
+}
+
+
 /***************************************************
 FACT
 Factorial function
@@ -1722,7 +1589,7 @@ double fact( double x )
 	long i = 1;
 	while (i <= x)
 		fact *= i++;
-	
+
 	return fact;
 }
 
@@ -1734,7 +1601,7 @@ double round( double x )
 {
 	if ( ( x - floor( x ) ) > ( ceil( x ) - x ) )
 		return ceil( x );
-	
+
 	return floor( x );
 }
 
@@ -1748,8 +1615,8 @@ double round_digits( double value, int digits )
 		return 0.0;
 
 	double factor = pow( 10.0, digits - ceil( log10( fabs( value ) ) ) );
-	
-	return round( value * factor ) / factor;   
+
+	return round( value * factor ) / factor;
 }
 
 
@@ -1760,14 +1627,14 @@ double lower_bound( double a, double b, double marg, double marg_eq, int dig )
 {
 	double rmin = round_digits( a, dig );
 	double rmax = round_digits( b, dig );
-	
+
 	if ( rmin > rmax )
 	{
 		double temp = rmin;
 		rmin = rmax;
 		rmax = temp;
 	}
-	
+
 	if ( rmin == rmax )
 	{
 		if ( rmin == 0.0 )
@@ -1796,14 +1663,14 @@ double upper_bound( double a, double b, double marg, double marg_eq, int dig )
 {
 	double rmin = round_digits( a, dig );
 	double rmax = round_digits( b, dig );
-	
+
 	if ( rmin > rmax )
 	{
 		double temp = rmin;
 		rmin = rmax;
 		rmax = temp;
 	}
-	
+
 	if ( rmin == rmax )
 	{
 		if ( rmax == 0.0 )
@@ -1859,12 +1726,12 @@ double poissoncdf( double lambda, double k )
 		plog( "\nWarning: bad lambda or k in function: poissoncdf" );
 		return 0.0;
 	}
-	
+
 	double sum = 0.0;
 	long i;
 	for ( i = 0; i <= k; i++ )
 		sum += pow( lambda, i ) / fact( i );
-	
+
 	return exp( -lambda ) * sum;
 }
 
@@ -1880,11 +1747,31 @@ double paretocdf( double mu, double alpha, double x )
 		plog( "\nWarning: bad mu, alpha in function: paretocdf" );
 		return 0.0;
 	}
-	
+
 	if ( x < mu )
 		return 0.0;
 	else
 		return 1.0 - pow( mu / x, alpha );
+}
+
+
+/***************************************************
+BPARETOCDF
+Bounded Pareto cumulative distribution function
+***************************************************/
+double bparetocdf( double alpha, double low, double high, double x )
+{
+	if ( alpha <= 0 || low <= 0 || low >= high )
+	{
+		plog( "\nWarning: bad alpha, low or high in function: bparetocdf" );
+		return 0.0;
+	}
+
+	if ( x < low )
+		return 0.0;
+	else
+		return ( 1 - pow( low, alpha ) * pow( x, - alpha ) ) /
+			   ( 1 - pow( low / high, alpha ) ) ;
 }
 
 
@@ -1899,7 +1786,7 @@ double normcdf( double mu, double sigma, double x )
 		plog( "\nWarning: bad sigma in function: normalcdf" );
 		return 0.0;
 	}
-	
+
 	return 0.5 * ( 1 + erf( ( x - mu ) / ( sigma * sqrt( 2.0 ) ) ) );
 }
 
@@ -1915,7 +1802,7 @@ double lnormcdf( double mu, double sigma, double x )
 		plog( "\nWarning: bad sigma or x in function: lnormalcdf" );
 		return 0.0;
 	}
-	
+
 	return 0.5 + 0.5 * erf( ( log( x ) - mu ) / ( sigma * sqrt( 2.0 ) ) );
 }
 
@@ -1931,7 +1818,7 @@ double alaplcdf( double mu, double alpha1, double alpha2, double x )
 		plog( "\nWarning: bad alpha in function: alaplcdf" );
 		return 0.0;
 	}
-	
+
 	if ( x < mu )									// cdf up to upper bound
 		return 0.5 * exp( ( x - mu ) / alpha1 );
 	else
@@ -1960,19 +1847,19 @@ double betacf( double a, double b, double x )
 	c = 1.0;
 	d = 1.0 - qab * x / qap;
 
-	if ( fabs( d ) < FPMIN ) 
+	if ( fabs( d ) < FPMIN )
 		d = FPMIN;
 	d = 1.0 / d;
 	h = d;
 
-	for ( m = 1; m <= MAXIT; m++ ) 
+	for ( m = 1; m <= MAXIT; m++ )
 	{
 		m2 = 2 * m;
 		aa = m * ( b - m ) * x / ( ( qam + m2 ) * ( a + m2 ) );
 		d = 1.0 + aa * d;
 		if ( fabs( d ) < FPMIN)
 			d = FPMIN;
-		
+
 		c = 1.0 + aa / c;
 		if ( fabs( c ) < FPMIN )
 			c=FPMIN;
@@ -1995,7 +1882,7 @@ double betacf( double a, double b, double x )
 			break;
 	}
 
-	if ( m > MAXIT ) 
+	if ( m > MAXIT )
 		plog( "\nWarning: a or b too big (or MAXIT too small) in function: betacf");
 
 	return h;
@@ -2020,7 +1907,7 @@ double betacdf( double alpha, double beta, double x )
 	if ( x == 0.0 || x == 1.0 )
 		bt = 0.0;
 	else
-		bt = exp( lgamma( alpha + beta ) - lgamma( alpha ) - lgamma( beta ) 
+		bt = exp( lgamma( alpha + beta ) - lgamma( alpha ) - lgamma( beta )
 				 + alpha * log( x ) + beta * log( 1.0 - x ) );
 
 	if ( x < ( alpha + 1.0 ) / ( alpha + beta + 2.0 ) )
@@ -2028,6 +1915,62 @@ double betacdf( double alpha, double beta, double x )
 	else
 		return 1.0 - bt * betacf( beta, alpha, 1.0 - x ) / beta;
 }
+
+
+#ifndef _NW_
+
+/****************************************************
+T_STAR
+Student t distribution  statistic for given
+degrees of freedom and confidence level (in %)
+****************************************************/
+double t_star( int df, double cl )
+{
+	int i;
+
+	for ( i = 0; i < T_CLEVS - 1; ++i )
+		if ( cl <= 100 * t_dist_cl[ i ] )
+			break;
+
+	if ( df <= 30 )
+		return t_dist_st[ i ][ df - 1 ];
+
+	if ( df <= 40 )
+		return t_dist_st[ i ][ 30 ];
+
+	if ( df <= 60 )
+		return t_dist_st[ i ][ 31 ];
+
+	if ( df <= 80 )
+		return t_dist_st[ i ][ 32 ];
+
+	if ( df <= 100 )
+		return t_dist_st[ i ][ 33 ];
+
+	if ( df <= 1000 )
+		return t_dist_st[ i ][ 34 ];
+
+	return t_dist_st[ i ][ 35 ];
+}
+
+
+/****************************************************
+Z_STAR
+Standard normal distribution statistic for given
+confidence level (in %)
+****************************************************/
+double z_star( double cl )
+{
+	int i;
+
+	for ( i = 0; i < Z_CLEVS - 1; ++i )
+		if ( cl <= 100 * z_dist_cl[ i ] )
+			break;
+
+	return z_dist_st[ i ];
+}
+
+#endif
 
 
 /****************************************************
@@ -2088,7 +2031,7 @@ ran_gen_id = 7 : Lagged fibonacci with 48 bits resolution in [0,1)
 int ran_gen_id = 2;					// ID of initial generator (DO NOT CHANGE)
 long idum = 0;						// Park-Miller default seed (legacy code only)
 
-#ifndef NP
+#ifndef _NP_
 mutex parallel_rd;					// mutex locks for random generator operations
 mutex parallel_lc1;
 mutex parallel_lc2;
@@ -2096,7 +2039,7 @@ mutex parallel_mt32;
 mutex parallel_mt64;
 mutex parallel_lf24;
 mutex parallel_lf48;
-#endif	
+#endif
 
 random_device rd;					// system random device
 minstd_rand lc1;					// linear congruential generator (internal)
@@ -2119,64 +2062,64 @@ void init_random( unsigned seed )
 
 template < class distr > double draw_rd( distr &d )
 {
-#ifndef NP
+#ifndef _NP_
 	// prevent concurrent draw by more than one thread
 	lock_guard < mutex > lock( parallel_rd );
-#endif	
+#endif
 	return d( rd );
 }
 
 template < class distr > double draw_lc1( distr &d )
 {
-#ifndef NP
+#ifndef _NP_
 	// prevent concurrent draw by more than one thread
 	lock_guard < mutex > lock( parallel_lc1 );
-#endif	
+#endif
 	return d( lc1 );
 }
 
 template < class distr > double draw_lc2( distr &d )
 {
-#ifndef NP
+#ifndef _NP_
 	// prevent concurrent draw by more than one thread
 	lock_guard < mutex > lock( parallel_lc2 );
-#endif	
+#endif
 	return d( lc2 );
 }
 
 template < class distr > double draw_mt32( distr &d )
 {
-#ifndef NP
+#ifndef _NP_
 	// prevent concurrent draw by more than one thread
 	lock_guard < mutex > lock( parallel_mt32 );
-#endif	
+#endif
 	return d( mt32 );
 }
 
 template < class distr > double draw_mt64( distr &d )
 {
-#ifndef NP
+#ifndef _NP_
 	// prevent concurrent draw by more than one thread
 	lock_guard < mutex > lock( parallel_mt64 );
-#endif	
+#endif
 	return d( mt64 );
 }
 
 template < class distr > double draw_lf24( distr &d )
 {
-#ifndef NP
+#ifndef _NP_
 	// prevent concurrent draw by more than one thread
 	lock_guard < mutex > lock( parallel_lf24 );
-#endif	
+#endif
 	return d( lf24 );
 }
 
 template < class distr > double draw_lf48( distr &d )
 {
-#ifndef NP
+#ifndef _NP_
 	// prevent concurrent draw by more than one thread
 	lock_guard < mutex > lock( parallel_lf48 );
-#endif	
+#endif
 	return d( lf48 );
 }
 
@@ -2195,17 +2138,17 @@ template < class distr > double draw_gen( distr &d )
 		case 3:						// linear congruential in [0,1)
 		default:
 			return draw_lc2( d );
-			
+
 		case 2:						// Mersenne-Twister 32 bits in (0,1)
 		case 4:						// Mersenne-Twister 32 bits in [0,1)
 			return draw_mt32( d );
 
 		case 5:						// Mersenne-Twister 64 bits in [0,1)
 			return draw_mt64( d );
-			
+
 		case 6:						// lagged fibonacci 24 bits in [0,1)
 			return draw_lf24( d );
-			
+
 		case 7:						// lagged fibonacci 48 bits in [0,1)
 			return draw_lf48( d );
 	}
@@ -2221,7 +2164,7 @@ void *set_random( int gen )
 	if ( gen >= 0 && gen <= 7 )
 	{
 		ran_gen_id = gen;
-		
+
 		switch ( ran_gen_id )
 		{
 			case 0:						// system (not pseudo) random generator
@@ -2247,7 +2190,7 @@ void *set_random( int gen )
 				return ( ( void * ) & lf48 );
 		}
 	}
-	
+
 	return NULL;
 }
 
@@ -2271,7 +2214,7 @@ double ran1( long *unused )
 {
 	double ran;
 	uniform_real_distribution< double > distr( 0, 1 );
-	
+
 	do
 		ran = draw_gen( distr );
 	while ( ran == 0.0 && ran_gen_id < 3 );
@@ -2306,8 +2249,8 @@ NORM
 double norm( double mean, double dev )
 {
 	static bool normStopErr;
-	
-	if ( dev < 0 )	
+
+	if ( dev < 0 )
 	{
 		warn_distr( & normErrCnt, & normStopErr, "norm", "negative standard deviation" );
 		return mean;
@@ -2325,7 +2268,7 @@ Return a draw from a lognormal distribution
 double lnorm( double mean, double dev )
 {
 	static bool lnormStopErr;
-	
+
 	if ( dev < 0 )
 	{
 		warn_distr( & lnormErrCnt, & lnormStopErr, "lnorm", "negative standard deviation" );
@@ -2343,7 +2286,7 @@ GAMMA
 double gamma( double alpha, double beta )
 {
 	static bool gammaStopErr;
-	
+
 	if ( alpha <= 0 || beta <= 0 )
 	{
 		warn_distr( & gammaErrCnt, & gammaStopErr, "gamma", "non-positive alpha or beta parameter" );
@@ -2361,11 +2304,11 @@ BERNOULLI
 double bernoulli( double p )
 {
 	static bool bernoStopErr;
-	
+
 	if ( p < 0 || p > 1 )
 	{
 		warn_distr( & bernoErrCnt, & bernoStopErr, "bernoulli", "probability out of \\[0, 1\\]" );
-			
+
 		if ( p < 0 )
 			return 0.0;
 		else
@@ -2383,7 +2326,7 @@ POISSON
 double poisson( double mean )
 {
 	static bool poissStopErr;
-	
+
 	if ( mean < 0 )
 	{
 		warn_distr( & poissErrCnt, & poissStopErr, "poisson", "negative mean" );
@@ -2401,11 +2344,11 @@ GEOMETRIC
 double geometric( double p )
 {
 	static bool geomStopErr;
-	
+
 	if ( p < 0 || p > 1 )
 	{
 		warn_distr( & geomErrCnt, & geomStopErr, "geometric", "probability out of \\[0, 1\\]" );
-			
+
 		if ( p < 0 )
 			return 0.0;
 		else
@@ -2423,11 +2366,11 @@ BINOMIAL
 double binomial( double p, double t )
 {
 	static bool binomStopErr;
-	
+
 	if ( p < 0 || p > 1 || t <= 0 )
 	{
 		warn_distr( & binomErrCnt, & binomStopErr, "binomial", "invalid parameter" );
-			
+
 		if ( p < 0 || t <= 0 )
 			return 0.0;
 		else
@@ -2445,7 +2388,7 @@ CAUCHY
 double cauchy( double a, double b )
 {
 	static bool cauchStopErr;
-	
+
 	if ( b <= 0 )
 	{
 		warn_distr( & cauchErrCnt, & cauchStopErr, "cauchy", "non-positive b parameter" );
@@ -2463,7 +2406,7 @@ CHI_SQUARED
 double chi_squared( double n )
 {
 	static bool chisqStopErr;
-	
+
 	if ( n <= 0 )
 	{
 		warn_distr( & chisqErrCnt, & chisqStopErr, "chi_squared", "non-positive n parameter" );
@@ -2481,7 +2424,7 @@ EXPONENTIAL
 double exponential( double lambda )
 {
 	static bool expStopErr;
-	
+
 	if ( lambda <= 0 )
 	{
 		warn_distr( & expErrCnt, & expStopErr, "exponential", "non-positive lambda parameter" );
@@ -2499,7 +2442,7 @@ FISHER
 double fisher( double m, double n )
 {
 	static bool fishStopErr;
-	
+
 	if ( m <= 0 || n <= 0 )
 	{
 		warn_distr( & fishErrCnt, & fishStopErr, "fisher", "invalid parameter" );
@@ -2517,7 +2460,7 @@ STUDENT
 double student( double n )
 {
 	static bool studStopErr;
-	
+
 	if ( n <= 0 )
 	{
 		warn_distr( & studErrCnt, & studStopErr, "student", "non-positive n parameter" );
@@ -2535,7 +2478,7 @@ WEIBULL
 double weibull( double a, double b )
 {
 	static bool weibStopErr;
-	
+
 	if ( a <= 0 || b <= 0 )
 	{
 		warn_distr( & weibErrCnt, & weibStopErr, "weibull", "non-positive a or b parameter" );
@@ -2554,11 +2497,11 @@ Return a draw from a Beta(alfa,beta) distribution
 double beta( double alpha, double beta )
 {
 	static bool betaStopErr;
-	
+
 	if ( alpha <= 0 || beta <= 0 )
 	{
 		warn_distr( & betaErrCnt, & betaStopErr, "beta", "non-positive alpha or beta parameter" );
-			
+
 		if ( alpha < beta )
 			return 0.0;
 		else
@@ -2577,7 +2520,7 @@ PARETO
 double pareto( double mu, double alpha )
 {
 	static bool paretStopErr;
-	
+
 	if ( mu <= 0 || alpha <= 0 )
 	{
 		warn_distr( & paretErrCnt, & paretStopErr, "pareto", "non-positive mu or alpha parameter" );
@@ -2588,6 +2531,25 @@ double pareto( double mu, double alpha )
 }
 
 
+/****************************************************
+BPARETO
+****************************************************/
+double bpareto( double alpha, double low, double high )
+{
+	static bool paretStopErr;
+
+	if ( alpha <= 0 || low <= 0 || low >= high )
+	{
+		warn_distr( & paretErrCnt, & paretStopErr, "bpareto", "non-positive alpha parameter or bounds or invalid bounds" );
+		return max( low, 0 );
+	}
+
+	return pow( pow( low, alpha ) /
+				( ran1( ) * ( pow( low / high, alpha ) - 1 ) + 1 ),
+				1 / alpha );
+}
+
+
 /***************************************************
 ALAPL
 Return a draw from an asymmetric laplace distribution
@@ -2595,7 +2557,7 @@ Return a draw from an asymmetric laplace distribution
 double alapl( double mu, double alpha1, double alpha2 )
 {
 	static bool alaplStopErr;
-	
+
 	if ( alpha1 <= 0 || alpha2 <= 0 )
 	{
 		warn_distr( & alaplErrCnt, & alaplStopErr, "alapl", "non-positive alpha1 or alpha2 parameter" );
@@ -2605,7 +2567,7 @@ double alapl( double mu, double alpha1, double alpha2 )
 	double draw = ran1( );
 	if ( draw < ( alpha1 / ( alpha1 + alpha2 ) ) )
 		return mu + alpha1 * log( draw * ( 1 + alpha1 / alpha2 ) );
-	else 
+	else
 		return mu - alpha2 * log( ( 1 - draw ) * ( 1 + alpha1 / alpha2 ) );
 }
 
@@ -2617,13 +2579,13 @@ void warn_distr( int *errCnt, bool *stopErr, const char *distr, const char *msg 
 {
 	if ( ++( *errCnt ) < ERR_LIM )	// prevent slow down due to I/O
 	{
-		plog( "\nWarning: %s in function '%s'", "", msg, distr );
+		plog( "\nWarning: %s in function '%s'", msg, distr );
 		*stopErr = false;
 	}
 	else
 		if ( ! *stopErr )
 		{
-			plog( "\nWarning: too many warnings in function '%s', stop reporting...\n", "", distr );
+			plog( "\nWarning: too many warnings in function '%s', stop reporting...\n", distr );
 			*stopErr = true;
 		}
 }

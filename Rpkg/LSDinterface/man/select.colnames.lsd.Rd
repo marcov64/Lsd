@@ -7,7 +7,7 @@ Select a subset of a LSD results matrix (by column/variable names)
 This function select a subset of a LSD results matrix (as produced by \code{\link{read.raw.lsd}}) by the column (variable) names, considering only the name part of the column labels.
 }
 \usage{
-select.colnames.lsd(dataSet, col.names, instance = 0)
+select.colnames.lsd( dataSet, col.names, instance = 0 )
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -29,22 +29,21 @@ Returns a single matrix containing the selected variables' time series contained
 The variable/column names must be valid R column names (e.g., names do not start with a underscore). Use \code{\link{make.names}} if required.
 }
 \seealso{
-\code{\link{select.colattrs.lsd}},
-\code{\link{make.names}}
+\code{\link{list.files.lsd}()}
+\code{\link{select.colattrs.lsd}()},
+\code{\link{make.names}()}
 }
 \examples{
-# Get the examples directory
-path <- system.file( "extdata", package = "LSDinterface" )
+# get the list of file names of example LSD results
+files <- list.files.lsd( system.file( "extdata", package = "LSDinterface" ) )
 
-# reads all instances of all variables
-bigTable <- read.raw.lsd( paste0( path, "/", "Sim1_1.res" ) )
-
-# See matrix in the data viewer (require package 'utils')
-\donttest{View( bigTable )}
+# read all instances of all variables in first file
+bigTable <- read.raw.lsd( files[ 1 ] )
+print( bigTable[ 1 : 10, 1 : 7 ] )
 
 # extract all instances of a set of variables named '_A1p' and '_growth1'
 abTable <- select.colnames.lsd( bigTable, make.names( c( "_A1p", "_growth1" ) ) )
-\donttest{View( abTable )}
+print( abTable[ 20, ] )
 }
 \keyword{ datasets }
 \keyword{ database }

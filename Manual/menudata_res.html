@@ -1077,7 +1077,7 @@ div.WordSection1
  style='width:90.0%'>
  <tr>
   <td width="75%" style='width:75.04%;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
-  <p class=MsoNormal><img width=616 height=417 src="image/anal_res.png"></p>
+  <p class=MsoNormal><img width=580 height=412 src="image/anal_res.png"></p>
   </td>
   <td width="24%" valign=top style='width:24.96%;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
   <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
@@ -1307,14 +1307,14 @@ lang=EN-US>Analysis</span></span><span lang=EN-US>.</span></p>
 <p class=MsoNormal><span lang=EN-US>In any case, it is always possible to load <a
 href="LSD_faqs.html#results">results files</a> saved from previous simulation
 runs. AR does not change the data state during a <a
-href="LSD_faqs.html#simulationrun">simulation run</a>, so it is possible to
-analyze partial results during a simulation interruption or pause and then
-continue it.</span></p>
+href="LSD_faqs.html#simulationrun">simulation run</a>, so it is possible to analyze
+partial results during a simulation interruption or pause and then continue it.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The AR window shows the time series
 available for analysis in the <a href="#Vars__Available">Series available</a>
-list box. The series to be used for analysis must be selected and included in
-the <a href="#_Series_selected">Series selected</a> list box. All the commands
+list box, which can be filtered to show only specific subsets of the available
+series. The series to be used for analysis must be selected and included in the
+<a href="#_Series_selected">Series selected</a> list box. All the commands
 discussed below operate only the series included this list box. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>After the desired time series are selected,
@@ -1392,38 +1392,50 @@ class=Cdigo><span lang=EN-US><a href="#statistics">Statistics</a></span></span><
 lang=EN-US>, </span><span class=Cdigo><span lang=EN-US><a href="#_Histogram">Histogram</a></span></span><span
 lang=EN-US>, etc.</span></p>
 
-<h2><a name=graph></a><a name="_The_plot_window"></a><span lang=EN-US>The plot
+<h2><a name=graph></a><a name="_The_plot_window"></a><span lang=EN-US>The Plots
 window</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>The plots produced with the command <a
-href="#timeseries">Plot </a>are created in independent windows and are endowed
-with features which simplify their use and analysis. Some features may be not
-available for all types of plots and plots produced by <a href="#Gnuplot">Gnuplot</a>
-have a different set of features (see Gnuplot documentation). </span></p>
+href="#timeseries">Plot </a>are created by default in a single notebook window,
+with tabs on the top to easily switch among them, and are endowed with features
+which simplify their use and analysis. Some features may be not available for
+all types of plots and plots produced by <a href="#Gnuplot">Gnuplot</a> have a
+different set of features (see Gnuplot documentation). </span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=549 height=420 src="image/example_graph.png"></span></p>
+border=0 width=580 height=460 src="image/example_graph.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The example above is a typical time series
-plot showing 13 series associated with <a href="LSD_faqs.html#variable">Variables</a>,
-151 <a href="#xscaling">cases</a> starting from 0 (the <a
-href="LSD_faqs.html#modelsetting">initial conditions</a> for the Variables) to
-time step 150, a <a href="#_Series_in_logs">linear</a> <a href="#scaling">primary
-automatic scale</a> (Y) from 0 to 378, using <a href="#_No_colors">colors</a>
-to identify the series, no <a href="#watch">grid lines</a>, 4 significant
-digits <a href="#_Precision">precision</a>, points of <a href="#point_size">size</a>
-1 and <a href="#lines_points">lines</a> connecting them, and automatically <a
-href="#title">named</a> after the first series selected. </span></p>
+plot showing 10 series associated with <a href="LSD_faqs.html#variable">Variables</a>,
+150 <a href="#xscaling">cases</a> starting from 1 to time step 150, a <a
+href="#_Series_in_logs">linear</a> <a href="#scaling">primary automatic scale</a>
+(Y) from 0 to 204, using <a href="#_No_colors">colors</a> to identify the
+series, no <a href="#watch">grid lines</a>, 3 significant digits <a
+href="#_Precision">precision</a>, points of <a href="#point_size">size</a> 1
+and <a href="#lines_points">lines</a> connecting them, and automatically <a
+href="#title">named</a> after the first series selected. In this example, there
+are 3 plot tabs available, being the tab showing Variable </span><span
+class=Cdigo><span lang=EN-US>InstallBase</span></span><span lang=EN-US> the one
+in focus.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>The plot window offers four command button
-types:</span></p>
+<p class=MsoNormal><span lang=EN-US>Tabs on the top of the LSD Plots notebook
+can be clicked to quickly switch among plots. The notebook can show up to 10
+separate tabs at once. Tab names are also truncated to 10 characters. When the
+number of plots is larger than 10, the tab set will contain just the last 10
+plots plus the tab </span><span class=Cdigo><span lang=EN-US>More…</span></span><span
+lang=EN-US>. Clicking on </span><span class=Cdigo><span lang=EN-US>More…</span></span><span
+lang=EN-US> will open a list of buttons which give access to all plots,
+attached to the notebook or not, similarly to the <a href="#graphs">Plots list
+box</a>.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>The plot tab/window offers seven command
+button types, presenting four or two at a time:</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Save</span></b></span><span
-lang=EN-US> (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>S</span></span><span
-lang=EN-US>): execute the </span><span class=Cdigo><span lang=EN-US><a
+lang=EN-US>: execute the </span><span class=Cdigo><span lang=EN-US><a
 href="#postscript">Save Plot</a></span></span><span lang=EN-US> command for the
 current window, saving to file a copy of the current plot in graphical format
 for later use. See <a href="#postscript">here</a> for details.</span></p>
@@ -1432,32 +1444,52 @@ for later use. See <a href="#postscript">here</a> for details.</span></p>
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Stop</span></b></span><span
-lang=EN-US> (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>S</span></span><span
-lang=EN-US>): stop the current plotting job. When there is too much data to be
-plotted, LSD may take a while to fill the plot window. Whenever this happens,
-the user has the option to interrupt the process, regaining control to LSD
-controls. In any other situation, this button is disabled (grayed).</span></p>
+lang=EN-US>: during the time required to plot complex data, it allows to stop
+the current plotting job. When there is too much data to be plotted, LSD may
+take a while to fill the plot window. Whenever this happens, the user has the
+option to interrupt the process, regaining control to LSD controls. This button
+is only available when the </span><span class=Cdigo><a href="#_Watch"><span
+lang=EN-US>Watch</span></a></span><span lang=EN-US> option is ticked (the
+default). After the plot is complete, this button changes to </span><span
+class=Cdigo><b><span lang=EN-US>Detach</span></b></span><span lang=EN-US> or </span><span
+class=Cdigo><b><span lang=EN-US>Gnuplot</span></b></span><span lang=EN-US> (see
+below).</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Detach</span></b></span><span
+lang=EN-US>: after the plot is fully draw, this button allows detaching the
+selected plot tab from the LSD Plots notebook, creating an independent window
+for it. This option is not available for <a href="#_Gnuplot">Gnuplot</a> plots
+(see alternative below).</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Attach</span></b></span><span
+lang=EN-US>: in a detached plot window, not in the LSD Plots notebook, this
+button allows attaching the plot back to the notebook. This option is not
+available for <a href="#_Gnuplot">Gnuplot</a> windows (see alternative below).</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Gnuplot</span></b></span><span
+lang=EN-US>: open the current plot using the <a href="#_Gnuplot">Gnuplot</a>
+application. The plot tab is not removed from the LSD Plots notebook. This
+option is not available for non-Gnuplot plots.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Zoom +</span></b></span><span
 lang=EN-US> / </span><span class=Cdigo><b><span lang=EN-US>-</span></b></span><span
-lang=EN-US> (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>+</span></span><span
-lang=EN-US>/</span><span class=Cdigo><span lang=EN-US>-</span></span><span
-lang=EN-US>): set the zoom level in the current window. Please note that the
+lang=EN-US>: set the zoom level in the current tab or window. This option is
+not available for <a href="#_Lattice_1">lattice plots</a>. Please note that the
 scroll bars become active when the user zooms in, so the part of the plot being
 zoomed can be easily controlled. The user can also enlarge or maximize the
-window to view a larger part of a zoomed plot.</span></p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Gnuplot</span></b></span><span
-lang=EN-US> (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>G</span></span><span
-lang=EN-US>): open the current plot using <a href="#_Gnuplot">Gnuplot</a>. This
-option is not available for <a href="#ts_cs">time series</a> <a href="#seq_xy">sequential</a>
-plots.</span></p>
+notebook or independent window to view a larger part of a zoomed plot.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The plot window is sensitive to the mouse
 position: the bottom-left part of the window presents the case (time step)
@@ -1469,26 +1501,35 @@ that the case values correspond to the <i>complete</i> number of time steps to
 the left of the cursor and so always a rounded-down integer.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Plots can be manually improved by the
-addition of new elements and the modification of the existing ones:</span></p>
+addition of new elements and the modification of the existing ones, by using
+the right-click context menu on the desired location or the corresponding
+shortcuts:</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Right click on series and axis labels</span></b><span
-lang=EN-US>: to edit the text,&nbsp;font, size, style and color.</span></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Right click on plotted lines</span></b><span
-lang=EN-US>: to edit the width, color and dash pattern.</span></p>
+</span></span><span class=Cdigo><b><span lang=EN-US>Properties</span></b></span><b><span
+lang=EN-US> </span></b><span lang=EN-US>(<i>shortcut</i>: </span><span
+class=Cdigo><span lang=EN-US>Alt+click</span></span><span lang=EN-US>)</span><span
+lang=EN-US>: in text elements, to edit the text,&nbsp;font, size, style and
+color, or in line or pattern elements, to edit the width, color and dash
+pattern.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Click with </span></b><span class=Cdigo><b><span
-lang=EN-US>Shift</span></b></span><b><span lang=EN-US> pressed</span></b><span
-lang=EN-US>: to create a new label at the mouse position. The label properties
-can be edited with a right click.</span></p>
+</span></span><span class=Cdigo><b><span lang=EN-US>Delete</span></b></span><span
+lang=EN-US>: to delete the element.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Add Text</span></b></span><b><span
+lang=EN-US> </span></b><span lang=EN-US>(<i>shortcut</i>: </span><span
+class=Cdigo><span lang=EN-US>Shift+click</span></span><span lang=EN-US>)</span><span
+lang=EN-US>: to create a new text label centered at the mouse position. The new
+text can have its properties edited using the </span><span class=Cdigo><span
+lang=EN-US>Properties</span></span><span lang=EN-US> menu.</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -1496,7 +1537,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 class=Cdigo><b><span lang=EN-US>Ctrl</span></b></span><b><span lang=EN-US>
 pressed</span></b><span lang=EN-US>: to create a new line from the initial
 mouse position to the position where the drag ends. The new line can have its
-properties edited with a right click, including adding arrow heads.</span></p>
+properties edited using the </span><span class=Cdigo><span lang=EN-US>Properties</span></span><span
+lang=EN-US> menu, including adding arrow heads.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -1506,45 +1548,54 @@ to adjust the position of existing series labels or added lines around the
 plot.</span></p>
 
 <p class=MsoNormal><a name=y2example></a><span lang=EN-US>The following example
-shows a fancy <a href="#y2axis">two-scale</a> plot with added title, arrows,
-labels and edited, repositioned and recolored series labels. </span></p>
+shows a fancy <a href="#y2axis">two-scale</a> plot in a detached window with
+added title, arrows, labels and edited, repositioned and recolored series
+labels. </span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=590 height=422 src="image/ex_piccolo.png"></span></p>
+border=0 width=590 height=456 src="image/ex_piccolo.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>Frequently, during an AR session, the user
 produces quite many plots, and the computer screen becomes easily crowded. To
-move among the different plot windows, three features are available: </span></p>
+move among the different plot tabs and windows, four features are available: </span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Close plot windows</span></b><span
-lang=EN-US>: plots can be closed (click the X on the title bar) and easily
-reopened later.</span></p>
+</span></span><b><span lang=EN-US>Select plot tab in notebook</span></b><span
+lang=EN-US>: plots in notebook can be selected by clicking in the corresponding
+tab.</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Close plot individual plot windows</span></b><span
+lang=EN-US>: plots in detached windows can be closed (click the X on the title
+bar) and easily reopened later (see below).</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Double click on <a href="#graphs">Plots list
-box</a></span></b><span lang=EN-US>: reopen and/or bring to the foreground any
+box</a></span></b><span lang=EN-US>: bring to the foreground and/or reopen any
 produced plot during the current AR session.</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Double click on a plot</span></b><span
 lang=EN-US>: bring the main Analysis of Results windows to the foreground. The
-user must double click in any empty part of the white plot “canvas”.</span></p>
+user must double click in any empty part of the plot canvas. Sometimes the plot
+windows have to be moved to allow access to the entire Analysis of Results
+window.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>All the plots produced during an AR session
 are cataloged in the <a href="#graphs">Plots list box</a>. A double click in
-any of the list items immediately brings the respective plot window to the
+any of the list items immediately brings the respective plot tab/window to the
 foreground, reopening it if needed. A left click on any item in the list
 removes it. Please note that items in the Plots list box are not saved when the
 AR window is closed. Only items explicitly saved to file, using the </span><span
 class=Cdigo><span lang=EN-US><a href="#postscript">Save Plot</a></span></span><span
 lang=EN-US> and </span><span class=Cdigo><span lang=EN-US><a href="#save">Save
 Data</a></span></span><span lang=EN-US> buttons, are preserved after the AR
-session is terminated (even if the <a href="browser.html">LSD Browser</a> is
-not closed).</span></p>
+session is terminated even if the <a href="browser.html">LSD Browser</a> is not
+closed.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -1634,8 +1685,15 @@ step. The time series unique serial number is 65.</span></p>
 <p class=MsoNormal><span lang=EN-US>The order of the series in the list box
 reflects the <a href="LSD_faqs.html#modelstructure">model structure</a>, and
 therefore elements saved from the same <a href="LSD_faqs.html#object">Object
-type</a> are listed sequentially. For large models it may be useful to <a
-href="#sort">sort the series</a> available. </span></p>
+type</a> are listed sequentially. For large models it may be useful to filter
+and/or <a href="#sort">sort the series</a> presented. The top row of this box
+is a drop-down selector allowing to choose Variables from specific Objects to
+be listed. The filter list contains only Objects in the model structure which
+contain elements with series available for analysis plus entries for series added
+by the user (created or loaded from file). For series loaded from data files,
+Object-based filtering is available only if the corresponding configuration
+file is loaded, otherwise series can be filtered only by the name of the files
+they came from.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Time series in the list box must be
 highlighted before they can be added to the <a href="#_Series_selected">Series
@@ -1670,6 +1728,11 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 class=Cdigo><span lang=EN-US>space</span></span><span lang=EN-US> on a series
 to select a subset of instances of an element, automatically adding them to the
 Series selected list box.</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US>Press </span><span class=Cdigo><span lang=EN-US>Ctrl+A</span></span><span
+lang=EN-US> to select all series in the current list box.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>For adding the highlighted series to the <a
 href="#_Series_selected">Series selected</a> list box, use the <a href="#in">button
@@ -1739,10 +1802,10 @@ Analysis of Results session. Every time the Analysis of Results module is
 <p style='margin-left:36.0pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><span lang=EN-US>YYYY</span></span><span
-lang=EN-US>: the title assigned to the plot by the user. If no title was assigned
-when the plot window was created, the default title is the identification (see <a
-href="#Vars__Available">above</a>) of the first series in the <a
-href="#_Series_selected">Series selected</a> list box.</span></p>
+lang=EN-US>: the title assigned to the plot by the user. If no title was
+assigned when the plot window was created, the default title is the
+identification (see <a href="#Vars__Available">above</a>) of the first series
+in the <a href="#_Series_selected">Series selected</a> list box.</span></p>
 
 <p><span lang=EN-US>A double click in any of the list items immediately brings
 the respective plot window to the foreground, reopening it if needed. Plots
@@ -1814,7 +1877,7 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US><a href="#batch_sel">Filter instances</a></span></p>
+</span></span><span lang=EN-US><a href="#batch_sel">Select instances</a></span></p>
 
 <h2><a name=in></a><a name="_&#9658;"></a><a name="_&#9658;_button"></a><span
 lang=EN-US>&#9658; button </span></h2>
@@ -1838,17 +1901,17 @@ series in the <a href="#_Series_selected">Series selected</a> list box, if any.
 
 <h2><a name=sort></a><a name="_Sort_buttons"></a><span lang=EN-US>Sort buttons </span></h2>
 
-<p class=MsoNormal><span lang=EN-US>The items in the <a href="#Vars__Available">Series
-available</a> list box are sorted according to the position of the <a
-href="LSD_faqs.html#object">Object instance</a> containing the associated <a
-href="LSD_faqs.html#variable">Variables</a> and <a
+<p class=MsoNormal><span lang=EN-US>When an AR session begins, the items in the
+<a href="#Vars__Available">Series available</a> list box are sorted according
+to the position of the <a href="LSD_faqs.html#object">Object instance</a>
+containing the associated <a href="LSD_faqs.html#variable">Variables</a> and <a
 href="LSD_faqs.html#parameter">Parameters</a> in the <a
 href="LSD_faqs.html#modelstructure">model structure</a>, starting from the
 highest level Objects. If the <a href="LSD_faqs.html#results">simulation
 results</a> contain many elements saved, it is convenient to sort the entries
 in the <a href="#Vars__Available">Series available</a> list box for easier
 access to the desired series. Also, when there are many instances (copies) of
-the same element, it may is useful to list together all the series of elements
+the same element, it may be useful to list together all the series of elements
 of the same type. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>There are four options to modify the order
@@ -1889,13 +1952,28 @@ lang=EN-US>, above. If Objects have been removed, it sorts sequentially the
 series with the same names placing first the series from Objects still existing
 at the simulation end or the time it was interrupted or paused, if any.</span></p>
 
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Unsort </span></b></span><span
+lang=EN-US>(<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+U</span></span><span
+lang=EN-US>): restore the original order of the list entries, according to the
+series serial numbers (KK </span><a href="#Vars__Available"><span lang=EN-US>here</span></a><span
+lang=EN-US>).</span></p>
+
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Unsort</span></b></span><span
-lang=EN-US> (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+U</span></span><span
-lang=EN-US>): restore the original order of the list entries, according to the
-series serial numbers (</span><span class=Cdigo><span lang=EN-US>KK</span></span><span
-lang=EN-US> <a href="#Vars__Available">here</a>).</span></p>
+</span></span><i><span lang=EN-US>shortcut</span></i><span lang=EN-US>: </span><span
+class=Cdigo><span lang=EN-US>Ctrl+I</span></span><span lang=EN-US>: invert the
+order of the series in the Series Selected list box. There is no corresponding
+button for this option.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>Sorting can be used together with
+filtering, by selecting, first, a subset of the available series to be
+presented in the Series available list box, and then, second, choosing the
+desired ordering option. Every time a new filtering subset is selected, series
+are organized back to their initial (</span><span class=Cdigo><span lang=EN-US>Unsort</span></span><span
+lang=EN-US>) order.</span></p>
 
 <h2><a name="_Find"></a><a name=find></a><span lang=EN-US>Find</span></h2>
 
@@ -1905,20 +1983,29 @@ class=Cdigo><span lang=EN-US>Ctrl+F</span></span><span lang=EN-US>.</span></p>
 <p class=MsoNormal><span lang=EN-US>Find the first occurrence of a series in
 the <a href="#Vars__Available">Series available</a> list box, asking for the
 name of the desired time series, or just part of it (see example below). If
-found, the corresponding series entry is highlighted.</span></p>
+found, the corresponding series entry is highlighted. Search is performed first
+for an exact match. If no series matches exactly, a new (case sensitive) search
+is done for the entered text as part of the name of one or more series. If none
+is found, it relaxes the requirement for case sensitivity. In any scenario, if
+more than one series matches the search criteria, the first instance found is
+selected in the Series available list box.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=225 height=143 src="image/find_series.png"></span></p>
+width=196 height=124 src="image/find_series.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>If more instances are to be found, user may
 press one the </span><span class=Cdigo><span lang=EN-US>F3</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>Ctrl+N</span></span><span
-lang=EN-US> keys repeatedly.</span></p>
+lang=EN-US> keys repeatedly. The search is always performed among all the
+available series irrespective of the series shown in the Series available list
+box. If the found series is not in the <a href="#Vars__Available">current
+filtered subset</a>, the filter is automatically updated to the <a
+href="LSD_faqs.html#object">Object</a> containing the series.</span></p>
 
 <h2><a name="add_series"></a><a name="_Add"></a><span lang=EN-US>Add </span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcut</span></i><span lang=EN-US>: </span><span
-class=Cdigo><span lang=EN-US>Ctrl+A</span></span><span lang=EN-US>.</span></p>
+class=Cdigo><span lang=EN-US>Ctrl+Shift+A</span></span><span lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Add more time series for analysis, created
 from elaborations of the current series or from previously saved <a
@@ -1930,7 +2017,7 @@ a previously run simulation are available, two options are offered by the
 following dialog box.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=225 height=134 src="image/choose_data_files.png"></span></p>
+border=0 width=196 height=128 src="image/choose_data_files.png"></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -1962,27 +2049,36 @@ class=Cdigo><span lang=EN-US>Ctrl</span></span><span lang=EN-US> or the </span><
 class=Cdigo><span lang=EN-US>Shift</span></span><span lang=EN-US> keys to
 select multiple individual or a range of files, respectively. The consolidated
 series will be marked by a </span><span class=Cdigo><span lang=EN-US>MC</span></span><span
-lang=EN-US> signature at the beginning of the variable tag. MC automatic data
+lang=EN-US> signature at the beginning of the variable tag and can be subset by
+MC-specific <a href="#Vars__Available">filtering targets</a>. MC automatic data
 consolidation can only be performed when all results files have exactly the
 same elements saved, for the same number of cases (time steps). If data from
-elements in stochastically-created Objects is present, LSD cannot automatically
+elements in randomly created Objects is present, LSD cannot automatically
 consolidate the data using this option.</span></p>
 
 <p class=MsoNormal><a name=createmc></a><span lang=EN-US>When </span><span
 class=Cdigo><span lang=EN-US>Files from Monte Carlo experiment</span></span><span
 lang=EN-US> is selected, LSD offers different consolidation options in the
-following dialog.</span></p>
+following dialog. Multiple options can be checked at once.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=225 height=275 src="image/add_mc_series.png"></span></p>
+border=0 width=196 height=235 src="image/add_mc_series.png"></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Average only</span></b></span><span
+</span></span><span class=Cdigo><b><span lang=EN-US>Average</span></b></span><span
 lang=EN-US>: each series in the results files will be averaged among every
 simulation time step, producing the MC mean series for all saved elements (</span><span
 class=Cdigo><span lang=EN-US>_avg</span></span><span lang=EN-US> suffix). </span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Median</span></b></span><span
+lang=EN-US>: each series in the results files will have the median computed for
+every simulation time step (</span><span class=Cdigo><span lang=EN-US>_med</span></span><span
+lang=EN-US> suffix). </span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -1997,53 +2093,24 @@ lang=EN-US> suffixes).</span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Averages, maximum and
-minimum</span></b></span><span lang=EN-US>: for each series in the results
-files three new time series are created, containing the MC mean and the
-absolute maximum and minimum values of every simulation time step step (</span><span
-class=Cdigo><span lang=EN-US>_avg</span></span><span lang=EN-US>,</span><span
-class=Cdigo><span lang=EN-US> _max</span></span><span lang=EN-US> and </span><span
-class=Cdigo><span lang=EN-US>_min</span></span><span lang=EN-US> suffixes).</span></p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Confidence interval</span></b></span><span
 lang=EN-US>: for each series in the results files two new time series are
 created, containing the upper and lower values of the confidence interval of
 the MC mean for every simulation time step (</span><span class=Cdigo><span
 lang=EN-US>_ci+</span></span><span lang=EN-US> and </span><span class=Cdigo><span
-lang=EN-US>_ci-</span></span><span lang=EN-US> suffixes).</span></p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Averages and confidence
-interval</span></b></span><span lang=EN-US>: for each series in the results
-files three new time series are created, containing the MC mean and the upper
-and lower values of its confidence interval for every simulation time step (</span><span
-class=Cdigo><span lang=EN-US>_avg</span></span><span lang=EN-US>,</span><span
-class=Cdigo><span lang=EN-US> _ci+</span></span><span lang=EN-US> and </span><span
-class=Cdigo><span lang=EN-US>_ci-</span></span><span lang=EN-US> suffixes). </span></p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>All the above</span></b></span><span
-lang=EN-US>: for each series in the results files five new time series are
-created, containing the MC mean, the absolute maximum and minimum values, and
-the upper and lower values of its confidence interval for every simulation time
-step (</span><span class=Cdigo><span lang=EN-US>_avg</span></span><span
-lang=EN-US>,</span><span class=Cdigo><span lang=EN-US> _max</span></span><span
-lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>_min</span></span><span
-lang=EN-US>,</span><span class=Cdigo><span lang=EN-US> _ci+</span></span><span
-lang=EN-US> and </span><span class=Cdigo><span lang=EN-US>_ci-</span></span><span
-lang=EN-US> suffixes). </span></p>
+lang=EN-US>_ci-</span></span><span lang=EN-US> suffixes). The intervals
+computed assume normal distribution of data. Intervals can be constructed
+around the median or the mean, according to the option </span><span
+class=Cdigo><span lang=EN-US>Asymptotic median CI</span></span><span
+lang=EN-US> is checked or not, respectively.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>When the confidence interval is being
 created, there is an option to change the default </span><span class=Cdigo><span
-lang=EN-US>Confidence level</span></span><span lang=EN-US> from 95% (integer
-values from 80 to 99% are accepted). Also, there is an option to </span><span
+lang=EN-US>Confidence level</span></span><span lang=EN-US> from 95% chosen from
+the drop-down list. When medians are computed, there is the </span><span
+class=Cdigo><span lang=EN-US>Asymptotic median CI</span></span><span
+lang=EN-US> option to use asymptotic confidence intervals around the median
+(assuming normal distribution) when checked. Also, there is an option to </span><span
 class=Cdigo><span lang=EN-US>Keep original series</span></span><span
 lang=EN-US> from the MC experiment files available for the analysis, as by
 default they are not kept after data consolidation.</span></p>
@@ -2054,7 +2121,7 @@ lang=EN-US> button, the user may choose between the options in the dialog box
 below.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=225 height=173 src="image/choose_data.png"></span></p>
+border=0 width=196 height=161 src="image/choose_data.png"></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -2083,11 +2150,11 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><span class=Cdigo><b><span lang=EN-US>Existing unsaved element</span></b></span><span
 lang=EN-US> (<i>shortcut</i>: </span><span class=Cdigo><span lang=EN-US>Ctrl+B</span></span><span
 lang=EN-US>): include the values from elements not <a
-href="browser.html#changeelement">marked for saving</a> but still in the computer
-memory. This includes <a href="LSD_faqs.html#parameter">Parameters</a> (single
-last values) and <a href="LSD_faqs.html#variable">Variables</a> (last and <a
-href="browser.html#change_nature">configured lagged values</a>). All values are
-presented at the time of the <a href="LSD_faqs.html#simulationrun">last
+href="browser.html#changeelement">marked for saving</a> but still in the
+computer memory. This includes <a href="LSD_faqs.html#parameter">Parameters</a>
+(single last values) and <a href="LSD_faqs.html#variable">Variables</a> (last
+and <a href="browser.html#change_nature">configured lagged values</a>). All
+values are presented at the time of the <a href="LSD_faqs.html#simulationrun">last
 update/computation</a>. Not changed Parameters are presented at time 0 (zero),
 which requires the explicit <a href="#xscaling">selection of the case</a> (0)
 to be shown. Single period elements are plotted as points, adjusting the <a
@@ -2115,7 +2182,15 @@ lang=EN-US> is chosen, the user has several choices on how to generate the new
 series:</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=225 height=539 src="image/create_series.png"></span></p>
+border=0 width=212 height=478 src="image/create_series.png"></span></p>
+
+<p class=MsoNormal><span lang=EN-US>It is possible to filter away data during
+the new series calculations by ignoring values below or above a specified
+threshold. If options </span><span class=Cdigo><span lang=EN-US>Ignore small
+values</span></span><span lang=EN-US> or </span><span class=Cdigo><span
+lang=EN-US>Ignore large values</span></span><span lang=EN-US> are selected, the
+field </span><span class=Cdigo><span lang=EN-US>Threshold</span></span><span
+lang=EN-US> must be filled properly.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The selected series can be aggregated along
 two dimensions:</span></p>
@@ -2146,9 +2221,10 @@ all the time steps chosen, according to the order in the <a
 href="#_Series_selected">Series selected</a> list box.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The new series can be computed as the
-average, sum, product, inverse (1/x), count, maximum, minimum, variance, standard
-deviation and confidence interval (at the specified confidence level) of the
-series. Select the desired type accordingly.</span></p>
+average, median, sum, product, inverse (1/x), count, maximum, minimum,
+variance, standard deviation, and mean and median confidence intervals (at the
+specified confidence level) of the series. Select the desired operation
+accordingly.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
 lang=EN-US>Count</span></span><span lang=EN-US> option produces a maximum value
@@ -2157,24 +2233,17 @@ Series which do not have values for a certain period are not considered in the
 counting for this period.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
-lang=EN-US>Confidence interval</span></span><span lang=EN-US> option produces
-three series: the average (same as selecting </span><span class=Cdigo><span
-lang=EN-US>Average</span></span><span lang=EN-US>), and the confidence interval
-upper and lower bounds. This way, the confidence interval for a
-multi-realization variable can be conveniently plotted by selecting the three
-generated series. The user can select the desired confidence level in the range
-from </span><span class=Cdigo><span lang=EN-US>80%</span></span><span
-lang=EN-US> to </span><span class=Cdigo><span lang=EN-US>99%</span></span><span
-lang=EN-US> (integer values only), entering the value in the entry box </span><span
-class=Cdigo><span lang=EN-US>@</span></span><span lang=EN-US>.</span></p>
-
-<p class=MsoNormal><span lang=EN-US>It is possible to filter away data during
-the new series calculations by ignoring values below or above a specified
-threshold. If options </span><span class=Cdigo><span lang=EN-US>Ignore small
-values</span></span><span lang=EN-US> or </span><span class=Cdigo><span
-lang=EN-US>Ignore large values</span></span><span lang=EN-US> are selected, the
-field </span><span class=Cdigo><span lang=EN-US>Threshold</span></span><span
-lang=EN-US> must be filled properly.</span></p>
+lang=EN-US>confidence interval</span></span><span lang=EN-US> operations produce
+three series: the average or the median (same as selecting </span><span
+class=Cdigo><span lang=EN-US>Average</span></span><span lang=EN-US> or </span><span
+class=Cdigo><span lang=EN-US>Median</span></span><span lang=EN-US>), and the
+confidence interval upper and lower bounds. This way, the confidence interval
+for a multi-realization variable can be conveniently plotted by selecting the
+three generated series. The computed intervals assume normal distribution or
+otherwise may be considered as asymptotic. The </span><span class=Cdigo><span
+lang=EN-US>Confidence level</span></span><span lang=EN-US> option allows
+selecting the desired confidence for the interval, according to the value
+selected from the drop-down list.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The user may specify a label and an index
 tag or accept the proposed default. These values will be used to name the new
@@ -2200,7 +2269,7 @@ lang=EN-US> is chosen, the user can select which type of time series is
 generated:</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=225 height=150 src="image/create_ma_series.png"></span></p>
+width=196 height=143 src="image/create_ma_series.png"></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -2209,8 +2278,9 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 lang=EN-US>: use the arithmetic average of the defined past period (t, t - 1,…,
 t - (p – 1), p is the selected period) to define every time step of each time
 series being created (one for each of the series in the <a
-href="#_Series_selected">Series selected</a> list box). By construction, the created
-time series are back-shifted in time with regards to the original series.</span></p>
+href="#_Series_selected">Series selected</a> list box). By construction, the
+created time series are back-shifted in time with regards to the original
+series.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><a name=empty></a><a
@@ -2245,7 +2315,7 @@ highlighting all labels in the list and pressing <a href="#out">button &#9668;</
 It does not affect any of the already created <a href="#graph">plot windows</a>.</span></p>
 
 <h2><a name="batch_sel"></a><a name="_Context_menu"></a><a
-name="_Filter_instances"></a><span lang=EN-US>Filter instances </span></h2>
+name="_Filter_instances"></a><span lang=EN-US>Select instances </span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcut</span></i><span lang=EN-US>: </span><span
 class=Cdigo><span lang=EN-US>Space</span></span><span lang=EN-US> or right
@@ -2259,9 +2329,9 @@ indexes</a>. This command is helpful when the user needs to operate on many
 series with the same name.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=214 height=361 src="image/add_batch.png"></span></p>
+border=0 width=214 height=395 src="image/add_batch.png"></span></p>
 
-<p class=MsoNormal><span lang=EN-US>There are four possible criteria for
+<p class=MsoNormal><span lang=EN-US>There are five possible criteria for
 selecting the time series:</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -2275,7 +2345,7 @@ contained.</span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Select by series' tags</span></b></span><span
+</span></span><span class=Cdigo><b><span lang=EN-US>Select by series tags</span></b></span><span
 lang=EN-US>: series are selected according to specified tag, composed by as
 many index fields as the position in the <a href="LSD_faqs.html#modelstructure">model
 structure</a> of the <a href="LSD_faqs.html#object">Object type</a> containing
@@ -2286,9 +2356,17 @@ in the second level of the structure tree, and therefore two indexes are
 required to indicate the exact instance: one index for the first level of
 Objects/instances and one for the second (the </span><span class=Cdigo><span
 lang=EN-US>Root</span></span><span lang=EN-US> level is not used because it
-always has only one copy). Filling all the index fields will select one exact specific
-instance. Filling just some index fields will select all the series respecting
-the conditions specified.</span></p>
+always has only one copy). Filling all the index fields will select one exact
+specific instance. Filling just some index fields will select all the series
+respecting the conditions specified.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Select by series cases</span></b></span><span
+lang=EN-US>: select series according to their initial and final cases (time
+steps). Only series starting at or later and finishing at or earlier the
+specified values will be selected.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -2374,7 +2452,7 @@ step zero) are not shown, please select case 0 explicitly if required. Further
 lags of initial values (<i>t</i> = -1, -2, …) cannot be used. </span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=317 height=29 src="image/xall.png"></span></p>
+border=0 width=360 height=28 src="image/xall.png"></span></p>
 
 <p class=MsoNormal><a name=initendcase></a><a name=xmanual></a><span
 lang=EN-US>When the </span><span class=Cdigo><span lang=EN-US>Use all cases</span></span><span
@@ -2395,7 +2473,7 @@ minimum values in the selected series are in different orders of magnitude,
 setting this option off may be desirable. </span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=332 height=29 src="image/yselfscaling.png"></span></p>
+border=0 width=369 height=23 src="image/yselfscaling.png"></span></p>
 
 <p class=MsoNormal><a name=minmaxy></a><span lang=EN-US>To manually set the
 maximum and minimum values of the vertical axis (Y), uncheck this option to
@@ -2438,7 +2516,7 @@ plots</a>. Y2 always use self-scaling (from series values) but the primary
 scale (Y) can still be <a href="#scaling">manually set</a>.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=216 height=27 src="image/y2_axis.png"></span></p>
+border=0 width=254 height=23 src="image/y2_axis.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>When the </span><span class=Cdigo><span
 lang=EN-US>Y2</span></span><span lang=EN-US> </span><span class=Cdigo><span
@@ -2452,10 +2530,10 @@ class=Cdigo><span lang=EN-US>Y2</span></span><span lang=EN-US> </span><span
 class=Cdigo><span lang=EN-US>axis</span></span><span lang=EN-US>. The series
 are numbered according to their ordinal position in the <a
 href="#_Series_selected">Series selected</a> list box: the first series is
-numbered as 1, the second, 2, and so on. All the series after the indicated
-series will also use the secondary scale. Therefore, the order number must be
-larger or equal than 2 (at least one series must use the primary scale) and up
-to the total number of selected series.</span></p>
+numbered as 1, the second, 2, and so on. All the series after the indicated series
+will also use the secondary scale. Therefore, the order number must be larger
+or equal than 2 (at least one series must use the primary scale) and up to the
+total number of selected series.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -2471,8 +2549,8 @@ to the total number of selected series.</span></p>
 <h1><a name="_Plot_format_options"></a><span lang=EN-US>Plot format options</span></h1>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
-lang=EN-US><a href="#timeseries">Plot</a></span></span><span lang=EN-US> command
-has several alternatives to present the data in the time series in the <a
+lang=EN-US><a href="#timeseries">Plot</a></span></span><span lang=EN-US>
+command has several alternatives to present the data in the time series in the <a
 href="#_Series_selected">Series selected</a> list box.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -2713,7 +2791,7 @@ class=Cdigo><span lang=EN-US><a href="#statistics">Statistics</a></span></span><
 lang=EN-US> commands on a dialog box like this:</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=225 height=245 src="image/insert_cross.png"></span></p>
+border=0 width=196 height=255 src="image/insert_cross.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>In the </span><span class=Cdigo><span
 lang=EN-US>Time step to add</span></span><span lang=EN-US> field the user type
@@ -2764,7 +2842,7 @@ values are re-arranged to generated 2 or more variables: one or two independent
 ones (for 2D or 3D plots, respectively), and one or more dependent variables.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=225 height=288 src="image/cd3Dcs.png"></span></p>
+border=0 width=196 height=271 src="image/cd3Dcs.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The required options are set using the
 above dialog:</span></p>
@@ -2810,8 +2888,8 @@ selected.</span></p>
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Number of dependent
-variables</span></b></span><span lang=EN-US>: how many dependent variables
-should be used in the plot, generating as many point groups (or surfaces) as a
+variables</span></b></span><span lang=EN-US>: how many dependent variables should
+be used in the plot, generating as many point groups (or surfaces) as a
 function of the number of independent variables. This option is only supported
 if </span><span class=Cdigo><span lang=EN-US><a href="#_Gnuplot">Gnuplot</a></span></span><span
 lang=EN-US> is checked.</span></p>
@@ -2873,7 +2951,7 @@ series, as the dependent variables, plotted on the vertical Z axis. Alternative
 definitions for the data used for the XY plane are available.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=225 height=262 src="image/cd3Dts.png"></span></p>
+border=0 width=196 height=238 src="image/cd3Dts.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The 3D XY Plot options dialog box is
 presented above. Initially, the user is requested to choose between a 2D plot,
@@ -2935,10 +3013,10 @@ below. Such images can be explored by dragging the mouse with main button
 pressed.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=410 height=297 src="image/ex3dsurface.jpg"></span></p>
+width=455 height=330 src="image/ex3dsurface.jpg"></span></p>
 
-<p class=MsoNormal><span lang=EN-US>To save Gnuplot plots to file the user click
-on the diskette icon in the Gnuplot toolbar. The plot is saved using the
+<p class=MsoNormal><span lang=EN-US>To save Gnuplot plots to file the user
+click on the diskette icon in the Gnuplot toolbar. The plot is saved using the
 enhanced metafile format (</span><span class=Cdigo><span lang=EN-US>.emf</span></span><span
 lang=EN-US>). If a different format is required, open the produced file in any
 graphical software and save the image in your preferred format.</span></p>
@@ -3029,9 +3107,9 @@ lang=EN-US>s </span></h2>
 created assign different colors to the series or data elements. If the </span><span
 class=Cdigo><span lang=EN-US>No colors </span></span><span lang=EN-US>check box
 is marked, the series or data are plotted using a gray scale, more appropriate
-for black-and-white printing. Users have also the option to edit line colors
-directly in the <a href="#graph">plot window</a> before saving the plot to
-file. This way the user can also use dash patterns for the plot lines.</span></p>
+for black-and-white printing. Users have also the option to edit line colors directly
+in the <a href="#graph">plot window</a> before saving the plot to file. This
+way the user can also use dash patterns for the plot lines.</span></p>
 
 <h2><a name=watch></a><a name=grids></a><a name="_Grid"></a><span lang=EN-US>Grids
 </span></h2>
@@ -3047,12 +3125,11 @@ evaluation of the data values.</span></p>
 LSD draws the <a href="#graph">plot windows</a> in an interactive mode,
 allowing the user to interrupt the drawing process by clicking on the </span><span
 class=Cdigo><span lang=EN-US><a href="#graph">Stop</a></span></span><span
-lang=EN-US> button (or pressing the </span><span class=Cdigo><span lang=EN-US>S</span></span><span
-lang=EN-US> key). If unchecked, the plot is created in background, increasing
+lang=EN-US> button. If unchecked, the plot is created in background, increasing
 slightly the drawing speed but preventing the process to be stopped by the user
 (the </span><span class=Cdigo><span lang=EN-US>Stop</span></span><span
-lang=EN-US> button is grayed and remains inactive). Also, the user cannot
-access other LSD windows during the plot drawing. </span></p>
+lang=EN-US> button is unavailable). Also, if this option is not marked, the
+user cannot access other LSD windows during the plot drawing. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
 lang=EN-US>Watch</span></span><span lang=EN-US> option is relevant only for
@@ -3092,7 +3169,7 @@ lang=EN-US>.</span></p>
 <p class=MsoNormal><span lang=EN-US>The field defines how many significant
 digits, or the precision, should be used to represent the values in the <a
 href="#graph">plot window</a> as well in data presented in the <a
-href="log.html">Log window</a>. The default is to use 4 significant digits. Any
+href="log.html">Log window</a>. The default is to use 3 significant digits. Any
 values between 1 and 8 may be selected. This setting does not affect the
 internal (saved) values for the time series, the data computations, or the
 values saved to file when using the </span><span class=Cdigo><span lang=EN-US><a
@@ -3128,9 +3205,10 @@ class=Cdigo><span lang=EN-US>Lines</span></span><span lang=EN-US> is selected,
 the default, the data points are connected by lines and not directly
 represented in the plot. If </span><span class=Cdigo><span lang=EN-US>Points</span></span><span
 lang=EN-US> is chosen, a marker is drawn at each point. According to the
-option, the size or type of the data point markers or the width of the data lines
-is controlled by the content of </span><span class=Cdigo><span lang=EN-US><a
-href="#point_size">Point size</a></span></span><span lang=EN-US> field. </span></p>
+option, the size or type of the data point markers or the width of the data
+lines is controlled by the content of </span><span class=Cdigo><span
+lang=EN-US><a href="#point_size">Point size</a></span></span><span lang=EN-US>
+field. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Note that for graphs using a large number
 of values, with more horizontal points than the screen resolution, the lines
@@ -3195,7 +3273,7 @@ class=Cdigo><span lang=EN-US>Ctrl+P</span></span><span lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
 lang=EN-US>Plot</span></span><span lang=EN-US> button creates a new <a
-href="#graph">plot window</a> presenting the data from the series listed in <a
+href="#graph">plot tab</a> presenting the data from the series listed in <a
 href="#_Series_selected">Series selected list box</a> according to the chosen <a
 href="#_Data_selection_options">data selection options</a> and <a
 href="#_Plot_format_options">plot format options</a>. Several plot type can be
@@ -3221,7 +3299,7 @@ lang=EN-US><a href="#timeseries">Plot</a></span></span><span lang=EN-US>
 command and be listed in the <a href="#graphs">Plots list box</a>. If the plot
 is not already highlighted in the Plots list box, a dialog box asks the user to
 select one before proceeding. This command is equivalent to pressing the button
-</span><span class=Cdigo><span lang=EN-US>Plot</span></span><span lang=EN-US>
+</span><span class=Cdigo><span lang=EN-US>Save</span></span><span lang=EN-US>
 in the corresponding plot window.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Before the plot is saved to file, the user
@@ -3229,13 +3307,29 @@ must confirm or change the plot settings in the Save Plot dialog box, as in the
 example below.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=225 height=221 src="image/save_plot.png"></span></p>
+width=196 height=243 src="image/save_plot.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The following options are available: </span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span class=Cdigo><span
+style='font-family:Symbol;color:windowtext'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><span class=Cdigo><b><span lang=EN-US>SVG</span></b></span><span
+class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;color:windowtext'>
+/ </span></span><span class=Cdigo><b><span lang=EN-US>Postscript</span></b></span><span
+class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;color:windowtext'>:
+define the file format between two options: Scalable Vector Graphics (SVG), the
+default, or Encapsulated Postscript (EPS). SVG format (</span></span><span
+class=Cdigo><span lang=EN-US>.svg</span></span><span class=Cdigo><span
+lang=EN-US style='font-family:"Arial",sans-serif;color:windowtext'> extension)
+is a standard internet format accepted by most modern software. EPS format</span></span><span
+lang=EN-US> (</span><span class=Cdigo><span lang=EN-US>.eps</span></span><span
+lang=EN-US> extension) is an older format, accepted by a more limited number of
+software packages.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Color</span></b></span><span
 lang=EN-US> / </span><span class=Cdigo><b><span lang=EN-US>Grayscale</span></b></span><span
 lang=EN-US> / </span><span class=Cdigo><b><span lang=EN-US>Mono</span></b></span><span
@@ -3247,7 +3341,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><span class=Cdigo><b><span lang=EN-US>Landscape</span></b></span><span
 lang=EN-US> / </span><span class=Cdigo><b><span lang=EN-US>Portrait</span></b></span><span
 lang=EN-US>: choose to save the image in horizontal or vertical orientation,
-respectively.</span></p>
+respectively. This option is only available when the Encapsulated Postscript
+(EPS) format is selected (see above).</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -3255,7 +3350,9 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><span class=Cdigo><b><span lang=EN-US>Dimension</span></b></span><span
 lang=EN-US>: define the width (in millimeters) of the picture assuming a 96 DPI
 (dots per inch) resolution for the output device. Default is 270 mm. Higher
-resolution devices will show an image proportionally smaller.</span></p>
+resolution devices will show an image proportionally smaller. This option is
+only available when the Encapsulated Postscript (EPS) format is selected (see
+above).</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -3266,11 +3363,16 @@ plot. Uncheck this option to be able to add the legends later.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>After confirming the plot image settings
 (press </span><span class=Cdigo><span lang=EN-US>OK</span></span><span
-lang=EN-US>), LSD requests the subdirectory and the file name to be used. The
-image file is saved in the encapsulated Postscript (</span><span class=Cdigo><span
-lang=EN-US>.eps</span></span><span lang=EN-US> extension). This is a high
-quality, vector-based format which is accepted by most text and image software
-packages. </span></p>
+lang=EN-US>), LSD requests the disk directory and the file name to be used. </span></p>
+
+<p class=MsoNormal><span lang=EN-US>The image file is always saved in high
+quality, vector-based formats which are accepted by most text and image
+software packages, like LaTex, OpenOffice, Microsoft Office (SVG only), Chrome,
+Firefox, etc. Format conversion to raster-based formats, like JPEG or PNG,
+should be avoided. When format conversion is needed, the use of an external
+utility is necessary. For basic needs, there are many websites offering
+conversion from SVG and EPS to any format. For advanced conversion controls,
+there are free tools like Inkscape.</span></p>
 
 <h2><a name=save></a><a name="_Save_Data"></a><span lang=EN-US>Save Data </span></h2>
 
@@ -3285,7 +3387,7 @@ to be chosen using the dialog box presented when the </span><span class=Cdigo><s
 lang=EN-US>Save Data</span></span><span lang=EN-US> button is pressed.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=225 height=155 src="image/save_data.png"></span></p>
+width=196 height=144 src="image/save_data.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>Options available: </span></p>
 
@@ -3325,7 +3427,7 @@ decompression, speeding up data reading.</span></p>
 dialog box with additional options is presented:</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=225 height=430 src="image/save_data_txt.png"></span></p>
+width=196 height=405 src="image/save_data_txt.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The offered options are:</span></p>
 
@@ -3457,19 +3559,19 @@ statistics on the time series in the <a href="#_Series_selected">Series
 selected list box</a> and present them in the <a href="log.html">Log window</a>.
 If </span><span class=Cdigo><span lang=EN-US><a href="#ts_cs">Time series</a></span></span><span
 lang=EN-US> is checked, the time steps to be considered in the computation are
-defined by the <a href="#xscaling">cases selection option</a>. Alternatively,
-when </span><span class=Cdigo><span lang=EN-US><a href="#ts_cs">Cross-section</a></span></span><span
+defined by the <a href="#xscaling">cases selection option</a>. Alternatively, when
+</span><span class=Cdigo><span lang=EN-US><a href="#ts_cs">Cross-section</a></span></span><span
 lang=EN-US> is selected, the computation is performed across the time series
 using the time steps chosen by the user as cross-section(s). If the </span><span
 class=Cdigo><span lang=EN-US><a href="#_Series_in_logs">Series in logs</a></span></span><span
 lang=EN-US> option is set, the natural logarithm of the time series data is
-used for computation.</span></p>
+used for computation. The header indicates the total number of cases
+considered.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>The provided statistics are: average,
-standard deviation, variance, absolute minimum and maximum. The statistics are
-reported as one line for each time series, informing also the name, instance
-index and the number of cases considered. The header indicates the total number
-of cases considered. </span></p>
+<p class=MsoNormal><span lang=EN-US>The provided statistics are average (mean),
+median, standard deviation (population), and absolute minimum and maximum. The
+statistics are reported as one line for each time series, also informing the
+name, instance index and the number of cases considered. </span></p>
 
 <h2><a name="_Histogram"></a><a name=histogram></a><span lang=EN-US>Histogram</span></h2>
 
@@ -3492,7 +3594,7 @@ in logs</a></span></span><span lang=EN-US> option is set, the natural logarithm
 of the time series data is used for computation.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=581 height=371 src="image/histogram_plot.png"></span></p>
+width=596 height=457 src="image/histogram_plot.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>Above, a sample histogram plot is shown.
 The bars represent the classes or bins grouping the data according to their
@@ -3503,7 +3605,7 @@ fitting (the green line) for the data statistical moments (indeed, a very bad
 fit in this example).</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=225 height=164 src="image/histogram.png"></span></p>
+width=196 height=173 src="image/histogram.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>There are three or four options in the
 histogram dialog box:</span></p>
@@ -3555,17 +3657,18 @@ href="#_Series_selected">Series selected list box</a>. The data values must be
 positive values, including 0, in which just the integer part is considered. If
 the </span><span class=Cdigo><span lang=EN-US><a href="#_Series_in_logs">Series
 in logs</a></span></span><span lang=EN-US> option is set, the natural logarithm
-of the time series data is used for computation and 0 is not a valid data
-value).</span></p>
+of the time series data is used for computation and 0 is not a valid data value).</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=325 height=349 src="image/lattice_plot.png"></span></p>
+width=585 height=458 src="image/lattice_plot.png"></span></p>
 
-<p class=MsoNormal><span lang=EN-US>The example above presents a 20×10 lattice
-(20 rows and 10 columns) sample. The quick color change in the upper part of
-the plot indicates an almost random pattern of change in the data values.
-However, the lower part of the lattice suggests a reduction in the frequency of
-the data values change (notice the repeated color cells).</span></p>
+<p class=MsoNormal><span lang=EN-US>The example above presents a 25×20 lattice
+(25 rows and 20 columns) sample. The quick color change all over the plot
+indicates an almost random pattern of change in the data values. Lattice tab or
+window has two buttons (</span><span class=Cdigo><span lang=EN-US>Save</span></span><span
+lang=EN-US> and </span><span class=Cdigo><span lang=EN-US>Detach</span></span><span
+lang=EN-US>/</span><span class=Cdigo><span lang=EN-US>Attach</span></span><span
+lang=EN-US>), common to <a href="#graph">all plots</a>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>If </span><span class=Cdigo><span
 lang=EN-US><a href="#ts_cs">Time series</a></span></span><span lang=EN-US> is
@@ -3587,7 +3690,7 @@ options dialog box is presented below (the times series version omits the first
 field). </span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=223 height=115 src="image/insert_lat.png"></span></p>
+border=0 width=196 height=142 src="image/insert_lat.png"></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 class=Cdigo><span style='font-family:Symbol;color:windowtext'>·<span
@@ -3666,8 +3769,8 @@ lost when the Analysis of Results is closed. Only items explicitly saved to
 file, using the </span><span class=Cdigo><span lang=EN-US><a href="#postscript">Save
 Plot</a></span></span><span lang=EN-US> and </span><span class=Cdigo><span
 lang=EN-US><a href="#save">Save Data</a></span></span><span lang=EN-US>
-buttons, are preserved after the Analysis of Results session is terminated (even
-if the <a href="browser.html">LSD Browser</a> is not closed).</span></p>
+buttons, are preserved after the Analysis of Results session is terminated
+(even if the <a href="browser.html">LSD Browser</a> is not closed).</span></p>
 
 <h2><a name=Gnuplot></a><span lang=EN-US>Gnuplot </span></h2>
 
@@ -3725,7 +3828,7 @@ name="_Gnuplot&gt;Options"></a><span class=Ttulo2Char><span lang=EN-US>Gnuplot&g
 be used by LSD when creating <a href="#seq_xy">XY plots</a> using Gnuplot.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=299 height=309 src="image/gnuplot_options.png"></span></p>
+width=295 height=294 src="image/gnuplot_options.png"></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span class=Cdigo><span
@@ -3803,7 +3906,7 @@ permanently in the </span><span class=Cdigo><span lang=EN-US>src/defaults.tcl</s
 lang=EN-US> file).</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=299 height=267 src="image/colors.png"></span></p>
+width=254 height=248 src="image/colors.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>Clicking the </span><span class=Cdigo><span
 lang=EN-US>Default</span></span><span lang=EN-US> button resets all colors to
@@ -3820,7 +3923,7 @@ permanently in the </span><span class=Cdigo><span lang=EN-US>src/defaults.tcl</s
 lang=EN-US> file).</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=326 height=279 src="image/plot_param.png"></span></p>
+width=326 height=276 src="image/plot_param.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available options are:</span></p>
 
@@ -3851,8 +3954,8 @@ axis values.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Vertical borders</span></b></span><span
 lang=EN-US>: heights in screen pixels of the vertical borders on the top and
-the bottom of the plotting area, respectively. The bottom border contains the
-horizontal (X) axis values and the data legends.</span></p>
+the bottom of the plotting area, respectively. The bottom border contains the horizontal
+(X) axis values and the data legends.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -3890,8 +3993,8 @@ specification can be changed at the individual legend level using the right
 mouse button on the <a href="#graph">plot window</a>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>High definition screens may require
-increasing the size-related values above to produce <a href="#graph">plot
-windows</a> of adequate size. In this case, it is recommended to use a common
+increasing the size-related values above to produce <a href="#graph">plot windows</a>
+of adequate size. In this case, it is recommended to use a common
 multiplication value to keep the adequate proportions.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Clicking the </span><span class=Cdigo><span
@@ -3910,7 +4013,7 @@ change the defaults permanently in the </span><span class=Cdigo><span
 lang=EN-US>src/defaults.tcl</span></span><span lang=EN-US> file).</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=299 height=142 src="image/lattice_param.png"></span></p>
+width=254 height=142 src="image/lattice_param.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available options are:</span></p>
 

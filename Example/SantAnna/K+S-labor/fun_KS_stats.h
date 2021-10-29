@@ -10,6 +10,27 @@
 
 /*========================= COUNTRY-LEVEL STATS ==============================*/
 
+EQUATION( "CD" )
+/*
+Total credit demand
+*/
+RESULT( VS( SECSTAL2, "CD1" ) + VS( SECSTAL2, "CD2" ) )
+
+
+EQUATION( "CDc" )
+/*
+Total credit demand constraint
+*/
+RESULT( VS( SECSTAL2, "CD1c" ) + VS( SECSTAL2, "CD2c" ) )
+
+
+EQUATION( "CS" )
+/*
+Total credit supplied
+*/
+RESULT( VS( SECSTAL2, "CS1" ) + VS( SECSTAL2, "CS2" ) )
+
+
 EQUATION( "Creal" )
 /*
 Real aggregated consumption
@@ -17,32 +38,23 @@ Real aggregated consumption
 RESULT( VS( GRANDPARENT, "C" ) / VS( CONSECL2, "CPI" ) )
 
 
-EQUATION( "DebGDP" )
-/*
-Government debt on GDP ratio
-*/
-v[1] = VS( GRANDPARENT, "GDP" );
-RESULT( v[1] > 0 ? VS( GRANDPARENT, "Deb" ) / v[1] : CURRENT )
-
-
 EQUATION( "DefGDP" )
 /*
 Government deficit on GDP ratio
 */
-v[1] = VS( GRANDPARENT, "GDP" );
+v[1] = VS( GRANDPARENT, "GDPnom" );
 RESULT( v[1] > 0 ? VS( GRANDPARENT, "Def" ) / v[1] : CURRENT )
 
 
 EQUATION( "GDI" )
 /*
-Gross domestic income (real terms)
+Gross domestic income (nominal terms)
 */
-RESULT( ( VS( CAPSECL2, "W1" ) + VS( CONSECL2, "W2" ) +
-		  VS( CAPSECL2, "Pi1" ) + VS( CONSECL2, "Pi2" ) + 
-		  VS( FINSECL2, "PiB" ) + VS( GRANDPARENT, "G" ) - 
-		  VS( GRANDPARENT, "Tax" ) + 
-		  VS( CAPSECL2, "PPI" ) * VS( CONSECL2, "SI" ) / VS( CONSECL2, "m2" ) ) / 
-		  VS( CONSECL2, "CPI" ) )
+RESULT( VS( CAPSECL2, "W1" ) + VS( CONSECL2, "W2" ) +
+		VS( CAPSECL2, "Pi1" ) + VS( CONSECL2, "Pi2" ) + 
+		VS( FINSECL2, "PiB" ) + VS( GRANDPARENT, "G" ) - 
+		VS( GRANDPARENT, "Tax" ) + 
+		VS( CAPSECL2, "PPI" ) * VS( CONSECL2, "SI" ) / VS( CONSECL2, "m2" ) )
 
 
 EQUATION( "dA" )
@@ -55,18 +67,11 @@ RESULT( v[1] > 0 ? VS( GRANDPARENT, "A" ) / v[1] - 1 : 0 )
 
 /*========================= FINANCIAL SECTOR STATS ===========================*/
 
-EQUATION( "BadDeb" )
-/*
-Total banking sector bad debt (defaults) on the period
-*/
-RESULT( SUMS( FINSECL2, "_BadDeb" ) )
-
-
 EQUATION( "BadDebAcc" )
 /*
-Bank accumulated losses from bad debt
+Accumulated losses from bad debt in financial sector
 */
-RESULT( CURRENT + VS( SECSTAL2, "BadDeb" ) )
+RESULT( CURRENT + VS( FINSECL2, "BadDeb" ) )
 
 
 EQUATION( "Bda" )
@@ -88,7 +93,7 @@ RESULT( COUNT_CNDS( FINSECL2, "Bank", "_Gbail", ">", 0 ) /
 
 EQUATION( "HHb" )
 /*
-Normalized Herfindahl-Hirschman index for banking sector
+Normalized Herfindahl-Hirschman index for financial sector
 */
 i = COUNTS( FINSECL2, "Bank" );
 RESULT( i > 1 ? max( 0, ( WHTAVES( FINSECL2, "_fB", "_fB" ) - 1.0 / i ) / 
@@ -97,7 +102,7 @@ RESULT( i > 1 ? max( 0, ( WHTAVES( FINSECL2, "_fB", "_fB" ) - 1.0 / i ) /
 
 EQUATION( "HPb" )
 /*
-Hymer-Pashigian index for banking sector
+Hymer-Pashigian index for financial sector
 */
 
 v[0] = 0;										// index accumulator
@@ -109,17 +114,59 @@ RESULT( v[0] )
 
 EQUATION( "TC" )
 /*
-Total credit supply provided by banks to firms.
-Negative value (-1) means unlimited credit.
+Total credit supply provided by financial sector
+Negative value (-1) means unlimited credit
 */
 
-if ( VS( GRANDPARENT, "flagCreditRule" ) != 1 )
+if ( VS( GRANDPARENT, "flagCreditRule" ) < 1 )
 	END_EQUATION( -1 );
 
 RESULT( SUMS( FINSECL2, "_TC" ) )
 
 
 /*======================= CAPITAL-GOOD SECTOR STATS ==========================*/
+
+EQUATION( "AtauAvg" )
+/*
+Average labor productivity of machines supplied by capital-good sector
+*/
+RESULT( AVES( CAPSECL2, "_Atau" ) )
+
+
+EQUATION( "BtauAvg" )
+/*
+Average labor productivity of machines produced by capital-good sector
+*/
+RESULT( AVES( CAPSECL2, "_Btau" ) )
+
+
+EQUATION( "CD1" )
+/*
+Total credit demand of firms in capital-good sector
+*/
+RESULT( SUMS( CAPSECL2, "_CD1" ) )
+
+
+EQUATION( "CD1c" )
+/*
+Total credit demand constraint of firms in capital-good sector
+*/
+RESULT( SUMS( CAPSECL2, "_CD1c" ) )
+
+
+EQUATION( "CS1" )
+/*
+Total credit supplied to firms in capital-good sector
+*/
+RESULT( SUMS( CAPSECL2, "_CS1" ) )
+
+
+EQUATION( "Deb1max" )
+/*
+Total maximum prudential credit supplied to firms in capital-good sector
+*/
+RESULT( SUMS( CAPSECL2, "_Deb1max" ) )
+
 
 EQUATION( "HCavg" )
 /*
@@ -211,11 +258,11 @@ Average age of firms in capital-good sector
 RESULT( T - AVES( CAPSECL2, "_t1ent" ) )
 
 
-EQUATION( "cred1c" )
+EQUATION( "i1" )
 /*
-Total credit constraint of firms in capital-good sector
+Interest paid by capital-good sector
 */
-RESULT( SUMS( CAPSECL2, "_cred1c" ) )
+RESULT( SUMS( CAPSECL2, "_i1" ) )
 
 
 EQUATION( "s1avg" )
@@ -224,7 +271,7 @@ Average workers compound skills in capital-good sector
 */
 
 if ( VS( GRANDPARENT, "flagWorkerLBU" ) == 0 )	// no worker-level learning?
-	END_EQUATION( 1 );							// skills = 1
+	END_EQUATION( INISKILL );
 	
 v[0] = i = 0;									// accumulators
 CYCLES( CAPSECL2, cur, "Wrk1" )
@@ -233,7 +280,7 @@ CYCLES( CAPSECL2, cur, "Wrk1" )
 	++i;				
 }
 
-RESULT( i > 0 ? v[0] / i : 0 )
+RESULT( i > 0 ? v[0] / i : CURRENT )
 
 
 /*======================= CONSUMER-GOOD SECTOR STATS =========================*/
@@ -308,6 +355,41 @@ Number of bonus paying firms in consumption-good sector
 RESULT( COUNT_CNDS( CONSECL2, "Firm2", "_B2", ">", 0 ) )
 
 
+EQUATION( "CD2" )
+/*
+Total credit demand of firms in consumer-good sector
+*/
+RESULT( SUMS( CONSECL2, "_CD2" ) )
+
+
+EQUATION( "CD2c" )
+/*
+Total credit demand constraint of firms in consumer-good sector
+*/
+RESULT( SUMS( CONSECL2, "_CD2c" ) )
+
+
+EQUATION( "CS2" )
+/*
+Total credit supplied to firms in consumer-good sector
+*/
+RESULT( SUMS( CONSECL2, "_CS2" ) )
+
+
+EQUATION( "Deb2max" )
+/*
+Total maximum prudential credit supplied to firms in consumer-good sector
+*/
+RESULT( SUMS( CONSECL2, "_Deb2max" ) )
+
+
+EQUATION( "EId" )
+/*
+Total desired expansion investment in consumption-good sector
+*/
+RESULT( SUMS( CONSECL2, "_EId" ) )
+
+
 EQUATION( "HH2" )
 /*
 Normalized Herfindahl-Hirschman index for consumption-good sector
@@ -377,6 +459,22 @@ else
 RESULT( v[0] )
 
 
+EQUATION( "RS2" )
+/*
+Machine (planned) scrapping rate in consumption-good sector
+*/
+v[1] = VLS( CONSECL2, "K", 1 );
+RESULT( T > 1 && v[1] > 0 ? SUMS( CONSECL2, "_RS2" ) / 
+		( v[1] / VS( CONSECL2, "m2" ) ) : 0 )
+
+
+EQUATION( "SId" )
+/*
+Total desired substitution investment in consumption-good sector
+*/
+RESULT( SUMS( CONSECL2, "_SId" ) )
+
+
 EQUATION( "age2avg" )
 /*
 Average age of firms in consumption-good sector
@@ -384,18 +482,18 @@ Average age of firms in consumption-good sector
 RESULT( T - AVES( CONSECL2, "_t2ent" ) )
 
 
-EQUATION( "cred2c" )
-/*
-Total credit constraint of firms in consumer-good sector
-*/
-RESULT( SUMS( CONSECL2, "_cred2c" ) )
-
-
 EQUATION( "dN" )
 /*
 Change in total inventories (real terms)
 */
 RESULT( VS( CONSECL2, "N" ) - VLS( CONSECL2, "N", 1 ) )
+
+
+EQUATION( "i2" )
+/*
+Interest paid by consumption-good sector
+*/
+RESULT( SUMS( CONSECL2, "_i2" ) )
 
 
 EQUATION( "mu2avg" )
@@ -454,7 +552,7 @@ Average weighted firms' workers compound skills in consumption-good sector
 */
 
 if ( VS( GRANDPARENT, "flagWorkerLBU" ) == 0 )	// no worker-level learning?
-	END_EQUATION( 1 );							// skills = 1
+	END_EQUATION( INISKILL );
 	
 RESULT( WHTAVES( CONSECL2, "_s2avg", "_f2" ) )
 
@@ -729,14 +827,25 @@ i = V( "_L2" );
 RESULT( i > 0 ? V( "_Q2e" ) / i : CURRENT )
 
 
+EQUATION( "_RS2" )
+/*
+Number of machines to scrap of firm in consumption-good sector
+*/
+
+v[0] = 0;
+CYCLE( cur, "Vint" )
+	v[0] += abs( VS( cur, "__RSvint" ) );
+	
+RESULT( v[0] )
+
+
 EQUATION( "_sT2avg" )
 /*
 Weighted average workers tenure skills of a firm in consumption-good sector
 */
 
-i = VS( GRANDPARENT, "flagWorkerLBU" );			// worker-level learning mode
-if ( i == 0 || i == 1 )							// no learning by tenure mode?
-	END_EQUATION( 1 );							// skills = 1
+if ( VS( GRANDPARENT, "flagWorkerLBU" ) <= 1 )	// no learning by tenure mode?
+	END_EQUATION( INISKILL );
 
 v[0] = v[1] = 0;
 CYCLE( cur, "Wrk2" )
@@ -756,7 +865,7 @@ Weighted average workers vintage skills of a firm in consumption-good sector
 
 i = VS( GRANDPARENT, "flagWorkerLBU" );			// worker-level learning mode
 if ( i == 0 || i == 2 )							// no learning by vintage mode?
-	END_EQUATION( 1 );							// skills = 1
+	END_EQUATION( INISKILL );
 	
 v[0] = v[1] = 0;
 CYCLE( cur, "Wrk2" )
@@ -768,7 +877,7 @@ CYCLE( cur, "Wrk2" )
 
 if ( v[0] == 0 || v[1] == 0 )					// no worker hired or no prod.?
 {
-	j = VS( HOOK( TOPVINT ), "_IDvint" );		// current top vintage
+	j = VS( HOOK( TOPVINT ), "__IDvint" );		// current top vintage
 	v[0] = V_EXTS( GRANDPARENT, countryE, vintProd[ j ].sVp );
 }												// assume public skills
 else
@@ -804,6 +913,18 @@ EQUATION_DUMMY( "Gini", "" )
 /*
 Gini index including workers all income and firm owners net cash flows
 Updated in 'wAvg'
+*/
+
+EQUATION_DUMMY( "exit1fail", "" )
+/*
+Rate of exiting bankrupt firms in capital-good sector
+Updated in 'entry1exit'
+*/
+
+EQUATION_DUMMY( "exit2fail", "" )
+/*
+Rate of exiting bankrupt firms in consumption-good sector
+Updated in 'entry2exit'
 */
 
 EQUATION_DUMMY( "wAvgReal", "wAvg" )

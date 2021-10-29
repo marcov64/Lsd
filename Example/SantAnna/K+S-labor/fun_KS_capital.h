@@ -35,16 +35,18 @@ RESULT( max( ceil( v[2] + v[3] - v[5] ), 0 ) )	// hires scaled and rounded up
 
 EQUATION( "MC1" )
 /*
-Market conditions index for entry in capital-good sector
+Market entry conditions index in capital-good sector
 */
 RESULT( log( max( VL( "NW1", 1 ), 0 ) + 1 ) - log( VL( "Deb1", 1 ) + 1 ) )
 
 
 EQUATION( "entry1exit" )
 /*
+Net (number of) entrant firms in capital-good sector
 Perform entry and exit of firms in the capital-good sector
 All relevant aggregate variables in sector must be computed before existing
 firms are deleted, so all active firms in period are considered
+Also updates 'F1', 'cEntry', 'cExit', 'exit1', 'entry1', 'exit1fail'
 */
 
 VS( CONSECL1, "K" );							// ensure canceled orders acct'd
@@ -94,27 +96,29 @@ CYCLE( cur, "Firm1" )
 }	
 
 // quit candidate firms exit, except the best one if all going to quit
-i = j = 0;										// firm counters
+v[6] = i = j = 0;								// firm counters
 CYCLE_SAFE( cur, "Firm1" )
 {
 	if ( quit[ i ] )
 	{
 		if ( h > 0 || i != k )					// firm must exit?
 		{
-			// account liquidation credit due to public, if any
-			v[2] += exit_firm1( cur );			// delete object and liq. val.
-			
 			++j;								// count exits
+			if ( VS( cur, "_NW1" ) < 0 )		// count bankruptcies
+				++v[6];
+			
+			// account liquidation credit due to public, if any
+			v[2] += exit_firm1( var, cur );		// del obj & collect liq. value
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
 			{
 				// new equity required
-				v[6] = NW10u + VS( cur, "_Deb1" ) - VS( cur, "_NW1" );
-				v[1] += v[6];					// accumulate "entry" equity cost
+				v[7] = NW10u + VS( cur, "_Deb1" ) - VS( cur, "_NW1" );
+				v[1] += v[7];					// accumulate "entry" equity cost
 				
 				WRITES( cur, "_Deb1", 0 );		// reset debt
-				INCRS( cur, "_NW1", v[6] );		// add new equity
+				INCRS( cur, "_NW1", v[7] );		// add new equity
 			}
 	}
 
@@ -124,10 +128,10 @@ CYCLE_SAFE( cur, "Firm1" )
 V( "f1rescale" );								// redistribute exiting m.s.
 
 // compute the potential number of entrants
-v[7] = ( MC1_1 == 0 ) ? 0 : MC1 / MC1_1 - 1;// change in market conditions
+v[8] = ( MC1_1 == 0 ) ? 0 : MC1 / MC1_1 - 1;	// change in market conditions
 
-k = max( 0, ceil( F1 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
-						 omicron * min( max( v[7], x2inf ), x2sup ) ) ) );
+k = max( 0, round( F1 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
+						  omicron * min( max( v[8], x2inf ), x2sup ) ) ) );
 				 
 // apply return-to-the-average stickiness random shock to the number of entrants
 k -= min( RND * stick * ( ( double ) ( F1 - j ) / F10 - 1 ) * F10, k );
@@ -140,13 +144,14 @@ if ( F1 + k > F1max )
 	k = F1max - F1 + j;
 
 v[0] = k - j;									// net number of entrants
-v[1] += entry_firm1( THIS, k, false );			// add entrant-firm objects
+v[1] += entry_firm1( var, THIS, k, false );		// add entrant-firm objects
 
 i = INCR( "F1", v[0] );							// update the number of firms
 INCRS( PARENT, "cEntry", v[1] );				// account equity cost of entry
 INCRS( PARENT, "cExit", v[2] );					// account exit credits
 WRITE( "exit1", ( double ) j / F1 );
 WRITE( "entry1", ( double ) k / F1 );
+WRITES( SECSTAL1, "exit1fail", v[6] / F1 );
 
 V( "f1rescale" );								// redistribute entrant m.s.
 INIT_TSEARCHT( "Firm1", i );					// prepare turbo search indexing
@@ -197,7 +202,7 @@ CYCLE_SAFE( cur, "Wrk1" )
 		if ( VLS( cur1, "_Te", 1 ) + 1 < VS( cur1, "_Tc" ) )// contract not over?
 			continue;							// go to next worker
 		
-		fire_worker( cur1 );					// register fire
+		fire_worker( var, cur1 );				// register fire
 		++i;									// scaled equivalent fires
 	}
 	else
@@ -242,7 +247,7 @@ while ( j > 0 && appl->size( ) > 0 )
 	{
 		// already employed? First quit current job
 		if ( VS( candidate.wrk, "_employed" ) )
-			quit_worker( candidate.wrk );
+			quit_worker( var, candidate.wrk );
 
 		// flag hiring and set wage, employer and vintage to be used by worker
 		hire_worker( candidate.wrk, 1, THIS, v[2] );// set firm, vintage & wage
@@ -264,7 +269,7 @@ while ( j > 0 && appl->size( ) > 0 )
 if ( j > 0 && i == 0 && cur != NULL )			// none hired but someone avail?
 {
 	if ( VS( cur, "_employed" ) )				// quit job if needed
-		quit_worker( cur );
+		quit_worker( var, cur );
 	
 	hire_worker( cur, 1, THIS, v[3] );			// pay requested wage
 	++i;
@@ -282,7 +287,7 @@ EQUATION( "A1" )
 Labor productivity of capital-good sector
 */
 V( "PPI" );										// ensure m.s. are updated
-RESULT( WHTAVE( "_Btau", "_f1" ) )
+RESULT( V( "Q1e" ) > 0 ? WHTAVE( "_Btau", "_f1" ) : CURRENT )
 
 
 EQUATION( "D1" )
@@ -333,7 +338,7 @@ RESULT( SUM( "_L1d" ) )
 
 EQUATION( "L1dRD" )
 /*
-Total R&D labor demand from firms in capital-good sector
+R&D labor demand from firms in capital-good sector
 */
 RESULT( SUM( "_L1dRD" ) )
 
@@ -413,7 +418,7 @@ EQUATION( "dA1b" )
 Notional productivity (bounded) rate of change in capital-good sector
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( THIS, "A1", VS( PARENT, "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "A1", VS( PARENT, "mLim" ), VS( PARENT, "mPer" ) ) )
 
 
 EQUATION( "imi" )
@@ -438,6 +443,14 @@ V( "imi" );										// ensure innovation is done
 RESULT( SUM( "_inn" ) / V( "F1" ) )
 
 
+EQUATION( "p1avg" )
+/*
+Weighted average price charged in capital-good sector
+*/
+v[1] = V( "Q1e" );
+RESULT( v[1] > 0 ? WHTAVE( "_p1", "_Q1e" ) / v[1] : CURRENT )
+
+
 EQUATION( "quits1" )
 /*
 Number of workers quitting jobs (not fired) in period in capital-good sector
@@ -453,7 +466,7 @@ i = 0;
 CYCLE_SAFE( cur, "Wrk1" )
 	if ( VS( SHOOKS( cur ), "_w" ) <= v[1] )	// wage under unemp. benefit?
 	{
-		fire_worker( SHOOKS( cur ) );			// register quit
+		fire_worker( var, SHOOKS( cur ) );		// register quit
 		++i;									// scaled equivalent fires
 	}
 
@@ -472,7 +485,7 @@ i = 0;
 CYCLE_SAFE( cur, "Wrk1" )
 	if ( VS( SHOOKS( cur ), "_age" ) == 1 )		// is a "reborn"?
 	{
-		fire_worker( SHOOKS( cur ) );			// register retirement
+		fire_worker( var, SHOOKS( cur ) );		// register retirement
 		++i;									// scaled equivalent fires
 	}
 
@@ -566,11 +579,5 @@ Updated in 'entry1exit'
 EQUATION_DUMMY( "exit1", "entry1exit" )
 /*
 Rate of exiting firms in capital-good sector
-Updated in 'entry1exit'
-*/
-
-EQUATION_DUMMY( "exit1fail", "entry1exit" )
-/*
-Rate of bankrupt firms in capital-good sector
 Updated in 'entry1exit'
 */

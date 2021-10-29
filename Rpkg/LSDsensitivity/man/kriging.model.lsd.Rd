@@ -7,7 +7,7 @@ Fit a Kriging meta-model to a LSD model sample data
 This function fits a Kriging meta-model (also known as a Gaussian process), using five alternative variance kernels and two trend model options, to the sampled data from a LSD simulation model.
 }
 \usage{
-kriging.model.lsd(data, ext.wgth = 0.5, trendModel = 0, covModel = 0, digits = 4)
+kriging.model.lsd( data, ext.wgth = 0.5, trendModel = 0, covModel = 0, digits = 4 )
 }
 \arguments{
   \item{data}{
@@ -27,7 +27,7 @@ integer: the number of significant digits to show in results. The default is 4.
 }
 }
 \details{
-This fuction fits a universal Kriging meta-model to the experimental data set previously loaded with  \code{\link{read.doe.lsd}} using the Gaussian process method (Rasmussen & Williams, 2006).
+This function fits a universal Kriging meta-model to the experimental data set previously loaded with  \code{\link{read.doe.lsd}} using the Gaussian process method (Rasmussen & Williams, 2006).
 
 This function is a wrapper to the function \code{\link[DiceKriging]{km}} in \code{\link[DiceKriging]{DiceKriging-package}}.
 }
@@ -64,15 +64,13 @@ Roustant O, Ginsbourger D, Deville Y (2012) \emph{Dicekriging, diceoptim: two R 
 See the note in \link[LSDsensitivity]{LSDsensitivity-package} for step-by-step instructions on how to perform the complete sensitivity analysis process using LSD and R.
 }
 \seealso{
-\code{\link{read.doe.lsd}}
+\code{\link{read.doe.lsd}()}
 
 \code{\link[DiceKriging]{km}} in \code{\link[DiceKriging]{DiceKriging-package}}
 }
 \examples{
-# Examples require the data files produced by LSD, please check the package
-# notes and LSD documentation on how to generate you simulation results files.
-# Please note that the full set of sensitivity analysis files must be available,
-# as detailed in the help page for the read.doe.lsd function.
+# get the example directory name
+path <- system.file( "extdata/sobol", package = "LSDsensitivity" )
 
 # Steps to use this function:
 # 1. define the variables you want to use in the analysis
@@ -81,12 +79,11 @@ See the note in \link[LSDsensitivity]{LSDsensitivity-package} for step-by-step i
 #    estimation and the other for out-of-sample (external) validation
 # 3. fit a Kriging (or polynomial) meta-model using kriging.model.lsd
 
-\donttest{
 lsdVars <- c( "var1", "var2", "var3" )         # the definition of existing variables
 
-dataSet <- read.doe.lsd( ".",                  # data files relative folder
-                         "Sim1",               # data files base name (same as .lsd file)
-                         "var1",               # variable name to perform the sensitivity analysis
+dataSet <- read.doe.lsd( path,                 # data files folder
+                         "Sim3",               # data files base name (same as .lsd file)
+                         "var3",               # variable name to perform the sensitivity analysis
                          does = 2,             # number of experiments (data + external validation)
                          saveVars = lsdVars )  # LSD variables to keep in dataset
 
@@ -94,7 +91,6 @@ model <- kriging.model.lsd( dataSet )          # estimate best Kriging meta-mode
 
 print( model$comparison )                      # model comparison table
 print( model$estimation.std )                  # model estimation (standardized) table
-}
 }
 \keyword{ methods }
 \keyword{ models }

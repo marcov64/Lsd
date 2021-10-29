@@ -7,12 +7,12 @@ Dimension information for a LSD results file
 This function reads some dimension information from a LSD results file (.res): number of time steps, number of variables and the original column (variable) names.
 }
 \usage{
-info.dimensions.lsd(file)
+info.dimensions.lsd( file )
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{file}{
-the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, getwd(). Tilde-expansion is performed where supported. This can be a compressed file (see file) and must include the appropriated extension (usually .res or .res.gz).
+the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, \code{\link[base]{getwd}()}. Tilde-expansion is performed where supported. This can be a compressed file (see file) and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
 }
 }
 \details{
@@ -26,16 +26,17 @@ Returns a list containing two integer values and a character vector describing t
 }
 \author{Marcelo C. Pereira}
 \seealso{
-\code{\link{info.details.lsd}},
-\code{\link{info.names.lsd}},
-\code{\link{info.init.lsd}}
+\code{\link{list.files.lsd}()}
+\code{\link{info.details.lsd}()},
+\code{\link{info.names.lsd}()},
+\code{\link{info.init.lsd}()}
 }
 \examples{
-# Get the examples directory
-path <- system.file( "extdata", package = "LSDinterface" )
+# get the list of file names of example LSD results
+files <- list.files.lsd( system.file( "extdata", package = "LSDinterface" ) )
 
-info.dimensions.lsd( paste0( path, "/", "Sim1_1.res" ) )
-info.dimensions.lsd( paste0( path, "/", "Sim1_2.res.gz" ) )
+# get dimensions from second file
+info.dimensions.lsd( files[ 2 ] )
 }
 \keyword{ attribute }
 \keyword{ file }

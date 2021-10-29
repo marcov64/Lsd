@@ -45,7 +45,7 @@ while ( v[1] > 0.01 )
 			if ( sup2[ j ] > 0 )				// product to supply?
 			{
 				v[4] = v[1] * f2[ j ];			// firm demand allocation
-			
+				
 				if ( v[4] <= sup2[ j ] )		// can supply all demanded?
 				{
 					INCRS( cur, "_D2", v[4] );	// supply all demanded
@@ -87,16 +87,18 @@ RESULT( v[0] )
 
 EQUATION( "MC2" )
 /*
-Market conditions index for entry in consumer-good sector
+Market entry conditions index in consumer-good sector
 */
 RESULT( log( max( VL( "NW2", 1 ), 0 ) + 1 ) - log( VL( "Deb2", 1 ) + 1 ) )
 
 
 EQUATION( "entry2exit" )
 /*
+Net (number of) entrant firms in consumer-good sector
 Perform entry and exit of firms in the consumer-good sector
 All relevant aggregate variables in sector must be computed before existing
 firms are deleted, so all active firms in period are considered
+Also updates 'F2', 'cEntry', 'cExit', 'exit2', 'entry2', 'exit2fail'
 */
 
 SUM( "_D2d" );									// desired demand before chg
@@ -149,27 +151,29 @@ CYCLE( cur, "Firm2" )
 }	
 
 // quit candidate firms exit, except the best one if all going to quit
-i = j = 0;										// firm counters
+v[7] = i = j = 0;								// firm counters
 CYCLE_SAFE( cur, "Firm2" )
 {
 	if ( quit[ i ] )
 	{
 		if ( h > 0 || i != k )					// firm must exit?
 		{
-			// account liquidation credit due to public, if any
-			v[3] += exit_firm2( cur, & v[1] );	// delete object and liq. val.
-			
 			++j;								// count exits
+			if ( VS( cur, "_NW2" ) < 0 )		// count bankruptcies
+				++v[7];
+
+			// account liquidation credit due to public, if any
+			v[3] += exit_firm2( var, cur, & v[1] );// del obj & collect liq. val.
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
 			{
 				// new equity required
-				v[7] = NW20u + VS( cur, "_Deb2" ) - VS( cur, "_NW2" );
-				v[2] += v[7];					// accumulate "entry" equity cost
+				v[8] = NW20u + VS( cur, "_Deb2" ) - VS( cur, "_NW2" );
+				v[2] += v[8];					// accumulate "entry" equity cost
 				
 				WRITES( cur, "_Deb2", 0 );		// reset debt
-				INCRS( cur, "_NW2", v[7] );		// add new equity
+				INCRS( cur, "_NW2", v[8] );		// add new equity
 			}
 	}
 
@@ -179,10 +183,10 @@ CYCLE_SAFE( cur, "Firm2" )
 V( "f2rescale" );								// redistribute exiting m.s.
 
 // compute the potential number of entrants
-v[8] = ( MC2_1 == 0 ) ? 0 : MC2 / MC2_1 - 1;// change in market conditions
+v[9] = ( MC2_1 == 0 ) ? 0 : MC2 / MC2_1 - 1;	// change in market conditions
 
-k = max( 0, ceil( F2 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
-						 omicron * min( max( v[8], x2inf ), x2sup ) ) ) );
+k = max( 0, round( F2 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
+						  omicron * min( max( v[9], x2inf ), x2sup ) ) ) );
 				 
 // apply return-to-the-average stickiness random shock to the number of entrants
 k -= min( RND * stick * ( ( double ) ( F2 - j ) / F20 - 1 ) * F20, k );
@@ -195,7 +199,7 @@ if ( F2 + k > F2max )
 	k = F2max - F2 + j;
 
 v[0] = k - j;									// net number of entrants
-v[2] += entry_firm2( THIS, k, false );			// add entrant-firm objects
+v[2] += entry_firm2( var, THIS, k, false );		// add entrant-firm objects
 
 INCR( "F2", v[0] );								// update the number of firms
 INCR( "fires2", v[1] );							// update fires
@@ -203,6 +207,7 @@ INCRS( PARENT, "cEntry", v[2] );				// account equity cost of entry
 INCRS( PARENT, "cExit", v[3] );					// account exit credits
 WRITE( "exit2", ( double ) j / F2 );
 WRITE( "entry2", ( double ) k / F2 );
+WRITES( SECSTAL1, "exit2fail", v[7] / F2 );
 
 V( "f2rescale" );								// redistribute entrant m.s.
 V( "firm2maps" );								// update firm mapping vectors
@@ -227,7 +232,8 @@ woLisT *offers = & V_EXTS( PARENT, countryE, firm2wo );
 order_offers( h, offers );
 
 // firms hire employees according to the selected hiring order
-for ( i = 0, itw = offers->begin( ); itw != offers->end( ); ++itw )
+i = 0;
+for ( auto itw = offers->begin( ); itw != offers->end( ); ++itw )
 {
 	v[3] = VS( itw->firm, "_postChg" ) ? VS( PARENT, "flagWageOfferChg" ) : 
 										 VS( PARENT, "flagWageOffer" );
@@ -259,7 +265,7 @@ for ( i = 0, itw = offers->begin( ); itw != offers->end( ); ++itw )
 			{
 				// already employed? First quit current job
 				if ( v[5] )
-					quit_worker( candidate.wrk );
+					quit_worker( var, candidate.wrk );
 
 				// flag hiring and set wage, employer and vintage to be used by worker
 				hire_worker( candidate.wrk, 2, itw->firm, itw->offer );
@@ -283,7 +289,7 @@ for ( i = 0, itw = offers->begin( ); itw != offers->end( ); ++itw )
 	if ( j > 0 && h == 0 && cur != NULL )		// none hired but someone avail?
 	{
 		if ( VS( cur, "_employed" ) )			// quit job if needed
-			quit_worker( cur );
+			quit_worker( var, cur );
 		
 		hire_worker( cur, 2, itw->firm, v[4] );	// pay requested wage
 		++i;
@@ -332,7 +338,7 @@ CYCLES( LABSUPL1, cur, "Worker" )				// scan all workers
 	cur1 = HOOKS( cur, VWRK );					// pointer to vintage bridge
 	if ( cur1 != NULL )							// discard disalloc. unempl. s.1
 	{
-		i = VS( PARENTS( cur1 ), "_IDvint" );	// vintage ID
+		i = VS( PARENTS( cur1 ), "__IDvint" );	// vintage ID
 		v[2] = VLS( cur, "_sV", 1 ) * v[1];		// last skills (weighted)
 		EXTS( PARENT, countryE ).vintProd[ i ].sVavg += v[2];
 		EXTS( PARENT, countryE ).vintProd[ i ].workers += v[1];
@@ -635,7 +641,7 @@ EQUATION( "dCPIb" )
 /*
 Consumer price index inflation (change) rate
 */
-RESULT( mov_avg_bound( THIS, "CPI", VS( PARENT, "mLim" ) ) )
+RESULT( mov_avg_bound( THIS, "CPI", VS( PARENT, "mLim" ), VS( PARENT, "mPer" ) ) )
 
 
 EQUATION( "dNnom" )
@@ -904,11 +910,5 @@ Updated in 'entry2exit'
 EQUATION_DUMMY( "exit2", "entry2exit" )
 /*
 Rate of exiting firms in consumption-good sector
-Updated in 'entry2exit'
-*/
-
-EQUATION_DUMMY( "exit2fail", "entry2exit" )
-/*
-Rate of bankrupt firms in consumption-good sector
 Updated in 'entry2exit'
 */

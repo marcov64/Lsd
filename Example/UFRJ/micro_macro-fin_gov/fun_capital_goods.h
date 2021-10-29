@@ -1,14 +1,6 @@
 /*****CAPITAL GOODS VARIABLES*****/
 
 
-EQUATION("Capital_Good_Production")
-/*
-Depends on the rule form using capital goods and the firm's effective production
-*/
-	V("Firm_Effective_Production");
-RESULT(CURRENT)
-
-
 EQUATION("Capital_Good_Acumulated_Production")
 /*
 Acumulated Production of one capital good, calculated in the middle of the period
@@ -27,7 +19,7 @@ EQUATION("Capital_Good_Productivity")
 /*
 Capital good's productivity increase with accumulated production due to a learning process.
 */   
-	v[1]=V("learning_adjustment");                         //learning by doing adjustment parameter
+	v[1]=V("sector_learning_adjustment");                  //learning by doing adjustment parameter
 	v[2]=VL("Capital_Good_Acumulated_Production",1);       //capital good's acumulated production
 	v[3]=1+v[1]*(1-exp(-v[2]));                       	   //the learning of the capital good depends on the acumulated production 
 	v[4]=V("capital_good_date_birth");                     //capital good date of birth

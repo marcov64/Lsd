@@ -11,7 +11,7 @@
 #define __MINGW64_STRINGIFY(x) \
   __STRINGIFY(x)
 
-#define __MINGW64_VERSION_MAJOR 8
+#define __MINGW64_VERSION_MAJOR 10
 #define __MINGW64_VERSION_MINOR 0
 #define __MINGW64_VERSION_BUGFIX 0
 
@@ -300,6 +300,8 @@
 #else
 #  define __mingw_attribute_artificial
 #endif
+
+#define __MINGW_SELECTANY  __attribute__((__selectany__))
 
 #if _FORTIFY_SOURCE > 0 && __OPTIMIZE__ > 0 && __MINGW_GNUC_PREREQ(4, 1)
 #  if _FORTIFY_SOURCE > 1

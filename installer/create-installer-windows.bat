@@ -1,7 +1,7 @@
 @echo off
 rem *************************************************************
 rem
-rem	 LSD 8.0 - December 2020
+rem	 LSD 8.0 - September 2021
 rem	 written by Marco Valente, Universita' dell'Aquila
 rem	 and by Marcelo Pereira, University of Campinas
 rem
@@ -18,7 +18,7 @@ rem  CREATE-INSTALLER-WINDOWS.BAT
 rem  Create LSD installer for Windows.
 rem *************************************************************
 
-set LSD_FILE_TAG=8-0-beta-1
+set LSD_FILE_TAG=8-0-beta-4
 
 if "%1"=="/?" (
 	echo Create LSD installer for Windows
@@ -32,7 +32,7 @@ if "%1"=="" (
 		goto create
 	)
 	echo No LSD FOLDER provided or found, aborting
-	pause
+	pause > nul
 	goto end
 ) else (
 	if exist "%1"\LMM.exe (
@@ -40,7 +40,7 @@ if "%1"=="" (
 		goto create
 	)
 	echo Provided LSD FOLDER not found, aborting
-	pause
+	pause > nul
 	goto end
 )
 

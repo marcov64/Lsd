@@ -32,3 +32,11 @@ BINARY_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/bin \
 INCLUDE_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/include \
 LIBRARY_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib \
 install
+
+SUBBOTOOLS
+
+cd subbotools-{version}
+make distclean
+./configure --prefix=/LSD/gnu
+make
+make install

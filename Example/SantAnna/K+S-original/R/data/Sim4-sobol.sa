@@ -1,0 +1,15 @@
+x5 0 2 f: 0 1
+iota 0 2 f: 0 0.3
+beta2 0 2 f: 1 5
+mu20 0 2 f: 0.1 0.5
+b 0 2 f: 1 10
+alpha2 0 2 f: 1 5
+omega2 0 2 f: 0.2 5
+chi 0 2 f: 0.2 5
+eta 0 2 f: 10 40
+alpha1 0 2 f: 1 5
+beta1 0 2 f: 1 5
+x1inf 0 2 f: -0.3 -0.1
+F1 0 2 i: 10 40
+x1sup 0 2 f: 0.1 0.3
+Phi2 0 2 f: 0.5 1

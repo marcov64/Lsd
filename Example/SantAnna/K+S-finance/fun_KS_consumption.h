@@ -87,10 +87,11 @@ RESULT( v[0] )
 
 EQUATION( "entry2exit" )
 /*
-Rate of entry-exit of firms in the consumer-good sector
-Perform entry and exit of firms
+Rate of entry-exit of firms in consumer-good sector
+Perform entry and exit of firms in the consumer-good sector
 All relevant aggregate variables in sector must be computed before existing
 firms are deleted, so all active firms in period are considered
+Also updates 'cEntry', 'cExit', 'exit2fail'
 */
 
 SUM( "_D2d" );									// desired demand before chg
@@ -105,24 +106,24 @@ vector < bool > quit( F2, false );				// vector of firms' quit status
 
 // mark bankrupt and market-share-irrelevant incumbent firms to quit the market
 h = F2;											// initial number of firms
-v[1] = v[2] = v[3] = v[4] = i = k = 0;			// accum., counters, registers
+v[1] = v[2] = v[3] = i = k = 0;					// accum., counters, registers
 CYCLE( cur, "Firm2" )
 {
-	v[5] = VS( cur, "_NW2" );					// current net wealth
+	v[4] = VS( cur, "_NW2" );					// current net wealth
 	
-	if ( v[5] < 0 || VS( cur, "_life2cycle" ) > 0 )// bankrupt or incumbent?
+	if ( v[4] < 0 || VS( cur, "_life2cycle" ) > 0 )// bankrupt or incumbent?
 	{
-		v[6] = VS( cur, "_f2" );				// current market share
+		v[5] = VS( cur, "_f2" );				// current market share
 		
-		if ( v[5] < 0 || v[6] < f2min )
+		if ( v[4] < 0 || v[5] < f2min )
 		{
 			quit[ i ] = true;					// mark for likely exit
 			--h;								// one less firm
 			
-			if ( v[6] > v[4] )					// best firm so far?
+			if ( v[5] > v[3] )					// best firm so far?
 			{
 				k = i;							// save firm index
-				v[4] = v[6];					// and market share
+				v[3] = v[5];					// and market share
 			}
 		}
 	}
@@ -131,24 +132,26 @@ CYCLE( cur, "Firm2" )
 }	
 
 // quit candidate firms exit, except the best one if all going to quit
-i = j = 0;										// firm counters
+v[6] = i = j = 0;								// firm counters
 CYCLE_SAFE( cur, "Firm2" )
 {
 	if ( quit[ i ] )
 	{
 		if ( h > 0 || i != k )					// firm must exit?
 		{
-			// account liquidation credit due to public, if any
-			v[3] += exit_firm2( cur, & v[1] );	// delete object and liq. val.
-			
 			++j;								// count exits
+			if ( VS( cur, "_NW2" ) < 0 )		// count bankruptcies
+				++v[6];
+
+			// account liquidation credit due to public, if any
+			v[2] += exit_firm2( var, cur );		// del obj & collect liq. val.
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
 			{
 				// new equity required
 				v[7] = NW20u + VS( cur, "_Deb2" ) - VS( cur, "_NW2" );
-				v[2] += v[7];					// accumulate "entry" equity cost
+				v[1] += v[7];					// accumulate "entry" equity cost
 				
 				WRITES( cur, "_Deb2", 0 );		// reset debt
 				INCRS( cur, "_NW2", v[7] );		// add new equity
@@ -161,10 +164,11 @@ CYCLE_SAFE( cur, "Firm2" )
 V( "f2rescale" );								// redistribute exiting m.s.
 
 // replace exiting firms by entrants
-v[2] += entry_firm2( THIS, j, false );			// add entrant-firm objects
+v[1] += entry_firm2( var, THIS, j, false );		// add entrant-firm objects
 
-INCRS( PARENT, "cEntry", v[2] );				// account equity cost of entry
-INCRS( PARENT, "cExit", v[3] );					// account exit credits
+INCRS( PARENT, "cEntry", v[1] );				// account equity cost of entry
+INCRS( PARENT, "cExit", v[2] );					// account exit credits
+WRITES( SECSTAL1, "exit2fail", v[6] / F2 );
 
 V( "f2rescale" );								// redistribute entrant m.s.
 V( "firm2maps" );								// update firm mapping vectors
@@ -245,13 +249,6 @@ Total expansion investment in consumption-good sector
 */
 V( "CI" );										// ensure cancellations acct'd 
 RESULT( SUM( "_EI" ) )	
-
-
-EQUATION( "F2" )
-/*
-Number of firms in consumption-good sector
-*/
-RESULT( COUNT( "Firm2" ) )
 
 
 EQUATION( "I" )
@@ -520,9 +517,3 @@ RESULT( i )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/
-
-EQUATION_DUMMY( "exit2fail", "entry2exit" )
-/*
-Rate of bankrupt firms in consumption-good sector
-Updated in 'entry2exit'
-*/

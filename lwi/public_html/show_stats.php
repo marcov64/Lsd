@@ -4,7 +4,7 @@
 ?>
 <!DOCTYPE html>
 <!--
-Copyright (C) 2017 Marcelo C. Pereira <mcper at unicamp.br>
+Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,24 +25,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="icon" href="lsd_favicon.ico">
+        <link rel="icon" href="favicon.ico">
         <link rel="stylesheet" href="w3.css">
         <link rel="stylesheet" href="lwi.css">
     </head>
     <body>
-        <?php include "../load_res.php"; ?>
+        <?php require "../load_res.php"; ?>
         <div class='w3-main' style='margin-left:10px; margin-right:10px'>
             <div class='w3-container w3-card-2 w3-margin-bottom' style='margin-top:10px'>
                 <h1 class='w3-xxxlarge w3-text-blue'><b>Statistics</b></h1>
                 <div class='w3-container' style='margin-top: 30px'>
                     <h2 class='w3-xxlarge w3-text-blue'>Time series descriptive statistics</h2>
                     <table class='w3-table w3-striped w3-white'>
-                        <col style='width:25%'>
-                        <col style='width:15%'>
-                        <col style='width:15%'>
-                        <col style='width:15%'>
-                        <col style='width:15%'>
-                        <col style='width:15%'>
+                        <col style='width:22%'>
+                        <col style='width:13%'>
+                        <col style='width:13%'>
+                        <col style='width:13%'>
+                        <col style='width:13%'>
+                        <col style='width:13%'>
+                        <col style='width:13%'>
                         <thead>
                             <td><em>Variable</em></td>
                             <td><em>Mean</em></td>
@@ -50,6 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                             <td><em>Minimum</em></td>
                             <td><em>Maximum</em></td>
                             <td><em>Observations</em></td>
+                            <td><em>MC Std. Error</em></td>
                         </thead>
                         <?php
                             // insert the table columns data
@@ -62,7 +64,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                 echo   "<td><b>" . $var . "</b></td>\n";
 
                                 foreach ( $stats[ $var ] as $stat => $val ) {
-                                    if ( $stat == "Obs" || $stats[ $var ][ "Obs" ] != 0 ) {
+                                    if ( is_numeric( $val ) && ( $stat == "Obs" || $stats[ $var ][ "Obs" ] != 0 ) ) {
                                         echo "<td>" . sprintf( "%.5G", $val ) . "</td>\n";
                                     } else {
                                         echo "<td>N/A</td>\n";
@@ -75,9 +77,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </table>
                     <?php
                         // table footnotes
-                        $t_msg = "Time step range: from " . ( $first + 1 ) . " to " . $last . ".\n";
-                        $log_msg = $linear ? "" : "  <em>Log values</em>.\n";
-                        echo "<p>" . $t_msg . $log_msg . "</p>\n";
+                        $t_msg = "Time step range: from " . ( $first + 1 ) . " to " . $last . ". ";
+                        $mc_msg = $mc_runs > 1 ? "Monte Carlo runs: " . $mc_runs . ". " : "";
+                        $log_msg = $linear ? "" : "  <em>Log values</em>.";
+                        echo "<p>" . $t_msg . $mc_msg . $log_msg . "</p>\n";
                     ?>
                 </div>
                 <div class="w3-container w3-center" style="margin-top: 30px"> 

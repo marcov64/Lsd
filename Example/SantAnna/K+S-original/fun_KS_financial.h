@@ -20,33 +20,17 @@ RESULT( 0 )
 
 EQUATION( "Depo" )
 /*
-Bank reserves (deposits)
+Total banking sector deposits
+Net deposits from exiting and entering firms in period not considered
 */
-
 VS( PARENT, "Sav" );							// ensure savings are calculated
-
-v[0] = VS( PARENT, "SavAcc" );					// workers deposits
-
-CYCLES( CAPSECL1, cur, "Firm1" )				// sector 1 deposits
-	v[0] += VS( cur, "_NW1" );
-
-CYCLES( CONSECL1, cur, "Firm2" )
-	v[0] += VS( cur, "_NW2" );					// sector 2 deposits
-	
-RESULT( v[0] )
+RESULT( VS( PARENT, "SavAcc" ) + SUMS( CAPSECL1, "_NW1" ) + 
+		SUMS( CONSECL1, "_NW2" ) )
 
 
 EQUATION( "Loans" )
 /*
-Bank loans (non-defaulted)
+Total banking sector loans (non-defaulted)
+Net loans to exiting and entering firms in period not considered
 */
-
-v[0] = 0;										// accumulator
-
-CYCLES( CAPSECL1, cur, "Firm1" )
-	v[0] += VS( cur, "_Deb1" );					// sector 1 debt
-
-CYCLES( CONSECL1, cur, "Firm2" )
-	v[0] += VS( cur, "_Deb2" );					// sector 2 debt
-	
-RESULT( v[0] )
+RESULT( SUMS( CAPSECL1, "_Deb1" ) + SUMS( CONSECL1, "_Deb2" ) )

@@ -110,14 +110,10 @@ during the simulation.
 
 
 'Init' appears in the equation for: (Never Used).
-_INIT_
-
 END_DESCRIPTION
 
 Object_Demand
 'Demand' appears in the equation for: (Never Used).
-_INIT_
-
 END_DESCRIPTION
 
 Variable_ActionDemand
@@ -127,8 +123,6 @@ The price read from the new seller is subject to noise, drawn from a normal func
 Note that the price of the current seller is re-loades, since in the meanwhile the old seller may have changed the price.
 
 'ActionDemand' appears in the equation for: (Never Used).
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_AvPrice
@@ -141,58 +135,38 @@ END_DESCRIPTION
 
 Parameter_VarPrice
 'VarPrice' appears in the equation for: ActionDemand.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_NumConsumer
 'NumConsumer' appears in the equation for: ActionDemand, Init.
-
-_INIT_
-
 
 END_DESCRIPTION
 
 Parameter_NoiseReading
 'NoiseReading' appears in the equation for: ActionDemand.
 
-_INIT_
-
-
 END_DESCRIPTION
 
 Object_group
 'group' appears in the equation for: (Never Used).
-_INIT_
-
 END_DESCRIPTION
 
 Object_Consumer
 'Consumer' appears in the equation for: ActionDemand, Init, NumConsumer.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_CurrSeller
 'CurrSeller' appears in the equation for: ActionDemand, Init.
-
-_INIT_
-
 
 END_DESCRIPTION
 
 Parameter_CurrPrice
 'CurrPrice' appears in the equation for: ActionDemand, Init.
 
-_INIT_
-
-
 END_DESCRIPTION
 
 Object_Supply
 'Supply' appears in the equation for: Init.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_ActionSupply
@@ -205,62 +179,41 @@ NumSwitch
 
 
 'ActionSupply' appears in the equation for: ActionDemand.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_NumSeller
 'NumSeller' appears in the equation for: ActionDemand, Init.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_NumStay
 'NumStay' appears in the equation for: ActionDemand, ActionSupply.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_NumSwitch
 'NumSwitch' appears in the equation for: ActionDemand, ActionSupply.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_Epsilon
 'Epsilon' appears in the equation for: Price.
-
-_INIT_
-
 
 END_DESCRIPTION
 
 Parameter_TargetMs
 'TargetMs' appears in the equation for: Price.
 
-_INIT_
-
-
 END_DESCRIPTION
 
 Object_Seller
 'Seller' appears in the equation for: ActionSupply, NumSeller.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_IdSeller
 'IdSeller' appears in the equation for: ActionDemand, Init.
 
-_INIT_
-
-
 END_DESCRIPTION
 
 Parameter_Sales
 'Sales' appears in the equation for: ActionDemand, ActionSupply, Init.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_Price
@@ -269,17 +222,12 @@ Increased or decreased of Epsilon, depending on whether the ms are below or abov
 
 
 'Price' appears in the equation for: ActionDemand, ActionSupply, Price, Init.
-
 _INIT_
-
-
+Set to positive values.
 END_DESCRIPTION
 
 Parameter_ms
 'ms' appears in the equation for: ActionDemand, ActionSupply, Price, Init.
-
-_INIT_
-
 
 END_DESCRIPTION
 
@@ -287,31 +235,30 @@ END_DESCRIPTION
 DOCUOBSERVE
 AvPrice
 VarPrice
+NumStay
+NumSwitch
 Sales
 Price
 ms
-NumStay
-NumSwitch
 
 END_DOCUOBSERVE
 
 
 DOCUINITIAL
-CurrSeller
-CurrPrice
 NumConsumer
 NoiseReading
+CurrSeller
+CurrPrice
+Epsilon
+TargetMs
 IdSeller
 Price
 ms
-Epsilon
-TargetMs
 
 END_DOCUINITIAL
 
 
 EQ_FILE
- 
 /***************************************************
 ****************************************************
 LSD 2.0 - April 2000

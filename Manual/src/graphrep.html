@@ -24,16 +24,16 @@ w\:* {behavior:url(#default#VML);}
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>9</o:Revision>
-  <o:TotalTime>51</o:TotalTime>
+  <o:Revision>11</o:Revision>
+  <o:TotalTime>58</o:TotalTime>
   <o:Created>2018-02-04T13:23:00Z</o:Created>
-  <o:LastSaved>2019-12-04T21:02:00Z</o:LastSaved>
+  <o:LastSaved>2021-04-24T23:19:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>547</o:Words>
-  <o:Characters>2954</o:Characters>
-  <o:Lines>24</o:Lines>
-  <o:Paragraphs>6</o:Paragraphs>
-  <o:CharactersWithSpaces>3495</o:CharactersWithSpaces>
+  <o:Words>590</o:Words>
+  <o:Characters>3190</o:Characters>
+  <o:Lines>26</o:Lines>
+  <o:Paragraphs>7</o:Paragraphs>
+  <o:CharactersWithSpaces>3773</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -41,7 +41,6 @@ w\:* {behavior:url(#default#VML);}
 <link rel=colorSchemeMapping href="graphrep_arquivos/colorschememapping.xml">
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
-  <w:Zoom>110</w:Zoom>
   <w:SpellingState>Clean</w:SpellingState>
   <w:GrammarState>Clean</w:GrammarState>
   <w:TrackMoves>false</w:TrackMoves>
@@ -764,8 +763,7 @@ p.MsoTitle, li.MsoTitle, div.MsoTitle
 	color:#254061;
 	font-weight:bold;}
 a:link, span.MsoHyperlink
-	{mso-style-noshow:yes;
-	mso-style-priority:99;
+	{mso-style-priority:99;
 	color:blue;
 	text-decoration:underline;
 	text-underline:single;}
@@ -1146,6 +1144,9 @@ span.Cdigo
 span.SpellE
 	{mso-style-name:"";
 	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
 .MsoChpDefault
 	{mso-style-type:export-only;
 	mso-default-props:yes;
@@ -1322,7 +1323,6 @@ div.WordSection1
 	mso-style-parent:"";
 	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
 	mso-para-margin:0cm;
-	mso-para-margin-bottom:.0001pt;
 	mso-pagination:widow-orphan;
 	font-size:10.0pt;
 	font-family:"Times New Roman",serif;}
@@ -1336,7 +1336,6 @@ table.Tabelanormal
 	mso-style-parent:"";
 	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
 	mso-para-margin:0cm;
-	mso-para-margin-bottom:.0001pt;
 	mso-pagination:widow-orphan;
 	font-size:10.0pt;
 	font-family:"Times New Roman",serif;}
@@ -1359,7 +1358,8 @@ table.Tabelanormal
  </o:shapelayout></xml><![endif]-->
 </head>
 
-<body lang=PT-BR link=blue vlink=purple style='tab-interval:36.0pt'>
+<body lang=PT-BR link=blue vlink=purple style='tab-interval:36.0pt;word-wrap:
+break-word'>
 
 <div class=WordSection1>
 
@@ -1369,7 +1369,7 @@ table.Tabelanormal
 EN-US'>LSD Model Structure<o:p></o:p></span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US
-style='mso-ansi-language:EN-US;mso-no-proof:yes'><img width=482 height=347
+style='mso-ansi-language:EN-US;mso-no-proof:yes'><img width=482 height=312
 id="_x0000_i1025" src="image/model_struct.png"></span><span lang=EN-US
 style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
@@ -1402,11 +1402,11 @@ direct descendants (sons) of the </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>Root</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> Object are shown at the top of the structure.
 In the level below, are the descendants of the sons of Root (its grandsons), as
-well all other Objects descending from them and so on. Very large model
-structures (too wide or too deep) may show incomplete in the default view of
-the window. To uncover the hidden Objects, the user may use the scroll bars to
-pan around the model structure or increase (or maximize) the size of the LSD
-Model Structure.<o:p></o:p></span></p>
+well all other Objects descending from them and so on. <span class=GramE>Very
+large</span> model structures (too wide or too deep) may show incomplete in the
+default view of the window. To uncover the hidden Objects, the user may use the
+scroll bars to pan around the model structure or increase (or maximize) the
+size of the LSD Model Structure.<o:p></o:p></span></p>
 
 <h2><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
 mso-ansi-language:EN-US'>Interacting with the model structure<o:p></o:p></span></h2>
@@ -1441,14 +1441,18 @@ style='mso-ansi-language:EN-US'> is the maximum number of <a
 href="LSD_faqs.html#variable">lags</a> used. <o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The LSD
-Model Structure can be used to change the <a href="LSD_windows.html#browser">LSD
-Browser</a> current Object by (left-) clicking on its symbol.<o:p></o:p></span></p>
+Model Structure can be used to change the current Object on <a
+href="LSD_windows.html#browser">LSD Browser</a> , <a href="menudata_brow.html">LSD
+Data Browser</a>, and <a href="menudata_res.html">LSD Analysis of Results</a> by
+(left-) clicking on its symbol.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>It is also
-possible to access the Object context menu by right-clicking its symbol. From
-the pop-up menu the user can perform several actions on the selected Object:
-add a new parent, rename, change the number of instances, delete, add elements,
-edit initial values and browse elements.<o:p></o:p></span></p>
+possible to access the Object context menu by <span class=GramE>right-clicking</span>
+its symbol when the <a href="LSD_windows.html#browser">LSD Browser</a> is
+active. From the pop-up menu the user can perform several actions on the
+selected Object: rename, change the number of instances, move, delete, add
+elements, edit initial <span class=GramE>values</span> and browse elements.
+Check the details <a href="browser.html#changeobject">here</a>.<o:p></o:p></span></p>
 
 <h2><span lang=EN-US style='mso-ansi-language:EN-US'>Changing the distribution
 of the Objects<o:p></o:p></span></h2>
@@ -1465,11 +1469,13 @@ Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'>A </span></b><span lang=EN-US style='mso-ansi-language:EN-US'>(<i>shortcuts</i>:
-</span><span class=SpellE><span class=Cdigo>Ctrl+A</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>/</span><span class=SpellE><span
-class=Cdigo>Alt+A</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>):
-automatically adjusts both the horizontal and vertical space distribution of
-Objects, trying to use as much of the window area as possible.<o:p></o:p></span></p>
+</span><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>Ctrl+A</span></span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'>/</span><span class=SpellE><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>Alt+A</span></span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): automatically adjusts both the horizontal
+and vertical space distribution of Objects, trying to use as much of the window
+area as possible.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l0 level1 lfo4'><![if !supportLists]><span
@@ -1477,9 +1483,9 @@ lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-fon
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>&#9650;/&#9660;
-(<i>shortcuts</i>: </span><span class=SpellE><span class=Cdigo>Alt</span></span><span
-class=Cdigo>+</span><span lang=EN-US style='mso-ansi-language:EN-US'>/</span><span
-class=SpellE><span class=Cdigo>Alt</span></span><span class=Cdigo>-</span><span
+(<i>shortcuts</i>: </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>Alt+</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>/</span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Alt-</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>): decreases/increases the vertical
 space distribution of Objects in the window.<o:p></o:p></span></p>
 
@@ -1511,8 +1517,8 @@ be able to see all the Objects in the model configuration.<o:p></o:p></span></p>
  </tr>
 </table>
 
-<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span lang=EN-US
-style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+<p class=MsoNormal style='margin:0cm'><span lang=EN-US style='mso-ansi-language:
+EN-US'><o:p>&nbsp;</o:p></span></p>
 
 </div>
 

@@ -563,7 +563,358 @@ typedef struct _DXVA_Status_VPx
     USHORT wNumMbsAffected;
 } DXVA_Status_VPx, *LPDXVA_Status_VPx;
 
+
+#define _DIRECTX_AV1_VA_
+
+/* AV1 decoder GUIDs */
+DEFINE_GUID(DXVA_ModeAV1_VLD_Profile0,           0xb8be4ccb, 0xcf53, 0x46ba, 0x8d, 0x59, 0xd6, 0xb8, 0xa6, 0xda, 0x5d, 0x2a);
+DEFINE_GUID(DXVA_ModeAV1_VLD_Profile1,           0x6936ff0f, 0x45b1, 0x4163, 0x9c, 0xc1, 0x64, 0x6e, 0xf6, 0x94, 0x61, 0x08);
+DEFINE_GUID(DXVA_ModeAV1_VLD_Profile2,           0x0c5f2aa1, 0xe541, 0x4089, 0xbb, 0x7b, 0x98, 0x11, 0x0a, 0x19, 0xd7, 0xc8);
+DEFINE_GUID(DXVA_ModeAV1_VLD_12bit_Profile2,     0x17127009, 0xa00f, 0x4ce1, 0x99, 0x4e, 0xbf, 0x40, 0x81, 0xf6, 0xf3, 0xf0);
+DEFINE_GUID(DXVA_ModeAV1_VLD_12bit_Profile2_420, 0x2d80bed6, 0x9cac, 0x4835, 0x9e, 0x91, 0x32, 0x7b, 0xbc, 0x4f, 0x9e, 0xe8);
+
+/* AV1 picture entry data structure */
+typedef struct _DXVA_PicEntry_AV1 {
+    UINT width;
+    UINT height;
+
+    INT wmmat[6];
+    __C89_NAMELESS union {
+        __C89_NAMELESS struct {
+            UCHAR wminvalid : 1;
+            UCHAR wmtype : 2;
+            UCHAR Reserved : 5;
+        } __C89_NAMELESSSTRUCTNAME;
+        UCHAR GlobalMotionFlags;
+    } __C89_NAMELESSUNIONNAME;
+    UCHAR Index;
+    UINT16 Reserved16Bits;
+} DXVA_PicEntry_AV1, *LPDXVA_PicEntry_AV1;
+
+/* AV1 picture parameters data structure */
+typedef struct _DXVA_PicParams_AV1 {
+    UINT width;
+    UINT height;
+
+    UINT max_width;
+    UINT max_height;
+
+    UCHAR CurrPicTextureIndex;
+    UCHAR superres_denom;
+    UCHAR bitdepth;
+    UCHAR seq_profile;
+
+    struct {
+        UCHAR cols;
+        UCHAR rows;
+        USHORT context_update_id;
+        USHORT widths[64];
+        USHORT heights[64];
+    } tiles;
+
+    union {
+        __C89_NAMELESS struct {
+            UINT use_128x128_superblock : 1;
+            UINT intra_edge_filter : 1;
+            UINT interintra_compound : 1;
+            UINT masked_compound : 1;
+            UINT warped_motion : 1;
+            UINT dual_filter : 1;
+            UINT jnt_comp : 1;
+            UINT screen_content_tools : 1;
+            UINT integer_mv : 1;
+            UINT cdef : 1;
+            UINT restoration : 1;
+            UINT film_grain : 1;
+            UINT intrabc : 1;
+            UINT high_precision_mv : 1;
+            UINT switchable_motion_mode : 1;
+            UINT filter_intra : 1;
+            UINT disable_frame_end_update_cdf : 1;
+            UINT disable_cdf_update : 1;
+            UINT reference_mode : 1;
+            UINT skip_mode : 1;
+            UINT reduced_tx_set : 1;
+            UINT superres : 1;
+            UINT tx_mode : 2;
+            UINT use_ref_frame_mvs : 1;
+            UINT enable_ref_frame_mvs : 1;
+            UINT reference_frame_update : 1;
+            UINT Reserved : 5;
+        } __C89_NAMELESSSTRUCTNAME;
+        UINT32 CodingParamToolFlags;
+    } coding;
+
+    union {
+        __C89_NAMELESS struct {
+            UCHAR frame_type : 2;
+            UCHAR show_frame : 1;
+            UCHAR showable_frame : 1;
+            UCHAR subsampling_x : 1;
+            UCHAR subsampling_y : 1;
+            UCHAR mono_chrome : 1;
+            UCHAR Reserved : 1;
+        } __C89_NAMELESSSTRUCTNAME;
+        UCHAR FormatAndPictureInfoFlags;
+    } format;
+
+    UCHAR primary_ref_frame;
+    UCHAR order_hint;
+    UCHAR order_hint_bits;
+
+    DXVA_PicEntry_AV1 frame_refs[7];
+    UCHAR RefFrameMapTextureIndex[8];
+
+    struct {
+        UCHAR filter_level[2];
+        UCHAR filter_level_u;
+        UCHAR filter_level_v;
+
+        UCHAR sharpness_level;
+        __C89_NAMELESS union {
+            __C89_NAMELESS struct {
+                UCHAR mode_ref_delta_enabled : 1;
+                UCHAR mode_ref_delta_update : 1;
+                UCHAR delta_lf_multi : 1;
+                UCHAR delta_lf_present : 1;
+                UCHAR Reserved : 4;
+            } __C89_NAMELESSSTRUCTNAME;
+            UCHAR ControlFlags;
+        } __C89_NAMELESSUNIONNAME;
+        CHAR ref_deltas[8];
+        CHAR mode_deltas[2];
+        UCHAR delta_lf_res;
+        UCHAR frame_restoration_type[3];
+        USHORT log2_restoration_unit_size[3];
+        UINT16 Reserved16Bits;
+    } loop_filter;
+
+    struct {
+        __C89_NAMELESS union {
+            __C89_NAMELESS struct {
+                UCHAR delta_q_present : 1;
+                UCHAR delta_q_res : 2;
+                UCHAR Reserved : 5;
+            } __C89_NAMELESSSTRUCTNAME;
+            UCHAR ControlFlags;
+        } __C89_NAMELESSUNIONNAME;
+
+        UCHAR base_qindex;
+        CHAR y_dc_delta_q;
+        CHAR u_dc_delta_q;
+        CHAR v_dc_delta_q;
+        CHAR u_ac_delta_q;
+        CHAR v_ac_delta_q;
+        UCHAR qm_y;
+        UCHAR qm_u;
+        UCHAR qm_v;
+        UINT16 Reserved16Bits;
+    } quantization;
+
+    struct {
+        __C89_NAMELESS union {
+            __C89_NAMELESS struct {
+                UCHAR damping : 2;
+                UCHAR bits : 2;
+                UCHAR Reserved : 4;
+            } __C89_NAMELESSSTRUCTNAME;
+            UCHAR ControlFlags;
+        } __C89_NAMELESSUNIONNAME;
+
+        union {
+            __C89_NAMELESS struct {
+                UCHAR primary : 6;
+                UCHAR secondary : 2;
+            } __C89_NAMELESSSTRUCTNAME;
+            UCHAR combined;
+        } y_strengths[8];
+
+        union {
+            __C89_NAMELESS struct {
+                UCHAR primary : 6;
+                UCHAR secondary : 2;
+            } __C89_NAMELESSSTRUCTNAME;
+            UCHAR combined;
+        } uv_strengths[8];
+
+    } cdef;
+
+    UCHAR interp_filter;
+
+    struct {
+        __C89_NAMELESS union {
+            __C89_NAMELESS struct {
+                UCHAR enabled : 1;
+                UCHAR update_map : 1;
+                UCHAR update_data : 1;
+                UCHAR temporal_update : 1;
+                UCHAR Reserved : 4;
+            } __C89_NAMELESSSTRUCTNAME;
+            UCHAR ControlFlags;
+        } __C89_NAMELESSUNIONNAME;
+        UCHAR Reserved24Bits[3];
+
+        union {
+            __C89_NAMELESS struct {
+                UCHAR alt_q : 1;
+                UCHAR alt_lf_y_v : 1;
+                UCHAR alt_lf_y_h : 1;
+                UCHAR alt_lf_u : 1;
+                UCHAR alt_lf_v : 1;
+                UCHAR ref_frame : 1;
+                UCHAR skip : 1;
+                UCHAR globalmv : 1;
+            } __C89_NAMELESSSTRUCTNAME;
+            UCHAR mask;
+        } feature_mask[8];
+
+        SHORT feature_data[8][8];
+
+    } segmentation;
+
+    struct {
+        __C89_NAMELESS union {
+            __C89_NAMELESS struct {
+                USHORT apply_grain : 1;
+                USHORT scaling_shift_minus8 : 2;
+                USHORT chroma_scaling_from_luma : 1;
+                USHORT ar_coeff_lag : 2;
+                USHORT ar_coeff_shift_minus6 : 2;
+                USHORT grain_scale_shift : 2;
+                USHORT overlap_flag : 1;
+                USHORT clip_to_restricted_range : 1;
+                USHORT matrix_coeff_is_identity : 1;
+                USHORT Reserved : 3;
+            } __C89_NAMELESSSTRUCTNAME;
+            USHORT ControlFlags;
+        } __C89_NAMELESSUNIONNAME;
+
+        USHORT grain_seed;
+        UCHAR scaling_points_y[14][2];
+        UCHAR num_y_points;
+        UCHAR scaling_points_cb[10][2];
+        UCHAR num_cb_points;
+        UCHAR scaling_points_cr[10][2];
+        UCHAR num_cr_points;
+        UCHAR ar_coeffs_y[24];
+        UCHAR ar_coeffs_cb[25];
+        UCHAR ar_coeffs_cr[25];
+        UCHAR cb_mult;
+        UCHAR cb_luma_mult;
+        UCHAR cr_mult;
+        UCHAR cr_luma_mult;
+        UCHAR Reserved8Bits;
+        SHORT cb_offset;
+        SHORT cr_offset;
+    } film_grain;
+
+    UINT   Reserved32Bits;
+    UINT   StatusReportFeedbackNumber;
+} DXVA_PicParams_AV1, *LPDXVA_PicParams_AV1;
+
+/* AV1 tile data structure */
+typedef struct _DXVA_Tile_AV1 {
+    UINT   DataOffset;
+    UINT   DataSize;
+    USHORT row;
+    USHORT column;
+    UINT16 Reserved16Bits;
+    UCHAR  anchor_frame;
+    UCHAR  Reserved8Bits;
+} DXVA_Tile_AV1, *LPDXVA_Tile_AV1;
+
+typedef struct _DXVA_Status_AV1 {
+    UINT  StatusReportFeedbackNumber;
+    DXVA_PicEntry_AV1 CurrPic;
+    UCHAR  BufType;
+    UCHAR  Status;
+    UCHAR  Reserved8Bits;
+    USHORT NumMbsAffected;
+} DXVA_Status_AV1, *LPDXVA_Status_AV1;
+
 #include <poppack.h>
+
+typedef enum _DXVA_VideoChromaSubsampling
+{
+    DXVA_VideoChromaSubsampling_Vertically_AlignedChromaPlanes  = 0x1,
+    DXVA_VideoChromaSubsampling_Vertically_Cosited              = 0x2,
+    DXVA_VideoChromaSubsampling_Horizontally_Cosited            = 0x4,
+    DXVA_VideoChromaSubsampling_ProgressiveChroma               = 0x8,
+
+    DXVA_VideoChromaSubsampling_Unknown = 0,
+    DXVA_VideoChromaSubsampling_Cosited = DXVA_VideoChromaSubsampling_Vertically_AlignedChromaPlanes
+            | DXVA_VideoChromaSubsampling_Vertically_Cosited
+            | DXVA_VideoChromaSubsampling_Horizontally_Cosited,
+    DXVA_VideoChromaSubsampling_DV_PAL = DXVA_VideoChromaSubsampling_Vertically_Cosited
+            | DXVA_VideoChromaSubsampling_Horizontally_Cosited,
+    DXVA_VideoChromaSubsampling_MPEG1 = DXVA_VideoChromaSubsampling_Vertically_AlignedChromaPlanes,
+    DXVA_VideoChromaSubsampling_MPEG2 = DXVA_VideoChromaSubsampling_Vertically_AlignedChromaPlanes
+            | DXVA_VideoChromaSubsampling_Horizontally_Cosited,
+} DXVA_VideoChromaSubsampling;
+
+typedef enum _DXVA_NominalRange
+{
+    DXVA_NominalRange_Unknown = 0,
+    DXVA_NominalRange_0_255 = 1,
+    DXVA_NominalRange_16_235 = 2,
+    DXVA_NominalRange_48_208 = 3,
+    DXVA_NominalRange_Normal = DXVA_NominalRange_0_255,
+    DXVA_NominalRange_Wide = DXVA_NominalRange_16_235,
+} DXVA_NominalRange;
+
+typedef enum _DXVA_VideoTransferMatrix
+{
+    DXVA_VideoTransferMatrix_Unknown = 0,
+    DXVA_VideoTransferMatrix_BT709 = 1,
+    DXVA_VideoTransferMatrix_BT601 = 2,
+    DXVA_VideoTransferMatrix_SMPTE240M = 3,
+} DXVA_VideoTransferMatrix;
+
+typedef enum _DXVA_VideoLighting
+{
+    DXVA_VideoLighting_Unknown = 0,
+    DXVA_VideoLighting_bright = 1,
+    DXVA_VideoLighting_office = 2,
+    DXVA_VideoLighting_dim = 3,
+    DXVA_VideoLighting_dark = 4,
+} DXVA_VideoLighting;
+
+typedef enum _DXVA_VideoPrimaries
+{
+    DXVA_VideoPrimaries_Unknown = 0,
+    DXVA_VideoPrimaries_reserved = 1,
+    DXVA_VideoPrimaries_BT709 = 2,
+    DXVA_VideoPrimaries_BT470_2_SysM = 3,
+    DXVA_VideoPrimaries_BT470_2_SysBG = 4,
+    DXVA_VideoPrimaries_SMPTE170M = 5,
+    DXVA_VideoPrimaries_SMPTE420M = 6,
+    DXVA_VideoPrimaries_EBU3213 = 7,
+    DXVA_VideoPrimaries_SMPTE_C = 8,
+} DXVA_VideoPrimaries;
+
+typedef enum _DXVA_VideoTransferFunction
+{
+    DXVA_VideoTransFunc_Unknown = 0,
+    DXVA_VideoTransFunc_10 = 1,
+    DXVA_VideoTransFunc_18 = 2,
+    DXVA_VideoTransFunc_20 = 3,
+    DXVA_VideoTransFunc_22 = 4,
+    DXVA_VideoTransFunc_22_709 = 5,
+    DXVA_VideoTransFunc_22_240M = 6,
+    DXVA_VideoTransFunc_22_8bit_sRGB = 7,
+    DXVA_VideoTransFunc_28 = 8,
+} DXVA_VideoTransferFunction;
+
+typedef struct _DXVA_ExtendedFormat
+{
+    UINT SampleFormat : 8;
+    UINT VideoChromaSubsampling : 4;
+    DXVA_NominalRange NominalRange : 3;
+    DXVA_VideoTransferMatrix VideoTransferMatrix : 3;
+    DXVA_VideoLighting VideoLighting : 4;
+    DXVA_VideoPrimaries VideoPrimaries : 5;
+    DXVA_VideoTransferFunction VideoTransferFunction : 5;
+} DXVA_ExtendedFormat;
 
 #ifdef __cplusplus
 }

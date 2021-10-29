@@ -1,5 +1,1 @@
 exportPattern( "^[[:alpha:]]+" )
-#importFrom( stats, sd )
-#importFrom( utils, read.delim )
-#importFrom( abind, abind )
-#importFrom( parallel, detectCores, makeCluster, clusterExport, clusterEvalQ, parLapply, stopCluster )

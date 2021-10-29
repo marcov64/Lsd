@@ -3,71 +3,70 @@
 # ------------------------- Kriging-Sobol DoE analysis ------------------------
 #
 #	Several files are required to run:
-#		folder/basename_XX_YY.csv		    : DoE specification from LSD
-#		folder/basename_YY+1_ZZ.csv		  : external validation from LSD (optional)
-#		folder/basename_XX_YY_WWW.csv 	: DoE response from R
-#		folder/basename_YY+1_ZZ_WWW.csv	: ext. validation response from R (optional)
-#		folder/basename.lsd			       	: LSD configuration with default values
-#		folder/basename.sa		          : factor sensitivity test ranges from LSD
+#		folder/basename_XX_YY.csv       : DoE specification from LSD
+#		folder/basename_YY+1_ZZ.csv     : external validation from LSD (optional)
+#		folder/basename_XX_YY_WWW.csv   : DoE response from R
+#		folder/basename_YY+1_ZZ_WWW.csv : ext. validation response from R (optional)
+#		folder/basename.lsd             : LSD configuration with default values
+#		folder/basename.sa              : factor sensitivity test ranges from LSD
 #
 #*******************************************************************************
 
 # Database files
-folder   <- "sobol"                   # data files folder
-baseName <- "Sim1-sobol"              # data files base name (same as .lsd file)
-varName <- "U"                        # analysis variable name
-iniDrop <- 300                        # initial time steps to drop from analysis (0=none)
-nKeep <- -1                           # number of time steps to keep (-1=all)
-onlyCross <- FALSE                    # use only cross validation to select model
+folder    <- "data"                 # data files folder
+baseName  <- "Sim4-sobol"           # data files base name (same as .lsd file)
+varName   <- "U"                    # analysis variable name
+iniDrop   <- 100                    # initial time steps to drop (0=none)
+nKeep     <- -1                     # number of time steps to keep (-1=all)
+onlyCross <- FALSE                  # use only cross validation to select model
 
 # Force selection of specific trend model and correlation function (0=auto)
-trendModel <- 0                       # trend model (1=constant / 2=1st order polynomial)
-covModel <- 0                         # 1=Matern5/2 / 2=Matern3/2 / 3=Gaussian / 4=expon. /5=power exp.
+trendModel <- 0                     # trend model (1=constant, 2=1st order polynomial)
+covModel  <- 0                      # 1=Matern5/2, 2=Matern3/2, 3=Gaussian, 4=expon.,5=power exp.
+
 # Flags for removing outliers from DoE & validation samples (use with care!)
-remOutl <- FALSE                      # remove outliers from DoE & validation samples?
-limOutl <- 10                         # limit deviation (number of standard deviations)
+remOutl   <- FALSE                  # remove outliers from DoE & validation samples?
+limOutl   <- 10                     # limit deviation (number of standard deviations)
 
 # General flags
-extWgth <- 0.5                        # weight of external error measures on model selection (0-1)
-conf <- 0.95                          # confidence level to use
-saSamples <- 1000                     # number of samples in sensitivity analysis
+extWgth   <- 0.5                    # external error measures weight on model selection (0-1)
+conf      <- 0.95                   # confidence level to use
+saSamples <- 1000                   # number of samples in sensitivity analysis
 
 # Force usage of specific factors in response surface graphs (0=auto)
-factor1 <- 0                          # first factor (# according to DoE factor order)
-factor2 <- 0                          # second factor
-factor3 <- 0                          # third factor
+factor1   <- 0                      # first factor (# according to DoE factor order)
+factor2   <- 0                      # second factor
+factor3   <- 0                      # third factor
 
 # Report output configuration
-plotRows <- 1   					            # number of plots per row in a page
-plotCols <- 1  	 					            # number of plots per column in a page
-plotW <- 10      					            # plot window width
-plotH <- 7       					            # plot window height
+plotRows  <- 1                      # number of plots per row in a page
+plotCols  <- 1                      # number of plots per column in a page
+plotW     <- 10                     # plot window width
+plotH     <- 7                      # plot window height
 
 # 3D surfaces visualization control
-grid3d <- 25                          # density for 3D wireframe plots
-theta3d <- 40                         # horizontal view angle
-phi3d <- 30                           # vertical view angle
+grid3d    <- 25                     # density for 3D wireframe plots
+theta3d   <- 40                     # horizontal view angle
+phi3d     <- 30                     # vertical view angle
 
 
 # ==== Aggregated variables to consider ====
 
 # Aggregated variables to use
-logVars <- c( "GDP", "EI", "C", "I", "Deb1", "Deb2", "NWb", "NW1", "NW2", "S1",
+logVars <- c( "GDP", "C", "I", "EI", "Deb1", "Deb2", "NWb", "NW1", "NW2", "S1",
               "S2", "A", "wAvg", "G", "Gbail", "Gtrain", "Tax", "Deb", "Def",
               "Loans", "W1", "W2", "B2" )
 aggrVars <- append( logVars, c( "dGDP", "dCPI", "Q2u", "F1", "F2", "entry1",
-                                "entry2", "exit1", "exit2", "f2posChg", "imi",
-                                "inn", "r", "U", "Ue", "TeAvg", "sTavg",
-                                "sVavg", "CPI", "q2avg" ) )
+                                "entry2", "exit1", "exit2", "imi", "inn", "r",
+                                "CPI", "U", "Ue", "TeAvg", "f2posChg", "sTavg",
+                                "sVavg", "q2avg" ) )
 newVars <- c( "freq_FE", "cris_llh", "GDP_sd" )
 
 
 # ====== External support functions & definitions ======
 
-require( LSDsensitivity, warn.conflicts = FALSE, quietly = TRUE )
-
-if( ! exists( "plot_norm", mode = "function" ) )             # already loaded?
-  source( "KS-support-functions.R" )
+# load support packages and functions
+source( "KS-support-functions.R" )
 
 # remove warnings for support functions
 # !diagnostics suppress = fit_subbotin, textplot, fmt, remove_outliers, log0, logNA

@@ -1,16 +1,33 @@
-Variable-firm-number K+S Model (version 0.3)
-============================================
+Variable-firm-number K+S Model (version 0.3.1)
+==============================================
 
 This version copyright by Marcelo C. Pereira.
 The original K+S code was developed by Andrea Roventini, Mauro Napoletano, Tania Treibich, and Marcelo Pereira.
 
-This is a full rewrite of the original "Schumpeter meeting Keynes" (K+S) model, plus the finance extensions and a variable number of firms in both sectors. Differently from original versions, the entire the model was recoded into regular LSD equations. There is no guarantee this version matches the results of original version exactly, due to intrinsic differences between programming approaches.
+This is a full rewrite of the original "Schumpeter meeting Keynes" (K+S) model, plus the finance extensions and a variable number of firms in both sectors. Differently from original versions, the entire the model was recoded into regular LSD equations.
+
+
+Change log
+==========
+v0.3                - initial LSD-only version
+v0.3.1 (01/09/2021) - fix firm finance statistics
+                      fix credit pecking order/credit scores
+                      unify new machine selection criteria (=scrapping rule)
+                      normalize values used to compute imitation euclidean distance
+                      increase sector 1 mark-up in all configurations to avoid exit spiral
+                      improve bank excess reserves and net worth computation and bail-out
+                      improve fiscal rules handling
+                      add bond market (muBonds, thetaBonds, rhoBonds)
+                      add intermediate bank capital restriction rule (flagCreditRule=1)
+                      add debt repayment control (deltaB)
+                      update configurations closer to papers' settings
 
 
 Relevant references
 ===================
 
-Dosi, G., G. Fagiolo, and A. Roventini (2010). Schumpeter meeting Keynes: A policy-friendly model of endogenous growth and business cycles. Journal of Economic Dynamics and Control 34:1748-1767.
+Dosi, G., G. Fagiolo, A. Roventini (2010). Schumpeter meeting Keynes: A policy-friendly model of endogenous growth and business cycles. Journal of Economic Dynamics and Control 34:1748-1767.
+Dosi, G., G. Fagiolo, M. Napoletano, and A. Roventini (2013). Income distribution, credit and fiscal policies in an agent-based Keynesian model. Journal of Economic Dynamics and Control 37:1598-1625.
 Dosi, G., G. Fagiolo, M. Napoletano, A. Roventini, and T. Treibich (2015). Fiscal and monetary policies in complex evolving economies. Journal of Economic Dynamics and Control 52:166-189.
 Dosi, G., M. C. Pereira, A. Roventini, and M. E. Virgillito (2018). Causes and consequences of hysteresis: aggregate demand, productivity, employment. Industrial and Corporate Change 27:1015-1044.
 
@@ -40,13 +57,15 @@ The central bank fixes the prime interest rate using a single or dual mandate Ta
 Example configurations
 ======================
 
-The model come with some ready-to-use configuration files (.lsd extension), illustrating the baseline in the original 2018 paper and two experiments:
+The model come with some ready-to-use configuration files (.lsd extension), illustrating three possible configurations:
 
-Free_entry.lsd = same set-up employed in the original 2015 paper but allowing the firm entry process to be independent from the exits from the market
+Free_entry.lsd = similar set-up employed in the 2015 paper model (baseline configuration) but allowing the firm entry process to be independent from exits from the market, so producing a variable number of firms
 
-Entry_after_exit.lsd = same set-up employed in the original 2015 paper where firm market entry only occurs after another firm exits, so maintaining a constant number of firms
+Fix_entry-Baseline_v2.lsd = fixed number of firms, same set-up employed in the original 2015 paper model (baseline configuration)
 
-Please refer to the original 2010/2015/2018 papers (reference above) for details.
+Fix_entry-No_fin-Benchmark_v1.lsd = fixed number of firms, no financial market and limits, similar configuration to the 2010 paper model (v0.1.1)
+
+Please refer to the original 2010/2015 papers (reference above) for details.
 
 
 R analysis scripts
@@ -66,9 +85,11 @@ KS-elementary-effects-SA.R = Morris elementary effects sensitivity analysis of t
 
 KS-kriging-sobol-SA.R = global Sobol variance-based sensitivity analysis using a Kriging meta-model, including alternative meta-model kernels selection, meta-model estimation and validation, Sobol variance decomposition for direct and interactive effects, and surface response plotting (2D and 3D) of top-influential factors
 
-Other support scripts exist in the R subdirectory and are required by the above scripts. The scripts are configured to use the R subdirectory as the R working directory. Please add all the data required for the analysis (including LSD configuration files) in subdirectories inside the R working directory (the default is 'data'). There is a set of preconfigured test configurations (Sim1-Sim2.lsd in the data subdirectory) which can be executed in LSD and analyzed by the R scripts without any change. Subdiretctories 'ee' and 'sobol' contain test configurations for sensitivity analysis scripts.
+Other support scripts exist in the R subdirectory and are required by the above scripts. The scripts are configured to use the R subdirectory as the R working directory. Please add all the data required for the analysis (including LSD configuration files) in subdirectories inside the R working directory (the default is 'data'). 
 
-The R scripts require the following R packages (and dependencies) to be installed from the standard repositories: LSDsensitivity, tseries, normalp, nortest, mFilter, np, matrixStats, gplots, rmutil, plotrix, extrafont.
+There is a set of preconfigured test configurations (Sim1-Sim4.lsd in the data subdirectory) which can be executed in LSD and analyzed by the R scripts without any change. The sample test configurations are configured for speed but the number of Monte Carlo experiments (runs) is insufficient for reliable inference. See 'Configuring the K+S scripts.txt' in R subdirectory for details and recommendations.
+
+The R scripts require the following R packages (and dependencies) to be installed from the standard repositories: LSDsensitivity, tseries, normalp, nortest, mFilter, np, matrixStats, gplots, corrplot, rmutil, plotrix, textplot, extrafont. 12GB or more of available memory is required to run some of the reports. Use 'install-lsd-examples-packages.R' script in R subdirectory to install the required packages automatically.
 
 
 Model control flags
@@ -97,7 +118,8 @@ Taxation (parameter flagTax)
 Bank total credit supply rule (parameter flagCreditRule)
 -----------------------------
 0 = no bank-level credit limit (firm-level prudential limit still apply)
-1 = Basel-like bank capital adequacy rule
+1 = deposits multiplier credit limit but no capital adequacy rule or bank bail-out
+2 = Basel-like bank capital adequacy rule and bank bail-out if net worth is negative
 
 Government fiscal rule (parameter flagFiscalRule)
 ----------------------
@@ -128,92 +150,99 @@ The model parameters control both the initial conditions applied to lagged varia
 
 Country-level parameters (object Country)
 ------------------------
-Crec = unfilled past consumption recover limit (as fraction of current consumption) (0-1)
+Crec = unfilled past consumption recover limit as fraction of current consumption (>0)
 gG = growth rate of fixed public expenditure (>=0)
-mLim = multiple limit on delta variation on sensitive calculations (>0)
-omicron = sensitivity of entry to market conditions (liquid assets vs. debt ratio) (0-1)
-stick = stickiness of the number of firms (return to the average) (>=0)
+mLim = absolute cap on moving-average growth calculation (>=0, 0=no limit)
+mPer = number of periods on moving-average growth calculation (>=1)
+omicron = sensitivity of entry to market conditions (liquid assets vs. debt ratio) ([0,1])
+stick = stickiness of the number of firms (return to average) (>=0)
 tr = tax rate (>=0)
 x2inf/x2sup = lower/upper support for entry draw distribution (-1<x2inf<=x2sup<1)
 
 Financial market parameters (object Financial)
 ---------------------------
 B = number of heterogeneous banks (>=1)
+DebRule = maximum government debt on GDP ratio for fiscal rule (>0)
+DefPrule = maximum government primary deficit on GDP ratio for fiscal rule (>0)
+EqB0 = initial equity of bank as multiple of firms total net worth (>0)
 Lambda = multiple of net assets or sales for credit limit (>0)
 Lambda0 = credit limit initial absolute floor (>=0)
-NWb0 = initial net worth (equity) of bank (>0)
-PhiB = fraction of incumbent bank net wealth provided to bailed-out bank (0<PhiB<=1)
-Ut = target unemployment rate for Central Bank's Taylor rule (>0)
-alphaB = Pareto distribution shape parameter defining bank size heterogeneity (>= 1)
+PhiB = fraction of incumbent banks net worth provided to bailed-out bank (]0,1])
+Trule = time to start enforcing fiscal rules (>1)
+Ut = target unemployment rate for central bank's Taylor rule (>0)
+alphaB = Pareto distribution shape parameter defining bank size heterogeneity (>0)
 betaB = bank sensitivity to financial fragility (>0)
-dB = dividend rate on net profits for bank (>=0)
-debRule = maximum government debt on GDP ratio for fiscal rule (>0)
-defRule = maximum government deficit on GDP ratio for fiscal rule (>0)
-gammaPi = Central Bank's Taylor rule sensitivity to target inflation (>=0)
-gammaU = Central Bank's Taylor rule sensitivity to target unemployment (>=0)
-kConst = interest rate scaling parameter for firms debt by credit class (>0)
-muDeb = bank spread (mark-up) on debt (over Central Bank rate r) (>=0)
-muRes = Central Bank spread (mark-up) on reserves (>0)
-phiT = unemployment benefit target as a share of average wage (>0)
-piT = target inflation rate by Central Bank's Taylor rule (>0)
-rAdj = prime rate and unemployment benefit adjustment step (>0)
-rD = interest rate paid on bank deposits (>=0)
-rT = target interest (prime) rate set by Central Bank (>0)
-tauB = minimum bank capital adequacy rate (0-1)
+dB = dividend rate on net profits for banks (>=0)
+deltaB = desired share of outstanding firm debt to pay in period (]0,1])
+deltaDeb = share of government debt to pay when debt fiscal rule is binding (]0,1])
+gammaPi = central bank's Taylor rule sensitivity to target inflation (>=0)
+gammaU = central bank's Taylor rule sensitivity to target unemployment (>=0)
+kConst = interest rate ramping parameter for firms debt by credit class (>=0)
+muBonds = sovereign bonds spread (mark-down over central bank prime rate) ([0,1])
+muD = bank spread (mark-down) on deposits (from central bank prime rate) ([0,1])
+muDeb = bank spread (mark-up) on debt (over central bank prime rate) (>=0)
+muRes = central bank spread (mark-down) on reserves ([0,1])
+piT = target inflation rate by central bank's Taylor rule (>0)
+rAdj = prime rate minimum adjustment step (>0)
+rT = target prime interest rate set by central bank (>0)
+rhoBonds = sovereign bonds risk premium (>=0)
+tauB = minimum bank capital adequacy rate (]0,1[)
+thetaBonds = average maturity periods of sovereign bonds (>0)
 
 Capital market parameters (object Capital)
 -------------------------
-Deb10ratio = debt-to-equity initial ratio in capital-good sector (0=only equity)
-F10 = initial number of firms in capital-good sector (>=F1min)
+Deb10ratio = debt-to-equity initial ratio in capital-good sector ([0,1], 0=only equity)
+F10 = initial number of firms in capital-good sector (1<=F1min<=F10<=F1max)
 F1max/F1min = maximum/minimum number of firms in capital-good sector (1<=F1min<=F10<=F1max)
-L1rdMax = Maximum share of workers in R&D (0-1)
-L1shortMax = maximum labor shortage allowed in capital-good sector (0-1)
+L1rdMax = maximum share of workers in R&D (]0,1[)
+L1shortMax = maximum labor shortage allowed in capital-good sector ([0,1])
 NW10 = average initial net worth in capital-good sector (>=0)
-Phi3/Phi4 = lower/upper support for capital-good entrant net wealth share (0<Phi3<Phi4<=1)
+Phi3/Phi4 = lower/upper support for capital-good entrant net worth share (0<Phi3<Phi4<=1)
 alpha1/beta1 = Beta distribution parameters for innovation drawing (>0)
 alpha2/beta2 = Beta distribution parameters for imitation drawing (>0)
-d1 = dividend rate for firm in capital-good sector (0-1)
-gamma = new customer share for firm in capital-good sector (0-1)
-m1 = worker output (scale) in capital-good units per period (>0)
+d1 = dividend rate in capital-good sector ([0,1])
+gamma = new customer share for firm in capital-good sector (]0,1])
+m1 = worker output in capital-good units per period (>0)
 mu1 = mark-up of firms in the capital-good sector (>0)
-n1 = number of periods for evaluating participation in capital-good sector (1-8)
-nu = share of revenue applied in R&D by firm in the capital-good sector (0, 1)
+n1 = number of periods for evaluating market share in capital-good sector (1-8)
+nu = share of revenue applied in R&D by firm in the capital-good sector (]0,1[)
 x1inf/x1sup = lower/upper support for new machine productivity change (x1inf<x1sup)
-x5 = upper relative limit for productivity improvement of capital-good entrant (>=0)
-xi = share of R&D expenses allocated to innovation (0-1)
-zeta1/zeta2 = average productivity gain of R&D expense in innovation/imitation (>0)
+x5 = upper share limit for productivity improvement of capital-good entrant (>=0)
+xi = share of R&D expenses in innovation ([0,1])
+zeta1/zeta2 = expected elasticity of R&D expense in innovation/imitation success (>=0)
 
 Consumer market parameters (object Consumption)
 --------------------------
-Deb20ratio = debt-to-equity initial ratio in consumption-good sector (0=only equity)
-F20 = initial number of firms in consumption-good sector (>=F2min)
+Deb20ratio = debt-to-equity initial ratio in consumption-good sector ([0,1], 0=only equity)
+F20 = initial number of firms in consumption-good sector (1<=F2min<=F20<=F2max)
 F2max/F2min = maximum/minimum number of firms in consumption-good sector (1<=F1min<=F10<=F1max)
-K0 = average initial capital stock of firm in consumption-good sector (>0)
-NW20 = average initial net worth of firm in consumption-good sector (>=0)
-Phi1/Phi2 = lower/upper support for consumption-good entrant net wealth share (0<Phi1<Phi2<=1)
-b = number of pay-back periods (minus 1) for machine scrapping (>1)
+NW20 = average initial net worth in consumption-good sector (>=0)
+Phi1/Phi2 = lower/upper support for consumption-good entrant net worth share (0<Phi1<Phi2<=1)
+b = number of pay-back periods before machine scrapping (>1)
 chi = replicator dynamics selectivity coefficient (>0)
-d2 = dividend rate for firm in consumption-good sector (0-1)
-e0 = weight of potential demand on firm expectations ("animal spirits") (0-1)
-e1/e2/e3/e4 = weight of t-1/t-2/t-3/t-4 demand on myopic expectations (0-1)
-e5 = acceleration rate on expected demand growth (0-1)
-e6 = first order adaptive expectation factor (0-1)
+d2 = dividend rate in consumption-good sector ([0,1])
+e0 = weight of potential demand on expectations (animal spirits) ([0,1])
+e1/e2/e3/e4 = weight of t-1/t-2/t-3/t-4 demand on myopic expectations ([0,1])
+e5 = acceleration rate on expected demand growth ([0,1])
+e6 = first order adaptive expectation factor ([0,1])
 e7/e8 = first/second order extrapolative expectation factors (0-1)
-eta = technical life time of machines (>1)
-f2min = minimum market share to firm stay in consumption-good sector (0-1)
-iota = planned inventories share on output (>=0)
+eta = technical lifetime of machines (>1)
+f2min = minimum market share to stay in consumption-good sector ([0,1[)
+iota = share of inventories on planned output (>=0)
 kappaMax/kappaMin = capital max/min threshold share growth (0<=kappaMin<kappaMax)
-m2 = machine output (scale) in consumption-good units per period (>0)
-mu20 = initial mark-up of firms in the consumption-good sector (0-1)
-omega1/omega2 = competitiveness weight for price/unfilled demand (>=0)
-u = planned utilization level of machinery in consumption-good sector (0-1)
-upsilon = sensitivity of mark-up adjustment in consumption-good sector (>0)
+m2 = machine output in consumption-good units per period (>0)
+mu20 = initial mark-up of firms in the consumption-good sector (>0)
+n2 = number of periods for evaluating market share in consumption-good sector (1-5)
+omega1/omega2 = competitiveness weight of price/unfilled demand (>=0)
+u = planned utilization of machinery (]0,1])
+upsilon = sensitivity of mark-up adjustment (>0)
 
 Labor supply parameters (object Labor)
 -----------------------
-Ls0 = initial number of workers in labor market (labor supply) (>1)
+Ls0 = initial number of workers in labor market (>1)
 delta = labor force growth rate (>=0)
-psi1 = share of inflation passed to wages (psi2 on 2010 paper) (0-1)
-psi2 = elasticity of wages to aggregate productivity growth (psi1 on paper) (>=0)
-psi3 = elasticity of wages to the unemployment rate (>=0)
-w0min = initial minimum wage and social benefit absolute floor (subsistence) (>0)
+phi = unemployment benefit as a share of average wage (>=0)
+psi1 = share of inflation passed to wages (psi2 on 2010 paper) ([0,1])
+psi2 = elasticity of wages to aggregate productivity growth (>=0)
+psi3 = elasticity of wages to the unemployment rate (<=0)
+w0min = social benefit absolute floor (subsistence) (>0)
