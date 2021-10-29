@@ -3564,7 +3564,7 @@ LOGIC_OP_CODE
 Check for valid relational operator and return
 operator code for CHECK_COND
 ****************************************************/
-const unordered_map < string, int > logic_ops = { { "==", 0 }, { "!=", 1 }, { ">", 2 }, { ">=", 3 }, { "<", 4 }, { "<=", 5 } };
+const unordered_map < string, int > logic_ops = { { "==", 0 }, { "=", 0 }, { "EQ", 0 }, { "!=", 1 }, { "=!", 1 }, { "NE", 1 }, { ">", 2 }, { "GT", 2 }, { ">=", 3 }, { "=>", 3 }, { "GE", 3 }, { "<", 4 }, { "LT", 4 }, { "<=", 5 }, { "=<", 5 }, { "LE", 5 } };
 
 int logic_op_code( const char *lop, const char *errmsg )
 {

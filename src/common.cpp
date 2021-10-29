@@ -1159,7 +1159,7 @@ bool compile_run( int run_mode, bool nw )
 		cmd( "ttk::label .t.l1 -style bold.TLabel -justify center -text \"Compiling model...\"" );
 
 	if ( run_mode != 0 )
-		cmd( "ttk::label .t.l2 -justify center -text \"Just recompiling equation file(s) changes.\nOn success, the new model program will be launched.\nOn failure, a new window will show the compilation errors.\"" );
+		cmd( "ttk::label .t.l2 -justify center -text \"Just recompiling equation file(s) changes.\nOn success, the %s will be launched.\nOn failure, a new window will show the compilation errors.\"", run_mode != 2 ? "new model program" : "debugger" );
 	else
 		if ( nw )
 #ifdef _LMM_
@@ -1203,7 +1203,7 @@ bool compile_run( int run_mode, bool nw )
 	if ( res == 2 )
 	{
 		cmd( "catch { close $makePipe }" );
-		cmd( "if [ file exists make.bat ] { file delete make.bat }" );
+		cmd( "if [ file exists make.bat ] { catch { file delete make.bat } }" );
 		cmd( "if { [ winfo exists .f.t.t ] } { \
 				focustop .f.t.t \
 			} else { \
@@ -1279,6 +1279,7 @@ bool compile_run( int run_mode, bool nw )
 			}" );
 
 end:
+
 	cmd( "cd \"$oldpath\"" );
 
 	return ret;

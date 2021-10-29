@@ -89,8 +89,7 @@ int lsdmain( int argn, const char **argv )
 	bool found, recolor = false;
 	int i, j, num, choice, shigh, recolor_all = 0, v_counter = 0;
 	const char *s;
-	char str[ 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], tmp[ MAX_BUFF_SIZE ], tmp1[ MAX_BUFF_SIZE ];
-	struct stat stExe, stMod;
+	char str[ 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], tmp[ MAX_BUFF_SIZE ];
 	FILE *f;
 
 	// initialize tcl/tk and set global bidirectional variables
@@ -1406,6 +1405,14 @@ int lsdmain( int argn, const char **argv )
 	// Run the model in the gdb debugger
 	if ( choice == 13 || choice == 58 )
 	{
+		s = get_str( "modelName" );
+		if ( s == NULL || ! strcmp( s, "" ) )
+		{
+			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+			choice = 0;
+			goto loop;
+		}
+
 		cmd( "if { ! [ catch { set f [ open $modelDir/$MODEL_OPTIONS r ] } ] } { \
 				set a [ string trim [ read $f ] ]; \
 				close $f; \
@@ -1426,70 +1433,13 @@ int lsdmain( int argn, const char **argv )
 				} \
 			}" );
 
-		if ( choice == 0 || ! compile_run( 2 ) )		// recompile if changed
-		{
-			choice = 0;
+		if ( choice == 0 )
 			goto loop;
-		}
-
-		s = get_str( "modelName" );
-		if ( s == NULL || ! strcmp( s, "" ) )
-		{
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
-			choice = 0;
-			goto loop;
-		}
-
-		cmd( "cd \"$modelDir\"" );
-
-		if ( choice == 58 )
-		{
-			cmd( "scan $vmenuInsert %%d.%%d line col" );
-			cmd( "if [ string equal -nocase $DbgExe lldb ] { set breakExt lldb; set breakTxt \"breakpoint set -f $fileDir/$fileName -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $fileDir/$fileName:$line\nrun\n\" }" );
-			cmd( "catch { set f [ open break.$breakExt w ]; puts $f $breakTxt; close $f }" );
-
-			cmd( "if [ string equal -nocase $DbgExe lldb ] { set cmdbreak \"-s break.lldb\" } { set cmdbreak \"--command=break.gdb\" }" );
-		}
-		else
-			cmd( "if [ string equal -nocase $DbgExe gdb ] { set cmdbreak \"--args\" } { set cmdbreak \"\" }" );
 
 		make_makefile( );
 
-		// check if executable file is older than model file
-		s = get_fun_name( str, MAX_PATH_LENGTH );
-		if ( s == NULL || ! strcmp( s, "" ) )
-			goto end_gdb;
-
-		strcpyn( str, s, MAX_PATH_LENGTH );
-
-		s = get_str( "modelDir" );
-		if ( s == NULL || ! strcmp( s, "" ) )
-			goto end_gdb;
-
-		snprintf( tmp, MAX_BUFF_SIZE, "%s/%s", s, str );
-
-		if ( platform == _MAC_ )
-			snprintf( tmp1, MAX_BUFF_SIZE, "%s/%s.app/Contents/MacOS/%s", s, str1, str1 );
-		else
-			snprintf( tmp1, MAX_BUFF_SIZE, "%s/%s", s, str1 );
-
-		// get OS info for files
-		if ( stat( tmp1, & stExe ) == 0 && stat( tmp, & stMod ) == 0 )
-		{
-			if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
-			{
-				cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing executable file is older than the last version of the model.\n\nPress 'OK' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\" ]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
-				if ( choice == 2 )
-					goto end_gdb;
-			}
-		}
-		else
-		{
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Executable not found\" -detail \"Compile the model before running it in the [ string toupper $DbgExe ] debugger.\"" );
-			goto end_gdb;
-		}
-
-		f = fopen( eval_str( "[ file nativename \"$modelDir/makefile\" ]" ), "r" );
+		cmd( "cd \"$modelDir\"" );
+		f = fopen( "makefile", "r" );
 		if ( f == NULL )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
@@ -1509,6 +1459,38 @@ int lsdmain( int argn, const char **argv )
 
 		strcpyn( str1, str + 7, 2 * MAX_PATH_LENGTH );
 
+		if ( ! compile_run( 2 ) )				// recompile if changed
+			goto end_gdb;
+
+		if ( choice == 58 )
+		{
+			cmd( "scan $vmenuInsert %%d.%%d line col" );
+			cmd( "if [ string equal -nocase $DbgExe lldb ] { \
+					set breakExt lldb; \
+					set breakTxt \"breakpoint set -f $fileDir/$fileName -l$line\nrun\n\" \
+				} else { \
+					set breakExt gdb; \
+					set breakTxt \"break $fileDir/$fileName:$line\nrun\n\" \
+				}" );
+			cmd( "catch { \
+					set f [ open break.$breakExt w ]; \
+					puts $f $breakTxt; \
+					close $f \
+				}" );
+
+			cmd( "if [ string equal -nocase $DbgExe lldb ] { \
+					set cmdbreak \"-s break.lldb\" \
+				} else { \
+					set cmdbreak \"-q -x break.gdb\" \
+				}" );
+		}
+		else
+			cmd( "if [ string equal -nocase $DbgExe lldb ] { \
+					set cmdbreak \"-o run\" \
+				} else { \
+					set cmdbreak \"-q -ex run\" \
+				}" );
+
 		switch( platform )
 		{
 			case _WIN_:
@@ -1518,7 +1500,6 @@ int lsdmain( int argn, const char **argv )
 				break;
 
 			case _MAC_:
-				cmd( "if [ string equal $cmdbreak \"--args\" ] { set cmdbreak \"\" }" );
 				snprintf( tmp, MAX_BUFF_SIZE, "cd $fileDir; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s", str1, str1 );
 				break;
 

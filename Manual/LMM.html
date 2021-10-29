@@ -366,8 +366,8 @@ lang=EN-US> in a line) are highlighted in green. </span></p>
 programming code is the automatic indentation. When a new line is inserted
 (pressing the key </span><span class=Cdigo><span lang=EN-US>Enter</span></span><span
 lang=EN-US>), the editor fills the beginning of the new line with as many
-spaces/tabs as in the previous line, facilitating the standard programming
-indented style. </span></p>
+spaces/tabs as in the previous line, facilitating the standard programming indented
+style. </span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -434,9 +434,9 @@ yellow folder icon on the tool bar.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Browse the <a href="LSD_faqs.html#model">LSD
 models</a> available on your computer using the <a
-href="LSD_windows.html#modelbrowser">LSD Model Browser</a>. The models are usually
-organized in groups containing related models. After installation, there are
-two main groups created: </span><span class=Cdigo><span lang=EN-US>Example
+href="LSD_windows.html#modelbrowser">LSD Model Browser</a>. The models are
+usually organized in groups containing related models. After installation,
+there are two main groups created: </span><span class=Cdigo><span lang=EN-US>Example
 Models</span></span><span lang=EN-US> and </span><span class=Cdigo><span
 lang=EN-US>Work in Progress</span></span><span lang=EN-US>. In the first group
 you find several ready-to-run example models (see the <a href="model_using.html">tutorial</a>
@@ -677,8 +677,8 @@ lang=EN-US> for Linux.</span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Debugger</span></b><span lang=EN-US>: the
-debugger command to use, normally </span><span class=Cdigo><span lang=EN-US>gdb</span></span><span
+</span></span><b><span lang=EN-US>Debugger</span></b><span lang=EN-US>: the debugger
+command to use, normally </span><span class=Cdigo><span lang=EN-US>gdb</span></span><span
 lang=EN-US> in Windows and Linux and </span><span class=Cdigo><span lang=EN-US>lldb</span></span><span
 lang=EN-US> in macOS.</span></p>
 
@@ -1137,10 +1137,10 @@ easier reading.</span></p>
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><a
-  name="_Larger_Font"></a><a name=lfont></a><a name=wrap></a><a name=LsdScript></a><span
-  lang=EN-US>&nbsp;</span><span style='font-size:10.0pt;color:black'><a
-  href="#top"><span style='color:red;text-decoration:none'>&#9650;Top</span></a></span></p>
+  <p class=MsoNormal align=center style='text-align:center'><a name=LsdScript></a><a
+  name=wrap></a><a name=lfont></a><a name="_Larger_Font"></a><span lang=EN-US>&nbsp;</span><span
+  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
+  text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -1330,9 +1330,9 @@ class=Cdigo><span lang=EN-US>F7</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>Ctrl+g</span></span><span lang=EN-US> or click the
 on the white window with a green arrow icon on the tool bar.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>Launch the GDB (or LLDB on macOS) debugger
-and load the current <a href="LSD_faqs.html#modelprogram">LSD model program</a>
-on it.</span></p>
+<p class=MsoNormal><span lang=EN-US>Launch the GDB (or LLDB on macOS) debugger,
+load the current <a href="LSD_faqs.html#modelprogram">LSD model program</a>,
+and run it.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The external debugger allows the modeler to
 follow the <a href="LSD_faqs.html#simulationrun">simulation run</a>
@@ -1344,27 +1344,40 @@ works as if the single lines of code execute their respective commands only
 when explicitly directed to do so. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>Note that GDB and LLDB are <a
-href="LSD_faqs.html#c">C++</a> debuggers. Therefore, they know nothing of LSD
-Equations, Objects, etc., except for their (complicate) technical
-representations. The debugger permits, for example, to investigate line by line
-the execution of an equation. However, this means that one has also to follow
-line-by-line a lot of non-interesting technical code. </span></p>
+href="LSD_faqs.html#c">C++</a> debuggers. Therefore, there is limited support
+to LSD Equations, Objects, etc., except for their (complicated) technical
+representations. However, LSD Macros can still be used in the debugger if the
+compiler option </span><span class=Cdigo>-ggdb3</span><span lang=EN-US> is
+provided (the default in LSD). The debugger permits, for example, to
+investigate line by line the execution of an equation, checking the content of
+both C++ and LSD variables involved in the process. Please notice that the </span><span
+class=Cdigo><span lang=EN-US>V(…)</span></span><span lang=EN-US> family of
+macros, other than retrieving values of Variables, also triggers their computation,
+if not yet done. This can disrupt the order of evaluation of the Equations (</span><span
+class=Cdigo><span lang=EN-US>VL(…)</span></span><span lang=EN-US>  Macros don’t
+suffer from this limitation).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>LSD modelers may find more useful the LSD
 Debugger: it follows the simulation at the level of individual Equations. When
-one Variable, marked to be debugged, is computed, the LSD debugger interrupts the
-simulation, shows the value produced in the equation, the values of the </span><span
-class=Cdigo><span lang=EN-US>v[n]</span></span><span lang=EN-US> temporary
-values, the model’s elements values, etc., permitting to find, most of times,
-the cause of an error. See the <a href="debug.html">LSD Debugger help page</a>.
-</span></p>
+one Variable, marked to be debugged, is computed, the LSD debugger interrupts
+the simulation, shows the value produced in the equation, the values of the </span><span
+class=Cdigo><span lang=EN-US>v[n]</span></span><span lang=EN-US> and </span><span
+class=Cdigo>cur</span><span lang=EN-US> temporary values, the model’s elements
+values, etc., permitting to find, most of times, the cause of an error. See the
+<a href="debug.html">LSD Debugger help page</a>. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>However, GDB/LLDB may be still useful in
 case of some hard problems. The LSD model program in GDB/LLDB runs as usual
 (slightly slower, if anything) but the user can interrupt the program at any
 point, check the value of any variable, and make the program proceed by single
 steps. It is usually useful to focus on one Equation at a time and see the
-behavior of the program while executing it. </span></p>
+behavior of the program while executing it. GDB/LLDB automatically run the LSD model
+from a terminal window. To manually interrupt the model execution, just press </span><span
+class=Cdigo><span lang=EN-US>Ctrl+C</span></span><span lang=EN-US> in the
+debugger terminal. After interruption, debugger commands can be executed in the
+terminal window. To resume model execution, use the </span><span class=Cdigo><span
+lang=EN-US>continue</span></span><span lang=EN-US> command (shortcut: </span><span
+class=Cdigo><span lang=EN-US>c</span></span><span lang=EN-US>).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Below, some basic GDB commands are
 presented (LLDB commands are similar but not the same, please check the LLDB
@@ -1492,17 +1505,23 @@ were called until that moment in the execution of the program.</span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Help</span></b></span><span
+</span></span><span class=Cdigo><b><span lang=EN-US>quit</span></b></span><span
+lang=EN-US>: close the model program and the debugger terminal.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>help</span></b></span><span
 lang=EN-US>: shows GDB help information.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>GDB can do (unambiguous) command
 completion, so that typing, for example, </span><span class=Cdigo><span
 lang=EN-US>disp</span></span><span lang=EN-US> and then pressing the </span><span
 class=Cdigo><span lang=EN-US>tab</span></span><span lang=EN-US> key, the
-command display is automatically completed. In case of possible ambiguity
-(e.g., typing only </span><span class=Cdigo><span lang=EN-US>dis</span></span><span
+command display is automatically completed. In case of possible ambiguity (e.g.,
+typing only </span><span class=Cdigo><span lang=EN-US>dis</span></span><span
 lang=EN-US> and </span><span class=Cdigo><span lang=EN-US>tab</span></span><span
-lang=EN-US>) the prompt shows the list of alternative among which to choose
+lang=EN-US>) the prompt shows the list of alternatives among which to choose
 (this is also a weird, but rather useful, way to discover new functionalities).
 Unambiguous shortcuts (e.g., </span><span class=Cdigo><span lang=EN-US>s</span></span><span
 lang=EN-US> for </span><span class=Cdigo><span lang=EN-US>step</span></span><span
@@ -1584,10 +1603,10 @@ the non-graphical LSD model program:</span></p>
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><b><span
 lang=EN-US>Compile the LSD model program:</span></b><span lang=EN-US> at the
 command line (terminal) prompt, make sure the copied model home directory is
-the current one and use the command</span><span class=Cdigo><span lang=EN-US> make
--f makefileNW </span></span><span lang=EN-US>to generate a new executable file.
-If you get an error and compilation fails, you may have to adjust some of the
-variables in the </span><span class=Cdigo><span lang=EN-US>makefileNW</span></span><span
+the current one and use the command</span><span class=Cdigo><span lang=EN-US>
+make -f makefileNW </span></span><span lang=EN-US>to generate a new executable
+file. If you get an error and compilation fails, you may have to adjust some of
+the variables in the </span><span class=Cdigo><span lang=EN-US>makefileNW</span></span><span
 lang=EN-US> file for the characteristics of your system.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -1600,8 +1619,8 @@ configuration file. </span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US>3)<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><b><span
-lang=EN-US>Collect the results files:</span></b><span lang=EN-US> after each
-simulation run, by default LSD generates a compressed results file (</span><span
+lang=EN-US>Collect the results files:</span></b><span lang=EN-US> after each simulation
+run, by default LSD generates a compressed results file (</span><span
 class=Cdigo><span lang=EN-US>.res.gz</span></span><span lang=EN-US> extension),
 containing the data marked for saving, in the same directory of the
 configuration file.</span></p>
@@ -1866,8 +1885,8 @@ problem, LSD allows the modeler to split the model’s code in as many separate
 files as needed (all stored in the <a href="LSD_faqs.html#modelhome">model home
 directory</a> or in a subdirectory of it). </span></p>
 
-<p class=MsoNormal><span lang=EN-US>Under a multi-source files model, the modeler
-is responsible to explicitly include all the extra source files at the
+<p class=MsoNormal><span lang=EN-US>Under a multi-source files model, the
+modeler is responsible to explicitly include all the extra source files at the
 beginning (just before </span><span class=Cdigo><span lang=EN-US>MODELBEGIN</span></span><span
 lang=EN-US>) of the main equation file (the one created by LSD) using the C++
 directive </span><span class=Cdigo><span lang=EN-US>#include
@@ -2367,11 +2386,10 @@ installed in case of Linux computers) </span></p>
   <td width="42%" style='width:42.3%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal><span lang=EN-US style='color:black'>Compiler switches
   (options) to be used for all files (system and equations). Added to the </span><span
-  style='color:black'><a href="#_Model_Options_1"><span lang=EN-US>model
-  specific switches</span></a></span><span lang=EN-US style='color:black'> for
-  the </span><span style='color:black'><a href="LSD_faqs.html#equationfile"><span
-  lang=EN-US>equation file(s)</span></a></span><span lang=EN-US
-  style='color:black'>.</span></p>
+  style='color:black'><a href="#_Model_Options_1"><span lang=EN-US>model specific
+  switches</span></a></span><span lang=EN-US style='color:black'> for the </span><span
+  style='color:black'><a href="LSD_faqs.html#equationfile"><span lang=EN-US>equation
+  file(s)</span></a></span><span lang=EN-US style='color:black'>.</span></p>
   <p class=MsoNormal><span lang=EN-US style='color:black'>Default switches
   produces code optimized for the compiling computer (executables may not run
   on older computers) and no optional (non-error) warnings.</span></p>
@@ -2556,9 +2574,9 @@ Primer Tutorial</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>LSD absolute new users are strongly
 recommended to do this <a href="LMM_primer.html">first tutorial</a>, covering
-the very basic operations and concepts of <a href="LSD_faqs.html#lmm">LMM</a> and
-LSD. It guides first-time users to open LMM, explore its basic components and
-test the running of the example models available in the LSD installation. </span></p>
+the very basic operations and concepts of <a href="LSD_faqs.html#lmm">LMM</a>
+and LSD. It guides first-time users to open LMM, explore its basic components
+and test the running of the example models available in the LSD installation. </span></p>
 
 <h2><a name="_Using_LSD_Models"></a><span lang=EN-US>Using LSD Models Tutorial</span></h2>
 
@@ -2573,7 +2591,8 @@ Tutorial</span></h2>
 <p class=MsoNormal><span lang=EN-US>The <a href="model_writing.html">third
 tutorial</a> offers an introduction to users planning to develop their own <a
 href="LSD_faqs.html#model">LSD models</a> or modify existing ones. It is
-organized as a step-by-step guide on the creation of a simple LSD simulation model.</span></p>
+organized as a step-by-step guide on the creation of a simple LSD simulation
+model.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
