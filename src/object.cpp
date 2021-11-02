@@ -2122,7 +2122,7 @@ double object::recal( const char *lab )
 		return NAN;
 
 	// don't do anything if not yet computed in t
-	if ( cv->last_update < t || cv->num_lag < 1 )
+	if ( cv->last_update < t )
 		return( cv->val[ 0 ] );
 
 	app = cv->val[ 0 ];
