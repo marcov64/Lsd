@@ -3321,7 +3321,7 @@ double object::increment( const char *lab, double value )
 
 	if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
 	{
-		error_hard( "invalid write operation",
+		error_hard( "invalid increment operation",
 					"check your equation code to prevent this situation",
 					true,
 					"value '%g' is invalid for incrementing element '%s'", value, lab );
@@ -3331,6 +3331,18 @@ double object::increment( const char *lab, double value )
 	cv = search_var_err( this, lab, true, false, "incrementing" );
 	if ( cv == NULL )
 		return NAN;
+
+	if ( ! use_nan && is_nan( cv->val[ 0 ] ) )	// try to recover from RECALC
+		cv->cal( this, 0 );
+		
+	if ( ( ! use_nan && is_nan( cv->val[ 0 ] ) ) || is_inf( cv->val[ 0 ] ) )
+	{
+		error_hard( "invalid increment operation",
+					"check your equation code to prevent this situation",
+					true,
+					"current value '%g' of element '%s' is invalid for incrementing", cv->val[ 0 ], lab );
+		return NAN;
+	}
 
 	new_value = cv->val[ 0 ] + value;
 	this->write( lab, new_value, t );
@@ -3352,7 +3364,7 @@ double object::multiply( const char *lab, double value )
 
 	if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
 	{
-		error_hard( "invalid write operation",
+		error_hard( "invalid multiply operation",
 					"check your equation code to prevent this situation",
 					true,
 					"value '%g' is invalid for multiplying element '%s'", value, lab );
@@ -3362,6 +3374,18 @@ double object::multiply( const char *lab, double value )
 	cv = search_var_err( this, lab, true, false, "multiplying" );
 	if ( cv == NULL )
 		return NAN;
+
+	if ( ! use_nan && is_nan( cv->val[ 0 ] ) )	// try to recover from RECALC
+		cv->cal( this, 0 );
+		
+	if ( ( ! use_nan && is_nan( cv->val[ 0 ] ) ) || is_inf( cv->val[ 0 ] ) )
+	{
+		error_hard( "invalid multiply operation",
+					"check your equation code to prevent this situation",
+					true,
+					"current value '%g' of element '%s' is invalid for multiplying", cv->val[ 0 ], lab );
+		return NAN;
+	}
 
 	new_value = cv->val[ 0 ] * value;
 	this->write( lab, new_value, t );
