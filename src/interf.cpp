@@ -2697,8 +2697,6 @@ object *operate( object *r )
 
 			cmd( "showtop $T" );
 			cmd( "mousewarpto $T.b.ok 0" );
-			cmd( "$T.n.e selection range 0 end" );
-			cmd( "focus $T.n.e" );
 
 			choice = -1;
 			while ( choice == -1 )			// wait for user action
