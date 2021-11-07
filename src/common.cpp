@@ -1980,7 +1980,7 @@ void exception_handler( int signum, const char *what )
 
 		case SIGMEM:
 			snprintf( msg1, MAX_LINE_SIZE, "SIGMEM (%s)", what != NULL && strlen( what ) > 0 ? what : "Out of memory" );
-			strcpyn( msg2, "Maybe too many series saved?\n	Try to reduce the number of series saved or the number of time steps", MAX_LINE_SIZE );
+			strcpyn( msg2, "Maybe too many series saved?\n	Try to reduce the number of series saved or the number of cases (time steps)", MAX_LINE_SIZE );
 			break;
 
 		case SIGABRT:

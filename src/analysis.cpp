@@ -4379,9 +4379,9 @@ double *log_data( double *data, int start, int end, int ser, const char *err_msg
 			logdata[ i ] = NAN;
 			if ( i > 0 && ++errCnt < ERR_LIM )	// prevent slow down due to I/O
 				if ( ser >= 0 )
-					plog( "\nWarning: zero or negative values in log %s (ignored)\n			Series: %d, Case: %d", err_msg, ser + 1, start + i );
+					plog( "\nWarning: zero or negative values in log %s (ignored)\n Series: %d, Case: %d", err_msg, ser + 1, start + i );
 				else
-					plog( "\nWarning: zero or negative values in log %s (ignored)\n			Case: %d", err_msg, start + i );
+					plog( "\nWarning: zero or negative values in log %s (ignored)\n Case: %d", err_msg, start + i );
 			else
 				if ( i > 0 && ! stopErr )
 				{
@@ -5116,8 +5116,8 @@ void plot_gnu( void )
 		cmd( "ttk::frame .da.s.d.o -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 		cmd( "if { ! [ info exists box ] } { set box 0 }" );
 		cmd( "ttk::radiobutton .da.s.d.o.a -text \"Use 1st and 2nd series\" -variable box -value 0" );
-		cmd( "ttk::radiobutton .da.s.d.o.c -text \"Use time and 1st series\" -variable box -value 2" );
-		cmd( "ttk::radiobutton .da.s.d.o.b -text \"Use time and rank\" -variable box -value 1" );
+		cmd( "ttk::radiobutton .da.s.d.o.c -text \"Use case and 1st series\" -variable box -value 2" );
+		cmd( "ttk::radiobutton .da.s.d.o.b -text \"Use case and rank\" -variable box -value 1" );
 		cmd( "pack .da.s.d.o.a .da.s.d.o.c .da.s.d.o.b -anchor w" );
 
 		cmd( "pack .da.s.d.l .da.s.d.o" );
@@ -5286,7 +5286,7 @@ void plot_gnu( void )
 	{
 		if ( gridd == 0 )
 		{
-			fprintf( f, "Time\t" );
+			fprintf( f, "Case\t" );
 			if ( box == 1 )
 			{
 				for ( i = 0; i < nv; ++i )
@@ -5301,7 +5301,7 @@ void plot_gnu( void )
 			}
 		}
 		else
-			fprintf( f, "Time\tRank\tVal" );
+			fprintf( f, "Case\tRank\tVal" );
 	}
 
 	fprintf( f, "\n" );
@@ -5439,7 +5439,7 @@ void plot_gnu( void )
 	if ( box == 0 )
 		snprintf( da_tmp, MAX_BUFF_SIZE, "set xlabel \"%s_%s\" textcolor \"%s\"\n", str[ 0 ], tag[ 0 ], app );
 	else
-		snprintf( da_tmp, MAX_BUFF_SIZE, "set xlabel \"Time\" textcolor \"%s\"\n", app );
+		snprintf( da_tmp, MAX_BUFF_SIZE, "set xlabel \"Case\" textcolor \"%s\"\n", app );
 
 	fprintf( f, "%s", da_tmp );
 	fprintf( f2, "%s", da_tmp );

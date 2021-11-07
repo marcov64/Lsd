@@ -253,7 +253,7 @@ void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const 
 		reset_plot( );		// show & disable run-time plot
 		set_buttons_run( false );
 
-		plog_tag( "\n\nError detected at time %d", "highlight", t );
+		plog_tag( "\n\nError detected at case (time step): %d", "highlight", t );
 		plog( "\n\nError: %s\nDetails: %s", boxTitle, logText );
 		if ( ! parallel_mode && stacklog != NULL && stacklog->vs != NULL )
 			plog( "\nOffending code contained in the equation for variable: '%s'", stacklog->vs->label );

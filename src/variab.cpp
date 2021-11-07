@@ -942,7 +942,7 @@ void parallel_update( variable *v, object* p, object *caller )
 						error_hard( "deadlock during parallel computation",
 									"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
 									true,
-									"variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->label, cv->up->label, MAX_WAIT_TIME, t );
+									"variable '%s' (object '%s') took more than %d seconds\nwhile computing value for case %d", cv->label, cv->up->label, MAX_WAIT_TIME, t );
 						return;
 					}
 				}
@@ -1014,7 +1014,7 @@ void parallel_update( variable *v, object* p, object *caller )
 				error_hard( "deadlock during parallel computation",
 							"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
 							true,
-							"variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv != NULL ? cv->up->label : "", cv != NULL ? cv->label : "", MAX_WAIT_TIME, t );
+							"variable '%s' (object '%s') took more than %d seconds\nwhile computing value for case %d", cv != NULL ? cv->up->label : "", cv != NULL ? cv->label : "", MAX_WAIT_TIME, t );
 				return;
 			}
 		}

@@ -1573,7 +1573,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 						error_hard( "cannot add object",
 									"check your equation code to prevent this situation",
 									true,
-									"invalid update time (%d) to set object '%s'\nvariable '%s' was updated later (%d)", t_update, lab, cv->label, cv->last_update );
+									"invalid update case (%d) to set object '%s'\nvariable '%s' was updated later (%d)", t_update, lab, cv->label, cv->last_update );
 						return NULL;
 					}
 
@@ -3284,7 +3284,7 @@ double object::write( const char *lab, double value, int time, int lag )
 					error_hard( "invalid write operation",
 								"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
 								true,
-								"invalid update time (%d) and lag (%d) for variable '%s'", time, lag, lab );
+								"invalid update case (%d) and lag (%d) for variable '%s'", time, lag, lab );
 					return NAN;
 				}
 			}

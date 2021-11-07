@@ -482,7 +482,7 @@ void enable_plot( void )
 			$rtptab select $activeplot; \
 			$activeplot.fond.go conf -state normal; \
 			$activeplot.fond.shift conf -state normal; \
-			tooltip::tooltip $activeplot.fond.go \"Center plot in current time step\"; \
+			tooltip::tooltip $activeplot.fond.go \"Center plot in current case (time step)\"; \
 			tooltip::tooltip $activeplot.fond.shift \"Automatic scrolling\"; \
 			$rtptab select $activeplot; \
 			if { [ info exists rtptab_show ] && ! $rtptab_show } { \

@@ -2872,8 +2872,8 @@ object *operate( object *r )
 
 		cmd( "pack $T.h $T.f -padx 5 -pady 5" );
 
-		cmd( "tooltip::tooltip $T.f.c \"First time step to compute the variable\"" );
-		cmd( "tooltip::tooltip $T.f.a \"Maximum time step for uniform random first computation\"" );
+		cmd( "tooltip::tooltip $T.f.c \"First case (time step) to compute the variable\"" );
+		cmd( "tooltip::tooltip $T.f.a \"Maximum case (time step) for uniform random first computation\"" );
 		cmd( "tooltip::tooltip $T.f.b \"Period between computations of variable\"" );
 		cmd( "tooltip::tooltip $T.f.d \"Maximum period for uniform random periodic computation\"" );
 
@@ -3002,7 +3002,7 @@ object *operate( object *r )
 		cmd( "ttk::frame $T.f2" );
 
 		cmd( "ttk::frame $T.f2.t" );
-		cmd( "ttk::label $T.f2.t.l -text \"Time steps:\"" );
+		cmd( "ttk::label $T.f2.t.l -text \"Cases:\"" );
 		cmd( "ttk::label $T.f2.t.w -text \"%d\" -style hl.TLabel", max_step );
 		cmd( "pack $T.f2.t.l $T.f2.t.w -side left -padx 2" );
 
@@ -5989,7 +5989,7 @@ object *operate( object *r )
 		cmd( "ttk::frame $b.f2" );
 
 		cmd( "ttk::frame $b.f2.t" );
-		cmd( "ttk::label $b.f2.t.l -text \"Time steps:\"" );
+		cmd( "ttk::label $b.f2.t.l -text \"Cases:\"" );
 		cmd( "ttk::label $b.f2.t.w -text \"%d\" -style hl.TLabel", max_step );
 		cmd( "pack $b.f2.t.l $b.f2.t.w -side left -padx 2" );
 

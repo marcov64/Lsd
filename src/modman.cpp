@@ -2482,7 +2482,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "pack .a.n.l .a.n.e" );
 
 		cmd( "ttk::frame .a.l" );
-		cmd( "ttk::label .a.l.l -text \"Time step appearing as latest computation\"" );
+		cmd( "ttk::label .a.l.l -text \"Case appearing as latest computation\"" );
 		cmd( "ttk::entry .a.l.e -width 5 -textvariable v_lag -justify center" );
 		cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 		cmd( "pack .a.l.l .a.l.e" );
