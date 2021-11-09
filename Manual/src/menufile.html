@@ -24,16 +24,16 @@ w\:* {behavior:url(#default#VML);}
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>8</o:Revision>
-  <o:TotalTime>17</o:TotalTime>
+  <o:Revision>10</o:Revision>
+  <o:TotalTime>30</o:TotalTime>
   <o:Created>2018-04-14T19:23:00Z</o:Created>
-  <o:LastSaved>2021-09-15T19:32:00Z</o:LastSaved>
+  <o:LastSaved>2021-11-09T21:27:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>2217</o:Words>
-  <o:Characters>11974</o:Characters>
-  <o:Lines>99</o:Lines>
+  <o:Words>2232</o:Words>
+  <o:Characters>12057</o:Characters>
+  <o:Lines>100</o:Lines>
   <o:Paragraphs>28</o:Paragraphs>
-  <o:CharactersWithSpaces>14163</o:CharactersWithSpaces>
+  <o:CharactersWithSpaces>14261</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -763,8 +763,7 @@ p.MsoTitle, li.MsoTitle, div.MsoTitle
 	color:#254061;
 	font-weight:bold;}
 a:link, span.MsoHyperlink
-	{mso-style-noshow:yes;
-	mso-style-priority:99;
+	{mso-style-priority:99;
 	color:blue;
 	text-decoration:underline;
 	text-underline:single;}
@@ -1564,11 +1563,11 @@ configuration to a new file, she must explicitly type the new name.<o:p></o:p></
 command is frequently used to create a copy of an existing configuration before
 experimenting with some changes. Note that the configuration files do not have
 to be stored in the <a href="LSD_faqs.html#modelhome">model home directory</a>.
-In fact, they can be stored anywhere in the file system, including in subdirectories
-of the home directory. This is useful because LSD automatically saves <a
-href="LSD_faqs.html#results">simulation run results data</a> to the same
-location where the configuration file is, allowing the easy organization of the
-results of different model configurations.<o:p></o:p></span></p>
+In fact, they can be stored anywhere in the file system, including in
+subdirectories of the home directory. This is useful because LSD automatically
+saves <a href="LSD_faqs.html#results">simulation run results data</a> to the
+same location where the configuration file is, allowing the easy organization
+of the results of different model configurations.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Another
 situation in which this command may be used is after a simulation run. As in
@@ -1927,6 +1926,19 @@ user may choose the directory and the text file to be produced.<o:p></o:p></span
 <h1><a name="_Equation_file_operations"></a><span lang=EN-US style='mso-fareast-font-family:
 "Times New Roman";mso-ansi-language:EN-US'>Equation file operations<o:p></o:p></span></h1>
 
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>LSD automatically
+stores a snapshot of the current <a href="LSD_faqs.html#equationfile">equation
+file</a> used to generate the <a href="LSD_faqs.html#modelprogram">LSD model
+program</a> in the <a href="LSD_faqs.html#modelsetting">model configuration
+file</a>. This snapshot does not support multi-file equation sources. Please
+note that this snapshot is stored into the configuration for backup purposes
+only. The <a href="LSD_faqs.html#equation">Equations</a> in the snapshot <i>are
+not</i> used for the creation of the LSD model program, except if previously
+extracted to a properly named equation file (see LMM menu </span><span
+class=Cdigo><a href="LMM.html#model_options"><span lang=EN-US style='mso-ansi-language:
+EN-US'>Model&gt;Model Options</span></a></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>).<o:p></o:p></span></p>
+
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Operations
 involving <a href="LSD_faqs.html#equationfile">LSD equation file</a>:<o:p></o:p></span></p>
 
@@ -1944,15 +1956,7 @@ lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-fon
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'><a
-href="#_Upload_Equation_File">Upload Equation File</a><o:p></o:p></span></p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:42.6pt;text-indent:-24.75pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
-lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
-Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'><a
-href="#_Offload_Equation_File">Offload Equation File</a><o:p></o:p></span></p>
+href="#_Offload_Equation_File">Restore Equation File</a><o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:42.6pt;text-indent:-24.75pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -1975,32 +1979,22 @@ href="LSD_faqs.html#equationfile">equation file</a> to the model. In general
 LSD should be able to identify the equation file automatically. However, in
 some cases the modeler may want to modify the file associated to it.<o:p></o:p></span></p>
 
-<h2><a name="_Upload_Equation_File"></a><span lang=EN-US style='mso-fareast-font-family:
-"Times New Roman";mso-ansi-language:EN-US'>Upload Equation File<o:p></o:p></span></h2>
+<h2><a name="_Upload_Equation_File"></a><a name="_Offload_Equation_File"></a><span
+lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
+EN-US'>Restore Equation File<o:p></o:p></span></h2>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Store into
-the <a href="LSD_faqs.html#modelsetting">model configuration file</a> a
-snapshot of the current <a href="LSD_faqs.html#equationfile">equation file</a>
-used to generate the <a href="LSD_faqs.html#modelprogram">LSD model program</a>.
-This command does not support multi-file equation sources.<o:p></o:p></span></p>
-
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Please note
-that the equation file is stored into the configuration for documentation and
-backup purposes only. These <a href="LSD_faqs.html#equation">Equations </a><i>are
-not</i> used for the creation of the LSD model program.<o:p></o:p></span></p>
-
-<h2><a name="_Offload_Equation_File"></a><span lang=EN-US style='mso-fareast-font-family:
-"Times New Roman";mso-ansi-language:EN-US'>Offload Equation File<o:p></o:p></span></h2>
-
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Generate an
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Generate a new
 <a href="LSD_faqs.html#equationfile">equation file</a> from the copy stored in
 the <a href="LSD_faqs.html#modelsetting">model configuration file</a>.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Please note
-that the equation file stored in the model configuration file is likely an <i>older
+that the equation file stored in the model configuration file may be an <i>older
 version</i> than the current one. Use this option to restore a known-good
 equation file. It is advisable to restore the equation file under a different
-name, to avoid overwriting the current one.<o:p></o:p></span></p>
+name, to avoid overwriting the current one, properly adjusting LMM’s menu </span><span
+class=Cdigo><a href="LMM.html#model_options"><span lang=EN-US style='mso-ansi-language:
+EN-US'>Model&gt;Model Options</span></a></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
 
 <h2><a name="_Compare_Equation_Files"></a><span lang=EN-US style='mso-fareast-font-family:
 "Times New Roman";mso-ansi-language:EN-US'>Compare Equation Files<o:p></o:p></span></h2>
@@ -2012,10 +2006,8 @@ the snapshot stored in the <a href="LSD_faqs.html#modelsetting">model
 configuration file</a>, if any, using TkDiff text-file comparison utility.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This
-command is useful to track the changes made to the equation file since the last
-snapshot with the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>File&gt;Upload Equation File</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> command (<a href="#_Upload_Equation_File">above</a>).<o:p></o:p></span></p>
+command is useful to track the changes made to the equation file since the snapshot
+in the configuration file was taken.<o:p></o:p></span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:

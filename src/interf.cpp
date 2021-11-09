@@ -818,8 +818,7 @@ int browse( object *r )
 			cmd( "$w add separator" );
 
 			cmd( "$w add command -label \"Set Equation File...\" -underline 2 -accelerator Ctrl+U -command { set choice 28 }" );
-			cmd( "$w add command -label \"Upload Equation File\" -command { set choice 51 }" );
-			cmd( "$w add command -label \"Offload Equation File...\" -underline 1 -command { set choice 52 }" );
+			cmd( "$w add command -label \"Restore Equation File...\" -underline 1 -command { set choice 52 }" );
 			cmd( "$w add command -label \"Compare Equation Files...\" -underline 2 -command { set choice 53 }" );
 
 			cmd( "$w add separator" );
@@ -4225,37 +4224,7 @@ object *operate( object *r )
 	break;
 
 
-	// Upload in memory current equation file
-	case 51:
-		/*
-		Replace lsd_eq_file with the eq_file. That is, make appear actually used equation file as the one used for the current configuration
-		*/
-
-		if ( ! struct_loaded )
-		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to upload an equation file.\"" );
-			break;
-		}
-
-		if ( ! strcmp( eq_file, lsd_eq_file ) )
-		{
-			cmd( "ttk::messageBox -parent . -title \"Upload Equations\" -icon info -message \"Nothing to do\" -detail \"There are no equations to be uploaded differing from the current configuration file.\" -type ok" );
-			break;
-		}
-
-		cmd( "set answer [ ttk::messageBox -parent . -title Confirmation -icon question -message \"Replace equations?\" -detail \"The equations associated to the configuration file are going to be replaced with the equations used for the LSD model program. Press 'OK' to confirm.\" -type okcancel -default ok ]" );
-		cmd( "if { [ string compare $answer ok ] == 0 } { set choice 1 } { set choice 0 }" );
-		if ( choice == 0 )
-			break;
-
-		strcpyn( lsd_eq_file, eq_file, MAX_FILE_SIZE );
-
-		unsaved_change( true );		// signal unsaved change
-
-	break;
-
-
-	// Offload configuration's equations in a new equation file
+	// Restore configuration's equations in a new equation file
 	case 52:
 		/*
 		Used to re-generate the equations used for the current configuration file

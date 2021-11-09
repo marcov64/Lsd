@@ -1331,7 +1331,7 @@ SAVE_EQFILE
 ***************************************************/
 void save_eqfile( FILE *f )
 {
-	if ( strlen( lsd_eq_file ) == 0 )
+	if ( strlen( lsd_eq_file ) == 0 || strcmp( lsd_eq_file, eq_file ) != 0 )
 		strcpyn( lsd_eq_file, eq_file, MAX_FILE_SIZE );
 
 	fprintf( f, "\nEQ_FILE\n" );

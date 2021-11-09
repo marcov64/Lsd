@@ -573,6 +573,18 @@ may choose the directory and the text file to be produced.</span></p>
 <h1><a name="_Equation_file_operations"></a><span lang=EN-US>Equation file
 operations</span></h1>
 
+<p class=MsoNormal><span lang=EN-US>LSD automatically stores a snapshot of the
+current <a href="LSD_faqs.html#equationfile">equation file</a> used to generate
+the <a href="LSD_faqs.html#modelprogram">LSD model program</a> in the <a
+href="LSD_faqs.html#modelsetting">model configuration file</a>. This snapshot
+does not support multi-file equation sources. Please note that this snapshot is
+stored into the configuration for backup purposes only. The <a
+href="LSD_faqs.html#equation">Equations</a> in the snapshot <i>are not</i> used
+for the creation of the LSD model program, except if previously extracted to a
+properly named equation file (see LMM menu </span><span class=Cdigo><a
+href="LMM.html#model_options"><span lang=EN-US>Model&gt;Model Options</span></a></span><span
+lang=EN-US>).</span></p>
+
 <p class=MsoNormal><span lang=EN-US>Operations involving <a
 href="LSD_faqs.html#equationfile">LSD equation file</a>:</span></p>
 
@@ -584,13 +596,7 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:42.6pt;text-indent:-24.75pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US><a href="#_Upload_Equation_File">Upload Equation
-File</a></span></p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:42.6pt;text-indent:-24.75pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US><a href="#_Offload_Equation_File">Offload
+</span></span><span lang=EN-US><a href="#_Offload_Equation_File">Restore
 Equation File</a></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -609,30 +615,20 @@ href="LSD_faqs.html#equationfile">equation file</a> to the model. In general
 LSD should be able to identify the equation file automatically. However, in
 some cases the modeler may want to modify the file associated to it.</span></p>
 
-<h2><a name="_Upload_Equation_File"></a><span lang=EN-US>Upload Equation File</span></h2>
+<h2><a name="_Upload_Equation_File"></a><a name="_Offload_Equation_File"></a><span
+lang=EN-US>Restore Equation File</span></h2>
 
-<p class=MsoNormal><span lang=EN-US>Store into the <a
-href="LSD_faqs.html#modelsetting">model configuration file</a> a snapshot of
-the current <a href="LSD_faqs.html#equationfile">equation file</a> used to
-generate the <a href="LSD_faqs.html#modelprogram">LSD model program</a>. This
-command does not support multi-file equation sources.</span></p>
-
-<p class=MsoNormal><span lang=EN-US>Please note that the equation file is
-stored into the configuration for documentation and backup purposes only. These
-<a href="LSD_faqs.html#equation">Equations </a><i>are not</i> used for the
-creation of the LSD model program.</span></p>
-
-<h2><a name="_Offload_Equation_File"></a><span lang=EN-US>Offload Equation File</span></h2>
-
-<p class=MsoNormal><span lang=EN-US>Generate an <a
+<p class=MsoNormal><span lang=EN-US>Generate a new <a
 href="LSD_faqs.html#equationfile">equation file</a> from the copy stored in the
 <a href="LSD_faqs.html#modelsetting">model configuration file</a>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Please note that the equation file stored
-in the model configuration file is likely an <i>older version</i> than the
-current one. Use this option to restore a known-good equation file. It is
-advisable to restore the equation file under a different name, to avoid overwriting
-the current one.</span></p>
+in the model configuration file may be an <i>older version</i> than the current
+one. Use this option to restore a known-good equation file. It is advisable to
+restore the equation file under a different name, to avoid overwriting the
+current one, properly adjusting LMM’s menu </span><span class=Cdigo><a
+href="LMM.html#model_options"><span lang=EN-US>Model&gt;Model Options</span></a></span><span
+lang=EN-US>.</span></p>
 
 <h2><a name="_Compare_Equation_Files"></a><span lang=EN-US>Compare Equation
 Files</span></h2>
@@ -644,9 +640,8 @@ stored in the <a href="LSD_faqs.html#modelsetting">model configuration file</a>,
 if any, using TkDiff text-file comparison utility.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>This command is useful to track the changes
-made to the equation file since the last snapshot with the </span><span
-class=Cdigo><span lang=EN-US>File&gt;Upload Equation File</span></span><span
-lang=EN-US> command (<a href="#_Upload_Equation_File">above</a>).</span></p>
+made to the equation file since the snapshot in the configuration file was
+taken.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
