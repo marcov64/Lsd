@@ -355,6 +355,13 @@ void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const 
 #endif
 		throw ( int ) 919293;			// force end of run() (in lsdmain.cpp)
 	}
+
+	if ( err == 1 )
+	{
+		save_pos( currObj );			// save browser position in structure
+		update_model_info( );			// save windows positions if appropriate
+	}
+
 #else
 
 	fprintf( stderr, "\nError: %s\n(%s)\n", boxTitle, logText );
