@@ -576,6 +576,7 @@ void worker::cal_worker( void )
 	try
 	{
 		running = true;
+		errored = false;
 
 		// update object map and register all signal handlers
 		unique_lock < mutex > lock_map( thr_ptr_lock );
@@ -635,9 +636,12 @@ void worker::cal_worker( void )
 						snprintf( err_msg3, MAX_BUFF_SIZE, "check your code to prevent this situation" );
 					}
 
+					errored = true;
+
 					throw;
 				}
-				user_excpt = false;
+
+				user_excpt = errored = false;
 
 				// scale down the past values
 				for ( i = 0; i < var->num_lag; ++i )
@@ -692,8 +696,7 @@ void worker::cal_worker( void )
 		}
 	}
 
-	free = false;
-	running = false;
+	running = free = false;
 }
 
 
@@ -722,7 +725,7 @@ WORKER destructor
 worker::~worker( void )
 {
 	// command thread shutdown if running
-	if ( running )
+	if ( running && ! errored )
 	{
 		unique_lock< mutex > lock_worker( lock );
 		running = free = false;
@@ -730,7 +733,7 @@ worker::~worker( void )
 	}
 
 	// wait for shutdown and check exception
-	if ( thr.joinable( ) )
+	if ( thr.joinable( ) && ! errored )
 		thr.join( );
 
 	// remove thread id from threads map
@@ -1037,4 +1040,31 @@ void parallel_update( variable *v, object* p, object *caller )
 	// re-enable concurrent parallel update
 	parallel_ready = true;
 }
+
 #endif
+
+/****************************************************
+WORKER_ERRORS
+Check how many workers are in error condition
+****************************************************/
+int worker_errors( void )
+{
+#ifndef _NP_
+
+	int i, count;
+
+	if ( workers == NULL )
+		return 0;
+
+	for ( count = i = 0; i < max_threads; ++i )
+		if ( workers[ i ].errored )
+			++count;
+
+	return count;
+
+#else
+
+	return 0;
+
+#endif
+}

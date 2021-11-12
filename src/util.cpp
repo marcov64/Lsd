@@ -279,7 +279,7 @@ void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const 
 	uncover_browser( );
 	cmd( "focustop .log" );
 
-	cmd( "set err %d", defQuit ? 1 : 2 );
+	cmd( "set err %d", ( defQuit || worker_errors( ) ) > 0 ? 1 : 2 );
 
 	cmd( "newtop .cazzo Error" );
 
@@ -309,6 +309,9 @@ void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const 
 
 	if ( parallel_mode || fast_mode != 0 )
 		cmd( ".cazzo.e.b.d configure -state disabled" );
+
+	if ( worker_errors( ) > 0 )
+		cmd( ".cazzo.e.b.r configure -state disabled" );
 
 	choice = 0;
 	while ( choice == 0 )

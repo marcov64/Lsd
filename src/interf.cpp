@@ -1823,7 +1823,7 @@ object *operate( object *r )
 
 		cmd( "destroytop .objprop" );
 
-		redrawRoot = true;				// always redraw, because of different vname
+		redrawRoot = redrawStruc = true;			// force browser/structure redraw
 
 		// dispatch chosen option
 		if ( done > 2 )

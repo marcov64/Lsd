@@ -506,6 +506,7 @@ struct worker							// multi-thread parallel worker data structure
 {
 	bool free;
 	bool running;
+	bool errored;
 	bool user_excpt;
 	char err_msg1[ MAX_BUFF_SIZE ];
 	char err_msg2[ MAX_BUFF_SIZE ];
@@ -584,6 +585,7 @@ int strlf( char *out, const char *str, int outSz );
 int strtrim( char *out, const char *str, int outSz );
 int strwrap( char *out, const char *str, int outSz, int wid );
 int run_system( const char *cmd, int id = -1 );
+int worker_errors( void );
 long eval_long( const char *tcl_exp );
 long get_long( const char *tcl_var, long *var = NULL );
 string win_path( string filepath );

@@ -1896,8 +1896,9 @@ void myexit( int v )
 {
 	fflush( stderr );
 #ifndef _NP_
-	// stop multi-thread workers, if needed
-	delete [ ] workers;
+	// stop multi-thread workers, if needed/safe
+	if ( worker_errors( ) == 0 )
+		delete [ ] workers;
 #endif
 
 #ifndef _NW_
