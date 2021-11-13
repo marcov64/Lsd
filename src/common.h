@@ -331,6 +331,7 @@ struct variable
 
 #ifndef _NP_
 	mutex parallel_comp;				// mutex lock for parallel computation
+	recursive_mutex recursive_comp;		// mutex for avoid blocking on recursion
 #endif
 
 	eq_funcT eq_func;					// pointer to equation function for fast look-up

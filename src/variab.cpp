@@ -278,8 +278,9 @@ double variable::cal( object *caller, int lag )
 		return val[ 0 ];				// it's a parameter, ignore lags
 
 #ifndef _NP_
-	// prepare mutex for variables and functions updated in multiple threads
-	unique_lock < mutex > guard( parallel_comp, defer_lock );
+	// prepare mutexes for variables and functions updated in multiple threads
+	unique_lock < recursive_mutex > guard1( recursive_comp, defer_lock );
+	unique_lock < mutex > guard2( parallel_comp, defer_lock );
 #endif
 
 	if ( param == 0 )					// it's a variable
@@ -319,9 +320,10 @@ double variable::cal( object *caller, int lag )
 			if ( last_update >= t || t < next_update )
 				return( val[ 0 ] );
 #ifndef _NP_
-			// prevent parallel computation of the same variable (except dummy equations)
+			// wait for computation of this variable by other threads
 			if ( parallel_mode && ! dummy )
-				 guard.lock( );
+				guard1.lock( );
+			
 			if ( last_update >= t )		// recheck if not computed during lock
 				return( val[ 0 ] );
 #endif
@@ -339,9 +341,9 @@ double variable::cal( object *caller, int lag )
 			return val[ 0 ];
 
 #ifndef _NP_
-		// prevent parallel computation of the same function (except dummy equations)
+		// wait for computation of this function by other threads
 		if ( parallel_mode && ! dummy )
-			 guard.lock( );
+			 guard1.lock( );
 #endif
 	}
 
@@ -355,6 +357,12 @@ double variable::cal( object *caller, int lag )
 					"equation for '%s' (object '%s') requested \nits own value while computing its current value", label, up->label );
 		return 0;
 	}
+
+#ifndef _NP_
+	// prevent computation of the same element by any thread
+	if ( parallel_mode && ! dummy )
+		 guard2.lock( );
+#endif
 
 	under_computation = true;
 
@@ -543,8 +551,11 @@ double variable::cal( object *caller, int lag )
 	if ( wait_delete != NULL )
 	{
 #ifndef _NP_
-		if ( guard.owns_lock( ) )
-			guard.unlock( );					// release lock
+		if ( guard1.owns_lock( ) )
+			guard1.unlock( );					// release lock
+		
+		if ( guard2.owns_lock( ) )
+			guard2.unlock( );
 #endif
 		wait_delete->delete_obj( this );
 	}
@@ -608,7 +619,17 @@ void worker::cal_worker( void )
 					snprintf( err_msg2, MAX_BUFF_SIZE, "the equation for '%s' in object '%s' requested its own value\nwhile parallel-computing its current value", var->label, var->up->label );
 					snprintf( err_msg3, MAX_BUFF_SIZE, "check your code to prevent this situation" );
 					user_excpt = true;
-					throw;
+
+					if ( worker_errors( ) == 0 )
+					{
+						errored = true;
+						throw;
+					}
+					else
+					{
+						errored = true;
+						goto stop;
+					}
 				}
 
 				var->under_computation = true;
@@ -636,9 +657,16 @@ void worker::cal_worker( void )
 						snprintf( err_msg3, MAX_BUFF_SIZE, "check your code to prevent this situation" );
 					}
 
-					errored = true;
-
-					throw;
+					if ( worker_errors( ) == 0 )
+					{
+						errored = true;
+						throw;
+					}
+					else
+					{
+						errored = true;
+						goto stop;
+					}
 				}
 
 				user_excpt = errored = false;
@@ -695,6 +723,8 @@ void worker::cal_worker( void )
 			snprintf( err_msg3, MAX_BUFF_SIZE, "disable parallel computation for this variable\nor check your code to prevent this situation" );
 		}
 	}
+	
+	stop:
 
 	running = free = false;
 }
@@ -824,7 +854,7 @@ Check if worker is running and handle problems
 ****************************************************/
 bool worker::check( void )
 {
-	if ( running )				// nothing to do?
+	if ( running && ! errored )				// nothing to do?
 		return true;
 
 	// only process first worker crash
