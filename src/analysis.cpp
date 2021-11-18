@@ -7602,6 +7602,7 @@ bool create_series( bool mc, vector < string > var_names )
 			for ( i = min_c; i <= max_c; ++i )
 			{
 				nn = nvar = sum = prod = 0;
+				inv = neg = lag = NAN;
 				v.clear( );
 				v.reserve( sel_series );
 
@@ -7717,6 +7718,7 @@ bool create_series( bool mc, vector < string > var_names )
 			for ( j = 0; j < sel_series; ++j )
 			{
 				nn = nvar = sum = prod = 0;
+				inv = neg = lag = NAN;
 				v.clear( );
 				v.reserve( max_c - min_c + 1 );
 

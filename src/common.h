@@ -170,6 +170,11 @@ typedef unordered_map < string, string > p_mapT;
 typedef unordered_map < string, variable * > v_mapT;
 typedef unordered_set < object * > o_setT;
 
+#ifndef _NP_
+typedef lock_guard < recursive_mutex > rec_lguardT;
+typedef unique_lock < recursive_mutex > rec_uniqlT;
+#endif
+
 #ifdef _WIN32
 typedef HANDLE handleT;
 #else
@@ -330,8 +335,7 @@ struct variable
 	variable *next;
 
 #ifndef _NP_
-	mutex parallel_comp;				// mutex lock for parallel computation
-	recursive_mutex recursive_comp;		// mutex for avoid blocking on recursion
+	recursive_mutex parallel_comp;		// mutex lock for parallel computation
 #endif
 
 	eq_funcT eq_func;					// pointer to equation function for fast look-up

@@ -210,7 +210,7 @@ void variable::init( object *_up, const char *_label, int _num_lag, double *v, i
 
 #ifndef _NP_
 	// prevent concurrent use by more than one thread
-	lock_guard < mutex > lock( parallel_comp );
+	rec_lguardT lock( parallel_comp );
 #endif
 
 	up = _up;
@@ -243,7 +243,7 @@ void variable::empty( bool no_lock )
 	if ( running && ! no_lock )
 	{
 		// prevent concurrent use by more than one thread
-		lock_guard < mutex > lock( parallel_comp );
+		rec_lguardT lock( parallel_comp );
 	}
 
 #endif
@@ -278,9 +278,8 @@ double variable::cal( object *caller, int lag )
 		return val[ 0 ];				// it's a parameter, ignore lags
 
 #ifndef _NP_
-	// prepare mutexes for variables and functions updated in multiple threads
-	unique_lock < recursive_mutex > guard1( recursive_comp, defer_lock );
-	unique_lock < mutex > guard2( parallel_comp, defer_lock );
+	// prepare mutex for variables and functions updated in multiple threads
+	rec_uniqlT guard( parallel_comp, defer_lock );
 #endif
 
 	if ( param == 0 )					// it's a variable
@@ -322,8 +321,8 @@ double variable::cal( object *caller, int lag )
 #ifndef _NP_
 			// wait for computation of this variable by other threads
 			if ( parallel_mode && ! dummy )
-				guard1.lock( );
-			
+				guard.lock( );
+
 			if ( last_update >= t )		// recheck if not computed during lock
 				return( val[ 0 ] );
 #endif
@@ -343,7 +342,7 @@ double variable::cal( object *caller, int lag )
 #ifndef _NP_
 		// wait for computation of this function by other threads
 		if ( parallel_mode && ! dummy )
-			 guard1.lock( );
+			 guard.lock( );
 #endif
 	}
 
@@ -357,12 +356,6 @@ double variable::cal( object *caller, int lag )
 					"equation for '%s' (object '%s') requested \nits own value while computing its current value", label, up->label );
 		return 0;
 	}
-
-#ifndef _NP_
-	// prevent computation of the same element by any thread
-	if ( parallel_mode && ! dummy )
-		 guard2.lock( );
-#endif
 
 	under_computation = true;
 
@@ -551,11 +544,8 @@ double variable::cal( object *caller, int lag )
 	if ( wait_delete != NULL )
 	{
 #ifndef _NP_
-		if ( guard1.owns_lock( ) )
-			guard1.unlock( );					// release lock
-		
-		if ( guard2.owns_lock( ) )
-			guard2.unlock( );
+		if ( guard.owns_lock( ) )
+			guard.unlock( );					// release lock
 #endif
 		wait_delete->delete_obj( this );
 	}
@@ -607,7 +597,7 @@ void worker::cal_worker( void )
 			// exit if shutdown or continue if already updated
 			if ( running && var != NULL && var->last_update < t )
 			{	// prevent parallel computation of the same variable
-				unique_lock < mutex > guard_var( var->parallel_comp );
+				rec_uniqlT guard_var( var->parallel_comp );
 
 				// recheck if not computed during lock
 				if ( var->last_update >= t )
@@ -723,7 +713,7 @@ void worker::cal_worker( void )
 			snprintf( err_msg3, MAX_BUFF_SIZE, "disable parallel computation for this variable\nor check your code to prevent this situation" );
 		}
 	}
-	
+
 	stop:
 
 	running = free = false;

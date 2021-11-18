@@ -900,7 +900,7 @@ void save_single( variable *v )
 
 #ifndef _NP_
 	// prevent concurrent use by more than one thread
-	lock_guard < mutex > lock( v->parallel_comp );
+	rec_lguardT lock( v->parallel_comp );
 #endif
 
 	set_lab_tit( v );

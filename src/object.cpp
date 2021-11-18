@@ -1560,7 +1560,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 		{
 #ifndef _NP_
 			// prevent concurrent use by more than one thread
-			lock_guard < mutex > lock( cv->parallel_comp );
+			rec_lguardT lock( cv->parallel_comp );
 #endif
 			if ( running && cv->param != 1 )
 			{
@@ -3192,7 +3192,7 @@ double object::write( const char *lab, double value, int time, int lag )
 
 #ifndef _NP_
 	// prevent concurrent use by more than one thread
-	lock_guard < mutex > lock( cv->parallel_comp );
+	rec_lguardT lock( cv->parallel_comp );
 #endif
 	if ( cv->param != 1 && time <= 0 && t > 1 )
 	{
