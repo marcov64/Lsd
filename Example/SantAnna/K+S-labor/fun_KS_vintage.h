@@ -3,9 +3,9 @@
 	VINTAGE OBJECT EQUATIONS
 	------------------------
 
-	Equations that are specific to the Vint objects in the K+S LSD model 
+	Equations that are specific to the Vint objects in the K+S LSD model
 	are coded below.
- 
+
  ******************************************************************************/
 
 /*============================== KEY EQUATIONS ===============================*/
@@ -19,7 +19,7 @@ Negative values represent machines out of technical life to be scrapped ASAP
 
 if ( V( "__tVint" ) < T - VS( GRANDPARENT, "eta" ) )// out of technical life?
 	END_EQUATION( - V( "__nVint" ) );			// scrap if not in use
-	
+
 VS( PARENT, "_supplier" );						// ensure supplier is selected
 cur = PARENTS( SHOOKS( HOOKS( PARENT, SUPPL ) ) );// pointer to supplier
 v[1] = VLS( PARENT, "_w2avg", 1 );				// average firm wage
@@ -27,13 +27,13 @@ v[1] = VLS( PARENT, "_w2avg", 1 );				// average firm wage
 // unit cost advantage of new machines
 v[2] = v[1] / V( "__Avint" ) - v[1] / VS( cur, "_Atau" );
 
-v[3] = VS( PARENT, "_postChg" ) ? VS( GRANDPARENT, "bChg" ) : 
+v[3] = VS( PARENT, "_postChg" ) ? VS( GRANDPARENT, "bChg" ) :
 								  VS( GRANDPARENT, "b" );// payback periods
 
 // if new machine cost is not better in absolute terms or
 // payback period of replacing current vintage is over b
 if ( v[2] <= 0 || VS( cur, "_p1" ) / VS( GRANDPARENT, "m2" ) / v[2] > v[3] )
-	END_EQUATION( 0 );							// nothing to scrap	
+	END_EQUATION( 0 );							// nothing to scrap
 
 RESULT( V( "__nVint" ) )						// scrap if can be replaced
 
@@ -57,9 +57,9 @@ CYCLE( cur, "WrkV" )
 
 if ( v[2] == 0 && cur1 == NULL )				// nothing to do
 	END_EQUATION( 0 );
-	
+
 v[5] = v[4] * v[1];								// last hired worker capacity
-v[6] = v[3] * v[1]; 							// all workers capacity
+v[6] = v[3] * v[1];								// all workers capacity
 
 if ( v[6] - v[5] > v[2] )						// is last worker in excess?
 {

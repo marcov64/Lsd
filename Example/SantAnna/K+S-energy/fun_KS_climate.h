@@ -3,13 +3,13 @@
 	CLIMATE OBJECT EQUATIONS
 	------------------------
 
-	Equations that are specific to the climate CO2 cycle object in the 
+	Equations that are specific to the climate CO2 cycle object in the
 	K+S LSD model are coded below.
- 
+
  ******************************************************************************/
 
-#define GTCGTCO2 	3.664						// conversion from GtC to GtCO2
-#define PPMCO2GTC 	2.13						// conversion from PPM CO2 to GtC
+#define GTCGTCO2	3.664						// conversion from GtC to GtCO2
+#define PPMCO2GTC	2.13						// conversion from PPM CO2 to GtC
 #define SEAFAREA	0.708						// sea fraction of global surface
 #define LANDEQDEP	8.4							// equivalent land area thickness
 #define SEAMDEP		100.0						// sea mixed layer depth
@@ -38,12 +38,12 @@ RESULT( V( "Cm0pre" ) * SEAMDEP * ( 1 - V( "betaT2" ) * VL( "Tm", 1 ) ) )
 
 EQUATION( "DeltaCam" )
 /*
-Flux of carbon from atmosphere to mixed sea layer 
+Flux of carbon from atmosphere to mixed sea layer
 */
 
-if ( T < V( "tA0" ) )							// compute after climate starts 
+if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
+
 RESULT( ( V( "CmRef" ) * pow( VL( "Ca", 1 ) / V( "Ca0pre" ), 1 / V( "xiA" ) ) -
 		  VL( "Cm", 1 ) ) / ( V( "tMmix" ) * V( "tScale" ) ) )// chemical balance
 
@@ -53,9 +53,9 @@ EQUATION( "DeltaCba" )
 Flux of carbon from biomass to atmosphere
 */
 
-if ( T < V( "tA0" ) )							// compute after climate starts 
+if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
+
 RESULT( ( 1 - V( "phiA" ) ) * VL( "Cb", 1 ) / ( V( "tauBa" ) * V( "tScale" ) ) )
 
 
@@ -64,9 +64,9 @@ EQUATION( "DeltaCbs" )
 Flux of carbon from biomass to soils
 */
 
-if ( T < V( "tA0" ) )							// compute after climate starts 
+if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
+
 RESULT( V( "phiA" ) * VL( "Cb", 1 ) / ( V( "tauBa" ) * V( "tScale" ) ) )
 
 
@@ -75,11 +75,11 @@ EQUATION( "DeltaCd12" )
 Flux of carbon from deep sea layer 1 to layer 2
 */
 
-if ( T < V( "tA0" ) )							// compute after climate starts 
+if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
-RESULT( ( V( "kEddy" ) / V( "tScale" ) ) * ( ( VL( "Cd1", 1 ) / SEAD1DEP ) - 
-											 ( VL( "Cd2", 1 ) / SEAD2DEP ) ) / 
+
+RESULT( ( V( "kEddy" ) / V( "tScale" ) ) * ( ( VL( "Cd1", 1 ) / SEAD1DEP ) -
+											 ( VL( "Cd2", 1 ) / SEAD2DEP ) ) /
 		( ( SEAD1DEP + SEAD2DEP ) / 2 ) )
 
 
@@ -88,11 +88,11 @@ EQUATION( "DeltaCd23" )
 Flux of carbon from deep sea layer 2 to layer 3
 */
 
-if ( T < V( "tA0" ) )							// compute after climate starts 
+if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
-RESULT( ( V( "kEddy" ) / V( "tScale" ) ) * ( ( VL( "Cd2", 1 ) / SEAD2DEP ) - 
-											 ( VL( "Cd3", 1 ) / SEAD3DEP ) ) / 
+
+RESULT( ( V( "kEddy" ) / V( "tScale" ) ) * ( ( VL( "Cd2", 1 ) / SEAD2DEP ) -
+											 ( VL( "Cd3", 1 ) / SEAD3DEP ) ) /
 		( ( SEAD2DEP + SEAD3DEP ) / 2 ) )
 
 
@@ -101,11 +101,11 @@ EQUATION( "DeltaCd34" )
 Flux of carbon from deep sea layer 3 to layer 4
 */
 
-if ( T < V( "tA0" ) )							// compute after climate starts 
+if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
-RESULT( ( V( "kEddy" ) / V( "tScale" ) ) * ( ( VL( "Cd3", 1 ) / SEAD3DEP ) - 
-											 ( VL( "Cd4", 1 ) / SEAD4DEP ) ) / 
+
+RESULT( ( V( "kEddy" ) / V( "tScale" ) ) * ( ( VL( "Cd3", 1 ) / SEAD3DEP ) -
+											 ( VL( "Cd4", 1 ) / SEAD4DEP ) ) /
 		( ( SEAD3DEP + SEAD4DEP ) / 2 ) )
 
 
@@ -114,11 +114,11 @@ EQUATION( "DeltaCmd" )
 Flux of carbon from mixed to deep sea layer 1
 */
 
-if ( T < V( "tA0" ) )							// compute after climate starts 
+if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
-RESULT( ( V( "kEddy" ) / V( "tScale" ) ) * ( ( VL( "Cm", 1 ) / SEAMDEP ) - 
-											 ( VL( "Cd1", 1 ) / SEAD1DEP ) ) / 
+
+RESULT( ( V( "kEddy" ) / V( "tScale" ) ) * ( ( VL( "Cm", 1 ) / SEAMDEP ) -
+											 ( VL( "Cd1", 1 ) / SEAD1DEP ) ) /
 		( ( SEAMDEP + SEAD1DEP ) / 2 ) )
 
 
@@ -127,9 +127,9 @@ EQUATION( "DeltaCsa" )
 Flux of carbon from soils to atmosphere
 */
 
-if ( T < V( "tA0" ) )							// compute after climate starts 
+if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
+
 RESULT( VL( "Cs", 1 ) / ( V( "tauSa" ) * V( "tScale" ) ) )
 
 
@@ -138,10 +138,10 @@ EQUATION( "DeltaHd12" )
 Heat transfer from deep sea layer 1 to layer 2
 */
 
-if ( T < V( "tA0" ) )							// compute after climate starts 
+if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
-RESULT( ( VL( "Hd1", 1 ) / ( SEAD1HCAP * V( "tScale" ) ) - 
+
+RESULT( ( VL( "Hd1", 1 ) / ( SEAD1HCAP * V( "tScale" ) ) -
 		  VL( "Hd2", 1 ) / ( SEAD2HCAP * V( "tScale" ) ) ) * V( "hTr" ) )
 
 
@@ -150,10 +150,10 @@ EQUATION( "DeltaHd23" )
 Heat transfer from deep sea layer 2 to layer 3
 */
 
-if ( T < V( "tA0" ) )							// compute after climate starts 
+if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
-RESULT( ( VL( "Hd2", 1 ) / ( SEAD2HCAP * V( "tScale" ) ) - 
+
+RESULT( ( VL( "Hd2", 1 ) / ( SEAD2HCAP * V( "tScale" ) ) -
 		  VL( "Hd3", 1 ) / ( SEAD3HCAP * V( "tScale" ) ) ) * V( "hTr" ) )
 
 
@@ -162,10 +162,10 @@ EQUATION( "DeltaHd34" )
 Heat transfer from deep sea layer 3 to layer 4
 */
 
-if ( T < V( "tA0" ) )							// compute after climate starts 
+if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
-RESULT( ( VL( "Hd3", 1 ) / ( SEAD3HCAP * V( "tScale" ) ) - 
+
+RESULT( ( VL( "Hd3", 1 ) / ( SEAD3HCAP * V( "tScale" ) ) -
 		  VL( "Hd4", 1 ) / ( SEAD4HCAP * V( "tScale" ) ) ) * V( "hTr" ) )
 
 
@@ -174,10 +174,10 @@ EQUATION( "DeltaHmd" )
 Heat transfer from mixed to deep sea layer 1
 */
 
-if ( T < V( "tA0" ) )							// compute after climate starts 
+if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
-RESULT( ( VL( "Tm", 1 ) - 
+
+RESULT( ( VL( "Tm", 1 ) -
 		  VL( "Hd1", 1 ) / ( SEAD1HCAP * V( "tScale" ) ) ) * V( "hTr" ) )
 
 
@@ -188,7 +188,7 @@ Carbon emissions calibrated to reference period
 
 if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
+
 v[1] = V( "EmCa0" ) / V( "tScale" );			// initial calibration value
 v[2] = V( "EmC" );								// effective emissions
 v[3] = V( "EmC0" );
@@ -200,7 +200,7 @@ else
 
 if ( v[1] < 0 )									// use only calibrated growth
 	// trend based on C-ROADS 2000-2100 baseline forecast line fit (R2=0.9941)
-	v[0] = ( 7.4995 + 0.1243 / V( "tScale" ) * ( ( T - V( "tA0" ) ) ) ) / 
+	v[0] = ( 7.4995 + 0.1243 / V( "tScale" ) * ( ( T - V( "tA0" ) ) ) ) /
 		   V( "tScale" );
 
 RESULT( v[0] )
@@ -213,7 +213,7 @@ Feedback cooling of mixed sea layer and atmosphere (blackbody radiation)
 
 if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
+
 RESULT( VL( "Tm", 1 ) * V( "gammaA" ) * log( 2 ) / V( "alphaA" ) )
 
 
@@ -224,7 +224,7 @@ Radiative forcing in the atmosphere from CO2
 
 if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
+
 RESULT( V( "gammaA" ) * log( VL( "Ca", 1 ) / V( "Ca0pre" ) ) )
 
 
@@ -236,11 +236,11 @@ Considers the fertilization, diminishing returns and warming effects
 
 if ( T < V( "tA0" ) )							// compute after climate starts
 	END_EQUATION( 0 );
-	
+
 v[1] = VL( "Ca", 1 ) / V( "Ca0pre" );			// atmo. carbon growth
 
-RESULT( ( V( "NPP0pre" ) / V( "tScale" ) ) * 
-		( 1 + V( "betaC1" ) * log( v[1] ) ) * 	// fertilization
+RESULT( ( V( "NPP0pre" ) / V( "tScale" ) ) *
+		( 1 + V( "betaC1" ) * log( v[1] ) ) *	// fertilization
 		( 1 - V( "betaC2" ) * max( 0., v[1] / V( "betaC3" ) - 1 ) ) *// dim. ret.
 		( 1 - V( "betaT1" ) * VL( "Tm", 1 ) ) )	// warming
 
@@ -280,7 +280,7 @@ EQUATION( "Ca" )
 /*
 Concentration of carbon in atmosphere
 */
-RESULT( CURRENT + V( "EmCa" ) - V( "NPP" ) + 	// man (+), biomass (-/+)
+RESULT( CURRENT + V( "EmCa" ) - V( "NPP" ) +	// man (+), biomass (-/+)
 		V( "DeltaCba" ) + V( "DeltaCsa" ) -		// and soils (+) contributions
 		V( "DeltaCam" )	)						// net sea contribution
 
@@ -341,7 +341,7 @@ Also updates once 'EmC0'
 */
 
 v[0] = VS( PARENT, "Em" ) / ( GTCGTCO2 * 1e6 );
-	
+
 if ( T == V( "tA0" ) )							// starting climate variables?
 	WRITE( "EmC0", v[0] );						// save reference period emissions
 
@@ -380,7 +380,7 @@ EQUATION( "Hm" )
 /*
 Heat in mixed sea layer and atmosphere
 */
-RESULT( CURRENT + V( "Fco2" ) - 				// greenhouse effect less
+RESULT( CURRENT + V( "Fco2" ) -					// greenhouse effect less
 		V( "FC" ) - V( "DeltaHmd" )	)			// feedback/lower layer cooling
 
 
@@ -460,19 +460,19 @@ double tScale = V( "tScale" );					// climate-year time steps
 double tauBa = V( "tauBa" );					// carbon resid. time in biomass
 
 // initial temperatures compatible with heat transfer equilibrium at ref. time
-double Tm0 = gammaA * log( Ca0 / Ca0pre ) / 	// mixed sea layer eq. temp.
+double Tm0 = gammaA * log( Ca0 / Ca0pre ) /		// mixed sea layer eq. temp.
 			 ( 1 + gammaA * log( 2 ) / V( "alphaA" ) );
-double Td10 = Tm0 - ( Tm0 - Td0 ) * ( 1 / SEAD1DEP ) / 
+double Td10 = Tm0 - ( Tm0 - Td0 ) * ( 1 / SEAD1DEP ) /
 			  ( 1 / SEAD1DEP + 1 / SEAD2DEP + 1 / SEAD3DEP + 1 / SEAD4DEP );
-double Td20 = Td10 - ( Tm0 - Td0 ) * ( 1 / SEAD2DEP ) / 
+double Td20 = Td10 - ( Tm0 - Td0 ) * ( 1 / SEAD2DEP ) /
 			  ( 1 / SEAD1DEP + 1 / SEAD2DEP + 1 / SEAD3DEP + 1 / SEAD4DEP );
-double Td30 = Td20 - ( Tm0 - Td0 ) * ( 1 / SEAD3DEP ) / 
+double Td30 = Td20 - ( Tm0 - Td0 ) * ( 1 / SEAD3DEP ) /
 			  ( 1 / SEAD1DEP + 1 / SEAD2DEP + 1 / SEAD3DEP + 1 / SEAD4DEP );
 double Td40 = Td0;
 
 // initial carbon stocks compatible with carbon flux equilibrium at ref. time
 double Cm0 = V( "Cm0pre" ) * SEAMDEP * ( 1 - V( "betaT2" ) * Tm0 ) *
-			 pow( Ca0 / Ca0pre,  				// mixed sea layer
+			 pow( Ca0 / Ca0pre,					// mixed sea layer
 				  1 / ( V( "xiA0" ) + V( "deltaA" ) * log( Ca0 / Ca0pre ) ) );
 double Cb0 = tauBa * V( "NPP0pre" ) *			// biomass
 			 ( 1 + V( "betaC1" ) * log( Ca0 / Ca0pre ) ) *

@@ -329,10 +329,10 @@ for( k in 1 : nExp ){             # do for each experiment
 
   textplot( formatC( key.stats, digits = sDigits, format = "g" ), cmar = 1.0 )
   title <- paste( "Monte Carlo firm-level statistics (", legends[ k ], ")" )
-  subTitle <- paste( eval( bquote( paste0( "( Sample size = ", nFirms[ k ],
+  subTitle <- paste( eval( bquote( paste0( "( Sample size = ", nFirms,
                                            " firms / MC runs = ", nSize,
-                                        " / Period = ", warmUp + 1, "-",
-                                        nTstat, " )" ) ) ),
+                                           " / Period = ", warmUp + 1, "-",
+                                           nTstat, " )" ) ) ),
                     sector, sep ="\n" )
   title( main = title, sub = subTitle )
 }

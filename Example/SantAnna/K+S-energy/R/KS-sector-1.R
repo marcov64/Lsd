@@ -540,7 +540,7 @@ for( k in 1 : nExp ){             # do for each experiment
                                            " firms / MC runs = ", nSize,
                                            " / Period = ", warmUp + 1, "-",
                                            nTstat, " )" ) ) ),
-                    sector, sep ="\n" )
+                     sector, sep ="\n" )
   title( main = title, sub = subTitle )
 }
 

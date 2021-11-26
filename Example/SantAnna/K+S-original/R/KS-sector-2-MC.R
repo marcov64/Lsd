@@ -156,7 +156,6 @@ plotCols  <- 1      # number of plots per column in a page
 plotW     <- 10     # plot window width
 plotH     <- 7      # plot window height
 
-
 # Colors assigned to each experiment's lines in graphics
 colors <- c( "black", "blue", "red", "orange", "green", "brown" )
 
@@ -332,8 +331,8 @@ for( k in 1 : nExp ){             # do for each experiment
   title <- paste( "Monte Carlo firm-level statistics (", legends[ k ], ")" )
   subTitle <- paste( eval( bquote( paste0( "( Sample size = ", nFirms,
                                            " firms / MC runs = ", nSize,
-                                        " / Period = ", warmUp + 1, "-",
-                                        nTstat, " )" ) ) ),
+                                           " / Period = ", warmUp + 1, "-",
+                                           nTstat, " )" ) ) ),
                     sector, sep ="\n" )
   title( main = title, sub = subTitle )
 }

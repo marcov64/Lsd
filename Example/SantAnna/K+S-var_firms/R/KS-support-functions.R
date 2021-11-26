@@ -1444,7 +1444,7 @@ plot_xy <- function( x, y, quant = 0.25, xlab = "",
 plot_recovery <- function( x, growth, strt, dur, per, mask, warm = 0, mrk = -1,
                            xlab = "", ylab = "", tit = "", subtit = "" ) {
 
-  y <- log0( x[ mask ] )    # log GDP series
+  y <- log0( x[ mask ] )    # log series
 
   yMin <- min( y, na.rm = TRUE )
   yMax <- max( y, na.rm = TRUE )
@@ -1479,7 +1479,7 @@ plot_recovery <- function( x, growth, strt, dur, per, mask, warm = 0, mrk = -1,
            type = "l", lty = "dotted" )
   }
 
-  # replot GDP curve
+  # replot curve
   lines( x = mask - warm, y = y )
 
   # plot regime transition mark
@@ -1616,7 +1616,7 @@ plot_epanechnikov <- function( lFit, ekOrd = 4, CI = 0.95, xlab = "", ylab = "",
 #   times: vector of time cross-sections to use
 #	  data: Monte Carlo experiment table (time x mc)
 #   bins: number of bins in histogram
-#   log: take log of variable (0=no log, 1=log, 2=log0)
+#   log: take log of variable (0=no log, 1=log, 2=log0, 3=logNA)
 #   labVar: text label for variable
 #   bw.adj: smoothing bandwidth adjustment
 #   leg: vector of text legends to each cross-section
@@ -1645,11 +1645,13 @@ plot_histo <- function( times, data, bins = 10, log = 0, labVar = NULL,
     breaks <- c( breaks, xMin + i * incr )
 
   yMax <- 0
-  for( i in 1 : nCS )
-    yMax <- max( yMax, tryCatch( density( cs[ i, ], bw = "SJ", adjust = bw.adj,
-                                na.rm = TRUE )$y,
-                                error = function( cond ) return( NA ) ),
-                 hist( cs[ i, ], breaks = breaks, plot = FALSE )$density )
+  for( i in 1 : nCS ) {
+    d <- tryCatch( density( cs[ i, ], bw = "SJ", adjust = bw.adj, na.rm = TRUE )$y,
+                   error = function( cond ) return( NA ) )
+    h <- tryCatch( hist( cs[ i, ], breaks = breaks, plot = FALSE )$density,
+                   error = function( cond ) return( NA ) )
+    yMax <- max( yMax, d, h )
+  }
 
   # change the output format but save existing conf to restore at end
   oldPar <- par( )

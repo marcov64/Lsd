@@ -3,9 +3,9 @@
 	FIRM1 OBJECT EQUATIONS
 	----------------------
 
-	Equations that are specific to the Firm1 objects in the K+S LSD model 
+	Equations that are specific to the Firm1 objects in the K+S LSD model
 	are coded below.
- 
+
  ******************************************************************************/
 
 /*============================== KEY EQUATIONS ===============================*/
@@ -16,7 +16,7 @@ Labor productivity of new vintage of machine when employed for production
 Also updates '_AtauEE', '_AtauEF', '_BtauLP', '_BtauEE', '_BtauEF'
 */
 
-double AinnEE, AinnEF, AinnLP, AimiEE, AimiEF, AimiLP, BinnEE, BinnEF, BinnLP, 
+double AinnEE, AinnEF, AinnLP, AimiEE, AimiEF, AimiLP, BinnEE, BinnEF, BinnLP,
 	   BimiEE, BimiEF, BimiLP, cImi, cInn, pImi, pInn;
 
 double AtauLP = CURRENT;						// previous period lab. product.
@@ -54,53 +54,53 @@ if ( bernoulli( v[1] ) )						// innovation succeeded?
 	double x1supEF = VS( PARENT, "x1supEF" );	// upper support e. fri. innov.
 	double alpha1 = VS( PARENT, "alpha1" );		// beta alpha parameter
 	double beta1 = VS( PARENT, "beta1" );		// beta beta paramameter
-	
+
 	// new final technical advance (A) from innovation
-	AinnLP = AtauLP * ( 1 + x1infLP + beta( alpha1, beta1 ) * 
+	AinnLP = AtauLP * ( 1 + x1infLP + beta( alpha1, beta1 ) *
 			 ( x1supLP - x1infLP ) );
-	AinnEE = AtauEE * ( 1 + x1infEE + beta( alpha1, beta1 ) * 
+	AinnEE = AtauEE * ( 1 + x1infEE + beta( alpha1, beta1 ) *
 			 ( x1supEE - x1infEE ) );
-	AinnEF = AtauEF * ( 1 - x1infEF - beta( alpha1, beta1 ) * 
+	AinnEF = AtauEF * ( 1 - x1infEF - beta( alpha1, beta1 ) *
 			 ( x1supEF - x1infEF ) );
-	
+
 	// new production advance (B) from innovation
-	BinnLP = BtauLP * ( 1 + x1infLP + beta( alpha1, beta1 ) * 
+	BinnLP = BtauLP * ( 1 + x1infLP + beta( alpha1, beta1 ) *
 			 ( x1supLP - x1infLP ) );
-	BinnEE = BtauEE * ( 1 + x1infEE + beta( alpha1, beta1 ) * 
+	BinnEE = BtauEE * ( 1 + x1infEE + beta( alpha1, beta1 ) *
 			 ( x1supEE - x1infEE ) );
-	BinnEF = BtauEF * ( 1 - x1infEF - beta( alpha1, beta1 ) * 
+	BinnEF = BtauEF * ( 1 - x1infEF - beta( alpha1, beta1 ) *
 			 ( x1supEF - x1infEF ) );
-	
+
 	// price and operating cost of new machine
 	pInn = ( 1 + mu1 ) * ( w / BinnLP + ( pE + trCO2 * BinnEF ) / BinnEE ) / m1;
 	cInn = w / AinnLP + ( pE + trCO2 * AinnEF ) / AinnEE;
 }
 
 // imitation process (success probability)
-v[2] = 1 - exp( - VS( PARENT, "zeta2" ) * ( 1 - xi ) * L1rdN ); 
+v[2] = 1 - exp( - VS( PARENT, "zeta2" ) * ( 1 - xi ) * L1rdN );
 
 if ( bernoulli( v[2] ) )						// imitation succeeded?
 {
 	double c2avg = VLS( CONSECL2, "c2", 1 );	// average machine operating cost
 	double p1avg = VLS( PARENT, "p1avg", 1 );	// average machine cost
-	
+
 	k = VS( PARENT, "F1" );						// number of firms in sector 1
 	dblVecT imiProb( k );						// vector for tech distance
-	
+
 	v[3] = i = 0;								// inverse distance/firm accum.
 	CYCLES( PARENT, cur, "Firm1" )				// 1st run: abs. inv. distance
 		if ( cur == THIS )
 			imiProb[ i++ ] = 0;					// can't self-imitate
 		else
-		{	
+		{
 			// price and operating cost of firm candidate for imitation
-			double p = ( 1 + mu1 ) * ( w / VLS( cur, "_BtauLP", 1 ) + 
-									 ( pE + trCO2 * VLS( cur, "_BtauEF", 1 ) ) / 
+			double p = ( 1 + mu1 ) * ( w / VLS( cur, "_BtauLP", 1 ) +
+									 ( pE + trCO2 * VLS( cur, "_BtauEF", 1 ) ) /
 									 VLS( cur, "_BtauEE", 1 ) ) / m1;
-			double c = w / VLS( cur, "_AtauLP", 1 ) + 
-					   ( pE + trCO2 * VLS( cur, "_AtauEF", 1 ) ) / 
+			double c = w / VLS( cur, "_AtauLP", 1 ) +
+					   ( pE + trCO2 * VLS( cur, "_AtauEF", 1 ) ) /
 					   VLS( cur, "_AtauEE", 1 );
-				   
+
 			// euclidian distance in 2-dimensional mean-standardized space
 			v[4] = sqrt( pow( ( p - pTau ) / p1avg, 2 ) +
 						 pow( ( c - cTau ) / c2avg, 2 ) );
@@ -116,23 +116,23 @@ if ( bernoulli( v[2] ) )						// imitation succeeded?
 			v[5] += imiProb[ i ] / v[3];		// normalize to add up to 1
 			imiProb[ i++ ] = v[5];
 		}
-			
+
 		// draw a firm to imitate according to the distance probabilities
 		j = upper_bound( imiProb.begin( ), imiProb.end( ), RND ) - imiProb.begin( );
-		
+
 		if ( j < k )							// at least one firm reachable?
 		{
 			cur = TSEARCHS( PARENT, "Firm1", j + 1 );// get pointer to firm
-			
+
 			AimiLP = VLS( cur, "_AtauLP", 1 );	// get imitated firm productivities
 			AimiEE = VLS( cur, "_AtauEE", 1 );
 			AimiEF = VLS( cur, "_AtauEF", 1 );
 			BimiLP = VLS( cur, "_BtauLP", 1 );
 			BimiEE = VLS( cur, "_BtauEE", 1 );
 			BimiEF = VLS( cur, "_BtauEF", 1 );
-			
+
 			// price and operating cost of new machine
-			pImi = ( 1 + mu1 ) * ( w / BimiLP + ( pE + trCO2 * BimiEF ) / 
+			pImi = ( 1 + mu1 ) * ( w / BimiLP + ( pE + trCO2 * BimiEF ) /
 				   BimiEE ) / m1;
 			cImi = w / AimiLP + ( pE + trCO2 * AimiEF ) / AimiEE;
 		}
@@ -205,19 +205,26 @@ Also updates '_CD1', '_CD1c', '_CS1'
 */
 
 // maximum debt allowed to firm, considering net worth and operating margin
-v[5] = VS( FINSECL2, "Lambda" ) * max( VL( "_NW1", 1 ), 
+v[5] = VS( FINSECL2, "Lambda" ) * max( VL( "_NW1", 1 ),
 									   VL( "_S1", 1 ) - VL( "_C1", 1 ) );
-		   
+
 // apply an absolute floor to maximum debt prudential limit
-v[0] = max( v[5], VS( FINSECL2, "Lambda0" ) * VLS( PARENT, "PPI", 1 ) / 
-				  VS( PARENT, "PPI0" ) );
-			
+v[0] = max( v[5], VS( FINSECL2, "Lambda0" ) * VLS( PARENT, "PPI", 1 ) /
+				  VS( PARENT, "pK0" ) );
+
 WRITE( "_CD1", 0 );								// reset total credit demand
 WRITE( "_CD1c", 0 );							// reset constraint for period
 WRITE( "_CS1", 0 );								// reset total credit supplied
 
 RESULT( v[0] )
-		
+
+
+EQUATION( "_Div1" )
+/*
+Dividends to pay by firm in capital-good sector
+*/
+RESULT( max( VS( PARENT, "d1" ) * ( V( "_Pi1" ) - V( "_Tax1" ) ), 0 ) )
+
 
 EQUATION( "_NC" )
 /*
@@ -225,106 +232,127 @@ Number of new client firms in the period.
 Also creates the client-supplier connecting objects.
 */
 
-firmMapT firms = V_EXTS( GRANDPARENT, country, firm2map );// list with all firms
-h = firms.size( );								// number of firms in sector 2
-k = V( "_HC" );									// number of historical clients
-j = V( "_ID1" );								// current firm ID
+// build single map with sector 2 and energy sector firms
+firmMapT firms = V_EXTS( GRANDPARENT, countryE, firm2map );// sector 2 firms
+firmMapT firmsE = V_EXTS( GRANDPARENT, countryE, firmEmap );// en. sector firms
+firms.insert( firmsE.begin( ), firmsE.end( ) );	// join maps
+
+k = firms.size( );								// number of firms both sectors
+h = V( "_HC" );									// number of historical clients
 
 CYCLE( cur, "Cli" )								// remove historical clients
 	firms.erase( ( int ) VS( cur, "__IDc" ) );
-	
-i = ceil( VS( PARENT, "gamma" ) * k );			// new clients in period
-i = min( max( i, 1 ), min( h - k, firms.size( ) ) );// between [1, F2 - HC]
 
-v[1] = max( 1, ceil( h / VS( PARENT, "F1" ) ) );// firm fair share
+CYCLE( cur, "CliEn" )
+	firms.erase( ( int ) VS( cur, "__IDcE" ) );
 
-if ( k + i < v[1] )								// ensure at least fair share
-	i = v[1] - k;
+i = ceil( VS( PARENT, "gamma" ) * h );			// new clients in period
+i = min( max( i, 1 ), min( k - h, firms.size( ) ) );// in [1, F2 + Fe - HC]
+
+j = max( 1, ceil( k / VS( PARENT, "F1" ) ) );	// firm fair share
+
+if ( h + i < j )								// ensure at least fair share
+	i = j - h;
 
 // build vector of all target firms (not yet clients)
 vector < firmPairT > targets( firms.begin( ), firms.end( ) );
 
 // draw new clients from target list, updating the list after each draw
-for ( v[0] = 0; i > 0 && targets.size( ) > 0; --i, ++v[0] )
+for ( k = 0; i > 0 && targets.size( ) > 0; --i, ++k )
 {
 	h = uniform_int( 0, targets.size( ) - 1 );	// draw a index in the list
 	firmPairT client = targets[ h ];			// retrieve drawn map pair
 	targets.erase( targets.begin( ) + h );		// remove drawn firm from list
 
 	// create the brochure/client interconnected objects
-	send_brochure( j, THIS, client.first, client.second );
+	send_brochure( THIS, client.second );
 }
 
-RESULT( v[0] )
+RESULT( k )
 
 
 EQUATION( "_Q1" )
 /*
 Planed production for a firm in capital-good sector
-Also updates '_CD1', '_CD1c', '_CS1'
+Also updates '_NW1', '_NW1p', '_Deb1', '_CD1', '_CD1c', '_CS1'
 */
 
 v[1] = V( "_D1" );								// potential production (orders)
-
-if ( v[1] <= 0 )
-	END_EQUATION( 0 );							// nothing to do
-
 v[2] = V( "_CS1a" );							// available credit supply
 v[3] = VL( "_NW1", 1 );							// net worth (cash available)
 v[4] = V( "_c1" );								// unit cost
 v[5] = V( "_p1" );								// machine price
 v[6] = V( "_RD" );								// R&D costs still to pay
 
-v[7] = v[1] * ( v[4] - v[5] ) + v[6];			// cash flow to fulfill orders
+v[7] = v[1] * ( v[4] - v[5] ) + v[6];			// cash to fulfill orders & R&D
 
-if ( v[7] < 0 || v[7] <= v[3] - 1 )				// firm can self-finance?
+if ( v[7] < 0 || v[7] <= v[3] )					// firm can self-finance?
 {
 	v[0] = v[1];								// plan the desired output
-	v[3] -= v[7];								// remove flow from cash
+	v[8] = v[3] - v[7];							// remove wage cost from cash
+	v[9] = 0;									// no finance
 }
 else
 {
-	if ( v[7] <= v[3] - 1 + v[2] )				// possible to finance all?
+	if ( v[7] <= v[3] + v[2] )					// possible to finance all?
 	{
 		v[0] = v[1];							// plan the desired output
-		v[8] = v[9] = v[7] - v[3] + 1;			// finance the difference
-		v[3] = 1;								// keep minimum cash
+		v[8] = 0;								// no cash
+		v[9] = v[10] = v[7] - v[3];				// finance the difference
 	}
 	else										// credit constrained firm
 	{
 		// produce as much as the available finance allows, positive but up to D1
-		v[0] = min( max( floor( ( v[3] - 1 - v[7] + v[2] ) / v[4] ), 0 ), v[1] );		
-		v[9] = v[7] - v[3] + 1;					// desired credit
-		
+		v[0] = min( max( floor( ( v[3] + v[2] - v[6] ) / v[4] ), 0 ), v[1] );
+		v[10] = v[7] - v[3];					// desired credit
+
 		if ( v[0] == 0 )
 		{
-			v[8] = 0;							// no finance
-			v[10] = 1;							// all orders canceled
-			v[3] -= v[6] - v[2];				// let negative NW (bankruptcy)
+			if ( v[6] <= v[3] )					// can pay R&D?
+			{
+				v[8] = v[3] - v[6];				// remove R&D wage cost from cash
+				v[9] = v[10] = 0;				// no finance
+			}
+			else								// always finance at least R&D
+			{
+				v[8] = 0;						// no cash
+				v[9] = v[6] - v[3];				// always finance at least R&D
+			}
+
+			v[11] = 1;							// all orders canceled
 		}
 		else
 		{
-			v[7] = v[0] * ( v[4] - v[5] ) + v[6];// reduced cash flow
-			v[8] = v[7] - v[3] + 1;				// finance what is possible
-			v[10] = 1 - v[0] / v[1];			// machine shortage factor
-			v[3] = 1;							// keep minimum cash
+			v[7] = v[0] * ( v[4] - v[5] ) + v[6];// reduced operation cost
+			if ( v[7] <= v[3] )
+			{
+				v[8] = v[3] - v[7];				// pay with available cash
+				v[9] = 0;						// no finance
+			}
+			else
+			{
+				v[8] = 0;						// no cash
+				v[9] = v[7] - v[3];				// finance the difference
+			}
+
+			v[11] = 1 - v[0] / v[1];			// machine shortage factor
 		}
-		
+
 		// shrink or cancel all exceeding orders
 		CYCLE( cur, "Cli" )
 			if ( VS( cur, "__tOrd" ) == T )		// order in this period?
-			{
-				if ( v[10] == 1 )				// bankruptcy?
-					INCRS( cur, "__nCan", VS( cur, "__nOrd" ) );
-				else
-					INCRS( cur, "__nCan", floor( VS( cur, "__nOrd" ) * v[10] ) );
-			}
+				INCRS( cur, "__nCan", floor( VS( cur, "__nOrd" ) * v[11] ) );
+
+		CYCLE( cur, "CliEn" )					// energy sector
+			if ( VS( cur, "__tOrdE" ) == T )	// order in this period?
+				INCRS( cur, "__nCanE", floor( VS( cur, "__nOrdE" ) * v[11] ) );
 	}
-	
-	update_debt1( THIS, v[9], v[8] );			// update debt (desired/granted)
+
+	update_debt( THIS, v[10], v[9] );			// update debt (desired/granted)
 }
 
-WRITE( "_NW1", v[3] );							// update the firm net worth
+update_depo( THIS, v[8], false );				// update the firm net worth
+WRITE( "_NW1p", v[3] - v[8] + v[9] );			// provision for production
 
 RESULT( v[0] )
 
@@ -341,85 +369,29 @@ if ( v[1] > 0 )
 	v[0] = v[2] * v[1];
 else											// no sales
 	// keep current expenditure or a share of available cash
-	v[0] = CURRENT;
-	
+	v[0] = min( CURRENT, v[2] * VL( "_NW1", 1 ) );
+
 RESULT( v[0] )
 
 
 EQUATION( "_Tax1" )
 /*
 Total tax paid by firm in capital-good sector
-Also updates '_Div1', '_NW1', '_CD1', '_CD1c', '_CS1'
+Also updates '_NW1', '_Deb1', '_CD1', '_CD1c', '_CS1'
 */
 
 v[1] = V( "_Pi1" );								// firm profit in period
-v[2] = VS( GRANDPARENT, "tr" );					// tax rate
 
 if ( v[1] > 0 )									// profits?
-{
-	v[0] = v[1] * v[2];							// tax to government
-	v[4] = VS( PARENT, "d1" ) * ( v[1] - v[0] );// dividend to shareholders
-}
+	v[0] = v[1] * VS( GRANDPARENT, "tr" );		// tax to government
 else
-	v[0] = v[4] = 0;							// no tax/dividend on losses
+	v[0] = 0;									// no tax on losses
 
-WRITE( "_Div1", v[4] );							// save period dividends
+cash_flow( THIS, v[1], v[0] );					// manage the period cash flow
 
-v[6] = v[1] - v[0] - v[4];						// free cash flow
-
-// net worth after reversing provisioned expected costs in '_Q1'
-v[7] = INCR( "_NW1", V( "_Q1" ) * ( V( "_c1" ) - V( "_p1" ) ) + V( "_RD" ) );
-
-if ( v[6] < 0 )									// must finance losses?
-{
-	if ( v[7] >= - v[6] + 1 )					// can cover losses with reserves?
-		INCR( "_NW1", v[6] );					// draw from net worth
-	else
-	{
-		v[8] = V( "_CS1a" );					// available credit supply
-		v[9] = - v[6] - v[7] + 1;				// desired finance
-		
-		if ( v[8] >= v[9] )						// can finance losses?
-		{
-			update_debt1( THIS, v[9], v[9] );	// finance all
-			WRITE( "_NW1", 1 );					// minimum net worth
-		}
-		else
-		{
-			update_debt1( THIS, v[9], v[8] );	// take what is possible
-			INCR( "_NW1", v[6] - v[8] );		// let negative NW (bankruptcy)
-		}					
-	}
-}
-else											// pay debt with available cash
-{
-	v[10] = V( "_Deb1" ) * VS( FINSECL2, "deltaB" );// desired debt repayment
-	
-	if ( v[10] > 0 )							// something to repay?
-	{
-		if ( v[6] > v[10] )						// can repay desired and more
-		{
-			update_debt1( THIS, 0, - v[10] );	// repay desired
-			INCR( "_NW1", v[6] - v[10] );		// save the rest
-		}
-		else
-			update_debt1( THIS, 0, - v[6] );	// repay what is possible
-	}
-	else
-		INCR( "_NW1", v[6] );					// save all
-}
-		
 v[0] += V( "_Em1" ) * VS( GRANDPARENT, "trCO2" );// tax on emissions already paid
 
 RESULT( v[0] )
-
-
-EQUATION( "_i1" )
-/*
-Interest paid by firm in capital-good sector
-*/
-RESULT( VL( "_Deb1", 1 ) * VS( FINSECL2, "rDeb" ) * 
-		( 1 + ( VL( "_qc1", 1 ) - 1 ) * VS( FINSECL2, "kConst" ) ) )
 
 
 EQUATION( "_p1" )
@@ -435,7 +407,8 @@ EQUATION( "_BC" )
 /*
 Number of buying clients for firm in capital-good sector
 */
-RESULT( COUNT_CND( "Cli", "__tOrd", "==", T ) )
+RESULT( COUNT_CND( "Cli", "__tOrd", "==", T ) +
+		COUNT_CND( "CliEn", "__tOrdE", "==", T ) )
 
 
 EQUATION( "_C1" )
@@ -452,7 +425,9 @@ EQUATION( "_D1" )
 Potential demand (orders) received by a firm in capital-good sector
 */
 VS( CONSECL2, "Id" );							// make sure all orders are sent
-RESULT( SUM_CND( "__nOrd", "__tOrd", "==", T ) )
+VS( ENESECL2, "EIe");
+RESULT( SUM_CND( "__nOrd", "__tOrd", "==", T ) +
+		SUM_CND( "__nOrdE", "__tOrdE", "==", T ) )
 
 
 EQUATION( "_Em1" )
@@ -471,14 +446,25 @@ RESULT( V( "_Q1e" ) / V( "_BtauEE" ) / VS( PARENT, "m1" ) )
 
 EQUATION( "_HC" )
 /*
-Number of historical client firms from consumer-good sector.
+Number of historical client firms
 Also removes old, non-buying clients.
 */
 
 i = 0;											// client counter
-CYCLE_SAFE( cur, "Cli" )						// remove old clients
+CYCLE_SAFE( cur, "Cli" )						// remove old sector 2 clients
 {
 	if ( VS( cur, "__tSel" ) < T - 1 )			// last selection is old?
+	{
+		DELETE( SHOOKS( cur ) );				// remove supplier brochure entry
+		DELETE( cur );							// remove client entry
+	}
+	else
+		++i;
+}
+
+CYCLE_SAFE( cur, "CliEn" )						// remove old en. sector clients
+{
+	if ( VS( cur, "__tSelE" ) < T - 1 )			// last selection is old?
 	{
 		DELETE( SHOOKS( cur ) );				// remove supplier brochure entry
 		DELETE( cur );							// remove client entry
@@ -512,7 +498,7 @@ v[6] = V( "_L1rd" );							// firm R&D labor
 v[7] = V( "_L1dRD" );							// firm R&D labor demand
 
 // total workers in firm after possible shortage of workers
-RESULT( min( v[5], v[6] + ( v[2] > v[4] ? ( v[5] - v[7] ) * ( v[1] - v[3] ) / 
+RESULT( min( v[5], v[6] + ( v[2] > v[4] ? ( v[5] - v[7] ) * ( v[1] - v[3] ) /
 										  ( v[2] - v[4] ) : 0 ) ) )
 
 
@@ -543,12 +529,7 @@ EQUATION( "_Pi1" )
 /*
 Profit (before taxes) of firm in capital-good sector
 */
-
-v[1] = V( "_S1" ) - V( "_C1" );					// gross operating margin
-v[2] = VS( FINSECL2, "rD" ) * VL( "_NW1", 1 );	// financial income
-v[3] = V( "_i1" ); 								// financial expense (interest)
-
-RESULT( v[1] + v[2] - v[3] )					// firm profits before taxes
+RESULT( V( "_S1" ) + V( "_iD1" ) - V( "_C1" ) - V( "_i1" ) )
 
 
 EQUATION( "_Q1e" )
@@ -562,12 +543,12 @@ v[2] = V( "_L1d" );								// desired total workers
 
 if ( v[1] >= v[2] )
 	END_EQUATION( v[0] );						// produce as planned
-	
+
 v[3] = V( "_L1rd" );							// effective R&D workers
 v[4] = V( "_L1dRD" );							// desired R&D workers
 
 // adjustment factor
-v[5] = v[2] > v[4] ? 1 - ( v[1] - v[3] ) / ( v[2] - v[4] ) : 1;	
+v[5] = v[2] > v[4] ? 1 - ( v[1] - v[3] ) / ( v[2] - v[4] ) : 1;
 
 // adjust all pending orders, supplying at least one machine
 CYCLE( cur, "Cli" )
@@ -577,7 +558,15 @@ CYCLE( cur, "Cli" )
 		v[0] -= v[7] = min( floor( v[6] * v[5] ), v[6] - 1 );
 		INCRS( cur, "__nCan", v[7] );
 	}
-	
+
+CYCLE( cur, "CliEn" )							// energy sector orders
+	if ( VS( cur, "__tOrdE" ) == T )			// order in this period?
+	{
+		v[6] = VS( cur, "__nOrdE" ) - VS( cur, "__nCanE" );// existing net orders
+		v[0] -= v[7] = min( floor( v[6] * v[5] ), v[6] - 1 );
+		INCRS( cur, "__nCanE", v[7] );
+	}
+
 RESULT( max( v[0], 0 ) )						// avoid negative in part. cases
 
 
@@ -602,7 +591,7 @@ Use sectoral average (pool of sector 1 workers).
 */
 V( "_AtauLP" );									// ensure innovation process ok
 RESULT( ( VS( LABSUPL2, "w" ) / V( "_BtauLP" ) +
-		  ( VS( ENESECL2, "pE" ) + VS( GRANDPARENT, "trCO2" ) * V( "_BtauEF" ) ) / 
+		  ( VS( ENESECL2, "pE" ) + VS( GRANDPARENT, "trCO2" ) * V( "_BtauEF" ) ) /
 		V( "_BtauEE" ) ) / VS( PARENT, "m1" ) )
 
 
@@ -610,8 +599,8 @@ EQUATION( "_cTau" )
 /*
 Planned (expected) unit production cost of machine when employed for production
 */
-RESULT( VS( LABSUPL2, "w" ) / V( "_AtauLP" ) + 
-	    ( VS( ENESECL2, "pE" ) + VS( GRANDPARENT, "trCO2" ) * 
+RESULT( VS( LABSUPL2, "w" ) / V( "_AtauLP" ) +
+		( VS( ENESECL2, "pE" ) + VS( GRANDPARENT, "trCO2" ) *
 		V( "_AtauEF" ) ) / V( "_AtauEE" ) )
 
 
@@ -622,6 +611,21 @@ Keep market share if sector didn't produce
 */
 v[1] = VS( PARENT, "Q1e" );
 RESULT( v[1] > 0 ? V( "_Q1e" ) / v[1] : CURRENT )
+
+
+EQUATION( "_i1" )
+/*
+Interest paid by firm in capital-good sector
+*/
+RESULT( VL( "_Deb1", 1 ) * VLS( FINSECL2, "rDeb", 1 ) *
+		( 1 + ( VL( "_qc1", 1 ) - 1 ) * VS( FINSECL2, "kConst" ) ) )
+
+
+EQUATION( "_iD1" )
+/*
+Interest received from deposits by firm in capital-good sector
+*/
+RESULT( VL( "_NW1", 1 ) * VLS( FINSECL2, "rD", 1 ) )
 
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/
@@ -638,10 +642,10 @@ v[2] = V( "_Deb1max" );							// maximum prudential credit
 if ( v[2] > v[1] )								// more credit possible?
 {
 	v[0] = v[2] - v[1];							// potential free credit
-	
+
 	cur = HOOK( BANK );							// firm's bank
 	v[3] = VS( cur, "_TC1free" );				// bank's available credit
-	
+
 	if ( v[3] > -0.1 )							// credit limit active
 		v[0] = min( v[0], v[3] );				// take just what is possible
 }
@@ -707,16 +711,16 @@ Stock of bank debt of firm in capital-good sector
 Updated in '_Q1', '_Tax1'
 */
 
-EQUATION_DUMMY( "_Div1", "" )
-/*
-Dividends paid by firm in capital-good sector
-Updated in '_Tax1'
-*/
-
 EQUATION_DUMMY( "_NW1", "" )
 /*
 Net worth of firm in capital-good sector
 Updated in '_Q1', '_Tax1'
+*/
+
+EQUATION_DUMMY( "_NW1p", "_Q1" )
+/*
+Provision for production of firm in capital-good sector
+Updated in '_Q1'
 */
 
 EQUATION_DUMMY( "_imi", "" )

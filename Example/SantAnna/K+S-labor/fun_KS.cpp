@@ -2,14 +2,14 @@
 
 	MAIN K+S LSD MODEL (including labor and finance extensions)
 	------------------
-	
-	VERSION: 5.1.2 - Full LSD version
 
-	This is the topmost code file for the K+S coded in LSD. 
+	VERSION: 5.1.3 - Full LSD version
+
+	This is the topmost code file for the K+S coded in LSD.
 	It contains only the scheduling equations 'runCountry' and 'timeStep',
 	and the main initialization equation 'init'.
 	All remaining equations are loaded from '.h' include files.
- 
+
  ******************************************************************************/
 
 // disable/enable full logging (FASTMODE=0/1/2)
@@ -109,7 +109,7 @@ RESULT( T )
 EQUATION( "timeStep" )
 /*
 Execute one time-step of one country in the K+S model
-Ensure the high-level scheduling of the model equation by forcing the 
+Ensure the high-level scheduling of the model equation by forcing the
 computation of key variables in the correct order
 In principle, the sequence defined here is embedded in the equations, so this
 equation is supposedly unnecessary (but may produce slightly different results)
@@ -121,21 +121,21 @@ NEW_VS( v[1], FINSECL0, "r" );					// prime interest rate
 NEW_VS( v[2], FINSECL0, "rDeb" );				// interest rate on debt
 NEW_VS( v[3], FINSECL0, "rBonds" );				// interest rate on bonds
 
-// consumption-good firms define expected demand, planned production, 
+// consumption-good firms define expected demand, planned production,
 // labor demand, and desired investment for sector
 NEW_VS( v[4], CONSECL0, "D2e" );				// expected demand for goods
 NEW_VS( v[5], CONSECL0, "Q2" );					// planned goods production
 NEW_VS( v[6], CONSECL0, "L2d" );				// total desired labor
 NEW_VS( v[7], CONSECL0, "Id" );					// desired investment
 
-// capital-good firms do R&D, receive orders, define machine production, 
+// capital-good firms do R&D, receive orders, define machine production,
 // and labor demand for sector
 NEW_VS( v[8], CAPSECL0, "D1" );					// orders for new machines
 NEW_VS( v[9], CAPSECL0, "Q1" );					// planned machine production
 NEW_VS( v[10], CAPSECL0, "L1d" );				// total desired labor
 
 // workers apply for jobs, firms define open job positions
-// and labor market search-and-match define effective employed labor 
+// and labor market search-and-match define effective employed labor
 NEW_VS( v[11], LABSUPL0, "appl" );				// applications posted by workers
 NEW_VS( v[12], CAPSECL0, "JO1" );				// open job positions in sector 1
 NEW_VS( v[13], CONSECL0, "JO2" );				// open job positions in sector 2
@@ -148,10 +148,10 @@ NEW_VS( v[16], CONSECL0, "Q2e" );				// effective goods production
 NEW_VS( v[17], CAPSECL0, "p1avg" );				// average machine prices
 NEW_VS( v[18], CONSECL0, "p2avg" );				// average goods prices
 
-// government decides expenditure and workers set all income to buying goods, 
+// government decides expenditure and workers set all income to buying goods,
 // demand is matched to supply of goods, producing inventories or forced savings
 NEW_VS( v[19], THIS, "G" );						// public total expenditures
-NEW_VS( v[20], CONSECL0, "D2d" );				// effective goods production
+NEW_VS( v[20], CONSECL0, "D2d" );				// desired goods demand
 NEW_VS( v[21], CONSECL0, "D2" );				// fulfilled demand for goods
 NEW_VS( v[22], CONSECL0, "N" );					// accumulated inventories
 NEW_VS( v[23], THIS, "Sav" );					// forced consumer savings
@@ -165,22 +165,20 @@ NEW_VS( v[28], CONSECL0, "Tax2" );				// tax paid by sector 2
 NEW_VS( v[29], FINSECL0, "TaxB" );				// tax paid by banks
 NEW_VS( v[30], CAPSECL0, "NW1" );				// net wealth of sector 1
 NEW_VS( v[31], CONSECL0, "NW2" );				// net wealth of sector 2
-NEW_VS( v[32], FINSECL0, "NWb" );				// liquid assets of banks
 
 // government collects taxes, compute public deficit or surplus form,
 // and adjust public debt accordingly
-NEW_VS( v[33], THIS, "Tax" );					// total tax income
-NEW_VS( v[34], THIS, "Def" );					// public total deficit
-NEW_VS( v[35], THIS, "Deb" );					// public accumulated debt
+NEW_VS( v[32], THIS, "Tax" );					// total tax income
+NEW_VS( v[33], THIS, "Def" );					// public total deficit
+NEW_VS( v[34], THIS, "Deb" );					// public accumulated debt
 
 // macro variables are computed by aggregation of micro-level data
-NEW_VS( v[36], THIS, "GDP" );					// real gross domestic product
-NEW_VS( v[37], THIS, "GDPnom" );				// nominal gross domestic product
+NEW_VS( v[35], THIS, "GDPreal" );				// real gross domestic product
+NEW_VS( v[36], THIS, "GDPnom" );				// nominal gross domestic product
 
-// exit and entry happens in both sectors and banks update credit scores 
-// and pecking order of client firms, and account bad debt losses
-NEW_VS( v[38], THIS, "entryExit" );				// net entry of firms
-NEW_VS( v[39], FINSECL0, "BadDeb" );			// bad debt losses of banks
+// exit and entry happens in both sectors and banks update credit scores
+// and pecking order of client firms
+NEW_VS( v[37], THIS, "entryExit" );				// net entry of firms
 
 RESULT( T )
 
@@ -193,7 +191,7 @@ MODELEND
 void close_sim( void )
 {
 	object *cur, *cur1, *cur2;
-	
+
 	CYCLES( root, cur, "Country" )				// scan all country objects
 	{
 		CYCLES( cur, cur1, "Consumption" )

@@ -1,4 +1,4 @@
-Labor- and finance-augmented K+S Model (version 5.1.2)
+Labor- and finance-augmented K+S Model (version 5.1.3)
 ======================================================
 
 This version copyright by Marcelo C. Pereira.
@@ -18,7 +18,7 @@ v5.1.1 (12/08/20) - use LSD C++11 pseudo-random generator engine
                     change capacity utilization measure to account for labor
                     fix flagGovExp operation for values less than 2 (minimum income)
                     fix L1shortMax value in example configurations
-v5.1.2 (01/10/21) - fix lag definition and initialization of some variables
+v5.1.2 (01/09/21) - fix lag definition and initialization of some variables
                     fix lagged values for taxes
                     fix firm finance statistics
                     fix credit pecking order/credit scores
@@ -30,6 +30,14 @@ v5.1.2 (01/10/21) - fix lag definition and initialization of some variables
                     add bond market (muBonds, thetaBonds, rhoBonds)
                     add intermediate bank capital restriction rule (flagCreditRule=1)
                     add debt repayment control (deltaB)
+v5.1.3 (01/01/22) - fix equation computation order in some cases
+                    fix temporal stock-flow inconsistencies
+                    fix good allocation inconsistencies
+                    improve firm maximum debt handling and statistics
+                    improve government bond market operation
+                    improve real GDP calculation
+                    add full dynamic multi-level SFC testing
+                    improve tests
 
 Relevant references
 ===================

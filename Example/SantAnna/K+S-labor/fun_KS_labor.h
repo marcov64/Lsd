@@ -3,9 +3,9 @@
 	LABOR MARKET OBJECT EQUATIONS
 	-----------------------------
 
-	Equations that are specific to the Labor Market objects in the K+S LSD 
+	Equations that are specific to the Labor Market objects in the K+S LSD
 	model are coded below.
- 
+
  ******************************************************************************/
 
 /*============================== KEY EQUATIONS ===============================*/
@@ -27,39 +27,39 @@ Result is scaled according to the defined scale
 v[1] = V( "Lscale" );							// labor scaling
 i = COUNT( "Worker" );							// count the worker objects
 h = i * v[1];									// adjust for scale
-	
+
 v[0] = V( "delta" );							// population growth rate
 
 // growing workforce and demand is higher than labor supply?
-if ( VS( PARENT, "flagAddWorkers" ) == 1 && 
+if ( VS( PARENT, "flagAddWorkers" ) == 1 &&
 	 VS( CAPSECL1, "L1d" ) + VS( CONSECL1, "L2d" ) > h )
 	v[0] += 0.01;								// lump grow in labor supply
-	
+
 j = h * ( 1 + v[0] );							// grow population
 
 v[2] = V( "wU" );								// unemployed wage (benefit)
 v[3] = V( "Tc" );								// contract term
 v[4] = V( "sigma" );							// public vintage skills
 v[5] = VS( PARENT, "flagWorkerLBU" );			// learning mode
-	
+
 if ( v[5] == 1 || v[5] == 3 )					// vintage skills in use?
 	v[6] = v[4];								// get public skills
 else
 	v[6] = INISKILL;
 
-for ( ; h < j ; h += v[1] ) 					// add missing workers
-{	
+for ( ; h < j ; h += v[1] )						// add missing workers
+{
 	cur = ADDOBJL( "Worker", T - 1 );			// insert object to be updated
 	ADDHOOKS( cur, WORKERHK );					// add object hooks
-	
+
 	WRITES( cur, "_ID", ++i );					// new ID
 	WRITES( cur, "_Tc", v[3] );					// set work contract term,
 	WRITES( cur, "_wRes", v[2] );				// reservation wage
 	WRITES( cur, "_employed", 0 );
-	
+
 	for ( i = 1; i <= 8; ++i )					// lagged wage memory
 		WRITELLS( cur, "_w", v[2], T - 1, i );
-	
+
 	WRITELLS( cur, "_sV", v[6], T - 1, 1 );
 	WRITELLS( cur, "_sT", INISKILL, T - 1, 1 );
 }
@@ -79,7 +79,7 @@ if ( VS( PARENT, "flagSearchDisc" ) == 1 )		// global discouragement mode?
 	v[0] = v[1] * exp( - v[1] * v[2] );			// compute global prob.
 }
 else
-	v[0] = 1;									// no: always search 
+	v[0] = 1;									// no: always search
 
 RESULT( v[0] )
 
@@ -100,7 +100,7 @@ if ( VS( PARENT, "flagHeterWage" ) == 0 )
 	v[6] = VLS( PARENT, "dAb", 1 );				// general productivity variat.
 	v[7] = VL( "dUeB", 1 );						// unemployment variation
 
-	v[0] = CURRENT * ( 1 + v[4] + v[1] * ( v[5] - v[4] ) + v[2] * v[6] + 
+	v[0] = CURRENT * ( 1 + v[4] + v[1] * ( v[5] - v[4] ) + v[2] * v[6] +
 					   v[3] * v[7] );
 	v[0] = max( v[0], V( "wMinPol" ) );			// adjust to minimum if needed
 }
@@ -143,6 +143,13 @@ RESULT( V( "phi" ) * VL( "wAvgEmp", 1 ) )
 
 /*============================ SUPPORT EQUATIONS =============================*/
 
+EQUATION( "Bon" )
+/*
+Total (nominal) bonuses
+*/
+RESULT( SUM( "_Bon" ) )
+
+
 EQUATION( "L" )
 /*
 Labor aggregated demand
@@ -155,6 +162,13 @@ EQUATION( "Ltrain" )
 Number of workers under government-supplied training
 */
 RESULT( ( V( "Ls" ) - V( "L" ) ) * V( "Gamma" ) )// workers under training
+
+
+EQUATION( "TaxW" )
+/*
+Total taxes paid by workers on wages
+*/
+RESULT( SUM( "_TaxW" ) )
 
 
 EQUATION( "Ue" )
@@ -174,10 +188,10 @@ CYCLE( cur, "Worker" )
 	if ( ! VS( cur, "_employed" ) )
 	{
 		++h;									// not employed
-		
+
 		if ( VS( cur, "_discouraged" ) )
 			++i;								// and not searching for work
-		
+
 		if ( VS( cur, "_Tu" ) <= 1 )
 			++j;								// and briefly unemployed
 	}
@@ -191,8 +205,15 @@ v[5] = v[1] - i * v[2];							// non-discouraged total workers
 WRITE( "U", h * v[2] / v[1] );
 WRITE( "Us", v[3] > 0 ? j * v[2] / v[3] : 1 );
 WRITE( "TeAvg", v[4] > 0 ? k * v[2] / v[4] : 0 );
-	
+
 RESULT( v[5] > 0 ? ( h - i ) * v[2] / v[5] : 1 )
+
+
+EQUATION( "W" )
+/*
+Total (nominal) wages
+*/
+RESULT( SUM_CND( "_w", "_employed", ">", 0 ) * V( "Lscale" ) )
 
 
 EQUATION( "appl" )
@@ -225,7 +246,7 @@ Also updates:
 h = VS( PARENT, "flagWorkerLBU" );				// learning-by-use mode
 if ( h == 0 )									// no worker-level learning?
 	END_EQUATION( INISKILL );
-	
+
 v[0] = v[1] = v[2] = v[3] = v[4] = i = 0;		// accumulators
 v[5] = 0;										// current maximum
 v[6] = DBL_MAX;									// current minimum
@@ -233,24 +254,24 @@ CYCLE( cur, "Worker" )
 {
 	v[0] += VS( cur, "_s" );
 	++i;
-	
+
 	if ( h >= 2 )
 	{
 		v[8] = VS( cur, "_sT" );
 		v[1] += v[8];							// sum of tenure skills
 		v[2] += pow( v[8], 2 );					// sum of square skills
-			
+
 		if ( v[8] > v[5] )
-			v[5] = v[8];						// new maximum					
+			v[5] = v[8];						// new maximum
 
 		if ( v[8] < v[6] )
-			v[6] = v[8];						// new minimum					
+			v[6] = v[8];						// new minimum
 	}
-	
+
 	if ( h == 1 || h == 3 )
 	{
 		v[9] = VS( cur, "_sV" );
-		
+
 		v[3] += v[9];							// sum of vintage skills
 		v[4] += pow( v[9], 2 );					// sum of square skills
 	}
@@ -273,7 +294,7 @@ else
 	WRITE( "sTmax", INISKILL );
 	WRITE( "sTmin", INISKILL );
 }
-	
+
 if ( h == 1 || h == 3 )
 {
 	WRITE( "sVavg", v[3] / i );
@@ -285,7 +306,7 @@ else
 	WRITE( "sVavg", INISKILL );
 	WRITE( "sVsd", 0 );
 }
-	
+
 RESULT( v[0] )
 
 
@@ -303,16 +324,16 @@ CYCLE( cur, "Worker" )							// consider all workers
 {
 	v[0] = VS( cur, "_w" );						// current wage or un. benefit
 	v[1] += v[0];								// sum of wages & benefits
-	
+
 	if ( VS( cur, "_employed" ) )				// account only employed
 	{
 		v[2] += v[0];							// sum of wages
 		v[3] += log( v[0] + 1 );				// sum of log wages
 		v[4] += pow( log( v[0] + 1 ), 2 );		// sum of squared log wages
-		
+
 		++j;
 	}
-	
+
 	++i;
 }
 

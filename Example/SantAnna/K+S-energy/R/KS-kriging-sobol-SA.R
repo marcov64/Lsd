@@ -53,14 +53,14 @@ phi3d     <- 30                     # vertical view angle
 # ==== Aggregated variables to consider ====
 
 # Aggregated variables to use
-logVars <- c( "GDP", "GDPnom", "D2", "G", "Gbail", "Tax", "Deb", "Def", "DefP",
-              "I", "EI", "A", "A1", "A2", "S1", "S2", "Deb1", "Deb2", "NWb",
-              "NW1", "NW2", "W1", "W2", "wReal", "Loans", "Em", "Em1", "Em2",
-              "EmE", "En" )
-aggrVars <- append( logVars, c( "dGDP", "dCPI", "CPI", "Q2u", "F1", "F2",
-                                "entry1", "entry2", "entry1exit", "entry2exit",
-                                "exit1", "exit2", "imi", "inn", "U", "r",
-                                "DebGDP", "DefPgdp", "Tm", "pE" ) )
+logVars <- c( "Creal", "GDPreal", "Ireal", "EI", "EIe", "DebE", "Deb1", "Deb2",
+              "NWb", "NWe", "NW1", "NW2", "SI", "SIe", "Se", "S1", "S2", "A",
+              "w", "G", "Gbail", "Tax", "Deb", "Def", "Loans", "We", "W1", "W2", 
+              "Em", "Em1", "Em2", "EmE", "En" )
+aggrVars <- append( logVars, c( "dGDP", "dCPI", "Q2u", "Fe", "F1", "F2",
+                                "entryE", "entry1", "entry2", "exitE", "exit1", 
+                                "exit2", "imi", "inn", "r", "CPI", "U", "Tm",
+                                "fKge", "pE" ) )
 newVars <- c( "freq_FE", "cris_llh", "GDP_sd" )
 
 

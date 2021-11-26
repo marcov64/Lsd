@@ -53,9 +53,9 @@ phi3d     <- 30                     # vertical view angle
 # ==== Aggregated variables to consider ====
 
 # Aggregated variables to use
-logVars <- c( "GDP", "C", "I", "EI", "Deb1", "Deb2", "NWb", "NW1", "NW2", "S1",
-              "S2", "A", "wAvg", "G", "Gbail", "Gtrain", "Tax", "Deb", "Def",
-              "Loans", "W1", "W2", "B2" )
+logVars <- c( "Creal", "GDPreal", "Ireal", "EI", "Deb1", "Deb2", "NWb", "NW1",
+              "NW2", "SI", "S1", "S2", "A", "wAvg", "G", "Gbail", "Gtrain",
+              "Tax", "Deb", "Def", "Loans", "W1", "W2", "Bon2" )
 aggrVars <- append( logVars, c( "dGDP", "dCPI", "Q2u", "F1", "F2", "entry1",
                                 "entry2", "exit1", "exit2", "imi", "inn", "r",
                                 "CPI", "U", "Ue", "TeAvg", "f2posChg", "sTavg",

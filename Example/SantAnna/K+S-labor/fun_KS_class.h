@@ -3,9 +3,9 @@
 	CLASS AND MACRO DEFINITIONS
 	---------------------------
 
-	C++ class and preprocessor macro definitions used in the K+S LSD model 
+	C++ class and preprocessor macro definitions used in the K+S LSD model
 	are coded below.
- 
+
  ******************************************************************************/
 
 /*============================= GENERAL CLASSES ==============================*/
@@ -59,11 +59,9 @@ struct countryE
 	dblVecT firm2wgtd;							// m. s. cum. weights in sector 2
 	objVecT bankPtr;							// pointers to banks
 	objVecT firm2ptr;							// pointers to firms in sector 2
-									
-	// country speed-up maps
 	firmMapT firm2map;							// ID to pointer map for sector 2
 	vintMapT vintProd;							// vintage productivities & skills
-	
+
 	// country lists
 	woLisT firm2wo;								// list of wage offers
 	appLisT firm1appl;							// sector 1 job applications
@@ -103,7 +101,7 @@ struct firm2E									// extensions to Firm2 object
 
 /*======================= OBJECT-LOCATION DEFINITIONS ========================*/
 
-// pointers to speed-up the access to individual market containers by caller 
+// pointers to speed-up the access to individual market containers by caller
 // equation levels
 #define CAPSECL0 V_EXT( countryE, capSec )
 #define CAPSECL1 V_EXTS( PARENT, countryE, capSec )

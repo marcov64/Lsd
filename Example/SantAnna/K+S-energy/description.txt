@@ -1,5 +1,5 @@
-Energy-augmented K+S Model (version 0.5)
-========================================
+Energy-augmented K+S Model (version 0.5.1)
+==========================================
 
 This version copyright by Marcelo C. Pereira.
 The original K+S and climate extensions code was developed by Andrea Roventini, Francesco Lamperti, and other contributors.
@@ -11,7 +11,17 @@ LSD version 8.0 or higher is required. Download at: https://github.com/SantAnnaK
 
 Change log
 ==========
-v0.5 - initial version based on LSD K+S v0.4
+v0.5                - initial version based on LSD K+S v0.4
+v0.5.1 (01/01/2022) - consolidate energy producer cash-flow to government for SFC
+                      fix equation computation order in some cases
+                      fix temporal stock-flow inconsistencies
+                      fix good allocation inconsistencies
+                      improve capital process in energy sector
+                      improve firm maximum debt handling and statistics
+                      improve government bond market operation
+                      improve real GDP calculation
+                      add full dynamic multi-level SFC testing
+                      improve tests
 
 
 Relevant references
@@ -251,10 +261,12 @@ dE = dividend rate in energy sector ([0,1])
 emDE0 = initial dirty energy plant emissions (>0)
 etaE = technical life time of power plants (>1)
 fEmin = minimum market share to stay in energy sector ([0,1[)
-fGE0 = initial share of green power plants and floor to dynamic R&D allocation [0, 1]
+fGE0 = initial share of green power plants and floor to dynamic R&D allocation ([0,1])
+iotaE = reserve capacity on poewer plant capacity in energy sector (>=0)
 kappaE = installed power plant capacity maximum growth per type (>0, 0=no limit)
 mDE = workers required per unit of dirty energy generation (>=0)
 mGE = workers required per unit of green energy generation (>=0)
+mEmin = minimum worker factor required to keep energy generation plant ([0,1])
 muE0 = initial mark-up of energy producer as share of real wage (>0)
 nE = number of periods for evaluating market share in energy sector (1-8)
 nuE = share of revenue applied in R&D by energy producer (0,1)
@@ -273,7 +285,7 @@ Capital market parameters (object Capital)
 Deb10ratio = debt-to-equity initial ratio in capital-good sector ([0,1], 0=only equity)
 F10 = initial number of firms in capital-good sector (1<=F1min<=F10<=F1max)
 F1max/F1min = maximum/minimum number of firms in capital-good sector (1<=F1min<=F10<=F1max)
-L1rdMax = maximum share of workers in capital-good R&D (]0,1[)
+L1rdMax = maximum share of workers in R&D (]0,1[)
 L1shortMax = maximum labor shortage allowed in capital-good sector ([0,1])
 NW10 = average initial net worth in capital-good sector (>=0)
 Phi3/Phi4 = lower/upper support for capital-good entrant net worth share (0<Phi3<Phi4<=1)

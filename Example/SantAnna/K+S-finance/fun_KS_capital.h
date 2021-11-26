@@ -3,9 +3,9 @@
 	CAPITAL-GOODS MARKET OBJECT EQUATIONS
 	-------------------------------------
 
-	Equations that are specific to the capital-goods market objects in the 
+	Equations that are specific to the capital-goods market objects in the
 	K+S LSD model are coded below.
- 
+
  ******************************************************************************/
 
 /*============================== KEY EQUATIONS ===============================*/
@@ -28,7 +28,7 @@ v[4] = min( v[4], v[1] );
 if ( v[1] - v[2] < v[3] + v[4] )				// labor shortage?
 {
 	v[6] = ( v[1] - v[2] ) / ( v[3] + v[4] );	// shortage factor
-	
+
 	if ( v[6] < 1 - v[5] )						// over cap?
 		v[6] = 1 - v[5];						// shortage on cap
 }
@@ -44,35 +44,38 @@ Rate of entry-exit of firms in capital-good sector
 Perform entry and exit of firms in the capital-good sector
 All relevant aggregate variables in sector must be computed before existing
 firms are deleted, so all active firms in period are considered
-Also updates 'cEntry', 'cExit', 'exit1fail'
+Also updates 'cEntry1', 'cExit1', 'exit1fail'
 */
 
 VS( CONSECL1, "K" );							// ensure canceled orders acct'd
 UPDATE;											// ensure aggregates are computed
 
-double NW10u = V( "NW10" ) * V( "PPI" ) / V( "PPI0" );// minimum wealth in s. 1
+double NW10u = V( "NW10" ) * V( "PPI" ) / V( "pK0" );// minimum wealth in s. 1
 double n1 = V( "n1" );							// market participation period
 int F1 = V( "F1" );								// number of firms
 
 vector < bool > quit( F1, false );				// vector of firms' quit status
 
+WRITE( "cEntry1", 0 );							// reset exit/entry accumulators
+WRITE( "cExit1", 0 );
+
 // mark bankrupt and market-share-irrelevant firms to quit the market
 h = F1;											// initial number of firms
-v[1] = v[2] = v[3] = i = k = 0;					// accum., counters, registers
+v[1] = v[3] = i = k = 0;						// accum., counters, registers
 CYCLE( cur, "Firm1" )
 {
 	v[4] = VS( cur, "_NW1" );					// current net wealth
-	
+
 	if ( v[4] < 0 || T >= VS( cur, "_t1ent" ) + n1 )// bankrupt or incumbent?
 	{
 		for ( v[5] = j = 0; j < n1; ++j )
 			v[5] += VLS( cur, "_BC", j );		// n1 periods customer number
-		
+
 		if ( v[4] < 0 || v[5] <= 0 )
 		{
 			quit[ i ] = true;					// mark for likely exit
 			--h;								// one less firm
-			
+
 			if ( v[5] > v[3] )					// best firm so far?
 			{
 				k = i;							// save firm index
@@ -80,9 +83,9 @@ CYCLE( cur, "Firm1" )
 			}
 		}
 	}
-	
+
 	++i;
-}	
+}
 
 // quit candidate firms exit, except the best one if all going to quit
 v[6] = i = j = 0;								// firm counters
@@ -95,19 +98,18 @@ CYCLE_SAFE( cur, "Firm1" )
 			++j;								// count exits
 			if ( VS( cur, "_NW1" ) < 0 )		// count bankruptcies
 				++v[6];
-			
-			// account liquidation credit due to public, if any
-			v[2] += exit_firm1( var, cur );		// del obj & collect liq. value
+
+			exit_firm( var, cur );				// del obj & collect liq. value
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
 			{
 				// new equity required
-				v[7] = NW10u + VS( cur, "_Deb1" ) - VS( cur, "_NW1" );
-				v[1] += v[7];					// accumulate "entry" equity cost
-				
+				v[1] += v[7] = NW10u + VS( cur, "_Deb1" ) - VS( cur, "_NW1" );
+
 				WRITES( cur, "_Deb1", 0 );		// reset debt
-				INCRS( cur, "_NW1", v[7] );		// add new equity
+				INCRS( cur, "_Eq1", v[7] );		// add new equity
+				INCRS( cur, "_NW1", v[7] );
 			}
 	}
 
@@ -117,11 +119,11 @@ CYCLE_SAFE( cur, "Firm1" )
 V( "f1rescale" );								// redistribute exiting m.s.
 
 // replace exiting firms by entrants
-v[1] += entry_firm1( var, THIS, j, false );		// add entrant-firm objects
+entry_firm1( var, THIS, j, false );				// add entrant-firm objects
 
-INCRS( PARENT, "cEntry", v[1] );				// account equity cost of entry
-INCRS( PARENT, "cExit", v[2] );					// account exit credits
+INCR( "cEntry1", v[1] );						// add cost of additional equity
 WRITES( SECSTAL1, "exit1fail", v[6] / F1 );
+RECALCS( FINSECL1, "BadDeb1" );					// update bad debt after exits
 
 V( "f1rescale" );								// redistribute entrant m.s.
 INIT_TSEARCHT( "Firm1", i );					// prepare turbo search indexing
@@ -161,6 +163,13 @@ V( "Tax1" );									// ensure dividends are computed
 RESULT( SUM( "_Div1" ) )
 
 
+EQUATION( "Eq1" )
+/*
+Equity hold by workers/households from firms in capital-good sector
+*/
+RESULT( SUM( "_Eq1" ) )
+
+
 EQUATION( "JO1" )
 /*
 Open job positions in capital-good sector
@@ -186,6 +195,7 @@ RESULT( SUM( "_L1dRD" ) )
 EQUATION( "L1rd" )
 /*
 Total R&D labor employed by firms in capital-good sector
+Apply hard limit to sectoral labor share if L1rdMax < 1
 */
 RESULT( min( V( "L1dRD" ), VS( LABSUPL1, "Ls" ) * V( "L1rdMax" ) ) )
 
@@ -247,6 +257,20 @@ Total wages paid by firms in capital-good sector
 RESULT( SUM( "_W1" ) )
 
 
+EQUATION( "i1" )
+/*
+Interest paid by capital-good sector
+*/
+RESULT( SUM( "_i1" ) )
+
+
+EQUATION( "iD1" )
+/*
+Interest received from deposits by capital-good sector
+*/
+RESULT( SUM( "_iD1" ) )
+
+
 EQUATION( "imi" )
 /*
 Imitation success rate in capital-good sector
@@ -299,7 +323,7 @@ if ( v[1] > 0 )									// production ok?
 else
 {
 	v[2] = 1 / COUNT( "Firm1" );				// firm fair share
-	
+
 	CYCLE( cur, "Firm1" )						// rescale to add-up to 1
 	{
 		v[0] += v[2];
@@ -311,3 +335,16 @@ RESULT( v[0] )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/
+
+EQUATION_DUMMY( "cEntry1", "" )
+/*
+Cost (new equity) of firm entries in capital-good sector
+Updated in 'entry1exit'
+*/
+
+EQUATION_DUMMY( "cExit1", "" )
+/*
+Credits (returned equity) from firm exits in capital-good sector
+Updated in 'entry1exit'
+*/
+

@@ -1,6 +1,6 @@
 K+S (var. firms)
-0.3.1
-01 January, 2018
+0.3.2
+01 January, 2022
 #
 #
 #

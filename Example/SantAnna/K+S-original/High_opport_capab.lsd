@@ -11,8 +11,14 @@ Label Root
 			Param: Lambda0
 			Param: r
 			Var: BadDeb
+			Var: BadDeb1
+			Var: BadDeb2
 			Var: Depo
+			Var: DepoG
 			Var: Loans
+			Var: PiB
+			Var: iB
+			Var: iDb
 
 		}
 
@@ -28,7 +34,9 @@ Label Root
 			Param: w0min
 			Var: L
 			Var: Ls
+			Var: TaxW
 			Var: U
+			Var: W
 			Var: dUb
 			Var: w
 			Var: wU
@@ -52,6 +60,7 @@ Label Root
 
 				}
 
+				Param: _Eq1
 				Param: _ID1
 				Param: _t1ent
 				Func: _CS1a
@@ -73,6 +82,7 @@ Label Root
 				Var: _L1rd
 				Var: _NC
 				Var: _NW1
+				Var: _NW1p
 				Var: _Pi1
 				Var: _Q1
 				Var: _Q1e
@@ -83,6 +93,8 @@ Label Root
 				Var: _c1
 				Var: _cTau
 				Var: _f1
+				Var: _i1
+				Var: _iD1
 				Var: _imi
 				Var: _inn
 				Var: _p1
@@ -94,7 +106,6 @@ Label Root
 			Param: L1rdMax
 			Param: L1shortMax
 			Param: NW10
-			Param: PPI0
 			Param: Phi3
 			Param: Phi4
 			Param: alpha1
@@ -108,6 +119,7 @@ Label Root
 			Param: mu1
 			Param: n1
 			Param: nu
+			Param: pK0
 			Param: x1inf
 			Param: x1sup
 			Param: x5
@@ -119,6 +131,7 @@ Label Root
 			Var: D1
 			Var: Deb1
 			Var: Div1
+			Var: Eq1
 			Var: JO1
 			Var: L1
 			Var: L1d
@@ -132,7 +145,11 @@ Label Root
 			Var: S1
 			Var: Tax1
 			Var: W1
+			Var: cEntry1
+			Var: cExit1
 			Var: entry1exit
+			Var: i1
+			Var: iD1
 			Var: imi
 			Var: inn
 			Var: p1avg
@@ -168,6 +185,7 @@ Label Root
 
 				}
 
+				Param: _Eq2
 				Param: _ID2
 				Param: _t2ent
 				Func: _CS2a
@@ -186,13 +204,16 @@ Label Root
 				Var: _E
 				Var: _EI
 				Var: _EId
+				Var: _Inom
 				Var: _JO2
 				Var: _K
 				Var: _Kd
+				Var: _Knom
 				Var: _L2
 				Var: _L2d
 				Var: _N
 				Var: _NW2
+				Var: _NW2p
 				Var: _Pi2
 				Var: _Q2
 				Var: _Q2d
@@ -212,6 +233,8 @@ Label Root
 				Var: _dA2b
 				Var: _dNnom
 				Var: _f2
+				Var: _i2
+				Var: _iD2
 				Var: _l2
 				Var: _life2cycle
 				Var: _mu2
@@ -246,8 +269,10 @@ Label Root
 			Param: lastID2
 			Param: m2
 			Param: mu20
+			Param: n2
 			Param: omega1
 			Param: omega2
+			Param: pC0
 			Param: u
 			Param: upsilon
 			Func: f2rescale
@@ -262,12 +287,14 @@ Label Root
 			Var: D2e
 			Var: Eavg
 			Var: EI
-			Var: I
+			Var: Eq2
 			Var: Id
 			Var: Inom
+			Var: Ireal
 			Var: JO2
 			Var: K
 			Var: Kd
+			Var: Knom
 			Var: L2
 			Var: L2d
 			Var: N
@@ -284,10 +311,14 @@ Label Root
 			Var: W2
 			Var: c2
 			Var: c2e
+			Var: cEntry2
+			Var: cExit2
 			Var: dCPI
 			Var: dCPIb
 			Var: dNnom
 			Var: entry2exit
+			Var: i2
+			Var: iD2
 			Var: l2avg
 			Var: oldVint
 			Var: p2avg
@@ -303,8 +334,6 @@ Label Root
 				Var: CD
 				Var: CDc
 				Var: CS
-				Var: Creal
-				Var: DebGDP
 				Var: DefGDP
 				Var: GDI
 				Var: dA
@@ -316,15 +345,18 @@ Label Root
 			{
 				Var: A2sd
 				Var: AtauAvg
-				Var: BtauAvg
 				Var: Bda
 				Var: BadDebAcc
+				Var: BtauAvg
 				Var: CD1
 				Var: CD1c
 				Var: CD2
 				Var: CD2c
 				Var: CS1
 				Var: CS2
+				Var: Deb1max
+				Var: Deb2max
+				Var: EId
 				Var: HCavg
 				Var: HH1
 				Var: HH2
@@ -333,6 +365,7 @@ Label Root
 				Var: NCavg
 				Var: RD
 				Var: RS2
+				Var: SId
 				Var: age1avg
 				Var: age2avg
 				Var: dN
@@ -371,6 +404,7 @@ Label Root
 			Param: test2tEnd
 			Param: test2idIni
 			Param: test2idEnd
+			Var: testSFC
 			Var: testCountry
 			Var: testFin
 			Var: testLabor
@@ -389,17 +423,26 @@ Label Root
 		Param: Crec
 		Param: gG
 		Param: mLim
+		Param: mPer
 		Param: tr
 		Var: A
 		Var: C
+		Var: Cd
+		Var: Creal
 		Var: Deb
+		Var: DebGDP
 		Var: Def
+		Var: DefP
+		Var: DefPgdp
+		Var: Div
+		Var: Eq
 		Var: G
-		Var: GDP
 		Var: GDPnom
+		Var: GDPreal
 		Var: Sav
 		Var: SavAcc
 		Var: Tax
+		Var: TaxDiv
 		Var: cEntry
 		Var: cExit
 		Var: dAb
@@ -431,17 +474,26 @@ Param: flagTax 0 n + n n	0
 Param: Crec 0 n + n n	0.2
 Param: gG 0 n + n n	0.005
 Param: mLim 0 n + n n	1
+Param: mPer 0 n + n n	1
 Param: tr 0 n + n n	0.1
 Var: A 4 s + n n	0	0	0	0
 Var: C 0 s + n n
+Var: Cd 0 s + n n
+Var: Creal 0 s + n n
 Var: Deb 1 s + n n	0
+Var: DebGDP 1 s + n n	0
 Var: Def 1 s + n n	0
+Var: DefP 0 s + n n
+Var: DefPgdp 1 s + n n	0
+Var: Div 1 s + n n	0
+Var: Eq 1 s + n n	0
 Var: G 1 s + n n	0
-Var: GDP 1 s + n n	0
-Var: GDPnom 0 s + n n
-Var: Sav 0 s + n n
-Var: SavAcc 0 s + n n
+Var: GDPnom 1 s + n n	0
+Var: GDPreal 1 s + n n	0
+Var: Sav 1 s + n n	0
+Var: SavAcc 1 s + n n	0
 Var: Tax 1 s + n n	0
+Var: TaxDiv 0 s + n n
 Var: cEntry 1 s + n n	0
 Var: cExit 1 s + n n	0
 Var: dAb 1 s + n n	0
@@ -455,8 +507,14 @@ Param: Lambda 0 n + n n	2
 Param: Lambda0 0 n + n n	0
 Param: r 0 n + n n	0.01
 Var: BadDeb 1 s + n n	0
+Var: BadDeb1 1 s + n n	0
+Var: BadDeb2 1 s + n n	0
 Var: Depo 1 s + n n	0
+Var: DepoG 1 s + n n	0
 Var: Loans 1 s + n n	0
+Var: PiB 0 s + n n
+Var: iB 0 s + n n
+Var: iDb 0 s + n n
 
 Object: Labor C	1
 Param: Ls0 0 n + n n	250000
@@ -468,7 +526,9 @@ Param: psi3 0 n + n n	0
 Param: w0min 0 n + n n	1
 Var: L 0 s + n n
 Var: Ls 1 s + n n	0
+Var: TaxW 0 s + n n
 Var: U 4 s + n p	0	0	0	0
+Var: W 0 s + n n
 Var: dUb 1 s + n n	0
 Var: w 1 s + n n	0
 Var: wU 0 s + n n
@@ -479,7 +539,6 @@ Param: F1 0 s + n n	50
 Param: L1rdMax 0 n + n n	0.2
 Param: L1shortMax 0 n + n n	1
 Param: NW10 0 n + n n	1000
-Param: PPI0 0 n + n n	0
 Param: Phi3 0 n + n n	0.1
 Param: Phi4 0 n + n n	0.9
 Param: alpha1 0 n + n n	3.3
@@ -493,6 +552,7 @@ Param: m1 0 n + n n	0.1
 Param: mu1 0 n + n n	0.08
 Param: n1 0 n + n n	4
 Param: nu 0 n + n n	0.04
+Param: pK0 0 n + n n	0
 Param: x1inf 0 n + n n	-0.15
 Param: x1sup 0 n + n n	0.15
 Param: x5 0 n + n n	0.3
@@ -504,6 +564,7 @@ Var: A1 1 s + n n	0
 Var: D1 0 s + n n
 Var: Deb1 1 s + n n	0
 Var: Div1 1 n + n n	0
+Var: Eq1 1 s + n n	0
 Var: JO1 0 n + n n
 Var: L1 1 s + n n	0
 Var: L1d 0 s + n n
@@ -517,12 +578,17 @@ Var: Q1e 0 s + n n
 Var: S1 0 s + n n
 Var: Tax1 0 n + n n
 Var: W1 0 s + n n
+Var: cEntry1 1 s + n n	0
+Var: cExit1 1 s + n n	0
 Var: entry1exit 0 s + n n
+Var: i1 0 s + n n
+Var: iD1 0 s + n n
 Var: imi 0 s + n n
 Var: inn 0 s + n n
 Var: p1avg 1 s + n n	0
 
 Object: Firm1 C	1
+Param: _Eq1 0 n + n n	0
 Param: _ID1 0 n + n n	0
 Param: _t1ent 0 n + n n	0
 Func: _CS1a 0 n + n n
@@ -535,7 +601,7 @@ Var: _CS1 0 n + n n
 Var: _D1 0 n + n N
 Var: _Deb1 1 n + n n	0
 Var: _Deb1max 0 n + n n
-Var: _Div1 0 n + n n
+Var: _Div1 1 n + n n	0
 Var: _HC 0 n + n n
 Var: _JO1 0 n + n n
 Var: _L1 1 n + n n	0
@@ -544,6 +610,7 @@ Var: _L1dRD 0 n + n n
 Var: _L1rd 1 n + n n	0
 Var: _NC 0 n + n n
 Var: _NW1 1 n + n n	0
+Var: _NW1p 0 n + n n
 Var: _Pi1 0 n + n n
 Var: _Q1 0 n + n n
 Var: _Q1e 0 s + n N
@@ -554,6 +621,8 @@ Var: _W1 1 n + n n	0
 Var: _c1 0 n + n n
 Var: _cTau 1 n + n n	0
 Var: _f1 1 n + n n	0
+Var: _i1 0 n + n n
+Var: _iD1 0 n + n n
 Var: _imi 0 n + n n
 Var: _inn 0 n + n n
 Var: _p1 1 n + n n	0
@@ -591,8 +660,10 @@ Param: kappaMin 0 n + n n	0
 Param: lastID2 0 n + n n	0
 Param: m2 0 n + n n	40
 Param: mu20 0 n + n n	0.3
+Param: n2 0 n + n n	1
 Param: omega1 0 n + n n	1
 Param: omega2 0 n + n n	1
+Param: pC0 0 n + n n	0
 Param: u 0 n + n n	0.75
 Param: upsilon 0 n + n n	0.04
 Func: f2rescale 0 n + n n
@@ -607,12 +678,14 @@ Var: D2d 0 s + n n
 Var: D2e 0 s + n n
 Var: Eavg 1 s + n n	0
 Var: EI 0 s + n n
-Var: I 0 s + n n
+Var: Eq2 1 s + n n	0
 Var: Id 0 s + n n
 Var: Inom 0 s + n n
+Var: Ireal 0 s + n n
 Var: JO2 0 n + n n
 Var: K 1 s + n n	0
 Var: Kd 0 s + n n
+Var: Knom 0 s + n n
 Var: L2 0 s + n n
 Var: L2d 0 s + n n
 Var: N 1 s + n n	0
@@ -629,15 +702,20 @@ Var: Tax2 0 n + n n
 Var: W2 0 s + n n
 Var: c2 1 s + n n	0
 Var: c2e 0 s + n n
+Var: cEntry2 1 s + n n	0
+Var: cExit2 1 s + n n	0
 Var: dCPI 1 s + n n	0
 Var: dCPIb 1 s + n n	0
 Var: dNnom 0 s + n n
 Var: entry2exit 0 s + n p
+Var: i2 0 s + n n
+Var: iD2 0 s + n n
 Var: l2avg 1 s + n n	0
 Var: oldVint 1 n + n n	0
 Var: p2avg 0 s + n n
 
 Object: Firm2 C	1
+Param: _Eq2 0 n + n n	0
 Param: _ID2 0 n + n n	0
 Param: _t2ent 0 n + n n	0
 Func: _CS2a 0 n + n n
@@ -652,17 +730,20 @@ Var: _D2d 4 n + n n	0	0	0	0
 Var: _D2e 1 n + n n	0
 Var: _Deb2 1 n + n n	0
 Var: _Deb2max 0 n + n n
-Var: _Div2 0 n + n n
+Var: _Div2 1 n + n n	0
 Var: _E 0 n + n N
 Var: _EI 0 n + n n
 Var: _EId 0 n + n n
+Var: _Inom 0 n + n n
 Var: _JO2 0 n + n n
 Var: _K 1 n + n n	0
 Var: _Kd 0 n + n n
+Var: _Knom 0 n + n n
 Var: _L2 1 n + n n	0
 Var: _L2d 0 n + n n
 Var: _N 1 n + n n	0
 Var: _NW2 1 n + n n	0
+Var: _NW2p 0 n + n n
 Var: _Pi2 0 n + n n
 Var: _Q2 0 n + n n
 Var: _Q2d 0 n + n n
@@ -681,7 +762,9 @@ Var: _c2 0 n + n N
 Var: _c2e 0 n + n n
 Var: _dA2b 1 n + n n	0
 Var: _dNnom 0 n + n n
-Var: _f2 2 n + n N	0	0
+Var: _f2 4 n + n N	0	0	0	0
+Var: _i2 0 n + n n
+Var: _iD2 0 n + n n
 Var: _l2 1 n + n n	0
 Var: _life2cycle 0 n + n n
 Var: _mu2 1 n + n n	0
@@ -717,12 +800,13 @@ Param: test2StIni 0 n + n n	1
 Param: test2StEnd 0 n + n n	0
 Param: test1tIni 0 n + n n	1
 Param: test1tEnd 0 n + n n	0
-Param: test1idIni 0 n + n n	1
-Param: test1idEnd 0 n + n n	0
+Param: test1idIni 0 n + n n	0
+Param: test1idEnd 0 n + n n	3
 Param: test2tIni 0 n + n n	1
 Param: test2tEnd 0 n + n n	0
-Param: test2idIni 0 n + n n	1
-Param: test2idEnd 0 n + n n	0
+Param: test2idIni 0 n + n n	0
+Param: test2idEnd 0 n + n n	3
+Var: testSFC 0 s + n n
 Var: testCountry 0 n + n n
 Var: testFin 0 n + n n
 Var: testLabor 0 n + n n
@@ -735,8 +819,6 @@ Object: Mac C	1
 Var: CD 0 s + n n
 Var: CDc 0 s + n n
 Var: CS 0 s + n n
-Var: Creal 0 s + n n
-Var: DebGDP 0 s + n n
 Var: DefGDP 0 s + n n
 Var: GDI 0 s + n n
 Var: dA 0 s + n n
@@ -744,15 +826,18 @@ Var: dA 0 s + n n
 Object: Sec C	1
 Var: A2sd 0 s + n n
 Var: AtauAvg 0 s + n n
-Var: BtauAvg 0 s + n n
 Var: Bda 0 s + n n
 Var: BadDebAcc 0 n + n n
+Var: BtauAvg 0 s + n n
 Var: CD1 0 s + n n
 Var: CD1c 0 s + n n
 Var: CD2 0 s + n n
 Var: CD2c 0 s + n n
 Var: CS1 0 s + n n
 Var: CS2 0 s + n n
+Var: Deb1max 0 s + n n
+Var: Deb2max 0 s + n n
+Var: EId 0 s + n n
 Var: HCavg 0 s + n n
 Var: HH1 0 s + n n
 Var: HH2 0 s + n n
@@ -761,6 +846,7 @@ Var: HP2 0 s + n n
 Var: NCavg 0 s + n n
 Var: RD 0 s + n n
 Var: RS2 0 s + n n
+Var: SId 0 s + n n
 Var: age1avg 0 s + n n
 Var: age2avg 0 s + n n
 Var: dN 0 s + n n
@@ -840,7 +926,8 @@ END_DESCRIPTION
 Parameter_flagTax
 Taxation
 0 = taxes on firm profit only
-1 = taxes on firm profit and worker income (wage/bonus)
+1 = taxes on firm profit and worker income (wage/bonus
+)
 2 = taxes on firm profits and worker and capitalist income
 _INIT_
 All 1 instances equal to 0.
@@ -861,10 +948,17 @@ All 1 instances equal to 0.005.
 END_DESCRIPTION
 
 Parameter_mLim
-Maximum absolute growth rate on sensitive calculations
+Absolute cap on moving-average growth calculation
 (>=0, 0=no limit)
 _INIT_
 All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_mPer
+Number of periods on moving-average calculation
+(>=1)
+_INIT_
+All 1 instances equal to 1
 END_DESCRIPTION
 
 Parameter_tr
@@ -884,8 +978,22 @@ Variable_C
 Nominal (monetary terms) aggregated consumption
 END_DESCRIPTION
 
+Variable_Cd
+Nominal (monetary terms) desired aggregated consumption
+END_DESCRIPTION
+
+Variable_Creal
+Real (in initial prices terms) aggregated consumption
+END_DESCRIPTION
+
 Variable_Deb
 Accumulated government debt
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_DebGDP
+Government debt on GDP ratio
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -896,34 +1004,66 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Variable_DefP
+Government primary deficit (negative if surplus)
+END_DESCRIPTION
+
+Variable_DefPgdp
+Government primary deficit on GDP ratio
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_Div
+Total dividends paid by firms and banks
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable_Eq
+Total firm equity hold by workers/households
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Variable_G
 Government expenditure (exogenous demand)
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Variable_GDP
-Gross domestic product
+Variable_GDPnom
+Gross domestic product in nominal (monetary) terms
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Variable_GDPnom
-Gross domestic product in nominal (monetary) terms
+Variable_GDPreal
+Real (in initial prices terms) gross domestic product
+_INIT_
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_Sav
 Residual nominal consumption in period (forced savings)
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable_SavAcc
 Accumulated nominal consumption from previous periods (forced savings)
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable_Tax
 Government tax income
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_TaxDiv
+Total taxes paid on dividends
 END_DESCRIPTION
 
 Variable_cEntry
@@ -942,7 +1082,8 @@ END_DESCRIPTION
 
 Variable_dAb
 Notional overall productivity (bounded) growth rate
-Used for wages adjustment only, 4 period moving average
+Used for wages adjustment only
+, 4 period moving average
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -991,13 +1132,34 @@ All 1 instances equal to 0.01.
 END_DESCRIPTION
 
 Variable_BadDeb
-Losses from bad debt of financial sector
-(can be negative because of proceedings from healthy exiting firms)_INIT_
-All 1 instances equal to 0.
+Total losses from bad debt in financial sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable_BadDeb1
+Total bad debt (defaults) in financial sector from capital-good sector
+(can be negative because of proceedings from healthy exiting firms)
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable_BadDeb2
+Total bad debt (defaults) in financial sector from consumption-good sector
+(can be negative because of proceedings from healthy exiting firms)
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable_Depo
 Total deposits on financial sector
+Net deposits from exiting and entering firms in period not considered
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_DepoG
+Government deposits (accumulated surplus) at central bank
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -1006,6 +1168,18 @@ Variable_Loans
 Total loans (not defaulted) from financial sector
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_PiB
+Total profits (before tax) of financial sector
+END_DESCRIPTION
+
+Variable_iB
+Interest on loans received by financial sector
+END_DESCRIPTION
+
+Variable_iDb
+Bank interest payments from deposits
 END_DESCRIPTION
 
 Object_Labor
@@ -1028,19 +1202,21 @@ END_DESCRIPTION
 
 Parameter_phi
 Unemployment benefit as share of average nominal wage
-(>0)
+(>=0)
 _INIT_
 All 1 instances equal to 0.4.
 END_DESCRIPTION
 
 Parameter_psi1
-Share of inflation passed to wages([0,1])
+Share of inflation passed to wages
+([0,1])
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_psi2
-Elasticity of wages to aggregate productivity growth(>=0)
+Elasticity of wages to aggregate productivity growth
+(>=0)
 _INIT_
 All 1 instances equal to 1.
 END_DESCRIPTION
@@ -1069,15 +1245,24 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Variable_TaxW
+Total taxes paid by workers (over wages and dividends)
+END_DESCRIPTION
+
 Variable_U
 Unemployment rate (including discouraged workers)
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Variable_W
+Total (nominal) wages
+END_DESCRIPTION
+
 Variable_dUb
 Unemployment (bounded) rate of change
-Used for wages adjustment only, 4 period moving average
+Used for wages adjustment only
+, 4 period moving average
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -1129,12 +1314,6 @@ Average initial net worth of capital-good firm
 (>=0)
 _INIT_
 All 1 instances equal to 1000.
-END_DESCRIPTION
-
-Parameter_PPI0
-Initial producer price index (self-filled)
-_INIT_
-All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_Phi3
@@ -1227,6 +1406,13 @@ _INIT_
 All 1 instances equal to 0.04.
 END_DESCRIPTION
 
+Parameter_pK0
+Initial price of capital (one machine)
+(auto-initialized)
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Parameter_x1inf
 Lower support for new machine productivity change
 (x1inf<x1sup)
@@ -1295,6 +1481,12 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Variable_Eq1
+Equity hold by workers/households from firms in capital-good sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Variable_JO1
 Total open job positions in capital-good sector
 END_DESCRIPTION
@@ -1353,8 +1545,28 @@ Variable_W1
 Total wages paid by capital-good sector
 END_DESCRIPTION
 
+Variable_cEntry1
+Cost (new equity) of firm entries in capital-good sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable_cExit1
+Credits (returned equity) from firm exits in capital-good sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Variable_entry1exit
 Net (number of) entrant firms in capital-good sector
+END_DESCRIPTION
+
+Variable_i1
+Interest paid by capital-good sector
+END_DESCRIPTION
+
+Variable_iD1
+Interest received from deposits by capital-good sector
 END_DESCRIPTION
 
 Variable_imi
@@ -1373,6 +1585,12 @@ END_DESCRIPTION
 
 Object_Firm1
 Capital-good firm object
+END_DESCRIPTION
+
+Parameter__Eq1
+Equity issued by firm in capital-good sector
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Parameter__ID1
@@ -1437,6 +1655,8 @@ END_DESCRIPTION
 
 Variable__Div1
 Dividends paid by capital-good firm
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable__HC
@@ -1473,6 +1693,10 @@ Variable__NW1
 Net worth of capital-good firm
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__NW1p
+Provision for production of firm in capital-good sector
 END_DESCRIPTION
 
 Variable__Pi1
@@ -1523,6 +1747,14 @@ Variable__f1
 Market share of capital-good firm
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__i1
+Interest paid by firm in capital-good sector
+END_DESCRIPTION
+
+Variable__iD1
+Interest received from deposits by firm in capital-good sector
 END_DESCRIPTION
 
 Variable__imi
@@ -1753,6 +1985,13 @@ _INIT_
 All 1 instances equal to 0.3.
 END_DESCRIPTION
 
+Parameter_n2
+Number of periods for evaluating market share in consumption-good sector 
+(1-5)
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
 Parameter_omega1
 Competitiveness weight of price in consumption-good sector
 (>=0)
@@ -1765,6 +2004,13 @@ Competitiveness weight of unfilled demand in consumption-good sector
 (>=0)
 _INIT_
 All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_pC0
+Initial price of goods (one unit)
+(auto-initialized)
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Parameter_u
@@ -1838,8 +2084,10 @@ Variable_EI
 Total expansion investment in consumption-good sector
 END_DESCRIPTION
 
-Variable_I
-Total investment (real terms) in consumption-good sector
+Variable_Eq2
+Equity hold by workers/households from firms in consumption-good sector
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable_Id
@@ -1848,6 +2096,10 @@ END_DESCRIPTION
 
 Variable_Inom
 Aggregated investment (nominal/currency terms) in consumption-good sector
+END_DESCRIPTION
+
+Variable_Ireal
+Aggregated real investment (in initial prices terms)
 END_DESCRIPTION
 
 Variable_JO2
@@ -1862,6 +2114,10 @@ END_DESCRIPTION
 
 Variable_Kd
 Total desired capital stock in consumption-good sector
+END_DESCRIPTION
+
+Variable_Knom
+Total capital (nominal/money terms) in consumption-good sector
 END_DESCRIPTION
 
 Variable_L2
@@ -1936,6 +2192,18 @@ Variable_c2e
 Effective average unit cost in consumption-good sector
 END_DESCRIPTION
 
+Variable_cEntry2
+Cost (new equity) of firm entries in consumption-good sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable_cExit2
+Credits (returned equity) from firm exits in consumption-good sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Variable_dCPI
 Consumer price index inflation (change) rate
 _INIT_
@@ -1954,6 +2222,14 @@ END_DESCRIPTION
 
 Variable_entry2exit
 Net (number of) entrant firms in consumption-good sector
+END_DESCRIPTION
+
+Variable_i2
+Interest paid by consumption-good sector
+END_DESCRIPTION
+
+Variable_iD2
+Interest received from deposits by consumption-good sector
 END_DESCRIPTION
 
 Variable_l2avg
@@ -1977,6 +2253,12 @@ Consumption-good firm object
 
 HOOK(0): current machine supplier (Broch)
 HOOK(1): to vintage in use (Vint)
+END_DESCRIPTION
+
+Parameter__Eq2
+Equity issued by firm in consumption-good sector
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Parameter__ID2
@@ -2051,6 +2333,8 @@ END_DESCRIPTION
 
 Variable__Div2
 Dividends paid by consumption-good firm
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable__E
@@ -2065,6 +2349,10 @@ Variable__EId
 Desired expansion investment of consumption-good firm
 END_DESCRIPTION
 
+Variable__Inom
+investment (nominal/currency terms)
+END_DESCRIPTION
+
 Variable__JO2
 Open job positions of consumption-good firm
 END_DESCRIPTION
@@ -2077,6 +2365,10 @@ END_DESCRIPTION
 
 Variable__Kd
 Desired capital stock of consumption-good firm
+END_DESCRIPTION
+
+Variable__Knom
+Current capital (nominal/currency terms) of firm in consumption-good sector
 END_DESCRIPTION
 
 Variable__L2
@@ -2099,6 +2391,10 @@ Variable__NW2
 Net worth of consumption-good firm
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__NW2p
+Provision for production of firm in consumption-good sector
 END_DESCRIPTION
 
 Variable__Pi2
@@ -2185,6 +2481,14 @@ Variable__f2
 Market share of consumption-good firm
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__i2
+Interest paid by firm in consumption-good sector
+END_DESCRIPTION
+
+Variable__iD2
+Interest received from deposits by firm in consumption-good sector
 END_DESCRIPTION
 
 Variable__l2
@@ -2387,7 +2691,7 @@ END_DESCRIPTION
 Parameter_test1idEnd
 Last firm ID for 'test1firm', or number of entrants from 'test1tIni' if 'test1idIni' <= 0
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 3
 END_DESCRIPTION
 
 Parameter_test2tIni
@@ -2407,13 +2711,18 @@ Parameter_test2idIni
 First firm ID for 'test2firm'
 Set to <= 0 to select entrants in 'test2tIni'
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Parameter_test2idEnd
 Last firm ID for 'test2firm', or number of entrants from 'test2tIni' if 'test2idIni' <= 0
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 3
+END_DESCRIPTION
+
+Variable_testSFC
+Test the balances of the balance-sheet and the transaction-flow matrices
+(set as variable to run continuously, or as function otherwise)
 END_DESCRIPTION
 
 Variable_testCountry
@@ -2471,14 +2780,6 @@ Variable_CS
 Total credit supplied
 END_DESCRIPTION
 
-Variable_Creal
-Real aggregated consumption
-END_DESCRIPTION
-
-Variable_DebGDP
-Government debt on GDP ratio
-END_DESCRIPTION
-
 Variable_DefGDP
 Government deficit on GDP ratio
 END_DESCRIPTION
@@ -2503,16 +2804,16 @@ Variable_AtauAvg
 Average labor productivity of machines supplied by capital-good sector
 END_DESCRIPTION
 
-Variable_BtauAvg
-Average labor productivity of machines produced by capital-good sector
-END_DESCRIPTION
-
 Variable_Bda
 Fragility of financial sector
 END_DESCRIPTION
 
 Variable_BadDebAcc
 Bank accumulated losses from bad debt
+END_DESCRIPTION
+
+Variable_BtauAvg
+Average labor productivity of machines produced by capital-good sector
 END_DESCRIPTION
 
 Variable_CD1
@@ -2537,6 +2838,18 @@ END_DESCRIPTION
 
 Variable_CS2
 Total credit supplied to consumption-good sector
+END_DESCRIPTION
+
+Variable_Deb1max
+Total maximum prudential credit supplied to firms in capital-good sector
+END_DESCRIPTION
+
+Variable_Deb2max
+Total maximum prudential credit supplied to firms in consumer-good sector
+END_DESCRIPTION
+
+Variable_EId
+Total desired expansion investment in consumption-good sector
 END_DESCRIPTION
 
 Variable_HCavg
@@ -2569,6 +2882,10 @@ END_DESCRIPTION
 
 Variable_RS2
 Machine (desired) scrapping rate in consumption-good sector
+END_DESCRIPTION
+
+Variable_SId
+Total desired substitution investment in consumption-good sector
 END_DESCRIPTION
 
 Variable_age1avg
@@ -2648,14 +2965,14 @@ EQ_FILE
 
 	K+S LSD MODEL (SFC version)
 	-------------
-	
-	VERSION: 0.1.1 - original JEDC2010 model plus stock-flow consistency (SFC)
 
-	This is the topmost code file for the K+S coded in LSD. 
+	VERSION: 0.1.2 - original JEDC2010 model plus stock-flow consistency (SFC)
+
+	This is the topmost code file for the K+S coded in LSD.
 	It contains only the scheduling equations 'runCountry' and 'timeStep',
 	and the main initialization equation 'init'.
 	All remaining equations are loaded from '.h' include files.
- 
+
  ******************************************************************************/
 
 // disable/enable full logging (FASTMODE=0/1/2)
@@ -2747,64 +3064,66 @@ RESULT( T )
 EQUATION( "timeStep" )
 /*
 Execute one time-step of one country in the K+S model
-Ensure the high-level scheduling of the model equation by forcing the 
+Ensure the high-level scheduling of the model equation by forcing the
 computation of key variables in the correct order
 In principle, the sequence defined here is embedded in the equations, so this
 equation is supposedly unnecessary (but may produce slightly different results)
 */
 
-// consumption-good firms define expected demand, planned production, 
+// consumption-good firms define expected demand, planned production,
+// labor demand, and desired investment for sector
+NEW_VS( v[4], CONSECL0, "D2e" );				// expected demand for goods
+NEW_VS( v[5], CONSECL0, "Q2" );					// planned goods production
+NEW_VS( v[6], CONSECL0, "L2d" );				// total desired labor
+NEW_VS( v[7], CONSECL0, "Id" );					// desired investment
+
+// capital-good firms do R&D, receive orders, define machine production,
 // and labor demand for sector
-v[1] = VS( CONSECL0, "D2e" );					// expected demand for goods
-v[2] = VS( CONSECL0, "Q2" );					// planned goods production
-v[3] = VS( CONSECL0, "L2d" );					// desired labor
+NEW_VS( v[8], CAPSECL0, "D1" );					// orders for new machines
+NEW_VS( v[9], CAPSECL0, "Q1" );					// planned machine production
+NEW_VS( v[10], CAPSECL0, "L1d" );				// total desired labor
 
-// capital-good firms do R&D, set prices, and search for new clients
-// and consumption-good firms define desired investment 
-v[4] = VS( CAPSECL0, "p1avg" );					// average machine prices
-v[5] = VS( CONSECL0, "Id" );					// desired investment
+// firms define open job positions and labor market define employed labor
+NEW_VS( v[12], CAPSECL0, "JO1" );				// open job positions in sector 1
+NEW_VS( v[13], CONSECL0, "JO2" );				// open job positions in sector 2
+NEW_VS( v[14], LABSUPL0, "L" );					// effective employed labor
 
-// capital-good firms receive orders, define machine production, 
-// and labor demand for sector
-v[6] = VS( CAPSECL0, "D1" );					// orders for new machines
-v[7] = VS( CAPSECL0, "Q1" );					// planned machine production
-v[8] = VS( CAPSECL0, "L1d" );					// desired labor
+// production is adjusted to labor effectively hired by firms
+// and firms set prices
+NEW_VS( v[15], CAPSECL0, "Q1e" );				// effective machine production
+NEW_VS( v[16], CONSECL0, "Q2e" );				// effective goods production
+NEW_VS( v[17], CAPSECL0, "p1avg" );				// average machine prices
+NEW_VS( v[18], CONSECL0, "p2avg" );				// average goods prices
 
-// labor market define effective employed labor, government decides expenditure 
-// investment and production is adjusted to labor available to firms
-v[9] = VS( LABSUPL0, "L" );					// employed labor
-v[10] = V( "G" );								// public total expenditures
-v[11] = VS( CAPSECL0, "Q1e" );					// effective machine production
-v[12] = VS( CONSECL0, "Q2e" );					// effective goods production
-
-// consumption-good firms set prices, existing demand is matched to 
-// available supply of goods, producing inventories or forced savings
-v[13] = VS( CONSECL0, "p2avg" );				// average goods prices
-v[14] = VS( CONSECL0, "D2" );					// fulfilled demand for goods
-v[15] = VS( CONSECL0, "N" );					// accumulated inventories
-v[16] = V( "Sav" );								// forced consumer savings
+// government decides expenditure and workers set all income to buying goods,
+// demand is matched to supply of goods, producing inventories or forced savings
+NEW_VS( v[19], THIS, "G" );						// public total expenditures
+NEW_VS( v[20], CONSECL0, "D2d" );				// desired goods demand
+NEW_VS( v[21], CONSECL0, "D2" );				// fulfilled demand for goods
+NEW_VS( v[22], CONSECL0, "N" );					// accumulated inventories
+NEW_VS( v[23], THIS, "Sav" );					// forced consumer savings
 
 // firms determine profits, taxes, cash flows, and update net wealths
-v[17] = VS( CAPSECL0, "Pi1" );					// profits of sector 1
-v[18] = VS( CONSECL0, "Pi2" );					// profits of sector 2
-v[19] = VS( CAPSECL0, "Tax1" );					// tax paid by sector 1
-v[20] = VS( CONSECL0, "Tax2" );					// tax paid by sector 2
-v[21] = VS( CAPSECL0, "NW1" );					// net wealth of sector 1
-v[22] = VS( CONSECL0, "NW2" );					// net wealth of sector 2
+NEW_VS( v[24], CAPSECL0, "Pi1" );				// profits of sector 1
+NEW_VS( v[25], CONSECL0, "Pi2" );				// profits of sector 2
+NEW_VS( v[27], CAPSECL0, "Tax1" );				// tax paid by sector 1
+NEW_VS( v[28], CONSECL0, "Tax2" );				// tax paid by sector 2
+NEW_VS( v[30], CAPSECL0, "NW1" );				// net wealth of sector 1
+NEW_VS( v[31], CONSECL0, "NW2" );				// net wealth of sector 2
 
 // government collects taxes, compute public deficit or surplus form,
 // and adjust public debt accordingly
-v[23] = V( "Tax" );								// total tax income
-v[24] = V( "Def" );								// public total deficit
-v[25] = V( "Deb" );								// public accumulated debt
+NEW_VS( v[32], THIS, "Tax" );					// total tax income
+NEW_VS( v[33], THIS, "Def" );					// public total deficit
+NEW_VS( v[34], THIS, "Deb" );					// public accumulated debt
 
 // macro variables are computed by aggregation of micro-level data
-v[26] = V( "GDP" );								// real gross domestic product
-v[27] = V( "GDPnom" );							// nominal gross domestic product
+NEW_VS( v[35], THIS, "GDPreal" );				// real gross domestic product
+NEW_VS( v[36], THIS, "GDPnom" );				// nominal gross domestic product
 
-// exit and entry happens in both sectors and banks update credit scores 
-// and pecking order of client firms, and account bad debt losses
-v[28] = V( "entryExit" );						// net entry of firms
+// exit and entry happens in both sectors and banks update credit scores
+// and pecking order of client firms
+NEW_VS( v[37], THIS, "entryExit" );				// net entry of firms
 
 RESULT( T )
 
@@ -2817,9 +3136,9 @@ MODELEND
 void close_sim( void )
 {
 	object *cur;
-	
+
 	CYCLES( root, cur, "Country" )				// scan all country objects
-		DELETE_EXTS( cur, country );			// reclaim allocated memory
+		DELETE_EXTS( cur, countryE );			// reclaim allocated memory
 }
 
 END_EQ_FILE

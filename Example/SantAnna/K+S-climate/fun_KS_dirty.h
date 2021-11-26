@@ -3,9 +3,9 @@
 	DIRTY OBJECT EQUATIONS
 	----------------------
 
-	Equations that are specific to the dirty energy plant objects in the 
+	Equations that are specific to the dirty energy plant objects in the
 	K+S LSD model are coded below.
- 
+
  ******************************************************************************/
 
 /*============================== KEY EQUATIONS ===============================*/
@@ -22,24 +22,32 @@ if ( T - V( "__tDE" ) > VS( PARENT, "etaE" ) )	// over technical life
 }
 else
 	v[0] = 0;
-	
+
 RESULT( v[0] )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
 
-EQUATION( "__cDE" )
+EQUATION( "__Df" )
 /*
-Production unit cost of dirty power plant
+Demand (physical units) of fuel by dirty power plant
 */
-RESULT( VS( PARENT, "pF" ) / V( "__Ade" ) )
+VS( PARENT, "Ce" );								// ensure generation allocated
+RESULT( V( "__Qde" ) / V( "__Ade" ) )
 
 
 EQUATION( "__EmDE" )
 /*
 CO2 emissions of dirty power plant
 */
-RESULT( V( "__Qde" ) * V( "__emDE" ) / V( "__Ade" ) )
+RESULT( V( "__Df" ) * V( "__emDE" ) )
+
+
+EQUATION( "__cDE" )
+/*
+Production unit cost of dirty power plant
+*/
+RESULT( VS( PARENT, "pF" ) / V( "__Ade" ) )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/
