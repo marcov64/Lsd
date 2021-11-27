@@ -405,7 +405,7 @@ double m1 = VS( cur1, "m1" );					// output factor in sector 1
 double m2 = VS( cur2, "m2" );					// output factor in sector 2
 double mu1 = VS( cur1, "mu1" );					// mark-up in sector 1
 double mu20 = VS( cur2, "mu20" );				// initial mark-up in sector 2
-double pF = VS( cur5, "pF" );					// price of fossil fuel
+double pF0 = VS( cur5, "pF0" );					// initial price of fossil fuel
 double phi = VS( cur4, "phi" );					// unemployment benefit rate
 double rT = VS( cur3, "rT" );					// prime rate target
 double tauB = VS( cur3, "tauB" );				// minimum capital adequacy rate
@@ -420,9 +420,9 @@ int Ls0 = VS( cur4, "Ls0" );					// initial labor supply
 
 double Btau0 = ( 1 + mu1 ) * INIPROD /			// initial productivity in sec. 1
 			   ( m1 * m2 * VS( cur2, "b" ) );
-double ICge0 = VS( cur5, "bE" ) * pF / Ade0;	// initial green plant unit cost
+double ICge0 = VS( cur5, "bE" ) * pF0 / Ade0;	// initial green plant unit cost
 double pE0 = INIWAGE * VS( cur5, "muE0" ) + 
-			 ( fGE0 == 1 ? 0 : pF / Ade0 );		// init. energy price
+			 ( fGE0 == 1 ? 0 : pF0 / Ade0 );	// init. energy price
 double c10 = ( INIWAGE / Btau0 + ( pE0 + trCO2 * INIEFRI ) / INIEEFF ) / m1;
 												// initial unit cost in sector 1
 double c20 = INIWAGE / INIPROD + ( pE0 + trCO2 * INIEFRI ) / INIEEFF;
@@ -462,7 +462,6 @@ WRITEL( "G", G0, -1 );
 WRITES( cur1, "pK0", p10 );
 WRITES( cur2, "pC0", p20 );
 WRITES( cur5, "ICge0", ICge0 );
-WRITES( cur5, "pE", pE0 );
 WRITELS( cur1, "A1", Btau0, -1 );
 WRITELS( cur1, "F1", F10, -1 );
 WRITELS( cur1, "PPI", p10, -1 );
@@ -479,6 +478,11 @@ WRITELS( cur3, "rRes", rRes, -1 );
 WRITELS( cur4, "Ls", Ls0, -1 );
 WRITELS( cur4, "w", INIWAGE, -1 );
 WRITELS( cur4, "wReal", INIWAGE, -1 );
+WRITELS( cur5, "pE", pE0, -1 );
+WRITELS( cur5, "pF", pF0, -1 );
+
+// variables not to recalculate in t=1
+WRITES( cur5, "pE", pE0 );
 
 // initialize climate
 VS( cur6, "initClimate" );

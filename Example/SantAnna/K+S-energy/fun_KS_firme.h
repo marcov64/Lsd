@@ -625,7 +625,7 @@ EQUATION( "_Kde" )
 Total generation capacity of dirty power plants of energy producer
 */
 V( "_EIe" );									// ensure capital is deployed
-RESULT( SUM( "__Kde" ) )
+RESULT( SUM_CND( "__Kde", "__RSde", "==", 0 ) )	// sum non-deprecated capacity
 
 
 EQUATION( "_Kge" )
@@ -633,7 +633,7 @@ EQUATION( "_Kge" )
 Total generation capacity of green power plants of energy producer
 */
 V( "_EIe" );									// ensure capital is deployed
-RESULT( SUM( "__Kge" ) )
+RESULT( SUM_CND( "__Kge", "__RSge", "==", 0 ) )	// sum non-deprecated capacity
 
 
 EQUATION( "_Le" )

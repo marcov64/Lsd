@@ -224,9 +224,18 @@ Price of energy
 RESULT( VS( PARENT, "flagEnClim" ) > 0 ? WHTAVEL( "_pE", "_fE", 1 ) : 0 )
 
 
+EQUATION( "pF" )
+/*
+Price of fossil fuel
+*/
+v[1] = VL( "pE", 1 );							// previous price of energy
+RESULT( v[1] > 0 ? CURRENT * ( 1 + V( "upsilonF" ) * ( V( "pE" ) / v[1] - 1 ) ) :
+				   CURRENT )
+
+
 EQUATION( "CeEq" )
 /*
-Cost of energy price equalization
+Cost (revenue) of energy price equalization supported by government
 */
 RESULT( V( "Se" ) - V( "De" ) * V( "pE" ) )
 

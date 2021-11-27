@@ -337,9 +337,10 @@ Label Root
 			Param: muE0
 			Param: nE
 			Param: nuE
-			Param: pF
+			Param: pF0
 			Param: trCO2e
 			Param: upsilonE
+			Param: upsilonF
 			Param: xEinfEm
 			Param: xEinfIC
 			Param: xEinfTE
@@ -393,6 +394,7 @@ Label Root
 			Var: iDe
 			Var: iE
 			Var: pE
+			Var: pF
 
 		}
 
@@ -1211,9 +1213,10 @@ Param: mEmin 0 n + n n	0.2
 Param: muE0 0 n + n n	0.001
 Param: nE 0 n + n n	4
 Param: nuE 0 n + n n	0.04
-Param: pF 0 n + n n	0.0005
+Param: pF0 0 n + n n	0.0005
 Param: trCO2e 0 n + n n	0
 Param: upsilonE 0 n + n n	0.04
+Param: upsilonF 0 n + n n	0.9
 Param: xEinfEm 0 n + n n	0
 Param: xEinfIC 0 n + n n	-0.05
 Param: xEinfTE 0 n + n n	-0.03
@@ -1266,7 +1269,8 @@ Var: entryEexit 0 s + n n
 Var: exitE 0 s + n n
 Var: iDe 0 s + n n
 Var: iE 0 s + n n
-Var: pE 0 s + n n
+Var: pE 1 s + n n	0
+Var: pF 1 s + n n	0
 
 Object: FirmE C	1
 Param: _EqE 0 n + n n	0
@@ -3315,11 +3319,11 @@ _INIT_
 All 1 instances equal to 0.04
 END_DESCRIPTION
 
-Parameter_pF
-Price of fossil fuel
+Parameter_pF0
+Initial price of fossil fuels
 (>0)
 _INIT_
-All 1 instances equal to 0.0005.
+All 1 instances equal to 0.0005
 END_DESCRIPTION
 
 Parameter_trCO2e
@@ -3330,10 +3334,16 @@ All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_upsilonE
-Sensitivity of mark-up adjustment in energy sector
+Sensitivity of energy price mark-up adjustment in energy sector
 (>=0)
 _INIT_
 All 1 instances equal to 0.04
+END_DESCRIPTION
+
+Parameter_upsilonF
+Sensitivity of fossil fuel price to energy price adjustment (>=0)
+_INIT_
+All 1 instances equal to 0.9
 END_DESCRIPTION
 
 Parameter_xEinfEm
@@ -3419,7 +3429,7 @@ Total generation costs of energy sector
 END_DESCRIPTION
 
 Variable_CeEq
-Cost of energy price equalization
+Cost (revenue) of energy price equalization supported by government
 END_DESCRIPTION
 
 Variable_CIe
@@ -3594,6 +3604,15 @@ END_DESCRIPTION
 
 Variable_pE
 Price of energy
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable_pF
+Price of fossil fuel
+(>0)
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Object_FirmE
