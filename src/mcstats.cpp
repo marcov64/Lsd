@@ -98,7 +98,7 @@ char *out_file = NULL;		// output .csv file, if any
 
 // command line strings
 const char lsdCmdMsg[ ] = "This is the LSD Monte Carlo statistics generator.";
-const char lsdCmdDsc[ ] = "It reads a set of CSV (comma separated values) result files (.csv)\nfrom a Monte Carlo (MC) experiment and generates four new CSV files\ncontaining the means, standard errors, maximums and minimum values\nfor each variable at each time step considering all the MC samples (runs).\n";
+const char lsdCmdDsc[ ] = "It reads a set of CSV (comma separated values) result files (.csv)\nfrom a Monte Carlo (MC) experiment and generates four new CSV files\ncontaining the means, standard errors, maximums and minimum values\nfor each variable and case (time step) considering all MC samples (runs).\n";
 const char lsdCmdHlp[ ] = "Command line options:\n'-o OUTPUT' base name for the comma separated output text files\n'-f FILENAME1.csv FILENAME2.csv ...' the MC experiment result files to use\n";
 
 

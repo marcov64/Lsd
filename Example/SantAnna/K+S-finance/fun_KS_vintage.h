@@ -3,9 +3,9 @@
 	VINTAGE OBJECT EQUATIONS
 	------------------------
 
-	Equations that are specific to the Vint objects in the K+S LSD model 
+	Equations that are specific to the Vint objects in the K+S LSD model
 	are coded below.
- 
+
  ******************************************************************************/
 
 /*============================== KEY EQUATIONS ===============================*/
@@ -36,9 +36,9 @@ v[2] = v[1] / V( "__Avint" ) - v[1] / VS( cur, "_Atau" );
 
 // if new machine cost is not better in absolute terms or
 // payback period of replacing current vintage is over b
-if ( v[2] <= 0 || 
+if ( v[2] <= 0 ||
 	 VS( cur, "_p1" ) / VS( GRANDPARENT, "m2" ) / v[2] > VS( GRANDPARENT, "b" ) )
-	END_EQUATION( 0 );							// nothing to scrap	
+	END_EQUATION( 0 );							// nothing to scrap
 
 RESULT( V( "__nVint" ) )						// scrap if can be replaced
 

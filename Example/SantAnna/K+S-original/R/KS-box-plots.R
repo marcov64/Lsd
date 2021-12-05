@@ -54,8 +54,8 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
         if( i == 1 ) {
           temp[ i - warmUpStat, j ] <- 0
         } else {
-          temp[ i - warmUpStat, j ] <- ( log0( mcData[[ k ]][ i, "GDP", j ] ) -
-                                          log0( mcData[[ k ]][ i - 1, "GDP", j ] ) )
+          temp[ i - warmUpStat, j ] <- ( log0( mcData[[ k ]][ i, "GDPreal", j ] ) -
+                                         log0( mcData[[ k ]][ i - 1, "GDPreal", j ] ) )
         }
 
     # Remove +/-infinite values and replace by +/-1
@@ -74,8 +74,8 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
         if( i == 1 ){
           temp[ i - warmUpStat, j ] <- 0
         } else {
-          if( log0( mcData[[ k ]][ i, "GDP", j ] ) -
-              log0( mcData[[ k ]][ i - 1, "GDP", j ] ) < -0.03 ){
+          if( log0( mcData[[ k ]][ i, "GDPreal", j ] ) -
+              log0( mcData[[ k ]][ i - 1, "GDPreal", j ] ) < -0.03 ){
             temp[ i - warmUpStat, j ] <- 1
           } else {
             temp[ i - warmUpStat, j ] <- 0
@@ -145,7 +145,7 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
       for( i in TmaskStat )
         if( mcData[[ k ]][ i, "U", j ] == 0 )
           temp[ i - warmUpStat, j ] <- 1
-    else
+        else
           temp[ i - warmUpStat, j ] <- 0
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
                      tit = "Full employment frequency",
@@ -199,6 +199,9 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
 
 
   # ---- Build experiments statistics table and performance comparison chart ----
+
+  perf.comp <- statsTb[ , 1, 1 ]
+  perf.names <- c( "Baseline[1]" )
 
   # Print whisker plots for each statistics
 

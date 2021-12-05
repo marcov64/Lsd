@@ -25,10 +25,11 @@ bootCI    <- NULL                   # bootstrap confidence interval method (SLOW
 expVal <- c( "Baseline", "LP shocks", "LP+EF shocks" )   # case parameter values
 
 # Aggregated variables to use
-logVars <- c( "GDP", "GDPnom", "D2", "G", "Gbail", "Tax", "Deb", "Def", "DefP",
-              "dN", "I", "EI", "A", "A1", "A2", "S1", "S2", "Deb1", "Deb2",
-              "NWb", "NW1", "NW2", "W1", "W2", "wReal", "BadDeb", "TC", "Loans",
-              "CD", "CS", "Aee", "Aef", "Em", "Em1", "Em2", "EmE", "En" )
+logVars <- c( "Creal", "GDPreal", "GDPnom", "G", "Gbail", "Tax", "Deb", "Def",
+              "DefP", "dN", "Ireal", "EI", "A", "A1", "A2", "S1", "S2", "Deb1",
+              "Deb2", "NWb", "NW1", "NW2", "W1", "W2", "wReal", "BadDeb",
+              "TC", "Loans", "CD", "CS", "Aee", "Aef", "Em", "Em1", "Em2",
+              "EmE", "En" )
 aggrVars <- append( logVars, c( "dGDP", "dCPI", "dA", "dw", "CPI", "Q2u",
                                 "F1", "F2", "entry1", "entry2", "entry1exit",
                                 "entry2exit", "exit1", "exit2", "exit1fail",
@@ -295,7 +296,7 @@ for( k in 1 : nExp ) { # Experiment k
   # cross-section times selection
   csT <- c( round( ( warmUpPlot + nTplot + 1 ) / 2 ), nTplot )
 
-  plot_histo( csT, mcData[[ k ]][ , "GDP", ], log = 1, bins = nBins,
+  plot_histo( csT, mcData[[ k ]][ , "GDPreal", ], log = 3, bins = nBins,
               tit = paste( "GDP distribution (",
                            legends[ k ], ")" ),
               subtit = paste( "( mean at dotted line / cross sections at (",
@@ -357,8 +358,8 @@ for( k in 1 : nExp ) { # Experiment k
   bpfMsg <- paste0( "Baxter-King bandpass-filtered series, low =", lowP,
                     "Q / high = ", highP, "Q / order = ", bpfK )
 
-  plot_bpf( list( log0( Pdata[[ k ]]$GDP ), log0( Pdata[[ k ]]$D2 ),
-                  log0( Pdata[[ k ]]$I ), log0( Pdata[[ k ]]$A ) ),
+  plot_bpf( list( log0( Pdata[[ k ]]$GDPreal ), log0( Pdata[[ k ]]$Creal ),
+                  log0( Pdata[[ k ]]$Ireal ), log0( Pdata[[ k ]]$A ) ),
             pl = lowP, pu = highP, nfix = bpfK, mask = TmaskPlot,
             col = colors, lty = lTypes,
             leg = c("GDP", "Consumption", "Investment", "Productivity" ),
@@ -376,7 +377,7 @@ for( k in 1 : nExp ) { # Experiment k
             subtit = paste( "(", bpfMsg, "/ MC runs =", nSize,
                             "/ MC ", mcStat, ")" ) )
 
-  plot_bpf( list( log0( Pdata[[ k ]]$GDP ), Pdata[[ k ]]$entry1exit,
+  plot_bpf( list( log0( Pdata[[ k ]]$GDPreal ), Pdata[[ k ]]$entry1exit,
                   Pdata[[ k ]]$entry2exit ),
             pl = lowP, pu = highP, nfix = bpfK, mask = TmaskPlot,
             resc = c( 0.5, NA ), col = colors, lty = lTypes,
@@ -391,9 +392,10 @@ for( k in 1 : nExp ) { # Experiment k
   # ---- Correlation table ----
   #
 
-  corr_table( c( "GDP", "D2", "I", "CPI", "A", "U", "wReal", "mu2avg", "r",
-                 "DebGDP", "TC", "Loans", "BadDeb", "entry1exit", "entry2exit",
-                 "En", "Em", "Tm" ), mcData[[1]], plot = TRUE,
+  corr_table( c( "GDPreal", "Creal", "Ireal", "CPI", "A", "U", "wReal",
+                 "mu2avg", "r", "DebGDP", "TC", "Loans", "BadDeb", "entry1exit",
+                 "entry2exit", "En", "Em", "Tm" ),
+              mcData[[1]], plot = TRUE,
               logVars = c( 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 2, 2, 2, 0, 0, 1, 0, 0 ),
               mask = TmaskStat, pl = lowP, pu = highP, nfix = bpfK,
               tit = paste( "Pearson correlation coefficients (", legends[ k ], ")" ),
@@ -426,8 +428,9 @@ for( k in 1 : nExp ) { # Experiment k
   dimnames( mcData[[ k ]] )[[ 2 ]][ seq( newVar, newVar - 1 + 5 ) ] <-
     c( "Deb12", "NWS12", "exit12fail", "entry12", "netEntr12" )
 
-  corr.struct.1 <- corr_struct( "GDP", c( "D2", "I", "EI", "dN", "U", "A",
-                                          "mu2avg", "Deb12", "NWS12", "exit12fail" ),
+  corr.struct.1 <- corr_struct( "GDPreal", c( "Creal", "Ireal", "EI", "dN", "U",
+                                              "A", "mu2avg", "Deb12", "NWS12",
+                                              "exit12fail" ),
                                 mcData[[ k ]], labRef = "GDP (output)",
                                 labVars = c( "Consumption", "Investment",
                                              "Net investment", "Change in inventories",
@@ -443,14 +446,15 @@ for( k in 1 : nExp ) { # Experiment k
 
   title <- paste( "Correlation structure for GDP (1) (", legends[ k ], ")" )
   testMsg <- paste0( "( test H0: lag coefficient is not significant at ",
-                                            ( 1 - CI ) * 100, "% level", " )" )
+                     ( 1 - CI ) * 100, "% level", " )" )
   subTitle <- paste( paste0( "( ", bpfMsg, " / MC runs = ", nSize, " / period = ",
                              warmUpStat + 1, " - ", nTstat, " )" ),
                      testMsg, sep = "\n" )
   title( main = title, sub = subTitle )
 
-  corr.struct.2 <- corr_struct( "GDP", c( "D2", "I", "A", "entry12", "netEntr12",
-                                          "wReal", "U", "V", "En", "Em" ),
+  corr.struct.2 <- corr_struct( "GDPreal", c( "Creal", "Ireal", "A", "entry12",
+                                              "netEntr12", "wReal", "U", "V",
+                                              "En", "Em" ),
                                 mcData[[ k ]], labRef = "GDP (output)",
                                 labVars = c( "Consumption", "Investment",
                                              "Productivity", "Entry", "Net entry",
@@ -470,7 +474,7 @@ for( k in 1 : nExp ) { # Experiment k
   # ---- MC growth statistics and unit root tests ----
   #
 
-  key.stats <- growth_stats( c( "GDP", "D2", "I", "A", "wReal", "En", "Em" ),
+  key.stats <- growth_stats( c( "GDPreal", "Creal", "Ireal", "A", "wReal", "En", "Em" ),
                              mcData[[ k ]], mask = TmaskStat,
                              labVars = c( "GDP (output)", "Consumption",
                                           "Investment", "Product.", "Real wage",

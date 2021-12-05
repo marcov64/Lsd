@@ -14,9 +14,10 @@ time_plots <- function( mcData, Pdata, mdata, Mdata, Sdata, cdata, Cdata,
 
   # ------ GDP, consumption and investment cases comparison charts ------
 
-  plot_lists( c( "GDP", "I", "D2" ), Pdata, mdata, Mdata, cdata, Cdata,
+  plot_lists( c( "GDPreal", "Ireal", "Creal" ), Pdata, mdata, Mdata, cdata, Cdata,
               leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI, log0 = TRUE,
-              col = colors, lty = lTypes, xlab = "Time", ylab = "Logs",
+              col = colors, lty = lTypes,
+              xlab = "Time", ylab = "Log real values",
               tit = "GDP, investment and consumption",
               subtit = paste( "MC runs =", nSize, "/ MC", mcStat ),
               leg2 = c( "GDP", "Investment", "Consumption" ) )
@@ -26,13 +27,13 @@ time_plots <- function( mcData, Pdata, mdata, Mdata, Sdata, cdata, Cdata,
 
   # add the GDP @ 100% utilization series to dataset
   for( k in 1 : nExp ) {
-    Pdata[[ k ]][ "GDP100" ] <- Pdata[[ k ]]$GDP / Pdata[[ k ]]$Q2u
-    mdata[[ k ]][ "GDP100" ] <- mdata[[ k ]]$GDP / Pdata[[ k ]]$Q2u
-    Mdata[[ k ]][ "GDP100" ] <- Mdata[[ k ]]$GDP / Pdata[[ k ]]$Q2u
-    Sdata[[ k ]][ "GDP100" ] <- sqrt( Sdata[[ k ]]$GDP ^ 2 + Sdata[[ k ]]$Q2u ^ 2 )
+    Pdata[[ k ]][ "GDP100" ] <- Pdata[[ k ]]$GDPreal / Pdata[[ k ]]$Q2u
+    mdata[[ k ]][ "GDP100" ] <- mdata[[ k ]]$GDPreal / Pdata[[ k ]]$Q2u
+    Mdata[[ k ]][ "GDP100" ] <- Mdata[[ k ]]$GDPreal / Pdata[[ k ]]$Q2u
+    Sdata[[ k ]][ "GDP100" ] <- sqrt( Sdata[[ k ]]$GDPreal ^ 2 + Sdata[[ k ]]$Q2u ^ 2 )
   }
 
-  plot_lists( c( "GDP", "GDP100" ), Pdata, mdata, Mdata, sdMC = Sdata,
+  plot_lists( c( "GDPreal", "GDP100" ), Pdata, mdata, Mdata, sdMC = Sdata,
               statMC = mcStat, leg = legends, mask = TmaskPlot, nMC = nSize,
               CI = CI, log0 = TRUE, col = colors, lty = lTypes,
               xlab = "Time", ylab = "Log real GDP",

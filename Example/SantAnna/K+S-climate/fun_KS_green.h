@@ -3,9 +3,9 @@
 	GREEN OBJECT EQUATIONS
 	----------------------
 
-	Equations that are specific to the green energy plant objects in the 
+	Equations that are specific to the green energy plant objects in the
 	K+S LSD model are coded below.
- 
+
  ******************************************************************************/
 
 /*============================== KEY EQUATIONS ===============================*/
@@ -22,7 +22,7 @@ if ( T - V( "__tGE" ) > VS( PARENT, "etaE" ) )	// over technical life
 }
 else
 	v[0] = 0;
-	
+
 RESULT( v[0] )
 
 

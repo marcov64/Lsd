@@ -1,4 +1,4 @@
-Finance-augmented K+S Model (version 0.2.1)
+Finance-augmented K+S Model (version 0.2.2)
 ===========================================
 
 This version copyright by Marcelo C. Pereira.
@@ -21,6 +21,14 @@ v0.2.1 (01/09/2021) - fix firm finance statistics
                       add intermediate bank capital restriction rule (flagCreditRule=1)
                       add debt repayment control (deltaB)
                       update configurations closer to papers' settings
+v0.2.2 (01/01/2022) - fix equation computation order in some cases
+                      fix temporal stock-flow inconsistencies
+                      fix good allocation inconsistencies
+                      improve firm maximum debt handling and statistics
+                      improve government bond market operation
+                      improve real GDP calculation
+                      add full dynamic multi-level SFC testing
+                      improve tests
 
 
 Relevant references
@@ -156,6 +164,7 @@ Country-level parameters (object Country)
 Crec = unfilled past consumption recover limit as fraction of current consumption (>0)
 gG = growth rate of fixed public expenditure (>=0)
 mLim = absolute cap on moving-average growth calculation (>=0, 0=no limit)
+mPer = number of periods on moving-average growth calculation (>=1)
 tr = tax rate (>=0)
 
 Financial market parameters (object Financial)

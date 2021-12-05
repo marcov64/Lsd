@@ -89,8 +89,7 @@ int lsdmain( int argn, const char **argv )
 	bool found, recolor = false;
 	int i, j, num, choice, shigh, recolor_all = 0, v_counter = 0;
 	const char *s;
-	char str[ 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], tmp[ MAX_BUFF_SIZE ], tmp1[ MAX_BUFF_SIZE ];
-	struct stat stExe, stMod;
+	char str[ 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], tmp[ MAX_BUFF_SIZE ];
 	FILE *f;
 
 	// initialize tcl/tk and set global bidirectional variables
@@ -1406,6 +1405,14 @@ int lsdmain( int argn, const char **argv )
 	// Run the model in the gdb debugger
 	if ( choice == 13 || choice == 58 )
 	{
+		s = get_str( "modelName" );
+		if ( s == NULL || ! strcmp( s, "" ) )
+		{
+			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+			choice = 0;
+			goto loop;
+		}
+
 		cmd( "if { ! [ catch { set f [ open $modelDir/$MODEL_OPTIONS r ] } ] } { \
 				set a [ string trim [ read $f ] ]; \
 				close $f; \
@@ -1426,70 +1433,13 @@ int lsdmain( int argn, const char **argv )
 				} \
 			}" );
 
-		if ( choice == 0 || ! compile_run( 2 ) )		// recompile if changed
-		{
-			choice = 0;
+		if ( choice == 0 )
 			goto loop;
-		}
-
-		s = get_str( "modelName" );
-		if ( s == NULL || ! strcmp( s, "" ) )
-		{
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
-			choice = 0;
-			goto loop;
-		}
-
-		cmd( "cd \"$modelDir\"" );
-
-		if ( choice == 58 )
-		{
-			cmd( "scan $vmenuInsert %%d.%%d line col" );
-			cmd( "if [ string equal -nocase $DbgExe lldb ] { set breakExt lldb; set breakTxt \"breakpoint set -f $fileDir/$fileName -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $fileDir/$fileName:$line\nrun\n\" }" );
-			cmd( "catch { set f [ open break.$breakExt w ]; puts $f $breakTxt; close $f }" );
-
-			cmd( "if [ string equal -nocase $DbgExe lldb ] { set cmdbreak \"-s break.lldb\" } { set cmdbreak \"--command=break.gdb\" }" );
-		}
-		else
-			cmd( "if [ string equal -nocase $DbgExe gdb ] { set cmdbreak \"--args\" } { set cmdbreak \"\" }" );
 
 		make_makefile( );
 
-		// check if executable file is older than model file
-		s = get_fun_name( str, MAX_PATH_LENGTH );
-		if ( s == NULL || ! strcmp( s, "" ) )
-			goto end_gdb;
-
-		strcpyn( str, s, MAX_PATH_LENGTH );
-
-		s = get_str( "modelDir" );
-		if ( s == NULL || ! strcmp( s, "" ) )
-			goto end_gdb;
-
-		snprintf( tmp, MAX_BUFF_SIZE, "%s/%s", s, str );
-
-		if ( platform == _MAC_ )
-			snprintf( tmp1, MAX_BUFF_SIZE, "%s/%s.app/Contents/MacOS/%s", s, str1, str1 );
-		else
-			snprintf( tmp1, MAX_BUFF_SIZE, "%s/%s", s, str1 );
-
-		// get OS info for files
-		if ( stat( tmp1, & stExe ) == 0 && stat( tmp, & stMod ) == 0 )
-		{
-			if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
-			{
-				cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing executable file is older than the last version of the model.\n\nPress 'OK' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\" ]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
-				if ( choice == 2 )
-					goto end_gdb;
-			}
-		}
-		else
-		{
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Executable not found\" -detail \"Compile the model before running it in the [ string toupper $DbgExe ] debugger.\"" );
-			goto end_gdb;
-		}
-
-		f = fopen( eval_str( "[ file nativename \"$modelDir/makefile\" ]" ), "r" );
+		cmd( "cd \"$modelDir\"" );
+		f = fopen( "makefile", "r" );
 		if ( f == NULL )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
@@ -1509,6 +1459,38 @@ int lsdmain( int argn, const char **argv )
 
 		strcpyn( str1, str + 7, 2 * MAX_PATH_LENGTH );
 
+		if ( ! compile_run( 2 ) )				// recompile if changed
+			goto end_gdb;
+
+		if ( choice == 58 )
+		{
+			cmd( "scan $vmenuInsert %%d.%%d line col" );
+			cmd( "if [ string equal -nocase $DbgExe lldb ] { \
+					set breakExt lldb; \
+					set breakTxt \"breakpoint set -f $fileDir/$fileName -l$line\nrun\n\" \
+				} else { \
+					set breakExt gdb; \
+					set breakTxt \"break $fileDir/$fileName:$line\nrun\n\" \
+				}" );
+			cmd( "catch { \
+					set f [ open break.$breakExt w ]; \
+					puts $f $breakTxt; \
+					close $f \
+				}" );
+
+			cmd( "if [ string equal -nocase $DbgExe lldb ] { \
+					set cmdbreak \"-s break.lldb\" \
+				} else { \
+					set cmdbreak \"-q -x break.gdb\" \
+				}" );
+		}
+		else
+			cmd( "if [ string equal -nocase $DbgExe lldb ] { \
+					set cmdbreak \"-o run\" \
+				} else { \
+					set cmdbreak \"-q -ex run\" \
+				}" );
+
 		switch( platform )
 		{
 			case _WIN_:
@@ -1518,7 +1500,6 @@ int lsdmain( int argn, const char **argv )
 				break;
 
 			case _MAC_:
-				cmd( "if [ string equal $cmdbreak \"--args\" ] { set cmdbreak \"\" }" );
 				snprintf( tmp, MAX_BUFF_SIZE, "cd $fileDir; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s", str1, str1 );
 				break;
 
@@ -2501,7 +2482,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "pack .a.n.l .a.n.e" );
 
 		cmd( "ttk::frame .a.l" );
-		cmd( "ttk::label .a.l.l -text \"Time step appearing as latest computation\"" );
+		cmd( "ttk::label .a.l.l -text \"Case appearing as latest computation\"" );
 		cmd( "ttk::entry .a.l.e -width 5 -textvariable v_lag -justify center" );
 		cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 		cmd( "pack .a.l.l .a.l.e" );
@@ -5450,7 +5431,7 @@ const char *cRegex[ ] = {
 	"^(\\s)*#\[^/]*",
 	"\\\"\[^\\\"]*\\\"",
 	"v\\[\[0-9]{1,3}]|curl?\[1-9]?|root|up|next|hook",
-	"MODEL(BEGIN|END)|(END_)?EQUATION(_DUMMY)?|FUNCTION|RESULT|ABORT|DEBUG_(START|STOP)(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM(_CND)?L?S?|COUNT(_ALL|_CNDL?|_ALL_CNDL?|_HOOK)?S?|STAT(_CND)?L?S?|STAT_(NETS?|NODES?)|(WHT)?AVE(_CND)?L?S?|MED(_CND)?L?S?|PERC(_CND)?L?S?|SD(_CND)?L?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAX(_CND)?L?S?|MIN(_CND)?L?S?|HOOKS?|SHOOKS?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|ARG_EXTS?|LAT|HOOKS?|SHOOKS?)|SEARCH(_CNDL?|_INST|_NODE|_LINK)?S?|SEARCHS?|TSEARCH(_CND)?S?|SORT2?L?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?|EXT_INITS?|HOOKS?)|DELETE|DELETE_(EXTS?|NETS?|NODES?|LINKS?)|DELETINGS?|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCH(_CND)?T?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|(USE|NO)_POINTER_CHECK|(USE|NO)_SAVED|(USE|NO)_SEARCH|(USE|NO)_ZERO_INSTANCE|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|LAST_CALCS?|RECALCS?|UPDATE(S|_RECS?)?|DEFAULT_RESULT|THIS|CALLER|NEXTS?|(GRAND)?PARENTS?|UP|DOWN|RUN|abs|min|max|round(_digits)?|(sq|cb)rt|pow|exp|log(10)?|fact|(t|l)?gamma|a?sin|a?cos|a?tan|pi|is_(finite|inf|nan)|uniform(_int)?|l?norm(cdf)?|poisson(cdf)?|beta(cdf)?|alapl(cdf)?|unifcdf|gammacdf|close_sim",
+	"MODEL(BEGIN|END)|(END_)?EQUATION(_DUMMY)?|FUNCTION|RESULT|ABORT|DEBUG_(START|STOP)(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM(_CND)?L?S?|COUNT(_ALL|_CNDL?|_ALL_CNDL?|_HOOK)?S?|STAT(_CND)?L?S?|STAT_(NETS?|NODES?)|(WHT)?AVE(_CND)?L?S?|MED(_CND)?L?S?|PERC(_CND)?L?S?|SD(_CND)?L?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAX(_CND)?L?S?|MIN(_CND)?L?S?|HOOKS?|SHOOKS?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|ARG_EXTS?|LAT|HOOKS?|SHOOKS?)|SEARCH(_CNDL?|_INST|_NODE|_LINK)?S?|SEARCHS?|TSEARCH(_CND)?S?|SORT2?L?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?|EXT_INITS?|HOOKS?)|DELETE|DELETE_(EXTS?|NETS?|NODES?|LINKS?)|DELETINGS?|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCH(_CND)?T?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|(USE|NO)_POINTER_CHECK|(USE|NO)_SAVED|(USE|NO)_SEARCH|(USE|NO)_ZERO_INSTANCE|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|LAST_CALCS?|RECALCS?|UPDATE(S|_RECS?)?|DEFAULT_RESULT|THIS|CALLER|NAMES?|NEXTS?|(GRAND)?PARENTS?|UP|DOWN|RUN|abs|min|max|round(_digits)?|(sq|cb)rt|pow|exp|log(10)?|fact|(t|l)?gamma|a?sin|a?cos|a?tan|pi|is_(finite|inf|nan)|uniform(_int)?|l?norm(cdf)?|poisson(cdf)?|beta(cdf)?|alapl(cdf)?|unifcdf|gammacdf|close_sim",
 	"auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
 	"break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
 };

@@ -266,7 +266,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						ttk::frame .deb.v.v1; \
 						ttk::label .deb.v.v1.name1 -text \"Variable:\"; \
 						ttk::label .deb.v.v1.name2 -width 20 -anchor w -style hl.TLabel; \
-						ttk::label .deb.v.v1.time1 -text \"Time step:\"; \
+						ttk::label .deb.v.v1.time1 -text \"Case:\"; \
 						ttk::label .deb.v.v1.time2 -width 5 -anchor w -style hl.TLabel; \
 						ttk::label .deb.v.v1.val1 -text \"Value \"; \
 						ttk::entry .deb.v.v1.val2 -width 15 -justify center -state disabled -validate key -validatecommand { \
@@ -581,17 +581,17 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				cmd( "pack $e.n.l $e.n.v -side left -padx 2" );
 
 				cmd( "ttk::frame $e.t" );
-				cmd( "ttk::label $e.t.l -text \"Current time:\"" );
+				cmd( "ttk::label $e.t.l -text \"Current case:\"" );
 				cmd( "ttk::label $e.t.v -style hl.TLabel -text $time" );
 				cmd( "pack $e.t.l $e.t.v -side left -padx 2" );
 
 				cmd( "ttk::frame $e.u" );
-				cmd( "ttk::label $e.u.l -text \"Last update time:\"" );
+				cmd( "ttk::label $e.u.l -text \"Last update:\"" );
 				cmd( "ttk::label $e.u.v -style hl.TLabel -text %d", cv->last_update );
 				cmd( "pack $e.u.l $e.u.v -side left -padx 2" );
 
 				cmd( "ttk::frame $e.x" );
-				cmd( "ttk::label $e.x.l -text \"Next update time:\"" );
+				cmd( "ttk::label $e.x.l -text \"Next update:\"" );
 				cmd( "ttk::label $e.x.v -style hl.TLabel -text %d", cv->next_update > 0 ? cv->next_update : cv->last_update < t ? t : t + 1 );
 				cmd( "pack $e.x.l $e.x.v -side left -padx 2" );
 
@@ -1062,7 +1062,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				cmd( "newtop $t \"Run Until\" { set choice 2 } .deb" );
 
 				cmd( "ttk::frame $t.t" );
-				cmd( "ttk::label $t.t.l -text \"Run until time step\"" );
+				cmd( "ttk::label $t.t.l -text \"Run until case\"" );
 				cmd( "ttk::entry $t.t.val -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set tdebug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tdebug; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( "$t.t.val insert 0 $tdebug" );
 				cmd( "pack $t.t.l $t.t.val" );

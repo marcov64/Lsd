@@ -5,7 +5,7 @@
 
 	Equations that are not required for the model to run but may produce
 	useful country- or sector-level statistics for analysis.
- 
+
  ******************************************************************************/
 
 /*========================= COUNTRY-LEVEL STATS ==============================*/
@@ -31,29 +31,21 @@ Total credit supplied
 RESULT( VS( SECSTAL2, "CS1" ) + VS( SECSTAL2, "CS2" ) )
 
 
-EQUATION( "Creal" )
-/*
-Real aggregated consumption
-*/
-RESULT( VS( GRANDPARENT, "C" ) / VS( CONSECL2, "CPI" ) )
-
-
 EQUATION( "DefGDP" )
 /*
 Government deficit on GDP ratio
 */
-v[1] = VS( GRANDPARENT, "GDPnom" );
-RESULT( v[1] > 0 ? VS( GRANDPARENT, "Def" ) / v[1] : CURRENT )
+RESULT( VS( GRANDPARENT, "Def" ) / VS( GRANDPARENT, "GDPnom" ) )
 
 
 EQUATION( "GDI" )
 /*
 Gross domestic income (nominal terms)
 */
-RESULT( VS( CAPSECL2, "W1" ) + VS( CONSECL2, "W2" ) +
-		VS( CAPSECL2, "Pi1" ) + VS( CONSECL2, "Pi2" ) + 
-		VS( FINSECL2, "PiB" ) + VS( GRANDPARENT, "G" ) - 
-		VS( GRANDPARENT, "Tax" ) + 
+RESULT( VS( LABSUPL2, "W" ) + VLS( LABSUPL2, "Bon", 1 ) +
+		VS( CAPSECL2, "Pi1" ) + VS( CONSECL2, "Pi2" ) +
+		VS( FINSECL2, "PiB" ) + VS( GRANDPARENT, "Div" ) +
+		VS( GRANDPARENT, "G" ) - VS( GRANDPARENT, "Tax" ) +
 		VS( CAPSECL2, "PPI" ) * VS( CONSECL2, "SI" ) / VS( CONSECL2, "m2" ) )
 
 
@@ -87,7 +79,7 @@ EQUATION( "Bfail" )
 Rate of failing banks
 */
 VS( FINSECL2, "NWb" );							// make sure it is updated
-RESULT( COUNT_CNDS( FINSECL2, "Bank", "_Gbail", ">", 0 ) / 
+RESULT( COUNT_CNDS( FINSECL2, "Bank", "_Gbail", ">", 0 ) /
 		COUNTS( FINSECL2, "Bank" ) )
 
 
@@ -96,7 +88,7 @@ EQUATION( "HHb" )
 Normalized Herfindahl-Hirschman index for financial sector
 */
 i = COUNTS( FINSECL2, "Bank" );
-RESULT( i > 1 ? max( 0, ( WHTAVES( FINSECL2, "_fB", "_fB" ) - 1.0 / i ) / 
+RESULT( i > 1 ? max( 0, ( WHTAVES( FINSECL2, "_fB", "_fB" ) - 1.0 / i ) /
 						( 1 - 1.0 / i ) ) : 1 )
 
 
@@ -109,7 +101,7 @@ v[0] = 0;										// index accumulator
 CYCLES( FINSECL2, cur, "Bank" )
 	v[0] += fabs( VLS( cur, "_fB", 1 ) - VS( cur, "_fB" ) );// sum share changes
 
-RESULT( v[0] )	
+RESULT( v[0] )
 
 
 EQUATION( "TC" )
@@ -180,7 +172,7 @@ EQUATION( "HH1" )
 Normalized Herfindahl-Hirschman index for capital-good sector
 */
 i = COUNTS( CAPSECL2, "Firm1" );
-RESULT( i > 1 ? max( 0, ( WHTAVES( CAPSECL2, "_f1", "_f1" ) - 1.0 / i ) / 
+RESULT( i > 1 ? max( 0, ( WHTAVES( CAPSECL2, "_f1", "_f1" ) - 1.0 / i ) /
 						( 1 - 1.0 / i ) ) : 1 )
 
 
@@ -193,7 +185,7 @@ v[0] = 0;										// index accumulator
 CYCLES( CAPSECL2, cur, "Firm1" )
 	v[0] += fabs( VLS( cur, "_f1", 1 ) - VS( cur, "_f1" ) );// sum share changes
 
-RESULT( v[0] )	
+RESULT( v[0] )
 
 
 EQUATION( "L1ent" )
@@ -212,7 +204,7 @@ Exit rate of labor (fires+quits over labor employed) in capital-good sector
 v[1] = VS( CAPSECL2, "L1" );
 
 if ( v[1] > 0 )
-	v[0] = ( VS( CAPSECL2, "fires1" ) + VS( CAPSECL2, "quits1" ) + 
+	v[0] = ( VS( CAPSECL2, "fires1" ) + VS( CAPSECL2, "quits1" ) +
 			 VS( CAPSECL2, "retires1" ) ) / v[1];
 else
 	v[0] = 0;
@@ -222,7 +214,7 @@ RESULT( v[0] )
 
 EQUATION( "L1v" )
 /*
-Vacancy rate of labor (unfilled positions over labor employed) in 
+Vacancy rate of labor (unfilled positions over labor employed) in
 capital-good sector
 */
 
@@ -258,13 +250,6 @@ Average age of firms in capital-good sector
 RESULT( T - AVES( CAPSECL2, "_t1ent" ) )
 
 
-EQUATION( "i1" )
-/*
-Interest paid by capital-good sector
-*/
-RESULT( SUMS( CAPSECL2, "_i1" ) )
-
-
 EQUATION( "s1avg" )
 /*
 Average workers compound skills in capital-good sector
@@ -272,12 +257,12 @@ Average workers compound skills in capital-good sector
 
 if ( VS( GRANDPARENT, "flagWorkerLBU" ) == 0 )	// no worker-level learning?
 	END_EQUATION( INISKILL );
-	
+
 v[0] = i = 0;									// accumulators
 CYCLES( CAPSECL2, cur, "Wrk1" )
 {
 	v[0] += VS( SHOOKS( cur ), "_s" );			// worker current compound skills
-	++i;				
+	++i;
 }
 
 RESULT( i > 0 ? v[0] / i : CURRENT )
@@ -287,27 +272,27 @@ RESULT( i > 0 ? v[0] / i : CURRENT )
 
 EQUATION( "A2posChg" )
 /*
-Machine-level weighted-average labor productivity of post-change firms in 
+Machine-level weighted-average labor productivity of post-change firms in
 consumption-good sector
 */
 v[1] = SUM_CNDS( CONSECL2, "_Q2", "_postChg", "!=", 0 );
-RESULT( v[1] > 0 ? WHTAVE_CNDS( CONSECL2, "_A2", "_Q2", "_postChg", "!=", 0 ) / 
+RESULT( v[1] > 0 ? WHTAVE_CNDS( CONSECL2, "_A2", "_Q2", "_postChg", "!=", 0 ) /
 				   v[1] : 0 )
 
 
 EQUATION( "A2preChg" )
 /*
-Machine-level weighted-average labor productivity of pre-change firms in 
+Machine-level weighted-average labor productivity of pre-change firms in
 consumption-good sector
 */
 v[1] = SUM_CNDS( CONSECL2, "_Q2", "_postChg", "==", 0 );
-RESULT( v[1] > 0 ? WHTAVE_CNDS( CONSECL2, "_A2", "_Q2", "_postChg", "==", 0 ) / 
+RESULT( v[1] > 0 ? WHTAVE_CNDS( CONSECL2, "_A2", "_Q2", "_postChg", "==", 0 ) /
 				   v[1] : 0 )
 
 
 EQUATION( "A2sd" )
 /*
-Standard deviation of machine-level log labor productivity of firms in 
+Standard deviation of machine-level log labor productivity of firms in
 consumption-good sector
 Also updates 'A2sdPreChg', 'A2sdPosChg'
 */
@@ -329,7 +314,7 @@ CYCLES( CONSECL2, cur, "Firm2" )
 
 	v[0] += pow( log( v[6] + 1 ) - v[1], 2 );
 	++i;
-	
+
 	if ( ! VS( cur, "_postChg" ) )				// pre-change?
 	{
 		v[4] += pow( log( v[6] + 1 ) - v[2], 2 );
@@ -352,33 +337,33 @@ EQUATION( "B2payers" )
 /*
 Number of bonus paying firms in consumption-good sector
 */
-RESULT( COUNT_CNDS( CONSECL2, "Firm2", "_B2", ">", 0 ) )
+RESULT( COUNT_CNDS( CONSECL2, "Firm2", "_Bon2", ">", 0 ) )
 
 
 EQUATION( "CD2" )
 /*
-Total credit demand of firms in consumer-good sector
+Total credit demand of firms in consumption-good sector
 */
 RESULT( SUMS( CONSECL2, "_CD2" ) )
 
 
 EQUATION( "CD2c" )
 /*
-Total credit demand constraint of firms in consumer-good sector
+Total credit demand constraint of firms in consumption-good sector
 */
 RESULT( SUMS( CONSECL2, "_CD2c" ) )
 
 
 EQUATION( "CS2" )
 /*
-Total credit supplied to firms in consumer-good sector
+Total credit supplied to firms in consumption-good sector
 */
 RESULT( SUMS( CONSECL2, "_CS2" ) )
 
 
 EQUATION( "Deb2max" )
 /*
-Total maximum prudential credit supplied to firms in consumer-good sector
+Total maximum prudential credit supplied to firms in consumption-good sector
 */
 RESULT( SUMS( CONSECL2, "_Deb2max" ) )
 
@@ -395,7 +380,7 @@ EQUATION( "HH2" )
 Normalized Herfindahl-Hirschman index for consumption-good sector
 */
 i = COUNTS( CONSECL2, "Firm2" );
-RESULT( i > 1 ? max( 0, ( WHTAVES( CONSECL2, "_f2", "_f2" ) - 1.0 / i ) / 
+RESULT( i > 1 ? max( 0, ( WHTAVES( CONSECL2, "_f2", "_f2" ) - 1.0 / i ) /
 						( 1 - 1.0 / i ) ) : 1 )
 
 
@@ -408,7 +393,7 @@ v[0] = 0;										// index accumulator
 CYCLES( CONSECL2, cur, "Firm2" )
 	v[0] += fabs( VLS( cur, "_f2", 1 ) - VS( cur, "_f2" ) );// sum share changes
 
-RESULT( v[0] )	
+RESULT( v[0] )
 
 
 EQUATION( "L2ent" )
@@ -427,12 +412,12 @@ Exit rate of labor (fires+quits over labor employed) in consumption-good sector
 v[1] = VS( CONSECL2, "L2" );
 
 if ( v[1] > 0 )
-	v[0] = ( VS( CONSECL2, "fires2" ) + VS( CONSECL2, "quits2" ) + 
+	v[0] = ( VS( CONSECL2, "fires2" ) + VS( CONSECL2, "quits2" ) +
 			 VS( CONSECL2, "retires2" ) ) / v[1];
 else
 	v[0] = 0;
 
-RESULT( v[0] ) 
+RESULT( v[0] )
 
 
 EQUATION( "L2larg" )
@@ -444,7 +429,7 @@ RESULT( MAXS( CONSECL2, "_L2" ) )
 
 EQUATION( "L2v" )
 /*
-Vacancy rate of labor (unfilled positions over labor employed) in 
+Vacancy rate of labor (unfilled positions over labor employed) in
 consumption-good sector
 */
 
@@ -464,7 +449,7 @@ EQUATION( "RS2" )
 Machine (planned) scrapping rate in consumption-good sector
 */
 v[1] = VLS( CONSECL2, "K", 1 );
-RESULT( T > 1 && v[1] > 0 ? SUMS( CONSECL2, "_RS2" ) / 
+RESULT( T > 1 && v[1] > 0 ? SUMS( CONSECL2, "_RS2" ) /
 		( v[1] / VS( CONSECL2, "m2" ) ) : 0 )
 
 
@@ -487,13 +472,6 @@ EQUATION( "dN" )
 Change in total inventories (real terms)
 */
 RESULT( VS( CONSECL2, "N" ) - VLS( CONSECL2, "N", 1 ) )
-
-
-EQUATION( "i2" )
-/*
-Interest paid by consumption-good sector
-*/
-RESULT( SUMS( CONSECL2, "_i2" ) )
 
 
 EQUATION( "mu2avg" )
@@ -530,7 +508,7 @@ RESULT( i / VS( CONSECL2, "F2" ) )
 
 EQUATION( "q2posChg" )
 /*
-Average product quality in consumer-good sector (weighted by output) 
+Average product quality in consumer-good sector (weighted by output)
 of post-change firms
 */
 v[1] = SUM_CNDS( CONSECL2, "_Q2e", "_postChg", "!=", 0 );
@@ -539,7 +517,7 @@ RESULT( v[1] > 0 ? WHTAVE_CNDS( CONSECL2, "_q2", "_Q2e", "_postChg", "!=", 0 ) /
 
 EQUATION( "q2preChg" )
 /*
-Average product quality in consumer-good sector (weighted by output) 
+Average product quality in consumer-good sector (weighted by output)
 of pre-change firms
 */
 v[1] = SUM_CNDS( CONSECL2, "_Q2e", "_postChg", "==", 0 );
@@ -553,7 +531,7 @@ Average weighted firms' workers compound skills in consumption-good sector
 
 if ( VS( GRANDPARENT, "flagWorkerLBU" ) == 0 )	// no worker-level learning?
 	END_EQUATION( INISKILL );
-	
+
 RESULT( WHTAVES( CONSECL2, "_s2avg", "_f2" ) )
 
 
@@ -566,8 +544,8 @@ v[0] = v[1] = 0;								// max accumulator
 CYCLES( CONSECL2, cur, "Firm2" )				// scan all firms
 {
 	v[2] = VS( cur, "_w2avg" );
-	v[3] =  VS( cur, "_L2" );
-	
+	v[3] =	VS( cur, "_L2" );
+
 	if ( v[3] > v[1] )							// largest firm yet?
 	{
 		v[1] = v[3];
@@ -591,7 +569,7 @@ EQUATION( "w2realPosChg" )
 Weighted average real wage paid by post-change firms in consumption-good sector
 */
 v[1] = SUM_CNDS( CONSECL2, "_L2", "_postChg", "!=", 0 );
-RESULT( v[1] > 0 ? WHTAVE_CNDS( CONSECL2, "_w2avg", "_L2", "_postChg", "!=", 0  ) / 
+RESULT( v[1] > 0 ? WHTAVE_CNDS( CONSECL2, "_w2avg", "_L2", "_postChg", "!=", 0 ) /
 				   v[1] / VS( CONSECL2, "CPI" ) : 0 )
 
 
@@ -600,7 +578,7 @@ EQUATION( "w2realPreChg" )
 Weighted average real wage paid by pre-change firms in consumption-good sector
 */
 v[1] = SUM_CNDS( CONSECL2, "_L2", "_postChg", "==", 0 );
-RESULT( v[1] > 0 ? WHTAVE_CNDS( CONSECL2, "_w2avg", "_L2", "_postChg", "==", 0  ) / 
+RESULT( v[1] > 0 ? WHTAVE_CNDS( CONSECL2, "_w2avg", "_L2", "_postChg", "==", 0 ) /
 				   v[1] / VS( CONSECL2, "CPI" ) : 0 )
 
 
@@ -610,7 +588,7 @@ EQUATION( "Lent" )
 /*
 Entry rate of labor (hires over total labor)
 */
-RESULT( ( VS( CAPSECL2, "hires1" ) + VS( CONSECL2, "hires2" ) ) / 
+RESULT( ( VS( CAPSECL2, "hires1" ) + VS( CONSECL2, "hires2" ) ) /
 		VS( LABSUPL2, "Ls" ) )
 
 
@@ -618,7 +596,7 @@ EQUATION( "Lexit" )
 /*
 Exit rate of labor (fires+quits+retires over labor employed)
 */
-v[1] = VS( CAPSECL2, "fires1" ) + VS( CAPSECL2, "quits1" ) + 
+v[1] = VS( CAPSECL2, "fires1" ) + VS( CAPSECL2, "quits1" ) +
 	   VS( CAPSECL2, "retires1" ) + VS( CONSECL2, "fires2" ) +
 	   VS( CONSECL2, "quits2" ) + VS( CONSECL2, "retires2" );
 RESULT( v[1] / VS( LABSUPL2, "Ls" ) )
@@ -636,7 +614,7 @@ EQUATION( "V" )
 /*
 Effective vacancy rate (unfilled positions over total labor supply)
 */
-RESULT( T > 1 ? min( ( VS( CAPSECL2, "JO1" ) + VS( CONSECL2, "JO2" ) ) / 
+RESULT( T > 1 ? min( ( VS( CAPSECL2, "JO1" ) + VS( CONSECL2, "JO2" ) ) /
 					   VS( LABSUPL2, "Ls" ), 1 ) : 0 )
 
 
@@ -690,7 +668,7 @@ j = COUNTS( LABSUPL2, "Worker" );				// count scaled workers
 h = COUNTS( CAPSECL2, "Firm1" );				// count firms (after entry-exit)
 h += COUNTS( CONSECL2, "Firm2" );
 h += j * v[30];									// number of worker+firm objects
-	
+
 double *rank1 = new double[ j ];				// allocate space for rank
 double *rank2 = new double[ h ];				// allocate space for indiv. rank
 
@@ -701,29 +679,29 @@ v[21] = v[22] = v[23] = v[24] = 0;
 v[5] = v[15] = v[25] = DBL_MAX;					// minimum registers
 CYCLES( LABSUPL2, cur, "Worker" )				// consider all workers
 {
-	v[0] = VS( cur, "_w" ) + VS( cur, "_B" );	// current wage + bonus
+	v[0] = VS( cur, "_w" ) + VS( cur, "_Bon" );	// current wage + bonus
 	v[1] += v[0];								// sum of wages + bonus
 	v[2] += log( v[0] + 1 );					// sum of log wages
 	v[3] += pow( log( v[0] + 1 ), 2 );			// sum of squared log wages
 	v[4] = max( v[0], v[4] );					// max wage
 	v[5] = min( v[0], v[5] );					// min wage
-	
+
 	rank1[ i++ ] = v[0];						// insert wage in rank array
-	
+
 	for ( int worker = 0; worker < v[30]; ++worker )
 		rank2[ k++ ] = v[0];					// same for income (wage+bonus)
-	
+
 	v[0] = VS( cur, "_wS" );					// current satisfacing wage
 	v[11] += v[0];								// sum of satisfacing wages
 	v[12] += log( v[0] + 1 );					// sum of log satisfacing wages
 	v[13] += pow( log( v[0] + 1 ), 2 );			// sum of sq. log satisf. wages
 	v[14] = max( v[0], v[14] );					// max satisfacing wage
 	v[15] = min( v[0], v[15] );					// min satisfacing wage
-	
+
 	v[0] = VS( cur, "_wR" );					// current requested wage
 	v[21] += v[0];								// sum of requested wages
 	v[22] += log( v[0] + 1 );					// sum of log requested wages
-	v[23] += pow( log( v[0] + 1 ), 2 );			// sum of sq. log req.  wages
+	v[23] += pow( log( v[0] + 1 ), 2 );			// sum of sq. log req. wages
 	v[24] = max( v[0], v[24] );					// max requested wage
 	v[25] = min( v[0], v[25] );					// min requested wage
 }
@@ -800,11 +778,11 @@ v[3] = DBL_MAX;									// minimum register
 CYCLES( LABSUPL2, cur, "Worker" )				// consider all workers
 	if ( VS( cur, "_employed" ) )				// account only employed
 	{
-		v[0] = VS( cur, "_w" ) + VS( cur, "_B" );// current wage + bonus
+		v[0] = VS( cur, "_w" ) + VS( cur, "_Bon" );// current wage + bonus
 		v[1] += v[0];							// sum of wages
 		v[2] = max( v[0], v[2] );				// max wage
 		v[3] = min( v[0], v[3] );				// min wage
-		
+
 		++i;
 	}
 
@@ -835,7 +813,7 @@ Number of machines to scrap of firm in consumption-good sector
 v[0] = 0;
 CYCLE( cur, "Vint" )
 	v[0] += abs( VS( cur, "__RSvint" ) );
-	
+
 RESULT( v[0] )
 
 
@@ -854,7 +832,7 @@ CYCLE( cur, "Wrk2" )
 	v[1] += v[2] = VS( cur1, "_Q" );			// worker current production
 	v[0] += VS( cur1, "_sT" ) * v[2] ;			// add worker potential
 }
-	
+
 RESULT( v[1] > 0 ? v[0] / v[1] : 0 )			// handle the no production case
 
 
@@ -866,7 +844,7 @@ Weighted average workers vintage skills of a firm in consumption-good sector
 i = VS( GRANDPARENT, "flagWorkerLBU" );			// worker-level learning mode
 if ( i == 0 || i == 2 )							// no learning by vintage mode?
 	END_EQUATION( INISKILL );
-	
+
 v[0] = v[1] = 0;
 CYCLE( cur, "Wrk2" )
 {
@@ -897,14 +875,14 @@ RESULT( V( "_w" ) / VS( CONSECL2, "CPI" ) )
 
 EQUATION_DUMMY( "A2sdPosChg", "A2sd" )
 /*
-Standard deviation of machine-level log labor productivity of post-change firms 
+Standard deviation of machine-level log labor productivity of post-change firms
 in consumption-good sector
 Updated in 'A2sd'
 */
 
 EQUATION_DUMMY( "A2sdPreChg", "A2sd" )
 /*
-Standard deviation of machine-level log labor productivity of pre-change firms 
+Standard deviation of machine-level log labor productivity of pre-change firms
 in consumption-good sector
 Updated in 'A2sd'
 */

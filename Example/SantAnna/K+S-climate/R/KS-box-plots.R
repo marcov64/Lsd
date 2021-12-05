@@ -54,8 +54,8 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
         if( i == 1 ) {
           temp[ i - warmUpStat, j ] <- 0
         } else {
-          temp[ i - warmUpStat, j ] <- ( log0( mcData[[ k ]][ i, "GDP", j ] ) -
-                                           log0( mcData[[ k ]][ i - 1, "GDP", j ] ) )
+          temp[ i - warmUpStat, j ] <- ( log0( mcData[[ k ]][ i, "GDPreal", j ] ) -
+                                         log0( mcData[[ k ]][ i - 1, "GDPreal", j ] ) )
         }
 
     # Remove +/-infinite values and replace by +/-1
@@ -74,8 +74,8 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
         if( i == 1 ){
           temp[ i - warmUpStat, j ] <- 0
         } else {
-          if( log0( mcData[[ k ]][ i, "GDP", j ] ) -
-              log0( mcData[[ k ]][ i - 1, "GDP", j ] ) < -0.03 ){
+          if( log0( mcData[[ k ]][ i, "GDPreal", j ] ) -
+              log0( mcData[[ k ]][ i - 1, "GDPreal", j ] ) < -0.03 ){
             temp[ i - warmUpStat, j ] <- 1
           } else {
             temp[ i - warmUpStat, j ] <- 0
@@ -157,8 +157,8 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
       for( i in TmaskStat )
         if( mcData[[ k ]][ i, "U", j ] < 0.001 )
           temp[ i - warmUpStat, j ] <- 1
-    else
-      temp[ i - warmUpStat, j ] <- 0
+        else
+          temp[ i - warmUpStat, j ] <- 0
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
                      tit = "Full employment frequency",
                      ylab = "Probability of zero unemployment rate" )
@@ -339,15 +339,15 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
 
       # Performance comparison table
       if( mcStat == "mean" ) {
-      perf.comp <- cbind( perf.comp, statsTb[ , 1, k ] / statsTb[ , 1, 1 ] )
+        perf.comp <- cbind( perf.comp, statsTb[ , 1, k ] / statsTb[ , 1, 1 ] )
 
         # t-test
-      t <- ( statsTb[ , 1, k ] - statsTb[ , 1, 1 ] ) /
-        sqrt( ( statsTb[ , 2, k ] ^ 2 + statsTb[ , 2, 1 ] ^ 2 ) / nSize )
-      df <- floor( ( ( statsTb[ , 2, k ] ^ 2 + statsTb[ , 2, 1 ] ^ 2 ) / nSize ) ^ 2 /
-                     ( ( 1 / ( nSize - 1 ) ) * ( ( statsTb[ , 2, k ] ^ 2 / nSize ) ^ 2 +
-                                                   ( statsTb[ , 2, 1 ] ^ 2 / nSize ) ^ 2 ) ) )
-      pval <- 2 * pt( - abs ( t ), df )
+        t <- ( statsTb[ , 1, k ] - statsTb[ , 1, 1 ] ) /
+          sqrt( ( statsTb[ , 2, k ] ^ 2 + statsTb[ , 2, 1 ] ^ 2 ) / nSize )
+        df <- floor( ( ( statsTb[ , 2, k ] ^ 2 + statsTb[ , 2, 1 ] ^ 2 ) / nSize ) ^ 2 /
+                       ( ( 1 / ( nSize - 1 ) ) * ( ( statsTb[ , 2, k ] ^ 2 / nSize ) ^ 2 +
+                                                     ( statsTb[ , 2, 1 ] ^ 2 / nSize ) ^ 2 ) ) )
+        pval <- 2 * pt( - abs ( t ), df )
 
       } else {
         perf.comp <- cbind( perf.comp, statsTb[ , 2, k ] / statsTb[ , 2, 1 ] )

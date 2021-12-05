@@ -210,7 +210,7 @@ void variable::init( object *_up, const char *_label, int _num_lag, double *v, i
 
 #ifndef _NP_
 	// prevent concurrent use by more than one thread
-	lock_guard < mutex > lock( parallel_comp );
+	rec_lguardT lock( parallel_comp );
 #endif
 
 	up = _up;
@@ -243,7 +243,7 @@ void variable::empty( bool no_lock )
 	if ( running && ! no_lock )
 	{
 		// prevent concurrent use by more than one thread
-		lock_guard < mutex > lock( parallel_comp );
+		rec_lguardT lock( parallel_comp );
 	}
 
 #endif
@@ -279,7 +279,7 @@ double variable::cal( object *caller, int lag )
 
 #ifndef _NP_
 	// prepare mutex for variables and functions updated in multiple threads
-	unique_lock < mutex > guard( parallel_comp, defer_lock );
+	rec_uniqlT guard( parallel_comp, defer_lock );
 #endif
 
 	if ( param == 0 )					// it's a variable
@@ -319,9 +319,10 @@ double variable::cal( object *caller, int lag )
 			if ( last_update >= t || t < next_update )
 				return( val[ 0 ] );
 #ifndef _NP_
-			// prevent parallel computation of the same variable (except dummy equations)
+			// wait for computation of this variable by other threads
 			if ( parallel_mode && ! dummy )
-				 guard.lock( );
+				guard.lock( );
+
 			if ( last_update >= t )		// recheck if not computed during lock
 				return( val[ 0 ] );
 #endif
@@ -339,7 +340,7 @@ double variable::cal( object *caller, int lag )
 			return val[ 0 ];
 
 #ifndef _NP_
-		// prevent parallel computation of the same function (except dummy equations)
+		// wait for computation of this function by other threads
 		if ( parallel_mode && ! dummy )
 			 guard.lock( );
 #endif
@@ -401,7 +402,7 @@ double variable::cal( object *caller, int lag )
 
 	// Compute the Variable's equation
 	user_exception = true;			// allow distinguishing among internal & user exceptions
-	try 							// do it while catching exceptions to avoid obscure aborts
+	try								// do it while catching exceptions to avoid obscure aborts
 	{
 		app = fun( caller );
 	}
@@ -433,6 +434,7 @@ double variable::cal( object *caller, int lag )
 
 	for ( i = 0; i < num_lag; ++i ) // scale down the past values
 		val[ num_lag - i ] = val[ num_lag - i - 1 ];
+
 	val[ 0 ] = app;
 
 	last_update = t;
@@ -575,6 +577,7 @@ void worker::cal_worker( void )
 	try
 	{
 		running = true;
+		errored = false;
 
 		// update object map and register all signal handlers
 		unique_lock < mutex > lock_map( thr_ptr_lock );
@@ -594,7 +597,7 @@ void worker::cal_worker( void )
 			// exit if shutdown or continue if already updated
 			if ( running && var != NULL && var->last_update < t )
 			{	// prevent parallel computation of the same variable
-				unique_lock < mutex > guard_var( var->parallel_comp );
+				rec_uniqlT guard_var( var->parallel_comp );
 
 				// recheck if not computed during lock
 				if ( var->last_update >= t )
@@ -606,7 +609,17 @@ void worker::cal_worker( void )
 					snprintf( err_msg2, MAX_BUFF_SIZE, "the equation for '%s' in object '%s' requested its own value\nwhile parallel-computing its current value", var->label, var->up->label );
 					snprintf( err_msg3, MAX_BUFF_SIZE, "check your code to prevent this situation" );
 					user_excpt = true;
-					throw;
+
+					if ( worker_errors( ) == 0 )
+					{
+						errored = true;
+						throw;
+					}
+					else
+					{
+						errored = true;
+						goto stop;
+					}
 				}
 
 				var->under_computation = true;
@@ -618,7 +631,7 @@ void worker::cal_worker( void )
 				if ( setjmp( env ) )		// allow recovering from signals
 					return;
 #endif
-				try 						// do it while catching exceptions to avoid obscure aborts
+				try							// do it while catching exceptions to avoid obscure aborts
 				{
 					app = var->fun( NULL );
 				}
@@ -634,9 +647,19 @@ void worker::cal_worker( void )
 						snprintf( err_msg3, MAX_BUFF_SIZE, "check your code to prevent this situation" );
 					}
 
-					throw;
+					if ( worker_errors( ) == 0 )
+					{
+						errored = true;
+						throw;
+					}
+					else
+					{
+						errored = true;
+						goto stop;
+					}
 				}
-				user_excpt = false;
+
+				user_excpt = errored = false;
 
 				// scale down the past values
 				for ( i = 0; i < var->num_lag; ++i )
@@ -691,8 +714,9 @@ void worker::cal_worker( void )
 		}
 	}
 
-	free = false;
-	running = false;
+	stop:
+
+	running = free = false;
 }
 
 
@@ -721,7 +745,7 @@ WORKER destructor
 worker::~worker( void )
 {
 	// command thread shutdown if running
-	if ( running )
+	if ( running && ! errored )
 	{
 		unique_lock< mutex > lock_worker( lock );
 		running = free = false;
@@ -729,7 +753,7 @@ worker::~worker( void )
 	}
 
 	// wait for shutdown and check exception
-	if ( thr.joinable( ) )
+	if ( thr.joinable( ) && ! errored )
 		thr.join( );
 
 	// remove thread id from threads map
@@ -771,7 +795,7 @@ void worker::signal( int sig )
 			strcpy( signame, "Unknown signal" );
 	}
 
-	if ( var != NULL && var->label != NULL  )
+	if ( var != NULL && var->label != NULL	)
 		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'. Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, var->label, var->up->label != NULL ? var->up->label : "(none)" );
 	else
 		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received by a parallel worker thread.\nDisable parallel computation to prevent this situation.", signame );
@@ -820,7 +844,7 @@ Check if worker is running and handle problems
 ****************************************************/
 bool worker::check( void )
 {
-	if ( running )				// nothing to do?
+	if ( running && ! errored )				// nothing to do?
 		return true;
 
 	// only process first worker crash
@@ -941,7 +965,7 @@ void parallel_update( variable *v, object* p, object *caller )
 						error_hard( "deadlock during parallel computation",
 									"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
 									true,
-									"variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->label, cv->up->label, MAX_WAIT_TIME, t );
+									"variable '%s' (object '%s') took more than %d seconds\nwhile computing value for case %d", cv->label, cv->up->label, MAX_WAIT_TIME, t );
 						return;
 					}
 				}
@@ -1013,7 +1037,7 @@ void parallel_update( variable *v, object* p, object *caller )
 				error_hard( "deadlock during parallel computation",
 							"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
 							true,
-							"variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv != NULL ? cv->up->label : "", cv != NULL ? cv->label : "", MAX_WAIT_TIME, t );
+							"variable '%s' (object '%s') took more than %d seconds\nwhile computing value for case %d", cv != NULL ? cv->up->label : "", cv != NULL ? cv->label : "", MAX_WAIT_TIME, t );
 				return;
 			}
 		}
@@ -1036,4 +1060,31 @@ void parallel_update( variable *v, object* p, object *caller )
 	// re-enable concurrent parallel update
 	parallel_ready = true;
 }
+
 #endif
+
+/****************************************************
+WORKER_ERRORS
+Check how many workers are in error condition
+****************************************************/
+int worker_errors( void )
+{
+#ifndef _NP_
+
+	int i, count;
+
+	if ( workers == NULL )
+		return 0;
+
+	for ( count = i = 0; i < max_threads; ++i )
+		if ( workers[ i ].errored )
+			++count;
+
+	return count;
+
+#else
+
+	return 0;
+
+#endif
+}

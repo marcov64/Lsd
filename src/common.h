@@ -170,6 +170,11 @@ typedef unordered_map < string, string > p_mapT;
 typedef unordered_map < string, variable * > v_mapT;
 typedef unordered_set < object * > o_setT;
 
+#ifndef _NP_
+typedef lock_guard < recursive_mutex > rec_lguardT;
+typedef unique_lock < recursive_mutex > rec_uniqlT;
+#endif
+
 #ifdef _WIN32
 typedef HANDLE handleT;
 #else
@@ -330,7 +335,7 @@ struct variable
 	variable *next;
 
 #ifndef _NP_
-	mutex parallel_comp;				// mutex lock for parallel computation
+	recursive_mutex parallel_comp;		// mutex lock for parallel computation
 #endif
 
 	eq_funcT eq_func;					// pointer to equation function for fast look-up
@@ -506,6 +511,7 @@ struct worker							// multi-thread parallel worker data structure
 {
 	bool free;
 	bool running;
+	bool errored;
 	bool user_excpt;
 	char err_msg1[ MAX_BUFF_SIZE ];
 	char err_msg2[ MAX_BUFF_SIZE ];
@@ -584,6 +590,7 @@ int strlf( char *out, const char *str, int outSz );
 int strtrim( char *out, const char *str, int outSz );
 int strwrap( char *out, const char *str, int outSz, int wid );
 int run_system( const char *cmd, int id = -1 );
+int worker_errors( void );
 long eval_long( const char *tcl_exp );
 long get_long( const char *tcl_var, long *var = NULL );
 string win_path( string filepath );

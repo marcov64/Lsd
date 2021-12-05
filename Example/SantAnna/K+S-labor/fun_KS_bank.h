@@ -5,71 +5,82 @@
 
 	Equations that are specific to the bank objects in the K+S LSD model
 	are coded below.
- 
+
  ******************************************************************************/
 
 /*============================== KEY EQUATIONS ===============================*/
 
 EQUATION( "_Bda" )
 /*
-Customer firms financial fragility defined as the ratio between accumulated 
+Customer firms financial fragility defined as the ratio between accumulated
 bad debt (loans in default) and total bank assets
 */
 
-v[1] = max( VL( "_BadDeb", 1 ), 0 );			// losses with bad debt, discarding
-												// negative losses (proceedings)
-v[2] = VL( "_Loans", 1 ) + VL( "_Bonds", 1 ) +	// bank assets
+// losses with bad debt, discarding negative losses (proceedings)
+v[1] = VL( "_BadDeb1", 1 ) + VL( "_BadDeb1", 1 );
+
+v[2] = VL( "_Loans", 1 ) + VL( "_BondsB", 1 ) +	// bank assets
 	   VL( "_Res", 1 ) + VL( "_ExRes", 1 );
 
 RESULT( v[2] > 0 ? v[1] / v[2] : 0 )
+
+
+EQUATION( "_DivB" )
+/*
+Dividends to pay by bank
+*/
+RESULT( max( VS( PARENT, "dB" ) * ( V( "_PiB" ) - V( "_TaxB" ) ), 0 ) )
 
 
 EQUATION( "_ExRes" )
 /*
 Bank excess reserves (free cash)
 Bank try to minimize excess reserves (not paying interest) trading bonds
-Updates '_Bonds', '_BD'
+Updates '_BondsB', '_BD'
 */
 
 // compute initial free cash in period, before adjustments
-v[0] = CURRENT + ( V( "_PiB" ) - V( "_TaxB" ) - V( "_DivB" ) ) - // + net profit 
-	   ( V( "_Res" ) - VL( "_Res", 1 ) );		// - increased reserves
+v[0] = CURRENT + ( V( "_PiB" ) - V( "_TaxB" ) )	// + net profit
+	   - VL( "_DivB", 1 )						// - distributed dividends
+	   - ( V( "_Res" ) - VL( "_Res", 1 ) );		// - increased reserves
 
 // account existing sovereign bonds maturing
-v[1] = VL( "_Bonds" , 1 );						// bonds hold by bank
-v[2] = v[1] / VS( PARENT, "thetaBonds" );		// bonds maturing in period
-v[1] -= v[2];									// remaining bonds
-v[0] += v[2];									// add matured bonds income
+v[1] = VS( PARENT, "thetaBonds" );				// maturing rate of bonds
+v[2] = VL( "_BondsB" , 1 );						// bonds hold by bank
+v[3] = v[2] / v[1];								// bonds maturing in period
+v[2] -= v[3];									// remaining bonds
+v[0] += v[3];									// add matured bonds income
 
 // repay exiting loans from central bank (liquidity lines)
-v[3] = VL( "_LoansCB", 1 );						// liquidity loans from c. bank
-if ( v[0] > 0 && v[3] > 0 )						// repay loans if possible
+v[4] = VL( "_LoansCB", 1 );						// liquidity loans from c. bank
+if ( v[0] > 0 && v[4] > 0 )						// repay loans if possible
 {
-	INCR( "_LoansCB", v[0] > v[3] ? - v[3] : - v[0] );// repay what is possible
-	v[0] = max( v[0] - v[3], 0 );				// remaining free cash
+	INCR( "_LoansCB", v[0] > v[4] ? - v[4] : - v[0] );// repay what is possible
+	v[0] = max( v[0] - v[4], 0 );				// remaining free cash
 }
 
 // trade bonds: sell if free cash negative or try to buy otherwise
 if ( v[0] <= 0 )								// need to top up total reserves?
 {
-	if ( - v[0] > v[1] )						// need larger than stock?
-		v[4] = - v[1];							// sell all bonds
+	if ( - v[0] > v[2] )						// need larger than stock?
+		v[5] = - v[2];							// sell all bonds
 	else
-		v[4] = v[0];							// sell just required amount
+		v[5] = v[0];							// sell just required amount
 }
 else											// try to buy bonds
 {
-	v[5] = V( "_fB" ) * VS( PARENT, "BS" );		// available bond supply
-	
-	if ( v[0] > v[5] )							// bonds are rationed?
-		v[4] = v[5];							// buy what is available
+	v[6] = V( "_fB" ) * ( VS( PARENT, "BS" ) +	// available bond share
+						  VLS( PARENT, "BondsCB", 1 ) / v[1] );
+
+	if ( v[0] > v[6] )							// bonds are rationed?
+		v[5] = v[6];							// buy what is available
 	else
-		v[4] = v[0];							// buy using all excess reserves
+		v[5] = v[0];							// buy using all excess reserves
 }
 
-WRITE( "_BD", v[4] );
-INCR( "_Bonds", v[4] - v[2] );
-v[0] -= v[4];									// update free cash after trade
+WRITE( "_BD", v[5] );
+INCR( "_BondsB", v[5] - v[3] );
+v[0] -= v[5];									// update free cash after trade
 
 // request loan from central bank if still illiquid (liquidity line)
 if ( v[0] < 0 )									// negative free cash
@@ -87,8 +98,8 @@ Bank net worth (book value)
 Also updates '_Gbail', '_ExRes', '_LoansCB'
 */
 
-// net worth as assets minus liabilities (deposits)
-v[0] = V( "_Loans" ) + V( "_Res" ) + V( "_ExRes" ) + V( "_Bonds" ) - 
+// net worth as assets minus liabilities (deposits) ('_ExRes' before '_BondsB'!)
+v[0] = V( "_Loans" ) + V( "_Res" ) + V( "_ExRes" ) + V( "_BondsB" ) -
 	   V( "_Depo" ) - V( "_LoansCB" );
 
 // government rescue bank when net worth is negative (Basel-like rule)
@@ -96,7 +107,7 @@ if ( v[0] < 0 && VS( GRANDPARENT, "flagCreditRule" ) == 2 )
 {
 	// use fraction of weighted average bank market to adjust net worth
 	v[1] = max( VL( "_fB", 1 ), V( "_fD" ) );	// lower bounded market share
-	
+
 	// remove effect of this bank net worth in the bank total average
 	if ( v[1] < 1 )
 		v[2] = ( VLS( PARENT, "NWb", 1 ) - CURRENT ) / ( 1 - v[1] );
@@ -111,15 +122,14 @@ if ( v[0] < 0 && VS( GRANDPARENT, "flagCreditRule" ) == 2 )
 
 	v[5] = - v[0] + v[4];						// government bailout
 	v[0] = v[4];								// assets after bailout
-	
+
 	INCR( "_ExRes", v[5] );						// bailout enter as free cash
-	WRITE( "_LoansCB", 0 );						
 	WRITE( "_Gbail", v[5] );					// register bailout
 }
 else
-	WRITE( "_Gbail", 0 );						// no bailout	
+	WRITE( "_Gbail", 0 );						// no bailout
 
-RESULT( v[0] )	
+RESULT( v[0] )
 
 
 EQUATION( "_TC" )
@@ -138,14 +148,14 @@ else
 		h = VS( PARENT, "mPerB" );
 		for ( v[1] = i = 0; i < h; ++i )
 			v[1] += VL( "_Bda", i ) / h;		// bank fragility moving average
-		
+
 		v[0] = VL( "_NWb", 1 ) / ( VS( PARENT, "tauB" ) *
 								 ( 1 + VS( PARENT, "betaB" ) * v[1] ) );
 	}
 	else
-		v[0] = -1;								// no-limit rule	
+		v[0] = -1;								// no-limit rule
 
-RESULT( v[0] )	
+RESULT( v[0] )
 
 
 EQUATION( "_TC1free" )
@@ -163,7 +173,7 @@ if ( VS( GRANDPARENT, "flagCreditRule" ) > 0 )
 		v[3] = v[1] / ( v[1] + v[2] );			// allocate according demand share
 	else
 		v[3] = 0.5;								// no demand, just do 50/50%
-	
+
 	v[0] = v[3] * max( 0, V( "_TC" ) - VL( "_Loans", 1 ) );// free cash to lend
 }
 else
@@ -191,16 +201,51 @@ if ( VS( GRANDPARENT, "flagCreditRule" ) > 0 )
 }
 else
 	v[0] = -1;									// no limit
-	
+
+RESULT( v[0] )
+
+
+EQUATION( "_iB" )
+/*
+Bank interest income from loans
+*/
+
+v[1] = VLS( PARENT, "rDeb", 1 );				// interest on debt
+v[2] = VS( PARENT, "kConst" );					// interest scaling
+
+// compute the firm-specific interest income
+v[0] = 0;										// interest accumulator
+CYCLE( cur, "Cli1" )							// sector 1
+{
+	j = VLS( SHOOKS( cur ), "_qc1", 1 );		// firm credit class
+	v[3] = VLS( SHOOKS( cur ), "_Deb1", 1 );	// firm debt
+	v[0] += v[3] * v[1] * ( 1 + ( j - 1 ) * v[2] );// interest received
+}
+
+CYCLE( cur, "Cli2" )							// sector 2
+{
+	j = VLS( SHOOKS( cur ), "_qc2", 1 );		// firm credit class
+	v[3] = VLS( SHOOKS( cur ), "_Deb2", 1 );	// firm debt
+	v[0] += v[3] * v[1] * ( 1 + ( j - 1 ) * v[2] );// interest received
+}
+
 RESULT( v[0] )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
 
-EQUATION( "_BadDeb" )
+EQUATION( "_BadDeb1" )
 /*
-Bank bad debt (defaults) on the period
-Just reset once per period, updated in 'entry1exit', 'entry2exit'
+Bank bad debt (defaults) from capital-good sector
+Just reset once per period, updated in 'entry1exit'
+*/
+RESULT( 0 )
+
+
+EQUATION( "_BadDeb2" )
+/*
+Bank bad debt (defaults) from consumption-good sector
+Just reset once per period, updated in 'entry2exit'
 */
 RESULT( 0 )
 
@@ -256,7 +301,7 @@ CYCLE( cur, "Cli1" )							// sector 1 deposits
 
 CYCLE( cur, "Cli2" )							// sector 2 deposits
 	v[0] += max( VS( SHOOKS( cur ), "_NW2" ), 0 );
-	
+
 RESULT( max( v[0], 0 ) )
 
 
@@ -276,7 +321,7 @@ CYCLE( cur, "Cli1" )							// sector 1 debt
 
 CYCLE( cur, "Cli2" )							// sector 2 debt
 	v[0] += VS( SHOOKS( cur ), "_Deb2" );
-	
+
 RESULT( v[0] )
 
 
@@ -284,30 +329,11 @@ EQUATION( "_PiB" )
 /*
 Bank gross profits (losses) before dividends/taxes
 */
-
-v[1] = VS( PARENT, "rDeb" );					// interest on debt
-v[2] = VS( PARENT, "kConst" );					// interest scaling
-
-// compute the firm-specific interest expense
-v[3] = 0;										// interest accumulator
-CYCLE( cur, "Cli1" )							// sector 1
-{
-	j = VLS( SHOOKS( cur ), "_qc1", 1 );		// firm credit class
-	v[4] = VLS( SHOOKS( cur ), "_Deb1", 1 );	// firm debt
-	v[3] += v[4] * v[1] * ( 1 + ( j - 1 ) * v[2] );// interest received
-}
-
-CYCLE( cur, "Cli2" )							// sector 2
-{
-	j = VLS( SHOOKS( cur ), "_qc2", 1 );		// firm credit class
-	v[4] = VLS( SHOOKS( cur ), "_Deb2", 1 );	// firm debt
-	v[3] += v[4] * v[1] * ( 1 + ( j - 1 ) * v[2] );// interest received
-}
-
-RESULT( v[3] + VS( PARENT, "rRes" ) * VL( "_Res", 1 ) + 
-		VS( PARENT, "rBonds" ) * VL( "_Bonds", 1 ) - 
-		VS( PARENT, "r" ) * VL( "_LoansCB", 1 ) -
-		VS( PARENT, "rD" ) * VL( "_Depo", 1 ) - VL( "_BadDeb", 1 ) )
+RESULT( V( "_iB" ) - V( "_iDb" ) +
+		VLS( PARENT, "rRes", 1 ) * VL( "_Res", 1 ) +
+		VLS( PARENT, "rBonds", 1 ) * VL( "_BondsB", 1 ) -
+		VLS( PARENT, "r", 1 ) * VL( "_LoansCB", 1 ) -
+		VL( "_BadDeb1", 1 ) - VL( "_BadDeb2", 1 ) )
 
 
 EQUATION( "_Res" )
@@ -320,24 +346,8 @@ RESULT( VS( PARENT, "tauB" ) * V( "_Depo" ) )
 EQUATION( "_TaxB" )
 /*
 Tax paid by bank in consumption-good sector
-Also updates '_DivB'
 */
-
-v[1] = V( "_PiB" );								// gross profits
-
-if ( v[1] > 0 )									// profits?
-{
-	v[2] = VS( GRANDPARENT, "tr" );				// tax rate	
-	
-	v[0] = v[2] * v[1];							// paid taxes
-	v[3] = VS( PARENT, "dB" ) * v[1] * ( 1 - v[2] );// paid dividends
-}
-else
-	v[3] = v[0] = 0;							// no dividends/taxes
-
-WRITE( "_DivB", v[3] );							// update dividends
-
-RESULT( v[0] )
+RESULT( max( V( "_PiB" ) * VS( GRANDPARENT, "tr" ), 0 ) )
 
 
 EQUATION( "_fB" )
@@ -345,6 +355,22 @@ EQUATION( "_fB" )
 Bank effective market share (in number of customers)
 */
 RESULT( V( "_Cl" ) / VS( PARENT, "Cl" ) )
+
+
+EQUATION( "_iDb" )
+/*
+Bank interest payments from deposits
+*/
+
+v[0] = V( "_fD" ) * VLS( GRANDPARENT, "SavAcc", 1 );// workers deposits
+
+CYCLE( cur, "Cli1" )							// sector 1 deposits
+	v[0] += max( VLS( SHOOKS( cur ), "_NW1", 1 ), 0 );
+
+CYCLE( cur, "Cli2" )							// sector 2 deposits
+	v[0] += max( VLS( SHOOKS( cur ), "_NW2", 1 ), 0 );
+
+RESULT( VLS( PARENT, "rD", 1 ) * v[0] )
 
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/
@@ -385,7 +411,7 @@ j = rank2.size( );								// # clients in sector 2
 h = 0;
 for ( auto cli : rank1 )
 {
-	WRITES( cli.firm, "_qc1", 
+	WRITES( cli.firm, "_qc1",
 			h < i * 0.25 ? 1 : h < i * 0.5 ? 2 : h < i * 0.75 ? 3 : 4 );
 	++h;
 }
@@ -393,7 +419,7 @@ for ( auto cli : rank1 )
 h = 0;
 for ( auto cli : rank2 )
 {
-	WRITES( cli.firm, "_qc2", 
+	WRITES( cli.firm, "_qc2",
 			h < j * 0.25 ? 1 : h < j * 0.5 ? 2 : h < j * 0.75 ? 3 : 4 );
 	++h;
 }
@@ -409,16 +435,10 @@ Sovereign bonds demand by bank
 Updated in '_ExRes'
 */
 
-EQUATION_DUMMY( "_Bonds", "_ExRes" )
+EQUATION_DUMMY( "_BondsB", "" )
 /*
 Sovereign bonds stock hold by bank
 Updated in '_ExRes'
-*/
-
-EQUATION_DUMMY( "_DivB", "_TaxB" )
-/*
-Bank distributed dividends
-Updated in '_PiB'
 */
 
 EQUATION_DUMMY( "_Gbail", "_NWb" )

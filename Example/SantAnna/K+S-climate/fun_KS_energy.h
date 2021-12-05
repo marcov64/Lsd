@@ -3,11 +3,11 @@
 	ENERGY OBJECT EQUATIONS
 	-----------------------
 
-	Equations that are specific to the Energy sector object in the 
+	Equations that are specific to the Energy sector object in the
 	K+S LSD model are coded below.
- 
+
  ******************************************************************************/
- 
+
 #define TECLIMIT		0.7						// thermal efficiency Carnot limit
 
 /*============================== KEY EQUATIONS ===============================*/
@@ -31,7 +31,7 @@ else
 }
 
 // normalized worker-equivalent on R&D (for ever-growing energy prices)
-v[3] = ( VL( "RDe", 1 ) / VLS( LABSUPL1, "wReal", 1 ) ) * VS( LABSUPL1, "Ls0" ) / 
+v[3] = ( VL( "RDe", 1 ) / VLS( LABSUPL1, "wReal", 1 ) ) * VS( LABSUPL1, "Ls0" ) /
 	   VLS( LABSUPL1, "Ls", 1 );
 
 // dirty energy innovation process (success probability)
@@ -45,12 +45,12 @@ if ( bernoulli( v[4] ) )						// dirty innovation succeeded?
 	v[8] = V( "xEsupEm" );						// upper support emissions innov.
 	v[9] = V( "alphaE" );						// beta distr. alpha parameter
 	v[10] = V( "betaE" );						// beta distr. beta parameter
-	
+
 	// draw new innovation values for thermal efficiency and emissions
-	v[11] = min( v[0] * ( 1 + v[5] + beta( v[9], v[10] ) * ( v[6] - v[5] ) ), 
+	v[11] = min( v[0] * ( 1 + v[5] + beta( v[9], v[10] ) * ( v[6] - v[5] ) ),
 				 TECLIMIT );					// consider Carnot limit eff.
 	v[12] = v[1] * ( 1 - v[7] - beta( v[9], v[10] ) * ( v[8] - v[7] ) );
-	
+
 	// select best between the two options (current/innovation) unit costs
 	v[13] = V( "pF" );							// fossil fuel price
 	v[14] = V( "trCO2e" );						// carbon tax on energy generat.
@@ -82,10 +82,6 @@ Also updates '__Qde'
 V( "IeNom" );									// ensure investment is done
 
 v[1] = V( "De" ) - V( "Kge" );					// dirty generation demand
-
-if ( v[1] <= 0 )
-	END_EQUATION( 0 );							// no generation costs
-
 v[2] = max( V( "Kde" ) - v[1], 0 );				// capacity not to use
 
 // allocate generation among plants, favoring cheaper (newer) plants
@@ -93,7 +89,7 @@ v[0] = 0;										// cost accumulator
 CYCLE( cur, "Dirty" )							// turn on required dirty plants
 {
 	v[3] = VS( cur, "__Kde" );					// plant notional capacity
-	
+
 	if( v[2] >= v[3] )							// no use for this plant?
 	{
 		v[4] = v[5] = 0;						// no generation/cost for plant
@@ -105,7 +101,7 @@ CYCLE( cur, "Dirty" )							// turn on required dirty plants
 		v[5] = v[4] * VS( cur, "__cDE" );		// generation cost
 		v[2] = 0;								// no more plants not to use
 	}
-	
+
 	WRITES( cur, "__Qde", v[4] );				// generation for plant
 	v[0] += v[5];								// accumulated generation costs
 }
@@ -127,6 +123,8 @@ Chooses between technologies and deploys new plants
 Also updates 'SIeNom'
 */
 
+V( "pE" );										// price computed w/ old plants
+
 v[1] = V( "EIe" );								// investment in cap. expansion
 v[2] = v[1] + V( "SIe" );						// total investment in capacity
 
@@ -142,7 +140,7 @@ v[5] = V( "kappaE" );							// max capacity growth rate
 v[6] = VL( "Kge", 1 );							// current green capacity
 v[7] = VL( "Kde", 1 );							// current dirty capacity
 
-// try to keep fix share until atmospheric CO2 reference time 
+// try to keep fix share until atmospheric CO2 reference time
 if ( T <= VS( CLIMATL1, "tA0" ) )
 {
 	v[8] = max( V( "fGE0" ) * V( "De" ) - v[6] + V( "SIgeD" ), 0 );// green new
@@ -162,7 +160,7 @@ else
 				v[8] = v[5] * v[6];				// invest in green to the cap
 			else								// both caps can't be enforced
 				v[8] = v[2] * v[6] / ( v[6] + v[7] );// keep green share
-			
+
 			v[9] = v[2] - v[8];					// dirty complements investment
 		}
 	else										// dirty plants are cheaper
@@ -178,7 +176,7 @@ else
 				v[9] = v[5] * v[7];				// invest in dirty to the cap
 			else								// both caps can't be enforced
 				v[9] = v[2] * v[7] / ( v[6] + v[7] );// keep dirty share
-				
+
 			v[8] = v[2] - v[9];					// green complements investment
 		}
 
@@ -186,7 +184,7 @@ if ( v[8] > 0 )									// invest in new green plants?
 {
 	v[0] = v[4] * v[8] * v[1] / v[2];			// green expansion cost
 	v[10] = v[4] * v[8] * ( 1 - v[1] / v[2] ) ;	// green substitution cost
-	
+
 	cur = ADDOBJL( "Green", T - 1 );			// create new green plant object
 	WRITES( cur, "__tGE", T );					// installation time
 	WRITES( cur, "__Kge", v[8] );				// plant generation capacity
@@ -228,7 +226,7 @@ else
 }
 
 // normalized worker-equivalent on R&D (for ever-growing energy prices)
-v[3] = ( VL( "RDe", 1 ) / VLS( LABSUPL1, "wReal", 1 ) ) * VS( LABSUPL1, "Ls0" ) / 
+v[3] = ( VL( "RDe", 1 ) / VLS( LABSUPL1, "wReal", 1 ) ) * VS( LABSUPL1, "Ls0" ) /
 	   VLS( LABSUPL1, "Ls", 1 );
 
 // green energy innovation process (success probability)
@@ -243,7 +241,7 @@ if ( bernoulli( v[4] ) )						// green innovation succeeded?
 
 	// draw new innovation values for installation cost
 	v[9] = v[0] * ( 1 - v[5] - beta( v[7], v[8] ) * ( v[6] - v[5] ) );
-	
+
 	// select best between the two options (current/innovation)
 	if ( v[9] < v[0] )							// compare costs
 	{
@@ -267,8 +265,7 @@ R&D expenditure of energy producer
 */
 // cap expenditure to existing funds / min R&D (1 worker) if negative net wealth
 RESULT( VS( PARENT, "flagEnClim" ) > 0 ?
-		max( min( V( "nuE" ) * VL( "Se", 1 ), VL( "NWe", 1 ) ), 
-		VS( LABSUPL1, "w" ) ) : 0 )
+		max( V( "nuE" ) * VL( "Se", 1 ), VS( LABSUPL1, "w" ) ) : 0 )
 
 
 EQUATION( "SIe" )
@@ -293,14 +290,12 @@ Price of energy
 if ( VS( PARENT, "flagEnClim" ) == 0 )
 	END_EQUATION( 0 );							// free energy
 
-V( "Ce" );										// ensure plant allocation done
-
-if ( V( "De" ) <= V( "Kge" ) + 0.01 )			// just green energy produced?
+if ( VL( "De", 1 ) <= VL( "Kge", 1 ) + 0.01 )	// just green energy produced?
 	v[1] = 0;									// no operating cost
 else
-	v[1] = MAX_CND( "__cDE", "__Qde", ">", 0 );	// higher cost among used plants
+	v[1] = MAX_CNDL( "__cDE", "__Qde", ">", 0, 1 );// max cost among used plants
 
-RESULT( isfinite( v[1] ) ? v[1] + V( "muE" ) : V( "muE" ) )
+RESULT( V( "muE" ) + ( isfinite( v[1] ) ? v[1] : 0 ) )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
@@ -310,6 +305,14 @@ EQUATION( "De" )
 Demand of energy from firms in capital- and consumer-good sectors
 */
 RESULT( VS( PARENT, "flagEnClim" ) == 0 ? 0 : VS( PARENT, "En" ) )
+
+
+EQUATION( "Df" )
+/*
+Demand (physical units) of fossil fuel by energy producer
+*/
+V( "Ce" );										// ensure generation is assigned
+RESULT( SUM( "__Df" ) )
 
 
 EQUATION( "EmE" )
@@ -334,11 +337,19 @@ Total generation capacity of power plants
 RESULT( V( "Kde" ) + V( "Kge" ) )
 
 
+EQUATION( "KeNom" )
+/*
+Capital stock (in historic money terms) of energy producer
+*/
+V( "IeNom" );									// ensure new plants installed
+RESULT( SUM( "__ICge" ) )
+
+
 EQUATION( "Kde" )
 /*
 Total generation capacity of dirty power plants
 */
-V( "IeNom" );									// assure new plants installed
+V( "IeNom" );									// ensure new plants installed
 RESULT( SUM( "__Kde" ) - SUM( "__RSde" ) )		// don't consider deferred scrap
 
 
@@ -346,15 +357,8 @@ EQUATION( "Kge" )
 /*
 Total generation capacity of green power plants
 */
-V( "IeNom" );									// assure new plants installed
+V( "IeNom" );									// ensure new plants installed
 RESULT( SUM( "__Kge" ) - SUM( "__RSge" ) )		// don't consider deferred scrap
-
-
-EQUATION( "NWe" )
-/*
-Net worth of energy producer
-*/
-RESULT( CURRENT + V( "PiE" ) - V( "IeNom" ) )
 
 
 EQUATION( "Qe" )
@@ -365,11 +369,11 @@ V( "Ce" );										// ensure dirty usage is comput.
 RESULT( SUM( "__Qde" ) + SUM( "__Qge" ) )
 
 
-EQUATION( "PiE" )
+EQUATION( "PiEnet" )
 /*
-Profit of energy producer
+Net cash flow of energy producer
 */
-RESULT( V( "Se" ) - V( "Ce" ) - V( "TaxE" ) - V( "RDe" ) )
+RESULT( V( "Se" ) - V( "Ce" ) - V( "IeNom" ) - V( "RDe" ) - V( "TaxE" ) )
 
 
 EQUATION( "SIeD" )
@@ -397,7 +401,7 @@ EQUATION( "Se" )
 /*
 Sales of energy producer
 */
-RESULT( VL( "pE", 1 ) * V( "Qe" ) )
+RESULT( V( "pE" ) * V( "Qe" ) )
 
 
 EQUATION( "TaxE" )

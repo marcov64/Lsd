@@ -99,7 +99,7 @@ bool no_ptr_chk = true;
 
 #define EQ_TEST_RESULT \
 	if ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) \
-		error_hard( "invalid equation result", "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation", true, "equation for '%s' produces the invalid value '%lf' at time %d", label, res, t );
+		error_hard( "invalid equation result", "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation", true, "equation for '%s' produces the invalid value '%lf' at case %d", label, res, t );
 
 #ifndef _NW_
 #define DEBUG_CODE \
@@ -286,6 +286,8 @@ bool no_ptr_chk = true;
 #define CURRENT ( var->val[ 0 ] )
 #define THIS ( p )
 #define CALLER ( c )
+#define NAME ( ( const char * ) p->label )
+#define NAMES( O ) ( chk_ptr( O ) ? NULL : ( const char * ) O->label )
 #define NEXT ( p->next )
 #define NEXTS( O ) ( CHK_PTR_OBJ( O ) O->next )
 #define PARENT ( p->up )

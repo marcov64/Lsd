@@ -64,9 +64,9 @@ corresponding linked list and then follow all the chain again.
 		   /\
 	   ||
 	   ||___________
-	  |             |
-	  |char *label  |------> object *next
-	  |variable *v  |
+	  |				|
+	  |char *label	|------> object *next
+	  |variable *v	|
 	  |_____________|
 	   ||
 	   ||-----> bridge *b -----> object *b->head ------> *b->head->next ----> ...
@@ -355,7 +355,7 @@ void object::init( object *_up, const char *lab, bool _to_compute )
 	node = NULL;				// not part of a network yet
 	cext = NULL;				// no C++ object extension yet
 	acounter = 0;				// "fail safe" when creating labels
-	lstCntUpd = 0; 				// counter never updated
+	lstCntUpd = 0;				// counter never updated
 	del_flag = NULL;			// address of flag to signal deletion
 	deleting = false;			// not being deleted
 }
@@ -414,7 +414,7 @@ void object::update( bool recurse, bool user )
 				cv->cal( NULL, 0 );
 		}
 
-		if ( ! deleted  )
+		if ( ! deleted	)
 		{
 			if ( cv->save || cv->savei )
 				cv->data[ t - cv->start ] = cv->val[ 0 ];
@@ -1560,7 +1560,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 		{
 #ifndef _NP_
 			// prevent concurrent use by more than one thread
-			lock_guard < mutex > lock( cv->parallel_comp );
+			rec_lguardT lock( cv->parallel_comp );
 #endif
 			if ( running && cv->param != 1 )
 			{
@@ -1573,7 +1573,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 						error_hard( "cannot add object",
 									"check your equation code to prevent this situation",
 									true,
-									"invalid update time (%d) to set object '%s'\nvariable '%s' was updated later (%d)", t_update, lab, cv->label, cv->last_update );
+									"invalid update case (%d) to set object '%s'\nvariable '%s' was updated later (%d)", t_update, lab, cv->label, cv->last_update );
 						return NULL;
 					}
 
@@ -2113,16 +2113,32 @@ forcing recalculation if already calculated
 ****************************************************/
 double object::recal( const char *lab )
 {
+	int i;
+	double app;
 	variable *cv;
 
 	cv = search_var_err( this, lab, no_search, false, "recalculating" );
 	if ( cv == NULL )
 		return NAN;
 
+	// don't do anything if not yet computed in t
+	if ( cv->last_update < t )
+		return( cv->val[ 0 ] );
+
+	app = cv->val[ 0 ];
+
+	for ( i = 0; i < cv->num_lag; ++i )		// scale up the past values
+		cv->val[ i ] = cv->val[ i + 1 ];
+
+	if ( ( cv->save || cv->savei ) && i + 1 <= t - cv->start )
+		cv->val[ i ] = cv->data[ t - i - 1 - cv->start ];
+	else
+		cv->val[ i ] = NAN;
+
 	cv->last_update = t - 1;
 	cv->next_update = t;
 
-	return cv->val[ 0 ];
+	return app;
 }
 
 
@@ -3022,7 +3038,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag )
 	{
 		b = ran1( ) * a;
 	}
-	while ( b == a ); 	// avoid ran1 == 1
+	while ( b == a );	// avoid ran1 == 1
 
 	a = cur1->cal( lv, lag );
 	for ( cur = cur1, cur1 = cur1->next; a <= b && cur1 != NULL; cur1 = cnext )
@@ -3066,7 +3082,7 @@ object *object::draw_rnd( const char *lab )
 	{
 		b = ran1( ) * a;
 	}
-	while ( b == a ); 	// avoid ran1 == 1
+	while ( b == a );	// avoid ran1 == 1
 
 	for ( a = 1, cur = cur1, cur1 = cur1->next; a <= b && cur1 != NULL; cur1 = cur1->next )
 	{
@@ -3176,7 +3192,7 @@ double object::write( const char *lab, double value, int time, int lag )
 
 #ifndef _NP_
 	// prevent concurrent use by more than one thread
-	lock_guard < mutex > lock( cv->parallel_comp );
+	rec_lguardT lock( cv->parallel_comp );
 #endif
 	if ( cv->param != 1 && time <= 0 && t > 1 )
 	{
@@ -3268,7 +3284,7 @@ double object::write( const char *lab, double value, int time, int lag )
 					error_hard( "invalid write operation",
 								"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
 								true,
-								"invalid update time (%d) and lag (%d) for variable '%s'", time, lag, lab );
+								"invalid update case (%d) and lag (%d) for variable '%s'", time, lag, lab );
 					return NAN;
 				}
 			}
@@ -3305,7 +3321,7 @@ double object::increment( const char *lab, double value )
 
 	if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
 	{
-		error_hard( "invalid write operation",
+		error_hard( "invalid increment operation",
 					"check your equation code to prevent this situation",
 					true,
 					"value '%g' is invalid for incrementing element '%s'", value, lab );
@@ -3315,6 +3331,18 @@ double object::increment( const char *lab, double value )
 	cv = search_var_err( this, lab, true, false, "incrementing" );
 	if ( cv == NULL )
 		return NAN;
+
+	if ( ! use_nan && is_nan( cv->val[ 0 ] ) )	// try to recover from RECALC
+		cv->cal( this, 0 );
+		
+	if ( ( ! use_nan && is_nan( cv->val[ 0 ] ) ) || is_inf( cv->val[ 0 ] ) )
+	{
+		error_hard( "invalid increment operation",
+					"check your equation code to prevent this situation",
+					true,
+					"current value '%g' of element '%s' is invalid for incrementing", cv->val[ 0 ], lab );
+		return NAN;
+	}
 
 	new_value = cv->val[ 0 ] + value;
 	this->write( lab, new_value, t );
@@ -3336,7 +3364,7 @@ double object::multiply( const char *lab, double value )
 
 	if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
 	{
-		error_hard( "invalid write operation",
+		error_hard( "invalid multiply operation",
 					"check your equation code to prevent this situation",
 					true,
 					"value '%g' is invalid for multiplying element '%s'", value, lab );
@@ -3346,6 +3374,18 @@ double object::multiply( const char *lab, double value )
 	cv = search_var_err( this, lab, true, false, "multiplying" );
 	if ( cv == NULL )
 		return NAN;
+
+	if ( ! use_nan && is_nan( cv->val[ 0 ] ) )	// try to recover from RECALC
+		cv->cal( this, 0 );
+		
+	if ( ( ! use_nan && is_nan( cv->val[ 0 ] ) ) || is_inf( cv->val[ 0 ] ) )
+	{
+		error_hard( "invalid multiply operation",
+					"check your equation code to prevent this situation",
+					true,
+					"current value '%g' of element '%s' is invalid for multiplying", cv->val[ 0 ], lab );
+		return NAN;
+	}
 
 	new_value = cv->val[ 0 ] * value;
 	this->write( lab, new_value, t );
@@ -3548,7 +3588,7 @@ LOGIC_OP_CODE
 Check for valid relational operator and return
 operator code for CHECK_COND
 ****************************************************/
-const unordered_map < string, int > logic_ops = { { "==", 0 }, { "!=", 1 }, { ">", 2 }, { ">=", 3 }, { "<", 4 }, { "<=", 5 } };
+const unordered_map < string, int > logic_ops = { { "==", 0 }, { "=", 0 }, { "EQ", 0 }, { "!=", 1 }, { "=!", 1 }, { "NE", 1 }, { ">", 2 }, { "GT", 2 }, { ">=", 3 }, { "=>", 3 }, { "GE", 3 }, { "<", 4 }, { "LT", 4 }, { "<=", 5 }, { "=<", 5 }, { "LE", 5 } };
 
 int logic_op_code( const char *lop, const char *errmsg )
 {

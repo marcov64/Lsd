@@ -2182,7 +2182,7 @@ lang=EN-US> is chosen, the user has several choices on how to generate the new
 series:</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=212 height=478 src="image/create_series.png"></span></p>
+border=0 width=212 height=497 src="image/create_series.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>It is possible to filter away data during
 the new series calculations by ignoring values below or above a specified
@@ -2216,15 +2216,17 @@ series selected. Each time step value for the new series is computed
 elaborating over the values for each of the series selected across all their
 time steps. For example, when choosing </span><span class=Cdigo><span
 lang=EN-US>Average</span></span><span lang=EN-US> each time step t in the new
-series value will be computed as the average value of the series number t over
+series value will be computed as the average value of the series number over
 all the time steps chosen, according to the order in the <a
 href="#_Series_selected">Series selected</a> list box.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The new series can be computed as the
-average, median, sum, product, inverse (1/x), count, maximum, minimum,
-variance, standard deviation, and mean and median confidence intervals (at the
-specified confidence level) of the series. Select the desired operation
-accordingly.</span></p>
+average, median, sum, product, inverse (1/x), negative (-x), lag (x(t-1)),
+count, maximum, minimum, variance, standard deviation, and mean and median
+confidence intervals (at the specified confidence level) of the series. Select
+the desired operation accordingly. Some operations (inverse, negative, lag),
+when calculating over series, use only the first selected series to create the
+new series. The lag operation can only be applied to computations over series.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
 lang=EN-US>Count</span></span><span lang=EN-US> option produces a maximum value
@@ -2233,8 +2235,8 @@ Series which do not have values for a certain period are not considered in the
 counting for this period.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
-lang=EN-US>confidence interval</span></span><span lang=EN-US> operations produce
-three series: the average or the median (same as selecting </span><span
+lang=EN-US>confidence interval</span></span><span lang=EN-US> operations
+produce three series: the average or the median (same as selecting </span><span
 class=Cdigo><span lang=EN-US>Average</span></span><span lang=EN-US> or </span><span
 class=Cdigo><span lang=EN-US>Median</span></span><span lang=EN-US>), and the
 confidence interval upper and lower bounds. This way, the confidence interval
@@ -2253,6 +2255,8 @@ class=Cdigo><span lang=EN-US>_avg</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>_sum</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>_prd</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>_inv</span></span><span lang=EN-US>, </span><span
+class=Cdigo><span lang=EN-US>_neg</span></span><span lang=EN-US>, </span><span
+class=Cdigo><span lang=EN-US>_lag</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>_num</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>_max</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>_min</span></span><span lang=EN-US>, </span><span
@@ -3107,9 +3111,9 @@ lang=EN-US>s </span></h2>
 created assign different colors to the series or data elements. If the </span><span
 class=Cdigo><span lang=EN-US>No colors </span></span><span lang=EN-US>check box
 is marked, the series or data are plotted using a gray scale, more appropriate
-for black-and-white printing. Users have also the option to edit line colors directly
-in the <a href="#graph">plot window</a> before saving the plot to file. This
-way the user can also use dash patterns for the plot lines.</span></p>
+for black-and-white printing. Users have also the option to edit line colors
+directly in the <a href="#graph">plot window</a> before saving the plot to
+file. This way the user can also use dash patterns for the plot lines.</span></p>
 
 <h2><a name=watch></a><a name=grids></a><a name="_Grid"></a><span lang=EN-US>Grids
 </span></h2>
@@ -3657,7 +3661,8 @@ href="#_Series_selected">Series selected list box</a>. The data values must be
 positive values, including 0, in which just the integer part is considered. If
 the </span><span class=Cdigo><span lang=EN-US><a href="#_Series_in_logs">Series
 in logs</a></span></span><span lang=EN-US> option is set, the natural logarithm
-of the time series data is used for computation and 0 is not a valid data value).</span></p>
+of the time series data is used for computation and 0 is not a valid data
+value).</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=585 height=458 src="image/lattice_plot.png"></span></p>
@@ -4083,9 +4088,8 @@ lang=EN-US> file).</span></p>
 class=Cdigo><span lang=EN-US>F1</span></span><span lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Menu </span><span class=Cdigo><span
-lang=EN-US><a href="menuhelp.html">Help</a></span></span><span lang=EN-US>
-documentation is <a href="menuhelp.html">here</a>. It is shared by all LSD
-modules.</span></p>
+lang=EN-US><a href="menuhelp.html">Help</a></span></span><span lang=EN-US> documentation
+is <a href="menuhelp.html">here</a>. It is shared by all LSD modules.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

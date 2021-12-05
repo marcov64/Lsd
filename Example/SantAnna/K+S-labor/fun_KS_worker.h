@@ -3,9 +3,9 @@
 	WORKER OBJECT EQUATIONS
 	-----------------------
 
-	Equations that are specific to the worker objects in the K+S LSD model 
+	Equations that are specific to the worker objects in the K+S LSD model
 	are coded below.
- 
+
  ******************************************************************************/
 
 /*============================== KEY EQUATIONS ===============================*/
@@ -82,7 +82,7 @@ if ( h <= 0 )
 firmSeT targetFirms;							// set of target firms
 firmSeT::iterator it;							// iterator to firm set
 dblVecT *weight = & V_EXTS( GRANDPARENT, countryE, firm2wgtd );// firms weights
-i = 0; 											// number of iterations limiter
+i = 0;											// number of iterations limiter
 j = weight->size( );							// number of operating firms
 h = min( h, k != 2 ? j : j - 1 );				// can't look for more than all
 
@@ -95,10 +95,10 @@ while ( ( int ) targetFirms.size( ) < h - 1 )
 
 	// target firm pointer
 	cur1 = V_EXTS( GRANDPARENT, countryE, firm2ptr[ itd - weight->begin( ) ] );
-	
-	if ( ( k != 2 || cur1 != cur ) && cur1 != NULL )// don't submit to employer		
+
+	if ( ( k != 2 || cur1 != cur ) && cur1 != NULL )// don't submit to employer
 		targetFirms.insert( cur1 );				// add firm to targets list
-		
+
 	++i;										// count iterations
 	if ( i > j || weight->at( 0 ) >= 1 )		// probably too few firms?
 		break;									// stop searching
@@ -108,13 +108,13 @@ while ( ( int ) targetFirms.size( ) < h - 1 )
 application applData;
 applData.w = v[5] = V( "_wR" );
 applData.s = v[6] = V( "_s" );
-applData.ws = v[5] / v[6]; 
+applData.ws = v[5] / v[6];
 applData.Te = VL( "_Te", 1 );
 applData.wrk = THIS;
 
 // apply to sector 1 queue
 EXEC_EXTS( GRANDPARENT, countryE, firm1appl, push_back, applData );
-											
+
 // insert worker application in the selected firms' queues (if any)
 for( i = 1, it = targetFirms.begin( ); it != targetFirms.end( ); ++i, ++it )
 	// add application to the job queue of corresponding firm in sector 2
@@ -137,15 +137,15 @@ switch ( ( int ) VS( GRANDPARENT, "flagWorkerSkProd" ) )
 	default:
 		v[0] = INISKILL;
 		break;
-		
+
 	case 1:										// only vintage skills count
 		v[0] = V( "_sV" );
 		break;
-		
+
 	case 2:										// only tenure skills count
 		v[0] = V( "_sT" ) / VLS( PARENT, "sTavg", 1 );// normalized tenure skills
 		break;
-	
+
 	case 3:										// both skills count
 		v[0] = V( "_sV" ) * V( "_sT" ) / VLS( PARENT, "sTavg", 1 );
 		break;
@@ -162,7 +162,7 @@ Tenure skills are >= INISKILL and unbounded
 
 if ( VS( GRANDPARENT, "flagWorkerLBU" ) <= 1 )	// no learning-by-tenure mode?
 	END_EQUATION( INISKILL );
-	
+
 if ( V( "_age" ) == 1 )							// just "born"?
 	END_EQUATION( VLS( PARENT, "sTmin", 1 ) );	// get minimum existing skills
 
@@ -196,7 +196,7 @@ switch ( ( int ) V( "_employed" ) )				// employment status
 		if ( V( "_Te" ) == 0 )					// just hired in firm?
 			v[0] = VLS( PARENTS( HOOK( FWRK ) ), "_sT2min", 1 );// firm minimum skills
 		else									// already working, just increase
-			v[0] = CURRENT  * ( 1 + VS( PARENT, "tauT" ) );
+			v[0] = CURRENT	* ( 1 + VS( PARENT, "tauT" ) );
 }
 
 RESULT( max( v[0], VLS( PARENT, "sTmin", 1 ) ) )// minimum skills is current min
@@ -214,8 +214,8 @@ if ( i == 0 || i == 2 )							// no learning-by-vintage mode?
 
 if ( HOOK( FWRK ) == NULL || V( "_age" ) == 1 )	// discard unempl./sect.1
 	END_EQUATION( VS( PARENT, "sigma" ) );		// skills = public skills
-	
-RESULT( CURRENT + VS( PARENT, "sigma" ) * ( VL( "_Q", 1 ) / VL( "_CQ", 1 ) ) * 
+
+RESULT( CURRENT + VS( PARENT, "sigma" ) * ( VL( "_Q", 1 ) / VL( "_CQ", 1 ) ) *
 		CURRENT * ( 1 - CURRENT ) )
 
 
@@ -260,7 +260,7 @@ i = 1;											// assume pre-change firm
 if ( h == 2 )									// employed in sector 2?
 {												// handle post-change
 	cur = PARENTS( HOOK( FWRK ) );				// pointer to employer in sec. 2
-	
+
 	if ( VS( cur, "_postChg" ) )				// employer of post-change type?
 	{
 		v[15] = VS( GRANDPARENT, "flagIndexWageChg" );// wage indexation mode
@@ -297,7 +297,7 @@ else
 
 	if ( v[15] == 2 && h == 2 )					// homogeneous wages?
 		END_EQUATION( VS( cur, "_w2o" ) );		// use current offered wage
-	
+
 	v[1] = VS( PARENT, "psi1" );				// inflation adjust. parameter
 	v[2] = VS( PARENT, "psi2" );				// general prod. adjust. param.
 	v[3] = VS( PARENT, "psi3" );				// unemploym. adjust. parameter
@@ -306,14 +306,14 @@ else
 	v[5] = VLS( CONSECL2, "dCPIb", 1 );			// current inflation
 	v[6] = VLS( GRANDPARENT, "dAb", 1 );		// general productivity variat.
 	v[7] = VLS( PARENT, "dUeB", 1 );			// unemployment variation
-	
+
 	if ( h == 1 )								// worker in sector 1?
 	{
 		k = 4;									// just to silent comp. warning
 		v[8] = VLS( CAPSECL2, "dA1b", 1 );		// sector 1 productivity variat.
 	}
 	else										// sector 2 workers
-	{ 	
+	{
 		k = VS( cur, "_life2cycle" );			// employer status
 		if ( k == 0 )							// handle entrants
 			v[8] = 0;
@@ -323,7 +323,7 @@ else
 			else
 				v[8] = max( VL( "_dQb", 1 ), 0);// delta pot. prod. (worker)
 	}
-	
+
 	// make sure total productivity effect is bounded to 1
 	if ( ( v[2] + v[4] ) > 1 )
 		v[2] = max( 1 - v[4], 0 );				// adjust general prod. effect
@@ -331,7 +331,7 @@ else
 	// adjust wage by composite index
 	v[9] = 1 + v[17] + v[1] * ( v[5] - v[17] ) + v[2] * v[6] + v[3] * v[7] + v[4] * v[8];
 	v[0] = CURRENT * v[9];
-	
+
 	// labor sharing mode? (applicable only in sector 2, for non-entrants)
 	if ( h == 2 && v[16] == 1 && k > 0 )
 	{
@@ -424,7 +424,7 @@ RESULT( v[0] / i )
 
 /*============================ SUPPORT EQUATIONS =============================*/
 
-EQUATION( "_B" )
+EQUATION( "_Bon" )
 /*
 Bonus received in the period by worker
 */
@@ -432,12 +432,10 @@ Bonus received in the period by worker
 if ( V( "_employed" ) != 2 )					// unemployed or sector 1?
 	END_EQUATION( 0 );							// no bonus
 
-VS( PARENTS( HOOK( FWRK ) ), "_Tax2" );			// ensure bonus is computed
-
 v[1] = VS( PARENTS( HOOK( FWRK ) ), "_W2" );	// total wages paid by firm
-v[2] = VS( PARENTS( HOOK( FWRK ) ), "_B2" );	// total bonuses paid by firm
+v[2] = VS( PARENTS( HOOK( FWRK ) ), "_Bon2" );	// total bonuses paid by firm
 
-RESULT( v[1] > 0 ? V( "_w" ) * v[2] / v[1] : 0 )// bonus share
+RESULT( v[1] > 0 ? v[2] * VS( PARENT, "Lscale" ) * V( "_w" ) / v[1] : 0 )
 
 
 EQUATION( "_CQ" )
@@ -453,9 +451,17 @@ Production with current worker skills and vintage
 */
 
 if ( HOOK( VWRK ) == NULL )						// disalloc., unempl. or sec. 1?
-    END_EQUATION( 0 );							// no production
-	
+	END_EQUATION( 0 );							// no production
+
 RESULT( V( "_s" ) * VS( PARENTS( HOOK( VWRK ) ), "__Avint" ) )
+
+
+EQUATION( "_TaxW" )
+/*
+Tax paid by worker on wage
+*/
+RESULT( VS( GRANDPARENT, "flagTax" ) >= 1 ? 
+		VS( GRANDPARENT, "tr" ) * ( V( "_w" ) + VL( "_Bon", 1 ) ) : 0 )
 
 
 EQUATION( "_Te" )
@@ -498,7 +504,7 @@ EQUATION( "_dQb" )
 Notional production (bounded) rate of change of worker
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( THIS, "_Q", VS( GRANDPARENT, "mLim" ), 
+RESULT( mov_avg_bound( THIS, "_Q", VS( GRANDPARENT, "mLim" ),
 					   VS( GRANDPARENT, "mPer" ) ) )
 
 
@@ -518,7 +524,7 @@ Updated in '_appl'
 
 EQUATION_DUMMY( "_employed", "" )
 /*
-Flag to indicate if worker is employed at a firm in sector 1 (=1), 
+Flag to indicate if worker is employed at a firm in sector 1 (=1),
 sector 2 (=2) or unemployed (=0)
 Updated in 'firing' and 'hiring'
 */

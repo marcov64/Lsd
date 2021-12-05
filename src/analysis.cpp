@@ -457,7 +457,7 @@ void analysis( bool mc )
 	cmd( "ttk::frame .da.f.h.v.ft.to" );
 	cmd( "ttk::label .da.f.h.v.ft.to.maxc -text \"to case\"" );
 	cmd( "ttk::entry .da.f.h.v.ft.to.mxc -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= $minc && $n <= $numc } { set maxc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $maxc; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-	cmd( "pack  .da.f.h.v.ft.to.maxc .da.f.h.v.ft.to.mxc -ipadx 5 -side left" );
+	cmd( "pack	.da.f.h.v.ft.to.maxc .da.f.h.v.ft.to.mxc -ipadx 5 -side left" );
 
 	cmd( "pack .da.f.h.v.ft.auto .da.f.h.v.ft.from .da.f.h.v.ft.to -side left -padx 5 -expand 1 -fill x" );
 
@@ -504,7 +504,7 @@ void analysis( bool mc )
 	// right options block
 	cmd( "ttk::frame .da.f.h.tc -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 	cmd( "ttk::radiobutton .da.f.h.tc.time -text \"Time series\" -variable tc -value 0 -command { if { $xy == 0 } { .da.f.h.v.y2.y2 conf -state normal }; if { $xy == 1 } { .da.f.tit.lp.line config -state normal; set line_point $linemodeP } }" );
-	cmd( "ttk::radiobutton .da.f.h.tc.cross -text \"Cross-section\" -variable tc -value 1 -command { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled; if { $xy == 1 } { set line_point 2;  .da.f.tit.lp.line config -state disabled } }" );
+	cmd( "ttk::radiobutton .da.f.h.tc.cross -text \"Cross-section\" -variable tc -value 1 -command { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled; if { $xy == 1 } { set line_point 2;	 .da.f.tit.lp.line config -state disabled } }" );
 	cmd( "pack .da.f.h.tc.time .da.f.h.tc.cross -anchor w" );
 
 	cmd( "tooltip::tooltip .da.f.h.tc.time \"Longitudinal plot (cases in x axis)\"" );
@@ -512,7 +512,7 @@ void analysis( bool mc )
 
 	cmd( "ttk::frame .da.f.h.xy -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 	cmd( "ttk::radiobutton .da.f.h.xy.seq -text \"Sequence\" -variable xy -value 0 -command { if { $tc == 0 } { .da.f.h.v.y2.y2 conf -state normal } { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled }; .da.f.tit.run.gnu conf -state disabled; .da.f.tit.run.watch conf -state normal; if { $tc == 1 } { .da.f.tit.lp.line config -state normal; set line_point $linemodeP } }" );
-	cmd( "ttk::radiobutton .da.f.h.xy.xy -text \"XY plot\" -variable xy -value 1 -command { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled; .da.f.tit.run.gnu conf -state normal; .da.f.tit.run.watch conf -state disabled; if { $tc == 1 } { set line_point 2;  .da.f.tit.lp.line config -state disabled } }" );
+	cmd( "ttk::radiobutton .da.f.h.xy.xy -text \"XY plot\" -variable xy -value 1 -command { set y2 0; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled; .da.f.tit.run.gnu conf -state normal; .da.f.tit.run.watch conf -state disabled; if { $tc == 1 } { set line_point 2;	.da.f.tit.lp.line config -state disabled } }" );
 	cmd( "pack .da.f.h.xy.seq .da.f.h.xy.xy -anchor w" );
 
 	cmd( "tooltip::tooltip .da.f.h.xy.seq \"Regular plot (cases and series in axes)\"" );
@@ -605,7 +605,7 @@ void analysis( bool mc )
 	cmd( "bind .da <Control-h> { set choice 32 }; bind .da <Control-H> { set choice 32 }" );	// plot histograms
 	cmd( "bind .da <Control-c> { set choice 8 }; bind .da <Control-C> { set choice 8 }" );	// empty (clear) selected series
 	cmd( "bind .da <Control-Shift-a> { set choice 24; break }; bind .da <Control-Shift-A> { set choice 24; break }" );	// insert new series
-	cmd( "bind .da <Control-i>  { set choice 34 }; bind .da <Control-I> { set choice 34 }" );	// sort selected in inverse order
+	cmd( "bind .da <Control-i>	{ set choice 34 }; bind .da <Control-I> { set choice 34 }" );	// sort selected in inverse order
 	cmd( "bind .da <Control-f> { set choice 39 }; bind .da <Control-F> { set choice 39 }" );	// search first
 	cmd( "bind .da <F3> { set choice 40 }; bind .da <Control-n> { set choice 40 }; bind .da <Control-N> { set choice 40 }" );	// search next
 	cmd( "bind .da <Control-greater> { set choice 6 }" );	// insert series
@@ -620,9 +620,9 @@ void analysis( bool mc )
 	cmd( "bind .da <Control-e> { set choice 10 }; bind .da <Control-E> { set choice 10 }" );	// save data
 	cmd( "bind .da <Control-d> { set choice 36 }; bind .da <Control-D> { set choice 36 }" );	// show data
 	cmd( "bind .da <Control-t> { set choice 12 }; bind .da <Control-D> { set choice 12 }" );	// statistics
-	cmd( "bind .da <Control-b> { set choice 45 }; bind .da <Control-B> { set choice 45 }" ); 	// add not saved series
-	cmd( "bind .da <Control-w> { set choice 46 }; bind .da <Control-W> { set choice 46 }" ); 	// create new series from existing
-	cmd( "bind .da <Control-m> { set choice 47 }; bind .da <Control-M> { set choice 47 }" ); 	// create moving average from existing
+	cmd( "bind .da <Control-b> { set choice 45 }; bind .da <Control-B> { set choice 45 }" );	// add not saved series
+	cmd( "bind .da <Control-w> { set choice 46 }; bind .da <Control-W> { set choice 46 }" );	// create new series from existing
+	cmd( "bind .da <Control-m> { set choice 47 }; bind .da <Control-M> { set choice 47 }" );	// create moving average from existing
 
 	// grab focus when called from LSD Debugger
 	cmd( "set running %d", running ? 1 : 0 );
@@ -1027,13 +1027,13 @@ void analysis( bool mc )
 				cmd( "ttk::frame .da.file.opt.fmt -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 				cmd( "ttk::radiobutton .da.file.opt.fmt.p1 -text SVG -variable pltSavFmt -value svg -command { \
 						.da.file.opt.pos.p1 configure -state disabled; \
-						.da.file.opt.pos.p2 configure -state disabled;  \
+						.da.file.opt.pos.p2 configure -state disabled;	\
 						.da.file.dim.n configure -state disabled  \
 					}" );
 				cmd( "ttk::radiobutton .da.file.opt.fmt.p2 -text Postscript -variable pltSavFmt -value eps -command { \
 						.da.file.opt.pos.p1 configure -state normal; \
 						.da.file.opt.pos.p2 configure -state normal;  \
-						.da.file.dim.n configure -state normal  \
+						.da.file.dim.n configure -state normal	\
 					}" );
 				cmd( "pack .da.file.opt.fmt.p1 .da.file.opt.fmt.p2 -side left -ipadx 5" );
 
@@ -1062,10 +1062,10 @@ void analysis( bool mc )
 				cmd( "if [ string equal $pltSavFmt eps ] { \
 						.da.file.opt.pos.p1 configure -state normal; \
 						.da.file.opt.pos.p2 configure -state normal;  \
-						.da.file.dim.n configure -state normal  \
+						.da.file.dim.n configure -state normal	\
 					} else { \
 						.da.file.opt.pos.p1 configure -state disabled; \
-						.da.file.opt.pos.p2 configure -state disabled;  \
+						.da.file.opt.pos.p2 configure -state disabled;	\
 						.da.file.dim.n configure -state disabled  \
 					}" );
 
@@ -2367,7 +2367,7 @@ void analysis( bool mc )
 						} \
 					}" );
 
-				cmd( "okhelpcancel .da.a b  { set choice 1 } { LsdHelp menudata_res.html#find } { set choice 2 }" );
+				cmd( "okhelpcancel .da.a b	{ set choice 1 } { LsdHelp menudata_res.html#find } { set choice 2 }" );
 				cmd( "showtop .da.a" );
 				cmd( "focus .da.a.v.e" );
 
@@ -2648,7 +2648,7 @@ void analysis( bool mc )
 						{
 							// make sure there is a path set
 							if ( strlen( path_res  ) > 0 )
-								cmd( "set path_res  \"%s\"", path_res );
+								cmd( "set path_res	\"%s\"", path_res );
 							else
 								cmd( "set path_res \"%s\"", path );
 
@@ -2662,7 +2662,7 @@ void analysis( bool mc )
 							h = choice;		// number of files
 
 							if ( h == 0 )
-								goto add_end; 	// no file selected
+								goto add_end;	// no file selected
 
 							if ( mc && h == 1 )
 							{
@@ -2867,7 +2867,7 @@ void analysis( bool mc )
 				cmd( "pack .da.a.o.l .da.a.o.t" );
 
 				cmd( "pack .da.a.l .da.a.st .da.a.t .da.a.d .da.a.o -pady 5 -padx 5" );
-				cmd( "okXhelpcancel .da.a b  { Default } { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#gpoptions } { set choice 2 }" );
+				cmd( "okXhelpcancel .da.a b	 { Default } { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#gpoptions } { set choice 2 }" );
 
 				cmd( "showtop .da.a" );
 				cmd( "mousewarpto .da.a.b.ok 0" );
@@ -3015,7 +3015,7 @@ void analysis( bool mc )
 				cmd( "set lx1 $hsizeP" );
 				cmd( "ttk::entry .da.s.x.e1 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set lx1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lx1; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.x.e1 insert 0 $lx1" );
-				cmd( "ttk::label .da.s.x.l2 -anchor e -text \"  XY\"" );
+				cmd( "ttk::label .da.s.x.l2 -anchor e -text \"	XY\"" );
 				cmd( "set lx2 $hsizePxy" );
 				cmd( "ttk::entry .da.s.x.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set lx2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lx2; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.x.e2 insert 0 $lx2" );
@@ -3027,7 +3027,7 @@ void analysis( bool mc )
 				cmd( "set ly1 $vsizeP" );
 				cmd( "ttk::entry .da.s.y.e1 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set ly1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ly1; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.y.e1 insert 0 $ly1" );
-				cmd( "ttk::label .da.s.y.l2 -anchor e -text \"  XY\"" );
+				cmd( "ttk::label .da.s.y.l2 -anchor e -text \"	XY\"" );
 				cmd( "set ly2 $vsizePxy" );
 				cmd( "ttk::entry .da.s.y.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set ly2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ly2; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.y.e2 insert 0 $ly2" );
@@ -3046,7 +3046,7 @@ void analysis( bool mc )
 				cmd( "set tb $tbordsizeP" );
 				cmd( "ttk::entry .da.s.v.e1 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set tb %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tb; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.v.e1 insert 0 $tb" );
-				cmd( "ttk::label .da.s.v.l2 -anchor e -text \"  Bottom\"" );
+				cmd( "ttk::label .da.s.v.l2 -anchor e -text \"	Bottom\"" );
 				cmd( "set bb $bbordsizeP" );
 				cmd( "ttk::entry .da.s.v.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set bb %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bb; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.v.e2 insert 0 $bb" );
@@ -3060,7 +3060,7 @@ void analysis( bool mc )
 				cmd( "set ht $hticksP" );
 				cmd( "ttk::entry .da.s.t.e1 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set ht %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ht; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.t.e1 insert 0 $ht" );
-				cmd( "ttk::label .da.s.t.l2 -anchor e -text \"  Vertical\"" );
+				cmd( "ttk::label .da.s.t.l2 -anchor e -text \"	Vertical\"" );
 				cmd( "set vt $vticksP" );
 				cmd( "ttk::entry .da.s.t.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set vt %%P; return 1 } { %%W delete 0 end; %%W insert 0 $vt; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.t.e2 insert 0 $vt" );
@@ -3071,7 +3071,7 @@ void analysis( bool mc )
 				cmd( "set sm $smoothP" );
 				cmd( "ttk::combobox .da.s.s.e1 -values [ list no yes raw ] -width 5 -justify center -validate focusout -validatecommand { set n %%P; if { $n in [ list no yes raw ] } { set sm %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sm; return 0 } } -invalidcommand { bell }" );
 				cmd( "write_any .da.s.s.e1 $sm" );
-				cmd( "ttk::label .da.s.s.l2 -anchor e -text \"  Spline segments\"" );
+				cmd( "ttk::label .da.s.s.l2 -anchor e -text \"	Spline segments\"" );
 				cmd( "set ss $splstepsP" );
 				cmd( "ttk::entry .da.s.s.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set ss %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ss; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 				cmd( "if { $sm == \"raw\" } { .da.s.s.e2 configure -state normal }" );
@@ -3123,38 +3123,38 @@ void analysis( bool mc )
 
 				if ( choice == 1 )
 				{
-					cmd( "set hsizeP 		[ .da.s.x.e1 get ]" );
-					cmd( "set hsizePxy 		[ .da.s.x.e2 get ]" );
-					cmd( "set vsizeP 		[ .da.s.y.e1 get ]" );
-					cmd( "set vsizePxy 		[ .da.s.y.e2 get ]" );
-					cmd( "set hmbordsizeP 	[ .da.s.h.e get ]" );
+					cmd( "set hsizeP		[ .da.s.x.e1 get ]" );
+					cmd( "set hsizePxy		[ .da.s.x.e2 get ]" );
+					cmd( "set vsizeP		[ .da.s.y.e1 get ]" );
+					cmd( "set vsizePxy		[ .da.s.y.e2 get ]" );
+					cmd( "set hmbordsizeP	[ .da.s.h.e get ]" );
 					cmd( "set tbordsizeP	[ .da.s.v.e1 get ]" );
 					cmd( "set bbordsizeP	[ .da.s.v.e2 get ]" );
-					cmd( "set hticksP 		[ .da.s.t.e1 get ]" );
-					cmd( "set vticksP 		[ .da.s.t.e2 get ]" );
-					cmd( "set splstepsP 	[ .da.s.s.e2 get ]" );
-					cmd( "set smoothP 		[ .da.s.s.e1 get ]" );
-					cmd( "set fontP 		[ list [ .da.s.f.e.font get ] [ .da.s.f.e.dim get ] [ .da.s.f.e.sty get ] ]" );
+					cmd( "set hticksP		[ .da.s.t.e1 get ]" );
+					cmd( "set vticksP		[ .da.s.t.e2 get ]" );
+					cmd( "set splstepsP		[ .da.s.s.e2 get ]" );
+					cmd( "set smoothP		[ .da.s.s.e1 get ]" );
+					cmd( "set fontP			[ list [ .da.s.f.e.font get ] [ .da.s.f.e.dim get ] [ .da.s.f.e.sty get ] ]" );
 
 
 				}
 
 				if ( choice == 3 )
 				{
-					cmd( "write_any .da.s.x.e1  $default_hsizeP" );
-					cmd( "write_any .da.s.x.e2  $default_hsizePxy" );
-					cmd( "write_any .da.s.y.e1  $default_vsizeP" );
-					cmd( "write_any .da.s.y.e2  $default_vsizePxy" );
-					cmd( "write_any .da.s.h.e   $default_hmbordsizeP" );
-					cmd( "write_any .da.s.v.e1  $default_tbordsizeP" );
-					cmd( "write_any .da.s.v.e2  $default_bbordsizeP" );
-					cmd( "write_any .da.s.t.e1  $default_hticksP" );
-					cmd( "write_any .da.s.t.e2  $default_vticksP" );
-					cmd( "write_any .da.s.s.e1 	$default_smoothP" );
-					cmd( "write_any .da.s.s.e2  $default_splstepsP" );
-					cmd( "write_any .da.s.f.e.font 	[ lindex $default_fontP 0 ]" );
-					cmd( "write_any .da.s.f.e.dim 	[ lindex $default_fontP 1 ]" );
-					cmd( "write_any .da.s.f.e.sty 	[ lindex $default_fontP 2 ]" );
+					cmd( "write_any .da.s.x.e1	$default_hsizeP" );
+					cmd( "write_any .da.s.x.e2	$default_hsizePxy" );
+					cmd( "write_any .da.s.y.e1	$default_vsizeP" );
+					cmd( "write_any .da.s.y.e2	$default_vsizePxy" );
+					cmd( "write_any .da.s.h.e	$default_hmbordsizeP" );
+					cmd( "write_any .da.s.v.e1	$default_tbordsizeP" );
+					cmd( "write_any .da.s.v.e2	$default_bbordsizeP" );
+					cmd( "write_any .da.s.t.e1	$default_hticksP" );
+					cmd( "write_any .da.s.t.e2	$default_vticksP" );
+					cmd( "write_any .da.s.s.e1	$default_smoothP" );
+					cmd( "write_any .da.s.s.e2	$default_splstepsP" );
+					cmd( "write_any .da.s.f.e.font	[ lindex $default_fontP 0 ]" );
+					cmd( "write_any .da.s.f.e.dim	[ lindex $default_fontP 1 ]" );
+					cmd( "write_any .da.s.f.e.sty	[ lindex $default_fontP 2 ]" );
 					goto set_plot;
 				}
 
@@ -3437,7 +3437,7 @@ void analysis( bool mc )
 				cmd( "focus $wid.l.e" );
 
 				// enable most options for non-dotted lines
-				cmd( "if { ! $dots } { $wid.l.e  configure -state normal; $wid.c.e  configure -state normal; $wid.fall.font  configure -state normal }" );
+				cmd( "if { ! $dots } { $wid.l.e	 configure -state normal; $wid.c.e	configure -state normal; $wid.fall.font	 configure -state normal }" );
 				// enable dashes & arrows for drawing lines only
 				cmd( "if $draw { $wid.d.e  configure -state normal }" );
 
@@ -4379,9 +4379,9 @@ double *log_data( double *data, int start, int end, int ser, const char *err_msg
 			logdata[ i ] = NAN;
 			if ( i > 0 && ++errCnt < ERR_LIM )	// prevent slow down due to I/O
 				if ( ser >= 0 )
-					plog( "\nWarning: zero or negative values in log %s (ignored)\n         Series: %d, Case: %d", err_msg, ser + 1, start + i );
+					plog( "\nWarning: zero or negative values in log %s (ignored)\n Series: %d, Case: %d", err_msg, ser + 1, start + i );
 				else
-					plog( "\nWarning: zero or negative values in log %s (ignored)\n         Case: %d", err_msg, start + i );
+					plog( "\nWarning: zero or negative values in log %s (ignored)\n Case: %d", err_msg, start + i );
 			else
 				if ( i > 0 && ! stopErr )
 				{
@@ -4630,7 +4630,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	else
 		gzclose( fz );
 
-	plog( "%d series",  new_v );
+	plog( "%d series",	new_v );
 
 	if ( ! gz )
 		f = fopen( filename, "rt" );
@@ -4692,7 +4692,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	else
 		gzgets( fz, linbuf, linsiz );
 
-	tok = strtok( linbuf , "\t" ); 		// prepares for parsing and get first one
+	tok = strtok( linbuf , "\t" );		// prepares for parsing and get first one
 	for ( i = *num_v; i < new_v + *num_v; ++i )
 	{
 		if ( tok == NULL )
@@ -4747,7 +4747,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		else
 			gzgets( fz, linbuf, linsiz );
 
-		tok = strtok( linbuf , "\t" ); 		// prepares for parsing and get first one
+		tok = strtok( linbuf , "\t" );		// prepares for parsing and get first one
 
 		for ( i = *num_v; i < new_v + *num_v; ++i )
 		{
@@ -4758,7 +4758,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 				goto end;
 			}
 
-	  		// ignore not started / already ended series' column
+			// ignore not started / already ended series' column
 			if ( j >= vs[ i ].start && j <= vs[ i ].end )
 			{
 				if ( ! strcmp( tok, nonavail ) )// it's a non-available observation
@@ -5116,8 +5116,8 @@ void plot_gnu( void )
 		cmd( "ttk::frame .da.s.d.o -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 		cmd( "if { ! [ info exists box ] } { set box 0 }" );
 		cmd( "ttk::radiobutton .da.s.d.o.a -text \"Use 1st and 2nd series\" -variable box -value 0" );
-		cmd( "ttk::radiobutton .da.s.d.o.c -text \"Use time and 1st series\" -variable box -value 2" );
-		cmd( "ttk::radiobutton .da.s.d.o.b -text \"Use time and rank\" -variable box -value 1" );
+		cmd( "ttk::radiobutton .da.s.d.o.c -text \"Use case and 1st series\" -variable box -value 2" );
+		cmd( "ttk::radiobutton .da.s.d.o.b -text \"Use case and rank\" -variable box -value 1" );
 		cmd( "pack .da.s.d.o.a .da.s.d.o.c .da.s.d.o.b -anchor w" );
 
 		cmd( "pack .da.s.d.l .da.s.d.o" );
@@ -5286,7 +5286,7 @@ void plot_gnu( void )
 	{
 		if ( gridd == 0 )
 		{
-			fprintf( f, "Time\t" );
+			fprintf( f, "Case\t" );
 			if ( box == 1 )
 			{
 				for ( i = 0; i < nv; ++i )
@@ -5301,7 +5301,7 @@ void plot_gnu( void )
 			}
 		}
 		else
-			fprintf( f, "Time\tRank\tVal" );
+			fprintf( f, "Case\tRank\tVal" );
 	}
 
 	fprintf( f, "\n" );
@@ -5439,7 +5439,7 @@ void plot_gnu( void )
 	if ( box == 0 )
 		snprintf( da_tmp, MAX_BUFF_SIZE, "set xlabel \"%s_%s\" textcolor \"%s\"\n", str[ 0 ], tag[ 0 ], app );
 	else
-		snprintf( da_tmp, MAX_BUFF_SIZE, "set xlabel \"Time\" textcolor \"%s\"\n", app );
+		snprintf( da_tmp, MAX_BUFF_SIZE, "set xlabel \"Case\" textcolor \"%s\"\n", app );
 
 	fprintf( f, "%s", da_tmp );
 	fprintf( f2, "%s", da_tmp );
@@ -5729,8 +5729,8 @@ void plot_cs_xy( void )
 
 	cmd( "ttk::frame .da.s.d.r -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 	cmd( "if { ! [ info exists ndim ] } { set ndim 2 }" );
-	cmd( "ttk::radiobutton .da.s.d.r.2d -text \"2D plot\" -variable ndim -value 2 -command  { .da.s.o.opt.g configure -state disabled; .da.s.o.opt.p configure -state disabled; set gridd 0; set pm3d 0 }" );
-	cmd( "ttk::radiobutton .da.s.d.r.3d -text \"3D plot\" -variable ndim -value 3 -command  { if { $gnu } { .da.s.o.opt.g configure -state normal; .da.s.o.opt.p configure -state normal } }" );
+	cmd( "ttk::radiobutton .da.s.d.r.2d -text \"2D plot\" -variable ndim -value 2 -command	{ .da.s.o.opt.g configure -state disabled; .da.s.o.opt.p configure -state disabled; set gridd 0; set pm3d 0 }" );
+	cmd( "ttk::radiobutton .da.s.d.r.3d -text \"3D plot\" -variable ndim -value 3 -command	{ if { $gnu } { .da.s.o.opt.g configure -state normal; .da.s.o.opt.p configure -state normal } }" );
 	cmd( "pack .da.s.d.r.2d .da.s.d.r.3d -anchor w" );
 
 	cmd( "pack .da.s.d.l .da.s.d.r" );
@@ -6316,7 +6316,7 @@ void show_plot_gnu( int n, int type, char **str, char **tag )
 			return;
 		}
 
-		type_plot[ n ] = -1; 		// external plot
+		type_plot[ n ] = -1;		// external plot
 		plot_w[ n ] = -1;
 		plot_l[ n ] = -1;
 		plot_nl[ n ] = -1;
@@ -6349,7 +6349,7 @@ void show_plot_gnu( int n, int type, char **str, char **tag )
 	cmd( "file delete plot.file; file rename plot_clean.file plot.file" );
 
 	// create plot notepad window, tab & canvas
-	add_da_plot_tab( ".dap", n );    		// plot tab window
+	add_da_plot_tab( ".dap", n );			// plot tab window
 
 	cmd( "set p $w.f.plots" );				// plot canvas
 
@@ -6422,7 +6422,7 @@ void show_plot_gnu( int n, int type, char **str, char **tag )
 	cmd( "ttk::button $w.b.z.b.m -width 3 -text - -command { scale_canvas $daptab.tab%d.c.f.plots \"-\" zoomLevel%d } -state disabled", n, n  );
 	cmd( "pack $w.b.z.b.p $w.b.z.b.m -pady 4" );
 
-	cmd( "pack  $w.b.z.l $w.b.z.b -side left -padx 2" );
+	cmd( "pack	$w.b.z.l $w.b.z.b -side left -padx 2" );
 
 	cmd( "pack $w.b.c $w.b.o $w.b.pad $w.b.s $w.b.z -padx 10 -pady 5 -side left" );
 	cmd( "pack $w.b -side right" );
@@ -6506,10 +6506,10 @@ void show_plot_gnu( int n, int type, char **str, char **tag )
 	cmd( "update idletasks" );
 
 	// save plot info
-	type_plot[ n ] = GNUPLOT; 	// Gnuplot plot
+	type_plot[ n ] = GNUPLOT;	// Gnuplot plot
 	plot_w[ n ] = hsize;		// plot width
-	plot_l[ n ] = vsize; 		// height of plot with labels
-	plot_nl[ n ] = vsize; 		// height of plot without labels
+	plot_l[ n ] = vsize;		// height of plot with labels
+	plot_nl[ n ] = vsize;		// height of plot without labels
 
 	choice = 0;
 }
@@ -6705,7 +6705,7 @@ void plot_lattice( void )
 	le = hsize / ncol;
 	cscale = get_double( "cscale" );
 
-	add_da_plot_tab( ".dap", cur_plot );    // plot tab window
+	add_da_plot_tab( ".dap", cur_plot );	// plot tab window
 
 	cmd( "ttk::frame $w.f -width %d -height %d", ncol * le + 1, nlin * hi + 1 );
 	cmd( "set p $w.f.plots" );
@@ -6980,7 +6980,7 @@ void histograms( void )
 	stat = choice;
 
 	if ( stat == 1 )
-		plog( "\nTime series histogram statistics\n #   Boundaries(center)\t\tMin.\tAverage\tMax.\tNum.\tFreq." );
+		plog( "\nTime series histogram statistics\n #	Boundaries(center)\t\tMin.\tAverage\tMax.\tNum.\tFreq." );
 
 	step = ( mx + a / 2 - ( mn - a / 2 ) ) / num_bins;
 	lminy = histo_cases;
@@ -7227,7 +7227,7 @@ void histograms_cs( void )
 	stat = choice;
 
 	if ( stat == 1 )
-		plog( "\nCross-section histogram statistics\n#    Boundaries(center)\t\tMin\tAve\tMax\tNum.\tFreq." );
+		plog( "\nCross-section histogram statistics\n#	  Boundaries(center)\t\tMin\tAve\tMax\tNum.\tFreq." );
 
 	step = ( mx + a / 2 - ( mn - a / 2 ) ) / num_bins;
 	lminy = active_v;
@@ -7303,7 +7303,7 @@ bool create_series( bool mc, vector < string > var_names )
 {
 	bool first, medCI = false, done = true;
 	char **str, **tag;
-	double nmax = 0, nmin = 0, nmean, nmed, nvar, nn, sum, prod, thflt, confi, cenCI, varCI, z_crit, **data;
+	double nmax = 0, nmin = 0, nmean, nmed, nvar, nn, sum, prod, inv, lag, neg, thflt, confi, cenCI, varCI, z_crit, **data;
 	int i, j, k, flt, cs_long, type_series, new_series, sel_series, *start, *end, *id;
 	store *app;
 	vector < double > v;
@@ -7371,25 +7371,27 @@ bool create_series( bool mc, vector < string > var_names )
 		cmd( "ttk::frame .da.s.i.r.c" );
 
 		cmd( "ttk::frame .da.s.i.r.c.l" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.l.m -text \"Average\" -variable bidi -value 100 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_avg\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.l.z -text \"Sum\" -variable bidi -value 5 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_sum\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.l.i -text \"Invert\" -variable bidi -value 10 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_inv\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.l.f -text \"Maximum\" -variable bidi -value 2 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_max\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.l.c -text \"Variance\" -variable bidi -value 4 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_var\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
-		cmd( "pack .da.s.i.r.c.l.m .da.s.i.r.c.l.z .da.s.i.r.c.l.i .da.s.i.r.c.l.f .da.s.i.r.c.l.c -anchor w" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.l.m -text \"Average\" -variable bidi -value 100 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_avg\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.l.z -text \"Sum\" -variable bidi -value 5 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_sum\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.l.i -text \"Invert\" -variable bidi -value 10 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_inv\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.l.l -text \"Lag\" -variable bidi -value 20 -command { set bido 1; .da.s.o.r.m configure -state disabled; .da.s.o.r.f configure -state disabled; .da.s.ci.p configure -state disabled; set vname \"${basename}_lag\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.l.f -text \"Maximum\" -variable bidi -value 2 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_max\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.l.c -text \"Variance\" -variable bidi -value 4 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_var\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "pack .da.s.i.r.c.l.m .da.s.i.r.c.l.z .da.s.i.r.c.l.i .da.s.i.r.c.l.l .da.s.i.r.c.l.f .da.s.i.r.c.l.c -anchor w" );
 
 		cmd( "ttk::frame .da.s.i.r.c.r" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.r.d -text \"Median\" -variable bidi -value 1 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_med\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.r.x -text \"Product\" -variable bidi -value 9 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_prd\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.r.n -text \"Count\" -variable bidi -value 7 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_num\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.r.t -text \"Minimum\" -variable bidi -value 3 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_min\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.r.s -text \"Standard deviation\" -variable bidi -value 8 -command { .da.s.ci.p configure -state disabled; set vname \"${basename}_sd\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
-		cmd( "pack .da.s.i.r.c.r.d .da.s.i.r.c.r.x .da.s.i.r.c.r.n .da.s.i.r.c.r.t .da.s.i.r.c.r.s -anchor w" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.d -text \"Median\" -variable bidi -value 1 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_med\"; set newSeries 1; .da.s.n.nv selection range 0 end	 }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.x -text \"Product\" -variable bidi -value 9 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_prd\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.g -text \"Negative\" -variable bidi -value 21 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_neg\"; set newSeries 1; .da.s.n.nv selection range 0 end	}" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.n -text \"Count\" -variable bidi -value 7 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_num\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.t -text \"Minimum\" -variable bidi -value 3 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_min\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.s -text \"Standard deviation\" -variable bidi -value 8 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_sd\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "pack .da.s.i.r.c.r.d .da.s.i.r.c.r.x .da.s.i.r.c.r.g .da.s.i.r.c.r.n .da.s.i.r.c.r.t .da.s.i.r.c.r.s -anchor w" );
 
 		cmd( "pack .da.s.i.r.c.l .da.s.i.r.c.r -side left -ipadx 7" );
 
-		cmd( "ttk::radiobutton .da.s.i.r.cia -text \"Average confidence interval (3 series)\" -variable bidi -value 111 -command { .da.s.ci.p configure -state readonly; set vname \"${basename}\"; set newSeries 3; set medCI 0; .da.s.n.nv selection range 0 end }" );
-		cmd( "ttk::radiobutton .da.s.i.r.cim -text \"Median confidence interval (3 series)\" -variable bidi -value 6 -command { .da.s.ci.p configure -state readonly; set vname \"${basename}\"; set newSeries 3; set medCI 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.cia -text \"Average confidence interval (3 series)\" -variable bidi -value 111 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state readonly; set vname \"${basename}\"; set newSeries 3; set medCI 0; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.cim -text \"Median confidence interval (3 series)\" -variable bidi -value 6 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state readonly; set vname \"${basename}\"; set newSeries 3; set medCI 1; .da.s.n.nv selection range 0 end }" );
 
 		cmd( "pack .da.s.i.r.c .da.s.i.r.cia .da.s.i.r.cim -anchor w" );
 
@@ -7433,6 +7435,9 @@ bool create_series( bool mc, vector < string > var_names )
 		cmd( "if [ string is double -strict [ .da.s.f.t.th get ] ] { set thflt [ .da.s.f.t.th get ] }" );
 		cmd( "if [ string is double -strict [ .da.s.ci.p get ] ] { set confi [ .da.s.ci.p get ] }" );
 		cmd( "destroytop .da.s" );
+
+		if ( choice != 2 && nv > 1 && ( get_int( "bidi" ) == 20 || ( get_int( "bido" ) == 1 && ( get_int( "bidi" ) == 10 || get_int( "bidi" ) == 21 ) ) ) )
+			cmd( "if { [ ttk::messageBox -parent .da -type okcancel -default ok -icon warning -title Warning -message \"Unused selected data\" -detail \"The operation '%s' was chosen but more than one series is selected. Just the first selected series will be used to create the new series.\n\nChoose 'Cancel' to abort the new series creation.\" ] ne \"ok\" } { set choice 2 }", get_int( "bidi" ) == 20 ? "Lag" : get_int( "bidi" ) == 10 ? "Invert" : "Negative" );
 
 		if ( choice == 2 )
 		{
@@ -7597,6 +7602,7 @@ bool create_series( bool mc, vector < string > var_names )
 			for ( i = min_c; i <= max_c; ++i )
 			{
 				nn = nvar = sum = prod = 0;
+				inv = neg = lag = NAN;
 				v.clear( );
 				v.reserve( sel_series );
 
@@ -7607,6 +7613,9 @@ bool create_series( bool mc, vector < string > var_names )
 						if ( first )
 						{
 							nmin = nmax = prod = data[ j ][ i - start[ j ] ];
+							inv = ( data[ j ][ i - start[ j ] ] != 0 ) ? 1 / data[ j ][ i - start[ j ] ] : NAN;
+							neg = - data[ j ][ i - start[ j ] ];
+							lag = ( i > start[ j ] ) ? data[ j ][ i - start[ j ] - 1 ] : NAN;
 							first = false;
 						}
 						else
@@ -7665,12 +7674,11 @@ bool create_series( bool mc, vector < string > var_names )
 				if ( type_series == 9 )
 					vs[ num_var ].data[ i - min_c ] = prod;
 				if ( type_series == 10 )
-				{
-					if ( nmean != 0 )
-						vs[ num_var ].data[ i - min_c ] = 1 / nmean;
-					else
-						vs[ num_var ].data[ i - min_c ] = NAN;
-				}
+					vs[ num_var ].data[ i - min_c ] = inv;
+				if ( type_series == 20 )
+					vs[ num_var ].data[ i - min_c ] = lag;
+				if ( type_series == 21 )
+					vs[ num_var ].data[ i - min_c ] = neg;
 
 				// compute proper variance for confidence intervals
 				if ( medCI )
@@ -7710,6 +7718,7 @@ bool create_series( bool mc, vector < string > var_names )
 			for ( j = 0; j < sel_series; ++j )
 			{
 				nn = nvar = sum = prod = 0;
+				inv = neg = lag = NAN;
 				v.clear( );
 				v.reserve( max_c - min_c + 1 );
 
@@ -7720,6 +7729,9 @@ bool create_series( bool mc, vector < string > var_names )
 						if ( first )
 						{
 							nmin = nmax = prod = data[ j ][ i - start[ j ] ];
+							inv = ( data[ j ][ i - start[ j ] ] != 0 ) ? 1 / data[ j ][ i - start[ j ] ] : NAN;
+							neg = - data[ j ][ i - start[ j ] ];
+							lag = ( i > start[ j ] ) ? data[ j ][ i - start[ j ] - 1 ] : NAN;
 							first = false;
 						}
 						else
@@ -7767,12 +7779,11 @@ bool create_series( bool mc, vector < string > var_names )
 				if ( type_series == 9 )
 					vs[ num_var ].data[ j ] = prod;
 				if ( type_series == 10 )
-				{
-					if ( nmean != 0 )
-						vs[ num_var ].data[ j ] = 1 / nmean;
-					else
-						vs[ num_var ].data[ j ] = NAN;
-				}
+					vs[ num_var ].data[ j ] = inv;
+				if ( type_series == 20 )
+					vs[ num_var ].data[ j ] = lag;
+				if ( type_series == 21 )
+					vs[ num_var ].data[ j ] = neg;
 
 				if ( medCI )
 				{
@@ -8133,7 +8144,7 @@ bool add_unsaved( void )
 			} \
 		}" );
 
-	cmd( "okhelpcancel .da.s b  { set choice 1 } { LsdHelp menudata_res.html#add_series } { set choice 2 }" );
+	cmd( "okhelpcancel .da.s b	{ set choice 1 } { LsdHelp menudata_res.html#add_series } { set choice 2 }" );
 	cmd( "showtop .da.s" );
 	cmd( "focus .da.s.i.e" );
 
@@ -8176,7 +8187,7 @@ void save_datazip( void )
 	gzFile fsavez = NULL;
 
 	const char str0[ ] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000";
-	const char strsp[ ] = "                                                                                ";
+	const char strsp[ ] = "																				   ";
 	const char descRes[ ] = "LSD Result File";
 	const char descTxt[ ] = "Text File";
 	const char extResZip[ ] = ".res.gz";
@@ -8371,7 +8382,7 @@ void save_datazip( void )
 	if ( strlen( path ) > 0 )
 		cmd( "cd \"$path\"" );
 
-	cmd( "set res [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }  } ]", ext, desc, ext );
+	cmd( "set res [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }	 } ]", ext, desc, ext );
 
 	// add the second extension in macOS only now
 	if ( platform == _MAC_ && dozip )
@@ -8389,7 +8400,7 @@ void save_datazip( void )
 	if ( dozip == 1 )
 		fsavez = gzopen( da_tmp, "wt" );
 	else
-		fsave = fopen( da_tmp, "wt" );  // use text mode for Windows better compatibility
+		fsave = fopen( da_tmp, "wt" );	// use text mode for Windows better compatibility
 
 	if ( del != 3 ) // delimited files
 	{
@@ -8420,7 +8431,7 @@ void save_datazip( void )
 		{
 			switch ( typelab )
 			{
-				case 1:   				// Original labels
+				case 1:					// Original labels
 					if ( headprefix == 1 )
 					{
 						if ( dozip == 1 )
@@ -8449,7 +8460,7 @@ void save_datazip( void )
 
 					break;
 
-				case 2: 				// New names for labels
+				case 2:					// New names for labels
 					if ( headprefix == 1 )
 					{
 						if ( dozip == 1 )
@@ -8478,7 +8489,7 @@ void save_datazip( void )
 
 					break;
 
-				case 3: 				// LSD result files
+				case 3:					// LSD result files
 					for ( i = 0; i < nv; ++i )
 					{
 						if ( dozip == 1 )
@@ -8490,7 +8501,7 @@ void save_datazip( void )
 					break;
 			}
 		}
-		else 							// header for fixed Column text files
+		else							// header for fixed Column text files
 		{
 			if ( headprefix == 1 )
 			{
@@ -8528,7 +8539,7 @@ void save_datazip( void )
 			fprintf( fsave, "\n" );
 	}
 
-	if ( del != 3 ) 					// data delimited writing
+	if ( del != 3 )						// data delimited writing
 	{
 		if ( dozip == 1 )
 		{
@@ -8567,7 +8578,7 @@ void save_datazip( void )
 			}
 		}
 	}
-	else 								//fixed column data writing
+	else								//fixed column data writing
 	{
 		for ( j = min_c; j <= max_c; ++j )
 		{
@@ -8814,7 +8825,7 @@ void plot( int type, int nv, double **data, const int *start, const int *end, co
 	{
 		// move the x-axis pointer in discrete steps
 		x2 = x1 + ( 1 + h ) * step;
-		++h;            	// counter for the average when many values occupy one x point
+		++h;				// counter for the average when many values occupy one x point
 
 		// fix initial x point if scale is too coarse
 		if ( i == iniCase && x2 - x1 > 1 )
@@ -8901,7 +8912,7 @@ void plot( int type, int nv, double **data, const int *start, const int *end, co
 				else
 				{
 					if ( start[ k ] == i || ( i <= 1 && start[ k ] <= 0 ) )
-					{ 	// series entering after x1
+					{	// series entering after x1
 						if ( ! xnext )					// "intra" step?
 							y[ k ] = yVal * h;			// suppose from the beginning of x1
 						else
@@ -8950,7 +8961,7 @@ void plot( int type, int nv, double **data, const int *start, const int *end, co
 
 		if ( watch )
 			cmd( "update" );
-		if	( choice == 2 ) 		// button STOP pressed
+		if	( choice == 2 )			// button STOP pressed
 			break;
 	}
 
@@ -8961,7 +8972,7 @@ void plot( int type, int nv, double **data, const int *start, const int *end, co
 	delete [ ] pdataY;
 	delete [ ] y;
 
-	if	( choice == 2 ) 			// Button STOP pressed
+	if	( choice == 2 )				// Button STOP pressed
 	{
 		cmd( "$daptab forget $daptab.tab%d", cur_plot );
 		cmd( "destroy $daptab.tab%d", cur_plot );
@@ -9043,10 +9054,10 @@ void plot( int type, int nv, double **data, const int *start, const int *end, co
 	}
 
 	// save plot info
-	type_plot[ cur_plot ] = type; 					// plot type
+	type_plot[ cur_plot ] = type;					// plot type
 	plot_w[ cur_plot ] = hcanvas;					// plot width
 	plot_nl[ cur_plot ] = tbordsize + vsize + lheight; // height of plot without labels
-	plot_l[ cur_plot ] = vcanvas; 					// height of plot with labels
+	plot_l[ cur_plot ] = vcanvas;					// height of plot with labels
 
 	choice = 0;
 }
@@ -9102,11 +9113,11 @@ void plot( int type, const int *start, const int *end, char **str, char **tag, b
 
 		if ( watch )
 			cmd( "update" );
-		if ( choice == 2 ) 		// button STOP pressed
+		if ( choice == 2 )		// button STOP pressed
 			break;
 	}
 
-	if	( choice == 2 ) 			// Button STOP pressed
+	if	( choice == 2 )				// Button STOP pressed
 	{
 		cmd( "$daptab forget $daptab.tab%d", cur_plot );
 		cmd( "destroy $daptab.tab%d", cur_plot );
@@ -9204,10 +9215,10 @@ void plot( int type, const int *start, const int *end, char **str, char **tag, b
 	}
 
 	// save plot info
-	type_plot[ cur_plot ] = type; 					// plot type
+	type_plot[ cur_plot ] = type;					// plot type
 	plot_w[ cur_plot ] = hcanvas;					// plot width
 	plot_nl[ cur_plot ] = tbordsize + vsize + lheight; // height of plot
-	plot_l[ cur_plot ] = vcanvas; 					// height of plot with labels
+	plot_l[ cur_plot ] = vcanvas;					// height of plot with labels
 
 	choice = 0;
 }
@@ -9302,7 +9313,7 @@ void plot_canvas( int type, int nv, const int *start, const int *end, char **str
 	cmd( "set hcanvasP %d; set vcanvasP %d", hcanvas, vcanvas );
 
 	// create plot notepad window, tab & canvas
-	add_da_plot_tab( ".dap", cur_plot );    // plot tab window
+	add_da_plot_tab( ".dap", cur_plot );	// plot tab window
 
 	cmd( "set p $w.f.plots" );				// plot canvas
 
@@ -9376,10 +9387,10 @@ void plot_canvas( int type, int nv, const int *start, const int *end, char **str
 
 	cmd( "ttk::frame $w.b.z.b" );
 	cmd( "ttk::button $w.b.z.b.p -width 3 -text + -command { scale_canvas $daptab.tab%d.c.f.plots \"+\" zoomLevel%d } -state disabled", cur_plot, cur_plot );
-	cmd( "ttk::button $w.b.z.b.m -width 3 -text - -command { scale_canvas $daptab.tab%d.c.f.plots \"-\" zoomLevel%d } -state disabled", cur_plot, cur_plot  );
+	cmd( "ttk::button $w.b.z.b.m -width 3 -text - -command { scale_canvas $daptab.tab%d.c.f.plots \"-\" zoomLevel%d } -state disabled", cur_plot, cur_plot	);
 	cmd( "pack $w.b.z.b.p $w.b.z.b.m -pady 4" );
 
-	cmd( "pack  $w.b.z.l $w.b.z.b -side left -padx 2" );
+	cmd( "pack	$w.b.z.l $w.b.z.b -side left -padx 2" );
 
 	cmd( "ttk::label $w.b.pad -width $pad1" );
 
@@ -9505,7 +9516,7 @@ void plot_canvas( int type, int nv, const int *start, const int *end, char **str
 	if ( i < nLine )
 	{
 		cmd( "set it [ $p create text $xlabel $ylabel -fill $colorsTheme(fg) -font $fontP -anchor nw -text \"(%d more...)\" ]", nLine - i );
-		cmd( "tooltip::tooltip $p -item  $it \"%d series labels not presented\"", nLine - i );
+		cmd( "tooltip::tooltip $p -item	 $it \"%d series labels not presented\"", nLine - i );
 	}
 
 	// create context menu and common bindings

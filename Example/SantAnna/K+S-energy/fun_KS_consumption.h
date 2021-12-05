@@ -3,9 +3,9 @@
 	CONSUMER-GOODS MARKET OBJECT EQUATIONS
 	--------------------------------------
 
-	Equations that are specific to the consumer-goods market objects in the 
+	Equations that are specific to the consumer-goods market objects in the
 	K+S LSD model are coded below.
- 
+
  ******************************************************************************/
 
 /*============================== KEY EQUATIONS ===============================*/
@@ -17,16 +17,17 @@ Update '_D2', '_l2'
 */
 
 k = V( "F2" );									// number of firms
-v[1] = V( "D2d" );								// real demand
+v[1] = VS( PARENT, "Cd" );						// nominal demand
 
 // create and fill temporary share and supply vectors & initialize firm demand
-dblVecT f2( k ), sup2( k );
+dblVecT f2( k ), p2( k ), sup2( k );
 
 j = 0;
 CYCLE( cur, "Firm2" )
 {
-	f2[ j ] = VS( cur, "_f2" );					// firm market share
 	sup2[ j ] = VS( cur, "_Q2e" ) + VLS( cur, "_N", 1 );// firm available supply
+	f2[ j ] = VS( cur, "_f2" );					// firm market share
+	p2[ j ] = VS( cur, "_p2" );					// firm price
 	WRITES( cur, "_D2", 0 );					// demand fulfilled accumulator
 	WRITES( cur, "_l2", 0 );					// assume no unsatisfied demand
 	++j;
@@ -36,32 +37,33 @@ CYCLE( cur, "Firm2" )
 v[0] = i = 0;									// fulfilled demand accumulator
 while ( v[1] > 0.01 )
 {
-	v[2] = v[1];								// remaining unallocated demand
+	v[2] = v[1];								// remaining unallocated $ demand
 	v[3] = j = 0;								// shares yet unallocated
 	CYCLE( cur, "Firm2" )
 	{
 		if ( f2[ j ] > 0 )						// firm has demand to supply
-		{	
+		{
 			if ( sup2[ j ] > 0 )				// product to supply?
 			{
-				v[4] = v[1] * f2[ j ];			// firm demand allocation
-				
-				if ( v[4] <= sup2[ j ] )		// can supply all demanded?
+				v[4] = v[1] * f2[ j ];			// firm $ demand allocation
+				v[5] = v[4] / p2[ j ];			// firm # demand allocation
+
+				if ( v[5] <= sup2[ j ] )		// can supply all demanded?
 				{
-					INCRS( cur, "_D2", v[4] );	// supply all demanded
-					v[0] += v[4];				// accumulate to total demand
-					v[2] -= v[4];				// discount from desired demand
+					INCRS( cur, "_D2", v[5] );	// supply all demanded
+					v[0] += v[5];				// accumulate to total # demand
+					v[2] -= v[4];				// discount from desired $ demand
 					v[3] += f2[ j ];			// save share yet to allocate
-					sup2[ j ] -= v[4];			// make supplied unavailable
+					sup2[ j ] -= v[5];			// make supplied # unavailable
 				}
 				else
 				{
 					if ( i == 0 )				// unsatisfied demand metric
-						WRITES( cur, "_l2", v[4] - sup2[ j ] );
+						WRITES( cur, "_l2", v[5] - sup2[ j ] );
 
-					INCRS( cur, "_D2", sup2[ j ] );// supply all available
-					v[0] += sup2[ j ];			// accumulate to total demand
-					v[2] -= sup2[ j ];			// discount from desired demand
+					INCRS( cur, "_D2", sup2[ j ] );// supply all # available
+					v[0] += sup2[ j ];			// accumulate to total # demand
+					v[2] -= sup2[ j ] * p2[ j ];// discount from desired $ demand
 					f2[ j ] = sup2[ j ] = 0;	// nothing else to supply
 				}
 			}
@@ -71,13 +73,13 @@ while ( v[1] > 0.01 )
 
 		++j;
 	}
-	
+
 	if ( v[3] > 0 )								// unallocated shares remaining?
 		for ( j = 0; j < k; ++j )
 			f2[ j ] /= v[3];					// rescale remaining firms
 	else
 		break;									// nothing else to supply
-	
+
 	v[1] = v[2];								// update unallocated
 	++i;
 }
@@ -98,7 +100,7 @@ Net (number of) entrant firms in consumer-good sector
 Perform entry and exit of firms in the consumer-good sector
 All relevant aggregate variables in sector must be computed before existing
 firms are deleted, so all active firms in period are considered
-Also updates 'F2', 'cEntry', 'cExit', 'exit2', 'entry2', 'exit2fail'
+Also updates 'F2', 'cEntry2', 'cExit2', 'exit2', 'entry2', 'exit2fail'
 */
 
 SUM( "_D2d" );									// desired demand before chg
@@ -106,9 +108,10 @@ UPDATE;											// ensure aggregates are computed
 
 double MC2 = V( "MC2" );						// market conditions in sector 2
 double MC2_1 = VL( "MC2", 1 );					// market conditions in sector 2
-double NW20u = V( "NW20" ) * VS( CAPSECL1, "PPI" ) / VS( CAPSECL1, "PPI0" );
+double NW20u = V( "NW20" ) * VS( CAPSECL1, "PPI" ) / VS( CAPSECL1, "pK0" );
 												// minimum wealth in sector 2
 double f2min = V( "f2min" );					// min market share in sector 2
+double n2 = V( "n2" );							// market participation period
 double omicron = VS( PARENT, "omicron" );		// entry sensitivity to mkt cond
 double stick = VS( PARENT, "stick" );			// stickiness in number of firms
 double x2inf = VS( PARENT, "x2inf" );			// entry lower distrib. support
@@ -120,22 +123,26 @@ int F2min = V( "F2min" );						// min firms in sector 2
 
 vector < bool > quit( F2, false );				// vector of firms' quit status
 
+WRITE( "cEntry2", 0 );							// reset exit/entry accumulators
+WRITE( "cExit2", 0 );
+
 // mark bankrupt and market-share-irrelevant incumbent firms to quit the market
 h = F2;											// initial number of firms
-v[1] = v[2] = v[3] = i = k = 0;					// accum., counters, registers
+v[1] = v[3] = i = k = 0;						// accum., counters, registers
 CYCLE( cur, "Firm2" )
 {
 	v[4] = VS( cur, "_NW2" );					// current net wealth
-	
+
 	if ( v[4] < 0 || VS( cur, "_life2cycle" ) > 0 )// bankrupt or incumbent?
 	{
-		v[5] = VS( cur, "_f2" );				// current market share
-		
+		for ( v[5] = j = 0; j < n2; ++j )
+			v[5] += VLS( cur, "_f2", j ) / n2;	// n2 periods avg. market share
+
 		if ( v[4] < 0 || v[5] < f2min )
 		{
 			quit[ i ] = true;					// mark for likely exit
 			--h;								// one less firm
-			
+
 			if ( v[5] > v[3] )					// best firm so far?
 			{
 				k = i;							// save firm index
@@ -143,9 +150,9 @@ CYCLE( cur, "Firm2" )
 			}
 		}
 	}
-	
+
 	++i;
-}	
+}
 
 // quit candidate firms exit, except the best one if all going to quit
 v[6] = i = j = 0;								// firm counters
@@ -159,18 +166,17 @@ CYCLE_SAFE( cur, "Firm2" )
 			if ( VS( cur, "_NW2" ) < 0 )		// count bankruptcies
 				++v[6];
 
-			// account liquidation credit due to public, if any
-			v[2] += exit_firm2( var, cur );		// del obj & collect liq. val.
+			exit_firm( var, cur );				// del obj & collect liq. val.
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
 			{
 				// new equity required
-				v[7] = NW20u + VS( cur, "_Deb2" ) - VS( cur, "_NW2" );
-				v[1] += v[7];					// accumulate "entry" equity cost
-				
+				v[1] += v[7] = NW20u + VS( cur, "_Deb2" ) - VS( cur, "_NW2" );
+
 				WRITES( cur, "_Deb2", 0 );		// reset debt
-				INCRS( cur, "_NW2", v[7] );		// add new equity
+				INCRS( cur, "_Eq2", v[7] );		// add new equity
+				INCRS( cur, "_NW2", v[7] );
 			}
 	}
 
@@ -182,9 +188,9 @@ V( "f2rescale" );								// redistribute exiting m.s.
 // compute the potential number of entrants
 v[8] = ( MC2_1 == 0 ) ? 0 : MC2 / MC2_1 - 1;	// change in market conditions
 
-k = max( 0, round( F2 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
+k = max( 0, round( F2 * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) +
 						  omicron * min( max( v[8], x2inf ), x2sup ) ) ) );
-				 
+
 // apply return-to-the-average stickiness random shock to the number of entrants
 k -= min( RND * stick * ( ( double ) ( F2 - j ) / F20 - 1 ) * F20, k );
 
@@ -195,15 +201,15 @@ if ( F2 - j + k < F2min )
 if ( F2 + k > F2max )
 	k = F2max - F2 + j;
 
-v[0] = k - j;									// net number of entrants
-v[1] += entry_firm2( var, THIS, k, false );		// add entrant-firm objects
+entry_firm2( var, THIS, k, false );				// add entrant-firm objects
 
+v[0] = k - j;									// net number of entrants
 INCR( "F2", v[0] );								// update the number of firms
-INCRS( PARENT, "cEntry", v[1] );				// account equity cost of entry
-INCRS( PARENT, "cExit", v[2] );					// account exit credits
+INCR( "cEntry2", v[1] );						// add cost of additional equity
 WRITE( "exit2", ( double ) j / F2 );
 WRITE( "entry2", ( double ) k / F2 );
 WRITES( SECSTAL1, "exit2fail", v[6] / F2 );
+RECALCS( FINSECL1, "BadDeb2" );					// update bad debt after exits
 
 V( "f2rescale" );								// redistribute entrant m.s.
 V( "firm2maps" );								// update firm mapping vectors
@@ -225,7 +231,7 @@ EQUATION( "CI" )
 /*
 Total canceled investment in consumption-good sector
 */
-RESULT( SUM( "_CI" ) )	
+RESULT( SUM( "_CI" ) )
 
 
 EQUATION( "CPI" )
@@ -240,7 +246,7 @@ EQUATION( "D2d" )
 /*
 Desired demand for firms in consumption-good sector
 */
-RESULT( ( VS( PARENT, "C" ) + VS( PARENT, "G" ) ) / V( "CPI" ) )
+RESULT( VS( PARENT, "Cd" ) / V( "CPI" ) )
 
 
 EQUATION( "D2e" )
@@ -265,6 +271,14 @@ V( "Tax2" );									// ensure dividends are computed
 RESULT( SUM( "_Div2" ) )
 
 
+EQUATION( "EI" )
+/*
+Total expansion investment in consumption-good sector
+*/
+V( "CI" );										// ensure cancellations acct'd
+RESULT( SUM( "_EI" ) )
+
+
 EQUATION( "Eavg" )
 /*
 Weighted average competitiveness of firms in consumption-good sector
@@ -276,14 +290,6 @@ CYCLE( cur, "Firm2" )
 		v[0] += VS( cur, "_E" ) * VLS( cur, "_f2", 1 );
 												// compute weighted average
 RESULT( v[0] )
-
-
-EQUATION( "EI" )
-/*
-Total expansion investment in consumption-good sector
-*/
-V( "CI" );										// ensure cancellations acct'd 
-RESULT( SUM( "_EI" ) )	
 
 
 EQUATION( "Em2" )
@@ -300,6 +306,13 @@ Total energy consumed by firms in consumption-good sector
 RESULT( SUM( "_En2" ) )
 
 
+EQUATION( "Eq2" )
+/*
+Equity hold by workers/households from firms in consumption-good sector
+*/
+RESULT( SUM( "_Eq2" ) )
+
+
 EQUATION( "F2" )
 /*
 Number of firms in consumption-good sector
@@ -307,26 +320,26 @@ Number of firms in consumption-good sector
 RESULT( COUNT( "Firm2" ) )
 
 
-EQUATION( "I" )
-/*
-Total (real) investment in consumption-good sector
-*/
-RESULT( V( "SI" ) + V( "EI" ) )	
-
-
 EQUATION( "Id" )
 /*
 Total desired investment in terms of output capacity (real terms)
 Don't recompute 'SI'/'EI' at this stage, to wait for order cancellations
 */
-RESULT( SUM( "_SI" ) + SUM( "_EI" ) )	
+RESULT( SUM( "_SI" ) + SUM( "_EI" ) )
 
 
 EQUATION( "Inom" )
 /*
 Aggregated investment (nominal/currency terms)
 */
-RESULT( VS( CAPSECL1, "S1" ) )
+RESULT( SUM( "_Inom" ) )
+
+
+EQUATION( "Ireal" )
+/*
+Aggregated real investment (in initial prices terms)
+*/
+RESULT( ( V( "SI" ) + V( "EI" ) ) / V( "m2" ) * VS( CAPSECL1, "pK0" ) )
 
 
 EQUATION( "JO2" )
@@ -349,6 +362,13 @@ EQUATION( "Kd" )
 Total desired capital stock of firms in consumption-good sector
 */
 RESULT( SUM( "_Kd" ) )
+
+
+EQUATION( "Knom" )
+/*
+Total capital (nominal/money terms) in consumption-good sector
+*/
+RESULT( SUM( "_Knom" ) )
 
 
 EQUATION( "L2" )
@@ -437,8 +457,8 @@ EQUATION( "SI" )
 /*
 Total substitution investment in consumption-good sector
 */
-V( "CI" );										// ensure cancellations acct'd 
-RESULT( SUM( "_SI" ) )	
+V( "CI" );										// ensure cancellations acct'd
+RESULT( SUM( "_SI" ) )
 
 
 EQUATION( "Tax2" )
@@ -492,6 +512,20 @@ Change in total nominal inventories (currency terms)
 RESULT( SUM( "_dNnom" ) )
 
 
+EQUATION( "i2" )
+/*
+Interest paid by consumption-good sector
+*/
+RESULT( SUM( "_i2" ) )
+
+
+EQUATION( "iD2" )
+/*
+Interest received from deposits by consumption-good sector
+*/
+RESULT( SUM( "_iD2" ) )
+
+
 EQUATION( "l2avg" )
 /*
 Average unfilled demand in consumption-good sector
@@ -539,7 +573,7 @@ if ( v[1] > 0 )									// production ok?
 else
 {
 	v[2] = 1 / COUNT( "Firm2" );				// firm fair share
-	
+
 	CYCLE( cur, "Firm2" )						// rescale to add-up to 1
 	{
 		v[0] += v[2];
@@ -557,16 +591,16 @@ Only to be called if firm objects in sector 2 are created or destroyed
 */
 
 // clear vectors
-EXEC_EXTS( PARENT, country, firm2map, clear );
-EXEC_EXTS( PARENT, country, firm2ptr, clear );
+EXEC_EXTS( PARENT, countryE, firm2map, clear );
+EXEC_EXTS( PARENT, countryE, firm2ptr, clear );
 
 i = 0;											// firm index in vector
 CYCLE( cur, "Firm2" )							// do for all firms in sector 2
 {
-	EXEC_EXTS( PARENT, country, firm2ptr, push_back, cur );// pointer to firm
-	EXEC_EXTS( PARENT, country, firm2map, insert, // save in firm's map
+	EXEC_EXTS( PARENT, countryE, firm2ptr, push_back, cur );// pointer to firm
+	EXEC_EXTS( PARENT, countryE, firm2map, insert, // save in firm's map
 			   firmPairT( ( int ) VS( cur, "_ID2" ), cur ) );
-	
+
 	++i;
 }
 
@@ -574,6 +608,18 @@ RESULT( i )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/
+
+EQUATION_DUMMY( "cEntry2", "" )
+/*
+Cost (new equity) of firm entries in consumption-good sector
+Updated in 'entry2exit'
+*/
+
+EQUATION_DUMMY( "cExit2", "" )
+/*
+Credits (returned equity) from firm exits in consumption-good sector
+Updated in 'entry2exit'
+*/
 
 EQUATION_DUMMY( "entry2", "entry2exit" )
 /*

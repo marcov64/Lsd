@@ -5,7 +5,7 @@
 
 	Equations that are not required for the model to run but may produce
 	useful country- or sector-level statistics for analysis.
- 
+
  ******************************************************************************/
 
 /*========================= COUNTRY-LEVEL STATS ==============================*/
@@ -15,8 +15,8 @@ EQUATION( "Aee" )
 Overall energy efficiency
 */
 v[1] = VS( GRANDPARENT, "En" );
-RESULT( v[1] > 0 ? ( VS( SECSTAL2, "A1ee" ) * VS( CAPSECL2, "En1" ) + 
-					 VS( SECSTAL2, "A2ee" ) * VS( CONSECL2, "En2" ) ) / v[1] : 
+RESULT( v[1] > 0 ? ( VS( SECSTAL2, "A1ee" ) * VS( CAPSECL2, "En1" ) +
+					 VS( SECSTAL2, "A2ee" ) * VS( CONSECL2, "En2" ) ) / v[1] :
 				   0 )
 
 
@@ -25,8 +25,8 @@ EQUATION( "Aef" )
 Overall environmental friendliness
 */
 v[1] = VS( GRANDPARENT, "Em" );
-RESULT( v[1] > 0 ? ( VS( SECSTAL2, "A1ef" ) * VS( CAPSECL2, "Em1" ) + 
-					 VS( SECSTAL2, "A2ef" ) * VS( CONSECL2, "Em2" ) ) / v[1] : 
+RESULT( v[1] > 0 ? ( VS( SECSTAL2, "A1ef" ) * VS( CAPSECL2, "Em1" ) +
+					 VS( SECSTAL2, "A2ef" ) * VS( CONSECL2, "Em2" ) ) / v[1] :
 				   0 )
 
 
@@ -51,52 +51,21 @@ Total credit supplied
 RESULT( VS( SECSTAL2, "CS1" ) + VS( SECSTAL2, "CS2" ) )
 
 
-EQUATION( "CO2a" )
-/*
-CO2 concentration in atmosphere in PPM
-*/
-RESULT( VS( CLIMATL2, "Ca" ) / PPMCO2GTC )
-
-
-EQUATION( "Creal" )
-/*
-Real aggregated consumption
-*/
-RESULT( VS( GRANDPARENT, "C" ) / VS( CONSECL2, "CPI" ) )
-
-
 EQUATION( "DefGDP" )
 /*
 Government deficit on GDP ratio
 */
-v[1] = VS( GRANDPARENT, "GDPnom" );
-RESULT( v[1] > 0 ? VS( GRANDPARENT, "Def" ) / v[1] : CURRENT )
-
-
-EQUATION( "EmGDP" )
-/*
-CO2 emissions to GDP ratio
-*/
-v[1] = VS( GRANDPARENT, "GDP" );
-RESULT( v[1] > 0 ? VS( GRANDPARENT, "Em" ) / v[1] : CURRENT )
-
-
-EQUATION( "EnGDP" )
-/*
-Energy demand to GDP ratio
-*/
-v[1] = VS( GRANDPARENT, "GDP" );
-RESULT( v[1] > 0 ? VS( GRANDPARENT, "En" ) / v[1] : CURRENT )
+RESULT( VS( GRANDPARENT, "Def" ) / VS( GRANDPARENT, "GDPnom" ) )
 
 
 EQUATION( "GDI" )
 /*
 Gross domestic income (nominal terms)
 */
-RESULT( VS( CAPSECL2, "W1" ) + VS( CONSECL2, "W2" ) +
-		VS( CAPSECL2, "Pi1" ) + VS( CONSECL2, "Pi2" ) + 
-		VS( FINSECL2, "PiB" ) + VS( GRANDPARENT, "G" ) - 
-		VS( GRANDPARENT, "Tax" ) + 
+RESULT( VS( LABSUPL2, "W" ) + VS( ENESECL2, "PiEnet" ) +
+		VS( CAPSECL2, "Pi1" ) + VS( CONSECL2, "Pi2" ) +
+		VS( FINSECL2, "PiB" ) + VS( GRANDPARENT, "Div" ) +
+		VS( GRANDPARENT, "G" ) - VS( GRANDPARENT, "Tax" ) +
 		VS( CAPSECL2, "PPI" ) * VS( CONSECL2, "SI" ) / VS( CONSECL2, "m2" ) )
 
 
@@ -104,8 +73,8 @@ EQUATION( "TaxCO2" )
 /*
 Government CO2 (carbon) tax income
 */
-RESULT( ( VS( CAPSECL2, "Em1" ) + VS( CONSECL2, "Em2" ) ) * 
-		VS( GRANDPARENT, "trCO2" ) + 
+RESULT( ( VS( CAPSECL2, "Em1" ) + VS( CONSECL2, "Em2" ) ) *
+		VS( GRANDPARENT, "trCO2" ) +
 		VS( ENESECL2, "EmE" ) * VS( ENESECL2, "trCO2e" ) )
 
 
@@ -117,6 +86,22 @@ v[1] = VLS( GRANDPARENT, "A", 1 );
 RESULT( v[1] > 0 ? VS( GRANDPARENT, "A" ) / v[1] - 1 : 0 )
 
 
+/*============================== CLIMATE STATS ===============================*/
+
+EQUATION( "CO2a" )
+/*
+CO2 concentration in atmosphere in PPM
+*/
+RESULT( VS( CLIMATL2, "Ca" ) / PPMCO2GTC )
+
+
+EQUATION( "EmGDP" )
+/*
+CO2 emissions to GDP ratio
+*/
+RESULT( VS( GRANDPARENT, "Em" ) / VS( GRANDPARENT, "GDPreal" ) )
+
+
 EQUATION( "dEm" )
 /*
 Overall CO2 emissions growth rate
@@ -125,23 +110,15 @@ v[1] = VLS( GRANDPARENT, "Em", 1 );
 RESULT( v[1] > 0 ? VS( GRANDPARENT, "Em" ) / v[1] - 1 : 0 )
 
 
-EQUATION( "dEn" )
-/*
-Overall energy demand growth rate
-*/
-v[1] = VLS( GRANDPARENT, "En", 1 );
-RESULT( v[1] > 0 ? VS( GRANDPARENT, "En" ) / v[1] - 1 : 0 )
-
-
 EQUATION( "shockAavg" )
 /*
 Expected disaster generating function shock size
 */
-v[1] = VS( CLIMATL2, "a0" ) * ( 1 + log( VLS( CLIMATL2, "Tm", 1 ) / 
+v[1] = VS( CLIMATL2, "a0" ) * ( 1 + log( VLS( CLIMATL2, "Tm", 1 ) /
 										 VS( CLIMATL2, "Tm0" ) ) );
-v[2] = VS( CLIMATL2, "b0" ) * VS( CLIMATL2, "sigma10y0" ) / 
+v[2] = VS( CLIMATL2, "b0" ) * VS( CLIMATL2, "sigma10y0" ) /
 							  VLS( CLIMATL2, "sigma10y", 1 );
-RESULT( VS( GRANDPARENT, "flagClimShocks" ) > 0 && T >= VS( CLIMATL2, "tA0" ) ? 
+RESULT( VS( GRANDPARENT, "flagClimShocks" ) > 0 && T >= VS( CLIMATL2, "tA0" ) ?
 		v[1] / ( v[1] + v[2] ) : 0 )
 
 
@@ -167,7 +144,7 @@ EQUATION( "Bfail" )
 Rate of failing banks
 */
 VS( FINSECL2, "NWb" );							// make sure it is updated
-RESULT( COUNT_CNDS( FINSECL2, "Bank", "_Gbail", ">", 0 ) / 
+RESULT( COUNT_CNDS( FINSECL2, "Bank", "_Gbail", ">", 0 ) /
 		COUNTS( FINSECL2, "Bank" ) )
 
 
@@ -176,7 +153,7 @@ EQUATION( "HHb" )
 Normalized Herfindahl-Hirschman index for financial sector
 */
 i = COUNTS( FINSECL2, "Bank" );
-RESULT( i > 1 ? max( 0, ( WHTAVES( FINSECL2, "_fB", "_fB" ) - 1.0 / i ) / 
+RESULT( i > 1 ? max( 0, ( WHTAVES( FINSECL2, "_fB", "_fB" ) - 1.0 / i ) /
 						( 1 - 1.0 / i ) ) : 1 )
 
 
@@ -189,7 +166,7 @@ v[0] = 0;										// index accumulator
 CYCLES( FINSECL2, cur, "Bank" )
 	v[0] += fabs( VLS( cur, "_fB", 1 ) - VS( cur, "_fB" ) );// sum share changes
 
-RESULT( v[0] )	
+RESULT( v[0] )
 
 
 EQUATION( "TC" )
@@ -206,18 +183,11 @@ RESULT( SUMS( FINSECL2, "_TC" ) )
 
 /*=========================== ENERGY SECTOR STATS ============================*/
 
-EQUATION( "KeNom" )
+EQUATION( "EnGDP" )
 /*
-Capital stock (in historic money terms) of energy sector
+Energy demand to GDP ratio
 */
-RESULT( SUMS( ENESECL2, "__ICge" ) )
-
-
-EQUATION( "PiEnet" )
-/*
-Net profit (after depreciation) of energy sector
-*/
-RESULT( VS( ENESECL2, "PiE" ) - V( "KeNom" ) / VS( ENESECL2, "etaE" ) )
+RESULT( VS( GRANDPARENT, "En" ) / VS( GRANDPARENT, "GDPreal" ) )
 
 
 EQUATION( "RSe" )
@@ -225,7 +195,7 @@ EQUATION( "RSe" )
 Power plant (planned) scrapping rate of energy sector
 */
 v[1] = VLS( ENESECL2, "Ke", 1 );
-RESULT( T > 1 && v[1] > 0 ? ( VS( ENESECL2, "SIdeD" ) + 
+RESULT( T > 1 && v[1] > 0 ? ( VS( ENESECL2, "SIdeD" ) +
 							  VS( ENESECL2, "SIgeD" ) ) / v[1] : 0 )
 
 
@@ -235,6 +205,14 @@ CO2 emissions growth rate of energy sector
 */
 v[1] = VLS( ENESECL2, "EmE", 1 );
 RESULT( v[1] > 0 ? VS( ENESECL2, "EmE" ) / v[1] - 1 : 0 )
+
+
+EQUATION( "dEn" )
+/*
+Overall energy demand growth rate
+*/
+v[1] = VLS( GRANDPARENT, "En", 1 );
+RESULT( v[1] > 0 ? VS( GRANDPARENT, "En" ) / v[1] - 1 : 0 )
 
 
 EQUATION( "fGE" )
@@ -296,6 +274,13 @@ Total credit supplied to firms in capital-good sector
 RESULT( SUMS( CAPSECL2, "_CS1" ) )
 
 
+EQUATION( "Deb1max" )
+/*
+Total maximum prudential credit supplied to firms in capital-good sector
+*/
+RESULT( SUMS( CAPSECL2, "_Deb1max" ) )
+
+
 EQUATION( "HCavg" )
 /*
 Number of historical clients of capital-good firms
@@ -308,7 +293,7 @@ EQUATION( "HH1" )
 Normalized Herfindahl-Hirschman index for capital-good sector
 */
 i = COUNTS( CAPSECL2, "Firm1" );
-RESULT( i > 1 ? max( 0, ( WHTAVES( CAPSECL2, "_f1", "_f1" ) - 1.0 / i ) / 
+RESULT( i > 1 ? max( 0, ( WHTAVES( CAPSECL2, "_f1", "_f1" ) - 1.0 / i ) /
 						( 1 - 1.0 / i ) ) : 1 )
 
 
@@ -321,7 +306,7 @@ v[0] = 0;										// index accumulator
 CYCLES( CAPSECL2, cur, "Firm1" )
 	v[0] += fabs( VLS( cur, "_f1", 1 ) - VS( cur, "_f1" ) );// sum share changes
 
-RESULT( v[0] )	
+RESULT( v[0] )
 
 
 EQUATION( "NCavg" )
@@ -345,13 +330,6 @@ Average age of firms in capital-good sector
 RESULT( T - AVES( CAPSECL2, "_t1ent" ) )
 
 
-EQUATION( "i1" )
-/*
-Interest paid by capital-good sector
-*/
-RESULT( SUMS( CAPSECL2, "_i1" ) )
-
-
 /*======================= CONSUMER-GOOD SECTOR STATS =========================*/
 
 EQUATION( "A2ee" )
@@ -370,7 +348,7 @@ RESULT( WHTAVES( CONSECL2, "_A2ef", "_f2" ) )
 
 EQUATION( "A2sd" )
 /*
-Standard deviation of machine-level log labor productivity of firms in 
+Standard deviation of machine-level log labor productivity of firms in
 consumption-good sector
 */
 
@@ -397,23 +375,37 @@ RESULT( i > 0 ? sqrt( v[0] / i ) : 0 )
 
 EQUATION( "CD2" )
 /*
-Total credit demand of firms in consumer-good sector
+Total credit demand of firms in consumption-good sector
 */
 RESULT( SUMS( CONSECL2, "_CD2" ) )
 
 
 EQUATION( "CD2c" )
 /*
-Total credit demand constraint of firms in consumer-good sector
+Total credit demand constraint of firms in consumption-good sector
 */
 RESULT( SUMS( CONSECL2, "_CD2c" ) )
 
 
 EQUATION( "CS2" )
 /*
-Total credit supplied to firms in consumer-good sector
+Total credit supplied to firms in consumption-good sector
 */
 RESULT( SUMS( CONSECL2, "_CS2" ) )
+
+
+EQUATION( "Deb2max" )
+/*
+Total maximum prudential credit supplied to firms in consumption-good sector
+*/
+RESULT( SUMS( CONSECL2, "_Deb2max" ) )
+
+
+EQUATION( "EId" )
+/*
+Total desired expansion investment in consumption-good sector
+*/
+RESULT( SUMS( CONSECL2, "_EId" ) )
 
 
 EQUATION( "HH2" )
@@ -421,7 +413,7 @@ EQUATION( "HH2" )
 Normalized Herfindahl-Hirschman index for consumption-good sector
 */
 i = COUNTS( CONSECL2, "Firm2" );
-RESULT( i > 1 ? max( 0, ( WHTAVES( CONSECL2, "_f2", "_f2" ) - 1.0 / i ) / 
+RESULT( i > 1 ? max( 0, ( WHTAVES( CONSECL2, "_f2", "_f2" ) - 1.0 / i ) /
 						( 1 - 1.0 / i ) ) : 1 )
 
 
@@ -434,7 +426,7 @@ v[0] = 0;										// index accumulator
 CYCLES( CONSECL2, cur, "Firm2" )
 	v[0] += fabs( VLS( cur, "_f2", 1 ) - VS( cur, "_f2" ) );// sum share changes
 
-RESULT( v[0] )	
+RESULT( v[0] )
 
 
 EQUATION( "L2larg" )
@@ -449,8 +441,15 @@ EQUATION( "RS2" )
 Machine (planned) scrapping rate in consumption-good sector
 */
 v[1] = VLS( CONSECL2, "K", 1 );
-RESULT( T > 1 && v[1] > 0 ? SUMS( CONSECL2, "_RS2" ) / 
+RESULT( T > 1 && v[1] > 0 ? SUMS( CONSECL2, "_RS2" ) /
 		( v[1] / VS( CONSECL2, "m2" ) ) : 0 )
+
+
+EQUATION( "SId" )
+/*
+Total desired substitution investment in consumption-good sector
+*/
+RESULT( SUMS( CONSECL2, "_SId" ) )
 
 
 EQUATION( "age2avg" )
@@ -465,13 +464,6 @@ EQUATION( "dN" )
 Change in total inventories (real terms)
 */
 RESULT( VS( CONSECL2, "N" ) - VLS( CONSECL2, "N", 1 ) )
-
-
-EQUATION( "i2" )
-/*
-Interest paid by consumption-good sector
-*/
-RESULT( SUMS( CONSECL2, "_i2" ) )
 
 
 EQUATION( "mu2avg" )
@@ -499,7 +491,7 @@ EQUATION( "V" )
 /*
 Effective vacancy rate (unfilled positions over total labor supply)
 */
-RESULT( T > 1 ? min( ( VS( CAPSECL2, "JO1" ) + VS( CONSECL2, "JO2" ) ) / 
+RESULT( T > 1 ? min( ( VS( CAPSECL2, "JO1" ) + VS( CONSECL2, "JO2" ) ) /
 					   VS( LABSUPL2, "Ls" ), 1 ) : 0 )
 
 
@@ -528,7 +520,7 @@ Number of machines to scrap of firm in consumption-good sector
 v[0] = 0;
 CYCLE( cur, "Vint" )
 	v[0] += abs( VS( cur, "__RSvint" ) );
-	
+
 RESULT( v[0] )
 
 

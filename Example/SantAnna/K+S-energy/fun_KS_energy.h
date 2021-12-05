@@ -3,11 +3,11 @@
 	ENERGY OBJECT EQUATIONS
 	-----------------------
 
-	Equations that are specific to the Energy sector object in the 
+	Equations that are specific to the Energy sector object in the
 	K+S LSD model are coded below.
- 
+
  ******************************************************************************/
- 
+
 /*============================== KEY EQUATIONS ===============================*/
 
 EQUATION( "De" )
@@ -42,7 +42,7 @@ else											// excess supply, auction req'd
 	CYCLE( cur, "FirmE" )						// allocate cheaper suppliers 1st
 	{
 		v[3] = VS( cur, "_QeO" );				// available (offered) generation
-		
+
 		if ( v[1] <= v[3] )						// can supply all demanded?
 		{
 			v[0] += v[4] = v[1];				// supply all demanded
@@ -53,7 +53,7 @@ else											// excess supply, auction req'd
 			v[0] += v[4] = v[3];				// supply all available
 			v[1] -= v[3];						// demand yet to be fulfilled
 		}
-		
+
 		WRITES( cur, "_De", v[4] );
 	}
 }
@@ -79,7 +79,7 @@ v[5] = min( v[5], v[1] );
 if ( v[1] - v[3] < v[4] + v[5] )				// labor shortage?
 {
 	v[7] = ( v[1] - v[3] ) / ( v[4] + v[5] );	// shortage factor
-	
+
 	if ( v[7] < 1 - v[6] )						// over cap?
 		v[7] = 1 - v[6];						// shortage on cap
 }
@@ -123,23 +123,26 @@ int FeMin = V( "FeMin" );						// min firms in energy sector
 
 vector < bool > quit( Fe, false );				// vector of firms' quit status
 
+WRITE( "cEntryE", 0 );							// reset exit/entry accumulators
+WRITE( "cExitE", 0 );
+
 // mark bankrupt and market-share-irrelevant firms to quit the market
 h = Fe;											// initial number of firms
-v[1] = v[2] = v[3] = i = k = 0;					// accum., counters, registers
+v[1] = v[3] = i = k = 0;						// accum., counters, registers
 CYCLE( cur, "FirmE" )
 {
 	v[4] = VS( cur, "_NWe" );					// current net wealth
-	
+
 	if ( v[4] < 0 || T >= VS( cur, "_tEent" ) + nE )// bankrupt or incumbent?
 	{
 		for ( v[5] = j = 0; j < nE; ++j )
 			v[5] += VLS( cur, "_fE", j ) / nE;	// nE periods market share
-		
+
 		if ( v[4] < 0 || v[5] <= fEmin )
 		{
 			quit[ i ] = true;					// mark for likely exit
 			--h;								// one less firm
-			
+
 			if ( v[5] > v[3] )					// best firm so far?
 			{
 				k = i;							// save firm index
@@ -147,9 +150,9 @@ CYCLE( cur, "FirmE" )
 			}
 		}
 	}
-	
+
 	++i;
-}	
+}
 
 // quit candidate firms exit, except the best one if all going to quit
 v[6] = i = j = 0;								// firm counters
@@ -162,19 +165,18 @@ CYCLE_SAFE( cur, "FirmE" )
 			++j;								// count exits
 			if ( VS( cur, "_NWe" ) < 0 )		// count bankruptcies
 				++v[6];
-			
-			// account liquidation credit due to public, if any
-			v[2] += exit_firmE( var, cur );		// del obj & collect liq. value
+
+			exit_firm( var, cur );				// del obj & collect liq. value
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
 			{
 				// new equity required
-				v[7] = NWe0u + VS( cur, "_DebE" ) - VS( cur, "_NWe" );
-				v[1] += v[7];					// accumulate "entry" equity cost
-				
+				v[1] += v[7] = NWe0u + VS( cur, "_DebE" ) - VS( cur, "_NWe" );
+
 				WRITES( cur, "_DebE", 0 );		// reset debt
-				INCRS( cur, "_NWe", v[7] );		// add new equity
+				INCRS( cur, "_EqE", v[7] );		// add new equity
+				INCRS( cur, "_NWe", v[7] );
 			}
 	}
 
@@ -186,9 +188,9 @@ V( "fErescale" );								// redistribute exiting m.s.
 // compute the potential number of entrants
 v[8] = ( MCe_1 == 0 ) ? 0 : MCe / MCe_1 - 1;	// change in market conditions
 
-k = max( 0, round( Fe * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) + 
+k = max( 0, round( Fe * ( ( 1 - omicron ) * uniform( x2inf, x2sup ) +
 						  omicron * min( max( v[8], x2inf ), x2sup ) ) ) );
-				 
+
 // apply return-to-the-average stickiness random shock to the number of entrants
 k -= min( RND * stick * ( ( double ) ( Fe - j ) / Fe0 - 1 ) * Fe0, k );
 
@@ -199,17 +201,18 @@ if ( Fe - j + k < FeMin )
 if ( Fe + k > FeMax )
 	k = FeMax - Fe + j;
 
-v[0] = k - j;									// net number of entrants
-v[1] += entry_firmE( var, THIS, k, false );		// add entrant-firm objects
+entry_firmE( var, THIS, k, false );				// add entrant-firm objects
 
-i = INCR( "Fe", v[0] );							// update the number of firms
-INCRS( PARENT, "cEntry", v[1] );				// account equity cost of entry
-INCRS( PARENT, "cExit", v[2] );					// account exit credits
-WRITES( ENESTAL1, "exitE", ( double ) j / Fe );
-WRITES( ENESTAL1, "entryE", ( double ) k / Fe );
+v[0] = k - j;									// net number of entrants
+INCR( "Fe", v[0] );								// update the number of firms
+INCR( "cEntryE", v[1] );						// add cost of additional equity
+WRITE( "exitE", ( double ) j / Fe );
+WRITE( "entryE", ( double ) k / Fe );
 WRITES( ENESTAL1, "exitEfail", v[6] / Fe );
+RECALCS( FINSECL1, "BadDebE" );					// update bad debt after exits
 
 V( "fErescale" );								// redistribute entrant m.s.
+V( "firmEmaps" );								// update firm mapping vectors
 
 RESULT( v[0] )
 
@@ -218,7 +221,23 @@ EQUATION( "pE" )
 /*
 Price of energy
 */
-RESULT( VS( PARENT, "flagEnClim" ) != 0 ? WHTAVEL( "_pE", "_fE", 1 ) : 0 )
+RESULT( VS( PARENT, "flagEnClim" ) > 0 ? WHTAVEL( "_pE", "_fE", 1 ) : 0 )
+
+
+EQUATION( "pF" )
+/*
+Price of fossil fuel
+*/
+v[1] = VL( "pE", 1 );							// previous price of energy
+RESULT( v[1] > 0 ? CURRENT * ( 1 + V( "upsilonF" ) * ( V( "pE" ) / v[1] - 1 ) ) :
+				   CURRENT )
+
+
+EQUATION( "CeEq" )
+/*
+Cost (revenue) of energy price equalization supported by government
+*/
+RESULT( V( "Se" ) - V( "De" ) * V( "pE" ) )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
@@ -227,23 +246,21 @@ EQUATION( "Ce" )
 /*
 Total generation costs of energy sector
 */
-V( "Cf" );										// ensure costs are updated
 RESULT( SUM( "_Ce" )  )
 
 
-EQUATION( "Cf" )
+EQUATION( "CIe" )
 /*
-Total fuel costs of energy sector
+Total canceled investment in energy sector
 */
-V( "TaxE" );									// ensure accounting updated
-RESULT( SUM( "_Cf" )  )
+RESULT( SUM( "_CIe" ) )
 
 
-EQUATION( "SfAcc" )
+EQUATION( "DeE" )
 /*
-Accumulated fuel sales to energy sector
+Demand expectation of energy sector
 */
-RESULT( CURRENT + V( "Cf" )  )
+RESULT( SUM( "_DeE" ) )
 
 
 EQUATION( "DebE" )
@@ -254,11 +271,17 @@ V( "TaxE" );									// ensure debt is updated
 RESULT( SUM( "_DebE" ) )
 
 
+EQUATION( "Df" )
+/*
+Demand (physical units) of fossil fuel by energy sector
+*/
+RESULT( SUM( "_Df" ) )
+
+
 EQUATION( "DivE" )
 /*
 Total dividends paid by energy sector
 */
-V( "TaxE" );									// ensure net worth is updated
 RESULT( SUM( "_DivE" ) )
 
 
@@ -266,16 +289,28 @@ EQUATION( "EIe" )
 /*
 Total expansion investment (in capacity terms) of energy sector
 */
-V( "De" );										// ensure demand is allocated
 RESULT( SUM( "_EIe" )  )
+
+
+EQUATION( "EIeD" )
+/*
+Total desired expansion investment (in capacity terms) of energy sector
+*/
+RESULT( SUM( "_EIeD" )  )
 
 
 EQUATION( "EmE" )
 /*
 Total CO2 (carbon) emissions of energy sector
 */
-V( "De" );										// ensure demand is allocated
 RESULT( SUM( "_EmE" ) )
+
+
+EQUATION( "EqE" )
+/*
+Equity hold by workers/households from firms in energy sector
+*/
+RESULT( SUM( "_EqE" ) )
 
 
 EQUATION( "Fe" )
@@ -285,11 +320,11 @@ Number of firms in energy sector
 RESULT( COUNT( "FirmE" ) )
 
 
-EQUATION( "Ie" )
+EQUATION( "IeNom" )
 /*
-Total investment (in capacity terms) of energy sector
+Total investment (nominal/currency terms) of energy sector
 */
-RESULT( V( "EIe" ) + V( "SIe" ) )
+RESULT( SUM( "_IeNom" ) )
 
 
 EQUATION( "JOe" )
@@ -307,11 +342,17 @@ Total generation capacity of power plants in energy sector
 RESULT( V( "Kde" ) + V( "Kge" ) )
 
 
+EQUATION( "KeNom" )
+/*
+Total capital (nominal/money terms) in energy sector
+*/
+RESULT( SUM( "_KeNom" ) )
+
+
 EQUATION( "Kde" )
 /*
 Total generation capacity of dirty power plants in energy sector
 */
-V( "De" );										// ensure demand is allocated
 RESULT( SUM( "_Kde" ) )
 
 
@@ -319,7 +360,6 @@ EQUATION( "Kge" )
 /*
 Total generation capacity of green power plants in energy sector
 */
-V( "De" );										// ensure demand is allocated
 RESULT( SUM( "_Kge" ) )
 
 
@@ -327,14 +367,14 @@ EQUATION( "LeD" )
 /*
 Total desired labor in energy sector
 */
-RESULT( SUML( "_LeD", 1 ) )
+RESULT( SUM( "_LeD" ) )
 
 
 EQUATION( "LeDrd" )
 /*
 Total desired R&D labor in energy sector
 */
-RESULT( SUML( "_LeDrd", 1 ) )
+RESULT( SUM( "_LeDrd" ) )
 
 
 EQUATION( "LeRD" )
@@ -379,7 +419,6 @@ EQUATION( "SIe" )
 /*
 Total substitution investment (in capacity terms) of energy sector
 */
-V( "De" );										// ensure demand is allocated
 RESULT( SUM( "_SIe" )  )
 
 
@@ -387,8 +426,7 @@ EQUATION( "SIeD" )
 /*
 Total desired substitution investment (in capacity terms) of energy sector
 */
-V( "De" );										// ensure demand is allocated
-RESULT( SUM( "_SIeD" )  )
+RESULT( SUM( "_SIeD" )	)
 
 
 EQUATION( "Se" )
@@ -396,7 +434,7 @@ EQUATION( "Se" )
 Total sales of energy sector
 */
 V( "TaxE" );									// ensure accounting is updated
-RESULT( SUM( "_Se" ) )	
+RESULT( SUM( "_Se" ) )
 
 
 EQUATION( "TaxE" )
@@ -413,6 +451,20 @@ Total wages paid by energy sector
 */
 V( "TaxE" );									// ensure accounting is updated
 RESULT( SUM( "_We" ) )
+
+
+EQUATION( "iDe" )
+/*
+Interest received from deposits by energy sector
+*/
+RESULT( SUM( "_iDe" ) )
+
+
+EQUATION( "iE" )
+/*
+Interest paid by energy sector
+*/
+RESULT( SUM( "_iE" ) )
 
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/
@@ -439,7 +491,7 @@ if ( v[1] > 0 )									// production ok?
 else
 {
 	v[2] = 1 / COUNT( "FirmE" );				// firm fair share
-	
+
 	CYCLE( cur, "FirmE" )						// rescale to add-up to 1
 	{
 		v[0] += v[2];
@@ -450,4 +502,51 @@ else
 RESULT( v[0] )
 
 
+EQUATION( "firmEmaps" )
+/*
+Updates the static maps of firms in energy sector
+Only to be called if firm objects in energy sector are created or destroyed
+*/
+
+// clear vectors
+EXEC_EXTS( PARENT, countryE, firmEmap, clear );
+EXEC_EXTS( PARENT, countryE, firmEptr, clear );
+
+i = 0;											// firm index in vector
+CYCLE( cur, "FirmE" )							// do for all firms in sector 2
+{
+	EXEC_EXTS( PARENT, countryE, firmEptr, push_back, cur );// pointer to firm
+	EXEC_EXTS( PARENT, countryE, firmEmap, insert, // save in firm's map
+			   firmPairT( ( int ) VS( cur, "_IDe" ), cur ) );
+
+	++i;
+}
+
+RESULT( i )
+
+
 /*============================= DUMMY EQUATIONS ==============================*/
+
+EQUATION_DUMMY( "cEntryE", "" )
+/*
+Cost (new equity) of firm entries in energy sector
+Updated in 'entryEexit'
+*/
+
+EQUATION_DUMMY( "cExitE", "" )
+/*
+Credits (returned equity) from firm exits in energy sector
+Updated in 'entryEexit'
+*/
+
+EQUATION_DUMMY( "entryE", "entryEexit" )
+/*
+Rate of entering firms in energy sector
+Updated in 'entryEexit'
+*/
+
+EQUATION_DUMMY( "exitE", "entryEexit" )
+/*
+Rate of exiting firms in energy sector
+Updated in 'entryEexit'
+*/

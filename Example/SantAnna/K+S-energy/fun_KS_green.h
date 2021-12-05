@@ -3,9 +3,9 @@
 	GREEN OBJECT EQUATIONS
 	----------------------
 
-	Equations that are specific to the green energy plant objects in the 
+	Equations that are specific to the green energy plant objects in the
 	K+S LSD model are coded below.
- 
+
  ******************************************************************************/
 
 /*============================== KEY EQUATIONS ===============================*/
@@ -14,7 +14,8 @@ EQUATION( "__LgeD" )
 /*
 Labor required for operation of green power plant
 */
-RESULT( V( "__Qge" ) * VS( GRANDPARENT, "mGE" ) )
+RESULT( max( VL( "__QgeU", 1 ), VS( GRANDPARENT, "mEmin" ) ) *
+		V( "__Kge" ) * VS( GRANDPARENT, "mGE" ) )
 
 
 EQUATION( "__RSge" )
@@ -22,22 +23,35 @@ EQUATION( "__RSge" )
 Capacity to scrap of green power plant
 */
 
-if ( T - V( "__tGE" ) > VS( GRANDPARENT, "etaE" ) )// over technical life
+v[0] = 0;										// assume no or done scrapping
+
+if ( CURRENT > 0 )								// scrapped last period?
 {
-	v[0] = V( "__Kge" );						// scrap entire plant
+	if ( HOOKS( PARENT, TOPVINT ) == THIS );	// last green plant?
+		WRITE_HOOKS( PARENT, TOPVINT, NULL );	// remove parent top pointer
+
 	DELETE( THIS );								// delete plant object (suicide)
 }
 else
-	v[0] = 0;
-	
+	if ( T - V( "__tGE" ) > VS( GRANDPARENT, "etaE" ) )// over technical life
+		v[0] = V( "__Kge" );					// scrap entire plant
+
 RESULT( v[0] )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
 
+EQUATION( "__QgeU" )
+/*
+Utilization of green power plant
+*/
+VS( PARENT, "_allocE" );						// ensure generation allocated
+RESULT( V( "__Qge" ) / V( "__Kge" ) )
+
+
 EQUATION( "__cGE" )
 /*
-Production unit cost of green power plant
+Planned production unit cost of green power plant
 */
 RESULT( VS( GRANDPARENT, "mGE" ) * VS( LABSUPL3, "w" ) )
 

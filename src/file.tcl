@@ -887,7 +887,7 @@ proc make_wait { } {
 		fileevent $makePipe readable ""
 
 		set t 0
-		while { t < 1000 && [ file exists make.bat ] && [ catch { file delete make.bat } ] } {
+		while { $t < 1000 && [ file exists make.bat ] && [ catch { file delete make.bat } ] } {
 			after 100
 			incr t 100
 		}

@@ -1159,7 +1159,7 @@ bool compile_run( int run_mode, bool nw )
 		cmd( "ttk::label .t.l1 -style bold.TLabel -justify center -text \"Compiling model...\"" );
 
 	if ( run_mode != 0 )
-		cmd( "ttk::label .t.l2 -justify center -text \"Just recompiling equation file(s) changes.\nOn success, the new model program will be launched.\nOn failure, a new window will show the compilation errors.\"" );
+		cmd( "ttk::label .t.l2 -justify center -text \"Just recompiling equation file(s) changes.\nOn success, the %s will be launched.\nOn failure, a new window will show the compilation errors.\"", run_mode != 2 ? "new model program" : "debugger" );
 	else
 		if ( nw )
 #ifdef _LMM_
@@ -1203,7 +1203,7 @@ bool compile_run( int run_mode, bool nw )
 	if ( res == 2 )
 	{
 		cmd( "catch { close $makePipe }" );
-		cmd( "if [ file exists make.bat ] { file delete make.bat }" );
+		cmd( "if [ file exists make.bat ] { catch { file delete make.bat } }" );
 		cmd( "if { [ winfo exists .f.t.t ] } { \
 				focustop .f.t.t \
 			} else { \
@@ -1279,6 +1279,7 @@ bool compile_run( int run_mode, bool nw )
 			}" );
 
 end:
+
 	cmd( "cd \"$oldpath\"" );
 
 	return ret;
@@ -1895,8 +1896,9 @@ void myexit( int v )
 {
 	fflush( stderr );
 #ifndef _NP_
-	// stop multi-thread workers, if needed
-	delete [ ] workers;
+	// stop multi-thread workers, if needed/safe
+	if ( worker_errors( ) == 0 )
+		delete [ ] workers;
 #endif
 
 #ifndef _NW_
@@ -1979,7 +1981,7 @@ void exception_handler( int signum, const char *what )
 
 		case SIGMEM:
 			snprintf( msg1, MAX_LINE_SIZE, "SIGMEM (%s)", what != NULL && strlen( what ) > 0 ? what : "Out of memory" );
-			strcpyn( msg2, "Maybe too many series saved?\n	Try to reduce the number of series saved or the number of time steps", MAX_LINE_SIZE );
+			strcpyn( msg2, "Maybe too many series saved?\n	Try to reduce the number of series saved or the number of cases (time steps)", MAX_LINE_SIZE );
 			break;
 
 		case SIGABRT:
