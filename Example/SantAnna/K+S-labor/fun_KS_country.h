@@ -379,7 +379,6 @@ Initialize the K+S country object. It is run only once per country.
 */
 
 PARAMETER;										// execute only once per country
-V( "regChg" );									// enforce change even at t=1
 
 // create the new country as an extension to current 'Country' object
 ADDEXT_INIT( countryE );
@@ -398,6 +397,8 @@ cur1 = CAPSECL0;
 cur2 = CONSECL0;
 cur3 = FINSECL0;
 cur4 = LABSUPL0;
+
+V( "regChg" );									// enforce change even at t=1
 
 // check unwanted extra instances (only one of each is required)
 if ( COUNT( "Capital" ) > 1 || COUNT( "Consumption" ) > 1 ||
