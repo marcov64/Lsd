@@ -191,9 +191,10 @@ object *send_brochure( object *suppl, object *client )
 
 // set initial supplier for entrant in equations 'entry2exit'
 
-object *set_supplier( object *firm, int firmID )
+object *set_supplier( object *firm )
 {
-	object *broch, *suppl, *cap = SEARCHS( GRANDPARENTS( firm ), "Capital" );
+	object *broch, *suppl,
+		   *cap = V_EXTS( GRANDPARENTS( firm ), countryE, capSec );
 
 	suppl = RNDDRAWS( cap, "Firm1", "_Atau" );	// draw capital supplier
 	broch = send_brochure( suppl, firm );		// get supplier brochure
@@ -302,8 +303,8 @@ void add_vintage( object *firm, double nMach, bool newInd )
 	// at t=1 firms have a mix of machines: old to new, many suppliers
 	if ( newInd )
 	{
-		cap = SEARCHS( GRANDPARENTS( firm ), "Capital" );
-		cons = SEARCHS( GRANDPARENTS( firm ), "Consumption" );
+		cap = V_EXTS( GRANDPARENTS( firm ), countryE, capSec );
+		cons = V_EXTS( GRANDPARENTS( firm ), countryE, conSec );
 
 		__ageVint = VS( cons, "eta" ) + 1;		// age of oldest machine
 		__nVint = ceil( nMach / __ageVint );	// machines per vintage
@@ -389,8 +390,8 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 		   _p1, AtauMax, BtauMax, Deb1, Eq1, NW1, mult;
 	int _ID1, _t1ent;
 	object *firm,
-		   *cons = SEARCHS( PARENTS( sector ), "Consumption" ),
-		   *lab = SEARCHS( PARENTS( sector ), "Labor" );
+		   *cons = V_EXTS( PARENTS( sector ), countryE, conSec ),
+		   *lab = V_EXTS( PARENTS( sector ), countryE, labSup );
 
 	double Deb10ratio = VS( sector, "Deb10ratio" );// bank fin. to equity ratio
 	double Phi3 = VS( sector, "Phi3" );			// lower support for wealth share
@@ -438,13 +439,14 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 	// add entrant firms (end of period, don't try to sell)
 	for ( Deb1 = Eq1 = NW1 = 0; n > 0; --n )
 	{
-		_ID1 = INCRS( sector, "lastID1", 1 );	// new firm ID
-
 		// create object, only recalculate in t if new industry
 		if ( newInd )
 			firm = ADDOBJLS( sector, "Firm1", T - 1 );
 		else
 			firm = ADDOBJS( sector, "Firm1" );
+
+		_ID1 = INCRS( sector, "lastID1", 1 );	// new firm ID
+		WRITES( firm, "_ID1", _ID1 );
 
 		DELETE( SEARCHS( firm, "Cli" ) );		// remove empty instances
 
@@ -471,7 +473,6 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 
 		// initialize variables
 		WRITES( firm, "_Eq1", _Eq1 );
-		WRITES( firm, "_ID1", _ID1 );
 		WRITES( firm, "_t1ent", _t1ent );
 		WRITELLS( firm, "_Atau", _Atau, _t1ent, 1 );
 		WRITELLS( firm, "_Btau", _Btau, _t1ent, 1 );
@@ -530,8 +531,8 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		   _c2, _f2, _life2cycle, _p2, Deb2, Eq2, K, N, NW2, mult;
 	int _ID2, _t2ent;
 	object *firm, *suppl,
-		   *cap = SEARCHS( PARENTS( sector ), "Capital" ),
-		   *lab = SEARCHS( PARENTS( sector ), "Labor" );
+		   *cap = V_EXTS( PARENTS( sector ), countryE, capSec ),
+		   *lab = V_EXTS( PARENTS( sector ), countryE, labSup );
 
 	double Deb20ratio = VS( sector, "Deb20ratio" );// bank fin. to equity ratio
 	double Phi1 = VS( sector, "Phi1" );			// lower support for K share
@@ -585,20 +586,21 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 	// add entrant firms (end of period, don't try to sell)
 	for ( Deb2 = Eq2 = NW2 = K = N = 0; n > 0; --n )
 	{
-		_ID2 = INCRS( sector, "lastID2", 1 );	// new firm ID
-
 		// create object, only recalculate in t if new industry
 		if ( newInd )
 			firm = ADDOBJLS( sector, "Firm2", T - 1 );
 		else
 			firm = ADDOBJS( sector, "Firm2" );
 
+		_ID2 = INCRS( sector, "lastID2", 1 );	// new firm ID
+		WRITES( firm, "_ID2", _ID2 );
+
 		ADDHOOKS( firm, FIRM2HK );				// add object hooks
 		DELETE( SEARCHS( firm, "Vint" ) );		// remove empty instances
 		DELETE( SEARCHS( firm, "Broch" ) );
 
 		// select initial machine supplier
-		suppl = set_supplier( firm, _ID2 );
+		suppl = set_supplier( firm );
 
 		// initial desired capital/expected demand, rounded to # of machines
 		mult = newInd ? 1 : uniform( Phi1, Phi2 );// capital multiple
@@ -621,7 +623,6 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 
 		// initialize variables
 		WRITES( firm, "_Eq2", _Eq2 );
-		WRITES( firm, "_ID2", _ID2 );
 		WRITES( firm, "_t2ent", _t2ent );
 		WRITES( firm, "_life2cycle", _life2cycle );
 		WRITELLS( firm, "_A2", _A2, _t2ent, 1 );

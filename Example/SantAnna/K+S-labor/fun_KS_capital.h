@@ -224,57 +224,28 @@ VS( CONSECL1, "fires2" );						// in both sectors
 VS( LABSUPL1, "appl" );							// and applications are done
 
 v[1] = VS( LABSUPL1, "Lscale" );				// labor scaling
-
 j = ceil( V( "JO1" ) / v[1] );					// scaled open jobs in sector 1
-appLisT *appl = & V_EXTS( PARENT, countryE, firm1appl );
-												// pointer to applications pool
-// get current top wage offered
-v[2] = VS( CONSECL1, "w2oMax" );
+v[2] = VS( CONSECL1, "w2oMax" );				// top wage offered
 
 // sort sector 1 candidate list according to the defined mode
+appLisT *appl = & V_EXTS( PARENT, countryE, firm1appl );
 order_applications( ( int ) VS( PARENT, "flagHireOrder1" ), appl );
 
 // hire the ordered applications until queue is exhausted
 i = 0;											// counter to hired workers
-v[3] = DBL_MAX;									// minimum wage requested
-cur = NULL;										// pointer to worker asking it
+auto ita = appl->begin( );						// first application
 
-while ( j > 0 && appl->size( ) > 0 )
+while ( j - i > 0 && ita != appl->end( ) )
 {
-	// get the candidate worker object element and a pointer to it
-	const application candidate = appl->front( );
-
 	// offered wage ok (ignore very small differences)?
-	if ( ROUND( candidate.w, v[2], 0.01 ) <= v[2] )
+	if ( ROUND( ita->w, v[2], 0.01 ) <= v[2] )
 	{
-		// already employed? First quit current job
-		if ( VS( candidate.wrk, "_employed" ) )
-			quit_worker( var, candidate.wrk );
-
 		// flag hiring and set wage, employer and vintage to be used by worker
-		hire_worker( candidate.wrk, 1, THIS, v[2] );// set firm, vintage & wage
+		hire_worker( var, ita->wrk, 1, THIS, v[2] );// set firm, vintage & wage
 		++i;									// scaled count hire
-		--j;									// adjust scaled labor demand
 	}
-	else
-		if ( candidate.w < v[3] )
-		{
-			v[3] = candidate.w;
-			cur = candidate.wrk;
-		}
 
-	// remove worker from candidate queue
-	appl->pop_front();
-}
-
-// try to hire at least one worker, at any wage
-if ( j > 0 && i == 0 && cur != NULL )			// none hired but someone avail?
-{
-	if ( VS( cur, "_employed" ) )				// quit job if needed
-		quit_worker( var, cur );
-
-	hire_worker( cur, 1, THIS, v[3] );			// pay requested wage
-	++i;
+	ita = appl->erase( ita );					// remove worker from list
 }
 
 appl->clear( );									// clear job application queue

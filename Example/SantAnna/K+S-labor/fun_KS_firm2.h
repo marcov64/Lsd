@@ -630,6 +630,8 @@ if ( VS( GRANDPARENT, "flagHeterWage" ) == 0 )	// centralized wage setting?
 	goto end_offer;
 }
 
+v[9] = VLS( PARENT, "w2oAvg", 1 );				// average market offer
+v[13] = VS( LABSUPL2, "wCap" );					// wage cap multiplier
 h = V( "_life2cycle" );							// firm status
 k = V( "_postChg" ) ? VS( GRANDPARENT, "flagWageOfferChg" ) :
 					  VS( GRANDPARENT, "flagWageOffer" );
@@ -637,7 +639,7 @@ k = V( "_postChg" ) ? VS( GRANDPARENT, "flagWageOfferChg" ) :
 if ( k == 0 )									// wage premium mode?
 {
 	if ( h == 0 )								// if entrant
-		v[0] = VLS( PARENT, "w2oAvg", 1 );		// use market average as base
+		v[0] = v[9];							// use market average as base
 	else
 		v[0] = CURRENT;
 
@@ -670,11 +672,10 @@ if ( k == 0 )									// wage premium mode?
 			break;
 
 		case 2:									// endogenous mechanism (WP2)
-			v[9] = VLS( PARENT, "w2oAvg", 1 );
 			if ( v[0] != 0 )					// valid  offer last period?
 				v[0] *= 1 + max( v[9] / v[0] - 1, 0 );
 			else								// no: use market average
-				v[0] = VLS( PARENT, "w2oAvg", 1 );
+				v[0] = v[9];
 	}
 }
 else
@@ -707,16 +708,13 @@ else
 }
 
 // check for abnormal change
-v[13] = VS( LABSUPL2, "wCap" );					// wage cap multiplier
 if ( h > 0 && v[13] > 0 )
 {
 	v[14] = v[0] / CURRENT;						// calculate multiple
 	v[15] = v[14] < 1 ? 1 / v[14] : v[14];
+
 	if ( v[15] > v[13] )						// explosive change?
-	{
-		v[16] = v[0];
 		v[0] = v[14] < 1 ? CURRENT / v[13] : CURRENT * v[13];
-	}
 }
 
 // check if non-entrant firm is able to pay wage
@@ -741,6 +739,7 @@ wageOffer woData;
 woData.offer = v[0];
 woData.workers = VL( "_L2", 1 );
 woData.firm = THIS;
+
 EXEC_EXTS( GRANDPARENT, countryE, firm2wo, push_back, woData );
 
 RESULT( v[0] )
@@ -819,7 +818,7 @@ V( "_fires2" );									// and fires are also done
 
 v[1] = V( "_L2d" ) - COUNT( "Wrk2" ) * VS( LABSUPL2, "Lscale" );
 
-RESULT( max( ceil( v[1] * ( 1 + VS( LABSUPL2, "theta" ) ) ), 0 ) )
+RESULT( max( ceil( ( 1 + VS( LABSUPL2, "theta" ) ) * v[1] ), 0 ) )
 
 
 EQUATION( "_K" )
@@ -923,7 +922,7 @@ RESULT( WHTAVE( "__nVint", "__pVint" ) )
 
 EQUATION( "_L2" )
 /*
-Effective (absolute) number of workers for firm in consumption-good sector
+Effective (absolute) number of workers of firm in consumption-good sector
 Result is scaled according to the defined scale
 */
 VS( PARENT, "hires2" );							// make sure hiring done
@@ -1318,7 +1317,7 @@ Credit supplied to firm in consumption-good sector
 Updated in '_Deb2max', '_Q2', '_EI', '_SI', '_Tax2'
 */
 
-EQUATION_DUMMY( "_D2", "D2" )
+EQUATION_DUMMY( "_D2", "" )
 /*
 Demand fulfilled by firm in consumption-good sector
 Updated in 'D2'
@@ -1342,13 +1341,13 @@ Provision for production of firm in consumption-good sector
 Updated in '_Q2'
 */
 
-EQUATION_DUMMY( "_hires2", "hires2" )
+EQUATION_DUMMY( "_hires2", "" )
 /*
 Effective number of workers hired in period for firm in sector 2
 Updated in 'hires2'
 */
 
-EQUATION_DUMMY( "_l2", "D2" )
+EQUATION_DUMMY( "_l2", "" )
 /*
 Unfilled demand of firm in consumption-good sector
 Updated in 'D2'
@@ -1360,7 +1359,7 @@ Oldest vintage (ID) in use in period by firm in consumption-good sector
 Updated in '_K'
 */
 
-EQUATION_DUMMY( "_qc2", "cScores" )
+EQUATION_DUMMY( "_qc2", "" )
 /*
 Credit class of firm in sector 2 (1,2,3,4)
 Updated in 'cScores'

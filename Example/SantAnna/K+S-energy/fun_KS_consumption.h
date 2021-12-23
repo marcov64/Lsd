@@ -373,7 +373,7 @@ RESULT( SUM( "_Knom" ) )
 
 EQUATION( "L2" )
 /*
-Work force (labor) size employed by consumption-good sector
+Work force (labor) size in consumption-good sector
 */
 v[1] = VS( LABSUPL1, "Ls" ) - VS( ENESECL1, "Le" ) - VS( CAPSECL1, "L1" );
 												// available labor force
@@ -384,7 +384,6 @@ RESULT( min( v[2], v[1] ) )						// pick up to available
 EQUATION( "L2d" )
 /*
 Total labor demand from firms in consumption-good sector
-Includes R&D labor
 */
 RESULT( SUM( "_L2d" ) )
 

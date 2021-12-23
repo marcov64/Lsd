@@ -847,7 +847,7 @@ Credit supplied to firm in consumption-good sector
 Updated in '_Deb2max', '_Q2', '_EI', '_SI', '_Tax2'
 */
 
-EQUATION_DUMMY( "_D2", "D2" )
+EQUATION_DUMMY( "_D2", "" )
 /*
 Demand fulfilled by firm in consumption-good sector
 Updated in 'D2'
@@ -871,7 +871,7 @@ Provision for production of firm in consumption-good sector
 Updated in '_Q2'
 */
 
-EQUATION_DUMMY( "_l2", "D2" )
+EQUATION_DUMMY( "_l2", "" )
 /*
 Unfilled demand of firm in consumption-good sector
 Updated in 'D2'

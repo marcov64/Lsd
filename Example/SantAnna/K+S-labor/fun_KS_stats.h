@@ -49,6 +49,13 @@ RESULT( VS( LABSUPL2, "W" ) + VLS( LABSUPL2, "Bon", 1 ) +
 		VS( CAPSECL2, "PPI" ) * VS( CONSECL2, "SI" ) / VS( CONSECL2, "m2" ) )
 
 
+EQUATION( "GDPdefl" )
+/*
+GDP price deflator
+*/
+RESULT( VS( GRANDPARENT, "GDPnom" ) / VS( GRANDPARENT, "GDPreal" ) )
+
+
 EQUATION( "dA" )
 /*
 Overall labor productivity growth rate
@@ -558,8 +565,7 @@ RESULT( v[0] )
 
 EQUATION( "w2oMin" )
 /*
-Lowest wage offered by a firm in consumption-good sector
-Updated in 'w2oMax'
+Lowest wage offered to workers in consumption-good sector
 */
 RESULT( MINS( CONSECL2, "_w2o" ) )
 
@@ -570,7 +576,7 @@ Weighted average real wage paid by post-change firms in consumption-good sector
 */
 v[1] = SUM_CNDS( CONSECL2, "_L2", "_postChg", "!=", 0 );
 RESULT( v[1] > 0 ? WHTAVE_CNDS( CONSECL2, "_w2avg", "_L2", "_postChg", "!=", 0 ) /
-				   v[1] / VS( CONSECL2, "CPI" ) : 0 )
+				   v[1] / VS( MACSTAL2, "GDPdefl" ) : 0 )
 
 
 EQUATION( "w2realPreChg" )
@@ -579,7 +585,7 @@ Weighted average real wage paid by pre-change firms in consumption-good sector
 */
 v[1] = SUM_CNDS( CONSECL2, "_L2", "_postChg", "==", 0 );
 RESULT( v[1] > 0 ? WHTAVE_CNDS( CONSECL2, "_w2avg", "_L2", "_postChg", "==", 0 ) /
-				   v[1] / VS( CONSECL2, "CPI" ) : 0 )
+				   v[1] / VS( MACSTAL2, "GDPdefl" ) : 0 )
 
 
 /*============================= LABOR STATS ==================================*/
@@ -615,7 +621,7 @@ EQUATION( "V" )
 Effective vacancy rate (unfilled positions over total labor supply)
 */
 RESULT( T > 1 ? min( ( VS( CAPSECL2, "JO1" ) + VS( CONSECL2, "JO2" ) ) /
-					   VS( LABSUPL2, "Ls" ), 1 ) : 0 )
+					 VS( LABSUPL2, "Ls" ), 1 ) : 0 )
 
 
 EQUATION( "dw" )
@@ -643,156 +649,160 @@ RESULT( i * VS( LABSUPL2, "Lscale" ) / VS( LABSUPL2, "Ls" ) )
 
 EQUATION( "wAvgReal" )
 /*
-Average real wages received by workers (including unemployment benefits)
-Also updates several worker level wage/income statistics at once:
+Average real wage received by workers (excluding unemployment benefits)
+Also updates several worker wage/income statistics at once for efficiency:
+	Gini: Gini index including all workers income and firm owners net cash flows
+	InAvg: average income of workers (including bonus & unemployment benefit)
+	InAvgReal: average real income of workers (including bonus & unemp. benefit)
+	InLogSD: income dispersion measured by the standard deviation of income log
+	InMax: highest income
+	InMin: lowest income
+	wGini: wage dispersion measured by the Gini index (Jasso-Deaton formula)
+	wLogSD: wage dispersion measured by the standard deviation of wage log
 	wMax: highest wage
 	wMin: lowest wage
 	wrAvg: average wage requested by workers
+	wrLogSD: log wage requested standard deviation
 	wrMax: highest wage requested by workers
 	wrMin: lowest wage requested by workers
 	wsAvg: average satisficing wage of workers
+	wsLogSD: log satisficing wage standard deviation
 	wsMax: highest satisficing wage of workers
 	wsMin: lowest satisficing wage of workers
-	wLogSD: wage dispersion measured by the standard deviation of wage log
-	wrLogSD: log wage requested standard deviation
-	wsLogSD: log satisficing wage standard deviation
-	wGini: wage dispersion measured by the Gini index (Jasso-Deaton formula)
-	Gini: Gini index including workers all income and firm owners net cash flows
 Wages include unemployment benefits (if available) but not bonuses.
 Income includes wages and bonuses.
 */
 
-v[30] = VS( LABSUPL2, "Lscale" );				// workers per object
+double _In, _w, _wR, _wS, InSum, InLogSum, InSqLogSum, InMax, InMin,
+	   rank1wSum, wRank1Sum, rank2InSum, InRank2Sum, wAvgReal, wLogSD,
+	   wSum, wLogSum, wSqLogSum, wMax, wMin,
+	   wsSum, wsLogSum, wsSqLogSum, wsMax, wsMin,
+	   wrSum, wrLogSum, wrSqLogSum, wrMax, wrMin;
 
-j = COUNTS( LABSUPL2, "Worker" );				// count scaled workers
-h = COUNTS( CAPSECL2, "Firm1" );				// count firms (after entry-exit)
-h += COUNTS( CONSECL2, "Firm2" );
-h += j * v[30];									// number of worker+firm objects
+int agtN, empN, wrkN;
+double GDPdefl = VS( MACSTAL2, "GDPdefl" );		// GDP deflator
+double Lscale = VS( LABSUPL2, "Lscale" );		// workers per object
 
-double *rank1 = new double[ j ];				// allocate space for rank
-double *rank2 = new double[ h ];				// allocate space for indiv. rank
+wrkN = COUNTS( LABSUPL2, "Worker" );			// count scaled workers
+agtN = wrkN * Lscale + COUNTS( CAPSECL2, "Firm1" ) + COUNTS( CONSECL2, "Firm2" );
+												// number of worker+firm agents
+double *rank1 = new double[ wrkN ];				// allocate space for worker rank
+double *rank2 = new double[ agtN ];				// allocate space for indiv. rank
 
-i = k = 0;
-v[1] = v[2] = v[3] = v[4] = 0;
-v[11] = v[12] = v[13] = v[14] = 0;
-v[21] = v[22] = v[23] = v[24] = 0;
-v[5] = v[15] = v[25] = DBL_MAX;					// minimum registers
+agtN = empN = wrkN = 0;
+InSum = InLogSum = InSqLogSum = wSum = wLogSum = wSqLogSum = 0;
+wsSum = wsLogSum = wsSqLogSum = wrSum = wrLogSum = wrSqLogSum = 0;
+InMax = wMax = wrMax = wsMax = 0;
+InMin = wMin = wsMin = wrMin = DBL_MAX;
+
 CYCLES( LABSUPL2, cur, "Worker" )				// consider all workers
 {
-	v[0] = VS( cur, "_w" ) + VS( cur, "_Bon" );	// current wage + bonus
-	v[1] += v[0];								// sum of wages + bonus
-	v[2] += log( v[0] + 1 );					// sum of log wages
-	v[3] += pow( log( v[0] + 1 ), 2 );			// sum of squared log wages
-	v[4] = max( v[0], v[4] );					// max wage
-	v[5] = min( v[0], v[5] );					// min wage
+	_w = VS( cur, "_w" );						// current wage + unemp. benef.
+	_In = _w + VS( cur, "_Bon" );				// total worker income
+	InSum += _In;								// sum of income
+	InLogSum += log( _In + 1 );					// sum of log income
+	InSqLogSum += pow( log( _In + 1 ), 2 );		// sum of sq. log income
+	InMax = max( _In, InMax );					// max income
+	InMin = min( _In, InMin );					// min income
 
-	rank1[ i++ ] = v[0];						// insert wage in rank array
+	for ( int worker = 0; worker < Lscale; ++worker )
+		rank2[ agtN++ ] = _In;					// insert income in rank array
 
-	for ( int worker = 0; worker < v[30]; ++worker )
-		rank2[ k++ ] = v[0];					// same for income (wage+bonus)
+	if ( VS( cur, "_employed" ) )
+	{
+		wSum += _w;								// sum of wages
+		wLogSum += log( _w + 1 );				// sum of log wages
+		wSqLogSum += pow( log( _w + 1 ), 2 );	// sum of squared log wages
+		wMax = max( _w, wMax );					// max wage
+		wMin = min( _w, wMin );					// min wage
+		rank1[ empN++ ] = _w;					// insert wage in rank array
+	}
 
-	v[0] = VS( cur, "_wS" );					// current satisfacing wage
-	v[11] += v[0];								// sum of satisfacing wages
-	v[12] += log( v[0] + 1 );					// sum of log satisfacing wages
-	v[13] += pow( log( v[0] + 1 ), 2 );			// sum of sq. log satisf. wages
-	v[14] = max( v[0], v[14] );					// max satisfacing wage
-	v[15] = min( v[0], v[15] );					// min satisfacing wage
+	_wR = VS( cur, "_wR" );						// current requested wage
+	wrSum += _wR;								// sum of requested wages
+	wrLogSum += log( _wR + 1 );					// sum of log requested wages
+	wrSqLogSum += pow( log( _wR + 1 ), 2 );		// sum of sq. log req. wages
+	wrMax = max( _wR, wrMax );					// max requested wage
+	wrMin = min( _wR, wrMin );					// min requested wage
 
-	v[0] = VS( cur, "_wR" );					// current requested wage
-	v[21] += v[0];								// sum of requested wages
-	v[22] += log( v[0] + 1 );					// sum of log requested wages
-	v[23] += pow( log( v[0] + 1 ), 2 );			// sum of sq. log req. wages
-	v[24] = max( v[0], v[24] );					// max requested wage
-	v[25] = min( v[0], v[25] );					// min requested wage
+	_wS = VS( cur, "_wS" );						// current satisfacing wage
+	wsSum += _wS;								// sum of satisfacing wages
+	wsLogSum += log( _wS + 1 );					// sum of log satisfacing wages
+	wsSqLogSum += pow( log( _wS + 1 ), 2 );		// sum of sq. log satisf. wages
+	wsMax = max( _wS, wsMax );					// max satisfacing wage
+	wsMin = min( _wS, wsMin );					// min satisfacing wage
+
+	++wrkN;
 }
 
 CYCLES( CAPSECL2, cur, "Firm1" )				// consider sector 1 firm owners
-	rank2[ k++ ] = max( VS( cur, "_NW1" ) - VLS( cur, "_NW1", 1 ), 0 );
+	rank2[ agtN++ ] = max( VS( cur, "_NW1" ) - VLS( cur, "_NW1", 1 ), 0 );
 												// Positive net wealth change
 
 CYCLES( CONSECL2, cur, "Firm2" )				// consider sector 2 firm owners
-	rank2[ k++ ] = max( VS( cur, "_NW2" ) - VLS( cur, "_NW2", 1 ), 0 );
+	rank2[ agtN++ ] = max( VS( cur, "_NW2" ) - VLS( cur, "_NW2", 1 ), 0 );
 												// Positive net wealth change
-// averages
-v[6] = v[1] / i;								// average of wages
-v[16] = v[11] / i;								// average of satisfacing wages
-v[26] = v[21] / i;								// average of requested wages
 
-// SDs
-v[7] = sqrt( max( ( v[3] / i ) - pow( v[2] / i, 2 ), 0 ) );// SD of log wages
-v[17] = sqrt( max( ( v[13] / i ) - pow( v[12] / i, 2 ), 0 ) );// SD log sat. wage
-v[27] = sqrt( max( ( v[23] / i ) - pow( v[22] / i, 2 ), 0 ) );// SD log req. wage
+// apply the Jasso-Deaton formula
+sort( rank1, rank1 + empN, greater < double > ( ) );// sort in descending order
+sort( rank2, rank2 + agtN, greater < double > ( ) );
 
-// sort ranks in descending order
-sort( rank1, rank1 + j, greater< double >() );
-sort( rank2, rank2 + h, greater< double >() );
-
-for ( v[8] = v[9] = 0, k = 0; k < j; ++k )
+for ( rank1wSum = wRank1Sum = k = 0; k < empN; ++k )
 {
-	v[8] += ( k + 1 ) * rank1[ k ];				// sum rank x wage
-	v[9] += rank1[ k ];							// sum wage
+	rank1wSum += ( k + 1 ) * rank1[ k ];
+	wRank1Sum += rank1[ k ];
 }
 
-for ( v[18] = v[19] = 0, k = 0; k < h; ++k )
+for ( rank2InSum = InRank2Sum = k = 0; k < agtN; ++k )
 {
-	v[18] += ( k + 1 ) * rank2[ k ];			// sum rank x wage
-	v[19] += rank2[ k ];						// sum wage
+	rank2InSum += ( k + 1 ) * rank2[ k ];
+	InRank2Sum += rank2[ k ];
 }
+
+double wGini = ( double ) ( empN + 1 ) / ( empN - 1 ) -
+			   2 * rank1wSum / ( ( empN - 1 ) * wRank1Sum );
+double Gini = ( double ) ( agtN + 1 ) / ( agtN - 1 ) -
+			   2 * rank2InSum / ( ( agtN - 1 ) * InRank2Sum );
+
+double InLogSD = sqrt( max( ( InSqLogSum / wrkN ) -
+							pow( InLogSum / wrkN, 2 ), 0 ) );
+double wrLogSD = sqrt( max( ( wrSqLogSum / wrkN ) -
+							pow( wrLogSum / wrkN, 2 ), 0 ) );
+double wsLogSD = sqrt( max( ( wsSqLogSum / wrkN ) -
+							pow( wsLogSum / wrkN, 2 ), 0 ) );
+
+if ( empN > 0 )
+{
+	wAvgReal = wSum / empN / GDPdefl;
+	wLogSD = sqrt( max( ( wSqLogSum / empN ) -
+						pow( wLogSum / empN, 2 ), 0 ) );
+}
+else
+	wAvgReal = wLogSD = wMin = 0;
 
 delete [] rank1;
 delete [] rank2;
 
-// apply the Jasso-Deaton formula
-v[10] = ( double ) ( j + 1 ) / ( j - 1 ) - 2 * v[8] / ( ( j - 1 ) * v[9] );
-v[20] = ( double ) ( h + 1 ) / ( h - 1 ) - 2 * v[18] / ( ( h - 1 ) * v[19] );
+WRITES( MACSTAL2, "Gini", Gini );				// overall Gini index
+WRITES( LABSTAL2, "InAvg", InSum / wrkN );		// average income
+WRITES( LABSTAL2, "InAvgReal", InSum / wrkN / GDPdefl);// average income
+WRITES( LABSTAL2, "InLogSD", InLogSD );			// log income SD
+WRITES( LABSTAL2, "InMax", InMax );				// max income
+WRITES( LABSTAL2, "InMin", InMin );				// min income
+WRITES( LABSTAL2, "wGini", wGini );				// Gini index
+WRITES( LABSTAL2, "wLogSD", wLogSD );			// log wage SD
+WRITES( LABSTAL2, "wMax", wMax );				// max wage
+WRITES( LABSTAL2, "wMin", wMin );				// min wage
+WRITES( LABSTAL2, "wrAvg", wrSum / wrkN );		// average requested wage
+WRITES( LABSTAL2, "wrLogSD", wrLogSD );			// log requested wage SD
+WRITES( LABSTAL2, "wrMax", wrMax );				// max requested wage
+WRITES( LABSTAL2, "wrMin", wrMin );				// min requested wage
+WRITES( LABSTAL2, "wsAvg", wsSum / wrkN );		// average category wage
+WRITES( LABSTAL2, "wsLogSD", wsLogSD );			// log satisficing wage SD
+WRITES( LABSTAL2, "wsMax", wsMax );				// max satisficing wage
+WRITES( LABSTAL2, "wsMin", wsMin );				// min satisficing wage
 
-// write results into dummy vars
-WRITES( LABSTAL2, "wMax", v[4] );				// max wage
-WRITES( LABSTAL2, "wMin", v[5] );				// min wage
-WRITES( LABSTAL2, "wLogSD", v[7] );				// log wage SD
-WRITES( LABSTAL2, "wGini", v[10] );				// Gini index
-WRITES( LABSTAL2, "wsAvg", v[16] );				// average satisficing wage
-WRITES( LABSTAL2, "wsMax", v[14] );				// max satisficing wage
-WRITES( LABSTAL2, "wsMin", v[15] );				// min satisficing wage
-WRITES( LABSTAL2, "wsLogSD", v[17] );			// log satisficing wage SD
-WRITES( LABSTAL2, "wrAvg", v[26] );				// average requested wage
-WRITES( LABSTAL2, "wrMax", v[24] );				// max requested wage
-WRITES( LABSTAL2, "wrMin", v[25] );				// min requested wage
-WRITES( LABSTAL2, "wrLogSD", v[27] );			// log requested wage SD
-WRITES( MACSTAL2, "Gini", v[20] );				// overall Gini index
-
-RESULT( v[6] / VS( CONSECL2, "CPI" ) )
-
-
-EQUATION( "wAvgRealEmp" )
-/*
-Average real wage received by employed workers (excluding unemployment benefits)
-Also updates other worker level wage statistics at once:
-	wMaxEmp: highest wage of employed workers
-	wMinEmp: lowest wage of employed workers
-*/
-
-i = 0;
-v[1] = v[2] = 0;
-v[3] = DBL_MAX;									// minimum register
-CYCLES( LABSUPL2, cur, "Worker" )				// consider all workers
-	if ( VS( cur, "_employed" ) )				// account only employed
-	{
-		v[0] = VS( cur, "_w" ) + VS( cur, "_Bon" );// current wage + bonus
-		v[1] += v[0];							// sum of wages
-		v[2] = max( v[0], v[2] );				// max wage
-		v[3] = min( v[0], v[3] );				// min wage
-
-		++i;
-	}
-
-v[4] = ( i > 0 ) ? v[1] / i : CURRENT;			// average of wages
-
-// write results into parameters
-WRITE( "wMaxEmp", v[2] );
-WRITE( "wMinEmp", v[3] );
-
-RESULT( v[4] / VS( CONSECL2, "CPI" ) )
+RESULT( wAvgReal )
 
 
 /*============================ AGENT-LEVEL STATS =============================*/
@@ -868,7 +878,7 @@ EQUATION( "_wReal" )
 /*
 Real wage received by worker
 */
-RESULT( V( "_w" ) / VS( CONSECL2, "CPI" ) )
+RESULT( V( "_w" ) / VS( MACSTAL2, "GDPdefl" ) )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/
@@ -887,10 +897,40 @@ in consumption-good sector
 Updated in 'A2sd'
 */
 
-EQUATION_DUMMY( "Gini", "" )
+EQUATION_DUMMY( "Gini", "wAvgReal" )
 /*
 Gini index including workers all income and firm owners net cash flows
-Updated in 'wAvg'
+Updated in 'wAvgReal'
+*/
+
+EQUATION_DUMMY( "InAvg", "wAvgReal" )
+/*
+Average income of workers (including bonus & unemployment benefit)
+Updated in 'wAvgReal'
+*/
+
+EQUATION_DUMMY( "InAvgReal", "wAvgReal" )
+/*
+Average real income of workers (including bonus & unemployment benefit)
+Updated in 'wAvgReal'
+*/
+
+EQUATION_DUMMY( "InLogSD", "wAvgReal" )
+/*
+Income dispersion measured by the standard deviation of income log
+Updated in 'wAvgReal'
+*/
+
+EQUATION_DUMMY( "InMax", "wAvgReal" )
+/*
+Highest income
+Updated in 'wAvgReal'
+*/
+
+EQUATION_DUMMY( "InMin", "wAvgReal" )
+/*
+Lowest income
+Updated in 'wAvgReal'
 */
 
 EQUATION_DUMMY( "exit1fail", "" )
@@ -905,92 +945,74 @@ Rate of exiting bankrupt firms in consumption-good sector
 Updated in 'entry2exit'
 */
 
-EQUATION_DUMMY( "wAvgReal", "wAvg" )
-/*
-Real average wage (CPI adjusted)
-Updated in 'wAvg'
-*/
-
-EQUATION_DUMMY( "wGini", "wAvg" )
+EQUATION_DUMMY( "wGini", "wAvgReal" )
 /*
 Wage dispersion measured by the Gini index (Jasso-Deaton formula)
-Updated in 'wAvg'
+Updated in 'wAvgReal'
 */
 
-EQUATION_DUMMY( "wLogSD", "wAvg" )
+EQUATION_DUMMY( "wLogSD", "wAvgReal" )
 /*
 Wage dispersion measured by the standard deviation of wage log
-Updated in 'wAvg'
+Updated in 'wAvgReal'
 */
 
-EQUATION_DUMMY( "wMax", "wAvg" )
-/*
-Highest wage
-Updated in 'wAvg'
-*/
-
-EQUATION_DUMMY( "wMaxEmp", "wAvgRealEmp" )
+EQUATION_DUMMY( "wMax", "wAvgReal" )
 /*
 Highest wage of employed workers
-Updated in 'wAvgRealEmp'
+Updated in 'wAvgReal'
 */
 
-EQUATION_DUMMY( "wMin", "wAvg" )
-/*
-Lowest wage
-Updated in 'wAvg'
-*/
-
-EQUATION_DUMMY( "wMinEmp", "wAvgRealEmp" )
+EQUATION_DUMMY( "wMin", "wAvgReal" )
 /*
 Lowest wage of employed workers
-Updated in 'wAvgRealEmp'
+Updated in 'wAvgReal'
 */
 
-EQUATION_DUMMY( "wrAvg", "wAvg" )
+EQUATION_DUMMY( "wrAvg", "wAvgReal" )
 /*
 Average wage requested by workers
-Updated in 'wAvg'
+Updated in 'wAvgReal'
 */
 
-EQUATION_DUMMY( "wrLogSD", "wAvg" )
+EQUATION_DUMMY( "wrLogSD", "wAvgReal" )
 /*
 Log wage requested standard deviation
-Updated in 'wAvg'
+Updated in 'wAvgReal'
 */
 
-EQUATION_DUMMY( "wrMax", "wAvg" )
+EQUATION_DUMMY( "wrMax", "wAvgReal" )
 /*
 Highest wage requested by workers
-Updated in 'wAvg'
+Updated in 'wAvgReal'
 */
 
-EQUATION_DUMMY( "wrMin", "wAvg" )
+EQUATION_DUMMY( "wrMin", "wAvgReal" )
 /*
 Lowest wage requested by workers
-Updated in 'wAvg'
+Updated in 'wAvgReal'
 */
 
-EQUATION_DUMMY( "wsAvg", "wAvg" )
+EQUATION_DUMMY( "wsAvg", "wAvgReal" )
 /*
 Average satisficing wage of workers
-Updated in 'wAvg'
+Updated in 'wAvgReal'
 */
 
-EQUATION_DUMMY( "wsLogSD", "wAvg" )
+EQUATION_DUMMY( "wsLogSD", "wAvgReal" )
 /*
 Log satisficing wage standard deviation
-Updated in 'wAvg'
+Updated in 'wAvgReal'
 */
 
-EQUATION_DUMMY( "wsMax", "wAvg" )
+EQUATION_DUMMY( "wsMax", "wAvgReal" )
 /*
 Highest satisficing wage of workers
-Updated in 'wAvg'
+Updated in 'wAvgReal'
 */
 
-EQUATION_DUMMY( "wsMin", "wAvg" )
+EQUATION_DUMMY( "wsMin", "wAvgReal" )
 /*
 Lowest satisficing wage of workers
-Updated in 'wAvg'
+Updated in 'wAvgReal'
 */

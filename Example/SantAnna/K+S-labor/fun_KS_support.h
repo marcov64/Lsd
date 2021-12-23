@@ -66,12 +66,13 @@ bool rank_desc_NWtoS( firmRank e1, firmRank e2 )
 
 const char *bankPar[ ] = { "_bank1", "_bank2" },
 		   *CliObj[ ] = { "Cli1", "Cli2" },
+		   *_IDpar[ ] = { "_ID1","_ID2" },
 		   *__IDpar[ ] = { "__ID1","__ID2" };
 
-object *set_bank( object *firm, int firmID )
+object *set_bank( object *firm )
 {
 	int _IDb, sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 : 1;
-	object *bank, *cli, *fin = SEARCHS( GRANDPARENTS( firm ), "Financial" );
+	object *bank, *cli, *fin = V_EXTS( GRANDPARENTS( firm ), countryE, finSec );
 
 	_IDb = VS( fin, "pickBank" );				// draw initial preferred bank
 	bank = V_EXTS( GRANDPARENTS( firm ), countryE, bankPtr[ _IDb - 1 ] );
@@ -79,7 +80,7 @@ object *set_bank( object *firm, int firmID )
 	WRITE_HOOKS( firm, BANK, bank );
 
 	cli = ADDOBJS( bank, CliObj[ sec ] );		// add to bank client list
-	WRITES( cli, __IDpar[ sec ], firmID );		// update object
+	WRITES( cli, __IDpar[ sec ], VS( firm, _IDpar[ sec ] ) );// update object
 	WRITE_SHOOKS( cli, firm );					// pointer back to client
 	WRITE_HOOKS( firm, BCLIENT, cli );			// pointer to bank client list
 
@@ -164,7 +165,7 @@ double cash_flow( object *firm, double profit, double tax )
 {
 	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
 			  strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
-	object *fin = SEARCHS( GRANDPARENTS( firm ), "Financial" );
+	object *fin = V_EXTS( GRANDPARENTS( firm ), countryE, finSec );
 
 	double bonus = ( sec == 1 ) ? VLS( firm, "_Bon2", 1 ) : 0;// worker bonus
 	double dividends = VLS( firm, _DivVar[ sec ], 1 );// shareholder dividends
@@ -239,9 +240,10 @@ object *send_brochure( object *suppl, object *client )
 
 // set initial supplier for entrant in equations 'entry2exit'
 
-object *set_supplier( object *firm, int firmID )
+object *set_supplier( object *firm )
 {
-	object *broch, *suppl, *cap = SEARCHS( GRANDPARENTS( firm ), "Capital" );
+	object *broch, *suppl,
+		   *cap = V_EXTS( GRANDPARENTS( firm ), countryE, capSec );
 
 	suppl = RNDDRAWS( cap, "Firm1", "_Atau" );	// draw capital supplier
 	broch = send_brochure( suppl, firm );		// get supplier brochure
@@ -350,8 +352,8 @@ void add_vintage( variable *var, object *firm, double nMach, bool newInd )
 	// at t=1 firms have a mix of machines: old to new, many suppliers
 	if ( newInd )
 	{
-		cap = SEARCHS( GRANDPARENTS( firm ), "Capital" );
-		cons = SEARCHS( GRANDPARENTS( firm ), "Consumption" );
+		cap = V_EXTS( GRANDPARENTS( firm ), countryE, capSec );
+		cons = V_EXTS( GRANDPARENTS( firm ), countryE, conSec );
 
 		__ageVint = VS( cons, "eta" ) + 1;		// age of oldest machine
 		__nVint = ceil( nMach / __ageVint );	// machines per vintage
@@ -438,49 +440,6 @@ double scrap_vintage( variable *var, object *vint )
 
 /*================== LABOR MANAGEMENT SUPPORT C FUNCTIONS ====================*/
 
-// update a worker after hiring in equations 'hire1', 'hire2'
-
-void hire_worker( object *worker, int sec, object *firm, double wage )
-{
-	int flagWorkerLBU, ID = VS( worker, "_ID" );
-	object *wrk;
-
-	WRITES( worker, "_employed", sec );
-	WRITES( worker, "_Te", 0 );
-	WRITES( worker, "_CQ", 0 );					// no cumulated production yet
-	WRITES( worker, "_w", wage );
-
-	flagWorkerLBU = VS( GRANDPARENTS( worker ), "flagWorkerLBU" );
-	if ( flagWorkerLBU != 0 && flagWorkerLBU != 2 )
-		WRITES( worker, "_sV", VS( PARENTS( worker ), "sigma" ) );// public skills
-	else
-		WRITES( worker, "_sV", INISKILL );
-
-	// then handle the case at hand, setting vintage and bridge objects
-	if ( sec < 2 )								// unemployed or sector 1?
-	{
-		wrk = NULL;								// no Firm2 in use
-
-		if ( sec == 1 )
-		{
-			// add bridge object between 'Wrk1' (in Capital) to 'Worker'
-			wrk = ADDOBJS( firm, "Wrk1" );
-			WRITE_SHOOKS( wrk, worker );		// pointer to worker from firm
-			WRITES( wrk, "_IDw1", ID );
-		}
-	}
-	else
-	{
-		// add bridge-object between 'Wrk2' (in Firm2) to 'Worker'
-		wrk = ADDOBJS( firm, "Wrk2" );
-		WRITE_SHOOKS( wrk, worker );			// pointer to worker from firm
-		WRITES( wrk, "__IDw2", ID );				// register worker ID ID
-	}
-
-	WRITE_HOOKS( worker, FWRK, wrk );			// pointer to firm from worker
-}
-
-
 // update a worker after firing in equations 'fires1', '_fires2', 'entry2exit',
 // 'quits1', 'retires1', '_quits2', '_retires2'
 
@@ -506,18 +465,63 @@ void fire_worker( variable *var, object *worker )
 }
 
 
-// perform worker quitting from current firm in equations 'hires1', 'hires2'
+// update a worker after hiring in equations 'hire1', 'hire2'
 
-void quit_worker( variable *var, object *worker )
+void hire_worker( variable *var, object *worker, int sec, object *firm,
+				  double wage )
 {
-	double Lscale = VS( PARENTS( worker ), "Lscale" );// labor scaling
+	int flagWorkerLBU;
+	object *wrk;
 
-	if ( VS( worker, "_employed" ) == 1 )		// sector 1?
-		INCRS( V_EXTS( GRANDPARENTS( worker ), countryE, capSec ), "quits1", Lscale );
-	else										// no: assume sector 2
-		INCRS( PARENTS( HOOKS( worker, FWRK ) ), "_quits2", Lscale );
+	int _ID = VS( worker, "_ID" );
+	int _employed = VS( worker, "_employed" );
 
-	fire_worker( var, worker );					// register fire
+	if ( _employed )								// worker must quit first?
+	{
+		double Lscale = VS( PARENTS( worker ), "Lscale" );// labor scaling
+
+		if ( _employed == 1 )						// sector 1?
+			INCRS( V_EXTS( GRANDPARENTS( worker ), countryE, capSec ), "quits1",
+				   Lscale );
+		else										// no: assume sector 2
+			INCRS( PARENTS( HOOKS( worker, FWRK ) ), "_quits2", Lscale );
+
+		fire_worker( var, worker );					// register fire
+	}
+
+	WRITES( worker, "_employed", sec );
+	WRITES( worker, "_Te", 0 );
+	WRITES( worker, "_CQ", 0 );					// no cumulated production yet
+	WRITES( worker, "_w", wage );
+
+	flagWorkerLBU = VS( GRANDPARENTS( worker ), "flagWorkerLBU" );
+	if ( flagWorkerLBU != 0 && flagWorkerLBU != 2 )
+		WRITES( worker, "_sV", VS( PARENTS( worker ), "sigma" ) );// public skills
+	else
+		WRITES( worker, "_sV", INISKILL );
+
+	// then handle the case at hand, setting vintage and bridge objects
+	if ( sec < 2 )								// unemployed or sector 1?
+	{
+		wrk = NULL;								// no Firm2 in use
+
+		if ( sec == 1 )
+		{
+			// add bridge object between 'Wrk1' (in Capital) to 'Worker'
+			wrk = ADDOBJS( firm, "Wrk1" );
+			WRITE_SHOOKS( wrk, worker );		// pointer to worker from firm
+			WRITES( wrk, "_IDw1", _ID );
+		}
+	}
+	else
+	{
+		// add bridge-object between 'Wrk2' (in Firm2) to 'Worker'
+		wrk = ADDOBJS( firm, "Wrk2" );
+		WRITE_SHOOKS( wrk, worker );			// pointer to worker from firm
+		WRITES( wrk, "__IDw2", _ID );			// register worker ID ID
+	}
+
+	WRITE_HOOKS( worker, FWRK, wrk );			// pointer to firm from worker
 }
 
 
@@ -628,45 +632,45 @@ bool appl_desc_ws( application e1, application e2 ) { return e1.ws > e2.ws; };
 bool appl_asc_Te( application e1, application e2 ) { return e1.Te < e2.Te; };
 bool appl_desc_Te( application e1, application e2 ) { return e1.Te > e2.Te; };
 
-void order_applications( int order, appLisT *appls )
+void order_applications( int order, appLisT *appl )
 {
-	if ( appls->size( ) == 0 )					// prevent empty lists
+	if ( appl->size( ) == 0 )					// prevent empty lists
 		return;
 
-	vector < application > temp( appls->size( ) );
+	vector < application > temp( appl->size( ) );
 
 	switch ( order )
 	{
 		default:
 		case 0:									// random order
 			// make a copy of list to a vector, shuffle, and copy back
-			copy( appls->begin( ), appls->end( ), temp.begin( ) );
+			copy( appl->begin( ), appl->end( ), temp.begin( ) );
 			shuffle( temp.begin( ), temp.end( ), random_engine );
-			copy( temp.begin( ), temp.end( ), appls->begin( ) );
+			copy( temp.begin( ), temp.end( ), appl->begin( ) );
 			break;
 		case 1:									// higher wage first order
-			appls->sort( appl_desc_w );
+			appl->sort( appl_desc_w );
 			break;
 		case 2:									// lower wage first order
-			appls->sort( appl_asc_w );
+			appl->sort( appl_asc_w );
 			break;
 		case 3:									// higher skills first order
-			appls->sort( appl_desc_s );
+			appl->sort( appl_desc_s );
 			break;
 		case 4:									// lower skills first order
-			appls->sort( appl_asc_s );
+			appl->sort( appl_asc_s );
 			break;
 		case 5:									// higher payback first order
-			appls->sort( appl_desc_ws );
+			appl->sort( appl_desc_ws );
 			break;
 		case 6:									// lower payback first order
-			appls->sort( appl_asc_ws );
+			appl->sort( appl_asc_ws );
 			break;
 		case 7:									// old hires first order
-			appls->sort( appl_desc_Te );
+			appl->sort( appl_desc_Te );
 			break;
 		case 8:									// recent hires first order
-			appls->sort( appl_asc_Te );
+			appl->sort( appl_asc_Te );
 			break;
 	}
 }
@@ -680,7 +684,7 @@ void order_applications( int order, appLisT *appls )
 const char *wrkName[ ] = { "Wrk1", "Wrk2" },
 		   *keyName[ ] = { "_key1", "__key2" };
 
-void order_workers( int order, int obj, object *firm )
+void order_workers( int order, int obj, object *caller )
 {
 	char keyN[ 4 ], dir[ 5 ];
 	double keyV;
@@ -688,8 +692,13 @@ void order_workers( int order, int obj, object *firm )
 
 	switch ( order )							// handle selected sort scheme
 	{
+		default:
 		case 0:									// random order
+		case 6:									// lower payback first order
 			strcpy( dir, "UP" );
+			break;
+		case 5:									// higher payback first order
+			strcpy( dir, "DOWN" );
 			break;
 		case 1:									// higher wage first order
 			strcpy( keyN, "_wR" );
@@ -707,12 +716,6 @@ void order_workers( int order, int obj, object *firm )
 			strcpy( keyN, "_s" );
 			strcpy( dir, "UP" );
 			break;
-		case 5:									// higher payback first order
-			strcpy( dir, "DOWN" );
-			break;
-		case 6:									// lower payback first order
-			strcpy( dir, "UP" );
-			break;
 		case 7:									// old hires first order
 			strcpy( keyN, "_Te" );
 			strcpy( dir, "DOWN" );
@@ -722,7 +725,7 @@ void order_workers( int order, int obj, object *firm )
 			strcpy( dir, "UP" );
 	}
 
-	CYCLES( firm, wrk, wrkName[ obj ] )			// update all employees
+	CYCLES( caller, wrk, wrkName[ obj ] )		// update all employees
 	{
 		if ( order == 0 )						// random order?
 			keyV = RND;
@@ -735,11 +738,11 @@ void order_workers( int order, int obj, object *firm )
 		WRITES( wrk, keyName[ obj ], keyV );	// copy key to bridge obj
 	}
 
-	SORTS( firm, wrkName[ obj ], keyName[ obj ], dir );// sort the bridge objects
+	SORTS( caller, wrkName[ obj ], keyName[ obj ], dir );// sort the bridge objects
 }
 
 
-// realize firing for firm in equation 'fires2'
+// do firing for firm in equation 'fires2'
 
 #define MODE_ALL 1								// fire all workers
 #define MODE_ADJ 2								// fire only for adjustment
@@ -751,23 +754,23 @@ double fire_workers( variable *var, object *firm, int mode, double xsCap,
 					 double *redCap )
 {
 	bool fire;
-	int Te;
+	int Te, i;
 	object *cyccur, *wrk, *worker;
 
-	object *cnt = GRANDPARENTS( firm );			// pointers to objects
-	object *lab = V_EXTS( cnt, countryE, labSup );
+	object *country = GRANDPARENTS( firm );		// pointers to objects
+	object *lab = V_EXTS( country, countryE, labSup );
 
-	int i = 0;									// fired workers counter
-	int Tp = VS( lab, "Tp" );					// time for protected workers
-	double w2avg = VLS( PARENTS( firm ), "w2avg", 1 );// average wage
 	double Lscale = VS( lab, "Lscale" );		// labor scale
+	double w2avg = VLS( PARENTS( firm ), "w2avg", 1 );// average wage
+	int Tp = VS( lab, "Tp" );					// time for protected workers
 
+	i = 0;										// fired workers counter
 	*redCap = 0;								// reduced capacity accumulator
 	xsCap *= 1 - VS( lab, "theta" );			// create slack (extra workers)
 
 	// order workers to fire according firm preference
-	int fOrder = VS( firm, "_postChg" ) ? VS( cnt, "flagFireOrder2Chg" ) :
-										  VS( cnt, "flagFireOrder2" );
+	int fOrder = VS( firm, "_postChg" ) ? VS( country, "flagFireOrder2Chg" ) :
+										  VS( country, "flagFireOrder2" );
 	if ( mode == MODE_PBACK )					// explicit payback firing?
 		fOrder = 0;								// ignore order set
 
@@ -844,8 +847,8 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 		   _p1, _sV, AtauMax, BtauMax, Deb1, Eq1, NW1, w1avg, mult;
 	int _ID1, _t1ent;
 	object *firm, *bank,
-		   *cons = SEARCHS( PARENTS( sector ), "Consumption" ),
-		   *lab = SEARCHS( PARENTS( sector ), "Labor" );
+		   *cons = V_EXTS( PARENTS( sector ), countryE, conSec ),
+		   *lab = V_EXTS( PARENTS( sector ), countryE, labSup );
 
 	double Deb10ratio = VS( sector, "Deb10ratio" );// bank fin. to equity ratio
 	double Phi3 = VS( sector, "Phi3" );			// lower support for wealth share
@@ -869,12 +872,12 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 		_f1 = 1.0 / n;							// fair share
 		_sV = VLS( lab, "sAvg", 1 );			// initial worker vintage skills
 		_t1ent = 0;								// entered before t=1
-		w1avg = INIWAGE;						// initial notional wage
+		w1avg = VLS( lab, "wAvg", 1 );			// initial average wage
 
 		// initial demand expectation, assuming all sector 2 firms, 1/eta
 		// replacement factor and fair share in sector 1 and full employment
 		double p20 = VLS( cons, "CPI", 1 );
-		double K0 = ceil( VS( lab, "Ls0" ) * INIWAGE / p20 / F20 / m2 ) * m2;
+		double K0 = ceil( VS( lab, "Ls0" ) * w1avg / p20 / F20 / m2 ) * m2;
 
 		_D10 = F20 * K0 / m2 / VS( cons, "eta" ) / n;
 	}
@@ -896,19 +899,20 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 	// add entrant firms (end of period, don't try to sell)
 	for ( Deb1 = Eq1 = NW1 = 0; n > 0; --n )
 	{
-		_ID1 = INCRS( sector, "lastID1", 1 );	// new firm ID
-
 		// create object, only recalculate in t if new industry
 		if ( newInd )
 			firm = ADDOBJLS( sector, "Firm1", T - 1 );
 		else
 			firm = ADDOBJS( sector, "Firm1" );
 
+		_ID1 = INCRS( sector, "lastID1", 1 );	// new firm ID
+		WRITES( firm, "_ID1", _ID1 );
+
 		ADDHOOKS( firm, FIRM1HK );				// add object hooks
 		DELETE( SEARCHS( firm, "Cli" ) );		// remove empty instances
 
 		// select associated bank
-		bank = set_bank( firm, _ID1 );
+		bank = set_bank( firm );
 
 		if ( ! newInd )
 		{
@@ -933,7 +937,6 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 
 		// initialize variables
 		WRITES( firm, "_Eq1", _Eq1 );
-		WRITES( firm, "_ID1", _ID1 );
 		WRITES( firm, "_t1ent", _t1ent );
 		WRITELLS( firm, "_Atau", _Atau, _t1ent, 1 );
 		WRITELLS( firm, "_Btau", _Btau, _t1ent, 1 );
@@ -994,11 +997,11 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 	bool _postChg;
 	double _A2, _D20, _D2e, _Deb2, _E, _Eq2, _K, _N, _NW2, _NW2f, _NW20, _Q2u,
 		   _c2, _f2, _life2cycle, _p2, _q2, Deb2, Eq2, K, N, NW2, f2posChg,
-		   w2avg, w2realAvg, mult;
+		   w2avg, w2oAvg, w2realAvg, mult;
 	int _ID2, _t2ent;
 	object *firm, *bank, *suppl,
-		   *cap = SEARCHS( PARENTS( sector ), "Capital" ),
-		   *lab = SEARCHS( PARENTS( sector ), "Labor" );
+		   *cap = V_EXTS( PARENTS( sector ), countryE, capSec ),
+		   *lab = V_EXTS( PARENTS( sector ), countryE, labSup );
 
 	bool AllFirmsChg = VS( PARENTS( sector ), "flagAllFirmsChg" );// change at once?
 	bool f2critChg = VS( sector, "f2critChg" );	// critical change thresh. met?
@@ -1042,7 +1045,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		_q2 = 1;								// initial quality
 		_t2ent = 0;								// entered before t=1
 		f2posChg = 0;							// m.s. of post-change firms
-		w2avg = w2realAvg = INIWAGE;			// initial notional wage
+		w2avg = w2realAvg = w2oAvg = INIWAGE;	// initial notional wage
 	}
 	else
 	{
@@ -1058,19 +1061,21 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		_t2ent = T;								// entered now
 		f2posChg = VS( sector, "f2posChg" );	// m.s. of post-change firms
 		w2avg = VS( sector, "w2avg" );			// average wage in sector 2
+		w2oAvg = VS( sector, "w2oAvg" );		// average wage offer in s. 2
 		w2realAvg = VS( sector, "w2realAvg" );	// average real wage in s. 2
 	}
 
 	// add entrant firms (end of period, don't try to sell)
 	for ( Deb2 = Eq2 = NW2 = K = N = 0; n > 0; --n )
 	{
-		_ID2 = INCRS( sector, "lastID2", 1 );	// new firm ID
-
 		// create object, only recalculate in t if new industry
 		if ( newInd )
 			firm = ADDOBJLS( sector, "Firm2", T - 1 );
 		else
 			firm = ADDOBJS( sector, "Firm2" );
+
+		_ID2 = INCRS( sector, "lastID2", 1 );	// new firm ID
+		WRITES( firm, "_ID2", _ID2 );
 
 		ADDHOOKS( firm, FIRM2HK );				// add object hooks
 		ADDEXTS( firm, firm2E );				// allocate extended data
@@ -1079,10 +1084,10 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		DELETE( SEARCHS( firm, "Wrk2" ) );
 
 		// select associated bank
-		bank = set_bank( firm, _ID2 );
+		bank = set_bank( firm );
 
 		// select initial machine supplier
-		suppl = set_supplier( firm, _ID2 );
+		suppl = set_supplier( firm );
 
 		// choose firm type (pre/post-change)
 		if ( TregChg <= 0 || T < TregChg )		// before regime change?
@@ -1119,7 +1124,6 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 
 		// initialize variables
 		WRITES( firm, "_Eq2", _Eq2 );
-		WRITES( firm, "_ID2", _ID2 );
 		WRITES( firm, "_t2ent", _t2ent );
 		WRITES( firm, "_life2cycle", _life2cycle );
 		WRITES( firm, "_postChg", _postChg );
@@ -1131,8 +1135,8 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		WRITELLS( firm, "_qc2", 4, _t2ent, 1 );
 		WRITELLS( firm, "_s2avg", sV, _t2ent, 1 );
 		WRITELLS( firm, "_sT2min", INISKILL, _t2ent, 1 );
-		WRITELLS( firm, "_w2avg", INIWAGE, _t2ent, 1 );
-		WRITELLS( firm, "_w2o", INIWAGE, _t2ent, 1 );
+		WRITELLS( firm, "_w2avg", w2avg, _t2ent, 1 );
+		WRITELLS( firm, "_w2o", w2oAvg, _t2ent, 1 );
 
 		for ( int i = 1; i <= 4; ++i )
 		{
@@ -1166,6 +1170,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 			WRITES( firm, "_q2", _q2 );
 			WRITES( firm, "_s2avg", sV );
 			WRITES( firm, "_w2avg", w2avg );
+			WRITES( firm, "_w2o", w2oAvg );
 			WRITES( firm, "_w2realAvg", w2realAvg );
 
 			// compute variables requiring calculation in t

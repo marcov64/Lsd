@@ -357,7 +357,7 @@ EQUATION( "V" )
 Effective vacancy rate (unfilled positions over total labor supply)
 */
 RESULT( T > 1 ? min( ( VS( CAPSECL2, "JO1" ) + VS( CONSECL2, "JO2" ) ) /
-					   VS( LABSUPL2, "Ls" ), 1 ) : 0 )
+					 VS( LABSUPL2, "Ls" ), 1 ) : 0 )
 
 
 EQUATION( "dw" )

@@ -45,7 +45,7 @@ Additional labor required for required utilization of vintage
 
 h = VS( PARENTS( GRANDPARENT ), "flagWorkerLBU" );// worker-level learning mode
 v[1] = V( "__Avint" ) * VS( LABSUPL3, "Lscale" );// vintage notional production
-v[2] = V( "__toUseVint" ) * VS( GRANDPARENT, "m2" );	// machine required capacity
+v[2] = V( "__toUseVint" ) * VS( GRANDPARENT, "m2" );// machine required capacity
 
 v[3] = v[4] = 0;								// accumulators
 cur1 = NULL;

@@ -206,9 +206,7 @@ Label Root
 			Var: sVsd
 			Var: searchProb
 			Var: wAvg
-			Var: wAvgEmp
 			Var: wCent
-			Var: wLogSDemp
 			Var: wMinPol
 			Var: wU
 
@@ -597,6 +595,7 @@ Label Root
 				Var: CS
 				Var: DefGDP
 				Var: GDI
+				Var: GDPdefl
 				Var: Gini
 				Var: TC
 				Var: dA
@@ -655,6 +654,11 @@ Label Root
 			Son: Lab
 			Label Lab
 			{
+				Var: InAvg
+				Var: InAvgReal
+				Var: InLogSD
+				Var: InMax
+				Var: InMin
 				Var: Lent
 				Var: Lexit
 				Var: L1ent
@@ -673,13 +677,10 @@ Label Root
 				Var: w2realPosChg
 				Var: w2realPreChg
 				Var: wAvgReal
-				Var: wAvgRealEmp
 				Var: wGini
 				Var: wLogSD
 				Var: wMax
-				Var: wMaxEmp
 				Var: wMin
-				Var: wMinEmp
 				Var: wrAvg
 				Var: wrLogSD
 				Var: wrMax
@@ -808,9 +809,9 @@ Var: runCountry 0 n + n n
 
 Object: Country C	1
 Param: flagAddWorkers 0 n + n n	0
-Param: flagAllFirmsChg 0 n + n n	1
+Param: flagAllFirmsChg 0 n + n n	0
 Param: flagCons 0 n + n n	2
-Param: flagCreditRule 0 n + n n	2
+Param: flagCreditRule 0 n + n n	0
 Param: flagExpect 0 n + n n	0
 Param: flagFireOrder1 0 n + n n	4
 Param: flagFireOrder1Chg 0 n + n n	5
@@ -818,7 +819,7 @@ Param: flagFireOrder2 0 n + n n	4
 Param: flagFireOrder2Chg 0 n + n n	5
 Param: flagFireRule 0 n + n n	3
 Param: flagFireRuleChg 0 n + n n	2
-Param: flagFiscalRule 0 n + n n	3
+Param: flagFiscalRule 0 n + n n	0
 Param: flagGovExp 0 n + n n	3
 Param: flagHeterWage 0 n + n n	1
 Param: flagHireOrder1 0 n + n n	3
@@ -885,30 +886,30 @@ Param: DebRule 0 n + n n	0.6
 Param: DefPrule 0 n + n n	0.03
 Param: EqB0 0 n + n n	1
 Param: Lambda 0 n + n n	2
-Param: LambdaChg 0 n + n n	2
-Param: Lambda0 0 n + n n	20000
+Param: LambdaChg 0 n + n n	3
+Param: Lambda0 0 n + n n	1000
 Param: PhiB 0 n + n n	0.5
-Param: Trule 0 n + n n	200
+Param: Trule 0 n + n n	100
 Param: Ut 0 n + n n	0.015
-Param: alphaB 0 n + n n	0.8
+Param: alphaB 0 n + n n	100
 Param: betaB 0 n + n n	1
 Param: dB 0 n + n n	0
-Param: deltaB 0 n + n n	0.33
+Param: deltaB 0 n + n n	1
 Param: deltaDeb 0 n + n n	0.05
-Param: gammaPi 0 n + n n	1.1
-Param: gammaU 0 n + n n	1.1
-Param: kConst 0 n + n n	0.1
+Param: gammaPi 0 n + n n	0
+Param: gammaU 0 n + n n	0
+Param: kConst 0 n + n n	0
 Param: mPerB 0 n + n n	4
-Param: muBonds 0 n + n n	0.6
+Param: muBonds 0 n + n n	0.5
 Param: muD 0 n + n n	1
 Param: muDeb 0 n + n n	0.3
-Param: muRes 0 n + n n	0.33
-Param: muResChg 0 n + n n	0.33
-Param: piT 0 n + n n	0.005
+Param: muRes 0 n + n n	0.5
+Param: muResChg 0 n + n n	0.5
+Param: piT 0 n + n n	0
 Param: rAdj 0 n + n n	0.0025
 Param: rT 0 n + n n	0.01
 Param: rTchg 0 n + n n	0.01
-Param: rhoBonds 0 n + n n	0.04
+Param: rhoBonds 0 n + n n	0
 Param: tauB 0 n + n n	0.08
 Param: tauBchg 0 n + n n	0.08
 Param: thetaBonds 0 n + n n	12
@@ -972,14 +973,14 @@ Var: _fB 1 n + n n	0
 Var: _iB 0 n + n n
 Var: _iDb 0 n + n n
 
-Object: Cli1 C	1
+Object: Cli1 N	1
 Param: __ID1 0 n + n n	0
 
-Object: Cli2 C	1
+Object: Cli2 N	1
 Param: __ID2 0 n + n n	0
 
 Object: Labor C	1
-Param: Gamma 0 n + n n	0.5
+Param: Gamma 0 n + n n	0
 Param: GammaCost 0 n + n n	0.1
 Param: Ls0 0 n + n n	250000
 Param: Lscale 0 n + n n	50
@@ -1003,10 +1004,10 @@ Param: psi2 0 n + n n	1
 Param: psi3 0 n + n n	0
 Param: psi4 0 n + n n	0.5
 Param: psi5 0 n + n n	0
-Param: psi6 0 n + n n	0
+Param: psi6 0 n + n n	0.2
 Param: rho 0 n + n n	1
 Param: sigma 0 n + n n	0.5
-Param: tauG 0 n + n n	0.005
+Param: tauG 0 n + n n	0
 Param: tauT 0 n + n n	0.01
 Param: tauU 0 n + n n	0.01
 Param: theta 0 n + n n	0
@@ -1034,9 +1035,7 @@ Var: sVavg 0 s + n n
 Var: sVsd 0 n + n n
 Var: searchProb 0 n + n n
 Var: wAvg 1 s + n n	0
-Var: wAvgEmp 1 s + n n	0
 Var: wCent 1 s + n n	0
-Var: wLogSDemp 0 s + n n
 Var: wMinPol 1 s + n n	0
 Var: wU 0 s + n n
 
@@ -1072,7 +1071,7 @@ Param: F1max 0 n + n n	100
 Param: F1min 0 n + n n	1
 Param: L1rdMax 0 n + n n	0.2
 Param: L1shortMax 0 n + n n	1
-Param: NW10 0 n + n n	10000
+Param: NW10 0 n + n n	1000
 Param: Phi3 0 n + n n	0.1
 Param: Phi4 0 n + n n	0.9
 Param: alpha1 0 n + n n	3
@@ -1084,7 +1083,7 @@ Param: gamma 0 n + n n	0.5
 Param: lastID1 0 n + n n	0
 Param: m1 0 n + n n	0.1
 Param: mu1 0 n + n n	0.1
-Param: n1 0 n + n n	4
+Param: n1 0 n + n n	8
 Param: nu 0 n + n n	0.04
 Param: pK0 0 n + n n	0
 Param: x1inf 0 n + n n	-0.15
@@ -1173,14 +1172,14 @@ Var: _inn 0 n + n n
 Var: _p1 1 n + n n	0
 Var: _qc1 1 n + n n	0
 
-Object: Cli C	1
+Object: Cli N	1
 Param: __IDc 0 n + n n	0
 Param: __nCan 0 n + n n	0
 Param: __nOrd 0 n + n n	0
 Param: __tOrd 0 n + n n	0
 Param: __tSel 0 n + n n	0
 
-Object: Wrk1 C	1
+Object: Wrk1 N	1
 Param: _IDw1 0 n + n n	0
 Param: _key1 0 n + n n	0
 
@@ -1189,15 +1188,15 @@ Param: Deb20ratio 0 n + n n	1
 Param: F20 0 n + n n	200
 Param: F2max 0 n + n n	400
 Param: F2min 0 n + n n	1
-Param: NW20 0 n + n n	5000
+Param: NW20 0 n + n n	0
 Param: Phi1 0 n + n n	0.1
 Param: Phi2 0 n + n n	0.9
-Param: b 0 n + n n	9
-Param: bChg 0 n + n n	9
+Param: b 0 n + n n	4
+Param: bChg 0 n + n n	4
 Param: chi 0 n + n n	1
 Param: d2 0 n + n n	0
 Param: e0 0 n + n n	0.5
-Param: e0Chg 0 n + n n	0.25
+Param: e0Chg 0 n + n n	0.5
 Param: e1 0 n + n n	1
 Param: e2 0 n + n n	1
 Param: e3 0 n + n n	1
@@ -1217,8 +1216,8 @@ Param: kappaMax 0 n + n n	0.5
 Param: kappaMin 0 n + n n	0
 Param: lastID2 0 n + n n	0
 Param: m2 0 n + n n	40
-Param: mu20 0 n + n n	0.3
-Param: mu20Chg 0 n + n n	0.3
+Param: mu20 0 n + n n	0.2
+Param: mu20Chg 0 n + n n	0.2
 Param: n2 0 n + n n	1
 Param: omega1 0 n + n n	1
 Param: omega2 0 n + n n	1
@@ -1390,10 +1389,10 @@ Var: __Qvint 0 n + n n
 Var: __RSvint 0 n + n n
 Var: __dLdVint 0 n + n n
 
-Object: WrkV C	1
+Object: WrkV N	1
 Param: ___IDwV 0 n + n n	0
 
-Object: Wrk2 C	1
+Object: Wrk2 N	1
 Param: __IDw2 0 n + n n	0
 Param: __key2 0 n + n n	0
 
@@ -1431,6 +1430,7 @@ Var: CDc 0 s + n n
 Var: CS 0 s + n n
 Var: DefGDP 0 s + n n
 Var: GDI 0 s + n n
+Var: GDPdefl 0 s + n n
 Var: Gini 0 s + n n
 Var: TC 0 s + n n
 Var: dA 0 s + n n
@@ -1481,6 +1481,11 @@ Var: s1avg 0 s + n n
 Var: s2avg 0 s + n n
 
 Object: Lab C	1
+Var: InAvg 0 s + n n
+Var: InAvgReal 0 s + n n
+Var: InLogSD 0 s + n n
+Var: InMax 0 s + n n
+Var: InMin 0 s + n n
 Var: Lent 0 s + n n
 Var: Lexit 0 s + n n
 Var: L1ent 0 n + n n
@@ -1499,13 +1504,10 @@ Var: w2oMin 0 n + n n
 Var: w2realPosChg 0 s + n n
 Var: w2realPreChg 0 s + n n
 Var: wAvgReal 0 s + n n
-Var: wAvgRealEmp 0 n + n n
 Var: wGini 0 s + n n
 Var: wLogSD 0 s + n n
 Var: wMax 0 n + n n
-Var: wMaxEmp 0 n + n n
 Var: wMin 0 n + n n
-Var: wMinEmp 0 n + n n
 Var: wrAvg 0 s + n n
 Var: wrLogSD 0 s + n n
 Var: wrMax 0 n + n n
@@ -1552,7 +1554,7 @@ Capital-good sector firm-specific regime change
 0 = only a fraction of new firms at t=TregChg change
 1 = all firms change at t=TregChg
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_flagCons
@@ -1570,7 +1572,7 @@ Bank total credit supply rule
 1 = deposits multiplier credit limit but no capital adequacy rule or bank bail-out
 2 = Basel-like bank capital adequacy rule and bank bail-out if net worth is negative
 _INIT_
-All 1 instances equal to 2.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_flagExpect
@@ -1653,7 +1655,7 @@ Government fiscal rule
 3 = balanced budget rule with maximum debt and deficit on GDP
 4 = soft balanced budget rule with maximum debt and deficit on GDP (only if GDP growing)
 _INIT_
-All 1 instances equal to 3.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_flagGovExp
@@ -2022,7 +2024,7 @@ All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_TaxDiv
-Total taxes paid by workers on dividends
+Total taxes paid on dividends
 END_DESCRIPTION
 
 Variable_cEntry
@@ -2112,14 +2114,14 @@ END_DESCRIPTION
 Parameter_LambdaChg
 Credit limit as a multiple of sales or net worth after regime change
 _INIT_
-All 1 instances equal to 2.
+All 1 instances equal to 3.
 END_DESCRIPTION
 
 Parameter_Lambda0
 Credit limit initial absolute floor
 (>=0)
 _INIT_
-All 1 instances equal to 20000.
+All 1 instances equal to 1000.
 END_DESCRIPTION
 
 Parameter_PhiB
@@ -2133,7 +2135,7 @@ Parameter_Trule
 Time to start enforcing fiscal rules
 (>1)
 _INIT_
-All 1 instances equal to 200.
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_Ut
@@ -2147,7 +2149,7 @@ Parameter_alphaB
 Pareto distribution shape parameter defining bank size heterogeneity
 (>0)
 _INIT_
-All 1 instances equal to 0.8.
+All 1 instances equal to 100.
 END_DESCRIPTION
 
 Parameter_betaB
@@ -2168,7 +2170,7 @@ Parameter_deltaB
 Desired share of outstanding firm debt to pay in period
 (]0,1])
 _INIT_
-All 1 instances equal to 0.33.
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_deltaDeb
@@ -2182,21 +2184,21 @@ Parameter_gammaPi
 Central bank Taylor rule sensitivity to target inflation
 (>=0)
 _INIT_
-All 1 instances equal to 1.1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_gammaU
 Central bank Taylor rule sensitivity to target unemployment
 (>=0)
 _INIT_
-All 1 instances equal to 1.1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_kConst
 Interest rate ramping parameter for firms debt by credit class
 (>=0)
 _INIT_
-All 1 instances equal to 0.1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_mPerB
@@ -2210,7 +2212,7 @@ Parameter_muBonds
 Sovereign bonds spread (mark-down from central bank prime rate)
 ([0,1])
 _INIT_
-All 1 instances equal to 0.6.
+All 1 instances equal to 0.5.
 END_DESCRIPTION
 
 Parameter_muD
@@ -2231,21 +2233,21 @@ Parameter_muRes
 Central bank spread (mark-down) on reserves (from central bank prime rate)
 ([0,1])
 _INIT_
-All 1 instances equal to 0.33.
+All 1 instances equal to 0.5.
 END_DESCRIPTION
 
 Parameter_muResChg
 Central bank spread (mark-down) on reserves after regime change
 ([0,1])
 _INIT_
-All 1 instances equal to 0.33.
+All 1 instances equal to 0.5.
 END_DESCRIPTION
 
 Parameter_piT
 Target inflation for central bank's Taylor rule
 (>0)
 _INIT_
-All 1 instances equal to 0.005.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_rAdj
@@ -2266,14 +2268,14 @@ Parameter_rTchg
 Target prime interest rate set by central bank after regime change
 (>0)
 _INIT_
-All 1 instances equal to 0.025.
+All 1 instances equal to 0.01.
 END_DESCRIPTION
 
 Parameter_rhoBonds
 Sovereign bonds risk premium
 (>=0)
 _INIT_
-All 1 instances equal to 0.04.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_tauB
@@ -2643,7 +2645,7 @@ Parameter_Gamma
 Share of unemployed workers covered by government-supplied training
 ([0,1])
 _INIT_
-All 1 instances equal to 0.5.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_GammaCost
@@ -2814,7 +2816,7 @@ Parameter_psi6
 Share of firm free cash flow paid as bonus in top consumption-good firms
 ([0,1])
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 0.2.
 END_DESCRIPTION
 
 Parameter_rho
@@ -2835,7 +2837,7 @@ Parameter_tauG
 Learning factor for workers under government-supplied training
 (>=0)
 _INIT_
-All 1 instances equal to 0.005.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_tauT
@@ -2978,15 +2980,7 @@ Overall probability of unemployed searching for job
 END_DESCRIPTION
 
 Variable_wAvg
-Average income of workers
-Include unemployment benefits and bonuses
-_INIT_
-All 1 instances equal to 0.
-END_DESCRIPTION
-
-Variable_wAvgEmp
-Average income of employed workers
-Exclude unemployment benefits but include bonuses
+Average wage received by workers  (excluding bonus & unemployment benefits)
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -2995,11 +2989,6 @@ Variable_wCent
 Centralized wage if flagHeterWage=0
 _INIT_
 All 1 instances equal to 0.
-END_DESCRIPTION
-
-Variable_wLogSDemp
-Standard deviation of log wage of employed workers
-Exclude unemployment benefits but include bonuses
 END_DESCRIPTION
 
 Variable_wMinPol
@@ -3188,7 +3177,7 @@ Parameter_NW10
 Average initial net worth of capital-good firm
 (>=0)
 _INIT_
-All 1 instances equal to 10000.
+All 1 instances equal to 1000.
 END_DESCRIPTION
 
 Parameter_Phi3
@@ -3271,7 +3260,7 @@ Parameter_n1
 Number of periods for evaluating market share in capital-good sector
 (1-8)
 _INIT_
-All 1 instances equal to 4.
+All 1 instances equal to 8.
 END_DESCRIPTION
 
 Parameter_nu
@@ -3801,7 +3790,7 @@ Parameter_NW20
 Average initial net worth in consumption-good sector
 (>=0)
 _INIT_
-All 1 instances equal to 5000.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_Phi1
@@ -3822,7 +3811,7 @@ Parameter_b
 Number of pay-back periods before machine scrapping
 (>1)
 _INIT_
-All 1 instances equal to 9.
+All 1 instances equal to 4
 END_DESCRIPTION
 
 Parameter_bChg
@@ -3830,7 +3819,7 @@ Number of pay-back periods before machine scrapping
  after regime change
 (>1)
 _INIT_
-All 1 instances equal to 9.
+All 1 instances equal to 4
 END_DESCRIPTION
 
 Parameter_chi
@@ -3858,7 +3847,7 @@ Parameter_e0Chg
 Weight of potential demand on expectations after regime change
 ([0,1])
 _INIT_
-All 1 instances equal to 0.25
+All 1 instances equal to 0.5
 END_DESCRIPTION
 
 Parameter_e1
@@ -3997,7 +3986,7 @@ Parameter_mu20
 Initial mark-up in consumption-good sector
 (>0)
 _INIT_
-All 1 instances equal to 0.3
+All 1 instances equal to 0.2
 END_DESCRIPTION
 
 Parameter_mu20Chg
@@ -4005,7 +3994,7 @@ Initial mark-up in consumption-good sector
  after regime change
 (>0)
 _INIT_
-All 1 instances equal to 0.3
+All 1 instances equal to 0.2
 END_DESCRIPTION
 
 Parameter_n2
@@ -5063,6 +5052,10 @@ Variable_GDI
 Gross domestic income
 END_DESCRIPTION
 
+Variable_GDPdefl
+GDP price deflator
+END_DESCRIPTION
+
 Variable_Gini
 Gini index 
 Include wages, unemployment benefits and bonuses, and firm owners net cash flows
@@ -5258,6 +5251,26 @@ Object_Lab
 Labor supply statistics
 END_DESCRIPTION
 
+Variable_InAvg
+Average income of workers (including bonus & unemployment benefit)
+END_DESCRIPTION
+
+Variable_InAvgReal
+Average real income of workers (including bonus & unemployment benefit)
+END_DESCRIPTION
+
+Variable_InLogSD
+Income dispersion measured by the standard deviation of income log
+END_DESCRIPTION
+
+Variable_InMax
+Highest income (including bonus & unemployment benefit)
+END_DESCRIPTION
+
+Variable_InMin
+Lowest income (including bonus & unemployment benefit)
+END_DESCRIPTION
+
 Variable_Lent
 Entry rate of workers in labor market
 Hires over total labor supply
@@ -5334,15 +5347,11 @@ Weighted average real wage paid by pre-change firms in consumption-good sector
 END_DESCRIPTION
 
 Variable_wAvgReal
-Real average income of workers
-END_DESCRIPTION
-
-Variable_wAvgRealEmp
-Real average income of employed workers
+Average real wage received by workers  (excluding bonus & unemployment benefits)
 END_DESCRIPTION
 
 Variable_wGini
-Income Gini index of workers
+Gini index of wages (excluding bonus & unemployment benefits)
 END_DESCRIPTION
 
 Variable_wLogSD
@@ -5350,21 +5359,11 @@ Standard deviation of log income of workers
 END_DESCRIPTION
 
 Variable_wMax
-Highest income of workers
-END_DESCRIPTION
-
-Variable_wMaxEmp
-Highest income of employed workers
+Highest wage of workers (excluding bonus & unemployment benefits)
 END_DESCRIPTION
 
 Variable_wMin
-Lowest income of workers
-Include unemployment benefits and bonuses
-END_DESCRIPTION
-
-Variable_wMinEmp
-Lowest income of employed workers
-Exclude unemployment benefits but include bonuses
+Lowest wage of employed workers (excluding bonus & unemployment benefits)
 END_DESCRIPTION
 
 Variable_wrAvg
@@ -5406,7 +5405,6 @@ _postChg
 _A2
 _A2p
 _E
-_JO2
 _L2
 _L2d
 _L2vac
