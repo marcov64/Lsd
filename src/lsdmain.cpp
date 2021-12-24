@@ -2094,7 +2094,7 @@ void cover_browser( const char *text1, const char *text2, bool run )
 
 		cmd( "ttk::frame .p.b1" );
 		cmd( "ttk::progressbar .p.b1.b -maximum %d -value 0", sim_num );
-		cmd( "ttk::label .p.b1.i -text \"Simulation: 0 of %d (0%% done)\"", sim_num );
+		cmd( "ttk::label .p.b1.i -text \"Simulation: 1 of %d (0%% done)\"", sim_num );
 		cmd( "pack .p.b1.b .p.b1.i -pady 5 -expand yes -fill x" );
 
 		cmd( "ttk::frame .p.b2" );
