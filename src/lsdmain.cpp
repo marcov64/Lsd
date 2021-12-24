@@ -2099,7 +2099,7 @@ void cover_browser( const char *text1, const char *text2, bool run )
 
 		cmd( "ttk::frame .p.b2" );
 		cmd( "ttk::progressbar .p.b2.b -maximum %d -value 0", max_step );
-		cmd( "ttk::label .p.b2.i -text \"Case: 0 of %d (0%% done)\"", max_step );
+		cmd( "ttk::label .p.b2.i -text \"Case: 1 of %d (0%% done)\"", max_step );
 		cmd( "pack .p.b2.b .p.b2.i -pady 5 -expand yes -fill x" );
 
 		if ( sim_num > 1 )
