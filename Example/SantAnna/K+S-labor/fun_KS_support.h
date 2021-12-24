@@ -344,7 +344,7 @@ void add_vintage( variable *var, object *firm, double nMach, bool newInd )
 {
 	double __Avint, __pVint;
 	int __ageVint, __nMach, __nVint;
-	object *cap, *cons, *cur, *suppl, *vint, *wrk;
+	object *cap, *cons, *cur, *suppl, *vint;
 
 	suppl = PARENTS( SHOOKS( HOOKS( firm, SUPPL ) ) );// current supplier
 	__nMach = floor( nMach );					// integer number of machines
@@ -395,8 +395,7 @@ void add_vintage( variable *var, object *firm, double nMach, bool newInd )
 		WRITES( vint, "__tVint", 1 - __ageVint );// vintage build time
 		WRITELLS( vint, "__AeVint", __Avint, T, 1 );// lagged value
 
-		wrk = SEARCHS( vint, "WrkV" );			// remove empty worker object
-			DELETE( wrk );
+		DELETE( SEARCHS( vint, "WrkV" ) );		// remove empty worker object
 
 		__nMach -= __nVint;
 		--__ageVint;

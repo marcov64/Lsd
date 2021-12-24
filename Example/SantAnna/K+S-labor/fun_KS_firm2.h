@@ -752,6 +752,8 @@ EQUATION( "_CI" )
 Canceled investment of firm in consumption-good sector
 */
 
+V( "_supplier" );								// ensure new supplier is set
+
 cur = HOOK( SUPPL );							// pointer to current supplier
 VS( PARENTS( SHOOKS( cur ) ), "_Q1e" );			// make sure supplier produced
 

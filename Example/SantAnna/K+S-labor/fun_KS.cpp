@@ -100,6 +100,8 @@ EQUATION( "runCountry" )
 Execute the current time-step for all existing countries
 */
 
+V( "init" );									// ensure initialization done
+
 CYCLE( cur, "Country" )
 	VS( cur, "timeStep" );
 
