@@ -1217,7 +1217,7 @@ void run( void )
 	}
 
 	if ( fast_mode == 2 )
-		plog( "\n\nFinished processing configuration file(s)\n" );
+		plog( "\nFinished processing configuration file(s)\n" );
 
 #ifndef _NW_
 	uncover_browser( );
@@ -1299,6 +1299,9 @@ void set_fast( int level )
 		empty_stack( );
 		deb_log( false );
 	}
+	
+	if ( fast_mode < 2 && level == 2 )
+		plog( "\n" );
 
 	fast_mode = level;
 	fast = ( level == 0 ) ? false : true;
