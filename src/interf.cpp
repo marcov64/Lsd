@@ -7416,7 +7416,7 @@ void save_pos( object *r )
 		return;										// browser not drawn yet
 
 	// save the current object & cursor position for quick reload
-	cmd( "set lastObj %s", r->label );
+	cmd( "set lastObj %s", r != NULL ? r->label : root->label );
 
 	cmd( "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { \
 				set lastList 2 \
