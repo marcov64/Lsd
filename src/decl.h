@@ -107,7 +107,7 @@ Relevant flags (when defined):
 bool is_finite( double x );
 bool is_inf( double x );
 bool is_nan( double x );
-bool results_alt_path( const char * );  				// change where results are saved.
+bool results_alt_path( const char * );					// change where results are saved.
 double _abs( double a );
 double alapl( double mu, double alpha1, double alpha2 );// draw from an asymmetric laplace distribution
 double alaplcdf( double mu, double alpha1, double alpha2, double x );	// asymmetric laplace cdf
@@ -210,7 +210,7 @@ bool load_description( const char *msg, FILE *f );
 bool load_prev_configuration( void );
 bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz );
 bool open_configuration( object *&r, bool reload );
-bool save_configuration( int findex = 0, const char *dest_path = NULL );
+bool save_configuration( int findex = 0, const char *dest_path = NULL, bool quick = false );
 bool save_sensitivity( FILE *f );
 bool search_parallel( object *r );
 bool sensitivity_clean_dir( const char *path );
@@ -236,7 +236,7 @@ int check_affected( object *c, object *pivot, int level, int affected[ ] );
 int compute_copyfrom( object *c, const char *parWnd );
 int entry_new_objnum( object *c, const char *tag );
 int hyper_count( const char *lab );
-int load_configuration( bool reload, bool quick = false );
+int load_configuration( bool reload, int quick = 0 );
 int load_sensitivity( FILE *f );
 int logic_op_code( const char *lop, const char *errmsg );
 int min_hborder( int pdigits, double miny, double maxy );
@@ -497,21 +497,21 @@ extern int prof_obs_only;		// profile only observed variables
 extern int saveConf;			// save configuration on results saving (bool)
 extern int series_saved;		// number of series saved
 extern int stack;				// LSD stack call level
-extern int stack_info; 			// LSD stack control
+extern int stack_info;			// LSD stack control
 extern int strWindowOn;			// control the presentation of the model structure window (bool)
 extern int watch;				// allow for graph generation interruption (bool)
-extern int when_debug;      	// next debug stop time step (0 for none )
+extern int when_debug;			// next debug stop time step (0 for none )
 extern int wr_warn_cnt;			// invalid write operations warning counter
 extern long nodesSerial;		// network node serial number global counter
 extern map< string, profile > prof;// set of saved profiling times
 extern mt19937 mt32;			// Mersenne-Twister 32 bits generator
 extern nolh NOLH[ NOLH_TABS ];	// characteristics of NOLH tables
-extern object *blueprint;   	// LSD blueprint (effective model in use )
+extern object *blueprint;		// LSD blueprint (effective model in use )
 extern object *currObj;			// pointer to current object in browser
 extern object *wait_delete;		// LSD object waiting for deletion
 extern o_setT obj_list;			// list with all existing LSD objects
-extern sense *rsense;       	// LSD sensitivity analysis structure
-extern variable *cemetery;  	// LSD saved data from deleted objects
+extern sense *rsense;			// LSD sensitivity analysis structure
+extern variable *cemetery;		// LSD saved data from deleted objects
 extern variable *last_cemetery;	// LSD last saved data from deleted objects
 extern vector < string > res_list;// list of results files last saved
 extern void *random_engine;		// current random number generator engine
