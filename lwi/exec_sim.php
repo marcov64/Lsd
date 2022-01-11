@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -45,19 +45,23 @@ foreach ( $config as $name => $value ) {
 
 fclose( $f );
 
-// creates the LSD configuration
-if ( file_exists( $confgen_exec ) && file_exists( $lsd_config ) ) {
-    $filename_conf = $config_pref . "run-" . $session_short_id;
-    exec( $confgen_exec . " -f " . $lsd_config . " -c " . $filename . " -o " . $filename_conf, $shell_out, $shell_err );
-    unlink( $filename );
-    if ( $shell_err != 0 ) {
-        echo "Error: lsd_confgen error=" . $shell_err;
+// creates the LSD configuration, if executable uses it
+if ( ! $csv_exec_config ) {
+    if ( file_exists( $confgen_exec ) && file_exists( $lsd_config ) ) {
+        $filename_conf = $config_pref . "run-" . $session_short_id;
+        exec( $confgen_exec . " -f " . $lsd_config . " -c " . $filename . " -o " . $filename_conf, $shell_out, $shell_err );
+        unlink( $filename );
+        if ( $shell_err != 0 ) {
+            echo "Error: lsd_confgen error=" . $shell_err;
+            return;
+        }
+        $filename_conf .= ".lsd";
+    } else {
+        echo "Error: lsd_confgen or lwi.lsd not reachable";
         return;
     }
-    $filename_conf .= ".lsd";
 } else {
-    echo "Error: lsd_confgen or lwi.lsd not reachable";
-    return;
+    $filename_conf = $filename;
 }
 
 // remove existing output files
@@ -77,15 +81,15 @@ function kill_recursive( $ppid, $signal ) {
 // terminate a tree of processes on abort
 function proc_tree_terminate( $proc, $signal ) {
     global $os;
-    
+
     $status = proc_get_status( $proc );
-    
+
     if ( ! $status[ "running" ] ) {
         return;
     }
-    
+
     $ppid = $status[ "pid" ];
-    
+
     if ( $os === "windows" ) {
         if ( $signal === SIGKILL ) {
             exec( "TASKKILL /F /T /PID " . $ppid );
@@ -110,13 +114,21 @@ if ( file_exists( $lsd_exec ) && file_exists( $filename_conf ) ) {
         1 => array ( "file", $filename_log, "a" ),   // stdout
         2 => array ( "file", $filename_log, "a" )    // stderr
     );
-    $command = $lsd_exec . " -t -z -p -b -c " . $max_thr_run . ":" . $max_par_run . " -f " . $filename_conf . " -o " . $output_pref;
+
+    if ( ! $csv_exec_config ) {
+        $command = $lsd_exec . " -t -z -p -b -c " . $max_thr_run . ":" . $max_par_run . " -f " . $filename_conf . " -o " . $output_pref;
+    } else {
+        $command = $lsd_exec . $filename_conf;
+    }
+
     if ( $nice_enable && $os !== "windows" ) {
         $command = "nice -n " . $nice_level . " " . $command;
     }
+
     if ( $os === "mac" ){
         $command = "exec " . $command;
     }
+
     $lsdNW = proc_open( $command, $descriptorspec, $pipes );
 
     if ( ! $lsdNW ) {
@@ -133,7 +145,7 @@ if ( file_exists( $lsd_exec ) && file_exists( $filename_conf ) ) {
     if ( file_exists( $filename_abort ) ) {
         unlink( $filename_abort );
     }
-    
+
     $abort = $timeout = false;
     $start = time( );
     while ( $status = proc_get_status( $lsdNW )[ "running" ] && ! $abort && ! $timeout ) {
