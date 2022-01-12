@@ -1527,7 +1527,8 @@ char *clean_path( char *filepath )
 	if ( filepath == NULL )
 		return NULL;
 
-	char temp[ strlen( filepath ) + 1 ] = "";
+	char temp[ strlen( filepath ) + 1 ];
+	strcpy( temp, "" );
 
 	for ( i = 0; i < npref && strncmp( filepath, pref[ i ], strlen( pref[ i ] ) ); ++i );
 
