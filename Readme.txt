@@ -277,7 +277,7 @@ If you get an error when trying to execute any of the above commands, please mak
 You may need to recompile LMM if the included pre-compiled versions have problems with your Linux setup. Move in the LSD installation directory and use the commands:
 
  cd src
- make -f makefile.linux
+ make -f makefile.LMM
 
 If the compilation fails, the most likely reason is the mis-specification of the locations of the files required for the compilation. The major problem is that Tcl/Tk may be installed in your systems in several different locations. The makefile contains a list of variables for the directory needed for the Tcl/Tk libraries and include files. For example, on some systems you have the Tcl/Tk library located in /usr/lib, or /usr/local/lib, or usr/share/lib, etc. Similarly, the include files may be located in different directories. The makefile lists the files you need to identify; check the location for those files and edit the makefile as appropriate for your system.
 

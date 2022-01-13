@@ -11,7 +11,10 @@
 
 #**************************************************************
 # MAKEFILE.GETLIMITS
-# Makefile for lsd_getlimits.
+# Makefile for lsd_getlimits
+# In a command prompt (terminal) in LSD root directory, use
+#  cd lwi
+#  make -f makefile.getlimits
 #**************************************************************
 
 CC=g++	

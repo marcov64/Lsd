@@ -11,7 +11,10 @@
 
 #**************************************************************
 # MAKEFILE.MCSTATS
-# Makefile for lsd_mcstats.
+# Makefile for lsd_mcstats
+# In a command prompt (terminal) in LSD root directory, use
+#  cd lwi
+#  make -f makefile.mcstats
 #**************************************************************
 
 CC=g++	

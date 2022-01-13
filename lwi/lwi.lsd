@@ -142,35 +142,26 @@ MODELREPORT report_nw04_Imi0_Inno0_Res0_Fis0.html
 DESCRIPTION
 
 Object_Root
-(no description available)
+
 END_DESCRIPTION
 
 Variable_T
-
 Saves the time step for plotting purposes. To make Gnuplot time series,
 place T in the first line of Selected Series in the Data Analysis
 window. Add the series to plot, check XYplot, and click Plot.
 
 'T' appears in the equation for: (Never Used).
-_INIT_
-
 END_DESCRIPTION
 
 Variable_Startup
-
 The equation is only run once. It secures that parameters are set
 consistently.
 
 'Startup' appears in the equation for: (Never Used).
-_INIT_
-
 END_DESCRIPTION
 
 Object_Statistics
-
 'Statistics' appears in the equation for: (Never Used).
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_Stats
@@ -178,8 +169,6 @@ Stats      - Parameter determining whether advanced
                 population is calculated. If 1, the statistics
                 is calculated
 'Stats' appears in the equation for: A_Mean, A_Mean_Delta, A_Var, Krepro_Mean, Covar_Krepro_A, Regres_Krepro_A, Innovation_effect, Selection_effect_est.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_InvHerf
@@ -194,9 +183,6 @@ measured. It varies between 1 (total concentration) and n (minimal
 concentration).
 
 'InvHerf' appears in the equation for: (Never Used).
-
-_INIT_
-
 END_DESCRIPTION
 
 Variable_HP_index
@@ -206,8 +192,6 @@ See Hymer and Pashigian, The Review of Economics and
 Statistics, Vol. 44 (1962).
 
 'HP_index' appears in the equation for: (Never Used).
-_INIT_
-
 END_DESCRIPTION
 
 Variable_A_Mean
@@ -218,10 +202,6 @@ where we weight by market shares (ms), we weight by capital shares (s)
 in A_Mean.
 
 'A_Mean' appears in the equation for: A_Mean_Delta, A_Var, Covar_Krepro_A.
-
-_INIT_
-
-
 END_DESCRIPTION
 
 Variable_A_Var
@@ -229,9 +209,6 @@ Weighted variance of the firms' productivities
 Var(A) = SUM[ s[t-1]*(A[t-1]-A_mean[t-1])^2) ]
 
 'A_Var' appears in the equation for: Regres_Krepro_A.
-
-_INIT_
-
 END_DESCRIPTION
 
 Variable_Krepro_Mean
@@ -239,9 +216,6 @@ Weighted mean of the firms' reproduction coefficients
 E(Krepro) = SUM[ s[t-1]*Krepro[t] ]
 
 'Krepro_Mean' appears in the equation for: Covar_Krepro_A.
-
-_INIT_
-
 END_DESCRIPTION
 
 Variable_Covar_Krepro_A
@@ -250,9 +224,6 @@ Cov(Krepro,A) =
   SUM[ s[t-1]*(Krepro[t-1]-Krepro_Mean[t-1])*(A[t-1]-A_mean[t-1])) ]
 
 'Covar_Krepro_A' appears in the equation for: Regres_Krepro_A.
-
-_INIT_
-
 END_DESCRIPTION
 
 Variable_Regres_Krepro_A
@@ -260,19 +231,12 @@ Regression coeff. of reprod. coeffs. on productivities
 Regress(Krepro,A) = Regress(Krepro,A)/Var(A)
 
 'Regres_Krepro_A' appears in the equation for: (Never Used).
-
-
-_INIT_
-
 END_DESCRIPTION
 
 Variable_A_Mean_Delta
 Change in weighted mean of the firms' productivities
 
 'A_Mean_Delta' appears in the equation for: Selection_effect_est.
-
-_INIT_
-
 END_DESCRIPTION
 
 Variable_Innovation_effect
@@ -280,9 +244,6 @@ Innovation effect by George Price's equation
 E(s[t]*(A[t]-A[t-1]))
 
 'Innovation_effect' appears in the equation for: Selection_effect_est.
-
-_INIT_
-
 END_DESCRIPTION
 
 Variable_Selection_effect
@@ -290,44 +251,31 @@ Selection effect according to Price's equation
 Selection effect = A_Mean_Delta - Innovation effect
 
 'Selection_effect_est' appears in the equation for: (Never Used).
-
-_INIT_
-
 END_DESCRIPTION
 
 Object_Industry
 'Industry' appears in the equation for: (Never Used).
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_Regime_imi
 Imitative regime (0: none / 1: best prod. / 2: mean prod.)
 'Regime_imi' appears in the equation for: Startup, A_IM.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_Regime_inno
 Innovative regime (0: none / 1:own prod. /2: mean prod. / 3: science)
 'Regime_inno' appears in the equation for: Startup, Inn_mean.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_Regime_restraint
 Monopolistic behaviour (0: no / 1: yes)
 'Regime_restraint' appears in the equation for: MU_target.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_Regime_fission
 Splitting of large firms (0: no / 1: yes)
 
 'Regime_fission' appears in the equation for: Fission.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_Fiss
@@ -336,43 +284,31 @@ since
 fiss * ms is lambda in a Poisson distribution
 that determines whether fission takes place
 'Fiss' appears in the equation for: Fission.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_Bank
 External financing rate
 'Bank' appears in the equation for: I_rate.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_Dem_Coeff
 Coefficient of the demand function
 'Dem_Coeff' appears in the equation for: Price.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_Dem_elast
 Price elasticity of demand
 'Dem_elast' appears in the equation for: Price, MU_target.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_Inn_stddev
 Standard deviation of innovative draws
 'Inn_stddev' appears in the equation for: A_IN.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_Dep_rate
 Depreciation rate
 'Dep_rate' appears in the equation for: I_rate, K.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_Supply
@@ -380,8 +316,6 @@ Sum of all the firms' quantities
 Supply(t) = Sum[Q(t)]
 
 'Supply' appears in the equation for: Price, ms.
-_INIT_
- All 1 instances equal to 64.
 END_DESCRIPTION
 
 Variable_Price
@@ -390,8 +324,6 @@ Price(t) = Dem_Coeff / (Supply(0)^Dem_elast)
 For the original model of Nelson and Winter, take Dem_Coeff=67 and Dem_elast=1
 
 'Price' appears in the equation for: PROF, MU_actual.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_A_Max
@@ -399,8 +331,6 @@ Maximum productivity among firms
 Max_Prod(t) = max[A(t-1)] for all firms
 
 'A_Max' appears in the equation for: A_IM
-_INIT_
-
 END_DESCRIPTION
 
 Variable_A_average
@@ -420,8 +350,6 @@ to v[4]. The values used in stat are referred to the present time,
 with no lag.
 
 'A_average' appears in the equation for: (never used)
-_INIT_
-
 END_DESCRIPTION
 
 Variable_K_total
@@ -429,8 +357,6 @@ Total capital as the sum of all the firms' capitals
 K_total(t) = Sum[K(t)]
 
 'K_total' appears in the equation for: s.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_A_mean
@@ -441,28 +367,24 @@ NW experiments in Lsd, it is emphasised how to use A_mean instead of
 A_average to calculate the innovative result (A_IN).
 
 'A_mean' appears in the equation for: A_IM, Inn_mean.
-_INIT_
-
 END_DESCRIPTION
 
 Object_Firm
 'Firm' appears in the equation for: Startup, InvHerf, A_Mean, A_Var, Krepro_Mean, Covar_Krepro_A, Innovation_effect, A_mean, Fission.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_RIM
 RIM - Imitative R&D per unit of capital
 'RIM' appears in the equation for: Startup, PROF, A_IM.
 _INIT_
- All 16 instances equal to 0.00112.
+All 16 instances equal to 0.00112.
 END_DESCRIPTION
 
 Parameter_RIN
 RIN - Innovative R&D per unit of capital
 'RIN' appears in the equation for: Startup, PROF, A_IN.
 _INIT_
- All 16 instances equal to 0.0223.
+All 16 instances equal to 0.0223.
 END_DESCRIPTION
 
 Parameter_Inn
@@ -470,43 +392,35 @@ Inn - Boolean (0 or 1) parameter; 1 if the firm is an innovator.
              0 if not an innovator
 'Inn' appears in the equation for: Startup, PROF, A_IN.
 _INIT_
- All 16 instances equal to 1.
+All 16 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_C
 C   - Production cost per unit of capital
 'C' appears in the equation for: PROF, MU_actual.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_AM
 AM  - Productivity of Imitative R&D Investment
 'AM' appears in the equation for: A_IM.
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_AN
 AN  - Productivity of Innovative R&D Investment
 'AN' appears in the equation for: A_IN.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_Q
-
 Q(t) = K(t-1) * A(t-1)
    Quantity is is computed as Capital times the productivity,
 both with lagged values
 
 'Q' appears in the equation for: Supply, ms.
 _INIT_
- All 16 instances equal to 4.
+All 16 instances equal to 4.
 END_DESCRIPTION
 
 Variable_A
-
 A(t) = max(A(t-1),A_IM(t),A_IN(t)
    The new productivity is the maximum among the previous one and the
 ones possibly obtained imitation and innovation. The latters are 
@@ -515,11 +429,10 @@ productivity (see their equation).
 
 'A' appears in the equation for: A_Mean, A_Var, Covar_Krepro_A, Innovation_effect, A_Max, A_average, A_mean, Q, PROF, A, Inn_mean, MU_actual, Fission.
 _INIT_
- All 16 instances equal to 0.16.
+All 16 instances equal to 0.16.
 END_DESCRIPTION
 
 Variable_K
-
 K(t) = K(t-1) * (1 - Dep_rate + Final Investment rate)
    The capital is reduced by depreciation and increased by investments.
 Investmens are aimed at reaching a desired expansion or contraction
@@ -529,23 +442,19 @@ possibility to obtain the desired expansion.
 
 'K' appears in the equation for: K_total, Q, A_IM, A_IN, K, s, Krepro, Fission.
 _INIT_
- All 16 instances equal to 22.425.
+All 16 instances equal to 22.425.
 END_DESCRIPTION
 
 Variable_PROF
-
 PROF(t) = P(t) * A(t-1) -C -RIM - RIN*Inn
    Profits per unit of capital are equal current price times lagged
 productivity minus the cost for research (innovative firms spend for
 both type of research) and fixed costs.
 
 'PROF' appears in the equation for: A_average, I_rate.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_A_IN
-
 if {RANDOM[K(0)*RIN*AN] AND Inn==1}
    then A_IN(t) = Normal[Inn_mean,Std_Prod)]
 else A_IN(t) = 0
@@ -561,12 +470,9 @@ deviation given by Std_Prod. If the research does not succeed the
 returned value is 0.
 
 'A_IN' appears in the equation for: A.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_A_IM
-
 if {RANDOM[K(0)*RIM*1.25]} then A_IM(t) = A_Max(t)
 else A_IM(t) = 0
    The probability of imitating is directly proportional to the
@@ -579,31 +485,24 @@ If the research does not succed, the returned value is 0. It is also 0
 if Regime_imi = 0.
 
 'A_IM' appears in the equation for: A.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_ch_ms
-
 Changes in market shares in absolute values. 
 Used in the Hymer-Pashigian Instability Index, see HP_index equation.
 
 'ch_ms' appears in the equation for: HP_index.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_ms
-
 Market shares, computed as the ratio of Q and Supply.
 
 'ms' appears in the equation for: InvHerf, A_mean, MU_target, ch_ms, Fission.
 _INIT_
- All 16 instances equal to 0.0625.
+All 16 instances equal to 0.0625.
 END_DESCRIPTION
 
 Variable_I_rate
-
 Investment Rate
    The rate is formed by taking the minimum between a desired 
 level and a performance constrained level. If both are 
@@ -611,64 +510,48 @@ negative the investment rate is calculated as being zero.
 The Investment rate is used in the capital function. 
 
 'I_rate' appears in the equation for: K.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_MU_target
-
 MU_target = Dem_elast/(Dem_elast - ms)
    If Regime_restraint = 1, then the firm's target markup is determined
 by the firm's market share and the market's demand elasticity. 
 If Regime_restraint = 0, then there is no monopolistic behaviour.
 
 'MU_target' appears in the equation for: I_rate.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_MU_actual
-
 MU_actual = Price * productivity / costs per capital unit
    The firm's actual markup is determined by the firm's productivity,
 the market price, and the constant costs per unit of capital.
 
 'MU_actual' appears in the equation for: I_rate.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_Krepro
-
 Krepro = K[t]/K[t-1]
 The reproduction coefficient of capital.
 Used in the calculation of population statistics.
 
 'Krepro' appears in the equation for: Krepro_Mean, Covar_Krepro_A.
-_INIT_
-
 END_DESCRIPTION
 
 Variable_Fission
-
 Fissions of firms are determined after the new productivity is found. The probability of a fission depends on the parameter psi times the market share of the firm (as a Poisson process). If a fission takes place, the capital of the firm is split according to a uniform distribution, and the smallest is set up as a new firm with the same productivity as the mother firm.
 
 'Fission' appears in the equation for: (Never Used).
-_INIT_
-
 END_DESCRIPTION
 
 Variable_s
-
 Capital shares, computed as the ratio of K[i] and K_total
 
 's' appears in the equation for: A_Mean, A_Var, Krepro_Mean, Covar_Krepro_A, Innovation_effect.
 _INIT_
- All 16 instances equal to 0.0625.
+All 16 instances equal to 0.0625.
 END_DESCRIPTION
 
 Variable_Inn_mean
-
 The mean of the normal distribution that determines the outcome of an
 innovation. It depends on the "technological regime" of the industry.
 If Regime_inno = 0, then the mean is zero. If the regime is 1, the
@@ -676,8 +559,6 @@ mean is A_mean (the industry's mean productivity). It the regime is 2,
 the mean is A (the firm's present productivity).
 
 'Inn_mean' appears in the equation for: A_IN.
-_INIT_
-
 END_DESCRIPTION
 
 
