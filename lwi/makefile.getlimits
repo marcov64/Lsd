@@ -27,11 +27,15 @@ SRC_DIR=$(LSDROOT)/$(SRC)/
 LIB=-lz
 RM=rm -f
 
-# add differentiating suffix in macOS executables
+# add differentiating platform suffix
 ifeq ($(shell uname -s),Darwin)
 	EXEC=$(TARGET)OSX
 else
-	EXEC=$TARGET
+	ifeq ($(OS),Windows_NT)
+		EXEC=$(TARGET).exe
+	else
+		EXEC=$(TARGET)
+	endif
 endif
 
 # variable to search for the tcl and tk headers
