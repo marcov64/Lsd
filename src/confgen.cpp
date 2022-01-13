@@ -39,9 +39,9 @@ two lagged values of a variable (A), and generating two
 configurations:
 
 Elem, Cfg1, Cfg2
-K   , 1   , 2
-A   , 3   , 4
-A -2, 5   , 6
+K	, 1	  , 2
+A	, 3	  , 4
+A -2, 5	  , 6
 *************************************************************/
 
 #include "decl.h"
@@ -194,9 +194,10 @@ int lsdmain( int argn, const char **argv )
 	// default config file name
 	if ( config_file == NULL )
 	{
-		config_file = new char[ strlen( struct_file ) + 1 ];
+		config_file = new char[ strlen( struct_file ) + 5 ];
 		strcpy( config_file, struct_file );
-		strcpy( config_file + strlen( config_file ) - 4, ".csv" ); // change extension
+		i = strlen( config_file );
+		strcpy( config_file + ( i > 4 ? i - 4 : i ), ".csv" ); // change extension
 	}
 
 	f = fopen( config_file, "r" );
@@ -212,7 +213,8 @@ int lsdmain( int argn, const char **argv )
 	{
 		simul_name = new char[ strlen( struct_file ) + 1 ];
 		strcpy( simul_name, struct_file );
-		simul_name[ strlen( simul_name ) - 4 ] = '\0'; // remove extension
+		i = strlen( simul_name );
+		simul_name[ i > 4 ? i - 4 : i ] = '\0'; 	// remove extension
 	}
 
 	root = new object;
@@ -241,7 +243,7 @@ int lsdmain( int argn, const char **argv )
 			myexit( 7 );
 		}
 
-		if ( ! save_configuration( confs == 1 ? 0 : i ) )
+		if ( ! save_configuration( confs == 1 ? 0 : i, "", true ) )
 		{
 			fprintf( stderr, "\nFile '%s.lsd' cannot be saved.\n%s\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n\n", simul_name, lsdCmdMsg  );
 			myexit( 8 );
@@ -256,9 +258,10 @@ int lsdmain( int argn, const char **argv )
 	empty_blueprint( );
 	empty_description( );
 	root->delete_obj( );
-	delete [ ] struct_file;
+	delete [ ] path;
 	delete [ ] config_file;
 	delete [ ] simul_name;
+	delete [ ] struct_file;
 	delete [ ] vars;
 	delete [ ] values;
 	delete [ ] lags;

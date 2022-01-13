@@ -136,7 +136,7 @@ int lsdmain( int argn, const char **argv )
 			// read -a parameter : show all variables/parameters
 			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'a' )
 			{
-				i--; 					// no parameter for this option
+				i--;					// no parameter for this option
 				all_var = true;
 				continue;
 			}
@@ -159,6 +159,11 @@ int lsdmain( int argn, const char **argv )
 		myexit( 4 );
 	}
 	fclose( f );
+
+	simul_name = new char[ strlen( struct_file ) + 1 ];
+	strcpy( simul_name, struct_file );
+	i = strlen( simul_name );
+	simul_name[ i > 4 ? i - 4 : i ] = '\0';
 
 	root = new object;
 	root->init( NULL, "Root" );
@@ -201,8 +206,10 @@ int lsdmain( int argn, const char **argv )
 	empty_blueprint( );
 	empty_description( );
 	root->delete_obj( );
+	delete [ ] path;
 	delete [ ] out_file;
 	delete [ ] simul_name;
+	delete [ ] struct_file;
 
 	return 0;
 }
