@@ -60,7 +60,7 @@ if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === "WIN" ) {
     $nice_enable = false;
 } elseif  ( strtolower( substr( PHP_OS, 0, 6 ) ) === "darwin" ) {
     $os = "mac";
-#    $lsd_exec .= "OSX";
+    $lsd_exec .= "OSX";
     $limits_exec .= "OSX";
     $saved_exec .= "OSX";
     $confgen_exec .= "OSX";
