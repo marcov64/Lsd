@@ -83,6 +83,7 @@ int fast_mode = 1;			// flag to hide LOG messages & runtime plot
 int findex = 1;				// current multi configuration job
 int findexSens = 0;			// index to sequential sensitivity configuration filenames
 int max_step = 100;			// default number of simulation runs
+int parallel_disable = false;// flag to control parallel mode
 int prof_aggr_time = false;	// show aggregate profiling times
 int prof_min_msecs = 0;		// profile only variables taking more than X msecs.
 int prof_obs_only = false;	// profile only observed variables
@@ -91,6 +92,7 @@ int t;						// current time step
 int series_saved = 0;		// number of series saved
 int sim_num = 1;			// simulation number running
 int stack;					// LSD stack call level
+int stack_info = 0;			// LSD stack control
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter
