@@ -381,7 +381,7 @@ check_error( Deb / GDPnom > 100 * TOL, "EXPLOSIVE-DEBT", 0, & errors );
 
 // SFC check
 RECALC( "testSFC" );
-if ( V( "testSFC" ) > TOL )
+if ( V( "testSFC" ) > 0 )
 	++errors;
 
 errorsTot += errors;
@@ -790,10 +790,13 @@ double sVavg = VS( LABSUPL1, "sVavg" );
 double sVsd = VS( LABSUPL1, "sVsd" );
 double searchProb = VS( LABSUPL1, "searchProb" );
 double wAvg = VS( LABSUPL1, "wAvg" );
-double wAvgEmp = VS( LABSUPL1, "wAvgEmp" );
 double wCent = VS( LABSUPL1, "wCent" );
-double wLogSDemp = VS( LABSUPL1, "wLogSDemp" );
 
+double InAvg = VS( LABSTAL1, "InAvg" );
+double InAvgReal = VS( LABSTAL1, "InAvgReal" );
+double InLogSD = VS( LABSTAL1, "InLogSD" );
+double InMax = VS( LABSTAL1, "InMax" );
+double InMin = VS( LABSTAL1, "InMin" );
 double TuAvg = VS( LABSTAL1, "TuAvg" );
 double Vac = VS( LABSTAL1, "V" );
 double part = VS( LABSTAL1, "part" );
@@ -834,13 +837,14 @@ double w2oMax = VS( CONSECL1, "w2oMax" );
 
 v[12] = SUMS( CONSECL1, "_L2" );
 
-double nonNeg[ ] = { Bon, Gtrain, Ltrain, TaxW, TeAvg, U, Ue, Us, W, sTsd, sVsd, 
-					 wAvg, wLogSDemp, wMinPol, wU, Vac, wLogSD, wMax, wMin, 
-					 wrLogSD, wsLogSD, w2oMin, L1, W1, quits1, retires1, Bon2, 
-					 L2, W2, quits2, retires2, TuAvg };
-double posit[ ] = { L, Ls, appl, sAvg, sTavg, sTmax, sTmin, sVavg, searchProb,
-					wAvgEmp, wCent, wMinPol, wU, part, w2oMax, wAvgReal, wGini,
-					wrAvg, wsAvg };
+double nonNeg[ ] = { Bon, Bon2, Gtrain, InLogSD, InMax, InMin, L1, L2, Ltrain,
+					 TaxW, TeAvg, TuAvg, sTsd, U, Ue, Us, Vac, W, W1, W2,
+					 quits1, quits2, retires1, retires2, sTavg, sTmax, sVavg,
+					 sVsd, wLogSD, wMax, wMin, wMinPol, wU, wrLogSD, wsLogSD,
+					 w2oMin };
+double posit[ ] = { InAvg, InAvgReal, L, Ls, appl, part, sAvg,
+					sTmin, searchProb, wAvg, wAvgReal, wCent, wGini,
+					wMinPol, wU, wrAvg, wsAvg, w2oMax };
 double finite[ ] = { dUeB };
 
 dblVecT all ( nonNeg, END_ARR( nonNeg ) );
@@ -899,14 +903,14 @@ check_error( sTerr.size( ) > 0, "EXCESS-SKILL-WORKERS", sTerr.size( ), & errors 
 check_error( VintErr.size( ) > 0, "EXCESS-SKILL-WORKERS", VintErr.size( ), & errors );
 
 // wages
-LOG( "\n   + wAvg=%.2g wAvgEmp=%.2g wMin=%.2g wMax=%.2g wrAvg=%.2g wsAvg=%.2g",
-	 wAvg, wAvgEmp, wMin, wMax, wrAvg, wsAvg );
+LOG( "\n   + InAvg=%.2g wAvg=%.2g wMin=%.2g wMax=%.2g wrAvg=%.2g wsAvg=%.2g",
+	 InAvg, wAvg, wMin, wMax, wrAvg, wsAvg );
 
 check_error( W1 + W2 + Bon2 > ( 1 + TOL ) * ( v[6] + v[9] ) ||
 			 round( W ) != round( W1 + W2 ) || round( Bon ) != round( Bon2 ),
 			 "INCONSISTENT-PAYROLL", 0, & errors );
 
-check_error( wAvg > wAvgEmp || wrAvg < wsAvg || W <= TaxW,
+check_error( wAvg + Bon / L < InAvg || wrAvg < wsAvg || W <= TaxW,
 			 "INCONSISTENT-WAGES", 0, & errors );
 
 check_error( wChgErr.size( ) > 0, "LARGE-WAGE-CHANGE", wChgErr.size( ), & errors );
@@ -1172,8 +1176,6 @@ k = v[4] = v[5] = 0;							// accumulators
 v[10] = v[11] = v[12] = v[13] = v[14] = v[15] = v[16] = 0;
 v[20] = v[21] = v[22] = v[23] = 0;
 
-
-
 CYCLES( CONSECL1, cur, "Firm2" )
 {
 	v[4] += VS( cur, "_f2" );
@@ -1212,8 +1214,8 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	if ( VS( cur, "_mu2" ) < mu20 / 5 || VS( cur, "_mu2" ) > mu20 * 5 )
 		mu2err.push_back( cur );
 
-	if ( VS( cur, "_w2o" ) == VLS( cur, "_w2o", 1 ) * wCap ||
-		 VS( cur, "_w2o" ) == VLS( cur, "_w2o", 1 ) / wCap )
+	if ( VS( cur, "_w2o" ) > VLS( cur, "_w2o", 1 ) * wCap ||
+		 VS( cur, "_w2o" ) < VLS( cur, "_w2o", 1 ) / wCap )
 		 w2oErr.push_back( cur );
 
 	if ( abs( + VS( cur, "_S2" ) - VS( cur, "_W2" ) - VS( cur, "_Tax2" )
@@ -1319,9 +1321,9 @@ double s2avg = VS( SECSTAL1, "s2avg" );
 double nonNeg[ ] = { Bon2, CD2, CD2c, CS2, CPI, CI, D2, D2d, D2e, Deb2, Div2,
 					 EI, Eq2, Id, Inom, Ireal, JO2, K, Kavb, Kd, Knom, L2,
 					 L2d, N, Q2, Q2d, Q2e, Q2p, Q2u, SI, S2, Tax2, W2, cEntry2,
-					 cExit2, fires2, hires2, i2, iD2, quits2, retires2, l2avg, 
+					 cExit2, fires2, hires2, i2, iD2, quits2, retires2, l2avg,
 					 l2max, l2min, HH2, HP2, noWrk2 };
-double posit[ ] = { A2, A2p, Eavg, F2, oldVint, p2avg, p2max, p2min, q2avg, 
+double posit[ ] = { A2, A2p, Eavg, F2, oldVint, p2avg, p2max, p2min, q2avg,
 					q2max, q2min, s2avg, sV2avg, w2avg, w2oAvg, w2oMax,
 					w2realAvg, age2avg, mu2avg };
 double finite[ ] = { NW2, dCPI, entry2exit, Pi2, Pi2rateAvg };
@@ -1864,7 +1866,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	double _Kavb = VLS( cur, "_K", 1 );
 	double _N_1 = VLS( cur, "_N", 1 );
 	double _NW2_1 = VLS( cur, "_NW2", 1 );
-	double _w2oPast = VLS( cur, "_w2o", 1 );
+	double _w2o_1 = VLS( cur, "_w2o", 1 );
 	double __pVint = ( cur1 != NULL && VS( cur1, "__tVint" ) == T ) ?
 					VS( cur1, "__pVint" ) : 0;
 
@@ -1957,7 +1959,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 							   v[11] / v[9] > _s2avg * ( 1 + TOL ) ),
 				 "INCONSISTENT-SKILLS", 0, & errors );
 
-	check_error( _w2o == _w2oPast * wCap || _w2o == _w2oPast / wCap,
+	check_error( _w2o > _w2o_1 * wCap || _w2o < _w2o_1 / wCap,
 				 "LARGE-WAGE-OFFER-CHANGE", 0, & errors );
 
 	check_error( round( v[10] ) != round( v[14] ),

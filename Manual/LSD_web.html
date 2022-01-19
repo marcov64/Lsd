@@ -337,15 +337,15 @@ documentation on how to set up virtual web servers.</span></p>
 
 <p><span lang=EN-US>To start, please copy the provided LWI subdirectory inside
 your LSD installation directory (normally at </span><span class=Cdigo><span
-lang=EN-US>~/Lsd/lwi</span></span><span lang=EN-US>) to the appropriate web
+lang=EN-US>~/LSD/lwi</span></span><span lang=EN-US>) to the appropriate web
 server directory. On Ubuntu, Windows/WSL and CentOS use the following terminal
 command:</span></p>
 
-<p><span class=Cdigo>sudo cp -R ~/Lsd/lwi /var/www/</span></p>
+<p><span class=Cdigo>sudo cp -R ~/LSD/lwi /var/www/</span></p>
 
 <p><span lang=EN-US>In macOS:</span></p>
 
-<p><span class=Cdigo><span lang=EN-US>sudo cp -R ~/Lsd/lwi
+<p><span class=Cdigo><span lang=EN-US>sudo cp -R ~/LSD/lwi
 /Library/WebServer/Documents/</span></span></p>
 
 <p><span lang=EN-GB>The structure of LWI subdirectory tree is the following:</span></p>
@@ -400,8 +400,13 @@ sudo setsebool -P httpd_ssi_exec on</span></span></p>
 
 <p><span lang=EN-GB>For macOS:</span></p>
 
-<p><span class=Cdigo><span lang=EN-GB>sudo chown -R :_www
-/Library/WebServer/Documents/lwi</span></span></p>
+<p><span class=Cdigo><span lang=EN-GB>sudo chown -R _www:_www
+/Library/WebServer/Documents/lwi<br>
+sudo chmod g+w /Library/WebServer/Documents/lwi/tmp<br>
+sudo chmod g+w /Library/WebServer/Documents/lwi</span></span><span class=Cdigo><span
+lang=EN-US>/public_html</span></span><span class=Cdigo><span lang=EN-GB>/tmp<br>
+</span></span><span lang=EN-GB style='font-family:"Courier New";color:gray'>sudo
+xattr -rd com.apple.quarantine <span class=Cdigo>/Library/WebServer/Documents</span>/lwi/*OSX</span></p>
 
 <p><span lang=EN-US>It is now necessary to configure the Apache web server to
 use LWI as the web entry point (virtual web server). Use the following commands
@@ -427,8 +432,8 @@ the files </span><span class=Cdigo><span lang=EN-US>lwi.conf</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>vhost.conf</span></span><span
 lang=EN-US> to your needs.</span></p>
 
-<p><span lang=EN-US>In macOS the setup is more complicated. Edit the Apache webserver
-configuration file in </span><span class=Cdigo><span lang=EN-US>nano</span></span><span
+<p><span lang=EN-US>In macOS the setup is more complicated. Edit the Apache
+webserver configuration file in </span><span class=Cdigo><span lang=EN-US>nano</span></span><span
 lang=EN-US> (text editor) to enable PHP and use LWI as the default website:</span></p>
 
 <p><span class=Cdigo><span lang=IT>sudo nano /etc/apache2/httpd.conf</span></span></p>
@@ -546,8 +551,7 @@ configuration, if needed.</span></p>
 <p><span class=Cdigo><span lang=EN-US>chmod a+x lwi-cleanup</span></span></p>
 
 <p><span lang=EN-US>Finally, copy the script file to the </span><span
-class=Cdigo><span lang=EN-US>cron</span></span><span lang=EN-US> daily
-directory:</span></p>
+class=Cdigo><span lang=EN-US>cron</span></span><span lang=EN-US> daily directory:</span></p>
 
 <p><span class=Cdigo><span lang=EN-US>sudo cp lwi-cleanup /etc/cron.daily</span></span></p>
 
@@ -605,13 +609,14 @@ href="#_Execution_section">starts a simulation</a>. The ‘No Window’ model
 program can be generated in <a href="LMM.html">LMM</a>, by using the menu
 command </span><span class=Cdigo><span lang=EN-US><a href="LMM.html#nowindow">Model&gt;Create
 'No Window<span style='font-family:"Arial",sans-serif'> </span>' Version</a></span></span><span
-lang=EN-US>. </span></p>
+lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Please note that the model program must be
-generated in a computer using the same operating system version as the LWI server
-(or in the server itself). If this is not possible (e.g., it is a headless
-server), it is possible to compile the ‘No Window’ model program using a
-terminal session in the server, see the instructions <a href="LMM.html#nowindow">here</a>.</span></p>
+generated in a computer using the same operating system version as the LWI
+server (or in the server itself). If this is not possible (e.g., it is a
+headless server), it is possible to compile the ‘No Window’ model program using
+a terminal session in the server, see the instructions <a
+href="LMM.html#nowindow">here</a>.</span></p>
 
 <h2><span lang=EN-US>Selecting the Parameters and Variables to configure</span></h2>
 
@@ -652,8 +657,8 @@ values for the Parameter or lagged Variable, separated by a space, select the </
 class=Cdigo><span lang=EN-US>Round to integer</span></span><span lang=EN-US>
 option if the element is an integer number, and click on </span><span
 class=Cdigo><span lang=EN-US>OK</span></span><span lang=EN-US>. Repeat this
-procedure until all elements to be exposed to the user have their ranges
-defined. To see the list of already selected elements, use the menu command </span><span
+procedure until all elements to be exposed to the user have their ranges defined.
+To see the list of already selected elements, use the menu command </span><span
 class=Cdigo><span lang=EN-US><a href="menurun.html#showsave">Run&gt;Show
 Elements to&gt;Sensitivity Analysis</a></span></span><span lang=EN-US>.</span></p>
 
@@ -725,13 +730,24 @@ structure):</span></p>
 
 <p class=MsoNormal><a name="_Selecting_the_Parameters"></a><span class=Cdigo><span
 lang=EN-US>cd ~/Lsd/Work/[YOUR_MODEL_PATH]<br>
-sudo cp lwi.lsd /var/www/lwi<br>
-sudo cp lwi.sa /var/www/lwi<br>
-sudo cp lsdNW /var/www/lwi</span></span></p>
+sudo cp lwi.lsd /var/www/lwi/<br>
+sudo cp lwi.sa /var/www/lwi/<br>
+sudo cp lsdNW /var/www/lwi/</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US>In macOS, the generated executable file (</span><span
+class=Cdigo><span lang=EN-US>lsdNW</span></span><span lang=EN-US>) must also be
+renamed to </span><span class=Cdigo><span lang=EN-US>lsdNWOSX</span></span><span
+lang=EN-US> during the installation:</span></p>
+
+<p class=MsoNormal><span class=Cdigo><span lang=EN-US>cd
+~/Lsd/Work/[YOUR_MODEL_PATH]<br>
+sudo cp lwi.lsd /Library/WebServer/Documents/lwi/<br>
+sudo cp lwi.sa /Library/WebServer/Documents/lwi/<br>
+sudo cp lsdNW /Library/WebServer/Documents/lwi/lsdNWOSX</span></span></p>
 
 <p class=MsoNormal><span lang=EN-US>These three files will replace the previous
-model and configuration used by LWI. Finally, reload the web server so it can
-start using the new files. On Ubuntu and Windows/WSL use:</span></p>
+model and configuration used by LWI. Finally, reload the web server so it can start
+using the new files. On Ubuntu and Windows/WSL use:</span></p>
 
 <p class=MsoNormal><span class=Cdigo><span lang=EN-US>sudo service apache2
 reload</span></span></p>
@@ -940,20 +956,20 @@ lang=EN-US>Execution area</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>The Execution area controls the execution
 of the simulation model in the LWI server. Model execution can take from a few
-seconds to several minutes, according to the selected configuration, in particular
-the chosen number of simulation time steps. The Execution area is divided in
-two subareas: the Status box and the command buttons.</span></p>
+seconds to several minutes, according to the selected configuration, in
+particular the chosen number of simulation time steps. The Execution area is
+divided in two subareas: the Status box and the command buttons.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The command buttons control the simulation
-model execution at the remote server. As soon as the user finishes the configuration
-of the model in the <a href="#_Configuration_area">Configuration area</a>, it
-is possible to start the execution by clicking on </span><span class=Cdigo><span
-lang=EN-US>Start</span></span><span lang=EN-US>. At any time, the user may
-interrupt the simulation by clicking on the </span><span class=Cdigo><span
-lang=EN-US>Abort</span></span><span lang=EN-US> button. Stopping the execution
-before the Status box shows </span><span class=Cdigo><span lang=EN-US>Simulation
-completed</span></span><span lang=EN-US> aborts the simulation and no data is
-saved for analysis. </span></p>
+model execution at the remote server. As soon as the user finishes the
+configuration of the model in the <a href="#_Configuration_area">Configuration
+area</a>, it is possible to start the execution by clicking on </span><span
+class=Cdigo><span lang=EN-US>Start</span></span><span lang=EN-US>. At any time,
+the user may interrupt the simulation by clicking on the </span><span
+class=Cdigo><span lang=EN-US>Abort</span></span><span lang=EN-US> button.
+Stopping the execution before the Status box shows </span><span class=Cdigo><span
+lang=EN-US>Simulation completed</span></span><span lang=EN-US> aborts the
+simulation and no data is saved for analysis. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>While the execution is going on, </span><span
 class=Cdigo><span lang=EN-US>Simulation running</span></span><span lang=EN-US>
@@ -1029,9 +1045,9 @@ may be open at any time.</span></p>
 <p class=MsoNormal><span lang=EN-US>Clicking on </span><span class=Cdigo><span
 lang=EN-US>Plot</span></span><span lang=EN-US> button creates a new browser
 window with the selected time series plots. The horizontal axis represents the
-simulation time steps and the vertical axis, the selected series values. At
-least one and up to 15 series can be selected at a time. Multiple plot windows
-may be open at a time.</span></p>
+simulation time steps and the vertical axis, the selected series values. At least
+one and up to 15 series can be selected at a time. Multiple plot windows may be
+open at a time.</span></p>
 
 <h2><a name="_Export_page"></a><span lang=EN-US>Export area</span></h2>
 

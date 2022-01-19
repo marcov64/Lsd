@@ -345,7 +345,7 @@ void init_plot( int num, int id_sim )
 
 		cmd( "set it [ $activeplot.fond create text $xlabel $ylabel -font $fontP -anchor nw -text $lab -fill $c%d ]", i < 1100 ? i : 0 );
 		cmd( "set xlabel [ expr { $xlabel + $app + $labhpadR } ]" );
-
+		cmd( "set lab [ regsub {#[0-9]+} [ lindex $tp %d ] \"\" ]", i );
 		cmd( "set_ttip_descr $activeplot.fond $lab $it 0" );
 	}
 

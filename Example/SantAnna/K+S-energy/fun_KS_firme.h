@@ -519,7 +519,8 @@ Canceled investment of firm in energy sector
 Updates '_EIe', '_SIe', '_NWe', '__ICge', '__Kge'
 */
 
-V( "_supplierE" );								// ensure supplier is selected
+V( "_supplierE" );								// ensure new supplier is set
+
 cur = HOOK( SUPPL );							// pointer to current supplier
 VS( PARENTS( SHOOKS( cur ) ), "_Q1e" );			// make sure supplier produced
 
@@ -867,7 +868,7 @@ of energy producer
 Updated in '_ICtauGE'
 */
 
-EQUATION_DUMMY( "_qcE", "cScores" )
+EQUATION_DUMMY( "_qcE", "" )
 /*
 Credit class of energy producer (1,2,3,4)
 Updated in 'cScores'

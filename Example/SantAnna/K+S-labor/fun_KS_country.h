@@ -18,7 +18,7 @@ Nominal (monetary terms) desired aggregated consumption
 
 // workers' net income after taxes
 // wages and unemployment bonuses this period and past period bonuses+dividends
-v[0] = VS( LABSUPL0, "W" ) + V( "G" ) + VLS( LABSUPL0, "Bon", 1 ) - 
+v[0] = VS( LABSUPL0, "W" ) + V( "G" ) + VLS( LABSUPL0, "Bon", 1 ) -
 	   VS( LABSUPL0, "TaxW" ) + VL( "Div", 1 ) - V( "TaxDiv" );
 
 // handle accumulated forced savings from the past
@@ -379,7 +379,6 @@ Initialize the K+S country object. It is run only once per country.
 */
 
 PARAMETER;										// execute only once per country
-V( "regChg" );									// enforce change even at t=1
 
 // create the new country as an extension to current 'Country' object
 ADDEXT_INIT( countryE );
@@ -398,6 +397,8 @@ cur1 = CAPSECL0;
 cur2 = CONSECL0;
 cur3 = FINSECL0;
 cur4 = LABSUPL0;
+
+V( "regChg" );									// enforce change even at t=1
 
 // check unwanted extra instances (only one of each is required)
 if ( COUNT( "Capital" ) > 1 || COUNT( "Consumption" ) > 1 ||
@@ -465,6 +466,7 @@ int F2max = VS( cur2, "F2max" );				// max firms in sector 2
 int Ls0 = VS( cur4, "Ls0" );					// initial labor supply
 int Tc = VS( cur4, "Tc" );						// work-contract term
 int Tr = VS( cur4, "Tr" );						// work-life duration
+int flagWorkerLBU = V( "flagWorkerLBU" );		// worker learning-by-use mode
 
 double Btau0 = ( 1 + mu1 ) * INIPROD /			// initial productivity in sec. 1
 			   ( m1 * m2 * VS( cur2, "b" ) );
@@ -488,7 +490,7 @@ double rD = rT * ( 1 - VS( cur3, "muD" ) );		// initial interest on deposits
 double rDeb = rT * ( 1 + VS( cur3, "muDeb" ) );	// initial interest on debt
 double rRes = rT * ( 1 - VS( cur3, "muRes" ) );	// initial interest on reserves
 double G0 = V( "gG" ) * Ls0;					// initial public spending
-double sV0 = ( V( "flagWorkerLBU" ) == 0 || V( "flagWorkerLBU" ) == 2 ) ?
+double sV0 = ( flagWorkerLBU == 0 || flagWorkerLBU == 2 ) ?
 			 INISKILL : VS( cur4, "sigma" );	// initial vintage skills
 double wRes = phi * INIWAGE;					// initial reservation wage
 
@@ -530,7 +532,6 @@ WRITELS( cur4, "sAvg", sV0, -1 );
 WRITELS( cur4, "sTavg", INISKILL, -1 );
 WRITELS( cur4, "sTmin", INISKILL, -1 );
 WRITELS( cur4, "wAvg", INIWAGE, -1 );
-WRITELS( cur4, "wAvgEmp", INIWAGE, -1 );
 WRITELS( cur4, "wCent", INIWAGE, -1 );
 WRITELS( cur4, "wMinPol", w0min, -1 );
 

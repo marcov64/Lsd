@@ -223,6 +223,7 @@ EQUATION( "hires2" )
 /*
 Number of workers hired by firms in consumption-good sector
 Process required hiring using the appropriate rule
+Updates '_hires2'
 */
 
 VS( CAPSECL1, "hires1" );						// ensure sector 1 is done
@@ -237,71 +238,60 @@ order_offers( h, offers );
 
 // firms hire employees according to the selected hiring order
 i = 0;
-for ( auto itw = offers->begin( ); itw != offers->end( ); ++itw )
+for ( auto ito = offers->begin( ); ito != offers->end( ); ++ito )
 {
-	v[3] = VS( itw->firm, "_postChg" ) ? VS( PARENT, "flagWageOfferChg" ) :
+	appLisT *appl = & V_EXTS( ito->firm, firm2E, appl );// applications list
+	v[3] = VS( ito->firm, "_postChg" ) ? VS( PARENT, "flagWageOfferChg" ) :
 										 VS( PARENT, "flagWageOffer" );
 
 	if ( v[1] == 0 || v[3] == 0 )				// avoid re-sorting the applics.
 	{
 		// sort firm's candidate list according to the defined strategy
-		int hOrder = VS( itw->firm, "_postChg" ) ? VS( PARENT, "flagHireOrder2Chg" ) :
-												   VS( PARENT, "flagHireOrder2" );
-		order_applications( hOrder, & V_EXTS( itw->firm, firm2E, appl ) );
+		k = VS( ito->firm, "_postChg" ) ? VS( PARENT, "flagHireOrder2Chg" ) :
+										  VS( PARENT, "flagHireOrder2" );
+		order_applications( k, appl );
 	}
 
 	// hire the ordered applications until queue is exhausted
-	j = ceil( VS( itw->firm, "_JO2" ) / v[2] );	// firm's jobs open (scaled)
+	j = ceil( VS( ito->firm, "_JO2" ) / v[2] );	// firm's jobs open (scaled)
 	h = 0;										// firm hiring counter
-	v[4] = DBL_MAX;								// minimum wage requested
 	cur = NULL;									// pointer to worker asking it
+	v[4] = DBL_MAX;								// minimum wage requested
+	auto ita = appl->begin( );					// first application
 
-	while ( j > 0 && EXEC_EXTS( itw->firm, firm2E, appl, size ) > 0 )
+	// run through the applications till all positions filled or list over
+	while ( j - h > 0 && ita != appl->end( ) )
 	{
-		// get the candidate worker object element and a pointer to it
-		const application candidate = EXEC_EXTS( itw->firm, firm2E, appl, front );
-
 		// candidate not yet hired in this period and offered wage ok?
-		v[5] = VS( candidate.wrk, "_employed" );
-		if ( ! ( v[5] && VS( candidate.wrk, "_Te" ) == 0 ) )
+		if ( ! ( VS( ita->wrk, "_employed" ) && VS( ita->wrk, "_Te" ) == 0 ) )
 		{
-			if ( ROUND( candidate.w, itw->offer, 0.01 ) <= itw->offer )
+			if ( ROUND( ita->w, ito->offer, 0.01 ) <= ito->offer )
 			{
-				// already employed? First quit current job
-				if ( v[5] )
-					quit_worker( var, candidate.wrk );
-
 				// flag hiring and set wage, employer and vintage to be used by worker
-				hire_worker( candidate.wrk, 2, itw->firm, itw->offer );
-				++i;							// scaled count hire (total)
+				hire_worker( var, ita->wrk, 2, ito->firm, ito->offer );
 				++h;							// scaled count hire (firm)
-				--j;							// adjust scaled labor demand
 			}
 			else
-				if ( candidate.w < v[4] )
+				if ( ita->w < v[4] )
 				{
-					v[4] = candidate.w;
-					cur = candidate.wrk;
+					v[4] = ita->w;
+					cur = ita->wrk;
 				}
 		}
 
-		// remove worker from candidate queue
-		EXEC_EXTS( itw->firm, firm2E, appl, pop_front );
+		ita = appl->erase( ita );				// remove worker from list
 	}
 
 	// try to hire at least one worker, at any wage
-	if ( j > 0 && h == 0 && cur != NULL )		// none hired but someone avail?
+	if ( j - h > 0 && h == 0 && cur != NULL )	// none hired but someone avail?
 	{
-		if ( VS( cur, "_employed" ) )			// quit job if needed
-			quit_worker( var, cur );
-
-		hire_worker( cur, 2, itw->firm, v[4] );	// pay requested wage
-		++i;
+		hire_worker( var, cur, 2, ito->firm, v[4] );// pay requested wage
 		++h;
 	}
 
-	WRITES( itw->firm, "_hires2", h * v[2] );	// update hires count for firm
-	EXEC_EXTS( itw->firm, firm2E, appl, clear );// clear application queue
+	WRITES( ito->firm, "_hires2", h * v[2] );	// update hires count for firm
+	EXEC_EXTS( ito->firm, firm2E, appl, clear );// clear application queue
+	i += h;										// total hired in sector
 }
 
 offers->clear( );								// clear offers set
@@ -524,7 +514,7 @@ RESULT( SUM( "_Knom" ) )
 
 EQUATION( "L2" )
 /*
-Work force (labor) size employed by consumption-good sector
+Work force (labor) size in consumption-good sector
 */
 RESULT( SUM( "_L2" ) )
 
@@ -532,7 +522,6 @@ RESULT( SUM( "_L2" ) )
 EQUATION( "L2d" )
 /*
 Total labor demand from firms in consumption-good sector
-Includes R&D labor
 */
 RESULT( SUM( "_L2d" ) )
 

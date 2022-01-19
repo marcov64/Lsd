@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,6 +25,7 @@ $max_par_run = 4;               // maximum parallel executions per simulation
 $max_thr_run = 1;               // maximum threads to use per execution
 $max_time = 30;                 // maximum execution time per simulation (minutes)
 $sleep_interval = 1;            // status update interval (seconds)
+$csv_exec_config = false;       // executable reads .csv config. (instead .lsd)
 
 // contact e-mail addresses
 $lwi_admin = "lwi_admin@localhost";     // email for contact messages about model

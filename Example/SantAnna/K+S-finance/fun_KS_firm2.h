@@ -487,6 +487,8 @@ EQUATION( "_CI" )
 Canceled investment of firm in consumption-good sector
 */
 
+V( "_supplier" );								// ensure new supplier is set
+
 cur = HOOK( SUPPL );							// pointer to current supplier
 VS( PARENTS( SHOOKS( cur ) ), "_Q1e" );			// make sure supplier produced
 
@@ -865,7 +867,7 @@ Credit supplied to firm in consumption-good sector
 Updated in '_Deb2max', '_Q2', '_EI', '_SI', '_Tax2'
 */
 
-EQUATION_DUMMY( "_D2", "D2" )
+EQUATION_DUMMY( "_D2", "" )
 /*
 Demand fulfilled by firm in consumption-good sector
 Updated in 'D2'
@@ -889,7 +891,7 @@ Provision for production of firm in consumption-good sector
 Updated in '_Q2'
 */
 
-EQUATION_DUMMY( "_l2", "D2" )
+EQUATION_DUMMY( "_l2", "" )
 /*
 Unfilled demand of firm in consumption-good sector
 Updated in 'D2'
@@ -901,7 +903,7 @@ Oldest vintage (ID) in use in period by firm in consumption-good sector
 Updated in '_K'
 */
 
-EQUATION_DUMMY( "_qc2", "cScores" )
+EQUATION_DUMMY( "_qc2", "" )
 /*
 Credit class of firm in sector 2 (1,2,3,4)
 Updated in 'cScores'

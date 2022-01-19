@@ -25,14 +25,15 @@ struct firmRank									// element of pecking order rank
 
 struct wageOffer								// element of wage offer list
 {
-	double offer;								// wage offer value_comp
+	double offer;								// wage offer value
 	int workers;								// workers in firm
 	object *firm;								// pointer to firm
 };
 
 struct application								// element of application list
 {
-	double w, s, ws, Te;						// ordering attributes
+	double w, s, ws;							// ordering attributes
+	int Te;
 	object *wrk;								// pointer to worker
 };
 

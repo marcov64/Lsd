@@ -87,13 +87,13 @@ Cent_wage-Benchmark_v1.lsd = centralized wage, no worker/firm skills, homogeneou
 
 Cent_wage-Baseline_v2.lsd = centralized wage, no worker/firm skills, homogeneous consumption-good, regular financial market (10 banks, variable interest rates, bank credit limits, monetary policy), fixed number of firms, no regulatory shock, close to configuration in 2015 paper (v0.2.1)
 
-No-skills-Fix_entry-No_fin.lsd = no worker/firm skills, homogeneous consumption-good, minimal financial market (1 bank, fixed interest rate, no bank credit limit, no fiscal policy), fixed number of firms, no regulatory shock, close to configuration in 2017 paper model (Fordist regime)
+No_skills-Fix_entry-No_fin.lsd = no worker/firm skills, homogeneous consumption-good, minimal financial market (1 bank, fixed interest rate, no bank credit limit, no fiscal policy), fixed number of firms, no regulatory shock, close to configuration in 2017 paper model (Fordist regime)
 
-Ten-skills-Free_entry-No_fin.lsd = worker tenure skills, quality differentiated consumption-good, minimal financial market (1 bank, fixed interest rate, no bank credit limit, no fiscal policy), entrant firm capital provided by workers (stock equity), variable number of firms, regulatory shock at t=200, close to configuration in 2018 paper (Fordist to Competitive regime transition)
+Ten_skills-Free_entry-No_fin.lsd = worker tenure skills, quality differentiated consumption-good, minimal financial market (1 bank, fixed interest rate, no bank credit limit, no fiscal policy), entrant firm capital provided by workers (stock equity), variable number of firms, regulatory shock at t=200, close to configuration in 2018 paper (Fordist to Competitive regime transition)
 
-Ten-skills-Free_entry-Full_fin.lsd = worker tenure skills, quality differentiated consumption-good, full financial market (10 banks, Taylor rule monetary policy, interest structure, Basel-like bank credit limit, soft fiscal-compact rule, bonds-spread adjustment), variable number of firms, unemployed training, regulatory shock at t=200, close to configuration in 2019 paper (Fordist to Competitive FC regime transition)
+Ten_skills-Free_entry-Full_fin.lsd = worker tenure skills, quality differentiated consumption-good, full financial market (10 banks, Taylor rule monetary policy, interest structure, Basel-like bank credit limit, soft fiscal-compact rule, bonds-spread adjustment), variable number of firms, unemployed training, regulatory shock at t=200, close to configuration in 2019 paper (Fordist to Competitive FC regime transition)
 
-Ten-skills-Free_entry-Bas_fin.lsd = worker tenure skills, quality differentiated consumption-good, basic financial market (10 banks, fixed interest rates, no bank credit limit, no fiscal policy), variable number of firms, regulatory shock at t=200 with pre/post-change firms competing, close to configuration in 2020 paper (invasion scenario)
+Ten_skills-Free_entry-Bas_fin.lsd = worker tenure skills, quality differentiated consumption-good, basic financial market (10 banks, fixed interest rates, no bank credit limit, no fiscal policy), variable number of firms, regulatory shock at t=200 with pre/post-change firms competing, close to configuration in 2020 paper (invasion scenario)
 
 Some set-ups include a regulatory shock at t=200 (parameter TregChg). In some cases, new, post-change entrant firms may compete with the existing pre-change incumbents. The parameters affected by the shock are identified by the suffix "Chg" in the names.
 

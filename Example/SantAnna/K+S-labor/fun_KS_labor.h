@@ -14,13 +14,13 @@ EQUATION( "Gtrain" )
 /*
 Public expenditure on unemployed worker training
 */
-RESULT( V( "Ltrain" ) * V( "GammaCost" ) * V( "wAvgEmp" ) )
+RESULT( V( "Ltrain" ) * V( "GammaCost" ) * V( "wAvg" ) )
 
 
 EQUATION( "Ls" )
 /*
-Effective work force (labor) size, increase workforce if full employment and
-flagAddWorkers is set to 1
+Effective work force (labor) size
+Increase workforce if full employment and flagAddWorkers is set to 1
 Result is scaled according to the defined scale
 */
 
@@ -138,7 +138,7 @@ EQUATION( "wU" )
 /*
 Unemployment benefit ("wage") paid by government
 */
-RESULT( V( "phi" ) * VL( "wAvgEmp", 1 ) )
+RESULT( V( "phi" ) * VL( "wAvg", 1 ) )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
@@ -147,7 +147,7 @@ EQUATION( "Bon" )
 /*
 Total (nominal) bonuses
 */
-RESULT( SUM( "_Bon" ) )
+RESULT( SUM( "_Bon" ) * V( "Lscale" ) )
 
 
 EQUATION( "L" )
@@ -312,43 +312,10 @@ RESULT( v[0] )
 
 EQUATION( "wAvg" )
 /*
-Average wages received by workers (including unemployment benefits)
-Also updates other worker level wage statistics at once:
-	wAvgEmp: average wage of employed workers (excluding unemployment benefits)
-	wLogSDemp: employed workers wage standard deviation of wage log
+Average wage received by workers (excluding bonus & unemployment benefits)
 */
-
-i = j = 0;										// counters
-v[1] = v[2] = v[3] = v[4] = 0;					// accumulators
-CYCLE( cur, "Worker" )							// consider all workers
-{
-	v[0] = VS( cur, "_w" );						// current wage or un. benefit
-	v[1] += v[0];								// sum of wages & benefits
-
-	if ( VS( cur, "_employed" ) )				// account only employed
-	{
-		v[2] += v[0];							// sum of wages
-		v[3] += log( v[0] + 1 );				// sum of log wages
-		v[4] += pow( log( v[0] + 1 ), 2 );		// sum of squared log wages
-
-		++j;
-	}
-
-	++i;
-}
-
-if ( j > 0 )
-{
-	WRITE( "wAvgEmp", v[2] / j );
-	WRITE( "wLogSDemp", sqrt( max( ( v[4] / j ) - pow( v[3] / j, 2 ), 0 ) ) );
-}
-else
-{
-	WRITE( "wAvgEmp", CURRENT );
-	WRITE( "wLogSDemp", 0 );
-}
-
-RESULT( i > 0 ? v[1] / i : CURRENT )
+v[0] = AVE_CND( "_w", "_employed", ">", 0 );
+RESULT( ! isnan( v[0] ) ? v[0] : CURRENT )
 
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/
@@ -408,16 +375,4 @@ EQUATION_DUMMY( "Us", "" )
 /*
 Short term unemployment rate (workers unemployed for less than 1 period)
 Updated in 'Ue'
-*/
-
-EQUATION_DUMMY( "wAvgEmp", "" )
-/*
-Average wage received by employed workers (excluding unemployment benefits)
-Updated in 'wAvg'
-*/
-
-EQUATION_DUMMY( "wLogSDemp", "" )
-/*
-Employed workers wage standard deviation of wage log
-Updated in 'wAvg'
 */

@@ -1629,7 +1629,7 @@ char *strcpyn( char *d, const char *s, size_t dSz )
 	if ( dSz <= 0 || d == NULL || s == NULL )
 		return d;
 
-	if ( strlen( d ) > dSz - 1 )
+	if ( strlen( s ) > dSz - 1 )
 	{
 		strncpy( d, s, dSz - 1 );
 		d[ dSz - 1 ] = '\0';

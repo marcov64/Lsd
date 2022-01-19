@@ -206,9 +206,7 @@ Label Root
 			Var: sVsd
 			Var: searchProb
 			Var: wAvg
-			Var: wAvgEmp
 			Var: wCent
-			Var: wLogSDemp
 			Var: wMinPol
 			Var: wU
 
@@ -597,6 +595,7 @@ Label Root
 				Var: CS
 				Var: DefGDP
 				Var: GDI
+				Var: GDPdefl
 				Var: Gini
 				Var: TC
 				Var: dA
@@ -655,6 +654,11 @@ Label Root
 			Son: Lab
 			Label Lab
 			{
+				Var: InAvg
+				Var: InAvgReal
+				Var: InLogSD
+				Var: InMax
+				Var: InMin
 				Var: Lent
 				Var: Lexit
 				Var: L1ent
@@ -673,13 +677,10 @@ Label Root
 				Var: w2realPosChg
 				Var: w2realPreChg
 				Var: wAvgReal
-				Var: wAvgRealEmp
 				Var: wGini
 				Var: wLogSD
 				Var: wMax
-				Var: wMaxEmp
 				Var: wMin
-				Var: wMinEmp
 				Var: wrAvg
 				Var: wrLogSD
 				Var: wrMax
@@ -972,10 +973,10 @@ Var: _fB 1 n + n n	0
 Var: _iB 0 n + n n
 Var: _iDb 0 n + n n
 
-Object: Cli1 C	1
+Object: Cli1 N	1
 Param: __ID1 0 n + n n	0
 
-Object: Cli2 C	1
+Object: Cli2 N	1
 Param: __ID2 0 n + n n	0
 
 Object: Labor C	1
@@ -1034,9 +1035,7 @@ Var: sVavg 0 s + n n
 Var: sVsd 0 n + n n
 Var: searchProb 0 n + n n
 Var: wAvg 1 s + n n	0
-Var: wAvgEmp 1 s + n n	0
 Var: wCent 1 s + n n	0
-Var: wLogSDemp 0 s + n n
 Var: wMinPol 1 s + n n	0
 Var: wU 0 s + n n
 
@@ -1173,14 +1172,14 @@ Var: _inn 0 n + n n
 Var: _p1 1 n + n n	0
 Var: _qc1 1 n + n n	0
 
-Object: Cli C	1
+Object: Cli N	1
 Param: __IDc 0 n + n n	0
 Param: __nCan 0 n + n n	0
 Param: __nOrd 0 n + n n	0
 Param: __tOrd 0 n + n n	0
 Param: __tSel 0 n + n n	0
 
-Object: Wrk1 C	1
+Object: Wrk1 N	1
 Param: _IDw1 0 n + n n	0
 Param: _key1 0 n + n n	0
 
@@ -1217,8 +1216,8 @@ Param: kappaMax 0 n + n n	0.5
 Param: kappaMin 0 n + n n	0
 Param: lastID2 0 n + n n	0
 Param: m2 0 n + n n	40
-Param: mu20 0 n + n n	0.3
-Param: mu20Chg 0 n + n n	0.3
+Param: mu20 0 n + n n	0.2
+Param: mu20Chg 0 n + n n	0.2
 Param: n2 0 n + n n	1
 Param: omega1 0 n + n n	1
 Param: omega2 0 n + n n	1
@@ -1390,10 +1389,10 @@ Var: __Qvint 0 n + n n
 Var: __RSvint 0 n + n n
 Var: __dLdVint 0 n + n n
 
-Object: WrkV C	1
+Object: WrkV N	1
 Param: ___IDwV 0 n + n n	0
 
-Object: Wrk2 C	1
+Object: Wrk2 N	1
 Param: __IDw2 0 n + n n	0
 Param: __key2 0 n + n n	0
 
@@ -1431,6 +1430,7 @@ Var: CDc 0 s + n n
 Var: CS 0 s + n n
 Var: DefGDP 0 s + n n
 Var: GDI 0 s + n n
+Var: GDPdefl 0 s + n n
 Var: Gini 0 s + n n
 Var: TC 0 s + n n
 Var: dA 0 s + n n
@@ -1481,6 +1481,11 @@ Var: s1avg 0 s + n n
 Var: s2avg 0 s + n n
 
 Object: Lab C	1
+Var: InAvg 0 s + n n
+Var: InAvgReal 0 s + n n
+Var: InLogSD 0 s + n n
+Var: InMax 0 s + n n
+Var: InMin 0 s + n n
 Var: Lent 0 s + n n
 Var: Lexit 0 s + n n
 Var: L1ent 0 n + n n
@@ -1499,13 +1504,10 @@ Var: w2oMin 0 n + n n
 Var: w2realPosChg 0 s + n n
 Var: w2realPreChg 0 s + n n
 Var: wAvgReal 0 s + n n
-Var: wAvgRealEmp 0 n + n n
 Var: wGini 0 s + n n
 Var: wLogSD 0 s + n n
 Var: wMax 0 n + n n
-Var: wMaxEmp 0 n + n n
 Var: wMin 0 n + n n
-Var: wMinEmp 0 n + n n
 Var: wrAvg 0 s + n n
 Var: wrLogSD 0 s + n n
 Var: wrMax 0 n + n n
@@ -2978,15 +2980,7 @@ Overall probability of unemployed searching for job
 END_DESCRIPTION
 
 Variable_wAvg
-Average income of workers
-Include unemployment benefits and bonuses
-_INIT_
-All 1 instances equal to 0.
-END_DESCRIPTION
-
-Variable_wAvgEmp
-Average income of employed workers
-Exclude unemployment benefits but include bonuses
+Average wage received by workers  (excluding bonus & unemployment benefits)
 _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
@@ -2995,11 +2989,6 @@ Variable_wCent
 Centralized wage if flagHeterWage=0
 _INIT_
 All 1 instances equal to 0.
-END_DESCRIPTION
-
-Variable_wLogSDemp
-Standard deviation of log wage of employed workers
-Exclude unemployment benefits but include bonuses
 END_DESCRIPTION
 
 Variable_wMinPol
@@ -3997,7 +3986,7 @@ Parameter_mu20
 Initial mark-up in consumption-good sector
 (>0)
 _INIT_
-All 1 instances equal to 0.3
+All 1 instances equal to 0.2
 END_DESCRIPTION
 
 Parameter_mu20Chg
@@ -4005,7 +3994,7 @@ Initial mark-up in consumption-good sector
  after regime change
 (>0)
 _INIT_
-All 1 instances equal to 0.3
+All 1 instances equal to 0.2
 END_DESCRIPTION
 
 Parameter_n2
@@ -5063,6 +5052,10 @@ Variable_GDI
 Gross domestic income
 END_DESCRIPTION
 
+Variable_GDPdefl
+GDP price deflator
+END_DESCRIPTION
+
 Variable_Gini
 Gini index 
 Include wages, unemployment benefits and bonuses, and firm owners net cash flows
@@ -5258,6 +5251,26 @@ Object_Lab
 Labor supply statistics
 END_DESCRIPTION
 
+Variable_InAvg
+Average income of workers (including bonus & unemployment benefit)
+END_DESCRIPTION
+
+Variable_InAvgReal
+Average real income of workers (including bonus & unemployment benefit)
+END_DESCRIPTION
+
+Variable_InLogSD
+Income dispersion measured by the standard deviation of income log
+END_DESCRIPTION
+
+Variable_InMax
+Highest income (including bonus & unemployment benefit)
+END_DESCRIPTION
+
+Variable_InMin
+Lowest income (including bonus & unemployment benefit)
+END_DESCRIPTION
+
 Variable_Lent
 Entry rate of workers in labor market
 Hires over total labor supply
@@ -5334,15 +5347,11 @@ Weighted average real wage paid by pre-change firms in consumption-good sector
 END_DESCRIPTION
 
 Variable_wAvgReal
-Real average income of workers
-END_DESCRIPTION
-
-Variable_wAvgRealEmp
-Real average income of employed workers
+Average real wage received by workers  (excluding bonus & unemployment benefits)
 END_DESCRIPTION
 
 Variable_wGini
-Income Gini index of workers
+Gini index of wages (excluding bonus & unemployment benefits)
 END_DESCRIPTION
 
 Variable_wLogSD
@@ -5350,21 +5359,11 @@ Standard deviation of log income of workers
 END_DESCRIPTION
 
 Variable_wMax
-Highest income of workers
-END_DESCRIPTION
-
-Variable_wMaxEmp
-Highest income of employed workers
+Highest wage of workers (excluding bonus & unemployment benefits)
 END_DESCRIPTION
 
 Variable_wMin
-Lowest income of workers
-Include unemployment benefits and bonuses
-END_DESCRIPTION
-
-Variable_wMinEmp
-Lowest income of employed workers
-Exclude unemployment benefits but include bonuses
+Lowest wage of employed workers (excluding bonus & unemployment benefits)
 END_DESCRIPTION
 
 Variable_wrAvg
@@ -5406,7 +5405,6 @@ _postChg
 _A2
 _A2p
 _E
-_JO2
 _L2
 _L2d
 _L2vac

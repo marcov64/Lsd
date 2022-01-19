@@ -113,7 +113,7 @@ description *descr = NULL;	// model description structure
 eq_mapT eq_map;				// fast equation look-up map
 int actual_steps = 0;		// number of executed time steps
 int choice;					// Tcl menu control variable (main window)
-int choice_g;               // Tcl menu control variable (structure window)
+int choice_g;				// Tcl menu control variable (structure window)
 int cur_plt;				// current graph plot number
 int cur_sim;				// current simulation run
 int debug_flag = false;		// debug enable control (bool)
@@ -296,28 +296,28 @@ int lsdmain( int argn, const char **argv )
 			// read -t parameter : produce .csv text results files
 			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 't' )
 			{
-				i--; 					// no parameter for this option
+				i--;					// no parameter for this option
 				docsv = true;
 				continue;
 			}
 			// read -r parameter : do not produce intermediate .res files
 			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'r' )
 			{
-				i--; 					// no parameter for this option
+				i--;					// no parameter for this option
 				no_res = true;
 				continue;
 			}
 			// read -p parameter : do not produce totals .tot files
 			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'p' )
 			{
-				i--; 					// no parameter for this option
+				i--;					// no parameter for this option
 				no_tot = true;
 				continue;
 			}
 			// read -g parameter : create grand total file (batch only)
 			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'g' )
 			{
-				i--; 					// no parameter for this option
+				i--;					// no parameter for this option
 				grandTotal = true;
 				printf( "\nGrand total file requested ('-g'), don't run another instance of 'lsdNW' in this folder!\n" );
 				continue;
@@ -325,14 +325,14 @@ int lsdmain( int argn, const char **argv )
 			// read -z parameter : don't create compressed result files
 			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'z' )
 			{
-				i--; 					// no parameter for this option
+				i--;					// no parameter for this option
 				dozip = false;
 				continue;
 			}
 			// read -b parameter : show a progress bar
 			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'b' )
 			{
-				i--; 					// no parameter for this option
+				i--;					// no parameter for this option
 				dobar = true;
 				continue;
 			}
@@ -384,7 +384,7 @@ int lsdmain( int argn, const char **argv )
 
 	fclose( f );
 
-	if ( load_configuration( true ) != 0 )
+	if ( load_configuration( true, 1 ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\nThis is the no window version of LSD.\nCheck if the file is a valid LSD configuration or regenerate it using the\nLSD Browser.\n\n", struct_file );
 		myexit( 8 );
@@ -640,7 +640,7 @@ int lsdmain( int argn, const char **argv )
 
 	// fix non-existent or old options file for new options
 	if ( i == 0 )
-		update_lmm_options( ); 			// update config file
+		update_lmm_options( );			// update config file
 
 	// create a Tcl command that calls the C discard_change function before killing LSD
 	Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
@@ -761,13 +761,13 @@ int lsdmain( int argn, const char **argv )
 		{
 			run( );
 		}
-		catch( int p )           	// return point from error_hard() (in object.cpp)
+		catch( int p )				// return point from error_hard() (in object.cpp)
 		{
 			if ( p != 919293 )		// check throw signature
 				throw;
 			quit = 0;
 		}
-		catch ( ... )            	// send the rest upward
+		catch ( ... )				// send the rest upward
 		{
 			throw;
 		}
@@ -845,7 +845,7 @@ void run( void )
 #ifndef _NW_
 	prof.clear( );			// reset profiling times
 
-	cover_browser( "Running...", "Use the buttons to control the simulation:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables", true );
+	cover_browser( "Running...", "Use the buttons to control the simulation:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :	accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables", true );
 #else
 	plog( "\nProcessing configuration file %s...\n", clean_file( struct_file ) );
 #endif
@@ -863,11 +863,11 @@ void run( void )
 	for ( i = 1, quit = 0; i <= sim_num && quit != 2; ++i )
 	{
 		running = true;		// signal simulation is running
-		cur_sim = i;	 	// update the current run in the set of runs
+		cur_sim = i;		// update the current run in the set of runs
 		actual_steps = 0;	// no steps performed yet
 		save_ok = true;		// valid structure to save
 
-		empty_cemetery( ); 	// ensure that previous data are not erroneously mixed
+		empty_cemetery( );	// ensure that previous data are not erroneously mixed
 
 #ifndef _NW_
 		par_map.clear( );	// restart variable to parent name map for AoR
@@ -881,10 +881,10 @@ void run( void )
 				plog( "\nSimulation %d of %d running (seed=%d)...", i, sim_num, seed );
 		}
 
-		// if new batch configuration file, reload all
+		// if new batch configuration file, reload all except descriptions
 		if ( batch_sequential_loop )
 		{
-			if ( load_configuration( true ) != 0 )
+			if ( load_configuration( true, 1 ) != 0 )
 			{
 #ifndef _NW_
 				log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
@@ -899,7 +899,7 @@ void run( void )
 
 		// if just another run seed, reload just structure & parameters
 		if ( i > 1 )
-			if ( load_configuration( true, true ) != 0 )
+			if ( load_configuration( true, 2 ) != 0 )
 			{
 #ifndef _NW_
 				log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
@@ -1018,15 +1018,15 @@ void run( void )
 					break;
 
 				// runtime plot events
-				case 7:  		// center button
+				case 7:			// center button
 					center_plot( );
 					break;
 
-				case 8: 		// scroll checkbox
+				case 8:			// scroll checkbox
 					scrollB = ! scrollB;
 					break;
 
-				case 9: 		// pause simulation
+				case 9:			// pause simulation
 					pause_run = ! pause_run;
 					if ( pause_run )
 					{
@@ -1074,12 +1074,12 @@ void run( void )
 		if ( fast_mode < 2 )
 			plog( "\nSimulation %d of %d %s at case %d (%.2f sec.)\n", i, sim_num, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( end - start ) / CLOCKS_PER_SEC );
 
-		if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
+		if ( quit == 1 )			// for multiple simulation runs you need to reset quit
 			quit = 0;
 
 #ifndef _NW_
 		cmd( ".p.b1.b configure -value %d", cur_sim );
-		cmd( ".p.b1.i configure -text \"Simulation: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", min( cur_sim + 1, sim_num ), sim_num, cur_sim, sim_num  );
+		cmd( ".p.b1.i configure -text \"Simulation: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", min( cur_sim + 1, sim_num ), sim_num, cur_sim, sim_num	);
 
 		cmd( "destroytop .deb" );
 		cmd( "update" );
@@ -1175,16 +1175,16 @@ void run( void )
 						plog( "Done\n" );
 				}
 
-				if ( i == sim_num )					  			// last run?
+				if ( i == sim_num )								// last run?
 					strcpyn( path_res, path_out, MAX_PATH_LENGTH );
 			}
 			else
 				if ( fast_mode < 2 )
 					plog( "Nothing to save: no element selected\n" );
 
-			if ( i == sim_num )					  				// last run?
+			if ( i == sim_num )									// last run?
 			{
-				if ( batch_sequential )					  		// last batch file?
+				if ( batch_sequential )							// last batch file?
 				{
 					findex++;									// try next file
 					snprintf( fname, MAX_PATH_LENGTH, "%s_%d.lsd", simul_name, findex );
@@ -1201,11 +1201,10 @@ void run( void )
 						break;
 					}
 
-					if ( fast_mode < 2 )
-						plog( "\nProcessing configuration file %s...\n", clean_file( struct_file ) );
-					fclose( f );  								// process next file
+					plog( "\nProcessing configuration file %s...\n", clean_file( struct_file ) );
+					fclose( f );								// process next file
 
-					i = 0;   									// force restarting run count
+					i = 0;										// force restarting run count
 					batch_sequential_loop = true;				// force reloading configuration
 				}
 #ifdef _NW_
@@ -1218,7 +1217,7 @@ void run( void )
 	}
 
 	if ( fast_mode == 2 )
-		plog( "\nSimulation %d of %d finished at case %d\n", i - 1, sim_num, t - 1 );
+		plog( "\nFinished processing configuration file(s)\n" );
 
 #ifndef _NW_
 	uncover_browser( );
@@ -1300,6 +1299,9 @@ void set_fast( int level )
 		empty_stack( );
 		deb_log( false );
 	}
+
+	if ( fast_mode < 2 && level == 2 )
+		plog( "\n" );
 
 	fast_mode = level;
 	fast = ( level == 0 ) ? false : true;
@@ -1428,7 +1430,7 @@ bool alloc_save_var( variable *v )
 		}
 		else
 		{
-			if ( v->num_lag > 0  || v->param == 1 )
+			if ( v->num_lag > 0	 || v->param == 1 )
 				v->data[ 0 ] = v->val[ 0 ];
 
 			++series_saved;
@@ -1725,13 +1727,13 @@ int monitor_logs( void )
 		log[ len ] = '\0';
 		fclose( f );
 
-		for ( i = len - 1; i >= 0; --i ) 	// move backwards in the log
+		for ( i = len - 1; i >= 0; --i )	// move backwards in the log
 			if ( strstr( log + i, "\n0%" ) != NULL )  // it is start of bar?
 			{
 				last = strrchr( log + i, '%' ) - ( log + i );	// end of bar
 				for ( j = last; j > 0 && ( log + i )[ j ] != '.'; --j ); // last n% in bar
 
-				if ( j > 0 ) 		// ignore the first '0%' in bar
+				if ( j > 0 )		// ignore the first '0%' in bar
 				{
 					++j;
 					strncpy( tok, log + i + j, min( last - j, 3 ) );
@@ -2008,7 +2010,7 @@ void create_logwindow( void )
 	cmd( "rename .log.text.text .log.text.text.internal" );
 	cmd( "proc .log.text.text { args } { switch -exact -- [ lindex $args 0 ] { insert { } delete { } replace { } default { return [ eval .log.text.text.internal $args] } } }" );
 
-	cmd( "plog \"LSD Version %s (%s)\nCopyright Marco Valente and Marcelo Pereira\nLSD is distributed under the GNU General Public License\nLSD is free software and comes with ABSOLUTELY NO WARRANTY\n[ LsdEnv {  } ]\n\"", _LSD_VERSION_, _LSD_DATE_ );
+	cmd( "plog \"LSD Version %s (%s)\nCopyright Marco Valente and Marcelo Pereira\nLSD is distributed under the GNU General Public License\nLSD is free software and comes with ABSOLUTELY NO WARRANTY\n[ LsdEnv {	} ]\n\"", _LSD_VERSION_, _LSD_DATE_ );
 
 	log_ok = true;
 }
@@ -2083,7 +2085,7 @@ void cover_browser( const char *text1, const char *text2, bool run )
 	cmd( "set mainMenuStates [ disable_tree .m ]" );
 
 	cmd( "ttk::frame .t1" );
-	cmd( "ttk::label .t1.l1 -justify center -text \"%s\" -style bold.TLabel", text1  );
+	cmd( "ttk::label .t1.l1 -justify center -text \"%s\" -style bold.TLabel", text1	 );
 	cmd( "pack .t1.l1 -pady 10 -expand yes -fill y" );
 	cmd( "pack .t1 -fill both -expand yes -padx 10 -pady 10" );
 
@@ -2094,12 +2096,12 @@ void cover_browser( const char *text1, const char *text2, bool run )
 
 		cmd( "ttk::frame .p.b1" );
 		cmd( "ttk::progressbar .p.b1.b -maximum %d -value 0", sim_num );
-		cmd( "ttk::label .p.b1.i -text \"Simulation: 0 of %d (0%% done)\"", sim_num );
+		cmd( "ttk::label .p.b1.i -text \"Simulation: 1 of %d (0%% done)\"", sim_num );
 		cmd( "pack .p.b1.b .p.b1.i -pady 5 -expand yes -fill x" );
 
 		cmd( "ttk::frame .p.b2" );
 		cmd( "ttk::progressbar .p.b2.b -maximum %d -value 0", max_step );
-		cmd( "ttk::label .p.b2.i -text \"Case: 0 of %d (0%% done)\"", max_step );
+		cmd( "ttk::label .p.b2.i -text \"Case: 1 of %d (0%% done)\"", max_step );
 		cmd( "pack .p.b2.b .p.b2.i -pady 5 -expand yes -fill x" );
 
 		if ( sim_num > 1 )

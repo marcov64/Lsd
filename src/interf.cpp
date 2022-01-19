@@ -828,30 +828,31 @@ int browse( object *r )
 			cmd( "set w .m.model" );
 			cmd( "ttk::menu $w -tearoff 0" );
 			cmd( ".m add cascade -label Model -menu $w -underline 0" );
-			cmd( "$w add command -label \"Add Variable...\" -underline 4 -accelerator Ctrl+V -command { set param 0; set choice 2 }" );
-			cmd( "$w add command -label \"Add Parameter...\" -underline 4 -accelerator Ctrl+P -command { set param 1; set choice 2 }" );
-			cmd( "$w add command -label \"Add Function...\" -underline 5 -accelerator Ctrl+N -command { set param 2; set choice 2 }" );
-			cmd( "$w add command -label \"Add Object...\" -underline 4 -accelerator Ctrl+D -command { set choice 3 }" );
+			cmd( "$w add command -label \"Add Variable...\" -underline 4 -accelerator Ctrl+V -command { set param 0; set choice 2 }" );	// entryconfig 0
+			cmd( "$w add command -label \"Add Parameter...\" -underline 4 -accelerator Ctrl+P -command { set param 1; set choice 2 }" );	// entryconfig 1
+			cmd( "$w add command -label \"Add Function...\" -underline 5 -accelerator Ctrl+N -command { set param 2; set choice 2 }" );	// entryconfig 2
+			cmd( "$w add command -label \"Add Object...\" -underline 4 -accelerator Ctrl+D -command { set choice 3 }" );	// entryconfig 3
 
-			cmd( "$w add separator" );
+			cmd( "$w add separator" );	// entryconfig 4
 
-			cmd( "$w add command -label \"Change Element...\" -underline 0 -accelerator Enter -command { set useCurrObj yes; set choice 7 }" );
-			cmd( "$w add command -label \"Change Object...\" -underline 7 -accelerator Ctrl+Enter -command { set useCurrObj yes; set choice 6 }" );
-			cmd( "$w add command -label \"Find Element...\" -underline 0 -accelerator Ctrl+F -command { set choice 50 }" );
+			cmd( "$w add command -label \"Change Element...\" -underline 0 -accelerator Enter -command { set useCurrObj yes; set choice 7 }" );	// entryconfig 5
+			cmd( "$w add command -label \"Change Object...\" -underline 7 -accelerator Ctrl+Enter -command { set useCurrObj yes; set choice 6 }" );	// entryconfig 6
+			cmd( "$w add command -label \"Find Element...\" -underline 0 -accelerator Ctrl+F -command { set choice 50 }" );	// entryconfig 7
 
-			cmd( "$w add cascade -label \"Sort Elements\" -underline 0 -menu $w.sort" );
+			cmd( "$w add cascade -label \"Sort Elements\" -underline 0 -menu $w.sort" );	// entryconfig 8
 
-			cmd( "$w add separator" );
+			cmd( "$w add separator" );	// entryconfig 9
 
-			cmd( "$w add command -label \"Create Model Report...\" -underline 7 -command { set choice 36 }" );
-			cmd( "$w add command -label \"Create LaTex Tables\" -underline 9 -command { set choice 57 }" );
-			cmd( "$w add command -label \"Create LaTex References\" -underline 13 -command { set choice 92 }" );
-			cmd( "$w add command -label \"Import Descriptions\" -underline 0 -command { set choice 43 }" );
+			cmd( "$w add command -label \"Create Model Report...\" -underline 7 -command { set choice 36 }" );	// entryconfig 10
+			cmd( "$w add command -label \"Create LaTex Tables\" -underline 9 -command { set choice 57 }" );	// entryconfig 11
+			cmd( "$w add command -label \"Create LaTex References\" -underline 13 -command { set choice 92 }" );	// entryconfig 12
+			cmd( "$w add command -label \"Import Descriptions\" -underline 0 -command { set choice 43 }" );	// entryconfig 13
 
-			cmd( "$w add separator" );
-
-			cmd( "$w add checkbutton -label \"Enable Structure Window\" -underline 17 -accelerator Ctrl+Tab -variable strWindowOn -command { set choice 70 }" );
-			cmd( "$w add checkbutton -label \"Ignore Equation File\" -underline 0 -variable ignore_eq_file -command { set choice 54 }" );
+			cmd( "$w add separator" );	// entryconfig 14
+			
+			cmd( "set strWindowChk $strWindowOn" );
+			cmd( "$w add checkbutton -label \"Enable Structure Window\" -underline 17 -accelerator Ctrl+Tab -variable strWindowChk -command { set choice 70 }" );	// entryconfig 15
+			cmd( "$w add checkbutton -label \"Ignore Equation File\" -underline 0 -variable ignore_eq_file -command { set choice 54 }" );	// entryconfig 16
 
 			cmd( "set w .m.model.sort" );
 			cmd( "ttk::menu $w -tearoff 0" );
@@ -6483,12 +6484,12 @@ object *operate( object *r )
 	case 70:
 
 		strWindowOn = strWindowOn ? 0 : 1;
+		cmd( "set strWindowChk $strWindowOn" );
+		cmd( "if { [ winfo exists .m.model ] } { .m.model entryconfig 15 -indicatoron $strWindowChk }" );
+		redrawStruc = true;
 
 		if ( strWindowOn )
-		{
 			cmd( "tooltip::tooltip .bbar.struct \"Hide structure\"" );
-			redrawStruc = true;
-		}
 		else
 			cmd( "tooltip::tooltip .bbar.struct \"Show structure\"" );
 
@@ -7415,7 +7416,7 @@ void save_pos( object *r )
 		return;										// browser not drawn yet
 
 	// save the current object & cursor position for quick reload
-	cmd( "set lastObj %s", r->label );
+	cmd( "set lastObj %s", r != NULL ? r->label : root->label );
 
 	cmd( "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { \
 				set lastList 2 \

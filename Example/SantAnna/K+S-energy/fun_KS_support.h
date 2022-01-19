@@ -67,13 +67,14 @@ bool rank_desc_NWtoS( firmRank e1, firmRank e2 )
 
 const char *bankPar[ ] = { "_bank1", "_bank2", "_bankE" },
 		   *CliObj[ ] = { "Cli1", "Cli2", "CliE" },
+		   *_IDpar[ ] = { "_ID1","_ID2", "_IDe" },
 		   *__IDpar[ ] = { "__ID1","__ID2", "__IDe" };
 
-object *set_bank( object *firm, int firmID )
+object *set_bank( object *firm )
 {
 	int _IDb, sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
 					strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
-	object *bank, *cli, *fin = SEARCHS( GRANDPARENTS( firm ), "Financial" );
+	object *bank, *cli, *fin = V_EXTS( GRANDPARENTS( firm ), countryE, finSec );
 
 	_IDb = VS( fin, "pickBank" );				// draw initial preferred bank
 	bank = V_EXTS( GRANDPARENTS( firm ), countryE, bankPtr[ _IDb - 1 ] );
@@ -81,7 +82,7 @@ object *set_bank( object *firm, int firmID )
 	WRITE_HOOKS( firm, BANK, bank );
 
 	cli = ADDOBJS( bank, CliObj[ sec ] );		// add to bank client list
-	WRITES( cli, __IDpar[ sec ], firmID );		// update object
+	WRITES( cli, __IDpar[ sec ], VS( firm, _IDpar[ sec ] ) );// update object
 	WRITE_SHOOKS( cli, firm );					// pointer back to client
 	WRITE_HOOKS( firm, BCLIENT, cli );			// pointer to bank client list
 
@@ -170,7 +171,7 @@ double cash_flow( object *firm, double profit, double tax )
 {
 	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
 			  strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
-	object *fin = SEARCHS( GRANDPARENTS( firm ), "Financial" );
+	object *fin = V_EXTS( GRANDPARENTS( firm ), countryE, finSec );
 
 	double dividends = VLS( firm, _DivVar[ sec ], 1 );// shareholder dividends
 	double cashFree = profit - tax - dividends;	// final free cash flow
@@ -227,7 +228,6 @@ double cash_flow( object *firm, double profit, double tax )
 
 const char *Cli1Obj[ ] = { "", "Cli", "CliEn" },
 		   *CliBrochObj[ ] = { "Cli", "Broch", "BrE" },
-		   *_IDpar[ ] = { "_ID1", "_ID2", "_IDe" },
 		   *__IDcPar[ ] = { "", "__IDc", "__IDcE" },
 		   *__IDsPar[ ] = { "", "__IDs", "__IDsE" },
 		   *__tSelPar[ ] = { "", "__tSel", "__tSelE" };
@@ -252,9 +252,10 @@ object *send_brochure( object *suppl, object *client )
 
 // set initial supplier for entrant in equations 'entry2exit', 'entryEexit'
 
-object *set_supplier( object *firm, int firmID )
+object *set_supplier( object *firm )
 {
-	object *broch, *suppl, *cap = SEARCHS( GRANDPARENTS( firm ), "Capital" );
+	object *broch, *suppl,
+		   *cap = V_EXTS( GRANDPARENTS( firm ), countryE, capSec );
 
 	suppl = RNDDRAWS( cap, "Firm1", "_AtauLP" );// draw capital supplier
 	broch = send_brochure( suppl, firm );		// get supplier brochure
@@ -369,8 +370,8 @@ void add_vintage( object *firm, double nMach, bool newInd )
 	// at t=1 firms have a mix of machines: old to new, many suppliers
 	if ( newInd )
 	{
-		cap = SEARCHS( GRANDPARENTS( firm ), "Capital" );
-		cons = SEARCHS( GRANDPARENTS( firm ), "Consumption" );
+		cap = V_EXTS( GRANDPARENTS( firm ), countryE, capSec );
+		cons = V_EXTS( GRANDPARENTS( firm ), countryE, conSec );
 
 		__ageVint = VS( cons, "eta" ) + 1;		// age of oldest machine
 		__nVint = ceil( nMach / __ageVint );	// machines per vintage
@@ -518,9 +519,9 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 		   BtauLPmax, Deb1, Eq1, NW1, mult;
 	int _ID1, _t1ent;
 	object *firm, *bank,
-		   *cons = SEARCHS( PARENTS( sector ), "Consumption" ),
-		   *ene = SEARCHS( PARENTS( sector ), "Energy" ),
-		   *lab = SEARCHS( PARENTS( sector ), "Labor" );
+		   *cons = V_EXTS( PARENTS( sector ), countryE, conSec ),
+		   *ene = V_EXTS( PARENTS( sector ), countryE, eneSec ),
+		   *lab = V_EXTS( PARENTS( sector ), countryE, labSup );
 
 	double Deb10ratio = VS( sector, "Deb10ratio" );// bank fin. to equity ratio
 	double Phi3 = VS( sector, "Phi3" );			// lower support for wealth share
@@ -576,20 +577,21 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 	// add entrant firms (end of period, don't try to sell)
 	for ( Deb1 = Eq1 = NW1 = 0; n > 0; --n )
 	{
-		_ID1 = INCRS( sector, "lastID1", 1 );	// new firm ID
-
 		// create object, only recalculate in t if new industry
 		if ( newInd )
 			firm = ADDOBJLS( sector, "Firm1", T - 1 );
 		else
 			firm = ADDOBJS( sector, "Firm1" );
 
+		_ID1 = INCRS( sector, "lastID1", 1 );	// new firm ID
+		WRITES( firm, "_ID1", _ID1 );
+
 		ADDHOOKS( firm, FIRM1HK );				// add object hooks
 		DELETE( SEARCHS( firm, "Cli" ) );		// remove empty instances
 		DELETE( SEARCHS( firm, "CliEn" ) );
 
 		// select associated bank
-		bank = set_bank( firm, _ID1 );
+		bank = set_bank( firm );
 
 		if ( ! newInd )
 		{
@@ -615,7 +617,6 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 
 		// initialize variables
 		WRITES( firm, "_Eq1", _Eq1 );
-		WRITES( firm, "_ID1", _ID1 );
 		WRITES( firm, "_t1ent", _t1ent );
 		WRITELLS( firm, "_AtauEE", _AtauEE, _t1ent, 1 );
 		WRITELLS( firm, "_AtauEF", _AtauEF, _t1ent, 1 );
@@ -683,9 +684,9 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		   _c2, _f2, _life2cycle, _p2, Deb2, Eq2, K, N, NW2, mult;
 	int _ID2, _t2ent;
 	object *firm, *bank, *suppl,
-		   *cap = SEARCHS( PARENTS( sector ), "Capital" ),
-		   *ene = SEARCHS( PARENTS( sector ), "Energy" ),
-		   *lab = SEARCHS( PARENTS( sector ), "Labor" );
+		   *cap = V_EXTS( PARENTS( sector ), countryE, capSec ),
+		   *ene = V_EXTS( PARENTS( sector ), countryE, eneSec ),
+		   *lab = V_EXTS( PARENTS( sector ), countryE, labSup );
 
 	double Deb20ratio = VS( sector, "Deb20ratio" );// bank fin. to equity ratio
 	double Phi1 = VS( sector, "Phi1" );			// lower support for K share
@@ -742,23 +743,24 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 	// add entrant firms (end of period, don't try to sell)
 	for ( Deb2 = Eq2 = NW2 = K = N = 0; n > 0; --n )
 	{
-		_ID2 = ID( 2, INCRS( sector, "lastID2", 1 ) );// new firm ID
-
 		// create object, only recalculate in t if new industry
 		if ( newInd )
 			firm = ADDOBJLS( sector, "Firm2", T - 1 );
 		else
 			firm = ADDOBJS( sector, "Firm2" );
 
+		_ID2 = ID( 2, INCRS( sector, "lastID2", 1 ) );// new firm ID
+		WRITES( firm, "_ID2", _ID2 );
+
 		ADDHOOKS( firm, FIRM2HK );				// add object hooks
 		DELETE( SEARCHS( firm, "Vint" ) );		// remove empty instances
 		DELETE( SEARCHS( firm, "Broch" ) );
 
 		// select associated bank
-		bank = set_bank( firm, _ID2 );
+		bank = set_bank( firm );
 
 		// select initial machine supplier
-		suppl = set_supplier( firm, _ID2 );
+		suppl = set_supplier( firm );
 
 		// initial desired capital/expected demand, rounded to # of machines
 		mult = newInd ? 1 : uniform( Phi1, Phi2 );// capital multiple
@@ -781,7 +783,6 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 
 		// initialize variables
 		WRITES( firm, "_Eq2", _Eq2 );
-		WRITES( firm, "_ID2", _ID2 );
 		WRITES( firm, "_t2ent", _t2ent );
 		WRITES( firm, "_life2cycle", _life2cycle );
 		WRITELLS( firm, "_A2", _A2, _t2ent, 1 );
@@ -854,9 +855,9 @@ double entry_firmE( variable *var, object *sector, int n, bool newInd )
 		   ICtauGEmax, ICtauGEmin, Kde, Kge, NWe, NWe0, emTauDEavg, mult;
 	int _IDe, _nMach, _tEent;
 	object *firm, *bank, *plant, *suppl,
-		   *cap = SEARCHS( PARENTS( sector ), "Capital" ),
-		   *cons = SEARCHS( PARENTS( sector ), "Consumption" ),
-		   *lab = SEARCHS( PARENTS( sector ), "Labor" );
+		   *cap = V_EXTS( PARENTS( sector ), countryE, capSec ),
+		   *cons = V_EXTS( PARENTS( sector ), countryE, conSec ),
+		   *lab = V_EXTS( PARENTS( sector ), countryE, labSup );
 
 	double DebE0ratio = VS( sector, "DebE0ratio" );// bank fin. to equity ratio
 	double Phi5 = VS( sector, "Phi5" );			// lower support for wealth share
@@ -909,13 +910,14 @@ double entry_firmE( variable *var, object *sector, int n, bool newInd )
 	// add entrant firms (end of period, don't try to sell)
 	for ( DebE = EqE = NWe = Kde = Kge = 0; n > 0; --n )
 	{
-		_IDe = ID( 3, INCRS( sector, "lastIDe", 1 ) );// new firm ID
-
 		// create object, only recalculate in t if new industry
 		if ( newInd )
 			firm = ADDOBJLS( sector, "FirmE", T - 1 );
 		else
 			firm = ADDOBJS( sector, "FirmE" );
+
+		_IDe = ID( 3, INCRS( sector, "lastIDe", 1 ) );// new firm ID
+		WRITES( firm, "_IDe", _IDe );
 
 		ADDHOOKS( firm, FIRMEHK );				// add object hooks
 		WRITE_HOOKS( firm, TOPVINT, NULL );		// no green plant yet
@@ -924,10 +926,10 @@ double entry_firmE( variable *var, object *sector, int n, bool newInd )
 		DELETE( SEARCHS( firm, "BrE" ) );
 
 		// select associated bank
-		bank = set_bank( firm, _IDe );
+		bank = set_bank( firm );
 
 		// select initial machine supplier
-		suppl = set_supplier( firm, _IDe );
+		suppl = set_supplier( firm );
 
 		if ( ! newInd )
 		{
@@ -975,7 +977,6 @@ double entry_firmE( variable *var, object *sector, int n, bool newInd )
 
 		// initialize variables
 		WRITES( firm, "_EqE", _EqE );
-		WRITES( firm, "_IDe", _IDe );
 		WRITES( firm, "_tEent", _tEent );
 		WRITELLS( firm, "_AtauDE", _AtauDE, _tEent, 1 );
 		WRITELLS( firm, "_DeE", _DeE, _tEent, 1 );

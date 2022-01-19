@@ -7179,6 +7179,13 @@ void histograms_cs( void )
 		goto end;
 	}
 
+	if ( mx <= mn )
+	{
+		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series have the same value for the chosen cases (time steps).\"" );
+		choice = 2;
+		goto end;
+	}
+
 	histo_mean = histo_mean / histo_cases;
 	histo_var = histo_var / histo_cases - histo_mean * histo_mean;
 

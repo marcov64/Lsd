@@ -399,7 +399,7 @@ check_error( Deb / GDPnom > 100 * TOL, "EXPLOSIVE-DEBT", 0, & errors );
 
 // SFC check
 RECALC( "testSFC" );
-if ( V( "testSFC" ) > TOL )
+if ( V( "testSFC" ) > 0 )
 	++errors;
 
 errorsTot += errors;

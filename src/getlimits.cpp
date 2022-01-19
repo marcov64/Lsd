@@ -70,6 +70,7 @@ int fast_mode = 1;			// flag to hide LOG messages & runtime plot
 int findex = 1;				// current multi configuration job
 int findexSens = 0;			// index to sequential sensitivity configuration filenames
 int max_step = 100;			// default number of simulation runs
+int parallel_disable = false;// flag to control parallel mode
 int prof_aggr_time = false;	// show aggregate profiling times
 int prof_min_msecs = 0;		// profile only variables taking more than X msecs.
 int prof_obs_only = false;	// profile only observed variables
@@ -78,6 +79,7 @@ int t;						// current time step
 int series_saved = 0;		// number of series saved
 int sim_num = 1;			// simulation number running
 int stack;					// LSD stack call level
+int stack_info = 0;			// LSD stack control
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter
@@ -169,6 +171,11 @@ int lsdmain( int argn, const char **argv )
 	}
 	fclose( f );
 
+	simul_name = new char[ strlen( struct_file ) + 1 ];
+	strcpy( simul_name, struct_file );
+	i = strlen( simul_name );
+	simul_name[ i > 4 ? i - 4 : i ] = '\0';
+
 	root = new object;
 	root->init( NULL, "Root" );
 	add_description( "Root" );
@@ -196,7 +203,7 @@ int lsdmain( int argn, const char **argv )
 
 	if ( load_sensitivity( f ) != 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\n%s\nCheck if the file is a valid LSD sensitivity analysis or regenerate it using the LSD Browser.\n\n", sens_file, lsdCmdMsg  );
+		fprintf( stderr, "\nFile '%s' is invalid.\n%s\nCheck if the file is a valid LSD sensitivity analysis or regenerate it using the LSD Browser.\n\n", sens_file, lsdCmdMsg	 );
 		fclose( f );
 		myexit( 8 );
 	}
@@ -208,7 +215,7 @@ int lsdmain( int argn, const char **argv )
 		f = fopen( out_file, "wt" );
 		if ( f == NULL )
 		{
-			fprintf( stderr, "\nFile '%s' cannot be saved.\n%s\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n\n", out_file, lsdCmdMsg  );
+			fprintf( stderr, "\nFile '%s' cannot be saved.\n%s\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n\n", out_file, lsdCmdMsg	 );
 			myexit( 9 );
 		}
 
@@ -224,15 +231,15 @@ int lsdmain( int argn, const char **argv )
 		// write simulation setting, if not already set
 		if ( ! meta_par_in[ 0 ] )
 			fprintf( f, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
-				 	 sep, sep, sep, sep, max_step, sep, MIN_STEP, sep, MAX_STEP, sep, DESC_STEP );
+					 sep, sep, sep, sep, max_step, sep, MIN_STEP, sep, MAX_STEP, sep, DESC_STEP );
 
 		if ( ! meta_par_in[ 1 ] )
 			fprintf( f, "_numRuns_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
-				 	 sep, sep, sep, sep, sim_num, sep, MIN_RUNS, sep, MAX_RUNS, sep, DESC_RUNS );
+					 sep, sep, sep, sep, sim_num, sep, MIN_RUNS, sep, MAX_RUNS, sep, DESC_RUNS );
 
 		if ( ! meta_par_in[ 2 ] )
 			fprintf( f, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
-				 	 sep, sep, sep, sep, seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
+					 sep, sep, sep, sep, seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
 
 		fclose( f );
 	}
@@ -242,23 +249,25 @@ int lsdmain( int argn, const char **argv )
 
 		if ( ! meta_par_in[ 0 ] )
 			fprintf( stdout, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
-				 	 sep, sep, sep, sep, max_step, sep, MIN_STEP, sep, MAX_STEP, sep, DESC_STEP );
+					 sep, sep, sep, sep, max_step, sep, MIN_STEP, sep, MAX_STEP, sep, DESC_STEP );
 
 		if ( ! meta_par_in[ 1 ] )
 			fprintf( stdout, "_numRuns_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
-				 	 sep, sep, sep, sep, sim_num, sep, MIN_RUNS, sep, MAX_RUNS, sep, DESC_RUNS );
+					 sep, sep, sep, sep, sim_num, sep, MIN_RUNS, sep, MAX_RUNS, sep, DESC_RUNS );
 
 		if ( ! meta_par_in[ 2 ] )
 			fprintf( stdout, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
-				 	 sep, sep, sep, sep, seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
+					 sep, sep, sep, sep, seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
 	}
 
 	empty_sensitivity( rsense );
 	empty_blueprint( );
 	empty_description( );
 	root->delete_obj( );
+	delete [ ] path;
 	delete [ ] out_file;
 	delete [ ] simul_name;
+	delete [ ] struct_file;
 
 	return 0;
 }

@@ -10,6 +10,29 @@
 
 /*============================== KEY EQUATIONS ===============================*/
 
+EQUATION( "_Q" )
+/*
+Production with current worker skills and vintage
+*/
+RESULT( HOOK( VWRK ) != NULL ?					// disalloc., unempl. or sec. 1?
+		V( "_s" ) * VS( PARENTS( HOOK( VWRK ) ), "__Avint" ) : 0 )
+
+
+EQUATION( "_age" )
+/*
+Worker working age
+Accumulates age and make worker to reborn after retirement
+*/
+
+i = VS( PARENT, "Tr" );							// retirement age
+if ( i == 0 || CURRENT < i )					// lives until retirement if any
+	v[0] = CURRENT + 1;							// simply gets older
+else
+	v[0] = 1;									// new age is 1 ("reborn")
+
+RESULT( v[0] )
+
+
 EQUATION( "_appl" )
 /*
 Number of job applications for firms in the period
@@ -435,7 +458,7 @@ if ( V( "_employed" ) != 2 )					// unemployed or sector 1?
 v[1] = VS( PARENTS( HOOK( FWRK ) ), "_W2" );	// total wages paid by firm
 v[2] = VS( PARENTS( HOOK( FWRK ) ), "_Bon2" );	// total bonuses paid by firm
 
-RESULT( v[1] > 0 ? v[2] * VS( PARENT, "Lscale" ) * V( "_w" ) / v[1] : 0 )
+RESULT( v[1] > 0 ? v[2] * V( "_w" ) / v[1] : 0 )
 
 
 EQUATION( "_CQ" )
@@ -445,22 +468,11 @@ Cumulated production with current technology
 RESULT( CURRENT + V( "_Q" ) )
 
 
-EQUATION( "_Q" )
-/*
-Production with current worker skills and vintage
-*/
-
-if ( HOOK( VWRK ) == NULL )						// disalloc., unempl. or sec. 1?
-	END_EQUATION( 0 );							// no production
-
-RESULT( V( "_s" ) * VS( PARENTS( HOOK( VWRK ) ), "__Avint" ) )
-
-
 EQUATION( "_TaxW" )
 /*
 Tax paid by worker on wage
 */
-RESULT( VS( GRANDPARENT, "flagTax" ) >= 1 ? 
+RESULT( VS( GRANDPARENT, "flagTax" ) >= 1 ?
 		VS( GRANDPARENT, "tr" ) * ( V( "_w" ) + VL( "_Bon", 1 ) ) : 0 )
 
 
@@ -480,21 +492,6 @@ if ( ! V( "_employed" ) )						// unemployed?
 	v[0] = CURRENT + 1;							// yes: one period more
 else
 	v[0] = 0;									// no: zero periods
-
-RESULT( v[0] )
-
-
-EQUATION( "_age" )
-/*
-Worker working age. Accumulates age and make worker to reborn after retirement.
-New "born" worker goes immediately to the labor market under minimum skills.
-*/
-
-i = VS( PARENT, "Tr" );							// retirement age
-if ( i == 0 || CURRENT < i )					// lives until retirement if any
-	v[0] = CURRENT + 1;							// simply gets older
-else
-	v[0] = 1;									// new age is 1 ("reborn")
 
 RESULT( v[0] )
 

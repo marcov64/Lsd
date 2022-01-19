@@ -579,7 +579,7 @@ Innovation success (1) or failure (0) for firm in capital-good sector
 Updated in '_Atau'
 */
 
-EQUATION_DUMMY( "_qc1", "cScores" )
+EQUATION_DUMMY( "_qc1", "" )
 /*
 Credit class of firm in sector 1 (1,2,3,4)
 Updated in 'cScores'
