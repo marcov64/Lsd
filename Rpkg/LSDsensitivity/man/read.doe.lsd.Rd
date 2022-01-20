@@ -7,11 +7,14 @@ Read a set of experimental data from a LSD model
 This function reads the sampling data produced by a LSD model design of experiment (DoE), pre-process it and saves it as a R object that can be used by the other tools provided by the LSDsensitivity package. Optionally, it can be used with a second DoE, on the same simulation model, to allow the out-of-sample (external) validation of the fitted meta-models.
 }
 \usage{
-read.doe.lsd( folder, baseName, outVar, does = 1, doeFile = NULL, respFile = NULL,
-              validFile = NULL, valRespFile = NULL, confFile = NULL, limFile = NULL,
-              iniDrop = 0, nKeep = -1, saveVars = c(), addVars = c(), eval.vars = NULL,
+read.doe.lsd( folder, baseName, outVar = "", does = 1, doeFile = NULL,
+              respFile = NULL, validFile = NULL, valRespFile = NULL,
+              confFile = NULL, limFile = NULL, iniDrop = 0, nKeep = -1,
+              saveVars = c(), addVars = c(), eval.vars = NULL,
               eval.run = NULL, pool = TRUE, na.rm = FALSE, rm.temp = TRUE,
-              rm.outl = FALSE, lim.outl = 10, nnodes = 1, quietly = TRUE )
+              rm.outl = FALSE, lim.outl = 10, nnodes = 1, quietly = TRUE,
+              instance = 1, posit = NULL,
+              posit.match = c( "fixed", "glob", "regex" ) )
 }
 \arguments{
   \item{folder}{
@@ -21,10 +24,10 @@ the \emph{relative} folder path to the LSD DoE data files, using the R working d
 the LSD data files base name, without numbering and extension suffixes (should be the same as the name of the baseline \code{.lsd} file, without the extension).
 }
   \item{outVar}{
-the name of an \emph{existing} variable to be used as the reference to perform the sensitivity analysis.
+the name of an \emph{existing} variable to be used as the reference to perform the sensitivity analysis. If no name is supplied, the default is to use the first element of \code{saveVars} or \code{addVars}.
 }
   \item{does}{
-1 or 2: number of experiments to be processes, being 2 only when one additional external validation sample (independent from the main sample) is available (see the required files below). The default is 1.
+1 or 2: number of experiments to be processed, being 2 only when one additional external validation sample (independent from the main sample) is available (see the required files below). The default is 1.
 }
   \item{doeFile}{
 the DoE specification file to be used. For the default (NULL), the \code{baseName} is used to generate the default LSD generated name.
@@ -51,7 +54,7 @@ integer: the number of initial time steps to drop from analysis (from \code{t = 
 integer: the total number of time steps to keep after \code{iniDrop}, if simulation length is longer than \code{nKeep} discard data from the end of the simulation. The default (-1) is to preserve all data.
 }
   \item{saveVars}{
-a vector of existing LSD variable names to be kept in the data set. The default (\code{c()}) is to save none. At least one existing or new variable must exist.
+a vector of existing LSD variable names to be kept in the data set. The default (\code{c()}) is to save none. At least one existing or new variable (defined by \code{addVars}) must exist. \code{saveVars} also defines the variables which are available for processing by the function defined by \code{eval.vars}, the default \code{saveVars = c()} representing all variables in the results files. For large datasets, this parameter allow reducing the memory required by not loading unnecessary data into memory.
 }
   \item{addVars}{
 a vector of new LSD variable names to be added to the data set. The default (\code{c()}) is to add none. At least one existing or new variable must exist.
@@ -63,16 +66,16 @@ a function to recalculate any item of the imported data set, including added var
 a function to evaluate the DoE response for each experimental sampling point, attributing an optional value to it. The default (NULL) is to have no function (use the selected variable Monte Carlo mean and standard deviation to value the point). If defined, function must take four arguments: (a) the data set (a 3-dimensional array of lists, the numbers of the DoE sampling points in the first dimension, variables in the second, and Monte Carlo runs in the in the third, being each list element a vector with all time-step values for that sample/variable/MC run), (b) the number of the DoE sampling point to evaluate, (c) the index to the analysis variable in the data set, and (d) the applicable confidence interval. The function must return a R list containing four values for the selected sampling point/variable pair: (a) the average value for the response, (b) the response standard deviation, (c) the the number of observations used, and (d) the number of observations discarded.
 }
   \item{pool}{
-logical: if TRUE then create a simpler data array, pooling together all non-NA Monte Carlo values from a single run for each variable. If FALSE (default) keep each Monte Carlo instance separated.
+logical: if \code{TRUE}, create a simpler data array, pooling together only a single instance for each variable. The instance to be considered is provided by \code{instance}. If \code{FALSE} (default), use all variable instances, which are treated as a single one (indeed, pooling all values...).
 }
   \item{na.rm}{
 logical: if TRUE NA values are stripped before the computation proceeds.
 }
   \item{rm.temp}{
-logical: if TRUE (default) then remove response and temporary speed up filess. If FALSE, do not remove response and temporary speed up files, allowing fast execution of subsequent call to this function. Please note that when set to FALSE, the user \emph{must} temporary files (extension \code{.Rdata}) manually whenever LSD data files are updated, so they are re-read. This can be done by simply turning \code{rm.temp} to TRUE once.
+logical: if \code{TRUE} (default), remove response and temporary speed up files. If \code{FALSE}, do not remove response and temporary speed up files, allowing fast execution of subsequent call to this function. Please note that when set to FALSE, the user \emph{must} temporary files (extension \code{.Rdata}) manually whenever LSD data files are updated, so they are re-read. This can be done by simply turning \code{rm.temp} to TRUE once.
 }
   \item{rm.outl}{
-logical: if TRUE, remove outliers from data set. Default is FALSE, no outliers removal.
+logical: if \code{TRUE}, remove outliers from data set. Default is \code{FALSE}, no outliers removal.
 }
   \item{lim.outl}{
 numeric: if \code{rm.outl = TRUE}, defines the limit for non-outliers deviation in number of standard deviations.
@@ -81,7 +84,16 @@ numeric: if \code{rm.outl = TRUE}, defines the limit for non-outliers deviation 
 integer: the maximum number of parallel computing nodes (parallel threads) in the current computer to be used for reading the files. The default, \code{nnodes = 1}, means single thread processing (no parallel threads). If equal to zero, creates up to one node per CPU core. Only \code{PSOCK} clusters are used, to ensure compatibility with any platform. Please note that each node requires its own memory space, so memory usage increases linearly with the number of nodes.
 }
   \item{quietly}{
-logical: if code{TRUE}, no message confirming file reading/information is printed. The default (\code{FALSE}) is to show details about each results file read.
+logical: if \code{TRUE}, no message confirming file reading/information is printed. The default (\code{FALSE}) is to show details about each results file read.
+}
+  \item{instance}{
+integer: the instance of the variable to be read, for variables that exist in more than one object, if \code{ pool = TRUE}, unused otherwise. This number is based on the relative position (column) of the variable in the results file. The default (1) is to read the first instance.
+}
+  \item{posit}{
+a string, a vector of strings or an integer vector describing the LSD object position of the variable(s) to select. If an integer vector, it should define the position of a SINGLE LSD object. If a string or vector of strings, each element should define one or more different LSD objects, so the returning matrix will contain variables from more than one object. By setting \code{posit.match}, globbing (wildcard), and regular expressions can be used to select multiple objects at once; in this case, all matching objects are returned.
+}
+  \item{posit.match}{
+a string defining how the \code{posit} argument, if provided, should be matched against the LSD object positions. If equal to \code{"fixed"}, the default, only exact matching is done. \code{"glob"} allows using simple wildcard characters ('*' and '?') in \code{posit} for matching. If \code{posit.match="regex"} interpret \code{posit} as POSIX 1003.2 extended regular expression(s). See \code{\link[=regex]{regular expressions}} for details of the different types of regular expressions. Options can be abbreviated.
 }
 }
 \details{
@@ -106,6 +118,8 @@ The function generates the required response files for the selected variable of 
 folder/baseName_XX_YY_WWW.csv    : DoE response for the selected variable (1 file)
 folder/baseName_YY+1_ZZ_WWW.csv  : validation response for variable (optional - 1 file)
 }
+
+When \code{posit} is supplied together with \code{col.names}, the variable selection process is done in two steps. Firstly, the (absolute) instances defined by \code{posit} are selected. Secondly, the column names set by \code{saveVars} and \code{instance} are selected out of the first selection set. See \code{\link{select.colnames.lsd}} and \code{\link{select.colattrs.lsd}} for examples on how to apply advanced selection options.
 }
 \value{
 The function returns an object/list of class \code{lsd-doe} containing all the experimental data and the corresponding results regarding the selected reference variable \code{outVar}, including the data for the out-of-sample (external) validation of the produced meta-models, if available, as well the DoE(s) details required by the package meta-modelling tools (\code{\link{elementary.effects.lsd}}, \code{\link{kriging.model.lsd}}, and \code{\link{polynomial.model.lsd}}).
@@ -166,7 +180,12 @@ dataSet <- read.doe.lsd( path,                 # data files folder
                          addVars = newVars,    # new variables to add to the LSD dataset
                          rm.temp = FALSE,      # reuse temporary speedup files
                          rm.outl = FALSE,      # remove outliers from dataset
-                         lim.outl = 10 )       # limit non-outliers deviation (# of std. devs.)
+                         lim.outl = 10,        # limit non-outliers deviation (# of std. devs.)
+                         quietly = FALSE )     # show information during processing
+print( dataSet$doe )            # the design of the experiment sample done in LSD
+print( dataSet$valid )          # the extenal validation sample
+print( dataSet$saVarName )      # the variable for which the response was analyzed
+print( dataSet$resp )           # analysis of the response of the selected variable
 
 #### OPTIONAL HANDLING FUNCTION EXAMPLES ####
 
@@ -204,6 +223,10 @@ dataSet <- read.doe.lsd( path,                 # data files folder
                          rm.temp = TRUE,       # remove temporary speedup files
                          rm.outl = FALSE,      # remove outliers from dataset
                          lim.outl = 10 )       # limit non-outliers deviation (# of std. devs.)
+print( dataSet$doe )            # the design of the experiment sample done in LSD
+print( dataSet$valid )          # the extenal validation sample
+print( dataSet$saVarName )      # the variable for which the response was analyzed
+print( dataSet$resp )           # analysis of the response of the selected variable
 
 # eval.vars( ) EXAMPLE 2
 # the definition of a function to compute the new variables
@@ -235,7 +258,7 @@ eval.vars <- function( data, vars ) {
   return( data )
 }
 
-# load data again, now using new variable v2 for analysis
+# load data again, now using new variable var2 for analysis
 dataSet <- read.doe.lsd( path,                 # data files folder
                          "Sim3",               # data files base name (same as .lsd file)
                          "var2",               # variable name to perform the sens. analysis
@@ -249,6 +272,10 @@ dataSet <- read.doe.lsd( path,                 # data files folder
                          rm.temp = TRUE,       # remove temporary speedup files
                          rm.outl = FALSE,      # remove outliers from dataset
                          lim.outl = 10 )       # limit non-outliers deviation (# of std. devs.)
+print( dataSet$doe )            # the design of the experiment sample done in LSD
+print( dataSet$valid )          # the extenal validation sample
+print( dataSet$saVarName )      # the variable for which the response was analyzed
+print( dataSet$resp )           # analysis of the response of the selected variable
 
 # eval.run( ) EXAMPLE
 # the definition of a function to evaluate a point in the DoE, associating a result
@@ -256,8 +283,7 @@ dataSet <- read.doe.lsd( path,                 # data files folder
 # the example evaluates the fat-taildness of the distribution of the selected
 # variable, using the Subbotin distribution b parameter as metric (response)
 
-# uncomment the lines below only if nolmalp package is available
-#library( normalp )
+library( normalp )
 
 eval.run <- function( data, run, varIdx, conf ) {
 
@@ -267,15 +293,15 @@ eval.run <- function( data, run, varIdx, conf ) {
   bSubbo <- rep( NA, dim( data )[ 3 ] )
   for( i in 1 : dim( data )[ 3 ] ) {
     x <- data[[ run, varIdx, i ]]
-#    sf <- paramp( x )
-#    sf$p <- estimatep( x, mu = sf$mean, p = sf$p, method = "inverse" )
-#    if( sf$p >= 1 ) {
-#      bSubbo[ i ] <- sf$p
-#      obs <- obs + 1
-#    } else {
-#      bSubbo[ i ] <- NA
+    sf <- paramp( x )
+    sf$p <- estimatep( x, mu = sf$mean, p = sf$p, method = "inverse" )
+    if( sf$p >= 1 ) {
+      bSubbo[ i ] <- sf$p
+      obs <- obs + 1
+    } else {
+      bSubbo[ i ] <- NA
       discards <- discards + 1
-#    }
+    }
   }
 
   return( list( mean( bSubbo, na.rm = TRUE ),
@@ -295,6 +321,10 @@ dataSet <- read.doe.lsd( path,                 # data files folder
                          rm.temp = TRUE,       # remove temporary speedup files
                          rm.outl = FALSE,      # remove outliers from dataset
                          lim.outl = 10 )       # limit non-outliers deviation (# of std. devs.)
+print( dataSet$doe )            # the design of the experiment sample done in LSD
+print( dataSet$valid )          # the extenal validation sample
+print( dataSet$saVarName )      # the variable for which the response was analyzed
+print( dataSet$resp )           # analysis of the response of the selected variable
 }
 \keyword{ interface }
 \keyword{ file }

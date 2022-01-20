@@ -2,9 +2,9 @@
 #
 # ------------------- LSD tools for sensitivity analysis ---------------------
 #
-#   Written by Marcelo Pereira, University of Campinas
+#   Written by Marcelo C. Pereira, University of Campinas
 #
-#   Copyright Marcelo Pereira
+#   Copyright Marcelo C. Pereira
 #   Distributed under the GNU General Public License
 #
 #*******************************************************************************

@@ -14,7 +14,7 @@ info.stats.lsd( array, rows = 1, cols = 2, median = FALSE,
 }
 \arguments{
   \item{array}{
-an 3D or 4D array as produced by \code{\link{read.3d.lsd}} and \code{\link{read.4d.lsd}}, where in the first dimension (rows) you have the time steps, in the second (columns), the variables and in the third/fourth dimension, the Monte Carlo experiments, and the instances in the third dimension (4D arrays only).
+a 3D or 4D array as produced by \code{\link{read.3d.lsd}} and \code{\link{read.4d.lsd}}, where in the first dimension (rows) you have the time steps, in the second (columns), the variables and in the third/fourth dimension, the Monte Carlo experiments, and the instances in the third dimension (4D arrays only).
 }
   \item{rows}{
 an integer array dimension to be used as the rows for the statistics matrices, default is to use first array dimension.
@@ -23,13 +23,13 @@ an integer array dimension to be used as the rows for the statistics matrices, d
 an integer array dimension to be used as the columns for the statistics matrices, default is to use second array dimension.
 }
   \item{median}{
-a logical value indicating if (\code{TRUE}) the median should also be computed.
+a logical value indicating if (\code{TRUE}) the median should also be computed. The default (\code{FALSE}) is not to compute the median.
 }
   \item{ci}{
 a character string specifying the type of confidence interval to compute, must be one of \code{"none"} (default) for no confidence interval computation, \code{"mean"}, to compute a confidence interval for the mean, \code{"median"}, for the median, or \code{"auto"}, to use the option set for the \code{median} argument (above). This option can be abbreviated.
 }
   \item{ci.conf}{
-confidence level of the confidence interval
+confidence level of the confidence interval.
 }
   \item{ci.boot}{
 a character string specifying the type of bootstrap confidence interval to compute, must be one of \code{"basic"}, \code{"perc"} (percentile interval), or \code{"bca"} (BCa - adjusted percentile interval). If set to \code{NULL} a regular asymptotic confidence interval is produced (no bootstrap), assuming normal distribution for the mean or using a non-parametric rank test for the median. Non-bootstrap percentiles are much faster to compute but generally less accurate.
@@ -50,7 +50,7 @@ Returns a list containing four to seven matrices, with the original size and nam
 \item{sd}{a matrix with the standard deviation of the MC experiments}
 \item{max}{a matrix with the maximum value of the MC experiments}
 \item{min}{a matrix with the minimum value of the MC experiments}
-\item{med}{a matrix with the median of the MC experiments (only present if argument \code{median} = \code{TRUE})}
+\item{med}{a matrix with the median of the MC experiments (only present if argument \code{median = TRUE})}
 \item{ci.hi}{a matrix with the maximum value of the MC experiments (only present if argument \code{ci} is not set to  \code{"none"})}
 \item{ci.lo}{a matrix with the minimum value of the MC experiments (only present if argument \code{ci} is not set to \code{"none"})}
 }

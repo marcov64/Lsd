@@ -1,1 +1,1 @@
-exportPattern( "^[[:alpha:]]+" )
+export( info.details.lsd, info.dimensions.lsd, info.distance.lsd, info.init.lsd, info.names.lsd, info.stats.lsd, list.files.lsd, name.check.lsd, name.clean.lsd, name.nice.lsd, name.r.unique.lsd, name.var.lsd, read.3d.lsd, read.4d.lsd, read.list.lsd, read.multi.lsd, read.raw.lsd, read.single.lsd, select.colattrs.lsd, select.colnames.lsd )
