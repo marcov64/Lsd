@@ -90,7 +90,7 @@ logical: if \code{TRUE}, no message confirming file reading/information is print
 integer: the instance of the variable to be read, for variables that exist in more than one object, if \code{ pool = TRUE}, unused otherwise. This number is based on the relative position (column) of the variable in the results file. The default (1) is to read the first instance.
 }
   \item{posit}{
-a string, a vector of strings or an integer vector describing the LSD object position of the variable(s) to select. If an integer vector, it should define the position of a SINGLE LSD object. If a string or vector of strings, each element should define one or more different LSD objects, so the returning matrix will contain variables from more than one object. By setting \code{posit.match}, globbing (wildcard), and regular expressions can be used to select multiple objects at once; in this case, all matching objects are returned.
+a string, a vector of strings or an integer vector describing the LSD object position of the variable(s) to select. If an integer vector, it should define the position of a SINGLE LSD object. If a string or vector of strings, each element should define one or more different LSD objects, so the returning matrix may contain variables from more than one object. By setting \code{posit.match}, globbing (wildcard), and regular expressions can be used to select multiple objects at once; in this case, all matching objects are returned.
 }
   \item{posit.match}{
 a string defining how the \code{posit} argument, if provided, should be matched against the LSD object positions. If equal to \code{"fixed"}, the default, only exact matching is done. \code{"glob"} allows using simple wildcard characters ('*' and '?') in \code{posit} for matching. If \code{posit.match="regex"} interpret \code{posit} as POSIX 1003.2 extended regular expression(s). See \code{\link[=regex]{regular expressions}} for details of the different types of regular expressions. Options can be abbreviated.
@@ -119,15 +119,15 @@ folder/baseName_XX_YY_WWW.csv    : DoE response for the selected variable (1 fil
 folder/baseName_YY+1_ZZ_WWW.csv  : validation response for variable (optional - 1 file)
 }
 
-When \code{posit} is supplied together with \code{col.names}, the variable selection process is done in two steps. Firstly, the (absolute) instances defined by \code{posit} are selected. Secondly, the column names set by \code{saveVars} and \code{instance} are selected out of the first selection set. See \code{\link{select.colnames.lsd}} and \code{\link{select.colattrs.lsd}} for examples on how to apply advanced selection options.
+When \code{posit} is supplied together with \code{col.names} or \code{instance}, the variable selection process is done in two steps. Firstly, the column names set by \code{saveVars} and \code{instance} are selected. Secondly, the instances defined by \code{posit} are selected from the first selection set. See \code{\link{select.colnames.lsd}} and \code{\link{select.colattrs.lsd}} for examples on how to apply advanced selection options.
 }
 \value{
 The function returns an object/list of class \code{lsd-doe} containing all the experimental data and the corresponding results regarding the selected reference variable \code{outVar}, including the data for the out-of-sample (external) validation of the produced meta-models, if available, as well the DoE(s) details required by the package meta-modelling tools (\code{\link{elementary.effects.lsd}}, \code{\link{kriging.model.lsd}}, and \code{\link{polynomial.model.lsd}}).
 
 List components:
-\item{doe}{the DoE data. Can be a tabular data frame if \code{POOL = TRUE} or a four-dimensional array otherwise.}
+\item{doe}{the DoE data. Can be a tabular data frame if \code{pool = TRUE} or a four-dimensional array otherwise.}
 \item{resp}{the DoE response data table.}
-\item{valid}{the external validation DoE data. Can be a tabular data frame if \code{POOL = TRUE} or a four-dimensional array otherwise.}
+\item{valid}{the external validation DoE data. Can be a tabular data frame if \code{pool = TRUE} or a four-dimensional array otherwise.}
 \item{valResp}{the external validation DoE response data table.}
 \item{facLim}{the factors limit ranges table.}
 \item{facLimLo}{the factors minimum values.}
@@ -224,7 +224,7 @@ dataSet <- read.doe.lsd( path,                 # data files folder
                          rm.outl = FALSE,      # remove outliers from dataset
                          lim.outl = 10 )       # limit non-outliers deviation (# of std. devs.)
 print( dataSet$doe )            # the design of the experiment sample done in LSD
-print( dataSet$valid )          # the extenal validation sample
+print( dataSet$valid )          # the external validation sample
 print( dataSet$saVarName )      # the variable for which the response was analyzed
 print( dataSet$resp )           # analysis of the response of the selected variable
 
@@ -273,7 +273,7 @@ dataSet <- read.doe.lsd( path,                 # data files folder
                          rm.outl = FALSE,      # remove outliers from dataset
                          lim.outl = 10 )       # limit non-outliers deviation (# of std. devs.)
 print( dataSet$doe )            # the design of the experiment sample done in LSD
-print( dataSet$valid )          # the extenal validation sample
+print( dataSet$valid )          # the external validation sample
 print( dataSet$saVarName )      # the variable for which the response was analyzed
 print( dataSet$resp )           # analysis of the response of the selected variable
 
@@ -322,7 +322,7 @@ dataSet <- read.doe.lsd( path,                 # data files folder
                          rm.outl = FALSE,      # remove outliers from dataset
                          lim.outl = 10 )       # limit non-outliers deviation (# of std. devs.)
 print( dataSet$doe )            # the design of the experiment sample done in LSD
-print( dataSet$valid )          # the extenal validation sample
+print( dataSet$valid )          # the external validation sample
 print( dataSet$saVarName )      # the variable for which the response was analyzed
 print( dataSet$resp )           # analysis of the response of the selected variable
 }

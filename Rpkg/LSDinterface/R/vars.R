@@ -61,9 +61,17 @@ name.check.lsd <- function( file, col.names = NULL, check.names = TRUE ) {
 # ==== Get a valid/unique R variable name from the original LSD variable name ====
 
 name.r.unique.lsd <- function( r.name ) {
-  r.name <- sub( "^_", "X_", r.name )
   r.name <- sub( "\\..*$", "", r.name )
+  r.name <- make.names( r.name )
   r.name <- unique( r.name )
+  return( r.name )
+}
+
+
+# ==== Get a valid R variable name from the original LSD variable name ====
+
+name.r <- function( r.name ) {
+  r.name <- sub( "\\..*$", "", r.name )
   r.name <- make.names( r.name )
   return( r.name )
 }

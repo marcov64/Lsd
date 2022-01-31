@@ -53,6 +53,7 @@ Returns a list containing four to seven matrices, with the original size and nam
 \item{med}{a matrix with the median of the MC experiments (only present if argument \code{median = TRUE})}
 \item{ci.hi}{a matrix with the maximum value of the MC experiments (only present if argument \code{ci} is not set to  \code{"none"})}
 \item{ci.lo}{a matrix with the minimum value of the MC experiments (only present if argument \code{ci} is not set to \code{"none"})}
+\item{n}{a matrix with the number of observations available for computation of statistics}
 }
 \author{Marcelo C. Pereira}
 \seealso{

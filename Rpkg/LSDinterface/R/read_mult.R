@@ -40,7 +40,7 @@ read.3d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
 
     if( i == 1 ) {                          # don't bind if first file
       dataArray <- dataSet[[ i ]]
-      nrows <- nrow( dataSet[[ i ]] )      # define base dimensions
+      nrows <- nrow( dataSet[[ i ]] )       # define base dimensions
       ncols <- ncol( dataSet[[ i ]] )
     } else {
       # check consistency

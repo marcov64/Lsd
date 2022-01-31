@@ -43,7 +43,7 @@ a string defining how the \code{posit} argument, if provided, should be matched 
 \details{
 Selection restriction arguments can be provided as needed; when not specified, all available cases are selected.
 
-When \code{posit} is supplied together with \code{col.names} or \code{instance}, the selection process is done in two steps. Firstly, the (absolute) instances defined by \code{posit} are selected. Secondly, the column names and (relative) instance positions set by \code{col.names} and \code{instance} are selected out of the first selection set.
+When \code{posit} is supplied together with \code{col.names} or \code{instance}, the selection process is done in two steps. Firstly, the column names and instance positions set by \code{col.names} and \code{instance} are selected. Secondly, the instances defined by \code{posit} are selected from the first selection set.
 
 See \code{\link{select.colnames.lsd}} and \code{\link{select.colattrs.lsd}} for examples on how to apply advanced selection options.
 }
@@ -79,13 +79,13 @@ all21_30 <- read.raw.lsd( files[ 2 ], skip = 20, nrows = 30 )
 print( all21_30[ , 1 : 7 ] )
 
 # read the third instances of a set of variables named '_A1p' and '_growth1'
-abTable <- read.raw.lsd( files[ 1 ], col.names = make.names( c( "_A1p", "_growth1" ) ),
+abTable <- read.raw.lsd( files[ 1 ], col.names = c( "_A1p", "_growth1" ),
                          instance = 3 )
 print( abTable[ 10 : 20, ] )
 
 # read instances of variable '_A1p' for the second and fourth objects under
 # any top-level object (use globbing)
-a24 <- read.raw.lsd( files[ 1 ], col.names = make.names( "_A1p" ),
+a24 <- read.raw.lsd( files[ 1 ], col.names = "_A1p",
                      posit = c( "*_2", "*_4" ), posit.match = "glob" )
 print( a24[ 1 : 10, ] )
 }

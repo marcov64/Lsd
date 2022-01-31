@@ -43,7 +43,7 @@ a string defining how the \code{posit} argument, if provided, should be matched 
 \details{
 Selection restriction arguments can be provided as needed; when not specified, all available cases are selected.
 
-When \code{posit} is supplied together with \code{col.names}, the selection process is done in two steps. Firstly, the (absolute) instances defined by \code{posit} are selected. Secondly, the column names set by \code{col.names} are selected out of the first selection set.
+When \code{posit} is supplied together with \code{col.names}, the selection process is done in two steps. Firstly, the column names set by \code{col.names} are selected. Secondly, the instances defined by \code{posit} are selected from the first selection set.
 
 See \code{\link{select.colnames.lsd}} and \code{\link{select.colattrs.lsd}} for examples on how to apply advanced selection options.
 }

@@ -17,90 +17,48 @@ read.raw.lsd <- function( file, nrows = -1, skip = 0, col.names = NULL,
                           posit.match = c( "fixed", "glob", "regex" ) ) {
 
   # read header line (labels) from disk
-  header <- scan( file, what = character( ), sep = "\t", quote = NULL,
-                  nlines = 1, quiet = TRUE )
-  header <- header[ 1 : ( length( header ) - 1 ) ]  # remove last tab
+  header <- readLines( file, n = 1, warn = FALSE )
+  header <- unlist( strsplit( header, "\t", fixed = TRUE ) )
   header <- make.names( header )
+  nVar <- length( header )
 
-  if( length( header ) == 0 )            # invalid file?
+  if( nVar == 0 )                       # invalid file?
     stop( paste0( "File '", file, "' is invalid!") )
 
   # try to calculate data size
-  if ( nrows > 0 ) {
-    n <- length( header ) * ( nrows - skip )
-  } else {
-    if ( nrows < 0 ) {
-      n <- -1
-    } else {                            # nrows = 0 : get initial values
-      n <- length( header )
+  nrows <- max( as.integer( nrows ), -1 )
+  skip <- max( as.integer( skip ), 0 )
+
+  # nrows = 0 : get initial values only
+  if ( nrows > 0 )
+    nLines <- nrows - skip
+  else
+    if ( nrows < 0 )
+      nLines <- num.lines( file ) - 2 - skip
+    else {
+      nLines <- 1
       skip <- -1
     }
-  }
+
+  if( nLines <= 0 )
+    return( NULL )
 
   # read data from disk
-  dataSet <- matrix( scan( file, what = numeric( ), n = n, quote = NULL,
-                           skip = skip + 2, na.strings = "NA", quiet = TRUE ),
-                     ncol = length( header ), byrow = TRUE )
+  dataSet <- matrix( unlist( scan( file, what = as.list( rep( 0.0, nVar ) ),
+                                   nlines = nLines, quote = NULL, skip = skip + 2,
+                                   na.strings = "NA", flush = TRUE, fill = TRUE,
+                                   multi.line = FALSE, quiet = TRUE ),
+                             recursive = FALSE, use.names = FALSE ),
+                     ncol = nVar, nrow = nLines,
+                     dimnames = list( c( ( 1 + skip ) : ( nLines + skip ) ),
+                                      name.clean.lsd( header ) ) )
 
-  if( nrow( dataSet ) == 0 )            # invalid file?
-    stop( paste0( "File '", file, "' is invalid!") )
-
-  # adjust row labels
-  rownames( dataSet ) <- c( ( 1 + skip ) : ( nrow( dataSet ) + skip ) )
-
-  # reformat column labels
-  colnames( dataSet ) <- name.clean.lsd( header )
-
-  # remove unwanted objects' columns if needed
-  if( ! is.null( posit ) && length( posit ) > 0 ) {
-
-    # format position if needed
-    posit <- fmt.posit( posit, match.arg( posit.match ) )
-
-    # matrix to store the columns, keep rownames
-    fieldData <- matrix( nrow = nrow( dataSet ), ncol = 0,
-                         dimnames = list( rownames( dataSet ) ) )
-    fieldCols <- 0
-
-    # select only required columns
-    for( i in 1 : ncol( dataSet ) ) {
-
-      # build position string and check it
-      pos <- unlist( strsplit( header[ i ], ".", fixed = TRUE ) )[ 2 ]
-
-      if( match.arg( posit.match ) == "fixed" ) {
-        if( ! ( pos %in% posit ) )
-          next
-
-      } else {
-        found <- FALSE
-        for( j in 1 : length( posit ) )
-          if( grepl( posit[ j ], pos ) )
-            found <- TRUE
-
-        if( ! found )
-          next
-      }
-
-      # ok, so the column should be included
-      fieldData <- cbind( fieldData, dataSet[ , i ] )
-      fieldCols <- fieldCols + 1
-
-      # apply column labels (first column requires different handling)
-      if( ncol( fieldData ) == 1 )
-        colnames( fieldData ) <- name.clean.lsd( header[ i ] )
-      else
-        colnames( fieldData )[ fieldCols ] <- name.clean.lsd( header[ i ] )
-    }
-
-    if( ncol( fieldData ) == 0 )
-      stop( paste0( "File '", file, "' has no variable with the specified position(s)") )
-
-    dataSet <- fieldData
-  }
+  if( nrow( dataSet ) == 0 || ncol( dataSet ) == 0 )      # invalid file?
+    stop( paste0( "File '", file, "' contains no LSD data!") )
 
   # remove unwanted columns if needed
-  if( ! is.null( col.names ) || instance != 0 ) {
+  if( ! is.null( col.names ) || instance != 0 ||
+      ( ! is.null( posit ) && length( posit ) > 0 ) ) {
 
     # check column names to adjust to R imported column names
     if( check.names && ! is.null( col.names ) )
@@ -108,11 +66,14 @@ read.raw.lsd <- function( file, nrows = -1, skip = 0, col.names = NULL,
 
     dataSet <- select.colnames.lsd( dataSet, col.names = col.names,
                                     instance = instance,
-                                    check.names = check.names )
+                                    check.names = check.names, posit = posit,
+                                    posit.match = match.arg( posit.match ) )
   }
 
-  if( clean.names ) {
+  if( clean.names && ! is.null( dataSet ) ) {
+
     cleaNames <- name.r.unique.lsd( colnames( dataSet ) )
+
     if( length( cleaNames ) == ncol( dataSet ) )
       colnames( dataSet ) <- cleaNames
   }
@@ -163,7 +124,7 @@ read.multi.lsd <- function( file, col.names = NULL, nrows = -1, skip = 0,
   for( i in 1 : length( fixedLabels ) ) {
 
     # ---- Select only required columns ----
-
+browser()
     fieldData[[ i ]] <- select.colnames.lsd( dataSet, fixedLabels[ i ],
                                              instance = 0,
                                              check.names = check.names )
@@ -181,4 +142,20 @@ read.multi.lsd <- function( file, col.names = NULL, nrows = -1, skip = 0,
   }
 
   return( fieldData )                   # return a list of matrices
+}
+
+
+# ==== support function to read the number of lines of a text file ====
+
+num.lines <- function( file ) {
+
+  f <- gzfile( file, open = "rb" )
+
+  nLines <- 0L
+  while ( length( chunk <- readBin( f, "raw", 1048576 ) ) > 0 )
+    nLines <- nLines + sum( chunk == as.raw( 10L ) )
+
+  close( f )
+
+  return( nLines )
 }

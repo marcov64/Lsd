@@ -40,6 +40,8 @@ a string defining how the \code{posit} argument, if provided, should be matched 
 \details{
 Selection restriction arguments can be provided as needed; when not specified, all available cases are selected.
 
+When \code{posit} is supplied together with other attribute filters, the selection process is done in two steps. Firstly, the column names set by otter attribute filters are selected. Secondly, the instances defined by \code{posit} are selected from the first selection set.
+
 See also the \code{read.XXXX.lsd} functions which may select just specific \code{posit} object instances when loading LSD results. If only a single set of instances is required, this would be more efficient than using this function.
 }
 \value{
@@ -71,7 +73,7 @@ print( abFirst2[ 50 : 60, ] )
 
 # extract instances of variable '_A1p' that start at time step t = 1
 # for the second and fourth objects under any top-level object (use globbing)
-a24 <- select.colattrs.lsd( bigTable, info, make.names( "_A1p" ), init.time = 1,
+a24 <- select.colattrs.lsd( bigTable, info, "_A1p", init.time = 1,
                             posit = c( "*_2", "*_4" ), posit.match = "glob" )
 print( a24[ 1 : 10, ] )
 

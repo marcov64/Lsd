@@ -34,16 +34,16 @@ integer: the instance of the variable to be read, for variables that exist in mo
 integer: the maximum number of parallel computing nodes (parallel threads) in the current computer to be used for reading the files. The default, \code{nnodes = 1}, means single thread processing (no parallel threads). If equal to zero, creates up to one node per CPU core. Only \code{PSOCK} clusters are used, to ensure compatibility with any platform. Please note that each node requires its own memory space, so memory usage increases linearly with the number of nodes.
 }
   \item{posit}{
-a string, a vector of strings or an integer vector describing the LSD object position of the variable(s) to select. If an integer vector, it should define the position of a SINGLE LSD object. If a string or vector of strings, each element should define one or more different LSD objects, so the returning matrix will contain variables from more than one object. By setting \code{posit.match}, globbing (wildcard), and regular expressions can be used to select multiple objects at once.
+a string, a vector of strings or an integer vector describing the LSD object position of the variable(s) to select. If an integer vector, it should define the position of a SINGLE LSD object. If a string or vector of strings, each element should define one or more different LSD objects, so the returning matrix may contain variables from more than one object. By setting \code{posit.match}, globbing (wildcard), and regular expressions can be used to select multiple objects at once.
 }
   \item{posit.match}{
 a string defining how the \code{posit} argument, if provided, should be matched against the LSD object positions. If equal to \code{"fixed"}, the default, only exact matching is done. \code{"glob"} allows using simple wildcard characters ('*' and '?') in \code{posit} for matching. If \code{posit.match="regex"} interpret \code{posit} as POSIX 1003.2 extended regular expression(s). See \code{\link[=regex]{regular expressions}} for details of the different types of regular expressions. Options can be abbreviated.
 }
 }
 \details{
-Selection restriction arguments can be provided as needed; when not specified, all available cases are considered, but just one (relative) \code{instance} is considered.
+Selection restriction arguments can be provided as needed; when not specified, all available cases are considered, but just one \code{instance} is considered.
 
-When \code{posit} is supplied, the selection process is done in two steps. Firstly, the (absolute) instances defined by \code{posit} are selected. Secondly, the column names and the (relative) instance position set by \code{col.names} and \code{instance} are selected out of the first selection set.
+When \code{posit} is supplied together with \code{col.names} or \code{instance}, the selection process is done in two steps. Firstly, the column names and the instance position set by \code{col.names} and \code{instance} are selected. Secondly, the instances defined by \code{posit} are selected from the first selection set.
 
 See \code{\link{select.colnames.lsd}} and \code{\link{select.colattrs.lsd}} for examples on how to apply advanced selection options.
 }
@@ -84,8 +84,8 @@ print( ab1Array[ 20 : 25, , 3 ] )
 # read instance 2 of all variables, skipping the initial 20 time steps
 # and keeping up to 30 time steps (from t = 21 up to t = 30)
 inst2Array21_30 <- read.3d.lsd( files, skip = 20, nrows = 30, instance = 2 )
-print( inst2Array21_30[ , 1 : 7, "Sim1_1" ] )   # use the file name to retrieve
-print( inst2Array21_30[ , 1 : 7, "Sim1_2" ] )
+print( inst2Array21_30[ , , "Sim1_1" ] )   # use the file name to retrieve
+print( inst2Array21_30[ , , "Sim1_2" ] )
 
 # read instance 5 of all variables in second-level objects, using up to 2 cores
 inst5array2 <- read.3d.lsd( files, instance = 2, posit = "*_*",

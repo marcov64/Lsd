@@ -136,7 +136,7 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
     transp <- FALSE
 
   # Allocate 2D arrays
-  avg <- sDev <- M <- m <-
+  avg <- sDev <- M <- m <- n <-
     array( as.numeric( NA ), dim = c( dimArray[ rows ], dimArray[ cols ] ),
            dimnames = list( dimNames[[ rows ]], dimNames[[ cols ]] ) )
 
@@ -199,11 +199,11 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
       if( inf.rm )
         elem <- elem[ is.finite( elem ) ]
 
-      n = length( elem[ is.finite( elem ) ] )
+      n[ i, j ] <- num <- length( elem[ is.finite( elem ) ] )
       avg[ i, j ] <- mean( elem )
       sDev[ i, j ] <- stats::sd( elem )
 
-      if( n > 0 ) {
+      if( num > 0 ) {
         M[ i, j ] <- max( elem )
         m[ i, j ] <- min( elem )
       }
@@ -218,10 +218,10 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
       if( ci != "none" ) {
         ci.lo[ i, j ] <- ci.hi[ i, j ] <- NA
 
-        if( n > 0 ) {
+        if( num > 0 ) {
           if( is.null( ci.boot ) ) {
             if( ci == "mean" ) {
-              d = abs( stats::qt( ( 1 - ci.conf ) / 2, n - 1 ) ) * sDev[ i, j ] / sqrt( n )
+              d = abs( stats::qt( ( 1 - ci.conf ) / 2, num - 1 ) ) * sDev[ i, j ] / sqrt( num )
 
               if( is.finite( avg[ i, j ] ) && ! is.null( d ) && is.finite( d ) ) {
                 ci.lo[ i, j ] = avg[ i, j ] - d
@@ -272,7 +272,7 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
     }
   }
 
-  res <- list( avg = avg, sd = sDev, max = M, min = m )
+  res <- list( avg = avg, sd = sDev, max = M, min = m, n = n )
 
   if( median )
     res[[ "med" ]] <- med
