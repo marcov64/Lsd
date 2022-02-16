@@ -118,7 +118,7 @@ if ( file_exists( $lsd_exec ) && file_exists( $filename_conf ) ) {
     if ( ! $csv_exec_config ) {
         $command = $lsd_exec . " -t -z -p -b -c " . $max_thr_run . ":" . $max_par_run . " -f " . $filename_conf . " -o " . $output_pref;
     } else {
-        $command = $lsd_exec . " " . $filename_conf . " " . $output_pref;
+        $command = $lsd_exec . " " . $filename_conf . " " . $output_pref . " " . $max_thr_run . " " . $max_par_run;
     }
 
     if ( $nice_enable && $os !== "windows" ) {
@@ -206,5 +206,5 @@ if ( file_exists( $lsd_exec ) && file_exists( $filename_conf ) ) {
 
     echo get_size( $filename_res );
 } else {
-    echo "Error: lsdNW or " . $filename_conf . "not reachable";
+    echo "Error: " . $lsd_exec . " or " . $filename_conf . "not reachable";
 }

@@ -156,10 +156,16 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
 lang=EN-US><a href="#_Customizing_the_LSD">Customizing</a> the LSD Web
 Interface.</span></p>
 
-<p class=MsoListParagraph style='margin-left:32.2pt;text-indent:-18.0pt'><span
-lang=EN-US>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span lang=EN-US>4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
 lang=EN-US>Configuring, running and analyzing results of LSD models <a
 href="#_LSD_web_interface">using the web interface</a>.</span></p>
+
+<p class=MsoListParagraph style='margin-left:32.2pt;text-indent:-18.0pt'><span
+lang=EN-US>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
+lang=EN-US><a href="#_Technical_details_of">Technical details</a> of LSD Web
+Interface operation.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -189,6 +195,14 @@ available for installation. LWI can be integrated to any HTML-based <a
 href="#_Server_requirements">web server</a> platform. LWI, per se, does not
 provide accounts or persistent storage to users, which can be provided by the
 host web platform. </span></p>
+
+<p><span lang=EN-US>LWI is NOT installed by the LSD installer. So, after
+installing LSD, please download the source code at <a
+href="https://github.com/marcov64/LSD">https://github.com/marcov64/LSD</a> and
+copy the folder named </span><span class=Cdigo><span lang=EN-US>lwi</span></span><span
+lang=EN-US> in the downloaded archive (.zip) to the same folder where you
+installed LSD, making sure the entire subfolder structure below </span><span
+class=Cdigo><span lang=EN-US>lwi</span></span><span lang=EN-US> is copied.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -330,10 +344,10 @@ and operating system/distribution.</span></p>
 href="LSD_faqs_arquivos#model">LSD model</a> under a unique baseline <a
 href="LSD_faqs_arquivos#simsetting">configuration</a> (see <a
 href="#_Customizing_the_LWI">below</a>). If different models or configurations
-must be supported, it is necessary to configure multiple virtual web servers
-(in a single physical server), installing one independent LWI instance
-(different directory) for each virtual server. Please refer Apache
-documentation on how to set up virtual web servers.</span></p>
+must be supported, it is necessary to configure multiple virtual web servers (in
+a single physical server), installing one independent LWI instance (different
+directory) for each virtual server. Please refer Apache documentation on how to
+set up virtual web servers.</span></p>
 
 <p><span lang=EN-US>To start, please copy the provided LWI subdirectory inside
 your LSD installation directory (normally at </span><span class=Cdigo><span
@@ -370,7 +384,8 @@ lang=EN-US> in Ubuntu, </span><span class=Cdigo><span lang=EN-US>apache</span></
 lang=EN-US> in CentOS, etc.) must have read-access to the entire </span><span
 class=Cdigo><span lang=EN-US>lwi</span></span><span lang=EN-US> subdirectory
 tree plus read-write access to <i>both</i> </span><span class=Cdigo><span
-lang=EN-US>tmp</span></span><span lang=EN-US> subdirectories (the default configuration).</span></p>
+lang=EN-US>tmp</span></span><span lang=EN-US> subdirectories (the default
+configuration).</span></p>
 
 <p><span lang=EN-GB>The provided files must yet be set with all required file
 permissions/ownership for a typical setup. Usually, it is enough to adjust the
@@ -459,8 +474,7 @@ lang=EN-US>&lt;Directory &quot; /Library/WebServer/Documents&quot;&gt;</span></s
 lang=EN-US> (or another path, should be below the previous one) and replace it
 by:</span></p>
 
-<p><span class=Cdigo><span lang=EN-US>&lt;Directory
-&quot;/Library/WebServer/Documents/lwi/public_html&quot;&gt;</span></span></p>
+<p><span class=Cdigo><span lang=EN-US>&lt;Directory &quot;/Library/WebServer/Documents/lwi/public_html&quot;&gt;</span></span></p>
 
 <p><span lang=EN-US>Save the configuration and close nano (</span><span
 class=Cdigo><span lang=EN-US>CTRL+X</span></span><span lang=EN-US>, </span><span
@@ -506,8 +520,8 @@ up properly. Except for the points discussed below, for all maintenance tasks
 on the LWI server, like backups, software updating, security audits, storage
 clean-up etc., please follow the usual (basic) standard web server guidelines.</span></p>
 
-<p><span lang=EN-US>The only special maintenance task in a LWI server is to
-manage temporary storage utilization. This is important as, per the default LWI
+<p><span lang=EN-US>The only special maintenance task in a LWI server is to manage
+temporary storage utilization. This is important as, per the default LWI
 installation, over time the server may accumulate temporary files from the user
 sessions. If nothing is done, the server may eventually run out of storage
 space, even if at a slow pace. The LWI server accumulates temporary files in
@@ -551,7 +565,8 @@ configuration, if needed.</span></p>
 <p><span class=Cdigo><span lang=EN-US>chmod a+x lwi-cleanup</span></span></p>
 
 <p><span lang=EN-US>Finally, copy the script file to the </span><span
-class=Cdigo><span lang=EN-US>cron</span></span><span lang=EN-US> daily directory:</span></p>
+class=Cdigo><span lang=EN-US>cron</span></span><span lang=EN-US> daily
+directory:</span></p>
 
 <p><span class=Cdigo><span lang=EN-US>sudo cp lwi-cleanup /etc/cron.daily</span></span></p>
 
@@ -580,11 +595,11 @@ href="LSD_faqs.html#variable">Variable initial conditions</a> should be exposed
 for the configuration by the user, as well the allowed value ranges, <a
 href="#_Defining_the_Variables">(3)</a> defining for which <a
 href="LSD_faqs.html#results">result Variables</a> the model’s output should be
-presented to the user, <a href="#_Installing_the_new">(4)</a> installing the
-produced configuration in the <a href="#_Installation_of_the">LWI server</a>,
-and <a href="#_Customizing_the_LWI">(5)</a> customizing the LWI server for the
-model. The customization is performed using standard LSD commands and
-configuration files, as described below.</span></p>
+presented to the user, <a href="#_Installing_the_new">(4)</a> installing the produced
+configuration in the <a href="#_Installation_of_the">LWI server</a>, and <a
+href="#_Customizing_the_LWI">(5)</a> customizing the LWI server for the model.
+The customization is performed using standard LSD commands and configuration files,
+as described below.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The default configuration of LWI after the
 installation of LSD brings the Schumpeterian Competition Model by Nelson &amp;
@@ -627,8 +642,8 @@ is to create a baseline <a href="LSD_faqs.html#modelsetting">configuration file<
 extension) and a limits-selection <a href="LSD_faqs.html#sa">sensitivity
 analysis</a> file (</span><span class=Cdigo><span lang=EN-US>.sa</span></span><span
 lang=EN-US> extension) using the <a href="browser.html">LSD Browser</a>. The
-baseline configuration and the selection files are automatically loaded whenever
-a LWI user <a href="#_Why_LSD?">starts a session</a> or <a
+baseline configuration and the selection files are automatically loaded
+whenever a LWI user <a href="#_Why_LSD?">starts a session</a> or <a
 href="#_Configuration_page">reset it to the defaults</a>. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>The <a href="LSD_faqs.html#parameter">Parameters</a>
@@ -657,8 +672,8 @@ values for the Parameter or lagged Variable, separated by a space, select the </
 class=Cdigo><span lang=EN-US>Round to integer</span></span><span lang=EN-US>
 option if the element is an integer number, and click on </span><span
 class=Cdigo><span lang=EN-US>OK</span></span><span lang=EN-US>. Repeat this
-procedure until all elements to be exposed to the user have their ranges defined.
-To see the list of already selected elements, use the menu command </span><span
+procedure until all elements to be exposed to the user have their ranges
+defined. To see the list of already selected elements, use the menu command </span><span
 class=Cdigo><span lang=EN-US><a href="menurun.html#showsave">Run&gt;Show
 Elements to&gt;Sensitivity Analysis</a></span></span><span lang=EN-US>.</span></p>
 
@@ -746,8 +761,8 @@ sudo cp lwi.sa /Library/WebServer/Documents/lwi/<br>
 sudo cp lsdNW /Library/WebServer/Documents/lwi/lsdNWOSX</span></span></p>
 
 <p class=MsoNormal><span lang=EN-US>These three files will replace the previous
-model and configuration used by LWI. Finally, reload the web server so it can start
-using the new files. On Ubuntu and Windows/WSL use:</span></p>
+model and configuration used by LWI. Finally, reload the web server so it can
+start using the new files. On Ubuntu and Windows/WSL use:</span></p>
 
 <p class=MsoNormal><span class=Cdigo><span lang=EN-US>sudo service apache2
 reload</span></span></p>
@@ -764,7 +779,8 @@ reload</span></span></p>
 the browser in the appropriate address (see <a href="#openbrowser">here</a> for
 details) and check the LWI operation for your model.</span></p>
 
-<h2><span lang=EN-US>Customizing the LWI server</span></h2>
+<h2><a name="_Customizing_the_LWI_1"></a><span lang=EN-US>Customizing the LWI
+web page</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>Almost everything in the LWI server can be
 customized. However, other than basic personalization, changing the HTML/PHP
@@ -780,11 +796,15 @@ The pre-set change points include adding:</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>Name of the model, in two versions. For large
-screen devices, the name used is the one marked by:<br>
+</span></span><span lang=EN-US>Name of the model, in three versions. A named
+used in the browser tab:<br>
+</span><span class=Cdigo><span lang=EN-US>&lt;!-- ### LWI ### ADD THE TAB NAME
+OF YOUR MODEL HERE --&gt;</span></span><span lang=EN-US><br>
+For large screen devices, the name used on the page heading is the one marked
+by:<br>
  </span><span class=Cdigo><span lang=EN-US>&lt;!-- ### LWI ### ADD THE LONG
 NAME OF YOUR MODEL HERE --&gt;</span></span><span lang=EN-US><br>
-For narrow screen devices, change the text following:<br>
+For narrow screen devices, also change the text following:<br>
 </span><span class=Cdigo><span lang=EN-US>&lt;!-- ### LWI ### ADD THE SHORT
 NAME OF YOUR MODEL HERE --&gt;</span></span><span lang=EN-US>.</span></p>
 
@@ -817,7 +837,8 @@ outside the comment-mark regions. </span></p>
 class=Cdigo><span lang=EN-US>lwi/defaults.php</span></span><span lang=EN-US>.
 It contains several server parameters which may require changes for specific
 applications. The default values are adequate only for small, dedicated
-servers. E-mail addresses for the Contact panel are also adjusted in this file.</span></p>
+servers. E-mail addresses for the Contact panel are also adjusted in this file.
+See more details <a href="#_Technical_configuration_of">below</a>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Please reload the web server after any
 change (follow the instructions <a href="#_Installing_the_new">above</a>).</span></p>
@@ -836,11 +857,11 @@ change (follow the instructions <a href="#_Installing_the_new">above</a>).</span
 <h1><a name="_LSD_web_interface"></a><a name=use></a><span class=Ttulo1Char><span
 lang=EN-US>LSD Web Interface usage</span></span></h1>
 
-<p><span lang=EN-US>LSD Web Interface (LWI) requires that users are at least
-familiar with the model being used. The user is supposed to have at least some
-basic knowledge of the model structure and its main parameters and variables to
-fully profit from LWI. All names used in LSD for the model’s parameters and
-variables are preserved in LWI.</span></p>
+<p><span lang=EN-US>LSD Web Interface (LWI) requires that users are at least familiar
+with the model being used. The user is supposed to have at least some basic
+knowledge of the model structure and its main parameters and variables to fully
+profit from LWI. All names used in LSD for the model’s parameters and variables
+are preserved in LWI.</span></p>
 
 <p><span lang=EN-GB>This section is organized in five subsections, mirroring
 LWI software organization. Initially, we introduce LWI <a
@@ -957,8 +978,8 @@ lang=EN-US>Execution area</span></h2>
 <p class=MsoNormal><span lang=EN-US>The Execution area controls the execution
 of the simulation model in the LWI server. Model execution can take from a few
 seconds to several minutes, according to the selected configuration, in
-particular the chosen number of simulation time steps. The Execution area is
-divided in two subareas: the Status box and the command buttons.</span></p>
+particular the chosen number of simulation time steps. The Execution area is divided
+in two subareas: the Status box and the command buttons.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The command buttons control the simulation
 model execution at the remote server. As soon as the user finishes the
@@ -987,10 +1008,10 @@ lang=EN-US> button to check the causes of the failure.</span></p>
 model, the Status box in the <a href="#_Execution_area">Execution area</a> will
 show </span><span class=Cdigo><span lang=EN-US>Simulation run complete</span></span><span
 lang=EN-US>, and the produced time series will be available for analysis in the
-Analysis area. The area is composed by the time series list, the option
-selectors, and the command buttons. Please make sure your browser is configured
-to allow the LWI website to open new browser windows/tabs when using the
-commands in this area.</span></p>
+Analysis area. The area is composed by the time series list, the option selectors,
+and the command buttons. Please make sure your browser is configured to allow
+the LWI website to open new browser windows/tabs when using the commands in
+this area.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The user can select one or more items in
 the time series list to be used when the command buttons are clicked. Clicking
@@ -1016,14 +1037,13 @@ class=Cdigo><span lang=EN-US>Linear</span></span><span lang=EN-US> option).</spa
 
 <p class=MsoNormal><span lang=EN-US>The MC-band options provide extra
 information for multi-run simulation plots. MC-bands are only available when </span><span
-class=Cdigo><span lang=EN-US>numRuns</span></span><span lang=EN-US>, in
-Configuration section, is set to more than one run (at least 10 runs are
-recommended for sensible results). The </span><span class=Cdigo><span
-lang=EN-US>Confidence</span></span><span lang=EN-US> option add a standard 95%
-confidence interval band to each series selected to plot. The </span><span
-class=Cdigo><span lang=EN-US>Max-min</span></span><span lang=EN-US> option a
-band from the minimum to the maximum values obtained in the set of simulation
-runs.</span></p>
+class=Cdigo><span lang=EN-US>numRuns</span></span><span lang=EN-US>, in Configuration
+section, is set to more than one run (at least 10 runs are recommended for
+sensible results). The </span><span class=Cdigo><span lang=EN-US>Confidence</span></span><span
+lang=EN-US> option add a standard 95% confidence interval band to each series
+selected to plot. The </span><span class=Cdigo><span lang=EN-US>Max-min</span></span><span
+lang=EN-US> option a band from the minimum to the maximum values obtained in
+the set of simulation runs.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Clicking on </span><span class=Cdigo><span
 lang=EN-US>Statistics</span></span><span lang=EN-US> button creates a new
@@ -1045,9 +1065,9 @@ may be open at any time.</span></p>
 <p class=MsoNormal><span lang=EN-US>Clicking on </span><span class=Cdigo><span
 lang=EN-US>Plot</span></span><span lang=EN-US> button creates a new browser
 window with the selected time series plots. The horizontal axis represents the
-simulation time steps and the vertical axis, the selected series values. At least
-one and up to 15 series can be selected at a time. Multiple plot windows may be
-open at a time.</span></p>
+simulation time steps and the vertical axis, the selected series values. At
+least one and up to 15 series can be selected at a time. Multiple plot windows
+may be open at a time.</span></p>
 
 <h2><a name="_Export_page"></a><span lang=EN-US>Export area</span></h2>
 
@@ -1079,6 +1099,267 @@ represent variables values at each time step. However, the first line has a
 special meaning, being the first time step values located in the second line
 and so on. The first line contains the columns headers with the names of the
 variables in each column.</span></p>
+
+<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_Technical_details_of"></a><span class=Ttulo1Char><span
+lang=EN-US>Technical details of LSD Web Interface operation</span></span></h1>
+
+<h2><a name="_LWI_workflow"></a><span lang=EN-US>LWI workflow</span></h2>
+
+<p class=MsoNormal><span lang=EN-US>LWI is a (mostly) PHP interface between an
+HTML web page and an LSD model executable program. LWI operation workflow can
+be described as a set of ordered actions:</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
+lang=EN-US>LWI loads from a configuration file (default: </span><span
+class=Cdigo><span lang=EN-US>lwi/lwi.lsd</span></span><span lang=EN-US>) the
+names of the parameters and initial conditions the modeler wants to offer for
+configuration at the LWI web page, and the names of output variables should be
+available to the user after the simulation is run. The same file includes the
+default/initial values of the parameters and initial conditions, and the
+textual description for parameters, initial conditions and output variables.
+This file has an LSD specific format and must be generated by the <a
+href="browser.html">LSD Browser</a>, as described in LSD documentation.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
+lang=EN-US>LWI loads from a sensitivity analysis file (default: </span><span
+class=Cdigo><span lang=EN-US>lwi/lwi.sa</span></span><span lang=EN-US>) the
+numerical limits (range) for each of the parameters and initial conditions
+contained in the configuration file. This file has an LSD specific format and
+must be also generated by the LSD Browser, as described in LSD documentation.
+Just two sensitivity values are required for each parameter/initial condition,
+if more are provided, only the first two are used. It is also possible to
+define parameters and initial conditions which accept only integer values
+(default is to allow real numbers).</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
+lang=EN-US>Using the file </span><span class=Cdigo><span lang=EN-US>lwi/public_html/index.html</span></span><span
+lang=EN-US>, LWI builds the model web page, offering an interface to the user
+modify the default values for parameters and initial conditions, under the
+defined range and integer/real restrictions for each one. This file can be
+customized to show the appropriate titles and text for each model as described <a
+href="#_Customizing_the_LWI_1">above</a>. Be careful when changing this file
+and make changes only to the marked regions.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US>4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
+lang=EN-US>After the user select the desired parameters and initial conditions,
+and ask the simulation to be started, LWI generates a comma-separated file
+(CSV, </span><span class=Cdigo><span lang=EN-US>.csv</span></span><span
+lang=EN-US> extension) containing the values chosen by the users. This is a
+text file with two columns, separated by a comma, and a first-line header
+(spaces must be ignored). First column has the parameter/initial condition
+name, and the second, the value set by the user. In the preconfigured Nelson
+&amp; Winter model (N&amp;W) example, if the user makes no change to the
+default values, the CSV configuration file content is (spaces added for
+clarity):</span></p>
+
+<p class=MsoNormal style='margin-left:35.45pt'><span class=Cdigo><span
+lang=EN-US>Name,               Value<br>
+Regime_imi,         1<br>
+Regime_inno,        1<br>
+Regime_restraint,   0<br>
+Regime_fission,     0<br>
+Bank,               0<br>
+Dem_Coeff,          67<br>
+Dem_elast,          1<br>
+Inn_stddev,         0.01<br>
+Dep_rate,           0.03<br>
+Fiss,               0.01<br>
+_timeSteps_,        1000<br>
+_numRuns_,          100<br>
+_rndSeed_,          1</span></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><span lang=EN-US>LWI converts the CSV configuration file to the native
+LSD format, and launches the model executable, passing the appropriate
+configuration file to it. The final LSD configuration file name has the format </span><span
+class=Cdigo><span lang=EN-US>run-XXXXXX.</span>lsd</span><span lang=EN-US>,
+where </span><span class=Cdigo><span lang=EN-US>XXXXXX</span></span><span
+lang=EN-US> is a random suffix associated with the current user session at the
+web server.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US>6.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
+lang=EN-US>During model execution, LWI redirects any output (</span><span
+class=Cdigo><span lang=EN-US>stdout</span></span><span lang=EN-US>/</span><span
+class=Cdigo><span lang=EN-US>stderr</span></span><span lang=EN-US>) from the
+model executable to a text log file </span><span class=Cdigo><span lang=EN-US>named
+run-XXXXXX.log</span></span><span lang=EN-US> in the default output folder. The
+content of this file is available in the web interface to the user when
+clicking the button </span><span class=Cdigo><span lang=EN-US>Log</span></span><span
+lang=EN-US>.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US>7.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
+lang=EN-US>When the model executable finishes the simulation, it must save the
+results as one or more CSV results files (</span><span class=Cdigo><span
+lang=EN-US>.csv</span></span><span lang=EN-US> extension), one file per Monte
+Carlo (MC) run (as per the </span><span class=Cdigo><span lang=EN-US>_numRuns_</span></span><span
+lang=EN-US> meta-parameter). These files are saved to the default output path.
+The results files are named as the configuration file plus a </span><span
+class=Cdigo><span lang=EN-US>_Y</span></span><span lang=EN-US> suffix, where </span><span
+class=Cdigo><span lang=EN-US>Y</span></span><span lang=EN-US> is the number of
+the MC run (</span><span class=Cdigo><span lang=EN-US>Y = 1, ..., _numRuns_</span></span><span
+lang=EN-US>). So, the results file names have the format </span><span
+class=Cdigo><span lang=EN-US>run-XXXXXX_Y.csv</span></span><span lang=EN-US>,
+where </span><span class=Cdigo><span lang=EN-US>XXXXXX</span></span><span
+lang=EN-US> is the same suffix as in the configuration file. Data is organized
+into columns, one per output variable, and rows, one per time step starting
+from the first one. A first line header, with the variable names, is also
+required. In the N&amp;W example, one of the (100) output files look like (just
+first columns/rows shown, spaces added for clarity):</span></p>
+
+<p class=MsoNormal style='margin-left:35.45pt'><span class=Cdigo>InvHerf,       
+HP_index,       A_Mean,         A_Var,          ...<br>
+16,             1.11E-16,       0.16,           0,              ...<br>
+15.98331152,    0.024193314,    0.16281849,     2.77E-05,       ...<br>
+15.97216525,    0.021439082,    0.165433691,    3.81E-05,       ...<br>
+</span><span class=Cdigo><span lang=EN-US>15.96389477,    0.009739913,   
+0.166184849,    3.57E-05,       ...<br>
+15.95129457,    0.008758251,    0.166610406,    3.82E-05,       ...<br>
+15.91051394,    0.026615029,    0.16949527,     7.70E-05,       ...<br>
+15.86399764,    0.02119951,     0.171245262,    0.000117196,    ...<br>
+15.80211593,    0.029093788,    0.174914063,    0.000159345,    ...<br>
+.               .               .               .<br>
+.               .               .               .<br>
+.               .               .               .</span></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>8.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><span lang=EN-US>After the model executable finishes, LWI reads all the
+produced results files, looking for the output variables marked for saving in
+the original LSD configuration file (default: </span><span class=Cdigo><span
+lang=EN-US>lwi/lwi.lsd</span></span><span lang=EN-US>).</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US>9.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
+lang=EN-US>When user selects output variables to be shown at the web page, LWI
+uses the data read from the results files to present the results in the
+requested format. When more than one results file exists, MC aggregation (mean,
+median, confidence interval, max/min) is automatically done by LWI from the
+from the set of output files.</span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US>10.<span
+style='font:7.0pt "Times New Roman"'> </span></span><span lang=EN-US>When user
+selects to download the produced output variable data, LWI creates a zipped
+archive containing the produced output files, if more than one exists.</span></p>
+
+<h2><a name="_Technical_configuration_of"></a><span lang=EN-US>Technical
+configuration of LWI</span></h2>
+
+<p class=MsoNormal><span lang=EN-US>The file </span><span class=Cdigo><span
+lang=EN-US>lwi/defaults.php</span></span><span lang=EN-US> (at LWI base folder)
+contains all the default values that may be adjusted to particular web server
+configurations. Instead of changing this file directly, it is recommended to
+create a text file named </span><span class=Cdigo>lwi/</span><span class=Cdigo><span
+lang=EN-US>my_defaults.php</span></span><span lang=EN-US> (at the same base
+folder) and redefine the required variables there. This way changes are not
+overwritten in case of LWI updates.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>As this is an embedded PHP file, please
+note that the </span><span class=Cdigo><span lang=EN-US>my_defaults.php</span></span><span
+lang=EN-US> file <i>must</i> begin with the line:</span></p>
+
+<p class=MsoNormal><span class=Cdigo><span lang=EN-US>&lt;?php</span></span></p>
+
+<h2><span lang=EN-US>Configuring non-LSD executables</span></h2>
+
+<p class=MsoNormal><span lang=EN-US>By default, LWI assumes a no-window LSD
+executable as the model program. Despite not supported, it is possible to use
+any command-line model executable with LWI. However, the model executable must
+be able to receive its configuration as a CSV file like the one shown in item 4
+to produce its output as a (set of) properly named CSV file(s), as described in
+item 7 <a href="#_LWI_workflow">above</a>.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>If a non-LSD executable is to be used, some
+of the default settings of LWI <i>must</i> be changed. To do so, create a text
+file named </span><span class=Cdigo><span lang=EN-US>my_defaults.php</span></span><span
+lang=EN-US> at the base LWI folder (the one set at the web server!) and add the
+following lines to it:</span></p>
+
+<p class=MsoNormal><span class=Cdigo><span lang=EN-US>&lt;?php<br>
+$lsd_exec = &quot;../NAME_OF_YOUR_EXECUTABLE&quot;;<br>
+$csv_exec_config = true;</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US>The second line defines the name of your
+model executable file, <i>without</i> OS-dependent suffixes or spaces in the
+name. When run in a Windows web server, the executable file is automatically
+assumed to have the </span><span class=Cdigo><span lang=EN-US>.exe</span></span><span
+lang=EN-US> extension, while if in a macOS one, the executable model file name
+is supposed to have an </span><span class=Cdigo><span lang=EN-US>OSX</span></span><span
+lang=EN-US> suffix (without a leading point). The configuration above assumes
+that the model executable is in the base LWI folder (</span><span class=Cdigo><span
+lang=EN-US>..</span></span><span lang=EN-US>), please adjust if this is not the
+case. Also make sure that the model executable can be executed (or is owned) by
+the web server default user (for instance, </span><span class=Cdigo><span
+lang=EN-US>www-data</span></span><span lang=EN-US> in Ubuntu/Debian), and is
+properly set with executable (</span><span class=Cdigo><span lang=EN-US>+x</span></span><span
+lang=EN-US>) permissions in macOS and Linux.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>Even if the model was not coded in LSD, LSD
+must be used to produce the model configuration (</span><span class=Cdigo>lwi/lwi.lsd</span><span
+lang=EN-US>) and sensitivity (</span><span class=Cdigo>lwi/lwi.sa</span><span
+lang=EN-US>) files. In this case, a dummy (empty) equation file can be used to
+open the LSD Browser to create the required files, no coding in LSD is
+required. Please check LSD documentation on how to use the LSD Browser to
+configure the model and to produce the sensitivity file. Object structure is
+not required in this case, and it is ignored if present.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>LWI launches the non-LSD model executable
+and passes four command-line arguments to it. The first argument is the
+path/name to the CSV configuration file, relative to the current path when the
+executable is launched, so the model program can load the selected
+configuration values and start the simulation. The configuration file name has
+the format </span><span class=Cdigo><span lang=EN-US>run-XXXXXX.csv</span></span><span
+lang=EN-US>, where </span><span class=Cdigo><span lang=EN-US>XXXXXX</span></span><span
+lang=EN-US> is a variable suffix. The second argument is the default output
+path, where the model results file(s) must be saved. The third argument defines
+the maximum number of threads per simulation the executable may spawn. The
+fourth argument sets the maximum number of MC runs which can be run in
+parallel. The model executable must respect those limits.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>If the model outputs a valid formatted
+progress bar (see the N&amp;W example for the correct format) to the standard
+output (</span><span class=Cdigo><span lang=EN-US>stdout</span></span><span
+lang=EN-US>), LWI uses this information (which is also saved to the log file)
+to update the </span><span class=Cdigo><span lang=EN-US>Status</span></span><span
+lang=EN-US> box in the user web page while the simulation is running. If a
+valid progress bar is not detected after one minute of simulation execution, a </span><span
+class=Cdigo><span lang=EN-US>no progress info</span></span><span lang=EN-US>
+message is shown instead.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>Simulation results file(s) must be saved to
+the provided default output path (second argument). The results file(s) base
+name must be the same as the configuration file (</span><span class=Cdigo><span
+lang=EN-US>run-XXXXXX</span></span><span lang=EN-US>) <i>plus</i> a </span><span
+class=Cdigo><span lang=EN-US>_Y.csv</span></span><span lang=EN-US> suffix, as
+in </span><span class=Cdigo><span lang=EN-US>run-XXXXXX_Y.csv</span></span><span
+lang=EN-US>, where </span><span class=Cdigo><span lang=EN-US>Y</span></span><span
+lang=EN-US> is the number of the MC run (</span><span class=Cdigo><span
+lang=EN-US>Y = 1</span></span><span lang=EN-US> if there is a single run).</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

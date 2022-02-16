@@ -80,9 +80,11 @@ This distribution contains:
 
 LSD source code: source files are usually managed (e.g., for compilation) automatically, so that users need not to worry for technical issues or command line usage. Upgrading to new versions of LSD (which always guarantees backward compatibility) necessitates only to replace the source files (e.g, extracting the new distribution on the existing location).
 
-LSD example models : several models are available, providing examples on the design of whole models, which can be used to copy-and-past single equations or chunks of code.
+LSD example models: several models are available, providing examples on the design of whole models, which can be used to copy-and-past single equations or chunks of code.
 
 LSD Model Manager (LMM): LSD models can be developed using any text editor and standard make files, so users are allowed to use their preferred development environment. However, LSD distribution contains a simple IDE (integrated development environment) providing all the functionalities required by the typical needs of a LSD project. LMM permits to manage easily several modeling projects (small and large), to create new model code with extensive assistance, and to easily debug problematic models.
+
+LSD Web Interface (LWI): LWI is NOT installed by the LSD installer. So, after installing LSD, please download the source code at https://github.com/marcov64/LSD and copy the folder named lwi in the downloaded archive (.zip) to the same folder where you installed LSD, making sure the entire subfolder structure below lwi is copied.
 
 
 *********************
