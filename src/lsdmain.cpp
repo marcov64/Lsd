@@ -994,7 +994,6 @@ void run( void )
 				break;
 
 				case 2:			// Fast button / f/F key
-				case 5:			// plot window DELETE_WINDOW button handler
 					set_fast( 1 );
 					debug_flag = false;
 					break;
@@ -1046,7 +1045,7 @@ void run( void )
 			done_in = 0;
 
 			// show run time plot if still enabled
-			if ( t == 1 && ! fast )
+			if ( i == 1 && t == 1 && ! fast )
 				enable_plot( );
 
 			// perform scrolling if enabled
@@ -1061,7 +1060,7 @@ void run( void )
 				last_update = clock( );
 			}
 #endif
-		}	// end of for t
+		}	// end of t
 
 		unsavedData = true;			// flag unsaved simulation results
 		running = false;
@@ -1083,7 +1082,6 @@ void run( void )
 
 		cmd( "destroytop .deb" );
 		cmd( "update" );
-		reset_plot( );
 #endif
 		// run user closing function, reporting error appropriately
 		user_exception = true;
@@ -1214,12 +1212,13 @@ void run( void )
 #endif
 			}
 		}
-	}
+	}	// end of run
 
 	if ( fast_mode == 2 )
 		plog( "\nFinished processing configuration file(s)\n" );
 
 #ifndef _NW_
+	reset_plot( );
 	uncover_browser( );
 	show_prof_aggr( );
 	cmd( "focustop .log" );
@@ -1281,10 +1280,9 @@ void set_fast( int level )
 		level = 0;
 
 #ifndef _NW_
-	if ( fast && level == 0 )
+	if ( level == 0 )
 		enable_plot( );
-
-	if ( ! fast && level > 0 )
+	else
 		disable_plot( );
 #endif
 
