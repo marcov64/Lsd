@@ -134,24 +134,27 @@ ADD_RT_PLOT_TAB
 **************************************/
 bool add_rt_plot_tab( const char *w, int id_sim )
 {
-	int i, j, k, cols, dbut, tabs;
+	int i, j, k, cols, rows, dbut, tabs;
 
 	switch ( platform )
 	{
 		case _WIN_:
 			tabs = 12;
-			cols = 10;
+			cols = 9;
+			rows = 12;
 			dbut = 2;
 			break;
 		case _LIN_:
-			tabs = 9;
+			tabs = 8;
 			cols = 8;
+			rows = 11;
 			dbut = 3;
 			break;
 		default:
 		case _MAC_:
 			tabs = 8;
 			cols = 5;
+			rows = 11;
 			dbut = 2;
 			break;
 	}
@@ -185,16 +188,6 @@ bool add_rt_plot_tab( const char *w, int id_sim )
 	cmd( "ttk::frame $activeplot" );
 	cmd( "pack $activeplot" );
 
-	if ( id_sim < 10 )
-		cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 4", id_sim );
-	else
-		if ( id_sim == 10 )
-			cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 5", id_sim );
-		else
-			cmd( "$rtptab add $activeplot -text \"Run %d\"", id_sim );
-
-	cmd( "$rtptab select $activeplot" );
-
 	// add More... tab if too many tabs
 	if ( id_sim > tabs )
 	{
@@ -207,18 +200,35 @@ bool add_rt_plot_tab( const char *w, int id_sim )
 		}
 		else
 			cmd( "$rtptab forget 1" );
+	}
 
-		// update the More.. tab list of plots
+	if ( id_sim < 10 )
+		cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 4", id_sim );
+	else
+		if ( id_sim == 10 )
+			cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 5", id_sim );
+		else
+			cmd( "$rtptab add $activeplot -text \"Run %d\"", id_sim );
+
+	cmd( "$rtptab select $activeplot" );
+
+	// update the More.. tab list of plots
+	if ( id_sim > tabs )
+	{
 		cmd( "destroy $rtptab.more.b" );
 		cmd( "ttk::frame $rtptab.more.b" );
 
-		for ( i = 0; cols * i + 1 <= id_sim; ++i )
+		if ( id_sim > cols * rows )
+			k = id_sim - cols * rows + 1;
+		else
+			k = 1;
+
+		for ( i = 1; k <= id_sim && i <= rows; ++i )
 		{
 			cmd( "ttk::frame $rtptab.more.b.l%d", i );
 
-			for ( j = 1; j <= cols && cols * i + j <= id_sim; ++j )
+			for ( j = 1; k <= id_sim && j <= cols; ++j )
 			{
-				k = cols * i + j;
 				cmd( "set b [ expr { $butWid - ( %d ) } ]", k > 99 ? dbut : dbut - 1 );
 				cmd( "ttk::button $rtptab.more.b.l%d.b%d -width $b -text \"Run %d\" -command { \
 						if { \"$rtptab.tab%d\" ni [ $rtptab tabs ] } { \
@@ -230,6 +240,8 @@ bool add_rt_plot_tab( const char *w, int id_sim )
 						$rtptab select $rtptab.tab%d \
 					}", i, k, k, k, tabs, k, k, k );
 				cmd( "pack $rtptab.more.b.l%d.b%d -side left -padx 2", i, k );
+
+				++k;
 			}
 
 			cmd( "pack $rtptab.more.b.l%d -anchor w -pady 2", i );
@@ -366,7 +378,7 @@ void init_plot( int num, int id_sim )
 		cmd( "set it [ $activeplot.fond create text $xlabel $ylabel -fill $colorsTheme(fg) -font $fontP -anchor nw -text \"(%d more...)\" ]", num - i );
 		cmd( "tooltip::tooltip $activeplot.fond -item  $it \"%d series labels not presented\"", num - i );
 	}
-	
+
 	if ( max_step > get_int( "hsizeR" ) )
 	{
 		cmd( "$activeplot.fond.go conf -state normal" );
@@ -463,7 +475,7 @@ void plot_rt( variable *v )
 	cmd( "set y2 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", old_val[ cur_plt ], ymin, ymax, ymin );
 
 	cmd( "$activeplot.c.c.cn create line $x2 $y2 $x1 $y1 -tag punto -fill $c%d", cur_plt );
-	
+
 	old_val[ cur_plt ] = v->val[ 0 ];
 	++cur_plt;
 }
