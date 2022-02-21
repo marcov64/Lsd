@@ -200,21 +200,8 @@ bool add_rt_plot_tab( const char *w, int id_sim )
 		}
 		else
 			cmd( "$rtptab forget 1" );
-	}
 
-	if ( id_sim < 10 )
-		cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 4", id_sim );
-	else
-		if ( id_sim == 10 )
-			cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 5", id_sim );
-		else
-			cmd( "$rtptab add $activeplot -text \"Run %d\"", id_sim );
-
-	cmd( "$rtptab select $activeplot" );
-
-	// update the More.. tab list of plots
-	if ( id_sim > tabs )
-	{
+		// update the More.. tab list of plots
 		cmd( "destroy $rtptab.more.b" );
 		cmd( "ttk::frame $rtptab.more.b" );
 
@@ -249,6 +236,16 @@ bool add_rt_plot_tab( const char *w, int id_sim )
 
 		cmd( "pack $rtptab.more.b -padx 20 -pady 20" );
 	}
+
+	if ( id_sim < 10 )
+		cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 4", id_sim );
+	else
+		if ( id_sim == 10 )
+			cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 5", id_sim );
+		else
+			cmd( "$rtptab add $activeplot -text \"Run %d\"", id_sim );
+
+	cmd( "$rtptab select $activeplot" );
 
 	return true;
 }

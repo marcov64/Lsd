@@ -667,6 +667,7 @@ void reset_blueprint( object *r )
 	set_blueprint( blueprint, r );
 }
 
+
 /***************************************************
 SEARCH_DESCRIPTION
 ***************************************************/
@@ -928,6 +929,16 @@ void reset_description( object *r )
 {
 	bridge *cb;
 	variable *cv;
+
+	if ( r == NULL )
+		return;
+
+	if ( r == root && ( r->label == NULL || strlen( r->label ) == 0 ) )
+	{
+		delete [ ] r->label;
+		r->label = new char[ 5 ];
+		strcpy( r->label, "Root" );
+	}
 
 	search_description( r->label );
 

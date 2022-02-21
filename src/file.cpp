@@ -567,8 +567,9 @@ bool open_configuration( object *&r, bool reload )
 		case 7:
 		case 8:									// problem from MODELREPORT section
 		case 9:									// problem from DESCRIPTION section
-			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d)\" -detail \"Element descriptions were lost but the configuration can still be used.\n\nPlease check if the desired file was selected or re-enter the description information if needed.\"", i );
+			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d)\" -detail \"Element descriptions were lost but the configuration can still be used.\n\nPlease check if the desired file was selected or re-enter the description information if needed.\n\nIf this is a sensitivity analysis configuration file, this message is expected, and configuration file is ok.\"", i );
 			reset_description( r );
+			break;
 
 		case 10:								// problem from DOCUOBSERVE section
 		case 11:
