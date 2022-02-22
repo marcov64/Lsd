@@ -532,9 +532,9 @@ proc ttk::messageBox_draw { name icon title parent message detail type default }
 	pack $name.top.icon.label -pady 5 -anchor nw
 
 	ttk::frame $name.top.text
-	ttk::label $name.top.text.message -wraplength 305 \
+	ttk::label $name.top.text.message -wraplength 300 -anchor w \
 				-justify left -text $message -style boldSmall.TLabel
-	ttk::label $name.top.text.details -wraplength 305  \
+	ttk::label $name.top.text.details -wraplength 300 -anchor w \
 				-justify left -text $detail
 	pack $name.top.text.message \
 		 $name.top.text.details -pady 5 -anchor nw
