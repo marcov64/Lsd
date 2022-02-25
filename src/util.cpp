@@ -933,13 +933,6 @@ void reset_description( object *r )
 	if ( r == NULL )
 		return;
 
-	if ( r == root && ( r->label == NULL || strlen( r->label ) == 0 ) )
-	{
-		delete [ ] r->label;
-		r->label = new char[ 5 ];
-		strcpy( r->label, "Root" );
-	}
-
 	search_description( r->label );
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )

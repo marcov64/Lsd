@@ -568,7 +568,7 @@ bool open_configuration( object *&r, bool reload )
 		case 8:									// problem from MODELREPORT section
 		case 9:									// problem from DESCRIPTION section
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d)\" -detail \"Element descriptions were lost but the configuration can still be used.\n\nPlease check if the desired file was selected or re-enter the description information if needed.\n\nIf this is a sensitivity analysis configuration file, this message is expected, and configuration file is ok.\"", i );
-			reset_description( r );
+			reset_description( root );
 			break;
 
 		case 10:								// problem from DOCUOBSERVE section
@@ -710,12 +710,11 @@ int load_configuration( bool reload, int quick )
 		goto endLoad;
 	}
 
+	empty_description( );						// remove existing descriptions
+	strcpy( lsd_eq_file, "" );					// and equation file
+
 	if ( quick == 1 )							// no descriptions
-	{
-		empty_description( );
-		strcpy( lsd_eq_file, "" );
 		goto endLoad;
-	}
 
 	fscanf( f, "%999s", msg );					// should be DESCRIPTION
 	if ( strcmp( msg, "DESCRIPTION" ) )
@@ -724,7 +723,6 @@ int load_configuration( bool reload, int quick )
 		goto endLoad;
 	}
 
-	empty_description( );						// remove existing descriptions
 	i = fscanf( f, "%999s", msg );				// should be the first description
 	for ( j = 0; strcmp( msg, "DOCUOBSERVE" ) && i == 1 && j < MAX_FILE_TRY; ++j )
 	{
@@ -793,7 +791,6 @@ int load_configuration( bool reload, int quick )
 		goto endLoad;
 	}
 
-	strcpy( lsd_eq_file, "" );
 	for ( j = 0; fgets( msg, MAX_LINE_SIZE, f ) != NULL && strncmp( msg, "END_EQ_FILE", 11 ) && strlen( lsd_eq_file ) < MAX_FILE_SIZE - MAX_LINE_SIZE && j < MAX_FILE_TRY; ++j )
 		strcatn( lsd_eq_file, msg, MAX_FILE_SIZE );
 
