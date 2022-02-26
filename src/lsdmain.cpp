@@ -170,6 +170,7 @@ const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 #ifndef _NP_
 atomic < bool > parallel_ready( true );// flag to indicate variable worker is ready
 map < thread::id, worker * > thr_ptr;// worker thread pointers
+mutex lock_obj_list;		// lock for object list for parallel manipulation
 mutex lock_run_logs;		// lock run_logs for parallel updating
 mutex lock_run_pids;		// lock run_pids for parallel updating
 mutex lock_run_status;		// lock run_status for parallel updating

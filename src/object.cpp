@@ -273,10 +273,6 @@ char *qsort_lab_secondary;
 int qsort_lag;
 object *globalcur;
 
-#ifndef _NP_
-mutex parallel_obj_list;		// mutex lock for parallel object list manipulation
-#endif
-
 
 /****************************************************
 BRIDGE
@@ -1631,7 +1627,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 		{
 #ifndef _NP_
 			// prevent concurrent update by more than one thread
-			lock_guard < mutex > lock( parallel_obj_list );
+			lock_guard < mutex > lock( lock_obj_list );
 #endif
 			obj_list.insert( cur );
 		}
@@ -1724,7 +1720,7 @@ void object::delete_obj( variable *caller )
 	{
 #ifndef _NP_
 		// prevent concurrent update by more than one thread
-		lock_guard < mutex > lock( parallel_obj_list );
+		lock_guard < mutex > lock( lock_obj_list );
 #endif
 		obj_list.erase( this );
 	}
@@ -3334,7 +3330,7 @@ double object::increment( const char *lab, double value )
 
 	if ( ! use_nan && is_nan( cv->val[ 0 ] ) )	// try to recover from RECALC
 		cv->cal( this, 0 );
-		
+
 	if ( ( ! use_nan && is_nan( cv->val[ 0 ] ) ) || is_inf( cv->val[ 0 ] ) )
 	{
 		error_hard( "invalid increment operation",
@@ -3377,7 +3373,7 @@ double object::multiply( const char *lab, double value )
 
 	if ( ! use_nan && is_nan( cv->val[ 0 ] ) )	// try to recover from RECALC
 		cv->cal( this, 0 );
-		
+
 	if ( ( ! use_nan && is_nan( cv->val[ 0 ] ) ) || is_inf( cv->val[ 0 ] ) )
 	{
 		error_hard( "invalid multiply operation",
@@ -3479,7 +3475,7 @@ double build_obj_list( bool set_list )
 {
 #ifndef _NP_
 	// prevent concurrent update by more than one thread
-	lock_guard < mutex > lock( parallel_obj_list );
+	lock_guard < mutex > lock( lock_obj_list );
 #endif
 
 	obj_list.clear( );			// reset list

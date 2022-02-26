@@ -520,6 +520,7 @@ extern void *random_engine;		// current random number generator engine
 #ifndef _NP_
 extern atomic < bool > parallel_ready;// flag to indicate multitasking is available
 extern map< thread::id, worker * > thr_ptr;// worker thread pointers
+extern mutex lock_obj_list;		// lock for object list for parallel manipulation
 extern mutex lock_run_logs;		// lock run_logs for parallel updating
 extern string run_log;			// consolidated runs log
 extern thread run_monitor;		// thread monitoring parallel instances
