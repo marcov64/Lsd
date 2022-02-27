@@ -127,6 +127,7 @@ int log_stop;				// last period to log to file, if any
 int macro;					// equations style (macros or C++) (bool)
 int max_runs;				// maximum number of parallel runs
 int max_threads;			// maximum number of parallel threads per run
+int no_ptr_chk = false;		// disable user pointer checking
 int no_res = false;			// do not produce .res results files (bool)
 int no_tot = true;			// do not produce .tot totals files (bool)
 int parallel_disable = false;// flag to control parallel mode

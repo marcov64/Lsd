@@ -3473,6 +3473,12 @@ Build the object list for user pointer checking
 ****************************************************/
 double build_obj_list( bool set_list )
 {
+	if ( no_pointer_check )		// disabled in compilation?
+	{
+		no_ptr_chk = true;
+		return 0;
+	}
+
 #ifndef _NP_
 	// prevent concurrent update by more than one thread
 	lock_guard < mutex > lock( lock_obj_list );

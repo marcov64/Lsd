@@ -25,20 +25,20 @@ User pointer check
 *****************************/
 inline bool chk_ptr( object *ptr )
 {
-	extern bool no_ptr_chk;			// disable user pointer checking
-	extern bool parallel_mode;		// parallel mode (multithreading) status
-	extern mutex lock_obj_list;		// lock for object list for parallel manipulation
-	extern o_setT obj_list;			// list with all existing LSD objects
+	extern bool parallel_mode;			// parallel mode (multithreading) status
+	extern int no_ptr_chk;				// disable user pointer checking
+	extern mutex lock_obj_list;			// lock for object list for parallel manipulation
+	extern o_setT obj_list;				// list with all existing LSD objects
 
 	bool obj_exists;
-
-	if ( no_ptr_chk )
-		return false;
 
 	if ( ptr == NULL )
 		return true;
 
-	if ( parallel_mode ) 			// use lock (slow) only if really needed
+	if ( no_ptr_chk )
+		return false;
+
+	if ( parallel_mode ) 				// use lock (slow) only if really needed
 	{
 #ifndef _NP_
 		// prevent concurrent update by more than one thread
@@ -63,8 +63,8 @@ valid or NULL pointer
 *****************************/
 inline bool chk_obj( object *ptr )
 {
-	extern bool no_ptr_chk;			// disable user pointer checking
 	extern bool parallel_mode;		// parallel mode (multithreading) status
+	extern int no_ptr_chk;			// disable user pointer checking
 	extern mutex lock_obj_list;		// lock for object list for parallel manipulation
 	extern o_setT obj_list;			// list with all existing LSD objects
 
@@ -97,13 +97,13 @@ Hook vector bound check
 *****************************/
 inline bool chk_hook( object *ptr, unsigned num )
 {
-	extern bool no_ptr_chk;			// disable user pointer checking
-
-	if ( no_ptr_chk )
-		return false;
+	extern int no_ptr_chk;				// disable user pointer checking
 
 	if ( ptr == NULL )
 		return true;
+
+	if ( no_ptr_chk )
+		return false;
 
 	if ( num < ptr->hooks.size( ) )
 		return false;
