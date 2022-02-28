@@ -34,10 +34,6 @@ source( "KS-support-functions.R" )
 
 # ---- Read data files ----
 
-nWorkerVarNew <- length( addWorkerVar ) # number of new variables to add
-newWorkerVar <- append( name.nice.lsd( workerVar ), addWorkerVar ) # new label set
-nVar <- length( newWorkerVar )          # number of variables (worker-level)
-
 # Function to read one experiment data (to be parallelized)
 readExp <- function( exper ) {
   if( nExp > 1 )
@@ -58,7 +54,7 @@ readExp <- function( exper ) {
 
   # Add new variables names (not in LSD files)
   nWorkerVarNew <- length( addWorkerVar )# number of new variables to add
-  newWorkerVar <- append( name.nice.lsd( workerVar ), addWorkerVar ) # new label set
+  newWorkerVar <- name.nice.lsd( c( dimnames( mc )[[ 2 ]], addWorkerVar ) )
   nVar <- length( newWorkerVar )         # number of variables (worker-level)
 
   # ------ Add new variables to data set ------

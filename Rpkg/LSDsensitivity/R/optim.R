@@ -17,13 +17,14 @@ model.optim.lsd <- function( model, data = NULL, lower.domain = NULL,
                              wait.generations = 10, precision = 1e-5,
                              nnodes = 1 ) {
 
-  if( ! is.null( data ) && class( data ) == "lsd-doe" ) {
-	if( is.null( lower.domain ) )
-	  lower.domain <- data$facLimLo
-	if( is.null( upper.domain ) )
-	  upper.domain <- data$facLimUp
-	if( is.null( starting.values ) )
-	  starting.values <- data$facDef
+  if( ! is.null( data ) && inherits( data, "lsd-doe" ) ) {
+
+  	if( is.null( lower.domain ) )
+  	  lower.domain <- data$facLimLo
+  	if( is.null( upper.domain ) )
+  	  upper.domain <- data$facLimUp
+  	if( is.null( starting.values ) )
+  	  starting.values <- data$facDef
   }
 
   # check variables allowed to variate (lower != upper)
@@ -99,7 +100,8 @@ model.optim.lsd <- function( model, data = NULL, lower.domain = NULL,
   if( cluster != FALSE )
     try( parallel::stopCluster( cluster ), silent = TRUE )
 
-  if( class( xStar ) == "try-error" ) return( t( rep( NA, length( lower.domain ) ) ) )
+  if( inherits( xStar, "try-error" ) )
+    return( t( rep( NA, length( lower.domain ) ) ) )
 
   if( ! is.null( starting.values ) )
     opt <- starting.values
@@ -126,7 +128,8 @@ model.limits.lsd <- function( data, model, sa = NULL,
                               wait.generations = 10, precision = 1e-5,
                               nnodes = 1 ) {
 
-  if( ! is.null( sa ) && ( class( sa ) == "kriging-sa" || class( sa ) == "polynomial-sa" ) ) {
+  if( ! is.null( sa ) && ( inherits( sa, "kriging-sa" ) ||
+                           inherits( sa, "polynomial-sa" ) ) ) {
     factor1 <- sa$topEffect[ 1 ]
     factor2 <- sa$topEffect[ 2 ]
     factor3 <- sa$topEffect[ 3 ]

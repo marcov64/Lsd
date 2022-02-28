@@ -3055,6 +3055,8 @@ EQUATION( "runCountry" )
 Execute the current time-step for all existing countries
 */
 
+V( "init" );									// ensure initialization done
+
 CYCLE( cur, "Country" )
 	VS( cur, "timeStep" );
 
@@ -3121,8 +3123,7 @@ NEW_VS( v[34], THIS, "Deb" );					// public accumulated debt
 NEW_VS( v[35], THIS, "GDPreal" );				// real gross domestic product
 NEW_VS( v[36], THIS, "GDPnom" );				// nominal gross domestic product
 
-// exit and entry happens in both sectors and banks update credit scores
-// and pecking order of client firms
+// exit and entry happens in both sectors
 NEW_VS( v[37], THIS, "entryExit" );				// net entry of firms
 
 RESULT( T )

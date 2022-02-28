@@ -54,7 +54,7 @@ readExp <- function( exper ) {
 
   # Add new variables names (not in LSD files)
   nFirmVarNew <- length( addFirmVar )   # number of new variables to add
-  newFirmVar <- append( name.nice.lsd( firmVar ), addFirmVar ) # new label set
+  newFirmVar <- name.nice.lsd( c( dimnames( mc )[[ 2 ]], addFirmVar ) )
   nVar <- length( newFirmVar )          # number of variables (firm-level)
 
   # ------ Add new variables to data set ------

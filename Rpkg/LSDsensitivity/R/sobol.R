@@ -16,7 +16,7 @@ sobol.decomposition.lsd <- function( data, model = NULL, krig.sa = FALSE, sa.sam
   if( is.null( model ) )
     out <- data.sensitivity( data )
   else
-    if( class( model ) == "kriging-model" )
+    if( inherits( model, "kriging-model" ) )
       out <- kriging.sensitivity( data, model, krig.sa = krig.sa, sa.samp = sa.samp )
     else
       out <- polynomial.sensitivity( data, model, sa.samp = sa.samp )
@@ -35,15 +35,15 @@ data.sensitivity <- function( data, tries = 5 ) {
                     silent = TRUE )
 
   # try a few times, as it usually succeeds...
-  while( class( metamodel ) == "try-error" && tries > 0 ) {
+  while( inherits( metamodel, "try-error" ) && tries > 0 ) {
     metamodel <- try( sensitivity::sobolSmthSpl( as.matrix( data$resp$Mean ), data$doe ),
                       silent = TRUE )
     tries <- tries - 1
-    if( class( metamodel ) != "try-error" )
+    if( ! inherits( metamodel, "try-error" ) )
       break
   }
 
-  if( class( metamodel ) == "try-error" )
+  if( inherits( metamodel, "try-error" ) )
     return( NULL )
 
   mainEffect <- function( x ) x$S[ , 1 ]

@@ -12,7 +12,7 @@
 # ==== Create DoE response file ====
 
 write.response <- function( folder, baseName, outVar = "", iniExp = 1, nExp = 1,
-                            pool = TRUE, iniDrop = 0, nKeep = -1, instance = 1,
+                            iniDrop = 0, nKeep = -1, pool = TRUE, instance = 1,
                             posit = NULL, posit.match = c( "fixed", "glob", "regex" ),
                             na.rm = FALSE, conf = 0.95, saveVars = c(  ),
                             addVars = c(  ), eval.vars = NULL, eval.run = NULL,

@@ -55,7 +55,7 @@ model.pred.lsd <- function( data.point, model ) {
   if( length( x[ x == TRUE ] ) > 0 )
     return( NULL )
 
-  if( class( model ) == "kriging-model" ) {
+  if( inherits( model, "kriging-model" ) ) {
     out <- DiceKriging::predict( model$selected, data.point, type = "UK" )
     out <- list( mean = out$mean, lower = out$lower95, upper = out$upper95 )
   } else {

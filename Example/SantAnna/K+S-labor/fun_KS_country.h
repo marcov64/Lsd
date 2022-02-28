@@ -130,7 +130,8 @@ EQUATION( "A" )
 /*
 Overall labor productivity
 */
-RESULT( V( "GDPreal" ) / VS( LABSUPL0, "L" ) )
+v[1] = VS( LABSUPL0, "L" );
+RESULT( v[1] > 0 ? V( "GDPreal" ) / v[1] : CURRENT )
 
 
 EQUATION( "C" )

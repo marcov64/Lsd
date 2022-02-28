@@ -16,7 +16,7 @@ read.doe.lsd <- function( folder, baseName, outVar = "", does = 1, doeFile = NUL
                           confFile = NULL, limFile = NULL, iniDrop = 0,
                           nKeep = -1, saveVars = c(  ), addVars = c(  ),
                           eval.vars = NULL, eval.run = NULL, pool = TRUE,
-                          na.rm = FALSE, rm.temp = TRUE,rm.outl = FALSE,
+                          na.rm = FALSE, rm.temp = TRUE, rm.outl = FALSE,
                           lim.outl = 10, nnodes = 1, quietly = TRUE,
                           instance = 1, posit = NULL,
                           posit.match = c( "fixed", "glob", "regex" ) ) {

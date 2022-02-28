@@ -218,7 +218,7 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
       if( ci != "none" ) {
         ci.lo[ i, j ] <- ci.hi[ i, j ] <- NA
 
-        if( num > 0 ) {
+        if( num > 1 ) {
           if( is.null( ci.boot ) ) {
             if( ci == "mean" ) {
               d = abs( stats::qt( ( 1 - ci.conf ) / 2, num - 1 ) ) * sDev[ i, j ] / sqrt( num )

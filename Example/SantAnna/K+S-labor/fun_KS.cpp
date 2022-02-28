@@ -15,7 +15,7 @@
 // disable/enable full logging (FASTMODE=0/1/2)
 #define FASTMODE 0
 
-// do not initialize and check LSD pointers
+// do not initialize and check LSD pointers (comment for debugging!)
 //#define NO_POINTER_INIT
 
 

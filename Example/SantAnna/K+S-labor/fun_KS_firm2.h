@@ -562,6 +562,8 @@ Equal to the average of the log tenure skills of workers
 if ( V( "_life2cycle" ) == 0 )
 	END_EQUATION( VLS( PARENT, "q2avg", 1 ) );
 
+V( "_L2" );										// ensure hiring is done
+
 v[0] = i = 0;									// accumulators
 CYCLE( cur, "Wrk2" )
 {
@@ -1003,6 +1005,8 @@ Expected potential production with remaining workers for a firm in
 consumption-good sector
 */
 
+V( "_quits2" );									// ensure quit/retiring is done
+
 v[0] = 0;										// accumulator
 CYCLE( cur, "Wrk2" )
 	v[0] += VLS( SHOOKS( cur ), "_Q", 1 );		// add previous production
@@ -1164,6 +1168,8 @@ Number of workers quitting jobs (not fired) in period for firm in sector 2
 Updated in 'hires1' and 'hires2'
 */
 
+V( "_retires2" );								// ensure retiring is done
+
 if ( VS( GRANDPARENT, "flagGovExp" ) < 2 )		// unemployment benefit exists?
 	END_EQUATION( 0 );
 
@@ -1207,6 +1213,8 @@ Minimum workers tenure skills of a firm in consumption-good sector
 if ( VS( GRANDPARENT, "flagWorkerLBU" ) <= 1 )	// no learning by tenure mode?
 	END_EQUATION( INISKILL );
 
+V( "_L2" );										// ensure hiring is done
+
 v[0] = DBL_MAX;									// current minimum
 CYCLE( cur, "Wrk2" )
 {
@@ -1227,6 +1235,8 @@ Weighted average workers compound skills of a firm in consumption-good sector
 if ( VS( GRANDPARENT, "flagWorkerLBU" ) == 0 )	// no learning ?
 	END_EQUATION( INISKILL );
 
+V( "_L2" );										// ensure hiring is done
+
 v[0] = i = 0;									// accumulators
 CYCLE( cur, "Wrk2" )
 {
@@ -1241,6 +1251,8 @@ EQUATION( "_w2avg" )
 /*
 Average wage paid by firm in consumption-good sector
 */
+
+V( "_L2" );										// ensure hiring is done
 
 v[0] = i = 0;									// accumulators
 CYCLE( cur, "Wrk2" )

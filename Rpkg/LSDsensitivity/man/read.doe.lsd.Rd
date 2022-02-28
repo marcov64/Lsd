@@ -10,7 +10,7 @@ This function reads the sampling data produced by a LSD model design of experime
 read.doe.lsd( folder, baseName, outVar = "", does = 1, doeFile = NULL,
               respFile = NULL, validFile = NULL, valRespFile = NULL,
               confFile = NULL, limFile = NULL, iniDrop = 0, nKeep = -1,
-              saveVars = c(), addVars = c(), eval.vars = NULL,
+              saveVars = c( ), addVars = c( ), eval.vars = NULL,
               eval.run = NULL, pool = TRUE, na.rm = FALSE, rm.temp = TRUE,
               rm.outl = FALSE, lim.outl = 10, nnodes = 1, quietly = TRUE,
               instance = 1, posit = NULL,
@@ -65,9 +65,6 @@ a function to recalculate any item of the imported data set, including added var
   \item{eval.run}{
 a function to evaluate the DoE response for each experimental sampling point, attributing an optional value to it. The default (NULL) is to have no function (use the selected variable Monte Carlo mean and standard deviation to value the point). If defined, function must take four arguments: (a) the data set (a 3-dimensional array of lists, the numbers of the DoE sampling points in the first dimension, variables in the second, and Monte Carlo runs in the in the third, being each list element a vector with all time-step values for that sample/variable/MC run), (b) the number of the DoE sampling point to evaluate, (c) the index to the analysis variable in the data set, and (d) the applicable confidence interval. The function must return a R list containing four values for the selected sampling point/variable pair: (a) the average value for the response, (b) the response standard deviation, (c) the the number of observations used, and (d) the number of observations discarded.
 }
-  \item{pool}{
-logical: if \code{TRUE}, create a simpler data array, pooling together only a single instance for each variable. The instance to be considered is provided by \code{instance}. If \code{FALSE} (default), use all variable instances, which are treated as a single one (indeed, pooling all values...).
-}
   \item{na.rm}{
 logical: if TRUE NA values are stripped before the computation proceeds.
 }
@@ -86,8 +83,11 @@ integer: the maximum number of parallel computing nodes (parallel threads) in th
   \item{quietly}{
 logical: if \code{TRUE}, no message confirming file reading/information is printed. The default (\code{FALSE}) is to show details about each results file read.
 }
+  \item{pool}{
+logical: if \code{TRUE} (default), create a simpler data array, pooling together only a single instance for each variable. The instance to be considered is provided by \code{instance}. If \code{FALSE}, use all variable instances, which are treated as a single one (indeed, pooling all values...). More control over which instances are used can be obtained by simultaneously using \code{posit}.
+}
   \item{instance}{
-integer: the instance of the variable to be read, for variables that exist in more than one object, if \code{ pool = TRUE}, unused otherwise. This number is based on the relative position (column) of the variable in the results file. The default (1) is to read the first instance.
+integer: the instance of the variable to be read, for variables that exist in more than one object, if \code{pool = TRUE}, unused otherwise. This number is based on the relative position (column) of the variable in the results file. The default (1) is to read the first instance.
 }
   \item{posit}{
 a string, a vector of strings or an integer vector describing the LSD object position of the variable(s) to select. If an integer vector, it should define the position of a SINGLE LSD object. If a string or vector of strings, each element should define one or more different LSD objects, so the returning matrix may contain variables from more than one object. By setting \code{posit.match}, globbing (wildcard), and regular expressions can be used to select multiple objects at once; in this case, all matching objects are returned.

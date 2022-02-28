@@ -305,7 +305,7 @@ for( k in 1 : nExp ) { # Experiment k
 
   corr_table( c( "GDPreal", "Creal", "Ireal", "CPI", "A", "U", "wReal",
                  "mu2avg", "DebGDP", "Loans", "BadDeb" ),
-              mcData[[1]], plot = TRUE,
+              mcData[[ k ]], plot = TRUE,
               logVars = c( 1, 1, 1, 0, 1, 0, 1, 0, 0, 2, 2 ),
               mask = TmaskStat, pl = lowP, pu = highP, nfix = bpfK,
               tit = paste( "Pearson correlation coefficients (", legends[ k ], ")" ),
