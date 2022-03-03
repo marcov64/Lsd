@@ -578,9 +578,9 @@ Var: runCountry 0 n + n n
 Object: Country C	1
 Param: flagAddWorkers 0 n + n n	0
 Param: flagCons 0 n + n n	1
-Param: flagCreditRule 0 n + n n	0
+Param: flagCreditRule 0 n + n n	2
 Param: flagExpect 0 n + n n	0
-Param: flagFiscalRule 0 n + n n	0
+Param: flagFiscalRule 0 n + n n	4
 Param: flagGovExp 0 n + n n	2
 Param: flagShock 0 n + n n	0
 Param: flagTax 0 n + n n	0
@@ -616,7 +616,7 @@ Var: initCountry 0 n + n n
 Var: timeStep 0 n + n n
 
 Object: Financial C	1
-Param: B 0 n + n n	1
+Param: B 0 n + n n	10
 Param: DebRule 0 n + n n	0.6
 Param: DefPrule 0 n + n n	0.03
 Param: EqB0 0 n + n n	1
@@ -629,21 +629,21 @@ Param: Ut 0 n + n n	0.015
 Param: alphaB 0 n + n n	0.8
 Param: betaB 0 n + n n	1
 Param: dB 0 n + n n	0
-Param: deltaB 0 n + n n	1
+Param: deltaB 0 n + n n	0.33
 Param: deltaDeb 0 n + n n	0.05
-Param: gammaPi 0 n + n n	0
-Param: gammaU 0 n + n n	0
-Param: kConst 0 n + n n	0
+Param: gammaPi 0 n + n n	1.1
+Param: gammaU 0 n + n n	1.1
+Param: kConst 0 n + n n	0.1
 Param: mPerB 0 n + n n	1
-Param: muBonds 0 n + n n	1
+Param: muBonds 0 n + n n	0.6
 Param: muD 0 n + n n	1
-Param: muDeb 0 n + n n	0
-Param: muRes 0 n + n n	1
-Param: piT 0 n + n n	0
+Param: muDeb 0 n + n n	0.3
+Param: muRes 0 n + n n	0.33
+Param: piT 0 n + n n	0.02
 Param: rAdj 0 n + n n	0.0025
-Param: rT 0 n + n n	0.01
+Param: rT 0 n + n n	0.025
 Param: r0shock 0 n + n n	0.01
-Param: rhoBonds 0 n + n n	0
+Param: rhoBonds 0 n + n n	0.04
 Param: rhoShock 0 n + n n	0.03
 Param: tauB 0 n + n n	0.08
 Param: thetaBonds 0 n + n n	12
@@ -718,9 +718,9 @@ Object: Labor C	1
 Param: Ls0 0 n + n n	250000
 Param: delta 0 n + n n	0
 Param: phi 0 n + n n	0.4
-Param: psi1 0 n + n n	0
+Param: psi1 0 n + n n	0.05
 Param: psi2 0 n + n n	1
-Param: psi3 0 n + n n	0
+Param: psi3 0 n + n n	-0.05
 Param: w0min 0 n + n n	1
 Var: L 0 s + n n
 Var: Ls 1 s + n n	0
@@ -793,7 +793,7 @@ Param: _pOrd1 0 n + n n	0
 Param: _t1ent 0 n + n n	0
 Func: _CS1a 0 n + n n
 Var: _Atau 1 n + n n	0
-Var: _Btau 1 s + n n	0
+Var: _Btau 1 n + n n	0
 Var: _BC 7 n + n n	0	0	0	0	0	0	0
 Var: _CD1 0 n + n n
 Var: _CD1c 0 n + n n
@@ -813,7 +813,7 @@ Var: _NW1 1 n + n n	0
 Var: _NW1p 0 n + n n
 Var: _Pi1 0 n + n n
 Var: _Q1 0 n + n n
-Var: _Q1e 0 s + n N
+Var: _Q1e 0 n + n N
 Var: _RD 1 n + n n	0
 Var: _S1 1 n + n n	0
 Var: _Tax1 0 n + n n
@@ -845,22 +845,22 @@ Param: b 0 n + n n	3
 Param: chi 0 n + n n	1
 Param: d2 0 n + n n	0
 Param: e0 0 n + n n	0.25
-Param: e1 0 n + n n	1
-Param: e2 0 n + n n	1
-Param: e3 0 n + n n	1
-Param: e4 0 n + n n	1
+Param: e1 0 n + n n	0.4
+Param: e2 0 n + n n	0.4
+Param: e3 0 n + n n	0
+Param: e4 0 n + n n	0
 Param: e5 0 n + n n	0.5
 Param: e6 0 n + n n	1
 Param: e7 0 n + n n	0.3
 Param: e8 0 n + n n	0.3
-Param: eta 0 n + n n	19
+Param: eta 0 n + n n	20
 Param: f2min 0 n + n n	1e-05
 Param: iota 0 n + n n	0.1
 Param: kappaMax 0 n + n n	0.5
 Param: kappaMin 0 n + n n	0
 Param: lastID2 0 n + n n	0
 Param: m2 0 n + n n	40
-Param: mu20 0 n + n n	0.3
+Param: mu20 0 n + n n	0.2
 Param: n2 0 n + n n	1
 Param: omega1 0 n + n n	1
 Param: omega2 0 n + n n	1
@@ -922,7 +922,7 @@ Param: _bank2 0 n + n n	0
 Param: _pOrd2 0 n + n n	0
 Param: _t2ent 0 n + n n	0
 Func: _CS2a 0 n + n n
-Var: _A2 4 s + n n	0	0	0	0
+Var: _A2 4 n + n n	0	0	0	0
 Var: _A2e 0 n + n n
 Var: _CD2 0 n + n n
 Var: _CD2c 0 n + n n
@@ -950,7 +950,7 @@ Var: _NW2p 0 n + n n
 Var: _Pi2 0 n + n n
 Var: _Q2 0 n + n n
 Var: _Q2d 0 n + n n
-Var: _Q2e 2 s + n n	0	0
+Var: _Q2e 2 n + n n	0	0
 Var: _Q2p 0 n + n N
 Var: _Q2pe 0 n + n N
 Var: _Q2u 0 n + n n
@@ -1069,9 +1069,9 @@ Var: V 0 s + n p
 Var: dw 0 s + n n
 Var: wReal 0 s + n n
 
-SIM_NUM 1
+SIM_NUM 400
 SEED 1
-MAX_STEP 600
+MAX_STEP 400
 EQUATION fun_KS.cpp
 MODELREPORT modelreport.html
 
@@ -1116,7 +1116,7 @@ Bank total credit supply rule
 1 = deposits multiplier credit limit but no capital adequacy rule or bank bail-out
 2 = Basel-like bank capital adequacy rule and bank bail-out if net worth is negative
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 2.
 END_DESCRIPTION
 
 Parameter_flagExpect
@@ -1138,7 +1138,7 @@ Government fiscal rule
 3 = balanced budget rule with maximum debt and deficit on GDP
 4 = soft balanced budget rule with maximum debt and deficit on GDP (only if GDP growing)
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 4.
 END_DESCRIPTION
 
 Parameter_flagGovExp
@@ -1350,7 +1350,7 @@ Parameter_B
 Number of heterogeneous banks
 (>=1)
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 10.
 END_DESCRIPTION
 
 Parameter_DebRule
@@ -1441,7 +1441,7 @@ Parameter_deltaB
 Desired share of outstanding firm debt to pay in period
 (]0,1])
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.33.
 END_DESCRIPTION
 
 Parameter_deltaDeb
@@ -1455,21 +1455,21 @@ Parameter_gammaPi
 Central bank Taylor rule sensitivity to target inflation
 (>=0)
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 1.1.
 END_DESCRIPTION
 
 Parameter_gammaU
 Central bank Taylor rule sensitivity to target unemployment
 (>=0)
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 1.1.
 END_DESCRIPTION
 
 Parameter_kConst
 Interest rate ramping parameter for firms debt by credit class
 (>=0)
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 0.1.
 END_DESCRIPTION
 
 Parameter_mPerB
@@ -1483,7 +1483,7 @@ Parameter_muBonds
 Sovereign bonds spread (mark-down from central bank prime rate)
 ([0,1])
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 0.6.
 END_DESCRIPTION
 
 Parameter_muD
@@ -1497,21 +1497,21 @@ Parameter_muDeb
 Bank spread (mark-up) on debt (over central bank prime rate)
 (>=0)
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 0.3.
 END_DESCRIPTION
 
 Parameter_muRes
 Central bank spread (mark-down) on reserves (from central bank prime rate)
 ([0,1])
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.33.
 END_DESCRIPTION
 
 Parameter_piT
 Target inflation for central bank's Taylor rule
 (>0)
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 0.02.
 END_DESCRIPTION
 
 Parameter_rAdj
@@ -1525,7 +1525,7 @@ Parameter_rT
 Target prime interest rate set by central bank
 (>0)
 _INIT_
-All 1 instances equal to 0.01.
+All 1 instances equal to 0.025.
 END_DESCRIPTION
 
 Parameter_r0shock
@@ -1539,7 +1539,7 @@ Parameter_rhoBonds
 Sovereign bonds risk premium
 (>=0)
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 0.04.
 END_DESCRIPTION
 
 Parameter_rhoShock
@@ -1936,7 +1936,7 @@ Parameter_psi1
 Share of inflation passed to wages
 ([0,1])
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 0.05.
 END_DESCRIPTION
 
 Parameter_psi2
@@ -1950,7 +1950,7 @@ Parameter_psi3
 Elasticity of wages to the unemployment rate
 (>=0)
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to -0.05.
 END_DESCRIPTION
 
 Parameter_w0min
@@ -2622,28 +2622,28 @@ Parameter_e1
 Weight of t-1 demand on myopic expectations
 ([0,1])
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.4.
 END_DESCRIPTION
 
 Parameter_e2
 Weight of t-2 demand on myopic expectations
 ([0,1])
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.4.
 END_DESCRIPTION
 
 Parameter_e3
 Weight of t-3 demand on myopic expectations
 ([0,1])
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_e4
 Weight of t-4 demand on myopic expectations
 ([0,1])
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_e5
@@ -2678,7 +2678,7 @@ Parameter_eta
 Technical lifetime of machines
 (>1)
 _INIT_
-All 1 instances equal to 19.
+All 1 instances equal to 20.
 END_DESCRIPTION
 
 Parameter_f2min
@@ -2726,7 +2726,7 @@ Parameter_mu20
 Initial mark-up in consumption-good sector
 (>0)
 _INIT_
-All 1 instances equal to 0.3.
+All 1 instances equal to 0.2.
 END_DESCRIPTION
 
 Parameter_n2

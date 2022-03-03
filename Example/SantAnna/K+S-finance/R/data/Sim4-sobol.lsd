@@ -62,6 +62,7 @@ Label Root
 			Param: Lambda0
 			Param: PhiB
 			Param: Trule
+			Param: Tshock
 			Param: Ut
 			Param: alphaB
 			Param: betaB
@@ -79,7 +80,9 @@ Label Root
 			Param: piT
 			Param: rAdj
 			Param: rT
+			Param: r0shock
 			Param: rhoBonds
+			Param: rhoShock
 			Param: tauB
 			Param: thetaBonds
 			Func: banksMaps
@@ -112,6 +115,7 @@ Label Root
 			Var: rD
 			Var: rDeb
 			Var: rRes
+			Var: rShock
 
 		}
 
@@ -524,6 +528,7 @@ Label Root
 		Param: flagExpect
 		Param: flagFiscalRule
 		Param: flagGovExp
+		Param: flagShock
 		Param: flagTax
 		Param: Crec
 		Param: gG
@@ -577,6 +582,7 @@ Param: flagCreditRule 0 n + n n	2
 Param: flagExpect 0 n + n n	0
 Param: flagFiscalRule 0 n + n n	0
 Param: flagGovExp 0 n + n n	2
+Param: flagShock 0 n + n n	0
 Param: flagTax 0 n + n n	0
 Param: Crec 0 n + n n	0.2
 Param: gG 0 n + n n	0.005
@@ -618,6 +624,7 @@ Param: Lambda 0 n + n n	2
 Param: Lambda0 0 n + n n	0
 Param: PhiB 0 n + n n	0.5
 Param: Trule 0 n + n n	100
+Param: Tshock 0 n + n n	300
 Param: Ut 0 n + n n	0.01
 Param: alphaB 0 n + n n	0.8
 Param: betaB 0 n + n n	1
@@ -635,7 +642,9 @@ Param: muRes 0 n + n n	0.33
 Param: piT 0 n + n n	0.02
 Param: rAdj 0 n + n n	0.0025
 Param: rT 0 n + n n	0.025
+Param: r0shock 0 n + n n	0.01
 Param: rhoBonds 0 n + n n	0
+Param: rhoShock 0 n + n n	0.03
 Param: tauB 0 n + n n	0.08
 Param: thetaBonds 0 n + n n	12
 Func: banksMaps 0 n + n n
@@ -668,6 +677,7 @@ Var: rBonds 1 s + n n	0
 Var: rD 1 s + n n	0
 Var: rDeb 1 s + n n	0
 Var: rRes 1 s + n n	0
+Var: rShock 1 s + n n	0
 
 Object: Bank C	1
 Param: _IDb 0 n + n n	0
@@ -1141,6 +1151,14 @@ _INIT_
 All 1 instances equal to 2.
 END_DESCRIPTION
 
+Parameter_flagShock
+Interest rate one-time shock
+0 = no shock on interest rate
+1 = a decaying shock of size r0shock is applied at time Tshock
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Parameter_flagTax
 Taxation
 0 = taxes on firm profit only
@@ -1384,6 +1402,13 @@ _INIT_
 All 1 instances equal to 100.
 END_DESCRIPTION
 
+Parameter_Tshock
+Time to start applying interest rate shock
+(>0)
+_INIT_
+All 1 instances equal to 300
+END_DESCRIPTION
+
 Parameter_Ut
 Target unemployment rate for central bank's Taylor rule
 (>0)
@@ -1503,11 +1528,25 @@ _INIT_
 All 1 instances equal to 0.025.
 END_DESCRIPTION
 
+Parameter_r0shock
+Interest rate full shock absolute size
+([-1,1])
+_INIT_
+All 1 instances equal to 0.01
+END_DESCRIPTION
+
 Parameter_rhoBonds
 Sovereign bonds risk premium
 (>=0)
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_rhoShock
+Decay constant for interest rate shock
+(]0,1])
+_INIT_
+All 1 instances equal to 0.03
 END_DESCRIPTION
 
 Parameter_tauB
@@ -1688,6 +1727,12 @@ END_DESCRIPTION
 
 Variable_rRes
 Interest rate paid on central bank reserves
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable_rShock
+Shock to prime interest rate for impulse response function computation
 _INIT_
 All 1 instances equal to 0
 END_DESCRIPTION
@@ -3790,6 +3835,8 @@ EQUATION( "runCountry" )
 /*
 Execute the current time-step for all existing countries
 */
+
+V( "init" );									// ensure initialization done
 
 CYCLE( cur, "Country" )
 	VS( cur, "timeStep" );
