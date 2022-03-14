@@ -131,7 +131,7 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libintl-8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libsigsegv-2.dll %LSD_DIR%\gnu\bin\
 
 rem subbotools required libraries
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgsl-25.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgsl-27.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgslcblas-0.dll %LSD_DIR%\gnu\bin\
 
 rem remove unneeded python cache files (requires python 3.5+ on path)
