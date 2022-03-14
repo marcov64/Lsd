@@ -24,6 +24,14 @@ rem  - gdb debugger
 rem  - diff compare tool
 rem *************************************************************
 
+rem component versions
+set GCC_VER=11.2.0
+set PYTHON_VER=3.9
+
+rem XCOPY options for files and directories
+set OPT=/D/Q/Y
+set XOPT=%OPT%/S
+
 if "%1"=="/?" (
 	echo Import MSYS2 developer tools to LSD
 	echo Usage: MSYS2-import [MSYS2 FOLDER] [LSD FOLDER]
@@ -58,23 +66,24 @@ if "%2"=="" (
 
 :import
 
-set GCC_VER=10.3.0
-set TCL_VER=8.6
-set DDE_VER=1.4
-set REG_VER=1.3
-set THREAD_VER=2.8.6
-set PYTHON_VER=3.9
-set OPT=/D/Q/Y
-set XOPT=%OPT%/S
+if not exist %MSYS_DIR%\mingw64\share\gcc-%GCC_VER% (
+	echo Please update the GCC version in this batch file
+	goto end
+)
 
-rem MSYS2 libraries and make utility
+if not exist %MSYS_DIR%\mingw64\lib\python%PYTHON_VER% (
+	echo Please update the PYTHON version in this batch file
+	goto end
+)
+
+echo MSYS2 libraries and make utility...
 XCOPY %OPT% %MSYS_DIR%\usr\bin\make.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\rm.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\msys-2.0.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\msys-intl-8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\msys-iconv-2.dll %LSD_DIR%\gnu\bin\
 
-rem g++ compiler
+echo g++ compiler...
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\gcc.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\g++.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\windres.exe %LSD_DIR%\gnu\bin\
@@ -82,60 +91,45 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libwinpthread-1.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgcc_s_seh-1.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgmp-10.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libstdc++-6.dll %LSD_DIR%\gnu\bin\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\include\c++ %LSD_DIR%\gnu\include\c++\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\include %LSD_DIR%\gnu\include\
+XCOPY %XOPT% %MSYS_DIR%\mingw64\lib %LSD_DIR%\gnu\lib\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\share\gcc-%GCC_VER% %LSD_DIR%\gnu\share\gcc-%GCC_VER%\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\x86_64-w64-mingw32 %LSD_DIR%\gnu\x86_64-w64-mingw32\
 
-rem zlib library
+echo zlib library...
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libzstd.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\zlib1.dll %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\include\zlib.h %LSD_DIR%\gnu\include\
-XCOPY %OPT% %MSYS_DIR%\mingw64\include\zconf.h %LSD_DIR%\gnu\include\
-XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libz.* %LSD_DIR%\gnu\lib\
 
-rem Tcl/Tk framework
-rem XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tclsh*.exe %LSD_DIR%\gnu\bin\
-rem XCOPY %OPT% %MSYS_DIR%\mingw64\bin\wish*.exe %LSD_DIR%\gnu\bin\
-rem XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tcl*.dll %LSD_DIR%\gnu\bin\
-rem XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tk*.dll %LSD_DIR%\gnu\bin\
-rem XCOPY %OPT% %MSYS_DIR%\mingw64\include\tcl*.* %LSD_DIR%\gnu\include\
-rem XCOPY %OPT% %MSYS_DIR%\mingw64\include\tk*.* %LSD_DIR%\gnu\include\
-rem XCOPY %XOPT% %MSYS_DIR%\mingw64\include\X11 %LSD_DIR%\gnu\include\X11\
-rem XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libtcl*.* %LSD_DIR%\gnu\lib\
-rem XCOPY %OPT% %MSYS_DIR%\mingw64\lib\libtk*.* %LSD_DIR%\gnu\lib\
-rem XCOPY %OPT% %MSYS_DIR%\mingw64\lib\tcl*.* %LSD_DIR%\gnu\lib\
-rem XCOPY %OPT% %MSYS_DIR%\mingw64\lib\tk*.* %LSD_DIR%\gnu\lib\
-rem XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tcl8 %LSD_DIR%\gnu\lib\tcl8\
-rem XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tcl%TCL_VER% %LSD_DIR%\gnu\lib\tcl%TCL_VER%\
-rem XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\tk%TCL_VER% %LSD_DIR%\gnu\lib\tk%TCL_VER%\
-rem XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\dde%DDE_VER% %LSD_DIR%\gnu\lib\dde%DDE_VER%\
-rem XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\reg%REG_VER% %LSD_DIR%\gnu\lib\reg%REG_VER%\
-rem XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\thread%THREAD_VER% %LSD_DIR%\gnu\lib\thread%THREAD_VER%\
+echo Tcl/Tk framework...
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tclsh*.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\wish*.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tcl*.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tk*.dll %LSD_DIR%\gnu\bin\
 
-rem gdb debugger
+echo gdb debugger...
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\gdb.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\python%PYTHON_VER%-config %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libpython%PYTHON_VER%.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libreadline8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libtermcap-0.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libxxhash.dll %LSD_DIR%\gnu\bin\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\gcc %LSD_DIR%\gnu\lib\gcc\
-XCOPY %XOPT% %MSYS_DIR%\mingw64\lib\python%PYTHON_VER% %LSD_DIR%\gnu\lib\python%PYTHON_VER%\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\share\gdb %LSD_DIR%\gnu\share\gdb\
 XCOPY %OPT% %MSYS_DIR%\mingw64\etc\gdbinit %LSD_DIR%\gnu\etc\
 
-rem diff compare tool
+echo diff compare tool...
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\diff.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libiconv-2.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libintl-8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libsigsegv-2.dll %LSD_DIR%\gnu\bin\
 
-rem subbotools required libraries
+echo subbotools required libraries...
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgsl-27.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgslcblas-0.dll %LSD_DIR%\gnu\bin\
 
-rem remove unneeded python cache files (requires python 3.5+ on path)
+echo remove python cache files...
+rem requires python 3.5+ on path!
 python3 -Bc "for p in __import__( 'pathlib' ).Path( '%LSD_DIR%\gnu' ).rglob( '*.py[co]' ) : p.unlink( )" > nul 2>&1
 python3 -Bc "for p in __import__( 'pathlib' ).Path( '%LSD_DIR%\gnu' ).rglob( '__pycache__' ) : p.rmdir( )" > nul 2>&1
+echo done
 
 :end

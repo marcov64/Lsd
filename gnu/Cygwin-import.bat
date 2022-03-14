@@ -20,6 +20,10 @@ rem  - Cygwin libraries
 rem  - multitail utility
 rem *************************************************************
 
+rem XCOPY options for files and directories
+set OPT=/D/Q/Y
+set XOPT=%OPT%/S
+
 if "%1"=="/?" (
 	echo Import Cygwin developer tools to LSD
 	echo Usage: Cygwin-import [CYGWIN FOLDER] [LSD FOLDER]
@@ -54,17 +58,14 @@ if "%2"=="" (
 
 :import
 
-set OPT=/D/Q/Y
-set XOPT=%OPT%/S
-
-rem Cygwin libraries
+echo Cygwin libraries...
 XCOPY %OPT% %CYG_DIR%\bin\cygwin1.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %CYG_DIR%\bin\cygiconv-2.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %CYG_DIR%\bin\cygintl-8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %CYG_DIR%\bin\cygncursesw-10.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %CYG_DIR%\bin\cygpanelw-10.dll %LSD_DIR%\gnu\bin\
 
-rem multitail utility
+echo multitail utility...
 XCOPY %OPT% %CYG_DIR%\bin\tail.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %CYG_DIR%\bin\multitail.exe %LSD_DIR%\gnu\bin\
 XCOPY %XOPT% %CYG_DIR%\usr\share\terminfo\78 %LSD_DIR%\gnu\usr\share\terminfo\78\
