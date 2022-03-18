@@ -16,6 +16,4 @@ install.packages( c( "LSDsensitivity",
                      "rmutil",
                      "plotrix",
                      "textplot",
-                     "extrafont",
-                     "randomForest",
-                     "partykit" ) )
+                     "extrafont" ) )

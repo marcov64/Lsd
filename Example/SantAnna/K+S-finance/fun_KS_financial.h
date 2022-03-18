@@ -55,10 +55,11 @@ if ( abs( v[2] - v[0] ) > 2 * v[1] )
 else
 	if ( abs( v[2] - v[0] ) > v[1] )
 		v[0] += ( v[2] > v[0] ) ? v[1] : - v[1];// small adjustment
-
+	
+v[0] = max( v[0], 0 );							// no negative nominal interest
 v[0] += V( "rShock" );							// apply current shock level
 
-RESULT( max( v[0], 0 ) )
+RESULT( v[0] )
 
 
 EQUATION( "rBonds" )
