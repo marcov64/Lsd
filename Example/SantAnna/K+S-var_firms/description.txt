@@ -6,6 +6,8 @@ The original K+S code was developed by Andrea Roventini, Mauro Napoletano, Tania
 
 This is a full rewrite of the original "Schumpeter meeting Keynes" (K+S) model, plus the finance extensions and a variable number of firms in both sectors. Differently from original versions, the entire the model was recoded into regular LSD equations.
 
+LSD version 8.0 or higher is required. Download at: https://github.com/SantAnnaKS/LSD
+
 
 Change log
 ==========
@@ -83,9 +85,9 @@ There are several R scripts (.R extension inside R subdirectory) ready to analyz
 
 KS-aggregates.R = overall analysis of macroeconomic aggregates, including scenario comparison, time series plots, de-trended series growth stationarity, temporal correlation structure, Monte Carlo experiments comparison (distribution and performance)
 
-KS-sector-1.R = pooled and Monte Carlo firm-level analysis of the capital-good sector, including scenario statistics comparison, size, productivity and growth rate empirical plots and fits to Gaussian, Laplace and Subbotin distributions
+KS-sector-1.R = pooled and Monte Carlo firm-level analysis of firms in the capital-good sector, including scenario statistics comparison, size, productivity and growth rate empirical plots and fits to Gaussian, Laplace and Subbotin distributions
 
-KS-sector-2-pool.R = pooled firm-level analysis of the consumption-good sector, including scenario statistics comparison, Gibrat-law and scaling-variance tests, and size, productivity and growth rate empirical plots and fits to Gaussian, Laplace and Subbotin distributions
+KS-sector-2-pool.R = pooled firm-level analysis of firms in the consumption-good sector, including scenario statistics comparison, Gibrat-law and scaling-variance tests, and size, productivity and growth rate empirical plots and fits to Gaussian, Laplace and Subbotin distributions
 
 KS-sector-2-MC.R = Monte Carlo firm-level analysis of the capital-good sector, including scenario statistics comparison, and productivity dynamics among groups of firms
 
@@ -95,7 +97,7 @@ KS-kriging-sobol-SA.R = global Sobol variance-based sensitivity analysis using a
 
 Other support scripts exist in the R subdirectory and are required by the above scripts. The scripts are configured to use the R subdirectory as the R working directory. Please add all the data required for the analysis (including LSD configuration files) in subdirectories inside the R working directory (the default is 'data'). 
 
-There is a set of preconfigured test configurations (Sim1-Sim4.lsd in the data subdirectory) which can be executed in LSD and analyzed by the R scripts without any change. The sample test configurations are configured for speed but the number of Monte Carlo experiments (runs) is insufficient for reliable inference. See 'Configuring the K+S scripts.txt' in R subdirectory for details and recommendations.
+There is a set of preconfigured test configurations (.lsd extension files in the data subdirectory) which can be executed in LSD and analyzed by the R scripts without any change. The sample test configurations are configured for speed but the number of Monte Carlo experiments (runs) is insufficient for reliable inference. See 'Configuring the K+S scripts.txt' in R subdirectory for details and recommendations.
 
 The R scripts require the following R packages (and dependencies) to be installed from the standard repositories: LSDsensitivity, tseries, normalp, nortest, mFilter, np, matrixStats, gplots, corrplot, rmutil, plotrix, textplot, extrafont. 12GB or more of available memory is required to run some of the reports. Use 'install-lsd-examples-packages.R' script in R subdirectory to install the required packages automatically.
 

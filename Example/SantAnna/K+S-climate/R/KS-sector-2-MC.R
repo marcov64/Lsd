@@ -1,12 +1,14 @@
 #******************************************************************
 #
-# ----------------- K+S sector 2 MC analysis --------------------
+# ------ K+S consumer-goods firm Monte Carlo analysis -----------
+#
+#   Written by Marcelo C. Pereira, University of Campinas
 #
 #   Copyright Marcelo C. Pereira
 #   Distributed under the GNU General Public License
 #
 #   The default configuration assumes that the supplied LSD
-#   simulation configurations:
+#   simulation configurations (basename Sim):
 #     R/data/Sim1.lsd
 #     R/data/Sim2.lsd
 #     R/data/Sim3.lsd

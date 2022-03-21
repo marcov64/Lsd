@@ -2,11 +2,16 @@
 #
 # ------------------------- Kriging-Sobol DoE analysis ------------------------
 #
+#   Written by Marcelo C. Pereira, University of Campinas
+#
+#   Copyright Marcelo C. Pereira
+#   Distributed under the GNU General Public License
+#
 #   The default configuration assumes that the supplied LSD
-#   main simulation configuration:
-#     R/data/sobol.lsd
+#   main simulation configuration (basename sa-sobol):
+#     R/data/sa-sobol.lsd
 #   is used with the also supplied sensitivity analysis (SA) set:
-#     R/data/sobol.sa
+#     R/data/sa-sobol.sa
 #   to generate a set of configurations which must be executed
 #   before this script is used
 #
@@ -49,7 +54,7 @@
 
 # Database files
 folder    <- "data"                 # data files folder
-baseName  <- "sobol"                # data files base name (same as .lsd file)
+baseName  <- "sa-sobol"             # data files base name (same as .lsd file)
 varName   <- "Tm"                   # analysis variable name
 iniDrop   <- 100                    # initial time steps to drop (0=none)
 nKeep     <- -1                     # number of time steps to keep (-1=all)

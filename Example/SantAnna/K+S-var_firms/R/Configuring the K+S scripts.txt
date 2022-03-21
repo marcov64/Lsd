@@ -18,7 +18,7 @@ Statistical analysis scripts, like "KS-aggregates.R", can analyze files from a s
 
 LSD results files (".res.gz" extension) must be not renamed, as they are already produced using the naming conventions expected by the R scripts in the proper folders, as well the remaining ancillary files used by sensitivity analysis scripts. Additionally, when comparing multiple experiments, the names of all involved LSD corresponding configuration files MUST share the same base name, that is, the filenames must differentiate only by a integer sequential suffix (e.g, "config1.lsd", "config2.lsd", etc.). Experiments to be compared must also have the same set of saved variables and number of time steps.
 
-All LSD configuration files MUST be stored in the same folder/directory. Results and ancillary files MUST be in the same directory as configuration files or in a subdirectory named as the respective configuration file. For convenience, it is easier to have the LSD data folder as a subdirectory of the R working directory, where the R scripts are. The example configurations are in the folder named "data", and you can create other subdirectories inside the R working directory to hold your own configurations (remember to adjust the "folder" variable in the R scripts). You can generate your LSD results files directly in those subdirectories, so no file copying is ever needed or recommended. Just save your LSD configuration (.lsd file) to the desired subdirectory BEFORE starting the simulation runs. When there is more than a configuration file in a folder, LSD automatically creates additional subdirectories in this folder to keep your data organized, saving data from different configurations segregated. All the scripts account for this segregation transparently. There is no need to include the configuration-specific subdirectory names to the "folder" R variable.
+All LSD configuration files MUST be stored in the same folder/directory. Results and ancillary files MUST be in the same directory as configuration files or in a subdirectory named as the respective configuration file. For convenience, it is easier to have the LSD data folder as a subdirectory of the R working directory, where the R scripts are. The example configurations are in the folder named "data", and you can create other subdirectories inside the R working directory to hold your own configurations (remember to adjust the "folder" variable in the R scripts). You can generate your LSD results files directly in those subdirectories, so no file copying is ever needed or recommended (LSD should do this automatically if the configuration file is already located there). Just save your LSD configuration (.lsd file) to the desired subdirectory BEFORE starting the simulation runs. When there is more than a configuration file in a folder, LSD automatically creates additional subdirectories in this folder to keep your data organized, saving data from different configurations segregated. All the scripts account for this segregation transparently. There is no need to include the configuration-specific subdirectory names to the "folder" R variable.
 
 The R scripts may have to be changed according to the type of LSD data files to be processed. All scripts have two critical variables to point to where/which data must be used:
  . "folder" (default is "data"): must have the relative path of your configuration files FROM the R working directory, that is, the folder where the these files (used to produce the data) are. It must NOT include the full path to the working directory. For instance, if the working directory is "C:\Users\Marcelo\LSD\Work\Test\R" and the data to be analyzed is in "C:\Users\Marcelo\LSD\Work\Test\R\my-exp", you must set "folder" to (just) "my-exp" (folder <- "my-exp").
@@ -27,7 +27,28 @@ The R scripts may have to be changed according to the type of LSD data files to 
 The R statistical scripts also have a third critical variable to set:
  . "nExp": if a single configuration (experiment) is being analyzed, it must be set to 1. Otherwise, it must be set to the number of experiments to be compared in the same report(s). Experiment numbering must start from 1 and be sequential (e.g., "my-conf1.lsd", "my-conf2.lsd", etc.).
 
-The scripts for sensitivity analysis also have a third critical variable:
+ The scripts for sensitivity analysis also have another critical variable:
  . "varName" (default is "U"): defines the name of the K+S model variable to be used for sensitivity analysis. For instance, if you want to check the sensitivity of the GDP growth rate, you must set "varName" to "dGDP" (varName <- "dGDP")
  
-Other R script variables are available for optional adjustments, like discarding initial/final time steps from analysis ("iniDrop"/"nKeep"), the type of summary statistic used for MC analysis ("mcStat"), the metric to use when computing MC runs distance from reference statistic (mean or median), the technique to build the confidence intervals ("bootCI"), naming experiments ("expVal"), define initial period for plots and statistics ("warmUpPlot"/"warmUpStat"), removing outliers from analysis ("remOutl"), among many others. Check the comments on the scripts for the description of all adjustable parameters.
+ Some other important variables for all scripts:
+ . "iniDrop" (default is 0): the number of initial time steps to drop from the analysis. If set to zero, no initial time steps is dropped. Discarding non-required time steps proportionally reduce the script memory needs and may be required in case of memory allocation errors (after coresExp and coresMC are set to 1).
+
+ . "nKeep" (default is -1): the number of total time steps to keep for the analysis, after initial time-step dropout (if iniDrop > 0). If set to -1, all time steps are kept. If set to a positive number, just the first nKeep time steps are kept. Discarding non-required time steps proportionally reduce the script memory needs and may be required in case of memory allocation errors (after coresExp and coresMC are set to 1).
+ 
+ Other R script variables are available for optional adjustments (not in all scripts):
+
+ . "mcStat" (default is "mean"): the type of summary statistic used for Monte Carlo (MC) analysis ("mean" or "median"). Despite less usual, the median is a more robust statistic to describe the MC experiment(s).
+
+ . "mcDist" (default is "" or NULL): the name of distance metric to use. Common options are "euclidean" and "manhattan". For detail on these and the many additional available metrics, see function TSDistances in R package TSdist.
+ 
+ . "CI" (default is 0.95): the confidence level (beta) to be used when building confidence intervals. It is the same as ( 1 - alpha ), alpha is the statistical significance level.
+ 
+ . "bootR" (default is 999): is the number of bootstrap replications when "bootCI" is set to use bootstrap. It is recommended to be an odd number.
+ 
+ . "bootCI" (default is "" or NULL): the technique to build the confidence intervals. The default is to use mean or median (according to "mcStat") asymptotic intervals. More precise (but slower to compute) bootstrap intervals can be generated using "basic" or "bca" bootstrap techniques.
+ 
+ . "expVal" (no default): an R character (string) vector naming the experiments (according to "nExp") being analyzed, to be used on the reports legends.
+ 
+ . "warmUpPlot"/"warmUpStat" (default 100/300): define initial periods to be ignored for plots and statistics purposes (applied on the effectivelly read cases, after "iniDrop" discards).
+ 
+ There are many other parameters that can be adjusted. Check the comments on the scripts for the description of all adjustable parameters.

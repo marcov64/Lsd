@@ -8,7 +8,7 @@
 #   Distributed under the GNU General Public License
 #
 #   The default configuration assumes that the supplied LSD
-#   simulation configurations:
+#   simulation configurations (basename Sim):
 #     R/data/Sim1.lsd
 #     R/data/Sim2.lsd
 #   are executed before this script is used.
@@ -68,7 +68,7 @@ aggrVars <- append( logVars, c( "dGDP", "dCPI", "dA", "dw", "CPI", "Q2u",
 source( "KS-support-functions.R" )
 
 # remove warnings for saved data
-# !diagnostics suppress = mc, mcRun, mcX, P, X, S, M, m, C, c
+# !diagnostics suppress = mc, mcP, mcX, P, X, S, M, m, C, c
 
 # ---- Read data files ----
 
@@ -108,25 +108,25 @@ readExp <- function( exper ) {
   C <- as.data.frame( cbind( t, stats$ci.hi ) )
   c <- as.data.frame( cbind( t, stats$ci.lo ) )
 
-  if( ! is.null( mcDist ) && mcDist != "" ) {   # use typical runs
+  if( ! is.null( mcDist ) && mcDist != "" ) {   # use typical runs?
     d <- info.distance.lsd( mc, P, distance = mcDist, rank = TRUE )
 
-    mcRun <- d$close[ 1, ]
-    runData <- matrix( nrow = nTsteps, ncol = 0 )
-    for( i in 1 : length( mcRun ) )
-      runData <- cbind( runData, mc[ , names( mcRun[ i ] ), mcRun[ i ] ] )
+    mcP <- d$close[ 1, ]
+    P <- matrix( nrow = nTsteps, ncol = 0 )
+    for( i in 1 : length( mcP ) )
+      P <- cbind( P, mc[ , names( mcP[ i ] ), mcP[ i ] ] )
 
-    dimnames( runData ) <- list( dimnames( mc )[[ 1 ]], names( mcRun ) )
-    P <- as.data.frame( cbind( t, runData ) )
+    dimnames( P ) <- list( dimnames( mc )[[ 1 ]], names( mcP ) )
+    P <- as.data.frame( cbind( t, P ) )
 
     mcX <- names( d$rank )[ 1 ]
     X <- as.data.frame( cbind( t, mc[ , , mcX ] ) )
   } else
-    mcRun <- mcX <- X <- NULL
+    mcP <- mcX <- X <- NULL
 
   # Save temporary results to disk to save memory
   tmpFile <- paste0( folder, "/", baseName, exper, "_aggr.Rdata" )
-  save( mc, mcRun, mcX, X, P, S, M, m, C, c, nTsteps, nVar, nSize, file = tmpFile )
+  save( mc, mcP, mcX, P, X, S, M, m, C, c, nTsteps, nVar, nSize, file = tmpFile )
 
   return( tmpFile )
 }
@@ -137,7 +137,7 @@ tmpFiles <- lapply( 1 : nExp, readExp )
 # ---- Organize data read from files ----
 
 # fill the lists to hold data
-mcData <- mcTag <- mcXtag <- Xdata <- Pdata <- Sdata <- Mdata <- mdata <-
+mcData <- mcPtag <- mcXtag <- Pdata <- Xdata <- Sdata <- Mdata <- mdata <-
   Cdata <- cdata <- list( )
 nTsteps.1 <- nSize.1 <- 0
 
@@ -161,8 +161,8 @@ for( k in 1 : nExp ) {                      # relocate data in separate lists
   nTsteps.1 <- nTsteps
   nSize.1 <- nSize
 
-  if( ! is.null( mcDist ) && mcDist != "" ) {   # use typical runs
-    mcTag[[ k ]] <- mcRun
+  if( ! is.null( mcDist ) && mcDist != "" ) {   # use typical runs?
+    mcPtag[[ k ]] <- mcP
     mcXtag[[ k ]] <- mcX
     Xdata[[ k ]] <- X
   } else
@@ -170,7 +170,7 @@ for( k in 1 : nExp ) {                      # relocate data in separate lists
 }
 
 # free memory
-rm( tmpFiles, mcRun, mcX, X, P, S, M, m, C, c, nTsteps.1, nSize.1 )
+rm( tmpFiles, mcP, mcX, P, X, S, M, m, C, c, nTsteps.1, nSize.1 )
 invisible( gc( verbose = FALSE ) )
 
 
@@ -231,22 +231,21 @@ if( repName == "" )
   repName <- baseName
 
 # create tags for MC-specific plots
-if( ! is.null( mcDist ) && mcDist != "" ) {   # use typical runs
-  temp <- c( )
-  for( i in 1 : length( mcTag[[ 1 ]] ) ) {
-    temp[ i ] <- mcTag[[ 1 ]][ i ]
-    if( length( mcTag ) > 1 )
-      for( j in 2 : length( mcTag ) )
-        temp[ i ] <- paste( temp[ i ], mcTag[[ j ]][ i ], sep = "|" )
+if( ! is.null( mcDist ) && mcDist != "" ) {   # use typical runs?
+  Ptag <- c( )
+  for( i in 1 : length( mcPtag[[ 1 ]] ) ) {
+    Ptag[ i ] <- mcPtag[[ 1 ]][ i ]
+    if( length( mcPtag ) > 1 )
+      for( j in 2 : length( mcPtag ) )
+        Ptag[ i ] <- paste( Ptag[ i ], mcPtag[[ j ]][ i ], sep = "|" )
   }
-  names( temp ) <- names( mcTag[[ 1 ]] )
-  mcTag <- temp
-  xTag <- paste( unlist( mcXtag ), collapse = "|" )
+  names( Ptag ) <- names( mcPtag[[ 1 ]] )
+  Xtag <- unlist( mcXtag )
   fileTag <- paste0( "_", ifelse( length( mcXtag ) > 1, "multi-mc", mcXtag[[ 1 ]] ) )
 } else {
-  mcTag <- rep( mcStat, nVar )
-  names( mcTag ) <- dimnames( mcData[[ 1 ]] )[[ 2 ]]
-  xTag <- mcStat
+  Ptag <- rep( mcStat, nVar )
+  names( Ptag ) <- dimnames( mcData[[ 1 ]] )[[ 2 ]]
+  Xtag <- rep( mcStat, nExp )
   fileTag <- ""
 }
 
@@ -291,7 +290,7 @@ par( mfrow = c ( plotRows, plotCols ) )             # define plots per page
 #
 
 time_plots( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata, mcStat,
-            nExp, nSize, nTsteps, TmaskPlot, CI, mcTag, xTag, legends, colors,
+            nExp, nSize, nTsteps, TmaskPlot, CI, Ptag, Xtag, legends, colors,
             lTypes, smoothing )
 
 box_plots( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat, warmUpStat, nTstat,
@@ -362,7 +361,7 @@ for( k in 1 : nExp ) { # Experiment k
             xlab = "Time", ylab = "Filtered series",
             tit = paste( "GDP cycles (", legends[ k ], ")" ),
             subtit = paste( "(", bpfMsg, "/ MC runs =", nSize,
-                            "/ MC ", xTag, ")" ) )
+                            "/ MC ", Xtag[ k ], ")" ) )
 
   plot_bpf( list( Xdata[[ k ]]$U, Xdata[[ k ]]$V ),
             pl = lowP, pu = highP, nfix = bpfK, mask = TmaskPlot,
@@ -371,7 +370,7 @@ for( k in 1 : nExp ) { # Experiment k
             xlab = "Time", ylab = "Filtered series",
             tit = paste( "Shimer puzzle (", legends[ k ], ")" ),
             subtit = paste( "(", bpfMsg, "/ MC runs =", nSize,
-                            "/ MC ", xTag, ")" ) )
+                            "/ MC ", Xtag[ k ], ")" ) )
 
   #
   # ---- Correlation table ----

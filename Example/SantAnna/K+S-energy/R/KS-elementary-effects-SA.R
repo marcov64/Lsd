@@ -2,14 +2,16 @@
 #
 # --------------- Elementary Effects DoE analysis (Morris 1991) ---------------
 #
+#   Written by Marcelo C. Pereira, University of Campinas
+#
 #   Copyright Marcelo C. Pereira
 #   Distributed under the GNU General Public License
 #
 #   The default configuration assumes that the supplied LSD
-#   main simulation configuration:
-#     R/data/ee.lsd
+#   main simulation configuration (basename sa-ee):
+#     R/data/sa-ee.lsd
 #   is used with the also supplied sensitivity analysis (SA) set:
-#     R/data/ee.sa
+#     R/data/sa-ee.sa
 #   to generate a set of configurations which must be executed
 #   before this script is used
 #
@@ -48,7 +50,7 @@
 
 # Database files / time steps to use
 folder    <- "data"                 # data files folder
-baseName  <- "ee"                   # data files base name (same as .lsd file)
+baseName  <- "sa-ee"                # data files base name (same as .lsd file)
 varName   <- "Tm"                   # analysis variable name
 iniDrop   <- 100                    # initial time steps to drop (0=none)
 nKeep     <- -1                     # number of time steps to keep (-1=all)

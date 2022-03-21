@@ -1,6 +1,6 @@
 #******************************************************************
 #
-# ------------------ K+S sector 1 analysis ----------------------
+# ------------- K+S capital-good firm analysis ------------------
 #
 #   Written by Marcelo C. Pereira, University of Campinas
 #
@@ -8,7 +8,7 @@
 #   Distributed under the GNU General Public License
 #
 #   The default configuration assumes that the supplied LSD
-#   simulation configurations:
+#   simulation configurations (basename Sim):
 #     R/data/Sim1.lsd
 #     R/data/Sim2.lsd
 #     R/data/Sim3.lsd
