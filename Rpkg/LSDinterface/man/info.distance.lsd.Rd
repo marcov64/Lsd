@@ -7,8 +7,9 @@ Compute distance measure between LSD Monte Carlo time series and a set of refere
 This function reads a 3 or 4-dimensional array produced by \code{\link{read.3d.lsd}} or \code{\link{read.4d.lsd}} and computes several types of distance measures between the time series from a set of Monte Carlo runs and a set of reference time series (like the Monte Carlo average or median).
 }
 \usage{
-info.distance.lsd( array, references, instance = 1, distance = "euclidean",
-                   std.dist = FALSE, std.val = FALSE, rank = FALSE, weights = 1, ... )
+info.distance.lsd( array, references, instance = 1,
+                   distance = "euclidean", std.dist = FALSE,
+                   std.val = FALSE, rank = FALSE, weights = 1, ... )
 }
 \arguments{
   \item{array}{
@@ -33,7 +34,7 @@ a logical value indicating, if \code{TRUE}, that the series values must be stand
 a logical value indicating, if \code{TRUE}, that the Monte Carlo runs must be ranked in terms of closeness to the \code{references}. The default is not computing the run ranking, as this may be computationally expensive for some \code{distance} measures.
 }
   \item{weights}{
-a numerical vector containing the weights to be used for each variable in \code{reference} when \code{rank = TRUE}. The order of the weights must be the same as the one used for the variables (columns) in the \code{references} matrix. If the length of \code{weigths} is smaller the number of variables, the vector is recycled. The default is to use the same weight for all variables.
+a numerical vector containing the weights to be used for each variable in \code{references} when \code{rank = TRUE}. If vector has named elements, the vector names must exactly match the names of variables in \code{references}, order is not important, If variable names not present in vector, the missing ones are not considered in the ranking. If the vector is not named, the order of the weights must be the same as the one used for the variables (columns) in the \code{references} matrix. If the length of \code{weigths} is smaller the number of variables and not named, the vector is recycled. The default is to use the same weight for all variables.
 }
   \item{...}{
 additional parameters required by the specific method (see \code{\link{TSDistances}}).
@@ -50,13 +51,14 @@ One typical application of distance metrics is to select runs which are closer t
 }
 \value{
 Returns a list containing:
-\item{dist}{a named matrix containing the distances for each Monte Carlo run (lines) and variables (columns) (contained both in \code{array} and \code{references})}
+\item{dist}{a named matrix containing the distances for each Monte Carlo run (lines) and variables (columns) contained both in \code{array} and \code{references} (and \code{weights}, if provided)}
+\item{close}{a named matrix of Monte Carlo run (sample) names, one column per variable, sorted in increasing distance order (closest runs in first line), which can be used to index the 3D or 4D \code{array}}
 \item{rank}{(only if \code{rank = TRUE}) a named vector of weighted Monte Carlo run standardized distances, sorted in increasing distance order (closest run first)}
 }
 \note{
 When comparing distance measures between different Monte Carlo runs and variables, it is important to standardize the distances and values to ensure consistency. For variables which may present \code{NA} values, setting \code{std.dist = TRUE} ensures distance comparability by dividing the absolute distance of each run-reference pair by the number of effective (non-\code{NA}) time steps. When comparing variables which are dimensionally heterogeneous, \code{std.val = TRUE} uses the relative measure (between 1 and the run value divided by the corresponding reference value) to compute the distances.
 
-When setting \code{std.val = TRUE}, all points in which the \code{references}' values are equal to zero are effectively removed from calculations. This behavior is always applied when searching for the closest Monte Carlo run.
+When setting \code{std.val = TRUE}, all points in which the \code{references}' values are equal to zero are effectively removed from calculations. This behavior is always applied when searching for the closest Monte Carlo run(s).
 }
 \author{Marcelo C. Pereira}
 \seealso{
@@ -75,7 +77,9 @@ inst1Array <- read.3d.lsd( files )
 inst1Stats <- info.stats.lsd( inst1Array )
 
 # compute the Euclidean distance to the mean for all variables and runs
-info.distance.lsd( inst1Array, inst1Stats$avg )$dist
+inst1dist <- info.distance.lsd( inst1Array, inst1Stats$avg )
+inst1dist$dist
+inst1dist$close
 
 # the same exercise but for a 4D array and Manhattan distance to the median
 # plus indicating the Monte Carlo run closest to the median
@@ -84,6 +88,7 @@ allStats <- info.stats.lsd( allArray, median = TRUE )
 allDist <- info.distance.lsd( allArray, allStats$med, distance = "manhattan",
                               rank = TRUE )
 allDist$dist
+allDist$close
 allDist$rank
 names( allDist$rank )[ 1 ]  # results file name of the closest run
 }

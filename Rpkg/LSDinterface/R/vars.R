@@ -81,6 +81,7 @@ name.r <- function( r.name ) {
 
 names.in.set <- function( sel.names, all.names ) {
 
+  sel.names <- sel.names[ sel.names != "" ]
   sel.names <- unique( make.names( sel.names ) )
   all.names <- unique( sub( "\\..*$", "", make.names( all.names ) ) )
 

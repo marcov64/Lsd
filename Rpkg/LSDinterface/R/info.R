@@ -141,7 +141,7 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
            dimnames = list( dimNames[[ rows ]], dimNames[[ cols ]] ) )
 
   if( median )
-    med <- avg
+    med <- mad <- avg
 
   ci <- match.arg( ci )
 
@@ -152,12 +152,15 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
       ci <- "mean"
   }
 
-  if( ! is.null( ci.boot ) &&
+  if( ! is.null( ci.boot ) && ci.boot != "" &&
       ! ci.boot %in% c( "basic", "perc", "bca" ) ) {
     ci.boot <- NULL
     warning( "Invalid bootstrap confidence interval type, ignoring",
              call. = FALSE )
   }
+
+  if( ! is.null( ci.boot ) && ci.boot == "" )
+    ci.boot <- NULL
 
   if( ci != "none" )
     ci.lo <- ci.hi <- avg
@@ -170,6 +173,8 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
     else
       baseMask[[ k ]] <- rep( TRUE, dimArray[ k ] )
   }
+
+  set.seed( 1 )         # reset PRNG seed to ensure reproducibility
 
   # Compute averages, std. deviation etc. and store in 2D arrays
   for( j in 1 : dimArray[ cols ] ) {
@@ -212,8 +217,10 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
         m[ i, j ] <- NA
       }
 
-      if( median )
+      if( median ) {
         med[ i, j ] <- stats::median( elem )
+        mad[ i, j ] <- stats::mad( elem )
+      }
 
       if( ci != "none" ) {
         ci.lo[ i, j ] <- ci.hi[ i, j ] <- NA
@@ -221,22 +228,22 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
         if( num > 1 ) {
           if( is.null( ci.boot ) ) {
             if( ci == "mean" ) {
-              d = abs( stats::qt( ( 1 - ci.conf ) / 2, num - 1 ) ) * sDev[ i, j ] / sqrt( num )
+              d = abs( stats::qt( ( 1 - ci.conf ) / 2, num - 1 ) ) * sDev[ i, j ] /
+                  sqrt( num )
 
               if( is.finite( avg[ i, j ] ) && ! is.null( d ) && is.finite( d ) ) {
                 ci.lo[ i, j ] = avg[ i, j ] - d
                 ci.hi[ i, j ] = avg[ i, j ] + d
               }
             } else {
-              c <- NULL
-              try( c <- suppressWarnings( stats::wilcox.test( elem, conf.int = TRUE,
-                                                              conf.level = ci.conf,
-                                                              digits.rank = 7 )$conf.int ),
-                   silent = TRUE )
-              if( ! is.null( c ) && is.finite( c[ 1 ] ) )
+              c <- suppressWarnings( stats::wilcox.test( elem, conf.int = TRUE,
+                                                         conf.level = ci.conf,
+                                                         digits.rank = 7 )$conf.int )
+
+              if( is.finite( c[ 1 ] ) )
                 ci.lo[ i, j ] <- c[ 1 ]
 
-              if( ! is.null( c ) && is.finite( c[ 2 ] ) )
+              if( is.finite( c[ 2 ] ) )
                 ci.hi[ i, j ] <- c[ 2 ]
             }
           } else {
@@ -246,15 +253,13 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
               f <- function( data, sel ) stats::median( data[ sel ] )
 
             b <- c <- NULL
-            try( invisible( utils::capture.output( b <- boot::boot( elem,
-                                                                    statistic = f,
-                                                                    R = boot.R ) ) ),
+            try( invisible( utils::capture.output(
+                    b <- boot::boot( elem, statistic = f, R = boot.R ) ) ),
                  silent = TRUE )
 
             if( ! is.null( b ) ) {
-              try( invisible( utils::capture.output( c <- boot::boot.ci( b,
-                                                                         conf = ci.conf,
-                                                                         type = ci.boot ) ) ),
+              try( invisible( utils::capture.output(
+                      c <- boot::boot.ci( b, conf = ci.conf, type = ci.boot ) ) ),
                    silent = TRUE )
             }
 
@@ -274,8 +279,10 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
 
   res <- list( avg = avg, sd = sDev, max = M, min = m, n = n )
 
-  if( median )
+  if( median ) {
     res[[ "med" ]] <- med
+    res[[ "mad" ]] <- mad
+  }
 
   if( ci != "none" ) {
     res[[ "ci.lo" ]] <- ci.lo
@@ -301,19 +308,43 @@ info.distance.lsd <- function( array, references, instance = 1,
   if( nDim < 3 || nDim > 4 )
     stop( "Error: invalid array for statistics" )
 
-  vars <- colnames( references )[ match( unlist( dimnames( array )[ 2 ] ),
+  vars <- colnames( references )[ match( dimnames( array )[[ 2 ]],
                                          colnames( references ) ) ]
 
   if( length( vars ) == 0 )
     stop( "Error: no reference variable matches any array one" )
 
+  if( is.null( weights ) || ! all( is.finite( weights ) ) )
+      stop( "Error: invalid vector weights" )
+
+  if( ! is.null( names( weights ) ) ) {
+    temp <- c( )
+    for( var in vars ) {
+      if( var %in% names( weights ) )
+        temp <- append( temp, weights[ var ] )
+      else
+        temp <- append( temp, 0 )
+    }
+
+    if( sum( temp ) == 0 )
+      stop( "Error: weights vector is incompatible with references matrix" )
+
+    weights <- temp[ temp != 0 ]
+    vars <- vars[ temp != 0 ]
+  } else
+    weights <- rep_len( weights, length( vars ) )
+
   nMC <- dim( array )[ nDim ]
-  weights <- rep_len( weights, length( vars ) )
-  dist.run <- rep.int( 0, nMC )
   dist <- dist.rel <- matrix( data = NA, nrow = nMC, ncol = length( vars ) )
-  names( dist.run ) <- dimnames( array )[[ nDim ]]
   rownames( dist ) <- dimnames( array )[[ nDim ]]
   colnames( dist ) <- vars
+
+  if( rank ) {
+    dist.rank <- rep.int( 0, nMC )
+    names( dist.rank ) <- rownames( dist )
+  }
+
+  set.seed( 1 )         # reset PRNG seed to ensure reproducibility
 
   for( i in 1 : nMC )
     for( j in 1 : length( vars ) ) {
@@ -353,13 +384,16 @@ info.distance.lsd <- function( array, references, instance = 1,
 
       if( rank && ! is.na( dist.std ) ) {
         dist.rel[ i, j ] <- dist.std / length( data.std )
-        dist.run[ i ] <- dist.run[ i ] + dist.rel[ i, j ] * weights[ j ]
+        dist.rank[ i ] <- dist.rank[ i ] + dist.rel[ i, j ] * weights[ j ]
       }
     }
 
-  if( ! rank )
-    return( list( dist = dist ) )
-  else {
-    return( list( dist = dist, rank = sort( dist.run ) ) )
-  }
+  dist.close <- apply( apply( dist, 2, rank, ties.method = "random" ), 2,
+                       function( x ) names( x )[ match( x, 1 : length( x ) ) ] )
+  rownames( dist.close ) <- 1 : nMC
+
+  if( rank )
+    return( list( dist = dist, close = dist.close, rank = sort( dist.rank ) ) )
+  else
+    return( list( dist = dist, close = dist.close ) )
 }

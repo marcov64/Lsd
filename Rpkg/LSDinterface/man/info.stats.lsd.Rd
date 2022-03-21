@@ -23,7 +23,7 @@ an integer array dimension to be used as the rows for the statistics matrices, d
 an integer array dimension to be used as the columns for the statistics matrices, default is to use second array dimension.
 }
   \item{median}{
-a logical value indicating if (\code{TRUE}) the median should also be computed. The default (\code{FALSE}) is not to compute the median.
+a logical value indicating if (\code{TRUE}) the median and the median absolute deviation should also be computed. The default (\code{FALSE}) is not to compute these statistics.
 }
   \item{ci}{
 a character string specifying the type of confidence interval to compute, must be one of \code{"none"} (default) for no confidence interval computation, \code{"mean"}, to compute a confidence interval for the mean, \code{"median"}, for the median, or \code{"auto"}, to use the option set for the \code{median} argument (above). This option can be abbreviated.
@@ -32,7 +32,7 @@ a character string specifying the type of confidence interval to compute, must b
 confidence level of the confidence interval.
 }
   \item{ci.boot}{
-a character string specifying the type of bootstrap confidence interval to compute, must be one of \code{"basic"}, \code{"perc"} (percentile interval), or \code{"bca"} (BCa - adjusted percentile interval). If set to \code{NULL} a regular asymptotic confidence interval is produced (no bootstrap), assuming normal distribution for the mean or using a non-parametric rank test for the median. Non-bootstrap percentiles are much faster to compute but generally less accurate.
+a character string specifying the type of bootstrap confidence interval to compute, must be one of \code{"basic"}, \code{"perc"} (percentile interval), or \code{"bca"} (BCa - adjusted percentile interval). If set to \code{NULL} or an empty string, a regular asymptotic confidence interval is produced (no bootstrap), assuming normal distribution for the mean or using a non-parametric rank test for the median. Non-bootstrap percentiles are much faster to compute but generally less accurate.
 }
   \item{boot.R}{
 number of bootstrap replicates.
@@ -51,6 +51,7 @@ Returns a list containing four to seven matrices, with the original size and nam
 \item{max}{a matrix with the maximum value of the MC experiments}
 \item{min}{a matrix with the minimum value of the MC experiments}
 \item{med}{a matrix with the median of the MC experiments (only present if argument \code{median = TRUE})}
+\item{mad}{a matrix with the median absolute deviation of the MC experiments (only present if argument \code{median = TRUE})}
 \item{ci.hi}{a matrix with the maximum value of the MC experiments (only present if argument \code{ci} is not set to  \code{"none"})}
 \item{ci.lo}{a matrix with the minimum value of the MC experiments (only present if argument \code{ci} is not set to \code{"none"})}
 \item{n}{a matrix with the number of observations available for computation of statistics}
