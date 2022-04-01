@@ -13,19 +13,62 @@
 
 model.optim.lsd <- function( model, data = NULL, lower.domain = NULL,
                              upper.domain = NULL, starting.values = NULL,
-                             minimize = TRUE, pop.size = 1000, max.generations = 30,
-                             wait.generations = 10, precision = 1e-5,
-                             nnodes = 1 ) {
+                             minimize = TRUE, pop.size = 1000,
+                             max.generations = 30, wait.generations = 10,
+                             precision = 1e-5, nnodes = 1 ) {
 
-  if( ! is.null( data ) && inherits( data, "lsd-doe" ) ) {
+  if( ! inherits( model, "kriging.model.lsd" ) &&
+      ! inherits( model, "polynomial.model.lsd" ) )
+    stop( "Invalid model (not from polynomial or kriging.model.lsd())" )
 
-  	if( is.null( lower.domain ) )
-  	  lower.domain <- data$facLimLo
-  	if( is.null( upper.domain ) )
-  	  upper.domain <- data$facLimUp
-  	if( is.null( starting.values ) )
-  	  starting.values <- data$facDef
+  if( ! is.null( data ) ) {
+    if( inherits( data, "doe.lsd" ) ) {
+    	if( is.null( lower.domain ) )
+    	  lower.domain <- data$facLimLo
+    	if( is.null( upper.domain ) )
+    	  upper.domain <- data$facLimUp
+    	if( is.null( starting.values ) )
+    	  starting.values <- data$facDef
+    } else
+      stop( "Invalid data (not from read.doe.lsd())" )
   }
+
+  if( is.null( lower.domain ) || ! all( is.finite( lower.domain ) ) ||
+      length( lower.domain ) < 1 )
+    stop( "Invalid lower domain vector (lower.domain)" )
+
+  if( is.null( upper.domain ) || ! all( is.finite( upper.domain ) ) ||
+      length( upper.domain ) < 1 )
+    stop( "Invalid upper domain vector (upper.domain)" )
+
+  if( is.null( starting.values ) || ! all( is.finite( starting.values ) ) ||
+      length( starting.values ) < 1 )
+    stop( "Invalid starting value vector (starting.values)" )
+
+  if( is.null( minimize ) || ! is.logical( minimize ) )
+    stop( "Invalid minimization switch (minimize)" )
+
+  if( is.null( pop.size ) || ! is.finite( pop.size ) || round( pop.size ) < 1 )
+    stop( "Invalid number of parallel search paths (pop.size)" )
+
+  if( is.null( max.generations ) || ! is.finite( max.generations ) ||
+      round( max.generations ) < 1 )
+    stop( "Invalid maximum number of generations (max.generations)" )
+
+  if( is.null( wait.generations ) || ! is.finite( wait.generations ) ||
+      round( wait.generations ) < 1 )
+    stop( "Invalid maximum no-improvement generations (wait.generations)" )
+
+  if( is.null( precision ) || ! is.finite( precision ) || precision <= 0 )
+    stop( "Invalid tolerance level (precision)" )
+
+  if( is.null( nnodes ) || ! is.finite( nnodes ) || round( nnodes ) < 1 )
+    stop( "Invalid number of parallel computing nodes (nnodes)" )
+
+  pop.size          <- round( pop.size )
+  max.generations   <- round( max.generations )
+  wait.generations  <- round( wait.generations )
+  nnodes            <- round( nnodes )
 
   # check variables allowed to variate (lower != upper)
   varName <- varLo <- varUp <- varStart <- vector( )
@@ -128,12 +171,56 @@ model.limits.lsd <- function( data, model, sa = NULL,
                               wait.generations = 10, precision = 1e-5,
                               nnodes = 1 ) {
 
-  if( ! is.null( sa ) && ( inherits( sa, "kriging-sa" ) ||
-                           inherits( sa, "polynomial-sa" ) ) ) {
-    factor1 <- sa$topEffect[ 1 ]
-    factor2 <- sa$topEffect[ 2 ]
-    factor3 <- sa$topEffect[ 3 ]
+  if( ! inherits( data, "doe.lsd" ) )
+    stop( "Invalid data (not from read.doe.lsd())" )
+
+  if( ! inherits( model, "kriging.model.lsd" ) &&
+      ! inherits( model, "polynomial.model.lsd" ) )
+    stop( "Invalid model (not from polynomial or kriging.model.lsd())" )
+
+  if( ! is.null( sa ) ) {
+    if( inherits( sa, "kriging.sensitivity.lsd" ) ||
+        inherits( sa, "polynomial.sensitivity.lsd" ) ) {
+      factor1 <- sa$topEffect[ 1 ]
+      factor2 <- sa$topEffect[ 2 ]
+      factor3 <- sa$topEffect[ 3 ]
+    } else
+      stop( "Invalid sensitivity analysis (not from sobol.decomposition.lsd())" )
   }
+
+  if( is.null( factor1 ) || ! is.finite( factor1 ) || round( factor1 ) < 1 )
+    stop( "Invalid index for first factor (factor1)" )
+
+  if( is.null( factor2 ) || ! is.finite( factor2 ) || round( factor2 ) < 1 )
+    stop( "Invalid index for second factor (factor2)" )
+
+  if( is.null( factor3 ) || ! is.finite( factor3 ) || round( factor3 ) < 1 )
+    stop( "Invalid index for third factor (factor3)" )
+
+  if( is.null( pop.size ) || ! is.finite( pop.size ) || round( pop.size ) < 1 )
+    stop( "Invalid number of parallel search paths (pop.size)" )
+
+  if( is.null( max.generations ) || ! is.finite( max.generations ) ||
+      round( max.generations ) < 1 )
+    stop( "Invalid maximum number of generations (max.generations)" )
+
+  if( is.null( wait.generations ) || ! is.finite( wait.generations ) ||
+      round( wait.generations ) < 1 )
+    stop( "Invalid maximum no-improvement generations (wait.generations)" )
+
+  if( is.null( precision ) || ! is.finite( precision ) || precision <= 0 )
+    stop( "Invalid tolerance level (precision)" )
+
+  if( is.null( nnodes ) || ! is.finite( nnodes ) || round( nnodes ) < 1 )
+    stop( "Invalid number of parallel computing nodes (nnodes)" )
+
+  factor1           <- round( factor1 )
+  factor2           <- round( factor2 )
+  factor3           <- round( factor3 )
+  pop.size          <- round( pop.size )
+  max.generations   <- round( max.generations )
+  wait.generations  <- round( wait.generations )
+  nnodes            <- round( nnodes )
 
   vars <- names( data$facDef )
 
@@ -212,5 +299,6 @@ model.limits.lsd <- function( data, model, sa = NULL,
                                 maxResp[ 2 ], minResp[ 3 ], maxResp[ 3 ],
                                 min2Resp, max2Resp ) )
   dimnames( max.min ) <- list( append( vars, "response" ), labels )
+
   return( max.min )
 }

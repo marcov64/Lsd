@@ -21,7 +21,7 @@ read.doe.lsd( folder, baseName, outVar = "", does = 1, doeFile = NULL,
 the \emph{relative} folder path to the LSD DoE data files, using the R working directory as reference (see \code{\link[base]{getwd}()}).
 }
   \item{baseName}{
-the LSD data files base name, without numbering and extension suffixes (should be the same as the name of the baseline \code{.lsd} file, without the extension).
+the LSD data files base name, without numbering and extension suffixes (should be the same as the name of the baseline \code{.lsd} file, without the extension). If \code{.lsd} extension is included, it is automatically removed.
 }
   \item{outVar}{
 the name of an \emph{existing} variable to be used as the reference to perform the sensitivity analysis. If no name is supplied, the default is to use the first element of \code{saveVars} or \code{addVars}.
@@ -54,7 +54,7 @@ integer: the number of initial time steps to drop from analysis (from \code{t = 
 integer: the total number of time steps to keep after \code{iniDrop}, if simulation length is longer than \code{nKeep} discard data from the end of the simulation. The default (-1) is to preserve all data.
 }
   \item{saveVars}{
-a vector of existing LSD variable names to be kept in the data set. The default (\code{c()}) is to save none. At least one existing or new variable (defined by \code{addVars}) must exist. \code{saveVars} also defines the variables which are available for processing by the function defined by \code{eval.vars}, the default \code{saveVars = c()} representing all variables in the results files. For large datasets, this parameter allow reducing the memory required by not loading unnecessary data into memory.
+a vector of existing LSD variable names to be kept in the data set. The default (\code{c()}) is to save just \code{outVar}, if supplied. At least one existing or new variable (defined by \code{addVars}) must exist. \code{saveVars} also defines the variables which are available for processing by the function defined by \code{eval.vars}, the default \code{saveVars = c()} representing all variables in the results files. For large datasets, this parameter allow reducing the memory required by not loading unnecessary data into memory.
 }
   \item{addVars}{
 a vector of new LSD variable names to be added to the data set. The default (\code{c()}) is to add none. At least one existing or new variable must exist.
@@ -87,10 +87,10 @@ logical: if \code{TRUE}, no message confirming file reading/information is print
 logical: if \code{TRUE} (default), create a simpler data array, pooling together only a single instance for each variable. The instance to be considered is provided by \code{instance}. If \code{FALSE}, use all variable instances, which are treated as a single one (indeed, pooling all values...). More control over which instances are used can be obtained by simultaneously using \code{posit}.
 }
   \item{instance}{
-integer: the instance of the variable to be read, for variables that exist in more than one object, if \code{pool = TRUE}, unused otherwise. This number is based on the relative position (column) of the variable in the results file. The default (1) is to read the first instance.
+integer: the instance of the variable to be read, for variables that exist in more than one object. This number is based on the relative position (column) of the variable in the results file. The default (1) is to read the first instance. Only a single existing instance at a time can be read for analysis.
 }
   \item{posit}{
-a string, a vector of strings or an integer vector describing the LSD object position of the variable(s) to select. If an integer vector, it should define the position of a SINGLE LSD object. If a string or vector of strings, each element should define one or more different LSD objects, so the returning matrix may contain variables from more than one object. By setting \code{posit.match}, globbing (wildcard), and regular expressions can be used to select multiple objects at once; in this case, all matching objects are returned.
+a string, a vector of strings or an integer vector describing the LSD object position of the variable(s) to select. If an integer vector, it should define the position of a SINGLE LSD object. If a string or vector of strings, each element should define one or more different LSD objects, so the returning matrix may contain variables from more than one object. By setting \code{posit.match}, globbing (wildcard), and regular expressions can be used to select multiple objects at once; in this case, all matching objects are selected, but only the instance defined by \code{instance} is used.
 }
   \item{posit.match}{
 a string defining how the \code{posit} argument, if provided, should be matched against the LSD object positions. If equal to \code{"fixed"}, the default, only exact matching is done. \code{"glob"} allows using simple wildcard characters ('*' and '?') in \code{posit} for matching. If \code{posit.match="regex"} interpret \code{posit} as POSIX 1003.2 extended regular expression(s). See \code{\link[=regex]{regular expressions}} for details of the different types of regular expressions. Options can be abbreviated.

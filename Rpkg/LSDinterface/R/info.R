@@ -21,13 +21,19 @@ info.dimensions.lsd <- function( file ) {
   nVars <- ncol( dataSet )
   varNames <- name.clean.lsd( colnames( dataSet ) )
 
-  return( list( tSteps = tSteps, nVars = nVars, varNames = varNames ) )
+  info <- list( tSteps = tSteps, nVars = nVars, varNames = varNames )
+  class( info ) <- "info.dimensions.lsd"
+
+  return( info )
 }
 
 
 # ==== Read variable names in results file (no duplicates) ====
 
 info.names.lsd <- function( file ) {
+
+  if( is.null( file ) || ! is.character( file ) || file == "" )
+    stop( "Invalid results file name (file)" )
 
   # read header line (labels) from disk
   header <- scan( file, what = character( ), sep = "\t", quote = NULL,
@@ -105,6 +111,8 @@ info.details.lsd <- function( file ) {
     info <- rbind( info, newLine )
   }
 
+  class( info ) <- append( class( info ), "info.details.lsd" )
+
   return( info )
 }
 
@@ -116,15 +124,52 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
                             ci.conf = 0.95, ci.boot = NULL, boot.R = 999,
                             na.rm = TRUE, inf.rm = TRUE ) {
 
+  if( ! is.array( array ) || ! is.numeric( array ) )
+    stop( "Invalid array for statistics (array)" )
+
+  if( is.null( rows ) || ! is.finite( rows ) || round( rows ) < 1 ||
+      round( rows ) > length( dim( array ) ) )
+    stop( "Invalid rows dimension (rows)" )
+
+  if( is.null( cols ) || ! is.finite( cols ) || round( cols ) < 1 ||
+      round( cols ) > length( dim( array ) ) || round( rows ) == round( cols ) )
+    stop( "Invalid columns dimension (cols)" )
+
+  if( is.null( median ) || ! is.logical( median ) )
+    stop( "Invalid median switch (median)" )
+
+  if( is.null( ci.conf ) || ! is.finite( ci.conf ) ||
+      ci.conf <= 0 || ci.conf >= 1 )
+    stop( "Invalid confidence level (ci.conf)" )
+
+  if( ! is.null( ci.boot ) && ci.boot != "" &&
+      ! ci.boot %in% c( "basic", "perc", "bca" ) ) {
+    stop( "Invalid bootstrap confidence interval type (ci.boot)" )
+  }
+
+  if( is.null( boot.R ) || ! is.finite( boot.R ) || round( boot.R ) < 1 )
+    stop( "Invalid bootstrap repetitions (boot.R)" )
+
+  if( is.null( na.rm ) || ! is.logical( na.rm ) )
+    stop( "Invalid NA removal switch (na.rm)" )
+
+  if( is.null( inf.rm ) || ! is.logical( inf.rm ) )
+    stop( "Invalid non-finite removal switch (inf.rm)" )
+
+  rows   <- round( rows )
+  cols   <- round( cols )
+  boot.R <- round( boot.R )
+  ci     <- match.arg( ci )
+
   # Get dimension data
   dimArray <- dim( array )
   nDimArray <- length( dimArray )
   dimNames <- dimnames( array )
   if( nDimArray < 3 || nDimArray > 4 )
-    stop( "Error: invalid array for statistics" )
+    stop( "Invalid array dimensions for statistics (array)" )
   if( rows == cols || rows < 1 || rows > nDimArray ||
       cols < 1 || cols > nDimArray )
-    stop( "Error: invalid dimension(s) for statistics" )
+    stop( "Invalid dimension size(s) for statistics (array)" )
 
   if( rows > cols ) {                    # has to transpose at the end?
     dimH <- rows                        # make sure rows dim < cols dim
@@ -143,20 +188,11 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
   if( median )
     med <- mad <- avg
 
-  ci <- match.arg( ci )
-
   if( ci == "auto" ) {
     if( median )
       ci <- "median"
     else
       ci <- "mean"
-  }
-
-  if( ! is.null( ci.boot ) && ci.boot != "" &&
-      ! ci.boot %in% c( "basic", "perc", "bca" ) ) {
-    ci.boot <- NULL
-    warning( "Invalid bootstrap confidence interval type, ignoring",
-             call. = FALSE )
   }
 
   if( ! is.null( ci.boot ) && ci.boot == "" )
@@ -293,6 +329,8 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
     for( i in 1 : length( res ) )
       res[[ i ]] = t( res[[ i ]] )
 
+  class( res ) <- "info.stats.lsd"
+
   return( res )
 }
 
@@ -304,18 +342,51 @@ info.distance.lsd <- function( array, references, instance = 1,
                                std.dist = FALSE, std.val = FALSE,
                                rank = FALSE, weights = 1, ... ) {
 
+  if( ! is.array( array ) || ! is.numeric( array ) )
+    stop( "Invalid array for statistics (array)" )
+
+  if( ( ! is.matrix( references ) && ! is.data.frame( references ) ) ||
+      ! is.numeric( references ) || is.null( colnames( references ) ) ||
+      length( colnames( references ) ) == 0 )
+    stop( "Invalid references matrix for statistics (references)" )
+
+  if( is.null( instance ) || ! is.finite( instance ) || round( instance ) < 1 )
+    stop( "Invalid variable instance (instance)" )
+
+  if( is.null( std.dist ) || ! is.logical( std.dist ) )
+    stop( "Invalid distance standardization switch (std.dist)" )
+
+  if( is.null( std.val ) || ! is.logical( std.val ) )
+    stop( "Invalid values standardization switch (std.val)" )
+
+  if( is.null( rank ) || ! is.logical( rank ) )
+    stop( "Invalid Monte Carlo ranking switch (rank)" )
+
+  if( is.null( weights ) || ! is.vector( weights ) || length( weights ) == 0 ||
+      ! all( is.finite( weights ) ) )
+      stop( "Invalid weights vector (weights)" )
+
+  references <- as.matrix( references )
+  instance   <- round( instance )
+  distance   <- match.arg( distance, c( "euclidean", "manhattan", "minkowski",
+                                        "infnorm", "ccor", "sts", "dtw", "keogh.lb",
+                                        "edr", "erp", "lcss", "fourier", "tquest",
+                                        "dissim", "acf", "pacf", "ar.lpc.ceps",
+                                        "ar.mah", "ar.mah.statistic", "ar.mah.pvalue",
+                                        "ar.pic", "cdm", "cid", "cor", "cort",
+                                        "int.per", "per", "mindist.sax", "ncd",
+                                        "pred", "spec.glk", "spec.isd", "spec.llr",
+                                        "pdc", "frechet", "tam" ) )
+
   nDim <- length( dim( array ) )
   if( nDim < 3 || nDim > 4 )
-    stop( "Error: invalid array for statistics" )
+    stop( "Invalid array for statistics (array)" )
 
   vars <- colnames( references )[ match( dimnames( array )[[ 2 ]],
                                          colnames( references ) ) ]
 
   if( length( vars ) == 0 )
-    stop( "Error: no reference variable matches any array one" )
-
-  if( is.null( weights ) || ! all( is.finite( weights ) ) )
-      stop( "Error: invalid vector weights" )
+    stop( "No reference variable matches any array one  (references)" )
 
   if( ! is.null( names( weights ) ) ) {
     temp <- c( )
@@ -327,7 +398,7 @@ info.distance.lsd <- function( array, references, instance = 1,
     }
 
     if( sum( temp ) == 0 )
-      stop( "Error: weights vector is incompatible with references matrix" )
+      stop( "Weights vector is incompatible with references matrix" )
 
     weights <- temp[ temp != 0 ]
     vars <- vars[ temp != 0 ]
@@ -393,7 +464,11 @@ info.distance.lsd <- function( array, references, instance = 1,
   rownames( dist.close ) <- 1 : nMC
 
   if( rank )
-    return( list( dist = dist, close = dist.close, rank = sort( dist.rank ) ) )
+    info <- list( dist = dist, close = dist.close, rank = sort( dist.rank ) )
   else
-    return( list( dist = dist, close = dist.close ) )
+    info <- list( dist = dist, close = dist.close )
+
+  class( info ) <- "info.distance.lsd"
+
+  return( info )
 }

@@ -238,6 +238,7 @@ int check_affected( object *c, object *pivot, int level, int affected[ ] );
 int compute_copyfrom( object *c, const char *parWnd );
 int entry_new_objnum( object *c, const char *tag );
 int hyper_count( const char *lab );
+int hyper_count_var( const char *lab );
 int load_configuration( bool reload, int quick = 0 );
 int load_sensitivity( FILE *f );
 int logic_op_code( const char *lop, const char *errmsg );

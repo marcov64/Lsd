@@ -7,9 +7,10 @@ Find optimal meta-model factor settings
 This function finds the optimal factor (parameter) settings using the estimated meta-model.
 }
 \usage{
-model.optim.lsd( model, data, lower.domain, upper.domain, starting.values = NULL,
-                 minimize = TRUE, pop.size = 1000, max.generations = 30,
-                 wait.generations = 10, precision = 1e-05, nnodes = 1 )
+model.optim.lsd( model, data = NULL, lower.domain = NULL, upper.domain = NULL,
+                 starting.values = NULL, minimize = TRUE, pop.size = 1000,
+                 max.generations = 30, wait.generations = 10,
+                 precision = 1e-05, nnodes = 1 )
 }
 \arguments{
   \item{model}{
@@ -19,13 +20,13 @@ an object created by a previous call to \code{\link{kriging.model.lsd}} or \code
 an optional object created by a previous call to \code{\link{read.doe.lsd}} which sets the default values for \code{lower.domain}, \code{upper.domain} and \code{starting.values}.
 }
   \item{lower.domain}{
-a vector or a single-line data frame which contains the minimum values to be considered for all the meta-model factors/variables. If \code{data} is provided, the default values are the lower limit ranges from the \code{.sa} file set in LSD.
+an optional vector or single-line data frame which contains the minimum values to be considered for all the meta-model factors/variables. If \code{data} is not provided, the default values are the lower limit ranges from the \code{.sa} file set in LSD.
 }
   \item{upper.domain}{
-a vector or a single-line data frame which contains the maximum values to be considered for all the meta-model factors/variables. If \code{data} is provided, the default values are the upper limit ranges from the \code{.sa} file set in LSD.
+an optional vector or single-line data frame which contains the maximum values to be considered for all the meta-model factors/variables. If \code{data} is not provided, the default values are the upper limit ranges from the \code{.sa} file set in LSD.
 }
   \item{starting.values}{
-a vector or a single-line data frame which contains the starting values to be used by \code{\link[rgenoud]{genoud}} for all the meta-model factors/variables. If \code{data} is provided, the default values are the calibration settings from the baseline configuration \code{.lsd} file set in LSD.
+an optional vector or single-line data frame which contains the starting values to be used by \code{\link[rgenoud]{genoud}} for all the meta-model factors/variables. If \code{data} is provided, the default values are the calibration settings from the baseline configuration \code{.lsd} file set in LSD.
 }
   \item{minimize}{
 logical: set to FALSE to perform maximization. The default is TRUE (minimization).

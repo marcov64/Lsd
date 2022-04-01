@@ -526,6 +526,29 @@ int hyper_count( const char *lab )
 
 
 /****************************************************
+HYPER_COUNT_VAR
+Return the total number of Object instances in the
+model which contain the variable named lab. The Object
+is searched in the whole model, including different branches
+****************************************************/
+int hyper_count_var( const char *lab )
+{
+	int n;
+	object *cur;
+	variable *cv;
+
+	cv = root->search_var( root, lab, true );	// find variable to use
+
+	if ( cv == NULL || cv->up == NULL )
+		return 0;
+
+	for ( n = 0, cur = cv->up; cur != NULL; ++n, cur = cur->hyper_next( ) );
+
+	return n;
+}
+
+
+/****************************************************
 SEARCH_BRIDGE
 Search the bridge which contains the Object lab in this.
 Uses the fast bridge look-up map.

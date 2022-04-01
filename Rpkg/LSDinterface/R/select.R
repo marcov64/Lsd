@@ -15,11 +15,23 @@ select.colnames.lsd <- function( dataSet, col.names = NULL, instance = 0,
                                  check.names = TRUE, posit = NULL,
                                  posit.match = c( "fixed", "glob", "regex" ) ) {
 
-  if( is.null( col.names ) || length( col.names ) == 0 ||
-      ! is.character( col.names ) || col.names[ 1 ] == "" ) {
+  if( is.null( col.names ) ) {
     col.names <- name.var.lsd( colnames( dataSet ) )
     check.names <- TRUE
   }
+
+  if( length( col.names ) == 0 || ! is.character( col.names ) ||
+      any( col.names == "" ) )
+    stop( "Invalid vector of variable names (col.names)" )
+
+  if( is.null( check.names ) || ! is.logical( check.names ) )
+    stop( "Invalid variable name check switch (check.names)" )
+
+  if( is.null( instance ) || ! is.finite( instance ) || round( instance ) < 0 )
+    stop( "Invalid variable instance (instance)" )
+
+  instance <- round( instance )
+  posit.match <- match.arg( posit.match )
 
   # prefix leading underscores, remove trailing points, and duplicates
   if( check.names ) {
@@ -71,14 +83,14 @@ select.colnames.lsd <- function( dataSet, col.names = NULL, instance = 0,
     return( dataSet )
 
   # format position if needed and extract positions in dataset
-  posit <- fmt.posit( posit, match.arg( posit.match ) )
+  posit <- fmt.posit( posit, posit.match )
   all.posit <- obj.posit( colnames( dataSet ) )
   all.posit <- all.posit[ ! is.na( all.posit ) ]
 
   if( length( all.posit ) == 0 )
     return( NULL )
 
-  if( match.arg( posit.match ) == "fixed" )
+  if( posit.match == "fixed" )
     col.match <- all.posit %in% posit
   else
     col.match <- grep( posit, all.posit )
@@ -99,16 +111,47 @@ select.colattrs.lsd <- function( dataSet, info, col.names = NULL, init.value = N
                                  posit.match = c( "fixed", "glob", "regex" ) ) {
 
   # test if files are compatible (in principle)
-  if( ! is.matrix( dataSet ) || ! is.data.frame( info ) ||
-      ncol( dataSet ) != nrow( info ) )
-    stop( "Info table invalid or incompatible with provided dataSet" )
+  if( ( ! is.matrix( dataSet ) && ! is.data.frame( dataSet ) ) )
+    stop( "Invalid dataSet (dataSet)" )
+
+  if( ! inherits( info, "info.details.lsd" ) || ncol( dataSet ) != nrow( info ) )
+    stop( "Info table invalid or incompatible with provided dataSet (info)" )
 
   # format valid names for matching
-  if( ! is.null( col.names ) )
+  if( ! is.null( col.names ) ) {
+    if( length( col.names ) == 0 || ! is.character( col.names ) ||
+        any( col.names == "" ) )
+      stop( "Invalid vector of variable names (col.names)" )
+
     col.names <- make.names( name.clean.lsd( col.names ) )
+  }
+
+  if( ! is.na( init.value ) && ( is.null( init.value ) ||
+                                 length( init.value ) == 0 ||
+                                 any( ! is.finite( init.value ) ) ) )
+    stop( "Invalid initial value(s) (init.value)" )
+
+  if( ! is.na( init.time ) && ( is.null( init.time ) ||
+                                length( init.time ) == 0 ||
+                                any( ! is.finite( init.time ) ) ||
+                                any( round( init.time ) < 1 ) ) )
+    stop( "Invalid initial time(s) (init.time)" )
+
+  if( ! is.na( end.time ) && ( is.null( end.time ) ||
+                               length( end.time ) == 0 ||
+                               any( ! is.finite( end.time ) ) ||
+                               any( round( end.time ) < 1 ) ) )
+    stop( "Invalid end time(s) (end.time)" )
+
+  if( ! is.null( posit ) && ! ( is.character( posit ) || all( is.finite( posit ) ) ) )
+    stop( "Invalid instance position specification (posit)" )
+
+  init.time <- round( init.time )
+  end.time <- round( end.time )
+  posit.match <- match.arg( posit.match )
 
   # format position if needed
-  posit <- fmt.posit( posit, match.arg( posit.match ) )
+  posit <- fmt.posit( posit, posit.match )
 
   # matrix to store the columns, keep rownames
   fieldData <- matrix( nrow = nrow( dataSet ), ncol = 0,
@@ -134,7 +177,7 @@ select.colattrs.lsd <- function( dataSet, info, col.names = NULL, init.value = N
     if( length( posit ) > 0 ) {
       pos <- unlist( strsplit( info[ i, "Full_name" ], ".", fixed = TRUE ) )[ 2 ]
 
-      if( match.arg( posit.match ) == "fixed" ) {
+      if( posit.match == "fixed" ) {
         if( ! ( pos %in% posit ) )
           next
 

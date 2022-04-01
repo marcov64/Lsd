@@ -20,11 +20,11 @@ write.response <- function( folder, baseName, outVar = "", iniExp = 1, nExp = 1,
 
   # evaluate new variables (not in LSD files) names
   nVarNew <- length( addVars )           # number of new variables to add
-  newNameVar <- LSDinterface::name.var.lsd( append( saveVars, addVars ) ) # new label set
+  newNameVar <- LSDinterface::name.var.lsd( append( saveVars, addVars ) )
   nVar <- length( newNameVar )          # total number of variables
 
   if( nVar == 0 && nVarNew == 0 )
-    stop( "No variable to be bept in the data set, at least one required" )
+    stop( "No variable to be kept in the data set, at least one required" )
 
   if( length( saveVars ) == 0 )
     saveVars <- NULL
@@ -39,13 +39,14 @@ write.response <- function( folder, baseName, outVar = "", iniExp = 1, nExp = 1,
 
   # check if files are in a subfolder
   myFiles <- LSDinterface::list.files.lsd( path = folder,
-                                           conf.name = paste0( baseName, "_", iniExp ) )
+                                           conf.name = paste0( baseName, "_",
+                                                               iniExp ) )
   if( length( myFiles ) == 0 || ! file.exists( myFiles[ 1 ] ) )
-    stop( "No data files  (baseName_XX_YY.res[.gz]) found on informed path" )
+    stop( "No data files (baseName_XX_YY.res[.gz]) found on informed path" )
 
   folder <- dirname( myFiles[ 1 ] )
 
-  # first check if extraction was interrupted and continue with partial files if appropriate
+  # first check if extraction interrupted and continue with partial files
   tempFile <- paste0( folder, "/", baseName, "_", iniExp,
                       "_", iniExp + nExp - 1, ".RData" )
   if( ! rm.temp && file.exists( tempFile ) )
@@ -146,22 +147,26 @@ write.response <- function( folder, baseName, outVar = "", iniExp = 1, nExp = 1,
 
           dataSet <- LSDinterface::read.single.lsd( myFiles[ j ],
                                                     col.names = saveVars,
-                                                    nrows = nKeep, skip = iniDrop,
+                                                    nrows = nKeep,
+                                                    skip = iniDrop,
                                                     instance = instance,
                                                     posit = posit,
                                                     posit.match = posit.match )
 
           origVars <- colnames( dataSet )           # original variables
 
+          if( length( origVars ) == 0 )
+            stop( "variable, instance or position not found (saveVars/instance/posit)" )
+
           # ------ Add new variables to data set ------
 
-          if( nVarNew != 0 )
+          if( nVarNew != 0 ) {
             dataSet <- abind::abind( dataSet, array( as.numeric( NA ),
                                                      dim = c( nTsteps, nVarNew ) ),
                                      along = 2, use.first.dimnames = TRUE )
-
-          colnames( dataSet ) <-
-            LSDinterface::name.var.lsd( append( origVars, addVars ) )
+            colnames( dataSet ) <-
+              LSDinterface::name.var.lsd( append( origVars, addVars ) )
+          }
 
           # Call function to fill new variables with data or reevaluate old ones
           if( ! is.null( eval.vars ) )
@@ -171,7 +176,8 @@ write.response <- function( folder, baseName, outVar = "", iniExp = 1, nExp = 1,
 
           for( i in 1 : nVar ) {
             if( ! newNameVar[ i ] %in% colnames( dataSet ) )
-              stop( paste0( "Invalid variable to be saved (", newNameVar[ i ] ,")" ) )
+              stop( paste0( "Invalid variable to be saved (", newNameVar[ i ]
+                            ,")" ) )
 
             x <- dataSet[ , newNameVar[ i ] ]
             if( na.rm )
@@ -215,7 +221,8 @@ write.response <- function( folder, baseName, outVar = "", iniExp = 1, nExp = 1,
         for( j in 1 : nSize )
           for( i in 1 : nVar ){
             if( ! newNameVar[ i ] %in% dimnames( dataSet )[[ 2 ]] )
-              stop( paste0( "Invalid variable to be saved (", newNameVar[ i ] ,")" ) )
+              stop( paste0( "Invalid variable to be saved (", newNameVar[ i ]
+                            ,")" ) )
 
             x <- as.vector( dataSet[ , newNameVar[ i ], , j ] )
             if( na.rm )

@@ -116,8 +116,30 @@ ww.test <- function( time.series, window.size ) {
 
 # ==== Calculate stationarity and ergodicity statistics table
 
-ergod.test.lsd <- function( data, vars = names( data[ 1, , 1 ] ), start.period = 0,
-                            signif = 0.05, digits = 2, ad.method = "asymptotic" ) {
+ergod.test.lsd <- function( data, vars = dimnames( data )[[ 2 ]],
+                            start.period = 0, signif = 0.05, digits = 2,
+                            ad.method = c( "asymptotic", "simulated", "exact" ) ) {
+
+  if( ! is.array( data ) || length( dim( data ) ) != 3 )
+    stop( "Invalid data set format (not 3D array)" )
+
+  if( is.null( vars ) || ! is.character( vars ) || length( vars ) == 0 ||
+      length( vars ) > dim( data )[ 2 ] )
+    stop( "Invalid variable name vector (vars)" )
+
+  if( is.null( start.period ) || ! is.finite( start.period ) ||
+      round( start.period ) < 0 )
+    stop( "Invalid starting period (start.period)" )
+
+  if( is.null( signif ) || ! is.finite( signif ) || signif <= 0 || signif > 1 )
+    stop( "Invalid significance level (signif)" )
+
+  if( is.null( digits ) || ! is.finite( digits ) || round( digits ) < 0 )
+    stop( "Invalid significant digits (digits)" )
+
+  start.period <- round( start.period )
+  digits       <- round( digits )
+  ad.method    <- match.arg( ad.method )
 
   stats <- c( "avg ADF", "rej ADF", "avg PP", "rej PP", "avg KPSS", "rej KPSS",
               "avg BDS", "rej BDS", "avg KS", "rej KS", "AD", "WW" )
@@ -225,9 +247,32 @@ ergod.test.lsd <- function( data, vars = names( data[ 1, , 1 ] ), start.period =
 
 # ==== Calculate unimodality & symmetry statistics table ====
 
-symmet.test.lsd <- function( data, vars = names( data[ 1, , 1 ] ),
+symmet.test.lsd <- function( data, vars = dimnames( data )[[ 2 ]],
                              start.period = 0, signif = 0.05, digits = 2,
                              sym.boot = FALSE ) {
+
+  if( ! is.array( data ) || length( dim( data ) ) != 3 )
+    stop( "Invalid data set format (not 3D array)" )
+
+  if( is.null( vars ) || ! is.character( vars ) || length( vars ) == 0 ||
+      length( vars ) > dim( data )[ 2 ] )
+    stop( "Invalid variable name vector (vars)" )
+
+  if( is.null( start.period ) || ! is.finite( start.period ) ||
+      round( start.period ) < 0 )
+    stop( "Invalid starting period (start.period)" )
+
+  if( is.null( signif ) || ! is.finite( signif ) || signif <= 0 || signif > 1 )
+    stop( "Invalid significance level (signif)" )
+
+  if( is.null( digits ) || ! is.finite( digits ) || round( digits ) < 0 )
+    stop( "Invalid significant digits (digits)" )
+
+  if( is.null( sym.boot ) || ! is.logical( sym.boot ) )
+    stop( "Invalid boostrap critical values switch (sym.boot)" )
+
+  start.period <- round( start.period )
+  digits       <- round( digits )
 
   stats <- c( "avg Hdip", "rej Hdip", "avg CM", "rej CM",
               "avg M", "rej M", "avg MGG", "rej MGG" )

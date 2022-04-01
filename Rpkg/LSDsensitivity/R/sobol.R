@@ -11,17 +11,35 @@
 
 # ==== Do sensitivity analysis of a fitted model ====
 
-sobol.decomposition.lsd <- function( data, model = NULL, krig.sa = FALSE, sa.samp = 1000 ) {
+sobol.decomposition.lsd <- function( data, model = NULL, krig.sa = FALSE,
+                                     sa.samp = 1000 ) {
 
-  if( is.null( model ) )
+  if( ! inherits( data, "doe.lsd" ) )
+    stop( "Invalid data (not from read.doe.lsd())" )
+
+  if( is.null( krig.sa ) || ! is.logical( krig.sa ) )
+    stop( "Invalid Kriging algorithm switch (krig.sa)" )
+
+  if( is.null( sa.samp ) || ! is.finite( sa.samp ) || round( sa.samp ) < 1 )
+    stop( "Invalid number of samples (sa.samp)" )
+
+  sa.samp <- round( sa.samp )
+
+  if( is.null( model ) ) {
     out <- data.sensitivity( data )
-  else
-    if( inherits( model, "kriging-model" ) )
-      out <- kriging.sensitivity( data, model, krig.sa = krig.sa, sa.samp = sa.samp )
-    else
-      out <- polynomial.sensitivity( data, model, sa.samp = sa.samp )
+  } else {
+    if( inherits( model, "kriging.model.lsd" ) ) {
+      out <- kriging.sensitivity( data, model, krig.sa = krig.sa,
+                                  sa.samp = sa.samp )
+    } else {
+      if( inherits( model, "polynomial.model.lsd" ) )
+        out <- polynomial.sensitivity( data, model, sa.samp = sa.samp )
+      else
+        stop( "Invalid model (not from polynomial or kriging.model.lsd())" )
+    }
+  }
 
-    return( out )
+  return( out )
 }
 
 
@@ -68,7 +86,7 @@ data.sensitivity <- function( data, tries = 5 ) {
   cat( " Third:", colnames( data$doe )[ topEffect[ 3 ] ], "\n\n" )
 
   sa <- list( metamodel = metamodel, sa = sa, topEffect = topEffect )
-  class( sa ) <- "b-spline-sa"
+  class( sa ) <- "spline.sensitivity.lsd"
 
   return( sa )
 }

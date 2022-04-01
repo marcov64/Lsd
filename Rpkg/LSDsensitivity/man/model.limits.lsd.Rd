@@ -7,9 +7,9 @@ Find maximum and minimum meta-model responses
 This function identifies the maximum and minimum meta-model response values when exploring a subset of three meta-model factors (parameters): one at a time and jointly changing the first and the second factors. All the remaining factors are kept at default/calibration values.
 }
 \usage{
-model.limits.lsd( data, model, sa = NULL, factor1 = 1, factor2 = 2, factor3 = 3,
-                  pop.size = 1000, max.generations = 30, wait.generations = 10,
-                  precision = 1e-05, nnodes = 1 )
+model.limits.lsd( data, model, sa = NULL, factor1 = 1, factor2 = 2,
+                  factor3 = 3, pop.size = 1000, max.generations = 30,
+                  wait.generations = 10, precision = 1e-05, nnodes = 1 )
 }
 \arguments{
   \item{data}{

@@ -16,6 +16,11 @@ read.3d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
                          posit = NULL,
                          posit.match = c( "fixed", "glob", "regex" ) ) {
 
+  if( is.null( files ) || length( files ) == 0 || ! is.character( files ) ||
+      any( files == "" ) )
+
+  posit.match <- match.arg( posit.match )
+
   # ---- Function to read data files (can be parallelized) ----
 
   readFile <- function( file ) {
@@ -27,7 +32,6 @@ read.3d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
 
   # ---- Read files in parallel ----
 
-  posit.match <- match.arg( posit.match )
   n <- length( files )
 
   dataSet <- run.parallel( nnodes, n, files, readFile,
@@ -69,6 +73,19 @@ read.list.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
                            nnodes = 1, posit = NULL,
                            posit.match = c( "fixed", "glob", "regex" ) ) {
 
+  if( is.null( files ) || length( files ) == 0 || ! is.character( files ) ||
+      any( files == "" ) )
+    stop( "Invalid results file names (files)" )
+
+  if( is.null( pool ) || ! is.logical( pool ) )
+    stop( "Invalid pooling switch (pool)" )
+
+  if( is.null( nnodes ) || ! is.finite( nnodes ) || round( nnodes ) < 0 )
+    stop( "Invalid number of parallel computing nodes (nnodes)" )
+
+  nnodes <- round( nnodes )
+  posit.match <- match.arg( posit.match )
+
   # ---- Function to read data files (can be parallelized) ----
 
   readFile <- function( file ) {
@@ -80,7 +97,6 @@ read.list.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
 
   # ---- Read files in parallel ----
 
-  posit.match <- match.arg( posit.match )
   n <- length( files )
 
   dataSet <- run.parallel( nnodes, n, files, readFile,
@@ -122,6 +138,19 @@ read.4d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
                          check.names = TRUE, pool = FALSE, nnodes = 1,
                          posit = NULL,
                          posit.match = c( "fixed", "glob", "regex" ) ) {
+
+  if( is.null( files ) || length( files ) == 0 || ! is.character( files ) ||
+      any( files == "" ) )
+    stop( "Invalid results file names (files)" )
+
+  if( is.null( pool ) || ! is.logical( pool ) )
+    stop( "Invalid pooling switch (pool)" )
+
+  if( is.null( nnodes ) || ! is.finite( nnodes ) || round( nnodes ) < 0 )
+    stop( "Invalid number of parallel computing nodes (nnodes)" )
+
+  nnodes <- round( nnodes )
+  posit.match <- match.arg( posit.match )
 
   # ---- Function to read data files (can be parallelized) ----
 

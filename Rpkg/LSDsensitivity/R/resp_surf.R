@@ -14,6 +14,39 @@
 response.surface.lsd <- function( data, model, sa, gridSz = 25, defPos = 2,
                                   factor1 = 0, factor2 = 0, factor3 = 0 ) {
 
+  if( ! inherits( data, "doe.lsd" ) )
+    stop( "Invalid data (not from read.doe.lsd())" )
+
+  if( ! inherits( model, "kriging.model.lsd" ) &&
+      ! inherits( model, "polynomial.model.lsd" ) )
+    stop( "Invalid model (not from polynomial or kriging.model.lsd())" )
+
+  if( ! inherits( sa, "polynomial.sensitivity.lsd" ) &&
+      ! inherits( sa, "kriging.sensitivity.lsd" ) )
+    stop( "Invalid sensitivity analysis (not from sobol.decomposition.lsd())" )
+
+  if( is.null( gridSz ) || ! is.finite( gridSz ) || round( gridSz ) < 1 )
+    stop( "Invalid size of grid division (gridSz)" )
+
+  if( is.null( defPos ) || ! is.finite( defPos ) || round( defPos ) < 1 ||
+      round( defPos ) > 3 )
+    stop( "Invalid default 3D plot position (defPos)" )
+
+  if( is.null( factor1 ) || ! is.finite( factor1 ) || round( factor1 ) < 0 )
+    stop( "Invalid index for first factor (factor1)" )
+
+  if( is.null( factor2 ) || ! is.finite( factor2 ) || round( factor2 ) < 0 )
+    stop( "Invalid index for second factor (factor2)" )
+
+  if( is.null( factor3 ) || ! is.finite( factor3 ) || round( factor3 ) < 0 )
+    stop( "Invalid index for third factor (factor3)" )
+
+  gridSz <- round( gridSz )
+  defPos <- round( defPos )
+  factor1 <- round( factor1 )
+  factor2 <- round( factor2 )
+  factor3 <- round( factor3 )
+
   # check if use fixed or top factors
   if( factor1 != 0 )
     sa$topEffect[ 1 ] <- factor1
@@ -51,17 +84,26 @@ response.surface.lsd <- function( data, model, sa, gridSz = 25, defPos = 2,
 
 model.pred.lsd <- function( data.point, model ) {
 
+  if( ! is.data.frame( data.point ) )
+    stop( "Invalid data frame (data.point)" )
+
   x <- is.na( data.point[ 1, ] )
   if( length( x[ x == TRUE ] ) > 0 )
     return( NULL )
 
-  if( inherits( model, "kriging-model" ) ) {
+  if( inherits( model, "kriging.model.lsd" ) ) {
     out <- DiceKriging::predict( model$selected, data.point, type = "UK" )
     out <- list( mean = out$mean, lower = out$lower95, upper = out$upper95 )
   } else {
-    out <- stats::predict( model$selected, data.point, type = "response", interval = "confidence"  )
-    out <- list( mean = out[ , "fit" ], lower = out[ , "lwr" ], upper = out[ , "upr" ] )
+    if( inherits( model, "polynomial.model.lsd" ) ) {
+      out <- stats::predict( model$selected, data.point, type = "response",
+                             interval = "confidence"  )
+      out <- list( mean = out[ , "fit" ], lower = out[ , "lwr" ],
+                   upper = out[ , "upr" ] )
+    } else
+      stop( "Invalid model (not from polynomial or kriging.model.lsd())" )
   }
+
   return( out )
 }
 

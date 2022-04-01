@@ -39,7 +39,7 @@ polynomial.sensitivity <- function( data, model, sa.samp = 1000 ) {
   cat( " Third:", colnames( data$doe )[ topEffect[ 3 ] ], "\n\n" )
 
   sa <- list( metamodel = metamodel, sa = sa, topEffect = topEffect )
-  class( sa ) <- "polynomial-sa"
+  class( sa ) <- "polynomial.sensitivity.lsd"
 
   return( sa )
 }
@@ -50,6 +50,31 @@ polynomial.sensitivity <- function( data, model, sa.samp = 1000 ) {
 polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
                                   orderModel = 0, interactModel = 0,
                                   digits = 4 ) {
+
+  if( ! inherits( data, "doe.lsd" ) )
+    stop( "Invalid data (not from read.doe.lsd())" )
+
+  if( is.null( ext.wgth ) || ! is.finite( ext.wgth ) || ext.wgth < 0 )
+    stop( "Invalid weight of external validation sample (ext.wgth)" )
+
+  if( is.null( ols.sig ) || ! is.finite( ols.sig ) || ols.sig < 0 ||
+      ols.sig > 1 )
+    stop( "Invalid OLS regression significance (ols.sig)" )
+
+  if( is.null( orderModel ) || ! is.finite( orderModel ) ||
+      round( orderModel ) < 0 || round( orderModel ) > 2 )
+    stop( "Invalid model order (orderModel)" )
+
+  if( is.null( interactModel ) || ! is.finite( interactModel ) ||
+      round( interactModel ) < 0 || round( interactModel ) > 2 )
+    stop( "Invalid model interaction order (interactModel)" )
+
+  if( is.null( digits ) || ! is.finite( digits ) || round( digits ) < 0 )
+    stop( "Invalid significant digits (digits)" )
+
+  orderModel    <- round( orderModel )
+  interactModel <- round( interactModel )
+  digits        <- round( digits )
 
   # Check if external validation is available or use cross validation only
   if( is.null( data$valid ) ) onlyCross <- TRUE else onlyCross <- FALSE
@@ -251,7 +276,7 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
                  coefficients = coeff, coefficients.std = stdCoeff, order = orderModel,
                  polyNames = polyNames, interact = interactModel,
                  interactNames = interactNames )
-  class( model ) <- "polynomial-model"
+  class( model ) <- "polynomial.model.lsd"
 
   return( model )
 }

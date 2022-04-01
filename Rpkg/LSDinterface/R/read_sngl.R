@@ -16,6 +16,34 @@ read.raw.lsd <- function( file, nrows = -1, skip = 0, col.names = NULL,
                           instance = 0, posit = NULL,
                           posit.match = c( "fixed", "glob", "regex" ) ) {
 
+  if( is.null( file ) || ! is.character( file ) || file == "" )
+    stop( "Invalid results file name (file)" )
+
+  if( is.null( nrows ) || ! is.finite( nrows ) )
+    stop( "Invalid maximum number of time steps (nrows)" )
+
+  if( is.null( skip ) || ! is.finite( skip ) || round( skip ) < 0 )
+    stop( "Invalid number of time steps to skip (skip)" )
+
+  if( ! is.null( col.names ) && ( length( col.names ) == 0 ||
+                                  ! is.character( col.names ) ||
+                                  any( col.names == "" ) ) )
+    stop( "Invalid vector of variable names (col.names)" )
+
+  if( is.null( check.names ) || ! is.logical( check.names ) )
+    stop( "Invalid variable name check switch (check.names)" )
+
+  if( is.null( clean.names ) || ! is.logical( clean.names ) )
+    stop( "Invalid variable name clean switch (clean.names)" )
+
+  if( is.null( instance ) || ! is.finite( instance ) || round( instance ) < 0 )
+    stop( "Invalid variable instance (instance)" )
+
+  nrows       <- round( nrows )
+  skip        <- round( skip )
+  instance    <- round( instance )
+  posit.match <- match.arg( posit.match )
+
   # read header line (labels) from disk
   header <- readLines( file, n = 1, warn = FALSE )
   header <- unlist( strsplit( header, "\t", fixed = TRUE ) )
@@ -67,7 +95,7 @@ read.raw.lsd <- function( file, nrows = -1, skip = 0, col.names = NULL,
     dataSet <- select.colnames.lsd( dataSet, col.names = col.names,
                                     instance = instance,
                                     check.names = check.names, posit = posit,
-                                    posit.match = match.arg( posit.match ) )
+                                    posit.match = posit.match )
   }
 
   if( clean.names && ! is.null( dataSet ) ) {
@@ -88,11 +116,10 @@ read.single.lsd <- function( file, col.names = NULL, nrows = -1, skip = 0,
                              check.names = TRUE, instance = 1, posit = NULL,
                              posit.match = c( "fixed", "glob", "regex" ) ) {
 
-  # only single instance
-  if( ! is.numeric( instance ) || length( instance ) != 1 || instance <= 0 )
-    instance <- 1
-  else
-    instance < as.integer( instance )
+  if( is.null( instance ) || ! is.finite( instance ) || round( instance ) < 1 )
+    stop( "Invalid variable instance (instance)" )
+
+  instance <- round( instance )
 
   dataSet <- read.raw.lsd( file, nrows = nrows, skip = skip,
                            col.names = col.names, check.names = check.names,
@@ -110,6 +137,9 @@ read.multi.lsd <- function( file, col.names = NULL, nrows = -1, skip = 0,
                             posit.match = c( "fixed", "glob", "regex" ),
                             posit.cols = FALSE ) {
 
+  if( is.null( posit.cols ) || ! is.logical( posit.cols ) )
+    stop( "Invalid position information switch (posit.cols)" )
+
   # ---- Read data from file and remove artifacts ----
 
   dataSet <- read.raw.lsd( file, nrows = nrows, skip = skip, instance = 0,
@@ -124,7 +154,7 @@ read.multi.lsd <- function( file, col.names = NULL, nrows = -1, skip = 0,
   for( i in 1 : length( fixedLabels ) ) {
 
     # ---- Select only required columns ----
-browser()
+
     fieldData[[ i ]] <- select.colnames.lsd( dataSet, fixedLabels[ i ],
                                              instance = 0,
                                              check.names = check.names )
