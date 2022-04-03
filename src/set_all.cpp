@@ -1906,10 +1906,12 @@ design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
 	// write the doe table to disk
 	for ( j = 0; j < k; ++j )		// write variable labels
 		for ( h = 0; h < inst[ j ]; ++h )	// for all instances
-			fprintf( f, "%s%s%s%c", lab[ j ],
-					 h > 0 ? "." : "",
-					 h > 0 ? itoa( h + 1, buf, 10 ) : "",
-					 j == k - 1 && h == inst[ j ] - 1 ? '\n' : ',' );
+			if( h == 0 )
+				fprintf( f, "%s%c", lab[ j ],
+						 j == k - 1 && h == inst[ j ] - 1 ? '\n' : ',' );
+			else
+				fprintf( f, "%s.%d%c", lab[ j ], h + 1,
+						 j == k - 1 && h == inst[ j ] - 1 ? '\n' : ',' );
 
 	for ( i = 0; i < n; ++i )		// for all experiments
 		for ( j = 0; j < k; ++j )	// for all factors
