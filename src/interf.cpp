@@ -80,7 +80,7 @@ int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 27, 28, 30, 31, 32, 33, 36, 43,
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
-int redoChoices[ ] = { 32, 33, 55, 74, 75, 76, 77, 78, 79, 80, 83, 96 };
+int redoChoices[ ] = { 32, 33, 55, 73, 74, 75, 76, 77, 78, 79, 80, 83, 96 };
 #define NUM_REDO_CHOICES ( sizeof( redoChoices ) / sizeof( redoChoices[ 0 ] ) )
 
 // comparison function for bsearch and qsort
@@ -2934,6 +2934,14 @@ object *operate( object *r )
 
 	// Exit the browser and run the simulation
 	case 1:
+
+		if ( struct_loaded && strlen( simul_name ) == 0 )
+		{
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration not saved\" -detail \"Please save your current configuration before trying to run the simulation.\"" );
+
+			choice = 73;
+			return r;
+		}
 
 		if ( ! struct_loaded || strlen( simul_name ) == 0 )
 		{
