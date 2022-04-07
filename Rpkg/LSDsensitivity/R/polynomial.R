@@ -94,7 +94,7 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
   for( i in 1 : nrow( modelNames ) )
     for( j in 1 : ncol( modelNames ) ) {
       # Estimate polynomial model y = f(x)
-      lm <- fit.poly( data$resp$Mean, data$doe, resp.noise = data$resp$Variance,
+      lm <- fit.poly( data$resp[ , 1 ], data$doe, resp.noise = data$resp[ , 2 ],
                       order = i, interaction = j - 1 )
       models[[ i, j ]] <- lm$model
       R2[ i, j ] <- lm$R2
@@ -103,13 +103,13 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
       std.coeff[[ i, j ]] <- lm$std.coeff
 
       if( ! onlyCross ) {
-        rmse[ i, j ] <- rmse.poly( lm$model, data$valResp$Mean, data$valid )
-        mae[ i, j ] <- mae.poly( lm$model, data$valResp$Mean, data$valid )
-        rma[ i, j ] <- rma.poly( lm$model, data$valResp$Mean, data$valid )
+        rmse[ i, j ] <- rmse.poly( lm$model, data$valResp[ , 1 ], data$valid )
+        mae[ i, j ] <- mae.poly( lm$model, data$valResp[ , 1 ], data$valid )
+        rma[ i, j ] <- rma.poly( lm$model, data$valResp[ , 1 ], data$valid )
       } else {
-        rmse[ i, j ] <- rmse.poly( lm$model, data$resp$Mean, data$doe )
-        mae[ i, j ] <- mae.poly( lm$model, data$resp$Mean, data$doe )
-        rma[ i, j ] <- rma.poly( lm$model, data$resp$Mean, data$doe )
+        rmse[ i, j ] <- rmse.poly( lm$model, data$resp[ , 1 ], data$doe )
+        mae[ i, j ] <- mae.poly( lm$model, data$resp[ , 1 ], data$doe )
+        rma[ i, j ] <- rma.poly( lm$model, data$resp[ , 1 ], data$doe )
       }
     }
 
@@ -319,11 +319,12 @@ fit.poly <- function( response, doe, resp.noise = NULL,
     form <- paste( form, "+" )
   }
 
-  if( is.null( resp.noise ) || min( abs( resp.noise ), na.rm = TRUE ) == 0 ) {
+  if( is.null( resp.noise ) || ! all( is.finite( resp.noise / response ) ) ||
+      min( abs( resp.noise / response ) ) == 0 )
     weigths <- rep( 1, nrow( doe ) )
-  } else {
-    weigths <- 1 / resp.noise
-  }
+  else
+    weigths <- 1 / ( resp.noise / response )
+
   # fit bot using the normal and standardized vars
   fit <- stats::lm( formula = formulas[[ order, interaction + 1 ]],
                     data = doe, weights = weigths, na.action = stats::na.exclude )

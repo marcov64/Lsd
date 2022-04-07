@@ -14,9 +14,10 @@
 write.response <- function( folder, baseName, outVar = "", iniExp = 1, nExp = 1,
                             iniDrop = 0, nKeep = -1, pool = TRUE, instance = 1,
                             posit = NULL, posit.match = c( "fixed", "glob", "regex" ),
-                            na.rm = FALSE, conf = 0.95, saveVars = c(  ),
-                            addVars = c(  ), eval.vars = NULL, eval.run = NULL,
-                            rm.temp = TRUE, nnodes = 1, quietly = TRUE ) {
+                            na.rm = FALSE, conf = 0.95, saveVars = NULL,
+                            addVars = NULL, eval.vars = NULL, eval.run = NULL,
+                            median = FALSE, rm.temp = TRUE, nnodes = 1,
+                            quietly = TRUE ) {
 
   # evaluate new variables (not in LSD files) names
   nVarNew <- length( addVars )           # number of new variables to add
@@ -25,9 +26,6 @@ write.response <- function( folder, baseName, outVar = "", iniExp = 1, nExp = 1,
 
   if( nVar == 0 && nVarNew == 0 )
     stop( "No variable to be kept in the data set, at least one required" )
-
-  if( length( saveVars ) == 0 )
-    saveVars <- NULL
 
   if( length( outVar ) == 0 )           # no output var?
     outVar <- newNameVar[ 1 ]           # use first var
@@ -254,7 +252,7 @@ write.response <- function( folder, baseName, outVar = "", iniExp = 1, nExp = 1,
   varIdx <- match( outVar, newNameVar )
 
   # Process the DoE experiments
-  respAvg <- respVar <- vector( "numeric" )
+  respStat <- respDisp <- vector( mode = "numeric", length = nExp )
   tobs <- tdiscards <- 0
 
   for( k in 1 : nExp ) {
@@ -265,44 +263,65 @@ write.response <- function( folder, baseName, outVar = "", iniExp = 1, nExp = 1,
       resp <- eval.run( poolData, run = k, varIdx = varIdx, conf = conf  )
 
     } else {                            # default processing - just calculate
-      # the average of all runs and the MC SD
-      mAc <- vAc <- obs <- 0
-      for( j in 1 : nSize ) {
-        data <- poolData[[ k, varIdx, j ]]
-        m <- mean( data, na.rm = TRUE )
-        mAc <- mAc + m
-        vAc <- vAc + m ^ 2
-        obs <- obs + length( data[ ! is.na( data ) ] )
-      }
+      if( median ) {
+        med <- vector( mode = "numeric", length = nSize )
+        obs <- 0
+        for( j in 1 : nSize ) {
+          data <- poolData[[ k, varIdx, j ]]
+          med[ j ] <- stats::median( data, na.rm = TRUE )
+          obs <- obs + length( data[ ! is.na( data ) ] )
+        }
 
-      # avoid negative rounding errors
-      if( is.finite( vAc ) && is.finite( mAc ) ) {
-        mAc <- mAc / nSize
-        if( vAc / nSize < mAc ^ 2 )
-          sAc <- 0
-        else
-          sAc <- sqrt( vAc / nSize - mAc ^ 2 )
+        statAcc <- stats::median( med, na.rm = TRUE )
+        dispAcc <- stats::mad( med, na.rm = TRUE )
+
       } else {
-        mAc <- vAc <- sAc <- NA
+        # the average of all runs and the MC SD
+        statAcc <- varAcc <- obs <- 0
+        for( j in 1 : nSize ) {
+          data <- poolData[[ k, varIdx, j ]]
+          m <- mean( data, na.rm = TRUE )
+          statAcc <- statAcc + m
+          varAcc <- varAcc + m ^ 2
+          obs <- obs + length( data[ ! is.na( data ) ] )
+        }
+
+        # avoid negative rounding errors
+        if( is.finite( varAcc ) && is.finite( statAcc ) ) {
+          statAcc <- statAcc / nSize
+          if( varAcc / nSize < statAcc ^ 2 )
+            dispAcc <- 0
+          else
+            dispAcc <- sqrt( varAcc / nSize - statAcc ^ 2 )
+        } else {
+          statAcc <- dispAcc <- NA
+        }
       }
 
-      resp <- list( mAc, sAc, obs / nSize, 0 )
+      resp <- list( statAcc, dispAcc, obs / nSize, 0 )
       rm( data )
     }
 
-    respAvg[ k ] <- resp[[ 1 ]]
-    respVar[ k ] <- resp[[ 2 ]]
+    respStat[ k ] <- resp[[ 1 ]]
+    respDisp[ k ] <- resp[[ 2 ]]
     tobs <- tobs + resp[[ 3 ]]
     tdiscards <- tdiscards + resp[[ 4 ]]
   }
 
   # Write table to the disk as CSV file for Excel
-  tresp <- as.data.frame( cbind( respAvg, respVar ) )
-  colnames( tresp ) <- c( "Mean", "Variance" )
+  tresp <- as.data.frame( cbind( respStat, respDisp ) )
+
+  if( median ) {
+    colnames( tresp ) <- c( "Median", "MAD" )
+    respTag <- "median"
+  } else {
+    colnames( tresp ) <- c( "Mean", "SD" )
+    respTag <- "mean"
+  }
 
   if( ! rm.temp ) {
     respFile <- paste0( folder, "/", baseName, "_", iniExp, "_",
-                        iniExp + nExp - 1, "_", outVar, ".csv" )
+                        iniExp + nExp - 1, "_", respTag, "_", outVar, ".csv" )
 
     tryCatch( suppressWarnings( utils::write.csv( tresp,
                                                   respFile,

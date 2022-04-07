@@ -46,7 +46,7 @@ elementary.effects.lsd <- function( data, p = 4, jump = 2 ) {
   Bsup <- matrix( sa$bsup, nrow = nrow( data$doe ), ncol = length( sa$bsup ),
                   byrow = TRUE )
   sa$X <- ( data$doe - Binf ) / ( Bsup - Binf )
-  sa$y <- data$resp$Mean
+  sa$y <- data$resp[ , 1 ]
   rm( Binf, Bsup )
 
   # Call elementary effects analysis from sensitivity package

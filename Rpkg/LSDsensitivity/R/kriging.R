@@ -94,13 +94,13 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
   # x = doe is in data.frame format, and contains the DoE (n rows, k columns)
   # z = valid is in data.frame format, and contains the values of the factors at the
   # additional points (n rows, k columns)
-  # y = resp$Mean is in data.frame format, and contains the values of the response
-  # d at the n points of the DoE, averaged over the nSize replications (column is
+  # y = resp[ , 1 ] is in matrix format, and contains the values of the response
+  # d at the n points of the DoE, over the nSize replications (column is
   # named totDist, n rows)
-  # sigma = resp$Variance is a column of n rows, with contains the variance of the
+  # sigma = resp[ , 2 ] is a column of n rows, with contains the SD/MAD of the
   # response d over the nSize replications of each n experiments.
-  # w = valResp$Mean is in data.frame format, and contains the values of the
-  # response at the additional points (averaged over the nSize replications ).
+  # w = valResp[ , 1 ] is in matrix format, and contains the values of the
+  # response at the additional points (over the nSize replications ).
   #
 
   # ------ Best model estimation & selection ------
@@ -125,16 +125,16 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
 
   for( i in 1 : length( trendTypes ) )
     for( j in 1 : length( covTypes ) ) {
-      km <- fit.kriging( data$resp$Mean, data$doe, resp.noise = data$resp$Variance,
+      km <- fit.kriging( data$resp[ , 1 ], data$doe, resp.noise = data$resp[ , 2 ],
                          trials = maxTrials, trend.func = trendTypes[[ i ]],
                          cov.func = covTypes[ j ] )
       models[[ i, j ]] <- km$model
       Q2[ i, j ] <- km$Q2
 
       if( ! onlyCross ) {
-        rmse[ i, j ] <- rmse.kriging( km$model, data$valResp$Mean, data$valid )
-        mae[ i, j ] <- mae.kriging( km$model, data$valResp$Mean, data$valid )
-        rma[ i, j ] <- rma.kriging( km$model, data$valResp$Mean, data$valid )
+        rmse[ i, j ] <- rmse.kriging( km$model, data$valResp[ , 1 ], data$valid )
+        mae[ i, j ] <- mae.kriging( km$model, data$valResp[ , 1 ], data$valid )
+        rma[ i, j ] <- rma.kriging( km$model, data$valResp[ , 1 ], data$valid )
       }
     }
 
@@ -223,7 +223,7 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
     rmseStat <- rmse[ trendModel, covModel ]
     maeStat <- mae[ trendModel, covModel ]
     rmaStat <- rma[ trendModel, covModel ]
-    valExtN <- length( data$valResp$Mean )
+    valExtN <- nrow( data$valResp )
   }
   colnames( table ) <- covNames
 
@@ -288,7 +288,7 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
                   ncol = length( data$facLimUp ), byrow = TRUE )
   X.std <- ( data$doe - Binf ) / ( Bsup - Binf )
 
-  m.std <- fit.kriging( data$resp$Mean, X.std, resp.noise = data$resp$Variance,
+  m.std <- fit.kriging( data$resp[ , 1 ], X.std, resp.noise = data$resp[ , 2 ],
                         trials = maxTrials, trend.func = trendTypes[[ trendModel ]],
                         cov.func = covTypes[ covModel ] )$model
 
@@ -343,7 +343,8 @@ fit.kriging <- function( response, doe, resp.noise = NULL, trend.func = ~1,
     ok <- TRUE
     tryCatch( fit <- DiceKriging::km( design = doe, response = response,
                                       formula = trend.func, covtype = cov.func,
-                                      noise.var = resp.noise * ( scaleFactor ^ trial ),
+                                      noise.var = ( resp.noise ^ 2 ) *
+                                        ( scaleFactor ^ trial ),
                                       control = list( trace = FALSE,
                                                       print.level = 0 ) ),
               error = function( ex ) {
@@ -353,6 +354,7 @@ fit.kriging <- function( response, doe, resp.noise = NULL, trend.func = ~1,
                 ok <<- FALSE
               } )
   }
+
   if( trial == trials )
     stop( "Can't fit a model using function 'km', try removing outliers" )
 

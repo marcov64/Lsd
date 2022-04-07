@@ -54,17 +54,17 @@ remove.outliers <- function( doe, resp, limit ) {
     stop( "Design of Experiments and response files do not match" )
 
   # check for abnormal DoE sample averages
-  m <- mean( resp$Mean )
-  d <- stats::sd( resp$Mean ) * limit         # maximum deviation
-  outl <- which( resp$Mean > m + d | resp$Mean < m - d, arr.ind = TRUE )
+  m <- mean( resp[ , 1 ], na.rm = TRUE )
+  d <- stats::sd( resp[ , 1 ], na.rm = TRUE ) * limit    # maximum deviation
+  outl <- which( resp[ , 1 ] > m + d | resp[ , 1 ] < m - d, arr.ind = TRUE )
   if( length( outl ) > 0 ) {
     doe <- doe[ - outl, ]
     resp <- resp[ - outl, ]
   }
 
   # check for too much noise in DoE samples
-  m <- sqrt( mean( resp$Variance ) )
-  outl <- which( resp$Variance > m * limit, arr.ind = TRUE )
+  m <- sqrt( mean( resp[ , 2 ], na.rm = TRUE ) )
+  outl <- which( resp[ , 2 ] > m * limit, arr.ind = TRUE )
   if( length( outl ) > 0 ) {
     doe <- doe[ - outl, ]
     resp <- resp[ - outl, ]

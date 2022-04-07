@@ -10,10 +10,10 @@ This function reads the sampling data produced by a LSD model design of experime
 read.doe.lsd( folder, baseName, outVar = "", does = 1, doeFile = NULL,
               respFile = NULL, validFile = NULL, valRespFile = NULL,
               confFile = NULL, limFile = NULL, iniDrop = 0, nKeep = -1,
-              saveVars = c( ), addVars = c( ), eval.vars = NULL,
-              eval.run = NULL, pool = TRUE, na.rm = FALSE, rm.temp = TRUE,
-              rm.outl = FALSE, lim.outl = 10, nnodes = 1, quietly = TRUE,
-              instance = 1, posit = NULL,
+              saveVars = NULL, addVars = NULL, eval.vars = NULL,
+              eval.run = NULL, median = FALSE, pool = TRUE, na.rm = FALSE,
+              rm.temp = TRUE, rm.outl = FALSE, lim.outl = 10, nnodes = 1,
+              quietly = TRUE, instance = 1, posit = NULL,
               posit.match = c( "fixed", "glob", "regex" ) )
 }
 \arguments{
@@ -54,16 +54,19 @@ integer: the number of initial time steps to drop from analysis (from \code{t = 
 integer: the total number of time steps to keep after \code{iniDrop}, if simulation length is longer than \code{nKeep} discard data from the end of the simulation. The default (-1) is to preserve all data.
 }
   \item{saveVars}{
-a vector of existing LSD variable names to be kept in the data set. The default (\code{c()}) is to save just \code{outVar}, if supplied. At least one existing or new variable (defined by \code{addVars}) must exist. \code{saveVars} also defines the variables which are available for processing by the function defined by \code{eval.vars}, the default \code{saveVars = c()} representing all variables in the results files. For large datasets, this parameter allow reducing the memory required by not loading unnecessary data into memory.
+a vector of existing LSD variable names to be kept in the data set. The default (\code{NULL}) is to save just \code{outVar}, if supplied. At least one existing or new variable (defined by \code{addVars}) must exist. \code{saveVars} also defines the variables which are available for processing by the function defined by \code{eval.vars}, the default \code{saveVars = c()} representing all variables in the results files. For large datasets, this parameter allow reducing the memory required by not loading unnecessary data into memory.
 }
   \item{addVars}{
-a vector of new LSD variable names to be added to the data set. The default (\code{c()}) is to add none. At least one existing or new variable must exist.
+a vector of new LSD variable names to be added to the data set. The default (\code{NULL}) is to add none. At least one existing or new variable must exist.
 }
   \item{eval.vars}{
 a function to recalculate any item of the imported data set, including added variables. The default (NULL) is to have no function (just use selected existing variables as is). If defined, function must take two arguments: the data set for a specific DoE point (time steps in the rows) and the list of variables (columns) in the data set. The function may change any value within the data set but \emph{should not} add or remove rows or columns.
 }
   \item{eval.run}{
-a function to evaluate the DoE response for each experimental sampling point, attributing an optional value to it. The default (NULL) is to have no function (use the selected variable Monte Carlo mean and standard deviation to value the point). If defined, function must take four arguments: (a) the data set (a 3-dimensional array of lists, the numbers of the DoE sampling points in the first dimension, variables in the second, and Monte Carlo runs in the in the third, being each list element a vector with all time-step values for that sample/variable/MC run), (b) the number of the DoE sampling point to evaluate, (c) the index to the analysis variable in the data set, and (d) the applicable confidence interval. The function must return a R list containing four values for the selected sampling point/variable pair: (a) the average value for the response, (b) the response standard deviation, (c) the the number of observations used, and (d) the number of observations discarded.
+a function to evaluate the DoE response for each experimental sampling point, attributing an optional value to it. The default (NULL) is to have no function. In this case, the function uses the selected variable Monte Carlo mean and standard deviation, or the median and the median absolute deviation if \code{median = TRUE}, to value the point. If defined, function must take four arguments: (a) the data set (a 3-dimensional array of lists, the numbers of the DoE sampling points in the first dimension, variables in the second, and Monte Carlo runs in the in the third, being each list element a vector with all time-step values for that sample/variable/MC run), (b) the number of the DoE sampling point to evaluate, (c) the index to the analysis variable in the data set, and (d) the applicable confidence interval. The function must return a R list containing four values for the selected sampling point/variable pair: (a) the average value for the response, (b) the response standard deviation, (c) the the number of observations used, and (d) the number of observations discarded.
+}
+  \item{median}{
+logical: indicating, if (\code{TRUE}), that the median and the median absolute deviation should be used to evaluate the DoE response when \code{eval.run = NULL}. The default (\code{FALSE}) is to use the mean and the standard deviation. If an evaluation function is provided in \code{eval.run}, this option is ignored.
 }
   \item{na.rm}{
 logical: if TRUE NA values are stripped before the computation proceeds.

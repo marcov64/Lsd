@@ -49,12 +49,12 @@ data.sensitivity <- function( data, tries = 5 ) {
 
   # ---- Sensitivity analysis using a B-spline smoothing interpolation model ----
 
-  metamodel <- try( sensitivity::sobolSmthSpl( as.matrix( data$resp$Mean ), data$doe ),
+  metamodel <- try( sensitivity::sobolSmthSpl( as.matrix( data$resp[ , 1 ] ), data$doe ),
                     silent = TRUE )
 
   # try a few times, as it usually succeeds...
   while( inherits( metamodel, "try-error" ) && tries > 0 ) {
-    metamodel <- try( sensitivity::sobolSmthSpl( as.matrix( data$resp$Mean ), data$doe ),
+    metamodel <- try( sensitivity::sobolSmthSpl( as.matrix( data$resp[ , 1 ] ), data$doe ),
                       silent = TRUE )
     tries <- tries - 1
     if( ! inherits( metamodel, "try-error" ) )
