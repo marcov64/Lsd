@@ -7,8 +7,9 @@ Stationarity and ergodicity tests
 Perform a set of stationarity and ergodicity tests useful for simulation model data from a Monte Carlo experiment time series. The included tests are: Augmented Dickey-Fuller test (ADF), Phillips-Perron test (PP),  Kwiatkowski-Phillips-Schmidt-Shin test (KPSS), Brock-Dechert-Scheinkman test (BDS), Kolmogorov-Smirnov k-sample test (KS), Anderson-Darling k-sample test (AD) and Wald-Wolfowitz k-sample test (WW).
 }
 \usage{
-ergod.test.lsd( data, vars = names( data[ 1, , 1 ] ), start.period = 0,
-                signif = 0.05, digits = 2, ad.method = "asymptotic" )
+ergod.test.lsd( data, vars = dimnames( data )[[ 2 ]],
+                start.period = 0, signif = 0.05, digits = 2,
+                ad.method = c( "asymptotic", "simulated", "exact" ) )
 }
 \arguments{
   \item{data}{

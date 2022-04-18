@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@ function check_html5( ) {
 function download_config( ) {
     // get the list of configuration values on the page
     var config = read_config( );
-    
+
     // prepare to launch download when file is ready on the server
     var xhttp = new XMLHttpRequest( );
     xhttp.onreadystatechange = function( ) {
@@ -46,7 +46,7 @@ function download_config( ) {
     // request the server to save configuration to the server disk
     xhttp.open( "POST", "download_config.php", true );
     xhttp.setRequestHeader( "Content-type", "application/x-www-form-urlencoded" );
-    xhttp.send( "x=" + JSON.stringify( config ) );        
+    xhttp.send( "x=" + JSON.stringify( config ) );
 }
 
 
@@ -79,15 +79,15 @@ function run_sim( ) {
     if ( run_done ) {
         if ( ! window.confirm( "Overwrite results from previous execution?\n\nAll previously produced results will be lost." ) ) {
             return;
-        }       
+        }
     }
-    
+
     // get the list of configuration values on the page
     var config = read_config( );
-    
+
     var xhttp = new XMLHttpRequest( );
     xhttp.onreadystatechange = function( ) {
-        if ( this.responseText.substring( 0, 6 ) === "Error:" || 
+        if ( this.responseText.substring( 0, 6 ) === "Error:" ||
              this.responseText.substring( 0, 5 ) === "Busy:" ) {
             status_stop( );
             document.getElementById( "status" ).innerHTML = this.responseText;
@@ -120,7 +120,7 @@ function run_sim( ) {
 
     xhttp.open( "POST", "run_sim.php", true );
     xhttp.setRequestHeader( "Content-type", "application/x-www-form-urlencoded" );
-    xhttp.send( "x=" + JSON.stringify( config ) );            
+    xhttp.send( "x=" + JSON.stringify( config ) );
 }
 
 
@@ -129,23 +129,23 @@ function abort_sim( ) {
     if ( statusID === null && chronoID === null ) {
         return;
     }
-    
+
     // workaround for Mac servers that are unable to notify end of simulation
     if ( abort ) {
         reset_session( "The server is not responding" );
         return;
     }
-    
+
     if ( ! window.confirm( "Abort simulation execution?\n\nAll results produced so far will be lost." ) ) {
         return;
     }
-    
+
     abort = true;
-    
+
     // request the server to create abort file in the server disk
     var xhttp = new XMLHttpRequest( );
     xhttp.open( "GET", "abort_sim.php", true );
-    xhttp.send( );            
+    xhttp.send( );
 }
 
 
@@ -162,7 +162,7 @@ function show_log( ) {
                 for ( x in resp ) {
                     text += resp[ x ];
                 }
-                log.onload = function( ) { 
+                log.onload = function( ) {
                     log.document.getElementById( "log_text" ).innerHTML = text.replace( new RegExp( '\r?\n', 'g' ), '<br/>' );
                 };
             } else {
@@ -173,7 +173,7 @@ function show_log( ) {
 
     // request the server to get log from the server disk (sync mode because of Safari)
     xhttp.open( "GET", "show_log.php", false );
-    xhttp.send( );        
+    xhttp.send( );
 }
 
 
@@ -196,7 +196,7 @@ function download_res( ) {
 
     // request the server to get results from the server disk
     xhttp.open( "GET", "download_res.php", true );
-    xhttp.send( );        
+    xhttp.send( );
 }
 
 
@@ -204,8 +204,8 @@ function download_res( ) {
 function reset_session( msg ) {
     if ( ! window.confirm( "Reset current session?\n\n" + msg + "." ) ) {
         return;
-    }   
-        
+    }
+
     var xhttp = new XMLHttpRequest( );
     xhttp.onreadystatechange = function( ) {
         if ( this.readyState === 4 && this.status === 200 ) {
@@ -214,14 +214,14 @@ function reset_session( msg ) {
     };
 
     xhttp.open( "GET", "reset_session.php", true );
-    xhttp.send( );            
+    xhttp.send( );
 }
 
 
 // read the current configuration input values from page
 function read_config( ) {
     var config = new Object( );
-    
+
     // get the pre set list of configuration elements on page
     var div_php = document.getElementById( "elem_in_names" );
     var elem_names = JSON.parse( div_php.getAttribute( "data-lwi-in" ) );
@@ -251,7 +251,7 @@ function send_and_clear( msg, name, email, text ) {
     message.name = document.getElementById( name ).value;
     message.email = document.getElementById( email ).value;
     message.text = document.getElementById( text ).value;
-    
+
     // prepare to launch download when file is ready on the server
     var xhttp = new XMLHttpRequest( );
     xhttp.onreadystatechange = function( ) {
@@ -266,7 +266,7 @@ function send_and_clear( msg, name, email, text ) {
     // request the server to save configuration to the server disk
     xhttp.open( "POST", "contact.php", true );
     xhttp.setRequestHeader( "Content-type", "application/x-www-form-urlencoded" );
-    xhttp.send( "x=" + JSON.stringify( message ) );        
+    xhttp.send( "x=" + JSON.stringify( message ) );
 }
 
 
@@ -282,7 +282,7 @@ function plot_chart( canv, lab, tval, dat, opt, lim ) {
     var limits_php = document.getElementById( lim );
     var min = Number( JSON.parse( limits_php.getAttribute( "data-min" ) ) );
     var max = Number( JSON.parse( limits_php.getAttribute( "data-max" ) ) );
-    
+
     // get the data set by PHP
     var label_php = document.getElementById( lab );
     var label = JSON.parse( label_php.getAttribute( "data-labels" ) );
@@ -294,11 +294,11 @@ function plot_chart( canv, lab, tval, dat, opt, lim ) {
     var dataset_hi = JSON.parse( dataset_php.getAttribute( "data-datasets_hi" ) );
     var dataset_min = JSON.parse( dataset_php.getAttribute( "data-datasets_min" ) );
     var dataset_max = JSON.parse( dataset_php.getAttribute( "data-datasets_max" ) );
-    
+
     if ( canv === null || label === null || t_value === null || dataset === null ) {
         return false;
     }
-    
+
     // create the plot data object
     var i, ds, series, color, c = 0, datasets = [ ];
     for ( i in dataset ) {
@@ -316,13 +316,13 @@ function plot_chart( canv, lab, tval, dat, opt, lim ) {
             pointHitRadius: 10,
             pointRadius: 0
         };
-        
+
         ds = datasets.length;
         datasets.push( series );
-        
+
         // add confidence bands if required
         if ( ci && dataset_lo.length !== 0 && dataset_hi.length !== 0 ) {
-            
+
             series = {
                 label: label[ i ] + "_ci+",
                 type: "line",
@@ -335,9 +335,9 @@ function plot_chart( canv, lab, tval, dat, opt, lim ) {
                 pointHitRadius: 0,
                 pointRadius: 0
             };
-            
+
             datasets.push( series );
-            
+
             series = {
                 label: label[ i ] + "_ci-",
                 type: "line",
@@ -350,13 +350,13 @@ function plot_chart( canv, lab, tval, dat, opt, lim ) {
                 pointHitRadius: 0,
                 pointRadius: 0
            };
-            
+
             datasets.push( series );
-        }      
-        
+        }
+
         // add confidence bands if required
         if ( mm && dataset_min.length !== 0 && dataset_max.length !== 0 ) {
-            
+
             series = {
                 label: label[ i ] + "_max",
                 type: "line",
@@ -369,9 +369,9 @@ function plot_chart( canv, lab, tval, dat, opt, lim ) {
                 pointHitRadius: 0,
                 pointRadius: 0
             };
-            
+
             datasets.push( series );
-            
+
             series = {
                 label: label[ i ] + "_min",
                 type: "line",
@@ -384,17 +384,17 @@ function plot_chart( canv, lab, tval, dat, opt, lim ) {
                 pointHitRadius: 0,
                 pointRadius: 0
            };
-            
+
             datasets.push( series );
         }
-        
-        
+
+
         ++c;
         if ( c >= Object.keys( colors ).length ) {
             c = 0;
         }
     }
-    
+
     // create the global options object
     var options = {
         maintainAspectRatio: false,
@@ -448,19 +448,19 @@ function plot_chart( canv, lab, tval, dat, opt, lim ) {
             backgroundColor: colors.white
         }
     };
-    
+
     if ( ! auto ) {
         options.scales.y.min = min;
         options.scales.y.max = max;
     }
-    
+
     console.log( min );
-    
+
     Chart.defaults.font.size = 16;
-    
+
     // plot
     var plot = new Chart( canv, {
-		type: "line",
+        type: "line",
         options: options,
         data: {
             labels: t_value,
@@ -481,8 +481,8 @@ function plot_chart( canv, lab, tval, dat, opt, lim ) {
                 }
             }
         }]
-    } );    
-    
+    } );
+
     return true;
 }
 
@@ -545,17 +545,17 @@ function status( ) {
     if ( statusID === null || chronoID === null ) {
         return;
     }
-    
+
     if ( abort ) {
         statusID.innerHTML = "Aborting ...";
         return;
     }
-    
-    var diff = new Date( Date.now( ) - start ); 
+
+    var diff = new Date( Date.now( ) - start );
     var sec = diff.getUTCSeconds( );
     var min = diff.getUTCMinutes( );
     var hr = diff.getUTCHours( );
-    
+
     // check status only each 5 seconds
     if ( ( sec + 1 ) % 5 === 0 ) {
         var xhttp = new XMLHttpRequest( );
@@ -571,6 +571,12 @@ function status( ) {
         xhttp.send( );
     }
 
+    if( ( hr > 0 || min > 0 ) && pdone == 0 ) {
+        statusID.innerHTML = "Simulation running ... (no progress info)";
+    } else {
+        statusID.innerHTML = "Simulation running ... (" + pdone + "% done)";
+    }
+
     // nice format digits
     if ( min < 10 ) {
         min = "0" + min;
@@ -578,8 +584,7 @@ function status( ) {
     if ( sec < 10 ) {
         sec = "0" + sec;
     }
-    
-    statusID.innerHTML = "Simulation running ... (" + pdone + "% done)";
+
     chronoID.innerHTML = hr + "h" + min + "min" + sec + "s";
     timerID = window.setTimeout( status, 1000 );
 }
@@ -606,7 +611,7 @@ function format_date( date ) {
         day = "0" + day;
     }
     year = year.toString().substr( 2, 2 );
-    
+
     return day + " " + monthNames[ monthIndex ] + " " + year + ",  " + hour + ":" + min;
 }
 

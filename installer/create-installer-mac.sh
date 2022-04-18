@@ -19,7 +19,7 @@
 #**************************************************************
 
 LSD_VER_NUM="8.0"
-LSD_VER_TAG="beta-4"
+LSD_VER_TAG="beta-5"
 
 if [ "$1" = "-h" ]; then
 	echo "Create LSD installer for macOS"

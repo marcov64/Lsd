@@ -673,11 +673,12 @@ Wages include unemployment benefits (if available) but not bonuses.
 Income includes wages and bonuses.
 */
 
-double _In, _w, _wR, _wS, InSum, InLogSum, InSqLogSum, InMax, InMin,
-	   rank1wSum, wRank1Sum, rank2InSum, InRank2Sum, wAvgReal, wLogSD,
+double _In, _w, _wR, _wS, 
+	   Gini, InSum, InLogSD, InLogSum, InSqLogSum, InMax, InMin,
+	   rank1wSum, wRank1Sum, rank2InSum, InRank2Sum, wAvgReal, wGini, wLogSD,
 	   wSum, wLogSum, wSqLogSum, wMax, wMin,
-	   wsSum, wsLogSum, wsSqLogSum, wsMax, wsMin,
-	   wrSum, wrLogSum, wrSqLogSum, wrMax, wrMin;
+	   wsSum, wsLogSum, wsSqLogSum, wsMax, wsMin, wsLogSD,
+	   wrSum, wrLogSum, wrSqLogSum, wrMax, wrMin, wrLogSD;
 
 int agtN, empN, wrkN;
 double GDPdefl = VS( MACSTAL2, "GDPdefl" );		// GDP deflator
@@ -759,17 +760,29 @@ for ( rank2InSum = InRank2Sum = k = 0; k < agtN; ++k )
 	InRank2Sum += rank2[ k ];
 }
 
-double wGini = ( double ) ( empN + 1 ) / ( empN - 1 ) -
-			   2 * rank1wSum / ( ( empN - 1 ) * wRank1Sum );
-double Gini = ( double ) ( agtN + 1 ) / ( agtN - 1 ) -
-			   2 * rank2InSum / ( ( agtN - 1 ) * InRank2Sum );
+if ( empN > 1 && wRank1Sum > 0 )
+	wGini = ( double ) ( empN + 1 ) / ( empN - 1 ) -
+			2 * rank1wSum / ( ( empN - 1 ) * wRank1Sum );
+else
+	wGini = 0;
 
-double InLogSD = sqrt( max( ( InSqLogSum / wrkN ) -
-							pow( InLogSum / wrkN, 2 ), 0 ) );
-double wrLogSD = sqrt( max( ( wrSqLogSum / wrkN ) -
-							pow( wrLogSum / wrkN, 2 ), 0 ) );
-double wsLogSD = sqrt( max( ( wsSqLogSum / wrkN ) -
-							pow( wsLogSum / wrkN, 2 ), 0 ) );
+if ( agtN > 1 && InRank2Sum > 0 )
+	Gini = ( double ) ( agtN + 1 ) / ( agtN - 1 ) -
+		   2 * rank2InSum / ( ( agtN - 1 ) * InRank2Sum );
+else
+	Gini = 0;
+
+if ( wrkN > 0 )
+{
+	InLogSD = sqrt( max( ( InSqLogSum / wrkN ) -
+						 pow( InLogSum / wrkN, 2 ), 0 ) );
+	wrLogSD = sqrt( max( ( wrSqLogSum / wrkN ) -
+						 pow( wrLogSum / wrkN, 2 ), 0 ) );
+	wsLogSD = sqrt( max( ( wsSqLogSum / wrkN ) -
+						 pow( wsLogSum / wrkN, 2 ), 0 ) );
+}
+else
+	InLogSD = wrLogSD = wsLogSD = 0;
 
 if ( empN > 0 )
 {

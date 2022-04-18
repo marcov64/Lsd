@@ -80,7 +80,7 @@ int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 27, 28, 30, 31, 32, 33, 36, 43,
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
-int redoChoices[ ] = { 32, 33, 55, 74, 75, 76, 77, 78, 79, 80, 83, 96 };
+int redoChoices[ ] = { 32, 33, 55, 73, 74, 75, 76, 77, 78, 79, 80, 83, 96 };
 #define NUM_REDO_CHOICES ( sizeof( redoChoices ) / sizeof( redoChoices[ 0 ] ) )
 
 // comparison function for bsearch and qsort
@@ -849,7 +849,7 @@ int browse( object *r )
 			cmd( "$w add command -label \"Import Descriptions\" -underline 0 -command { set choice 43 }" );	// entryconfig 13
 
 			cmd( "$w add separator" );	// entryconfig 14
-			
+
 			cmd( "set strWindowChk $strWindowOn" );
 			cmd( "$w add checkbutton -label \"Enable Structure Window\" -underline 17 -accelerator Ctrl+Tab -variable strWindowChk -command { set choice 70 }" );	// entryconfig 15
 			cmd( "$w add checkbutton -label \"Ignore Equation File\" -underline 0 -variable ignore_eq_file -command { set choice 54 }" );	// entryconfig 16
@@ -1128,7 +1128,7 @@ object *operate( object *r )
 	char observe, initial, *lab0;
 	const char *lab1, *lab2, *lab3, *lab4;
 	char lab[ MAX_BUFF_SIZE ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_LINE_SIZE ], ch1[ MAX_ELEM_LENGTH ], NOLHfile[ MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], nw_exe[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ], buf_descr[ MAX_BUFF_SIZE ];
-	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, temp[ 10 ], done = 0;
+	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, temp[ 11 ], done = 0;
 	long nLinks, ptsSa, maxMC;
 	double fracMC, fake = 0;
 	FILE *f;
@@ -2935,6 +2935,14 @@ object *operate( object *r )
 	// Exit the browser and run the simulation
 	case 1:
 
+		if ( struct_loaded && strlen( simul_name ) == 0 )
+		{
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration not saved\" -detail \"Please save your current configuration before trying to run the simulation.\"" );
+
+			choice = 73;
+			return r;
+		}
+
 		if ( ! struct_loaded || strlen( simul_name ) == 0 )
 		{
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to run the simulation.\"" );
@@ -3369,7 +3377,8 @@ object *operate( object *r )
 		temp[ 6 ] = prof_min_msecs;
 		temp[ 7 ] = prof_obs_only;
 		temp[ 8 ] = prof_aggr_time;
-		temp[ 9 ] = parallel_disable;
+		temp[ 9 ] = no_ptr_chk;
+		temp[ 10 ] = parallel_disable;
 
 		Tcl_LinkVar( inter, "sim_num", ( char * ) & sim_num, TCL_LINK_INT );
 		Tcl_LinkVar( inter, "seed", ( char * ) & seed, TCL_LINK_INT );
@@ -3378,6 +3387,7 @@ object *operate( object *r )
 		Tcl_LinkVar( inter, "prof_min_msecs", ( char * ) & prof_min_msecs, TCL_LINK_INT );
 		Tcl_LinkVar( inter, "prof_obs_only", ( char * ) & prof_obs_only, TCL_LINK_BOOLEAN );
 		Tcl_LinkVar( inter, "prof_aggr_time", ( char * ) & prof_aggr_time, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( inter, "no_ptr_chk", ( char * ) & no_ptr_chk, TCL_LINK_BOOLEAN );
 		Tcl_LinkVar( inter, "parallel_disable", ( char * ) & parallel_disable, TCL_LINK_BOOLEAN );
 
 		cmd( "set tw 28" );					// text label width
@@ -3429,15 +3439,16 @@ object *operate( object *r )
 
 		cmd( "ttk::checkbutton $T.c.obs -text \"Profile observed variables only\" -variable prof_obs_only" );
 		cmd( "ttk::checkbutton $T.c.aggr -text \"Show aggregated profiling times\" -variable prof_aggr_time" );
+		cmd( "ttk::checkbutton $T.c.nchk -text \"Disable pointer checks\" -variable no_ptr_chk -state %s", no_pointer_check ? "disabled" : "normal" );
 
-	#ifndef _NP_
+#ifndef _NP_
 		cmd( "ttk::checkbutton $T.c.npar -text \"Disable parallel computation\" -variable parallel_disable" );
 		if ( ! search_parallel( root ) || max_threads < 2 )
 			cmd( "$T.c.npar configure -state disabled" );
-		cmd( "pack $T.c.obs $T.c.aggr $T.c.npar -anchor w" );
-	#else
-		cmd( "pack $T.c.obs $T.c.aggr -anchor w" );
-	#endif
+		cmd( "pack $T.c.obs $T.c.aggr $T.c.nchk $T.c.npar -anchor w" );
+#else
+		cmd( "pack $T.c.obs $T.c.aggr $T.c.nchk -anchor w" );
+#endif
 
 		cmd( "pack $T.f $T.c -padx 5 -pady 5" );
 
@@ -3477,11 +3488,12 @@ object *operate( object *r )
 			prof_min_msecs = temp[ 6 ];
 			prof_obs_only = temp[ 7 ];
 			prof_aggr_time = temp[ 8 ];
-			parallel_disable = temp[ 9 ];
+			no_ptr_chk = temp[ 9 ];
+			parallel_disable = temp[ 10 ];
 		}
 		else
 			// signal unsaved change if anything to be saved
-			if ( temp[ 1 ] != sim_num || ( unsigned ) temp[ 2 ] != seed || temp[ 3 ] != max_step || temp[ 4 ] != when_debug || temp[ 5 ] != stack_info || temp[ 6 ] != prof_min_msecs || temp[ 7 ] != prof_obs_only || temp[ 8 ] != prof_aggr_time || temp[ 9 ] != parallel_disable )
+			if ( temp[ 1 ] != sim_num || ( unsigned ) temp[ 2 ] != seed || temp[ 3 ] != max_step || temp[ 4 ] != when_debug || temp[ 5 ] != stack_info || temp[ 6 ] != prof_min_msecs || temp[ 7 ] != prof_obs_only || temp[ 8 ] != prof_aggr_time || temp[ 9 ] != no_ptr_chk || temp[ 10 ] != parallel_disable )
 				unsaved_change( true );
 
 		Tcl_UnlinkVar( inter, "sim_num" );
@@ -3491,6 +3503,7 @@ object *operate( object *r )
 		Tcl_UnlinkVar( inter, "prof_min_msecs" );
 		Tcl_UnlinkVar( inter, "prof_obs_only" );
 		Tcl_UnlinkVar( inter, "prof_aggr_time" );
+		Tcl_UnlinkVar( inter, "no_ptr_chk" );
 		Tcl_UnlinkVar( inter, "parallel_disable" );
 
 	break;
@@ -5847,7 +5860,7 @@ object *operate( object *r )
 	// Start NO WINDOW job as a separate background process
 	case 69:
 
-	#ifndef _NP_
+#ifndef _NP_
 
 		// check if background are not being run already
 		if ( parallel_monitor )
@@ -5864,7 +5877,7 @@ object *operate( object *r )
 			}
 		}
 
-	#endif
+#endif
 
 		// check a model is already loaded
 		if ( ! struct_loaded || strlen( simul_name ) == 0 || strlen( struct_file ) == 0 )
@@ -5931,11 +5944,11 @@ object *operate( object *r )
 		if ( no_tot )
 			no_res = false;
 
-	#ifdef _NP_
+#ifdef _NP_
 		param = 1;
-	#else
+#else
 		param = min( sim_num, max_threads );
-	#endif
+#endif
 
 		cmd( "set simNum %d", sim_num );
 		cmd( "set firstFile \"%s_%d\"", simul_name, seed );
@@ -6160,19 +6173,19 @@ object *operate( object *r )
 		if ( strlen( path ) > 0 )
 			cmd( "cd $path" );
 
-	#ifdef _NP_
+#ifdef _NP_
 
 		snprintf( lab, MAX_PATH_LENGTH, "%s.log", simul_name );
 		cmd( "catch { exec %s -f %s%s%s%s%s%s%s%s -l %s & }", nw_exe, struct_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", dobar ? " -b" : "", subDir ? " -o " : "", subDir ? out_dir : "", lab );
 		run_logs.clear( );
 		run_logs.push_back( lab );
 
-	#else
+#else
 
 		plog( "\n\nProcessing parallel background run (threads=%d runs=%d)...", nature, param );
 		run_parallel( false, nw_exe, simul_name, seed, sim_num, nature, param );
 
-	#endif
+#endif
 
 		show_logs( path, run_logs, true );
 
@@ -6507,7 +6520,7 @@ object *operate( object *r )
 	// present parallel run log
 	case 8:
 
-	#ifndef _NP_
+#ifndef _NP_
 
 		// destroy monitor thread
 		if ( run_monitor.joinable( ) )
@@ -6516,7 +6529,7 @@ object *operate( object *r )
 		plog( "\n%s\n", run_log.c_str( ) );
 		plog( "Finished parallel background run\n" );
 
-	#endif
+#endif
 
 	break;
 

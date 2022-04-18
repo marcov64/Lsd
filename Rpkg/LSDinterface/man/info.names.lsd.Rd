@@ -19,7 +19,9 @@ Returns a character vector containing the names of all unique variables containe
 }
 \author{Marcelo C. Pereira}
 \note{
-Not all names can be automatically reconverted to the original LSD names. The conversion may be incorrect if the original LSD variable is named in the format "X_...".
+Not all names can be automatically reconverted to the original LSD names, using LSD/C++ naming conventions.
+
+The conversion may be incorrect if the original LSD variable is named in the format "X_...".
 }
 \seealso{
 \code{\link{list.files.lsd}()}

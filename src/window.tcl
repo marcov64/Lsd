@@ -551,9 +551,15 @@ proc sizetop { { w all } } {
 				}
 
 				.str {
-					set posXstr [ expr { [ winfo x . ] + $corrX + $hmargin + [ winfo width . ] - 2 * $bordsize } ]
-					set posYstr [ expr { [ winfo y . ] + $corrY } ]
-					set defGeom "${hsizeM}x${vsizeM}+${posXstr}+${posYstr}"
+					if { [ winfo screenwidth $w ] - ( [ winfo x . ] + [ winfo width . ] + 2 * $bordsize ) >= $hsizeM + $hmargin } {
+						set X [ expr { [ winfo x . ] + [ winfo width . ] + 2 * $bordsize + $corrX + $hmargin } ]
+					} elseif { [ winfo x . ] >= $hsizeM + $hmargin } {
+						set X [ expr { [ winfo x . ] + $corrX - $hsizeM - $hmargin } ]
+					} else {
+						set X [ getx .str centerW ]
+					}
+
+					set defGeom "${hsizeM}x${vsizeM}+${X}+[ gety .str righttoM ]"
 
 					# handle the extra scaling parameters
 					set geom [ split [ checkgeom $strGeom $defGeom $screenWidth $screenHeight ] ":" ]
@@ -804,10 +810,25 @@ proc align { w1 w2 { side R } } {
 
 
 #************************************************
+# MAXIMIZED
+# Check if window is maximized
+#************************************************
+proc maximized { w } {
+
+	if { [ wm state $w ] eq "zoomed" || [ wm attributes $w -fullscreen ] } {
+		return true
+	} else {
+		return false
+	}
+}
+
+
+#************************************************
 # PRIMDISP
-# check if window center is in primary display
+# check if window top-left corner is in primary display
 #************************************************
 proc primdisp w {
+
 	if { [ winfo rootx $w ] > 0 && [ winfo rootx $w ] < [ winfo screenwidth $w ] && [ winfo rooty $w ] > 0 && [ winfo rooty $w ] < [ winfo screenheight $w ] } {
 		return true
 	} else {
@@ -826,6 +847,14 @@ proc getx { w pos } {
 	set par [ winfo parent $w ]
 	if { $par == "" } {
 		set par .
+	}
+
+	if { ( [ maximized $par ] || ! [ primdisp $par ] ) && ( $pos eq "righttoW" || $pos eq "lefttoW" || $pos eq "righttoM" ) } {
+		if [ winfo viewable $par ] {
+			set pos centerW
+		} else {
+			set pos centerS
+		}
 	}
 
 	switch $pos {
@@ -851,13 +880,31 @@ proc getx { w pos } {
 			set hpos [ expr { [ winfo screenwidth $w ] - $hmargin - 2 * $bordsize - [ winfo reqwidth $w ] } ]
 		}
 		righttoW {
-			set hpos [ expr { [ winfo x $par ] + $corrX + $hmargin + [ winfo width $par ] + 2 * $bordsize } ]
+			if { [ winfo screenwidth $w ] - ( [ winfo x $par ] + [ winfo width $par ] + 2 * $bordsize ) >= [ winfo reqwidth $w ] + $hmargin } {
+				set hpos [ expr { [ winfo x $par ] + [ winfo width $par ] + 2 * $bordsize + $corrX + $hmargin } ]
+			} elseif { [ winfo x $par ] >= [ winfo reqwidth $w ] + $hmargin } {
+				set hpos [ expr { [ winfo x $par ] + $corrX - [ winfo reqwidth $w ] - $hmargin } ]
+			} else {
+				set hpos [ expr { [ winfo x $par ] + $corrX + [ winfo width $par ] / 2  - [ winfo reqwidth $w ] / 2 } ]
+			}
 		}
 		lefttoW {
-			set hpos [ expr { [ winfo x $par ] + $corrX - $hmargin - [ winfo reqwidth $w ] + 2 * $bordsize } ]
+			if { [ winfo x $par ] >= [ winfo reqwidth $w ] + $hmargin } {
+				set hpos [ expr { [ winfo x $par ] + $corrX - [ winfo reqwidth $w ] - $hmargin } ]
+			} elseif { [ winfo screenwidth $w ] - ( [ winfo x $par ] + [ winfo width $par ] + 2 * $bordsize ) >= [ winfo reqwidth $w ] + $hmargin } {
+				set hpos [ expr { [ winfo x $par ] + [ winfo width $par ] + 2 * $bordsize + $corrX + $hmargin } ]
+			} else {
+				set hpos [ expr { [ winfo x $par ] + $corrX + [ winfo width $par ] / 2  - [ winfo reqwidth $w ] / 2 } ]
+			}
 		}
 		righttoM {
-			set hpos [ expr { [ winfo x . ] + $corrX + $hmargin + [ winfo width . ] - 2 * $bordsize } ]
+			if { [ winfo screenwidth $w ] - ( [ winfo x . ] + [ winfo width . ] + 2 * $bordsize ) >= [ winfo reqwidth $w ] + $hmargin } {
+				set hpos [ expr { [ winfo x . ] + [ winfo width . ] + 2 * $bordsize + $corrX + $hmargin } ]
+			} elseif { [ winfo x . ] >= [ winfo reqwidth $w ] + $hmargin } {
+				set hpos [ expr { [ winfo x . ] + $corrX - [ winfo reqwidth $w ] - $hmargin } ]
+			} else {
+				set hpos [ expr { [ winfo x . ] + $corrX + [ winfo width . ] / 2  - [ winfo reqwidth $w ] / 2 } ]
+			}
 		}
 		default {
 			set hpos [ expr { [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 } ]
@@ -887,6 +934,10 @@ proc gety { w pos } {
 	set par [ winfo parent $w ]
 	if { $par == "" } {
 		set par .
+	}
+
+	if { ( [ maximized $par ] || ! [ primdisp $par ] ) && ( $pos eq "righttoW" || $pos eq "lefttoW" || $pos eq "righttoM" ) } {
+		set pos centerW
 	}
 
 	switch $pos {

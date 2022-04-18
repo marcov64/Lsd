@@ -6,6 +6,8 @@ The original finance-augmented K+S code was developed by Andrea Roventini, Mauro
 
 This is a full rewrite of the original "Schumpeter meeting Keynes" (K+S) model, plus the finance extensions. Differently from original versions, the entire the model was recoded into regular LSD equations. The main intended changes was ensuring stock-and-flow consistency in firm entry process. There is no guarantee this version matches the results of original version exactly, due to intrinsic differences between programming approaches, some minor improvements, and bug fixes.
 
+LSD version 8.0 or higher is required. Download at: https://github.com/SantAnnaKS/LSD
+
 
 Change log
 ==========
@@ -21,13 +23,14 @@ v0.2.1 (01/09/2021) - fix firm finance statistics
                       add intermediate bank capital restriction rule (flagCreditRule=1)
                       add debt repayment control (deltaB)
                       update configurations closer to papers' settings
-v0.2.2 (01/01/2022) - fix equation computation order in some cases
+v0.2.2 (01/03/2022) - fix equation computation order in some cases
                       fix temporal stock-flow inconsistencies
                       fix good allocation inconsistencies
                       improve firm maximum debt handling and statistics
                       improve government bond market operation
                       improve real GDP calculation
                       add full dynamic multi-level SFC testing
+                      add interest rate onte-time shock for IRF computation
                       improve tests
 
 
@@ -86,11 +89,13 @@ There are several R scripts (.R extension inside R subdirectory) ready to analyz
 
 KS-aggregates.R = overall analysis of macroeconomic aggregates, including scenario comparison, time series plots, de-trended series growth stationarity, temporal correlation structure, Monte Carlo experiments comparison (distribution and performance)
 
-KS-sector-1.R = pooled and Monte Carlo firm-level analysis of the capital-good sector, including scenario statistics comparison, size, productivity and growth rate empirical plots and fits to Gaussian, Laplace and Subbotin distributions
+KS-IRF.R = analyze the impulse-response function of real GDP to an interest rate shock
 
-KS-sector-2-pool.R = pooled firm-level analysis of the consumption-good sector, including scenario statistics comparison, Gibrat-law and scaling-variance tests, and size, productivity and growth rate empirical plots and fits to Gaussian, Laplace and Subbotin distributions
+KS-sector-1.R = pooled and Monte Carlo firm-level analysis of firms in the capital-good sector, including scenario statistics comparison, size, productivity and growth rate empirical plots and fits to Gaussian, Laplace and Subbotin distributions
 
-KS-sector-2-MC.R = Monte Carlo firm-level analysis of the capital-good sector, including scenario statistics comparison, and productivity dynamics among groups of firms
+KS-sector-2-pool.R = pooled firm-level analysis of firms in the consumption-good sector, including scenario statistics comparison, Gibrat-law and scaling-variance tests, and size, productivity and growth rate empirical plots and fits to Gaussian, Laplace and Subbotin distributions
+
+KS-sector-2-MC.R = Monte Carlo firm-level analysis of firms in the capital-good sector, including scenario statistics comparison, and productivity dynamics among groups of firms
 
 KS-elementary-effects-SA.R = Morris elementary effects sensitivity analysis of the selected model responses for all model parameters, including sensitivity coefficients estimation and significance, for both linear and nonlinear effects
 
@@ -98,7 +103,7 @@ KS-kriging-sobol-SA.R = global Sobol variance-based sensitivity analysis using a
 
 Other support scripts exist in the R subdirectory and are required by the above scripts. The scripts are configured to use the R subdirectory as the R working directory. Please add all the data required for the analysis (including LSD configuration files) in subdirectories inside the R working directory (the default is 'data'). 
 
-There is a set of preconfigured test configurations (Sim1-Sim4.lsd in the data subdirectory) which can be executed in LSD and analyzed by the R scripts without any change. The sample test configurations are configured for speed but the number of Monte Carlo experiments (runs) is insufficient for reliable inference. See 'Configuring the K+S scripts.txt' in R subdirectory for details and recommendations.
+There is a set of preconfigured test configurations (.lsd extension files in the data subdirectory) which can be executed in LSD and analyzed by the R scripts without any change. The sample test configurations are configured for speed but the number of Monte Carlo experiments (runs) is insufficient for reliable inference. See 'Configuring the K+S scripts.txt' in R subdirectory for details and recommendations.
 
 The R scripts require the following R packages (and dependencies) to be installed from the standard repositories: LSDsensitivity, tseries, normalp, nortest, mFilter, np, matrixStats, gplots, corrplot, rmutil, plotrix, textplot, extrafont. 12GB or more of available memory is required to run some of the reports. Use 'install-lsd-examples-packages.R' script in R subdirectory to install the required packages automatically.
 
@@ -131,6 +136,11 @@ Bank total credit supply rule (parameter flagCreditRule)
 0 = no bank-level credit limit (firm-level prudential limit still apply)
 1 = deposits multiplier credit limit but no capital adequacy rule or bank bail-out
 2 = Basel-like bank capital adequacy rule and bank bail-out if net worth is negative
+
+Interest rate one-time shock (parameter flagShock)
+----------------------------
+0 = no shock on interest rate
+1 = a decaying shock of size r0shock is applied at time Tshock
 
 Government fiscal rule (parameter flagFiscalRule)
 ----------------------
@@ -177,6 +187,7 @@ Lambda = multiple of net assets or sales for credit limit (>0)
 Lambda0 = credit limit initial absolute floor (>=0)
 PhiB = fraction of incumbent banks net worth provided to bailed-out bank (]0,1])
 Trule = time to start enforcing fiscal rules (>1)
+Tshock = time to start applying interest rate shock (>0)
 Ut = target unemployment rate for central bank's Taylor rule (>0)
 alphaB = Pareto distribution shape parameter defining bank size heterogeneity (>0)
 betaB = bank sensitivity to financial fragility (>0)
@@ -192,8 +203,10 @@ muDeb = bank spread (mark-up) on debt (over central bank prime rate) (>=0)
 muRes = central bank spread (mark-down) on reserves ([0,1])
 piT = target inflation rate by central bank's Taylor rule (>0)
 rAdj = prime rate minimum adjustment step (>0)
+r0shock = interest rate full shock absolute size ([-1,1])
 rT = target prime interest rate set by central bank (>0)
 rhoBonds = sovereign bonds risk premium (>=0)
+rhoShock = decay constant for interest rate shock r0shock (]0,1])
 tauB = minimum bank capital adequacy rate (]0,1[)
 thetaBonds = average maturity periods of sovereign bonds (>0)
 

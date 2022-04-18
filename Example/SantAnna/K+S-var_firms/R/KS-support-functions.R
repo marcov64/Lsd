@@ -2,6 +2,14 @@
 #
 # ------------- Plot, fit and support functions -----------------
 #
+#   Written by Marcelo C. Pereira, University of Campinas
+#
+#   Copyright Marcelo C. Pereira
+#   Distributed under the GNU General Public License
+#
+#   Script used by other scripts.
+#   This script should not be executed directly.
+#
 #******************************************************************
 
 # ==== User parameters ====
@@ -36,10 +44,10 @@ suppressPackageStartupMessages( require( extrafont, warn.conflicts = FALSE ) )
 suppressPackageStartupMessages( require( mFilter, warn.conflicts = FALSE ) )
 
 # check minimum required versions
-if( packageVersion( "LSDinterface" ) < "1.1.0" )
-  stop( "Please update LSDinterface package to current version")
-if( packageVersion( "LSDsensitivity" ) < "1.1.0" )
-  stop( "Please update LSDsensitivity package to current version")
+if( packageVersion( "LSDinterface" ) < "1.2.1" )
+  stop( "Please update LSDinterface package to current version" )
+if( packageVersion( "LSDsensitivity" ) < "1.2.1" )
+  stop( "Please update LSDsensitivity package to current version" )
 
 # remove warnings for support functions
 # !diagnostics suppress = paramp
@@ -293,7 +301,7 @@ transp_color <- function( color, factor = 0.5, name = NULL ) {
 # Define plot window y limits
 #
 # Output:
-#   two-value vector mith minimum and maximum values for y axis
+#   two-value vector with minimum and maximum values for y axis
 #
 # Input:
 #   yMin: minimum value in data
@@ -1267,9 +1275,8 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
     ylim <- findYlim( yMin, yMax )
 
     title <- paste( tit, "(", leg[k], ")" )
-    subTitle <- as.expression( bquote( paste( "( ", .(CI * 100),
-                                              "% confidence band in gray, min/max values in light gray / ",
-                                              .(sub), " )" ) ) )
+    subTitle <- paste0( "( gray: ", CI * 100,
+                        "% confidence / light gray: min/max / ", sub, " )" )
     plot( x = c( xMin : xMax ), y = plt[[k]][[1]][ xMin : xMax ], type = "l",
           main = title, sub = subTitle, xlab = xlab, ylab = ylab, ylim = ylim )
 

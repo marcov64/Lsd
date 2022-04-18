@@ -40,14 +40,15 @@ $output_pref = "tmp/";          // prefix to output results files
 $config_pref = "../tmp/";       // prefix to intermediate configuration files
 $flag_pref = "../tmp/";         // prefix to execution flag files (server control)
 
-// LSD file names (relative to index.php path)
-$lsd_exec = "../lsdNW";             // LSD getlimits executable (no extension)
+// file names (relative to index.php path)
+$lsd_exec = "../lsdNW";             // model executable command
 $lsd_config = "../lwi.lsd";         // LSD model configuration file to use
 $sa_config = "../lwi.sa";           // LSD model parameter-range file to use
 $limits_exec = "../lsd_getlimits";  // LSD getlimits executable (no extension)
 $saved_exec = "../lsd_getsaved";    // LSD getsaved executable (no extension)
 $confgen_exec = "../lsd_confgen";   // LSD confgen executable (no extension)
 $mcstats_exec = "../lsd_mcstats";   // LSD mcstats executable (no extension)
+$special_defaults = "../my_defaults.php";  // defaults redefinition file
 
 // os-specific settings
 if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === "WIN" ) {
@@ -69,3 +70,7 @@ if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === "WIN" ) {
     $os = "linux";
 }
 
+// apply user-specific redefinitions
+if ( file_exists( $special_defaults ) ) {
+    include $special_defaults;
+}

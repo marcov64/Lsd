@@ -7,7 +7,8 @@ Fit a Kriging meta-model to a LSD model sample data
 This function fits a Kriging meta-model (also known as a Gaussian process), using five alternative variance kernels and two trend model options, to the sampled data from a LSD simulation model.
 }
 \usage{
-kriging.model.lsd( data, ext.wgth = 0.5, trendModel = 0, covModel = 0, digits = 4 )
+kriging.model.lsd( data, ext.wgth = 0.5, trendModel = 0, covModel = 0,
+                   digits = 4 )
 }
 \arguments{
   \item{data}{

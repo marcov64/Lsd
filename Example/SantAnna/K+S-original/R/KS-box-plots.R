@@ -2,6 +2,14 @@
 #
 # ----------------- K+S aggregates box-plots --------------------
 #
+#   Written by Marcelo C. Pereira, University of Campinas
+#
+#   Copyright Marcelo C. Pereira
+#   Distributed under the GNU General Public License
+#
+#   Script used by KS-aggregates.R
+#   This script should not be executed directly.
+#
 #******************************************************************
 
 # remove warnings for support functions

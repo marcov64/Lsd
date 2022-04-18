@@ -14,14 +14,14 @@ name.check.lsd( file, col.names = NULL, check.names = TRUE )
 the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, \code{\link[base]{getwd}()}. This can be a compressed file (see file) and must include the appropriated extension (usually \code{.res} or \code{.res.gz}).
 }
   \item{col.names}{
-a vector of optional names for the variables. The default is to read all (unique) variables.
+a vector of optional names for the variables. The default is to read all (unique) variable names.
 }
   \item{check.names}{
-logical. If TRUE then the names of the variables are checked to ensure that they are syntactically valid variable names. If necessary they are adjusted (by make.names) so that they are, and also to ensure that there are no duplicates.
+logical. If \code{TRUE} then the names of the variables are checked to ensure that they are syntactically valid variable names. If necessary they are adjusted to ensure that there are no duplicates.
 }
 }
 \value{
-Returns a character vector containing the valid variable names contained in the results file.
+Returns a string vector containing the (original) valid variable names contained in the results file, using LSD/C++ naming conventions.
 }
 \author{Marcelo C. Pereira}
 \seealso{

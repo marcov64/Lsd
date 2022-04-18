@@ -1,6 +1,33 @@
 #******************************************************************
 #
-# ---------------- K+S Worker-level analysis --------------------
+# ------------------- K+S worker analysis -----------------------
+#
+#   Written by Marcelo C. Pereira, University of Campinas
+#
+#   Copyright Marcelo C. Pereira
+#   Distributed under the GNU General Public License
+#
+#   The default configuration assumes that the supplied LSD
+#   simulation configurations (basename Sim):
+#     R/data/Sim1.lsd
+#     R/data/Sim2.lsd
+#   are executed before this script is used.
+#
+#   To execute the simulations, (1) open LSD Model Manager (LMM),
+#   (2) in LSD Model Browser, open the model which contains this
+#   script (double click), (3) in LMM, compile and run the model
+#   (menu Model>Compile and Run), (4) in LSD Model Browser, load
+#   the desired configuration (menu File>Load), (5) execute the
+#   configuration (menu Run>Run or Run> Parallel Run), accepting
+#   the defaults (parallel run is optional but typically saves
+#   significant execution time).
+#
+#   IMPORTANT: this script assumes the R working directory is set
+#   to the R subfolder where this script file is stored. This can
+#   be done automatically in RStudio if a project is created at
+#   this subfolder, or using the command setwd(). The "folder"
+#   variable below must always point to a (relative) subfolder
+#   of the R working directory.
 #
 #******************************************************************
 
@@ -34,10 +61,6 @@ source( "KS-support-functions.R" )
 
 # ---- Read data files ----
 
-nWorkerVarNew <- length( addWorkerVar ) # number of new variables to add
-newWorkerVar <- append( name.nice.lsd( workerVar ), addWorkerVar ) # new label set
-nVar <- length( newWorkerVar )          # number of variables (worker-level)
-
 # Function to read one experiment data (to be parallelized)
 readExp <- function( exper ) {
   if( nExp > 1 )
@@ -58,7 +81,7 @@ readExp <- function( exper ) {
 
   # Add new variables names (not in LSD files)
   nWorkerVarNew <- length( addWorkerVar )# number of new variables to add
-  newWorkerVar <- append( name.nice.lsd( workerVar ), addWorkerVar ) # new label set
+  newWorkerVar <- name.nice.lsd( c( dimnames( mc )[[ 2 ]], addWorkerVar ) )
   nVar <- length( newWorkerVar )         # number of variables (worker-level)
 
   # ------ Add new variables to data set ------

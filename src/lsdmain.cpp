@@ -127,6 +127,7 @@ int log_stop;				// last period to log to file, if any
 int macro;					// equations style (macros or C++) (bool)
 int max_runs;				// maximum number of parallel runs
 int max_threads;			// maximum number of parallel threads per run
+int no_ptr_chk = false;		// disable user pointer checking
 int no_res = false;			// do not produce .res results files (bool)
 int no_tot = true;			// do not produce .tot totals files (bool)
 int parallel_disable = false;// flag to control parallel mode
@@ -170,6 +171,7 @@ const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 #ifndef _NP_
 atomic < bool > parallel_ready( true );// flag to indicate variable worker is ready
 map < thread::id, worker * > thr_ptr;// worker thread pointers
+mutex lock_obj_list;		// lock for object list for parallel manipulation
 mutex lock_run_logs;		// lock run_logs for parallel updating
 mutex lock_run_pids;		// lock run_pids for parallel updating
 mutex lock_run_status;		// lock run_status for parallel updating
@@ -994,7 +996,6 @@ void run( void )
 				break;
 
 				case 2:			// Fast button / f/F key
-				case 5:			// plot window DELETE_WINDOW button handler
 					set_fast( 1 );
 					debug_flag = false;
 					break;
@@ -1046,7 +1047,7 @@ void run( void )
 			done_in = 0;
 
 			// show run time plot if still enabled
-			if ( t == 1 && ! fast )
+			if ( i == 1 && t == 1 && ! fast )
 				enable_plot( );
 
 			// perform scrolling if enabled
@@ -1061,7 +1062,7 @@ void run( void )
 				last_update = clock( );
 			}
 #endif
-		}	// end of for t
+		}	// end of t
 
 		unsavedData = true;			// flag unsaved simulation results
 		running = false;
@@ -1083,7 +1084,6 @@ void run( void )
 
 		cmd( "destroytop .deb" );
 		cmd( "update" );
-		reset_plot( );
 #endif
 		// run user closing function, reporting error appropriately
 		user_exception = true;
@@ -1214,12 +1214,13 @@ void run( void )
 #endif
 			}
 		}
-	}
+	}	// end of run
 
 	if ( fast_mode == 2 )
 		plog( "\nFinished processing configuration file(s)\n" );
 
 #ifndef _NW_
+	reset_plot( );
 	uncover_browser( );
 	show_prof_aggr( );
 	cmd( "focustop .log" );
@@ -1281,10 +1282,9 @@ void set_fast( int level )
 		level = 0;
 
 #ifndef _NW_
-	if ( fast && level == 0 )
+	if ( level == 0 )
 		enable_plot( );
-
-	if ( ! fast && level > 0 )
+	else
 		disable_plot( );
 #endif
 

@@ -92,7 +92,7 @@ Below are the minimum required steps to perform SA on a working LSD model using 
 
 \item Adjust the arguments to the function \code{\link{read.doe.lsd}()} for the relative folder of LSD data files (default is same as R working directory), the data files base name (the file name chosen for the baseline configuration in step 4 without the \code{.lsd} suffix) and the name of the variable to be used as reference for the sensitivity analysis (you have to run the script multiple times if there is more than one)
 
-\item Save the modified script, renaming if necessary, and run it in R (or click the \code{Source} button in RScript), redirecting output to a file first if required
+\item Save the modified script, renaming if necessary, and run it in R (or click the \code{Source} button in RStudio), redirecting output to a file first if required
 }
 }
 \author{

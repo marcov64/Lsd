@@ -273,10 +273,6 @@ char *qsort_lab_secondary;
 int qsort_lag;
 object *globalcur;
 
-#ifndef _NP_
-mutex parallel_obj_list;		// mutex lock for parallel object list manipulation
-#endif
-
 
 /****************************************************
 BRIDGE
@@ -524,6 +520,29 @@ int hyper_count( const char *lab )
 	object *cur;
 
 	for ( n = 0, cur = root->search( lab ); cur != NULL; ++n, cur = cur->hyper_next( ) );
+
+	return n;
+}
+
+
+/****************************************************
+HYPER_COUNT_VAR
+Return the total number of Object instances in the
+model which contain the variable named lab. The Object
+is searched in the whole model, including different branches
+****************************************************/
+int hyper_count_var( const char *lab )
+{
+	int n;
+	object *cur;
+	variable *cv;
+
+	cv = root->search_var( root, lab, true );	// find variable to use
+
+	if ( cv == NULL || cv->up == NULL )
+		return 0;
+
+	for ( n = 0, cur = cv->up; cur != NULL; ++n, cur = cur->hyper_next( ) );
 
 	return n;
 }
@@ -1631,7 +1650,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 		{
 #ifndef _NP_
 			// prevent concurrent update by more than one thread
-			lock_guard < mutex > lock( parallel_obj_list );
+			lock_guard < mutex > lock( lock_obj_list );
 #endif
 			obj_list.insert( cur );
 		}
@@ -1724,7 +1743,7 @@ void object::delete_obj( variable *caller )
 	{
 #ifndef _NP_
 		// prevent concurrent update by more than one thread
-		lock_guard < mutex > lock( parallel_obj_list );
+		lock_guard < mutex > lock( lock_obj_list );
 #endif
 		obj_list.erase( this );
 	}
@@ -3334,7 +3353,7 @@ double object::increment( const char *lab, double value )
 
 	if ( ! use_nan && is_nan( cv->val[ 0 ] ) )	// try to recover from RECALC
 		cv->cal( this, 0 );
-		
+
 	if ( ( ! use_nan && is_nan( cv->val[ 0 ] ) ) || is_inf( cv->val[ 0 ] ) )
 	{
 		error_hard( "invalid increment operation",
@@ -3377,7 +3396,7 @@ double object::multiply( const char *lab, double value )
 
 	if ( ! use_nan && is_nan( cv->val[ 0 ] ) )	// try to recover from RECALC
 		cv->cal( this, 0 );
-		
+
 	if ( ( ! use_nan && is_nan( cv->val[ 0 ] ) ) || is_inf( cv->val[ 0 ] ) )
 	{
 		error_hard( "invalid multiply operation",
@@ -3477,9 +3496,15 @@ Build the object list for user pointer checking
 ****************************************************/
 double build_obj_list( bool set_list )
 {
+	if ( no_pointer_check )		// disabled in compilation?
+	{
+		no_ptr_chk = true;
+		return 0;
+	}
+
 #ifndef _NP_
 	// prevent concurrent update by more than one thread
-	lock_guard < mutex > lock( parallel_obj_list );
+	lock_guard < mutex > lock( lock_obj_list );
 #endif
 
 	obj_list.clear( );			// reset list

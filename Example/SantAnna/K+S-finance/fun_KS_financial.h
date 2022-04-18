@@ -42,7 +42,7 @@ EQUATION( "r" )
 Interest rate set by the central bank (prime rate)
 */
 
-v[0] = CURRENT;									// last period rate
+v[0] = CURRENT - VL( "rShock", 1 );				// last period rate without shock
 v[1] = V( "rAdj" );								// rate adjustment step
 
 // Taylor rule
@@ -55,8 +55,11 @@ if ( abs( v[2] - v[0] ) > 2 * v[1] )
 else
 	if ( abs( v[2] - v[0] ) > v[1] )
 		v[0] += ( v[2] > v[0] ) ? v[1] : - v[1];// small adjustment
+	
+v[0] = max( v[0], 0 );							// no negative nominal interest
+v[0] += V( "rShock" );							// apply current shock level
 
-RESULT( max( v[0], 0 ) )
+RESULT( v[0] )
 
 
 EQUATION( "rBonds" )
@@ -104,6 +107,14 @@ EQUATION( "rRes" )
 Interest rate paid by central bank to banks' reserves
 */
 RESULT( ( 1 - V( "muRes" ) ) * V( "r" ) )
+
+
+EQUATION( "rShock" )
+/*
+Shock to prime interest rate for impulse response function computation
+*/
+RESULT( VS( PARENT, "flagShock" ) && T == V( "Tshock" ) ? 
+		V( "r0shock" ) : ( 1 - V( "rhoShock" ) ) * CURRENT )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/

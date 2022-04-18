@@ -2,9 +2,9 @@
 #
 # ------------------- LSD tools for sensitivity analysis ---------------------
 #
-#   Written by Marcelo Pereira, University of Campinas
+#   Written by Marcelo C. Pereira, University of Campinas
 #
-#   Copyright Marcelo Pereira
+#   Copyright Marcelo C. Pereira
 #   Distributed under the GNU General Public License
 #
 #*******************************************************************************
@@ -39,7 +39,7 @@ polynomial.sensitivity <- function( data, model, sa.samp = 1000 ) {
   cat( " Third:", colnames( data$doe )[ topEffect[ 3 ] ], "\n\n" )
 
   sa <- list( metamodel = metamodel, sa = sa, topEffect = topEffect )
-  class( sa ) <- "polynomial-sa"
+  class( sa ) <- "polynomial.sensitivity.lsd"
 
   return( sa )
 }
@@ -50,6 +50,31 @@ polynomial.sensitivity <- function( data, model, sa.samp = 1000 ) {
 polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
                                   orderModel = 0, interactModel = 0,
                                   digits = 4 ) {
+
+  if( ! inherits( data, "doe.lsd" ) )
+    stop( "Invalid data (not from read.doe.lsd())" )
+
+  if( is.null( ext.wgth ) || ! is.finite( ext.wgth ) || ext.wgth < 0 )
+    stop( "Invalid weight of external validation sample (ext.wgth)" )
+
+  if( is.null( ols.sig ) || ! is.finite( ols.sig ) || ols.sig < 0 ||
+      ols.sig > 1 )
+    stop( "Invalid OLS regression significance (ols.sig)" )
+
+  if( is.null( orderModel ) || ! is.finite( orderModel ) ||
+      round( orderModel ) < 0 || round( orderModel ) > 2 )
+    stop( "Invalid model order (orderModel)" )
+
+  if( is.null( interactModel ) || ! is.finite( interactModel ) ||
+      round( interactModel ) < 0 || round( interactModel ) > 2 )
+    stop( "Invalid model interaction order (interactModel)" )
+
+  if( is.null( digits ) || ! is.finite( digits ) || round( digits ) < 0 )
+    stop( "Invalid significant digits (digits)" )
+
+  orderModel    <- round( orderModel )
+  interactModel <- round( interactModel )
+  digits        <- round( digits )
 
   # Check if external validation is available or use cross validation only
   if( is.null( data$valid ) ) onlyCross <- TRUE else onlyCross <- FALSE
@@ -69,7 +94,7 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
   for( i in 1 : nrow( modelNames ) )
     for( j in 1 : ncol( modelNames ) ) {
       # Estimate polynomial model y = f(x)
-      lm <- fit.poly( data$resp$Mean, data$doe, resp.noise = data$resp$Variance,
+      lm <- fit.poly( data$resp[ , 1 ], data$doe, resp.noise = data$resp[ , 2 ],
                       order = i, interaction = j - 1 )
       models[[ i, j ]] <- lm$model
       R2[ i, j ] <- lm$R2
@@ -78,13 +103,13 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
       std.coeff[[ i, j ]] <- lm$std.coeff
 
       if( ! onlyCross ) {
-        rmse[ i, j ] <- rmse.poly( lm$model, data$valResp$Mean, data$valid )
-        mae[ i, j ] <- mae.poly( lm$model, data$valResp$Mean, data$valid )
-        rma[ i, j ] <- rma.poly( lm$model, data$valResp$Mean, data$valid )
+        rmse[ i, j ] <- rmse.poly( lm$model, data$valResp[ , 1 ], data$valid )
+        mae[ i, j ] <- mae.poly( lm$model, data$valResp[ , 1 ], data$valid )
+        rma[ i, j ] <- rma.poly( lm$model, data$valResp[ , 1 ], data$valid )
       } else {
-        rmse[ i, j ] <- rmse.poly( lm$model, data$resp$Mean, data$doe )
-        mae[ i, j ] <- mae.poly( lm$model, data$resp$Mean, data$doe )
-        rma[ i, j ] <- rma.poly( lm$model, data$resp$Mean, data$doe )
+        rmse[ i, j ] <- rmse.poly( lm$model, data$resp[ , 1 ], data$doe )
+        mae[ i, j ] <- mae.poly( lm$model, data$resp[ , 1 ], data$doe )
+        rma[ i, j ] <- rma.poly( lm$model, data$resp[ , 1 ], data$doe )
       }
     }
 
@@ -251,7 +276,7 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
                  coefficients = coeff, coefficients.std = stdCoeff, order = orderModel,
                  polyNames = polyNames, interact = interactModel,
                  interactNames = interactNames )
-  class( model ) <- "polynomial-model"
+  class( model ) <- "polynomial.model.lsd"
 
   return( model )
 }
@@ -294,11 +319,12 @@ fit.poly <- function( response, doe, resp.noise = NULL,
     form <- paste( form, "+" )
   }
 
-  if( is.null( resp.noise ) || min( abs( resp.noise ), na.rm = TRUE ) == 0 ) {
+  if( is.null( resp.noise ) || ! all( is.finite( resp.noise / response ) ) ||
+      min( abs( resp.noise / response ) ) == 0 )
     weigths <- rep( 1, nrow( doe ) )
-  } else {
-    weigths <- 1 / resp.noise
-  }
+  else
+    weigths <- 1 / ( resp.noise / response )
+
   # fit bot using the normal and standardized vars
   fit <- stats::lm( formula = formulas[[ order, interaction + 1 ]],
                     data = doe, weights = weigths, na.action = stats::na.exclude )

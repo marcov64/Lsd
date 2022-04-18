@@ -5,7 +5,7 @@ To import Windows 64-bit MSYS2 compiler tools:
 3. Follow the instructions to finish install, defaults are fine
 4. Open the MSYS2 MinGW 64-bit terminal
 5. Ensure all packages are updated: 'pacman -Syu' and then 'pacman -Su'
-6. Install the compiler and tools: 'pacman -S make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-diffutils'
+6. Install the compiler and tools: 'pacman -S mingw-w64-x86_64-make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-diffutils mingw-w64-x86_64-gsl mingw-w64-x86_64-libsigsegv'
 7. Run the import batch 'MSYS2-import.bat'
 
 

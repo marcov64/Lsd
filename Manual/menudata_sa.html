@@ -3,7 +3,6 @@
 <head>
 <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
 <meta name=Generator content="Microsoft Word 15 (filtered)">
-<title>Sensitivity Analysis</title>
 <style>
 <!--
  /* Font Definitions */
@@ -49,6 +48,18 @@ h3
 	font-size:12.0pt;
 	font-family:"Arial",sans-serif;
 	font-weight:bold;}
+p.MsoHeader, li.MsoHeader, div.MsoHeader
+	{mso-style-link:"Header Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;}
+p.MsoFooter, li.MsoFooter, div.MsoFooter
+	{mso-style-link:"Footer Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;}
 p.MsoTitle, li.MsoTitle, div.MsoTitle
 	{mso-style-link:"Title Char";
 	margin-right:0cm;
@@ -107,6 +118,14 @@ p.msonormal0, li.msonormal0, div.msonormal0
 	margin-right:0cm;
 	margin-left:0cm;
 	font-size:12.0pt;
+	font-family:"Arial",sans-serif;}
+span.HeaderChar
+	{mso-style-name:"Header Char";
+	mso-style-link:Header;
+	font-family:"Arial",sans-serif;}
+span.FooterChar
+	{mso-style-name:"Footer Char";
+	mso-style-link:Footer;
 	font-family:"Arial",sans-serif;}
 span.TitleChar
 	{mso-style-name:"Title Char";
@@ -208,7 +227,8 @@ span.Cdigo
 	color:gray;}
 .MsoChpDefault
 	{font-size:10.0pt;}
-@page WordSection1
+ /* Page Definitions */
+ @page WordSection1
 	{size:595.3pt 841.9pt;
 	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
 div.WordSection1
@@ -578,24 +598,26 @@ width=299 height=286 src="image/sa_entry.png"></span></p>
 by the data entry area. Depending on the type of SA exercise to be performed,
 the user must enter here a set (</span><span class=Cdigo><span lang=EN-US>Full</span></span><span
 lang=EN-US> and </span><span class=Cdigo><span lang=EN-US>MC Point Sampling</span></span><span
-lang=EN-US> options) or a range (</span><span class=Cdigo><span lang=EN-US>MC Range</span></span><span
-lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>EE</span></span><span
-lang=EN-US> and </span><span class=Cdigo><span lang=EN-US>NOLH Sampling</span></span><span
-lang=EN-US> options) of values. Value sets may contain from two to any number
-of integer or float values and the SA is performed considering each individual
-value. Value ranges consist of two integer or float values and the SA is done
-in the range defined by the two values (included). If more than two values are
-supplied for a value range, only the first two are used. The order of the
-values is not relevant. Float values should use the point (</span><span
-class=Cdigo><span lang=EN-US>.</span></span><span lang=EN-US>) as the decimal
-separator. Scientific notation float numbers are allowed (use the “</span><span
-class=Cdigo><span lang=EN-US>E</span></span><span lang=EN-US>” or “</span><span
-class=Cdigo><span lang=EN-US>e</span></span><span lang=EN-US>” prefix to
-indicate the 10 exponent).</span></p>
+lang=EN-US> options) or one or more ranges (</span><span class=Cdigo><span
+lang=EN-US>MC Range</span></span><span lang=EN-US>, </span><span class=Cdigo><span
+lang=EN-US>EE</span></span><span lang=EN-US> and </span><span class=Cdigo><span
+lang=EN-US>NOLH Sampling</span></span><span lang=EN-US> options) of values.
+Value sets may contain from two to any number of integer or float values and
+the SA is performed considering each individual value. Value ranges consist of
+pairs of integer or float values and the SA is done in the range defined by
+each pair (included). If more than one pair of values is supplied for an
+element, each pair is applied to subsequent instances of the element, if any.
+Pairs over the last element instance are ignored. If more instances than pairs
+exist, pairs are recycled. The order of the values in a pair is not relevant.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>Individual values can be separated using
-any combination of the most usual separators, including spaces, tabs, commas,
-semi-colons, colons, line-feeds etc.</span></p>
+<p class=MsoNormal><span lang=EN-US>Floating-point values should use the point
+(</span><span class=Cdigo><span lang=EN-US>.</span></span><span lang=EN-US>) as
+the decimal separator. Scientific notation floating-point numbers are allowed
+(use the “</span><span class=Cdigo><span lang=EN-US>E</span></span><span
+lang=EN-US>” or “</span><span class=Cdigo><span lang=EN-US>e</span></span><span
+lang=EN-US>” prefix to separate the 10 exponent). Individual values can be
+separated using any combination of the usual separators, including spaces,
+tabs, commas, semi-colons, colons, linefeeds, etc.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>To simplify the entry of some specific
 value sets, the user can use the special </span><span class=Cdigo><span
@@ -666,10 +688,10 @@ only.</span></p>
 <p class=MsoNormal><span lang=EN-US>It should be noted that the values set for
 Parameters and lagged Variables SA <b>ARE NOT</b> saved in the regular </span><span
 class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> <a
-href="LSD_faqs.html#modelsetting">model configuration</a> files, because each configuration
-can be tested under different SA strategies. To save SA test values, the user
-should use the menu option </span><span class=Cdigo><span lang=EN-US><a
-href="menufile.html">File&gt;Save Sensitivity</a></span></span><span
+href="LSD_faqs.html#modelsetting">model configuration</a> files, because each
+configuration can be tested under different SA strategies. To save SA test
+values, the user should use the menu option </span><span class=Cdigo><span
+lang=EN-US><a href="menufile.html">File&gt;Save Sensitivity</a></span></span><span
 lang=EN-US> and select a name for the SA configuration. Similarly, existing SA
 configuration data is not automatically loaded when the user loads a </span><span
 class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> configuration.
@@ -700,9 +722,9 @@ and <a href="LSD_faqs.html#variable">lagged Variables</a> are explored.
 Differently from the other DoE methods, this one modifies the current <a
 href="LSD_faqs.html#modelstructure">model structure</a> to create a single <a
 href="LSD_faqs.html#modelsetting">model configuration</a> containing as many
-copies of the original model structure as necessary by the factorial
-combinatorics. It is appropriate to quickly analyze the SA of few elements
-without requiring more sophisticated batch/parallel processing.</span></p>
+copies of the original model structure as necessary by the factorial combinatorics.
+It is appropriate to quickly analyze the SA of few elements without requiring
+more sophisticated batch/parallel processing.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>In the example <a href="#_SA_workflow">above</a>,
 LSD would generate 8 different instances of the entire model structure directly
@@ -786,15 +808,15 @@ proceed.</span></p>
 <h1><a name="_MC_point_sampling"></a><a name=mcpoint></a><span lang=EN-US>MC
 point sampling SA</span></h1>
 
-<p class=MsoNormal><span lang=EN-US>This command produces a design of
-experiment (DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a> (SA)
-consisting of a random fraction of a full factorial design (the Monte Carlo
-sample). A user-specified fraction of the combinations of the <a
+<p class=MsoNormal><span lang=EN-US>This command produces a design of experiment
+(DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a> (SA) consisting
+of a random fraction of a full factorial design (the Monte Carlo sample). A
+user-specified fraction of the combinations of the <a
 href="#_Configuring_values">configured test initialization values</a> for <a
 href="LSD_faqs.html#parameter">Parameters</a> and <a
-href="LSD_faqs.html#variable">lagged Variables</a> is explored. The selected
-combinations are taken randomly. The method creates multiple </span><span
-class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> <a
+href="LSD_faqs.html#variable">lagged Variables</a> is explored. The selected combinations
+are taken randomly. The method creates multiple </span><span class=Cdigo><span
+lang=EN-US>.lsd</span></span><span lang=EN-US> <a
 href="LSD_faqs.html#modelsetting">model configuration</a> files each one
 containing one copy of the original model structure configured using the
 selected combination of values.</span></p>
@@ -807,10 +829,10 @@ size as a percentage (0 to 100), in a dialog box like the one depicted above.
 Large sample sizes are only recommended when there are few elements and values
 for the SA. Note that LSD shows in the <a href="log.html">Log window</a> the
 total number of combinations in a full factorial design, over which the
-provided percentage is applied to calculate the target number of points to sample.
-The provided factor should be large enough to produce (in average) at least one
-sample. The final number of configurations produced may be somewhat smaller or
-larger than the target number. </span></p>
+provided percentage is applied to calculate the target number of points to
+sample. The provided factor should be large enough to produce (in average) at
+least one sample. The final number of configurations produced may be somewhat
+smaller or larger than the target number. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>The dialog box also presents the output
 path where the DoE files will be created. LSD may create a separated folder if
@@ -832,8 +854,8 @@ window. Before the analysis can be concluded, they have to be run to produce <a
 href="LSD_faqs.html#results">simulation results</a>. Usually, the menu command </span><span
 class=Cdigo><span lang=EN-US><a href="menurun.html">Run&gt;Parallel Batch</a></span></span><span
 lang=EN-US> is the more convenient way to run the entire set of configuration
-files. Please refer to the recommended <a href="#_SA_workflow">SA workflow</a> on
-how to proceed.</span></p>
+files. Please refer to the recommended <a href="#_SA_workflow">SA workflow</a>
+on how to proceed.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -884,10 +906,10 @@ lang=EN-US> configuration.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>In the example <a href="#_SA_workflow">above</a>,
 we could define ranges instead of points to perform SA with Parameters A and B.
-Similarly to the initial configuration, we could use the range 1-7 for
-Parameter A and 1-2 for B, taking care of specifying them as integers in the <a
+Like in the initial configuration, we could use the range 1-7 for Parameter A
+and 1-2 for B, taking care of specifying them as integers in the <a
 href="#_Configuring_values">SA data entry window</a> if necessary. In this
-case, if you set the MC sample size to 4, LSD would generate 4 different </span><span
+case, if you set the MC sample size to 4, LSD would generate four different </span><span
 class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> configuration
 files with the same model structure. Each configuration file would (likely)
 contain different initialization values for the Parameters A and B.</span></p>
@@ -901,6 +923,17 @@ class=Cdigo><span lang=EN-US><a href="menurun.html">Run&gt;Parallel Batch</a></s
 lang=EN-US> is the more convenient way to run the entire set of configuration
 files. Please refer to the recommended <a href="#_SA_workflow">SA workflow</a>
 on how to proceed.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>When more than one instance of a Parameter
+or a Variable initial condition exists in the <a
+href="LSD_faqs.html#modelsetting">model configuration</a>, value pairs for
+multiple ranges may be provided in the <a href="#_Configuring_values">SA window</a>.
+In this case, the first instance has a value drawn using the first range pair,
+and so on. If there are less instances than range pairs, the sequence of range
+pairs is “recycled” (reused from the beginning). If there are mores pairs than
+instances, the last range pairs are ignored. Differently from <a
+href="#_EE_sampling_SA">EE</a> and <a href="#_NOLH_sampling_SA">NOLH</a>
+sampling, each instance of an element is drawn independently.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -994,13 +1027,25 @@ lang=EN-US> configuration.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>After executing this command, a certain
 number of </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
-lang=EN-US> configuration files will be generated, as informed in the Log window.
-Before the analysis can be concluded, they have to be run to produce <a
+lang=EN-US> configuration files will be generated, as informed in the Log
+window. Before the analysis can be concluded, they have to be run to produce <a
 href="LSD_faqs.html#results">simulation results</a>. Usually, the menu command </span><span
 class=Cdigo><span lang=EN-US><a href="menurun.html">Run&gt;Parallel Batch</a></span></span><span
 lang=EN-US> is the more convenient way to run the entire set of configuration
 files. Please refer to the recommended <a href="#_SA_workflow">SA workflow</a>
 on how to proceed.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>When more than one instance of a Parameter
+or a Variable initial condition exists in the <a
+href="LSD_faqs.html#modelsetting">model configuration</a>, value pairs for
+multiple ranges may be provided in the <a href="#_Configuring_values">SA window</a>.
+In this case, the first instance has a value drawn using the first range pair,
+and so on. If there are less instances than range pairs, the sequence of range
+pairs is “recycled” (reused from the beginning). If there are mores pairs than
+instances, the last range pairs are ignored. Differently from <a
+href="#_MC_range_sampling">MC range</a> sampling, each instance of an element
+is drawn over the same trajectory point, but correctly scaled for the
+corresponding range of values.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -1098,10 +1143,22 @@ lang=EN-US> configuration files will be generated, as informed in the Log
 window. Before the analysis can be concluded, they have to be run to produce <a
 href="LSD_faqs.html#results">simulation results</a>. Usually, the menu command </span><span
 class=Cdigo><a href="menurun.html"><span lang=EN-US style='color:gray;
-text-decoration:none'>Run&gt;Parallel Batch</span></a></span> <span lang=EN-US>is
-the more convenient way to run the entire set of configuration files. Please
+text-decoration:none'>Run&gt;Parallel Batch</span></a></span><span lang=EN-US>
+is the more convenient way to run the entire set of configuration files. Please
 refer to the recommended <a href="#_SA_workflow">SA workflow</a> on how to
 proceed.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>When more than one instance of a Parameter
+or a Variable initial condition exists in the <a
+href="LSD_faqs.html#modelsetting">model configuration</a>, value pairs for
+multiple ranges may be provided in the <a href="#_Configuring_values">SA window</a>.
+In this case, the first instance has a value drawn using the first range pair,
+and so on. If there are less instances than range pairs, the sequence of range
+pairs is “recycled” (reused from the beginning). If there are mores pairs than
+instances, the last range pairs are ignored. Differently from <a
+href="#_MC_range_sampling">MC range</a> sampling, each instance of an element
+is drawn over the same NOLH point, but correctly scaled for the corresponding
+range of values.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -1120,10 +1177,11 @@ package</span></h1>
 <p class=MsoNormal><span lang=EN-US>The LSDsensitivity <a href="LSD_faqs.html#r">R
 package</a> provides tools to analyze simulated experiments created using LSD
 native methods to sample the configuration (factor) space of the simulation
-model using different design of experiments (DoE). The LSD-produced experimental
-design data can be transparently imported to R by using the function </span><span
-class=Cdigo><span lang=EN-US>read.doe.lsd</span></span><span lang=EN-US> (see
-the package help pages for details on all the package functions).</span></p>
+model using different design of experiments (DoE). The LSD-produced
+experimental design data can be transparently imported to R by using the
+function </span><span class=Cdigo><span lang=EN-US>read.doe.lsd</span></span><span
+lang=EN-US> (see the package help pages for details on all the package
+functions).</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The package offers two sensitivity analysis
 (SA) methods pre-configured for application on LSD simulations: Morris

@@ -25,12 +25,31 @@ User pointer check
 *****************************/
 inline bool chk_ptr( object *ptr )
 {
-	extern o_setT obj_list;			// list with all existing LSD objects
+	extern bool parallel_mode;			// parallel mode (multithreading) status
+	extern int no_ptr_chk;				// disable user pointer checking
+	extern mutex lock_obj_list;			// lock for object list for parallel manipulation
+	extern o_setT obj_list;				// list with all existing LSD objects
+
+	bool obj_exists;
 
 	if ( ptr == NULL )
 		return true;
 
-	if ( no_ptr_chk || obj_list.find( ptr ) != obj_list.end( ) )
+	if ( no_ptr_chk )
+		return false;
+
+	if ( parallel_mode ) 				// use lock (slow) only if really needed
+	{
+#ifndef _NP_
+		// prevent concurrent update by more than one thread
+		lock_guard < mutex > lock( lock_obj_list );
+#endif
+		obj_exists = obj_list.find( ptr ) != obj_list.end( );
+	}
+	else
+		obj_exists = obj_list.find( ptr ) != obj_list.end( );
+
+	if ( obj_exists )
 		return false;
 
 	return true;
@@ -44,9 +63,28 @@ valid or NULL pointer
 *****************************/
 inline bool chk_obj( object *ptr )
 {
+	extern bool parallel_mode;		// parallel mode (multithreading) status
+	extern int no_ptr_chk;			// disable user pointer checking
+	extern mutex lock_obj_list;		// lock for object list for parallel manipulation
 	extern o_setT obj_list;			// list with all existing LSD objects
 
-	if ( ptr == NULL || no_ptr_chk || obj_list.find( ptr ) != obj_list.end( ) )
+	bool obj_exists;
+
+	if ( no_ptr_chk || ptr == NULL )
+		return false;
+
+	if ( parallel_mode ) 			// use lock (slow) only if really needed
+	{
+#ifndef _NP_
+		// prevent concurrent update by more than one thread
+		lock_guard < mutex > lock( lock_obj_list );
+#endif
+		obj_exists = obj_list.find( ptr ) != obj_list.end( );
+	}
+	else
+		obj_exists = obj_list.find( ptr ) != obj_list.end( );
+
+	if ( obj_exists )
 		return false;
 
 	return true;
@@ -59,10 +97,15 @@ Hook vector bound check
 *****************************/
 inline bool chk_hook( object *ptr, unsigned num )
 {
+	extern int no_ptr_chk;				// disable user pointer checking
+
 	if ( ptr == NULL )
 		return true;
 
-	if ( no_ptr_chk || num < ptr->hooks.size( ) )
+	if ( no_ptr_chk )
+		return false;
+
+	if ( num < ptr->hooks.size( ) )
 		return false;
 
 	return true;
@@ -173,6 +216,7 @@ hook pointers in macros
 *****************************/
 object *no_hook_obj( object *ptr, unsigned num, const char *file, int line )
 {
+	extern mutex lock_obj_list;		// lock for object list for parallel manipulation
 	extern o_setT obj_list;			// list with all existing LSD objects
 
 	bool bad_index = false;
@@ -181,10 +225,16 @@ object *no_hook_obj( object *ptr, unsigned num, const char *file, int line )
 	if ( ptr == NULL )
 		snprintf( err_msg, MAX_LINE_SIZE, "NULL pointer used in file '%s', line %d", file, line );
 	else
+	{
+#ifndef _NP_
+		// prevent concurrent update by more than one thread
+		lock_guard < mutex > lock( lock_obj_list );
+#endif
 		if ( obj_list.find( ptr ) == obj_list.end( ) )
 			snprintf( err_msg, MAX_LINE_SIZE, "pointer to non-existing object used\nin file '%s', line %d", file, line );
 		else
 			bad_index = true;
+	}
 
 	if ( ! bad_index )
 		error_hard( "invalid pointer operation",

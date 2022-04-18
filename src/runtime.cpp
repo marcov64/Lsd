@@ -68,8 +68,8 @@ void prepare_plot( object *r, int id_sim )
 	i = 0;
 	assign( r, &i, lab );
 
-	add_rt_plot_tab( ".plt", id_sim );
-	init_plot( i, id_sim );
+	if ( add_rt_plot_tab( ".plt", id_sim ) )
+		init_plot( i, id_sim );
 }
 
 
@@ -106,7 +106,7 @@ void assign( object *r, int *i, const char *lab )
 	for ( a = r->v; a != NULL; a = a->next )
 		if ( a->plot == 1 )
 		{
-			list_var[ *i ] = a; 	// assigns the address of a to the list to plot
+			list_var[ *i ] = a;		// assigns the address of a to the list to plot
 			cmd( "lappend tp \"%s%s\"", a->label, lab );
 			*i = *i + 1;
 		}
@@ -117,13 +117,13 @@ void assign( object *r, int *i, const char *lab )
 			continue;
 
 		c = cb->head;
-		if ( c->next != NULL ) 		// multiple instances
+		if ( c->next != NULL )		// multiple instances
 			for ( j = 1, c1 = c; c1 != NULL; c1 = go_brother( c1 ), ++j )
 			{
 				snprintf( cur_lab, MAX_ELEM_LENGTH, "%s#%d", lab, j );
 				assign( c1, i, cur_lab );
 			}
-		else 						// unique instance
+		else						// unique instance
 			assign( c, i, lab );
 	}
 }
@@ -132,34 +132,42 @@ void assign( object *r, int *i, const char *lab )
 /**************************************
 ADD_RT_PLOT_TAB
 **************************************/
-void add_rt_plot_tab( const char *w, int id_sim )
+bool add_rt_plot_tab( const char *w, int id_sim )
 {
-	int i, j, k, cols, dbut, tabs;
+	int i, j, k, cols, rows, dbut, tabs;
 
 	switch ( platform )
 	{
 		case _WIN_:
 			tabs = 12;
-			cols = 10;
+			cols = 9;
+			rows = 12;
 			dbut = 2;
 			break;
 		case _LIN_:
-			tabs = 9;
+			tabs = 8;
 			cols = 8;
+			rows = 11;
 			dbut = 3;
 			break;
 		default:
 		case _MAC_:
 			tabs = 8;
 			cols = 5;
+			rows = 11;
 			dbut = 2;
 			break;
 	}
 
 	cmd( "set w %s", w );
 	cmd( "set rtptab $w.pad" );
+
+	// abort on weird Tk cases
+	if ( id_sim > 1 && ( ! exists_window( "$rtptab" ) || eval_int( "[ $rtptab index end ]" ) == 0 ) )
+		return false;
+
 	cmd( "if { ! [ winfo exists $rtptab ] } { \
-			newtop $w \"%s%s - LSD Run-time Plots\" { set_c_var done_in 5 } \"\"; \
+			newtop $w \"%s%s - LSD Run-time Plots\" \"destroytop $w\" \"\"; \
 			wm transient $w .; \
 			ttk::notebook $rtptab; \
 			pack $rtptab; \
@@ -180,38 +188,34 @@ void add_rt_plot_tab( const char *w, int id_sim )
 	cmd( "ttk::frame $activeplot" );
 	cmd( "pack $activeplot" );
 
-	if ( id_sim < tabs )
-		cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 4", id_sim );
-
-	if ( id_sim == tabs )
-		cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 5", id_sim );
-
-	if ( id_sim <= tabs )
-		cmd( "$rtptab select $activeplot" );
-
-	if ( id_sim == tabs + 1 )
-	{
-		cmd( "ttk::frame $rtptab.more" );
-		cmd( "pack $rtptab.more" );
-		cmd( "$rtptab insert 0 $rtptab.more -text \"More...\" -underline 0" );
-	}
-
+	// add More... tab if too many tabs
 	if ( id_sim > tabs )
 	{
-		cmd( "$rtptab forget 1" );
-		cmd( "$rtptab add $activeplot -text \"Run %d\"", id_sim );
-		cmd( "$rtptab select $activeplot" );
+		if ( ! exists_window( "$rtptab.more" ) )
+		{
+			cmd( "$rtptab forget 0" );
+			cmd( "ttk::frame $rtptab.more" );
+			cmd( "pack $rtptab.more" );
+			cmd( "$rtptab insert 0 $rtptab.more -text \"More...\" -underline 0" );
+		}
+		else
+			cmd( "$rtptab forget 1" );
 
-		cmd( "destroy $rtptab.more.b");
-		cmd( "ttk::frame $rtptab.more.b");
+		// update the More.. tab list of plots
+		cmd( "destroy $rtptab.more.b" );
+		cmd( "ttk::frame $rtptab.more.b" );
 
-		for ( i = 0; cols * i + 1 <= id_sim; ++i )
+		if ( id_sim > cols * rows )
+			k = id_sim - cols * rows + 1;
+		else
+			k = 1;
+
+		for ( i = 1; k <= id_sim && i <= rows; ++i )
 		{
 			cmd( "ttk::frame $rtptab.more.b.l%d", i );
 
-			for ( j = 1; j <= cols && cols * i + j <= id_sim; ++j )
+			for ( j = 1; k <= id_sim && j <= cols; ++j )
 			{
-				k = cols * i + j;
 				cmd( "set b [ expr { $butWid - ( %d ) } ]", k > 99 ? dbut : dbut - 1 );
 				cmd( "ttk::button $rtptab.more.b.l%d.b%d -width $b -text \"Run %d\" -command { \
 						if { \"$rtptab.tab%d\" ni [ $rtptab tabs ] } { \
@@ -223,6 +227,8 @@ void add_rt_plot_tab( const char *w, int id_sim )
 						$rtptab select $rtptab.tab%d \
 					}", i, k, k, k, tabs, k, k, k );
 				cmd( "pack $rtptab.more.b.l%d.b%d -side left -padx 2", i, k );
+
+				++k;
 			}
 
 			cmd( "pack $rtptab.more.b.l%d -anchor w -pady 2", i );
@@ -230,6 +236,18 @@ void add_rt_plot_tab( const char *w, int id_sim )
 
 		cmd( "pack $rtptab.more.b -padx 20 -pady 20" );
 	}
+
+	if ( id_sim < 10 )
+		cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 4", id_sim );
+	else
+		if ( id_sim == 10 )
+			cmd( "$rtptab add $activeplot -text \"Run %d\" -underline 5", id_sim );
+		else
+			cmd( "$rtptab add $activeplot -text \"Run %d\"", id_sim );
+
+	cmd( "$rtptab select $activeplot" );
+
+	return true;
 }
 
 
@@ -239,6 +257,9 @@ INIT_PLOT
 void init_plot( int num, int id_sim )
 {
 	int i;
+
+	if ( ! exists_var( "activeplot" ) || ! exists_window( "$activeplot" ) )
+		return;
 
 	cmd( "if { %d > $hsizeR } { set plot_step 1 } { set plot_step [ expr { $hsizeR / %d.0 } ] }", max_step, max_step );
 
@@ -286,7 +307,7 @@ void init_plot( int num, int id_sim )
 				set color $colorsTheme(dfg) \
 			}; \
 			$p create line $j $sclvmarginR $j $k -fill $color; \
-			$p create line $j $k $j [ expr { $k + $ticmarginR } ] -fill  $colorsTheme(dfg); \
+			$p create line $j $k $j [ expr { $k + $ticmarginR } ] -fill	 $colorsTheme(dfg); \
 			if { $l > $u } { \
 				$p create text $j [ expr { $k + $ticmarginR } ] -text $l -anchor n -fill $colorsTheme(dfg); \
 				set u $l \
@@ -355,6 +376,14 @@ void init_plot( int num, int id_sim )
 		cmd( "tooltip::tooltip $activeplot.fond -item  $it \"%d series labels not presented\"", num - i );
 	}
 
+	if ( max_step > get_int( "hsizeR" ) )
+	{
+		cmd( "$activeplot.fond.go conf -state normal" );
+		cmd( "$activeplot.fond.shift conf -state normal" );
+		cmd( "tooltip::tooltip $activeplot.fond.go \"Center plot in current case (time step)\"" );
+		cmd( "tooltip::tooltip $activeplot.fond.shift \"Automatic scrolling\"" );
+	}
+
 	cmd( "pack $activeplot.fond -expand yes -fill both -pady 7" );
 }
 
@@ -368,9 +397,7 @@ void plot_rt( variable *v )
 	int height, p_digits;
 	double value, scale, zero_lim;
 
-	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot.c.c.cn ] } { set res 1 } { set res 0 }" );
-
-	if ( ! get_bool( "res" ) )
+	if ( ! exists_var( "activeplot" ) || ! exists_window( "$activeplot.c.c.cn" ) )
 		return;
 
 	height = get_int( "vsizeR" );
@@ -380,7 +407,7 @@ void plot_rt( variable *v )
 	if ( cur_plt > 100 )
 		return;
 
-	if ( ymax == ymin ) 		// very initial setting
+	if ( ymax == ymin )			// very initial setting
 	{
 		if ( v->val[ 0 ] > 0 )
 			ymax = round_digits( v->val[ 0 ] * ( 1 + MARG ), p_digits );
@@ -405,7 +432,7 @@ void plot_rt( variable *v )
 
 		relabel = true;
 
-		cmd( "$activeplot.c.c.cn scale punto 0 $vsizeR 1 %lf", scale  < 0.01 ? 0.01 : scale  );
+		cmd( "$activeplot.c.c.cn scale punto 0 $vsizeR 1 %lf", scale  < 0.01 ? 0.01 : scale	 );
 	}
 
 	if ( v->val[ 0 ] <= ymin )
@@ -461,12 +488,11 @@ void reset_plot( void )
 			$activeplot.fond.shift conf -state disabled; \
 			tooltip::tooltip clear $activeplot.fond.go; \
 			tooltip::tooltip clear $activeplot.fond.shift; \
-			if { %d || ! [ info exists rtptab_show ] || ! $rtptab_show } { \
+			if { %d || ! [ winfo ismapped $activeplot ] || ! [ info exists rtptab_show ] || ! $rtptab_show } { \
 				destroytop [ winfo toplevel $activeplot ] \
 			} else { \
-				deiconifytop $activeplot; \
 				$rtptab select $activeplot; \
-				wm protocol [ winfo toplevel $activeplot ] WM_DELETE_WINDOW \"destroytop [ winfo toplevel $activeplot ]\" \
+				deiconifytop $activeplot \
 			}; \
 			update \
 		}", fast ? 1 : 0 );
@@ -479,11 +505,6 @@ ENABLE_PLOT
 void enable_plot( void )
 {
 	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] } { \
-			$rtptab select $activeplot; \
-			$activeplot.fond.go conf -state normal; \
-			$activeplot.fond.shift conf -state normal; \
-			tooltip::tooltip $activeplot.fond.go \"Center plot in current case (time step)\"; \
-			tooltip::tooltip $activeplot.fond.shift \"Automatic scrolling\"; \
 			$rtptab select $activeplot; \
 			if { [ info exists rtptab_show ] && ! $rtptab_show } { \
 				set rtptab_show 1; \
@@ -503,10 +524,6 @@ DISABLE_PLOT
 void disable_plot( void )
 {
 	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] } { \
-			$activeplot.fond.go conf -state disabled; \
-			$activeplot.fond.shift conf -state disabled; \
-			tooltip::tooltip clear $activeplot.fond.go; \
-			tooltip::tooltip clear $activeplot.fond.shift; \
 			wm withdraw [ winfo toplevel $activeplot ]; \
 			update \
 		}" );
@@ -532,7 +549,7 @@ SCROLL_PLOT
 void scroll_plot( void )
 {
 	if ( scrollB )
-		cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] && %d > [ expr { $hsizeR * 0.8 } ] } { \
+		cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] && [ winfo ismapped $activeplot ] && %d > [ expr { $hsizeR * 0.8 } ] } { \
 				$activeplot.c.c.cn xview scroll 1 units \
 			}", t );
 }

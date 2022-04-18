@@ -2,9 +2,9 @@
 #
 # ------------------- LSD tools for sensitivity analysis ---------------------
 #
-#   Written by Marcelo Pereira, University of Campinas
+#   Written by Marcelo C. Pereira, University of Campinas
 #
-#   Copyright Marcelo Pereira
+#   Copyright Marcelo C. Pereira
 #   Distributed under the GNU General Public License
 #
 #*******************************************************************************
@@ -22,7 +22,8 @@ kriging.sensitivity <- function( data, model, krig.sa = FALSE, sa.samp = 1000 ) 
     X2 <- sobol.rnd.exp( sa.samp, colnames( data$doe ), lwr.bound = data$facLimLo,
                          upr.bound = data$facLimUp )
 
-    metamodel <- sensitivity::sobolGP( model = model$selected, type = "UK", X1 = X1, X2 = X2,
+    metamodel <- sensitivity::sobolGP( model = model$selected, type = "UK",
+                                       X1 = X1, X2 = X2,
                                        MCmethod = "soboljansen", nboot = 100 )
     mainEffect <- function( x ) x$S$mean
     totEffect <- function( x ) x$T$mean
@@ -37,14 +38,17 @@ kriging.sensitivity <- function( data, model, krig.sa = FALSE, sa.samp = 1000 ) 
     totEffect <- function( x ) 1 - x$Dt / x$V
   }
 
-  sa <- cbind( mainEffect( metamodel ), totEffect( metamodel ) - mainEffect( metamodel ) )
+  sa <- cbind( mainEffect( metamodel ), totEffect( metamodel ) -
+                 mainEffect( metamodel ) )
   rownames( sa ) <- colnames( data$doe )
   colnames( sa ) <- c( "Direct effects", "Interactions" )
 
   max.index <- function( x, pos = 1 )
-    as.integer( sapply( sort( x, index.return = TRUE ), `[`, length( x ) - pos + 1 )[ 2 ] )
+    as.integer( sapply( sort( x, index.return = TRUE ), `[`,
+                        length( x ) - pos + 1 )[ 2 ] )
 
-  topEffect <- c( max.index( totEffect( metamodel ), 1 ), max.index( totEffect( metamodel ), 2 ),
+  topEffect <- c( max.index( totEffect( metamodel ), 1 ),
+                  max.index( totEffect( metamodel ), 2 ),
                   max.index( totEffect( metamodel ), 3 ) )
 
   cat( "Top parameters influencing response surface:\n" )
@@ -53,7 +57,7 @@ kriging.sensitivity <- function( data, model, krig.sa = FALSE, sa.samp = 1000 ) 
   cat( " Third:", colnames( data$doe )[ topEffect[ 3 ] ], "\n\n" )
 
   sa <- list( metamodel = metamodel, sa = sa, topEffect = topEffect )
-  class( sa ) <- "kriging-sa"
+  class( sa ) <- "kriging.sensitivity.lsd"
 
   return( sa )
 }
@@ -64,18 +68,39 @@ kriging.sensitivity <- function( data, model, krig.sa = FALSE, sa.samp = 1000 ) 
 kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
                                covModel = 0, digits = 4 ) {
 
+  if( ! inherits( data, "doe.lsd" ) )
+    stop( "Invalid data (not from read.doe.lsd())" )
+
+  if( is.null( ext.wgth ) || ! is.finite( ext.wgth ) || ext.wgth < 0 )
+    stop( "Invalid weight of external validation sample (ext.wgth)" )
+
+  if( is.null( trendModel ) || ! is.finite( trendModel ) ||
+      round( trendModel ) < 0 || round( trendModel ) > 2 )
+    stop( "Invalid trend model order (trendModel)" )
+
+  if( is.null( covModel ) || ! is.finite( covModel ) ||
+      round( covModel ) < 0 || round( covModel ) > 5 )
+    stop( "Invalid covariance model type (covModel)" )
+
+  if( is.null( digits ) || ! is.finite( digits ) || round( digits ) < 0 )
+    stop( "Invalid significant digits (digits)" )
+
+  trendModel  <- round( trendModel )
+  covModel    <- round( covModel )
+  digits      <- round( digits )
+
   # The following code was adapted and expanded from Salle & Yildizoglu 2014
   #
   # x = doe is in data.frame format, and contains the DoE (n rows, k columns)
   # z = valid is in data.frame format, and contains the values of the factors at the
   # additional points (n rows, k columns)
-  # y = resp$Mean is in data.frame format, and contains the values of the response
-  # d at the n points of the DoE, averaged over the nSize replications (column is
+  # y = resp[ , 1 ] is in matrix format, and contains the values of the response
+  # d at the n points of the DoE, over the nSize replications (column is
   # named totDist, n rows)
-  # sigma = resp$Variance is a column of n rows, with contains the variance of the
+  # sigma = resp[ , 2 ] is a column of n rows, with contains the SD/MAD of the
   # response d over the nSize replications of each n experiments.
-  # w = valResp$Mean is in data.frame format, and contains the values of the
-  # response at the additional points (averaged over the nSize replications ).
+  # w = valResp[ , 1 ] is in matrix format, and contains the values of the
+  # response at the additional points (over the nSize replications ).
   #
 
   # ------ Best model estimation & selection ------
@@ -100,16 +125,16 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
 
   for( i in 1 : length( trendTypes ) )
     for( j in 1 : length( covTypes ) ) {
-      km <- fit.kriging( data$resp$Mean, data$doe, resp.noise = data$resp$Variance,
+      km <- fit.kriging( data$resp[ , 1 ], data$doe, resp.noise = data$resp[ , 2 ],
                          trials = maxTrials, trend.func = trendTypes[[ i ]],
                          cov.func = covTypes[ j ] )
       models[[ i, j ]] <- km$model
       Q2[ i, j ] <- km$Q2
 
       if( ! onlyCross ) {
-        rmse[ i, j ] <- rmse.kriging( km$model, data$valResp$Mean, data$valid )
-        mae[ i, j ] <- mae.kriging( km$model, data$valResp$Mean, data$valid )
-        rma[ i, j ] <- rma.kriging( km$model, data$valResp$Mean, data$valid )
+        rmse[ i, j ] <- rmse.kriging( km$model, data$valResp[ , 1 ], data$valid )
+        mae[ i, j ] <- mae.kriging( km$model, data$valResp[ , 1 ], data$valid )
+        rma[ i, j ] <- rma.kriging( km$model, data$valResp[ , 1 ], data$valid )
       }
     }
 
@@ -171,28 +196,34 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
 
   if( onlyCross ) {
     table <- data.frame( Q2, row.names = NULL )
-    rownames( table ) <- c( apply( cbind( rep( "Q2", length( trendTypes ) ), trendNames,
+    rownames( table ) <- c( apply( cbind( rep( "Q2", length( trendTypes ) ),
+                                          trendNames,
                                           rep( "trend", length( trendTypes ) ) ),
                                    1, paste, collapse = " " ) )
     rmseStat <- maeStat <- rmaStat <- valExtN <- NA
   } else {
-    table <- data.frame( rbind( Q2, rmse, mae, rma, deparse.level = 0 ), row.names = NULL )
-    rownames( table ) <- c( apply( cbind( rep( "Q2", length( trendTypes ) ), trendNames,
+    table <- data.frame( rbind( Q2, rmse, mae, rma, deparse.level = 0 ),
+                         row.names = NULL )
+    rownames( table ) <- c( apply( cbind( rep( "Q2", length( trendTypes ) ),
+                                          trendNames,
                                           rep( "trend", length( trendTypes ) ) ),
                                    1, paste, collapse = " " ),
-                            apply( cbind( rep( "RMSE", length( trendTypes ) ), trendNames,
+                            apply( cbind( rep( "RMSE", length( trendTypes ) ),
+                                          trendNames,
                                           rep( "trend", length( trendTypes ) ) ),
                                    1, paste, collapse = " " ),
-                            apply( cbind( rep( "MAE", length( trendTypes ) ), trendNames,
+                            apply( cbind( rep( "MAE", length( trendTypes ) ),
+                                          trendNames,
                                           rep( "trend", length( trendTypes ) ) ),
                                    1, paste, collapse = " " ),
-                            apply( cbind( rep( "RMA", length( trendTypes ) ), trendNames,
+                            apply( cbind( rep( "RMA", length( trendTypes ) ),
+                                          trendNames,
                                           rep( "trend", length( trendTypes ) ) ),
                                    1, paste, collapse = " " ) )
     rmseStat <- rmse[ trendModel, covModel ]
     maeStat <- mae[ trendModel, covModel ]
     rmaStat <- rma[ trendModel, covModel ]
-    valExtN <- length( data$valResp$Mean )
+    valExtN <- nrow( data$valResp )
   }
   colnames( table ) <- covNames
 
@@ -200,8 +231,10 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
     format( round( x, digits = digits ), nsmall = digits )
 
   coef.label <- c( "trend(intercept)", "trend(inclination)",
-                   apply( cbind( rep( paste0( m@covariance@range.names, "(" ), m@covariance@d ),
-                                 m@covariance@var.names, rep( ")", m@covariance@d ) ),
+                   apply( cbind( rep( paste0( m@covariance@range.names, "(" ),
+                                      m@covariance@d ),
+                                 m@covariance@var.names, rep( ")",
+                                                              m@covariance@d ) ),
                           1, paste0, collapse = "" ) )
 
   fit.label <- c( "Trend specification", "Correlation function", "Cross-sample Q2",
@@ -255,7 +288,7 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
                   ncol = length( data$facLimUp ), byrow = TRUE )
   X.std <- ( data$doe - Binf ) / ( Bsup - Binf )
 
-  m.std <- fit.kriging( data$resp$Mean, X.std, resp.noise = data$resp$Variance,
+  m.std <- fit.kriging( data$resp[ , 1 ], X.std, resp.noise = data$resp[ , 2 ],
                         trials = maxTrials, trend.func = trendTypes[[ trendModel ]],
                         cov.func = covTypes[ covModel ] )$model
 
@@ -276,11 +309,12 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
   colnames( estimation.std ) <- c( "Coefficient", "Other information", "" )
 
   model <- list( selected = m, Q2 = Q2stat, comparison = table, rmse = rmseStat,
-                 mae = maeStat, rma = rmaStat, extN = valExtN, estimation = estimation,
-                 estimation.std = estimation.std, coefficients = coefficients,
+                 mae = maeStat, rma = rmaStat, extN = valExtN,
+                 estimation = estimation, estimation.std = estimation.std,
+                 coefficients = coefficients,
                  coefficients.std = coefficients.std, trend = trendModel,
                  trendNames = trendNames, cov = covModel, covNames = covNames )
-  class( model ) <- "kriging-model"
+  class( model ) <- "kriging.model.lsd"
 
   return( model )
 }
@@ -296,7 +330,8 @@ fit.kriging <- function( response, doe, resp.noise = NULL, trend.func = ~1,
 
   # Cross validation - don't use noise info because of Q2 doesn't support it
   fit <- DiceKriging::km( design = doe, response = response, formula = trend.func,
-                          covtype = cov.func, control = list( trace = FALSE, print.level = 0 ) )
+                          covtype = cov.func, control = list( trace = FALSE,
+                                                              print.level = 0 ) )
   Q2 <- Q2.kriging( fit )
 
   # External validation - reestimate the model using noise information
@@ -308,8 +343,10 @@ fit.kriging <- function( response, doe, resp.noise = NULL, trend.func = ~1,
     ok <- TRUE
     tryCatch( fit <- DiceKriging::km( design = doe, response = response,
                                       formula = trend.func, covtype = cov.func,
-                                      noise.var = resp.noise * ( scaleFactor ^ trial ),
-                                      control = list( trace = FALSE, print.level = 0 ) ),
+                                      noise.var = ( resp.noise ^ 2 ) *
+                                        ( scaleFactor ^ trial ),
+                                      control = list( trace = FALSE,
+                                                      print.level = 0 ) ),
               error = function( ex ) {
                 warning( "Model search: Problem in function 'km', trying to scale down noise...",
                          call. = FALSE )
@@ -317,6 +354,7 @@ fit.kriging <- function( response, doe, resp.noise = NULL, trend.func = ~1,
                 ok <<- FALSE
               } )
   }
+
   if( trial == trials )
     stop( "Can't fit a model using function 'km', try removing outliers" )
 

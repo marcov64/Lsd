@@ -11,14 +11,14 @@ name.var.lsd( r.name )
 }
 \arguments{
   \item{r.name}{
-a character vector, or an object which can be coerced to a character vector by as.character, from the column names produced by reading a LSD results file.
+a string, a vector of strings, or an object which can be coerced to a character vector by \code{as.character}, from the column names produced by reading a LSD results file.
 }
 }
 \details{
 The conversion may be incorrect if the original LSD variable is named in the format "X_...". No checking is done to make sure the variable really exists.
 }
 \value{
-A character vector of with the same attributes as x (after possible coercion).
+A string or a string vector with the same attributes as x (after possible coercion).
 }
 \author{Marcelo C. Pereira}
 \seealso{

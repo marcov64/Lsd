@@ -24,7 +24,7 @@ Cygwin 3.1.7 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
 7-Zip LZMA SDK 19.0 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
 Makeself 2.4.3 is copyrighted by Stephane Peter under GPL2, https://makeself.io
 Gnuplot 5.4.1 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
-Eigen 3.3.9 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
+Eigen 3.4.0 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
 subbotools 1.3 is copyrighted by Giulio Bottazzi under GPL2, http://cafim.sssup.it/~giulio/software/subbotools
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
 NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under GPL 2.1, http://harvest.nps.edu
@@ -80,9 +80,11 @@ This distribution contains:
 
 LSD source code: source files are usually managed (e.g., for compilation) automatically, so that users need not to worry for technical issues or command line usage. Upgrading to new versions of LSD (which always guarantees backward compatibility) necessitates only to replace the source files (e.g, extracting the new distribution on the existing location).
 
-LSD example models : several models are available, providing examples on the design of whole models, which can be used to copy-and-past single equations or chunks of code.
+LSD example models: several models are available, providing examples on the design of whole models, which can be used to copy-and-past single equations or chunks of code.
 
 LSD Model Manager (LMM): LSD models can be developed using any text editor and standard make files, so users are allowed to use their preferred development environment. However, LSD distribution contains a simple IDE (integrated development environment) providing all the functionalities required by the typical needs of a LSD project. LMM permits to manage easily several modeling projects (small and large), to create new model code with extensive assistance, and to easily debug problematic models.
+
+LSD Web Interface (LWI): LWI is NOT installed by the LSD installer. So, after installing LSD, please download the source code at https://github.com/marcov64/LSD and copy the folder named lwi in the downloaded archive (.zip) to the same folder where you installed LSD, making sure the entire subfolder structure below lwi is copied.
 
 
 *********************
@@ -310,7 +312,7 @@ Step-by-step procedure to install the MSYS2 64-bit compiler (an internet connect
 
 4. Still in the shell, install the compiler and required tools:
 
- pacman -S mingw-w64-x86_64-make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb
+ pacman -S mingw-w64-x86_64-make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-diffutils mingw-w64-x86_64-gsl mingw-w64-x86_64-libsigsegv
 
 5. Press "Windows" and "R" keys together, type the command "sysdm.cpl" in the "Run" dialog box and press "Enter". In the "System Properties" window, go to the "Advanced" tab and click on button "Environment Variables...". In the "System variables" list, select "Path" and press "Edit...". Run across the lines to see if your MSYS2 MinGW64 bin folder, i.e. "C:\msys64\mingw64\bin", is already there. If Yes, just press "Cancel" 3 times. If not, click on "New" and type MSYS2 MinGW64 binary folder, i.e. "C:\msys64\mingw64\bin". Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your MSYS2 MinGW64 bin folder in PATH.
 

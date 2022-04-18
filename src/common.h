@@ -445,8 +445,8 @@ struct sense
 
 struct design							// design of experiment object
 {
-	int typ, tab, n, k, *par, *lag;		// experiment parameters
-	double *hi, *lo, **ptr;
+	int typ, tab, n, k, *par, *lag, *inst;// experiment parameters
+	double **hi, **lo, ***doe;
 	char **lab;
 	bool *intg;
 
@@ -454,6 +454,8 @@ struct design							// design of experiment object
 			int findex, int samples, int factors = 0, int jump = 2, int trajs = 4 );
 										// constructor
 	~design( void );					// destructor
+	void clear_design( void );
+	void load_design_data( sense *rsens, int n );
 };
 
 struct lsdstack

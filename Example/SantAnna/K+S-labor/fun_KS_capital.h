@@ -430,6 +430,8 @@ EQUATION( "W1" )
 Total wages paid by firms in capital-good sector
 */
 
+V( "L1" );										// ensure hiring is done
+
 v[0] = 0;										// wage accumulator
 CYCLE( cur, "Wrk1" )
 	v[0] += VS( SHOOKS( cur ), "_w" );			// go through all workers
@@ -495,6 +497,8 @@ Number of workers quitting jobs (not fired) in period in capital-good sector
 Updated in 'hires1' and 'hires2'
 */
 
+V( "retires1" );								// ensure retiring is done
+
 if ( VS( PARENT, "flagGovExp" ) < 2 )			// unemployment benefit exists?
 	END_EQUATION( 0 );
 
@@ -538,6 +542,8 @@ Minimum workers tenure skills in capital-good sector
 i = VS( PARENT, "flagWorkerLBU" );				// worker-level learning mode
 if ( i == 0 || i == 1 )							// no tenure learning?
 	END_EQUATION( 1 );							// skills = 1
+
+V( "L1" );										// ensure hiring is done
 
 v[0] = DBL_MAX;									// current minimum
 CYCLE( cur, "Wrk1" )

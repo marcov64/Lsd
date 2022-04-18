@@ -667,6 +667,7 @@ void reset_blueprint( object *r )
 	set_blueprint( blueprint, r );
 }
 
+
 /***************************************************
 SEARCH_DESCRIPTION
 ***************************************************/
@@ -928,6 +929,9 @@ void reset_description( object *r )
 {
 	bridge *cb;
 	variable *cv;
+
+	if ( r == NULL )
+		return;
 
 	search_description( r->label );
 

@@ -41,6 +41,8 @@ If 0 < omega/omegaU < 1, use the value to draw the probability to apply
 at least for one firm
 */
 
+VS( CONSECL2, "fires2" );						// ensure firing done
+
 k = V( "_employed" );							// employment status
 
 // select the correct parameter values for post-change type of firms

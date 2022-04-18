@@ -160,18 +160,19 @@ void *set_random( int gen );							// set random generator
 // global variables (visible to the users)
 extern bool fast;						// flag to hide LOG messages & runtime (read-only)
 extern bool fast_lookup;				// flag for fast equation look-up mode
-extern bool no_ptr_chk;					// disable user pointer checking
 extern bool no_saved;					// disable the usage of saved values as lagged ones
 extern bool no_search;					// disable the standard variable search mechanism
 extern bool no_zero_instance;			// flag to allow deleting last object instance
 extern bool use_nan;					// flag to allow using Not a Number value
 extern char *path;						// folder where the configuration is
 extern char *simul_name;				// configuration name being run (for saving networks)
+extern const bool no_pointer_check;		// user pointer checking static disable
 extern double def_res;					// default equation result
 extern eq_mapT eq_map;					// map to fast equation look-up
 extern int cur_sim;
 extern int debug_flag;
 extern int max_step;
+extern int no_ptr_chk;					// dynamic disable user pointer checking
 extern int sim_num;
 extern int t;
 extern unsigned seed;
@@ -195,6 +196,7 @@ FILE *search_data_ent( const char *name, variable *v );
 FILE *search_data_str( const char *name, const char *init, const char *str );
 FILE *search_str( const char *name, const char *str );
 bool abort_run_threads( void );
+bool add_rt_plot_tab( const char *w, int id_sim );
 bool add_unsaved( void );
 bool alloc_save_mem( object *r );
 bool alloc_save_var( variable *v );
@@ -236,6 +238,7 @@ int check_affected( object *c, object *pivot, int level, int affected[ ] );
 int compute_copyfrom( object *c, const char *parWnd );
 int entry_new_objnum( object *c, const char *tag );
 int hyper_count( const char *lab );
+int hyper_count_var( const char *lab );
 int load_configuration( bool reload, int quick = 0 );
 int load_sensitivity( FILE *f );
 int logic_op_code( const char *lop, const char *errmsg );
@@ -257,7 +260,6 @@ object *skip_next_obj( object *t, int *count );
 void NOLH_clear( void );
 void add_cemetery( variable *v );
 void add_da_plot_tab( const char *w, int id_plot );
-void add_rt_plot_tab( const char *w, int id_sim );
 void analysis( bool mc = false );
 void ancestors( object *r, FILE *f, bool html = true );
 void assign( object *r, int *idx, const char *lab );
@@ -520,6 +522,7 @@ extern void *random_engine;		// current random number generator engine
 #ifndef _NP_
 extern atomic < bool > parallel_ready;// flag to indicate multitasking is available
 extern map< thread::id, worker * > thr_ptr;// worker thread pointers
+extern mutex lock_obj_list;		// lock for object list for parallel manipulation
 extern mutex lock_run_logs;		// lock run_logs for parallel updating
 extern string run_log;			// consolidated runs log
 extern thread run_monitor;		// thread monitoring parallel instances

@@ -71,7 +71,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	res = 1;
 	value1 = cv->val [ lag ];					// preload the existing value of the first object
 	value2 = 0;
-	cmd( "set value 1" ); 						// method
+	cmd( "set value 1" );						// method
 	cmd( "set fill 0" );
 	cmd( "set to_all 1" );
 	cmd( "set step_in 1" );
@@ -113,7 +113,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	{
 		cmd( "ttk::label $_w.head.l.c -text \"Variable: \"" );
 		cmd( "ttk::label $_w.head.l.n1 -text \"%s  \" -style hl.TLabel", lab );
-		cmd( "ttk::label $_w.head.l.n2 -text \"\\[  lag \"" );
+		cmd( "ttk::label $_w.head.l.n2 -text \"\\[	lag \"" );
 		cmd( "ttk::label $_w.head.l.n3 -text \"%d\" -style hl.TLabel", t - cv->last_update + lag + 1  );
 		cmd( "ttk::label $_w.head.l.n4 -text \"\\]\"" );
 		cmd( "pack $_w.head.l.c $_w.head.l.n1 $_w.head.l.n2 $_w.head.l.n3 $_w.head.l.n4 -side left" );
@@ -145,7 +145,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	cmd( "ttk::entry $_w.m.f1.val.i.l2.e2 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set value2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value2; set err $_w.m.f1.val.i.l2.e2; set choice 1; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 	cmd( "pack $_w.m.f1.val.i.l2.l2 $_w.m.f1.val.i.l2.e2" );
 
-	cmd( "pack $_w.m.f1.val.i.l1 $_w.m.f1.val.i.l2 -expand yes -fill x  -ipadx 5 -ipady 2" );
+	cmd( "pack $_w.m.f1.val.i.l1 $_w.m.f1.val.i.l2 -expand yes -fill x	-ipadx 5 -ipady 2" );
 
 	cmd( "pack $_w.m.f1.val.l $_w.m.f1.val.i" );
 
@@ -222,8 +222,8 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	cmd( "pack $_w.m.f2.s.i.l.a.l $_w.m.f2.s.i.l.a.e $_w.m.f2.s.i.l.a.l1 -side left -padx 1" );
 
 	cmd( "ttk::checkbutton $_w.m.f2.s.i.l.f -text \"Fill-in\" -variable fill" );
-	cmd( "pack  $_w.m.f2.s.i.l.a $_w.m.f2.s.i.l.f -padx 5 -side left" );
-	cmd( "pack  $_w.m.f2.s.i.l -pady 2" );
+	cmd( "pack	$_w.m.f2.s.i.l.a $_w.m.f2.s.i.l.f -padx 5 -side left" );
+	cmd( "pack	$_w.m.f2.s.i.l -pady 2" );
 
 	cmd( "tooltip::tooltip $_w.m.f2.s.i.l.a \"Number of instances to skip from initializing\"" );
 	cmd( "tooltip::tooltip $_w.m.f2.s.i.l.f \"Fill intermediate instances with same value\"" );
@@ -610,7 +610,7 @@ object *sensitivity_parallel( object *o, sense *s )
 	int i;
 	sense *cs;
 	object *cur = o;
-	variable *cvar;
+	variable *cv;
 
 	if ( s->next != NULL )
 	{
@@ -628,11 +628,11 @@ object *sensitivity_parallel( object *o, sense *s )
 		s->i = i;
 		for ( cs = rsense; cs != NULL; cs = cs->next )
 		{
-			cvar = cur->search_var( cur, cs->label );
+			cv = cur->search_var( cur, cs->label );
 			if ( cs->param == 0 )				// handle lags > 0
-				cvar->val[ cs->lag ] = cs->v[ cs->i ];
+				cv->val[ cs->lag ] = cs->v[ cs->i ];
 			else
-				cvar->val[ 0 ] = cs->v[ cs->i ];
+				cv->val[ 0 ] = cs->v[ cs->i ];
 		}
 
 		cur = cur->hyper_next( cur->label );
@@ -672,7 +672,7 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl, const char
 	int i, nv;
 	sense *cs;
 	object *cur;
-	variable *cvar;
+	variable *cv;
 
 	if ( s->next != NULL )
 	{
@@ -691,15 +691,15 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl, const char
 		for ( nv = 1, cs = rsense; cs != NULL; cs = cs->next )
 		{
 			nv *= cs->nvalues;
-			cvar = root->search_var( root, cs->label );
+			cv = root->search_var( root, cs->label );
 
-			for ( cur = cvar->up; cur != NULL; cur = cur->hyper_next( cur->label ) )
+			for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( cur->label ) )
 			{
-				cvar = cur->search_var( cur, cs->label );
+				cv = cur->search_var( cur, cs->label );
 				if ( cs->param == 1 )				// handle lags > 0
-					cvar->val[ 0 ] = cs->v[ cs->i ];
+					cv->val[ 0 ] = cs->v[ cs->i ];
 				else
-					cvar->val[ cs->lag ] = cs->v[ cs->i ];
+					cv->val[ cs->lag ] = cs->v[ cs->i ];
 			}
 
 		}
@@ -827,7 +827,7 @@ void dataentry_sensitivity( sense *s, int nval )
 			strcatn( sss, tok, MAX_ELEM_LENGTH * s->nvalues + 1 );	// to the string
 		}
 
-		cmd( "set sss \"%s\"", sss );		 	// pass string to Tk window
+		cmd( "set sss \"%s\"", sss );			// pass string to Tk window
 		cmd( ".sens.t.t insert 0.0 $sss" );		// insert string in entry window
 		delete [ ] tok;
 		delete [ ] sss;
@@ -950,7 +950,7 @@ NOLH_TABLE
 Calculate a Near Orthogonal Latin Hypercube (NOLH) design for sampling.
 Include tables to up to 29 variables ( sanchez 2009, Cioppa and Lucas 2007).
 Returns the number of samples (n) required for the calculated design and a
-pointer 	to the matrix n x k, where k is the number of factors ( variables).
+pointer		to the matrix n x k, where k is the number of factors ( variables).
 
 It is possible to load one additional design table from disk ( file NOLH.csv in
 the same folder as the configuration file .lsd). The table should be formed
@@ -1069,8 +1069,8 @@ bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false )
 	while ( ! feof( NOLHfile ) );
 
 	// get contiguous space for the 2D table
-	NOLH_0 = new int*[ n ];
-	NOLH_0[ 0 ] = new int[ n * kFile ];
+	NOLH_0 = new int * [ n ];
+	NOLH_0[ 0 ] = new int [ n * kFile ];
 	for ( i = 1; i < n; i++ )
 		NOLH_0[ i ] = NOLH_0[ i - 1 ] + kFile;
 
@@ -1137,16 +1137,16 @@ Matrix operations support functions for morris_oat() and enhancements
 // allocate dynamic space for matrix
 double **mat_new( int m, int n )
 {
-	double **c = new double *[ m ];
-	for ( int i = 0; i < m ; ++i )	 	//rows
-		c[ i ] = new double[ n ];
+	double **c = new double * [ m ];
+	for ( int i = 0; i < m ; ++i )		//rows
+		c[ i ] = new double [ n ];
 	return c;
 }
 
 // deallocate dynamic space for matrix
 void mat_del( double **a, int m, int n )
 {
-	for ( int i = 0; i < m ; ++i )	 	//rows
+	for ( int i = 0; i < m ; ++i )		//rows
 		delete [ ] a[ i ];
 	delete [ ] a;
 }
@@ -1156,7 +1156,7 @@ double **mat_mult_mat( double **a, int m, int n, double **b, int o, int p, doubl
 {
 	if ( n != o )
 		return NULL;
-	for ( int i = 0; i < m ; ++i )	 	//row of first matrix
+	for ( int i = 0; i < m ; ++i )		//row of first matrix
 		for ( int j = 0; j < p; ++j )	//column of second matrix
 		{
 			c[ i ][ j ] = 0;
@@ -1169,7 +1169,7 @@ double **mat_mult_mat( double **a, int m, int n, double **b, int o, int p, doubl
 // add two same size matrices ( c<-a+b)
 double **mat_add_mat( double **a, int m, int n, double **b, double **c )
 {
-	for ( int i = 0; i < m ; ++i )	 	//rows
+	for ( int i = 0; i < m ; ++i )		//rows
 		for ( int j = 0; j < n; ++j )	//columns
 			c[ i ][ j ] = a[ i ][ j ] + b[ i ][ j ];
 	return c;
@@ -1178,7 +1178,7 @@ double **mat_add_mat( double **a, int m, int n, double **b, double **c )
 // multiply all positions in matrix by a scalar
 double **mat_mult_scal( double **a, int m, int n, double b, double **c )
 {
-	for ( int i = 0; i < m ; ++i )	 	//rows
+	for ( int i = 0; i < m ; ++i )		//rows
 		for ( int j = 0; j < n; ++j )	//columns
 			c[ i ][ j ] = a[ i ][ j ] * b;
 	return c;
@@ -1187,7 +1187,7 @@ double **mat_mult_scal( double **a, int m, int n, double b, double **c )
 // add a scalar to all positions in matrix
 double **mat_add_scal( double **a, int m, int n, double b, double **c )
 {
-	for ( int i = 0; i < m ; ++i )	 	//rows
+	for ( int i = 0; i < m ; ++i )		//rows
 		for ( int j = 0; j < n; ++j )	//columns
 			c[ i ][ j ] = a[ i ][ j ] + b;
 	return c;
@@ -1196,7 +1196,7 @@ double **mat_add_scal( double **a, int m, int n, double b, double **c )
 // copy a scalar to all positions in matrix
 double **mat_copy_scal( double **a, int m, int n, double b )
 {
-	for ( int i = 0; i < m ; ++i )	 	//rows
+	for ( int i = 0; i < m ; ++i )		//rows
 		for ( int j = 0; j < n; ++j )	//columns
 			a[ i ][ j ] = b;
 	return a;
@@ -1205,7 +1205,7 @@ double **mat_copy_scal( double **a, int m, int n, double b )
 // copy same size matrices
 double **mat_copy_mat( double **a, int m, int n, double **b )
 {
-	for ( int i = 0; i < m ; ++i )	 	//rows
+	for ( int i = 0; i < m ; ++i )		//rows
 		for ( int j = 0; j < n; ++j )	//columns
 			a[ i ][ j ] = b[ i ][ j ];
 	return a;
@@ -1216,7 +1216,7 @@ double **mat_ins_mat( double **a, int m, int n, double **b, int o, int p, int lp
 {
 	if ( lpos + o > m || p > n )
 		return NULL;
-	for ( int i = 0; i < m ; ++i )	 	//rows
+	for ( int i = 0; i < m ; ++i )		//rows
 		for ( int j = 0; j < n; ++j )	//columns
 			if ( i >= lpos && i < lpos + o && j < p )
 				a[ i ][ j ] = b[ i - lpos ][ j ];
@@ -1228,7 +1228,7 @@ double **mat_ext_mat( double **a, int m, int n, double **b, int o, int p, int lp
 {
 	if ( lpos + m > o || n < p )
 		return NULL;
-	for ( int i = 0; i < m ; ++i )	 	//rows
+	for ( int i = 0; i < m ; ++i )		//rows
 		for ( int j = 0; j < n; ++j )	//columns
 				a[ i ][ j ] = b[ i + lpos ][ j ];
 	return a;
@@ -1240,7 +1240,7 @@ double **mat_ext_mat( double **a, int m, int n, double **b, int o, int p, int lp
 double mat_sum_dists( double **a, int m, int n, double **b )
 {
 	double sum = 0;
-	for ( int i = 0; i < m ; ++i )	 		//rows in a
+	for ( int i = 0; i < m ; ++i )			//rows in a
 		for ( int k = 0; k < m; ++k )		//rows in b
 		{
 			double dist2 = 0;
@@ -1301,7 +1301,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 				DM[ i ][ j ] = ( i == j )? RND_CHOICE( -1, 1 ) : 0;
 
 		// permutation matrix P
-		int *perm = new int[ k ];
+		int *perm = new int [ k ];
 		for ( i = 0; i < k; ++i )
 			perm [ i ] = i;
 
@@ -1359,11 +1359,10 @@ COMPUTE_DISTANCE_MATRIX
 	according to Campolongo et al 2007 and Ruano 2012. Code adapted
 	from SAlib by Jon Herman.
 
-	k: number of factors
-	pool: pool of trajectories produced by morris_oat()
+	sample: pool of trajectories produced by morris_oat()
 	M: number of trajectories in pool
 	r: number of final trajectories (<= M)
-	ptr: preallocated memory area to save the trajectories
+	DM: preallocated memory area to save the trajectories
 ******************************************************************************/
 double **compute_distance_matrix( double **sample, int M, int k, double **DM )
 {
@@ -1612,17 +1611,105 @@ double **opt_trajectories( int k, double **pool, int M, int r, double **X )
 ******************************************************************************/
 design::~design( void )
 {
-	for ( int i = 0; i < n; i++ )		// run through all experiments
-		delete [ ] ptr[ i ];				// free memory
-	for ( int i = 0; i < k; i++ )		// and all variables
+	clear_design( );
+}
+
+void design::clear_design( void )
+{
+	int i, j;
+
+	for ( i = 0; i < n; ++i )			// free memory through all experiments
+	{
+		for ( j = 0; j < k; ++j )
+			delete [ ] doe[ i ][ j ];
+
+		delete [ ] doe[ i ];
+	}
+
+	for ( i = 0; i < k; ++i )			// and all variables
+	{
+		delete [ ] hi[ i ];
+		delete [ ] lo[ i ];
 		delete [ ] lab[ i ];
-	delete [ ] ptr;
-	delete [ ] lab;
-	delete [ ] hi;
-	delete [ ] lo;
+	}
+
 	delete [ ] par;
 	delete [ ] lag;
+	delete [ ] inst;
 	delete [ ] intg;
+	delete [ ] hi;
+	delete [ ] lo;
+	delete [ ] doe;
+	delete [ ] lab;
+
+	typ = tab = n = k = 0;
+	par = lag = inst = NULL;
+	intg = NULL;
+	hi = lo = NULL;
+	lab = NULL;
+	doe = NULL;
+}
+
+
+/*****************************************************************************
+LOAD_DESIGN_DATA
+	Load the design data from sensitivity object
+******************************************************************************/
+void design::load_design_data( sense *rsens, int n )
+{
+	int h, i, j, nVal;
+	sense *cs;
+
+	// allocate memory for data
+	par = new int [ k ];			// array of variable type (parameter / lagged variable )
+	lag = new int [ k ];			// array of lags
+	inst = new int [ k ];			// array of number of instances
+	intg = new bool [ k ];			// array of format (integer/float)
+	hi = new double * [ k ];		// array of high factor values (per instance)
+	lo = new double * [ k ];		// array of low factor values (per instance)
+	lab = new char * [ k ];			// array of variable labels
+	doe = new double ** [ n ];		// allocate space for weighted design table
+
+	// define low and high values from sensitivity data for each factor/variable
+	for ( i = 0, cs = rsens; i < k && cs != NULL; ++i, cs = cs->next )
+	{
+		inst[ i ] = hyper_count_var( cs->label );
+		nVal = cs->nvalues;			// number of data values
+		nVal = nVal % 2 == 0 ? nVal : nVal - 1 ;// discard last unpaired value
+
+		if ( inst[ i ] == 0 || nVal < 2 )// only multi-instance/value factor
+			continue;
+
+		par[ i ] = cs->param;		// set factor type
+		lag[ i ] = cs->lag;			// set number of lags
+		intg[ i ] = cs->integer;	// set factor format
+		lab[ i ] = new char [ strlen( cs->label ) + 1 ];
+		strcpy( lab[ i ], cs->label );// set factor name
+
+		hi[ i ] = new double [ inst[ i ] ];
+		lo[ i ] = new double [ inst[ i ] ];
+		for ( h = j = 0; j < inst[ i ]; ++j )
+		{
+			if ( 2 * j + 1 < nVal )	// data available?
+			{
+				hi[ i ][ j ] = max( cs->v[ 2 * j ], cs->v[ 2 * j + 1 ] );
+				lo[ i ][ j ] = min( cs->v[ 2 * j ], cs->v[ 2 * j + 1 ] );
+			}
+			else					// recycle previous data
+			{
+				hi[ i ][ j ] = hi[ i ][ h ];
+				lo[ i ][ j ] = lo[ i ][ h++ ];
+			}
+		}
+	}
+
+	// define data structure to hold DoE
+	for ( i = 0; i < n; ++i )		// for all experiments
+	{
+		doe[ i ] = new double * [ k ];// allocate 2nd level data
+		for ( j = 0; j < k; ++j )	// for all factors
+			doe[ i ][ j ] = new double[ inst[ j ] ];
+	}
 }
 
 
@@ -1638,25 +1725,27 @@ DESIGN
 design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
 				int findex, int samples, int factors, int jump, int trajs )
 {
-	int i , j, kTab, doeRange, poolSz;
-	double **pool;
-	char *doefname, doeName[ MAX_ELEM_LENGTH ];
+	int h, i, j, kTab, doeRange, poolSz;
+	double **pool, **traj;
+	char *doefname, buf[ 35 ], doeName[ MAX_ELEM_LENGTH ];
 	FILE *f;
-	sense *cs;
 
 	// reset random number generator
 	init_random( seed );
 
 	if ( rsens == NULL )					// valid pointer?
 		typ = 0;							// trigger invalid design
+	else
+		k = num_sensitivity_variables( rsens );	// number of factors
 
 	switch ( typ )
 	{
 		case 1:								// Near Orthogonal Latin Hypercube sampling
-			k = kTab = num_sensitivity_variables( rsens );	// number of factors
-
 			if ( strcmp( fname, "" ) )		// if filename was specified
+			{
 				NOLH_load( fname, true );	// load file and force using it always
+				kTab = k;
+			}
 			else
 			{
 				if ( factors != 0 && k > factors )	// invalid # of factors selected?
@@ -1667,6 +1756,7 @@ design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
 								"number of NOLH variables selected is too small" );
 					goto invalid;
 				}
+
 				// if user selected # of factors, use it to select internal table
 				kTab = ( factors == 0 ) ? k : factors;
 			}
@@ -1701,170 +1791,86 @@ design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
 
 			plog( "\nNOLH table used: %d (%s), n = %d", tab, tab > 0 ? "built-in" : "from file", n );
 
-			// allocate memory for data
-			par = new int[ k ];				// vector of variable type (parameter / lagged value )
-			lag = new int[ k ];				// vector of lags
-			intg = new bool[ k ];			// vector of format (integer/float)
-			hi = new double[ k ];			// vector of high factor value
-			lo = new double[ k ];			// vector of low factor value
-			lab = new char *[ k ];			// vector of variable labels
-			ptr = new double *[ n ];		// allocate space for weighted design table
-
-			// define low and high values from sensitivity data
-			for ( i = 0, cs = rsens; cs != NULL; cs = cs->next )
-			{
-				if ( cs->nvalues < 2 )		// consider only multivalue variables
-					continue;
-
-				hi[ i ] = lo[ i ] = cs->v[ 0 ];
-				for ( j = 1; j < cs->nvalues; j++ )
-				{
-					hi[ i ] = fmax( cs->v[ j ], hi[ i ] );
-					lo[ i ] = fmin( cs->v[ j ], lo[ i ] );
-				}
-
-				intg[ i ] = cs->integer;	// set variable format
-				par[ i ] = cs->param;		// set variable type
-				lag[ i ] = cs->lag;			// set number of lags
-
-				// copy label (name )
-				lab[ i ] = new char[ strlen( cs->label ) + 1 ];
-				strcpy( lab[ i ], cs->label );
-
-				i++;
-			}
+			// load data from sensitivity objects
+			load_design_data( rsens, n );
 
 			// calculate the design of the experiment
 			doeRange = NOLH[ tab ].hiLevel - NOLH[ tab ].loLevel;
-			for ( i = 0; i < n; i++ )		// for all experiments
-			{
-				ptr[ i ] = new double[ k ];	// allocate 2nd level data
-				for ( j = 0; j < k; j++ )	// for all factors
-					ptr[ i ][ j ] = lo[ j ] +
-					( *( NOLH[ tab ].table + i * NOLH[ tab ].kMax + j ) - 1 ) *
-					( hi[ j ] - lo[ j ] ) / doeRange;
-			}
+			for ( i = 0; i < n; ++i )		// for all experiments
+				for ( j = 0; j < k; ++j )	// for all factors
+					for ( h = 0; h < inst[ j ]; ++h )	// for all instances
+						doe[ i ][ j ][ h ] = lo[ j ][ h ] +
+						( *( NOLH[ tab ].table + i * NOLH[ tab ].kMax + j ) - 1 ) *
+						( hi[ j ][ h ] - lo[ j ][ h ] ) / doeRange;
 
 			break;
 
 		case 2:								// random sampling
-			k = num_sensitivity_variables( rsens );	// number of factors
 			n = samples;					// number of samples required
 			if ( n < 1 )					// at least one sample required
 				goto invalid;
 
-			// allocate memory for data
-			par = new int[ k ];				// vector of variable type (parameter / lagged value )
-			lag = new int[ k ];				// vector of lags
-			intg = new bool[ k ];			// vector of format (integer/float)
-			hi = new double[ k ];			// vector of high factor value
-			lo = new double[ k ];			// vector of low factor value
-			lab = new char *[ k ];			// vector of variable labels
-			ptr = new double *[ n ];		// allocate space for weighted design table
-
-			// define low and high values from sensitivity data
-			for ( i = 0, cs = rsens; cs != NULL; cs = cs->next )
-			{
-				if ( cs->nvalues < 2 )		// consider only multivalue variables
-					continue;
-
-				hi[ i ] = lo[ i ] = cs->v[ 0 ];
-				for ( j = 1; j < cs->nvalues; j++ )
-				{
-					hi[ i ] = fmax( cs->v[ j ], hi[ i ] );
-					lo[ i ] = fmin( cs->v[ j ], lo[ i ] );
-				}
-
-				intg[ i ] = cs->integer;	// set variable format
-				par[ i ] = cs->param;		// set variable type
-				lag[ i ] = cs->lag;			// set number of lags
-
-				// copy label (name )
-				lab[ i ] = new char[ strlen( cs->label ) + 1 ];
-				strcpy( lab[ i ], cs->label );
-
-				i++;
-			}
+			// load data from sensitivity objects
+			load_design_data( rsens, n );
 
 			// calculate the design of the experiment
-			for ( i = 0; i < n; i++ )		// for all experiments
-			{
-				ptr[ i ] = new double[ k ];	// allocate 2nd level data
-				for ( j = 0; j < k; j++ )	// for all factors
-					ptr[ i ][ j ] = lo[ j ] + ran1( ) * ( hi[ j ] - lo[ j ] );
-			}
+			for ( i = 0; i < n; ++i )		// for all experiments
+				for ( j = 0; j < k; ++j )	// for all factors
+					for ( h = 0; h < inst[ j ]; ++h )	// for all instances
+						doe[ i ][ j ][ h ] = lo[ j ][ h ] +
+											 ran1( ) * ( hi[ j ][ h ] - lo[ j ][ h ] );
 
 			break;
 
 		case 3:								// Elementary Effects sampling
-			k = num_sensitivity_variables( rsens );	// number of factors
 			poolSz = samples * ( k + 1 );	// larger pool to extract samples
 			n = trajs * ( k + 1 );			// number of effective samples
 			if ( n < 1 || n > poolSz )		// at least one sample required
 				goto invalid;
 
-			// allocate memory for data
-			par = new int[ k ];				// vector of variable type (parameter / lagged value )
-			lag = new int[ k ];				// vector of lags
-			intg = new bool[ k ];			// vector of format (integer/float)
-			hi = new double[ k ];			// vector of high factor value
-			lo = new double[ k ];			// vector of low factor value
-			lab = new char *[ k ];			// vector of variable labels
-			ptr = new double *[ n ];		// allocate space for weighted design table
-			for ( i = 0; i < n; i++ )		// for all final trajectories
-				ptr[ i ] = new double[ k ];	// allocate 2nd level data
-			pool = new double *[ poolSz ];	// allocate space for weighted design table
-			for ( i = 0; i < poolSz; i++ )	// for all pool trajectories
-				pool[ i ] = new double[ k ];
+			// load data from sensitivity objects
+			load_design_data( rsens, n );
 
-			// define low and high values from sensitivity data
-			for ( i = 0, cs = rsens; cs != NULL; cs = cs->next )
-			{
-				if ( cs->nvalues < 2 )		// consider only multivalue variables
-					continue;
-
-				hi[ i ] = lo[ i ] = cs->v[ 0 ];
-				for ( j = 1; j < cs->nvalues; j++ )
-				{
-					hi[ i ] = fmax( cs->v[ j ], hi[ i ] );
-					lo[ i ] = fmin( cs->v[ j ], lo[ i ] );
-				}
-
-				intg[ i ] = cs->integer;	// set variable format
-				par[ i ] = cs->param;		// set variable type
-				lag[ i ] = cs->lag;			// set number of lags
-
-				// copy label (name )
-				lab[ i ] = new char[ strlen( cs->label ) + 1 ];
-				strcpy( lab[ i ], cs->label );
-
-				i++;
-			}
+			pool = new double * [ poolSz ];	// allocate space for weighted design table
+			for ( i = 0; i < poolSz; ++i )	// for all pool trajectories
+				pool[ i ] = new double [ k ];
 
 			// calculate the Morris OAT pool of trajectories
 			pool = morris_oat( k, samples, factors, jump, pool );
 
 			// select the best trajectories from pool
-			ptr = opt_trajectories( k, pool, samples, trajs, ptr );
+			traj = new double * [ n ];
+			for ( i = 0; i < n; ++i )		 // for all final trajectories
+				traj[ i ] = new double [ k ];
 
-			for ( i = 0; i < poolSz; i++ )	// free pool memory
-				delete [ ] pool[ i ];
-			delete [ ] pool;
+			traj = opt_trajectories( k, pool, samples, trajs, traj );
 
 			// scale the DoE to the sensitivity test ranges
-			for ( i = 0; i < n; i++ )		// for all experiments
-				for ( j = 0; j < k; j++ )	// for all factors
-					ptr[ i ][ j ] = lo[ j ] + ptr[ i ][ j ] * ( hi[ j ] - lo[ j ] );
+			for ( i = 0; i < n; ++i )		// for all experiments
+				for ( j = 0; j < k; ++j )	// for all factors
+					for ( h = 0; h < inst[ j ]; ++h )	// for all instances
+						doe[ i ][ j ][ h ] = lo[ j ][ h ] + traj[ i ][ j ] *
+											 ( hi[ j ][ h ] - lo[ j ][ h ] );
+
+			for ( i = 0; i < poolSz; ++i )	// free pool memory
+				delete [ ] pool[ i ];
+
+			for ( i = 0; i < n; ++i )		// free trajectory memory
+				delete [ ] traj[ i ];
+
+			delete [ ] pool;
+			delete [ ] traj;
 
 			break;
 
+		case 0:
 		default:							// invalid design!
 		invalid:
 			typ = tab = n = k = 0;
-			par = lag = NULL;
+			par = lag = inst = NULL;
 			hi = lo = NULL;
 			intg = NULL;
-			ptr = NULL;
+			doe = NULL;
 			lab = NULL;
 			return;
 	}
@@ -1876,32 +1882,19 @@ design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
 
 	if ( strlen( dest_path ) > 0 )				// non-default folder?
 	{
-		doefname = new char[ strlen( dest_path ) + strlen( simul_name ) + strlen( doeName ) + 10 ];
+		doefname = new char [ strlen( dest_path ) + strlen( simul_name ) + strlen( doeName ) + 10 ];
 		sprintf( doefname, "%s/%s_%s.csv", dest_path, strlen( simul_name ) > 0 ? simul_name : "doe", doeName );
 	}
 	else
 	{
-		doefname = new char[ strlen( simul_name ) + strlen( doeName ) + 9 ];
+		doefname = new char [ strlen( simul_name ) + strlen( doeName ) + 9 ];
 		sprintf( doefname, "%s_%s.csv", strlen( simul_name ) > 0 ? simul_name : "doe", doeName );
 	}
 
 	if ( ( f = fopen( doefname, "w" ) ) == NULL )
 	{
-		delete [ ] par;
-		delete [ ] lag;
-		delete [ ] hi;
-		delete [ ] lo;
-		delete [ ] intg;
-		delete [ ] ptr;
-		delete [ ] lab;
 		delete [ ] doefname;
-
-		typ = tab = n = k = 0;
-		par = lag = NULL;
-		hi = lo = NULL;
-		intg = NULL;
-		ptr = NULL;
-		lab = NULL;
+		clear_design( );
 
 		error_hard( "cannot create DoE configuration file",
 					"check if disk is not full or set READ-ONLY",
@@ -1911,18 +1904,26 @@ design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
 	}
 
 	// write the doe table to disk
-	for ( j = 0; j < k; j++ )		// write variable labels
-		fprintf( f, "%s%c", lab[ j ], ( j == ( k - 1 ) ? '\n' : ',' ) );
+	for ( j = 0; j < k; ++j )		// write variable labels
+		for ( h = 0; h < inst[ j ]; ++h )	// for all instances
+			if( h == 0 )
+				fprintf( f, "%s%c", lab[ j ],
+						 j == k - 1 && h == inst[ j ] - 1 ? '\n' : ',' );
+			else
+				fprintf( f, "%s.%d%c", lab[ j ], h + 1,
+						 j == k - 1 && h == inst[ j ] - 1 ? '\n' : ',' );
 
-	for ( i = 0; i < n; i++ )		// for all experiments
-		for ( j = 0; j < k; j++ )	// write variable experimental values
-		{
-			// round to integer if necessary
-			if ( intg[ j ] )
-				ptr[ i ][ j ] = round( ptr[ i ][ j ] );
+	for ( i = 0; i < n; ++i )		// for all experiments
+		for ( j = 0; j < k; ++j )	// for all factors
+			for ( h = 0; h < inst[ j ]; ++h )	// for all instances
+			{
+				// round to integer if necessary
+				if ( intg[ j ] )
+					doe[ i ][ j ][ h ] = round( doe[ i ][ j ][ h ] );
 
-			fprintf( f, "%lf%c", ptr[ i ][ j ], ( j == ( k - 1 ) ? '\n' : ',' ) );
-		}
+				fprintf( f, "%lf%c", doe[ i ][ j ][ h ],
+						 j == k - 1 && h == inst[ j ] - 1 ? '\n' : ',' );
+			}
 
 	fclose( f );
 
@@ -1939,9 +1940,9 @@ SENSITIVITY_DOE
 ******************************************************************************/
 void sensitivity_doe( int *findex, design *doe, const char *dest_path )
 {
-	int i, j, inif = *findex;
+	int h, i, j, inif = *findex;
 	object *cur;
-	variable *cvar;
+	variable *cv;
 
 	stop = false;
 	cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\" %d { set stop true }", doe->n );
@@ -1951,14 +1952,14 @@ void sensitivity_doe( int *findex, design *doe, const char *dest_path )
 		// set up the variables ( factors) with the experiment values
 		for ( j = 0; j < doe->k; j++ )			// run through all factors
 		{
-			cvar = root->search_var( root, doe->lab[ j ] );	// find variable to set
-			for ( cur = cvar->up; cur != NULL; cur = cur->hyper_next( cur->label ) )
+			cv = root->search_var( root, doe->lab[ j ] );	// find variable to set
+			for ( h = 0, cur = cv->up; cur != NULL; ++h, cur = cur->hyper_next( cur->label ) )
 			{									// run through all objects containing var
-				cvar = cur->search_var( cur, doe->lab[ j ] );
+				cv = cur->search_var( cur, doe->lab[ j ] );
 				if ( doe->par[ j ] == 1 )		// handle lags > 0
-					cvar->val[ 0 ] = doe->ptr[ i ][ j ];
+					cv->val[ 0 ] = doe->doe[ i ][ j ][ h ];
 				else
-					cvar->val[ doe->lag[ j ] ] = doe->ptr[ i ][ j ];
+					cv->val[ doe->lag[ j ] ] = doe->doe[ i ][ j ][ h ];
 			}
 		}
 

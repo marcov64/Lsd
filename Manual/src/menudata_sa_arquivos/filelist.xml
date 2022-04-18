@@ -3,5 +3,6 @@
  <o:File HRef="preview.wmf"/>
  <o:File HRef="themedata.thmx"/>
  <o:File HRef="colorschememapping.xml"/>
+ <o:File HRef="header.html"/>
  <o:File HRef="filelist.xml"/>
 </xml>

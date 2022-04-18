@@ -7,7 +7,7 @@ Unimodality and symmetry tests
 Perform a set of unimodality and symmetry tests useful for simulation model data from a Monte Carlo experiment distributions. The included tests are: Hartigans dip test for unimodality (Hdip), and the Cabilio and Masaro (CM), the Mira (M), and the Miao, Gel and Gastwirth tests for symmetry.
 }
 \usage{
-symmet.test.lsd( data, vars = names( data[ 1, , 1 ] ), start.period = 0,
+symmet.test.lsd( data, vars = dimnames( data )[[ 2 ]], start.period = 0,
                  signif = 0.05, digits = 2, sym.boot = FALSE )
 }
 \arguments{
