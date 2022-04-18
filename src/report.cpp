@@ -477,7 +477,7 @@ void write_obj( object *r, FILE *frep, int *elemDone )
 			if ( cv->param != 1 )
 				count = 1;
 
-		if ( count != 0 )	// avoid no need for code, typically root or parameters only object
+		if ( count != 0 || 1==1)	// avoid no need for code, typically root or parameters only object
 		{
 			fprintf( frep, "<HR WIDTH=\"100%%\">\n" );
 
