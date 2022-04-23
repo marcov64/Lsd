@@ -1003,7 +1003,7 @@ variable *object::search_var_err( object *caller, const char *lab, bool no_searc
 	variable *cv;
 
 	cv = search_var( caller, lab, true, no_search, search_sons );
-	if ( cv == NULL )
+	if ( cv == NULL && label != NULL )
 	{	// check if it is not a zero-instance object
 		cur = blueprint->search( label );				// current object in blueprint
 		if ( cur == NULL || cur->search_var( NULL, lab, true, no_search, search_sons ) == NULL )

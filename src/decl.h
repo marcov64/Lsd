@@ -61,6 +61,7 @@ Relevant flags (when defined):
 #define MARG_CONST 0.1					// y-axis % plot clearance margin for constant series
 #define BAR_DONE_SIZE 80				// characters in the percentage done bar
 #define NOLH_TABS 7						// number of defined NOLH tables
+#define FILE_BUF_SIZE 1000000			// buffer size for file reading
 #define T_CLEVS 10						// number of defined t distribution confidence levels
 #define Z_CLEVS 7						// number of defined normal distr. confidence levels
 #define SIG_DIG 10						// number of significant digits in data files
@@ -236,6 +237,7 @@ int browse( object *r );
 int check_label( const char *lab, object *r );
 int check_affected( object *c, object *pivot, int level, int affected[ ] );
 int compute_copyfrom( object *c, const char *parWnd );
+int count_lines( const char *fname, bool dozip = FALSE );
 int entry_new_objnum( object *c, const char *tag );
 int hyper_count( const char *lab );
 int hyper_count_var( const char *lab );

@@ -4583,7 +4583,7 @@ INSERT_DATA_FILE
 void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool keep_vars )
 {
 	FILE *f = NULL;
-	gzFile fz = NULL;
+	gzFile fz = Z_NULL;
 	char ch, *tok, *linbuf, *tag;
 	int i, j, new_v, new_c;
 	bool header = false;
@@ -4594,6 +4594,12 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		f = fopen( filename, "rt" );
 	else
 		fz = gzopen( filename, "rt" );
+
+	if ( f == NULL && fz == Z_NULL )
+	{
+		plog( "\nError: cannot open file, aborting file load\n" );
+		goto end;
+	}
 
 	new_v = 0;
 	plog( "\nResults data from file %s (F_%d) ", filename, file_counter );
@@ -4632,30 +4638,9 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 
 	plog( "%d series",	new_v );
 
-	if ( ! gz )
-		f = fopen( filename, "rt" );
-	else
-		fz = gzopen( filename, "rt" );
-
-	new_c = -1;
-	while ( ch != EOF )
-	{
-		if ( ! gz )
-			ch = ( char ) fgetc( f );
-		else
-			ch = ( char ) gzgetc( fz );
-
-		if ( ch == '\n' )
-			++new_c;
-	}
-
-	if ( ! gz )
-		fclose( f );
-	else
-		gzclose( fz );
-
 	cmd( ".da.pas.main.p2.scale configure -maximum %d", new_c - 1 );
 	cmd( "update idletasks" );
+	new_c = count_lines( filename, gz ) - 1;
 
 	if ( *num_v == 0 )
 		vs = new store[ new_v ];
@@ -4680,11 +4665,6 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 
 	linsiz = ( int ) max( linsiz, new_v * ( DBL_DIG + 4 ) ) + 1;
 	linbuf = new char[ linsiz ];
-	if ( linbuf == NULL )
-	{
-		plog( "\nError: not enough memory or invalid format, aborting file load\n" );
-		goto end;
-	}
 
 	// read header line
 	if ( ! gz )
