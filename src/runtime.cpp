@@ -461,9 +461,10 @@ void plot_rt( variable *v )
 
 	if ( t == 1 )
 	{
-		old_val[ cur_plt ] = v->val[ 0 ];
-		++cur_plt;
-		return;
+		if ( v->param != 1 && v->num_lag > 0 )
+			old_val[ cur_plt ] = v->val[ 1 ];
+		else
+			goto end;
 	}
 
 	cmd( "set x1 [ expr { floor( $cvhmarginR + %d * $plot_step ) } ]", t );
@@ -473,6 +474,8 @@ void plot_rt( variable *v )
 
 	cmd( "$activeplot.c.c.cn create line $x2 $y2 $x1 $y1 -tag punto -fill $c%d", cur_plt );
 
+	end:
+	
 	old_val[ cur_plt ] = v->val[ 0 ];
 	++cur_plt;
 }
