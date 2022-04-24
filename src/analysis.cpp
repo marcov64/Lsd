@@ -193,6 +193,7 @@ void analysis( bool mc )
 	cmd( "set gpdgrid3d \"$gnuplotGrid3D\"" );
 	cmd( "set gpoptions \"$gnuplotOptions\"" );
 	cmd( "set moving 0" );
+	cmd( "set prog_series %d", PROG_SERIES );
 	cmd( "set list_times [ list ]" );
 
 	cmd( "init_series .da.vars.lb.flt .da.vars.lb.f.v .da.vars.lb.bh.nvar .da.vars.lb.bh.ncas .da.vars.ch.f.v .da.vars.ch.bh.sel .da.vars.pl.f.v .da.vars.pl.bh.plot" );
@@ -384,7 +385,7 @@ void analysis( bool mc )
 
 	cmd( "ttk::frame .da.vars.ch.bh" );
 	cmd( "ttk::label .da.vars.ch.bh.l -text \"Series =\"" );
-	cmd( "ttk::label .da.vars.ch.bh.sel -width 5 -anchor w" );
+	cmd( "ttk::label .da.vars.ch.bh.sel -width 6 -anchor w" );
 	cmd( "pack .da.vars.ch.bh.l .da.vars.ch.bh.sel -side left" );
 	cmd( "pack .da.vars.ch.bh" );
 
@@ -1166,9 +1167,9 @@ void analysis( bool mc )
 				Tcl_LinkVar( inter, "compvalue", ( char * ) &compvalue, TCL_LINK_DOUBLE );
 				cmd( "set a [ split $res ]" );
 				cmd( "set b [ lindex $a 0 ]" );
-				cmd( "set c [ lindex $a 1 ]" ); // get the tag value
-				cmd( "set ntag [ llength [ split $c {_} ] ]" );
+				cmd( "set ntag [ llength [ split [ lindex $a 1 ] {_} ] ]" );
 				cmd( "set ssys 2" );
+
 				cmd( "if { ! [ info exist ca1 ] || ! [ string is integer -strict $ca1 ] } { set ca1 0 }" );
 				cmd( "if { ! [ info exist ca2 ] || ! [ string is integer -strict $ca2 ] } { set ca2 $maxc }" );
 				cmd( "if { ! [ info exist tvar ] || ! [ string is integer -strict $tvar ] } { set tvar $maxc }" );
@@ -1460,12 +1461,7 @@ void analysis( bool mc )
 				// select all
 				if ( choice == 2 )
 				{
-					cmd( "set tot [ .da.vars.lb.f.v get 0 end ]" );
-					cmd( "foreach i $tot { \
-						if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
-							insert_series .da.vars.ch.f.v \"$i\" \
-						} \
-					}" );
+					cmd( "insert_series_list .da.vars.ch.f.v [ .da.vars.lb.f.v get 0 end ] $b" );
 					cmd( "if { \"$tit\" == \"\" } { set tit [ .da.vars.ch.f.v get 0 ] }" );
 				}
 
@@ -1474,20 +1470,20 @@ void analysis( bool mc )
 				{
 					cmd( "if { ! [ string is integer -strict $ca1 ] } { set ca1 0 }" );
 					cmd( "if { ! [ string is integer -strict $ca2 ] } { set ca2 $maxc }" );
-					cmd( "set tot [ .da.vars.lb.f.v get 0 end ]" );
-					cmd( "foreach i $tot { \
-						if { [ lindex [ split $i ] 0 ] == \"$b\" && [ scan [ lindex [ split $i ] 2 ] \"(%%d-%%d)\" d e ] == 2 && $d >= $ca1 && $e <= $ca2 } { \
-								insert_series .da.vars.ch.f.v \"$i\" \
+					cmd( "set slist [ list ]" );
+					cmd( "foreach i [ .da.vars.lb.f.v get 0 end ] { \
+						if { [ lindex $i 0 ] == \"$b\" && [ scan [ lindex $i 2 ] \"(%%d-%%d)\" d e ] == 2 && $d >= $ca1 && $e <= $ca2 } { \
+								lappend slist \"$i\" \
 						} \
 					}" );
+					cmd( "insert_series_list .da.vars.ch.f.v $slist" );
 					cmd( "if { \"$tit\" == \"\" } { set tit [ .da.vars.ch.f.v get 0 ] }" );
 				}
 
-				// select tags
+				// select by tags
 				if ( choice == 1 )
 				{
-					cmd( "set choice $cond" );
-					i  = choice;
+					cmd( "set tot [ .da.vars.lb.f.v get 0 end ]" );
 
 					choice = -1;
 					cmd( "for { set x 0 } { $x < $ntag } { incr x } { \
@@ -1497,122 +1493,128 @@ void analysis( bool mc )
 						}" );
 
 					if ( choice == -1 )
-					{
-						cmd( "set tot [ .da.vars.lb.f.v get 0 end ]" );
-						cmd( "foreach i $tot { \
-								if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
-									insert_series .da.vars.ch.f.v \"$i\" \
-								} \
-							}" );
-					}
+						cmd( "insert_series_list .da.vars.ch.f.v $tot $b" );
 					else
 					{
-						cmd( "set tot [ .da.vars.lb.f.v get 0 end ]" );
-						cmd( "set vcell [ list ]" );
 						cmd( "for { set x 0 } { $x < $ntag } { incr x } { \
-								if { [ array exists vtag ] && [ info exists vtag($x) ] } { \
-									lappend vcell $vtag($x) \
+								if { ! [ array exists vtag ] || ! [ info exists vtag($x) ] } { \
+									set vtag($x) \"\" \
 								} \
 							}" );
 
-						switch ( i )
+						cmd( "set slist [ list ]" );
+						cmd( "set choice $cond" );
+						switch ( choice )
 						{
-							case 0:
-								cmd( "foreach i $tot { \
-										if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+							case 0:							// different
+								cmd( "foreach s $tot { \
+										if { [ lindex $s 0 ] eq $b } { \
 											set c 1; \
 											for { set x 0 } { $x < $ntag } { incr x } { \
-												if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] == [ lindex [ split [ lindex [ split $i ] 1 ] {_} ] $x ] } { \
-													set c 0 \
+												if { $vtag($x) ne \"\" && $vtag($x) == [ lindex [ split [ lindex $s 1 ] {_} ] $x ] } { \
+													set c 0; \
+													break \
 												} \
 											}; \
-											if { $c == 1 } { \
-												insert_series .da.vars.ch.f.v \"$i\" \
+											if { $c } { \
+												lappend slist \"$s\" \
 											} \
 										} \
 									}" );
 								break;
-							case 1:
-								cmd( "foreach i $tot { \
-										if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+
+							case 1:							// equal
+								cmd( "foreach s $tot { \
+										if { [ lindex $s 0 ] eq $b } { \
 											set c 1; \
 											for { set x 0 } { $x < $ntag } { incr x } { \
-												if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] != [ lindex [ split [ lindex [ split $i ] 1 ] {_} ] $x ] } { \
-													set c 0 \
+												if { $vtag($x) ne \"\" && $vtag($x) != [ lindex [ split [ lindex $s 1 ] {_} ] $x ] } { \
+													set c 0; \
+													break \
 												} \
 											}; \
-											if { $c == 1 } { \
-												insert_series .da.vars.ch.f.v \"$i\" \
+											if { $c } { \
+												lappend slist \"$s\" \
 											} \
 										} \
 									}" );
 								break;
-							case 2:
-								cmd( "foreach i $tot { \
-										if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+
+							case 2:							// larger or equal
+								cmd( "foreach s $tot { \
+										if { [ lindex $s 0 ] eq $b } { \
 											set c 1; \
 											for { set x 0 } { $x < $ntag } { incr x } { \
-												if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] > [ lindex [ split [ lindex [ split $i ] 1 ] {_} ] $x ] } { \
-													set c 0 \
+												if { $vtag($x) ne \"\" && $vtag($x) > [ lindex [ split [ lindex $s 1 ] {_} ] $x ] } { \
+													set c 0; \
+													break \
 												} \
 											}; \
-											if { $c == 1 } { \
-												insert_series .da.vars.ch.f.v \"$i\" \
+											if { $c } { \
+												lappend slist \"$s\" \
 											} \
 										} \
 									}" );
 								break;
-							case 3:
-								cmd( "foreach i $tot { \
-										if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+
+							case 3:							// larger
+								cmd( "foreach s $tot { \
+										if { [ lindex $s 0 ] eq $b } { \
 											set c 1; \
 											for { set x 0 } { $x < $ntag } { incr x } { \
-												if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] >= [ lindex [ split [ lindex [ split $i ] 1 ] {_} ] $x ] } { \
-													set c 0\
+												if { $vtag($x) ne \"\" && $vtag($x) >= [ lindex [ split [ lindex $s 1 ] {_} ] $x ] } { \
+													set c 0; \
+													break \
 												} \
 											}; \
-											if { $c == 1 } { \
-												insert_series .da.vars.ch.f.v \"$i\" \
+											if { $c } { \
+												lappend slist \"$s\" \
 											} \
 										} \
 									}" );
 								break;
-							case 4:
-								cmd( "foreach i $tot { \
-										if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+
+							case 4:							// smaller or equal
+								cmd( "foreach s $tot { \
+										if { [ lindex $s 0 ] eq $b } { \
 											set c 1; \
 											for { set x 0 } { $x < $ntag } { incr x } { \
-												if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] < [ lindex [ split [ lindex [ split $i ] 1 ] {_} ] $x ] } { \
-													set c 0 \
+												if { $vtag($x) ne \"\" && $vtag($x) < [ lindex [ split [ lindex $s 1 ] {_} ] $x ] } { \
+													set c 0; \
+													break \
 												} \
 											}; \
-											if { $c == 1 } { \
-												insert_series .da.vars.ch.f.v \"$i\" \
+											if { $c } { \
+												lappend slist \"$s\" \
 											} \
 										} \
 									}" );
 								break;
-							case 5:
-							   cmd( "foreach i $tot { \
-										if { [ lindex [ split $i ] 0 ] == \"$b\" } { \
+
+							case 5:							// smaller
+							   cmd( "foreach s $tot { \
+										if { [ lindex $s 0 ] eq $b } { \
 											set c 1; \
 											for { set x 0 } { $x < $ntag } { incr x } { \
-												if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] <= [ lindex [ split [ lindex [ split $i ] 1 ] {_} ] $x ] } { \
-													set c 0 \
+												if { $vtag($x) ne \"\" && $vtag($x) <= [ lindex [ split [ lindex $s 1 ] {_} ] $x ] } { \
+													set c 0; \
+													break \
 												} \
 											}; \
-											if { $c == 1 } { \
-												insert_series .da.vars.ch.f.v \"$i\" \
+											if { $c } { \
+												lappend slist \"$s\" \
 											} \
 										} \
 									}" );
 						}
+
+						cmd( "insert_series_list .da.vars.ch.f.v $slist" );
 					}
 
 					choice = 0;
 				}
 
-				// select by values or by values from other series
+				// select by fixed values or from other series
 				if ( choice == 3 || choice == 4 )
 				{
 					l = choice;
@@ -1630,6 +1632,7 @@ void analysis( bool mc )
 					cmd( "set choice $tvar" );
 					h = choice;
 
+					cmd( "set slist [ list ]" );
 					for ( i = 0; i < j; ++i )
 					{
 						cmd( "set res [ lindex $tot %d ]", i );
@@ -1670,10 +1673,12 @@ void analysis( bool mc )
 								}
 
 								if ( r == 1 )
-									cmd( "insert_series .da.vars.ch.f.v $res" );
+									cmd( "lappend slist $res" );
 							}
 						}
 					}
+
+					cmd( "insert_series_list .da.vars.ch.f.v $slist" );
 				}
 
 				cmd( "destroytop .da.a" );
@@ -2404,8 +2409,11 @@ void analysis( bool mc )
 
 			// insert the variables selected in the list of the variables to plot
 			case 6:
-				cmd( "set a [ .da.vars.lb.f.v curselection ]" );
-				cmd( "foreach i $a { insert_series .da.vars.ch.f.v \"[ .da.vars.lb.f.v get $i ]\" }" );
+				cmd( "set slist [ list ]" );
+				cmd( "foreach i [ .da.vars.lb.f.v curselection ] { \
+						lappend slist \"[ .da.vars.lb.f.v get $i ]\" \
+					}" );
+				cmd( "insert_series_list .da.vars.ch.f.v $slist" );
 				cmd( "set tit [ .da.vars.ch.f.v get 0 ]" );
 
 				break;
@@ -2413,9 +2421,32 @@ void analysis( bool mc )
 
 			// remove the vars. selected from the variables to plot
 			case 7:
+				cmd( "set tot [ .da.vars.ch.f.v curselection ]" );
+				cmd( "set l [ llength $tot ]" );
+				cmd( "if { $l > %d } { \
+						progressbox .da.ser \"Remove Series\" \"Removing selected series\" \"Series\" $l { set stop true } .da \
+						}", PROG_SERIES / 100 );
 				cmd( "set steps 0" );
-				cmd( "foreach i [ .da.vars.ch.f.v curselection ] { .da.vars.ch.f.v delete [ expr { $i - $steps } ]; incr steps }" );
-				cmd( "if { [ .da.vars.ch.f.v size ] == 0 } { set tit \"\" } { set tit [ .da.vars.ch.f.v get 0 ] }" );
+				cmd( "set stop false" );
+				cmd( "foreach i $tot { \
+						.da.vars.ch.f.v delete [ expr { $i - $steps } ]; \
+						incr steps; \
+						if { $l > %d && $steps %% %d == 0 } { \
+							prgboxupdate .da.ser [ expr { $steps - 1 } ] \
+						}; \
+						if { $stop } { \
+							break \
+						} \
+					}", PROG_SERIES / 100, PROG_SERIES / 100 );
+				cmd( "if { $l > %d } { \
+						prgboxupdate .da.ser [ expr { $steps - 1 } ] \
+					}", PROG_SERIES / 100 );
+				cmd( "destroytop .da.ser" );
+				cmd( "if { [ .da.vars.ch.f.v size ] == 0 } { \
+						set tit \"\" \
+					} else { \
+						set tit [ .da.vars.ch.f.v get 0 ] \
+					}" );
 
 				break;
 
@@ -2448,7 +2479,7 @@ void analysis( bool mc )
 				if ( choice == 47 )
 					cmd( "set bidi 5" );
 
-			// insert new series ( from disk or combining existing series).
+			// insert new series (from disk or combining existing series).
 			case 24:
 				if ( choice == 24 )
 				{
@@ -2682,9 +2713,9 @@ void analysis( bool mc )
 							k = true;
 
 						if ( h > 1 )
-							cmd( "progressbox .da.pas \"Add Series\" \"Loading results files\" \"File\" %d { set stop true } .da \"Case\"", h );
+							cmd( "progressbox .da.pas \"Add Series\" \"Loading results files\" \"File\" %d { set stop true } .da \"Series\"", h );
 						else
-							cmd( "progressbox .da.pas \"Add Series\" \"Loading series\" \"\" 1 { set stop true } .da \"Case\"" );
+							cmd( "progressbox .da.pas \"Add Series\" \"Loading series\" \"\" 1 { set stop true } .da \"Series\"" );
 
 						for ( i = 0, stop = gz = false; i < h && ! stop; ++i )
 						{
@@ -4412,10 +4443,23 @@ INSERT_DATA_MEM
 ****************************************************/
 void insert_data_mem( object *r, int *num_v, const char *lab )
 {
-	int i, ini_v = *num_v;
+	int i = 0, ini_v = *num_v;
+
+	stop = false;
+
+	count_labels_mem( r, &i, lab );
+
+	if ( i > PROG_SERIES )
+		cmd( "progressbox .da.ser \"Load Series\" \"Loading saved series\" \"Series\" %d { set stop true } .da", i );
 
 	insert_labels_mem( r, num_v, lab );
 	cmd( "update_parent" );
+
+	if ( i > PROG_SERIES )
+	{
+		cmd( "prgboxupdate .da.ser %d", *num_v );
+		cmd( ".da.ser.b.cancel configure -state disabled" );
+	}
 
 	store *vs_new = new store[ *num_v ];
 
@@ -4429,7 +4473,9 @@ void insert_data_mem( object *r, int *num_v, const char *lab )
 	delete [ ] vs;
 	vs = vs_new;
 
-	insert_store_mem( r, &ini_v, lab );
+	insert_store_mem( r, *num_v, &ini_v, lab );
+
+	cmd( "destroytop .da.ser" );
 
 	if ( *num_v != ini_v )
 	{
@@ -4461,6 +4507,36 @@ void create_par_map( object *r )
 
 
 /***************************************************
+COUNT_LABELS_MEM
+****************************************************/
+void count_labels_mem( object *r, int *count, const char *lab )
+{
+	bool found;
+	object *cur;
+	variable *cv;
+	bridge *cb;
+
+	for ( found = false, cv = r->v; cv != NULL; cv = cv->next )
+		if ( ( lab == NULL && cv->save ) || ( lab != NULL && ! strcmp( cv->label, lab ) ) )
+		{
+			if ( ! cv->save )
+				found = true;
+
+			++( *count );
+		}
+
+	for ( cb = r->b; cb != NULL && ! found; cb = cb->next )
+		if ( cb->head != NULL && cb->head->to_compute )
+			for ( cur = cb->head; cur != NULL; cur = cur->next )
+				count_labels_mem( cur, count, lab );
+
+	if ( r->up == NULL && lab == NULL )
+		for ( cv = cemetery; cv != NULL; cv = cv->next )
+			++( *count );
+}
+
+
+/***************************************************
 INSERT_LABELS_MEM
 ****************************************************/
 void insert_labels_mem( object *r, int *num_v, const char *lab )
@@ -4471,7 +4547,7 @@ void insert_labels_mem( object *r, int *num_v, const char *lab )
 	variable *cv;
 	bridge *cb;
 
-	for ( found = false, cv = r->v; cv != NULL; cv = cv->next )
+	for ( found = false, cv = r->v; cv != NULL && ! stop; cv = cv->next )
 		if ( ( lab == NULL && cv->save ) || ( lab != NULL && ! strcmp( cv->label, lab ) ) )
 		{
 			if ( cv->save )
@@ -4493,7 +4569,8 @@ void insert_labels_mem( object *r, int *num_v, const char *lab )
 			if ( cv->start < first_c )
 				first_c = cv->start;
 
-			*num_v += 1;
+			if ( ++( *num_v ) % PROG_SERIES == 0 )
+				cmd( "prgboxupdate .da.ser %d", *num_v - 1 );
 		}
 
 	for ( cb = r->b; cb != NULL && ! found; cb = cb->next )
@@ -4502,7 +4579,7 @@ void insert_labels_mem( object *r, int *num_v, const char *lab )
 				insert_labels_mem( cur, num_v, lab );
 
 	if ( r->up == NULL && lab == NULL )
-		for ( cv = cemetery; cv != NULL; cv = cv->next )
+		for ( cv = cemetery; cv != NULL && ! stop; cv = cv->next )
 		{
 			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", cv->label, cv->lab_tit, cv->start, cv->end, *num_v, par_map[ cv->label ].c_str( ) );
 
@@ -4512,7 +4589,8 @@ void insert_labels_mem( object *r, int *num_v, const char *lab )
 			if ( cv->start < first_c )
 				first_c = cv->start;
 
-			*num_v += 1;
+			if ( ++( *num_v ) % PROG_SERIES == 0 )
+				cmd( "prgboxupdate .da.ser %d", *num_v - 1 );
 		}
 }
 
@@ -4520,7 +4598,7 @@ void insert_labels_mem( object *r, int *num_v, const char *lab )
 /***************************************************
 INSERT_STORE_MEM
 ****************************************************/
-void insert_store_mem( object *r, int *num_v, const char *lab )
+void insert_store_mem( object *r, int max_v, int *num_v, const char *lab )
 {
 	bool found;
 	char tag_pref[ 3 ];
@@ -4529,7 +4607,7 @@ void insert_store_mem( object *r, int *num_v, const char *lab )
 	variable *cv;
 	bridge *cb;
 
-	for ( found = false, cv = r->v; cv != NULL; cv = cv->next )
+	for ( found = false, cv = r->v; cv != NULL && *num_v < max_v; cv = cv->next )
 		if ( ( lab == NULL && cv->save ) || ( lab != NULL && ! strcmp( cv->label, lab ) ) )
 		{
 			if ( cv->save )
@@ -4554,17 +4632,16 @@ void insert_store_mem( object *r, int *num_v, const char *lab )
 			vs[ *num_v ].end = cv->end;
 			vs[ *num_v ].rank = *num_v;
 			vs[ *num_v ].data = cv->data;
-
-			*num_v += 1;
+			++( *num_v );
 		}
 
 	for ( cb = r->b; cb != NULL && ! found; cb = cb->next )
 		if ( cb->head != NULL && cb->head->to_compute )
 			for ( cur = cb->head; cur != NULL; cur = cur->next )
-				insert_store_mem( cur, num_v, lab );
+				insert_store_mem( cur, max_v, num_v, lab );
 
 	if ( r->up == NULL && lab == NULL )
-		for ( cv = cemetery; cv != NULL; cv = cv->next )
+		for ( cv = cemetery; cv != NULL && *num_v < max_v; cv = cv->next )
 		{
 			strcpyn( vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
 			strcpyn( vs[ *num_v ].tag, cv->lab_tit, MAX_ELEM_LENGTH );
@@ -4572,7 +4649,7 @@ void insert_store_mem( object *r, int *num_v, const char *lab )
 			vs[ *num_v ].end = cv->end;
 			vs[ *num_v ].rank = *num_v;
 			vs[ *num_v ].data = cv->data;
-			*num_v += 1;
+			++( *num_v );
 		}
 }
 
@@ -4637,9 +4714,8 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		gzclose( fz );
 
 	plog( "%d series",	new_v );
+	cmd( ".da.pas.main.p2.scale configure -maximum %d", new_v );
 
-	cmd( ".da.pas.main.p2.scale configure -maximum %d", new_c - 1 );
-	cmd( "update idletasks" );
 	new_c = count_lines( filename, gz ) - 1;
 
 	if ( *num_v == 0 )
@@ -4673,7 +4749,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		gzgets( fz, linbuf, linsiz );
 
 	tok = strtok( linbuf , "\t" );		// prepares for parsing and get first one
-	for ( i = *num_v; i < new_v + *num_v; ++i )
+	for ( i = *num_v; i < new_v + *num_v && ! stop; ++i )
 	{
 		if ( tok == NULL )
 		{
@@ -4715,12 +4791,28 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 		}
 
 		tok = strtok( NULL, "\t" );			// get next token, if any
+
+		if ( ( i - *num_v + 2 ) % 1000 == 0 )
+			cmd( "prgboxupdate .da.pas \"\" %d", i - *num_v + 1 );
+	}
+
+	cmd( "prgboxupdate .da.pas \"\" %d", i - *num_v + 1 );
+
+	if ( stop )
+	{
+		new_v = i - *num_v;
+		new_c = 2;
+		stop = false;
 	}
 
 	cmd( "update_parent" );
 
+	cmd( ".da.pas.main.p2.info.elem configure -text Case" );
+	cmd( ".da.pas.main.p2.scale configure -maximum %d", new_c - 1 );
+	cmd( "prgboxupdate .da.pas \"\" 0" );
+
 	// read data lines
-	for ( first_c = 1, j = 0; j < new_c; ++j )
+	for ( first_c = 1, j = 0; j < new_c && ! stop; ++j )
 	{
 		if ( ! gz )
 			fgets( linbuf, linsiz, f );		// buffers one entire line
@@ -4759,10 +4851,18 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 			cmd( "prgboxupdate .da.pas \"\" %d", j + 1 );
 	}
 
+	cmd( "prgboxupdate .da.pas \"\" %d", j + 1 );
+
 	*num_v += new_v;
-	new_c--;
+
+	if ( stop )
+		new_c = j - 1;
+
+	--new_c;
+
 	if ( new_c > num_c )
 		num_c = new_c;
+
 	if ( new_c > max_c )
 		max_c = new_c;
 

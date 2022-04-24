@@ -1727,7 +1727,7 @@ design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
 {
 	int h, i, j, kTab, doeRange, poolSz;
 	double **pool, **traj;
-	char *doefname, buf[ 35 ], doeName[ MAX_ELEM_LENGTH ];
+	char *doefname, doeName[ MAX_ELEM_LENGTH ];
 	FILE *f;
 
 	// reset random number generator

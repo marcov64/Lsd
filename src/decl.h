@@ -61,6 +61,7 @@ Relevant flags (when defined):
 #define MARG_CONST 0.1					// y-axis % plot clearance margin for constant series
 #define BAR_DONE_SIZE 80				// characters in the percentage done bar
 #define NOLH_TABS 7						// number of defined NOLH tables
+#define PROG_SERIES 10000				// AoR progress bar when loading series limit
 #define FILE_BUF_SIZE 1000000			// buffer size for file reading
 #define T_CLEVS 10						// number of defined t distribution confidence levels
 #define Z_CLEVS 7						// number of defined normal distr. confidence levels
@@ -280,6 +281,7 @@ void collect_inst( object *r, o_setT &list );
 void control_to_compute( object *r, const char *lab );
 void copy_descendant( object *from, object *to );
 void count( object *r, int *i );
+void count_labels_mem( object *r, int *count, const char *lab = NULL );
 void count_save( object *n, int *count );
 void cover_browser( const char *text1, const char *text2, bool run );
 void create( void );
@@ -323,7 +325,7 @@ void insert_data_mem( object *r, int *num_v, const char *lab = NULL );
 void insert_labels_mem( object *r, int *num_v, const char *lab = NULL );
 void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int *count );
 void insert_object( const char *w, object *r, bool netOnly = false, object *above = NULL );
-void insert_store_mem( object *r, int *num_v, const char *lab = NULL );
+void insert_store_mem( object *r, int max_v, int *num_v, const char *lab = NULL );
 void link_cells( object *root, const char *lab );
 void log_parallel( bool nw );
 void monitor_parallel( bool nw );

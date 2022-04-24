@@ -236,6 +236,10 @@ proc progressbox { w tit lab elem1 { max1 1 } { destroy "" } { par . } { elem2 "
 	ttk::label $w.main.lab -text $lab
 	pack $w.main.lab -pady 10
 
+	if { $max1 <= 0 } {
+		set max1 1
+	}
+
 	ttk::frame $w.main.p1
 	ttk::progressbar $w.main.p1.scale -length 300 -maximum $max1
 	ttk::frame $w.main.p1.info
@@ -246,6 +250,10 @@ proc progressbox { w tit lab elem1 { max1 1 } { destroy "" } { par . } { elem2 "
 
 	if { $elem1 != "" } {
 		pack $w.main.p1 -pady 5
+	}
+
+	if { $max2 <= 0 } {
+		set max2 1
 	}
 
 	ttk::frame $w.main.p2
@@ -285,7 +293,7 @@ proc progressbox { w tit lab elem1 { max1 1 } { destroy "" } { par . } { elem2 "
 
 #************************************************
 # PRGBOXUPDATE
-# Updates an existing progressbox
+# Updates an existing progress box
 #************************************************
 proc prgboxupdate { w last1 { last2 "" } } {
 
@@ -293,8 +301,8 @@ proc prgboxupdate { w last1 { last2 "" } } {
 		return
 	}
 
-	set max1 [ $w.main.p1.scale cget -maximum ]
-	set max2 [ $w.main.p2.scale cget -maximum ]
+	set max1 [ expr { max( [ $w.main.p1.scale cget -maximum ], 1 ) } ]
+	set max2 [ expr { max( [ $w.main.p2.scale cget -maximum ], 1 ) } ]
 
 	if { $last1 != "" && [ string is integer -strict $last1 ] } {
 		$w.main.p1.scale configure -value $last1
@@ -483,11 +491,7 @@ proc filter_series { { par "" } } {
 		$serLbox delete 0 end
 		tooltip::tooltip clear ${serLbox}*
 
-		foreach ser $serList {
-			if { $par eq $parAll || $par eq [ dict get $serParDict [ lindex $ser 0 ] ] } {
-				insert_series $serLbox $ser
-			}
-		}
+		insert_series_list $serLbox $serList "" $par
 
 		set parFlt $par
 		set serSel 0
@@ -630,16 +634,91 @@ proc insert_series { lbox ser { pos end } } {
 
 
 #************************************************
+# INSERT_SERIES_LIST
+# Append list of series to an AoR listbox,
+# optionally filtering a specific variable name
+# or object parent
+#************************************************
+proc insert_series_list { lbox slist { name "" } { par "" } { pos end } } {
+	global parAll serParDict prog_series
+
+	if { $name ne "" } {
+		set slistflt [ list ]
+		foreach ser $slist {
+			if { $name eq [ lindex $ser 0 ] } {
+				lappend slistflt $ser
+			}
+		}
+	} elseif { $par ne "" } {
+		set slistflt [ list ]
+		foreach ser $slist {
+			if { $par eq $parAll || $par eq [ dict get $serParDict [ lindex $ser 0 ] ] } {
+				lappend slistflt $ser
+			}
+		}
+	} else {
+		set slistflt $slist
+	}
+
+	set n [ llength $slistflt ]
+
+	if { $n == 0 } {
+		return
+	}
+
+	if { $n > $prog_series } {
+		progressbox .da.ser "Update Series" "Updating series" "Series" $n "" .da
+	}
+
+	set i 0
+	foreach ser $slistflt {
+		insert_series $lbox $ser $pos
+		incr i
+
+		if { $n > $prog_series && $i % $prog_series == 0 } {
+			prgboxupdate .da.ser [ expr { $i - 1 } ]
+		}
+	}
+
+	if { $n > $prog_series } {
+		prgboxupdate .da.ser [ expr { $i - 1 } ]
+	}
+
+	destroytop .da.ser
+}
+
+
+#************************************************
 # SORT_SERIES
 # Sort series to an AoR listbox, according to
 # the selected criterion, if different
 #************************************************
 proc sort_series { lbox ord } {
-	global parAll parFlt serList serOrd serLbox selLbox
+	global parAll parFlt serList serOrd serLbox selLbox prog_series
 
 	if { ( $lbox eq $serLbox && $serOrd ne $ord ) || $lbox eq $selLbox } {
+
 		set ss [ $lbox get 0 end ]
-		if { [ llength $ss ] > 1 } {
+		set n [ llength $ss ]
+
+		if { $n > 1 } {
+			if { $n > $prog_series } {
+				set w .da.sort
+				newtop $w "Sort Series" "" .da
+				ttk::frame $w.main
+				ttk::label $w.main.lab -text "Sorting series"
+				pack $w.main.lab -pady 10
+				ttk::frame $w.main.p1
+				ttk::progressbar $w.main.p1.scale -length 300 -maximum 10
+				ttk::frame $w.main.p1.info
+				ttk::label $w.main.p1.info.elem -text "Please wait..."
+				pack $w.main.p1.info.elem -padx 1 -side left
+				pack $w.main.p1.scale $w.main.p1.info -pady 2
+				pack $w.main.p1 -pady 5
+				pack $w.main -padx 10 -pady 10
+				showtop $w centerW
+			}
+
 			switch -glob $ord {
 				inc* {
 					set ss [ lsort -command comp_und_inc $ss ]
@@ -667,10 +746,9 @@ proc sort_series { lbox ord } {
 
 			$lbox delete 0 end
 			tooltip::tooltip clear ${lbox}*
+			destroytop .da.sort
 
-			foreach s $ss {
-				insert_series $lbox "$s"
-			}
+			insert_series_list $lbox $ss
 
 			if { $lbox eq $serLbox } {
 				set serOrd $ord
