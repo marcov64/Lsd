@@ -238,7 +238,7 @@ int browse( object *r );
 int check_label( const char *lab, object *r );
 int check_affected( object *c, object *pivot, int level, int affected[ ] );
 int compute_copyfrom( object *c, const char *parWnd );
-int count_lines( const char *fname, bool dozip = FALSE );
+int count_lines( const char *fname, bool dozip = false );
 int entry_new_objnum( object *c, const char *tag );
 int hyper_count( const char *lab );
 int hyper_count_var( const char *lab );

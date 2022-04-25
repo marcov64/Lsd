@@ -112,9 +112,17 @@ function read_config( $type_config ) {
         die ( "Invalid input file contents: idxs=$idxs keys=$keys" );
     }
     
+    $ln = 1;
     while ( ! feof( $f ) ) {
         
         $line = fgetcsv( $f );
+        ++$ln;
+        
+        $cols = count( $line );
+        if ( $cols > 2 && $cols != $keys ) {
+            die ( "Invalid input file contents: line=$ln cols=$cols" );
+        }
+        
         if ( $line[ $col_idx[ "Type" ] ] != $type_config ) {
             continue;
         }
@@ -135,7 +143,6 @@ function read_config( $type_config ) {
             if ( $delta_up > $delta_dw ) {
                 $step = $delta_up / 100;
                 if ( $delta_dw > 0 ) {
-                //    $step = $delta_dw / round( $delta_dw / $step );
                     $step = ( float ) sprintf( "%.3f", $delta_dw / round( $delta_dw / $step ) );
                 }
             } else {
@@ -206,9 +213,17 @@ function read_saved( ) {
         die ( "Invalid output file contents: idxs=$idxs keys=$keys" );
     }
     
+    $ln = 1;
     while ( ! feof( $f ) ) {
         
         $line = fgetcsv( $f );
+        ++$ln;
+        
+        $cols = count( $line );
+        if ( $cols > 2 && $cols != $keys ) {
+            die ( "Invalid input file contents: line=$ln cols=$cols" );
+        }
+        
         if ( $line[ $col_idx[ "Name" ] ] == "" ) {
             continue;
         }
