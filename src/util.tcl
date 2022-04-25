@@ -272,6 +272,8 @@ proc progressbox { w tit lab elem1 { max1 1 } { destroy "" } { par . } { elem2 "
 
 	if { $destroy != "" } {
 		cancel $w b $destroy
+	} else {
+		wm protocol $w WM_DELETE_WINDOW { }
 	}
 
 	# handle installer with main window withdrawn
@@ -666,7 +668,7 @@ proc insert_series_list { lbox slist { name "" } { par "" } { pos end } } {
 		return
 	}
 
-	if { $n > $prog_series } {
+	if { $n > $prog_series && ! [ winfo exists .da.ser ] } {
 		progressbox .da.ser "Update Series" "Updating series" "Series" $n "" .da
 	}
 
@@ -682,9 +684,8 @@ proc insert_series_list { lbox slist { name "" } { par "" } { pos end } } {
 
 	if { $n > $prog_series } {
 		prgboxupdate .da.ser [ expr { $i - 1 } ]
+		destroytop .da.ser
 	}
-
-	destroytop .da.ser
 }
 
 
@@ -703,20 +704,9 @@ proc sort_series { lbox ord } {
 
 		if { $n > 1 } {
 			if { $n > $prog_series } {
-				set w .da.sort
-				newtop $w "Sort Series" "" .da
-				ttk::frame $w.main
-				ttk::label $w.main.lab -text "Sorting series"
-				pack $w.main.lab -pady 10
-				ttk::frame $w.main.p1
-				ttk::progressbar $w.main.p1.scale -length 300 -maximum 10
-				ttk::frame $w.main.p1.info
-				ttk::label $w.main.p1.info.elem -text "Please wait..."
-				pack $w.main.p1.info.elem -padx 1 -side left
-				pack $w.main.p1.scale $w.main.p1.info -pady 2
-				pack $w.main.p1 -pady 5
-				pack $w.main -padx 10 -pady 10
-				showtop $w centerW
+				progressbox .da.ser "Sort Series" "Sorting series" "Series" $n "" .da
+				.da.ser.main.p1.info.val configure -text "please wait..."
+				update
 			}
 
 			switch -glob $ord {
@@ -746,7 +736,6 @@ proc sort_series { lbox ord } {
 
 			$lbox delete 0 end
 			tooltip::tooltip clear ${lbox}*
-			destroytop .da.sort
 
 			insert_series_list $lbox $ss
 
