@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2017 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -53,9 +53,9 @@ body {
     height: 10600px;
     overflow: hidden;
     position: absolute;
-    left: 0; 
+    left: 0;
     right: 0;
-    top: 0; 
+    top: 0;
     bottom:0;
     z-index: 99;
     background-color: Black;

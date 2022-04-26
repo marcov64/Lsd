@@ -1,5 +1,11 @@
 <?php
-    $session_id = preg_replace( "/[^\da-z]/i", "", filter_input( INPUT_COOKIE, session_name( ), FILTER_SANITIZE_STRING ) );
+    $cookie_id = filter_input( INPUT_COOKIE, session_name( ), FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+    if ( ! is_null( $cookie_id ) && is_string( $cookie_id ) ) {
+        $session_id = preg_replace( "/[^\da-z]/i", "", $cookie_id );
+    } else {
+        $session_id = "NOCOOKIE";
+    }
+
     $session_short_id = substr( $session_id, -6 );
 ?>
 <!DOCTYPE html>
@@ -83,7 +89,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         echo "<p>" . $t_msg . $mc_msg . $log_msg . "</p>\n";
                     ?>
                 </div>
-                <div class="w3-container w3-center" style="margin-top: 30px"> 
+                <div class="w3-container w3-center" style="margin-top: 30px">
                     <button onclick='window.close( )' class='w3-button w3-blue w3-padding-large w3-margin-right w3-margin-bottom w3-hover-black'>Close</button>
                 </div>
             </div>

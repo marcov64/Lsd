@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,13 @@
 require '../filter_config.php';
 require '../defaults.php';
 
-$session_id = preg_replace( "/[^\da-z]/i", "", filter_input( INPUT_COOKIE, session_name( ), FILTER_SANITIZE_STRING ) );
+$cookie_id = filter_input( INPUT_COOKIE, session_name( ), FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+if ( ! is_null( $cookie_id ) && is_string( $cookie_id ) ) {
+    $session_id = preg_replace( "/[^\da-z]/i", "", $cookie_id );
+} else {
+    $session_id = "NOCOOKIE";
+}
+
 $session_short_id = substr( $session_id, -6 );
 
 // Check if the form was submitted
@@ -28,7 +34,7 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
     // save configuration to an individual user file for later download
     $config = filter_config( json_decode( filter_input_array( INPUT_POST )[ "x" ], false ) );
 
-    if ( count( $config ) == 0 ) {
+    if ( ! is_countable( $config ) || count( $config ) == 0 ) {
         echo "Error\n\nNo data to save.";
         return;
     }
@@ -36,7 +42,7 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
     // download file name for this session
     $filename_base = $output_pref . "config-" . $session_short_id . "-";
     $filename_down = $filename_base . sprintf( "%02u%02u%02u%02u%02u", getdate( )[ "hours" ], getdate( )[ "minutes" ], getdate( )[ "mday" ], getdate( )[ "mon" ], getdate( )[ "year" ] - 2000 ) . ".csv";
-    
+
     // delete previous file in same session
     if ( $old = glob( $filename_base . "*" ) ) {
         foreach ( $old as $file ) {

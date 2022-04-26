@@ -1,5 +1,11 @@
 <?php
-    $session_id = preg_replace( "/[^\da-z]/i", "", filter_input( INPUT_COOKIE, session_name( ), FILTER_SANITIZE_STRING ) );
+    $cookie_id = filter_input( INPUT_COOKIE, session_name( ), FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+    if ( ! is_null( $cookie_id ) && is_string( $cookie_id ) ) {
+        $session_id = preg_replace( "/[^\da-z]/i", "", $cookie_id );
+    } else {
+        $session_id = "NOCOOKIE";
+    }
+
     $session_short_id = substr( $session_id, -6 );
 ?>
 <!DOCTYPE html>
@@ -37,19 +43,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         window.alert( 'Invalid plot data\n\nPlease check your data selection and try again.' );
                         window.close( );
                     }">
-        <?php 
-            require "../load_res.php"; 
-            
+        <?php
+            require "../load_res.php";
+
             // set plot labels
             $labels = array ( );
             foreach ( $sel_vars as $var ) {
                 if ( ! isset ( $series[ $var ] ) ) {
                     continue;
                 }
-                
+
                 $labels[ ] = $var;
             }
-            
+
             echo "<div id='_labels_' data-labels='" . json_encode( $labels ) . "'></div>\n";
 
             // set data matrix on the specified time window
@@ -63,15 +69,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     if ( ! isset ( $series[ $var ] ) ) {
                         continue;
                     }
-                    
+
                     if ( is_numeric( $series[ $var ][ $i ] ) ) {
                         $datasets[ $k ][ $j ] = sprintf( "%.4G", $series[ $var ][ $i ] );
                     } else {
                         $datasets[ $k ][ $j ] = null;
                     }
-                    
+
                     if ( $ci && $mc_runs > 1 ) {
-                        if ( is_numeric( $series_lo[ $var ][ $i ] ) && 
+                        if ( is_numeric( $series_lo[ $var ][ $i ] ) &&
                              is_numeric( $series_hi[ $var ][ $i ] ) ) {
                             $datasets_lo[ $k ][ $j ] = sprintf( "%.4G", $series_lo[ $var ][ $i ] );
                             $datasets_hi[ $k ][ $j ] = sprintf( "%.4G", $series_hi[ $var ][ $i ] );
@@ -79,9 +85,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                             $datasets_lo[ $k ][ $j ] = $datasets_hi[ $k ][ $j ] = null;
                         }
                     }
-                    
+
                     if ( $mm && $mc_runs > 1 ) {
-                        if ( is_numeric( $series_min[ $var ][ $i ] ) && 
+                        if ( is_numeric( $series_min[ $var ][ $i ] ) &&
                              is_numeric( $series_max[ $var ][ $i ] ) ) {
                             $datasets_min[ $k ][ $j ] = sprintf( "%.4G", $series_min[ $var ][ $i ] );
                             $datasets_max[ $k ][ $j ] = sprintf( "%.4G", $series_max[ $var ][ $i ] );
@@ -89,19 +95,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                             $datasets_min[ $k ][ $j ] = $datasets_max[ $k ][ $j ] = null;
                         }
                     }
-                    
+
                     ++$k;
                 }
             }
             echo "<div id='_t_values_' data-t_values='" . json_encode( $t_values ) . "'></div>\n";
-            echo "<div id='_datasets_' data-datasets='" . json_encode( $datasets ) . 
-                                    "' data-datasets_lo='" . json_encode( $datasets_lo ) . 
-                                    "' data-datasets_hi='" . json_encode( $datasets_hi ) . 
-                                    "' data-datasets_min='" . json_encode( $datasets_min ) . 
+            echo "<div id='_datasets_' data-datasets='" . json_encode( $datasets ) .
+                                    "' data-datasets_lo='" . json_encode( $datasets_lo ) .
+                                    "' data-datasets_hi='" . json_encode( $datasets_hi ) .
+                                    "' data-datasets_min='" . json_encode( $datasets_min ) .
                                     "' data-datasets_max='" . json_encode( $datasets_max ) . "'></div>\n";
-            echo "<div id='_options_' data-linear='" . json_encode( $linear ) . 
-                                   "' data-auto='" . json_encode( $auto ) . 
-                                   "' data-ci='" . json_encode( $ci ) . 
+            echo "<div id='_options_' data-linear='" . json_encode( $linear ) .
+                                   "' data-auto='" . json_encode( $auto ) .
+                                   "' data-ci='" . json_encode( $ci ) .
                                    "' data-mm='" . json_encode( $mm ) . "'></div>\n";
             if ( $auto ) {
                 echo "<div id='_limits_' data-min='0.0' data-max='1.0'></div>\n";
@@ -125,7 +131,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         echo "<p>" . $t_msg . $ci_msg . $mm_msg . $scale_msg . $log_msg . "</p>\n";
                     ?>
                 </div>
-                <div class="w3-container w3-center" style="margin-top: 30px"> 
+                <div class="w3-container w3-center" style="margin-top: 30px">
                     <button onclick='window.close( )' class='w3-button w3-blue w3-padding-large w3-margin-right w3-margin-bottom w3-hover-black'>Close</button>
                 </div>
             </div>

@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,11 +19,17 @@
 
 include '../defaults.php';
 
-$session_id = preg_replace( "/[^\da-z]/i", "", filter_input( INPUT_COOKIE, session_name( ), FILTER_SANITIZE_STRING ) );
+$cookie_id = filter_input( INPUT_COOKIE, session_name( ), FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+if ( ! is_null( $cookie_id ) && is_string( $cookie_id ) ) {
+    $session_id = preg_replace( "/[^\da-z]/i", "", $cookie_id );
+} else {
+    $session_id = "NOCOOKIE";
+}
+
 $session_short_id = substr( $session_id, -6 );
 
 $filename_log = $output_pref . "run-" . $session_short_id . ".log";
 
 if ( file_exists( $filename_log ) ) {
-    echo json_encode( file( $filename_log ) );    
+    echo json_encode( file( $filename_log ) );
 }
