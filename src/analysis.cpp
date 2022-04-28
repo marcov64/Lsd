@@ -587,7 +587,7 @@ void analysis( bool mc )
 	cmd( "ttk::button .da.b.sp -width [ expr { $butWid + 1 } ] -text \"Show Data\" -command { set choice 36 } -underline 5" );
 	cmd( "ttk::button .da.b.st -width [ expr { $butWid + 1 } ] -text Statistics -command { set choice 12 } -underline 1" );
 	cmd( "ttk::button .da.b.fr -width [ expr { $butWid + 1 } ] -text Histogram -command { set choice 32 } -underline 0" );
-	cmd( "ttk::button .da.b.lat -width [ expr { $butWid + 1 } ] -text Lattice -command { set choice 23 } -underline 0" );
+	cmd( "ttk::button .da.b.lat -width [ expr { $butWid + 1 } ] -text Lattice -command { set choice 35 } -underline 0" );
 
 	cmd( "pack .da.b.ts .da.b.dump .da.b.sv .da.b.sp .da.b.st .da.b.fr .da.b.lat -padx $butSpc -side left" );
 	cmd( "pack .da.b -padx $butPad -pady $butPad -side right" );
@@ -602,7 +602,7 @@ void analysis( bool mc )
 
 	// top window shortcuts binding
 	cmd( "bind .da <KeyPress-Escape> { set choice 2 }" );	// quit
-	cmd( "bind .da <Control-l> { set choice 23 }; bind .da <Control-L> { set choice 23 }" );	// plot lattice
+	cmd( "bind .da <Control-l> { set choice 35 }; bind .da <Control-L> { set choice 35 }" );	// plot lattice
 	cmd( "bind .da <Control-h> { set choice 32 }; bind .da <Control-H> { set choice 32 }" );	// plot histograms
 	cmd( "bind .da <Control-c> { set choice 8 }; bind .da <Control-C> { set choice 8 }" );	// empty (clear) selected series
 	cmd( "bind .da <Control-Shift-a> { set choice 24; break }; bind .da <Control-Shift-A> { set choice 24; break }" );	// insert new series
@@ -872,7 +872,7 @@ void analysis( bool mc )
 
 			// plot a lattice.
 			// Data must be stored on a single time step organized for lines and columns in sequence
-			case 23:
+			case 35:
 				cur_plot++;
 
 				plot_lattice( );
@@ -3721,6 +3721,9 @@ void analysis( bool mc )
 
 				break;
 
+
+			// do nothing
+			case 23:
 			default:
 				break;
 		}
