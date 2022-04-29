@@ -9,6 +9,9 @@
 
 **************************************************************
 
+This file has no line breaks, please use it on an editor able 
+to perform word wrapping.
+
 ***********
 Legal stuff
 ***********

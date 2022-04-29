@@ -11,10 +11,10 @@ read.doe.lsd( folder, baseName, outVar = "", does = 1, doeFile = NULL,
               respFile = NULL, validFile = NULL, valRespFile = NULL,
               confFile = NULL, limFile = NULL, iniDrop = 0, nKeep = -1,
               saveVars = NULL, addVars = NULL, eval.vars = NULL,
-              eval.run = NULL, median = FALSE, pool = TRUE, na.rm = FALSE,
-              rm.temp = TRUE, rm.outl = FALSE, lim.outl = 10, nnodes = 1,
-              quietly = TRUE, instance = 1, posit = NULL,
-              posit.match = c( "fixed", "glob", "regex" ) )
+              eval.run = NULL, eval.stat = c( "mean", "median" ),
+              pool = TRUE, na.rm = FALSE, rm.temp = TRUE, rm.outl = FALSE,
+              lim.outl = 10, nnodes = 1, quietly = TRUE, instance = 1,
+              posit = NULL, posit.match = c( "fixed", "glob", "regex" ) )
 }
 \arguments{
   \item{folder}{
@@ -65,8 +65,8 @@ a function to recalculate any item of the imported data set, including added var
   \item{eval.run}{
 a function to evaluate the DoE response for each experimental sampling point, attributing an optional value to it. The default (NULL) is to have no function. In this case, the function uses the selected variable Monte Carlo mean and standard deviation, or the median and the median absolute deviation if \code{median = TRUE}, to value the point. If defined, function must take four arguments: (a) the data set (a 3-dimensional array of lists, the numbers of the DoE sampling points in the first dimension, variables in the second, and Monte Carlo runs in the in the third, being each list element a vector with all time-step values for that sample/variable/MC run), (b) the number of the DoE sampling point to evaluate, (c) the index to the analysis variable in the data set, and (d) the applicable confidence interval. The function must return a R list containing four values for the selected sampling point/variable pair: (a) the average value for the response, (b) the response standard deviation, (c) the the number of observations used, and (d) the number of observations discarded.
 }
-  \item{median}{
-logical: indicating, if (\code{TRUE}), that the median and the median absolute deviation should be used to evaluate the DoE response when \code{eval.run = NULL}. The default (\code{FALSE}) is to use the mean and the standard deviation. If an evaluation function is provided in \code{eval.run}, this option is ignored.
+  \item{eval.stat}{
+character: define the statistics to be used to evaluate the DoE response when \code{eval.run = NULL}. Options are \code{"mean"} to use the mean and the standard deviation (default), or \code{"median"}, to use the median and the median absolute deviation (MAD). Names can be abbreviated. If an evaluation function is provided in \code{eval.run}, this option is ignored.
 }
   \item{na.rm}{
 logical: if TRUE NA values are stripped before the computation proceeds.
@@ -181,6 +181,7 @@ dataSet <- read.doe.lsd( path,                 # data files folder
                          nKeep = -1,           # number of time steps to keep (-1=all)
                          saveVars = lsdVars,   # LSD variables to keep in dataset
                          addVars = newVars,    # new variables to add to the LSD dataset
+                         eval.stat = "median", # use median to evaluate runs
                          rm.temp = FALSE,      # reuse temporary speedup files
                          rm.outl = FALSE,      # remove outliers from dataset
                          lim.outl = 10,        # limit non-outliers deviation (# of std. devs.)

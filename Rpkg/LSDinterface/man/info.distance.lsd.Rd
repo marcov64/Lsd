@@ -9,7 +9,8 @@ This function reads a 3 or 4-dimensional array produced by \code{\link{read.3d.l
 \usage{
 info.distance.lsd( array, references, instance = 1,
                    distance = "euclidean", std.dist = FALSE,
-                   std.val = FALSE, rank = FALSE, weights = 1, ... )
+                   std.val = FALSE, rank = FALSE, weights = 1,
+                   seed = 1, ... )
 }
 \arguments{
   \item{array}{
@@ -35,6 +36,9 @@ a logical value indicating, if \code{TRUE}, that the Monte Carlo runs must be ra
 }
   \item{weights}{
 a numerical vector containing the weights to be used for each variable in \code{references} when \code{rank = TRUE}. If vector has named elements, the vector names must exactly match the names of variables in \code{references}, order is not important, If variable names not present in vector, the missing ones are not considered in the ranking. If the vector is not named, the order of the weights must be the same as the one used for the variables (columns) in the \code{references} matrix. If the length of \code{weigths} is smaller the number of variables and not named, the vector is recycled. The default is to use the same weight for all variables.
+}
+  \item{seed}{
+a single value, interpreted as an integer to define the pseudo-random number generator state used when sampling data, or \code{NULL}, to re-initialize the generator as if no seed had yet been set (a new state is created from the current time and the process ID).
 }
   \item{...}{
 additional parameters required by the specific method (see \code{\link{TSDistances}}).

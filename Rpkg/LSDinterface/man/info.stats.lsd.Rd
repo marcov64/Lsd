@@ -10,7 +10,7 @@ This function reads a 3 or 4-dimensional array produced by \code{\link{read.3d.l
 info.stats.lsd( array, rows = 1, cols = 2, median = FALSE,
                 ci = c( "none", "mean", "median", "auto" ),
                 ci.conf = 0.95, ci.boot = NULL, boot.R = 999,
-                na.rm = TRUE, inf.rm = TRUE )
+                seed = 1, na.rm = TRUE, inf.rm = TRUE )
 }
 \arguments{
   \item{array}{
@@ -36,6 +36,9 @@ a character string specifying the type of bootstrap confidence interval to compu
 }
   \item{boot.R}{
 number of bootstrap replicates.
+}
+  \item{seed}{
+a single value, interpreted as an integer to define the pseudo-random number generator state used for the bootstrap process, or \code{NULL}, to re-initialize the generator as if no seed had yet been set (a new state is created from the current time and the process ID).
 }
   \item{na.rm }{
 a logical value indicating whether \code{NA} values should be stripped before the computation proceeds.

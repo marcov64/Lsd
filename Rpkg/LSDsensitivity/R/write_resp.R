@@ -16,8 +16,8 @@ write.response <- function( folder, baseName, outVar = "", iniExp = 1, nExp = 1,
                             posit = NULL, posit.match = c( "fixed", "glob", "regex" ),
                             na.rm = FALSE, conf = 0.95, saveVars = NULL,
                             addVars = NULL, eval.vars = NULL, eval.run = NULL,
-                            median = FALSE, rm.temp = TRUE, nnodes = 1,
-                            quietly = TRUE ) {
+                            eval.stat = c( "mean", "median" ), rm.temp = TRUE,
+                            nnodes = 1, quietly = TRUE ) {
 
   # evaluate new variables (not in LSD files) names
   nVarNew <- length( addVars )           # number of new variables to add
@@ -263,7 +263,7 @@ write.response <- function( folder, baseName, outVar = "", iniExp = 1, nExp = 1,
       resp <- eval.run( poolData, run = k, varIdx = varIdx, conf = conf  )
 
     } else {                            # default processing - just calculate
-      if( median ) {
+      if( match.arg( eval.stat ) == "median" ) {
         med <- vector( mode = "numeric", length = nSize )
         obs <- 0
         for( j in 1 : nSize ) {
@@ -311,17 +311,14 @@ write.response <- function( folder, baseName, outVar = "", iniExp = 1, nExp = 1,
   # Write table to the disk as CSV file for Excel
   tresp <- as.data.frame( cbind( respStat, respDisp ) )
 
-  if( median ) {
+  if( match.arg( eval.stat ) == "median" )
     colnames( tresp ) <- c( "Median", "MAD" )
-    respTag <- "median"
-  } else {
+  else
     colnames( tresp ) <- c( "Mean", "SD" )
-    respTag <- "mean"
-  }
 
   if( ! rm.temp ) {
     respFile <- paste0( folder, "/", baseName, "_", iniExp, "_",
-                        iniExp + nExp - 1, "_", respTag, "_", outVar, ".csv" )
+                        iniExp + nExp - 1, "_", eval.stat, "_", outVar, ".csv" )
 
     tryCatch( suppressWarnings( utils::write.csv( tresp,
                                                   respFile,
