@@ -3,6 +3,11 @@
 	BANK OBJECTS EQUATIONS
 	----------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are specific to the bank objects in the K+S LSD model
 	are coded below.
 

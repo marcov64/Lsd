@@ -3,6 +3,11 @@
 	CAPITAL-GOODS MARKET OBJECT EQUATIONS
 	-------------------------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are specific to the capital-goods market objects in the
 	K+S LSD model are coded below.
 
@@ -260,7 +265,7 @@ EQUATION( "A1" )
 Labor productivity of capital-good sector
 */
 V( "PPI" );										// ensure m.s. are updated
-RESULT( V( "Q1e" ) > 0 ? WHTAVE( "_Btau", "_f1" ) : CURRENT )
+RESULT( WHTAVE( "_Btau", "_f1" ) )
 
 
 EQUATION( "D1" )
@@ -488,7 +493,7 @@ EQUATION( "p1avg" )
 Weighted average price charged in capital-good sector
 */
 v[1] = V( "Q1e" );
-RESULT( v[1] > 0 ? WHTAVE( "_p1", "_Q1e" ) / v[1] : CURRENT )
+RESULT( v[1] > 0 ? WHTAVE( "_p1", "_Q1e" ) / v[1] : AVE( "_p1" ) )
 
 
 EQUATION( "quits1" )

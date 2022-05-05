@@ -3,6 +3,11 @@
 	LABOR MARKET OBJECT EQUATIONS
 	-----------------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are specific to the Labor Market objects in the K+S LSD
 	model are coded below.
 
@@ -288,7 +293,6 @@ if ( h >= 2 )
 }
 else
 {
-	v[0] = INISKILL;
 	WRITE( "sTavg", INISKILL );
 	WRITE( "sTsd", 0 );
 	WRITE( "sTmax", INISKILL );
@@ -302,7 +306,6 @@ if ( h == 1 || h == 3 )
 }
 else
 {
-	v[0] = INISKILL;
 	WRITE( "sVavg", INISKILL );
 	WRITE( "sVsd", 0 );
 }

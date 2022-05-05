@@ -3,6 +3,11 @@
 	CLASS AND MACRO DEFINITIONS
 	---------------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	C++ class and preprocessor macro definitions used in the K+S LSD model
 	are coded below.
 

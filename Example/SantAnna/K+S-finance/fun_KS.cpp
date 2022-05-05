@@ -3,6 +3,11 @@
 	K+S LSD MODEL (including finance extensions)
 	-------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	VERSION: 0.2.2 - decentralized financial sector and monetary/fiscal policies
 
 	This is the topmost code file for the K+S coded in LSD.

@@ -1,6 +1,18 @@
 #******************************************************************
 #
-# ------------- Plot, fit and support functions -----------------
+# ------- Industry Model: plot, fit and support functions --------
+#
+#   Written by Marcelo C. Pereira, University of Campinas
+#
+#   Copyright Marcelo C. Pereira
+#   Distributed under the GNU General Public License
+#
+#   IMPORTANT: this script assumes the R working directory is set
+#   to the R subfolder where this script file is stored. This can
+#   be done automatically in RStudio if a project is created at
+#   this subfolder, or using the command setwd(). The "folder"
+#   variable below must always point to a (relative) subfolder
+#   of the R working directory.
 #
 #******************************************************************
 

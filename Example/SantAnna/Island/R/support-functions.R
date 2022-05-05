@@ -1,8 +1,16 @@
-#******************************************************************
+#*******************************************************************************
 #
-# ------------- Plot, fit and support functions -----------------
+# -------------- Island Model: plot, fit and support functions ----------------
 #
-#******************************************************************
+#   Written by Marcelo C. Pereira, University of Campinas
+#
+#   Copyright Marcelo C. Pereira
+#   Distributed under the GNU General Public License
+#
+#   Script used by other scripts.
+#   This script should not be executed directly.
+#
+#*******************************************************************************
 
 # ==== User parameters ====
 

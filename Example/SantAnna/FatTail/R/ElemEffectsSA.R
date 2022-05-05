@@ -1,6 +1,11 @@
-#*******************************************************************************
+#******************************************************************
 #
-# --------------- Elementary Effects DoE analysis (Morris 1991) ---------------
+# - Industry Model: Elementary Effects DoE analysis (Morris 1991) -
+#
+#   Written by Marcelo C. Pereira, University of Campinas
+#
+#   Copyright Marcelo C. Pereira
+#   Distributed under the GNU General Public License
 #
 #	Several files are required to run:
 #		folder/baseName_XX_YY.csv		    : DoE specification from LSD
@@ -8,7 +13,14 @@
 #		folder/baseName.lsd				      : LSD configuration with default values
 #		folder/baseName.sa		          : factor sensitivity test ranges from LSD
 #
-#*******************************************************************************
+#   IMPORTANT: this script assumes the R working directory is set
+#   to the R subfolder where this script file is stored. This can
+#   be done automatically in RStudio if a project is created at
+#   this subfolder, or using the command setwd(). The "folder"
+#   variable below must always point to a (relative) subfolder
+#   of the R working directory.
+#
+#******************************************************************
 
 # ====== User parameters ======
 

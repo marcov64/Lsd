@@ -3,6 +3,11 @@
 	K+S LSD MODEL (SFC version)
 	-------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	VERSION: 0.1.2 - original JEDC2010 model plus stock-flow consistency (SFC)
 
 	This is the topmost code file for the K+S coded in LSD.

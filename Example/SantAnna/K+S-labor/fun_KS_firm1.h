@@ -3,6 +3,11 @@
 	FIRM1 OBJECT EQUATIONS
 	----------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are specific to the Firm1 objects in the K+S LSD model
 	are coded below.
 
@@ -462,10 +467,10 @@ RESULT( VLS( PARENT, "w1avg", 1 ) / ( V( "_Btau" ) * VS( PARENT, "m1" ) ) )
 EQUATION( "_f1" )
 /*
 Market share of firm in capital-good sector
-Keep market share if sector didn't produce
+Fair market share if sector didn't produce
 */
 v[1] = VS( PARENT, "Q1e" );
-RESULT( v[1] > 0 ? V( "_Q1e" ) / v[1] : CURRENT )
+RESULT( v[1] > 0 ? V( "_Q1e" ) / v[1] : 1 / VS( PARENT, "F1" ) )
 
 
 EQUATION( "_i1" )

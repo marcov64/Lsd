@@ -4,14 +4,14 @@
 #
 #******************************************************************
 
-install.packages( c( "LSDsensitivity", 
-                     "tseries", 
-                     "normalp", 
-                     "nortest", 
-                     "mFilter", 
-                     "np", 
-                     "matrixStats", 
-                     "gplots", 
-                     "rmutil", 
-                     "plotrix", 
+install.packages( c( "LSDsensitivity",
+                     "tseries",
+                     "normalp",
+                     "nortest",
+                     "mFilter",
+                     "np",
+                     "matrixStats",
+                     "gplots",
+                     "rmutil",
+                     "plotrix",
                      "extrafont" ) )
