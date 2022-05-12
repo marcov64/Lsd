@@ -1,6 +1,6 @@
 #*************************************************************
 #
-#	LSD 8.0 - September 2021
+#	LSD 8.0 - May 2022
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
