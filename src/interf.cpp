@@ -130,12 +130,6 @@ void create( void )
 			cur = root;
 		}
 
-		if ( redrawStruc )
-		{
-			show_graph( cur );
-			redrawStruc = false;
-		}
-
 		if ( message_logged )
 		{
 			cmd( "focustop .log" );
@@ -1005,6 +999,12 @@ int browse( object *r )
 	}
 
 	cmd( "settop . no { if { [ discard_change ] eq \"ok\" && [ abort_run_threads ] eq \"ok\" } { exit } } no yes" );
+
+	if ( redrawStruc )
+	{
+		show_graph( r );
+		redrawStruc = false;
+	}
 
 	main_cycle:
 
