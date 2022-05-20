@@ -99,8 +99,8 @@ Topology configuration
 Set the maximum radius for initial known islands: l0radius
 Define the minimum signal probability to consider (speed-up): minSgnPrb
 
-hook pointers
--------------
+Accelerator network hook pointers
+---------------------------------
 LSD hook pointers connect all the objects to maximize performance:
  . KnowIsland -> Island
  . Miner -> Agent
