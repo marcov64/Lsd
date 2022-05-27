@@ -3,6 +3,11 @@
 	COUNTRY OBJECT EQUATIONS
 	------------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are specific to the Country objects in the K+S LSD model
 	are coded below. Also the general country-level initialization is
 	defined below.
@@ -421,7 +426,7 @@ int Ls0 = VS( cur4, "Ls0" );					// initial labor supply
 double Btau0 = ( 1 + mu1 ) * INIPROD /			// initial productivity in sec. 1
 			   ( m1 * m2 * VS( cur2, "b" ) );
 double ICge0 = VS( cur5, "bE" ) * pF0 / Ade0;	// initial green plant unit cost
-double pE0 = INIWAGE * VS( cur5, "muE0" ) + 
+double pE0 = INIWAGE * VS( cur5, "muE0" ) +
 			 ( fGE0 == 1 ? 0 : pF0 / Ade0 );	// init. energy price
 double c10 = ( INIWAGE / Btau0 + ( pE0 + trCO2 * INIEFRI ) / INIEEFF ) / m1;
 												// initial unit cost in sector 1
@@ -557,7 +562,7 @@ CYCLES( cur3, cur, "Bank" )
 	if ( v[8] > 0 )								// bank has clients?
 		v[9] = EqB0 * v[8];						// bank initial tier 1 capital
 	else
-		v[9] = EqB0 * ( F10 * NW10 + F20 * NW20 + Fe0 * NWe0 ) * 
+		v[9] = EqB0 * ( F10 * NW10 + F20 * NW20 + Fe0 * NWe0 ) *
 			   VS( cur, "_fD" );// use proxy
 
 	v[4] += v[10] = tauB * v[8];				// part on required reserves

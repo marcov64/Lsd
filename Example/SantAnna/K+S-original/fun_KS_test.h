@@ -3,6 +3,11 @@
 	TEST EQUATIONS
 	--------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are not required for the model to run but can be used for
 	testing, in-depth consistency analysis, and debugging.
 
@@ -442,7 +447,7 @@ check_error( abs( NW1 + NW2 + SavAcc - Depo - Deb1 - Deb2 + Loans ) / Depo > TOL
 check_error( CS > CD || CDc > CD, "INCONSISTENT-FINANCE", 0, & errors );
 
 // bank cash-flow
-LOG( "\n   $$ BadDeb=%.2g iDb=%.2g iB=%.2g PiB=%.2g", 
+LOG( "\n   $$ BadDeb=%.2g iDb=%.2g iB=%.2g PiB=%.2g",
 	 BadDeb1 + BadDeb2, iDb, iB, PiB );
 
 check_error( abs( - PiB - BadDeb_1 - iDb + iB

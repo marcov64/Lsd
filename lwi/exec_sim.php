@@ -20,7 +20,8 @@
 require '../defaults.php';
 
 // check if too many instances already running
-if ( count( glob( $flag_pref . "run-*.flag" ) ) >= $max_run ) {
+$flags = glob( $flag_pref . "run-*.flag" );
+if ( is_countable( $flags ) && count( $flags ) >= $max_run ) {
     echo "Busy: Cannot execute now, please try later";
     return;
 }
@@ -165,9 +166,12 @@ if ( file_exists( $lsd_exec ) && file_exists( $filename_conf ) ) {
     }
 
     // close child process
-    fclose( $pipes[ 0 ] );
-    fclose( $pipes[ 1 ] );
-    fclose( $pipes[ 2 ] );
+    for ( $i = 0; $i < 3; ++$i ) {
+        if ( is_resource( $pipes[ $i ] ) ) {
+            fclose( $pipes[ $i ] );
+        }
+    }
+
     proc_close( $lsdNW );
 
     // remove LSD configuration and grand total results files
@@ -191,7 +195,7 @@ if ( file_exists( $lsd_exec ) && file_exists( $filename_conf ) ) {
     $filename_res = glob( $base_name . "_*.csv" );
 
     // creates the MC analysis
-    if ( count( $filename_res ) > 1 ) {
+    if ( is_countable( $filename_res ) && count( $filename_res ) > 1 ) {
         if ( file_exists( $mcstats_exec ) ) {
             exec( $mcstats_exec . " -o " . $base_name . " -f " . implode( " ", $filename_res ), $shell_out, $shell_err );
             if ( $shell_err != 0 ) {

@@ -3,6 +3,11 @@
 	STATISTICS EQUATIONS
 	--------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are not required for the model to run but may produce
 	useful country- or sector-level statistics for analysis.
 
@@ -673,7 +678,7 @@ Wages include unemployment benefits (if available) but not bonuses.
 Income includes wages and bonuses.
 */
 
-double _In, _w, _wR, _wS, 
+double _In, _w, _wR, _wS,
 	   Gini, InSum, InLogSD, InLogSum, InSqLogSum, InMax, InMin,
 	   rank1wSum, wRank1Sum, rank2InSum, InRank2Sum, wAvgReal, wGini, wLogSD,
 	   wSum, wLogSum, wSqLogSum, wMax, wMin,

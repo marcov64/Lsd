@@ -2,12 +2,12 @@ Package: LSDinterface
 Type: Package
 Title: Interface Tools for LSD Simulation Results Files
 Version: 1.2.1
-Date: 2022-4-1
+Date: 2022-5-12
 Authors@R: person( "Marcelo C.", "Pereira", email = "mcper@unicamp.br",	role = c( "aut", "cre" ), comment = c( ORCID = "0000-0002-8069-2734" ) )
-Description: Interfaces R with LSD simulation models. Reads object-oriented data in results files (.res[.gz]) produced by LSD and creates appropriate multi-dimensional arrays in R. Supports multiple core parallel threads of multi-file data reading for increased performance. Also provides functions to extract basic information and statistics from data files. LSD (Laboratory for Simulation Development) is free software developed by Marco Valente (documentation and downloads available at <https://www.labsimdev.org/>).
+Description: Interfaces R with LSD simulation models. Reads object-oriented data in results files (.res[.gz]) produced by LSD and creates appropriate multi-dimensional arrays in R. Supports multiple core parallel threads of multi-file data reading for increased performance. Also provides functions to extract basic information and statistics from data files. LSD (Laboratory for Simulation Development) is free software developed by Marco Valente and Marcelo C. Pereira (documentation and downloads available at <https://www.labsimdev.org/>).
 Depends: R (>= 3.2.0)
 Imports: stats, boot, utils, parallel, abind, TSdist
 Suggests: LSDsensitivity
+License: GPL-3
 Language: en-US
 Encoding: UTF-8
-License: GPL-3

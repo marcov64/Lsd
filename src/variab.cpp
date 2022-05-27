@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - September 2021
+	LSD 8.0 - May 2022
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -494,7 +494,7 @@ double variable::cal( object *caller, int lag )
 
 		// open the debugger if required
 		if ( debug_flag && t == when_debug && debug == 'd' && deb_cond == 0 )
-			deb( ( object * ) up, caller, label, &val[ 0 ], true );
+			deb( ( object * ) up, caller, label, &val[ 0 ], false );
 		else
 			switch ( deb_cond )
 			{
@@ -502,15 +502,15 @@ double variable::cal( object *caller, int lag )
 					break;
 				case 1:
 					if ( val[ 0 ] == deb_cnd_val )
-						deb( ( object * ) up, caller, label, &val[ 0 ], true );
+						deb( ( object * ) up, caller, label, &val[ 0 ], false );
 					break;
 				case 2:
 					if ( val[ 0 ] > deb_cnd_val )
-						deb( ( object * ) up, caller, label, &val[ 0 ], true );
+						deb( ( object * ) up, caller, label, &val[ 0 ], false );
 					break;
 				case 3:
 					if ( val[ 0 ] < deb_cnd_val )
-						deb( ( object * ) up, caller, label, &val[ 0 ], true );
+						deb( ( object * ) up, caller, label, &val[ 0 ], false );
 					break;
 				default:
 					error_hard( "internal problem in LSD",

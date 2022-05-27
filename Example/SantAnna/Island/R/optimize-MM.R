@@ -1,9 +1,14 @@
 #*******************************************************************************
 #
-# -------------------------- Meta-model optimization --------------------------
+# ----------------- Island Model: meta-model optimization --------------------
+#
+#   Written by Marcelo C. Pereira, University of Campinas
+#
+#   Copyright Marcelo C. Pereira
+#   Distributed under the GNU General Public License
 #
 #	Run this script ONLY after fitting a meta-model for LSD experiment data
-#  (by running "kriging-sobol-SA.R" or "poly-sobol-SA.R")
+#   (by running "kriging-sobol-SA.R" or "poly-sobol-SA.R")
 #
 #*******************************************************************************
 

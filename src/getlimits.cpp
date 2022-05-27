@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - September 2021
+	LSD 8.0 - May 2022
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -231,15 +231,15 @@ int lsdmain( int argn, const char **argv )
 
 		// write simulation setting, if not already set
 		if ( ! meta_par_in[ 0 ] )
-			fprintf( f, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
+			fprintf( f, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",
 					 sep, sep, sep, sep, max_step, sep, MIN_STEP, sep, MAX_STEP, sep, DESC_STEP );
 
 		if ( ! meta_par_in[ 1 ] )
-			fprintf( f, "_numRuns_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
+			fprintf( f, "_numRuns_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",
 					 sep, sep, sep, sep, sim_num, sep, MIN_RUNS, sep, MAX_RUNS, sep, DESC_RUNS );
 
 		if ( ! meta_par_in[ 2 ] )
-			fprintf( f, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
+			fprintf( f, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",
 					 sep, sep, sep, sep, seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
 
 		fclose( f );
@@ -249,15 +249,15 @@ int lsdmain( int argn, const char **argv )
 		get_sa_limits( root, stdout, "\t" );
 
 		if ( ! meta_par_in[ 0 ] )
-			fprintf( stdout, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
+			fprintf( stdout, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",
 					 sep, sep, sep, sep, max_step, sep, MIN_STEP, sep, MAX_STEP, sep, DESC_STEP );
 
 		if ( ! meta_par_in[ 1 ] )
-			fprintf( stdout, "_numRuns_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
+			fprintf( stdout, "_numRuns_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",
 					 sep, sep, sep, sep, sim_num, sep, MIN_RUNS, sep, MAX_RUNS, sep, DESC_RUNS );
 
 		if ( ! meta_par_in[ 2 ] )
-			fprintf( stdout, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s%s\n",
+			fprintf( stdout, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",
 					 sep, sep, sep, sep, seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
 	}
 

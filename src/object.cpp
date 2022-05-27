@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - September 2021
+	LSD 8.0 - May 2022
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -1003,7 +1003,7 @@ variable *object::search_var_err( object *caller, const char *lab, bool no_searc
 	variable *cv;
 
 	cv = search_var( caller, lab, true, no_search, search_sons );
-	if ( cv == NULL )
+	if ( cv == NULL && label != NULL )
 	{	// check if it is not a zero-instance object
 		cur = blueprint->search( label );				// current object in blueprint
 		if ( cur == NULL || cur->search_var( NULL, lab, true, no_search, search_sons ) == NULL )
@@ -3597,8 +3597,7 @@ double object::interact( const char *text, double v, double *tv, int i, int j,
 		n_values[ 8 ] = curl8;
 		n_values[ 9 ] = curl9;
 
-		non_var = true;					// signals INTERACT macro
-		deb( this, NULL, text, &app, true );
+		deb( this, NULL, text, &app, true );	// signals INTERACT macro
 	}
 
 	return app;

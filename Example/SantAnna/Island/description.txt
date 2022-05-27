@@ -1,10 +1,11 @@
 Island Model (ver. 1.0)
 =======================
 
+Recoded in LSD by Marcelo C. Pereira, University of Campinas
+Copyright Marcelo C. Pereira
+
 Based on Fagiolo, G., Dosi, G. (2003) Exploitation, exploration and innovation in a model of endogenous growth with locally interacting agents, Structural Change and Economic Dynamics,
 v. 14, p. 237-273.
-
-Recoded in LSD by Marcelo C. Pereira
 
 Model setup
 -----------
@@ -22,7 +23,7 @@ The code is organized in sections, associated to the respective object types:
  - KnowIsland: one instance per known island
  - Miner: one dummy instance per agent mining on island
  - Agent: one instance per agent
- 
+
 Object Sea
 ----------
 Init: initializes the model, run once
@@ -33,15 +34,15 @@ Init: initializes the model, run once
 Step: forces agents to decide what to do first
 l: counts the known islands
 m: counts the number of miners
-Q: accumulates the sea’s production (GDP)
+Q: accumulates the sea's production (GDP)
 J: expands and counts the islands set
  . Expand each frontier as required (N, S, W, E)
 
 Object KnownIsland
 ------------------
 _m: counts the miners in the island
- . Ignore “inactive” Miner object instances
- . Adjust island color on the lattice (empty/colonized) 
+ . Ignore "inactive" Miner object instances
+ . Adjust island color on the lattice (empty/colonized)
 _Qisland: accumulates the island production
 _c: compute the island productivity
 
@@ -62,15 +63,15 @@ _a: define the state of the agent
 
 Data structure
 --------------
-Object Root: 
+Object Root:
  . User parameters: simSpeed, sizeLattice
  . Internal parameter: latticeOpen (do not change)
-Object Sea: 
+Object Sea:
  . User parameters: N, alpha, epsilon, phi, lambda, pi, rho, l0radius, minSgnPrb
  . Variables: l, m, J, Q
  . Internal parameters: seaShown, xxxxFrontier (do not change)
  . Internal variables: Init, Step
-Object Island: 
+Object Island:
  . Internal parameters: _known, _idIsland, _xIsland, _yIsland (do not change)
 Object KnowIsland:
  . Variables: _c, _m, _Qisland
@@ -78,10 +79,10 @@ Object KnowIsland:
 Object Miner:
  . Variables: _cBest, _Qminer
  . Internal parameters: _active, _agentId, _xBest, _yBest (do not change)
-Object Agent: 
+Object Agent:
  . Variables: _a
  . Internal parameters: _idAgent, _knownId, _xAgent, _yAgent, _xTarget, _yTarget, _Qlast (do not change)
- 
+
 Original paper parameters
 -------------------------
 All the original paper parameters and initial conditions can be found in object Sea and can be changed.
@@ -98,8 +99,8 @@ Topology configuration
 Set the maximum radius for initial known islands: l0radius
 Define the minimum signal probability to consider (speed-up): minSgnPrb
 
-hook pointers
--------------
+Accelerator network hook pointers
+---------------------------------
 LSD hook pointers connect all the objects to maximize performance:
  . KnowIsland -> Island
  . Miner -> Agent
@@ -111,7 +112,7 @@ Each KnownIsland instance is the hub of a star network to all other relevant kno
  . Link creation depends on the signal intensity threshold defined by MinSgnPrb
  . All links are bidirectional
  . Link weight is defined by the exponential decay factor between the two islands
- 
+
 Data analysis
 -------------
 Some R scripts are provided to analyze the model outputs, to perform sensitivity analysis, and to generate response surfaces:
@@ -128,6 +129,6 @@ sobol-SA.R - perform Sobol sensitivity analysis directly on DoE data (require de
 
 optimize-MM.R - using a fitted meta-model, find points in the parameter space which maximize and minimize the value of the selected variable
 
-The scripts and the pre-defined example configurations to use the scripts can be found in folders in the R folder inside the model folder ([LSD_directory]/Example/SantAnna/Island/R). 
+The scripts and the pre-defined example configurations to use the scripts can be found in folders in the R folder inside the model folder ([LSD_directory]/Example/SantAnna/Island/R).
 
 All the scripts assume the R working directory is set to this particular folder. All the scripts require the following R packages (and its dependencies) to be installed: LSDsensitivity, normalp, nortest, mFilter, matrixStats, tseries, gplots, plotrix, extrafont.

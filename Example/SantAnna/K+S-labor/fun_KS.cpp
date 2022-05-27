@@ -3,6 +3,11 @@
 	MAIN K+S LSD MODEL (including labor and finance extensions)
 	------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	VERSION: 5.1.3 - Full LSD version
 
 	This is the topmost code file for the K+S coded in LSD.
@@ -101,6 +106,9 @@ Execute the current time-step for all existing countries
 */
 
 V( "init" );									// ensure initialization done
+
+CYCLE( cur, "Country" )
+	VS( cur, "regChg" );						// do regulatory regime change
 
 CYCLE( cur, "Country" )
 	VS( cur, "timeStep" );

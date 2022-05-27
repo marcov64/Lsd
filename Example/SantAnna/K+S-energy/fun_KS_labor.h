@@ -3,6 +3,11 @@
 	LABOR MARKET OBJECT EQUATIONS
 	-----------------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are specific to the Labor Market objects in the K+S LSD
 	model are coded below.
 
@@ -19,7 +24,7 @@ flagAddWorkers is set to 1
 v[1] = V( "delta" );							// population growth rate
 
 // growing workforce and demand is higher than labor supply?
-if ( VS( PARENT, "flagAddWorkers" ) == 1 && VS( ENESECL1, "LeD" ) + 
+if ( VS( PARENT, "flagAddWorkers" ) == 1 && VS( ENESECL1, "LeD" ) +
 	 VS( CAPSECL1, "L1d" ) + VS( CONSECL1, "L2d" ) > CURRENT )
 	v[1] += 0.02;								// lump grow in labor supply
 

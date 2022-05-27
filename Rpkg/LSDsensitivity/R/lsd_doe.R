@@ -15,10 +15,11 @@ read.doe.lsd <- function( folder, baseName, outVar = "", does = 1, doeFile = NUL
                           respFile = NULL, validFile = NULL, valRespFile = NULL,
                           confFile = NULL, limFile = NULL, iniDrop = 0,
                           nKeep = -1, saveVars = NULL, addVars = NULL,
-                          eval.vars = NULL, eval.run = NULL, median = FALSE,
-                          pool = TRUE, na.rm = FALSE, rm.temp = TRUE,
-                          rm.outl = FALSE, lim.outl = 10, nnodes = 1,
-                          quietly = TRUE, instance = 1, posit = NULL,
+                          eval.vars = NULL, eval.run = NULL,
+                          eval.stat = c( "mean", "median" ), pool = TRUE,
+                          na.rm = FALSE, rm.temp = TRUE, rm.outl = FALSE,
+                          lim.outl = 10, nnodes = 1, quietly = TRUE,
+                          instance = 1, posit = NULL,
                           posit.match = c( "fixed", "glob", "regex" ) ) {
 
   if( is.null( folder ) || ! is.character( folder ) )
@@ -63,9 +64,6 @@ read.doe.lsd <- function( folder, baseName, outVar = "", does = 1, doeFile = NUL
   if( ! is.null( eval.run ) && ! is.function( eval.run ) )
     stop( "Invalid function to evaluate responses (eval.run)" )
 
-  if( is.null( median ) || ! is.logical( median ) )
-    stop( "Invalid median switch (median)" )
-
   if( is.null( pool ) || ! is.logical( pool ) )
     stop( "Invalid pooling switch (pool)" )
 
@@ -83,6 +81,7 @@ read.doe.lsd <- function( folder, baseName, outVar = "", does = 1, doeFile = NUL
 
   does      <- round( does )
   instance  <- round( instance )
+  eval.stat <- match.arg( eval.stat )
 
   # ---- Process LSD result files ----
 
@@ -108,15 +107,10 @@ read.doe.lsd <- function( folder, baseName, outVar = "", does = 1, doeFile = NUL
   if( ! file.exists( doeFile ) )
     stop( "DoE specification file does not exist (", doeFile, ")" )
 
-  if( median )
-    respTag <- "median"
-  else
-    respTag <- "mean"
-
   if( is.null( respFile ) ) {
     if( length( files ) < 1 )
       stop( "No valid response file" )
-    respFile <- paste0( folder, "/", files[ 1 ], "_", respTag, "_",
+    respFile <- paste0( folder, "/", files[ 1 ], "_", eval.stat, "_",
                         outVar, ".csv" )
   }
 
@@ -133,7 +127,7 @@ read.doe.lsd <- function( folder, baseName, outVar = "", does = 1, doeFile = NUL
     if( is.null( valRespFile ) ) {
       if( length( files ) < 2 )
         stop( "No valid DoE validation response file" )
-      valRespFile <- paste0( folder, "/", files[ 2 ], "_", respTag, "_",
+      valRespFile <- paste0( folder, "/", files[ 2 ], "_", eval.stat, "_",
                              outVar, ".csv" )
     }
   }
@@ -149,7 +143,7 @@ read.doe.lsd <- function( folder, baseName, outVar = "", does = 1, doeFile = NUL
                             posit.match = match.arg( posit.match ), na.rm = na.rm,
                             nExp = size.doe( doeFile )[ 2 ], addVars = addVars,
                             pool = pool, instance = instance, eval.vars = eval.vars,
-                            eval.run = eval.run, median = median,
+                            eval.run = eval.run, eval.stat = eval.stat,
                             saveVars = saveVars, nnodes = nnodes, quietly = quietly )
   } else {
     resp <- utils::read.csv( respFile )
@@ -166,7 +160,7 @@ read.doe.lsd <- function( folder, baseName, outVar = "", does = 1, doeFile = NUL
                                posit.match = match.arg( posit.match ),
                                addVars = addVars, eval.vars = eval.vars,
                                pool = pool, instance = instance,
-                               eval.run = eval.run, median = median,
+                               eval.run = eval.run, eval.stat = eval.stat,
                                saveVars = saveVars, nnodes = nnodes,
                                quietly = quietly )
   } else {

@@ -3,6 +3,11 @@
 	COUNTRY OBJECT EQUATIONS
 	------------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are specific to the Country objects in the K+S LSD model
 	are coded below. Also the general country-level initialization is
 	defined below.
@@ -198,7 +203,7 @@ EQUATION( "Tax" )
 /*
 Government tax income
 */
-RESULT( VS( CAPSECL0, "Tax1" ) + VS( CONSECL0, "Tax2" ) + 
+RESULT( VS( CAPSECL0, "Tax1" ) + VS( CONSECL0, "Tax2" ) +
 		VS( LABSUPL0, "TaxW" ) + V( "TaxDiv" ) )
 
 

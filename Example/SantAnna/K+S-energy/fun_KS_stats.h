@@ -3,6 +3,11 @@
 	STATISTICS EQUATIONS
 	--------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are not required for the model to run but may produce
 	useful country- or sector-level statistics for analysis.
 

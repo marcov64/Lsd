@@ -3,6 +3,11 @@
 	DIRTY OBJECT EQUATIONS
 	----------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are specific to the dirty energy plant objects in the
 	K+S LSD model are coded below.
 

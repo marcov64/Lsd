@@ -3,6 +3,11 @@
 	FIRM2 OBJECT EQUATIONS
 	----------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are specific to the Firm2 objects in the K+S LSD model
 	are coded below.
 
@@ -606,17 +611,15 @@ CYCLE( cur, "Broch" )							// use brochures to find supplier
 
 // if supplier is found, simply update it, if not, draw a random one
 if ( cur2 != NULL && cur3 != NULL )
+{
 	WRITES( cur2, "__tSel", T );				// update selection time
+	WRITE_HOOK( SUPPL, cur3 );					// pointer to current brochure
+}
 else											// no brochure received
 {
-	cur1 = RNDDRAWS( CAPSECL2, "Firm1", "_Atau" );// try draw new good supplier
+	cur1 = set_supplier( THIS );				// draw new supplier
 	i = VS( cur1, "_ID1" );
-
-	// create the brochure/client interconnected objects
-	cur3 = send_brochure( cur1, THIS );
 }
-
-WRITE_HOOK( SUPPL, cur3 );						// pointer to current brochure
 
 RESULT( i )
 

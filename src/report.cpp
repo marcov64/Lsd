@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - September 2021
+	LSD 8.0 - May 2022
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -939,9 +939,10 @@ bool contains( FILE *f, const char *lab, int len )
 						// scan the whole word, until a different char is not found
 						got = 1;
 						if ( pot[ 0 ] != '\"' ) 			// in case the eq. contains "" it gets fucked up..
-							for ( j = 0; got == 1 && pot[ j ] != '\"' && lab + j != NULL; ++j )
+							for ( j = 0; got == 1 && pot[ j ] != '\"' && lab != NULL; ++j )
 								if ( pot[ j ] != lab[ j ])
 									got = 0;
+								
 						for ( ; pot[ j ] != '\"'; ++j ); 	// finishes the word, until the closed quotes
 
 						i = i + j + 1;

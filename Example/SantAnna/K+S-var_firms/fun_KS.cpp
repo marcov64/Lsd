@@ -3,6 +3,11 @@
 	K+S LSD MODEL (including finance extensions and variable number of firms)
 	-------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	VERSION: 0.3.2 - independent entry and exit of firms in both sectors
 
 	This is the topmost code file for the K+S coded in LSD.

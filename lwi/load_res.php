@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,11 +21,11 @@ require "../defaults.php";
 
 // t distribution for 95% confidence level factor
 function t95cl( $df ) {
-    $t975 = [ 12.710, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228, 
-              2.201, 2.179, 2.160, 2.145, 2.131, 2.120, 2.110, 2.101, 2.093, 2.086, 
-              2.080, 2.074, 2.069, 2.064, 2.060, 2.056, 2.052, 2.048, 2.045, 2.042, 
-              2.021, 2.000, 1.990, 1.984, 1.962, 1.960 ];   
-    
+    $t975 = [ 12.710, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228,
+              2.201, 2.179, 2.160, 2.145, 2.131, 2.120, 2.110, 2.101, 2.093, 2.086,
+              2.080, 2.074, 2.069, 2.064, 2.060, 2.056, 2.052, 2.048, 2.045, 2.042,
+              2.021, 2.000, 1.990, 1.984, 1.962, 1.960 ];
+
     if ( $df <= 30 ) {
         return $t975[ $df - 1 ];
     } elseif ( $df <= 40 ) {
@@ -46,46 +46,57 @@ function t95cl( $df ) {
 function getcsvheader( $fn, &$vars, &$err ) {
     $f = fopen( $fn, "r" );
     if ( $f == null ) {
-        $err = array ( "Error", 
+        $err = array ( "Error",
                        "Cannot open results file '" . $fn . "' on server" );
         return 0;
     }
 
     $vars = fgetcsv( $f );
-    $tot_vars = count( $vars );
+
+    if ( is_countable( $vars ) ) {
+        $tot_vars = count( $vars );
+    } else {
+        $tot_vars = 0;
+    }
+
     fclose( $f );
 
     if ( ! $vars || $tot_vars === 0 || ! isset( $vars[ 0 ] ) || $vars[ 0 ] === "" ) {
-        $err = array ( "Error", 
+        $err = array ( "Error",
                        "Invalid results file '" . $fn . "' on server" );
         return 0;
     }
-    
+
     return $tot_vars;
 }
 
 function getcsvdata( $fn, $log, &$series, &$err ) {
-    
+
     $f = fopen( $fn, "r" );
     if ( $f == null ) {
-        $err = array ( "Error", 
+        $err = array ( "Error",
                        "Cannot open results file '" . $fn . "' on server" );
         return 0;
     }
 
     $vars = fgetcsv( $f );
-    $tot_vars = count( $vars );
+
+    if ( is_countable( $vars ) ) {
+        $tot_vars = count( $vars );
+    } else {
+        $tot_vars = 0;
+    }
 
     if ( ! $vars || feof( $f ) || $tot_vars === 0 ) {
-        $err = array ( "Error", 
+        $err = array ( "Error",
                        "Invalid results file '" . $fn . "' on server" );
         fclose( $f );
         return 0;
     }
-    
+
     $steps = 0;
     while ( ! feof( $f ) ) {
-        
+
         $line = fgetcsv( $f );
 
         // ignore blank lines
@@ -94,8 +105,8 @@ function getcsvdata( $fn, $log, &$series, &$err ) {
         }
 
         // check if all data is present
-        if ( count( $line ) < $tot_vars ) {
-            $err = array ( "Error", 
+        if ( ! is_countable( $line ) || count( $line ) < $tot_vars ) {
+            $err = array ( "Error",
                            "Invalid results file '" . $fn . "' on line " . ( $steps + 2 ) );
             fclose( $f );
             return 0;
@@ -103,9 +114,9 @@ function getcsvdata( $fn, $log, &$series, &$err ) {
 
         // read each column and add to one time series
         for ( $i = 0; $i < $tot_vars; ++$i ) {
-            
+
             if ( ! is_numeric( $line[ $i ] ) && strtoupper( $line[ $i ] ) !== "NA" ) {
-                $err = array ( "Error", 
+                $err = array ( "Error",
                                "Invalid results file '" . $fn . "' on line " . ( $steps + 2 ) . ", column " . ( $i + 1 ) );
                 fclose( $f );
                 return 0;
@@ -126,11 +137,11 @@ function getcsvdata( $fn, $log, &$series, &$err ) {
 
         ++$steps;
     }
-   
+
     fclose( $f );
     return $steps;
 }
-    
+
 $err = array ( );
 
 // check data integrity and load it if ok
@@ -147,8 +158,8 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
         $script = $full_name;
     }
 
-    if ( count( $config ) == 0 ) {
-        $err = array ( "Error", 
+    if ( ! is_countable( $config ) || count( $config ) == 0 ) {
+        $err = array ( "Error",
                        "No data to produce simulation statistics" );
         goto end_err;
     }
@@ -158,19 +169,19 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
     $config[ "_end_" ] = min( max( filter_var( $config[ "_end_" ], FILTER_SANITIZE_NUMBER_INT ), $config[ "_begin_" ] ), 10000 );
     $config[ "_linear_" ] = filter_var( $config[ "_linear_" ], FILTER_SANITIZE_NUMBER_INT );
     $config[ "_auto_" ] = filter_var( $config[ "_auto_" ], FILTER_SANITIZE_NUMBER_INT );
-    
+
     if ( isset ( $config[ "_CI_" ] ) ) {
         $config[ "_CI_" ] = filter_var( $config[ "_CI_" ], FILTER_SANITIZE_NUMBER_INT );
     } else {
         $config[ "_CI_" ] = "0";
     }
-    
+
     if ( isset ( $config[ "_MM_" ] ) ) {
         $config[ "_MM_" ] = filter_var( $config[ "_MM_" ], FILTER_SANITIZE_NUMBER_INT );
     } else {
-        $config[ "_MM_" ] = "0";        
+        $config[ "_MM_" ] = "0";
     }
-    
+
     $first = $config[ "_begin_" ] - 1;
     $ci = ( $config[ "_CI_" ] == "1" ) ? true : false;
     $mm = ( $config[ "_MM_" ] == "1" ) ? true : false;
@@ -189,22 +200,22 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
     $num_vars = 0;
     $sel_vars = array ( );
     foreach ( $config as $var => $value ) {
-        $var = filter_var( $var, FILTER_SANITIZE_STRING );
-        $value = filter_var( $value, FILTER_SANITIZE_STRING );
+        $var = filter_var( $var, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+        $value = filter_var( $value, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
         if ( ! strncmp( $var, "_out-", 5 ) && $value == "on" ) {
             ++$num_vars;
             $sel_vars[ ] = substr( $var, 5 );
         }
     }
-    
+
     if ( $num_vars == 0 && $script !== "show_stats.php" ) {
-        $err = array ( "No time series selected", 
+        $err = array ( "No time series selected",
                        "Please select at least one series and try again" );
         goto end_err;
     }
-    
+
     if ( $num_vars > 15 ) {
-        $err = array ( "Too many time series selected", 
+        $err = array ( "Too many time series selected",
                        "Please select up to 15 series and try again" );
         goto end_err;
     }
@@ -212,8 +223,8 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
     // get results file name
     $results = glob( $output_pref . "run-" . $session_short_id . "_*.csv" );
 
-    if ( ! $results || count( $results ) === 0 ) {
-        $err = array ( "No simulation results available", 
+    if ( ! is_countable( $results ) || count( $results ) === 0 ) {
+        $err = array ( "No simulation results available",
                        "Please execute the simulation before using this option" );
         goto end_err;
     }
@@ -225,26 +236,26 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
                 ++$mc_runs;
             }
         }
-        
+
         $results = glob( $output_pref . "run-" . $session_short_id . "_mean.csv" );
         $res_se = glob( $output_pref . "run-" . $session_short_id . "_se.csv" );
         $res_max = glob( $output_pref . "run-" . $session_short_id . "_max.csv" );
         $res_min = glob( $output_pref . "run-" . $session_short_id . "_min.csv" );
-        
-        if ( ! $results || count( $results ) !== 1 ||
-             ! $res_se || count( $res_se ) !== 1 || 
-             ! $res_max || count( $res_max ) !== 1 || 
-             ! $res_min || count( $res_min ) !== 1 ) {
-            $err = array ( "Incomplete simulation results available", 
+
+        if ( ! is_countable( $results ) || count( $results ) !== 1 ||
+             ! is_countable( $res_se ) || count( $res_se ) !== 1 ||
+             ! is_countable( $res_max ) || count( $res_max ) !== 1 ||
+             ! is_countable( $res_min ) || count( $res_min ) !== 1 ) {
+            $err = array ( "Incomplete simulation results available",
                            "Please try to execute the simulation again" );
             goto end_err;
         }
     } else {
         $mc_runs = 1;
     }
-    
+
     // read (mean) results file
-    $vars = array ( );    
+    $vars = array ( );
     $tot_vars = getcsvheader( $results[ 0 ], $vars, $err );
     if ( $tot_vars === 0 ) {
         goto end_err;
@@ -255,32 +266,32 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
     if ( $steps === 0 ) {
         goto end_err;
     }
-    
+
     // read other MC results files
     if ( isset ( $res_se ) && isset ( $res_max ) && isset ( $res_min ) ) {
         $vars_se = $vars_max = $vars_min = array ( );
         getcsvheader( $res_se[ 0 ], $vars_se, $err );
         getcsvheader( $res_max[ 0 ], $vars_max, $err );
         getcsvheader( $res_min[ 0 ], $vars_min, $err );
-        
+
         if ( $vars_se !== $vars || $vars_max !== $vars || $vars_min !== $vars ) {
-            $err = array ( "Inconsistent MC simulation results (vars)", 
+            $err = array ( "Inconsistent MC simulation results (vars)",
                            "Please try to execute the simulation again" );
             goto end_err;
-        }        
-        
+        }
+
         $series_se = $series_max = $series_min = array ( );
         $steps_se = getcsvdata( $res_se[ 0 ], $log, $series_se, $err );
         $steps_max = getcsvdata( $res_max[ 0 ], $log, $series_max, $err );
         $steps_min = getcsvdata( $res_min[ 0 ], $log, $series_min, $err );
-         
+
         if ( $steps_se !== $steps || $steps_max !== $steps || $steps_min !== $steps ) {
-            $err = array ( "Inconsistent MC simulation results (steps)", 
+            $err = array ( "Inconsistent MC simulation results (steps)",
                            "Please try to execute the simulation again" );
             goto end_err;
         }
     }
-    
+
     // finish sanitizing user-set options
     $last = max( min( $config[ "_end_" ], $steps ), $first + 1 );
     $all = ( $first > 1 || $last < $steps ) ? false : true;
@@ -293,7 +304,7 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
 
     // compute descriptive statistics
     if ( $script === "show_stats.php" ) {
-        
+
         $stats = array ( );
         foreach( $series as $var => $ts ) {
             $n = $sum = $sqsum = 0;
@@ -301,59 +312,59 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
             $ma = -INF;
             for ( $i = $first; $i < $last; ++$i ) {
                 $x = $ts[ $i ];
-                
+
                 if ( ! is_float( $x ) || ! is_finite( $x ) ) {
                     continue;
                 }
-                
+
                 ++$n;
                 $sum += $x;
                 $sqsum += $x * $x;
-                
+
                 if ( $x < $mi ) {
                     $mi = $x;
                 }
-                
+
                 if ( $x > $ma ) {
                     $ma = $x;
                 }
             }
 
             if ( $n == 0 ) {
-                $stats[ $var ][ "Mean" ] = "N/A";  
-                $stats[ $var ][ "SD" ] = "N/A";  
-                $stats[ $var ][ "Min" ] = "N/A";  
-                $stats[ $var ][ "Max" ] = "N/A";  
+                $stats[ $var ][ "Mean" ] = "N/A";
+                $stats[ $var ][ "SD" ] = "N/A";
+                $stats[ $var ][ "Min" ] = "N/A";
+                $stats[ $var ][ "Max" ] = "N/A";
             } else {
-                $stats[ $var ][ "Mean" ] = $sum / $n;  
-                $stats[ $var ][ "SD" ] = sqrt( max( $sqsum / $n - ( $sum / $n ) * ( $sum / $n ), 0 ) );  
-                $stats[ $var ][ "Min" ] = $mi;  
-                $stats[ $var ][ "Max" ] = $ma;  
+                $stats[ $var ][ "Mean" ] = $sum / $n;
+                $stats[ $var ][ "SD" ] = sqrt( max( $sqsum / $n - ( $sum / $n ) * ( $sum / $n ), 0 ) );
+                $stats[ $var ][ "Min" ] = $mi;
+                $stats[ $var ][ "Max" ] = $ma;
             }
-            
+
             $stats[ $var ][ "Obs" ] = $n * $mc_runs;
-            
+
             if ( ! isset ( $series_se ) ) {
                 $stats[ $var ][ "SE" ] = "N/A";
             }
         }
-        
+
         if ( isset ( $series_se ) ) {
             foreach( $series_se as $var => $ts ) {
                 $n = $sum = 0;
                 for ( $i = $first; $i < $last; ++$i ) {
                     $x = $ts[ $i ];
-                    
+
                     if ( ! is_float( $x ) || ! is_finite( $x ) ) {
                         continue;
                     }
-                    
+
                     ++$n;
                     $sum += $x;
                 }
 
                 if ( $n == 0 ) {
-                   $stats[ $var ][ "SE" ] = "N/A";  
+                   $stats[ $var ][ "SE" ] = "N/A";
                 } else {
                    $stats[ $var ][ "SE" ] = $sum / $n;
                 }
@@ -369,15 +380,15 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
             $series_lo[ $var ] = $series_hi[ $var ] = array ( );
             for ( $i = 0; $i < $steps; ++$i ) {
                 $x = $series_se[ $var ][ $i ];
-                
-                if ( ! is_float( $x ) || ! is_finite( $x ) || 
+
+                if ( ! is_float( $x ) || ! is_finite( $x ) ||
                      ! is_float( $ts[ $i ] ) || ! is_finite( $ts[ $i ] ) ) {
                     $series_hi[ $var ][ $i ] = "N/A";
                     $series_lo[ $var ][ $i ] = "N/A";
                 } else {
                     $ci_range = t95cl( $mc_runs - 1 ) * $x;
                     $series_hi[ $var ][ $i ] = $ts[ $i ] + $ci_range;
-                    
+
                     if ( ! $linear && $script === "show_plot.php" && $ts[ $i ] <= $ci_range ) {
                         if ( isset ( $series_min[ $var ][ $i ] ) && $series_min[ $var ][ $i ] > 0 ) {
                             $series_lo[ $var ][ $i ] = $series_min[ $var ][ $i ];
@@ -391,19 +402,19 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
             }
         }
     }
-        
+
 } else {
     $err = array ( "Error", "Invalid page call" );
 }
 
 end_err:
 
-if ( count( $err ) === 2 ) {
+if ( is_countable( $err ) && count( $err ) === 2 ) {
 ?>
             <div class='w3-main w3-display-middle' style='max-width: 600px; margin-left:10px; margin-right:10px'>
                 <div class='w3-container w3-card-2 w3-margin-bottom' style='margin-top:10px'>
                     <div class='w3-container w3-center'>
-                    <?php 
+                    <?php
                         echo "<h2>" . $err[ 0 ] . "</h2></br>\n";
                         echo "<p>" . $err[ 1 ] . "</p>\n";
                     ?>

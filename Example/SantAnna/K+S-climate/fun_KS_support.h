@@ -3,6 +3,11 @@
 	SUPPORT C FUNCTIONS
 	-------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Pure C support functions used in the objects in the K+S LSD model are
 	coded below.
 

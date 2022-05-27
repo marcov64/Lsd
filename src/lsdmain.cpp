@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - September 2021
+	LSD 8.0 - May 2022
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -70,7 +70,6 @@ bool no_saved = true;		// disable the usage of saved values as lagged ones
 bool no_search;				// disable the standard variable search mechanism
 bool no_window = false;		// no-window command line job
 bool no_zero_instance = true;// flag to allow deleting last object instance
-bool non_var = false;		// flag to indicate INTERACT macro condition
 bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_abort;		// indicate parallel threads were aborted
 bool parallel_mode;			// parallel mode (multithreading) status
@@ -2142,6 +2141,13 @@ void cover_browser( const char *text1, const char *text2, bool run )
 		set_shortcuts_run( "." );
 		set_shortcuts_run( ".log" );
 		set_shortcuts_run( ".str" );
+
+		// disable debug button when running in parallel mode
+		if ( ! parallel_disable && search_parallel( root ) )
+		{
+			cmd( ".b.r2.deb configure -state disabled" );
+			cmd( "tooltip::tooltip .b.r2.deb \"Disable parallel processing\nto enable debugging\"" );
+		}
 	}
 	else
 	{

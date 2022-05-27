@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - September 2021
+	LSD 8.0 - May 2022
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -128,12 +128,6 @@ void create( void )
 						"invalid model configuration loaded" );
 			unload_configuration( true );
 			cur = root;
-		}
-
-		if ( redrawStruc )
-		{
-			show_graph( cur );
-			redrawStruc = false;
 		}
 
 		if ( message_logged )
@@ -1005,6 +999,12 @@ int browse( object *r )
 	}
 
 	cmd( "settop . no { if { [ discard_change ] eq \"ok\" && [ abort_run_threads ] eq \"ok\" } { exit } } no yes" );
+
+	if ( redrawStruc )
+	{
+		show_graph( r );
+		redrawStruc = false;
+	}
 
 	main_cycle:
 

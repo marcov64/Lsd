@@ -25,7 +25,7 @@ rem  - diff compare tool
 rem *************************************************************
 
 rem component versions
-set GCC_VER=11.2.0
+set GCC_VER=11.3.0
 set PYTHON_VER=3.9
 
 rem XCOPY options for files and directories
@@ -108,6 +108,7 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tk*.dll %LSD_DIR%\gnu\bin\
 
 echo gdb debugger...
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\gdb.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libncursesw6.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\python%PYTHON_VER%-config %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libpython%PYTHON_VER%.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libreadline8.dll %LSD_DIR%\gnu\bin\

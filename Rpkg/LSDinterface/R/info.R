@@ -122,7 +122,7 @@ info.details.lsd <- function( file ) {
 info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
                             ci = c( "none", "mean", "median", "auto" ),
                             ci.conf = 0.95, ci.boot = NULL, boot.R = 999,
-                            na.rm = TRUE, inf.rm = TRUE ) {
+                            seed = 1, na.rm = TRUE, inf.rm = TRUE ) {
 
   if( ! is.array( array ) || ! is.numeric( array ) )
     stop( "Invalid array for statistics (array)" )
@@ -149,6 +149,9 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
 
   if( is.null( boot.R ) || ! is.finite( boot.R ) || round( boot.R ) < 1 )
     stop( "Invalid bootstrap repetitions (boot.R)" )
+
+  if( ! is.null( seed ) && ! is.finite( seed ) )
+    stop( "Invalid random seed (seed)" )
 
   if( is.null( na.rm ) || ! is.logical( na.rm ) )
     stop( "Invalid NA removal switch (na.rm)" )
@@ -210,7 +213,7 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
       baseMask[[ k ]] <- rep( TRUE, dimArray[ k ] )
   }
 
-  set.seed( 1 )         # reset PRNG seed to ensure reproducibility
+  set.seed( seed )       # reset PRNG seed to ensure reproducibility
 
   # Compute averages, std. deviation etc. and store in 2D arrays
   for( j in 1 : dimArray[ cols ] ) {
@@ -340,7 +343,7 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
 info.distance.lsd <- function( array, references, instance = 1,
                                distance = "euclidean",
                                std.dist = FALSE, std.val = FALSE,
-                               rank = FALSE, weights = 1, ... ) {
+                               rank = FALSE, weights = 1, seed = 1, ... ) {
 
   if( ! is.array( array ) || ! is.numeric( array ) )
     stop( "Invalid array for statistics (array)" )
@@ -365,6 +368,9 @@ info.distance.lsd <- function( array, references, instance = 1,
   if( is.null( weights ) || ! is.vector( weights ) || length( weights ) == 0 ||
       ! all( is.finite( weights ) ) )
       stop( "Invalid weights vector (weights)" )
+
+  if( ! is.null( seed ) && ! is.finite( seed ) )
+    stop( "Invalid random seed (seed)" )
 
   references <- as.matrix( references )
   instance   <- round( instance )
@@ -415,7 +421,7 @@ info.distance.lsd <- function( array, references, instance = 1,
     names( dist.rank ) <- rownames( dist )
   }
 
-  set.seed( 1 )         # reset PRNG seed to ensure reproducibility
+  set.seed( seed )       # reset PRNG seed to ensure reproducibility
 
   for( i in 1 : nMC )
     for( j in 1 : length( vars ) ) {

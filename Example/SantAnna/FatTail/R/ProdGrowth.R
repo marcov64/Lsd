@@ -1,4 +1,20 @@
-########### Productivity growth rate distribution (pooled data) ############
+#******************************************************************
+#
+# ------ Industry Model: pool. prod. growth distr. analysis ------
+#
+#   Written by Marcelo C. Pereira, University of Campinas
+#
+#   Copyright Marcelo C. Pereira
+#   Distributed under the GNU General Public License
+#
+#   IMPORTANT: this script assumes the R working directory is set
+#   to the R subfolder where this script file is stored. This can
+#   be done automatically in RStudio if a project is created at
+#   this subfolder, or using the command setwd(). The "folder"
+#   variable below must always point to a (relative) subfolder
+#   of the R working directory.
+#
+#******************************************************************
 
 # ==== User defined parameters ====
 

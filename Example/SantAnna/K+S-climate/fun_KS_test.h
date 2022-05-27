@@ -3,6 +3,11 @@
 	TEST EQUATIONS
 	--------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are not required for the model to run but can be used for
 	testing, in-depth consistency analysis, and debugging.
 
@@ -904,7 +909,7 @@ double pE = VS( ENESECL1, "pE" );
 
 double nonNeg[ ] = { Df, EIe, EIeNom, IeNom, Kde, Kge, RDe, SIe, SIeD, SIeNom,
 					 SIdeD, SIgeD, TaxE, fKge, innDE, innGE };
-double posit[ ] = { AtauDE, Ce, De, EmE, ICtauGE, Ke, KeNom, Qe, Se, emTauDE, 
+double posit[ ] = { AtauDE, Ce, De, EmE, ICtauGE, Ke, KeNom, Qe, Se, emTauDE,
 					muE, pE };
 double finite[ ] = { PiEnet };
 

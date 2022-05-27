@@ -1463,7 +1463,7 @@ plot_recovery <- function( x, growth, strt, dur, per, mask, warm = 0, mrk = -1,
   plot( x = mask - warm, y = y, ylim = ylim, type = "l",
         main = tit, sub = subtit, xlab = xlab, ylab = ylab )
 
-  if( is.na( strt ) || is.na( dur ) )
+  if( is.null( strt ) || is.null( dur ) )
     return( )
 
   growthTrend <- hpfilter( growth, smoothing ) $ trend[ , 1 ]
@@ -1471,8 +1471,13 @@ plot_recovery <- function( x, growth, strt, dur, per, mask, warm = 0, mrk = -1,
   # mark crisis and plot trend lines
   preCrisisTrend <- c( rep( NA , length( x ) ) )
   for( i in 1 : length( strt ) ) {
+
     start <- strt[ i ]
     end <- start + dur[ i ]
+
+    if( is.na( end ) )
+      next
+
     polygon( x = c( start, start, end, end ) - warm,
              y = c( rev( ylim ), ylim ),
              col = "gray90", border = NA )

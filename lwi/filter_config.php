@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@ class config_class {
 
 // validate a configuration array
 function filter_config( $config ) {
-    
+
     // open and close session as fast as possible
     //session_start( [ 'cookie_lifetime' => 86400, 'cookie_secure' => true, 'cookie_samesite' => "None" ] );
     //$config_init = $_SESSION[ "config_init" ];
@@ -39,12 +39,12 @@ function filter_config( $config ) {
 
     $config_clean = array( );
     foreach ( $config as $name => $value ) {
-        
-        $name_clean = filter_var( $name, FILTER_SANITIZE_STRING );
+
+        $name_clean = filter_var( $name, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
         if ( ! $name_clean ) {
             continue;
         }
-        
+
         // handle meta-parameters and regular elements
         if ( $name_clean == "_timeSteps_" ) {
             $value_clean = min( max( filter_var( $value, FILTER_SANITIZE_NUMBER_INT ), 10 ), 10000 );
@@ -65,11 +65,11 @@ function filter_config( $config ) {
             } else {
                 $value_clean = filter_var( $value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION );
             }
-            
+
             if ( ! $value_clean && $value_clean !== "0" ) {
                 continue;
             }
-            
+
             $value_clean = min( max( $value_clean, $min ), $max );
         }
         $config_clean[ $name_clean ] = $value_clean;
@@ -84,9 +84,15 @@ function filter_config( $config ) {
 // doesn't work on Mac servers because 'session_save_path( )' doesn't work
 function session_readonly( )
 {
-    $session_id = preg_replace( "/[^\da-z]/i", "", filter_input( INPUT_COOKIE, session_name( ), FILTER_SANITIZE_STRING ) );
+    $cookie_id = filter_input( INPUT_COOKIE, session_name( ), FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+    if ( ! is_null( $cookie_id ) && is_string( $cookie_id ) ) {
+        $session_id = preg_replace( "/[^\da-z]/i", "", $cookie_id );
+    } else {
+        $session_id = "NOCOOKIE";
+    }
+
     $session_file = session_save_path( ) . "/sess_" . $session_id;
-    
+
     if ( file_exists( $session_file ) ) {
         $session_data = file_get_contents( $session_file );
 
@@ -105,10 +111,10 @@ function session_readonly( )
             $offset += strlen( serialize( $data ) );
         }
         $_SESSION = $return_data;
-        
+
         return true;
     }
-    
+
     return false;
 }
 
@@ -117,7 +123,7 @@ function error_handler( $errno, $errstr ) {
     if ( $errno === E_WARNING || $errno === E_NOTICE ) {
         return;
     }
-    
+
     echo "<b>Error:</b> [$errno] $errstr<br>";
     echo "Ending Script";
     die( );
@@ -127,7 +133,7 @@ set_error_handler( "error_handler" );
 
 // get size of a set of files
 function get_size( $files ) {
-    if ( $files != false && count( $files ) > 0 ) {
+    if ( is_countable( $files ) && count( $files ) > 0 ) {
         $size = 0;
         $num = 0;
         foreach ( $files as $f ) {
@@ -136,7 +142,7 @@ function get_size( $files ) {
                 ++$num;
             }
         }
-        
+
         if ( $size > 0 ) {
             if ( $num > 1 ) {
                 return number_format( $size / 1024, 1 ) . " kB  [" . $num . " file(s)]";

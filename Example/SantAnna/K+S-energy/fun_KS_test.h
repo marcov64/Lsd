@@ -3,6 +3,11 @@
 	TEST EQUATIONS
 	--------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are not required for the model to run but can be used for
 	testing, in-depth consistency analysis, and debugging.
 

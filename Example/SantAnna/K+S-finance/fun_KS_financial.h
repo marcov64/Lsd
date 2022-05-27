@@ -3,6 +3,11 @@
 	FINANCIAL MARKET OBJECT EQUATIONS
 	---------------------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Equations that are specific to the financial market object in the K+S
 	LSD model are coded below.
 
@@ -55,7 +60,7 @@ if ( abs( v[2] - v[0] ) > 2 * v[1] )
 else
 	if ( abs( v[2] - v[0] ) > v[1] )
 		v[0] += ( v[2] > v[0] ) ? v[1] : - v[1];// small adjustment
-	
+
 v[0] = max( v[0], 0 );							// no negative nominal interest
 v[0] += V( "rShock" );							// apply current shock level
 
@@ -113,7 +118,7 @@ EQUATION( "rShock" )
 /*
 Shock to prime interest rate for impulse response function computation
 */
-RESULT( VS( PARENT, "flagShock" ) && T == V( "Tshock" ) ? 
+RESULT( VS( PARENT, "flagShock" ) && T == V( "Tshock" ) ?
 		V( "r0shock" ) : ( 1 - V( "rhoShock" ) ) * CURRENT )
 
 

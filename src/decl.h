@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - September 2021
+	LSD 8.0 - May 2022
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -61,6 +61,8 @@ Relevant flags (when defined):
 #define MARG_CONST 0.1					// y-axis % plot clearance margin for constant series
 #define BAR_DONE_SIZE 80				// characters in the percentage done bar
 #define NOLH_TABS 7						// number of defined NOLH tables
+#define PROG_SERIES 10000				// AoR progress bar when loading series limit
+#define FILE_BUF_SIZE 1000000			// buffer size for file reading
 #define T_CLEVS 10						// number of defined t distribution confidence levels
 #define Z_CLEVS 7						// number of defined normal distr. confidence levels
 #define SIG_DIG 10						// number of significant digits in data files
@@ -236,6 +238,7 @@ int browse( object *r );
 int check_label( const char *lab, object *r );
 int check_affected( object *c, object *pivot, int level, int affected[ ] );
 int compute_copyfrom( object *c, const char *parWnd );
+int count_lines( const char *fname, bool dozip = false );
 int entry_new_objnum( object *c, const char *tag );
 int hyper_count( const char *lab );
 int hyper_count_var( const char *lab );
@@ -278,6 +281,7 @@ void collect_inst( object *r, o_setT &list );
 void control_to_compute( object *r, const char *lab );
 void copy_descendant( object *from, object *to );
 void count( object *r, int *i );
+void count_labels_mem( object *r, int *count, const char *lab = NULL );
 void count_save( object *n, int *count );
 void cover_browser( const char *text1, const char *text2, bool run );
 void create( void );
@@ -321,7 +325,7 @@ void insert_data_mem( object *r, int *num_v, const char *lab = NULL );
 void insert_labels_mem( object *r, int *num_v, const char *lab = NULL );
 void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int *count );
 void insert_object( const char *w, object *r, bool netOnly = false, object *above = NULL );
-void insert_store_mem( object *r, int *num_v, const char *lab = NULL );
+void insert_store_mem( object *r, int max_v, int *num_v, const char *lab = NULL );
 void link_cells( object *root, const char *lab );
 void log_parallel( bool nw );
 void monitor_parallel( bool nw );
@@ -436,7 +440,6 @@ extern bool iniShowOnce;		// prevent repeating warning on # of columns
 extern bool log_ok;				// control for log window available
 extern bool message_logged;		// new message posted in log window
 extern bool meta_par_in[ ];		// flag meta variables for simulation settings found
-extern bool non_var;			// flag to indicate INTERACT macro condition
 extern bool on_bar;				// flag to indicate bar is being draw in log window
 extern bool parallel_abort;		// indicate parallel threads were aborted
 extern bool parallel_monitor;	// parallel monitor thread status

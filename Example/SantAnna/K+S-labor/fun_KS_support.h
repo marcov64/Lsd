@@ -3,6 +3,11 @@
 	SUPPORT C FUNCTIONS
 	-------------------
 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
 	Pure C support functions used in the objects in the K+S LSD model are
 	coded below.
 
@@ -1014,7 +1019,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 	double m2 = VS( sector, "m2" );				// machine output per period
 	double p10 = VLS( cap, "p1avg", 1 );		// initial machine price
 	double u = VS( sector, "u" );				// desired capital utilization
-	double sV = VLS( lab, "sAvg", 1 );			// initial worker vintage skills
+	double sAvg = VLS( lab, "sAvg", 1 );		// initial worker compound skills
 	int TregChg = VS( PARENTS( sector ), "TregChg" );// time for regime change
 
 	if ( newInd )
@@ -1132,7 +1137,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 		WRITELLS( firm, "_mu2", mu20, _t2ent, 1 );
 		WRITELLS( firm, "_p2", _p2, _t2ent, 1 );
 		WRITELLS( firm, "_qc2", 4, _t2ent, 1 );
-		WRITELLS( firm, "_s2avg", sV, _t2ent, 1 );
+		WRITELLS( firm, "_s2avg", sAvg, _t2ent, 1 );
 		WRITELLS( firm, "_sT2min", INISKILL, _t2ent, 1 );
 		WRITELLS( firm, "_w2avg", w2avg, _t2ent, 1 );
 		WRITELLS( firm, "_w2o", w2oAvg, _t2ent, 1 );
@@ -1167,7 +1172,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 			WRITES( firm, "_mu2", mu20 );
 			WRITES( firm, "_p2", _p2 );
 			WRITES( firm, "_q2", _q2 );
-			WRITES( firm, "_s2avg", sV );
+			WRITES( firm, "_s2avg", sAvg );
 			WRITES( firm, "_w2avg", w2avg );
 			WRITES( firm, "_w2o", w2oAvg );
 			WRITES( firm, "_w2realAvg", w2realAvg );

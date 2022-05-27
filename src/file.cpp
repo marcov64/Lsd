@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.0 - September 2021
+	LSD 8.0 - May 2022
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -1732,4 +1732,48 @@ result::~result( void )
 		gzclose( fz );
 	else
 		fclose( f );
+}
+
+
+/***************************************************
+COUNT_LINES
+Counts the number of lines in a text file
+***************************************************/
+int count_lines( const char *fname, bool dozip )
+{
+	char *res, buf[ FILE_BUF_SIZE ];
+	int fend, n = 0;
+	FILE *f = NULL;
+	gzFile fz = NULL;
+
+	if ( ! dozip )
+		f = fopen( fname, "rt" );
+	else
+		fz = gzopen( fname, "rt" );
+
+	if ( f == NULL && fz == Z_NULL )
+		return 0;
+
+	do
+	{
+		if ( ! dozip )
+		{
+			res = fgets( buf, FILE_BUF_SIZE, f );
+			fend = feof( f );
+		}
+		else
+		{
+			res = gzgets( fz, buf, FILE_BUF_SIZE );
+			fend = gzeof( fz );
+		}
+
+		if ( res == NULL )
+			return n;
+
+		if ( fend || strchr( buf, '\n' ) != NULL )
+			++n;
+	}
+	while ( ! fend );
+
+	return n;
 }
