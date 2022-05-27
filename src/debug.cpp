@@ -304,7 +304,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 							} \
 						} else { \
 							ttk::label .deb.v.v1.val1 -text \"Value:\"; \
-							ttk::label .deb.v.v1.val2 -width 15 -anchor w -style hl.TLabel -text [ format %%g $value ] \
+							ttk::label .deb.v.v1.val2 -width 15 -anchor w -style hl.TLabel \
 						}; \
 						ttk::label .deb.v.v1.obs -text \"(click to change value or view more digits)\"; \
 						if { %d == 1 } { \
@@ -392,6 +392,9 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 							bind .deb.v.v1.val2 <Return> { .deb.b.act.run invoke } \
 						}" );
 				else
+				{
+					cmd( ".deb.v.v1.val2 configure -text [ format %%g $value ]" );
+
 					if ( lab != NULL )
 					{
 						cmd( "bind .deb.v.v1.name1 <Button-1> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 8 }", lab );
@@ -411,6 +414,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						cmd( "tooltip::tooltip .deb.v.v1.obs $__msg__" );
 						cmd( "unset __msg__" );
 					}
+				}
 			}
 
 			// resize the scrollbar if needed and adjust position
@@ -692,7 +696,10 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 					snprintf( ch, MAX_ELEM_LENGTH, "val%d", i );
 
 					if ( i == 0 && strcmp( cv->label, lab ) == 0 )
-						cmd( ".deb.v.v1.val2 configure -text [ format %%g %lf ]", cv->val[ 0 ] );
+					{
+						app_res = cv->val[ 0 ];
+						cmd( ".deb.v.v1.val2 configure -text [ format %%g $value ]" );
+					}
 
 					Tcl_UnlinkVar( inter, ch );
 					cmd( "unset val$i" );
