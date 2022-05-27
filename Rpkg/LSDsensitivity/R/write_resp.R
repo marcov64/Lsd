@@ -52,7 +52,7 @@ write.response <- function( folder, baseName, outVar = "", iniExp = 1, nExp = 1,
   else
     tempDate <- 0
 
-  # test if data files exit and are newer
+  # test if data files exist and are newer
   dataDate <- 0
   for( k in 1 : nExp ) {
     myFiles <- LSDinterface::list.files.lsd( path = folder,
