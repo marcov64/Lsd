@@ -23,7 +23,7 @@ to be debugged has just been computed, or
 Moreover, it can be used to explore thoughrouly a model by choosing
 the option Data Browse from the main Browser.
 
-When the simulation is stopped by the debugger,  shows all the contents of the
+When the simulation is stopped by the debugger,	 shows all the contents of the
 objects, that is, it lists the Variables and Parameters of the object, their
 value and their time of last updating, for Variables. User are then allowed
 to set or remove conditional break and debug flags on any variable in the model.
@@ -268,40 +268,45 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						ttk::label .deb.v.v1.name2 -width 20 -anchor w -style hl.TLabel; \
 						ttk::label .deb.v.v1.time1 -text \"Case:\"; \
 						ttk::label .deb.v.v1.time2 -width 5 -anchor w -style hl.TLabel; \
-						ttk::label .deb.v.v1.val1 -text \"Value \"; \
-						ttk::entry .deb.v.v1.val2 -width 15 -justify center -state disabled -validate key -validatecommand { \
-							set n %%P; \
-							if [ regexp {^[0-9eE.+-]*$} \"$n\" ] { \
-								set value_temp $n; \
-								set value_change 1; \
-								return 1 \
-							} { \
-								%%W delete 0 end; \
-								if { $value_change } { \
-									%%W insert 0 $value_temp \
+						if { %d } { \
+							ttk::label .deb.v.v1.val1 -text \"Value \"; \
+							ttk::entry .deb.v.v1.val2 -width 15 -justify center -validate key -validatecommand { \
+								set n %%P; \
+								if [ regexp {^[0-9eE.+-]*$} \"$n\" ] { \
+									set value_temp $n; \
+									set value_change 1; \
+									return 1 \
 								} { \
-									%%W insert 0 $value \
+									%%W delete 0 end; \
+									if { $value_change } { \
+										%%W insert 0 $value_temp \
+									} { \
+										%%W insert 0 $value \
+									}; \
+									return 0 \
+								} \
+							}; \
+							bind .deb.v.v1.val2 <Left> { \
+								set c [ .deb.v.v1.val2 index insert ]; \
+								if { $c > 0 } { \
+									incr c -1; \
+									.deb.v.v1.val2 icursor $c \
 								}; \
-								return 0 \
+								break \
+							}; \
+							bind .deb.v.v1.val2 <Right> { \
+								set c [ .deb.v.v1.val2 index insert ]; \
+								if { $c < [ string length [ .deb.v.v1.val2 get ] ] } { \
+									incr c; \
+									.deb.v.v1.val2 icursor $c \
+								}; \
+								break \
 							} \
+						} else { \
+							ttk::label .deb.v.v1.val1 -text \"Value:\"; \
+							ttk::label .deb.v.v1.val2 -width 15 -anchor w -style hl.TLabel -text [ format %%g $value ] \
 						}; \
-						bind .deb.v.v1.val2 <Left> { \
-							set c [ .deb.v.v1.val2 index insert ]; \
-							if { $c > 0 } { \
-								incr c -1; \
-								.deb.v.v1.val2 icursor $c \
-							}; \
-							break \
-						}; \
-						bind .deb.v.v1.val2 <Right> { \
-							set c [ .deb.v.v1.val2 index insert ]; \
-							if { $c < [ string length [ .deb.v.v1.val2 get ] ] } { \
-								incr c; \
-								.deb.v.v1.val2 icursor $c \
-							}; \
-							break \
-						}; \
-						ttk::label .deb.v.v1.obs -text \"\"; \
+						ttk::label .deb.v.v1.obs -text \"(click to change value or view more digits)\"; \
 						if { %d == 1 } { \
 							pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 .deb.v.v1.val1 .deb.v.v1.val2 .deb.v.v1.obs -side left; \
 							bind .deb <KeyPress-g> { set choice 28 }; \
@@ -309,10 +314,10 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						} { \
 							pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 -side left \
 						} \
-					}", mode );
+					}", interact ? 1 : 0, mode );
 
 				cmd( ".deb.v.v1.name2 conf -text \"%s\"", lab == NULL ? "" : lab );
-				cmd( ".deb.v.v1.time2 conf -text \"%d      \"", t );
+				cmd( ".deb.v.v1.time2 conf -text \"%d	   \"", t );
 			}
 
 			// create the element list
@@ -329,23 +334,17 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 			cmd( "set debDone 1" );
 			cmd( "event generate .deb <Configure>" );	// resize canvas as window is mapped now
 
-			// update variable label field
-			cmd( "if [ winfo exists .deb.v.v1.name1 ] { \
-					if { %d == 0 } { \
-						.deb.v.v1.name1 configure -text \"Variable:\" \
-					} { \
+			// update variable label and observation fields if interacting
+			if ( interact )
+			{
+				cmd( "if { [ winfo exists .deb.v.v1.name1 ] } { \
 						.deb.v.v1.name1 configure -text \"Message:\" \
-					} \
-				} ", non_var ? 1 : 0 );
-
-			// update observations field
-			cmd( "if [ winfo exists .deb.v.v1.obs ] { \
-					if { %d == 0 } { \
-						.deb.v.v1.obs configure -text \"     (enter new value to change variable)\" \
-					} { \
-						.deb.v.v1.obs configure -text \"     (enter value and click Run or press Enter to continue)\" \
-					} \
-				} ", non_var ? 1 : 0 );
+					} " );
+				cmd( "if [ winfo exists .deb.v.v1.obs ] { \
+						.deb.v.v1.obs configure -text \"  (enter value and click Run or press Enter to continue)\" \
+						} \
+					} " );
+			}
 
 			// disable or enable the caller button
 			if ( mode == 1 )
@@ -388,13 +387,30 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 				if ( interact )
 					cmd( "if { ! $value_change } { \
-							.deb.v.v1.val2 configure -state normal; \
 							.deb.v.v1.val2 delete 0 end; \
-							catch { .deb.v.v1.val2 insert 0 [ format %%g $value ] }; \
+							catch { .deb.v.v1.val2 insert 0 $value }; \
 							bind .deb.v.v1.val2 <Return> { .deb.b.act.run invoke } \
 						}" );
 				else
-					cmd( "catch { write_any .deb.v.v1.val2 [ format %%g $value ] }" );
+					if ( lab != NULL )
+					{
+						cmd( "bind .deb.v.v1.name1 <Button-1> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 8 }", lab );
+						cmd( "bind .deb.v.v1.name2 <Button-1> { event generate .deb.v.v1.name1 <Button-1> }" );
+						cmd( "bind .deb.v.v1.time1 <Button-1> { event generate .deb.v.v1.name1 <Button-1> }" );
+						cmd( "bind .deb.v.v1.time2 <Button-1> { event generate .deb.v.v1.name1 <Button-1> }" );
+						cmd( "bind .deb.v.v1.val1 <Button-1> { event generate .deb.v.v1.name1 <Button-1> }" );
+						cmd( "bind .deb.v.v1.val2 <Button-1> { event generate .deb.v.v1.name1 <Button-1> }" );
+						cmd( "bind .deb.v.v1.obs <Button-1> { event generate .deb.v.v1.name1 <Button-1> }" );
+						cmd( "set __msg__ \"Click to change value\nor view more digits\"" );
+						cmd( "tooltip::tooltip .deb.v.v1.name1 $__msg__" );
+						cmd( "tooltip::tooltip .deb.v.v1.name2 $__msg__" );
+						cmd( "tooltip::tooltip .deb.v.v1.time1 $__msg__" );
+						cmd( "tooltip::tooltip .deb.v.v1.time2 $__msg__" );
+						cmd( "tooltip::tooltip .deb.v.v1.val1 $__msg__" );
+						cmd( "tooltip::tooltip .deb.v.v1.val2 $__msg__" );
+						cmd( "tooltip::tooltip .deb.v.v1.obs $__msg__" );
+						cmd( "unset __msg__" );
+					}
 			}
 
 			// resize the scrollbar if needed and adjust position
@@ -405,7 +421,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						.deb.cc.grid.can yview moveto $hlPos \
 					} \
 				} elseif [ info exists lstDebPos ] { \
-					$g.can yview moveto [ lindex $lstDebPos 0 ]; \
+					.deb.cc.grid.can yview moveto [ lindex $lstDebPos 0 ]; \
 				}" );
 			cmd( "unset -nocomplain lstDebPos" );
 		}
@@ -457,7 +473,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 			case 2:
 				cmd( "destroytop .deb" );
 				set_buttons_run( true );
-				if ( ! non_var )
+				if ( ! interact )
 					debug_flag = false;
 
 				break;
@@ -674,6 +690,9 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 					cv->val[ i ] = app_values[ i ];
 					snprintf( ch, MAX_ELEM_LENGTH, "val%d", i );
+
+					if ( i == 0 && strcmp( cv->label, lab ) == 0 )
+						cmd( ".deb.v.v1.val2 configure -text [ format %%g %lf ]", cv->val[ 0 ] );
 
 					Tcl_UnlinkVar( inter, ch );
 					cmd( "unset val$i" );
@@ -1459,7 +1478,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						cmd( "focustop .deb" );
 
 						if ( exists_var( "res_g" ) )
-							cur = root->search(  get_str( "res_g" ) );
+							cur = root->search(	 get_str( "res_g" ) );
 						else
 							cur = NULL;
 
@@ -1488,7 +1507,6 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 	}
 
 	*res = app_res;
-	non_var = false;
 
 	Tcl_UnlinkVar( inter, "value" );
 
@@ -1746,6 +1764,10 @@ void deb_show( object *r, const char *hl_var, int mode )
 			}", hl_var, hl_var, hl_var, hl_var );
 
 		Tcl_UnlinkVar( inter, "i" );
+
+		// force scrollbar cursor to show (Tk bug)
+		cmd( "update idletasks" );
+		cmd( "$g.can configure -scrollregion [ $g.can bbox all ]" );
 	}
 }
 
@@ -2180,7 +2202,7 @@ void attach_instance_number( char *outh, char *outv, object *r, int outSz )
 	if ( r->up == NULL )
 		snprintf( inst_msg, MAX_BUFF_SIZE, "%d:%s (1/1) ", inst_dpth = 1, r->label );
 	else
-		snprintf( inst_msg, MAX_BUFF_SIZE, " |  %d:%s (%d/%d) ", ++inst_dpth, r->label, j, i - 1 );
+		snprintf( inst_msg, MAX_BUFF_SIZE, " |	%d:%s (%d/%d) ", ++inst_dpth, r->label, j, i - 1 );
 
 	strcatn( outh, inst_msg, outSz );
 

@@ -3597,8 +3597,7 @@ double object::interact( const char *text, double v, double *tv, int i, int j,
 		n_values[ 8 ] = curl8;
 		n_values[ 9 ] = curl9;
 
-		non_var = true;					// signals INTERACT macro
-		deb( this, NULL, text, &app, true );
+		deb( this, NULL, text, &app, true );	// signals INTERACT macro
 	}
 
 	return app;
