@@ -32,7 +32,7 @@ v[0] = 0;										// assume no or done scrapping
 
 if ( CURRENT > 0 )								// scrapped last period?
 {
-	if ( HOOKS( PARENT, TOPVINT ) == THIS );	// last green plant?
+	if ( HOOKS( PARENT, TOPVINT ) == THIS )		// last green plant?
 		WRITE_HOOKS( PARENT, TOPVINT, NULL );	// remove parent top pointer
 
 	DELETE( THIS );								// delete plant object (suicide)

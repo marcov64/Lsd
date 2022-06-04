@@ -178,7 +178,7 @@ EQUATION( "A1" )
 Labor productivity of capital-good sector
 */
 V( "PPI" );										// ensure m.s. are updated
-RESULT( WHTAVE( "_Btau", "_f1" ) )
+RESULT( WHTAVE( "_BtauLP", "_f1" ) )
 
 
 EQUATION( "D1" )

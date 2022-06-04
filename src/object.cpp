@@ -388,11 +388,12 @@ should be the fastest.
 ****************************************************/
 void object::update( bool recurse, bool user )
 {
-	bool deleted = false;
+	static bool deleted;
 	bridge *cb, *cb1;
 	object *cur, *cnext;
 	variable *cv;
 
+	deleted = false;
 	del_flag = & deleted;			// register feedback channel
 
 	for ( cv = v; ! deleted && cv != NULL && quit != 2; cv = cv->next )
