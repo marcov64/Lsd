@@ -44,8 +44,9 @@ else
 	sed 's:$LSDROOT:'"$LSDROOT"':g' "$LSDROOT/$TARGET" > "$DESKTOP/$TARGET"
 	chmod +x "$DESKTOP/$TARGET"
 
+	# make shortcut clickable in newer GNOME
 	if command -v gio &> /dev/null; then
-		gio set "$DESKTOP/$TARGET" "metadata::trusted" true
+		dbus-launch gio set "$DESKTOP/$TARGET" "metadata::trusted" true > /dev/null 2>&1
 	fi
 	
 	# also add icon to user window manager configuration
