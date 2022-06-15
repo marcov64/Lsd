@@ -42,7 +42,7 @@ folder    <- "data"                 # data files folder
 baseName  <- "irf"                  # data files base name (no-shock/shock:1/2)
 iniDrop   <- 100                    # initial time steps to drop (0=none)
 nKeep     <- -1                     # number of time steps to keep (-1=all)
-mcStat    <- "mean"                 # Monte Carlo statistic ("mean", "median")
+mcStat    <- "median"               # Monte Carlo statistic ("mean", "median")
 
 irfVar    <- "GDPreal"              # variable to compute impulse-response fun.
 refVar    <- "GDPreal"              # reference var. to compute IRF as share (%)
@@ -84,7 +84,6 @@ irfHor    <- 20                     # time horizon to compute IRF
 irfRel    <- TRUE                   # F=absolute deviation, T=relative deviation
 
 limOutl   <- 3                      # limit threshold multiple for outliers (0=off)
-trimOutl  <- 0.02                   # fraction of outliers to be trimmed (means)
 
 bootAlpha <- 0.05                   # bootstrap confidence interval significance
 bootR     <- 999                    # bootstrap confidence interval replicates
@@ -92,7 +91,7 @@ bootCI    <- "basic"                # bootstrap confidence interval method
                                     # ("basic" or "bca")
 
 treeN     <- 1000                   # number of trees in random forest
-treeDep   <- 1                      # maximum depth of random trees
+treeDep   <- 2                      # maximum depth of random trees
 nodeMin   <- 30                     # final node min number of observations
 varTry    <- 2                      # number of variables to try/sample per node
 alpha     <- 0.05                   # significance for node differences
@@ -106,24 +105,7 @@ plotW     <- 10                     # plot window width
 plotH     <- 7                      # plot window height
 
 
-# ====== Functions to process state variable dataset ======
-
-# function to compute IRF metric (higher values mean better performance)
-irfMetric <- function( data ) {
-
-  # cumulative irf time weights in reverse order (0 if not set)
-  irfWght <- c( 1, 1, 1, 1 )
-
-  metric <- rep( 0, nrow( data ) )
-  irfWght <- irfWght[ 1 : min( ncol( data ), length( irfWght ) ) ]
-
-  for( i in 1 : length( irfWght ) )
-    metric <- metric - irfWght[ i ] * data[ , irfHor - i + 1 ]
-
-  metric <- metric / sum( irfWght )
-
-  return( metric )
-}
+# ====== Functions to process dataset ======
 
 # function to define IRF states according to the value of state variable(s)
 evalState <- function( data ) {
@@ -145,9 +127,27 @@ addVars <- function( data ) {
   return( data )
 }
 
+# function to compute IRF metric (higher values mean better performance)
+irfMetric <- function( data ) {
+
+  # cumulative irf time weights in reverse order (0 if not set)
+  irfWght <- c( 1, 1, 1, 1 )
+
+  metric <- rep( 0, nrow( data ) )
+  irfWght <- irfWght[ 1 : min( ncol( data ), length( irfWght ) ) ]
+
+  for( i in 1 : length( irfWght ) )
+    metric <- metric - irfWght[ i ] * data[ , irfHor - i + 1 ]
+
+  metric <- metric / sum( irfWght )
+
+  return( metric )
+}
+
+
 # ====== External support functions & definitions ======
 
-source( "irf.R" )
+library( LSDirf )
 
 # remove warnings for support functions and saved data
 # !diagnostics suppress = irf.lsd, state.irf.lsd
@@ -163,30 +163,28 @@ if( irfRel ) irType <- "Relative" else irType <- "Absolute"
 
 linearIRF <- irf.lsd( data = mc,              # non-shocked MC data
                       data.shock = mcShock,   # shocked data
+                      t.horiz = irfHor,       # post-shock analysis time horizon
                       var.irf = irfVar,       # variable to compute IRF
                       var.shock = shockVar,   # shock variable (impulse)
                       var.ref = refVar,       # reference variable to IR measure
-                      t.horiz = irfHor,       # post-shock analysis time horizon
+                      irf.type = "none",      # no plot now
                       stat = mcStat,          # type of statistic to use
-                      type = "none",          # no plot now
-                      alpha = bootAlpha,      # confidence interval conf. level
                       ci.R = bootR,           # CI bootstrap repetitions (odd)
                       ci.type = bootCI,       # CI algorithm type
                       lim.outl = limOutl,     # outlier limit/threshold
-                      trim.outl = trimOutl,   # outlier trim fraction for means
-                      metr.outl = irfMetric ) # function to compare IR's
+                      alpha = bootAlpha )     # confidence interval conf. level
 
 stateIRF <- state.irf.lsd(
                       data = mc,              # non-shock MC data
                       irf = linearIRF,        # linear IRF produced by irf.lsd()
                       state.vars = stateVar,  # variable defining states
                       eval.state = evalState, # function to evaluate state(s)
-                      type = "none",          # no plot now
+                      metr.irf = irfMetric,   # function to compare C-IR's
                       add.vars = addVars,     # function to add new variables
-                      trim.outl = trimOutl,   # outlier trim fraction for means
-                      alpha = bootAlpha,      # confidence interval conf. level
+                      irf.type = "none",      # no plot now
                       ci.R = bootR,           # CI bootstrap repetitions (odd)
-                      ci.type = bootCI )      # CI algorithm type
+                      ci.type = bootCI,       # CI algorithm type
+                      alpha = bootAlpha )     # confidence interval conf. level
 
 
 # ====== Random-forest state identification ======
@@ -194,8 +192,8 @@ stateIRF <- state.irf.lsd(
 stateIdent <- state.ident.lsd(
                       data = mc,              # non-shock MC data
                       irf = linearIRF,        # linear IRF produced by irf.lsd()
-                      metr.irf = irfMetric,   # function to compare C-IR's
                       state.vars = stateVars, # MC state variables to consider
+                      metr.irf = irfMetric,   # function to compare C-IR's
                       add.vars = addVars,     # function to add new variables
                       ntree = treeN,          # number of trees in random forest
                       maxdepth = treeDep,     # maximum depth of random trees
@@ -207,14 +205,53 @@ stateIdent <- state.ident.lsd(
 stateSens <- state.sa.lsd(
                       data = mc,              # non-shock MC data
                       irf = linearIRF,        # linear IRF produced by irf.lsd()
-                      metr.irf = irfMetric,   # function to compare C-IR's
                       state.vars = stateVars, # MC state variables to consider
+                      metr.irf = irfMetric,   # function to compare C-IR's
                       add.vars = addVars,     # function to add new variables
                       ntree = treeN,          # number of trees in random forest
                       nodesize = nodeMin,     # final node min number of observations
                       mtry = varTry,          # number of variable samples per node
                       alpha = alpha,          # significance for node differences
                       no.plot = TRUE )        # do not plot yet
+
+
+# ====== Analyze state-dependent IRF of top 3 identified states ======
+
+stateIRF1 <- state.irf.lsd(
+                      data = mc,              # non-shock MC data
+                      irf = linearIRF,        # linear IRF produced by irf.lsd()
+                      states = stateIdent,    # object with identified states
+                      state.num = 1,          # number of identified state to analyze
+                      metr.irf = irfMetric,   # function to compare C-IR's
+                      add.vars = addVars,     # function to add new variables
+                      irf.type = "none",      # no plot now
+                      ci.R = bootR,           # CI bootstrap repetitions (odd)
+                      ci.type = bootCI,       # CI algorithm type
+                      alpha = bootAlpha )     # confidence interval conf. level
+
+stateIRF2 <- state.irf.lsd(
+                      data = mc,              # non-shock MC data
+                      irf = linearIRF,        # linear IRF produced by irf.lsd()
+                      states = stateIdent,    # object with identified states
+                      state.num = 2,          # number of identified state to analyze
+                      metr.irf = irfMetric,   # function to compare C-IR's
+                      add.vars = addVars,     # function to add new variables
+                      irf.type = "none",      # no plot now
+                      ci.R = bootR,           # CI bootstrap repetitions (odd)
+                      ci.type = bootCI,       # CI algorithm type
+                      alpha = bootAlpha )     # confidence interval conf. level
+
+stateIRF3 <- state.irf.lsd(
+                      data = mc,              # non-shock MC data
+                      irf = linearIRF,        # linear IRF produced by irf.lsd()
+                      states = stateIdent,    # object with identified states
+                      state.num = 3,          # number of identified state to analyze
+                      metr.irf = irfMetric,   # function to compare C-IR's
+                      add.vars = addVars,     # function to add new variables
+                      irf.type = "none",      # no plot now
+                      ci.R = bootR,           # CI bootstrap repetitions (odd)
+                      ci.type = bootCI,       # CI algorithm type
+                      alpha = bootAlpha )     # confidence interval conf. level
 
 
 # ==== Create PDF ====
@@ -231,14 +268,14 @@ par( mfrow = c ( plotRows, plotCols ) )
 xlab <- "Relative time after shock"
 col <- "red"
 
-plot( linearIRF, type = "incr", scale = 2, center = TRUE, col = col, lwd = 2,
-      lty.ci = 2,  xlab = xlab, ylab = "Impulse response",
+plot( linearIRF, irf.type = "incr", scale = 2, center = TRUE, col = col,
+      lwd = 2, lty.ci = 2,  xlab = xlab, ylab = "Impulse response",
       main = paste( "Linear impulse-response function for", irfVar ),
       sub = paste( "( MC sample =", linearIRF$nsample, "/ MC", mcStat,
                    "/ CI signif. =",  linearIRF$alpha, ")" ) )
 
-plot( linearIRF, type = "cum", scale = 1, center = FALSE, col = col, lwd = 2,
-      lty.ci = 2,  xlab = xlab, ylab = "Cumulative impulse response",
+plot( linearIRF, irf.type = "cum", scale = 1, center = FALSE, col = col,
+      lwd = 2, lty.ci = 2,  xlab = xlab, ylab = "Cumulative impulse response",
       main = paste( "Linear cumulative impulse-response function for", irfVar ),
       sub = paste( "( MC sample =", linearIRF$nsample, "/ MC", mcStat,
                    "/ CI signif. =",  linearIRF$alpha, ")" ) )
@@ -250,9 +287,10 @@ plot( linearIRF, type = "cum", scale = 1, center = FALSE, col = col, lwd = 2,
 
 col <- c( "green", "blue" )
 
-plot( stateIRF, state = 0, type = "incr", scale = 1, center = TRUE, col = col,
-      lwd = 2, col.ci = col, xlab = xlab, ylab = "Impulse response by state",
-      main = paste( "State-dependent impulse-response function for", irfVar ),
+plot( stateIRF, state = 0, irf.type = "incr", scale = 1, center = TRUE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Impulse response by state",
+      main = paste( "State-dependent impulse-response functions for", irfVar ),
       sub = paste( "( MC sample =", stateIRF$nsample, "/ MC", mcStat,
                    "/ CI signif. =",  linearIRF$alpha,
                    "/ U-test p-val =", signif( stateIRF$irf.test$p.value, 2 ),
@@ -260,14 +298,80 @@ plot( stateIRF, state = 0, type = "incr", scale = 1, center = TRUE, col = col,
       leg = c( paste( "Low", stateVar, "state" ),
                paste( "High", stateVar, "state" ) ) )
 
-plot( stateIRF, state = 0, type = "cum", scale = 1, center = FALSE, col = col,
-      lwd = 2, col.ci = col, xlab = xlab,
+plot( stateIRF, state = 0, irf.type = "cum", scale = 1, center = FALSE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
       ylab = "Cumulative impulse response by state",
       main = paste( "State-dependent cumulative impulse-response functions for",
                     irfVar ),
       sub = paste( "( MC sample =", stateIRF$nsample, "/ MC", mcStat,
                    "/ CI signif. =", linearIRF$alpha,
                    "/ U-test p-val =", signif( stateIRF$cirf.test$p.value, 2 ),
+                   "/ H0: similar states )" ),
+      leg = c( paste( "Low", stateVar, "state" ),
+               paste( "High", stateVar, "state" ) ) )
+
+plot( stateIRF1, state = 0, irf.type = "incr", scale = 1, center = TRUE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Impulse response by state",
+      main = paste( "State-dependent IRF for", stateIRF1$state ),
+      sub = paste( "( MC sample =", stateIRF1$nsample, "/ MC", mcStat,
+                   "/ CI signif. =",  linearIRF$alpha,
+                   "/ U-test p-val =", signif( stateIRF1$irf.test$p.value, 2 ),
+                   "/ H0: similar states )" ),
+      leg = c( paste( "Low", stateVar, "state" ),
+               paste( "High", stateVar, "state" ) ) )
+
+plot( stateIRF1, state = 0, irf.type = "cum", scale = 1, center = FALSE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Cumulative impulse response by state",
+      main = paste( "State-dependent C-IRF for", stateIRF1$state ),
+      sub = paste( "( MC sample =", stateIRF1$nsample, "/ MC", mcStat,
+                   "/ CI signif. =", linearIRF$alpha,
+                   "/ U-test p-val =", signif( stateIRF1$cirf.test$p.value, 2 ),
+                   "/ H0: similar states )" ),
+      leg = c( paste( "Low", stateVar, "state" ),
+               paste( "High", stateVar, "state" ) ) )
+
+plot( stateIRF2, state = 0, irf.type = "incr", scale = 1, center = TRUE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Impulse response by state",
+      main = paste( "State-dependent IRF for", stateIRF2$state ),
+      sub = paste( "( MC sample =", stateIRF2$nsample, "/ MC", mcStat,
+                   "/ CI signif. =",  linearIRF$alpha,
+                   "/ U-test p-val =", signif( stateIRF2$irf.test$p.value, 2 ),
+                   "/ H0: similar states )" ),
+      leg = c( paste( "Low", stateVar, "state" ),
+               paste( "High", stateVar, "state" ) ) )
+
+plot( stateIRF2, state = 0, irf.type = "cum", scale = 1, center = FALSE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Cumulative impulse response by state",
+      main = paste( "State-dependent C-IRF for", stateIRF2$state ),
+      sub = paste( "( MC sample =", stateIRF2$nsample, "/ MC", mcStat,
+                   "/ CI signif. =", linearIRF$alpha,
+                   "/ U-test p-val =", signif( stateIRF2$cirf.test$p.value, 2 ),
+                   "/ H0: similar states )" ),
+      leg = c( paste( "Low", stateVar, "state" ),
+               paste( "High", stateVar, "state" ) ) )
+
+plot( stateIRF3, state = 0, irf.type = "incr", scale = 1, center = TRUE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Impulse response by state",
+      main = paste( "State-dependent IRF for", stateIRF3$state ),
+      sub = paste( "( MC sample =", stateIRF3$nsample, "/ MC", mcStat,
+                   "/ CI signif. =",  linearIRF$alpha,
+                   "/ U-test p-val =", signif( stateIRF3$irf.test$p.value, 2 ),
+                   "/ H0: similar states )" ),
+      leg = c( paste( "Low", stateVar, "state" ),
+               paste( "High", stateVar, "state" ) ) )
+
+plot( stateIRF3, state = 0, irf.type = "cum", scale = 1, center = FALSE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Cumulative impulse response by state",
+      main = paste( "State-dependent C-IRF for", stateIRF3$state ),
+      sub = paste( "( MC sample =", stateIRF3$nsample, "/ MC", mcStat,
+                   "/ CI signif. =", linearIRF$alpha,
+                   "/ U-test p-val =", signif( stateIRF3$cirf.test$p.value, 2 ),
                    "/ H0: similar states )" ),
       leg = c( paste( "Low", stateVar, "state" ),
                paste( "High", stateVar, "state" ) ) )
