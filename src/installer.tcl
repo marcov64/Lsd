@@ -207,7 +207,26 @@ ttk::button .dir.choice.but.browse -text Browse -width -1 -command {
 pack .dir.choice.but.lab .dir.choice.but.browse
 pack .dir.choice.blk .dir.choice.but -padx 5 -side left
 ttk::label .dir.obs -text "If LSD is already installed in the\nselected directory, it will be updated" -justify center
-pack .dir.choice .dir.obs -pady 5
+
+if [ string equal $CurPlatform windows ] {
+	set wall 0
+	ttk::checkbutton .dir.wall -variable wall -text "Install for all users" -command {
+		if { $wall } {
+			if [ file exists $winRoot ] {
+				set RootLsd "${winRoot}$LsdDir"
+			} else {
+				set RootLsd "/$LsdDir"
+			}
+		} elseif { [ string first " " "$homeDir" ] < 0 } {
+			set RootLsd [ file normalize "~/$LsdDir" ]
+		}
+	}
+	tooltip::tooltip .dir.wall "Allow any user logged in this computer to use LSD"
+	pack .dir.choice .dir.wall .dir.obs -pady 5
+} else {
+	pack .dir.choice .dir.obs -pady 5
+}
+
 if { [ info exists xcode ] && [ info exists gnuplot ] } {
 	ttk::label .dir.extra -text "Xcode command line tools and\nGnuplot graphical terminal\nare not available and will be installed" -justify center
 	pack .dir.extra -pady 5
@@ -220,10 +239,12 @@ if { [ info exists xcode ] && [ info exists gnuplot ] } {
 		pack .dir.extra -pady 5
 	}
 }
+
 if { [ info exists linuxPkgMiss ] && [ llength $linuxPkgMiss ] > 0 } {
 	ttk::label .dir.extra -text "Some Linux packages are not\navailable and will be installed:\n$linuxPkgMiss" -justify center
 	pack .dir.extra -pady 5
 }
+
 ttk::label .dir.lic -text "LSD is free software and comes\nwith ABSOLUTELY NO WARRANTY\nSee Readme.txt for copyright information" -justify center
 pack .dir.lic -pady 5
 pack .dir -padx 10 -pady 10
@@ -367,20 +388,33 @@ set issues [ list ]
 
 if [ string equal $CurPlatform windows ] {
 
-	# add LSD to user PATH environment variable if no conflict exists or
-	# ask about changing the system PATH if potential conflicts exist
-	set sysPath 0
-	if { [ llength $existGCC ] == 0 && [ llength $existDLL ] == 0 } {
-		set res [ add_win_path "$RootLsd/gnu/bin" user end ]
+	if { $wall } {
+		set sysPath 1
+		if { [ llength $existGCC ] == 0 && [ llength $existDLL ] == 0 } {
+			set res [ add_win_path "$RootLsd/gnu/bin" system end ]
+		} else {
+			if [ string equal [ ttk::messageBox -parent "" -type yesno -default yes -title Warning -icon warning -message "Potentially conflicting software installed" -detail "Software components included in LSD are already installed in the computer.\n\nYou may want to set the software components included in LSD as the new system default. If not, LSD will use the existing software components but it is not guaranteed they are compatible with LSD.\n\nPress 'Yes' to set LSD components as the system default, or 'No' to continue the installation anyway." ] yes ] {
+				set res [ add_win_path "$RootLsd/gnu/bin" system begin ]
+			} else {
+				set res [ add_win_path "$RootLsd/gnu/bin" system end ]
+			}
+		}
 	} else {
-		if [ string equal [ ttk::messageBox -parent "" -type yesno -default yes -title Warning -icon warning -message "Potentially conflicting software installed" -detail "Software components included in LSD are already installed in the computer.\n\nYou may want to set the software components included in LSD as the new system default. If not, LSD will use the existing software components but it is not guaranteed they are compatible with LSD.\n\nPress 'Yes' to set LSD components as the system default, or 'No' to continue the installation anyway." ] yes ] {
+		# add LSD to user PATH environment variable if no conflict exists or
+		# ask about changing the system PATH if potential conflicts exist
+		set sysPath 0
+		if { [ llength $existGCC ] == 0 && [ llength $existDLL ] == 0 } {
+			set res [ add_win_path "$RootLsd/gnu/bin" user end ]
+		} else {
+			if [ string equal [ ttk::messageBox -parent "" -type yesno -default yes -title Warning -icon warning -message "Potentially conflicting software installed" -detail "Software components included in LSD are already installed in the computer.\n\nYou may want to set the software components included in LSD as the new system default. If not, LSD will use the existing software components but it is not guaranteed they are compatible with LSD.\n\nPress 'Yes' to set LSD components as the system default, or 'No' to continue the installation anyway." ] yes ] {
 				set res [ add_win_path "$RootLsd/gnu/bin" system begin ]
 				set sysPath 1
 			} else {
 				set res [ add_win_path "$RootLsd/gnu/bin" user begin ]
 			}
+		}
 	}
-
+	
 	if { ! $res } {
 		if [ string equal [ ttk::messageBox -parent "" -type okcancel -default ok -title Error -icon error -message "Cannot add LSD to PATH" -detail "LSD libraries folder could not be added to the user PATH environment variable.\n\nYou may try to repeat the installation or manually add the folder '$RootLsd/gnu/bin' to the PATH variable following the steps described in 'Readme.txt'.\n\nPress 'OK' if you want to continue the installation anyway or 'Cancel' to exit." ] ok ] {
 			if { $sysPath } {
