@@ -268,15 +268,27 @@ par( mfrow = c ( plotRows, plotCols ) )
 xlab <- "Relative time after shock"
 col <- "red"
 
-plot( linearIRF, irf.type = "incr", scale = 2, center = TRUE, col = col,
+plot( linearIRF, irf.type = "incr.irf", scale = 2, center = TRUE, col = col,
       lwd = 2, lty.ci = 2,  xlab = xlab, ylab = "Impulse response",
       main = paste( "Linear impulse-response function for", irfVar ),
       sub = paste( "( MC sample =", linearIRF$nsample, "/ MC", mcStat,
                    "/ CI signif. =",  linearIRF$alpha, ")" ) )
 
-plot( linearIRF, irf.type = "cum", scale = 1, center = FALSE, col = col,
+plot( linearIRF, irf.type = "cum.irf", scale = 1, center = FALSE, col = col,
       lwd = 2, lty.ci = 2,  xlab = xlab, ylab = "Cumulative impulse response",
       main = paste( "Linear cumulative impulse-response function for", irfVar ),
+      sub = paste( "( MC sample =", linearIRF$nsample, "/ MC", mcStat,
+                   "/ CI signif. =",  linearIRF$alpha, ")" ) )
+
+plot( linearIRF, irf.type = "peak.mult", scale = 2, center = TRUE, col = col,
+      lwd = 2, lty.ci = 2,  xlab = xlab, ylab = "Peak impulse-multiplier",
+      main = paste( "Linear peak impulse-multiplier function for", irfVar ),
+      sub = paste( "( MC sample =", linearIRF$nsample, "/ MC", mcStat,
+                   "/ CI signif. =",  linearIRF$alpha, ")" ) )
+
+plot( linearIRF, irf.type = "cum.mult", scale = 1, center = FALSE, col = col,
+      lwd = 2, lty.ci = 2,  xlab = xlab, ylab = "Cumulative impulse-multiplier",
+      main = paste( "Linear cumulative impulse-multiplier function for", irfVar ),
       sub = paste( "( MC sample =", linearIRF$nsample, "/ MC", mcStat,
                    "/ CI signif. =",  linearIRF$alpha, ")" ) )
 
@@ -287,7 +299,7 @@ plot( linearIRF, irf.type = "cum", scale = 1, center = FALSE, col = col,
 
 col <- c( "green", "blue" )
 
-plot( stateIRF, state = 0, irf.type = "incr", scale = 1, center = TRUE,
+plot( stateIRF, state = 0, irf.type = "incr.irf", scale = 1, center = TRUE,
       col = col, lwd = 2, col.ci = col, xlab = xlab,
       ylab = "Impulse response by state",
       main = paste( "State-dependent impulse-response functions for", irfVar ),
@@ -298,7 +310,7 @@ plot( stateIRF, state = 0, irf.type = "incr", scale = 1, center = TRUE,
       leg = c( paste( "Low", stateVar, "state" ),
                paste( "High", stateVar, "state" ) ) )
 
-plot( stateIRF, state = 0, irf.type = "cum", scale = 1, center = FALSE,
+plot( stateIRF, state = 0, irf.type = "cum.irf", scale = 1, center = FALSE,
       col = col, lwd = 2, col.ci = col, xlab = xlab,
       ylab = "Cumulative impulse response by state",
       main = paste( "State-dependent cumulative impulse-response functions for",
@@ -310,7 +322,31 @@ plot( stateIRF, state = 0, irf.type = "cum", scale = 1, center = FALSE,
       leg = c( paste( "Low", stateVar, "state" ),
                paste( "High", stateVar, "state" ) ) )
 
-plot( stateIRF1, state = 0, irf.type = "incr", scale = 1, center = TRUE,
+plot( stateIRF, state = 0, irf.type = "peak.mult", scale = 1, center = TRUE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Peak impulse-multiplier by state",
+      main = paste( "State-dependent peak impulse-multiplier functions for", irfVar ),
+      sub = paste( "( MC sample =", stateIRF$nsample, "/ MC", mcStat,
+                   "/ CI signif. =",  linearIRF$alpha,
+                   "/ U-test p-val =", signif( stateIRF$irf.test$p.value, 2 ),
+                   "/ H0: similar states )" ),
+      leg = c( paste( "Low", stateVar, "state" ),
+               paste( "High", stateVar, "state" ) ) )
+
+plot( stateIRF, state = 0, irf.type = "cum.mult", scale = 1, center = FALSE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Cumulative impulse-multiplier by state",
+      main = paste( "State-dependent cumulative impulse-multiplier functions for",
+                    irfVar ),
+      sub = paste( "( MC sample =", stateIRF$nsample, "/ MC", mcStat,
+                   "/ CI signif. =", linearIRF$alpha,
+                   "/ U-test p-val =", signif( stateIRF$cirf.test$p.value, 2 ),
+                   "/ H0: similar states )" ),
+      leg = c( paste( "Low", stateVar, "state" ),
+               paste( "High", stateVar, "state" ) ) )
+
+
+plot( stateIRF1, state = 0, irf.type = "incr.irf", scale = 1, center = TRUE,
       col = col, lwd = 2, col.ci = col, xlab = xlab,
       ylab = "Impulse response by state",
       main = paste( "State-dependent IRF for", stateIRF1$state ),
@@ -321,7 +357,7 @@ plot( stateIRF1, state = 0, irf.type = "incr", scale = 1, center = TRUE,
       leg = c( paste( "Low", stateVar, "state" ),
                paste( "High", stateVar, "state" ) ) )
 
-plot( stateIRF1, state = 0, irf.type = "cum", scale = 1, center = FALSE,
+plot( stateIRF1, state = 0, irf.type = "cum.irf", scale = 1, center = FALSE,
       col = col, lwd = 2, col.ci = col, xlab = xlab,
       ylab = "Cumulative impulse response by state",
       main = paste( "State-dependent C-IRF for", stateIRF1$state ),
@@ -332,7 +368,30 @@ plot( stateIRF1, state = 0, irf.type = "cum", scale = 1, center = FALSE,
       leg = c( paste( "Low", stateVar, "state" ),
                paste( "High", stateVar, "state" ) ) )
 
-plot( stateIRF2, state = 0, irf.type = "incr", scale = 1, center = TRUE,
+plot( stateIRF1, state = 0, irf.type = "peak.mult", scale = 1, center = TRUE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Peak impulse-multiplier by state",
+      main = paste( "State-dependent P-IMF for", stateIRF1$state ),
+      sub = paste( "( MC sample =", stateIRF1$nsample, "/ MC", mcStat,
+                   "/ CI signif. =",  linearIRF$alpha,
+                   "/ U-test p-val =", signif( stateIRF1$irf.test$p.value, 2 ),
+                   "/ H0: similar states )" ),
+      leg = c( paste( "Low", stateVar, "state" ),
+               paste( "High", stateVar, "state" ) ) )
+
+plot( stateIRF1, state = 0, irf.type = "cum.mult", scale = 1, center = FALSE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Cumulative impulse-multiplier by state",
+      main = paste( "State-dependent C-IMF for", stateIRF1$state ),
+      sub = paste( "( MC sample =", stateIRF1$nsample, "/ MC", mcStat,
+                   "/ CI signif. =", linearIRF$alpha,
+                   "/ U-test p-val =", signif( stateIRF1$cirf.test$p.value, 2 ),
+                   "/ H0: similar states )" ),
+      leg = c( paste( "Low", stateVar, "state" ),
+               paste( "High", stateVar, "state" ) ) )
+
+
+plot( stateIRF2, state = 0, irf.type = "incr.irf", scale = 1, center = TRUE,
       col = col, lwd = 2, col.ci = col, xlab = xlab,
       ylab = "Impulse response by state",
       main = paste( "State-dependent IRF for", stateIRF2$state ),
@@ -343,7 +402,7 @@ plot( stateIRF2, state = 0, irf.type = "incr", scale = 1, center = TRUE,
       leg = c( paste( "Low", stateVar, "state" ),
                paste( "High", stateVar, "state" ) ) )
 
-plot( stateIRF2, state = 0, irf.type = "cum", scale = 1, center = FALSE,
+plot( stateIRF2, state = 0, irf.type = "cum.irf", scale = 1, center = FALSE,
       col = col, lwd = 2, col.ci = col, xlab = xlab,
       ylab = "Cumulative impulse response by state",
       main = paste( "State-dependent C-IRF for", stateIRF2$state ),
@@ -354,7 +413,30 @@ plot( stateIRF2, state = 0, irf.type = "cum", scale = 1, center = FALSE,
       leg = c( paste( "Low", stateVar, "state" ),
                paste( "High", stateVar, "state" ) ) )
 
-plot( stateIRF3, state = 0, irf.type = "incr", scale = 1, center = TRUE,
+plot( stateIRF2, state = 0, irf.type = "peak.mult", scale = 1, center = TRUE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Peak impulse-multiplier by state",
+      main = paste( "State-dependent P-IMF for", stateIRF2$state ),
+      sub = paste( "( MC sample =", stateIRF2$nsample, "/ MC", mcStat,
+                   "/ CI signif. =",  linearIRF$alpha,
+                   "/ U-test p-val =", signif( stateIRF2$irf.test$p.value, 2 ),
+                   "/ H0: similar states )" ),
+      leg = c( paste( "Low", stateVar, "state" ),
+               paste( "High", stateVar, "state" ) ) )
+
+plot( stateIRF2, state = 0, irf.type = "cum.mult", scale = 1, center = FALSE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Cumulative impulse-multiplier by state",
+      main = paste( "State-dependent C-IMF for", stateIRF2$state ),
+      sub = paste( "( MC sample =", stateIRF2$nsample, "/ MC", mcStat,
+                   "/ CI signif. =", linearIRF$alpha,
+                   "/ U-test p-val =", signif( stateIRF2$cirf.test$p.value, 2 ),
+                   "/ H0: similar states )" ),
+      leg = c( paste( "Low", stateVar, "state" ),
+               paste( "High", stateVar, "state" ) ) )
+
+
+plot( stateIRF3, state = 0, irf.type = "incr.irf", scale = 1, center = TRUE,
       col = col, lwd = 2, col.ci = col, xlab = xlab,
       ylab = "Impulse response by state",
       main = paste( "State-dependent IRF for", stateIRF3$state ),
@@ -365,10 +447,32 @@ plot( stateIRF3, state = 0, irf.type = "incr", scale = 1, center = TRUE,
       leg = c( paste( "Low", stateVar, "state" ),
                paste( "High", stateVar, "state" ) ) )
 
-plot( stateIRF3, state = 0, irf.type = "cum", scale = 1, center = FALSE,
+plot( stateIRF3, state = 0, irf.type = "cum.irf", scale = 1, center = FALSE,
       col = col, lwd = 2, col.ci = col, xlab = xlab,
       ylab = "Cumulative impulse response by state",
       main = paste( "State-dependent C-IRF for", stateIRF3$state ),
+      sub = paste( "( MC sample =", stateIRF3$nsample, "/ MC", mcStat,
+                   "/ CI signif. =", linearIRF$alpha,
+                   "/ U-test p-val =", signif( stateIRF3$cirf.test$p.value, 2 ),
+                   "/ H0: similar states )" ),
+      leg = c( paste( "Low", stateVar, "state" ),
+               paste( "High", stateVar, "state" ) ) )
+
+plot( stateIRF3, state = 0, irf.type = "peak.mult", scale = 1, center = TRUE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Peak impulse-multiplier by state",
+      main = paste( "State-dependent P-IMF for", stateIRF3$state ),
+      sub = paste( "( MC sample =", stateIRF3$nsample, "/ MC", mcStat,
+                   "/ CI signif. =",  linearIRF$alpha,
+                   "/ U-test p-val =", signif( stateIRF3$irf.test$p.value, 2 ),
+                   "/ H0: similar states )" ),
+      leg = c( paste( "Low", stateVar, "state" ),
+               paste( "High", stateVar, "state" ) ) )
+
+plot( stateIRF3, state = 0, irf.type = "cum.mult", scale = 1, center = FALSE,
+      col = col, lwd = 2, col.ci = col, xlab = xlab,
+      ylab = "Cumulative impulse-multiplier by state",
+      main = paste( "State-dependent C-IMF for", stateIRF3$state ),
       sub = paste( "( MC sample =", stateIRF3$nsample, "/ MC", mcStat,
                    "/ CI signif. =", linearIRF$alpha,
                    "/ U-test p-val =", signif( stateIRF3$cirf.test$p.value, 2 ),

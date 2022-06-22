@@ -15,7 +15,8 @@
 state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
                            state.vars = NULL, eval.state = NULL,
                            metr.irf = NULL, add.vars = NULL,
-                           irf.type = c( "cumulative", "incremental", "none" ),
+                           irf.type = c( "incr.irf", "cum.irf", "peak.mult",
+                                         "cum.mult", "none" ),
                            ci.R = 999, ci.type = c( "basic", "perc", "bca" ),
                            alpha = 0.05, seed = 1, ... ) {
 
@@ -96,21 +97,25 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
   else
     funIRF <- function( x, idx ) mean( x[ idx ], na.rm = TRUE )
 
-  irfState <- irfStateCIlo <- irfStateCIhi <-
-    cirfState <- cirfStateCIlo <- cirfStateCIhi <-
-    irfStateYlim <- cirfStateYlim <- scirMetric <- list( )
+  irfState <- irfStateCIlo <- irfStateCIhi <- irfStateYlim <-
+    cirfState <- cirfStateCIlo <- cirfStateCIhi <- cirfStateYlim <-
+    pmfState <- pmfStateCIlo <- pmfStateCIhi <- pmfStateYlim <-
+    cmfState <- cmfStateCIlo <- cmfStateCIhi <- cmfStateYlim <-
+    scirMetric <- list( )
 
   set.seed( seed )      # reset PRNG seed to ensure reproducibility
 
   # split state-specific ir's, compute state-dependent IRF's and conf. intervals
   for( i in 1 : length( uniqStates ) ) {
-    sir <- scir <- matrix( nrow = 0, ncol = ncol( irf$ir ) )
+    sir <- scir <- spm <- scm <- matrix( nrow = 0, ncol = ncol( irf$ir ) )
     scirMetric[[ i ]] <- vector( "numeric" )
 
     for( j in 1 : length( stateMC ) )
       if( stateMC[ j ] == i ) {
         sir  <- rbind( sir, irf$ir[ j, ] )
         scir <- rbind( scir, irf$cir[ j, ] )
+        spm <- rbind( spm, irf$pm[ j, ] )
+        scm <- rbind( scm, irf$cm[ j, ] )
 
         if( ! is.null( cirMetric ) )
           scirMetric[[ i ]] <- append( scirMetric[[ i ]], cirMetric[ j ] )
@@ -119,18 +124,24 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
     if( irf$stat == "median" ) {
       irfState[[ i ]]  <- apply( sir, 2, stats::median, na.rm = TRUE )
       cirfState[[ i ]] <- apply( scir, 2, stats::median, na.rm = TRUE )
+      pmfState[[ i ]] <- apply( spm, 2, stats::median, na.rm = TRUE )
+      cmfState[[ i ]] <- apply( scm, 2, stats::median, na.rm = TRUE )
     } else {
       irfState[[ i ]]  <- apply( sir, 2, mean, na.rm = TRUE )
       cirfState[[ i ]] <- apply( scir, 2, mean, na.rm = TRUE )
+      pmfState[[ i ]] <- apply( spm, 2, mean, na.rm = TRUE )
+      cmfState[[ i ]] <- apply( scm, 2, mean, na.rm = TRUE )
     }
 
 
     irfStateCIlo[[ i ]] <- irfStateCIhi[[ i ]] <-
-      cirfStateCIlo[[ i ]] <- cirfStateCIhi[[ i ]] <- rep( NA, ncol( sir ) )
+      cirfStateCIlo[[ i ]] <- cirfStateCIhi[[ i ]] <-
+      pmfStateCIlo[[ i ]] <- pmfStateCIhi[[ i ]] <-
+      cmfStateCIlo[[ i ]] <- cmfStateCIhi[[ i ]] <- rep( NA, ncol( sir ) )
 
     # compute bootstrap confidence intervals and IRF limits
     for( j in 1 : ncol( sir ) ) {
-      sirfCI <- scirfCI <- NULL
+      sirfCI <- scirfCI <- spmfCI <- scmfCI <- NULL
 
       try( invisible(
         utils::capture.output(
@@ -148,6 +159,22 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
         )
       ), silent = TRUE )
 
+      try( invisible(
+        utils::capture.output(
+          spmfCI <- boot::boot.ci( boot::boot( spm[ , j ], statistic = funIRF,
+                                               R = ci.R ),
+                                   conf = 1 - alpha, type = ci.type )
+        )
+      ), silent = TRUE )
+
+      try( invisible(
+        utils::capture.output(
+          scmfCI <- boot::boot.ci( boot::boot( scm[ , j ], statistic = funIRF,
+                                               R = ci.R ),
+                                   conf = 1 - alpha, type = ci.type )
+        )
+      ), silent = TRUE )
+
       if( ! is.null( sirfCI ) ) {
         irfStateCIlo[[ i ]][ j ] <- sirfCI$basic[ 4 ]
         irfStateCIhi[[ i ]][ j ] <- sirfCI$basic[ 5 ]
@@ -157,6 +184,16 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
         cirfStateCIlo[[ i ]][ j ] <- scirfCI$basic[ 4 ]
         cirfStateCIhi[[ i ]][ j ] <- scirfCI$basic[ 5 ]
       }
+
+      if( ! is.null( spmfCI ) ) {
+        pmfStateCIlo[[ i ]][ j ] <- spmfCI$basic[ 4 ]
+        pmfStateCIhi[[ i ]][ j ] <- spmfCI$basic[ 5 ]
+      }
+
+      if( ! is.null( scmfCI ) ) {
+        cmfStateCIlo[[ i ]][ j ] <- scmfCI$basic[ 4 ]
+        cmfStateCIhi[[ i ]][ j ] <- scmfCI$basic[ 5 ]
+      }
     }
 
     # find IRF vertical limits
@@ -164,14 +201,21 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
                                max( irfStateCIhi[[ i ]], na.rm = TRUE ) )
     cirfStateYlim[[ i ]] <- c( min( cirfStateCIlo[[ i ]], na.rm = TRUE ),
                                max( cirfStateCIhi[[ i ]], na.rm = TRUE ) )
+    pmfStateYlim[[ i ]] <- c( min( pmfStateCIlo[[ i ]], na.rm = TRUE ),
+                              max( pmfStateCIhi[[ i ]], na.rm = TRUE ) )
+    cmfStateYlim[[ i ]] <- c( min( cmfStateCIlo[[ i ]], na.rm = TRUE ),
+                              max( cmfStateCIhi[[ i ]], na.rm = TRUE ) )
   }
 
   names( irfState ) <- names( irfStateCIlo ) <- names( irfStateCIhi ) <-
     names( cirfState ) <- names( cirfStateCIlo ) <- names( cirfStateCIhi ) <-
+    names( pmfState ) <- names( pmfStateCIlo ) <- names( pmfStateCIhi ) <-
+    names( cmfState ) <- names( cmfStateCIlo ) <- names( cmfStateCIhi ) <-
     names( irfStateYlim ) <- names( cirfStateYlim ) <-
+    names( pmfStateYlim ) <- names( cmfStateYlim ) <-
     paste0( "s", c( 1 : length( uniqStates ) ) )
 
-  irfTest <- cirfTest <- NA
+  irfTest <- cirfTest <- pmfTest <- cmfTest <- NA
   cirfTestThoriz <- NULL
 
   # test significance of the difference among states
@@ -187,6 +231,18 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
 
       try( cirfTest <- suppressWarnings(
         stats::wilcox.test( cirfState[[ 1 ]], cirfState[[ 2 ]], paired = TRUE,
+                            exact = FALSE, na.action = "na.omit",
+                            digits.rank = 7 ) ),
+        silent = TRUE )
+
+      try( pmfTest <- suppressWarnings(
+        stats::wilcox.test( pmfState[[ 1 ]], pmfState[[ 2 ]], paired = TRUE,
+                            exact = FALSE, na.action = "na.omit",
+                            digits.rank = 7 ) ),
+        silent = TRUE )
+
+      try( cmfTest <- suppressWarnings(
+        stats::wilcox.test( cmfState[[ 1 ]], cmfState[[ 2 ]], paired = TRUE,
                             exact = FALSE, na.action = "na.omit",
                             digits.rank = 7 ) ),
         silent = TRUE )
@@ -209,6 +265,16 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
                        na.action = "na.omit", conf.level = 1 - alpha ) ),
         silent = TRUE )
 
+      try( pmfTest <- suppressWarnings(
+        stats::t.test( pmfState[[ 1 ]], pmfState[[ 2 ]], paired = TRUE,
+                       na.action = "na.omit", conf.level = 1 - alpha ) ),
+        silent = TRUE )
+
+      try( cmfTest <- suppressWarnings(
+        stats::t.test( cmfState[[ 1 ]], cmfState[[ 2 ]], paired = TRUE,
+                       na.action = "na.omit", conf.level = 1 - alpha ) ),
+        silent = TRUE )
+
       if( ! is.null( cirMetric ) )
         try( cirfTestThoriz <- suppressWarnings(
           stats::t.test( scirMetric[[ 1 ]], scirMetric[[ 2 ]],
@@ -228,6 +294,14 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
         stats::kruskal.test( cirfState, na.action = "na.omit" ) ),
         silent = TRUE )
 
+      try( pmfTest <- suppressWarnings(
+        stats::kruskal.test( pmfState, na.action = "na.omit" ) ),
+        silent = TRUE )
+
+      try( cmfTest <- suppressWarnings(
+        stats::kruskal.test( cmfState, na.action = "na.omit" ) ),
+        silent = TRUE )
+
       if( ! is.null( cirMetric ) )
         try( cirfTestThoriz <- suppressWarnings(
           stats::kruskal.test( scirMetric, na.action = "na.omit" ) ),
@@ -240,6 +314,12 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
       cirfData <- data.frame( resp = rep( letters[ 1 : length( uniqStates ) ],
                                           each = length( cirfState[[ 1 ]] ) ),
                               state = unlist( cirfState ) )
+      pmfData <- data.frame( resp = rep( letters[ 1 : length( uniqStates ) ],
+                                         each = length( pmfState[[ 1 ]] ) ),
+                             state = unlist( pmfState ) )
+      cmfData <- data.frame( resp = rep( letters[ 1 : length( uniqStates ) ],
+                                         each = length( cmfState[[ 1 ]] ) ),
+                             state = unlist( cmfState ) )
 
       # one-way ANOVA F-test to test difference between several states
       try( irfTest <- suppressWarnings(
@@ -248,6 +328,14 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
 
       try( cirfTest <- suppressWarnings(
         stats::anova( stats::lm( state ~ resp, cirfData, na.action = "na.omit" ) ) ),
+        silent = TRUE )
+
+      try( pmfTest <- suppressWarnings(
+        stats::anova( stats::lm( state ~ resp, pmfData, na.action = "na.omit" ) ) ),
+        silent = TRUE )
+
+      try( cmfTest <- suppressWarnings(
+        stats::anova( stats::lm( state ~ resp, cmfData, na.action = "na.omit" ) ) ),
         silent = TRUE )
 
       if( ! is.null( cirMetric ) ) {
@@ -262,11 +350,15 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
   }
 
   # pack object
-  sirf <- list( irf.state = irfState, cirf.state = cirfState,
-                irf.state.ci.lo = irfStateCIlo, irf.state.ci.hi = irfStateCIhi,
-                cirf.state.ci.lo = cirfStateCIlo, cirf.state.ci.hi = cirfStateCIhi,
-                irf.state.ylim = irfStateYlim, cirf.state.ylim = cirfStateYlim,
-                irf.test = irfTest, cirf.test = cirfTest,
+  sirf <- list( irf.state = irfState, cirf.state = cirfState, pmf.state = pmfState,
+                cmf.state = cmfState, irf.state.ci.lo = irfStateCIlo,
+                irf.state.ci.hi = irfStateCIhi, cirf.state.ci.lo = cirfStateCIlo,
+                cirf.state.ci.hi = cirfStateCIhi, pmf.state.ci.lo = pmfStateCIlo,
+                pmf.state.ci.hi = pmfStateCIhi, cmf.state.ci.lo = cmfStateCIlo,
+                cmf.state.ci.hi = cmfStateCIhi, irf.state.ylim = irfStateYlim,
+                cirf.state.ylim = cirfStateYlim, pmf.state.ylim = pmfStateYlim,
+                cmf.state.ylim = cmfStateYlim, irf.test = irfTest,
+                cirf.test = cirfTest, pmf.test = pmfTest,
                 cirf.test.t.horiz = cirfTestThoriz, state = state,
                 state.vars = state.vars, t.horiz = irf$t.horiz,
                 var.irf = irf$var.irf, var.ref = irf$var.ref, stat = irf$stat,
@@ -288,10 +380,14 @@ print.state.irf.lsd <- function( x, ... ) {
   if( ! inherits( x, "state.irf.lsd" ) )
     stop( "Invalid object (not from state.irf.lsd())" )
 
-  if( ! exists( "irf.type" ) )
-    irf.type <- "cumulative"
-  else
-    irf.type <- match.arg( irf.type, c( "cumulative", "incremental" ) )
+  printPars <- list( ... )
+  if( is.null( printPars$irf.type ) )
+    irf.type <- "incr.irf"
+  else {
+    irf.type <- match.arg( printPars$irf.type, c( "incr.irf", "cum.irf",
+                                                  "peak.mult", "cum.mult" ) )
+    printPars[[ "irf.type" ]] <- NULL
+  }
 
   if( x$stat == "median" )
     test <- ifelse( length( x$irf.state ) == 2, "U-test", "H-test" )
@@ -306,12 +402,16 @@ print.state.irf.lsd <- function( x, ... ) {
 
     irf.p.val <- x$irf.test[ 1, "Pr(>F)" ]
     cirf.p.val <- x$cirf.test[ 1, "Pr(>F)" ]
+    pmf.p.val <- x$pmf.test[ 1, "Pr(>F)" ]
+    cmf.p.val <- x$cmf.test[ 1, "Pr(>F)" ]
   } else {
     if( ! is.null( x$cirf.test.t.horiz ) )
       cirf.t.horiz.p.val <- x$cirf.test.t.horiz$p.value
 
     irf.p.val <- x$irf.test$p.value
     cirf.p.val <- x$cirf.test$p.value
+    pmf.p.val <- x$pmf.test$p.value
+    cmf.p.val <- x$cmf.test$p.value
   }
 
   if( is.null( x$state ) ) {
@@ -329,6 +429,8 @@ print.state.irf.lsd <- function( x, ... ) {
                          signif( irf.p.val, digits = 4 ),
                          signif( cirf.p.val, digits = 4 ),
                          signif( cirf.t.horiz.p.val, digits = 4 ),
+                         signif( pmf.p.val, digits = 4 ),
+                         signif( cmf.p.val, digits = 4 ),
                          x$alpha,
                          x$nsample,
                          length( x$outliers ) ) )
@@ -340,30 +442,43 @@ print.state.irf.lsd <- function( x, ... ) {
                          paste( "IRF", test, "p-value (H0: states =):"),
                          paste( "C-IRF", test, "p-value (H0: states =):"),
                          paste( "C-IRF t-horizon", test, "p-value:"),
+                         paste( "P-IMF", test, "p-value (H0: states =):"),
+                         paste( "C-IMF", test, "p-value (H0: states =):"),
                          "Conf. interval significance:",
                          "Number of employed MC samples:",
                          "Number of outlier MC samples:" )
-
-  printPars <- list( ... )
-  printPars[[ "irf.type" ]] <- NULL
 
   print( info, printPars )
 
   if( length( x$cirf.state ) == 2 ) {
 
-    if( irf.type == "cumulative" ) {
-      f <- "Cumulative impulse-response function"
-      l <- "IRF"
-      data <- x$cirf.state
-      ciLo <- x$cirf.state.ci.lo
-      ciHi <- x$cirf.state.ci.hi
-    } else {
+    if( irf.type == "incr.irf" ) {
       f <- "Impulse-response function"
-      l <- "C-IRF"
+      l <- "IRF"
       data <- x$irf.state
       ciLo <- x$irf.state.ci.lo
       ciHi <- x$irf.state.ci.hi
-    }
+    } else
+      if( irf.type == "cum.irf" ) {
+        f <- "Cumulative impulse-response function"
+        l <- "C-IRF"
+        data <- x$cirf.state
+        ciLo <- x$cirf.state.ci.lo
+        ciHi <- x$cirf.state.ci.hi
+      } else
+        if( irf.type == "peak.mult" ) {
+          f <- "Peak impulse-multiplier function"
+          l <- "P-IMF"
+          data <- x$pmf.state
+          ciLo <- x$pmf.state.ci.lo
+          ciHi <- x$pmf.state.ci.hi
+        } else {
+          f <- "Cumulative impulse-multiplier function"
+          l <- "C-IMF"
+          data <- x$cmf.state
+          ciLo <- x$cmf.state.ci.lo
+          ciHi <- x$cmf.state.ci.hi
+        }
 
     cat( "\n" )
     cat( f, "according to the state-dependent variable(s):\n\n" )
@@ -388,31 +503,51 @@ plot.state.irf.lsd <- function( x, ... ) {
   if( ! inherits( x, "state.irf.lsd" ) )
     stop( "Invalid object (not from state.irf.lsd())" )
 
-  if( ! exists( "state" ) )
+  plotPars <- list( ... )
+
+  if( is.null( plotPars$irf.type ) )
+    irf.type <- "incr.irf"
+  else {
+    irf.type <- match.arg( plotPars$irf.type, c( "incr.irf", "cum.irf",
+                                                 "peak.mult", "cum.mult" ) )
+    plotPars[[ "irf.type" ]] <- NULL
+  }
+
+  if( is.null( plotPars$state ) )
     state <- 0
-  else
+  else {
+    state <- plotPars$state
     if( is.null( state ) || ! is.finite( state ) || round( state ) < 0 ||
         round( state ) > ( length( x$thr.state.val ) + 1 ) )
       stop( "Invalid state selected" )
 
-  if( ! exists( "irf.type" ) )
-    irf.type <- "cumulative"
-  else
-    irf.type <- match.arg( irf.type, c( "cumulative", "incremental" ) )
+    state <- round( state )
+    plotPars[[ "state" ]] <- NULL
+  }
 
-  state <- round( state )
-
-  if( irf.type == "cumulative" ) {
-    data <- x$cirf.state
-    ciLo <- x$cirf.state.ci.lo
-    ciHi <- x$cirf.state.ci.hi
-    ylim <- x$cirf.state.ylim
-  } else {
+  if( irf.type == "incr.irf" ) {
     data <- x$irf.state
     ciLo <- x$irf.state.ci.lo
     ciHi <- x$irf.state.ci.hi
     ylim <- x$irf.state.ylim
-  }
+  } else
+    if( irf.type == "cum.irf" ) {
+      data <- x$cirf.state
+      ciLo <- x$cirf.state.ci.lo
+      ciHi <- x$cirf.state.ci.hi
+      ylim <- x$cirf.state.ylim
+    } else
+      if( irf.type == "peak.mult" ) {
+        data <- x$pmf.state
+        ciLo <- x$pmf.state.ci.lo
+        ciHi <- x$pmf.state.ci.hi
+        ylim <- x$pmf.state.ylim
+      } else {
+        data <- x$cmf.state
+        ciLo <- x$cmf.state.ci.lo
+        ciHi <- x$cmf.state.ci.hi
+        ylim <- x$cmf.state.ylim
+      }
 
   if( state != 0 ) {
     data <- data[[ state ]]
@@ -420,10 +555,6 @@ plot.state.irf.lsd <- function( x, ... ) {
     ciHi <- ciHi[[ state ]]
     ylim <- ylim[[ state ]]
   }
-
-  plotPars <- list( ... )
-  plotPars[[ "state" ]] <- NULL
-  plotPars[[ "irf.type" ]] <- NULL
 
   do.call( plot_irf, c( list( data, ciLo, ciHi, ylim ), plotPars ) )
 }

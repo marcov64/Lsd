@@ -12,7 +12,7 @@ This function performs a (linear) impulse-response function (IRF) analysis on th
 
 \usage{
 irf.lsd( data, data.shock, t.horiz, var.irf, var.shock, var.ref = NULL,
-         irf.type = c( "incremental", "cumulative", "none" ),
+         irf.type = c( "incr.irf", "cum.irf", "peak.mult", "cum.mult", "none" ),
          stat = c( "mean", "median" ), ci.R = 999,
          ci.type = c( "basic", "perc", "bca" ),
          lim.outl = 0, alpha = 0.05, seed = 1, ... )
@@ -37,7 +37,7 @@ irf.lsd( data, data.shock, t.horiz, var.irf, var.shock, var.ref = NULL,
   \item{var.ref}{string: the name of a reference variable to scale down (divide) the shock variable. The default is to do no scaling. If provided, it must be one of the column names in \code{data}. The special value \code{"\%"} represents the same variable as the shock one, but using the corresponding non-shock values, so effectively standardizing the shock values.
   }
 
-  \item{irf.type}{string: one of three options (\code{"incremental"}, \code{"cumulative"}, or \code{"none"}) defining the type of impulse-response function plot to be produced. The default is \code{"incremental"} response. This option only affect the plot, not the produced data.
+  \item{irf.type}{string: one of five options (\code{"incr.irf"}, \code{"cum.irf"}, \code{"peak.mult"}, \code{"cum.mult"}, or \code{"none"}) defining the type of function plot to be produced: incremental impulse-response, cumulative impulse-response, peak multiplier, cumulative multiplier, or no plot. The default is \code{"incr.irf"}. This option only affect the plot, not the produced data.
   }
 
   \item{stat}{string: one of \code{"mean"} or \code{"median"}, representing the Monte Carlo statistic used to compare samples. It also selects the corresponding deviation measure, between the standard deviation (SD) or the median absolute deviation (MAD). The default is to use the mean and SD.
@@ -77,6 +77,12 @@ It returns an object of class \code{irf.lsd}, which has \code{print}- and \code{
   \item{cirf}{numeric: vector of length \code{t.horiz + 1} containing the average or median (according to \code{stat}) cumulative impulse response function data.
   }
 
+  \item{pmf}{numeric: vector of length \code{t.horiz + 1} containing the average or median (according to \code{stat}) peak-multiplier function data. The peak impulse-multiplier function evaluates the analysis variable (\code{var.irf}) as a multiple of the impulse variable (\code{var.shock}) at the shock start time.
+  }
+
+  \item{cmf}{numeric: vector of length \code{t.horiz + 1} containing the average or median (according to \code{stat}) cumulative impulse-multiplier function data. The cumulative-multiplier function evaluates the accumulated analysis variable (\code{var.irf}), from impulse time, as a multiple of the accumulated impulse variable (\code{var.shock}) over the time horizon (\code{t.horiz}).
+  }
+
   \item{irf.ci.lo}{numeric: vector of length \code{t.horiz + 1} containing the confidence interval lower limit of incremental impulse response function data.
   }
 
@@ -89,16 +95,40 @@ It returns an object of class \code{irf.lsd}, which has \code{print}- and \code{
   \item{cirf.ci.hi}{numeric: vector of length \code{t.horiz + 1} containing the confidence interval upper limit of cumulative impulse response function data.
   }
 
+  \item{pmf.ci.lo}{numeric: vector of length \code{t.horiz + 1} containing the confidence interval lower limit of peak multiplier function data.
+  }
+
+  \item{pmf.ci.hi}{numeric: vector of length \code{t.horiz + 1} containing the confidence interval upper limit of peak multiplier function data.
+  }
+
+  \item{cmf.ci.lo}{numeric: vector of length \code{t.horiz + 1} containing the confidence interval lower limit of cumulative multiplier function data.
+  }
+
+  \item{cmf.ci.hi}{numeric: vector of length \code{t.horiz + 1} containing the confidence interval upper limit of cumulative multiplier function data.
+  }
+
   \item{irf.ylim}{numeric: vector of length two containing the absolute minimum and maximum values for the incremental impulse response function data.
   }
 
   \item{cirf.ylim}{numeric: vector of length two containing the absolute minimum and maximum values for the cumulative impulse response function data.
   }
 
+  \item{pmf.ylim}{numeric: vector of length two containing the absolute minimum and maximum values for the peak multiplier function data.
+  }
+
+  \item{cmf.ylim}{numeric: vector of length two containing the absolute minimum and maximum values for the cumulative multiplier function data.
+  }
+
   \item{ir}{numeric: data frame with \code{nsample} (see below) rows and \code{t.horiz + 1} columns. The data frame is the set of individual incremental impulse responses from each Monte Carlo (MC) sample.
   }
 
   \item{cir}{numeric: data frame with \code{nsample} (see below) rows and \code{t.horiz + 1} columns. The data frame is the set of individual cumulative impulse responses from each MC sample.
+  }
+
+  \item{pm}{numeric: data frame with \code{nsample} (see below) rows and \code{t.horiz + 1} columns. The data frame is the set of individual peak multipliers from each MC sample.
+  }
+
+  \item{cm}{numeric: data frame with \code{nsample} (see below) rows and \code{t.horiz + 1} columns. The data frame is the set of individual cumulative multipliers from each MC sample.
   }
 
   \item{t.shock}{numeric: vector of length equal to \code{nsample} (see below), containing the time the shock was detected in each MC sample.

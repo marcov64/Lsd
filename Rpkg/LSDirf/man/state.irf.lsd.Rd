@@ -14,7 +14,8 @@ This function performs a state-dependent impulse-response function (IRF) analysi
 state.irf.lsd( data, irf, states = NULL, state.num = 1,
                state.vars = NULL, eval.state = NULL,
                metr.irf = NULL, add.vars = NULL,
-               irf.type = c( "cumulative", "incremental", "none" ),
+               irf.type = c( "incr.irf", "cum.irf", "peak.mult",
+                             "cum.mult", "none" ),
                ci.R = 999, ci.type = c( "basic", "perc", "bca" ),
                alpha = 0.05, seed = 1, ... )
 }
@@ -44,7 +45,7 @@ state.irf.lsd( data, irf, states = NULL, state.num = 1,
   \item{add.vars}{function: a optional function to add new variables to the MC dataset, before the analysis is performed. The function must take a single Monte Carlo run data frame, organized as time on rows and (original) variables on columns. It must return this data frame with new column(s) added, one per each new variable.
   }
 
-  \item{irf.type}{string: one of three options (\code{"incremental"}, \code{"cumulative"}, or \code{"none"}) defining the type of impulse-response function plot to be produced. The default is \code{"incremental"} response. This option only affect the plot, not the produced data.
+  \item{irf.type}{string: one of five options (\code{"incr.irf"}, \code{"cum.irf"}, \code{"peak.mult"}, \code{"cum.mult"}, or \code{"none"}) defining the type of function plot to be produced: incremental impulse-response, cumulative impulse-response, peak multiplier, cumulative multiplier, or no plot. The default is \code{"incr.irf"}. This option only affect the plot, not the produced data.
   }
 
   \item{ci.R}{integer: number of bootstrap replicates when computing the bootstrap confidence interval.
@@ -78,6 +79,12 @@ It returns an object of class \code{state.irf.lsd}, which has \code{print}- and 
   \item{cirf.state}{list: each list element is a vector of length \code{t.horiz + 1} containing the average or median (according to \code{stat}) cumulative impulse response function data for each identified state.
   }
 
+  \item{pmf.state}{list: each list element is a vector of length \code{t.horiz + 1} containing the average or median (according to \code{stat}) peak impulse-multiplier function data for each identified state. The peak impulse-multiplier function evaluates the analysis variable (\code{var.irf}) as a multiple of the impulse variable (\code{var.shock}) at the shock start time.
+  }
+
+  \item{cmf.state}{list: each list element is a vector of length \code{t.horiz + 1} containing the average or median (according to \code{stat}) cumulative impulse-multiplier function data for each identified state. The cumulative-multiplier function evaluates the accumulated analysis variable (\code{var.irf}), from impulse time, as a multiple of the accumulated impulse variable (\code{var.shock}) over the time horizon (\code{t.horiz})
+  }
+
   \item{irf.state.ci.lo}{list: each list element is a vector of length \code{t.horiz + 1} containing the confidence interval lower limit of incremental impulse response function data for each identified state.
   }
 
@@ -90,10 +97,28 @@ It returns an object of class \code{state.irf.lsd}, which has \code{print}- and 
   \item{cirf.state.ci.hi}{list: each list element is a vector of length \code{t.horiz + 1} containing the confidence interval upper limit of cumulative impulse response function data for each identified state.
   }
 
+  \item{pmf.state.ci.lo}{list: each list element is a vector of length \code{t.horiz + 1} containing the confidence interval lower limit of peak multiplier function data for each identified state.
+  }
+
+  \item{pmf.state.ci.hi}{list: each list element is a vector of length \code{t.horiz + 1} containing the confidence interval upper limit of peak multiplier function data for each identified state.
+  }
+
+  \item{cmf.state.ci.lo}{list: each list element is a vector of length \code{t.horiz + 1} containing the confidence interval lower limit of cumulative multiplier function data for each identified state.
+  }
+
+  \item{cmf.state.ci.hi}{list: each list element is a vector of length \code{t.horiz + 1} containing the confidence interval upper limit of cumulative multiplier function data for each identified state.
+  }
+
   \item{irf.state.ylim}{list: each list element is a vector of length two containing the absolute minimum and maximum values for the incremental impulse response function data for each identified state.
   }
 
   \item{cirf.state.ylim}{list: each list element is a vector of length two containing the absolute minimum and maximum values for the cumulative impulse response function data for each identified state.
+  }
+
+  \item{pmf.state.ylim}{list: each list element is a vector of length two containing the absolute minimum and maximum values for the peak multiplier function data for each identified state.
+  }
+
+  \item{cmf.state.ylim}{list: each list element is a vector of length two containing the absolute minimum and maximum values for the cumulative multiplier function data for each identified state.
   }
 
   \item{irf.test}{object: the result of the test comparing the statistical significance of the incremental impulse-response function difference among different states. Two-state setups are evaluated with t or U tests, according to \code{stat} in \code{\link{irf.lsd}}, or H or F tests otherwise.
@@ -103,6 +128,12 @@ It returns an object of class \code{state.irf.lsd}, which has \code{print}- and 
   }
 
   \item{cirf.test.t.horiz}{object: the result of the test comparing the statistical significance of the cumulative impulse-response function difference among different states just at the end of the analysis time horizon (\code{t.horiz}). Two-state setups are evaluated with t or U tests, according to \code{stat} in \code{\link{irf.lsd}}, or H or F tests otherwise.
+  }
+
+  \item{pmf.test}{object: the result of the test comparing the statistical significance of the peak multiplier function difference among different states. Two-state setups are evaluated with t or U tests, according to \code{stat} in \code{\link{irf.lsd}}, or H or F tests otherwise.
+  }
+
+  \item{cmf.test}{object: the result of the test comparing the statistical significance of the cumulative multiplier function difference among different states. Two-state setups are evaluated with t or U tests, according to \code{stat} in \code{\link{irf.lsd}}, or H or F tests otherwise.
   }
 
   \item{state}{character: a textual description of the tested state.
