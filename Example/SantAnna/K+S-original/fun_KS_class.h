@@ -3,9 +3,14 @@
 	CLASS AND MACRO DEFINITIONS
 	---------------------------
 
-	C++ class and preprocessor macro definitions used in the K+S LSD model 
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
+	C++ class and preprocessor macro definitions used in the K+S LSD model
 	are coded below.
- 
+
  ******************************************************************************/
 
 /*============================= GENERAL CLASSES ==============================*/
@@ -26,56 +31,70 @@ typedef vector < object * > objVecT;			// vector of objects template
 
 /*======================== COUNTRY EXTENSION CLASS ===========================*/
 
-struct country
+struct countryE
 {
 	// static global pointers to speed-up the access to individual containers
 	object *finSec, *capSec, *conSec, *labSup, *macSta, *secSta, *labSta;
 
 	// country speed-up vectors & maps
 	objVecT firm2ptr;							// pointers to firms in sector 2
-	firmMapT firm2map;							// ID to pointer map for sector 2	
+	firmMapT firm2map;							// ID to pointer map for sector 2
 };
+
+
+/*======================= INITIAL NOTIONAL DEFINITIONS =======================*/
+
+#define INIPROD		1					// initial notional machine productivity
+#define INIWAGE		1					// initial notional wage
 
 
 /*========================= HOOK-RELATED DEFINITIONS =========================*/
 
 // number of dynamic hooks per object type
-#define FIRM2HK 2			// Firm2
+#define FIRM2HK		2					// Firm2
 
 // dynamic hook name to number
-#define SUPPL 0				// from Firm2 to Broch (in Firm2)
-#define TOPVINT 1			// from Firm2 to Vint (in Firm2)
+#define SUPPL		0					// from Firm2 to Broch (in Firm2)
+#define TOPVINT		1					// from Firm2 to Vint (in Firm2)
 
 
 /*======================= OBJECT-LOCATION DEFINITIONS ========================*/
 
-// pointers to speed-up the access to individual market containers by caller 
+// pointers to speed-up the access to individual market containers by caller
 // equation levels
-#define CAPSECL0 V_EXT( country, capSec )
-#define CAPSECL1 V_EXTS( PARENT, country, capSec )
-#define CAPSECL2 V_EXTS( GRANDPARENT, country, capSec )
-#define CONSECL0 V_EXT( country, conSec )
-#define CONSECL1 V_EXTS( PARENT, country, conSec )
-#define CONSECL2 V_EXTS( GRANDPARENT, country, conSec )
-#define LABSUPL0 V_EXT( country, labSup )
-#define LABSUPL1 V_EXTS( PARENT, country, labSup )
-#define LABSUPL2 V_EXTS( GRANDPARENT, country, labSup )
-#define LABSUPL3 V_EXTS( GRANDPARENT->up, country, labSup )
-#define FINSECL0 V_EXT( country, finSec )
-#define FINSECL1 V_EXTS( PARENT, country, finSec )
-#define FINSECL2 V_EXTS( GRANDPARENT, country, finSec )
-#define MACSTAL0 V_EXT( country, macSta )
-#define MACSTAL1 V_EXTS( PARENT, country, macSta )
-#define MACSTAL2 V_EXTS( GRANDPARENT, country, macSta )
-#define SECSTAL0 V_EXT( country, secSta )
-#define SECSTAL1 V_EXTS( PARENT, country, secSta )
-#define SECSTAL2 V_EXTS( GRANDPARENT, country, secSta )
-#define LABSTAL0 V_EXT( country, labSta )
-#define LABSTAL1 V_EXTS( PARENT, country, labSta )
-#define LABSTAL2 V_EXTS( GRANDPARENT, country, labSta )
+#define CAPSECL0 V_EXT( countryE, capSec )
+#define CAPSECL1 V_EXTS( PARENT, countryE, capSec )
+#define CAPSECL2 V_EXTS( GRANDPARENT, countryE, capSec )
+#define CONSECL0 V_EXT( countryE, conSec )
+#define CONSECL1 V_EXTS( PARENT, countryE, conSec )
+#define CONSECL2 V_EXTS( GRANDPARENT, countryE, conSec )
+#define LABSUPL0 V_EXT( countryE, labSup )
+#define LABSUPL1 V_EXTS( PARENT, countryE, labSup )
+#define LABSUPL2 V_EXTS( GRANDPARENT, countryE, labSup )
+#define LABSUPL3 V_EXTS( PARENTS( GRANDPARENT ), countryE, labSup )
+#define FINSECL0 V_EXT( countryE, finSec )
+#define FINSECL1 V_EXTS( PARENT, countryE, finSec )
+#define FINSECL2 V_EXTS( GRANDPARENT, countryE, finSec )
+#define MACSTAL0 V_EXT( countryE, macSta )
+#define MACSTAL1 V_EXTS( PARENT, countryE, macSta )
+#define MACSTAL2 V_EXTS( GRANDPARENT, countryE, macSta )
+#define SECSTAL0 V_EXT( countryE, secSta )
+#define SECSTAL1 V_EXTS( PARENT, countryE, secSta )
+#define SECSTAL2 V_EXTS( GRANDPARENT, countryE, secSta )
+#define LABSTAL0 V_EXT( countryE, labSta )
+#define LABSTAL1 V_EXTS( PARENT, countryE, labSta )
+#define LABSTAL2 V_EXTS( GRANDPARENT, countryE, labSta )
 
 
 /*============================== SUPPORT MACROS ==============================*/
+
+// macro for checking if variable was already computed (used in timeStep)
+#define NEW_VS( VAL, OBJ, VAR ) \
+	if ( LAST_CALCS( OBJ, VAR ) == T ) \
+		LOG( "\n (t=%g) Variable '%s = %.4g' already computed", \
+			 T, VAR, VAL = VS( OBJ, VAR ) ); \
+	else \
+		VAL = VS( OBJ, VAR );
 
 // macro to round values too close to a reference
 #define ROUND( V, Ref, Tol ) ( abs( V - Ref ) > Tol ? V : Ref )

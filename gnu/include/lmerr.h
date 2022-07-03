@@ -1,12 +1,17 @@
-#ifndef _LMERR_H
-#define _LMERR_H
-#if __GNUC__ >=3
-#pragma GCC system_header
-#endif
+/**
+ * This file has no copyright assigned and is placed in the Public Domain.
+ * This file is part of the mingw-w64 runtime package.
+ * No warranty is given; refer to the file DISCLAIMER.PD within this package.
+ */
+#ifndef NETERR_INCLUDED
+#define NETERR_INCLUDED
+
+#define NERR_Success 0
 
 #include <winerror.h>
-#define NERR_Success 0 
+
 #define NERR_BASE 2100
+
 #define NERR_NetNotStarted (NERR_BASE+2)
 #define NERR_UnknownServer (NERR_BASE+3)
 #define NERR_ShareMem (NERR_BASE+4)
@@ -156,6 +161,7 @@
 #define NERR_DeviceShareConflict (NERR_BASE+218)
 #define NERR_BrowserTableIncomplete (NERR_BASE+219)
 #define NERR_NotLocalDomain (NERR_BASE+220)
+#define NERR_IsDfsShare (NERR_BASE+221)
 #define NERR_DevInvalidOpCode (NERR_BASE+231)
 #define NERR_DevNotFound (NERR_BASE+232)
 #define NERR_DevNotOpen (NERR_BASE+233)
@@ -295,12 +301,25 @@
 #define NERR_DfsNotSupportedInServerDfs (NERR_BASE+575)
 #define NERR_DfsDuplicateService (NERR_BASE+576)
 #define NERR_DfsCantRemoveLastServerShare (NERR_BASE+577)
-#define NERR_DfsVolumeIsInterDfs  (NERR_BASE+578)
+#define NERR_DfsVolumeIsInterDfs (NERR_BASE+578)
 #define NERR_DfsInconsistent (NERR_BASE+579)
 #define NERR_DfsServerUpgraded (NERR_BASE+580)
 #define NERR_DfsDataIsIdentical (NERR_BASE+581)
 #define NERR_DfsCantRemoveDfsRoot (NERR_BASE+582)
 #define NERR_DfsChildOrParentInDfs (NERR_BASE+583)
 #define NERR_DfsInternalError (NERR_BASE+590)
+#define NERR_SetupAlreadyJoined (NERR_BASE+591)
+#define NERR_SetupNotJoined (NERR_BASE+592)
+#define NERR_SetupDomainController (NERR_BASE+593)
+#define NERR_DefaultJoinRequired (NERR_BASE+594)
+#define NERR_InvalidWorkgroupName (NERR_BASE+595)
+#define NERR_NameUsesIncompatibleCodePage (NERR_BASE+596)
+#define NERR_ComputerAccountNotFound (NERR_BASE+597)
+#define NERR_PersonalSku (NERR_BASE+598)
+#define NERR_PasswordMustChange (NERR_BASE + 601)
+#define NERR_AccountLockedOut (NERR_BASE + 602)
+#define NERR_PasswordTooLong (NERR_BASE + 603)
+#define NERR_PasswordNotComplexEnough (NERR_BASE + 604)
+#define NERR_PasswordFilterError (NERR_BASE + 605)
 #define MAX_NERR (NERR_BASE+899)
-#endif 
+#endif

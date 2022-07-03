@@ -35,7 +35,7 @@ Label Root
 			Param: time
 			Param: true_value
 			Param: best_value
-			Param: err_best-true
+			Param: err_best_true
 
 		}
 
@@ -81,7 +81,7 @@ Object: Years C	24
 Param: time 0 n + n n	1	2	3	4	5	6	7	8	9	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
 Param: true_value 0 n + n n	9.38068	16.2368	28.1115	54.2673	88.3242	159.256	250.914	390.22	545.722	678.931	752.837	902.275	926.305	912.743	993.114	1016.12	1005.61	969.236	1025.71	985.133	998.956	982.677	965.36	951.662
 Param: best_value 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
-Param: err_best-true 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: err_best_true 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
 
 SIM_NUM 1
 SEED 0
@@ -399,7 +399,7 @@ if(v[0]>v[1] || t==1)
    v[9]=v[3]*(v[8]/(v[4]+v[8]));
    
    cur->write("best_value",v[9],0);
-   cur->write("err_best-true",v[9]-values[(int)v[5]-1],0);
+   cur->write("err_best_true",v[9]-values[(int)v[5]-1],0);
    cur=cur->next;
    } 
   res=1;

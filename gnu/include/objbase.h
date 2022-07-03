@@ -1,204 +1,173 @@
-/* Include here to prevent circular dependencies if windows.h
-   not already included */
+/**
+ * This file is part of the mingw-w64 runtime package.
+ * No warranty is given; refer to the file DISCLAIMER.PD within this package.
+ */
+#include <winapifamily.h>
+
 #include <rpc.h>
 #include <rpcndr.h>
 
-#ifndef _OBJBASE_H
-#define _OBJBASE_H
+#ifndef _OBJBASE_H_
 #define _OBJBASE_H_
-#if __GNUC__ >=3
-#pragma GCC system_header
-#endif
 
-#include <stdlib.h>
-#pragma pack(push,8)
-#include <basetyps.h>
-
-#define WINOLEAPI STDAPI
-#define WINOLEAPI_(type) STDAPI_(type)
-#define FARSTRUCT
-#define HUGEP
-#define LISet32(li,v) ((li).HighPart=(v)<0?-1:0,(li).LowPart=(v))
-#define ULISet32(li,v) ((li).HighPart=0,(li).LowPart=(v))
-#define CLSCTX_ALL (CLSCTX_INPROC_SERVER|CLSCTX_INPROC_HANDLER|CLSCTX_LOCAL_SERVER)
-#define CLSCTX_INPROC (CLSCTX_INPROC_SERVER|CLSCTX_INPROC_HANDLER)
-#define CLSCTX_SERVER (CLSCTX_INPROC_SERVER|CLSCTX_LOCAL_SERVER|CLSCTX_REMOTE_SERVER)
-#define MARSHALINTERFACE_MIN 500
-#define CWCSTORAGENAME 32
-#define STGM_DIRECT 0
-#define STGM_TRANSACTED 0x10000L
-#define STGM_SIMPLE 0x8000000L
-#define STGM_READ 0
-#define STGM_WRITE 1
-#define STGM_READWRITE 2
-#define STGM_SHARE_DENY_NONE 0x40
-#define STGM_SHARE_DENY_READ 0x30
-#define STGM_SHARE_DENY_WRITE 0x20
-#define STGM_SHARE_EXCLUSIVE 0x10
-#define STGM_PRIORITY 0x40000L
-#define STGM_DELETEONRELEASE 0x4000000
-#define STGM_NOSCRATCH 0x100000
-#define STGM_CREATE 0x1000
-#define STGM_CONVERT 0x20000
-#define STGM_NOSNAPSHOT 0x200000
-#define STGM_FAILIFTHERE 0
-#define CWCSTORAGENAME 32
-#define ASYNC_MODE_COMPATIBILITY	1
-#define ASYNC_MODE_DEFAULT	0
-#define STGTY_REPEAT	256
-#define STG_TOEND	0xFFFFFFFF
-#define STG_LAYOUT_SEQUENTIAL	0
-#define STG_LAYOUT_INTERLEAVED	1
-#define COM_RIGHTS_EXECUTE 1
-#define COM_RIGHTS_SAFE_FOR_SCRIPTING 2
-#define STGOPTIONS_VERSION 2
-typedef enum tagSTGFMT {
-	STGFMT_STORAGE = 0, 
-	STGFMT_FILE = 3, 
-	STGFMT_ANY = 4, 
-	STGFMT_DOCFILE = 5
-} STGFMT;
-typedef struct tagSTGOPTIONS {
-	USHORT usVersion;
-	USHORT reserved;
-	ULONG ulSectorSize;
-	const WCHAR *pwcsTemplateFile;
-} STGOPTIONS;
-typedef enum tagREGCLS {
-	REGCLS_SINGLEUSE = 0,
-	REGCLS_MULTIPLEUSE = 1,
-	REGCLS_MULTI_SEPARATE = 2
-} REGCLS;
-#include <wtypes.h>
-#include <unknwn.h>
-#include <objidl.h>
-
-#ifdef __cplusplus
-inline BOOL IsEqualGUID(REFGUID rguid1, REFGUID rguid2)
-	{ return !memcmp(&rguid1, &rguid2, sizeof(GUID)); }
-inline BOOL operator==(const GUID& guidOne, const GUID& guidOther)
-	{ return !memcmp(&guidOne,&guidOther,sizeof(GUID)); }
-inline BOOL operator!=(const GUID& g1, const GUID& g2)
-	{ return !(g1 == g2); }
-#else
-#define IsEqualGUID(rguid1, rguid2) (!memcmp(rguid1, rguid2, sizeof(GUID)))
-#endif
-#define IsEqualIID(id1,id2) IsEqualGUID(id1,id2)
-#define IsEqualCLSID(id1,id2) IsEqualGUID(id1,id2)
-#include <cguid.h>
+#include <pshpack8.h>
+#include <combaseapi.h>
 
 typedef enum tagCOINIT {
-	COINIT_APARTMENTTHREADED	= 0x2,
-	COINIT_MULTITHREADED		= 0x0,
-	COINIT_DISABLE_OLE1DDE		= 0x4,
-	COINIT_SPEED_OVER_MEMORY	= 0x8
+  COINIT_APARTMENTTHREADED = 0x2,
+  COINIT_MULTITHREADED = COINITBASE_MULTITHREADED,
+  COINIT_DISABLE_OLE1DDE = 0x4,
+  COINIT_SPEED_OVER_MEMORY = 0x8
 } COINIT;
-typedef enum tagSTDMSHLFLAGS {
-    SMEXF_SERVER  = 0x01,
-    SMEXF_HANDLER = 0x02
-} STDMSHLFLAGS;
 
-WINOLEAPI_(DWORD) CoBuildVersion(void);
-WINOLEAPI CoInitialize(PVOID);
-WINOLEAPI CoInitializeEx(LPVOID,DWORD);
-WINOLEAPI_(void) CoUninitialize(void);
-WINOLEAPI CoGetMalloc(DWORD,LPMALLOC*);
-WINOLEAPI_(DWORD) CoGetCurrentProcess(void);
-WINOLEAPI CoRegisterMallocSpy(LPMALLOCSPY);
-WINOLEAPI CoRevokeMallocSpy(void);
-WINOLEAPI CoCreateStandardMalloc(DWORD,IMalloc**);
-#ifdef DBG
-WINOLEAPI_(ULONG) DebugCoGetRpcFault(void);
-WINOLEAPI_(void) DebugCoSetRpcFault(ULONG);
+#define MARSHALINTERFACE_MIN 500
+#define CWCSTORAGENAME 32
+
+#define STGM_DIRECT __MSABI_LONG(0x00000000)
+#define STGM_TRANSACTED __MSABI_LONG(0x00010000)
+#define STGM_SIMPLE __MSABI_LONG(0x08000000)
+
+#define STGM_READ __MSABI_LONG(0x00000000)
+#define STGM_WRITE __MSABI_LONG(0x00000001)
+#define STGM_READWRITE __MSABI_LONG(0x00000002)
+
+#define STGM_SHARE_DENY_NONE __MSABI_LONG(0x00000040)
+#define STGM_SHARE_DENY_READ __MSABI_LONG(0x00000030)
+#define STGM_SHARE_DENY_WRITE __MSABI_LONG(0x00000020)
+#define STGM_SHARE_EXCLUSIVE __MSABI_LONG(0x00000010)
+
+#define STGM_PRIORITY __MSABI_LONG(0x00040000)
+#define STGM_DELETEONRELEASE __MSABI_LONG(0x04000000)
+#define STGM_NOSCRATCH __MSABI_LONG(0x00100000)
+#define STGM_CREATE __MSABI_LONG(0x00001000)
+#define STGM_CONVERT __MSABI_LONG(0x00020000)
+#define STGM_FAILIFTHERE __MSABI_LONG(0x00000000)
+#define STGM_NOSNAPSHOT __MSABI_LONG(0x00200000)
+#define STGM_DIRECT_SWMR __MSABI_LONG(0x00400000)
+
+#define ASYNC_MODE_COMPATIBILITY __MSABI_LONG(0x00000001)
+#define ASYNC_MODE_DEFAULT __MSABI_LONG(0x00000000)
+
+#define STGTY_REPEAT __MSABI_LONG(0x00000100)
+#define STG_TOEND __MSABI_LONG(0xffffffff)
+
+#define STG_LAYOUT_SEQUENTIAL __MSABI_LONG(0x00000000)
+#define STG_LAYOUT_INTERLEAVED __MSABI_LONG(0x00000001)
+
+typedef DWORD STGFMT;
+
+#define STGFMT_STORAGE 0
+#define STGFMT_NATIVE 1
+#define STGFMT_FILE 3
+#define STGFMT_ANY 4
+#define STGFMT_DOCFILE 5
+#define STGFMT_DOCUMENT 0
+
+#include <objidl.h>
+
+#ifdef _OLE32_
+#ifdef _OLE32PRIV_
+WINBOOL _fastcall wIsEqualGUID (REFGUID rguid1, REFGUID rguid2);
+
+#define IsEqualGUID(rguid1, rguid2) wIsEqualGUID (rguid1, rguid2)
+#else
+#define __INLINE_ISEQUAL_GUID
 #endif
-WINOLEAPI CoGetClassObject(REFCLSID,DWORD,COSERVERINFO*,REFIID,PVOID*);
-WINOLEAPI CoRegisterClassObject(REFCLSID,LPUNKNOWN,DWORD,DWORD,PDWORD);
-WINOLEAPI CoRevokeClassObject(DWORD);
-WINOLEAPI CoGetMarshalSizeMax(ULONG*,REFIID,LPUNKNOWN,DWORD,PVOID,DWORD);
-WINOLEAPI CoMarshalInterface(LPSTREAM,REFIID,LPUNKNOWN,DWORD,PVOID,DWORD);
-WINOLEAPI CoUnmarshalInterface(LPSTREAM,REFIID,PVOID*);
-WINOLEAPI CoMarshalHresult(LPSTREAM,HRESULT);
-WINOLEAPI CoUnmarshalHresult(LPSTREAM,HRESULT*);
-WINOLEAPI CoReleaseMarshalData(LPSTREAM);
-WINOLEAPI CoDisconnectObject(LPUNKNOWN,DWORD);
-WINOLEAPI CoLockObjectExternal(LPUNKNOWN,BOOL,BOOL);
-WINOLEAPI CoGetStandardMarshal(REFIID,LPUNKNOWN,DWORD,PVOID,DWORD,LPMARSHAL*);
-WINOLEAPI CoGetStdMarshalEx(LPUNKNOWN,DWORD,LPUNKNOWN*);
-WINOLEAPI_(BOOL) CoIsHandlerConnected(LPUNKNOWN);
-WINOLEAPI_(BOOL) CoHasStrongExternalConnections(LPUNKNOWN);
-WINOLEAPI CoMarshalInterThreadInterfaceInStream(REFIID,LPUNKNOWN,LPSTREAM*);
-WINOLEAPI CoGetInterfaceAndReleaseStream(LPSTREAM,REFIID,PVOID*);
-WINOLEAPI CoCreateFreeThreadedMarshaler(LPUNKNOWN,LPUNKNOWN*);
-WINOLEAPI_(HINSTANCE) CoLoadLibrary(LPOLESTR,BOOL);
-WINOLEAPI_(void) CoFreeLibrary(HINSTANCE);
-WINOLEAPI_(void) CoFreeAllLibraries(void);
-WINOLEAPI_(void) CoFreeUnusedLibraries(void);
-WINOLEAPI CoCreateInstance(REFCLSID,LPUNKNOWN,DWORD,REFIID,PVOID*);
-WINOLEAPI CoCreateInstanceEx(REFCLSID,IUnknown*,DWORD,COSERVERINFO*,DWORD,MULTI_QI*);
-WINOLEAPI StringFromCLSID(REFCLSID,LPOLESTR*);
-WINOLEAPI CLSIDFromString(LPOLESTR,LPCLSID);
-WINOLEAPI StringFromIID(REFIID,LPOLESTR*);
-WINOLEAPI IIDFromString(LPOLESTR,LPIID);
-WINOLEAPI_(BOOL) CoIsOle1Class(REFCLSID);
-WINOLEAPI ProgIDFromCLSID(REFCLSID,LPOLESTR*);
-WINOLEAPI CLSIDFromProgID(LPCOLESTR,LPCLSID);
-WINOLEAPI_(int) StringFromGUID2(REFGUID,LPOLESTR,int);
-WINOLEAPI CoCreateGuid(GUID*);
-WINOLEAPI_(BOOL) CoFileTimeToDosDateTime(FILETIME*,LPWORD,LPWORD);
-WINOLEAPI_(BOOL) CoDosDateTimeToFileTime(WORD,WORD,FILETIME*);
-WINOLEAPI CoFileTimeNow(FILETIME*);
-WINOLEAPI CoRegisterMessageFilter(LPMESSAGEFILTER,LPMESSAGEFILTER*);
-WINOLEAPI CoGetTreatAsClass(REFCLSID,LPCLSID);
-WINOLEAPI CoTreatAsClass(REFCLSID,REFCLSID);
-typedef HRESULT (STDAPICALLTYPE *LPFNGETCLASSOBJECT)(REFCLSID,REFIID,PVOID*);
-typedef HRESULT (STDAPICALLTYPE *LPFNCANUNLOADNOW)(void);
-STDAPI DllGetClassObject(REFCLSID,REFIID,PVOID*);
-STDAPI DllCanUnloadNow(void);
-WINOLEAPI_(PVOID) CoTaskMemAlloc(ULONG);
-WINOLEAPI_(PVOID) CoTaskMemRealloc(PVOID,ULONG);
-WINOLEAPI_(void) CoTaskMemFree(PVOID);
-WINOLEAPI CreateDataAdviseHolder(LPDATAADVISEHOLDER*);
-WINOLEAPI CreateDataCache(LPUNKNOWN,REFCLSID,REFIID,PVOID*);
-WINOLEAPI StgCreateDocfile(const OLECHAR*,DWORD,DWORD,IStorage**);
-WINOLEAPI StgCreateDocfileOnILockBytes(ILockBytes*,DWORD,DWORD,IStorage**);
-WINOLEAPI StgOpenStorage(const OLECHAR*,IStorage*,DWORD,SNB,DWORD,IStorage**);
-WINOLEAPI StgOpenStorageOnILockBytes(ILockBytes*,IStorage*,DWORD,SNB,DWORD,IStorage**);
-WINOLEAPI StgIsStorageFile(const OLECHAR*);
-WINOLEAPI StgIsStorageILockBytes(ILockBytes*);
-WINOLEAPI StgSetTimes(OLECHAR const*,FILETIME const*,FILETIME const*,FILETIME const*);
-WINOLEAPI StgCreateStorageEx(const WCHAR*,DWORD,DWORD,DWORD,STGOPTIONS*,void*,REFIID,void**);
-WINOLEAPI StgOpenStorageEx(const WCHAR*,DWORD,DWORD,DWORD,STGOPTIONS*,void*,REFIID,void**);
-WINOLEAPI BindMoniker(LPMONIKER,DWORD,REFIID,PVOID*);
-WINOLEAPI CoGetObject(LPCWSTR,BIND_OPTS*,REFIID,void**);
-WINOLEAPI MkParseDisplayName(LPBC,LPCOLESTR,ULONG*,LPMONIKER*);
-WINOLEAPI MonikerRelativePathTo(LPMONIKER,LPMONIKER,LPMONIKER*,BOOL);
-WINOLEAPI MonikerCommonPrefixWith(LPMONIKER,LPMONIKER,LPMONIKER*);
-WINOLEAPI CreateBindCtx(DWORD,LPBC*);
-WINOLEAPI CreateGenericComposite(LPMONIKER,LPMONIKER,LPMONIKER*);
-WINOLEAPI GetClassFile (LPCOLESTR,CLSID*);
-WINOLEAPI CreateFileMoniker(LPCOLESTR,LPMONIKER*);
-WINOLEAPI CreateItemMoniker(LPCOLESTR,LPCOLESTR,LPMONIKER*);
-WINOLEAPI CreateAntiMoniker(LPMONIKER*);
-WINOLEAPI CreatePointerMoniker(LPUNKNOWN,LPMONIKER*);
-WINOLEAPI GetRunningObjectTable(DWORD,LPRUNNINGOBJECTTABLE*);
-WINOLEAPI CoInitializeSecurity(PSECURITY_DESCRIPTOR,LONG,SOLE_AUTHENTICATION_SERVICE*, void*,DWORD,DWORD,void*,DWORD,void*);
-WINOLEAPI CoGetCallContext(REFIID,void**);
-WINOLEAPI CoQueryProxyBlanket(IUnknown*, DWORD*,DWORD*,OLECHAR**,DWORD*,DWORD*,RPC_AUTH_IDENTITY_HANDLE*,DWORD*);
-WINOLEAPI CoSetProxyBlanket(IUnknown*,DWORD,DWORD,OLECHAR*,DWORD,DWORD,RPC_AUTH_IDENTITY_HANDLE, DWORD);
-WINOLEAPI CoCopyProxy(IUnknown*,IUnknown**);
-WINOLEAPI CoQueryClientBlanket(DWORD*,DWORD*,OLECHAR**, DWORD*,DWORD*,RPC_AUTHZ_HANDLE*,DWORD*);
-WINOLEAPI CoImpersonateClient(void);
-WINOLEAPI CoRevertToSelf(void);
-WINOLEAPI CoQueryAuthenticationServices(DWORD*, SOLE_AUTHENTICATION_SERVICE**);
-WINOLEAPI CoSwitchCallContext(IUnknown*,IUnknown**);
-WINOLEAPI CoGetInstanceFromFile(COSERVERINFO*, CLSID*,IUnknown*,DWORD,DWORD,OLECHAR*,DWORD,MULTI_QI*);
-WINOLEAPI CoGetInstanceFromIStorage(COSERVERINFO*,CLSID*, IUnknown*,DWORD,struct IStorage*, DWORD,MULTI_QI*);
-WINOLEAPI_(ULONG) CoAddRefServerProcess(void);
-WINOLEAPI_(ULONG) CoReleaseServerProcess(void);
-WINOLEAPI CoResumeClassObjects(void);
-WINOLEAPI CoSuspendClassObjects(void);
-WINOLEAPI CoGetPSClsid(REFIID,CLSID*);
-WINOLEAPI CoRegisterPSClsid(REFIID,REFCLSID);
+#endif
 
-#pragma pack(pop)
+#if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
+WINOLEAPI_(DWORD) CoBuildVersion (VOID);
+WINOLEAPI CoInitialize (LPVOID pvReserved);
+WINOLEAPI CoRegisterMallocSpy (LPMALLOCSPY pMallocSpy);
+WINOLEAPI CoRevokeMallocSpy (void);
+WINOLEAPI CoCreateStandardMalloc (DWORD memctx, IMalloc **ppMalloc);
+WINOLEAPI CoRegisterInitializeSpy (LPINITIALIZESPY pSpy, ULARGE_INTEGER *puliCookie);
+WINOLEAPI CoRevokeInitializeSpy (ULARGE_INTEGER uliCookie);
+
+typedef enum tagCOMSD {
+  SD_LAUNCHPERMISSIONS = 0,
+  SD_ACCESSPERMISSIONS = 1,
+  SD_LAUNCHRESTRICTIONS = 2,
+  SD_ACCESSRESTRICTIONS = 3
+} COMSD;
+
+WINOLEAPI CoGetSystemSecurityPermissions (COMSD comSDType, PSECURITY_DESCRIPTOR *ppSD);
+WINOLEAPI_(HINSTANCE) CoLoadLibrary (LPOLESTR lpszLibName, WINBOOL bAutoFree);
+WINOLEAPI_(void) CoFreeLibrary (HINSTANCE hInst);
+WINOLEAPI_(void) CoFreeAllLibraries (void);
+WINOLEAPI CoGetInstanceFromFile (COSERVERINFO *pServerInfo, CLSID *pClsid, IUnknown *punkOuter, DWORD dwClsCtx, DWORD grfMode, OLECHAR *pwszName, DWORD dwCount, MULTI_QI *pResults);
+WINOLEAPI CoGetInstanceFromIStorage (COSERVERINFO *pServerInfo, CLSID *pClsid, IUnknown *punkOuter, DWORD dwClsCtx, struct IStorage *pstg, DWORD dwCount, MULTI_QI *pResults);
+WINOLEAPI CoAllowSetForegroundWindow (IUnknown *pUnk, LPVOID lpvReserved);
+WINOLEAPI DcomChannelSetHResult (LPVOID pvReserved, ULONG *pulReserved, HRESULT appsHR);
+WINOLEAPI_(WINBOOL) CoIsOle1Class (REFCLSID rclsid);
+WINOLEAPI CLSIDFromProgIDEx (LPCOLESTR lpszProgID, LPCLSID lpclsid);
+WINOLEAPI_(WINBOOL) CoFileTimeToDosDateTime (FILETIME *lpFileTime, LPWORD lpDosDate, LPWORD lpDosTime);
+WINOLEAPI_(WINBOOL) CoDosDateTimeToFileTime (WORD nDosDate, WORD nDosTime, FILETIME *lpFileTime);
+WINOLEAPI CoFileTimeNow (FILETIME *lpFileTime);
+WINOLEAPI CoRegisterMessageFilter (LPMESSAGEFILTER lpMessageFilter, LPMESSAGEFILTER *lplpMessageFilter);
+WINOLEAPI CoRegisterChannelHook (REFGUID ExtensionUuid, IChannelHook *pChannelHook);
+WINOLEAPI CoTreatAsClass (REFCLSID clsidOld, REFCLSID clsidNew);
+WINOLEAPI CreateDataAdviseHolder (LPDATAADVISEHOLDER *ppDAHolder);
+WINOLEAPI CreateDataCache (LPUNKNOWN pUnkOuter, REFCLSID rclsid, REFIID iid, LPVOID *ppv);
+WINOLEAPI StgOpenLayoutDocfile (OLECHAR const *pwcsDfName, DWORD grfMode, DWORD reserved, IStorage **ppstgOpen);
+#endif
+
+#if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_APP)
+WINOLEAPI StgCreateDocfile (const WCHAR *pwcsName, DWORD grfMode, DWORD reserved, IStorage **ppstgOpen);
+WINOLEAPI StgCreateDocfileOnILockBytes (ILockBytes *plkbyt, DWORD grfMode, DWORD reserved, IStorage **ppstgOpen);
+WINOLEAPI StgOpenStorage (const WCHAR *pwcsName, IStorage *pstgPriority, DWORD grfMode, SNB snbExclude, DWORD reserved, IStorage **ppstgOpen);
+WINOLEAPI StgOpenStorageOnILockBytes (ILockBytes *plkbyt, IStorage *pstgPriority, DWORD grfMode, SNB snbExclude, DWORD reserved, IStorage **ppstgOpen);
+WINOLEAPI StgIsStorageFile (const WCHAR *pwcsName);
+WINOLEAPI StgIsStorageILockBytes (ILockBytes *plkbyt);
+WINOLEAPI StgSetTimes (const WCHAR *lpszName, const FILETIME *pctime, const FILETIME *patime, const FILETIME *pmtime);
+WINOLEAPI StgOpenAsyncDocfileOnIFillLockBytes (IFillLockBytes *pflb, DWORD grfMode, DWORD asyncFlags, IStorage **ppstgOpen);
+WINOLEAPI StgGetIFillLockBytesOnILockBytes (ILockBytes *pilb, IFillLockBytes **ppflb);
+WINOLEAPI StgGetIFillLockBytesOnFile (OLECHAR const *pwcsName, IFillLockBytes **ppflb);
+#endif
+
+#define STGOPTIONS_VERSION 2
+
+typedef struct tagSTGOPTIONS {
+  USHORT usVersion;
+  USHORT reserved;
+  ULONG ulSectorSize;
+#if STGOPTIONS_VERSION >= 2
+  const WCHAR *pwcsTemplateFile;
+#endif
+} STGOPTIONS;
+
+#if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_APP)
+WINOLEAPI StgCreateStorageEx (const WCHAR *pwcsName, DWORD grfMode, DWORD stgfmt, DWORD grfAttrs, STGOPTIONS *pStgOptions, PSECURITY_DESCRIPTOR pSecurityDescriptor, REFIID riid, void **ppObjectOpen);
+WINOLEAPI StgOpenStorageEx (const WCHAR *pwcsName, DWORD grfMode, DWORD stgfmt, DWORD grfAttrs, STGOPTIONS *pStgOptions, PSECURITY_DESCRIPTOR pSecurityDescriptor, REFIID riid, void **ppObjectOpen);
+WINOLEAPI BindMoniker (LPMONIKER pmk, DWORD grfOpt, REFIID iidResult, LPVOID *ppvResult);
+WINOLEAPI CoGetObject (LPCWSTR pszName, BIND_OPTS *pBindOptions, REFIID riid, void **ppv);
+WINOLEAPI MkParseDisplayName (LPBC pbc, LPCOLESTR szUserName, ULONG *pchEaten, LPMONIKER *ppmk);
+WINOLEAPI MonikerRelativePathTo (LPMONIKER pmkSrc, LPMONIKER pmkDest, LPMONIKER *ppmkRelPath, WINBOOL dwReserved);
+WINOLEAPI MonikerCommonPrefixWith (LPMONIKER pmkThis, LPMONIKER pmkOther, LPMONIKER *ppmkCommon);
+WINOLEAPI CreateBindCtx (DWORD reserved, LPBC *ppbc);
+WINOLEAPI CreateGenericComposite (LPMONIKER pmkFirst, LPMONIKER pmkRest, LPMONIKER *ppmkComposite);
+WINOLEAPI GetClassFile (LPCOLESTR szFilename, CLSID *pclsid);
+WINOLEAPI CreateClassMoniker (REFCLSID rclsid, LPMONIKER *ppmk);
+WINOLEAPI CreateFileMoniker (LPCOLESTR lpszPathName, LPMONIKER *ppmk);
+WINOLEAPI CreateItemMoniker (LPCOLESTR lpszDelim, LPCOLESTR lpszItem, LPMONIKER *ppmk);
+WINOLEAPI CreateAntiMoniker (LPMONIKER *ppmk);
+WINOLEAPI CreatePointerMoniker (LPUNKNOWN punk, LPMONIKER *ppmk);
+WINOLEAPI CreateObjrefMoniker (LPUNKNOWN punk, LPMONIKER *ppmk);
+#endif
+
+#if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
+WINOLEAPI CoInstall (IBindCtx *pbc, DWORD dwFlags, uCLSSPEC *pClassSpec, QUERYCONTEXT *pQuery, LPWSTR pszCodeBase);
+WINOLEAPI GetRunningObjectTable (DWORD reserved, LPRUNNINGOBJECTTABLE *pprot);
+#endif
+
+#include <urlmon.h>
+#include <propidl.h>
+
+#if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
+WINOLEAPI CreateStdProgressIndicator (HWND hwndParent, LPCOLESTR pszTitle, IBindStatusCallback *pIbscCaller, IBindStatusCallback **ppIbsc);
+#endif
+
+#ifndef RC_INVOKED
+#include <poppack.h>
+#endif
 #endif

@@ -1,7 +1,7 @@
 <?php
 
-/* 
- * Copyright (C) 2017 Marcelo C. Pereira <mcper at unicamp.br>
+/*
+ * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// set the correct e-mail addresses below
-$lwi_admin = "lwi_admin@localhost";
-$reply_to = "webmaster@localhost";
-$subject = "LWI user feedback";
-
+include '../defaults.php';
 
 if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
 
@@ -29,11 +25,11 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
     $message = json_decode( filter_input_array( INPUT_POST )[ "x" ], false );
     if ( isset ( $message ) ) {
         if ( isset ( $message->name ) ) {
-            $name = filter_var( $message->name, FILTER_SANITIZE_STRING );
+            $name = filter_var( $message->name, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
             if ( isset ( $message->email ) ) {
                 $email = filter_var( $message->email, FILTER_SANITIZE_EMAIL );
                 if ( isset ( $message->text ) ) {
-                    $text = wordwrap( filter_var( $message->text, FILTER_SANITIZE_STRING ), 70, "\r\n" );
+                    $text = wordwrap( filter_var( $message->text, FILTER_SANITIZE_FULL_SPECIAL_CHARS ), 70, "\r\n" );
                 } else {
                     echo "Invalid message text\n\nPlease try adding a valid text and try again";
                     return;
@@ -72,7 +68,7 @@ if ( filter_input_array( INPUT_SERVER )[ "REQUEST_METHOD" ] === "POST" ) {
     // Send mail
     if ( mail( $lwi_admin , $subject, $text, $header ) ) {
         echo "Message sent\n\nThanks for your feedback";
-    } else {    
+    } else {
         echo "Message not sent\n\nSorry, there was a problem sending your message";
     }
 

@@ -1,0 +1,10 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Type=Application
+Categories=Development;Simulation;IDE;
+Terminal=false
+Name=LSD Model Manager
+Comment=Laboratory for Simulation Development
+Exec=$LSDROOT/LMM
+Icon=$LSDROOT/src/icons/lmm.png

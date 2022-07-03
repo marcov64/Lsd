@@ -1,34 +1,42 @@
 Industry Model (ver. 2)
 =======================
 
+Written by Marcelo C. Pereira, University of Campinas
+Copyright Marcelo C. Pereira
 
-Based on Dosi, Pereira and Virgilito 2016, The footprint of evolutionary processes of learning and selection upon the statistical properties of industrial dynamics,
+
+Relevant references
+===================
+
+Dosi, Pereira and Virgilito 2017, The footprint of evolutionary processes of learning and selection upon the statistical properties of industrial dynamics. Industrial and Corporate Change, 26(2):187-210.
+
+Dosi, Pereira and Virgilito 2018, On the robustness of the fat-tailed distribution of firm growth rates: a global sensitivity analysis. Journal of Economic Interaction and Coordination, 13:173-193.
 
 
 Timeline and model organization
 ===============================
 
-a) At time 0= There are N initial incumbent firms. They have at time 0 equal productivity and equal market shares. 
+a) At time 0= There are N initial incumbent firms. They have at time 0 equal productivity and equal market shares.
 
 b) At time 1= During the first period, if not under regime Mk I, they learn according to the dynamic of the specified process on competitiveness. Hence they acquire or loose market share according to the quasi replicator. The replicator is applied BEFORE firms die.
 
-c) Moroever they may die according to the "two" rules of death: too small market shares and/or very very low competitiveness. 
+c) Moroever they may die according to the "two" rules of death: too small market shares and/or very very low competitiveness.
 
-d) At the end of the period the number of entrants is drawn as a function of the TOTAL number of firms at the beggining of the period (survived or in the process of dying) or in a way to keep the initial number of firms constant (according to the configuration). 
+d) At the end of the period the number of entrants is drawn as a function of the TOTAL number of firms at the beggining of the period (survived or in the process of dying) or in a way to keep the initial number of firms constant (according to the configuration).
 
-e) The competitiveness of the entrants is chosen according to the selected arrival regime. 
+e) The competitiveness of the entrants is chosen according to the selected arrival regime.
 
-f) Attribute an initial small share to the entrants and recalculate accordingly the share of surviving incumbents. The initial small share is transfered from the incumbents proportionally to their market share (if possible).  
+f) Attribute an initial small share to the entrants and recalculate accordingly the share of surviving incumbents. The initial small share is transfered from the incumbents proportionally to their market share (if possible).
 
 g) At time 2= repeat the process starting from the new initial conditions and the level of competitiveness inherited from period 1. Entrants older than 1 period (or as set in the AgeEntrant parameter) become incumbents. During the entrant phase of life, firms don't learn.
 
-h) The three market regimes are mutually exclusive (may be analyzed in independent markets). 
+h) The three market regimes are mutually exclusive (may be analyzed in independent markets).
 
 i) There are three entry regimes.
 
 j) There are two arrival regimes, independently from the market regime.
 
-k) Productivity advances (theta) follow six alternative innovation shock profiles, according to the selected distribution. 
+k) Productivity advances (theta) follow six alternative innovation shock profiles, according to the selected distribution.
 
 l) Firm level statistics: market share, productivity, normalized productivity, growth (log), age.
 
@@ -48,7 +56,7 @@ There are several .sa files in the model home directory pre-configured for sensi
 Analysis of results in R
 ========================
 
-There are .R scripts for doing the model analysis in the subdirectory R. When using these scripts, the best approach is to generate the LSD results files in a subdirectory inside the R one. 
+There are .R scripts for doing the model analysis in the subdirectory R. When using these scripts, the best approach is to generate the LSD results files in a subdirectory inside the R one.
 
 As an example, the R/MarkII/Beta subdirectory contains an example configuration (MarkII-Beta.lsd) which can be loaded in LSD and executed (it will produce 10 runs of data, as an short MC sample). The generated data can be analyzed using the scripts in the R subdirectory (except for the SA ones, see below). Set the R subdirectory as the working directory for R and run the scripts using the 'Rscript' terminal command or open the desired script in RStudio and click on the 'Source' button. The results (.csv and .pdf files) are generated in the same subdirectory.
 

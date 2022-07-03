@@ -1,13 +1,16 @@
 **************************************************************
 
-	LSD 7.2 - December 2019
+	LSD 8.0 - May 2022
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
-	
+
 **************************************************************
+
+This file has no line breaks, please use it on an editor able 
+to perform word wrapping.
 
 ***********
 Legal stuff
@@ -17,12 +20,28 @@ LSD is copyrighted by Marco Valente and Marcelo C. Pereira (version 7.x addition
 
 LSD includes third party software under the license of the copyright owners:
 
-Eigen 3.3.7 is copyrighted by Benoit Jacob and others under a MPL2 license, http://eigen.tuxfamily.org
-NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under a GPL 2.1 license, http://harvest.nps.edu
-NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under a GPL 2.1 license, http://harvest.nps.edu
+GCC 11.3 and associated utilities are copyrighted by the Free Software Foundation, Inc. under GPL 3, https://gcc.gnu.org
+Tcl/Tk 8.6 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
+MSYS2 3.3.4, https://www.msys2.org
+Cygwin 3.3.4 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
+7-Zip LZMA SDK 21.07 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
+Makeself 2.4.5 is copyrighted by Stephane Peter under GPL2, https://makeself.io
+Gnuplot 5.4.3 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
+Eigen 3.4.0 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
+subbotools 1.3 is copyrighted by Giulio Bottazzi under GPL2, http://cafim.sssup.it/~giulio/software/subbotools
+NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
+NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under GPL 2.1, http://harvest.nps.edu
 seticon/osxconutils is copyrighted by Sveinbjorn Thordarson, https://sveinbjorn.org/osxiconutils
 Shortcut.exe 1.11 is copyrighted by Marty List, http://www.OptimumX.com
-Silk icon set 1.3 is copyrighted by Mark James under a CCA 2.5 license, http://www.famfamfam.com/lab/icons/silk
+Silk icon set 1.3 is copyrighted by Mark James under CCA 2.5 license, http://www.famfamfam.com/lab/icons/silk
+awthemes 9.2.2 is copyrighted by Brad Lanam, https://sourceforge.net/projects/tcl-awthemes
+BallroomDJ 3.29.20 is copyrighted by Brad Lanam, https://sourceforge.net/projects/ballroomdj
+ttkthemes 3.1.0 is copyrighted by RedFantom under GNU GPL 3+, https://github.com/TkinterEP/ttkthemes
+tksvg 0.7 is copyrighted by Harald Oehlmann, https://github.com/oehhar/tksvg
+dblclick.tcl is copyrighted by Wolf-Dieter Busch under OLL, https://wiki.tcl-lang.org/page/doubleclick
+tooltip.tcl 1.4.6 is copyrighted by Jeffrey Hobbs, https://wiki.tcl-lang.org/page/tklib
+tkcon.tcl 2.5 is copyrighted by Jeffrey Hobbs, https://wiki.tcl-lang.org/page/Tkcon
+tkdiff.tcl 4.2 is copyrighted by John M. Klassa and others GNU GPL 2+, https://sourceforge.net/projects/tkdiff
 
 
 ********
@@ -31,16 +50,16 @@ Contents
 
 This Readme.txt file contains five sections:
 
-- Introduction to LSD
-- LSD distribution content
-- Installing LSD (Windows, MacOS X and Linux)
-- Manually configuring LSD
-- Hints on the use of LSD
+1. Introduction to LSD
+2. LSD distribution content
+3. Hints on the use of LSD
+4. Installing LSD (Windows, macOS and Linux)
+5. Optional compilers in Windows (MSYS2 and Cygwin)
 
 
-************
-What is LSD?
-************
+***************
+1. What is LSD?
+***************
 
 LSD is based on the assumption that simulation models are distinguished from simulation programs. Using LSD a user is concerned exclusively with the description of the theoretical model, while all the technicalities of the program implementing the model are automatically generated in an intuitive and computationally efficient way.
 
@@ -48,235 +67,34 @@ LSD can be considered as a modeling language. Using LSD a user is required to de
 
 The code for the equations is expressed in a highly symbolic form, using a development environment providing assistance and examples. From this code the system automatically generates a program endowed with a complete set of interfaces to exploit the model. With such interfaces the user can: define the elements of the model, run simulations in various modes, inspect in any details events at run time, being informed on errors, analyze the results, generate automatic documentation.
 
-The user interfaces and the skills required to implement simple models can be learned in a few days of training. Being based on C++ a LSD model can both express any computational content, and make use of existing libraries, generating extremely fast and efficient code. LSD is an open source project and makes use of other open source tools, as the GNU C++ compiler, Tcl/Tk windowing toolkit, gnuplot graphical package. LSD is available natively for Linux, Windows and Mac OS X systems, with minimal requirements.
+The user interfaces and the skills required to implement simple models can be learned in a few days of training. Being based on C++ a LSD model can both express any computational content, and make use of existing libraries, generating extremely fast and efficient code. LSD is an open source project and makes use of other open source tools, as the GNU C++ compiler, Tcl/Tk windowing toolkit, gnuplot graphical package. LSD is available natively for Windows, macOS and Linux computers, with minimal requirements.
 
 
-************************
-LSD distribution content
-************************
+***************************
+2. LSD distribution content
+***************************
 
 This distribution contains:
 
 - LSD code, for the creation of simulation models
 - LSD Model Manager (LMM), a development environment for LSD models
 - Several LSD example models
-- Comprehensive documentation, organized as context-sensitive help pages 
+- Comprehensive documentation, organized as context-sensitive help pages
 
 LSD source code: source files are usually managed (e.g., for compilation) automatically, so that users need not to worry for technical issues or command line usage. Upgrading to new versions of LSD (which always guarantees backward compatibility) necessitates only to replace the source files (e.g, extracting the new distribution on the existing location).
 
-LSD example models : several models are available, providing examples on the design of whole models, which can be used to copy-and-past single equations or chunks of code.
+LSD example models: several models are available, providing examples on the design of whole models, which can be used to copy-and-past single equations or chunks of code.
 
 LSD Model Manager (LMM): LSD models can be developed using any text editor and standard make files, so users are allowed to use their preferred development environment. However, LSD distribution contains a simple IDE (integrated development environment) providing all the functionalities required by the typical needs of a LSD project. LMM permits to manage easily several modeling projects (small and large), to create new model code with extensive assistance, and to easily debug problematic models.
- 
-Documentation: all LSD documentation is accessible through help menus and presented as HTML pages.
 
+LSD Web Interface (LWI): LWI is NOT installed by the LSD installer. So, after installing LSD, please download the source code at https://github.com/marcov64/LSD and copy the folder named lwi in the downloaded archive (.zip) to the same folder where you installed LSD, making sure the entire subfolder structure below lwi is copied.
 
-********************************
-Windows installation (32/64-bit)
-********************************
 
-To install LSD, simply unzip the LSD distribution file on the desired folder. In most cases "C:\" (the root of the hard disk) is the best option. The simplest way of doing is:
+*********************
+3. Use of LMM and LSD
+*********************
 
-1. In an internet browser, open the site https://github.com/marcov64/Lsd/releases , choose the desired release, and click on the respective "Source code (zip)" link to download the LSD distribution file.
-
-2. Open Windows Explorer and double-click on the downloaded LSD distribution file to open it (e.g., Lsd-7.2-master.zip).
-
-3. Drag the single folder inside the distribution file (e.g., Lsd-7.2-master) to the desired location. The recommended is "C:\", normally labeled as "Local Disk (C:)" in Windows Explorer.
-
-This will create the whole LSD folder structure. The distribution file may be deleted after installation.
-
-IMPORTANT: LSD cannot be installed within a folder (or having a parent folder) containing spaces in its name. For example, the directory "C:\Program Files\Lsd" cannot be used. If you installed LSD in such a location, simply move (drag) the whole LSD folder structure to an adequate place ("C:\" recommended).
-
-LSD operates in two modes: 32 and 64-bit. Most recent Windows computers come enabled to the newer 64-bit mode. So, the recommended configuration for most users is to use the more capable 64-bit version of LSD. It can handle much larger models and access all the memory available in your computer (the 32-bit version is limited to 2 Gbytes). However, to use the 64-bit version the user has to manually install a compatible 64-bit compiler, if one is not already present (usually not), as detailed in the next section.
-
-To create a desktop link (icon) to run LSD/LMM, you simply double-click in Windows Explorer one of the following batch files available in the installation directory:
-
-LSD 32-bit: add-shortcut.bat 
-LSD 64-bit: add-shortcut64.bat   (requires the installation of a 64-bit compiler, see below)
- 
-After the desktop icon is created, double-clicking it opens LMM (LSD Model Manager) in the selected mode (32-bit or 64-bit), which allows to create new models, or select existing models. Never invoke the files "lmm.exe" or "lmm64.exe" directly, because they need some environment variables to be set by "run.bat" or "run64.bat". 
-
-If you create a model using a mode (say, 32-bit) and later decides to use it under a different one (say, 64-bit), you must manually reconfigure LSD following the instructions in the "Manually configuring LSD" section below.
-
-GNUPLOT INSTALLATION:
-
-It is recommended, but not required, to install the Gnuplot graphical plotting application. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. The required Gnuplot installer (64-bit preferred, except for old Windows 32-bit computers) can be downloaded from http://www.gnuplot.info . The step-by-step instructions to install Gnuplot are:
-
-1. In an internet browser, open the site http://www.gnuplot.info, choose the desired version (the current stable one is recommended), click on the respective Release link, and on the files list choose gpXXX-winYY-mingw.exe, where XXX is the current version number an YY is the Windows type (currently, gp527-win64-mingw.exe, for 64-bit Windows).
-
-2. Open Windows Explorer and double-click on the downloaded Gnuplot installer (e.g., gp527-win64-mingw.exe).
-
-3. Accept the agreement, press "Next" twice, agree with the default installation folder, press "Next", accept the proposed components to install, press "Next", accept the creation of a Start Menu item, and press "Next" again.
-
-4. In the "Select Additional Tasks", set the terminal type to "wxt", keep the proposed file associations, and MAKE SURE you select the "Add application directory to your PATH environment variable". If this option is not visible, you need to scroll down in the window to see it. Press "Next" and then "Install". When the installation is completed, press "Next" and "Finish".
-
-ATTENTION: If Gnuplot is not included in the Windows PATH environment variable, LSD will not be able to use Gnuplot. If this option is missing, Gnuplot must be installed again using the correct options as described above.
-
-
-**********************************
-Windows installation (64-bit only)
-**********************************
-
-To use the 64-bit mode of LSD, you need the GNU 64-bit C++ compiler installed (Cygwin or MSYS2 mingw-w64-x86_64 versions are both fine). The Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Preferably, install Cygwin to the default directory ("C:\cygwin64"). If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, four non-default packages are REQUIRED by LSD (mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make, gdb and multitail). Lastly, Cygwin must be added to the PATH environment variable (not done by the installer).
-
-If you prefer to use MSYS2 instead of Cygwin (only recommended for advanced users), see instructions at the end of this section.
-
-Step-by-step procedure to enable LSD 64-bit mode (an internet connection is required):
-
-1. In an internet browser, open the site http://www.cygwin.com and find the link to download the Cygwin installer file for Windows 64-bit (setup-x86_64.exe).
-
-2. In Windows Explorer, double click the downloaded "setup-x86_64.exe" installer file.
-
-3. When the installer opens, choose "Install from Internet", accept the proposed root install directory (C:\cygwin64), press "Next", opt for installing for "All Users", press "Next", accept the proposed local package directory (C:\cygwin64), "Next" again, select "Direct Connection", press "Next", choose any of the offered download sites (one closer to your location will just provide faster downloads), and "Next".
-
-4. When the "Select Packages" window opens, click on the View option list, choose "Full" (to see the list with all packages), type the name of each required package in the Search box, find the EXACT name in the packages list (do not use partial matches), and on the "New" column change the option from "Skip" to the latest available version (the one with the higher number). Repeat this process for each of the five required packages: "mingw64-x86_64-gcc-g++", "mingw64-x86_64-zlib", "make", "gdb", and "multitail".
-
-5. When all the required packages are marked for download, choose "Next", accept the proposed changes and proceed to download and install Cygwin. Please wait until the installer finishes (it may take a while) and close the installer when requested.
-
-6. In Windows Explorer, double click in the "add-cygwin64-to-path.bat" file (in LSD installation folder). A black empty window should briefly open and close, and the Windows 64-bit configuration is done. Otherwise, if there is an error message and the black window remains open, see the alternative steps below to fix the problem.
-
-IN CASE OF PROBLEMS:
-
-LSD requires Cygwin to be added to the Windows PATH environment variable. If the above instructions fail, please open a Windows Command Prompt in the LSD installation directory. To do so, press and hold shift while right clicking LSD folder in Windows Explorer, then select "Open command prompt here". On the Command Line, please type the command below and press "Enter". If the installation was done to a different path, please adjust the command to the correct Cygwin installation directory:
-
-add-cygwin64-to-path C:\cygwin64
-
-Alternatively, or if you have problems with the command above, you can use Windows GUI to add Cygwin to the PATH. In Windows open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, select "Path" and press "Edit..." (be carefull to NOT DELETE the existing text). Run across the lines to see if your Cygwin bin folder, i.e. "C:\cygwin64\bin", is already there. If Yes, just press "Cancel" 3 times. If not, at the end of the "Variable value" field type ";" (next to the existing text) and add your Cygwin bin folder. Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your Cygwin bin folder in PATH.
-
-If you cannot create the LSD icon on your desktop following the steps above, you may still run LSD by double-clicking the file "run64.bat" inside the LSD installation directory.
-
-WARNING: LSD operates by creating and modifying executable (.exe) files for your simulation models. This kind of procedure may be INCORRECTLY detected as suspicious by some anti-virus software and incorrect operation of LSD may arise, particularly when you try to compile and/or run your model. In this case, you may try to reconfigure your anti-virus to allow LSD operation or try to TEMPORARILY disable it entirely. Microsoft standard anti-virus software (included and enabled by default in Windows 10) is known to operate properly with LSD and offers a good level of protection for most users.
-
-MSYS2: Please note that MSYS2 is NOT required if the above instructions for installing Cygwin were already performed. Steps to configure MSYS2:
-
-1. Download and install the MSYS2 64-bit installer from http://www.msys2.org.
-
-2. Open the MSYS2 shell and update MSYS2 using the command:
-
-pacman -Syu
-
-3. When instructed, close and re-open the MSYS2 shell, and update again:
-
-pacman -Su
-
-4. Still in the shell, install the compiler and required tools:
-
-pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb
-
-5. Add the compiler to path, double clicking on "add-msys2-to-path.bat" file (in LSD installation folder) if MSYS2 was installed on the default path (C:\msys64). Otherwise, use the command below in the LSD installation folder (replacing PATH with the chosen installation folder):
-
-add-msys2-to-path PATH
-
-SLOW GDB OPERATION: the GDB debugger can become very slow in Windows when the models are large. This is due to the Windows special handling of the heap (dynamic memory allocation) for programs being debugged. It is normally safe to disable this special handling by defining the folowing environment variable:
-
-_NO_DEBUG_HEAP=1
-
-To define it, open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, press "New...", type "_NO_DEBUG_HEAP" as the variable name, and "1" as its value. Press "Ok" 3 times and you are done.
-
-
-******************
-Linux Installation
-******************
-
-To install LSD, simply unpack the LSD distribution file (e.g., Lsd-7.2-master.tar.gz) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using your file manager. This will create the whole directory structure. 
-
-Alternatively, it is also possible to unpack the distribution file using the terminal using the command (".tar.gz" extension files only):
-
-tar -xzf Lsd-7.2-master.tar.gz
-
-The distribution file may be deleted after installation.
-
-If you want to create a desktop link (icon) to run LSD/LMM, you can use the script available in the installation directory executing the command (Ubuntu and Gnome based distributions):
-
-./add-shortcut-linux.sh
-
-To use the LSD in Linux it is necessary to have the GNU gcc/g++ compiler (version 4.9+) with the standard packages, including zlib, Tcl/Tk 8.6, and GDB. Likely, you already have those installed on your computer but you may need to install the development version of these packages. Usually, you can use your distribution package manager to get the appropriate 'dev' package versions to your installation. Though not strictly necessary, it is also suggested to have the Gnuplot graphical package (for advanced graphics), preferably using Qt. 
-
-In Debian or Ubuntu, to make sure you have the correct libraries you can use:
-
-sudo apt-get install build-essential gdb gnuplot-qt zlib1g-dev tcl8.6-dev tk8.6-dev multitail
-
-In Fedora, CentOS or Red Hat, the equivalent command is:
-
-sudo yum install gcc-c++ make gdb gnuplot zlib-devel tcl tk tcl-devel tk-devel multitail
-
-IN CASE OF PROBLEMS:
-
-Please check your configuration has at least g++ version 4.9 installed (you may check it by issuing the command "g++ -v" in terminal). Ubuntu minimum supported version is 15.04 (older versions can be updated to use g++ 4.9 but this is not the default configuration). If only g++ version 4.8 is available, it is usually possible to use it if the user change the "-std=gnu++14" directive to "-std=gnu++11" in the GLOBAL_CC parameter in LMM menu "Model>System Options". 
-
-Also make sure if Tcl/Tk version 8.6 is present (use the command "echo 'puts $tcl_version;exit 0' | tclsh" to get the installed version). If a different version is present, but at least version 8.5, the user must change the TCL_VERSION parameter in LMM menu "Model>System Options" to the appropriate value.
-
-To run LMM from a system shell, please open a terminal in the installation directory (or use your graphical file browser) and execute:
-
-./lmm
-
-If you get an error when trying to execute any of the above commands, please make sure the respective files are set as executable (use terminal command "chmod +x FILENAME" in the installation directory, replacing FILENAME by the name of the corresponding file).
-
-You may need to recompile LMM if the included pre-compiled versions have problems with your Linux setup (a 32-bit distribution, for instance). Move in the LSD installation directory and use the command:
-
-make -f makefile.linux
-
-If the compilation fails, the most likely reason is the mis-specification of the locations of the files required for the compilation. The major problem is that Tcl/Tk may be installed in your systems in several different locations. The makefile contains a list of variables for the directory needed for the Tcl/Tk libraries and include files. For example, on some systems you have the Tcl/Tk library located in /usr/lib, or /usr/local/lib, or usr/share/lib, etc. Similarly, the include files may be located in different directories. The makefile lists the files you need to identify; check the location for those files and edit the makefile as appropriate for your system. 
-
-It is also possible that Tcl/Tk requires further libraries besides those specified in the makefile. If you have errors even after having specified the correct path to the Tcl/Tk libraries, then find out where the file wish is located (using the command "whereis wish"), and then find out which libraries are used with the command:
-
-ldd /usr/bin/wish
-
-If the system lists further libraries, add the appropriate option to the linker (e.g. -lieee to add the library libieee.a) in the makefile to the variable DUMMY.
-
-IMPORTANT: if you modified the makefile to compile LMM, the same changes need to be made to the makefiles used to generate the LSD Model programs. You need to make these changes only once using LMM. Use the menu item System Compilation Options in menu Model. You will have to fill the same variables as in the makefile used to compile LMM, which must be set to the same values.
-
-
-***************************
-macOS (10.10+) Installation
-***************************
-
-LSD is only supported in mac computers as a native macOS (Aqua) application. Dark mode (macOS 10.14+) is not fully supported because of the color scheme imposed by macOS (colors may be manually remapped to attenuate the problem changing the src/defaults.tcl file, look for the 'default colors' section).
-
-To install LSD, simply unzip the LSD distribution file (e.g., Lsd-7.2-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
-
-Next, open the Terminal application (located inside the Utilities app folder), and type the following commands (each line must be completed by pressing "Enter"):
-
-cd ~/Lsd-7.2-master
-./add-shortcut-mac.sh
-
-After a successful installation, a desktop shortcut (icon) will be available for using LMM/LSD.
- 
-Users of macOS Sierra (10.12) or newer MUST yet manually install the Apple Command Line Tools package (the full Xcode package is NOT required) to make the compiler and other required command line tools available in macOS. To install it, open the Terminal  and enter the following command:
-
-xcode-select --install
-
-Then, in the opened window, click on the "Install" button (do NOT click on the "Get Xcode" button), accept the license and wait the installation to complete (you may have to reboot to finish the installation).
-
-It is recommended, but not required, to install multitail and Gnuplot applications. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. The easiest way to install Gnuplot is to use the Homebrew package manager for the installation. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
-
-ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-
-After Homebrew installation finishes (details at http://brew.sh), you can install Gnuplot using the following command in Terminal (Qt framework will be automatically installed too):
-
-brew install multitail gnuplot
-
-IN CASE OF PROBLEMS:
-
-If using macOS 10.12 (Sierra) or newer, you MUST use the "add-shortcut-mac.sh" command above to remove LMM and LSD from the system quarantine. Failing to do so will prevent from using LSD as a native macOS application.
-
-If you delete or cannot create the LSD desktop shortcut, you can still run the app named LMM located inside the LSD installation directory (double click it in Finder) to open LMM/LSD, or try to rerun the "add-shortcut-mac.sh" script to recreate the shortcut.
-
-
-************************
-Manually configuring LSD
-************************
-
-After LSD installation, or when changing between operating systems or 32 and 64-bit modes, it may be necessary to (re-) configure LSD. To do so, after launching LMM, perform the following steps:
-
-1. Select "Options..." in menu "File" then press the button "Default", change any configuration if desired, and press "OK". 
-
-2. Select "System Options..." in menu "Model", press the button "Default", and "OK".
-
-
-******************
-Use of LMM and LSD
-******************
+INSTALLATION: please follow the detailed steps below to install LSD in your Linux, Windows or Mac computer. DO NOT try to use LSD without making sure all the required steps were successfully performed.
 
 LMM (LSD Model Manager) is a program used to manage LSD model programs. LSD (Laboratory for Simulation Development) model programs are stand-alone programs that execute fast and efficiently difference-equation simulation models. For a user to develop a new simulation model it is only requested to specify the equations of the model in a simplified C++ language, with the assistance of automatic help. LSD model programs generate automatically the code necessary to link the equations in a coherent sequence within a simulated time steps, saving and elaborating the result, allowing easy access to initialization values, and many other operations required for fully exploiting the simulation model.
 
@@ -291,6 +109,254 @@ ATTENTION: the very first time a model is compiled an error may be caused by the
 
 When a model program is successfully compiled and run by LMM, then the user can interact with the LSD Browser interface. This window permits to control every aspect of the simulation run (e.g., setting initial values, observing and saving results, reading the model documentation etc.) except for the modification of the code for the equations, done in LMM. For this latter operation you need to close the LSD model program, tell LMM to show the equation file if necessary, edit the model's equations and compile/run a new LSD model program.
 
-Please check LSD documentation using the menu Help at any time. The documentation includes from tutorials and a course on LSD to a complete manual covering all LSD details.
+DOCUMENTATION: all LSD documentation is accessible through help menus and presented as HTML pages after installation is finished. The documentation includes from tutorials and a course on LSD to a complete manual covering all LSD details.
+
+MANUAL CONFIGURATION: after LSD installation, or when changing between operating systems or 32 and 64-bit modes, it may be necessary to (re-) configure LSD. To do so, after launching LMM, perform the following steps:
+
+1. Select "Options..." in menu "File" then press the button "Default", change any configuration if desired, and press "OK".
+
+2. Select "System Options..." in menu "Model", press the button "Default", and "OK".
+
+WARNING: LSD operates by creating and modifying executable (.exe) files for your simulation models. This kind of procedure may be INCORRECTLY detected as suspicious by some anti-virus software and incorrect operation of LSD may arise, particularly when you try to compile and/or run your model. In this case, you may try to reconfigure your anti-virus to allow LSD operation or try to TEMPORARILY disable it entirely. Windows standard anti-virus software (included and enabled by default in Windows 10) is known to operate properly with LSD and offers a good level of protection for most users.
 
 For persisting problems email us: valente@ec.univaq.it or mcper@unicamp.br
+
+
+**************************************
+4.1 Windows installation (64-bit ONLY)
+**************************************
+
+IMPORTANT: from version 8.0 and higher, LSD supports only Windows 64-bit. If you must run LSD in a Windows 32-bit computer, please use the 7.2 version which can be downloaded from the same site indicated below. If you are unsure of the version of Windows in your computer, please check in "Windows > Settings > System > About > System type".
+
+ANTIVIRUS BAD BEHAVIOR: many third-party anti-virus software consider LSD operation suspicious because it creates executable files and deals with tools, like compilers, which do not belong to the regular user universe. This wrong assumption can break LSD operation in many aspects and usually cannot be fixed reliably, so using LSD together with these tools is NOT SUPPORTED. LSD is tested and fully works with the embedded Windows Security anti-virus, which is unfortunately disabled when a third-party anti-virus is installed by the user. According to specialized media tests, Windows anti-virus is considered an excellent option, in particular when compared to the free alternatives, so using it instead should not create any problem. However, if you cannot remove your current third-party anti-virus (and enable Windows Security), you still have the option to run LSD inside a virtual machine like VirtualBox or VMware (but with reduced performance).
+
+To install LSD, the simplest alternative is to use the installer executable (e.g. LSD-installer-windows-8-0-stable-1.exe). Download it, double-click on the installer file, and follow the instructions. The installer executable can be deleted after the installation. According to your configuration, express authorization must be provided before downloading and running the LSD installer. This is normal.
+ 
+Alternatively, or in the case of problems using the installer, it is also possible to simply unzip a LSD distribution file archive on the desired folder. In most cases "C:\" (the root of the hard disk) is a good option. The steps to perform a manual installation are:
+
+1. In an internet browser, open the site https://github.com/marcov64/Lsd/releases , choose the desired release, and click on the respective "Source code (zip)" link to download the LSD distribution file.
+
+2. Open Windows Explorer and double-click on the downloaded LSD distribution file to open it (e.g., LSD-8.0-master.zip).
+
+3. Drag the single folder inside the distribution file (e.g., LSD-8.0-master) to the desired location. The recommended is "C:\", normally labeled as "Local Disk (C:)" in Windows Explorer.
+
+This will create the whole LSD folder structure. The distribution file may be deleted after installation.
+
+IMPORTANT: LSD cannot be installed within a folder (or having a parent folder) containing spaces in its name. For example, the directory "C:\Program Files\Lsd" cannot be used. If you installed LSD in such a location, simply move (or drag) the whole LSD folder structure to an adequate place ("C:\" recommended).
+
+To create a desktop link (icon) to run LSD/LMM, as well as an entry to the Windows Start Menu, you can simply double-click in Windows Explorer the following batch file available in the installation directory:
+
+ add-shortcut-windows[.bat]
+
+After the desktop icon is created, double-clicking it opens LMM (LSD Model Manager) which allows to create new models, or select existing models. If you cannot create the LSD icon on your desktop, or an entry in Start Menu, following the steps above, you may still run LSD by double-clicking the file "LMM.exe" inside the LSD installation directory.
+
+GNUPLOT INSTALLATION:
+
+It is recommended, but not required, to install the Gnuplot graphical plotting application. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. LSD installer usually detects when Gnuplot is missing and tries to install it automatically. If this is not possible, Gnuplot can be also installed manually. The required Gnuplot installer (64-bit) can be downloaded from http://www.gnuplot.info . The step-by-step instructions to install Gnuplot are:
+
+1. In an internet browser, open the site http://www.gnuplot.info, choose the desired version (the current stable one is recommended), click on the respective Release link, and on the files list choose gpXXX-win64-mingw.exe, where XXX is the current version number (currently, gp528-win64-mingw.exe), ensuring the 64-bit Windows version is selected.
+
+2. Open Windows Explorer and double-click on the downloaded Gnuplot installer (e.g., gp528-win64-mingw.exe).
+
+3. Accept the agreement, press "Next" twice, agree with the default installation folder, press "Next", accept the proposed components to install, press "Next", accept the creation of a Start Menu item, and press "Next" again.
+
+4. In the "Select Additional Tasks", set the terminal type to "wxt", keep the proposed file associations, and MAKE SURE you select the "Add application directory to your PATH environment variable". If this option is not visible, you need to scroll down in the window to see it. Press "Next" and then "Install". When the installation is completed, press "Next" and "Finish".
+
+ATTENTION: If Gnuplot is not included in the Windows PATH environment variable, LSD may not be able to use Gnuplot. If this option is missing, Gnuplot must be installed again using the correct options as described above.
+
+FIXING COMPILATION ERRORS:
+
+Some free software packages have the bad habit of installing old copies of libraries required by LSD on the system PATH, which may prevent successful compilation and operation of LSD. The installer tries to detect and inform about possible sources of problems, which may have to be fixed before LSD can be run reliably. Alternatively, the user may force LSD libraries into the system PATH, which is NOT done by the installer. To do so, open Windows Explorer, navigate to the folder where LSD was installed, right-click on the file:
+
+ set-system-path-windows[.bat]
+ 
+and choose the "Run as administrator" option. This will force LSD libraries to be used system-wide, which may break other software which relies on older versions of the libraries.
+
+USING DIFFERENT COMPILERS (optional):
+
+It is possible to use LSD with a C++ compiler already installed in your computer. However, in this case the user must install and configure the compiler to ensure it has all the required optional libraries. LSD supports any version of GNU 64-bit C++ compiler (GCC) supporting C++14 (or more recent) standard. Cygwin and MSYS2 mingw-w64-x86_64 versions are both fine, but they require Tcl/Tk 8.6 and zlib 1.2 libraries to be installed. Cygwin compiler is somewhat easier to install as it does not require the user to deal with a command prompt. MSYS2 compiler usually releases new versions earlier. Instructions for installing both are available at the end of this document. Even if they are already installed, the instructions can be also followed to make sure the installation is complete and LSD is configured to use it.
+
+
+************************************
+4.2 macOS installation (10.10+ ONLY)
+************************************
+
+To install LSD, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-8-0-stable-1.dmg). Download it, double-click on the package file to mount it, double-click on the LSD Installer application, and follow the instructions. The installer package can be unmounted and deleted after the installation.
+ 
+IMPORTANT: please pay attention to the Terminal windows opened by the installer. They may require your interaction, according to the instructions of the installer. Do not close any Terminal window which is not inactive. If the Terminal window is closed or interrupted by accident, please cancel the installation and restart.
+
+To manually install LSD, simply unzip a LSD distribution file (e.g., LSD-8.0-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
+
+Next, open the Terminal application (located inside the Utilities app folder), and type the following commands (each line must be completed by pressing "Enter"):
+
+ cd ~/Lsd-8.0-master
+ ./add-shortcut-mac.sh
+
+After a successful installation, a desktop shortcut (icon) will be available for using LMM/LSD. A shortcut is also created in the computer Applications folder.
+
+Users of macOS Sierra (10.12) or newer MUST yet manually install the Apple Command Line Tools package (the full Xcode package is NOT required) to make the compiler and other required command line tools available in macOS. To install it, open the Terminal  and enter the following command:
+
+ xcode-select --install
+
+Then, in the opened window, click on the "Install" button (do NOT click on the "Get Xcode" button), accept the license and wait the installation to complete (you may have to reboot to finish the installation).
+
+It is recommended, but not required, to install multitail and Gnuplot applications. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. The easiest way to install Gnuplot is to use the Homebrew package manager for the installation. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
+
+ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+
+After Homebrew installation finishes (details at http://brew.sh), you can install multitail and Gnuplot using the following command in Terminal (Qt framework will be automatically installed too):
+
+ brew install multitail gnuplot
+
+INACTIVE TERMINAL WINDOWS:
+
+As LSD accesses external programs, inactive Terminal windows may be left open in the computer desktop. To prevent this default behavior, the user can change the Terminal aplication configuration. In Terminal, open menu "Preferences > Profiles > Shell" and set options "When the shell exists" to "Close if the shell exited cleanly", and "Ask before closing" to "Never".
+
+IN CASE OF PROBLEMS:
+
+LSD is only supported in mac computers as a native macOS (Aqua) application. There is no longer support for X11.
+
+If using macOS 10.12 (Sierra) or newer, you MUST use the "add-shortcut-mac.sh" command above to remove LMM and LSD from the system quarantine. Failing to do so will prevent from using LSD as a native macOS application.
+
+If you delete or cannot create the LSD shortcuts, you can still run the app named LMM located inside the LSD installation directory (double click it in Finder) to open LMM/LSD, or try to rerun the "add-shortcut-mac.sh" script to recreate the shortcut.
+
+AUTOMATION ACCESS:
+
+LSD needs to control external programs to automate operation. The first time it needs automation access, a macOS (10.14+) pop-up will request the user to allow it, please click on OK. If user denies automation access once, macOS will not ask again for authorization and will silently block all further LSD operations, curtailing LSD capabilities and preventing some operations. To force the system to ask again for authorization (all programs) please use the following command on the Terminal:
+
+ tccutil reset AppleEvents
+
+Authorized programs can be checked at System Preferences > Security & Privacy > Privacy > Automation.
+
+
+**********************
+4.3 Linux installation
+**********************
+
+To install LSD, the simplest alternative is to use the installer script package (e.g. LSD-installer-linux-8-0-stable-1.zip). Download, extract and execute it. If your file manager does not support extracting compressed files or executing scripts directly, open a terminal, and type (replacing the X's with the actual values):
+
+ cd ~/Downloads
+ unzip LSD-installer-linux-8-X-xxxx-X.sh
+ ./LSD-installer-linux-8-X-xxxx-X.sh
+
+You may have to adjust the download directory according to your computer. When the LSD installer program opens, follow the instructions to install LSD and the required packages. The installer requires Tcl/Tk to be installed. This is the default in most distributions. The installer script will ask you to install Tcl/Tk if this is not the case. The installer package and script can be deleted after the installation.
+
+Alternatively, or in the case of problems using the installer script, it is also possible to simply unpack the LSD distribution file (e.g., Lsd-8.0-master.tar.gz) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using your file manager or command line. This will create the whole directory structure. In terminal, you may use the command (".tar.gz" extension files only):
+
+ tar -xzf Lsd-8.0-master.tar.gz
+
+The distribution file may be deleted after installation.
+
+If you want to create a desktop link (icon) to run LSD/LMM, you can use the script available in the installation directory executing the command (may work only in Gnome-based distributions):
+
+ ./add-shortcut-linux.sh
+
+To use the LSD in Linux it is necessary to have the GNU gcc/g++ compiler (version 6.4+) with the standard packages, including zlib, Tcl/Tk 8.6, and GDB. Likely, you already have those installed on your computer but you may need to install the development version of these packages. Usually, you can use your distribution package manager to get the appropriate 'dev' package versions to your installation. Though not strictly necessary, it is also suggested to have the Gnuplot graphical package (for advanced graphics), preferably using Qt.
+
+In Debian or Ubuntu, to make sure you have the correct libraries you can use:
+
+ sudo apt-get install build-essential gdb gnuplot-qt multitail zlib1g-dev tcl-dev tk-dev xterm
+
+In Fedora, CentOS or Red Hat, the equivalent command is:
+
+ sudo yum install gcc-c++ make gdb gnuplot multitail zlib-devel tcl tk tcl-devel tk-devel xterm
+
+In Mandriva or Mageia:
+
+ sudo urpmi gcc-c++ make gdb gnuplot multitail lib64z-devel lib64tcl-devel lib64tk-devel xterm
+
+If installing to a server (no desktop), please remove gnuplot/gnuplot-qt from the above commands to prevent the full desktop stack to be installed, which is not usually adequate for a server.
+
+IN CASE OF PROBLEMS:
+
+Please check your configuration has at least g++ version 6.4 installed (you may check it by issuing the command "g++ -v" in terminal). Ubuntu minimum supported version is 18.04 (older versions can be updated to use g++ 6.4 or newer but this is not the default configuration).
+
+Also make sure if Tcl/Tk version 8.6 or newer is present (use the command "echo 'puts $tcl_version;exit 0' | tclsh" to get the installed version).
+
+To run LMM from a system shell, please open a terminal in the installation directory (or use your graphical file browser) and execute:
+
+ ./run.sh
+
+If you get an error when trying to execute any of the above commands, please make sure the respective files are set as executable (use terminal command "chmod +x FILENAME" in the installation directory, replacing FILENAME by the name of the corresponding file).
+
+You may need to recompile LMM if the included pre-compiled versions have problems with your Linux setup. Move in the LSD installation directory and use the commands:
+
+ cd src
+ make -f makefile.LMM
+
+If the compilation fails, the most likely reason is the mis-specification of the locations of the files required for the compilation. The major problem is that Tcl/Tk may be installed in your systems in several different locations. The makefile contains a list of variables for the directory needed for the Tcl/Tk libraries and include files. For example, on some systems you have the Tcl/Tk library located in /usr/lib, or /usr/local/lib, or usr/share/lib, etc. Similarly, the include files may be located in different directories. The makefile lists the files you need to identify; check the location for those files and edit the makefile as appropriate for your system.
+
+It is also possible that Tcl/Tk requires further libraries besides those specified in the makefile. If you have errors even after having specified the correct path to the Tcl/Tk libraries, then find out where the file wish is located (using the command "whereis wish"), and then find out which libraries are used with the command:
+
+ ldd /usr/bin/wish
+
+If the system lists further libraries, add the appropriate option to the linker (e.g. -lieee to add the library libieee.a) in the makefile to the variable DUMMY.
+
+IMPORTANT: if you modified the makefile to compile LMM, the same changes need to be made to the makefiles used to generate the LSD Model programs. You need to make these changes only once using LMM. Use the menu item System Compilation Options in menu Model. You will have to fill the same variables as in the makefile used to compile LMM, which must be set to the same values.
+
+
+******************************************
+5.1 MSYS2 compiler installation (optional)
+******************************************
+
+Please note that MSYS2 compiler is NOT required (or recommended) if the above instructions for installing LSD were already performed, as LSD already embeds an up-to-date MSYS2 Windows compiler. If performing an update over an existing MSYS2 installation, it is recommended to uninstall the previous version before proceeding. If an on-place update is performed, without removing the existing version, start on step 2 below.
+
+Step-by-step procedure to install the MSYS2 64-bit compiler (an internet connection is required):
+
+1. Download and execute the MSYS2 64-bit installer from https://www.msys2.org, accepting the default installation directory ("c:\msys64") to prevent warnings in LSD
+
+2. Open the MSYS2 shell (icon on Start Menu) and update MSYS2 using the command:
+
+ pacman -Syu
+
+3. When instructed, close and re-open the MSYS2 shell, and update again:
+
+ pacman -Su
+
+4. Still in the shell, install the compiler and required tools:
+
+ pacman -S make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-diffutils mingw-w64-x86_64-gsl mingw-w64-x86_64-libsigsegv mingw-w64-x86_64-python-pygments
+
+5. Press "Windows" and "R" keys together, type the command "sysdm.cpl" in the "Run" dialog box and press "Enter". In the "System Properties" window, go to the "Advanced" tab and click on button "Environment Variables...". In the "System variables" list, select "Path" and press "Edit...". Run across the lines to see if your MSYS2 MinGW64 bin folder, i.e. "C:\msys64\mingw64\bin", is already there. If Yes, just press "Cancel" 3 times. If not, click on "New" and type MSYS2 MinGW64 binary folder, i.e. "C:\msys64\mingw64\bin". Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your MSYS2 MinGW64 bin folder in PATH.
+
+6. Open LSD LMM and choose menu "Model" > "System Options...". Edit the following entries to the values shown bellow:
+
+ PATH_HEADER=.
+ PATH_LIB=.
+
+
+SLOW GDB OPERATION: the GDB debugger can become very slow in Windows when the models are large. This is due to the Windows special handling of the heap (dynamic memory allocation) for programs being debugged. It is normally safe to disable this special handling by defining the following environment variable:
+
+ _NO_DEBUG_HEAP=1
+
+To define it, open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, press "New...", type "_NO_DEBUG_HEAP" as the variable name, and "1" as its value. Press "Ok" 3 times and you are done.
+
+
+*******************************************
+5.2 Cygwin compiler installation (optional)
+*******************************************
+
+Please note that Cygwin compiler is NOT required (or recommended) if the above instructions for installing LSD were already performed, as LSD already embeds an up-to-date compiler for Windows. 
+
+The Windows Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Install Cygwin to the default directory ("C:\cygwin64") to prevent warnings in LSD. If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, five non-default packages are REQUIRED by LSD (mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make, gdb and multitail). Alternatively, the pure-Cygwin, non-MinGW 64-bit gcc compiler can be also used, if matched with the corresponding Tcl/Tk and zlib libraries. Lastly, Cygwin main and compiler binary subdirectories must be added to the PATH environment variable (not done by the installer).
+
+Step-by-step procedure to install the Cygwing 64-bit compiler (an internet connection is required):
+
+1. In an internet browser, open the site https://www.cygwin.com and find the link to download the Cygwin installer file for Windows 64-bit (setup-x86_64.exe).
+
+2. In Windows Explorer, double click the downloaded "setup-x86_64.exe" installer file.
+
+3. When the installer opens, choose "Install from Internet", accept the proposed root install directory (C:\cygwin64), press "Next", opt for installing for "All Users", press "Next", accept the proposed local package directory (C:\cygwin64), "Next" again, select "Direct Connection", press "Next", choose any of the offered download sites (one closer to your location will just provide faster downloads), and "Next".
+
+4. When the "Select Packages" window opens, click on the View option list, choose "Full" (to see the list with all packages), type the name of each required package in the Search box, find the EXACT name in the packages list (do not use partial matches), and on the "New" column change the option from "Skip" to the latest available version (the one with the higher number). Repeat this process for each of the five required packages: "mingw64-x86_64-gcc-g++", "mingw64-x86_64-zlib", "make", "gdb", and "multitail".
+
+5. When all the required packages are marked for download, choose "Next", accept the proposed changes and proceed to download and install Cygwin. Please wait until the installer finishes (it may take a while) and close the installer when requested.
+
+6. Press "Windows" and "R" keys together, type the command "sysdm.cpl" in the "Run" dialog box and press "Enter". In the "System Properties" window, go to the "Advanced" tab and click on button "Environment Variables...". In the "System variables" list, select "Path" and press "Edit...". Run across the lines to see if your Cygwin two bin folders, i.e. "C:\cygwin64\bin" and "C:\cygwin64\usr\x86_64-w64-mingw32\sys-root\mingw\bin", are already there. If Yes, just press "Cancel" 3 times. If not, click on "New" and type Cygwin main binary folder, i.e. "C:\cygwin64\bin", then press "New" again and type the compiler binary folder, i.e."C:\cygwin64\usr\x86_64-w64-mingw32\sys-root\mingw\bin". Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your Cygwin bin folder in PATH.
+
+7. Open LSD LMM and choose menu "Model" > "System Options...". Edit the following entries to the values shown bellow:
+
+ PATH_HEADER=.
+ PATH_LIB=.
+ WRC=x86_64-w64-mingw32-windres
+ CC=x86_64-w64-mingw32-g++

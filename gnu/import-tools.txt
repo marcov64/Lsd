@@ -1,0 +1,18 @@
+To import Windows 64-bit MSYS2 compiler tools:
+
+1. Get clean MSYS2 installer at https://www.msys2.org (ex. msys2-x86_64-20200720.exe)
+2. Install it to default location (ex. C:\msys64)
+3. Follow the instructions to finish install, defaults are fine
+4. Open the MSYS2 MinGW 64-bit terminal
+5. Ensure all packages are updated: 'pacman -Syu' and then 'pacman -Su'
+6. Install the compiler and tools: 'pacman -S mingw-w64-x86_64-make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-diffutils mingw-w64-x86_64-gsl mingw-w64-x86_64-libsigsegv'
+7. Run the import batch 'MSYS2-import.bat'
+
+
+To import Windows 64-bit Cygwin-only tools:
+
+1. Get clean Cygwin installer at https://www.cygwin.com (ex. setup-x86_64.exe)
+2. Install it to default location (ex. C:\cygwin64)
+3. Follow the instructions to install, defaults are fine
+4. When 'Select Packages' window opens, select the package 'multitail'
+5. Run the import batch 'Cygwin-import.bat'

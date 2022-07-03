@@ -1,0 +1,11 @@
+prefix=/mingw64
+exec_prefix=/mingw64
+libdir=/mingw64/lib
+includedir=/mingw64/include
+GSL_CBLAS_LIB=-lgslcblas
+
+Name: GSL
+Description: GNU Scientific Library
+Version: 2.7.1
+Libs: -L/mingw64/lib -lgsl ${GSL_CBLAS_LIB} -lm -lm 
+Cflags: -I/mingw64/include

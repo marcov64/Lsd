@@ -1,0 +1,49 @@
+/*************************************************************
+
+	LSD 8.0 - May 2022
+	written by Marco Valente, Universita' dell'Aquila
+	and by Marcelo Pereira, University of Campinas
+
+	Copyright Marco Valente and Marcelo Pereira
+	LSD is distributed under the GNU General Public License
+
+	See Readme.txt for copyright information of
+	third parties' code used in LSD
+
+ *************************************************************/
+
+/**************************************************************
+ LSD_MANIFEST.RC
+ Windows resource file for LSD
+**************************************************************/
+
+#include <winuser.h>
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "LSD.exe.manifest"
+
+101 ICON "icons/lsd.ico"
+
+1 VERSIONINFO
+FILEVERSION     8,0,0,0
+PRODUCTVERSION  8,0,0,0
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4"
+    BEGIN
+      VALUE "CompanyName", "Marco Valente & Marcelo C. Pereira"
+      VALUE "FileDescription", "LSD"
+      VALUE "FileVersion", "8.0"
+      VALUE "InternalName", "LSD"
+      VALUE "LegalCopyright", "Copyright Marco Valente and Marcelo C. Pereira"
+      VALUE "OriginalFilename", "lsd.exe"
+      VALUE "ProductName", "LSD"
+      VALUE "ProductVersion", "8.0"
+    END
+  END
+
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END

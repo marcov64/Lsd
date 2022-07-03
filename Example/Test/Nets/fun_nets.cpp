@@ -172,7 +172,7 @@ if ( curl1 != NULL )
 
 if ( v[1] != 0 )							// search top pointed node
 {
-	cur2 = SEARCH_NODES( p->up, "Node", v[1] );
+	cur2 = SEARCH_NODES( PARENT, "Node", v[1] );
 
 	if ( cur != NULL && cur != cur2 )		// check pointer & id match
 		plog( "\nWarning: pointer mismatch" );

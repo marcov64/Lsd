@@ -1,128 +1,141 @@
-/*
-	windows.h - main header file for the Win32 API
+/**
+ * This file has no copyright assigned and is placed in the Public Domain.
+ * This file is part of the mingw-w64 runtime package.
+ * No warranty is given; refer to the file DISCLAIMER.PD within this package.
+ */
+#ifndef _WINDOWS_
+#define _WINDOWS_
 
-	Written by Anders Norlander <anorland@hem2.passagen.se>
+#include <_mingw.h>
+#include <sdkddkver.h>
 
-	This file is part of a free library for the Win32 API.
-
-	This library is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-*/
-#ifndef _WINDOWS_H
-#define _WINDOWS_H
-#if __GNUC__ >=3
-#pragma GCC system_header
+/* Some kludge for Obj-C.
+   For Obj-C the 'interface' is a keyword, but interface is used
+   in midl-code too.  To resolve this conflict for at least the
+   main windows API header, we define it here temporary.  */
+#ifdef __OBJC__
+#pragma push_macro("interface")
+#undef interface
+#define interface struct
 #endif
 
-/* translate GCC target defines to MS equivalents. Keep this synchronized
-   with winnt.h. */
-#if defined(__i686__) && !defined(_M_IX86)
-#define _M_IX86 600
-#elif defined(__i586__) && !defined(_M_IX86)
-#define _M_IX86 500
-#elif defined(__i486__) && !defined(_M_IX86)
-#define _M_IX86 400
-#elif defined(__i386__) && !defined(_M_IX86)
-#define _M_IX86 300
-#endif
-#if defined(_M_IX86) && !defined(_X86_)
-#define _X86_
-#elif defined(_M_ALPHA) && !defined(_ALPHA_)
-#define _ALPHA_
-#elif defined(_M_PPC) && !defined(_PPC_)
-#define _PPC_
-#elif defined(_M_MRX000) && !defined(_MIPS_)
-#define _MIPS_
-#elif defined(_M_M68K) && !defined(_68K_)
-#define _68K_
-#endif
+#ifndef _INC_WINDOWS
+#define _INC_WINDOWS
 
-#ifdef RC_INVOKED
-/* winresrc.h includes the necessary headers */
+#if defined(RC_INVOKED) && !defined(NOWINRES)
+
 #include <winresrc.h>
 #else
 
+#ifdef RC_INVOKED
+#define NOATOM
+#define NOGDI
+#define NOGDICAPMASKS
+#define NOMETAFILE
+#define NOMINMAX
+#define NOMSG
+#define NOOPENFILE
+#define NORASTEROPS
+#define NOSCROLL
+#define NOSOUND
+#define NOSYSMETRICS
+#define NOTEXTMETRIC
+#define NOWH
+#define NOCOMM
+#define NOKANJI
+#define NOCRYPT
+#define NOMCX
+#endif
+
+#if defined(__x86_64) && \
+  !(defined(_X86_) || defined(__i386__) || defined(_IA64_))
+#if !defined(_AMD64_)
+#define _AMD64_
+#endif
+#endif /* _AMD64_ */
+
+#if defined(__ia64__) && \
+  !(defined(_X86_) || defined(__x86_64) || defined(_AMD64_))
+#if !defined(_IA64_)
+#define _IA64_
+#endif
+#endif /* _IA64_ */
+
+#ifndef RC_INVOKED
+#include <excpt.h>
 #include <stdarg.h>
+#endif
+
 #include <windef.h>
-#include <wincon.h>
 #include <winbase.h>
-#if !(defined NOGDI || defined  _WINGDI_H)
 #include <wingdi.h>
-#endif
-#ifndef _WINUSER_H
 #include <winuser.h>
-#endif
-#ifndef _WINNLS_H
 #include <winnls.h>
-#endif
-#ifndef _WINVER_H
+#include <wincon.h>
 #include <winver.h>
-#endif
-#ifndef _WINNETWK_H
-#include <winnetwk.h>
-#endif
-#ifndef _WINREG_H
 #include <winreg.h>
-#endif
-#ifndef _WINSVC_H
-#include <winsvc.h>
-#endif
+#include <winnetwk.h>
+#include <virtdisk.h>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #include <cderr.h>
 #include <dde.h>
 #include <ddeml.h>
 #include <dlgs.h>
-#include <imm.h>
 #include <lzexpand.h>
 #include <mmsystem.h>
 #include <nb30.h>
 #include <rpc.h>
 #include <shellapi.h>
 #include <winperf.h>
-#ifndef NOGDI
-#include <commdlg.h>
-#include <winspool.h>
-#endif
-#if defined(Win32_Winsock)
-#warning "The  Win32_Winsock macro name is deprecated.\
-    Please use __USE_W32_SOCKETS instead"
-#ifndef __USE_W32_SOCKETS
-#define __USE_W32_SOCKETS
-#endif
-#endif
-#if defined(__USE_W32_SOCKETS) || !(defined(__CYGWIN__) || defined(__MSYS__) || defined(_UWIN))
-#if (_WIN32_WINNT >= 0x0400)
-#include <winsock2.h>
-/*
- * MS likes to include mswsock.h here as well,
- * but that can cause undefined symbols if
- * winsock2.h is included before windows.h
- */
-#else
+#if defined(__USE_W32_SOCKETS) || !defined(__CYGWIN__)
 #include <winsock.h>
-#endif /*  (_WIN32_WINNT >= 0x0400) */
 #endif
+#ifndef NOCRYPT
+#include <wincrypt.h>
+#include <winefs.h>
+#include <winscard.h>
+#endif
+
+#ifndef NOUSER
 #ifndef NOGDI
-#if !defined (__OBJC__)
-#if (__GNUC__ >= 3) || defined (__WATCOMC__)
+#include <winspool.h>
+#ifdef INC_OLE1
+#include <ole.h>
+#else
 #include <ole2.h>
 #endif
-#endif /* __OBJC__ */
+#include <commdlg.h>
+#endif
+#endif
 #endif
 
-#endif /* WIN32_LEAN_AND_MEAN */
+#ifndef __CYGWIN__
+#include <stralign.h>
+#endif
 
-#endif /* RC_INVOKED */
+#ifdef INC_OLE2
+#include <ole2.h>
+#endif
 
+#ifndef NOSERVICE
+#include <winsvc.h>
+#endif
+
+#ifndef NOMCX
+#include <mcx.h>
+#endif
+
+#ifndef NOIME
+#include <imm.h>
+#endif
+
+#endif
+#endif
+
+/* Restore old value of interface for Obj-C.  See above.  */
 #ifdef __OBJC__
-/* FIXME: Not undefining BOOL here causes all BOOLs to be WINBOOL (int),
-   but undefining it causes trouble as well if a file is included after
-   windows.h
-*/
-#undef BOOL
+#pragma pop_macro("interface")
 #endif
 
 #endif

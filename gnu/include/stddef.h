@@ -1,28 +1,35 @@
-/* Copyright (C) 1989, 1997, 1998, 1999, 2000, 2002 Free Software Foundation, Inc.
+/**
+ * This file has no copyright assigned and is placed in the Public Domain.
+ * This file is part of the mingw-w64 runtime package.
+ * No warranty is given; refer to the file DISCLAIMER.PD within this package.
+ */
 
-This file is part of GCC.
+#include <crtdefs.h>
 
-GCC is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+#ifndef _INC_STDDEF
+#define _INC_STDDEF
 
-GCC is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-You should have received a copy of the GNU General Public License
-along with GCC; see the file COPYING.  If not, write to
-the Free Software Foundation, 59 Temple Place - Suite 330,
-Boston, MA 02111-1307, USA.  */
+#ifndef _CRT_ERRNO_DEFINED
+#define _CRT_ERRNO_DEFINED
+  _CRTIMP extern int *__cdecl _errno(void);
+#define errno (*_errno())
+  errno_t __cdecl _set_errno(int _Value);
+  errno_t __cdecl _get_errno(int *_Value);
+#endif /* _CRT_ERRNO_DEFINED */
 
-/* As a special exception, if you include this header file into source
-   files compiled by GCC, this header file does not by itself cause
-   the resulting executable to be covered by the GNU General Public
-   License.  This exception does not however invalidate any other
-   reasons why the executable file might be covered by the GNU General
-   Public License.  */
+  _CRTIMP extern unsigned long __cdecl __threadid(void);
+#define _threadid (__threadid())
+  _CRTIMP extern uintptr_t __cdecl __threadhandle(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _INC_STDDEF */
 
 /*
  * ISO C Standard:  7.17  Common definitions  <stddef.h>
@@ -48,19 +55,6 @@ Boston, MA 02111-1307, USA.  */
 #endif
 
 #ifndef __sys_stdtypes_h
-/* This avoids lossage on SunOS but only if stdtypes.h comes first.
-   There's no way to win with the other order!  Sun lossage.  */
-
-/* On 4.3bsd-net2, make sure ansi.h is included, so we have
-   one less case to deal with in the following.  */
-#if defined (__BSD_NET2__) || defined (____386BSD____) || (defined (__FreeBSD__) && (__FreeBSD__ < 5)) || defined(__NetBSD__)
-#include <machine/ansi.h>
-#endif
-/* On FreeBSD 5, machine/ansi.h does not exist anymore... */
-#if defined (__FreeBSD__) && (__FreeBSD__ >= 5)
-#include <sys/_types.h>
-#endif
-
 /* In 4.3bsd-net2, machine/ansi.h defines these symbols, which are
    defined if the corresponding type is *not* defined.
    FreeBSD-2.1 defines _MACHINE_ANSI_H_ instead of _ANSI_H_ */
@@ -146,9 +140,16 @@ _TYPE_wchar_t;
 #define ___int_ptrdiff_t_h
 #define _GCC_PTRDIFF_T
 #ifndef __PTRDIFF_TYPE__
+#ifdef _WIN64
+#define __PTRDIFF_TYPE__ long long int
+#else
 #define __PTRDIFF_TYPE__ long int
 #endif
-typedef __PTRDIFF_TYPE__ ptrdiff_t;
+#endif
+#ifndef _PTRDIFF_T_DEFINED
+#define _PTRDIFF_T_DEFINED
+__MINGW_EXTENSION typedef __PTRDIFF_TYPE__ ptrdiff_t;
+#endif
 #endif /* _GCC_PTRDIFF_T */
 #endif /* ___int_ptrdiff_t_h */
 #endif /* _BSD_PTRDIFF_T_ */
@@ -207,10 +208,14 @@ typedef __PTRDIFF_TYPE__ ptrdiff_t;
 #define __size_t
 #endif
 #ifndef __SIZE_TYPE__
+#ifdef _WIN64
+#define __SIZE_TYPE__ long long unsigned int
+#else
 #define __SIZE_TYPE__ long unsigned int
 #endif
+#endif
 #if !(defined (__GNUG__) && defined (size_t))
-typedef __SIZE_TYPE__ size_t;
+__MINGW_EXTENSION typedef __SIZE_TYPE__ size_t;
 #ifdef __BEOS__
 typedef long ssize_t;
 #endif /* __BEOS__ */
@@ -295,7 +300,7 @@ typedef _BSD_RUNE_T_ rune_t;
 #define _BSD_WCHAR_T_DEFINED_
 #define _BSD_RUNE_T_DEFINED_	/* Darwin */
 #if defined (__FreeBSD__) && (__FreeBSD__ < 5)
-/* Why is this file so hard to maintain properly?  In constrast to
+/* Why is this file so hard to maintain properly?  In contrast to
    the comment above regarding BSD/386 1.1, on FreeBSD for as long
    as the symbol has existed, _BSD_RUNE_T_ must not stay defined or
    redundant typedefs will occur when stdlib.h is included after this file. */
@@ -304,22 +309,10 @@ typedef _BSD_RUNE_T_ rune_t;
 #endif
 #endif
 #endif
-/* FreeBSD 5 can't be handled well using "traditional" logic above
-   since it no longer defines _BSD_RUNE_T_ yet still desires to export
-   rune_t in some cases... */
-#if defined (__FreeBSD__) && (__FreeBSD__ >= 5)
-#if !defined (_ANSI_SOURCE) && !defined (_POSIX_SOURCE)
-#if __BSD_VISIBLE
-#ifndef _RUNE_T_DECLARED
-typedef __rune_t        rune_t;
-#define _RUNE_T_DECLARED
-#endif
-#endif
-#endif
-#endif
 
 #ifndef __WCHAR_TYPE__
-#define __WCHAR_TYPE__ int
+/* wchar_t is unsigned short for compatibility with MS runtime */
+#define __WCHAR_TYPE__ unsigned short
 #endif
 #ifndef __cplusplus
 typedef __WCHAR_TYPE__ wchar_t;
@@ -347,11 +340,15 @@ typedef __WCHAR_TYPE__ wchar_t;
 #if defined (__need_wint_t)
 #ifndef _WINT_T
 #define _WINT_T
-
 #ifndef __WINT_TYPE__
-#define __WINT_TYPE__ unsigned int
+/* wint_t is unsigned short for compatibility with MS runtime */
+#define __WINT_TYPE__ unsigned short
 #endif
-typedef __WINT_TYPE__ wint_t;
+#ifndef _WCTYPE_T_DEFINED
+#define _WCTYPE_T_DEFINED
+  typedef __WINT_TYPE__ wint_t;
+  typedef unsigned short wctype_t;
+#endif
 #endif
 #undef __need_wint_t
 #endif
@@ -395,13 +392,17 @@ typedef __WINT_TYPE__ wint_t;
 
 #if defined (_STDDEF_H) || defined (__need_NULL)
 #undef NULL		/* in case <stdio.h> has defined it. */
-#ifdef __GNUG__
+#if defined(__GNUG__) && __GNUG__ >= 3
 #define NULL __null
 #else   /* G++ */
 #ifndef __cplusplus
 #define NULL ((void *)0)
 #else   /* C++ */
+#ifndef _WIN64
 #define NULL 0
+#else
+#define NULL 0LL
+#endif  /* W64 */
 #endif  /* C++ */
 #endif  /* G++ */
 #endif	/* NULL not defined and <stddef.h> or need NULL.  */
@@ -410,17 +411,25 @@ typedef __WINT_TYPE__ wint_t;
 #ifdef _STDDEF_H
 
 /* Offset of member MEMBER in a struct of type TYPE. */
-#ifndef __cplusplus
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
-#else
-/* The cast to "char &" below avoids problems with user-defined
-   "operator &", which can appear in a POD type.  */
-#define offsetof(TYPE, MEMBER)					\
-  (__offsetof__ (reinterpret_cast <size_t>			\
-                 (&reinterpret_cast <const volatile char &>	\
-                  (static_cast<TYPE *> (0)->MEMBER))))
-#endif /* C++ */
-#endif /* _STDDEF_H was defined this time */
+#define offsetof(TYPE, MEMBER) __builtin_offsetof (TYPE, MEMBER)
+
+#if (defined (__STDC_VERSION__) && __STDC_VERSION__ >= 201112L) \
+  || (defined(__cplusplus) && __cplusplus >= 201103L)
+#if !defined(_GCC_MAX_ALIGN_T) && !defined(__CLANG_MAX_ALIGN_T_DEFINED)
+#define _GCC_MAX_ALIGN_T
+#define __CLANG_MAX_ALIGN_T_DEFINED
+/* Type whose alignment is supported in every context and is at least
+   as great as that of any standard type not using alignment
+   specifiers.  */
+typedef struct {
+  long long __max_align_ll __attribute__((__aligned__(__alignof__(long long))));
+  long double __max_align_ld __attribute__((__aligned__(__alignof__(long double))));
+} max_align_t;
+#endif
+#endif /* C11 or C++11.  */
+
+#endif /* _STDDEF_H was defined this time.  */
 
 #endif /* !_STDDEF_H && !_STDDEF_H_ && !_ANSI_STDDEF_H && !__STDDEF_H__
 	  || __need_XXX was not defined before */
+

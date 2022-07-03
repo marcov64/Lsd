@@ -1,217 +1,328 @@
-/* 
- * time.h
+/**
  * This file has no copyright assigned and is placed in the Public Domain.
- * This file is a part of the mingw-runtime package.
- * No warranty is given; refer to the file DISCLAIMER within the package.
- *
- * Date and time functions and types.
- *
+ * This file is part of the mingw-w64 runtime package.
+ * No warranty is given; refer to the file DISCLAIMER.PD within this package.
  */
+#ifndef _TIME_H_
+#define _TIME_H_
 
-#ifndef	_TIME_H_
-#define	_TIME_H_
+#include <crtdefs.h>
 
-/* All the headers include this file. */
-#include <_mingw.h>
-
-#define __need_wchar_t
-#define __need_size_t
-#define __need_NULL
-#ifndef RC_INVOKED
-#include <stddef.h>
-#endif	/* Not RC_INVOKED */
-
-/*
- * Number of clock ticks per second. A clock tick is the unit by which
- * processor time is measured and is returned by 'clock'.
- */
-#define	CLOCKS_PER_SEC	((clock_t)1000)
-#define	CLK_TCK		CLOCKS_PER_SEC
-
-
-#ifndef RC_INVOKED
-
-/*
- * A type for storing the current time and date. This is the number of
- * seconds since midnight Jan 1, 1970.
- * NOTE: This is also defined in non-ISO sys/types.h.
- */
-#ifndef _TIME_T_DEFINED
-typedef	long	time_t;
-#define _TIME_T_DEFINED
+#ifndef _WIN32
+#error Only Win32 target is supported!
 #endif
 
-#ifndef __STRICT_ANSI__
-/* A 64-bit time_t to get to Y3K */
-#ifndef _TIME64_T_DEFINED
-typedef __int64 __time64_t;
-#define _TIME64_T_DEFINED
-#endif
-#endif
-/*
- * A type for measuring processor time (in clock ticks).
- */
-#ifndef _CLOCK_T_DEFINED
-typedef	long	clock_t;
-#define _CLOCK_T_DEFINED
-#endif
+#if defined(__LIBMSVCRT__)
+/* When building mingw-w64, this should be blank.  */
+#define _SECIMP
+#else
+#ifndef _SECIMP
+#define _SECIMP __declspec(dllimport)
+#endif /* _SECIMP */
+#endif /* defined(_CRTBLD) || defined(__LIBMSVCRT__) */
 
-#ifndef _TM_DEFINED
-/*
- * A structure for storing all kinds of useful information about the
- * current (or another) time.
- */
-struct tm
-{
-	int	tm_sec;		/* Seconds: 0-59 (K&R says 0-61?) */
-	int	tm_min;		/* Minutes: 0-59 */
-	int	tm_hour;	/* Hours since midnight: 0-23 */
-	int	tm_mday;	/* Day of the month: 1-31 */
-	int	tm_mon;		/* Months *since* january: 0-11 */
-	int	tm_year;	/* Years since 1900 */
-	int	tm_wday;	/* Days since Sunday (0-6) */
-	int	tm_yday;	/* Days since Jan. 1: 0-365 */
-	int	tm_isdst;	/* +1 Daylight Savings Time, 0 No DST,
-				 * -1 don't know */
-};
-#define _TM_DEFINED
-#endif
+/* Adding timespec definition.  */
+#include <sys/timeb.h>
 
-#ifdef	__cplusplus
+#pragma pack(push,_CRT_PACKING)
+
+#ifdef __cplusplus
 extern "C" {
 #endif
 
-_CRTIMP clock_t __cdecl	clock (void);
-_CRTIMP time_t __cdecl	time (time_t*);
-_CRTIMP double __cdecl	difftime (time_t, time_t);
-_CRTIMP time_t __cdecl	mktime (struct tm*);
-
-/*
- * These functions write to and return pointers to static buffers that may
- * be overwritten by other function calls. Yikes!
- *
- * NOTE: localtime, and perhaps the others of the four functions grouped
- * below may return NULL if their argument is not 'acceptable'. Also note
- * that calling asctime with a NULL pointer will produce an Invalid Page
- * Fault and crap out your program. Guess how I know. Hint: stat called on
- * a directory gives 'invalid' times in st_atime etc...
- */
-_CRTIMP char* __cdecl		asctime (const struct tm*);
-_CRTIMP char* __cdecl		ctime (const time_t*);
-_CRTIMP struct tm*  __cdecl	gmtime (const time_t*);
-_CRTIMP struct tm*  __cdecl	localtime (const time_t*);
-
-_CRTIMP size_t __cdecl		strftime (char*, size_t, const char*, const struct tm*);
-
-#ifndef __STRICT_ANSI__
-
-extern _CRTIMP void __cdecl	_tzset (void);
-
-#ifndef _NO_OLDNAMES
-extern _CRTIMP void __cdecl	tzset (void);
+#ifndef _CRTIMP
+#define _CRTIMP __declspec(dllimport)
 #endif
 
-_CRTIMP char* __cdecl	_strdate(char*);
-_CRTIMP char* __cdecl	_strtime(char*);
+#ifndef _WCHAR_T_DEFINED
+#define _WCHAR_T_DEFINED
+  typedef unsigned short wchar_t;
+#endif
 
-/* These require newer versions of msvcrt.dll (6.10 or higher). */ 
-#if __MSVCRT_VERSION__ >= 0x0601
-_CRTIMP __time64_t __cdecl  _time64( __time64_t);
-_CRTIMP __time64_t __cdecl  _mktime64 (struct tm*);
-_CRTIMP char* __cdecl _ctime64 (const __time64_t*);
-_CRTIMP struct tm*  __cdecl _gmtime64 (const __time64_t*);
-_CRTIMP struct tm*  __cdecl _localtime64 (const __time64_t*);
-#endif /* __MSVCRT_VERSION__ >= 0x0601 */
+#ifndef _TIME32_T_DEFINED
+#define _TIME32_T_DEFINED
+  typedef long __time32_t;
+#endif
 
-/*
- * _daylight: non zero if daylight savings time is used.
- * _timezone: difference in seconds between GMT and local time.
- * _tzname: standard/daylight savings time zone names (an array with two
- *          elements).
- */
-#ifdef __MSVCRT__
+#ifndef _TIME64_T_DEFINED
+#define _TIME64_T_DEFINED
+  __MINGW_EXTENSION typedef __int64 __time64_t;
+#endif
 
-/* These are for compatibility with pre-VC 5.0 suppied MSVCRT. */
-extern _CRTIMP int* __cdecl	__p__daylight (void);
-extern _CRTIMP long* __cdecl	__p__timezone (void);
-extern _CRTIMP char** __cdecl	__p__tzname (void);
+#ifndef _TIME_T_DEFINED
+#define _TIME_T_DEFINED
+#ifdef _USE_32BIT_TIME_T
+  typedef __time32_t time_t;
+#else
+  typedef __time64_t time_t;
+#endif
+#endif
 
-__MINGW_IMPORT int	_daylight;
-__MINGW_IMPORT long	_timezone;
-__MINGW_IMPORT char 	*_tzname[2];
+#ifndef _CLOCK_T_DEFINED
+#define _CLOCK_T_DEFINED
+  typedef long clock_t;
+#endif
 
-#else /* not __MSVCRT (ie. crtdll) */
+#ifndef _SIZE_T_DEFINED
+#define _SIZE_T_DEFINED
+#undef size_t
+#ifdef _WIN64
+  __MINGW_EXTENSION typedef unsigned __int64 size_t;
+#else
+  typedef unsigned int size_t;
+#endif
+#endif
 
-#ifndef __DECLSPEC_SUPPORTED
+#ifndef _SSIZE_T_DEFINED
+#define _SSIZE_T_DEFINED
+#undef ssize_t
+#ifdef _WIN64
+  __MINGW_EXTENSION typedef __int64 ssize_t;
+#else
+  typedef int ssize_t;
+#endif
+#endif
 
-extern int*	_imp___daylight_dll;
-extern long*	_imp___timezone_dll;
-extern char**	_imp___tzname;
+#ifndef NULL
+#ifdef __cplusplus
+#ifndef _WIN64
+#define NULL 0
+#else
+#define NULL 0LL
+#endif  /* W64 */
+#else
+#define NULL ((void *)0)
+#endif
+#endif
 
-#define _daylight	(*_imp___daylight_dll)
-#define _timezone	(*_imp___timezone_dll)
-#define _tzname		(*_imp___tzname)
+#ifndef _TM_DEFINED
+#define _TM_DEFINED
+  struct tm {
+    int tm_sec;
+    int tm_min;
+    int tm_hour;
+    int tm_mday;
+    int tm_mon;
+    int tm_year;
+    int tm_wday;
+    int tm_yday;
+    int tm_isdst;
+  };
+#endif
 
-#else /* __DECLSPEC_SUPPORTED */
+#define CLOCKS_PER_SEC 1000
 
-__MINGW_IMPORT int	_daylight_dll;
-__MINGW_IMPORT long	_timezone_dll;
-__MINGW_IMPORT char*	_tzname[2];
+#ifdef _UCRT
+#define TIME_UTC 1
+#endif
 
-#define _daylight	_daylight_dll
-#define _timezone	_timezone_dll
+#ifdef _UCRT
+  _CRTIMP int *__cdecl __daylight(void);
+  _CRTIMP long *__cdecl __dstbias(void);
+  _CRTIMP long *__cdecl __timezone(void);
+  _CRTIMP char **__cdecl __tzname(void);
+#define _daylight (* __daylight())
+#define _dstbias (* __dstbias())
+#define _timezone (* __timezone())
+#define _tzname (__tzname())
+#else
+  __MINGW_IMPORT int _daylight;
+  __MINGW_IMPORT long _dstbias;
+  __MINGW_IMPORT long _timezone;
+  __MINGW_IMPORT char * _tzname[2];
+#endif
 
-#endif /* __DECLSPEC_SUPPORTED */
+  _CRTIMP errno_t __cdecl _get_daylight(int *_Daylight);
+  _CRTIMP errno_t __cdecl _get_dstbias(long *_Daylight_savings_bias);
+  _CRTIMP errno_t __cdecl _get_timezone(long *_Timezone);
+  _CRTIMP errno_t __cdecl _get_tzname(size_t *_ReturnValue,char *_Buffer,size_t _SizeInBytes,int _Index);
+  char *__cdecl asctime(const struct tm *_Tm) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
+  _SECIMP errno_t __cdecl asctime_s (char *_Buf,size_t _SizeInWords,const struct tm *_Tm);
+  _CRTIMP char *__cdecl _ctime32(const __time32_t *_Time) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
+  _SECIMP errno_t __cdecl _ctime32_s (char *_Buf,size_t _SizeInBytes,const __time32_t *_Time);
+  clock_t __cdecl clock(void);
+  _CRTIMP double __cdecl _difftime32(__time32_t _Time1,__time32_t _Time2);
+  _CRTIMP struct tm *__cdecl _gmtime32(const __time32_t *_Time) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
+  _SECIMP errno_t __cdecl _gmtime32_s (struct tm *_Tm,const __time32_t *_Time);
+  _CRTIMP struct tm *__cdecl _localtime32(const __time32_t *_Time) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
+  _SECIMP errno_t __cdecl _localtime32_s (struct tm *_Tm,const __time32_t *_Time);
+  size_t __cdecl strftime(char * __restrict__ _Buf,size_t _SizeInBytes,const char * __restrict__ _Format,const struct tm * __restrict__ _Tm);
+  _CRTIMP size_t __cdecl _strftime_l(char * __restrict__ _Buf,size_t _Max_size,const char * __restrict__ _Format,const struct tm * __restrict__ _Tm,_locale_t _Locale);
+  _CRTIMP char *__cdecl _strdate(char *_Buffer) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
+  _SECIMP errno_t __cdecl _strdate_s (char *_Buf,size_t _SizeInBytes);
+  _CRTIMP char *__cdecl _strtime(char *_Buffer) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
+  _SECIMP errno_t __cdecl _strtime_s (char *_Buf ,size_t _SizeInBytes);
+  _CRTIMP __time32_t __cdecl _time32(__time32_t *_Time);
+#ifdef _UCRT
+  _CRTIMP int __cdecl _timespec32_get(struct _timespec32 *_Ts, int _Base);
+#endif
+  _CRTIMP __time32_t __cdecl _mktime32(struct tm *_Tm);
+  _CRTIMP __time32_t __cdecl _mkgmtime32(struct tm *_Tm);
 
-#endif /* not __MSVCRT__ */
+#if defined (_POSIX_) || defined(__GNUC__)
+  void __cdecl tzset(void) __MINGW_ATTRIB_DEPRECATED_MSVC2005;
+#endif
+#if !defined (_POSIX_)
+#ifndef _UCRT
+  _CRTIMP
+#endif
+  void __cdecl _tzset(void);
+#endif
 
-#ifndef _NO_OLDNAMES
-
-#ifdef __MSVCRT__
-
-/* These go in the oldnames import library for MSVCRT. */
-__MINGW_IMPORT int	daylight;
-__MINGW_IMPORT long	timezone;
-__MINGW_IMPORT char 	*tzname[2];
-
-#else /* not __MSVCRT__ */
-
-/* CRTDLL is royally messed up when it comes to these macros.
-   TODO: import and alias these via oldnames import library instead 
-   of macros.  */
-
-#define daylight        _daylight
-/* NOTE: timezone not defined because it would conflict with sys/timeb.h.
-   Also, tzname used to a be macro, but now it's in moldname. */
-__MINGW_IMPORT char 	*tzname[2];
-
-#endif /* not __MSVCRT__ */
-
-#endif	/* Not _NO_OLDNAMES */
-#endif	/* Not __STRICT_ANSI__ */
+  _CRTIMP double __cdecl _difftime64(__time64_t _Time1,__time64_t _Time2);
+  _CRTIMP char *__cdecl _ctime64(const __time64_t *_Time) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
+  _SECIMP errno_t __cdecl _ctime64_s (char *_Buf,size_t _SizeInBytes,const __time64_t *_Time);
+  _CRTIMP struct tm *__cdecl _gmtime64(const __time64_t *_Time) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
+  _SECIMP errno_t __cdecl _gmtime64_s (struct tm *_Tm,const __time64_t *_Time);
+  _CRTIMP struct tm *__cdecl _localtime64(const __time64_t *_Time) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
+  _SECIMP errno_t __cdecl _localtime64_s (struct tm *_Tm,const __time64_t *_Time);
+  _CRTIMP __time64_t __cdecl _mktime64(struct tm *_Tm);
+  _CRTIMP __time64_t __cdecl _mkgmtime64(struct tm *_Tm);
+  _CRTIMP __time64_t __cdecl _time64(__time64_t *_Time);
+#ifdef _UCRT
+  _CRTIMP int __cdecl _timespec64_get(struct _timespec64 *_Ts, int _Base);
+#endif
+  unsigned __cdecl _getsystime(struct tm *_Tm);
+  unsigned __cdecl _setsystime(struct tm *_Tm,unsigned _MilliSec);
 
 #ifndef _WTIME_DEFINED
-/* wide function prototypes, also declared in wchar.h */
-#ifndef __STRICT_ANSI__
-#ifdef __MSVCRT__
-_CRTIMP wchar_t* __cdecl	_wasctime(const struct tm*);
-_CRTIMP wchar_t* __cdecl	_wctime(const time_t*);
-_CRTIMP wchar_t* __cdecl	_wstrdate(wchar_t*);
-_CRTIMP wchar_t* __cdecl	_wstrtime(wchar_t*);
-#if __MSVCRT_VERSION__ >= 0x0601
-_CRTIMP wchar_t* __cdecl	_wctime64 (const __time64_t*);
-#endif
-#endif /*  __MSVCRT__ */
-#endif /* __STRICT_ANSI__ */
-_CRTIMP size_t __cdecl		wcsftime (wchar_t*, size_t, const wchar_t*, const struct tm*);
-#define _WTIME_DEFINED
-#endif /* _WTIME_DEFINED */ 
+  _CRTIMP wchar_t *__cdecl _wasctime(const struct tm *_Tm);
+  _SECIMP errno_t __cdecl _wasctime_s (wchar_t *_Buf,size_t _SizeInWords,const struct tm *_Tm);
+  wchar_t *__cdecl _wctime32(const __time32_t *_Time) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
+  _SECIMP errno_t __cdecl _wctime32_s (wchar_t *_Buf,size_t _SizeInWords,const __time32_t *_Time);
+  size_t __cdecl wcsftime(wchar_t * __restrict__ _Buf,size_t _SizeInWords,const wchar_t * __restrict__ _Format,const struct tm * __restrict__ _Tm);
+  _CRTIMP size_t __cdecl _wcsftime_l(wchar_t * __restrict__ _Buf,size_t _SizeInWords,const wchar_t * __restrict__ _Format,const struct tm * __restrict__ _Tm,_locale_t _Locale);
+  _CRTIMP wchar_t *__cdecl _wstrdate(wchar_t *_Buffer) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
+  _SECIMP errno_t __cdecl _wstrdate_s (wchar_t *_Buf,size_t _SizeInWords);
+  _CRTIMP wchar_t *__cdecl _wstrtime(wchar_t *_Buffer) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
+  _SECIMP errno_t __cdecl _wstrtime_s (wchar_t *_Buf,size_t _SizeInWords);
+  _CRTIMP wchar_t *__cdecl _wctime64(const __time64_t *_Time) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
+  _SECIMP errno_t __cdecl _wctime64_s (wchar_t *_Buf,size_t _SizeInWords,const __time64_t *_Time);
 
-#ifdef	__cplusplus
+#if !defined (RC_INVOKED) && !defined (_INC_WTIME_INL)
+#define _INC_WTIME_INL
+  wchar_t *__cdecl _wctime(const time_t *) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
+#ifndef __CRT__NO_INLINE
+#ifndef _USE_32BIT_TIME_T
+  __CRT_INLINE wchar_t *__cdecl _wctime(const time_t *_Time) { return _wctime64(_Time); }
+#else
+  __CRT_INLINE wchar_t *__cdecl _wctime(const time_t *_Time) { return _wctime32(_Time); }
+#endif
+#endif /* __CRT__NO_INLINE */
+#endif
+
+#if !defined (RC_INVOKED) && !defined (_INC_WTIME_S_INL)
+#define _INC_WTIME_S_INL
+  errno_t __cdecl _wctime_s(wchar_t *, size_t, const time_t *);
+#ifndef __CRT__NO_INLINE
+#ifndef _USE_32BIT_TIME_T
+  __CRT_INLINE errno_t __cdecl _wctime_s (wchar_t *_Buffer,size_t _SizeInWords,const time_t *_Time) { return _wctime64_s (_Buffer,_SizeInWords,_Time); }
+#else
+  __CRT_INLINE errno_t __cdecl _wctime_s (wchar_t *_Buffer,size_t _SizeInWords,const time_t *_Time) { return _wctime32_s (_Buffer,_SizeInWords,_Time); }
+#endif
+#endif  /* __CRT__NO_INLINE */
+#endif
+
+#define _WTIME_DEFINED
+#endif
+
+#ifndef RC_INVOKED
+
+#ifdef _USE_32BIT_TIME_T
+static __inline time_t __CRTDECL time(time_t *_Time) { return _time32(_Time); }
+#ifdef _UCRT
+static __inline int __CRTDECL timespec_get(struct timespec* _Ts, int _Base) { return _timespec32_get((struct _timespec32*)_Ts, _Base); }
+#endif
+static __inline double __CRTDECL difftime(time_t _Time1,time_t _Time2)  { return _difftime32(_Time1,_Time2); }
+static __inline struct tm *__CRTDECL localtime(const time_t *_Time) { return _localtime32(_Time); }
+static __inline errno_t __CRTDECL localtime_s(struct tm *_Tm,const time_t *_Time) { return _localtime32_s(_Tm,_Time); }
+static __inline struct tm *__CRTDECL gmtime(const time_t *_Time) { return _gmtime32(_Time); }
+static __inline errno_t __CRTDECL gmtime_s(struct tm *_Tm, const time_t *_Time)   { return _gmtime32_s(_Tm, _Time); }
+static __inline char *__CRTDECL ctime(const time_t *_Time) { return _ctime32(_Time); }
+static __inline errno_t __CRTDECL ctime_s(char *_Buf,size_t _SizeInBytes,const time_t *_Time) { return _ctime32_s(_Buf,_SizeInBytes,_Time); }
+static __inline time_t __CRTDECL mktime(struct tm *_Tm) { return _mktime32(_Tm); }
+static __inline time_t __CRTDECL _mkgmtime(struct tm *_Tm) { return _mkgmtime32(_Tm); }
+#else
+static __inline time_t __CRTDECL time(time_t *_Time) { return _time64(_Time); }
+#ifdef _UCRT
+static __inline int __CRTDECL timespec_get(struct timespec* _Ts, int _Base) { return _timespec64_get((struct _timespec64*)_Ts, _Base); }
+#endif
+static __inline double __CRTDECL difftime(time_t _Time1,time_t _Time2) { return _difftime64(_Time1,_Time2); }
+static __inline struct tm *__CRTDECL localtime(const time_t *_Time) { return _localtime64(_Time); }
+static __inline errno_t __CRTDECL localtime_s(struct tm *_Tm,const time_t *_Time) { return _localtime64_s(_Tm,_Time); }
+static __inline struct tm *__CRTDECL gmtime(const time_t *_Time) { return _gmtime64(_Time); }
+static __inline errno_t __CRTDECL gmtime_s(struct tm *_Tm, const time_t *_Time) { return _gmtime64_s(_Tm, _Time); }
+static __inline char *__CRTDECL ctime(const time_t *_Time) { return _ctime64(_Time); }
+static __inline errno_t __CRTDECL ctime_s(char *_Buf,size_t _SizeInBytes,const time_t *_Time) { return _ctime64_s(_Buf,_SizeInBytes,_Time); }
+static __inline time_t __CRTDECL mktime(struct tm *_Tm) { return _mktime64(_Tm); }
+static __inline time_t __CRTDECL _mkgmtime(struct tm *_Tm) { return _mkgmtime64(_Tm); }
+#endif
+
+#endif /* !RC_INVOKED */
+
+#if !defined(NO_OLDNAMES) || defined(_POSIX)
+#define CLK_TCK CLOCKS_PER_SEC
+
+#ifdef _UCRT
+#define __MINGW_ATTRIB_DEPRECATED_UCRT \
+    __MINGW_ATTRIB_DEPRECATED_MSG( \
+        "Only provided for source compatibility; this variable might " \
+        "not always be accurate when linking to UCRT.")
+#else
+#define __MINGW_ATTRIB_DEPRECATED_UCRT
+#endif
+
+  _CRTIMP extern int daylight __MINGW_ATTRIB_DEPRECATED_UCRT;
+  _CRTIMP extern long timezone __MINGW_ATTRIB_DEPRECATED_UCRT;
+  _CRTIMP extern char *tzname[2] __MINGW_ATTRIB_DEPRECATED_UCRT;
+  void __cdecl tzset(void) __MINGW_ATTRIB_DEPRECATED_MSVC2005;
+#endif
+
+#include <_timeval.h>
+
+#ifndef _TIMEZONE_DEFINED /* also in sys/time.h */
+#define _TIMEZONE_DEFINED
+struct timezone {
+  int tz_minuteswest;
+  int tz_dsttime;
+};
+
+  extern int __cdecl mingw_gettimeofday (struct timeval *p, struct timezone *z);
+#endif /* _TIMEZONE_DEFINED */
+
+#pragma pack(pop)
+
+#if defined(_POSIX_C_SOURCE) && !defined(_POSIX_THREAD_SAFE_FUNCTIONS)
+#define _POSIX_THREAD_SAFE_FUNCTIONS 200112L
+#endif
+
+#ifdef _POSIX_THREAD_SAFE_FUNCTIONS
+__forceinline struct tm *__CRTDECL localtime_r(const time_t *_Time, struct tm *_Tm) {
+  return localtime_s(_Tm, _Time) ? NULL : _Tm;
+}
+__forceinline struct tm *__CRTDECL gmtime_r(const time_t *_Time, struct tm *_Tm) {
+  return gmtime_s(_Tm, _Time) ? NULL : _Tm;
+}
+__forceinline char *__CRTDECL ctime_r(const time_t *_Time, char *_Str) {
+  return ctime_s(_Str, 0x7fffffff, _Time) ? NULL : _Str;
+}
+__forceinline char *__CRTDECL asctime_r(const struct tm *_Tm, char * _Str) {
+  return asctime_s(_Str, 0x7fffffff, _Tm) ? NULL : _Str;
 }
 #endif
 
-#endif	/* Not RC_INVOKED */
+#ifdef __cplusplus
+}
+#endif
 
-#endif	/* Not _TIME_H_ */
+/* POSIX 2008 says clock_gettime and timespec are defined in time.h header,
+   but other systems - like Linux, Solaris, etc - tend to declare such
+   recent extensions only if the following guards are met.  */
+#if !defined(IN_WINPTHREAD) && \
+	((!defined(_STRICT_STDC) && !defined(__XOPEN_OR_POSIX)) || \
+	 (_POSIX_C_SOURCE > 2) || defined(__EXTENSIONS__))
+#include <pthread_time.h>
+#endif
+
+#endif /* End _TIME_H_ */
 

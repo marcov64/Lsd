@@ -1,9 +1,12 @@
-K+S (var. firm number)
-0.3
-01 January, 2018
+K+S (var. firms)
+0.3.2
+01 January, 2022
 #
 #
 #
 #
 #
 #
+#
+#
+Free_entry.lsd

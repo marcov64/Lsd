@@ -1,12 +1,8 @@
-#ifndef _INITGUID_H
-#define _INITGUID_H
-#if __GNUC__ >=3
-#pragma GCC system_header
-#endif
+/**
+ * This file has no copyright assigned and is placed in the Public Domain.
+ * This file is part of the mingw-w64 runtime package.
+ * No warranty is given; refer to the file DISCLAIMER.PD within this package.
+ */
+#define INITGUID
 
-#ifndef DEFINE_GUID
-#include <basetyps.h>
-#endif
-#undef DEFINE_GUID
-#define DEFINE_GUID(n,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) GUID_EXT const GUID n GUID_SECT = {l,w1,w2,{b1,b2,b3,b4,b5,b6,b7,b8}}
-#endif
+#include <guiddef.h>

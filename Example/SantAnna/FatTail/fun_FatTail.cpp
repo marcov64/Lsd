@@ -1,3 +1,19 @@
+/******************************************************************************
+
+	INDUSTRY LSD MODEL (aka Fat Tail Model)
+	------------------
+
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
+	VERSION: 2 - supporting advnced sensitivity analysis
+
+	This is the single code file for the model in LSD.
+
+ ******************************************************************************/
+
 #include "fun_head_fast.h"
 
 bool	stdHHI = false;						// standardized HHI calculation flag
@@ -72,7 +88,7 @@ v[0] = VL( "_a", 1 );						// last period productivity
 v[1] = V( "_theta");						// productivity shock
 
 v[2] = v[0] * ( 1 + v[1] );					// inovation equation (eq. 1 and eq. 8)
-  
+
 RESULT( v[2] )
 
 
@@ -122,11 +138,11 @@ else
 		case 1:								// Schumpeter Mark I regime
 		  	v[3] = 0;						// no learning for incumbent (eq. 5)
  			break;
-  
+
 		case 2:								// intermediate regime
 			v[3] = V( "InnoShock" );		// learning from asym. Laplace (eq. 7)
 			break;
-  
+
 		case 3:
 			v[4] = V( "InnoShock" );		// learning from beta distribution
 			v[5] = VL( "_a", 1 );			// previous productivity
@@ -211,7 +227,7 @@ RESULT( v[6] )
 EQUATION( "E" )
 /*
 Draws the number of entrants in the period.
-Entry Process occurs in one of three scenarios: 
+Entry Process occurs in one of three scenarios:
 . no entry
 . according to a proportion on the number of incumbent in the previous period
 . fixed number of firms (may be one less for a while)
@@ -259,7 +275,7 @@ for ( v[6]=1; v[6] <= v[0] ; v[6]++ )		// do one at a time
 	switch ( (int) v[4] )
 	{
 		case 0:
-			v[7] = 1 + V( "InnoShock" );	// draw a theta for entrant (eq. 7) 
+			v[7] = 1 + V( "InnoShock" );	// draw a theta for entrant (eq. 7)
 			v[8] = v[1];					// average productivity as reference
 			break;
 
@@ -270,13 +286,13 @@ for ( v[6]=1; v[6] <= v[0] ; v[6]++ )		// do one at a time
 			break;
 
 		case 2:
-			v[7] = 1 + V( "betaInnoDrawEntr" );	// draw a theta for entrant (eq. 7) 
+			v[7] = 1 + V( "betaInnoDrawEntr" );	// draw a theta for entrant (eq. 7)
 			v[8] = v[2];					// uses top productivity (frontier)
 			break;
 	}
 
 	cur = ADDOBJ( "Firm" );					// create a new "Firm" in current market
-  
+
 	WRITES( cur, "_age", 0 );				// set age to 0
 	WRITES( cur, "_incumbent", 0 );			// set as not an incumbent
 	WRITES( cur, "_theta", v[7] );			// initial shock
@@ -310,7 +326,7 @@ CYCLE( cur, "Firm" )						// scans incumbents and entrants in t
 {
 	v[2] = VS( cur, "_incumbent" );			// gets firm's incumbent (or not) status
 	v[3] = VS( cur, "_s" );					// gets firm's share
-  
+
 	if ( v[2] )								// if it's an incumbent
 		v[1] += v[3];						// add it to the right accumulator
 	else
@@ -341,7 +357,7 @@ else
 	{
 		v[2] = VS( cur, "_incumbent" );		// gets firm's incumbent (or not) status
 		v[3] = VS( cur, "_s" );				// gets firm's share
-  
+
 		if ( v[2] )							// only do for incumbents
 			WRITES( cur, "_s", v[3] * v[4] );	// adjusts share
 	}
@@ -365,11 +381,11 @@ if ( v[1] > v[2] )
 	v[3] = true;							// flag incumbent if older than limit
 else
 	v[3] = v[0];							// else keep as it is
-  
-RESULT( v[3] )  
+
+RESULT( v[3] )
 
 
-EQUATION( "_age" )	
+EQUATION( "_age" )
 /*
 This equation updates the age of the firm
 */
@@ -380,7 +396,7 @@ v[0] ++;
 RESULT( v[0] )
 
 
-EQUATION( "_growth" )	
+EQUATION( "_growth" )
 /*
 Calculates the growth rate of the market share of the firm (log)
 */
@@ -454,8 +470,8 @@ v[0] = 0;
 CYCLE( cur, "Firm" )
 {
 	v[1] = VS( cur, "_a" );
-	v[2] = VLS( cur, "_s", 1 ); 
-  
+	v[2] = VLS( cur, "_s", 1 );
+
 	if( ! isnan( v[1] ) && ! isnan( v[2] ) )	// do not consider NaNs
 		v[0] += v[1] * v[2];
 	else
@@ -467,7 +483,7 @@ RESULT( v[0] )
 
 EQUATION( "aAvg2" )
 /*
-Average Productivity weighted with the value of past shares and productivities. 
+Average Productivity weighted with the value of past shares and productivities.
 Only for MarkII.
 Calculated with the productivity values before entry/exit ("_a").
 */
@@ -585,7 +601,7 @@ CYCLE( cur, "Firm" )
 	}
 }
 
-RESULT( v[0] / v[1] )						// average 
+RESULT( v[0] / v[1] )						// average
 
 
 EQUATION( "growthSD" )
@@ -632,7 +648,7 @@ CYCLE( cur, "Firm" )
 		v[0] = v[1];
 }
 
-RESULT( v[0] )								// maximum 
+RESULT( v[0] )								// maximum
 
 
 EQUATION( "aGrowthAvg" )
@@ -653,7 +669,7 @@ CYCLE( cur, "Firm" )
 	}
 }
 
-RESULT( v[0] / v[1] )						// average 
+RESULT( v[0] / v[1] )						// average
 
 
 EQUATION( "aGrowthSD" )
@@ -700,7 +716,7 @@ CYCLE( cur, "Firm" )
 		v[0] = v[1];
 }
 
-RESULT( v[0] )								// maximum 
+RESULT( v[0] )								// maximum
 
 
 // ######################## STATISTICS GENERATION ######################## //
@@ -721,7 +737,7 @@ CYCLE( cur, "Firm" )
 		v[0] += v[1];
 }
 
-RESULT( v[0] )								// maximum 
+RESULT( v[0] )								// maximum
 
 
 EQUATION( "totalFirms" )
@@ -762,8 +778,8 @@ RESULT( v[0] )
 
 EQUATION( "HHI" )
 /*
-Herfindahl-Hirschman index 
-According to the stdHHI flag, the normalized/standardized HHI (corrected for 
+Herfindahl-Hirschman index
+According to the stdHHI flag, the normalized/standardized HHI (corrected for
 the number of firms) is calculated
 */
 
@@ -790,8 +806,8 @@ if ( stdHHI )
 		else
 			v[0] = 0;
 }
-	
-v[0] = fmax( 0, fmin( v[0], 1 ) );			// handle abnormal cases	
+
+v[0] = fmax( 0, fmin( v[0], 1 ) );			// handle abnormal cases
 
 RESULT( v[0] )
 
@@ -812,7 +828,7 @@ CYCLE( cur, "Firm" )						// all firms in the market
 		v[0] += abs( v[1] - v[2] );			// compute sum
 }
 
-v[0] = fmax( 0, fmin( v[0], 2 ) );			// handle abnormal cases	
+v[0] = fmax( 0, fmin( v[0], 2 ) );			// handle abnormal cases
 
 RESULT( v[0] )
 

@@ -1,14 +1,47 @@
 #*******************************************************************************
 #
-# ------------------- Polynomial Regression OLS DoE analysis ------------------
+# ---- Island Model: NOLH polynomial regression Sobol sensitivity analysis ----
 #
-#	Several files are required to run:
-#		folder/baseName_XX_YY.csv		    : DoE specification from LSD
-#		folder/baseName_YY+1_ZZ.csv		  : external validation from LSD (optional)
-#		folder/baseName_XX_YY_WWW.csv	  : DoE response from R
-#		folder/baseName_YY+1_ZZ_WWW.csv	: ext. validation response from R (optional)
-#		folder/baseName.lsd				      : LSD configuration with default values
-#		folder/baseName.sa      		    : factor sensitivity test ranges from LSD
+#   Written by Marcelo C. Pereira, University of Campinas
+#
+#   Copyright Marcelo C. Pereira
+#   Distributed under the GNU General Public License
+#
+#   The default configuration assumes that the supplied LSD
+#   main simulation configuration (basename sobol):
+#     R/sa-sobol/sobol.lsd
+#   is used with the also supplied sensitivity analysis (SA) set:
+#     R/sa-sobol/sobol.sa
+#   to generate a set of configurations which must be executed
+#   before this script is used
+#
+#   To generate the configuration set, (1) open LSD Model Manager
+#   (LMM), (2) in LSD Model Browser, open the model which contains
+#   this script (double click), (3) in LMM, compile and run the
+#   model (menu Model>Compile and Run), (4) in LSD Model Browser,
+#   load the desired configuration (menu File>Load), (5) load the
+#   desired SA set (menu File>Load Sensitivity), (6) generate the
+#   configuration set (menu Data>Sensitivity Analysis>NOLH Sampling),
+#   accepting all the default options, (7) create an out-of-sample
+#   set of samples when asked by LSD, accepting the proposed number
+#   of samples.
+#
+#   To execute the simulation set, (8) create a parallel processing
+#   batch (menu Run>Parallel Batch), accepting to use the configura-
+#   tion set just created and the default options, (9) execute the
+#   created batch, accepting the option offered, (10) confirm opening
+#   the background run monitor, (11) wait until all simulation runs
+#   in the background run monitor finish.
+#
+#   Several files are required to run:
+#       folder/baseName_XX_YY.csv       : DoE specification from LSD
+#       folder/baseName_YY+1_ZZ.csv     : external validation from LSD (optional)
+#       folder/baseName_XX_YY_WWW.csv   : DoE response from R
+#       folder/baseName_YY+1_ZZ_WWW.csv : ext. validation response from R (optional)
+#       folder/baseName.lsd             : LSD configuration with default values
+#       folder/baseName.sa              : factor sensitivity test ranges from LSD
+#
+#   Run this script ONLY after producing the required data in LSD
 #
 #*******************************************************************************
 
@@ -22,7 +55,7 @@ iniDrop <- 0                          # initial time steps to drop from analysis
 nKeep <- -1                           # number of time steps to keep (-1=all)
 
 plotRows <- 1                         # number of plots per row in a page
-plotCols <- 1  	                      # number of plots per column in a page
+plotCols <- 1                         # number of plots per column in a page
 plotW <- 12                           # plot window width
 plotH <- 8                            # plot window height
 raster <- FALSE                       # raster or vector plots
@@ -60,7 +93,7 @@ eval.vars <- function( dataSet, allVars ) {
 
 dataSet <- read.doe.lsd( folder,                 # data files relative folder
                          baseName,               # data files base name (same as .lsd file)
-                         varName,				         # variable name to perform the sensitivity analysis
+                         varName,                        # variable name to perform the sensitivity analysis
                          does = 2,               # number of experiments (data + external validation)
                          iniDrop = iniDrop,      # initial time steps to drop from analysis (0=none)
                          nKeep = nKeep,          # number of time steps to keep (-1=all)

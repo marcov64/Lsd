@@ -1,30 +1,140 @@
-#ifndef _NB30_H
-#define _NB30_H
-#if __GNUC__ >=3
-#pragma GCC system_header
-#endif
+/**
+ * This file has no copyright assigned and is placed in the Public Domain.
+ * This file is part of the mingw-w64 runtime package.
+ * No warranty is given; refer to the file DISCLAIMER.PD within this package.
+ */
+#ifndef NCB_INCLUDED
+#define NCB_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 #define NCBNAMSZ 16
 #define MAX_LANA 254
+
+  typedef struct _NCB {
+    UCHAR ncb_command;
+    UCHAR ncb_retcode;
+    UCHAR ncb_lsn;
+    UCHAR ncb_num;
+    PUCHAR ncb_buffer;
+    WORD ncb_length;
+    UCHAR ncb_callname[NCBNAMSZ];
+    UCHAR ncb_name[NCBNAMSZ];
+    UCHAR ncb_rto;
+    UCHAR ncb_sto;
+    void (CALLBACK *ncb_post)(struct _NCB *);
+    UCHAR ncb_lana_num;
+    UCHAR ncb_cmd_cplt;
+#ifdef _WIN64
+    UCHAR ncb_reserve[18];
+#else
+    UCHAR ncb_reserve[10];
+#endif
+    HANDLE ncb_event;
+
+  } NCB,*PNCB;
+
+  typedef struct _ADAPTER_STATUS {
+    UCHAR adapter_address[6];
+    UCHAR rev_major;
+    UCHAR reserved0;
+    UCHAR adapter_type;
+    UCHAR rev_minor;
+    WORD duration;
+    WORD frmr_recv;
+    WORD frmr_xmit;
+    WORD iframe_recv_err;
+    WORD xmit_aborts;
+    DWORD xmit_success;
+    DWORD recv_success;
+    WORD iframe_xmit_err;
+    WORD recv_buff_unavail;
+    WORD t1_timeouts;
+    WORD ti_timeouts;
+    DWORD reserved1;
+    WORD free_ncbs;
+    WORD max_cfg_ncbs;
+    WORD max_ncbs;
+    WORD xmit_buf_unavail;
+    WORD max_dgram_size;
+    WORD pending_sess;
+    WORD max_cfg_sess;
+    WORD max_sess;
+    WORD max_sess_pkt_size;
+    WORD name_count;
+  } ADAPTER_STATUS,*PADAPTER_STATUS;
+
+  typedef struct _NAME_BUFFER {
+    UCHAR name[NCBNAMSZ];
+    UCHAR name_num;
+    UCHAR name_flags;
+  } NAME_BUFFER,*PNAME_BUFFER;
+
 #define NAME_FLAGS_MASK 0x87
+
 #define GROUP_NAME 0x80
 #define UNIQUE_NAME 0x00
+
 #define REGISTERING 0x00
 #define REGISTERED 0x04
 #define DEREGISTERED 0x05
 #define DUPLICATE 0x06
 #define DUPLICATE_DEREG 0x07
+
+  typedef struct _SESSION_HEADER {
+    UCHAR sess_name;
+    UCHAR num_sess;
+    UCHAR rcv_dg_outstanding;
+    UCHAR rcv_any_outstanding;
+  } SESSION_HEADER,*PSESSION_HEADER;
+
+  typedef struct _SESSION_BUFFER {
+    UCHAR lsn;
+    UCHAR state;
+    UCHAR local_name[NCBNAMSZ];
+    UCHAR remote_name[NCBNAMSZ];
+    UCHAR rcvs_outstanding;
+    UCHAR sends_outstanding;
+  } SESSION_BUFFER,*PSESSION_BUFFER;
+
 #define LISTEN_OUTSTANDING 0x01
 #define CALL_PENDING 0x02
 #define SESSION_ESTABLISHED 0x03
 #define HANGUP_PENDING 0x04
 #define HANGUP_COMPLETE 0x05
 #define SESSION_ABORTED 0x06
+
+  typedef struct _LANA_ENUM {
+    UCHAR length;
+    UCHAR lana[MAX_LANA+1];
+  } LANA_ENUM,*PLANA_ENUM;
+
+  typedef struct _FIND_NAME_HEADER {
+    WORD node_count;
+    UCHAR reserved;
+    UCHAR unique_group;
+  } FIND_NAME_HEADER,*PFIND_NAME_HEADER;
+
+  typedef struct _FIND_NAME_BUFFER {
+    UCHAR length;
+    UCHAR access_control;
+    UCHAR frame_control;
+    UCHAR destination_addr[6];
+    UCHAR source_addr[6];
+    UCHAR routing_info[18];
+  } FIND_NAME_BUFFER,*PFIND_NAME_BUFFER;
+
+  typedef struct _ACTION_HEADER {
+    ULONG transport_id;
+    USHORT action_code;
+    USHORT reserved;
+  } ACTION_HEADER,*PACTION_HEADER;
+
 #define ALL_TRANSPORTS "M\0\0\0"
 #define MS_NBF "MNBF"
+
 #define NCBCALL 0x10
 #define NCBLISTEN 0x11
 #define NCBHANGUP 0x12
@@ -51,8 +161,11 @@ extern "C" {
 #define NCBACTION 0x77
 #define NCBFINDNAME 0x78
 #define NCBTRACE 0x79
+
 #define ASYNCH 0x80
+
 #define NRC_GOODRET 0x00
+
 #define NRC_BUFLEN 0x01
 #define NRC_ILLCMD 0x03
 #define NRC_CMDTMO 0x05
@@ -90,96 +203,13 @@ extern "C" {
 #define NRC_LOCKFAIL 0x3C
 #define NRC_OPENERR 0x3f
 #define NRC_SYSTEM 0x40
+
 #define NRC_PENDING 0xff
+
+  UCHAR WINAPI Netbios(PNCB pncb);
+
 #define NCB_POST void CALLBACK
-typedef struct _ACTION_HEADER {
-	ULONG transport_id;
-	USHORT action_code;
-	USHORT reserved;
-} ACTION_HEADER,*PACTION_HEADER;
-typedef struct _ADAPTER_STATUS {
-	UCHAR adapter_address[6];
-	UCHAR rev_major;
-	UCHAR reserved0;
-	UCHAR adapter_type;
-	UCHAR rev_minor;
-	WORD duration;
-	WORD frmr_recv;
-	WORD frmr_xmit;
-	WORD iframe_recv_err;
-	WORD xmit_aborts;
-	DWORD xmit_success;
-	DWORD recv_success;
-	WORD iframe_xmit_err;
-	WORD recv_buff_unavail;
-	WORD t1_timeouts;
-	WORD ti_timeouts;
-	DWORD reserved1;
-	WORD free_ncbs;
-	WORD max_cfg_ncbs;
-	WORD max_ncbs;
-	WORD xmit_buf_unavail;
-	WORD max_dgram_size;
-	WORD pending_sess;
-	WORD max_cfg_sess;
-	WORD max_sess;
-	WORD max_sess_pkt_size;
-	WORD name_count;
-} ADAPTER_STATUS,*PADAPTER_STATUS;
-typedef struct _FIND_NAME_BUFFER {
-	UCHAR length;
-	UCHAR access_control;
-	UCHAR frame_control;
-	UCHAR destination_addr[6];
-	UCHAR source_addr[6];
-	UCHAR routing_info[18];
-} FIND_NAME_BUFFER,*PFIND_NAME_BUFFER;
-typedef struct _FIND_NAME_HEADER {
-	WORD node_count;
-	UCHAR reserved;
-	UCHAR unique_group;
-} FIND_NAME_HEADER,*PFIND_NAME_HEADER;
-typedef struct _LANA_ENUM {
-	UCHAR length;
-	UCHAR lana[MAX_LANA+1];
-} LANA_ENUM,*PLANA_ENUM;
-typedef struct _NAME_BUFFER {
-	UCHAR name[NCBNAMSZ];
-	UCHAR name_num;
-	UCHAR name_flags;
-} NAME_BUFFER,*PNAME_BUFFER;
-typedef struct _NCB {
-	UCHAR ncb_command;
-	UCHAR ncb_retcode;
-	UCHAR ncb_lsn;
-	UCHAR ncb_num;
-	PUCHAR ncb_buffer;
-	WORD ncb_length;
-	UCHAR ncb_callname[NCBNAMSZ];
-	UCHAR ncb_name[NCBNAMSZ];
-	UCHAR ncb_rto;
-	UCHAR ncb_sto;
-	void (CALLBACK *ncb_post)(struct _NCB*);
-	UCHAR ncb_lana_num;
-	UCHAR ncb_cmd_cplt;
-	UCHAR ncb_reserve[10];
-	HANDLE ncb_event;
-} NCB,*PNCB;
-typedef struct _SESSION_BUFFER {
-	UCHAR lsn;
-	UCHAR state;
-	UCHAR local_name[NCBNAMSZ];
-	UCHAR remote_name[NCBNAMSZ];
-	UCHAR rcvs_outstanding;
-	UCHAR sends_outstanding;
-} SESSION_BUFFER,*PSESSION_BUFFER;
-typedef struct _SESSION_HEADER {
-	UCHAR sess_name;
-	UCHAR num_sess;
-	UCHAR rcv_dg_outstanding;
-	UCHAR rcv_any_outstanding;
-} SESSION_HEADER,*PSESSION_HEADER;
-UCHAR WINAPI Netbios(PNCB);
+
 #ifdef __cplusplus
 }
 #endif

@@ -14,8 +14,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GCC; see the file COPYING.  If not, write to
-the Free Software Foundation, 59 Temple Place - Suite 330,
-Boston, MA 02111-1307, USA.  */
+the Free Software Foundation, 51 Franklin Street, Fifth Floor,
+Boston, MA 02110-1301, USA.  */
 
 /* As a special exception, if you include this header file into source
    files compiled by GCC, this header file does not by itself cause
@@ -28,9 +28,10 @@ Boston, MA 02111-1307, USA.  */
  * ISO C Standard:  7.15  Variable arguments  <stdarg.h>
  */
 
+#if defined(__GNUC__)
+
 #ifndef _STDARG_H
 #ifndef _ANSI_STDARG_H_
-#ifndef RC_INVOKED
 #ifndef __need___va_list
 #define _STDARG_H
 #define _ANSI_STDARG_H_
@@ -51,7 +52,7 @@ typedef __builtin_va_list __gnuc_va_list;
 #define va_start(v,l)	__builtin_va_start(v,l)
 #define va_end(v)	__builtin_va_end(v)
 #define va_arg(v,l)	__builtin_va_arg(v,l)
-#if !defined(__STRICT_ANSI__) || __STDC_VERSION__ + 0 >= 199900L
+#if !defined(__STRICT_ANSI__) || __STDC_VERSION__ + 0 >= 199900L || defined(__GXX_EXPERIMENTAL_CXX0X__)
 #define va_copy(d,s)	__builtin_va_copy(d,s)
 #endif
 #define __va_copy(d,s)	__builtin_va_copy(d,s)
@@ -130,6 +131,11 @@ typedef __gnuc_va_list va_list;
 
 #endif /* _STDARG_H */
 
-#endif /* not RC_INVOKED */
 #endif /* not _ANSI_STDARG_H_ */
 #endif /* not _STDARG_H */
+
+#endif /*__GNUC__ */
+
+/* include mingw stuff */
+#include <_mingw_stdarg.h>
+

@@ -1,82 +1,138 @@
-/*
- * utime.h
+/**
  * This file has no copyright assigned and is placed in the Public Domain.
- * This file is a part of the mingw-runtime package.
- * No warranty is given; refer to the file DISCLAIMER within the package.
- *
- * Support for the utime function.
- *
+ * This file is part of the mingw-w64 runtime package.
+ * No warranty is given; refer to the file DISCLAIMER.PD within this package.
  */
-#ifndef	_UTIME_H_
-#define	_UTIME_H_
+#ifndef _INC_UTIME
+#define _INC_UTIME
 
-/* All the headers include this file. */
-#include <_mingw.h>
+#ifndef _WIN32
+#error Only Win32 target is supported!
+#endif
 
-#define __need_wchar_t
-#define __need_size_t
-#ifndef RC_INVOKED
-#include <stddef.h>
-#endif	/* Not RC_INVOKED */
-#include <sys/types.h>
+#include <crtdefs.h>
 
-#ifndef	RC_INVOKED
+#pragma pack(push,_CRT_PACKING)
 
-/*
- * Structure used by _utime function.
- */
-struct _utimbuf
-{
-	time_t	actime;		/* Access time */
-	time_t	modtime;	/* Modification time */
-};
-
-
-#ifndef	_NO_OLDNAMES
-/* NOTE: Must be the same as _utimbuf above. */
-struct utimbuf
-{
-	time_t	actime;
-	time_t	modtime;
-};
-#endif	/* Not _NO_OLDNAMES */
-
-struct __utimbuf64
-{
-	__time64_t actime;
-	__time64_t modtime;
-};
-
-
-#ifdef	__cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
-_CRTIMP int __cdecl	_utime (const char*, struct _utimbuf*);
+#ifndef _CRTIMP
+#define _CRTIMP __declspec(dllimport)
+#endif
 
-#ifndef	_NO_OLDNAMES
-_CRTIMP int __cdecl	utime (const char*, struct utimbuf*);
-#endif	/* Not _NO_OLDNAMES */
+#ifndef _WCHAR_T_DEFINED
+  typedef unsigned short wchar_t;
+#define _WCHAR_T_DEFINED
+#endif
 
-_CRTIMP int __cdecl	_futime (int, struct _utimbuf*);
+#ifdef _USE_32BIT_TIME_T
+#ifdef _WIN64
+#undef _USE_32BIT_TIME_T
+#endif
+#endif
 
-/* The wide character version, only available for MSVCRT versions of the
- * C runtime library. */
-#ifdef __MSVCRT__
-_CRTIMP int __cdecl	_wutime (const wchar_t*, struct _utimbuf*);
-#endif /* MSVCRT runtime */
+#ifndef _TIME32_T_DEFINED
+#define _TIME32_T_DEFINED
+  typedef long __time32_t;
+#endif
 
-/* These require newer versions of msvcrt.dll (6.10 or higher).  */ 
-#if __MSVCRT_VERSION__ >= 0x0601
-_CRTIMP int __cdecl	_utime64 (const char*, struct __utimbuf64*);
-_CRTIMP int __cdecl	_wutime64 (const wchar_t*, struct __utimbuf64*);
-_CRTIMP int __cdecl	_futime64 (int, struct __utimbuf64*);
-#endif /* __MSVCRT_VERSION__ >= 0x0601 */
+#ifndef _TIME64_T_DEFINED
+#define _TIME64_T_DEFINED
+  __MINGW_EXTENSION typedef __int64 __time64_t;
+#endif
 
-#ifdef	__cplusplus
+#ifndef _TIME_T_DEFINED
+#define _TIME_T_DEFINED
+#ifdef _USE_32BIT_TIME_T
+  typedef __time32_t time_t;
+#else
+  typedef __time64_t time_t;
+#endif
+#endif
+
+#ifndef _UTIMBUF_DEFINED
+#define _UTIMBUF_DEFINED
+
+  struct _utimbuf {
+    time_t actime;
+    time_t modtime;
+  };
+
+  struct __utimbuf32 {
+    __time32_t actime;
+    __time32_t modtime;
+  };
+
+  struct __utimbuf64 {
+    __time64_t actime;
+    __time64_t modtime;
+  };
+
+#ifndef	NO_OLDNAMES
+  struct utimbuf {
+    time_t actime;
+    time_t modtime;
+  };
+
+  struct utimbuf32 {
+    __time32_t actime;
+    __time32_t modtime;
+  };
+#endif
+#endif
+
+  _CRTIMP int __cdecl _utime32(const char *_Filename,struct __utimbuf32 *_Time);
+  _CRTIMP int __cdecl _futime32(int _FileDes,struct __utimbuf32 *_Time);
+  _CRTIMP int __cdecl _wutime32(const wchar_t *_Filename,struct __utimbuf32 *_Time);
+  _CRTIMP int __cdecl _utime64(const char *_Filename,struct __utimbuf64 *_Time);
+  _CRTIMP int __cdecl _futime64(int _FileDes,struct __utimbuf64 *_Time);
+  _CRTIMP int __cdecl _wutime64(const wchar_t *_Filename,struct __utimbuf64 *_Time);
+
+#ifndef RC_INVOKED
+int __cdecl _utime(const char *,struct _utimbuf *);
+int __cdecl _futime(int,struct _utimbuf *);
+int __cdecl _wutime(const wchar_t *,struct _utimbuf *);
+#ifndef __CRT__NO_INLINE
+#ifdef _USE_32BIT_TIME_T
+__CRT_INLINE int __cdecl _utime(const char *_Filename,struct _utimbuf *_Utimbuf) {
+  return _utime32(_Filename,(struct __utimbuf32 *)_Utimbuf);
+}
+__CRT_INLINE int __cdecl _futime(int _Desc,struct _utimbuf *_Utimbuf) {
+  return _futime32(_Desc,(struct __utimbuf32 *)_Utimbuf);
+}
+__CRT_INLINE int __cdecl _wutime(const wchar_t *_Filename,struct _utimbuf *_Utimbuf) {
+  return _wutime32(_Filename,(struct __utimbuf32 *)_Utimbuf);
+}
+#else
+__CRT_INLINE int __cdecl _utime(const char *_Filename,struct _utimbuf *_Utimbuf) {
+  return _utime64(_Filename,(struct __utimbuf64 *)_Utimbuf);
+}
+__CRT_INLINE int __cdecl _futime(int _Desc,struct _utimbuf *_Utimbuf) {
+  return _futime64(_Desc,(struct __utimbuf64 *)_Utimbuf);
+}
+__CRT_INLINE int __cdecl _wutime(const wchar_t *_Filename,struct _utimbuf *_Utimbuf) {
+  return _wutime64(_Filename,(struct __utimbuf64 *)_Utimbuf);
+}
+#endif
+#endif /* !__CRT__NO_INLINE */
+
+#ifndef	NO_OLDNAMES
+  int __cdecl utime(const char *, struct utimbuf *);
+#ifndef __CRT__NO_INLINE
+#ifndef _USE_32BIT_TIME_T
+__CRT_INLINE int __cdecl utime(const char *_Filename,struct utimbuf *_Utimbuf) {
+  return _utime64(_Filename,(struct __utimbuf64 *)_Utimbuf);
+}
+#endif /* !_USE_32BIT_TIME_T */
+#endif /* !__CRT__NO_INLINE */
+#endif
+#endif
+
+#ifdef __cplusplus
 }
 #endif
 
-#endif	/* Not RC_INVOKED */
-
-#endif	/* Not _UTIME_H_ */
+#pragma pack(pop)
+#endif

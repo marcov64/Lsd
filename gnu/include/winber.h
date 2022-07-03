@@ -1,67 +1,56 @@
-/*
-  winber.h - Header file for the Windows LDAP Basic Encoding Rules API
+/**
+ * This file is part of the mingw-w64 runtime package.
+ * No warranty is given; refer to the file DISCLAIMER within this package.
+ */
 
-  Written by Filip Navara <xnavara@volny.cz>
+#ifndef _WINBER_DEFINED_
+#define _WINBER_DEFINED_
 
-  References:
-    The C LDAP Application Program Interface
-    http://www.watersprings.org/pub/id/draft-ietf-ldapext-ldap-c-api-05.txt
+#include <winapifamily.h>
 
-    Lightweight Directory Access Protocol Reference
-    http://msdn.microsoft.com/library/en-us/netdir/ldap/ldap_reference.asp
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-*/
-
-#ifndef _WINBER_H
-#define _WINBER_H
-#if __GNUC__ >= 3
-#pragma GCC system_header
-#endif
+#if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifndef WINBERAPI
+#ifndef _WINBER_
 #define WINBERAPI DECLSPEC_IMPORT
+#else
+#define WINBERAPI
 #endif
 
-typedef struct berelement BerElement;
-typedef ULONG ber_len_t;
-#include <pshpack4.h>
-typedef struct berval {
-	ber_len_t bv_len;
-	char *bv_val;
-} BerValue, LDAP_BERVAL, *PLDAP_BERVAL, BERVAL, *PBERVAL;
-#include <poppack.h>
+#ifndef BERAPI
+#define BERAPI __cdecl
+#endif
 
-typedef ULONG ber_tag_t;
-typedef INT ber_int_t;
-typedef UINT ber_uint_t;
-typedef INT ber_slen_t;
+#define LBER_ERROR __MSABI_LONG(0xffffffff)
+#define LBER_DEFAULT __MSABI_LONG(0xffffffff)
 
-#define LBER_ERROR ((ber_tag_t)-1)
-#define LBER_DEFAULT ((ber_tag_t)-1)
-#define LBER_USE_DER 0x01
+  typedef unsigned int ber_tag_t;
+  typedef int ber_int_t;
+  typedef unsigned int ber_uint_t;
+  typedef unsigned int ber_len_t;
+  typedef int ber_slen_t;
 
-WINBERAPI BerElement *ber_init(const BerValue*);
-WINBERAPI int ber_printf(BerElement*,const char*,...);
-WINBERAPI int ber_flatten(BerElement*,BerValue**);
-WINBERAPI ber_tag_t ber_scanf(BerElement*,const char*,...);
-WINBERAPI ber_tag_t ber_peek_tag(BerElement*,ber_len_t*);
-WINBERAPI ber_tag_t ber_skip_tag(BerElement*,ber_len_t*);
-WINBERAPI ber_tag_t ber_first_element(BerElement*,ber_len_t*,char**);
-WINBERAPI ber_tag_t ber_next_element(BerElement*,ber_len_t*,char*);
-WINBERAPI void ber_bvfree(BerValue*);
-WINBERAPI void ber_bvecfree(BerValue**);
-WINBERAPI void ber_free(BerElement*,int);
-WINBERAPI BerValue *ber_bvdup(BerValue*);
-WINBERAPI BerElement *ber_alloc_t(int);
+  WINBERAPI BerElement *BERAPI ber_init (BERVAL *pBerVal);
+  WINBERAPI VOID BERAPI ber_free (BerElement *pBerElement, INT fbuf);
+  WINBERAPI VOID BERAPI ber_bvfree (BERVAL *pBerVal);
+  WINBERAPI VOID BERAPI ber_bvecfree (PBERVAL *pBerVal);
+  WINBERAPI BERVAL *BERAPI ber_bvdup (BERVAL *pBerVal);
+  WINBERAPI BerElement *BERAPI ber_alloc_t (INT options);
+  WINBERAPI ULONG BERAPI ber_skip_tag (BerElement *pBerElement, ULONG *pLen);
+  WINBERAPI ULONG BERAPI ber_peek_tag (BerElement *pBerElement, ULONG *pLen);
+  WINBERAPI ULONG BERAPI ber_first_element (BerElement *pBerElement, ULONG *pLen, CHAR **ppOpaque);
+  WINBERAPI ULONG BERAPI ber_next_element (BerElement *pBerElement, ULONG *pLen, CHAR *opaque);
+  WINBERAPI INT BERAPI ber_flatten (BerElement *pBerElement, PBERVAL *pBerVal);
+  WINBERAPI INT BERAPI ber_printf (BerElement *pBerElement, PSTR fmt,...);
+  WINBERAPI ULONG BERAPI ber_scanf (BerElement *pBerElement, PSTR fmt,...);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* _WINBER_H */
+
+#endif
+
+#endif

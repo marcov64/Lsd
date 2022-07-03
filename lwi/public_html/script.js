@@ -1,5 +1,5 @@
-/* 
- * Copyright (C) 2017 Marcelo C. Pereira <mcper at unicamp.br>
+/*
+ * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ function check_html5( ) {
 function download_config( ) {
     // get the list of configuration values on the page
     var config = read_config( );
-    
+
     // prepare to launch download when file is ready on the server
     var xhttp = new XMLHttpRequest( );
     xhttp.onreadystatechange = function( ) {
@@ -46,7 +46,7 @@ function download_config( ) {
     // request the server to save configuration to the server disk
     xhttp.open( "POST", "download_config.php", true );
     xhttp.setRequestHeader( "Content-type", "application/x-www-form-urlencoded" );
-    xhttp.send( "x=" + JSON.stringify( config ) );        
+    xhttp.send( "x=" + JSON.stringify( config ) );
 }
 
 
@@ -79,21 +79,22 @@ function run_sim( ) {
     if ( run_done ) {
         if ( ! window.confirm( "Overwrite results from previous execution?\n\nAll previously produced results will be lost." ) ) {
             return;
-        }       
+        }
     }
-    
+
     // get the list of configuration values on the page
     var config = read_config( );
-    
+
     var xhttp = new XMLHttpRequest( );
     xhttp.onreadystatechange = function( ) {
-        if ( this.responseText.substring( 0, 6 ) === "Error:" ) {
+        if ( this.responseText.substring( 0, 6 ) === "Error:" ||
+             this.responseText.substring( 0, 5 ) === "Busy:" ) {
             status_stop( );
             document.getElementById( "status" ).innerHTML = this.responseText;
         } else {
-            if ( this.responseText === "Aborted" ) {
+            if ( this.responseText.substring( 0, 8 ) === "Aborted:" ) {
                 status_stop( );
-                document.getElementById( "status" ).innerHTML = "Simulation aborted by user";
+                document.getElementById( "status" ).innerHTML = this.responseText;
                 run_done = false;
             } else {
                 if ( this.readyState === 1 ) {
@@ -105,7 +106,7 @@ function run_sim( ) {
                         document.getElementById( "_begin_" ).max = config._timeSteps_;
                         document.getElementById( "_end_" ).value = config._timeSteps_;
                         document.getElementById( "_end_" ).max = config._timeSteps_;
-                        document.getElementById( "_ready_" ).innerHTML = "Results ready for download";
+                        document.getElementById( "_ready_" ).innerHTML = "Ready for download";
                         document.getElementById( "_date_" ).innerHTML = format_date( new Date( ) );
                         document.getElementById( "_size_" ).innerHTML = this.responseText;
                         if ( this.status !== 200 ) {
@@ -119,7 +120,7 @@ function run_sim( ) {
 
     xhttp.open( "POST", "run_sim.php", true );
     xhttp.setRequestHeader( "Content-type", "application/x-www-form-urlencoded" );
-    xhttp.send( "x=" + JSON.stringify( config ) );            
+    xhttp.send( "x=" + JSON.stringify( config ) );
 }
 
 
@@ -128,23 +129,23 @@ function abort_sim( ) {
     if ( statusID === null && chronoID === null ) {
         return;
     }
-    
+
     // workaround for Mac servers that are unable to notify end of simulation
     if ( abort ) {
         reset_session( "The server is not responding" );
         return;
     }
-    
+
     if ( ! window.confirm( "Abort simulation execution?\n\nAll results produced so far will be lost." ) ) {
         return;
     }
-    
+
     abort = true;
-    
+
     // request the server to create abort file in the server disk
     var xhttp = new XMLHttpRequest( );
     xhttp.open( "GET", "abort_sim.php", true );
-    xhttp.send( );            
+    xhttp.send( );
 }
 
 
@@ -161,7 +162,7 @@ function show_log( ) {
                 for ( x in resp ) {
                     text += resp[ x ];
                 }
-                log.onload = function( ) { 
+                log.onload = function( ) {
                     log.document.getElementById( "log_text" ).innerHTML = text.replace( new RegExp( '\r?\n', 'g' ), '<br/>' );
                 };
             } else {
@@ -172,27 +173,30 @@ function show_log( ) {
 
     // request the server to get log from the server disk (sync mode because of Safari)
     xhttp.open( "GET", "show_log.php", false );
-    xhttp.send( );        
+    xhttp.send( );
 }
 
 
 // download current results .csv file on server, if any
 function download_res( ) {
+    document.getElementById( "_ready_" ).innerHTML = "Preparing download...";
     // prepare to launch download when file is ready on the server
     var xhttp = new XMLHttpRequest( );
     xhttp.onreadystatechange = function( ) {
         if ( this.readyState === 4 && this.status === 200 ) {
             if ( this.responseText === "NoFile:" ) {
+                document.getElementById( "_ready_" ).innerHTML = "Results not available";
                 window.alert( "Results file is not available\n\nPlease execute the simulation before using this option." );
             } else {
                 download( this.responseText );
+                document.getElementById( "_ready_" ).innerHTML = "Results downloaded";
             }
         }
     };
 
     // request the server to get results from the server disk
     xhttp.open( "GET", "download_res.php", true );
-    xhttp.send( );        
+    xhttp.send( );
 }
 
 
@@ -200,8 +204,8 @@ function download_res( ) {
 function reset_session( msg ) {
     if ( ! window.confirm( "Reset current session?\n\n" + msg + "." ) ) {
         return;
-    }   
-        
+    }
+
     var xhttp = new XMLHttpRequest( );
     xhttp.onreadystatechange = function( ) {
         if ( this.readyState === 4 && this.status === 200 ) {
@@ -210,14 +214,14 @@ function reset_session( msg ) {
     };
 
     xhttp.open( "GET", "reset_session.php", true );
-    xhttp.send( );            
+    xhttp.send( );
 }
 
 
 // read the current configuration input values from page
 function read_config( ) {
     var config = new Object( );
-    
+
     // get the pre set list of configuration elements on page
     var div_php = document.getElementById( "elem_in_names" );
     var elem_names = JSON.parse( div_php.getAttribute( "data-lwi-in" ) );
@@ -234,7 +238,7 @@ function read_config( ) {
     // add the static configuration elements (simulation length and seed)
     config._timeSteps_ = document.getElementById( "_timeSteps_" ).value;
     config._rndSeed_ = document.getElementById( "_rndSeed_" ).value;
-    config._numRuns_ = "1";
+    config._numRuns_ = document.getElementById( "_numRuns_" ).value;
 
     return config;
 }
@@ -247,7 +251,7 @@ function send_and_clear( msg, name, email, text ) {
     message.name = document.getElementById( name ).value;
     message.email = document.getElementById( email ).value;
     message.text = document.getElementById( text ).value;
-    
+
     // prepare to launch download when file is ready on the server
     var xhttp = new XMLHttpRequest( );
     xhttp.onreadystatechange = function( ) {
@@ -262,12 +266,23 @@ function send_and_clear( msg, name, email, text ) {
     // request the server to save configuration to the server disk
     xhttp.open( "POST", "contact.php", true );
     xhttp.setRequestHeader( "Content-type", "application/x-www-form-urlencoded" );
-    xhttp.send( "x=" + JSON.stringify( message ) );        
+    xhttp.send( "x=" + JSON.stringify( message ) );
 }
 
 
 // plot the selected series
 function plot_chart( canv, lab, tval, dat, opt, lim ) {
+
+    // get user options
+    var options_php = document.getElementById( opt );
+    var auto = JSON.parse( options_php.getAttribute( "data-auto" ) );
+    var linear = JSON.parse( options_php.getAttribute( "data-linear" ) );
+    var ci = JSON.parse( options_php.getAttribute( "data-ci" ) );
+    var mm = JSON.parse( options_php.getAttribute( "data-mm" ) );
+    var limits_php = document.getElementById( lim );
+    var min = Number( JSON.parse( limits_php.getAttribute( "data-min" ) ) );
+    var max = Number( JSON.parse( limits_php.getAttribute( "data-max" ) ) );
+
     // get the data set by PHP
     var label_php = document.getElementById( lab );
     var label = JSON.parse( label_php.getAttribute( "data-labels" ) );
@@ -275,119 +290,207 @@ function plot_chart( canv, lab, tval, dat, opt, lim ) {
     var t_value = JSON.parse( t_value_php.getAttribute( "data-t_values" ) );
     var dataset_php = document.getElementById( dat );
     var dataset = JSON.parse( dataset_php.getAttribute( "data-datasets" ) );
-    
-    // get user options
-    var options_php = document.getElementById( opt );
-    var auto = JSON.parse( options_php.getAttribute( "data-auto" ) );
-    var linear = JSON.parse( options_php.getAttribute( "data-linear" ) );
-    var limits_php = document.getElementById( lim );
-    var min = Number( JSON.parse( limits_php.getAttribute( "data-min" ) ) );
-    var max = Number( JSON.parse( limits_php.getAttribute( "data-max" ) ) );
-    
+    var dataset_lo = JSON.parse( dataset_php.getAttribute( "data-datasets_lo" ) );
+    var dataset_hi = JSON.parse( dataset_php.getAttribute( "data-datasets_hi" ) );
+    var dataset_min = JSON.parse( dataset_php.getAttribute( "data-datasets_min" ) );
+    var dataset_max = JSON.parse( dataset_php.getAttribute( "data-datasets_max" ) );
+
     if ( canv === null || label === null || t_value === null || dataset === null ) {
         return false;
     }
-    
+
     // create the plot data object
-    var i, datasets = [ ];
+    var i, ds, series, color, c = 0, datasets = [ ];
     for ( i in dataset ) {
-        var series = {
+        color = colors[ Object.keys( colors )[ c ] ];
+        series = {
             label: label[ i ],
+            type: "line",
             data: dataset[ i ],
+            borderColor: color,
+            backgroundColor: color,
+            showLegend: true,
             spanGaps: true,
             fill: false,
             borderWidth: 2,
+            pointHitRadius: 10,
             pointRadius: 0
         };
+
+        ds = datasets.length;
         datasets.push( series );
-    }
-    
-    // apply different colors
-    i = 0;
-    var c, len = datasets.length;
-    for ( c in colors ) {
-        if ( i >= len ) {
-            break;
+
+        // add confidence bands if required
+        if ( ci && dataset_lo.length !== 0 && dataset_hi.length !== 0 ) {
+
+            series = {
+                label: label[ i ] + "_ci+",
+                type: "line",
+                data: dataset_hi[ i ],
+                spanGaps: true,
+                fill: ds,
+                borderColor: "transparent",
+                backgroundColor: colorAlpha( color, 0.2 ),
+                showLegend: false,
+                pointHitRadius: 0,
+                pointRadius: 0
+            };
+
+            datasets.push( series );
+
+            series = {
+                label: label[ i ] + "_ci-",
+                type: "line",
+                data: dataset_lo[ i ],
+                spanGaps: true,
+                fill: ds,
+                borderColor: "transparent",
+                backgroundColor: colorAlpha( color, 0.2 ),
+                showLegend: false,
+                pointHitRadius: 0,
+                pointRadius: 0
+           };
+
+            datasets.push( series );
         }
-        datasets[ i ].borderColor = colors[ c ];
-        datasets[ i ].backgroundColor = colors[ c ];
-        ++i;
+
+        // add confidence bands if required
+        if ( mm && dataset_min.length !== 0 && dataset_max.length !== 0 ) {
+
+            series = {
+                label: label[ i ] + "_max",
+                type: "line",
+                data: dataset_max[ i ],
+                spanGaps: true,
+                fill: ds,
+                borderColor: "transparent",
+                backgroundColor: colorAlpha( color, 0.1 ),
+                showLegend: false,
+                pointHitRadius: 0,
+                pointRadius: 0
+            };
+
+            datasets.push( series );
+
+            series = {
+                label: label[ i ] + "_min",
+                type: "line",
+                data: dataset_min[ i ],
+                spanGaps: true,
+                fill: ds,
+                borderColor: "transparent",
+                backgroundColor: colorAlpha( color, 0.1 ),
+                showLegend: false,
+                pointHitRadius: 0,
+                pointRadius: 0
+           };
+
+            datasets.push( series );
+        }
+
+
+        ++c;
+        if ( c >= Object.keys( colors ).length ) {
+            c = 0;
+        }
     }
-    
+
     // create the global options object
     var options = {
         maintainAspectRatio: false,
         scales: {
-            yAxes: [ {
+            y: {
                 type: linear ? "linear" : "logarithmic",
                 ticks: {
                     maxTicksLimit: 6
                 },
-                gridLines: {
+                grid: {
                     display: true,
                     color: colors.lightgray
                 }
-            } ],
-            xAxes: [ {
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: "Time"
+                },
                 ticks: {
                     autoSkipPadding: 100,
                     maxRotation: 0,
                     maxTicksLimit: 10
                 },
-                gridLines: {
+                grid: {
                     display: false,
                     color: colors.lightgray
                 }
-            } ]
-        },
-        legend: {
-            display: true,
-            position: "right",
-            labels: {
-                boxWidth: 10
             }
         },
-        tooltips: {
-            mode: "nearest",
-            intersect: false,
-            position: "nearest"
+        plugins: {
+            legend: {
+                display: true,
+                position: "bottom",
+                labels: {
+                    color: "black",
+                    boxWidth: 16,
+                    padding: 20,
+                    filter: function ( item, chart ) {
+                        return datasets[ item.datasetIndex ].showLegend;
+                    }
+                }
+            },
+            tooltips: {
+                mode: "nearest",
+                intersect: false,
+                position: "nearest"
+            }
         },
         chartArea: {
             backgroundColor: colors.white
         }
     };
-    
-    if ( ! auto ) {
-        options.scales.yAxes[ 0 ].ticks.min = min;
-        options.scales.yAxes[ 0 ].ticks.max = max;
-    }
-    
-    // control the background color
-    Chart.pluginService.register( {
-        beforeDraw: function ( chart, easing ) {
-            if ( chart.config.options.chartArea && chart.config.options.chartArea.backgroundColor ) {
-                var ctx = chart.chart.ctx;
-                var chartArea = chart.chartArea;
 
-                ctx.save( );
-                ctx.fillStyle = chart.config.options.chartArea.backgroundColor;
-                ctx.fillRect( chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top );
-                ctx.restore( );
-            }
-        }
-    } );	
-	
+    if ( ! auto ) {
+        options.scales.y.min = min;
+        options.scales.y.max = max;
+    }
+
+    console.log( min );
+
+    Chart.defaults.font.size = 16;
+
     // plot
     var plot = new Chart( canv, {
-		type: "line",
+        type: "line",
         options: options,
         data: {
             labels: t_value,
             datasets: datasets
-        }
-    } );    
-    
+        },
+        plugins: [{
+            // control the background color
+            beforeDraw: function ( chart ) {
+                if ( chart.config.options.chartArea && chart.config.options.chartArea.backgroundColor ) {
+                    var ctx = chart.canvas.getContext( '2d' ) ;
+                    var chartArea = chart.chartArea;
+
+                    ctx.save( );
+                    ctx.globalCompositeOperation = 'destination-over';
+                    ctx.fillStyle = chart.config.options.chartArea.backgroundColor;
+                    ctx.fillRect( chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top );
+                    ctx.restore( );
+                }
+            }
+        }]
+    } );
+
     return true;
+}
+
+
+// change the opacity (alpha channel) of a color
+function colorAlpha( color, alpha ) {
+    var rgba = color.replace( /[^\d,]/g, '' ).split( ',' );
+    return 'rgba(' + rgba[ 0 ] + ',' + rgba[ 1 ] + ',' + rgba[ 2 ] + ',' + alpha + ')';
 }
 
 
@@ -442,17 +545,17 @@ function status( ) {
     if ( statusID === null || chronoID === null ) {
         return;
     }
-    
+
     if ( abort ) {
         statusID.innerHTML = "Aborting ...";
         return;
     }
-    
-    var diff = new Date( Date.now( ) - start ); 
+
+    var diff = new Date( Date.now( ) - start );
     var sec = diff.getUTCSeconds( );
     var min = diff.getUTCMinutes( );
     var hr = diff.getUTCHours( );
-    
+
     // check status only each 5 seconds
     if ( ( sec + 1 ) % 5 === 0 ) {
         var xhttp = new XMLHttpRequest( );
@@ -468,6 +571,12 @@ function status( ) {
         xhttp.send( );
     }
 
+    if( ( hr > 0 || min > 0 ) && pdone == 0 ) {
+        statusID.innerHTML = "Simulation running ... (no progress info)";
+    } else {
+        statusID.innerHTML = "Simulation running ... (" + pdone + "% done)";
+    }
+
     // nice format digits
     if ( min < 10 ) {
         min = "0" + min;
@@ -475,8 +584,7 @@ function status( ) {
     if ( sec < 10 ) {
         sec = "0" + sec;
     }
-    
-    statusID.innerHTML = "Simulation running ... (" + pdone + "% done)";
+
     chronoID.innerHTML = hr + "h" + min + "min" + sec + "s";
     timerID = window.setTimeout( status, 1000 );
 }
@@ -503,7 +611,7 @@ function format_date( date ) {
         day = "0" + day;
     }
     year = year.toString().substr( 2, 2 );
-    
+
     return day + " " + monthNames[ monthIndex ] + " " + year + ",  " + hour + ":" + min;
 }
 
@@ -539,6 +647,7 @@ var colors = {
     indigo: "rgba( 75, 0, 130, 1 )",
     khaki: "rgba( 240, 230, 140, 1 )",
     siena: "rgba( 160, 82, 45, 1 )",
+    darkgray: "rgba( 160, 160, 160, 1 )",
     lightgray: "rgba( 211, 211, 211, 1 )",
     white: "rgba( 255, 255, 255, 1 )"
 };

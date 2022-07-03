@@ -1,0 +1,13 @@
+# Libraries options
+TCL_VERSION=8.6
+PATH_TCLTK_HEADER=/usr/include/tcl$(TCL_VERSION)
+PATH_TCLTK_LIB=/usr/lib/tcl$(TCL_VERSION)
+TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
+PATH_HEADER=.
+PATH_LIB=.
+LIB=-lz -lpthread
+
+# Compiler options
+CC=g++
+GLOBAL_CC=-march=native -w
+SSWITCH_CC=-fnon-call-exceptions -O3

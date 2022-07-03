@@ -1,0 +1,2932 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 15">
+<meta name=Originator content="Microsoft Word 15">
+<link rel=File-List href="model_using_arquivos/filelist.xml">
+<link rel=Preview href="model_using_arquivos/preview.wmf">
+<title>LSD Basic Usage</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
+  <o:Revision>6</o:Revision>
+  <o:TotalTime>10</o:TotalTime>
+  <o:Created>2018-02-04T13:42:00Z</o:Created>
+  <o:LastSaved>2020-09-10T20:58:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>5257</o:Words>
+  <o:Characters>28393</o:Characters>
+  <o:Lines>236</o:Lines>
+  <o:Paragraphs>67</o:Paragraphs>
+  <o:CharactersWithSpaces>33583</o:CharactersWithSpaces>
+  <o:Version>16.00</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]-->
+<link rel=themeData href="model_using_arquivos/themedata.thmx">
+<link rel=colorSchemeMapping href="model_using_arquivos/colorschememapping.xml">
+<!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:Zoom>110</w:Zoom>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:TrackMoves>false</w:TrackMoves>
+  <w:TrackFormatting/>
+  <w:HyphenationZone>21</w:HyphenationZone>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:DoNotPromoteQF/>
+  <w:LidThemeOther>EN-US</w:LidThemeOther>
+  <w:LidThemeAsian>X-NONE</w:LidThemeAsian>
+  <w:LidThemeComplexScript>X-NONE</w:LidThemeComplexScript>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SplitPgBreakAndParaMark/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+  <m:mathPr>
+   <m:mathFont m:val="Cambria Math"/>
+   <m:brkBin m:val="before"/>
+   <m:brkBinSub m:val="&#45;-"/>
+   <m:smallFrac m:val="off"/>
+   <m:dispDef/>
+   <m:lMargin m:val="0"/>
+   <m:rMargin m:val="0"/>
+   <m:defJc m:val="centerGroup"/>
+   <m:wrapIndent m:val="1440"/>
+   <m:intLim m:val="subSup"/>
+   <m:naryLim m:val="undOvr"/>
+  </m:mathPr></w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" DefUnhideWhenUsed="false"
+  DefSemiHidden="false" DefQFormat="false" DefPriority="99"
+  LatentStyleCount="376">
+  <w:LsdException Locked="false" Priority="0" QFormat="true" Name="Normal"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 1"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 2"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 3"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="heading 4"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="heading 5"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="heading 6"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="heading 7"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="heading 8"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="heading 9"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 6"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 7"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 8"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 9"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 1"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 2"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 3"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 4"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 5"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 6"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 7"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 8"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 9"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Normal Indent"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="footnote text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="annotation text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="header"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="footer"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index heading"/>
+  <w:LsdException Locked="false" Priority="35" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="caption"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="table of figures"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="envelope address"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="envelope return"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="footnote reference"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="annotation reference"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="line number"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="page number"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="endnote reference"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="endnote text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="table of authorities"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="macro"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="toa heading"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Number"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Number 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Number 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Number 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Number 5"/>
+  <w:LsdException Locked="false" Priority="10" QFormat="true" Name="Title"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Closing"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Signature"/>
+  <w:LsdException Locked="false" Priority="1" SemiHidden="true"
+   UnhideWhenUsed="true" Name="Default Paragraph Font"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text Indent"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Message Header"/>
+  <w:LsdException Locked="false" Priority="11" QFormat="true" Name="Subtitle"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Salutation"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Date"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text First Indent"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text First Indent 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Note Heading"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text Indent 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text Indent 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Block Text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Hyperlink"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="FollowedHyperlink"/>
+  <w:LsdException Locked="false" Priority="22" QFormat="true" Name="Strong"/>
+  <w:LsdException Locked="false" Priority="20" QFormat="true" Name="Emphasis"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Document Map"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Plain Text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="E-mail Signature"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Top of Form"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Bottom of Form"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Normal (Web)"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Acronym"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Address"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Cite"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Code"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Definition"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Keyboard"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Preformatted"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Sample"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Typewriter"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Variable"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Normal Table"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="annotation subject"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="No List"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Outline List 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Outline List 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Outline List 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Simple 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Simple 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Simple 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Classic 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Classic 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Classic 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Classic 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Colorful 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Colorful 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Colorful 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 6"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 7"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 8"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 6"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 7"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 8"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table 3D effects 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table 3D effects 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table 3D effects 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Contemporary"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Elegant"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Professional"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Subtle 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Subtle 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Web 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Web 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Web 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Balloon Text"/>
+  <w:LsdException Locked="false" Priority="59" SemiHidden="true"
+   UnhideWhenUsed="true" Name="Table Grid"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Theme"/>
+  <w:LsdException Locked="false" SemiHidden="true" Name="Placeholder Text"/>
+  <w:LsdException Locked="false" Priority="1" QFormat="true" Name="No Spacing"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 1"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" Name="Revision"/>
+  <w:LsdException Locked="false" Priority="34" QFormat="true"
+   Name="List Paragraph"/>
+  <w:LsdException Locked="false" Priority="29" QFormat="true" Name="Quote"/>
+  <w:LsdException Locked="false" Priority="30" QFormat="true"
+   Name="Intense Quote"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 1"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 1"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 1"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 2"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 2"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 2"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 2"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 3"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 3"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 3"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 3"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 4"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 4"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 4"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 4"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 5"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 5"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 5"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 5"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 6"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 6"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 6"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 6"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="19" QFormat="true"
+   Name="Subtle Emphasis"/>
+  <w:LsdException Locked="false" Priority="21" QFormat="true"
+   Name="Intense Emphasis"/>
+  <w:LsdException Locked="false" Priority="31" QFormat="true"
+   Name="Subtle Reference"/>
+  <w:LsdException Locked="false" Priority="32" QFormat="true"
+   Name="Intense Reference"/>
+  <w:LsdException Locked="false" Priority="33" QFormat="true" Name="Book Title"/>
+  <w:LsdException Locked="false" Priority="37" SemiHidden="true"
+   UnhideWhenUsed="true" Name="Bibliography"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="TOC Heading"/>
+  <w:LsdException Locked="false" Priority="41" Name="Plain Table 1"/>
+  <w:LsdException Locked="false" Priority="42" Name="Plain Table 2"/>
+  <w:LsdException Locked="false" Priority="43" Name="Plain Table 3"/>
+  <w:LsdException Locked="false" Priority="44" Name="Plain Table 4"/>
+  <w:LsdException Locked="false" Priority="45" Name="Plain Table 5"/>
+  <w:LsdException Locked="false" Priority="40" Name="Grid Table Light"/>
+  <w:LsdException Locked="false" Priority="46" Name="Grid Table 1 Light"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark"/>
+  <w:LsdException Locked="false" Priority="51" Name="Grid Table 6 Colorful"/>
+  <w:LsdException Locked="false" Priority="52" Name="Grid Table 7 Colorful"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 1"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 1"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 1"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 1"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 1"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 1"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 2"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 2"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 2"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 2"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 2"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 2"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 3"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 3"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 3"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 3"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 3"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 3"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 4"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 4"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 4"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 4"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 4"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 4"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 5"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 5"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 5"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 5"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 5"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 5"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 6"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 6"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 6"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 6"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 6"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 6"/>
+  <w:LsdException Locked="false" Priority="46" Name="List Table 1 Light"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark"/>
+  <w:LsdException Locked="false" Priority="51" Name="List Table 6 Colorful"/>
+  <w:LsdException Locked="false" Priority="52" Name="List Table 7 Colorful"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 1"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 1"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 1"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 1"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 1"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 1"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 2"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 2"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 2"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 2"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 2"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 2"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 3"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 3"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 3"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 3"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 3"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 3"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 4"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 4"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 4"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 4"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 4"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 4"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 5"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 5"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 5"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 5"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 5"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 5"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 6"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 6"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 6"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 6"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 6"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 6"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Mention"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Smart Hyperlink"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Hashtag"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Unresolved Mention"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Smart Link"/>
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:roman;
+	mso-font-pitch:variable;
+	mso-font-signature:3 0 0 0 1 0;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-520081665 -1073717157 41 0 66047 0;}
+@font-face
+	{font-family:"Segoe UI";
+	panose-1:2 11 5 2 4 2 4 2 2 3;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-469750017 -1073683329 9 0 511 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+h1
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 1 Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	mso-outline-level:1;
+	font-size:14.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	color:#254061;
+	font-weight:bold;}
+h2
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 2 Char";
+	margin-top:24.0pt;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	mso-outline-level:2;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	font-weight:bold;}
+h3
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 3 Char";
+	margin-top:36.0pt;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	mso-outline-level:3;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	font-weight:bold;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{mso-style-noshow:yes;
+	mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Title Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	text-align:center;
+	mso-pagination:widow-orphan;
+	font-size:18.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	color:#254061;
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+tt
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	font-family:"Courier New";
+	mso-ascii-font-family:"Courier New";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-hansi-font-family:"Courier New";
+	mso-bidi-font-family:"Courier New";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-link:"Balloon Text Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:8.0pt;
+	font-family:"Tahoma",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{mso-style-noshow:yes;
+	mso-style-priority:1;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{mso-style-noshow:yes;
+	mso-style-priority:34;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:36.0pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.Heading1Char
+	{mso-style-name:"Heading 1 Char";
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 1";
+	mso-ansi-font-size:16.0pt;
+	mso-bidi-font-size:16.0pt;
+	font-family:"Cambria",serif;
+	mso-ascii-font-family:Cambria;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Cambria;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	color:#365F91;
+	mso-themecolor:accent1;
+	mso-themeshade:191;}
+span.Heading2Char
+	{mso-style-name:"Heading 2 Char";
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 2";
+	mso-ansi-font-size:13.0pt;
+	mso-bidi-font-size:13.0pt;
+	font-family:"Cambria",serif;
+	mso-ascii-font-family:Cambria;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Cambria;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	color:#365F91;
+	mso-themecolor:accent1;
+	mso-themeshade:191;}
+span.Heading3Char
+	{mso-style-name:"Heading 3 Char";
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 3";
+	mso-ansi-font-size:12.0pt;
+	mso-bidi-font-size:12.0pt;
+	font-family:"Cambria",serif;
+	mso-ascii-font-family:Cambria;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Cambria;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	color:#243F60;
+	mso-themecolor:accent1;
+	mso-themeshade:127;}
+p.msonormal0, li.msonormal0, div.msonormal0
+	{mso-style-name:msonormal;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.TitleChar
+	{mso-style-name:"Title Char";
+	mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:Title;
+	mso-ansi-font-size:28.0pt;
+	mso-bidi-font-size:28.0pt;
+	font-family:"Cambria",serif;
+	mso-ascii-font-family:Cambria;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Cambria;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	letter-spacing:-.5pt;
+	mso-font-kerning:14.0pt;}
+span.BalloonTextChar
+	{mso-style-name:"Balloon Text Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Balloon Text";
+	mso-ansi-font-size:9.0pt;
+	mso-bidi-font-size:9.0pt;
+	font-family:"Segoe UI",sans-serif;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:36.0pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:36.0pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:36.0pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.Ttulo1, li.Ttulo1, div.Ttulo1
+	{mso-style-name:"T\00EDtulo 1";
+	mso-style-unhide:no;
+	mso-style-link:"T\00EDtulo 1 Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.Ttulo1Char
+	{mso-style-name:"T\00EDtulo 1 Char";
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"T\00EDtulo 1";
+	font-family:"Arial",sans-serif;
+	mso-ascii-font-family:Arial;
+	mso-hansi-font-family:Arial;
+	mso-bidi-font-family:Arial;
+	color:#254061;
+	font-weight:bold;}
+p.Ttulo2, li.Ttulo2, div.Ttulo2
+	{mso-style-name:"T\00EDtulo 2";
+	mso-style-unhide:no;
+	mso-style-link:"T\00EDtulo 2 Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.Ttulo2Char
+	{mso-style-name:"T\00EDtulo 2 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"T\00EDtulo 2";
+	font-family:"Arial",sans-serif;
+	mso-ascii-font-family:Arial;
+	mso-hansi-font-family:Arial;
+	mso-bidi-font-family:Arial;
+	font-weight:bold;}
+p.Ttulo3, li.Ttulo3, div.Ttulo3
+	{mso-style-name:"T\00EDtulo 3";
+	mso-style-unhide:no;
+	mso-style-link:"T\00EDtulo 3 Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.Ttulo3Char
+	{mso-style-name:"T\00EDtulo 3 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"T\00EDtulo 3";
+	font-family:"Arial",sans-serif;
+	mso-ascii-font-family:Arial;
+	mso-hansi-font-family:Arial;
+	mso-bidi-font-family:Arial;
+	font-weight:bold;}
+p.Ttulo, li.Ttulo, div.Ttulo
+	{mso-style-name:T\00EDtulo;
+	mso-style-unhide:no;
+	mso-style-link:"T\00EDtulo Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.TtuloChar
+	{mso-style-name:"T\00EDtulo Char";
+	mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:T\00EDtulo;
+	font-family:"Arial",sans-serif;
+	mso-ascii-font-family:Arial;
+	mso-hansi-font-family:Arial;
+	mso-bidi-font-family:Arial;
+	color:#254061;
+	font-weight:bold;}
+p.Textodebalo, li.Textodebalo, div.Textodebalo
+	{mso-style-name:"Texto de bal\00E3o";
+	mso-style-unhide:no;
+	mso-style-link:"Texto de bal\00E3o Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.TextodebaloChar
+	{mso-style-name:"Texto de bal\00E3o Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Texto de bal\00E3o";
+	font-family:"Tahoma",sans-serif;
+	mso-ascii-font-family:Tahoma;
+	mso-hansi-font-family:Tahoma;
+	mso-bidi-font-family:Tahoma;}
+span.Cdigo
+	{mso-style-name:C\00F3digo;
+	mso-style-unhide:no;
+	font-family:"Courier New";
+	mso-ascii-font-family:"Courier New";
+	mso-hansi-font-family:"Courier New";
+	mso-bidi-font-family:"Courier New";
+	color:gray;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	mso-default-props:yes;
+	font-size:10.0pt;
+	mso-ansi-font-size:10.0pt;
+	mso-bidi-font-size:10.0pt;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:70.85pt 3.0cm 70.85pt 3.0cm;
+	mso-header-margin:35.4pt;
+	mso-footer-margin:35.4pt;
+	mso-paper-source:0;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:48112137;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-261978798 67698689 -728440120 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l0:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:35.85pt;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l0:level2
+	{mso-level-start-at:3;
+	mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:71.85pt;
+	text-indent:-18.0pt;
+	font-family:Symbol;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Arial;}
+@list l0:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:107.85pt;
+	text-indent:-9.0pt;}
+@list l0:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:143.85pt;
+	text-indent:-18.0pt;}
+@list l0:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:179.85pt;
+	text-indent:-18.0pt;}
+@list l0:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:215.85pt;
+	text-indent:-9.0pt;}
+@list l0:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:251.85pt;
+	text-indent:-18.0pt;}
+@list l0:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:287.85pt;
+	text-indent:-18.0pt;}
+@list l0:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:323.85pt;
+	text-indent:-9.0pt;}
+@list l1
+	{mso-list-id:109472407;
+	mso-list-type:hybrid;
+	mso-list-template-ids:372274222 -1467479352 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l1:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:35.85pt;
+	text-indent:-18.0pt;}
+@list l1:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:71.85pt;
+	text-indent:-18.0pt;}
+@list l1:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:107.85pt;
+	text-indent:-9.0pt;}
+@list l1:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:143.85pt;
+	text-indent:-18.0pt;}
+@list l1:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:179.85pt;
+	text-indent:-18.0pt;}
+@list l1:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:215.85pt;
+	text-indent:-9.0pt;}
+@list l1:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:251.85pt;
+	text-indent:-18.0pt;}
+@list l1:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:287.85pt;
+	text-indent:-18.0pt;}
+@list l1:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:323.85pt;
+	text-indent:-9.0pt;}
+@list l2
+	{mso-list-id:345861535;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-2079965556 -1467479352 -728440120 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l2:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:35.85pt;
+	text-indent:-18.0pt;}
+@list l2:level2
+	{mso-level-start-at:3;
+	mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:71.85pt;
+	text-indent:-18.0pt;
+	font-family:Symbol;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Arial;}
+@list l2:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:107.85pt;
+	text-indent:-9.0pt;}
+@list l2:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:143.85pt;
+	text-indent:-18.0pt;}
+@list l2:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:179.85pt;
+	text-indent:-18.0pt;}
+@list l2:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:215.85pt;
+	text-indent:-9.0pt;}
+@list l2:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:251.85pt;
+	text-indent:-18.0pt;}
+@list l2:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:287.85pt;
+	text-indent:-18.0pt;}
+@list l2:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:323.85pt;
+	text-indent:-9.0pt;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman",serif;}
+table.Tabelanormal
+	{mso-style-name:"Tabela normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman",serif;}
+</style>
+<![endif]-->
+<link rel=icon href="image/lsd.png">
+<meta name=Author content="LSD - Laboratory for Simulation Development">
+
+<iframe name=navbar src=navbar.html scrolling=no style='position:fixed;
+ border-bottom-style:none;border-left-style:none;border-right-style:none;
+ border-top-style:none;height:55px;left:0in;overflow:hidden;right:0in;
+ top:0in;width:100%'>
+</iframe>
+
+<!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="1026"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body lang=PT-BR link=blue vlink=purple style='tab-interval:36.0pt'>
+
+<div class=WordSection1>
+
+<p class=MsoTitle><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoTitle><span lang=EN-US style='mso-ansi-language:EN-US'>Using an
+existing LSD Model<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This is a
+tutorial presenting the main steps to start using LSD models for practical
+purposes. The goal of a simulation exercise is to obtain interesting results
+and understand why they have been produced. Therefore it is not sufficient to
+obtain fancy plots, but it is also necessary to get into the code of the model,
+and understand how it is functioning. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>After all,
+the best way to learn how to use a LSD model is, like any software, by trial
+and error. This tutorial should enable you to fully exploit an existing model,
+and to explore the LSD interface even in the parts not explicitly covered here.
+<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>To run a
+simulation exercise with LSD it is necessary: <o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l2 level1 lfo2'><![if !supportLists]><span
+lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
+style='mso-list:Ignore'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>If
+not already done, please first install LSD following the instructions in the <a
+href="LMM.html#install" target=newindow>manual</a>.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l2 level1 lfo2'><![if !supportLists]><span
+lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
+style='mso-list:Ignore'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>A
+<a href="LSD_faqs.html#model">LSD model program</a>. This is a program
+implementing the <a href="LSD_faqs.html#equation">Equations</a> for a given
+model and the LSD internal code. The modeler has created the <a
+href="LSD_faqs.html#equationfile">code for the Equations</a>, and users
+typically do not modify it if the just want to <a
+href="LSD_faqs.html#simulationrun">run the simulation model</a>.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l2 level1 lfo2'><![if !supportLists]><span
+lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
+style='mso-list:Ignore'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>A
+matched <a href="LSD_faqs.html#modelsetting">model configuration</a>. This is
+(at least one of) the configuration for the model prepared by the modeler. It
+contains details of the model in terms of the <a
+href="LSD_faqs.html#modelstructure">model structure</a> (the <a
+href="LSD_faqs.html#object">Objects</a> tree) and the initial data required by <a
+href="LSD_faqs.html#variable">Variables</a> and <a
+href="LSD_faqs.html#parameter">Parameters</a>. The configuration contains also
+all the remaining information necessary to <a href="LSD_faqs.html#simulationrun">run
+a simulation</a>: the number of time steps, etc. Users can easily modify each
+of these values to test different configurations.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The table
+below contains the detailed steps used in this tutorial. It consists of three
+columns: <o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
+lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
+style='mso-list:Ignore'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
+EN-US'>Operation:</span></b><span lang=EN-US style='mso-ansi-language:EN-US'> a
+summary of the operations to perform in each step.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
+lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
+style='mso-list:Ignore'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
+EN-US'>Window:</span></b><span lang=EN-US style='mso-ansi-language:EN-US'>
+indicates the target window to be used in the step: the many <a
+href="LSD_windows.html">LSD windows</a>, the web browser, or the operating
+system (Windows, Linux or macOS).<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
+lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
+style='mso-list:Ignore'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
+EN-US'>Instructions:</span></b><span lang=EN-US style='mso-ansi-language:EN-US'>
+This cell contains the commands to perform (menu choices, mouse actions etc.)
+followed by an explanation on the operation performed.<o:p></o:p></span></p>
+
+<p class=MsoNormal><b><span lang=EN-US style='mso-ansi-language:EN-US'>WARNING:</span></b><span
+lang=EN-US style='mso-ansi-language:EN-US'> Using LSD entails the access to
+several windows opened at the same time and sometimes the one to be used is
+hidden just behind the others. It is strongly advised to the user to make use
+of the computer taskbar to switch among LSD windows. <o:p></o:p></span></p>
+
+<div align=center>
+
+<table class=Tabelanormal border=0 cellspacing=7 cellpadding=0 width="100%"
+ style='width:100.0%;mso-cellspacing:5.2pt;mso-yfti-tbllook:1184;mso-padding-alt:
+ 0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+  <td valign=top style='background:#BFBFBF;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b>Operation</b></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#BFBFBF;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='color:black;mso-color-alt:windowtext'>Window</span></b></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#BFBFBF;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='color:black;mso-color-alt:windowtext'>Instructions</span></b></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:1'>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Open LMM</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Operating system</p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Double-click
+  LSD (LMM) icon in the desktop or in the program menu.<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The LSD
+  (LMM) icons should have been created during the LSD </span><a
+  href="LMM.html#install" target=newindow><span lang=EN-US style='mso-ansi-language:
+  EN-US'>installation</span></a><span lang=EN-US style='mso-ansi-language:EN-US'>.
+  If the icon was deleted (or otherwise is not available), you may (re)create
+  it following the instructions contained in Readme.txt for your operating
+  system (Windows, Linux or macOS).<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Alternatively,
+  you may also invoke </span><a href="LSD_windows.html#lmm" target=newwindow><span
+  lang=EN-US style='mso-ansi-language:EN-US'>LMM</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> from the file explorer program by
+  double-clicking the appropriate file in the LSD installation directory
+  (Windows: </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LMM.exe</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>,
+  Linux: </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LMM</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>,
+  macOS: </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LMM[.app]</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>)
+  or running it from a command prompt or terminal window.<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:2'>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l1></a><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>Run the LSD model program
+  for the selected model</span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#lmm" target=newwindow><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LMM</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'><br>
+  and<br>
+  </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#modelbrowser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Model Browser</span></a></span><span lang=EN-US style='mso-ansi-language:
+  EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>Select menu option </span><span class=Cdigo><span
+  lang=EN-US style='mso-ansi-language:EN-US'>File&gt;Browse Models</span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> (or click on the yellow folder icon). The </span><span
+  style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#modelbrowser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Model Browser</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> window will reopen listing
+  all the models available in the computer. Models are organized in a tree of
+  groups, like directory/folders in the file system, and navigation is done
+  using the usual file browser commands. The user may have to navigate into the
+  groups until the desired model is listed.</span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>When the desired model is highlighted (single click
+  or arrow keys), selected it with a double click or pressing </span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Enter</span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>. </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#lmm" target=newwindow><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LMM</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'> will
+  load the model and present the full model description, if any, or the model </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_faqs.html#equation"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Equations</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>’ code otherwise. </span><span lang=EN-US style='mso-ansi-language:
+  EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>Create the </span><span style='color:black;
+  mso-color-alt:windowtext'><a href="LSD_faqs.html#model"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LSD model program</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> for the model using the command </span><span class=Cdigo><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Model&gt;Compile and Run Model </span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>(or click on the second yellow lightning icon, the one with the green
+  arrow). </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#lmm" target=newwindow><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LMM</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>
+  automatically </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#compiler"><span lang=EN-US style='mso-ansi-language:EN-US'>(re)
+  compiles</span></a></span><span lang=EN-US style='color:black;mso-color-alt:
+  windowtext;mso-ansi-language:EN-US'> all the required LSD modules including
+  the </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#equationfile"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>equation file</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>. If no errors are found,
+  the </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#browser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Browser</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> for the model is launched.
+  Failure to compile is more frequently associated with errors in the model’s
+  code but sometimes is due to a wrong LSD configuration (to be sure, reset
+  your system configurations using the command </span><span class=Cdigo><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Model&gt;System Options</span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>, and clicking on the button </span><span class=Cdigo><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Default XXX</span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> appropriate to your computer type).</span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>When the </span><span style='color:black;mso-color-alt:
+  windowtext'><a href="LSD_faqs.html#model"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD model program</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> is launched, it opens two
+  windows, the </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#browser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Browser</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> and the </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_windows.html#log"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>LSD Log</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>. However, the </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#modelsetting"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>model configuration</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'> is
+  initially empty, once no configuration is loaded yet.</span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:3'>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l2></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Load a model configuration file<o:p></o:p></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Use the
+  menu command </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>File&gt;Load </span></span><span lang=EN-US style='mso-ansi-language:
+  EN-US'>(or click on the yellow folder icon) and choose one of the proposed
+  configuration files. <o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>A
+  complete </span><a href="LSD_faqs.html#modelsetting"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>model configuration</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> contains the model description, the
+  initial data, and (supposedly) everything else required for </span><a
+  href="LSD_faqs.html#simulationrun"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>running the simulation</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'> model. The modeler (should) have prepared at least one configuration,
+  and more can be created with the </span><a href="LSD_windows.html#browser"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>LSD Browser</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The </span><a
+  href="LSD_windows.html#browser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Browser</span></a><span lang=EN-US style='mso-ansi-language:EN-US'>
+  now shows the </span><a href="LSD_faqs.html#object"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Object</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> named </span><span class=Cdigo><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Root</span></span><span
+  lang=EN-US style='mso-ansi-language:EN-US'> as containing some elements. A
+  graphical representation of the model is shown in a </span><a
+  href="LSD_windows.html#modelstructure"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Model Structure</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'> window. The </span><a href="LSD_windows.html#browser"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>LSD Browser</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> is thought as a control center to
+  issue commands to LSD and to inspect the </span><a
+  href="LSD_faqs.html#modelsetting"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>model configuration</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'> details, like an </span><a href="LSD_faqs.html#object"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Object</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> properties. The </span><a
+  href="LSD_windows.html#browser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Browser</span></a><span lang=EN-US style='mso-ansi-language:EN-US'>
+  is always pointed to an (current) Object, as indicated in the information
+  bar, and lists its contained </span><a href="LSD_faqs.html#variable"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Variables</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'>, </span><a
+  href="LSD_faqs.html#parameter"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Parameters</span></a><span lang=EN-US style='mso-ansi-language:EN-US'>
+  and descending (son) </span><a href="LSD_faqs.html#object"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Objects</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'>. <o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:4'>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l3></a><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>Take a first look at the
+  model</span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#browser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Browser</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> <br>
+  and<br>
+  </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#modelstructure"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Model Structure</span></a></span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>Although you may already run the simulation, spend
+  some time to look at how LSD represents the model.&nbsp; </span><span
+  lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>Check the graphical representation of the </span><span
+  style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#modelstructure"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>model structure</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> on the </span><span
+  style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#modelstructure"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Model Structure</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'> window.
+  Hovering over the </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#object"><span lang=EN-US style='mso-ansi-language:EN-US'>Object</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> you can uncover the list of contained </span><span style='color:black;
+  mso-color-alt:windowtext'><a href="LSD_faqs.html#variable"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Variables</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'> and </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_faqs.html#parameter"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Parameters</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>. The numbers below the Object types indicate the respective </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_faqs.html#object"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>number of instances</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>. The context menu (right click) of each Object allows directly
+  changing its properties. It is still possible to click on any Object to move
+  the current </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#browser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Browser</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> Object there. </span><span
+  lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>The “skeleton” of the model is made of </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_faqs.html#object"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Objects</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>, elements containing </span><span style='color:black;mso-color-alt:
+  windowtext'><a href="LSD_faqs.html#variable"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Variables</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>, </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_faqs.html#parameter"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Parameters</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>, or other (descending) Objects. Therefore, a model is represented by
+  a (inverted tree) </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#modelstructure"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>hierarchy of Objects</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'> whose
+  “top” element is conventionally called </span><span class=Cdigo><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Root</span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>. </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Root</span></span><span lang=EN-US style='color:black;mso-color-alt:
+  windowtext;mso-ansi-language:EN-US'> is the only Object that is always present
+  in a model with a single instance (no copies), while all other Objects can be
+  multiplied in as many instances as desired. Users can change these values, as
+  we will see later. </span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#variable"><span lang=EN-US style='mso-ansi-language:EN-US'>Variables</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> and </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#parameter"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Parameters</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> are names (labels)
+  attached to (real) numerical values. The key difference is that a Variable in
+  principle changes its value at each </span><span style='color:black;
+  mso-color-alt:windowtext'><a href="LSD_faqs.html#simulationrun"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>time step</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> using a specific </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#equation"><span lang=EN-US style='mso-ansi-language:EN-US'>Equation</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>, while a Parameter do not have an Equation and typically has a
+  constant value (although an Equation for a Variable can change the value of a
+  Parameter during the </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#simulationrun"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>simulation run</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>). The purpose of </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_faqs.html#object"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Objects</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> in a LSD model is to contain and organize its Variables and
+  Parameters. Multiplying the number of </span><span style='color:black;
+  mso-color-alt:windowtext'><a href="LSD_faqs.html#object"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>instances of an Object type</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>, also multiply the instances of the contained Variables, Parameters
+  and son Objects. This is similar to using vectors and matrices in
+  conventional programing, but </span><span style='color:black;mso-color-alt:
+  windowtext'><a href="LSD_faqs.html#modelstructure"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>far more efficient</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> in most applications. </span><span lang=EN-US style='mso-ansi-language:
+  EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>It is possible to explore the model with the </span><span
+  style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#browser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Browser</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>, which shows one single </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_faqs.html#object"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Object's</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> content at a time. There is a bar presenting the current Object and
+  its parent and two list boxes: the </span><span style='color:black;
+  mso-color-alt:windowtext'><a href="LSD_faqs.html#modelstructure"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>descending (son) Objects</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>, at the left, and the </span><span style='color:black;mso-color-alt:
+  windowtext'><a href="LSD_faqs.html#variable"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Variables</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'> and </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_faqs.html#parameter"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Parameters</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>, at the right. Variables (</span><span class=Cdigo><span lang=EN-US
+  style='mso-ansi-language:EN-US'>V</span></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>) which
+  are indicated with a number (</span><span class=Cdigo><span lang=EN-US
+  style='mso-ansi-language:EN-US'>V_X</span></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>) of </span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>X</span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> lagged values (used in the model for computations involving this
+  Variable) and Parameters (</span><span class=Cdigo><span lang=EN-US
+  style='mso-ansi-language:EN-US'>P</span></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>). Any
+  element in the Browser can be double clicked to set their options and see their
+  documentation (see below). The context menu (right click) for each element is
+  also available for quick changing most settings. The current Object in the
+  Browser can be changed to another one by double-clicking the desired (son)
+  descendant (to go down in the </span><span style='color:black;mso-color-alt:
+  windowtext'><a href="LSD_faqs.html#modelstructure"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>hierarchy tree</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>) or on the name of its parent (to go up). You can also use the arrow
+  keys, </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Enter</span></span><span lang=EN-US style='color:black;mso-color-alt:
+  windowtext;mso-ansi-language:EN-US'> and </span><span class=Cdigo><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Backspace</span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> (as in a file browser) to move along Objects, Variables and
+  Parameters.&nbsp; </span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:5'>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Generate
+  and analyze the model report<o:p></o:p></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LSD Browser</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> <br>
+  and<br>
+  Web browser<o:p></o:p></span></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Now,
+  select option </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Model&gt;Create Model Report</span></span><span lang=EN-US
+  style='mso-ansi-language:EN-US'> to generate a detailed </span><a
+  href="LSD_faqs.html#modelreport"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>report about the model</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'>. Accept the default options in the Report Generation window and click
+  in </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>OK</span></span><span
+  lang=EN-US style='mso-ansi-language:EN-US'>. The produced report should be
+  automatically presented in your web browser. At any <span class=GramE>time</span>
+  the model report can be retrieved again using the menu option </span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Help&gt;Model
+  Report</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The exact
+  role of each element (</span><a href="LSD_faqs.html#object"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Object</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'>, </span><a href="LSD_faqs.html#variable"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Variable</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> or </span><a
+  href="LSD_faqs.html#parameter"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Parameter</span></a><span lang=EN-US style='mso-ansi-language:EN-US'>)
+  in the model depends not only on its own content but also on its relation
+  with the rest of </span><a href="LSD_faqs.html#modelstructure"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>structure of the model</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'>. To grasp this aspect of a LSD
+  model, one valuable tool is the </span><a href="LSD_faqs.html#modelreport"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>model report</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'>. It is a standard HTML document
+  that can be loaded in any web browser (e.g., Chrome).&nbsp;The model report
+  is a hyperlinked document containing the entire model information in a
+  convenient format. </span>The hyperlinks <span class=SpellE>permit</span> <span
+  class=SpellE>to</span> see: </p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:
+  EN-US'>a textual description of the model, with an indication of the key
+  elements to observe and configure (if provided by the modeler<span
+  class=GramE>);</span><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:
+  EN-US'>the </span><a href="LSD_faqs.html#modelstructure"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>hierarchy tree</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> of Objects;<o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:
+  EN-US'>details on each </span><a href="LSD_faqs.html#object"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Object</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> and its <span class=GramE>content;</span><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:
+  EN-US'>details on each </span><a href="LSD_faqs.html#parameter"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Parameter</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> and </span><a
+  href="LSD_faqs.html#variable"><span lang=EN-US style='mso-ansi-language:EN-US'>lagged
+  Variable</span></a><span lang=EN-US style='mso-ansi-language:EN-US'> initial
+  values;<o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:
+  EN-US'>where each element is used (e.g., the Variables using a specific Parameter<span
+  class=GramE>);</span><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:
+  EN-US'>which elements are used to calculate each Variable (e.g., the
+  Parameters used in a Variable's </span><a href="LSD_faqs.html#equation"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Equation</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'>);<o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:
+  EN-US'>the Equation code for each Variable, with links to the used elements.<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Spend
+  some time to play with the links on the </span><a
+  href="LSD_faqs.html#modelreport"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>model report</span></a><span lang=EN-US style='mso-ansi-language:EN-US'>,
+  to see how they uncover the </span><a href="LSD_faqs.html#modelstructure"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>model structure</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> and content. Do not try, at least
+  for complex models, to read systematically the document and to understand the
+  whole model structure. Just start from one component, look at its equations,
+  or the equations that use it, and continue along creating your own path
+  through the model structure.&nbsp;<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:6'>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l4></a><span class=SpellE><span style='color:black;
+  mso-color-alt:windowtext'>Run</span></span><span style='color:black;
+  mso-color-alt:windowtext'> <span class=SpellE>the</span> <span class=SpellE>simulation</span></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#browser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Browser</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'><br>
+  and<br>
+  </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#log"><span lang=EN-US style='mso-ansi-language:EN-US'>LSD
+  Log</span></a></span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>Select menu command </span><span class=Cdigo><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Run&gt;Run</span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> (or click on the blue triangle/play icon) to </span><span
+  style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#simulationrun"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>run the simulation</span></a></span><span lang=EN-US style='color:
+  black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>. If there are no
+  unsaved changes, the simulation will start and show either the </span><span
+  style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#runtime"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Run-time Plot</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> window presenting some of
+  the time series being produced, or just print messages in the </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_windows.html#log"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>LSD Log</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> window, or both.</span><span lang=EN-US style='mso-ansi-language:
+  EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>This will run the simulation using all the
+  configuration settings defined by the modeler (as we just browsed the model
+  without changing anything). Before running the simulation, the system may
+  issue a confirmation message, telling how the results data will be handled
+  and/or confirming the saving of any unsaved change in the </span><span
+  style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#modelsetting"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>model configuration</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>.</span><span
+  lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>A </span><span style='color:black;mso-color-alt:
+  windowtext'><a href="LSD_faqs.html#simulationrun"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>simulation run consists in several time steps</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>, during each of which all the </span><span style='color:black;
+  mso-color-alt:windowtext'><a href="LSD_faqs.html#variable"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Variables</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'> of the
+  model are updated, using the associated </span><span style='color:black;
+  mso-color-alt:windowtext'><a href="LSD_faqs.html#equation"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Equations</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'> to
+  compute the new values.&nbsp;During the simulation run, some Variables time
+  series may be plotted in the LSD Runt-time Plot window, if they are
+  configured so. If no Variable is set to be plot during the simulation run,
+  the Log window may still print information about the ongoing status. </span><span
+  lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>During a </span><span style='color:black;mso-color-alt:
+  windowtext'><a href="LSD_faqs.html#simulationrun"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>simulation run</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> it is possible to use the buttons in the </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_windows.html#log"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>LSD Log</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> window to control the process: </span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>Stop: abort the simulation
+  run (press ‘</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>S</span></span><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>’ as a shortcut<span class=GramE>);</span></span><span
+  lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>Pause/Resume: allow the
+  temporary suspension and resume of an ongoing simulation run (shortcut is ‘</span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>P</span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>’ or ‘</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>R</span></span><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>’), the </span><span style='color:black;mso-color-alt:
+  windowtext'><a href="LSD_windows.html#debugger"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LSD Debugger</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> being available during the pause period;</span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>Fast: hides the Run-time
+  Plot window and set Log verbosity to a minimum to speed-up simulation run
+  (same as the ‘</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>F</span></span><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>’ key<span class=GramE>);</span></span><span
+  lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>Observe: show the Run-time
+  Plot windows and enable more verbosity in the Log window (same as ‘</span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>O</span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>’<span class=GramE>);</span></span><span lang=EN-US style='mso-ansi-language:
+  EN-US'><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>Debug: interrupt the
+  simulation run, if not already paused, when an equation marked to be debugged
+  is computed (the simulation run may be resumed) (same as ‘</span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>D</span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>’<span class=GramE>);</span></span><span lang=EN-US style='mso-ansi-language:
+  EN-US'><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>Copy: copy the selected
+  text in the Log window to the clipboard (same as ‘</span><span class=Cdigo><span
+  lang=EN-US style='mso-ansi-language:EN-US'>C</span></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>’ or </span><span
+  class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Ctrl+C</span></span></span><span class=GramE><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>);</span></span><span
+  lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>Help: help on the Log
+  window (same as ‘</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>H</span></span><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>’).</span><span lang=EN-US style='mso-ansi-language:
+  EN-US'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:7'>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l5></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Analyze the simulation run results<o:p></o:p></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LSD Browser</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'><br>
+  and<br>
+  </span><a href="LSD_windows.html#analysisofresults"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LSD Analysis of Results</span></a><span
+  style='mso-ansi-language:EN-US'> <span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>After the
+  simulation is finished or aborted, select the menu option </span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Data&gt;Analysis
+  of Results</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> (or
+  click in the plot icon) in the </span><a href="LSD_windows.html#browser"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>LSD Browser</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'>. This command presents the list
+  of all the time series stored in memory after the last </span><a
+  href="LSD_faqs.html#simulationrun"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>simulation run</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'> in the </span><a href="LSD_windows.html#analysisofresults"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>LSD Analysis of Results</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> window. Previously saved data
+  files, from older simulation runs, can also be loaded in memory for analysis
+  using the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Add…</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+  button.<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The
+  run-time plot may have given you some intuition about the simulation results.
+  However, the modeler is likely to have set more data to be saved, besides the
+  time series shown during run time. In fact, LSD models allow choosing the </span><a
+  href="LSD_faqs.html#variable"><span lang=EN-US style='mso-ansi-language:EN-US'>Variables</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> and </span><a
+  href="LSD_faqs.html#parameter"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Parameters</span></a><span lang=EN-US style='mso-ansi-language:EN-US'>
+  values to be saved for later analysis (by default, none is saved). <o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The
+  overall structure of the </span><a href="LSD_windows.html#analysisofresults"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>LSD Analysis of Results</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> window is composed by the list
+  box, on the left, of the elements with available time series for analysis.
+  Some (or all) of these must be selected by double clicking the desired
+  series, using the vertical button <span class=GramE>bar</span> or using the
+  context (right click) menu. Once one (or more) series are selected, it is
+  shown in the central list box and is ready for further elaboration. Using the
+  buttons in the lower part of the window, the user can create plots, produce
+  statistics on and export the selected series. The right box contains the list
+  of the plots already produced in the current session, for quick reload. For
+  instance, select one of the available series (double click) and click on the </span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Plot</span></span><span
+  lang=EN-US style='mso-ansi-language:EN-US'> button to generate a time series
+  plot of all the </span><a href="LSD_faqs.html#simulationrun"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>simulation run time steps</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'>. Next, click on </span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Statistics</span></span><span
+  lang=EN-US style='mso-ansi-language:EN-US'> to see some descriptive
+  statistics about the series printed in the </span><a
+  href="LSD_windows.html#log"><span lang=EN-US style='mso-ansi-language:EN-US'>LSD
+  Log</span></a><span lang=EN-US style='mso-ansi-language:EN-US'> window. <o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>You may
+  try to further explore the data available (see the </span><a
+  href="menudata_res.html" target=newwindow><span lang=EN-US style='mso-ansi-language:
+  EN-US'>manual</span></a><span lang=EN-US style='mso-ansi-language:EN-US'> on
+  this topic for details). There are <span class=GramE>a large number of</span>
+  possible options to produce time series and cross-section plots, XY
+  scatterplots, histograms, and more. Moreover, users can save selected data to
+  files in a variety of formats. It is also possible to launch <span
+  class=SpellE>Gnuplot</span>, a package for advanced function and data
+  plotting. <o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Further
+  and more advanced statistical analysis and data-charting resources are
+  available at the R platform, including transparent usage of LSD hierarchical
+  results data and sensitivity analysis, using the </span><a
+  href="LSD_faqs.html#r"><span lang=EN-US style='mso-ansi-language:EN-US'>LSD-specific
+  R packages</span></a><span lang=EN-US style='mso-ansi-language:EN-US'>. <o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:8'>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l6></a><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>Interpret the simulation
+  run results</span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#analysisofresults"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Analysis of Results</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'><br>
+  and<br>
+  Web browser</span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>Plot graphs and statistics of the simulation data
+  and use the </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#modelreport"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>model report</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> to make sense of the time
+  series meaning. Search in the documentation the elements of interest and look
+  at their functioning in the model to understand the reasons for the obtained
+  results. </span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>When finished, close the </span><span
+  style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#analysisofresults"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Analysis of Results</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'> window
+  using the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Exit&gt;Qui and Return to Browser</span></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'> menu
+  entry or simply click on the X in the title bar. If you have <span
+  class=GramE>produce</span> any plot, a confirmation dialog informing that
+  unsaved plots will be lost, will show up.</span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:9'>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l7></a><span class=SpellE>Reload</span> <span
+  class=SpellE>the</span> <span class=SpellE>model</span> <span class=SpellE>configuration</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Back on
+  the </span><a href="LSD_windows.html#browser"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LSD Browser</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'>, select </span><span class=Cdigo><span
+  lang=EN-US style='mso-ansi-language:EN-US'>File&gt;Reload</span></span><span
+  lang=EN-US style='mso-ansi-language:EN-US'> in the menu (or click on the
+  green recycle icon). This will reset the </span><a
+  href="LSD_faqs.html#modelsetting"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>model configuration</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'> to the values for beginning a </span><a
+  href="LSD_faqs.html#simulationrun"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>simulation run</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'> again or for editing the configuration.<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>After a </span><a
+  href="LSD_faqs.html#simulationrun"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>simulation run</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'>, LSD contains in memory the values for all elements as computed at
+  the last simulated time step. To prevent mistakes, LSD prevents the immediate
+  use of these final values as the starting values for a new simulation run.
+  So, to run the simulation again or to modify its configuration a </span><a
+  href="LSD_faqs.html#modelsetting"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>configuration file</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'> must be (re) loaded. <o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Note
+  that, if you really want to continue the simulation from where it stopped, it
+  is possible to save the current configuration status as a new configuration,
+  which can, in turn, be loaded to continue the simulation exercise. However,
+  this is not a common simulation situation, so be careful.<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:10'>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l8></a><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>Modify the number of
+  instances&nbsp;of an Object</span><span lang=EN-US style='mso-ansi-language:
+  EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#browser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Browser</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'><br>
+  or<br>
+  </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#modelstructure"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Model Structure</span></a></span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>In the </span><span style='color:black;mso-color-alt:
+  windowtext'><a href="LSD_windows.html#browser"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LSD Browser</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>, make the </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#object"><span lang=EN-US style='mso-ansi-language:EN-US'>Object</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> you desire to modify the current one and then select </span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Data&gt;Number
+  of Objects</span></span><span lang=EN-US style='color:black;mso-color-alt:
+  windowtext;mso-ansi-language:EN-US'> in the menu (or click the white on green
+  plus icon). Alternatively, in the </span><span style='color:black;mso-color-alt:
+  windowtext'><a href="LSD_windows.html#modelstructure"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LSD Model Structure</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>, right click directly on the target Object and select </span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Number of
+  Objects</span></span><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'> in the context menu.</span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>After selection this command, a new window opens,
+  prompting you about the details on the desired change. Update the </span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Number of
+  instances</span></span><span lang=EN-US style='color:black;mso-color-alt:
+  windowtext;mso-ansi-language:EN-US'> field to the new number of instances
+  desired for the selected </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#object"><span lang=EN-US style='mso-ansi-language:EN-US'>Object</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>. A number larger than the current one means increasing the number of
+  instances (and you may choose from which of the existing instances the new
+  ones should be copied). Conversely, a smaller than the current value means
+  deleting some of the existing instances (and LSD will give the opportunity to
+  choose which ones should be removed).</span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>One obvious request to test a simulation model is to
+  modify the number of </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#object"><span lang=EN-US style='mso-ansi-language:EN-US'>Objects</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> and, therefore, the number of </span><span style='color:black;
+  mso-color-alt:windowtext'><a href="LSD_faqs.html#variable"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Variables</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>, </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_faqs.html#parameter"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Parameters</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> and other Objects they contain. Using the interface described above
+  it is possible to modify any group of Objects, yet always maintaining the
+  same </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#modelstructure"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>model structure</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>. That is, any new Objects
+  at higher level in the hierarchy will still contain the same type(s) of
+  descending Objects at the lower levels. </span><span style='color:black;
+  mso-color-alt:windowtext'>For <span class=SpellE>details</span>, <span
+  class=SpellE>please</span> <span class=SpellE>see</span> the <a
+  href="menudata_objn.html" target=newwindow>LSD help</a>.&nbsp; </span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:11'>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l9></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Define the initial values of Parameters and lagged Variables<o:p></o:p></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LSD Browser</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'><br>
+  or<br>
+  </span><a href="LSD_windows.html#modelstructure"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LSD Model Structure</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>In the </span><a
+  href="LSD_windows.html#browser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Browser</span></a><span lang=EN-US style='mso-ansi-language:EN-US'>,
+  make the </span><a href="LSD_faqs.html#object"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Object</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> which contains the </span><a
+  href="LSD_faqs.html#parameter"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Parameter</span></a><span lang=EN-US style='mso-ansi-language:EN-US'>
+  or </span><a href="LSD_faqs.html#variable"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Variable</span></a><span lang=EN-US style='mso-ansi-language:EN-US'>
+  you want to edit the current and then select </span><span class=Cdigo><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Data&gt;Initial Values</span></span><span
+  lang=EN-US style='mso-ansi-language:EN-US'> in the menu (or click the
+  spreadsheet with a pencil icon). Alternatively, in the </span><a
+  href="LSD_windows.html#modelstructure"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Model Structure</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'>, right click directly on the target Object and select </span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Initial Values</span></span><span
+  lang=EN-US style='mso-ansi-language:EN-US'> in the context menu.<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>When
+  choosing the above command, </span><a href="LSD_windows.html#initialvalues"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>LSD Initial Values Editor</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> window opens and you may edit the
+  initial values for all </span><a href="LSD_faqs.html#parameter"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Parameters</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> and </span><a
+  href="LSD_faqs.html#variable"><span lang=EN-US style='mso-ansi-language:EN-US'>Variables</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'>, used to start the simulation,
+  contained in the current </span><a href="LSD_faqs.html#object"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Object</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'>.&nbsp;When starting a simulation LSD needs
+  to know the values to assign to the Parameters and to the Variables used with
+  lagged values. Note that the hierarchical structure of the LSD models
+  requires the usage of indexing to identify the Object instance containing the
+  elements requiring initial values, so the first (brother) Object is number 1,
+  the second, 2 and so on. This way the user can set different initial values
+  for the same Parameter or lagged Variable across different (brother) Object
+  instances.<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The
+  initialization of values is necessary also for the </span><a
+  href="LSD_faqs.html#object"><span lang=EN-US style='mso-ansi-language:EN-US'>Object</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> instances created when increasing
+  their number (see above). The new instances are assigned a default value
+  (copied from the selected existing instance), but usually the user must
+  confirm this choice (just opening the </span><a
+  href="LSD_windows.html#initialvalues"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Initial Values Editor</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'> and clicking the </span><span class=Cdigo><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Done</span></span><span lang=EN-US
+  style='mso-ansi-language:EN-US'> button). Although the data may be inserted
+  manually for each Object instance (up to 100), when there are many instances
+  it is convenient to use the </span><span class=Cdigo><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Set All</span></span><span lang=EN-US
+  style='mso-ansi-language:EN-US'> button to set all the initial values at
+  once. See the </span><a href="menudata_init.html" target=newwindow><span
+  lang=EN-US style='mso-ansi-language:EN-US'>LSD manual</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> for more details.&nbsp; <o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>When
+  finished, click on </span><span class=Cdigo><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Done</span></span><span lang=EN-US
+  style='mso-ansi-language:EN-US'> to return to the </span><a
+  href="LSD_windows.html#browser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Browser</span></a><span lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:12'>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>Choose which Variables (and Parameters) to save data
+  series, to plot at run-time, or to debug</span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#browser">LSD Browser</a>&nbsp;</span></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>Make the </span><span style='color:black;mso-color-alt:
+  windowtext'><a href="LSD_faqs.html#object"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Object</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> which contains the </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_faqs.html#variable"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Variable</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> (or </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#parameter"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Parameter</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>) the current Object and
+  then double click the desired element. This will open the Change Element
+  dialog window, from where you can edit or modify any property of a Variable
+  or Parameter.</span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>For the chosen </span><span style='color:black;
+  mso-color-alt:windowtext'><a href="LSD_faqs.html#variable"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Variable</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'> or </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_faqs.html#parameter"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Parameter</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> it is possible to decide whether: </span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>it is be included in the
+  data saved for analysis (mark the </span><span class=Cdigo><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Save</span></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>
+  checkbox<span class=GramE>);</span></span><span lang=EN-US style='mso-ansi-language:
+  EN-US'><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>it appears in the run-time
+  plot (mark the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Run-time plot</span></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> checkbox<span class=GramE>);</span></span><span
+  lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>it triggers the </span><span
+  style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#debugger"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Debugger</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>, interrupting the </span><span
+  style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#simulationrun"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>simulation run</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> immediately after its
+  computation (mark the </span><span class=Cdigo><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Debug</span></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>
+  checkbox).</span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>See the </span><span style='color:black;mso-color-alt:
+  windowtext'><a href="browser.html#variables" target=newwindow><span
+  lang=EN-US style='mso-ansi-language:EN-US'>LSD manual</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> for details on these and the remaining element configuration options.</span><span
+  lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>These choices can also be changed quickly by means
+  of the context menu by right clicking on its name on the </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_faqs.html#variable"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Variables</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> and </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#parameter"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Parameters</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> list box in the </span><span
+  style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#browser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Browser</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>. </span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:13'>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l10></a><span class=SpellE>Edit</span> <span
+  class=SpellE>the</span> <span class=SpellE>simulation</span> settings</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Use the
+  menu option </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Run&gt;Simulation Settings</span></span><span lang=EN-US
+  style='mso-ansi-language:EN-US'> (or click the wrench icon) to adjust the
+  remaining simulation settings.<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>In the
+  Simulation Settings dialog <span class=GramE>window</span> you may choose the
+  number of time steps per simulation, the seed for the pseudorandom number
+  generator, and number of simulation exercises to be run in a sequence.
+  Sequential </span><a href="LSD_faqs.html#simulationrun"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>simulation runs</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> use the same </span><a
+  href="LSD_faqs.html#modelsetting"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>model configuration</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'> except for a different random generator seed (increased by 1 each
+  turn). Running more than one sequential simulation runs cause LSD to automatically
+  save the results data to files.<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>See the </span><a
+  href="menurun.html#simsetting" target=newwindow><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LSD manual</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> for more information on these and some
+  further advanced simulation settings available. <o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:14'>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l11></a><a name=l12></a><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>Save the
+  modified model configuration</span><span lang=EN-US style='mso-ansi-language:
+  EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#browser">LSD Browser</a></span></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>The menu option </span><span class=Cdigo><span
+  lang=EN-US style='mso-ansi-language:EN-US'>File&gt;Save</span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> (or click the blue floppy disk icon) saves the current </span><span
+  style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#modelsetting"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>model configuration</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'> in
+  memory to a file, overwriting the last loaded configuration file (with the </span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.<span
+  class=SpellE>lsd</span></span></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'> extension), if any, or
+  under the default name </span><span class=Cdigo><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Sim1.lsd</span></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>
+  otherwise.</span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>If you want to preserve the original configuration
+  file (which is frequently the case), the modified configuration may be saved
+  using the option </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>File&gt;Save As</span></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>, which allows the user to
+  type a new file name or overwrite an arbitrary existing file. To preserve the
+  existing configuration file, it is important to use the </span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>File&gt;Save As</span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> command <b>before</b> trying to run the new unsaved configuration.
+  Otherwise, LSD will prompt to automatically overwrite the originally loaded
+  configuration file.</span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:15'>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l13></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Run the modified model configuration<o:p></o:p></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>After
+  (optionally) saving the modified </span><a href="LSD_faqs.html#modelsetting"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>model configuration</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> under a new name, you can use the
+  command </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Run&gt;Run</span></span><span lang=EN-US style='mso-ansi-language:
+  EN-US'> (or click on the blue triangle/play icon) to </span><a
+  href="LSD_faqs.html#simulationrun"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>run the simulation</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'> again.<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>It is
+  possible that an attempt to run a modified model <span class=GramE>does not
+  succeed</span>. LSD may prevent running incomplete or inadequate </span><a
+  href="LSD_faqs.html#modelsetting"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>model configurations</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'>. In these cases, messages indicating the problem and the possible
+  fixes are printed in the </span><a href="LSD_windows.html#log"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>LSD Log</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> window. </span><span
+  class=SpellE>Typical</span> <span class=SpellE>errors</span> are: </p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo6'><![if !supportLists]><span
+  lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;
+  mso-bidi-font-family:Symbol;mso-ansi-language:EN-US'><span style='mso-list:
+  Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Model already <span class=GramE>run</span>.</span></b><span
+  lang=EN-US style='mso-ansi-language:EN-US'> The </span><a
+  href="LSD_faqs.html#modelsetting"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>model configuration</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'> in memory is the last step of a </span><a
+  href="LSD_faqs.html#simulationrun"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>simulation run</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'>, and not from a “fresh” configuration file. Load the original
+  configuration file, make the changes indicated above, save the configuration
+  under a new name, and, finally, run the newly configured model.<o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo6'><![if !supportLists]><span
+  lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;
+  mso-bidi-font-family:Symbol;mso-ansi-language:EN-US'><span style='mso-list:
+  Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Data not initialized.</span></b><span lang=EN-US style='mso-ansi-language:
+  EN-US'> If the number of </span><a href="LSD_faqs.html#object"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Object</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> instances is increased, the newly created
+  instances contain </span><a href="LSD_faqs.html#parameter"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Parameters</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> and/or lagged </span><a
+  href="LSD_faqs.html#variable"><span lang=EN-US style='mso-ansi-language:EN-US'>Variables</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> that must be initialized (or
+  confirmed) before they can be used for a </span><a
+  href="LSD_faqs.html#simulationrun"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>simulation run</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'>. Move the </span><a href="LSD_windows.html#browser"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LSD Browser</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> to point to the Object indicated in the
+  error message (in the </span><a href="LSD_windows.html#log"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LSD Log</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> window) and choose </span><span class=Cdigo><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Data&gt;Initial Values</span></span><span
+  lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo6'><![if !supportLists]><span
+  lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;
+  mso-bidi-font-family:Symbol;mso-ansi-language:EN-US'><span style='mso-list:
+  Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Inconsistent initial values.</span></b><span lang=EN-US
+  style='mso-ansi-language:EN-US'> Inadequate values were chosen for </span><a
+  href="LSD_faqs.html#parameter"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Parameters</span></a><span lang=EN-US style='mso-ansi-language:EN-US'>
+  or lagged </span><a href="LSD_faqs.html#variable"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>Variables</span></a><span lang=EN-US
+  style='mso-ansi-language:EN-US'> initialization. These may be causing, for
+  example, divisions by zero during the computation of some </span><a
+  href="LSD_faqs.html#equation"><span lang=EN-US style='mso-ansi-language:EN-US'>Equation</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'>. The simulation results may be
+  erratic in these cases, according to the random generator seed used, for
+  instance, and may even cause sudden crashes of LSD. Revert to the unmodified
+  original </span><a href="LSD_faqs.html#modelsetting"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>configuration file</span></a><span
+  lang=EN-US style='mso-ansi-language:EN-US'> and try the changes again with
+  different values.<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>For a
+  more complete overview of the possible errors and their fixes, please check
+  the </span><a href="LSD_quickhelp.html"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>quick help</span></a><span lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:16'>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>Test other aspects of LSD</span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html"><span class=SpellE>Any</span> LSD <span class=SpellE>window</span></a></span></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>Explore any menu entry of the </span><span
+  style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_windows.html#browser"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD Browser</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>. </span><span
+  style='color:black;mso-color-alt:windowtext'>As general <span class=SpellE>advice</span>:
+  </span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>the menu </span><span
+  class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Model</span></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> modifies the structure of the model, and should be used only by
+  modelers since it likely entails required modifications of the </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_faqs.html#equation"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Equations</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>' code;</span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>remember that when running
+  a <span class=GramE>simulation</span> the configuration is written on file,
+  overwriting the last configuration loaded with the same name;</span><span
+  lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoListParagraph style='margin-left:35.85pt;text-indent:-18.0pt;
+  mso-list:l0 level1 lfo6'><![if !supportLists]><span lang=EN-US
+  style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+  Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span></span><![endif]><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>keep the </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_documentation.html"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>LSD help pages</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> open, helping to understand in detail the effects of any operation.</span><span
+  lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>All other </span><span style='color:black;
+  mso-color-alt:windowtext'><a href="LSD_windows.html"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>LSD windows</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> are also open for experimentation. Just be careful when overwriting </span><span
+  style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#modelsetting"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>configuration files</span></a></span><span lang=EN-US
+  style='color:black;mso-color-alt:windowtext;mso-ansi-language:EN-US'>:
+  everything else can be easily recovered by quitting LSD and restarting it.</span><span
+  lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:17'>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=SpellE>Try</span> <span class=SpellE>another</span>
+  <span class=SpellE>model</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>LMM</p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Select
+  menu option </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>File&gt;Browse Models</span></span><span lang=EN-US style='mso-ansi-language:
+  EN-US'> (or click on the yellow folder icon) to pick another model.<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Create
+  the </span><a href="LSD_faqs.html#model"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>LSD model program</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'> for the model using the command </span><span class=Cdigo><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Model&gt;Compile and Run Model </span></span><span
+  lang=EN-US style='mso-ansi-language:EN-US'>(or click on the second yellow
+  lightning icon, the one with the green arrow).<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Use the
+  menu command </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>File&gt;Load </span></span><span lang=EN-US style='mso-ansi-language:
+  EN-US'>(or click on the yellow folder icon) and choose one of the proposed </span><a
+  href="LSD_faqs.html#modelsetting"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>configuration file</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'>. <o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Select
+  menu command </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Run&gt;Run</span></span><span lang=EN-US style='mso-ansi-language:
+  EN-US'> (or click on the blue triangle/play icon) to </span><a
+  href="LSD_faqs.html#simulationrun"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>run the simulation</span></a><span lang=EN-US style='mso-ansi-language:
+  EN-US'>. <o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Follow
+  the instructions above to understand the differences (and the common stuff)
+  between two LSD models.<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:18;mso-yfti-lastrow:yes'>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=SpellE><span style='color:black;mso-color-alt:
+  windowtext'>Create</span></span><span style='color:black;mso-color-alt:windowtext'>
+  <span class=SpellE>your</span> <span class=SpellE>own</span> <span
+  class=SpellE>model</span></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span style='color:black;mso-color-alt:windowtext'>LMM</span></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>As you have seen, using an existing model permit to
+  modify every <i>numerical</i> aspect of the simulation. However, you are
+  still constrained to keep the same </span><span style='color:black;
+  mso-color-alt:windowtext'><a href="LSD_faqs.html#modelstructure"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>model structure</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> (</span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#object"><span lang=EN-US style='mso-ansi-language:EN-US'>Objects</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>, </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#variable"><span lang=EN-US style='mso-ansi-language:EN-US'>Variables</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> and </span><span style='color:black;mso-color-alt:windowtext'><a
+  href="LSD_faqs.html#parameter"><span lang=EN-US style='mso-ansi-language:
+  EN-US'>Parameters</span></a></span><span lang=EN-US style='color:black;
+  mso-color-alt:windowtext;mso-ansi-language:EN-US'>) and </span><span
+  style='color:black;mso-color-alt:windowtext'><a href="LSD_faqs.html#equation"><span
+  lang=EN-US style='mso-ansi-language:EN-US'>Equations</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'>. This is because the structure influences the way the Equations
+  compute their values for the Variables. </span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='color:black;mso-color-alt:windowtext;
+  mso-ansi-language:EN-US'>Follow to the </span><span style='color:black;
+  mso-color-alt:windowtext'><a href="model_writing.html"><span lang=EN-US
+  style='mso-ansi-language:EN-US'>last tutorial</span></a></span><span
+  lang=EN-US style='color:black;mso-color-alt:windowtext;mso-ansi-language:
+  EN-US'> to learn how to create a new LSD model.</span><span lang=EN-US
+  style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+  </td>
+ </tr>
+</table>
+
+</div>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+</div>
+
+</body>
+
+</html>

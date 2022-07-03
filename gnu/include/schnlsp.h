@@ -1,14 +1,11 @@
-#ifndef _SCHNLSP_H
-#define _SCHNLSP_H
-#if __GNUC__ >=3
-#pragma GCC system_header
-#endif
-
-
-#define SECPKG_ATTR_SUPPORTED_ALGS 86
-#define SECPKG_ATTR_CIPHER_STRENGTHS 87
-#define SECPKG_ATTR_SUPPORTED_PROTOCOLS 88
+/**
+ * This file has no copyright assigned and is placed in the Public Domain.
+ * This file is part of the mingw-w64 runtime package.
+ * No warranty is given; refer to the file DISCLAIMER.PD within this package.
+ */
+#ifndef __SCHNLSP_H__
+#define __SCHNLSP_H__
 
 #include <schannel.h>
 
-#endif /* _SCHNLSP_H */
+#endif

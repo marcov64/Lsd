@@ -1,11 +1,14 @@
 /*************************************************************
 
-	LSD 7.2 - December 2019
+	LSD 8.0 - May 2022
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
 	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
+
+	See Readme.txt for copyright information of
+	third parties' code used in LSD
 
  *************************************************************/
 
@@ -16,8 +19,18 @@ Executes the lsd_getlimits command line utility.
 Lists all initial values ranges and configuration.
 *************************************************************/
 
-#include <set>
 #include "decl.h"
+
+// limits and description for simulation settings
+#define MIN_STEP 1
+#define MAX_STEP 100000
+#define DESC_STEP "Number of time steps to perform the simulation"
+#define MIN_RUNS 1
+#define MAX_RUNS 100000
+#define DESC_RUNS "Number of times to repeat the simulation (Monte Carlo experiment)"
+#define MIN_SEED 1
+#define MAX_SEED 100000
+#define DESC_SEED "First seed to be used to initialize the pseudorandom number generator"
 
 
 #define SEP	",;\t"			// column separators to use
@@ -25,14 +38,15 @@ Lists all initial values ranges and configuration.
 
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
 bool message_logged = false;// new message posted in log window
+bool meta_par_in[ META_PAR_NUM ];// flag meta parameter for simulation settings found
 bool no_more_memory = false;// memory overflow when setting data save structure
-bool no_ptr_chk = false;	// disable user pointer checking
 bool no_saved = true;		// disable the usage of saved values as lagged ones
 bool no_search;				// disable the standard variable search mechanism
 bool no_zero_instance = true;// flag to allow deleting last object instance
 bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
 bool running = false;		// simulation is running
+bool save_ok = true;		// control if saving model configuration is possible
 bool struct_loaded = false;	// a valid configuration file is loaded
 bool unsavedData = false;	// flag unsaved simulation results
 bool unsavedSense = false;	// control for unsaved changes in sensitivity data
@@ -46,16 +60,18 @@ char *sens_file = NULL;		// current sensitivity analysis file
 char *simul_name = NULL;	// name of current simulation configuration
 char *struct_file = NULL;	// name of current configuration file
 char equation_name[ MAX_PATH_LENGTH ] = "";	// equation file name
-char lsd_eq_file[ MAX_FILE_SIZE + 1 ] = "";	// equations saved in configuration file
-char msg[ TCL_BUFF_STR ] = "";				// auxiliary Tcl buffer
-char name_rep[ MAX_PATH_LENGTH ] = "";		// documentation report file name
+char lsd_eq_file[ MAX_FILE_SIZE ] = "";	// equations saved in configuration file
+char name_rep[ MAX_PATH_LENGTH ] = "";	// documentation report file name
 char nonavail[ ] = "NA";	// string for unavailable values (use R default)
+const bool no_pointer_check = false;// user pointer checking static disable
 int actual_steps = 0;		// number of executed time steps
 int debug_flag = false;		// debug enable control (bool)
 int fast_mode = 1;			// flag to hide LOG messages & runtime plot
 int findex = 1;				// current multi configuration job
 int findexSens = 0;			// index to sequential sensitivity configuration filenames
 int max_step = 100;			// default number of simulation runs
+int no_ptr_chk = false;		// disable user pointer checking
+int parallel_disable = false;// flag to control parallel mode
 int prof_aggr_time = false;	// show aggregate profiling times
 int prof_min_msecs = 0;		// profile only variables taking more than X msecs.
 int prof_obs_only = false;	// profile only observed variables
@@ -64,6 +80,7 @@ int t;						// current time step
 int series_saved = 0;		// number of series saved
 int sim_num = 1;			// simulation number running
 int stack;					// LSD stack call level
+int stack_info = 0;			// LSD stack control
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter
@@ -78,14 +95,23 @@ sense *rsense = NULL;		// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
 variable *last_cemetery = NULL;	// LSD last saved data from deleted objects
 
+// constant string arrays
+const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
+const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
+
 
 char *out_file = NULL;		// output .csv file, if any
 
+// command line strings
+const char lsdCmdMsg[ ] = "This is the LSD Initial Values Range Reader.";
+const char lsdCmdDsc[ ] = "It reads a LSD configuration file (.lsd) and a LSD sensitivity analysis file\n(.sa) and shows the ranges used for variables/parameters being analyzed,\noptionally saving them in a comma separated text file (.csv).\n";
+const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd' the configuration file to use\n'-s FILENAME.sa' the sensitivity analysis file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n";
+
 
 /*********************************
-LSD MAIN
-*********************************/
-int lsdmain( int argn, char **argv )
+ LSDMAIN
+ *********************************/
+int lsdmain( int argn, const char **argv )
 {
 	int i, confs;
 	char *sep;
@@ -98,7 +124,7 @@ int lsdmain( int argn, char **argv )
 
 	if ( argn < 5 )
 	{
-		fprintf( stderr, "\nThis is LSD Initial Values Range Reader.\nIt reads a LSD configuration file (.lsd) and a LSD sensitivity analysis file\n(.sa) and shows the ranges used for variables/parameters being analyzed,\noptionally saving them in a comma separated text file (.csv).\n\nCommand line options:\n'-f FILENAME.lsd' the configuration file to use\n'-s FILENAME.sa' the sensitivity analysis file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n" );
+		fprintf( stderr, "\n%s\n%s\n%s\n", lsdCmdMsg, lsdCmdDsc, lsdCmdHlp );
 		myexit( 1 );
 	}
 	else
@@ -127,47 +153,44 @@ int lsdmain( int argn, char **argv )
 				continue;
 			}
 
-			fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is LSD Initial Values Range Reader.\n\nCommand line options:\n'-f FILENAME.lsd' the configuration file to use\n'-s FILENAME.sa' the sensitivity analysis file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n", argv[ i ][ 0 ], argv[ i ][ 1 ] );
+			fprintf( stderr, "\nOption '%c%c' not recognized.\n%s\n%s\n", argv[ i ][ 0 ], argv[ i ][ 1 ], lsdCmdMsg, lsdCmdHlp );
 			myexit( 2 );
 		}
 	}
 
 	if ( struct_file == NULL )
 	{
-		fprintf( stderr, "\nNo original configuration file provided.\nThis is LSD Initial Values Range Reader.\nSpecify a -f FILENAME.lsd to use for reading the saved variables (if any).\n" );
+		fprintf( stderr, "\nNo original configuration file provided.\n%s\nSpecify a -f FILENAME.lsd to use for reading the saved variables (if any).\n\n", lsdCmdMsg );
 		myexit( 3 );
 	}
 
 	f = fopen( struct_file, "r" );
 	if ( f == NULL )
 	{
-		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Initial Values Range Reader.\nSpecify an existing -f FILENAME.lsd configuration file.\n", struct_file );
+		fprintf( stderr, "\nFile '%s' not found.\n%s\nSpecify an existing -f FILENAME.lsd configuration file.\n\n", struct_file, lsdCmdMsg );
 		myexit( 4 );
 	}
 	fclose( f );
 
+	simul_name = new char[ strlen( struct_file ) + 1 ];
+	strcpy( simul_name, struct_file );
+	i = strlen( simul_name );
+	simul_name[ i > 4 ? i - 4 : i ] = '\0';
+
 	root = new object;
 	root->init( NULL, "Root" );
-	add_description( "Root", "Object", "(no description available)" );
-	blueprint = new object;
-	blueprint->init( NULL, "Root" );
-	stacklog = new lsdstack;
-	stacklog->prev = NULL;
-	stacklog->next = NULL;
-	stacklog->ns = 0;
-	stacklog->vs = NULL;
-	strcpy( stacklog->label, "LSD Simulation Manager" );
-	stack = 0;
+	add_description( "Root" );
+	reset_blueprint( NULL );
 
 	if ( load_configuration( true ) != 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Initial Values Range Reader.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n", struct_file );
+		fprintf( stderr, "\nFile '%s' is invalid.\n%s\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n\n", struct_file, lsdCmdMsg );
 		myexit( 5 );
 	}
 
 	if ( sens_file == NULL )
 	{
-		fprintf( stderr, "\nNo sensitivity analysis file provided.\nThis is LSD Initial Values Range Reader.\nSpecify a -s FILENAME.sa to use for reading the values limits (if any).\n" );
+		fprintf( stderr, "\nNo sensitivity analysis file provided.\n%s\nSpecify a -s FILENAME.sa to use for reading the values limits (if any).\n\n", lsdCmdMsg );
 		myexit( 6 );
 	}
 
@@ -175,13 +198,13 @@ int lsdmain( int argn, char **argv )
 	f = fopen( sens_file, "rt" );
 	if ( f == NULL )
 	{
-		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Initial Values Range Reader.\nSpecify an existing -s FILENAME.sa sensitivity analysis file.\n", sens_file );
+		fprintf( stderr, "\nFile '%s' not found.\n%s\nSpecify an existing -s FILENAME.sa sensitivity analysis file.\n\n", sens_file, lsdCmdMsg );
 		myexit( 7 );
 	}
 
 	if ( load_sensitivity( f ) != 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Initial Values Range Reader.\nCheck if the file is a valid LSD sensitivity analysis or regenerate it using the LSD Browser.\n", sens_file  );
+		fprintf( stderr, "\nFile '%s' is invalid.\n%s\nCheck if the file is a valid LSD sensitivity analysis or regenerate it using the LSD Browser.\n\n", sens_file, lsdCmdMsg	 );
 		fclose( f );
 		myexit( 8 );
 	}
@@ -193,7 +216,7 @@ int lsdmain( int argn, char **argv )
 		f = fopen( out_file, "wt" );
 		if ( f == NULL )
 		{
-			fprintf( stderr, "\nFile '%s' cannot be saved.\nThis is LSD Initial Values Range Reader.\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n", out_file  );
+			fprintf( stderr, "\nFile '%s' cannot be saved.\n%s\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n\n", out_file, lsdCmdMsg	 );
 			myexit( 9 );
 		}
 
@@ -202,21 +225,50 @@ int lsdmain( int argn, char **argv )
 
 		// write .csv header
 		fprintf( f, "Name%sType%sLag%sFormat%sValue%sMinimum%sMaximum%sDescription\n", sep, sep, sep, sep, sep, sep, sep );
+
+		// write all parameters and initial conditions
 		get_sa_limits( root, f, sep );
+
+		// write simulation setting, if not already set
+		if ( ! meta_par_in[ 0 ] )
+			fprintf( f, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",
+					 sep, sep, sep, sep, max_step, sep, MIN_STEP, sep, MAX_STEP, sep, DESC_STEP );
+
+		if ( ! meta_par_in[ 1 ] )
+			fprintf( f, "_numRuns_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",
+					 sep, sep, sep, sep, sim_num, sep, MIN_RUNS, sep, MAX_RUNS, sep, DESC_RUNS );
+
+		if ( ! meta_par_in[ 2 ] )
+			fprintf( f, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",
+					 sep, sep, sep, sep, seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
+
 		fclose( f );
 	}
 	else	// send to stdout
+	{
 		get_sa_limits( root, stdout, "\t" );
 
+		if ( ! meta_par_in[ 0 ] )
+			fprintf( stdout, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",
+					 sep, sep, sep, sep, max_step, sep, MIN_STEP, sep, MAX_STEP, sep, DESC_STEP );
+
+		if ( ! meta_par_in[ 1 ] )
+			fprintf( stdout, "_numRuns_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",
+					 sep, sep, sep, sep, sim_num, sep, MIN_RUNS, sep, MAX_RUNS, sep, DESC_RUNS );
+
+		if ( ! meta_par_in[ 2 ] )
+			fprintf( stdout, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",
+					 sep, sep, sep, sep, seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
+	}
+
 	empty_sensitivity( rsense );
-	empty_cemetery( );
-	blueprint->empty( );
-	root->empty( );
-	delete blueprint;
-	delete root;
-	delete stacklog;
+	empty_blueprint( );
+	empty_description( );
+	root->delete_obj( );
+	delete [ ] path;
 	delete [ ] out_file;
 	delete [ ] simul_name;
+	delete [ ] struct_file;
 
 	return 0;
 }
@@ -232,48 +284,4 @@ double variable::fun( object* r ) { return NAN; }
 /*********************************
 ALLOC_SAVE_VAR
 *********************************/
-bool alloc_save_var( variable *v )
-{
-	bool prev_state = no_more_memory;
-
-	if ( ! running )
-		return true;
-
-	if ( ! no_more_memory )
-	{
-		if ( v->num_lag > 0 || v->param == 1 )
-			v->start = t - 1;
-		else
-			v->start = t;
-
-		v->end = max_step;
-
-		// use C stdlib to be able to deallocate memory for deleted objects
-		free( v->data );
-		v->data = ( double * ) malloc( ( v->end - v->start + 1 ) * sizeof( double ) );
-
-		if( v->data == NULL )
-		{
-			no_more_memory = true;
-			v->save = v->savei = false;
-			v->start = v->end = 0;
-
-			if ( no_more_memory != prev_state )
-			{
-				set_lab_tit( v );
-				plog( "\nWarning: cannot allocate memory for saving '%s %s' (object '%s')\n Subsequent series will not be saved\n", "", v->label, v->lab_tit, v->up->label );
-			}
-		}
-		else
-		{
-			if ( v->num_lag > 0  || v->param == 1 )
-				v->data[ 0 ] = v->val[ 0 ];
-
-			++series_saved;
-		}
-	}
-	else
-		v->save = v->savei = false;
-
-	return ! no_more_memory;
-}
+bool alloc_save_var( variable *v ) { return true; }

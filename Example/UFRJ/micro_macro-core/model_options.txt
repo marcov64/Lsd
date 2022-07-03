@@ -1,0 +1,6 @@
+TARGET=lsd
+FUN=fun_MMM_CORE
+FUN_EXTRA= mmm_core_time_step.h mmm_core_analysis.h mmm_core_macro.h mmm_core_macro_sfc.h mmm_core_classes.h mmm_core_external_sector.h mmm_core_government.h  mmm_core_sector_aggregates.h mmm_core_sector_demand.h mmm_core_entry_exit.h mmm_core_firm_capital.h mmm_core_firm_finance.h mmm_core_firm_investment.h mmm_core_firm_price.h mmm_core_firm_production.h mmm_core_firm_profit.h mmm_core_firm_rnd.h mmm_core_firm_sales.h mmm_core_firm_inputs.h mmm_core_capital_goods.h mmm_core_sector_analysis.h  mmm_core_calibration.h
+SWITCH_CC=-Og -ggdb3
+SWITCH_CC_LNK=
+

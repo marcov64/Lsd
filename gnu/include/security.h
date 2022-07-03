@@ -1,42 +1,50 @@
-#ifndef _SECURITY_H
-#define _SECURITY_H
-#if __GNUC__ >=3
-#pragma GCC system_header
+/**
+ * This file is part of the mingw-w64 runtime package.
+ * No warranty is given; refer to the file DISCLAIMER within this package.
+ */
+
+#include <winapifamily.h>
+#include <_mingw_unicode.h>
+
+#if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
+
+#ifndef NTLMSP_NAME_A
+#define NTLMSP_NAME_A "NTLM"
+#define NTLMSP_NAME L"NTLM"
 #endif
 
+#ifndef MICROSOFT_KERBEROS_NAME_A
+#define MICROSOFT_KERBEROS_NAME_A "Kerberos"
+#define MICROSOFT_KERBEROS_NAME_W L"Kerberos"
+#ifdef WIN32_CHICAGO
+#define MICROSOFT_KERBEROS_NAME MICROSOFT_KERBEROS_NAME_A
+#else
+#define MICROSOFT_KERBEROS_NAME MICROSOFT_KERBEROS_NAME_W
+#endif
+#endif
 
-#define SEC_E_OK 0
-#define SEC_E_CERT_EXPIRED (-2146893016)
-#define SEC_E_INCOMPLETE_MESSAGE (-2146893032)
-#define SEC_E_INSUFFICIENT_MEMORY (-2146893056)
-#define SEC_E_INTERNAL_ERROR (-2146893052)
-#define SEC_E_INVALID_HANDLE (-2146893055)
-#define SEC_E_INVALID_TOKEN (-2146893048)
-#define SEC_E_LOGON_DENIED (-2146893044)
-#define SEC_E_NO_AUTHENTICATING_AUTHORITY (-2146893039)
-#define SEC_E_NO_CREDENTIALS (-2146893042)
-#define SEC_E_TARGET_UNKNOWN (-2146893053)
-#define SEC_E_UNSUPPORTED_FUNCTION (-2146893054)
-#define SEC_E_UNTRUSTED_ROOT (-2146893019)
-#define SEC_E_WRONG_PRINCIPAL (-2146893022)
-#define SEC_E_SECPKG_NOT_FOUND (-2146893051)
-#define SEC_E_QOP_NOT_SUPPORTED (-2146893046)
-#define SEC_E_UNKNOWN_CREDENTIALS (-2146893043)
-#define SEC_E_NOT_OWNER (-2146893050)
-#define SEC_I_RENEGOTIATE 590625
-#define SEC_I_COMPLETE_AND_CONTINUE 590612
-#define SEC_I_COMPLETE_NEEDED 590611
-#define SEC_I_CONTINUE_NEEDED 590610
-#define SEC_I_INCOMPLETE_CREDENTIALS 590624
+#ifndef NEGOSSP_NAME
+#define NEGOSSP_NAME_W L"Negotiate"
+#define NEGOSSP_NAME_A "Negotiate"
 
-/* always a char */
-typedef char SEC_CHAR;
-typedef wchar_t SEC_WCHAR;
-typedef long SECURITY_STATUS;
-#define SEC_FAR
+#define NEGOSSP_NAME __MINGW_NAME_UAW(NEGOSSP_NAME)
+#endif
+
+#ifndef CLOUDAP_NAME
+#define CLOUDAP_NAME_W L"CloudAP"
+#define ClOUDAP_NAME_A "CloudAP"
+
+#define CLOUDAP_NAME __MINGW_NAME_UAW(CLOUDAP_NAME)
+#endif
 
 #include <sspi.h>
-#include <ntsecpkg.h>
-#include <secext.h>
 
-#endif /* _SECURITY_H */
+#if defined (SECURITY_WIN32) || defined (SECURITY_KERNEL)
+#include <secext.h>
+#endif
+
+#if ISSP_LEVEL == 16
+#include <issper16.h>
+#endif
+
+#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) */

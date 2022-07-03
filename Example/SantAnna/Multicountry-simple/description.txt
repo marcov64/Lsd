@@ -1,0 +1,23 @@
+Multi-country model (exogenous demand)
+======================================
+
+Copyright and code by Emanuele Russo.
+
+
+Relevant references
+===================
+
+Dosi, G., A. Roventini and Russo, E. (2019). Endogenous growth and global divergence in a multi-country agent-based model. Journal of Economic Dynamics and Control 101:101-129.
+
+
+Model description
+=================
+
+Simplified version of the original model with exogenous demand. It is a starting point for work focused on international trade. It incorporates the whole trade part of the original model and it is intended for didactical purposes.
+
+
+Example configurations
+======================
+
+Sim_2c = 2 country world
+Sim_10c = 10 country world

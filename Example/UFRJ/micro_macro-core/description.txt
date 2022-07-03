@@ -1,0 +1,223 @@
+MICRO-MACRO MULTISECTORAL MODEL (ver. 2.9_core)
+
+*********************************************************************************************************************************************
+
+This is a new simplified and stylized version of the model created by Dweck (2006) and used in Dweck, Vianna and Barbosa (2018). 
+Coded by Matheus Vianna.
+
+What was introduced in the "2.0" version:
+
+--The entire code, including element names, was translated to english
+--The entire code was translated to LSD Macros, instead of C++ writing
+--The entire code was padronized (see below)
+--Names are now descriptive and intuitive
+--Income classes were transformed into objects
+--Government and External Sector were transformed into objects
+--Variables were grouped by objects in additional files
+
+Then, the "2.0_core" Version made some simplifications and stylizations of the model. 
+The goal was to reduce the code as much as possible, in term of lines, number of variable and parameters, without losing too much properties and main results of the 2.0 model.
+The idea was to turn the model more user friendly, so some names were changed and the code is as clear and descriptive as possible.
+
+Main simplifications and modifications of the "_core" version:
+
+--A considerable number of parameters and variables were eliminated or incorporated into another variable, for not beeing in use. Also, many were renamed.
+--The Government object was simplified: simple primary budget rule, two types of taxes (income and indirect) and only one type of expenditure (government wages). 
+--One intermediate goods sector and one income classe wre eliminated . The model is running with 3 sectors, one of each type, and 3 income classes. 
+--The Input object was eliminated since there is only one intermediate sector now. All Input variables were reorganized to Firm object or Sector object.
+--All essential parameters are in the Sector object. Parameters in other objects are results of Sector parameters or they are rewritten during simulation.
+--Creation of Analysis object. In this object there are only analysis variables, with short names for R analysis scripts.
+--Calibration: a variable for initial demand calibration based only on essential parameters was created.
+--Initialization: a variable for writting initial lagged values and parameters was created.
+--R&D variables were simplificated and a few removed. 
+--Product Innovation (Quality) does not require capital goods demand to be implemented in this version (simplification).
+--Investment variables were revised and rewritten. Mainly the codes were generalized to changes in parameter "investment_period".
+--Wage was moved to the Firm level.
+--R&D expenses were incorporated to firm's wages, as it should be, and variables as Net_Revenue and Net_Profits were created.
+--Entry and exit variables were revised, rewritten and most of them, eliminated.
+
+Version 2.9:
+--All essential parameters were moved to MACRO object. (Strong hypothesis: all sectors are equal, except for specific differences already in the code. This is done for a initial sensitivity analysis on those parameters.)
+--All variables and parameters were renamed to better organizations and identification.
+--Minor Bug Fixes.
+
+*********************************************************************************************************************************************
+
+ORIGIN:
+
+The origin of the MMM model can be traced back to Mario Possas's Ph.D. Thesis (Possas 1983). In order to explain the main components of the dynamics of a capitalist economy, Possas combines theoretical propositions of three of the most influential economists of the twentieth century: John Maynard Keynes, Michail Kalecki and Joseph Schumpeter. 
+Possas stablishes a multisectoral model where basic units are the sectors and intersectoral relationships give birth to dynamics, not only sectoral but also aggregated. The model was based on input-output matrices to determine sectoral conponents of the intermediate consumption of each sector. 
+As highligthed by the author, the model was already very complex and it would require a solution by computer simulation. However, due to the inexistent computation and processing power at that time, he opted for analytical solution. Only at the end of 90's the author started to work again in the model, now with enough computational power to use numeric solution. 
+Possas and Dweck (2004) presented the consolidated MMM model for the first time while Dweck (2006) did an extensive analysis of the dynamic properties.
+
+MODEL DESCRIPTION AND FEATURES:
+
+The MMM model is a multisectoral micro-macro dynamic model of simulation, that combines theorectical foundations from pos-keynesian, kaleckian and schumpeterian
+approaches, useful to investigate general dynamic properties of capitalist economies.
+
+Multisectoral: most of the general dynamic properties derives from the intersectoral relationships, using input-output matrices to determine intersectoral demands. Additionally, a matrix of income apropriation determines income distribution among dierent classes from functional distribution. Sectors basically differ by how they fit in the productive chain, which can be capital goods production, intermediate goods production or consumption goods production. Sectoral demands are determined endogenously by firms and income classes decisions.
+	The core version runs with the minimum number of sector of each type (1), but the model can be generalized for more than one sector of each type, employing input-output matrices to generate sectoral demands, as proposed by Possas (1983). The number of income classes can also be generalized.  
+	Additionally, the model have two "exoneous" blocks that were simplified in the core version: Government and External Sector.
+
+Dynamic: the model generates dynamic trajectories in discrete time (time steps). It is a desequilibrium model, since causality is based on decisions to produce and spend, no equilibrium position is ever required. The basic time unit is the production period of the firm, which can be understood as one quarter in cronological time. In each time step, firms take production decisions but other decisions can happen in dierent frequencies, for instance, the investment decision and the markup adjustment decision. 
+
+Micro-Macro: decisions happen at the firm level, in the micro level. Consequences of those decisions, however, affect both the sectoral level and the macro level. Addionally, the sectoral and macro structures can affect firm's decisions trough feedback mechanisms.
+
+Theoretical: the main goal of the model is to investigate general dynamic properties of capitalist economies, so the results are general, theoretical, representing only the essential elements of a non-specic capitalist economy. Historical, national and intitutional particularities are, most of the time, omited from the model.
+
+Agent-Based: Firms are the main agents. Each firm belongs only to one sector. Structural changes in each sector are endogenously dependent on firms behavior, especially as a result of technological and strategic diversity.  Firms decide on:
+	(i) production, prices and profits: production decisions are based on expected sales for the production period, extrapolated from the average of some previous periods. As to prices, themodel assumes each sector to be an oligopoly with some degree of price competition as well as of product differentiation, following a version of Kalecki's price model (1954, ch. 1), in which actual price is a weighted average of the price corresponding to the expected markup and the industry average price, but subject to change according to a feedback from the firm's competitive performance.
+	(ii) investment: investment decision rules on new capacity are also based on extrapolated expected sales from some previous (investment) periods but limited by a debt constraint following Kalecki's principle of increasing risk (1954, ch. 8). Wider financial features are included in these decisions to capture the influence of assets and liabilities structure of the firm, represented by debt/equity ratio, retained profits and liquidity demand.
+	(iii) technological search:  technological search combines different approaches: both innovative and imitative searches follow a stochastic process as in Nelson and Winter (1982) and a learning process is also included drawing on the vintage model by Silverberg et al. (1988), from which a payback period criterion for equipment replacement decisions is also applied.
+
+TIMELINE OF EVENTS:
+
+1. Planned Production: (first firm's decision) Differentiated among sectors: for consumption and intermediate goods it depends on expected sales; for capital goods it depends of effective orders. 
+2. Effective Production: it depends on the productive capacity and inputs availability, given de planned production. Firms in every sector use labor, capital and inputs in order to produce, based on a Leontief production function.
+3. Price Decision: (second firm's decision) Weighted average among desired price and average market price; desired price is determined by a desired mark up over variable cost.
+4. External Sector: Exports are determined by a fixed coefficient, over the rest of the world income and the corresponding income elasticity on the world market.
+5. Total sectoral orders:
+	i. Consumption Goods: depends on income classes and exports.
+	ii. Capital Goods: depends on firms' decisions to invest and exports.
+	iii. Intermediate Goods: third firm's decision: depends on firm's decision to order intermediate goods for next period production.
+6. Firm's orders: effective orders received by a firm depend on total sectorial demand, and on the firm's market share, determined by the replicator dynamic equation, under the effect of firm's competitiveness.
+7. Sales: actual sales are determined by the effective orders, which may or may not correspond to the expectations that previously defined the level of production. This interaction between sales and production over time creates a mechanism of dynamic induction over the subsequent production decisions, via changes on the expected behavior of future sales. Orders not met by firm's production and sales becomes delivery delay and negatively affect firm's competitiveness.
+8. Income creation
+	i. Functional distribution
+		Ttoal Wages: determined by government wages and private wages. Private wages depend on sector's effective production times unitary wage of each firm and R&D expenses.
+		Total Profits: determined by revenue, discounting indirect tax and R&D expenses, and unit variable cost; part is distributed to households and the rest is reinvested or allocated at the financial sector.
+	ii. Personal distribution: total wages and total distributed profits are converted into personal income by a matrix of income appropriation for each class (wage share and profit share of each class).
+9. Investment Decision: (fourth firm's decision) given the financial restriction, at the end of each investment period firms must decide the amount of investment. This decision is divided into three different components:
+	i. Investment on capacity expansion (induced liquid investment): depends on expected sales and the capacity utilization level;
+	ii. Investment on physical depreciation: added to the first one, they both comprise the induced gross investment;
+	iii. Investment given the technological obsolescence of capital equipment (autonomous investment): depends on the innovative success and the payback calculus;
+10. R&D: the innovation and diffusion (imitation) processes follow closely those 2 stage processes proposed by Nelson & Winter (1982, ch. 12). Technological search by any firm is accomplished through process and product R&D. 
+11. Entry and Exit: firms can exit because of small market share of high debt rate. The total number of firms is not constant, but entry only occurs in case of exit. The possibility of entry of a new firm is limited to an exit caused by financial problems.
+
+***************************************************************************************************************************************************************
+
+HOW TO READ THE CODE:
+
+--All objects use full capital letters
+--All variables begin with capital letters
+--All parameters begin with small letters (in this version most of them located at MACRO object).
+
+--All functions are variables with the word "_Function" in the end, located at MACRO object
+--Most MACRO variable names begin with "Total_"
+--Most SECTOR variable names begin with "Sector_"
+--Most FIRM variable names begin with "Firm_"
+--Most CLASS variable names begin with "Class_"
+--Most GOVERNMENT variable names begin with "Government_"
+
+--Variables are grouped in additional files. 
+--Most of the variables, except the trivial ones, have line-by-line description
+
+--Frequency Parameters: 
+There is a set of parameters that define the frequency of certain decisions or how many periods an agent takes in consideration into its decisions.
+All the code is generalized for changes in those parameters.
+"annual_period"
+"investment_period"
+"depreciation_period"
+"markup_period"
+"class_period"
+"government_period"
+
+*********************************************************************************************************************************************
+
+MODEL PARAMETERS:
+
+Macro:
+"annual_period":												determines how many time steps is an year 
+"antecipation": 												determines the payback calculus
+"aprop": 														determines how much firms want to apropriate gain in the desired markup
+"initial_avg_price": 											initial price, the same for all firms	
+"bargain_power_adjustment":										determines the rate of adjustment of bargain power
+"capital_output_ratio": 										determines the sector capital relation and the capital goods productive capacity
+"crisis_threshold": 											defines the limit to consider a crisis
+"depreciation_period":											number of period for the capital good to depreciate
+"desired_debt_rate": 											debt to capital ratio desired by the firms
+"desired_degree_capacity_utilization": 							firm's desired degree of capacity utilization"
+"desired_financial_rate": 										financial assets to capital ratio desired by the firms	
+"desired_inventories_proportion": 								desired inventories as proportion of sales
+"elasticicty_delay": 											delivery delay elasticity of competitiveness	
+"elasticicty_price": 											price elasticity of comeptitiveness
+"elasticicty_quality": 											quality elasticity of comeptitiveness
+"expand": 														determines how much firms want to expand market share in the desired markup
+"external_price_competitiveness": 								determines how much domestic price affects foreig price
+"external_price_growth": 										determines the growth of foreign price	
+"initial_external_price": 										determines the initial foreign price
+"initial_productivity":											initial capital goods productivity
+"expectations": 												expectation parameter
+"indirect_tax_rate": 											indirect tax share of the sector
+"innovation_proportion": 										share of revenue destinated to innovation
+"input_tech_coefficient": 										input teachnical relationship
+"investment_period": 											investment decistion period in terms of production periods (time steps)	
+"initial_markup": 												initial markup
+"markup_period": 												markup decision adjustment period in terms of production periods (time steps)
+"number_object_firms": 											initial number of firms of each sector. Will be use in the "Initialization" variable to create objects.
+"strategic_price_weight": 										kaleckian parameter in the price decision
+"basic_percent_spread": 										percent spread to be applied to specific firm's interest rate
+"exports_elasticicty_income": 									(external) income elasticicty of imports
+"exports_elasticicty_price": 									price (an exchange rate) elasticity of exports
+"profits_distribution_rate": 									determines the share of profits to be distributed to income classes
+"std_dev_innovation": 											determines the standad deviation of innovation distriution	
+"tech_opportunity": 											determines the technological opportunities of the sector and the success rate o innovation.	
+
+Sectors:
+"sector_passthrough_inflation": 								determines how much of inflation is adjusted to wage growth
+"sector_passthrough_productivity": 								determines how much of productivity is adjusted to wage growth	
+"sector_exports_coefficient": 									share of external income that will determine exports for the sector
+"sector_initial_demand": 										sector initial demand, calculated and written in the "Initial_Demand_Calculation" variable
+"id_capital_goods_sector": 										identifies capital goods sector	
+"id_consumption_goods_sector": 									identifies comsumption goods sector
+"id_intermediate_goods_sector": 								identifies intermediate goods sector
+
+Firms:
+"capital_goods_effective_orders_firm_temporary":				stores temporary values during simulaton runs
+"capital_goods_production_temporary":							stores temporary values during simulaton runs
+"consumption_effective_orders_firm_temporary":					stores temporary values during simulaton runs	
+"firm_date_birth":												firm's date of birth
+"id_firm_number":												firm's overall number, used in "Investment_Period_Firm"
+"intermediate_effective_orders_firm_temporary"					stores temporary values during simulaton runs
+"intermediate_production_firm_temporary":						stores temporary values during simulaton runs
+
+Capital:
+"capital_good_date_birth":										capital good's date of birth, used for depreciation	
+"capital_good_productive_capacity": 							capital good's productive capacity, inverse of the capital output ratio	
+"capital_good_productivity_initial":							capital goods's initial productivity, to be incremented by learning-by-doing	
+"capital_good_to_replace":										determines if the capital good should be replaced or not
+
+Income Classes:
+"class_period":													defines the frequency of certain class' decisions
+"class_direct_tax":												income tax rate of the class
+"class_interest_payment_share":									share of government interest paid to the class	
+"class_max_debt_ratio":											class' maximum debt to financial assets ratio	
+"class_profit_share":											class' share of distributed profits	
+"class_propensity_to_consume":									class' propensity to conume on average past income
+"class_propensity_to_import": 									class' propensity to import on average past income
+"class_wage_share":												class' share of wages	
+
+Government:
+"government_expectations":										government's expectation parameter
+"government_period":											government variables adjustment period in terms of production periods (time step)
+"government_surplus_rate_target":								surplus rate target, in terms of GDP
+"inflation_sensitivity":										taylor rule inflation sensitivity
+"inflation_target":												government inflation target
+"interest_rate":												initial basic interest rate
+"interest_rate_adjustment":										taylor rule adjustment parameter 	
+"unemployment_sensitivity":										taylor rule unemployment sensitivity
+"unemployment_target":											government unemployment target
+
+External Sector:
+"exchange_rate_growth":											exchange rate growth	
+"external_income_growth":										external income growth
+
+*********************************************************************************************************************************************
+
+Some Configurations:
+Sim1: baseline
+Sim2: no autonomous consumption
+Sim3: no autonomous consumption, higher technological opportunities (0.007)
+
+
+

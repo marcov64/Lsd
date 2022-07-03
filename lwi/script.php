@@ -1,7 +1,7 @@
 <?php
 
-/* 
- * Copyright (C) 2017 Marcelo C. Pereira <mcper at unicamp.br>
+/*
+ * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,16 +17,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-include '../filter_config.php';
+require '../filter_config.php';
 
-session_start( );
+session_start( [ 'cookie_lifetime' => 86400, 'cookie_secure' => true, 'cookie_samesite' => "None" ] );
 
-$lsd_config = "../lwi.lsd";
-$sa_config = "../lwi.sa";
-$input_config = "../lwi-in.csv";
-$output_config = "../lwi-out.csv";
-$limits_exec = "../lsd_getlimits";
-$saved_exec = "../lsd_getsaved";
+require '../defaults.php';
+
+$input_config = $config_pref . "lwi-in.csv";
+$output_config = $config_pref . "lwi-out.csv";
 $config_init = array ( );
 $config_out = array ( );
 $elem_in_names = array ( );
@@ -34,48 +32,49 @@ $elem_out_names = array ( );
 $session_short_id = substr( session_id( ), -6 );
 
 
-// adjust Windows executable names
-if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === "WIN" ) {
-    $limits_exec .= ".exe";
-    $saved_exec .= ".exe";
-}
-// adjust Mac executable names
-if ( strtolower( substr( PHP_OS, 0, 6 ) ) === "darwin" ) {
-    $limits_exec .= "OSX";
-    $saved_exec .= "OSX";
-}
-
 // check if configuration files are up to date and update if required
 function check_config( ) {
-    global $lsd_config, $sa_config, $input_config, $output_config, $limits_exec, $saved_exec;
-    
+    global $config_pref, $output_pref, $lsd_config, $sa_config, $input_config, $output_config, $limits_exec, $saved_exec;
+
+	if ( ! touch( $config_pref . "test.tmp" ) ) {
+        die( "Cannot write to '" . $config_pref . "*'" );
+	}
+
+	unlink( $config_pref . "test.tmp" );
+
+	if ( ! touch( $output_pref . "test.tmp" ) ) {
+        die( "Cannot write to '" . $output_pref . "*'" );
+	}
+
+	unlink( $output_pref . "test.tmp" );
+
     if ( ! file_exists( $lsd_config ) ) {
-        return;
+        die( "LSD configuration file missing" );
     }
-        
+
     if ( ! file_exists( $output_config ) || ( file_exists( $output_config ) && filemtime( $output_config ) < filemtime( $lsd_config ) ) ) {
         if ( file_exists( $saved_exec ) ) {
-            $filename_conf = "../tmp/lwi-out.csv";
-            exec( $saved_exec . " -f " . $lsd_config . " -o " . $filename_conf, $shell_out, $shell_err );
-            if ( file_exists( $filename_conf ) ) {
-                copy( $filename_conf, $output_config );
-                unlink( $filename_conf );
-            }
-        }
+            exec( $saved_exec . " -f " . $lsd_config . " -o " . $output_config, $shell_out, $shell_err );
+			if ( $shell_err !== 0 ) {
+				die( "'lsd_getsaved' failed: " . implode( " ", $shell_out ) . " (" . $shell_err . ")" );
+			}
+        } else {
+			die( "'lsd_getsaved' not found" );
+		}
     }
 
     if ( ! file_exists( $sa_config ) ) {
-        return;
+        die( "LSD sensitivity analysis file missing" );
     }
-        
+
     if ( ! file_exists( $input_config ) || ( file_exists( $input_config ) && filemtime( $input_config ) < max( filemtime( $lsd_config ), filemtime( $sa_config ) ) ) ) {
         if ( file_exists( $limits_exec ) ) {
-            $filename_conf = "../tmp/lwi-in.csv";
-            exec( $limits_exec . " -f " . $lsd_config . " -s " . $sa_config . " -o " . $filename_conf, $shell_out, $shell_err );
-            if ( file_exists( $filename_conf ) ) {
-                copy( $filename_conf, $input_config );
-                unlink( $filename_conf );
-            }
+            exec( $limits_exec . " -f " . $lsd_config . " -s " . $sa_config . " -o " . $input_config, $shell_out, $shell_err );
+			if ( $shell_err !== 0 ) {
+				die( "'lsd_getlimits' failed: " . implode( " ", $shell_out ) . " (" . $shell_err . ")" );
+			}
+        } else {
+			die( "'lsd_getlimits' not found" );
         }
     }
 }
@@ -84,19 +83,25 @@ function check_config( ) {
 // read .csv configuration file from server
 function read_config( $type_config ) {
     global $input_config, $config_init, $elem_in_names;
-    
+
     $col_names = array ( "Name", "Type", "Lag", "Format", "Value", "Minimum", "Maximum", "Description" );
     $col_idx = array_fill_keys( $col_names, -1 );
-    
+
     if ( ! file_exists( $input_config ) ) {
         die ( "Required input file not found" );
     }
-        
+
     $f = fopen( $input_config, "r" );
-    
+
     // find column indexes to all required names
     $header = fgetcsv( $f );
-    $cols = count( $header );
+
+    if ( is_countable( $header ) ) {
+        $cols = count( $header );
+    } else {
+        $cols = 0;
+    }
+
     $keys = count( $col_names );
     $idxs = 0;
     for ( $i = 0; $i < $cols; ++$i ) {
@@ -108,18 +113,31 @@ function read_config( $type_config ) {
             }
         }
     }
-    
+
     if ( $idxs < $keys ) {
         die ( "Invalid input file contents: idxs=$idxs keys=$keys" );
     }
-    
+
+    $ln = 1;
     while ( ! feof( $f ) ) {
-        
+
         $line = fgetcsv( $f );
+        ++$ln;
+
+        if ( is_countable( $line ) ) {
+            $cols = count( $line );
+        } else {
+            $cols = 0;
+        }
+
+        if ( $cols > 2 && $cols != $keys ) {
+            die ( "Invalid input file contents: line=$ln cols=$cols" );
+        }
+
         if ( $line[ $col_idx[ "Type" ] ] != $type_config ) {
             continue;
         }
-        
+
         $elem = new config_class( );
         foreach ( $col_names as $value ) {
             $elem->$value = $line[ $col_idx[ $value ] ];
@@ -127,7 +145,7 @@ function read_config( $type_config ) {
 
         $config_init[ $line[ $col_idx[ "Name" ] ] ] = $elem;
         array_push( $elem_in_names, $line[ $col_idx[ "Name" ] ] );
-        
+
         if ( $line[ $col_idx[ "Format" ] ] == "integer" ) {
             $step = 1;
         } else {
@@ -136,14 +154,13 @@ function read_config( $type_config ) {
             if ( $delta_up > $delta_dw ) {
                 $step = $delta_up / 100;
                 if ( $delta_dw > 0 ) {
-                //    $step = $delta_dw / round( $delta_dw / $step );
                     $step = ( float ) sprintf( "%.3f", $delta_dw / round( $delta_dw / $step ) );
                 }
             } else {
                 $step = $delta_dw / 100;
             }
         }
-        
+
         // create one parameter's table line
         echo "<tr>\n";
         echo "<td><b>" . $line[ $col_idx[ "Name" ] ] . "</b></td>\n";
@@ -154,8 +171,8 @@ function read_config( $type_config ) {
         echo "<td><button onclick='document.getElementById( '" . $line[ $col_idx[ "Name" ] ] . "' ).value = " . $line[ $col_idx[ "Value" ] ] . "; return false;' class='w3-button w3-blue w3-hover-black'>Reset</button></td>\n";
         echo "</tr>\n";
     }
-    
-    fclose( $f ); 
+
+    fclose( $f );
 
     $_SESSION[ "config_init" ] = $config_init;
 }
@@ -164,9 +181,9 @@ function read_config( $type_config ) {
 // add hidden configuration data for JS
 function write_config( ) {
     global $elem_in_names;
-    
+
     session_write_close( );
-    
+
     echo "<div id='elem_in_names' data-lwi-in='" . json_encode( $elem_in_names ) . "'></div>\n";
 }
 
@@ -178,19 +195,25 @@ class output_class {
 // read .csv saved variables file from server
 function read_saved( ) {
     global $output_config, $config_out, $elem_out_names;
-    
+
     $col_names = array ( "Name", "Type", "Object", "Description" );
     $col_idx = array_fill_keys( $col_names, -1 );
-          
+
     if ( ! file_exists( $output_config ) ) {
         die ( "Required output file not found" );
     }
-        
+
     $f = fopen( $output_config, "r" );
-    
+
     // find column indexes to all required names
     $header = fgetcsv( $f );
-    $cols = count( $header );
+
+    if ( is_countable( $header ) ) {
+        $cols = count( $header );
+    } else {
+        $cols = 0;
+    }
+
     $keys = count( $col_names );
     $idxs = 0;
     for ( $i = 0; $i < $cols; ++$i ) {
@@ -202,18 +225,31 @@ function read_saved( ) {
             }
         }
     }
-    
+
     if ( $idxs < $keys ) {
         die ( "Invalid output file contents: idxs=$idxs keys=$keys" );
     }
-    
+
+    $ln = 1;
     while ( ! feof( $f ) ) {
-        
+
         $line = fgetcsv( $f );
+        ++$ln;
+
+        if ( is_countable( $line ) ) {
+            $cols = count( $line );
+        } else {
+            $cols = 0;
+        }
+
+        if ( $cols > 2 && $cols != $keys ) {
+            die ( "Invalid input file contents: line=$ln cols=$cols" );
+        }
+
         if ( $line[ $col_idx[ "Name" ] ] == "" ) {
             continue;
         }
-        
+
         $elem = new output_class( );
         foreach ( $col_names as $value ) {
             $elem->$value = $line[ $col_idx[ $value ] ];
@@ -221,7 +257,7 @@ function read_saved( ) {
 
         $config_out[ $line[ $col_idx[ "Name" ] ] ] = $elem;
         array_push( $elem_out_names, $line[ $col_idx[ "Name" ] ] );
-        
+
         // create one output's table line
         echo "<tr>\n";
         echo "<td><b>" . $line[ $col_idx[ "Name" ] ] . "</b></td>\n";
@@ -229,9 +265,9 @@ function read_saved( ) {
         echo "<td><input name='_out-" . $line[ $col_idx[ "Name" ] ] . "' id='_out-" . $line[ $col_idx[ "Name" ] ] . "' class='w3-check' type='checkbox'></td>\n";
         echo "</tr>\n";
     }
-    
+
     fclose( $f );
-    
+
     echo "<div id='elem_out_names' data-lwi-out='" . json_encode( $elem_out_names ) . "'></div>\n";
 }
 
@@ -240,37 +276,34 @@ $filename_res = false;
 
 // check previously succesfull simulation execution results
 function check_results( $session_short_id ) {
-    global $filename_res;
+    global $filename_res, $output_pref;
 
     // get results file name
-    $filename_res = glob( "tmp/run-" . $session_short_id . "_*.csv" );
-    
+    $filename_res = glob( $output_pref . "run-" . $session_short_id . "_*.csv" );
+
     if ( $filename_res ) {
         $filename_res = $filename_res[ 0 ];
-        echo "Results ready for download";
+        echo "Ready for download";
     } else {
-        echo "Simulation not executed";
+        echo "Simulation not run";
     }
 }
-                                    
+
+
 // check date/time creation of a previously found simulation results
 function results_date_time( ) {
     global $filename_res;
 
-    if ( $filename_res && file_exists( $filename_res ) ) {
-        echo date( "d M Y,  H:i T", filectime( $filename_res ) );
+    if ( $filename_res && file_exists( $filename_res[ 0 ] ) ) {
+        echo date( "d M Y,  H:i T", filectime( $filename_res[ 0 ] ) );
     } else {
         echo "-";
     }
 }
 
-// check date/time creation of a previously found simulation results
+
+// check size of a previously found simulation results
 function results_size( ) {
     global $filename_res;
-
-    if ( $filename_res && file_exists( $filename_res ) ) {
-        echo number_format( filesize( $filename_res ) / 1024, 1 ) . " kB";
-    } else {
-        echo "-";
-    }
+    echo get_size( $filename_res );
 }

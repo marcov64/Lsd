@@ -1,7 +1,7 @@
-<?php include '../filter_config.php'; ?>
+<?php require '../filter_config.php'; ?>
 <!DOCTYPE html>
 <!--
-Copyright (C) 2017 Marcelo C. Pereira <mcper at unicamp.br>
+Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="icon" href="lsd_favicon.ico">
+        <link rel="icon" href="favicon.ico">
         <link rel="stylesheet" href="w3.css">
         <link rel="stylesheet" href="lwi.css">
         <!-- PHP & JS functions -->
@@ -47,7 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
                     // Verify file size - 10kB maximum
                     $maxsize = 10 * 1024;
-                    if ( $filesize > $maxsize ) { 
+                    if ( $filesize > $maxsize ) {
                         $err1 = "Error";
                         $err2 = "File size is larger than the allowed 10kB limit";
                         goto end_err;
@@ -88,7 +88,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
                     // sanitize read values
                     $config_clean = filter_config( $config );
- 
+
                 } else {
                     $err1 = "Error";
                     $err2 = "Problem loading configuration file (" . $_FILES[ "csv" ][ "error" ] . ")";
@@ -108,7 +108,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <div class='w3-main w3-display-middle' style='max-width: 600px; margin-left:10px; margin-right:10px'>
                     <div class='w3-container w3-card-2 w3-margin-bottom' style='margin-top:10px'>
                         <div class='w3-container w3-center'>
-                        <?php 
+                        <?php
                             echo "<h2>" . $err1 . "</h2></br>\n";
                             echo "<p>" . $err2 . "</p>\n";
                         ?>

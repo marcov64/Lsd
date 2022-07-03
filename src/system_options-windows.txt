@@ -1,0 +1,14 @@
+# Libraries options
+TCL_VERSION=86
+PATH_TCLTK_HEADER=$(LSDROOT)/gnu/include
+PATH_TCLTK_LIB=$(LSDROOT)/gnu/lib
+TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
+PATH_HEADER=$(LSDROOT)/gnu/include
+PATH_LIB=$(LSDROOT)/gnu/lib
+LIB=-lz
+
+# Compiler options
+WRC=windres
+CC=g++
+GLOBAL_CC=-march=native -w
+SSWITCH_CC=-mthreads -mwindows -O3

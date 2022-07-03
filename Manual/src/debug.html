@@ -1,0 +1,3296 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 15">
+<meta name=Originator content="Microsoft Word 15">
+<link rel=File-List href="debug_arquivos/filelist.xml">
+<link rel=Preview href="debug_arquivos/preview.wmf">
+<link rel=Edit-Time-Data href="debug_arquivos/editdata.mso">
+<!--[if !mso]>
+<style>
+v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style>
+<![endif]-->
+<title>Debugger</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
+  <o:Revision>23</o:Revision>
+  <o:TotalTime>564</o:TotalTime>
+  <o:Created>2018-03-16T19:40:00Z</o:Created>
+  <o:LastSaved>2022-05-27T13:12:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>4610</o:Words>
+  <o:Characters>24899</o:Characters>
+  <o:Lines>207</o:Lines>
+  <o:Paragraphs>58</o:Paragraphs>
+  <o:CharactersWithSpaces>29451</o:CharactersWithSpaces>
+  <o:Version>16.00</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]-->
+<link rel=dataStoreItem href="debug_arquivos/item0007.xml"
+target="debug_arquivos/props008.xml">
+<link rel=themeData href="debug_arquivos/themedata.thmx">
+<link rel=colorSchemeMapping href="debug_arquivos/colorschememapping.xml">
+<!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:Zoom>120</w:Zoom>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:TrackMoves>false</w:TrackMoves>
+  <w:TrackFormatting/>
+  <w:HyphenationZone>21</w:HyphenationZone>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:DoNotPromoteQF/>
+  <w:LidThemeOther>EN-US</w:LidThemeOther>
+  <w:LidThemeAsian>X-NONE</w:LidThemeAsian>
+  <w:LidThemeComplexScript>X-NONE</w:LidThemeComplexScript>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SplitPgBreakAndParaMark/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+  <m:mathPr>
+   <m:mathFont m:val="Cambria Math"/>
+   <m:brkBin m:val="before"/>
+   <m:brkBinSub m:val="&#45;-"/>
+   <m:smallFrac m:val="off"/>
+   <m:dispDef/>
+   <m:lMargin m:val="0"/>
+   <m:rMargin m:val="0"/>
+   <m:defJc m:val="centerGroup"/>
+   <m:wrapIndent m:val="1440"/>
+   <m:intLim m:val="subSup"/>
+   <m:naryLim m:val="undOvr"/>
+  </m:mathPr></w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" DefUnhideWhenUsed="false"
+  DefSemiHidden="false" DefQFormat="false" DefPriority="99"
+  LatentStyleCount="376">
+  <w:LsdException Locked="false" Priority="0" QFormat="true" Name="Normal"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 1"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 2"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 3"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="heading 4"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="heading 5"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="heading 6"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="heading 7"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="heading 8"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="heading 9"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 6"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 7"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 8"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 9"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 1"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 2"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 3"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 4"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 5"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 6"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 7"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 8"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" Name="toc 9"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Normal Indent"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="footnote text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="annotation text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="header"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="footer"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index heading"/>
+  <w:LsdException Locked="false" Priority="35" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="caption"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="table of figures"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="envelope address"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="envelope return"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="footnote reference"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="annotation reference"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="line number"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="page number"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="endnote reference"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="endnote text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="table of authorities"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="macro"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="toa heading"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Number"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Number 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Number 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Number 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Number 5"/>
+  <w:LsdException Locked="false" Priority="10" QFormat="true" Name="Title"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Closing"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Signature"/>
+  <w:LsdException Locked="false" Priority="1" SemiHidden="true"
+   UnhideWhenUsed="true" Name="Default Paragraph Font"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text Indent"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Message Header"/>
+  <w:LsdException Locked="false" Priority="11" QFormat="true" Name="Subtitle"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Salutation"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Date"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text First Indent"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text First Indent 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Note Heading"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text Indent 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text Indent 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Block Text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Hyperlink"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="FollowedHyperlink"/>
+  <w:LsdException Locked="false" Priority="22" QFormat="true" Name="Strong"/>
+  <w:LsdException Locked="false" Priority="20" QFormat="true" Name="Emphasis"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Document Map"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Plain Text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="E-mail Signature"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Top of Form"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Bottom of Form"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Normal (Web)"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Acronym"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Address"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Cite"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Code"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Definition"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Keyboard"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Preformatted"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Sample"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Typewriter"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Variable"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Normal Table"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="annotation subject"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="No List"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Outline List 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Outline List 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Outline List 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Simple 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Simple 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Simple 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Classic 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Classic 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Classic 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Classic 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Colorful 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Colorful 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Colorful 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 6"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 7"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 8"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 6"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 7"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 8"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table 3D effects 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table 3D effects 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table 3D effects 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Contemporary"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Elegant"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Professional"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Subtle 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Subtle 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Web 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Web 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Web 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Balloon Text"/>
+  <w:LsdException Locked="false" Priority="59" Name="Table Grid"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Theme"/>
+  <w:LsdException Locked="false" SemiHidden="true" Name="Placeholder Text"/>
+  <w:LsdException Locked="false" Priority="1" QFormat="true" Name="No Spacing"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 1"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" Name="Revision"/>
+  <w:LsdException Locked="false" Priority="34" QFormat="true"
+   Name="List Paragraph"/>
+  <w:LsdException Locked="false" Priority="29" QFormat="true" Name="Quote"/>
+  <w:LsdException Locked="false" Priority="30" QFormat="true"
+   Name="Intense Quote"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 1"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 1"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 1"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 2"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 2"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 2"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 2"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 3"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 3"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 3"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 3"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 4"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 4"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 4"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 4"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 5"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 5"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 5"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 5"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 6"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 6"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 6"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 6"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="19" QFormat="true"
+   Name="Subtle Emphasis"/>
+  <w:LsdException Locked="false" Priority="21" QFormat="true"
+   Name="Intense Emphasis"/>
+  <w:LsdException Locked="false" Priority="31" QFormat="true"
+   Name="Subtle Reference"/>
+  <w:LsdException Locked="false" Priority="32" QFormat="true"
+   Name="Intense Reference"/>
+  <w:LsdException Locked="false" Priority="33" QFormat="true" Name="Book Title"/>
+  <w:LsdException Locked="false" Priority="37" SemiHidden="true"
+   UnhideWhenUsed="true" Name="Bibliography"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="TOC Heading"/>
+  <w:LsdException Locked="false" Priority="41" Name="Plain Table 1"/>
+  <w:LsdException Locked="false" Priority="42" Name="Plain Table 2"/>
+  <w:LsdException Locked="false" Priority="43" Name="Plain Table 3"/>
+  <w:LsdException Locked="false" Priority="44" Name="Plain Table 4"/>
+  <w:LsdException Locked="false" Priority="45" Name="Plain Table 5"/>
+  <w:LsdException Locked="false" Priority="40" Name="Grid Table Light"/>
+  <w:LsdException Locked="false" Priority="46" Name="Grid Table 1 Light"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark"/>
+  <w:LsdException Locked="false" Priority="51" Name="Grid Table 6 Colorful"/>
+  <w:LsdException Locked="false" Priority="52" Name="Grid Table 7 Colorful"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 1"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 1"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 1"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 1"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 1"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 1"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 2"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 2"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 2"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 2"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 2"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 2"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 3"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 3"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 3"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 3"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 3"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 3"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 4"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 4"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 4"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 4"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 4"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 4"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 5"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 5"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 5"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 5"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 5"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 5"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 6"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 6"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 6"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 6"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 6"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 6"/>
+  <w:LsdException Locked="false" Priority="46" Name="List Table 1 Light"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark"/>
+  <w:LsdException Locked="false" Priority="51" Name="List Table 6 Colorful"/>
+  <w:LsdException Locked="false" Priority="52" Name="List Table 7 Colorful"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 1"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 1"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 1"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 1"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 1"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 1"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 2"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 2"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 2"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 2"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 2"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 2"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 3"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 3"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 3"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 3"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 3"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 3"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 4"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 4"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 4"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 4"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 4"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 4"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 5"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 5"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 5"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 5"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 5"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 5"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 6"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 6"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 6"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 6"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 6"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 6"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Mention"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Smart Hyperlink"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Hashtag"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Unresolved Mention"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Smart Link"/>
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:2;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:0 268435456 0 0 -2147483648 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:roman;
+	mso-font-pitch:variable;
+	mso-font-signature:3 0 0 0 1 0;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-520081665 -1073717157 41 0 66047 0;}
+@font-face
+	{font-family:"Segoe UI";
+	panose-1:2 11 5 2 4 2 4 2 2 3;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-469750017 -1073683329 9 0 511 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+h1
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 1 Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	mso-outline-level:1;
+	font-size:14.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	color:#254061;
+	font-weight:bold;}
+h2
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 2 Char";
+	margin-top:24.0pt;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	mso-outline-level:2;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	font-weight:bold;}
+h3
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 3 Char";
+	margin-top:36.0pt;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	mso-outline-level:3;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	font-weight:bold;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{mso-style-noshow:yes;
+	mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Title Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	text-align:center;
+	mso-pagination:widow-orphan;
+	font-size:18.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	color:#254061;
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+tt
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	font-family:"Courier New";
+	mso-ascii-font-family:"Courier New";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-hansi-font-family:"Courier New";
+	mso-bidi-font-family:"Courier New";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-link:"Balloon Text Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:8.0pt;
+	font-family:"Tahoma",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{mso-style-noshow:yes;
+	mso-style-priority:1;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{mso-style-noshow:yes;
+	mso-style-priority:34;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:36.0pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.Heading1Char
+	{mso-style-name:"Heading 1 Char";
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 1";
+	mso-ansi-font-size:16.0pt;
+	mso-bidi-font-size:16.0pt;
+	font-family:"Cambria",serif;
+	mso-ascii-font-family:Cambria;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Cambria;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	color:#365F91;
+	mso-themecolor:accent1;
+	mso-themeshade:191;}
+span.Heading2Char
+	{mso-style-name:"Heading 2 Char";
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 2";
+	mso-ansi-font-size:13.0pt;
+	mso-bidi-font-size:13.0pt;
+	font-family:"Cambria",serif;
+	mso-ascii-font-family:Cambria;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Cambria;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	color:#365F91;
+	mso-themecolor:accent1;
+	mso-themeshade:191;}
+span.Heading3Char
+	{mso-style-name:"Heading 3 Char";
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 3";
+	mso-ansi-font-size:12.0pt;
+	mso-bidi-font-size:12.0pt;
+	font-family:"Cambria",serif;
+	mso-ascii-font-family:Cambria;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Cambria;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	color:#243F60;
+	mso-themecolor:accent1;
+	mso-themeshade:127;}
+p.msonormal0, li.msonormal0, div.msonormal0
+	{mso-style-name:msonormal;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.TitleChar
+	{mso-style-name:"Title Char";
+	mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:Title;
+	mso-ansi-font-size:28.0pt;
+	mso-bidi-font-size:28.0pt;
+	font-family:"Cambria",serif;
+	mso-ascii-font-family:Cambria;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Cambria;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	letter-spacing:-.5pt;
+	mso-font-kerning:14.0pt;}
+span.BalloonTextChar
+	{mso-style-name:"Balloon Text Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Balloon Text";
+	mso-ansi-font-size:9.0pt;
+	mso-bidi-font-size:9.0pt;
+	font-family:"Segoe UI",sans-serif;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:36.0pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:36.0pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:36.0pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.Ttulo1Char
+	{mso-style-name:"T\00EDtulo 1 Char";
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"T\00EDtulo 1";
+	font-family:"Arial",sans-serif;
+	mso-ascii-font-family:Arial;
+	mso-hansi-font-family:Arial;
+	mso-bidi-font-family:Arial;
+	color:#254061;
+	font-weight:bold;}
+p.Ttulo1, li.Ttulo1, div.Ttulo1
+	{mso-style-name:"T\00EDtulo 1";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-link:"T\00EDtulo 1 Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.Ttulo2Char
+	{mso-style-name:"T\00EDtulo 2 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"T\00EDtulo 2";
+	font-family:"Arial",sans-serif;
+	mso-ascii-font-family:Arial;
+	mso-hansi-font-family:Arial;
+	mso-bidi-font-family:Arial;
+	font-weight:bold;}
+p.Ttulo2, li.Ttulo2, div.Ttulo2
+	{mso-style-name:"T\00EDtulo 2";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-link:"T\00EDtulo 2 Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.Ttulo3Char
+	{mso-style-name:"T\00EDtulo 3 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"T\00EDtulo 3";
+	font-family:"Arial",sans-serif;
+	mso-ascii-font-family:Arial;
+	mso-hansi-font-family:Arial;
+	mso-bidi-font-family:Arial;
+	font-weight:bold;}
+p.Ttulo3, li.Ttulo3, div.Ttulo3
+	{mso-style-name:"T\00EDtulo 3";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-link:"T\00EDtulo 3 Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.TtuloChar
+	{mso-style-name:"T\00EDtulo Char";
+	mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:T\00EDtulo;
+	font-family:"Arial",sans-serif;
+	mso-ascii-font-family:Arial;
+	mso-hansi-font-family:Arial;
+	mso-bidi-font-family:Arial;
+	color:#254061;
+	font-weight:bold;}
+p.Ttulo, li.Ttulo, div.Ttulo
+	{mso-style-name:T\00EDtulo;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-link:"T\00EDtulo Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.TextodebaloChar
+	{mso-style-name:"Texto de bal\00E3o Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Texto de bal\00E3o";
+	font-family:"Tahoma",sans-serif;
+	mso-ascii-font-family:Tahoma;
+	mso-hansi-font-family:Tahoma;
+	mso-bidi-font-family:Tahoma;}
+p.Textodebalo, li.Textodebalo, div.Textodebalo
+	{mso-style-name:"Texto de bal\00E3o";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-link:"Texto de bal\00E3o Char";
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.Cdigo
+	{mso-style-name:C\00F3digo;
+	mso-style-unhide:no;
+	font-family:"Courier New";
+	mso-ascii-font-family:"Courier New";
+	mso-hansi-font-family:"Courier New";
+	mso-bidi-font-family:"Courier New";
+	color:gray;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	mso-default-props:yes;
+	font-size:10.0pt;
+	mso-ansi-font-size:10.0pt;
+	mso-bidi-font-size:10.0pt;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:70.85pt 3.0cm 70.85pt 3.0cm;
+	mso-header-margin:35.4pt;
+	mso-footer-margin:35.4pt;
+	mso-paper-source:0;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:213933616;
+	mso-list-template-ids:1633993818;}
+@list l0:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l0:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l0:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:108.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l0:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:144.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l0:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:180.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l0:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:216.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l0:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:252.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l0:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:288.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l0:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:324.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l1
+	{mso-list-id:226771884;
+	mso-list-template-ids:1725957652;}
+@list l1:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l1:level2
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:108.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l1:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:144.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l1:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:180.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l1:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:216.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l1:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:252.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l1:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:288.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l1:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:324.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l2
+	{mso-list-id:232785957;
+	mso-list-type:hybrid;
+	mso-list-template-ids:626674770 68550657 68550659 68550661 68550657 68550659 68550661 68550657 68550659 68550661;}
+@list l2:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l2:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l2:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l2:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l2:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l2:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l2:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l2:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l2:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l3
+	{mso-list-id:254410823;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-265531700 -353479246 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l3:level1
+	{mso-level-start-at:5;
+	mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:38.85pt;
+	text-indent:-21.0pt;
+	font-family:Symbol;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Arial;}
+@list l3:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:71.85pt;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l3:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:107.85pt;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l3:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:143.85pt;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l3:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:179.85pt;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l3:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:215.85pt;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l3:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:251.85pt;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l3:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:287.85pt;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l3:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:323.85pt;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l4
+	{mso-list-id:615332519;
+	mso-list-template-ids:-1265060114;}
+@list l4:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l4:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l4:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:108.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l4:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:144.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l4:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:180.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l4:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:216.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l4:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:252.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l4:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:288.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l4:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:324.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l5
+	{mso-list-id:700935925;
+	mso-list-type:hybrid;
+	mso-list-template-ids:601780462 453442918 -742622528 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l5:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:35.85pt;
+	text-indent:-18.0pt;}
+@list l5:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:71.85pt;
+	text-indent:-18.0pt;}
+@list l5:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:107.85pt;
+	text-indent:-9.0pt;}
+@list l5:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:143.85pt;
+	text-indent:-18.0pt;}
+@list l5:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:179.85pt;
+	text-indent:-18.0pt;}
+@list l5:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:215.85pt;
+	text-indent:-9.0pt;}
+@list l5:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:251.85pt;
+	text-indent:-18.0pt;}
+@list l5:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:287.85pt;
+	text-indent:-18.0pt;}
+@list l5:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:323.85pt;
+	text-indent:-9.0pt;}
+@list l6
+	{mso-list-id:814570334;
+	mso-list-template-ids:-261355548;}
+@list l6:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l6:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l6:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:108.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l6:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:144.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l6:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:180.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l6:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:216.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l6:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:252.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l6:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:288.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l6:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:324.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l7
+	{mso-list-id:877468927;
+	mso-list-template-ids:1408667472;}
+@list l7:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l7:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l7:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:108.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l7:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:144.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l7:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:180.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l7:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:216.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l7:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:252.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l7:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:288.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l7:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:324.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l8
+	{mso-list-id:2130199531;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1528009488 67698703 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l8:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l8:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l8:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l8:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l8:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l8:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l8:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l8:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l8:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman",serif;}
+table.Tabelanormal
+	{mso-style-name:"Tabela normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman",serif;}
+</style>
+<![endif]-->
+<link rel=icon href="image/lsd.png">
+<meta name=Author content="LSD - Laboratory for Simulation Development">
+
+<iframe name=navbar src=navbar.html scrolling=no style='position:fixed;
+ border-bottom-style:none;border-left-style:none;border-right-style:none;
+ border-top-style:none;height:55px;left:0in;overflow:hidden;right:0in;
+ top:0in;width:100%'>
+</iframe>
+
+<!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="1027"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body lang=PT-BR link=blue vlink=purple style='tab-interval:36.0pt;word-wrap:
+break-word'>
+
+<div class=WordSection1>
+
+<p class=MsoTitle><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoTitle><span lang=EN-US style='mso-ansi-language:EN-US'>LSD Debugger<o:p></o:p></span></p>
+
+<div align=center>
+
+<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="93%"
+ style='width:93.94%;mso-cellspacing:0cm;mso-yfti-tbllook:1184;mso-padding-alt:
+ 0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width=532 style='width:399.05pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal><!--[if gte vml 1]><v:shapetype id="_x0000_t75"
+   coordsize="21600,21600" o:spt="75" o:preferrelative="t" path="m@4@5l@4@11@9@11@9@5xe"
+   filled="f" stroked="f">
+   <v:stroke joinstyle="miter"/>
+   <v:formulas>
+    <v:f eqn="if lineDrawn pixelLineWidth 0"/>
+    <v:f eqn="sum @0 1 0"/>
+    <v:f eqn="sum 0 0 @1"/>
+    <v:f eqn="prod @2 1 2"/>
+    <v:f eqn="prod @3 21600 pixelWidth"/>
+    <v:f eqn="prod @3 21600 pixelHeight"/>
+    <v:f eqn="sum @0 0 1"/>
+    <v:f eqn="prod @6 1 2"/>
+    <v:f eqn="prod @7 21600 pixelWidth"/>
+    <v:f eqn="sum @8 21600 0"/>
+    <v:f eqn="prod @7 21600 pixelHeight"/>
+    <v:f eqn="sum @10 21600 0"/>
+   </v:formulas>
+   <v:path o:extrusionok="f" gradientshapeok="t" o:connecttype="rect"/>
+   <o:lock v:ext="edit" aspectratio="t"/>
+  </v:shapetype><v:shape id="Imagem_x0020_2" o:spid="_x0000_s1026" type="#_x0000_t75"
+   style='position:absolute;margin-left:0;margin-top:0;width:443.05pt;height:271.85pt;
+   z-index:251658240;visibility:visible;mso-wrap-style:square;
+   mso-width-percent:0;mso-height-percent:0;mso-wrap-distance-left:11.25pt;
+   mso-wrap-distance-top:0;mso-wrap-distance-right:11.25pt;
+   mso-wrap-distance-bottom:0;mso-position-horizontal:left;
+   mso-position-horizontal-relative:text;mso-position-vertical:absolute;
+   mso-position-vertical-relative:line;mso-width-percent:0;
+   mso-height-percent:0;mso-width-relative:page;mso-height-relative:page'
+   o:allowoverlap="f">
+   <v:imagedata src="image/debugger.png"/>
+   <w:wrap type="square" anchory="line"/>
+  </v:shape><![endif]--><![if !vml]><img width=591 height=362
+  src="image/debugger.png" align=left hspace=15 v:shapes="Imagem_x0020_2"><![endif]><span
+  style='mso-fareast-font-family:"Times New Roman"'><o:p></o:p></span></p>
+  </td>
+  <td width=246 valign=top style='width:184.8pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l5 level1 lfo1'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>1.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_The_debugging_process">The debugging process</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l5 level1 lfo1'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#activate">Activating debug mode</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l5 level1 lfo1'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>3.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_The_Debugger_window">The main window</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:57.75pt;text-indent:-18.0pt;mso-list:l5 level2 lfo1'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>a.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_Model_browsing_buttons">Model browsing buttons</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:57.75pt;text-indent:-18.0pt;mso-list:l5 level2 lfo1'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>b.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_Object_content">Object content</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:57.75pt;text-indent:-18.0pt;mso-list:l5 level2 lfo1'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>c.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_Observe_and_edit">Observe and edit element values</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:57.75pt;text-indent:-18.0pt;mso-list:l5 level2 lfo1'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>d.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_Set_Conditional_Breaks">Set Conditional Breaks</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l5 level1 lfo1'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>4.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_Menu_Exit">Menu Exit</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l5 level1 lfo1'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>5.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_Menu_Find">Menu <span class=SpellE>Find</span></a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l5 level1 lfo1'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="menuhelp.html">Menu Help</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l5 level1 lfo1'><![if !supportLists]><span
+  style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>7.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><a
+  href="#_The_LSD_Simulation">LSD simulation run details</a></p>
+  </td>
+ </tr>
+</table>
+
+</div>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The LSD
+Debugger can help finding errors in the <a href="LSD_faqs.html#equation">Equations</a>
+code and for understanding the actual sequence of computations executed in a <a
+href="LSD_faqs.html#simulationrun">simulation run</a>, as well the associated
+numerical values at each time step.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The information
+below is also applicable for the <a href="menudata_brow.html">Data Browser</a>
+window, when applicable.<o:p></o:p></span></p>
+
+<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt;color:black;mso-color-alt:windowtext'><a href="#top"><span
+  style='color:red;text-decoration:none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_The_debugging_process"></a><span lang=EN-US style='mso-ansi-language:
+EN-US'>The debugging <span class=GramE>process</span><o:p></o:p></span></h1>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The first step
+to start the debugging procedure is to set one or more <a
+href="LSD_faqs.html#variable">Variables</a> for debugging before a <a
+href="LSD_faqs.html#simulationrun">simulation run</a> (see <a
+href="browser.html#changeelement">here</a> how). Next, still before running the
+simulation, use the option </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>Run&gt;Settings</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> to define the time step the debugging will
+start (see <a href="menurun.html#simsetting">here</a>), or, alternatively,
+during the simulation run, press the button </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>Debug</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> in the <a href="LSD_windows.html#log">LSD Log
+window</a> to define when to start tracking the selected Variables. Last, <a
+href="menurun.html#run">start</a> the simulation run using menu </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Run&gt;Run</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>After finishing
+the computation of any of the marked Variables, the simulation is interrupted,
+the <a href="#operate">Debugger window</a> is opened, and the contents of the <a
+href="LSD_faqs.html#object">Object</a> <a href="LSD_faqs.html#object">instance</a>
+containing the computed Variable is presented. At this point, the user can
+browse through the model's Objects using the <a href="#browse">browsing buttons</a>.
+Analyzing the values of the Variables and <a href="LSD_faqs.html#parameter">Parameters</a>
+it is possible to check if the value returned by the <a
+href="LSD_faqs.html#equation">Equation</a> is the expected one. The user can
+also refer to the values of the temporary variables </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'><a href="#v"><span style='color:
+gray;text-decoration:none;text-underline:none'>v[…]</span></a></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> just computed by the current
+Equation’s code. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The modeler
+can still control the Variables that started to be computed but could not be
+completed yet (<span class=GramE>at the moment</span> the current Variable was
+computed). The current list of Variables under computation is available in the
+LSD stack. The user can modify the values of the Variables and Parameters by
+double clicking on their names in the <a href="#content">Debugger window</a>.
+Finally, the user can continue the simulation (or abort it) with different
+options using the <a href="#simulation">simulation control</a> buttons. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Two
+suggestions for serious problems where the LSD Debugger cannot help: (1) focus
+on the identification of the Variable(s) that caused the problem (see <a
+href="#_LSD_simulation_run">here</a> on how to find the Variable causing a
+complicate crash), and (2) learn how to use the GDB/LLDB debuggers (see <a
+href="LMM.html#debug">here</a> for details), two more advanced debugging tools
+(LLDB is for macOS only).<o:p></o:p></span></p>
+
+<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt;color:black;mso-color-alt:windowtext'><a href="#top"><span
+  style='color:red;text-decoration:none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=activate></a><a name="_Activating_the_Debugger"></a><span
+lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
+EN-US'>Activating debug mode<o:p></o:p></span></h1>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The
+Debugger starts when two conditions are simultaneously met: <o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt;mso-list:l3 level1 lfo2'><![if !supportLists]><span
+lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>The
+simulation starts debug mode (because of the simulation settings or the user
+pressed the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>Debug</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+button)<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt;mso-list:l3 level1 lfo2'><![if !supportLists]><span
+lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>A
+<a href="LSD_faqs.html#variable">Variable</a> <a
+href="browser.html#changeelement">marked for debugging</a> finish computing<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>To enter
+debug mode users can set a positive value in the appropriate entry in the <a
+href="menurun.html#simsetting">simulation settings</a> (menu </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Run&gt;Simulation
+Settings</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>) before
+launching a <a href="LSD_faqs.html#simulationrun">simulation run</a>. New
+values for the time step when activating the debug mode can also be set using
+the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
+href="#until"><span style='color:gray;text-decoration:none;text-underline:none'>Until</span></a></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> button. During a simulation run,
+debug mode can be also activated clicking on the </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>Debug</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> button in <a href="log.html">Log window</a>.
+When the user clicks on button </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'><a href="#run"><span style='color:gray;
+text-decoration:none;text-underline:none'>Run</span></a></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>, to continue an interrupted
+simulation, or <a href="#_Menu_Exit">exits</a> the Debugger, to abort the
+simulation, LSD leaves debug mode. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>A Variable
+is marked for debugging before a simulation run by using the main <a
+href="browser.html">LSD Browser</a> to <a href="browser.html#changeelement">change
+its properties</a>. In this case, the debug setting is set for all the <a
+href="LSD_faqs.html#object">instances</a> of the Variable. The setting is also
+saved to the <a href="LSD_faqs.html#modelsetting">configuration file</a>. Users
+can also set a Variable to be debugged from within the Debugger (see <a
+href="#_Observe_and_edit">here</a> how). In this situation, the user has the
+option to selected only a specific instance of the Variable to interrupt the
+simulation (other instances of the same Variable will not trigger the
+Debugger). Finally, the Debugger is also activated when a <a href="#cond">conditional
+break</a> is met, as explained below. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>In any
+case, irrespective to the above conditions, the Debugger can also be automatically
+activated by LSD when a <a href="#crash">serious error</a> forces it to abort
+the simulation. <o:p></o:p></span></p>
+
+<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt;color:black;mso-color-alt:windowtext'><a href="#top"><span
+  style='color:red;text-decoration:none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=operate></a><a name="_The_Debugger_window"></a><a
+name="_The_Debugger/Data_Browser"></a><span lang=EN-US style='mso-fareast-font-family:
+"Times New Roman";mso-ansi-language:EN-US'>The Debugger/Data Browser window<o:p></o:p></span></h1>
+
+<p class=MsoNormal style='margin:0cm'><span lang=EN-US style='mso-ansi-language:
+EN-US'>The <a href="#top">Debugger</a> and the <a href="menudata_brow.html">Data
+Browser</a> windows show the content of a single <a href="LSD_faqs.html#object">instance</a>
+of an <a href="LSD_faqs.html#object">Object</a>, that is, the Object whose <a
+href="LSD_faqs.html#variable">Variable</a> has been just computed or selected.
+The window is composed by: <o:p></o:p></span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='mso-list:l4 level1 lfo3;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
+     EN-US'>A <a href="#title">title</a> row (not available in the Data
+     Browser):<o:p></o:p></span></li>
+</ul>
+
+<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US
+style='mso-ansi-language:EN-US;mso-no-proof:yes'><img border=0 width=401
+height=26 id="_x0000_i1031" src="image/tit_debug.png"></span><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='mso-list:l1 level1 lfo4;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
+     EN-US'>The <a href="#name">type and instance number</a> of the shown
+     Object:<o:p></o:p></span></li>
+</ul>
+
+<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US
+style='mso-ansi-language:EN-US;mso-no-proof:yes'><img border=0 width=371
+height=23 id="_x0000_i1030" src="image/inst_debugger.png"></span><span
+lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='mso-list:l6 level1 lfo5;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
+     EN-US'>The <a href="#browse">model browsing buttons</a>:<o:p></o:p></span></li>
+</ul>
+
+<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US
+style='mso-ansi-language:EN-US;mso-no-proof:yes'><img border=0 width=666
+height=34 id="_x0000_i1029" src="image/browse_debugger.png"></span><span
+lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='mso-list:l7 level1 lfo6;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
+     EN-US'>The <a href="#control">simulation control buttons</a> (not
+     available in the Data Browser):<o:p></o:p></span></li>
+</ul>
+
+<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US
+style='mso-ansi-language:EN-US;mso-no-proof:yes'><img border=0 width=627
+height=36 id="_x0000_i1028" src="image/contr_debugger.png"></span><span
+lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><span
+     lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
+     EN-US'>The <a href="#content">content</a> of the shown Object: <o:p></o:p></span></li>
+</ul>
+
+<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN-US
+style='mso-ansi-language:EN-US;mso-no-proof:yes'><img border=0 width=325
+height=81 id="_x0000_i1027" src="image/linedebugger.png"></span><span
+lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<h2><a name=title></a><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
+mso-ansi-language:EN-US'>Title row<o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The row shows
+the name of the <a href="LSD_faqs.html#variable">Variable</a> which interrupted
+the <a href="LSD_faqs.html#simulationrun">simulation run</a>, the current time step,
+and the just computed Variable value. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This value
+can be modified by the user before the simulation continues by clicking in any
+part of the title row. Any change on the value(s) are immediately incorporated
+into the simulation.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The presented
+value is rounded for easier reading. To view all the stored digits, without
+rounded, click on any part of the title row, taking care of not changing the
+value(s) if not required.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This line
+is not present in the <a href="menudata_brow.html">Data Browser</a> window.<o:p></o:p></span></p>
+
+<h2><a name=simulation></a><a name="_Simulation_control_buttons"></a><a
+name=name></a><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
+mso-ansi-language:EN-US'>Object name, instance number and list of ancestors <o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The row
+presents the name of the <a href="LSD_faqs.html#object">Object</a> <a
+href="LSD_faqs.html#object">instance</a> containing the <a
+href="LSD_faqs.html#variable">Variable</a>, the names and indexes of this
+Object’s ancestors in the <a href="LSD_faqs.html#modelstructure">model
+structure</a>. The indexes list pairs report the instance number (position in
+the group) and the total number of instances of the container Object in the
+current branch of the model. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Clicking on
+any part of the list of Object names allows the user to modify the number
+instances of the current Object type. It is possible to change this number both
+before running a simulation (in Data Browser) and during a simulation (in
+Debugger). See <a href="menudata_objn.html#modifyNumberObj">here</a> for
+details on how to modify the number of Object instances in the model. <o:p></o:p></span></p>
+
+<p class=MsoNormal><a name="_Model_browsing_buttons"></a><span lang=EN-US
+style='mso-ansi-language:EN-US'>The <a href="#top">Debugger</a> and the <a
+href="menudata_brow.html">Data Browser</a> windows work similarly to the LSD
+main <a href="browser.html">Browser</a> in showing the Object content, but
+consider one single instance of an Object instead of an <a
+href="LSD_faqs.html#object">Object type</a> as in the Browser. <o:p></o:p></span></p>
+
+<h2><a name=browse></a><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
+mso-ansi-language:EN-US'>Model browsing buttons <o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The <a
+href="#top">Debugger</a> and the <a href="menudata_brow.html">Data Browser</a>
+windows start by showing the content of the <a href="LSD_faqs.html#object">Object</a>
+whose <a href="LSD_faqs.html#variable">Variable</a> caused the <a
+href="LSD_faqs.html#simulationrun">simulation run</a> to stop (Debugger) or was
+selected by the user (Data Browser). Users can then move from the current
+Object to show any other Object. A set of buttons is used to browse through the
+<a href="LSD_faqs.html#modelstructure">model structure</a>. The user can
+explore each individual instance of each Object. <o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Up</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>U</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): move to the parent of the current Object. No
+action if the Root (the upmost Object) is the current one. <o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Down</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>D</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): move to the first instance of the first
+Object descending from the current one. No action if the Object does not have
+descendants. <o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Previous</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>P</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): move to the (brother) Object instance
+preceding the current one, if any, or to the Object type preceding the current
+Object, if exists. Note that the “previous” instance must be of the same Object
+type or under the same parent. No action if there is no preceding Object.<o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Next</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>N</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): move to the (brother) Object instance
+following the current one, if any, or to the Object type following the current
+Object, if exists. Note that the “next” instance must be of the same Object
+type or under the same parent. No action if there is no following Object. <o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Next Type</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>T</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): move to the first instance of the (brother)
+Object type following the current Object type, under the same parent. No action
+if there is no following Object type. <o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Last</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>L</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): move to the last instance of the current
+Object type. <o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><a
+name=find></a><![if !supportLists]><span lang=EN-US style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
+mso-bidi-font-family:Symbol;mso-ansi-language:EN-US'><span style='mso-list:
+Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Find</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>F</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): find a Variable or Parameter given its name
+in the current (shown) Object. See details <a href="#_Find_Element">below</a>.
+If the searched element is not in the current Object or a specific numerical
+value for a multi-instanced element is required, please check the menu option </span><span
+class=Cdigo><a href="#_Find_Object_Containing"><span lang=EN-US
+style='mso-ansi-language:EN-US'>Find&gt;Find Object Containing…</span></a></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span
+class=SpellE><span class=Cdigo>Ctrl</span></span><span class=Cdigo>+</span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>F</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>). <o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><a
+name=hooks></a><![if !supportLists]><span lang=EN-US style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
+mso-bidi-font-family:Symbol;mso-ansi-language:EN-US'><span style='mso-list:
+Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Hooks</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>H</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): show a list of available <a
+href="LSD_macros.html#hook">hook pointers</a> of the current Object and move
+the Debugger window to the Object pointed by the one selected by the user. If
+the Object has no dynamic pointer allocated and the static pointer is set and
+valid, the Debugger window move to it immediately. Only hook pointers pointing
+to a valid Object are presented for selection. This button is disabled if no
+hook pointer is set to the current Object.<o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Network</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>W</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): presents the <a href="LSD_faqs.html#network">LSD
+network</a> links connecting the current Object to its neighbors in the
+network, if any. This button is disabled if the Object is not configured as a
+network node. Clicking this button while the network links window is open
+closes it.<o:p></o:p></span></p>
+
+<h2><a name="_Object_content"></a><a name=control></a><span lang=EN-US
+style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN-US'>Simulation
+control buttons <o:p></o:p></span></h2>
+
+<p class=MsoNormal style='margin:0cm'><span lang=EN-US style='mso-ansi-language:
+EN-US'>These buttons control the flow of the <a
+href="LSD_faqs.html#simulationrun">simulation run</a> during the debugging
+session. They are not present in the <a href="menudata_brow.html">Data Browser</a>
+window.<o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><a
+name=run></a><![if !supportLists]><span lang=EN-US style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
+mso-bidi-font-family:Symbol;mso-ansi-language:EN-US'><span style='mso-list:
+Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Run</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcuts</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>R</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>F5</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): continues the simulation closing the <a
+href="#operate">Debugger</a> window and leaving <a href="#activate">debug mode</a>.
+Therefore, the simulation is no longer interrupted until a <a href="#cond">conditional
+break</a> is met, or buttons </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>Debug</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>Pause</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> or </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>Stop</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> are pressed in the <a href="log.html">Log</a>
+window.<o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><a
+name=until></a><![if !supportLists]><span lang=EN-US style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
+mso-bidi-font-family:Symbol;mso-ansi-language:EN-US'><span style='mso-list:
+Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Until</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcuts</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>I</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>F7</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): ask for a time step and normally continue
+the simulation until there, when debug mode is reactivated, causing for the
+simulation to be interrupted at the first <a href="LSD_faqs.html#variable">Variable</a>
+to be debugged. <o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><a
+name=step></a><![if !supportLists]><span lang=EN-US style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
+mso-bidi-font-family:Symbol;mso-ansi-language:EN-US'><span style='mso-list:
+Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Step</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcuts</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>S</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>F8</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): continues the simulation, remaining in debug
+mode, until another Variable to be debugged is updated, either in the same or
+in a subsequent time step. <o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Caller</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcuts</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>C</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>F6</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): move the Debugger window to the <a
+href="LSD_faqs.html#object">Object</a> containing the Variable which requested
+the computation of the current Variable. If the Variable computation was not
+triggered by any Equation (LSD demanded its update), this button does nothing.<o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><a
+name=v></a><![if !supportLists]><span lang=EN-US style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
+mso-bidi-font-family:Symbol;mso-ansi-language:EN-US'><span style='mso-list:
+Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>v[…]</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>V</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): show the set of intermediate values used in
+the Variable’s <a href="LSD_faqs.html#equation">Equation</a>. These temporary
+values may be used to re-construct the internal computation of the Variable
+just executed. Please note that only the temporary variables effectively used
+in the Equation have meaningful values, all others show useless data. These
+values may not be reliable in case the Debugger was activated because of a
+conditional break. Clicking this button while the intermediate values window is
+open closes it.<o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><a
+name=printstack></a><![if !supportLists]><span lang=EN-US style='font-size:
+10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;mso-fareast-font-family:
+Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:EN-US'><span
+style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Analysis</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>A</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): open the <a href="menudata_res.html">Analysis
+of Result </a>module, permitting users to analyze every saved time series up to
+the previous time step. <o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Stack</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> (<i>shortcut</i>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>K</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): shows in the Log window the state of the LSD
+simulation stack, presenting which Variables are currently under computation. That
+is, the set of Variables whose computation started but is still not completed
+because other Variables needed to be computed first. See the <a href="#simman">example</a>
+on how to use this data.<o:p></o:p></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><a
+name=stackinfo></a><![if !supportLists]><span lang=EN-US style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
+mso-bidi-font-family:Symbol;mso-ansi-language:EN-US'><span style='mso-list:
+Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b><span lang=EN-US
+style='mso-ansi-language:EN-US'>Stack level</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>: define the maximum LSD simulation stack level
+in the computation log to be presented in the Log window during the debugging
+session. The default (</span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>0</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>) disables showing the stack. Please note that
+this option significantly reduces the simulation speed, as it prints one line
+for each Variable being updated up to that level, <span class=GramE>in
+particular when</span> deep stack levels are configured. More information is
+available <a href="#simman">below</a>.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>If the
+Debugger window is open while the simulation is paused (by pressing the button </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Pause</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> in the <a href="log.html">Log</a>
+window), some of the buttons above will not be shown.<o:p></o:p></span></p>
+
+<h2><a name=analysis></a><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
+mso-ansi-language:EN-US'>Object content <o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>In the <a
+href="#top">Debugger</a> and the <a href="menudata_brow.html">Data Browser</a>
+windows, a two-column list shows the <a href="LSD_faqs.html#variable">Variables</a>
+and <a href="LSD_faqs.html#parameter">Parameters</a> contained in the <a
+href="LSD_faqs.html#object">Object</a> shown. In each column, a line shows: <o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Name
+of the Variable or Parameter.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Current
+value (for Variables, it is the lastly computed value).<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Last
+update (not used for parameters): the simulation time step during which the
+Variable has most recently computed its <a href="LSD_faqs.html#equation">Equation</a>.
+Comparing the value of last update for a Variable with the current time it is
+possible to know whether the Variable will still be computed during the current
+step or if it has already been updated.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Clicking
+with the right button on the element name activates the </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
+href="menudata_init.html#setall">Set All<span style='font-family:"Arial",sans-serif'>
+command</span></a></span></span><span lang=EN-US style='mso-ansi-language:EN-US'>.
+The </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Set
+All</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> command
+recognizes the <a href="LSD_faqs.html#object">instance</a> of the Object
+currently selected, and allows the change of a single branch in the <a
+href="LSD_faqs.html#modelstructure">model structure</a>. This can be used
+before running a simulation or at any one time during a <a
+href="LSD_faqs.html#simulationrun">simulation run</a>. The last update time of
+the Variables will not be affected by this change. See the </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
+href="menudata_init.html#setall">Set All<span style='font-family:"Arial",sans-serif'>
+command</span></a></span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+for further details. <o:p></o:p></span></p>
+
+<h2><a name="_Observe_and_edit"></a><a name=content></a><span lang=EN-US
+style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN-US'>Observe
+and edit element values<o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Double-clicking
+on the element name allows the observation and editing of the value(s) of the
+element.<o:p></o:p></span></p>
+
+<p class=MsoNormal align=center style='text-align:center'><span lang=EN-US
+style='mso-ansi-language:EN-US;mso-no-proof:yes'><img border=0 width=196
+height=229 id="_x0000_i1026" src="image/variab_debug.png"></span><span
+lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The Status
+window (above) shows one entry for each lagged value in case of <a
+href="LSD_faqs.html#variable">lagged Variables</a> or one single entry for
+non-lagged <a href="LSD_faqs.html#variable">Variables</a> and <a
+href="LSD_faqs.html#parameter">Parameters</a>. The entries show the current
+values and the user can modify them. Clicking on the </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'><a href="menudata_init.html#setall">Set
+All</a></span></span><span lang=EN-US style='mso-ansi-language:EN-US'> buttons
+allows the change of all, or some, of the values for the same element contained
+in other <a href="LSD_faqs.html#object">Object instances</a> in the model (see <a
+href="menudata_init.html#setall">here</a> for details). Beware that the changes
+ignore the actual time of last computation for each element. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The other
+elements of the window are: <o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Debug</span></b></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> / </span><span class=Cdigo><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>Debug all instances</span></b></span><span lang=EN-US style='mso-ansi-language:
+EN-US'>: marking one of the checkboxes sets the Variable to be debugged. That
+is, next time the Variable is computed the simulation will be interrupted. The
+user may request the Debugger to stop just for this specific instance or for
+any instance of the Variable.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Equation</span></b></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>: shows the code for the Variable’s <a
+href="LSD_faqs.html#equation">Equation</a> in a new window.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Set Break</span></b></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>:<b> </b>define conditional breaks for
+the <a href="LSD_faqs.html#simulationrun">simulation run</a>, according to
+particular values of the Variable (see <a href="#cond">below</a>).<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Update</span></b></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>: forces the variable to be updated.
+It produces no result if the variable has been already updated in the current
+time step.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=Cdigo><b style='mso-bidi-font-weight:
+normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Done</span></b></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>: returns to the main Debugger
+window.<o:p></o:p></span></p>
+
+<h2><a name=cond></a><a name="_Set_Conditional_Breaks"></a><span
+class=Ttulo3Char><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
+mso-ansi-language:EN-US'>Set conditional breaks </span></span><span lang=EN-US
+style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN-US'><o:p></o:p></span></h2>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Using
+conditional breaks <a href="LSD_faqs.html#variable">Variables</a> can be marked
+for interrupting the <a href="LSD_faqs.html#simulationrun">simulation run</a>
+only if they have a specific value attributed to them. A conditional break can
+be set only during a debugging session, when the simulation was interrupted at
+least once by the computation of a Variable with the (unconditional) <a
+href="browser.html#changeelement">debug attribute</a> set. After that, however,
+it is possible to add conditional debug breaks even for Variables not marked
+for debugging. The user can set conditional breaks in case the Variable’s
+result from its <a href="LSD_faqs.html#equation">Equation</a> is equal to,
+lesser than or greater than a given value. Conditional breaks last only during
+the current debugging session. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>To set a
+conditional break, in the <a href="#_The_Debugger/Data_Browser">Debugger</a>
+window double click on the name of the desired Variable and press the </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Set Break</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> button in the <a
+href="#_Observe_and_edit">Element Status</a> dialog box.<o:p></o:p></span></p>
+
+<p class=MsoNormal align=center style='text-align:center'><span lang=EN-US
+style='mso-ansi-language:EN-US;mso-no-proof:yes'><img border=0 width=195
+height=216 id="_x0000_i1025" src="image/cond_break.png"></span><span
+lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>On the
+Conditional Break dialog (above), the user first choses which condition should
+interrupt the simulation run and, if required, sets a numerical value
+associated to the selected condition. Four conditions are available: (1) None,
+to set a dynamic <i style='mso-bidi-font-style:normal'>unconditional</i> break,
+(2) “=”, to interrupt if the Variable computation result is exactly equal to
+the chosen value, (3) “&gt;”, to interrupt if result is larger than the value,
+or (4) “&lt;”, to break if result is less than the set value. Only one
+conditional break can be defined for each Variable. Several Variables can have
+assigned conditional breaks at once. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>When a
+conditional break condition is satisfied for any Variable, the simulation is
+interrupted and the Object containing that Variable is shown in the Debugger
+window. <o:p></o:p></span></p>
+
+<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt;color:black;mso-color-alt:windowtext'><a href="#top"><span
+  style='color:red;text-decoration:none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_Menu_Find"></a><span lang=EN-US style='mso-ansi-language:EN-US'>Menu
+Find<o:p></o:p></span></h1>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Search
+operations to find <a href="LSD_faqs.html#variable">Variable</a>, <a
+href="LSD_faqs.html#parameter">Parameter</a> and <a
+href="LSD_faqs.html#function">Function</a> elements and highlight them on the <a
+href="LSD_faqs.html#object">Object</a> content part of the LSD Debugger window.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt;mso-list:l2 level1 lfo8'><![if !supportLists]><span
+lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'><a
+href="#_Find_Element">Find Element</a><o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt;mso-list:l2 level1 lfo8'><![if !supportLists]><span
+lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'><a
+href="#_Find_Object_Containing">Find Object Containing</a><o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt;mso-list:l2 level1 lfo8'><![if !supportLists]><span
+lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'><a
+href="#_Clear_Highlighted">Clear Highlighted</a><o:p></o:p></span></p>
+
+<h2><a name="_Find_Element"></a><span lang=EN-US style='mso-ansi-language:EN-US'>Find
+Element<o:p></o:p></span></h2>
+
+<p class=MsoNormal><i><span lang=EN-US style='mso-ansi-language:EN-US'>Shortcuts</span></i><span
+lang=EN-US style='mso-ansi-language:EN-US'>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>F</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> or press button </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>Find</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Search for
+a <a href="LSD_faqs.html#variable">Variable</a>, <a
+href="LSD_faqs.html#parameter">Parameter</a> or <a href="LSD_faqs.html#function">Function</a>
+in the current (shown) <a href="LSD_faqs.html#object">Object</a>. After a
+successful search, the Debugger highlights this element and adjusts the window
+scroll position to make it visible, if necessary.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Note that
+the Find Element window is endowed with auto-completion: while you type, the
+entry box proposes the first element with the typed initial letters, if any.<o:p></o:p></span></p>
+
+<h2><a name="_Find_Object_Containing"></a><span lang=EN-US style='mso-ansi-language:
+EN-US'>Find Object Containing<o:p></o:p></span></h2>
+
+<p class=MsoNormal><i><span lang=EN-US style='mso-ansi-language:EN-US'>Shortcut</span></i><span
+lang=EN-US style='mso-ansi-language:EN-US'>: </span><span class=SpellE><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Ctrl+F</span></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Search for
+a <a href="LSD_faqs.html#variable">Variable</a>, <a
+href="LSD_faqs.html#parameter">Parameter</a> or <a href="LSD_faqs.html#function">Function</a>
+in any existing <a href="LSD_faqs.html#object">Object</a> in the model. If a
+numerical reference value is required, the user may select a narrower search
+condition based on it. After a successful search, the Debugger moves to show
+the Object containing the searched element and value condition, if any,
+highlights this element and adjusts the window scroll position to make it
+visible, if necessary. If more than one Object instance contains the requested
+Variable satisfying the given condition, the system shows the one closest to
+the current Object and instance.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Note that
+the Find Object Containing window is endowed with auto-completion: while you
+type, the entry box proposes the first element with the typed initial letters,
+if any.<o:p></o:p></span></p>
+
+<h2><a name="_Clear_Highlighted"></a><span lang=EN-US style='mso-ansi-language:
+EN-US'>Clear Highlighted<o:p></o:p></span></h2>
+
+<p class=MsoNormal><i><span lang=EN-US style='mso-ansi-language:EN-US'>Shortcut</span></i><span
+lang=EN-US style='mso-ansi-language:EN-US'>: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>Delete</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Removes the
+highlighting from the last found element, if any.<o:p></o:p></span></p>
+
+<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt;color:black;mso-color-alt:windowtext'><a href="#top"><span
+  style='color:red;text-decoration:none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_Menu_Exit"></a><a name=quit></a><span lang=EN-US
+style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN-US'>Menu
+Exit<o:p></o:p></span></h1>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This menu
+has the single entry </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>Quit and Resume Simulation</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>. As a shortcut, the user may click
+on the X in the LSD Debugger title bar or press the key </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Esc</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>If a
+simulation is running, executing </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>Quit and Resume Simulation</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> does not abort the simulation. If
+aborting the simulation is required, simply press </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>Stop</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> in the <a href="LSD_windows.html#log">LSD Log
+window</a> <i>after</i> resuming the simulation.<o:p></o:p></span></p>
+
+<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt;color:black;mso-color-alt:windowtext'><a href="#top"><span
+  style='color:red;text-decoration:none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=simman></a><a name="_The_LSD_Simulation"></a><a
+name="_LSD_simulation_run"></a><a name=crash></a><span lang=EN-US
+style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN-US'>LSD
+simulation run details <o:p></o:p></span></h1>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>In order to
+use the LSD <span class=GramE>Debugger</span> it is crucial to understand how a
+simulation is run in LSD. When a simulation is started, the model loaded in LSD
+is passed to the simulation manager. When the manager starts, the time step is
+initialized to 1 and at each step it is increased by one unit. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The LSD
+simulation manager follows a simple cycle for each time step and for each
+Object in the model: <o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l8 level1 lfo9'><![if !supportLists]><span
+lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
+style='mso-list:Ignore'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Take
+an Object with non-computed Variable(s)<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l8 level1 lfo9'><![if !supportLists]><span
+lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
+style='mso-list:Ignore'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Take
+one non-computed Variable from the current Object<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l8 level1 lfo9'><![if !supportLists]><span
+lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
+style='mso-list:Ignore'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Execute
+the associated Equation<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l8 level1 lfo9'><![if !supportLists]><span
+lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
+style='mso-list:Ignore'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>If
+the Equation requests the updated (lag zero) value of any other Variable, and
+this has not been computed yet, execute its Equation<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l8 level1 lfo9'><![if !supportLists]><span
+lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
+style='mso-list:Ignore'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>If
+there are any non-computed Variable in the current Object, go to 2<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l8 level1 lfo9'><![if !supportLists]><span
+lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
+style='mso-list:Ignore'>6.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>If
+there is any Object with non-computed Variable(s), go to 1<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l8 level1 lfo9'><![if !supportLists]><span
+lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
+style='mso-list:Ignore'>7.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Increment
+the time step and go to 1<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This cycle
+starts with the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>Root</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+Object, and proceeds, recursively, for each of its descendant, their own
+descendants and so on. Note that the Equation for a Variable can be computed
+under three circumstances: <o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>The
+LSD simulation manager requests its value because it was not yet updated
+(except if the update flag is not set for the Object containing the Variable)<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Another
+Variable has requested its updated value<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>In the
+second case, the Equation that caused the Variable to be updated is interrupted
+until the other Equation is completed. That is, the first Equation's
+computation is placed “on the stack” and is resumed only when the second
+Equation is completed. Of course, the second Equation can itself trigger the
+computation of another Equations, and, therefore, it can be placed on the stack
+too (second level) while the Variables it requested are computed. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>It is a
+common mistake to write Equations that create a <span class=GramE>dead-lock</span>.
+As when, in the simplest case, you have two equations like: <o:p></o:p></span></p>
+
+<p class=MsoNormal><i><span lang=EN-US style='mso-ansi-language:EN-US'>X</span></i><span
+lang=EN-US style='mso-ansi-language:EN-US'> = F(<span class=GramE><i>Y</i>)<span
+style='mso-spacerun:yes'>   </span></span><span
+style='mso-spacerun:yes'> </span>and<span style='mso-spacerun:yes'>    </span><i>Y</i>
+= G(<i>X</i>) <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Of course,
+it is necessary that either F(.) or G(.) use a lagged value, otherwise the set
+of two equations is not computable (a kind of “egg-and-chicken” problem).
+Similar errors are common even in mildly complex <span class=GramE>models, when</span>
+a long chain of equations reciprocal computations can hinder the source of the
+error. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Model
+writers can make use of the stack log provided, on request, by LSD. At a
+significant cost to speed, when the value set for the stack log level is higher
+than zero, LSD profiles the simulation execution. The stack log level can be
+set either in the <a href="menurun.html#simsetting">simulation settings</a>,
+before starting a simulation run, or in the <a href="#_Object_content">Debugger</a>
+window, during a debugging session. When the profiling log is active, the
+simulation manager prints out in the <a href="log.html">Log</a> window one line
+for each equation computed up to the selected stack level. That is, <o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Stack
+level 1 means that the equation has been computed because of simulation manager
+request (end of cycle updating<span class=GramE>);</span><o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Stack
+level 2 means that the equation has been computed as consequence of a request
+made by an equation computed at stack level <span class=GramE>1;</span><o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>...<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Stack
+level <i style='mso-bidi-font-style:normal'>n</i> means that the equation has
+been computed as consequence of a request made by an equation computed at stack
+level <i style='mso-bidi-font-style:normal'>n</i> - <span class=GramE>1;</span><o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The
+profiler log issues one line per processed Equation, like this: <o:p></o:p></span></p>
+
+<p class=MsoNormal><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>VarLabel (4) =</span></span><span class=Cdigo><span lang=EN-US
+style='color:red;mso-ansi-language:EN-US'>3.<span class=GramE>14&nbsp; <span
+style='color:gray'>t</span></span></span></span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>=</span></span><span class=Cdigo><span
+lang=EN-US style='color:red;mso-ansi-language:EN-US'>18</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>  </span>msecs=</span></span><span class=Cdigo><span
+lang=EN-US style='color:red;mso-ansi-language:EN-US'>1</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>  </span>stack=</span></span><span class=Cdigo><span
+lang=EN-US style='color:red;mso-ansi-language:EN-US'>6</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>  </span>caller=ObjLabel<span
+style='mso-spacerun:yes'>  </span>trigger=VarTwo </span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>It means
+that: <o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Variable
+</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>VarLabel</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> has just being computed<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>It
+is contained in the fourth instance of the container Object type<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>The
+result of the Equation computation is </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>3.14</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>It
+was computed in time step </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>18</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>It
+was computed at stack level 6 (because requested by another Variable, which, in
+turn, was computed at stack 5)<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>The
+Object containing the Variable which requested its value if of type </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>ObjLabel</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> (this field reports </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>SYSTEM</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> if the Variable was computed by the
+simulation manager)<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt;
+mso-list:l0 level1 lfo7;tab-stops:list 36.0pt'><![if !supportLists]><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
+mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol;mso-ansi-language:
+EN-US'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>The
+Variable in whose equation it was requested is </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>VarTwo</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> (this field is not present if the
+Variable was computed by the simulation manager)<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The
+profiler log provides the exact scheduling used by the simulation manager to
+compute the model. This information is frequently used along the data from the
+current stack status. For example, suppose you choose to control when the
+Equation for Variable </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>ExpChoose</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> is computed. You first set the Variable </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>ExpChoose</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> with the debug flag on (see <a
+href="browser.html#changeelement">here</a> how). You also configure the simulation
+with the options for debugging from step </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>20</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> and profiling the stack up to level </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>5</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> (see <a
+href="menurun.html#simsetting">here</a> how). The simulation will run (rather
+slowly) printing a line for each Equation computed. When the Equation for </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>ExpChoose</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> finishes computing at time step 20,
+the Debugger will automatically interrupt the simulation. After that you press
+the button </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>Stack</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> in
+the Debugger, the Log window may show the following information: <o:p></o:p></span></p>
+
+<p class=MsoNormal><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>DevLearn<span style='mso-spacerun:yes'>  </span>(10) =</span></span><span
+class=Cdigo><span lang=EN-US style='color:red;mso-ansi-language:EN-US'>0.05&nbsp;&nbsp;&nbsp;&nbsp;</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>t=</span></span><span
+class=Cdigo><span lang=EN-US style='color:red;mso-ansi-language:EN-US'>19 </span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'> </span>stack=</span></span><span class=Cdigo><span
+lang=EN-US style='color:red;mso-ansi-language:EN-US'>1 </span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'> </span>caller=SYSTEM <br>
+ChUsed<span style='mso-spacerun:yes'>    </span>(10) =</span></span><span
+class=Cdigo><span lang=EN-US style='color:red;mso-ansi-language:EN-US'>0</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t=</span></span><span
+class=Cdigo><span lang=EN-US style='color:red;mso-ansi-language:EN-US'>19</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>  </span>stack=</span></span><span class=Cdigo><span
+lang=EN-US style='color:red;mso-ansi-language:EN-US'>1</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>  </span>caller=SYSTEM <br>
+MSNiche<span style='mso-spacerun:yes'>   </span>(10) =</span></span><span
+class=Cdigo><span lang=EN-US style='color:red;mso-ansi-language:EN-US'>1</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t=</span></span><span
+class=Cdigo><span lang=EN-US style='color:red;mso-ansi-language:EN-US'>19</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>  </span>stack=</span></span><span class=Cdigo><span
+lang=EN-US style='color:red;mso-ansi-language:EN-US'>2 </span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'> </span>caller=TGCh<span style='mso-spacerun:yes'>   
+</span>trigger=TechStats <br>
+TechStats (10) =</span></span><span class=Cdigo><span lang=EN-US
+style='color:red;mso-ansi-language:EN-US'>1</span></span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+t=</span></span><span class=Cdigo><span lang=EN-US style='color:red;mso-ansi-language:
+EN-US'>19</span></span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'><span style='mso-spacerun:yes'>  </span>stack=</span></span><span
+class=Cdigo><span lang=EN-US style='color:red;mso-ansi-language:EN-US'>1 </span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'> </span>caller=SYSTEM <br>
+ResetNum<span style='mso-spacerun:yes'>  </span>(1)<span
+style='mso-spacerun:yes'>  </span>=</span></span><span class=Cdigo><span
+lang=EN-US style='color:red;mso-ansi-language:EN-US'>0</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t=</span></span><span
+class=Cdigo><span lang=EN-US style='color:red;mso-ansi-language:EN-US'>20</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>  </span>stack=</span></span><span class=Cdigo><span
+lang=EN-US style='color:red;mso-ansi-language:EN-US'>1 </span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'> </span>caller=SYSTEM <br>
+Learning<span style='mso-spacerun:yes'>  </span>(5)<span
+style='mso-spacerun:yes'>  </span>=</span></span><span class=Cdigo><span
+lang=EN-US style='color:red;mso-ansi-language:EN-US'>0.0298&nbsp;&nbsp;</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>t=</span></span><span
+class=Cdigo><span lang=EN-US style='color:red;mso-ansi-language:EN-US'>20</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>  </span>stack=</span></span><span class=Cdigo><span
+lang=EN-US style='color:red;mso-ansi-language:EN-US'>2 </span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'> </span>caller=Agent<span style='mso-spacerun:yes'>  
+</span>trigger=Action <br>
+IssuerId<span style='mso-spacerun:yes'>  </span>(1)<span
+style='mso-spacerun:yes'>  </span>=</span></span><span class=Cdigo><span
+lang=EN-US style='color:red;mso-ansi-language:EN-US'>5</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t=</span></span><span
+class=Cdigo><span lang=EN-US style='color:red;mso-ansi-language:EN-US'>20</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>  </span>stack=</span></span><span class=Cdigo><span
+lang=EN-US style='color:red;mso-ansi-language:EN-US'>2 </span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'> </span>caller=Demand<span style='mso-spacerun:yes'> 
+</span>trigger=Action <br>
+ExpChoose (1)<span style='mso-spacerun:yes'>  </span>=</span></span><span
+class=Cdigo><span lang=EN-US style='color:red;mso-ansi-language:EN-US'>1</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t=</span></span><span
+class=Cdigo><span lang=EN-US style='color:red;mso-ansi-language:EN-US'>20</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'>  </span>stack=</span></span><span class=Cdigo><span
+lang=EN-US style='color:red;mso-ansi-language:EN-US'>4 </span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><span
+style='mso-spacerun:yes'> </span>caller=Group<span style='mso-spacerun:yes'>  
+</span>trigger=SetARank </span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'><o:p>&nbsp;</o:p></span></span></p>
+
+<p class=MsoNormal><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>List of Variables currently under computation<o:p></o:p></span></span></p>
+
+<p class=MsoNormal><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>Level<span style='mso-spacerun:yes'>           </span>Variable Label <br>
+4<span style='mso-spacerun:yes'>               </span>ExpChoose <br>
+3<span style='mso-spacerun:yes'>               </span>SetARank <br>
+2<span style='mso-spacerun:yes'>               </span>Choose <br>
+1<span style='mso-spacerun:yes'>               </span>Action <br>
+0<span style='mso-spacerun:yes'>               </span>LSD Simulation Manager </span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>(<span class=GramE>the</span> first-level variable is computed by the
+simulation manager, <br>
+while possible other Variables are triggered by the lower level ones <br>
+because necessary for completing their computation) </span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Let's see
+how to interpret this data. Variable </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>ResetNum</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> is the first to be completed at time 20. Then
+we have two Variables computed because requested by the Equation for </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Action</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> (</span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>Learning</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> and </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>IssuerId</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>). Both are computed at stack 2
+(indicating that </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>Action</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> is
+computed at stack 1, because requested by the simulation manager). Finally, we
+have our </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>ExpChoose</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+equation, which is completed at stack 4, because requested by </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>SetARank</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>, which must therefore have been
+computed at stack 3. The information about the stack status confirms our
+conclusion: </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>ExpChoose</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+is computed because requested by </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>SetARank</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>, which was triggered by </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Choose</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>, which, in turn, was triggered by </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Action</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>. <o:p></o:p></span></p>
+
+<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt;color:black;mso-color-alt:windowtext'><a href="#top"><span
+  style='color:red;text-decoration:none;text-underline:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal><a name="_Handling_simulation_crashes"></a><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+</div>
+
+</body>
+
+</html>

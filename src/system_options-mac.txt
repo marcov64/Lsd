@@ -1,0 +1,13 @@
+# Libraries options
+PATH_TCL_HEADER=Tcl.framework/Headers
+PATH_TK_HEADER=Tk.framework/Headers
+PATH_TCLTK_LIB=./$(TARGET).app/Contents/Frameworks
+TCLTK_LIB=-framework Tcl -framework Tk
+PATH_HEADER=.
+PATH_LIB=.
+LIB=-lz -lpthread
+
+# Compiler options
+CC=g++
+GLOBAL_CC=-march=native -std=c++14 -w
+SSWITCH_CC=-fnon-call-exceptions -O3

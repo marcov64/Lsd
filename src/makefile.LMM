@@ -1,0 +1,88 @@
+#**************************************************************
+#
+#	LSD 8.0 - May 2022
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente and Marcelo Pereira
+#	LSD is distributed under the GNU General Public License
+#
+#**************************************************************
+
+#**************************************************************
+# MAKEFILE.LMM
+# Makefile for LMM
+# In a command prompt (terminal) in LSD root directory, use
+#  cd src
+#  make -f makefile.LMM
+#**************************************************************
+
+CC=g++
+TARGET=LMM
+SWITCH_CC=-D_LMM_ -D_NP_ -O3 -Wall
+
+# from here you should not need to modify anything
+
+# using GCC and Tcl/Tk in the Lsd installation
+LSDROOT=..
+SRC=src
+SRC_DIR=$(LSDROOT)/$(SRC)/
+
+# OS command to delete files
+RM=rm -f
+
+# modules to compile
+ALL_TARGETS=$(LSDROOT)/$(TARGET).exe $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o
+
+# handle platform-specific stuff
+ifeq ($(shell uname -s),Darwin)
+	EXT=
+	MANIF=
+	PATH_TCL_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tcl.framework/Headers
+	PATH_TK_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tk.framework/Headers
+	PATH_TCLTK_LIB=$(SRC_DIR)LSD.app/Contents/Frameworks
+	TCLTK_LIB=-framework Tcl -framework Tk
+	SWITCH_CC+=-Wno-unused-result -std=c++14 -mmacosx-version-min=10.10
+else
+	ifeq ($(OS),Windows_NT)
+		EXT=.exe
+		WRC=windres
+		MANIF=$(SRC_DIR)lmm_manifest.o
+		TCL_VERSION=86
+		PATH_TCLTK_HEADER=$(LSDROOT)/gnu/include
+		PATH_TCLTK_LIB=$(LSDROOT)/gnu/lib
+		TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
+		SWITCH_CC+=-mthreads -mwindows -static-libstdc++
+		ALL_TARGETS+=$(MANIF)
+	else
+		EXT=
+		MANIF=
+		TCL_VERSION=8.6
+		PATH_TCLTK_HEADER=/usr/include/tcl$(TCL_VERSION)
+		PATH_TCLTK_LIB=/usr/lib/tcl$(TCL_VERSION)
+		TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
+		SWITCH_CC+=-Wno-unused-result
+	endif
+endif
+
+# variable to search for the tcl and tk headers
+INCLUDE=-I$(PATH_TCLTK_HEADER) -I$(LSDROOT)/$(SRC)
+
+$(LSDROOT)/$(TARGET)$(EXT): $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o $(MANIF)
+	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o $(MANIF) \
+	-L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(LSDROOT)/$(TARGET)$(EXT)
+
+$(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp $(SRC_DIR)common.h
+	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o
+
+$(SRC_DIR)common-lmm.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
+	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common-lmm.o
+
+$(SRC_DIR)lmm_manifest.o: $(SRC_DIR)lmm_manifest.rc $(SRC_DIR)lmm.exe.manifest
+	$(WRC) $(INCLUDE) -i $(SRC_DIR)lmm_manifest.rc -o $(SRC_DIR)lmm_manifest.o
+
+all: $(ALL_TARGETS)
+
+# delete object files
+clean:
+	$(RM) $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o $(MANIF)

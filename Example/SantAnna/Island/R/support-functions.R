@@ -1,8 +1,16 @@
-#******************************************************************
+#*******************************************************************************
 #
-# ------------- Plot, fit and support functions -----------------
+# -------------- Island Model: plot, fit and support functions ----------------
 #
-#******************************************************************
+#   Written by Marcelo C. Pereira, University of Campinas
+#
+#   Copyright Marcelo C. Pereira
+#   Distributed under the GNU General Public License
+#
+#   Script used by other scripts.
+#   This script should not be executed directly.
+#
+#*******************************************************************************
 
 # ==== User parameters ====
 
@@ -27,9 +35,7 @@ require( tseries, warn.conflicts = FALSE, quietly = TRUE )
 require( gplots, warn.conflicts = FALSE, quietly = TRUE )
 require( plotrix, warn.conflicts = FALSE, quietly = TRUE )
 require( extrafont, warn.conflicts = FALSE, quietly = TRUE )
-
-# must be downloaded from http://www.commanster.eu/rcode.html
-#require( rmutil, warn.conflicts = FALSE, quietly = TRUE )
+require( rmutil, warn.conflicts = FALSE, quietly = TRUE )
 
 # subbotools location (leave blank in linux/Mac)
 if( tolower( .Platform$OS.type ) == "windows" ){

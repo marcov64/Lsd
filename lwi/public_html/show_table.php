@@ -1,10 +1,16 @@
 <?php
-    $session_id = preg_replace( "/[^\da-z]/i", "", filter_input( INPUT_COOKIE, session_name( ), FILTER_SANITIZE_STRING ) );
+    $cookie_id = filter_input( INPUT_COOKIE, session_name( ), FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+    if ( ! is_null( $cookie_id ) && is_string( $cookie_id ) ) {
+        $session_id = preg_replace( "/[^\da-z]/i", "", $cookie_id );
+    } else {
+        $session_id = "NOCOOKIE";
+    }
+
     $session_short_id = substr( $session_id, -6 );
 ?>
 <!DOCTYPE html>
 <!--
-Copyright (C) 2017 Marcelo C. Pereira <mcper at unicamp.br>
+Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,12 +31,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="icon" href="lsd_favicon.ico">
+        <link rel="icon" href="favicon.ico">
         <link rel="stylesheet" href="w3.css">
         <link rel="stylesheet" href="lwi.css">
     </head>
     <body>
-        <?php include "../load_res.php"; ?>
+        <?php require "../load_res.php"; ?>
         <div class='w3-main' style='margin-left:10px; margin-right:10px'>
             <div class='w3-container w3-card-2 w3-margin-bottom' style='margin-top:10px'>
                 <h1 class='w3-xxxlarge w3-text-blue'><b>Data</b></h1>
@@ -84,8 +90,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </table>
                     <?php
                         // table footnotes
+                        $mc_msg = $mc_runs > 1 ? "Monte Carlo means from " . $mc_runs . " runs. " : "";
                         $log_msg = $linear ? "" : "<em>Log values</em>.\n";
-                        echo "<p>" . $log_msg . "</p>\n";
+                        echo "<p>" . $mc_msg . $log_msg . "</p>\n";
                     ?>
                 </div>
                 <div class="w3-container w3-center" style="margin-top: 30px"> 

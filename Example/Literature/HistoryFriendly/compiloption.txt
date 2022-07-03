@@ -1,5 +1,5 @@
 #Type here the name of the program to build. You can modify this freely
-TARGET=lsd
+TARGET=LSD
 
 #Type here the name of the source file containing the functions of the model. Do not
 # type the .cpp extension. 
