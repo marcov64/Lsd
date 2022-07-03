@@ -42,6 +42,8 @@ kriging.sensitivity <- function( data, model, krig.sa = FALSE, sa.samp = 1000 ) 
                  mainEffect( metamodel ) )
   rownames( sa ) <- colnames( data$doe )
   colnames( sa ) <- c( "Direct effects", "Interactions" )
+  sa <- as.data.frame( sa )
+  sa <- sa[ order( - rowSums( sa, na.rm = TRUE ) ), ]
 
   max.index <- function( x, pos = 1 )
     as.integer( sapply( sort( x, index.return = TRUE ), `[`,

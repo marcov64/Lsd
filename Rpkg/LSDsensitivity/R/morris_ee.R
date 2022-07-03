@@ -55,11 +55,13 @@ elementary.effects.lsd <- function( data, p = 4, jump = 2 ) {
   # change the class to lsd print/plot equivalents
   class( sa ) <- "morris.lsd"
 
-  # add the standard error to the statistics
+  # add the standard error to the statistics and sort factors by importance
   sa$table <- as.data.frame( print( sa ) )
+  sa$table <- sa$table[ order( - sa$table$mu.star ), ]
   sa$table$se <- sa$table$sigma / sqrt( sa$r )
   sa$table$p.value <- stats::pt( sa$table$mu.star / sa$table$se, df = sa$r - 1,
                                  lower.tail = FALSE )
+
 
   return( sa )
 }

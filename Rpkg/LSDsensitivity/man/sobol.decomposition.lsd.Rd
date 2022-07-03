@@ -32,7 +32,7 @@ This function is a wrapper to the functions \code{\link[sensitivity]{fast99}} an
 The function returns an object/list of class \code{kriging-sa} or \code{polynomial-sa}, according to the input meta-model, containing several items:
 
 \item{metamodel}{an object/list of class \code{\link[sensitivity]{fast99}} containing the estimated total and conditional variances for all the meta-model factors.}
-\item{sa}{a print-ready table with the Sobol indexes for each factor.}
+\item{sa}{a print-ready data frame with the Sobol indexes for each factor.}
 \item{topEffect}{a vector containing the indexes to the three most influential factors, automatically calculated (if \code{factorX = 0}) or according to the order pre-selected by the user.}
 
 If no model is supplied and a B-spline smoothing interpolation model cannot be fitted, returns \code{NULL}.

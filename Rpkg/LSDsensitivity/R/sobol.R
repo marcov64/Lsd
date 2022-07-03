@@ -73,11 +73,15 @@ data.sensitivity <- function( data, tries = 5 ) {
 
   rownames( sa ) <- colnames( data$doe )
   colnames( sa ) <- c( "Direct effects", "Interactions" )
+  sa <- as.data.frame( sa )
+  sa <- sa[ order( - rowSums( sa, na.rm = TRUE ) ), ]
 
   max.index <- function( x, pos = 1 )
-    as.integer( sapply( sort( x, index.return = TRUE ), `[`, length( x ) - pos + 1 )[ 2 ] )
+    as.integer( sapply( sort( x, index.return = TRUE ), `[`,
+                        length( x ) - pos + 1 )[ 2 ] )
 
-  topEffect <- c( max.index( mainEffect( metamodel ), 1 ), max.index( mainEffect( metamodel ), 2 ),
+  topEffect <- c( max.index( mainEffect( metamodel ), 1 ),
+                  max.index( mainEffect( metamodel ), 2 ),
                   max.index( mainEffect( metamodel ), 3 ) )
 
   cat( "Top parameters influencing response surface:\n" )
