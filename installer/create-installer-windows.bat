@@ -18,7 +18,7 @@ rem  CREATE-INSTALLER-WINDOWS.BAT
 rem  Create LSD installer for Windows.
 rem *************************************************************
 
-set LSD_FILE_TAG=8-0-rc-1
+set LSD_FILE_TAG=8-0-stable-1
 
 if "%1"=="/?" (
 	echo Create LSD installer for Windows

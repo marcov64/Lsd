@@ -174,7 +174,7 @@ and choose the "Run as administrator" option. This will force LSD libraries to b
 
 USING DIFFERENT COMPILERS (optional):
 
-It is possible to use LSD with a C++ compiler already installed in your computer. However, in this case the user must install and configure the compiler to ensure it has all the required optional libraries. LSD supports any version of GNU 64-bit C++ compiler (GCC) supporting C++14 (or more recent) standard. Cygwin and MSYS2 mingw-w64-x86_64 versions are both fine, but they require Tcl/Tk 8.6 and zlib 1.2 libraries to be installed. Cygwin compiler is sometwhat easier to install as it does not require the user to deal with a command prompt. MSYS2 compiler usually releases new versions earlier. Instructions for installing both are available at the end of this document. Even if they are already installed, the instructions can be also followed to make sure the installation is complete and LSD is configured to use it.
+It is possible to use LSD with a C++ compiler already installed in your computer. However, in this case the user must install and configure the compiler to ensure it has all the required optional libraries. LSD supports any version of GNU 64-bit C++ compiler (GCC) supporting C++14 (or more recent) standard. Cygwin and MSYS2 mingw-w64-x86_64 versions are both fine, but they require Tcl/Tk 8.6 and zlib 1.2 libraries to be installed. Cygwin compiler is somewhat easier to install as it does not require the user to deal with a command prompt. MSYS2 compiler usually releases new versions earlier. Instructions for installing both are available at the end of this document. Even if they are already installed, the instructions can be also followed to make sure the installation is complete and LSD is configured to use it.
 
 
 ************************************
@@ -222,7 +222,7 @@ If you delete or cannot create the LSD shortcuts, you can still run the app name
 
 AUTOMATION ACCESS:
 
-LSD needs to control external programs to automate operation. The first time it needs automation access, a macOS (10.14+) popup will request the user to allow it, please click on OK. If user denies automation access once, macOS will not ask again for authorization and will silently block all further LSD operations, curtailing LSD capabilities and preventing some operations. To force the system to ask again for authorization (all programs) please use the following command on the Terminal:
+LSD needs to control external programs to automate operation. The first time it needs automation access, a macOS (10.14+) pop-up will request the user to allow it, please click on OK. If user denies automation access once, macOS will not ask again for authorization and will silently block all further LSD operations, curtailing LSD capabilities and preventing some operations. To force the system to ask again for authorization (all programs) please use the following command on the Terminal:
 
  tccutil reset AppleEvents
 
@@ -325,7 +325,7 @@ Step-by-step procedure to install the MSYS2 64-bit compiler (an internet connect
  PATH_LIB=.
 
 
-SLOW GDB OPERATION: the GDB debugger can become very slow in Windows when the models are large. This is due to the Windows special handling of the heap (dynamic memory allocation) for programs being debugged. It is normally safe to disable this special handling by defining the folowing environment variable:
+SLOW GDB OPERATION: the GDB debugger can become very slow in Windows when the models are large. This is due to the Windows special handling of the heap (dynamic memory allocation) for programs being debugged. It is normally safe to disable this special handling by defining the following environment variable:
 
  _NO_DEBUG_HEAP=1
 
