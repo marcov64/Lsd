@@ -798,10 +798,10 @@ Var: runCountry 0 n + n n
 
 Object: Country C	1
 Param: flagAddWorkers 0 n + n n	0
-Param: flagClimShocks 0 n + n n	3
+Param: flagClimShocks 0 n + n n	0
 Param: flagCons 0 n + n n	1
-Param: flagCreditRule 0 n + n n	1
-Param: flagEnClim 0 n + n n	1
+Param: flagCreditRule 0 n + n n	2
+Param: flagEnClim 0 n + n n	0
 Param: flagEnRDshare 0 n + n n	0
 Param: flagExpect 0 n + n n	0
 Param: flagFiscalRule 0 n + n n	0
@@ -846,7 +846,7 @@ Var: initCountry 0 n + n n
 Var: timeStep 0 n + n n
 
 Object: Financial C	1
-Param: B 0 n + n n	1
+Param: B 0 n + n n	10
 Param: DebRule 0 n + n n	0.6
 Param: DefPrule 0 n + n n	0.03
 Param: EqB0 0 n + n n	1
@@ -860,19 +860,19 @@ Param: betaB 0 n + n n	1
 Param: dB 0 n + n n	0
 Param: deltaB 0 n + n n	0.33
 Param: deltaDeb 0 n + n n	0.05
-Param: gammaPi 0 n + n n	0
+Param: gammaPi 0 n + n n	1.1
 Param: gammaU 0 n + n n	0
-Param: kConst 0 n + n n	0
+Param: kConst 0 n + n n	0.1
 Param: mPerB 0 n + n n	1
-Param: muBonds 0 n + n n	1
+Param: muBonds 0 n + n n	0.6
 Param: muD 0 n + n n	1
-Param: muDeb 0 n + n n	0.5
-Param: muRes 0 n + n n	1
-Param: piT 0 n + n n	0
+Param: muDeb 0 n + n n	0.3
+Param: muRes 0 n + n n	0.33
+Param: piT 0 n + n n	0.02
 Param: rAdj 0 n + n n	0.0025
 Param: rT 0 n + n n	0.025
 Param: rhoBonds 0 n + n n	0
-Param: tauB 0 n + n n	0.5
+Param: tauB 0 n + n n	0.08
 Param: thetaBonds 0 n + n n	12
 Func: banksMaps 0 n + n n
 Func: cScores 0 n + n n
@@ -941,13 +941,13 @@ Object: Cli2 C	1
 Param: __ID2 0 n + n n	0
 
 Object: Climate C	1
-Param: Ca0 0 n + n n	784.65
+Param: Ca0 0 n + n n	590
 Param: Ca0pre 0 n + n n	590
 Param: Cm0pre 0 n + n n	10.2373
 Param: EmC0 0 n + n n	0
 Param: EmCa0 0 n + n n	7.624
 Param: NPP0pre 0 n + n n	85.1771
-Param: Td0 0 n + n n	0.03
+Param: Td0 0 n + n n	0
 Param: Tm0 0 n + n n	0
 Param: a0 0 n + n n	1
 Param: alphaA 0 n + n n	3
@@ -963,7 +963,7 @@ Param: hTr 0 n + n n	1.23
 Param: kEddy 0 n + n n	4400
 Param: phiA 0 n + n n	0.428
 Param: sigma10y0 0 n + n n	0.04
-Param: tA0 0 n + n n	100
+Param: tA0 0 n + n n	1
 Param: tMmix 0 n + n n	1
 Param: tScale 0 n + n n	4
 Param: tauBa 0 n + n n	10.6
@@ -1085,9 +1085,9 @@ Object: Labor C	1
 Param: Ls0 0 n + n n	250000
 Param: delta 0 n + n n	0
 Param: phi 0 n + n n	0.4
-Param: psi1 0 n + n n	0
+Param: psi1 0 n + n n	0.05
 Param: psi2 0 n + n n	1
-Param: psi3 0 n + n n	0
+Param: psi3 0 n + n n	-0.05
 Param: w0min 0 n + n n	1
 Var: L 0 s + n n
 Var: Ls 1 s + n n	0
@@ -1234,10 +1234,10 @@ Param: b 0 n + n n	3
 Param: chi 0 n + n n	1
 Param: d2 0 n + n n	0
 Param: e0 0 n + n n	0.25
-Param: e1 0 n + n n	1
-Param: e2 0 n + n n	1
-Param: e3 0 n + n n	1
-Param: e4 0 n + n n	1
+Param: e1 0 n + n n	0.4
+Param: e2 0 n + n n	0.4
+Param: e3 0 n + n n	0
+Param: e4 0 n + n n	0
 Param: e5 0 n + n n	0.5
 Param: e6 0 n + n n	1
 Param: e7 0 n + n n	0.3
@@ -1249,7 +1249,7 @@ Param: kappaMax 0 n + n n	0.5
 Param: kappaMin 0 n + n n	0
 Param: lastID2 0 n + n n	0
 Param: m2 0 n + n n	40
-Param: mu20 0 n + n n	0.28
+Param: mu20 0 n + n n	0.2
 Param: n2 0 n + n n	1
 Param: omega1 0 n + n n	1
 Param: omega2 0 n + n n	1
@@ -1495,7 +1495,7 @@ Var: L2larg 0 s + n n
 Var: V 0 s + n p
 Var: dw 0 s + n n
 
-SIM_NUM 5
+SIM_NUM 1
 SEED 1
 MAX_STEP 500
 EQUATION fun_KS.cpp
@@ -1540,7 +1540,7 @@ Climate shocks
 8 = on aggregate consumption
 9 = on GDP a la Nordhaus 2013
 _INIT_
-All 1 instances equal to 3
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_flagCons
@@ -1558,7 +1558,7 @@ Bank total credit supply rule
 1 = deposits multiplier credit limit but no capital adequacy rule or bank bail-out
 2 = Basel-like bank capital adequacy rule and bank bail-out if net worth is negative
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 2.
 END_DESCRIPTION
 
 Parameter_flagEnClim
@@ -1844,7 +1844,7 @@ Parameter_B
 Number of heterogeneous banks
 (>=1)
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 10.
 END_DESCRIPTION
 
 Parameter_DebRule
@@ -1942,7 +1942,7 @@ Parameter_gammaPi
 Central bank Taylor rule sensitivity to target inflation
 (>=0)
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 1.1.
 END_DESCRIPTION
 
 Parameter_gammaU
@@ -1956,7 +1956,7 @@ Parameter_kConst
 Interest rate ramping parameter for firms debt by credit class
 (>=0)
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 0.1.
 END_DESCRIPTION
 
 Parameter_mPerB
@@ -1970,7 +1970,7 @@ Parameter_muBonds
 Sovereign bonds spread (mark-down from central bank prime rate)
 ([0,1])
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.6.
 END_DESCRIPTION
 
 Parameter_muD
@@ -1984,21 +1984,21 @@ Parameter_muDeb
 Bank spread (mark-up) on debt (over central bank prime rate)
 (>=0)
 _INIT_
-All 1 instances equal to 0.5.
+All 1 instances equal to 0.3.
 END_DESCRIPTION
 
 Parameter_muRes
 Central bank spread (mark-down) on reserves (from central bank prime rate)
 ([0,1])
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.33.
 END_DESCRIPTION
 
 Parameter_piT
 Target inflation for central bank's Taylor rule
 (>0)
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 0.02.
 END_DESCRIPTION
 
 Parameter_rAdj
@@ -2026,7 +2026,7 @@ Parameter_tauB
 Minimum bank capital adequacy rate
 (]0,1[)
 _INIT_
-All 1 instances equal to 0.5.
+All 1 instances equal to 0.08.
 END_DESCRIPTION
 
 Parameter_thetaBonds
@@ -2382,7 +2382,7 @@ Parameter_Ca0
 Concentration of CO2 in atmosphere at reference time
 (>=Ca0pre)
 _INIT_
-All 1 instances equal to 784.65 (@2000, Sterman et al. 2013)
+All 1 instances equal to 590 (Sterman et al. 2013)
 END_DESCRIPTION
 
 Parameter_Ca0pre
@@ -2423,7 +2423,7 @@ Parameter_Td0
 Calibrated temperature change at deepest sea layer at reference period
 (>=0)
 _INIT_
-All 1 instances equal to 0.03 (@2000, Sterman et al. 2013)
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_Tm0
@@ -2535,7 +2535,7 @@ Reference period for carbon/temperature calibrated levels
 If Ca0/Tm0 are different from pre-industrial levels, some periods are required for climate stabilization
 (>0)
 _INIT_
-All 1 instances equal to 100.
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Parameter_tMmix
@@ -3168,7 +3168,7 @@ Parameter_psi1
 Share of inflation passed to wages
 ([0,1])
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 0.05.
 END_DESCRIPTION
 
 Parameter_psi2
@@ -3182,7 +3182,7 @@ Parameter_psi3
 Elasticity of wages to the unemployment rate
 (>=0)
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to -0.05.
 END_DESCRIPTION
 
 Parameter_w0min
@@ -3980,28 +3980,28 @@ Parameter_e1
 Weight of t-1 demand on myopic expectations
 ([0,1])
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.4.
 END_DESCRIPTION
 
 Parameter_e2
 Weight of t-2 demand on myopic expectations
 ([0,1])
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.4.
 END_DESCRIPTION
 
 Parameter_e3
 Weight of t-3 demand on myopic expectations
 ([0,1])
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_e4
 Weight of t-4 demand on myopic expectations
 ([0,1])
 _INIT_
-All 1 instances equal to 1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_e5
@@ -4084,7 +4084,7 @@ Parameter_mu20
 Initial mark-up in consumption-good sector
 (>0)
 _INIT_
-All 1 instances equal to 0.28.
+All 1 instances equal to 0.2.
 END_DESCRIPTION
 
 Parameter_n2
@@ -5271,10 +5271,15 @@ END_DOCUINITIAL
 EQ_FILE
 /******************************************************************************
 
-	K+S LSD MODEL (including finance, variable firms, climate and energy)
-	-------------
+	DSK REFRESH (CLIMATE-AUGMENTED K+S) LSD MODEL
+	---------------------------------------------
 
-	VERSION: 0.4.1 - climate model and energy sector
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
+	VERSION: 0.4.1 - climate model
 
 	This is the topmost code file for the K+S coded in LSD.
 	It contains only the scheduling equations 'runCountry' and 'timeStep',
@@ -5368,6 +5373,8 @@ EQUATION( "runCountry" )
 /*
 Execute the current time-step for all existing countries
 */
+
+V( "init" );									// ensure initialization done
 
 CYCLE( cur, "Country" )
 	VS( cur, "timeStep" );

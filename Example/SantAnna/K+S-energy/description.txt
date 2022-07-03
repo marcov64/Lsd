@@ -4,7 +4,7 @@ Energy-augmented K+S Model (version 0.5.1)
 This version copyright by Marcelo C. Pereira.
 The original K+S and climate extensions code was developed by Andrea Roventini, Francesco Lamperti, and other contributors.
 
-This new version is build on top of the full rewrite of the "Dystopian Schumpeter meeting Keynes" (DSK) model (K+S Climate-augmented v0.4), and adds a variable number of firms in a competitive, finance-driven energy sector. The climate part is based on the carbon-cycle of C-ROADS model (Sterman et al. 2013).
+This new version is build on top of the full rewrite of the "Dystopian Schumpeter meeting Keynes" (DSK) model (DSK Refresh v0.4), and adds a variable number of firms in a competitive, finance-driven energy sector. The climate part is based on the carbon-cycle of C-ROADS model (Sterman et al. 2013).
 
 LSD version 8.0 or higher is required. Download at: https://github.com/SantAnnaKS/LSD
 

@@ -1,5 +1,5 @@
-Climate-augmented K+S Model (version 0.4.1)
-===========================================
+DSK Refresh (climate-augmented K+S) Model (version 0.4.1)
+=========================================================
 
 This version copyright by Marcelo C. Pereira.
 The original Dystopian K+S (DSK) code was developed by Francesco Lamperti and other contributors.

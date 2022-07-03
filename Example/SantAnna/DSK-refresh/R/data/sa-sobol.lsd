@@ -1177,7 +1177,7 @@ Var: _AtauEF 1 n + n n	0
 Var: _AtauLP 1 n + n n	0
 Var: _BtauEE 1 n + n n	0
 Var: _BtauEF 1 n + n n	0
-Var: _BtauLP 1 s + n n	0
+Var: _BtauLP 1 n + n n	0
 Var: _BC 7 n + n n	0	0	0	0	0	0	0
 Var: _C1 1 n + n n	0
 Var: _CD1 0 n + n n
@@ -1200,7 +1200,7 @@ Var: _NW1 1 n + n n	0
 Var: _NW1p 0 n + n n
 Var: _Pi1 0 n + n n
 Var: _Q1 0 n + n n
-Var: _Q1e 0 s + n N
+Var: _Q1e 0 n + n N
 Var: _RD 1 n + n n	0
 Var: _S1 1 n + n n	0
 Var: _Tax1 0 n + n n
@@ -1317,7 +1317,7 @@ Param: _bank2 0 n + n n	0
 Param: _pOrd2 0 n + n n	0
 Param: _t2ent 0 n + n n	0
 Func: _CS2a 0 n + n n
-Var: _A2 4 s + n n	0	0	0	0
+Var: _A2 4 n + n n	0	0	0	0
 Var: _A2e 0 n + n n
 Var: _A2ee 0 n + n n
 Var: _A2ef 0 n + n n
@@ -1350,7 +1350,7 @@ Var: _NW2p 0 n + n n
 Var: _Pi2 0 n + n n
 Var: _Q2 0 n + n n
 Var: _Q2d 0 n + n n
-Var: _Q2e 2 s + n n	0	0
+Var: _Q2e 2 n + n n	0	0
 Var: _Q2p 0 n + n N
 Var: _Q2pe 0 n + n N
 Var: _Q2u 0 n + n n
@@ -1396,7 +1396,7 @@ Var: __Qvint 0 n + n n
 Var: __RSvint 0 n + n n
 Var: __cVint 0 n + n n
 
-Object: Stats C	1
+Object: Stats N	1
 Param: testCtIni 0 n + n n	1
 Param: testCtEnd 0 n + n n	0
 Param: testCBtIni 0 n + n n	1
@@ -1495,7 +1495,7 @@ Var: L2larg 0 s + n n
 Var: V 0 s + n p
 Var: dw 0 s + n n
 
-SIM_NUM 1
+SIM_NUM 5
 SEED 1
 MAX_STEP 500
 EQUATION fun_KS.cpp
@@ -5271,10 +5271,15 @@ END_DOCUINITIAL
 EQ_FILE
 /******************************************************************************
 
-	K+S LSD MODEL (including finance, variable firms, climate and energy)
-	-------------
+	DSK REFRESH (CLIMATE-AUGMENTED K+S) LSD MODEL
+	---------------------------------------------
 
-	VERSION: 0.4.1 - climate model and energy sector
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
+	VERSION: 0.4.1 - climate model
 
 	This is the topmost code file for the K+S coded in LSD.
 	It contains only the scheduling equations 'runCountry' and 'timeStep',
@@ -5368,6 +5373,8 @@ EQUATION( "runCountry" )
 /*
 Execute the current time-step for all existing countries
 */
+
+V( "init" );									// ensure initialization done
 
 CYCLE( cur, "Country" )
 	VS( cur, "timeStep" );

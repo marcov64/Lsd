@@ -1495,7 +1495,7 @@ Var: L2larg 0 s + n n
 Var: V 0 s + n p
 Var: dw 0 s + n n
 
-SIM_NUM 5
+SIM_NUM 3
 SEED 1
 MAX_STEP 500
 EQUATION fun_KS.cpp
@@ -5271,10 +5271,15 @@ END_DOCUINITIAL
 EQ_FILE
 /******************************************************************************
 
-	K+S LSD MODEL (including finance, variable firms, climate and energy)
-	-------------
+	DSK REFRESH (CLIMATE-AUGMENTED K+S) LSD MODEL
+	---------------------------------------------
 
-	VERSION: 0.4.1 - climate model and energy sector
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
+	VERSION: 0.4.1 - climate model
 
 	This is the topmost code file for the K+S coded in LSD.
 	It contains only the scheduling equations 'runCountry' and 'timeStep',
@@ -5368,6 +5373,8 @@ EQUATION( "runCountry" )
 /*
 Execute the current time-step for all existing countries
 */
+
+V( "init" );									// ensure initialization done
 
 CYCLE( cur, "Country" )
 	VS( cur, "timeStep" );

@@ -1,14 +1,14 @@
 /******************************************************************************
 
-	K+S LSD MODEL (including finance, variable firms, climate and energy)
-	-------------
+	DSK REFRESH (CLIMATE-AUGMENTED K+S) LSD MODEL
+	---------------------------------------------
 
 	Written by Marcelo C. Pereira, University of Campinas
 
 	Copyright Marcelo C. Pereira
 	Distributed under the GNU General Public License
 
-	VERSION: 0.4.1 - climate model and energy sector
+	VERSION: 0.4.1 - climate model
 
 	This is the topmost code file for the K+S coded in LSD.
 	It contains only the scheduling equations 'runCountry' and 'timeStep',
