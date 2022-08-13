@@ -551,11 +551,13 @@ void put_text( const char *str, const char *n, int x, int y, const char *str2 )
 				if { $CurPlatform eq \"mac\" } { \
 					set __focus__ [ focus ] \
 				}; \
-				wm geometry .list +[ expr { %%X + 5 } ]+[ expr { %%Y + 5 } ]; \
-				wm deiconify .list; \
-				catch { raise .list }; \
-				if { $CurPlatform eq \"mac\" } { \
-					after idle { catch { focus -force $__focus__ } } \
+				catch { \
+					wm geometry .list +[ expr { %%X + 5 } ]+[ expr { %%Y + 5 } ]; \
+					wm deiconify .list; \
+					raise .list; \
+					if { $CurPlatform eq \"mac\" } { \
+						after idle { catch { focus -force $__focus__ } } \
+					} \
 				} \
 			} ] \
 		}", str2, str2, str, n, str2, str2, str2 );
