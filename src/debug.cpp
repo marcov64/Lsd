@@ -567,6 +567,12 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 			// element change (click on parameter/variable)
 			case 8:
+				if ( mode != 1 && mode != 3 )		// do only if debugger is active
+				{
+					choice = 0;
+					break;
+				}
+
 				Tcl_LinkVar( inter, "debug", ( char * ) &count, TCL_LINK_INT );
 				Tcl_LinkVar( inter, "time", ( char * ) &t, TCL_LINK_INT );
 				Tcl_LinkVar( inter, "i", ( char * ) &i, TCL_LINK_INT );
@@ -1127,8 +1133,9 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 			// change the object number of instances (click on level / object instance)
 			case 17:
-				if ( r->up != NULL )
-					entry_new_objnum( r, "" );
+				if ( mode == 1 || mode == 3 )		// do only if debugger is active
+					if ( r->up != NULL )
+						entry_new_objnum( r, "" );
 
 				choice = 0;
 				break;
@@ -1402,7 +1409,8 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 			// right-click (set all) on multi-instanced parameter or variable
 			case 25:
-				set_all( r, get_str( "res" ), 0, ".deb" );
+				if ( mode == 1 || mode == 3 )		// do only if debugger is active
+					set_all( r, get_str( "res" ), 0, ".deb" );
 
 				choice = 0;
 				break;
@@ -1417,6 +1425,12 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 			// Debug variable under computation CTRL+G
 			case 28:
+				if ( mode != 1 && mode != 3 )		// do only if debugger is active
+				{
+					choice = 0;
+					break;
+				}
+
 				if ( asl == NULL && stacklog != NULL )
 				{
 					asl = stacklog;
