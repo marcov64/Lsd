@@ -498,7 +498,7 @@ void write_obj( object *r, FILE *frep, int *elemDone )
 
 		for ( cv = cur->v; cv != NULL && ! stop; cv = cv->next )
 		{
-			write_var( cv, frep );
+			write_var( r, cv, frep );
 			cmd( "prgboxupdate .prep \"\" %d", ( *elemDone )++ );
 		}
 
@@ -514,12 +514,14 @@ void write_obj( object *r, FILE *frep, int *elemDone )
 /******************************
 WRITE_VAR
 *******************************/
-void write_var( variable *v, FILE *frep )
+void write_var( object *r, variable *v, FILE *frep )
 {
 	bool one, found;
 	char *app, c1_lab[ 2 * MAX_LINE_SIZE ], c2_lab[ 2 * MAX_LINE_SIZE ], c3_lab[ 2 * MAX_LINE_SIZE ], updt_in[ MAX_ELEM_LENGTH ];
 	const char *fname;
 	int i, j, k, done, flag_begin, flag_string, flag_comm, flag_var, nfiles;
+	object *cur;
+	variable *cv;
 	FILE *ffun ;
 
 	cmd( "update" );
@@ -564,7 +566,7 @@ void write_var( variable *v, FILE *frep )
 
 				if ( done )
 				{
-					fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one ? ", " : "", c2_lab,  c2_lab );
+					fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one ? ", " : "", c2_lab,	 c2_lab );
 					one = true;
 				}
 			}
@@ -587,9 +589,53 @@ void write_var( variable *v, FILE *frep )
 
 		if ( ! found )
 			fprintf( frep, "(none)" );
+
+		fprintf( frep, "<BR>\n" );
 	}
 
-	fprintf( frep,"<BR>\n" );
+	fprintf( frep, "<BR>\n" );
+
+	// print initial values
+	if ( v->param == 1 || ( v->param == 0 && v->num_lag > 0 ) )
+	{
+		fprintf( frep,"<I>Initial values (by instance): &nbsp;</I>" );
+
+		if ( v->param == 1 || v->num_lag == 1 )
+		{
+			fprintf( frep, "%g", v->val[ 0 ] );
+
+			for ( j = 1, cur = r->hyper_next( r->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
+			{
+				cv = cur->search_var( cur, v->label );
+				fprintf( frep, ", %g", cv->val[ 0 ] );
+			}
+
+			if ( j == MAX_INIT && cur != NULL )
+				fprintf( frep, ", ..." );
+
+			fprintf( frep, "<BR>\n" );
+		}
+		else
+		{
+			for ( i = 0; i < v->num_lag; ++i )
+			{
+				fprintf( frep, "<P style=\"margin-left:10px;\"><I>Lag %d:</I> %g", i + 1, v->val[ i ] );
+
+				for ( j = 1, cur = r->hyper_next( r->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
+				{
+					cv = cur->search_var( cur, v->label );
+					fprintf( frep, ", %g", cv->val[ i ] );
+				}
+
+				if ( j == MAX_INIT && cur != NULL )
+					fprintf( frep, ", ..." );
+			}
+
+			fprintf( frep, "</P>\n" );
+		}
+
+		fprintf( frep, "<BR>\n" );
+	}
 
 	if ( v->param == 1 )
 		return;
@@ -616,7 +662,7 @@ void write_var( variable *v, FILE *frep )
 				if ( ! macro )
 					done = 0;
 				else
-					done = 1; 		// will never stop with {} only
+					done = 1;		// will never stop with {} only
 
 				if ( ! strcmp( c2_lab, v->label ) )
 				{
@@ -624,9 +670,9 @@ void write_var( variable *v, FILE *frep )
 					one = true;
 
 					if ( k == 0 )
-						fprintf( frep,"<BR><I>Equation code:</I><BR>\n" );
+						fprintf( frep,"<I>Equation code:</I><BR>\n" );
 					else
-						fprintf( frep,"<BR><I>Equation code</I> <TT>(%s)</TT>:<BR>\n", fname );
+						fprintf( frep,"<I>Equation code</I> <TT>(%s)</TT>:<BR>\n", fname );
 
 					fprintf( frep, "<BR>\n<TT>%s</TT>", c1_lab );
 
@@ -742,7 +788,7 @@ void write_var( variable *v, FILE *frep )
 						fprintf( frep, "</TT>\n" );
 
 						if ( ! strncmp( c3_lab, "RESULT(", 7 ) && macro )
-							done = 0; 		// force it to stop
+							done = 0;		// force it to stop
 					}
 
 					fprintf( frep, "</FONT><BR><BR>\n" );
@@ -755,7 +801,7 @@ void write_var( variable *v, FILE *frep )
 	}
 
 	if ( ! one )
-		fprintf( frep,"<BR><I>Equation code</I>: (not available)<BR><BR>\n" );
+		fprintf( frep,"<I>Equation code</I>: (not available)<BR><BR>\n" );
 }
 
 
@@ -900,13 +946,13 @@ bool contains( FILE *f, const char *lab, int len )
 
 		for ( i = 0; c1_lab[ i ] != 0; ++i ) // scans each character
 		{
-			if ( c1_lab[ i ] == '{' ) 		// if it is an open bracket
+			if ( c1_lab[ i ] == '{' )		// if it is an open bracket
 			{
 				bra++;
 				start = 0;
 			}
 			else
-				if ( c1_lab[ i ] == '}' ) 	// if it is a closed bracket
+				if ( c1_lab[ i ] == '}' )	// if it is a closed bracket
 					bra--;
 				else
 				{
@@ -928,12 +974,12 @@ bool contains( FILE *f, const char *lab, int len )
 
 						// scan the whole word, until a different char is not found
 						got = 1;
-						if ( pot[ 0 ] != '\"' ) 			// in case the eq. contains "" it gets fucked up..
+						if ( pot[ 0 ] != '\"' )				// in case the eq. contains "" it gets fucked up..
 							for ( j = 0; got == 1 && pot[ j ] != '\"' && lab != NULL; ++j )
 								if ( pot[ j ] != lab[ j ])
 									got = 0;
 
-						for ( ; pot[ j ] != '\"'; ++j ); 	// finishes the word, until the closed quotes
+						for ( ; pot[ j ] != '\"'; ++j );	// finishes the word, until the closed quotes
 
 						i = i + j + 1;
 
@@ -1017,12 +1063,12 @@ void write_list( FILE *frep, object *root, bool show_all, const char *prefix )
 
 	Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
 
-	if ( show_all ) 						// initial listing?
+	if ( show_all )							// initial listing?
 		fprintf( frep, "<H3>Variables</H3>\n" );
 	else
 		fprintf( frep, "<i>Variables: &nbsp;</i>" );
 
-	cmd( "set rawlist [ list ]" ); 			// create an empty list
+	cmd( "set rawlist [ list ]" );			// create an empty list
 
 	if ( strcmp( prefix, "_i_" ) == 0 )
 		fill_list_var( root, show_all, true ); // insert only lagged variables
@@ -1039,13 +1085,8 @@ void write_list( FILE *frep, object *root, bool show_all, const char *prefix )
 		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_v_all_%s_%s", root->label, prefix );
 
 	if ( lmenu )
-	{
 		create_form( num, s1, prefix, frep );
-		if ( num == 0 )
-			fprintf( frep, "(none)<BR>\n" );
-	}
 	else
-	{
 		for ( i = 0; i < num; ++i )
 		{
 			cmd( "set app [ lindex $alphalist %d ]", i );
@@ -1056,25 +1097,24 @@ void write_list( FILE *frep, object *root, bool show_all, const char *prefix )
 				fprintf( frep, "<TT>, </TT>" );
 		}
 
-		if ( num > 0 )
-			fprintf( frep, "<BR>\n" );
-		else
-			fprintf( frep, "(none)<BR>\n" );
-	}
+	if ( num == 0 )
+		fprintf( frep, "(none)<BR>\n" );
+	else
+		fprintf( frep, "<BR>\n" );
 
-	if ( show_all ) 						// initial listing
+	if ( show_all )							// initial listing
 		fprintf( frep, "<H3>Parameters</H3>\n" );
 	else
 		fprintf( frep, "<i>Parameters: &nbsp;</i>" );
 
-	cmd( "lappend rawlist" ); 				// create the list if not existed
-	cmd( "unset rawlist" ); 				// empty the list
-	cmd( "lappend rawlist" ); 				// create a surely empty list
+	cmd( "lappend rawlist" );				// create the list if not existed
+	cmd( "unset rawlist" );					// empty the list
+	cmd( "lappend rawlist" );				// create a surely empty list
 
 	fill_list_par( root, show_all );
 
-	cmd( "set alphalist [lsort -dictionary $rawlist]" );
-	cmd( "set num [llength $alphalist]" );
+	cmd( "set alphalist [ lsort -dictionary $rawlist ]" );
+	cmd( "set num [ llength $alphalist ]" );
 
 	// distinguish the case you are compiling the initial list of element (all) or for a single Object)
 	if ( ! show_all )
@@ -1083,13 +1123,8 @@ void write_list( FILE *frep, object *root, bool show_all, const char *prefix )
 		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_p_all_%s_%s", root->label, prefix );
 
 	if ( lmenu )
-	{
 		create_form( num, s1, prefix, frep );
-		if ( num == 0 )
-			fprintf( frep, "(none)<BR>\n" );
-	}
 	else
-	{
 		for ( i = 0; i < num; ++i )
 		{
 			cmd( "set app [ lindex $alphalist %d ]", i );
@@ -1099,11 +1134,13 @@ void write_list( FILE *frep, object *root, bool show_all, const char *prefix )
 				fprintf( frep, "<TT>, </TT>" );
 		}
 
-		if ( num > 0 )
-			fprintf( frep, "<BR>\n" );
-		else
-			fprintf( frep, "(none)<BR>\n" );
-	}
+	if ( num == 0 )
+		fprintf( frep, "(none)<BR>\n" );
+	else
+		fprintf( frep, "<BR>\n" );
+
+	if ( ! show_all )
+		fprintf( frep, "<BR>\n" );
 
 	Tcl_UnlinkVar( inter, "num" );
 }
@@ -1330,8 +1367,8 @@ void create_initial_values( object *r, FILE *frep )
 
 	fprintf( frep, "<HR WIDTH=\"100%%\">\n" );
 	fprintf( frep, "<H3><A NAME=\"%s\">Object: &nbsp;<TT><U>%s</U></TT></A></H3>", r->label, r->label );
-	fprintf( frep, "<i>Instances number: &nbsp</i>%d<BR>", count );
-	fprintf( frep, "<i>Instances group(s): &nbsp;</i>" );
+	fprintf( frep, "<i>Instance number: &nbsp</i>%d<BR>", count );
+	fprintf( frep, "<i>Instance group(s): &nbsp;</i>" );
 
 	for ( i = 0, cur = r; cur != NULL; )
 	{
@@ -1370,7 +1407,7 @@ void create_initial_values( object *r, FILE *frep )
 			fprintf( frep, "<td>Par.</td>\n" );
 			fprintf( frep, "<td>%g", cv->val[ 0 ] );
 
-			for ( j = 1, cur = r->hyper_next( r->label ); cur !=NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
+			for ( j = 1, cur = r->hyper_next( r->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
 			{
 				cv1 = cur->search_var( cur, cv->label );
 				fprintf( frep, ", %g", cv1->val[ 0 ] );
@@ -1895,7 +1932,7 @@ void tex_report_struct( object *r, FILE *f, bool table )
 	{
 		fprintf( f,"\\emph{Containing:} \\lsd{%s}", r->b->blabel );
 		for ( cb = r->b->next; cb != NULL; cb = cb->next )
-			fprintf( f, ",  \\lsd{%s}", cb->blabel );
+			fprintf( f, ",	\\lsd{%s}", cb->blabel );
 		fprintf( f, "\n\n" );
 	}
 
@@ -1908,7 +1945,7 @@ void tex_report_struct( object *r, FILE *f, bool table )
 		if ( ! table )
 			fprintf( f,"\\emph{Contained elements:}\n\n" );
 		else
-			fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n  \\hline\n  \\textbf{Element} & \\textbf{Type} & \\textbf{Lags} & \\textbf{Description and initial values comments} \\\\ \n  \\hline \\endhead\n  \\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
+			fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n	 \\hline\n	\\textbf{Element} & \\textbf{Type} & \\textbf{Lags} & \\textbf{Description and initial values comments} \\\\ \n	 \\hline \\endhead\n  \\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n	\\endfoot\n	 \\endlastfoot\n" );
 	}
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
@@ -1996,7 +2033,7 @@ void tex_report_observe( object *r, FILE *f, bool table )
 		fprintf( f, "\\section{Relevant elements to observe}\n\n" );
 		tab_lines = 0;
 		if ( table )
-			fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n  \\hline\n  \\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description} \\\\ \n  \\hline \\endhead\n  \\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
+			fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n	 \\hline\n	\\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
 	}
 
 	ol = new char[ 2 * strlen( r->label ) + 1 ];
@@ -2069,7 +2106,7 @@ void tex_report_init( object *r, FILE *f, bool table )
 		fprintf( f, "\\section{Relevant elements to initialize}\n\n" );
 		tab_lines = 0;
 		if ( table )
-			fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n  \\hline\n  \\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description and initial values comments} \\\\ \n  \\hline \\endhead\n  \\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
+			fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n	 \\hline\n	\\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description and initial values comments} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
 	}
 
 	ol = new char[ 2 * strlen( r->label ) + 1 ];
@@ -2156,7 +2193,7 @@ void tex_report_initall( object *r, FILE *f, bool table )
 	if ( r->up == NULL )
 	{
 		fprintf( f, "\\section{Initial values}\n\n" );
-		fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n  \\hline\n  \\textbf{Object} & \\textbf{Element} & \\textbf{Lag} & \\textbf{Initial values (by instance)} \\\\ \n  \\hline \\endhead\n  \\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
+		fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n	 \\hline\n	\\textbf{Object} & \\textbf{Element} & \\textbf{Lag} & \\textbf{Initial values (by instance)} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
 	}
 
 	ol = new char[ 2 * strlen( r->label ) + 1 ];

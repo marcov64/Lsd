@@ -423,7 +423,7 @@ void wipe_out( object *d );
 void write_list( FILE *frep, object *root, bool show_all, const char *prefix );
 void write_obj( object *r, FILE *frep, int *elemDone );
 void write_str( object *r, FILE *frep, int dep, const char *prefix );
-void write_var( variable *v, FILE *frep );
+void write_var( object *r, variable *v, FILE *frep );
 
 #ifndef _NP_
 void parallel_update( variable *v, object* p, object *caller = NULL );
