@@ -45,7 +45,7 @@ state.irf.lsd( data, irf, states = NULL, state.num = 1,
   \item{add.vars}{function: a optional function to add new variables to the MC dataset, before the analysis is performed. The function must take a single Monte Carlo run data frame, organized as time on rows and (original) variables on columns. It must return this data frame with new column(s) added, one per each new variable.
   }
 
-  \item{irf.type}{string: one of five options (\code{"incr.irf"}, \code{"cum.irf"}, \code{"peak.mult"}, \code{"cum.mult"}, or \code{"none"}) defining the type of function plot to be produced: incremental impulse-response, cumulative impulse-response, peak multiplier, cumulative multiplier, or no plot. The default is \code{"incr.irf"}. This option only affect the plot, not the produced data.
+  \item{irf.type}{string: one of five options (\code{"incr.irf"}, \code{"cum.irf"}, \code{"peak.mult"}, \code{"cum.mult"}, or \code{"none"}) defining the type of function plot to be produced: incremental impulse-response, cumulative impulse-response, peak multiplier, cumulative multiplier, or no plot. It also selects the type of function to be used when printing reports (response or multiplier functions). The default is \code{"incr.irf"}. This option only affect the plot, not the produced data, as all function values are always computed and saved in the output object.
   }
 
   \item{ci.R}{integer: number of bootstrap replicates when computing the bootstrap confidence interval.

@@ -37,7 +37,7 @@ irf.lsd( data, data.shock, t.horiz, var.irf, var.shock, var.ref = NULL,
   \item{var.ref}{string: the name of a reference variable to scale down (divide) the shock variable. The default is to do no scaling. If provided, it must be one of the column names in \code{data}. The special value \code{"\%"} represents the same variable as the shock one, but using the corresponding non-shock values, so effectively standardizing the shock values.
   }
 
-  \item{irf.type}{string: one of five options (\code{"incr.irf"}, \code{"cum.irf"}, \code{"peak.mult"}, \code{"cum.mult"}, or \code{"none"}) defining the type of function plot to be produced: incremental impulse-response, cumulative impulse-response, peak multiplier, cumulative multiplier, or no plot. The default is \code{"incr.irf"}. This option only affect the plot, not the produced data.
+  \item{irf.type}{string: one of five options (\code{"incr.irf"}, \code{"cum.irf"}, \code{"peak.mult"}, \code{"cum.mult"}, or \code{"none"}) defining the type of function plot to be produced: incremental impulse-response, cumulative impulse-response, peak multiplier, cumulative multiplier, or no plot. It also selects the type of function to be used when printing reports (response or multiplier functions). The default is \code{"incr.irf"}. This option only affect the plot, not the produced data, as all function values are always computed and saved in the output object.
   }
 
   \item{stat}{string: one of \code{"mean"} or \code{"median"}, representing the Monte Carlo statistic used to compare samples. It also selects the corresponding deviation measure, between the standard deviation (SD) or the median absolute deviation (MAD). The default is to use the mean and SD.

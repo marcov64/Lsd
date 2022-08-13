@@ -68,10 +68,10 @@ irf.lsd <- function( data, data.shock, t.horiz, var.irf, var.shock, var.ref = NU
     t.horiz <- dim( data )[ 1 ] - 1
   }
 
-  ci.R <- round( ci.R )
+  ci.R     <- round( ci.R )
   irf.type <- match.arg( irf.type )
-  stat <- match.arg( stat )
-  ci.type <- match.arg( ci.type )
+  stat     <- match.arg( stat )
+  ci.type  <- match.arg( ci.type )
 
   tShock <- outliers <- vector( "numeric" )
   ir <- cir <- pm <- cm <- data.frame( )

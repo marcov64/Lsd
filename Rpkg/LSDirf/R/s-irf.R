@@ -53,7 +53,7 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
   state.num <- round( state.num )
   ci.R      <- round( ci.R )
   ci.type   <- match.arg( ci.type )
-  irf.type      <- match.arg( irf.type )
+  irf.type  <- match.arg( irf.type )
 
   # default evaluation function: 2 states, lower or higher than mean/average
   if( is.null( states ) && is.null( eval.state ) ) {
