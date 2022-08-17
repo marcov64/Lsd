@@ -1246,7 +1246,7 @@ void object::add_var_from_example( variable *example )
 	cv->observe = example->observe;
 	cv->param = example->param;
 	cv->deb_cond = example->deb_cond;
-	cv->debug = example->debug;
+	cv->deb_mode = example->deb_mode;
 	cv->deb_cnd_val = example->deb_cnd_val;
 	cv->data_loaded = example->data_loaded;
 
@@ -3322,6 +3322,13 @@ double object::write( const char *lab, double value, int time, int lag )
 				if ( time == 0 && cv->start == 0 )
 					cv->data[ 0 ] = value;
 		}
+	}
+
+	if ( debug_flag && t == when_debug && cv->deb_mode != 'n' && cv->deb_mode != 'd' )
+	{
+		watch_trigger = true;
+		watch_write_mode = true;
+		strncpy( watch_elem, cv->label, MAX_ELEM_LENGTH );
 	}
 
 	return value;

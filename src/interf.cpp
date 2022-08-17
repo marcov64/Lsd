@@ -36,26 +36,27 @@ object r. See the switch for the complete list of the available commands
 - void show_save( object *n )
 shows all variables to be saved in the result files
 
-- void clean_debug( object *n );
-remove all the flags to debug from any variable in the model
+- void show_debug( object *n );
+shows all variables to debug or watch
+
+- void show_plot( object *n );
+shows all variables to plot during run time
 
 - void clean_save( object *n );
 remove all the flags to save from any variable in the model
 
-- void clean_plot( object *n );
-remove all the flags to plot from any variable in the model
-
 - void clean_debug( object *n );
-remove all the flags to debug from any variable in the model
-
-- void clean_save( object *n );
-remove all the flags to save from any variable in the model
+remove all the flags to debug and watch from any variable in the model
 
 - void clean_plot( object *n );
 remove all the flags to plot from any variable in the model
 
 - void wipe_out( object *d );
-Eliminate all the Object like d from the model. Cancel also the their descendants
+Eliminate all the Object like d from the model
+Cancel also the their descendants
+
+...
+
 *************************************************************/
 
 /*
@@ -195,7 +196,7 @@ int browse( object *r )
 					sp_upd = false;
 
 				// set flags string
-				cmd( "set varFlags \"%s%s%s%s%s\"", ( cv->save || cv->savei ) ? "+" : "", cv->plot ? "*" : "", cv->debug == 'd' ? "!" : "", cv->parallel ? "&" : "", sp_upd ? "\u00A7" : "" );
+				cmd( "set varFlags \"%s%s%s%s%s%s\"", ( cv->save || cv->savei ) ? "+" : "", cv->plot ? "*" : "", ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? "!" : "", ( cv->deb_mode == 'w' || cv->deb_mode == 'W' ) ? "?" : "", ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? "\u00BF" : "", cv->parallel ? "&" : "", sp_upd ? "\u00A7" : "" );
 
 				// add elements to the listbox
 				if ( cv->param == 0 )
@@ -248,21 +249,23 @@ int browse( object *r )
 		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 3
 		cmd( ".l.v.c.var_name.v add checkbutton -label \"Save (+)\" -variable save -accelerator F5 -command { set ctxMenuCmd \"set_var_conf $vname save $save\"; set choice 95 }" );	// entryconfig 4
 		cmd( ".l.v.c.var_name.v add checkbutton -label \"Run Plot (*)\" -variable plot -accelerator F6 -command { set ctxMenuCmd \"set_var_conf $vname plot $plot\"; set choice 95 }" );	// entryconfig 5
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Debug (!)\" -state disabled -variable num -accelerator F7 -command { set ctxMenuCmd \"set_var_conf $vname debug $num\"; set choice 95 }" );	// entryconfig 6
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Parallel (&)\" -state disabled -variable parallel -accelerator F8 -command { set ctxMenuCmd \"set_var_conf $vname parallel $parallel\"; set choice 95 }" );	// entryconfig 7
-		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 8
-		cmd( ".l.v.c.var_name.v add command -label \"Move Up\" -accelerator \"Ctrl+\u2191\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 9
-		cmd( ".l.v.c.var_name.v add command -label \"Move Down\" -accelerator \"Ctrl+\u2193\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr { [ .l.v.c.var_name size ] - 1 } ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 10
-		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 11
-		cmd( ".l.v.c.var_name.v add command -label Move -command { set choice 79 }" );	// entryconfig 12
-		cmd( ".l.v.c.var_name.v add command -label Delete -accelerator Del -command { set choice 76 }" );	// entryconfig 13
-		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 14
-		cmd( ".l.v.c.var_name.v add command -label Equation -state disabled -command { set choice 29 }" );	// entryconfig 15
-		cmd( ".l.v.c.var_name.v add command -label Using -state disabled -command { set choice 46 }" );	// entryconfig 16
-		cmd( ".l.v.c.var_name.v add command -label \"Used In\" -state disabled -command { set choice 47 }" );	// entryconfig 17
-		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 18
-		cmd( ".l.v.c.var_name.v add command -label \"Initial Values\" -state disabled -command { set choice 77 }" );	// entryconfig 19
-		cmd( ".l.v.c.var_name.v add command -label Sensitivity -state disabled -command { set choice 78 }" );	// entryconfig 20
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Debug (!)\" -state disabled -variable debug -accelerator F7 -command { set ctxMenuCmd \"set_var_conf $vname debug $debug\"; set choice 95 }" );	// entryconfig 6
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Watch (?)\" -state disabled -variable watch -accelerator F8 -command { set watch_write 0; set ctxMenuCmd \"set_var_conf $vname watch $watch\"; set choice 95 }" );	// entryconfig 7
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Watch Write (\u00BF)\" -state disabled -variable watch_write -accelerator F9 -command { set watch 0; set ctxMenuCmd \"set_var_conf $vname watch_write $watch_write\"; set choice 95 }" );	// entryconfig 8
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Parallel (&)\" -state disabled -variable parallel -accelerator F10 -command { set ctxMenuCmd \"set_var_conf $vname parallel $parallel\"; set choice 95 }" );	// entryconfig 9
+		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 10
+		cmd( ".l.v.c.var_name.v add command -label \"Move Up\" -accelerator \"Ctrl+\u2191\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 11
+		cmd( ".l.v.c.var_name.v add command -label \"Move Down\" -accelerator \"Ctrl+\u2193\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr { [ .l.v.c.var_name size ] - 1 } ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 12
+		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 13
+		cmd( ".l.v.c.var_name.v add command -label Move -command { set choice 79 }" );	// entryconfig 14
+		cmd( ".l.v.c.var_name.v add command -label Delete -accelerator Del -command { set choice 76 }" );	// entryconfig 15
+		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 16
+		cmd( ".l.v.c.var_name.v add command -label Equation -state disabled -command { set choice 29 }" );	// entryconfig 17
+		cmd( ".l.v.c.var_name.v add command -label Using -state disabled -command { set choice 46 }" );	// entryconfig 18
+		cmd( ".l.v.c.var_name.v add command -label \"Used In\" -state disabled -command { set choice 47 }" );	// entryconfig 19
+		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 20
+		cmd( ".l.v.c.var_name.v add command -label \"Initial Values\" -state disabled -command { set choice 77 }" );	// entryconfig 21
+		cmd( ".l.v.c.var_name.v add command -label Sensitivity -state disabled -command { set choice 78 }" );	// entryconfig 22
 
 		// variables panel bindings
 		if ( r->v != NULL )
@@ -295,40 +298,48 @@ int browse( object *r )
 						.l.v.c.var_name.v entryconfig 2 -state normal; \
 						.l.v.c.var_name.v entryconfig 6 -state normal; \
 						.l.v.c.var_name.v entryconfig 7 -state normal; \
+						.l.v.c.var_name.v entryconfig 8 -state normal; \
 						.l.v.c.var_name.v entryconfig 9 -state normal; \
-						.l.v.c.var_name.v entryconfig 10 -state normal; \
-						.l.v.c.var_name.v entryconfig 15 -state normal; \
-						.l.v.c.var_name.v entryconfig 16 -state normal; \
+						.l.v.c.var_name.v entryconfig 11 -state normal; \
+						.l.v.c.var_name.v entryconfig 12 -state normal; \
 						.l.v.c.var_name.v entryconfig 17 -state normal; \
+						.l.v.c.var_name.v entryconfig 18 -state normal; \
 						.l.v.c.var_name.v entryconfig 19 -state normal; \
-						.l.v.c.var_name.v entryconfig 20 -state normal; \
+						.l.v.c.var_name.v entryconfig 21 -state normal; \
+						.l.v.c.var_name.v entryconfig 22 -state normal; \
 						set save [ get_var_conf $vname save ]; \
 						set plot [ get_var_conf $vname plot ]; \
-						set num [ get_var_conf $vname debug ]; \
+						set debug [ get_var_conf $vname debug ]; \
+						set watch [ get_var_conf $vname watch ]; \
+						set watch_write [ get_var_conf $vname watch_write ]; \
 						set parallel [ get_var_conf $vname parallel ]; \
 						if [ string equal $color $colorsTheme(var) ] { \
-							.l.v.c.var_name.v entryconfig 19 -state disabled; \
-							.l.v.c.var_name.v entryconfig 20 -state disabled; \
+							.l.v.c.var_name.v entryconfig 21 -state disabled; \
+							.l.v.c.var_name.v entryconfig 22 -state disabled; \
 						} elseif [ string equal $color $colorsTheme(par) ] { \
 							.l.v.c.var_name.v entryconfig 2 -state disabled; \
 							.l.v.c.var_name.v entryconfig 6 -state disabled; \
-							.l.v.c.var_name.v entryconfig 7 -state disabled; \
-							.l.v.c.var_name.v entryconfig 15 -state disabled; \
-							.l.v.c.var_name.v entryconfig 16 -state disabled \
+							.l.v.c.var_name.v entryconfig 9 -state disabled; \
+							.l.v.c.var_name.v entryconfig 17 -state disabled; \
+							.l.v.c.var_name.v entryconfig 18 -state disabled \
 						} elseif [ string equal $color $colorsTheme(lfun) ] { \
 							.l.v.c.var_name.v entryconfig 2 -state disabled; \
-							.l.v.c.var_name.v entryconfig 7 -state disabled \
+							.l.v.c.var_name.v entryconfig 7 -state disabled; \
+							.l.v.c.var_name.v entryconfig 8 -state disabled; \
+							.l.v.c.var_name.v entryconfig 9 -state disabled \
 						} elseif [ string equal $color $colorsTheme(fun) ] { \
 							.l.v.c.var_name.v entryconfig 2 -state disabled; \
 							.l.v.c.var_name.v entryconfig 7 -state disabled; \
-							.l.v.c.var_name.v entryconfig 19 -state disabled; \
-							.l.v.c.var_name.v entryconfig 20 -state disabled; \
+							.l.v.c.var_name.v entryconfig 8 -state disabled; \
+							.l.v.c.var_name.v entryconfig 9 -state disabled; \
+							.l.v.c.var_name.v entryconfig 21 -state disabled; \
+							.l.v.c.var_name.v entryconfig 22 -state disabled; \
 						}; \
 						if { $itemfocus == 0 } { \
-							.l.v.c.var_name.v entryconfig 9 -state disabled \
+							.l.v.c.var_name.v entryconfig 11 -state disabled \
 						}; \
 						if { $itemfocus == [ expr { [ .l.v.c.var_name size ] - 1 } ] } { \
-							.l.v.c.var_name.v entryconfig 10 -state disabled \
+							.l.v.c.var_name.v entryconfig 12 -state disabled \
 						}; \
 						tk_popup .l.v.c.var_name.v %%X %%Y \
 					} \
@@ -431,8 +442,8 @@ int browse( object *r )
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color $colorsTheme(par) ] } { \
-						set num [ expr { ! [ get_var_conf $vname debug ] } ]; \
-						set ctxMenuCmd \"set_var_conf $vname debug $num\"; \
+						set debug [ expr { ! [ get_var_conf $vname debug ] } ]; \
+						set ctxMenuCmd \"set_var_conf $vname debug $debug\"; \
 						set choice 95 \
 					} \
 				}" );
@@ -443,6 +454,34 @@ int browse( object *r )
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color $colorsTheme(lfun) ] && ! [ string equal $color $colorsTheme(fun) ] } { \
+						set watch_write 0; \
+						set watch [ expr { ! [ get_var_conf $vname watch ] } ]; \
+						set ctxMenuCmd \"set_var_conf $vname watch $watch\"; \
+						set choice 95 \
+					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <question> { \
+					event generate .l.v.c.var_name <F8> \
+				}" );
+			cmd( "bind .l.v.c.var_name <F9> { \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color $colorsTheme(lfun) ] && ! [ string equal $color $colorsTheme(fun) ] } { \
+						set watch 0; \
+						set watch_write [ expr { ! [ get_var_conf $vname watch_write ] } ]; \
+						set ctxMenuCmd \"set_var_conf $vname watch_write $watch_write\"; \
+						set choice 95 \
+					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <questiondown> { \
+					event generate .l.v.c.var_name <F9> \
+				}" );
+			cmd( "bind .l.v.c.var_name <F11> { \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color $colorsTheme(par) ] && ! [ string equal $color $colorsTheme(lfun) ] && ! [ string equal $color $colorsTheme(fun) ] } { \
 						set parallel [ expr { ! [ get_var_conf $vname parallel ] } ]; \
 						set ctxMenuCmd \"set_var_conf $vname parallel $parallel\"; \
@@ -450,7 +489,7 @@ int browse( object *r )
 					} \
 				}" );
 			cmd( "bind .l.v.c.var_name <ampersand> { \
-					event generate .l.v.c.var_name <F8> \
+					event generate .l.v.c.var_name <F11> \
 				}" );
 			cmd( "bind .l.v.c.var_name <KeyRelease> { \
 					if { ( %%s & 0x20004 ) != 0 } { \
@@ -900,7 +939,7 @@ int browse( object *r )
 			cmd( "ttk::menu $w -tearoff 0" );
 			cmd( "$w add command -label Save -underline 0 -command { set choice 39 }" );
 			cmd( "$w add command -label \"Run-time Plot\" -underline 0 -command { set choice 84 }" );
-			cmd( "$w add command -label Debug -underline 0 -command { set choice 85 }" );
+			cmd( "$w add command -label \"Debug and Watch\" -underline 0 -command { set choice 85 }" );
 			cmd( "$w add command -label Initialize -underline 0 -command { set choice 49 }" );
 			cmd( "$w add command -label Observe -underline 0 -command { set choice 42 }" );
 			cmd( "$w add command -label Parallelize -underline 0 -command { set choice 86 }" );
@@ -912,7 +951,7 @@ int browse( object *r )
 			cmd( "ttk::menu $w -tearoff 0" );
 			cmd( "$w add command -label Save -underline 0 -accelerator Ctrl+G -command { set choice 30 }" );
 			cmd( "$w add command -label \"Run-time Plot\" -underline 0 -command { set choice 31 }" );
-			cmd( "$w add command -label Debug -underline 0 -accelerator Ctrl+F -command { set choice 27 }" );
+			cmd( "$w add command -label \"Debug and Watch\" -underline 0 -accelerator Ctrl+F -command { set choice 27 }" );
 			cmd( "$w add command -label Parallelize -underline 0 -command { set choice 87 }" );
 
 			cmd( "set w .m.help" );
@@ -1125,10 +1164,10 @@ OPERATE
 object *operate( object *r )
 {
 	bool saveAs, delVar, renVar, table, subDir, overwDir;
-	char observe, initial, *lab0;
+	char observe, initial, deb_mode, *lab0;
 	const char *lab1, *lab2, *lab3, *lab4;
 	char lab[ MAX_BUFF_SIZE ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_LINE_SIZE ], ch1[ MAX_ELEM_LENGTH ], NOLHfile[ MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], nw_exe[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ], buf_descr[ MAX_BUFF_SIZE ];
-	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, temp[ 11 ], done = 0;
+	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, temp[ 11 ], done = 0;
 	long nLinks, ptsSa, maxMC;
 	double fracMC, fake = 0;
 	FILE *f;
@@ -1391,7 +1430,7 @@ object *operate( object *r )
 						cv->save = 0;
 						cv->param = param;
 						cv->num_lag = num;
-						cv->debug = 'n';
+						cv->deb_mode = 'n';
 						if ( ( param == 0 && num == 0 ) || param == 2 )
 							cv->data_loaded = '+';
 						else
@@ -1959,7 +1998,6 @@ object *operate( object *r )
 	case 7:
 
 		redrawRoot = redrawStruc = true;	// force browser/structure redraw
-		int savei, parallel;
 
 		cmd( "if { ! [ catch { set vname [ .l.v.c.var_name get [ .l.v.c.var_name curselection ] ] } ] && ! [ string equal $vname \"\" ] } { set choice 1 } { set choice 0 }" );
 		if ( choice == 0 )
@@ -1977,16 +2015,20 @@ object *operate( object *r )
 		cd = search_description( lab_old );
 
 		Tcl_LinkVar( inter, "done", ( char * ) &done, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "debug", ( char * ) &num, TCL_LINK_BOOLEAN );
 		Tcl_LinkVar( inter, "save", ( char * ) &save, TCL_LINK_BOOLEAN );
 		Tcl_LinkVar( inter, "savei", ( char * ) &savei, TCL_LINK_BOOLEAN );
 		Tcl_LinkVar( inter, "plot", ( char * ) &plot, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( inter, "debug", ( char * ) &debug, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( inter, "watch", ( char * ) &watch, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( inter, "watch_write", ( char * ) &watch_write, TCL_LINK_BOOLEAN );
 		Tcl_LinkVar( inter, "parallel", ( char * ) &parallel, TCL_LINK_BOOLEAN );
 
 		save = cv->save;
-		num = ( cv->debug == 'd' ) ? 1 : 0;
-		plot = cv->plot;
 		savei = cv->savei;
+		plot = cv->plot;
+		debug = ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? 1 : 0;
+		watch = ( cv->deb_mode == 'w' || cv->deb_mode == 'W' || cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? 1 : 0;
+		watch_write = ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? 1 : 0;
 		parallel = cv->parallel;
 
 		cmd( "set observe %d", cd->observe == 'y' ? 1 : 0 );
@@ -2121,26 +2163,53 @@ object *operate( object *r )
 		cmd( "ttk::frame $T.b1" );
 
 		cmd( "ttk::frame $T.b1.sav" );
-		cmd( "ttk::checkbutton $T.b1.sav.n -text \"Save: save the series for analysis	   \" -variable save -underline 0 -command { if $save { .chgelem.b1.sav.i configure -state normal } { set savei 0; .chgelem.b1.sav.i configure -state disabled } }" );
+		cmd( "ttk::checkbutton $T.b1.sav.n -text \"Save: save the series for analysis	   \" -variable save -underline 0 -command { \
+				if { $save } { \
+					.chgelem.b1.sav.i configure -state normal \
+				} else { \
+					set savei 0; \
+					.chgelem.b1.sav.i configure -state disabled \
+				} \
+			}" );
 		cmd( "ttk::checkbutton $T.b1.sav.i -text \"Save in separate files\" -variable savei -underline 17" );
-		cmd( "if { ! $save } { set savei 0; .chgelem.b1.sav.i configure -state disabled }" );
+		cmd( "if { ! $save } { \
+				set savei 0; \
+				.chgelem.b1.sav.i configure -state disabled \
+			}" );
 		cmd( "pack $T.b1.sav.n $T.b1.sav.i -side left -anchor w" );
 
 		cmd( "ttk::checkbutton $T.b1.plt -text \"Run-time plot: observe the series during the simulation execution\" -variable plot -underline 9" );
-		cmd( "ttk::checkbutton $T.b1.deb -text \"Debug: allow interruption after this equation/function\" -variable debug -underline 0" );
+		cmd( "ttk::checkbutton $T.b1.deb -text \"Debug: interrupt after variable is updated\" -variable debug -underline 0" );
+
+		cmd( "ttk::frame $T.b1.watch" );
+		cmd( "ttk::checkbutton $T.b1.watch.n -text \"Watch: interrupt when variable is accessed	   \" -variable watch -underline 0 -command { \
+				if { $watch } { \
+					.chgelem.b1.watch.i configure -state normal \
+				} else { \
+					set watch_write 0; \
+					.chgelem.b1.watch.i configure -state disabled \
+				} \
+			}" );
+		cmd( "ttk::checkbutton $T.b1.watch.i -text \"Watch only writes\" -variable watch_write -underline 4" );
+		cmd( "if { ! $watch } { \
+				set watch_write 0; \
+				.chgelem.b1.watch.i configure -state disabled \
+			}" );
+		cmd( "pack $T.b1.watch.n $T.b1.watch.i -side left -anchor w" );
+
 		cmd( "ttk::checkbutton $T.b1.par -text \"Parallel: allow multi-object parallel updating for this equation\" -variable parallel -underline 0" );
 
 		switch ( cv->param )
 		{
 			case 1:
-				cmd( "pack $T.b1.sav $T.b1.plt -anchor w" );
+				cmd( "pack $T.b1.sav $T.b1.plt $T.b1.watch -anchor w" );
 				break;
 			case 2:
 				cmd( "pack $T.b1.sav $T.b1.plt $T.b1.deb -anchor w" );
 				cmd( "bind $T <Control-d> \"$T.b1.deb invoke\"; bind $T <Control-D> \"$T.b1.deb invoke\"" );
 				break;
 			case 0:
-				cmd( "pack $T.b1.sav $T.b1.plt $T.b1.deb $T.b1.par -anchor w" );
+				cmd( "pack $T.b1.sav $T.b1.plt $T.b1.deb $T.b1.watch $T.b1.par -anchor w" );
 				cmd( "bind $T <Control-d> \"$T.b1.deb invoke\"; bind $T <Control-D> \"$T.b1.deb invoke\"" );
 				cmd( "bind $T <Control-p> \"$T.b1.par invoke\"; bind $T <Control-P> \"$T.b1.par invoke\"" );
 		}
@@ -2236,6 +2305,8 @@ object *operate( object *r )
 		cmd( "bind $T <Control-s> \"$T.b1.sav.n invoke\"; bind $T <Control-S> \"$T.b1.sav.n invoke\"" );
 		cmd( "bind $T <Control-f> \"$T.b1.sav.i invoke\"; bind $T <Control-F> \"$T.b1.sav.i invoke\"" );
 		cmd( "bind $T <Control-p> \"$T.b1.plt invoke\"; bind $T <Control-P> \"$T.b1.plt invoke\"" );
+		cmd( "bind $T <Control-w> \"$T.b1.watch.n invoke\"; bind $T <Control-W> \"$T.b1.watch.n invoke\"" );
+		cmd( "bind $T <Control-h> \"$T.b1.watch.i invoke\"; bind $T <Control-H> \"$T.b1.watch.i invoke\"" );
 		cmd( "bind $T <Control-o> \"$Td.opt.obs invoke\"; bind $T <Control-O> \"$Td.opt.obs invoke\"" );
 		cmd( "bind $T <Control-a> \"$Td.b.auto_doc invoke\"; bind $T <Control-A> \"$Td.b.auto_doc invoke\"" );
 		cmd( "bind $T <Control-u> \"$Td.b.us invoke\"; bind $T <Control-U> \"$Td.b.us invoke\"" );
@@ -2293,12 +2364,33 @@ object *operate( object *r )
 			cd->initial = initial;
 			cd->observe = observe;
 
+			if ( debug )
+			{
+				if ( watch_write )
+					deb_mode = 'R';
+				else
+					if ( watch )
+						deb_mode = 'W';
+					else
+						deb_mode = 'd';
+			}
+			else
+			{
+				if ( watch_write )
+					deb_mode = 'r';
+				else
+					if ( watch )
+						deb_mode = 'w';
+					else
+						deb_mode = 'n';
+			}
+
 			for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 			{
 			   cv = cur->search_var( NULL, lab_old );
 			   cv->save = save;
 			   cv->savei = savei;
-			   cv->debug = ( num == 1 ) ? 'd' : 'n';
+			   cv->deb_mode = deb_mode;
 			   cv->plot = plot;
 			   cv->parallel = parallel;
 			   cv->observe = ( observe == 'y' ) ? true : false;
@@ -2328,8 +2420,10 @@ object *operate( object *r )
 		Tcl_UnlinkVar( inter, "done" );
 		Tcl_UnlinkVar( inter, "save" );
 		Tcl_UnlinkVar( inter, "savei" );
-		Tcl_UnlinkVar( inter, "debug" );
 		Tcl_UnlinkVar( inter, "plot" );
+		Tcl_UnlinkVar( inter, "debug" );
+		Tcl_UnlinkVar( inter, "watch" );
+		Tcl_UnlinkVar( inter, "watch_write" );
 		Tcl_UnlinkVar( inter, "parallel" );
 		cmd( "unset done" );
 
@@ -3667,10 +3761,10 @@ object *operate( object *r )
 	break;
 
 
-	// Show variables to debug
+	// Show elements to debug and watch
 	case 85:
 
-		plog( "\n\nVariables to debug:\n" );
+		plog( "\n\nVariables and parameters to debug and watch:\n" );
 		lcount = 0;
 		show_debug( root );
 		if ( lcount == 0 )
@@ -3754,10 +3848,10 @@ object *operate( object *r )
 	break;
 
 
-	// Remove all the debugging flags
+	// Remove all the debug and watch flags
 	case 27:
 
-		cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove debug flags?\" -detail \"Confirm the removal of all debugging information. Debugger will not stop in any variable update.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
+		cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove debug and watch flags?\" -detail \"Confirm the removal of all debugging and watching information. Debugger will not stop in any variable update, access or write.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 
 		if ( choice == 1 )
 		{
@@ -6717,13 +6811,36 @@ void show_debug( object *n )
 	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
-		if ( cv->debug == 'd' )
+		if ( cv->deb_mode != 'n' )
 		{
 			if ( cv->param == 0 )
 				plog( "Object: %s \tVariable:\t", n->label );
+			if ( cv->param == 1 )
+				plog( "Object: %s \tParameter:\t", n->label );
 			if ( cv->param == 2 )
 				plog( "Object: %s \tFunction:\t", n->label );
-			plog_tag( "%s\n", "highlight", cv->label );
+
+			plog_tag( "%s\t", "highlight", cv->label );
+
+			switch ( cv->deb_mode )
+			{
+				default:
+				case 'd':
+					plog( "(debug)\n" );
+					break;
+				case 'w':
+					plog( "(watch)\n" );
+					break;
+				case 'D':
+					plog( "(debug and watch)\n" );
+					break;
+				case 'r':
+					plog( "(watch write)\n" );
+					break;
+				case 'R':
+					plog( "(debug and watch write)\n" );
+			}
+
 			lcount++;
 		}
 
@@ -6804,7 +6921,7 @@ void clean_debug( object *n )
 	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
-		cv->debug = 'n';
+		cv->deb_mode = 'n';
 
 	for ( cb = n->b; cb != NULL; cb = cb->next )
 		for ( co = cb->head; co != NULL; co = co->next )
@@ -7831,12 +7948,18 @@ int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 			res[ 0 ] = cv->plot ? '1' : '0';
 		else
 			if ( ! strcmp( argv[ 2 ], "debug" ) )
-				res[ 0 ] = cv->debug == 'd' ? '1' : '0';
+				res[ 0 ] = ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? '1' : '0';
 			else
-				if ( ! strcmp( argv[ 2 ], "parallel" ) )
-					res[ 0 ] = cv->parallel ? '1' : '0';
+				if ( ! strcmp( argv[ 2 ], "watch" ) )
+					res[ 0 ] = ( cv->deb_mode == 'w' || cv->deb_mode == 'W' ) ? '1' : '0';
 				else
-					return TCL_ERROR;
+					if ( ! strcmp( argv[ 2 ], "watch_write" ) )
+						res[ 0 ] = ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? '1' : '0';
+					else
+						if ( ! strcmp( argv[ 2 ], "parallel" ) )
+							res[ 0 ] = cv->parallel ? '1' : '0';
+						else
+							return TCL_ERROR;
 
 	Tcl_SetResult( inter, res, TCL_VOLATILE );
 	return TCL_OK;
@@ -7880,12 +8003,75 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 					cv->plot = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
 				else
 					if ( ! strcmp( argv[ 2 ], "debug" ) )
-						cv->debug  = ( ! strcmp( argv[ 3 ], "1" ) ) ? 'd' : 'n';
-					else
-						if ( ! strcmp( argv[ 2 ], "parallel" ) )
-							cv->parallel  = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+					{
+						if ( ! strcmp( argv[ 3 ], "1" ) )
+						{
+							if ( cv->deb_mode == 'n' )
+								cv->deb_mode = 'd';
+							else
+								if ( cv->deb_mode == 'w' )
+									cv->deb_mode = 'W';
+								else
+									if ( cv->deb_mode == 'r' )
+										cv->deb_mode = 'R';
+						}
 						else
-							return TCL_ERROR;
+						{
+							if ( cv->deb_mode == 'd' )
+								cv->deb_mode = 'n';
+							else
+								if ( cv->deb_mode == 'W' )
+									cv->deb_mode = 'w';
+								else
+									if ( cv->deb_mode == 'R' )
+										cv->deb_mode = 'r';
+						}
+					}
+					else
+						if ( ! strcmp( argv[ 2 ], "watch" ) )
+						{
+							if ( ! strcmp( argv[ 3 ], "1" ) )
+							{
+								if ( cv->deb_mode == 'n' || cv->deb_mode == 'r' )
+									cv->deb_mode = 'w';
+								else
+									if ( cv->deb_mode == 'd' || cv->deb_mode == 'R' )
+										cv->deb_mode = 'W';
+							}
+							else
+							{
+								if ( cv->deb_mode == 'w' || cv->deb_mode == 'r' )
+									cv->deb_mode = 'n';
+								else
+									if ( cv->deb_mode == 'W' || cv->deb_mode == 'R' )
+										cv->deb_mode = 'd';
+							}
+						}
+						else
+							if ( ! strcmp( argv[ 2 ], "watch_write" ) )
+							{
+								if ( ! strcmp( argv[ 3 ], "1" ) )
+								{
+									if ( cv->deb_mode == 'n' || cv->deb_mode == 'w' )
+										cv->deb_mode = 'r';
+									else
+										if ( cv->deb_mode == 'd' || cv->deb_mode == 'W' )
+											cv->deb_mode = 'R';
+								}
+								else
+								{
+									if ( cv->deb_mode == 'r' )
+										cv->deb_mode = 'n';
+									else
+										if ( cv->deb_mode == 'R' )
+											cv->deb_mode = 'd';
+								}
+							}
+							else
+								if ( ! strcmp( argv[ 2 ], "parallel" ) )
+									cv->parallel  = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+								else
+									return TCL_ERROR;
 	}
 
 	unsaved_change( true );				// signal unsaved change

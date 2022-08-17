@@ -68,7 +68,7 @@
 #define MAX_BUFF_SIZE 10000				// standard Tcl buffer size (>9999)
 #define MAX_PATH_LENGTH 1000			// maximum path length (>999)
 #define MAX_LINE_SIZE 1000				// max size of a text line to read from files (>999)
-#define MAX_ELEM_LENGTH 100				// maximum element ( object, variable ) name length (>99)
+#define MAX_ELEM_LENGTH 100				// maximum element (object, variable) name length (>99)
 #define MAX_FILE_SIZE 1000000			// max number of bytes to read from files
 #define MAX_FILE_TRY 100000				// max number of lines to read from files
 
@@ -309,7 +309,7 @@ struct variable
 	char *label;
 	char *lab_tit;
 	char data_loaded;
-	char debug;
+	char deb_mode;
 	bool dummy;
 	bool observe;
 	bool parallel;

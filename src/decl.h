@@ -451,6 +451,8 @@ extern bool scrollB;			// scroll check box state in current runtime plot
 extern bool struct_loaded;		// a valid configuration file is loaded
 extern bool unsavedData;		// control for unsaved simulation results
 extern bool unsavedSense;		// control for unsaved changes in sensitivity data
+extern bool watch_trigger;		// indicate that a watch condition was met
+extern bool watch_write_mode;	// flag for write-only watch condition
 extern bool worker_ready;		// parallel worker ready flag
 extern bool worker_crashed;		// parallel worker crash flag
 extern char *eq_file;			// equation file content
@@ -465,6 +467,7 @@ extern char name_rep[ ];		// documentation report file name
 extern char nonavail[ ];		// string for unavailable values
 extern char path_res[ ];		// path of last used results directory
 extern char path_sens[ ];		// path of last used sensitivity directory
+extern char watch_elem[ ];		// name of element triggering watch condition
 extern description *descr;		// model description structure
 extern double t_dist_cl[ T_CLEVS ];// t-distribution table confidence levels
 extern double t_dist_st[ T_CLEVS ][ 36 ];// t-distribution table statistics

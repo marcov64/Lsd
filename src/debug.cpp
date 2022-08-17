@@ -68,7 +68,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 {
 	bool pre_running, redraw;
 	char ch[ 4 * MAX_ELEM_LENGTH ], ch1[ MAX_ELEM_LENGTH ];
-	int i, j, k, count, cond, eff_lags;
+	int i, j, k, count, cond, debug, eff_lags;
 	double value_search, app_res, *app_values;
 	object *cur, *cur1, *cur2;
 	bridge *cb, *cb1;
@@ -251,6 +251,23 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 	Tcl_LinkVar( inter, "value", ( char * ) &app_res, TCL_LINK_DOUBLE );
 	cmd( "set value_change 0" );
 
+	if ( watch_trigger )
+	{
+		if ( watch_write_mode )
+			cmd( "set watch_msg \"      Write watch:\"" );
+		else
+			cmd( "set watch_msg \"      Read watch:\"" );
+
+		cmd( "set watch_name %s", watch_elem );
+	}
+	else
+	{
+		cmd( "set watch_msg \"\"" );
+		cmd( "set watch_name \"\"" );
+	}
+
+	watch_trigger = false;		// clears any watch condition already signaled
+
 	redraw = true;
 	choice = 0;
 
@@ -306,9 +323,11 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 							ttk::label .deb.v.v1.val1 -text \"Value:\"; \
 							ttk::label .deb.v.v1.val2 -width 15 -anchor w -style hl.TLabel \
 						}; \
-						ttk::label .deb.v.v1.obs -text \"(click to change value or view more digits)\"; \
+						ttk::label .deb.v.v1.obs -text \"(click to change or more digits)\"; \
+						ttk::label .deb.v.v1.msg; \
+						ttk::label .deb.v.v1.watch -style hl.TLabel; \
 						if { %d == 1 } { \
-							pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 .deb.v.v1.val1 .deb.v.v1.val2 .deb.v.v1.obs -side left; \
+							pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 .deb.v.v1.val1 .deb.v.v1.val2 .deb.v.v1.obs .deb.v.v1.msg .deb.v.v1.watch -side left; \
 							bind .deb <KeyPress-g> { set choice 28 }; \
 							bind .deb <KeyPress-G> { set choice 28 } \
 						} { \
@@ -316,8 +335,8 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						} \
 					}", interact ? 1 : 0, mode );
 
-				cmd( ".deb.v.v1.name2 conf -text \"%s\"", lab == NULL ? "" : lab );
-				cmd( ".deb.v.v1.time2 conf -text \"%d	   \"", t );
+				cmd( ".deb.v.v1.name2 configure -text \"%s\"", lab == NULL ? "" : lab );
+				cmd( ".deb.v.v1.time2 configure -text \"%d	   \"", t );
 			}
 
 			// create the element list
@@ -429,6 +448,9 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				}" );
 			cmd( "unset -nocomplain lstDebPos" );
 		}
+
+		cmd( ".deb.v.v1.msg configure -text \"$watch_msg\"" );
+		cmd( ".deb.v.v1.watch configure -text $watch_name" );
 
 		cmd( "update idletasks" );
 		cmd( "after idle { focustop .deb }" );		// wait before focus because of Tk bug
@@ -573,13 +595,13 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 					break;
 				}
 
-				Tcl_LinkVar( inter, "debug", ( char * ) &count, TCL_LINK_INT );
+				Tcl_LinkVar( inter, "debug", ( char * ) &debug, TCL_LINK_INT );
 				Tcl_LinkVar( inter, "time", ( char * ) &t, TCL_LINK_INT );
 				Tcl_LinkVar( inter, "i", ( char * ) &i, TCL_LINK_INT );
 
 				cv = r->search_var( NULL, get_str( "res" ) );
 				i = cv->last_update;
-				count = ( cv->debug == 'd' ) ? 1 : 0;
+				debug = ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? 1 : 0;
 				eff_lags = ( cv->last_update >= cv->num_lag ) ? cv->num_lag : cv->num_lag - 1;
 				app_values = new double[ eff_lags + 1 ];
 				cmd( "set debugall 0" );
@@ -716,7 +738,29 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 				cmd( "destroytop $e" );
 
-				cv->debug = ( count == 1 ) ? 'd' : 'n';
+				if ( debug )
+				{
+					if ( cv->deb_mode == 'n' )
+						cv->deb_mode = 'd';
+					else
+						if ( cv->deb_mode == 'w' )
+							cv->deb_mode = 'W';
+						else
+							if ( cv->deb_mode == 'r' )
+								cv->deb_mode = 'R';
+				}
+				else
+				{
+					if ( cv->deb_mode == 'd' )
+						cv->deb_mode = 'n';
+					else
+						if ( cv->deb_mode == 'W' )
+							cv->deb_mode = 'w';
+						else
+							if ( cv->deb_mode == 'R' )
+								cv->deb_mode = 'r';
+				}
+
 				Tcl_UnlinkVar( inter, "debug" );
 				count = choice;
 
@@ -725,7 +769,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 					for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 					{
 						cv1 = cur->search_var( cur, cv->label );
-						cv1->debug = cv->debug;
+						cv1->deb_mode = cv->deb_mode;
 					}
 
 				choice = count;

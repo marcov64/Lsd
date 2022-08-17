@@ -98,7 +98,7 @@ OBJECT::SAVE_PARAM
 void object::save_param( FILE *f )
 {
 	int i, count = 0;
-	char ch, ch1, ch2;
+	char ch1, ch2, ch3, ch4;
 	bridge *cb;
 	description *cd;
 	object *cur;
@@ -122,14 +122,14 @@ void object::save_param( FILE *f )
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		// search for unloaded data
-		ch = '+';
+		ch2 = '+';
 		if ( cv->param == 1 || cv->num_lag > 0 )
 			for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
 			{
 				cv1 = cur->search_var( NULL, cv->label );
 				if ( cv1->data_loaded == '-' )
 				{
-					ch = '-';
+					ch2 = '-';
 					break;
 				}
 			}
@@ -139,17 +139,35 @@ void object::save_param( FILE *f )
 			cd->initial = 'n';
 		}
 
+		// debug mode: character coding for compatibility
+		// ch1: n = no save
+		//		s = save to memory
+		//		S = save to disk
+		// ch2: + = initialized
+		//		- = not initialized
+		// ch3: n = no debug or watch
+		//		d = debug only
+		//		w = watch only
+		//		W = debug and watch
+		//		r = watch write only
+		//		R = debug and watch write
+		// ch4: n = no runtime plot or parallel update
+		//		N = parallel update only
+		//		p = runtime plot only
+		//		P = runtime plot and parallel update
+
 		ch1 = cv->save ? 's' : 'n';
 		ch1 = cv->savei ? toupper( ch1 ) : ch1;
-		ch2 = cv->plot ? 'p' : 'n';
-		ch2 = cv->parallel ? toupper( ch2 ) : ch2;
+		ch3 = cv->deb_mode;
+		ch4 = cv->plot ? 'p' : 'n';
+		ch4 = cv->parallel ? toupper( ch4 ) : ch4;
 
 		if ( cv->param == 0 )
-			fprintf( f, "Var: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch, cv->debug, ch2 );
+			fprintf( f, "Var: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch2, ch3, ch4 );
 		if ( cv->param == 1 )
-			fprintf( f, "Param: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch, cv->debug, ch2 );
+			fprintf( f, "Param: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch2, ch3, ch4 );
 		if ( cv->param == 2 )
-			fprintf( f, "Func: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch, cv->debug, ch2 );
+			fprintf( f, "Func: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch2, ch3, ch4 );
 
 		for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
 		{
@@ -185,7 +203,7 @@ OBJECT::LOAD_PARAM
 ****************************************************/
 bool object::load_param( const char *file_name, int repl, FILE *f )
 {
-	char str[ MAX_ELEM_LENGTH ], ch, ch1, ch2;
+	char str[ MAX_ELEM_LENGTH ], ch1, ch2, ch3, ch4;
 	int num, i;
 	double app;
 	fpos_t pos;
@@ -204,10 +222,10 @@ bool object::load_param( const char *file_name, int repl, FILE *f )
 	if ( f == NULL )
 		return false;
 
-	if ( fscanf( f, " %c", &ch ) != 1 )
+	if ( fscanf( f, " %c", &ch1 ) != 1 )
 		return false;
 
-	if ( ch == 'C' )
+	if ( ch1 == 'C' )
 		to_compute = true;
 	else
 		to_compute = false;
@@ -216,6 +234,7 @@ bool object::load_param( const char *file_name, int repl, FILE *f )
 	{
 		if ( fscanf( f, "\t%d", &num ) != 1 )
 			return false;
+
 		cur->to_compute = to_compute;
 		cur->replicate( num );
 		for ( ; go_brother( cur ) != NULL; cur = cur->next );
@@ -229,26 +248,28 @@ bool object::load_param( const char *file_name, int repl, FILE *f )
 		if ( f == NULL )
 			return false;
 
-		if ( fscanf( f, "%d %c %c %c %c", &( cv->num_lag ), &ch1, &ch, &( cv->debug ), &ch2	  ) != 5 )
+		if ( fscanf( f, "%d %c %c %c %c", &( cv->num_lag ), &ch1, &ch2, &ch3, &ch4 ) != 5 )
 			return false;
 
 		cv->save = ( tolower( ch1 ) == 's' ) ? true : false;
 		cv->savei = ( ch1 == 'S' || ch1 == 'N' ) ? true : false;
-		cv->plot = ( tolower( ch2 ) == 'p' ) ? true : false;
-		cv->parallel = ( ch2 == 'P' || ch2 == 'N' ) ? true : false;
+		cv->data_loaded = ch2;
+		cv->deb_mode = ch3;
+		cv->plot = ( tolower( ch4 ) == 'p' ) ? true : false;
+		cv->parallel = ( ch4 == 'P' || ch4 == 'N' ) ? true : false;
 
 		for ( cur = this; cur != NULL; repl == 1 ? cur = cur->hyper_next( label ) : cur = NULL )
 		{
 			cv1 = cur->search_var( NULL, cv->label );
 			cv1->val = new double[ cv->num_lag + 1 ];
+			cv1->param = cv->param;
 			cv1->num_lag = cv->num_lag;
 			cv1->save = cv->save;
 			cv1->savei = cv->savei;
 			cv1->plot = cv->plot;
+			cv1->data_loaded = cv->data_loaded;
+			cv1->deb_mode = cv->deb_mode;
 			cv1->parallel = cv->parallel;
-			cv1->param = cv->param;
-			cv1->debug = cv->debug;
-			cv1->data_loaded = ch;
 
 			if ( cv1->param == 1 )
 			{
