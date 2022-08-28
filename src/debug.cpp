@@ -449,8 +449,11 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 			cmd( "unset -nocomplain lstDebPos" );
 		}
 
+		if ( mode == 1 || mode == 4 )
+		{
 		cmd( ".deb.v.v1.msg configure -text \"$watch_msg\"" );
 		cmd( ".deb.v.v1.watch configure -text $watch_name" );
+		}
 
 		cmd( "update idletasks" );
 		cmd( "after idle { focustop .deb }" );		// wait before focus because of Tk bug
