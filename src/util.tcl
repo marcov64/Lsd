@@ -690,6 +690,65 @@ proc insert_series_list { lbox slist { name "" } { par "" } { pos end } } {
 
 
 #************************************************
+# REMOVE_SERIES_SELECTED
+# Remove selected or all series from an AoR listbox
+#************************************************
+proc removes_series_selected { lbox { all false } } {
+	global serDescrDict prog_series tit
+
+	if { $all } {
+		$lbox delete 0 end
+	} else {
+		set tot [ $lbox curselection ]
+		set n [ llength $tot ]
+		set prog_series_fast [ expr { $prog_series / 100 } ]
+
+		if { $n > $prog_series_fast } {
+			progressbox .da.ser "Remove Series" "Removing selected series" "Series" $n { set stop true } .da
+		}
+
+		set steps 0
+		set stop false
+		foreach i $tot {
+			set j [ expr { $i - $steps } ]
+			tooltip::tooltip $lbox -item $j ""
+			$lbox delete $j
+
+			incr steps
+
+			if { $n > $prog_series_fast && $steps % $prog_series_fast == 0 } {
+				prgboxupdate .da.ser [ expr { $steps - 1 } ]
+			}
+
+			if { $stop } {
+				break
+			}
+		}
+
+		if { $n > $prog_series_fast } {
+			prgboxupdate .da.ser [ expr { $steps - 1 } ]
+		}
+
+		set j [ $lbox index end ]
+		for { set i 0 } { $i < $j } { incr i } {
+			set name [ lindex [ $lbox get $i ] 0 ]
+			if { [ dict exists $serDescrDict $name ] } {
+				tooltip::tooltip $lbox -item $i [ dict get $serDescrDict $name ]
+			}
+		}
+
+		destroytop .da.ser
+	}
+
+	if { [ $lbox size ] == 0 } {
+		set tit ""
+	} else {
+		set tit [ $lbox get 0 ]
+	}
+}
+
+
+#************************************************
 # SORT_SERIES
 # Sort series to an AoR listbox, according to
 # the selected criterion, if different
@@ -850,7 +909,7 @@ proc comp_und_dec { a b } {
 # in increasing order
 #************************************************
 proc str_comp_dict { a b } {
-	dict get {1 0  {0 1} -1  {1 0} 1} [ lsort -indices -dictionary -unique [ list $a $b ] ]
+	dict get {1 0  {0 1} -1	 {1 0} 1} [ lsort -indices -dictionary -unique [ list $a $b ] ]
 }
 
 
@@ -941,7 +1000,7 @@ proc rgb_24_color { color } {
 set winYes [ list "86" "-ltcl" "-ltk" "-lz" "-mthreads" "-mwindows" "LSDROOT" "SRC" "PATH_TCLTK_HEADER" "PATH_TCLTK_LIB" "TCLTK_LIB" "PATH_HEADER" "PATH_LIB" "LIB" "WRC" "CC" "GLOBAL_CC" "SSWITCH_CC" ]
 set winNo  [ list "-framework" "-lpthread" "EXT" "PATH_TCL_HEADER" "PATH_TK_HEADER" "PATH_TCL_LIB" "PATH_TK_LIB" "TCL_LIB" "LIBS" ]
 set linuxYes [ list "8.6" "-ltcl" "-ltk" "-lz" "-lpthread" "LSDROOT" "SRC" "PATH_TCLTK_HEADER" "PATH_TCLTK_LIB" "TCLTK_LIB" "PATH_HEADER" "PATH_LIB" "LIB" "CC" "GLOBAL_CC" "SSWITCH_CC" ]
-set linuxNo  [ list "windres" "-framework" "-mthreads" "-mwindows" "PATH_TCL_HEADER" "PATH_TK_HEADER" "PATH_TCL_LIB" "PATH_TK_LIB" "TCL_LIB" "LIBS" "WRC" ]
+set linuxNo	 [ list "windres" "-framework" "-mthreads" "-mwindows" "PATH_TCL_HEADER" "PATH_TK_HEADER" "PATH_TCL_LIB" "PATH_TK_LIB" "TCL_LIB" "LIBS" "WRC" ]
 set macYes [ list "-framework" "-lz" "-lpthread" "LSDROOT" "SRC" "PATH_TCL_HEADER" "PATH_TK_HEADER" "PATH_TCLTK_LIB" "TCLTK_LIB" "PATH_HEADER" "PATH_LIB" "LIB" "CC" "GLOBAL_CC" "SSWITCH_CC" ]
 set macNo  [ list "86" "8.6" "windres" "-mthreads" "-mwindows" "PATH_TCLTK_HEADER" "PATH_TCL_LIB" "PATH_TK_LIB" "TCL_LIB" "LIBS" "WRC" ]
 
@@ -1189,8 +1248,8 @@ proc listToByteArray { valuetype list { elemsize 0 } } {
 }
 
 interp alias { } stringsToByteArray { } listToByteArray s
-interp alias { } intsToByteArray    { } listToByteArray i
-interp alias { } floatsToByteArray  { } listToByteArray f
+interp alias { } intsToByteArray	{ } listToByteArray i
+interp alias { } floatsToByteArray	{ } listToByteArray f
 interp alias { } doublesToByteArray { } listToByteArray d
 
 
@@ -1214,8 +1273,8 @@ proc byteArrayToList { valuetype bytearray { elemsize 0 } } {
 		   binary scan $bytearray ${valuetype}* result
 		}
 		s {
-			set result  { }
-			set length  [ string length $bytearray ]
+			set result	{ }
+			set length	[ string length $bytearray ]
 			set noelems [ expr { $length / $elemsize } ]
 			for { set i 0 } { $i < $noelems } { incr i } {
 				set elem [ string range $bytearray \
@@ -1237,8 +1296,8 @@ proc byteArrayToList { valuetype bytearray { elemsize 0 } } {
 }
 
 interp alias { } byteArrayToStrings { } byteArrayToList s
-interp alias { } byteArrayToInts    { } byteArrayToList i
-interp alias { } byteArrayToFloats  { } byteArrayToList f
+interp alias { } byteArrayToInts	{ } byteArrayToList i
+interp alias { } byteArrayToFloats	{ } byteArrayToList f
 interp alias { } byteArrayToDoubles { } byteArrayToList d
 
 

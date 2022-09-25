@@ -2226,11 +2226,7 @@ void analysis( bool mc )
 				cmd( "destroytop .da.a" );
 
 				cmd( "if { ! $selOnly } { \
-						set steps 0; \
-						foreach i [ .da.vars.ch.f.v curselection ] { \
-							.da.vars.ch.f.v delete [ expr { $i - $steps } ]; \
-							incr steps \
-						} \
+						removes_series_selected .da.vars.ch.f.v \
 					} { \
 						if { [ llength [ .da.vars.ch.f.v curselection ] ] > 0 } { \
 							.da.vars.ch.f.v see [ lindex [ .da.vars.ch.f.v curselection ] 0 ] \
@@ -2421,43 +2417,13 @@ void analysis( bool mc )
 
 			// remove the vars. selected from the variables to plot
 			case 7:
-				cmd( "set tot [ .da.vars.ch.f.v curselection ]" );
-				cmd( "set l [ llength $tot ]" );
-				cmd( "if { $l > %d } { \
-						progressbox .da.ser \"Remove Series\" \"Removing selected series\" \"Series\" $l { set stop true } .da \
-						}", PROG_SERIES / 100 );
-				cmd( "set steps 0" );
-				cmd( "set stop false" );
-				cmd( "foreach i $tot { \
-						.da.vars.ch.f.v delete [ expr { $i - $steps } ]; \
-						incr steps; \
-						if { $l > %d && $steps %% %d == 0 } { \
-							prgboxupdate .da.ser [ expr { $steps - 1 } ] \
-						}; \
-						if { $stop } { \
-							break \
-						} \
-					}", PROG_SERIES / 100, PROG_SERIES / 100 );
-				cmd( "if { $l > %d } { \
-						prgboxupdate .da.ser [ expr { $steps - 1 } ] \
-					}", PROG_SERIES / 100 );
-				cmd( "destroytop .da.ser" );
-				cmd( "if { [ .da.vars.ch.f.v size ] == 0 } { \
-						set tit \"\" \
-					} else { \
-						set tit [ .da.vars.ch.f.v get 0 ] \
-					}" );
-
+				cmd( "removes_series_selected .da.vars.ch.f.v" );
 				break;
-
 
 			// remove all the variables from the list of vars to plot
 			case 8:
-				cmd( ".da.vars.ch.f.v delete 0 end" );
-				cmd( "set tit \"\"" );
-
+				cmd( "removes_series_selected .da.vars.ch.f.v true" );
 				break;
-
 
 			// add existing variables (no saved)
 			case 45:

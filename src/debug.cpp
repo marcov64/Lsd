@@ -451,8 +451,8 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 		if ( mode == 1 || mode == 4 )
 		{
-		cmd( ".deb.v.v1.msg configure -text \"$watch_msg\"" );
-		cmd( ".deb.v.v1.watch configure -text $watch_name" );
+			cmd( ".deb.v.v1.msg configure -text \"$watch_msg\"" );
+			cmd( ".deb.v.v1.watch configure -text $watch_name" );
 		}
 
 		cmd( "update idletasks" );
