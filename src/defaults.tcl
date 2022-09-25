@@ -136,6 +136,7 @@ set rstepM		0.1	; # relative scaling factor step step
 set rfactM		0.3	; # horizontal range exponential factor
 set rinitM		750	; # horizontal initial width (4 root sons)
 set rincrM		100	; # horizontal width increase step
+set rootyM		15	; # vertical height of the root object click area
 
 # runtime windows margins and defaults
 set hsizeR		500	; # horizontal size in pixels

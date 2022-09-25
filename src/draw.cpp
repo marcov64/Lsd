@@ -102,6 +102,9 @@ void show_graph( object *t )
 	cmd( "bind .str.f.c <Button-1> { \
 			if { [ info exists res_g ] } { \
 				set choice_g 24 \
+			} elseif { %%y <= $rootyM } { \
+				set res_g Root; \
+				set choice_g 24 \
 			} \
 		}" );
 	cmd( "bind .str.f.c <Double-Button-1> { \
