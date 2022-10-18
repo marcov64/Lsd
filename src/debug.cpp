@@ -82,6 +82,10 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 	set_buttons_run( false );
 
+	// destroy existing window if INTERACT happens while debugger is stepping
+	if ( interact && exists_var( "interacting" ) && ! get_bool( "interacting" ) )
+		cmd( "destroytop .deb" );
+
 	cmd( "set deb .deb" );
 	cmd( "set lab \"%s\"", lab == NULL ? "" : lab );
 	cmd( "if { ! [ winfo exists .deb ] } { \
@@ -197,19 +201,19 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 			{
 				cmd( "ttk::button .deb.b.act.run -width $butWidD -text Run -command { set choice 2; set_c_var done_in 0 } -underline 0" );
 				cmd( "ttk::button .deb.b.act.until -width $butWidD -text Until -command { set choice 16; set_c_var done_in 0 } -underline 3" );
-				cmd( "ttk::button .deb.b.act.ok -width $butWidD -text Step -command { set choice 1; set_c_var done_in 3 } -underline 0" );
+				cmd( "ttk::button .deb.b.act.step -width $butWidD -text Step -command { set choice 1; set_c_var done_in 3 } -underline 0" );
 				cmd( "ttk::button .deb.b.act.call -width $butWidD -text Caller -command { set choice 9 } -underline 0" );
 				cmd( "ttk::button .deb.b.act.prn_v -width $butWidD -text \"v\\\[...\\]\" -command { set choice 15 } -underline 0" );
 
 				cmd( "tooltip::tooltip .deb.b.act.run \"Continue simulation to end\"" );
 				cmd( "tooltip::tooltip .deb.b.act.until \"Continue simulation to given time step\"" );
-				cmd( "tooltip::tooltip .deb.b.act.ok \"Continue simulation to next time step\"" );
+				cmd( "tooltip::tooltip .deb.b.act.step \"Continue simulation to next time step\"" );
 				cmd( "tooltip::tooltip .deb.b.act.call \"Move to caller object\"" );
 				cmd( "tooltip::tooltip .deb.b.act.prn_v \"Show/hide intermediate values\"" );
 
 				cmd( "bind .deb <KeyPress-r> { .deb.b.act.run invoke }; bind .deb <KeyPress-R> { .deb.b.act.run invoke }; bind .deb <F5> { .deb.b.act.run invoke }" );
 				cmd( "bind .deb <KeyPress-i> { .deb.b.act.until invoke }; bind .deb <KeyPress-I> { .deb.b.act.until invoke }; bind .deb <F7> { .deb.b.act.until invoke }" );
-				cmd( "bind .deb <KeyPress-s> { .deb.b.act.ok invoke }; bind .deb <KeyPress-S> { .deb.b.act.ok invoke }; bind .deb <F8> { .deb.b.act.ok invoke }" );
+				cmd( "bind .deb <KeyPress-s> { .deb.b.act.step invoke }; bind .deb <KeyPress-S> { .deb.b.act.step invoke }; bind .deb <F8> { .deb.b.act.step invoke }" );
 				cmd( "bind .deb <KeyPress-c> { .deb.b.act.call invoke }; bind .deb <KeyPress-C> { .deb.b.act.call invoke }; bind .deb <F6> { .deb.b.act.call invoke }" );
 				cmd( "bind .deb <KeyPress-v> { .deb.b.act.prn_v invoke }; bind .deb <KeyPress-V> { .deb.b.act.prn_v invoke }" );
 			}
@@ -232,7 +236,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 			cmd( "tooltip::tooltip .deb.b.act.stack \"Maximum level of computation stack\"" );
 
 			if ( mode == 1 )
-				cmd( "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.call .deb.b.act.prn_v .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx $butSpc -side left" );
+				cmd( "pack .deb.b.act.run .deb.b.act.until .deb.b.act.step .deb.b.act.call .deb.b.act.prn_v .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx $butSpc -side left" );
 			else
 				cmd( "pack .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx $butSpc -side left" );
 
@@ -286,6 +290,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						ttk::label .deb.v.v1.time1 -text \"Case:\"; \
 						ttk::label .deb.v.v1.time2 -width 5 -anchor w -style hl.TLabel; \
 						if { %d } { \
+							set interacting 1; \
 							ttk::label .deb.v.v1.val1 -text \"Value \"; \
 							ttk::entry .deb.v.v1.val2 -width 15 -justify center -validate key -validatecommand { \
 								set n %%P; \
@@ -320,6 +325,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 								break \
 							} \
 						} else { \
+							set interacting 0; \
 							ttk::label .deb.v.v1.val1 -text \"Value:\"; \
 							ttk::label .deb.v.v1.val2 -width 15 -anchor w -style hl.TLabel \
 						}; \
@@ -330,7 +336,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 							pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 .deb.v.v1.val1 .deb.v.v1.val2 .deb.v.v1.obs .deb.v.v1.msg .deb.v.v1.watch -side left; \
 							bind .deb <KeyPress-g> { set choice 28 }; \
 							bind .deb <KeyPress-G> { set choice 28 } \
-						} { \
+						} else { \
 							pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 -side left \
 						} \
 					}", interact ? 1 : 0, mode );
@@ -363,6 +369,13 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						.deb.v.v1.obs configure -text \"  (enter value and click Run or press Enter to continue)\" \
 						} \
 					} " );
+				cmd( ".deb.b.act.until configure -state disabled" );
+				cmd( ".deb.b.act.step configure -state disabled" );
+			}
+			else
+			{
+				cmd( ".deb.b.act.until configure -state normal" );
+				cmd( ".deb.b.act.step configure -state normal" );
 			}
 
 			// disable or enable the caller button
