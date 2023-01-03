@@ -25,8 +25,8 @@ rem  - diff compare tool
 rem *************************************************************
 
 rem component versions
-set GCC_VER=11.3.0
-set PYTHON_VER=3.9
+set GCC_VER=12.2.0
+set PYTHON_VER=3.10
 
 rem XCOPY options for files and directories
 set OPT=/D/Q/Y
@@ -90,6 +90,9 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\bin\windres.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libwinpthread-1.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgcc_s_seh-1.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgmp-10.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libisl-23.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libmpfr-6.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libmpc-3.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libstdc++-6.dll %LSD_DIR%\gnu\bin\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\include %LSD_DIR%\gnu\include\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\lib %LSD_DIR%\gnu\lib\

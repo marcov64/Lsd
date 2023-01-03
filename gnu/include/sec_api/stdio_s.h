@@ -15,7 +15,7 @@
 #ifndef _SECIMP
 #define _SECIMP __declspec(dllimport)
 #endif /* _SECIMP */
-#endif /* defined(_CRTBLD) || defined(__LIBMSVCRT__) */
+#endif /* defined(__LIBMSVCRT__) */
 
 #ifdef __cplusplus
 extern "C" {
@@ -570,6 +570,8 @@ extern "C" {
 
   _CRTIMP char* __cdecl gets_s(char*,rsize_t);
   __DEFINE_CPP_OVERLOAD_SECURE_FUNC_0_0(char*,get_s,char,_DstBuf)
+
+  _CRTIMP errno_t __cdecl tmpfile_s(FILE **_File);
 
   _CRTIMP errno_t __cdecl tmpnam_s(char*,rsize_t);
   __DEFINE_CPP_OVERLOAD_SECURE_FUNC_0_0(errno_t,tmpnam_s,char,_DstBuf)

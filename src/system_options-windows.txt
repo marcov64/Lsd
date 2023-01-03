@@ -8,7 +8,7 @@ PATH_LIB=$(LSDROOT)/gnu/lib
 LIB=-lz
 
 # Compiler options
-WRC=windres
+WRC=windres -D_WIN32
 CC=g++
 GLOBAL_CC=-march=native -w
 SSWITCH_CC=-mthreads -mwindows -O3

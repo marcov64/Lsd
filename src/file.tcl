@@ -979,7 +979,7 @@ proc make_background { target threads nw macPkg } {
 		}
 
 		set file [ open make.bat w ]
-		puts -nonewline $file "$DefaultMakeExe -j $threads -f makefile$makeSuffix 2> makemessage.txt\n"
+		puts -nonewline $file "$DefaultMakeExe --jobs=$threads --jobserver-style=pipe --file=makefile$makeSuffix 2> makemessage.txt\n"
 		close $file
 
 		set makePipe [ open "| make.bat" r ]

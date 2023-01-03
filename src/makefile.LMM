@@ -49,7 +49,7 @@ else
 	ifeq ($(OS),Windows_NT)
 		PKG=
 		EXT=.exe
-		WRC=windres
+		WRC=windres -D_WIN32
 		MANIF=$(SRC_DIR)lmm_manifest.o
 		TOUCH=
 		TCL_VERSION=86
