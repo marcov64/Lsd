@@ -36,30 +36,36 @@ ALL_TARGETS=$(LSDROOT)/$(TARGET).exe $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o
 
 # handle platform-specific stuff
 ifeq ($(shell uname -s),Darwin)
+	PKG=$(TARGET).app/Contents/MacOS/
 	EXT=
 	MANIF=
+	TOUCH=touch -c $(LSDROOT)/$(TARGET).app
 	PATH_TCL_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tcl.framework/Headers
 	PATH_TK_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tk.framework/Headers
-	PATH_TCLTK_LIB=$(SRC_DIR)LSD.app/Contents/Frameworks
+	PATH_TCLTK_LIB=-F $(SRC_DIR)LSD.app/Contents/Frameworks
 	TCLTK_LIB=-framework Tcl -framework Tk
 	SWITCH_CC+=-Wno-unused-result -std=c++14 -mmacosx-version-min=10.10
 else
 	ifeq ($(OS),Windows_NT)
+		PKG=
 		EXT=.exe
 		WRC=windres
 		MANIF=$(SRC_DIR)lmm_manifest.o
+		TOUCH=
 		TCL_VERSION=86
 		PATH_TCLTK_HEADER=$(LSDROOT)/gnu/include
-		PATH_TCLTK_LIB=$(LSDROOT)/gnu/lib
+		PATH_TCLTK_LIB=-L $(LSDROOT)/gnu/lib
 		TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
 		SWITCH_CC+=-mthreads -mwindows -static-libstdc++
 		ALL_TARGETS+=$(MANIF)
 	else
+		PKG=
 		EXT=
 		MANIF=
+		TOUCH=
 		TCL_VERSION=8.6
 		PATH_TCLTK_HEADER=/usr/include/tcl$(TCL_VERSION)
-		PATH_TCLTK_LIB=/usr/lib/tcl$(TCL_VERSION)
+		PATH_TCLTK_LIB=-L /usr/lib/tcl$(TCL_VERSION)
 		TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
 		SWITCH_CC+=-Wno-unused-result
 	endif
@@ -68,9 +74,10 @@ endif
 # variable to search for the tcl and tk headers
 INCLUDE=-I$(PATH_TCLTK_HEADER) -I$(LSDROOT)/$(SRC)
 
-$(LSDROOT)/$(TARGET)$(EXT): $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o $(MANIF)
+$(LSDROOT)/$(PKG)$(TARGET)$(EXT): $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o $(MANIF)
 	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o $(MANIF) \
-	-L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(LSDROOT)/$(TARGET)$(EXT)
+	$(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(LSDROOT)/$(PKG)$(TARGET)$(EXT)
+	$(TOUCH)
 
 $(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp $(SRC_DIR)common.h
 	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o
