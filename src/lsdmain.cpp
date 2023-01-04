@@ -2094,16 +2094,16 @@ void cover_browser( const char *text1, const char *text2, bool run )
 	if ( run )
 	{
 		cmd( "ttk::frame .p" );
-		cmd( "ttk::label .p.l -text \"Simulation progress\"" );
+		cmd( "ttk::label .p.l -text \"Simulation progress\" -anchor center" );
 
 		cmd( "ttk::frame .p.b1" );
 		cmd( "ttk::progressbar .p.b1.b -maximum %d -value 0", sim_num );
-		cmd( "ttk::label .p.b1.i -text \"Simulation: 1 of %d (0%% done)\"", sim_num );
+		cmd( "ttk::label .p.b1.i -text \"Simulation: 1 of %d (0%% done)\" -anchor center", sim_num );
 		cmd( "pack .p.b1.b .p.b1.i -pady 5 -expand yes -fill x" );
 
 		cmd( "ttk::frame .p.b2" );
 		cmd( "ttk::progressbar .p.b2.b -maximum %d -value 0", max_step );
-		cmd( "ttk::label .p.b2.i -text \"Case: 1 of %d (0%% done)\"", max_step );
+		cmd( "ttk::label .p.b2.i -text \"Case: 1 of %d (0%% done)\" -anchor center", max_step );
 		cmd( "pack .p.b2.b .p.b2.i -pady 5 -expand yes -fill x" );
 
 		if ( sim_num > 1 )

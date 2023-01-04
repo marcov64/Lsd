@@ -1806,7 +1806,7 @@ object *operate( object *r )
 		cmd( "set w $T.desc" );
 
 		cmd( "ttk::frame $w" );
-		cmd( "ttk::label $w.int -text \"Description\"" );
+		cmd( "ttk::label $w.int -text Description -anchor center" );
 		cmd( "ttk::frame $w.f" );
 		cmd( "ttk::scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
 		cmd( "ttk::text $w.f.text -wrap word -width 60 -height 10 -yscrollcommand \"$w.f.yscroll set\" -dark $darkTheme -style smallFixed.TText" );

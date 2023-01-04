@@ -246,7 +246,7 @@ void analysis( bool mc )
 
 	// available series listbox
 	cmd( "ttk::frame .da.vars.lb" );
-	cmd( "ttk::label .da.vars.lb.th -text \"Series available\" -style boldSmall.TLabel" );
+	cmd( "ttk::label .da.vars.lb.th -text \"Series available\" -style boldSmall.TLabel -anchor center" );
 	cmd( "ttk::combobox .da.vars.lb.flt -state readonly -textvariable serPar -postcommand { .da.vars.lb.flt configure -values [ update_parent ] }" );
 	cmd( "pack .da.vars.lb.th .da.vars.lb.flt -fill x" );
 
