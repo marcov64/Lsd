@@ -373,10 +373,10 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				cmd( ".deb.b.act.step configure -state disabled" );
 			}
 			else
-			{
-				cmd( ".deb.b.act.until configure -state normal" );
-				cmd( ".deb.b.act.step configure -state normal" );
-			}
+				cmd( "if { [ winfo exists .deb.b.act ] } { \
+						.deb.b.act.until configure -state normal; \
+						.deb.b.act.step configure -state normal \
+					}" );
 
 			// disable or enable the caller button
 			if ( mode == 1 )
@@ -2283,7 +2283,7 @@ void attach_instance_number( char *outh, char *outv, object *r, int outSz )
 	if ( r->up == NULL )
 		snprintf( inst_msg, MAX_BUFF_SIZE, "%d:%s (1/1) ", inst_dpth = 1, r->label );
 	else
-		snprintf( inst_msg, MAX_BUFF_SIZE, " | %d:%s (%d/%d) ", ++inst_dpth, r->label, j, i - 1 );
+		snprintf( inst_msg, MAX_BUFF_SIZE, "| %d:%s (%d/%d) ", ++inst_dpth, r->label, j, i - 1 );
 
 	strcatn( outh, inst_msg, outSz );
 
