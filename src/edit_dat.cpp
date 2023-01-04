@@ -29,12 +29,12 @@ The main functions contained in this file are:
 Initialize the window, calls search_title and link_data, then wait for a
 message from user.
 
-- void search_title( object *r, const char *tag, int *i, const char *lab, int *incr )
+- void search_title( object *r, const char *tag, int *i, const char *lab, int *cols )
 It is a recursive routine. Scan the model structure looking for the object
 of type as r and prepare the relative tag for any object. The tag is then
 used by set_title to be printed as columns headers
 
-- void set_title( object *c, const char *lab, const char *tag, int *incr );
+- void set_title( object *c, const char *lab, const char *tag, int *cols );
 prints the column headers
 
 - void link_cells( object *r, const char *lab );
@@ -49,8 +49,9 @@ values
 #include "decl.h"
 
 // flags to avoid recursive usage (confusing and tk windows are not ready)
-bool colOvflw;					// indicate columns overflow (>MAX_COLS)
+bool overflow;					// indicate table overflow (>MAX_COLS or >MAX_CELS)
 bool iniShowOnce = false;		// prevent repeating warning on # of columns
+int maxCols;					// maximum number of columns to show (prevent crash)
 
 
 /****************************************************
@@ -59,12 +60,41 @@ EDIT_DATA
 void edit_data( object *r, const char *lab )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ], ch1[ MAX_ELEM_LENGTH ];
-	int i, counter, lag;
+	int i, lag, cols, rows;
 	object *first;
+	variable *cv;
+
+	// find number of rows to fix max number of columns
+	first = r->search( lab );
+	if ( first != NULL )
+		for ( cv = first->v, rows = i = 0; cv != NULL; )
+		{
+			if ( cv->param == 1 || cv->num_lag > 0 )
+				++rows;
+
+			if ( cv->param == 0 && i + 1 < cv->num_lag )
+				++i;
+			else
+			{
+				cv = cv->next;
+				i = 0;
+			}
+		}
+
+	if ( first == NULL || rows == 0 )
+	{
+		cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"No value to edit\" -detail \"The selected object has no element requiring values to be set.\"" );
+		return;
+	}
+
+	if ( rows > MAX_CELS )
+		cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"Too many values to edit\" -detail \"LSD Initial Values editor can reliably edit up to %d elements per object. If LSD crashes, please split elements among children objects to prevent this error.\"", MAX_CELS );
+
+	// limit the total number of cells because of Tcl/Tk bug
+	maxCols = max( min( MAX_COLS, MAX_CELS / rows ), 1 );
 
 	Tcl_LinkVar( inter, "lag", ( char * ) &lag, TCL_LINK_INT );
 
-	first = r->search( lab );
 	cmd( "set cwidth 11" );
 
 	cmd( "newtop .inid \"%s%s - LSD Initial Values Editor\" { set choice 1 }", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
@@ -137,12 +167,10 @@ void edit_data( object *r, const char *lab )
 
 	strcpy( ch, "" );
 	i = 0;
-	counter = 1;
-	colOvflw = false;
-	search_title( r, ch, &i, lab, &counter );
+	cols = 1;
+	overflow = false;
+	search_title( r, ch, &i, lab, &cols );
 	link_cells( r, lab );
-
-	cmd( "set line_counter %d", counter );
 
 	cmd( "pack .inid.t -expand 1 -fill both" );
 
@@ -154,23 +182,24 @@ void edit_data( object *r, const char *lab )
 	cmd( "bind .inid <Escape> { set choice 1 }" );
 	cmd( "bind .inid <F1> { LsdHelp menudata_init.html }" );
 
-	// show overflow warning just once per configuration but always indicate
-	if ( colOvflw )
-	{
-		cmd( ".inid.err conf -text \"OBJECTS NOT SHOWN! (> %d)\" -style hl.TLabel", MAX_COLS );
-		if ( ! iniShowOnce )
-		{
-			cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"Too many objects to edit\" -detail \"LSD Initial Values editor can show only the first %d objects' values. Please use the 'Set All' button to define values for objects beyond those.\" ", MAX_COLS );
-			iniShowOnce = true;
-		}
-	}
-
 	cmd( "showtop .inid topleftW 1 1" );
 	cmd( "mousewarpto .inid.b.ok" );
 	cmd( "wm minsize .inid $hsizeImin $vsizeImin" );
 	cmd( "wm maxsize .inid [ winfo vrootwidth .inid ] [ winfo vrootheight .inid ]" );
 	cmd( "pack propagate .inid 0" );
 	cmd( "set iniDone 1" );
+
+	// show overflow warning just once per configuration but always indicate
+	if ( overflow )
+	{
+		cmd( ".inid.err conf -text \"INSTANCES NOT SHOWN! (> %d)\" -style hl.TLabel", maxCols );
+		if ( ! iniShowOnce )
+		{
+			cmd( "update idletasks" );
+			cmd( "ttk::messageBox -parent .inid -type ok -title Warning -icon warning -message \"Too many instances to edit\" -detail \"LSD Initial Values editor can show only the first %d object instances' values. Please use the 'Set All' button to define values for instances beyond those.\"", maxCols );
+			iniShowOnce = true;
+		}
+	}
 
 	editloop:
 
@@ -205,14 +234,14 @@ void edit_data( object *r, const char *lab )
 /****************************************************
 SEARCH_TITLE
 ****************************************************/
-void search_title( object *r, const char *tag, int *i, const char *lab, int *incr )
+void search_title( object *r, const char *tag, int *i, const char *lab, int *cols )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ];
 	int multi, counter;
 	bridge *cb;
 	object *c, *cur;
 
-	set_title( r, lab, tag, incr );
+	set_title( r, lab, tag, cols );
 
 	for ( cb = r->b, counter = 1; cb != NULL; cb = cb->next, counter = 1 )
 	{
@@ -237,8 +266,8 @@ void search_title( object *r, const char *tag, int *i, const char *lab, int *inc
 			else
 				strcpyn( ch, tag, 2 * MAX_ELEM_LENGTH );
 
-			if ( *incr <= MAX_COLS )
-				search_title( cur, ch, i, lab, incr );
+			if ( *cols <= maxCols )
+				search_title( cur, ch, i, lab, cols );
 
 		}
 	}
@@ -248,7 +277,7 @@ void search_title( object *r, const char *tag, int *i, const char *lab, int *inc
 /****************************************************
 SET_TITLE
 ****************************************************/
-void set_title( object *c, const char *lab, const char *tag, int *incr )
+void set_title( object *c, const char *lab, const char *tag, int *cols )
 {
 	char ch1[ MAX_ELEM_LENGTH ], ch2[ MAX_ELEM_LENGTH ];
 
@@ -259,20 +288,20 @@ void set_title( object *c, const char *lab, const char *tag, int *incr )
 		if ( strlen( tag ) != 0 )
 			strcpyn( ch2, tag, MAX_ELEM_LENGTH );
 		else
-			strcpy( ch2, "  " );
+			strcpy( ch2, "	" );
 
-		cmd( "set titheader_%d \"%s\"", *incr , ch2 );
+		cmd( "set titheader_%d \"%s\"", *cols , ch2 );
 
-		cmd( "ttk::label $w.c%d_tit -text ${titheader_%d} -style boldSmall.TLabel", *incr ,*incr );
-		cmd( "grid $w.c%d_tit -row 0 -column [ expr { 2 + %d } ] ", *incr, *incr );
-		cmd( "mouse_wheel $w.c%d_tit", *incr );
+		cmd( "ttk::label $w.c%d_tit -text ${titheader_%d} -style boldSmall.TLabel", *cols ,*cols );
+		cmd( "grid $w.c%d_tit -row 0 -column [ expr { 2 + %d } ] ", *cols, *cols );
+		cmd( "mouse_wheel $w.c%d_tit", *cols );
 
 		if ( strlen( tag ) == 0 )
-			cmd( "set tag_%d \"\"", *incr );
+			cmd( "set tag_%d \"\"", *cols );
 		else
-			cmd( "set tag_%d %s", *incr, tag );
+			cmd( "set tag_%d %s", *cols, tag );
 
-		++( *incr );
+		++( *cols );
 	}
 }
 
@@ -335,7 +364,7 @@ void link_cells( object *r, const char *lab )
 			}
 		}
 
-		for ( cur = cur1, i = 1; i <= MAX_COLS && cur != NULL; cur = cur->hyper_next( lab ) , ++i )
+		for ( cur = cur1, i = 1; i <= maxCols && cur != NULL; cur = cur->hyper_next( lab ) , ++i )
 		{
 			cv = cur->search_var( cur, cv1->label );
 			cv->data_loaded = '+';
@@ -401,17 +430,17 @@ void link_cells( object *r, const char *lab )
 					if ( strlen( previous ) != 0 )
 					{
 						cmd( "bind %s <Return> { selectcell $g.can $w.c%d_v%s_%d }", previous, i, cv->label, j );
-						cmd( "bind  $w.c%d_v%s_%d <Shift-Return> { selectcell $g.can %s }", i, cv->label, j, previous );
+						cmd( "bind	$w.c%d_v%s_%d <Shift-Return> { selectcell $g.can %s }", i, cv->label, j, previous );
 						cmd( "bind %s <Tab> { selectcell $g.can $w.c%d_v%s_%d }", previous, i, cv->label, j );
-						cmd( "bind  $w.c%d_v%s_%d <Shift-Tab> { selectcell $g.can %s }", i, cv->label, j, previous );
+						cmd( "bind	$w.c%d_v%s_%d <Shift-Tab> { selectcell $g.can %s }", i, cv->label, j, previous );
 						cmd( "bind %s <Down> { selectcell $g.can $w.c%d_v%s_%d }", previous, i, cv->label, j );
-						cmd( "bind  $w.c%d_v%s_%d <Up> { selectcell $g.can %s }", i, cv->label, j, previous );
+						cmd( "bind	$w.c%d_v%s_%d <Up> { selectcell $g.can %s }", i, cv->label, j, previous );
 					}
 					else
 					{
-						cmd( "bind  $w.c%d_v%s_%d <Shift-Return> { break }", i, cv->label, j );
+						cmd( "bind	$w.c%d_v%s_%d <Shift-Return> { break }", i, cv->label, j );
 						cmd( "bind %s <Tab> { break }", previous );
-						cmd( "bind  $w.c%d_v%s_%d <Shift-Tab> { break }", i, cv->label, j );
+						cmd( "bind	$w.c%d_v%s_%d <Shift-Tab> { break }", i, cv->label, j );
 					}
 
 					snprintf( previous, 2 * MAX_ELEM_LENGTH, "$w.c%d_v%s_%d", i, cv->label, j );
@@ -433,9 +462,9 @@ void link_cells( object *r, const char *lab )
 			cmd( "bind %s <Down> { break }", previous );
 		}
 
-		// indicate columns overflow (>MAX_COLS)
-		if ( ! colOvflw && cur != NULL )
-			colOvflw = true;
+		// indicate columns overflow (>maxCols)
+		if ( ! overflow && cur != NULL )
+			overflow = true;
 
 		// set flag of data loaded also to not shown pars.
 		for ( ; cur != NULL; cur = cur->hyper_next( lab ) )
@@ -469,7 +498,7 @@ void show_cells( object *r, const char *lab )
 
 	cur = r->search( lab );
 
-	for ( i = 1; i <= MAX_COLS && cur != NULL; cur = cur->hyper_next( lab ), ++i )
+	for ( i = 1; i <= maxCols && cur != NULL; cur = cur->hyper_next( lab ), ++i )
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 			if ( cv->param == 1 )
 			{
@@ -496,7 +525,7 @@ void save_cells( object *r, const char *lab )
 
 	cur = r->search( lab );
 
-	for ( i = 1; i <= MAX_COLS && cur != NULL; cur = cur->hyper_next( lab ), ++i )
+	for ( i = 1; i <= maxCols && cur != NULL; cur = cur->hyper_next( lab ), ++i )
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 			if ( cv->param == 1 )
 				cmd( "catch \"set p%s_%d [ $w.c%d_v%sp get ]\"", cv->label, i, i, cv->label );
@@ -518,7 +547,7 @@ void unlink_cells( object *r, const char *lab )
 
 	cur = r->search( lab );
 
-	for ( i = 1; i <= MAX_COLS && cur != NULL; cur = cur->hyper_next( lab ), ++i )
+	for ( i = 1; i <= maxCols && cur != NULL; cur = cur->hyper_next( lab ), ++i )
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 			if ( cv->param == 1 )
 			{

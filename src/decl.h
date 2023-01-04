@@ -46,6 +46,7 @@ Relevant flags (when defined):
 #define NOLH_DEF_FILE "NOLH.csv"		// default NOLH file name
 #define MAX_SENS_POINTS 999				// default warning threshold for sensitivity analysis
 #define MAX_COLS 100					// max numbers of columns in init. editor
+#define MAX_CELS 9000					// max number of cells (rows x columns) in init. editor
 #define MAX_PLOTS 1000					// max numbers of plots in analysis
 #define MAX_PLOT_TABS 10				// max number of plot tabs to show
 #define MAX_TAB_LEN 10					// max length of plot tab title
@@ -364,7 +365,7 @@ void save_single( variable *v );
 void scan_used_lab( const char *lab, const char *parWnd = NULL );
 void scan_using_lab( const char *lab, const char *parWnd = NULL );
 void scroll_plot( void );
-void search_title( object *r, const char *tag, int *idx, const char *lab, int *incr );
+void search_title( object *r, const char *tag, int *idx, const char *lab, int *cols );
 void sensitivity_created( const char *path, const char *sim_name, int findex );
 void sensitivity_doe( int *findex, design *doe, const char *dest_path );
 void sensitivity_sequential( int *findexSens, sense *s, double probSampl, const char *dest_path );
@@ -377,7 +378,7 @@ void set_lab_tit( variable *var );
 void set_obj_number( object *r );
 void set_shortcuts( const char *window );
 void set_shortcuts_run( const char *window );
-void set_title( object *c, const char *lab, const char *tag, int *incr );
+void set_title( object *c, const char *lab, const char *tag, int *cols );
 void set_ttip_descr( const char *w, const char *lab, int it = -1, bool init = true );
 void shift_desc( int direction, const char *dlab, object *r );
 void shift_var( int direction, const char *vlab, object *r );
