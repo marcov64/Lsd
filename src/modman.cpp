@@ -251,7 +251,7 @@ int lsdmain( int argn, const char **argv )
 	cmd( "set alignMode \"LMM\"" );
 	cmd( "set small_character [ expr { $dim_character - $deltaSize } ]" );
 
-	cmd( "set modelGroup \"\"" );
+	cmd( "set modelGroup \"$rootname\"" );
 	cmd( "set modelName \"(no model)\"" );
 	cmd( "set modelVersion \"\"" );
 	cmd( "set fileName \"(no name)\"" );

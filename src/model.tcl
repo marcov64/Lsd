@@ -26,8 +26,6 @@
 # in the group selected
 #*************************************************************
 
-set rootname "Root"
-set modelGroup "$rootname"
 set result 0
 set memory 0
 set months [ list January February March April May June July August September October November December ]
@@ -72,11 +70,13 @@ proc showmodel pippo {
 				showmodel [ lindex $ldn $result ]
 			}
 		}
+
 		$m add command -label "New Model/Group..." -underline 0  -accelerator Ins -command {
 			set result -1
 			set memory 0
 			set choiceSM 14
 		}
+
 		$m add command -label Quit -underline 0 -accelerator Esc -command {
 			set result -1
 			set memory 0
@@ -169,7 +169,7 @@ proc showmodel pippo {
 		.l.l.l.m  add command -label Delete -accelerator Del -command { .l.m.edit invoke 3 }
 
 		ttk::frame .l.t
-		ttk::label .l.t.tit -text Description
+		ttk::label .l.t.tit -text Description -anchor center
 		pack .l.t.tit -pady 3 -expand yes -fill x
 		ttk::scrollbar .l.t.yscroll -command ".l.t.text yview"
 		ttk::text .l.t.text -wrap word -width 60 -yscrollcommand ".l.t.yscroll set" -entry 0 -dark $darkTheme -style smallFixed.TText

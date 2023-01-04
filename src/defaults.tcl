@@ -203,6 +203,9 @@ set splstepsP 	3	; # number of spline segments when smoothP is raw
 set gnuplotGrid3D		"60,60,3"
 set gnuplotOptions		"set ticslevel 0.0"
 
+# Model Manager defaults
+set rootname "Root"	; # root model group name
+
 # folder/group/object symbols
 set upSymbol 			"\u25B2 .."	; # up in tree structure symbol
 set groupSymbol			"\u25B6 "	; # group symbol
