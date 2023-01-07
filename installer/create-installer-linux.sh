@@ -19,7 +19,7 @@
 #**************************************************************
 
 LSD_VER_NUM="8.0"
-LSD_VER_TAG="stable-1"
+LSD_VER_TAG="stable-2"
 
 if [ "$1" = "-h" ]; then
 	echo "Create LSD installer for Linux"

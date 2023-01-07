@@ -7,7 +7,7 @@
 #
 #	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
-#	
+#
 #	See Readme.txt for copyright information of
 #	third parties' code used in LSD
 #
@@ -19,28 +19,41 @@
 # Also fixes some macOS security issues.
 #**************************************************************
 
-if [ "$1" = "-h" ]; then
+if [[ "$1" = "-h" ]]; then
 	echo "Add a shortcut to LSD LMM in the desktop"
 	echo "Usage: ./add-shortcut-mac.sh"
 	exit 0
 fi
 
-# remove existing aliases, if any
-TARGET="LMM"
-rm -f ~/Desktop/"$TARGET" ~/Desktop/"$TARGET.app" ~/Desktop/LSD\ Model\ Manager
-rm -f ~/Applications/"$TARGET" ~/Applications/"$TARGET.app" ~/Applications/LSD\ Model\ Manager
-	
-# disable macOS quarantine of LSD executables
+LMMLNK="LSD Model Manager"
+LSDROOT="$( cd "$( dirname "${ BASH_SOURCE[0] }" )" && pwd -P )"
+LMMAPP=LMM
 LSDAPP=LSD
-LSDROOT="$( cd "$(dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
-sudo xattr -rd com.apple.quarantine "$LSDROOT/$TARGET.app"
+DESKTOP="$( osascript \
+             -e 'tell application "System Events"' \
+             -e 'get POSIX path of (path to desktop folder from user domain)' \
+             -e 'end tell' )"
+APPHOME="$( osascript \
+             -e 'tell application "System Events"' \
+             -e 'get POSIX path of (path to applications folder from user domain)' \
+             -e 'end tell' )"
+
+
+# remove existing aliases, if any
+rm -f "$DESKTOP/$LMMAPP" "$DESKTOP/$LMMAPP.app" "$DESKTOP/$LMMLNK"
+rm -f "$APPHOME/$LMMAPP" "$APPHOME/$LMMAPP.app" "$APPHOME/$LMMLNK"
+
+# disable macOS quarantine of LSD executables
+sudo xattr -rd com.apple.quarantine "$LSDROOT/$LMMAPP.app"
 sudo xattr -rd com.apple.quarantine "$LSDROOT/src/$LSDAPP.app"
 
 # create alias on desktop
 osascript >/dev/null <<END_SCRIPT
 	tell application "Finder"
 		set appHome to path to applications folder from user domain
-		make new alias to file (posix file "$LSDROOT/$TARGET.app") at appHome with properties {name:"LSD Model Manager"}
-		make new alias to file (posix file "$LSDROOT/$TARGET.app") at desktop with properties {name:"LSD Model Manager"}
+		make new alias to file (posix file "$LSDROOT/$LMMAPP.app") at appHome with properties {name:"$LMMLNK"}
+		make new alias to file (posix file "$LSDROOT/$LMMAPP.app") at desktop with properties {name:"$LMMLNK"}
 	end tell
 END_SCRIPT
+
+exit 0

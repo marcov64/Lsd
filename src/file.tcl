@@ -23,7 +23,7 @@
 # are available and on the proper versions
 #************************************************
 proc check_components { } {
-	global CurPlatform RootLsd winGCC winDLL winTcl winTk linuxPkg linuxTyp inclPkg inclFile libPkg libFile linuxMissing xcode gnuplot multitail linuxPkgMiss linuxInclude linuxLib pathInclude pathLib existGCC existDLL msgGCC msgDLL winConflict gccInclude gccLib
+	global CurPlatform RootLsd winGCC winDLL winTcl winTk linuxPkg linuxTyp inclPkg inclFile libPkg libFile linuxMissing xcode gnuplot multitail linuxPkgMiss linuxInclude linuxLib pathInclude pathLib existGCC existGCCsys existDLL existDLLsys msgGCC msgDLL winConflict gccInclude gccLib
 
 	if { $CurPlatform eq "mac" } {
 
@@ -129,8 +129,14 @@ proc check_components { } {
 
 	} elseif { $CurPlatform eq "windows" } {
 
+		# get system path
+		if { [ catch { set sysPath [ string tolower [ registry get "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment" "Path" ] ] } ] } {
+			set sysPath ""
+		}
+
 		# check if another compiler exists and is ahead on path
 		set existGCC [ list ]
+		set existGCCsys [ list ]
 		set msgGCC ""
 		if { ! [ catch { set res [ exec where g++ ] } ] } {
 			foreach f [ split $res ] {
@@ -139,6 +145,10 @@ proc check_components { } {
 				} else {
 					set existGCC [ lappend existGCC $f ]
 					set msgGCC "$msgGCC\n$f"
+
+					if { [ string first "[ string tolower [ file nativename [ file dirname $f ] ] ]" "$sysPath" ] != -1 } {
+						set existGCCsys [ lappend existGCCsys $f ]
+					}
 				}
 			}
 		}
@@ -160,6 +170,7 @@ proc check_components { } {
 
 		# check if required libraries exist ahead on path
 		set existDLL [ list ]
+		set existDLLsys [ list ]
 		set msgDLL ""
 		foreach dll $winDLL {
 			if { ! [ catch { set res [ exec where $dll ] } ] } {
@@ -169,6 +180,10 @@ proc check_components { } {
 					} else {
 						set existDLL [ lappend existDLL $f ]
 						set msgDLL "$msgDLL\n$f"
+
+						if { [ string first "[ string tolower [ file nativename [ file dirname $f ] ] ]" "$sysPath" ] != -1 } {
+							set existDLLsys [ lappend existDLLsys $f ]
+						}
 					}
 				}
 			}

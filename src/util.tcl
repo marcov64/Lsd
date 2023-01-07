@@ -210,10 +210,10 @@ proc add_win_path { path { prof user } { pos end } } {
 		if { $pos eq "end" } {
 			set newPath "$curPath;$path;"
 		} else {
-			set newPath "$path;$curPath;"
+			set newPath "$path;$curPath"
 		}
 
-		if { ! [ catch { registry set $regPath "Path" "$newPath" } ] } {
+		if { ! [ catch { registry set $regPath "Path" "$newPath" expand_sz } ] } {
 			registry broadcast "Environment"
 			return 1
 		}

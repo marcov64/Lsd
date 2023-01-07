@@ -1,6 +1,6 @@
 ;!@Install@!UTF-8!
 Title="LSD Installer"
-BeginPrompt="Do you want to install LSD?"
+BeginPrompt="Do you want to install LSD?\n\nInstalling for all users requires administrator rights\n\nIf required, and not yet selected, please click 'No' to stop the installer now, right-click on the installer file in Windows Explorer, and select 'Run as administrator' to restart the installation"
 ExecuteFile=".\gnu\bin\wish86.exe"
 ExecuteParameters=".\src\installer.tcl"
 ;!@InstallEnd@!

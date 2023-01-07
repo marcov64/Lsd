@@ -9,7 +9,7 @@
 
 **************************************************************
 
-This file has no line breaks, please use it on an editor able 
+This file has no line breaks, please use it on an editor able
 to perform word wrapping.
 
 ***********
@@ -20,13 +20,13 @@ LSD is copyrighted by Marco Valente and Marcelo C. Pereira (version 7.x addition
 
 LSD includes third party software under the license of the copyright owners:
 
-GCC 11.3 and associated utilities are copyrighted by the Free Software Foundation, Inc. under GPL 3, https://gcc.gnu.org
-Tcl/Tk 8.6 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
-MSYS2 3.3.4, https://www.msys2.org
-Cygwin 3.3.4 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
-7-Zip LZMA SDK 21.07 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
+GCC 12.2 and associated utilities are copyrighted by the Free Software Foundation, Inc. under GPL 3, https://gcc.gnu.org
+Tcl/Tk 8.6.13 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
+MSYS2 3.4.3, https://www.msys2.org
+Cygwin 3.4.3 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
+7-Zip LZMA SDK 22.01 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
 Makeself 2.4.5 is copyrighted by Stephane Peter under GPL2, https://makeself.io
-Gnuplot 5.4.3 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
+Gnuplot 5.4.5 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
 Eigen 3.4.0 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
 subbotools 1.3 is copyrighted by Giulio Bottazzi under GPL2, http://cafim.sssup.it/~giulio/software/subbotools
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
@@ -54,7 +54,8 @@ This Readme.txt file contains five sections:
 2. LSD distribution content
 3. Hints on the use of LSD
 4. Installing LSD (Windows, macOS and Linux)
-5. Optional compilers in Windows (MSYS2 and Cygwin)
+5. Installation of optional compilers in Windows (MSYS2 and Cygwin)
+6. Removing LSD
 
 
 ***************
@@ -130,8 +131,12 @@ IMPORTANT: from version 8.0 and higher, LSD supports only Windows 64-bit. If you
 
 ANTIVIRUS BAD BEHAVIOR: many third-party anti-virus software consider LSD operation suspicious because it creates executable files and deals with tools, like compilers, which do not belong to the regular user universe. This wrong assumption can break LSD operation in many aspects and usually cannot be fixed reliably, so using LSD together with these tools is NOT SUPPORTED. LSD is tested and fully works with the embedded Windows Security anti-virus, which is unfortunately disabled when a third-party anti-virus is installed by the user. According to specialized media tests, Windows anti-virus is considered an excellent option, in particular when compared to the free alternatives, so using it instead should not create any problem. However, if you cannot remove your current third-party anti-virus (and enable Windows Security), you still have the option to run LSD inside a virtual machine like VirtualBox or VMware (but with reduced performance).
 
-To install LSD, the simplest alternative is to use the installer executable (e.g. LSD-installer-windows-8-0-stable-1.exe). Download it, double-click on the installer file, and follow the instructions. The installer executable can be deleted after the installation. According to your configuration, express authorization must be provided before downloading and running the LSD installer. This is normal.
- 
+To install LSD, the simplest alternative is to use the installer executable (e.g. LSD-installer-windows-8-0-stable-2.exe). Download it, double-click on the installer file, and follow the instructions. The installer executable can be deleted after the installation. According to your configuration, express authorization must be provided in both the browser and Explorer before downloading and running the LSD installer. This is normal and safe if you downloaded LSD from the official site.
+
+If Gnuplot software is not already installed, the LSD installer will install it automatically during the set-up process. In this case, the User Account Control (UAC) window will ask permission to Gnuplot installer to do the required system-level changes to your computer. If you reject the permission, LSD will still install fine, but some plot options will not work. Gnuplot is also open-source free software, and the version included in LSD is directly provided by Gnuplot official site (http://www.gnuplot.info).
+
+The LSD installer only require administrative rights if you need to install LSD to be available for all the users of the computer (a system-level installation). If this is the case, you must run the installer with administrative rights, by clicking with the right mouse button on the installer file in Windows Explorer, and then selecting 'Run as administrator' from the drop-down context menu. Also, when the installer ask for the destination directory, make sure the 'Install for all users' check-box is marked.
+
 Alternatively, or in the case of problems using the installer, it is also possible to simply unzip a LSD distribution file archive on the desired folder. In most cases "C:\" (the root of the hard disk) is a good option. The steps to perform a manual installation are:
 
 1. In an internet browser, open the site https://github.com/marcov64/Lsd/releases , choose the desired release, and click on the respective "Source code (zip)" link to download the LSD distribution file.
@@ -148,7 +153,7 @@ To create a desktop link (icon) to run LSD/LMM, as well as an entry to the Windo
 
  add-shortcut-windows[.bat]
 
-After the desktop icon is created, double-clicking it opens LMM (LSD Model Manager) which allows to create new models, or select existing models. If you cannot create the LSD icon on your desktop, or an entry in Start Menu, following the steps above, you may still run LSD by double-clicking the file "LMM.exe" inside the LSD installation directory.
+If you create the icon and the entry for all users in the computer, run the batch in a command prompt adding the '/s' option after the file name. After the desktop icon is created, double-clicking it opens LMM (LSD Model Manager) which allows to create new models, or select existing models. If you cannot create the LSD icon on your desktop, or an entry in Start Menu, following the steps above, you may still run LSD by double-clicking the file "LMM.exe" inside the LSD installation directory.
 
 GNUPLOT INSTALLATION:
 
@@ -169,7 +174,7 @@ FIXING COMPILATION ERRORS:
 Some free software packages have the bad habit of installing old copies of libraries required by LSD on the system PATH, which may prevent successful compilation and operation of LSD. The installer tries to detect and inform about possible sources of problems, which may have to be fixed before LSD can be run reliably. Alternatively, the user may force LSD libraries into the system PATH, which is NOT done by the installer. To do so, open Windows Explorer, navigate to the folder where LSD was installed, right-click on the file:
 
  set-system-path-windows[.bat]
- 
+
 and choose the "Run as administrator" option. This will force LSD libraries to be used system-wide, which may break other software which relies on older versions of the libraries.
 
 USING DIFFERENT COMPILERS (optional):
@@ -181,8 +186,8 @@ It is possible to use LSD with a C++ compiler already installed in your computer
 4.2 macOS installation (10.10+ ONLY)
 ************************************
 
-To install LSD, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-8-0-stable-1.dmg). Download it, double-click on the package file to mount it, double-click on the LSD Installer application, and follow the instructions. The installer package can be unmounted and deleted after the installation.
- 
+To install LSD, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-8-0-stable-2.dmg). Download it, double-click on the package file to mount it, double-click on the LSD Installer application, and follow the instructions. The installer package can be unmounted and deleted after the installation.
+
 IMPORTANT: please pay attention to the Terminal windows opened by the installer. They may require your interaction, according to the instructions of the installer. Do not close any Terminal window which is not inactive. If the Terminal window is closed or interrupted by accident, please cancel the installation and restart.
 
 To manually install LSD, simply unzip a LSD distribution file (e.g., LSD-8.0-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
@@ -233,7 +238,7 @@ Authorized programs can be checked at System Preferences > Security & Privacy > 
 4.3 Linux installation
 **********************
 
-To install LSD, the simplest alternative is to use the installer script package (e.g. LSD-installer-linux-8-0-stable-1.zip). Download, extract and execute it. If your file manager does not support extracting compressed files or executing scripts directly, open a terminal, and type (replacing the X's with the actual values):
+To install LSD, the simplest alternative is to use the installer script package (e.g. LSD-installer-linux-8-0-stable-2.zip). Download, extract and execute it. If your file manager does not support extracting compressed files or executing scripts directly, open a terminal, and type (replacing the X's with the actual values):
 
  cd ~/Downloads
  unzip LSD-installer-linux-8-X-xxxx-X.sh
@@ -336,7 +341,7 @@ To define it, open "Control Panel", sequentially select "System and Security", "
 5.2 Cygwin compiler installation (optional)
 *******************************************
 
-Please note that Cygwin compiler is NOT required (or recommended) if the above instructions for installing LSD were already performed, as LSD already embeds an up-to-date compiler for Windows. 
+Please note that Cygwin compiler is NOT required (or recommended) if the above instructions for installing LSD were already performed, as LSD already embeds an up-to-date compiler for Windows.
 
 The Windows Cygwin installer can be downloaded at http://www.cygwin.com (make sure you download the "setup-x86_64.exe" file). Install Cygwin to the default directory ("C:\cygwin64") to prevent warnings in LSD. If installing to a different directory please note that the same restrictions mentioned above, about folder using names WITHOUT spaces, also apply to Cygwin. Additionally to the packages automatically installed with Cygwin, five non-default packages are REQUIRED by LSD (mingw64-x86_64-gcc-g++, mingw64-x86_64-zlib, make, gdb and multitail). Alternatively, the pure-Cygwin, non-MinGW 64-bit gcc compiler can be also used, if matched with the corresponding Tcl/Tk and zlib libraries. Lastly, Cygwin main and compiler binary subdirectories must be added to the PATH environment variable (not done by the installer).
 
@@ -360,3 +365,40 @@ Step-by-step procedure to install the Cygwing 64-bit compiler (an internet conne
  PATH_LIB=.
  WRC=x86_64-w64-mingw32-windres
  CC=x86_64-w64-mingw32-g++
+
+
+***************
+6. Removing LSD
+***************
+
+To remove LSD, simply run one of the provided scripts in the installation directory:
+
+ uninstall-linux.sh     (for Linux)
+ uninstall-mac.sh       (for macOS)
+ uninstall-windows.bat  (for Windows)
+
+According to the file manager used (Nautilus, Finder, Explorer, etc.) and the computer configuration, the removal scripts can be run by simply (double) clicking on the corresponding file. If this is not possible, the user must first open a shell/terminal/command prompt, navigate to the LSD installation directory (e.g., cd ~/LSD) and execute the script (e.g., ./uninstall-linux.sh). Before the uninstaller proceeds, the user has to confirm it on the (created) terminal window.
+
+In Windows, the script requires to be run with administrator rights if LSD was installed for all users or in the system PATH. LSD can be also uninstalled using the standard Windows Settings > Apps procedure.
+
+Please note that the uninstall script removes only LSD-created files and folders on the installation directory. User-created folders (model groups) or models in the Work directory/group are NOT removed. However, user files created inside LSD folders (including Example) are deleted.
+
+Third-party utilities installed by LSD (Gnuplot and optional system modules) are not removed by the script, as they may be required by other installed software. If required, the user must follow the adequate steps to remove them. See the details below to remove the undesired utilities in each platform. Beware that installed utilities may be still required by software installed after LSD.
+
+In Windows, removing Gnuplot can be performed directly in Windows Settings > Apps, as usual. This is the only third-party utility installed by LSD in Windows.
+
+In macOS, fully uninstalling Homebrew, including all utilities, can be done in Terminal with the command:
+
+ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+
+In Linux, all utilities LSD require can be removed using the distribution package manager. For Debian or Ubuntu the shell command is:
+
+ sudo apt-get remove build-essential gdb gnuplot-qt multitail zlib1g-dev tcl-dev tk-dev xterm
+
+For Fedora, CentOS or Red Hat, the equivalent command is:
+
+ sudo yum remove gcc-c++ make gdb gnuplot multitail zlib-devel tcl tk tcl-devel tk-devel xterm
+
+For Mandriva or Mageia:
+
+ sudo urpme gcc-c++ make gdb gnuplot multitail lib64z-devel lib64tcl-devel lib64tk-devel xterm

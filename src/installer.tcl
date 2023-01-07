@@ -24,9 +24,16 @@ wm withdraw .
 # setup configuration values
 #
 
+set _LSD_NAME_ "LSD Laboratory for Simulation Development"
+set _LSD_PUBLISHER_ "Marco Valente and Marcelo Pereira"
+set _LSD_VERSION_ "8.0"
+set _LSD_DATE_ "January 3 2023"
+set _LSD_SIZE_KB_ 552326
+
 set LsdDir LSD
 set LsdSrc src
-set winGnuplot "gp543-win64-mingw.exe"
+set LsdIco $LsdSrc/icons
+set winGnuplot "gp545-win64-mingw.exe"
 set winRoot "C:/"
 
 set linuxPmPkg(apt)	[ list	build-essential 	make	gdb		gnuplot		xterm	multitail	zlib1g-dev		tcl-dev			tk-dev			]
@@ -221,8 +228,17 @@ if [ string equal $CurPlatform windows ] {
 			set RootLsd [ file normalize "~/$LsdDir" ]
 		}
 	}
-	tooltip::tooltip .dir.wall "Allow any user logged in this computer to use LSD"
+
 	pack .dir.choice .dir.wall .dir.obs -pady 5
+
+	if { ! [ catch { exec net session >nul 2>&1 } ] } {
+		set wadmin 1
+		tooltip::tooltip .dir.wall "Allow any user logged in this computer to use LSD"
+	} else {
+		set wadmin 0
+		tooltip::tooltip .dir.wall "To enable this option run installer as administrator"
+		.dir.wall configure -state disabled
+	}
 } else {
 	pack .dir.choice .dir.obs -pady 5
 }
@@ -390,13 +406,16 @@ if [ string equal $CurPlatform windows ] {
 
 	if { $wall } {
 		set sysPath 1
-		if { [ llength $existGCC ] == 0 && [ llength $existDLL ] == 0 } {
+		if { [ llength $existGCCsys ] == 0 && [ llength $existDLLsys ] == 0 } {
 			set res [ add_win_path "$RootLsd/gnu/bin" system end ]
+			set wconfl 0
 		} else {
 			if [ string equal [ ttk::messageBox -parent "" -type yesno -default yes -title Warning -icon warning -message "Potentially conflicting software installed" -detail "Software components included in LSD are already installed in the computer.\n\nYou may want to set the software components included in LSD as the new system default. If not, LSD will use the existing software components but it is not guaranteed they are compatible with LSD.\n\nPress 'Yes' to set LSD components as the system default, or 'No' to continue the installation anyway." ] yes ] {
 				set res [ add_win_path "$RootLsd/gnu/bin" system begin ]
+				set wconfl 0
 			} else {
 				set res [ add_win_path "$RootLsd/gnu/bin" system end ]
+				set wconfl 1
 			}
 		}
 	} else {
@@ -405,16 +424,26 @@ if [ string equal $CurPlatform windows ] {
 		set sysPath 0
 		if { [ llength $existGCC ] == 0 && [ llength $existDLL ] == 0 } {
 			set res [ add_win_path "$RootLsd/gnu/bin" user end ]
-		} else {
+			set wconfl 0
+		} elseif { [ llength $existGCCsys ] == 0 && [ llength $existDLLsys ] == 0 } {
+			set res [ add_win_path "$RootLsd/gnu/bin" user begin ]
+			set wconfl 0
+		} elseif { $wadmin } {
 			if [ string equal [ ttk::messageBox -parent "" -type yesno -default yes -title Warning -icon warning -message "Potentially conflicting software installed" -detail "Software components included in LSD are already installed in the computer.\n\nYou may want to set the software components included in LSD as the new system default. If not, LSD will use the existing software components but it is not guaranteed they are compatible with LSD.\n\nPress 'Yes' to set LSD components as the system default, or 'No' to continue the installation anyway." ] yes ] {
 				set res [ add_win_path "$RootLsd/gnu/bin" system begin ]
 				set sysPath 1
+				set wconfl 0
 			} else {
 				set res [ add_win_path "$RootLsd/gnu/bin" user begin ]
+				set wconfl 1
 			}
+		} else {
+			ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Potentially conflicting software installed" -detail "Software components included in LSD are already installed in the computer.\n\nLSD will use the existing software components but it is not guaranteed they are compatible with LSD.\n\nIf LSD does not perform as expected, you may try to re-run LSD installer as administrator, and then choose to set the software components included in LSD as the new system default."
+			set res [ add_win_path "$RootLsd/gnu/bin" user begin ]
+			set wconfl 1
 		}
 	}
-	
+
 	if { ! $res } {
 		if [ string equal [ ttk::messageBox -parent "" -type okcancel -default ok -title Error -icon error -message "Cannot add LSD to PATH" -detail "LSD libraries folder could not be added to the user PATH environment variable.\n\nYou may try to repeat the installation or manually add the folder '$RootLsd/gnu/bin' to the PATH variable following the steps described in 'Readme.txt'.\n\nPress 'OK' if you want to continue the installation anyway or 'Cancel' to exit." ] ok ] {
 			if { $sysPath } {
@@ -431,7 +460,7 @@ if [ string equal $CurPlatform windows ] {
 		}
 	}
 
-	if { ! $sysPath && [ llength $existGCC ] > 0 } {
+	if { $wconfl && [ llength $existGCC ] > 0 } {
 		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Potentially unsupported C++ compiler installed" -detail "There is another C++ compiler already installed:\n$msgGCC\n\nLSD will use it but it is not guaranteed this compiler is updated and configured to support LSD.\n\nCheck in 'Readme.txt' the required steps to properly configure your external compiler or remove/uninstall it before using LSD.\n\nInstallation will continue but you may have to fix this problem so LSD can work reliably."
 
 		foreach comp $existGCC {
@@ -439,7 +468,7 @@ if [ string equal $CurPlatform windows ] {
 		}
 	}
 
-	if { ! $sysPath && [ llength $existDLL ] > 0 } {
+	if { $wconfl && [ llength $existDLL ] > 0 } {
 		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Potentially conflicting libraries installed" -detail "There are libraries used by LSD already installed:\n$msgDLL\n\nLSD will use them but it is not guaranteed they are updated and compatible to support LSD.\n\nYou may want to remove or update them before using LSD.\n\nInstallation will continue but you may have to fix this problem so LSD can work reliably."
 
 		foreach dll $existDLL {
@@ -450,12 +479,35 @@ if [ string equal $CurPlatform windows ] {
 
 
 #
-# add icons to desktop and program menu
+# add icons to desktop and program menu, perform registration if needed
 #
 
 cd $RootLsd
 if [ string equal $CurPlatform windows ] {
-	set res [ catch { exec $RootLsd/add-shortcut-windows.bat } result ]
+
+	if { $wall } {
+		set wopt "/s"
+		set regPath "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\LSD"
+	} else {
+		set wopt ""
+		set regPath "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\LSD"
+	}
+
+	set res [ catch { exec $RootLsd/add-shortcut-windows.bat $wopt } result ]
+
+	catch {
+		registry set $regPath DisplayIcon "[ file nativename $RootLsd/$LsdIco ]\\lsd.ico" sz
+		registry set $regPath DisplayName "$_LSD_NAME_" sz
+		registry set $regPath DisplayVersion "$_LSD_VERSION_" sz
+		registry set $regPath Publisher "$_LSD_PUBLISHER_" sz
+		registry set $regPath EstimatedSize $_LSD_SIZE_KB_ dword
+		registry set $regPath InstallLocation "[ file nativename $RootLsd ]" sz
+		registry set $regPath VersionMajor [ lindex [ split $_LSD_VERSION_ . ] 0 ] dword
+		registry set $regPath VersionMinor [ lindex [ split $_LSD_VERSION_ . ] 1 ] dword
+		registry set $regPath NoModify 1 dword
+		registry set $regPath NoRepair 1 dword
+		registry set $regPath UninstallString "[ file nativename $RootLsd ]\\uninstall-windows.bat /s" sz
+	}
 } elseif [ string equal $CurPlatform linux ] {
 	set res [ catch { exec $RootLsd/add-shortcut-linux.sh } result ]
 } else {

@@ -30,6 +30,7 @@
 *.exe
 *.dll
 *.bat
+*.vbs
 *.gitignore
 *.err
 *.gch
