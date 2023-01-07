@@ -47,37 +47,40 @@ README="Readme.txt"
 LSD_VER="$LSD_VER_NUM-$LSD_VER_TAG"
 LSD_FILE_TAG="${LSD_VER//./-}"
 SRC_DIR="$LSD_DIR/src"
-INST_DIR="$LSD_DIR/installer/LSD Installer.app/Contents/Resources"
+DMG_DIR="$LSD_DIR/installer"
+INST_DIR="$DMG_DIR/LSD Installer.app/Contents/Resources"
+FILENAME="$DMG_DIR/LSD-installer-mac"
+APPNAME="LSD Installer"
 EXC_LST="$( tr '\n' ' ' < $LSD_DIR/installer/exclude-installer-mac.txt )"
 
 # create zipped distribution package
-rm -f $LSD_DIR/installer/LSD-archive-mac.zip
+rm -f $DMG_DIR/LSD-archive-mac.zip
 cd "$LSD_DIR"
 # apparently the macOS zip version has a bug handling exclusion filelist, so the workaround
-#zip -9 -q -r -X $LSD_DIR/installer/LSD-archive-mac.zip . -x@"$LSD_DIR"/installer/exclude-installer-mac.txt
-eval zip -9 -q -r -X $LSD_DIR/installer/LSD-archive-mac.zip . -x $EXC_LST
+#zip -9 -q -r -X $DMG_DIR/LSD-archive-mac.zip . -x@"$LSD_DIR"/installer/exclude-installer-mac.txt
+eval zip -9 -q -r -X $DMG_DIR/LSD-archive-mac.zip . -x $EXC_LST
 cd - > /dev/null
 
 # update the installer application
-rm -f "$INST_DIR"/Package/LSD-archive-mac.zip "$INST_DIR"/Scripts/src/*
-mv -f $LSD_DIR/installer/LSD-archive-mac.zip "$INST_DIR"/Package/
-cp -f $SRC_DIR/*.tcl "$INST_DIR"/Scripts/src/
+rm -f "$INST_DIR/Package/LSD-archive-mac.zip" "$INST_DIR/Scripts/src/"*
+mv -f "$DMG_DIR/LSD-archive-mac.zip" "$INST_DIR/Package/"
+cp -f "$SRC_DIR/"*.tcl "$INST_DIR/Scripts/src/"
 
 # create .dmg archive
-rm -f -R /tmp/LSD_INSTALLER "$LSD_DIR/installer/LSD-installer-mac-$LSD_FILE_TAG.dmg"
+rm -f -R /tmp/LSD_INSTALLER "$FILENAME-$LSD_FILE_TAG.dmg"
 mkdir "/tmp/LSD_INSTALLER"
-mkdir "/tmp/LSD_INSTALLER/LSD Installer ($LSD_VER).app"
-cp -f -R "$LSD_DIR/installer/LSD Installer.app/"* "/tmp/LSD_INSTALLER/LSD Installer ($LSD_VER).app/"
+mkdir "/tmp/LSD_INSTALLER/$APPNAME ($LSD_VER).app"
+cp -f -R "$DMG_DIR/$APPNAME.app/"* "/tmp/LSD_INSTALLER/$APPNAME ($LSD_VER).app/"
 cp -f "$LSD_DIR/$README" "/tmp/LSD_INSTALLER/"
 
-hdiutil create /tmp/tmp.dmg -fs HFS+ -ov -quiet -volname "LSD Installer ($LSD_VER)" -srcfolder "/tmp/LSD_INSTALLER/"
-hdiutil convert /tmp/tmp.dmg -format UDBZ -o "$LSD_DIR/installer/LSD-installer-mac-$LSD_FILE_TAG.dmg" -quiet
+hdiutil create /tmp/tmp.dmg -fs HFS+ -ov -quiet -volname "$APPNAME ($LSD_VER)" -srcfolder "/tmp/LSD_INSTALLER/"
+hdiutil convert /tmp/tmp.dmg -format UDBZ -o "$FILENAME-$LSD_FILE_TAG.dmg" -quiet
 
 # cleanup
 rm -f -R "$INST_DIR"/Package/LSD-archive-mac.zip "$INST_DIR"/Scripts/src/* /tmp/LSD_INSTALLER /tmp/tmp.dmg
 
-if [ -f "$LSD_DIR/installer/LSD-installer-mac-$LSD_FILE_TAG.dmg" ]; then
-	echo "Self-extracting LSD package created: $LSD_DIR/installer/LSD-installer-mac-$LSD_FILE_TAG.dmg"
+if [ -f "$FILENAME-$LSD_FILE_TAG.dmg" ]; then
+	echo "Self-extracting LSD package created: $FILENAME-$LSD_FILE_TAG.dmg"
 else
 	echo "Error creating LSD installer"
 fi

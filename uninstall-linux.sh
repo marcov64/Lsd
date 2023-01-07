@@ -24,7 +24,7 @@ if [[ "$1" = "-h" ]]; then
 	exit 0
 fi
 
-LSDROOT="$( cd "$( dirname "${ BASH_SOURCE[0] }" )" && pwd -P )"
+LSDROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
 
 read -p "LSD installation at '$LSDROOT' is going to be removed. Proceed [Y,N]?" -n 1 -r
 echo
@@ -33,9 +33,10 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 LMMLNK="LMM.desktop"
-LMMEXE=LMM
+LMMEXE="LMM"
 LSDFOLDERS="Example gnu installer LMM.app lwi Manual Rpkg src"
-APPMENU="~/.local/share/applications"
+LSDWORK="Work"
+APPMENU="$HOME/.local/share/applications"
 if [ -x "$( command -v xdg-user-dir )" ]; then
 	DESKTOP="$( xdg-user-dir DESKTOP )"
 else
@@ -66,20 +67,20 @@ for f in $LSDFOLDERS; do
 done
 
 # remove Work if empty
-if [[ -d "$LSDROOT/Work" ]]; then
-	COUNT=$( ls -l "$LSDROOT/Work" | grep -c ^d )
+if [[ -d "$LSDROOT/$LSDWORK" ]]; then
+	COUNT=$( ls -l "$LSDROOT/$LSDWORK" | grep -c ^d )
 else
 	COUNT=1
 fi
 
 if [[ $COUNT = 0 ]]; then
-	rm -rf "$LSDROOT/Work"
+	rm -rf "$LSDROOT/$LSDWORK"
 fi
 
 # remove main directory if empty or just files otherwise
 COUNT=$( ls -l "$LSDROOT" | grep -c ^d )
 if [[ $COUNT = 0 ]]; then
-	rm -rf "$LSDROOT"
+	rm -rf "${LSDROOT:-/tmp/__UNDEFINED__}"
 else
 	rm -f $( find "$LSDROOT" -maxdepth 1 -type f )
 fi

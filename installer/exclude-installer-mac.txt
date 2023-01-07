@@ -18,6 +18,7 @@
 'LMM.exe.config'
 'lmm_options.txt'
 'add-shortcut-linux.sh'
+'uninstall-linux.sh'
 '*elements.txt'
 '*makefile'
 '*makefileNW'

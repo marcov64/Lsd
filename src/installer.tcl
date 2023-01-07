@@ -216,7 +216,20 @@ pack .dir.choice.blk .dir.choice.but -padx 5 -side left
 ttk::label .dir.obs -text "If LSD is already installed in the\nselected directory, it will be updated" -justify center
 
 if [ string equal $CurPlatform windows ] {
-	set wall 0
+
+	if { ! [ catch { exec net session >nul 2>&1 } ] } {
+		set wadmin 1
+		set wall 1
+		if [ file exists $winRoot ] {
+			set RootLsd "${winRoot}$LsdDir"
+		} else {
+			set RootLsd "/$LsdDir"
+		}
+	} else {
+		set wadmin 0
+		set wall 0
+	}
+	
 	ttk::checkbutton .dir.wall -variable wall -text "Install for all users" -command {
 		if { $wall } {
 			if [ file exists $winRoot ] {
@@ -231,11 +244,9 @@ if [ string equal $CurPlatform windows ] {
 
 	pack .dir.choice .dir.wall .dir.obs -pady 5
 
-	if { ! [ catch { exec net session >nul 2>&1 } ] } {
-		set wadmin 1
+	if { $wadmin } {
 		tooltip::tooltip .dir.wall "Allow any user logged in this computer to use LSD"
 	} else {
-		set wadmin 0
 		tooltip::tooltip .dir.wall "To enable this option run installer as administrator"
 		.dir.wall configure -state disabled
 	}
@@ -434,12 +445,12 @@ if [ string equal $CurPlatform windows ] {
 				set sysPath 1
 				set wconfl 0
 			} else {
-				set res [ add_win_path "$RootLsd/gnu/bin" user begin ]
+				set res [ add_win_path "$RootLsd/gnu/bin" user end ]
 				set wconfl 1
 			}
 		} else {
 			ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Potentially conflicting software installed" -detail "Software components included in LSD are already installed in the computer.\n\nLSD will use the existing software components but it is not guaranteed they are compatible with LSD.\n\nIf LSD does not perform as expected, you may try to re-run LSD installer as administrator, and then choose to set the software components included in LSD as the new system default."
-			set res [ add_win_path "$RootLsd/gnu/bin" user begin ]
+			set res [ add_win_path "$RootLsd/gnu/bin" user end ]
 			set wconfl 1
 		}
 	}

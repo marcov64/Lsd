@@ -46,20 +46,27 @@ if "%1"=="" (
 
 :create
 
-set INST_DIR=%LSD_DIR%\installer
+set README="%LSD_DIR%\Readme.txt"
+set INST_DIR="%LSD_DIR%\installer"
+set FILENAME="%INST_DIR%\LSD-installer-windows"
 
-del %INST_DIR%\LSD-archive-windows.7z >nul 2>&1
-del %INST_DIR%\LSD-installer-windows-%LSD_FILE_TAG%.exe >nul 2>&1
+rem create installer executable
+del %FILENAME%.7z >nul 2>&1
+del %FILENAME%-%LSD_FILE_TAG%.exe >nul 2>&1
+7z a -r -mx=9 %FILENAME%.7z %LSD_DIR%\* -x@exclude-installer-windows.txt
+copy /b %INST_DIR%\7zSD.sfx + %INST_DIR%\config-installer-windows.txt + %FILENAME%.7z %FILENAME%-%LSD_FILE_TAG%.exe  >nul 2>&1
 
-%INST_DIR%\7zr.exe a %INST_DIR%\LSD-archive-windows.7z %LSD_DIR%\* -x@exclude-installer-windows.txt -r -mx -mf=BCJ2
+rem create compressed distribution file
+del %FILENAME%-%LSD_FILE_TAG%.zip >nul 2>&1
+7z a -tzip -mx=1 %FILENAME%-%LSD_FILE_TAG%.zip %README% %FILENAME%-%LSD_FILE_TAG%.exe
 
-copy /b %INST_DIR%\7zSD.sfx + %INST_DIR%\config-installer-windows.txt + %INST_DIR%\LSD-archive-windows.7z %INST_DIR%\LSD-installer-windows-%LSD_FILE_TAG%.exe  >nul 2>&1
-
-del %INST_DIR%\LSD-archive-windows.7z >nul 2>&1
+rem cleanup
+del %FILENAME%.7z >nul 2>&1
+del %FILENAME%-%LSD_FILE_TAG%.exe >nul 2>&1
 echo .
 
-if exist %INST_DIR%\LSD-installer-windows-%LSD_FILE_TAG%.exe (
-	echo Self-extracting LSD package created: %INST_DIR%\LSD-installer-windows-%LSD_FILE_TAG%.exe
+if exist %FILENAME%-%LSD_FILE_TAG%.zip (
+	echo LSD installer package created: %FILENAME%-%LSD_FILE_TAG%.zip
 ) else (
 	echo Error creating LSD installer
 )

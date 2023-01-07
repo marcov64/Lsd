@@ -1,7 +1,7 @@
 To create Windows .exe installer
 
 1. Get 7-Zip LZMA SDK at https://www.7-zip.org (ex. lzma1900.7z)
-2. Copy 7zr.exe and 7zSD.sfx to gnu\installer folder in LSD installation
+2. Copy 7zSD.sfx to gnu\installer folder in LSD installation
 3. Open 7zSD.sfx in Resource Hacker (http://www.angusj.com/resourcehacker)
 4. Menu Action > Add from Blank Script
 5. Import manifest from 7zSD-manifest.xml

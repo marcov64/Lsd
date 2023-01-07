@@ -28,7 +28,9 @@ IF "%1"=="/?" (
 
 SET LSDROOT=%~dp0
 SET LSDROOT=%LSDROOT:~0,-1%
+SET GETFOLDER=%LSDROOT%\src\get-dir-windows.vbs
 SET LSDFOLDERS=Example gnu installer LMM.app lwi Manual Rpkg src
+SET LSDWORK=Work
 
 IF /I "%1"=="/s" GOTO nocheck
 
@@ -76,15 +78,15 @@ CALL SET NEWPATH=%%USRPATH:%LSDROOT%\gnu\bin=%%
 IF NOT "%NEWPATH%"=="%USRPATH%" SETX PATH "%NEWPATH%" > nul
 
 rem remove desktop and start menu links, unregister from Windows
-FOR /F "delims=" %%i in ('cscript %~dp0\src\get-dir-windows.vbs //nologo Desktop') DO SET DESKTOP=%%i
-FOR /F "delims=" %%i in ('cscript %~dp0\src\get-dir-windows.vbs //nologo Programs') DO SET STRTMENU=%%i
+FOR /F "delims=" %%i in ('cscript %GETFOLDER% //nologo Desktop') DO SET DESKTOP=%%i
+FOR /F "delims=" %%i in ('cscript %GETFOLDER% //nologo Programs') DO SET STRTMENU=%%i
 ERASE /F "%DESKTOP%\LSD Model Manager.lnk" > NUL 2>&1
 ERASE /F "%STRTMENU%\LSD Model Manager.lnk" > NUL 2>&1
 REG DELETE "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\LSD" /f > NUL 2>&1
 
 IF %ADMIN%==1 (
-FOR /F "delims=" %%i in ('cscript %~dp0\src\get-dir-windows.vbs //nologo AllUsersDesktop') DO SET DESKTOP=%%i
-FOR /F "delims=" %%i in ('cscript %~dp0\src\get-dir-windows.vbs //nologo AllUsersPrograms') DO SET STRTMENU=%%i
+FOR /F "delims=" %%i in ('cscript %GETFOLDER% //nologo AllUsersDesktop') DO SET DESKTOP=%%i
+FOR /F "delims=" %%i in ('cscript %GETFOLDER% //nologo AllUsersPrograms') DO SET STRTMENU=%%i
 REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\LSD" /f > NUL 2>&1
 )
 
@@ -102,13 +104,13 @@ rem remove folders
 FOR %%f IN (%LSDFOLDERS%) DO IF EXIST "%LSDROOT%\%%f" RMDIR /S /Q "%LSDROOT%\%%f"
 
 rem remove Work if empty
-IF EXIST "%LSDROOT%\Work" (
-	FOR /F %%f IN ('DIR /b /ad "%LSDROOT%\Work"^|find /c /v "" ') DO SET COUNT=%%f
+IF EXIST "%LSDROOT%\%LSDWORK%" (
+	FOR /F %%f IN ('DIR /b /ad "%LSDROOT%\%LSDWORK%"^|find /c /v "" ') DO SET COUNT=%%f
 ) ELSE (
 	SET COUNT=-1
 )
 
-IF %COUNT%==0 RMDIR /S /Q "%LSDROOT%\Work"
+IF %COUNT%==0 RMDIR /S /Q "%LSDROOT%\%LSDWORK%"
 
 rem remove main directory if empty or just files otherwise
 FOR /F %%f IN ('DIR /b /ad "%LSDROOT%"^|find /c /v "" ') DO SET COUNT=%%f

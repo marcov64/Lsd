@@ -26,7 +26,7 @@ if [[ "$1" = "-h" ]]; then
 fi
 
 LMMLNK="LSD Model Manager"
-LSDROOT="$( cd "$( dirname "${ BASH_SOURCE[0] }" )" && pwd -P )"
+LSDROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
 LMMAPP=LMM
 LSDAPP=LSD
 DESKTOP="$( osascript \

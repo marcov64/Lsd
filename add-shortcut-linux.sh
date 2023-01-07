@@ -26,8 +26,8 @@ fi
 
 LMMLNK="LMM.desktop"
 LMMEXE=LMM
-LSDROOT="$( cd "$( dirname "${ BASH_SOURCE[0] }" )" && pwd -P )"
-APPMENU="~/.local/share/applications"
+LSDROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
+APPMENU="$HOME/.local/share/applications"
 if [ -x "$( command -v xdg-user-dir )" ]; then
 	DESKTOP="$( xdg-user-dir DESKTOP )"
 else
@@ -56,6 +56,7 @@ fi
 if [ ! -d "$APPMENU" ]; then
 	mkdir -p "$APPMENU"
 fi
+
 cp -f "$DESKTOP/$LMMLNK" "$APPMENU/"
 
 exit 0

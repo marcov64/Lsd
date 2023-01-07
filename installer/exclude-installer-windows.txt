@@ -21,6 +21,7 @@ LMM
 LMM.desktop
 lmm_options.txt
 LSD*.exe
+LSD*.zip
 elements.txt
 makefile
 makefileNW

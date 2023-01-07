@@ -18,6 +18,7 @@
 ./src/system_options.txt
 ./lmm_options.txt
 ./add-shortcut-mac.sh
+./uninstall-mac.sh
 *elements.txt
 *makefile
 *makefileNW
