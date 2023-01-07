@@ -2247,7 +2247,7 @@ void analysis( bool mc )
 					break;
 
 				cmd( "scan $it %%d) a" );
-				cmd( "if [ winfo exists $daptab.tab$a ] { \
+				cmd( "if { [ info exists daptab ] && [ winfo exists $daptab.tab$a ] } { \
 						if [ istoplevel $daptab.tab$a ] { \
 							destroytop $daptab.tab$a \
 						} else { \
@@ -2270,7 +2270,7 @@ void analysis( bool mc )
 			// Raise the clicked plot
 			case 3:
 				cmd( "scan $it %%d) a" );
-				cmd( "if [ winfo exists $daptab.tab$a ] { \
+				cmd( "if { [ info exists daptab ] && [ winfo exists $daptab.tab$a ] } { \
 						if [ istoplevel $daptab.tab$a ] { \
 							focustop $daptab.tab$a \
 						} else { \
