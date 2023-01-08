@@ -46,9 +46,9 @@ if "%1"=="" (
 
 :create
 
-set README="%LSD_DIR%\Readme.txt"
-set INST_DIR="%LSD_DIR%\installer"
-set FILENAME="%INST_DIR%\LSD-installer-windows"
+set README=%LSD_DIR%\Readme.txt
+set INST_DIR=%LSD_DIR%\installer
+set FILENAME=%INST_DIR%\LSD-installer-windows
 
 rem create installer executable
 del %FILENAME%.7z >nul 2>&1
