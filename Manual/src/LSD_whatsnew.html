@@ -15,16 +15,16 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>87</o:Revision>
-  <o:TotalTime>1001</o:TotalTime>
+  <o:Revision>88</o:Revision>
+  <o:TotalTime>1004</o:TotalTime>
   <o:Created>2018-04-14T19:11:00Z</o:Created>
-  <o:LastSaved>2022-08-16T23:51:00Z</o:LastSaved>
+  <o:LastSaved>2023-01-11T21:19:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
   <o:Words>3698</o:Words>
-  <o:Characters>21079</o:Characters>
+  <o:Characters>21085</o:Characters>
   <o:Lines>175</o:Lines>
   <o:Paragraphs>49</o:Paragraphs>
-  <o:CharactersWithSpaces>24728</o:CharactersWithSpaces>
+  <o:CharactersWithSpaces>24734</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -32,6 +32,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <link rel=colorSchemeMapping href="LSD_whatsnew_arquivos/colorschememapping.xml">
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
+  <w:Zoom>120</w:Zoom>
   <w:TrackMoves>false</w:TrackMoves>
   <w:TrackFormatting/>
   <w:HyphenationZone>21</w:HyphenationZone>
@@ -1364,8 +1365,8 @@ break-word'>
 
 <p class=MsoTitle>What’s new in LSD</p>
 
-<h1><span style='mso-fareast-font-family:"Times New Roman"'>Version 8.0
-(September 2022)<o:p></o:p></span></h1>
+<h1><span style='mso-fareast-font-family:"Times New Roman"'>Version 8.0 (March
+2023)<o:p></o:p></span></h1>
 
 <p class=MsoNormal>The version introduces an improved user interface and other
 improvements:</p>
@@ -1374,8 +1375,8 @@ improvements:</p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><b>Interface themes</b>. LSD interface may now be
-configured according to many predefined themes, including dark ones. This
+</span></span></span><![endif]><b>Interface themes</b>. LSD interface may now
+be configured according to many predefined themes, including dark ones. This
 provides a refresh on the classic LSD interface while allowing the
 customization of LSD appearance to the needs of different users, monitors and
 platforms. The desired theme may be chosen in LMM <span class=Cdigo><span
@@ -1434,8 +1435,8 @@ style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b>Other interface improvements</b>. Several
 small usability improvements. Tabbed interface for <a href="runtime.html">Run-time</a>
-and <a href="menudata_res.html">Analysis of Results</a> plot windows. Series
-filtering in <a href="menudata_res.html">Analysis of Results</a>. Moving
+and <a href="menudata_res.html">Analysis of Results</a> plot windows. Advanced
+series filtering in <a href="menudata_res.html">Analysis of Results</a>. Moving
 Objects in the <a href="graphrep.html">LSD Model Structure</a> (finally!).
 Quick-search keys on all list boxes. Auto-detection of model Object names. List
 of elements unused in equation file(s). Improvements to the <a href="debug.html">Debugger</a>
@@ -1451,12 +1452,13 @@ snapping to default buttons (optional). </p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><b>Parallel batch execution of multi-run simulations.</b>
-When <a href="menurun.html#batch">executing a parallel run</a> of a model with
-a <a href="menurun.html#simsetting">number of simulation runs</a> larger than
-one, LSD will automatically offer to execute the runs in parallel, using up to
-the number of available (virtual) cores. This feature is also available when
-using the <a href="LMM.html#nowindow">command-line version</a> of the model.</p>
+</span></span></span><![endif]><b>Parallel batch execution of multi-run
+simulations.</b> When <a href="menurun.html#batch">executing a parallel run</a>
+of a model with a <a href="menurun.html#simsetting">number of simulation runs</a>
+larger than one, LSD will automatically offer to execute the runs in parallel,
+using up to the number of available (virtual) cores. This feature is also
+available when using the <a href="LMM.html#nowindow">command-line version</a>
+of the model.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1506,9 +1508,9 @@ class=Cdigo><a href="LSD_macros.html#THIS">GRANDPARENTS(…)</a></span> allow
 navigating the <span lang=PT-BR style='mso-ansi-language:PT-BR'><a
 href="LSD_faqs.html#modelstructure"><span lang=EN-US style='mso-ansi-language:
 EN-US'>model structure</span></a></span> without using the C++ complex pointer
-syntax with the important benefit of full pointer checking by default,
-preventing obscure crashes and providing identification of problem location in
-code. <span class=Cdigo><span lang=PT-BR style='mso-ansi-language:PT-BR'><a
+syntax with the important benefit of full pointer checking by default, preventing
+obscure crashes and providing identification of problem location in code. <span
+class=Cdigo><span lang=PT-BR style='mso-ansi-language:PT-BR'><a
 href="LSD_macros.html#DELETING"><span lang=EN-US style='mso-ansi-language:EN-US'>DELETING</span></a></span></span>
 allows checking for deferred Object deletions due to Variables still computing.
 <span class=Cdigo><span lang=PT-BR style='mso-ansi-language:PT-BR'><a
@@ -1577,8 +1579,8 @@ style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b>Embedded Windows 64-bit compiler.</b> The C++
 compiler preinstalled with LSD in Windows computers was updated to a modern,
-64-bit version (10.2) of GCC compiler. This allows the generation of faster
-models, better error messages, and support of virtually unlimited memory.</p>
+64-bit version of GCC compiler. This allows the generation of faster models,
+better error messages, and support of virtually unlimited memory.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1606,8 +1608,8 @@ may still use LSD version 7.2.</p>
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span style='mso-bidi-font-weight:bold'>New
-embedded Tcl/Tk 8.6.12 for macOS Monterey support, new GCC 11 binaries for
-Windows, and many bug fixes.</span></p>
+embedded Tcl/Tk 8.6.13 for macOS Monterey/Ventura support, new GCC 12 binaries
+for Windows, and many bug fixes.</span></p>
 
 <p class=MsoListParagraph style='margin-left:35.85pt'><o:p>&nbsp;</o:p></p>
 
@@ -1666,7 +1668,8 @@ style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b>New example models.</b> New <a
 href="modelbrowser.html#groups">examples</a> on macroeconomics models
-(Sant’Anna’s K+S and UFRJ Micro-Macro), including in-depth sensitivity analysis.</p>
+(Sant’Anna’s K+S and UFRJ Micro-Macro), including in-depth sensitivity
+analysis.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1702,8 +1705,8 @@ controlled, including an automatic fit option.</p>
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b>New Macros.</b> <span class=Cdigo><a
-href="LSD_macros.html#LAST_CALC">LAST_CALC(…)</a></span> allows reading the last
-time a Variable or Parameter was calculated or updated. <span class=Cdigo><span
+href="LSD_macros.html#LAST_CALC">LAST_CALC(…)</a></span> allows reading the
+last time a Variable or Parameter was calculated or updated. <span class=Cdigo><span
 lang=PT-BR style='mso-ansi-language:PT-BR'><a href="LSD_macros.html#MED"><span
 lang=EN-US style='mso-ansi-language:EN-US'>MED(…)</span></a></span></span> / <span
 class=Cdigo><span lang=PT-BR style='mso-ansi-language:PT-BR'><a
@@ -1793,8 +1796,8 @@ data download.</p>
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b style='mso-bidi-font-weight:normal'>Fast
-Object and Variable look-up</b>. Significant search speed-up of larger models by
-the allocation of high-performance dynamic memory maps to sets of Object
+Object and Variable look-up</b>. Significant search speed-up of larger models
+by the allocation of high-performance dynamic memory maps to sets of Object
 instances (bridges), Variables and Parameters. It replaces linked-list
 sequential searching in most situations at the expense of slightly higher
 memory footprint. It affects both user generated searches and internal LSD
@@ -1983,12 +1986,12 @@ Full integration with R advanced sensitivity analysis package.</p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><b>Integration with R.</b> Two advanced R packages
-available on CRAN (LSDinterface and LSDsensitivity). Transparent use of LSD
-Object-oriented hierarchical data in R (multidimensional arrays). Parallel
-multi-core reading of multiple results files. Automatic handling of compressed
-results files. Advanced tools for sensitivity analysis and the study of
-response surfaces of simulation models (Morris Elementary Effects, Sobol
+</span></span></span><![endif]><b>Integration with R.</b> Two advanced R
+packages available on CRAN (LSDinterface and LSDsensitivity). Transparent use
+of LSD Object-oriented hierarchical data in R (multidimensional arrays).
+Parallel multi-core reading of multiple results files. Automatic handling of
+compressed results files. Advanced tools for sensitivity analysis and the study
+of response surfaces of simulation models (Morris Elementary Effects, Sobol
 Decomposition, Kriging Meta-modelling etc.).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -2008,9 +2011,8 @@ Support of larger structures in the LSD Model Structure window. </p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><b>Multiple source files support.</b> Equation
-files can be split in many “include” files with editing and version control
-support.</p>
+</span></span></span><![endif]><b>Multiple source files support.</b> Equation files
+can be split in many “include” files with editing and version control support.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -2067,10 +2069,10 @@ system signals and exceptions in all modules. Tcl/Tk buffer overrun control.</p>
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b>New persistent configuration options. </b>Choose
-the default external debugger. Define arbitrary directory for new models. Predefine
-the font type and size (smart defaults by platform) all over LSD. Save other
-LMM interface options (syntax highlighting, text wrapping, tab size, LMM auto
-hide).</p>
+the default external debugger. Define arbitrary directory for new models.
+Predefine the font type and size (smart defaults by platform) all over LSD.
+Save other LMM interface options (syntax highlighting, text wrapping, tab size,
+LMM auto hide).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -2100,9 +2102,9 @@ class=Cdigo>ADDxOBJL</span>).</p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><b>User-defined data in Objects.</b> Any C++ data
-structure can be attached to any LSD Object, including arrays, vectors, STL
-containers and user-defined <span class=Cdigo>class</span> or <span
+</span></span></span><![endif]><b>User-defined data in Objects.</b> Any C++
+data structure can be attached to any LSD Object, including arrays, vectors,
+STL containers and user-defined <span class=Cdigo>class</span> or <span
 class=Cdigo>struct</span>.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -2175,8 +2177,8 @@ style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
 <h1><span style='mso-fareast-font-family:"Times New Roman"'>Version 6.4 (Nov
 2015)<o:p></o:p></span></h1>
 
-<p class=MsoNormal>The new version maintains the compatibility with all the models
-built with previous versions of LSD. There are several improvements:</p>
+<p class=MsoNormal>The new version maintains the compatibility with all the
+models built with previous versions of LSD. There are several improvements:</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -2317,8 +2319,8 @@ from the LSD browser and is automatically inserted in the model report. </p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><b>Stricter error catching.</b> The number of errors
-spotted by LSD model programs is vastly increased. Moreover, detailed
+</span></span></span><![endif]><b>Stricter error catching.</b> The number of
+errors spotted by LSD model programs is vastly increased. Moreover, detailed
 information is provided when an error occurs. For example, among other things,
 the system controls the amount of memory required to save the results, and
 indicated when it is not sufficient, leaving to the user the decision on

@@ -1443,7 +1443,6 @@ if( (isnan(res)==1 || isinf(res)==1) && quit!=1)
   PLOG( "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res );
 
   debug_flag=1;
-  debug='d';
  } 
 
 if(debug_flag==1)

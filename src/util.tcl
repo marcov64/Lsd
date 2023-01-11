@@ -374,14 +374,18 @@ proc waitbox { w tit msg { steps "" } { timer no } { par . } } {
 # Initialize the main AoR series listbox control
 # data structures
 #************************************************
-proc init_series { fltcb serlb sern casn sellb seln pltlb pltn } {
-	global parAll serPar parChg parFlt serSel serList parList serOrd serNext serParDict serNdict serDescrDict fltCbox serLbox selLbox pltLbox serNlab casNlab selNlab pltNlab DaModElem DaModPar
+proc init_series { objcb fltcb serlb sern casn sellb seln pltlb pltn } {
+	global parAll serPar parChg parFlt serSel serList fltList parList serOrd serNext serParDict serNdict serDescrDict objCbox fltCbox serLbox selLbox pltLbox serNlab casNlab selNlab pltNlab lastFltStr fltRegExp DaModElem DaModPar
 
 	set parChg 0
 	set parFlt $parAll
 	set serPar "$parAll (0)"
+	set fltStr ""
+	set lastFltStr ""
+	set fltRegExp 0
 	set serSel 0
 	set serOrd none
+	set objCbox $objcb
 	set fltCbox $fltcb
 	set serLbox $serlb
 	set selLbox $sellb
@@ -391,6 +395,7 @@ proc init_series { fltcb serlb sern casn sellb seln pltlb pltn } {
 	set selNlab $seln
 	set pltNlab $pltn
 
+	set fltList [ list ]
 	set serList [ list ]
 	set parList [ list "$parAll (0)" ]
 	set serNext [ list ]
@@ -410,15 +415,15 @@ proc init_series { fltcb serlb sern casn sellb seln pltlb pltn } {
 # Updates the main AoR series listboxes stats
 #************************************************
 proc stat_series { } {
-	global fltCbox serLbox selLbox pltLbox serNlab casNlab selNlab pltNlab numc
+	global objCbox serLbox selLbox pltLbox serNlab casNlab selNlab pltNlab numc
 
 	$serNlab configure -text [ $serLbox size ]
 	$casNlab configure -text $numc
 	$selNlab configure -text [ $selLbox size ]
 	$pltNlab configure -text [ $pltLbox size ]
 
-	if { [ $fltCbox current ] < 0 } {
-		$fltCbox configure -values [ update_parent ]
+	if { [ $objCbox current ] < 0 } {
+		$objCbox configure -values [ update_parent ]
 	}
 }
 
@@ -465,39 +470,59 @@ proc update_parent { } {
 # Filter the main AoR series listbox to show
 # just series from one parent/source
 #************************************************
-proc filter_series { { par "" } } {
-	global parAll serPar parFlt parList serSel serList serOrd serParDict fltCbox serLbox
+proc filter_series { cmd { par "" } } {
+	global parAll serPar parFlt parList serSel serList serOrd serParDict objCbox fltCbox serLbox fltStr lastFltStr fltList
 
-	if { $par eq "" } {
-		set par [ lindex $serPar 0 ]
-	} else {
-		set i 0
-		set found 0
-		foreach p $parList {
-			if { [ lindex $p 0 ] eq $par } {
-				set found 1
-				set $serPar "$p"
-				$fltCbox current $i
-				break
+	if { $cmd eq "obj" } {
+		if { $par eq "" } {
+			set par [ lindex $serPar 0 ]
+		} else {
+			set i 0
+			set found 0
+			foreach p $parList {
+				if { [ lindex $p 0 ] eq $par } {
+					set found 1
+					set $serPar "$p"
+					$objCbox current $i
+					break
+				}
+
+				incr i
 			}
 
-			incr i
+			if { ! $found } {
+				return
+			}
 		}
 
-		if { ! $found } {
-			return
-		}
-	}
+		if { $par ne $parFlt } {
+			$serLbox delete 0 end
+			tooltip::tooltip clear ${serLbox}*
 
-	if { $par ne $parFlt } {
+			insert_series_list $serLbox $serList "" $par
+
+			set fltStr ""
+			set lastFltStr ""
+			set parFlt $par
+			set serSel 0
+			set serOrd none
+			stat_series
+		}
+	} elseif { $cmd eq "str" && $fltStr ne $lastFltStr } {
 		$serLbox delete 0 end
-		tooltip::tooltip clear ${serLbox}*
+		insert_series_list $serLbox $serList "" $parFlt end $fltStr
 
-		insert_series_list $serLbox $serList "" $par
+		if { $fltStr ne "" } {
+			set hstPos [ lsearch -nocase -exact $fltList $fltStr ]
+			if { $hstPos != -1 } {
+				set fltList [ lreplace $fltList $hstPos $hstPos ]
+			}
 
-		set parFlt $par
-		set serSel 0
-		set serOrd none
+			set fltList [ linsert $fltList 0 $fltStr ]
+			$fltCbox configure -values $fltList
+		}
+
+		set lastFltStr $fltStr
 		stat_series
 	}
 
@@ -551,7 +576,7 @@ proc search_series { { text "" } } {
 	set par [ dict get $serParDict [ lindex $serlin 0 ] ]
 
 	if { $parFlt ne $par } {
-		filter_series $par
+		filter_series obj $par
 	}
 
 	selectinlist $serLbox [ lsearch -exact [ $serLbox get 0 end ] $serlin ] 1
@@ -569,7 +594,7 @@ proc add_series { ser par } {
 	global parAll serPar parChg parFlt serList serParDict serNdict serLbox DaModElem DaModPar
 
 	if { $parFlt ne $parAll } {
-		filter_series $parAll
+		filter_series obj $parAll
 	}
 
 	lappend serList "$ser"
@@ -641,8 +666,8 @@ proc insert_series { lbox ser { pos end } } {
 # optionally filtering a specific variable name
 # or object parent
 #************************************************
-proc insert_series_list { lbox slist { name "" } { par "" } { pos end } } {
-	global parAll serParDict prog_series
+proc insert_series_list { lbox slist { name "" } { par "" } { pos end } { flt "" } } {
+	global parAll serParDict fltRegExp prog_series
 
 	if { $name ne "" } {
 		set slistflt [ list ]
@@ -660,6 +685,14 @@ proc insert_series_list { lbox slist { name "" } { par "" } { pos end } } {
 		}
 	} else {
 		set slistflt $slist
+	}
+
+	if { $flt ne "" } {
+		if { $fltRegExp } {
+			set slistflt [ lsearch -regexp -all -inline $slistflt $flt ]
+		} else {
+			set slistflt [ lsearch -glob -nocase -all -inline $slistflt "*$flt*" ]
+		}
 	}
 
 	set n [ llength $slistflt ]

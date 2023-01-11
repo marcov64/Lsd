@@ -19,7 +19,7 @@ Contains the routines to manage the data analysis module.
 The main functions contained here are:
 
 - void analysis( void )
-Builds the managemen window, setting all the bindings, and enters in a cycle
+Builds the management window, setting all the bindings, and enters in a cycle
 from which can make several choices:
 
 1) Plot the plot as indicated
@@ -83,8 +83,8 @@ struct bin
 bin *histo_bins;
 bool avgSmplMsg;
 bool first_run = true;
-char filename[ MAX_PATH_LENGTH ];
 char da_tmp[ MAX_BUFF_SIZE ];
+char filename[ MAX_PATH_LENGTH ];
 double histo_mean;
 double histo_var;
 double maxy;
@@ -162,7 +162,7 @@ void analysis( bool mc )
 	Tcl_LinkVar( inter, "grid", ( char * ) &grid, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "point_size", ( char * ) &point_size, TCL_LINK_DOUBLE );
 	Tcl_LinkVar( inter, "tc", ( char * ) &time_cross, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "line_point", (char * ) &line_point, TCL_LINK_INT );
+	Tcl_LinkVar( inter, "line_point", ( char * ) &line_point, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "xy", ( char * ) &xy, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "pdigits", ( char * ) &pdigits, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "watch", ( char * ) &watch, TCL_LINK_BOOLEAN );
@@ -196,7 +196,8 @@ void analysis( bool mc )
 	cmd( "set prog_series %d", PROG_SERIES );
 	cmd( "set list_times [ list ]" );
 
-	cmd( "init_series .da.vars.lb.flt .da.vars.lb.f.v .da.vars.lb.bh.nvar .da.vars.lb.bh.ncas .da.vars.ch.f.v .da.vars.ch.bh.sel .da.vars.pl.f.v .da.vars.pl.bh.plot" );
+	// save the name of key widgets that manipulate the series lists
+	cmd( "init_series .da.vars.lb.obj .da.vars.lb.flt.str .da.vars.lb.f.v .da.vars.lb.bh.nvar .da.vars.lb.bh.ncas .da.vars.ch.f.v .da.vars.ch.bh.sel .da.vars.pl.f.v .da.vars.pl.bh.plot" );
 
 	cmd( "newtop .da \"%s%s - LSD Analysis of Results\" { set choice 2 } \"\"", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
 
@@ -247,12 +248,30 @@ void analysis( bool mc )
 	// available series listbox
 	cmd( "ttk::frame .da.vars.lb" );
 	cmd( "ttk::label .da.vars.lb.th -text \"Series available\" -style boldSmall.TLabel -anchor center" );
-	cmd( "ttk::combobox .da.vars.lb.flt -state readonly -textvariable serPar -postcommand { .da.vars.lb.flt configure -values [ update_parent ] }" );
-	cmd( "pack .da.vars.lb.th .da.vars.lb.flt -fill x" );
+	cmd( "ttk::combobox .da.vars.lb.obj -state readonly -textvariable serPar -postcommand { .da.vars.lb.obj configure -values [ update_parent ] }" );
 
-	cmd( "tooltip::tooltip .da.vars.lb.flt \"Filter series to show\"" );
+	cmd( "ttk::frame .da.vars.lb.flt" );
+	cmd( "ttk::combobox .da.vars.lb.flt.str -width 10 -textvariable fltStr" );
+	cmd( "ttk::button .da.vars.lb.flt.go -style Toolbutton -text \u279c -command { filter_series str }" );
+	cmd( "ttk::button .da.vars.lb.flt.clr -style Toolbutton -text \u274c -command { \
+			set fltStr \"\"; \
+			filter_series str \
+		}" );
+	cmd( "ttk::checkbutton .da.vars.lb.flt.re -text RE -variable fltRegExp" );
+	cmd( "pack .da.vars.lb.flt.str -side left -expand yes -fill x" );
+	cmd( "pack .da.vars.lb.flt.go .da.vars.lb.flt.clr .da.vars.lb.flt.re -side left" );
 
-	cmd( "bind .da.vars.lb.flt <<ComboboxSelected>> { filter_series }" );
+	cmd( "pack .da.vars.lb.th .da.vars.lb.obj .da.vars.lb.flt -fill x" );
+
+	cmd( "tooltip::tooltip .da.vars.lb.obj \"Show series in specific objects\"" );
+	cmd( "tooltip::tooltip .da.vars.lb.flt.str \"Enter text to filter series\"" );
+	cmd( "tooltip::tooltip .da.vars.lb.flt.go \"Apply text filter\"" );
+	cmd( "tooltip::tooltip .da.vars.lb.flt.clr \"Clear text filter\"" );
+	cmd( "tooltip::tooltip .da.vars.lb.flt.re \"Use regular expression\"" );
+
+	cmd( "bind .da.vars.lb.obj <<ComboboxSelected>> { filter_series obj }" );
+	cmd( "bind .da.vars.lb.flt.str <Return> { filter_series str }" );
+	cmd( "bind .da.vars.lb.flt.str <<ComboboxSelected>> { filter_series str }" );
 
 	cmd( "set f .da.vars.lb.f" );
 	cmd( "ttk::frame $f" );
@@ -311,10 +330,10 @@ void analysis( bool mc )
 	cmd( "set f .da.vars.b" );
 	cmd( "ttk::frame $f" );
 	cmd( "ttk::label $f.pad1 -style boldSmall.TLabel" );
-	cmd( "ttk::button $f.in -width 6 -style Toolbutton -text \u25b6 -command { set choice 6 }" );
-	cmd( "ttk::button $f.out -width 6 -style Toolbutton -state disabled -text \u25c0 -command { set choice 7 }" );
-	cmd( "ttk::button $f.sort -width 6 -style Toolbutton -text \"Sort \u25b2\" -command { set choice 5 } -underline 0" );
-	cmd( "ttk::button $f.sortdesc -width 6 -style Toolbutton -text \"Sort \u25bc\" -command { set choice 38 } -underline 1" );
+	cmd( "ttk::button $f.in -width 6 -style Toolbutton -text \"\u25B6\" -command { set choice 6 }" );
+	cmd( "ttk::button $f.out -width 6 -style Toolbutton -state disabled -text \"\u25C0\" -command { set choice 7 }" );
+	cmd( "ttk::button $f.sort -width 6 -style Toolbutton -text \"Sort \u25B2\" -command { set choice 5 } -underline 0" );
+	cmd( "ttk::button $f.sortdesc -width 6 -style Toolbutton -text \"Sort \u25BC\" -command { set choice 38 } -underline 1" );
 	cmd( "ttk::button $f.sortend -width 6 -style Toolbutton -text \"Sort+\" -command { set choice 15 } -underline 2" );
 	cmd( "ttk::button $f.unsort -width 6 -style Toolbutton -text \"Unsort\" -command { set choice 14 } -underline 0" );
 	cmd( "ttk::button $f.search -width 6 -style Toolbutton -text Find... -command { set choice 39 } -underline 0" );
@@ -3677,7 +3696,7 @@ void analysis( bool mc )
 					case 24:
 
 						cmd( "focus .da.vars.lb.f.v" );
-						cmd( "if { [ info exists res_g ] } { filter_series $res_g }" );
+						cmd( "if { [ info exists res_g ] } { filter_series obj $res_g }" );
 
 						break;
 

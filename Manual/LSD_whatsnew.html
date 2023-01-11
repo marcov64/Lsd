@@ -94,7 +94,7 @@ div.WordSection1
 
 <p class=MsoTitle>What’s new in LSD</p>
 
-<h1>Version 8.0 (September 2022)</h1>
+<h1>Version 8.0 (March 2023)</h1>
 
 <p class=MsoNormal>The version introduces an improved user interface and other
 improvements:</p>
@@ -154,12 +154,12 @@ launch, at the same Object previously selected.</p>
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Other interface improvements</b>. Several small usability
 improvements. Tabbed interface for <a href="runtime.html">Run-time</a> and <a
-href="menudata_res.html">Analysis of Results</a> plot windows. Series filtering
-in <a href="menudata_res.html">Analysis of Results</a>. Moving Objects in the <a
-href="graphrep.html">LSD Model Structure</a> (finally!). Quick-search keys on
-all list boxes. Auto-detection of model Object names. List of elements unused
-in equation file(s). Improvements to the <a href="debug.html">Debugger</a> / <a
-href="debug.html">Data Browser</a>, <span class=Cdigo><span lang=PT-BR><a
+href="menudata_res.html">Analysis of Results</a> plot windows. Advanced series
+filtering in <a href="menudata_res.html">Analysis of Results</a>. Moving
+Objects in the <a href="graphrep.html">LSD Model Structure</a> (finally!).
+Quick-search keys on all list boxes. Auto-detection of model Object names. List
+of elements unused in equation file(s). Improvements to the <a href="debug.html">Debugger</a>
+/ <a href="debug.html">Data Browser</a>, <span class=Cdigo><span lang=PT-BR><a
 href="menudata_init.html"><span lang=EN-US>Data&gt;Initial Values</span></a></span></span>
 and <span class=Cdigo><a href="menudata_objn.html">Data&gt;Number of Objects</a></span>
 windows. Interruptible progress boxes for slow operations. Automatic generation
@@ -185,9 +185,9 @@ configuration files for sensitivity analysis, LSD will automatically create a
 new subfolder to hold those files whenever there is risk of data from different
 configurations to be (improperly) mixed. It also prevents the user from
 creating such files in the main model directory. The subfolder is named as the
-respective configuration file. All tools, including R packages, automatically
-recognize the proper file locations without user intervention. Sensitivity
-analysis configuration files also take less disk space.</p>
+respective configuration file. All tools, including R packages, automatically recognize
+the proper file locations without user intervention. Sensitivity analysis
+configuration files also take less disk space.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -227,9 +227,9 @@ allow sorting Object instances by lagged Variable values.</p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Object instance “suicide” support. </b>Equations invoking the
-Macro <span class=Cdigo><a href="LSD_macros.html#DELETE">DELETE(…)</a></span>
-for removing the Object instance containing the Variable under computation is
-now supported in all operations where this may make sense, including
+Macro <span class=Cdigo><a href="LSD_macros.html#DELETE">DELETE(…)</a></span> for
+removing the Object instance containing the Variable under computation is now
+supported in all operations where this may make sense, including
 brotherhood-chain operations like <span class=Cdigo><span lang=PT-BR><a
 href="LSD_macros.html#SUM"><span lang=EN-US>SUM(…)</span></a></span></span>.</p>
 
@@ -275,8 +275,8 @@ Micro-Macro finance- and government augmented).</p>
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Embedded Windows 64-bit compiler.</b> The C++ compiler
 preinstalled with LSD in Windows computers was updated to a modern, 64-bit
-version (10.2) of GCC compiler. This allows the generation of faster models,
-better error messages, and support of virtually unlimited memory.</p>
+version of GCC compiler. This allows the generation of faster models, better
+error messages, and support of virtually unlimited memory.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -290,17 +290,17 @@ the case in Linux and macOS versions.</p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Removed support for legacy platforms.</b> Windows 32-bit and
-Mac OS X (10.09 and below) are no longer supported by LSD. This was done because
-of the small base of those platforms nowadays (computers typically 10-year-old
-or more), and the possibility of adding new features not supported on them.
-Also, Tcl/Tk version 8.6 is now the minimum requirement in Linux. Users of
-these legacy platforms may still use LSD version 7.2.</p>
+Mac OS X (10.09 and below) are no longer supported by LSD. This was done
+because of the small base of those platforms nowadays (computers typically
+10-year-old or more), and the possibility of adding new features not supported
+on them. Also, Tcl/Tk version 8.6 is now the minimum requirement in Linux.
+Users of these legacy platforms may still use LSD version 7.2.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>New embedded Tcl/Tk 8.6.12 for macOS Monterey support, new GCC 11
-binaries for Windows, and many bug fixes.</p>
+</span></span>New embedded Tcl/Tk 8.6.13 for macOS Monterey/Ventura support,
+new GCC 12 binaries for Windows, and many bug fixes.</p>
 
 <p class=MsoListParagraph style='margin-left:35.85pt'>&nbsp;</p>
 
@@ -382,8 +382,8 @@ automatic fit option.</p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>New Macros.</b> <span class=Cdigo><a
-href="LSD_macros.html#LAST_CALC">LAST_CALC(…)</a></span> allows reading the
-last time a Variable or Parameter was calculated or updated. <span class=Cdigo><span
+href="LSD_macros.html#LAST_CALC">LAST_CALC(…)</a></span> allows reading the last
+time a Variable or Parameter was calculated or updated. <span class=Cdigo><span
 lang=PT-BR><a href="LSD_macros.html#MED"><span lang=EN-US>MED(…)</span></a></span></span>
 / <span class=Cdigo><span lang=PT-BR><a href="LSD_macros.html#PERC"><span
 lang=EN-US>PERC(…)</span></a></span></span> computes the median / percentile of
@@ -506,14 +506,15 @@ including in-depth sensitivity analysis.</p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>New Macros.</b> <a href="LSD_macros.html#lattice">Lattice macros</a>
-for color reading (<span class=Cdigo>V_LAT(…)</span>), window closing (<span
-class=Cdigo>DELETE_LAT(…)</span>), and move in a Object structure organized as
-a lattice (<span class=Cdigo>UP_LAT(…)</span>, <span class=Cdigo>DOWN_LAT(…)</span>,
-<span class=Cdigo>RIGHT_LAT(…)</span>, <span class=Cdigo>LEFT_LAT(…)</span>).
-General macros to <a href="LSD_macros.html#count">count object instances</a> (<span
-class=Cdigo>COUNT(…)</span>/<span class=Cdigo>COUNT_ALL(…)</span>), access pure
-<a href="LSD_macros_arquivos#ADDEXT">data extension</a> C++ objects directly (<span
+</span></span><b>New Macros.</b> <a href="LSD_macros.html#lattice">Lattice
+macros</a> for color reading (<span class=Cdigo>V_LAT(…)</span>), window
+closing (<span class=Cdigo>DELETE_LAT(…)</span>), and move in a Object
+structure organized as a lattice (<span class=Cdigo>UP_LAT(…)</span>, <span
+class=Cdigo>DOWN_LAT(…)</span>, <span class=Cdigo>RIGHT_LAT(…)</span>, <span
+class=Cdigo>LEFT_LAT(…)</span>). General macros to <a
+href="LSD_macros.html#count">count object instances</a> (<span class=Cdigo>COUNT(…)</span>/<span
+class=Cdigo>COUNT_ALL(…)</span>), access pure <a
+href="LSD_macros_arquivos#ADDEXT">data extension</a> C++ objects directly (<span
 class=Cdigo>EXT(…)</span>, <span class=Cdigo>EXTS(…)</span>), and execute
 extension C++ objects methods (<span class=Cdigo>DO_EXT(…)</span>). Create <a
 href="LSD_macros.html#EQUATION_DUMMY">dummy Equations</a> (<span class=Cdigo>EQUATION_DUMMY(…)</span>)
@@ -622,10 +623,10 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span><b>Integration with R.</b> Two advanced R packages available on
 CRAN (LSDinterface and LSDsensitivity). Transparent use of LSD Object-oriented
 hierarchical data in R (multidimensional arrays). Parallel multi-core reading
-of multiple results files. Automatic handling of compressed results files.
-Advanced tools for sensitivity analysis and the study of response surfaces of
-simulation models (Morris Elementary Effects, Sobol Decomposition, Kriging
-Meta-modelling etc.).</p>
+of multiple results files. Automatic handling of compressed results files. Advanced
+tools for sensitivity analysis and the study of response surfaces of simulation
+models (Morris Elementary Effects, Sobol Decomposition, Kriging Meta-modelling
+etc.).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -679,8 +680,8 @@ full debugger support.</p>
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>New unsaved configuration indicator.</b> All LSD windows now
 show configuration name and save status (‘<span class=Cdigo>*</span>’ in title
-bar when unsaved changes are present). Unsaved changes warning dialog in all potential
-data loss situations.</p>
+bar when unsaved changes are present). Unsaved changes warning dialog in all
+potential data loss situations.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -730,8 +731,8 @@ user-defined <span class=Cdigo>class</span> or <span class=Cdigo>struct</span>.<
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Updated lattice tools.</b> Improved lattice performance. New
-easy-to-use lattice macros, including save to disk. Revised lattice windows. New
-lattice color options (full RGB support).</p>
+easy-to-use lattice macros, including save to disk. Revised lattice windows.
+New lattice color options (full RGB support).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -786,8 +787,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 
 <h1>Version 6.4 (Nov 2015)</h1>
 
-<p class=MsoNormal>The new version maintains the compatibility with all the
-models built with previous versions of LSD. There are several improvements:</p>
+<p class=MsoNormal>The new version maintains the compatibility with all the models
+built with previous versions of LSD. There are several improvements:</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -821,9 +822,9 @@ icons in Windows and Linux. Improved initial windows sizes and placement.</p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>Improvements to analysis of results.</b> Support to logarithmic
-scales. Improve the display of scales with precision control. Add reverse sort
-to variables under analysis of results.</p>
+</span></span><b>Improvements to analysis of results.</b> Support to
+logarithmic scales. Improve the display of scales with precision control. Add
+reverse sort to variables under analysis of results.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -877,8 +878,8 @@ structures.</p>
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Change number of objects and series of data during a
 simulation run.</b> The initialization interfaces are accessible also from the
-data browser window and the debugger. If marked to be saved in the original objects,
-elements in new objects will also be saved,</p>
+data browser window and the debugger. If marked to be saved in the original
+objects, elements in new objects will also be saved,</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
