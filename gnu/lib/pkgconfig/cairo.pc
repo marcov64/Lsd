@@ -1,0 +1,11 @@
+prefix=/mingw64
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: cairo
+Description: Multi-platform 2D graphics library
+Version: 1.17.8
+Requires.private: zlib, libpng, fontconfig >=  2.2.95, freetype2 >=  9.7.3, pixman-1 >=  0.36.0
+Libs: -L${libdir} -lcairo
+Libs.private: -lm -lgdi32 -lmsimg32 -ldwrite -ld2d1 -lwindowscodecs
+Cflags: -I${includedir}/cairo

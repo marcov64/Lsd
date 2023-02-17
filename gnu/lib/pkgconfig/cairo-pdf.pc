@@ -1,0 +1,8 @@
+prefix=/mingw64
+includedir=${prefix}/include
+
+Name: cairo-pdf
+Description: PDF surface backend for cairo graphics library
+Version: 1.17.8
+Requires: cairo, zlib
+Cflags: -I${includedir}
