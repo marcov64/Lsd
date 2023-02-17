@@ -1,0 +1,10 @@
+prefix=/mingw64
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: cairo-dwrite-font
+Description: Microsoft Windows DWrite font backend for cairo graphics library
+Version: 1.17.8
+Requires: cairo
+Libs: -ldwrite -ld2d1 -lwindowscodecs
+Cflags: -I${includedir}

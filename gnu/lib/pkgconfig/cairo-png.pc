@@ -1,0 +1,8 @@
+prefix=/mingw64
+includedir=${prefix}/include
+
+Name: cairo-png
+Description: PNG functions for cairo graphics library
+Version: 1.17.8
+Requires: cairo, libpng
+Cflags: -I${includedir}

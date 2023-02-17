@@ -1,0 +1,8 @@
+prefix=/mingw64
+includedir=${prefix}/include
+
+Name: cairo-xml
+Description: XML surface backend for cairo graphics library
+Version: 1.17.8
+Requires: cairo, zlib
+Cflags: -I${includedir}
