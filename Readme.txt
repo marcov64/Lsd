@@ -26,7 +26,7 @@ MSYS2 3.4.3, https://www.msys2.org
 Cygwin 3.4.3 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
 7-Zip LZMA SDK 22.01 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
 Makeself 2.4.5 is copyrighted by Stephane Peter under GPL2, https://makeself.io
-Gnuplot 5.4.5 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
+Gnuplot 5.4.6 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
 Eigen 3.4.0 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
 subbotools 1.3 is copyrighted by Giulio Bottazzi under GPL2, http://cafim.sssup.it/~giulio/software/subbotools
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
@@ -119,6 +119,8 @@ MANUAL CONFIGURATION: after LSD installation, or when changing between operating
 2. Select "System Options..." in menu "Model", press the button "Default", and "OK".
 
 WARNING: LSD operates by creating and modifying executable (.exe) files for your simulation models. This kind of procedure may be INCORRECTLY detected as suspicious by some anti-virus software and incorrect operation of LSD may arise, particularly when you try to compile and/or run your model. In this case, you may try to reconfigure your anti-virus to allow LSD operation or try to TEMPORARILY disable it entirely. Windows standard anti-virus software (included and enabled by default in Windows 10) is known to operate properly with LSD and offers a good level of protection for most users.
+
+LSDROOT environment variable: for special installations, like multiple LSD versions in the same machine, it is possible to set a system-level environment variable named LSDROOT pointing to the directory where the version of LSD to be used is located. Please note that LSD installer does not create or update this variable. If LSDROOT is set to an invalid (non-LSD) directory, LSD will not work.
 
 For persisting problems email us: valente@ec.univaq.it or mcper@unicamp.br
 

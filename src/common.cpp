@@ -178,7 +178,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 
 	if ( ! set_env( true ) )
 	{
-		log_tcl_error( false, "Set environment variables", "Environment variable setup failed, Tcl/Tk may be unavailable" );
+		log_tcl_error( false, "Set environment variables", "Environment variable setup failed, Tcl/Tk may be unavailable, or environment variable LSDROOT (if exists) does not point to the directory where LSD is installed" );
 		myexit( 2 );
 	}
 

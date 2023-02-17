@@ -33,7 +33,7 @@ set _LSD_SIZE_KB_ 552326
 set LsdDir LSD
 set LsdSrc src
 set LsdIco $LsdSrc/icons
-set winGnuplot "gp545-win64-mingw.exe"
+set winGnuplot "gp546-win64-mingw.exe"
 set winRoot "C:/"
 
 set linuxPmPkg(apt)	[ list	build-essential 	make	gdb		gnuplot		xterm	multitail	zlib1g-dev		tcl-dev			tk-dev			]
@@ -128,24 +128,30 @@ if { $CurPlatform eq "mac" } {
 # check default LSD directory location
 #
 
-if { [ string equal $CurPlatform mac ] || [ string equal $CurPlatform linux ] } {
-	if { [ string first " " "$homeDir" ] < 0 } {
-		set RootLsd "~/$LsdDir"
-	} else {
-		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Home directory includes space(s)" -detail "The system directory '$homeDir' is invalid for installing LSD.\nLSD subdirectory must be located in a directory with no spaces in the full path name.\n\nYou may use another directory if you have write permissions to it.\n\nExiting now."
-		set homeDir "/"
-		set RootLsd "/$LsdDir"
-	}
+if { [ info exists env(LSDROOT) ] && [ file exists [ file dirname $env(LSDROOT) ] ] } {
+	set homeDir [ file dirname $env(LSDROOT) ]
+	set RootLsd [ file normalize $env(LSDROOT) ]
 
 } else {
-	if { [ string first " " "$homeDir" ] < 0 } {
-		set RootLsd [ file normalize "~/$LsdDir" ]
-	} elseif [ file exists $winRoot ] {
-		set homeDir "$winRoot"
-		set RootLsd "${winRoot}$LsdDir"
+	if { [ string equal $CurPlatform mac ] || [ string equal $CurPlatform linux ] } {
+		if { [ string first " " "$homeDir" ] < 0 } {
+			set RootLsd "~/$LsdDir"
+		} else {
+			ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Home directory includes space(s)" -detail "The system directory '$homeDir' is invalid for installing LSD.\nLSD subdirectory must be located in a directory with no spaces in the full path name.\n\nYou may use another directory if you have write permissions to it.\n\nExiting now."
+			set homeDir "/"
+			set RootLsd "/$LsdDir"
+		}
+
 	} else {
-		set homeDir "/"
-		set RootLsd "/$LsdDir"
+		if { [ string first " " "$homeDir" ] < 0 } {
+			set RootLsd [ file normalize "~/$LsdDir" ]
+		} elseif [ file exists $winRoot ] {
+			set homeDir "$winRoot"
+			set RootLsd "${winRoot}$LsdDir"
+		} else {
+			set homeDir "/"
+			set RootLsd "/$LsdDir"
+		}
 	}
 }
 
@@ -229,7 +235,7 @@ if [ string equal $CurPlatform windows ] {
 		set wadmin 0
 		set wall 0
 	}
-	
+
 	ttk::checkbutton .dir.wall -variable wall -text "Install for all users" -command {
 		if { $wall } {
 			if [ file exists $winRoot ] {
@@ -339,6 +345,11 @@ while 1 {
 	} else {
 		break
 	}
+}
+
+if { [ info exists env(LSDROOT) ] && [ file normalize $env(LSDROOT) ] ne [ file normalize $RootLsd ] } {
+	ttk::messageBox -parent "" -type ok -title Error -icon error -message "Invalid LSDROOT value" -detail "Please make sure the environment variable LSDROOT points to the directory where LSD is going to be installed.\n\nPlease try reinstalling after changing the LSDROOT variable or install to the directory it points to (the default).\n\nExiting now."
+	exit 7
 }
 
 if { ! [ file exists "$RootLsd" ] && [ catch { file mkdir "$RootLsd" } ] } {
