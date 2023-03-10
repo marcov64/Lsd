@@ -82,7 +82,7 @@ set vsizeAminMac		500
 set hsizeAminLinux		850
 set vsizeAminLinux		530
 set hsizeAminWindows	720
-set vsizeAminWindows	460
+set vsizeAminWindows	490
 set hsizePminMac		860	; # analysis of results plot window
 set vsizePminMac		580
 set hsizePminLinux		730

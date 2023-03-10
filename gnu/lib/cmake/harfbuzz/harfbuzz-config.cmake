@@ -2,7 +2,7 @@ set(_harfbuzz_libdir "/mingw64/lib")
 set(_harfbuzz_includedir "/mingw64/include")
 
 # Extract version information from libtool.
-set(_harfbuzz_version_info "60700:0:60700")
+set(_harfbuzz_version_info "60710:0:60710")
 string(REPLACE ":" ";" _harfbuzz_version_info "${_harfbuzz_version_info}")
 list(GET _harfbuzz_version_info 0
   _harfbuzz_current)

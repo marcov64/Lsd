@@ -4,8 +4,8 @@ libdir=${prefix}/lib
 
 Name: harfbuzz-cairo
 Description: HarfBuzz cairo support
-Version: 7.0.0
-Requires: harfbuzz =  7.0.0
+Version: 7.1.0
+Requires: harfbuzz =  7.1.0
 Requires.private: freetype2, glib-2.0, graphite2, cairo
 Libs: -L${libdir} -lharfbuzz-cairo
 Libs.private: -lm -L${libdir} -lharfbuzz -lusp10 -lgdi32 -lrpcrt4
