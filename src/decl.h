@@ -165,6 +165,7 @@ extern bool fast;						// flag to hide LOG messages & runtime (read-only)
 extern bool fast_lookup;				// flag for fast equation look-up mode
 extern bool no_saved;					// disable the usage of saved values as lagged ones
 extern bool no_search;					// disable the standard variable search mechanism
+extern bool no_search_up;				// disable the object up-search mechanism
 extern bool no_zero_instance;			// flag to allow deleting last object instance
 extern bool use_nan;					// flag to allow using Not a Number value
 extern char *path;						// folder where the configuration is

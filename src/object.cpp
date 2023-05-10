@@ -576,7 +576,7 @@ SEARCH (*)
 Search the first Object lab in the branch of the model below this.
 Uses the fast bridge look-up map.
 ***************************************************/
-object *object::search( const char *lab, bool no_search )
+object *object::search( const char *lab, bool no_search, bool no_search_up )
 {
 	bridge *cb;
 	object *cur;
@@ -606,6 +606,13 @@ object *object::search( const char *lab, bool no_search )
 			return cur;
 	}
 
+	// search in the entire tree if enabled
+	if ( ! no_search_up && up != NULL )
+	{
+		cur = up->search( lab, false, false );
+		return cur;
+	}
+
 	return NULL;
 }
 
@@ -613,27 +620,38 @@ object *object::search( const char *lab, bool no_search )
 /************************************************
 SEARCH_ERR
 *************************************************/
-object *object::search_err( const char *lab, bool no_search, const char *errmsg )
+object *object::search_err( const char *lab, bool no_search, bool no_search_up, const char *errmsg )
 {
-	object *cur;
+	object *cur, *cur1;
 
-	cur = search( lab, no_search );
+	cur = search( lab, no_search, no_search_up );
 	if ( cur == NULL )
-	{	// check if it is not a zero-instance object
-		cur = blueprint->search( lab );				// current object in blueprint
-		if ( cur == NULL || ( no_search && strcmp( cur->up->label, this->label ) ) )
-			error_hard( "object not found",
-						"create object in model structure",
+	{	// check if it is a zero-instance object
+		cur = blueprint->search( lab );
+
+		if ( ! no_zero_instance && cur != NULL )// zero instance allowed?
+			return NULL;						// deleted instance but NULL is ok
+
+		// check if object exists somewhere
+		cur1 = root->search( lab );
+
+		if ( cur1 == NULL )		// doesn't exist in current tree
+			if ( cur == NULL )	// never existed
+				error_hard( "object not found",
+							"create object in model structure",
+							false,
+							"object '%s' is missing for %s", lab, errmsg );
+			else 				// exists only in blueprint but no zero instance
+				error_hard( "last object instance deleted",
+							"check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE",
+							true,
+							"all instances of '%s' were deleted", lab );
+		else		// exits in current tree but not (directly) below
+			error_hard( "object is not a descending object",
+						"move object in model structure, or specify a parent object",
 						false,
-						"object '%s' is missing for %s%s", lab, errmsg, no_search && cur != NULL ? " (NO_SEARCH enabled!)" : "");
-
-		if ( no_zero_instance )
-			error_hard( "object has no instance",
-						"check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE",
-						true,
-						"all instances of '%s' were deleted", lab );
-
-		cur = NULL;									// do not return blueprint objects
+						"object '%s' not%s under '%s' for %s%s",
+						lab, no_search ? " directly" : "", label == NULL ? "" : label, errmsg, no_search ? " (NO_SEARCH enabled!)" : "" );
 	}
 
 	return cur;
@@ -942,7 +960,7 @@ from descendants the search goes up again, or from the parent down.
 Uses the fast variable look-up map of the searched variables.
 *************************************************/
 variable *object::search_var( object *caller, const char *lab, bool no_error,
-							  bool no_search, bool search_sons )
+							  bool no_search, bool no_search_up, bool search_sons )
 {
 	bridge *cb;
 	variable *cv;
@@ -962,7 +980,7 @@ variable *object::search_var( object *caller, const char *lab, bool no_error,
 		// search down only if one instance exists and the label is different from caller
 		if ( cb->head != NULL && ( caller == NULL || strcmp( cb->head->label, caller->label ) ) )
 		{
-			cv = cb->head->search_var( this, lab, no_error, no_search, false );
+			cv = cb->head->search_var( this, lab, no_error, no_search, true );
 			if ( cv != NULL )
 				return cv;
 		}
@@ -971,10 +989,10 @@ variable *object::search_var( object *caller, const char *lab, bool no_error,
 	}
 
 	// stop if search is disabled
-	if ( no_search )
+	if ( no_search || no_search_up )
 		return NULL;
 
-	// Search up in the tree
+	// search up in the tree
 	if ( up != caller )
 	{
 		if ( up == NULL )
@@ -987,7 +1005,7 @@ variable *object::search_var( object *caller, const char *lab, bool no_error,
 			return NULL;
 		}
 
-		cv = up->search_var( this, lab, no_error, false, false );
+		cv = up->search_var( this, lab, no_error );
 	}
 
 	return cv;
@@ -998,26 +1016,41 @@ variable *object::search_var( object *caller, const char *lab, bool no_error,
 SEARCH_VAR_ERR
 *************************************************/
 variable *object::search_var_err( object *caller, const char *lab, bool no_search,
-								  bool search_sons, const char *errmsg )
+								  bool no_search_up, bool search_sons, const char *errmsg )
 {
 	object *cur;
-	variable *cv;
+	variable *cv, *cv1;
 
-	cv = search_var( caller, lab, true, no_search, search_sons );
+	cv = search_var( caller, lab, true, no_search, no_search_up, search_sons );
 	if ( cv == NULL && label != NULL )
-	{	// check if it is not a zero-instance object
-		cur = blueprint->search( label );				// current object in blueprint
-		if ( cur == NULL || cur->search_var( NULL, lab, true, no_search, search_sons ) == NULL )
-			error_hard( "variable or parameter not found",
-						"create variable or parameter in model structure",
-						false,
-						"element '%s' is missing for %s", lab, errmsg );
+	{	// check if it is a zero-instance object
+		cur = blueprint->search( label );
+		if ( cur != NULL )
+			cv = cur->search_var( NULL, lab, true );
 
-		if ( no_zero_instance )
-			error_hard( "last object instance deleted",
-						"check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE",
-						true,
-						"all instances of the object containing '%s' were deleted", lab );
+		if ( ! no_zero_instance && cv != NULL )	// zero instance allowed?
+			return NULL;						// deleted instance but NULL is ok
+
+		// check if variable exists somewhere
+		cv1 = root->search_var( NULL, lab, true );
+
+		if ( cv1 == NULL )		// doesn't exist in current tree
+			if ( cv == NULL )	// never existed
+				error_hard( "variable or parameter not found",
+							"create variable or parameter in model structure",
+							false,
+							"element '%s' is missing for %s", lab, errmsg );
+			else 				// exists only in blueprint
+				error_hard( "last object instance deleted",
+							"check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE",
+							true,
+							"all instances of the object containing '%s' were deleted", lab );
+		else		// exits in current tree but not (directly) below
+			error_hard( "variable or parameter not in a descending object",
+						"move object in model structure, or specify a parent object",
+						false,
+						"'%s' in '%s' not%s under '%s' for %s%s",
+						lab, cv1->up != NULL && cv1->up->label != NULL ? cv1->up->label : "?", no_search ? " directly" : "", label, errmsg, no_search ? " (NO_SEARCH enabled!)" : "" );
 	}
 
 	return cv;
@@ -1038,7 +1071,7 @@ object *object::search_var_cond( const char *lab, double value, int lag )
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, true, "conditional searching" );
+	cv = search_var_err( this, lab, no_search, no_search_up, true, "conditional searching" );
 	if ( cv == NULL )
 		return NULL;
 
@@ -1066,7 +1099,7 @@ double object::initturbo_cond( const char *lab )
 	variable *cv;
 	b_mapT::iterator bit;
 
-	cv = search_var_err( this, lab, no_search, true, "turbo conditional searching" );
+	cv = search_var_err( this, lab, no_search, no_search_up, true, "turbo conditional searching" );
 	if ( cv == NULL )
 		return 0;
 
@@ -1125,7 +1158,7 @@ object *object::turbosearch_cond( const char *lab, double value )
 	b_mapT::iterator bit;
 	o_mapT::iterator oit;
 
-	cv = search_var_err( this, lab, no_search, true, "turbo conditional searching" );
+	cv = search_var_err( this, lab, no_search, no_search_up, true, "turbo conditional searching" );
 	if ( cv == NULL )
 		return NULL;
 
@@ -1175,7 +1208,7 @@ variable *object::add_empty_var( const char *lab )
 {
 	variable *cv;
 
-	if ( search_var( this, lab, true, true, false ) != NULL )
+	if ( search_var( this, lab, true, true ) != NULL )
 	{
 		error_hard( "variable or parameter not added",
 					"choose an unique name for the element",
@@ -1216,7 +1249,7 @@ void object::add_var_from_example( variable *example )
 {
 	variable *cv;
 
-	if ( search_var( this, example->label, true, true, false ) != NULL )
+	if ( search_var( this, example->label, true, true ) != NULL )
 	{
 		error_hard( "variable or parameter not added",
 					"choose an unique name for the element",
@@ -2053,7 +2086,7 @@ bool object::under_comput_var( const char *lab )
 {
 	variable *cv;
 
-	cv = search_var_err( this, lab, false, false, "retrieving" );
+	cv = search_var_err( this, lab, false, false, false, "retrieving" );
 
 	if ( cv != NULL && cv->under_computation )
 		return true;
@@ -2075,7 +2108,7 @@ double object::cal( object *caller, const char *lab, int lag, bool force_search 
 	if ( quit == 2 )
 		return NAN;
 
-	cv = search_var_err( this, lab, force_search ? false : no_search, false, "retrieving" );
+	cv = search_var_err( this, lab, force_search ? false : no_search, false, false, "retrieving" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -2093,7 +2126,7 @@ double object::cal( object *caller, const char *lab, int lag )
 	if ( quit == 2 )
 		return NAN;
 
-	cv = search_var_err( this, lab, no_search, false, "retrieving" );
+	cv = search_var_err( this, lab, no_search, false, false, "retrieving" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -2118,7 +2151,7 @@ double object::last_cal( const char *lab )
 {
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, false, "last updating" );
+	cv = search_var_err( this, lab, no_search, false, false, "last updating" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -2137,7 +2170,7 @@ double object::recal( const char *lab )
 	double app;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, false, "recalculating" );
+	cv = search_var_err( this, lab, no_search, false, false, "recalculating" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -2176,14 +2209,14 @@ double object::sum( const char *lab1, int lag, bool cond, const char *lab2, cons
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab1, no_search, true, "summing" );
+	cv = search_var_err( this, lab1, no_search, no_search_up, true, "summing" );
 	if ( cv == NULL )
 		return 0;
 
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "summing" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "summing" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "summing" ) == NULL )
 			return 0;
 	}
 	else
@@ -2222,14 +2255,14 @@ double object::overall_max( const char *lab1, int lag, bool cond, const char *la
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab1, no_search, true, "maximizing" );
+	cv = search_var_err( this, lab1, no_search, no_search_up, true, "maximizing" );
 	if ( cv == NULL )
 		return NAN;
 
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "maximizing" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "maximizing" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "maximizing" ) == NULL )
 			return NAN;
 	}
 	else
@@ -2272,14 +2305,14 @@ double object::overall_min( const char *lab1, int lag, bool cond, const char *la
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab1, no_search, true, "minimizing" );
+	cv = search_var_err( this, lab1, no_search, no_search_up, true, "minimizing" );
 	if ( cv == NULL )
 		return NAN;
 
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "minimizing" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "minimizing" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "minimizing" ) == NULL )
 			return NAN;
 	}
 	else
@@ -2321,14 +2354,14 @@ double object::av( const char *lab1, int lag, bool cond, const char *lab2, const
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab1, no_search, true, "averaging" );
+	cv = search_var_err( this, lab1, no_search, no_search_up, true, "averaging" );
 	if ( cv == NULL )
 		return NAN;
 
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "averaging" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "averaging" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "averaging" ) == NULL )
 			return NAN;
 	}
 	else
@@ -2369,18 +2402,18 @@ double object::whg_av( const char *lab1, const char *lab2, int lag, bool cond, c
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab1, no_search, true, "weighted averaging" );
+	cv = search_var_err( this, lab1, no_search, no_search_up, true, "weighted averaging" );
 	if ( cv == NULL )
 		return 0;
 
-	cv = search_var_err( this, lab2, no_search, true, "weighted averaging" );
+	cv = search_var_err( this, lab2, no_search, no_search_up, true, "weighted averaging" );
 	if ( cv == NULL )
 		return 0;
 
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "weighted averaging" );
-		if ( lopc < 0 || search_var_err( this, lab3, no_search, true, "weighted averaging" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab3, no_search, no_search_up, true, "weighted averaging" ) == NULL )
 			return 0;
 	}
 	else
@@ -2441,14 +2474,14 @@ double object::perc( const char *lab1, double p, int lag, bool cond, const char 
 		return NAN;
 	}
 
-	cv = search_var_err( this, lab1, no_search, true, "calculating percentile" );
+	cv = search_var_err( this, lab1, no_search, no_search_up, true, "calculating percentile" );
 	if ( cv == NULL )
 		return NAN;
 
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "calculating percentile" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "calculating percentile" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "calculating percentile" ) == NULL )
 			return NAN;
 	}
 	else
@@ -2500,14 +2533,14 @@ double object::sd( const char *lab1, int lag, bool cond, const char *lab2, const
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab1, no_search, true, "calculating s.d." );
+	cv = search_var_err( this, lab1, no_search, no_search_up, true, "calculating s.d." );
 	if ( cv == NULL )
 		return NAN;
 
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "calculating s.d." );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "calculating s.d." ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "calculating s.d." ) == NULL )
 			return NAN;
 	}
 	else
@@ -2547,7 +2580,7 @@ double object::count( const char *lab1, int lag, bool cond, const char *lab2, co
 	int n, lopc;
 	object *cur, *cnext;
 
-	cur = search_err( lab1, no_search, "counting" );
+	cur = search_err( lab1, no_search, no_search_up, "counting" );
 
 	if ( cur == NULL )
 		return 0;
@@ -2555,7 +2588,7 @@ double object::count( const char *lab1, int lag, bool cond, const char *lab2, co
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "counting" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "counting" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "counting" ) == NULL )
 			return NAN;
 	}
 	else
@@ -2586,9 +2619,9 @@ double object::count_all( const char *lab1, int lag, bool cond, const char *lab2
 	object *cur, *cnext;
 
 	if ( up->b->head != NULL )
-		cur = up->b->head->search_err( lab1, no_search, "counting" );// pick always first instance
+		cur = up->b->head->search_err( lab1, no_search, no_search_up, "counting all" );// pick always first instance
 	else
-		cur = search_err( lab1, no_search, "counting" );	// count from here (bad)
+		cur = search_err( lab1, no_search, no_search_up, "counting all" );	// count from here (bad)
 
 	if ( cur == NULL )
 		return 0;
@@ -2596,7 +2629,7 @@ double object::count_all( const char *lab1, int lag, bool cond, const char *lab2
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "counting" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "counting" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "counting all" ) == NULL )
 			return NAN;
 	}
 	else
@@ -2642,7 +2675,7 @@ double object::stat( const char *lab1, double *r, int lag, bool cond, const char
 	if ( r == NULL )
 		r = r_temp;
 
-	cv = search_var_err( this, lab1, no_search, true, "calculating statistics" );
+	cv = search_var_err( this, lab1, no_search, no_search_up, true, "calculating statistics" );
 	if ( cv == NULL || cv->up == NULL )
 	{
 		r[ 0 ] = 0;
@@ -2653,7 +2686,7 @@ double object::stat( const char *lab1, double *r, int lag, bool cond, const char
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "calculating statistics" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, true, "calculating statistics" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "calculating statistics" ) == NULL )
 			return NAN;
 	}
 	else
@@ -2758,7 +2791,7 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 
 	if ( ! useNodeId )
 	{
-		cv = search_var_err( this, var, no_search, true, "sorting" );
+		cv = search_var_err( this, var, no_search, no_search_up, true, "sorting" );
 		if ( cv == NULL )
 			return NULL;
 
@@ -2939,7 +2972,7 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 		return NULL;
 	}
 
-	cv = search_var_err( this, var1, no_search, true, "sorting" );
+	cv = search_var_err( this, var1, no_search, no_search_up, true, "sorting" );
 	if ( cv == NULL )
 		return NULL;
 
@@ -3024,7 +3057,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag )
 	object *cur, *cur1, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lv, no_search, true, "random drawing" );
+	cv = search_var_err( this, lv, no_search, no_search_up, true, "random drawing" );
 	if ( cv == NULL )
 		return NULL;
 
@@ -3081,7 +3114,7 @@ object *object::draw_rnd( const char *lab )
 	double a, b;
 	object *cur, *cur1;
 
-	cur1 = cur = search_err( lab, no_search, "random drawing" );
+	cur1 = cur = search_err( lab, no_search, no_search_up, "random drawing" );
 
 	if ( cur == NULL )
 		return NULL;
@@ -3133,7 +3166,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag, double tot )
 		return NULL;
 	}
 
-	cv = search_var_err( this, lv, no_search, true, "random drawing" );
+	cv = search_var_err( this, lv, no_search, no_search_up, true, "random drawing" );
 	if ( cv == NULL )
 		return NULL;
 
@@ -3181,7 +3214,7 @@ double object::write( const char *lab, double value, int time, int lag )
 		return NAN;
 	}
 
-	cv = search_var_err( this, lab, true, false, "writing" );
+	cv = search_var_err( this, lab, true, true, false, "writing" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -3355,7 +3388,7 @@ double object::increment( const char *lab, double value )
 		return NAN;
 	}
 
-	cv = search_var_err( this, lab, true, false, "incrementing" );
+	cv = search_var_err( this, lab, true, true, false, "incrementing" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -3398,7 +3431,7 @@ double object::multiply( const char *lab, double value )
 		return NAN;
 	}
 
-	cv = search_var_err( this, lab, true, false, "multiplying" );
+	cv = search_var_err( this, lab, true, true, false, "multiplying" );
 	if ( cv == NULL )
 		return NAN;
 

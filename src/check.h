@@ -118,7 +118,7 @@ Support function used in CYCLEx macros
 ***************************************************/
 inline object *cycle_obj( object *parent, const char *label, const char *command )
 {
-	return parent->search_err( label, no_search, "cycling" );
+	return parent->search_err( label, no_search, no_search_up, "cycling" );
 }
 
 
