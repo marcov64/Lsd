@@ -271,7 +271,6 @@ see file.cpp
 char *qsort_lab;
 char *qsort_lab_secondary;
 int qsort_lag;
-object *globalcur;
 
 
 /****************************************************
@@ -283,7 +282,8 @@ bridge::bridge( const char *lab )
 	copy = false;
 	counter_updated = false;
 	next = NULL;
-	mn = NULL;
+	turbo_tot = 0;
+	turbo_tree = NULL;
 	head = NULL;
 	search_var = NULL;
 	o_map.clear( );
@@ -298,7 +298,8 @@ bridge::bridge( const bridge &b )
 	counter_updated = b.counter_updated;
 	next = b.next;
 	blabel = b.blabel;
-	mn = b.mn;
+	turbo_tot = b.turbo_tot;
+	turbo_tree = b.turbo_tree;
 	head = b.head;
 	search_var = b.search_var;
 	o_map = b.o_map;
@@ -311,10 +312,10 @@ bridge::~bridge( void )
 	if ( copy )
 		return;					// don't empty copy bridges
 
-	if ( mn != NULL )			// turbo search node exists?
+	if ( turbo_tree != NULL )	// turbo search node exists?
 	{
-		mn->empty( );
-		delete mn;
+		turbo_tree->empty( );
+		delete turbo_tree;
 	}
 
 	for ( cur = head; cur != NULL; cur = cnext )
@@ -659,6 +660,30 @@ object *object::search_err( const char *lab, bool no_search, bool no_search_up, 
 
 
 /****************************
+EMPTY_TURBO_TREE
+remove all turbo search nodes
+*****************************/
+void object::empty_turbo_tree( void )
+{
+	bridge *cb;
+	object *cur;
+
+	for ( cb = this->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->turbo_tree != NULL )
+		{
+			cb->turbo_tree->empty( );
+			delete cb->turbo_tree;
+			cb->turbo_tree = NULL;
+			cb->turbo_tot = 0;
+		}
+		for ( cur = cb->head; cur != NULL; cur = cur->next )
+			cur->empty_turbo_tree( );
+	}
+}
+
+
+/****************************
 EMPTY
 turbosearch component
 *****************************/
@@ -676,54 +701,29 @@ void mnode::empty( void )
 
 
 /****************************
-EMPTYTURBO
-remove all turbo search nodes
-*****************************/
-void object::emptyturbo( void )
-{
-	bridge *cb;
-	object *cur;
-
-	for ( cb = this->b; cb != NULL; cb = cb->next )
-	{
-		if ( cb->mn != NULL )
-		{
-			cb->mn->empty( );
-			delete cb->mn;
-			cb->mn = NULL;
-		}
-		for ( cur = cb->head; cur != NULL; cur = cur->next )
-			cur->emptyturbo( );
-	}
-}
-
-
-/****************************
 CREATE
 turbosearch component
 *****************************/
-void mnode::create( double level )
+void mnode::create( object *&cur, int level )
 {
-	int i;
-
-	deflev = ( long int ) level;
+	def_level = level;
 
 	if ( level > 0 )
 	{
-		pntr = NULL;
+		obj = NULL;
 		son = new mnode[ 10 ];
 
-		for ( i = 0; i < 10 && globalcur != NULL; ++i )
-			son[ i ].create( level - 1 );
-
-		return;
+		for ( int i = 0; i < 10 && cur != NULL; ++i )
+			son[ i ].create( cur, level - 1 );
 	}
+	else
+	{
+		son = NULL;
+		obj = cur;
 
-	son = NULL;
-	pntr = globalcur;
-
-	if ( globalcur->next != NULL )
-		globalcur = globalcur->next;
+		if ( cur->next != NULL )
+			cur = cur->next;
+	}
 }
 
 
@@ -731,23 +731,24 @@ void mnode::create( double level )
 FETCH
 turbosearch component
 *****************************/
-object *mnode::fetch( double *n, double level )
+object *mnode::fetch( long pos, int level )
 {
 	object *cur;
-	double a, b;
+	long a, b;
 
 	if ( level <= 0 )
-		level = deflev;
+		level = def_level;
 
 	--level;
-	if ( level == 0 )
-		cur = son[ ( int )( *n ) ].pntr;
+
+	if ( level <= 0 && pos < 10 )
+		cur = son[ pos ].obj;
 	else
 	{
-		a = pow( 10, level );
-		b = floor( *n / a );
-		*n = *n - b * a ;
-		cur = son[ ( int ) b ].fetch( n, level );
+		a = ( long ) ipow( 10, level );
+		b = pos / a;
+		pos = pos - b * a;
+		cur = son[ b ].fetch( pos, level );
 	}
 
 	return cur;
@@ -763,8 +764,9 @@ Generate the data structure required to use the turbosearch.
 double object::initturbo( const char *lab, double tot = 0 )
 {
 	bridge *cb;
+	int level;
+	long ltot;
 	object *cur;
-	double lev;
 
 	cb = search_bridge( lab, true );
 	if ( cb == NULL )
@@ -785,26 +787,29 @@ double object::initturbo( const char *lab, double tot = 0 )
 		return 0;
 	}
 
-	if ( tot <= 0 )				// if size not informed, compute it
-		for ( tot = 0, cur = this->search( lab ); cur != NULL; ++tot, cur = go_brother( cur ) );
+	ltot = ( long ) floor( tot );
+
+	if ( ltot <= 0 )				// if size not informed, compute it
+		for ( ltot = 0, cur = this->search( lab ); cur != NULL; ++ltot, cur = go_brother( cur ) );
 
 #ifndef _NP_
 	// prevent concurrent initialization by more than one thread
 	lock_guard < mutex > lock( parallel_comp );
 #endif
 
-	if ( cb->mn != NULL )		// remove existing mnode
+	if ( cb->turbo_tree != NULL )	// remove existing mnode
 	{
-		cb->mn->empty( );
-		delete cb->mn;
+		cb->turbo_tree->empty( );
+		delete cb->turbo_tree;
 	}
 
-	globalcur = cb->head;
-	lev = ( tot > 1 ) ? floor( log10( tot - 1 ) ) + 1 : 1;
-	cb->mn = new mnode;
-	cb->mn->create( lev );
+	cur = cb->head;
+	level = ( ltot > 1 ) ? ( int ) ( log10( ltot - 1 ) + 1e-6 ) + 1 : 1;
+	cb->turbo_tree = new mnode;
+	cb->turbo_tree->create( cur, level );
+	cb->turbo_tot = ltot;
 
-	return tot;
+	return ( double ) ltot;
 }
 
 
@@ -817,16 +822,8 @@ If tot is 0, previous set value is used
 object *object::turbosearch( const char *lab, double tot, double num )
 {
 	bridge *cb;
-	double val, lev;
-
-	if ( num < 1 )
-	{
-		error_hard( "invalid search operation",
-					"check your equation code to prevent this situation",
-					true,
-					"position '%.0lf' is invalid for turbo searching object '%s'", num, lab );
-		return NULL;
-	}
+	int level;
+	long ltot, pos;
 
 	cb = search_bridge( lab, true );
 	if ( cb == NULL )
@@ -838,7 +835,7 @@ object *object::turbosearch( const char *lab, double tot, double num )
 		return NULL;
 	}
 
-	if ( cb->mn == NULL )
+	if ( cb->turbo_tree == NULL )
 	{
 		error_hard( "invalid search operation",
 					"check your equation code to prevent this situation",
@@ -847,13 +844,21 @@ object *object::turbosearch( const char *lab, double tot, double num )
 		return NULL;
 	}
 
-	val = num - 1;
-	if ( tot > 1 )					// if size is informed
-		lev = floor( log10( tot - 1 ) ) + 1;
-	else
-		lev = 0;					// if not, use default
+	pos = ( long ) floor ( num ) - 1;
 
-	return( cb->mn->fetch( &val, lev ) );
+	if ( pos < 0 || pos >= cb->turbo_tot )
+	{
+		error_hard( "invalid search operation",
+					"check your equation code to prevent this situation",
+					true,
+					"position '%.0lf' is invalid for turbo searching object '%s'", num, lab );
+		return NULL;
+	}
+
+	ltot = ( long ) floor( tot );
+	level = ( ltot > 1 ) ? ( int ) ( log10( ltot - 1 ) + 1e-6 ) + 1 : 0;
+
+	return( cb->turbo_tree->fetch( pos, level ) );
 }
 
 

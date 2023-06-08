@@ -49,7 +49,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	char ch[ MAX_ELEM_LENGTH ], action[ MAX_ELEM_LENGTH ], msg[ MAX_LINE_SIZE ];
 	const char *app;
 	double value, value1, value2, step, counter;
-	int res, i, j, kappa, to_all, update_d, cases_from, cases_to, fill, use_seed, rnd_seed, step_in;
+	int res, i, j, kappa = 0, to_all, update_d, cases_from, cases_to, fill, use_seed, rnd_seed, step_in;
 	description *cd;
 	object *cur, *r;
 	variable *cv;

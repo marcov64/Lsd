@@ -1095,7 +1095,7 @@ void run( void )
 		user_exception = false;
 
 		reset_end( root );
-		root->emptyturbo( );
+		root->empty_turbo_tree( );
 
 		if ( quit != 2 && ( sim_num > 1 || no_window ) )
 		{

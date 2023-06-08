@@ -130,6 +130,7 @@ double fisher( double m, double n );					// draw from a Fisher-F distribution
 double gamma( double alpha, double beta = 1 );			// draw from a gamma distribution
 double geometric( double p );							// draw from a geometric distribution
 double init_lattice( int init_color = -0xffffff, double nrow = 100, double ncol = 100, double pixW = 0, double pixH = 0 );
+double ipow( double base, double exp );					// integer exponentiation
 double lnorm( double mu, double sigma );				// draw from a lognormal distribution
 double lnormcdf( double mu, double sigma, double x );	// lognormal cumulative distribution function
 double max( double a, double b );
