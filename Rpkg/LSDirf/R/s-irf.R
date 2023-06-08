@@ -37,7 +37,8 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
     stop( "Invalid states object (not from state.ident.lsd())" )
 
   if( ! is.null( states ) && ( is.null( state.num ) || ! is.finite( state.num ) ||
-                               round( state.num ) < 1 || round( state.num ) > nrow( states$state.freq ) ) )
+                               round( state.num ) < 1 ||
+                               round( state.num ) > nrow( states$state.freq ) ) )
     stop( "Invalid state selection (state.num)" )
 
   if( is.null( alpha ) || ! is.finite( alpha ) ||
