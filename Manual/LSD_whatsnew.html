@@ -94,7 +94,7 @@ div.WordSection1
 
 <p class=MsoTitle>What’s new in LSD</p>
 
-<h1>Version 8.0 (March 2023)</h1>
+<h1>Version 8.0 (July 2023)</h1>
 
 <p class=MsoNormal>The version introduces an improved user interface and other
 improvements:</p>
@@ -121,8 +121,8 @@ default, according to the computer’s system settings.</p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Tool tips on tool bars and list boxes</b>. Information about
-commands in tool bars and buttons and about model elements can obtained by
-simply hovering with the mouse over the corresponding items.</p>
+commands in tool bars and buttons and about model elements can obtained by simply
+hovering with the mouse over the corresponding items.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -180,14 +180,14 @@ the <a href="LMM.html#nowindow">command-line version</a> of the model.</p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Automatic segregation of results and sensitivity analysis
-files.</b> When creating results files from multiple simulation runs or
-configuration files for sensitivity analysis, LSD will automatically create a
-new subfolder to hold those files whenever there is risk of data from different
+files.</b> When creating results files from multiple simulation runs or configuration
+files for sensitivity analysis, LSD will automatically create a new subfolder
+to hold those files whenever there is risk of data from different
 configurations to be (improperly) mixed. It also prevents the user from
 creating such files in the main model directory. The subfolder is named as the
-respective configuration file. All tools, including R packages, automatically recognize
-the proper file locations without user intervention. Sensitivity analysis
-configuration files also take less disk space.</p>
+respective configuration file. All tools, including R packages, automatically
+recognize the proper file locations without user intervention. Sensitivity
+analysis configuration files also take less disk space.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -227,9 +227,9 @@ allow sorting Object instances by lagged Variable values.</p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Object instance “suicide” support. </b>Equations invoking the
-Macro <span class=Cdigo><a href="LSD_macros.html#DELETE">DELETE(…)</a></span> for
-removing the Object instance containing the Variable under computation is now
-supported in all operations where this may make sense, including
+Macro <span class=Cdigo><a href="LSD_macros.html#DELETE">DELETE(…)</a></span>
+for removing the Object instance containing the Variable under computation is
+now supported in all operations where this may make sense, including
 brotherhood-chain operations like <span class=Cdigo><span lang=PT-BR><a
 href="LSD_macros.html#SUM"><span lang=EN-US>SUM(…)</span></a></span></span>.</p>
 
@@ -253,6 +253,22 @@ a bounded Pareto distribution using <span class=Cdigo><span lang=PT-BR><a
 href="LSD_macros.html#Math"><span lang=EN-US>bpareto(…)</span></a></span></span>
 and compute its cumulative distribution function <span class=Cdigo><span
 lang=PT-BR><a href="LSD_macros.html#Math">bparetocdf(…)</a></span></span>.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Expanded auto-search for elements</b>. By default, all macros
+now automatically search for one instance of the desired Object, Variable, or
+Parameter all over the model structure, except for macros changing element
+values (<span class=MsoHyperlink><span style='font-family:"Courier New"'><a
+href="LSD_macros.html#WRITE">WRITE(…)</a></span></span>, <span
+class=MsoHyperlink><span style='font-family:"Courier New"'><a
+href="LSD_macros.html#INCR">INCR(…)</a></span></span>, <span
+class=MsoHyperlink><span style='font-family:"Courier New"'><a
+href="LSD_macros.html#MULT">MULT(…)</a></span></span>). Disabling auto-search
+can be done using <span class=MsoHyperlink><span lang=PT-BR style='font-family:
+"Courier New"'><a href="LSD_macros.html#NO_SEARCH">NO_SEARCH</a></span></span>
+macro.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -382,8 +398,8 @@ automatic fit option.</p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>New Macros.</b> <span class=Cdigo><a
-href="LSD_macros.html#LAST_CALC">LAST_CALC(…)</a></span> allows reading the last
-time a Variable or Parameter was calculated or updated. <span class=Cdigo><span
+href="LSD_macros.html#LAST_CALC">LAST_CALC(…)</a></span> allows reading the
+last time a Variable or Parameter was calculated or updated. <span class=Cdigo><span
 lang=PT-BR><a href="LSD_macros.html#MED"><span lang=EN-US>MED(…)</span></a></span></span>
 / <span class=Cdigo><span lang=PT-BR><a href="LSD_macros.html#PERC"><span
 lang=EN-US>PERC(…)</span></a></span></span> computes the median / percentile of
@@ -623,10 +639,10 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span><b>Integration with R.</b> Two advanced R packages available on
 CRAN (LSDinterface and LSDsensitivity). Transparent use of LSD Object-oriented
 hierarchical data in R (multidimensional arrays). Parallel multi-core reading
-of multiple results files. Automatic handling of compressed results files. Advanced
-tools for sensitivity analysis and the study of response surfaces of simulation
-models (Morris Elementary Effects, Sobol Decomposition, Kriging Meta-modelling
-etc.).</p>
+of multiple results files. Automatic handling of compressed results files.
+Advanced tools for sensitivity analysis and the study of response surfaces of
+simulation models (Morris Elementary Effects, Sobol Decomposition, Kriging
+Meta-modelling etc.).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -787,8 +803,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 
 <h1>Version 6.4 (Nov 2015)</h1>
 
-<p class=MsoNormal>The new version maintains the compatibility with all the models
-built with previous versions of LSD. There are several improvements:</p>
+<p class=MsoNormal>The new version maintains the compatibility with all the
+models built with previous versions of LSD. There are several improvements:</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
