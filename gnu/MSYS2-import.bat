@@ -25,7 +25,7 @@ rem  - diff compare tool
 rem *************************************************************
 
 rem component versions
-set GCC_VER=12.2.0
+set GCC_VER=13.1.0
 set PYTHON_VER=3.10
 
 rem XCOPY options for files and directories
@@ -77,11 +77,13 @@ if not exist %MSYS_DIR%\mingw64\lib\python%PYTHON_VER% (
 )
 
 echo MSYS2 libraries and make utility...
-XCOPY %OPT% %MSYS_DIR%\usr\bin\make.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\rm.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\msys-2.0.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\msys-intl-8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\msys-iconv-2.dll %LSD_DIR%\gnu\bin\
+
+echo make utility...
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\mingw32-make.exe %LSD_DIR%\gnu\bin\make.exe
 
 echo g++ compiler...
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\gcc.exe %LSD_DIR%\gnu\bin\

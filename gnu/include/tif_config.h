@@ -1,4 +1,10 @@
 /* libtiff/tif_config.h.  Generated from tif_config.h.in by configure.  */
+/* clang-format off */
+/* clang-format disabled because CMake scripts are very sensitive to the
+ * formatting of this file. configure_file variables of type "@VAR@" are
+ * modified by clang-format and won't be substituted.
+ */
+
 /* libtiff/tif_config.h.in.  Not generated, but originated from autoheader.  */
 
 #include "tiffconf.h"
@@ -99,7 +105,7 @@
 #define PACKAGE_NAME "LibTIFF Software"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "LibTIFF Software 4.5.0"
+#define PACKAGE_STRING "LibTIFF Software 4.5.1"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "tiff"
@@ -108,7 +114,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "4.5.0"
+#define PACKAGE_VERSION "4.5.1"
 
 /* The size of `size_t', as computed by sizeof. */
 #define SIZEOF_SIZE_T 8
@@ -123,7 +129,7 @@
 #define USE_WIN32_FILEIO 1
 
 /* Version number of package */
-#define VERSION "4.5.0"
+#define VERSION "4.5.1"
 
 /* Support webp compression */
 #define WEBP_SUPPORT 1
@@ -173,3 +179,5 @@
 #else
 #  error "Unsupported size_t size; please submit a bug report"
 #endif
+
+/* clang-format on */

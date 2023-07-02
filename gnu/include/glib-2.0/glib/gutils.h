@@ -36,19 +36,6 @@
 
 G_BEGIN_DECLS
 
-/* Define G_VA_COPY() to do the right thing for copying va_list variables.
- * glibconfig.h may have already defined G_VA_COPY as va_copy or __va_copy.
- */
-#if !defined (G_VA_COPY)
-#  if defined (__GNUC__) && defined (__PPC__) && (defined (_CALL_SYSV) || defined (_WIN32))
-#    define G_VA_COPY(ap1, ap2)	  (*(ap1) = *(ap2))
-#  elif defined (G_VA_COPY_AS_ARRAY)
-#    define G_VA_COPY(ap1, ap2)	  memmove ((ap1), (ap2), sizeof (va_list))
-#  else /* va_list is a pointer */
-#    define G_VA_COPY(ap1, ap2)	  ((ap1) = (ap2))
-#  endif /* va_list is a pointer */
-#endif /* !G_VA_COPY */
-
 GLIB_AVAILABLE_IN_ALL
 const gchar *         g_get_user_name        (void);
 GLIB_AVAILABLE_IN_ALL
@@ -439,8 +426,7 @@ g_bit_storage_impl (gulong number)
 #  include <stdlib.h>
 #  define g_abort() abort ()
 #else
-GLIB_AVAILABLE_IN_2_50
-G_NORETURN void g_abort (void) G_ANALYZER_NORETURN;
+G_NORETURN GLIB_AVAILABLE_IN_2_50 void g_abort (void) G_ANALYZER_NORETURN;
 #endif
 #endif
 

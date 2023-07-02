@@ -69,9 +69,38 @@ struct _GIconIface
   guint       (* hash)        (GIcon   *icon);
   gboolean    (* equal)       (GIcon   *icon1,
                                GIcon   *icon2);
+
+  /**
+   * GIconIface::to_tokens:
+   * @icon: The #GIcon
+   * @tokens: (element-type utf8) (out caller-allocates):
+   *   The array to fill with tokens
+   * @out_version: (out): version of serialized tokens
+   *
+   * Serializes the @icon into string tokens.
+   * This is can be invoked when g_icon_new_for_string() is called.
+   *
+   * Returns: %TRUE if serialization took place, %FALSE otherwise
+   *
+   * Since: 2.20
+   */
   gboolean    (* to_tokens)   (GIcon   *icon,
-			       GPtrArray *tokens,
+                               GPtrArray *tokens,
                                gint    *out_version);
+
+  /**
+   * GIconIface::from_tokens:
+   * @tokens: (array length=num_tokens): An array of tokens
+   * @num_tokens: The number of tokens in @tokens
+   * @version: Version of the serialized tokens
+   * @error: Return location for errors, or %NULL to ignore
+   *
+   * Constructs a #GIcon from a list of @tokens.
+   *
+   * Returns: (nullable) (transfer full): the #GIcon or %NULL on error
+   *
+   * Since: 2.20
+   */
   GIcon *     (* from_tokens) (gchar  **tokens,
                                gint     num_tokens,
                                gint     version,
@@ -80,23 +109,23 @@ struct _GIconIface
   GVariant *  (* serialize)   (GIcon   *icon);
 };
 
-GLIB_AVAILABLE_IN_ALL
+GIO_AVAILABLE_IN_ALL
 GType    g_icon_get_type  (void) G_GNUC_CONST;
 
-GLIB_AVAILABLE_IN_ALL
+GIO_AVAILABLE_IN_ALL
 guint    g_icon_hash            (gconstpointer  icon);
-GLIB_AVAILABLE_IN_ALL
+GIO_AVAILABLE_IN_ALL
 gboolean g_icon_equal           (GIcon         *icon1,
                                  GIcon         *icon2);
-GLIB_AVAILABLE_IN_ALL
+GIO_AVAILABLE_IN_ALL
 gchar   *g_icon_to_string       (GIcon         *icon);
-GLIB_AVAILABLE_IN_ALL
+GIO_AVAILABLE_IN_ALL
 GIcon   *g_icon_new_for_string  (const gchar   *str,
                                  GError       **error);
 
-GLIB_AVAILABLE_IN_2_38
+GIO_AVAILABLE_IN_2_38
 GVariant * g_icon_serialize     (GIcon         *icon);
-GLIB_AVAILABLE_IN_2_38
+GIO_AVAILABLE_IN_2_38
 GIcon *    g_icon_deserialize   (GVariant      *value);
 
 G_END_DECLS

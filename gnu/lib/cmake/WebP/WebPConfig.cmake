@@ -1,4 +1,4 @@
-set(WebP_VERSION 1.3.0)
+set(WebP_VERSION 1.3.1)
 set(WEBP_VERSION ${WebP_VERSION})
 
 
@@ -32,9 +32,11 @@ if(TRUE)
   find_dependency(Threads REQUIRED)
 endif()
 
-include ("${CMAKE_CURRENT_LIST_DIR}/WebPTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/WebPTargets.cmake")
 
-set(WebP_INCLUDE_DIRS "/mingw64/include")
+set_and_check(WebP_INCLUDE_DIR "${PACKAGE_PREFIX_DIR}/include")
 set(WEBP_INCLUDE_DIRS ${WebP_INCLUDE_DIRS})
 set(WebP_LIBRARIES "webpdecoder;webp;webpdemux;webpmux")
 set(WEBP_LIBRARIES "${WebP_LIBRARIES}")
+
+check_required_components(WebP)

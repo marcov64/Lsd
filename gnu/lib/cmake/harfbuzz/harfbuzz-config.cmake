@@ -2,7 +2,7 @@ set(_harfbuzz_libdir "/mingw64/lib")
 set(_harfbuzz_includedir "/mingw64/include")
 
 # Extract version information from libtool.
-set(_harfbuzz_version_info "60710:0:60710")
+set(_harfbuzz_version_info "60730:0:60730")
 string(REPLACE ":" ";" _harfbuzz_version_info "${_harfbuzz_version_info}")
 list(GET _harfbuzz_version_info 0
   _harfbuzz_current)
@@ -12,13 +12,17 @@ list(GET _harfbuzz_version_info 2
   _harfbuzz_age)
 unset(_harfbuzz_version_info)
 
-if (APPLE)
-  set(_harfbuzz_lib_suffix ".0${CMAKE_SHARED_LIBRARY_SUFFIX}")
-elseif (UNIX)
-  set(_harfbuzz_lib_suffix "${CMAKE_SHARED_LIBRARY_SUFFIX}.0.${_harfbuzz_current}.${_harfbuzz_revision}")
+if ("" MATCHES "static")
+  set(_harfbuzz_lib_suffix ".a")
 else ()
-  # Unsupported.
-  set(harfbuzz_FOUND 0)
+  if (APPLE)
+    set(_harfbuzz_lib_suffix ".0${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  elseif (UNIX)
+    set(_harfbuzz_lib_suffix "${CMAKE_SHARED_LIBRARY_SUFFIX}.0.${_harfbuzz_current}.${_harfbuzz_revision}")
+  else ()
+    # Unsupported.
+    set(harfbuzz_FOUND 0)
+  endif ()
 endif ()
 
 # Add the libraries.

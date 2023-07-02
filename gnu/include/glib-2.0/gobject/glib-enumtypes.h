@@ -8,14 +8,14 @@
 
 G_BEGIN_DECLS
 
-/* enumerations from "../glib-2.74.6/gobject/../glib/gunicode.h" */
-GLIB_AVAILABLE_IN_2_60 GType g_unicode_type_get_type (void) G_GNUC_CONST;
+/* enumerations from "../glib-2.76.3/gobject/../glib/gunicode.h" */
+GOBJECT_AVAILABLE_IN_2_60 GType g_unicode_type_get_type (void) G_GNUC_CONST;
 #define G_TYPE_UNICODE_TYPE (g_unicode_type_get_type ())
-GLIB_AVAILABLE_IN_2_60 GType g_unicode_break_type_get_type (void) G_GNUC_CONST;
+GOBJECT_AVAILABLE_IN_2_60 GType g_unicode_break_type_get_type (void) G_GNUC_CONST;
 #define G_TYPE_UNICODE_BREAK_TYPE (g_unicode_break_type_get_type ())
-GLIB_AVAILABLE_IN_2_60 GType g_unicode_script_get_type (void) G_GNUC_CONST;
+GOBJECT_AVAILABLE_IN_2_60 GType g_unicode_script_get_type (void) G_GNUC_CONST;
 #define G_TYPE_UNICODE_SCRIPT (g_unicode_script_get_type ())
-GLIB_AVAILABLE_IN_2_60 GType g_normalize_mode_get_type (void) G_GNUC_CONST;
+GOBJECT_AVAILABLE_IN_2_60 GType g_normalize_mode_get_type (void) G_GNUC_CONST;
 #define G_TYPE_NORMALIZE_MODE (g_normalize_mode_get_type ())
 G_END_DECLS
 

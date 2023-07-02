@@ -28,10 +28,10 @@ MODLIBS=           $(LOCALMODLIBS) $(BASEMODLIBS)
 
 # === Variables set by configure
 VERSION=	3.10
-srcdir=		../Python-3.10.10
-VPATH=		../Python-3.10.10
-abs_srcdir=	/c/M/mingw-w64-python/src/build-MINGW64/../Python-3.10.10
-abs_builddir=	/c/M/mingw-w64-python/src/build-MINGW64
+srcdir=		../Python-3.10.12
+VPATH=		../Python-3.10.12
+abs_srcdir=	/c/M/B/src/build-MINGW64/../Python-3.10.12
+abs_builddir=	/c/M/B/src/build-MINGW64
 
 
 CC=		gcc
@@ -86,7 +86,7 @@ CONFIGURE_CFLAGS=	-march=nocona -msahf -mtune=generic -O2 -pipe -Wp,-D_FORTIFY_S
 # CFLAGS_NODIST is used for building the interpreter and stdlib C extensions.
 # Use it when a compiler flag should _not_ be part of the distutils CFLAGS
 # once Python is installed (Issue #21121).
-CONFIGURE_CFLAGS_NODIST= -fno-semantic-interposition -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers -Werror=implicit-function-declaration -fvisibility=hidden -D_WIN32_WINNT=0x0601 -DPY3_DLLNAME='L"libpython$(LDVERSION).dll"' -DMS_DLL_ID='"3.10"'
+CONFIGURE_CFLAGS_NODIST= -fno-semantic-interposition -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers -Wstrict-prototypes -Werror=implicit-function-declaration -fvisibility=hidden -D_WIN32_WINNT=0x0601 -DPY3_DLLNAME='L"libpython$(LDVERSION).dll"' -DMS_DLL_ID='"3.10"'
 # LDFLAGS_NODIST is used in the same manner as CFLAGS_NODIST.
 # Use it when a linker flag should _not_ be part of the distutils LDFLAGS
 # once Python is installed (bpo-35257)
@@ -120,7 +120,7 @@ PY_CORE_CFLAGS=	$(PY_STDMODULE_CFLAGS) -DPy_BUILD_CORE
 PY_CORE_LDFLAGS=$(PY_LDFLAGS) $(PY_LDFLAGS_NODIST)
 # Strict or non-strict aliasing flags used to compile dtoa.c, see above
 CFLAGS_ALIASING=
-RCFLAGS= -DFIELD3=10150 -O COFF --target=pe-x86-64
+RCFLAGS= -DFIELD3=12150 -O COFF --target=pe-x86-64
 
 
 # Machine-dependent subdirectories
@@ -140,10 +140,10 @@ exec_prefix=	${prefix}
 datarootdir=    ${prefix}/share
 
 # Locations needed for semi-native fixup of sysconfig.
-srcdir_b2h=		C:/M/mingw-w64-python/src/Python-3.10.10
-VPATH_b2h=		C:/M/mingw-w64-python/src/Python-3.10.10
-abs_srcdir_b2h=		C:/M/mingw-w64-python/src/Python-3.10.10
-abs_builddir_b2h=	C:/M/mingw-w64-python/src/build-MINGW64
+srcdir_b2h=		C:/M/B/src/Python-3.10.12
+VPATH_b2h=		C:/M/B/src/Python-3.10.12
+abs_srcdir_b2h=		C:/M/B/src/Python-3.10.12
+abs_builddir_b2h=	C:/M/B/src/build-MINGW64
 prefix_b2h=		D:/a/msys64/mingw64
 
 # Expanded directories

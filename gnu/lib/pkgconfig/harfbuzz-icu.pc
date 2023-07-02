@@ -4,8 +4,8 @@ libdir=${prefix}/lib
 
 Name: harfbuzz-icu
 Description: HarfBuzz text shaping library ICU integration
-Version: 7.1.0
-Requires: harfbuzz =  7.1.0
+Version: 7.3.0
+Requires: harfbuzz =  7.3.0
 Requires.private: icu-uc
 Libs: -L${libdir} -lharfbuzz-icu
 Cflags: -I${includedir}/harfbuzz
