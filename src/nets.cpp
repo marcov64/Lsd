@@ -403,10 +403,10 @@ object *object::search_node_net( const char *lab, long destId )
 {
 	object *cur;
 
-	for ( cur = search( lab );
+	for ( cur = search_err( lab, no_search, no_search_up, "searching net node" );
 		  cur != NULL && cur->node != NULL && cur->node->id != destId;
 		  cur = go_brother( cur ) );
-	if ( cur->node == NULL )						// no network structure?
+	if ( cur == NULL || cur->node == NULL )						// no network structure?
 		return NULL;
 	else
 		return cur;
@@ -427,7 +427,7 @@ double object::stats_net( const char *lab, double *r )
 {
 	r[ 0 ] = r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = r[ 5 ] = 0;
 
-	object *cur = search( lab );
+	object *cur = search_err( lab, no_search, no_search_up, "stating net" );
 
 	if ( cur == NULL || cur->node == NULL )			// invalid network node?
 		return NAN;
@@ -466,7 +466,7 @@ object *object::draw_node_net( const char *lab )
 	object *cur, *cur1, *cur2;
 
 	// make sure this is being called from the parent (container) object
-	cur1 = cur = search( lab );
+	cur1 = cur = search_err( lab, no_search, no_search_up, "drawing net node" );
 	if ( cur == NULL )
 		return NULL;
 
@@ -554,8 +554,7 @@ long nodes2create( object *parent, const char *lab, long numNodes )
 	long count;
 	object *cur;
 
-	for ( count = 0, cur = parent->search( lab );
-		  cur != NULL; count++, cur = go_brother( cur ) );
+	for ( count = 0, cur = parent->search_err( lab, no_search, no_search_up, "adding net node" ); cur != NULL; count++, cur = go_brother( cur ) );
 	if ( numNodes >= count )
 		return numNodes - count;
 	plog( "\nWarning: number of existing nodes is more than the required." );
@@ -731,7 +730,9 @@ long object::init_star_net( const char *lab, long numNodes )
 	if ( init_discon_net( lab, numNodes ) != 0 )
 		return 0;
 
-	cur1 = search( lab );				// save hub
+	cur1 = search_err( lab, no_search, no_search_up, "initing net" );// save hub
+	if ( cur1 == NULL )
+		return 0;
 
 	for ( cur2 = go_brother( cur1 ), links = 0; cur2 != NULL;
 		 cur2 = go_brother( cur2 ) )	// create the strokes
@@ -1577,7 +1578,7 @@ void object::delete_net( const char *lab )
 {
 	object *cur;
 
-	for ( cur = search( lab ); cur != NULL; cur = go_brother( cur ) )
+	for ( cur = search_err( lab, no_search, no_search_up, "deleting net" ); cur != NULL; cur = go_brother( cur ) )
 		cur->delete_node_net( );								// scan all nodes
 }
 
@@ -1590,7 +1591,7 @@ CHECK_NET_STRUCT
 ****************************************************/
 object *check_net_struct( object *caller, const char *nodeLab, bool noErr )
 {
-	object *cur = caller->search( nodeLab );
+	object *cur = caller->search( nodeLab, no_search, no_search_up );
 
 	if ( cur == NULL )
 	{
