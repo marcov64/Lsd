@@ -61,7 +61,7 @@ span.TitleChar
 	font-family:"Cambria",serif;
 	letter-spacing:-.5pt;}
 span.Cdigo
-	{mso-style-name:C\00F3digo;
+	{mso-style-name:Código;
 	font-family:"Courier New";
 	color:gray;}
 .MsoChpDefault
@@ -94,7 +94,53 @@ div.WordSection1
 
 <p class=MsoTitle>What’s new in LSD</p>
 
-<h1>Version 8.0 (July 2023)</h1>
+<h1>Version 8.1 (July 2023)</h1>
+
+<p class=MsoNormal>The version introduces an improved user interface and other
+improvements:</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Expanded auto-search for elements</b>. By default, all macros
+now automatically search for one instance of the desired Object, Variable, or
+Parameter all over the model structure, except for macros changing element
+values or instances (<span class=MsoHyperlink><span style='font-family:"Courier New"'><a
+href="LSD_macros.html#WRITE">WRITE(…)</a></span></span>, <span
+class=MsoHyperlink><span style='font-family:"Courier New"'><a
+href="LSD_macros.html#INCR">INCR(…)</a></span></span>, <span
+class=MsoHyperlink><span style='font-family:"Courier New"'><a
+href="LSD_macros.html#MULT">MULT(…)</a></span></span>, <span
+class=MsoHyperlink><span style='font-family:"Courier New"'><a
+href="LSD_macros.html#ADDOBJ">ADDOBJ(…)</a></span></span>, <span
+class=MsoHyperlink><span style='font-family:"Courier New"'><a
+href="LSD_macros.html#ADDOBJ_EX">ADDOBJ_EX(…)</a></span></span>, <span
+class=MsoHyperlink><span style='font-family:"Courier New"'><a
+href="LSD_macros.html#DELETE">DELETE(…)</a></span></span>). This new behavior
+may break legacy models in some exotic scenarios. Disabling auto-search can be
+done using <span class=MsoHyperlink><span lang=PT-BR style='font-family:"Courier New"'><a
+href="LSD_macros.html#NO_SEARCH"><span lang=EN-US>NO_SEARCH</span></a></span></span>
+macro.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>New GCC 13 binaries for Windows, and bug fixes.</p>
+
+<p class=MsoListParagraph style='margin-left:35.85pt'>&nbsp;</p>
+
+<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
+  text-decoration:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1>Version 8.0 (January 2023)</h1>
 
 <p class=MsoNormal>The version introduces an improved user interface and other
 improvements:</p>
@@ -121,8 +167,8 @@ default, according to the computer’s system settings.</p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Tool tips on tool bars and list boxes</b>. Information about
-commands in tool bars and buttons and about model elements can obtained by simply
-hovering with the mouse over the corresponding items.</p>
+commands in tool bars and buttons and about model elements can obtained by
+simply hovering with the mouse over the corresponding items.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -180,9 +226,9 @@ the <a href="LMM.html#nowindow">command-line version</a> of the model.</p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Automatic segregation of results and sensitivity analysis
-files.</b> When creating results files from multiple simulation runs or configuration
-files for sensitivity analysis, LSD will automatically create a new subfolder
-to hold those files whenever there is risk of data from different
+files.</b> When creating results files from multiple simulation runs or
+configuration files for sensitivity analysis, LSD will automatically create a
+new subfolder to hold those files whenever there is risk of data from different
 configurations to be (improperly) mixed. It also prevents the user from
 creating such files in the main model directory. The subfolder is named as the
 respective configuration file. All tools, including R packages, automatically
@@ -267,7 +313,7 @@ href="LSD_macros.html#INCR">INCR(…)</a></span></span>, <span
 class=MsoHyperlink><span style='font-family:"Courier New"'><a
 href="LSD_macros.html#MULT">MULT(…)</a></span></span>). Disabling auto-search
 can be done using <span class=MsoHyperlink><span lang=PT-BR style='font-family:
-"Courier New"'><a href="LSD_macros.html#NO_SEARCH">NO_SEARCH</a></span></span>
+"Courier New"'><a href="LSD_macros.html#NO_SEARCH"><span lang=EN-US>NO_SEARCH</span></a></span></span>
 macro.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
@@ -342,8 +388,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 control.</b> LSD Variables can now be updated/recomputed under arbitrary time
 schemes, deterministic or random. The modeler can now configure update periods
 larger than 1, including an initial “sleep” for any Variable. Both period and
-initial times can be set as a fixed number or a uniform random draw from a
-modeler-defined range.</p>
+initial times can be set as a fixed number or a uniform random draw from a modeler-defined
+range.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -648,13 +694,13 @@ Meta-modelling etc.).</p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Renewed graphical interface.</b> New button bars. New context
-menus (right-clicks on lists). Automatic windows positioning. Fully
-hierarchical window system management (properly block of unavailable windows
-and buttons etc.). System-wide consistent windows decorations, buttons and
-organization. In-session persistent windows sizes. Unnecessary window redraws
-eliminated. Faster debugger interface. Easy to change defaults (<span
-class=Cdigo>windows.tcl</span>). New accelerator keys in LSD Log window.
-Support of larger structures in the LSD Model Structure window. </p>
+menus (right-clicks on lists). Automatic windows positioning. Fully hierarchical
+window system management (properly block of unavailable windows and buttons
+etc.). System-wide consistent windows decorations, buttons and organization.
+In-session persistent windows sizes. Unnecessary window redraws eliminated.
+Faster debugger interface. Easy to change defaults (<span class=Cdigo>windows.tcl</span>).
+New accelerator keys in LSD Log window. Support of larger structures in the LSD
+Model Structure window. </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
