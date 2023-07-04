@@ -29,7 +29,7 @@
 #define _LSD_MAJOR_ 8
 #define _LSD_MINOR_ 0
 #define _LSD_VERSION_ "8.0"
-#define _LSD_DATE_ "July 3 2023"	 // __DATE__
+#define _LSD_DATE_ "January 3 2023"	 // __DATE__
 
 // standard libraries used
 #include <cstdlib>
