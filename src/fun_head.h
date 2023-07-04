@@ -319,7 +319,6 @@ const bool no_pointer_init = true;
 #define PARENTS( O ) ( CHK_PTR_OBJ( O ) O->up )
 #define GRANDPARENT ( CHK_PTR_POBJ( p ) p->up->up )
 #define GRANDPARENTS( O ) ( CHK_PTR_POBJ( O ) O->up->up )
-#define ROOT root
 
 #define T ( ( double ) t )
 #define LAST_T ( ( double ) max_step )
