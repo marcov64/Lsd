@@ -293,7 +293,7 @@ struct object
 	void delete_obj( variable *caller = NULL );
 	void delete_var( const char *lab );
 	void empty( void );
-	void empty_turbo_tree( void );			// remove turbo search structure
+	void emptyturbo( void );			// remove turbo search structure
 	void init( object *_up, const char *_label, bool _to_compute = true );
 	void name_node_net( const char *nodeName );
 	void recreate_maps( void );
@@ -355,8 +355,7 @@ struct bridge
 	bool copy;							// just a temporary copy
 	bool counter_updated;
 	bridge *next;
-	long turbo_tot;
-	mnode *turbo_tree;
+	mnode *mn;
 	object *head;
 	char *search_var;					// current initialized search variable
 
@@ -369,14 +368,13 @@ struct bridge
 
 struct mnode
 {
-	int def_level;						// saves log number of number objects
-	long def_tot;						// saves total number of number objects
+	long deflev;						// saves the log number objects to allow defaulting
 	mnode *son;
-	object *obj;
+	object *pntr;
 
-	void create( object *&cur, int level );
+	void create( double level );
 	void empty( void );
-	object *fetch( long pos, int level = 0 );
+	object *fetch( double *n, double level = 0 );
 };
 
 struct netNode							// network node data

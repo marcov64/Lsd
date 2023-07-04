@@ -348,7 +348,7 @@ void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const 
 		user_exception = false;
 
 		reset_end( root );
-		root->empty_turbo_tree( );
+		root->emptyturbo( );
 		uncover_browser( );
 
 #ifndef _NP_
@@ -1605,34 +1605,6 @@ double fact( double x )
 		fact *= i++;
 
 	return fact;
-}
-
-
-/***************************************************
-IPOW
-Integer exponentiation
-***************************************************/
-double ipow( double base, double exp )
-{
-	long res = 1, lbase = ( long ) floor( base ), lexp = ( long ) floor( exp );
-
-	if ( lexp < 0 )
-		return 0;
-
-	while ( true )
-	{
-		if ( ( lexp & 1 ) != 0 )
-			res *= lbase;
-
-		lexp >>= 1;
-
-		if ( lexp == 0 )
-			break;
-
-		lbase *= lbase;
-	}
-
-	return res;
 }
 
 
