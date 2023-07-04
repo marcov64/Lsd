@@ -1,7 +1,7 @@
 #!/bin/bash
 #**************************************************************
 #
-#	LSD 8.1 - July 2023
+#	LSD 8.0 - May 2022
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -18,8 +18,8 @@
 # Create LSD installer for macOS.
 #**************************************************************
 
-LSD_VER_NUM="8.1"
-LSD_VER_TAG="stable"
+LSD_VER_NUM="8.0"
+LSD_VER_TAG="stable-2"
 
 if [ "$1" = "-h" ]; then
 	echo "Create LSD installer for macOS"
