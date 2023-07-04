@@ -288,21 +288,18 @@ state.ident.lsd <- function( data, irf, state.vars = NULL, metr.irf = NULL,
   stateFreq <- table( stateDisc$state )
 
   # estimate the mean/median relative metric of discrete states
-  stateMetr <- stateAbsMetr <- vector( mode = "numeric", length = length( stateFreq ) )
+  stateMetr <- vector( mode = "numeric", length = length( stateFreq ) )
   for( i in 1 : length( stateFreq ) ) {
     metrs <- stateDisc$metric[ which( stateDisc$state == names( stateFreq )[ i ] ) ]
-    if( irf$stat == "median" ) {
-      stateMetr[ i ] <- stats::median( metrs, na.rm = TRUE )
-      stateAbsMetr[ i ] <- stats::median( abs( metrs ), na.rm = TRUE )
-    } else {
-      stateMetr[ i ] <- mean( metrs, na.rm = TRUE )
-      stateAbsMetr[ i ] <- mean( abs( metrs ), na.rm = TRUE )
-    }
+    if( irf$stat == "median" )
+      stateMetr[ i ] <- stats::median( abs( metrs ), na.rm = TRUE )
+    else
+      stateMetr[ i ] <- mean( abs( metrs ), na.rm = TRUE )
   }
 
   stateFreq <- data.frame( stateFreq / sum( stateFreq ) )
-  stateFreq <- cbind( stateFreq, stateMetr, stateAbsMetr )
-  colnames( stateFreq ) <- c( "State", "Prob", "MetrD", "MetrAD" )
+  stateFreq <- cbind( stateFreq, stateMetr )
+  colnames( stateFreq ) <- c( "State", "Prob", "MetrAD" )
   stateFreq <- stateFreq[ order( stateFreq$Prob, decreasing = TRUE ), ]
   rownames( stateFreq ) <- 1 : nrow( stateFreq )
 
@@ -337,15 +334,15 @@ state.ident.lsd <- function( data, irf, state.vars = NULL, metr.irf = NULL,
       qData <- varQuant[[ var ]][[ rel ]][[ quant ]]
 
       if( irf$stat == "median" ) {
-        stateFreq[ i, j * 4 + 1 ] <- stats::median( qData )
-        stateFreq[ i, j * 4 + 2 ] <- stats::mad( qData )
+        stateFreq[ i, j * 4 ] <- stats::median( qData )
+        stateFreq[ i, j * 4 + 1 ] <- stats::mad( qData )
       } else {
-        stateFreq[ i, j * 4 + 1 ] <- mean( qData )
-        stateFreq[ i, j * 4 + 2 ] <- stats::sd( qData )
+        stateFreq[ i, j * 4 ] <- mean( qData )
+        stateFreq[ i, j * 4 + 1 ] <- stats::sd( qData )
       }
 
-      stateFreq[ i, j * 4 + 3 ] <- min( qData )
-      stateFreq[ i, j * 4 + 4 ] <- max( qData )
+      stateFreq[ i, j * 4 + 2 ] <- min( qData )
+      stateFreq[ i, j * 4 + 3 ] <- max( qData )
     }
   }
 

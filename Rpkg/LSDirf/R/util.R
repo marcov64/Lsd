@@ -166,7 +166,7 @@ eval.state.default <- function( data, states, state.num ) {
   for( i in 1 : length( nodes ) ) {
     splits$var[ i ] <- sub( regex, "\\1", nodes[ i ] )
     splits$gt[ i ] <- substr( sub( regex, "\\2", nodes[ i ] ), 1, 1 ) == ">"
-    splits$val[ i ] <- states$state.freq[ state.num, i * 4 + 1 ]
+    splits$val[ i ] <- states$state.freq[ state.num, i * 4 ]
   }
 
   # evaluate the state of each MC run (line)
