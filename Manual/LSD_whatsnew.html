@@ -125,7 +125,53 @@ macro.</p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>New GCC 13 binaries for Windows, and bug fixes.</p>
+</span></span><b>Variable and Parameter watch in debugger</b>. It is now
+possible to interrupt the simulation and have the LSD Debugger open immediately
+after any equation that reads and/or writes from/to any selected Variable or
+Parameter.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>New example models.</b> New and updated <a
+href="modelbrowser.html#groups">examples</a> (Sant’Anna’s Multi-country
+Labor-augmented K+S, and basic Island).</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Advanced series filtering</b>. In <a href="menudata_res.html">Analysis
+of Results</a> it is now possible to filter the available series using basic
+text and powerful regular expressions.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Detailed initialization information in automatic documentation</b>.
+Initialization values for multi-instanced Variables and Parameters are now
+presented in the detailed reports.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>New R package for IRF analysis</b>. An R package implementing
+the Counter-factual Monte Carlo (CMC) methodology to evaluate experimental
+impulse-response functions (IRF) using native LSD results files is now
+included.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Uninstall support</b>. Platform-native uninstallers are now
+available for LSD installations. When LSD installer is used, the uninstaller is
+automatically registered with the Windows application manager for easier
+uninstallation. User data is preserved.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>New embedded Tcl/Tk 8.6.13 for macOS Ventura support, New GCC 13
+binaries for Windows, and bug fixes.</p>
 
 <p class=MsoListParagraph style='margin-left:35.85pt'>&nbsp;</p>
 
@@ -140,7 +186,7 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
  </tr>
 </table>
 
-<h1>Version 8.0 (January 2023)</h1>
+<h1>Version 8.0 (May 2022)</h1>
 
 <p class=MsoNormal>The version introduces an improved user interface and other
 improvements:</p>
@@ -200,11 +246,10 @@ launch, at the same Object previously selected.</p>
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Other interface improvements</b>. Several small usability
 improvements. Tabbed interface for <a href="runtime.html">Run-time</a> and <a
-href="menudata_res.html">Analysis of Results</a> plot windows. Advanced series
-filtering in <a href="menudata_res.html">Analysis of Results</a>. Moving
-Objects in the <a href="graphrep.html">LSD Model Structure</a> (finally!).
-Quick-search keys on all list boxes. Auto-detection of model Object names. List
-of elements unused in equation file(s). Improvements to the <a href="debug.html">Debugger</a>
+href="menudata_res.html">Analysis of Results</a> plot windows. Moving Objects
+in the <a href="graphrep.html">LSD Model Structure</a> (finally!). Quick-search
+keys on all list boxes. Auto-detection of model Object names. List of elements
+unused in equation file(s). Improvements to the <a href="debug.html">Debugger</a>
 / <a href="debug.html">Data Browser</a>, <span class=Cdigo><span lang=PT-BR><a
 href="menudata_init.html"><span lang=EN-US>Data&gt;Initial Values</span></a></span></span>
 and <span class=Cdigo><a href="menudata_objn.html">Data&gt;Number of Objects</a></span>
@@ -303,30 +348,6 @@ lang=PT-BR><a href="LSD_macros.html#Math">bparetocdf(…)</a></span></span>.</p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>Expanded auto-search for elements</b>. By default, all macros
-now automatically search for one instance of the desired Object, Variable, or
-Parameter all over the model structure, except for macros changing element
-values (<span class=MsoHyperlink><span style='font-family:"Courier New"'><a
-href="LSD_macros.html#WRITE">WRITE(…)</a></span></span>, <span
-class=MsoHyperlink><span style='font-family:"Courier New"'><a
-href="LSD_macros.html#INCR">INCR(…)</a></span></span>, <span
-class=MsoHyperlink><span style='font-family:"Courier New"'><a
-href="LSD_macros.html#MULT">MULT(…)</a></span></span>). Disabling auto-search
-can be done using <span class=MsoHyperlink><span lang=PT-BR style='font-family:
-"Courier New"'><a href="LSD_macros.html#NO_SEARCH"><span lang=EN-US>NO_SEARCH</span></a></span></span>
-macro.</p>
-
-<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
-5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>Variable and Parameter watch in debugger</b>. It is now
-possible to interrupt the simulation and have the LSD Debugger open immediately
-after any equation that reads and/or writes from/to any selected Variable or
-Parameter.</p>
-
-<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
-5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>New example models.</b> New and updated <a
 href="modelbrowser.html#groups">examples</a> on macroeconomics models
 (Sant’Anna’s Multi-country simple and climate-augmented K+S, and UFRJ
@@ -355,14 +376,14 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 Mac OS X (10.09 and below) are no longer supported by LSD. This was done
 because of the small base of those platforms nowadays (computers typically
 10-year-old or more), and the possibility of adding new features not supported
-on them. Also, Tcl/Tk version 8.6 is now the minimum requirement in Linux.
-Users of these legacy platforms may still use LSD version 7.2.</p>
+on them. Also, Tcl/Tk version 8.6 is now the minimum requirement in Linux. Users
+of these legacy platforms may still use LSD version 7.2.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>New embedded Tcl/Tk 8.6.13 for macOS Monterey/Ventura support,
-new GCC 12 binaries for Windows, and many bug fixes.</p>
+</span></span>New embedded Tcl/Tk 8.6.12 for macOS Monterey support, new GCC 12
+binaries for Windows, and many bug fixes.</p>
 
 <p class=MsoListParagraph style='margin-left:35.85pt'>&nbsp;</p>
 
@@ -388,8 +409,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 control.</b> LSD Variables can now be updated/recomputed under arbitrary time
 schemes, deterministic or random. The modeler can now configure update periods
 larger than 1, including an initial “sleep” for any Variable. Both period and
-initial times can be set as a fixed number or a uniform random draw from a modeler-defined
-range.</p>
+initial times can be set as a fixed number or a uniform random draw from a
+modeler-defined range.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -461,9 +482,9 @@ of a Variable being saved, irrespective of the lag number definition.</p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Compiler info on <a href="menuhelp.html#about">About LSD
-window</a>. </b>The information about the compiler being used for model
-compilation in now presented, allowing for easy identification of compiler
-mismatch problems. </p>
+window</a>. </b>The information about the compiler being used for model compilation
+in now presented, allowing for easy identification of compiler mismatch
+problems. </p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -694,13 +715,13 @@ Meta-modelling etc.).</p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Renewed graphical interface.</b> New button bars. New context
-menus (right-clicks on lists). Automatic windows positioning. Fully hierarchical
-window system management (properly block of unavailable windows and buttons
-etc.). System-wide consistent windows decorations, buttons and organization.
-In-session persistent windows sizes. Unnecessary window redraws eliminated.
-Faster debugger interface. Easy to change defaults (<span class=Cdigo>windows.tcl</span>).
-New accelerator keys in LSD Log window. Support of larger structures in the LSD
-Model Structure window. </p>
+menus (right-clicks on lists). Automatic windows positioning. Fully
+hierarchical window system management (properly block of unavailable windows
+and buttons etc.). System-wide consistent windows decorations, buttons and
+organization. In-session persistent windows sizes. Unnecessary window redraws
+eliminated. Faster debugger interface. Easy to change defaults (<span
+class=Cdigo>windows.tcl</span>). New accelerator keys in LSD Log window.
+Support of larger structures in the LSD Model Structure window. </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -720,8 +741,8 @@ for details). </p>
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Native macOS support.</b> LMM and LSD models are now standard
 macOS apps. Embedded up-to-date Tcl/Tk libraries. Useless terminal windows
-eliminated. Much improved graphical user interface (now on par with
-Windows/Linux). LLDB debugger support.</p>
+eliminated. Much improved graphical user interface (now on par with Windows/Linux).
+LLDB debugger support.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
