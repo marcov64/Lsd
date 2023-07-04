@@ -1645,7 +1645,7 @@ int lsdmain( int argn, const char **argv )
 			}
 
 			// control for existing directory
-			cmd( "if [ file exists \"$groupDir/$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"[ file nativename $groupDir/$mdir ]\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+			cmd( "if [ file exists \"$groupDir/$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupDir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 			if ( choice == 3 )
 			{
 				cmd( "focus .a.mdir.e" );
@@ -1736,7 +1736,7 @@ int lsdmain( int argn, const char **argv )
 		}
 
 		// control for existing directory
-		cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"[ file nativename $groupDir/$mdir ]\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+		cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupDir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 		if ( choice == 3 )
 		{
 			cmd( "focus .a.mdir.e" );
@@ -1773,7 +1773,7 @@ int lsdmain( int argn, const char **argv )
 
 		if ( choice == 3 )
 		{
-			cmd( "ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: [ file nativename $curdir ]).\"" );
+			cmd( "ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $curdir).\"" );
 			cmd( ".a.mname.e selection range 0 end" );
 			cmd( "focus .a.mname.e" );
 			goto loop_copy_new;
@@ -1782,7 +1782,7 @@ int lsdmain( int argn, const char **argv )
 		if ( choice == 4 )
 		{
 			choice = 0;
-			cmd( "set answer [ ttk::messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' (ver. $mver) already exists in directory: [ file nativename $curdir ].\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you may cancel this operation, and use the 'Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname'.\" ]" );
+			cmd( "set answer [ ttk::messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' (ver. $mver) already exists in directory: $curdir.\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you may cancel this operation, and use the 'Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname'.\" ]" );
 
 			cmd( "if { ! [ string compare $answer ok ] } { set choice 1 } { set choice 0 }" );
 			if ( choice == 0 )
@@ -1826,7 +1826,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( ".m.model entryconf 10 -state normal" );
 		cmd( ".m.model entryconf 12 -state normal" );
 
-		cmd( "ttk::messageBox -parent . -type ok -title \"New Model\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: [ file nativename $modelDir ]\"" );
+		cmd( "ttk::messageBox -parent . -type ok -title \"New Model\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: $modelDir\"" );
 
 		cmd( "set before [ .f.t.t get 1.0 end ]" ); //avoid to re-issue a warning for non saved files
 
@@ -4370,7 +4370,7 @@ int lsdmain( int argn, const char **argv )
 		}
 
 		// control for existing directory
-		cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"[ file nativename $groupDir/$mdir ]\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+		cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupDir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 		if ( choice == 3 )
 		{
 			cmd( "focus .a.mdir.e" );
@@ -4406,7 +4406,7 @@ int lsdmain( int argn, const char **argv )
 
 		if ( choice == 3 )
 		{
-			cmd( "ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: [ file nativename $curdir ]).\"" );
+			cmd( "ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $curdir).\"" );
 			cmd( ".a.mname.e selection range 0 end" );
 			cmd( "focus .a.mname.e" );
 			goto loop_copy;
@@ -4425,7 +4425,7 @@ int lsdmain( int argn, const char **argv )
 		// create the model info file
 		update_model_info( true );
 
-		cmd( "ttk::messageBox -parent . -type ok -title \"Save Model As...\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: [ file nativename $modelDir ]\"" );
+		cmd( "ttk::messageBox -parent . -type ok -title \"Save Model As...\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: $modelDir\"" );
 
 		choice = 49;
 		goto loop;

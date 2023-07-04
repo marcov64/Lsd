@@ -375,7 +375,7 @@ proc showmodel pippo {
 				lappend lmd "[ read -nonewline $f ]"
 				close $f
 			} else {
-				lappend lmd "Model: $app1\nin directory: [ file nativename $pippo/$i ]\n(description not available)"
+				lappend lmd "Model: $app1\nin directory: $pippo/$i\n(description not available)"
 			}
 
 			lappend group 0
@@ -435,11 +435,11 @@ proc mdelete i {
 	}
 
 	if { [ string match -nocase $RootLsd/trashbin* [ lindex $ldn $i ] ] } {
-		set answer [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n([ file nativename [ lindex $ldn $i ] ])?" ]
+		set answer [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n([ lindex $ldn $i ])?" ]
 		file delete -force [ lindex $ldn $i ]
 		showmodel [ lindex $lrn $i ]
 	} else {
-		set answer [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n([ file nativename [ lindex $ldn $i ] ])?" ]
+		set answer [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n([ lindex $ldn $i ])?" ]
 
 		if { $answer == "yes" } {
 			if { ! [ file exists "$RootLsd/trashbin" ] } {
@@ -459,7 +459,7 @@ proc mdelete i {
 			}
 
 			if { [ catch { file rename -force [ lindex $ldn $i ] "$RootLsd/trashbin/$name" } ] } {
-				ttk::messageBox -parent .l -title Error -icon error -type ok -message "Delete error" -detail "Directory [ file nativename [ lindex $ldn $i ] ] cannot be deleted now.\nYou may try again later."
+				ttk::messageBox -parent .l -title Error -icon error -type ok -message "Delete error" -detail "Directory [ lindex $ldn $i ] cannot be deleted now.\nYou may try again later."
 			}
 
 			showmodel [ lindex $lrn $i ]
@@ -637,11 +637,11 @@ proc mpaste i {
 		set appl [ .l.p.n.n get ]
 		set appdsc "[ .l.p.t.t.text get 1.0 end ]"
 
-		set confirm [ ttk::messageBox -parent .l.p -type okcancel -icon question -title Confirmation -default ok -message "Confirm copy?" -detail "Every file in dir.:\n[ file nativename $copydir ]\n is going to be copied in dir.:\n[ file nativename $pastedir/$appd ]" ]
+		set confirm [ ttk::messageBox -parent .l.p -type okcancel -icon question -title Confirmation -default ok -message "Confirm copy?" -detail "Every file in dir.:\n$copydir\n is going to be copied in dir.:\n$pastedir/$appd" ]
 		if { $confirm == "ok" } {
 			set app [ file exists $pastedir/$appd ]
 			if { $app == 1 } {
-				ttk::messageBox -parent .l.p -title Error -icon error -type ok -message "Copy error" -detail "Directory [ file nativename $pastedir/$appd ] already exists.\nSpecify a different directory."
+				ttk::messageBox -parent .l.p -title Error -icon error -type ok -message "Copy error" -detail "Directory $pastedir/$appd already exists.\nSpecify a different directory."
 			} else {
 				#viable directory name
 				file mkdir $pastedir/$appd
