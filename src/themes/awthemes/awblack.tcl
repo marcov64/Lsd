@@ -67,7 +67,7 @@ namespace eval ::ttk::theme::awblack {
     set colors(notebook.tab.focusthickness) 1
     set colors(notebook.tab.padding) {4 2 4 2}
     set colors(border.scale) $colors(bg.darkest)
-    set colors(select.bg) $colors(bg.darkest)
+    set colors(select.bg) $colors(bg.bg)
     set colors(tree.arrow.selected) $colors(fg.fg)
     set colors(trough.color) $colors(bg.darkest)
   }
