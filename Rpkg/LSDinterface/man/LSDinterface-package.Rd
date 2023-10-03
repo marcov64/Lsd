@@ -1,4 +1,5 @@
 \name{LSDinterface-package}
+\alias{LSDinterface-package}
 \alias{LSDinterface}
 \docType{package}
 \title{

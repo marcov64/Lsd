@@ -1,4 +1,5 @@
 \name{LSDirf-package}
+\alias{LSDirf-package}
 \alias{LSDirf}
 \docType{package}
 

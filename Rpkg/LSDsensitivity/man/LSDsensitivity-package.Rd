@@ -1,4 +1,5 @@
 \name{LSDsensitivity-package}
+\alias{LSDsensitivity-package}
 \alias{LSDsensitivity}
 \docType{package}
 \title{
