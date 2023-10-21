@@ -334,6 +334,11 @@ const bool no_pointer_init = true;
 #define VS( O, X ) ( CHK_PTR_DBL( O ) O->cal( O, ( char * ) X, 0 ) )
 #define VLS( O, X, Y ) ( CHK_PTR_DBL( O ) O->cal( O, ( char * ) X, Y ) )
 
+#define MAVE( X, P ) ( p->mav( p, ( char * ) X, P, 0 ) )
+#define MAVEL( X, P, L ) ( p->mav( p, ( char * ) X, P, L ) )
+#define MAVES( O, X, P ) ( CHK_PTR_DBL( O ) O->mav( O, ( char * ) X, P, 0 ) )
+#define MAVELS( O, X, P, L ) ( CHK_PTR_DBL( O ) O->mav( O, ( char * ) X, P, L ) )
+
 #define SUM( X ) ( p->sum( ( char * ) X, 0, false, "", "", 0. ) )
 #define SUML( X, L ) ( p->sum( ( char * ) X, L, false, "", "", 0. ) )
 #define SUMS( O, X ) ( CHK_PTR_DBL( O ) O->sum( ( char * ) X, 0, false, "", "", 0. ) )

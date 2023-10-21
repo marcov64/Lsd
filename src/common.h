@@ -227,6 +227,7 @@ struct object
 		netLink *curl2, netLink *curl3, netLink *curl4, netLink *curl5, netLink *curl6,
 		netLink *curl7, netLink *curl8, netLink *curl9 );
 	double last_cal( const char *lab );
+	double mav( object *caller, const char *lab, double per, int lag = 0 );
 	double med( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 	double multiply( const char *lab, double value );
 	double overall_max( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );

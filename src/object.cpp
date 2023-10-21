@@ -2347,7 +2347,51 @@ double object::overall_min( const char *lab1, int lag, bool cond, const char *la
 
 
 /****************************************************
-AV (*)
+MAVE (*)
+Return the moving average of Variable with label lab
+with period per and computed from lag to lag+per
+***************************************************/
+double object::mav( object *caller, const char *lab, double per, int lag )
+{
+	int n, maxlag;
+	double sum;
+	variable *cv;
+
+	if ( ( ! use_nan && is_nan( per ) ) || is_inf( per ) || abs( per ) < 1 )
+	{
+		error_hard( "invalid moving average period",
+					"check your equation code to prevent this situation",
+					true,
+					"period '%g' is invalid for moving average '%s'", per, lab );
+		return NAN;
+	}
+
+	cv = search_var_err( this, lab, no_search, no_search_up, true, "move-averaging" );
+	if ( cv == NULL )
+		return NAN;
+	
+	if ( per < 0 )
+	{
+		per = - per;
+		maxlag = cv->num_lag;
+	}
+	else
+		maxlag = 0;
+
+	for ( sum = 0, n = lag; n < per + lag; ++n )
+	{
+		if ( n - t >= maxlag )
+			break;
+
+		sum += cv->cal( caller, n );
+	}
+
+	return sum / n;
+}
+
+
+/****************************************************
+AVE (*)
 Compute the average of lab1.
 If cond is true check if expression 'V("lab2") lop value'
 is true before considering each instance of the object.
@@ -2395,7 +2439,7 @@ double object::av( const char *lab1, int lag, bool cond, const char *lab2, const
 
 
 /****************************************************
-WHG_AV (*)
+WHTAVE (*)
 Compute the weighted average (or product sum) of lab1 and lab2.
 If cond is true check if expression 'V("lab3") lop value'
 is true before considering each instance of the object.
