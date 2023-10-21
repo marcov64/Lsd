@@ -578,7 +578,7 @@ double variable::cal( object *caller, int lag )
 		error_hard( "invalid lag used",
 					"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
 					false,
-					"variable or function '%s' (object '%s') requested \nwith lag=%d but declared with lag=%d\nPossible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum, or\n- enable USE_SAVED and mark '%s' to be saved (variables only)", label, up->label, eff_lag, num_lag, label, eff_lag, caller == NULL ? "(none)" : caller->label, label, num_lag, label );
+					"variable or function '%s' (object '%s') requested \nwith lag=%d but declared with lag=%d\nPossible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the offender equation to request the value of '%s' with lag=%d maximum, or\n- enable USE_SAVED and mark '%s' to be saved (variables only)", label, up->label, eff_lag, num_lag, label, eff_lag, label, num_lag, label );
 	else
 		error_hard( "invalid lag used",
 					"check your code (used lags in equation) to prevent negative lag",
