@@ -118,7 +118,23 @@ Support function used in CYCLEx macros
 ***************************************************/
 inline object *cycle_obj( object *parent, const char *label, const char *command )
 {
-	return parent->search_err( label, no_search, no_search_up, "cycling" );
+	object *cur = parent->search_err( label, no_search, no_search_up, "cycling" );
+
+	if ( cur == NULL )   // invalid cyclable object, even if in blueprint
+	{
+		object *cur1 = root->search( label );
+
+		if ( no_search && cur1 != NULL && parent->label != NULL &&
+			 cur1->up != NULL && cur1->up->label != NULL &&
+			 strcmp( parent->label, cur1->up->label ) )
+			error_hard( "object is not a descending object",
+						"move object in model structure, or specify a parent object",
+						false,
+						"object '%s' not directly under '%s' for cycling (NO_SEARCH enabled!)",
+						label, parent->label );
+	}
+
+	return cur;
 }
 
 
