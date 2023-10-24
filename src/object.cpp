@@ -1031,7 +1031,7 @@ variable *object::search_var_err( object *caller, const char *lab, bool no_searc
 	{	// check if it is a zero-instance object
 		cur = blueprint->search( label );
 		if ( cur != NULL )
-			cv = cur->search_var( NULL, lab, true );
+			cv = cur->search_var( NULL, lab, true, no_search, no_search_up, search_sons );
 
 		if ( ! no_zero_instance && cv != NULL )	// zero instance allowed?
 			return NULL;						// deleted instance but NULL is ok
