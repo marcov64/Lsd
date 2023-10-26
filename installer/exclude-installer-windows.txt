@@ -27,6 +27,7 @@ makefile
 makefileNW
 makemessage.txt
 temp.html
+sync.ffs_db
 *src\*.o
 *.obj
 *.sh

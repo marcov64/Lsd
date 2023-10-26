@@ -24,7 +24,7 @@ GCC 12.2 and associated utilities are copyrighted by the Free Software Foundatio
 Tcl/Tk 8.6.13 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
 MSYS2 3.4.3, https://www.msys2.org
 Cygwin 3.4.3 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
-7-Zip LZMA SDK 22.01 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
+7-Zip LZMA SDK 23.01 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
 Makeself 2.4.5 is copyrighted by Stephane Peter under GPL2, https://makeself.io
 Gnuplot 5.4.6 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
 Eigen 3.4.0 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org

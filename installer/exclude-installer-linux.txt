@@ -24,6 +24,7 @@
 *makefileNW
 *makemessage.txt
 *temp.html
+*sync.ffs_db
 *.o
 *.obj
 *.rc'

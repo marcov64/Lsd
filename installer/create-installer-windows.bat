@@ -7,7 +7,7 @@ rem	 and by Marcelo Pereira, University of Campinas
 rem
 rem	 Copyright Marco Valente and Marcelo Pereira
 rem	 LSD is distributed under the GNU General Public License
-rem	
+rem
 rem	See Readme.txt for copyright information of
 rem	third parties' code used in LSD
 rem
@@ -18,7 +18,7 @@ rem  CREATE-INSTALLER-WINDOWS.BAT
 rem  Create LSD installer for Windows.
 rem *************************************************************
 
-set LSD_FILE_TAG=8-1-stable-1
+set LSD_FILE_TAG=8-1-stable-2
 
 if "%1"=="/?" (
 	echo Create LSD installer for Windows
