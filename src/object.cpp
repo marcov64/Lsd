@@ -2351,10 +2351,10 @@ MAVE (*)
 Return the moving average of Variable with label lab
 with period per and computed from lag to lag+per
 ***************************************************/
-double object::mav( object *caller, const char *lab, double per, int lag )
+double object::mav( object *caller, const char *lab, double per, const double weight[ ], int lag )
 {
-	int n, maxlag;
-	double sum;
+	int i, maxlag;
+	double sumv, sumw;
 	variable *cv;
 
 	if ( ( ! use_nan && is_nan( per ) ) || is_inf( per ) || abs( per ) < 1 )
@@ -2369,7 +2369,7 @@ double object::mav( object *caller, const char *lab, double per, int lag )
 	cv = search_var_err( this, lab, no_search, no_search_up, true, "move-averaging" );
 	if ( cv == NULL )
 		return NAN;
-	
+
 	if ( per < 0 )
 	{
 		per = - per;
@@ -2378,15 +2378,26 @@ double object::mav( object *caller, const char *lab, double per, int lag )
 	else
 		maxlag = 0;
 
-	for ( sum = 0, n = lag; n < per + lag; ++n )
+	for ( i = sumv = sumw = 0; i < per; ++i )
 	{
-		if ( n - t >= maxlag )
+		if ( i + lag - t >= maxlag )
 			break;
 
-		sum += cv->cal( caller, n );
+		if ( weight == NULL )
+			sumv += cv->cal( caller, i + lag );
+		else
+		{
+			sumv += cv->cal( caller, i + lag ) * weight[ i ];
+			sumw += weight[ i ];
+		}
 	}
 
-	return sum / n;
+	return weight == NULL ? sumv / per : sumv / sumw;
+}
+
+double object::mav( object *caller, const char *lab, double per, int lag )
+{
+	return mav( caller, lab, per, NULL, lag );
 }
 
 

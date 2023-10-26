@@ -339,6 +339,11 @@ const bool no_pointer_init = true;
 #define MAVES( O, X, P ) ( CHK_PTR_DBL( O ) O->mav( O, ( char * ) X, P, 0 ) )
 #define MAVELS( O, X, P, L ) ( CHK_PTR_DBL( O ) O->mav( O, ( char * ) X, P, L ) )
 
+#define WHTMAVE( X, P, W ) ( p->mav( p, ( char * ) X, P, W, 0 ) )
+#define WHTMAVEL( X, P, W, L ) ( p->mav( p, ( char * ) X, P, W, L ) )
+#define WHTMAVES( O, X, P, W ) ( CHK_PTR_DBL( O ) O->mav( O, ( char * ) X, P, W, 0 ) )
+#define WHTMAVELS( O, X, P, W, L ) ( CHK_PTR_DBL( O ) O->mav( O, ( char * ) X, P, W, L ) )
+
 #define SUM( X ) ( p->sum( ( char * ) X, 0, false, "", "", 0. ) )
 #define SUML( X, L ) ( p->sum( ( char * ) X, L, false, "", "", 0. ) )
 #define SUMS( O, X ) ( CHK_PTR_DBL( O ) O->sum( ( char * ) X, 0, false, "", "", 0. ) )
