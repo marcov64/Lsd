@@ -195,6 +195,7 @@ void analysis( bool mc )
 	cmd( "set moving 0" );
 	cmd( "set prog_series %d", PROG_SERIES );
 	cmd( "set list_times [ list ]" );
+	cmd( "set fltStr \"\"" );
 
 	// save the name of key widgets that manipulate the series lists
 	cmd( "init_series .da.vars.lb.obj .da.vars.lb.flt.str .da.vars.lb.f.v .da.vars.lb.bh.nvar .da.vars.lb.bh.ncas .da.vars.ch.f.v .da.vars.ch.bh.sel .da.vars.pl.f.v .da.vars.pl.bh.plot" );
