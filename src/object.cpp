@@ -2392,7 +2392,7 @@ double object::mav( object *caller, const char *lab, double per, const double we
 		}
 	}
 
-	return weight == NULL ? sumv / per : sumv / sumw;
+	return weight == NULL ? sumv / i : sumv / sumw;
 }
 
 double object::mav( object *caller, const char *lab, double per, int lag )
