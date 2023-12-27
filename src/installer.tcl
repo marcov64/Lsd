@@ -26,14 +26,13 @@ wm withdraw .
 
 set _LSD_NAME_ "LSD Laboratory for Simulation Development"
 set _LSD_PUBLISHER_ "Marco Valente and Marcelo Pereira"
-set _LSD_VERSION_ "8.0"
-set _LSD_DATE_ "January 3 2023"
+set _LSD_VERSION_ "8.1"
+set _LSD_DATE_ "December 26 2023"
 set _LSD_SIZE_KB_ 552326
 
 set LsdDir LSD
 set LsdSrc src
 set LsdIco $LsdSrc/icons
-set winGnuplot "gp546-win64-mingw.exe"
 set winRoot "C:/"
 
 set linuxPmPkg(apt)	[ list	build-essential 	make	gdb		gnuplot		xterm	multitail	zlib1g-dev		tcl-dev			tk-dev			]
@@ -610,11 +609,29 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 
 	if [ string equal $CurPlatform windows ] {
 
-		set res [ catch { exec $filesDir/installer/$winGnuplot /SILENT /LOADINF=wgnuplot.inf } result ]
+		set res [ catch { set f [ open $filesDir/installer/wgnuplot.txt ] } result ]
 
 		if { $res } {
-			ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Gnuplot" -detail "The installation of Gnuplot graphical terminal failed ($result).\n\nYou may try to repeat the installation or do a manual install following the steps described in 'Readme.txt'."
-			lappend issues "Windows Gnuplot not installed ($winGnuplot)"
+			ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Gnuplot" -detail "Cannot open 'wgnuplot.txt' ($result).\n\nLSD installer is damaged."
+			lappend issues "Windows Gnuplot not installed (no wgnuplot.txt)"
+		} else {
+
+			set res [ catch { string trim [ gets $f winGnuplot ] } result ]
+
+			if { $res || ! [ file exists $filesDir/installer/$winGnuplot ] } {
+				ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Gnuplot" -detail "Invalid content in 'wgnuplot.txt' ($result).\n\nLSD installer is damaged."
+				lappend issues "Windows Gnuplot not installed (invalid wgnuplot.txt)"
+			} else {
+
+				set res [ catch { exec $filesDir/installer/$winGnuplot /SILENT /LOADINF=wgnuplot.inf } result ]
+
+				if { $res } {
+					ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Gnuplot" -detail "The installation of Gnuplot graphical terminal failed ($result).\n\nYou may try to repeat the installation or do a manual install following the steps described in 'Readme.txt'."
+					lappend issues "Windows Gnuplot not installed ($winGnuplot)"
+				}
+			}
+
+			close $f
 		}
 	}
 
