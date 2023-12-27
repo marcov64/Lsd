@@ -24,8 +24,8 @@ CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "LMM.exe.manifest"
 101 ICON "icons/lmm.ico"
 
 1 VERSIONINFO
-FILEVERSION     8,0,0,0
-PRODUCTVERSION  8,0,0,0
+FILEVERSION     8,1,2,0
+PRODUCTVERSION  8,1,2,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -33,12 +33,12 @@ BEGIN
     BEGIN
       VALUE "CompanyName", "Marco Valente & Marcelo C. Pereira"
       VALUE "FileDescription", "LSD Model Manager (LMM)"
-      VALUE "FileVersion", "8.0"
+      VALUE "FileVersion", "8.1"
       VALUE "InternalName", "LMM"
       VALUE "LegalCopyright", "Copyright Marco Valente and Marcelo C. Pereira"
       VALUE "OriginalFilename", "lmm.exe"
       VALUE "ProductName", "LSD"
-      VALUE "ProductVersion", "8.0"
+      VALUE "ProductVersion", "8.1"
     END
   END
 
