@@ -29,10 +29,8 @@
 # are on "Windows NT" or "Windows XP" or whatever.
 #
 # Machine specific
-# % amd64  -> x86_64
 # % arm*   -> arm
 # % sun4*  -> sparc
-# % ia32*  -> ix86
 # % intel  -> ix86
 # % i*86*  -> ix86
 # % Power* -> powerpc
@@ -73,7 +71,6 @@ proc ::platform::generic {} {
 	    set cpu sparc
 	}
 	intel -
-	ia32* -
 	i*86* {
 	    set cpu ix86
 	}
@@ -83,7 +80,6 @@ proc ::platform::generic {} {
 		set cpu ix86
 	    }
 	}
-	ppc -
 	"Power*" {
 	    set cpu powerpc
 	}
@@ -98,6 +94,9 @@ proc ::platform::generic {} {
     }
 
     switch -glob -- $plat {
+	cygwin* {
+	    set plat cygwin
+	}
 	windows {
 	    if {$tcl_platform(platform) == "unix"} {
 		set plat cygwin
@@ -150,9 +149,6 @@ proc ::platform::generic {} {
 	osf1 {
 	    set plat tru64
 	}
-	default {
-	    set plat [lindex [split $plat _-] 0]
-	}
     }
 
     return "${plat}-${cpu}"
@@ -179,16 +175,11 @@ proc ::platform::identify {} {
 	}
 	macosx {
 	    set major [lindex [split $tcl_platform(osVersion) .] 0]
-	    if {$major > 19} {
-		set minor [lindex [split $tcl_platform(osVersion) .] 1]
-		incr major -9
-		append plat $major.[expr {$minor - 1}]
-	    } else {
+	    if {$major > 8} {
 		incr major -4
 		append plat 10.$major
 		return "${plat}-${cpu}"
 	    }
-	    return "${plat}-${cpu}"
 	}
 	linux {
 	    # Look for the libc*.so and determine its version
@@ -339,7 +330,7 @@ proc ::platform::patterns {id} {
 	    lappend res macosx-universal macosx-i386-x86_64
 	}
 	macosx*-*    {
-	    # 10.5+,11.0+
+	    # 10.5+
 	    if {[regexp {macosx([^-]*)-(.*)} $id -> v cpu]} {
 
 		switch -exact -- $cpu {
@@ -347,61 +338,17 @@ proc ::platform::patterns {id} {
 			lappend alt i386-x86_64
 			lappend alt universal
 		    }
-		    x86_64  {
-			if {[lindex [split $::tcl_platform(osVersion) .] 0] < 19} {
-			    set alt i386-x86_64
-			} else {
-			    set alt {}
-			}
-		    }
-		    arm  {
-			lappend alt x86_64
-		    }
+		    x86_64  { lappend alt i386-x86_64 }
 		    default { set alt {} }
 		}
 
 		if {$v ne ""} {
 		    foreach {major minor} [split $v .] break
 
-		    set res {}
-		    if {$major eq 13} {
-			# Add 13.0 to 13.minor to patterns.
-			for {set j $minor} {$j >= 0} {incr j -1} {
-			    lappend res macosx${major}.${j}-${cpu}
-			    foreach a $alt {
-				lappend res macosx${major}.${j}-$a
-			    }
-			}
-			set major 12
-			set minor 5
-		    }
-		    if {$major eq 12} {
-			# Add 12.0 to 12.minor to patterns.
-			for {set j $minor} {$j >= 0} {incr j -1} {
-			    lappend res macosx${major}.${j}-${cpu}
-			    foreach a $alt {
-				lappend res macosx${major}.${j}-$a
-			    }
-			}
-			set major 11
-			set minor 5
-		    }
-		    if {$major eq 11} {
-			# Add 11.0 to 11.minor to patterns.
-			for {set j $minor} {$j >= 0} {incr j -1} {
-			    lappend res macosx${major}.${j}-${cpu}
-			    foreach a $alt {
-				lappend res macosx${major}.${j}-$a
-			    }
-			}
-			set major 10
-			set minor 15
-		    }
 		    # Add 10.5 to 10.minor to patterns.
+		    set res {}
 		    for {set j $minor} {$j >= 5} {incr j -1} {
-			if {$cpu ne "arm"} {
-			    lappend res macosx${major}.${j}-${cpu}
-			}
+			lappend res macosx${major}.${j}-${cpu}
 			foreach a $alt {
 			    lappend res macosx${major}.${j}-$a
 			}
@@ -431,7 +378,7 @@ proc ::platform::patterns {id} {
 # ### ### ### ######### ######### #########
 ## Ready
 
-package provide platform 1.0.19
+package provide platform 1.0.14
 
 # ### ### ### ######### ######### #########
 ## Demo application

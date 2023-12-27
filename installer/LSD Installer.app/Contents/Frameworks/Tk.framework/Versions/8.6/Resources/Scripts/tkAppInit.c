@@ -15,20 +15,9 @@
 #undef BUILD_tk
 #undef STATIC_BUILD
 #include "tk.h"
-#include "tkPort.h"
-#if TCL_MAJOR_VERSION < 9 && TCL_MINOR_VERSION < 7
-#   define Tcl_LibraryInitProc Tcl_PackageInitProc
-#   define Tcl_StaticLibrary Tcl_StaticPackage
-#endif
 
 #ifdef TK_TEST
-#ifdef __cplusplus
-extern "C" {
-#endif
-extern Tcl_LibraryInitProc Tktest_Init;
-#ifdef __cplusplus
-}
-#endif
+extern Tcl_PackageInitProc Tktest_Init;
 #endif /* TK_TEST */
 
 /*
@@ -41,11 +30,7 @@ extern Tcl_LibraryInitProc Tktest_Init;
 #define TK_LOCAL_APPINIT Tcl_AppInit
 #endif
 #ifndef MODULE_SCOPE
-#   ifdef __cplusplus
-#	define MODULE_SCOPE extern "C"
-#   else
-#	define MODULE_SCOPE extern
-#   endif
+#   define MODULE_SCOPE extern
 #endif
 MODULE_SCOPE int TK_LOCAL_APPINIT(Tcl_Interp *);
 MODULE_SCOPE int main(int, char **);
@@ -124,19 +109,13 @@ Tcl_AppInit(
     if (Tk_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
-    Tcl_StaticLibrary(interp, "Tk", Tk_Init, Tk_SafeInit);
-
-#if defined(USE_CUSTOM_EXIT_PROC)
-    if (TkpWantsExitProc()) {
-	Tcl_SetExitProc(TkpExitProc);
-    }
-#endif
+    Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_SafeInit);
 
 #ifdef TK_TEST
     if (Tktest_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
-    Tcl_StaticLibrary(interp, "Tktest", Tktest_Init, 0);
+    Tcl_StaticPackage(interp, "Tktest", Tktest_Init, 0);
 #endif /* TK_TEST */
 
     /*

@@ -99,20 +99,23 @@ namespace eval ttk {
 	}
 
 	"aqua" {
-	    array set Cursors {
-		standard	arrow
-		text 	ibeam
-		link	pointinghand
-		crosshair	crosshair
-		busy	watch
-		forbidden	notallowed
+	    if {[package vsatisfies [package provide Tk] 8.5]} {
+		# appeared 2007-04-23, Tk 8.5a6
+		array set Cursors {
+		    standard	arrow
+		    text 	ibeam
+		    link	pointinghand
+		    crosshair	crosshair
+		    busy	watch
+		    forbidden	notallowed
 
-		hresize 	resizeleftright
-		vresize 	resizeupdown
-		nresize	resizeup
-		sresize	resizedown
-		wresize	resizeleft
-		eresize	resizeright
+		    hresize 	resizeleftright
+		    vresize 	resizeupdown
+		    nresize	resizeup
+		    sresize	resizedown
+		    wresize	resizeleft
+		    eresize	resizeright
+		}
 	    }
 	}
     }
@@ -137,30 +140,8 @@ proc ttk::cursor {name} {
 
 proc ttk::setCursor {w name} {
     variable Cursors
-    if {[info exists Cursors($name)]} {
-        set cursorname $Cursors($name)
-    }  else {
-        set cursorname $name
-    }
-    if {[$w cget -cursor] ne $cursorname} {
-        $w configure -cursor $cursorname
-    }
-}
-
-## ttk::saveCursor $w $saveVar $excludeList --
-#       Set variable $saveVar to the -cursor value from widget $w,
-#       if either:
-#       a. $saveVar does not yet exist
-#       b. the currently user-specified cursor for $w is not in
-#          $excludeList
-
-proc ttk::saveCursor {w saveVar excludeList} {
-    upvar $saveVar sv
-    if {![info exists sv]} {
-        set sv [$w cget -cursor]
-    }
-    if {[$w cget -cursor] ni $excludeList} {
-        set sv [$w cget -cursor]
+    if {[$w cget -cursor] ne $Cursors($name)} {
+	$w configure -cursor $Cursors($name)
     }
 }
 
@@ -198,7 +179,7 @@ proc ttk::CursorSampler {f} {
 if {[info exists argv0] && $argv0 eq [info script]} {
     wm title . "[array size ::ttk::Cursors] cursors"
     pack [ttk::CursorSampler .f] -expand true -fill both
-    bind . <Escape> [list destroy .]
+    bind . <KeyPress-Escape> [list destroy .]
     focus .f
 }
 

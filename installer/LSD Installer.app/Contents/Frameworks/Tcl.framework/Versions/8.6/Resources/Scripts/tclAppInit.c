@@ -15,19 +15,15 @@
 #undef BUILD_tcl
 #undef STATIC_BUILD
 #include "tcl.h"
-#if TCL_MAJOR_VERSION < 9 && TCL_MINOR_VERSION < 7
-#   define Tcl_LibraryInitProc Tcl_PackageInitProc
-#   define Tcl_StaticLibrary Tcl_StaticPackage
-#endif
 
 #ifdef TCL_TEST
-extern Tcl_LibraryInitProc Tcltest_Init;
-extern Tcl_LibraryInitProc Tcltest_SafeInit;
+extern Tcl_PackageInitProc Tcltest_Init;
+extern Tcl_PackageInitProc Tcltest_SafeInit;
 #endif /* TCL_TEST */
 
 #ifdef TCL_XT_TEST
 extern void                XtToolkitInitialize(void);
-extern Tcl_LibraryInitProc Tclxttest_Init;
+extern Tcl_PackageInitProc Tclxttest_Init;
 #endif /* TCL_XT_TEST */
 
 /*
@@ -83,9 +79,6 @@ main(
 
 #ifdef TCL_LOCAL_MAIN_HOOK
     TCL_LOCAL_MAIN_HOOK(&argc, &argv);
-#elif (TCL_MAJOR_VERSION > 8 || TCL_MINOR_VERSION > 6) && (!defined(_WIN32) || defined(UNICODE))
-    /* New in Tcl 8.7. This doesn't work on Windows without UNICODE */
-    TclZipfs_AppHook(&argc, &argv);
 #endif
 
     Tcl_Main(argc, argv, TCL_LOCAL_APPINIT);
@@ -129,7 +122,7 @@ Tcl_AppInit(
     if (Tcltest_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
-    Tcl_StaticLibrary(interp, "Tcltest", Tcltest_Init, Tcltest_SafeInit);
+    Tcl_StaticPackage(interp, "Tcltest", Tcltest_Init, Tcltest_SafeInit);
 #endif /* TCL_TEST */
 
     /*

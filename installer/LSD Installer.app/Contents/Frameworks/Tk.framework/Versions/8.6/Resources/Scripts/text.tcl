@@ -292,23 +292,22 @@ bind Text <<PasteSelection>> {
 bind Text <Insert> {
     catch {tk::TextInsert %W [::tk::GetSelection %W PRIMARY]}
 }
-bind Text <Key> {
+bind Text <KeyPress> {
     tk::TextInsert %W %A
 }
 
 # Ignore all Alt, Meta, and Control keypresses unless explicitly bound.
 # Otherwise, if a widget binding for one of these is defined, the
-# <Key> class binding will also fire and insert the character,
+# <KeyPress> class binding will also fire and insert the character,
 # which is wrong.  Ditto for <Escape>.
 
-bind Text <Alt-Key> {# nothing }
-bind Text <Meta-Key> {# nothing}
-bind Text <Control-Key> {# nothing}
+bind Text <Alt-KeyPress> {# nothing }
+bind Text <Meta-KeyPress> {# nothing}
+bind Text <Control-KeyPress> {# nothing}
 bind Text <Escape> {# nothing}
 bind Text <KP_Enter> {# nothing}
 if {[tk windowingsystem] eq "aqua"} {
-    bind Text <Command-Key> {# nothing}
-    bind Text <Mod4-Key> {# nothing}
+    bind Text <Command-KeyPress> {# nothing}
 }
 
 # Additional emacs-like bindings:
@@ -430,27 +429,14 @@ bind Text <Control-h> {
 	%W see insert
     }
 }
-if {[tk windowingsystem] ne "aqua"} {
-    bind Text <2> {
-        if {!$tk_strictMotif} {
-        tk::TextScanMark %W %x %y
-        }
+bind Text <2> {
+    if {!$tk_strictMotif} {
+	tk::TextScanMark %W %x %y
     }
-    bind Text <B2-Motion> {
-        if {!$tk_strictMotif} {
-        tk::TextScanDrag %W %x %y
-        }
-    }
-} else {
-    bind Text <3> {
-        if {!$tk_strictMotif} {
-        tk::TextScanMark %W %x %y
-        }
-    }
-    bind Text <B3-Motion> {
-        if {!$tk_strictMotif} {
-        tk::TextScanDrag %W %x %y
-        }
+}
+bind Text <B2-Motion> {
+    if {!$tk_strictMotif} {
+	tk::TextScanDrag %W %x %y
     }
 }
 set ::tk::Priv(prevPos) {}
@@ -500,7 +486,7 @@ if {[tk windowingsystem] eq "x11"} {
     # Support for mousewheels on Linux/Unix commonly comes through mapping
     # the wheel to the extended buttons.  If you have a mousewheel, find
     # Linux configuration info at:
-    #	https://linuxreviews.org/HOWTO_change_the_mouse_speed_in_X
+    #	http://linuxreviews.org/howtos/xfree/mouse/
     bind Text <4> {
 	if {!$tk_strictMotif} {
 	    %W yview scroll -50 pixels
@@ -572,7 +558,12 @@ proc ::tk::TextButton1 {w x y} {
     } else {
 	$w mark gravity $anchorname left
     }
-    focus $w
+    # Allow focus in any case on Windows, because that will let the
+    # selection be displayed even for state disabled text widgets.
+    if {[tk windowingsystem] eq "win32" \
+	    || [$w cget -state] eq "normal"} {
+	focus $w
+    }
     if {[$w cget -autoseparators]} {
 	$w edit separator
     }
