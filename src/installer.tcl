@@ -1,6 +1,6 @@
 #*************************************************************
 #
-#	LSD 8.1 - July 2023
+#	LSD 9.0 - January 2024
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
@@ -26,8 +26,8 @@ wm withdraw .
 
 set _LSD_NAME_ "LSD Laboratory for Simulation Development"
 set _LSD_PUBLISHER_ "Marco Valente and Marcelo Pereira"
-set _LSD_VERSION_ "8.1"
-set _LSD_DATE_ "December 26 2023"
+set _LSD_VERSION_ "9.0"
+set _LSD_DATE_ "January 2 2024"
 set _LSD_SIZE_KB_ 552326
 
 set LsdDir LSD

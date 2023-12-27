@@ -1,6 +1,6 @@
 **************************************************************
 
-	LSD 8.1 - July 2023
+	LSD 9.0 - January 2024
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -16,18 +16,19 @@ to perform word wrapping.
 Legal stuff
 ***********
 
-LSD is copyrighted by Marco Valente and Marcelo C. Pereira (version 7.x additions) and is distributed according to the GNU General Public License. That is, as I understand it, you can use, modify and redistribute this code for free, as long as you maintain the same conditions. For legal conditions on gnuplot and the other software used see their legal notices.
+LSD is copyrighted by Marco Valente and Marcelo C. Pereira and is distributed according to the GNU General Public License. That is, as we understand it, you can use, modify and redistribute this code for free, as long as you maintain the same conditions, and cite our work properly.
 
-LSD includes third party software under the license of the copyright owners:
+LSD includes third party software under the original licenses of the copyright owners:
 
-GCC 12.2 and associated utilities are copyrighted by the Free Software Foundation, Inc. under GPL 3, https://gcc.gnu.org
+GCC 13.2 and associated utilities are copyrighted by the Free Software Foundation, Inc. under GPL 3, https://gcc.gnu.org
 Tcl/Tk 8.6.13 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
-MSYS2 3.4.3, https://www.msys2.org
-Cygwin 3.4.3 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
+MSYS2 3.4.10, https://www.msys2.org
+Cygwin 3.4.10 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
 7-Zip LZMA SDK 23.01 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
 Makeself 2.4.5 is copyrighted by Stephane Peter under GPL2, https://makeself.io
-Gnuplot 5.4.6 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
+Gnuplot 5.4.8 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
 Eigen 3.4.0 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
+pugixml 1.14 is copyrighted by Arseny Kapoulkine MIT license, https://pugixml.org
 subbotools 1.3 is copyrighted by Giulio Bottazzi under GPL2, http://cafim.sssup.it/~giulio/software/subbotools
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
 NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under GPL 2.1, http://harvest.nps.edu
@@ -42,6 +43,8 @@ dblclick.tcl is copyrighted by Wolf-Dieter Busch under OLL, https://wiki.tcl-lan
 tooltip.tcl 1.4.6 is copyrighted by Jeffrey Hobbs, https://wiki.tcl-lang.org/page/tklib
 tkcon.tcl 2.5 is copyrighted by Jeffrey Hobbs, https://wiki.tcl-lang.org/page/Tkcon
 tkdiff.tcl 4.2 is copyrighted by John M. Klassa and others GNU GPL 2+, https://sourceforge.net/projects/tkdiff
+
+For legal conditions on third party software included in LSD see the legal licenses on the sites above.
 
 
 ********

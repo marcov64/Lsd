@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.1 - July 2023
+	LSD 9.0 - January 2024
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -26,10 +26,10 @@
  *************************************************************/
 
 // LSD version strings, for About... boxes and code testing
-#define _LSD_MAJOR_ 8
-#define _LSD_MINOR_ 1
-#define _LSD_VERSION_ "8.1"
-#define _LSD_DATE_ "December 26 2023"	 // __DATE__
+#define _LSD_MAJOR_ 9
+#define _LSD_MINOR_ 0
+#define _LSD_VERSION_ "9.0"
+#define _LSD_DATE_ "January 2 2024"	 // __DATE__
 
 // standard libraries used
 #include <cstdlib>

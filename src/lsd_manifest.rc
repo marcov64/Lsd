@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.1 - July 2023
+	LSD 9.0 - January 2024
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -24,8 +24,8 @@ CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "LSD.exe.manifest"
 101 ICON "icons/lsd.ico"
 
 1 VERSIONINFO
-FILEVERSION     8,1,2,0
-PRODUCTVERSION  8,1,2,0
+FILEVERSION     9,0,0,0
+PRODUCTVERSION  9,0,0,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -33,12 +33,12 @@ BEGIN
     BEGIN
       VALUE "CompanyName", "Marco Valente & Marcelo C. Pereira"
       VALUE "FileDescription", "LSD"
-      VALUE "FileVersion", "8.1"
+      VALUE "FileVersion", "9.0"
       VALUE "InternalName", "LSD"
       VALUE "LegalCopyright", "Copyright Marco Valente and Marcelo C. Pereira"
       VALUE "OriginalFilename", "lsd.exe"
       VALUE "ProductName", "LSD"
-      VALUE "ProductVersion", "8.1"
+      VALUE "ProductVersion", "9.0"
     END
   END
 

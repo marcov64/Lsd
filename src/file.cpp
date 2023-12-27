@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 8.1 - July 2023
+	LSD 9.0 - January 2024
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 

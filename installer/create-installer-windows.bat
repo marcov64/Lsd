@@ -1,7 +1,7 @@
 @echo off
 rem *************************************************************
 rem
-rem	 LSD 8.1 - July 2023
+rem	 LSD 9.0 - January 2024
 rem	 written by Marco Valente, Universita' dell'Aquila
 rem	 and by Marcelo Pereira, University of Campinas
 rem
@@ -18,7 +18,7 @@ rem  CREATE-INSTALLER-WINDOWS.BAT
 rem  Create LSD installer for Windows.
 rem *************************************************************
 
-set LSD_FILE_TAG=8-1-stable-2
+set LSD_FILE_TAG=9-0-beta-1
 
 if "%1"=="/?" (
 	echo Create LSD installer for Windows
