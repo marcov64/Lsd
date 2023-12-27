@@ -20,8 +20,8 @@ make -C tk${ver}/macosx deploy
 make -C tcl${ver}/macosx install-embedded INSTALL_ROOT=/Users/Marcelo/TclTk/
 make -C tk${ver}/macosx install-embedded INSTALL_ROOT=/Users/Marcelo/TclTk/
 
-In both LMM.app/Contents and src/LSD.app/Contents, remove the Frameworks subfolder.
+In LMM.app/Contents, installer/LSD Installer.app/Contents, and src/LSD.app/Contents, remove the Frameworks subfolder.
 
-Copy the Frameworks subfolder from Applications/Utilities/Wish.app/Contents, into both LMM.app/Contents and src/LSD.app/Contents.
+Copy the Frameworks subfolder from TclTk/Applications/Utilities/Wish.app/Contents, into LMM.app/Contents, installer/LSD Installer.app/Contents, and src/LSD.app/Contents.
 
-Copy to src/LSD.app/Contents/Frameworks the MISSING header and library items from build/tcl/Tcl.Framework and build/tk/Tk.Framework, being careful to not overwrite the existing files (Headers and PrivateHeaders folders, libtclstubX.X.a, libtkstubX.X.a, and respective link files). Copy link files ONLY after copying real files/folders.
+Copy only to src/LSD.app/Contents/Frameworks the MISSING Headers, PrivateHeaders, libtclstub8.6.a andlibtkstub8.6.a items from build/tcl/Tcl.Framework[/Versions/8.6] and build/tk/Tk.Framework[/Versions/8.6], being careful to not overwrite the existing files. Copy files and the respective link files. Copy link files ONLY after copying real files/folders.
