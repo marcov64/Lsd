@@ -556,14 +556,16 @@ int lsdmain( int argn, const char **argv )
 
 	// check if directory is ok and if executable is inside a macOS package
 	cmd( "set path [ file normalize \"%s\" ]", exec_path );
-	cmd( "if { $tcl_platform(os) ne \"Darwin\" } { \
-			cd \"$path\" \
-		} else { \
-			cd \"$path/../../..\"; \
-			set path \"[ pwd ]\" \
+	cmd( "if { $tcl_platform(os) eq \"Darwin\" } { \
+			set pathsplit [ file split \"$path\" ]; \
+			if { [ lindex $pathsplit end ] eq \"MacOS\" && [ lindex $pathsplit end-1 ] eq \"Contents\" } { \
+				set path [ file normalize \"$path/../../..\" ] \
+			}; \
+			unset pathsplit \
 		}" );
 
 	cmd( "set modelDir \"$path\"" );
+	cmd( "cd \"$path\"" );
 	app = get_str( "path" );
 	delete [ ] path;
 	path = new char[ strlen( app ) + 1 ];
