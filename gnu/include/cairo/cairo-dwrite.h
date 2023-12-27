@@ -51,7 +51,7 @@ cairo_public IDWriteRenderingParams *
 cairo_dwrite_font_face_get_rendering_params (cairo_font_face_t *font_face);
 
 cairo_public void
-cairo_dwrite_font_face_set_rendering_params (cairo_font_face_t *font_face, IDWriteRenderingParams *param);
+cairo_dwrite_font_face_set_rendering_params (cairo_font_face_t *font_face, IDWriteRenderingParams *params);
 
 cairo_public DWRITE_MEASURING_MODE
 cairo_dwrite_font_face_get_measuring_mode (cairo_font_face_t *font_face);

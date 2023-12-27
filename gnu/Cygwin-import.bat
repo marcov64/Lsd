@@ -70,4 +70,6 @@ XCOPY %OPT% %CYG_DIR%\bin\tail.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %CYG_DIR%\bin\multitail.exe %LSD_DIR%\gnu\bin\
 XCOPY %XOPT% %CYG_DIR%\usr\share\terminfo\78 %LSD_DIR%\gnu\usr\share\terminfo\78\
 
+echo done copying files
+
 :end

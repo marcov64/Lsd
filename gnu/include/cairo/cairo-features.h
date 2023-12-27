@@ -41,5 +41,3 @@
 
 #define CAIRO_HAS_WIN32_SURFACE 1
 
-#define CAIRO_HAS_XML_SURFACE 1
-

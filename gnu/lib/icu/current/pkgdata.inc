@@ -3,10 +3,10 @@ SO=dll
 SOBJ=dll
 A=a
 LIBPREFIX=lib
-LIB_EXT_ORDER=72.dll
-COMPILE=gcc   -DHAVE_DLOPEN=0 -DU_HAVE_MMAP=0 -DU_HAVE_STRTOD_L=0  -DWINVER=0x0601 -D_WIN32_WINNT=0x0601 -DU_ATTRIBUTE_DEPRECATED= -O2 -std=c11 -Wall -pedantic -Wshadow -Wpointer-arith -Wmissing-prototypes -Wwrite-strings -mthreads  -c
+LIB_EXT_ORDER=74.dll
+COMPILE=gcc -D__USE_MINGW_ANSI_STDIO=1   -DHAVE_DLOPEN=0 -DU_HAVE_MMAP=0 -DU_HAVE_STRTOD_L=0  -DWINVER=0x0601 -D_WIN32_WINNT=0x0601 -DU_ATTRIBUTE_DEPRECATED= -march=nocona -msahf -mtune=generic -O2 -pipe -Wp,-D_FORTIFY_SOURCE=2 -fstack-protector-strong -std=c11 -Wall -pedantic -Wshadow -Wpointer-arith -Wmissing-prototypes -Wwrite-strings -mthreads  -c
 LIBFLAGS=-I/mingw64/include -DPIC 
-GENLIB=gcc -O2 -std=c11 -Wall -pedantic -Wshadow -Wpointer-arith -Wmissing-prototypes -Wwrite-strings -mthreads   -shared  -Wl,--enable-auto-import -Wl,--out-implib=./all.dll.a
+GENLIB=gcc -march=nocona -msahf -mtune=generic -O2 -pipe -Wp,-D_FORTIFY_SOURCE=2 -fstack-protector-strong -std=c11 -Wall -pedantic -Wshadow -Wpointer-arith -Wmissing-prototypes -Wwrite-strings -mthreads  -pipe  -shared  -Wl,--enable-auto-import -Wl,--out-implib=./all.dll.a
 LDICUDTFLAGS=
 LD_SONAME=
 RPATH_FLAGS=

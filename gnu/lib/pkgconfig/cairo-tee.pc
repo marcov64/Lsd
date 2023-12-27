@@ -3,6 +3,6 @@ includedir=${prefix}/include
 
 Name: cairo-tee
 Description: Tee surface backend for cairo graphics library
-Version: 1.17.8
+Version: 1.18.0
 Requires: cairo
 Cflags: -I${includedir}

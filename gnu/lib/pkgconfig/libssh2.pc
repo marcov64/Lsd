@@ -13,5 +13,5 @@ Description: Library for SSH-based communication
 Version: 1.11.0
 Requires.private: libssl libcrypto zlib
 Libs: -L${libdir} -lssh2
-Libs.private:  -lws2_32 -L/mingw64/lib -lssl -L/mingw64/lib -lcrypto -R/mingw64/lib
+Libs.private:  -lws2_32 -L/mingw64/lib -lssl -L/mingw64/lib -lcrypto
 Cflags: -I${includedir}

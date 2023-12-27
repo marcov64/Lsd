@@ -91,6 +91,14 @@ cairo_gobject_rectangle_int_get_type (void);
 cairo_public GType
 cairo_gobject_region_get_type (void);
 
+#define CAIRO_GOBJECT_TYPE_GLYPH cairo_gobject_glyph_get_type ()
+cairo_public GType
+cairo_gobject_glyph_get_type (void);
+
+#define CAIRO_GOBJECT_TEXT_CLUSTER_GLYPH cairo_gobject_text_cluster_get_type ()
+cairo_public GType
+cairo_gobject_text_cluster_get_type (void);
+
 /* enums */
 
 #define CAIRO_GOBJECT_TYPE_STATUS cairo_gobject_status_get_type ()

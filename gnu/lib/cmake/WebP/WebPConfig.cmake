@@ -1,4 +1,4 @@
-set(WebP_VERSION 1.3.1)
+set(WebP_VERSION 1.3.2)
 set(WEBP_VERSION ${WebP_VERSION})
 
 

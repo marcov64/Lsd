@@ -1,62 +1,51 @@
-set(_harfbuzz_libdir "/mingw64/lib")
-set(_harfbuzz_includedir "/mingw64/include")
 
-# Extract version information from libtool.
-set(_harfbuzz_version_info "60730:0:60730")
-string(REPLACE ":" ";" _harfbuzz_version_info "${_harfbuzz_version_info}")
-list(GET _harfbuzz_version_info 0
-  _harfbuzz_current)
-list(GET _harfbuzz_version_info 1
-  _harfbuzz_revision)
-list(GET _harfbuzz_version_info 2
-  _harfbuzz_age)
-unset(_harfbuzz_version_info)
+get_filename_component(PACKAGE_PREFIX_DIR "${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)
 
-if ("" MATCHES "static")
-  set(_harfbuzz_lib_suffix ".a")
-else ()
-  if (APPLE)
-    set(_harfbuzz_lib_suffix ".0${CMAKE_SHARED_LIBRARY_SUFFIX}")
-  elseif (UNIX)
-    set(_harfbuzz_lib_suffix "${CMAKE_SHARED_LIBRARY_SUFFIX}.0.${_harfbuzz_current}.${_harfbuzz_revision}")
-  else ()
-    # Unsupported.
-    set(harfbuzz_FOUND 0)
-  endif ()
-endif ()
+macro(set_and_check _var _file)
+  set(${_var} "${_file}")
+  if(NOT EXISTS "${_file}")
+    message(FATAL_ERROR "File or directory ${_file} referenced by variable ${_var} does not exist !")
+  endif()
+endmacro()
+
+macro(check_required_components _NAME)
+  foreach(comp ${${_NAME}_FIND_COMPONENTS})
+    if(NOT ${_NAME}_${comp}_FOUND)
+      if(${_NAME}_FIND_REQUIRED_${comp})
+        set(${_NAME}_FOUND FALSE)
+      endif()
+    endif()
+  endforeach()
+endmacro()
+
+
+set_and_check(HARFBUZZ_INCLUDE_DIR "${PACKAGE_PREFIX_DIR}/include/harfbuzz")
 
 # Add the libraries.
 add_library(harfbuzz::harfbuzz SHARED IMPORTED)
 set_target_properties(harfbuzz::harfbuzz PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "${_harfbuzz_includedir}/harfbuzz"
-  IMPORTED_LOCATION "${_harfbuzz_libdir}/libharfbuzz${_harfbuzz_lib_suffix}")
+  INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/include/harfbuzz"
+  IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_IMPORT_LIBRARY_PREFIX}harfbuzz${CMAKE_IMPORT_LIBRARY_SUFFIX}")
 
 add_library(harfbuzz::icu SHARED IMPORTED)
 set_target_properties(harfbuzz::icu PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "${_harfbuzz_includedir}/harfbuzz"
+  INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/include/harfbuzz"
   INTERFACE_LINK_LIBRARIES "harfbuzz::harfbuzz"
-  IMPORTED_LOCATION "${_harfbuzz_libdir}/libharfbuzz-icu${_harfbuzz_lib_suffix}")
+  IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_IMPORT_LIBRARY_PREFIX}harfbuzz-icu${CMAKE_IMPORT_LIBRARY_SUFFIX}")
 
 add_library(harfbuzz::subset SHARED IMPORTED)
 set_target_properties(harfbuzz::subset PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "${_harfbuzz_includedir}/harfbuzz"
+  INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/include/harfbuzz"
   INTERFACE_LINK_LIBRARIES "harfbuzz::harfbuzz"
-  IMPORTED_LOCATION "${_harfbuzz_libdir}/libharfbuzz-subset${_harfbuzz_lib_suffix}")
+  IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_IMPORT_LIBRARY_PREFIX}harfbuzz-subset${CMAKE_IMPORT_LIBRARY_SUFFIX}")
 
 # Only add the gobject library if it was built.
-set(_harfbuzz_have_gobject "true")
-if (_harfbuzz_have_gobject)
+if (YES)
   add_library(harfbuzz::gobject SHARED IMPORTED)
   set_target_properties(harfbuzz::gobject PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES "${_harfbuzz_includedir}/harfbuzz"
+    INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/include/harfbuzz"
     INTERFACE_LINK_LIBRARIES "harfbuzz::harfbuzz"
-    IMPORTED_LOCATION "${_harfbuzz_libdir}/libharfbuzz-gobject${_harfbuzz_lib_suffix}")
+    IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_IMPORT_LIBRARY_PREFIX}harfbuzz-gobject${CMAKE_IMPORT_LIBRARY_SUFFIX}")
 endif ()
 
-# Clean out variables we used in our scope.
-unset(_harfbuzz_lib_suffix)
-unset(_harfbuzz_current)
-unset(_harfbuzz_revision)
-unset(_harfbuzz_age)
-unset(_harfbuzz_includedir)
-unset(_harfbuzz_libdir)
+check_required_components(harfbuzz)

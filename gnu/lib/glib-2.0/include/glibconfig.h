@@ -113,7 +113,7 @@ typedef unsigned long long guintptr;
 #define G_GUINTPTR_FORMAT       "llu"
 
 #define GLIB_MAJOR_VERSION 2
-#define GLIB_MINOR_VERSION 76
+#define GLIB_MINOR_VERSION 78
 #define GLIB_MICRO_VERSION 3
 
 #define G_OS_WIN32
@@ -212,6 +212,8 @@ typedef void* GPid;
 #define G_DIR_SEPARATOR_S "\\"
 #define G_SEARCHPATH_SEPARATOR ';'
 #define G_SEARCHPATH_SEPARATOR_S ";"
+
+#undef G_HAVE_FREE_SIZED
 
 G_END_DECLS
 
