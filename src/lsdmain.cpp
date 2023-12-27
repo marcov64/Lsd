@@ -214,13 +214,14 @@ int lsdmain( int argn, const char **argv )
 	const char *app;
 	int i, j = 0, k = 0;
 	object *r;
+	FILE *f;
 
 	path = new char[ strlen( "" ) + 1 ];
 	simul_name = new char[ strlen( "" ) + 1 ];
 	exec_path = new char[ MAX_PATH_LENGTH ];
 	strcpy( path, "" );
 	strcpy( simul_name, "" );
-	exec_path = getcwd( exec_path, MAX_PATH_LENGTH );
+	exec_path = getcwd( exec_path, MAX_PATH_LENGTH );	// assume exec path is current path
 	exec_file = clean_file( argv[ 0 ] );	// global pointer to the name of executable file
 	exec_path = clean_path( exec_path );	// global pointer to path of executable file
 
@@ -379,7 +380,6 @@ int lsdmain( int argn, const char **argv )
 	}
 
 	delete [ ] str;
-	FILE *f;
 
 	if ( ( f = fopen( struct_file, "r" ) ) == NULL )
 	{
@@ -532,8 +532,17 @@ int lsdmain( int argn, const char **argv )
 	cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
 	cmd( "set DATE_FMT \"%s\"", DATE_FMT );
 
+	// check if exec file is in current path
+	i = strlen( exec_path ) + strlen( exec_file ) + 1;
+	str = new char[ i ];
+	snprintf( str, i, "%s/%s", exec_path, exec_file );
+	f = fopen( str, "r" );
+	delete [ ] str;
+	if ( f != NULL )
+		fclose( f );
+
 	// try to use exec_path to change to the model directory
-	if ( strlen( exec_path ) == 0 || ! strcmp( exec_path, "/" ) )
+	if ( f == NULL || strlen( exec_path ) == 0 || ! strcmp( exec_path, "/" ) )
 	{	// try to get name from Tcl
 		cmd( "if { [ info nameofexecutable ] != \"\" } { set path [ file dirname [ info nameofexecutable ] ] } { set path \"\" }" );
 		app = get_str( "path" );
