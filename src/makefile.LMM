@@ -35,29 +35,29 @@ RM=rm -f
 ALL_TARGETS=$(LSDROOT)/$(TARGET).exe $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o
 
 # handle platform-specific stuff
-ifeq ($(shell uname -s),Darwin)
-	PKG=$(TARGET).app/Contents/MacOS/
-	EXT=
-	MANIF=
-	TOUCH=touch -c $(LSDROOT)/$(TARGET).app
-	PATH_TCL_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tcl.framework/Headers
-	PATH_TK_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tk.framework/Headers
-	PATH_TCLTK_LIB=-F $(SRC_DIR)LSD.app/Contents/Frameworks
-	TCLTK_LIB=-framework Tcl -framework Tk
-	SWITCH_CC+=-Wno-unused-result -std=c++14 -mmacosx-version-min=10.10
+ifeq ($(OS),Windows_NT)
+	PKG=
+	EXT=.exe
+	WRC=windres -D_WIN32
+	MANIF=$(SRC_DIR)lmm_manifest.o
+	TOUCH=
+	TCL_VERSION=86
+	PATH_TCLTK_HEADER=$(LSDROOT)/gnu/include
+	PATH_TCLTK_LIB=-L $(LSDROOT)/gnu/lib
+	TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
+	SWITCH_CC+=-mthreads -mwindows -static-libstdc++
+	ALL_TARGETS+=$(MANIF)
 else
-	ifeq ($(OS),Windows_NT)
-		PKG=
-		EXT=.exe
-		WRC=windres -D_WIN32
-		MANIF=$(SRC_DIR)lmm_manifest.o
-		TOUCH=
-		TCL_VERSION=86
-		PATH_TCLTK_HEADER=$(LSDROOT)/gnu/include
-		PATH_TCLTK_LIB=-L $(LSDROOT)/gnu/lib
-		TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
-		SWITCH_CC+=-mthreads -mwindows -static-libstdc++
-		ALL_TARGETS+=$(MANIF)
+	ifeq ($(shell uname -s),Darwin)
+		PKG=$(TARGET).app/Contents/MacOS/
+		EXT=
+		MANIF=
+		TOUCH=touch -c $(LSDROOT)/$(TARGET).app
+		PATH_TCL_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tcl.framework/Headers
+		PATH_TK_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tk.framework/Headers
+		PATH_TCLTK_LIB=-F $(SRC_DIR)LSD.app/Contents/Frameworks
+		TCLTK_LIB=-framework Tcl -framework Tk
+		SWITCH_CC+=-Wno-unused-result -std=c++14 -mmacosx-version-min=10.10
 	else
 		PKG=
 		EXT=

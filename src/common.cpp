@@ -1038,6 +1038,9 @@ bool make_no_window( void )
 	for ( i = 0; i < LSD_NW_NUM; ++i )
 		cmd( "file copy -force \"$RootLsd/$LsdSrc/%s\" \"$modelDir/$LsdSrc\"", lsd_nw_src[ i ] );
 
+	// copy pugixml just once
+	cmd( "if { ! [ file exists \"$modelDir/$LsdSrc/pugixml\" ] } { file copy -force \"$RootLsd/$LsdSrc/pugixml\" \"$modelDir/$LsdSrc\" }" );
+
 	// copy Eigen library files if in use, just once to save time
 	if( use_eigen( ) )
 		cmd( "if { ! [ file exists \"$modelDir/$LsdSrc/Eigen\" ] } { file copy -force \"$RootLsd/$LsdSrc/Eigen\" \"$modelDir/$LsdSrc\" }" );
@@ -1871,6 +1874,62 @@ char *strtcl( char *out, const char *text, int outSz )
 	out[ j ] = '\0';
 
 	return out;
+}
+
+
+/***************************************************
+ STRDECDATA
+ decode string from a XML CDATA value
+ out and in strings can be the same
+ if out is NULL, space is allocated to the result,
+ which MUST be deallocated by the caller
+ ***************************************************/
+char *strdecdata( char *out, const char *in, int outSz )
+{
+	string buf = in;
+	int pos = -3;
+
+	if ( out != NULL && outSz <= 0 )
+		return NULL;
+
+	while ( ( pos = buf.find( "]]\x7f>", pos + 3 ) ) != ( int ) string::npos )
+		buf.erase( pos + 2, 1 );		// remove DEL (0x7f) character
+
+	if ( out == NULL )
+	{
+		outSz = outSz > 0 ? outSz : buf.length( ) + 1;
+		out = new char [ outSz ];
+	}
+
+	return strcpyn( out, buf.c_str( ), outSz );
+}
+
+
+/***************************************************
+ STRENCDATA
+ encode string for a XML CDATA value
+ out and in strings can be the same
+ if out is NULL, space is allocated to the result,
+ which MUST be deallocated by the caller
+***************************************************/
+char *strencdata( char *out, const char *in, int outSz )
+{
+	string buf = in;
+	int pos = -4;
+
+	if ( out != NULL && outSz <= 0 )
+		return NULL;
+
+	while ( ( pos = buf.find( "]]>", pos + 4 ) ) != ( int ) string::npos )
+		buf.insert( pos + 2, "\x7f" );		// insert DEL (0x7f) character
+
+	if ( out == NULL )
+	{
+		outSz = outSz > 0 ? outSz : buf.length( ) + 1;
+		out = new char [ outSz ];
+	}
+
+	return strcpyn( out, buf.c_str( ), outSz );
 }
 
 

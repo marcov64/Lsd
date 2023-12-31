@@ -5,7 +5,7 @@ SRC_DIR=$(SRC)/
 INCLUDE=-I$(SRC) -I$(PATH_HEADER)
 
 # common dependencies (all source files)
-COM_DEP=$(SRC_DIR)decl.h $(SRC_DIR)common.h 
+COM_DEP=$(SRC_DIR)decl.h $(SRC_DIR)common.h
 
 # no-window specific variables
 SUFFIX_NW=NW
@@ -20,10 +20,10 @@ RM=rm -f
 # link executable
 $(TARGET_NW): $(FUN)$(SUFFIX_NW).o $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o \
 $(SRC_DIR)file.o $(SRC_DIR)nets.o $(SRC_DIR)object.o \
-$(SRC_DIR)util.o $(SRC_DIR)variab.o
+$(SRC_DIR)util.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o
 	$(CC_NW) $(SWITCH_CC_NW) $(FUN)$(SUFFIX_NW).o $(SRC_DIR)common.o \
-	$(SRC_DIR)lsdmain.o $(SRC_DIR)file.o $(SRC_DIR)nets.o \
-	$(SRC_DIR)object.o $(SRC_DIR)util.o $(SRC_DIR)variab.o \
+	$(SRC_DIR)lsdmain.o $(SRC_DIR)file.o $(SRC_DIR)nets.o $(SRC_DIR)object.o \
+	$(SRC_DIR)util.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o \
 	$(SWITCH_CC_LNK) -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)
 
 # compile modules
@@ -51,9 +51,13 @@ $(SRC_DIR)util.o: $(SRC_DIR)util.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 
 $(SRC_DIR)variab.o: $(SRC_DIR)variab.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)variab.cpp -o $(SRC_DIR)variab.o
-	
+
+$(SRC_DIR)pugixml.o: $(SRC_DIR)pugixml/pugixml.cpp $(SRC_DIR)pugixml/pugixml.hpp \
+$(SRC_DIR)pugixml/pugiconfig.hpp
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)pugixml/pugixml.cpp -o $(SRC_DIR)pugixml.o
+
 # remove compiled files
 clean:
 	$(RM) $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o $(SRC_DIR)file.o $(SRC_DIR)nets.o \
-	$(SRC_DIR)object.o $(SRC_DIR)util.o $(SRC_DIR)variab.o $(FUN)$(SUFFIX_NW).o \
-	$(TARGET_NW) $(TARGET_NW).exe
+	$(SRC_DIR)object.o $(SRC_DIR)util.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o \
+	$(FUN)$(SUFFIX_NW).o $(TARGET_NW) $(TARGET_NW).exe

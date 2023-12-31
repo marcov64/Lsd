@@ -28,6 +28,7 @@ Relevant flags (when defined):
 #include "common.h"
 
 // standard libraries used
+#include <sstream>
 #include <cstdarg>
 #include <cfloat>
 #include <limits>

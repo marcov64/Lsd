@@ -64,6 +64,11 @@
 #include <wordexp.h>
 #endif
 
+// xml library
+#define PUGIXML_NO_XPATH
+#define PUGIXML_COMPACT
+#include "pugixml/pugixml.hpp"
+
 // global constants
 #define MAX_BUFF_SIZE 10000				// standard Tcl buffer size (>9999)
 #define MAX_PATH_LENGTH 1000			// maximum path length (>999)
@@ -170,6 +175,10 @@ typedef unordered_map < string, string > p_mapT;
 typedef unordered_map < string, variable * > v_mapT;
 typedef unordered_set < object * > o_setT;
 
+typedef pugi::xml_document xml_doc;
+typedef pugi::xml_node xml_node;
+typedef pugi::xml_attribute xml_attr;
+
 #ifndef _NP_
 typedef lock_guard < recursive_mutex > rec_lguardT;
 typedef unique_lock < recursive_mutex > rec_uniqlT;
@@ -208,6 +217,8 @@ struct object
 
 	bool load_insts( const char *file_name, FILE *f );
 	bool load_struct( FILE *f );
+	bool load_xml_insts( xml_node &n );
+	bool load_xml_struct( xml_node &n, bool quick );
 	bool under_computation( void );
 	bool under_comput_var( const char *lab );
 	bridge *search_bridge( const char *lab, bool no_error = false );
@@ -302,6 +313,7 @@ struct object
 	void replicate( int num, bool propagate = false );
 	void save_insts( FILE *f );
 	void save_struct( FILE *f, const char *tab );
+	void save_xml_struct( xml_node &pn, bool quick );
 	void search_inst( object *obj, long *pos, long *checked );
 	void update( bool recurse, bool user );
 };
@@ -578,6 +590,8 @@ char *get_str( const char *tcl_var, char *var, int var_size );
 char *search_lsd_root( char *start_path );
 char *strcatn( char *d, const char *s, size_t dSz );
 char *strcpyn( char *d, const char *s, size_t dSz );
+char *strdecdata( char *out, const char *in, int outSz = 0 );
+char *strencdata( char *out, const char *in, int outSz = 0 );
 char *strtcl( char *out, const char *text, int outSz );
 char *strupr( char *s );
 const char *eval_str( const char *tcl_exp );

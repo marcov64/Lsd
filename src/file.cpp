@@ -161,6 +161,8 @@ int load_configuration( bool reload, int quick )
 	variable *cv, *cv1;
 	description *cd;
 	FILE *g, *f = NULL;
+	gzFile fz;
+	xml_doc xf;
 
 	unload_configuration( false );				// unload current
 
@@ -174,12 +176,125 @@ int load_configuration( bool reload, int quick )
 		sprintf( struct_file, "%s%s%s.lsd", path, strlen( path ) > 0 ? "/" : "", simul_name );
 	}
 
+	// try to open maybe compressed xml configuration
+	fz = gzopen( struct_file, "rb" );
+	if ( fz == Z_NULL )
+		return 1;
+
+	// compute xml file size
+	for ( i = 0, j = 1; j > 0; i += j )
+		j = gzread( fz, ( void * ) buf1, MAX_FILE_SIZE );
+
+	if ( i == 0 )
+	{
+		gzclose( fz );
+		return 1;
+	}
+
+	gzrewind( fz );
+	buf = static_cast < char * >( pugi::get_memory_allocation_function( )( i ) );
+	j = gzread( fz, ( void * ) buf, i );
+	gzclose( fz );
+
+	if ( j < i )
+		return 1;
+
 	// set default values
 	max_step = 100;
 	sim_num = seed = 1;
 	when_debug = stack_info = prof_min_msecs = 0;
 	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = false;
 	snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
+
+	// try to read xml configuration
+	auto res = xf.load_buffer_inplace_own( buf, i, pugi::parse_default |
+										   pugi::parse_doctype |
+										   pugi::parse_trim_pcdata );
+	if ( res.status == pugi::status_ok )
+	{
+		xml_node typeNode = xf.first_child( );	// document type node
+		xml_node lsdNode = xf.document_element( );	// LSD top element
+
+		if ( strstr( typeNode.value( ), "LSD " ) != typeNode.value( ) ||
+			 strcmp( lsdNode.name( ), "LSD" ) != 0 )
+			return 1;							// invalid xml type/format
+
+		// get model structure
+		xml_node cfgNode = lsdNode.child( "configuration" );// load config.
+		xml_node rootNode = cfgNode.child( "structure" ).child( "object" );
+
+		if ( rootNode.empty( ) )
+			return 1;							// missing root
+
+		if ( ! reload || quick != 0 )
+			empty_description( );				// remove existing descriptions
+
+		// load non-instanced model structure
+		struct_loaded = root->load_xml_struct( rootNode,
+										( reload && quick == 2 ) || quick == 1 );
+		if( ! struct_loaded )
+		{
+			load = 2;
+			goto endLoad;
+		}
+
+		// load model structure instances
+		if( ! root->load_xml_insts( rootNode ) )
+		{
+			load = 3;
+			goto endLoad;
+		}
+
+		if ( reload && quick == 2 )				// just quick reload?
+			goto endLoad;
+
+		xml_node setNode = cfgNode.child( "settings" );
+		xml_node simNode = setNode.child( "simulation" );
+
+		if ( setNode.empty( ) || simNode.empty( ) )	// missing settings
+		{
+			load = 4;
+			goto endLoad;
+		}
+
+		// get simulation settings
+		xml_attr hint;							// speed-up pointer
+		max_step = simNode.attribute( "steps", hint ).as_uint( max_step );
+		sim_num = simNode.attribute( "runs", hint ).as_uint( sim_num );
+		seed = simNode.attribute( "seed", hint ).as_uint( seed );
+		when_debug = simNode.attribute( "debug_start", hint ).as_uint( when_debug );
+		no_ptr_chk = ! simNode.attribute( "ptr_check", hint ).as_bool( ! no_ptr_chk );
+		parallel_disable = ! simNode.attribute( "parallel", hint ).as_bool( ! parallel_disable );
+		stack_info = setNode.child( "profiling" ).attribute( "level", hint ).as_uint( stack_info );
+		prof_min_msecs = setNode.child( "profiling" ).attribute( "time", hint ).as_uint( prof_min_msecs );
+		prof_obs_only = setNode.child( "profiling" ).attribute( "observed", hint ).as_bool( prof_obs_only );
+		prof_aggr_time = setNode.child( "profiling" ).attribute( "aggregate", hint ).as_bool( prof_aggr_time );
+
+		// get report file name
+		strcpyn( name_rep, setNode.child( "report_file" ).text( ).as_string( name_rep ), MAX_PATH_LENGTH );
+
+		// get equation file name and content
+		xml_node eqfNode = cfgNode.child( "equation_file" );
+		if ( eqfNode.empty( ) )
+		{
+			load = 7;
+			goto endLoad;
+		}
+
+		// use the current equation name only if the file exists
+		snprintf( full_name, 2 * MAX_PATH_LENGTH, "%s/%s", exec_path,
+				  eqfNode.child( "filename" ).text( ).as_string( "NONE" ) );
+		if ( ( f = fopen( full_name, "r" ) ) != NULL )
+			strcpyn( equation_name, eqfNode.child( "filename" ).text( ).get( ), MAX_PATH_LENGTH );
+
+		if ( quick != 1 )						// load equation file?
+			// decode xml ]]> escape sequences
+			strdecdata( lsd_eq_file, eqfNode.child( "content" ).text( ).get( ), MAX_FILE_SIZE );
+		else
+			strcpy( lsd_eq_file, "" );
+
+		goto endLoad;
+	}
 
 	// try to read legacy configuration
 	f = fopen( struct_file, "rb" );
@@ -453,6 +568,107 @@ void unload_configuration ( bool full )
 
 
 /****************************************************
+OBJECT::LOAD_XML_STRUCT
+	Load the object structure tree under this object
+	from an xml object node
+	If quick is true, just the structure and the
+	parameters are retrieved, no descriptions
+****************************************************/
+const char *type_names[ ] = { "variable", "parameter", "function" };
+const int type_num = 3;
+
+bool object::load_xml_struct( xml_node &n, bool quick )
+{
+	bool obs;
+	const char *str, *desc, *init;
+	int i;
+	bridge *cb;
+	variable *cv;
+
+	if ( strcmp( n.attribute( "name" ).value( ), label ) != 0 )
+		return false;
+
+	to_compute = n.attribute( "compute" ).as_bool( true );
+
+	// scan contained child objects and elements
+	for ( xml_node cn : n.children( ) )
+	{
+		if ( ! strcmp( cn.name( ), "object" ) )			// add object?
+		{
+			str = cn.attribute( "name" ).value( );
+			if ( strlen( str ) == 0 )
+				return false;
+
+			cmd( "lappend modObj %s", str );
+
+			add_obj( str, 1, 0 );
+			cb = search_bridge( str );
+
+			if ( cb->head == NULL || ! cb->head->load_xml_struct( cn, quick ) )
+				return false;
+
+			if ( ! quick )
+			{
+				desc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
+				add_description( str, 4, desc );
+				delete [ ] desc;
+			}
+		}
+		else
+			if ( ! strcmp( cn.name( ), "element" ) )	// add element?
+			{
+				str = cn.attribute( "type" ).value( );
+				if ( strlen( str ) == 0 )
+					return false;
+
+				for ( i = 0; i < type_num; ++i )
+					if ( ! strcmp( str, type_names[ i ] ) )
+						break;
+
+				str = cn.attribute( "name" ).value( );
+				if ( strlen( str ) == 0 )
+					return false;
+
+				switch( i )
+				{
+					case 0:
+						cmd( "lappend modVar %s", str );
+						break;
+					case 1:
+						cmd( "lappend modPar %s", str );
+						break;
+					case 2:
+						cmd( "lappend modFun %s", str );
+						break;
+					default:
+						return false;
+				}
+
+				cmd( "lappend modElem %s", str );
+
+				cv = add_empty_var( str );
+				cv->param = i;
+
+				if ( ! quick )
+				{
+					desc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
+					init = strdecdata( NULL, cn.child( "description" ).child( "initialization" ).text( ).get( ) );
+					obs = cn.child( "documentation" ).attribute( "observe" ).as_bool( );
+
+					add_description( str, i, desc, init, cn.child( "documentation" ).attribute( "initialization" ).as_bool( ), obs );
+					cv->observe = obs;
+
+					delete [ ] desc;
+					delete [ ] init;
+				}
+			}
+	}
+
+	return true;
+}
+
+
+/****************************************************
 OBJECT::LOAD_STRUCT (LEGACY)
 	Load the object structure tree under this object
 	from a LEGACY text file
@@ -526,6 +742,127 @@ bool object::load_struct( FILE *f )
 
 	if ( i >= MAX_FILE_TRY )
 		return false;
+
+	return true;
+}
+
+
+/****************************************************
+OBJECT::LOAD_XML_INSTS
+	Load the object instances of tree under this
+	object from an xml object node
+****************************************************/
+bool object::load_xml_insts( xml_node &n )
+{
+	int i, j;
+	string tmp;
+	bridge *cb;
+	object *cur;
+	variable *cv, *cv1;
+
+	if ( strcmp( n.attribute( "name" ).value( ), label ) != 0 )
+		return false;
+
+	// split the number of instances string into a integer vector
+	string i1( n.child( "counts" ).text( ).get( ) );
+	stringstream s1( i1 );
+	vector < int > cnt;
+	while ( getline( s1, tmp, ',' ) )
+		cnt.push_back( stoi( tmp ) );
+
+	// set # of instances for each object group
+	for ( i = 0, cur = this; cur != NULL; cur = cur->hyper_next( label ), ++i )
+	{
+		if ( i >= ( int ) cnt.size( ) )		// inconsistent # of groups
+			return false;
+
+		cur->to_compute = to_compute;
+		cur->replicate( cnt[ i ] );
+
+		for ( ; go_brother( cur ) != NULL; cur = cur->next );	// go next group
+	}
+
+	if ( i < ( int ) cnt.size( ) )			// inconsistent # of groups
+		return false;
+
+	for ( cv = v; cv != NULL; cv = cv->next )
+	{
+		xml_node cn = n.find_child_by_attribute( "element", "name", cv->label );
+		if ( cn.empty( ) )
+			return false;
+
+		// split the values of instances string into a double vector
+		string i2( cn.child( "values" ).text( ).get( ) );
+		stringstream s2( i2 );
+		vector < double > val;
+		while ( getline( s2, tmp, ',' ) )
+			val.push_back( stod( tmp ) );
+
+		if ( cv->param != 1 )
+			cv->num_lag = cn.attribute( "lags" ).as_uint( );
+
+		cv->save = cn.attribute( "save" ).as_bool( );
+		cv->savei = cn.attribute( "save_file" ).as_bool( );
+		cv->plot = cn.attribute( "plot" ).as_bool( );
+		cv->parallel = cn.attribute( "parallel" ).as_bool( );
+		cv->deb_mode = cn.attribute( "debug" ).as_string( "n" )[ 0 ];
+		cv->initialized = cn.attribute( "initialized" ).as_bool( true );
+
+		if ( cv->param == 0 )
+		{
+			cv->delay = cn.attribute( "delay" ).as_uint( );
+			cv->delay_range = cn.attribute( "delay_range" ).as_uint( );
+			cv->period = cn.attribute( "period" ).as_uint( 1 );
+			cv->period_range = cn.attribute( "period_range" ).as_uint( );
+		}
+
+		// set values of instances for each variable group
+		for ( i = 0, cur = this; cur != NULL; cur = cur->hyper_next( label ), ++i )
+		{
+			cv1 = cur->search_var( NULL, cv->label );
+			cv1->param = cv->param;
+			cv1->num_lag = cv->num_lag;
+			cv1->save = cv->save;
+			cv1->savei = cv->savei;
+			cv1->plot = cv->plot;
+			cv1->parallel = cv->parallel;
+			cv1->deb_mode = cv->deb_mode;
+			cv1->initialized = cv->initialized;
+			cv1->delay = cv->delay;
+			cv1->delay_range = cv->delay_range;
+			cv1->period = cv->period;
+			cv1->period_range = cv->period_range;
+			cv1->observe = cv->observe;
+
+			// set parameters and initial conditions
+			cv1->val = new double[ cv1->num_lag + 1 ];
+
+			if ( cv1->param == 1 || cv1->num_lag > 0 )
+			{
+				if ( i >= ( int ) val.size( ) )	// inconsistent # of groups
+					return false;
+
+				for ( j = 0; j < ( cv1->param == 1 ? 1 : cv1->num_lag ); ++j )
+					cv1->val[ j ] = val[ i ];
+			}
+
+			if ( cv1->param != 1 )				// remove trash from last position
+				cv1->val[ cv1->num_lag ] = 0;
+		}
+
+		if ( i < ( int ) val.size( ) )			// inconsistent # of groups
+			return false;
+	}
+
+	for ( cb = b; cb != NULL; cb = cb->next )
+	{
+		xml_node cn = n.find_child_by_attribute( "object", "name", cb->blabel );
+		if ( cb->head == NULL || ! cb->head->load_xml_insts( cn ) )
+			return false;
+	}
+
+	if ( up == NULL )	// this is the root, and therefore the end of the loading
+		set_blueprint( blueprint, this );
 
 	return true;
 }
@@ -756,6 +1093,9 @@ bool save_configuration( int findex, const char *dest_path, bool quick )
 	const char *save_path;
 	description *cd;
 	FILE *f;
+	gzFile fz;
+	ostringstream buf;
+	xml_doc xf;
 
 	delta = ( findex > 0 ) ? sim_num * ( findex - 1 ) : 0;
 	indexDig = ( findex > 0 ) ? ( int ) floor( log10( findex ) + 2 ) : 0;
@@ -819,58 +1159,319 @@ bool save_configuration( int findex, const char *dest_path, bool quick )
 		}
 	}
 
-	f = fopen( save_file, "wb" );
-	if ( f == NULL )
-		goto error;
+	// legacy file save (TO REMOVE)
+	if ( false )
+	{
+		string save_file_leg( save_file );
+		save_file_leg.erase( save_file_leg.find_last_of( "." ) );
+		save_file_leg += "_leg.lsd";
 
-	root->save_struct( f, "" );
-	fprintf( f, "\nDATA\n" );
-	root->save_insts( f );
+		f = fopen( save_file_leg.c_str( ), "wb" );
+		if ( f != NULL )
+		{
+			root->save_struct( f, "" );
+			fprintf( f, "\nDATA\n" );
+			root->save_insts( f );
 
-	fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d", sim_num, seed + delta, max_step );
+			fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d", sim_num, seed + delta, max_step );
 
-	if ( when_debug > 0 || stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time || no_ptr_chk || parallel_disable )
-		fprintf( f, " %d %d %d %d %d %d %d", when_debug, stack_info, prof_min_msecs, prof_obs_only ? 1 : 0, prof_aggr_time ? 1 : 0, no_ptr_chk ? 1 : 0, parallel_disable ? 1 : 0 );
+			if ( when_debug > 0 || stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time || no_ptr_chk || parallel_disable )
+				fprintf( f, " %d %d %d %d %d %d %d", when_debug, stack_info, prof_min_msecs, prof_obs_only ? 1 : 0, prof_aggr_time ? 1 : 0, no_ptr_chk ? 1 : 0, parallel_disable ? 1 : 0 );
 
-	fprintf( f, "\nEQUATION %s\nMODELREPORT %s\n", equation_name, name_rep );
+			fprintf( f, "\nEQUATION %s\nMODELREPORT %s\n", equation_name, name_rep );
+
+			if ( ! quick )
+			{
+				fprintf( f, "\nDESCRIPTION\n\n" );
+				save_description( root, f );
+
+				fprintf( f, "\nDOCUOBSERVE\n" );
+				for ( cd = descr; cd != NULL; cd = cd->next )
+					if ( cd->observe )
+						fprintf( f, "%s\n", cd->label );
+				fprintf( f, "\nEND_DOCUOBSERVE\n\n" );
+
+				fprintf( f, "\nDOCUINITIAL\n" );
+				for ( cd = descr; cd != NULL; cd = cd->next )
+					if ( cd->initial )
+						fprintf( f, "%s\n", cd->label );
+				fprintf( f, "\nEND_DOCUINITIAL\n\n" );
+
+				save_eqfile( f );
+			}
+
+			if ( ! ferror( f ) )
+			{
+				save_ok = true;
+
+#ifndef _NW_
+				cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", exec_path, struct_file );
+#endif
+			}
+		}
+
+		fclose( f );
+	}
+
+	// add XML declaration, type and root node
+	xml_node declNode = xf.append_child( pugi::node_declaration );
+	declNode.append_attribute( "version" ) = "1.0";
+	declNode.append_attribute( "encoding" ) = "ANSI";
+	declNode.append_attribute( "standalone" ) = "yes";
+	xf.append_child( pugi::node_doctype ).set_value( "LSD [\n \
+	<!ELEMENT LSD (configuration)>\n \
+	<!ELEMENT configuration (settings, structure, equation_file)>\n \
+	<!ELEMENT settings (simulation, profiling?, #PCDATA)>\n \
+	<!ELEMENT structure (object)>\n \
+	<!ELEMENT equation_file (#PCDATA, #CDATA?)>\n \
+	<!ELEMENT object (#PCDATA, object*, element*, description?)>\n \
+	<!ELEMENT element (#PCDATA?, description?, documentation?)>\n \
+	<!ELEMENT description (#PCDATA+)>\n \
+	<!ELEMENT documentation EMPTY> ]" );
+	xml_node lsdNode = xf.append_child( "LSD" );
+	xml_node cfgNode = lsdNode.append_child( "configuration" );
+	cfgNode.append_attribute( "version" ) = "1.0";
+
+	// add simulation settings
+	xml_node setNode = cfgNode.append_child( "settings" );
+	xml_node simNode = setNode.append_child( "simulation" );
+	simNode.append_attribute( "steps" ) = max_step;
+	simNode.append_attribute( "runs" ) = sim_num;
+	simNode.append_attribute( "seed" ) = seed + delta;
+
+	// optional settings (include only if non-default)
+	if ( when_debug > 0 )
+		simNode.append_attribute( "debug_start" ) = when_debug;
+
+	if ( no_ptr_chk )
+		simNode.append_attribute( "ptr_check" ) = false;
+
+	if ( parallel_disable )
+		simNode.append_attribute( "parallel" ) = false;
+
+	// add profile settings, if any
+	if ( stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time )
+	{
+		xml_node profNode = setNode.append_child( "profiling" );
+
+		if ( stack_info > 0 )
+			profNode.append_attribute( "level" ) = stack_info;
+
+		if ( prof_min_msecs > 0 )
+			profNode.append_attribute( "time" ) = prof_min_msecs;
+
+		if ( prof_obs_only )
+			profNode.append_attribute( "observed" ) = true;
+
+		if ( prof_aggr_time )
+			profNode.append_attribute( "aggregate" ) = true;
+	}
+
+	// add report file name
+	setNode.append_child( "report_file" ).text( ) = name_rep;
+
+	// add model structure
+	xml_node strNode = cfgNode.append_child( "structure" );
+	root->save_xml_struct( strNode, quick );
+
+	// add equation file name and content
+	xml_node eqfNode = cfgNode.append_child( "equation_file" );
+	eqfNode.append_child( "filename" ).text( ) = equation_name;
 
 	if ( ! quick )
 	{
-		fprintf( f, "\nDESCRIPTION\n\n" );
-		save_description( root, f );
+		if ( eq_file != NULL && ( strlen( lsd_eq_file ) == 0 || strcmp( lsd_eq_file, eq_file ) != 0 ) )
+			strcpyn( lsd_eq_file, eq_file, MAX_FILE_SIZE );
 
-		fprintf( f, "\nDOCUOBSERVE\n" );
-		for ( cd = descr; cd != NULL; cd = cd->next )
-			if ( cd->observe )
-				fprintf( f, "%s\n", cd->label );
-		fprintf( f, "\nEND_DOCUOBSERVE\n\n" );
-
-		fprintf( f, "\nDOCUINITIAL\n" );
-		for ( cd = descr; cd != NULL; cd = cd->next )
-			if ( cd->initial )
-				fprintf( f, "%s\n", cd->label );
-		fprintf( f, "\nEND_DOCUINITIAL\n\n" );
-
-		save_eqfile( f );
+		// encode xml ]]> escape sequences
+		eqfNode.append_child( "content" ).append_child( pugi::node_cdata ).set_value( strencdata( lsd_eq_file, lsd_eq_file, MAX_FILE_SIZE ) );
 	}
 
-	if ( ! ferror( f ) )
+	xf.save( buf );
+
+	if ( ( fz = gzopen( save_file, "wb9" ) ) != Z_NULL )
 	{
-		save_ok = true;
-
-#ifndef _NW_
-		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", exec_path, struct_file );
-#endif
+		save_ok = gzputs( fz, buf.str( ).c_str( ) );
+		save_ok = gzclose( fz ) == Z_OK ? save_ok : false;
 	}
-
-	fclose( f );
-
-	error:
+	else
+		save_ok = false;
 
 	delete [ ] save_file;
 	delete [ ] bak_file;
 
 	return save_ok;
+}
+
+
+/****************************************************
+OBJECT::SAVE_XML_STRUCT
+	Save the object structure tree under this object
+	to an xml object
+	If quick is true, just the structure and the
+	parameters are saved, no descriptions
+****************************************************/
+void object::save_xml_struct( xml_node &pn, bool quick )
+{
+	bool first, init;
+	char *str, val[ 32 + 1 ];
+	int i, count;
+	string data;
+	bridge *cb;
+	description *cd;
+	object *cur;
+	variable *cv, *cv1;
+
+	xml_node n = pn.append_child( "object" );
+	n.append_attribute( "name" ) = label;
+
+	if ( ! to_compute )
+		n.append_attribute( "compute" ) = false;
+
+	for ( data = "", first = true, cur = this; cur != NULL;
+		  first = false, cur = cur->hyper_next( cur->label ) )
+	{
+		skip_next_obj( cur, &count );
+		ostringstream str;
+		str << ( first ? "" : "," ) << count;
+		data.append( str.str( ) );
+		for ( ; go_brother( cur ) != NULL; cur = cur->next );
+	}
+
+	n.append_child( "counts" ).text( ) = data.c_str( );
+
+	if ( ! quick )
+	{
+		cd = search_description( label );
+
+		if ( ! strwsp( cd->text ) )
+		{
+			xml_node nd = n.append_child( "description" );
+			str = strencdata( NULL, cd->text );
+			nd.append_child( "text" ).append_child( pugi::node_cdata ).set_value( str );
+			delete [ ] str;
+		}
+	}
+
+	for ( cb = b; cb != NULL; cb = cb->next )
+		if ( cb->head == NULL )
+			blueprint->search( cb->blabel )->save_xml_struct( n, quick );
+		else
+			cb->head->save_xml_struct( n, quick );
+
+	for ( cv = v; cv != NULL; cv = cv->next )
+	{
+		xml_node cn = n.append_child( "element" );
+		cn.append_attribute( "name" ) = cv->label;
+		cn.append_attribute( "type" ) = type_names[ cv->param ];
+
+		if ( cv->param != 1 )
+			cn.append_attribute( "lags" ) = cv->num_lag;
+
+		// search for uninitialized data
+		if ( cv->param == 1 || cv->num_lag > 0 )
+		{
+			for ( init = true, cur = this; cur != NULL; cur = cur->hyper_next( label ) )
+			{
+				cv1 = cur->search_var( NULL, cv->label );
+				if ( ! cv1->initialized )
+				{
+					init = false;
+					break;
+				}
+			}
+
+			if ( ! init )
+				cn.append_attribute( "initialized" ) = false;
+		}
+
+		// save only non-default values
+		if ( cv->save )
+			cn.append_attribute( "save" ) = true;
+
+		if ( cv->savei )
+			cn.append_attribute( "save_file" ) = true;
+
+		if ( cv->plot )
+			cn.append_attribute( "plot" ) = true;
+
+		if ( cv->parallel )
+			cn.append_attribute( "parallel" ) = true;
+
+		if ( cv->deb_mode != 'n' )
+		{
+			data = cv->deb_mode;
+			cn.append_attribute( "debug" ) = data.c_str( );
+		}
+
+		if ( cv->delay > 0 )
+			cn.append_attribute( "delay" ) = cv->delay;
+
+		if ( cv->delay_range > 0 )
+			cn.append_attribute( "delay_range" ) = cv->delay_range;
+
+		if ( cv->period > 1 )
+			cn.append_attribute( "period" ) = cv->period;
+
+		if ( cv->period_range > 0 )
+			cn.append_attribute( "period_range" ) = cv->period_range;
+
+		// add initial values
+		if ( cv->param == 1 || cv->num_lag > 0 )
+		{
+			for ( data = "", first = true, cur = this; cur != NULL;
+				  first = false, cur = cur->hyper_next( label ) )
+			{
+				cv1 = cur->search_var( NULL, cv->label );
+
+				for ( i = 0; i < ( cv1->param == 1 ? 1 : cv1->num_lag ); ++i )
+				{
+					snprintf( val, 32, "%s%.15g", first ? "" : ",",
+							  cv1->initialized ? cv1->val[ i ] : 0. );
+					data.append( val );
+				}
+			}
+
+			cn.append_child( "values" ).text( ) = data.c_str( );
+		}
+
+		if ( quick )
+			continue;
+
+		// add description text
+		cd = search_description( cv->label );
+
+		if ( ! strwsp( cd->text ) || ! strwsp( cd->init ) )
+		{
+			xml_node cnd = cn.append_child( "description" );
+
+			if ( ! strwsp( cd->text ) )
+			{
+				str = strencdata( NULL, cd->text );
+				cnd.append_child( "text" ).append_child( pugi::node_cdata ).set_value( str );
+				delete [ ] str;
+			}
+
+			if ( ! strwsp( cd->init ) )
+			{
+				str = strencdata( NULL, cd->init );
+				cnd.append_child( "initialization" ).append_child( pugi::node_cdata ).set_value( str );
+				delete [ ] str;
+			}
+		}
+
+		// add documentation marks
+		if ( cd->observe || cd->initial )
+		{
+			xml_node cnd = cn.append_child( "documentation" );
+
+			if ( cd->observe )
+				cnd.append_attribute( "observe" ) = true;
+
+			if ( cd->initial )
+				cnd.append_attribute( "initialization" ) = true;
+		}
+	}
 }
 
 
