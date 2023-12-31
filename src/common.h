@@ -206,7 +206,7 @@ struct object
 	mutex parallel_comp;				// mutex lock for parallel computations
 #endif
 
-	bool load_param( const char *file_name, FILE *f );
+	bool load_insts( const char *file_name, FILE *f );
 	bool load_struct( FILE *f );
 	bool under_computation( void );
 	bool under_comput_var( const char *lab );
@@ -300,7 +300,7 @@ struct object
 	void name_node_net( const char *nodeName );
 	void recreate_maps( void );
 	void replicate( int num, bool propagate = false );
-	void save_param( FILE *f );
+	void save_insts( FILE *f );
 	void save_struct( FILE *f, const char *tab );
 	void search_inst( object *obj, long *pos, long *checked );
 	void update( bool recurse, bool user );

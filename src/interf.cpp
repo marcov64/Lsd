@@ -4395,7 +4395,7 @@ object *operate( object *r )
 			fprintf( f, "%s", lsd_eq_file );
 			fclose( f );
 
-			read_eq_filename( lab, MAX_PATH_LENGTH );
+			read_eqfile_name( lab, MAX_PATH_LENGTH );
 			cmd( "open_diff %s %s %s %s.lsd", lab, lab_old, equation_name, simul_name  );
 		}
 		else

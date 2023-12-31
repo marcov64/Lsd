@@ -690,8 +690,8 @@ int lsdmain( int argn, const char **argv )
 	cmd( "set gpterm \"\"" );
 
 	// load/check model equation file
-	read_eq_filename( equation_name, MAX_PATH_LENGTH );
-	eq_file = upload_eqfile( );
+	read_eqfile_name( equation_name, MAX_PATH_LENGTH );
+	eq_file = load_eqfile( );
 
 	// load/check model information file and fix if required
 	if ( ! load_model_info( exec_path ) )
