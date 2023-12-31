@@ -730,7 +730,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				while ( choice == 0 )
 					Tcl_DoOneEvent( 0 );
 
-				cv->data_loaded='+';
+				cv->initialized = true;
 
 				for ( i = 0; i <= eff_lags; ++i )
 				{

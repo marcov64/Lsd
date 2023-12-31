@@ -1286,7 +1286,7 @@ void object::add_var_from_example( variable *example )
 	cv->deb_cond = example->deb_cond;
 	cv->deb_mode = example->deb_mode;
 	cv->deb_cnd_val = example->deb_cnd_val;
-	cv->data_loaded = example->data_loaded;
+	cv->initialized = example->initialized;
 
 	v_map.insert( v_pairT ( example->label, cv ) );
 }

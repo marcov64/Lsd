@@ -367,7 +367,7 @@ void link_cells( object *r, const char *lab )
 		for ( cur = cur1, i = 1; i <= maxCols && cur != NULL; cur = cur->hyper_next( lab ) , ++i )
 		{
 			cv = cur->search_var( cur, cv1->label );
-			cv->data_loaded = '+';
+			cv->initialized = true;
 
 			if ( cv->param == 1 )
 			{
@@ -470,7 +470,7 @@ void link_cells( object *r, const char *lab )
 		for ( ; cur != NULL; cur = cur->hyper_next( lab ) )
 		{
 			cv = cur->search_var( cur, cv1->label );
-			cv->data_loaded = '+';
+			cv->initialized = true;
 		}
 
 		if ( cv1->param == 1 || cv1->num_lag > 0 )

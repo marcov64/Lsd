@@ -160,7 +160,7 @@ int load_configuration( bool reload, int quick )
 	object *cur;
 	variable *cv, *cv1;
 	description *cd;
-	FILE *f = NULL, *g;
+	FILE *g, *f = NULL;
 
 	unload_configuration( false );				// unload current
 
@@ -589,7 +589,7 @@ bool object::load_insts( const char *file_name, FILE *f )
 
 		cv->save = ( tolower( ch1 ) == 's' ) ? true : false;
 		cv->savei = ( ch1 == 'S' || ch1 == 'N' ) ? true : false;
-		cv->data_loaded = ch2;
+		cv->initialized = ( ch2 == '+' ) ? true : false;
 		cv->deb_mode = ch3;
 		cv->plot = ( tolower( ch4 ) == 'p' ) ? true : false;
 		cv->parallel = ( ch4 == 'P' || ch4 == 'N' ) ? true : false;
@@ -603,7 +603,7 @@ bool object::load_insts( const char *file_name, FILE *f )
 			cv1->save = cv->save;
 			cv1->savei = cv->savei;
 			cv1->plot = cv->plot;
-			cv1->data_loaded = cv->data_loaded;
+			cv1->initialized = cv->initialized;
 			cv1->deb_mode = cv->deb_mode;
 			cv1->parallel = cv->parallel;
 
@@ -751,7 +751,7 @@ SAVE_CONFIGURATION
 bool save_configuration( int findex, const char *dest_path, bool quick )
 {
 	bool save_ok = false;
-	int delta, indexDig, save_len, pos;
+	int delta, indexDig, save_len;
 	char ch[ MAX_PATH_LENGTH ], *save_file, *bak_file = NULL;
 	const char *save_path;
 	description *cd;
@@ -810,12 +810,12 @@ bool save_configuration( int findex, const char *dest_path, bool quick )
 			if ( f != NULL )
 			{
 				fclose( f );
-				if( remove( bak_file ) )
-					goto error;
-			}
 
-			if ( rename( save_file, bak_file ) )
-				goto error;
+				if( ! remove( bak_file ) )
+					rename( save_file, bak_file );
+			}
+			else
+				rename( save_file, bak_file );
 		}
 	}
 
@@ -954,7 +954,7 @@ void object::save_insts( FILE *f )
 			for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
 			{
 				cv1 = cur->search_var( NULL, cv->label );
-				if ( cv1->data_loaded == '-' )
+				if ( ! cv1->initialized )
 				{
 					ch2 = '-';
 					break;
@@ -995,13 +995,13 @@ void object::save_insts( FILE *f )
 		{
 			cv1 = cur->search_var( NULL, cv->label );
 			if ( cv1->param == 1 )
-				if ( cv1->data_loaded == '+' )
+				if ( cv1->initialized )
 					fprintf( f, "\t%.15g", cv1->val[ 0 ] );
 				else
 					fprintf( f, "\t%c", '0' );
 			else
 				for ( i = 0; i < cv->num_lag; ++i )
-					if ( cv1->data_loaded == '+' )
+					if ( cv1->initialized )
 						fprintf( f, "\t%.15g", cv1->val[ i ] );
 					else
 						fprintf( f, "\t%c", '0' );

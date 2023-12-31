@@ -1369,7 +1369,7 @@ bool alloc_save_mem( object *r )
 	// for each variable set the data saving support
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
-		if ( ( cv->num_lag > 0 || cv->param == 1 ) && cv->data_loaded == '-' )
+		if ( ( cv->num_lag > 0 || cv->param == 1 ) && ! cv->initialized )
 		{
 			error_hard( "required initialization values missing",
 						"select the object and choose menu 'Data'/'Initial Values'",

@@ -448,7 +448,7 @@ bool change_configuration( object *root, int findex )
 						return false;
 					}
 				}
-				cv->data_loaded = '+';
+				cv->initialized = true;
 				cv->val[ lag ] = values[ i ][ findex - 1 ];
 			}
 		}

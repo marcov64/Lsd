@@ -79,7 +79,7 @@ contain the global time when it was lastly computed the equation for the variabl
 Flag set to 1, in case the variable is considered a parameter. In case it is,
 when requested the value it is always returned its field val[ 0 ].
 
-- char data_loaded;
+- char initialized;
 flag indicative whether the variable has been initialized with numerical values
 set as default by the system or if they were actually chosen by the user.
 The flag is 0 in case of newly created objects and 1 in case the variable's
@@ -142,7 +142,7 @@ variable::variable( void )
 	under_computation = false;
 	lab_tit = NULL;
 	label = NULL;
-	data_loaded = '-';
+	initialized = false;
 	deb_mode = 'n';
 	data = NULL;
 	val = NULL;
@@ -179,7 +179,7 @@ variable::variable( const variable &v )
 	under_computation = v.under_computation;
 	lab_tit = v.lab_tit;
 	label = v.label;
-	data_loaded = v.data_loaded;
+	initialized = v.initialized;
 	deb_mode = v.deb_mode;
 	data = v.data;
 	val = v.val;

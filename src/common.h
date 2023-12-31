@@ -310,9 +310,9 @@ struct variable
 {
 	char *label;
 	char *lab_tit;
-	char data_loaded;
 	char deb_mode;
 	bool dummy;
+	bool initialized;
 	bool observe;
 	bool parallel;
 	bool plot;

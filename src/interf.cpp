@@ -1432,9 +1432,9 @@ object *operate( object *r )
 						cv->num_lag = num;
 						cv->deb_mode = 'n';
 						if ( ( param == 0 && num == 0 ) || param == 2 )
-							cv->data_loaded = '+';
+							cv->initialized = true;
 						else
-							cv->data_loaded = '-';
+							cv->initialized = false;
 
 						for ( i = 0; i < num + 1; ++i )
 							cv->val[ i ] = 0;
@@ -2064,7 +2064,7 @@ object *operate( object *r )
 			cmd( "ttk::frame $T.h.i" );
 			cmd( "ttk::label $T.h.i.l -text \"Initial value%s%s:\"", cv->num_lag > 1 ? "s" : "", cv->up->next == NULL ? "" : " (first instance)" );
 
-			if ( cv->data_loaded != '-' )
+			if ( cv->initialized )
 			{
 				strcpy ( buf_descr, "" );
 
@@ -2587,7 +2587,7 @@ object *operate( object *r )
 				cv->param = nature;
 
 				if ( cv->param == 1 || cv->num_lag > 0 )
-					cv->data_loaded = '-';
+					cv->initialized = false;
 
 				if ( cv->param != 0 )
 				{

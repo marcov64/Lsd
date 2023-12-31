@@ -391,7 +391,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 				{
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = value1;
-					cv->data_loaded = '+';
+					cv->initialized = true;
 					++j;
 				}
 
@@ -412,7 +412,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 				{
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = value1 + value * step;
-					cv->data_loaded = '+';
+					cv->initialized = true;
 					++j;
 				}
 
@@ -432,7 +432,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 				{
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = value1 + step * value2;
-					cv->data_loaded = '+';
+					cv->initialized = true;
 					++j;
 				}
 
@@ -451,7 +451,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 				{
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = value1 + step * value2;
-					cv->data_loaded = '+';
+					cv->initialized = true;
 					++j;
 					++step;
 
@@ -470,7 +470,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 				{
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = uniform( value1, value2 );
-					cv->data_loaded = '+';
+					cv->initialized = true;
 					++j;
 				}
 
@@ -485,7 +485,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 				{
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = uniform_int( round( value1 ), round( value2 ) );
-					cv->data_loaded = '+';
+					cv->initialized = true;
 					++j;
 				}
 
@@ -500,7 +500,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 				{
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = norm( value1, value2 );
-					cv->data_loaded = '+';
+					cv->initialized = true;
 					++j;
 				}
 
@@ -535,7 +535,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = value;
-					cv->data_loaded = '+';
+					cv->initialized = true;
 					++j;
 				}
 
