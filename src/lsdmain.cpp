@@ -39,7 +39,7 @@ Relevant flags (when defined):
 #include "decl.h"
 
 // some program defaults
-bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
+bool ignore_eq_file = false;// flag to ignore equation file in configuration file
 char err_file[ ] = "LSD.err";// error log file name
 char nonavail[ ] = "NA";	// string for unavailable values (use R default)
 char tabs[ ] = "5c 7.5c 10c 12.5c 15c 17.5c 20c";	// Log window tabs

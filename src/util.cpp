@@ -699,7 +699,7 @@ ADD_DESCRIPTION
 ***************************************************/
 const char *kwords[ ] = { BEG_INIT, END_DESCR };
 
-description *add_description( const char *lab, int type, const char *text, const char *init, char initial, char observe )
+description *add_description( const char *lab, int type, const char *text, const char *init, bool initial, bool observe )
 {
 	char *str, ltype[ MAX_ELEM_LENGTH ];
 	int i, j;
@@ -782,7 +782,7 @@ description *add_description( const char *lab, int type, const char *text, const
 /***************************************************
 CHANGE_DESCRIPTION
 ***************************************************/
-description *change_description( const char *lab_old, const char *lab, int type, const char *text, const char *init, char initial, char observe )
+description *change_description( const char *lab_old, const char *lab, int type, const char *text, const char *init, int initial, int observe )
 {
 	char *str, ltype[ MAX_ELEM_LENGTH ];
 	int i, j;
@@ -793,7 +793,7 @@ description *change_description( const char *lab_old, const char *lab, int type,
 		if ( ! strcmp( cd->label, lab_old ) )
 		{
 
-			if ( lab == NULL && type < 0 && text == NULL && init == NULL && initial == '\0' && observe == '\0' )
+			if ( lab == NULL && type < 0 && text == NULL && init == NULL && initial == -1 && observe == -1 )
 			{
 				delete [ ] cd->label;
 				delete [ ] cd->type;
@@ -886,10 +886,10 @@ description *change_description( const char *lab_old, const char *lab, int type,
 					cd->init = NULL;
 			}
 
-			if ( initial != '\0' )
+			if ( initial != -1 )
 				cd->initial = initial;
 
-			if ( observe != '\0' )
+			if ( observe != -1 )
 				cd->observe = observe;
 
 			return cd;

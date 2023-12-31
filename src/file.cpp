@@ -41,10 +41,9 @@ Initialize a model by creating	one as defined
 in the data file. The model, after this stage, has only one instance for each
 object type and variables and parameters are simply labels.
 
-- int object::load_param( const char *file_name, int repl )
+- int object::load_param( const char *file_name )
 It loads from the file named as specified the data
 for the object. It is made in specular way in respect of save_param.
-Called from browser in INTERF.CPP immediately after load_struct.
 *************************************************************/
 
 #include "decl.h"
@@ -58,7 +57,7 @@ void object::save_struct( FILE *f, const char *tab )
 	char tab1[ MAX_ELEM_LENGTH ];
 	bridge *cb;
 	object *o;
-	variable *var;
+	variable *cv;
 
 	if ( up == NULL )
 		fprintf( f, "\t\n" );
@@ -77,14 +76,14 @@ void object::save_struct( FILE *f, const char *tab )
 		o->save_struct( f, tab1 );
 	}
 
-	for ( var = v; var != NULL; var = var->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		if ( var->param == 0 )
-			fprintf( f, "%sVar: %s\n", tab1, var->label );
-		if ( var->param == 1 )
-			fprintf( f, "%sParam: %s\n", tab1, var->label );
-		if ( var->param == 2)
-			fprintf( f, "%sFunc: %s\n", tab1, var->label );
+		if ( cv->param == 0 )
+			fprintf( f, "%sVar: %s\n", tab1, cv->label );
+		if ( cv->param == 1 )
+			fprintf( f, "%sParam: %s\n", tab1, cv->label );
+		if ( cv->param == 2)
+			fprintf( f, "%sFunc: %s\n", tab1, cv->label );
 	}
 
 	fprintf( f, "\n" );
@@ -97,10 +96,9 @@ OBJECT::SAVE_PARAM
 ****************************************************/
 void object::save_param( FILE *f )
 {
-	int i, count = 0;
+	int i, count;
 	char ch1, ch2, ch3, ch4;
 	bridge *cb;
-	description *cd;
 	object *cur;
 	variable *cv, *cv1;
 
@@ -133,11 +131,6 @@ void object::save_param( FILE *f )
 					break;
 				}
 			}
-		else
-		{	// avoid marking as to initialize for elements not worth it
-			cd = search_description( cv->label );
-			cd->initial = 'n';
-		}
 
 		// debug mode: character coding for compatibility
 		// ch1: n = no save
@@ -201,7 +194,7 @@ void object::save_param( FILE *f )
 /****************************************************
 OBJECT::LOAD_PARAM
 ****************************************************/
-bool object::load_param( const char *file_name, int repl, FILE *f )
+bool object::load_param( const char *file_name, FILE *f )
 {
 	char str[ MAX_ELEM_LENGTH ], ch1, ch2, ch3, ch4;
 	int num, i;
@@ -237,6 +230,7 @@ bool object::load_param( const char *file_name, int repl, FILE *f )
 
 		cur->to_compute = to_compute;
 		cur->replicate( num );
+
 		for ( ; go_brother( cur ) != NULL; cur = cur->next );
 	}
 
@@ -258,7 +252,7 @@ bool object::load_param( const char *file_name, int repl, FILE *f )
 		cv->plot = ( tolower( ch4 ) == 'p' ) ? true : false;
 		cv->parallel = ( ch4 == 'P' || ch4 == 'N' ) ? true : false;
 
-		for ( cur = this; cur != NULL; repl == 1 ? cur = cur->hyper_next( label ) : cur = NULL )
+		for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
 		{
 			cv1 = cur->search_var( NULL, cv->label );
 			cv1->val = new double[ cv->num_lag + 1 ];
@@ -301,7 +295,7 @@ bool object::load_param( const char *file_name, int repl, FILE *f )
 				return false;
 
 			if ( num > 0 )
-				for ( cur = this; cur != NULL; repl == 1 ? cur = cur->hyper_next( label ) : cur = NULL )
+				for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
 				{
 					cv1 = cur->search_var( NULL, cv->label );
 					cv1->delay = cv->delay;
@@ -316,7 +310,7 @@ bool object::load_param( const char *file_name, int repl, FILE *f )
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
-		if ( cb->head == NULL || ! cb->head->load_param( file_name, repl, f ) )
+		if ( cb->head == NULL || ! cb->head->load_param( file_name, f ) )
 			return false;
 		num = 0;
 	}
@@ -617,8 +611,8 @@ LOAD_CONFIGURATION
 ******************************************************************************/
 int load_configuration( bool reload, int quick )
 {
-	int i, j = 0, load = 0;
 	char msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
+	int i, j, load = 0;
 	object *cur;
 	variable *cv, *cv1;
 	description *cd;
@@ -649,7 +643,7 @@ int load_configuration( bool reload, int quick )
 
 	strcpy( msg, "" );
 	fscanf( f, "%999s", msg );					// should be DATA
-	if ( ! ( ! strcmp( msg, "DATA" ) && root->load_param( struct_file, 1, f ) ) )
+	if ( ! ( ! strcmp( msg, "DATA" ) && root->load_param( struct_file, f ) ) )
 	{
 		load = 3;
 		goto endLoad;
@@ -764,7 +758,7 @@ int load_configuration( bool reload, int quick )
 		cd = search_description( msg );
 		if ( cd != NULL )
 		{
-			cd->observe = 'y';
+			cd->observe = true;
 			cv = root->search_var( NULL, msg );
 			if ( cv != NULL )
 				for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( cv->up->label ) )
@@ -795,7 +789,7 @@ int load_configuration( bool reload, int quick )
 	{
 		cd = search_description( msg );
 		if ( cd != NULL )
-			cd->initial = 'y';
+			cd->initial = true;
 		fscanf( f, "%999s", msg );
 	}
 
@@ -815,18 +809,15 @@ int load_configuration( bool reload, int quick )
 	for ( j = 0; fgets( msg, MAX_LINE_SIZE, f ) != NULL && strncmp( msg, "END_EQ_FILE", 11 ) && strlen( lsd_eq_file ) < MAX_FILE_SIZE - MAX_LINE_SIZE && j < MAX_FILE_TRY; ++j )
 		strcatn( lsd_eq_file, msg, MAX_FILE_SIZE );
 
-	// remove extra \n and \r (Windows) at the end
-	if ( lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] == '\n' )
-		lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] = '\0';
-	if ( lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] == '\r' )
-		lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] = '\0';
-
-	if ( ! ignore_eq_file && strcmp( lsd_eq_file, eq_file ) )
-	{
-		plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the LSD model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
-	}
-
 endLoad:
+
+	// remove extra clear space at the beginning/end and standardize line ends
+	strcln( buf1, lsd_eq_file, MAX_FILE_SIZE );
+	strcpyn( lsd_eq_file, buf1, MAX_FILE_SIZE );
+
+	if ( quick == 0 && ! ignore_eq_file && strncmp( lsd_eq_file, eq_file, min( strlen( lsd_eq_file ), strlen( eq_file ) ) ) )
+		plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the LSD model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
+
 	fclose( f );
 
 	t = 0;
@@ -915,50 +906,23 @@ void unload_configuration ( bool full )
 }
 
 
-/*********************************
-SAVE_SINGLE
-*********************************/
-void save_single( variable *v )
-{
-	char fn[ MAX_PATH_LENGTH ];
-	int i;
-	FILE *f;
-
-#ifndef _NP_
-	// prevent concurrent use by more than one thread
-	rec_lguardT lock( v->parallel_comp );
-#endif
-
-	set_lab_tit( v );
-	snprintf( fn, MAX_PATH_LENGTH, "%s_%s-%d_%d_seed-%d.res", v->label, v->lab_tit, v->start, v->end, seed - 1 );
-	f = fopen( fn, "wt" );			// use text mode for Windows better compatibility
-
-	fprintf( f, "%s %s (%d %d)\t\n", v->label, v->lab_tit, v->start, v->end );
-
-	for ( i = 0; i <= t - 1; ++i )
-		if ( i >= v->start && i <= v->end && ! is_nan( v->data[ i - v->start ] ) )	// save NaN as n/a
-			fprintf( f,"%lf\t\n", v->data[ i - v->start ] );
-		else
-			fprintf( f,"%s\t\n", nonavail );
-
-	fclose( f );
-}
-
-
 /*****************************************************************************
 SAVE_CONFIGURATION
 	Save current defined configuration (adding tag index if appropriate)
-	If quick is true, just the structure and the parameters is saved
+	If quick is true, just the structure and the parameters are saved
 	Returns: true: save ok, false: save failure
 ******************************************************************************/
 bool save_configuration( int findex, const char *dest_path, bool quick )
 {
 	bool save_ok = false;
-	int delta, indexDig, save_len;
+	int delta, indexDig, save_len, pos;
 	char ch[ MAX_PATH_LENGTH ], *save_file, *bak_file = NULL;
 	const char *save_path;
 	description *cd;
 	FILE *f;
+	gzFile fz;
+	ostringstream buf;
+	xml_doc xf;
 
 	delta = ( findex > 0 ) ? sim_num * ( findex - 1 ) : 0;
 	indexDig = ( findex > 0 ) ? ( int ) floor( log10( findex ) + 2 ) : 0;
@@ -1044,13 +1008,13 @@ bool save_configuration( int findex, const char *dest_path, bool quick )
 
 		fprintf( f, "\nDOCUOBSERVE\n" );
 		for ( cd = descr; cd != NULL; cd = cd->next )
-			if ( cd->observe == 'y' )
+			if ( cd->observe )
 				fprintf( f, "%s\n", cd->label );
 		fprintf( f, "\nEND_DOCUOBSERVE\n\n" );
 
 		fprintf( f, "\nDOCUINITIAL\n" );
 		for ( cd = descr; cd != NULL; cd = cd->next )
-			if ( cd->initial == 'y' )
+			if ( cd->initial )
 				fprintf( f, "%s\n", cd->label );
 		fprintf( f, "\nEND_DOCUINITIAL\n\n" );
 
@@ -1240,6 +1204,36 @@ bool save_sensitivity( FILE *f )
 }
 
 
+/*********************************
+SAVE_SINGLE
+*********************************/
+void save_single( variable *v )
+{
+	char fn[ MAX_PATH_LENGTH ];
+	int i;
+	FILE *f;
+
+#ifndef _NP_
+	// prevent concurrent use by more than one thread
+	rec_lguardT lock( v->parallel_comp );
+#endif
+
+	set_lab_tit( v );
+	snprintf( fn, MAX_PATH_LENGTH, "%s_%s-%d_%d_seed-%d.res", v->label, v->lab_tit, v->start, v->end, seed - 1 );
+	f = fopen( fn, "wt" );			// use text mode for Windows better compatibility
+
+	fprintf( f, "%s %s (%d %d)\t\n", v->label, v->lab_tit, v->start, v->end );
+
+	for ( i = 0; i <= t - 1; ++i )
+		if ( i >= v->start && i <= v->end && ! is_nan( v->data[ i - v->start ] ) )	// save NaN as n/a
+			fprintf( f,"%lf\t\n", v->data[ i - v->start ] );
+		else
+			fprintf( f,"%s\t\n", nonavail );
+
+	fclose( f );
+}
+
+
 /****************************************************
 GET_SAVED
 ****************************************************/
@@ -1410,23 +1404,36 @@ UPLOAD_EQFILE
 ***************************************************/
 char *upload_eqfile( void )
 {
-	char s[ MAX_PATH_LENGTH ], line[ MAX_LINE_SIZE ], *eq;
-	int sz;
+	char s[ MAX_FILE_SIZE ], *buf1, *buf2, *eq;
+	int i;
+	long sz;
 	FILE *f;
 
 	read_eq_filename( s, MAX_PATH_LENGTH );
 	if ( ( f = fopen( s, "r" ) ) == NULL )
 		return NULL;
 
-	cmd( "set res [ file size %s ]", s );
-	sz = get_int( "res" ) + 1;
-	eq = new char[ sz ];
-	strcpy( eq, "" );
+	// obtain file size
+	for ( sz = 0, i = 1; i > 0; sz += i )
+		i = fread( ( void * ) s, 1, MAX_FILE_SIZE, f );
 
-	while ( fgets( line, MAX_LINE_SIZE, f ) != NULL )
-		strcatn( eq, line, sz );
+	rewind( f );
 
+	buf1 = new char[ sz + 1 ];
+	strcpy( buf1, "" );
+	fread( ( void * ) buf1, 1, sz, f );
 	fclose( f );
+	buf1[ sz ] = '\0';
+
+	// remove extra clear space at the beginning/end and standardize line ends
+	buf2 = new char[ sz + 1 ];
+	sz = strcln( buf2, buf1, sz + 1 );
+
+	eq = new char[ sz + 1 ];
+	strcpyn( eq, buf2, sz + 1 );
+
+	delete [ ] buf1;
+	delete [ ] buf2;
 
 	return eq;
 }

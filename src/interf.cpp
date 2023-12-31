@@ -1163,8 +1163,8 @@ OPERATE
 ****************************************************/
 object *operate( object *r )
 {
-	bool saveAs, delVar, renVar, table, subDir, overwDir;
-	char observe, initial, deb_mode, *lab0;
+	bool observe, initial, saveAs, delVar, renVar, table, subDir, overwDir;
+	char deb_mode, *lab0;
 	const char *lab1, *lab2, *lab3, *lab4;
 	char lab[ MAX_BUFF_SIZE ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_LINE_SIZE ], ch1[ MAX_ELEM_LENGTH ], NOLHfile[ MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], nw_exe[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ], buf_descr[ MAX_BUFF_SIZE ];
 	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, temp[ 11 ], done = 0;
@@ -2031,8 +2031,8 @@ object *operate( object *r )
 		watch_write = ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? 1 : 0;
 		parallel = cv->parallel;
 
-		cmd( "set observe %d", cd->observe == 'y' ? 1 : 0 );
-		cmd( "set initial %d", cd->initial == 'y' ? 1 : 0 );
+		cmd( "set observe %d", cd->observe ? 1 : 0 );
+		cmd( "set initial %d", cd->initial ? 1 : 0 );
 		cmd( "set vname %s", lab_old );
 
 		cmd( "set T .chgelem" );
@@ -2358,9 +2358,9 @@ object *operate( object *r )
 		else
 		{
 			cmd( "set choice $observe" );
-			choice == 1 ? observe = 'y' : observe = 'n';
+			observe = choice ? true : false;
 			cmd( "set choice $initial" );
-			choice == 1 ? initial = 'y' : initial = 'n';
+			initial = choice ? true : false;
 			cd->initial = initial;
 			cd->observe = observe;
 
@@ -2393,7 +2393,7 @@ object *operate( object *r )
 			   cv->deb_mode = deb_mode;
 			   cv->plot = plot;
 			   cv->parallel = parallel;
-			   cv->observe = ( observe == 'y' ) ? true : false;
+			   cv->observe = observe;
 			}
 
 			change_description( lab_old, NULL, -1, eval_str( "[ .chgelem.desc.f.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
@@ -6693,7 +6693,7 @@ void show_observe( object *n )
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
 		cd = search_description( cv->label );
-		if ( cd->observe=='y' )
+		if ( cd->observe )
 		{
 			if ( cv->param == 1 )
 				plog( "Object: %s \tParameter:\t", n->label );
@@ -6730,7 +6730,7 @@ void show_initial( object *n )
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
 		cd = search_description( cv->label );
-		if ( cd->initial == 'y' )
+		if ( cd->initial )
 		{
 			if ( cv->param == 1 )
 				plog( "Object: %s \tParameter:\t", n->label );

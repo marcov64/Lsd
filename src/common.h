@@ -206,7 +206,7 @@ struct object
 	mutex parallel_comp;				// mutex lock for parallel computations
 #endif
 
-	bool load_param( const char *file_name, int repl, FILE *f );
+	bool load_param( const char *file_name, FILE *f );
 	bool load_struct( FILE *f );
 	bool under_computation( void );
 	bool under_comput_var( const char *lab );
@@ -429,8 +429,8 @@ struct description
 	char *label;
 	char *text;
 	char *type;
-	char initial;
-	char observe;
+	bool initial;
+	bool observe;
 	description *next;
 };
 

@@ -1612,7 +1612,7 @@ void show_rep_observe( FILE *f, object *n, int *begin, FILE *frep )
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
 		cd = search_description( cv->label );
-		if ( cd->observe == 'y' )
+		if ( cd->observe )
 		{
 			if ( *begin == 1 )
 			{
@@ -1688,7 +1688,7 @@ void show_rep_initial( FILE *f, object *n, int *begin, FILE *frep )
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
 		cd = search_description( cv->label );
-		if ( cd->initial == 'y' )
+		if ( cd->initial )
 		{
 			if ( *begin == 1 )
 			{
@@ -2042,7 +2042,7 @@ void tex_report_observe( object *r, FILE *f, bool table )
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
 		cd = search_description( cv->label );
-		if ( cd->observe == 'y' )
+		if ( cd->observe )
 		{
 			vl = new char[ 2 * strlen( cv->label ) + 1 ];
 			tex_strcpy( vl, cv->label );
@@ -2115,7 +2115,7 @@ void tex_report_init( object *r, FILE *f, bool table )
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
 		cd = search_description( cv->label );
-		if ( cd->initial == 'y' )
+		if ( cd->initial )
 		{
 			vl = new char[ 2 * strlen( cv->label ) + 1 ];
 			tex_strcpy( vl, cv->label );
