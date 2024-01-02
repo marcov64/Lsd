@@ -89,7 +89,7 @@ The flag prevents to run a simulation if the data where not confirmed by users.
 
 The main methods of the (C++) object variable are:
 
-- void init( object *_up, char *_label, int _num_lag, double *val, int _save );
+- void init( object *_up, char *_label, int_param, int _num_lag, double *_val );
 perform the initialization.
 
 - double cal( object *caller, int lag );
@@ -204,7 +204,7 @@ variable::variable( const variable &v )
 /****************************************************
 INIT
 ****************************************************/
-void variable::init( object *_up, const char *_label, int _num_lag, double *v, int _save )
+void variable::init( object *_up, const char *_label, int _param, int _num_lag, double *_val )
 {
 	int i;
 
@@ -214,18 +214,16 @@ void variable::init( object *_up, const char *_label, int _num_lag, double *v, i
 #endif
 
 	up = _up;
-	save = _save;
-
-	i = strlen( _label ) + 1;
-	label = new char[ i ];
+	param = _param;
+	num_lag = _num_lag;
+	label = new char[ strlen( _label ) + 1 ];
 	strcpy( label, _label );
 
-	num_lag = _num_lag;
-	if ( num_lag >= 0 )
+	if ( _val != NULL )
 	{
 		val = new double[ num_lag + 1 ];
-		for ( i = 0; i < num_lag + 1; ++i )
-			val[ i ] = v[ i ];
+		for ( i = 0; i <= num_lag; ++i )
+			val[ i ] = _val[ i ];
 	}
 	else
 		val = NULL;

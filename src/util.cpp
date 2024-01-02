@@ -701,6 +701,7 @@ const char *kwords[ ] = { BEG_INIT, END_DESCR };
 
 description *add_description( const char *lab, int type, const char *text, const char *init, bool initial, bool observe )
 {
+	bool obj = false;
 	char *str, ltype[ MAX_ELEM_LENGTH ];
 	int i, j;
 	description *cd;
@@ -735,6 +736,7 @@ description *add_description( const char *lab, int type, const char *text, const
 			break;
 		case 4:
 			strcpy( ltype, "Object" );
+			obj = true;
 	}
 
 	cd->type = new char [ strlen( ltype ) + 1 ];
@@ -772,8 +774,13 @@ description *add_description( const char *lab, int type, const char *text, const
 	else
 		cd->init = NULL;
 
-	cd->initial = initial;
-	cd->observe = observe;
+	if ( ! obj )
+	{
+		cd->initial = initial;
+		cd->observe = observe;
+	}
+	else
+		cd->initial = cd->observe = false;
 
 	return cd;
 }
@@ -784,6 +791,7 @@ CHANGE_DESCRIPTION
 ***************************************************/
 description *change_description( const char *lab_old, const char *lab, int type, const char *text, const char *init, int initial, int observe )
 {
+	bool obj = false;
 	char *str, ltype[ MAX_ELEM_LENGTH ];
 	int i, j;
 	description *cd, *cd1;
@@ -838,6 +846,7 @@ description *change_description( const char *lab_old, const char *lab, int type,
 					case 4:
 					default:
 						strcpy( ltype, "Object" );
+						obj = true;
 				}
 
 				cd->type = new char [ strlen( ltype ) + 1 ];
@@ -886,10 +895,10 @@ description *change_description( const char *lab_old, const char *lab, int type,
 					cd->init = NULL;
 			}
 
-			if ( initial != -1 )
+			if ( ! obj && initial != -1 )
 				cd->initial = initial;
 
-			if ( observe != -1 )
+			if ( ! obj && observe != -1 )
 				cd->observe = observe;
 
 			return cd;

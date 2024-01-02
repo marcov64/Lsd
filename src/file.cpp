@@ -418,15 +418,18 @@ int load_configuration( bool reload, int quick )
 		cd = search_description( msg );
 		if ( cd != NULL )
 		{
-			cd->observe = true;
 			cv = root->search_var( NULL, msg );
 			if ( cv != NULL )
+			{
+				cd->observe = true;
+
 				for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( cv->up->label ) )
 				{
 					cv1 = cur->search_var( NULL, cv->label );
 					if ( cv1 != NULL )
 						cv1->observe = true;
 				}
+		}
 		}
 		fscanf( f, "%999s", msg );
 	}
@@ -448,7 +451,8 @@ int load_configuration( bool reload, int quick )
 	for ( j = 0; strcmp( msg, "END_DOCUINITIAL" ) && j < MAX_FILE_TRY; ++j )
 	{
 		cd = search_description( msg );
-		if ( cd != NULL )
+		cv = root->search_var( NULL, msg );
+		if ( cd != NULL && cv != NULL )
 			cd->initial = true;
 		fscanf( f, "%999s", msg );
 	}
@@ -714,7 +718,8 @@ bool object::load_struct( FILE *f )
 		if ( ! strcmp( ch, "Var:" ) )
 		{
 			fscanf( f, "%*[ ]%99s", ch );
-			add_empty_var( ch );
+			cv = add_empty_var( ch );
+			cv->param = 0;
 			cmd( "lappend modElem %s", ch );
 			cmd( "lappend modVar %s", ch );
 		}

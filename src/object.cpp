@@ -1239,7 +1239,7 @@ variable *object::add_empty_var( const char *lab )
 		cv = cv->next;
 	}
 
-	cv->init( this, lab, -1, NULL, 0 );
+	cv->init( this, lab );
 	v_map.insert( v_pairT ( lab, cv ) );
 
 	return cv;
@@ -1272,21 +1272,21 @@ void object::add_var_from_example( variable *example )
 		cv = cv->next;
 	}
 
-	cv->init( this, example->label, example->num_lag, example->val, example->save );
+	cv->init( this, example->label, example->param, example->num_lag, example->val );
+	cv->save = example->save;
 	cv->savei = example->savei;
-	cv->last_update = example->last_update;
+	cv->plot = ( ! running ) ? example->plot : false;
+	cv->parallel = example->parallel;
+	cv->deb_mode = example->deb_mode;
+	cv->initialized = example->initialized;
 	cv->delay = example->delay;
 	cv->delay_range = example->delay_range;
 	cv->period = example->period;
 	cv->period_range = example->period_range;
-	cv->plot = ( ! running ) ? example->plot : false;
-	cv->parallel = example->parallel;
 	cv->observe = example->observe;
-	cv->param = example->param;
+	cv->last_update = example->last_update;
 	cv->deb_cond = example->deb_cond;
-	cv->deb_mode = example->deb_mode;
 	cv->deb_cnd_val = example->deb_cnd_val;
-	cv->initialized = example->initialized;
 
 	v_map.insert( v_pairT ( example->label, cv ) );
 }

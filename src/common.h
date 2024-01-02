@@ -360,7 +360,7 @@ struct variable
 	double cal( object *caller, int lag );
 	double fun( object *caller );
 	void empty( bool no_lock = false );
-	void init( object *_up, const char *_label, int _num_lag, double *val, int _save );
+	void init( object *_up, const char *_label, int _param = -1, int _num_lag = -1, double *_val = NULL );
 };
 
 struct bridge
