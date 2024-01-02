@@ -60,7 +60,7 @@ Cancel also the their descendants
 *************************************************************/
 
 /*
-USED CASE 97
+LAST USED CASE 97, FREE 15, 16, 25, 35, 40, 45, 51
 */
 
 #include "decl.h"
@@ -77,7 +77,7 @@ object *initParent = NULL;			// parent of new variable initial setting
 
 
 // list of choices that are bad with existing run data
-int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95, 96 };
+int badChoices[ ] = { 1, 2, 3, 6, 7, 9, 19, 21, 22, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95, 96 };
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
@@ -824,8 +824,11 @@ int browse( object *r )
 			cmd( "$w add command -label Reload -underline 0 -accelerator Ctrl+W -command { set choice 38 }" );
 			cmd( "$w add command -label Save -underline 0 -accelerator Ctrl+S -command { set choice 18 }" );
 			cmd( "$w add command -label \"Save As...\" -underline 5 -command { set choice 73 }" );
+
 			cmd( "$w add command -label Unload -underline 0 -accelerator Ctrl+E -command { set choice 20 }" );
 			cmd( "$w add command -label \"Compare...\" -underline 0 -command { set choice 82 }" );
+			cmd( "$w add command -label \"Export Legacy...\" -underline 9 -command { set choice 9 }" );
+			cmd( "$w add command -label \"Export Saved Elements...\" -underline 1 -command { set choice 91 }" );
 
 			cmd( "$w add separator" );
 
@@ -833,20 +836,16 @@ int browse( object *r )
 
 			cmd( "$w add separator" );
 
-			cmd( "$w add command -label \"Load Network...\" -underline 5 -command { set choice 88 }" );
-			cmd( "$w add command -label \"Save Network...\" -underline 8 -command { set choice 89 }" );
-			cmd( "$w add command -label \"Unload Network\" -underline 3 -command { set choice 93 }" );
-
-			cmd( "$w add separator" );
-
-			cmd( "$w add command -label \"Load Sensitivity...\" -underline 3 -command { set choice 64 }" );
-			cmd( "$w add command -label \"Save Sensitivity...\" -underline 6 -command { set choice 65 }" );
 			cmd( "$w add command -label \"Unload Sensitivity\" -underline 11 -command { set choice 67 }" );
+			cmd( "$w add command -label \"Import Sensitivity...\" -underline 3 -command { set choice 64 }" );
+			cmd( "$w add command -label \"Export Sensitivity...\" -underline 6 -command { set choice 65 }" );
+			cmd( "$w add command -label \"Export Sensitivity Limits...\" -underline 2 -command { set choice 90 }" );
 
 			cmd( "$w add separator" );
 
-			cmd( "$w add command -label \"Export Saved Elements...\" -underline 1 -command { set choice 91 }" );
-			cmd( "$w add command -label \"Export Sensitivity Limits...\" -underline 2 -command { set choice 90 }" );
+			cmd( "$w add command -label \"Unload Network\" -underline 3 -command { set choice 93 }" );
+			cmd( "$w add command -label \"Import Network...\" -underline 5 -command { set choice 88 }" );
+			cmd( "$w add command -label \"Export Network...\" -underline 8 -command { set choice 89 }" );
 
 			cmd( "$w add separator" );
 
@@ -3275,7 +3274,7 @@ object *operate( object *r )
 
 		if ( overwConf )					// save if needed
 		{
-			if ( ! save_configuration( ) )
+			if ( ! save_xml_configuration( ) )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the file is set READ-ONLY, or try to save to a different location.\"", simul_name );
 				break;
@@ -3385,7 +3384,7 @@ object *operate( object *r )
 			redrawStruc = true;		// structure redraw because of titlebar
 		}
 
-		if ( ! save_configuration( ) )
+		if ( ! save_xml_configuration( ) )
 		{
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"The model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", simul_name	);
 		}
@@ -5242,20 +5241,20 @@ object *operate( object *r )
 	break;
 
 
-	// Load a sensitivity analysis configuration
+	// import a sensitivity analysis configuration
 	case 64:
 
 		// check a model is already loaded
 		if ( ! struct_loaded || strlen( simul_name ) == 0 )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to load a sensitivity analysis configuration.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to import a sensitivity analysis configuration.\"" );
 			break;
 		}
 
 		// check for existing sensitivity data loaded
 		if ( rsense != NULL )
 		{
-			cmd( "set answer [ ttk::messageBox -parent . -type okcancel -icon warning -default ok -title Warning -message \"Sensitivity data already loaded\" -detail \"Press 'OK' if you want to discard the existing data before loading a new sensitivity configuration.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } }" );
+			cmd( "set answer [ ttk::messageBox -parent . -type okcancel -icon warning -default ok -title Warning -message \"Sensitivity data already loaded\" -detail \"Press 'OK' if you want to discard the existing data before importing a new sensitivity configuration.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } }" );
 			if ( choice == 2 )
 				break;
 
@@ -5273,7 +5272,7 @@ object *operate( object *r )
 			cmd( "cd \"$path\"" );
 
 		// open dialog box to get file name & folder
-		cmd( " set bah [ tk_getOpenFile -parent . -title \"Load Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile \"$res\" -initialdir \"$path\"  -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
+		cmd( "set bah [ tk_getOpenFile -parent . -title \"Import Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile \"$res\" -initialdir \"$path\"  -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
 		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr { [ string last .sa $res ] - 1 } ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
 		if ( choice == 2 )
 			break;
@@ -5295,20 +5294,20 @@ object *operate( object *r )
 		}
 
 		if ( load_sensitivity( f ) != 0 )
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid sensitivity analysis file\" -detail \"Please check if you select a valid file or recreate your sensitivity configuration.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid sensitivity analysis file\" -detail \"Please check if you select a valid file or recreate your sensitivity analysis configuration.\"" );
 
 		fclose( f );
 
 	break;
 
 
-	// Save a sensitivity analysis configuration
+	// export a sensitivity analysis configuration
 	case 65:
 
 		// check a model is already loaded
 		if ( ! struct_loaded || strlen( simul_name ) == 0 )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to save a sensitivity analysis configuration.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to export a sensitivity analysis configuration.\"" );
 			break;
 		}
 
@@ -5327,7 +5326,7 @@ object *operate( object *r )
 
 		// open dialog box to get file name & folder
 		choice = 0;
-		cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -initialdir \"$path\" -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
+		cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -initialdir \"$path\" -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
 		cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ]; set last [ expr { [ string last .sa $res ] - 1 } ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
 		if ( choice == 2 )
 			break;
@@ -5353,6 +5352,38 @@ object *operate( object *r )
 
 		fclose( f );
 		unsavedSense = false;			// nothing to save
+
+	break;
+
+
+	// export configuration in legacy LSD format
+	case 9:
+
+		if ( ! struct_loaded || strlen( simul_name ) == 0 )
+		{
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration to export\" -detail \"Please load or create and load a configuration before trying to export to legacy LSD format.\"" );
+			break;
+		}
+
+		// default file name
+		cmd( "set res %s-legacy", simul_name );
+
+		// make sure there is a path set
+		cmd( "set path \"%s\"", path );
+		if ( strlen( path ) > 0 )
+			cmd( "cd \"$path\"" );
+
+		// open dialog box to get file name & folder
+		choice = 0;
+		cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Configuration in Legacy LSD Format\" -defaultextension \".csv\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD configuration files} {.lsd} } } ]" );
+		cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file rootname [ file tail $bah ] ]; set ext [ file extension $bah ] } { set choice 2 }" );
+
+		if ( choice == 2 )
+			break;
+
+		// write export file
+		if ( ! save_configuration( get_str( "path" ), get_str( "res" ), get_str( "ext" ) ) )
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Legacy configuration file not saved\" -detail \"Please check if the file name and path are valid, or if the drive or the file is set READ-ONLY, or try to save to a different location.\"" );
 
 	break;
 
@@ -6252,7 +6283,7 @@ object *operate( object *r )
 
 		if ( overwConf )				// save if needed
 		{
-			if ( ! save_configuration( ) )
+			if ( ! save_xml_configuration( ) )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY, or try to save to a different location.\"", simul_name	);
 				break;
@@ -6294,7 +6325,7 @@ object *operate( object *r )
 
 		if ( ! struct_loaded || strlen( simul_name ) == 0 )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and load one before trying to load a network structure file.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and load one before trying to import a network structure file.\"" );
 			break;
 		}
 
@@ -6305,9 +6336,22 @@ object *operate( object *r )
 		if ( strlen( path ) > 0 )
 			cmd( "cd \"$path\"" );
 
-		cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Network Structure File\"	 -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } { {All files} {*} } } ]" );
+		cmd( "set bah [ tk_getOpenFile -parent . -title \"Import Network Structure File\"	 -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } { {All files} {*} } } ]" );
 		choice = 0;
-		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr { $posExt + 1 } ] end ]; set netFile [ string range $netFile 0 [ expr { $posExt - 1 } ] ] } { set netExt \"\" } } { set choice 2 }" );
+		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { \
+				set netPath [ file dirname $bah ]; \
+				set netFile [ file tail $bah ]; \
+				set posExt [ string last . $netFile ]; \
+				if { $posExt >= 0 } { \
+					set netExt [ string range $netFile [ expr { $posExt + 1 } ] end ]; \
+					set netFile [ string range $netFile 0 [ expr { $posExt - 1 } ] ] \
+				} { \
+					set netExt \"\" \
+				} \
+			} { \
+				set choice 2 \
+			}" );
+
 		if ( choice == 2 )
 			break;
 
@@ -6333,7 +6377,7 @@ object *operate( object *r )
 		}
 
 		cmd( "set TT .objs" );
-		cmd( "newtop $TT \"Load Network\" { set choice 2 }" );
+		cmd( "newtop $TT \"Import Network\" { set choice 2 }" );
 
 		cmd( "ttk::frame $TT.l" );
 		cmd( "ttk::label $TT.l.l -text \"Suggested object:\"" );
@@ -6385,7 +6429,7 @@ object *operate( object *r )
 
 		lab4 = get_str( "nodeObj" );
 
-		plog( "\nLoading network on object '%s' from file %s%s%s%s%s...\n", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
+		plog( "\nImporting network on object '%s' from file %s%s%s%s%s...\n", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
 
 		cur = root->search( lab4 );
 		if ( cur != NULL && cur->up != NULL )
@@ -6397,12 +6441,15 @@ object *operate( object *r )
 				plog( "Error: No network links created\n" );
 			}
 			else
-				plog( " %ld network links created\n", nLinks );
+			{
+				plog( " %ld network links imported\n", nLinks );
+				redrawRoot = redrawStruc = true;			// force browser/structure redraw
+			}
 		}
 		else
 		{
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid object\" -detail \"Please make sure you select a valid object for attributing the network's nodes role.\"" );
-			plog( "Error: No network links created\n" );
+			plog( "Error: No network links imported\n" );
 		}
 
 	break;
@@ -6413,12 +6460,12 @@ object *operate( object *r )
 
 		if ( ! struct_loaded || strlen( simul_name ) == 0 )
 		{
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to save a network structure file.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to export a network structure file.\"" );
 			break;
 		}
 
 		cmd( "set TT .objs" );
-		cmd( "newtop $TT \"Save Network\" { set choice 2 }" );
+		cmd( "newtop $TT \"Export Network\" { set choice 2 }" );
 
 		cmd( "ttk::frame $TT.v" );
 		cmd( "ttk::label $TT.v.l -justify center -text \"Object containing\nthe network nodes\"" );
@@ -6434,7 +6481,7 @@ object *operate( object *r )
 		if ( get_int( "numNets" ) == 0 )
 		{
 			cmd( "destroytop .objs" );
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No network object found\" -detail \"Please make sure there are objects set as network nodes before saving the network structure.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No network object found\" -detail \"Please make sure there are objects set as network nodes before exporting the network structure.\"" );
 			break;
 		}
 
@@ -6477,9 +6524,22 @@ object *operate( object *r )
 			cmd( "cd \"$path\"" );
 
 		cmd( "set bah \"%s\"", simul_name );
-		cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Network Structure File\"	 -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } } ]" );
+		cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Network Structure File\"	 -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } } ]" );
 		choice = 0;
-		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr { $posExt + 1 } ] end ]; set netFile [ string range $netFile 0 [ expr { $posExt - 1 } ] ] } { set netExt \"\" } } { set choice 2 }" );
+		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { \
+				set netPath [ file dirname $bah ]; \
+				set netFile [ file tail $bah ]; \
+				set posExt [ string last . $netFile ]; \
+				if { $posExt >= 0 } { \
+					set netExt [ string range $netFile [ expr { $posExt + 1 } ] end ]; \
+					set netFile [ string range $netFile 0 [ expr { $posExt - 1 } ] ] \
+				} { \
+					set netExt \"\" \
+				} \
+			} { \
+				set choice 2 \
+			}" );
+
 		if ( choice == 2 )
 			break;
 
@@ -6489,16 +6549,16 @@ object *operate( object *r )
 		if ( strlen( lab2 ) == 0 )
 			break;
 
-		plog( "\nSaving network on object '%s' to file %s%s%s%s%s...\n", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
+		plog( "\nExporting network on object '%s' to file %s%s%s%s%s...\n", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
 
 		nLinks = cur->up->write_file_net( lab4, lab1, lab2, -1 );
 		if ( nLinks == 0 )
 		{
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or object\" -detail \"Please check the chosen directory/file for WRITE access and make sure you select a valid object for retrieving the network's nodes.\"" );
-			plog( "Error: No network links saved\n" );
+			plog( "Error: No network links exported\n" );
 		}
 		else
-			plog( " %ld network links saved\n", nLinks );
+			plog( " %ld network links exported\n", nLinks );
 
 	break;
 

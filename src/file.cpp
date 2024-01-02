@@ -429,7 +429,7 @@ int load_configuration( bool reload, int quick )
 					if ( cv1 != NULL )
 						cv1->observe = true;
 				}
-		}
+			}
 		}
 		fscanf( f, "%999s", msg );
 	}
@@ -1102,19 +1102,18 @@ bool load_description( const char *d, FILE *f )
 
 
 /*****************************************************************************
-SAVE_CONFIGURATION
+SAVE_XML_CONFIGURATION
 	Save current defined configuration (adding tag index if appropriate) to
 	gzip-compressed xml file
 	If quick is true, just the structure and the parameters are saved
 	Returns: true: save ok, false: save failure
 ******************************************************************************/
-bool save_configuration( int findex, const char *dest_path, bool quick )
+bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 {
-	bool save_ok = false;
+	bool save_ok;
 	int delta, indexDig, save_len;
-	char ch[ MAX_PATH_LENGTH ], *save_file, *bak_file = NULL;
+	char ch[ MAX_PATH_LENGTH ], *save_file, *bak_file;
 	const char *save_path;
-	description *cd;
 	FILE *f;
 	gzFile fz;
 	ostringstream buf;
@@ -1180,60 +1179,8 @@ bool save_configuration( int findex, const char *dest_path, bool quick )
 			else
 				rename( save_file, bak_file );
 		}
-	}
 
-	// legacy file save (TO REMOVE)
-	if ( false )
-	{
-		string save_file_leg( save_file );
-		save_file_leg.erase( save_file_leg.find_last_of( "." ) );
-		save_file_leg += "_leg.lsd";
-
-		f = fopen( save_file_leg.c_str( ), "wb" );
-		if ( f != NULL )
-		{
-			root->save_struct( f, "" );
-			fprintf( f, "\nDATA\n" );
-			root->save_insts( f );
-
-			fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d", sim_num, seed + delta, max_step );
-
-			if ( when_debug > 0 || stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time || no_ptr_chk || parallel_disable )
-				fprintf( f, " %d %d %d %d %d %d %d", when_debug, stack_info, prof_min_msecs, prof_obs_only ? 1 : 0, prof_aggr_time ? 1 : 0, no_ptr_chk ? 1 : 0, parallel_disable ? 1 : 0 );
-
-			fprintf( f, "\nEQUATION %s\nMODELREPORT %s\n", equation_name, name_rep );
-
-			if ( ! quick )
-			{
-				fprintf( f, "\nDESCRIPTION\n\n" );
-				save_description( root, f );
-
-				fprintf( f, "\nDOCUOBSERVE\n" );
-				for ( cd = descr; cd != NULL; cd = cd->next )
-					if ( cd->observe )
-						fprintf( f, "%s\n", cd->label );
-				fprintf( f, "\nEND_DOCUOBSERVE\n\n" );
-
-				fprintf( f, "\nDOCUINITIAL\n" );
-				for ( cd = descr; cd != NULL; cd = cd->next )
-					if ( cd->initial )
-						fprintf( f, "%s\n", cd->label );
-				fprintf( f, "\nEND_DOCUINITIAL\n\n" );
-
-				save_eqfile( f );
-			}
-
-			if ( ! ferror( f ) )
-			{
-				save_ok = true;
-
-#ifndef _NW_
-				cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", exec_path, struct_file );
-#endif
-			}
-		}
-
-		fclose( f );
+		delete [ ] bak_file;
 	}
 
 	// add XML declaration, type and root node
@@ -1320,8 +1267,14 @@ bool save_configuration( int findex, const char *dest_path, bool quick )
 	else
 		save_ok = false;
 
+#ifndef _NW_
+
+	if ( save_ok )
+		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", exec_path, struct_file );
+
+#endif
+
 	delete [ ] save_file;
-	delete [ ] bak_file;
 
 	return save_ok;
 }
@@ -1495,6 +1448,87 @@ void object::save_xml_struct( xml_node &pn, bool quick )
 				cnd.append_attribute( "initialization" ) = true;
 		}
 	}
+}
+
+
+/*****************************************************************************
+SAVE_CONFIGURATION (LEGACY)
+	Save current defined configuration (adding tag index if appropriate) to
+	gzip-compressed xml file
+	If quick is true, just the structure and the parameters are saved
+	Returns: true: save ok, false: save failure
+******************************************************************************/
+bool save_configuration( const char *path, const char *rname, const char *ext )
+{
+	bool save_ok = false;
+	char *save_file, *bak_file;
+	description *cd;
+	FILE *f;
+
+	save_file = new char[ strlen( path ) + strlen( rname ) + strlen( ext ) + 2 ];
+	sprintf( save_file, "%s%s%s%s", path, strlen( path ) > 0 ? "/" : "", rname, ext );
+
+	f = fopen( save_file, "r" );
+	if ( f != NULL )
+	{
+		fclose( f );
+
+		// create backup file
+		bak_file = new char[ strlen( save_file ) - strlen( ext ) + 5 ];
+		sprintf( bak_file, "%s%s%s.bak", path, strlen( path ) > 0 ? "/" : "", rname );
+
+		f = fopen( bak_file, "r" );
+		if ( f != NULL )
+		{
+			fclose( f );
+
+			if( ! remove( bak_file ) )
+				rename( save_file, bak_file );
+		}
+		else
+			rename( save_file, bak_file );
+
+		delete [ ] bak_file;
+	}
+
+	f = fopen( save_file, "wb" );
+	delete [ ] save_file;
+
+	if ( f != NULL )
+	{
+		root->save_struct( f, "" );
+		fprintf( f, "\nDATA\n" );
+		root->save_insts( f );
+
+		fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d", sim_num, seed, max_step );
+
+		if ( when_debug > 0 || stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time || no_ptr_chk || parallel_disable )
+			fprintf( f, " %d %d %d %d %d %d %d", when_debug, stack_info, prof_min_msecs, prof_obs_only ? 1 : 0, prof_aggr_time ? 1 : 0, no_ptr_chk ? 1 : 0, parallel_disable ? 1 : 0 );
+
+		fprintf( f, "\nEQUATION %s\nMODELREPORT %s\n", equation_name, name_rep );
+
+		fprintf( f, "\nDESCRIPTION\n\n" );
+		save_description( root, f );
+
+		fprintf( f, "\nDOCUOBSERVE\n" );
+		for ( cd = descr; cd != NULL; cd = cd->next )
+			if ( cd->observe )
+				fprintf( f, "%s\n", cd->label );
+		fprintf( f, "\nEND_DOCUOBSERVE\n\n" );
+
+		fprintf( f, "\nDOCUINITIAL\n" );
+		for ( cd = descr; cd != NULL; cd = cd->next )
+			if ( cd->initial )
+				fprintf( f, "%s\n", cd->label );
+		fprintf( f, "\nEND_DOCUINITIAL\n\n" );
+
+		save_eqfile( f );
+
+		save_ok = ! ferror( f );
+		fclose( f );
+	}
+
+	return save_ok;
 }
 
 

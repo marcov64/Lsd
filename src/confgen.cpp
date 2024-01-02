@@ -244,7 +244,7 @@ int lsdmain( int argn, const char **argv )
 			myexit( 7 );
 		}
 
-		if ( ! save_configuration( confs == 1 ? 0 : i, "", true ) )
+		if ( ! save_xml_configuration( confs == 1 ? 0 : i, "", true ) )
 		{
 			fprintf( stderr, "\nFile '%s.lsd' cannot be saved.\n%s\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n\n", simul_name, lsdCmdMsg  );
 			myexit( 8 );
