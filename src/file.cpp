@@ -760,6 +760,7 @@ OBJECT::LOAD_XML_INSTS
 bool object::load_xml_insts( xml_node &n )
 {
 	int i, j;
+	double x;
 	string tmp;
 	bridge *cb;
 	object *cur;
@@ -801,11 +802,25 @@ bool object::load_xml_insts( xml_node &n )
 		stringstream s2( i2 );
 		vector < double > val;
 		while ( getline( s2, tmp, ',' ) )
-			val.push_back( stod( tmp ) );
+		{
+			errno = 0;						// detect invalid values
+			x = strtod( tmp.c_str( ), NULL );
 
-		if ( cv->param != 1 )
-			cv->num_lag = cn.attribute( "lags" ).as_uint( );
+			if ( errno == ERANGE )
+			{
+				if ( x == HUGE_VAL )
+					x = DBL_MAX;
+				else
+					if ( x == - HUGE_VAL )
+						x = - DBL_MAX;
 
+				plog( "\nInvalid value for '%s' (%s), adjusted to %g", cv->label, tmp.c_str( ), x );
+			}
+
+			val.push_back( x );
+		}
+
+		cv->num_lag = ( cv->param == 1 ) ? 0 : cn.attribute( "lags" ).as_uint( );
 		cv->save = cn.attribute( "save" ).as_bool( );
 		cv->savei = cn.attribute( "save_file" ).as_bool( );
 		cv->plot = cn.attribute( "plot" ).as_bool( );
@@ -928,6 +943,9 @@ bool object::load_insts( const char *file_name, FILE *f )
 
 		if ( fscanf( f, "%d %c %c %c %c", &( cv->num_lag ), &ch1, &ch2, &ch3, &ch4 ) != 5 )
 			return false;
+
+		if ( cv->param == 1 )
+			cv->num_lag = 0;
 
 		cv->save = ( tolower( ch1 ) == 's' ) ? true : false;
 		cv->savei = ( ch1 == 'S' || ch1 == 'N' ) ? true : false;
