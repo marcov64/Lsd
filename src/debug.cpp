@@ -1491,9 +1491,9 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 					break;
 				}
 
-				if ( asl == NULL && stacklog != NULL )
+				if ( asl == NULL && stack_log != NULL )
 				{
-					asl = stacklog;
+					asl = stack_log;
 					plog( "\nVariable: %s", asl->label );
 					if ( asl->vs != NULL && asl->vs->up != NULL )
 						choice = deb( asl->vs->up, c, lab, res, interact );

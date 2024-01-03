@@ -255,8 +255,8 @@ void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const 
 
 		plog_tag( "\n\nError detected at case (time step): %d", "highlight", t );
 		plog( "\n\nError: %s\nDetails: %s", boxTitle, logText );
-		if ( ! parallel_mode && stacklog != NULL && stacklog->vs != NULL )
-			plog( "\nOffending code contained in the equation for variable: '%s'", stacklog->vs->label );
+		if ( ! parallel_mode && stack_log != NULL && stack_log->vs != NULL )
+			plog( "\nOffending code contained in the equation for variable: '%s'", stack_log->vs->label );
 		plog( "\nSuggestion: %s", boxText );
 		print_stack( );
 		cmd( "focustop .log" );
@@ -323,13 +323,13 @@ void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const 
 
 	if ( err == 3 )
 	{
-		if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL &&
-			 stacklog->vs != NULL && stacklog->vs->label != NULL )
+		if ( ! parallel_mode && fast_mode == 0 && stack_log != NULL &&
+			 stack_log->vs != NULL && stack_log->vs->label != NULL )
 		{
 			char err_msg[ MAX_LINE_SIZE ];
 			double useless = -1;
-			snprintf( err_msg, MAX_LINE_SIZE, "%s (ERROR)", stacklog->vs->label );
-			deb( stacklog->vs->up, NULL, err_msg, & useless );
+			snprintf( err_msg, MAX_LINE_SIZE, "%s (ERROR)", stack_log->vs->label );
+			deb( stack_log->vs->up, NULL, err_msg, & useless );
 		}
 
 		err = 2;
@@ -399,7 +399,7 @@ void print_stack( void )
 	plog( "\n\nList of variables currently under computation" );
 	plog( "\n\nLevel\tVariable Label" );
 
-	for ( app = stacklog; app != NULL; app = app->prev )
+	for ( app = stack_log; app != NULL; app = app->prev )
 		plog( "\n%d\t%s", app->ns, app->label );
 
 	plog( "\n\n(the zero-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones\nbecause necessary for completing their computation)\n" );

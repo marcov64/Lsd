@@ -141,14 +141,14 @@ int prof_obs_only = false;	// profile only observed variables
 int quit = 0;				// simulation interruption mode (0=none)
 int series_saved = 0;		// number of series saved
 int sim_num = 1;			// simulation number running
-int stack;					// LSD stack call level
+int stack_level;			// LSD stack call level
 int stack_info = 0;			// LSD stack control
 int stop;					// activity interruption flag (Tcl boolean)
 int t;						// current time step
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter
-lsdstack *stacklog = NULL;	// LSD stack
+lsdstack *stack_log = NULL;	// LSD stack
 map < string, profile > prof;// set of saved profiling times
 object *blueprint = NULL;	// LSD blueprint (effective model in use)
 object *currObj = NULL;		// pointer to current object in browser
@@ -759,13 +759,13 @@ int lsdmain( int argn, const char **argv )
 	if ( fast_lookup )
 		init_map( );
 
-	stacklog = new lsdstack;
-	stacklog->prev = NULL;
-	stacklog->next = NULL;
-	stacklog->ns = 0;
-	stacklog->vs = NULL;
-	strcpy( stacklog->label, "LSD Simulation Manager" );
-	stack = 0;
+	stack_log = new lsdstack;
+	stack_log->prev = NULL;
+	stack_log->next = NULL;
+	stack_log->ns = 0;
+	stack_log->vs = NULL;
+	strcpy( stack_log->label, "LSD Simulation Manager" );
+	stack_level = 0;
 
 #ifndef _NW_
 
@@ -811,7 +811,7 @@ int lsdmain( int argn, const char **argv )
 	empty_description( );
 	root->delete_obj( );
 
-	delete stacklog;
+	delete stack_log;
 	delete [ ] path;
 	delete [ ] rootLsd;
 	delete [ ] exec_path;
@@ -1328,20 +1328,20 @@ EMPTY_STACK
 *********************************/
 void empty_stack( void )
 {
-	if ( stacklog != NULL )
+	if ( stack_log != NULL )
 	{
 		// remove stack allocation
-		while ( stacklog->prev != NULL )
+		while ( stack_log->prev != NULL )
 		{
-			lsdstack *cur_stack = stacklog;
-			stacklog = stacklog->prev;
+			lsdstack *cur_stack = stack_log;
+			stack_log = stack_log->prev;
 			delete cur_stack;
 		}
 		// prepare for next run
-		stacklog->next = NULL;
-		stacklog->ns = 0;
-		stacklog->vs = NULL;
-		stack = 0;
+		stack_log->next = NULL;
+		stack_log->ns = 0;
+		stack_log->vs = NULL;
+		stack_level = 0;
 	}
 	else
 	{

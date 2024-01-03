@@ -614,8 +614,7 @@ int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const cha
  ****************************************************/
 bool valid_label( const char *lab )
 {
-	cmd( "if [ regexp {^[a-zA-Z_][a-zA-Z0-9_]*$} \"%s\" ] { set res 1 } { set res 0 }", lab );
-	return get_bool( "res" );
+	return regex_match( lab, regex( "^[a-zA-Z_][a-zA-Z0-9_]*$" ) );
 }
 
 
@@ -2083,11 +2082,11 @@ void exception_handler( int signum, const char *what )
 		strcpyn( msg3, "Additional information may be obtained running the simulation using the 'Model'/'GDB Debugger' menu option", MAX_LINE_SIZE );
 		if ( quit != 2 )
 		{
-			if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL &&
-				 stacklog->vs != NULL && stacklog->vs->label != NULL )
+			if ( ! parallel_mode && fast_mode == 0 && stack_log != NULL &&
+				 stack_log->vs != NULL && stack_log->vs->label != NULL )
 			{
 				strcatn( msg3, "\n\nAttempting to open the LSD Debugger.\n\nLSD will close immediately after exiting the Debugger.", MAX_LINE_SIZE );
-				plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", stacklog->vs->label );
+				plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", stack_log->vs->label );
 				print_stack( );
 			}
 			else
@@ -2110,12 +2109,12 @@ void exception_handler( int signum, const char *what )
 #ifndef _LMM_
 	if ( user_exception )
 	{
-		if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL &&
-			 stacklog->vs != NULL && stacklog->vs->label != NULL )
+		if ( ! parallel_mode && fast_mode == 0 && stack_log != NULL &&
+			 stack_log->vs != NULL && stack_log->vs->label != NULL )
 		{
 			double useless = -1;
-			snprintf( msg3, MAX_LINE_SIZE, "%s (ERROR)", stacklog->vs->label );
-			deb( stacklog->vs->up, NULL, msg3, & useless );
+			snprintf( msg3, MAX_LINE_SIZE, "%s (ERROR)", stack_log->vs->label );
+			deb( stack_log->vs->up, NULL, msg3, & useless );
 		}
 	}
 	else

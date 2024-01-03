@@ -45,6 +45,7 @@
 #include <functional>
 #include <unordered_map>
 #include <unordered_set>
+#include <regex>
 #include <mutex>
 #include <condition_variable>
 #include <thread>
@@ -645,7 +646,7 @@ extern char *rootLsd;					// path of LSD root directory
 extern char equation_name[ ];			// equation file name
 extern char err_file[ ];				// error log file name
 extern int stop;						// activity interruption flag (Tcl boolean)
-extern lsdstack *stacklog;				// LSD stack
+extern lsdstack *stack_log;				// LSD stack
 
 // common constant string arrays (not visible to the users)
 extern const char *lmm_options[ ];

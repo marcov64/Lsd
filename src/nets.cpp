@@ -297,21 +297,25 @@ netNode::netNode( long nodeId, const char *nodeName, double nodeProb )
 	id = nodeId;
 	time = t;						// save creation time
 	serNum = ++nodesSerial;
+	prob = nodeProb;
 	nLinks = 0;
 	first = last = NULL;
 
 	if ( id < 0 )					// ID assigned?
 		id = serNum;
 
-	if ( strcmp( nodeName, "" ) )	// name assigned?
+	if ( strcmp( nodeName, "" ) && valid_label( nodeName ) )// valid name assigned?
 	{
 		name = new char[ strlen( nodeName ) + 1 ];
 		strcpy( name, nodeName );
 	}
 	else
+	{
 		name = NULL;
 
-	prob = nodeProb;
+		if ( strcmp( nodeName, "" ) && ! silent )
+			plog( "\nWarning: network node name '%s' is invalid, ignored." );
+	}
 }
 
 

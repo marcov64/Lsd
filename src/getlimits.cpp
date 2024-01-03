@@ -79,14 +79,14 @@ int quit = 0;				// simulation interruption mode (0=none)
 int t;						// current time step
 int series_saved = 0;		// number of series saved
 int sim_num = 1;			// simulation number running
-int stack;					// LSD stack call level
+int stack_level;			// LSD stack call level
 int stack_info = 0;			// LSD stack control
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter
 unsigned seed = 1;			// random number generator initial seed
 description *descr = NULL;	// model description structure
-lsdstack *stacklog = NULL;	// LSD stack
+lsdstack *stack_log = NULL;	// LSD stack
 object *blueprint = NULL;	// LSD blueprint (effective model in use)
 object *root = NULL;		// LSD root object
 object *wait_delete = NULL;	// LSD object waiting for deletion
