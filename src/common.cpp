@@ -610,15 +610,6 @@ int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const cha
 
 
 /****************************************************
- VALID_LABEL
- ****************************************************/
-bool valid_label( const char *lab )
-{
-	return regex_match( lab, regex( "^[a-zA-Z_][a-zA-Z0-9_]*$" ) );
-}
-
-
-/****************************************************
  EXISTS_VAR
  ****************************************************/
 bool exists_var( const char *lab )
@@ -1558,6 +1549,15 @@ char *clean_path( char *filepath )
 			filepath[ i ] = '/';
 
 	return filepath;
+}
+
+
+/****************************************************
+ VALID_LABEL
+ ****************************************************/
+bool valid_label( const char *lab )
+{
+	return regex_match( lab, regex( "^[a-zA-Z_][a-zA-Z0-9_]*$" ) );
 }
 
 
