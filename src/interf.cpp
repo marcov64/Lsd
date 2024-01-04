@@ -6320,7 +6320,7 @@ object *operate( object *r )
 	break;
 
 
-	// Load network
+	// import network
 	case 88:
 
 		if ( ! struct_loaded || strlen( simul_name ) == 0 )
@@ -6435,10 +6435,10 @@ object *operate( object *r )
 		if ( cur != NULL && cur->up != NULL )
 		{
 			nLinks = cur->up->read_file_net( lab4, lab1, lab2, -1, lab3 );
-			if ( nLinks == 0 )
+			if ( nLinks < 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or object\" -detail \"Please check the file contents for a valid Pajek network structure file (Pajek .net format) and make sure you select a valid object for attributing the network's nodes role.\"" );
-				plog( "Error: No network links created\n" );
+				plog( "Error: Network file not imported\n" );
 			}
 			else
 			{
@@ -6449,13 +6449,13 @@ object *operate( object *r )
 		else
 		{
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid object\" -detail \"Please make sure you select a valid object for attributing the network's nodes role.\"" );
-			plog( "Error: No network links imported\n" );
+			plog( "Error: Network file not imported\n" );
 		}
 
 	break;
 
 
-	// Save network
+	// export network
 	case 89:
 
 		if ( ! struct_loaded || strlen( simul_name ) == 0 )
@@ -6552,10 +6552,10 @@ object *operate( object *r )
 		plog( "\nExporting network on object '%s' to file %s%s%s%s%s...\n", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
 
 		nLinks = cur->up->write_file_net( lab4, lab1, lab2, -1 );
-		if ( nLinks == 0 )
+		if ( nLinks < 0 )
 		{
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or object\" -detail \"Please check the chosen directory/file for WRITE access and make sure you select a valid object for retrieving the network's nodes.\"" );
-			plog( "Error: No network links exported\n" );
+			plog( "Error: Network file not exported\n" );
 		}
 		else
 			plog( " %ld network links exported\n", nLinks );
@@ -6563,7 +6563,7 @@ object *operate( object *r )
 	break;
 
 
-	// Unload network
+	// unload network
 	case 93:
 
 		if ( ! struct_loaded )

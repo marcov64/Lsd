@@ -313,7 +313,7 @@ netNode::netNode( long nodeId, const char *nodeName, double nodeProb )
 	{
 		name = NULL;
 
-		if ( strcmp( nodeName, "" ) && ! silent )
+		if ( strcmp( nodeName, "" ) )
 			plog( "\nWarning: network node name '%s' is invalid, ignored." );
 	}
 }
@@ -1358,7 +1358,7 @@ double object::read_file_net( const char *lab, const char dir[ ], const char bas
 	// make sure this is being called from the parent (container) object
 	cur = check_net_struct( this, lab, serial < 0 );
 	if ( cur == NULL )
-		return 0;
+		return -1;
 
 	if ( serial >= 0 )
 		snprintf( fileName, MAX_PATH_LENGTH, "%s%s%s_%i%s%s", dir, foldersep( dir ), base_name, serial, strlen( ext ) == 0 ? "" : ".", ext );	// fully formed file name
@@ -1372,7 +1372,7 @@ double object::read_file_net( const char *lab, const char dir[ ], const char bas
 						"check if the file requested in equation code exists",
 						true,
 						"cannot open network file '%s'", fileName );
-		return 0;
+		return -2;
 	}
 
 	numNodes = 0;											// no node read yet
@@ -1392,7 +1392,7 @@ double object::read_file_net( const char *lab, const char dir[ ], const char bas
 						"check the requested file content",
 						false,
 						"empty or invalid network file '%s'", fileName );
-		return 0;
+		return -3;
 	}
 
 	for ( countNodes = 1, inSection = true; countNodes <= numNodes;
@@ -1423,7 +1423,7 @@ double object::read_file_net( const char *lab, const char dir[ ], const char bas
 	numLinks = 0;											// prepare to count links
 	initturbo( lab, numNodes );								// seed the turbosearch linked list
 
-	while ( !feof( pajekFile ) )							// while file is not over
+	while ( ! feof( pajekFile ) )							// while file is not over
 	{
 		inSection = true;									// assume still inside section
 
@@ -1441,7 +1441,7 @@ double object::read_file_net( const char *lab, const char dir[ ], const char bas
 						cur1 = turbosearch( lab, 0, (double) endNode );	// searches second node object
 						cur2 = cur->add_link_net( cur1 );				// add link to network
 
-						if ( rd >=3 )									// is there a weight?
+						if ( rd >= 3 )									// is there a weight?
 							cur2->weight = weight;
 
 						numLinks++;										// one more link in network
@@ -1487,6 +1487,7 @@ WRITE_FILE_NET (*)
 double object::write_file_net( const char *lab, const char dir[ ], const char base_name[ ],
 							 int serial, bool append )
 {
+	bool iniSec;
 	int tCur = ( t > max_step ) ? max_step : t;				// effective current time
 	long numNodes, numLinks = 0;
 	double weight;
@@ -1498,7 +1499,7 @@ double object::write_file_net( const char *lab, const char dir[ ], const char ba
 	// make sure this is being called from the parent (container) object
 	firstNode = cur = check_net_struct( this, lab, serial < 0 );
 	if ( cur == NULL )
-		return 0;
+		return -1;
 
 	if ( serial >= 0 )
 		snprintf( fileName, MAX_PATH_LENGTH, "%s%s%s_%i.%s", dir, foldersep( dir ), base_name, serial, append ? "paj" : "net" );				// fully formed file name
@@ -1517,7 +1518,7 @@ double object::write_file_net( const char *lab, const char dir[ ], const char ba
 						"check disk space and permissions",
 						false,
 						"cannot create network file '%s'", fileName );
-		return 0;
+		return -2;
 	}
 
 	if ( append )
@@ -1546,7 +1547,7 @@ double object::write_file_net( const char *lab, const char dir[ ], const char ba
 							"check your equation code to add\nthe network structure before using this macro",
 							true,
 							"object '%s' has no network data structure, file '%s' not saved", lab, fileName );
-			return 0;
+			return -3;
 		}
 
 		if ( cur->node->name == NULL )						// no name assigned?
@@ -1557,12 +1558,17 @@ double object::write_file_net( const char *lab, const char dir[ ], const char ba
 					 cur->node->name, cur->node->time, tCur );	// output text name
 	}
 
-	fprintf( pajekFile, "*Arcs\n" );						// start arcs section
 
-	for ( cur = firstNode; cur != NULL; cur = go_brother(cur) )	// scan all nodes
+	for ( iniSec = true, cur = firstNode; cur != NULL; cur = go_brother(cur) )// scan all nodes
 		if ( cur->node->nLinks > 0 )							// if node has at least one link
 			for ( cur1 = cur->node->first; cur1 != NULL; cur1 = cur1->next )
 			{													// scan all links from node
+				if ( iniSec )
+				{
+					fprintf( pajekFile, "*Arcs\n" );			// start arcs section
+					iniSec = false;
+				}
+
 				weight = ( cur1->weight == 0 ) ? 1 : cur1->weight;
 				fprintf( pajekFile, "%ld %ld %g [%d-%d]\n",
 						 cur->node->serNum, cur1->serTo, weight, cur1->time, tCur );
