@@ -36,6 +36,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cctype>
+#include <cfloat>
 #include <cmath>
 #include <ctime>
 #include <csignal>
@@ -218,8 +219,6 @@ struct object
 
 	bool load_insts( const char *file_name, FILE *f );
 	bool load_struct( FILE *f );
-	bool load_xml_insts( xml_node &n );
-	bool load_xml_struct( xml_node &n, bool quick );
 	bool under_computation( void );
 	bool under_comput_var( const char *lab );
 	bridge *search_bridge( const char *lab, bool no_error = false );
@@ -268,6 +267,8 @@ struct object
 	long init_small_world_net( const char *lab, long numNodes, long outDeg, double rho );
 	long init_star_net( const char *lab, long numNodes );
 	long init_uniform_net( const char *lab, long numNodes, long outDeg );
+	int load_xml_insts( xml_node &n );
+	int load_xml_struct( xml_node &n, bool quick );
 	netLink *add_link_net( object *destPtr, double weight = 0, double probTo = 1 );
 	netLink *draw_link_net( void );
 	netLink *search_link_net( long id );
@@ -614,7 +615,11 @@ int run_system( const char *cmd, int id = -1 );
 int worker_errors( void );
 long eval_long( const char *tcl_exp );
 long get_long( const char *tcl_var, long *var = NULL );
+string to_string( const char *fmt, double val );
 string win_path( string filepath );
+vector < string > strtostrsplit( const char *in, char sep );
+vector < long > strtolsplit( const char *in, char sep, long inv = 0 );
+vector < double > strtodsplit( const char *in, char sep, long inv = 0. );
 void check_option_files( bool sys = false );
 void clean_spaces( char *s );
 void cmd( const char *cm, ... );

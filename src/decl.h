@@ -30,7 +30,6 @@ Relevant flags (when defined):
 // standard libraries used
 #include <sstream>
 #include <cstdarg>
-#include <cfloat>
 #include <limits>
 #include <algorithm>
 #include <random>

@@ -1932,6 +1932,120 @@ char *strencdata( char *out, const char *in, int outSz )
 }
 
 
+/***************************************************
+ STRTOSTRSPLIT
+ split a C string into a vector of strings using
+ sep as the separator character
+***************************************************/
+vector < string > strtostrsplit( const char *in, char sep )
+{
+	string buf;
+	stringstream ss( in );
+	vector < string > out;
+
+	while ( getline( ss, buf, sep ) )
+		out.push_back( buf );
+
+	return out;
+}
+
+
+/***************************************************
+ STRTOLSPLIT
+ split a C string into a vector of long integers
+ using sep as the separator character
+
+***************************************************/
+vector < long > strtolsplit( const char *in, char sep, long inv )
+{
+	long l;
+	string buf;
+	stringstream ss( in );
+	vector < long > out;
+
+	while ( getline( ss, buf, sep ) )
+	{
+		errno = 0;				// detect invalid values
+
+		if ( buf.size( ) == 0 )
+			l = inv;
+		else
+			l = strtol( buf.c_str( ), NULL, 10 );
+
+		if ( errno == ERANGE )
+		{
+			if ( l == 0 )
+				l = inv;
+
+			plog( "\nWarning: invalid long integer (%s), adjusted to %d", buf.c_str( ), l );
+		}
+
+		out.push_back( l );
+	}
+
+	return out;
+}
+
+
+/***************************************************
+ STRTODSPLIT
+ split a C string into a vector of double floats
+ using sep as the separator character
+***************************************************/
+vector < double > strtodsplit( const char *in, char sep, long inv )
+{
+	double d;
+	string buf;
+	stringstream ss( in );
+	vector < double > out;
+
+	while ( getline( ss, buf, sep ) )
+	{
+		errno = 0;				// detect invalid values
+
+		if ( buf.size( ) == 0 )
+			d = inv;
+		else
+			d = strtod( buf.c_str( ), NULL );
+
+		if ( errno == ERANGE )
+		{
+			if ( d == 0. )
+				d = inv;
+			else
+				if ( d == HUGE_VAL )
+					d = DBL_MAX;
+				else
+					if ( d == - HUGE_VAL )
+						d = - DBL_MAX;
+
+			plog( "\nWarning: invalid double float (%s), adjusted to %g", buf.c_str( ), d );
+		}
+
+		out.push_back( d );
+	}
+
+	return out;
+}
+
+
+/***************************************************
+ TO_STRING
+ convert double to string, allowing for sprintf
+ pattern format
+***************************************************/
+string to_string( const char *fmt, double val )
+{
+	char buf[ 100 + 1 ];
+	string res;
+
+	if ( snprintf( buf, 100, fmt, val ) < 0 )
+		strcpy( buf, "" );
+
+	return res = buf;
+}
+
+
 /****************************************************
  MSLEEP
  stop execution for a given period

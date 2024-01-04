@@ -115,25 +115,44 @@ bool open_configuration( object *&r, bool reload )
 				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME	 );
 			return false;
 
-		case 2:
-		case 3:
+		case 2:									// problem from STRUCT section
+		case 3:									// problem from DATA section
+		case 21:								// invalid XML format
+		case 22:								// missing XML root node
+		case 31:								// internal XML error
+		case 41:
+		case 32:								// missing XML object name
+		case 33:								// missing XML element type
+		case 34:								// missing XML element name
+		case 52:
+		case 35:								// invalid XML element type
+		case 42 ... 43:							// XML inconsistent # of groups
+		case 44 ... 45:							// XML inconsistent # of node ids/names
+		case 46:								// XML inconsistent # of nodes
+		case 47:								// XML inconsistent # of link groups
+		case 51:
+		case 48:								// XML invalid links
+		case 49:								// XML inconsistent # of links
+		case 50:								// XML inconsistent # of weights
+		case 53 ... 55:							// XML inconsistent # of variable values
+
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file (%d)\" -detail \"Please check if a proper file was selected.\"", i );
 			return false;
 
-		case 4:
-		case 5:
-		case 6:
-		case 7:
+		case 4:									// problem from SIM_NUM section
+		case 5:									// problem from SEED
+		case 6:									// problem from MAX_STEP section
+		case 7:									// problem from EQUATION section
 		case 8:									// problem from MODELREPORT section
 		case 9:									// problem from DESCRIPTION section
+		case 23:								// missing XML settings node
+		case 24:									// missing XML equation node
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d)\" -detail \"Element descriptions were lost but the configuration can still be used.\n\nPlease check if the desired file was selected or re-enter the description information if needed.\n\nIf this is a sensitivity analysis configuration file, this message is expected, and configuration file is ok.\"", i );
 			reset_description( root );
 			break;
 
-		case 10:								// problem from DOCUOBSERVE section
-		case 11:
-		case 12:								// problem from DOCUINITIAL section
-		case 13:
+		case 10 ... 11:							// problem from DOCUOBSERVE section
+		case 12 ... 13:							// problem from DOCUINITIAL section
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d)\" -detail \"Observation flags and equation file were lost but the configuration can still be used.\n\nPlease check if the desired file was selected or re-configure the lost parts if needed.\"", i );
 	}
 
@@ -156,7 +175,7 @@ LOAD_CONFIGURATION
 int load_configuration( bool reload, int quick )
 {
 	char *buf = NULL, buf1[ MAX_FILE_SIZE ], msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
-	int i, j, load = 0;
+	int i, j, load;
 	object *cur;
 	variable *cv, *cv1;
 	description *cd;
@@ -217,33 +236,29 @@ int load_configuration( bool reload, int quick )
 
 		if ( strstr( typeNode.value( ), "LSD " ) != typeNode.value( ) ||
 			 strcmp( lsdNode.name( ), "LSD" ) != 0 )
-			return 1;							// invalid xml type/format
+			return 21;							// invalid xml type/format
 
 		// get model structure
 		xml_node cfgNode = lsdNode.child( "configuration" );// load config.
 		xml_node rootNode = cfgNode.child( "structure" ).child( "object" );
 
 		if ( rootNode.empty( ) )
-			return 1;							// missing root
+			return 22;							// missing root
 
 		if ( ! reload || quick != 0 )
 			empty_description( );				// remove existing descriptions
 
 		// load non-instanced model structure
-		struct_loaded = root->load_xml_struct( rootNode,
-										( reload && quick == 2 ) || quick == 1 );
-		if( ! struct_loaded )
-		{
-			load = 2;
+		load = root->load_xml_struct( rootNode, ( reload && quick == 2 ) || quick == 1 );
+		if( load == 0 )
+			struct_loaded = true;
+		else
 			goto endLoad;
-		}
 
 		// load model structure instances
-		if( ! root->load_xml_insts( rootNode ) )
-		{
-			load = 3;
+		load = root->load_xml_insts( rootNode );
+		if( load != 0 )
 			goto endLoad;
-		}
 
 		if ( reload && quick == 2 )				// just quick reload?
 			goto endLoad;
@@ -253,7 +268,7 @@ int load_configuration( bool reload, int quick )
 
 		if ( setNode.empty( ) || simNode.empty( ) )	// missing settings
 		{
-			load = 4;
+			load = 23;
 			goto endLoad;
 		}
 
@@ -277,7 +292,7 @@ int load_configuration( bool reload, int quick )
 		xml_node eqfNode = cfgNode.child( "equation_file" );
 		if ( eqfNode.empty( ) )
 		{
-			load = 7;
+			load = 24;
 			goto endLoad;
 		}
 
@@ -581,7 +596,7 @@ OBJECT::LOAD_XML_STRUCT
 const char *type_names[ ] = { "variable", "parameter", "function" };
 const int type_num = 3;
 
-bool object::load_xml_struct( xml_node &n, bool quick )
+int object::load_xml_struct( xml_node &n, bool quick )
 {
 	bool obs;
 	const char *str, *desc, *init;
@@ -590,7 +605,7 @@ bool object::load_xml_struct( xml_node &n, bool quick )
 	variable *cv;
 
 	if ( strcmp( n.attribute( "name" ).value( ), label ) != 0 )
-		return false;
+		return 31;
 
 	to_compute = n.attribute( "compute" ).as_bool( true );
 
@@ -601,15 +616,16 @@ bool object::load_xml_struct( xml_node &n, bool quick )
 		{
 			str = cn.attribute( "name" ).value( );
 			if ( strlen( str ) == 0 )
-				return false;
+				return 32;
 
 			cmd( "lappend modObj %s", str );
 
 			add_obj( str, 1, 0 );
 			cb = search_bridge( str );
 
-			if ( cb->head == NULL || ! cb->head->load_xml_struct( cn, quick ) )
-				return false;
+			i = cb->head->load_xml_struct( cn, quick );
+			if ( i != 0 )
+				return i;
 
 			if ( ! quick )
 			{
@@ -623,7 +639,7 @@ bool object::load_xml_struct( xml_node &n, bool quick )
 			{
 				str = cn.attribute( "type" ).value( );
 				if ( strlen( str ) == 0 )
-					return false;
+					return 33;
 
 				for ( i = 0; i < type_num; ++i )
 					if ( ! strcmp( str, type_names[ i ] ) )
@@ -631,7 +647,7 @@ bool object::load_xml_struct( xml_node &n, bool quick )
 
 				str = cn.attribute( "name" ).value( );
 				if ( strlen( str ) == 0 )
-					return false;
+					return 34;
 
 				switch( i )
 				{
@@ -645,7 +661,7 @@ bool object::load_xml_struct( xml_node &n, bool quick )
 						cmd( "lappend modFun %s", str );
 						break;
 					default:
-						return false;
+						return 35;
 				}
 
 				cmd( "lappend modElem %s", str );
@@ -668,7 +684,7 @@ bool object::load_xml_struct( xml_node &n, bool quick )
 			}
 	}
 
-	return true;
+	return 0;
 }
 
 
@@ -757,68 +773,109 @@ OBJECT::LOAD_XML_INSTS
 	Load the object instances of tree under this
 	object from an xml object node
 ****************************************************/
-bool object::load_xml_insts( xml_node &n )
+int object::load_xml_insts( xml_node &n )
 {
-	int i, j;
-	double x;
-	string tmp;
+	int i;
+	long k, l, m, nd;
+	string data;
+	vector < double > val, wht, lnkwht1;
+	vector < long > num, nid, lnkto1;
+	vector < string > nname, lnkto, lnkwht;
 	bridge *cb;
-	object *cur;
+	object *cur, *cur1, *par;
 	variable *cv, *cv1;
 
 	if ( strcmp( n.attribute( "name" ).value( ), label ) != 0 )
-		return false;
+		return 41;
 
-	// split the number of instances string into a integer vector
-	string i1( n.child( "counts" ).text( ).get( ) );
-	stringstream s1( i1 );
-	vector < int > cnt;
-	while ( getline( s1, tmp, ',' ) )
-		cnt.push_back( stoi( tmp ) );
+	// split the number of instances string into an integer vector
+	num = strtolsplit( n.child( "counts" ).text( ).get( ), ',' );
 
 	// set # of instances for each object group
-	for ( i = 0, cur = this; cur != NULL; cur = cur->hyper_next( label ), ++i )
+	for ( nd = l = 0, cur = this; cur != NULL;
+		  nd += num[ l ], ++l, cur = cur->hyper_next( label ) )
 	{
-		if ( i >= ( int ) cnt.size( ) )		// inconsistent # of groups
-			return false;
+		if ( l >= ( long ) num.size( ) )		// inconsistent # of groups
+			return 42;
 
 		cur->to_compute = to_compute;
-		cur->replicate( cnt[ i ] );
+		cur->replicate( num[ l ] );
 
-		for ( ; go_brother( cur ) != NULL; cur = cur->next );	// go next group
+		for ( ; go_brother( cur ) != NULL; cur = cur->next );// go next group
 	}
 
-	if ( i < ( int ) cnt.size( ) )			// inconsistent # of groups
-		return false;
+	if ( l < ( long ) num.size( ) || nd != reduce( num.begin( ), num.end( ) ) )
+		return 43;				// inconsistent # of groups
 
+	// load network attributes and links
+	xml_node nn = n.child( "nodes" );
+	if ( up != NULL && ! nn.empty( ) )
+	{
+		nid = strtolsplit( nn.child( "ids" ).text( ).get( ), ',', -1 );
+		if ( ( long ) nid.size( ) != nd )		// inconsistent # of node ids
+			return 44;
+
+		nname = strtostrsplit( nn.child( "names" ).text( ).get( ), ',' );
+		if ( ( long ) nname.size( ) != nd )		// inconsistent # of node names
+			return 45;
+
+		for ( l = 0, cur = this; cur != NULL; ++l, cur = cur->hyper_next( label ) )
+		{
+			if ( l >= ( long ) nid.size( ) || l >= ( long ) nname.size( ) )
+				return 46;						// inconsistent # of nodes
+
+			if ( nid [ l ] > 0 )				// valid node?
+				cur->add_node_net( nid[ l ], nname[ l ].c_str( ), true );// add node
+		}
+
+		lnkto = strtostrsplit( nn.child( "linksto" ).text( ).get( ), ';' );
+		lnkwht = strtostrsplit( nn.child( "linksweigth" ).text( ).get( ), ';' );
+
+		// add links to node objects
+		for ( l = k = 0, par = NULL, cur = this; cur != NULL;
+			  ++l, cur = cur->hyper_next( label ) )
+		{
+			if ( par != cur->up )				// entering a new group of instances?
+			{
+				par = cur->up;
+				par->initturbo( label, num[ k++ ] );
+			}
+
+			if ( cur->node == NULL )			// no node on instance?
+				continue;
+
+			if ( l >= ( long ) lnkto.size( ) || l >= ( long ) lnkwht.size( ) )
+				return 47;						// inconsistent # of link groups
+
+			lnkto1 = strtolsplit( lnkto[ l ].c_str( ), ',', -1 );
+			lnkwht1 = strtodsplit( lnkwht[ l ].c_str( ), ',' );
+
+			for ( m = 0; m < ( long ) lnkto1.size( ); ++m )
+			{
+				if ( lnkto1[ m ] < 0 )
+					return 48;					// invalid links
+
+				if ( m >= ( long ) lnkwht1.size( ) )
+					return 49;					// inconsistent # of links
+
+				cur1 = par->turbosearch( label, 0, ( double ) lnkto1[ m ] );
+				cur->add_link_net( cur1, lnkwht1[ m ] );
+			}
+
+			if ( m < ( long ) lnkwht1.size( ) )
+				return 50;						// inconsistent # of weights
+		}
+
+		if ( l < ( long ) lnkto.size( ) || l < ( long ) lnkwht.size( ) )
+			return 51;							// inconsistent # of link groups
+	}
+
+	// load elements (parameters, variables and functions)
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		xml_node cn = n.find_child_by_attribute( "element", "name", cv->label );
 		if ( cn.empty( ) )
-			return false;
-
-		// split the values of instances string into a double vector
-		string i2( cn.child( "values" ).text( ).get( ) );
-		stringstream s2( i2 );
-		vector < double > val;
-		while ( getline( s2, tmp, ',' ) )
-		{
-			errno = 0;						// detect invalid values
-			x = strtod( tmp.c_str( ), NULL );
-
-			if ( errno == ERANGE )
-			{
-				if ( x == HUGE_VAL )
-					x = DBL_MAX;
-				else
-					if ( x == - HUGE_VAL )
-						x = - DBL_MAX;
-
-				plog( "\nInvalid value for '%s' (%s), adjusted to %g", cv->label, tmp.c_str( ), x );
-			}
-
-			val.push_back( x );
-		}
+			return 52;
 
 		cv->num_lag = ( cv->param == 1 ) ? 0 : cn.attribute( "lags" ).as_uint( );
 		cv->save = cn.attribute( "save" ).as_bool( );
@@ -836,8 +893,16 @@ bool object::load_xml_insts( xml_node &n )
 			cv->period_range = cn.attribute( "period_range" ).as_uint( );
 		}
 
-		// set values of instances for each variable group
-		for ( i = 0, cur = this; cur != NULL; cur = cur->hyper_next( label ), ++i )
+		// split the values of instances string into a double vector
+		if ( cv->param == 1 || cv->num_lag > 0 )
+		{
+			val = strtodsplit( cn.child( "values" ).text( ).get( ), ',' );
+			if ( ( long ) val.size( ) != nd )	// inconsistent # of values
+				return 53;
+		}
+
+		// set values of instances for each variable instance
+		for ( l = 0, cur = this; cur != NULL; cur = cur->hyper_next( label ), ++l )
 		{
 			cv1 = cur->search_var( NULL, cv->label );
 			cv1->param = cv->param;
@@ -859,32 +924,33 @@ bool object::load_xml_insts( xml_node &n )
 
 			if ( cv1->param == 1 || cv1->num_lag > 0 )
 			{
-				if ( i >= ( int ) val.size( ) )	// inconsistent # of groups
-					return false;
+				if ( l >= nd )					// inconsistent # of values
+					return 54;
 
-				for ( j = 0; j < ( cv1->param == 1 ? 1 : cv1->num_lag ); ++j )
-					cv1->val[ j ] = val[ i ];
+				for ( i = 0; i < ( cv1->param == 1 ? 1 : cv1->num_lag ); ++i )
+					cv1->val[ i ] = val[ l ];
 			}
 
 			if ( cv1->param != 1 )				// remove trash from last position
 				cv1->val[ cv1->num_lag ] = 0;
 		}
 
-		if ( i < ( int ) val.size( ) )			// inconsistent # of groups
-			return false;
+		if ( l < nd )							// inconsistent # of values
+			return 55;
 	}
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		xml_node cn = n.find_child_by_attribute( "object", "name", cb->blabel );
-		if ( cb->head == NULL || ! cb->head->load_xml_insts( cn ) )
-			return false;
+		i = cb->head->load_xml_insts( cn );
+		if ( i != 0 )
+			return i;
 	}
 
 	if ( up == NULL )	// this is the root, and therefore the end of the loading
 		set_blueprint( blueprint, this );
 
-	return true;
+	return 0;
 }
 
 
@@ -1289,12 +1355,13 @@ OBJECT::SAVE_XML_STRUCT
 ****************************************************/
 void object::save_xml_struct( xml_node &pn, bool quick )
 {
-	bool first, init;
+	bool init, nodes;
 	char *str, val[ 32 + 1 ];
 	int i, count;
-	string data;
+	string data, nname, lnkto, lnkwht;
 	bridge *cb;
 	description *cd;
+	netLink *curl;
 	object *cur;
 	variable *cv, *cv1;
 
@@ -1304,14 +1371,18 @@ void object::save_xml_struct( xml_node &pn, bool quick )
 	if ( ! to_compute )
 		n.append_attribute( "compute" ) = false;
 
-	for ( data = "", first = true, cur = this; cur != NULL;
-		  first = false, cur = cur->hyper_next( cur->label ) )
+	for ( data = "", nodes = false, cur = this; cur != NULL;
+		  cur = cur->hyper_next( cur->label ) )
 	{
+		if ( cur != this )
+			data += ",";
+
 		skip_next_obj( cur, &count );
-		ostringstream str;
-		str << ( first ? "" : "," ) << count;
-		data.append( str.str( ) );
-		for ( ; go_brother( cur ) != NULL; cur = cur->next );
+		data += to_string( count );
+
+		for ( ; go_brother( cur ) != NULL; cur = cur->next )
+			if ( cur->node != NULL )	// check if object contains network nodes
+				nodes = true;
 	}
 
 	n.append_child( "counts" ).text( ) = data.c_str( );
@@ -1335,6 +1406,53 @@ void object::save_xml_struct( xml_node &pn, bool quick )
 		else
 			cb->head->save_xml_struct( n, quick );
 
+	// save network attributes and links
+	if ( nodes )
+	{
+		for ( data = "", cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
+		{
+			if ( cur != this )
+			{
+				data += ",";
+				nname += ",";
+				lnkto += ";";
+				lnkwht += ";";
+			}
+
+			if ( cur->node != NULL )
+			{
+				data += to_string( cur->node->id );
+
+				if ( cur->node->name != NULL )
+					nname += cur->node->name;
+
+				// scan all links from node
+				if ( cur->node->nLinks > 0 )
+					for ( curl = cur->node->first; curl != NULL; curl = curl->next )
+					{
+						if ( curl != cur->node->first )
+						{
+							lnkto += ",";
+							lnkwht += ",";
+						}
+
+						if ( curl->ptrTo == NULL || curl->ptrTo->node == NULL )
+							continue;				// ignore invalid link
+
+						lnkto += to_string( curl->ptrTo->node->id );
+						lnkwht += to_string( "%.15g", curl->weight );
+					}
+			}
+		}
+
+		xml_node nd = n.append_child( "nodes" );
+		nd.append_child( "ids" ).text( ) = data.c_str( );
+		nd.append_child( "names" ).text( ) = nname.c_str( );
+		nd.append_child( "linksto" ).text( ) = lnkto.c_str( );
+		nd.append_child( "linksweigth" ).text( ) = lnkwht.c_str( );
+	}
+
+	// save elements (parameters, variables and functions)
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		xml_node cn = n.append_child( "element" );
@@ -1395,14 +1513,14 @@ void object::save_xml_struct( xml_node &pn, bool quick )
 		// add initial values
 		if ( cv->param == 1 || cv->num_lag > 0 )
 		{
-			for ( data = "", first = true, cur = this; cur != NULL;
-				  first = false, cur = cur->hyper_next( label ) )
+			for ( data = "", cur = this; cur != NULL;
+				  cur = cur->hyper_next( label ) )
 			{
 				cv1 = cur->search_var( NULL, cv->label );
 
 				for ( i = 0; i < ( cv1->param == 1 ? 1 : cv1->num_lag ); ++i )
 				{
-					snprintf( val, 32, "%s%.15g", first ? "" : ",",
+					snprintf( val, 32, "%s%.15g", cur == this ? "" : ",",
 							  cv1->initialized ? cv1->val[ i ] : 0. );
 					data.append( val );
 				}
