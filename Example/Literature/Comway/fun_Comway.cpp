@@ -87,8 +87,7 @@ if(v[3]<0)
    {
     
     v[2]=(double)i*v[1]+(double)j;
-    //cur=p->turbosearch("node",v[0]*v[1],v[2]);
-    cur=TSEARCHT("node", v[0]*v[1],v[2]);
+    cur=TSEARCH("node", v[2]);
     WRITELS(cur,"State",1, t-1);
    
    }

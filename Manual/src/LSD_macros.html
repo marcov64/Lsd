@@ -17,7 +17,7 @@ target="LSD_macros_arquivos/props007.xml">
 <link rel=colorSchemeMapping href="LSD_macros_arquivos/colorschememapping.xml">
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
-  <w:Zoom>140</w:Zoom>
+  <w:Zoom>120</w:Zoom>
   <w:TrackMoves>false</w:TrackMoves>
   <w:TrackFormatting/>
   <w:HyphenationZone>21</w:HyphenationZone>
@@ -1522,7 +1522,7 @@ target="LSD_macros_arquivos/props007.xml">
 	mso-font-charset:134;
 	mso-generic-font-family:modern;
 	mso-font-pitch:fixed;
-	mso-font-signature:643 680460288 22 0 262145 0;}
+	mso-font-signature:515 680460288 22 0 262145 0;}
 @font-face
 	{font-family:SimSun-ExtB;
 	panose-1:2 1 6 9 6 1 1 1 1 1;
@@ -5477,9 +5477,9 @@ color:gray;mso-ansi-language:EN-US'><br>
 <span class=Cdigo>} </span></span><span lang=EN-US style='mso-ansi-language:
 EN-US'><o:p></o:p></span></p>
 
-<p><a name=MODELBEGIN></a><span lang=EN-US style='mso-ansi-language:EN-US'>The
-user should place the Equations only after the keyword </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>MODELBEGIN</span></span><span
+<p><a name=MODELBEGIN></a><span lang=EN-US style='mso-ansi-language:EN-US'>The user
+should place the Equations only after the keyword </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>MODELBEGIN</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> and before </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>MODELEND</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
@@ -5774,8 +5774,8 @@ rate: </span></span><br>
 – RIN * Inn </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>profits per unit of capital are
 equal current price times lagged productivity </span></span><br>
-<span class=Cdigo><span style='color:#00B050'>minus the cost for research
-(innovative firms spend for both type </span></span><br>
+<span class=Cdigo><span style='color:#00B050'>minus the cost for research (innovative
+firms spend for both type </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>of research) and fixed costs. </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>***************************/</span>
 </span></span><span lang=EN-US style='font-family:"Courier New";color:gray;
@@ -5923,10 +5923,10 @@ EN-US'>THIS</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
 Macro (and the predefined C++ pointer </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>p</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>) refers to the Object instance containing the
-Variable or Function whose Equation is being executed (as “this” instance).
-Since most of the operations in an Equation concern the values in the same
-Object instance, this is the most frequently used in the Equations, and in most
-of cases the LSD Macros allow to use it by default without specifying it. Only
+Variable or Function whose Equation is being executed (as “this” instance). Since
+most of the operations in an Equation concern the values in the same Object
+instance, this is the most frequently used in the Equations, and in most of
+cases the LSD Macros allow to use it by default without specifying it. Only
 advanced code should require direct access to it.<o:p></o:p></span></p>
 
 <h2><a name="_Caller_Object:_c"></a><span class=Ttulo2Char><span lang=EN-US
@@ -6157,7 +6157,8 @@ Firm 4 | =&gt; . . . =&gt; | Firm 100 |</span><br>
 <span class=Cdigo>&nbsp;&nbsp;&nbsp;&nbsp;
 ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; . .
-.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; . . .&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; . .
+.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 . . .</span><br>
 <span class=Cdigo>&nbsp;&nbsp;&nbsp;&nbsp;
 ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ||</span><br>
@@ -6198,11 +6199,11 @@ discard all the instances of <i>Worker</i> for each of the instances of <i>Firm
 In fact, the Macro </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">V(…)</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> will initially search down, into <i>Worker</i>,
-for a Variable or Parameter <i>Price</i>. Only if it does not find it downward
-in the tree, it will look then upwards, trying to find <i>Price</i> in the
-parent <i>Market</i>. This means that LSD must skip 100,000 Object instances,
-in total, before computing the 100 instances of the Firm’s Variable. Instead,
-using the code line: <o:p></o:p></span></p>
+for a Variable or Parameter <i>Price</i>. Only if it does not find it downward in
+the tree, it will look then upwards, trying to find <i>Price</i> in the parent <i>Market</i>.
+This means that LSD must skip 100,000 Object instances, in total, before
+computing the 100 instances of the Firm’s Variable. Instead, using the code
+line: <o:p></o:p></span></p>
 
 <p class=MsoNormal><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'>v[0] = VS( PARENT, &quot;Price&quot; ); </span></span><span lang=EN-US
@@ -6256,19 +6257,18 @@ lang=EN-US style='mso-ansi-language:EN-US'>cur1</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>…</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> and uses the pointer in another Macro
-requiring it as an operand. See the <a href="#ex_obj">examples</a> of LSD
-Macros returning Object pointers. Predefined pointer variables are usually
-initialized to the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>NULL</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
-value, to prevent severe errors when used incorrectly. However, this adds a
-small overhead to LSD. Pointer pre-initialization can be disabled by adding a </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>#define
-NO_POINTER_INIT</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
-statement before the </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>#include fun_head_fast.h</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> line. Disabling pointer
-initialization also disable pointer checking (see </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'><a
+requiring it as an operand. See the <a href="#ex_obj">examples</a> of LSD Macros
+returning Object pointers. Predefined pointer variables are usually initialized
+to the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>NULL</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> value, to prevent severe errors
+when used incorrectly. However, this adds a small overhead to LSD. Pointer
+pre-initialization can be disabled by adding a </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>#define NO_POINTER_INIT</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> statement before the </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>#include
+fun_head_fast.h</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+line. Disabling pointer initialization also disable pointer checking (see </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
 href="#_NO_POINTER_CHECK_USE_POINTER_CHECK">NO_POINTER_CHECK</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> Macro for details).<o:p></o:p></span></p>
 
@@ -6329,9 +6329,9 @@ href="#_COUNT_HOOK,_COUNT_HOOKS(_obj">COUNT_HOOK(…)</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Hooks are
-available to the modelers for special purposes, allowing the creation of
-heterogeneous, multi-layer, ad-hoc networks. Any two Object instances in a
-model can be “hooked”, irrespective of where they are in the <a
+available to the modelers for special purposes, allowing the creation of heterogeneous,
+multi-layer, ad-hoc networks. Any two Object instances in a model can be
+“hooked”, irrespective of where they are in the <a
 href="LSD_faqs.html#modelstructure">model structure</a>. Also, a single Object
 may have as many hooks to other Object instances as required. Typically, hooks
 are employed to efficiently speed up the access to frequently used instances,
@@ -6451,8 +6451,8 @@ color:#00B050;mso-ansi-language:EN-US'><br>
 function. It is computed only once and then it is </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>transformed in a parameter and
 never computed again.</span></span><br>
-<span class=Cdigo><span style='color:#00B050'>Sets the global pointer 'market' pointing
-to the Object Market, so </span></span><br>
+<span class=Cdigo><span style='color:#00B050'>Sets the global pointer 'market'
+pointing to the Object Market, so </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>to speed up the access to this
 object </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>*/ </span></span></span><span
@@ -6600,9 +6600,9 @@ EN-US'>Postfixes and Macro families<o:p></o:p></span></h1>
 LSD Macros, like </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">V(…)</a></span></span><span
 class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;mso-ansi-language:
-EN-US'> </span></span><span lang=EN-US style='mso-ansi-language:EN-US'>used in
-the examples above, come as a family where the name of the Macro can be
-expressed with no postfix, or with “</span><span class=Cdigo><span lang=EN-US
+EN-US'> </span></span><span lang=EN-US style='mso-ansi-language:EN-US'>used in the
+examples above, come as a family where the name of the Macro can be expressed
+with no postfix, or with “</span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>L</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>”, “</span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>S</span></span><span lang=EN-US
@@ -6616,11 +6616,11 @@ lang=EN-US style='mso-ansi-language:EN-US'>S</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>” indicates a Specific Object instance.
 Consider that any LSD operation is performed in each Equation, at every time
 step. Therefore, the time “now” and the Object instance containing the Variable
-whose Equation is being executed are used by default when no postfix is
-supplied. Otherwise, for operations that must refer to past time steps, or to
-Object instances different from the one containing the Variable whose Equation
-is under execution, the modeler must use one of the post-fixed versions of the
-LSD Macro and provide the necessary details: <o:p></o:p></span></p>
+whose Equation is being executed are used by default when no postfix is supplied.
+Otherwise, for operations that must refer to past time steps, or to Object
+instances different from the one containing the Variable whose Equation is
+under execution, the modeler must use one of the post-fixed versions of the LSD
+Macro and provide the necessary details: <o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:32.2pt;text-indent:-18.0pt;mso-list:l2 level1 lfo2'><![if !supportLists]><span
@@ -6748,8 +6748,8 @@ in the current or <i>obj</i> descendants’ instances<o:p></o:p></span></p>
 lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
 style='mso-list:Ignore'>3)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Search
-in the current or <i>obj</i> descendants’ descendants’ instances recursively,
-to the lowest level in the model structure tree<o:p></o:p></span></p>
+in the current or <i>obj</i> descendants’ descendants’ instances recursively, to
+the lowest level in the model structure tree<o:p></o:p></span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 54.0pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span
@@ -6780,9 +6780,8 @@ lang=EN-US style='mso-ansi-language:EN-US'><a href="#_SEARCH(_&quot;obj_Lab&quot
 lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>So, for example, if there
-is only one instance of Variable <i>Lab</i> in the model, this can be found in
-any upstream or downstream Object, irrespective of where the search is started.
-<o:p></o:p></span></p>
+is only one instance of Variable <i>Lab</i> in the model, this can be found in any
+upstream or downstream Object, irrespective of where the search is started. <o:p></o:p></span></p>
 
 <h2><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
 mso-ansi-language:EN-US'>Example <o:p></o:p></span></h2>
@@ -6799,8 +6798,8 @@ color:gray;mso-ansi-language:EN-US'><br>
 </span><span class=Cdigo><span lang=EN-US style='color:#00B050;mso-ansi-language:
 EN-US'>/* </span></span><span lang=EN-US style='font-family:"Courier New";
 color:#00B050;mso-ansi-language:EN-US'><br>
-<span class=Cdigo><span style='color:#00B050'>Compute the quantity Q as the
-product of lagged capital K and current productivity A </span></span><br>
+<span class=Cdigo><span style='color:#00B050'>Compute the quantity Q as the product
+of lagged capital K and current productivity A </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>*/ </span></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
@@ -6883,8 +6882,8 @@ starting after the specified <i>lag</i> (effectively using the period from <i>la
 to <i>lag</i>+<i>per</i>) the. Similar to </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">V(…)</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, these Macros search for <i>Lab</i>
-over the entire <a href="LSD_faqs.html#modelstructure">model structure</a>,
-starting by the descendants of the current Object (</span><span class=Cdigo><span
+over the entire <a href="LSD_faqs.html#modelstructure">model structure</a>, starting
+by the descendants of the current Object (</span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'><a href="#_Parent_Object:_p">THIS</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) or <i>obj</i>, except if </span><span
 class=MsoHyperlink><span lang=EN-US style='font-family:"Courier New";
@@ -6928,17 +6927,18 @@ while the latter performs the average computation over Object instances.<o:p></o
 lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
 EN-US'>WHTMAVE( &quot;<i>Lab</i>&quot;, <i>per</i>, <i>weight </i>), WHTMAVES( <i>obj</i>,
 &quot;<i>Lab</i>&quot;, <i>per</i>, <i>weight </i>)<br>
-WHTMAVEL( &quot;<i>Lab</i>&quot;, <i>per</i>, <i>weight</i>, <i>lag </i>), WHTMAVELS(
-<i>obj</i>, &quot;<i>Lab</i>&quot;, <i>per</i>, <i>weight</i>, <i>lag </i>) <o:p></o:p></span></h1>
+WHTMAVEL( &quot;<i>Lab</i>&quot;, <i>per</i>, <i>weight</i>, <i>lag </i>),
+WHTMAVELS( <i>obj</i>, &quot;<i>Lab</i>&quot;, <i>per</i>, <i>weight</i>, <i>lag
+</i>) <o:p></o:p></span></h1>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>The </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>WHTAVE[LS](…)</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> Macros compute the time weighted moving
-average of Variable named <i>Lab</i> for <i>per</i> periods using the array <i>weight</i>
-to define importance of each lagged period, optionally starting after the
-specified <i>lag</i> (effectively using the period from <i>lag</i> to <i>lag</i>+<i>per</i>)
-the. Similar to </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">V(…)</a></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> Macros compute the time weighted
+moving average of Variable named <i>Lab</i> for <i>per</i> periods using the
+array <i>weight</i> to define importance of each lagged period, optionally
+starting after the specified <i>lag</i> (effectively using the period from <i>lag</i>
+to <i>lag</i>+<i>per</i>) the. Similar to </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">V(…)</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, these Macros search for <i>Lab</i>
 over the entire <a href="LSD_faqs.html#modelstructure">model structure</a>,
 starting by the descendants of the current Object (</span><span class=Cdigo><span
@@ -6953,14 +6953,14 @@ of type </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'>double</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
 must have, at least, length equal to <i>per</i>. The values in the array are
 used to weight the moving average in the direct order: the first array element
-(weight[0]) is used for the first lag considered (equal to the current case 0 if
-<i>lag</i> is not specified), the second element (weight[1]) weights the second
-effective lag, as so on.<o:p></o:p></span></p>
+(weight[0]) is used for the first lag considered (equal to the current case 0
+if <i>lag</i> is not specified), the second element (weight[1]) weights the
+second effective lag, as so on.<o:p></o:p></span></p>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>By default, the weighted moving
-average considers only Variable values computed during the simulation (for t =
-1, 2, …), that is, it does not consider the initial value(s) set in the
-configuration (the t = 0 value, for instance), if any. However, if a negative
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>By default, the weighted
+moving average considers only Variable values computed during the simulation
+(for t = 1, 2, …), that is, it does not consider the initial value(s) set in
+the configuration (the t = 0 value, for instance), if any. However, if a negative
 value for <i>per</i> is provided, the initial values provided, if any, are all
 considered for the moving average computation. Naturally, only the absolute
 value of <i>per</i> is considered in any case.<o:p></o:p></span></p>
@@ -6983,7 +6983,7 @@ while the latter performs the average computation over Object instances.<o:p></o
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
   style='font-size:10.0pt;color:black;mso-color-alt:windowtext'><a href="#top"><span
-  style='color:red;text-decoration:none;text-underline:none'>&#9650;Top</span></a></span><o:p></o:p></p>
+  style='color:red;text-decoration:none;text-underline:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -7027,8 +7027,8 @@ class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>( V(
 &quot;Lab2&quot; ) lop value )</span></span><span lang=EN-US style='mso-ansi-language:
 EN-US'> evaluates to </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>true</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>. <i>lop</i> can be any of the following
-standard C++ logical operators: </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>. <i>lop</i> can be any of the following standard
+C++ logical operators: </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>==</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>!=</span></span><span lang=EN-US
@@ -7228,13 +7228,13 @@ style='mso-ansi-language:EN-US'>) or <i>obj</i>, using the appropriate <i>lag</i
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>If </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>MIN_CND[LS](…)</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> forms are used, only Object
-instances satisfying the conditional expression, defined by Variable or
-Parameter <i>Lab2</i>, the logical operator <i>lop</i> and the reference <i>value</i>,
-are used in computation. Both <i>Lab1</i> and <i>Lab2</i> must be contained in
-the same Object. See </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'><a href="#SUM">SUM(…)</a></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> for details and examples.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> forms are used, only Object instances
+satisfying the conditional expression, defined by Variable or Parameter <i>Lab2</i>,
+the logical operator <i>lop</i> and the reference <i>value</i>, are used in
+computation. Both <i>Lab1</i> and <i>Lab2</i> must be contained in the same
+Object. See </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'><a href="#SUM">SUM(…)</a></span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> for details and examples.<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>If the Object containing <i>Lab</i>/<i>Lab1</i>
 has no instance (see<span style='mso-spacerun:yes'>  </span></span><span
@@ -7291,13 +7291,13 @@ style='mso-ansi-language:EN-US'>) or <i>obj</i>, using the appropriate <i>lag</i
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>If </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>AVE_CND[LS](…)</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> forms are used, only Object
-instances satisfying the conditional expression, defined by Variable or
-Parameter <i>Lab2</i>, the logical operator <i>lop</i> and the reference <i>value</i>,
-are used in computation. Both <i>Lab1</i> and <i>Lab2</i> must be contained in
-the same Object. See </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'><a href="#SUM">SUM(…)</a></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> for details and examples.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> forms are used, only Object instances
+satisfying the conditional expression, defined by Variable or Parameter <i>Lab2</i>,
+the logical operator <i>lop</i> and the reference <i>value</i>, are used in
+computation. Both <i>Lab1</i> and <i>Lab2</i> must be contained in the same
+Object. See </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'><a href="#SUM">SUM(…)</a></span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> for details and examples.<o:p></o:p></span></p>
 
 <p><a name="_MED(_&quot;Lab&quot;_),"></a><span lang=EN-US style='mso-ansi-language:
 EN-US'>If the Object containing <i>Lab</i>/<i>Lab1</i> has no instance
@@ -7349,8 +7349,8 @@ WHTAVE_CNDL( &quot;<i>Lab1</i>&quot;, &quot;<i>Lab2</i>&quot;, &quot;<i>Lab3</i>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Similar to </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a href="#SUM">SUM(…)</a></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>, but, instead of the sum, these
-Macros compute the weighted average of the Variable or Parameter named <i>Lab1</i>
+lang=EN-US style='mso-ansi-language:EN-US'>, but, instead of the sum, these Macros
+compute the weighted average of the Variable or Parameter named <i>Lab1</i>
 among the descendants of the current Object (</span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'><a href="#_Parent_Object:_p">THIS</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) or <i>obj</i>, using the Variable
@@ -7416,8 +7416,8 @@ MED_CNDL( &quot;<i>Lab1</i>&quot;, &quot;<i>Lab2</i>&quot;, &quot;<i>lop</i>&quo
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Similar to </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a href="#SUM">SUM(…)</a></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>, but, instead of the sum, these
-Macros compute the median of the Variable or Parameter named <i>Lab</i> or <i>Lab1</i>
+lang=EN-US style='mso-ansi-language:EN-US'>, but, instead of the sum, these Macros
+compute the median of the Variable or Parameter named <i>Lab</i> or <i>Lab1</i>
 among the descendants of the current Object (</span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'><a href="#_Parent_Object:_p">THIS</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) or <i>obj</i>, using the
@@ -7689,8 +7689,8 @@ STAT_CNDL( &quot;<i>Lab1</i>&quot;, &quot;<i>Lab2</i>&quot;, &quot;<i>lop</i>&qu
 Macro </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
 href="#SUM">SUM(…)</a></span></span><span lang=EN-US style='mso-ansi-language:
 EN-US'>, but, instead of the sum, they compute a set of descriptive statistics
-of the Variable or Parameter named <i>Lab</i> or <i>Lab1</i> among the
-descendants of the current Object (</span><span class=Cdigo><span lang=EN-US
+of the Variable or Parameter named <i>Lab</i> or <i>Lab1</i> among the descendants
+of the current Object (</span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'><a href="#_Parent_Object:_p">THIS</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) or <i>obj</i>, using the
 appropriate <i>lag</i>. <o:p></o:p></span></p>
@@ -7800,14 +7800,14 @@ lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
 EN-US'>INTERACT( &quot;<i>Comment</i>&quot;, <i>value </i>), INTERACTS( <i>obj</i>,
 &quot;<i>Comment</i> &quot;, <i>value </i>) <o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>These
-Macros interrupt the simulation run and open the <a href="debug.html">LSD
-Debugger</a> window, presenting the message <i>Comment</i>. The Object shown in
-the debugger is the same Object instance containing the Variable under
-computation (which has the </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>INTERACT(…)</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> call) or the specified Object <tt><i><span
-style='mso-ansi-font-size:12.0pt;mso-bidi-font-size:12.0pt;font-family:"Arial",sans-serif'>obj</span></i></tt>.<o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>These Macros
+interrupt the simulation run and open the <a href="debug.html">LSD Debugger</a>
+window, presenting the message <i>Comment</i>. The Object shown in the debugger
+is the same Object instance containing the Variable under computation (which
+has the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>INTERACT(…)</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+call) or the specified Object <tt><i><span style='mso-ansi-font-size:12.0pt;
+mso-bidi-font-size:12.0pt;font-family:"Arial",sans-serif'>obj</span></i></tt>.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Contrary to
 the debugger usual behavior, additionally to the name of the Variable just
@@ -7902,11 +7902,11 @@ EN-US'>SEARCH( &quot;<i>obj_Lab</i>&quot; ), SEARCHS( <i>obj</i>, &quot;<i>obj_L
 ) <o:p></o:p></span></h1>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>These Macros explore the
-model searching for the first instance of the Object named <i>obj_Lab</i>,
-starting at the Object instance where is the Variable is under computation, or
-at the Object instance pointed by <i>obj</i>. If one instance is found, the
-Macros return a pointer to it, otherwise </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>NULL</span></span><span lang=EN-US
+model searching for the first instance of the Object named <i>obj_Lab</i>, starting
+at the Object instance where is the Variable is under computation, or at the
+Object instance pointed by <i>obj</i>. If one instance is found, the Macros
+return a pointer to it, otherwise </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>NULL</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> is returned,<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>When an specific <i>obj</i>
@@ -8099,9 +8099,9 @@ to </span><span class=MsoHyperlink><span lang=EN-US style='font-family:"Courier 
 mso-ansi-language:EN-US'><a href="#_SEARCH(_&quot;obj_Lab&quot;_),">SEARCH(…)</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>If a matching Object
-instance is found, the Macro returns the instance number representing the
-position of the specific instance pointed by <i>obj</i> in the <a
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>If a matching Object instance
+is found, the Macro returns the instance number representing the position of
+the specific instance pointed by <i>obj</i> in the <a
 href="#_Object’s_relatives:_up,">brotherhood chain</a>, starting from 1. If the
 Object is not found, </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>SEARCH_INST(…)</span></span><span lang=EN-US
@@ -8161,17 +8161,17 @@ RNDDRAWL( &quot;<i>obj_Lab</i>&quot;, &quot;<i>Lab</i>&quot;, <i>lag </i>),
 RNDDRAWLS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot;, &quot;<i>Lab</i>&quot;, <i>lag
 </i>) <o:p></o:p></span></h1>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>These Macros search for a
-group of Object instances named <i>obj_Lab</i> and returns a pointer to one of
-them, randomly chosen with probability proportional to the values of the
-Variable labeled <i>Lab</i> in the same Object. The Macros can optionally
-consider <i>obj</i> as the starting point for the search (instead of the
-current Object under calculation, </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'><a href="#_Parent_Object:_p">THIS</a></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>) and the specific lag <i>lag</i> if
-different from current time step. The search process for <i>obj_Lab</i> is
-similar to </span><span class=MsoHyperlink><span lang=EN-US style='font-family:
-"Courier New";mso-ansi-language:EN-US'><a href="#_SEARCH(_&quot;obj_Lab&quot;_),">SEARCH(…)</a></span></span><span
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>These Macros search for a group
+of Object instances named <i>obj_Lab</i> and returns a pointer to one of them,
+randomly chosen with probability proportional to the values of the Variable
+labeled <i>Lab</i> in the same Object. The Macros can optionally consider <i>obj</i>
+as the starting point for the search (instead of the current Object under
+calculation, </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'><a href="#_Parent_Object:_p">THIS</a></span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>) and the specific lag <i>lag</i> if different
+from current time step. The search process for <i>obj_Lab</i> is similar to </span><span
+class=MsoHyperlink><span lang=EN-US style='font-family:"Courier New";
+mso-ansi-language:EN-US'><a href="#_SEARCH(_&quot;obj_Lab&quot;_),">SEARCH(…)</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
 
 <h2><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
@@ -8536,8 +8536,8 @@ lang=EN-US style='mso-ansi-language:EN-US'> family.<o:p></o:p></span></p>
 
 <h2><span lang=EN-US style='mso-ansi-language:EN-US'>Warning<o:p></o:p></span></h2>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>If <i>Lab</i> is a
-Variable, these Macros will not trigger the computation of the Equation for <i>Lab</i>
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>If <i>Lab</i> is a Variable,
+these Macros will not trigger the computation of the Equation for <i>Lab</i>
 before the multiplication is performed. That is, if <i>Lab</i> was not yet
 computed in the current period (<i>t</i>), the last available value for <i>Lab</i>
 is used as the base for the multiplication and the result will be saved as the
@@ -8765,15 +8765,15 @@ ADDNOBJS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot;, <i>num</i> )<br>
 ADDNOBJL( &quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>t_upd </i>), ADDNOBJLS( <i>obj</i>,
 &quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>t_upd</i> )<o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>These
-Macros add one (or more) new instance(s) to the Object named <i>obj_Lab</i>
-descending from <i>obj</i>, or to <a href="#_Parent_Object:_p"><span
-class=Cdigo><span style='color:blue'>THIS</span></span></a> if <i>obj</i> is
-not specified. </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>ADDOBJ(…)</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
-returns a pointer to the (first) newly created Object. More than one Object
-instance can be created at once if their number <i>num</i> is informed in the </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>ADDNOBJ(…)</span></span><span
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>These Macros
+add one (or more) new instance(s) to the Object named <i>obj_Lab</i> descending
+from <i>obj</i>, or to <a href="#_Parent_Object:_p"><span class=Cdigo><span
+style='color:blue'>THIS</span></span></a> if <i>obj</i> is not specified. </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>ADDOBJ(…)</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> returns a pointer to the (first)
+newly created Object. More than one Object instance can be created at once if
+their number <i>num</i> is informed in the </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>ADDNOBJ(…)</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> formats. In this case, a pointer is
 returned only to the first created Object instance. The additional instances
 can be easily reached by using the </span><span class=Cdigo><span lang=EN-US
@@ -8811,9 +8811,9 @@ lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
 EN-US'>obj_Lab</span></i><span lang=EN-US style='mso-ansi-language:EN-US'> <b>must</b>
 be contained in (a son of) the Object instance <i>obj </i>or in the current
 instance (<a href="#_Parent_Object:_p"><span class=Cdigo><span
-style='color:blue'>THIS</span></span></a>) of the Variable being computed,
-otherwise the Macros produce an error and stop the simulation. Differently from
-most other Macros, </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+style='color:blue'>THIS</span></span></a>) of the Variable being computed, otherwise
+the Macros produce an error and stop the simulation. Differently from most
+other Macros, </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'>ADDOBJ(…)</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>never
 performs searching across the model structure, unlike </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'><a href="#_SEARCH(_&quot;obj_Lab&quot;_),">SEARCH(…)</a></span></span><span
@@ -9060,8 +9060,8 @@ href="#_SEARCH_CND(_&quot;Lab&quot;,_value">SEARCH_CND[…]</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, and should be used with extreme
 care.<o:p></o:p></span></p>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>Actual Object instance
-deletion may be postponed if the Variable Equation in which the Macro </span><span
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>Actual Object instance deletion
+may be postponed if the Variable Equation in which the Macro </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>DELETE(…)</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> is invoked as part of the
 computation of another Variable in the same Object instance. In this case, <i>only</i>
@@ -9132,10 +9132,10 @@ In case there are more than one chain of Object instances with label <i>obj_Lab<
 the Macro sorts only the first set found by exploring the model with the usual
 full search strategy (see </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'><a href="#_SEARCH(_&quot;obj_Lab&quot;_),">SEARCH(…)</a></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>). If <i>obj</i> is specified, the search
-for the group of instances to be sorted starts from <i>obj</i>. The Macros can
-optionally consider the specific <i>lag</i> for Variable <i>Lab1</i> (and <i>Lab2</i>)
-if different from current time step.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'>). If <i>obj</i> is specified, the
+search for the group of instances to be sorted starts from <i>obj</i>. The
+Macros can optionally consider the specific <i>lag</i> for Variable <i>Lab1</i>
+(and <i>Lab2</i>) if different from current time step.<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>The </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>SORT2(…)</span></span><span
@@ -9190,8 +9190,8 @@ Variables.<o:p></o:p></span></p>
 <i>num</i> )<br>
 SHOOK, SHOOKS( <i>obj</i> )<o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>These
-Macros return a pointer to another Object previously “<a
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>These Macros
+return a pointer to another Object previously “<a
 href="#_Hook_pointers:_HOOK(…)">hooked</a>” to the current Object instance </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
 href="#_Parent_Object:_p">THIS</a></span></span><span lang=EN-US
@@ -9357,8 +9357,8 @@ color:#00B050;mso-ansi-language:EN-US'><br>
 consumer.</span></span><br>
 <span class=Cdigo><span style='color:#00B050'>Look whether the product breaks
 down or not. In the first case choose a new product.</span></span><br>
-<span class=Cdigo><span style='color:#00B050'>Dynamic HOOK( 0 ) is the consumers'
-free pointer containing the firm used by the consumer.</span></span><br>
+<span class=Cdigo><span style='color:#00B050'>Dynamic HOOK( 0 ) is the
+consumers' free pointer containing the firm used by the consumer.</span></span><br>
 <span class=Cdigo><span style='color:#00B050'>*/</span></span><br>
 </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>if (
 COUNT_HOOK == 0 )</span></span><span lang=EN-US style='font-family:"Courier New";
@@ -9420,12 +9420,12 @@ EN-US'><o:p></o:p></span></p>
 EN-US'>RESULT( v[1] )</span></span><span lang=EN-US style='mso-ansi-language:
 EN-US'><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Of course,
-as only a single hook is needed for each <i>Consumer</i> object, in this
-example one could have used the static (non-numbered) hook, which is
-pre-allocated. To do so, simply replace </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>HOOK( 0 )</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> with </span><span class=Cdigo><span
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Of course, as
+only a single hook is needed for each <i>Consumer</i> object, in this example
+one could have used the static (non-numbered) hook, which is pre-allocated. To
+do so, simply replace </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>HOOK( 0 )</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> with </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>SHOOK</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>WRITE_HOOK( 0, cur )</span></span><span
@@ -9572,12 +9572,12 @@ lang=EN-US style='mso-ansi-language:EN-US'> returns the number of allocated <a
 href="#_Hook_pointers:_HOOK(…)">dynamic hooks</a> (initialized or not). Hooks
 may be counted for the current Object instance </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'><a href="#_Parent_Object:_p">THIS</a></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> (the one containing the
-Variable/Function being computed) or to the one <a
-href="#_Temporary_Object's_pointers:">pointed by <i>obj</i></a>. Counting for
-an Object without hooks added by </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'><a href="#_ADDHOOK(_num_),">ADDHOOK(…)</a></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> return zero.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> (the one containing the Variable/Function
+being computed) or to the one <a href="#_Temporary_Object's_pointers:">pointed
+by <i>obj</i></a>. Counting for an Object without hooks added by </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
+href="#_ADDHOOK(_num_),">ADDHOOK(…)</a></span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> return zero.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Please note
 that hooks are numbered from zero to the number of allocated hooks <i>minus one</i>.
@@ -9610,13 +9610,13 @@ LEFT_LAT, LEFT_LATS( <i>obj</i> )<br>
 RIGHT_LAT, RIGHT_LATS( <i>obj</i> )<br>
 UP_LAT, UP_LATS( <i>obj</i> )<o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>These
-Macros simplify moving in an <a href="#_Object’s_relatives:_up,">Object
-structure</a> created in lattice format (<i>n</i> instances of a top Object
-type, each one composed by a single descending Object which also has a single
-descending and so on, up to <i>m</i> levels). If an Object instance <i>obj</i>
-is specified, or the current Object instance </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'><a href="#_Parent_Object:_p">THIS</a></span></span><span
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>These Macros
+simplify moving in an <a href="#_Object’s_relatives:_up,">Object structure</a>
+created in lattice format (<i>n</i> instances of a top Object type, each one
+composed by a single descending Object which also has a single descending and
+so on, up to <i>m</i> levels). If an Object instance <i>obj</i> is specified,
+or the current Object instance </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'><a href="#_Parent_Object:_p">THIS</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> otherwise, a pointer to the
 corresponding down, left, right, or up neighbor instance in the lattice is
 returned. If <i>obj</i> or </span><span class=Cdigo><span lang=EN-US
@@ -9806,11 +9806,11 @@ name="WRITE_LAT"></a><span lang=EN-US style='mso-fareast-font-family:"Times New 
 mso-ansi-language:EN-US'>WRITE_LAT( <i>row</i>, <i>col </i>)<br>
 WRITE_LAT( <i>row</i>, <i>col</i>, <i>color</i> ) <o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>These
-Macros write to one cell in the lattice, modifying its color. The change is
-applied to the lattice cell in line <i>row</i> and column <i>col</i> to the
-color value defined by <i>color</i>. If <i>color</i> is not specified, it is
-set to black (1).<o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>These Macros
+write to one cell in the lattice, modifying its color. The change is applied to
+the lattice cell in line <i>row</i> and column <i>col</i> to the color value
+defined by <i>color</i>. If <i>color</i> is not specified, it is set to black
+(1).<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The lattice
 origin (1, 1) is at the upper-left corner of the graphical window. Only
@@ -9963,8 +9963,8 @@ lang=EN-US style='mso-ansi-language:EN-US'> for an example).<o:p></o:p></span></
 style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN-US'>LSD
 Networks<o:p></o:p></span></h1>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>LSD Network tools provide
-Macros to configure a set of LSD Object instances, typically a <a
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>LSD Network tools provide Macros
+to configure a set of LSD Object instances, typically a <a
 href="#_Object’s_relatives:_up,">brotherhood chain</a>, as a network. Such
 Object instances become the network nodes and any topology of directed links
 can be built over them. All Network Macros operate on a special data structure
@@ -9976,11 +9976,11 @@ using two directed arcs (links) in opposite directions.<o:p></o:p></span></p>
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Each LSD Object can have a
 single Node and so participate in a single Network. Also, only instances which
 are part of a single <a href="#_Object’s_relatives:_up,">brotherhood chain</a>,
-that is, have the same name (label) and parent Object, can be handled as an
-entity by network-level Macros. However, multiple Networks can coexist in a
-model, given that each of them is based on Nodes associated to different
-chains. Additionally, Object instances which are not brothers can use some of
-the basic Network Macros that do not operate over an entire Network/<a
+that is, have the same name (label) and parent Object, can be handled as an entity
+by network-level Macros. However, multiple Networks can coexist in a model,
+given that each of them is based on Nodes associated to different chains.
+Additionally, Object instances which are not brothers can use some of the basic
+Network Macros that do not operate over an entire Network/<a
 href="#_Object’s_relatives:_up,">brotherhood chain</a> (typically the ones
 which do not use the chain name “<i>node_Obj</i>”).<o:p></o:p></span></p>
 
@@ -10164,12 +10164,11 @@ lang=EN-US style='mso-ansi-language:EN-US'>: density (including loops)<o:p></o:p
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>STAT_NODE(…)</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> Macros return the number of
-outgoing Links from the Node indicated by <a
-href="#_Temporary_Object's_pointers:">Object pointer</a> <i>node_obj</i>, or
-the current Node </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'><a href="#_Parent_Object:_p">THIS</a></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> otherwise.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> Macros return the number of outgoing
+Links from the Node indicated by <a href="#_Temporary_Object's_pointers:">Object
+pointer</a> <i>node_obj</i>, or the current Node </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'><a href="#_Parent_Object:_p">THIS</a></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> otherwise.<o:p></o:p></span></p>
 
 <div align=center>
 
@@ -10451,8 +10450,8 @@ style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
 &quot;<i>node_Lab</i>&quot;, &quot;<i>gen</i>&quot;, <i>nodes</i>, <i>par1</i>,
 <i>par2</i> )<o:p></o:p></span></h1>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>These Macros create a
-Network using as Nodes the Object instances with label <i>node_Lab</i> that are
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>These Macros create a Network
+using as Nodes the Object instances with label <i>node_Lab</i> that are
 descendants from current Object instance </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'><a href="#_Parent_Object:_p"><span
 style='color:gray;text-decoration:none;text-underline:none'><span
@@ -10625,10 +10624,10 @@ mso-ansi-language:EN-US'>LOAD_NET<a name="_SAVE_NET()"></a>( &quot;<i>node_Lab</
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>LOAD_NET(…)</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> Macros read a network in Pajek format
-from file named “filename_xx.net” (where xx is the current pseudorandom number
-generator seed, see </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'><a href="#_RND_SETSEED(_seed_)">RND_SEED</a></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> Macros read a network in Pajek
+format from file named “filename_xx.net” (where xx is the current pseudorandom
+number generator seed, see </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'><a href="#_RND_SETSEED(_seed_)">RND_SEED</a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) using as Nodes the Object
 instances with label <i>node_Lab</i> that are descendants from current Object
 instance </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
@@ -10675,10 +10674,9 @@ is particularly useful when performing Monte Carlo analysis.<o:p></o:p></span></
  <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><a
-  name="_SNAP_NET(_&quot;node_Lab&quot;,_&quot;filename"></a><a
-  name="_SNAP_NET()"></a><span style='font-size:10.0pt;color:black;mso-color-alt:
-  windowtext'><a href="#top"><span style='color:red;text-decoration:none;
-  text-underline:none'>&#9650;Top</span></a></span></p>
+  name="_SNAP_NET()"></a><a name="_SNAP_NET(_&quot;node_Lab&quot;,_&quot;filename"></a><span
+  style='font-size:10.0pt;color:black;mso-color-alt:windowtext'><a href="#top"><span
+  style='color:red;text-decoration:none;text-underline:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -10744,8 +10742,8 @@ lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
 EN-US'>ADDNODE( <i>id</i>, &quot;<i>name</i>&quot; ), ADDNODES( <i>obj</i>, <i>id</i>,
 &quot;<i>name</i>&quot; )<o:p></o:p></span></h1>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>These Macros add the Node
-data structure to the Object instance indicated by <a
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>These Macros add the Node data
+structure to the Object instance indicated by <a
 href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i>, or the
 current Object </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'><a href="#_Parent_Object:_p"><span style='color:gray;text-decoration:
@@ -11326,9 +11324,9 @@ lang=EN-US style='font-family:Symbol;mso-ansi-language:EN-US'>·</span><span
 lang=EN-US style='font-size:7.0pt;font-family:"Times New Roman",serif;
 mso-ansi-language:EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b><span
 lang=EN-US style='mso-ansi-language:EN-US'>lnormcdf( <i>mean</i>, <i>dev</i>, <i>x</i>
-)</span></b><span lang=EN-US style='mso-ansi-language:EN-US'>: the lognormal
-cumulative distribution with mean <i>mean</i> and deviation <i>dev</i> from
-minus infinity to <i>x</i><o:p></o:p></span></p>
+)</span></b><span lang=EN-US style='mso-ansi-language:EN-US'>: the lognormal cumulative
+distribution with mean <i>mean</i> and deviation <i>dev</i> from minus infinity
+to <i>x</i><o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 lang=EN-US style='font-family:Symbol;mso-ansi-language:EN-US'>·</span><span
@@ -11549,9 +11547,9 @@ license.<o:p></o:p></span></p>
 <h1><a name="_Advanced_LSD_coding_1"></a><span lang=EN-US style='mso-fareast-font-family:
 "Times New Roman";mso-ansi-language:EN-US'>Advanced LSD coding <o:p></o:p></span></h1>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>The commands listed here
-provide special operations rarely necessary for basic models. They normally
-concern only advanced modelers.<o:p></o:p></span></p>
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>The commands listed here provide
+special operations rarely necessary for basic models. They normally concern
+only advanced modelers.<o:p></o:p></span></p>
 
 <h2><a name="_#define_EIGENLIB"></a><a name=eigenlib></a><span lang=EN-US
 style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN-US'>#define
@@ -11816,8 +11814,8 @@ color:gray;mso-ansi-language:EN-US'><br>
 </span><span class=Cdigo><span lang=EN-US style='color:#00B050;mso-ansi-language:
 EN-US'>/* </span></span><span lang=EN-US style='font-family:"Courier New";
 color:#00B050;mso-ansi-language:EN-US'><br>
-<span class=Cdigo><span style='color:#00B050'>This function returns a progressive
-value each time it is requested </span></span><br>
+<span class=Cdigo><span style='color:#00B050'>This function returns a
+progressive value each time it is requested </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>*/ </span></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
@@ -12018,9 +12016,9 @@ non-error message.<o:p></o:p></span></p>
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>FAST</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> and </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>FAST_FULL</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> modes reduce the information
-available to LSD when an error occurs. It is recommended to turn it off during
-the debugging of Equations’ code.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> modes reduce the information available
+to LSD when an error occurs. It is recommended to turn it off during the
+debugging of Equations’ code.<o:p></o:p></span></p>
 
 <h2><a name="_LAST_CALC(_obj,_&quot;lab&quot;"></a><a name="LAST_CALC"></a><a
 name="_LAST_CALC(_&quot;lab&quot;_),"></a><span lang=EN-US style='mso-ansi-language:
@@ -12070,11 +12068,10 @@ simulation is running in </span><span class=Cdigo><u><span lang=EN-US
 style='color:blue;mso-ansi-language:EN-US'><a href="#_PARAMETER">OBSERVE(…)</a></span></u></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> mode. Use </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>PLOG(…)</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> (as “priority” log) to be able to
-present messages that are required in any running mode (</span><span
-class=Cdigo><u><span lang=EN-US style='color:blue;mso-ansi-language:EN-US'><a
-href="#_PARAMETER">OBSERVE(…)</a></span></u></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> or </span><span class=Cdigo><u><span
+lang=EN-US style='mso-ansi-language:EN-US'> (as “priority” log) to be able to present
+messages that are required in any running mode (</span><span class=Cdigo><u><span
+lang=EN-US style='color:blue;mso-ansi-language:EN-US'><a href="#_PARAMETER">OBSERVE(…)</a></span></u></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> or </span><span class=Cdigo><u><span
 lang=EN-US style='color:blue;mso-ansi-language:EN-US'><a href="#_PARAMETER">FAST(…)</a></span></u></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>).<o:p></o:p></span></p>
 
@@ -12209,9 +12206,9 @@ style='mso-ansi-language:EN-US'>#define NO_POINTER_CHECK</span></span></a><span
 style='mso-bookmark:_Hlk96886614'></span><span lang=EN-US style='mso-ansi-language:
 EN-US'> may be also used at the beginning of the equation file (<i>before</i>
 the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>#include
-fun_head_fast.h</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> line).
-This way, pointer checking is completely disabled, which provides a small
-performance gain when compared to using Macro </span><span class=Cdigo><span
+fun_head_fast.h</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+line). This way, pointer checking is completely disabled, which provides a
+small performance gain when compared to using Macro </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>NO_POINTER_CHECK</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> in the equations’ code. However, in
 this case pointer checking is permanently disabled at the compilation time, so
@@ -12621,19 +12618,19 @@ style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN-US'>TSEARC
 <i>pos</i> )<br>
 INIT_TSEARCH( &quot;<i>obj_Lab</i>&quot; ), INIT_TSEARCHS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot;
 )<br>
-INIT_TSEARCHT( &quot;<i>obj_Lab</i>&quot;, <i>num</i> ), INIT_TSEARCHTS( <i>obj</i>,
-&quot;<i>obj_Lab</i>&quot;, <i>num</i> )<o:p></o:p></span></h2>
+TSEARCH_SET( &quot;<i>obj_Lab</i>&quot; ), TSEARCH_SETS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot;
+)<o:p></o:p></span></h2>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>Turbo searches Object
-instances contained in the level immediately below the current (</span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
-href="#_Parent_Object:_p">THIS</a></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>) or the chosen (<i>obj</i>) Object instance.
-The search process for <i>Lab</i> is similar to </span><span class=Cdigo><u><span
-lang=EN-US style='color:blue;mso-ansi-language:EN-US'><a
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>TSEARCH(…)</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> Macros search Object instances
+contained in the level immediately below the current (</span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'><a href="#_Parent_Object:_p">THIS</a></span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>) or the chosen (<i>obj</i>) Object
+instance. The search process for <i>Lab</i> is similar to </span><span
+class=Cdigo><u><span lang=EN-US style='color:blue;mso-ansi-language:EN-US'><a
 href="#_SEARCH(_&quot;obj_Lab&quot;_),">SEARCH(…)</a></span></u></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>. Instead of searching for a name
-(like </span><span class=Cdigo><u><span lang=EN-US style='color:blue;
+lang=EN-US style='mso-ansi-language:EN-US'>. However, instead of searching for
+a name (like </span><span class=Cdigo><u><span lang=EN-US style='color:blue;
 mso-ansi-language:EN-US'><a href="#_SEARCH(_&quot;obj_Lab&quot;_),">SEARCH(…)</a></span></u></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) or a value (like </span><span
 class=Cdigo><u><span lang=EN-US style='color:blue;mso-ansi-language:EN-US'><a
@@ -12641,15 +12638,17 @@ href="#_SEARCH_CND(_&quot;Lab&quot;,_value">SEARCH_CND(…)</a></span></u></span><
 lang=EN-US style='mso-ansi-language:EN-US'>), </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>TSEARCH(…)</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> family looks for the Object
-instance position (<i>pos</i>) in the brotherhood chain of Object instances
-named <i>obj_Lab</i>. <i>pos</i> can be set from 1 (first instance in the
-chain) up to the total number of instances in the brotherhood. <o:p></o:p></span></p>
+instance position (<i>pos</i>) in the brotherhood-chain of Object instances
+named <i>obj_Lab</i>. <i>pos</i> can be set from 1 (for the first instance in
+the chain) up to the total number of instances in the brotherhood. <o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>A pointer to the instance
 in the <i>pos</i> position of the chain is returned by </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>TSEARCH(…)</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> Macros. If <i>pos</i> is larger
-than the number of existing Object instances, the last one will be returned.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> Macros. If <i>pos</i> is less than
+1 or larger than the number of existing Object instances, a </span><span
+class=Cdigo>NULL</span><span style='mso-ansi-language:EN-US'> <span lang=EN-US>pointer
+is returned.<o:p></o:p></span></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Before the first usage of </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>TSEARCH(…)</span></span><span
@@ -12659,16 +12658,8 @@ class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>INIT_TSEARCH(…)</sp
 lang=EN-US style='mso-ansi-language:EN-US'> Macro. If </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>TSEARCH(…)</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>is used before initialization, an
-error is produced and the simulation stops. If the suffix “</span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>T</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>” initialization Macro version is
-selected, the total number (<i>num</i>) of Object instances in the chain has to
-be informed. This speed up the initialization search procedure a little bit but
-has no effect on the subsequent </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>TSEARCH(…)</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> performance.<o:p></o:p></span></p>
-
-<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>INIT_TSEARCH(…)</span></span><span
+error is produced and the simulation stops. </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>INIT_TSEARCH(…)</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> Macros return the number of Object
 instances found for initialization.<o:p></o:p></span></p>
 
@@ -12683,8 +12674,25 @@ initialized (so the search data structure exists and can be used).
 Initialization must be repeated any time Object instances are added or deleted
 to/from a previously initialized Object brotherhood, before using </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>TSEARCH(…)</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> again (or unpredictable results are
-produced).<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> again, as the required data
+structures are removed in those circumstances.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>To check if
+the data structure required by </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>TSEARCH(…)</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> is set, that is, it exists and is updated, the
+</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>TSEARCH_SET(…)</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> Macros can be used. They return 0
+(zero) if there is NO data structure set for <i>obj_Lab</i> in the parent
+Object (</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>THIS</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>) or
+in <i>obj</i>., meaning that a call of </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>TSEARCH(…)</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> on it would produce an error. If a
+positive value is returned, the structure is still available for </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>TSEARCH(…)</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>, and it indicates de number of
+Object instances.<o:p></o:p></span></p>
 
 <h2><a name="_TSEARCH_CND(_&quot;obj_Lab&quot;,_pos"></a><a
 name="_TSEARCH_CND(_&quot;Lab&quot;,_value"></a><span lang=EN-US
@@ -12692,7 +12700,9 @@ style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN-US'>TSEARC
 &quot;<i>Lab</i>&quot;, <i>value</i> ), TSEARCH_CNDS( <i>obj</i>, &quot;<i>Lab</i>&quot;,
 <i>value</i> )<br>
 INIT_TSEARCH_CND( &quot;<i>Lab</i>&quot; ), INIT_TSEARCH_CNDS( <i>obj</i>,
-&quot;<i>Lab</i>&quot; )<o:p></o:p></span></h2>
+&quot;<i>Lab</i>&quot; )<br>
+TSEARCH_CND_SET( &quot;<i>Lab</i>&quot; ), TSEARCH_CND_SETS( <i>obj</i>, &quot;<i>Lab</i>&quot;
+)<o:p></o:p></span></h2>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Turbo searches in and below
 the current (</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
@@ -12707,10 +12717,10 @@ lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>It performs similarly to </span><span
 class=Cdigo><u><span lang=EN-US style='color:blue;mso-ansi-language:EN-US'><a
 href="#_SEARCH_CND(_&quot;Lab&quot;,_value">SEARCH_CND(…)</a></span></u></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> Macros, but using a much faster
-method to retrieve the desired instance, in particular when searching among
-many of them. The Variable or Parameter values are supposed to be unique for
-each Object instance. <o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'> Macros, but using a much faster method
+to retrieve the desired instance, in particular when searching among many of
+them. The Variable or Parameter values are supposed to be unique for each
+Object instance. <o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>The Macros return the
 pointer to the first found instance of Object <i>obj_Lab</i> or </span><span
@@ -12736,12 +12746,19 @@ time the values stored in the Variable or Parameter <i>Lab</i> have changed, in
 any Object instance, or when Object instances are added or deleted to/from the
 set of instances. Performing </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>TSEARCH_CND(…)</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> under such conditions will produce undefined
-behavior.<o:p></o:p></span></p>
+style='mso-ansi-language:EN-US'> under such conditions will produce errors (added/deleted
+instances) or undefined behavior (changed values).<o:p></o:p></span></p>
 
 <p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>INIT_TSEARCH_CND(…)</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> Macros return the number of Object
-instances found for initialization.<o:p></o:p></span></p>
+instances found for initialization. Turbo searching initialization can be checked
+with the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>TSEARCH_CND_SET(…)</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'> Macros. They return 0 (zero) if a brotherhood of objects under </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>THIS</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> or <i>obj</i> was not initialized for
+Variable or Parameter <i>Lab</i>, or a positive value otherwise. This value
+represents the number of Object instances in the brotherhood.<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Each set of Object
 instances under a common parent (a brotherhood) can have a single Variable or
@@ -12881,10 +12898,10 @@ ADDEXT_INIT( <i>class</i><span style='mso-bidi-font-style:italic'>, <i>initializ
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>These Macros adds an
 arbitrary C++ data extension of type <i>class</i> to the current LSD Object
 under computation, allocating memory space for it. If an <a
-href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is supplied,
-the data extension is added to this specific Object. The data extension can be
-from a simple scalar variable to a fully defined C++ object like a </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>class</span></span><span
+href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is
+supplied, the data extension is added to this specific Object. The data
+extension can be from a simple scalar variable to a fully defined C++ object
+like a </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>class</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> or a </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>struct</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>. Data extension allocation is
@@ -13142,8 +13159,8 @@ style='color:gray;text-decoration:none;text-underline:none'><span
 style='mso-field-code:" HYPERLINK  \\l \0022_Current_Object\:_THIS\0022 "'><u><span
 style='color:blue'>THIS</span></u></span></span></a></span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> under computation, or in the Object
-pointed by <i>obj</i>, if present, deallocating any allocated memory space. If
-the target LSD Object has no data extension set previously by </span><span
+pointed by <i>obj</i>, if present, deallocating any allocated memory space. If the
+target LSD Object has no data extension set previously by </span><span
 class=Cdigo><u><span lang=EN-US style='color:blue;mso-ansi-language:EN-US'><a
 href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
@@ -13277,8 +13294,8 @@ lang=EN-US style='mso-ansi-language:EN-US'> under computation, or in the Object
 pointed by <i>obj</i>, if present. <o:p></o:p></span></p>
 
 <p><b><span lang=EN-US style='mso-ansi-language:EN-US'>Warning:</span></b><span
-lang=EN-US style='mso-ansi-language:EN-US'> the data extension <b>must</b> be
-set before using this Macro. If the target LSD Object has no data extension set
+lang=EN-US style='mso-ansi-language:EN-US'> the data extension <b>must</b> be set
+before using this Macro. If the target LSD Object has no data extension set
 previously by </span><span class=Cdigo><u><span lang=EN-US style='color:blue;
 mso-ansi-language:EN-US'><a href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, a LSD run time crash will happen.<o:p></o:p></span></p>
@@ -13372,12 +13389,13 @@ normal'>c_obj</i>, <i style='mso-bidi-font-style:normal'>value</i>, <i
 style='mso-bidi-font-style:normal'>…</i> )<o:p></o:p></span></h2>
 
 <p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>WRITE_EXT(…)</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> macros write <i>value</i> to the contents
-of a C++ variable named <i>var</i> contained within an extension of type <i>class</i>
-(a C++ </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>class</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> or </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>struct</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>) from the current Object </span><span
+lang=EN-US style='mso-ansi-language:EN-US'> macros write <i>value</i> to the
+contents of a C++ variable named <i>var</i> contained within an extension of
+type <i>class</i> (a C++ </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>class</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> or </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>struct</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>) from the current Object </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
 href="#_Parent_Object:_p"><span style='color:gray;text-decoration:none;
 text-underline:none'><span style='mso-field-code:" HYPERLINK  \\l \0022_Current_Object\:_THIS\0022 "'><u><span
@@ -13422,8 +13440,8 @@ example. <o:p></o:p></span></p>
  1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
  <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><a name="close_sim"></a><a
-  name="_HOOK(_num_),"></a><a name="_Basic_C++_coding"></a><span
+  <p class=MsoNormal align=center style='text-align:center'><a
+  name="_Basic_C++_coding"></a><a name="_HOOK(_num_),"></a><a name="close_sim"></a><span
   style='font-size:10.0pt;color:black;mso-color-alt:windowtext'><a href="#top"><span
   style='color:red;text-decoration:none;text-underline:none'>&#9650;Top</span></a></span></p>
   </td>
@@ -13515,9 +13533,8 @@ mathematical operations, using the parentheses to group relevant priorities:<o:p
 EN-US'>a = b + 3 – d / (e + g) * (h + i);</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Less
-obviously, it is also possible to use the same variable on both sides of the
-assignment:<o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Less obviously,
+it is also possible to use the same variable on both sides of the assignment:<o:p></o:p></span></p>
 
 <p class=MsoNormal><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'>a = a + 32;</span></span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
@@ -13613,9 +13630,9 @@ class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>--</span></span><sp
 lang=EN-US style='mso-ansi-language:EN-US'>) may work differently depending on
 whether it is used after or before a variable symbol in some situations. If it
 is used after (</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>a++</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>) the
-command first assigns the current value, and then increases it by 1. Instead,
-if </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>++</span></span><span
+EN-US'>a++</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>) the command
+first assigns the current value, and then increases it by 1. Instead, if </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>++</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> is used before a variable (</span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>++a</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>), it firstly increases its value,

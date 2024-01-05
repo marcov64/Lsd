@@ -593,16 +593,19 @@ const bool no_pointer_init = true;
 #define UPDATE_REC ( p->update( true, true ) )
 #define UPDATE_RECS( O ) ( CHK_PTR_VOID( O ) O->update( true, true ) )
 
-#define INIT_TSEARCH( X ) ( p->initturbo( ( char * ) X, 0 ) )
-#define INIT_TSEARCHT( X, Y ) ( p->initturbo( ( char * ) X, Y ) )
-#define INIT_TSEARCHS( O, X ) ( CHK_PTR_DBL( O ) O->initturbo( ( char * ) X, 0 ) )
-#define INIT_TSEARCHTS( O, X, Y ) ( CHK_PTR_DBL( O ) O->initturbo( ( char * ) X, Y ) )
-#define TSEARCH( X, Y ) ( p->turbosearch( ( char * ) X, 0, Y ) )
-#define TSEARCHS( O, X, Y ) ( CHK_PTR_OBJ( O ) O->turbosearch( ( char * ) X, 0, Y ) )
+#define INIT_TSEARCH( X ) ( p->initturbo( ( char * ) X ) )
+#define INIT_TSEARCHS( O, X ) ( CHK_PTR_DBL( O ) O->initturbo( ( char * ) X ) )
+#define TSEARCH( X, Y ) ( p->turbosearch( ( char * ) X, Y ) )
+#define TSEARCHS( O, X, Y ) ( CHK_PTR_OBJ( O ) O->turbosearch( ( char * ) X, Y ) )
+#define TSEARCH_SET( X ) ( p->turboset( ( char * ) X ) )
+#define TSEARCH_SETS( O, X ) ( CHK_PTR_DBL( O ) O->turboset( ( char * ) X ) )
+
 #define INIT_TSEARCH_CND( X ) ( p->initturbo_cond( ( char * ) X ) )
 #define INIT_TSEARCH_CNDS( O, X ) ( CHK_PTR_DBL( O ) O->initturbo_cond( ( char * ) X ) )
 #define TSEARCH_CND( X, Y ) ( p->turbosearch_cond( ( char * ) X, Y ) )
 #define TSEARCH_CNDS( O, X, Y ) ( CHK_PTR_OBJ( O ) O->turbosearch_cond( ( char * ) X, Y ) )
+#define TSEARCH_CND_SET( X ) ( p->turboset_cond( ( char * ) X ) )
+#define TSEARCH_CND_SETS( O, X ) ( CHK_PTR_DBL( O ) O->turboset_cond( ( char * ) X ) )
 
 #define V_CHEAT( X, Y ) ( p->cal( Y, ( char * ) X, 0 ) )
 #define V_CHEATL( X, L, Y ) ( p->cal( Y, ( char * ) X, L ) )
@@ -708,11 +711,14 @@ char msg[ MAX_BUFF_SIZE ];							// legacy auxiliary buffer
 #define ADDNOBJL_EX( X, Y, Z, W ) ADDNOBJ_EXL( X, Y, Z, W )
 #define ADDNOBJS_EX( O, X, Y, Z ) ADDNOBJ_EXS( O, X, Y, Z )
 #define ADDNOBJLS_EX( O, X, Y, Z, W ) ADDNOBJ_EXLS( O, X, Y, Z, W )
+#define INIT_TSEARCHT( X, Y ) INIT_TSEARCH( X )
+#define INIT_TSEARCHTS( O, X, Y ) INIT_TSEARCHS( O, X )
 #define TSEARCH_INI( X ) INIT_TSEARCH( X )
 #define TSEARCHS_INI( O, X ) INIT_TSEARCHS( O, X )
-#define TSEARCHT_INI( X, Y ) INIT_TSEARCHT( X, Y)	// the number of objects no longer required
-#define TSEARCHT( X, Y, Z ) TSEARCH( X, Z )			// when calling turbo search, as it is already
-#define TSEARCHTS( O, X, Y, Z ) TSEARCHS( O, X, Z )	// stored in the bridge in faster log form
+#define TSEARCHT_INI( X, Y ) INIT_TSEARCH( X )
+#define TSEARCHTS_INI( O, X, Y ) INIT_TSEARCHS( O, X )
+#define TSEARCHT( X, Y, Z ) TSEARCH( X, Z )
+#define TSEARCHTS( O, X, Y, Z ) TSEARCHS( O, X, Z )
 #define SORTS2( O, X, Y, L, Z ) SORT2S( O, X, Y, L, Z )
 #define RNDDRAWFAIR( X ) RNDDRAW_FAIR( X )
 #define RNDDRAWFAIRS(Z, X ) RNDDRAW_FAIRS(Z, X )

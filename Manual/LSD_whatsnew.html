@@ -121,9 +121,34 @@ applications.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New configuration file format.</span></b><span
 lang=EN-US> LSD configuration files (</span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
-lang=EN-US>) are now organized in open, standards-based xml format, allowing
-for the inclusion of additional data, increasing robustness to corruption, and
-safe manipulation by other applications, including text editors.</span></p>
+lang=EN-US>) are now organized in open, standards-based compressed XML format,
+allowing for the inclusion of additional data like network and sensitivity
+analysis information, increasing robustness to corruption, and safe
+manipulation by other applications, including text editors. Legacy
+configuration files can still be read and exported (basic model structure
+only). Reading of uncompressed XML format is also supported.</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Improved turbo searching.</span></b><span
+lang=EN-US> Faster and more robust turbo searching algorithms were added. New
+Macros to check for the turbo searching data structures (</span><span
+class=MsoHyperlink><span lang=EN-US style='font-family:"Courier New"'><a
+href="LSD_macros.html#TSEARCH">TSEARCH_SET(…)</a></span></span><span
+lang=EN-US>, </span><span class=MsoHyperlink><span lang=EN-US style='font-family:
+"Courier New"'><a href="LSD_macros.html#TSEARCH_CND">TSEARCH_CND_SET(…)</a></span></span><span
+lang=EN-US>) were added.</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Improved network file operations.</span></b><span
+lang=EN-US> Better support for importing and exporting Pajek-formatted network
+files, including </span><span class=Cdigo>*edgeslist</span><span lang=EN-US>
+sections, and more robust error checking and recovering. Network data is now
+saved by default in LSD configuration files (</span><span class=Cdigo><span
+lang=EN-US>.lsd</span></span><span lang=EN-US>).</span></p>
 
 <p class=MsoListParagraph style='margin-left:35.85pt'><span lang=EN-US>&nbsp;</span></p>
 
@@ -458,8 +483,8 @@ version 7.2.</span></p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>New embedded Tcl/Tk 8.6.12 for macOS Monterey support,
-new GCC 12 binaries for Windows, and many bug fixes.</span></p>
+</span></span><span lang=EN-US>New embedded Tcl/Tk 8.6.12 for macOS Monterey
+support, new GCC 12 binaries for Windows, and many bug fixes.</span></p>
 
 <p class=MsoListParagraph style='margin-left:35.85pt'><span lang=EN-US>&nbsp;</span></p>
 
@@ -620,8 +645,8 @@ lang=EN-US> A full HTML/PHP engine and associated tools to make any LSD model
 available to be used on the web by unexperienced users. Full modeler control of
 which configuration values are exposed. Complete validation of user settings.
 On-server simulation running. Extensive web-based analysis of results support,
-including time series plots. User configurations up and download. Results CSV data
-download.</span></p>
+including time series plots. User configurations up and download. Results CSV
+data download.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -790,11 +815,11 @@ minGW.</span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Parallel processing.</span></b><span
-lang=EN-US> The Equation for any multi-instanced Variable can be evaluated in
-parallel (by default in all CPU cores). Fine parallelization control (per
-Object type) to allow mixed parallel/serial evaluation in the same model
-(support any data model). Updated code profiler to indicate key candidate
-Objects for parallel processing.</span></p>
+lang=EN-US> The Equation for any multi-instanced Variable can be evaluated in parallel
+(by default in all CPU cores). Fine parallelization control (per Object type)
+to allow mixed parallel/serial evaluation in the same model (support any data
+model). Updated code profiler to indicate key candidate Objects for parallel
+processing.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US

@@ -439,7 +439,7 @@ double object::stats_net( const char *lab, double *r )
 	for ( ; cur != NULL; cur = go_brother( cur ) )	// scan all nodes
 		if ( cur->node != NULL )					// valid node?
 		{
-			double nLinks = (double) cur->node->nLinks;
+			double nLinks = ( double ) cur->node->nLinks;
 			if ( r[ 0 ] == 0. )						// first node?
 				r[ 3 ] = nLinks;						// update minimum
 			else
@@ -518,13 +518,13 @@ object *object::shuffle_nodes_net( const char *lab )
 	for ( numNodes = 0; cur != NULL;
 		  numNodes++, cur = go_brother( cur ) );	// count number of nodes
 
-	initturbo( lab, numNodes );						// seed the turbosearch linked list
+	initturbo( lab );								// seed the turbosearch linked list
 
 	for ( i = numNodes; i > 1; i-- )				// run the shuffling
 	{
-		j = (long) uniform_int( 1, i );
-		cur = turbosearch( lab, 0, (double) i );
-		cur1 = turbosearch( lab, 0, (double) j );
+		j = ( long ) uniform_int( 1, i );
+		cur = turbosearch( lab, ( double ) i );
+		cur1 = turbosearch( lab, ( double ) j );
 
 		if ( cur->node == NULL || cur1->node == NULL )
 		{
@@ -619,7 +619,7 @@ double object::init_stub_net( const char *lab, const char* gen, long numNodes, l
 	if ( ! strcmp( option, "RENYI-ERDOS" ) )
 	{
 		if ( par2 == 0 && numNodes != 0 && par1 != 0 )
-			par2 = (double) par1 / numNodes;		// compute parameter
+			par2 = ( double ) par1 / numNodes;		// compute parameter
 		if ( par2 > 0 )
 			return init_renyi_erdos_net( lab, numNodes, par2 );
 	}
@@ -898,7 +898,7 @@ long object::init_uniform_net( const char *lab, long numNodes, long outDeg )
 		cur->add_node_net( idNode++ );								// scan all nodes aplying ID numbers
 
 	numNodes = idNode - 1;											// effective number of nodes
-	initturbo( lab, numNodes );										// seed the turbosearch linked list
+	initturbo( lab );												// seed the turbosearch linked list
 
 	for ( numLinks = 0, cur = firstNode; cur != NULL; cur = go_brother( cur ) )
 	{
@@ -909,13 +909,13 @@ long object::init_uniform_net( const char *lab, long numNodes, long outDeg )
 			tryNode = idNode;
 			while ( ! newNode || tryNode == idNode )				// while no new link found
 			{
-				tryNode = (long) uniform_int( 1, numNodes );		// draw link (other node ID)
+				tryNode = ( long ) uniform_int( 1, numNodes );		// draw link (other node ID)
 				if ( cur->search_link_net( tryNode ) )				// link already exists?
 					newNode = false;								// yes
 				else
 					newNode = true;									// no, flag new link
 			}
-			cur1 = turbosearch( lab, 0, (double) tryNode );			// get target node object
+			cur1 = turbosearch( lab, ( double ) tryNode );			// get target node object
 			cur->add_link_net( cur1 );								// set link to found new link node ID
 			numLinks++;												// one more link
 		}
@@ -955,7 +955,7 @@ long object::init_renyi_erdos_net( const char *lab, long numNodes, double linkPr
 		cur->add_node_net( idNode++ );								// scan all nodes aplying ID numbers
 
 	numNodes = idNode - 1;											// effective number of nodes
-	initturbo( lab, numNodes );										// seed the turbosearch linked list
+	initturbo( lab );												// seed the turbosearch linked list
 
 	for ( numLinks = 0, startNode = 1; startNode < numNodes; startNode++ )
 	{																// for all nodes except last
@@ -963,8 +963,8 @@ long object::init_renyi_erdos_net( const char *lab, long numNodes, double linkPr
 		{															// and for all higher numbered nodes
 			if ( ran1( ) < linkProb )								// draws the existence of a link between both
 			{
-				cur = turbosearch( lab, 0, (double) startNode );	// searches first node object
-				cur1 = turbosearch( lab, 0, (double) endNode );		// searches second node object
+				cur = turbosearch( lab, ( double ) startNode );		// searches first node object
+				cur1 = turbosearch( lab, ( double ) endNode );		// searches second node object
 				cur->add_link_net( cur1 );							// create link start->end
 				cur1->add_link_net( cur );							// create link end->start
 
@@ -1008,7 +1008,7 @@ long object::init_circle_net( const char *lab, long numNodes, long outDeg )
 		cur->add_node_net( idNode++ );								// scan all nodes aplying ID numbers
 
 	numNodes = idNode - 1;											// effective number of nodes
-	initturbo( lab, numNodes );										// seed the turbosearch linked list
+	initturbo( lab );												// seed the turbosearch linked list
 
 	for ( numLinks = 0, cur = firstNode; cur != NULL; cur = go_brother( cur ) )
 	{
@@ -1027,7 +1027,7 @@ long object::init_circle_net( const char *lab, long numNodes, long outDeg )
 					lowNeigh -= numNodes;							// big jump down
 			}
 
-			cur1 = turbosearch( lab, 0, (double) lowNeigh );		// get target node object
+			cur1 = turbosearch( lab, ( double ) lowNeigh );			// get target node object
 
 			if ( cur->search_link_net( cur1->node->id ) == NULL )	// link doesn't exist yet
 			{
@@ -1096,7 +1096,7 @@ long object::init_small_world_net( const char *lab, long numNodes, long outDeg, 
 				newNode = idNode;									// look for a new node to create a link
 				while ( newNode == idNode )
 					newNode = (long) uniform_int( 1, numNodes );	// draw a random int different from this agent
-				cur1 = turbosearch( lab, 0, newNode );				// and get new linking node object
+				cur1 = turbosearch( lab, newNode );					// and get new linking node object
 
 				cur->add_link_net( cur1 );							// create a new link to the new neighbor
 				cur1->add_link_net( cur );							// and vice-versa
@@ -1147,7 +1147,7 @@ long object::init_scale_free_net( const char *lab, long numNodes, long outDeg, d
 		cur->add_node_net( idNode++ );								// scan all nodes aplying ID numbers
 
 	numNodes = idNode - 1;											// effective number of nodes
-	initturbo( lab, numNodes );										// seed the turbosearch linked list
+	initturbo( lab );												// seed the turbosearch linked list
 
 	for ( numLinks = 0, node1 = true, cur = firstNode; cur != NULL; cur = go_brother( cur ) )
 	{																// run through all nodes (first scan)
@@ -1261,51 +1261,51 @@ long object::init_lattice_net( int nRow, int nCol, const char *lab, int eightNei
 		}
 	}
 
-	initturbo( lab, numNodes );						// seed the turbosearch linked list
+	initturbo( lab );								// seed the turbosearch linked list
 
 	for ( i = j = 0, cur = search( lab ); cur != NULL; cur = go_brother( cur ) )
 	{
 		h = nCol * ( i == 0 ? nRow - 1 : i - 1 ) + j + 1;	// north
-		cur1 = turbosearch( lab, numNodes, h );
+		cur1 = turbosearch( lab, h );
 		cur->add_link_net( cur1, 0, 1 );
 
 		if ( eightNeigbr )
 		{
 			h = nCol * ( i == 0 ? nRow - 1 : i - 1 ) + ( j == nCol - 1 ? 0 : j + 1 ) + 1;
-			cur1 = turbosearch( lab, numNodes, h );			// northeast
+			cur1 = turbosearch( lab, h );			// northeast
 			cur->add_link_net( cur1, 0, 1 );
 		}
 
 		h = nCol * i + ( j == nCol - 1 ? 0 : j + 1 ) + 1;	// east
-		cur1 = turbosearch( lab, numNodes, h );
+		cur1 = turbosearch( lab, h );
 		cur->add_link_net( cur1, 0, 1 );
 
 		if ( eightNeigbr )
 		{
 			h = nCol * ( i == nRow - 1 ? 0 : i + 1 ) + ( j == nCol - 1 ? 0 : j + 1 ) + 1;
-			cur1 = turbosearch( lab, numNodes, h );			// southeast
+			cur1 = turbosearch( lab, h );			// southeast
 			cur->add_link_net( cur1, 0, 1 );
 		}
 
 		h = nCol * ( i == nRow - 1 ? 0 : i + 1 ) + j + 1;	// south
-		cur1 = turbosearch( lab, numNodes, h );
+		cur1 = turbosearch( lab, h );
 		cur->add_link_net( cur1, 0, 1 );
 
 		if ( eightNeigbr )
 		{
 			h = nCol * ( i == nRow - 1 ? 0 : i + 1 ) + ( j == 0 ? nCol - 1 : j - 1 ) + 1;
-			cur1 = turbosearch( lab, numNodes, h );			// southwest
+			cur1 = turbosearch( lab, h );			// southwest
 			cur->add_link_net( cur1, 0, 1 );
 		}
 
 		h = nCol * i + ( j == 0 ? nCol - 1 : j - 1 ) + 1;	// west
-		cur1 = turbosearch( lab, numNodes, h );
+		cur1 = turbosearch( lab, h );
 		cur->add_link_net( cur1, 0, 1 );
 
 		if ( eightNeigbr )
 		{
 			h = nCol * ( i == 0 ? nRow - 1 : i - 1 ) + ( j == 0 ? nCol - 1 : j - 1 )  + 1;
-			cur1 = turbosearch( lab, numNodes, h );			// northwest
+			cur1 = turbosearch( lab, h );			// northwest
 			cur->add_link_net( cur1, 0, 1 );
 
 			numLinks += 8;
@@ -1344,7 +1344,7 @@ void get_line( char *lBuffer, FILE *fPtr )
 }
 
 double object::read_file_net( const char *lab, const char dir[ ], const char base_name[ ],
-							int serial, const char ext[ ] )
+							  int serial, const char ext[ ] )
 {
 	long idNode, numNodes, countNodes, numLinks, startNode, endNode;
 	int rd;
@@ -1413,7 +1413,7 @@ double object::read_file_net( const char *lab, const char dir[ ], const char bas
 			cur = add_n_objects2( lab, 1 );					// create new node object
 
 		cur->add_node_net( idNode, nameNode, true );		// add (or reset) net data
-	}
+		}
 
 	numNodes = countNodes - 1;								// effective number of nodes
 
@@ -1430,10 +1430,10 @@ double object::read_file_net( const char *lab, const char dir[ ], const char bas
 		if ( strstr( textLine, "*ARCS" ) )					// check *Arcs section start
 			while ( inSection )								// scan *Arcs section
 			{
-				get_line( textLine, pajekFile );						// gets next text line
+				get_line( textLine, pajekFile );			// gets next text line
 
-				if ( strchr( textLine, '*' ) || feof( pajekFile ) )		// check new section start or file end
-					inSection = false;									// no more in *Arcs section
+				if ( strchr( textLine, '*' ) || feof( pajekFile ) )	// check new section start or file end
+					inSection = false;						// no more in *Arcs section
 				else
 					if ( ( rd = sscanf( textLine, " %ld %ld %lf", &startNode, &endNode, &weight ) ) >= 2 )
 					{													// read new arc start/end
@@ -1448,13 +1448,13 @@ double object::read_file_net( const char *lab, const char dir[ ], const char bas
 					}
 			}
 		else
-			if ( strstr( textLine, "*EDGES" ) )							// check *Edges section start
-				while ( inSection )										// scan *Edges section
+			if ( strstr( textLine, "*EDGES" ) )				// check *Edges section start
+				while ( inSection )							// scan *Edges section
 				{
 					get_line( textLine, pajekFile );					// gets next text line
 
 					if ( strchr( textLine, '*' ) || feof( pajekFile ) )	// check new section start or file end
-						inSection = false;								// no more *Edges section
+						inSection = false;					// no more *Edges section
 					else
 						if ( ( rd = sscanf( textLine, " %ld %ld %lf", &startNode, &endNode, &weight ) ) >= 2 )
 						{												// read edge start/end
@@ -1468,11 +1468,11 @@ double object::read_file_net( const char *lab, const char dir[ ], const char bas
 							if ( rd >=3 )								// is there a weight?
 								cur2->weight = cur3->weight = weight;
 
-							numLinks += 2;								// two more links in network
-						}
-				}
-			else														// no more sections
-				get_line( textLine, pajekFile );						// gets next text line
+									numLinks += 2;			// two more links in network
+								}
+							}
+				else										// no more sections
+					get_line( textLine, pajekFile );		// gets next text line
 	}
 	fclose( pajekFile );
 
@@ -1525,7 +1525,7 @@ double object::write_file_net( const char *lab, const char dir[ ], const char ba
 	{
 		strcpyn( name, base_name, MAX_PATH_LENGTH );
 		while ( ( c = strchr( name, ' ' ) ) != NULL )
-			c[ 0 ] = '_';										// replace space by underscore
+			c[ 0 ] = '_';									// replace space by underscore
 
 		fprintf( pajekFile, "\n*Network %s_%d_%d\n", base_name, serial, tCur );	// name network
 	}
@@ -1550,19 +1550,19 @@ double object::write_file_net( const char *lab, const char dir[ ], const char ba
 			return -3;
 		}
 
-		if ( cur->node->name == NULL )						// no name assigned?
+				if ( cur->node->name == NULL )				// no name assigned?
 			fprintf( pajekFile, "%ld \"%ld\" [%d-%d]\n", cur->node->serNum,
 					 cur->node->id, cur->node->time, tCur );	// output id as name
-		else
+				else
 			fprintf( pajekFile, "%ld \"%s\" [%d-%d]\n", cur->node->serNum,
 					 cur->node->name, cur->node->time, tCur );	// output text name
-	}
+			}
 
 
 	for ( iniSec = true, cur = firstNode; cur != NULL; cur = go_brother(cur) )// scan all nodes
 		if ( cur->node->nLinks > 0 )							// if node has at least one link
 			for ( cur1 = cur->node->first; cur1 != NULL; cur1 = cur1->next )
-			{													// scan all links from node
+			{												// scan all links from node
 				if ( iniSec )
 				{
 					fprintf( pajekFile, "*Arcs\n" );			// start arcs section
@@ -1572,8 +1572,8 @@ double object::write_file_net( const char *lab, const char dir[ ], const char ba
 				weight = ( cur1->weight == 0 ) ? 1 : cur1->weight;
 				fprintf( pajekFile, "%ld %ld %g [%d-%d]\n",
 						 cur->node->serNum, cur1->serTo, weight, cur1->time, tCur );
-				numLinks++;
-			}
+					numLinks++;
+				}
 	fclose( pajekFile );
 
 	return numLinks;

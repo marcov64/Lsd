@@ -275,48 +275,51 @@ int qsort_lag;
 
 /****************************************************
 BRIDGE
-Constructor, copy constructor and destructor
+Constructor
 ****************************************************/
 bridge::bridge( const char *lab )
 {
 	copy = false;
 	counter_updated = false;
 	next = NULL;
-	turbo_tot = 0;
-	turbo_tree = NULL;
 	head = NULL;
 	search_var = NULL;
-	o_map.clear( );
 
 	blabel = new char[ strlen( lab ) + 1 ];
 	strcpy( blabel, lab );
 }
 
+/****************************************************
+BRIDGE
+Copy (MOVE!) constructor
+This is not really a copy constructor, once it does
+not reallocate space for the pointed contents.
+It can be used ONLY for moving content from one
+instance to another using iterators
+****************************************************/
 bridge::bridge( const bridge &b )
 {
 	copy = true;
 	counter_updated = b.counter_updated;
-	next = b.next;
 	blabel = b.blabel;
-	turbo_tot = b.turbo_tot;
-	turbo_tree = b.turbo_tree;
-	head = b.head;
 	search_var = b.search_var;
+	next = b.next;
+	head = b.head;
+	t_map = b.t_map;
 	o_map = b.o_map;
 }
 
+
+/****************************************************
+BRIDGE
+Destructor
+****************************************************/
 bridge::~bridge( void )
 {
 	object *cur, *cnext;
 
 	if ( copy )
 		return;					// don't empty copy bridges
-
-	if ( turbo_tree != NULL )	// turbo search node exists?
-	{
-		turbo_tree->empty( );
-		delete turbo_tree;
-	}
 
 	for ( cur = head; cur != NULL; cur = cnext )
 	{
@@ -660,112 +663,21 @@ object *object::search_err( const char *lab, bool no_search, bool no_search_up, 
 
 
 /****************************
-EMPTY_TURBO_TREE
-remove all turbo search nodes
-*****************************/
-void object::empty_turbo_tree( void )
-{
-	bridge *cb;
-	object *cur;
-
-	for ( cb = this->b; cb != NULL; cb = cb->next )
-	{
-		if ( cb->turbo_tree != NULL )
-		{
-			cb->turbo_tree->empty( );
-			delete cb->turbo_tree;
-			cb->turbo_tree = NULL;
-			cb->turbo_tot = 0;
-		}
-		for ( cur = cb->head; cur != NULL; cur = cur->next )
-			cur->empty_turbo_tree( );
-	}
-}
-
-
-/****************************
-EMPTY
-turbosearch component
-*****************************/
-void mnode::empty( void )
-{
-	int i;
-
-	if ( son != NULL )
-	{
-		for ( i = 0; i < 10; ++i )
-			son[ i ].empty( );
-		delete [ ] son;
-	}
-}
-
-
-/****************************
-CREATE
-turbosearch component
-*****************************/
-void mnode::create( object *&cur, int level )
-{
-	def_level = level;
-
-	if ( level > 0 )
-	{
-		obj = NULL;
-		son = new mnode[ 10 ];
-
-		for ( int i = 0; i < 10 && cur != NULL; ++i )
-			son[ i ].create( cur, level - 1 );
-	}
-	else
-	{
-		son = NULL;
-		obj = cur;
-
-		if ( cur->next != NULL )
-			cur = cur->next;
-	}
-}
-
-
-/****************************
-FETCH
-turbosearch component
-*****************************/
-object *mnode::fetch( long pos, int level )
-{
-	object *cur;
-	long a, b;
-
-	if ( level <= 0 )
-		level = def_level;
-
-	--level;
-
-	if ( level <= 0 && pos < 10 )
-		cur = son[ pos ].obj;
-	else
-	{
-		a = ( long ) ipow( 10, level );
-		b = pos / a;
-		pos = pos - b * a;
-		cur = son[ b ].fetch( pos, level );
-	}
-
-	return cur;
-}
-
-
-/****************************
 INITTURBO (*)
-Generate the data structure required to use the turbosearch.
-- lab must be the label of the descending object whose set is to be organized
-- num is the total number of objects (if not provided or zero, it's calculated).
+Generate the map required to use the turbosearch.
+lab must be the label of the descending object
+whose set is to be organized
+num is not used (legacy code compatibility)
 *****************************/
-double object::initturbo( const char *lab, double tot = 0 )
+double object::initturbo( const char *lab, double tot )
 {
+	return initturbo( lab );
+}
+
+double object::initturbo( const char *lab )
+{
+	long l;
 	bridge *cb;
-	int level;
-	long ltot;
 	object *cur;
 
 	cb = search_bridge( lab, true );
@@ -787,43 +699,65 @@ double object::initturbo( const char *lab, double tot = 0 )
 		return 0;
 	}
 
-	ltot = ( long ) floor( tot );
-
-	if ( ltot <= 0 )				// if size not informed, compute it
-		for ( ltot = 0, cur = this->search( lab ); cur != NULL; ++ltot, cur = go_brother( cur ) );
-
 #ifndef _NP_
 	// prevent concurrent initialization by more than one thread
 	lock_guard < mutex > lock( parallel_comp );
 #endif
 
-	if ( cb->turbo_tree != NULL )	// remove existing mnode
+	cb->t_map.clear( );
+
+	// fill the map with the object positions
+	for ( l = 1, cur = search( lab ); cur != NULL; ++l, cur = go_brother( cur ) )
+		cb->t_map.insert( n_pairT( l, cur ) );
+
+	return ( double ) cb->t_map.size( );
+}
+
+
+/****************************
+TURBOSET (*)
+Check if the turbosearch for
+object lab was set with initturbo
+and is still valid. Object instance
+creation and destruction destroy
+the turbosearch map.
+returns 0 if there is no map or
+the number of objects in map.
+*****************************/
+double object::turboset( const char *lab )
+{
+	bridge *cb;
+
+	cb = search_bridge( lab, true );
+	if ( cb == NULL )
 	{
-		cb->turbo_tree->empty( );
-		delete cb->turbo_tree;
+		error_hard( "object not found",
+					"check your equation code to prevent this situation",
+					true,
+					"cannot find turbo search object '%s'", lab );
+		return 0;
 	}
 
-	cur = cb->head;
-	level = ( ltot > 1 ) ? ( int ) ( log10( ltot - 1 ) + 1e-6 ) + 1 : 1;
-	cb->turbo_tree = new mnode;
-	cb->turbo_tree->create( cur, level );
-	cb->turbo_tot = ltot;
-
-	return ( double ) ltot;
+	return ( double ) cb->t_map.size( );
 }
 
 
 /****************************
 TURBOSEARCH (*)
 Search the object lab placed in num position.
-This search exploits the structure created with 'initturbo'
-If tot is 0, previous set value is used
+This search requires the map
+previously created with 'initturbo'.
+tot is ignored (legacy code compatibility)
 *****************************/
 object *object::turbosearch( const char *lab, double tot, double num )
 {
+	return turbosearch( lab, num );
+}
+
+object *object::turbosearch( const char *lab, double num )
+{
 	bridge *cb;
-	int level;
-	long ltot, pos;
+	n_mapT::iterator nit;
 
 	cb = search_bridge( lab, true );
 	if ( cb == NULL )
@@ -835,7 +769,7 @@ object *object::turbosearch( const char *lab, double tot, double num )
 		return NULL;
 	}
 
-	if ( cb->turbo_tree == NULL )
+	if ( cb->t_map.size( ) == 0 )
 	{
 		error_hard( "invalid search operation",
 					"check your equation code to prevent this situation",
@@ -844,21 +778,11 @@ object *object::turbosearch( const char *lab, double tot, double num )
 		return NULL;
 	}
 
-	pos = ( long ) floor ( num ) - 1;
-
-	if ( pos < 0 || pos >= cb->turbo_tot )
-	{
-		error_hard( "invalid search operation",
-					"check your equation code to prevent this situation",
-					true,
-					"position '%.0lf' is invalid for turbo searching object '%s'", num, lab );
+	// find the object in position
+	if ( ( nit = cb->t_map.find( ( long ) floor ( num ) ) ) != cb->t_map.end( ) )
+		return nit->second;
+	else
 		return NULL;
-	}
-
-	ltot = ( long ) floor( tot );
-	level = ( ltot > 1 ) ? ( int ) ( log10( ltot - 1 ) + 1e-6 ) + 1 : 0;
-
-	return( cb->turbo_tree->fetch( pos, level ) );
 }
 
 
@@ -1095,7 +1019,8 @@ object *object::search_var_cond( const char *lab, double value, int lag )
 
 /****************************
 INITTURBO_COND (*)
-Generate the data structure required to use the turbosearch with condition.
+Generate the data structure required
+to use the turbosearch with condition.
 *****************************/
 double object::initturbo_cond( const char *lab )
 {
@@ -1134,6 +1059,7 @@ double object::initturbo_cond( const char *lab )
 
 	cb = bit->second;
 	cb->o_map.clear( );						// remove any existing mapping
+	delete [ ] cb->search_var;
 
 	// fill the map with the object values
 	for ( cur = cb->head; cur != NULL; cur = cnext )
@@ -1146,7 +1072,51 @@ double object::initturbo_cond( const char *lab )
 	cb->search_var = new char [ strlen( lab ) + 1 ];
 	strcpy( cb->search_var, lab );
 
-	return cb->o_map.size( );
+	return ( double ) cb->o_map.size( );
+}
+
+
+/****************************
+TURBOSET_COND (*)
+Check if the turbosearch for
+object lab with a condition
+was set with initturbo_cond on
+on variable lab and is still
+valid. Object instance creation
+and destruction destroy the
+turbosearch map.
+returns 0 if there is no map or
+the number of nodes in map.
+*****************************/
+double object::turboset_cond( const char *lab )
+{
+	variable *cv;
+	b_mapT::iterator bit;
+
+	cv = search_var_err( this, lab, no_search, no_search_up, true, "turbo conditional searching" );
+	if ( cv == NULL )
+		return 0;
+
+	if ( cv->up->up == NULL )				// variable at root level?
+	{
+		error_hard( "invalid variable or parameter for turbo search",
+					"check your model structure to prevent this situation",
+					false,
+					"element '%s' is at root level (always single-instanced)", lab );
+		return 0;
+	}
+
+	// find the bridge which contains the object containing the variable
+	if ( ( bit = cv->up->up->b_map.find( cv->up->label ) ) == cv->up->up->b_map.end( ) )
+	{
+		error_hard( "internal problem in LSD",
+					"if error persists, please contact developers",
+					true,
+					"invalid data structure (bridge not found)" );
+		return 0;
+	}
+
+	return ( double ) bit->second->o_map.size( );
 }
 
 
@@ -1548,15 +1518,6 @@ object *object::add_n_objects2( const char *lab, int n, int t_update )
 	return add_n_objects2( lab, n, blueprint->search( lab ), t_update );
 }
 
-
-/****************************************************
-ADD_N_OBJECTS2 (*)
-Add N objects to the model making a copies of the example object ex
-In respect of the original version, it allows for the specification
-of the time of last update if t_update is positive or zero. If
-t_update is negative (<0) it takes the time of last update from
-the example object (if >0) or current t (if =0)
-****************************************************/
 object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update )
 {
 	bool net;
@@ -1666,6 +1627,12 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 			for ( cur1 = cb->head; cur1 != NULL; cur1 = cur1->next )
 				cur->add_n_objects2( cur1->label, 1, cur1, t_update );
 		}
+
+		// destroy invalidated turbosearch trees
+		cb2->t_map.clear( );
+		cb2->o_map.clear( );
+		delete [ ] cb2->search_var;
+		cb->search_var = NULL;
 
 		// attach the new objects to the linked chain of the bridge
 		if ( last == NULL )
@@ -1825,8 +1792,11 @@ void object::delete_obj( variable *caller )
 
 		cb->counter_updated = false;
 
-		if ( cb->search_var != NULL )						// indexed objects?
-			cb->o_map.erase( cal( cb->search_var, 0 ) );	// try to remove map entry
+		// destroy invalidated turbosearch trees
+		cb->t_map.clear( );
+		cb->o_map.clear( );
+		delete [ ] cb->search_var;
+		cb->search_var = NULL;
 	}
 
 	if ( del_flag != NULL )

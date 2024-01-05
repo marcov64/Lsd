@@ -160,7 +160,6 @@ using namespace std;
 struct object;
 struct variable;
 struct bridge;
-struct mnode;
 struct netNode;
 struct netLink;
 
@@ -168,11 +167,13 @@ struct netLink;
 typedef function < double( object *caller, variable *var ) > eq_funcT;
 typedef pair < string, bridge * > b_pairT;
 typedef pair < double, object * > o_pairT;
+typedef pair < long, object * > n_pairT;
 typedef pair < string, variable * > v_pairT;
 typedef vector < object * > o_vecT;
 typedef unordered_map < string, eq_funcT > eq_mapT;
 typedef unordered_map < string, bridge * > b_mapT;
 typedef unordered_map < double, object * > o_mapT;
+typedef unordered_map < long, object * > n_mapT;
 typedef unordered_map < string, string > p_mapT;
 typedef unordered_map < string, variable * > v_mapT;
 typedef unordered_set < object * > o_setT;
@@ -229,7 +230,8 @@ struct object
 	double count( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 	double count_all( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 	double increment( const char *lab, double value );
-	double initturbo( const char *label, double num );
+	double initturbo( const char *lab );
+	double initturbo( const char *lab, double tot );
 	double initturbo_cond( const char *label );
 	double init_stub_net( const char *lab, const char* gen, long numNodes = 0, long par1 = 0, double par2 = 0.0 );
 	double interact( const char *text, double v, double *tv, int i, int j, int h, int k,
@@ -253,6 +255,8 @@ struct object
 	double stats_net( const char *lab, double *r );
 	double sum( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 	double to_delete( void );
+	double turboset( const char *lab );
+	double turboset_cond( const char *lab );
 	double whg_av( const char *lab1, const char *lab2, int lag = 0, bool cond = false, const char *lab3 = "", const char *lop = "", double value = NAN );
 	double write( const char *lab, double value, int time, int lag = 0 );
 	double write_file_net( const char *lab, const char *dir = "", const char *base_name = "net", int serial = 1, bool append = false );
@@ -292,6 +296,7 @@ struct object
 	object *search_node_net( const char *lab, long id );
 	object *search_var_cond( const char *lab, double value, int lag = 0 );
 	object *shuffle_nodes_net( const char *lab );
+	object *turbosearch( const char *label, double num );
 	object *turbosearch( const char *label, double tot, double num );
 	object *turbosearch_cond( const char *label, double value );
 	variable *add_empty_var( const char *str );
@@ -308,7 +313,6 @@ struct object
 	void delete_obj( variable *caller = NULL );
 	void delete_var( const char *lab );
 	void empty( void );
-	void empty_turbo_tree( void );			// remove turbo search structure
 	void init( object *_up, const char *_label, bool _to_compute = true );
 	void name_node_net( const char *nodeName );
 	void recreate_maps( void );
@@ -367,32 +371,18 @@ struct variable
 
 struct bridge
 {
-	char *blabel;
 	bool copy;							// just a temporary copy
 	bool counter_updated;
-	bridge *next;
-	long turbo_tot;
-	mnode *turbo_tree;
-	object *head;
+	char *blabel;
 	char *search_var;					// current initialized search variable
-
-	o_mapT o_map;						// fast lookup map to objects
+	bridge *next;
+	object *head;
+	n_mapT t_map;						// turbosearch map
+	o_mapT o_map;						// fast lookup map to object values
 
 	bridge( const char *lab );			// constructor
 	bridge( const bridge &b );			// copy constructor
 	~bridge( void );					// destructor
-};
-
-struct mnode
-{
-	int def_level;						// saves log number of number objects
-	long def_tot;						// saves total number of number objects
-	mnode *son;
-	object *obj;
-
-	void create( object *&cur, int level );
-	void empty( void );
-	object *fetch( long pos, int level = 0 );
 };
 
 struct netNode							// network node data

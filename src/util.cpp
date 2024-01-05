@@ -348,7 +348,6 @@ void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const 
 		user_exception = false;
 
 		reset_end( root );
-		root->empty_turbo_tree( );
 		uncover_browser( );
 
 #ifndef _NP_

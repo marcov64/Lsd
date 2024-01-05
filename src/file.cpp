@@ -858,8 +858,6 @@ int object::load_xml_insts( xml_node &n )
 				if ( m >= ( long ) lnkwht1.size( ) )
 					return 49;					// inconsistent # of links
 
-				cur1 = par->turbosearch( label, 0, ( double ) lnkto1[ m ] );
-				cur->add_link_net( cur1, lnkwht1[ m ] );
 			}
 
 			if ( m < ( long ) lnkwht1.size( ) )
