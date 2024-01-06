@@ -23,14 +23,13 @@ All functions work on specially defined LSD object's data structures (named here
 "node"), with the following organization:
 
 object --+-- node --+- nodeID (long) : node unique ID number (re-orderable)
-					+- serNum (long) : node serial number (initial order, fixed)
+					+- serNum (long) : node sequential serial number (reset on save)
 					+- nLinks (long) : number of arcs FROM node
 					+- first (ptr) : pointer to the first outgoing link
 					+- last(ptr) : pointer to the last outgoing link
 					+- prob (double) : assigned node probability (power-law)
 					|
-					+-- link --+- serTo (long) : destination node serial
-							   +- ptrTo (ptr) : pointer to neighbor
+					+-- link --+- ptrTo (ptr) : pointer to neighbor
 							   +- node (ptr) : node containing link
 							   +- prev (ptr) : pointer to previous link or NULL
 							   +- next (ptr) : pointer to next link or NULL
@@ -144,7 +143,6 @@ netLink::netLink( object *origNode, object *destNode, double linkWeight, double 
 
 	ptrTo = destNode;
 	ptrFrom = origNode;
-	serTo = ptrTo->node->serNum;
 	prev = ptrFrom->node->last;
 	next = NULL;
 	weight = linkWeight;
@@ -204,6 +202,50 @@ netLink *object::add_link_net( object *destPtr, double weight, double probTo )
 	cur = new netLink( this, destPtr, weight, probTo );
 
 	return cur;
+}
+
+
+/****************************************************
+ADD_LINK_NET
+	Add new link between two nodes by IDs.
+	Does NOT check if the link already exists. So,
+	if multiple links are to be prevented, caller
+	has to check before calling.
+	Mode numbers must start from 1 and contiguous,
+	numbers refer to the object position in the
+	nodes' brotherhood.
+****************************************************/
+netLink *object::add_link_net( const char *nodeName, long startNode, long endNode,
+							   double weight, double probTo, bool edge )
+{
+	netLink *curl = NULL;
+	object *cur, *cur1;
+
+	if ( ! turboset( nodeName ) )						// initialize if needed
+		initturbo( nodeName );
+
+	cur = turbosearch( nodeName, ( double ) startNode );// searches first node object
+
+	if ( cur->node == NULL || cur->node->id != startNode )
+		plog( "\nWarning: invalid %s origin (%ld to %ld), ignored",
+			  edge ? "edge" : "arc", startNode, endNode );
+	else
+	{
+		cur1 = turbosearch( nodeName, ( double ) endNode );// searches second node object
+
+		if ( cur1->node == NULL || cur1->node->id != endNode )
+			plog( "\nWarning: invalid %s destination (%ld to %ld), ignored",
+				  edge ? "edge" : "arc", startNode, endNode );
+		else
+		{
+			curl = cur->add_link_net( cur1, weight, probTo );// add link(s) to network
+
+			if ( edge )
+				cur1->add_link_net( cur, weight, probTo );
+		}
+	}
+
+	return curl;
 }
 
 
@@ -296,7 +338,7 @@ netNode::netNode( long nodeId, const char *nodeName, double nodeProb )
 {
 	id = nodeId;
 	time = t;						// save creation time
-	serNum = ++nodesSerial;
+	serNum = nodesSerial++;
 	prob = nodeProb;
 	nLinks = 0;
 	first = last = NULL;
@@ -1004,15 +1046,15 @@ long object::init_circle_net( const char *lab, long numNodes, long outDeg )
 	add_n_objects2( lab , nodes2create( this, lab, numNodes ) );
 																	// creates the missing node objects,
 																	// cloning the first one
-	for ( idNode = 1; cur != NULL; cur = go_brother( cur ) )
-		cur->add_node_net( idNode++ );								// scan all nodes aplying ID numbers
+	for ( idNode = 1; cur != NULL; ++idNode, cur = go_brother( cur ) )
+		cur->add_node_net( idNode );								// scan all nodes aplying ID numbers
 
 	numNodes = idNode - 1;											// effective number of nodes
 	initturbo( lab );												// seed the turbosearch linked list
 
 	for ( numLinks = 0, cur = firstNode; cur != NULL; cur = go_brother( cur ) )
 	{
-		idNode = cur->node->serNum;									// gets ID of current node
+		idNode = cur->node->id;										// gets ID of current node
 		lowNeigh = idNode - outDeg / 2;								// calculates lower ID neighbour
 
 		for ( link = 1; link <= outDeg; link++ )					// run through all node's links
@@ -1077,7 +1119,7 @@ long object::init_small_world_net( const char *lab, long numNodes, long outDeg, 
 		for ( link = 1; link <= numNeigh; link++ )					// all possible neighbors' node IDs
 			if ( ran1( ) < rho ) 									// draw rewiring probability
 			{														// if rewiring
-				idNode = cur->node->serNum;							// get current node ID
+				idNode = cur->node->id;								// get current node ID
 				tryNode = idNode + link;							// next node to try
 
 				if ( tryNode > numNodes )							// if above max node ID
@@ -1341,18 +1383,21 @@ void get_line( char *lBuffer, FILE *fPtr )
 
 	if ( firstChar == '*' )									// check new section start
 		strupr( lBuffer );									// to uppercase
+
+	strtrimin( lBuffer, lBuffer, MAX_LINE_SIZE );			// remove extra spaces
 }
 
-double object::read_file_net( const char *lab, const char dir[ ], const char base_name[ ],
-							  int serial, const char ext[ ] )
+double object::read_file_net( const char *lab, const char dir[ ],
+							  const char base_name[ ], int serial,
+							  const char ext[ ] )
 {
-	long idNode, numNodes, countNodes, numLinks, startNode, endNode;
-	int rd;
+	int i;
 	double weight;
+	long idNode, numNodes, countNode, numLinks, startNode, endNode;
 	char fileName[ MAX_PATH_LENGTH ], textLine[ MAX_LINE_SIZE ], nameNode[ MAX_LINE_SIZE ];
 	bool inSection;
-	object *cur, *cur1;
-	netLink *cur2, *cur3;
+	vector < string > nodes;
+	object *cur;
 	FILE *pajekFile;
 
 	// make sure this is being called from the parent (container) object
@@ -1361,9 +1406,11 @@ double object::read_file_net( const char *lab, const char dir[ ], const char bas
 		return -1;
 
 	if ( serial >= 0 )
-		snprintf( fileName, MAX_PATH_LENGTH, "%s%s%s_%i%s%s", dir, foldersep( dir ), base_name, serial, strlen( ext ) == 0 ? "" : ".", ext );	// fully formed file name
+		snprintf( fileName, MAX_PATH_LENGTH, "%s%s%s_%i%s%s", dir, foldersep( dir ),
+				  base_name, serial, strlen( ext ) == 0 ? "" : ".", ext );	// fully formed file name
 	else
-		snprintf( fileName, MAX_PATH_LENGTH, "%s%s%s%s%s", dir, foldersep( dir ), base_name,  strlen( ext ) == 0 ? "" : ".", ext );
+		snprintf( fileName, MAX_PATH_LENGTH, "%s%s%s%s%s", dir, foldersep( dir ),
+				  base_name,  strlen( ext ) == 0 ? "" : ".", ext );
 
 	if ( ! ( pajekFile = fopen( fileName, "r" ) ) )			// open file for reading
 	{
@@ -1395,9 +1442,10 @@ double object::read_file_net( const char *lab, const char dir[ ], const char bas
 		return -3;
 	}
 
-	for ( countNodes = 1, inSection = true; countNodes <= numNodes;
-		  ++countNodes, cur = go_brother( cur ) )
+	for ( countNode = 1, inSection = true; countNode <= numNodes;
+		  ++countNode, cur = go_brother( cur ) )
 	{														// creates all nodes
+		idNode = -1;										// assume no explicit nodes
 		strcpy( nameNode, "" );
 
 		if ( inSection )									// if still in *Vertices
@@ -1412,16 +1460,23 @@ double object::read_file_net( const char *lab, const char dir[ ], const char bas
 		if ( cur == NULL )									// node does not exist?
 			cur = add_n_objects2( lab, 1 );					// create new node object
 
-		cur->add_node_net( idNode, nameNode, true );		// add (or reset) net data
+		if ( idNode > 0 && idNode != countNode )
+		{
+			if ( serial >= 0 )
+				plog( "\nWarning: network node # %d is invalid, changing to %d", idNode, countNode );
+			idNode = countNode;
 		}
 
-	numNodes = countNodes - 1;								// effective number of nodes
+		if ( idNode < 0 )
+			cur->add_node_net( countNode, nameNode, true );	// add (or reset) net data
+		else
+			cur->add_node_net( idNode, nameNode, true );
+	}
 
 	if ( inSection )										// * was not already read
 		get_line( textLine, pajekFile );					// gets next text line
 
 	numLinks = 0;											// prepare to count links
-	initturbo( lab, numNodes );								// seed the turbosearch linked list
 
 	while ( ! feof( pajekFile ) )							// while file is not over
 	{
@@ -1430,50 +1485,71 @@ double object::read_file_net( const char *lab, const char dir[ ], const char bas
 		if ( strstr( textLine, "*ARCS" ) )					// check *Arcs section start
 			while ( inSection )								// scan *Arcs section
 			{
+				weight = 0;									// default is no weight
 				get_line( textLine, pajekFile );			// gets next text line
 
 				if ( strchr( textLine, '*' ) || feof( pajekFile ) )	// check new section start or file end
 					inSection = false;						// no more in *Arcs section
 				else
-					if ( ( rd = sscanf( textLine, " %ld %ld %lf", &startNode, &endNode, &weight ) ) >= 2 )
-					{													// read new arc start/end
-						cur = turbosearch( lab, 0, (double) startNode );// searches first node object
-						cur1 = turbosearch( lab, 0, (double) endNode );	// searches second node object
-						cur2 = cur->add_link_net( cur1 );				// add link to network
-
-						if ( rd >= 3 )									// is there a weight?
-							cur2->weight = weight;
-
-						numLinks++;										// one more link in network
+					if ( sscanf( textLine, " %ld %ld %lf", &startNode, &endNode, &weight ) >= 2 )
+					{
+						add_link_net( lab, startNode, endNode, weight );
+						++numLinks;							// one more link in network
 					}
+					else
+						if ( serial >= 0 && strlen( textLine ) > 0 )
+							plog( "\nWarning: invalid arc (%s), ignored", textLine );
 			}
 		else
-			if ( strstr( textLine, "*EDGES" ) )				// check *Edges section start
-				while ( inSection )							// scan *Edges section
+			if ( strstr( textLine, "*EDGESLIST" ) )			// check *EdgesList
+				while ( inSection )							// scan *EdgesList section
 				{
-					get_line( textLine, pajekFile );					// gets next text line
+					get_line( textLine, pajekFile );
 
-					if ( strchr( textLine, '*' ) || feof( pajekFile ) )	// check new section start or file end
-						inSection = false;					// no more *Edges section
+					if ( strchr( textLine, '*' ) || feof( pajekFile ) )
+						inSection = false;					// no more *EdgesList section
 					else
-						if ( ( rd = sscanf( textLine, " %ld %ld %lf", &startNode, &endNode, &weight ) ) >= 2 )
-						{												// read edge start/end
-							cur = turbosearch( lab, 0, (double) startNode );
-																		// searches first node object
-							cur1 = turbosearch( lab, 0, (double) endNode );
-																		// searches second node object
-							cur2 = cur->add_link_net( cur1 );			// add links in both directions
-							cur3 = cur1->add_link_net( cur );
+					{
+						nodes = strtostrsplit( textLine, ' ' );
+						if ( nodes.size( ) >= 2 )
+						{
+							startNode = strtol( nodes[ 0 ].c_str( ), NULL, 10, 0 );
 
-							if ( rd >=3 )								// is there a weight?
-								cur2->weight = cur3->weight = weight;
-
-									numLinks += 2;			// two more links in network
-								}
+							for ( i = 1; i < ( int ) nodes.size( ); ++i )
+							{
+								endNode = strtol( nodes[ i ].c_str( ), NULL, 10, 0 );
+								add_link_net( lab, startNode, endNode, 0, 1, true );
+								numLinks += 2;				// two more links in network
 							}
+						}
+						else
+							if ( serial >= 0 && strlen( textLine ) > 0 )
+								plog( "\nWarning: invalid edge list (%s), ignored", textLine );
+					}
+				}
+			else
+				if ( strstr( textLine, "*EDGES" ) )			// check *Edges section start
+					while ( inSection )						// scan *Edges section
+					{
+						weight = 0;
+						get_line( textLine, pajekFile );
+
+						if ( strchr( textLine, '*' ) || feof( pajekFile ) )
+							inSection = false;				// no more *Edges section
+						else
+							if ( sscanf( textLine, " %ld %ld %lf", &startNode, &endNode, &weight ) >= 2 )
+							{
+								add_link_net( lab, startNode, endNode, weight, 1, true );
+								numLinks += 2;				// two more links in network
+							}
+							else
+								if ( serial >= 0 && strlen( textLine ) > 0 )
+									plog( "\nWarning: invalid edge (%s), ignored", textLine );
+					}
 				else										// no more sections
 					get_line( textLine, pajekFile );		// gets next text line
 	}
+
 	fclose( pajekFile );
 
 	return numLinks;
@@ -1487,13 +1563,12 @@ WRITE_FILE_NET (*)
 double object::write_file_net( const char *lab, const char dir[ ], const char base_name[ ],
 							 int serial, bool append )
 {
-	bool iniSec;
+	bool iniSec, noName, noTime, noWeight;
 	int tCur = ( t > max_step ) ? max_step : t;				// effective current time
-	long numNodes, numLinks = 0;
-	double weight;
+	long l, numNodes, numLinks = 0;
 	char *c, mode[ 2 ], fileName[ MAX_PATH_LENGTH ], name[ MAX_PATH_LENGTH ];
-	object *firstNode, *cur;
-	netLink *cur1;
+	object *firstNode, *cur, *cur1;
+	netLink *curl;
 	FILE *pajekFile;
 
 	// make sure this is being called from the parent (container) object
@@ -1502,9 +1577,11 @@ double object::write_file_net( const char *lab, const char dir[ ], const char ba
 		return -1;
 
 	if ( serial >= 0 )
-		snprintf( fileName, MAX_PATH_LENGTH, "%s%s%s_%i.%s", dir, foldersep( dir ), base_name, serial, append ? "paj" : "net" );				// fully formed file name
+		snprintf( fileName, MAX_PATH_LENGTH, "%s%s%s_%i.%s", dir, foldersep( dir ),
+				  base_name, serial, append ? "paj" : "net" );// fully formed file name
 	else
-		snprintf( fileName, MAX_PATH_LENGTH, "%s%s%s.%s", dir, foldersep( dir ), base_name, append ? "paj" : "net" );
+		snprintf( fileName, MAX_PATH_LENGTH, "%s%s%s.%s", dir, foldersep( dir ),
+				  base_name, append ? "paj" : "net" );
 
 	if ( append && tCur > 1 )								// select write mode
 		strcpy( mode, "a" );
@@ -1527,53 +1604,102 @@ double object::write_file_net( const char *lab, const char dir[ ], const char ba
 		while ( ( c = strchr( name, ' ' ) ) != NULL )
 			c[ 0 ] = '_';									// replace space by underscore
 
-		fprintf( pajekFile, "\n*Network %s_%d_%d\n", base_name, serial, tCur );	// name network
+		fprintf( pajekFile, "\n*Network %s_%d_%d\n\n", base_name, serial, tCur );	// name network
 	}
 	else
-		fprintf( pajekFile, "%% %s objects from LSD '%s' configuration\n", lab, strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
+		fprintf( pajekFile, "%% %s objects from LSD '%s' configuration\n\n",
+				 lab, strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
 
-	for ( numNodes = 0; cur != NULL;
-		  numNodes++, cur = go_brother( cur ) );			// count number of nodes
+	// get network information
+	for ( numNodes = l = 0, noName = noTime = noWeight = true, cur1 = NULL,
+		  cur = firstNode; cur != NULL; ++l, cur1 = cur, cur = go_brother( cur ) )
+		if ( cur->node != NULL )
+		{
+			++numNodes;
+
+			if ( cur->node->name != NULL && strlen( cur->node->name ) > 0 )
+				noName = false;
+
+			if ( cur->node->time > 0 )
+				noTime = false;
+
+			for ( curl = cur->node->first; curl != NULL; curl = curl->next )
+				if ( curl->weight != 0 )
+				{
+					noWeight = false;
+					break;
+				}
+		}
+
+	if ( serial >= 0 && l > numNodes )
+		plog( "\nWarning: instances of object '%s' have no data structure,\n \
+			   they must be at the end of the chain of siblings", cur1->label );
+
+	if ( serial >= 0 && cur1->hyper_next( cur1->label ) != NULL )
+		plog( "\nWarning: multiple parents of object '%s', considering just first",
+			  cur1->label );
 
 	fprintf( pajekFile, "*Vertices %lu\n", numNodes);		// start vertices section
 
-	for ( cur = firstNode; cur != NULL; cur = go_brother( cur ) )// scan all nodes
+	for ( l = 1, cur = firstNode; cur != NULL; cur = go_brother( cur ) )// scan all nodes
 	{
-		if ( cur->node == NULL )							// not node of a network?
+		if ( cur->node == NULL && l <= numNodes )			// non-node at the beginning?
 		{
 			fclose( pajekFile );
 			if ( serial >= 0 )								// interactive mode - handle in interf.cpp
 				error_hard( "invalid network object",
 							"check your equation code to add\nthe network structure before using this macro",
 							true,
-							"object '%s' has no network data structure, file '%s' not saved", lab, fileName );
+							"object '%s' has incorrect network structure, file '%s' not saved",
+							lab, fileName );
 			return -3;
 		}
 
+		if ( cur->node != NULL )							// valid node?
+		{
+			if ( ! noName || ! noTime || tCur > 0 )			// adding node lines?
+			{
 				if ( cur->node->name == NULL )				// no name assigned?
-			fprintf( pajekFile, "%ld \"%ld\" [%d-%d]\n", cur->node->serNum,
-					 cur->node->id, cur->node->time, tCur );	// output id as name
+					fprintf( pajekFile, "%ld \"%ld\"", l, cur->node->id );// id as name
 				else
-			fprintf( pajekFile, "%ld \"%s\" [%d-%d]\n", cur->node->serNum,
-					 cur->node->name, cur->node->time, tCur );	// output text name
+					fprintf( pajekFile, "%ld \"%s\"", l, cur->node->name );
+
+				if ( ! noTime || tCur > 0 )					// time information?
+					fprintf( pajekFile, " [%d-%d]", cur->node->time, tCur );
+
+				fprintf( pajekFile, "\n" );
 			}
 
+			cur->node->serNum = l++;						// reset serials
+		}
+	}
 
-	for ( iniSec = true, cur = firstNode; cur != NULL; cur = go_brother(cur) )// scan all nodes
-		if ( cur->node->nLinks > 0 )							// if node has at least one link
-			for ( cur1 = cur->node->first; cur1 != NULL; cur1 = cur1->next )
+	for ( iniSec = true, cur = firstNode; cur != NULL; cur = go_brother( cur ) )
+		if ( cur->node != NULL )
+			for ( curl = cur->node->first; curl != NULL; curl = curl->next )
 			{												// scan all links from node
 				if ( iniSec )
 				{
-					fprintf( pajekFile, "*Arcs\n" );			// start arcs section
+					fprintf( pajekFile, "\n*Arcs\n" );		// start arcs section
 					iniSec = false;
 				}
 
-				weight = ( cur1->weight == 0 ) ? 1 : cur1->weight;
-				fprintf( pajekFile, "%ld %ld %g [%d-%d]\n",
-						 cur->node->serNum, cur1->serTo, weight, cur1->time, tCur );
+				if ( curl->ptrTo->node != NULL )
+				{
+					fprintf( pajekFile, "%ld %ld", cur->node->serNum,
+							 curl->ptrTo->node->serNum );
+
+					if ( ! noWeight )
+						fprintf( pajekFile, " %g", curl->weight );
+
+					if ( ! noTime || tCur > 0 )
+						fprintf( pajekFile, " [%d-%d]", curl->time, tCur );
+
+					fprintf( pajekFile, "\n" );
 					numLinks++;
 				}
+			}
+
 	fclose( pajekFile );
 
 	return numLinks;

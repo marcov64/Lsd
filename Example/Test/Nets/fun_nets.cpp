@@ -1,13 +1,13 @@
 #include "fun_head_fast.h"
 
 /****************************************************************************
-	
+
 	Network generation algorithms
 	=============================
 
-	Networks are created as sets of two type of objects: nodes and links. 
-	Links are special properties of object nodes, so	each undirected link is 
-	represented by two objects (two directed links), each one contained inside 
+	Networks are created as sets of two type of objects: nodes and links.
+	Links are special properties of object nodes, so	each undirected link is
+	represented by two objects (two directed links), each one contained inside
 	its own node.
 
  ****************************************************************************/
@@ -40,7 +40,7 @@ switch ( (int) v[0] )						// executes initialization for each type
 {
 	case 0:									// read external network file
 		v[2] = LOAD_NETS( cur, "Node", "net" );
-		sprintf( message, "\n Network read from file: net_%d.net", seed - 1); 
+		sprintf( message, "\n Network read from file: net_%d.net", seed - 1);
 	break;
 
 	case 1:									// (fully) Directed random network
@@ -71,14 +71,14 @@ switch ( (int) v[0] )						// executes initialization for each type
 	case 6:									// Small-World random network
 		v[2] = INIT_NETS( cur, "Node", "SMALL-WORLD", v[1], v[3], v[5] );
 		strcpy( message, "\n Small-world random network created" );
-	break;  
-		
+	break;
+
 	case 7:									// Scale-free (power law) random network
 		v[2] = INIT_NETS( cur, "Node", "SCALE-FREE", v[1], v[3], v[6] );
 		strcpy( message, "\n Scale-free random network created" );
 	break;
 
-	case 8:									// Star non-random network
+	case 8:									// Star (non-random) network
 		v[2] = INIT_NETS( cur, "Node", "STAR", v[1], 0, 0 );
 		strcpy( message, "\n Star network created" );
 	break;
@@ -87,7 +87,7 @@ switch ( (int) v[0] )						// executes initialization for each type
 		v[2] = INIT_NETS( cur, "Node", "LATTICE", v[1], v[7], v[8] );
 		strcpy( message, "\n Lattice network created" );
 	break;
-		
+
 	default:
 		strcpy( message, "\nError: Invalid type of network selected!\n" );
 }
@@ -101,8 +101,8 @@ WRITES( cur, "avgOutDeg", v[2] );
 LOG( message );
 LOG( "\n Num. nodes: %.0f, Num. arcs: %.0f, Avg. out-degree: %.4f", v[0], v[1], v[2] );
 LOG( "\n Min. out-degree: %.0f, Max. out-degree: %.0f, Density: %.4f", v[3], v[4], v[5] );
-																
-SHUFFLE_NETS( cur, "Node" );				// shuffles node sequence 
+
+SHUFFLE_NETS( cur, "Node" );				// shuffles node sequence
 											// (IDs and linked list order)
 
 PARAMETER;									// turn variable into parameter
@@ -187,13 +187,145 @@ if ( v[1] != 0 )							// search top pointed node
 RESULT( v[1] )
 
 
+// equations to create all example networks under the Example object and save each one to disk
+
+EQUATION( "PajekInit" )
+/*
+Produce the Pajek imported network (net_2.net) example
+*/
+
+LOAD_NET( "PajNode", "net" );
+SAVE_NET( "PajNode", "Pajek" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "DirectInit" )
+/*
+Produce the (fully) directed random network example
+*/
+
+INIT_NET( "DirNode", "RANDOM-DIR", V( "numNodes" ),  V( "numLinks" ), 0 );
+SAVE_NET( "DirNode", "Directed" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "UndirInit" )
+/*
+Produce the (fully) undirected random network example
+*/
+
+INIT_NET( "UndNode", "RANDOM-UNDIR", V( "numNodes" ),  V( "numLinks" ), 0 );
+SAVE_NET( "UndNode", "Undirected" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "RandomInit" )
+/*
+Produce the uniform random network example
+*/
+
+INIT_NET( "RandNode", "UNIFORM", V( "numNodes" ), V( "avgOutDeg" ), 0 );
+SAVE_NET( "RandNode", "UniformRandom" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "RenyiInit" )
+/*
+Produce the Renyi-Erdos random network example
+*/
+
+INIT_NET( "RenyiNode", "RENYI-ERDOS", V( "numNodes" ), 0, V( "linkProb" ) );
+SAVE_NET( "RenyiNode", "RenyiErdos" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "CircleInit" )
+/*
+Produce the circle (non-random) network example
+*/
+
+INIT_NET( "CircNode", "CIRCLE", V( "numNodes" ), V( "avgOutDeg" ), 0 );
+SAVE_NET( "CircNode", "Circle" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "SmallWInit" )
+/*
+Produce the small-world random network example
+*/
+
+INIT_NET( "SWnode", "SMALL-WORLD", V( "numNodes" ), V( "avgOutDeg" ), V( "rho" ) );
+SAVE_NET( "SWnode", "SmallWorld" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "ScFreeInit" )
+/*
+Produce the scale-free (power law) random network example
+*/
+
+INIT_NET( "SFnode", "SCALE-FREE", V( "numNodes" ), V( "avgOutDeg" ), V( "expLink" ) );
+SAVE_NET( "SFnode", "ScaleFree" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "StarInit" )
+/*
+Produce the star (non-random) network example
+*/
+
+INIT_NET( "StarNode", "STAR", V( "numNodes" ), 0, 0 );
+SAVE_NET( "StarNode", "ScaleFree" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "LatticeInit" )
+/*
+Produce the lattice network example
+*/
+
+INIT_NET( "LatNode", "LATTICE", V( "numNodes" ), V( "nCol" ), V( "eightNeigbr" ) );
+SAVE_NET( "LatNode", "Lattice" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
 MODELEND
 
 
 void close_sim( void )
 {
 	// save final network as Pajek file
-	LOG( "\n Saving final network: %s%s%s_%d.net", 
+	LOG( "\n Saving final network: %s%s%s_%d.net",
 			 path, strlen( path ) == 0 ? "" : "/", simul_name, seed - 1 );
 	SAVE_NETS( network, "Node", CONFIG );
 }

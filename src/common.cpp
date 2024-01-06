@@ -1648,18 +1648,18 @@ char *strcpyn( char *d, const char *s, size_t dSz )
  STRUPR
  convert string to upper case
  ****************************************************/
-#ifndef GCCLIBS
 char *strupr( char *s )
 {
+	char *p;
+
 	if ( s == NULL )
 		return NULL;
 
-	for ( unsigned char *p = ( unsigned char * ) s; *p; ++p )
-		*p = toupper( *p );
+	for ( p = s ; strlen( p ) != 0; ++p )
+		*p = ( char ) toupper( ( int ) *p );
 
 	return s;
 }
-#endif
 
 
 /***************************************************
@@ -1748,6 +1748,22 @@ int strtrim( char *out, const char *str, int outSz )
 	out[ size ] = '\0';
 
 	return size;
+}
+
+
+/***************************************************
+ STRTRIMIN
+ trim whitespace from the beginning/end of string,
+ and also remove duplicated whitespace inside
+ ***************************************************/
+int strtrimin( char *out, const char *str, int outSz )
+{
+	string buf, in = str;
+
+	unique_copy( in.begin( ), in.end( ), back_insert_iterator < string > ( buf ),
+				 [ ] ( char a, char b ) { return isspace( a ) && isspace( b ); } );
+
+	return strtrim( out, buf.c_str( ), outSz );
 }
 
 
@@ -1953,35 +1969,18 @@ vector < string > strtostrsplit( const char *in, char sep )
 /***************************************************
  STRTOLSPLIT
  split a C string into a vector of long integers
- using sep as the separator character
-
+ using sep as the separator character, controlling
+ for conversion errors, producing inv as result
+ in this case
 ***************************************************/
 vector < long > strtolsplit( const char *in, char sep, long inv )
 {
-	long l;
 	string buf;
 	stringstream ss( in );
 	vector < long > out;
 
 	while ( getline( ss, buf, sep ) )
-	{
-		errno = 0;				// detect invalid values
-
-		if ( buf.size( ) == 0 )
-			l = inv;
-		else
-			l = strtol( buf.c_str( ), NULL, 10 );
-
-		if ( errno == ERANGE )
-		{
-			if ( l == 0 )
-				l = inv;
-
-			plog( "\nWarning: invalid long integer (%s), adjusted to %d", buf.c_str( ), l );
-		}
-
-		out.push_back( l );
-	}
+		out.push_back( strtol( buf.c_str( ), NULL, 10, 0 ) );
 
 	return out;
 }
@@ -1990,42 +1989,84 @@ vector < long > strtolsplit( const char *in, char sep, long inv )
 /***************************************************
  STRTODSPLIT
  split a C string into a vector of double floats
- using sep as the separator character
+ using sep as the separator character, controlling
+ for conversion errors, producing inv as result
+ in this case
 ***************************************************/
-vector < double > strtodsplit( const char *in, char sep, long inv )
+vector < double > strtodsplit( const char *in, char sep, double inv )
 {
-	double d;
 	string buf;
 	stringstream ss( in );
 	vector < double > out;
 
 	while ( getline( ss, buf, sep ) )
-	{
-		errno = 0;				// detect invalid values
-
-		if ( buf.size( ) == 0 )
-			d = inv;
-		else
-			d = strtod( buf.c_str( ), NULL );
-
-		if ( errno == ERANGE )
-		{
-			if ( d == 0. )
-				d = inv;
-			else
-				if ( d == HUGE_VAL )
-					d = DBL_MAX;
-				else
-					if ( d == - HUGE_VAL )
-						d = - DBL_MAX;
-
-			plog( "\nWarning: invalid double float (%s), adjusted to %g", buf.c_str( ), d );
-		}
-
-		out.push_back( d );
-	}
+		out.push_back( strtod( buf.c_str( ), NULL, 0. ) );
 
 	return out;
+}
+
+
+/***************************************************
+ STRTOL
+ split a C string into a long integer,
+ controlling for conversion errors, producing
+ inv as result in this case
+***************************************************/
+long strtol( const char *in, char** endptr, int base, long inv )
+{
+	long l;
+
+	errno = 0;				// detect invalid values
+	if ( strlen( in ) == 0 )
+		l = inv;
+	else
+		l = strtol( in, endptr, base );
+
+	if ( errno != 0 )
+	{
+		if ( l == 0 )
+			l = inv;
+#ifndef _LMM_
+		plog( "\nWarning: invalid long integer (%s), adjusted to %d", in, l );
+#endif
+	}
+
+	return l;
+}
+
+
+/***************************************************
+ STRTOD
+ split a C string into a double float,
+ controlling for conversion errors, producing
+ inv as result in this case
+***************************************************/
+double strtod( const char *in, char** endptr, double inv )
+{
+	double d;;
+
+	errno = 0;				// detect invalid values
+	if ( strlen( in ) == 0 )
+		d = inv;
+	else
+		d = strtod( in, endptr );
+
+	if ( errno != 0 )
+	{
+		if ( d == 0. )
+			d = inv;
+		else
+			if ( d == HUGE_VAL )
+				d = DBL_MAX;
+			else
+				if ( d == - HUGE_VAL )
+					d = - DBL_MAX;
+#ifndef _LMM_
+		plog( "\nWarning: invalid double float (%s), adjusted to %g", in, d );
+#endif
+	}
+
+	return d;
 }
 
 

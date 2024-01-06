@@ -392,7 +392,7 @@ struct netNode							// network node data
 	int time;							// time of creation/update
 	long id;							// node unique ID number (reorderable )
 	long nLinks;						// number of arcs FROM node
-	long serNum;						// node serial number (initial order, fixed )
+	long serNum;						// node serial number (for file save/export)
 	netLink *first;						// first link in the linked list of links
 	netLink *last;						// last link in the linked list of links
 
@@ -406,7 +406,6 @@ struct netLink							// individual outgoing link
 	double probTo;						// destination node draw probability
 	double weight;						// link weight
 	int time;							// time of creation/update
-	long serTo;							// destination node serial number (fixed )
 	netLink *next;						// pointer to next link (NULL if last )
 	netLink *prev;						// pointer to previous link (NULL if first )
 	object *ptrFrom;					// network node containing the link
@@ -592,6 +591,7 @@ const char *get_str( const char *tcl_var );
 const char *signal_name( int signum );
 double eval_double( const char *tcl_exp );
 double get_double( const char *tcl_var, double *var = NULL );
+double strtod( const char *in, char** endptr, double inv );
 int deb( object *r, object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" );
 int eval_int( const char *tcl_exp );
 int get_int( const char *tcl_var, int *var = NULL );
@@ -600,16 +600,18 @@ int lsdmain( int argn, const char **argv );
 int strcln( char *out, const char *str, int outSz );
 int strlf( char *out, const char *str, int outSz );
 int strtrim( char *out, const char *str, int outSz );
+int strtrimin( char *out, const char *str, int outSz );
 int strwrap( char *out, const char *str, int outSz, int wid );
 int run_system( const char *cmd, int id = -1 );
 int worker_errors( void );
 long eval_long( const char *tcl_exp );
 long get_long( const char *tcl_var, long *var = NULL );
+long strtol( const char *in, char** endptr, int base, long inv );
 string to_string( const char *fmt, double val );
 string win_path( string filepath );
 vector < string > strtostrsplit( const char *in, char sep );
 vector < long > strtolsplit( const char *in, char sep, long inv = 0 );
-vector < double > strtodsplit( const char *in, char sep, long inv = 0. );
+vector < double > strtodsplit( const char *in, char sep, double inv = 0. );
 void check_option_files( bool sys = false );
 void clean_spaces( char *s );
 void cmd( const char *cm, ... );
