@@ -869,9 +869,9 @@ int browse( object *r )
 
 			cmd( "$w add command -label \"Change Element...\" -underline 0 -accelerator Enter -command { set useCurrObj yes; set choice 7 }" );	// entryconfig 5
 			cmd( "$w add command -label \"Change Object...\" -underline 7 -accelerator Ctrl+Enter -command { set useCurrObj yes; set choice 6 }" );	// entryconfig 6
-			cmd( "$w add command -label \"Find Element...\" -underline 0 -accelerator Ctrl+F -command { set choice 50 }" );	// entryconfig 7
+			cmd( "$w add command -label \"Find...\" -underline 0 -accelerator Ctrl+F -command { set choice 50 }" );	// entryconfig 7
 
-			cmd( "$w add cascade -label \"Sort Elements\" -underline 0 -menu $w.sort" );	// entryconfig 8
+			cmd( "$w add cascade -label \"Sort\" -underline 0 -menu $w.sort" );	// entryconfig 8
 
 			cmd( "$w add separator" );	// entryconfig 9
 
@@ -1003,7 +1003,7 @@ int browse( object *r )
 				} else { \
 					tooltip::tooltip .bbar.struct \"Show Sstructure\" \
 				}" );
-			cmd( "tooltip::tooltip .bbar.find \"Find Element...\"" );
+			cmd( "tooltip::tooltip .bbar.find \"Find...\"" );
 			cmd( "tooltip::tooltip .bbar.addvar \"Add Variable...\"" );
 			cmd( "tooltip::tooltip .bbar.addpar \"Add Parameter...\"" );
 			cmd( "tooltip::tooltip .bbar.addobj \"Add Object...\"" );
@@ -6458,11 +6458,11 @@ object *operate( object *r )
 			if ( nLinks < 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or object\" -detail \"Please check the file contents for a valid Pajek network structure file (Pajek .net format) and make sure you select a valid object for attributing the network's nodes role.\"" );
-				plog( "Error: Network file not imported\n" );
+				plog( "\nError: Network file not imported\n" );
 			}
 			else
 			{
-				plog( " %ld network links imported\n", nLinks );
+				plog( "\n%ld network links imported\n", nLinks );
 				redrawRoot = redrawStruc = true;			// force browser/structure redraw
 			}
 		}
@@ -6575,10 +6575,10 @@ object *operate( object *r )
 		if ( nLinks < 0 )
 		{
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or object\" -detail \"Please check the chosen directory/file for WRITE access and make sure you select a valid object for retrieving the network's nodes.\"" );
-			plog( "Error: Network file not exported\n" );
+			plog( "\nError: Network file not exported\n" );
 		}
 		else
-			plog( " %ld network links exported\n", nLinks );
+			plog( "\n%ld network links exported\n", nLinks );
 
 	break;
 
@@ -7520,6 +7520,7 @@ bool sort_listbox( int box, int order, object *r )
 				cb1->next = cb;
 			cb1 = cb;
 		}
+
 		cb1->next = NULL;
 
 		r->recreate_maps( );		// recreate the fast look-up maps
