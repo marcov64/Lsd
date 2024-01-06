@@ -4260,7 +4260,7 @@ object *operate( object *r )
 	break;
 
 
-	// Find an element of the model
+	// find an object or element of the model
 	case 50:
 
 		if ( ! struct_loaded )
@@ -4270,12 +4270,13 @@ object *operate( object *r )
 		}
 
 		cmd( "set bidi \"\"" );
+		cmd( "set a [ lsort -dictionary [ concat Root $modObj $modElem ] ]" );
 
-		cmd( "newtop .srch \"Find Element\" { set choice 2 }" );
+		cmd( "newtop .srch \"Find\" { set choice 2 }" );
 
 		cmd( "ttk::frame .srch.i" );
-		cmd( "ttk::label .srch.i.l -text \"Element name\"" );
-		cmd( "ttk::combobox .srch.i.e -width 20 -textvariable bidi -justify center -values $modElem" );
+		cmd( "ttk::label .srch.i.l -text \"Name\"" );
+		cmd( "ttk::combobox .srch.i.e -width 20 -textvariable bidi -justify center -values $a" );
 		cmd( "pack .srch.i.l .srch.i.e" );
 
 		cmd( "ttk::label .srch.o -justify center -text \"(type the initial letters of the\nname, LSD will complete it)\"" );
@@ -4286,12 +4287,12 @@ object *operate( object *r )
 
 		cmd( "bind .srch.i.e <KeyPress-Return> { set choice 1; break }" );
 		cmd( "bind .srch.i.e <KeyRelease> { \
-				if { %%N < 256 && [ info exists modElem ] } { \
+				if { %%N < 256 } { \
 					set b [ .srch.i.e index insert ]; \
 					set s [ .srch.i.e get ]; \
-					set f [ lsearch -glob $modElem $s* ]; \
+					set f [ lsearch -glob $a $s* ]; \
 					if { $f !=-1 } { \
-						set d [ lindex $modElem $f ]; \
+						set d [ lindex $a $f ]; \
 						.srch.i.e delete 0 end; \
 						.srch.i.e insert 0 $d; \
 						.srch.i.e index $b; \
@@ -4316,17 +4317,36 @@ object *operate( object *r )
 	// Arrive here from the list of vars used (keep together with case 50!)
 	case 55:
 
+		cur = NULL;
+		cv = NULL;
+		if ( eval_bool( "\"$bidi\" eq \"Root\"" ) )
+			cur = root;
+		else
+			if ( eval_bool( "\"$bidi\" in $modObj" ) )
+				cur = r->search( get_str( "bidi" ), false, false );
+			else
 		cv = r->search_var( r, get_str( "bidi" ), true );
+
+		if ( cur != NULL )
+		{
+			cmd( "set listfocus 2; set itemfocus 0" );
+			redrawRoot = redrawStruc = true;			// request browser redraw
+			choice = 0;
+			return cur;
+		}
+		else
 		if ( cv != NULL )
 		{
-			for ( i = 0, cv1 = cv->up->v; cv1 != cv; cv1 = cv1->next, ++i );
+				for ( i = 0, cv1 = cv->up->v; cv1 != cv && cv1 != NULL;
+					  cv1 = cv1->next, ++i );
+
 			cmd( "set listfocus 1; set itemfocus %d", i );
 			redrawRoot = redrawStruc = true;			// request browser redraw
 			choice = 0;
 			return cv->up;
 		}
 		else
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Element not found\" -detail \"Check the spelling of the element name.\"" );
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Name not found\" -detail \"Check the spelling of the name.\"" );
 
 	break;
 
