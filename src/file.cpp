@@ -176,6 +176,7 @@ int load_configuration( bool reload, int quick )
 {
 	char *buf = NULL, buf1[ MAX_FILE_SIZE ], msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
 	int i, j, load;
+	n_mapT node_map;
 	object *cur;
 	variable *cv, *cv1;
 	description *cd;
@@ -256,7 +257,7 @@ int load_configuration( bool reload, int quick )
 			goto endLoad;
 
 		// load model structure instances
-		load = root->load_xml_insts( rootNode );
+		load = root->load_xml_insts( rootNode, node_map );
 		if( load != 0 )
 			goto endLoad;
 
@@ -620,7 +621,7 @@ int object::load_xml_struct( xml_node &n, bool quick )
 
 			cmd( "lappend modObj %s", str );
 
-			add_obj( str, 1, 0 );
+			add_obj( str );
 			cb = search_bridge( str );
 
 			i = cb->head->load_xml_struct( cn, quick );
@@ -721,7 +722,7 @@ bool object::load_struct( FILE *f )
 		if ( ! strcmp( ch, "Son:" ) )
 		{
 			fscanf( f, "%*[ ]%99s", ch );
-			add_obj( ch, 1, 0 );
+			add_obj( ch );
 			cmd( "lappend modObj %s", ch );
 
 			// find the bridge which contains the object
@@ -773,16 +774,16 @@ OBJECT::LOAD_XML_INSTS
 	Load the object instances of tree under this
 	object from an xml object node
 ****************************************************/
-int object::load_xml_insts( xml_node &n )
+int object::load_xml_insts( xml_node &n, n_mapT &node_map )
 {
 	int i;
 	long k, l, m, nd;
 	string data;
 	vector < double > val, wht, lnkwht1;
-	vector < long > num, nid, lnkto1;
-	vector < string > nname, lnkto, lnkwht;
+	vector < long > num, nser, nid, lnkto1;
+	vector < string > nnam, lnkto, lnkwht;
 	bridge *cb;
-	object *cur, *cur1, *par;
+	object *cur;
 	variable *cv, *cv1;
 
 	if ( strcmp( n.attribute( "name" ).value( ), label ) != 0 )
@@ -811,58 +812,61 @@ int object::load_xml_insts( xml_node &n )
 	xml_node nn = n.child( "nodes" );
 	if ( up != NULL && ! nn.empty( ) )
 	{
+		nser = strtolsplit( nn.child( "serials" ).text( ).get( ), ',', -1 );
+		if ( ( long ) nser.size( ) != nd )		// inconsistent # of node serials
+			return 44;
+
 		nid = strtolsplit( nn.child( "ids" ).text( ).get( ), ',', -1 );
 		if ( ( long ) nid.size( ) != nd )		// inconsistent # of node ids
 			return 44;
 
-		nname = strtostrsplit( nn.child( "names" ).text( ).get( ), ',' );
-		if ( ( long ) nname.size( ) != nd )		// inconsistent # of node names
+		nnam = strtostrsplit( nn.child( "names" ).text( ).get( ), ',' );
+		if ( ( long ) nnam.size( ) != nd )		// inconsistent # of node names
 			return 45;
 
 		for ( l = 0, cur = this; cur != NULL; ++l, cur = cur->hyper_next( label ) )
 		{
-			if ( l >= ( long ) nid.size( ) || l >= ( long ) nname.size( ) )
+			if ( l >= ( long ) nid.size( ) || l >= ( long ) nnam.size( ) )
 				return 46;						// inconsistent # of nodes
 
 			if ( nid [ l ] > 0 )				// valid node?
-				cur->add_node_net( nid[ l ], nname[ l ].c_str( ), true );// add node
+			{
+				cur->add_node_net( nid[ l ], nnam[ l ].c_str( ), true );// add node
+				node_map.insert( n_pairT( nser[ l ], cur ) );
+			}
 		}
 
 		lnkto = strtostrsplit( nn.child( "linksto" ).text( ).get( ), ';' );
 		lnkwht = strtostrsplit( nn.child( "linksweigth" ).text( ).get( ), ';' );
 
 		// add links to node objects
-		for ( l = k = 0, par = NULL, cur = this; cur != NULL;
+		for ( l = k = 0, cur = this; cur != NULL;
 			  ++l, cur = cur->hyper_next( label ) )
-		{
-			if ( par != cur->up )				// entering a new group of instances?
+			if ( cur->node != NULL )			// node on instance?
 			{
-				par = cur->up;
-				par->initturbo( label, num[ k++ ] );
+				if ( l >= ( long ) lnkto.size( ) || l >= ( long ) lnkwht.size( ) )
+					return 47;						// inconsistent # of link groups
+
+				lnkto1 = strtolsplit( lnkto[ l ].c_str( ), ',', -1 );
+				lnkwht1 = strtodsplit( lnkwht[ l ].c_str( ), ',' );
+
+				for ( m = 0; m < ( long ) lnkto1.size( ); ++m )
+				{
+					if ( lnkto1[ m ] < 0 )
+						return 48;					// invalid links
+
+					if ( m >= ( long ) lnkwht1.size( ) )
+						return 49;					// inconsistent # of links
+
+					if ( node_map.find( lnkto1[ m ] ) == node_map.end( ) )
+						return 48;
+
+					cur->add_link_net( node_map[ lnkto1[ m ] ], lnkwht1[ m ] );
+				}
+
+				if ( m < ( long ) lnkwht1.size( ) )
+					return 50;						// inconsistent # of weights
 			}
-
-			if ( cur->node == NULL )			// no node on instance?
-				continue;
-
-			if ( l >= ( long ) lnkto.size( ) || l >= ( long ) lnkwht.size( ) )
-				return 47;						// inconsistent # of link groups
-
-			lnkto1 = strtolsplit( lnkto[ l ].c_str( ), ',', -1 );
-			lnkwht1 = strtodsplit( lnkwht[ l ].c_str( ), ',' );
-
-			for ( m = 0; m < ( long ) lnkto1.size( ); ++m )
-			{
-				if ( lnkto1[ m ] < 0 )
-					return 48;					// invalid links
-
-				if ( m >= ( long ) lnkwht1.size( ) )
-					return 49;					// inconsistent # of links
-
-			}
-
-			if ( m < ( long ) lnkwht1.size( ) )
-				return 50;						// inconsistent # of weights
-		}
 
 		if ( l < ( long ) lnkto.size( ) || l < ( long ) lnkwht.size( ) )
 			return 51;							// inconsistent # of link groups
@@ -940,7 +944,7 @@ int object::load_xml_insts( xml_node &n )
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		xml_node cn = n.find_child_by_attribute( "object", "name", cb->blabel );
-		i = cb->head->load_xml_insts( cn );
+		i = cb->head->load_xml_insts( cn, node_map );
 		if ( i != 0 )
 			return i;
 	}
@@ -1178,6 +1182,7 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 	int delta, indexDig, save_len;
 	char ch[ MAX_PATH_LENGTH ], *save_file, *bak_file;
 	const char *save_path;
+	long node_serial = 1;
 	FILE *f;
 	gzFile fz;
 	ostringstream buf;
@@ -1258,10 +1263,12 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 	<!ELEMENT settings (simulation, profiling?, #PCDATA)>\n \
 	<!ELEMENT structure (object)>\n \
 	<!ELEMENT equation_file (#PCDATA, #CDATA?)>\n \
-	<!ELEMENT object (#PCDATA, object*, element*, description?)>\n \
-	<!ELEMENT element (#PCDATA?, description?, documentation?)>\n \
+	<!ELEMENT object (#PCDATA, description?, nodes?, object*, element*)>\n \
 	<!ELEMENT description (#PCDATA+)>\n \
-	<!ELEMENT documentation EMPTY> ]" );
+	<!ELEMENT nodes (#PCDATA, #PCDATA, #PCDATA, #PCDATA, #PCDATA)>\n \
+	<!ELEMENT element (#PCDATA?, description?, documentation?, sensitivity?)>\n \
+	<!ELEMENT documentation EMPTY> \
+	<!ELEMENT sensitivity ( )>\n ]" );
 	xml_node lsdNode = xf.append_child( "LSD" );
 	xml_node cfgNode = lsdNode.append_child( "configuration" );
 	cfgNode.append_attribute( "version" ) = "1.0";
@@ -1306,7 +1313,7 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 
 	// add model structure
 	xml_node strNode = cfgNode.append_child( "structure" );
-	root->save_xml_struct( strNode, quick );
+	root->save_xml_struct( strNode, node_serial, quick );
 
 	// add equation file name and content
 	xml_node eqfNode = cfgNode.append_child( "equation_file" );
@@ -1351,16 +1358,17 @@ OBJECT::SAVE_XML_STRUCT
 	If quick is true, just the structure and the
 	parameters are saved, no descriptions
 ****************************************************/
-void object::save_xml_struct( xml_node &pn, bool quick )
+void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 {
 	bool init, nodes;
 	char *str, val[ 32 + 1 ];
 	int i, count;
-	string data, nname, lnkto, lnkwht;
+	string data, nser, nid, nnam, lnkto, lnkwht;
 	bridge *cb;
 	description *cd;
 	netLink *curl;
 	object *cur;
+	sense *cs;
 	variable *cv, *cv1;
 
 	xml_node n = pn.append_child( "object" );
@@ -1400,52 +1408,63 @@ void object::save_xml_struct( xml_node &pn, bool quick )
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 		if ( cb->head == NULL )
-			blueprint->search( cb->blabel )->save_xml_struct( n, quick );
+			blueprint->search( cb->blabel )->save_xml_struct( n, node_serial, quick );
 		else
-			cb->head->save_xml_struct( n, quick );
+			cb->head->save_xml_struct( n, node_serial, quick );
 
 	// save network attributes and links
 	if ( nodes )
-	{
-		for ( data = "", cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
+	{	// first save nodes and attribute serials
+		for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
 		{
 			if ( cur != this )
 			{
-				data += ",";
-				nname += ",";
-				lnkto += ";";
-				lnkwht += ";";
+				nser += ",";
+				nid += ",";
+				nnam += ",";
 			}
 
 			if ( cur->node != NULL )
 			{
-				data += to_string( cur->node->id );
+				cur->node->serNum = node_serial++;
+				nser += to_string( cur->node->serNum );
+				nid += to_string( cur->node->id );
 
 				if ( cur->node->name != NULL )
-					nname += cur->node->name;
-
-				// scan all links from node
-				if ( cur->node->nLinks > 0 )
-					for ( curl = cur->node->first; curl != NULL; curl = curl->next )
-					{
-						if ( curl != cur->node->first )
-						{
-							lnkto += ",";
-							lnkwht += ",";
-						}
-
-						if ( curl->ptrTo == NULL || curl->ptrTo->node == NULL )
-							continue;				// ignore invalid link
-
-						lnkto += to_string( curl->ptrTo->node->id );
-						lnkwht += to_string( "%.15g", curl->weight );
-					}
+					nnam += cur->node->name;
 			}
 		}
 
+		// second save links using serials for destination
+		for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
+		{
+			if ( cur != this )
+			{
+				lnkto += ";";
+				lnkwht += ";";
+			}
+
+			if ( cur->node != NULL )			// scan all links from node
+				for ( curl = cur->node->first; curl != NULL; curl = curl->next )
+				{
+					if ( curl != cur->node->first )
+					{
+						lnkto += ",";
+						lnkwht += ",";
+					}
+
+					if ( curl->ptrTo == NULL || curl->ptrTo->node == NULL )
+						continue;				// ignore invalid link
+
+					lnkto += to_string( curl->ptrTo->node->serNum );
+					lnkwht += to_string( "%.15g", curl->weight );
+				}
+		}
+
 		xml_node nd = n.append_child( "nodes" );
-		nd.append_child( "ids" ).text( ) = data.c_str( );
-		nd.append_child( "names" ).text( ) = nname.c_str( );
+		nd.append_child( "serials" ).text( ) = nser.c_str( );
+		nd.append_child( "ids" ).text( ) = nid.c_str( );
+		nd.append_child( "names" ).text( ) = nnam.c_str( );
 		nd.append_child( "linksto" ).text( ) = lnkto.c_str( );
 		nd.append_child( "linksweigth" ).text( ) = lnkwht.c_str( );
 	}
@@ -1562,6 +1581,17 @@ void object::save_xml_struct( xml_node &pn, bool quick )
 
 			if ( cd->initial )
 				cnd.append_attribute( "initialization" ) = true;
+		}
+
+		// add sensitivity analysis data
+		for ( cs = rsense; cs != NULL; cs = cs->next )
+			if ( strcmp( cs->label, cv->label ) == 0 )
+				break;
+
+		if ( cs != NULL )					// sensitivity data present?
+		{
+			xml_node cns = cn.append_child( "sensitivity" );
+
 		}
 	}
 }
@@ -1968,7 +1998,7 @@ void empty_sensitivity( sense *cs )
 
 /*****************************************************************************
 SAVE_SENSITIVITY
-	Save current sensitivity configuration
+	Save current sensitivity configuration to file
 	Returns: true: save ok, false: save failure
 ******************************************************************************/
 bool save_sensitivity( FILE *f )

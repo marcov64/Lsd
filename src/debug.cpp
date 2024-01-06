@@ -2038,9 +2038,13 @@ void show_tmp_vars( object *r, bool update )
 			if ( r->node != NULL )
 			{
 				for ( curLnk = r->node->first; curLnk != NULL; curLnk = curLnk->next )
-					if ( curLnk == n_values[ j ] && curLnk->ptrTo != NULL && curLnk->ptrTo->label != NULL )
+					if ( curLnk == n_values[ j ] && curLnk->ptrTo != NULL && curLnk->ptrTo->node != NULL )
 					{
-						cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%ld)\"", curLnk->ptrTo->label, curLnk->serTo );
+						if ( curLnk->ptrTo->label != NULL )
+							cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%ld)\"", curLnk->ptrTo->label, curLnk->ptrTo->node->id );
+						else
+							cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"(%ld)\"", curLnk->ptrTo->node->id );
+
 						n = 1;
 						break;
 					}

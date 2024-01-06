@@ -223,10 +223,10 @@ in different groups.
 - void add_empty_var( char *label );
 Add a variable to the object
 
-- void add_obj( char *label, int num );
+- object *add_obj( char *label, int num, bool propagate );
 Add a new object type in the model as descendant of current one
- and initialize its name. It makes num copies
-of it. This is NOT to be used to make more instances of existing objects.
+and initialize its name. It makes num copiesof it, and can propagate to other
+instances of the same parent object.
 
 - void move_obj( char *lab );
 Move the current object as descendant to a new parent
@@ -248,8 +248,8 @@ and it si changed in n
 Add a variable before knowing its contents, setting to a default initialization
 values all the fields in the variable. It operates only on object this
 
-- void add_var_from_example( variable *example );
-Add a variable copying all the fields by the variable example.
+- variable *add_var_from_example( variable *example );
+Add a variable instance copying all the fields by the variable example.
 It operates only on object this
 
 - void empty( void ) ;
@@ -1177,7 +1177,8 @@ object *object::turbosearch_cond( const char *lab, double value )
 
 /****************************************************
 ADD_EMPTY_VAR
-Add a new (empty) Variable, used in the creation of the model structure
+Add a new (empty) element, used in the creation
+of the model structure
 ****************************************************/
 variable *object::add_empty_var( const char *lab )
 {
@@ -1188,7 +1189,16 @@ variable *object::add_empty_var( const char *lab )
 		error_hard( "variable or parameter not added",
 					"choose an unique name for the element",
 					true,
-					"element '%s' already exists in object '%s'", lab, label );
+					"an element named '%s' already exists in the model", lab );
+		return NULL;
+	}
+
+	if ( search( lab ) != NULL )
+	{
+		error_hard( "variable or parameter not added",
+					"choose an unique name for the element",
+					true,
+					"an object named '%s' already exists in the model", lab );
 		return NULL;
 	}
 
@@ -1218,9 +1228,9 @@ variable *object::add_empty_var( const char *lab )
 
 /****************************************************
 ADD_VAR_FROM_EXAMPLE
-Add a Variable identical to the example.
+Add a new element instance identical to the example
 ****************************************************/
-void object::add_var_from_example( variable *example )
+variable *object::add_var_from_example( variable *example )
 {
 	variable *cv;
 
@@ -1230,7 +1240,7 @@ void object::add_var_from_example( variable *example )
 					"choose an unique name for the element",
 					true,
 					"element '%s' already exists in object '%s'", example->label, label );
-		return;
+		return NULL;
 	}
 
 	if ( v == NULL )
@@ -1259,19 +1269,40 @@ void object::add_var_from_example( variable *example )
 	cv->deb_cnd_val = example->deb_cnd_val;
 
 	v_map.insert( v_pairT ( example->label, cv ) );
+
+	return cv;
 }
 
 
 /****************************************************
 ADD_OBJ
-Add num sons with label lab to ANY object like this one, wherever is on the
+Add num new sons with label lab, to ANY object like
+this one if propagate = true, wherever is on the
 tree
 ****************************************************/
-void object::add_obj( const char *lab, int num, int propagate )
+object *object::add_obj( const char *lab, int num, bool propagate )
 {
 	int i;
 	bridge *cb;
-	object *cur, *cur1;
+	object *cur, *cur1, *cur2;
+
+	if ( search( lab ) != NULL )
+	{
+		error_hard( "object not added",
+					"choose an unique name for the object",
+					true,
+					"an object named '%s' already exists in the model", lab );
+		return NULL;
+	}
+
+	if ( search_var( NULL, lab, true ) != NULL )
+	{
+		error_hard( "object not added",
+					"choose an unique name for the object",
+					true,
+					"an element named '%s' already exists in the model", lab );
+		return NULL;
+	}
 
 #ifndef _NW_
 	if ( ! valid_label( lab ) )
@@ -1281,7 +1312,7 @@ void object::add_obj( const char *lab, int num, int propagate )
 	}
 #endif
 
-	for ( cur = this; cur != NULL; propagate == 1 ? cur = cur->hyper_next( label ) : cur = NULL )
+	for ( cur = this; cur != NULL; propagate ? cur = cur->hyper_next( label ) : cur = NULL )
 	{
 		// create bridge
 		if ( cur->b == NULL )
@@ -1297,7 +1328,7 @@ void object::add_obj( const char *lab, int num, int propagate )
 		for ( i = 0; i < num; ++i )
 		{
 			if ( i == 0 )
-				cur1 = cb->head = new object;
+				cur1 = cur2 = cb->head = new object;
 			else
 				cur1 = cur1->next = new object;
 
@@ -1306,6 +1337,8 @@ void object::add_obj( const char *lab, int num, int propagate )
 
 		cur->b_map.insert( b_pairT ( lab, cb ) );
 	}
+
+	return cur2;
 }
 
 
@@ -1632,7 +1665,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 		cb2->t_map.clear( );
 		cb2->o_map.clear( );
 		delete [ ] cb2->search_var;
-		cb->search_var = NULL;
+		cb2->search_var = NULL;
 
 		// attach the new objects to the linked chain of the bridge
 		if ( last == NULL )

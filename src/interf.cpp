@@ -1575,7 +1575,7 @@ object *operate( object *r )
 				goto here_newobject;
 			}
 
-			r->add_obj( lab, 1, 1 );
+			r->add_obj( lab, 1, true );
 
 			add_description( lab, 4, eval_str( "[ .addobj.d.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 			cmd( "lappend modObj %s", lab );
@@ -4325,7 +4325,7 @@ object *operate( object *r )
 			if ( eval_bool( "\"$bidi\" in $modObj" ) )
 				cur = r->search( get_str( "bidi" ), false, false );
 			else
-		cv = r->search_var( r, get_str( "bidi" ), true );
+				cv = r->search_var( r, get_str( "bidi" ), true );
 
 		if ( cur != NULL )
 		{
@@ -4335,17 +4335,17 @@ object *operate( object *r )
 			return cur;
 		}
 		else
-		if ( cv != NULL )
-		{
+			if ( cv != NULL )
+			{
 				for ( i = 0, cv1 = cv->up->v; cv1 != cv && cv1 != NULL;
 					  cv1 = cv1->next, ++i );
 
-			cmd( "set listfocus 1; set itemfocus %d", i );
-			redrawRoot = redrawStruc = true;			// request browser redraw
-			choice = 0;
-			return cv->up;
-		}
-		else
+				cmd( "set listfocus 1; set itemfocus %d", i );
+				redrawRoot = redrawStruc = true;			// request browser redraw
+				choice = 0;
+				return cv->up;
+			}
+			else
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Name not found\" -detail \"Check the spelling of the name.\"" );
 
 	break;

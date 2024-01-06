@@ -271,14 +271,16 @@ struct object
 	long init_small_world_net( const char *lab, long numNodes, long outDeg, double rho );
 	long init_star_net( const char *lab, long numNodes );
 	long init_uniform_net( const char *lab, long numNodes, long outDeg );
-	int load_xml_insts( xml_node &n );
+	int load_xml_insts( xml_node &n, n_mapT &node_map );
 	int load_xml_struct( xml_node &n, bool quick );
 	netLink *add_link_net( object *destPtr, double weight = 0, double probTo = 1 );
+	netLink *add_link_net( const char *nodeName, long startNode, long endNode, double weight = 0, double probTo = 1, bool edge = false );
 	netLink *draw_link_net( void );
 	netLink *search_link_net( long id );
 	object *add_n_objects2( const char *lab, int n, int t_update = -1 );
 	object *add_n_objects2( const char *lab, int n, object *ex, int t_update = -1 );
 	object *add_node_net( long id = -1, const char *nodeName = "", bool silent = false );
+	object *add_obj( const char *label, int num = 1, bool propagate = false );
 	object *draw_node_net( const char *lab );
 	object *draw_rnd( const char *lo );
 	object *draw_rnd( const char *lo, const char *lv, int lag = 0 );
@@ -300,10 +302,9 @@ struct object
 	object *turbosearch( const char *label, double tot, double num );
 	object *turbosearch_cond( const char *label, double value );
 	variable *add_empty_var( const char *str );
+	variable *add_var_from_example( variable *example );
 	variable *search_var( object *caller, const char *label, bool no_error = false, bool no_search = false, bool no_search_up = false, bool search_sons = false );
 	variable *search_var_err( object *caller, const char *label, bool no_search, bool no_search_up, bool search_sons, const char *errmsg );
-	void add_obj( const char *label, int num, int propagate );
-	void add_var_from_example( variable *example );
 	void chg_lab( const char *lab );
 	void chg_var_lab( const char *old, const char *n );
 	void collect_cemetery( variable *caller = NULL );
@@ -319,7 +320,7 @@ struct object
 	void replicate( int num, bool propagate = false );
 	void save_insts( FILE *f );
 	void save_struct( FILE *f, const char *tab );
-	void save_xml_struct( xml_node &pn, bool quick );
+	void save_xml_struct( xml_node &pn, long &node_serial, bool quick );
 	void search_inst( object *obj, long *pos, long *checked );
 	void update( bool recurse, bool user );
 };
@@ -387,10 +388,10 @@ struct bridge
 
 struct netNode							// network node data
 {
-	char *name;							// node textual name (not required )
+	char *name;							// node textual name (not required)
 	double prob;						// assigned node draw probability
 	int time;							// time of creation/update
-	long id;							// node unique ID number (reorderable )
+	long id;							// node unique ID number (reorderable)
 	long nLinks;						// number of arcs FROM node
 	long serNum;						// node serial number (for file save/export)
 	netLink *first;						// first link in the linked list of links

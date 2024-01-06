@@ -629,7 +629,7 @@ void set_blueprint( object *container, object *r )
 			continue;
 
 		cur1 = cb->head;
-		container->add_obj( cur1->label, 1, 0 );
+		container->add_obj( cur1->label );
 
 		for ( cb1 = container->b; strcmp( cb1->blabel, cb->blabel ); cb1 = cb1->next );
 
