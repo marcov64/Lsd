@@ -7580,7 +7580,8 @@ Restore sensitivity configuration
 bool load_prev_configuration( void )
 {
 	char *saFile = NULL;
-	int lstFidx = findexSens;
+	int i, lstFidx = findexSens;
+	string warnings;
 	FILE *f;
 
 	if ( sens_file != NULL )					// save SA file name if one is loaded
@@ -7589,9 +7590,9 @@ bool load_prev_configuration( void )
 		strcpy( saFile, sens_file );
 	}
 
-	if ( load_configuration( true ) != 0 )
+	if ( ( i = load_configuration( true, &warnings ) ) != 0 )
 	{
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Previously loaded configuration could not be restored. Check if LSD still has access to the model directory.\n\nCurrent configuration will be reset now.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded (%d :%.24s)\" -detail \"Previously loaded configuration could not be restored. Check if LSD still has access to the model directory.\n\nCurrent configuration will be reset now.\"", i, warnings.c_str( ) );
 
 		unload_configuration( true );			// full unload everything
 		return false;

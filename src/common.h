@@ -43,6 +43,7 @@
 #include <new>
 #include <string>
 #include <vector>
+#include <set>
 #include <functional>
 #include <unordered_map>
 #include <unordered_set>
@@ -271,7 +272,7 @@ struct object
 	long init_small_world_net( const char *lab, long numNodes, long outDeg, double rho );
 	long init_star_net( const char *lab, long numNodes );
 	long init_uniform_net( const char *lab, long numNodes, long outDeg );
-	int load_xml_insts( xml_node &n, n_mapT &node_map );
+	int load_xml_insts( xml_node &n, n_mapT &node_map, set < int > &warning );
 	int load_xml_struct( xml_node &n, bool quick );
 	netLink *add_link_net( object *destPtr, double weight = 0, double probTo = 1 );
 	netLink *add_link_net( const char *nodeName, long startNode, long endNode, double weight = 0, double probTo = 1, bool edge = false );

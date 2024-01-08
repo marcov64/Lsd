@@ -389,7 +389,7 @@ int lsdmain( int argn, const char **argv )
 
 	fclose( f );
 
-	if ( load_configuration( true, 1 ) != 0 )
+	if ( load_configuration( true, NULL, 1 ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\nThis is the no window version of LSD.\nCheck if the file is a valid LSD configuration or regenerate it using the\nLSD Browser.\n\n", struct_file );
 		myexit( 8 );
@@ -900,7 +900,7 @@ void run( void )
 		// if new batch configuration file, reload all except descriptions
 		if ( batch_sequential_loop )
 		{
-			if ( load_configuration( true, 1 ) != 0 )
+			if ( load_configuration( true, NULL, 1 ) != 0 )
 			{
 #ifndef _NW_
 				log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
@@ -915,7 +915,7 @@ void run( void )
 
 		// if just another run seed, reload just structure & parameters
 		if ( i > 1 )
-			if ( load_configuration( true, 2 ) != 0 )
+			if ( load_configuration( true, NULL, 2 ) != 0 )
 			{
 #ifndef _NW_
 				log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );

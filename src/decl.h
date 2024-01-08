@@ -36,7 +36,6 @@ Relevant flags (when defined):
 #include <chrono>
 #include <list>
 #include <map>
-#include <set>
 #include <atomic>
 #include <exception>
 
@@ -246,7 +245,7 @@ int count_lines( const char *fname, bool dozip = false );
 int entry_new_objnum( object *c, const char *tag );
 int hyper_count( const char *lab );
 int hyper_count_var( const char *lab );
-int load_configuration( bool reload, int quick = 0 );
+int load_configuration( bool reload, string *warnings = NULL, int quick = 0 );
 int load_sensitivity( FILE *f );
 int logic_op_code( const char *lop, const char *errmsg );
 int min_hborder( int pdigits, double miny, double maxy );

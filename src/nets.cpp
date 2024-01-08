@@ -1374,11 +1374,7 @@ void get_line( char *lBuffer, FILE *fPtr )
 {
 	char firstChar;
 
-	if ( feof( fPtr ) )
-	{
-		strcpy( lBuffer, "" );
-		return;
-	}
+	strcpy( lBuffer, "" );
 
 	do
 	{
@@ -1510,8 +1506,8 @@ double object::read_file_net( const char *lab, const char dir[ ],
 						if ( serial >= 0 && strlen( textLine ) > 0 )
 							plog( "\nWarning: invalid arc (%s), ignored", textLine );
 
-					if ( feof( pajekFile ) )				// check file end
-						break;
+				if ( feof( pajekFile ) )					// check file end
+					break;
 			}
 		else
 			if ( strstr( textLine, "*EDGESLIST" ) )			// check *EdgesList
@@ -1538,10 +1534,10 @@ double object::read_file_net( const char *lab, const char dir[ ],
 						else
 							if ( serial >= 0 && strlen( textLine ) > 0 )
 								plog( "\nWarning: invalid edge list (%s), ignored", textLine );
-
-						if ( feof( pajekFile ) )
-							break;
 					}
+
+					if ( feof( pajekFile ) )
+						break;
 				}
 			else
 				if ( strstr( textLine, "*EDGES" ) )			// check *Edges section start
@@ -1562,8 +1558,8 @@ double object::read_file_net( const char *lab, const char dir[ ],
 								if ( serial >= 0 && strlen( textLine ) > 0 )
 									plog( "\nWarning: invalid edge (%s), ignored", textLine );
 
-							if ( feof( pajekFile ) )
-								break;
+						if ( feof( pajekFile ) )
+							break;
 					}
 				else										// no more sections
 					get_line( textLine, pajekFile );		// gets next text line

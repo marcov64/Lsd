@@ -58,8 +58,10 @@ OPEN_CONFIGURATION
 ****************************************************/
 bool open_configuration( object *&r, bool reload )
 {
-	int i;
+	bool loaded;
 	const char *lab1, *lab2;
+	int i;
+	string warnings;
 
 	if ( ! reload || strlen( simul_name ) == 0 )
 	{									// ask user the file to use, if not reloading
@@ -106,38 +108,39 @@ bool open_configuration( object *&r, bool reload )
 	redrawRoot = redrawStruc = true;			// force browser/structure redraw
 	iniShowOnce = false;						// show warning on # of columns in .ini
 
-	switch ( i = load_configuration( reload ) )	// try to load the configuration
+	switch ( i = load_configuration( reload, &warnings ) )// try to load the configuration
 	{
 		case 1:									// file/path not found
 			if ( strlen( path ) > 0 )
 				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME, path );
 			else
 				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME	 );
-			return false;
+			loaded = false;
+			break;
 
 		case 2:									// problem from STRUCT section
 		case 3:									// problem from DATA section
 		case 21:								// invalid XML format
 		case 22:								// missing XML root node
 		case 31:								// internal XML error
-		case 41:
 		case 32:								// missing XML object name
 		case 33:								// missing XML element type
 		case 34:								// missing XML element name
-		case 52:
 		case 35:								// invalid XML element type
+		case 41:								// internal XML error
 		case 42 ... 43:							// XML inconsistent # of groups
 		case 44 ... 45:							// XML inconsistent # of node ids/names
-		case 46:								// XML inconsistent # of nodes
-		case 47:								// XML inconsistent # of link groups
-		case 51:
+		case 46 ... 47:							// XML inconsistent # of link/weight groups
 		case 48:								// XML invalid links
 		case 49:								// XML inconsistent # of links
 		case 50:								// XML inconsistent # of weights
-		case 53 ... 55:							// XML inconsistent # of variable values
+		case 51:								// XML inconsistent # of link/weight groups
+		case 52:								// missing XML element data
+		case 53 ... 56:							// XML inconsistent variable values
 
-			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file (%d)\" -detail \"Please check if a proper file was selected.\"", i );
-			return false;
+			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file (%d :%.24s)\" -detail \"Incomplete configuration loaded!\n\nPlease check if a proper LSD configuration file was selected or complete the missing model components and settings.\"", i, warnings.c_str( ) );
+			loaded = false;
+			break;
 
 		case 4:									// problem from SIM_NUM section
 		case 5:									// problem from SEED
@@ -146,22 +149,27 @@ bool open_configuration( object *&r, bool reload )
 		case 8:									// problem from MODELREPORT section
 		case 9:									// problem from DESCRIPTION section
 		case 23:								// missing XML settings node
-		case 24:									// missing XML equation node
-			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d)\" -detail \"Element descriptions were lost but the configuration can still be used.\n\nPlease check if the desired file was selected or re-enter the description information if needed.\n\nIf this is a sensitivity analysis configuration file, this message is expected, and configuration file is ok.\"", i );
+		case 24:								// missing XML equation node
+			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d :%.24s)\" -detail \"Element descriptions were lost but the configuration can still be used.\n\nPlease check if the desired LSD configuration file was selected or re-enter the description information if needed.\n\nIf this is a sensitivity analysis configuration file, this message is expected, and configuration file is ok.\"", i, warnings.c_str( ) );
 			reset_description( root );
+			loaded = true;
 			break;
 
 		case 10 ... 11:							// problem from DOCUOBSERVE section
 		case 12 ... 13:							// problem from DOCUINITIAL section
-			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d)\" -detail \"Observation flags and equation file were lost but the configuration can still be used.\n\nPlease check if the desired file was selected or re-configure the lost parts if needed.\"", i );
+			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d :%.24s)\" -detail \"Observation flags and equation file were lost but the configuration can still be used.\n\nPlease check if the desired LSD configuration file was selected or re-configure the lost parts if needed.\"", i, warnings.c_str( ) );
+			loaded = true;
 	}
 
-	if ( r != NULL && reload )
+	if ( i == 0 && warnings.size( ) > 0 )
+			cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"Partially damaged file (%d :%.24s)\" -detail \"Part of the configuration data was missing or invalid and was replaced by default values.\n\nPlease check if the desired LSD configuration file was selected or re-configure the affected parts as needed.\"", i, warnings.c_str( ) );
+
+	if ( loaded && r != NULL && reload )
 		currObj = r = restore_pos( root );		// restore pointed object and variable
 	else
 		currObj = r = root;						// new structure
 
-	return true;
+	return loaded;
 }
 
 #endif
@@ -172,10 +180,11 @@ LOAD_CONFIGURATION
 	If quick is != 0, just the structure and the parameters are retrieved
 	Returns: 0: load ok, 1,2,3,4,...: load failure
 ******************************************************************************/
-int load_configuration( bool reload, int quick )
+int load_configuration( bool reload, string *warnings, int quick )
 {
 	char *buf = NULL, buf1[ MAX_FILE_SIZE ], msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
 	int i, j, load = 0;
+	set < int > warning;
 	n_mapT node_map;
 	object *cur;
 	variable *cv, *cv1;
@@ -257,9 +266,12 @@ int load_configuration( bool reload, int quick )
 			goto endLoad;
 
 		// load model structure instances
-		load = root->load_xml_insts( rootNode, node_map );
+		load = root->load_xml_insts( rootNode, node_map, warning );
 		if( load != 0 )
 			goto endLoad;
+
+		// set blueprint to initial condition
+		set_blueprint( blueprint, root );
 
 		if ( reload && quick == 2 )				// just quick reload?
 			goto endLoad;
@@ -501,6 +513,13 @@ endLoad:
 	if ( f != NULL )
 		fclose( f );
 
+	if ( warnings != NULL )
+	{
+		warnings->clear( );
+		for ( auto i : warning )
+			*warnings += " " + to_string( i );
+	}
+
 	t = 0;
 
 #ifndef _NW_
@@ -616,7 +635,7 @@ int object::load_xml_struct( xml_node &n, bool quick )
 		if ( ! strcmp( cn.name( ), "object" ) )			// add object?
 		{
 			str = cn.attribute( "name" ).value( );
-			if ( strlen( str ) == 0 )
+			if ( strlen( str ) == 0 || ! valid_label( str ) )
 				return 32;
 
 			cmd( "lappend modObj %s", str );
@@ -628,7 +647,7 @@ int object::load_xml_struct( xml_node &n, bool quick )
 			if ( i != 0 )
 				return i;
 
-			if ( ! quick )
+			if ( ! quick && ! cn.child( "description" ).empty( ) )
 			{
 				desc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
 				add_description( str, 4, desc );
@@ -647,7 +666,7 @@ int object::load_xml_struct( xml_node &n, bool quick )
 						break;
 
 				str = cn.attribute( "name" ).value( );
-				if ( strlen( str ) == 0 )
+				if ( strlen( str ) == 0 || ! valid_label( str ) )
 					return 34;
 
 				switch( i )
@@ -670,7 +689,7 @@ int object::load_xml_struct( xml_node &n, bool quick )
 				cv = add_empty_var( str );
 				cv->param = i;
 
-				if ( ! quick )
+				if ( ! quick && ! cn.child( "description" ).empty( ) )
 				{
 					desc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
 					init = strdecdata( NULL, cn.child( "description" ).child( "initialization" ).text( ).get( ) );
@@ -774,14 +793,15 @@ OBJECT::LOAD_XML_INSTS
 	Load the object instances of tree under this
 	object from an xml object node
 ****************************************************/
-int object::load_xml_insts( xml_node &n, n_mapT &node_map )
+int object::load_xml_insts( xml_node &n, n_mapT &node_map, set < int > &warning )
 {
 	int i;
+	double d;
 	long k, l, m, nd;
 	string data;
-	vector < double > val, wht, lnkwht1;
+	vector < double > wht, val1, lnkwht1;
 	vector < long > num, nser, nid, lnkto1;
-	vector < string > nnam, lnkto, lnkwht;
+	vector < string > val, nnam, lnkto, lnkwht;
 	bridge *cb;
 	object *cur;
 	variable *cv, *cv1;
@@ -796,49 +816,69 @@ int object::load_xml_insts( xml_node &n, n_mapT &node_map )
 	for ( nd = l = 0, cur = this; cur != NULL;
 		  nd += num[ l ], ++l, cur = cur->hyper_next( label ) )
 	{
-		if ( l >= ( long ) num.size( ) )		// inconsistent # of groups
-			return 42;
+		if ( l >= ( long ) num.size( ) || num[ l ] <= 0 )
+		{
+			warning.insert( 42 );				// inconsistent # of groups
+			m = 1;
+		}
+		else
+			m = num[ l ];
 
 		cur->to_compute = to_compute;
-		cur->replicate( num[ l ] );
+		cur->replicate( m );
 
 		for ( ; go_brother( cur ) != NULL; cur = cur->next );// go next group
 	}
 
 	if ( l < ( long ) num.size( ) || nd != reduce( num.begin( ), num.end( ) ) )
-		return 43;				// inconsistent # of groups
+		warning.insert( 43 );					// inconsistent # of groups
 
 	// load network attributes and links
-	xml_node nn = n.child( "nodes" );
-	if ( up != NULL && ! nn.empty( ) )
+	if ( up != NULL && ! n.child( "nodes" ).empty( ) )
 	{
+		xml_node nn = n.child( "nodes" );
 		nser = strtolsplit( nn.child( "serials" ).text( ).get( ), ',', -1 );
 		nid = strtolsplit( nn.child( "ids" ).text( ).get( ), ',', -1 );
 		if ( ( long ) nser.size( ) != nd || ( long ) nid.size( ) != nd )
-			return 44;							// inconsistent # of node serials/ids
+			warning.insert( 44 );				// inconsistent # of node serials/ids
 
 		if ( ! nn.child( "names" ).empty( ) )
 		{
 			nnam = strtostrsplit( nn.child( "names" ).text( ).get( ), ',', true );
-			if ( ( long ) nnam.size( ) != nd )	// inconsistent # of node names
-				return 45;
+			if ( ( long ) nnam.size( ) != nd )
+				warning.insert( 45 );			// inconsistent # of node names
 		}
 
 		for ( l = 0, cur = this; cur != NULL; ++l, cur = cur->hyper_next( label ) )
 		{
-			if ( l >= ( long ) nser.size( ) || l >= ( long ) nid.size( ) ||
-				 ( nnam.size( ) > 0 && l >= ( long ) nnam.size( ) ) )
-				return 46;						// inconsistent # of nodes
-
-			if ( nser [ l ] > 0 )				// valid node?
+			if ( l >= ( long ) nser.size( ) || nser[ l ] < 1 )
 			{
-				if ( nnam.size( ) > 0 )
-					cur->add_node_net( nid[ l ], nnam[ l ].c_str( ), true );// add node
-				else
-					cur->add_node_net( nid[ l ], "", true );
-
-				node_map.insert( n_pairT( nser[ l ], cur ) );
+				warning.insert( 44 );			// inconsistent # of node serials
+				break;
 			}
+			else
+				m = nser[ l ];
+
+			if ( l >= ( long ) nid.size( ) || nid[ l ] < 1 )
+			{
+				warning.insert( 44 );			// inconsistent # of node ids
+				k = m;
+			}
+			else
+				k = nid[ l ];
+
+			data = "";
+			if ( nnam.size( ) > 0 )
+			{
+				if ( l >= ( long ) nnam.size( ) )
+					warning.insert( 45 );			// inconsistent # of node names
+				else
+					if ( nnam[ l ] != to_string( k ) )// ignore name = ID
+						data = nnam[ l ];
+			}
+
+			cur->add_node_net( k, data.c_str( ), true );// add node
+			node_map.insert( n_pairT( m, cur ) );
 		}
 
 		if ( ! nn.child( "linksto" ).empty( ) )
@@ -849,43 +889,56 @@ int object::load_xml_insts( xml_node &n, n_mapT &node_map )
 				lnkwht = strtostrsplit( nn.child( "linksweigth" ).text( ).get( ), ';' );
 
 			// add links to node objects
-			for ( l = k = 0, cur = this; cur != NULL;
-				  ++l, cur = cur->hyper_next( label ) )
+			for ( l = k = 0, cur = this; cur != NULL; ++l, cur = cur->hyper_next( label ) )
 				if ( cur->node != NULL )		// node on instance?
 				{
-					if ( l >= ( long ) lnkto.size( ) ||
-						 ( lnkwht.size( ) > 0 && l >= ( long ) lnkwht.size( ) ) )
-						return 47;				// inconsistent # of link groups
+					if ( l >= ( long ) lnkto.size( ) )
+					{
+						warning.insert( 46 );	// inconsistent # of link groups
+						break;
+					}
 
 					lnkto1 = strtolsplit( lnkto[ l ].c_str( ), ',', -1 );
 
 					if ( lnkwht.size( ) > 0 )
-						lnkwht1 = strtodsplit( lnkwht[ l ].c_str( ), ',' );
+					{
+						if ( l >= ( long ) lnkwht.size( ) )
+						{
+							warning.insert( 47 );// inconsistent # of link groups
+							lnkwht1.clear( );
+						}
+						else
+							lnkwht1 = strtodsplit( lnkwht[ l ].c_str( ), ',' );
+					}
 
 					for ( m = 0; m < ( long ) lnkto1.size( ); ++m )
 					{
-						if ( lnkto1[ m ] <= 0 ||
-							 node_map.find( lnkto1[ m ] ) == node_map.end( ) )
-							return 48;			// invalid links
+						if ( lnkto1[ m ] < 1 || node_map.find( lnkto1[ m ] ) ==
+												node_map.end( ) )
+						{
+							warning.insert( 48 );// invalid links
+							break;
+						}
 
+						d = 0;
 						if ( lnkwht.size( ) > 0 )
 						{
 							if ( m >= ( long ) lnkwht1.size( ) )
-								return 49;		// inconsistent # of weights
-
-							cur->add_link_net( node_map[ lnkto1[ m ] ], lnkwht1[ m ] );
+								warning.insert( 49 );// inconsistent # of weights
+							else
+								d = lnkwht1[ m ];
 						}
-						else
-							cur->add_link_net( node_map[ lnkto1[ m ] ] );
+
+						cur->add_link_net( node_map[ lnkto1[ m ] ], d );
 					}
 
 					if ( m < ( long ) lnkwht1.size( ) )
-						return 50;				// inconsistent # of weights
+						warning.insert( 50 );	// inconsistent # of weights
 				}
 
-			if ( l < ( long ) lnkto.size( ) ||
-				 ( lnkwht.size( ) > 0 && l < ( long ) lnkwht.size( ) ) )
-				return 51;						// inconsistent # of link groups
+			if ( l < ( long ) lnkto.size( ) || ( lnkwht.size( ) > 0 &&
+												 l < ( long ) lnkwht.size( ) ) )
+				warning.insert( 51 );			// inconsistent # of link groups
 		}
 	}
 
@@ -894,7 +947,7 @@ int object::load_xml_insts( xml_node &n, n_mapT &node_map )
 	{
 		xml_node cn = n.find_child_by_attribute( "element", "name", cv->label );
 		if ( cn.empty( ) )
-			return 52;
+			warning.insert( 52 );				// missing element data
 
 		cv->num_lag = ( cv->param == 1 ) ? 0 : cn.attribute( "lags" ).as_uint( );
 		cv->save = cn.attribute( "save" ).as_bool( );
@@ -912,12 +965,11 @@ int object::load_xml_insts( xml_node &n, n_mapT &node_map )
 			cv->period_range = cn.attribute( "period_range" ).as_uint( );
 		}
 
-		// split the values of instances string into a double vector
 		if ( cv->param == 1 || cv->num_lag > 0 )
-		{
-			val = strtodsplit( cn.child( "values" ).text( ).get( ), ',' );
-			if ( ( long ) val.size( ) != nd )	// inconsistent # of values
-				return 53;
+		{	// split the values of instances string into a string vector
+			val = strtostrsplit( cn.child( "values" ).text( ).get( ), ';' );
+			if ( ( long ) val.size( ) != nd )
+				warning.insert( 53 );			// inconsistent # of value groups
 		}
 
 		// set values of instances for each variable instance
@@ -943,31 +995,43 @@ int object::load_xml_insts( xml_node &n, n_mapT &node_map )
 
 			if ( cv1->param == 1 || cv1->num_lag > 0 )
 			{
-				if ( l >= nd )					// inconsistent # of values
-					return 54;
+				if ( l >= ( long ) val.size( ) || strlen( val[ l ].c_str( ) ) == 0 )
+				{
+					warning.insert( 54 );		// inconsistent value groups
+					val1.clear( );
+				}
+				else
+					val1 = strtodsplit( val[ l ].c_str( ), ',' );
 
 				for ( i = 0; i < ( cv1->param == 1 ? 1 : cv1->num_lag ); ++i )
-					cv1->val[ i ] = val[ l ];
+				{
+					if ( i >= ( long ) val1.size( ) || ! is_finite( val1[ i ] ) )
+					{
+						warning.insert( 55 );	// inconsistent values
+						d = 0;
+					}
+					else
+						d = val1[ i ];
+
+					cv1->val[ i ] = d;
+				}
 			}
 
 			if ( cv1->param != 1 )				// remove trash from last position
 				cv1->val[ cv1->num_lag ] = 0;
 		}
 
-		if ( l < nd )							// inconsistent # of values
-			return 55;
+		if ( l < nd )
+			warning.insert( 56 );				// inconsistent # of value groups
 	}
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		xml_node cn = n.find_child_by_attribute( "object", "name", cb->blabel );
-		i = cb->head->load_xml_insts( cn, node_map );
+		i = cb->head->load_xml_insts( cn, node_map, warning );
 		if ( i != 0 )
 			return i;
 	}
-
-	if ( up == NULL )	// this is the root, and therefore the end of the loading
-		set_blueprint( blueprint, this );
 
 	return 0;
 }
@@ -1285,7 +1349,7 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 	<!ELEMENT nodes (#PCDATA, #PCDATA, #PCDATA?, #PCDATA?, #PCDATA?)>\n \
 	<!ELEMENT element (#PCDATA?, description?, documentation?, sensitivity?)>\n \
 	<!ELEMENT documentation EMPTY> \
-	<!ELEMENT sensitivity ( )>\n ]" );
+	<!ELEMENT sensitivity ( )>\n]" );
 	xml_node lsdNode = xf.append_child( "LSD" );
 	xml_node cfgNode = lsdNode.append_child( "configuration" );
 	cfgNode.append_attribute( "version" ) = "1.0";
@@ -1378,7 +1442,7 @@ OBJECT::SAVE_XML_STRUCT
 void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 {
 	bool init, nodes, noWht;
-	char *str, val[ 32 + 1 ];
+	char *str;
 	int i, count;
 	long l, k;
 	string data, nser, nid, nnam, lnkto, lnkwht;
@@ -1484,10 +1548,10 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 		nd.append_child( "serials" ).text( ) = nser.c_str( );
 		nd.append_child( "ids" ).text( ) = nid.c_str( );
 
-		if ( nnam.size( ) > l * 3 - 1 )			// don't add if no name
+		if ( ( long ) nnam.size( ) > l * 3 - 1 )		// don't add if no name
 			nd.append_child( "names" ).text( ) = nnam.c_str( );
 
-		if ( lnkto.size( ) > k - 1 )			// don't add if no link
+		if ( ( long ) lnkto.size( ) > k - 1 )			// don't add if no link
 		{
 			nd.append_child( "linksto" ).text( ) = lnkto.c_str( );
 
@@ -1567,13 +1631,16 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 			for ( data = "", cur = this; cur != NULL;
 				  cur = cur->hyper_next( label ) )
 			{
-				cv1 = cur->search_var( NULL, cv->label );
+				if ( cur != this )
+					data += ";";
 
+				cv1 = cur->search_var( NULL, cv->label );
 				for ( i = 0; i < ( cv1->param == 1 ? 1 : cv1->num_lag ); ++i )
 				{
-					snprintf( val, 32, "%s%.15g", cur == this ? "" : ",",
-							  cv1->initialized ? cv1->val[ i ] : 0. );
-					data.append( val );
+					if ( i != 0 )
+						data += ",";
+
+					data += to_string( "%.15g", cv1->initialized ? cv1->val[ i ] : 0 );
 				}
 			}
 
