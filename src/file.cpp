@@ -175,7 +175,7 @@ LOAD_CONFIGURATION
 int load_configuration( bool reload, int quick )
 {
 	char *buf = NULL, buf1[ MAX_FILE_SIZE ], msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
-	int i, j, load;
+	int i, j, load = 0;
 	n_mapT node_map;
 	object *cur;
 	variable *cv, *cv1;
@@ -813,63 +813,80 @@ int object::load_xml_insts( xml_node &n, n_mapT &node_map )
 	if ( up != NULL && ! nn.empty( ) )
 	{
 		nser = strtolsplit( nn.child( "serials" ).text( ).get( ), ',', -1 );
-		if ( ( long ) nser.size( ) != nd )		// inconsistent # of node serials
-			return 44;
-
 		nid = strtolsplit( nn.child( "ids" ).text( ).get( ), ',', -1 );
-		if ( ( long ) nid.size( ) != nd )		// inconsistent # of node ids
-			return 44;
+		if ( ( long ) nser.size( ) != nd || ( long ) nid.size( ) != nd )
+			return 44;							// inconsistent # of node serials/ids
 
-		nnam = strtostrsplit( nn.child( "names" ).text( ).get( ), ',' );
-		if ( ( long ) nnam.size( ) != nd )		// inconsistent # of node names
-			return 45;
+		if ( ! nn.child( "names" ).empty( ) )
+		{
+			nnam = strtostrsplit( nn.child( "names" ).text( ).get( ), ',', true );
+			if ( ( long ) nnam.size( ) != nd )	// inconsistent # of node names
+				return 45;
+		}
 
 		for ( l = 0, cur = this; cur != NULL; ++l, cur = cur->hyper_next( label ) )
 		{
-			if ( l >= ( long ) nid.size( ) || l >= ( long ) nnam.size( ) )
+			if ( l >= ( long ) nser.size( ) || l >= ( long ) nid.size( ) ||
+				 ( nnam.size( ) > 0 && l >= ( long ) nnam.size( ) ) )
 				return 46;						// inconsistent # of nodes
 
-			if ( nid [ l ] > 0 )				// valid node?
+			if ( nser [ l ] > 0 )				// valid node?
 			{
-				cur->add_node_net( nid[ l ], nnam[ l ].c_str( ), true );// add node
+				if ( nnam.size( ) > 0 )
+					cur->add_node_net( nid[ l ], nnam[ l ].c_str( ), true );// add node
+				else
+					cur->add_node_net( nid[ l ], "", true );
+
 				node_map.insert( n_pairT( nser[ l ], cur ) );
 			}
 		}
 
-		lnkto = strtostrsplit( nn.child( "linksto" ).text( ).get( ), ';' );
-		lnkwht = strtostrsplit( nn.child( "linksweigth" ).text( ).get( ), ';' );
+		if ( ! nn.child( "linksto" ).empty( ) )
+		{
+			lnkto = strtostrsplit( nn.child( "linksto" ).text( ).get( ), ';' );
 
-		// add links to node objects
-		for ( l = k = 0, cur = this; cur != NULL;
-			  ++l, cur = cur->hyper_next( label ) )
-			if ( cur->node != NULL )			// node on instance?
-			{
-				if ( l >= ( long ) lnkto.size( ) || l >= ( long ) lnkwht.size( ) )
-					return 47;						// inconsistent # of link groups
+			if ( ! nn.child( "linksweigth" ).empty( ) )
+				lnkwht = strtostrsplit( nn.child( "linksweigth" ).text( ).get( ), ';' );
 
-				lnkto1 = strtolsplit( lnkto[ l ].c_str( ), ',', -1 );
-				lnkwht1 = strtodsplit( lnkwht[ l ].c_str( ), ',' );
-
-				for ( m = 0; m < ( long ) lnkto1.size( ); ++m )
+			// add links to node objects
+			for ( l = k = 0, cur = this; cur != NULL;
+				  ++l, cur = cur->hyper_next( label ) )
+				if ( cur->node != NULL )		// node on instance?
 				{
-					if ( lnkto1[ m ] < 0 )
-						return 48;					// invalid links
+					if ( l >= ( long ) lnkto.size( ) ||
+						 ( lnkwht.size( ) > 0 && l >= ( long ) lnkwht.size( ) ) )
+						return 47;				// inconsistent # of link groups
 
-					if ( m >= ( long ) lnkwht1.size( ) )
-						return 49;					// inconsistent # of links
+					lnkto1 = strtolsplit( lnkto[ l ].c_str( ), ',', -1 );
 
-					if ( node_map.find( lnkto1[ m ] ) == node_map.end( ) )
-						return 48;
+					if ( lnkwht.size( ) > 0 )
+						lnkwht1 = strtodsplit( lnkwht[ l ].c_str( ), ',' );
 
-					cur->add_link_net( node_map[ lnkto1[ m ] ], lnkwht1[ m ] );
+					for ( m = 0; m < ( long ) lnkto1.size( ); ++m )
+					{
+						if ( lnkto1[ m ] <= 0 ||
+							 node_map.find( lnkto1[ m ] ) == node_map.end( ) )
+							return 48;			// invalid links
+
+						if ( lnkwht.size( ) > 0 )
+						{
+							if ( m >= ( long ) lnkwht1.size( ) )
+								return 49;		// inconsistent # of weights
+
+							cur->add_link_net( node_map[ lnkto1[ m ] ], lnkwht1[ m ] );
+						}
+						else
+							cur->add_link_net( node_map[ lnkto1[ m ] ] );
+					}
+
+					if ( m < ( long ) lnkwht1.size( ) )
+						return 50;				// inconsistent # of weights
 				}
 
-				if ( m < ( long ) lnkwht1.size( ) )
-					return 50;						// inconsistent # of weights
-			}
-
-		if ( l < ( long ) lnkto.size( ) || l < ( long ) lnkwht.size( ) )
-			return 51;							// inconsistent # of link groups
+			if ( l < ( long ) lnkto.size( ) ||
+				 ( lnkwht.size( ) > 0 && l < ( long ) lnkwht.size( ) ) )
+				return 51;						// inconsistent # of link groups
+		}
 	}
 
 	// load elements (parameters, variables and functions)
@@ -1265,7 +1282,7 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 	<!ELEMENT equation_file (#PCDATA, #CDATA?)>\n \
 	<!ELEMENT object (#PCDATA, description?, nodes?, object*, element*)>\n \
 	<!ELEMENT description (#PCDATA+)>\n \
-	<!ELEMENT nodes (#PCDATA, #PCDATA, #PCDATA, #PCDATA, #PCDATA)>\n \
+	<!ELEMENT nodes (#PCDATA, #PCDATA, #PCDATA?, #PCDATA?, #PCDATA?)>\n \
 	<!ELEMENT element (#PCDATA?, description?, documentation?, sensitivity?)>\n \
 	<!ELEMENT documentation EMPTY> \
 	<!ELEMENT sensitivity ( )>\n ]" );
@@ -1360,9 +1377,10 @@ OBJECT::SAVE_XML_STRUCT
 ****************************************************/
 void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 {
-	bool init, nodes;
+	bool init, nodes, noWht;
 	char *str, val[ 32 + 1 ];
 	int i, count;
+	long l, k;
 	string data, nser, nid, nnam, lnkto, lnkwht;
 	bridge *cb;
 	description *cd;
@@ -1406,16 +1424,12 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 		}
 	}
 
-	for ( cb = b; cb != NULL; cb = cb->next )
-		if ( cb->head == NULL )
-			blueprint->search( cb->blabel )->save_xml_struct( n, node_serial, quick );
-		else
-			cb->head->save_xml_struct( n, node_serial, quick );
-
 	// save network attributes and links
+	l = k = 0;
+	noWht = true;
 	if ( nodes )
 	{	// first save nodes and attribute serials
-		for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
+		for ( cur = this; cur != NULL; ++l, cur = cur->hyper_next( cur->label ) )
 		{
 			if ( cur != this )
 			{
@@ -1431,7 +1445,9 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 				nid += to_string( cur->node->id );
 
 				if ( cur->node->name != NULL )
-					nnam += cur->node->name;
+					nnam += "\"" + ( data = cur->node->name ) + "\"";
+				else
+					nnam += "\"\"";
 			}
 		}
 
@@ -1445,7 +1461,7 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 			}
 
 			if ( cur->node != NULL )			// scan all links from node
-				for ( curl = cur->node->first; curl != NULL; curl = curl->next )
+				for ( curl = cur->node->first; curl != NULL; ++k, curl = curl->next )
 				{
 					if ( curl != cur->node->first )
 					{
@@ -1458,16 +1474,34 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 
 					lnkto += to_string( curl->ptrTo->node->serNum );
 					lnkwht += to_string( "%.15g", curl->weight );
+
+					if ( curl->weight != 0 )
+						noWht = false;
 				}
 		}
 
 		xml_node nd = n.append_child( "nodes" );
 		nd.append_child( "serials" ).text( ) = nser.c_str( );
 		nd.append_child( "ids" ).text( ) = nid.c_str( );
-		nd.append_child( "names" ).text( ) = nnam.c_str( );
-		nd.append_child( "linksto" ).text( ) = lnkto.c_str( );
-		nd.append_child( "linksweigth" ).text( ) = lnkwht.c_str( );
+
+		if ( nnam.size( ) > l * 3 - 1 )			// don't add if no name
+			nd.append_child( "names" ).text( ) = nnam.c_str( );
+
+		if ( lnkto.size( ) > k - 1 )			// don't add if no link
+		{
+			nd.append_child( "linksto" ).text( ) = lnkto.c_str( );
+
+			if ( ! noWht )
+				nd.append_child( "linksweigth" ).text( ) = lnkwht.c_str( );
+		}
 	}
+
+	// save son objects recursively
+	for ( cb = b; cb != NULL; cb = cb->next )
+		if ( cb->head == NULL )
+			blueprint->search( cb->blabel )->save_xml_struct( n, node_serial, quick );
+		else
+			cb->head->save_xml_struct( n, node_serial, quick );
 
 	// save elements (parameters, variables and functions)
 	for ( cv = v; cv != NULL; cv = cv->next )

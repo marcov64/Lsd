@@ -346,7 +346,7 @@ netNode::netNode( long nodeId, const char *nodeName, double nodeProb )
 	if ( id < 0 )					// ID assigned?
 		id = serNum;
 
-	if ( strcmp( nodeName, "" ) && valid_label( nodeName ) )// valid name assigned?
+	if ( strcmp( nodeName, "" ) && valid_xml_string( nodeName ) )// valid name assigned?
 	{
 		name = new char[ strlen( nodeName ) + 1 ];
 		strcpy( name, nodeName );
@@ -356,7 +356,7 @@ netNode::netNode( long nodeId, const char *nodeName, double nodeProb )
 		name = NULL;
 
 		if ( strcmp( nodeName, "" ) )
-			plog( "\nWarning: network node name '%s' is invalid, ignored." );
+			plog( "\nWarning: network node name '%s' is invalid, ignored.", nodeName );
 	}
 }
 
@@ -1373,6 +1373,13 @@ READ_FILE_NET (*)
 void get_line( char *lBuffer, FILE *fPtr )
 {
 	char firstChar;
+
+	if ( feof( fPtr ) )
+	{
+		strcpy( lBuffer, "" );
+		return;
+	}
+
 	do
 	{
 		fgets( lBuffer, MAX_LINE_SIZE, fPtr );				// gets next text line
@@ -1471,6 +1478,9 @@ double object::read_file_net( const char *lab, const char dir[ ],
 			cur->add_node_net( countNode, nameNode, true );	// add (or reset) net data
 		else
 			cur->add_node_net( idNode, nameNode, true );
+
+		if ( feof( pajekFile ) )							// check file end
+			break;
 	}
 
 	if ( inSection )										// * was not already read
@@ -1488,7 +1498,7 @@ double object::read_file_net( const char *lab, const char dir[ ],
 				weight = 0;									// default is no weight
 				get_line( textLine, pajekFile );			// gets next text line
 
-				if ( strchr( textLine, '*' ) || feof( pajekFile ) )	// check new section start or file end
+				if ( strchr( textLine, '*' ) )				// check new section start
 					inSection = false;						// no more in *Arcs section
 				else
 					if ( sscanf( textLine, " %ld %ld %lf", &startNode, &endNode, &weight ) >= 2 )
@@ -1499,6 +1509,9 @@ double object::read_file_net( const char *lab, const char dir[ ],
 					else
 						if ( serial >= 0 && strlen( textLine ) > 0 )
 							plog( "\nWarning: invalid arc (%s), ignored", textLine );
+
+					if ( feof( pajekFile ) )				// check file end
+						break;
 			}
 		else
 			if ( strstr( textLine, "*EDGESLIST" ) )			// check *EdgesList
@@ -1506,7 +1519,7 @@ double object::read_file_net( const char *lab, const char dir[ ],
 				{
 					get_line( textLine, pajekFile );
 
-					if ( strchr( textLine, '*' ) || feof( pajekFile ) )
+					if ( strchr( textLine, '*' ) )
 						inSection = false;					// no more *EdgesList section
 					else
 					{
@@ -1525,6 +1538,9 @@ double object::read_file_net( const char *lab, const char dir[ ],
 						else
 							if ( serial >= 0 && strlen( textLine ) > 0 )
 								plog( "\nWarning: invalid edge list (%s), ignored", textLine );
+
+						if ( feof( pajekFile ) )
+							break;
 					}
 				}
 			else
@@ -1534,7 +1550,7 @@ double object::read_file_net( const char *lab, const char dir[ ],
 						weight = 0;
 						get_line( textLine, pajekFile );
 
-						if ( strchr( textLine, '*' ) || feof( pajekFile ) )
+						if ( strchr( textLine, '*' ) )
 							inSection = false;				// no more *Edges section
 						else
 							if ( sscanf( textLine, " %ld %ld %lf", &startNode, &endNode, &weight ) >= 2 )
@@ -1545,6 +1561,9 @@ double object::read_file_net( const char *lab, const char dir[ ],
 							else
 								if ( serial >= 0 && strlen( textLine ) > 0 )
 									plog( "\nWarning: invalid edge (%s), ignored", textLine );
+
+							if ( feof( pajekFile ) )
+								break;
 					}
 				else										// no more sections
 					get_line( textLine, pajekFile );		// gets next text line

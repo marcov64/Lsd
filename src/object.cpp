@@ -1284,7 +1284,7 @@ object *object::add_obj( const char *lab, int num, bool propagate )
 {
 	int i;
 	bridge *cb;
-	object *cur, *cur1, *cur2;
+	object *cur, *cur1, *cur2 = NULL;
 
 	if ( search( lab ) != NULL )
 	{

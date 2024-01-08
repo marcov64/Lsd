@@ -1561,6 +1561,15 @@ bool valid_label( const char *lab )
 }
 
 
+/****************************************************
+ VALID_XML_STRING
+ ****************************************************/
+bool valid_xml_string( const char *lab )
+{
+	return regex_match( lab, regex( "[^&<>\"']*" ) );
+}
+
+
 /***************************************************
  CLEAN_SPACES
  ***************************************************/
@@ -1953,14 +1962,19 @@ char *strencdata( char *out, const char *in, int outSz )
  split a C string into a vector of strings using
  sep as the separator character
 ***************************************************/
-vector < string > strtostrsplit( const char *in, char sep )
+vector < string > strtostrsplit( const char *in, char sep, bool remQuotes )
 {
 	string buf;
 	stringstream ss( in );
 	vector < string > out;
 
 	while ( getline( ss, buf, sep ) )
+	{
+		if ( remQuotes )
+			buf.erase( remove( buf.begin( ), buf.end( ), '\"' ), buf.end( ) );
+
 		out.push_back( buf );
+	}
 
 	return out;
 }

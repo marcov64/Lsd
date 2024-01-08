@@ -299,7 +299,7 @@ Produce the star (non-random) network example
 */
 
 INIT_NET( "StarNode", "STAR", V( "numNodes" ), 0, 0 );
-SAVE_NET( "StarNode", "ScaleFree" );
+SAVE_NET( "StarNode", "Star" );
 
 PARAMETER;									// do just once
 

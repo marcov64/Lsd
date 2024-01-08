@@ -6435,6 +6435,7 @@ object *operate( object *r )
 		}
 		cmd( "for { set i 0 } { $i < [ $TT.v.t.lb size ] } { incr i } { if [ string equal [ $TT.v.t.lb get $i ] %s ] { set cur $i; break } }", lab_old );
 		cmd( "$TT.v.t.lb selection set $cur" );
+		cmd( "$TT.v.t.lb see $cur" );
 		cmd( "focus $TT.v.t.lb" );
 
 		choice = 0;
@@ -6543,8 +6544,8 @@ object *operate( object *r )
 		if ( strlen( path ) > 0 )
 			cmd( "cd \"$path\"" );
 
-		cmd( "set bah \"%s\"", simul_name );
-		cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Network Structure File\"	 -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } } ]" );
+		cmd( "set bah \"%s-%s\"", simul_name, lab4 );
+		cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Network Structure File\" -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } } ]" );
 		choice = 0;
 		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { \
 				set netPath [ file dirname $bah ]; \
