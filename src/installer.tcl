@@ -855,10 +855,10 @@ if [ string equal $CurPlatform linux ] {
 
 		waitbox .wait "Compiling LMM..." "Compiling LSD Model Manager (LMM)\nfor your Linux distribution.\n\nPlease wait..." "" 0 ""
 
-		file copy -force "$RootLsd/lmm" "/tmp/"
+		file copy -force "$RootLsd/LMM" "/tmp/"
 		cd "$RootLsd/$LsdSrc"
 
-		set res [ catch { exec make -f makefile-linux } result ]
+		set res [ catch { exec make -f makefile.LMM } result ]
 
 		file delete -force {*}[ glob -nocomplain -directory "$RootLsd/$LsdSrc" *.o ]
 		destroytop .wait
@@ -866,9 +866,9 @@ if [ string equal $CurPlatform linux ] {
 		if { $res } {
 			ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error compiling LMM" -detail "The compilation of LSD Model Manager (LMM) failed ($result).\n\nYou may try to do a manual compilation following the steps described in 'Readme.txt' and also may have to."
 			lappend issues "Cannot recompile LMM (make -f $linuxMkFile)"
-			file copy -force "/tmp/lmm" "/$RootLsd/"
+			file copy -force "/tmp/LMM" "/$RootLsd/"
 		} else {
-			file delete -force "/tmp/lmm"
+			file delete -force "/tmp/LMM"
 		}
 	}
 }
