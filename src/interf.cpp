@@ -2842,8 +2842,7 @@ object *operate( object *r )
 				}
 			}
 		}
-		// edit sensitivity analysis data
-		else
+		else								// edit sensitivity analysis data
 		{
 			choice = 0;
 			bool exist = false;
@@ -2876,7 +2875,7 @@ object *operate( object *r )
 				cs->label = new char[ strlen( cv->label ) + 1 ];
 				strcpy( cs->label, cv->label );
 				cs->next = NULL;
-				cs->nvalues = 0;
+				cs->numv = 0;
 				cs->v = NULL;
 				cs->entryOk = false;		// no valid data yet
 			}
@@ -4648,7 +4647,7 @@ object *operate( object *r )
 					break;
 
 			for ( i = 1, cs = rsense; cs!=NULL; cs = cs->next )
-				i *= cs->nvalues;
+				i *= cs->numv;
 			cur = root->b->head;
 			root->add_n_objects2( cur->label, i - 1, cur );
 
@@ -5321,7 +5320,7 @@ object *operate( object *r )
 	break;
 
 
-	// export a sensitivity analysis configuration
+	// export sensitivity analysis configuration
 	case 65:
 
 		// check a model is already loaded
@@ -5537,11 +5536,11 @@ object *operate( object *r )
 		for ( cs = rsense; cs != NULL; cs = cs->next )
 		{
 			if ( cs->param == 1 )
-				plog( "Param: %s\\[%s\\]\t#%d:\t", cs->label, cs->integer ? "int" : "flt", cs->nvalues );
+				plog( "Param: %s\\[%s\\]\t#%d:\t", cs->label, cs->integer ? "int" : "flt", cs->numv );
 			else
-				plog( "Var: %s(-%d)\\[%s\\]\t#%d:\t", cs->label, cs->lag+1, cs->integer ? "int" : "flt", cs->nvalues );
+				plog( "Var: %s(-%d)\\[%s\\]\t#%d:\t", cs->label, cs->lag+1, cs->integer ? "int" : "flt", cs->numv );
 
-			for ( i = 0; i < cs->nvalues; ++i )
+			for ( i = 0; i < cs->numv; ++i )
 				plog_tag( "%g\t", "highlight", cs->v[ i ] );
 			plog( "\n" );
 		}

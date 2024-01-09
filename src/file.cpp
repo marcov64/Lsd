@@ -110,6 +110,10 @@ bool open_configuration( object *&r, bool reload )
 
 	switch ( i = load_configuration( reload, &warnings ) )// try to load the configuration
 	{
+		case 0:
+			loaded = true;
+			break;
+
 		case 1:									// file/path not found
 			if ( strlen( path ) > 0 )
 				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME, path );
@@ -619,8 +623,9 @@ const int type_num = 3;
 int object::load_xml_struct( xml_node &n, bool quick )
 {
 	bool obs;
-	const char *str, *desc, *init;
-	int i;
+	const char *str, *desc, *init, *val;
+	int i, type;
+	vector < string > data;
 	bridge *cb;
 	variable *cv;
 
@@ -661,15 +666,15 @@ int object::load_xml_struct( xml_node &n, bool quick )
 				if ( strlen( str ) == 0 )
 					return 33;
 
-				for ( i = 0; i < type_num; ++i )
-					if ( ! strcmp( str, type_names[ i ] ) )
+				for ( type = 0; type < type_num; ++type )
+					if ( ! strcmp( str, type_names[ type ] ) )
 						break;
 
 				str = cn.attribute( "name" ).value( );
 				if ( strlen( str ) == 0 || ! valid_label( str ) )
 					return 34;
 
-				switch( i )
+				switch( type )
 				{
 					case 0:
 						cmd( "lappend modVar %s", str );
@@ -687,19 +692,52 @@ int object::load_xml_struct( xml_node &n, bool quick )
 				cmd( "lappend modElem %s", str );
 
 				cv = add_empty_var( str );
-				cv->param = i;
+				cv->param = type;
 
-				if ( ! quick && ! cn.child( "description" ).empty( ) )
+				if ( ! quick )
 				{
-					desc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
-					init = strdecdata( NULL, cn.child( "description" ).child( "initialization" ).text( ).get( ) );
-					obs = cn.child( "documentation" ).attribute( "observe" ).as_bool( );
+					if ( ! cn.child( "description" ).empty( ) )
+					{
+						desc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
+						init = strdecdata( NULL, cn.child( "description" ).child( "initialization" ).text( ).get( ) );
+						obs = cn.child( "documentation" ).attribute( "observe" ).as_bool( );
 
-					add_description( str, i, desc, init, cn.child( "documentation" ).attribute( "initialization" ).as_bool( ), obs );
-					cv->observe = obs;
+						add_description( str, type, desc, init,
+										 cn.child( "documentation" ).attribute( "initialization" ).as_bool( ),
+										 obs );
+						cv->observe = obs;
 
-					delete [ ] desc;
-					delete [ ] init;
+						delete [ ] desc;
+						delete [ ] init;
+					}
+
+					if ( ! cn.child( "sensitivity" ).empty( ) )
+					{
+						xml_node cns = cn.child( "sensitivity" );
+
+						if ( type == 1 )
+						{
+							val = cns.child( "values" ).text( ).get( );
+						}
+						else
+							if ( type == 0 )
+							{
+								for ( xml_node sn : cns.children( ) )
+								{
+									data = strtostrsplit( sn.name( ), '-' );
+
+									if ( data.size( ) < 2 )
+										continue;
+
+									i = strtol( data[ 1 ].c_str( ), NULL, 10, -1 );
+
+									if ( i < 0 )
+										continue;
+
+
+								}
+							}
+					}
 				}
 			}
 	}
@@ -1445,7 +1483,7 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 	char *str;
 	int i, count;
 	long l, k;
-	string data, nser, nid, nnam, lnkto, lnkwht;
+	string data, text, nser, nid, nnam, lnkto, lnkwht;
 	bridge *cb;
 	description *cd;
 	netLink *curl;
@@ -1687,13 +1725,32 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 		// add sensitivity analysis data
 		for ( cs = rsense; cs != NULL; cs = cs->next )
 			if ( strcmp( cs->label, cv->label ) == 0 )
-				break;
+			{
+				if ( cs->integer )
+					cn.append_attribute( "integer" ) = true;
 
-		if ( cs != NULL )					// sensitivity data present?
-		{
-			xml_node cns = cn.append_child( "sensitivity" );
+				xml_node cns;
 
-		}
+				if ( cn.child( "sensitivity" ).empty( ) )
+					cns = cn.append_child( "sensitivity" );
+				else
+					cns = cn.child( "sensitivity" );
+
+				for ( data = "", i = 0; cs->v != NULL && i < cs->numv; ++i )
+				{
+					if ( i != 0 )
+						data += ",";
+
+					data += to_string( "%.15g", cs->v[ i ] );
+				}
+
+				if ( cv->param )
+					text = "values";
+				else
+					text = "values-" + to_string( cs->lag + 1 );
+
+				cns.append_child( text.c_str( ) ).text( ) = data.c_str( );
+			}
 	}
 }
 
@@ -2005,7 +2062,7 @@ int load_sensitivity( FILE *f )
 		strcpy( cs->label, lab );
 
 		// get lags and # of values to test
-		if ( fscanf( f, "%d %d ", &cs->lag, &cs->nvalues ) < 2 )
+		if ( fscanf( f, "%d %d ", &cs->lag, &cs->numv ) < 2 )
 			goto error2;
 
 		// get variable type (newer versions)
@@ -2031,8 +2088,8 @@ int load_sensitivity( FILE *f )
 			cs->lag = abs( cs->lag ) - 1;
 		}
 
-		cs->v = new double[ cs->nvalues ];	// get values
-		for ( i = 0; i < cs->nvalues; ++i )
+		cs->v = new double[ cs->numv ];	// get values
+		for ( i = 0; i < cs->numv; ++i )
 			if ( ! fscanf( f, "%lf", &cs->v[ i ] ) )
 				goto error5;
 			else
@@ -2110,10 +2167,10 @@ bool save_sensitivity( FILE *f )
 	for ( cs = rsense; cs != NULL; cs = cs->next )
 	{
 		if ( cs->param == 1 )
-			fprintf( f, "%s 0 %d %c:", cs->label, cs->nvalues, cs->integer ? 'i' : 'f' );
+			fprintf( f, "%s 0 %d %c:", cs->label, cs->numv, cs->integer ? 'i' : 'f' );
 		else
-			fprintf( f, "%s -%d %d %c:", cs->label, cs->lag + 1, cs->nvalues, cs->integer ? 'i' : 'f' );
-		for ( i = 0; cs->v != NULL && i < cs->nvalues; ++i )
+			fprintf( f, "%s -%d %d %c:", cs->label, cs->lag + 1, cs->numv, cs->integer ? 'i' : 'f' );
+		for ( i = 0; cs->v != NULL && i < cs->numv; ++i )
 			fprintf( f," %g", cs->v[ i ] );
 		fprintf( f,"\n" );
 	}
@@ -2611,7 +2668,7 @@ void get_sa_limits( object *r, FILE *out, const char *sep )
 
 		// find max and min values
 		double min = HUGE_VAL, max = - HUGE_VAL;
-		for ( i = 0; cs->v != NULL &&  i < cs->nvalues; ++i )
+		for ( i = 0; cs->v != NULL &&  i < cs->numv; ++i )
 			if ( cs->v[ i ] < min )
 				min = cs->v[ i ];
 			else

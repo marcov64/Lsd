@@ -584,176 +584,6 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 }
 
 
-/*******************************************************************************
-SENSITIVITY_PARALLEL
-This function fills the initial values according to the sensitivity analysis
-system performed by parallel simulations: 1 single run over many independent
-configurations descending in parallel from Root.
-
-Users can set one or more elements to be part of the sensitivity analysis. For
-each element the user has to provide the number of values to be explored and
-their values. When all elements involved in the sensitivity analysis are
-configured, the user must launch the command Sensitivity from menu Data in the
-main LSD Browser. This command generates as many copies as the product of all
-values for all elements in the s.a. It then kicks off the initialization of all
-elements involved so that each combination of parameters is assigned to one
-branch of the model.
-
-The user is supposed then to save the resulting configuration.
-
-Options concerning initialization for sensitivity analysis are not saved into
-the model configuration files, and are therefore lost when closing the LSD model
-program if not saved in a .sa file.
-*******************************************************************************/
-object *sensitivity_parallel( object *o, sense *s )
-{
-	int i;
-	sense *cs;
-	object *cur = o;
-	variable *cv;
-
-	if ( s->next != NULL )
-	{
-		for ( i = 0; i < s->nvalues; ++i )
-		{
-			s->i = i;
-			cur = sensitivity_parallel( cur, s->next );
-		}
-
-		return cur;
-	}
-
-	for ( i = 0; i < s->nvalues; ++i )
-	{
-		s->i = i;
-		for ( cs = rsense; cs != NULL; cs = cs->next )
-		{
-			cv = cur->search_var( cur, cs->label );
-			if ( cs->param == 0 )				// handle lags > 0
-				cv->val[ cs->lag ] = cs->v[ cs->i ];
-			else
-				cv->val[ 0 ] = cs->v[ cs->i ];
-		}
-
-		cur = cur->hyper_next( cur->label );
-	}
-
-	return cur;
-}
-
-
-/*******************************************************************************
-SENSITIVITY_SEQUENTIAL
-This function fills the initial values according to the sensitivity analysis
-system performed by sequential simulations: each run executes one configuration
-labelled with sequential labels.
-
-Contrary to parallel sensitivity settings, this function initialize all elements
-in the configuration with the specified label.
-
-Users can set one or more elements to be part of the sensitivity analysis. For
-each element the user has to provide the number of values to be explored and
-their values. When all elements involved in the sensitivity analysis are
-configured, the user must launch the command Sensitivity from menu Data in the
-main LSD Browser.
-
-Options concerning initialization for sensitivity analysis are saved into model
-configuration files, to be executed with a No Window version of the LSD model.
-One configuration file is created for each possible combination of the
-sensitivity analysis values (parameters and initial conditions). Optionally, it
-is possible to define the parameter "probSampl" with the (uniform) probability
-of a given point in the sensitivity analysis space is saved as configuration
-file. In practice, this allows for the Monte Carlo sampling of the parameter
-space, which is often necessary when the s.a. space is too big to be analyzed
-in its entirety.
-*******************************************************************************/
-void sensitivity_sequential( int *findex, sense *s, double probSampl, const char *dest_path )
-{
-	int i, nv;
-	sense *cs;
-	object *cur;
-	variable *cv;
-
-	if ( s->next != NULL )
-	{
-		for ( i = 0; i < s->nvalues && ! stop; ++i )
-		{
-			s->i = i;
-			sensitivity_sequential( findex, s->next, probSampl, dest_path );
-		}
-
-		return;
-	}
-
-	for ( i = 0; i < s->nvalues && ! stop; ++i )
-	{
-		s->i = i;
-		for ( nv = 1, cs = rsense; cs != NULL; cs = cs->next )
-		{
-			nv *= cs->nvalues;
-			cv = root->search_var( root, cs->label );
-
-			for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( cur->label ) )
-			{
-				cv = cur->search_var( cur, cs->label );
-				if ( cs->param == 1 )				// handle lags > 0
-					cv->val[ 0 ] = cs->v[ cs->i ];
-				else
-					cv->val[ cs->lag ] = cs->v[ cs->i ];
-			}
-
-		}
-
-		if ( probSampl == 1.0 || ran1( ) <= probSampl )	// if required draw if point will be sampled
-		{
-			// generate a configuration file for the experiment (no descriptions)
-			if ( ! save_xml_configuration( *findex, dest_path, true ) )
-			{
-				plog( "Aborted\n" );
-				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
-				return;
-			}
-
-			if ( ( *findex + 1 ) % 10 == 0 )
-				cmd( "prgboxupdate .psa %d", *findex );
-
-			*findex = *findex + 1;
-		}
-	}
-}
-
-
-/*****************************************************************************
-NUM_SENSITIVITY_POINTS
-Calculate the sensitivity space size
-******************************************************************************/
-long num_sensitivity_points( sense *rsens )
-{
-	long nv;
-	sense *cs;
-
-	for ( nv = 1, cs = rsens; cs != NULL; cs = cs->next )	// scan the linked-list
-		nv *= cs->nvalues;	// update the number of variables
-	return nv;
-}
-
-
-/*****************************************************************************
-NUM_SENSITIVITY_VARIABLES
-Calculate the number of variables to test
-******************************************************************************/
-int num_sensitivity_variables( sense *rsens )
-{
-	int nv;
-	sense *cs;
-
-	for ( nv = 0, cs = rsens; cs != NULL; cs = cs->next)
-		if ( cs->nvalues > 1 )				// count variables with 2 or more values
-			nv++;
-	return nv;
-}
-
-
 /*****************************************************************************
 DATAENTRY_SENSITIVITY
 Try to get values for sensitivity analysis
@@ -769,14 +599,14 @@ void dataentry_sensitivity( sense *s, int nval )
 	init_random( seed );
 
 	Tcl_LinkVar( inter, "integerV", ( char * ) &integerV, TCL_LINK_BOOLEAN );
-	integerV = s->entryOk ? s->integer : false;
+	integerV = s->integer;
 
 	cmd( "set sens .sens" );
 	cmd( "newtop .sens \"Sensitivity Analysis\" { set choice 2 }" );
 
 	cmd( "ttk::frame .sens.lab" );
 	if ( nval > 0)								// number of values defined (0=no)?
-		cmd( "ttk::label .sens.lab.l1 -text \"Enter n=%d values for:\"", s->nvalues );
+		cmd( "ttk::label .sens.lab.l1 -text \"Enter n=%d values for:\"", s->numv );
 	else
 		cmd( "ttk::label .sens.lab.l1 -text \"Enter the desired values (at least 2) for:\"" );
 
@@ -818,13 +648,13 @@ void dataentry_sensitivity( sense *s, int nval )
 
 	if ( s->entryOk )	// is there valid data from a previous data entry?
 	{
-		sss = new char[ MAX_ELEM_LENGTH * s->nvalues + 1 ];	// allocate space for string
+		sss = new char[ MAX_ELEM_LENGTH * s->numv + 1 ];	// allocate space for string
 		tok = new char[ MAX_ELEM_LENGTH ];
 		strcpy( sss, "" );
-		for ( i = 0; i < s->nvalues; i++ )		// pass existing data as a string
+		for ( i = 0; i < s->numv; i++ )		// pass existing data as a string
 		{
 			snprintf( tok, MAX_ELEM_LENGTH, "%.15g ", s->v[ i ] );	// add each value
-			strcatn( sss, tok, MAX_ELEM_LENGTH * s->nvalues + 1 );	// to the string
+			strcatn( sss, tok, MAX_ELEM_LENGTH * s->numv + 1 );	// to the string
 		}
 
 		cmd( "set sss \"%s\"", sss );			// pass string to Tk window
@@ -842,14 +672,14 @@ void dataentry_sensitivity( sense *s, int nval )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
-		if ( choice == 3 )					// force error to delete variable from list
-		{
-			s->entryOk = false;
-			choice = 2;
-		}
-
 		if ( choice == 2 )
 			goto end;
+
+		if ( choice == 3 )
+		{
+			delete s;
+			goto end;
+		}
 
 		app = eval_str( "[ .sens.t.t get 0.0 end ]" );
 		sss = new char[ strlen( app ) + 1 ];
@@ -882,17 +712,17 @@ void dataentry_sensitivity( sense *s, int nval )
 			if ( i < 2 )					// invalid number of elements?
 				i = 2;						// minimum is 2
 
-			if ( s->nvalues < i )			// is there insufficient space already alloc'd?
+			if ( s->numv < i )			// is there insufficient space already alloc'd?
 			{
 				delete [ ] s->v;			// free old and reallocate enough space
 				s->v = new double[ i ];
 			}
-			s->nvalues = i;					// update # of values
+			s->numv = i;					// update # of values
 
 			delete [ ] tss;
 		}
 
-		for ( i = 0; i < s->nvalues; )
+		for ( i = 0; i < s->numv; )
 		{
 			tok = strtok( sss, SENS_SEP );	// accepts several separators
 			if ( tok == NULL )				// finished too early?
@@ -937,11 +767,247 @@ void dataentry_sensitivity( sense *s, int nval )
 	while ( tok == NULL || i < 2 );	// require enough values (if more, extra ones are discarded)
 
 	s->integer = integerV;			// save integer restriction flag
-	s->entryOk = true;				// flag valid data
 
 	end:
+
 	cmd( "destroytop .sens" );
 	Tcl_UnlinkVar( inter, "integerV" );
+}
+
+
+/*******************************************************************************
+SENSITIVITY CONSTRUCTOR
+Add or update sensitivity settings for a model element
+*******************************************************************************/
+sense::sense( const char *lab, int _param, int _lag, sense *prev,
+			  int _numv, const double *_v, bool _integer )
+{
+	int i;
+
+	param = _param;
+	lag = _lag;
+	integer = _integer;
+	curv = 0;
+
+	if ( lab != NULL )
+	{
+		label = new char [ strlen( lab ) + 1 ];
+		strcpy( label, lab );
+	}
+	else
+		label = NULL;
+
+	if ( _numv > 0 && _v != NULL )
+	{
+		numv = _numv;
+		v = new double [ numv ];
+		for ( i = 0; i < numv; ++i )
+			v[ i ] = _v[ i ];
+	}
+	else
+	{
+		numv = 0;
+		v = NULL;
+	}
+
+	if ( prev != NULL )
+	{
+		next = prev->next;
+		prev->next = this;
+	}
+	else
+		next = NULL;
+}
+
+
+/*******************************************************************************
+SENSITIVITY DESTRUCTOR
+Add or update sensitivity settings for a model element
+*******************************************************************************/
+sense::~sense( void )
+{
+/*	sense *cs, *ps;
+
+	delete [ ] label;
+	delete [ ] v;
+
+	for ( cs = rsense, ps = NULL; cs != this && cs != NULL; ps = cs, cs = cs->next );
+
+	if ( cs == rsense )
+		rsense = next;
+	else
+		if ( cs == this && ps != NULL )
+			ps->next = next;
+*/}
+
+
+/*****************************************************************************
+NUM_SENSITIVITY_POINTS
+Calculate the sensitivity space size
+******************************************************************************/
+long num_sensitivity_points( sense *rsens )
+{
+	long nv;
+	sense *cs;
+
+	for ( nv = 1, cs = rsens; cs != NULL; cs = cs->next )	// scan the linked-list
+		nv *= cs->numv;	// update the number of variables
+	return nv;
+}
+
+
+/*****************************************************************************
+NUM_SENSITIVITY_VARIABLES
+Calculate the number of variables to test
+******************************************************************************/
+int num_sensitivity_variables( sense *rsens )
+{
+	int nv;
+	sense *cs;
+
+	for ( nv = 0, cs = rsens; cs != NULL; cs = cs->next)
+		if ( cs->numv > 1 )				// count variables with 2 or more values
+			nv++;
+	return nv;
+}
+
+
+/*******************************************************************************
+SENSITIVITY_PARALLEL
+This function fills the initial values according to the sensitivity analysis
+system performed by parallel simulations: 1 single run over many independent
+configurations descending in parallel from Root.
+
+Users can set one or more elements to be part of the sensitivity analysis. For
+each element the user has to provide the number of values to be explored and
+their values. When all elements involved in the sensitivity analysis are
+configured, the user must launch the command Sensitivity from menu Data in the
+main LSD Browser. This command generates as many copies as the product of all
+values for all elements in the s.a. It then kicks off the initialization of all
+elements involved so that each combination of parameters is assigned to one
+branch of the model.
+
+The user is supposed then to save the resulting configuration.
+
+Options concerning initialization for sensitivity analysis are not saved into
+the model configuration files, and are therefore lost when closing the LSD model
+program if not saved in a .sa file.
+*******************************************************************************/
+object *sensitivity_parallel( object *o, sense *s )
+{
+	int i;
+	sense *cs;
+	object *cur = o;
+	variable *cv;
+
+	if ( s->next != NULL )
+	{
+		for ( i = 0; i < s->numv; ++i )
+		{
+			s->curv = i;
+			cur = sensitivity_parallel( cur, s->next );
+		}
+
+		return cur;
+	}
+
+	for ( i = 0; i < s->numv; ++i )
+	{
+		s->curv = i;
+		for ( cs = rsense; cs != NULL; cs = cs->next )
+		{
+			cv = cur->search_var( cur, cs->label );
+			if ( cs->param == 0 )				// handle lags > 0
+				cv->val[ cs->lag ] = cs->v[ cs->curv ];
+			else
+				cv->val[ 0 ] = cs->v[ cs->curv ];
+		}
+
+		cur = cur->hyper_next( cur->label );
+	}
+
+	return cur;
+}
+
+
+/*******************************************************************************
+SENSITIVITY_SEQUENTIAL
+This function fills the initial values according to the sensitivity analysis
+system performed by sequential simulations: each run executes one configuration
+labelled with sequential labels.
+
+Contrary to parallel sensitivity settings, this function initialize all elements
+in the configuration with the specified label.
+
+Users can set one or more elements to be part of the sensitivity analysis. For
+each element the user has to provide the number of values to be explored and
+their values. When all elements involved in the sensitivity analysis are
+configured, the user must launch the command Sensitivity from menu Data in the
+main LSD Browser.
+
+Options concerning initialization for sensitivity analysis are saved into model
+configuration files, to be executed with a No Window version of the LSD model.
+One configuration file is created for each possible combination of the
+sensitivity analysis values (parameters and initial conditions). Optionally, it
+is possible to define the parameter "probSampl" with the (uniform) probability
+of a given point in the sensitivity analysis space is saved as configuration
+file. In practice, this allows for the Monte Carlo sampling of the parameter
+space, which is often necessary when the s.a. space is too big to be analyzed
+in its entirety.
+*******************************************************************************/
+void sensitivity_sequential( int *findex, sense *s, double probSampl, const char *dest_path )
+{
+	int i, nv;
+	sense *cs;
+	object *cur;
+	variable *cv;
+
+	if ( s->next != NULL )
+	{
+		for ( i = 0; i < s->numv && ! stop; ++i )
+		{
+			s->curv = i;
+			sensitivity_sequential( findex, s->next, probSampl, dest_path );
+		}
+
+		return;
+	}
+
+	for ( i = 0; i < s->numv && ! stop; ++i )
+	{
+		s->curv = i;
+		for ( nv = 1, cs = rsense; cs != NULL; cs = cs->next )
+		{
+			nv *= cs->numv;
+			cv = root->search_var( root, cs->label );
+
+			for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( cur->label ) )
+			{
+				cv = cur->search_var( cur, cs->label );
+				if ( cs->param == 1 )				// handle lags > 0
+					cv->val[ 0 ] = cs->v[ cs->curv ];
+				else
+					cv->val[ cs->lag ] = cs->v[ cs->curv ];
+			}
+
+		}
+
+		if ( probSampl == 1.0 || ran1( ) <= probSampl )	// if required draw if point will be sampled
+		{
+			// generate a configuration file for the experiment (no descriptions)
+			if ( ! save_xml_configuration( *findex, dest_path, true ) )
+			{
+				plog( "Aborted\n" );
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
+				return;
+			}
+
+			if ( ( *findex + 1 ) % 10 == 0 )
+				cmd( "prgboxupdate .psa %d", *findex );
+
+			*findex = *findex + 1;
+		}
+	}
 }
 
 
@@ -1674,7 +1740,7 @@ void design::load_design_data( sense *rsens, int n )
 	for ( i = 0, cs = rsens; i < k && cs != NULL; ++i, cs = cs->next )
 	{
 		inst[ i ] = hyper_count_var( cs->label );
-		nVal = cs->nvalues;			// number of data values
+		nVal = cs->numv;			// number of data values
 		nVal = nVal % 2 == 0 ? nVal : nVal - 1 ;// discard last unpaired value
 
 		if ( inst[ i ] == 0 || nVal < 2 )// only multi-instance/value factor

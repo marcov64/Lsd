@@ -444,12 +444,17 @@ struct sense
 	bool entryOk;						// flag valid data entered
 	bool integer;						// integer element
 	char *label;
-	double *v;
-	int i;
-	int lag;							// handling lags > 1
-	int nvalues;
-	int param;							// save element type/lag to allow
-	sense *next;
+	double *v;							// values to test sensitivity
+	int curv;							// index for value in use in combinations
+	int lag;							// lag of initial value
+	int numv;							// number of values to test
+	int param;							// element type
+	sense *next;						// sensitivity analysis chain of elements
+
+	sense( const char *lab = NULL, int _param = -1, int _lag = -1,
+		   sense *prev = NULL, int _numv = 0, const double *_v = NULL,
+		   bool _integer = false );		// constructor
+	~sense( void );						// destructor
 };
 
 struct design							// design of experiment object
