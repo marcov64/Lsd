@@ -30,7 +30,7 @@ Recursive function that increments i of one for any variable to plot.
 Create a list of Variables to plot and create the list of labels (adding
 the indexes if necessary) to be used in the plot.
 
-- void init_plot( int i, int id_sim );
+- void init_plot( int i );
 create the canvas for the plot, the lines, button, labels, etc.
 
 - void plot_rt( variable *v )
@@ -69,7 +69,7 @@ void prepare_plot( object *r, int id_sim )
 	assign( r, &i, lab );
 
 	if ( add_rt_plot_tab( ".plt", id_sim ) )
-		init_plot( i, id_sim );
+		init_plot( i );
 }
 
 
@@ -254,7 +254,7 @@ bool add_rt_plot_tab( const char *w, int id_sim )
 /**************************************
 INIT_PLOT
 **************************************/
-void init_plot( int num, int id_sim )
+void init_plot( int num )
 {
 	int i;
 

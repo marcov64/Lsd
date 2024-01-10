@@ -1257,7 +1257,7 @@ double **mat_new( int m, int n )
 }
 
 // deallocate dynamic space for matrix
-void mat_del( double **a, int m, int n )
+void mat_del( double **a, int m )
 {
 	for ( int i = 0; i < m ; ++i )		//rows
 		delete [ ] a[ i ];
@@ -1454,13 +1454,13 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 	cmd( "destroytop .psa" );
 
 	// deallocate all temporary matrices
-	mat_del( B, k + 1, k );
-	mat_del( DM, k, k );
-	mat_del( P, k, k );
-	mat_del( X_base, k + 1, k );
-	mat_del( delta_diag, k, k );
-	mat_del( temp_1, k + 1, k );
-	mat_del( temp_2, k + 1, k );
+	mat_del( B, k + 1 );
+	mat_del( DM, k );
+	mat_del( P, k );
+	mat_del( X_base, k + 1 );
+	mat_del( delta_diag, k );
+	mat_del( temp_1, k + 1 );
+	mat_del( temp_2, k + 1 );
 
 	return X;
 }
@@ -1505,8 +1505,8 @@ double **compute_distance_matrix( double **sample, int M, int k, double **DM )
 
 	cmd( "destroytop .psa" );
 
-	mat_del( input_1, k + 1, k );
-	mat_del( input_2, k + 1, k );
+	mat_del( input_1, k + 1 );
+	mat_del( input_2, k + 1 );
 
 	return DM;
 }
@@ -1711,8 +1711,8 @@ double **opt_trajectories( int k, double **pool, int M, int r, double **X )
 		X = mat_ins_mat( X, r * ( k + 1 ), k, temp, k + 1, k, index_list[ i ] );
 	}
 
-	mat_del( temp, k + 1, k );
-	mat_del( DM, M, M );
+	mat_del( temp, k + 1 );
+	mat_del( DM, M );
 
 	return X;
 }

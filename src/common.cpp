@@ -1994,7 +1994,7 @@ vector < long > strtolsplit( const char *in, char sep, long inv )
 	vector < long > out;
 
 	while ( getline( ss, buf, sep ) )
-		out.push_back( strtol( buf.c_str( ), NULL, 10, 0 ) );
+		out.push_back( strtol( buf.c_str( ), NULL, 10, inv ) );
 
 	return out;
 }
@@ -2014,7 +2014,7 @@ vector < double > strtodsplit( const char *in, char sep, double inv )
 	vector < double > out;
 
 	while ( getline( ss, buf, sep ) )
-		out.push_back( strtod( buf.c_str( ), NULL, 0. ) );
+		out.push_back( strtod( buf.c_str( ), NULL, inv ) );
 
 	return out;
 }

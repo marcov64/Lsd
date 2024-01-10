@@ -2282,7 +2282,7 @@ void analysis( bool mc )
 					}" );
 				cmd( ".da.vars.pl.f.v delete $n_it" );
 
-				update_more_tab( ".dap" );
+				update_more_tab( );
 
 				break;
 
@@ -9788,7 +9788,7 @@ void add_da_plot_tab( const char *w, int id_plot )
 		cmd( "$daptab select $t" );
 
 		cmd( "set addplot \"%d) $tit\"", id_plot );
-		update_more_tab( w, true );
+		update_more_tab( true );
 	}
 }
 
@@ -9797,7 +9797,7 @@ void add_da_plot_tab( const char *w, int id_plot )
  UPDATE_MORE_TAB
  update the plots index tab, if it exists
  *******************************************************/
-void update_more_tab( const char *w, bool adding )
+void update_more_tab( bool adding )
 {
 	int i, j, k, n, cols;
 

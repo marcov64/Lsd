@@ -639,7 +639,7 @@ void chg_obj_num( object **c, int value, int level, int affected[ ], int cfrom )
 
 	while ( cur != NULL )
 	{	// as long as necessary
-		if ( affected == NULL || check_affected( cur, pivot, level, affected ) == 1 )
+		if ( affected == NULL || check_affected( cur, level, affected ) == 1 )
 		{
 			skip_next_obj( cur, &num ); 	// count the existing objects
 
@@ -824,7 +824,7 @@ void eliminate_obj( object **c, int actual, int desired )
 /***************************************************
 CHECK_AFFECTED
 ****************************************************/
-int check_affected( object *c, object *pivot, int level, int affected[ ] )
+int check_affected( object *c, int level, int affected[ ] )
 {
 	int i, j, res;
 	object *cur, *cur1;
