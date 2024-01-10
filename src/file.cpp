@@ -551,7 +551,7 @@ void unload_configuration ( bool full )
 	reset_blueprint( NULL );
 
 	empty_cemetery( );							// garbage collection
-	empty_sensitivity( rsense );				// discard sensitivity analysis data
+	empty_sensitivity( );						// discard sensitivity analysis data
 
 	save_ok = true;								// valid structure to save
 	unsavedData = false;						// no unsaved simulation results
@@ -622,9 +622,10 @@ const int type_num = 3;
 
 int object::load_xml_struct( xml_node &n, bool quick )
 {
-	bool obs;
-	const char *str, *desc, *init, *val;
-	int i, type;
+	bool obs, integer;
+	const char *str, *desc, *init;
+	int i, type, lags;
+	vector < double > val;
 	vector < string > data;
 	bridge *cb;
 	variable *cv;
@@ -714,10 +715,15 @@ int object::load_xml_struct( xml_node &n, bool quick )
 					if ( ! cn.child( "sensitivity" ).empty( ) )
 					{
 						xml_node cns = cn.child( "sensitivity" );
+						integer = cn.attribute( "integer" ).as_bool( );
+						lags = cn.attribute( "lags" ).as_uint( );
 
 						if ( type == 1 )
 						{
-							val = cns.child( "values" ).text( ).get( );
+							val = strtodsplit( cns.child( "values" ).text( ).get( ), ',' );
+
+							if ( val.size( ) > 1 )
+								new sense( str, type, 0, val.size( ), &val, integer );
 						}
 						else
 							if ( type == 0 )
@@ -726,15 +732,16 @@ int object::load_xml_struct( xml_node &n, bool quick )
 								{
 									data = strtostrsplit( sn.name( ), '-' );
 
-									if ( data.size( ) < 2 )
+									if ( data.size( ) < 2 || data[ 0 ] != "values" )
 										continue;
 
-									i = strtol( data[ 1 ].c_str( ), NULL, 10, -1 );
-
-									if ( i < 0 )
+									if ( ( i = strtol( data[ 1 ].c_str( ), NULL, 10, -1 ) ) < 1 || i > lags )
 										continue;
 
+									val = strtodsplit( sn.text( ).get( ), ',' );
 
+									if ( val.size( ) > 1 )
+										new sense( str, type, i - 1, val.size( ), &val, integer );
 								}
 							}
 					}
@@ -1386,8 +1393,8 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 	<!ELEMENT description (#PCDATA+)>\n \
 	<!ELEMENT nodes (#PCDATA, #PCDATA, #PCDATA?, #PCDATA?, #PCDATA?)>\n \
 	<!ELEMENT element (#PCDATA?, description?, documentation?, sensitivity?)>\n \
-	<!ELEMENT documentation EMPTY> \
-	<!ELEMENT sensitivity ( )>\n]" );
+	<!ELEMENT documentation EMPTY>\n \
+	<!ELEMENT sensitivity (#PCDATA+)>\n]" );
 	xml_node lsdNode = xf.append_child( "LSD" );
 	xml_node cfgNode = lsdNode.append_child( "configuration" );
 	cfgNode.append_attribute( "version" ) = "1.0";
@@ -2023,10 +2030,12 @@ LOAD_SENSITIVITY
 ******************************************************************************/
 int load_sensitivity( FILE *f )
 {
-	int i;
+	bool integer;
+	vector < double > v;
+	int i, lag, param, numv;
 	char cc, lab[ MAX_ELEM_LENGTH ];
 	variable *cv;
-	sense *cs = rsense;
+	sense *cs;
 
 	// read data from file (1 line per element, '#' indicate comment)
 	while ( ! feof( f ) )
@@ -2047,22 +2056,8 @@ int load_sensitivity( FILE *f )
 		if ( cv == NULL || ( cv->param != 1 && cv->num_lag == 0 ) )
 			goto error1;					// and not parameter or lagged variable
 
-		// create memory allocation for new variable
-		if ( rsense == NULL )				// allocate first element
-			rsense = cs = new sense;
-		else								// allocate next ones
-		{
-			cs->next = new sense;
-			cs = cs->next;
-		}
-		cs->v = NULL;						// initialize struct pointers
-		cs->next = NULL;
-
-		cs->label = new char[ strlen( lab ) + 1 ];	// save element name
-		strcpy( cs->label, lab );
-
 		// get lags and # of values to test
-		if ( fscanf( f, "%d %d ", &cs->lag, &cs->numv ) < 2 )
+		if ( fscanf( f, "%d %d ", &lag, &numv ) < 2 )
 			goto error2;
 
 		// get variable type (newer versions)
@@ -2071,30 +2066,31 @@ int load_sensitivity( FILE *f )
 
 		if ( cc == 'i' || cc == 'd' || cc == 'f' )
 		{
-			cs->integer = ( cc == 'i' ) ? true : false;
+			integer = ( cc == 'i' ) ? true : false;
 			fscanf( f, ": " );				// remove separator
 		}
 		else
 			if ( cc == ':' )
-				cs->integer = false;
+				integer = false;
 			else
 				goto error4;
 
-		if ( cs->lag == 0 )					// adjust type and lag #
-			cs->param = 1;
+		if ( lag == 0 )						// adjust type and lag #
+			param = 1;
 		else
 		{
-			cs->param = 0;
-			cs->lag = abs( cs->lag ) - 1;
+			param = 0;
+			lag = abs( lag ) - 1;
 		}
 
-		cs->v = new double[ cs->numv ];	// get values
-		for ( i = 0; i < cs->numv; ++i )
-			if ( ! fscanf( f, "%lf", &cs->v[ i ] ) )
+		for ( v.resize( numv ), i = 0; i < numv; ++i )
+			if ( ! fscanf( f, "%lf", &v[ i ] ) )
 				goto error5;
-			else
-				if ( cs->integer )
-					cs->v[ i ] = round( cs->v[ i ] );
+
+		if ( ( cs = search_sensitivity( lab, lag ) ) != NULL )
+			delete cs;
+
+		new sense( lab, param, lag, numv, &v, integer );
 	}
 
 	return 0;
@@ -2105,52 +2101,32 @@ int load_sensitivity( FILE *f )
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid lag selected\" -detail \"Variable '%s' has no lags set.\"", lab );
 		i = 1;
 		goto error;
+
 	error2:
 		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid range\" -detail \"Element '%s' has less than two values to test.\"", lab );
 		i = 2;
 		goto error;
+
 	error3:
 		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid element type\" -detail \"Element '%s' has an invalid value set.\"", lab );
 		i = 3;
 		goto error;
+
 	error4:
 		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Missing separator\" -detail \"Element '%s' has no separator character (':').\"", lab );
 		i = 4;
 		goto error;
+
 	error5:
 		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid range value\" -detail \"Element '%s' has non-numeric range values.\"", lab );
 		i = 5;
 		goto error;
 
 	error:
-	empty_sensitivity( rsense );		// discard read data
-	rsense = NULL;
+
+	empty_sensitivity( );					// discard read data
 
 	return i;
-}
-
-
-/*****************************************************************************
-EMPTY_SENSITIVITY
-	Deallocate sensitivity analysis memory
-******************************************************************************/
-void empty_sensitivity( sense *cs )
-{
-	if ( cs == NULL )		// prevent invalid calls (last variable)
-		return;
-
-	if ( cs->next != NULL )	// recursively start from the end of the list
-		empty_sensitivity( cs->next );
-#ifndef _NW_
-	else
-		NOLH_clear( );		// deallocate DoE (last object only)
-#endif
-	if ( cs->v != NULL )	// deallocate requested memory, if applicable
-		delete cs->v;
-	if ( cs->label != NULL )
-		delete cs->label;
-
-	delete cs;				// suicide
 }
 
 
@@ -2170,8 +2146,10 @@ bool save_sensitivity( FILE *f )
 			fprintf( f, "%s 0 %d %c:", cs->label, cs->numv, cs->integer ? 'i' : 'f' );
 		else
 			fprintf( f, "%s -%d %d %c:", cs->label, cs->lag + 1, cs->numv, cs->integer ? 'i' : 'f' );
+
 		for ( i = 0; cs->v != NULL && i < cs->numv; ++i )
 			fprintf( f," %g", cs->v[ i ] );
+
 		fprintf( f,"\n" );
 	}
 

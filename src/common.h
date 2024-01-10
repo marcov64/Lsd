@@ -441,7 +441,6 @@ struct description
 
 struct sense
 {
-	bool entryOk;						// flag valid data entered
 	bool integer;						// integer element
 	char *label;
 	double *v;							// values to test sensitivity
@@ -451,10 +450,11 @@ struct sense
 	int param;							// element type
 	sense *next;						// sensitivity analysis chain of elements
 
-	sense( const char *lab = NULL, int _param = -1, int _lag = -1,
-		   sense *prev = NULL, int _numv = 0, const double *_v = NULL,
-		   bool _integer = false );		// constructor
+	sense( const char *lab, int _param, int _lag, int _numv = 0,
+		   vector < double > *_v = NULL, bool _integer = false );// constructor
 	~sense( void );						// destructor
+	int dataentry( void );
+
 };
 
 struct design							// design of experiment object

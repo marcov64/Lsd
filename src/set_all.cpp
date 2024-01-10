@@ -586,31 +586,24 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 /*****************************************************************************
 DATAENTRY_SENSITIVITY
-Try to get values for sensitivity analysis
+Get values for sensitivity analysis
 ******************************************************************************/
-void dataentry_sensitivity( sense *s, int nval )
+int sense::dataentry( void )
 {
-	int i, j, nPar, samples, integerV;
-	double start, end;
+	int i, j, res, nPar, samples;
+	double temp, start, end;
 	char *sss = NULL, *tok = NULL, type;
 	const char *app;
 
-	// reset random number generator
-	init_random( seed );
-
-	Tcl_LinkVar( inter, "integerV", ( char * ) &integerV, TCL_LINK_BOOLEAN );
-	integerV = s->integer;
+	cmd( "set integer %d", integer );
 
 	cmd( "set sens .sens" );
 	cmd( "newtop .sens \"Sensitivity Analysis\" { set choice 2 }" );
 
 	cmd( "ttk::frame .sens.lab" );
-	if ( nval > 0)								// number of values defined (0=no)?
-		cmd( "ttk::label .sens.lab.l1 -text \"Enter n=%d values for:\"", s->numv );
-	else
-		cmd( "ttk::label .sens.lab.l1 -text \"Enter the desired values (at least 2) for:\"" );
+	cmd( "ttk::label .sens.lab.l1 -text \"Enter the desired values (at least 2) for:\"" );
 
-	cmd( "ttk::label .sens.lab.l2 -style hl.TLabel -text \"%s\"", s->label );
+	cmd( "ttk::label .sens.lab.l2 -style hl.TLabel -text \"%s\"", label );
 	cmd( "pack .sens.lab.l1 .sens.lab.l2 -side left -padx 2" );
 
 	cmd( "ttk::label .sens.obs1 -text \"Paste of clipboard data is allowed, most separators are accepted\"" );
@@ -628,7 +621,7 @@ void dataentry_sensitivity( sense *s, int nval )
 	cmd( "pack .sens.pad -pady 5" );
 
 	cmd( "ttk::frame .sens.fb" );
-	cmd( "ttk::checkbutton .sens.fb.int -variable integerV -text \"Round to integer\"" );
+	cmd( "ttk::checkbutton .sens.fb.int -variable integer -text \"Round to integer\"" );
 	cmd( "ttk::button .sens.fb.paste -width $butWid -text Paste -command { tk_textPaste .sens.t.t }" );
 	cmd( "ttk::button .sens.fb.del -width $butWid -text Delete -command { .sens.t.t delete 0.0 end }" );
 	cmd( "ttk::button .sens.fb.rem -width $butWid -text Remove -command { set choice 3 }" );
@@ -646,24 +639,24 @@ void dataentry_sensitivity( sense *s, int nval )
 	cmd( "showtop .sens topleftW" );
 	cmd( "mousewarpto .sens.fb2.ok 0" );
 
-	if ( s->entryOk )	// is there valid data from a previous data entry?
+	sss = new char[ MAX_ELEM_LENGTH * numv + 1 ];	// allocate space for string
+	tok = new char[ MAX_ELEM_LENGTH ];
+	strcpy( sss, "" );
+	for ( i = 0; i < numv; i++ )		// pass existing data as a string
 	{
-		sss = new char[ MAX_ELEM_LENGTH * s->numv + 1 ];	// allocate space for string
-		tok = new char[ MAX_ELEM_LENGTH ];
-		strcpy( sss, "" );
-		for ( i = 0; i < s->numv; i++ )		// pass existing data as a string
-		{
-			snprintf( tok, MAX_ELEM_LENGTH, "%.15g ", s->v[ i ] );	// add each value
-			strcatn( sss, tok, MAX_ELEM_LENGTH * s->numv + 1 );	// to the string
-		}
-
-		cmd( "set sss \"%s\"", sss );			// pass string to Tk window
-		cmd( ".sens.t.t insert 0.0 $sss" );		// insert string in entry window
-		delete [ ] tok;
-		delete [ ] sss;
+		snprintf( tok, MAX_ELEM_LENGTH, "%.15g ", v[ i ] );	// add each value
+		strcatn( sss, tok, MAX_ELEM_LENGTH * numv + 1 );	// to the string
 	}
 
+	cmd( "set sss \"%s\"", sss );			// pass string to Tk window
+	cmd( ".sens.t.t insert 0.0 $sss" );		// insert string in entry window
+	delete [ ] tok;
+	delete [ ] sss;
+
 	cmd( "focus .sens.t.t" );
+
+	// reset random number generator to make random numbers reproducible
+	init_random( seed );
 
 	choice = 0;
 
@@ -673,56 +666,57 @@ void dataentry_sensitivity( sense *s, int nval )
 			Tcl_DoOneEvent( 0 );
 
 		if ( choice == 2 )
-			goto end;
-
-		if ( choice == 3 )
 		{
-			delete s;
+			res = numv > 1 ? 1 : 2;
 			goto end;
 		}
 
+		if ( choice == 3 )
+		{
+			res = 2;
+			goto end;
+		}
+
+		integer = get_bool( "integer" );
 		app = eval_str( "[ .sens.t.t get 0.0 end ]" );
 		sss = new char[ strlen( app ) + 1 ];
 		strcpy( sss, app );
 
-		if ( nval == 0 )					// undefined number of values?
+		char *tss, *ss = new char[ strlen( sss ) + 1 ];
+		tss = ss;						// save original pointer to gc
+		strcpy( ss, sss );				// make a draft copy
+
+		i = 0;							// count number of values
+		do
 		{
-			double temp;
-			char *tss, *ss = new char[ strlen( sss ) + 1 ];
-			tss = ss;						// save original pointer to gc
-			strcpy( ss, sss );				// make a draft copy
+			tok = strtok( ss, SENS_SEP );	// accepts several separators
+			if ( tok == NULL )			// finished?
+				break;
 
-			i = 0;							// count number of values
-			do
-			{
-				tok = strtok( ss, SENS_SEP );	// accepts several separators
-				if ( tok == NULL )			// finished?
-					break;
-				ss = NULL;
+			ss = NULL;
 
-				// is it a clause to be expanded?
-				nPar = sscanf( tok, "=%lf:%lf@%u%%%c", &start, &end, &samples, &type );
-				if ( nPar == 4 )			// all values are required
-					i += samples;			// samples to create
-				else						// no, read as regular double float
-					i += sscanf( tok, "%lf", &temp );	// count valid doubles only
-			}
-			while ( tok != NULL );
+			// is it a clause to be expanded?
+			nPar = sscanf( tok, "=%lf:%lf@%u%%%c", &start, &end, &samples, &type );
+			if ( nPar == 4 )			// all values are required
+				i += samples;			// samples to create
+			else						// no, read as regular double float
+				i += sscanf( tok, "%lf", &temp );	// count valid doubles only
+		}
+		while ( tok != NULL );
 
-			if ( i < 2 )					// invalid number of elements?
-				i = 2;						// minimum is 2
+		if ( i < 2 )					// invalid number of elements?
+			i = 2;						// minimum is 2
 
-			if ( s->numv < i )			// is there insufficient space already alloc'd?
-			{
-				delete [ ] s->v;			// free old and reallocate enough space
-				s->v = new double[ i ];
-			}
-			s->numv = i;					// update # of values
-
-			delete [ ] tss;
+		if ( numv != i )				// change in space alloc'd?
+		{
+			delete [ ] v;				// free old and reallocate enough space
+			v = new double[ i ];
+			numv = i;					// update # of values
 		}
 
-		for ( i = 0; i < s->numv; )
+		delete [ ] tss;
+
+		for ( i = 0; i < numv; )
 		{
 			tok = strtok( sss, SENS_SEP );	// accepts several separators
 			if ( tok == NULL )				// finished too early?
@@ -742,36 +736,38 @@ void dataentry_sensitivity( sense *s, int nval )
 			{
 				if ( toupper( type ) == 'L' && samples > 0 )// linear sampling
 				{
-					s->v[ i++ ] = integerV ? round( fmin( start, end ) ) : fmin( start, end );
+					v[ i++ ] = integer ? round( fmin( start, end ) ) : fmin( start, end );
 					for ( int j = 1; j < samples; ++j, ++i )
 					{
-						s->v[ i ] = s->v[ i - 1 ] + ( fmax( start, end ) - fmin( start, end ) ) / ( samples - 1 );
-						s->v[ i ] = integerV ? round( s->v[ i ] ) : s->v[ i ];
+						v[ i ] = v[ i - 1 ] + ( fmax( start, end ) - fmin( start, end ) ) / ( samples - 1 );
+						v[ i ] = integer ? round( v[ i ] ) : v[ i ];
 					}
 				}
+
 				if ( toupper( type ) == 'R' && samples > 0 )// random sampling
 					for ( int j = 0; j < samples; ++j, ++i )
 					{
-						s->v[ i ] = fmin( start, end ) + ran1( ) * ( fmax( start, end ) - fmin( start, end ) );
-						s->v[ i ] = integerV ? round( s->v[ i ] ) : s->v[ i ];
+						v[ i ] = fmin( start, end ) + ran1( ) * ( fmax( start, end ) - fmin( start, end ) );
+						v[ i ] = integer ? round( v[ i ] ) : v[ i ];
 					}
 			}
 			else											// no, read as regular double float
 			{
 				j = i;
-				i += sscanf( tok, "%lf", &( s->v[ i ] ) );	// count valid doubles only
-				s->v[ j ] = integerV ? round( s->v[ j ] ) : s->v[ j ];
+				i += sscanf( tok, "%lf", &( v[ i ] ) );	// count valid doubles only
+				v[ j ] = integer ? round( v[ j ] ) : v[ j ];
 			}
 		}
 	}
 	while ( tok == NULL || i < 2 );	// require enough values (if more, extra ones are discarded)
 
-	s->integer = integerV;			// save integer restriction flag
+	res = 0;
 
 	end:
 
 	cmd( "destroytop .sens" );
-	Tcl_UnlinkVar( inter, "integerV" );
+
+	return res;
 }
 
 
@@ -779,10 +775,11 @@ void dataentry_sensitivity( sense *s, int nval )
 SENSITIVITY CONSTRUCTOR
 Add or update sensitivity settings for a model element
 *******************************************************************************/
-sense::sense( const char *lab, int _param, int _lag, sense *prev,
-			  int _numv, const double *_v, bool _integer )
+sense::sense( const char *lab, int _param, int _lag, int _numv,
+			  vector < double > *_v, bool _integer )
 {
 	int i;
+	sense *cs;
 
 	param = _param;
 	lag = _lag;
@@ -800,9 +797,9 @@ sense::sense( const char *lab, int _param, int _lag, sense *prev,
 	if ( _numv > 0 && _v != NULL )
 	{
 		numv = _numv;
-		v = new double [ numv ];
+		v = new double [ _v->size( ) ];
 		for ( i = 0; i < numv; ++i )
-			v[ i ] = _v[ i ];
+			v[ i ] = integer ? round( ( *_v )[ i ] ) : ( *_v )[ i ];
 	}
 	else
 	{
@@ -810,13 +807,15 @@ sense::sense( const char *lab, int _param, int _lag, sense *prev,
 		v = NULL;
 	}
 
-	if ( prev != NULL )
-	{
-		next = prev->next;
-		prev->next = this;
-	}
+	if ( rsense == NULL )
+		rsense = this;
 	else
-		next = NULL;
+	{
+		for ( cs = rsense; cs->next != NULL; cs = cs->next );
+		cs->next = this;
+	}
+
+	next = NULL;
 }
 
 
@@ -826,32 +825,79 @@ Add or update sensitivity settings for a model element
 *******************************************************************************/
 sense::~sense( void )
 {
-/*	sense *cs, *ps;
+	sense *cs, *ps;
 
 	delete [ ] label;
 	delete [ ] v;
 
-	for ( cs = rsense, ps = NULL; cs != this && cs != NULL; ps = cs, cs = cs->next );
+	if ( rsense != NULL )
+	{
+		for ( cs = rsense, ps = NULL; cs != this && cs != NULL; ps = cs, cs = cs->next );
 
-	if ( cs == rsense )
-		rsense = next;
+		if ( cs == rsense )
+			rsense = next;
+		else
+			if ( cs == this && ps != NULL )
+				ps->next = next;
+	}
+}
+
+
+/*****************************************************************************
+EMPTY_SENSITIVITY
+Deallocate sensitivity analysis memory
+******************************************************************************/
+void empty_sensitivity( sense *cs )
+{
+	if ( cs == NULL )
+	{
+		if ( rsense == NULL )
+			return;
+
+		cs = rsense;
+		rsense = NULL;
+	}
+
+	if ( cs->next != NULL )
+		empty_sensitivity( cs->next );
+#ifndef _NW_
 	else
-		if ( cs == this && ps != NULL )
-			ps->next = next;
-*/}
+		NOLH_clear( );		// deallocate DoE (last object only)
+#endif
+
+	delete cs;				// suicide
+}
+
+
+/*****************************************************************************
+SEARCH_SENSITIVITY
+Find element in sensitivity data linked list
+******************************************************************************/
+sense *search_sensitivity( const char *lab, int lag )
+{
+	sense *cs;
+
+	for ( cs = rsense; cs != NULL; cs = cs->next )
+		if ( ! strcmp( cs->label, lab ) &&
+			 ( cs->param == 1 || cs->lag == lag ) )
+			 break;
+
+	return cs;
+}
 
 
 /*****************************************************************************
 NUM_SENSITIVITY_POINTS
 Calculate the sensitivity space size
 ******************************************************************************/
-long num_sensitivity_points( sense *rsens )
+long num_sensitivity_points( void )
 {
 	long nv;
 	sense *cs;
 
-	for ( nv = 1, cs = rsens; cs != NULL; cs = cs->next )	// scan the linked-list
+	for ( nv = 1, cs = rsense; cs != NULL; cs = cs->next )	// scan the linked-list
 		nv *= cs->numv;	// update the number of variables
+
 	return nv;
 }
 
@@ -860,14 +906,15 @@ long num_sensitivity_points( sense *rsens )
 NUM_SENSITIVITY_VARIABLES
 Calculate the number of variables to test
 ******************************************************************************/
-int num_sensitivity_variables( sense *rsens )
+int num_sensitivity_variables( void )
 {
 	int nv;
 	sense *cs;
 
-	for ( nv = 0, cs = rsens; cs != NULL; cs = cs->next)
+	for ( nv = 0, cs = rsense; cs != NULL; cs = cs->next)
 		if ( cs->numv > 1 )				// count variables with 2 or more values
 			nv++;
+
 	return nv;
 }
 
@@ -1802,7 +1849,7 @@ design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
 	if ( rsens == NULL )					// valid pointer?
 		typ = 0;							// trigger invalid design
 	else
-		k = num_sensitivity_variables( rsens );	// number of factors
+		k = num_sensitivity_variables( );	// number of factors
 
 	switch ( typ )
 	{

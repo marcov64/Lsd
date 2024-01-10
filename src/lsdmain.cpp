@@ -805,7 +805,7 @@ int lsdmain( int argn, const char **argv )
 
 	empty_stack( );
 	empty_lattice( );
-	empty_sensitivity( rsense );
+	empty_sensitivity( );
 	empty_cemetery( );
 	empty_blueprint( );
 	empty_description( );

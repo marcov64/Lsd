@@ -2844,61 +2844,18 @@ object *operate( object *r )
 		}
 		else								// edit sensitivity analysis data
 		{
-			choice = 0;
-			bool exist = false;
-			sense *cs, *ps = NULL;
+			if ( ( cs = search_sensitivity( cv->label, lag ) ) == NULL )
+				cs = new sense( cv->label, cv->param, lag );
 
-			if ( rsense == NULL )			// no sensitivity analysis structure yet?
-				rsense = cs = new sense;
-			else
-			{
-				// check if sensitivity data for the variable already exists
-				for ( cs = rsense, ps = NULL; cs != NULL; ps = cs, cs = cs->next )
-					if ( ! strcmp( cs->label, cv->label ) &&
-						 ( cs->param == 1 || cs->lag == lag ) )
-					{
-						exist = true;
-						break;				// get out of the inner for loop
-					}
+			i = cs->dataentry( );
 
-				if ( ! exist )				// if new variable, append at the end of the list
-				{
-					for ( cs = rsense; cs->next != NULL; cs = cs->next );	// pick last
-					cs->next = new sense;	// create new variable
-					ps = cs;				// keep previous sensitivity variable
-					cs = cs->next;
-				}
-			}
-
-			if ( ! exist )					// do only for new variables in the list
-			{
-				cs->label = new char[ strlen( cv->label ) + 1 ];
-				strcpy( cs->label, cv->label );
-				cs->next = NULL;
-				cs->numv = 0;
-				cs->v = NULL;
-				cs->entryOk = false;		// no valid data yet
-			}
-			else
-				cs->entryOk = true;			// valid data already there
-
-			// save type and specific lag in this case
-			cs->param = cv->param;
-			cs->lag = lag;
-
-			dataentry_sensitivity( cs, 0 );
-
-			if ( ! cs->entryOk )			// data entry failed?
-			{
-				if ( rsense == cs )			// is it the first variable?
-					rsense = cs->next;		// update list root
-				else
-					ps->next = cs->next;	// remove from sensitivity list
-				delete [ ] cs->label;		// garbage collection
+			if ( i == 2 )					// data entry failed, no data?
 				delete cs;
-			}
 			else
-				unsavedSense = true;		// signal unsaved change
+				if ( i == 0 )
+					unsavedSense = true;	// signal unsaved change
+
+			choice = 0;
 		}
 
 	break;
@@ -4635,9 +4592,9 @@ object *operate( object *r )
 			if ( ! discard_change( false ) )	// unsaved configuration?
 				break;
 
-			varSA = num_sensitivity_variables( rsense );// number of variables to test
+			varSA = num_sensitivity_variables( );// number of variables to test
 			plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
-			ptsSa = num_sensitivity_points( rsense );	// total number of points in sensitivity space
+			ptsSa = num_sensitivity_points( );	// total number of points in sensitivity space
 			plog( "\nSensitivity analysis space size: %ld", ptsSa );
 
 			// Prevent running into too big sensitivity spaces (high computation times)
@@ -4683,9 +4640,9 @@ object *operate( object *r )
 			if ( ! discard_change( false ) )	// unsaved configuration?
 				break;
 
-			varSA = num_sensitivity_variables( rsense );// number of variables to test
+			varSA = num_sensitivity_variables( );// number of variables to test
 			plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
-			ptsSa = num_sensitivity_points( rsense );	// total number of points in sensitivity space
+			ptsSa = num_sensitivity_points( );	// total number of points in sensitivity space
 			plog( "\nSensitivity analysis space size: %ld", ptsSa );
 
 			// Prevent running into too big sensitivity spaces (high computation times)
@@ -4754,9 +4711,9 @@ object *operate( object *r )
 			if ( ! discard_change( false ) )	// unsaved configuration?
 				break;
 
-			varSA = num_sensitivity_variables( rsense );// number of variables to test
+			varSA = num_sensitivity_variables( );// number of variables to test
 			plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
-			maxMC = num_sensitivity_points( rsense );	// total number of points in sensitivity space
+			maxMC = num_sensitivity_points( );	// total number of points in sensitivity space
 			plog( "\nSensitivity analysis space size: %ld", maxMC );
 
 			// get the number of Monte Carlo samples to produce
@@ -4879,7 +4836,7 @@ object *operate( object *r )
 			if ( ! discard_change( false ) )	// unsaved configuration?
 				break;
 
-			varSA = num_sensitivity_variables( rsense );	// number of variables to test
+			varSA = num_sensitivity_variables( );	// number of variables to test
 			plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 			lab1 = NOLH_valid_tables( varSA, ch, 2 * MAX_LINE_SIZE );
 
@@ -5025,7 +4982,7 @@ object *operate( object *r )
 			if ( ! discard_change( false ) )	// unsaved configuration?
 				break;
 
-			varSA = num_sensitivity_variables( rsense );	// number of variables to test
+			varSA = num_sensitivity_variables( );	// number of variables to test
 			plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 
 			// get the number of Monte Carlo samples to produce
@@ -5135,7 +5092,7 @@ object *operate( object *r )
 			if ( ! discard_change( false ) )	// unsaved configuration?
 				break;
 
-			varSA = num_sensitivity_variables( rsense );	// number of variables to test
+			varSA = num_sensitivity_variables( );	// number of variables to test
 			plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 
 			// get the number of Monte Carlo samples to produce
@@ -5278,8 +5235,7 @@ object *operate( object *r )
 				break;
 
 			// empty sensitivity data
-			empty_sensitivity( rsense );			// discard read data
-			rsense = NULL;
+			empty_sensitivity( );					// discard read data
 			unsavedSense = false;					// nothing to save
 			findexSens = 0;
 		}
@@ -5538,7 +5494,7 @@ object *operate( object *r )
 			if ( cs->param == 1 )
 				plog( "Param: %s\\[%s\\]\t#%d:\t", cs->label, cs->integer ? "int" : "flt", cs->numv );
 			else
-				plog( "Var: %s(-%d)\\[%s\\]\t#%d:\t", cs->label, cs->lag+1, cs->integer ? "int" : "flt", cs->numv );
+				plog( "Var: %s(-%d)\\[%s\\]\t#%d:\t", cs->label, cs->lag + 1, cs->integer ? "int" : "flt", cs->numv );
 
 			for ( i = 0; i < cs->numv; ++i )
 				plog_tag( "%g\t", "highlight", cs->v[ i ] );
@@ -5564,9 +5520,8 @@ object *operate( object *r )
 			break;
 
 		// empty sensitivity data
-		empty_sensitivity( rsense );			// discard read data
+		empty_sensitivity( );					// discard read data
 		plog( "\nSensitivity data removed.\n" );
-		rsense = NULL;
 		unsavedSense = false;					// nothing to save
 		findexSens = 0;
 
@@ -7599,6 +7554,7 @@ bool load_prev_configuration( void )
 
 	if ( saFile != NULL )						// restore SA configuration, if any
 	{
+		empty_sensitivity( );
 		f = fopen( saFile, "rt" );
 		if ( f == NULL || load_sensitivity( f ) != 0 )
 		{
