@@ -233,7 +233,7 @@ int load_configuration( bool reload, string *warnings, int quick )
 		return 1;
 
 	// set default values
-	max_step = 100;
+	max_step = MAX_STEPS;
 	sim_num = seed = 1;
 	when_debug = stack_info = prof_min_msecs = 0;
 	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = false;

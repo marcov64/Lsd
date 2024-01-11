@@ -16,7 +16,7 @@
 DECL.H
 Global definitions among all LSD C++ modules
 
-Relevant flags (when defined):
+Relevant macros for conditional compilation (when defined):
 
 - _FUN_: user model equation file
 - _NW_: No Window executable
@@ -40,6 +40,7 @@ Relevant flags (when defined):
 #include <exception>
 
 // global constants
+#define MAX_STEPS 100					// default number of simulation steps
 #define DEF_CONF_FILE "Sim1"			// default new configuration name
 #define NO_CONF_NAME "(no name)"		// no configuration file name yet
 #define NOLH_DEF_FILE "NOLH.csv"		// default NOLH file name
@@ -246,7 +247,9 @@ int entry_new_objnum( object *c, const char *tag );
 int hyper_count( const char *lab );
 int hyper_count_var( const char *lab );
 int load_configuration( bool reload, string *warnings = NULL, int quick = 0 );
+int load_gui( const char **argv );
 int load_sensitivity( FILE *f );
+int load_term_configuration( int argn, const char **argv );
 int logic_op_code( const char *lop, const char *errmsg );
 int min_hborder( int pdigits, double miny, double maxy );
 int monitor_logs( void );
@@ -377,6 +380,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd = N
 void set_blueprint( object *container, object *r );
 void set_buttons_run( bool enable );
 void set_cs_data( void );
+void set_exec( const char *path, const char *file );
 void set_lab_tit( variable *var );
 void set_obj_number( object *r );
 void set_shortcuts( const char *window );

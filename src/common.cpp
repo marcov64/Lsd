@@ -16,7 +16,7 @@
  COMMON.CPP
  Code common between LMM and LSD Browser.
 
- Relevant flags (when defined):
+ Relevant macros for conditional compilation (when defined):
 
  - _LMM_: Model Manager executable
  - _FUN_: user model equation file
@@ -1285,44 +1285,6 @@ void cmd( const char *cm, ... ) { }
 #endif
 
 
-/*************************************
- MAIN
- *************************************/
-int main( int argn, const char **argv )
-{
-	int res = 0;
-
-#ifndef _NT_
-	// register all signal handlers
-	handle_signals( signal_handler );
-
-	try
-	{
-#endif
-		res = lsdmain( argn, argv );
-
-#ifndef _NT_
-	}
-	catch ( bad_alloc& exc )	// out of memory conditions
-	{
-		exception_handler( SIGMEM, exc.what( ) );
-	}
-	catch ( exception& exc )	// other known error conditions
-	{
-		exception_handler( SIGSTL, exc.what( ) );
-	}
-	catch ( ... )				// other unknown error conditions
-	{
-		abort( );				// raises a SIGABRT exception, tell user & close
-	}
-
-#endif
-
-	myexit( res );
-	return res;
-}
-
-
 #ifdef _WIN32
 
 /****************************************************
@@ -1494,16 +1456,23 @@ int kill_system( int id )
  ****************************************************/
 char *clean_file( const char *filename )
 {
-	if ( filename != NULL )
-	{
-		if ( strchr( filename, '/' ) != NULL )
-			return ( char * ) strrchr( filename, '/' ) + 1;
+	char *name, *newname;
 
+	if ( filename == NULL )
+		return NULL;
+
+	if ( strchr( filename, '/' ) != NULL )
+		name = strrchr( filename, '/' ) + 1;
+	else
 		if ( strchr( filename, '\\' ) != NULL )
-			return ( char * ) strrchr( filename, '\\' ) + 1;
-	}
+			name = strrchr( filename, '\\' ) + 1;
+		else
+			name = ( char * ) filename;
 
-	return ( char * ) filename;
+	newname = new char [ strlen( name ) + 1 ];
+	strcpyn( newname, name, strlen( name ) + 1 );
+
+	return newname;
 }
 
 
@@ -1511,22 +1480,25 @@ char *clean_file( const char *filename )
  CLEAN_PATH
  remove cygwin/MSYS path prefixes, if present, and replace \ with /
  ****************************************************/
-char *clean_path( char *filepath )
+char *clean_path( const char *filepath )
 {
 	int i, drvpos, pathpos;
+	char *newpath, oldpath[ strlen( filepath ) + 1 ];
 	const int npref = 5;
 	const char *pref[ npref ] = { "/cygdrive/", "/c/", "/d/", "/e/", "/f/" };
 
 	if ( filepath == NULL )
 		return NULL;
 
-	char temp[ strlen( filepath ) + 1 ];
-	strcpy( temp, "" );
+	strcpy( oldpath, filepath );
 
-	for ( i = 0; i < npref && strncmp( filepath, pref[ i ], strlen( pref[ i ] ) ); ++i );
+	for ( i = 0; i < npref && strncmp( oldpath, pref[ i ], strlen( pref[ i ] ) ); ++i );
 
 	if ( i < npref )
 	{
+		char temp[ strlen( oldpath ) + 1 ];
+		strcpy( temp, "" );
+
 		if ( i == 0 )	// Cygwin
 		{
 			drvpos = strlen( pref[ i ] );				// drive letter position
@@ -1538,17 +1510,20 @@ char *clean_path( char *filepath )
 			pathpos = 2;								// path start
 		}
 
-		temp[ 0 ] = toupper( filepath[ drvpos ] );		// copy drive letter
+		temp[ 0 ] = toupper( oldpath[ drvpos ] );		// copy drive letter
 		temp[ 1 ] = ':';								// insert ':' drive separator
-		strcpyn( temp + 2, filepath + pathpos, strlen( filepath ) - 1 );
-		strcpyn( filepath, temp, strlen( filepath ) + 1 );
+		strcpyn( temp + 2, oldpath + pathpos, strlen( oldpath ) - 1 );
+		strcpyn( oldpath, temp, strlen( oldpath ) + 1 );
 	}
 
-	for ( i = 0; i < ( int ) strlen( filepath ); ++i )
-		if ( filepath[ i ] == '\\' )					// replace \ with /
-			filepath[ i ] = '/';
+	for ( i = 0; i < ( int ) strlen( oldpath ); ++i )
+		if ( oldpath[ i ] == '\\' )						// replace \ with /
+			oldpath[ i ] = '/';
 
-	return filepath;
+	newpath = new char [ strlen( oldpath ) + 1 ];
+	strcpyn( newpath, oldpath, strlen( oldpath ) + 1 );
+
+	return newpath;
 }
 
 

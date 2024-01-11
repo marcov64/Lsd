@@ -16,7 +16,7 @@
  COMMON.H
  Global definitions common between LMM and LSD Browser
 
- Relevant flags (when defined):
+ Relevant macros for conditional compilation (when defined):
 
  - _LMM_: Model Manager executable
  - _FUN_: user model equation file
@@ -138,8 +138,8 @@
 							 "#", "#", "#", \
 							 "#", "#", "#", \
 							 "Root", "1", "0", "0" }
-#define LSD_NW_NUM 12
-#define LSD_NW_SRC { "lsdmain.cpp", "common.cpp", "file.cpp", "nets.cpp", \
+#define LSD_NW_NUM 13
+#define LSD_NW_SRC { "lsd.cpp", "lsdmain.cpp", "common.cpp", "file.cpp", "nets.cpp", \
 					 "object.cpp", "util.cpp", "variab.cpp", "check.h", \
 					 "common.h", "decl.h", "fun_head.h", "fun_head_fast.h" }
 #define LSD_DIR_NUM 8
@@ -583,7 +583,7 @@ bool use_eigen( void );
 bool valid_label( const char *lab );
 bool valid_xml_string( const char *lab );
 char *clean_file( const char *file );
-char *clean_path( char *path );
+char *clean_path( const char *path );
 char *eval_str( const char *tcl_exp, char *var, int var_size );
 char *get_str( const char *tcl_var, char *var, int var_size );
 char *search_lsd_root( char *start_path );
@@ -604,7 +604,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact = fal
 int eval_int( const char *tcl_exp );
 int get_int( const char *tcl_var, int *var = NULL );
 int kill_system( int id );
-int lsdmain( int argn, const char **argv );
+int modman( int argn, const char **argv );
 int strcln( char *out, const char *str, int outSz );
 int strlf( char *out, const char *str, int outSz );
 int strtrim( char *out, const char *str, int outSz );

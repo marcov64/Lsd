@@ -14,39 +14,43 @@
 
 /*************************************************************
 MODMAN.CPP
-This program is a front end for dealing with LSD models code (running, compiling, editing,
-debugging LSD model programs). See the manual for help on its use.
+This program is a front end for dealing with LSD models code
+(running, compiling, editing, debugging LSD model programs).
+See the manual for help on its use.
 
-IMPORTANT: this is _NOT_ a LSD model, but the best I could produce of something similar to
-a programming environment for LSD model programs.
+IMPORTANT: this is _NOT_ a LSD model, but the best we could
+produce of something similar to a development environment for
+LSD model programs.
 
-This file can be compiled with the command line:
+This file can be compiled with the command make in the src
+directory.
 
-make -f <makefile>
-
-There are several makefiles in LSD root directory appropriate to different environments
-(Windows, Mac & Linux) and configurations (32 or 64-bit).
-
-LMM starts in a quite weird way. If there is no parameter in the call used to start it, the only
-operation it does is to ... run a copy of itself followed by the parameter "kickstart". This trick
-is required because under Windows there are troubles launching external package from a "first
-instance" of a program.
-
-LMM reads all the directories that are not: Manual, gnu, installer, LMM.app, lwi, Rpkg and src as model
-directories, where it expect to find certain files. At any given moment a model name is stored,
-together with its directory and the file shown.
+LMM reads all the directories that are not: Manual, gnu,
+installer, LMM.app, lwi, Rpkg and src as model directories,
+where it expect to find certain files. At any given moment
+a model name is stored, together with its directory and the
+file shown.
 
 Any internal command is executed in a condition like this:
 
 if ( choice == x )
  do_this_and_that
 
-and returned to the main cycle. After each block the flow returns to "loop" where the main
-Tcl_DoOneEvent loop sits.
+and returned to the main cycle. After each block the flow
+returns to "loop" where the main Tcl_DoOneEvent loop sits.
 
 The widget of importance are:
 - .f.t.t is the main text editor
-- .f.m is the frame containing the upper buttons, models list and help window
+- .f.m is the frame containing the upper buttons, models
+list and help window
+
+Relevant macros for conditional compilation (when defined):
+
+- _LMM_: Model Manager executable
+- _FUN_: user model equation file
+- _NW_: No Window executable
+- _NP_: no parallel (multi-task) processing
+- _NT_: no signal trapping (better when debugging in GDB)
 *************************************************************/
 
 /*****
@@ -82,9 +86,48 @@ const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 
 
 /*************************************
- LSDMAIN
+ MAIN
  *************************************/
-int lsdmain( int argn, const char **argv )
+int main( int argn, const char **argv )
+{
+	int res = -1;
+
+#ifndef _NT_
+	// register all signal handlers
+	handle_signals( signal_handler );
+
+	try
+	{
+#endif
+
+		res = modman( argn, argv );
+
+#ifndef _NT_
+	}
+	catch ( bad_alloc& exc )	// out of memory conditions
+	{
+		exception_handler( SIGMEM, exc.what( ) );
+	}
+	catch ( exception& exc )	// other known error conditions
+	{
+		exception_handler( SIGSTL, exc.what( ) );
+	}
+	catch ( ... )				// other unknown error conditions
+	{
+		abort( );				// raises a SIGABRT exception, tell user & close
+	}
+
+#endif
+
+	myexit( res );
+	return res;
+}
+
+
+/*************************************
+ MODMAN
+ *************************************/
+int modman( int argn, const char **argv )
 {
 	bool found, recolor = false;
 	int i, j, num, choice, shigh, recolor_all = 0, v_counter = 0;

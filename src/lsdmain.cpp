@@ -14,21 +14,36 @@
 
 /*************************************************************
 LSDMAIN.CPP
-Contains:
-- early initialization (namely, of the Log windows)
-- the main cycle: browse a model, run simulation, return to the browser.
+Contains the global variables and the API to run LSD
+simulations in the GUI or the terminal, including:
+- early initialization (Tcl/Tk GUI, the Log window).
+- the main cycle: browse a model, configure it, run simulation,
+return to the browser, and so on.
 
 The main functions contained here are:
 
+- lsd_constructor( ), lsd_destructor( )
+Allocates and initializes the global variables on program
+startup, and destroys allocated global variables on program exit.
+
+- load_gui( argv )
+Initializes the Tcl/Tk environment and passes control to the
+LSD browser.
+
+- load_term_configuration( argn, argv )
+Load the configuration file(s) supplied on the terminal command
+line.
+
 - void run( )
-Run the simulation model whose root is r. Running is not only the actual
-simulation run, but also the initialization of result files. Of course, it has
-also to manage the messages from user and from the model at run time.
+Run the loaded simulation model. Running is not only the actual
+simulation run, but also the initialization of result files. Of
+course, it has also to manage the messages from user and from the
+model at run time.
 
 - bool alloc_save_mem( );
 Prepare variables to store saved data.
 
-Relevant flags (when defined):
+Relevant macros for conditional compilation (when defined):
 
 - _FUN_: user model equation file
 - _NW_: No Window executable
@@ -49,7 +64,6 @@ int dobar = false;			// output a progress bar to the log/standard output
 int docsv = false;			// produce .csv text results files (bool)
 int doover = false;			// overwrite results folder (bool)
 int dozip = true;			// compressed results file flag (bool)
-int max_step = 100;			// default number of simulation runs
 int overwConf = true;		// overwrite configuration on run flag (bool)
 int saveConf = false;		// save configuration on results saving (bool)
 int strWindowOn = true;		// control the presentation of the model structure window (bool)
@@ -129,6 +143,7 @@ int log_start;				// first period to start logging to file
 int log_stop;				// last period to log to file, if any
 int macro;					// equations style (macros or C++) (bool)
 int max_runs;				// maximum number of parallel runs
+int max_step = MAX_STEPS;	// number of simulation steps
 int max_threads;			// maximum number of parallel threads per run
 int no_ptr_chk = false;		// disable user pointer checking
 int no_res = false;			// do not produce .res results files (bool)
@@ -206,24 +221,14 @@ const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd [-s SEED] [-e
 
 
 /*********************************
- LSDMAIN
+ LSD_CONSTRUCTOR
  *********************************/
-int lsdmain( int argn, const char **argv )
+void __attribute__( ( constructor ) ) lsd_constructor( )
 {
-	char *str;
-	const char *app;
-	int i, j = 0, k = 0;
-	object *r;
-	FILE *f;
-
 	path = new char[ strlen( "" ) + 1 ];
 	simul_name = new char[ strlen( "" ) + 1 ];
-	exec_path = new char[ MAX_PATH_LENGTH ];
 	strcpy( path, "" );
 	strcpy( simul_name, "" );
-	exec_path = getcwd( exec_path, MAX_PATH_LENGTH );	// assume exec path is current path
-	exec_file = clean_file( argv[ 0 ] );	// global pointer to the name of executable file
-	exec_path = clean_path( exec_path );	// global pointer to path of executable file
 
 #ifndef _NP_
 	main_thread = this_thread::get_id( );
@@ -237,23 +242,82 @@ int lsdmain( int argn, const char **argv )
 	add_description( "Root" );
 	reset_blueprint( NULL );
 
+	// create fast equation look-up map if required
+	if ( fast_lookup )
+		init_map( );
+
+	stack_log = new lsdstack;
+	stack_log->prev = NULL;
+	stack_log->next = NULL;
+	stack_log->ns = 0;
+	stack_log->vs = NULL;
+	strcpy( stack_log->label, "LSD Simulation Manager" );
+	stack_level = 0;
+}
+
+
+/*********************************
+ LSD_DESTRUCTOR
+ *********************************/
+void __attribute__( ( destructor ) ) lsd_destructor( )
+{
+	empty_stack( );
+	empty_lattice( );
+	empty_sensitivity( NULL );
+	empty_cemetery( );
+	empty_blueprint( );
+	empty_description( );
+	root->delete_obj( );
+
+	delete stack_log;
+	delete [ ] path;
+	delete [ ] rootLsd;
+	delete [ ] exec_path;
+	delete [ ] exec_file;
+	delete [ ] simul_name;
+	delete [ ] eq_file;
+	delete [ ] struct_file;
+	delete [ ] log_filename;
+}
+
+
+/*********************************
+ SET_EXEC
+ *********************************/
+void set_exec( const char *path, const char *file )
+{
+	exec_path = clean_path( path );			// path of executable file
+	exec_file = clean_file( file );			// name of executable file
+}
+
+
+/*********************************
+ LOAD_TERM_CONFIGURATION
+ *********************************/
+int load_term_configuration( int argn, const char **argv )
+{
+
 #ifdef _NW_
 
-	dozip = no_window = true;			// to preserve compatibility
+	char *str;
+	int i, j = 0, k = 0;
+	FILE *f;
+
+	dozip = no_window = true;				// to preserve compatibility
 	dobar = doover = docsv = no_res = no_tot = grandTotal = false;
-	findex = -1;						// no default
-	fend = 0;							// no file number limit
+	findex = -1;							// no default
+	fend = 0;								// no file number limit
 
 	if ( exec_file == NULL || exec_path == NULL )
 	{
 		fprintf( stderr, "\nInvalid LSD executable name or path.\n%s\nMake sure the LSD directory is not too deep into the disk directory tree (over %d chars).\n\n", lsdCmdMsg, MAX_PATH_LENGTH - 1 );
-		myexit( 5 );
+		return 5;
 	}
 
 	if ( argn < 3 )
 	{
 		fprintf( stderr, "\nNo configuration to run.\n%s\n%s\n", lsdCmdMsg, lsdCmdHlp );
-		myexit( 0 );
+		return 5;
 	}
 	else
 	{
@@ -344,7 +408,7 @@ int lsdmain( int argn, const char **argv )
 			}
 
 			fprintf( stderr, "\nOption '%c%c' not recognized.\n%s\n%s\n", argv[ i ][ 0 ], argv[ i ][ 1 ], lsdCmdMsg, lsdCmdHlp );
-			myexit( 6 );
+			return 6;
 		}
 	}
 
@@ -355,7 +419,7 @@ int lsdmain( int argn, const char **argv )
 	if ( strlen( str ) == 0 )
 	{
 		fprintf( stderr, "\nOption '-f' required, no configuration file(s).\n%s\n%s\n", lsdCmdMsg, lsdCmdHlp );
-		myexit( 6 );
+		return 6;
 	}
 
 	if ( strstr( str, ".LSD" ) == NULL )
@@ -365,7 +429,7 @@ int lsdmain( int argn, const char **argv )
 		if ( findex < 0 || fend < 0 || fend < findex )
 		{
 			fprintf( stderr, "\nInvalid -s and/or -e values.\n%s\n%s\n", lsdCmdMsg, lsdCmdHlp );
-			myexit( 6 );
+			return 6;
 		}
 
 		struct_file = new char[ strlen( simul_name ) + ( int ) log10( findex ) + 7 ];
@@ -384,7 +448,7 @@ int lsdmain( int argn, const char **argv )
 	if ( ( f = fopen( struct_file, "r" ) ) == NULL )
 	{
 		fprintf( stderr, "\nFile '%s' not found.\nThis is the no window version of LSD.\nSpecify a -f FILENAME.lsd to run a simulation or -f FILE_BASE_NAME -s 1 for\nbatch sequential simulation mode (requires configuration files:\nFILE_BASE_NAME_1.lsd, FILE_BASE_NAME_2.lsd, etc).\n\n", struct_file );
-		myexit( 7 );
+		return 7;
 	}
 
 	fclose( f );
@@ -392,7 +456,7 @@ int lsdmain( int argn, const char **argv )
 	if ( load_configuration( true, NULL, 1 ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\nThis is the no window version of LSD.\nCheck if the file is a valid LSD configuration or regenerate it using the\nLSD Browser.\n\n", struct_file );
-		myexit( 8 );
+		return 8;
 	}
 
 	if ( ! batch_sequential )
@@ -459,7 +523,25 @@ int lsdmain( int argn, const char **argv )
 
 #endif
 
-#else
+#endif
+
+	return 0;
+}
+
+
+/*********************************
+ LOAD_GUI
+ *********************************/
+int load_gui( const char **argv )
+{
+
+#ifndef _NW_
+
+	char *str;
+	const char *app;
+	int i, j = 0, k = 0;
+	object *r;
+	FILE *f;
 
 	for ( i = 1; argv[ i ] != NULL; i++ )
 	{
@@ -747,31 +829,15 @@ int lsdmain( int argn, const char **argv )
 	cmd( ". configure -menu .m -background $colorsTheme(bg)" );
 	cmd( "icontop . lsd" );
 	cmd( "sizetop .lsd" );
-	cmd( "setglobkeys ." );				// set global keys for main window
-	cmd( "setstyles" );					// set ttk custom style
+	cmd( "setglobkeys ." );			// set global keys for main window
+	cmd( "setstyles" );				// set ttk custom style
 	cmd( "init_canvas_colors" );
 
 	create_logwindow( );
 
-#endif
-
-	// create fast equation look-up map if required
-	if ( fast_lookup )
-		init_map( );
-
-	stack_log = new lsdstack;
-	stack_log->prev = NULL;
-	stack_log->next = NULL;
-	stack_log->ns = 0;
-	stack_log->vs = NULL;
-	strcpy( stack_log->label, "LSD Simulation Manager" );
-	stack_level = 0;
-
-#ifndef _NW_
-
-	while ( 1 )
+	while ( 1 )						// main GUI loop: create/edit configuration - run
 	{
-		create( );
+		create( );					// open LSD browser
 
 		try
 		{
@@ -797,28 +863,7 @@ int lsdmain( int argn, const char **argv )
 
 	set_env( false );
 
-#else
-
-	run( );
-
 #endif
-
-	empty_stack( );
-	empty_lattice( );
-	empty_sensitivity( );
-	empty_cemetery( );
-	empty_blueprint( );
-	empty_description( );
-	root->delete_obj( );
-
-	delete stack_log;
-	delete [ ] path;
-	delete [ ] rootLsd;
-	delete [ ] exec_path;
-	delete [ ] simul_name;
-	delete [ ] eq_file;
-	delete [ ] struct_file;
-	delete [ ] log_filename;
 
 	return 0;
 }
