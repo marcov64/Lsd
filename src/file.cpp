@@ -232,13 +232,6 @@ int load_configuration( bool reload, string *warnings, int quick )
 	if ( j < i )
 		return 1;
 
-	// set default values
-	max_step = MAX_STEPS;
-	sim_num = seed = 1;
-	when_debug = stack_info = prof_min_msecs = 0;
-	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = false;
-	snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
-
 	// try to read xml configuration
 	auto res = xf.load_buffer_inplace_own( buf, i, pugi::parse_default |
 										   pugi::parse_doctype |
@@ -291,18 +284,19 @@ int load_configuration( bool reload, string *warnings, int quick )
 
 		// get simulation settings
 		xml_attr hint;							// speed-up pointer
-		max_step = simNode.attribute( "steps", hint ).as_uint( max_step );
-		sim_num = simNode.attribute( "runs", hint ).as_uint( sim_num );
-		seed = simNode.attribute( "seed", hint ).as_uint( seed );
-		when_debug = simNode.attribute( "debug_start", hint ).as_uint( when_debug );
-		no_ptr_chk = ! simNode.attribute( "ptr_check", hint ).as_bool( ! no_ptr_chk );
-		parallel_disable = ! simNode.attribute( "parallel", hint ).as_bool( ! parallel_disable );
-		stack_info = setNode.child( "profiling" ).attribute( "level", hint ).as_uint( stack_info );
-		prof_min_msecs = setNode.child( "profiling" ).attribute( "time", hint ).as_uint( prof_min_msecs );
-		prof_obs_only = setNode.child( "profiling" ).attribute( "observed", hint ).as_bool( prof_obs_only );
-		prof_aggr_time = setNode.child( "profiling" ).attribute( "aggregate", hint ).as_bool( prof_aggr_time );
+		max_step = simNode.attribute( "steps", hint ).as_uint( MAX_STEPS );
+		sim_num = simNode.attribute( "runs", hint ).as_uint( 1 );
+		seed = simNode.attribute( "seed", hint ).as_uint( 1 );
+		when_debug = simNode.attribute( "debug_start", hint ).as_uint( );
+		no_ptr_chk = ! simNode.attribute( "ptr_check", hint ).as_bool( true );
+		parallel_disable = ! simNode.attribute( "parallel", hint ).as_bool( true );
+		stack_info = setNode.child( "profiling" ).attribute( "level", hint ).as_uint( );
+		prof_min_msecs = setNode.child( "profiling" ).attribute( "time", hint ).as_uint( );
+		prof_obs_only = setNode.child( "profiling" ).attribute( "observed", hint ).as_bool( );
+		prof_aggr_time = setNode.child( "profiling" ).attribute( "aggregate", hint ).as_bool( );
 
 		// get report file name
+		snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
 		strcpyn( name_rep, setNode.child( "report_file" ).text( ).as_string( name_rep ), MAX_PATH_LENGTH );
 
 		// get equation file name and content
@@ -351,6 +345,7 @@ int load_configuration( bool reload, string *warnings, int quick )
 	if ( reload && quick == 2 )					// just quick reload?
 		goto endLoad;
 
+	sim_num = 1;
 	fscanf( f, "%999s", msg );					// should be SIM_NUM
 	if ( ! ( ! strcmp( msg, "SIM_NUM" ) && fscanf( f, "%d", & sim_num ) && sim_num > 0 ) )
 	{
@@ -358,6 +353,7 @@ int load_configuration( bool reload, string *warnings, int quick )
 		goto endLoad;
 	}
 
+	seed = 1;
 	fscanf( f, "%999s", msg );					// should be SEED
 	if ( ! ( ! strcmp( msg, "SEED" ) && fscanf( f, "%d", & seed ) && seed > 0 ) )
 	{
@@ -365,6 +361,9 @@ int load_configuration( bool reload, string *warnings, int quick )
 		goto endLoad;
 	}
 
+	max_step = MAX_STEPS;
+	when_debug = stack_info = prof_min_msecs = 0;
+	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = 0;
 	fscanf( f, "%999s", msg );					// should be MAX_STEP
 	if ( strcmp( msg, "MAX_STEP" ) )
 	{
@@ -410,6 +409,7 @@ int load_configuration( bool reload, string *warnings, int quick )
 		strcpyn( equation_name, name + 1, MAX_PATH_LENGTH );
 	}
 
+	snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
 	fscanf( f, "%999s", msg );					// should be MODELREPORT
 	if ( ! ( ! strcmp( msg, "MODELREPORT" ) && fscanf( f, "%999s", name_rep ) ) )
 	{
@@ -463,6 +463,7 @@ int load_configuration( bool reload, string *warnings, int quick )
 				}
 			}
 		}
+
 		fscanf( f, "%999s", msg );
 	}
 
@@ -486,6 +487,7 @@ int load_configuration( bool reload, string *warnings, int quick )
 		cv = root->search_var( NULL, msg );
 		if ( cd != NULL && cv != NULL )
 			cd->initial = true;
+
 		fscanf( f, "%999s", msg );
 	}
 
@@ -527,6 +529,7 @@ endLoad:
 	t = 0;
 
 #ifndef _NW_
+
 	if ( load == 0 )
 		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", exec_path, struct_file );
 #endif
