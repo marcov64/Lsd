@@ -667,6 +667,154 @@ void reset_blueprint( object *r )
 }
 
 
+/*****************************************************************************
+SENSITIVITY CONSTRUCTOR
+Add or update sensitivity settings for a model element
+******************************************************************************/
+sense::sense( const char *lab, int _param, int _lag, int _numv,
+			  vector < double > *_v, bool _integer )
+{
+	int i;
+	sense *cs;
+
+	param = _param;
+	lag = _lag;
+	integer = _integer;
+	curv = 0;
+
+	if ( lab != NULL )
+	{
+		label = new char [ strlen( lab ) + 1 ];
+		strcpy( label, lab );
+	}
+	else
+		label = NULL;
+
+	if ( _numv > 0 && _v != NULL )
+	{
+		numv = _numv;
+		v = new double [ _v->size( ) ];
+		for ( i = 0; i < numv; ++i )
+			v[ i ] = integer ? round( ( *_v )[ i ] ) : ( *_v )[ i ];
+	}
+	else
+	{
+		numv = 0;
+		v = NULL;
+	}
+
+	if ( rsense == NULL )
+		rsense = this;
+	else
+	{
+		for ( cs = rsense; cs->next != NULL; cs = cs->next );
+		cs->next = this;
+	}
+
+	next = NULL;
+}
+
+
+/*****************************************************************************
+SENSITIVITY DESTRUCTOR
+Add or update sensitivity settings for a model element
+******************************************************************************/
+sense::~sense( void )
+{
+	sense *cs, *ps;
+
+	delete [ ] label;
+	delete [ ] v;
+
+	if ( rsense != NULL )
+	{
+		for ( cs = rsense, ps = NULL; cs != this && cs != NULL; ps = cs, cs = cs->next );
+
+		if ( cs == rsense )
+			rsense = next;
+		else
+			if ( cs == this && ps != NULL )
+				ps->next = next;
+	}
+}
+
+
+/*****************************************************************************
+EMPTY_SENSITIVITY
+Deallocate sensitivity analysis memory
+******************************************************************************/
+void empty_sensitivity( sense *cs )
+{
+	if ( cs == NULL )
+	{
+		if ( rsense == NULL )
+			return;
+
+		cs = rsense;
+		rsense = NULL;
+	}
+
+	if ( cs->next != NULL )
+		empty_sensitivity( cs->next );
+#ifndef _NW_
+	else
+		NOLH_clear( );		// deallocate DoE (last object only)
+#endif
+
+	delete cs;				// suicide
+}
+
+
+/*****************************************************************************
+SEARCH_SENSITIVITY
+Find element in sensitivity data linked list
+******************************************************************************/
+sense *search_sensitivity( const char *lab, int lag )
+{
+	sense *cs;
+
+	for ( cs = rsense; cs != NULL; cs = cs->next )
+		if ( ! strcmp( cs->label, lab ) &&
+			 ( cs->param == 1 || cs->lag == lag ) )
+			 break;
+
+	return cs;
+}
+
+
+/*****************************************************************************
+NUM_SENSITIVITY_POINTS
+Calculate the sensitivity space size
+******************************************************************************/
+long num_sensitivity_points( void )
+{
+	long nv;
+	sense *cs;
+
+	for ( nv = 1, cs = rsense; cs != NULL; cs = cs->next )	// scan the linked-list
+		nv *= cs->numv;	// update the number of variables
+
+	return nv;
+}
+
+
+/*****************************************************************************
+NUM_SENSITIVITY_VARIABLES
+Calculate the number of variables to test
+******************************************************************************/
+int num_sensitivity_variables( void )
+{
+	int nv;
+	sense *cs;
+
+	for ( nv = 0, cs = rsense; cs != NULL; cs = cs->next)
+		if ( cs->numv > 1 )				// count variables with 2 or more values
+			nv++;
+
+	return nv;
+}
+
+
 /***************************************************
 SEARCH_DESCRIPTION
 ***************************************************/
