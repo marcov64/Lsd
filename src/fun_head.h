@@ -30,10 +30,10 @@ using namespace Eigen;
 
 // create and set fast lookup flag
 #if ! defined FAST_LOOKUP
-bool fast_lookup = false;
+const bool fast_lookup = false;
 void init_map( ) { };
 #else
-bool fast_lookup = true;
+const bool fast_lookup = true;
 #endif
 
 // enable pointer checking to protect users (medium overhead) if not disabled

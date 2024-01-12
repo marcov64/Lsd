@@ -176,6 +176,12 @@ variable *last_cemetery = NULL;// LSD last saved data from deleted objects
 vector < string > res_list;	// list of results files last saved
 FILE *log_file = NULL;		// log file, if any
 
+// DLL external functions/variables (to be registered by main exec/DLL)
+const bool fast_lookup_reg;
+const bool no_pointer_check_reg;
+void ( * fast_lookup_ref ) ( void );
+
+
 // constant arrays
 const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
 const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;

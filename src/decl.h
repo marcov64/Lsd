@@ -163,7 +163,6 @@ void *set_random( int gen );							// set random generator
 
 // global variables (visible to the users)
 extern bool fast;						// flag to hide LOG messages & runtime (read-only)
-extern bool fast_lookup;				// flag for fast equation look-up mode
 extern bool no_saved;					// disable the usage of saved values as lagged ones
 extern bool no_search;					// disable the standard variable search mechanism
 extern bool no_search_up;				// disable the object up-search mechanism
@@ -171,6 +170,7 @@ extern bool no_zero_instance;			// flag to allow deleting last object instance
 extern bool use_nan;					// flag to allow using Not a Number value
 extern char *path;						// folder where the configuration is
 extern char *simul_name;				// configuration name being run (for saving networks)
+extern const bool fast_lookup;			// flag for fast equation look-up mode
 extern const bool no_pointer_check;		// user pointer checking static disable
 extern double def_res;					// default equation result
 extern eq_mapT eq_map;					// map to fast equation look-up
