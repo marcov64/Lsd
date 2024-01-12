@@ -33,8 +33,16 @@ Relevant macros for conditional compilation (when defined):
 
 *************************************************************/
 
-//#include "libLSD.h"
-#include "decl.h"
+#include <cstdlib>
+#include <csignal>
+#include <exception>
+#include <unistd.h>
+#include "libLSD.h"
+
+// user defined signals
+#define SIGMEM NSIG + 1					// out of memory signal
+#define SIGSTL NSIG + 2					// standard library exception signal
+
 
 
 /*************************************
@@ -76,11 +84,11 @@ int main( int argn, const char **argv )
 
 #ifndef _NT_
 	}
-	catch ( bad_alloc& exc )	// out of memory conditions
+	catch ( std::bad_alloc& exc )	// out of memory conditions
 	{
 		exception_handler( SIGMEM, exc.what( ) );
 	}
-	catch ( exception& exc )	// other known error conditions
+	catch ( std::exception& exc )	// other known error conditions
 	{
 		exception_handler( SIGSTL, exc.what( ) );
 	}

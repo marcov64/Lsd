@@ -18,44 +18,23 @@ This file contains the list of LSD functions to be exported
 by a model dynamic link library (.dll/.so).
 *************************************************************/
 
-// define LIBLSD_EXPORTS when building the dynamic library
-#ifdef _WIN32
-	#ifdef _LIBLSD_EXPORTS
-		#define LSD_API __declspec( dllexport )
-		#define LSD_API_V LSD_API
+// DLL_EXPORT must be defined when building the dynamic library
+#if defined _WIN32 && defined _DLL
+	#ifdef _DLL_EXPORT
+		#define API __declspec( dllexport )
 	#else
-		#define LSD_API __declspec( dllimport )
-		#define LSD_API_V LSD_API extern
+		#define API __declspec( dllimport )
 	#endif
 #else
-	#define LSD_API
-	#ifdef _LIBLSD_EXPORTS
-		#define LSD_API_V
-	#else
-		#define LSD_API_V extern
-	#endif
+	#define API
 #endif
-	
 
 // LSD API functions
-LSD_API int lsdmain( int argn, const char **argv );
-LSD_API void myprint( void );
-LSD_API void settest( int );
-
-/*
-clean_path
-clean_file
-*/
-
-// LSD API variables
-LSD_API_V int mytest;
-
-/*
-LSD_API_V exec_path
-LSD_API_V exec_file
-LSD_API_V
-LSD_API_V
-LSD_API_V
-LSD_API_V
-LSD_API_V
-*/
+API int load_gui( const char **argv );
+API int load_term_configuration( int argn, const char **argv );
+API void exception_handler( int signum, const char *what = NULL );
+API void handle_signals( void ( * handler ) ( int signum ) );
+API void myexit( int v );
+API void run( void );
+API void set_exec( const char *path, const char *file );
+API void signal_handler( int signum );

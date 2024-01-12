@@ -56,21 +56,25 @@
 #include <zlib.h>
 
 #ifdef _WIN32
-#include <windows.h>
-#undef DELETE
-#undef THIS
+	#include <windows.h>
+	#undef DELETE
+	#undef THIS
 #else
-#include <unistd.h>
-#include <signal.h>
-#include <errno.h>
-#include <sys/wait.h>
-#include <wordexp.h>
+	#include <unistd.h>
+	#include <signal.h>
+	#include <errno.h>
+	#include <sys/wait.h>
+	#include <wordexp.h>
 #endif
 
 // xml library
 #define PUGIXML_NO_XPATH
 #define PUGIXML_COMPACT
 #include "pugixml/pugixml.hpp"
+
+// Windows DLL exports
+#define _DLL_EXPORT
+#include "libLSD.h"
 
 // global constants
 #define MAX_BUFF_SIZE 10000				// standard Tcl buffer size (>9999)
@@ -623,16 +627,12 @@ vector < double > strtodsplit( const char *in, char sep, double inv = 0. );
 void check_option_files( bool sys = false );
 void clean_spaces( char *s );
 void cmd( const char *cm, ... );
-void exception_handler( int signum, const char *what = NULL );
-void handle_signals( void ( * handler ) ( int signum ) );
 void init_tcl_tk( const char *exec, const char *tcl_app_name );
 void log_tcl_error( bool show, const char *cm, const char *message, ... );
 void make_makefile( bool nw = false );
-void myexit( int v );
 void print_stack( void );
 void show_comp_result( bool nw = false );
 void show_tcl_error( const char *boxTitle, const char *errMsg, ... );
-void signal_handler( int signum );
 void update_lmm_options( bool justLmmGeom = false );
 void update_model_info( bool fix = false );
 
