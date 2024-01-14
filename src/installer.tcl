@@ -858,7 +858,7 @@ if [ string equal $CurPlatform linux ] {
 		file copy -force "$RootLsd/LMM" "/tmp/"
 		cd "$RootLsd/$LsdSrc"
 
-		set res [ catch { exec make -f makefile.LMM } result ]
+		set res [ catch { exec make } result ]
 
 		file delete -force {*}[ glob -nocomplain -directory "$RootLsd/$LsdSrc" *.o ]
 		destroytop .wait

@@ -76,8 +76,9 @@ if not exist %MSYS_DIR%\mingw64\lib\python%PYTHON_VER% (
 	goto end
 )
 
-echo MSYS2 libraries and make utility...
+echo MSYS2 libraries and utilities...
 XCOPY %OPT% %MSYS_DIR%\usr\bin\rm.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\usr\bin\mkdir.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\msys-2.0.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\msys-intl-8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\msys-iconv-2.dll %LSD_DIR%\gnu\bin\

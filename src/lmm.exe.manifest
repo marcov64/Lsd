@@ -48,7 +48,7 @@
 			<assemblyIdentity
 				type="win32"
 				name="LMM.assembly"
-				version="8.0.0.0"
+				version="9.0.0.0"
 				processorArchitecture="AMD64"
 				publicKeyToken="257fa66c876581b9"
 				language="*"
