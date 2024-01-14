@@ -1075,6 +1075,37 @@ bool object::load_insts( const char *file_name, FILE *f )
 
 
 /****************************************************
+SEARCH_DATA_STR (LEGACY)
+****************************************************/
+FILE *search_data_str( const char *name, const char *init, const char *str )
+{
+	FILE *f;
+	char got[ MAX_LINE_SIZE ];
+
+	f = fopen( name, "r" );
+	if ( f == NULL )
+		return NULL;
+
+	fscanf( f, "%999s", got );
+	for ( int i = 0; strcmp( got, init ) && i < MAX_FILE_TRY; ++i )
+		if ( fscanf( f, "%999s", got ) == EOF )
+			return NULL;
+
+	if ( strcmp( got, init ) )
+		return NULL;
+
+	for ( int i = 0; strcmp( got, str ) && i < MAX_FILE_TRY; ++i )
+		if ( fscanf( f, "%999s", got ) == EOF )
+			return NULL;
+
+	if ( ! strcmp( got, str ) )
+		return f;
+	else
+		return NULL;
+}
+
+
+/****************************************************
 LOAD_DESCRIPTION (LEGACY)
 	Load the descriptions of elements of tree under
 	this object from a LEGACY text file
@@ -1130,18 +1161,18 @@ bool load_description( const char *d, FILE *f )
 		type = ctype;			// silently fix wrong type (old LSD bug)
 
 	fgets( str, MAX_LINE_SIZE, f );		// skip first newline character
-	for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, END_DESCR, strlen( END_DESCR ) ) && strncmp( str, BEG_INIT, strlen( BEG_INIT ) ) && strlen( text ) <= 9 * MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
+	for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, desc_key_words[ 1 ], strlen( desc_key_words[ 1 ] ) ) && strncmp( str, desc_key_words[ 0 ], strlen( desc_key_words[ 0 ] ) ) && strlen( text ) <= 9 * MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
 		strcatn( text, str, 10 * MAX_LINE_SIZE + 1 );
 
-	if ( strncmp( str, END_DESCR, strlen( END_DESCR ) ) && strncmp( str, BEG_INIT, strlen( BEG_INIT ) ) )
+	if ( strncmp( str, desc_key_words[ 1 ], strlen( desc_key_words[ 1 ] ) ) && strncmp( str, desc_key_words[ 0 ], strlen( desc_key_words[ 0 ] ) ) )
 		return false;
 
-	if ( ! strncmp( str, BEG_INIT, strlen( BEG_INIT ) ) )
+	if ( ! strncmp( str, desc_key_words[ 0 ], strlen( desc_key_words[ 0 ] ) ) )
 	{
-		for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, END_DESCR, strlen( END_DESCR ) ) && strlen( init ) <= 9 * MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
+		for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, desc_key_words[ 1 ], strlen( desc_key_words[ 1 ] ) ) && strlen( init ) <= 9 * MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
 			strcatn( init, str, 10 * MAX_LINE_SIZE + 1 );
 
-		if ( strncmp( str, END_DESCR, strlen( END_DESCR ) ) )
+		if ( strncmp( str, desc_key_words[ 1 ], strlen( desc_key_words[ 1 ] ) ) )
 			return false;
 	}
 

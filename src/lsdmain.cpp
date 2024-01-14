@@ -177,6 +177,7 @@ vector < string > res_list;	// list of results files last saved
 FILE *log_file = NULL;		// log file, if any
 
 // constant arrays
+const char *desc_key_words[ DESC_KEY_NUM ] = DESC_KEY_WORDS;
 const char *elem_type_names[ ELEM_TYPE_NUM ] = ELEM_TYPE_NAMES;
 const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
 const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;
@@ -206,7 +207,6 @@ worker *workers = NULL;		// multi-thread parallel worker data
 #endif
 
 #ifndef _NW_
-#include "tables.h"
 double d_values[ USER_D_VARS ];
 int i_values[ 4 ];			// user temporary variables copy
 netLink *n_values[ 10 ];

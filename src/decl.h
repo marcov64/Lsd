@@ -74,8 +74,6 @@ Relevant macros for conditional compilation (when defined):
 #define UPD_PER 0.2						// update period during simulation run in s
 #define NO_DESCR ""						// no description available text
 #define LEGACY_NO_DESCR "(no description available)" // legacy description (do not change)
-#define BEG_INIT "_INIT_"				// initial values description section begin keyword
-#define END_DESCR "END_DESCRIPTION"		// description section end keyword
 
 // define meta-parameter names for LWI getlimits
 #define META_PAR_NUM 3
@@ -148,6 +146,8 @@ double round( double r );
 double round_digits( double value, int digits );
 double save_lattice( const char fname[ ] = "lattice" );
 double student( double n );								// draw from a Student-T distribution
+double t_star( int df, double cl );						// Student-t distribution statistic
+double z_star( double cl );								// Standard normal distribution statistic
 double unifcdf( double a, double b, double x );			// uniform cumulative distribution function
 double uniform( double min, double max );
 double uniform_int( double min, double max );
@@ -197,9 +197,7 @@ extern FILE *f_values[ ];
 
 // standalone internal C functions/procedures (not visible to the users)
 FILE *create_frames( const char *path, const char *fname );
-FILE *search_data_ent( const char *name, variable *v );
 FILE *search_data_str( const char *name, const char *init, const char *str );
-FILE *search_str( const char *name, const char *str );
 bool abort_run_threads( void );
 bool add_rt_plot_tab( const char *w, int id_sim );
 bool add_unsaved( void );
@@ -235,8 +233,6 @@ description *change_description( const char *lab_old, const char *lab = NULL, in
 description *search_description( const char *lab, bool add_missing = true );
 double lower_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
 double upper_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
-double t_star( int df, double cl );
-double z_star( double cl );
 double *log_data( double *data, int start, int end, int ser, const char *err_msg );
 int browse( object *r );
 int check_label( const char *lab, object *r );
@@ -382,6 +378,7 @@ void set_obj_number( object *r );
 void set_shortcuts( const char *window );
 void set_shortcuts_run( const char *window );
 void set_title( object *c, const char *lab, const char *tag, int *cols );
+void set_tit_counter( object *o );
 void set_ttip_descr( const char *w, const char *lab, int it = -1, bool init = true );
 void shift_desc( int direction, const char *dlab, object *r );
 void shift_var( int direction, const char *vlab, object *r );

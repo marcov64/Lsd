@@ -14,21 +14,21 @@
 
 /*************************************************************
 FILE.CPP
-Contains the non-basic methods and functions used to access 
-files. The remaining file-oriented functions are stored in 
+Contains the non-basic methods and functions used to access
+files. The remaining file-oriented functions are stored in
 FILELIB.CPP.
 
 The main methods of object contained in this file are:
 
 - void object::save_struct( FILE *f, char *tab )
 Saves the structure of the object (that is, the label,
-variables and parameters and descendants, not number of 
+variables and parameters and descendants, not number of
 objects). Calls the save_struct for all the descendant types.
 
 - void object::save_insts( FILE *f )
 Save the numerical values for object instances (one number
-for each group of object of this type) and the initial values 
-for variables. It save also option information, that is 
+for each group of object of this type) and the initial values
+for variables. It save also option information, that is
 whether to save, plot or debug the variables.
 It calls the save_insts for all the descendant types.
 *************************************************************/
@@ -870,18 +870,18 @@ void save_description( object *r, FILE *f )
 	cd = search_description( r->label );
 
 	if ( strwsp( cd->init ) )
-		fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, END_DESCR );
+		fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ] );
 	else
-		fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, BEG_INIT, cd->init, END_DESCR );
+		fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 0 ], cd->init, desc_key_words[ 1 ] );
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
 		cd = search_description( cv->label );
 
 		if ( ( cv->param != 1 && cv->num_lag == 0 ) || strwsp( cd->init ) )
-			fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, END_DESCR );
+			fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ] );
 		else
-			fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, BEG_INIT, cd->init, END_DESCR );
+			fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ], cd->init, desc_key_words[ 1 ] );
 	}
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )

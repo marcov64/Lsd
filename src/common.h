@@ -118,6 +118,8 @@
 #define EIGEN "#define EIGENLIB"
 
 // constant string arrays
+#define DESC_KEY_NUM 2
+#define DESC_KEY_WORDS { "_INIT_", "END_DESCRIPTION" }
 #define ELEM_TYPE_NUM 3
 #define ELEM_TYPE_NAMES { "variable", "parameter", "function" }
 #define LMM_OPTIONS_NUM 16
@@ -143,9 +145,10 @@
 							 "#", "#", "#", \
 							 "#", "#", "#", \
 							 "Root", "1", "0", "0" }
-#define LSD_NW_NUM 14
-#define LSD_NW_SRC { "lsd.cpp", "lsdmain.cpp", "common.cpp", "filelib.cpp", \
-					 "nets.cpp", "object.cpp", "util.cpp", "variab.cpp", \
+#define LSD_NW_NUM 18
+#define LSD_NW_SRC { "lsd.cpp", "lsdmain.cpp", "common.cpp", "description.cpp", \
+					 "filelib.cpp", "lattice.cpp", "math.cpp", "nets.cpp", \
+					 "object.cpp", "stattables.cpp", "utillib.cpp", "variab.cpp", \
 					 "check.h", "libLSD.h", "common.h", "decl.h", \
 					 "fun_head.h", "fun_head_fast.h" }
 #define LSD_DIR_NUM 8
@@ -659,6 +662,7 @@ extern int stop;						// activity interruption flag (Tcl boolean)
 extern lsdstack *stack_log;				// LSD stack
 
 // common constant string arrays (not visible to the users)
+extern const char *desc_key_words[ ];
 extern const char *elem_type_names[ ];
 extern const char *lmm_options[ ];
 extern const char *lmm_defaults[ ];

@@ -18,8 +18,8 @@ TARGET_NW=lsd$(SUFFIX_NW)
 RM=rm -f
 
 # link executable
-$(TARGET_NW): $(FUN)$(SUFFIX_NW).o $(SRC_DIR)common.o $(SRC_DIR)lsd.o $(SRC_DIR)lsdmain.o $(SRC_DIR)filelib.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)util.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o
-	$(CC_NW) $(SWITCH_CC_NW) $(FUN)$(SUFFIX_NW).o $(SRC_DIR)common.o $(SRC_DIR)lsd.o $(SRC_DIR)lsdmain.o $(SRC_DIR)filelib.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)util.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o $(SWITCH_CC_LNK) -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)
+$(TARGET_NW): $(FUN)$(SUFFIX_NW).o $(SRC_DIR)common.o $(SRC_DIR)lsd.o $(SRC_DIR)lsdmain.o $(SRC_DIR)description.o $(SRC_DIR)filelib.o $(SRC_DIR)lattice.o $(SRC_DIR)math.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)stattables.o $(SRC_DIR)utillib.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o
+	$(CC_NW) $(SWITCH_CC_NW) $(FUN)$(SUFFIX_NW).o $(SRC_DIR)common.o $(SRC_DIR)lsd.o $(SRC_DIR)lsdmain.o $(SRC_DIR)description.o $(SRC_DIR)filelib.o $(SRC_DIR)lattice.o $(SRC_DIR)math.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)stattables.o $(SRC_DIR)utillib.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o $(SWITCH_CC_LNK) -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)
 
 # compile modules
 $(FUN)$(SUFFIX_NW).o: $(FUN).cpp $(FUN_EXTRA) $(SRC_DIR)check.h $(SRC_DIR)fun_head.h $(SRC_DIR)decl.h $(SRC_DIR)common.h
@@ -34,8 +34,17 @@ $(SRC_DIR)lsd.o: $(SRC_DIR)lsd.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 $(SRC_DIR)lsdmain.o: $(SRC_DIR)lsdmain.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)lsdmain.cpp -o $(SRC_DIR)lsdmain.o
 
+$(SRC_DIR)description.o: $(SRC_DIR)description.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)description.cpp -o $(SRC_DIR)description.o
+
 $(SRC_DIR)filelib.o: $(SRC_DIR)filelib.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)filelib.cpp -o $(SRC_DIR)filelib.o
+
+$(SRC_DIR)lattice.o: $(SRC_DIR)lattice.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)lattice.cpp -o $(SRC_DIR)lattice.o
+
+$(SRC_DIR)math.o: $(SRC_DIR)math.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)math.cpp -o $(SRC_DIR)math.o
 
 $(SRC_DIR)nets.o: $(SRC_DIR)nets.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.o
@@ -43,8 +52,11 @@ $(SRC_DIR)nets.o: $(SRC_DIR)nets.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 $(SRC_DIR)object.o: $(SRC_DIR)object.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)object.cpp -o $(SRC_DIR)object.o
 
-$(SRC_DIR)util.o: $(SRC_DIR)util.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)util.cpp -o $(SRC_DIR)util.o
+$(SRC_DIR)stattables.o: $(SRC_DIR)stattables.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)stattables.cpp -o $(SRC_DIR)stattables.o
+
+$(SRC_DIR)utillib.o: $(SRC_DIR)utillib.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)utillib.cpp -o $(SRC_DIR)utillib.o
 
 $(SRC_DIR)variab.o: $(SRC_DIR)variab.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)variab.cpp -o $(SRC_DIR)variab.o
@@ -54,4 +66,4 @@ $(SRC_DIR)pugixml.o: $(SRC_DIR)pugixml/pugixml.cpp $(SRC_DIR)pugixml/pugixml.hpp
 
 # remove compiled files
 clean:
-	$(RM) $(SRC_DIR)common.o $(SRC_DIR)lsd.o $(SRC_DIR)lsdmain.o $(SRC_DIR)filelib.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)util.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o $(FUN)$(SUFFIX_NW).o $(TARGET_NW) $(TARGET_NW).exe
+	$(RM) $(SRC_DIR)common.o $(SRC_DIR)lsd.o $(SRC_DIR)lsdmain.o $(SRC_DIR)description.o $(SRC_DIR)filelib.o $(SRC_DIR)lattice.o $(SRC_DIR)math.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)stattables.o $(SRC_DIR)utillib.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o $(FUN)$(SUFFIX_NW).o $(TARGET_NW) $(TARGET_NW).exe
