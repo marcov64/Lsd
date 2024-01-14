@@ -176,12 +176,6 @@ variable *last_cemetery = NULL;// LSD last saved data from deleted objects
 vector < string > res_list;	// list of results files last saved
 FILE *log_file = NULL;		// log file, if any
 
-// DLL external functions/variables (to be registered by main exec/DLL)
-const bool fast_lookup_reg;
-const bool no_pointer_check_reg;
-void ( * fast_lookup_ref ) ( void );
-
-
 // constant arrays
 const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
 const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;
@@ -549,18 +543,18 @@ int load_gui( const char **argv )
 	object *r;
 	FILE *f;
 
+	if ( exec_file == NULL || exec_path == NULL )
+	{
+		log_tcl_error( true, "Invalid LSD executable name or path", "Make sure the LSD directory is not too deep into the disk directory tree" );
+		return 1;
+	}
+
 	for ( i = 1; argv[ i ] != NULL; i++ )
 	{
-		if ( exec_file == NULL || exec_path == NULL )
-		{
-			log_tcl_error( true, "Invalid LSD executable name or path", "Make sure the LSD directory is not too deep into the disk directory tree" );
-			myexit( 1 );
-		}
-
 		if ( argv[ i ][ 0 ] != '-' || ( argv[ i ][ 1 ] != 'f' && argv[ i ][ 1 ] != 'i' && argv[ i ][ 1 ] != 'c' ) )
 		{
 			log_tcl_error( true, "Command line parameters", "Invalid option, available options: -i TCL_DIRECTORY / -f MODEL_NAME / -c MAX_THREADS" );
-			myexit( 1 );
+			return 1;
 		}
 
 		if ( argv[ i ][ 1 ] == 'f' )
@@ -684,7 +678,7 @@ int load_gui( const char **argv )
 	{
 		log_tcl_error( false, "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where LSD is installed" );
 		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where LSD is installed.\n\nLSD is aborting now.\"" );
-		myexit( 9 );
+		return 9;
 	}
 
 	cmd( "set env(LSDROOT) $RootLsd" );
@@ -701,7 +695,7 @@ int load_gui( const char **argv )
 	{
 		log_tcl_error( false, "LSD directory check", "Cannot locate LSD folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
 		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSD directory missing\" -detail \"Cannot locate the LSD installation folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
-		myexit( 9 );
+		return 9;
 	}
 
 	// load/check LMM configuration file
@@ -723,7 +717,7 @@ int load_gui( const char **argv )
 	{
 		log_tcl_error( false, "Source files check failed", "Required Tcl/Tk source file(s) missing or corrupted (0x%04x), check your installation and reinstall LSD if the problem persists\n\n0x01: %s\n\n0x02: %s\n\n0x04: %s", choice, get_str( "err0x01" ), get_str( "err0x02" ), get_str( "err0x04" ) );
 		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
-		myexit( 200 + choice );
+		return 200 + choice;
 	}
 
 	app = get_str( "CurPlatform" );
@@ -739,7 +733,7 @@ int load_gui( const char **argv )
 			{
 				log_tcl_error( false, "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"", choice );
-				myexit( 200 );
+				return 200;
 			}
 
 	// fix non-existent or old options file for new options
@@ -810,8 +804,7 @@ int load_gui( const char **argv )
 		sprintf( struct_file, "%s%s%s.lsd", path, strlen( path ) > 0 ? "/" : "", simul_name );
 		snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
 
-		r = NULL;
-		i = open_configuration( r, true );
+		i = open_configuration( ( r = NULL ), true );
 	}
 	else
 		i = 0;

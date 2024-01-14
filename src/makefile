@@ -10,11 +10,11 @@
 #**************************************************************
 
 #**************************************************************
-# MAKEFILE.LMM
+# MAKEFILE
 # Makefile for LMM
 # In a command prompt (terminal) in LSD root directory, use
 #  cd src
-#  make -f makefile.LMM
+#  make
 #**************************************************************
 
 CC=g++
@@ -26,30 +26,24 @@ SWITCH_CC=-D_LMM_ -D_NP_ -O3 -Wall \
 
 # using GCC and Tcl/Tk in the Lsd installation
 LSDROOT=..
-SRC=src
-SRC_DIR=$(LSDROOT)/$(SRC)/
-
-# OS command to delete files
-RM=rm -f
-
-# modules to compile
-ALL_TARGETS=$(LSDROOT)/$(TARGET).exe $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o
+SRC_DIR=
 
 # handle platform-specific stuff
 ifeq ($(OS),Windows_NT)
+	OBJ_DIR=$(TMP)\$(TARGET)/
 	PKG=
 	EXT=.exe
 	WRC=windres -D_WIN32
-	MANIF=$(SRC_DIR)lmm_manifest.o
+	MANIF=$(OBJ_DIR)lmm_manifest.o
 	TOUCH=
 	TCL_VERSION=86
 	PATH_TCLTK_HEADER=$(LSDROOT)/gnu/include
 	PATH_TCLTK_LIB=-L $(LSDROOT)/gnu/lib
 	TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
 	SWITCH_CC+=-mthreads -mwindows -static-libstdc++
-	ALL_TARGETS+=$(MANIF)
 else
 	ifeq ($(shell uname -s),Darwin)
+		OBJ_DIR=$(TMPDIR)/$(TARGET)/
 		PKG=$(TARGET).app/Contents/MacOS/
 		EXT=
 		MANIF=
@@ -60,6 +54,7 @@ else
 		TCLTK_LIB=-framework Tcl -framework Tk
 		SWITCH_CC+=-Wno-unused-result -std=c++14 -mmacosx-version-min=10.10
 	else
+		OBJ_DIR=$(TMPDIR)/$(TARGET)/
 		PKG=
 		EXT=
 		MANIF=
@@ -73,24 +68,31 @@ else
 endif
 
 # variable to search for the tcl and tk headers
-INCLUDE=-I$(PATH_TCLTK_HEADER) -I$(LSDROOT)/$(SRC)
+INCLUDE=-I$(PATH_TCLTK_HEADER)
 
-$(LSDROOT)/$(PKG)$(TARGET)$(EXT): $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o $(MANIF)
-	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o $(MANIF) \
-	$(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(LSDROOT)/$(PKG)$(TARGET)$(EXT)
+# OS commands to delete files and create directories
+RM=@rm$(EXT) -f
+MKDIR=@mkdir$(EXT) -p
+
+# make rules
+all: $(LSDROOT)/$(TARGET)$(EXT)
+
+$(LSDROOT)/$(PKG)$(TARGET)$(EXT): $(OBJ_DIR)modman.o $(OBJ_DIR)common.o $(MANIF)
+	$(CC) $(SWITCH_CC) $(OBJ_DIR)modman.o $(OBJ_DIR)common.o $(MANIF) $(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(LSDROOT)/$(PKG)$(TARGET)$(EXT)
 	$(TOUCH)
 
-$(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp $(SRC_DIR)common.h
-	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o
+$(OBJ_DIR)modman.o: $(SRC_DIR)modman.cpp $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)modman.cpp -o $(OBJ_DIR)modman.o
 
-$(SRC_DIR)common-lmm.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
-	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common-lmm.o
+$(OBJ_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)common.cpp -o $(OBJ_DIR)common.o
 
-$(SRC_DIR)lmm_manifest.o: $(SRC_DIR)lmm_manifest.rc $(SRC_DIR)lmm.exe.manifest
-	$(WRC) $(INCLUDE) -i $(SRC_DIR)lmm_manifest.rc -o $(SRC_DIR)lmm_manifest.o
-
-all: $(ALL_TARGETS)
+$(OBJ_DIR)lmm_manifest.o: $(SRC_DIR)lmm_manifest.rc $(SRC_DIR)lmm.exe.manifest
+	$(MKDIR) $(@D)
+	$(WRC) $(INCLUDE) -i $(SRC_DIR)lmm_manifest.rc -o $(OBJ_DIR)lmm_manifest.o
 
 # delete object files
 clean:
-	$(RM) $(SRC_DIR)modman.o $(SRC_DIR)common-lmm.o $(MANIF)
+	$(RM) $(OBJ_DIR)modman.o $(OBJ_DIR)common.o $(MANIF)

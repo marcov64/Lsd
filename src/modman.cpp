@@ -4865,7 +4865,7 @@ int modman( int argn, const char **argv )
 						file delete -force \"$i\" \
 					} \
 				}; \
-				set objs [ glob -nocomplain -directory \"$modelDir\" *.o src break.gdb makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.app *.bak *.err ]; \
+				set objs [ glob -nocomplain -directory \"$modelDir\" *.o src break.gdb makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.dll *.so *.app *.bak *.err ]; \
 				foreach i $objs { \
 					catch { \
 						file delete -force \"$i\" \

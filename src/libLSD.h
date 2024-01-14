@@ -19,8 +19,8 @@ by a model dynamic link library (.dll/.so).
 *************************************************************/
 
 // DLL_EXPORT must be defined when building the dynamic library
-#if defined _WIN32 && defined _DLL
-	#ifdef _DLL_EXPORT
+#if defined _WIN32 && defined _DLL_
+	#ifdef DLL_EXPORT
 		#define API __declspec( dllexport )
 	#else
 		#define API __declspec( dllimport )

@@ -73,7 +73,7 @@
 #include "pugixml/pugixml.hpp"
 
 // Windows DLL exports
-#define _DLL_EXPORT
+#define DLL_EXPORT
 #include "libLSD.h"
 
 // global constants
@@ -125,11 +125,10 @@
 						   "autoHide", "showFileCmds", "LsdNew", \
 						   "DbgExe", "restoreWin", "lmmGeom", \
 						   "lsdTheme" }
-#define LMM_OPTIONS_DEFAULT { "$DefaultSysTerm", "$DefaultHtmlBrowser", "$DefaultFont", \
-							  "$DefaultWish", "src", "$DefaultFontSize", \
-							  "4", "1", "2", \
-							  "0", "0", "Work", \
-							  "$DefaultDbgExe", "1", "#", \
+#define LMM_OPTIONS_DEFAULT { "$DefaultSysTerm", "$DefaultHtmlBrowser", \
+							  "$DefaultFont", "$DefaultWish", "src", \
+							  "$DefaultFontSize", "4", "1", "2", "0", "0", \
+							  "Work", "$DefaultDbgExe", "1", "#", \
 							  "$DefaultTheme" }
 #define MODEL_INFO_NUM 16
 #define MODEL_INFO_NAME { "modelName", "modelVersion", "modelDate", \
@@ -147,9 +146,11 @@
 					 "object.cpp", "util.cpp", "variab.cpp", "check.h", \
 					 "common.h", "decl.h", "fun_head.h", "fun_head_fast.h" }
 #define LSD_DIR_NUM 8
-#define LSD_DIR_NAME { "src", "gnu", "installer", "Manual", "LMM.app", "Rpkg", "lwi", "___" }
+#define LSD_DIR_NAME { "src", "gnu", "installer", "Manual", "LMM.app", "Rpkg", \
+					   "lwi", "___" }
 #define LSD_MIN_NUM 3
-#define LSD_MIN_FILES { "src/icons", "src/themes", "src/interf.cpp", "src/analysis.cpp" }
+#define LSD_MIN_FILES { "src/icons", "src/themes", "src/interf.cpp", \
+						"src/analysis.cpp" }
 #define WIN_COMP_NUM 2
 #define WIN_COMP_PATH { "mingw64\\bin", "cygwin64\\bin" }	// must use (double) backslashes
 #define LSD_WIN_NUM MODEL_INFO_NUM - 3
@@ -157,7 +158,8 @@
 #define REG_SIG_NUM 6
 #define REG_SIG_CODE { SIGINT, SIGTERM, SIGABRT, SIGFPE, SIGILL, SIGSEGV }
 #define REG_SIG_NAME { "Interrupt signal", "Terminate signal", "Abort signal", \
-					   "Floating-point exception", "Illegal instruction", "Segmentation violation" }
+					   "Floating-point exception", "Illegal instruction", \
+					   "Segmentation violation" }
 
 using namespace std;
 

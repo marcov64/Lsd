@@ -898,7 +898,7 @@ double eval_double( const char *tcl_exp )
 
 /*********************************
  CHECK_OPTION_FILES
- check if model ans system option
+ check if model and system option
  files exist and create them if not
  *********************************/
 void check_option_files( bool sys )
