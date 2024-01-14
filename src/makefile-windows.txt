@@ -9,29 +9,18 @@ RM=rm -f
 
 # LSD executable
 $(TARGET).exe: $(SRC_DIR)lsd.o $(SRC_DIR)lsd_manifest.o libLSD.dll
-	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(SRC_DIR)lsd.o $(SRC_DIR)lsd_manifest.o \
-	-mwindows -L. -lLSD -o $(TARGET)
+	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(SRC_DIR)lsd.o $(SRC_DIR)lsd_manifest.o -mwindows -L. -lLSD -o $(TARGET)
 
 # dynamic link library
-libLSD.dll: $(FUN).o $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o $(SRC_DIR)analysis.o \
-$(SRC_DIR)debug.o $(SRC_DIR)draw.o $(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o \
-$(SRC_DIR)file.o $(SRC_DIR)interf.o $(SRC_DIR)nets.o $(SRC_DIR)object.o \
-$(SRC_DIR)report.o $(SRC_DIR)runtime.o $(SRC_DIR)set_all.o $(SRC_DIR)show_eq.o \
-$(SRC_DIR)util.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o
-	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(FUN).o $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o \
-	$(SRC_DIR)analysis.o $(SRC_DIR)debug.o $(SRC_DIR)draw.o $(SRC_DIR)edit.o \
-	$(SRC_DIR)edit_dat.o $(SRC_DIR)file.o $(SRC_DIR)interf.o $(SRC_DIR)nets.o \
-	$(SRC_DIR)object.o $(SRC_DIR)report.o $(SRC_DIR)runtime.o $(SRC_DIR)set_all.o \
-	$(SRC_DIR)show_eq.o $(SRC_DIR)util.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o \
-	$(SWITCH_CC_LNK) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) \
+libLSD.dll: $(FUN).o $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o $(SRC_DIR)analysis.o $(SRC_DIR)debug.o $(SRC_DIR)draw.o $(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o $(SRC_DIR)file.o $(SRC_DIR)filelib.o $(SRC_DIR)interf.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)report.o $(SRC_DIR)runtime.o $(SRC_DIR)set_all.o $(SRC_DIR)sensitivity.o $(SRC_DIR)show_eq.o $(SRC_DIR)util.o $(SRC_DIR)utillib.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o
+	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(FUN).o $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o $(SRC_DIR)analysis.o $(SRC_DIR)debug.o $(SRC_DIR)draw.o $(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o $(SRC_DIR)file.o $(SRC_DIR)filelib.o $(SRC_DIR)interf.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)report.o $(SRC_DIR)runtime.o $(SRC_DIR)set_all.o $(SRC_DIR)sensitivity.o $(SRC_DIR)show_eq.o $(SRC_DIR)util.o $(SRC_DIR)utillib.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o $(SWITCH_CC_LNK) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) \
 	-D_DLL -shared -o libLSD.dll
 
 # compile modules
 $(SRC_DIR)lsd.o: $(SRC_DIR)lsd.cpp $(SRC_DIR)libLSD.h
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)lsd.cpp -o $(SRC_DIR)lsd.o
 
-$(FUN).o: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)check.h \
-$(SRC_DIR)decl.h.gch $(SRC_DIR)fun_head.h $(SRC_DIR)fun_head_fast.h
+$(FUN).o: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)check.h $(SRC_DIR)decl.h.gch $(SRC_DIR)fun_head.h $(SRC_DIR)fun_head_fast.h
 	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(INCLUDE) -c $(FUN).cpp -o $(FUN).o
 
 $(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h $(SRC_DIR)system_options.txt
@@ -58,6 +47,9 @@ $(SRC_DIR)edit_dat.o: $(SRC_DIR)edit_dat.cpp $(SRC_DIR)decl.h.gch
 $(SRC_DIR)file.o: $(SRC_DIR)file.cpp $(SRC_DIR)decl.h.gch
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)file.cpp -o $(SRC_DIR)file.o
 
+$(SRC_DIR)filelib.o: $(SRC_DIR)filelib.cpp $(SRC_DIR)decl.h.gch
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)filelib.cpp -o $(SRC_DIR)filelib.o
+
 $(SRC_DIR)interf.o: $(SRC_DIR)interf.cpp $(SRC_DIR)decl.h.gch
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)interf.cpp -o $(SRC_DIR)interf.o
 
@@ -73,6 +65,9 @@ $(SRC_DIR)report.o: $(SRC_DIR)report.cpp $(SRC_DIR)decl.h.gch
 $(SRC_DIR)runtime.o: $(SRC_DIR)runtime.cpp $(SRC_DIR)decl.h.gch
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)runtime.cpp -o $(SRC_DIR)runtime.o
 
+$(SRC_DIR)sensitivity.o: $(SRC_DIR)sensitivity.cpp $(SRC_DIR)tables.h $(SRC_DIR)decl.h.gch
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)sensitivity.cpp -o $(SRC_DIR)sensitivity.o
+
 $(SRC_DIR)set_all.o: $(SRC_DIR)set_all.cpp $(SRC_DIR)tables.h $(SRC_DIR)decl.h.gch
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)set_all.cpp -o $(SRC_DIR)set_all.o
 
@@ -82,14 +77,16 @@ $(SRC_DIR)show_eq.o: $(SRC_DIR)show_eq.cpp $(SRC_DIR)decl.h.gch
 $(SRC_DIR)util.o: $(SRC_DIR)util.cpp $(SRC_DIR)decl.h.gch
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)util.cpp -o $(SRC_DIR)util.o
 
+$(SRC_DIR)utillib.o: $(SRC_DIR)utillib.cpp $(SRC_DIR)decl.h.gch
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)utillib.cpp -o $(SRC_DIR)utillib.o
+
 $(SRC_DIR)variab.o: $(SRC_DIR)variab.cpp $(SRC_DIR)decl.h.gch
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)variab.cpp -o $(SRC_DIR)variab.o
 
 $(SRC_DIR)lsd_manifest.o: $(SRC_DIR)lsd_manifest.rc $(SRC_DIR)lsd.exe.manifest
 	$(WRC) -i $(SRC_DIR)lsd_manifest.rc -o $(SRC_DIR)lsd_manifest.o $(INCLUDE)
 
-$(SRC_DIR)pugixml.o: $(SRC_DIR)pugixml/pugixml.cpp $(SRC_DIR)pugixml/pugixml.hpp \
-$(SRC_DIR)pugixml/pugiconfig.hpp
+$(SRC_DIR)pugixml.o: $(SRC_DIR)pugixml/pugixml.cpp $(SRC_DIR)pugixml/pugixml.hpp $(SRC_DIR)pugixml/pugiconfig.hpp
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)pugixml/pugixml.cpp -o $(SRC_DIR)pugixml.o
 
 $(SRC_DIR)decl.h.gch: $(SRC_DIR)decl.h $(SRC_DIR)common.h $(SRC_DIR)system_options.txt
@@ -97,9 +94,4 @@ $(SRC_DIR)decl.h.gch: $(SRC_DIR)decl.h $(SRC_DIR)common.h $(SRC_DIR)system_optio
 
 # remove compiled files
 clean:
-	$(RM) $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o $(SRC_DIR)analysis.o $(SRC_DIR)debug.o \
-	$(SRC_DIR)draw.o $(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o $(SRC_DIR)file.o \
-	$(SRC_DIR)interf.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)report.o \
-	$(SRC_DIR)runtime.o $(SRC_DIR)set_all.o $(SRC_DIR)show_eq.o $(SRC_DIR)util.o \
-	$(SRC_DIR)variab.o $(SRC_DIR)pugixml.o $(SRC_DIR)lsd.o $(SRC_DIR)lsd_manifest.o \
-	$(SRC_DIR)decl.h.gch $(FUN).o $(TARGET).exe libLSD.dll
+	$(RM) $(SRC_DIR)common.o $(SRC_DIR)lsdmain.o $(SRC_DIR)analysis.o $(SRC_DIR)debug.o $(SRC_DIR)draw.o $(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o $(SRC_DIR)file.o $(SRC_DIR)filelib.o $(SRC_DIR)interf.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)report.o $(SRC_DIR)runtime.o $(SRC_DIR)sensitivity.o $(SRC_DIR)set_all.o $(SRC_DIR)show_eq.o $(SRC_DIR)util.o $(SRC_DIR)utillib.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o $(SRC_DIR)lsd.o $(SRC_DIR)lsd_manifest.o $(SRC_DIR)decl.h.gch $(FUN).o $(TARGET).exe libLSD.dll

@@ -118,6 +118,8 @@
 #define EIGEN "#define EIGENLIB"
 
 // constant string arrays
+#define ELEM_TYPE_NUM 3
+#define ELEM_TYPE_NAMES { "variable", "parameter", "function" }
 #define LMM_OPTIONS_NUM 16
 #define LMM_OPTIONS_NAME { "sysTerm", "HtmlBrowser", "fonttype", \
 						   "wish", "LsdSrc", "dim_character", \
@@ -141,10 +143,11 @@
 							 "#", "#", "#", \
 							 "#", "#", "#", \
 							 "Root", "1", "0", "0" }
-#define LSD_NW_NUM 13
-#define LSD_NW_SRC { "lsd.cpp", "lsdmain.cpp", "common.cpp", "file.cpp", "nets.cpp", \
-					 "object.cpp", "util.cpp", "variab.cpp", "check.h", \
-					 "common.h", "decl.h", "fun_head.h", "fun_head_fast.h" }
+#define LSD_NW_NUM 14
+#define LSD_NW_SRC { "lsd.cpp", "lsdmain.cpp", "common.cpp", "filelib.cpp", \
+					 "nets.cpp", "object.cpp", "util.cpp", "variab.cpp", \
+					 "check.h", "libLSD.h", "common.h", "decl.h", \
+					 "fun_head.h", "fun_head_fast.h" }
 #define LSD_DIR_NUM 8
 #define LSD_DIR_NAME { "src", "gnu", "installer", "Manual", "LMM.app", "Rpkg", \
 					   "lwi", "___" }
@@ -656,6 +659,7 @@ extern int stop;						// activity interruption flag (Tcl boolean)
 extern lsdstack *stack_log;				// LSD stack
 
 // common constant string arrays (not visible to the users)
+extern const char *elem_type_names[ ];
 extern const char *lmm_options[ ];
 extern const char *lmm_defaults[ ];
 extern const char *model_info[ ];

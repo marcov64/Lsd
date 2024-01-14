@@ -177,6 +177,7 @@ vector < string > res_list;	// list of results files last saved
 FILE *log_file = NULL;		// log file, if any
 
 // constant arrays
+const char *elem_type_names[ ELEM_TYPE_NUM ] = ELEM_TYPE_NAMES;
 const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
 const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;
 const char *model_info[ MODEL_INFO_NUM ] = MODEL_INFO_NAME;
