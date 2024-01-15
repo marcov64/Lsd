@@ -77,8 +77,8 @@ MKDIR=@mkdir$(EXT) -p
 # make rules
 all: $(LSDROOT)/$(TARGET)$(EXT)
 
-$(LSDROOT)/$(PKG)$(TARGET)$(EXT): $(OBJ_DIR)modman.o $(OBJ_DIR)common.o $(MANIF)
-	$(CC) $(SWITCH_CC) $(OBJ_DIR)modman.o $(OBJ_DIR)common.o $(MANIF) $(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(LSDROOT)/$(PKG)$(TARGET)$(EXT)
+$(LSDROOT)/$(PKG)$(TARGET)$(EXT): $(OBJ_DIR)modman.o $(OBJ_DIR)common.o $(OBJ_DIR)commonlib.o $(MANIF)
+	$(CC) $(SWITCH_CC) $(OBJ_DIR)modman.o $(OBJ_DIR)common.o $(OBJ_DIR)commonlib.o $(MANIF) $(PATH_TCLTK_LIB) $(TCLTK_LIB) -o $(LSDROOT)/$(PKG)$(TARGET)$(EXT)
 	$(TOUCH)
 
 $(OBJ_DIR)modman.o: $(SRC_DIR)modman.cpp $(SRC_DIR)common.h
@@ -89,10 +89,14 @@ $(OBJ_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)common.cpp -o $(OBJ_DIR)common.o
 
+$(OBJ_DIR)commonlib.o: $(SRC_DIR)commonlib.cpp $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)commonlib.cpp -o $(OBJ_DIR)commonlib.o
+
 $(OBJ_DIR)lmm_manifest.o: $(SRC_DIR)lmm_manifest.rc $(SRC_DIR)lmm.exe.manifest
 	$(MKDIR) $(@D)
 	$(WRC) $(INCLUDE) -i $(SRC_DIR)lmm_manifest.rc -o $(OBJ_DIR)lmm_manifest.o
 
 # delete object files
 clean:
-	$(RM) $(OBJ_DIR)modman.o $(OBJ_DIR)common.o $(MANIF)
+	$(RM) $(OBJ_DIR)modman.o $(OBJ_DIR)common.o $(OBJ_DIR)commonlib.o $(MANIF)

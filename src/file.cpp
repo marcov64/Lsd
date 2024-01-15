@@ -158,7 +158,48 @@ bool open_configuration( object *&r, bool reload )
 	else
 		currObj = r = root;						// new structure
 
+	if ( loaded )
+	{
+		load_elem_lists( root );
+
+		if ( ! ignore_eq_file && strncmp( lsd_eq_file, eq_file, min( strlen( lsd_eq_file ), strlen( eq_file ) ) ) )
+			plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the LSD model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
+	}
+
 	return loaded;
+}
+
+
+/*****************************************************************************
+UNLOAD_CONFIGURATION_GUI (DLL WRAPPER)
+	Unload the current configuration
+	If full is false, just the model data is unloaded
+	Returns: pointer to root object
+******************************************************************************/
+void unload_configuration_gui( bool full )
+{
+	unload_configuration( full );
+
+	currObj = NULL;								// no current object pointer
+	unsaved_change( false );					// signal no unsaved change
+	cmd( "destroytop .lat" );					// remove lattice window
+	cmd( "unset -nocomplain modObj modElem modVar modPar modFun" );	// no elements in model structure
+	NOLH_clear( );								// deallocate DoE
+
+	if ( ! running )
+		cmd( "destroytop .plt" );				// remove run-time plot window
+
+	if ( full )									// full unload? (no new config?)
+	{
+		cmd( "set path \"%s\"", path );
+		if ( strlen( path ) > 0 )
+			cmd( "cd \"$path\"" );
+
+		cmd( "unset -nocomplain lastConf" );	// no last configuration to reload
+		cmd( "set listfocus 1; set itemfocus 0" );// point for first var in listbox
+		cmd( "set lastObj \"\"" );				// disable last object for reload
+		redrawRoot = redrawStruc = true;		// force browser/structure redraw
+	}
 }
 
 
@@ -331,12 +372,8 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 	else
 		save_ok = false;
 
-#ifndef _NW_
-
 	if ( save_ok )
 		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", exec_path, struct_file );
-
-#endif
 
 	delete [ ] save_file;
 
@@ -1023,7 +1060,6 @@ bool save_sensitivity( FILE *f )
 	return ! ferror( f );
 }
 
-#ifndef _NW_
 
 /***************************************************
 LOAD_EQFILE
@@ -1099,7 +1135,6 @@ void read_eqfile_name( char *s, int sz )
 	return;
 }
 
-#endif
 
 /***************************************************
 SAVE_EQFILE
@@ -1278,7 +1313,6 @@ int count_lines( const char *fname, bool dozip )
 	return n;
 }
 
-#ifndef _NW_
 
 /****************************************************
 SHOW_LOGS
@@ -1332,5 +1366,3 @@ void show_logs( const char *path, vector < string > & logs, bool par_cntl )
 			ttk::messageBox -parent . -type ok -icon error -title Error -message \"%s failed to launch\" -detail \"Please check if %s is installed and set up properly.\n\nDetail:\n$termResult\" \
 		}", exec, logs_str, exec, exec );
 }
-
-#endif

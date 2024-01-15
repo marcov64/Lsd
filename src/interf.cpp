@@ -127,7 +127,7 @@ void create( void )
 						"if error persists, please contact developers",
 						false,
 						"invalid model configuration loaded" );
-			unload_configuration( true );
+			unload_configuration_gui( true );
 			cur = root;
 		}
 
@@ -1195,7 +1195,7 @@ object *operate( object *r )
 	case 11:
 
 		if ( discard_change( ) && abort_run_threads( ) )
-			myexit( 0 );
+			lsd_exit_gui( 0 );
 
 	break;
 
@@ -3251,7 +3251,7 @@ object *operate( object *r )
 		if ( discard_change( ) )	// unsaved configuration changes ?
 			if ( ! open_configuration( r, choice == 38 ? true : false ) )
 			{
-				unload_configuration( true );
+				unload_configuration_gui( true );
 				choice = 0;
 				return root;
 			}
@@ -3360,7 +3360,7 @@ object *operate( object *r )
 		if ( ! discard_change( ) )		// check for unsaved configuration changes
 			break;
 
-		unload_configuration( true );
+		unload_configuration_gui( true );
 
 		r = root;						// just an empty root exists
 
@@ -3611,7 +3611,7 @@ object *operate( object *r )
 		// remove existing results from memory before proceeding
 		if ( ! open_configuration( r, true ) )
 		{
-			unload_configuration( true );
+			unload_configuration_gui( true );
 			r = root;
 		}
 
@@ -5236,6 +5236,7 @@ object *operate( object *r )
 
 			// empty sensitivity data
 			empty_sensitivity( );					// discard read data
+			NOLH_clear( );							// deallocate DoE
 			unsavedSense = false;					// nothing to save
 			findexSens = 0;
 		}
@@ -5521,6 +5522,7 @@ object *operate( object *r )
 
 		// empty sensitivity data
 		empty_sensitivity( );					// discard read data
+		NOLH_clear( );							// deallocate DoE
 		plog( "\nSensitivity data removed.\n" );
 		unsavedSense = false;					// nothing to save
 		findexSens = 0;
@@ -7548,13 +7550,19 @@ bool load_prev_configuration( void )
 	{
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded (%d :%.24s)\" -detail \"Previously loaded configuration could not be restored. Check if LSD still has access to the model directory.\n\nCurrent configuration will be reset now.\"", i, warnings.c_str( ) );
 
-		unload_configuration( true );			// full unload everything
+		unload_configuration_gui( true );		// full unload everything
 		return false;
+	}
+	else
+	{
+		load_elem_lists( root );
+		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", exec_path, struct_file );
 	}
 
 	if ( saFile != NULL )						// restore SA configuration, if any
 	{
 		empty_sensitivity( );
+		NOLH_clear( );							// deallocate DoE
 		f = fopen( saFile, "rt" );
 		if ( f == NULL || load_sensitivity( f ) != 0 )
 		{
@@ -7571,6 +7579,44 @@ bool load_prev_configuration( void )
 	findexSens = lstFidx;
 
 	return true;
+}
+
+
+/****************************************************
+LOAD_ELEM_LISTS
+Load tcl lists of model objects and other elements
+****************************************************/
+void load_elem_lists( object *r )
+{
+	bridge *cb;
+	variable *cv;
+
+	if ( r->up == NULL )						// reset lists if root
+		cmd( "unset -nocomplain modObj modElem modVar modPar modFun" );
+	else
+		cmd( "lappend modObj %s", r->label );	// register object if not root
+
+	// register elements in object
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+	{
+		switch( cv->param )
+		{
+			case 0:
+				cmd( "lappend modVar %s", cv->label );
+				break;
+			case 1:
+				cmd( "lappend modPar %s", cv->label );
+				break;
+			case 2:
+				cmd( "lappend modFun %s", cv->label );
+		}
+
+		cmd( "lappend modElem %s", cv->label );
+	}
+
+	// register son objects
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		load_elem_lists( cb-> head );
 }
 
 
@@ -7784,7 +7830,6 @@ bool unsaved_change( bool val )
 	{
 		unsavedChange = val;
 
-#ifndef _NW_
 		char chgMark[ ] = "\0\0";
 		chgMark[ 0 ] = unsavedChange ? '*' : ' ';
 
@@ -7793,7 +7838,6 @@ bool unsaved_change( bool val )
 		{
 			cmd( "if [ winfo exist %s ] { wm title %s \"%s[ string range [ wm title %s ] 1 end ]\" }", wndName[ i ], wndName[ i ], chgMark, wndName[ i ]  );
 		}
-#endif
 	}
 
 	return unsavedChange;

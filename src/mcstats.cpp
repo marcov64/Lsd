@@ -116,7 +116,7 @@ int lsdmain( int argn, const char **argv )
 	if ( argn < 2 )
 	{
 		fprintf( stderr, "\n%s\n%s\n%s\n", lsdCmdMsg, lsdCmdDsc, lsdCmdHlp );
-		myexit( 1 );
+		lsd_exit( 1 );
 	}
 	else
 	{
@@ -149,14 +149,14 @@ int lsdmain( int argn, const char **argv )
 			}
 
 			fprintf( stderr, "\nOption '%c%c' not recognized.\n%s\n%s\n", argv[ i ][ 0 ], argv[ i ][ 1 ], lsdCmdMsg, lsdCmdHlp );
-			myexit( 2 );
+			lsd_exit( 2 );
 		}
 	}
 
 	if ( files < 2 )
 	{
 		fprintf( stderr, "\nInsufficient result files provided.\n%s.\nSpecify '-f FILENAME1.csv FILENAME2.csv ...' to provide at least 2 result files.\n\n", lsdCmdMsg );
-		myexit( 3 );
+		lsd_exit( 3 );
 	}
 
 	for ( i = 0; i < files; ++i )
@@ -165,7 +165,7 @@ int lsdmain( int argn, const char **argv )
 		if ( f == NULL )
 		{
 			fprintf( stderr, "\nFile '%s' not found.\n%s\nSpecify existing '-f FILENAME1.csv FILENAME2.csv ...' result files.\n\n", in_files[ i ], lsdCmdMsg );
-			myexit( 4 );
+			lsd_exit( 4 );
 		}
 
 		// determine number of rows and columns from results file
@@ -189,14 +189,14 @@ int lsdmain( int argn, const char **argv )
 		if ( j < 2 || j != rows )
 		{
 			fprintf( stderr, "\nInvalid file rows (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
-			myexit( 5 );
+			lsd_exit( 5 );
 		}
 	}
 
 	if ( out_file == NULL || strlen( out_file ) == 0 )
 	{
 		fprintf( stderr, "\nNo base name to MC files provided.\n%s.\nSpecify '-o OUTPUT' to provide a base name.\n\n", lsdCmdMsg );
-		myexit( 6 );
+		lsd_exit( 6 );
 	}
 
 	linbuf = new char[ linsz + 2 ];
@@ -229,7 +229,7 @@ int lsdmain( int argn, const char **argv )
 		if ( j < 1 || j != cols || cur_vars != vars )
 		{
 			fprintf( stderr, "\nInvalid file header (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
-			myexit( 7 );
+			lsd_exit( 7 );
 		}
 
 		// read data lines
@@ -248,7 +248,7 @@ int lsdmain( int argn, const char **argv )
 					if ( sscanf( out, "%lf", & val ) == 0 )
 					{
 						fprintf( stderr, "\nInvalid file values (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
-						myexit( 8 );
+						lsd_exit( 8 );
 					}
 
 				mcdata( i, j, k ) = val;
@@ -258,14 +258,14 @@ int lsdmain( int argn, const char **argv )
 			if ( k < cols || tok != NULL )
 			{
 				fprintf( stderr, "\nInvalid file columns (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
-				myexit( 9 );
+				lsd_exit( 9 );
 			}
 		}
 
 		if ( j < rows - 1 )
 		{
 			fprintf( stderr, "\nInvalid file rows (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
-			myexit( 10 );
+			lsd_exit( 10 );
 		}
 
 		fclose( f );
@@ -335,7 +335,7 @@ void save_csv( const char *base, const char *suffix, vector < string > header, v
 	if ( f == NULL )
 	{
 		fprintf( stderr, "\nFile '%s' cannot be created.\n%s\nCheck if base name is correct.\n\n", fn, lsdCmdMsg );
-		myexit( 11 );
+		lsd_exit( 11 );
 	}
 
 	for ( i = 0; i < ( int ) header.size( ); ++ i )

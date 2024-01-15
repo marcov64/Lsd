@@ -369,9 +369,6 @@ endLoad:
 	strcln( buf1, lsd_eq_file, MAX_FILE_SIZE );
 	strcpyn( lsd_eq_file, buf1, MAX_FILE_SIZE );
 
-	if ( quick == 0 && ! ignore_eq_file && strncmp( lsd_eq_file, eq_file, min( strlen( lsd_eq_file ), strlen( eq_file ) ) ) )
-		plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the LSD model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
-
 	if ( f != NULL )
 		fclose( f );
 
@@ -384,12 +381,6 @@ endLoad:
 
 	t = 0;
 
-#ifndef _NW_
-
-	if ( load == 0 )
-		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", exec_path, struct_file );
-#endif
-
 	return load;
 }
 
@@ -400,7 +391,7 @@ UNLOAD_CONFIGURATION
 	If full is false, just the model data is unloaded
 	Returns: pointer to root object
 ******************************************************************************/
-void unload_configuration ( bool full )
+void unload_configuration( bool full )
 {
 	empty_blueprint( );							// remove current model structure
 	root->delete_obj( );
@@ -420,16 +411,6 @@ void unload_configuration ( bool full )
 	actual_steps = 0;							// reset steps counter
 	findexSens = 0;								// reset sensitivity serial number
 	nodesSerial = 0;							// reset network node serial number
-
-#ifndef _NW_
-	currObj = NULL;								// no current object pointer
-	unsaved_change( false );					// signal no unsaved change
-	cmd( "destroytop .lat" );					// remove lattice window
-	cmd( "unset -nocomplain modObj modElem modVar modPar modFun" );	// no elements in model structure
-
-	if ( ! running )
-		cmd( "destroytop .plt" );				// remove run-time plot window
-#endif
 
 	if ( full )									// full unload? (no new config?)
 	{
@@ -454,17 +435,6 @@ void unload_configuration ( bool full )
 
 		delete sens_file;						// reset sensitivity file name
 		sens_file = NULL;
-
-#ifndef _NW_
-		cmd( "set path \"%s\"", path );
-		if ( strlen( path ) > 0 )
-			cmd( "cd \"$path\"" );
-
-		cmd( "unset -nocomplain lastConf" );	// no last configuration to reload
-		cmd( "set listfocus 1; set itemfocus 0" );// point for first var in listbox
-		cmd( "set lastObj \"\"" );				// disable last object for reload
-		redrawRoot = redrawStruc = true;		// force browser/structure redraw
-#endif
 	}
 }
 
@@ -500,8 +470,6 @@ int object::load_xml_struct( xml_node &n, bool quick )
 			if ( strlen( str ) == 0 || ! valid_label( str ) )
 				return 32;
 
-			cmd( "lappend modObj %s", str );
-
 			add_obj( str );
 			cb = search_bridge( str );
 
@@ -530,23 +498,6 @@ int object::load_xml_struct( xml_node &n, bool quick )
 				str = cn.attribute( "name" ).value( );
 				if ( strlen( str ) == 0 || ! valid_label( str ) )
 					return 34;
-
-				switch( type )
-				{
-					case 0:
-						cmd( "lappend modVar %s", str );
-						break;
-					case 1:
-						cmd( "lappend modPar %s", str );
-						break;
-					case 2:
-						cmd( "lappend modFun %s", str );
-						break;
-					default:
-						return 35;
-				}
-
-				cmd( "lappend modElem %s", str );
 
 				cv = add_empty_var( str );
 				cv->param = type;
@@ -643,7 +594,6 @@ bool object::load_struct( FILE *f )
 		{
 			fscanf( f, "%*[ ]%99s", ch );
 			add_obj( ch );
-			cmd( "lappend modObj %s", ch );
 
 			// find the bridge which contains the object
 			cb = search_bridge( ch );
@@ -657,8 +607,6 @@ bool object::load_struct( FILE *f )
 			fscanf( f, "%*[ ]%99s", ch );
 			cv = add_empty_var( ch );
 			cv->param = 0;
-			cmd( "lappend modElem %s", ch );
-			cmd( "lappend modVar %s", ch );
 		}
 
 		if ( ! strcmp( ch, "Param:" ) )
@@ -666,8 +614,6 @@ bool object::load_struct( FILE *f )
 			fscanf( f, "%*[ ]%99s", ch );
 			cv = add_empty_var( ch );
 			cv->param = 1;
-			cmd( "lappend modElem %s", ch );
-			cmd( "lappend modPar %s", ch );
 		}
 
 		if ( ! strcmp( ch, "Func:" ) )
@@ -675,8 +621,6 @@ bool object::load_struct( FILE *f )
 			fscanf( f, "%*[ ]%99s", ch );
 			cv = add_empty_var( ch );
 			cv->param = 2;
-			cmd( "lappend modElem %s", ch );
-			cmd( "lappend modFun %s", ch );
 		}
 
 		fscanf( f, "%*[{\r\t\n]%99s", ch );
@@ -1303,10 +1247,6 @@ void empty_sensitivity( sense *cs )
 
 	if ( cs->next != NULL )
 		empty_sensitivity( cs->next );
-#ifndef _NW_
-	else
-		NOLH_clear( );		// deallocate DoE (last object only)
-#endif
 
 	delete cs;				// suicide
 }

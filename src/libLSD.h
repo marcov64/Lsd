@@ -34,7 +34,7 @@ API int load_gui( const char **argv );
 API int load_term_configuration( int argn, const char **argv );
 API void exception_handler( int signum, const char *what = NULL );
 API void handle_signals( void ( * handler ) ( int signum ) );
-API void myexit( int v );
+API void lsd_exit( int v );
 API void run( void );
 API void set_exec( const char *path, const char *file );
 API void signal_handler( int signum );

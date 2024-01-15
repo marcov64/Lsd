@@ -20,7 +20,7 @@ UTIL.CPP.
 
 The main functions contained in this file are:
 
-- void plog( const char *m );
+- void plog( const char *m, ... );
 print  message string m in the Log screen or the console.
 
 - void error_hard( const char *boxTitle, const char *boxText,
@@ -35,51 +35,57 @@ recovery.
 
 /*********************************
 PLOG
-Print message on the log window
+Print message on the log window,
+if GUI is available, or console
 *********************************/
 void plog( const char *cm, ... )
 {
 	static va_list argptr;
 
 	va_start( argptr, cm );
-	plog_backend( cm, "", argptr );
+	
+	if ( dllcbck.plog_backend != NULL )
+		dllcbck.plog_backend( cm, "", argptr );
+	else
+		plog_terminal( cm, argptr );
+
 	va_end( argptr );
 }
 
 
 /*********************************
 PLOG_TAG
-The optional tag parameter has to correspond to the log window existing tags
+The optional tag parameter has to
+correspond to the log window
+existing tags, if GUI is available,
+or console
 *********************************/
 void plog_tag( const char *cm, const char *tag, ... )
 {
 	static va_list argptr;
 
 	va_start( argptr, tag );
-	plog_backend( cm, tag, argptr );
+
+	if ( dllcbck.plog_backend != NULL )
+		dllcbck.plog_backend( cm, tag, argptr );
+	else
+		plog_terminal( cm, argptr );
+
 	va_end( argptr );
 }
 
 
 /*********************************
-PLOG_BACKEND
-Back-end to plog and plog_tag
+PLOG_TERMINAL
+Back-end to plog and plog_tag on
+console
 *********************************/
-#define NUM_TAGS 7
-const char *tags[ NUM_TAGS ] = { "", "highlight", "table", "series", "prof1", "prof2", "bar" };
-
-void plog_backend( const char *cm, const char *tag, va_list arg )
+void plog_terminal( const char *cm, va_list arg )
 {
 	static bool bufdyn;
 	static char *buffer, *message, bufstat[ MAX_BUFF_SIZE ], msgstat[ MAX_BUFF_SIZE ];
-	static bool tag_ok;
 	static int i, j, reqsz, sz;
 	static va_list argcpy;
-
-#ifndef _NW_
-	if ( ! tk_ok || ! log_ok )
-		return;
-#endif
 
 #ifndef _NP_
 	// abort if not running in main LSD thread
@@ -95,11 +101,7 @@ void plog_backend( const char *cm, const char *tag, va_list arg )
 
 	if ( reqsz < 0 )
 	{
-#ifndef _NW_
-		log_tcl_error( true, "Invalid text message", "Cannot expand message '%s...'", cm );
-#else
 		fprintf( stderr, "\nCannot expand message '%s...'\n", cm );
-#endif
 		return;
 	}
 
@@ -111,11 +113,7 @@ void plog_backend( const char *cm, const char *tag, va_list arg )
 
 		if ( reqsz < 0 || sz > reqsz )
 		{
-#ifndef _NW_
-			log_tcl_error( true, "Invalid text message", "Cannot expand message '%s...'", cm );
-#else
 			fprintf( stderr, "\nCannot expand message '%s...'\n", cm );
-#endif
 			delete [ ] buffer;
 			return;
 		}
@@ -137,31 +135,8 @@ void plog_backend( const char *cm, const char *tag, va_list arg )
 			message[ j++ ] = buffer[ i ];
 	message[ j ] = '\0';
 
-#ifdef _NW_
 	printf( "%s", message );
 	fflush( stdout );
-#else
-	for ( tag_ok = false, i = 0; i < NUM_TAGS; ++i )
-		if ( ! strcmp( tag, tags[ i ] ) )
-			tag_ok = true;
-
-	// handle the "bar" pseudo tag
-	if ( strcmp( tag, "bar" ) )
-		on_bar = false;
-
-	if ( tag_ok )
-	{
-		cmd( "set log_ok 0" );
-		cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { \
-				catch { set log_ok [ winfo exists .log ] } \
-			}" );
-		cmd( "if $log_ok { .log.text.text.internal see [ .log.text.text.internal index insert ] }" );
-		cmd( "if $log_ok { catch { .log.text.text.internal insert end \"%s\" %s } }", message, tag );
-		cmd( "if $log_ok { .log.text.text.internal see end }" );
-	}
-	else
-		plog( "\nError: invalid tag, message ignored:\n%s\n", message );
-#endif
 
 	message_logged = true;
 
@@ -173,13 +148,13 @@ void plog_backend( const char *cm, const char *tag, va_list arg )
 }
 
 
-/***********
+/*************************************************************
 ERROR_HARD
 Procedure called when an unrecoverable error occurs.
 Information about the state of the simulation when the error
 occurred is provided. Users can abort the program or analyze
 the results collected up the latest time step available.
-*************/
+*************************************************************/
 #ifndef _NP_
 mutex error;
 #endif
@@ -216,131 +191,14 @@ void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const 
 	}
 #endif
 
-#ifndef _NW_
-	if ( running )			// handle running events differently
-	{
-		cmd( "if [ winfo exists .deb ] { destroytop .deb }" );
-		deb_log( false );	// close any open debug log file
-		reset_plot( );		// show & disable run-time plot
-		set_buttons_run( false );
-
-		plog_tag( "\n\nError detected at case (time step): %d", "highlight", t );
-		plog( "\n\nError: %s\nDetails: %s", boxTitle, logText );
-		if ( ! parallel_mode && stack_log != NULL && stack_log->vs != NULL )
-			plog( "\nOffending code contained in the equation for variable: '%s'", stack_log->vs->label );
-		plog( "\nSuggestion: %s", boxText );
-		print_stack( );
-		cmd( "focustop .log" );
-		cmd( "ttk::messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\n\nSimulation cannot continue.\"", boxTitle, boxText  );
-	}
-	else
-	{
-		plog( "\n\nError: %s\nDetails: %s", boxTitle, logText );
-		plog( "\nSuggestion: %s\n", boxText );
-		cmd( "ttk::messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\"", boxTitle, boxText  );
-	}
-#endif
-
-	if ( ! running )
-		return;
-
 	quit = 2;				// do not continue simulation
 
-#ifndef _NW_
-	uncover_browser( );
-	cmd( "focustop .log" );
+	if ( dllcbck.error_hard_helper != NULL )
+		dllcbck.error_hard_helper( boxTitle, boxText, logText, defQuit );
+	else
+		fprintf( stderr, "\nError: %s\n(%s)\n", boxTitle, logText );
 
-	cmd( "set err %d", ( defQuit || worker_errors( ) ) > 0 ? 1 : 2 );
-
-	cmd( "newtop .cazzo Error" );
-
-	cmd( "ttk::frame .cazzo.t" );
-	cmd( "ttk::label .cazzo.t.l -style hl.TLabel -text \"An error occurred during the simulation\"" );
-	cmd( "pack .cazzo.t.l -pady 10" );
-	cmd( "ttk::label .cazzo.t.l1 -justify center -text \"Information about the error is reported in the log window.\nPartial results are available in the LSD browser.\"" );
-	cmd( "pack .cazzo.t.l1" );
-
-	cmd( "ttk::frame .cazzo.e" );
-	cmd( "ttk::label .cazzo.e.l -text \"Choose one option to continue\"" );
-
-	cmd( "ttk::frame .cazzo.e.b -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-	cmd( "ttk::radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to LSD Browser to edit the model configuration\"" );
-	cmd( "ttk::radiobutton .cazzo.e.b.d -variable err -value 3 -text \"Open LSD Debugger on the offending variable and object instance\"" );
-	cmd( "ttk::radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit LSD Browser to edit the model equations' code in LMM\"" );
-	cmd( "pack .cazzo.e.b.r .cazzo.e.b.d .cazzo.e.b.e -anchor w" );
-
-	cmd( "pack .cazzo.e.l .cazzo.e.b" );
-
-	cmd( "pack .cazzo.t .cazzo.e -padx 5 -pady 5" );
-
-	cmd( "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
-
-	cmd( "showtop .cazzo centerW" );
-	cmd( "mousewarpto .cazzo.b.ok" );
-
-	if ( parallel_mode || fast_mode != 0 )
-		cmd( ".cazzo.e.b.d configure -state disabled" );
-
-	if ( worker_errors( ) > 0 )
-		cmd( ".cazzo.e.b.r configure -state disabled" );
-
-	choice = 0;
-	while ( choice == 0 )
-		Tcl_DoOneEvent( 0 );
-
-	cmd( "destroytop .cazzo" );
-
-	int err = get_int( "err" );
-
-	if ( err == 3 )
-	{
-		if ( ! parallel_mode && fast_mode == 0 && stack_log != NULL &&
-			 stack_log->vs != NULL && stack_log->vs->label != NULL )
-		{
-			char err_msg[ MAX_LINE_SIZE ];
-			double useless = -1;
-			snprintf( err_msg, MAX_LINE_SIZE, "%s (ERROR)", stack_log->vs->label );
-			deb( stack_log->vs->up, NULL, err_msg, & useless );
-		}
-
-		err = 2;
-	}
-
-	if ( err == 2 )
-	{
-		// do run( ) cleanup
-		empty_stack( );
-		unsavedData = true;				// flag unsaved simulation results
-		running = false;
-
-		// run user closing function, reporting error appropriately
-		user_exception = true;
-		close_sim( );
-		user_exception = false;
-
-		reset_end( root );
-		uncover_browser( );
-
-#ifndef _NP_
-		// stop multi-thread workers
-		delete [ ] workers;
-		workers = NULL;
-#endif
-		throw ( int ) 919293;			// force end of run() (in lsdmain.cpp)
-	}
-
-	if ( err == 1 )
-	{
-		save_pos( currObj );			// save browser position in structure
-		update_model_info( );			// save windows positions if appropriate
-	}
-
-#else
-
-	fprintf( stderr, "\nError: %s\n(%s)\n", boxTitle, logText );
-#endif
-
-	myexit( 13 );
+	lsd_exit( 13 );
 }
 
 

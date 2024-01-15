@@ -3837,7 +3837,7 @@ void plot_tseries( void )
 							"if error persists, please contact developers",
 							true,
 							"invalid series data" );
-				myexit( 18 );
+				lsd_exit_gui( 18 );
 			}
 
 			if ( logs )			// apply log to the values to show "log scale" in the y-axis
@@ -4037,7 +4037,7 @@ void plot_cross( void )
 							"if error persists, please contact developers",
 							true,
 							"invalid series data" );
-				myexit( 18 );
+				lsd_exit_gui( 18 );
 			}
 
 			if ( logs )			// apply log to the values to show "log scale"
@@ -4472,7 +4472,7 @@ void insert_data_mem( object *r, int *num_v, const char *lab )
 					"if error persists, please contact developers",
 					true,
 					"invalid number of series" );
-		myexit( 18 );
+		lsd_exit_gui( 18 );
 	}
 }
 
@@ -4915,7 +4915,7 @@ void statistics( void )
 							"if error persists, please contact developers",
 							true,
 							"invalid series data" );
-				myexit( 18 );
+				lsd_exit_gui( 18 );
 			}
 
 			if ( logs )			// apply log to the values to show "log scale" in the y-axis
@@ -5061,7 +5061,7 @@ void statistics_cross( void )
 						"if error persists, please contact developers",
 						true,
 						"invalid series data" );
-			myexit( 18 );
+			lsd_exit_gui( 18 );
 		}
 
 		if ( logs )			// apply log to the values to show "log scale" in the y-axis
@@ -5257,7 +5257,7 @@ void plot_gnu( void )
 							"if error persists, please contact developers",
 							true,
 							"invalid series data" );
-				myexit( 18 );
+				lsd_exit_gui( 18 );
 			}
 
 			if ( logs )		// apply log to the values to show "log scale" in the y-axis
@@ -5715,7 +5715,7 @@ void plot_cs_xy( void )
 							"if error persists, please contact developers",
 							true,
 							"invalid series data" );
-				myexit( 18 );
+				lsd_exit_gui( 18 );
 			}
 
 			if ( logs )		// apply log to the values to show "log scale" in the y-axis
@@ -6137,7 +6137,7 @@ void plot_phase_diagram( void )
 							"if error persists, please contact developers",
 							true,
 							"invalid series data" );
-				myexit( 18 );
+				lsd_exit_gui( 18 );
 			}
 
 			if ( logs )			// apply log to the values to show "log scale" in the y-axis
@@ -6722,7 +6722,7 @@ void plot_lattice( void )
 						"if error persists, please contact developers",
 						true,
 						"invalid series data" );
-			myexit( 18 );
+			lsd_exit_gui( 18 );
 		}
 
 		if ( logs )			// apply log to the values to show "log scale"
@@ -6894,7 +6894,7 @@ void histograms( void )
 					"if error persists, please contact developers",
 					true,
 					"invalid series data" );
-		myexit( 18 );
+		lsd_exit_gui( 18 );
 	}
 
 	if ( logs )			// apply log to the values to show "log scale" in the y-axis
@@ -7159,7 +7159,7 @@ void histograms_cs( void )
 						"if error persists, please contact developers",
 						true,
 						"invalid series data" );
-			myexit( 18 );
+			lsd_exit_gui( 18 );
 		}
 
 		if ( logs )			// apply log to the values to show "log scale" in the y-axis
@@ -7635,7 +7635,7 @@ bool create_series( bool mc, vector < string > var_names )
 							"if error persists, please contact developers",
 							true,
 							"invalid series data" );
-				myexit( 18 );
+				lsd_exit_gui( 18 );
 			}
 		}
 	}
@@ -8090,7 +8090,7 @@ bool create_maverag( void )
 							"if error persists, please contact developers",
 							true,
 							"invalid series data" );
-				myexit( 18 );
+				lsd_exit_gui( 18 );
 			}
 
 			if ( ma_type == 0 )		// simple moving average
@@ -8304,7 +8304,7 @@ void save_datazip( void )
 						"if error persists, please contact developers",
 						true,
 						"invalid series data" );
-			myexit( 18 );
+			lsd_exit_gui( 18 );
 		}
 
 		if ( max_c < end[ i ] )
@@ -8760,7 +8760,7 @@ void plog_series( void )
 							"if error persists, please contact developers",
 							true,
 							"invalid series data" );
-				myexit( 18 );
+				lsd_exit_gui( 18 );
 			}
 		}
 	}
@@ -9945,7 +9945,7 @@ int store( struct s *c, int x4 )
 				"if error persists, please contact developers",
 				true,
 				"invalid data structure" );
-	myexit( 14 );
+	lsd_exit_gui( 14 );
 
 	return 0;
 }
@@ -9980,7 +9980,7 @@ int store( struct s *c, int x3, int x4 )
 				"if error persists, please contact developers",
 				true,
 				"invalid data structure" );
-	myexit( 15 );
+	lsd_exit_gui( 15 );
 
 	return 0;
 }
@@ -10020,7 +10020,7 @@ int store( struct s *c, int x2, int x3, int x4 )
 				"if error persists, please contact developers",
 				true,
 				"invalid data structure" );
-	myexit( 16 );
+	lsd_exit_gui( 16 );
 
 	return 0;
 }
@@ -10065,7 +10065,7 @@ int store( int x1, int x2, int x3, int x4 )
 				"if error persists, please contact developers",
 				true,
 				"invalid data structure" );
-	myexit( 17 );
+	lsd_exit_gui( 17 );
 
 	return 0;
 }

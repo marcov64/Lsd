@@ -75,7 +75,7 @@ int main( int argn, const char **argv )
 
 		// terminal load
 		if ( ( res = load_term_configuration( argn, argv ) ) != 0 )
-			myexit( res );
+			lsd_exit( res );
 
 		// simulation execution
 		run( );
@@ -99,6 +99,6 @@ int main( int argn, const char **argv )
 
 #endif
 
-	myexit( res );
+	lsd_exit( res );
 	return res;
 }

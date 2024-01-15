@@ -114,7 +114,7 @@ int lsdmain( int argn, const char **argv )
 	if ( argn < 3 )
 	{
 		fprintf( stderr, "\n%s\n%s\n%s\n", lsdCmdMsg, lsdCmdDsc, lsdCmdHlp );
-		myexit( 1 );
+		lsd_exit( 1 );
 	}
 	else
 	{
@@ -143,21 +143,21 @@ int lsdmain( int argn, const char **argv )
 			}
 
 			fprintf( stderr, "\nOption '%c%c' not recognized.\n%s\n%s\n", argv[ i ][ 0 ], argv[ i ][ 1 ], lsdCmdMsg, lsdCmdHlp );
-			myexit( 2 );
+			lsd_exit( 2 );
 		}
 	}
 
 	if ( struct_file == NULL )
 	{
 		fprintf( stderr, "\nNo configuration file provided.\n%s.\nSpecify a -f FILENAME.lsd to use for reading the saved variables (if any).\n\n", lsdCmdMsg );
-		myexit( 3 );
+		lsd_exit( 3 );
 	}
 
 	f = fopen( struct_file, "r" );
 	if ( f == NULL )
 	{
 		fprintf( stderr, "\nFile '%s' not found.\n%s\nSpecify an existing -f FILENAME.lsd configuration file.\n\n", struct_file, lsdCmdMsg );
-		myexit( 4 );
+		lsd_exit( 4 );
 	}
 	fclose( f );
 
@@ -174,7 +174,7 @@ int lsdmain( int argn, const char **argv )
 	if ( load_configuration( true ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\n%s\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n\n", struct_file, lsdCmdMsg );
-		myexit( 5 );
+		lsd_exit( 5 );
 	}
 
 	count_save( root, & i );
@@ -190,7 +190,7 @@ int lsdmain( int argn, const char **argv )
 		if ( f == NULL )
 		{
 			fprintf( stderr, "\nFile '%s' cannot be saved.\n%s\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n\n", out_file, lsdCmdMsg );
-			myexit( 6 );
+			lsd_exit( 6 );
 		}
 
 		sep = new char [ strlen( CSV_SEP ) + 1 ];

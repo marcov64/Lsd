@@ -145,7 +145,7 @@ int lsdmain( int argn, const char **argv )
 	if ( argn < 7 )
 	{
 		fprintf( stderr, "\n%s\n%s\n%s\n", lsdCmdMsg, lsdCmdDsc, lsdCmdHlp );
-		myexit( 1 );
+		lsd_exit( 1 );
 	}
 	else
 	{
@@ -174,21 +174,21 @@ int lsdmain( int argn, const char **argv )
 			}
 
 			fprintf( stderr, "\nOption '%c%c' not recognized.\n%s\n%s\n", argv[ i ][ 0 ], argv[ i ][ 1 ], lsdCmdMsg, lsdCmdHlp );
-			myexit( 2 );
+			lsd_exit( 2 );
 		}
 	}
 
 	if ( struct_file == NULL )
 	{
 		fprintf( stderr, "\nNo original configuration file provided.\n%s\nSpecify a -f FILENAME.lsd to use as a base for the new configuration files.\n\n", lsdCmdMsg );
-		myexit( 3 );
+		lsd_exit( 3 );
 	}
 
 	f = fopen( struct_file, "r" );
 	if ( f == NULL )
 	{
 		fprintf( stderr, "\nFile '%s' not found.\n%s\nSpecify an existing -f FILENAME.lsd base configuration file.\n\n", struct_file, lsdCmdMsg );
-		myexit( 4 );
+		lsd_exit( 4 );
 	}
 	fclose( f );
 
@@ -205,7 +205,7 @@ int lsdmain( int argn, const char **argv )
 	if ( f == NULL )
 	{
 		fprintf( stderr, "\nFile '%s' not found.\n%s\nSpecify an existing -c CONFIG.csv to use as the new configuration values.\n\n", config_file, lsdCmdMsg );
-		myexit( 4 );
+		lsd_exit( 4 );
 	}
 	fclose( f );
 
@@ -226,14 +226,14 @@ int lsdmain( int argn, const char **argv )
 	if ( load_configuration( true ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\n%s\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n\n", struct_file, lsdCmdMsg );
-		myexit( 5 );
+		lsd_exit( 5 );
 	}
 
 	confs = load_confs_csv( config_file );
 	if ( confs == 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\n%s\nSpecify a -c CONFIG.csv with a valid comma separated format.\n\n", config_file, lsdCmdMsg );
-		myexit( 6 );
+		lsd_exit( 6 );
 	}
 
 	for ( i = 1; i <= confs; ++i )
@@ -241,13 +241,13 @@ int lsdmain( int argn, const char **argv )
 		if ( ! change_configuration( root, i ) )
 		{
 			fprintf( stderr, "\nInvalid parameter or variable name.\n%s\nCheck if the spelling of the names of parameters and variables is exactly the\nsame as in the original configuration.\n\n", lsdCmdMsg );
-			myexit( 7 );
+			lsd_exit( 7 );
 		}
 
 		if ( ! save_xml_configuration( confs == 1 ? 0 : i, "", true ) )
 		{
 			fprintf( stderr, "\nFile '%s.lsd' cannot be saved.\n%s\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n\n", simul_name, lsdCmdMsg  );
-			myexit( 8 );
+			lsd_exit( 8 );
 		}
 	}
 

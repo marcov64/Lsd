@@ -20,13 +20,114 @@ executables are stored in UTILLIB.CPP.
 
 The main functions contained in this file are:
 
-- void cmd( const char *cc );
+- void plog_backend( const char *cm, ... );
+print  message string m in the Log screen.
+
+- void cmd( const char *cc, ... );
 Standard routine to send the message string cc to the TCL
 interpreter in order to execute a command for the graphical
 interfaces.
 *************************************************************/
 
 #include "decl.h"
+
+
+/*********************************
+PLOG_BACKEND
+Back-end to plog and plog_tag on
+log window
+*********************************/
+#define NUM_TAGS 7
+const char *tags[ NUM_TAGS ] = { "", "highlight", "table", "series", "prof1", "prof2", "bar" };
+
+void plog_backend( const char *cm, const char *tag, va_list arg )
+{
+	static bool bufdyn;
+	static char *buffer, *message, bufstat[ MAX_BUFF_SIZE ], msgstat[ MAX_BUFF_SIZE ];
+	static bool tag_ok;
+	static int i, j, reqsz, sz;
+	static va_list argcpy;
+
+	if ( ! tk_ok || ! log_ok )
+		return;
+
+#ifndef _NP_
+	// abort if not running in main LSD thread
+	if ( this_thread::get_id( ) != main_thread )
+		return;
+#endif
+
+	buffer = bufstat;
+	message = msgstat;
+	va_copy( argcpy, arg );
+
+	reqsz = vsnprintf( buffer, MAX_BUFF_SIZE, cm, arg );
+
+	if ( reqsz < 0 )
+	{
+		log_tcl_error( true, "Invalid text message", "Cannot expand message '%s...'", cm );
+		return;
+	}
+
+	// handle very large messages
+	if ( reqsz >= MAX_BUFF_SIZE )
+	{
+		buffer = new char[ reqsz + 1 ];
+		sz = vsnprintf( buffer, reqsz + 1, cm, argcpy );
+
+		if ( reqsz < 0 || sz > reqsz )
+		{
+			log_tcl_error( true, "Invalid text message", "Cannot expand message '%s...'", cm );
+			delete [ ] buffer;
+			return;
+		}
+
+		message = new char[ reqsz + 1 ];
+		bufdyn = true;
+	}
+	else
+		bufdyn = false;
+
+	va_end( argcpy );
+
+	// remove invalid charaters and Tk control characters
+	for ( i = 0, j = 0; buffer[ i ] != '\0' && j < reqsz; ++i )
+		if ( ( isprint( buffer[ i ] ) || buffer[ i ] == '\n' ||
+			   buffer[ i ] == '\r' || buffer[ i ] == '\t' ) &&
+			 ! ( buffer[ i ] == '\"' ||
+				 ( buffer[ i ] == '$' && buffer[ i + 1 ] != '$' ) ) )
+			message[ j++ ] = buffer[ i ];
+	message[ j ] = '\0';
+
+	for ( tag_ok = false, i = 0; i < NUM_TAGS; ++i )
+		if ( ! strcmp( tag, tags[ i ] ) )
+			tag_ok = true;
+
+	// handle the "bar" pseudo tag
+	if ( strcmp( tag, "bar" ) )
+		on_bar = false;
+
+	if ( tag_ok )
+	{
+		cmd( "set log_ok 0" );
+		cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { \
+				catch { set log_ok [ winfo exists .log ] } \
+			}" );
+		cmd( "if $log_ok { .log.text.text.internal see [ .log.text.text.internal index insert ] }" );
+		cmd( "if $log_ok { catch { .log.text.text.internal insert end \"%s\" %s } }", message, tag );
+		cmd( "if $log_ok { .log.text.text.internal see end }" );
+	}
+	else
+		plog( "\nError: invalid tag, message ignored:\n%s\n", message );
+
+	message_logged = true;
+
+	if ( bufdyn )
+	{
+		delete [ ] buffer;
+		delete [ ] message;
+	}
+}
 
 
 /****************************
@@ -60,7 +161,130 @@ void print_stack( void )
 	plog( "\n\n(the zero-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones\nbecause necessary for completing their computation)\n" );
 }
 
-#ifndef _NW_
+
+/*************************************************************
+ERROR_HARD_HELPER
+Helper function to handle unrecoverable errors at the GUI.
+Users can abort the program or analyze the results collected
+up the latest time step available.
+*************************************************************/
+void error_hard_helper( const char *boxTitle, const char *boxText, const char *logText, bool defQuit )
+{
+	if ( running )			// handle running events differently
+	{
+		cmd( "if [ winfo exists .deb ] { destroytop .deb }" );
+		deb_log( false );	// close any open debug log file
+		reset_plot( );		// show & disable run-time plot
+		set_buttons_run( false );
+
+		plog_tag( "\n\nError detected at case (time step): %d", "highlight", t );
+		plog( "\n\nError: %s\nDetails: %s", boxTitle, logText );
+		if ( ! parallel_mode && stack_log != NULL && stack_log->vs != NULL )
+			plog( "\nOffending code contained in the equation for variable: '%s'", stack_log->vs->label );
+		plog( "\nSuggestion: %s", boxText );
+		print_stack( );
+		cmd( "focustop .log" );
+		cmd( "ttk::messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\n\nSimulation cannot continue.\"", boxTitle, boxText  );
+	}
+	else
+	{
+		plog( "\n\nError: %s\nDetails: %s", boxTitle, logText );
+		plog( "\nSuggestion: %s\n", boxText );
+		cmd( "ttk::messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\"", boxTitle, boxText  );
+	}
+
+	if ( ! running )
+		return;
+
+	uncover_browser( );
+	cmd( "focustop .log" );
+
+	cmd( "set err %d", ( defQuit || worker_errors( ) ) > 0 ? 1 : 2 );
+
+	cmd( "newtop .cazzo Error" );
+
+	cmd( "ttk::frame .cazzo.t" );
+	cmd( "ttk::label .cazzo.t.l -style hl.TLabel -text \"An error occurred during the simulation\"" );
+	cmd( "pack .cazzo.t.l -pady 10" );
+	cmd( "ttk::label .cazzo.t.l1 -justify center -text \"Information about the error is reported in the log window.\nPartial results are available in the LSD browser.\"" );
+	cmd( "pack .cazzo.t.l1" );
+
+	cmd( "ttk::frame .cazzo.e" );
+	cmd( "ttk::label .cazzo.e.l -text \"Choose one option to continue\"" );
+
+	cmd( "ttk::frame .cazzo.e.b -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+	cmd( "ttk::radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to LSD Browser to edit the model configuration\"" );
+	cmd( "ttk::radiobutton .cazzo.e.b.d -variable err -value 3 -text \"Open LSD Debugger on the offending variable and object instance\"" );
+	cmd( "ttk::radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit LSD Browser to edit the model equations' code in LMM\"" );
+	cmd( "pack .cazzo.e.b.r .cazzo.e.b.d .cazzo.e.b.e -anchor w" );
+
+	cmd( "pack .cazzo.e.l .cazzo.e.b" );
+
+	cmd( "pack .cazzo.t .cazzo.e -padx 5 -pady 5" );
+
+	cmd( "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
+
+	cmd( "showtop .cazzo centerW" );
+	cmd( "mousewarpto .cazzo.b.ok" );
+
+	if ( parallel_mode || fast_mode != 0 )
+		cmd( ".cazzo.e.b.d configure -state disabled" );
+
+	if ( worker_errors( ) > 0 )
+		cmd( ".cazzo.e.b.r configure -state disabled" );
+
+	choice = 0;
+	while ( choice == 0 )
+		Tcl_DoOneEvent( 0 );
+
+	cmd( "destroytop .cazzo" );
+
+	int err = get_int( "err" );
+
+	if ( err == 3 )
+	{
+		if ( ! parallel_mode && fast_mode == 0 && stack_log != NULL &&
+			 stack_log->vs != NULL && stack_log->vs->label != NULL )
+		{
+			char err_msg[ MAX_LINE_SIZE ];
+			double useless = -1;
+			snprintf( err_msg, MAX_LINE_SIZE, "%s (ERROR)", stack_log->vs->label );
+			deb( stack_log->vs->up, NULL, err_msg, & useless );
+		}
+
+		err = 2;
+	}
+
+	if ( err == 2 )
+	{
+		// do run( ) cleanup
+		empty_stack( );
+		unsavedData = true;				// flag unsaved simulation results
+		running = false;
+
+		// run user closing function, reporting error appropriately
+		user_exception = true;
+		close_sim( );
+		user_exception = false;
+
+		reset_end( root );
+		uncover_browser( );
+
+#ifndef _NP_
+		// stop multi-thread workers
+		delete [ ] workers;
+		workers = NULL;
+#endif
+		throw ( int ) 919293;			// force end of run() (in lsdmain.cpp)
+	}
+
+	if ( err == 1 )
+	{
+		save_pos( currObj );			// save browser position in structure
+		update_model_info( );			// save windows positions if appropriate
+	}
+}
+
 
 /***************************************************
 FMT_TTIP_DESCR
@@ -327,8 +551,6 @@ void auto_document( const char *lab, const char *which, bool append )
 		} 					// end of the label to document
 	}						// end of the for (desc)
 }
-
-#endif
 
 
 /****************************************************

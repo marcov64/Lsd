@@ -551,7 +551,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 						"if error persists, please contact developers",
 						true,
 						"invalid option for setting values" );
-			myexit( 22 );
+			lsd_exit_gui( 22 );
 	}
 
 	if ( update_d )

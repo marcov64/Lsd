@@ -15,13 +15,6 @@
 /*************************************************************
 DECL.H
 Global definitions among all LSD C++ modules
-
-Relevant macros for conditional compilation (when defined):
-
-- _FUN_: user model equation file
-- _NW_: No Window executable
-- _NP_: no parallel (multi-task) processing
-- _NT_: no signal trapping (better when debugging in GDB)
 *************************************************************/
 
 // common definitions for LMM and LSD
@@ -156,6 +149,7 @@ double weibull( double a, double b );					// draw from a Weibull distribution
 void close_lattice( void );
 void deb_log( bool on, int time = 0 );					// control debug mode
 void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const char *logFmt, ... );
+void error_hard_helper( const char *boxTitle, const char *boxText, const char *logText, bool defQuit );
 void init_random( unsigned seed );						// reset the random number generator seed
 void set_fast( int level );								// enable fast mode
 void *set_random( int gen );							// set random generator
@@ -232,6 +226,8 @@ description *add_description( const char *lab, int type = 4, const char *text = 
 description *change_description( const char *lab_old, const char *lab = NULL, int type = -1, const char *text = NULL, const char *init = NULL, int initial = -1, int observe = -1 );
 description *search_description( const char *lab, bool add_missing = true );
 double lower_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
+double save_lattice_helper( const char *fname );
+double update_lattice_helper( double line, double col, double val, int line_int, int col_int, int val_int );
 double upper_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
 double *log_data( double *data, int start, int end, int ser, const char *err_msg );
 int browse( object *r );
@@ -317,6 +313,7 @@ void get_saved( object *n, FILE *out, const char *sep, bool all_var = false );
 void get_var_descr( const char *lab, char *desc, int descr_len );
 void histograms( void );
 void histograms_cs( void );
+void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, int init_color );
 void init_map( void );
 void init_math_error( void );
 void init_plot( int i );
@@ -327,12 +324,15 @@ void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int 
 void insert_object( const char *w, object *r, bool netOnly = false, object *above = NULL );
 void insert_store_mem( object *r, int max_v, int *num_v, const char *lab = NULL );
 void link_cells( object *root, const char *lab );
+void load_elem_lists( object *r );
 void log_parallel( bool nw );
+void lsd_exit_gui( int v );
 void monitor_parallel( bool nw );
 void move_obj( const char *lab, const char *dest );
 void plog_backend( const char *cm, const char *tag, va_list arg );
 void plog_series( void );
 void plog_tag( const char *cm, const char *tag, ... );
+void plog_terminal( const char *cm, va_list arg );
 void plot( int type, const int *start, const int *end, char **str, char **tag, bool norm );
 void plot( int type, int nv, double **data, const int *start, const int *end, const int *id, char **str, char **tag );
 void plot_canvas( int type, int nv, const int *start, const int *end, char **str, char **tag );
@@ -412,7 +412,8 @@ void tex_report_initall( object *r, FILE *f, bool table = true );
 void tex_report_observe( object *r, FILE *f, bool table = true );
 void tex_report_struct( object *r, FILE *f, bool table = true );
 void uncover_browser( void );
-void unload_configuration ( bool full );
+void unload_configuration( bool full );
+void unload_configuration_gui( bool full );
 void unlink_cells( object *r, const char *lab );
 void unset_shortcuts_run( const char *window );
 void update_bar( char *bar, int done, int & last_done, int bar_sz );

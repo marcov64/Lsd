@@ -42,13 +42,6 @@ model at run time.
 
 - bool alloc_save_mem( );
 Prepare variables to store saved data.
-
-Relevant macros for conditional compilation (when defined):
-
-- _FUN_: user model equation file
-- _NW_: No Window executable
-- _NP_: no parallel (multi-task) processing
-- _NT_: no signal trapping (better when debugging in GDB)
 *************************************************************/
 
 #include "decl.h"
@@ -127,6 +120,7 @@ char path_sens[ MAX_PATH_LENGTH ] = "";	// path of last used sensitivity directo
 char tcl_dir[ MAX_PATH_LENGTH ] = "";	// Tcl/Tk directory
 char watch_elem[ MAX_ELEM_LENGTH + 1 ] = "";// name of element triggering watch condition
 description *descr = NULL;	// model description structure
+dllcallback dllcbck;		// call-back references for DLL
 eq_mapT eq_map;				// fast equation look-up map
 int actual_steps = 0;		// number of executed time steps
 int choice;					// Tcl menu control variable (main window)
@@ -810,7 +804,7 @@ int load_gui( const char **argv )
 	else
 		i = 0;
 
-	// no or failed configuration
+	// failed configuration
 	if ( i == 0 )
 	{
 		delete [ ] simul_name;
@@ -834,6 +828,17 @@ int load_gui( const char **argv )
 	cmd( "init_canvas_colors" );
 
 	create_logwindow( );
+
+	// set dynamic link library (DLL) call-back references
+	dllcbck.cmd = & cmd;
+	dllcbck.deb = & deb;
+	dllcbck.print_stack = & print_stack;
+	dllcbck.plog_backend = & plog_backend;
+	dllcbck.log_tcl_error = & log_tcl_error;
+	dllcbck.error_hard_helper = & error_hard_helper;
+	dllcbck.init_lattice_helper = & init_lattice_helper;
+	dllcbck.update_lattice_helper = & update_lattice_helper;
+	dllcbck.save_lattice_helper = & save_lattice_helper;
 
 	while ( 1 )						// main GUI loop: create/edit configuration - run
 	{
@@ -953,7 +958,7 @@ void run( void )
 #else
 				fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );
 #endif
-				myexit( 10 );
+				lsd_exit( 10 );
 			}
 			batch_sequential_loop = false;
 		}
@@ -968,7 +973,7 @@ void run( void )
 #else
 				fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );
 #endif
-				myexit( 10 );
+				lsd_exit( 10 );
 			}
 
 		// build initial object list for user pointer checking
@@ -986,7 +991,7 @@ void run( void )
 #else
 			fprintf( stderr, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, max_step );
 #endif
-			myexit( 11 );
+			lsd_exit( 11 );
 		}
 
 		// reset trace stack
@@ -1395,7 +1400,7 @@ void empty_stack( void )
 #else
 		fprintf( stderr, "\nLSD trace stack corrupted.\n" );
 #endif
-		myexit( 28 );
+		lsd_exit( 28 );
 	}
 }
 
@@ -2020,7 +2025,7 @@ CREATE_LOGWINDOW
 void create_logwindow( void )
 {
 	if ( ! tk_ok )
-		myexit( 7 );
+		lsd_exit_gui( 7 );
 
 	cmd( "newtop .log \"LSD Log\" { if { [ discard_change ] eq \"ok\" && [ abort_run_threads ] eq \"ok\" } { exit } } \"\"" );
 

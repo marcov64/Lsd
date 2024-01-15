@@ -47,9 +47,6 @@ list and help window
 Relevant macros for conditional compilation (when defined):
 
 - _LMM_: Model Manager executable
-- _FUN_: user model equation file
-- _NW_: No Window executable
-- _NP_: no parallel (multi-task) processing
 - _NT_: no signal trapping (better when debugging in GDB)
 *************************************************************/
 
@@ -70,6 +67,7 @@ bool tk_ok = false;				// control for tk_ready to operate
 char err_file[ ] = "LMM.err";	// error log file name
 char *exec_path = NULL;			// path of executable file
 char *rootLsd = NULL;			// path of LSD root directory
+dllcallback dllcbck;			// call-back references for DLL
 int platform = 0;				// OS platform (1=Linux, 2=Mac, 3=Windows)
 int tosave = false;				// modified file flag
 Tcl_Interp *inter = NULL;		// Tcl standard interpreter pointer
@@ -119,7 +117,7 @@ int main( int argn, const char **argv )
 
 #endif
 
-	myexit( res );
+	lsd_exit( res );
 	return res;
 }
 
@@ -308,6 +306,10 @@ int modman( int argn, const char **argv )
 	cmd( "sizetop .lmm" );
 	cmd( "setglobkeys ." );				// set global keys for main window
 	cmd( "setstyles" );					// set ttk custom style
+
+	// set dynamic link library (DLL) call-back references
+	dllcbck.cmd = & cmd;
+	dllcbck.log_tcl_error = & log_tcl_error;
 
 	// main menu
 	cmd( "ttk::menu .m -tearoff 0" );

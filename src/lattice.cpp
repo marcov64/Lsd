@@ -24,8 +24,6 @@ int **lattice = NULL;					// lattice data colors array
 int rows = 0;							// lattice size
 int columns = 0;
 int error_count;						// error counters
-double dimW = 0;						// lattice screen size
-double dimH = 0;
 
 
 /***************************************************
@@ -44,8 +42,7 @@ Create a new run time lattice having:
 ***************************************************/
 double init_lattice( double pixW, double pixH, double nrow, double ncol, const char lrow[ ], const char lcol[ ], const char lvar[ ], object *p, int init_color )
 {
-	char init_color_string[ 32 ];	// the final string to be used to define tk color to use
-	int i, j, hsize, vsize, hsizeMax, vsizeMax;
+	int i, j;
 
 	// ignore invalid values
 	if ( ( int ) nrow < 1 || ( int ) ncol < 1 || ( int ) nrow > INT_MAX || ( int ) ncol > INT_MAX )
@@ -71,7 +68,148 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, const c
 		for ( j = 0; j < columns; ++j )
 			lattice[ i ][ j ] = init_color;
 
-#ifndef _NW_
+	if ( dllcbck.init_lattice_helper != 0 )
+		dllcbck.init_lattice_helper( pixW, pixH, nrow, ncol, init_color );
+
+	return 0;
+}
+
+// call for macro
+double init_lattice( int init_color, double nrow, double ncol, double pixW, double pixH )
+{
+	return init_lattice( pixW, pixH, nrow, ncol, "y", "x", "", NULL, init_color );
+}
+
+
+/***************************************************
+EMPTY_LATTICE
+***************************************************/
+void empty_lattice( void )
+{
+	if ( lattice != NULL && rows > 0 )
+	{
+		for ( int i = 0; i < rows; ++i )
+			delete [ ] lattice[ i ];
+
+		delete [ ] lattice;
+	}
+
+	lattice = NULL;
+	rows = columns = 0;
+}
+
+
+/***************************************************
+CLOSE_LATTICE
+***************************************************/
+void close_lattice( void )
+{
+	empty_lattice( );
+
+	if ( dllcbck.cmd != 0 )					// Tcl GUI available?
+		dllcbck.cmd( "destroytop .lat" );
+}
+
+
+/***************************************************
+UPDATE_LATTICE
+update the cell line.col to the color val (1 to 21 as set in default.tcl palette)
+negative values of val prompt for the use of the (positive) RGB equivalent
+***************************************************/
+double update_lattice( double line, double col, double val )
+{
+	int line_int, col_int, val_int;
+
+	line_int = line - 1;
+	col_int = col - 1;
+	val_int = max( 0, floor( val ) );
+
+	// ignore invalid values
+	if ( line_int < 0 || col_int < 0 || line_int >= rows ||
+		 col_int >= columns || ( int ) fabs( val ) > INT_MAX )
+	{
+		if ( error_count == ERR_LIM )
+			plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");
+		else
+			if ( error_count < ERR_LIM )
+				plog( "\nError: invalid lattice update values, ignoring." );
+		
+		++error_count;
+
+		return -1;
+	}
+
+	// save lattice color data
+
+	if ( lattice != NULL && rows > 0 && columns > 0 )
+	{
+		if ( val >= 0 && lattice[ line_int ][ col_int ] == val_int )
+			return 0;
+		else
+			lattice[ line_int ][ col_int ] = val_int;
+	}
+
+	if ( dllcbck.update_lattice_helper != 0 )
+		return dllcbck.update_lattice_helper( line, col, val, line_int, col_int, val_int );
+	else
+		return 0;
+}
+
+
+/***************************************************
+READ_LATTICE
+read the cell line.col color val (1 to 21 as set in default.tcl palette)
+negative values of val mean the use of the (positive) RGB equivalent
+***************************************************/
+double read_lattice( double line, double col )
+{
+	// ignore invalid values
+	if ( ( int ) line <= 0 || ( int ) col <= 0 || ( int ) line > rows || ( int ) col > columns )
+	{
+		if ( error_count == ERR_LIM )
+			plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");
+		else
+			if ( error_count < ERR_LIM )
+				plog( "\nError: invalid lattice update values, ignoring." );
+
+		++error_count;
+
+		return -1;
+	}
+
+	if ( lattice != NULL && rows > 0 && columns > 0 )
+		return lattice[ ( int ) line - 1 ][ ( int ) col - 1 ];
+	else
+		return 0;
+}
+
+
+/***************************************************
+SAVE_LATTICE
+Save the existing lattice (if any) to the specified file name.
+***************************************************/
+double save_lattice( const char *fname )
+{
+	if ( dllcbck.save_lattice_helper != 0 )
+		return dllcbck.save_lattice_helper( fname );
+	else
+		return 0;
+}
+
+
+#if ! defined _NW_ && ! defined _DLL_
+
+double dimW = 0;						// lattice screen size
+double dimH = 0;
+
+/***************************************************
+INIT_LATTICE_HELPER (DLL WRAPPER)
+Initialize the GUI part of the lattice.
+***************************************************/
+void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, int init_color )
+{
+	char init_color_string[ 32 ];	// the final string to be used to define tk color to use
+	int hsize, vsize, hsizeMax, vsizeMax;
 
 	hsize = get_int( "hsizeLat" );			// 400
 	vsize = get_int( "vsizeLat" );			// 400
@@ -153,89 +291,16 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, const c
 	cmd( "bind .lat <Button-3> { event generate .lat <Button-2> -x %%x -y %%y }" );
 	cmd( "bind .lat <F1> { LsdHelp lattice.html }" );
 	set_shortcuts_run( ".lat" );
-
-#endif
-
-	return 0;
-}
-
-// call for macro
-double init_lattice( int init_color, double nrow, double ncol, double pixW, double pixH )
-{
-	return init_lattice( pixW, pixH, nrow, ncol, "y", "x", "", NULL, init_color );
 }
 
 
 /***************************************************
-EMPTY_LATTICE
+UPDATE_LATTICE_HELPER (DLL WRAPPER)
+Update the GUI part of the lattice.
 ***************************************************/
-void empty_lattice( void )
-{
-	if ( lattice != NULL && rows > 0 )
-	{
-		for ( int i = 0; i < rows; ++i )
-			delete [ ] lattice[ i ];
-
-		delete [ ] lattice;
-	}
-
-	lattice = NULL;
-	rows = columns = 0;
-}
-
-
-/***************************************************
-CLOSE_LATTICE
-***************************************************/
-void close_lattice( void )
-{
-	empty_lattice( );
-
-#ifndef _NW_
-	cmd( "destroytop .lat" );
-#endif
-}
-
-
-/***************************************************
-UPDATE_LATTICE
-update the cell line.col to the color val (1 to 21 as set in default.tcl palette)
-negative values of val prompt for the use of the (positive) RGB equivalent
-***************************************************/
-double update_lattice( double line, double col, double val )
+double update_lattice_helper( double line, double col, double val, int line_int, int col_int, int val_int )
 {
 	char val_string[ 32 ];		// the final string to be used to define tk color to use
-	int line_int, col_int, val_int;
-
-	line_int = line - 1;
-	col_int = col - 1;
-	val_int = max( 0, floor( val ) );
-
-	// ignore invalid values
-	if ( line_int < 0 || col_int < 0 || line_int >= rows ||
-		 col_int >= columns || ( int ) fabs( val ) > INT_MAX )
-	{
-		if ( error_count == ERR_LIM )
-			plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");
-		else
-			if ( error_count < ERR_LIM )
-				plog( "\nError: invalid lattice update values, ignoring." );
-
-		++error_count;
-
-		return -1;
-	}
-
-	// save lattice color data
-
-	if ( lattice != NULL && rows > 0 && columns > 0 )
-	{
-		if ( val >= 0 && lattice[ line_int ][ col_int ] == val_int )
-			return 0;
-		else
-			lattice[ line_int ][ col_int ] = val_int;
-	}
-#ifndef _NW_
 
 	// avoid operation if canvas was closed
 	if ( ! exists_window( ".lat.c" ) )
@@ -245,54 +310,23 @@ double update_lattice( double line, double col, double val )
 		snprintf( val_string, 32, "#%06x", - ( int ) val );	// yes: just use the positive RGB value
 	else
 	{
-		snprintf( val_string, 32, "$c%d", val_int );			// no: use the predefined Tk color
+		snprintf( val_string, 32, "$c%d", val_int );	// no: use the predefined Tk color
 		// create (background color) pallete entry if invalid palette in val
 		cmd( "if { ! [ info exist c%d ] } { set c%d $colorsTheme(bg) }", val_int, val_int  );
 	}
 
 	cmd( ".lat.c itemconfigure c%d_%d -fill %s", line_int + 1, col_int + 1, val_string );
 
-#endif
-
 	return 0;
 }
 
 
 /***************************************************
-READ_LATTICE
-read the cell line.col color val (1 to 21 as set in default.tcl palette)
-negative values of val mean the use of the (positive) RGB equivalent
+SAVE_LATTICE_HELPER (DLL WRAPPER)
+Save the existing GUI lattice (if any).
 ***************************************************/
-double read_lattice( double line, double col )
+double save_lattice_helper( const char *fname )
 {
-	// ignore invalid values
-	if ( ( int ) line <= 0 || ( int ) col <= 0 || ( int ) line > rows || ( int ) col > columns )
-	{
-		if ( error_count == ERR_LIM )
-			plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");
-		else
-			if ( error_count < ERR_LIM )
-				plog( "\nError: invalid lattice update values, ignoring." );
-
-		++error_count;
-
-		return -1;
-	}
-
-	if ( lattice != NULL && rows > 0 && columns > 0 )
-		return lattice[ ( int ) line - 1 ][ ( int ) col - 1 ];
-	else
-		return 0;
-}
-
-
-/***************************************************
-SAVE_LATTICE
-Save the existing lattice (if any) to the specified file name.
-***************************************************/
-double save_lattice( const char *fname )
-{
-#ifndef _NW_
 	// avoid operation if no canvas or no file name
 	if ( ! exists_window( ".lat.c" ) || fname == NULL || strlen( fname ) == 0 )
 		return -1;
@@ -300,6 +334,8 @@ double save_lattice( const char *fname )
 	cmd( "set latname \"%s\"", fname );
 	cmd( "append latname .eps" );
 	cmd( ".lat.c postscript -colormode color -file $latname" );
-#endif
+
 	return 0;
 }
+
+#endif
