@@ -27,10 +27,11 @@ SWITCH_CC=-D_LMM_ -D_NP_ -O3 -Wall \
 # using GCC and Tcl/Tk in the Lsd installation
 LSDROOT=..
 SRC_DIR=
+LIB_DIR=$(SRC_DIR)lib/
 
 # handle platform-specific stuff
 ifeq ($(OS),Windows_NT)
-	OBJ_DIR=$(TMP)\$(TARGET)/
+	OBJ_DIR=$(TMP)/$(TARGET)/
 	PKG=
 	EXT=.exe
 	WRC=windres -D_WIN32
@@ -68,7 +69,7 @@ else
 endif
 
 # variable to search for the tcl and tk headers
-INCLUDE=-I$(PATH_TCLTK_HEADER)
+INCLUDE=-I$(SRC). -I$(PATH_TCLTK_HEADER)
 
 # OS commands to delete files and create directories
 RM=@rm$(EXT) -f
@@ -89,9 +90,9 @@ $(OBJ_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)common.cpp -o $(OBJ_DIR)common.o
 
-$(OBJ_DIR)commonlib.o: $(SRC_DIR)commonlib.cpp $(SRC_DIR)common.h
+$(OBJ_DIR)commonlib.o: $(LIB_DIR)commonlib.cpp $(SRC_DIR)common.h
 	$(MKDIR) $(@D)
-	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)commonlib.cpp -o $(OBJ_DIR)commonlib.o
+	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(LIB_DIR)commonlib.cpp -o $(OBJ_DIR)commonlib.o
 
 $(OBJ_DIR)lmm_manifest.o: $(SRC_DIR)lmm_manifest.rc $(SRC_DIR)lmm.exe.manifest
 	$(MKDIR) $(@D)

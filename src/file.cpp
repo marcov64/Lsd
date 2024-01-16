@@ -93,7 +93,7 @@ bool open_configuration( object *&r, bool reload )
 	redrawRoot = redrawStruc = true;			// force browser/structure redraw
 	iniShowOnce = false;						// show warning on # of columns in .ini
 
-	switch ( i = load_configuration( reload, &warnings ) )// try to load the configuration
+	switch ( i = load_configuration( reload, &warnings, 0 ) )// try to load the configuration
 	{
 		case 0:
 			loaded = true;
@@ -148,6 +148,10 @@ bool open_configuration( object *&r, bool reload )
 		case 12 ... 13:							// problem from DOCUINITIAL section
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d :%.24s)\" -detail \"Observation flags and equation file were lost but the configuration can still be used.\n\nPlease check if the desired LSD configuration file was selected or re-configure the lost parts if needed.\"", i, warnings.c_str( ) );
 			loaded = true;
+			break;
+
+		default:
+			loaded = false;
 	}
 
 	if ( i == 0 && warnings.size( ) > 0 )
@@ -924,6 +928,67 @@ void save_description( object *r, FILE *f )
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 		if ( cb->head != NULL )
 			save_description( cb->head, f );
+}
+
+
+/*******************************************
+DEB_LOG
+Creates/saves the file "log.txt" and
+enable/disable logging the variables
+computation order and enable/disable the
+debugger
+********************************************/
+void deb_log( bool on, int time )
+{
+	// check if should turn off
+	if ( ! on || parallel_mode || fast_mode != 0 )
+	{
+		// disable debugging
+		if ( time > t && when_debug >= time )
+			when_debug = 0;
+		else
+			if ( ( time == 0 && when_debug == t ) || time == t )
+				debug_flag = false;
+
+		// act now?
+		if ( time == 0 || t > time )
+		{
+			// close file if open
+			if ( log_file != NULL )
+			{
+				fclose( log_file );
+				log_file = NULL;
+			}
+		}
+		else
+			log_stop = time;
+	}
+
+	// check if should turn on
+	if ( on && ! parallel_mode && fast_mode == 0 )
+	{
+		// enable debugging
+		if ( time > t )
+			when_debug = time;
+		else
+			if ( time == 0 || time == t )
+			{
+				when_debug = t;
+				debug_flag = true;
+				cmd( "focustop .deb" );
+			}
+
+		// ignore if log already open
+		if ( log_file == NULL )
+		{
+			log_file = fopen( "log.txt", "a" );
+			log_start = time;
+			log_stop = max_step;
+		}
+	}
+
+	if ( on && ( parallel_mode || fast_mode > 0 ) )
+		plog( "\nWarning: %s is active, debug command ignored", parallel_mode ? "parallel processing" : "fast mode" );
 }
 
 

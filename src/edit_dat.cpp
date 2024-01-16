@@ -93,7 +93,7 @@ void edit_data( object *r, const char *lab )
 	// limit the total number of cells because of Tcl/Tk bug
 	maxCols = max( min( MAX_COLS, MAX_CELS / rows ), 1 );
 
-	Tcl_LinkVar( inter, "lag", ( char * ) &lag, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "lag", ( char * ) &lag, TCL_LINK_INT );
 
 	cmd( "set cwidth 11" );
 
@@ -227,7 +227,7 @@ void edit_data( object *r, const char *lab )
 	cmd( "destroytop .inid" );
 
 	unlink_cells( r, lab );
-	Tcl_UnlinkVar( inter, "lag");
+	Tcl_UnlinkVar( interp, "lag");
 }
 
 
@@ -372,7 +372,7 @@ void link_cells( object *r, const char *lab )
 			if ( cv->param == 1 )
 			{
 				snprintf( ch1, MAX_ELEM_LENGTH, "p%s_%d", cv->label, i );
-				Tcl_LinkVar( inter, ch1, ( char * ) &( cv->val[ 0 ] ), TCL_LINK_DOUBLE );
+				Tcl_LinkVar( interp, ch1, ( char * ) &( cv->val[ 0 ] ), TCL_LINK_DOUBLE );
 
 				cmd( "ttk::entry $w.c%d_v%sp -width $cwidth -justify center -validate focusout -validatecommand { set n %%P; if [ string is double -strict $n ] { set p%s_%d $n; return 1 } { %%W delete 0 end; %%W insert 0 ${p%s_%d}; return 0 } } -invalidcommand { bell }", i, cv->label, cv->label, i, cv->label, i, cv->label, i );
 				cmd( "$w.c%d_v%sp insert 0 [ formatfloat ${p%s_%d} ]", i, cv->label, cv->label, i );
@@ -414,7 +414,7 @@ void link_cells( object *r, const char *lab )
 				if ( j < cv->num_lag )
 				{
 					snprintf( ch1, MAX_ELEM_LENGTH, "v%s_%d_%d", cv->label, i, j );
-					Tcl_LinkVar( inter, ch1, ( char * ) &( cv->val[ j ] ), TCL_LINK_DOUBLE );
+					Tcl_LinkVar( interp, ch1, ( char * ) &( cv->val[ j ] ), TCL_LINK_DOUBLE );
 
 					cmd( "ttk::entry $w.c%d_v%s_%d -width $cwidth -justify center -validate focusout -validatecommand { set n %%P; if [ string is double -strict $n ] { set v%s_%d_%d $n; return 1 } { %%W delete 0 end; %%W insert 0 ${v%s_%d_%d}; return 0 } } -invalidcommand { bell }", i, cv->label, j, cv->label, i, j, cv->label, i, j, cv->label, i, j );
 					cmd( "$w.c%d_v%s_%d insert 0 [ formatfloat ${v%s_%d_%d} ]", i, cv->label, j, cv->label, i, j );
@@ -552,12 +552,12 @@ void unlink_cells( object *r, const char *lab )
 			if ( cv->param == 1 )
 			{
 				snprintf( ch1, 2 * MAX_ELEM_LENGTH,"p%s_%d", cv->label, i );
-				Tcl_UnlinkVar( inter, ch1 );
+				Tcl_UnlinkVar( interp, ch1 );
 			}
 			else
 				for ( j = 0; j < cv->num_lag; ++j )
 				{
 					snprintf( ch1, 2 * MAX_ELEM_LENGTH,"v%s_%d_%d", cv->label, i, j );
-					Tcl_UnlinkVar( inter, ch1 );
+					Tcl_UnlinkVar( interp, ch1 );
 				}
 }

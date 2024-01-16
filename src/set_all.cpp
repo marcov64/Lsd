@@ -63,9 +63,9 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	if ( cv->param == 1 )
 		lag = 0;
 
-	Tcl_LinkVar( inter, "res", ( char * ) &res, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "value1", ( char * ) &value1, TCL_LINK_DOUBLE );
-	Tcl_LinkVar( inter, "value2", ( char * ) &value2, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( interp, "res", ( char * ) &res, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "value1", ( char * ) &value1, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( interp, "value2", ( char * ) &value2, TCL_LINK_DOUBLE );
 
 	// default values
 	res = 1;
@@ -361,9 +361,9 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 	cmd( "destroytop $_w" );
 
-	Tcl_UnlinkVar( inter, "value1" );
-	Tcl_UnlinkVar( inter, "value2" );
-	Tcl_UnlinkVar( inter, "res" );
+	Tcl_UnlinkVar( interp, "value1" );
+	Tcl_UnlinkVar( interp, "value2" );
+	Tcl_UnlinkVar( interp, "res" );
 
 	if ( choice == 2 )
 		return;

@@ -67,10 +67,10 @@ bool tk_ok = false;				// control for tk_ready to operate
 char err_file[ ] = "LMM.err";	// error log file name
 char *exec_path = NULL;			// path of executable file
 char *rootLsd = NULL;			// path of LSD root directory
-dllcallback dllcbck;			// call-back references for DLL
+dlliblinkage liblnk;			// call-back references for DLL
 int platform = 0;				// OS platform (1=Linux, 2=Mac, 3=Windows)
 int tosave = false;				// modified file flag
-Tcl_Interp *inter = NULL;		// Tcl standard interpreter pointer
+Tcl_Interp *interp = NULL;		// Tcl standard interpreter pointer
 
 // constant string arrays
 const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
@@ -135,11 +135,11 @@ int modman( int argn, const char **argv )
 
 	// initialize tcl/tk and set global bidirectional variables
 	init_tcl_tk( argv[ 0 ], "lmm" );
-	Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "shigh", ( char * ) &shigh, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "choice", ( char * ) &choice, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "tosave", ( char * ) &tosave, TCL_LINK_BOOLEAN);
-	Tcl_LinkVar( inter, "recolor_all", ( char * ) &recolor_all, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( interp, "num", ( char * ) &num, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "shigh", ( char * ) &shigh, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "choice", ( char * ) &choice, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "tosave", ( char * ) &tosave, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( interp, "recolor_all", ( char * ) &recolor_all, TCL_LINK_BOOLEAN);
 
 	// set system defaults in tcl
 	cmd( "set LMM_OPTIONS \"%s\"", LMM_OPTIONS );
@@ -269,10 +269,10 @@ int modman( int argn, const char **argv )
 			}
 
 	// create a Tcl command that calls the C discard_change function before killing LMM
-	Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
+	Tcl_CreateCommand( interp, "discard_change", Tcl_discard_change, NULL, NULL );
 
 	// Tcl command to save message to LSD log
-	Tcl_CreateCommand( inter, "log_tcl_error", Tcl_log_tcl_error, NULL, NULL );
+	Tcl_CreateCommand( interp, "log_tcl_error", Tcl_log_tcl_error, NULL, NULL );
 
 	// fix non-existent or old options file for new options
 	if ( i == 0 )
@@ -308,8 +308,8 @@ int modman( int argn, const char **argv )
 	cmd( "setstyles" );					// set ttk custom style
 
 	// set dynamic link library (DLL) call-back references
-	dllcbck.cmd = & cmd;
-	dllcbck.log_tcl_error = & log_tcl_error;
+	liblnk.cmd_backend = & cmd_backend;
+	liblnk.log_tcl_error = & log_tcl_error;
 
 	// main menu
 	cmd( "ttk::menu .m -tearoff 0" );
@@ -4271,7 +4271,7 @@ int modman( int argn, const char **argv )
 	{
 		cmd( "destroytop .mm" );					// close compilation results, if open
 
-		Tcl_LinkVar( inter, "choiceSM", ( char * ) & num, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "choiceSM", ( char * ) & num, TCL_LINK_INT );
 		num = 0;
 
 		cmd( "showmodel $groupDir" );
@@ -4285,7 +4285,7 @@ int modman( int argn, const char **argv )
 		cmd( "focustop .f.t.t" );
 
 		choice = num;
-		Tcl_UnlinkVar( inter, "choiceSM" );
+		Tcl_UnlinkVar( interp, "choiceSM" );
 
 		if ( choice == 2 || choice == 0 )
 		{
@@ -4851,8 +4851,16 @@ int modman( int argn, const char **argv )
 					catch { \
 						file delete -force \"$i\" \
 					} \
+				}; \
+				if { [ info exists ::env(TEMP) ] && [ file exists $::env(TEMP) ] } { \
+					set objs [ glob -nocomplain -directory $::env(TEMP) LMM lsdNW [ file rootname %s ] ]; \
+					foreach i $objs { \
+						catch { \
+							file delete -force \"$i\" \
+						} \
+					} \
 				} \
-			}" );
+			}", get_target_name( str, MAX_PATH_LENGTH ) );
 		cmd( "pack .l.d.opt.debug .l.d.opt.ext .l.d.opt.def .l.d.opt.cle -padx $butSpc -side left" );
 
 		cmd( "tooltip::tooltip .l.d.opt.debug \"Enable using GDB/LLDB debugger\"" );
@@ -5406,11 +5414,11 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	Tcl_UnlinkVar( inter, "num");
-	Tcl_UnlinkVar( inter, "shigh");
-	Tcl_UnlinkVar( inter, "choice");
-	Tcl_UnlinkVar( inter, "tosave");
-	Tcl_UnlinkVar( inter, "recolor_all");
+	Tcl_UnlinkVar( interp, "num");
+	Tcl_UnlinkVar( interp, "shigh");
+	Tcl_UnlinkVar( interp, "choice");
+	Tcl_UnlinkVar( interp, "tosave");
+	Tcl_UnlinkVar( interp, "recolor_all");
 
 	set_env( false );
 
@@ -5601,9 +5609,9 @@ void color( int hiLev, long iniLin, long finLin )
 	qsort( ( void * ) hits, tsize, sizeof( hit ), comphit );
 
 	// process each occurrence, if applicable
-	Tcl_LinkVar( inter, "lin", ( char * ) &newLin, TCL_LINK_LONG | TCL_LINK_READ_ONLY );
-	Tcl_LinkVar( inter, "col", ( char * ) &newCol, TCL_LINK_LONG | TCL_LINK_READ_ONLY );
-	Tcl_LinkVar( inter, "cnt", ( char * ) &newCnt, TCL_LINK_INT | TCL_LINK_READ_ONLY );
+	Tcl_LinkVar( interp, "lin", ( char * ) &newLin, TCL_LINK_LONG | TCL_LINK_READ_ONLY );
+	Tcl_LinkVar( interp, "col", ( char * ) &newCol, TCL_LINK_LONG | TCL_LINK_READ_ONLY );
+	Tcl_LinkVar( interp, "cnt", ( char * ) &newCnt, TCL_LINK_INT | TCL_LINK_READ_ONLY );
 
 	for ( k = 0; k < tsize; ++k )
 		// skip occurrences inside other occurrence
@@ -5623,9 +5631,9 @@ void color( int hiLev, long iniLin, long finLin )
 			sscanf( ppos, "%ld.%ld", &curLin, &curCol );
 		}
 
-	Tcl_UnlinkVar( inter, "lin");
-	Tcl_UnlinkVar( inter, "col");
-	Tcl_UnlinkVar( inter, "cnt");
+	Tcl_UnlinkVar( interp, "lin");
+	Tcl_UnlinkVar( interp, "col");
+	Tcl_UnlinkVar( interp, "cnt");
 	delete [ ] hits;
 }
 

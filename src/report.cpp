@@ -91,11 +91,11 @@ void report( object *r )
 	else
 		strcpyn( path_rep, path, MAX_PATH_LENGTH );
 
-	Tcl_LinkVar( inter, "detail", ( char * ) &detail, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "init", ( char * ) &init, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "desc", ( char * ) &desc, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "extra", ( char * ) &extra, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "obs", ( char * ) &obs, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "detail", ( char * ) &detail, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "init", ( char * ) &init, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "desc", ( char * ) &desc, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "extra", ( char * ) &extra, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "obs", ( char * ) &obs, TCL_LINK_BOOLEAN );
 
 	desc = true;
 	obs = true;
@@ -426,10 +426,11 @@ void report( object *r )
 
 	end:
 
-	Tcl_UnlinkVar( inter, "detail" );
-	Tcl_UnlinkVar( inter, "init" );
-	Tcl_UnlinkVar( inter, "desc" );
-	Tcl_UnlinkVar( inter, "extra" );
+	Tcl_UnlinkVar( interp, "detail" );
+	Tcl_UnlinkVar( interp, "init" );
+	Tcl_UnlinkVar( interp, "desc" );
+	Tcl_UnlinkVar( interp, "extra" );
+	Tcl_UnlinkVar( interp, "obs" );
 }
 
 
@@ -1061,7 +1062,7 @@ void write_list( FILE *frep, object *root, bool show_all, const char *prefix )
 	int num, i;
 	char s1[ 2 * MAX_ELEM_LENGTH ], s2[ MAX_ELEM_LENGTH ];
 
-	Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "num", ( char * ) &num, TCL_LINK_INT );
 
 	if ( show_all )							// initial listing?
 		fprintf( frep, "<H3>Variables</H3>\n" );
@@ -1142,7 +1143,7 @@ void write_list( FILE *frep, object *root, bool show_all, const char *prefix )
 	if ( ! show_all )
 		fprintf( frep, "<BR>\n" );
 
-	Tcl_UnlinkVar( inter, "num" );
+	Tcl_UnlinkVar( interp, "num" );
 }
 
 /********************************

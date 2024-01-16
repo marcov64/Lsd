@@ -22,11 +22,6 @@ The main functions contained in this file are:
 
 - void plog_backend( const char *cm, ... );
 print  message string m in the Log screen.
-
-- void cmd( const char *cc, ... );
-Standard routine to send the message string cc to the TCL
-interpreter in order to execute a command for the graphical
-interfaces.
 *************************************************************/
 
 #include "decl.h"
@@ -60,7 +55,6 @@ void plog_backend( const char *cm, const char *tag, va_list arg )
 	buffer = bufstat;
 	message = msgstat;
 	va_copy( argcpy, arg );
-
 	reqsz = vsnprintf( buffer, MAX_BUFF_SIZE, cm, arg );
 
 	if ( reqsz < 0 )
@@ -173,7 +167,7 @@ void error_hard_helper( const char *boxTitle, const char *boxText, const char *l
 	if ( running )			// handle running events differently
 	{
 		cmd( "if [ winfo exists .deb ] { destroytop .deb }" );
-		deb_log( false );	// close any open debug log file
+		deb_log( false, 0 );// close any open debug log file
 		reset_plot( );		// show & disable run-time plot
 		set_buttons_run( false );
 
@@ -286,6 +280,41 @@ void error_hard_helper( const char *boxTitle, const char *boxText, const char *l
 }
 
 
+/*********************************
+TCL_SET_C_VAR
+Function to set a c variable when
+not in a Tcl idle loop (hardcoded
+vars only)
+*********************************/
+int Tcl_set_c_var( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+{
+	char vname[ MAX_ELEM_LENGTH ];
+	int value;
+
+	if ( argc != 3 )					// require 2 parameters: variable name and value
+		return TCL_ERROR;
+
+	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL )
+		return TCL_ERROR;
+
+	if ( ! sscanf( argv[ 1 ], "%99s", vname ) )	// remove unwanted spaces
+		return TCL_ERROR;
+
+	// set the appropriate variable (hardcoded in an else-if chain)
+	if ( ! strcmp( vname, "done_in" ) )
+	{
+		if ( ! sscanf( argv[ 2 ], "%d", &value ) )	// transform to integer
+			return TCL_ERROR;
+
+		done_in = value;
+	}
+	else
+		return TCL_ERROR;
+
+	return TCL_OK;
+}
+
+
 /***************************************************
 FMT_TTIP_DESCR
 ***************************************************/
@@ -343,7 +372,7 @@ void set_ttip_descr( const char *w, const char *lab, int it, bool init )
 /***************************************************
 TCL_SET_TTIP_DESCR
 ***************************************************/
-int Tcl_set_ttip_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+int Tcl_set_ttip_descr( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	int it, init;
 

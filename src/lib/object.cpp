@@ -420,8 +420,8 @@ void object::update( bool recurse, bool user )
 			if ( cv->save || cv->savei )
 				cv->data[ t - cv->start ] = cv->val[ 0 ];
 #ifndef _NW_
-			if ( ! user && cv->plot == 1 )
-				plot_rt( cv );
+			if ( ! user && cv->plot == 1 && liblnk.plot_rt != NULL )
+				liblnk.plot_rt( cv );
 #endif
 		}
 	}
@@ -1206,7 +1206,7 @@ variable *object::add_empty_var( const char *lab )
 	if ( ! valid_label( lab ) )
 	{
 		plog( "\nWarning: invalid variable name '%s', please rename", lab );
-		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Invalid characters in variable name\" -detail \"Variable '%s' has an invalid name. Please rename it to prevent problems.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
+		cmd_gui( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Invalid characters in variable name\" -detail \"Variable '%s' has an invalid name. Please rename it to prevent problems.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
 	}
 #endif
 
@@ -1308,7 +1308,7 @@ object *object::add_obj( const char *lab, int num, bool propagate )
 	if ( ! valid_label( lab ) )
 	{
 		plog( "\nWarning: invalid object name '%s', please rename", lab );
-		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Invalid characters in object name\" -detail \"Object '%s' has an invalid name. Please rename it to prevent problems.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
+		cmd_gui( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Invalid characters in object name\" -detail \"Object '%s' has an invalid name. Please rename it to prevent problems.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
 	}
 #endif
 
@@ -3701,7 +3701,8 @@ double object::interact( const char *text, double v, double *tv, int i, int j,
 		n_values[ 8 ] = curl8;
 		n_values[ 9 ] = curl9;
 
-		deb( this, NULL, text, &app, true );	// signals INTERACT macro
+		if ( liblnk.deb != NULL )
+			liblnk.deb( this, NULL, text, &app, true, "" );// signals INTERACT macro
 	}
 
 	return app;

@@ -64,10 +64,6 @@
 #define PUGIXML_COMPACT
 #include "pugixml/pugixml.hpp"
 
-// Windows DLL exports
-#define DLL_EXPORT
-#include "libLSD.h"
-
 // global constants
 #define MAX_BUFF_SIZE 10000				// standard Tcl buffer size (>9999)
 #define MAX_PATH_LENGTH 1000			// maximum path length (>999)
@@ -137,11 +133,8 @@
 							 "#", "#", "#", \
 							 "#", "#", "#", \
 							 "Root", "1", "0", "0" }
-#define LSD_NW_NUM 18
-#define LSD_NW_SRC { "lsd.cpp", "lsdmain.cpp", "commonlib.cpp", "description.cpp", \
-					 "filelib.cpp", "lattice.cpp", "math.cpp", "nets.cpp", \
-					 "object.cpp", "stattables.cpp", "utillib.cpp", "variab.cpp", \
-					 "check.h", "libLSD.h", "common.h", "decl.h", \
+#define LSD_NW_NUM 7
+#define LSD_NW_SRC { "lsdnw.cpp", "libLSD.h", "check.h", "common.h", "decl.h", \
 					 "fun_head.h", "fun_head_fast.h" }
 #define LSD_DIR_NUM 8
 #define LSD_DIR_NAME { "src", "gnu", "installer", "Manual", "LMM.app", "Rpkg", \
@@ -461,6 +454,16 @@ struct sense
 
 };
 
+struct lattice							// model (visual) lattice data
+{
+	int **array = NULL;					// lattice data colors array
+	int rows = 0;						// lattice size
+	int columns = 0;
+	int errors = 0;						// error counter
+	double width = 0;					// lattice screen size
+	double height = 0;
+};
+
 struct design							// design of experiment object
 {
 	int typ, tab, n, k, *par, *lag, *inst;// experiment parameters
@@ -526,19 +529,35 @@ struct nolh								// near-orthogonal Latin hypercube description
 	int *table;
 };
 
-struct dllcallback						// callback references for dynamic link library
+struct dlliblinkage						// callback references for dynamic link library
 {
-	void ( *cmd )( const char *cm, ... ) = NULL;
-	void ( *print_stack )( void ) = NULL;
-	void ( *plog_backend )( const char *cm, const char *tag, va_list arg ) = NULL;
-	void ( *log_tcl_error )( bool show, const char *cm,
-							 const char *message, ... ) = NULL;
-	void ( *error_hard_helper )( const char *boxTitle, const char *boxText,
+	void ( *center_plot ) ( void ) = NULL;
+	void ( *cmd_backend ) ( const char *cm, va_list arg ) = NULL;
+	void ( *cover_browser ) ( const char *text1, const char *text2,
+							  bool run ) = NULL;
+	void ( *deb_log ) ( bool on, int time ) = NULL;
+	void ( *disable_plot ) ( void ) = NULL;
+	void ( *enable_plot ) ( void ) = NULL;
+	void ( *error_hard_helper ) ( const char *boxTitle, const char *boxText,
 								 const char *logText, bool defQuit ) = NULL;
-	void ( *init_lattice_helper )( double pixW, double pixH, double nrow, double ncol, int init_color ) = NULL;
-	double ( *update_lattice_helper )( double line, double col, double val, int line_int, int col_int, int val_int ) = NULL;
-	double ( *save_lattice_helper )( const char *fname ) = NULL;
-	int ( * deb )( object *r, object *c, const char *lab, double *res, bool interact, const char *hl_var ) = NULL;
+	void ( *init_lattice_helper ) ( double pixW, double pixH, double nrow, double ncol, int init_color ) = NULL;
+	void ( *log_tcl_error ) ( bool show, const char *cm,
+							 const char *message, ... ) = NULL;
+	void ( *plog_backend ) ( const char *cm, const char *tag,
+							 va_list arg ) = NULL;
+	void ( *plot_rt ) ( variable *var ) = NULL;
+	void ( *prepare_plot ) ( object *r, int id_sim ) = NULL;
+	void ( *print_stack ) ( void ) = NULL;
+	void ( *reset_plot ) ( void ) = NULL;
+	void ( *scroll_plot ) ( void ) = NULL;
+	void ( *show_prof_aggr ) ( void ) = NULL;
+	void ( *uncover_browser ) ( void ) = NULL;
+	double ( *save_lattice_helper ) ( const char *fname ) = NULL;
+	double ( *update_lattice_helper ) ( double line, double col, double val,
+										int line_int, int col_int,
+										int val_int ) = NULL;
+	int ( * deb ) ( object *r, object *c, const char *lab, double *res,
+					bool interact, const char *hl_var ) = NULL;
 };
 
 #ifndef _NP_
@@ -614,6 +633,7 @@ char *strtcl( char *out, const char *text, int outSz );
 char *strupr( char *s );
 const char *eval_str( const char *tcl_exp );
 const char *get_fun_name( char *str, int str_sz, bool nw = false );
+const char *get_target_name( char *str, int str_sz, bool nw = false );
 const char *get_str( const char *tcl_var );
 const char *signal_name( int signum );
 double eval_double( const char *tcl_exp );
@@ -642,6 +662,10 @@ vector < double > strtodsplit( const char *in, char sep, double inv = 0. );
 void check_option_files( bool sys = false );
 void clean_spaces( char *s );
 void cmd( const char *cm, ... );
+void cmd_backend( const char *cm, va_list arg );
+void cmd_gui( const char *cm, ... );
+void exception_handler( int signum, const char *what );
+void handle_signals( void ( * handler ) ( int signum ) );
 void init_tcl_tk( const char *exec, const char *tcl_app_name );
 void log_tcl_error( bool show, const char *cm, const char *message, ... );
 void lsd_exit( int v );
@@ -649,6 +673,7 @@ void make_makefile( bool nw = false );
 void print_stack( void );
 void show_comp_result( bool nw = false );
 void show_tcl_error( const char *boxTitle, const char *errMsg, ... );
+void signal_handler( int signum );
 void update_lmm_options( bool justLmmGeom = false );
 void update_model_info( bool fix = false );
 
@@ -666,7 +691,7 @@ extern char *exec_path;					// path of executable file
 extern char *rootLsd;					// path of LSD root directory
 extern char equation_name[ ];			// equation file name
 extern char err_file[ ];				// error log file name
-extern dllcallback dllcbck;				// call-back references for DLL
+extern dlliblinkage liblnk;				// call-back references for DLL
 extern int stop;						// activity interruption flag (Tcl boolean)
 extern lsdstack *stack_log;				// LSD stack
 
@@ -691,15 +716,12 @@ extern worker *workers;					// multi-thread parallel worker data
 
 // Tcl/Tk specific definitions (for the windowed version only)
 #ifndef _NW_
-
 #include <tk.h>
-
-extern Tcl_Interp *inter;				// Tcl standard interpreter pointer
+extern Tcl_Interp *interp;				// Tcl standard interpreter pointer
 
 // C to TCL interface functions
-int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
-int Tcl_log_tcl_error( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
-
+int Tcl_discard_change( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
+int Tcl_log_tcl_error( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 #endif
 
 #endif

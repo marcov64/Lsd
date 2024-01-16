@@ -343,13 +343,13 @@ SCAN_USED_LAB
 ****************************************************/
 void scan_used_lab( const char *lab, const char *parWnd )
 {
-	bool exist, no_window;
+	bool exist, no_win;
 	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ];
 	const char *fname;
 	int i, j, k, nfiles, done;
 	FILE *f;
 
-	no_window = ( parWnd != NULL && strlen( parWnd ) == 0 ) ? true : false;
+	no_win = ( parWnd != NULL && strlen( parWnd ) == 0 ) ? true : false;
 
 	// define the correct parent window
 	cmd( "if { \"%s\" eq \".chgelem\" } { \
@@ -358,7 +358,7 @@ void scan_used_lab( const char *lab, const char *parWnd )
 			set list .listused_%s \
 		}", parWnd != NULL ? parWnd : ".", lab, lab );
 
-	if ( ! no_window )
+	if ( ! no_win )
 	{
 		if ( exists_window( "$list" ) )
 			return;
@@ -431,7 +431,7 @@ void scan_used_lab( const char *lab, const char *parWnd )
 					done = contains( f, lab, strlen( lab ) );
 					if ( done == 1 )
 					{
-						if ( no_window )
+						if ( no_win )
 							cmd( "lappend list_used %s", c2_lab );
 						else
 							cmd( "$list.l.l insert end %s", c2_lab );
@@ -444,7 +444,7 @@ void scan_used_lab( const char *lab, const char *parWnd )
 		}
 	}
 
-	if ( no_window )
+	if ( no_win )
 	{
 		cmd( "if [ info exists list_used ] { set list_used [ join $list_used \", \" ] } { set list_used \"(never used)\" }" );
 		return;

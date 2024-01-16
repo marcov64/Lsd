@@ -218,22 +218,19 @@ void exception_handler( int signum, const char *what )
 	{
 		case SIGINT:
 		case SIGTERM:
-			if ( dllcbck.cmd == NULL )
+			if ( liblnk.cmd_backend == NULL )
 			{
 				snprintf( msg1, MAX_LINE_SIZE, "SIGINT/SIGTERM (%s)", signal_name( signum ) );
 				break;
 			}
 			else
-				dllcbck.cmd( "set choice 1" );	// regular quit (checking for save)
+				cmd_gui( "set choice 1" );		// regular quit (checking for save)
 
 			return;
 #ifdef SIGWINCH
 		case SIGWINCH:
-			if ( dllcbck.cmd != NULL )
-			{
-				dllcbck.cmd( "sizetop all" );	// readjust windows size/positions
-				dllcbck.cmd( "update" );
-			}
+			cmd_gui( "sizetop all" );			// readjust windows size/positions
+			cmd_gui( "update" );
 
 			return;
 #endif
@@ -271,7 +268,7 @@ void exception_handler( int signum, const char *what )
 			strcpy( msg2, "" );
 	}
 
-	if ( dllcbck.cmd != NULL )					// Tcl GUI available?
+	if ( liblnk.cmd_backend != NULL )			// Tcl GUI available?
 	{
 #ifndef _LMM_
 		if ( ! user_exception )
@@ -291,8 +288,8 @@ void exception_handler( int signum, const char *what )
 				{
 					strcatn( msg3, "\n\nAttempting to open the LSD Debugger.\n\nLSD will close immediately after exiting the Debugger.", MAX_LINE_SIZE );
 					plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", stack_log->vs->label );
-					if ( dllcbck.print_stack != NULL )
-						dllcbck.print_stack( );
+					if ( liblnk.print_stack != NULL )
+						liblnk.print_stack( );
 				}
 				else
 				{
@@ -306,7 +303,7 @@ void exception_handler( int signum, const char *what )
 		}
 #endif
 
-		dllcbck.cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { \
+		cmd_gui( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { \
 				catch { ttk::messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s:\n  %s\n\n%s\" } \
 				}", msg1, msg2, msg3 );
 
@@ -318,14 +315,14 @@ void exception_handler( int signum, const char *what )
 			{
 				double useless = -1;
 				snprintf( msg3, MAX_LINE_SIZE, "%s (ERROR)", stack_log->vs->label );
-				if ( dllcbck.deb != NULL )
-					dllcbck.deb( stack_log->vs->up, NULL, msg3, & useless, false, "" );
+				if ( liblnk.deb != NULL )
+					liblnk.deb( stack_log->vs->up, NULL, msg3, & useless, false, "" );
 			}
 		}
 		else
 #endif
-			if ( dllcbck.log_tcl_error != NULL )
-				dllcbck.log_tcl_error( true, "FATAL ERROR", "System Signal received: %s", msg1 );
+			if ( liblnk.log_tcl_error != NULL )
+				liblnk.log_tcl_error( true, "FATAL ERROR", "System Signal received: %s", msg1 );
 	}
 	else
 		fprintf( stderr, "\nFATAL ERROR: System Signal received: %s\n", msg1 );
@@ -456,6 +453,22 @@ char *clean_path( const char *filepath )
 	strcpyn( newpath, oldpath, strlen( oldpath ) + 1 );
 
 	return newpath;
+}
+
+
+/****************************************************
+ CMD_GUI
+ ****************************************************/
+void cmd_gui( const char *cm, ... )
+{
+	static va_list argptr;
+
+	va_start( argptr, cm );
+
+	if ( liblnk.cmd_backend != NULL )
+		liblnk.cmd_backend( cm, argptr );
+
+	va_end( argptr );
 }
 
 

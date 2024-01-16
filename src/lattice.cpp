@@ -14,193 +14,12 @@
 
 /*************************************************************
 LATTICE.CPP
-Contains the methods and functions to work with graphical
-lattices.
+Contains the functions to work with graphical lattices on the
+GUI. The basic functions are stored in LATTICELIB.CPP.
 *************************************************************/
 
 #include "decl.h"
 
-int **lattice = NULL;					// lattice data colors array
-int rows = 0;							// lattice size
-int columns = 0;
-int error_count;						// error counters
-
-
-/***************************************************
-INIT_LATTICE
-Create a new run time lattice having:
-- pix= maximum pixel (600 should fit in typical screens, 0=default size)
-- nrow= number of rows
-- ncol= number of columns
-- lrow= label of variable or parameter indicating the row value
-- lcol= label of variable or parameter indicating the column value
-- lvar= label of variable or parameter from which to read the color of the cell
-- p= pointer of the object containing the initial color of the cell (if flag==-1)
-- init_color= indicate the type of initialization.
-  If init_color < 0, the (positive) RGB equivalent to init_color is used.
-  Otherwise, the lattice is homogeneously initialized to the palette color specified by init_color.
-***************************************************/
-double init_lattice( double pixW, double pixH, double nrow, double ncol, const char lrow[ ], const char lcol[ ], const char lvar[ ], object *p, int init_color )
-{
-	int i, j;
-
-	// ignore invalid values
-	if ( ( int ) nrow < 1 || ( int ) ncol < 1 || ( int ) nrow > INT_MAX || ( int ) ncol > INT_MAX )
-	{
-		plog( "\nError: invalid lattice initialization values, ignoring.\n");
-		return -1;
-	}
-
-	init_color = min( init_color, 1099 );	// limit to valid palette
-
-	// reset the LSD lattice, if any
-	close_lattice( );
-	rows = ( int ) max( 0, floor( nrow ) );
-	columns = ( int ) max( 0, floor( ncol ) );
-	error_count = 0;
-
-	// create the color data matrix
-	lattice = new int *[ rows ];
-	for ( i = 0; i < rows; ++i )
-		lattice[ i ] = new int [ columns ];
-
-	for ( i = 0; i < rows; ++i )
-		for ( j = 0; j < columns; ++j )
-			lattice[ i ][ j ] = init_color;
-
-	if ( dllcbck.init_lattice_helper != 0 )
-		dllcbck.init_lattice_helper( pixW, pixH, nrow, ncol, init_color );
-
-	return 0;
-}
-
-// call for macro
-double init_lattice( int init_color, double nrow, double ncol, double pixW, double pixH )
-{
-	return init_lattice( pixW, pixH, nrow, ncol, "y", "x", "", NULL, init_color );
-}
-
-
-/***************************************************
-EMPTY_LATTICE
-***************************************************/
-void empty_lattice( void )
-{
-	if ( lattice != NULL && rows > 0 )
-	{
-		for ( int i = 0; i < rows; ++i )
-			delete [ ] lattice[ i ];
-
-		delete [ ] lattice;
-	}
-
-	lattice = NULL;
-	rows = columns = 0;
-}
-
-
-/***************************************************
-CLOSE_LATTICE
-***************************************************/
-void close_lattice( void )
-{
-	empty_lattice( );
-
-	if ( dllcbck.cmd != 0 )					// Tcl GUI available?
-		dllcbck.cmd( "destroytop .lat" );
-}
-
-
-/***************************************************
-UPDATE_LATTICE
-update the cell line.col to the color val (1 to 21 as set in default.tcl palette)
-negative values of val prompt for the use of the (positive) RGB equivalent
-***************************************************/
-double update_lattice( double line, double col, double val )
-{
-	int line_int, col_int, val_int;
-
-	line_int = line - 1;
-	col_int = col - 1;
-	val_int = max( 0, floor( val ) );
-
-	// ignore invalid values
-	if ( line_int < 0 || col_int < 0 || line_int >= rows ||
-		 col_int >= columns || ( int ) fabs( val ) > INT_MAX )
-	{
-		if ( error_count == ERR_LIM )
-			plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");
-		else
-			if ( error_count < ERR_LIM )
-				plog( "\nError: invalid lattice update values, ignoring." );
-		
-		++error_count;
-
-		return -1;
-	}
-
-	// save lattice color data
-
-	if ( lattice != NULL && rows > 0 && columns > 0 )
-	{
-		if ( val >= 0 && lattice[ line_int ][ col_int ] == val_int )
-			return 0;
-		else
-			lattice[ line_int ][ col_int ] = val_int;
-	}
-
-	if ( dllcbck.update_lattice_helper != 0 )
-		return dllcbck.update_lattice_helper( line, col, val, line_int, col_int, val_int );
-	else
-		return 0;
-}
-
-
-/***************************************************
-READ_LATTICE
-read the cell line.col color val (1 to 21 as set in default.tcl palette)
-negative values of val mean the use of the (positive) RGB equivalent
-***************************************************/
-double read_lattice( double line, double col )
-{
-	// ignore invalid values
-	if ( ( int ) line <= 0 || ( int ) col <= 0 || ( int ) line > rows || ( int ) col > columns )
-	{
-		if ( error_count == ERR_LIM )
-			plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");
-		else
-			if ( error_count < ERR_LIM )
-				plog( "\nError: invalid lattice update values, ignoring." );
-
-		++error_count;
-
-		return -1;
-	}
-
-	if ( lattice != NULL && rows > 0 && columns > 0 )
-		return lattice[ ( int ) line - 1 ][ ( int ) col - 1 ];
-	else
-		return 0;
-}
-
-
-/***************************************************
-SAVE_LATTICE
-Save the existing lattice (if any) to the specified file name.
-***************************************************/
-double save_lattice( const char *fname )
-{
-	if ( dllcbck.save_lattice_helper != 0 )
-		return dllcbck.save_lattice_helper( fname );
-	else
-		return 0;
-}
-
-
-#if ! defined _NW_ && ! defined _DLL_
-
-double dimW = 0;						// lattice screen size
-double dimH = 0;
 
 /***************************************************
 INIT_LATTICE_HELPER (DLL WRAPPER)
@@ -221,8 +40,8 @@ void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, in
 	pixW = min( pixW, hsizeMax );
 	pixH = min( pixH, vsizeMax );
 
-	dimH = pixH / rows;
-	dimW = pixW / columns;
+	latt.height = pixH / latt.rows;
+	latt.width = pixW / latt.columns;
 
 	if ( init_color < 0 && ( - init_color ) <= 0xffffff )		// RGB mode selected?
 		snprintf( init_color_string, 32, "#%06x", - init_color );	// yes: just use the positive RGB value
@@ -268,10 +87,10 @@ void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, in
 			} \
 		}", strlen( simul_name ) > 0 ? simul_name : "plot", path );
 
-	cmd( "set rows %d", rows );
-	cmd( "set columns %d", columns );
-	cmd( "set dimH %.6g", dimH );
-	cmd( "set dimW %.6g", dimW );
+	cmd( "set rows %d", latt.rows );
+	cmd( "set columns %d", latt.columns );
+	cmd( "set dimH %.6g", latt.height );
+	cmd( "set dimW %.6g", latt.width );
 
 	cmd( "for { set i 1 } { $i <= $rows } { incr i } { \
 			for { set j 1 } { $j <= $columns } { incr j } { \
@@ -337,5 +156,3 @@ double save_lattice_helper( const char *fname )
 
 	return 0;
 }
-
-#endif

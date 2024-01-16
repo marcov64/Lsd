@@ -73,11 +73,11 @@ void set_obj_number( object *r )
 	char lab[ MAX_ELEM_LENGTH ];
 	int idx, res, count, done;
 
-	Tcl_LinkVar( inter, "idx", ( char * ) &idx, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "val", ( char * ) &count, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "result", ( char * ) &res, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "hid_level", ( char * ) &hid_level, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "max_depth", ( char * ) &max_depth, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "idx", ( char * ) &idx, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "val", ( char * ) &count, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "result", ( char * ) &res, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "hid_level", ( char * ) &hid_level, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "max_depth", ( char * ) &max_depth, TCL_LINK_INT );
 
 	level = lowest_level = 1;
 	max_depth = 0;							// start with all levels open
@@ -178,11 +178,11 @@ void set_obj_number( object *r )
 
 	cmd( "destroytop .inin" );
 
-	Tcl_UnlinkVar( inter, "idx" );
-	Tcl_UnlinkVar( inter, "val" );
-	Tcl_UnlinkVar( inter, "result" );
-	Tcl_UnlinkVar( inter, "hid_level" );
-	Tcl_UnlinkVar( inter, "max_depth" );
+	Tcl_UnlinkVar( interp, "idx" );
+	Tcl_UnlinkVar( interp, "val" );
+	Tcl_UnlinkVar( interp, "result" );
+	Tcl_UnlinkVar( interp, "hid_level" );
+	Tcl_UnlinkVar( interp, "max_depth" );
 }
 
 
@@ -744,8 +744,8 @@ void eliminate_obj( object **c, int actual, int desired )
 	}
 	else
 	{
-		Tcl_LinkVar( inter, "val2", ( char * ) &val2, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "idx2", ( char * ) &idx2, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "val2", ( char * ) &val2, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "idx2", ( char * ) &idx2, TCL_LINK_INT );
 		del = new int[ actual - desired ];
 		cmd( "set conf 0" );
 
@@ -814,8 +814,8 @@ void eliminate_obj( object **c, int actual, int desired )
 		end:
 
 		cmd( "destroytop $d" );
-		Tcl_UnlinkVar( inter, "val2" );
-		Tcl_UnlinkVar( inter, "idx2" );
+		Tcl_UnlinkVar( interp, "val2" );
+		Tcl_UnlinkVar( interp, "idx2" );
 		choice = 0;
 	}
 }

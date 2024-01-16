@@ -145,29 +145,29 @@ void analysis( bool mc )
 
 	cmd( "destroytop .dap" );
 
-	Tcl_LinkVar( inter, "cur_plot", ( char * ) &cur_plot, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "nv", ( char * ) &nv, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "avgSmpl", ( char * ) &avgSmpl, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "showInit", ( char * ) &showInit, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "auto", ( char * ) &autom, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "auto_x", ( char * ) &autom_x, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "firstc", ( char * ) &first_c, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "numc", ( char * ) &num_c, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "minc", ( char * ) &min_c, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "maxc", ( char * ) &max_c, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "miny", ( char * ) &miny, TCL_LINK_DOUBLE );
-	Tcl_LinkVar( inter, "maxy", ( char * ) &maxy, TCL_LINK_DOUBLE );
-	Tcl_LinkVar( inter, "logs", ( char * ) &logs, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "allblack", ( char * ) &allblack, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "grid", ( char * ) &grid, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "point_size", ( char * ) &point_size, TCL_LINK_DOUBLE );
-	Tcl_LinkVar( inter, "tc", ( char * ) &time_cross, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "line_point", ( char * ) &line_point, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "xy", ( char * ) &xy, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "pdigits", ( char * ) &pdigits, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "watch", ( char * ) &watch, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "gnu", ( char * ) &gnu, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "num_y2", ( char * ) &num_y2, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "cur_plot", ( char * ) &cur_plot, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "nv", ( char * ) &nv, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "avgSmpl", ( char * ) &avgSmpl, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "showInit", ( char * ) &showInit, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "auto", ( char * ) &autom, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "auto_x", ( char * ) &autom_x, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "firstc", ( char * ) &first_c, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "numc", ( char * ) &num_c, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "minc", ( char * ) &min_c, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "maxc", ( char * ) &max_c, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "miny", ( char * ) &miny, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( interp, "maxy", ( char * ) &maxy, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( interp, "logs", ( char * ) &logs, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "allblack", ( char * ) &allblack, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "grid", ( char * ) &grid, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "point_size", ( char * ) &point_size, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( interp, "tc", ( char * ) &time_cross, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "line_point", ( char * ) &line_point, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "xy", ( char * ) &xy, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "pdigits", ( char * ) &pdigits, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "watch", ( char * ) &watch, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "gnu", ( char * ) &gnu, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "num_y2", ( char * ) &num_y2, TCL_LINK_INT );
 
 	avgSmplMsg = false;
 	logs = false;
@@ -793,29 +793,29 @@ void analysis( bool mc )
 				cmd( "destroytop .da" );
 				uncover_browser( );
 
-				Tcl_UnlinkVar( inter, "auto" );
-				Tcl_UnlinkVar( inter, "auto_x" );
-				Tcl_UnlinkVar( inter, "firstc" );
-				Tcl_UnlinkVar( inter, "numc" );
-				Tcl_UnlinkVar( inter, "minc" );
-				Tcl_UnlinkVar( inter, "maxc" );
-				Tcl_UnlinkVar( inter, "miny" );
-				Tcl_UnlinkVar( inter, "maxy" );
-				Tcl_UnlinkVar( inter, "logs" );
-				Tcl_UnlinkVar( inter, "allblack" );
-				Tcl_UnlinkVar( inter, "grid" );
-				Tcl_UnlinkVar( inter, "point_size" );
-				Tcl_UnlinkVar( inter, "tc" );
-				Tcl_UnlinkVar( inter, "line_point" );
-				Tcl_UnlinkVar( inter, "xy" );
-				Tcl_UnlinkVar( inter, "pdigits" );
-				Tcl_UnlinkVar( inter, "watch" );
-				Tcl_UnlinkVar( inter, "gnu" );
-				Tcl_UnlinkVar( inter, "num_y2" );
-				Tcl_UnlinkVar( inter, "cur_plot" );
-				Tcl_UnlinkVar( inter, "nv" );
-				Tcl_UnlinkVar( inter, "avgSmpl" );
-				Tcl_UnlinkVar( inter, "showInit" );
+				Tcl_UnlinkVar( interp, "auto" );
+				Tcl_UnlinkVar( interp, "auto_x" );
+				Tcl_UnlinkVar( interp, "firstc" );
+				Tcl_UnlinkVar( interp, "numc" );
+				Tcl_UnlinkVar( interp, "minc" );
+				Tcl_UnlinkVar( interp, "maxc" );
+				Tcl_UnlinkVar( interp, "miny" );
+				Tcl_UnlinkVar( interp, "maxy" );
+				Tcl_UnlinkVar( interp, "logs" );
+				Tcl_UnlinkVar( interp, "allblack" );
+				Tcl_UnlinkVar( interp, "grid" );
+				Tcl_UnlinkVar( interp, "point_size" );
+				Tcl_UnlinkVar( interp, "tc" );
+				Tcl_UnlinkVar( interp, "line_point" );
+				Tcl_UnlinkVar( interp, "xy" );
+				Tcl_UnlinkVar( interp, "pdigits" );
+				Tcl_UnlinkVar( interp, "watch" );
+				Tcl_UnlinkVar( interp, "gnu" );
+				Tcl_UnlinkVar( interp, "num_y2" );
+				Tcl_UnlinkVar( interp, "cur_plot" );
+				Tcl_UnlinkVar( interp, "nv" );
+				Tcl_UnlinkVar( interp, "avgSmpl" );
+				Tcl_UnlinkVar( interp, "showInit" );
 
 				cmd( "catch { set a [ glob -nocomplain plotxy_* ] }" ); // remove directories
 				cmd( "foreach b $a { catch { file delete -force $b } }" );
@@ -1184,7 +1184,7 @@ void analysis( bool mc )
 			// Use right button of the mouse to select all series with a given label
 			case 30:
 				compvalue = 0;
-				Tcl_LinkVar( inter, "compvalue", ( char * ) &compvalue, TCL_LINK_DOUBLE );
+				Tcl_LinkVar( interp, "compvalue", ( char * ) &compvalue, TCL_LINK_DOUBLE );
 				cmd( "set a [ split $res ]" );
 				cmd( "set b [ lindex $a 0 ]" );
 				cmd( "set ntag [ llength [ split [ lindex $a 1 ] {_} ] ]" );
@@ -1453,7 +1453,7 @@ void analysis( bool mc )
 
 				cmd( "set tvar [ .da.a.c.v.t.e2 get ]" );
 				cmd( "set compvalue [ .da.a.c.v.c.e get ]" );
-				Tcl_UnlinkVar( inter, "compvalue" );
+				Tcl_UnlinkVar( interp, "compvalue" );
 
 				if ( choice == 2 )
 				{
@@ -1711,7 +1711,7 @@ void analysis( bool mc )
 			// Use right button of the mouse to remove series selected with different criteria
 			case 33:
 				compvalue = 0;
-				Tcl_LinkVar( inter, "compvalue", ( char * ) &compvalue, TCL_LINK_DOUBLE );
+				Tcl_LinkVar( interp, "compvalue", ( char * ) &compvalue, TCL_LINK_DOUBLE );
 				cmd( "set a [ split $res ]" );
 				cmd( "set b [ lindex $a 0 ]" );
 				cmd( "set c [ lindex $a 1 ]" ); //get the tag value
@@ -1983,7 +1983,7 @@ void analysis( bool mc )
 
 				cmd( "set tvar [ .da.a.c.v.t.e2 get ]" );
 				cmd( "set compvalue [ .da.a.c.v.c.e get ]" );
-				Tcl_UnlinkVar( inter, "compvalue" );
+				Tcl_UnlinkVar( interp, "compvalue" );
 
 				if ( choice == 2 )
 				{
@@ -4159,8 +4159,8 @@ void set_cs_data( void )
 		return;
 	}
 
-	Tcl_LinkVar( inter, "res", ( char * ) &res, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "dir", ( char * ) &dir, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "res", ( char * ) &res, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "dir", ( char * ) &dir, TCL_LINK_INT );
 
 	cmd( "set bidi $maxc" );
 	cmd( "set res $maxc" );
@@ -4309,8 +4309,8 @@ void set_cs_data( void )
 
 	cmd( "destroytop .da.s" );
 
-	Tcl_UnlinkVar( inter, "res" );
-	Tcl_UnlinkVar( inter, "dir" );
+	Tcl_UnlinkVar( interp, "res" );
+	Tcl_UnlinkVar( interp, "dir" );
 
 	return;
 }
@@ -5008,9 +5008,9 @@ void statistics_cross( void )
 	int i, j, h, k, nt, *start, *end, *id, *list_times;
 	vector < double > v;
 
-	Tcl_LinkVar( inter, "nt", ( char * ) &nt, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "nt", ( char * ) &nt, TCL_LINK_INT );
 	cmd( "if [ info exists num_t ] { set nt $num_t } { set nt \"-1\" }" );
-	Tcl_UnlinkVar( inter, "nt" );
+	Tcl_UnlinkVar( interp, "nt" );
 
 	if ( nv < 2 || nt <= 0 )
 	{
@@ -5022,7 +5022,7 @@ void statistics_cross( void )
 	// sets the list of cases to plot
 	list_times = new int [ nt ];
 	cmd( "set k 0" );
-	Tcl_LinkVar( inter, "k", ( char * ) &k, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "k", ( char * ) &k, TCL_LINK_INT );
 
 	for ( i = 0; i < nt; ++i )
 	{
@@ -5030,7 +5030,7 @@ void statistics_cross( void )
 		list_times[ i ] = k;
 	}
 
-	Tcl_UnlinkVar( inter, "k" );
+	Tcl_UnlinkVar( interp, "k" );
 
 	data = new double *[ nv ];
 	start = new int [ nv ];
@@ -8311,11 +8311,11 @@ void save_datazip( void )
 			max_c = end[ i ];
 	}
 
-	Tcl_LinkVar( inter, "fr", ( char * ) &fr, TCL_LINK_BOOLEAN);
-	Tcl_LinkVar( inter, "dozip", ( char * ) &dozip, TCL_LINK_BOOLEAN);
-	Tcl_LinkVar( inter, "typelab", ( char * ) &typelab, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "deli", ( char * ) &del, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "numcol", ( char * ) &numcol, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "fr", ( char * ) &fr, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( interp, "dozip", ( char * ) &dozip, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( interp, "typelab", ( char * ) &typelab, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "deli", ( char * ) &del, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "numcol", ( char * ) &numcol, TCL_LINK_INT );
 
 	strcpyn( misval, nonavail, 10 );
 	typelab = 3;
@@ -8694,11 +8694,11 @@ void save_datazip( void )
 	end:
 
 	cmd( "destroytop .da.lab" );
-	Tcl_UnlinkVar( inter, "typelab" );
-	Tcl_UnlinkVar( inter, "dozip" );
-	Tcl_UnlinkVar( inter, "numcol" );
-	Tcl_UnlinkVar( inter, "deli" );
-	Tcl_UnlinkVar( inter, "fr" );
+	Tcl_UnlinkVar( interp, "typelab" );
+	Tcl_UnlinkVar( interp, "dozip" );
+	Tcl_UnlinkVar( interp, "numcol" );
+	Tcl_UnlinkVar( interp, "deli" );
+	Tcl_UnlinkVar( interp, "fr" );
 
 	choice = 0;
 
@@ -9883,17 +9883,17 @@ int min_hborder( int pdigits, double miny, double maxy )
  TCL_UPLOAD_SERIES
  data transfer routine from C to Tcl
  *****************************/
-int Tcl_upload_series( ClientData cd, Tcl_Interp *inter, int oc, Tcl_Obj *CONST ov[ ] )
+int Tcl_upload_series( ClientData cd, Tcl_Interp *interp, int oc, Tcl_Obj *CONST ov[ ] )
 {
 	int size, *data;
 
 	if ( oc != 3 )
 	{
-		Tcl_WrongNumArgs( inter, 1, ov, "size data" );
+		Tcl_WrongNumArgs( interp, 1, ov, "size data" );
 		return TCL_ERROR;
 	}
 
-	if ( Tcl_GetIntFromObj( inter, ov[ 1 ], &size ) != TCL_OK )
+	if ( Tcl_GetIntFromObj( interp, ov[ 1 ], &size ) != TCL_OK )
 		return TCL_ERROR;
 
 	data = ( int * ) Tcl_GetByteArrayFromObj( ov[ 2 ], NULL );

@@ -252,7 +252,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 	}
 
 	app_res = *res;
-	Tcl_LinkVar( inter, "value", ( char * ) &app_res, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( interp, "value", ( char * ) &app_res, TCL_LINK_DOUBLE );
 	cmd( "set value_change 0" );
 
 	if ( watch_trigger )
@@ -611,9 +611,8 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 					break;
 				}
 
-				Tcl_LinkVar( inter, "debug", ( char * ) &debug, TCL_LINK_INT );
-				Tcl_LinkVar( inter, "time", ( char * ) &t, TCL_LINK_INT );
-				Tcl_LinkVar( inter, "i", ( char * ) &i, TCL_LINK_INT );
+				Tcl_LinkVar( interp, "debug", ( char * ) &debug, TCL_LINK_INT );
+				Tcl_LinkVar( interp, "i", ( char * ) &i, TCL_LINK_INT );
 
 				cv = r->search_var( NULL, get_str( "res" ) );
 				i = cv->last_update;
@@ -627,6 +626,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				cmd( "newtop $e \"Element Status\" { set choice 1 } .deb" );
 
 				cmd( "ttk::frame $e.n" );
+				
 				switch ( cv->param )
 				{
 					case 1:
@@ -641,12 +641,13 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						cmd( "ttk::label $e.n.l -text \"Variable:\"" );
 						break;
 				}
+				
 				cmd( "ttk::label $e.n.v -style hl.TLabel -text $res" );
 				cmd( "pack $e.n.l $e.n.v -side left -padx 2" );
 
 				cmd( "ttk::frame $e.t" );
 				cmd( "ttk::label $e.t.l -text \"Current case:\"" );
-				cmd( "ttk::label $e.t.v -style hl.TLabel -text $time" );
+				cmd( "ttk::label $e.t.v -style hl.TLabel -text %d", t );
 				cmd( "pack $e.t.l $e.t.v -side left -padx 2" );
 
 				cmd( "ttk::frame $e.u" );
@@ -660,12 +661,13 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				cmd( "pack $e.x.l $e.x.v -side left -padx 2" );
 
 				cmd( "ttk::frame $e.v" );
+				
 				for ( i = 0; i <= eff_lags; ++i )
 				{
 					cmd( "set val%d %g", i, cv->val[ i ] );
 					app_values[ i ] = cv->val[ i ];
 					snprintf( ch, MAX_ELEM_LENGTH, "val%d", i );
-					Tcl_LinkVar( inter, ch, ( char * ) &( app_values[ i ] ), TCL_LINK_DOUBLE );
+					Tcl_LinkVar( interp, ch, ( char * ) &( app_values[ i ] ), TCL_LINK_DOUBLE );
 
 					cmd( "ttk::frame $e.v.l$i" );
 
@@ -745,12 +747,13 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						cmd( ".deb.v.v1.val2 configure -text [ format %%g $value ]" );
 					}
 
-					Tcl_UnlinkVar( inter, ch );
+					Tcl_UnlinkVar( interp, ch );
 					cmd( "unset val$i" );
 				}
 
 				delete [ ] app_values;
-				Tcl_UnlinkVar( inter, "i");
+				Tcl_UnlinkVar( interp, "i" );
+				Tcl_UnlinkVar( interp, "debug" );
 
 				cmd( "destroytop $e" );
 
@@ -777,7 +780,6 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 								cv->deb_mode = 'r';
 				}
 
-				Tcl_UnlinkVar( inter, "debug" );
 				count = choice;
 
 				cmd( "if { $debugall || $undebugall } { set choice 1 } { set choice 0 }" );
@@ -890,8 +892,8 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				if ( choice == 0 )
 					break;
 
-				Tcl_LinkVar( inter, "value_search", ( char * ) &value_search, TCL_LINK_DOUBLE );
-				Tcl_LinkVar( inter, "condition", ( char * ) &cond, TCL_LINK_INT );
+				Tcl_LinkVar( interp, "value_search", ( char * ) &value_search, TCL_LINK_DOUBLE );
+				Tcl_LinkVar( interp, "condition", ( char * ) &cond, TCL_LINK_INT );
 				cond = 0;
 				choice = 0;
 				value_search = 0;
@@ -966,8 +968,8 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				if ( choice == 2 )
 				{
 					cmd( "destroytop .deb.so" );
-					Tcl_UnlinkVar( inter, "value_search" );
-					Tcl_UnlinkVar( inter, "condition" );
+					Tcl_UnlinkVar( interp, "value_search" );
+					Tcl_UnlinkVar( interp, "condition" );
 
 					choice = 0;
 					redraw = false;
@@ -1059,8 +1061,8 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 				quit = 0;	// if name is mispelled don't stop the simulation!
 				cmd( "destroytop .deb.so" );
-				Tcl_UnlinkVar( inter, "value_search" );
-				Tcl_UnlinkVar( inter, "condition" );
+				Tcl_UnlinkVar( interp, "value_search" );
+				Tcl_UnlinkVar( interp, "condition" );
 
 				if ( cur != NULL )
 					choice = deb( cur, r, lab, res, interact, ch );
@@ -1589,7 +1591,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 	*res = app_res;
 
-	Tcl_UnlinkVar( inter, "value" );
+	Tcl_UnlinkVar( interp, "value" );
 
 	return choice;
 }
@@ -1735,7 +1737,7 @@ void deb_show( object *r, const char *hl_var, int mode )
 	}
 	else
 	{
-		Tcl_LinkVar( inter, "i", ( char * ) &i, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "i", ( char * ) &i, TCL_LINK_INT );
 
 		// single frame ($w=.deb.cc.grid.can.f) in canvas to hold all cells
 		cmd( "set w $g.can.f" );
@@ -1844,7 +1846,7 @@ void deb_show( object *r, const char *hl_var, int mode )
 				set lastHl \"\"; \
 			}", hl_var, hl_var, hl_var, hl_var );
 
-		Tcl_UnlinkVar( inter, "i" );
+		Tcl_UnlinkVar( interp, "i" );
 
 		// force scrollbar cursor to show (Tk bug)
 		cmd( "update idletasks" );
@@ -1921,7 +1923,7 @@ void show_tmp_vars( object *r, bool update )
 	cmd( "$in.l1.n.name configure -text \"%s\"", r->label == NULL ? "" : r->label );
 	cmd( "$in.l1.n.id configure -text \"%d\"", m );
 
-	Tcl_LinkVar( inter, "i", ( char * ) &i, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "i", ( char * ) &i, TCL_LINK_INT );
 
 	cmd( "$in.n.t insert end \"Temporary storage\n\" bold" );
 
@@ -2150,7 +2152,7 @@ void show_tmp_vars( object *r, bool update )
 		cmd( "$in.n.t insert end \\n" );
 	}
 
-	Tcl_UnlinkVar( inter, "i" );
+	Tcl_UnlinkVar( interp, "i" );
 	cmd( "$in.n.t configure -state disabled" );
 }
 
@@ -2231,7 +2233,7 @@ void show_neighbors( object *r, bool update )
 	cmd( "$N.l1.n.name configure -text \"%s\"", r->node->name == NULL ? "" : r->node->name );
 	cmd( "$N.l2.n configure -text %ld", r->node->nLinks );
 
-	Tcl_LinkVar( inter, "i", ( char * ) &i, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "i", ( char * ) &i, TCL_LINK_INT );
 
 	for ( i = 1, curLnk = r->node->first; curLnk != NULL; curLnk = curLnk->next, ++i )
 	{
@@ -2258,7 +2260,7 @@ void show_neighbors( object *r, bool update )
 		cmd( "$N.n.t insert end \\n" );
 	}
 
-	Tcl_UnlinkVar( inter, "i" );
+	Tcl_UnlinkVar( interp, "i" );
 	cmd( "$N.n.t configure -state disabled" );
 }
 

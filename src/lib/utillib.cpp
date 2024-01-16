@@ -43,9 +43,9 @@ void plog( const char *cm, ... )
 	static va_list argptr;
 
 	va_start( argptr, cm );
-	
-	if ( dllcbck.plog_backend != NULL )
-		dllcbck.plog_backend( cm, "", argptr );
+
+	if ( liblnk.plog_backend != NULL )
+		liblnk.plog_backend( cm, "", argptr );
 	else
 		plog_terminal( cm, argptr );
 
@@ -66,8 +66,8 @@ void plog_tag( const char *cm, const char *tag, ... )
 
 	va_start( argptr, tag );
 
-	if ( dllcbck.plog_backend != NULL )
-		dllcbck.plog_backend( cm, tag, argptr );
+	if ( liblnk.plog_backend != NULL )
+		liblnk.plog_backend( cm, tag, argptr );
 	else
 		plog_terminal( cm, argptr );
 
@@ -193,12 +193,22 @@ void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const 
 
 	quit = 2;				// do not continue simulation
 
-	if ( dllcbck.error_hard_helper != NULL )
-		dllcbck.error_hard_helper( boxTitle, boxText, logText, defQuit );
+	if ( liblnk.error_hard_helper != NULL )
+		liblnk.error_hard_helper( boxTitle, boxText, logText, defQuit );
 	else
 		fprintf( stderr, "\nError: %s\n(%s)\n", boxTitle, logText );
 
 	lsd_exit( 13 );
+}
+
+
+/*********************************
+ SET_EXEC
+ *********************************/
+void set_exec( const char *path, const char *file )
+{
+	exec_path = clean_path( path );			// path of executable file
+	exec_file = clean_file( file );			// name of executable file
 }
 
 
@@ -343,4 +353,27 @@ void reset_blueprint( object *r )
 	blueprint = new object;
 	blueprint->init( NULL, "Root" );
 	set_blueprint( blueprint, r );
+}
+
+
+/***************************************
+SEARCH_PARALLEL
+***************************************/
+bool search_parallel( object *r )
+{
+	bridge *cb;
+	variable *cv;
+
+	// search among the variables
+	for ( cv = r->v; cv != NULL; cv=cv->next )
+		if ( cv->parallel )
+			return true;
+
+	// search among descendants
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		if ( cb->head != NULL )
+			if ( search_parallel( cb->head ) )
+				return true;
+
+	return false;
 }

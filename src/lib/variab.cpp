@@ -509,24 +509,28 @@ double variable::cal( object *caller, int lag )
 			fprintf( log_file, "%s\t= %g\t(t=%d)\n", label, val[ 0 ], t );
 
 		// open the debugger if required
-		if ( debug_flag && t == when_debug && ( watch_trigger || ( deb_cond == 0 && ( deb_mode == 'd' || deb_mode == 'W' || deb_mode == 'R' ) ) ) )
-			deb( ( object * ) up, caller, label, &val[ 0 ], false );
+		if ( debug_flag && t == when_debug && liblnk.deb != NULL && ( watch_trigger || ( deb_cond == 0 && ( deb_mode == 'd' || deb_mode == 'W' || deb_mode == 'R' ) ) ) )
+			liblnk.deb( ( object * ) up, caller, label, &val[ 0 ], false, "" );
 		else
+		{
+			if ( liblnk.deb == NULL && deb_cond >= 1 && deb_cond <= 3 )
+				deb_cond = -1;
+
 			switch ( deb_cond )
 			{
 				case 0:
 					break;
 				case 1:
 					if ( val[ 0 ] == deb_cnd_val )
-						deb( ( object * ) up, caller, label, &val[ 0 ], false );
+						liblnk.deb( ( object * ) up, caller, label, &val[ 0 ], false, "" );
 					break;
 				case 2:
 					if ( val[ 0 ] > deb_cnd_val )
-						deb( ( object * ) up, caller, label, &val[ 0 ], false );
+						liblnk.deb( ( object * ) up, caller, label, &val[ 0 ], false, "" );
 					break;
 				case 3:
 					if ( val[ 0 ] < deb_cnd_val )
-						deb( ( object * ) up, caller, label, &val[ 0 ], false );
+						liblnk.deb( ( object * ) up, caller, label, &val[ 0 ], false, "" );
 					break;
 				default:
 					error_hard( "internal problem in LSD",
@@ -535,6 +539,7 @@ double variable::cal( object *caller, int lag )
 								"conditional debug '%d' in variable '%s'", deb_cond, label );
 					return -1;
 			}
+		}
 #endif
 		// remove the element from the stack
 		if ( stack_log != NULL && stack_log->prev != NULL )

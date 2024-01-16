@@ -28,7 +28,7 @@
  ****************************************************/
 void lsd_exit_gui( int v )
 {
-	if ( inter != NULL )
+	if ( interp != NULL )
 	{
 		if ( tk_ok )
 			cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { catch { destroy . } }" );
@@ -194,22 +194,22 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 
 	// initialize the tcl/tk interpreter
 	Tcl_FindExecutable( exec );
-	inter = Tcl_CreateInterp( );
-	num = Tcl_Init( inter );
+	interp = Tcl_CreateInterp( );
+	num = Tcl_Init( interp );
 	if ( num != TCL_OK )
 	{
-		log_tcl_error( false, "Create Tcl interpreter", "Tcl initialization directories not found, check the Tcl/Tk installation  and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
+		log_tcl_error( false, "Create Tcl interpreter", "Tcl initialization directories not found, check the Tcl/Tk installation  and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( interp ) );
 		lsd_exit_gui( 3 );
 	}
 
 	// set variables and links in TCL interpreter
-	Tcl_SetVar( inter, "_LSD_VERSION_", _LSD_VERSION_, 0 );
-	Tcl_SetVar( inter, "_LSD_DATE_", _LSD_DATE_, 0 );
-	Tcl_LinkVar( inter, "res", ( char * ) &res, TCL_LINK_INT );
+	Tcl_SetVar( interp, "_LSD_VERSION_", _LSD_VERSION_, 0 );
+	Tcl_SetVar( interp, "_LSD_DATE_", _LSD_DATE_, 0 );
+	Tcl_LinkVar( interp, "res", ( char * ) &res, TCL_LINK_INT );
 
 	// test Tcl interpreter
 	cmd( "set res 1234567890" );
-	Tcl_UpdateLinkedVar( inter, "res" );
+	Tcl_UpdateLinkedVar( interp, "res" );
 	if ( res != 1234567890 )
 	{
 		log_tcl_error( false, "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall LSD" );
@@ -217,13 +217,13 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 	}
 
 	// initialize & test the tk application
-	num = Tk_Init( inter );
+	num = Tk_Init( interp );
 	if ( num == TCL_OK )
 		cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { set res 0 } { set res 1 }" );
 
 	if ( num != TCL_OK || res )
 	{
-		log_tcl_error( false, "Start Tk", "Tk failed, check the Tcl/Tk installation (version 8.6+) and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
+		log_tcl_error( false, "Start Tk", "Tk failed, check the Tcl/Tk installation (version 8.6+) and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( interp ) );
 		lsd_exit_gui( 3 );
 	}
 
@@ -257,7 +257,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 		lsd_exit_gui( 4 );
 	}
 
-	Tcl_UnlinkVar( inter, "res" );
+	Tcl_UnlinkVar( interp, "res" );
 }
 
 
@@ -444,10 +444,23 @@ char *search_lsd_root( char *start_path )
  ****************************************************/
 void cmd( const char *cm, ... )
 {
+	static va_list argptr;
+
+	va_start( argptr, cm );
+	cmd_backend( cm, argptr );
+	va_end( argptr );
+}
+
+
+/****************************************************
+ CMD_BACKEND
+ ****************************************************/
+void cmd_backend( const char *cm, va_list arg )
+{
 	static bool bufdyn;
 	static char *buffer, bufstat[ MAX_BUFF_SIZE ];
 	static int reqsz, sz;
-	static va_list argptr;
+	static va_list argcpy;
 
 #ifndef _NP_
 	// abort if not running in main LSD thread
@@ -456,16 +469,15 @@ void cmd( const char *cm, ... )
 #endif
 
 	// abort if Tcl interpreter not initialized
-	if ( inter == NULL )
+	if ( interp == NULL )
 	{
 		fprintf( stderr, "\nTcl interpreter not initialized. Quitting LSD now.\n" );
 		lsd_exit_gui( 24 );
 	}
 
 	buffer = bufstat;
-	va_start( argptr, cm );
-	reqsz = vsnprintf( buffer, MAX_BUFF_SIZE, cm, argptr );
-	va_end( argptr );
+	va_copy( argcpy, arg );
+	reqsz = vsnprintf( buffer, MAX_BUFF_SIZE, cm, arg );
 
 	if ( reqsz < 0 )
 	{
@@ -477,9 +489,7 @@ void cmd( const char *cm, ... )
 	if ( reqsz >= MAX_BUFF_SIZE )
 	{
 		buffer = new char[ reqsz + 1 ];
-		va_start( argptr, cm );
-		sz = vsnprintf( buffer, reqsz + 1, cm, argptr );
-		va_end( argptr );
+		sz = vsnprintf( buffer, reqsz + 1, cm, argcpy );
 
 		if ( reqsz < 0 || sz > reqsz )
 		{
@@ -493,8 +503,10 @@ void cmd( const char *cm, ... )
 	else
 		bufdyn = false;
 
-	if ( Tcl_Eval( inter, buffer ) != TCL_OK )
-		log_tcl_error( true, cm, Tcl_GetStringResult( inter ) );
+	va_end( argcpy );
+
+	if ( Tcl_Eval( interp, buffer ) != TCL_OK )
+		log_tcl_error( true, cm, Tcl_GetStringResult( interp ) );
 
 	if ( bufdyn )
 		delete [ ] buffer;
@@ -564,7 +576,7 @@ void log_tcl_error( bool show, const char *cm, const char *message, ... )
  TCL_LOG_TCL_ERROR
  Entry point function for access from the Tcl interpreter
  ****************************************************/
-int Tcl_log_tcl_error( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+int Tcl_log_tcl_error( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	if ( argc != 4 || argv[ 1 ] == NULL || argv[ 2 ] == NULL || argv[ 3 ] == NULL )	// require 3 parameters
 		return TCL_ERROR;
@@ -572,7 +584,7 @@ int Tcl_log_tcl_error( ClientData cdata, Tcl_Interp *inter, int argc, const char
 	log_tcl_error( strcmp( argv[ 1 ], "0" ), argv[ 2 ], argv[ 3 ] );
 
 	static char empty[ ] = "";
-	Tcl_SetResult( inter, empty, TCL_VOLATILE );
+	Tcl_SetResult( interp, empty, TCL_VOLATILE );
 	return TCL_OK;
 }
 
@@ -609,12 +621,12 @@ void show_tcl_error( const char *boxTitle, const char *errMsg, ... )
  TCL_DISCARD_CHANGE
  Entry point function for access from the Tcl interpreter
  ****************************************************/
-int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+int Tcl_discard_change( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	if ( discard_change( ) == 1 )
-		Tcl_SetResult( inter, ( char * ) "ok", TCL_VOLATILE );
+		Tcl_SetResult( interp, ( char * ) "ok", TCL_VOLATILE );
 	else
-		Tcl_SetResult( inter, ( char * ) "cancel", TCL_VOLATILE );
+		Tcl_SetResult( interp, ( char * ) "cancel", TCL_VOLATILE );
 	return TCL_OK;
 }
 
@@ -657,8 +669,8 @@ bool get_bool( const char *tcl_var, bool *var )
 			return false;
 	}
 
-	if ( Tcl_GetBoolean( inter, strvar, & intvar ) != TCL_OK )
-		if ( Tcl_GetInt( inter, strvar, & intvar ) != TCL_OK )
+	if ( Tcl_GetBoolean( interp, strvar, & intvar ) != TCL_OK )
+		if ( Tcl_GetInt( interp, strvar, & intvar ) != TCL_OK )
 		{
 			log_tcl_error( true, "Cannot convert to boolean", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
 			return false;
@@ -689,7 +701,7 @@ int get_int( const char *tcl_var, int *var )
 			return 0;
 	}
 
-	if ( Tcl_GetInt( inter, strvar, & intvar ) != TCL_OK )
+	if ( Tcl_GetInt( interp, strvar, & intvar ) != TCL_OK )
 	{
 		log_tcl_error( true, "Cannot convert to integer", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
 		return 0;
@@ -751,7 +763,7 @@ double get_double( const char *tcl_var, double *var )
 			return NAN;
 	}
 
-	if ( Tcl_GetDouble( inter, strvar, & dblvar ) != TCL_OK )
+	if ( Tcl_GetDouble( interp, strvar, & dblvar ) != TCL_OK )
 	{
 		log_tcl_error( true, "Cannot convert to double", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
 		return NAN;
@@ -770,7 +782,7 @@ double get_double( const char *tcl_var, double *var )
  ***************************************************/
 char *get_str( const char *tcl_var, char *var, int var_size )
 {
-	const char *strvar = Tcl_GetVar( inter, tcl_var, 0 );
+	const char *strvar = Tcl_GetVar( interp, tcl_var, 0 );
 
 	if ( strvar == NULL )
 	{
@@ -817,7 +829,7 @@ bool expr_eq( const char *tcl_exp, const char *c_str )
  ***************************************************/
 char *eval_str( const char *tcl_exp, char *var, int var_size )
 {
-	if ( Tcl_ExprString( inter, tcl_exp ) != TCL_OK )
+	if ( Tcl_ExprString( interp, tcl_exp ) != TCL_OK )
 	{
 		log_tcl_error( true, "Cannot evaluate to string", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
 		return var;
@@ -825,11 +837,11 @@ char *eval_str( const char *tcl_exp, char *var, int var_size )
 
 	if ( var != NULL && var_size > 0 )
 	{
-		strcpyn( var, Tcl_GetStringResult( inter ), var_size );
+		strcpyn( var, Tcl_GetStringResult( interp ), var_size );
 		return var;
 	}
 	else
-		return ( char * ) Tcl_GetStringResult( inter );
+		return ( char * ) Tcl_GetStringResult( interp );
 }
 
 const char *eval_str( const char *tcl_exp )
@@ -847,10 +859,10 @@ bool eval_bool( const char *tcl_exp )
 	int intvar;
 	long longvar;
 
-	if ( Tcl_ExprBoolean( inter, tcl_exp, & intvar ) == TCL_OK )
+	if ( Tcl_ExprBoolean( interp, tcl_exp, & intvar ) == TCL_OK )
 		return intvar ? true : false;
 
-	if ( Tcl_ExprLong( inter, tcl_exp, & longvar ) != TCL_OK )
+	if ( Tcl_ExprLong( interp, tcl_exp, & longvar ) != TCL_OK )
 	{
 		log_tcl_error( true, "Cannot evaluate to boolean", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
 		return false;
@@ -878,7 +890,7 @@ long eval_long( const char *tcl_exp )
 {
 	long longvar;
 
-	if ( Tcl_ExprLong( inter, tcl_exp, & longvar ) != TCL_OK )
+	if ( Tcl_ExprLong( interp, tcl_exp, & longvar ) != TCL_OK )
 	{
 		log_tcl_error( true, "Cannot evaluate to long integer", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
 		return 0;
@@ -896,7 +908,7 @@ double eval_double( const char *tcl_exp )
 {
 	double dblvar;
 
-	if ( Tcl_ExprDouble( inter, tcl_exp, & dblvar ) != TCL_OK )
+	if ( Tcl_ExprDouble( interp, tcl_exp, & dblvar ) != TCL_OK )
 	{
 		log_tcl_error( true, "Cannot evaluate to double", "Internal LSD error evaluating expression '%s'. If the problem persists, please contact developers", tcl_exp );
 		return NAN;
@@ -1076,17 +1088,32 @@ bool make_no_window( void )
 		return false;
 
 	// copy the base LSD source files to distribution directory
-	cmd( "if { ! [ file exists \"$modelDir/$LsdSrc\" ] } { file mkdir \"$modelDir/$LsdSrc\" }" );
+	cmd( "if { ! [ file exists \"$modelDir/$LsdSrc\" ] } { \
+			file mkdir \"$modelDir/$LsdSrc\" \
+		}" );
 
 	for ( i = 0; i < LSD_NW_NUM; ++i )
 		cmd( "file copy -force \"$RootLsd/$LsdSrc/%s\" \"$modelDir/$LsdSrc\"", lsd_nw_src[ i ] );
 
+	// copy LSD library files always
+	cmd( "if { ! [ file exists \"$modelDir/$LsdSrc/lib\" ] } { \
+			file mkdir \"$modelDir/$LsdSrc/lib\" \
+		}" );
+
+	cmd( "foreach f [ glob -nocomplain -directory \"$RootLsd/$LsdSrc/lib\" * ] { \
+			file copy -force $f \"$modelDir/$LsdSrc/lib\" \
+		}" );
+
 	// copy pugixml just once
-	cmd( "if { ! [ file exists \"$modelDir/$LsdSrc/pugixml\" ] } { file copy -force \"$RootLsd/$LsdSrc/pugixml\" \"$modelDir/$LsdSrc\" }" );
+	cmd( "if { ! [ file exists \"$modelDir/$LsdSrc/pugixml\" ] } { \
+			file copy -force \"$RootLsd/$LsdSrc/pugixml\" \"$modelDir/$LsdSrc\" \
+		}" );
 
 	// copy Eigen library files if in use, just once to save time
 	if( use_eigen( ) )
-		cmd( "if { ! [ file exists \"$modelDir/$LsdSrc/Eigen\" ] } { file copy -force \"$RootLsd/$LsdSrc/Eigen\" \"$modelDir/$LsdSrc\" }" );
+		cmd( "if { ! [ file exists \"$modelDir/$LsdSrc/Eigen\" ] } { \
+				file copy -force \"$RootLsd/$LsdSrc/Eigen\" \"$modelDir/$LsdSrc\" \
+			}" );
 
 	// create makefileNW and compile a local machine version of lsdNW
 	return compile_run( false, true );
@@ -1134,7 +1161,7 @@ bool compile_run( int run_mode, bool nw )
 	int res, max_threads = 1;
 	FILE *f;
 
-	Tcl_LinkVar( inter, "res", ( char * ) &res, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "res", ( char * ) &res, TCL_LINK_INT );
 
 	cmd( "set oldpath [ pwd ]" );
 	cmd( "cd \"$modelDir\"" );
@@ -1230,7 +1257,7 @@ bool compile_run( int run_mode, bool nw )
 
 	// close banner
 	cmd( "destroytop .t" );
-	Tcl_UnlinkVar( inter, "res" );
+	Tcl_UnlinkVar( interp, "res" );
 
 	ret = false;
 

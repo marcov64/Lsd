@@ -277,9 +277,9 @@ const bool no_pointer_init = true;
 #define DOWN "DOWN"
 
 #define ABORT { quit = 1; }
-#define DEBUG_START deb_log( true )
+#define DEBUG_START deb_log( true, 0 )
 #define DEBUG_START_AT( X ) deb_log( true, X )
-#define DEBUG_STOP deb_log( false )
+#define DEBUG_STOP deb_log( false, 0 )
 #define DEBUG_STOP_AT( X ) deb_log( false, X )
 #define DEFAULT_RESULT( X ) { def_res = X; }
 

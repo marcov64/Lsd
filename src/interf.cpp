@@ -95,8 +95,8 @@ void create( void )
 {
 	object *cur;
 
-	Tcl_LinkVar( inter, "strWindowOn", ( char * ) &strWindowOn, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( inter, "actual_steps", ( char * ) &actual_steps, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "strWindowOn", ( char * ) &strWindowOn, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "actual_steps", ( char * ) &actual_steps, TCL_LINK_INT );
 
 	// sort the list of choices with existing run data to use later
 	qsort( badChoices, NUM_BAD_CHOICES, sizeof ( int ), comp_ints );
@@ -151,8 +151,8 @@ void create( void )
 		cur = operate( cur );
 	}
 
-	Tcl_UnlinkVar( inter, "strWindowOn" );
-	Tcl_UnlinkVar( inter, "actual_steps" );
+	Tcl_UnlinkVar( interp, "strWindowOn" );
+	Tcl_UnlinkVar( interp, "actual_steps" );
 }
 
 
@@ -1225,8 +1225,8 @@ object *operate( object *r )
 		// from disk, if needed, or just update the missing elements lists
 		cmd( "if { [ llength $missVar ] == 0 || [ llength $missPar ] == 0 } { read_elem_file %s } { upd_miss_elem }", exec_path );
 
-		Tcl_LinkVar( inter, "done", ( char * ) &done, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "done", ( char * ) &done, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "num", ( char * ) &num, TCL_LINK_INT );
 
 		param = get_int( "param" );
 		cmd( "set num 0" );
@@ -1462,8 +1462,8 @@ object *operate( object *r )
 		if ( cur2 != NULL )						// restore original current object
 			r = cur2;
 
-		Tcl_UnlinkVar( inter, "done" );
-		Tcl_UnlinkVar( inter, "num" );
+		Tcl_UnlinkVar( interp, "done" );
+		Tcl_UnlinkVar( interp, "num" );
 		cmd( "unset done" );
 
 		if ( initVal )
@@ -1510,7 +1510,7 @@ object *operate( object *r )
 		// from disk, if needed, or just update the missing elements lists
 		cmd( "if { [ llength $missObj ] == 0 } { read_elem_file %s } { upd_miss_elem }", exec_path );
 
-		Tcl_LinkVar( inter, "done", ( char * ) &done, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "done", ( char * ) &done, TCL_LINK_INT );
 
 		cmd( "set lab \"\"" );
 
@@ -1594,7 +1594,7 @@ object *operate( object *r )
 		if ( cur2 != NULL )			// restore original current object
 			r = cur2;
 
-		Tcl_UnlinkVar( inter, "done" );
+		Tcl_UnlinkVar( interp, "done" );
 		cmd( "unset done" );
 
 	break;
@@ -2013,14 +2013,14 @@ object *operate( object *r )
 		cv = r->search_var( NULL, lab_old );
 		cd = search_description( lab_old );
 
-		Tcl_LinkVar( inter, "done", ( char * ) &done, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "save", ( char * ) &save, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "savei", ( char * ) &savei, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "plot", ( char * ) &plot, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "debug", ( char * ) &debug, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "watch", ( char * ) &watch, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "watch_write", ( char * ) &watch_write, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "parallel", ( char * ) &parallel, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "done", ( char * ) &done, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "save", ( char * ) &save, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "savei", ( char * ) &savei, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "plot", ( char * ) &plot, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "debug", ( char * ) &debug, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "watch", ( char * ) &watch, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "watch_write", ( char * ) &watch_write, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "parallel", ( char * ) &parallel, TCL_LINK_BOOLEAN );
 
 		save = cv->save;
 		savei = cv->savei;
@@ -2416,14 +2416,14 @@ object *operate( object *r )
 		here_endelem:
 
 		cmd( "destroytop .chgelem" );
-		Tcl_UnlinkVar( inter, "done" );
-		Tcl_UnlinkVar( inter, "save" );
-		Tcl_UnlinkVar( inter, "savei" );
-		Tcl_UnlinkVar( inter, "plot" );
-		Tcl_UnlinkVar( inter, "debug" );
-		Tcl_UnlinkVar( inter, "watch" );
-		Tcl_UnlinkVar( inter, "watch_write" );
-		Tcl_UnlinkVar( inter, "parallel" );
+		Tcl_UnlinkVar( interp, "done" );
+		Tcl_UnlinkVar( interp, "save" );
+		Tcl_UnlinkVar( interp, "savei" );
+		Tcl_UnlinkVar( interp, "plot" );
+		Tcl_UnlinkVar( interp, "debug" );
+		Tcl_UnlinkVar( interp, "watch" );
+		Tcl_UnlinkVar( interp, "watch_write" );
+		Tcl_UnlinkVar( interp, "parallel" );
 		cmd( "unset done" );
 
 		// options to be handled in a second run of the operate function
@@ -2878,10 +2878,10 @@ object *operate( object *r )
 		temp[ 3 ] = cv->period;
 		temp[ 4 ] = cv->period_range;
 
-		Tcl_LinkVar( inter, "delay", ( char * ) & cv->delay, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "delay_range", ( char * ) & cv->delay_range, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "period", ( char * ) & cv->period, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "period_range", ( char * ) & cv->period_range, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "delay", ( char * ) & cv->delay, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "delay_range", ( char * ) & cv->delay_range, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "period", ( char * ) & cv->period, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "period_range", ( char * ) & cv->period_range, TCL_LINK_INT );
 
 		cmd( "set T .updating" );
 		cmd( "newtop $T \"Variable Updating\" { set choice 2 }" );
@@ -2973,10 +2973,10 @@ object *operate( object *r )
 				redrawRoot = true;
 			}
 
-		Tcl_UnlinkVar( inter, "delay" );
-		Tcl_UnlinkVar( inter, "delay_range" );
-		Tcl_UnlinkVar( inter, "period" );
-		Tcl_UnlinkVar( inter, "period_range" );
+		Tcl_UnlinkVar( interp, "delay" );
+		Tcl_UnlinkVar( interp, "delay_range" );
+		Tcl_UnlinkVar( interp, "period" );
+		Tcl_UnlinkVar( interp, "period_range" );
 
 	break;
 
@@ -3032,13 +3032,13 @@ object *operate( object *r )
 		// remove any custom save path (save to current by default)
 		results_alt_path( "" );
 
-		Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "add_to_tot", ( char * ) & add_to_tot, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "doover", ( char * ) & doover, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "add_to_tot", ( char * ) & add_to_tot, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "doover", ( char * ) & doover, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
 
 		cmd( "set firstFile \"%s_%d\"", simul_name, seed );
 		cmd( "set lastFile \"%s_%d\"", simul_name, seed + sim_num - 1 );
@@ -3202,13 +3202,13 @@ object *operate( object *r )
 
 		cmd( "destroytop .run" );
 
-		Tcl_UnlinkVar( inter, "no_res" );
-		Tcl_UnlinkVar( inter, "no_tot" );
-		Tcl_UnlinkVar( inter, "add_to_tot" );
-		Tcl_UnlinkVar( inter, "docsv" );
-		Tcl_UnlinkVar( inter, "doover" );
-		Tcl_UnlinkVar( inter, "dozip" );
-		Tcl_UnlinkVar( inter, "overwConf" );
+		Tcl_UnlinkVar( interp, "no_res" );
+		Tcl_UnlinkVar( interp, "no_tot" );
+		Tcl_UnlinkVar( interp, "add_to_tot" );
+		Tcl_UnlinkVar( interp, "docsv" );
+		Tcl_UnlinkVar( interp, "doover" );
+		Tcl_UnlinkVar( interp, "dozip" );
+		Tcl_UnlinkVar( interp, "overwConf" );
 
 		if ( choice == 2 )
 			break;
@@ -3272,7 +3272,7 @@ object *operate( object *r )
 			break;
 		}
 
-		Tcl_LinkVar( inter, "done", ( char * ) &done, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "done", ( char * ) &done, TCL_LINK_INT );
 
 		if ( actual_steps > 0 )
 		{
@@ -3283,7 +3283,7 @@ object *operate( object *r )
 
 			if ( done == 2 )
 			{
-				Tcl_UnlinkVar( inter, "done" );
+				Tcl_UnlinkVar( interp, "done" );
 				cmd( "unset done" );
 				break;
 			}
@@ -3348,7 +3348,7 @@ object *operate( object *r )
 			unsaved_change( false );					// signal no unsaved change
 
 		save_end:
-		Tcl_UnlinkVar( inter, "done" );
+		Tcl_UnlinkVar( interp, "done" );
 		cmd( "unset done" );
 
 	break;
@@ -3429,15 +3429,15 @@ object *operate( object *r )
 		temp[ 9 ] = no_ptr_chk;
 		temp[ 10 ] = parallel_disable;
 
-		Tcl_LinkVar( inter, "sim_num", ( char * ) & sim_num, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "seed", ( char * ) & seed, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "max_step", ( char * ) & max_step, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "stack_info", ( char * ) & stack_info, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "prof_min_msecs", ( char * ) & prof_min_msecs, TCL_LINK_INT );
-		Tcl_LinkVar( inter, "prof_obs_only", ( char * ) & prof_obs_only, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "prof_aggr_time", ( char * ) & prof_aggr_time, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "no_ptr_chk", ( char * ) & no_ptr_chk, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "parallel_disable", ( char * ) & parallel_disable, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "sim_num", ( char * ) & sim_num, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "seed", ( char * ) & seed, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "max_step", ( char * ) & max_step, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "stack_info", ( char * ) & stack_info, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "prof_min_msecs", ( char * ) & prof_min_msecs, TCL_LINK_INT );
+		Tcl_LinkVar( interp, "prof_obs_only", ( char * ) & prof_obs_only, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "prof_aggr_time", ( char * ) & prof_aggr_time, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "no_ptr_chk", ( char * ) & no_ptr_chk, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "parallel_disable", ( char * ) & parallel_disable, TCL_LINK_BOOLEAN );
 
 		cmd( "set tw 28" );					// text label width
 
@@ -3545,15 +3545,15 @@ object *operate( object *r )
 			if ( temp[ 1 ] != sim_num || ( unsigned ) temp[ 2 ] != seed || temp[ 3 ] != max_step || temp[ 4 ] != when_debug || temp[ 5 ] != stack_info || temp[ 6 ] != prof_min_msecs || temp[ 7 ] != prof_obs_only || temp[ 8 ] != prof_aggr_time || temp[ 9 ] != no_ptr_chk || temp[ 10 ] != parallel_disable )
 				unsaved_change( true );
 
-		Tcl_UnlinkVar( inter, "sim_num" );
-		Tcl_UnlinkVar( inter, "seed" );
-		Tcl_UnlinkVar( inter, "max_step" );
-		Tcl_UnlinkVar( inter, "stack_info" );
-		Tcl_UnlinkVar( inter, "prof_min_msecs" );
-		Tcl_UnlinkVar( inter, "prof_obs_only" );
-		Tcl_UnlinkVar( inter, "prof_aggr_time" );
-		Tcl_UnlinkVar( inter, "no_ptr_chk" );
-		Tcl_UnlinkVar( inter, "parallel_disable" );
+		Tcl_UnlinkVar( interp, "sim_num" );
+		Tcl_UnlinkVar( interp, "seed" );
+		Tcl_UnlinkVar( interp, "max_step" );
+		Tcl_UnlinkVar( interp, "stack_info" );
+		Tcl_UnlinkVar( interp, "prof_min_msecs" );
+		Tcl_UnlinkVar( interp, "prof_obs_only" );
+		Tcl_UnlinkVar( interp, "prof_aggr_time" );
+		Tcl_UnlinkVar( interp, "no_ptr_chk" );
+		Tcl_UnlinkVar( interp, "parallel_disable" );
 
 	break;
 
@@ -4005,9 +4005,9 @@ object *operate( object *r )
 			break;
 		}
 
-		Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "saveConf", ( char * ) & saveConf, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "saveConf", ( char * ) & saveConf, TCL_LINK_BOOLEAN );
 
 		time_t rawtime;
 		time( &rawtime );
@@ -4049,9 +4049,9 @@ object *operate( object *r )
 
 		cmd( "destroytop .n" );
 
-		Tcl_UnlinkVar( inter, "docsv" );
-		Tcl_UnlinkVar( inter, "dozip" );
-		Tcl_UnlinkVar( inter, "saveConf" );
+		Tcl_UnlinkVar( interp, "docsv" );
+		Tcl_UnlinkVar( interp, "dozip" );
+		Tcl_UnlinkVar( interp, "saveConf" );
 
 		if ( choice == 2 )
 			break;
@@ -4718,7 +4718,7 @@ object *operate( object *r )
 
 			// get the number of Monte Carlo samples to produce
 			fracMC = 10;
-			Tcl_LinkVar( inter, "fracMC", ( char * ) & fracMC, TCL_LINK_DOUBLE );
+			Tcl_LinkVar( interp, "fracMC", ( char * ) & fracMC, TCL_LINK_DOUBLE );
 
 			// detect the need of a new save path
 			subDir = need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH );
@@ -4753,7 +4753,7 @@ object *operate( object *r )
 
 			cmd( "set fracMC [ .s.i.e get ]" );
 			cmd( "destroytop .s" );
-			Tcl_UnlinkVar( inter, "fracMC" );
+			Tcl_UnlinkVar( interp, "fracMC" );
 
 			if ( choice == 2 )
 				break;
@@ -4987,7 +4987,7 @@ object *operate( object *r )
 
 			// get the number of Monte Carlo samples to produce
 			sizMC = 10;
-			Tcl_LinkVar( inter, "sizMC", ( char * ) & sizMC, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "sizMC", ( char * ) & sizMC, TCL_LINK_INT );
 
 			// detect the need of a new save path
 			subDir = need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH );
@@ -5023,7 +5023,7 @@ object *operate( object *r )
 
 			cmd( "set sizMC [ .s.i.e get ]" );
 			cmd( "destroytop .s" );
-			Tcl_UnlinkVar( inter, "sizMC" );
+			Tcl_UnlinkVar( interp, "sizMC" );
 
 			if ( choice == 2 )
 				break;
@@ -5097,11 +5097,11 @@ object *operate( object *r )
 
 			// get the number of Monte Carlo samples to produce
 			int nLevels = 4, jumpSz = 2, nTraj = 10, nSampl = 100;
-			Tcl_LinkVar( inter, "varSA", ( char * ) & varSA, TCL_LINK_INT );
-			Tcl_LinkVar( inter, "nLevels", ( char * ) & nLevels, TCL_LINK_INT );
-			Tcl_LinkVar( inter, "jumpSz", ( char * ) & jumpSz, TCL_LINK_INT );
-			Tcl_LinkVar( inter, "nTraj", ( char * ) & nTraj, TCL_LINK_INT );
-			Tcl_LinkVar( inter, "nSampl", ( char * ) & nSampl, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "varSA", ( char * ) & varSA, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "nLevels", ( char * ) & nLevels, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "jumpSz", ( char * ) & jumpSz, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "nTraj", ( char * ) & nTraj, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "nSampl", ( char * ) & nSampl, TCL_LINK_INT );
 
 			// detect the need of a new save path
 			subDir = need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH );
@@ -5161,11 +5161,11 @@ object *operate( object *r )
 			cmd( "set nLevels [ .s.l.e3 get ]" );
 			cmd( "set jumpSz [ .s.j.e4 get ]" );
 			cmd( "destroytop .s" );
-			Tcl_UnlinkVar( inter, "varSA" );
-			Tcl_UnlinkVar( inter, "nLevels" );
-			Tcl_UnlinkVar( inter, "jumpSz" );
-			Tcl_UnlinkVar( inter, "nTraj" );
-			Tcl_UnlinkVar( inter, "nSampl" );
+			Tcl_UnlinkVar( interp, "varSA" );
+			Tcl_UnlinkVar( interp, "nLevels" );
+			Tcl_UnlinkVar( interp, "jumpSz" );
+			Tcl_UnlinkVar( interp, "nTraj" );
+			Tcl_UnlinkVar( interp, "nSampl" );
 
 			if ( choice == 2 )
 				break;
@@ -5685,11 +5685,11 @@ object *operate( object *r )
 			}
 		}
 
-		Tcl_LinkVar( inter, "natBat", ( char * ) & natBat, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "natBat", ( char * ) & natBat, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
 
 		if ( no_tot )
 			no_res = false;
@@ -5759,11 +5759,11 @@ object *operate( object *r )
 
 		cmd( "destroytop .s" );
 
-		Tcl_UnlinkVar( inter, "natBat" );
-		Tcl_UnlinkVar( inter, "no_res" );
-		Tcl_UnlinkVar( inter, "no_tot" );
-		Tcl_UnlinkVar( inter, "docsv" );
-		Tcl_UnlinkVar( inter, "dozip" );
+		Tcl_UnlinkVar( interp, "natBat" );
+		Tcl_UnlinkVar( interp, "no_res" );
+		Tcl_UnlinkVar( interp, "no_tot" );
+		Tcl_UnlinkVar( interp, "docsv" );
+		Tcl_UnlinkVar( interp, "dozip" );
 
 		if ( choice == 2 )
 			break;
@@ -6030,13 +6030,13 @@ object *operate( object *r )
 		subDir = need_res_dir( path, simul_name, out_dir, MAX_PATH_LENGTH );
 		overwDir = check_res_dir( out_dir );
 
-		Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "dobar", ( char * ) & dobar, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "doover", ( char * ) & doover, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
-		Tcl_LinkVar( inter, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "dobar", ( char * ) & dobar, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "doover", ( char * ) & doover, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
+		Tcl_LinkVar( interp, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
 
 		// only ask to overwrite configuration if there are changes
 		overwConf = unsaved_change( ) ? true : false;
@@ -6221,13 +6221,13 @@ object *operate( object *r )
 
 		cmd( "destroytop .batch" );
 
-		Tcl_UnlinkVar( inter, "no_res" );
-		Tcl_UnlinkVar( inter, "no_tot" );
-		Tcl_UnlinkVar( inter, "dobar" );
-		Tcl_UnlinkVar( inter, "docsv" );
-		Tcl_UnlinkVar( inter, "doover" );
-		Tcl_UnlinkVar( inter, "dozip" );
-		Tcl_UnlinkVar( inter, "overwConf" );
+		Tcl_UnlinkVar( interp, "no_res" );
+		Tcl_UnlinkVar( interp, "no_tot" );
+		Tcl_UnlinkVar( interp, "dobar" );
+		Tcl_UnlinkVar( interp, "docsv" );
+		Tcl_UnlinkVar( interp, "doover" );
+		Tcl_UnlinkVar( interp, "dozip" );
+		Tcl_UnlinkVar( interp, "overwConf" );
 
 		if ( choice == 2 )
 			break;
@@ -7546,7 +7546,7 @@ bool load_prev_configuration( void )
 		strcpy( saFile, sens_file );
 	}
 
-	if ( ( i = load_configuration( true, &warnings ) ) != 0 )
+	if ( ( i = load_configuration( true, &warnings, 0 ) ) != 0 )
 	{
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded (%d :%.24s)\" -detail \"Previously loaded configuration could not be restored. Check if LSD still has access to the model directory.\n\nCurrent configuration will be reset now.\"", i, warnings.c_str( ) );
 
@@ -7963,12 +7963,12 @@ bool abort_run_threads( void )
  TCL_ABORT_RUN_THREADS
  Entry point function for access from the Tcl interpreter
  ****************************************************/
-int Tcl_abort_run_threads( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+int Tcl_abort_run_threads( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	if ( abort_run_threads( ) == 1 )
-		Tcl_SetResult( inter, ( char * ) "ok", TCL_VOLATILE );
+		Tcl_SetResult( interp, ( char * ) "ok", TCL_VOLATILE );
 	else
-		Tcl_SetResult( inter, ( char * ) "cancel", TCL_VOLATILE );
+		Tcl_SetResult( interp, ( char * ) "cancel", TCL_VOLATILE );
 
 	return TCL_OK;
 }
@@ -7979,7 +7979,7 @@ TCL_GET_VAR_DESCR
 Function to get variable description on
 equation file(s) from Tcl
 ****************************************************/
-int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	char vname[ MAX_ELEM_LENGTH ], desc[ MAX_BUFF_SIZE ];
 
@@ -7994,7 +7994,7 @@ int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char
 		get_var_descr( vname, desc, MAX_BUFF_SIZE );
 	}
 
-	Tcl_SetResult( inter, desc, TCL_VOLATILE );
+	Tcl_SetResult( interp, desc, TCL_VOLATILE );
 	return TCL_OK;
 }
 
@@ -8003,7 +8003,7 @@ int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char
 TCL_GET_VAR_CONF
 Function to get variable configuration from Tcl
 ****************************************************/
-int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	char vname[ MAX_ELEM_LENGTH ], res[ 2 ];
 	variable *cv;
@@ -8043,7 +8043,7 @@ int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 						else
 							return TCL_ERROR;
 
-	Tcl_SetResult( inter, res, TCL_VOLATILE );
+	Tcl_SetResult( interp, res, TCL_VOLATILE );
 	return TCL_OK;
 }
 
@@ -8052,7 +8052,7 @@ int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 TCL_SET_VAR_CONF
 Function to set variable configuration from Tcl
 ****************************************************/
-int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	char vname[ MAX_ELEM_LENGTH ];
 	variable *cv;
@@ -8178,7 +8178,7 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 TCL_GET_OBJ_CONF
 Function to get object configuration from Tcl
 ****************************************************/
-int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	char vname[ MAX_ELEM_LENGTH ], res[ 2 ];
 	object *cur;
@@ -8202,7 +8202,7 @@ int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 	else
 		return TCL_ERROR;
 
-	Tcl_SetResult( inter, res, TCL_VOLATILE );
+	Tcl_SetResult( interp, res, TCL_VOLATILE );
 	return TCL_OK;
 }
 
@@ -8211,7 +8211,7 @@ int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 TCL_SET_OBJ_CONF
 Function to set object configuration from Tcl
 ****************************************************/
-int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
+int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	char vname[ MAX_ELEM_LENGTH ];
 	object *cur, *cur1;

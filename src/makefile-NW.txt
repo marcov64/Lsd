@@ -1,5 +1,6 @@
 # specify where are the sources of LSD
 SRC_DIR=$(SRC)/
+LIB_DIR=$(SRC_DIR)lib/
 
 # location of headers
 INCLUDE=-I$(SRC) -I$(PATH_HEADER)
@@ -14,56 +15,90 @@ CC_NW=$(CC_CROSS)g++
 SWITCH_CC_NW=$(GLOBAL_CC) $(SWITCH_CC) -D_NW_ -O3 -g0
 TARGET_NW=lsd$(SUFFIX_NW)
 
-# OS command to delete files
-RM=rm -f
+# location of object files
+ifeq ($(OS),Windows_NT)
+	OBJ_DIR=$(TMP)\$(TARGET_NW)/
+	EXT=.exe
+else
+	OBJ_DIR=$(TMPDIR)/$(TARGET_NW)/
+	EXT=
+endif
 
-# link executable
-$(TARGET_NW): $(FUN)$(SUFFIX_NW).o $(SRC_DIR)lsd.o $(SRC_DIR)lsdmain.o $(SRC_DIR)commonlib.o $(SRC_DIR)description.o $(SRC_DIR)filelib.o $(SRC_DIR)lattice.o $(SRC_DIR)math.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)stattables.o $(SRC_DIR)utillib.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o
-	$(CC_NW) $(SWITCH_CC_NW) $(FUN)$(SUFFIX_NW).o $(SRC_DIR)lsd.o $(SRC_DIR)lsdmain.o $(SRC_DIR)commonlib.o $(SRC_DIR)description.o $(SRC_DIR)filelib.o $(SRC_DIR)lattice.o $(SRC_DIR)math.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)stattables.o $(SRC_DIR)utillib.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o $(SWITCH_CC_LNK) -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)
+# OS commands to delete files and create directories
+RM=@rm$(EXT) -f
+MKDIR=@mkdir$(EXT) -p
 
-# compile modules
-$(FUN)$(SUFFIX_NW).o: $(FUN).cpp $(FUN_EXTRA) $(SRC_DIR)check.h $(SRC_DIR)fun_head.h $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(FUN).cpp -o $(FUN)$(SUFFIX_NW).o
+all: $(TARGET_NW)$(EXT)
 
-$(SRC_DIR)lsd.o: $(SRC_DIR)lsd.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)lsd.cpp -o $(SRC_DIR)lsd.o
+# LSD No Window executable
+$(TARGET_NW)$(EXT): $(OBJ_DIR)lsdnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN)$(SUFFIX_NW).o
+	$(CC_NW) $(SWITCH_CC_NW) $(SWITCH_CC_LNK) $(OBJ_DIR)lsdnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN)$(SUFFIX_NW).o -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)$(EXT)
 
-$(SRC_DIR)lsdmain.o: $(SRC_DIR)lsdmain.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)lsdmain.cpp -o $(SRC_DIR)lsdmain.o
+# executable modules
+$(OBJ_DIR)$(FUN)$(SUFFIX_NW).o: $(FUN).cpp $(FUN_EXTRA) $(SRC_DIR)check.h $(SRC_DIR)fun_head.h $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(FUN).cpp -o $(OBJ_DIR)$(FUN)$(SUFFIX_NW).o
 
-$(SRC_DIR)commonlib.o: $(SRC_DIR)commonlib.cpp $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)commonlib.cpp -o $(SRC_DIR)commonlib.o
+$(OBJ_DIR)lsdnw.o: $(SRC_DIR)lsdnw.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)lsdnw.cpp -o $(OBJ_DIR)lsdnw.o
 
-$(SRC_DIR)description.o: $(SRC_DIR)description.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)description.cpp -o $(SRC_DIR)description.o
+$(OBJ_DIR)libmain.o: $(LIB_DIR)libmain.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)libmain.cpp -o $(OBJ_DIR)libmain.o
 
-$(SRC_DIR)filelib.o: $(SRC_DIR)filelib.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)filelib.cpp -o $(SRC_DIR)filelib.o
+$(OBJ_DIR)commonlib.o: $(LIB_DIR)commonlib.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)commonlib.cpp -o $(OBJ_DIR)commonlib.o
 
-$(SRC_DIR)lattice.o: $(SRC_DIR)lattice.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)lattice.cpp -o $(SRC_DIR)lattice.o
+$(OBJ_DIR)description.o: $(LIB_DIR)description.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)description.cpp -o $(OBJ_DIR)description.o
 
-$(SRC_DIR)math.o: $(SRC_DIR)math.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)math.cpp -o $(SRC_DIR)math.o
+$(OBJ_DIR)filelib.o: $(LIB_DIR)filelib.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)filelib.cpp -o $(OBJ_DIR)filelib.o
 
-$(SRC_DIR)nets.o: $(SRC_DIR)nets.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.o
+$(OBJ_DIR)latticelib.o: $(LIB_DIR)latticelib.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)latticelib.cpp -o $(OBJ_DIR)latticelib.o
 
-$(SRC_DIR)object.o: $(SRC_DIR)object.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)object.cpp -o $(SRC_DIR)object.o
+$(OBJ_DIR)math.o: $(LIB_DIR)math.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)math.cpp -o $(OBJ_DIR)math.o
 
-$(SRC_DIR)stattables.o: $(SRC_DIR)stattables.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)stattables.cpp -o $(SRC_DIR)stattables.o
+$(OBJ_DIR)nets.o: $(LIB_DIR)nets.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)nets.cpp -o $(OBJ_DIR)nets.o
 
-$(SRC_DIR)utillib.o: $(SRC_DIR)utillib.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)utillib.cpp -o $(SRC_DIR)utillib.o
+$(OBJ_DIR)object.o: $(LIB_DIR)object.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)object.cpp -o $(OBJ_DIR)object.o
 
-$(SRC_DIR)variab.o: $(SRC_DIR)variab.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)variab.cpp -o $(SRC_DIR)variab.o
+$(OBJ_DIR)parallel.o: $(LIB_DIR)parallel.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)parallel.cpp -o $(OBJ_DIR)parallel.o
 
-$(SRC_DIR)pugixml.o: $(SRC_DIR)pugixml/pugixml.cpp $(SRC_DIR)pugixml/pugixml.hpp $(SRC_DIR)pugixml/pugiconfig.hpp
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)pugixml/pugixml.cpp -o $(SRC_DIR)pugixml.o
+$(OBJ_DIR)run.o: $(LIB_DIR)run.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)run.cpp -o $(OBJ_DIR)run.o
+
+$(OBJ_DIR)stattables.o: $(LIB_DIR)stattables.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)stattables.cpp -o $(OBJ_DIR)stattables.o
+
+$(OBJ_DIR)utillib.o: $(LIB_DIR)utillib.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)utillib.cpp -o $(OBJ_DIR)utillib.o
+
+$(OBJ_DIR)variab.o: $(LIB_DIR)variab.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)variab.cpp -o $(OBJ_DIR)variab.o
+
+$(OBJ_DIR)pugixml.o: $(SRC_DIR)pugixml/pugixml.cpp $(SRC_DIR)pugixml/pugixml.hpp $(SRC_DIR)pugixml/pugiconfig.hpp
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)pugixml/pugixml.cpp -o $(OBJ_DIR)pugixml.o
 
 # remove compiled files
 clean:
-	$(RM) $(SRC_DIR)lsd.o $(SRC_DIR)lsdmain.o $(SRC_DIR)commonlib.o $(SRC_DIR)description.o $(SRC_DIR)filelib.o $(SRC_DIR)lattice.o $(SRC_DIR)math.o $(SRC_DIR)nets.o $(SRC_DIR)object.o $(SRC_DIR)stattables.o $(SRC_DIR)utillib.o $(SRC_DIR)variab.o $(SRC_DIR)pugixml.o $(FUN)$(SUFFIX_NW).o $(TARGET_NW) $(TARGET_NW).exe
+	$(RM) $(OBJ_DIR)lsdnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN)$(SUFFIX_NW).o $(TARGET_NW) $(TARGET_NW).exe

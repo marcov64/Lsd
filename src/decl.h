@@ -147,7 +147,7 @@ double uniform_int( double min, double max );
 double update_lattice( double line, double col, double val = 1 );
 double weibull( double a, double b );					// draw from a Weibull distribution
 void close_lattice( void );
-void deb_log( bool on, int time = 0 );					// control debug mode
+void deb_log( bool on, int time );						// control debug mode
 void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const char *logFmt, ... );
 void error_hard_helper( const char *boxTitle, const char *boxText, const char *logText, bool defQuit );
 void init_random( unsigned seed );						// reset the random number generator seed
@@ -209,6 +209,7 @@ bool load_description( const char *msg, FILE *f );
 bool load_prev_configuration( void );
 bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz );
 bool open_configuration( object *&r, bool reload );
+bool results_alt_path( const char * );
 bool save_configuration( const char *path, const char *rname, const char *ext );
 bool save_sensitivity( FILE *f );
 bool save_xml_configuration( int findex = 0, const char *dest_path = NULL, bool quick = false );
@@ -238,13 +239,15 @@ int count_lines( const char *fname, bool dozip = false );
 int entry_new_objnum( object *c, const char *tag );
 int hyper_count( const char *lab );
 int hyper_count_var( const char *lab );
-int load_configuration( bool reload, string *warnings = NULL, int quick = 0 );
+int load_configuration( bool reload, std::string *warnings, int quick );
+int load_gui( const char **argv );
 int load_sensitivity( FILE *f );
 int logic_op_code( const char *lop, const char *errmsg );
 int min_hborder( int pdigits, double miny, double maxy );
 int monitor_logs( void );
 int num_sensitivity_variables( void );
 int rnd_int( int min, int max );
+int run( void );
 int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns );
 int shrink_gnufile( void );
 int uniform_int_0( int max );
@@ -373,6 +376,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd = N
 void set_blueprint( object *container, object *r );
 void set_buttons_run( bool enable );
 void set_cs_data( void );
+void set_exec( const char *path, const char *file );
 void set_lab_tit( variable *var );
 void set_obj_number( object *r );
 void set_shortcuts( const char *window );
@@ -432,22 +436,26 @@ void parallel_update( variable *v, object* p, object *caller = NULL );
 #endif
 
 // global internal variables (not visible to the users)
-extern FILE *log_file;			// log file, if any
+extern bool batch_sequential;// no-window multi configuration job running
 extern bool brCovered;			// browser cover currently covered
 extern bool eq_dum;				// current equation is dummy
 extern bool error_hard_thread;	// flag to error_hard() called in worker thread
+extern bool grandTotal;			// flag to produce grand total in batch processing
 extern bool idle_loop;			// indicates in main idle loop (no running operation)
 extern bool ignore_eq_file;		// control of configuration files equation updating
 extern bool iniShowOnce;		// prevent repeating warning on # of columns
 extern bool log_ok;				// control for log window available
 extern bool message_logged;		// new message posted in log window
 extern bool meta_par_in[ ];		// flag meta variables for simulation settings found
+extern bool no_more_memory;		// memory overflow when setting data save structure
 extern bool on_bar;				// flag to indicate bar is being draw in log window
 extern bool parallel_abort;		// indicate parallel threads were aborted
 extern bool parallel_monitor;	// parallel monitor thread status
+extern bool pause_run;			// pause running simulation
 extern bool redrawRoot;			// control for redrawing root window (.)
 extern bool redrawStruc;		// control for redrawing model structure window
 extern bool running;			// simulation is running
+extern bool save_alt_path;		// alternate save path flag
 extern bool save_ok;			// control if saving model configuration is possible
 extern bool scrollB;			// scroll check box state in current runtime plot
 extern bool struct_loaded;		// a valid configuration file is loaded
@@ -457,8 +465,10 @@ extern bool watch_trigger;		// indicate that a watch condition was met
 extern bool watch_write_mode;	// flag for write-only watch condition
 extern bool worker_ready;		// parallel worker ready flag
 extern bool worker_crashed;		// parallel worker crash flag
+extern char *alt_path;			// alternative output path
 extern char *eq_file;			// equation file content
 extern char *exec_file;			// name of executable file
+extern char *log_filename;		// name of log file, if any
 extern char *sens_file;			// current sensitivity analysis file
 extern char *struct_file;		// name of current configuration file
 extern char error_hard_msg1[ ];	// buffer for parallel worker title msg
@@ -469,6 +479,7 @@ extern char name_rep[ ];		// documentation report file name
 extern char nonavail[ ];		// string for unavailable values
 extern char path_res[ ];		// path of last used results directory
 extern char path_sens[ ];		// path of last used sensitivity directory
+extern char tcl_dir[ ];			// Tcl/Tk directory
 extern char watch_elem[ ];		// name of element triggering watch condition
 extern description *descr;		// model description structure
 extern double t_dist_cl[ T_CLEVS ];// t-distribution table confidence levels
@@ -490,12 +501,16 @@ extern int choice_g;			// Tcl menu control variable ( structure window)
 extern int cur_plt;				// current graph plot number
 extern int dobar;				// output a progress bar to the log/standard output
 extern int docsv;				// produce .csv text results files (bool)
+extern int done_in;				// Tcl menu control variable (log window)
 extern int doover;				// overwrite results folder (bool)
 extern int dozip;				// compressed results file flag (bool)
+extern int fend;				// last multi configuration job to run
+extern int findex;				// current multi configuration job
 extern int findexSens;			// index to sequential sensitivity configuration filenames
 extern int log_start;			// first period to start logging to file, if any
 extern int log_stop;			// last period to log to file, if any
 extern int macro;				// equations style (macros or C++) (bool)
+extern int max_runs;			// maximum number of parallel runs
 extern int max_threads;			// maximum number of parallel threads per run
 extern int no_res;				// do not produce .res results files (bool)
 extern int no_tot;				// do not produce .tot totals files (bool)
@@ -512,6 +527,7 @@ extern int strWindowOn;			// control the presentation of the model structure win
 extern int watch;				// allow for graph generation interruption (bool)
 extern int when_debug;			// next debug stop time step (0 for none )
 extern int wr_warn_cnt;			// invalid write operations warning counter
+extern lattice latt;			// model lattice
 extern long nodesSerial;		// network node serial number global counter
 extern map< string, profile > prof;// set of saved profiling times
 extern mt19937 mt32;			// Mersenne-Twister 32 bits generator
@@ -525,6 +541,7 @@ extern variable *cemetery;		// LSD saved data from deleted objects
 extern variable *last_cemetery;	// LSD last saved data from deleted objects
 extern vector < string > res_list;// list of results files last saved
 extern void *random_engine;		// current random number generator engine
+extern FILE *log_file;			// log file, if any
 
 // multi-threading control
 #ifndef _NP_
@@ -532,26 +549,31 @@ extern atomic < bool > parallel_ready;// flag to indicate multitasking is availa
 extern map< thread::id, worker * > thr_ptr;// worker thread pointers
 extern mutex lock_obj_list;		// lock for object list for parallel manipulation
 extern mutex lock_run_logs;		// lock run_logs for parallel updating
+extern mutex lock_run_status;	// lock run_status for parallel updating
 extern string run_log;			// consolidated runs log
 extern thread run_monitor;		// thread monitoring parallel instances
+extern vector < int > run_status;// parallel running instances status
+extern vector < string > run_results;// parallel run results files
 extern vector < string > run_logs;// list of log files produced in parallel run
+extern vector < thread > run_threads;// parallel running instances
 #endif
 
 // Tcl/Tk specific definitions (for the windowed version only)
 #ifndef _NW_
 
 extern p_mapT par_map;			// element to parent name map for AoR
+extern Tcl_Interp *inter;		// Tcl interpreter in GUI (for legacy LSD code)
 
 // C to TCL interface functions
-int Tcl_abort_run_threads( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
-int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
-int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
-int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
-int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
-int Tcl_set_c_var( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
-int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
-int Tcl_set_ttip_descr( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
-int Tcl_upload_series( ClientData cd, Tcl_Interp *inter, int oc, Tcl_Obj *CONST ov[ ] );
+int Tcl_abort_run_threads( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
+int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
+int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
+int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
+int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
+int Tcl_set_c_var( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
+int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
+int Tcl_set_ttip_descr( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
+int Tcl_upload_series( ClientData cd, Tcl_Interp *interp, int oc, Tcl_Obj *CONST ov[ ] );
 
 #endif
 

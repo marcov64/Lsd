@@ -17,24 +17,3 @@ LIBLSD.H
 This file contains the list of LSD functions to be exported
 by a model dynamic link library (.dll/.so).
 *************************************************************/
-
-// DLL_EXPORT must be defined when building the dynamic library
-#if defined _WIN32 && defined _DLL_
-	#ifdef DLL_EXPORT
-		#define API __declspec( dllexport )
-	#else
-		#define API __declspec( dllimport )
-	#endif
-#else
-	#define API
-#endif
-
-// LSD API functions
-API int load_gui( const char **argv );
-API int load_term_configuration( int argn, const char **argv );
-API void exception_handler( int signum, const char *what = NULL );
-API void handle_signals( void ( * handler ) ( int signum ) );
-API void lsd_exit( int v );
-API void run( void );
-API void set_exec( const char *path, const char *file );
-API void signal_handler( int signum );

@@ -223,7 +223,7 @@ int lsdmain( int argn, const char **argv )
 	add_description( "Root" );
 	reset_blueprint( NULL );
 
-	if ( load_configuration( true ) != 0 )
+	if ( load_configuration( true, NULL, 0 ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\n%s\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n\n", struct_file, lsdCmdMsg );
 		lsd_exit( 5 );
