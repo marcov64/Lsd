@@ -971,6 +971,49 @@ const char *get_fun_name( char *str, int str_sz, bool nw )
 
 	sscanf( str + 4, "%994s", buf );
 	snprintf( str, str_sz, "%s.cpp", buf );
+
+	return str;
+
+error:
+	cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not found or corrupted\" -detail \"Please check 'Model Options' and 'System Options' in LMM menu 'Model'.\"" );
+	return NULL;
+}
+
+
+/*********************************
+ GET_TARGET_NAME
+ get current executable file name
+ *********************************/
+const char *get_target_name( char *str, int str_sz, bool nw )
+{
+	char buf[ MAX_PATH_LENGTH ];
+	FILE *f;
+
+	if ( nw )					// NW version use fixed name because of batches
+	{
+		snprintf( str, str_sz, "lsdNW%s", platform == _WIN_ ? ".exe" : "" );
+		return str;
+	}
+
+	make_makefile( nw );
+
+	cmd( "set fapp [ file nativename \"$modelDir/makefile%s\" ]", nw ? "NW" : "" );
+	f = fopen( get_str( "fapp" ), "r" );
+	if ( f == NULL )
+		goto error;
+
+	do
+		fgets( str, str_sz, f );
+	while ( strncmp( str, "TARGET=", 7 ) && ! feof( f ) );
+
+	fclose( f );
+
+	if ( strncmp( str, "TARGET=", 7 ) != 0 )
+		goto error;
+
+	sscanf( str + 7, "%994s", buf );
+	snprintf( str, str_sz, "%s%s", buf, platform == _WIN_ ? ".exe" : "" );
+
 	return str;
 
 error:
@@ -1127,23 +1170,11 @@ bool compile_run( int run_mode, bool nw )
 
 	cmd( "set fname \"%s\"", s );
 
-	// get target exec name
-	cmd( "set fapp [ file nativename \"$modelDir/makefile%s\" ]", nw ? "NW" : "" );
-	f = fopen( get_str( "fapp" ), "r" );
-	fscanf( f, "%1999s", str );
-	while ( strncmp( str, "TARGET=", 7 ) && fscanf( f, "%1999s", str ) != EOF );
-	fclose( f );
-	if ( strncmp( str, "TARGET=", 7 ) != 0 )
-	{
-		cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Makefile%s corrupted\" -detail \"Check 'Model Options' and 'System Options' in LMM menu 'Model'.\"", nw ? "NW" : "" );
-		goto end;
-	}
+	// get executable name
+	cmd( "set mainExe %s", get_target_name( str, 2 * MAX_PATH_LENGTH ) );
 
 	if ( nw )
-	{
-		cmd( "set mainExe %s", str + 7 );
-		strcpy( str, "TARGET=lsdNW" );		// NW version use fixed name because of batches
-	}
+		get_target_name( str, 2 * MAX_PATH_LENGTH, nw );
 
 	// show compilation banner
 	cmd( "if { ( [ info exists autoHide ] && ! $autoHide ) || %d == 0 } { \
@@ -1191,7 +1222,7 @@ bool compile_run( int run_mode, bool nw )
 
 	// start compilation as a background task
 	res = -1;
-	cmd( "make_background %s %d %d %d", str + 7, max_threads, nw, true );
+	cmd( "make_background %s %d %d %d", str, max_threads, nw, true );
 
 	// loop to wait compilation to finish or be aborted
 	while ( res < 0 )
@@ -1244,15 +1275,15 @@ bool compile_run( int run_mode, bool nw )
 					switch ( platform )
 					{
 						case _LIN_:
-							cmd( "while { [ catch { exec -- ./%s & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
+							cmd( "while { [ catch { exec -- ./%s & } result ] && $n > 0 } { incr n -1; after 50 }", str );
 							break;
 
 						case _MAC_:
-							cmd( "while { [ catch { exec -- open -F -n ./%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
+							cmd( "while { [ catch { exec -- open -F -n ./%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", str );
 							break;
 
 						case _WIN_:
-							cmd( "while { [ catch { exec -- %s.exe & } result ] && $n > 0 } { incr n -1; after 50 }", str + 7 );
+							cmd( "while { [ catch { exec -- %s & } result ] && $n > 0 } { incr n -1; after 50 }", str );
 							break;
 					}
 				}

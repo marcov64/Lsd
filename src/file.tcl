@@ -947,22 +947,12 @@ proc make_background { target threads nw macPkg } {
 		set makeSuffix ""
 	}
 
-	if [ string equal $CurPlatform windows ] {
-		set exeSuffix ".exe"
-	} else {
-		set exeSuffix ""
-	}
-
 	if { ! $nw && $macPkg && $CurPlatform eq "mac" } {
 		set targetExe "$target.app/Contents/MacOS/$target"
 	} else {
-		set targetExe "$target$exeSuffix"
-		if [ info exists mainExe ] {
-			if { $macPkg && $CurPlatform eq "mac" } {
-				set mainExe "$mainExe.app/Contents/MacOS/$mainExe"
-			} else {
-				set mainExe "$mainExe$exeSuffix"
-			}
+		set targetExe "$target"
+		if { [ info exists mainExe ] && $macPkg && $CurPlatform eq "mac" } {
+			set mainExe "$mainExe.app/Contents/MacOS/$mainExe"
 		}
 	}
 
@@ -971,7 +961,7 @@ proc make_background { target threads nw macPkg } {
 	# handle Windows access to open executable and empty compilation windows
 	if [ string equal $CurPlatform windows ] {
 
-		if [ file exists "$target$exeSuffix" ] {
+		if [ file exists "$target" ] {
 			if [ catch {
 				close [ file tempfile targetTemp ]
 				file delete $targetTemp
@@ -979,8 +969,8 @@ proc make_background { target threads nw macPkg } {
 				file mkdir "$targetDir"
 				set targetTemp "$targetDir/$target.bak"
 
-				file rename -force "$target$exeSuffix" "$targetTemp"
-				file copy -force "$targetTemp" "$target$exeSuffix"
+				file rename -force "$target" "$targetTemp"
+				file copy -force "$targetTemp" "$target"
 			} msg ] {
 				catch {
 					set f [ open makemessage.txt w ]

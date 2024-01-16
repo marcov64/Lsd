@@ -1481,28 +1481,8 @@ int modman( int argn, const char **argv )
 		if ( choice == 0 )
 			goto loop;
 
-		make_makefile( );
-
 		cmd( "cd \"$modelDir\"" );
-		f = fopen( "makefile", "r" );
-		if ( f == NULL )
-		{
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
-			goto end_gdb;
-		}
-
-		fscanf( f, "%999s", str );
-		while ( strncmp( str, "TARGET=", 7 ) && fscanf( f, "%999s", str ) != EOF );
-
-		fclose( f );
-
-		if ( strncmp( str, "TARGET=", 7 ) != 0 )
-		{
-			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
-			goto end_gdb;
-		}
-
-		strcpyn( str1, str + 7, 2 * MAX_PATH_LENGTH );
+		s = get_target_name( str, 2 * MAX_PATH_LENGTH );
 
 		if ( ! compile_run( 2 ) )				// recompile if changed
 			goto end_gdb;
@@ -1512,10 +1492,10 @@ int modman( int argn, const char **argv )
 			cmd( "scan $vmenuInsert %%d.%%d line col" );
 			cmd( "if [ string equal -nocase $DbgExe lldb ] { \
 					set breakExt lldb; \
-					set breakTxt \"breakpoint set -f $fileDir/$fileName -l$line\nrun\n\" \
+					set breakTxt \"breakpoint set -f $fileName -l$line\nrun\n\" \
 				} else { \
 					set breakExt gdb; \
-					set breakTxt \"break $fileDir/$fileName:$line\nrun\n\" \
+					set breakTxt \"set breakpoint pending on\nbreak $fileName:$line\nrun\n\" \
 				}" );
 			cmd( "catch { \
 					set f [ open break.$breakExt w ]; \
@@ -1539,13 +1519,12 @@ int modman( int argn, const char **argv )
 		switch( platform )
 		{
 			case _WIN_:
-				strcatn( str1, ".exe", MAX_PATH_LENGTH );
 			case _LIN_:
-				snprintf( tmp, MAX_BUFF_SIZE, "$DbgExe $cmdbreak %s", str1 );
+				snprintf( tmp, MAX_BUFF_SIZE, "$DbgExe $cmdbreak %s", s );
 				break;
 
 			case _MAC_:
-				snprintf( tmp, MAX_BUFF_SIZE, "cd $fileDir; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s", str1, str1 );
+				snprintf( tmp, MAX_BUFF_SIZE, "cd $fileDir; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s", s, s );
 				break;
 
 			default:
