@@ -395,46 +395,42 @@ int Tcl_set_ttip_descr( ClientData cdata, Tcl_Interp *interp, int argc, const ch
 }
 
 
-/****************************************************
-SEARCH_ALL_SOURCES
-****************************************************/
-FILE *search_all_sources( char *str )
+/***************************************************
+AUTO_DOCUMENT
+***************************************************/
+void auto_document( const char *lab, const char *which, bool append )
 {
-	char got[ MAX_LINE_SIZE ];
-	const char *fname;
-	int i, j, nfiles;
-	FILE *f;
+	bool var;
+	char str1[ MAX_LINE_SIZE ], app[ 10 * MAX_LINE_SIZE ], text[ 2 * MAX_BUFF_SIZE ];
+	description *cd;
 
-	// search in all source files
-	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
-	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
-	cmd( "set res [ llength $source_files ]" );
-	nfiles = get_int( "res" );
-
-	for ( i = 0; i < nfiles; ++i )
+	for ( cd = descr; cd != NULL; cd = cd->next )
 	{
-		cmd( "set brr [ lindex $source_files %d ]", i );
-		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
-		fname = get_str( "brr" );
-		if ( ( f = fopen( fname, "r" ) ) == NULL )
-			continue;
+		app[ 0 ] = '\0';
+		if ( ( lab == NULL && ( ! strcmp( which, "ALL" ) || ! strcmp( cd->type, "Variable" ) || ! strcmp( cd->type, "Function" ) ) ) || ( lab != NULL && ! strcmp( lab, cd->label ) ) )
+		{	// for each description
+			if ( ( ! strcmp( cd->type, "Variable") ) == 1 || ( ! strcmp( cd->type, "Function" ) ) == 1 )
+			{ 	// if it is a Variable
+				var = true;
+				get_var_descr( cd->label, app, 10 * MAX_LINE_SIZE );
+			}
+			else
+				var = false;
 
-		fgets( got, MAX_LINE_SIZE, f );
-		clean_spaces( got );
-		for ( j = 0; strncmp( got, str, strlen( str ) ) && j < MAX_FILE_TRY; ++j )
-		{
-			if ( fgets( got, MAX_LINE_SIZE, f ) == NULL )
-				break;
-			clean_spaces( got );
-		}
+			return_where_used( cd->label, str1, MAX_LINE_SIZE );
+			if ( ( append || ! var ) && has_descr_text ( cd ) )
+				if ( strwsp( cd->text ) )
+					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+				else
+					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
+			else
+				snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
 
-		if ( ! strncmp( got, str, strlen( str ) ) )
-			return f;
-
-		fclose( f );
-	}
-
-	return NULL;
+			delete [ ] cd->text;
+			cd->text = new char[ strlen( text ) + 1 ];
+			strcpy( cd->text, text );
+		} 					// end of the label to document
+	}						// end of the for (desc)
 }
 
 
@@ -543,42 +539,396 @@ void get_var_descr( const char *lab, char *desc, int descr_len )
 }
 
 
-/***************************************************
-AUTO_DOCUMENT
-***************************************************/
-void auto_document( const char *lab, const char *which, bool append )
+/****************************************************
+SEARCH_ALL_SOURCES
+****************************************************/
+FILE *search_all_sources( char *str )
 {
-	bool var;
-	char str1[ MAX_LINE_SIZE ], app[ 10 * MAX_LINE_SIZE ], text[ 2 * MAX_BUFF_SIZE ];
-	description *cd;
+	char got[ MAX_LINE_SIZE ];
+	const char *fname;
+	int i, j, nfiles;
+	FILE *f;
 
-	for ( cd = descr; cd != NULL; cd = cd->next )
+	// search in all source files
+	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
+	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
+	cmd( "set res [ llength $source_files ]" );
+	nfiles = get_int( "res" );
+
+	for ( i = 0; i < nfiles; ++i )
 	{
-		app[ 0 ] = '\0';
-		if ( ( lab == NULL && ( ! strcmp( which, "ALL" ) || ! strcmp( cd->type, "Variable" ) || ! strcmp( cd->type, "Function" ) ) ) || ( lab != NULL && ! strcmp( lab, cd->label ) ) )
-		{	// for each description
-			if ( ( ! strcmp( cd->type, "Variable") ) == 1 || ( ! strcmp( cd->type, "Function" ) ) == 1 )
-			{ 	// if it is a Variable
-				var = true;
-				get_var_descr( cd->label, app, 10 * MAX_LINE_SIZE );
-			}
-			else
-				var = false;
+		cmd( "set brr [ lindex $source_files %d ]", i );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		fname = get_str( "brr" );
+		if ( ( f = fopen( fname, "r" ) ) == NULL )
+			continue;
 
-			return_where_used( cd->label, str1, MAX_LINE_SIZE );
-			if ( ( append || ! var ) && has_descr_text ( cd ) )
-				if ( strwsp( cd->text ) )
-					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+		fgets( got, MAX_LINE_SIZE, f );
+		clean_spaces( got );
+		for ( j = 0; strncmp( got, str, strlen( str ) ) && j < MAX_FILE_TRY; ++j )
+		{
+			if ( fgets( got, MAX_LINE_SIZE, f ) == NULL )
+				break;
+			clean_spaces( got );
+		}
+
+		if ( ! strncmp( got, str, strlen( str ) ) )
+			return f;
+
+		fclose( f );
+	}
+
+	return NULL;
+}
+
+
+/****************************************************
+TCL_GET_VAR_DESCR
+Function to get variable description on
+equation file(s) from Tcl
+****************************************************/
+int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+{
+	char vname[ MAX_ELEM_LENGTH ], desc[ MAX_BUFF_SIZE ];
+
+	if ( argc != 2 )						// require 1 parameter: variable name
+		return TCL_ERROR;
+
+	if ( argv[ 1 ] == NULL || strlen( argv[ 1 ] ) == 0 )
+		strcpy( desc, "" );				// empty name: do nothing
+	else
+	{
+		sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
+		get_var_descr( vname, desc, MAX_BUFF_SIZE );
+	}
+
+	Tcl_SetResult( interp, desc, TCL_VOLATILE );
+	return TCL_OK;
+}
+
+
+/****************************************************
+TCL_GET_VAR_CONF
+Function to get variable configuration from Tcl
+****************************************************/
+int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+{
+	char vname[ MAX_ELEM_LENGTH ], res[ 2 ];
+	variable *cv;
+
+	if ( argc != 3 )					// require 2 parameters: variable name and property
+		return TCL_ERROR;
+
+	if ( currObj == NULL || argv[ 1 ] == NULL || argv[ 2 ] == NULL ||
+		 ! strcmp( argv[ 1 ], "(none)" ) )
+		return TCL_ERROR;
+
+	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
+	cv = currObj->search_var( NULL, vname );
+
+	if ( cv == NULL )					// variable not found
+		return TCL_ERROR;
+
+	// get the appropriate value for variable
+	res[ 1 ] = '\0';					// default is 1 char string array
+	if ( ! strcmp( argv[ 2 ], "save" ) )
+		res[ 0 ] = cv->save ? '1' : '0';
+	else
+		if ( ! strcmp( argv[ 2 ], "plot" ) )
+			res[ 0 ] = cv->plot ? '1' : '0';
+		else
+			if ( ! strcmp( argv[ 2 ], "debug" ) )
+				res[ 0 ] = ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? '1' : '0';
+			else
+				if ( ! strcmp( argv[ 2 ], "watch" ) )
+					res[ 0 ] = ( cv->deb_mode == 'w' || cv->deb_mode == 'W' ) ? '1' : '0';
 				else
-					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
-			else
-				snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+					if ( ! strcmp( argv[ 2 ], "watch_write" ) )
+						res[ 0 ] = ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? '1' : '0';
+					else
+						if ( ! strcmp( argv[ 2 ], "parallel" ) )
+							res[ 0 ] = cv->parallel ? '1' : '0';
+						else
+							return TCL_ERROR;
 
-			delete [ ] cd->text;
-			cd->text = new char[ strlen( text ) + 1 ];
-			strcpy( cd->text, text );
-		} 					// end of the label to document
-	}						// end of the for (desc)
+	Tcl_SetResult( interp, res, TCL_VOLATILE );
+	return TCL_OK;
+}
+
+
+/****************************************************
+TCL_SET_VAR_CONF
+Function to set variable configuration from Tcl
+****************************************************/
+int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+{
+	char vname[ MAX_ELEM_LENGTH ];
+	variable *cv;
+	object *cur;
+
+	if ( argc != 4 )					// require 3 parameters: variable name, property and value
+		return TCL_ERROR;
+
+	if ( currObj == NULL || argv[ 1 ] == NULL || argv[ 2 ] == NULL ||
+		 argv[ 3 ] == NULL || ! strcmp( argv[ 1 ], "(none)" ) )
+		return TCL_ERROR;
+
+	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
+	cv = currObj->search_var( NULL, vname );
+
+	if ( cv == NULL )					// variable not found
+		return TCL_ERROR;
+
+	// set the appropriate value for variable (all instances)
+	for ( cur = currObj; cur != NULL; cur = cur->hyper_next( cur->label ) )
+	{
+		cv = cur->search_var( NULL, vname );
+		if ( ! strcmp( argv[ 2 ], "save" ) )
+			cv->save = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+		else
+			if ( ! strcmp( argv[ 2 ], "savei" ) )
+				cv->savei = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+			else
+				if ( ! strcmp( argv[ 2 ], "plot" ) )
+					cv->plot = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+				else
+					if ( ! strcmp( argv[ 2 ], "debug" ) )
+					{
+						if ( ! strcmp( argv[ 3 ], "1" ) )
+						{
+							if ( cv->deb_mode == 'n' )
+								cv->deb_mode = 'd';
+							else
+								if ( cv->deb_mode == 'w' )
+									cv->deb_mode = 'W';
+								else
+									if ( cv->deb_mode == 'r' )
+										cv->deb_mode = 'R';
+						}
+						else
+						{
+							if ( cv->deb_mode == 'd' )
+								cv->deb_mode = 'n';
+							else
+								if ( cv->deb_mode == 'W' )
+									cv->deb_mode = 'w';
+								else
+									if ( cv->deb_mode == 'R' )
+										cv->deb_mode = 'r';
+						}
+					}
+					else
+						if ( ! strcmp( argv[ 2 ], "watch" ) )
+						{
+							if ( ! strcmp( argv[ 3 ], "1" ) )
+							{
+								if ( cv->deb_mode == 'n' || cv->deb_mode == 'r' )
+									cv->deb_mode = 'w';
+								else
+									if ( cv->deb_mode == 'd' || cv->deb_mode == 'R' )
+										cv->deb_mode = 'W';
+							}
+							else
+							{
+								if ( cv->deb_mode == 'w' || cv->deb_mode == 'r' )
+									cv->deb_mode = 'n';
+								else
+									if ( cv->deb_mode == 'W' || cv->deb_mode == 'R' )
+										cv->deb_mode = 'd';
+							}
+						}
+						else
+							if ( ! strcmp( argv[ 2 ], "watch_write" ) )
+							{
+								if ( ! strcmp( argv[ 3 ], "1" ) )
+								{
+									if ( cv->deb_mode == 'n' || cv->deb_mode == 'w' )
+										cv->deb_mode = 'r';
+									else
+										if ( cv->deb_mode == 'd' || cv->deb_mode == 'W' )
+											cv->deb_mode = 'R';
+								}
+								else
+								{
+									if ( cv->deb_mode == 'r' )
+										cv->deb_mode = 'n';
+									else
+										if ( cv->deb_mode == 'R' )
+											cv->deb_mode = 'd';
+								}
+							}
+							else
+								if ( ! strcmp( argv[ 2 ], "parallel" ) )
+									cv->parallel  = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+								else
+									return TCL_ERROR;
+	}
+
+	unsaved_change( true );				// signal unsaved change
+	redrawReq = true;
+
+	if ( ( ! strcmp( argv[ 2 ], "save" ) && cv->save ) ||
+		 ( ! strcmp( argv[ 2 ], "savei" ) && cv->savei ) )
+	{
+		for ( cur = currObj; cur != NULL; cur = cur->up )
+			if ( ! cur->to_compute )
+			{
+				cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\"", vname, cur->label );
+				break;
+			}
+	}
+
+	return TCL_OK;
+}
+
+
+/****************************************************
+TCL_GET_OBJ_CONF
+Function to get object configuration from Tcl
+****************************************************/
+int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+{
+	char vname[ MAX_ELEM_LENGTH ], res[ 2 ];
+	object *cur;
+
+	if ( argc != 3 )					// require 2 parameters: variable name and property
+		return TCL_ERROR;
+
+	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL || ! strcmp( argv[ 1 ], "(none)" ) )
+		return TCL_ERROR;
+
+	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
+	cur = root->search( vname );
+
+	if ( cur == NULL )					// variable not found
+		return TCL_ERROR;
+
+	// get the appropriate value for variable
+	res[ 1 ] = '\0';					// default is 1 char string array
+	if ( ! strcmp( argv[ 2 ], "comp" ) )
+		res[ 0 ] = cur->to_compute ? '1' : '0';
+	else
+		return TCL_ERROR;
+
+	Tcl_SetResult( interp, res, TCL_VOLATILE );
+	return TCL_OK;
+}
+
+
+/****************************************************
+TCL_SET_OBJ_CONF
+Function to set object configuration from Tcl
+****************************************************/
+int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+{
+	char vname[ MAX_ELEM_LENGTH ];
+	object *cur, *cur1;
+
+	if ( argc != 4 )					// require 3 parameters: variable name, property and value
+		return TCL_ERROR;
+
+	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL ||
+		 argv[ 3 ] == NULL || ! strcmp( argv[ 1 ], "(none)" ) )
+		return TCL_ERROR;
+
+	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
+	cur = root->search( vname );
+
+	if ( cur == NULL )					// variable not found
+		return TCL_ERROR;
+
+	// set the appropriate value for variable (all instances)
+	for ( check_save = true, cur1 = cur; cur1 != NULL; cur1 = cur1->hyper_next( cur1->label ) )
+		if ( ! strcmp( argv[ 2 ], "comp" ) )
+		{
+			cur1->to_compute = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+
+			if ( ! cur1->to_compute && check_save )
+			{
+				// control for elements to save in objects to be not computed
+				control_to_compute( cur, cur->label );
+				check_save = false;		// do it just once
+			}
+		}
+		else
+			return TCL_ERROR;
+
+	unsaved_change( true );				// signal unsaved change
+	redrawReq = true;
+
+	return TCL_OK;
+}
+
+
+/****************************************************
+CHECK_LABEL
+Control that the label lab does not already exist in the model
+Also prevents invalid characters in the names
+****************************************************/
+int check_label( const char *lab, object *r )
+{
+	bridge *cb;
+	object *cur;
+	variable *cv;
+
+	if ( ! valid_label( lab ) )
+		return 2;				// invalid characters (incl. spaces)
+
+	if ( ! strcmp( lab, r->label ) )
+		return 1;
+
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+		if ( ! strcmp( lab, cv->label ) )
+			return 1;
+
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			cur = blueprint->search( cb->blabel );
+		else
+			cur = cb->head;
+
+		if ( check_label( lab, cur ) )
+			return 1;
+	}
+
+	return 0;
+}
+
+
+/****************************************************
+CONTROL_TO_COMPUTE
+****************************************************/
+void control_to_compute( object *r, const char *lab )
+{
+	bridge *cb;
+	object *cur;
+	variable *cv;
+
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+	{
+		if ( ! check_save )
+			return;
+
+		if ( cv->save == 1 )
+		{
+			cmd( "set res [ ttk::messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->label, lab );
+			cmd( "if [ string equal $res cancel ] { set res 1 } { set res 0 }" );
+
+			if ( get_bool( "res" ) )
+				check_save = false;
+		}
+	}
+
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			cur = blueprint->search( cb->blabel );
+		else
+			cur = cb->head;
+
+		control_to_compute( cur, lab );
+	}
 }
 
 
@@ -604,3 +954,352 @@ void count_save( object *n, int *count )
 		count_save( co, count );
 	}
 }
+
+
+/****************************************************
+SHOW_SAVE
+****************************************************/
+void show_save( object *n )
+{
+	char out[ 3 * MAX_ELEM_LENGTH ];
+	bridge *cb;
+	object *co;
+	variable *cv;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+	{
+		if ( cv->save == 1 || cv->savei == 1 )
+		{
+			if ( cv->param == 1 )
+				snprintf( out, 3 * MAX_ELEM_LENGTH, "Object: %s \tParameter:\t", n->label );
+			else
+				snprintf( out, 3 * MAX_ELEM_LENGTH, "Object: %s \tVariable :\t", n->label );
+			if ( cv->savei == 1 )
+			{
+				if ( cv->save == 1 )
+				   strcatn( out, " (memory and disk)", 3 * MAX_ELEM_LENGTH );
+				else
+				   strcatn( out, " (disk only)", 3 * MAX_ELEM_LENGTH );
+			}
+			plog( out );
+			plog_tag( "%s\n", "highlight", cv->label );
+			++elem_count;
+		}
+	}
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head;
+		show_save( co );
+	}
+}
+
+
+/****************************************************
+CLEAN_SAVE
+****************************************************/
+void clean_save( object *n )
+{
+	bridge *cb;
+	object *co;
+	variable *cv;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+	{
+		cv->save = 0;
+		cv->savei = 0;
+	}
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+		for ( co = cb->head; co != NULL; co = co->next )
+			clean_save( co );
+}
+
+
+/****************************************************
+SHOW_PLOT
+****************************************************/
+void show_plot( object *n )
+{
+	bridge *cb;
+	object *co;
+	variable *cv;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		if ( cv->plot )
+		{
+			if ( cv->param == 1 )
+				plog( "Object: %s \tParameter:\t", n->label );
+			if ( cv->param == 0 )
+				plog( "Object: %s \tVariable :\t", n->label );
+			if ( cv->param == 2 )
+				plog( "Object: %s \tFunction :\t", n->label );
+			plog_tag( "%s\n", "highlight", cv->label );
+			++elem_count;
+		}
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head;
+		show_plot( co );
+	}
+}
+
+
+/****************************************************
+CLEAN_PLOT
+****************************************************/
+void clean_plot( object *n )
+{
+	bridge *cb;
+	object *co;
+	variable *cv;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		cv->plot = false;
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+		for ( co = cb->head; co != NULL; co = co->next )
+			clean_plot( co );
+}
+
+
+/****************************************************
+SHOW_DEBUG
+****************************************************/
+void show_debug( object *n )
+{
+	bridge *cb;
+	object *co;
+	variable *cv;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		if ( cv->deb_mode != 'n' )
+		{
+			if ( cv->param == 0 )
+				plog( "Object: %s \tVariable:\t", n->label );
+			if ( cv->param == 1 )
+				plog( "Object: %s \tParameter:\t", n->label );
+			if ( cv->param == 2 )
+				plog( "Object: %s \tFunction:\t", n->label );
+
+			plog_tag( "%s\t", "highlight", cv->label );
+
+			switch ( cv->deb_mode )
+			{
+				default:
+				case 'd':
+					plog( "(debug)\n" );
+					break;
+				case 'w':
+					plog( "(watch)\n" );
+					break;
+				case 'D':
+					plog( "(debug and watch)\n" );
+					break;
+				case 'r':
+					plog( "(watch write)\n" );
+					break;
+				case 'R':
+					plog( "(debug and watch write)\n" );
+			}
+
+			++elem_count;
+		}
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head;
+		show_debug( co );
+	}
+}
+
+
+/****************************************************
+CLEAN_DEBUG
+****************************************************/
+void clean_debug( object *n )
+{
+	bridge *cb;
+	object *co;
+	variable *cv;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		cv->deb_mode = 'n';
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+		for ( co = cb->head; co != NULL; co = co->next )
+			clean_debug( co );
+}
+
+
+/****************************************************
+SHOW_PARALLEL
+****************************************************/
+void show_parallel( object *n )
+{
+	bridge *cb;
+	object *co;
+	variable *cv;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		if ( cv->parallel )
+		{
+			plog( "Object: %s \tVariable:\t", n->label );
+			plog_tag( "%s\n", "highlight", cv->label );
+			++elem_count;
+		}
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head;
+		show_parallel( co );
+	}
+}
+
+
+/****************************************************
+CLEAN_PARALLEL
+****************************************************/
+void clean_parallel( object *n )
+{
+	bridge *cb;
+	object *co;
+	variable *cv;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		cv->parallel = false;
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+		for ( co = cb->head; co != NULL; co = co->next )
+			clean_parallel( co );
+}
+
+
+/****************************************************
+SHOW_OBSERVE
+****************************************************/
+void show_observe( object *n )
+{
+	bridge *cb;
+	description *cd;
+	object *co;
+	variable *cv;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+	{
+		cd = search_description( cv->label );
+		if ( cd->observe )
+		{
+			if ( cv->param == 1 )
+				plog( "Object: %s \tParameter:\t", n->label );
+			else
+				plog( "Object: %s \tVariable :\t", n->label );
+
+			plog_tag( "%s (%lf)\n", "highlight", cv->label, cv->val[ 0 ] );
+			++elem_count;
+		}
+	}
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head;
+		show_observe( co );
+	}
+}
+
+
+/****************************************************
+SHOW_INITIAL
+****************************************************/
+void show_initial( object *n )
+{
+	char buf_descr[ MAX_BUFF_SIZE ];
+	bridge *cb;
+	object *co;
+	description *cd;
+	variable *cv, *cv1;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+	{
+		cd = search_description( cv->label );
+		if ( cd->initial )
+		{
+			if ( cv->param == 1 )
+				plog( "Object: %s \tParameter:\t", n->label );
+			if ( cv->param == 0 )
+				plog( "Object: %s \tVariable :\t", n->label );
+			if ( cv->param == 2 )
+				plog( "Object: %s \tFunction :\t", n->label );
+
+			++elem_count;
+			plog_tag( "%s \t", "highlight", cv->label );
+
+			if ( cd->init == NULL || strlen( cd->init ) == 0 )
+			{
+				for ( co = n; co != NULL; co = co->hyper_next( co->label ) )
+				{
+					cv1 = co->search_var( NULL, cv->label );
+					plog( " %g", cv1->val[ 0 ] );
+				}
+			}
+			else
+				plog( "%s", strtcl( buf_descr, cd->init, MAX_BUFF_SIZE ) );
+
+			plog( "\n" );
+		}
+	}
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head != NULL )
+		{
+			co = cb->head;
+			show_initial( co );
+		}
+	}
+}
+
+
+/****************************************************
+SHOW_SPECIAL_UPDAT
+****************************************************/
+void show_special_updat( object *n )
+{
+	bridge *cb;
+	object *co;
+	variable *cv;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		if ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 )
+		{
+			plog( "Object: %s \tVariable:\t", n->label );
+			plog_tag( "%s\n", "highlight", cv->label );
+			++elem_count;
+		}
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head;
+		show_special_updat( co );
+	}
+}
+
+

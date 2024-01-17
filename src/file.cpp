@@ -174,6 +174,97 @@ bool open_configuration( object *&r, bool reload )
 }
 
 
+/****************************************************
+LOAD_PREV_CONFIGURATION
+Restore sensitivity configuration
+****************************************************/
+bool load_prev_configuration( void )
+{
+	char *saFile = NULL;
+	int i, lstFidx = findexSens;
+	string warnings;
+	FILE *f;
+
+	if ( sens_file != NULL )					// save SA file name if one is loaded
+	{
+		saFile = new char[ strlen( sens_file ) + 1 ];
+		strcpy( saFile, sens_file );
+	}
+
+	if ( ( i = load_configuration( true, &warnings, 0 ) ) != 0 )
+	{
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded (%d :%.24s)\" -detail \"Previously loaded configuration could not be restored. Check if LSD still has access to the model directory.\n\nCurrent configuration will be reset now.\"", i, warnings.c_str( ) );
+
+		unload_configuration_gui( true );		// full unload everything
+		return false;
+	}
+	else
+	{
+		load_elem_lists( root );
+		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", exec_path, struct_file );
+	}
+
+	if ( saFile != NULL )						// restore SA configuration, if any
+	{
+		empty_sensitivity( );
+		NOLH_clear( );							// deallocate DoE
+		f = fopen( saFile, "rt" );
+		if ( f == NULL || load_sensitivity( f ) != 0 )
+		{
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis file cannot be reloaded\" -detail \"Previously loaded SA configuration could not be restored. Check if LSD still has access to the model directory.\n\nCurrent configuration will be reset now.\"" );
+			return false;
+		}
+
+		if ( f != NULL )
+			fclose( f );
+
+		delete [ ] saFile;
+	}
+
+	findexSens = lstFidx;
+
+	return true;
+}
+
+
+/****************************************************
+LOAD_ELEM_LISTS
+Load tcl lists of model objects and other elements
+****************************************************/
+void load_elem_lists( object *r )
+{
+	bridge *cb;
+	variable *cv;
+
+	if ( r->up == NULL )						// reset lists if root
+		cmd( "unset -nocomplain modObj modElem modVar modPar modFun" );
+	else
+		cmd( "lappend modObj %s", r->label );	// register object if not root
+
+	// register elements in object
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+	{
+		switch( cv->param )
+		{
+			case 0:
+				cmd( "lappend modVar %s", cv->label );
+				break;
+			case 1:
+				cmd( "lappend modPar %s", cv->label );
+				break;
+			case 2:
+				cmd( "lappend modFun %s", cv->label );
+		}
+
+		cmd( "lappend modElem %s", cv->label );
+	}
+
+	// register son objects
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		load_elem_lists( cb-> head );
+}
+
+
 /*****************************************************************************
 UNLOAD_CONFIGURATION_GUI (DLL WRAPPER)
 	Unload the current configuration
@@ -989,6 +1080,148 @@ void deb_log( bool on, int time )
 
 	if ( on && ( parallel_mode || fast_mode > 0 ) )
 		plog( "\nWarning: %s is active, debug command ignored", parallel_mode ? "parallel processing" : "fast mode" );
+}
+
+
+/****************************************************
+NEED_RES_DIR
+Evaluate if a separated results directory must be
+created according to a set of criteria
+****************************************************/
+#define RES_AVOID_PATTERN "*.cpp *.h *.txt *.R *.o *.exe *.html"
+bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz )
+{
+	bool newDir = false;
+
+	cmd( "if { [ string length \"%s\" ] > 0 } { \
+			set f [ file normalize \"%s/%s\" ]; \
+		} else { \
+			set f [ file normalize \"%s\" ]; \
+		}", path, path, sim_name, sim_name );
+
+	cmd( "set s \".*[ file tail $f ]_\\[0-9\\]+\\.lsd$\"" );
+	cmd( "set f \"$f.lsd\"" );
+	cmd( "set d [ file dirname $f ]" );
+
+	// check if path is valid
+	cmd( "if { [ file exists $d ] && [ file isdirectory $d ] } { set res 1 } { set res 0 }" );
+	if ( get_bool( "res" ) )
+	{
+		// check if in the main model directory
+		cmd( "if { $d eq [ file normalize \"%s\" ] } { set res 1 } { set res 0 }", exec_path );
+		if ( get_bool( "res" ) )
+			newDir = true;
+
+		// check if we are in a code directory
+		cmd( "set l [ glob -nocomplain -directory $d %s ]", RES_AVOID_PATTERN );
+		cmd( "if { [ llength $l ] > 0 } { set res 1 } { set res 0 }" );
+		if ( get_bool( "res" ) )
+			newDir = true;
+
+		// check if the only LSD configuration is the current one or sensitivity version
+		cmd( "set l [ glob -nocomplain -directory $d *.lsd ]" );
+		cmd( "set l [ lsearch -exact -all -inline -not $l $f ]" );
+		cmd( "set l [ lsearch -regexp -all -inline -not $l $s ]" );
+
+		cmd( "if { [ llength $l ] > 0 } { set res 1 } { set res 0 }" );
+		if ( get_bool( "res" ) )
+			newDir = true;
+
+		if ( newDir )
+			cmd( "set d \"$d/[ file tail \"%s\" ]\"", sim_name );
+	}
+	else
+		cmd( "set d \"\"" );
+
+	get_str( "d", buf, buf_sz );
+
+	return newDir;
+}
+
+
+/****************************************************
+CHECK_RES_DIR
+Check if the results directory exists and
+contains files to be deleted
+****************************************************/
+#define RES_CLEAR_PATTERN "*.res *.tot *.csv *.gz *.log *.bat *.pdf *.eps *.svg *.Rdata *.bak"
+bool check_res_dir( const char *path, const char *sim_name )
+{
+	bool done;
+
+	cmd( "set d \"%s\"", path );
+
+	cmd( "if { [ file exists $d ] && [ file isdirectory $d ] && [ file normalize $d ] ne [ file normalize \"%s\" ] && [ llength [ glob -nocomplain -directory $d %s ] ] > 0 } { set res 1 } { set res 0 }", exec_path, RES_CLEAR_PATTERN );
+	done = get_bool( "res" );
+
+	if ( sim_name != NULL )
+	{
+		cmd( "if { [ file exists $d ] && [ file isdirectory $d ] } { \
+				set l [ glob -nocomplain -directory $d *.lsd ]; \
+				set n [ llength $l ]; \
+				if { $n > 1 } { \
+					set res 1 \
+				} elseif { $n == 1 && [ file normalize [ lindex $l 0 ] ] ne [ file normalize \"$d/%s.lsd\" ] } { \
+					set res 1 \
+				} else { \
+					set res 0 \
+				} \
+			}", clean_file( sim_name ) );
+
+		done |= get_bool( "res" );
+	}
+
+	return done;
+}
+
+
+/****************************************************
+CREATE_RES_DIR
+Create the results directory, if not exists yet
+****************************************************/
+bool create_res_dir( const char *path )
+{
+	cmd( "set d \"%s\"", path );
+
+	cmd( "if { [ file exists $d ] && [ file isdirectory $d ] } { set res 1 } { set res 0 }" );
+	if ( ! get_bool( "res" ) )
+	{
+		cmd( "if { [ file exists $d ] } { catch { file delete -force $d } }" );
+		cmd( "catch { file mkdir $d }" );
+		cmd( "if { ! [ file exists $d ] || ! [ file isdirectory $d ] } { set res 1 } { set res 0 }" );
+		if ( get_bool( "res" ) )
+			return false;
+	}
+
+	return true;
+}
+
+
+/****************************************************
+CLEAN_RES_DIR
+Clear LSD produced files in the results directory,
+if existent,
+****************************************************/
+void clean_res_dir( const char *path, const char *sim_name )
+{
+	cmd( "set d \"%s\"", path );
+
+	cmd( "if { [ file exists $d ] && [ file isdirectory $d ] } { \
+			set l [ glob -nocomplain -directory $d %s ]; \
+			if { [ llength $l ] > 0 } { \
+				catch { file delete -force {*}$l } \
+			} \
+		}", RES_CLEAR_PATTERN );
+
+	if ( sim_name != NULL )
+		cmd( "if { [ file exists $d ] && [ file isdirectory $d ] } { \
+				set l [ glob -nocomplain -directory $d *.lsd ]; \
+				foreach f $l { \
+					if { [ file normalize $f ] ne [ file normalize \"$d/%s.lsd\" ] } { \
+						catch { file delete -force $f } \
+					} \
+				} \
+			}", clean_file( sim_name ) );
 }
 
 
