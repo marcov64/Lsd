@@ -55,7 +55,7 @@ used up to 88 options
 *******/
 
 // common definitions for LMM and LSD
-#include "common.h"
+#include "LSD.h"
 
 // auxiliary C procedures
 bool is_source_file( const char *fname );
@@ -4659,14 +4659,8 @@ int modman( int argn, const char **argv )
 				.l.t.text insert end \"SRC=$LsdSrc\n\n\"; \
 				.l.t.text insert end \"$a\"; \
 				.l.d.msg configure -text \"\"; \
-				set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.gch ]; \
-				foreach i $objs { \
-					catch { \
-						file delete -force \"$i\" \
-					} \
-				}; \
 				if { ! [ string equal -nocase \"$modelDir\" \"$RootLsd\" ] } { \
-					set objs [ glob -nocomplain -directory \"$modelDir\" *.o src makefile* makemessage.txt lsd* *.exe* *.app ]; \
+					set objs [ glob -nocomplain -directory \"$modelDir\" *.o *.a src makefile* makemessage.txt lsd* *.exe *.dll *.so *.app ]; \
 					foreach i $objs { \
 						catch { \
 							file delete -force \"$i\" \
@@ -4840,13 +4834,7 @@ int modman( int argn, const char **argv )
 				.l.t.text insert end \"$default\" \
 			}" );
 		cmd( "ttk::button .l.d.opt.cle -width $butWid -text \"Clean Obj.\" -command { \
-				set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.gch ]; \
-				foreach i $objs { \
-					catch { \
-						file delete -force \"$i\" \
-					} \
-				}; \
-				set objs [ glob -nocomplain -directory \"$modelDir\" *.o src break.gdb makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.dll *.so *.app *.bak *.err ]; \
+				set objs [ glob -nocomplain -directory \"$modelDir\" *.o *.a src break.gdb makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.dll *.so *.app *.bak *.err ]; \
 				foreach i $objs { \
 					catch { \
 						file delete -force \"$i\" \

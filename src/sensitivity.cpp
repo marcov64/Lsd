@@ -19,7 +19,7 @@ analysis. The remaining basic sensitivity-oriented methods
 and functions are stored in FILELIB.CPP.
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 
 /*****************************************************************************

@@ -24,7 +24,7 @@ The main functions contained in this file are:
 print  message string m in the Log screen.
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 
 /*********************************

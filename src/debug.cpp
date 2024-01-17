@@ -53,7 +53,7 @@ command from user. The available actions are
 fill in all the content of the object.
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 char inst_msg[ MAX_BUFF_SIZE ];	// instances string
 int inst_dpth;					// instance depth
@@ -626,7 +626,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				cmd( "newtop $e \"Element Status\" { set choice 1 } .deb" );
 
 				cmd( "ttk::frame $e.n" );
-				
+
 				switch ( cv->param )
 				{
 					case 1:
@@ -641,7 +641,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						cmd( "ttk::label $e.n.l -text \"Variable:\"" );
 						break;
 				}
-				
+
 				cmd( "ttk::label $e.n.v -style hl.TLabel -text $res" );
 				cmd( "pack $e.n.l $e.n.v -side left -padx 2" );
 
@@ -661,7 +661,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				cmd( "pack $e.x.l $e.x.v -side left -padx 2" );
 
 				cmd( "ttk::frame $e.v" );
-				
+
 				for ( i = 0; i <= eff_lags; ++i )
 				{
 					cmd( "set val%d %g", i, cv->val[ i ] );

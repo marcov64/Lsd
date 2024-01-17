@@ -33,7 +33,7 @@ pointers, so that readers can easily jump hypertextually through the whole repor
 and also the whole set of variables and parameters used in the its own equation.
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 #define MAX_INIT 100
 #define TEX_PAPER "a4paper"

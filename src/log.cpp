@@ -18,7 +18,7 @@ Contains the functions to create and interface with the Log
 window, including when Browser is running model.
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 char tabs[ ] = "5c 7.5c 10c 12.5c 15c 17.5c 20c";	// Log window tabs
 

@@ -38,7 +38,7 @@ draw the line
 Draw the different texts and sets the bindings
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 float level_factor[ MAX_LEVEL ];
 int range;

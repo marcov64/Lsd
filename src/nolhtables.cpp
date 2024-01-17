@@ -18,7 +18,7 @@ Contains near-orthogonal Latin hypercube for sensitivity
 designs of experiments (DoE).
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 
 // characteristics of NOLH tables

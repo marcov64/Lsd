@@ -37,7 +37,7 @@ create the canvas for the plot, the lines, button, labels, etc.
 the function used run time to plot the value of variable v
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 char intval[ 100 ];				// string buffer
 double ymax;
@@ -475,7 +475,7 @@ void plot_rt( variable *v )
 	cmd( "$activeplot.c.c.cn create line $x2 $y2 $x1 $y1 -tag punto -fill $c%d", cur_plt );
 
 	end:
-	
+
 	old_val[ cur_plt ] = v->val[ 0 ];
 	++cur_plt;
 }

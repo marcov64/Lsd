@@ -63,7 +63,7 @@ Cancel also the their descendants
 LAST USED CASE 97, FREE 15, 16, 25, 35, 40, 45, 51
 */
 
-#include "decl.h"
+#include "LSD.h"
 
 bool check_save;					// control saving message inside disabled objects
 bool initVal = false;				// new variable initial setting going on

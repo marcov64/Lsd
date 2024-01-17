@@ -115,7 +115,7 @@ It is used to free all the memory assigned to the variable. Used by
 object::delete_obj to cancel an object.
 *************************************************************/
 
-#include "decl.h"
+#include "libLSD.h"
 
 clock_t start_profile[ 100 ], end_profile[ 100 ];
 

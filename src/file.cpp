@@ -33,7 +33,7 @@ whether to save, plot or debug the variables.
 It calls the save_insts for all the descendant types.
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 
 /****************************************************

@@ -19,7 +19,7 @@ Execute the lsd_getsaved command line utility.
 Lists all variables being saved in a configuration.
 *************************************************************/
 
-#include "decl.h"
+#include "libLSD.h"
 
 #define SEP	",;\t"			// column separators to use
 

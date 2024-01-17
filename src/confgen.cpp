@@ -44,7 +44,7 @@ A	, 3	  , 4
 A -2, 5	  , 6
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 #define SEP	",;\t"			// column separators to use
 

@@ -46,7 +46,7 @@ called before exiting, removes all the links between tcl variables and model
 values
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 // flags to avoid recursive usage (confusing and tk windows are not ready)
 bool overflow;					// indicate table overflow (>MAX_COLS or >MAX_CELS)

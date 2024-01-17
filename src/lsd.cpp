@@ -27,7 +27,7 @@ Relevant macros for conditional compilation (when defined):
 - _NT_: no signal trapping (better when debugging in GDB)
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 
 /*************************************

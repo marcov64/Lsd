@@ -30,7 +30,7 @@ file, recovering LSD configuration to allow for non-crashing
 recovery.
 *************************************************************/
 
-#include "decl.h"
+#include "libLSD.h"
 
 
 /*********************************

@@ -18,7 +18,7 @@ Contains the functions to work with graphical lattices on the
 GUI. The basic functions are stored in LATTICELIB.CPP.
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 
 /***************************************************

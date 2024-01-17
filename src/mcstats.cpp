@@ -19,8 +19,7 @@ Execute the lsd_mcstats command line utility.
 Generate Monte Carlo experiment statistic files.
 *************************************************************/
 
-#include <cfloat>
-#include "common.h"
+#include "libLSD.h"
 
 #define SEP	",;\t"			// column separators to use
 

@@ -59,7 +59,7 @@ Sort in descending order the variables. Used in plot_cross.
 used case 47
 */
 
-#include "decl.h"
+#include "LSD.h"
 
 // plot types
 #define TSERIES	0

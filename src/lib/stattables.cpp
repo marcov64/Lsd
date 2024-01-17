@@ -17,7 +17,7 @@ STATTABLES.CPP
 Contains statistical tables.
 *************************************************************/
 
-#include "decl.h"
+#include "libLSD.h"
 
 
 // standard normal distribution table

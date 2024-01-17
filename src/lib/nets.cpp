@@ -125,7 +125,8 @@ object->search_link_net( destId )
 object->draw_link_net( )
 *************************************************************/
 
-#include "decl.h"
+#include "libLSD.h"
+
 
 /****************************************************
 NETLINK

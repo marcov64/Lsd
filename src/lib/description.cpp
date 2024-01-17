@@ -18,7 +18,7 @@ Contains the functions to operate on model's object and
 element textual descriptions.
 *************************************************************/
 
-#include "decl.h"
+#include "libLSD.h"
 
 
 /***************************************************

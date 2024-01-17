@@ -18,7 +18,7 @@ Contains the mathematical and statistical functions used in
 LSD and models.
 *************************************************************/
 
-#include "decl.h"
+#include "libLSD.h"
 
 int	normErrCnt, lnormErrCnt, gammaErrCnt, bernoErrCnt, poissErrCnt;
 int geomErrCnt, binomErrCnt, cauchErrCnt, chisqErrCnt, expErrCnt;

@@ -36,7 +36,7 @@ and max is the inserted value
 standard deviation is the inserted value.
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 
 /****************************************************

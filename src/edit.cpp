@@ -56,7 +56,7 @@ numbers. The list is as long as are the instances to eliminate. Each element
 is the ordinal number of one instance to eliminate
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 bool hid_level;
 int level;

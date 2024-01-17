@@ -19,7 +19,7 @@ Executes the lsd_getlimits command line utility.
 Lists all initial values ranges and configuration.
 *************************************************************/
 
-#include "decl.h"
+#include "libLSD.h"
 
 // limits and description for simulation settings
 #define MIN_STEP 1

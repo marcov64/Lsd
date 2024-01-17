@@ -37,7 +37,7 @@ It is based on the recognition of the string lab between quotes, thus any functi
 is recognized.
 *************************************************************/
 
-#include "decl.h"
+#include "LSD.h"
 
 
 /****************************************************

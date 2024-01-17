@@ -19,7 +19,8 @@
  stored in COMMON.CPP.
  *************************************************************/
 
-#include "common.h"
+#include "libLSD.h"
+
 
 #ifdef _WIN32
 
