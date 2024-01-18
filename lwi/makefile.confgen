@@ -6,7 +6,7 @@
 #
 #	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
-#	
+#
 #**************************************************************
 
 #**************************************************************
@@ -17,61 +17,104 @@
 #  make -f makefile.confgen
 #**************************************************************
 
-CC=g++	
+CC=g++
 TARGET=lsd_confgen
 SWITCH_CC=-D_NW_ -D_NP_ -std=c++11 -Wno-unused-result -O3
 
 # from here you should not need to modify anything
 
-# using GCC in the OS
-LSDROOT=..
-SRC=src
-SRC_DIR=$(LSDROOT)/$(SRC)/
-LIB=-lz
-RM=rm -f
-
 # add differentiating platform suffix
-ifeq ($(shell uname -s),Darwin)
-	EXEC=$(TARGET)OSX
+ifeq ($(OS),Windows_NT)
+	OBJ_DIR=$(TMP)/$(TARGET)/
+	EXT=.exe
+	EXEC=$(TARGET)$(EXT)
 else
-	ifeq ($(OS),Windows_NT)
-		EXEC=$(TARGET).exe
+	ifeq ($(shell uname -s),Darwin)
+		OBJ_DIR=$(TMPDIR)/$(TARGET)/
+		EXT=
+		EXEC=$(TARGET)OSX
 	else
+		OBJ_DIR=$(TMPDIR)/$(TARGET)/
+		EXT=
 		EXEC=$(TARGET)
 	endif
 endif
 
-# variable to search for the tcl and tk headers
+# using GCC in the OS
+LSDROOT=..
+SRC=src
+SRC_DIR=$(LSDROOT)/$(SRC)/
+LIB_DIR=$(SRC_DIR)lib/
 INCLUDE=-I$(LSDROOT)/$(SRC)
+LIB=-lz
+RM=@rm$(EXT) -f
+MKDIR=@mkdir$(EXT) -p
 
-$(EXEC): $(SRC_DIR)common.o $(SRC_DIR)confgen.o $(SRC_DIR)file.o \
-$(SRC_DIR)object.o $(SRC_DIR)variab.o $(SRC_DIR)nets.o $(SRC_DIR)util.o 
-	$(CC) $(SWITCH_CC) $(SRC_DIR)common.o $(SRC_DIR)confgen.o $(SRC_DIR)file.o \
-	$(SRC_DIR)object.o $(SRC_DIR)variab.o $(SRC_DIR)nets.o $(SRC_DIR)util.o \
-	$(LIB) -o $(EXEC)
+# make rules
+$(EXEC): $(OBJ_DIR)confgen.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o
+	$(CC) $(SWITCH_CC) $(OBJ_DIR)confgen.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(LIB) -o $(EXEC)
 
-$(SRC_DIR)common.o: $(SRC_DIR)common.cpp $(SRC_DIR)common.h
-	$(CC) $(SWITCH_CC) -c $(SRC_DIR)common.cpp -o $(SRC_DIR)common.o $(INCLUDE)
+# executable modules
+$(OBJ_DIR)confgen.o: $(SRC_DIR)confgen.cpp $(SRC_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)confgen.cpp -o $(OBJ_DIR)confgen.o
 
-$(SRC_DIR)confgen.o: $(SRC_DIR)confgen.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC) $(SWITCH_CC) -c $(SRC_DIR)confgen.cpp -o $(SRC_DIR)confgen.o $(INCLUDE)
+$(OBJ_DIR)libmain.o: $(LIB_DIR)libmain.cpp $(SRC_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)libmain.cpp -o $(OBJ_DIR)libmain.o
 
-$(SRC_DIR)file.o: $(SRC_DIR)file.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC) $(SWITCH_CC) -c $(SRC_DIR)file.cpp -o $(SRC_DIR)file.o $(INCLUDE)
+$(OBJ_DIR)commonlib.o: $(LIB_DIR)commonlib.cpp $(SRC_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)commonlib.cpp -o $(OBJ_DIR)commonlib.o
 
-$(SRC_DIR)object.o: $(SRC_DIR)object.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC) $(SWITCH_CC) -c $(SRC_DIR)object.cpp -o $(SRC_DIR)object.o $(INCLUDE)
+$(OBJ_DIR)description.o: $(LIB_DIR)description.cpp $(SRC_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)description.cpp -o $(OBJ_DIR)description.o
 
-$(SRC_DIR)variab.o: $(SRC_DIR)variab.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC) $(SWITCH_CC) -c $(SRC_DIR)variab.cpp -o $(SRC_DIR)variab.o $(INCLUDE)
+$(OBJ_DIR)filelib.o: $(LIB_DIR)filelib.cpp $(SRC_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)filelib.cpp -o $(OBJ_DIR)filelib.o
 
-$(SRC_DIR)nets.o: $(SRC_DIR)nets.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC) $(SWITCH_CC) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.o $(INCLUDE)
+$(OBJ_DIR)latticelib.o: $(LIB_DIR)latticelib.cpp $(SRC_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)latticelib.cpp -o $(OBJ_DIR)latticelib.o
 
-$(SRC_DIR)util.o: $(SRC_DIR)util.cpp $(SRC_DIR)decl.h $(SRC_DIR)common.h
-	$(CC) $(SWITCH_CC) -c $(SRC_DIR)util.cpp -o $(SRC_DIR)util.o $(INCLUDE)
+$(OBJ_DIR)math.o: $(LIB_DIR)math.cpp $(SRC_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)math.cpp -o $(OBJ_DIR)math.o
+
+$(OBJ_DIR)nets.o: $(LIB_DIR)nets.cpp $(SRC_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)nets.cpp -o $(OBJ_DIR)nets.o
+
+$(OBJ_DIR)object.o: $(LIB_DIR)object.cpp $(SRC_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)object.cpp -o $(OBJ_DIR)object.o
+
+$(OBJ_DIR)parallel.o: $(LIB_DIR)parallel.cpp $(SRC_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)parallel.cpp -o $(OBJ_DIR)parallel.o
+
+$(OBJ_DIR)run.o: $(LIB_DIR)run.cpp $(SRC_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)run.cpp -o $(OBJ_DIR)run.o
+
+$(OBJ_DIR)stattables.o: $(LIB_DIR)stattables.cpp $(SRC_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)stattables.cpp -o $(OBJ_DIR)stattables.o
+
+$(OBJ_DIR)utillib.o: $(LIB_DIR)utillib.cpp $(SRC_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)utillib.cpp -o $(OBJ_DIR)utillib.o
+
+$(OBJ_DIR)variab.o: $(LIB_DIR)variab.cpp $(SRC_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)variab.cpp -o $(OBJ_DIR)variab.o
+
+$(OBJ_DIR)pugixml.o: $(SRC_DIR)pugixml/pugixml.cpp $(SRC_DIR)pugixml/pugixml.hpp $(SRC_DIR)pugixml/pugiconfig.hpp
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)pugixml/pugixml.cpp -o $(OBJ_DIR)pugixml.o
 
 # remove compiled files
 clean:
-	$(RM) $(SRC_DIR)common.o $(SRC_DIR)confgen.o $(SRC_DIR)file.o $(SRC_DIR)object.o \
-	$(SRC_DIR)variab.o $(SRC_DIR)nets.o $(SRC_DIR)util.o $(EXEC)
+	$(RM) $(OBJ_DIR)* $(EXEC)

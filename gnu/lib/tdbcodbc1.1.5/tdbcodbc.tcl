@@ -221,6 +221,19 @@ package require tdbc
 	return -level 0 -options $options $result
     }
 
+    # The 'evaldirect' evaluates driver-native SQL code without preparing it,
+    # and returns a list of dicts (similar to '$connection allrows -as dicts').
+
+    method evaldirect {sqlStatement} {
+	set stmt [::tdbc::odbc::evaldirectStatement create \
+		      Stmt::[incr statementSeq] [self] $sqlStatement]
+       	set status [catch {
+	    $stmt allrows -as dicts
+	} result options]
+	catch {rename $stmt {}}
+	return -level 0 -options $options $result
+    }
+
     # The 'prepareCall' method gives a portable interface to prepare
     # calls to stored procedures.  It delegates to 'prepare' to do the
     # actual work.
@@ -444,6 +457,32 @@ oo::class create ::tdbc::odbc::foreignkeysStatement {
     # ways like the constructor of the 'statement' class except that
     # its 'init' method sets up to enumerate foreign keys and not run a SQL
     # query.
+
+    # The 'resultSetCreate' method forwards to the result set constructor
+
+    forward resultSetCreate ::tdbc::odbc::resultset create
+
+}
+
+#------------------------------------------------------------------------------
+#
+# tdbc::odbc::evaldirectStatement --
+#
+#	The class 'tdbc::odbc::evaldirectStatement' provides a mechanism to
+#	execute driver-name SQL code through an ODBC connection.  The SQL code
+#	is not prepared and no tokenization or variable substitution is done.
+#
+#------------------------------------------------------------------------------
+
+oo::class create ::tdbc::odbc::evaldirectStatement {
+
+    superclass ::tdbc::statement
+
+    # The constructor is written in C. It accepts the handle to the
+    # connection and a SQL statement.  It works in all
+    # ways like the constructor of the 'statement' class except that
+    # its 'init' method does not tokenize or prepare the SQL statement, and
+    # sets up to run the SQL query without performing variable substitution.
 
     # The 'resultSetCreate' method forwards to the result set constructor
 

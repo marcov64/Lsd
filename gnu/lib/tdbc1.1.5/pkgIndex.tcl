@@ -13,14 +13,14 @@ apply {{dir} {
 	set libraryfile [file join $::env(TDBC_LIBRARY) tdbc.tcl]
     }
     if {[package vsatisfies [package provide Tcl] 9.0-]} {
-	package ifneeded tdbc 1.1.3 \
+	package ifneeded tdbc 1.1.5 \
 		"package require TclOO;\
-		[list load [file join $dir tcl9tdbc113.dll] [string totitle tdbc]]\;\
+		[list load [file join $dir tcl9tdbc115.dll] [string totitle tdbc]]\;\
 		[list source $libraryfile]"
     } else {
-	package ifneeded tdbc 1.1.3 \
+	package ifneeded tdbc 1.1.5 \
 		"package require TclOO;\
-		[list load [file join $dir tdbc113.dll] [string totitle tdbc]]\;\
+		[list load [file join $dir tdbc115.dll] [string totitle tdbc]]\;\
 		[list source $libraryfile]"
     }
 }} $dir
