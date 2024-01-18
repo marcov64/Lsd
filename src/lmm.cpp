@@ -4717,7 +4717,7 @@ int modman( int argn, const char **argv )
 		cmd( "set a [ string trim [ read $f ] ]" );
 		cmd( "close $f" );
 
-		cmd( "set gcc_conf \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=\"" );
+		cmd( "set gcc_conf \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\nPRECOMPILED=true\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=\"" );
 		cmd( "set gcc_deb_nopt \"-O0\"" );
 		cmd( "set gcc_deb \"$gcc_conf$gcc_deb_nopt -ggdb3\nSWITCH_CC_LNK=\"" );
 		cmd( "set gcc_opt \"$gcc_conf -O3\nSWITCH_CC_LNK=\"" );

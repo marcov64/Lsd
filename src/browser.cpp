@@ -125,14 +125,6 @@ int load_gui( const char **argv )
 	// initialize tcl/tk and set global bidirectional variables
 	init_tcl_tk( argv[ 0 ], "lsd" );
 
-	// if the LSD dll contains a dummy (invalid) equation function, stops
-	if ( fun_dummy )
-	{
-		log_tcl_error( false, "libLSD check", "Invalid equation file library, launch LSD from LMM, or set the environment variable LD_LIBRARY_PATH to point to the directory where the LSD model compiled library is located" );
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Invalid equation file library\" -detail \"Please launch LSD from LMM.\n\nYou may also set the environment variable LD_LIBRARY_PATH to point to the directory where the library compiled from your model is located.\n\nLSD is aborting now.\"" );
-		return 8;
-	}
-
 	// global links between C and tcl variables
 	Tcl_LinkVar( interp, "choice", ( char * ) &choice, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "choice_g", ( char * ) &choice_g, TCL_LINK_INT );
@@ -162,7 +154,11 @@ int load_gui( const char **argv )
 	// try to use exec_path to change to the model directory
 	if ( f == NULL || strlen( exec_path ) == 0 || ! strcmp( exec_path, "/" ) )
 	{	// try to get name from Tcl
-		cmd( "if { [ info nameofexecutable ] != \"\" } { set path [ file dirname [ info nameofexecutable ] ] } { set path \"\" }" );
+		cmd( "if { [ info nameofexecutable ] != \"\" } { \
+				set path [ file dirname [ info nameofexecutable ] ] \
+			} { \
+				set path \"\" \
+			}" );
 		app = get_str( "path" );
 		if ( app != NULL && strlen( app ) > 0 )
 		{
@@ -172,7 +168,7 @@ int load_gui( const char **argv )
 		}
 	}
 
-	// check if directory is ok and if executable is inside a macOS package
+	// check if executable is inside a macOS package
 	cmd( "set path [ file normalize \"%s\" ]", exec_path );
 	cmd( "if { $tcl_platform(os) eq \"Darwin\" } { \
 			set pathsplit [ file split \"$path\" ]; \
@@ -181,10 +177,16 @@ int load_gui( const char **argv )
 			}; \
 			unset pathsplit \
 		}" );
+		
+	// only use the exec path if not already in a model directory
+	cmd( "if { [ file exists $MODEL_OPTIONS ] } { \
+			set modelDir \"[ pwd ]\" \
+		} { \
+			set modelDir \"$path\"; \
+		}" );
 
-	cmd( "set modelDir \"$path\"" );
-	cmd( "cd \"$path\"" );
-	app = get_str( "path" );
+	cmd( "cd \"$modelDir\"" );
+	app = get_str( "modelDir" );
 	delete [ ] path;
 	path = new char[ strlen( app ) + 1 ];
 	strcpy( path, app );

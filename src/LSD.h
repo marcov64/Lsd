@@ -157,7 +157,7 @@ char *eval_str( const char *tcl_exp, char *var, int var_size );
 char *fmt_ttip_descr( char *out, description *d, int outSz, bool init = true );
 char *get_str( const char *tcl_var, char *var, int var_size );
 char *load_eqfile( void );
-char *search_lsd_root( char *start_path );
+char *search_lsd_root( char *buf, int bufSz );
 char *strencdata( char *out, const char *in, int outSz = 0 );
 char *strtcl( char *out, const char *text, int outSz );
 char *strupr( char *s );

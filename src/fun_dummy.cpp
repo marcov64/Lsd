@@ -17,7 +17,6 @@ FUN_DUMMY.CPP
 Dummy empty model for library pre-compilation.
 *************************************************************/
 
-#define FUN_DUMMY
 #include "fun_head_fast.h"
 
 MODELBEGIN

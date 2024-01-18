@@ -270,7 +270,7 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 bool set_env( bool set )
 {
 	bool res = true;
-	char *lsd_root, *exec_path = NULL;
+	char *lsd_root, cur_path[ PATH_MAX ];
 	static char *lsd_root_env = NULL, *tcl_lib_env = NULL, *path_env = NULL;
 
 	if ( set )
@@ -279,11 +279,8 @@ bool set_env( bool set )
 
 		if ( lsd_root == NULL )
 		{
-			exec_path = new char[ MAX_PATH_LENGTH ];
-			exec_path = getcwd( exec_path, MAX_PATH_LENGTH );
-			exec_path = clean_path( exec_path );
-
-			lsd_root = search_lsd_root( exec_path );
+			if ( getcwd( cur_path, PATH_MAX ) != NULL )
+				lsd_root = search_lsd_root( clean_path( cur_path ), PATH_MAX );
 
 			if ( lsd_root != NULL )
 			{
@@ -356,7 +353,6 @@ bool set_env( bool set )
 #else
 		res = true;					// do not stop on linux/mac
 #endif
-		delete [ ] exec_path;
 	}
 	else
 	{
@@ -373,33 +369,25 @@ bool set_env( bool set )
  SEARCH_LSD_ROOT
  searches LSD root directory upwards to the root
  ****************************************************/
-char *search_lsd_root( char *start_path )
+char *search_lsd_root( char *path, int pathSz )
 {
 	bool miss;
 	const char *files[ ] = LSD_MIN_FILES;
-	char *file, *cur_dir, *last_dir, *orig_dir, *found = NULL;
+	char *file, cur_dir[ PATH_MAX ], last_dir[ PATH_MAX ], orig_dir[ PATH_MAX ], *found = NULL;
 	int i, st;
 	struct stat info;
 
-	cur_dir = new char[ MAX_PATH_LENGTH ];
-	last_dir = new char[ MAX_PATH_LENGTH ];
-	orig_dir = new char[ MAX_PATH_LENGTH ];
-	orig_dir = getcwd( orig_dir, MAX_PATH_LENGTH );
+	if ( getcwd( orig_dir, PATH_MAX ) == NULL )
+		return NULL;
 
-	if ( orig_dir == NULL )
-		goto err;
-
-	if ( chdir( start_path ) )
+	if ( chdir( path ) == -1 )
 		goto end;
 
 	strcpy( last_dir, "" );
 
 	do
 	{
-		cur_dir = getcwd( cur_dir, MAX_PATH_LENGTH );
-		cur_dir = clean_path( cur_dir );
-
-		if ( cur_dir == NULL || ! strcmp( cur_dir, last_dir ) )
+		if ( getcwd( cur_dir, PATH_MAX ) == NULL || ! strcmp( clean_path( cur_dir ), last_dir ) )
 			goto end;
 
 		for ( i = 0, miss = false; i < LSD_MIN_NUM; ++i )
@@ -418,22 +406,17 @@ char *search_lsd_root( char *start_path )
 
 		if ( ! miss )
 		{
-			strcpyn( start_path, cur_dir, strlen( start_path ) + 1 );
-			found = start_path;
+			strcpyn( path, cur_dir, pathSz );
+			found = path;
 			break;
 		}
 
-		strcpyn( last_dir, cur_dir, MAX_PATH_LENGTH );
+		strcpyn( last_dir, cur_dir, PATH_MAX );
 	}
 	while ( ! chdir( ".." ) );
 
 	end:
 	chdir( orig_dir );
-
-	err:
-	delete [ ] cur_dir;
-	delete [ ] last_dir;
-	delete [ ] orig_dir;
 
 	return found;
 }
@@ -929,7 +912,7 @@ void check_option_files( bool sys )
 	{
 		cmd( "set dir [ glob -nocomplain \"$modelDir/fun_*.cpp\" ]" );
 		cmd( "if { $dir ne \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
-		cmd( "set a \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
+		cmd( "set a \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\nPRECOMPILED=true\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
 		cmd( "set f [ open \"$modelDir/$MODEL_OPTIONS\" w ]" );
 		cmd( "puts $f $a" );
 		cmd( "close $f" );
