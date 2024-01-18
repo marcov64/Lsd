@@ -101,16 +101,16 @@ $(LSDROOT)/$(TARGET_LSD)$(EXE_EXT): $(MANIF_LSD) $(SRC_DIR)libLSDgui.a $(LSDROOT
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(MANIF_LSD) -L$(LSDROOT) -l$(TARGET_LSD) -L$(SRC_DIR) -lLSDgui -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(LSDROOT)/$(TARGET_LSD)$(EXE_EXT)
 
 # LSD dynamic library
-$(LSDROOT)/lib$(TARGET_LSD)$(DLL_EXT): $(SRC_DIR)libLSDbase.a
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) -L$(SRC_DIR) -Wl,--whole-archive -lLSDbase -Wl,--no-whole-archive -L$(PATH_LIB) $(LIB) -shared -o $(LSDROOT)/lib$(TARGET_LSD)$(DLL_EXT)
+$(LSDROOT)/lib$(TARGET_LSD)$(DLL_EXT): $(OBJ_DIR_LSD)fun_dummy.o $(SRC_DIR)libLSDbase.a
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(OBJ_DIR_LSD)fun_dummy.o -L$(SRC_DIR) -Wl,--whole-archive -lLSDbase -Wl,--no-whole-archive -L$(PATH_LIB) $(LIB) -shared -o $(LSDROOT)/lib$(TARGET_LSD)$(DLL_EXT)
 
 # LSD GUI static library
 $(SRC_DIR)libLSDgui.a: $(OBJ_DIR_LSD)lsd.o $(OBJ_DIR_LSD)lsdmain.o $(OBJ_DIR_LSD)analysis.o $(OBJ_DIR_LSD)browser.o $(OBJ_DIR_LSD)common.o $(OBJ_DIR_LSD)debug.o $(OBJ_DIR_LSD)draw.o $(OBJ_DIR_LSD)edit.o $(OBJ_DIR_LSD)edit_dat.o $(OBJ_DIR_LSD)file.o $(OBJ_DIR_LSD)interf.o $(OBJ_DIR_LSD)lattice.o $(OBJ_DIR_LSD)log.o $(OBJ_DIR_LSD)nolhtables.o $(OBJ_DIR_LSD)report.o $(OBJ_DIR_LSD)runtime.o $(OBJ_DIR_LSD)set_all.o $(OBJ_DIR_LSD)sensitivity.o $(OBJ_DIR_LSD)show_eq.o $(OBJ_DIR_LSD)util.o
 	$(AR) $(SRC_DIR)libLSDgui.a $(OBJ_DIR_LSD)lsd.o $(OBJ_DIR_LSD)lsdmain.o $(OBJ_DIR_LSD)analysis.o $(OBJ_DIR_LSD)browser.o $(OBJ_DIR_LSD)common.o $(OBJ_DIR_LSD)debug.o $(OBJ_DIR_LSD)draw.o $(OBJ_DIR_LSD)edit.o $(OBJ_DIR_LSD)edit_dat.o $(OBJ_DIR_LSD)file.o $(OBJ_DIR_LSD)interf.o $(OBJ_DIR_LSD)lattice.o $(OBJ_DIR_LSD)log.o $(OBJ_DIR_LSD)nolhtables.o $(OBJ_DIR_LSD)report.o $(OBJ_DIR_LSD)runtime.o $(OBJ_DIR_LSD)set_all.o $(OBJ_DIR_LSD)sensitivity.o $(OBJ_DIR_LSD)show_eq.o $(OBJ_DIR_LSD)util.o
 
 # base static library for LSD dynamic library
-$(SRC_DIR)libLSDbase.a: $(OBJ_DIR_LSD)fun_dummy.o $(OBJ_DIR_LSD)libmain.o $(OBJ_DIR_LSD)commonlib.o $(OBJ_DIR_LSD)description.o $(OBJ_DIR_LSD)filelib.o $(OBJ_DIR_LSD)latticelib.o $(OBJ_DIR_LSD)math.o $(OBJ_DIR_LSD)nets.o $(OBJ_DIR_LSD)object.o $(OBJ_DIR_LSD)parallel.o $(OBJ_DIR_LSD)run.o $(OBJ_DIR_LSD)stattables.o $(OBJ_DIR_LSD)utillib.o $(OBJ_DIR_LSD)variab.o $(OBJ_DIR_LSD)pugixml.o
-	$(AR) $(SRC_DIR)libLSDbase.a $(OBJ_DIR_LSD)fun_dummy.o $(OBJ_DIR_LSD)libmain.o $(OBJ_DIR_LSD)commonlib.o $(OBJ_DIR_LSD)description.o $(OBJ_DIR_LSD)filelib.o $(OBJ_DIR_LSD)latticelib.o $(OBJ_DIR_LSD)math.o $(OBJ_DIR_LSD)nets.o $(OBJ_DIR_LSD)object.o $(OBJ_DIR_LSD)parallel.o $(OBJ_DIR_LSD)run.o $(OBJ_DIR_LSD)stattables.o $(OBJ_DIR_LSD)utillib.o $(OBJ_DIR_LSD)variab.o $(OBJ_DIR_LSD)pugixml.o
+$(SRC_DIR)libLSDbase.a: $(OBJ_DIR_LSD)libmain.o $(OBJ_DIR_LSD)commonlib.o $(OBJ_DIR_LSD)description.o $(OBJ_DIR_LSD)filelib.o $(OBJ_DIR_LSD)latticelib.o $(OBJ_DIR_LSD)math.o $(OBJ_DIR_LSD)nets.o $(OBJ_DIR_LSD)object.o $(OBJ_DIR_LSD)parallel.o $(OBJ_DIR_LSD)run.o $(OBJ_DIR_LSD)stattables.o $(OBJ_DIR_LSD)utillib.o $(OBJ_DIR_LSD)variab.o $(OBJ_DIR_LSD)pugixml.o
+	$(AR) $(SRC_DIR)libLSDbase.a $(OBJ_DIR_LSD)libmain.o $(OBJ_DIR_LSD)commonlib.o $(OBJ_DIR_LSD)description.o $(OBJ_DIR_LSD)filelib.o $(OBJ_DIR_LSD)latticelib.o $(OBJ_DIR_LSD)math.o $(OBJ_DIR_LSD)nets.o $(OBJ_DIR_LSD)object.o $(OBJ_DIR_LSD)parallel.o $(OBJ_DIR_LSD)run.o $(OBJ_DIR_LSD)stattables.o $(OBJ_DIR_LSD)utillib.o $(OBJ_DIR_LSD)variab.o $(OBJ_DIR_LSD)pugixml.o
 
 # LMM executable modules
 $(OBJ_DIR_LMM)lmm.o: $(SRC_DIR)lmm.cpp $(SRC_DIR)LSD.h
@@ -279,7 +279,7 @@ $(OBJ_DIR_LSD)lsd_manifest.o: $(SRC_DIR)lsd_manifest.rc $(SRC_DIR)lsd.exe.manife
 clean: cleanlmm cleanlsd
 
 cleanlmm:
-	$(RM) $(OBJ_DIR_LMM)*
+	$(RM) $(OBJ_DIR_LMM)* $(LSDROOT)/$(TARGET_LMM)$(EXE_EXT)
 
 cleanlsd:
-	$(RM) $(OBJ_DIR_LSD)*
+	$(RM) $(OBJ_DIR_LSD)* $(SRC_DIR)libLSDbase.a $(LSDROOT)/lib$(TARGET_LSD)$(DLL_EXT) $(SRC_DIR)libLSDgui.a $(LSDROOT)/$(TARGET_LSD)$(EXE_EXT)
