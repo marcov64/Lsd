@@ -628,6 +628,7 @@ extern bool use_nan;					// flag to allow using Not a Number value
 extern char *path;						// folder where the configuration is
 extern char *simul_name;				// configuration name being run (for saving networks)
 extern const bool fast_lookup;			// flag for fast equation look-up mode
+extern const bool fun_dummy;			// flag indicating a dummy (invalid) equation file
 extern const bool no_pointer_check;		// user pointer checking static disable
 extern double def_res;					// default equation result
 extern eq_mapT eq_map;					// map to fast equation look-up

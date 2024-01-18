@@ -43,4 +43,16 @@
 			/>
 		</dependentAssembly>
 	</dependency>
+	<dependency>
+		<dependentAssembly>
+			<assemblyIdentity
+				type="win32"
+				name="LSD.assembly"
+				version="9.0.0.0"
+				processorArchitecture="AMD64"
+				publicKeyToken="257fa66c876581ba"
+				language="*"
+			/>
+		</dependentAssembly>
+	</dependency>
 </assembly>

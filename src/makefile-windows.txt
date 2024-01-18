@@ -4,25 +4,25 @@ LIB_DIR=$(SRC_DIR)lib/
 OBJ_DIR=$(TMP)/$(TARGET)/
 
 # location of tcl/tk and other headers
-INCLUDE=-I$(OBJ_DIR) -I$(LSDROOT)\$(SRC) -I$(PATH_TCLTK_HEADER) -I$(PATH_HEADER)
+INCLUDE=-I$(LSDROOT)/$(SRC) -I$(PATH_TCLTK_HEADER) -I$(PATH_HEADER)
 
 # OS-specific commands and definitions
 EXE_EXT=.exe
 DLL_EXT=.dll
 AR_DIR=$(LSDROOT)/gnu/x86_64-w64-mingw32/bin/
 AR=$(AR_DIR)ar$(EXE_EXT) -rcs
-CP=@copy
 RM=@rm$(EXE_EXT) -f
 MKDIR=@mkdir$(EXE_EXT) -p
 
 # targets
+.PHONY: all libdll libgui libbase clean
 all: $(TARGET)$(EXE_EXT)
 libgui: $(OBJ_DIR)libLSDgui.a
 libdll: lib$(TARGET)$(DLL_EXT)
 libbase: $(OBJ_DIR)libLSDbase.a
 
 # LSD executable
-$(TARGET)$(EXE_EXT): $(OBJ_DIR)lsd_manifest.o $(OBJ_DIR)libLSDgui.a lib$(TARGET).dll
+$(TARGET)$(EXE_EXT): $(OBJ_DIR)lsd_manifest.o $(OBJ_DIR)libLSDgui.a lib$(TARGET)$(DLL_EXT)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(OBJ_DIR)lsd_manifest.o -L. -l$(TARGET) -L$(OBJ_DIR) -lLSDgui -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(TARGET)$(EXE_EXT)
 
 # dynamic library

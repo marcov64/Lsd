@@ -4,8 +4,10 @@
 		name="LSD.assembly"
 		version="9.0.0.0"
 		processorArchitecture="AMD64"
-		publicKeyToken="257fa66c876581b9"
+		publicKeyToken="257fa66c876581ba"
 	/>
+    <file name="MSVCRT.dll" hashalg="SHA1"/>
+    <file name="kernel32.dll" hashalg="SHA1"/>
     <file name="libLSD.dll" hashalg="SHA1"/>
     <file name="libgcc_s_seh-1.dll" hashalg="SHA1"/>
     <file name="libwinpthread-1.dll" hashalg="SHA1"/>

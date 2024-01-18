@@ -28,6 +28,13 @@ using namespace Eigen;
 #include "libLSD.h"										// LSD library classes
 #include "check.h"										// LSD macro check support code
 
+// set the dummy equation file flag
+#if defined FUN_DUMMY
+const bool fun_dummy = true;
+#else
+const bool fun_dummy = false;
+#endif
+
 // create and set fast lookup flag
 #if ! defined FAST_LOOKUP
 const bool fast_lookup = false;

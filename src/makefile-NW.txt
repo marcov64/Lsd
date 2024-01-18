@@ -26,6 +26,7 @@ RM=@rm$(EXT) -f
 MKDIR=@mkdir$(EXT) -p
 
 # targets
+.PHONY: all
 all: $(TARGET_NW)$(EXT)
 
 # LSD No Window executable

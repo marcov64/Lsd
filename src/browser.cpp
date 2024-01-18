@@ -124,6 +124,16 @@ int load_gui( const char **argv )
 
 	// initialize tcl/tk and set global bidirectional variables
 	init_tcl_tk( argv[ 0 ], "lsd" );
+
+	// if the LSD dll contains a dummy (invalid) equation function, stops
+	if ( fun_dummy )
+	{
+		log_tcl_error( false, "libLSD check", "Invalid equation file library, launch LSD from LMM, or set the environment variable LD_LIBRARY_PATH to point to the directory where the LSD model compiled library is located" );
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Invalid equation file library\" -detail \"Please launch LSD from LMM.\n\nYou may also set the environment variable LD_LIBRARY_PATH to point to the directory where the library compiled from your model is located.\n\nLSD is aborting now.\"" );
+		return 8;
+	}
+
+	// global links between C and tcl variables
 	Tcl_LinkVar( interp, "choice", ( char * ) &choice, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "choice_g", ( char * ) &choice_g, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "stop", ( char * ) &stop, TCL_LINK_BOOLEAN );
