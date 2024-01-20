@@ -75,7 +75,7 @@ div.WordSection1
  -->
 </style>
 
-<link rel=icon href="image/lsd.png">
+<link rel=icon href="src/image/lsd.png">
 <meta name=Author content="LSD - Laboratory for Simulation Development">
 
 <iframe name=navbar src=navbar.html scrolling=no style='position:fixed;
@@ -113,8 +113,11 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>New model executable organization and
 interface</span></b><span lang=EN-US>. LSD Model Browser is now a fixed
 executable, and different models are compiled as dynamic-link libraries (DLL).
-This speeds up model compilation and allows for model re-use by other
-applications.</span></p>
+Also, pre-compiled binaries for LSD modules are provided. These changes speed
+up model compilation and allow for model re-use with other applications. Use of
+pre-compiled binaries can be disabled for any model by adding the </span><span
+class=Cdigo><span lang=EN-US>PRECOMPÌLED=false</span></span><span lang=EN-US>
+line to the model options.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -123,21 +126,22 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 lang=EN-US> LSD configuration files (</span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
 lang=EN-US>) are now organized in open, standards-based compressed XML format,
 allowing for the inclusion of additional data like network and sensitivity
-analysis information, increasing robustness to corruption, and safe
-manipulation by other applications, including text editors. Legacy
+analysis information in a single file, increasing robustness to corruption, and
+safe manipulation by other applications, including text editors. Legacy
 configuration files can still be read and exported (basic model structure
-only). Reading of uncompressed XML format is also supported.</span></p>
+only). Reading from uncompressed XML format is also supported. This allows
+other applications to easily create/modify LSD configuration files.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Improved turbo searching.</span></b><span
-lang=EN-US> Faster and more robust turbo searching algorithms were added. New
-Macros to check for the turbo searching data structures (</span><span
+lang=EN-US> Faster and more robust turbo searching algorithms were included.
+New Macros to check for the turbo searching data structures (</span><span
 class=MsoHyperlink><span lang=EN-US style='font-family:"Courier New"'><a
-href="LSD_macros.html#TSEARCH">TSEARCH_SET(…)</a></span></span><span
+href="src/src/LSD_macros.html#TSEARCH">TSEARCH_SET(…)</a></span></span><span
 lang=EN-US>, </span><span class=MsoHyperlink><span lang=EN-US style='font-family:
-"Courier New"'><a href="LSD_macros.html#TSEARCH_CND">TSEARCH_CND_SET(…)</a></span></span><span
+"Courier New"'><a href="src/src/LSD_macros.html#TSEARCH_CND">TSEARCH_CND_SET(…)</a></span></span><span
 lang=EN-US>) were added.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
@@ -145,10 +149,16 @@ lang=EN-US>) were added.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Improved network file operations.</span></b><span
 lang=EN-US> Better support for importing and exporting Pajek-formatted network
-files, including </span><span class=Cdigo>*edgeslist</span><span lang=EN-US>
-sections, and more robust error checking and recovering. Network data is now
-saved by default in LSD configuration files (</span><span class=Cdigo><span
-lang=EN-US>.lsd</span></span><span lang=EN-US>).</span></p>
+files, including </span><span class=Cdigo><span lang=EN-US>*edgeslist</span></span><span
+lang=EN-US> sections, and more robust error checking and recovering. Network
+data is now saved by default in LSD configuration files (</span><span
+class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US>).</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Small fixes and improvements.</span></b><span
+lang=EN-US> </span></p>
 
 <p class=MsoListParagraph style='margin-left:35.85pt'><span lang=EN-US>&nbsp;</span></p>
 
@@ -176,31 +186,31 @@ lang=EN-US>. By default, all macros now automatically search for one instance
 of the desired Object, Variable, or Parameter all over the model structure,
 except for macros changing element values or instances (</span><span
 class=MsoHyperlink><span lang=EN-US style='font-family:"Courier New"'><a
-href="LSD_macros.html#WRITE">WRITE(…)</a></span></span><span lang=EN-US>, </span><span
-class=MsoHyperlink><span lang=EN-US style='font-family:"Courier New"'><a
-href="LSD_macros.html#INCR">INCR(…)</a></span></span><span lang=EN-US>, </span><span
-class=MsoHyperlink><span lang=EN-US style='font-family:"Courier New"'><a
-href="LSD_macros.html#MULT">MULT(…)</a></span></span><span lang=EN-US>, </span><span
-class=MsoHyperlink><span lang=EN-US style='font-family:"Courier New"'><a
-href="LSD_macros.html#ADDOBJ">ADDOBJ(…)</a></span></span><span lang=EN-US>, </span><span
-class=MsoHyperlink><span lang=EN-US style='font-family:"Courier New"'><a
-href="LSD_macros.html#ADDOBJ_EX">ADDOBJ_EX(…)</a></span></span><span
+href="src/src/LSD_macros.html#WRITE">WRITE(…)</a></span></span><span
 lang=EN-US>, </span><span class=MsoHyperlink><span lang=EN-US style='font-family:
-"Courier New"'><a href="LSD_macros.html#DELETE">DELETE(…)</a></span></span><span
+"Courier New"'><a href="src/src/LSD_macros.html#INCR">INCR(…)</a></span></span><span
+lang=EN-US>, </span><span class=MsoHyperlink><span lang=EN-US style='font-family:
+"Courier New"'><a href="src/src/LSD_macros.html#MULT">MULT(…)</a></span></span><span
+lang=EN-US>, </span><span class=MsoHyperlink><span lang=EN-US style='font-family:
+"Courier New"'><a href="src/src/LSD_macros.html#ADDOBJ">ADDOBJ(…)</a></span></span><span
+lang=EN-US>, </span><span class=MsoHyperlink><span lang=EN-US style='font-family:
+"Courier New"'><a href="src/src/LSD_macros.html#ADDOBJ_EX">ADDOBJ_EX(…)</a></span></span><span
+lang=EN-US>, </span><span class=MsoHyperlink><span lang=EN-US style='font-family:
+"Courier New"'><a href="src/src/LSD_macros.html#DELETE">DELETE(…)</a></span></span><span
 lang=EN-US>). This new behavior may break legacy models in some exotic
 scenarios. Disabling auto-search can be done using </span><span
 class=MsoHyperlink><span style='font-family:"Courier New"'><a
-href="LSD_macros.html#NO_SEARCH"><span lang=EN-US>NO_SEARCH</span></a></span></span><span
+href="src/src/LSD_macros.html#NO_SEARCH"><span lang=EN-US>NO_SEARCH</span></a></span></span><span
 lang=EN-US> macro.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New Macros.</span></b><span lang=EN-US> </span><span
-class=Cdigo><span lang=EN-US><a href="LSD_macros.html#MAVE">MAVE(…)</a></span></span><span
+class=Cdigo><span lang=EN-US><a href="src/src/LSD_macros.html#MAVE">MAVE(…)</a></span></span><span
 lang=EN-US> and </span><span class=Cdigo><span lang=EN-US><a
-href="LSD_macros.html#WHTMAVE">WHTMAVE(…)</a></span></span><span lang=EN-US>
-provide the moving average of Variables.</span></p>
+href="src/src/LSD_macros.html#WHTMAVE">WHTMAVE(…)</a></span></span><span
+lang=EN-US> provide the moving average of Variables.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -214,16 +224,16 @@ any selected Variable or Parameter.</span></p>
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New example models.</span></b><span
-lang=EN-US> New and updated <a href="modelbrowser.html#groups">examples</a>
+lang=EN-US> New and updated <a href="src/src/modelbrowser.html#groups">examples</a>
 (Sant’Anna’s Multi-country Labor-augmented K+S, and basic Island).</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Advanced series filtering</span></b><span
-lang=EN-US>. In <a href="menudata_res.html">Analysis of Results</a> it is now
-possible to filter the available series using basic text and powerful regular
-expressions.</span></p>
+lang=EN-US>. In <a href="src/src/menudata_res.html">Analysis of Results</a> it
+is now possible to filter the available series using basic text and powerful
+regular expressions.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -281,7 +291,7 @@ LSD interface may now be configured according to many predefined themes,
 including dark ones. This provides a refresh on the classic LSD interface while
 allowing the customization of LSD appearance to the needs of different users,
 monitors and platforms. The desired theme may be chosen in LMM </span><span
-class=Cdigo><a href="LMM.html#options"><span lang=EN-US>File&gt;Options</span></a></span><span
+class=Cdigo><a href="src/src/LMM.html#options"><span lang=EN-US>File&gt;Options</span></a></span><span
 lang=EN-US> menu and it will be applied the next time LMM or LSD Browser is
 open.</span></p>
 
@@ -333,28 +343,29 @@ selected.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Other interface improvements</span></b><span
 lang=EN-US>. Several small usability improvements. Tabbed interface for <a
-href="runtime.html">Run-time</a> and <a href="menudata_res.html">Analysis of
-Results</a> plot windows. Moving Objects in the <a href="graphrep.html">LSD
-Model Structure</a> (finally!). Quick-search keys on all list boxes.
-Auto-detection of model Object names. List of elements unused in equation
-file(s). Improvements to the <a href="debug.html">Debugger</a> / <a
-href="debug.html">Data Browser</a>, </span><span class=Cdigo><a
-href="menudata_init.html"><span lang=EN-US>Data&gt;Initial Values</span></a></span><span
+href="src/src/runtime.html">Run-time</a> and <a href="src/src/menudata_res.html">Analysis
+of Results</a> plot windows. Moving Objects in the <a
+href="src/src/graphrep.html">LSD Model Structure</a> (finally!). Quick-search
+keys on all list boxes. Auto-detection of model Object names. List of elements
+unused in equation file(s). Improvements to the <a href="src/src/debug.html">Debugger</a>
+/ <a href="src/src/debug.html">Data Browser</a>, </span><span class=Cdigo><a
+href="src/src/menudata_init.html"><span lang=EN-US>Data&gt;Initial Values</span></a></span><span
 lang=EN-US> and </span><span class=Cdigo><span lang=EN-US><a
-href="menudata_objn.html">Data&gt;Number of Objects</a></span></span><span
+href="src/src/menudata_objn.html">Data&gt;Number of Objects</a></span></span><span
 lang=EN-US> windows. Interruptible progress boxes for slow operations.
-Automatic generation of <a href="LMM.html#nowindow">’No Window’ executables</a>
-when required. Mouse snapping to default buttons (optional). </span></p>
+Automatic generation of <a href="src/src/LMM.html#nowindow">’No Window’
+executables</a> when required. Mouse snapping to default buttons (optional). </span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Parallel batch execution of multi-run
-simulations.</span></b><span lang=EN-US> When <a href="menurun.html#batch">executing
-a parallel run</a> of a model with a <a href="menurun.html#simsetting">number
-of simulation runs</a> larger than one, LSD will automatically offer to execute
-the runs in parallel, using up to the number of available (virtual) cores. This
-feature is also available when using the <a href="LMM.html#nowindow">command-line
+simulations.</span></b><span lang=EN-US> When <a
+href="src/src/menurun.html#batch">executing a parallel run</a> of a model with
+a <a href="src/src/menurun.html#simsetting">number of simulation runs</a>
+larger than one, LSD will automatically offer to execute the runs in parallel,
+using up to the number of available (virtual) cores. This feature is also
+available when using the <a href="src/src/LMM.html#nowindow">command-line
 version</a> of the model.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
@@ -378,47 +389,50 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 lang=EN-US>. All Macros performing computations over multiple Object instances
 may now operate conditionally, allowing for much finer control of data
 aggregation (see for instance </span><span class=Cdigo><span lang=EN-US><a
-href="LSD_macros.html#SUM">SUM_CND(…)</a></span></span><span lang=EN-US> for
-details). Any Variable or Parameter contained in an Object instance may be used
-to control its inclusion in aggregated statistics, including lagged values.</span></p>
+href="src/src/LSD_macros.html#SUM">SUM_CND(…)</a></span></span><span
+lang=EN-US> for details). Any Variable or Parameter contained in an Object
+instance may be used to control its inclusion in aggregated statistics,
+including lagged values.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New Macros.</span></b><span lang=EN-US> </span><span
-class=Cdigo><span lang=EN-US><a href="LSD_macros.html#T">RUN</a></span></span><span
+class=Cdigo><span lang=EN-US><a href="src/src/LSD_macros.html#T">RUN</a></span></span><span
 lang=EN-US> informs the current run number in a multi-run simulation execution.
-</span><span class=Cdigo><a href="LSD_macros.html#T"><span lang=EN-US>LAST_RUN</span></a></span><span
+</span><span class=Cdigo><a href="src/src/LSD_macros.html#T"><span lang=EN-US>LAST_RUN</span></a></span><span
 lang=EN-US> provides the total number of runs configured for the current
-simulation. </span><span class=Cdigo><a href="LSD_macros.html#THIS"><span
+simulation. </span><span class=Cdigo><a href="src/src/LSD_macros.html#THIS"><span
 lang=EN-US>THIS</span></a></span><span lang=EN-US> points to the current Object
-under computation. </span><span class=Cdigo><a href="LSD_macros.html#THIS"><span
-lang=EN-US>NEXT</span></a></span><span lang=EN-US>, </span><span class=Cdigo><span
-lang=EN-US><a href="LSD_macros.html#THIS">NEXTS(…)</a></span></span><span
+under computation. </span><span class=Cdigo><a
+href="src/src/LSD_macros.html#THIS"><span lang=EN-US>NEXT</span></a></span><span
 lang=EN-US>, </span><span class=Cdigo><span lang=EN-US><a
-href="LSD_macros.html#THIS">PARENTS(…)</a></span></span><span lang=EN-US> and </span><span
-class=Cdigo><span lang=EN-US><a href="LSD_macros.html#THIS">GRANDPARENTS(…)</a></span></span><span
-lang=EN-US> allow navigating the </span><a href="LSD_faqs.html#modelstructure"><span
-lang=EN-US>model structure</span></a><span lang=EN-US> without using the C++
-complex pointer syntax with the important benefit of full pointer checking by
-default, preventing obscure crashes and providing identification of problem
-location in code. </span><span class=Cdigo><a href="LSD_macros.html#DELETING"><span
-lang=EN-US>DELETING</span></a></span><span lang=EN-US> allows checking for
-deferred Object deletions due to Variables still computing. </span><span
-class=Cdigo><a href="LSD_macros.html#SORT"><span lang=EN-US>SORTL(…)</span><span
-lang=EN-US style='font-family:"Arial",sans-serif'>/</span><span lang=EN-US>SORT2L(…)</span></a></span><span
-lang=EN-US> allow sorting Object instances by lagged Variable values.</span></p>
+href="src/src/LSD_macros.html#THIS">NEXTS(…)</a></span></span><span lang=EN-US>,
+</span><span class=Cdigo><span lang=EN-US><a href="src/src/LSD_macros.html#THIS">PARENTS(…)</a></span></span><span
+lang=EN-US> and </span><span class=Cdigo><span lang=EN-US><a
+href="src/src/LSD_macros.html#THIS">GRANDPARENTS(…)</a></span></span><span
+lang=EN-US> allow navigating the </span><a
+href="src/src/LSD_faqs.html#modelstructure"><span lang=EN-US>model structure</span></a><span
+lang=EN-US> without using the C++ complex pointer syntax with the important
+benefit of full pointer checking by default, preventing obscure crashes and
+providing identification of problem location in code. </span><span class=Cdigo><a
+href="src/src/LSD_macros.html#DELETING"><span lang=EN-US>DELETING</span></a></span><span
+lang=EN-US> allows checking for deferred Object deletions due to Variables
+still computing. </span><span class=Cdigo><a href="src/src/LSD_macros.html#SORT"><span
+lang=EN-US>SORTL(…)</span><span lang=EN-US style='font-family:"Arial",sans-serif'>/</span><span
+lang=EN-US>SORT2L(…)</span></a></span><span lang=EN-US> allow sorting Object
+instances by lagged Variable values.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Object instance “suicide” support. </span></b><span
 lang=EN-US>Equations invoking the Macro </span><span class=Cdigo><span
-lang=EN-US><a href="LSD_macros.html#DELETE">DELETE(…)</a></span></span><span
+lang=EN-US><a href="src/src/LSD_macros.html#DELETE">DELETE(…)</a></span></span><span
 lang=EN-US> for removing the Object instance containing the Variable under
 computation is now supported in all operations where this may make sense,
 including brotherhood-chain operations like </span><span class=Cdigo><a
-href="LSD_macros.html#SUM"><span lang=EN-US>SUM(…)</span></a></span><span
+href="src/src/LSD_macros.html#SUM"><span lang=EN-US>SUM(…)</span></a></span><span
 lang=EN-US>.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
@@ -427,9 +441,9 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>Support for true random number generator</span></b><span
 lang=EN-US>. If the hardware offers a truly random, non-deterministic random
 number generator, LSD can use it to all available <a
-href="LSD_macros.html#randomdraw">random draw types</a>. This is NOT the
-default simulation configuration, however, the Macro </span><span class=Cdigo><span
-lang=EN-US><a href="LSD_macros.html#RND_GENERATOR">RND_GENERATOR(0)</a></span></span><span
+href="src/src/LSD_macros.html#randomdraw">random draw types</a>. This is NOT
+the default simulation configuration, however, the Macro </span><span
+class=Cdigo><span lang=EN-US><a href="src/src/LSD_macros.html#RND_GENERATOR">RND_GENERATOR(0)</a></span></span><span
 lang=EN-US> must be invoked prior to the use of this particular generator. If
 the system does not support this generator, a regular pseudo-random number
 generator is used.</span></p>
@@ -439,18 +453,18 @@ generator is used.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New bounded Pareto distribution math
 functions</span></b><span lang=EN-US>. Draw from a bounded Pareto distribution
-using </span><span class=Cdigo><a href="LSD_macros.html#Math"><span lang=EN-US>bpareto(…)</span></a></span><span
-lang=EN-US> and compute its cumulative distribution function </span><span
-class=Cdigo><a href="LSD_macros.html#Math">bparetocdf(…)</a></span><span
-lang=EN-US>.</span></p>
+using </span><span class=Cdigo><a href="src/src/LSD_macros.html#Math"><span
+lang=EN-US>bpareto(…)</span></a></span><span lang=EN-US> and compute its
+cumulative distribution function </span><span class=Cdigo><a
+href="src/src/LSD_macros.html#Math">bparetocdf(…)</a></span><span lang=EN-US>.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New example models.</span></b><span
-lang=EN-US> New and updated <a href="modelbrowser.html#groups">examples</a> on
-macroeconomics models (Sant’Anna’s Multi-country simple and climate-augmented
-K+S, and UFRJ Micro-Macro finance- and government augmented).</span></p>
+lang=EN-US> New and updated <a href="src/src/modelbrowser.html#groups">examples</a>
+on macroeconomics models (Sant’Anna’s Multi-country simple and
+climate-augmented K+S, and UFRJ Micro-Macro finance- and government augmented).</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -507,7 +521,7 @@ improvements and changes:</span></p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US><a href="browser.html#updating">Variable
+</span></span><b><span lang=EN-US><a href="src/src/browser.html#updating">Variable
 update</a> time control.</span></b><span lang=EN-US> LSD Variables can now be
 updated/recomputed under arbitrary time schemes, deterministic or random. The
 modeler can now configure update periods larger than 1, including an initial
@@ -517,28 +531,28 @@ number or a uniform random draw from a modeler-defined range.</span></p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US><a href="menudata_res.html#createmc">Monte
+</span></span><b><span lang=EN-US><a href="src/src/menudata_res.html#createmc">Monte
 Carlo experiment</a> automatic data consolidation.</span></b><span lang=EN-US>
 Simulation models containing stochastic components which require Monte Carlo
 experiment to evaluate results can have data consolidation automatically
-performed by LSD before performing the <a href="menudata_res.html">Analysis of
-Results</a>.</span></p>
+performed by LSD before performing the <a href="src/src/menudata_res.html">Analysis
+of Results</a>.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Automatic description for new
 Variable/Function</span></b><span lang=EN-US>. When <a
-href="menumodel.html#AddAVar">adding new Variables and Functions</a> using the
-name list, <a name="_Hlk11434818">any existing description text (comments)
-existing in the equation file(s) is used to fill the Description field
-automatically</a>.</span></p>
+href="src/src/menumodel.html#AddAVar">adding new Variables and Functions</a>
+using the name list, <a name="_Hlk11434818">any existing description text
+(comments) existing in the equation file(s) is used to fill the Description
+field automatically</a>.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New example models.</span></b><span
-lang=EN-US> New <a href="modelbrowser.html#groups">examples</a> on
+lang=EN-US> New <a href="src/src/modelbrowser.html#groups">examples</a> on
 macroeconomics models (Sant’Anna’s K+S and UFRJ Micro-Macro), including
 in-depth sensitivity analysis.</span></p>
 
@@ -556,32 +570,33 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>Windows sizes and positions saving.</span></b><span
 lang=EN-US> User customizations of LMM and LSD windows may now be preserved
 among sessions. This behavior is enabled by default but can be disabled in LMM </span><span
-class=Cdigo><a href="LMM.html#options"><span lang=EN-US>File&gt;Options</span></a></span><span
+class=Cdigo><a href="src/src/LMM.html#options"><span lang=EN-US>File&gt;Options</span></a></span><span
 lang=EN-US> menu.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Model structure size control.</span></b><span
-lang=EN-US> The graphical model representation in the <a href="graphrep.html">LSD
-Model Structure</a> window can have the space distribution of the Objects
-finely controlled, including an automatic fit option.</span></p>
+lang=EN-US> The graphical model representation in the <a
+href="src/src/graphrep.html">LSD Model Structure</a> window can have the space
+distribution of the Objects finely controlled, including an automatic fit
+option.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New Macros.</span></b><span lang=EN-US> </span><span
-class=Cdigo><span lang=EN-US><a href="LSD_macros.html#LAST_CALC">LAST_CALC(…)</a></span></span><span
+class=Cdigo><span lang=EN-US><a href="src/src/LSD_macros.html#LAST_CALC">LAST_CALC(…)</a></span></span><span
 lang=EN-US> allows reading the last time a Variable or Parameter was calculated
-or updated. </span><span class=Cdigo><a href="LSD_macros.html#MED"><span
+or updated. </span><span class=Cdigo><a href="src/src/LSD_macros.html#MED"><span
 lang=EN-US>MED(…)</span></a></span><span lang=EN-US> / </span><span
-class=Cdigo><a href="LSD_macros.html#PERC"><span lang=EN-US>PERC(…)</span></a></span><span
+class=Cdigo><a href="src/src/LSD_macros.html#PERC"><span lang=EN-US>PERC(…)</span></a></span><span
 lang=EN-US> computes the median / percentile of a Variable contained in a
 brotherhood of Objects. </span><span class=Cdigo><a
-href="LSD_macros.html#UPDATE"><span lang=EN-US>UPDATE</span></a></span><span
+href="src/src/LSD_macros.html#UPDATE"><span lang=EN-US>UPDATE</span></a></span><span
 lang=EN-US> provides a tool to compute all Variables in a single Object or in
 an entire subtree of the model, useful for updating aggregates before Object
-deletions. </span><span class=Cdigo><a href="LSD_macros.html#USE_SAVED"><span
+deletions. </span><span class=Cdigo><a href="src/src/LSD_macros.html#USE_SAVED"><span
 lang=EN-US>USE_SAVED</span></a></span><span lang=EN-US> allows accessing any
 lagged value of a Variable being saved, irrespective of the lag number
 definition.</span></p>
@@ -589,10 +604,11 @@ definition.</span></p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US>Compiler info on <a href="menuhelp.html#about">About
-LSD window</a>. </span></b><span lang=EN-US>The information about the compiler
-being used for model compilation in now presented, allowing for easy
-identification of compiler mismatch problems. </span></p>
+</span></span><b><span lang=EN-US>Compiler info on <a
+href="src/src/menuhelp.html#about">About LSD window</a>. </span></b><span
+lang=EN-US>The information about the compiler being used for model compilation
+in now presented, allowing for easy identification of compiler mismatch
+problems. </span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -601,9 +617,9 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 class=Cdigo><b><span lang=EN-US>tail</span></b></span><span lang=EN-US> <b>/ </b></span><span
 class=Cdigo><b><span lang=EN-US>multitail</span></b></span><b><span lang=EN-US>.</span></b><span
 lang=EN-US> <a name="_Hlk26036486">When starting background execution of
-simulations (menu </a><a href="menurun.html#batch"><span style='font-family:
-"Courier New"'>Run&gt;Start 'No Window' Batch</span></a> and <a
-href="menurun.html#parallel"><span style='font-family:"Courier New"'>Run&gt;Create/Start
+simulations (menu </a><a href="src/src/menurun.html#batch"><span
+style='font-family:"Courier New"'>Run&gt;Start 'No Window' Batch</span></a> and
+<a href="src/src/menurun.html#parallel"><span style='font-family:"Courier New"'>Run&gt;Create/Start
 Parallel Batch</span></a>), LSD offers to launch </span><span class=Cdigo><span
 lang=EN-US>tail</span></span><span lang=EN-US> or </span><span class=Cdigo><span
 lang=EN-US>multitail</span></span><span lang=EN-US> applications to follow up
@@ -640,7 +656,7 @@ with all the models built with previous versions of. Main changes:</span></p>
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US><a href="LSD_web.html">Web interface</a>.</span></b><span
+</span></span><b><span lang=EN-US><a href="src/src/LSD_web.html">Web interface</a>.</span></b><span
 lang=EN-US> A full HTML/PHP engine and associated tools to make any LSD model
 available to be used on the web by unexperienced users. Full modeler control of
 which configuration values are exposed. Complete validation of user settings.
@@ -671,15 +687,15 @@ may have performance impact for some models, new Macros (</span><span
 class=Cdigo><span lang=EN-US>USE_POINTER_CHECK</span></span><span lang=EN-US>
 and </span><span class=Cdigo><span lang=EN-US>NO_POINTER_CHECK</span></span><span
 lang=EN-US>) are available for the modeler control <a
-href="LSD_macros.html#POINTER_CHECK">pointer checking</a>.</span></p>
+href="src/src/LSD_macros.html#POINTER_CHECK">pointer checking</a>.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=EN-US><a href="LSD_macros.html#eigen">Eigen library</a>.</span></b><span
-lang=EN-US> A powerful library for executing linear algebra in Equations code,
-including native C++ support to matrix and vector containers, numerical
-solvers, and related algorithms.</span></p>
+</span></span><b><span lang=EN-US><a href="src/src/LSD_macros.html#eigen">Eigen
+library</a>.</span></b><span lang=EN-US> A powerful library for executing
+linear algebra in Equations code, including native C++ support to matrix and
+vector containers, numerical solvers, and related algorithms.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -687,30 +703,30 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>Standard C++11 random library. </span></b><span
 lang=EN-US>Use the new powerful random number generator facilities included in
 the C++ library, which may be significantly faster, and add several <a
-href="LSD_macros.html#randomdraw">new distributions</a> to draw from (thanks
-Frederik for the suggestion).</span></p>
+href="src/src/LSD_macros.html#randomdraw">new distributions</a> to draw from
+(thanks Frederik for the suggestion).</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New NOLH internal table.</span></b><span
 lang=EN-US> Sensitivity analysis of models with up to 100 factors/parameters
-and 512 samples using <a href="menudata_sa.html#nolh">near-orthogonal Latin
-hypercubes</a> is now possible without using external files.</span></p>
+and 512 samples using <a href="src/src/menudata_sa.html#nolh">near-orthogonal
+Latin hypercubes</a> is now possible without using external files.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New example models.</span></b><span
-lang=EN-US> New <a href="modelbrowser.html#groups">examples</a> on industrial
-dynamics, market dynamics, consumer networks, and macroeconomics, including
-in-depth sensitivity analysis.</span></p>
+lang=EN-US> New <a href="src/src/modelbrowser.html#groups">examples</a> on
+industrial dynamics, market dynamics, consumer networks, and macroeconomics,
+including in-depth sensitivity analysis.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>New Macros.</span></b><span lang=EN-US> <a
-href="LSD_macros.html#lattice">Lattice macros</a> for color reading (</span><span
+href="src/src/LSD_macros.html#lattice">Lattice macros</a> for color reading (</span><span
 class=Cdigo><span lang=EN-US>V_LAT(…)</span></span><span lang=EN-US>), window
 closing (</span><span class=Cdigo><span lang=EN-US>DELETE_LAT(…)</span></span><span
 lang=EN-US>), and move in a Object structure organized as a lattice (</span><span
@@ -718,30 +734,31 @@ class=Cdigo><span lang=EN-US>UP_LAT(…)</span></span><span lang=EN-US>, </span><s
 class=Cdigo><span lang=EN-US>DOWN_LAT(…)</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>RIGHT_LAT(…)</span></span><span lang=EN-US>, </span><span
 class=Cdigo><span lang=EN-US>LEFT_LAT(…)</span></span><span lang=EN-US>).
-General macros to <a href="LSD_macros.html#count">count object instances</a> (</span><span
-class=Cdigo><span lang=EN-US>COUNT(…)</span></span><span lang=EN-US>/</span><span
-class=Cdigo><span lang=EN-US>COUNT_ALL(…)</span></span><span lang=EN-US>),
-access pure <a href="LSD_macros_arquivos#ADDEXT">data extension</a> C++ objects
-directly (</span><span class=Cdigo><span lang=EN-US>EXT(…)</span></span><span
+General macros to <a href="src/src/LSD_macros.html#count">count object
+instances</a> (</span><span class=Cdigo><span lang=EN-US>COUNT(…)</span></span><span
+lang=EN-US>/</span><span class=Cdigo><span lang=EN-US>COUNT_ALL(…)</span></span><span
+lang=EN-US>), access pure <a href="src/src/LSD_macros_arquivos#ADDEXT">data
+extension</a> C++ objects directly (</span><span class=Cdigo><span lang=EN-US>EXT(…)</span></span><span
 lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>EXTS(…)</span></span><span
 lang=EN-US>), and execute extension C++ objects methods (</span><span
 class=Cdigo><span lang=EN-US>DO_EXT(…)</span></span><span lang=EN-US>). Create <a
-href="LSD_macros.html#EQUATION_DUMMY">dummy Equations</a> (</span><span
+href="src/src/LSD_macros.html#EQUATION_DUMMY">dummy Equations</a> (</span><span
 class=Cdigo><span lang=EN-US>EQUATION_DUMMY(…)</span></span><span lang=EN-US>)
 for Variables only updated by other Variables. Search for Object instance
 number (</span><span class=Cdigo><span lang=EN-US>SEARCH_INST(…)</span></span><span
 lang=EN-US>). Option to disable/enable the automatic search of Variables and
 Parameters (</span><span class=Cdigo><span lang=EN-US>NO_SEARCH</span></span><span
 lang=EN-US>/</span><span class=Cdigo><span lang=EN-US>USE_SEARCH</span></span><span
-lang=EN-US>). New <a href="LSD_macros.html#DEBUG">debug-control macros</a>
+lang=EN-US>). New <a href="src/src/LSD_macros.html#DEBUG">debug-control macros</a>
 allow finer control of the LSD Debugger activation and log file creation.
-Please refer to the <a href="LSD_macros.html">LSD Macros</a> documentation.</span></p>
+Please refer to the <a href="src/src/LSD_macros.html">LSD Macros</a>
+documentation.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Unlimited hook pointers.</span></b><span
-lang=EN-US> A modeler-defined number of <a href="LSD_macros.html#hook">hook
+lang=EN-US> A modeler-defined number of <a href="src/src/LSD_macros.html#hook">hook
 pointers</a> can now be associated to any Object, allowing for the fast
 processing of multi-connected Objects.</span></p>
 
@@ -753,7 +770,7 @@ Objects handling</span></b><span lang=EN-US>. Some Macros now deal with Objects
 which have all instances deleted (only during run-time), when meaningful (e.g.,
 when counting instances). The modeler has to handle the results coming from
 those situations to avoid potentially serious errors. See </span><span
-class=Cdigo><span lang=EN-US><a href="LSD_macros.html#noinstance">USE_ZERO_INSTANCE</a></span></span><span
+class=Cdigo><span lang=EN-US><a href="src/src/LSD_macros.html#noinstance">USE_ZERO_INSTANCE</a></span></span><span
 lang=EN-US> Macro documentation.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
@@ -764,7 +781,7 @@ lang=EN-US>. Automatic usage of default plotting terminals, supporting
 contemporaneous options like Qt and wxt. Updated system terminal options,
 shared with LMM. WARNING: the old Windows 32-bit version of Gnuplot was removed
 from LSD, now users in all platforms must install Gnuplot, please refer to </span><span
-class=Cdigo><span lang=EN-US><a href="../Readme.txt">Readme.txt</a></span></span><span
+class=Cdigo><span lang=EN-US><a href="src/Readme.txt">Readme.txt</a></span></span><span
 lang=EN-US> for details.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
@@ -874,7 +891,7 @@ and version control support.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Icon access</span></b><span lang=EN-US>.
 Scripts for automatic creation of desktop icons to access LMM in all platforms
-(see <a href="../Readme.txt">Readme.txt</a> for details). </span></p>
+(see <a href="src/Readme.txt">Readme.txt</a> for details). </span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US

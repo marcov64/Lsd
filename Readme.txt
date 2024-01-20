@@ -125,6 +125,8 @@ WARNING: LSD operates by creating and modifying executable (.exe) files for your
 
 LSDROOT environment variable: for special installations, like multiple LSD versions in the same machine, it is possible to set a system-level environment variable named LSDROOT pointing to the directory where the version of LSD to be used is located. Please note that LSD installer does not create or update this variable. If LSDROOT is set to an invalid (non-LSD) directory, LSD will not work.
 
+Pre-compiled code: to speed-up compilation, LSD comes with already compiled code that may not work with your specific model. You can disable the use of pre-compiled code on a model basis, by adding/changing to the line "PRECOMPILED=false" to the "Model Options..." in the menu "Model", and recompiling the model.
+
 For persisting problems email us: valente@ec.univaq.it or mcper@unicamp.br
 
 
@@ -289,7 +291,7 @@ To run LMM from a system shell, please open a terminal in the installation direc
 
 If you get an error when trying to execute any of the above commands, please make sure the respective files are set as executable (use terminal command "chmod +x FILENAME" in the installation directory, replacing FILENAME by the name of the corresponding file).
 
-You may need to recompile LMM if the included pre-compiled versions have problems with your Linux setup. Move in the LSD installation directory and use the commands:
+Last, LSD comes with pre-compiled code that may need to be recompiled to your specific environment. To recreate the pre-compiled binaries, close all LSD instances and open a terminal instance at the LSD installation directory. Then, use the following commands:
 
  cd src
  make
@@ -301,6 +303,8 @@ It is also possible that Tcl/Tk requires further libraries besides those specifi
  ldd /usr/bin/wish
 
 If the system lists further libraries, add the appropriate option to the linker (e.g. -lieee to add the library libieee.a) in the makefile to the variable DUMMY.
+
+Last, LSD comes with pre-compiled code that may need to be recompiled to your specific environment. To recreate the pre-compiled binaries, close all LSD instances and open a terminal instance at the LSD installation directory. Then, use the following commands:
 
 IMPORTANT: if you modified the makefile to compile LMM, the same changes need to be made to the makefiles used to generate the LSD Model programs. You need to make these changes only once using LMM. Use the menu item System Compilation Options in menu Model. You will have to fill the same variables as in the makefile used to compile LMM, which must be set to the same values.
 
