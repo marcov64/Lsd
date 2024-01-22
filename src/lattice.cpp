@@ -85,7 +85,7 @@ void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, in
 				}; \
 				plog \"\nPlot saved: $a\n\" \
 			} \
-		}", strlen( simul_name ) > 0 ? simul_name : "plot", path );
+		}", strlen( simul_name ) > 0 ? simul_name : "plot", conf_path );
 
 	cmd( "set rows %d", latt.rows );
 	cmd( "set columns %d", latt.columns );

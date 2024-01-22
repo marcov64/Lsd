@@ -70,11 +70,11 @@ bool open_configuration( object *&r, bool reload )
 			simul_name = new char[ strlen( lab2 ) + 1 ];
 			strcpy( simul_name, lab2 );
 
-			delete [ ] path;
-			path = new char[ strlen( lab1 ) + 1 ];
-			strcpy( path, lab1 );
+			delete [ ] conf_path;
+			conf_path = new char[ strlen( lab1 ) + 1 ];
+			strcpy( conf_path, lab1 );
 
-			if ( strlen( path ) > 0 )
+			if ( strlen( conf_path ) > 0 )
 				cmd( "cd $path" );
 
 			cmd( "set listfocus 1; set itemfocus 0" );// point for first var in listbox
@@ -100,8 +100,8 @@ bool open_configuration( object *&r, bool reload )
 			break;
 
 		case 1:									// file/path not found
-			if ( strlen( path ) > 0 )
-				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME, path );
+			if ( strlen( conf_path ) > 0 )
+				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME, conf_path );
 			else
 				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME	 );
 			loaded = false;
@@ -201,7 +201,7 @@ bool load_prev_configuration( void )
 	else
 	{
 		load_elem_lists( root );
-		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", exec_path, struct_file );
+		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", model_path, struct_file );
 	}
 
 	if ( saFile != NULL )						// restore SA configuration, if any
@@ -286,8 +286,8 @@ void unload_configuration_gui( bool full )
 
 	if ( full )									// full unload? (no new config?)
 	{
-		cmd( "set path \"%s\"", path );
-		if ( strlen( path ) > 0 )
+		cmd( "set path \"%s\"", model_path );
+		if ( strlen( model_path ) > 0 )
 			cmd( "cd \"$path\"" );
 
 		cmd( "unset -nocomplain lastConf" );	// no last configuration to reload
@@ -321,7 +321,7 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 	indexDig = ( findex > 0 ) ? ( int ) floor( log10( findex ) + 2 ) : 0;
 
 	if ( dest_path == NULL )
-		save_path = path;
+		save_path = conf_path;
 	else
 		save_path = dest_path;
 
@@ -335,7 +335,7 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 	if ( strlen( name_rep ) == 0 )
 		snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
 
-	if ( strlen( path ) > 0 )
+	if ( strlen( conf_path ) > 0 )
 	{
 		save_len = strlen( save_path ) + strlen( simul_name ) + 6 + indexDig;
 		save_file = new char[ save_len ];
@@ -468,7 +468,7 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 		save_ok = false;
 
 	if ( save_ok )
-		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", exec_path, struct_file );
+		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", conf_path, struct_file );
 
 	delete [ ] save_file;
 
@@ -768,15 +768,15 @@ SAVE_CONFIGURATION (LEGACY)
 	If quick is true, just the structure and the parameters are saved
 	Returns: true: save ok, false: save failure
 ******************************************************************************/
-bool save_configuration( const char *path, const char *rname, const char *ext )
+bool save_configuration( const char *dest_path, const char *rname, const char *ext )
 {
 	bool save_ok = false;
 	char *save_file, *bak_file;
 	description *cd;
 	FILE *f;
 
-	save_file = new char[ strlen( path ) + strlen( rname ) + strlen( ext ) + 2 ];
-	sprintf( save_file, "%s%s%s%s", path, strlen( path ) > 0 ? "/" : "", rname, ext );
+	save_file = new char[ strlen( dest_path ) + strlen( rname ) + strlen( ext ) + 2 ];
+	sprintf( save_file, "%s%s%s%s", dest_path, strlen( dest_path ) > 0 ? "/" : "", rname, ext );
 
 	f = fopen( save_file, "r" );
 	if ( f != NULL )
@@ -785,7 +785,7 @@ bool save_configuration( const char *path, const char *rname, const char *ext )
 
 		// create backup file
 		bak_file = new char[ strlen( save_file ) - strlen( ext ) + 5 ];
-		sprintf( bak_file, "%s%s%s.bak", path, strlen( path ) > 0 ? "/" : "", rname );
+		sprintf( bak_file, "%s%s%s.bak", dest_path, strlen( dest_path ) > 0 ? "/" : "", rname );
 
 		f = fopen( bak_file, "r" );
 		if ( f != NULL )
@@ -1089,7 +1089,7 @@ Evaluate if a separated results directory must be
 created according to a set of criteria
 ****************************************************/
 #define RES_AVOID_PATTERN "*.cpp *.h *.txt *.R *.o *.exe *.html"
-bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz )
+bool need_res_dir( const char *dest_path, const char *sim_name, char *buf, int buf_sz )
 {
 	bool newDir = false;
 
@@ -1097,7 +1097,7 @@ bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz
 			set f [ file normalize \"%s/%s\" ]; \
 		} else { \
 			set f [ file normalize \"%s\" ]; \
-		}", path, path, sim_name, sim_name );
+		}", dest_path, dest_path, sim_name, sim_name );
 
 	cmd( "set s \".*[ file tail $f ]_\\[0-9\\]+\\.lsd$\"" );
 	cmd( "set f \"$f.lsd\"" );
@@ -1108,7 +1108,7 @@ bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz
 	if ( get_bool( "res" ) )
 	{
 		// check if in the main model directory
-		cmd( "if { $d eq [ file normalize \"%s\" ] } { set res 1 } { set res 0 }", exec_path );
+		cmd( "if { $d eq [ file normalize \"%s\" ] } { set res 1 } { set res 0 }", model_path );
 		if ( get_bool( "res" ) )
 			newDir = true;
 
@@ -1145,13 +1145,13 @@ Check if the results directory exists and
 contains files to be deleted
 ****************************************************/
 #define RES_CLEAR_PATTERN "*.res *.tot *.csv *.gz *.log *.bat *.pdf *.eps *.svg *.Rdata *.bak"
-bool check_res_dir( const char *path, const char *sim_name )
+bool check_res_dir( const char *dest_path, const char *sim_name )
 {
 	bool done;
 
-	cmd( "set d \"%s\"", path );
+	cmd( "set d \"%s\"", dest_path );
 
-	cmd( "if { [ file exists $d ] && [ file isdirectory $d ] && [ file normalize $d ] ne [ file normalize \"%s\" ] && [ llength [ glob -nocomplain -directory $d %s ] ] > 0 } { set res 1 } { set res 0 }", exec_path, RES_CLEAR_PATTERN );
+	cmd( "if { [ file exists $d ] && [ file isdirectory $d ] && [ file normalize $d ] ne [ file normalize \"%s\" ] && [ llength [ glob -nocomplain -directory $d %s ] ] > 0 } { set res 1 } { set res 0 }", model_path, RES_CLEAR_PATTERN );
 	done = get_bool( "res" );
 
 	if ( sim_name != NULL )
@@ -1179,9 +1179,9 @@ bool check_res_dir( const char *path, const char *sim_name )
 CREATE_RES_DIR
 Create the results directory, if not exists yet
 ****************************************************/
-bool create_res_dir( const char *path )
+bool create_res_dir( const char *dest_path )
 {
-	cmd( "set d \"%s\"", path );
+	cmd( "set d \"%s\"", dest_path );
 
 	cmd( "if { [ file exists $d ] && [ file isdirectory $d ] } { set res 1 } { set res 0 }" );
 	if ( ! get_bool( "res" ) )
@@ -1202,9 +1202,9 @@ CLEAN_RES_DIR
 Clear LSD produced files in the results directory,
 if existent,
 ****************************************************/
-void clean_res_dir( const char *path, const char *sim_name )
+void clean_res_dir( const char *dest_path, const char *sim_name )
 {
-	cmd( "set d \"%s\"", path );
+	cmd( "set d \"%s\"", dest_path );
 
 	cmd( "if { [ file exists $d ] && [ file isdirectory $d ] } { \
 			set l [ glob -nocomplain -directory $d %s ]; \
@@ -1409,7 +1409,7 @@ void read_eqfile_name( char *s, int sz )
 	char lab[ MAX_PATH_LENGTH ];
 	FILE *f;
 
-	snprintf( lab, MAX_PATH_LENGTH, "%s/%s", exec_path, MODEL_OPTIONS );
+	snprintf( lab, MAX_PATH_LENGTH, "%s/%s", model_path, MODEL_OPTIONS );
 	f = fopen( lab, "r" );
 
 	if ( f == NULL )
@@ -1616,12 +1616,12 @@ int count_lines( const char *fname, bool dozip )
 SHOW_LOGS
 	Open tail/multitail to show log files dynamically
 ****************************************************/
-void show_logs( const char *path, vector < string > & logs, bool par_cntl )
+void show_logs( const char *dest_path, vector < string > & logs, bool par_cntl )
 {
 	char exec[ MAX_PATH_LENGTH	];
 	int i, j, n, sz;
 
-	cmd( "switch [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Background run monitor\" -message \"Open the background run monitor?\" -detail \"The selected simulation runs were started as parallel background job(s). Each job progress can be monitored in a separated window results by choosing 'Yes'\n\nLog files are being created in the folder:\n\n[ fn_break [ file nativename \"%s\" ] 40 ]\" ] { yes { set ans 1 } no { set ans 0 } }", path );
+	cmd( "switch [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Background run monitor\" -message \"Open the background run monitor?\" -detail \"The selected simulation runs were started as parallel background job(s). Each job progress can be monitored in a separated window results by choosing 'Yes'\n\nLog files are being created in the folder:\n\n[ fn_break [ file nativename \"%s\" ] 40 ]\" ] { yes { set ans 1 } no { set ans 0 } }", dest_path );
 
 	if ( ! get_int( "ans" ) || ( par_cntl && ! parallel_monitor ) )
 		return;

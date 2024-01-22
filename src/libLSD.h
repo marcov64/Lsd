@@ -625,7 +625,6 @@ extern bool no_search;					// disable the standard variable search mechanism
 extern bool no_search_up;				// disable the object up-search mechanism
 extern bool no_zero_instance;			// flag to allow deleting last object instance
 extern bool use_nan;					// flag to allow using Not a Number value
-extern char *path;						// folder where the configuration is
 extern char *simul_name;				// configuration name being run (for saving networks)
 extern const bool fast_lookup;			// flag for fast equation look-up mode
 extern const bool no_pointer_check;		// user pointer checking static disable
@@ -766,10 +765,15 @@ extern bool watch_write_mode;	// flag for write-only watch condition
 extern bool worker_ready;		// parallel worker ready flag
 extern bool worker_crashed;		// parallel worker crash flag
 extern char *alt_path;			// alternative output path
+extern char *conf_path;			// folder where the current configuration is
 extern char *eq_file;			// equation file content
 extern char *exec_file;			// name of executable file
 extern char *exec_path;			// path of executable file
 extern char *log_filename;		// name of log file, if any
+extern char *lib_file;			// name of shared library, if any
+extern char *lib_path;			// path of shared library, if any
+extern char *model_path;		// folder where the model files are
+extern char *rootLsd;			// path of LSD root directory
 extern char *sens_file;			// current sensitivity analysis file
 extern char *struct_file;		// name of current configuration file
 extern char equation_name[ ];	// equation file name

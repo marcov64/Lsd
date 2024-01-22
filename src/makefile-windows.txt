@@ -5,11 +5,14 @@ OBJ_DIR=$(TMP)/$(TARGET)/
 INCLUDE=-I$(LSDROOT)/$(SRC) -I$(PATH_TCLTK_HEADER) -I$(PATH_HEADER)
 
 # check if LSD source must be recompiled
-ifneq ($(strip $(TARGET)),LSD)
-  PRECOMPILED=false
+ifeq ($(findstring $(strip $(TARGET)),LSD lSD LsD LSd Lsd lSd lsD lsd),)
+  PRECOMP=false
+else
+  TARGET=LSD
+  PRECOMP=$(findstring $(strip $(PRECOMPILED)),false False FALSE no No NO 0)
 endif
 
-ifneq ($(strip $(PRECOMPILED)),false)
+ifeq ($(PRECOMP),)
   LIB_GUI=$(SRC_DIR)LSDgui-windows.a
   LIB_BASE=$(SRC_DIR)LSDbase-windows.a
 else
@@ -32,7 +35,7 @@ MKDIR=@mkdir$(EXE_EXT) -p
 # targets
 .PHONY: all clean
 
-ifneq ($(strip $(PRECOMPILED)),false)
+ifeq ($(PRECOMP),)
 all: lib$(TARGET)$(DLL_EXT)
 else
 all: $(TARGET)$(EXE_EXT)
@@ -46,7 +49,7 @@ $(OBJ_DIR)$(FUN).o: $(FUN).cpp $(DEP_BASE) $(SRC_DIR)check.h $(SRC_DIR)fun_head.
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(INCLUDE) -c $(FUN).cpp -o $(OBJ_DIR)$(FUN).o
 
-ifeq ($(strip $(PRECOMPILED)),false)
+ifneq ($(PRECOMP),)
 # base static library for dynamic library
 $(LIB_BASE): $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o
 	$(AR) $(LIB_BASE) $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o
@@ -109,21 +112,21 @@ $(OBJ_DIR)pugixml.o: $(SRC_DIR)pugixml/pugixml.cpp $(SRC_DIR)pugixml/pugixml.hpp
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)pugixml/pugixml.cpp -o $(OBJ_DIR)pugixml.o
 
 # executable
-$(TARGET)$(EXE_EXT): $(OBJ_DIR)lsd_manifest.o $(LIB_GUI) lib$(TARGET)$(DLL_EXT)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(OBJ_DIR)lsd_manifest.o $(LIB_GUI) -L. -l$(TARGET) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(TARGET)$(EXE_EXT)
+$(TARGET)$(EXE_EXT): $(OBJ_DIR)LSD.exe.manifest.o $(LIB_GUI) lib$(TARGET)$(DLL_EXT)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(OBJ_DIR)LSD.exe.manifest.o $(LIB_GUI) -L. -l$(TARGET) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(TARGET)$(EXE_EXT)
 
 # executable static library
-$(LIB_GUI): $(OBJ_DIR)lsd.o $(OBJ_DIR)lsdmain.o $(OBJ_DIR)analysis.o $(OBJ_DIR)browser.o $(OBJ_DIR)common.o $(OBJ_DIR)debug.o $(OBJ_DIR)draw.o $(OBJ_DIR)edit.o $(OBJ_DIR)edit_dat.o $(OBJ_DIR)file.o $(OBJ_DIR)interf.o $(OBJ_DIR)lattice.o $(OBJ_DIR)log.o $(OBJ_DIR)nolhtables.o $(OBJ_DIR)report.o $(OBJ_DIR)runtime.o $(OBJ_DIR)set_all.o $(OBJ_DIR)sensitivity.o $(OBJ_DIR)show_eq.o $(OBJ_DIR)util.o
-	$(AR) $(LIB_GUI) $(OBJ_DIR)lsd.o $(OBJ_DIR)lsdmain.o $(OBJ_DIR)analysis.o $(OBJ_DIR)browser.o $(OBJ_DIR)common.o $(OBJ_DIR)debug.o $(OBJ_DIR)draw.o $(OBJ_DIR)edit.o $(OBJ_DIR)edit_dat.o $(OBJ_DIR)file.o $(OBJ_DIR)interf.o $(OBJ_DIR)lattice.o $(OBJ_DIR)log.o $(OBJ_DIR)nolhtables.o $(OBJ_DIR)report.o $(OBJ_DIR)runtime.o $(OBJ_DIR)set_all.o $(OBJ_DIR)sensitivity.o $(OBJ_DIR)show_eq.o $(OBJ_DIR)util.o
+$(LIB_GUI): $(OBJ_DIR)LSD.o $(OBJ_DIR)LSDmain.o $(OBJ_DIR)analysis.o $(OBJ_DIR)browser.o $(OBJ_DIR)common.o $(OBJ_DIR)debug.o $(OBJ_DIR)draw.o $(OBJ_DIR)edit.o $(OBJ_DIR)edit_dat.o $(OBJ_DIR)file.o $(OBJ_DIR)interf.o $(OBJ_DIR)lattice.o $(OBJ_DIR)log.o $(OBJ_DIR)nolhtables.o $(OBJ_DIR)report.o $(OBJ_DIR)runtime.o $(OBJ_DIR)set_all.o $(OBJ_DIR)sensitivity.o $(OBJ_DIR)show_eq.o $(OBJ_DIR)util.o
+	$(AR) $(LIB_GUI) $(OBJ_DIR)LSD.o $(OBJ_DIR)LSDmain.o $(OBJ_DIR)analysis.o $(OBJ_DIR)browser.o $(OBJ_DIR)common.o $(OBJ_DIR)debug.o $(OBJ_DIR)draw.o $(OBJ_DIR)edit.o $(OBJ_DIR)edit_dat.o $(OBJ_DIR)file.o $(OBJ_DIR)interf.o $(OBJ_DIR)lattice.o $(OBJ_DIR)log.o $(OBJ_DIR)nolhtables.o $(OBJ_DIR)report.o $(OBJ_DIR)runtime.o $(OBJ_DIR)set_all.o $(OBJ_DIR)sensitivity.o $(OBJ_DIR)show_eq.o $(OBJ_DIR)util.o
 
 # executable static library modules
-$(OBJ_DIR)lsd.o: $(SRC_DIR)lsd.cpp $(DEP_GUI)
+$(OBJ_DIR)LSD.o: $(SRC_DIR)LSD.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)lsd.cpp -o $(OBJ_DIR)lsd.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)LSD.cpp -o $(OBJ_DIR)LSD.o
 
-$(OBJ_DIR)lsdmain.o: $(SRC_DIR)lsdmain.cpp $(DEP_GUI)
+$(OBJ_DIR)LSDmain.o: $(SRC_DIR)LSDmain.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)lsdmain.cpp -o $(OBJ_DIR)lsdmain.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)LSDmain.cpp -o $(OBJ_DIR)LSDmain.o
 
 $(OBJ_DIR)analysis.o: $(SRC_DIR)analysis.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
@@ -197,9 +200,9 @@ $(OBJ_DIR)util.o: $(SRC_DIR)util.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)util.cpp -o $(OBJ_DIR)util.o
 
-$(OBJ_DIR)lsd_manifest.o: $(SRC_DIR)lsd_manifest.rc $(SRC_DIR)lsd.exe.manifest
+$(OBJ_DIR)LSD.exe.manifest.o: $(SRC_DIR)LSD.exe.manifest.rc $(SRC_DIR)LSD.exe.manifest
 	$(MKDIR) $(@D)
-	$(WRC) -i $(SRC_DIR)lsd_manifest.rc -o $(OBJ_DIR)lsd_manifest.o $(INCLUDE)
+	$(WRC) -i $(SRC_DIR)LSD.exe.manifest.rc -o $(OBJ_DIR)LSD.exe.manifest.o $(INCLUDE)
 endif
 
 # remove compiled files

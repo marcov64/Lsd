@@ -891,12 +891,42 @@ proc LsdHelp { fn } {
 
 
 #************************************************
+# TEMP_DIR
+#************************************************
+proc temp_dir { } {
+	global CurPlatform env
+
+	if [ string equal $CurPlatform windows ] {
+		set tmpVar [ list TEMP TMP TMPDIR ]
+		set tmpDir [ list C:/temp C:/tmp ]
+	} else {
+		set tmpVar [ list TMPDIR TMP ]
+		set tmpDir [ list /tmp /var/tmp ]
+	}
+
+	foreach var $tmpVar {
+		if { [ info exists env($var) ] } {
+			return [ file normalize $env($var) ]
+		}
+	}
+
+	foreach dir $tmpDir {
+		if { [ file exists $dir ] } {
+			return [ file normalize $dir ]
+		}
+	}
+
+	return ""
+}
+
+
+#************************************************
 # MAKE_WAIT
 # Waits for a makefile background task to finish
 # Set 'res' to 1 if compilation succeeds and 0 otherwise
 #************************************************
 proc make_wait { } {
-	global targetExe iniTime makePipe exeTime res
+	global targetExe targetLib nwTarget prcmpTarget iniTime makePipe exeTime libTime res
 
 	if { [ eof $makePipe ] } {
 		fileevent $makePipe readable ""
@@ -914,6 +944,12 @@ proc make_wait { } {
 			set exeTime 0
 		};
 
+		if [ file exist "$targetLib" ] {
+			set libTime [ file mtime "$targetLib" ]
+		} else {
+			set libTime 0
+		};
+
 		if { [ file exists makemessage.txt ] && [ file size makemessage.txt ] == 0 } {
 			set res 1
 			set t 0
@@ -921,7 +957,7 @@ proc make_wait { } {
 				after 100
 				incr t 100
 			}
-		} elseif { $iniTime <= $exeTime } {
+		} elseif { ( $nwTarget || $iniTime <= $libTime ) && ( $prcmpTarget || $iniTime <= $exeTime ) } {
 			set res 1
 		} else {
 			set res 0
@@ -938,48 +974,69 @@ proc make_wait { } {
 # MAKE_BACKGROUND
 # Start a makefile as a background task
 #************************************************
-proc make_background { target threads nw macPkg } {
-	global CurPlatform DefaultMakeExe RootLsd LsdGnu mainExe targetExe iniTime makePipe res
+proc make_background { target threads nw precompiled } {
+	global CurPlatform DefaultMakeExe RootLsd LsdGnu mainExe targetExe targetLib nwTarget prcmpTarget iniTime makePipe res
 
 	if { $nw } {
+		set nwTarget 1
 		set makeSuffix "NW"
+		set prcmpTarget 0
 	} else {
+		set nwTarget 0
 		set makeSuffix ""
+		set prcmpTarget $precompiled
 	}
 
-	if { ! $nw && $macPkg && $CurPlatform eq "mac" } {
-		set targetExe "$target.app/Contents/MacOS/$target"
-	} else {
-		set targetExe "$target"
-		if { [ info exists mainExe ] && $macPkg && $CurPlatform eq "mac" } {
-			set mainExe "$mainExe.app/Contents/MacOS/$mainExe"
+	set targetExe "$target"
+	set targetLib ""
+
+	if { ! $nw } {
+		if { $CurPlatform eq "mac" } {
+			set targetExe "$target.app/Contents/MacOS/$target"
+			set targetLib "$target.app/Contents/MacOS/lib$target.dylib"
+
+			if { [ info exists mainExe ] } {
+				set mainExe "$mainExe.app/Contents/MacOS/$mainExe"
+			}
+		} elseif { $CurPlatform eq "windows" } {
+			set targetLib "lib[ file rootname $target ].dll"
+		} else {
+			set targetLib "lib$target.so"
 		}
 	}
 
 	set iniTime [ clock seconds ]
 
-	# handle Windows access to open executable and empty compilation windows
+	# handle Windows access to open executable
 	if [ string equal $CurPlatform windows ] {
 
-		if [ file exists "$target" ] {
-			if [ catch {
-				close [ file tempfile targetTemp ]
-				file delete $targetTemp
-				set targetDir [ file dirname $targetTemp ]
-				file mkdir "$targetDir"
-				set targetTemp "$targetDir/$target.bak"
+		if { $precompiled } {
+			set targets [ list $targetLib ]
+		} else {
+			set targets [ list $targetExe $targetLib ]
+		}
 
-				file rename -force "$target" "$targetTemp"
-				file copy -force "$targetTemp" "$target"
-			} msg ] {
-				catch {
-					set f [ open makemessage.txt w ]
-					puts $f $msg
-					close $f
+		foreach tgt $targets {
+			if [ file exists "$tgt" ] {
+				if [ catch {
+					set targetDir "[ temp_dir ]/[ file rootname $target ]"
+					if { ! [ file exists $targetDir ] } {
+						file mkdir "$targetDir"
+					}
+
+					set targetTemp "$targetDir/$tgt.bak"
+					file rename -force "$tgt" "$targetTemp"
+					file copy -force "$targetTemp" "$tgt"
+				} msg ] {
+					catch {
+						set f [ open makemessage.txt w ]
+						puts $f $msg
+						close $f
+					}
+
+					set res 0
+					return
 				}
-
-				set res 0
-				return
 			}
 		}
 

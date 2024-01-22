@@ -1121,8 +1121,8 @@ void analysis( bool mc )
 					break;
 
 				// make sure there is a path set
-				cmd( "set path \"%s\"", path );
-				if ( strlen( path ) > 0 )
+				cmd( "set path \"%s\"", conf_path );
+				if ( strlen( conf_path ) > 0 )
 					cmd( "cd \"$path\"" );
 
 				cmd( "if [ string equal $pltSavFmt eps ] { \
@@ -2667,7 +2667,7 @@ void analysis( bool mc )
 							if ( strlen( path_res  ) > 0 )
 								cmd( "set path_res	\"%s\"", path_res );
 							else
-								cmd( "set path_res \"%s\"", path );
+								cmd( "set path_res \"%s\"", conf_path );
 
 							cmd( "if { [ string length $path_res ] > 0 } { \
 									set oldpath [ pwd ]; \
@@ -8454,8 +8454,8 @@ void save_datazip( void )
 	}
 
 	// make sure there is a path set
-	cmd( "set path \"%s\"", path );
-	if ( strlen( path ) > 0 )
+	cmd( "set path \"%s\"", conf_path );
+	if ( strlen( conf_path ) > 0 )
 		cmd( "cd \"$path\"" );
 
 	cmd( "set res [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }	 } ]", ext, desc, ext );

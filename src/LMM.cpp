@@ -65,9 +65,10 @@ void color( int hiLev, long iniLin, long finLin );
 bool sourcefile = false;		// current file type
 bool tk_ok = false;				// control for tk_ready to operate
 char err_file[ ] = "LMM.err";	// error log file name
+char *exec_file = NULL;			// name of executable file
 char *exec_path = NULL;			// path of executable file
 char *rootLsd = NULL;			// path of LSD root directory
-dlliblinkage liblnk;			// call-back references for DLL
+dlliblinkage liblnk;			// call-back references for DLL (not used)
 int platform = 0;				// OS platform (1=Linux, 2=Mac, 3=Windows)
 int tosave = false;				// modified file flag
 Tcl_Interp *interp = NULL;		// Tcl standard interpreter pointer
@@ -129,7 +130,7 @@ int modman( int argn, const char **argv )
 {
 	bool found, recolor = false;
 	int i, j, num, choice, shigh, recolor_all = 0, v_counter = 0;
-	const char *s;
+	const char *s, *t;
 	char str[ 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], tmp[ MAX_BUFF_SIZE ];
 	FILE *f;
 
@@ -167,14 +168,17 @@ int modman( int argn, const char **argv )
 	}
 
 	// prepare to use exec path to find LSD directory
-	cmd( "if { [ info nameofexecutable ] ne \"\" } { set path [ file dirname [ info nameofexecutable ] ] } { set path \"[ pwd ]\" }" );
+	cmd( "if { [ info nameofexecutable ] ne \"\" } { \
+			set path [ file dirname [ info nameofexecutable ] ]; \
+			set exec [ file rootname [ info nameofexecutable ] ] \
+		} { \
+			set path \"[ pwd ]\"; \
+			set exec \"\" \
+		}" );
 	s = get_str( "path" );
-	if ( s != NULL && strlen( s ) > 0 )
-	{
-		exec_path = new char[ strlen( s ) + 1 ];
-		strcpy( exec_path, s );
-		exec_path = clean_path( exec_path );
-	}
+	t = get_str( "exec" );
+	if ( s != NULL && t != NULL && strlen( t ) > 0 )
+		set_exec( s, t );
 	else
 	{
 		log_tcl_error( false, "LMM executable check", "Cannot locate LSD executable on disk, check the installation of LSD and reinstall LSD if the problem persists" );
@@ -1483,6 +1487,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "cd \"$modelDir\"" );
 		s = get_target_name( str, 2 * MAX_PATH_LENGTH );
+		i = get_precompiled_flag( );
 
 		if ( ! compile_run( 2 ) )				// recompile if changed
 			goto end_gdb;
@@ -1520,11 +1525,11 @@ int modman( int argn, const char **argv )
 		{
 			case _WIN_:
 			case _LIN_:
-				snprintf( tmp, MAX_BUFF_SIZE, "$DbgExe $cmdbreak %s", s );
+				snprintf( tmp, MAX_BUFF_SIZE, "$DbgExe $cmdbreak %s%s%s", i ? rootLsd : "", i ? "/" : "", s );
 				break;
 
 			case _MAC_:
-				snprintf( tmp, MAX_BUFF_SIZE, "cd $fileDir; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s", s, s );
+				snprintf( tmp, MAX_BUFF_SIZE, "cd $fileDir; clear; $DbgExe $cmdbreak -f %s%s%s.app/Contents/MacOS/%s", s, i ? rootLsd : "", i ? "/" : "", s );
 				break;
 
 			default:
@@ -4840,8 +4845,9 @@ int modman( int argn, const char **argv )
 						file delete -force \"$i\" \
 					} \
 				}; \
-				if { [ info exists ::env(TEMP) ] && [ file exists $::env(TEMP) ] } { \
-					set objs [ glob -nocomplain -directory $::env(TEMP) LMM lsdNW [ file rootname %s ] ]; \
+				set tmpDir [ temp_dir ]; \
+				if { $tmpDir ne \"\" } { \
+					set objs [ glob -nocomplain -directory $tmpDir LMM lsdNW [ file rootname %s ] ]; \
 					foreach i $objs { \
 						catch { \
 							file delete -force \"$i\" \
@@ -5411,6 +5417,7 @@ int modman( int argn, const char **argv )
 	set_env( false );
 
 	delete [ ] rootLsd;
+	delete [ ] exec_file;
 	delete [ ] exec_path;
 
 	return 0;

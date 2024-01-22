@@ -346,7 +346,7 @@ int run( void )
 				}
 				else
 				{
-					path_out = path;
+					path_out = conf_path;
 					name_out = simul_name;
 				}
 

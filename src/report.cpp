@@ -89,7 +89,7 @@ void report( object *r )
 		eval_str( "[ pwd ]", path_rep, MAX_PATH_LENGTH );
 	}
 	else
-		strcpyn( path_rep, path, MAX_PATH_LENGTH );
+		strcpyn( path_rep, conf_path, MAX_PATH_LENGTH );
 
 	Tcl_LinkVar( interp, "detail", ( char * ) &detail, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( interp, "init", ( char * ) &init, TCL_LINK_BOOLEAN );
@@ -152,7 +152,7 @@ void report( object *r )
 	cmd( "ttk::frame .w.s.e2.file" );
 	cmd( "ttk::label .w.s.e2.file.tlab -text \"Get from file\"" );
 	cmd( "ttk::entry .w.s.e2.file.tit -width 25 -state disabled -textvariable file2 -justify center" );
-	cmd( "ttk::button .w.s.e2.file.new -width 5 -state disabled -text Search -command { set file2 [ tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} } -initialdir \"%s\" ]; if [ fn_spaces \"$file2\" .w ] { set file2 \"\" } }", exec_path );
+	cmd( "ttk::button .w.s.e2.file.new -width 5 -state disabled -text Search -command { set file2 [ tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} } -initialdir \"%s\" ]; if [ fn_spaces \"$file2\" .w ] { set file2 \"\" } }", model_path );
 	cmd( "pack .w.s.e2.file.tlab .w.s.e2.file.tit .w.s.e2.file.new -side left -padx 2" );
 
 	cmd( "pack .w.s.e2.h .w.s.e2.header .w.s.e2.file -padx 5 -pady 2" );
@@ -161,7 +161,7 @@ void report( object *r )
 
 	cmd( "pack .w.f .w.l .w.g .w.s -padx 5 -pady 5" );
 
-	cmd( "okXhelpcancel .w b Search { set res [ tk_getSaveFile -parent .w -title \"Existing Report File\" -filetypes { { {HTML files} {.html} } } -initialdir \"%s\" ]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }", exec_path );
+	cmd( "okXhelpcancel .w b Search { set res [ tk_getSaveFile -parent .w -title \"Existing Report File\" -filetypes { { {HTML files} {.html} } } -initialdir \"%s\" ]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }", model_path );
 
 	cmd( "showtop .w topleftW" );
 	cmd( "mousewarpto .w.b.ok" );
@@ -190,7 +190,7 @@ void report( object *r )
 
 	cmd( "destroytop .w" );
 
-	cmd( "set eqf [ file join \"%s\" \"%s\" ]", exec_path, equation_name );
+	cmd( "set eqf [ file join \"%s\" \"%s\" ]", model_path, equation_name );
 
 	while ( strlen( equation_name ) == 0 || ( f = fopen( get_str( "eqf" ), "r" ) ) == NULL )
 	{
@@ -247,7 +247,7 @@ void report( object *r )
 
 	if ( desc )
 	{
-		snprintf( fname, MAX_PATH_LENGTH, "%s/description.txt", exec_path );
+		snprintf( fname, MAX_PATH_LENGTH, "%s/description.txt", model_path );
 		f = fopen( fname, "r" );
 		if ( f != NULL )
 		{
@@ -541,7 +541,7 @@ void write_var( object *r, variable *v, FILE *frep )
 	fprintf( frep, "<I>Used in: &nbsp;</I>" );
 
 	// search in all source files
-	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
+	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
 	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = get_int( "res" );
@@ -549,7 +549,7 @@ void write_var( object *r, variable *v, FILE *frep )
 	for ( one = false, k = 0; k < nfiles; ++k )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", k );
-		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", model_path, model_path );
 		fname = get_str( "brr" );
 
 		if ( ( ffun = fopen( fname, "r" ) ) == NULL )
@@ -644,7 +644,7 @@ void write_var( object *r, variable *v, FILE *frep )
 	for ( one = false, k = 0; ! one && k < nfiles; ++k )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", k );
-		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", model_path, model_path );
 		fname = get_str( "brr" );
 
 		if ( ( ffun = fopen( fname, "r" ) ) == NULL )
@@ -820,7 +820,7 @@ void find_using( object *r, variable *v, FILE *frep, bool *found )
 	FILE *ffun;
 
 	// search in all source files
-	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
+	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
 	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = get_int( "res" );
@@ -829,7 +829,7 @@ void find_using( object *r, variable *v, FILE *frep, bool *found )
 	for ( i = 0; i < nfiles; ++i )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", i );
-		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", model_path, model_path );
 		fname = get_str( "brr" );
 
 		if ( ( ffun = fopen( fname, "r" ) ) == NULL )
@@ -860,7 +860,7 @@ void find_using( object *r, variable *v, FILE *frep, bool *found )
 			for ( i = 0; i < nfiles; ++i )
 			{
 				cmd( "set brr [ lindex $source_files %d ]", i );
-				cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+				cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", model_path, model_path );
 				fname = get_str( "brr" );
 
 				if ( ( ffun = fopen( fname, "r" ) ) == NULL )
@@ -1532,11 +1532,11 @@ void ancestors( object *r, FILE *f, bool html )
 /************
  CREATE_FRAMES
  ************/
-FILE *create_frames( const char *path, const char *fname )
+FILE *create_frames( const char *dest_path, const char *fname )
 {
 	FILE *f;
 
-	cmd( "set fullFileName [ file join \"%s\" \"%s\" ]", path, fname );
+	cmd( "set fullFileName [ file join \"%s\" \"%s\" ]", dest_path, fname );
 	f = fopen( get_str( "fullFileName" ), "w" );
 	if ( f == NULL )
 		return NULL;
@@ -1548,7 +1548,7 @@ FILE *create_frames( const char *path, const char *fname )
 
 	fclose( f );
 
-	cmd( "set fullFileName [ file join \"%s\" \"head_%s\" ]", path, fname );
+	cmd( "set fullFileName [ file join \"%s\" \"head_%s\" ]", dest_path, fname );
 	f = fopen( get_str( "fullFileName" ), "w" );
 	if ( f == NULL )
 		return NULL;
@@ -1566,7 +1566,7 @@ FILE *create_frames( const char *path, const char *fname )
 	fprintf( f, "</body> </html>" );
 	fclose( f );
 
-	cmd( "set fullFileName [ file join \"%s\" \"body_%s\" ]", path, fname );
+	cmd( "set fullFileName [ file join \"%s\" \"body_%s\" ]", dest_path, fname );
 	f = fopen( get_str( "fullFileName" ), "w" );
 
 	return f;

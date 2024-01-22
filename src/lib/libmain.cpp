@@ -72,12 +72,15 @@ bool watch_write_mode;		// flag for write-only watch condition
 bool worker_ready;			// parallel worker ready flag
 bool worker_crashed;		// parallel worker crash flag
 char *alt_path = NULL;		// alternative output path
+char *conf_path = NULL;		// folder where the current configuration is
 char *eq_file = NULL;		// equation file content
 char *exec_file = NULL;		// name of executable file
 char *exec_path = NULL;		// path of executable file
 char *log_filename = NULL;	// name of log file, if any
+char *lib_file = NULL;		// name of shared library, if any
+char *lib_path = NULL;		// path of shared library, if any
+char *model_path = NULL;	// folder where the model files are
 char *rootLsd = NULL;		// path of LSD root directory
-char *path = NULL;			// path of current configuration
 char *sens_file = NULL;		// current sensitivity analysis file
 char *simul_name = NULL;	// name of current simulation configuration
 char *struct_file = NULL;	// name of current configuration file
@@ -177,9 +180,19 @@ Tcl_Interp *inter = NULL;	// Tcl interpreter in GUI (for legacy LSD code)
  *********************************/
 void __attribute__( ( constructor ) ) lib_constructor( )
 {
-	path = new char[ strlen( "" ) + 1 ];
+	conf_path = new char[ strlen( "" ) + 1 ];
+	exec_file = new char[ strlen( "" ) + 1 ];
+	exec_path = new char[ strlen( "" ) + 1 ];
+	lib_file = new char[ strlen( "" ) + 1 ];
+	lib_path = new char[ strlen( "" ) + 1 ];
+	model_path = new char[ strlen( "" ) + 1 ];
 	simul_name = new char[ strlen( "" ) + 1 ];
-	strcpy( path, "" );
+	strcpy( conf_path, "" );
+	strcpy( exec_file, "" );
+	strcpy( exec_path, "" );
+	strcpy( lib_file, "" );
+	strcpy( lib_path, "" );
+	strcpy( model_path, "" );
 	strcpy( simul_name, "" );
 
 #ifndef _NP_
@@ -222,12 +235,15 @@ void __attribute__( ( destructor ) ) lib_destructor( )
 	root->delete_obj( );
 
 	delete stack_log;
-	delete [ ] path;
-	delete [ ] rootLsd;
-	delete [ ] exec_path;
-	delete [ ] exec_file;
-	delete [ ] simul_name;
 	delete [ ] eq_file;
+	delete [ ] rootLsd;
+	delete [ ] conf_path;
+	delete [ ] exec_file;
+	delete [ ] exec_path;
+	delete [ ] lib_file;
+	delete [ ] lib_path;
+	delete [ ] model_path;
+	delete [ ] simul_name;
 	delete [ ] struct_file;
 	delete [ ] log_filename;
 }

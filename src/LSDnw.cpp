@@ -261,7 +261,6 @@ int parse_cmdline( int argn, const char **argv )
 int load_config( void )
 {
 	char *str;
-	int i;
 	FILE *f;
 
 	str = new char[ strlen( simul_name ) + 1 ];

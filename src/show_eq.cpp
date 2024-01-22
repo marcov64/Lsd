@@ -64,11 +64,11 @@ void show_eq( const char *lab, const char *parWnd )
 	start:
 
 	fname = equation_name;
-	snprintf( full_name, MAX_PATH_LENGTH, "%s/%s", exec_path, fname );
+	snprintf( full_name, MAX_PATH_LENGTH, "%s/%s", model_path, fname );
 	if ( ( f1 = fopen( full_name, "r" ) ) == NULL )
 	{
 		cmd( "switch [ ttk::messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'OK' to search it.\" ] { ok { set ans 1 } cancel { set ans 0 } }", equation_name  );
-		cmd( "if { $ans } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir \"%s\" -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ]; if [ fn_spaces \"$res\" . ] { set res \"\" } { set res [ file tail $res ] } }", exec_path );
+		cmd( "if { $ans } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir \"%s\" -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ]; if [ fn_spaces \"$res\" . ] { set res \"\" } { set res [ file tail $res ] } }", model_path );
 
 		if ( get_bool( "ans" ) )
 		{
@@ -87,7 +87,7 @@ void show_eq( const char *lab, const char *parWnd )
 		fclose( f1 );
 
 	// search in all source files
-	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
+	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
 	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
 	cmd( "set i [ llength $source_files ]" );
 	i = get_int( "i" );
@@ -95,7 +95,7 @@ void show_eq( const char *lab, const char *parWnd )
 	for ( done = false, k = 0; done == false && k < i; ++k )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", k );
-		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", model_path, model_path );
 		fname = get_str( "brr" );
 		if ( ( f2 = fopen( fname, "r" ) ) == NULL )
 			continue;
@@ -390,7 +390,7 @@ void scan_used_lab( const char *lab, const char *parWnd )
 	}
 
 	// search in all source files
-	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
+	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
 	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = get_int( "res" );
@@ -400,7 +400,7 @@ void scan_used_lab( const char *lab, const char *parWnd )
 	for ( exist = false, k = 0; k < nfiles; ++k )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", k );
-		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", model_path, model_path );
 		fname = get_str( "brr" );
 
 		if ( ( f = fopen( fname, "r" ) ) != NULL )

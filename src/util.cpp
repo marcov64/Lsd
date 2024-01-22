@@ -550,7 +550,7 @@ FILE *search_all_sources( char *str )
 	FILE *f;
 
 	// search in all source files
-	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
+	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
 	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = get_int( "res" );
@@ -558,7 +558,7 @@ FILE *search_all_sources( char *str )
 	for ( i = 0; i < nfiles; ++i )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", i );
-		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", model_path, model_path );
 		fname = get_str( "brr" );
 		if ( ( f = fopen( fname, "r" ) ) == NULL )
 			continue;
@@ -861,9 +861,40 @@ int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char
 
 
 /****************************************************
+CHECK_NW_EXEC
+Check if NW executable/lib files are older than
+running executable file
+****************************************************/
+bool check_nw_exec( const char *nw_exe )
+{
+	char exe[ MAX_PATH_LENGTH ], lib[ MAX_PATH_LENGTH ];
+	struct stat stNWexe, stLib, stExe;
+	
+	if ( strlen( lib_path ) > 0 )
+		snprintf( lib, MAX_PATH_LENGTH, "%s/%s", lib_path, lib_file );// full lib name
+	else
+		strcpyn( lib, lib_file, MAX_PATH_LENGTH );
+		
+	if ( strlen( exec_path ) > 0 )
+		snprintf( exe, MAX_PATH_LENGTH, "%s/%s", exec_path, exec_file );// full exe name
+	else
+		strcpyn( exe, exec_file, MAX_PATH_LENGTH );
+		
+	// get OS info for files
+	if ( stat( nw_exe, &stNWexe ) == 0 && ( stat( lib, &stLib ) == 0 || ( stat( lib, &stExe ) == 0 ) ) )
+		if ( ( stat( lib, &stLib ) == 0 && difftime( stNWexe.st_mtime, stLib.st_mtime ) < 0 ) ||
+			 ( stat( lib, &stExe ) == 0 && difftime( stNWexe.st_mtime, stExe.st_mtime ) < 0 ) )
+			return true;
+			
+	return false;
+}
+
+	
+/****************************************************
 CHECK_LABEL
-Control that the label lab does not already exist in the model
-Also prevents invalid characters in the names
+Control that the label lab does not already exist
+in the model. Also prevents invalid characters in 
+the names.
 ****************************************************/
 int check_label( const char *lab, object *r )
 {

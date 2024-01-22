@@ -268,9 +268,13 @@ Standard version (non parallel computation)
 ****************************************************/
 double variable::cal( object *caller, int lag )
 {
-	int i, eff_lag, time;
-	clock_t pstart = 0, pend = 0;
+	int i, eff_lag;
 	double app;
+
+#ifndef _NW_
+	int time;
+	clock_t pstart = 0, pend = 0;
+#endif
 
 	if ( param == 1 )
 	{

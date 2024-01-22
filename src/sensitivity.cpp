@@ -468,7 +468,7 @@ void NOLH_clear( void )
 
 /*****************************************************************************
 NOLH_LOAD
-Function to load a .csv file named NOLH.csv as table 0 ( first to be used)
+Function to load a .csv file named NOLH.csv as table 0 (first to be used)
 If option 'force' is used, will be used for any number of factors
 ******************************************************************************/
 bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false )
@@ -481,10 +481,10 @@ bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false )
 	if ( NOLH_0 != NULL )			// table already loaded?
 		NOLH_clear( );
 
-	if ( strlen( path ) > 0 )
+	if ( strlen( conf_path ) > 0 )
 	{
-		fileName = new char[ strlen( path ) + strlen( baseName ) + 2 ];
-		sprintf( fileName, "%s/%s", path, baseName );
+		fileName = new char[ strlen( conf_path ) + strlen( baseName ) + 2 ];
+		sprintf( fileName, "%s/%s", conf_path, baseName );
 	}
 	else
 	{

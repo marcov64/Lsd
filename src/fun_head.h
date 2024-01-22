@@ -692,6 +692,8 @@ void cmd( const char *cm, ... );
 
 char msg[ MAX_BUFF_SIZE ];							// legacy auxiliary buffer
 
+#define path conf_path
+
 #define FUNCTION( X ) \
 	if ( ! strcmp( label, X ) ) { \
 		last_update--; \

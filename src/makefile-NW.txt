@@ -30,17 +30,17 @@ MKDIR=@mkdir$(EXT) -p
 all: $(TARGET_NW)$(EXT)
 
 # LSD No Window executable
-$(TARGET_NW)$(EXT): $(OBJ_DIR)lsdnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN)$(SUFFIX_NW).o
-	$(CC_NW) $(SWITCH_CC_NW) $(SWITCH_CC_LNK) $(OBJ_DIR)lsdnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN)$(SUFFIX_NW).o -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)$(EXT)
+$(TARGET_NW)$(EXT): $(OBJ_DIR)LSDnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN)$(SUFFIX_NW).o
+	$(CC_NW) $(SWITCH_CC_NW) $(SWITCH_CC_LNK) $(OBJ_DIR)LSDnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN)$(SUFFIX_NW).o -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)$(EXT)
 
 # executable modules
 $(OBJ_DIR)$(FUN)$(SUFFIX_NW).o: $(FUN).cpp $(SRC_DIR)libLSD.h $(SRC_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA)
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(FUN).cpp -o $(OBJ_DIR)$(FUN)$(SUFFIX_NW).o
 
-$(OBJ_DIR)lsdnw.o: $(SRC_DIR)lsdnw.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)LSDnw.o: $(SRC_DIR)LSDnw.cpp $(SRC_DIR)libLSD.h
 	$(MKDIR) $(@D)
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)lsdnw.cpp -o $(OBJ_DIR)lsdnw.o
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)LSDnw.cpp -o $(OBJ_DIR)LSDnw.o
 
 $(OBJ_DIR)libmain.o: $(LIB_DIR)libmain.cpp $(SRC_DIR)libLSD.h
 	$(MKDIR) $(@D)

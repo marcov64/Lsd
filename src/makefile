@@ -38,8 +38,8 @@ ifeq ($(OS),Windows_NT)
   DLL_EXT=.dll
   WRC=windres -D_WIN32
   AR_DIR=$(LSDROOT)/gnu/x86_64-w64-mingw32/bin/
-  MANIF_LMM=$(TMP_DIR)/$(TARGET_LMM)/lmm_manifest.o
-  MANIF_LSD=$(TMP_DIR)/$(TARGET_LSD)/lsd_manifest.o
+  MANIF_LMM=$(TMP_DIR)/$(TARGET_LMM)/LMM.exe.manifest.o
+  MANIF_LSD=$(TMP_DIR)/$(TARGET_LSD)/LSD.exe.manifest.o
   TCL_VERSION=86
   PATH_TCLTK_HEADER=$(LSDROOT)/gnu/include
   PATH_TCLTK_LIB=$(LSDROOT)/gnu/lib
@@ -92,23 +92,23 @@ RM=@rm$(EXE_EXT) -f
 MKDIR=@mkdir$(EXE_EXT) -p
 
 # targets
-.PHONY: all lmm lsd libdll libgui libbase clean cleanlmm cleanlsd
-all: lmm lsd
-lmm: $(LSDROOT)/$(TARGET_LMM)$(EXE_EXT)
-lsd: $(LSDROOT)/$(TARGET_LSD)$(EXE_EXT)
+.PHONY: all LMM LSD libdll libgui libbase clean cleanLMM cleanLSD
+all: LMM LSD
+LMM: $(LSDROOT)/$(TARGET_LMM)$(EXE_EXT)
+LSD: $(LSDROOT)/$(TARGET_LSD)$(EXE_EXT)
 libdll: $(LSDROOT)/lib$(TARGET_LSD)$(DLL_EXT)
 libgui: $(LIB_GUI)
 libbase: $(LIB_BASE)
 
 # LMM executable
-$(LSDROOT)/$(PKG_LMM)$(TARGET_LMM)$(EXE_EXT): $(OBJ_DIR_LMM)lmm.o $(OBJ_DIR_LMM)common.o $(OBJ_DIR_LMM)commonlib.o $(MANIF_LMM)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LMM) $(OBJ_DIR_LMM)lmm.o $(OBJ_DIR_LMM)common.o $(OBJ_DIR_LMM)commonlib.o $(MANIF_LMM) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(LSDROOT)/$(PKG_LMM)$(TARGET_LMM)$(EXE_EXT)
+$(LSDROOT)/$(PKG_LMM)$(TARGET_LMM)$(EXE_EXT): $(OBJ_DIR_LMM)LMM.o $(OBJ_DIR_LMM)common.o $(OBJ_DIR_LMM)commonlib.o $(MANIF_LMM)
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LMM) $(OBJ_DIR_LMM)LMM.o $(OBJ_DIR_LMM)common.o $(OBJ_DIR_LMM)commonlib.o $(MANIF_LMM) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(LSDROOT)/$(PKG_LMM)$(TARGET_LMM)$(EXE_EXT)
 	$(TOUCH_LMM)
 
 # LMM executable modules
-$(OBJ_DIR_LMM)lmm.o: $(SRC_DIR)lmm.cpp $(DEP_GUI)
+$(OBJ_DIR_LMM)LMM.o: $(SRC_DIR)LMM.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LMM) $(INCLUDE) -c $(SRC_DIR)lmm.cpp -o $(OBJ_DIR_LMM)lmm.o
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LMM) $(INCLUDE) -c $(SRC_DIR)LMM.cpp -o $(OBJ_DIR_LMM)LMM.o
 
 $(OBJ_DIR_LMM)common.o: $(SRC_DIR)common.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
@@ -118,9 +118,9 @@ $(OBJ_DIR_LMM)commonlib.o: $(LIB_DIR)commonlib.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LMM) $(INCLUDE) -c $(LIB_DIR)commonlib.cpp -o $(OBJ_DIR_LMM)commonlib.o
 
-$(OBJ_DIR_LMM)lmm_manifest.o: $(SRC_DIR)lmm_manifest.rc $(SRC_DIR)lmm.exe.manifest
+$(MANIF_LMM): $(SRC_DIR)LMM.exe.manifest.rc $(SRC_DIR)LMM.exe.manifest
 	$(MKDIR) $(@D)
-	$(WRC) $(INCLUDE) -i $(SRC_DIR)lmm_manifest.rc -o $(OBJ_DIR_LMM)lmm_manifest.o
+	$(WRC) $(INCLUDE) -i $(SRC_DIR)LMM.exe.manifest.rc -o $(MANIF_LMM)
 
 # LSD dynamic library (removed after executable is built)
 $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT): $(OBJ_DIR_LSD)fun_dummy.o $(LIB_BASE)
@@ -199,17 +199,17 @@ $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT): $(MANIF_LSD) $(LIB_GUI) $(LSDROOT)
 	$(TOUCH_LSD)
 
 # LSD executable static library
-$(LIB_GUI): $(OBJ_DIR_LSD)lsd.o $(OBJ_DIR_LSD)lsdmain.o $(OBJ_DIR_LSD)analysis.o $(OBJ_DIR_LSD)browser.o $(OBJ_DIR_LSD)common.o $(OBJ_DIR_LSD)debug.o $(OBJ_DIR_LSD)draw.o $(OBJ_DIR_LSD)edit.o $(OBJ_DIR_LSD)edit_dat.o $(OBJ_DIR_LSD)file.o $(OBJ_DIR_LSD)interf.o $(OBJ_DIR_LSD)lattice.o $(OBJ_DIR_LSD)log.o $(OBJ_DIR_LSD)nolhtables.o $(OBJ_DIR_LSD)report.o $(OBJ_DIR_LSD)runtime.o $(OBJ_DIR_LSD)set_all.o $(OBJ_DIR_LSD)sensitivity.o $(OBJ_DIR_LSD)show_eq.o $(OBJ_DIR_LSD)util.o
-	$(AR) $(LIB_GUI) $(OBJ_DIR_LSD)lsd.o $(OBJ_DIR_LSD)lsdmain.o $(OBJ_DIR_LSD)analysis.o $(OBJ_DIR_LSD)browser.o $(OBJ_DIR_LSD)common.o $(OBJ_DIR_LSD)debug.o $(OBJ_DIR_LSD)draw.o $(OBJ_DIR_LSD)edit.o $(OBJ_DIR_LSD)edit_dat.o $(OBJ_DIR_LSD)file.o $(OBJ_DIR_LSD)interf.o $(OBJ_DIR_LSD)lattice.o $(OBJ_DIR_LSD)log.o $(OBJ_DIR_LSD)nolhtables.o $(OBJ_DIR_LSD)report.o $(OBJ_DIR_LSD)runtime.o $(OBJ_DIR_LSD)set_all.o $(OBJ_DIR_LSD)sensitivity.o $(OBJ_DIR_LSD)show_eq.o $(OBJ_DIR_LSD)util.o
+$(LIB_GUI): $(OBJ_DIR_LSD)LSD.o $(OBJ_DIR_LSD)LSDmain.o $(OBJ_DIR_LSD)analysis.o $(OBJ_DIR_LSD)browser.o $(OBJ_DIR_LSD)common.o $(OBJ_DIR_LSD)debug.o $(OBJ_DIR_LSD)draw.o $(OBJ_DIR_LSD)edit.o $(OBJ_DIR_LSD)edit_dat.o $(OBJ_DIR_LSD)file.o $(OBJ_DIR_LSD)interf.o $(OBJ_DIR_LSD)lattice.o $(OBJ_DIR_LSD)log.o $(OBJ_DIR_LSD)nolhtables.o $(OBJ_DIR_LSD)report.o $(OBJ_DIR_LSD)runtime.o $(OBJ_DIR_LSD)set_all.o $(OBJ_DIR_LSD)sensitivity.o $(OBJ_DIR_LSD)show_eq.o $(OBJ_DIR_LSD)util.o
+	$(AR) $(LIB_GUI) $(OBJ_DIR_LSD)LSD.o $(OBJ_DIR_LSD)LSDmain.o $(OBJ_DIR_LSD)analysis.o $(OBJ_DIR_LSD)browser.o $(OBJ_DIR_LSD)common.o $(OBJ_DIR_LSD)debug.o $(OBJ_DIR_LSD)draw.o $(OBJ_DIR_LSD)edit.o $(OBJ_DIR_LSD)edit_dat.o $(OBJ_DIR_LSD)file.o $(OBJ_DIR_LSD)interf.o $(OBJ_DIR_LSD)lattice.o $(OBJ_DIR_LSD)log.o $(OBJ_DIR_LSD)nolhtables.o $(OBJ_DIR_LSD)report.o $(OBJ_DIR_LSD)runtime.o $(OBJ_DIR_LSD)set_all.o $(OBJ_DIR_LSD)sensitivity.o $(OBJ_DIR_LSD)show_eq.o $(OBJ_DIR_LSD)util.o
 
 # LSD executable static library modules
-$(OBJ_DIR_LSD)lsd.o: $(SRC_DIR)lsd.cpp $(DEP_GUI)
+$(OBJ_DIR_LSD)LSD.o: $(SRC_DIR)LSD.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(SRC_DIR)lsd.cpp -o $(OBJ_DIR_LSD)lsd.o
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(SRC_DIR)LSD.cpp -o $(OBJ_DIR_LSD)LSD.o
 
-$(OBJ_DIR_LSD)lsdmain.o: $(SRC_DIR)lsdmain.cpp $(DEP_GUI)
+$(OBJ_DIR_LSD)LSDmain.o: $(SRC_DIR)LSDmain.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(SRC_DIR)lsdmain.cpp -o $(OBJ_DIR_LSD)lsdmain.o
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(SRC_DIR)LSDmain.cpp -o $(OBJ_DIR_LSD)LSDmain.o
 
 $(OBJ_DIR_LSD)analysis.o: $(SRC_DIR)analysis.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
@@ -283,15 +283,15 @@ $(OBJ_DIR_LSD)util.o: $(SRC_DIR)util.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(SRC_DIR)util.cpp -o $(OBJ_DIR_LSD)util.o
 
-$(OBJ_DIR_LSD)lsd_manifest.o: $(SRC_DIR)lsd_manifest.rc $(SRC_DIR)lsd.exe.manifest
+$(MANIF_LSD): $(SRC_DIR)LSD.exe.manifest.rc $(SRC_DIR)LSD.exe.manifest
 	$(MKDIR) $(@D)
-	$(WRC) -i $(SRC_DIR)lsd_manifest.rc -o $(OBJ_DIR_LSD)lsd_manifest.o $(INCLUDE)
+	$(WRC) -i $(SRC_DIR)LSD.exe.manifest.rc -o $(MANIF_LSD) $(INCLUDE)
 
 # delete object files
-clean: cleanlmm cleanlsd
+clean: cleanLMM cleanLSD
 
-cleanlmm:
+cleanLMM:
 	$(RM) $(OBJ_DIR_LMM)* $(LSDROOT)/$(TARGET_LMM)$(EXE_EXT)
 
-cleanlsd:
+cleanLSD:
 	$(RM) $(OBJ_DIR_LSD)* $(LIB_BASE) $(LIB_GUI) $(LSDROOT)/$(TARGET_LSD)$(EXE_EXT)

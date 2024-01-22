@@ -61,8 +61,8 @@ int load_configuration( bool reload, string *warnings, int quick )
 	if ( ! reload || strlen( struct_file ) == 0 )
 	{
 		delete [ ] struct_file;
-		struct_file = new char[ strlen( path ) + strlen( simul_name ) + 6 ];
-		sprintf( struct_file, "%s%s%s.lsd", path, strlen( path ) > 0 ? "/" : "", simul_name );
+		struct_file = new char[ strlen( conf_path ) + strlen( simul_name ) + 6 ];
+		sprintf( struct_file, "%s%s%s.lsd", conf_path, strlen( conf_path ) > 0 ? "/" : "", simul_name );
 	}
 
 	// try to open maybe compressed xml configuration
@@ -164,7 +164,7 @@ int load_configuration( bool reload, string *warnings, int quick )
 		}
 
 		// use the current equation name only if the file exists
-		snprintf( full_name, 2 * MAX_PATH_LENGTH, "%s/%s", exec_path,
+		snprintf( full_name, 2 * MAX_PATH_LENGTH, "%s/%s", model_path,
 				  eqfNode.child( "filename" ).text( ).as_string( "NONE" ) );
 		if ( ( f = fopen( full_name, "r" ) ) != NULL )
 			strcpyn( equation_name, eqfNode.child( "filename" ).text( ).get( ), MAX_PATH_LENGTH );
@@ -257,7 +257,7 @@ int load_configuration( bool reload, string *warnings, int quick )
 		name[ strlen( name ) - 1 ] = '\0';
 
 	// use the current equation name only if the file exists
-	snprintf( full_name, 2 * MAX_PATH_LENGTH, "%s/%s", exec_path, name + 1 );
+	snprintf( full_name, 2 * MAX_PATH_LENGTH, "%s/%s", model_path, name + 1 );
 	g = fopen( full_name, "r" );
 	if ( g != NULL )
 	{
@@ -416,9 +416,9 @@ void unload_configuration( bool full )
 	{
 		empty_description( );					// remove element descriptions
 
-		delete [ ] path;						// reset current path
-		path = new char[ strlen( exec_path ) + 1 ];
-		strcpy( path, exec_path );
+		delete [ ] conf_path;					// reset current path
+		conf_path = new char[ strlen( model_path ) + 1 ];
+		strcpy( conf_path, model_path );
 
 		delete [ ] simul_name;					// reset simulation name to default
 		simul_name = new char[ strlen( "" ) + 1 ];

@@ -522,7 +522,7 @@ void log_tcl_error( bool show, const char *cm, const char *message, ... )
 #ifdef _LMM_
 	err_path = rootLsd;
 #else
-	err_path = exec_path;
+	err_path = model_path;
 #endif
 
 	if ( err_path != NULL && strlen( err_path ) > 0 )
@@ -981,7 +981,7 @@ error:
  *********************************/
 const char *get_target_name( char *str, int str_sz, bool nw )
 {
-	char buf[ MAX_PATH_LENGTH ];
+	char buf[ MAX_PATH_LENGTH ], buf1[ MAX_PATH_LENGTH ];
 	FILE *f;
 
 	if ( nw )					// NW version use fixed name because of batches
@@ -1007,9 +1007,66 @@ const char *get_target_name( char *str, int str_sz, bool nw )
 		goto error;
 
 	sscanf( str + 7, "%994s", buf );
+	strcpyn( buf1, buf, MAX_PATH_LENGTH );
+
+	if ( strcmp( strupr( buf1 ), "LSD" ) == 0 )
+		strcpy( buf, "LSD" );			// LSD default target is case insensitive
+
 	snprintf( str, str_sz, "%s%s", buf, platform == _WIN_ ? ".exe" : "" );
 
 	return str;
+
+error:
+	cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not found or corrupted\" -detail \"Please check 'Model Options' and 'System Options' in LMM menu 'Model'.\"" );
+	return NULL;
+}
+
+
+/*********************************
+ GET_PRECOMPILED_FLAG
+ get current executable pre-
+ compilation flag
+ *********************************/
+bool get_precompiled_flag( bool warn )
+{
+	bool deftarg = true, precomp = true;		// defaults if settings are missing
+	char target[ MAX_PATH_LENGTH ], buf[ MAX_PATH_LENGTH ], buf1[ MAX_PATH_LENGTH ];
+	FILE *f;
+
+	// non default executable name - cannot use precompiled code
+	if ( strcmp( get_target_name( target, MAX_PATH_LENGTH ),
+				 platform == _WIN_ ? "LSD.exe" : "LSD" ) != 0 )
+		deftarg = false;
+
+	cmd( "set fapp [ file nativename \"$modelDir/makefile\" ]" );
+	f = fopen( get_str( "fapp" ), "r" );
+	if ( f == NULL )
+		goto error;
+
+	do
+		fgets( buf, MAX_PATH_LENGTH, f );
+	while ( strncmp( buf, "PRECOMPILED=", 12 ) && ! feof( f ) );
+
+	fclose( f );
+
+	if ( strncmp( buf, "PRECOMPILED=", 12 ) != 0 )
+		return precomp;
+
+	sscanf( buf + 12, "%989s", buf1 );
+	strupr( buf1 );
+
+	if ( strncmp( buf1, "FALSE", MAX_PATH_LENGTH ) == 0 ||
+		 strncmp( buf1, "NO", MAX_PATH_LENGTH ) == 0 ||
+		 strncmp( buf1, "0", MAX_PATH_LENGTH ) == 0 )
+		precomp = false;
+
+	if ( warn && ( ! deftarg && precomp ) )
+	{
+		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Cannot use pre-compiled code\" -detail \"Non-default TARGET name '[ file rootname %s ]' cannot be used together with the pre-compiled code option (PRECOMPILED = true).\n\nPlease adjust your model options to avoid this message.\"", target );
+		precomp = false;
+	}
+
+	return precomp;
 
 error:
 	cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not found or corrupted\" -detail \"Please check 'Model Options' and 'System Options' in LMM menu 'Model'.\"" );
@@ -1138,7 +1195,7 @@ void make_makefile( bool nw )
  *********************************/
 bool compile_run( int run_mode, bool nw )
 {
-	bool ret = false;
+	bool precompiled, ret = false;
 	char str[ 2 * MAX_PATH_LENGTH ];
 	const char *s;
 	int res, max_threads = 1;
@@ -1160,12 +1217,6 @@ bool compile_run( int run_mode, bool nw )
 		goto end;
 	}
 
-	if ( run_mode == 0 && ! nw )// delete existing object file if it's just compiling
-	{							// to force recompilation
-		cmd( "set oldObj \"[ file rootname [ lindex [ glob -nocomplain fun_*.cpp ] 0 ] ].o\"" );
-		cmd( "if { [ file exists \"$oldObj\" ] } { file delete \"$oldObj\" }" );
-	}
-
 #endif
 
 	// get source name
@@ -1185,6 +1236,21 @@ bool compile_run( int run_mode, bool nw )
 
 	if ( nw )
 		get_target_name( str, 2 * MAX_PATH_LENGTH, nw );
+
+#ifdef _LMM_
+	if ( run_mode == 0 && ! nw )// delete existing object file if it's just compiling
+	{							// to force recompilation
+		cmd( "set oldObj \"[ temp_dir ]/[ file rootname $mainExe ]/[ file rootname [ lindex [ glob -nocomplain fun_*.cpp ] 0 ] ].o\"" );
+		cmd( "if { [ file exists \"$oldObj\" ] } { file delete \"$oldObj\" }" );
+	}
+
+	precompiled = get_precompiled_flag( ! nw );
+#else
+	precompiled = get_precompiled_flag( );
+#endif
+
+	if ( ! nw && precompiled )	// remove old unused executables
+		cmd( "if { [ file exists %s ] } { file delete %s }", str, str );
 
 	// show compilation banner
 	cmd( "if { ( [ info exists autoHide ] && ! $autoHide ) || %d == 0 } { \
@@ -1232,7 +1298,7 @@ bool compile_run( int run_mode, bool nw )
 
 	// start compilation as a background task
 	res = -1;
-	cmd( "make_background %s %d %d %d", str, max_threads, nw, true );
+	cmd( "make_background %s %d %d %d ", str, max_threads, nw, precompiled );
 
 	// loop to wait compilation to finish or be aborted
 	while ( res < 0 )
@@ -1285,15 +1351,15 @@ bool compile_run( int run_mode, bool nw )
 					switch ( platform )
 					{
 						case _LIN_:
-							cmd( "while { [ catch { exec -- ./%s & } result ] && $n > 0 } { incr n -1; after 50 }", str );
+							cmd( "while { [ catch { exec -- %s/%s & } result ] && $n > 0 } { incr n -1; after 50 }", precompiled ? rootLsd : ".", str );
 							break;
 
 						case _MAC_:
-							cmd( "while { [ catch { exec -- open -F -n ./%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", str );
+							cmd( "while { [ catch { exec -- open -F -n %s/%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", precompiled ? rootLsd : ".", str );
 							break;
 
 						case _WIN_:
-							cmd( "while { [ catch { exec -- %s & } result ] && $n > 0 } { incr n -1; after 50 }", str );
+							cmd( "while { [ catch { exec -- %s%s%s & } result ] && $n > 0 } { incr n -1; after 50 }", precompiled ? rootLsd : "", precompiled ? "/" : "", str );
 							break;
 					}
 				}

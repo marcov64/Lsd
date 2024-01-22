@@ -187,6 +187,64 @@ int kill_system( int id )
 
 #endif
 
+/*********************************
+ SET_EXEC
+ *********************************/
+void set_exec( const char *path, const char *file )
+{
+	string exefile, exepath, libfile, libpath, fname;
+
+	exepath = path;
+	exefile = file;
+
+	delete [ ] exec_path;
+	delete [ ] exec_file;
+
+	exec_path = clean_path( exepath.c_str( ) );	// path of executable file
+	exec_file = clean_file( exefile.c_str( ) );	// name of executable file
+
+#ifndef _LMM_
+	// try to set dynamic library information
+	libpath = exec_path;
+	libfile = "lib";
+	libfile += exec_file;						// base library name
+	if ( libfile.find( '.' ) != string::npos )	// remove Windows extension
+		libfile = libfile.substr( 0, libfile.rfind( "." ) );
+
+#ifdef __linux__
+	libfile += ".so";
+#else
+#ifdef __APPLE__
+	libfile += ".dylib";
+#else
+	libfile += ".dll";
+#endif
+#endif
+
+	// check if lib file is in path
+	fname = exec_path;
+	fname += "/" + libfile;
+	FILE *f = fopen( fname.c_str( ), "r" );
+	if ( f != NULL )
+		fclose( f );
+
+	if ( f == NULL )							// lib not find
+	{
+		if ( lib_path != NULL && lib_file != NULL )
+			return;								// keep previous lib
+
+		libfile = libpath = "";
+	}
+
+	delete [ ] lib_path;
+	delete [ ] lib_file;
+
+	lib_path = clean_path( libpath.c_str( ) );
+	lib_file = clean_file( libfile.c_str( ) );
+#endif
+}
+
+
 /****************************************************
  LSD_EXIT
  exit LSD

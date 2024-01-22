@@ -125,6 +125,7 @@ Global definitions shared by all LSD GUI modules.
 bool abort_run_threads( void );
 bool add_rt_plot_tab( const char *w, int id_sim );
 bool add_unsaved( void );
+bool check_nw_exec( const char *nw_exe );
 bool check_res_dir( const char *path, const char *sim_name = NULL );
 bool compile_run( int run_mode, bool nw = false );
 bool contains( FILE *f, const char *lab, int len );
@@ -136,6 +137,7 @@ bool exists_var( const char *lab );
 bool exists_window( const char *lab );
 bool expr_eq( const char *tcl_exp, const char *c_str );
 bool get_bool( const char *tcl_var, bool *var = NULL );
+bool get_precompiled_flag( bool warn = false );
 bool is_equation_header( const char *line, char *var, char *updt_in );
 bool load_lmm_options( void );
 bool load_model_info( const char *path );
@@ -384,7 +386,6 @@ extern bool redrawRoot;			// control for redrawing root window (.)
 extern bool redrawStruc;		// control for redrawing model structure window
 extern bool redrawReq;			// flag for asynchronous window redraw request
 extern bool tk_ok;				// control for tk_ready to operate
-extern char *rootLsd;			// path of LSD root directory
 extern char err_file[ ];		// error log file name
 extern char path_sens[ ];		// path of last used sensitivity directory
 extern char tcl_dir[ ];			// Tcl/Tk directory
@@ -401,8 +402,8 @@ extern object *currObj;			// pointer to current object in browser
 extern Tcl_Interp *interp;		// Tcl standard interpreter pointer
 
 // common constant string arrays (not visible to the users)
-extern const char *lmm_options[ ];
 extern const char *lmm_defaults[ ];
-extern const char *model_info[ ];
+extern const char *lmm_options[ ];
 extern const char *model_defaults[ ];
+extern const char *model_info[ ];
 extern const char *wnd_names[ ];// LSD main windows' names

@@ -46,7 +46,7 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 	char *alt_name;
 	int i, j, k, num, sl;
 
-	int path_len = save_alt_path ? strlen( alt_path ) : strlen( path );
+	int path_len = save_alt_path ? strlen( alt_path ) : strlen( conf_path );
 	int name_len = strlen( simname ) + ( int ) log10( fseed + runs ) + 2;
 	int dest_len = path_len + 5;
 	int log_len = path_len + name_len + 6;
@@ -77,13 +77,13 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 		for ( i = fseed, j = 1; j <= parruns; ++j )
 		{
 			// log file name
-			snprintf( log_file, log_len, "%s%s%s_%d.log", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, j );
+			snprintf( log_file, log_len, "%s%s%s_%d.log", save_alt_path ? alt_path : conf_path, strlen( save_alt_path ? alt_path : conf_path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, j );
 			run_logs.push_back( log_file );
 
 			// results file names
 			for ( k = i; k < i + num + ( j <= sl ? 1 : 0 ); ++k )
 			{
-				snprintf( res_file, res_len, "%s%s%s_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, k, docsv ? "csv" : "res" );
+				snprintf( res_file, res_len, "%s%s%s_%d.%s", save_alt_path ? alt_path : conf_path, strlen( save_alt_path ? alt_path : conf_path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, k, docsv ? "csv" : "res" );
 
 				if ( dozip )
 					strcatn( res_file, ".gz", res_len );
@@ -107,11 +107,11 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 		for ( i = fseed, j = 1; i < fseed + runs; ++i, ++j )
 		{
 			// log file name
-			snprintf( log_file, log_len, "%s%s%s_%d.log", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, i );
+			snprintf( log_file, log_len, "%s%s%s_%d.log", save_alt_path ? alt_path : conf_path, strlen( save_alt_path ? alt_path : conf_path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, i );
 			run_logs.push_back( log_file );
 
 			// results file name
-			snprintf( res_file, res_len, "%s%s%s_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, i, docsv ? "csv" : "res" );
+			snprintf( res_file, res_len, "%s%s%s_%d.%s", save_alt_path ? alt_path : conf_path, strlen( save_alt_path ? alt_path : conf_path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, i, docsv ? "csv" : "res" );
 
 			if ( dozip )
 				strcatn( res_file, ".gz", res_len );

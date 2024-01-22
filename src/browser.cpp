@@ -60,7 +60,7 @@ int comp_ints ( const void *a, const void *b ) { return ( *( int * ) a - *( int 
 int load_gui( const char **argv )
 {
 	char *str, cwd[ PATH_MAX ];
-	const char *app;
+	const char *app, *app1;
 	int i, j = 0, k = 0;
 	object *r;
 	FILE *f;
@@ -143,7 +143,7 @@ int load_gui( const char **argv )
 	cmd( "set DATE_FMT \"%s\"", DATE_FMT );
 
 	// check if exec file is in current path
-	i = strlen( exec_path ) + strlen( exec_file ) + 1;
+	i = strlen( exec_path ) + strlen( exec_file ) + 2;
 	str = new char[ i ];
 	snprintf( str, i, "%s/%s", exec_path, exec_file );
 	f = fopen( str, "r" );
@@ -155,17 +155,17 @@ int load_gui( const char **argv )
 	if ( f == NULL || strlen( exec_path ) == 0 || ! strcmp( exec_path, "/" ) )
 	{	// try to get name from Tcl
 		cmd( "if { [ info nameofexecutable ] != \"\" } { \
-				set path [ file dirname [ info nameofexecutable ] ] \
+				set path [ file dirname [ info nameofexecutable ] ]; \
+				set exec [ file rootname [ info nameofexecutable ] ] \
 			} { \
-				set path \"\" \
+				set path \"\"; \
+				set exec \"\" \
 			}" );
+
 		app = get_str( "path" );
-		if ( app != NULL && strlen( app ) > 0 )
-		{
-			delete [ ] exec_path;
-			exec_path = new char[ strlen( app ) + 1 ];
-			strcpy( exec_path, app );
-		}
+		app1 = get_str( "exec" );
+		if ( app != NULL && app1 != NULL && strlen( app1 ) > 0 )
+			set_exec( app, app1 );
 	}
 
 	// check if executable is inside a macOS package
@@ -177,7 +177,7 @@ int load_gui( const char **argv )
 			}; \
 			unset pathsplit \
 		}" );
-		
+
 	// only use the exec path if not already in a model directory
 	cmd( "if { [ file exists $MODEL_OPTIONS ] } { \
 			set modelDir \"[ pwd ]\" \
@@ -187,12 +187,13 @@ int load_gui( const char **argv )
 
 	cmd( "cd \"$modelDir\"" );
 	app = get_str( "modelDir" );
-	delete [ ] path;
-	path = new char[ strlen( app ) + 1 ];
-	strcpy( path, app );
-	delete [ ] exec_path;
-	exec_path = new char[ strlen( app ) + 1 ];
-	strcpy( exec_path, app );
+
+	delete [ ] conf_path;
+	delete [ ] model_path;
+	conf_path = new char[ strlen( app ) + 1 ];
+	model_path = new char[ strlen( app ) + 1 ];
+	strcpy( conf_path, app );
+	strcpy( model_path, app );
 
 	// check if LSDROOT already exists and use it if so, if not, search the current directory tree
 	cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if { ! [ file exists \"$RootLsd/src/interf.cpp\" ] } { unset RootLsd } }" );
@@ -204,7 +205,7 @@ int load_gui( const char **argv )
 			while { ! [ file exists \"src/interf.cpp\" ] && ! [ string equal [ pwd ] \"/\" ] && [ string length [ pwd ] ] > 3 } { \
 				cd .. \
 			}; \
-			if [ file exists \"src/interf.cpp\" ] { \
+			if [ file exists \"src/LSD.h\" ] { \
 				set RootLsd [ pwd ] \
 			} { \
 				set choice 1 \
@@ -314,7 +315,7 @@ int load_gui( const char **argv )
 	eq_file = load_eqfile( );
 
 	// load/check model information file and fix if required
-	if ( ! load_model_info( exec_path ) )
+	if ( ! load_model_info( model_path ) )
 		update_model_info( true );
 
 	// check model configuration file
@@ -328,9 +329,9 @@ int load_gui( const char **argv )
 		cmd( "set path [ file normalize [ file dirname $lastConf ] ]" );
 		if ( eval_bool( "$path ne [ pwd ]" ) )
 		{
-			delete [ ] path;
-			path = new char[ eval_int( "[ string length $path ]" ) + 1 ];
-			strcpy( path, get_str( "path" ) );
+			delete [ ] conf_path;
+			conf_path = new char[ eval_int( "[ string length $path ]" ) + 1 ];
+			strcpy( conf_path, get_str( "path" ) );
 			cmd( "cd $path" );
 		}
 	}
@@ -338,8 +339,8 @@ int load_gui( const char **argv )
 	// try to load model configuration file
 	if ( strlen( simul_name ) > 0 )
 	{
-		struct_file = new char[ strlen( path ) + strlen( simul_name ) + 6 ];
-		sprintf( struct_file, "%s%s%s.lsd", path, strlen( path ) > 0 ? "/" : "", simul_name );
+		struct_file = new char[ strlen( conf_path ) + strlen( simul_name ) + 6 ];
+		sprintf( struct_file, "%s%s%s.lsd", conf_path, strlen( conf_path ) > 0 ? "/" : "", simul_name );
 		snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
 
 		i = open_configuration( ( r = NULL ), true );
@@ -357,7 +358,7 @@ int load_gui( const char **argv )
 		strcpy( simul_name, "" );
 		strcpy( struct_file, "" );
 		strcpy( name_rep, "" );
-		cmd( "cd \"%s\"", exec_path );
+		cmd( "cd \"%s\"", model_path );
 	}
 
 	grandTotal = true;				// not in parallel mode: use .tot headers

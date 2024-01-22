@@ -202,16 +202,6 @@ void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const 
 }
 
 
-/*********************************
- SET_EXEC
- *********************************/
-void set_exec( const char *path, const char *file )
-{
-	exec_path = clean_path( path );			// path of executable file
-	exec_file = clean_file( file );			// name of executable file
-}
-
-
 /***************************************************
 SET_LAB_TIT
 Ensure that all objects on top of the variables have the counter updated,

@@ -55,7 +55,6 @@ object *operate( object *r )
 	description *cd;
 	design *doe;
 	vector < string > logs;
-	struct stat stExe, stMod;
 
 	if ( ! redrawReq )
 		redrawRoot = false;		// assume no browser redraw
@@ -99,7 +98,7 @@ object *operate( object *r )
 
 			// read the lists of variables/functions, parameters and objects in model program
 			// from disk, if needed, or just update the missing elements lists
-			cmd( "if { [ llength $missVar ] == 0 || [ llength $missPar ] == 0 } { read_elem_file %s } { upd_miss_elem }", exec_path );
+			cmd( "if { [ llength $missVar ] == 0 || [ llength $missPar ] == 0 } { read_elem_file %s } { upd_miss_elem }", model_path );
 
 			Tcl_LinkVar( interp, "done", ( char * ) &done, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "num", ( char * ) &num, TCL_LINK_INT );
@@ -384,7 +383,7 @@ object *operate( object *r )
 
 			// read the lists of variables/functions, parameters and objects in model program
 			// from disk, if needed, or just update the missing elements lists
-			cmd( "if { [ llength $missObj ] == 0 } { read_elem_file %s } { upd_miss_elem }", exec_path );
+			cmd( "if { [ llength $missObj ] == 0 } { read_elem_file %s } { upd_miss_elem }", model_path );
 
 			Tcl_LinkVar( interp, "done", ( char * ) &done, TCL_LINK_INT );
 
@@ -1942,7 +1941,7 @@ object *operate( object *r )
 			if ( sim_num > 1 )
 			{
 				// detect the need of a new save path and if it has results files
-				subDir = need_res_dir( path, simul_name, out_dir, MAX_PATH_LENGTH );
+				subDir = need_res_dir( conf_path, simul_name, out_dir, MAX_PATH_LENGTH );
 				overwDir = check_res_dir( out_dir );
 
 				cmd( "ttk::frame $T.f2.n" );
@@ -2169,8 +2168,8 @@ object *operate( object *r )
 
 			done = 0;
 			cmd( "set res \"%s\"", strlen( simul_name ) > 0 ? simul_name : DEF_CONF_FILE );
-			cmd( "set path \"%s\"", path );
-			if ( strlen( path ) > 0 )
+			cmd( "set path \"%s\"", conf_path );
+			if ( strlen( conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			if ( saveAs )			// only asks file name if instructed to or necessary
@@ -2202,13 +2201,13 @@ object *operate( object *r )
 				strcpy( simul_name, lab1 );
 
 				lab1 = get_str( "path" );
-				delete [ ] path;
-				path = new char[ strlen( lab1 ) + 1 ];
-				strcpy( path, lab1 );
+				delete [ ] conf_path;
+				conf_path = new char[ strlen( lab1 ) + 1 ];
+				strcpy( conf_path, lab1 );
 
 				delete [ ] struct_file;
-				struct_file = new char[ strlen( path ) + strlen( simul_name ) + 6 ];
-				sprintf( struct_file, "%s%s%s.lsd", path, strlen( path ) > 0 ? "/" : "", simul_name );
+				struct_file = new char[ strlen( conf_path ) + strlen( simul_name ) + 6 ];
+				sprintf( struct_file, "%s%s%s.lsd", conf_path, strlen( conf_path ) > 0 ? "/" : "", simul_name );
 
 				if ( strlen( lab1 ) > 0 )
 					cmd( "cd $path" );
@@ -2514,7 +2513,7 @@ object *operate( object *r )
 
 			cmd( "set res %s", equation_name );
 
-			cmd( "set res1 [ file tail [ tk_getOpenFile -parent . -title \"Select New Equation File\" -initialfile \"$res\" -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ] ]", exec_path );
+			cmd( "set res1 [ file tail [ tk_getOpenFile -parent . -title \"Select New Equation File\" -initialfile \"$res\" -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ] ]", model_path );
 			cmd( "if [ fn_spaces \"$res1\" . ] { set res1 \"\" } { set res1 [ file tail $res1 ] }" );
 
 			lab1 = get_str( "res1" );
@@ -2633,7 +2632,7 @@ object *operate( object *r )
 
 			// read the lists of variables/functions, parameters and objects in model program
 			// from disk, if needed, or just update the missing elements lists
-			cmd( "if { [ llength $unusVar ] == 0 || [ llength $unusFun ] == 0 || [ llength $unusPar ] == 0 || [ llength $unusObj ] == 0 } { read_elem_file %s } { upd_unus_elem }", exec_path );
+			cmd( "if { [ llength $unusVar ] == 0 || [ llength $unusFun ] == 0 || [ llength $unusPar ] == 0 || [ llength $unusObj ] == 0 } { read_elem_file %s } { upd_unus_elem }", model_path );
 
 			plog( "\n\nElements/objects apparently unused/missing in equation file(s):\n" );
 
@@ -2938,22 +2937,22 @@ object *operate( object *r )
 
 			if ( saveConf && strlen( simul_name ) > 0 )
 			{
-				if ( strlen( path ) == 0 )
+				if ( strlen( conf_path ) == 0 )
 				{
 					cmd( "file copy -force %s.lsd %s.lsd", simul_name, ch1 );
 					plog( "\nSaved configuration to file %s.lsd", ch1 );
 				}
 				else
 				{
-					cmd( "file copy -force %s/%s.lsd %s/%s.lsd", path, simul_name, path, ch1 );
-					plog( "\nSaved configuration to file %s/%s.lsd", path, ch1 );
+					cmd( "file copy -force %s/%s.lsd %s/%s.lsd", conf_path, simul_name, conf_path, ch1 );
+					plog( "\nSaved configuration to file %s/%s.lsd", conf_path, ch1 );
 				}
 			}
 
-			if ( strlen( path ) == 0 )
+			if ( strlen( conf_path ) == 0 )
 				snprintf( out_file, MAX_PATH_LENGTH, "%s.%s", ch1, docsv ? "csv" : "res" );
 			else
-				snprintf( out_file, MAX_PATH_LENGTH, "%s/%s.%s", path, ch1, docsv ? "csv" : "res" );
+				snprintf( out_file, MAX_PATH_LENGTH, "%s/%s.%s", conf_path, ch1, docsv ? "csv" : "res" );
 
 			if ( dozip )
 				strcatn( out_file, ".gz", MAX_PATH_LENGTH );
@@ -3202,7 +3201,7 @@ object *operate( object *r )
 			}
 
 			cmd( "set res1 fun_%s.cpp", simul_name );
-			cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ]", exec_path );
+			cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ]", model_path );
 
 			cmd( "if { [ string length $bah ] > 0 } { set choice 1; set res1 [ file tail $bah ] } { set choice 0 }" );
 			if ( choice == 0 )
@@ -3265,8 +3264,8 @@ object *operate( object *r )
 			}
 
 			// make sure there is a path set
-			cmd( "set path \"%s\"", path );
-			if ( strlen( path ) > 0 )
+			cmd( "set path \"%s\"", conf_path );
+			if ( strlen( conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			cmd( "set res1 [ tk_getOpenFile -parent . -title \"Select Configuration File to Compare to\" -initialdir \"$path\" -filetypes { { {LSD configuration files} {.lsd} } } ]" );
@@ -3315,7 +3314,7 @@ object *operate( object *r )
 				break;
 			}
 
-			snprintf( out_file, MAX_PATH_LENGTH, "%s%s%s_%s.tex", strlen( path ) > 0 ? path : "", strlen( path ) > 0 ? "/" : "", table ? "table" : "href", simul_name );
+			snprintf( out_file, MAX_PATH_LENGTH, "%s%s%s_%s.tex", strlen( conf_path ) > 0 ? conf_path : "", strlen( conf_path ) > 0 ? "/" : "", table ? "table" : "href", simul_name );
 			cmd( "set choice [ file exists %s ]", out_file );
 			if ( choice == 1 )
 			{
@@ -3528,7 +3527,7 @@ object *operate( object *r )
 						break;
 
 				// detect the need of a new save path and create it if required
-				if ( need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH ) )
+				if ( need_res_dir( conf_path, simul_name, path_sens, MAX_PATH_LENGTH ) )
 					create_res_dir( path_sens );
 
 				// ask to clean existing files before proceeding if required
@@ -3597,7 +3596,7 @@ object *operate( object *r )
 				Tcl_LinkVar( interp, "fracMC", ( char * ) & fracMC, TCL_LINK_DOUBLE );
 
 				// detect the need of a new save path
-				subDir = need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH );
+				subDir = need_res_dir( conf_path, simul_name, path_sens, MAX_PATH_LENGTH );
 
 				cmd( "newtop .s \"MC Point Sampling\" { set choice 2 }" );
 
@@ -3717,7 +3716,7 @@ object *operate( object *r )
 				lab1 = NOLH_valid_tables( varSA, ch, 2 * MAX_LINE_SIZE );
 
 				// detect the need of a new save path
-				subDir = need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH );
+				subDir = need_res_dir( conf_path, simul_name, path_sens, MAX_PATH_LENGTH );
 
 				cmd( "set extdoe 0" );	// flag for using external DoE file
 				cmd( "set NOLHfile \"NOLH.csv\"" );
@@ -3866,7 +3865,7 @@ object *operate( object *r )
 				Tcl_LinkVar( interp, "sizMC", ( char * ) & sizMC, TCL_LINK_INT );
 
 				// detect the need of a new save path
-				subDir = need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH );
+				subDir = need_res_dir( conf_path, simul_name, path_sens, MAX_PATH_LENGTH );
 
 				cmd( "set applst 1" );	// flag for appending to existing configuration files
 
@@ -3980,7 +3979,7 @@ object *operate( object *r )
 				Tcl_LinkVar( interp, "nSampl", ( char * ) & nSampl, TCL_LINK_INT );
 
 				// detect the need of a new save path
-				subDir = need_res_dir( path, simul_name, path_sens, MAX_PATH_LENGTH );
+				subDir = need_res_dir( conf_path, simul_name, path_sens, MAX_PATH_LENGTH );
 
 				cmd( "newtop .s \"Elementary Effects Sampling\" { set choice 2 }" );
 
@@ -4119,8 +4118,8 @@ object *operate( object *r )
 
 			// set default name and path to conf. file folder
 			cmd( "set res \"%s\"", simul_name );
-			cmd( "set path \"%s\"", path );
-			if ( strlen( path ) > 0 )
+			cmd( "set path \"%s\"", conf_path );
+			if ( strlen( conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			// open dialog box to get file name & folder
@@ -4172,8 +4171,8 @@ object *operate( object *r )
 
 			// default file name and path
 			cmd( "set res %s", simul_name );
-			cmd( "set path \"%s\"", path );
-			if ( strlen( path ) > 0 )
+			cmd( "set path \"%s\"", conf_path );
+			if ( strlen( conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			// open dialog box to get file name & folder
@@ -4221,8 +4220,8 @@ object *operate( object *r )
 			cmd( "set res %s-legacy", simul_name );
 
 			// make sure there is a path set
-			cmd( "set path \"%s\"", path );
-			if ( strlen( path ) > 0 )
+			cmd( "set path \"%s\"", conf_path );
+			if ( strlen( conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			// open dialog box to get file name & folder
@@ -4262,8 +4261,8 @@ object *operate( object *r )
 			cmd( "set res %s-saved", simul_name );
 
 			// make sure there is a path set
-			cmd( "set path \"%s\"", path );
-			if ( strlen( path ) > 0 )
+			cmd( "set path \"%s\"", conf_path );
+			if ( strlen( conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			// open dialog box to get file name & folder
@@ -4316,8 +4315,8 @@ object *operate( object *r )
 			cmd( "set res %s-limits", simul_name );
 
 			// make sure there is a path set
-			cmd( "set path \"%s\"", path );
-			if ( strlen( path ) > 0 )
+			cmd( "set path \"%s\"", conf_path );
+			if ( strlen( conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			// open dialog box to get file name & folder
@@ -4417,7 +4416,7 @@ object *operate( object *r )
 					break;
 
 			// check for existing NW executable
-			snprintf( nw_exe, MAX_PATH_LENGTH, "%s/lsdNW", exec_path );	// form full executable name
+			snprintf( nw_exe, MAX_PATH_LENGTH, "%s/lsdNW", model_path );	// form full executable name
 			if ( platform == _WIN_ )
 				strcatn( nw_exe, ".exe", MAX_PATH_LENGTH );	// add Windows ending
 
@@ -4429,27 +4428,21 @@ object *operate( object *r )
 			else
 				fclose( f );
 
-			// check if NW executable file is older than running executable file
-			snprintf( lab, MAX_PATH_LENGTH, "%s/%s", exec_path, exec_file );	// form full exec name
-
-			// get OS info for files
-			if ( stat( nw_exe, &stExe ) == 0 && stat( lab, &stMod ) == 0 )
+			// check if NW executable/lib files are older than running executable file
+			if ( check_nw_exec( nw_exe ) )
 			{
-				if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
-				{
-					cmd( "switch [ ttk::messageBox -parent . -title Warning -icon warning -type yesnocancel -default yes -message \"Recompile 'lsdNW'?\" -detail \"The existing 'No Window' executable file ('lsdNW') is older than the current executable.\n\nPress 'Yes' to recompile, 'No' continue anyway, or 'Cancel' to abort.\" ] { \
-							yes { set choice 0 } \
-							no { set choice 1 } \
-							cancel { set choice 2 } \
-						}" );
+				cmd( "switch [ ttk::messageBox -parent . -title Warning -icon warning -type yesnocancel -default yes -message \"Recompile 'lsdNW'?\" -detail \"The existing 'No Window' executable file ('lsdNW') is older than the current executable.\n\nPress 'Yes' to recompile, 'No' continue anyway, or 'Cancel' to abort.\" ] { \
+						yes { set choice 0 } \
+						no { set choice 1 } \
+						cancel { set choice 2 } \
+					}" );
 
-					if ( choice == 2 )
+				if ( choice == 2 )
+					break;
+
+				if ( choice == 0 )
+					if ( ! make_no_window( ) )
 						break;
-
-					if ( choice == 0 )
-						if ( ! make_no_window( ) )
-							break;
-				}
 			}
 
 			// check if serial sensitivity configuration was just created
@@ -4475,7 +4468,7 @@ object *operate( object *r )
 				strcpyn( out_file, simul_name, MAX_PATH_LENGTH );
 				strcpyn( out_dir, path_sens, MAX_PATH_LENGTH );
 				cmd( "set res \"%s\"", simul_name );
-				cmd( "set path \"%s\"", path );
+				cmd( "set path \"%s\"", conf_path );
 			}
 			else										// ask for first configuration file
 			{
@@ -4490,8 +4483,8 @@ object *operate( object *r )
 				else
 					cmd( "set res \"\"" );
 
-				cmd( "set path \"%s\"", path );
-				if ( strlen( path ) > 0 )
+				cmd( "set path \"%s\"", conf_path );
+				if ( strlen( conf_path ) > 0 )
 					cmd( "cd \"$path\"" );
 
 				// open dialog box to get file name & folder
@@ -4864,7 +4857,7 @@ object *operate( object *r )
 			}
 
 			// check for existing NW executable
-			snprintf( nw_exe, MAX_PATH_LENGTH, "%s/lsdNW", exec_path );// form full executable name
+			snprintf( nw_exe, MAX_PATH_LENGTH, "%s/lsdNW", model_path );// form full executable name
 			if ( platform == _WIN_ )
 				strcatn( nw_exe, ".exe", MAX_PATH_LENGTH );	// add Windows ending
 
@@ -4876,34 +4869,28 @@ object *operate( object *r )
 			else
 				fclose( f );
 
-			// check if NW executable file is older than running executable file
-			snprintf( lab, MAX_PATH_LENGTH, "%s/%s", exec_path, exec_file );	// form full exec name
-
-			// get OS info for files
-			if ( stat( nw_exe, &stExe ) == 0 && stat( lab, &stMod ) == 0 )
+			// check if NW executable/lib files are older than running executable file
+			if ( check_nw_exec( nw_exe ) )
 			{
-				if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
-				{
-					cmd( "switch [ ttk::messageBox -parent . -title Warning -icon warning -type yesnocancel -default yes -message \"Recompile 'lsdNW'?\" -detail \"The existing 'No Window' executable file ('lsdNW') is older than the current executable.\n\nPress 'Yes' to recompile, 'No' continue anyway, or 'Cancel' to abort.\" ] { \
-							yes { set choice 0 } \
-							no { set choice 1 } \
-							cancel { set choice 2 } \
-						}" );
+				cmd( "switch [ ttk::messageBox -parent . -title Warning -icon warning -type yesnocancel -default yes -message \"Recompile 'lsdNW'?\" -detail \"The existing 'No Window' executable file ('lsdNW') is older than the current executable.\n\nPress 'Yes' to recompile, 'No' continue anyway, or 'Cancel' to abort.\" ] { \
+						yes { set choice 0 } \
+						no { set choice 1 } \
+						cancel { set choice 2 } \
+					}" );
 
-					if ( choice == 2 )
+				if ( choice == 2 )
+					break;
+
+				if ( choice == 0 )
+					if ( ! make_no_window( ) )
 						break;
-
-					if ( choice == 0 )
-						if ( ! make_no_window( ) )
-							break;
-				}
 			}
 
 			// remove any custom save path (save to current by default)
 			results_alt_path( "" );
 
 			// detect the need of a new save path and if it has results files
-			subDir = need_res_dir( path, simul_name, out_dir, MAX_PATH_LENGTH );
+			subDir = need_res_dir( conf_path, simul_name, out_dir, MAX_PATH_LENGTH );
 			overwDir = check_res_dir( out_dir );
 
 			Tcl_LinkVar( interp, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
@@ -5146,8 +5133,8 @@ object *operate( object *r )
 
 			// start the job
 			cmd( "set oldpath [ pwd ]" );
-			cmd( "set path \"%s\"", path );
-			if ( strlen( path ) > 0 )
+			cmd( "set path \"%s\"", conf_path );
+			if ( strlen( conf_path ) > 0 )
 				cmd( "cd $path" );
 
 	#ifdef _NP_
@@ -5164,7 +5151,7 @@ object *operate( object *r )
 
 	#endif
 
-			show_logs( path, run_logs, true );
+			show_logs( conf_path, run_logs, true );
 
 			cmd( "set path $oldpath" );
 			cmd( "cd $path" );
@@ -5184,8 +5171,8 @@ object *operate( object *r )
 			cmd( "set bah \"%s\"", simul_name );
 
 			// make sure there is a path set
-			cmd( "set path \"%s\"", path );
-			if ( strlen( path ) > 0 )
+			cmd( "set path \"%s\"", conf_path );
+			if ( strlen( conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			cmd( "set bah [ tk_getOpenFile -parent . -title \"Import Network Structure File\"	 -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } { {All files} {*} } } ]" );
@@ -5372,8 +5359,8 @@ object *operate( object *r )
 			}
 
 			// make sure there is a path set
-			cmd( "set path \"%s\"", path );
-			if ( strlen( path ) > 0 )
+			cmd( "set path \"%s\"", conf_path );
+			if ( strlen( conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			cmd( "set bah \"%s-%s\"", simul_name, lab4 );
