@@ -30,7 +30,12 @@ exec wish "$0" -- ${1+"$@"}
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #*************************************************************
 
-package require Tk 8.0
+#*************************************************************
+# Modified by MCP to handle GZip compressed files transparently
+#*************************************************************
+
+# requires 8.6 for GZip support
+package require Tk 8.6
 
 # Change to t for trace info on stderr
 set g(debug) f
@@ -48,8 +53,6 @@ set g(started) 0
 
 # LSD temporary files to be deleted
 set lsd 0
-set file1 ""
-set file2 ""
 
 # FIXME - move to preferences
 option add "*TearOff" false 100
@@ -218,6 +221,10 @@ array set finfo {
 	title        {}
 	tmp,1        0
 	tmp,2        0
+	lsd,1      ""
+	lsd,2      ""
+	unzip,1      ""
+	unzip,2      ""
 }
 set uniq 0
 
@@ -352,21 +359,56 @@ catch {tk scaling [expr {100.0 / 72}]}
 ###############################################################################
 
 ###############################################################################
+# Open file for reading, with GZip decompression if needed
+###############################################################################
+proc gzopen { name { n "z" } } {
+	#debug-info "gzopen ($name)"
+	global finfo
+
+	if { [ catch { open $name } fid ] } {
+		error "Couldn't open file: $name"
+		close $fid
+	} else {
+		zlib push gunzip $fid
+		if { [ catch { read $fid } data ] } {
+			chan pop $fid
+			set zip 0
+		} else {
+			close $fid
+			set outfile [ tmpfile $n ]
+			set out [ open $outfile w ]
+			puts -nonewline $out $data
+			close $out
+			set fid [ open $outfile ]
+			set zip 1
+		}
+
+		if { $n eq "1" || $n eq "2" } {
+			if { $zip } {
+				set finfo(unzip,$n) $outfile
+			} else {
+				set finfo(unzip,$n) $name
+			}
+		}
+
+		seek $fid 0
+		return $fid
+	}
+}
+
+###############################################################################
 # Exit with proper code
 ###############################################################################
 proc do-exit {{returncode {}}} {
 	debug-info "do-exit ($returncode)"
-	global g file1 file2
+	global g finfo
 
 	# Delete LSD temporary files
-	if { ! [ string equal $file1 "" ] } {
-			file delete $file1
-	}
-	if { ! [ string equal $file2 "" ] } {
-			file delete $file2
+	foreach mod { 1 2 } {
+		catch { file delete $finfo(lsd,$mod) }
 	}
 
-   # we don't particularly care if del-tmp fails.
+    # we don't particularly care if del-tmp fails.
 	catch {del-tmp}
 	if {$returncode == ""} {
 		set returncode $g(returnValue)
@@ -490,7 +532,8 @@ proc die-unless {cmd file} {
 proc filterCRCRLF {file} {
 	debug-info "filterCRCLF ($file)"
 	set outfile [tmpfile 9]
-	set inp [open $file r]
+#	set inp [open $file r]
+	set inp [ gzopen $file ]
 	set out [open $outfile w]
 	fconfigure $inp -translation binary
 	fconfigure $out -translation binary
@@ -672,9 +715,10 @@ proc split-conflictfile {name} {
 	set temp1 [tmpfile 1]
 	set temp2 [tmpfile 2]
 
-	if {[catch {set input [open $name r]}]} {
-		fatal-error "Couldn't open file '$name'"
-	}
+#	if {[catch {set input [open $name r]}]} {
+#		fatal-error "Couldn't open file '$name'"
+#	}
+	set input [ gzopen $name ]
 	set first [open $temp1 w]
 	set second [open $temp2 w]
 
@@ -1238,10 +1282,10 @@ proc assemble-args {} {
 
 			# Record LSD temporary file
 			if { $lsd && [ string equal [ file extension $f1 ] ".tmp" ] } {
-				set file1 $f1
+				set finfo(lsd,1) $f1
 			}
 			if { $lsd && [ string equal [ file extension $f2 ] ".tmp" ] } {
-				set file2 $f2
+				set finfo(lsd,2) $f2
 			}
 
 			if {[file isdirectory $f1]} {
@@ -4152,7 +4196,8 @@ proc merge-read-file {} {
 	catch {destroy .merge}
 	merge-create-window
 
-	set hndl [open "$finfo(pth,1)" r]
+#	set hndl [open "$finfo(pth,1)" r]
+	set hndl [ gzopen "$finfo(pth,1)" 1 ]
 	$w(mergeText) configure -state normal
 	$w(mergeText) delete 1.0 end
 	$w(mergeText) insert 1.0 [read $hndl]
@@ -5255,19 +5300,23 @@ proc rediff {} {
 			set text $w(RightText)
 		}
 		show-info "reading $finfo(pth,$mod)..."
-		if {[catch {set hndl [open "$finfo(pth,$mod)" r]}]} {
-			fatal-error "Failed to open file: $finfo(pth,$mod)"
-		}
+#		if {[catch {set hndl [open "$finfo(pth,$mod)" r]}]} {
+#			fatal-error "Failed to open file: $finfo(pth,$mod)"
+#		}
+		set hndl [ gzopen "$finfo(pth,$mod)" $mod ]
 		$text insert 1.0 [read $hndl]
 		close $hndl
 	}
 
 	# Diff the two files and store the summary lines into 'g(diff)'.
 	if {$opts(ignoreblanks) == 1} {
-		set diffcmd "$opts(diffcmd) $opts(ignoreblanksopt)  {$finfo(pth,1)} \
+#		set diffcmd "$opts(diffcmd) $opts(ignoreblanksopt)  {$finfo(pth,1)} \
 		  {$finfo(pth,2)}"
+		set diffcmd "$opts(diffcmd) $opts(ignoreblanksopt)  {$finfo(unzip,1)} \
+		  {$finfo(unzip,2)}"
 	} else {
-		set diffcmd "$opts(diffcmd) {$finfo(pth,1)} {$finfo(pth,2)}"
+#		set diffcmd "$opts(diffcmd) {$finfo(pth,1)} {$finfo(pth,2)}"
+		set diffcmd "$opts(diffcmd) {$unzip(pth,1)} {$unzip(pth,2)}"
 	}
 	show-info "Executing \"$diffcmd\""
 
@@ -6984,7 +7033,8 @@ proc simpleEd {command args} {
 			grid rowconfigure $w 0 -weight 1
 			grid rowconfigure $w 1 -weight 0
 
-			set fd [open $filename]
+#			set fd [open $filename]
+			set fd [ gzopen $filename ]
 			$w.text insert 1.0 [read $fd]
 			close $fd
 		}

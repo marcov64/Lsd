@@ -302,7 +302,7 @@ set gnuplotLinux		"gnuplot"
 set gnuplotWindows		"wgnuplot.exe"
 
 # default diff application settings
-set diffApp				"tkdiff.tcl"; # command line diff application to use
+set diffApp				"tklib/tkdiff.tcl"; # command line diff application to use
 set diffAppType			0			; # type of application (0=tk/1=terminal/2=graphical)
 set diffFile1			""			; # option to inform first file name
 set diffFile2			""			; # option to inform second file name

@@ -77,7 +77,7 @@ proc isDarkTheme { } {
 
 		} elseif { ( $wm eq "" || $wm eq "kde" || $wm eq "plasma" ) && \
 				   [ file exists "~/.config/kdeglobals" ] } {
-			source "$RootLsd/$LsdSrc/ini.tcl" ;	# load config file reader
+			source "$RootLsd/$LsdSrc/tklib/ini.tcl" ;	# load config file reader
 			if { ! [ catch { set f [ ini::open "~/.config/kdeglobals" ] } ] && \
 				 ! [ catch { ini::value $f General Name } results ] } {
 				set theme $results
@@ -113,7 +113,7 @@ proc isDarkTheme { } {
 			}
 		} elseif { ( $wm eq "" || $wm eq "lxqt" ) && \
 				   [ file exists "~/.config/lxqt/lxqt.conf" ] } {
-			source "$RootLsd/$LsdSrc/ini.tcl" ;	# load config file reader
+			source "$RootLsd/$LsdSrc/tklib/ini.tcl" ;	# load config file reader
 			if { ! [ catch { set f [ ini::open "~/.config/lxqt/lxqt.conf" ] } ] && \
 				 ! [ catch { ini::value $f Qt style } results ] } {
 				set theme $results

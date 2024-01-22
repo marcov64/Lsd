@@ -3238,7 +3238,9 @@ object *operate( object *r )
 				break;
 			}
 
-			snprintf( lab_old, 2 * MAX_PATH_LENGTH, "orig-eq_%s.tmp", simul_name);
+			cmd( "set tmpdir [ temp_dir ]" );
+			lab1 = get_str( "tmpdir" );
+			snprintf( lab_old, 2 * MAX_PATH_LENGTH, "%s/orig-eq_%s.tmp", lab1, simul_name);
 
 			if ( ( f = fopen( lab_old, "wb" ) ) != NULL )
 			{
@@ -3285,9 +3287,10 @@ object *operate( object *r )
 			}
 			fclose( f );
 
-			cmd( "file copy -force -- $res1 ext-cfg.tmp" );
-			cmd( "file copy -force -- %s int-cfg.tmp", struct_file );
-			cmd( "open_diff ext-cfg.tmp int-cfg.tmp %s %s.lsd", lab2, simul_name );
+			cmd( "set tmpdir [ temp_dir ]" );
+			cmd( "file copy -force -- $res1 \"$tmpdir/ext-cfg.tmp\"" );
+			cmd( "file copy -force -- %s \"$tmpdir/int-cfg.tmp\"", struct_file );
+			cmd( "open_diff \"$tmpdir/ext-cfg.tmp\" \"$tmpdir/int-cfg.tmp\" %s %s.lsd", lab2, simul_name );
 
 		break;
 

@@ -33,12 +33,12 @@ package require Tk 8.6
 
 # load extra code
 lappend auto_path "$RootLsd/$LsdSrc/themes"
-source "$RootLsd/$LsdSrc/defaults.tcl" ;	# load LSD defaults
-source "$RootLsd/$LsdSrc/window.tcl" ;		# load LSD gui management
-source "$RootLsd/$LsdSrc/wgtclone.tcl" ;	# load LSD widget cloning tools
-source "$RootLsd/$LsdSrc/theme.tcl" ;		# load LSD gui theming
-source "$RootLsd/$LsdSrc/tooltip.tcl" ;		# tklib tootip management
-source "$RootLsd/$LsdSrc/dblclick.tcl" ;	# enhancements to double-click in text widgets
+source "$RootLsd/$LsdSrc/defaults.tcl" ;		# load LSD defaults
+source "$RootLsd/$LsdSrc/window.tcl" ;			# load LSD gui management
+source "$RootLsd/$LsdSrc/theme.tcl" ;			# load LSD gui theming
+source "$RootLsd/$LsdSrc/tklib/wgtclone.tcl" ;	# load LSD widget cloning tools
+source "$RootLsd/$LsdSrc/tklib/tooltip.tcl" ;	# tklib tootip management
+source "$RootLsd/$LsdSrc/tklib/dblclick.tcl" ;	# enhancements to double-click in text widgets
 
 # optional development tools
 set conWnd		false ;	# enable console window to be opened with CTRL+ALT+J
@@ -427,8 +427,8 @@ catch { image create photo warnDlgImg -file "$RootLsd/$LsdSrc/icons/warning.png"
 if $conWnd {
 	set msg "File(s) missing or corrupted"
 	set det "Tcl/Tk console file 'tkcon.tcl' is missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is continuing without console support."
-	if [ file exists "$RootLsd/$LsdSrc/tkcon.tcl" ] {
-		if { [ catch { source "$RootLsd/$LsdSrc/tkcon.tcl" } ] == 0 } {
+	if [ file exists "$RootLsd/$LsdSrc/tklib/tkcon.tcl" ] {
+		if { [ catch { source "$RootLsd/$LsdSrc/tklib/tkcon.tcl" } ] == 0 } {
 			set tkcon::PRIV(showOnStartup) 0
 			set tkcon::PRIV(root) .console
 			set tkcon::PRIV(protocol) { tkcon hide }
