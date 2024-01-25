@@ -131,7 +131,7 @@ WRITES( SECSTAL1, "exit1fail", v[6] / F1 );
 RECALCS( FINSECL1, "BadDeb1" );					// update bad debt after exits
 
 V( "f1rescale" );								// redistribute entrant m.s.
-INIT_TSEARCHT( "Firm1", i );					// prepare turbo search indexing
+INIT_TSEARCH( "Firm1" );						// prepare turbo search indexing
 
 RESULT( ( double ) j / F1 )
 
