@@ -91,6 +91,8 @@ KS-aggregates.R = overall analysis of macroeconomic aggregates, including scenar
 
 KS-IRF.R = analyze the impulse-response function of real GDP to an interest rate shock
 
+KS-IRF-paper.R = perform the impulse response function analysis as presented in the paper by Amendola and Pereira (2024). Assumes the simulation data was previously produced with the configurations at 'R/data-irf' subfolder.
+
 KS-sector-1.R = pooled and Monte Carlo firm-level analysis of firms in the capital-good sector, including scenario statistics comparison, size, productivity and growth rate empirical plots and fits to Gaussian, Laplace and Subbotin distributions
 
 KS-sector-2-pool.R = pooled firm-level analysis of firms in the consumption-good sector, including scenario statistics comparison, Gibrat-law and scaling-variance tests, and size, productivity and growth rate empirical plots and fits to Gaussian, Laplace and Subbotin distributions

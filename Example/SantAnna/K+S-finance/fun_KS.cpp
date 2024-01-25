@@ -26,6 +26,8 @@
 
 /*======================== ADDITIONAL CODE TO INCLUDE ========================*/
 
+#include <list>									// C++ list data structure
+
 // LSD and K+S macros and objects definition and support code
 #include <fun_head_fast.h>						// LSD definitions
 #include "fun_KS_class.h"						// K+S class/macro definitions
