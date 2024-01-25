@@ -80,7 +80,7 @@ build_state_data <- function( data, irf, add.vars, state.vars,
     MC <- NULL
     try( MC <- add.vars( data.frame( data[ , , 1 ] ) ) )
 
-    if( is.null( MC ) || ! all( is.finite( MC ) ) ||
+    if( is.null( MC ) || ! all( sapply( MC, is.finite ) ) ||
         nrow( MC ) != dim( data )[ 1 ] || ncol( MC ) <= dim( data )[ 2 ] )
       stop( "Invalid result from function to add variables (add.vars)" )
 
@@ -91,7 +91,7 @@ build_state_data <- function( data, irf, add.vars, state.vars,
         MC <- NULL
         try( MC <- add.vars( data.frame( data[ , , i ] ) ) )
 
-        if( is.null( MC ) || ! all( is.finite( MC ) ) ||
+        if( is.null( MC ) || ! all( sapply( MC, is.finite ) ) ||
             nrow( MC ) != dim( data )[ 1 ] || ncol( MC ) <= dim( data )[ 2 ] )
           stop( "Invalid result from function to add variables (add.vars)" )
 
