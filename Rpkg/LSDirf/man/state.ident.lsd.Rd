@@ -34,7 +34,7 @@ state.ident.lsd( data, irf, state.vars = NULL, metr.irf = NULL,
   \item{metr.irf}{function: a function that assigns a metric to compare each run of a Monte Carlo experiment, to be used on regressions. The function must take a cumulative impulse-response matrix, organized as runs on rows and response times (0, 1, ...,\code{t.horiz}) on columns. It must return a numeric vector of length equal to the number of runs, defining the metric associated with each run. Higher metric values correspond to increased impulse effect. If no function is supplied (\code{NULL}), the default, the sum of state variable value(s) at impulse time is used as metric.
   }
 
-  \item{add.vars}{function: a optional function to add new variables to the MC dataset, before the analysis is performed. The function must take a single Monte Carlo run data frame, organized as time on rows and (original) variables on columns. It must return this data frame with new column(s) added, one per each new variable.
+  \item{add.vars}{function: an optional function to add new variables to the MC dataset, before the analysis is performed. The function must take a single Monte Carlo run data frame, organized as time on rows and (original) variables on columns. It must return this data frame with new column(s) added, one per each new variable.
   }
 
   \item{state.cont}{logical: if \code{TRUE}, the resulting object will contain the full list of continuous states produced during the analysis. If \code{FALSE}, the default, the list of continuous states is not saved.
