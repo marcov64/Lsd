@@ -141,7 +141,7 @@ build_state_data <- function( data, irf, add.vars, state.vars,
       metric <- metric[ - nas ]
     }
   } else
-    metric <- rowSums( stateData, na.rm = TRUE )
+    metric <- rowSums( irf$cir, na.rm = TRUE ) / ncol( irf$cir )
 
   stateData <- cbind( metric, stateData )
   colnames( stateData ) <- c( "metric", state.vars )

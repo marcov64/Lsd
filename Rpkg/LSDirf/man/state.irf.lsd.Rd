@@ -39,7 +39,7 @@ state.irf.lsd( data, irf, states = NULL, state.num = 1,
   \item{eval.state}{function: a function able to define the corresponding state of each run of a Monte Carlo experiment. The function must take a matrix as argument, organized as runs on rows and the state variable(s) on columns. It must return an integer vector of length equal to the number of runs, defining the state of each run. States are defined by a sequence of integer values, e.g., 0, 1 or 1, 2 ,3, The minimum number of states is two and there is no maximum. If no function is supplied (\code{NULL}), the default, an internal 2-state evaluation function is used, using the mean or the median, according to \code{stat}, to split the MC set into two states.
   }
 
-  \item{metr.irf}{function: a function that assigns a metric to compare each run of a Monte Carlo experiment, to be used on regressions. The function must take a cumulative impulse-response matrix, organized as runs on rows and response times (0, 1, ...,\code{t.horiz}) on columns. It must return a numeric vector of length equal to the number of runs, defining the metric associated with each run. Higher metric values correspond to increased impulse effect. If no function is supplied (\code{NULL}), the default, the sum of state variable value(s) at impulse time is used as metric.
+  \item{metr.irf}{function: a function that assigns a metric to compare each run of a Monte Carlo experiment, to be used on regressions. The function must take a cumulative impulse-response matrix, organized as runs on rows and response times (0, 1, ...,\code{t.horiz}) on columns. It must return a numeric vector of length equal to the number of runs, defining the metric associated with each run. Higher metric values correspond to increased impulse effect. If no function is supplied (\code{NULL}), the default, the mean of state variable value(s) from impulse time (\code{t=0}) until the time horizon (\code{t=t.horiz}) is used as metric.
   }
 
   \item{add.vars}{function: an optional function to add new variables to the MC dataset, before the analysis is performed. The function must take a single Monte Carlo run data frame, organized as time on rows and (original) variables on columns. It must return this data frame with new column(s) added, one per each new variable.
@@ -186,9 +186,58 @@ See the note in \link[LSDirf]{LSDirf-package} for an methodological overview and
 }
 
 \examples{
-# get the example directory name
-path <- system.file( "extdata/sirf", package = "LSDirf" )
+# Example data generation: Y is an AR(1) process that may receive a shock at
+# t=50, S is the shock (0/1), a combination of 3 AR(1) processes (X1-X3)
+# X4 is another AR(1) process, uncorrelated with S, X4sq is just X4^2
+# All AR(1) processes have the same phi=0.98 coefficient, and are Monte
+# Carlo sampled 500 times
+set.seed( 1 )   # make results reproducible
+# LSD-like arrays to store simulated time series (t x var x MC)
+dataNoShock <- dataShock <-array ( 0, dim = c( 60, 7, 500 ) )
+colnames( dataNoShock ) <- colnames( dataShock ) <-
+  c( "Y", "S", "X1", "X2", "X3", "X4", "X4sq" )
+# Monte Carlo sampling
+for( n in 1 : 500 ) {
+  # simulation time
+  for( t in 2 : 60 ) {
+    # AR process on X vars
+    for( v in c( "X1", "X2", "X3", "X4" ) ) {
+      dataNoShock[ t, v, n ] = dataShock[ t, v, n ] =
+        0.98 * dataShock[ t - 1, v, n ] + rnorm( 1, 0, 0.1 )
+    }
+    # apply shock once
+    if( t == 50 ) {
+      dataShock[ t, "S", n ] <- 1
+      shockEff <- 0.4 + 0.7 * isTRUE( dataShock[ t, "X1", n ] > 0.1 ) -
+        0.4 * isTRUE( dataShock[ t, "X2", n ] > 0.1 ) +
+        0.2 * isTRUE( dataShock[ t, "X3", n ] > 0.05 ) + rnorm( 1, 0, 0.2 )
+    } else
+      shockEff <- 0
+    # AR process on Y var
+    rs <- rnorm( 1, 0, 0.1 )
+    dataNoShock[ t, "Y", n ] = 0.98 * dataNoShock[ t - 1, "Y", n ] + rs
+    dataShock[ t, "Y", n ] = 0.98 * dataShock[ t - 1, "Y", n ] + shockEff + rs
+  }
+}
+# another uncorrelated var
+dataNoShock[ , "X4sq", ] <- dataShock[ , "X4sq", ] <- dataShock[ , "X4", ] ^ 2
 
+# linear IRF analysis
+linearIRF <- irf.lsd( data = dataNoShock,      # non-shocked MC data
+                      data.shock = dataShock,  # shocked data
+                      t.horiz = 10,            # post-shock analysis t horizon
+                      var.irf = "Y",           # variable to compute IRF
+                      var.shock = "S",         # shock variable (impulse)
+                      irf.type = "none" )      # no plot of linear IRF
+
+# state-dependent IRF analysis
+stateIRF <- state.irf.lsd( data = dataNoShock, # non-shocked MC data
+                           irf = linearIRF,    # linear IRF produced by irf.lsd
+                           state.vars = "X1" ) # variable defining states
+
+plot( stateIRF, irf.type = "cum.irf" )         # cumulative IRF plot
+
+print( stateIRF )                              # show IRF data
 }
 
 \keyword{methods}

@@ -1,8 +1,8 @@
 Package: LSDirf
 Type: Package
 Title: Impulse-Response Function Analysis Tools for LSD simulations
-Version: 0.1.1
-Date: 2024-1-24
+Version: 0.1.2
+Date: 2024-1-30
 Authors@R: c( person( "Marcelo C.", "Pereira", email = "mcper@unicamp.br",	role = c( "aut", "cre" ), comment = c( ORCID = "0000-0002-8069-2734" ) ),
               person( "Marco", "Amendola", email = "marco.amendola@univaq.it",	role = c( "aut" ) ) )
 Description: Tools for performing impulse-response function (IRF) analysis of relevant variables of LSD simulation models. Based on data produced by LSD simulation models, it performs both linear and state-dependent IRF analysis, providing the tools required by the Counterfactual Monte Carlo (CMC) methodology, including state identification and sensitivity. CMC proposes retrieving the causal effect of shocks by exploiting the opportunity to directly observe the counterfactual in a fully controlled experimental setup. LSD (Laboratory for Simulation Development) is free software developed by Marco Valente and Marcelo C. Pereira (documentation and downloads available at <https://www.labsimdev.org/>).

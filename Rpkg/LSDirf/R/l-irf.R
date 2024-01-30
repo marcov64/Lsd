@@ -301,7 +301,10 @@ print.irf.lsd <- function( x, ... ) {
                          "Number of employed MC samples:",
                          "Number of outlier MC samples:" )
 
-  print( info, printPars )
+  if( length( printPars ) == 0 )
+    print( info )
+  else
+    print( info, printPars )
 
   if( irf.type == "incr.irf" || irf.type == "cum.irf" ) {
     cat( "\nImpulse-response and cumulative impulse-response functions:\n\n" )
@@ -323,7 +326,10 @@ print.irf.lsd <- function( x, ... ) {
                            "C-IMF ci-", paste( "C-IMF", x$stat ), "C-IMF ci+" )
   }
 
-  print( data, row.names = FALSE, printPars )
+  if( length( printPars ) == 0 )
+    print( data, row.names = FALSE )
+  else
+    print( data, row.names = FALSE, printPars )
 }
 
 
