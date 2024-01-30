@@ -22,8 +22,7 @@ state.sa.lsd <- function( data, irf, state.vars = NULL, metr.irf = NULL,
 
   # check data, remove outliers, add new variables, and select state variables
   stateData <- build_state_data( data, irf, add.vars, state.vars,
-                                 metr.irf = metr.irf,
-                                 eval.state = function( x ) NULL )
+                                 metr.irf = metr.irf )
   state.vars <- colnames( stateData )
   nVar <- length( state.vars )
 
@@ -81,7 +80,7 @@ state.sa.lsd <- function( data, irf, state.vars = NULL, metr.irf = NULL,
   class( rfsa ) <- "state.sa.lsd"
 
   if( ! no.plot )
-    plot.state.sa.lsd( rfsa, ... )
+    plot.state.sa.lsd( rfsa, alpha = alpha, ... )
 
   return( rfsa )
 }
