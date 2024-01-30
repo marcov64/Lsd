@@ -359,7 +359,7 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
                 cmf.state.ci.hi = cmfStateCIhi, irf.state.ylim = irfStateYlim,
                 cirf.state.ylim = cirfStateYlim, pmf.state.ylim = pmfStateYlim,
                 cmf.state.ylim = cmfStateYlim, irf.test = irfTest,
-                cirf.test = cirfTest, pmf.test = pmfTest,
+                cirf.test = cirfTest, pmf.test = pmfTest, cmf.test = cmfTest,
                 cirf.test.t.horiz = cirfTestThoriz, state = state,
                 state.vars = state.vars, t.horiz = irf$t.horiz,
                 var.irf = irf$var.irf, var.ref = irf$var.ref, stat = irf$stat,
@@ -368,7 +368,7 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
   class( sirf ) <- "state.irf.lsd"
 
   if( irf.type != "none" )
-    plot.state.irf.lsd( sirf, state = state, irf.type = irf.type, ... )
+    plot.state.irf.lsd( sirf, state.num = state.num, irf.type = irf.type, ... )
 
   return( sirf )
 }
@@ -395,24 +395,39 @@ print.state.irf.lsd <- function( x, ... ) {
   else
     test <- ifelse( length( x$irf.state ) == 2, "t-test", "F-test" )
 
-  cirf.t.horiz.p.val <- NA
+  irf.p.val <- cirf.p.val <- pmf.p.val <- cmf.p.val <- cirf.t.horiz.p.val <- NA
 
   if( x$stat == "mean" && length( x$irf.state ) > 2 ) {
-    if( ! is.null( x$cirf.test.t.horiz ) )
-      cirf.t.horiz.p.val <- x$cirf.test.t.horiz[ 1, "Pr(>F)" ]
+    if( length( x$irf.test ) > 1 )
+      irf.p.val <- signif( x$irf.test[ 1, "Pr(>F)" ], digits = 4 )
 
-    irf.p.val <- x$irf.test[ 1, "Pr(>F)" ]
-    cirf.p.val <- x$cirf.test[ 1, "Pr(>F)" ]
-    pmf.p.val <- x$pmf.test[ 1, "Pr(>F)" ]
-    cmf.p.val <- x$cmf.test[ 1, "Pr(>F)" ]
+    if( length( x$cirf.test ) > 1 )
+      cirf.p.val <- signif( x$cirf.test[ 1, "Pr(>F)" ], digits = 4 )
+
+    if( length( x$pmf.test ) > 1 )
+      pmf.p.val <- signif( x$pmf.test[ 1, "Pr(>F)" ], digits = 4 )
+
+    if( length( x$cmf.test ) > 1 )
+      cmf.p.val <- signif( x$cmf.test[ 1, "Pr(>F)" ], digits = 4 )
+
+    if( ! is.null( x$cirf.test.t.horiz ) )
+      cirf.t.horiz.p.val <- signif( x$cirf.test.t.horiz[ 1, "Pr(>F)" ],
+                                    digits = 4 )
   } else {
-    if( ! is.null( x$cirf.test.t.horiz ) )
-      cirf.t.horiz.p.val <- x$cirf.test.t.horiz$p.value
+    if( length( x$irf.test ) > 1 )
+      irf.p.val <- signif( x$irf.test$p.value, digits = 4 )
 
-    irf.p.val <- x$irf.test$p.value
-    cirf.p.val <- x$cirf.test$p.value
-    pmf.p.val <- x$pmf.test$p.value
-    cmf.p.val <- x$cmf.test$p.value
+    if( length( x$cirf.test ) > 1 )
+      cirf.p.val <- signif( x$cirf.test$p.value, digits = 4 )
+
+    if( length( x$pmf.test ) > 1 )
+      pmf.p.val <- signif( x$pmf.test$p.value, digits = 4 )
+
+    if( length( x$cmf.test ) > 1 )
+      cmf.p.val <- signif( x$cmf.test$p.value, digits = 4 )
+
+    if( ! is.null( x$cirf.test.t.horiz ) )
+      cirf.t.horiz.p.val <- signif( x$cirf.test.t.horiz$p.value, digits = 4 )
   }
 
   if( is.null( x$state ) ) {
@@ -427,11 +442,11 @@ print.state.irf.lsd <- function( x, ... ) {
                          x$var.irf,
                          x$var.ref,
                          length( x$irf.state[[ 1 ]] ),
-                         signif( irf.p.val, digits = 4 ),
-                         signif( cirf.p.val, digits = 4 ),
-                         signif( cirf.t.horiz.p.val, digits = 4 ),
-                         signif( pmf.p.val, digits = 4 ),
-                         signif( cmf.p.val, digits = 4 ),
+                         irf.p.val,
+                         cirf.p.val,
+                         cirf.t.horiz.p.val,
+                         pmf.p.val,
+                         cmf.p.val,
                          x$alpha,
                          x$nsample,
                          length( x$outliers ) ) )
@@ -449,7 +464,10 @@ print.state.irf.lsd <- function( x, ... ) {
                          "Number of employed MC samples:",
                          "Number of outlier MC samples:" )
 
-  print( info, printPars )
+  if( length( printPars ) == 0 )
+    print( info )
+  else
+    print( info, printPars )
 
   if( length( x$cirf.state ) == 2 ) {
 
@@ -494,7 +512,11 @@ print.state.irf.lsd <- function( x, ... ) {
                            paste0( "Hi", l, " ci-" ),
                            paste0( "Hi", l, " ", x$stat ),
                            paste0( "Hi", l, " ci+" ) )
-    print( data, row.names = FALSE, printPars )
+
+    if( length( printPars ) == 0 )
+      print( data, row.names = FALSE )
+    else
+      print( data, row.names = FALSE, printPars )
   }
 }
 
@@ -514,16 +536,17 @@ plot.state.irf.lsd <- function( x, ... ) {
     plotPars[[ "irf.type" ]] <- NULL
   }
 
-  if( is.null( plotPars$state ) )
-    state <- 0
+  if( is.null( plotPars$state.num ) )
+    state.num <- 1
   else {
-    state <- plotPars$state
-    if( is.null( state ) || ! is.finite( state ) || round( state ) < 0 ||
-        round( state ) > ( length( x$thr.state.val ) + 1 ) )
+    state.num <- plotPars$state.num
+    if( is.null( state.num ) || ! is.finite( state.num ) ||
+        round( state.num ) < 0 ||
+        round( state.num ) > ( length( x$thr.state.val ) + 1 ) )
       stop( "Invalid state selected" )
 
-    state <- round( state )
-    plotPars[[ "state" ]] <- NULL
+    state.num <- round( state.num )
+    plotPars[[ "state.num" ]] <- NULL
   }
 
   if( irf.type == "incr.irf" ) {
@@ -550,11 +573,11 @@ plot.state.irf.lsd <- function( x, ... ) {
         ylim <- x$cmf.state.ylim
       }
 
-  if( state != 0 ) {
-    data <- data[[ state ]]
-    ciLo <- ciLo[[ state ]]
-    ciHi <- ciHi[[ state ]]
-    ylim <- ylim[[ state ]]
+  if( state.num != 0 ) {
+    data <- data[[ state.num ]]
+    ciLo <- ciLo[[ state.num ]]
+    ciHi <- ciHi[[ state.num ]]
+    ylim <- ylim[[ state.num ]]
   }
 
   do.call( plot_irf, c( list( data, ciLo, ciHi, ylim ), plotPars ) )

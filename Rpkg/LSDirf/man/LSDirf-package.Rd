@@ -23,6 +23,8 @@ Summing up, state-dependency can be studied in a robust way through an intuitive
 The CMC methodology evaluates state-dependency on the assumption that the simulation state in question is known to the researcher. In many cases, however, it may be interesting to adopt the opposite approach, that is: instead of testing whether specific states significantly impact the effect of the shock, try to find such states from simulated data. A similar target, for example, is at the heart of the recent literature on “Optimal Policy”, which goal is to find the optimal allocation of the treatment across heterogeneous units (e.g. Kitagawa and Tetenov, 2018; Athey and Wager, 2020). To this aim, we offer a data-driven heuristic helpful for discovering such states. It is named Random Forest State Identification Algorithm (RFSIA) as it adapts the random forest machine learning technique to our goal.
 
 The main intuition behind the RFSIA is the exploitation of the random forest technique to obtain a series of “meaningful” stratifications of the data on which to test state-dependency. More precisely, the idea is to test the state-dependency in the final nodes of the regression trees and then recombine and rearrange this extremely detailed information to obtain a more general sense of which states have a significant impact on the effect of the shock. However, such state information is extremely detailed and, at times, difficult to interpret. Therefore, to make the output more understandable and bring out the more evident state patterns, the last step of RFSIA is the quantile discretization of the economic states. To this aim, we divide each state variable into deciles and replace the threshold values entering each state, and grouping of similar states.
+
+More details on the methodology, and a comprehensive application to a full LSD simulation model can be found in Amendola and Pereira (2024).
 }
 
 \note{
@@ -54,7 +56,9 @@ Maintainer: \packageMaintainer{LSDirf}
 \references{
 LSD documentation is available at \url{https://www.labsimdev.org/}
 
-The latest LSD binaries and source code can be downloaded at \url{https://github.com/marcov64/Lsd/}.
+The latest LSD binaries and source code can be downloaded at \url{https://github.com/SantannaKS/Lsd/}.
+
+Amendola, M., Pereira, M. C. (2024) \emph{Linear and state-dependent impulse responses in agent-based models: a new methodology and an economic application}. To appear. Available at [SSRN LINK]
 
 Athey [INITIALS], Wager [INITIALS] (2020) \emph{[PAPER TITLE]}. [JOURNAL]
 [VOL]([ISSUE]):[PAGINI]-[PAGEND]
