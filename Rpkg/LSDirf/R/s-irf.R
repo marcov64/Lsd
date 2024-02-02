@@ -17,7 +17,8 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
                            metr.irf = NULL, add.vars = NULL,
                            irf.type = c( "incr.irf", "cum.irf", "peak.mult",
                                          "cum.mult", "none" ),
-                           ci.R = 999, ci.type = c( "basic", "perc", "bca" ),
+                           state.plot = 0, ci.R = 999,
+                           ci.type = c( "basic", "perc", "bca" ),
                            alpha = 0.05, seed = 1, ... ) {
 
   # check data, remove outliers, add new variables, and select state variables
@@ -41,6 +42,10 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
                                round( state.num ) > nrow( states$state.freq ) ) )
     stop( "Invalid state selection (state.num)" )
 
+  if( is.null( state.plot ) || ! is.finite( state.plot ) ||
+      round( state.plot ) < 0 )
+    stop( "Invalid state to plot (state.plot)" )
+
   if( is.null( alpha ) || ! is.finite( alpha ) ||
       alpha <= 0 || alpha > 0.5 )
     stop( "Invalid significance level (alpha)" )
@@ -52,6 +57,7 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
     stop( "Invalid random seed (seed)" )
 
   state.num <- round( state.num )
+  state.plot <- round( state.plot )
   ci.R      <- round( ci.R )
   ci.type   <- match.arg( ci.type )
   irf.type  <- match.arg( irf.type )
@@ -368,7 +374,7 @@ state.irf.lsd <- function( data, irf, states = NULL, state.num = 1,
   class( sirf ) <- "state.irf.lsd"
 
   if( irf.type != "none" )
-    plot.state.irf.lsd( sirf, state.num = state.num, irf.type = irf.type, ... )
+    plot.state.irf.lsd( sirf, state.plot = state.plot, irf.type = irf.type, ... )
 
   return( sirf )
 }
@@ -536,17 +542,17 @@ plot.state.irf.lsd <- function( x, ... ) {
     plotPars[[ "irf.type" ]] <- NULL
   }
 
-  if( is.null( plotPars$state.num ) )
-    state.num <- 1
+  if( is.null( plotPars$state.plot ) )
+    state.plot <- 0                 # plot all
   else {
-    state.num <- plotPars$state.num
-    if( is.null( state.num ) || ! is.finite( state.num ) ||
-        round( state.num ) < 0 ||
-        round( state.num ) > ( length( x$thr.state.val ) + 1 ) )
-      stop( "Invalid state selected" )
+    state.plot <- plotPars$state.plot
+    if( is.null( state.plot ) || ! is.finite( state.plot ) ||
+        round( state.plot ) < 0 ||
+        round( state.plot ) > ( length( x$thr.state.val ) + 1 ) )
+      stop( "Invalid state to plot (state.plot)" )
 
-    state.num <- round( state.num )
-    plotPars[[ "state.num" ]] <- NULL
+    state.plot <- round( state.plot )
+    plotPars[[ "state.plot" ]] <- NULL
   }
 
   if( irf.type == "incr.irf" ) {
@@ -573,11 +579,11 @@ plot.state.irf.lsd <- function( x, ... ) {
         ylim <- x$cmf.state.ylim
       }
 
-  if( state.num != 0 ) {
-    data <- data[[ state.num ]]
-    ciLo <- ciLo[[ state.num ]]
-    ciHi <- ciHi[[ state.num ]]
-    ylim <- ylim[[ state.num ]]
+  if( state.plot != 0 ) {
+    data <- data[[ state.plot ]]
+    ciLo <- ciLo[[ state.plot ]]
+    ciHi <- ciHi[[ state.plot ]]
+    ylim <- ylim[[ state.plot ]]
   }
 
   do.call( plot_irf, c( list( data, ciLo, ciHi, ylim ), plotPars ) )
