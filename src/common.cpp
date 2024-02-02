@@ -1880,6 +1880,9 @@ char *strtcl( char *out, const char *text, int outSz )
  ****************************************************/
 void msleep( unsigned msec )
 {
+	if ( msec <= 0 )
+		return
+
 #ifdef _WIN32
 	Sleep( msec );
 #else

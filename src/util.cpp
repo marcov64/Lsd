@@ -1143,7 +1143,7 @@ void get_var_descr( const char *lab, char *desc, int descr_len )
 
 					if ( str1[ i ] == '/' && str1[ i + 1 ] == '*' )
 					{
-						done = 0; 		// beginning of a multiline comment
+						done = 0; 		// beginning of a multi-line comment
 						i += 2;
 
 						// discard initial empty line
@@ -1157,21 +1157,25 @@ void get_var_descr( const char *lab, char *desc, int descr_len )
 
 					if ( str1[ i ] == '/' && str1[ i + 1 ] == '/' )
 					{
-						done = 2; 		// beginning of a single line comment
+						done = 2; 		// beginning of a single-line comment
 						i += 2;
+
+						while( str1[ i ] == '/' )
+							++i;		// skip extra slashes
 					}
 				}
 
-				if ( done == 0 ) 		// we are in a comment
+				if ( done == 0 ) 		// we are in a multi-line comment
 					if ( str1[ i ] == '*' && str1[ i + 1 ] == '/' )
+						done = 1;
+
+				if ( done == 2 ) 		// we are in a single-line comment
+					if ( str1[ i ] == '\n' )
 						done = 1;
 
 				if ( done == 0 || done == 2 )
 					if ( str1[ i ] != '\r' )
 						str2[ j++ ] = str1[ i ];
-
-				if ( done == 2 && str1[ i ] == '\n' )
-					done = -1;
 
 				if ( j >= descr_len - 2 )
 					done = 1;
