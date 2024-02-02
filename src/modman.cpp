@@ -2137,7 +2137,7 @@ int lsdmain( int argn, const char **argv )
 		cmd( "set a [ .f.t.t index insert ]" );
 
 		cmd( ".f.t.t insert insert \"EQUATION(\\\"$v_label\\\")\\n\"" );
-		cmd( ".f.t.t insert insert \"/*\\nComment\\n*/\\n\\n\"" );
+		cmd( ".f.t.t insert insert \"// Comment\\n\\n\"" );
 		cmd( ".f.t.t insert insert \"RESULT( )\\n\"" );
 		cmd( ".f.t.t mark set insert \"$a + 2 line\"" );
 		cmd( ".f.t.t tag add sel insert \"insert + 7 char\"" );
