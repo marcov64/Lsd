@@ -496,7 +496,7 @@ void get_var_descr( const char *lab, char *desc, int descr_len )
 
 					if ( str1[ i ] == '/' && str1[ i + 1 ] == '*' )
 					{
-						done = 0; 		// beginning of a multiline comment
+						done = 0; 		// beginning of a multi-line comment
 						i += 2;
 
 						// discard initial empty line
@@ -510,21 +510,25 @@ void get_var_descr( const char *lab, char *desc, int descr_len )
 
 					if ( str1[ i ] == '/' && str1[ i + 1 ] == '/' )
 					{
-						done = 2; 		// beginning of a single line comment
+						done = 2; 		// beginning of a single-line comment
 						i += 2;
+
+						while( str1[ i ] == '/' )
+							++i;		// skip extra slashes
 					}
 				}
 
-				if ( done == 0 ) 		// we are in a comment
+				if ( done == 0 ) 		// we are in a multi-line comment
 					if ( str1[ i ] == '*' && str1[ i + 1 ] == '/' )
+						done = 1;
+
+				if ( done == 2 )		// we are in a single-line comment
+					if ( str1[ i ] == '\n' )
 						done = 1;
 
 				if ( done == 0 || done == 2 )
 					if ( str1[ i ] != '\r' )
 						str2[ j++ ] = str1[ i ];
-
-				if ( done == 2 && str1[ i ] == '\n' )
-					done = -1;
 
 				if ( j >= descr_len - 2 )
 					done = 1;
@@ -869,31 +873,31 @@ bool check_nw_exec( const char *nw_exe )
 {
 	char exe[ MAX_PATH_LENGTH ], lib[ MAX_PATH_LENGTH ];
 	struct stat stNWexe, stLib, stExe;
-	
+
 	if ( strlen( lib_path ) > 0 )
 		snprintf( lib, MAX_PATH_LENGTH, "%s/%s", lib_path, lib_file );// full lib name
 	else
 		strcpyn( lib, lib_file, MAX_PATH_LENGTH );
-		
+
 	if ( strlen( exec_path ) > 0 )
 		snprintf( exe, MAX_PATH_LENGTH, "%s/%s", exec_path, exec_file );// full exe name
 	else
 		strcpyn( exe, exec_file, MAX_PATH_LENGTH );
-		
+
 	// get OS info for files
 	if ( stat( nw_exe, &stNWexe ) == 0 && ( stat( lib, &stLib ) == 0 || ( stat( lib, &stExe ) == 0 ) ) )
 		if ( ( stat( lib, &stLib ) == 0 && difftime( stNWexe.st_mtime, stLib.st_mtime ) < 0 ) ||
 			 ( stat( lib, &stExe ) == 0 && difftime( stNWexe.st_mtime, stExe.st_mtime ) < 0 ) )
 			return true;
-			
+
 	return false;
 }
 
-	
+
 /****************************************************
 CHECK_LABEL
 Control that the label lab does not already exist
-in the model. Also prevents invalid characters in 
+in the model. Also prevents invalid characters in
 the names.
 ****************************************************/
 int check_label( const char *lab, object *r )
