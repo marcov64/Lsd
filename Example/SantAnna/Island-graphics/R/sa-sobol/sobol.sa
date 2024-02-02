@@ -1,0 +1,6 @@
+rho 0 2 f: 0.1 10
+lambda 0 2 f: 1 5
+alpha 0 2 f: 1 5
+phi 0 2 f: 0 0.8
+pi 0 2 f: 0.05 0.5
+epsilon 0 2 f: 0.1 0.9

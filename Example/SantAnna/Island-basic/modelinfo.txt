@@ -1,0 +1,13 @@
+Island (basic)
+1.0
+30 January, 2024
+#
+#
+#
+#
+#
+#
+#
+#
+l0=10_l0radius=25_T=500.lsd
+
