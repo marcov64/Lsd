@@ -1,0 +1,133 @@
+Island Model (basic) (ver. 1.0)
+===============================
+
+Recoded in LSD by Marcelo C. Pereira, University of Campinas
+Copyright Marcelo C. Pereira
+
+Based on Fagiolo, G., Dosi, G. (2003) Exploitation, exploration and innovation in a model of endogenous growth with locally interacting agents, Structural Change and Economic Dynamics,
+v. 14, p. 237-273.
+
+This basic version has no sea graphics (lattice), and does not support no-exploration setup (pi=0). Use the graphics version if you need these.
+
+Model setup
+-----------
+The number of instances of all of the sea's descending objects should be set to 1. The model equations create and delete all the required object instances. The entire Sea object can be manually instanced.
+
+Not all model parameters are supposed to be set by the user, please refer to the information on each one to see if changing values is posible and the appropriate ranges (user parameters).
+
+Model structure
+---------------
+
+The code is organized in sections, associated to the respective object types:
+
+ - Sea: single object instance representing one sea
+ - Island: one instance per island (known/unknown)
+ - KnowIsland: one instance per known island
+ - Miner: one dummy instance per agent mining on island
+ - Agent: one instance per agent
+
+Object Sea
+----------
+Init: initializes the model, run once
+ . Create the lattice, if appropriate
+ . Create the  random initial islands (known/unknown)
+ . Draw the initially known islands
+ . Allocate agents in known islands randomly
+Step: forces agents to decide what to do first
+l: counts the known islands
+m: counts the number of miners
+i: counts the number of imitators
+e: counts the number of explorers
+Q: accumulates the sea's production (GDP)
+J: expands and counts the islands set
+ . Expand each frontier as required (N, S, W, E)
+
+Object KnownIsland
+------------------
+_Init: function to initialize a new known island, run once
+_m: counts the miners in the island
+ . Ignore "inactive" Miner object instances
+ . Adjust island color on the lattice (empty/colonized)
+_Qisland: accumulates the island production
+_c: compute the island productivity
+
+Object Miner
+------------
+_Qminer: compute miner production
+
+Object Agent
+------------
+_a: define the state of the agent
+ . If an Explorer, navigate to a new random position
+ . If an Imitator, navigate the shortest path to target
+ . If navigator, update position on the lattice
+ . If arrive in an island, become a Miner
+ . If a Miner decide if become Explorer or Imitator
+_cTarget: the best signal productivity received
+ . Evaluates all signals received on the island
+ . Computes _cTarget, _xTarget, _yTarget, wBest, _xBest, _yBest
+_leave: function to disconnect miner agent from island
+
+Data structure
+--------------
+Object Sea:
+ . User parameters: N, alpha, epsilon, phi, lambda, pi, rho, l0, l0radius, minSgnPrb
+ . Variables: l, e, i, m, J, Q
+ . Internal parameters: xxxxFrontier (do not change)
+ . Internal variables: Init, Step
+Object Island:
+ . Internal parameters: _known, _idIsland, _xIsland, _yIsland (do not change)
+Object KnowIsland:
+ . Variables: _c, _m, _Qisland
+ . Function: _Init
+ . Internal parameters: _idKnown, _s (do not change)
+Object Miner:
+ . Variables: _Qminer
+ . Internal parameters: _agentId (do not change)
+Object Agent:
+ . Variables: _a, _xAgent, _yAgent, _Qlast, _cTarget, _xTarget, _yTarget, wBest, _xBest, _yBest
+ . Function: _leave
+ . Internal parameters: _idAgent, _knownId (do not change)
+
+Original paper parameters
+-------------------------
+All the original paper parameters and initial conditions can be found in object Sea and can be changed.
+
+Topology configuration
+----------------------
+Set the maximum radius for initial known islands: l0radius
+Define the minimum signal probability to consider (speed-up): minSgnPrb
+
+Accelerator network hook pointers
+---------------------------------
+LSD hook pointers connect all the objects to maximize performance:
+ . KnowIsland -> Island
+ . Miner -> Agent
+ . Agent -> Miner
+
+Diffusion network
+-----------------
+Each KnownIsland instance is the hub of a star network to all other relevant known islands
+ . Link creation depends on the signal intensity threshold defined by MinSgnPrb
+ . All links are bidirectional
+ . Link weight is defined by the exponential decay factor between the two islands
+
+Data analysis
+-------------
+Some R scripts are provided to analyze the model outputs, to perform sensitivity analysis, and to generate response surfaces:
+
+aggregates_analysis.R - analyze model aggregate variables
+
+elementary-effects-SA.R - perform Morris OAT elementary effects sensitivity analysis
+
+kriging-sobol-SA.R - fit Kriging meta-model, perform Sobol sensitivity analysis on it, and present the response surface
+
+poly-sobol-SA.R - fit polynomial meta-model, perform Sobol sensitivity analysis on it, and present the response surface (experimental, use with care)
+
+sobol-SA.R - perform Sobol sensitivity analysis directly on DoE data (require dense sampling), no response surface analysis
+
+optimize-MM.R - using a fitted meta-model, find points in the parameter space which maximize and minimize the value of the selected variable
+
+The scripts and the pre-defined example configurations to use the scripts can be found in folders in the R folder inside the model folder ([LSD_directory]/Example/SantAnna/Island/R).
+
+All the scripts assume the R working directory is set to this particular folder. All the scripts require the following R packages (and its dependencies) to be installed: LSDsensitivity, normalp, nortest, mFilter, matrixStats, tseries, gplots, plotrix, extrafont. The scripts try to install the libraries if an internet connection is available.
