@@ -166,7 +166,7 @@ stateIRF <- state.irf.lsd( data = mc, irf = linearIRF_GDP,
                            irf.type = "none", ci.R = bootR, ci.type = bootCI,
                            alpha = bootAlpha )
 
-plot( stateIRF, state = 0, irf.type = "cum.irf", scale = 1, center = TRUE,
+plot( stateIRF, irf.type = "cum.irf", scale = 1, center = TRUE,
       col = c( "green", "blue" ), col.ci = c( "green", "blue" ), lwd = 2,
       xlab = "Relative time after shock",
       ylab = "State-dependent Cumulative impulse response",
@@ -183,7 +183,7 @@ stateIRF <- state.irf.lsd( data = mc, irf = linearIRF_GDP,
                            irf.type = "none", ci.R = bootR, ci.type = bootCI,
                            alpha = bootAlpha )
 
-plot( stateIRF, state = 0, irf.type = "cum.irf", scale = 1, center = TRUE,
+plot( stateIRF, irf.type = "cum.irf", scale = 1, center = TRUE,
       col = c( "green", "blue" ), col.ci = c( "green", "blue" ), lwd = 2,
       xlab = "Relative time after shock",
       ylab = "State-dependent Cumulative impulse response",
@@ -211,7 +211,7 @@ stateIRF1 <- state.irf.lsd( data = mc, irf = linearIRF_GDP, states = stateIdent,
                             add.vars = addVars, irf.type = "none",
                             ci.R = bootR, ci.type = bootCI, alpha = bootAlpha )
 
-plot( stateIRF1, state = 0, irf.type = "cum.irf", scale = 1, center = TRUE,
+plot( stateIRF1, irf.type = "cum.irf", scale = 1, center = TRUE,
       col = c( "green", "blue" ), col.ci = c( "green", "blue" ), lwd = 2,
       xlab = "Relative time after shock",
       ylab = "State-dependent Cumulative impulse response",
@@ -226,7 +226,7 @@ stateIRF2 <- state.irf.lsd( data = mc, irf = linearIRF_GDP, states = stateIdent,
                             add.vars = addVars, irf.type = "none",
                             ci.R = bootR, ci.type = bootCI, alpha = bootAlpha )
 
-plot( stateIRF2, state = 0, irf.type = "cum.irf", scale = 1, center = TRUE,
+plot( stateIRF2, irf.type = "cum.irf", scale = 1, center = TRUE,
       col = c( "blue", "green" ), col.ci = c( "blue", "green" ), lwd = 2,
       xlab = "Relative time after shock",
       ylab = "State-dependent Cumulative impulse response",
@@ -241,7 +241,7 @@ stateIRF3 <- state.irf.lsd( data = mc, irf = linearIRF_GDP, states = stateIdent,
                             add.vars = addVars, irf.type = "none",
                             ci.R = bootR, ci.type = bootCI, alpha = bootAlpha )
 
-plot( stateIRF3, state = 0, irf.type = "cum.irf", scale = 1, center = TRUE,
+plot( stateIRF3, irf.type = "cum.irf", scale = 1, center = TRUE,
       col = c( "green", "blue" ), col.ci = c( "green", "blue" ), lwd = 2,
       xlab = "Relative time after shock",
       ylab = "State-dependent Cumulative impulse response",

@@ -16,7 +16,8 @@ state.irf.lsd( data, irf, states = NULL, state.num = 1,
                metr.irf = NULL, add.vars = NULL,
                irf.type = c( "incr.irf", "cum.irf", "peak.mult",
                              "cum.mult", "none" ),
-               ci.R = 999, ci.type = c( "basic", "perc", "bca" ),
+               state.plot = 0, ci.R = 999,
+               ci.type = c( "basic", "perc", "bca" ),
                alpha = 0.05, seed = 1, ... )
 }
 
@@ -46,6 +47,9 @@ state.irf.lsd( data, irf, states = NULL, state.num = 1,
   }
 
   \item{irf.type}{string: one of five options (\code{"incr.irf"}, \code{"cum.irf"}, \code{"peak.mult"}, \code{"cum.mult"}, or \code{"none"}) defining the type of function plot to be produced: incremental impulse-response, cumulative impulse-response, peak multiplier, cumulative multiplier, or no plot. It also selects the type of function to be used when printing reports (response or multiplier functions). The default is \code{"incr.irf"}. This option only affect the plot, not the produced data, as all function values are always computed and saved in the output object.
+  }
+
+  \item{state.plot}{integer: the relative position (1,2,...) of the state (as defined by \code{eval.state}) which data is to be used on plots. The default (\code{0}) is to plot data from all states, which allows comparing the state responses.
   }
 
   \item{ci.R}{integer: number of bootstrap replicates when computing the bootstrap confidence interval.
