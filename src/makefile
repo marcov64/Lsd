@@ -52,7 +52,8 @@ else
     TMP_DIR=$(TMPDIR)
     PKG_LMM=$(TARGET_LMM).app/Contents/MacOS/
     PKG_LSD=$(TARGET_LSD).app/Contents/MacOS/
-    DLL_EXT=.so
+    EXE_EXT=
+    DLL_EXT=.dylib
     TOUCH_LMM=touch -c $(LSDROOT)/$(TARGET_LMM).app
     TOUCH_LSD=touch -c $(LSDROOT)/$(TARGET_LSD).app
     PATH_TCL_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tcl.framework/Headers
@@ -63,7 +64,8 @@ else
   else
     PLAT=linux
     TMP_DIR=$(TMPDIR)
-    DLL_EXT=.dylib
+    EXE_EXT=
+    DLL_EXT=.so
     TCL_VERSION=8.6
     PATH_TCLTK_HEADER=/usr/include/tcl$(TCL_VERSION)
     PATH_TCLTK_LIB=/usr/lib/tcl$(TCL_VERSION)
@@ -85,7 +87,7 @@ LIB=-lz
 DEP_GUI=$(SRC_DIR)LSD.h
 DEP_BASE=$(SRC_DIR)libLSD.h
 
-# OS-specific commands and definitions
+# OS commands
 CC=g++$(EXE_EXT)
 AR=$(AR_DIR)ar$(EXE_EXT) -rcs
 RM=@rm$(EXE_EXT) -f

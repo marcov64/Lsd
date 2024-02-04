@@ -1,8 +1,6 @@
 # specify where are the sources of LSD
 SRC_DIR=$(SRC)/
 LIB_DIR=$(SRC_DIR)lib/
-
-# location of headers
 INCLUDE=-I$(SRC) -I$(PATH_HEADER)
 
 # no-window specific variables
@@ -12,31 +10,52 @@ CC_NW=$(CC_CROSS)g++
 SWITCH_CC_NW=$(GLOBAL_CC) $(SWITCH_CC) -D_NW_ -O3 -g0
 TARGET_NW=lsd$(SUFFIX_NW)
 
-# location of object files
+# handle platform-specific stuff
 ifeq ($(OS),Windows_NT)
-	OBJ_DIR=$(TMP)/$(TARGET_NW)/
-	EXT=.exe
+  OBJ_DIR=$(TMP)/$(TARGET_NW)/
+  EXE_EXT=.exe
+  DLL_EXT=.dll
 else
-	OBJ_DIR=$(TMPDIR)/$(TARGET_NW)/
-	EXT=
+  ifeq ($(shell uname -s),Darwin)
+    OBJ_DIR=$(TMPDIR)/$(TARGET_NW)/
+    EXE_EXT=
+    DLL_EXT=.dylib
+  else
+    OBJ_DIR=$(TMPDIR)/$(TARGET_NW)/
+    EXE_EXT=
+    DLL_EXT=.so
+  endif
 endif
 
-# OS commands to delete files and create directories
-RM=@rm$(EXT) -f
-MKDIR=@mkdir$(EXT) -p
+# check if DLL is to be created
+DLL=$(findstring $(strip $(DLL_NW)),false False FALSE no No NO 0)
+
+# OS commands
+RM=@rm$(EXE_EXT) -f
+MKDIR=@mkdir$(EXE_EXT) -p
 
 # targets
 .PHONY: all
-all: $(TARGET_NW)$(EXT)
+all: $(TARGET_NW)$(EXE_EXT)
 
-# LSD No Window executable
-$(TARGET_NW)$(EXT): $(OBJ_DIR)LSDnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN)$(SUFFIX_NW).o
-	$(CC_NW) $(SWITCH_CC_NW) $(SWITCH_CC_LNK) $(OBJ_DIR)LSDnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN)$(SUFFIX_NW).o -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)$(EXT)
+ifeq ($(DLL),)
+# dynamic library
+lib$(TARGET_NW)$(DLL_EXT): $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o -L$(PATH_LIB) $(LIB_NW) -shared -o lib$(TARGET_NW)$(DLL_EXT)
 
-# executable modules
-$(OBJ_DIR)$(FUN)$(SUFFIX_NW).o: $(FUN).cpp $(SRC_DIR)libLSD.h $(SRC_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA)
+# No Window executable (small file)
+$(TARGET_NW)$(EXE_EXT): $(OBJ_DIR)LSDnw.o lib$(TARGET_NW)$(DLL_EXT)
+	$(CC_NW) $(SWITCH_CC_NW) $(SWITCH_CC_LNK) $(OBJ_DIR)LSDnw.o -L. -l$(TARGET_NW) -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)$(EXE_EXT)
+else
+# No Window executable (single file)
+$(TARGET_NW)$(EXE_EXT): $(OBJ_DIR)LSDnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o
+	$(CC_NW) $(SWITCH_CC_NW) $(SWITCH_CC_LNK) $(OBJ_DIR)LSDnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)$(EXE_EXT)
+endif
+
+# executable/DLL modules
+$(OBJ_DIR)$(FUN).o: $(FUN).cpp $(SRC_DIR)libLSD.h $(SRC_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA)
 	$(MKDIR) $(@D)
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(FUN).cpp -o $(OBJ_DIR)$(FUN)$(SUFFIX_NW).o
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(FUN).cpp -o $(OBJ_DIR)$(FUN).o
 
 $(OBJ_DIR)LSDnw.o: $(SRC_DIR)LSDnw.cpp $(SRC_DIR)libLSD.h
 	$(MKDIR) $(@D)
@@ -100,4 +119,4 @@ $(OBJ_DIR)pugixml.o: $(SRC_DIR)pugixml/pugixml.cpp $(SRC_DIR)pugixml/pugixml.hpp
 
 # remove compiled files
 clean:
-	$(RM) $(OBJ_DIR)* $(TARGET_NW)$(EXT)
+	$(RM) $(OBJ_DIR)* lib$(TARGET_NW)$(DLL_EXT) $(TARGET_NW)$(EXE_EXT)

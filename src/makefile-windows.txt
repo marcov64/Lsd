@@ -12,6 +12,7 @@ else
   PRECOMP=$(findstring $(strip $(PRECOMPILED)),false False FALSE no No NO 0)
 endif
 
+# select static libraries to link
 ifeq ($(PRECOMP),)
   LIB_GUI=$(SRC_DIR)LSDgui-windows.a
   LIB_BASE=$(SRC_DIR)LSDbase-windows.a
@@ -24,7 +25,7 @@ endif
 DEP_GUI=$(SRC_DIR)LSD.h $(SRC_DIR)system_options.txt
 DEP_BASE=$(SRC_DIR)libLSD.h $(SRC_DIR)system_options.txt
 
-# OS-specific commands and definitions
+# OS commands and definitions
 EXE_EXT=.exe
 DLL_EXT=.dll
 AR_DIR=$(LSDROOT)/gnu/x86_64-w64-mingw32/bin/
