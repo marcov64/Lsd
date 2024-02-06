@@ -2114,7 +2114,11 @@ object *operate( object *r )
 					unsaved_change( false );	// signal no unsaved change
 			}
 
+			pause_run = false;					// not paused
+			done_in = 0;						// no run-time button pressed
+
 			choice = 1;
+
 			return n;
 
 

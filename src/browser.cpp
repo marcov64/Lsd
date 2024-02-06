@@ -375,7 +375,6 @@ int load_gui( const char **argv )
 
 	// set dynamic link library (DLL) call-back references
 	inter = interp;
-	liblnk.center_plot = & center_plot;
 	liblnk.cmd_backend = & cmd_backend;
 	liblnk.cover_browser = & cover_browser;
 	liblnk.deb = & deb;
@@ -390,7 +389,8 @@ int load_gui( const char **argv )
 	liblnk.prepare_plot = & prepare_plot;
 	liblnk.print_stack = & print_stack;
 	liblnk.reset_plot = & reset_plot;
-	liblnk.scroll_plot = & scroll_plot;
+	liblnk.runtime_buttons = & runtime_buttons;
+	liblnk.runtime_step = & runtime_step;
 	liblnk.save_lattice_helper = & save_lattice_helper;
 	liblnk.show_prof_aggr = & show_prof_aggr;
 	liblnk.uncover_browser = & uncover_browser;
@@ -1495,6 +1495,116 @@ int browse( object *r )
 		}
 
 	return choice;
+}
+
+
+/****************************************************
+RUNTIME_STEP
+Updates GUI at the start of each time step
+Checks if debug must be invoked and if simulation
+is paused (return FALSE) or not (TRUE)
+****************************************************/
+bool runtime_step( int &t )
+{
+	cur_plt = 0;			// restart runtime variable color cycle
+
+	if ( pause_run )		// adjust "clock" backwards if simulation is paused
+		t--;
+
+	if ( t == when_debug )	// activate degugger if it's time
+	{
+		debug_flag = true;
+		cmd( "focustop .deb" );
+	}
+	else
+		debug_flag = false;
+
+	return ! pause_run;		// only update variables if simulation not paused
+}
+
+
+/****************************************************
+RUNTIME_BUTTONS
+Handle active buttons during simulation execution
+at the end of each time step
+****************************************************/
+void runtime_buttons( int cur_sim, int t, clock_t &last_update )
+{
+	switch ( done_in )
+	{
+		case 1:			// Stop button / s/S key
+			if ( pause_run )
+			{
+				cmd( "wm title .log \"$origLogTit\"" );
+				cmd( ".b.r2.pause conf -text Pause" );
+			}
+
+			quit = 2;
+			break;
+
+		case 2:			// Fast button / f/F key
+			set_fast( 1 );
+			debug_flag = false;
+			break;
+
+		case 3:			// Debug button / d/D key
+			if ( ! pause_run )
+			{
+				when_debug = t + 1;
+				debug_flag = true;
+				cmd( "focustop .deb" );
+			}
+			else		// if paused, just call the data browser
+			{
+				double useless = 0;
+				deb( root, NULL, "Paused by User", &useless, false, "" );
+			}
+
+			break;
+
+		case 4:			// Observe button / o/O key
+			set_fast( 0 );
+			break;
+
+		// runtime plot events
+		case 7:			// center button
+			center_plot( );
+			break;
+
+		case 8:			// scroll checkbox
+			scrollB = ! scrollB;
+			break;
+
+		case 9:			// pause simulation
+			pause_run = ! pause_run;
+			if ( pause_run )
+			{
+				cmd( "set origLogTit [ wm title .log ]; wm title .log \"$origLogTit (PAUSED)\"" );
+				plog( "\nSimulation %d of %d paused at case %d", cur_sim, sim_num, t );
+				cmd( ".b.r2.pause conf -text Resume" );
+			}
+			else
+			{
+				cmd( "wm title .log \"$origLogTit\"" );
+				plog( "\nSimulation %d of %d resumed at case %d", cur_sim, sim_num, t );
+				cmd( ".b.r2.pause conf -text Pause" );
+			}
+	}
+
+	done_in = 0;
+
+	if ( cur_sim == 1 && t == 1 )
+		enable_plot( );	// show run time plot if still enabled
+
+	scroll_plot( );		// perform scrolling if enabled
+
+	if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER )
+	{
+		cmd( ".p.b2.b configure -value %d", t );
+		cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", min( t + 1, max_step ), max_step, t, max_step );
+		cmd( "update" );
+		last_update = clock( );
+	}
 }
 
 

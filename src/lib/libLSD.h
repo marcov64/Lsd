@@ -499,7 +499,13 @@ struct profile							// profiled variable class
 
 struct dlliblinkage						// callback references for dynamic link library
 {
-	void ( *center_plot ) ( void ) = NULL;
+	bool ( *runtime_step ) ( int &t ) = NULL;
+	double ( *save_lattice_helper ) ( const char *fname ) = NULL;
+	double ( *update_lattice_helper ) ( double line, double col, double val,
+										int line_int, int col_int,
+										int val_int ) = NULL;
+	int ( * deb ) ( object *r, object *c, const char *lab, double *res,
+					bool interact, const char *hl_var ) = NULL;
 	void ( *cmd_backend ) ( const char *cm, va_list arg ) = NULL;
 	void ( *cover_browser ) ( const char *text1, const char *text2,
 							  bool run ) = NULL;
@@ -508,7 +514,8 @@ struct dlliblinkage						// callback references for dynamic link library
 	void ( *enable_plot ) ( void ) = NULL;
 	void ( *error_hard_helper ) ( const char *boxTitle, const char *boxText,
 								 const char *logText, bool defQuit ) = NULL;
-	void ( *init_lattice_helper ) ( double pixW, double pixH, double nrow, double ncol, int init_color ) = NULL;
+	void ( *init_lattice_helper ) ( double pixW, double pixH, double nrow,
+									double ncol, int init_color ) = NULL;
 	void ( *log_tcl_error ) ( bool show, const char *cm,
 							 const char *message, ... ) = NULL;
 	void ( *plog_backend ) ( const char *cm, const char *tag,
@@ -517,15 +524,9 @@ struct dlliblinkage						// callback references for dynamic link library
 	void ( *prepare_plot ) ( object *r, int id_sim ) = NULL;
 	void ( *print_stack ) ( void ) = NULL;
 	void ( *reset_plot ) ( void ) = NULL;
-	void ( *scroll_plot ) ( void ) = NULL;
+	void ( *runtime_buttons ) ( int cur_sim, int t, clock_t &last_update ) = NULL;
 	void ( *show_prof_aggr ) ( void ) = NULL;
 	void ( *uncover_browser ) ( void ) = NULL;
-	double ( *save_lattice_helper ) ( const char *fname ) = NULL;
-	double ( *update_lattice_helper ) ( double line, double col, double val,
-										int line_int, int col_int,
-										int val_int ) = NULL;
-	int ( * deb ) ( object *r, object *c, const char *lab, double *res,
-					bool interact, const char *hl_var ) = NULL;
 };
 
 #ifndef _NP_
@@ -750,7 +751,6 @@ extern bool on_bar;				// flag to indicate bar is being draw in log window
 extern bool parallel_abort;		// indicate parallel threads were aborted
 extern bool parallel_mode;		// parallel mode (multithreading) status
 extern bool parallel_monitor;	// parallel monitor thread status
-extern bool pause_run;			// pause running simulation
 extern bool running;			// simulation is running
 extern bool save_alt_path;		// alternate save path flag
 extern bool save_ok;			// control if saving model configuration is possible
@@ -801,10 +801,8 @@ extern int NOLH_6[ ][ 100 ];
 extern int actual_steps;		// number of executed time steps
 extern int add_to_tot;			// type of totals file generated (bool)
 extern int choice;				// Tcl menu control variable (main window)
-extern int cur_plt;				// current graph plot number
 extern int dobar;				// output a progress bar to the log/standard output
 extern int docsv;				// produce .csv text results files (bool)
-extern int done_in;				// Tcl menu control variable (log window)
 extern int dozip;				// compressed results file flag (bool)
 extern int fend;				// last multi configuration job to run
 extern int findex;				// current multi configuration job
@@ -824,7 +822,6 @@ extern int stack_level;			// LSD stack call level
 extern int stack_info;			// LSD stack control
 extern int watch;				// allow for graph generation interruption (bool)
 extern int when_debug;			// next debug stop time step (0 for none )
-extern int wr_warn_cnt;			// invalid write operations warning counter
 extern lattice latt;			// model lattice
 extern long nodesSerial;		// network node serial number global counter
 extern lsdstack *stack_log;		// LSD stack

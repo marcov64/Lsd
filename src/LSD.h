@@ -144,6 +144,7 @@ bool load_prev_configuration( void );
 bool make_no_window( void );
 bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz );
 bool open_configuration( object *&r, bool reload );
+bool runtime_step( int &t );
 bool save_configuration( const char *path, const char *rname, const char *ext );
 bool save_sensitivity( FILE *f );
 bool save_xml_configuration( int findex = 0, const char *dest_path = NULL, bool quick = false );
@@ -295,6 +296,7 @@ void read_eqfile_name( char *s, int sz );
 void report( object *r );
 void reset_plot( void );
 void return_where_used( char *lab, char *s, int sz );
+void runtime_buttons( int cur_sim, int t, clock_t &last_update );
 void save_cells( object *r, const char *lab );
 void save_data1( void );
 void save_datazip( void );
@@ -381,6 +383,7 @@ extern bool eq_dum;				// current equation is dummy
 extern bool ignore_eq_file;		// control of configuration files equation updating
 extern bool log_ok;				// control for log window available
 extern bool meta_par_in[ ];		// flag meta variables for simulation settings found
+extern bool pause_run;			// pause running simulation
 extern bool redrawRoot;			// control for redrawing root window (.)
 extern bool redrawStruc;		// control for redrawing model structure window
 extern bool redrawReq;			// flag for asynchronous window redraw request
@@ -390,6 +393,8 @@ extern char path_sens[ ];		// path of last used sensitivity directory
 extern char tcl_dir[ ];			// Tcl/Tk directory
 extern const char *res_g;		// structure window result variable
 extern int choice_g;			// Tcl menu control variable ( structure window)
+extern int cur_plt;				// current graph plot number
+extern int done_in;				// Tcl menu control variable (log window)
 extern int doover;				// overwrite results folder (bool)
 extern int elem_count;			// recursive element counter for show elements menu
 extern int macro;				// equations style (macros or C++) (bool)

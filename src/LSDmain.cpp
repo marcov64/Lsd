@@ -38,6 +38,7 @@ bool check_save;			// control saving message inside disabled objects
 bool eq_dum = false;		// current equation is dummy
 bool log_ok = false;		// control for log window available
 bool meta_par_in[ META_PAR_NUM ];// flag meta parameter for simulation settings found
+bool pause_run;				// pause running simulation
 bool redrawRoot;			// control for redrawing root window (.)
 bool redrawStruc;			// control for redrawing model structure window
 bool redrawReq = false;		// flag for asynchronous window redraw request
@@ -46,6 +47,8 @@ char path_sens[ MAX_PATH_LENGTH ] = "";	// path of last used sensitivity directo
 char tcl_dir[ MAX_PATH_LENGTH ] = "";	// Tcl/Tk directory
 const char *res_g = NULL;	// structure window result variable
 int choice_g;				// Tcl menu control variable (structure window)
+int cur_plt;				// current graph plot number
+int done_in;				// Tcl menu control variable (log window)
 int elem_count;				// recursive element counter for show elements menu
 int macro;					// equations style (macros or C++) (bool)
 int platform = 0;			// OS platform (1=Linux, 2=Mac, 3=Windows)

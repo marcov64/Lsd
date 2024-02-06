@@ -41,10 +41,7 @@ int run( void )
 	int i, perc_done, last_done;
 	FILE *f;
 	clock_t start, end, last_update;
-	result *rf;					// pointer for results files (may be zipped or not)
-
-	if ( strlen( simul_name ) == 0 || strlen( struct_file ) == 0  )
-		return 5;				// it should never get here... just in case
+	result *rf;				// pointer for results files (may be zipped or not)
 
 #ifndef _NP_
 	// check if there are parallel computing variables
@@ -170,8 +167,6 @@ int run( void )
 		init_math_error( );
 
 		seed++;
-		pause_run = false;
-		debug_flag = false;
 		error_hard_thread = false;
 		worker_ready = true;
 		worker_crashed = false;
@@ -180,8 +175,6 @@ int run( void )
 		use_nan = false;
 		no_search = false;
 		no_search_up = false;
-		done_in = 0;
-		wr_warn_cnt = 0;
 		start = last_update = clock( );
 
 		for ( t = 1; quit == 0 && t <= max_step; ++t )
@@ -191,21 +184,8 @@ int run( void )
 				update_bar( bar_done, perc_done, last_done, 2 * BAR_DONE_SIZE );
 
 #ifndef _NW_
-			// restart runtime variables color cycle
-			cur_plt = 0;
-
-			// adjust "clock" backwards if simulation is paused
-			if ( pause_run )
-				t--;
-
-			if ( when_debug == t )
-			{
-				debug_flag = true;
-				cmd_gui( "focustop .deb" );
-			}
-
 			// only update if simulation not paused
-			if ( ! pause_run )
+			if ( liblnk.runtime_buttons == NULL || liblnk.runtime_step( t ) )
 #endif
 			{
 				actual_steps = t;
@@ -215,90 +195,9 @@ int run( void )
 			perc_done = min( 100 * ( ( i - 1 ) + ( double ) t / max_step ) / sim_num, 100 );
 
 #ifndef _NW_
-			switch ( done_in )
-			{
-				case 1:			// Stop button / s/S key
-					if ( pause_run )
-					{
-						cmd_gui( "wm title .log \"$origLogTit\"" );
-						cmd_gui( ".b.r2.pause conf -text Pause" );
-					}
-
-					quit = 2;
-					break;
-
-				case 2:			// Fast button / f/F key
-					set_fast( 1 );
-					debug_flag = false;
-					break;
-
-				case 3:			// Debug button / d/D key
-					if ( ! pause_run )
-					{
-						when_debug = t + 1;
-						debug_flag = true;
-						cmd_gui( "focustop .deb" );
-					}
-					else		// if paused, just call the data browser
-					{
-						double useless = 0;
-
-						if ( liblnk.deb != NULL )
-							liblnk.deb( root, NULL, "Paused by User", &useless, false, "" );
-					}
-
-					break;
-
-				case 4:			// Observe button / o/O key
-					set_fast( 0 );
-					break;
-
-				// runtime plot events
-				case 7:			// center button
-					if ( liblnk.center_plot != NULL )
-							liblnk.center_plot( );
-
-					break;
-
-				case 8:			// scroll checkbox
-					scrollB = ! scrollB;
-					break;
-
-				case 9:			// pause simulation
-					pause_run = ! pause_run;
-					if ( pause_run )
-					{
-						cmd_gui( "set origLogTit [ wm title .log ]; wm title .log \"$origLogTit (PAUSED)\"" );
-						plog( "\nSimulation %d of %d paused at case %d", i, sim_num, t );
-						cmd_gui( ".b.r2.pause conf -text Resume" );
-					}
-					else
-					{
-						cmd_gui( "wm title .log \"$origLogTit\"" );
-						plog( "\nSimulation %d of %d resumed at case %d", i, sim_num, t );
-						cmd_gui( ".b.r2.pause conf -text Pause" );
-					}
-
-					break;
-			}
-
-			done_in = 0;
-
-			// show run time plot if still enabled
-			if ( i == 1 && t == 1 && ! fast && liblnk.enable_plot != 0 )
-				liblnk.enable_plot( );
-
-			// perform scrolling if enabled
-			if ( ! pause_run && liblnk.scroll_plot != 0 )
-				liblnk.scroll_plot( );
-
-			if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER )
-			{
-				cmd_gui( ".p.b2.b configure -value %d", t );
-				cmd_gui( ".p.b2.i configure -text \"Case: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", min( t + 1, max_step ), max_step, t, max_step );
-				cmd_gui( "update" );
-				last_update = clock( );
-			}
+			// handle runtime button pressings
+			if ( liblnk.runtime_buttons != NULL )
+				liblnk.runtime_buttons( i, t, last_update );
 #endif
 		}	// end of t
 
