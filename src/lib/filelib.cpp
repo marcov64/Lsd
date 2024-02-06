@@ -31,7 +31,7 @@ for the objects. It is made in specular way in respect of
 save_insts.
 *************************************************************/
 
-#include "libLSD.h"
+#include "lib/libLSD.h"				// LSD library classes
 
 
 /*****************************************************************************

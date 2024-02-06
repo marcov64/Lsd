@@ -18,7 +18,7 @@ Contains the functions to operate on model's object and
 element textual descriptions.
 *************************************************************/
 
-#include "libLSD.h"
+#include "lib/libLSD.h"				// LSD library classes
 
 
 /***************************************************

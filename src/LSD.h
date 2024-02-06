@@ -18,7 +18,7 @@ Global definitions shared by all LSD GUI modules.
 *************************************************************/
 
 // definitions from LSD library
-#include "libLSD.h"
+#include "lib/libLSD.h"
 
 // standard libraries used
 #include <list>
@@ -107,9 +107,8 @@ Global definitions shared by all LSD GUI modules.
 							 "#", "#", "#", \
 							 "#", "#", "#", \
 							 "Root", "1", "0", "0" }
-#define LSD_NW_NUM 5
-#define LSD_NW_SRC { "lsdnw.cpp", "libLSD.h", "check.h", "fun_head.h", \
-					 "fun_head_fast.h" }
+#define LSD_NW_NUM 3
+#define LSD_NW_SRC { "lsdnw.cpp", "fun_head.h", "fun_head_fast.h" }
 #define LSD_DIR_NUM 8
 #define LSD_DIR_NAME { "src", "gnu", "installer", "Manual", "LMM.app", "Rpkg", \
 					   "lwi", "___" }

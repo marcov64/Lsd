@@ -1,6 +1,7 @@
 # specify where are the sources of LSD and destination of temporary files
 SRC_DIR=$(LSDROOT)/$(SRC)/
 LIB_DIR=$(SRC_DIR)lib/
+PUGI_DIR=$(SRC_DIR)pugixml/
 OBJ_DIR=$(TMP)/$(TARGET)/
 INCLUDE=-I$(LSDROOT)/$(SRC) -I$(PATH_TCLTK_HEADER) -I$(PATH_HEADER)
 
@@ -23,7 +24,7 @@ endif
 
 # set general dependencies
 DEP_GUI=$(SRC_DIR)LSD.h $(SRC_DIR)system_options.txt
-DEP_BASE=$(SRC_DIR)libLSD.h $(SRC_DIR)system_options.txt
+DEP_LIB=$(LIB_DIR)libLSD.h $(SRC_DIR)system_options.txt
 
 # OS commands and definitions
 EXE_EXT=.exe
@@ -46,7 +47,7 @@ endif
 lib$(TARGET)$(DLL_EXT): $(OBJ_DIR)$(FUN).o $(LIB_BASE)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(OBJ_DIR)$(FUN).o -Wl,--whole-archive $(LIB_BASE) -Wl,--no-whole-archive -L$(PATH_LIB) $(LIB) -shared -o lib$(TARGET)$(DLL_EXT)
 
-$(OBJ_DIR)$(FUN).o: $(FUN).cpp $(DEP_BASE) $(SRC_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA) model_options.txt
+$(OBJ_DIR)$(FUN).o: $(FUN).cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA) model_options.txt
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(INCLUDE) -c $(FUN).cpp -o $(OBJ_DIR)$(FUN).o
 
@@ -56,61 +57,61 @@ $(LIB_BASE): $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $
 	$(AR) $(LIB_BASE) $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o
 
 # base static library modules
-$(OBJ_DIR)libmain.o: $(LIB_DIR)libmain.cpp $(DEP_BASE)
+$(OBJ_DIR)libmain.o: $(LIB_DIR)libmain.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)libmain.cpp -o $(OBJ_DIR)libmain.o
 
-$(OBJ_DIR)commonlib.o: $(LIB_DIR)commonlib.cpp $(DEP_BASE)
+$(OBJ_DIR)commonlib.o: $(LIB_DIR)commonlib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)commonlib.cpp -o $(OBJ_DIR)commonlib.o
 
-$(OBJ_DIR)description.o: $(LIB_DIR)description.cpp $(DEP_BASE)
+$(OBJ_DIR)description.o: $(LIB_DIR)description.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)description.cpp -o $(OBJ_DIR)description.o
 
-$(OBJ_DIR)filelib.o: $(LIB_DIR)filelib.cpp $(DEP_BASE)
+$(OBJ_DIR)filelib.o: $(LIB_DIR)filelib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)filelib.cpp -o $(OBJ_DIR)filelib.o
 
-$(OBJ_DIR)latticelib.o: $(LIB_DIR)latticelib.cpp $(DEP_BASE)
+$(OBJ_DIR)latticelib.o: $(LIB_DIR)latticelib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)latticelib.cpp -o $(OBJ_DIR)latticelib.o
 
-$(OBJ_DIR)math.o: $(LIB_DIR)math.cpp $(DEP_BASE)
+$(OBJ_DIR)math.o: $(LIB_DIR)math.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)math.cpp -o $(OBJ_DIR)math.o
 
-$(OBJ_DIR)nets.o: $(LIB_DIR)nets.cpp $(DEP_BASE)
+$(OBJ_DIR)nets.o: $(LIB_DIR)nets.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)nets.cpp -o $(OBJ_DIR)nets.o
 
-$(OBJ_DIR)object.o: $(LIB_DIR)object.cpp $(DEP_BASE)
+$(OBJ_DIR)object.o: $(LIB_DIR)object.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)object.cpp -o $(OBJ_DIR)object.o
 
-$(OBJ_DIR)parallel.o: $(LIB_DIR)parallel.cpp $(DEP_BASE)
+$(OBJ_DIR)parallel.o: $(LIB_DIR)parallel.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)parallel.cpp -o $(OBJ_DIR)parallel.o
 
-$(OBJ_DIR)run.o: $(LIB_DIR)run.cpp $(DEP_BASE)
+$(OBJ_DIR)run.o: $(LIB_DIR)run.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)run.cpp -o $(OBJ_DIR)run.o
 
-$(OBJ_DIR)stattables.o: $(LIB_DIR)stattables.cpp $(DEP_BASE)
+$(OBJ_DIR)stattables.o: $(LIB_DIR)stattables.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)stattables.cpp -o $(OBJ_DIR)stattables.o
 
-$(OBJ_DIR)utillib.o: $(LIB_DIR)utillib.cpp $(DEP_BASE)
+$(OBJ_DIR)utillib.o: $(LIB_DIR)utillib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)utillib.cpp -o $(OBJ_DIR)utillib.o
 
-$(OBJ_DIR)variab.o: $(LIB_DIR)variab.cpp $(DEP_BASE)
+$(OBJ_DIR)variab.o: $(LIB_DIR)variab.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)variab.cpp -o $(OBJ_DIR)variab.o
 
-$(OBJ_DIR)pugixml.o: $(SRC_DIR)pugixml/pugixml.cpp $(SRC_DIR)pugixml/pugixml.hpp $(SRC_DIR)pugixml/pugiconfig.hpp
+$(OBJ_DIR)pugixml.o: $(PUGI_DIR)pugixml.cpp $(PUGI_DIR)pugixml.hpp $(PUGI_DIR)pugiconfig.hpp
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)pugixml/pugixml.cpp -o $(OBJ_DIR)pugixml.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(PUGI_DIR)pugixml.cpp -o $(OBJ_DIR)pugixml.o
 
 # executable
 $(TARGET)$(EXE_EXT): $(OBJ_DIR)LSD.exe.manifest.o $(LIB_GUI) lib$(TARGET)$(DLL_EXT)

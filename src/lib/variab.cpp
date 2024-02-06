@@ -115,7 +115,7 @@ It is used to free all the memory assigned to the variable. Used by
 object::delete_obj to cancel an object.
 *************************************************************/
 
-#include "libLSD.h"
+#include "lib/libLSD.h"				// LSD library classes
 
 clock_t start_profile[ 100 ], end_profile[ 100 ];
 
@@ -319,7 +319,7 @@ double variable::cal( object *caller, int lag )
 					if ( lag > t - start )	// or before there are saved values
 						goto error;
 
-				return data[ t - lag - start ];	// use saved past value
+				return data[ t - lag - start ]; // use saved past value
 			}
 			else
 				return val[ eff_lag ];	// use regular past value
@@ -350,7 +350,7 @@ double variable::cal( object *caller, int lag )
 	}
 	else								// function
 	{
-		if ( lag < 0 || lag > num_lag )	// with invalid lag
+		if ( lag < 0 || lag > num_lag ) // with invalid lag
 			goto error;
 
 		if ( lag > 0 )					// lagged value
@@ -575,7 +575,7 @@ double variable::cal( object *caller, int lag )
 		wait_delete->delete_obj( this );
 	}
 
-	return app;	// by default the requested value is the last one, not yet computed
+	return app; // by default the requested value is the last one, not yet computed
 
 	error:
 

@@ -19,7 +19,7 @@ no-window executables. The graphical GUI code is stored in
 LATTICE.CPP.
 *************************************************************/
 
-#include "libLSD.h"
+#include "lib/libLSD.h"				// LSD library classes
 
 
 /***************************************************

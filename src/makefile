@@ -29,6 +29,7 @@ SWITCH_CC_LSD=
 LSDROOT=..
 SRC_DIR=$(LSDROOT)/src/
 LIB_DIR=$(SRC_DIR)lib/
+PUGI_DIR=$(SRC_DIR)pugixml/
 
 # handle platform-specific stuff
 ifeq ($(OS),Windows_NT)
@@ -85,7 +86,7 @@ LIB=-lz
 
 # set general dependencies
 DEP_GUI=$(SRC_DIR)LSD.h
-DEP_BASE=$(SRC_DIR)libLSD.h
+DEP_LIB=$(LIB_DIR)libLSD.h
 
 # OS commands
 CC=g++$(EXE_EXT)
@@ -129,7 +130,7 @@ $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT): $(OBJ_DIR_LSD)fun_dummy.o $(LIB
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(OBJ_DIR_LSD)fun_dummy.o -Wl,--whole-archive $(LIB_BASE) -Wl,--no-whole-archive -L$(PATH_LIB) $(LIB) -shared -o $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
 	$(TOUCH_LSD)
 
-$(OBJ_DIR_LSD)fun_dummy.o: $(SRC_DIR)fun_dummy.cpp $(DEP_BASE) $(SRC_DIR)check.h $(SRC_DIR)fun_head.h
+$(OBJ_DIR_LSD)fun_dummy.o: $(SRC_DIR)fun_dummy.cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)fun_dummy.cpp -o $(OBJ_DIR_LSD)fun_dummy.o
 
@@ -138,61 +139,61 @@ $(LIB_BASE): $(OBJ_DIR_LSD)libmain.o $(OBJ_DIR_LSD)commonlib.o $(OBJ_DIR_LSD)des
 	$(AR) $(LIB_BASE) $(OBJ_DIR_LSD)libmain.o $(OBJ_DIR_LSD)commonlib.o $(OBJ_DIR_LSD)description.o $(OBJ_DIR_LSD)filelib.o $(OBJ_DIR_LSD)latticelib.o $(OBJ_DIR_LSD)math.o $(OBJ_DIR_LSD)nets.o $(OBJ_DIR_LSD)object.o $(OBJ_DIR_LSD)parallel.o $(OBJ_DIR_LSD)run.o $(OBJ_DIR_LSD)stattables.o $(OBJ_DIR_LSD)utillib.o $(OBJ_DIR_LSD)variab.o $(OBJ_DIR_LSD)pugixml.o
 
 # LSD base static library modules
-$(OBJ_DIR_LSD)libmain.o: $(LIB_DIR)libmain.cpp $(DEP_BASE)
+$(OBJ_DIR_LSD)libmain.o: $(LIB_DIR)libmain.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)libmain.cpp -o $(OBJ_DIR_LSD)libmain.o
 
-$(OBJ_DIR_LSD)commonlib.o: $(LIB_DIR)commonlib.cpp $(DEP_BASE)
+$(OBJ_DIR_LSD)commonlib.o: $(LIB_DIR)commonlib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)commonlib.cpp -o $(OBJ_DIR_LSD)commonlib.o
 
-$(OBJ_DIR_LSD)description.o: $(LIB_DIR)description.cpp $(DEP_BASE)
+$(OBJ_DIR_LSD)description.o: $(LIB_DIR)description.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)description.cpp -o $(OBJ_DIR_LSD)description.o
 
-$(OBJ_DIR_LSD)filelib.o: $(LIB_DIR)filelib.cpp $(DEP_BASE)
+$(OBJ_DIR_LSD)filelib.o: $(LIB_DIR)filelib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)filelib.cpp -o $(OBJ_DIR_LSD)filelib.o
 
-$(OBJ_DIR_LSD)latticelib.o: $(LIB_DIR)latticelib.cpp $(DEP_BASE)
+$(OBJ_DIR_LSD)latticelib.o: $(LIB_DIR)latticelib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)latticelib.cpp -o $(OBJ_DIR_LSD)latticelib.o
 
-$(OBJ_DIR_LSD)math.o: $(LIB_DIR)math.cpp $(DEP_BASE)
+$(OBJ_DIR_LSD)math.o: $(LIB_DIR)math.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)math.cpp -o $(OBJ_DIR_LSD)math.o
 
-$(OBJ_DIR_LSD)nets.o: $(LIB_DIR)nets.cpp $(DEP_BASE)
+$(OBJ_DIR_LSD)nets.o: $(LIB_DIR)nets.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)nets.cpp -o $(OBJ_DIR_LSD)nets.o
 
-$(OBJ_DIR_LSD)object.o: $(LIB_DIR)object.cpp $(DEP_BASE)
+$(OBJ_DIR_LSD)object.o: $(LIB_DIR)object.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)object.cpp -o $(OBJ_DIR_LSD)object.o
 
-$(OBJ_DIR_LSD)parallel.o: $(LIB_DIR)parallel.cpp $(DEP_BASE)
+$(OBJ_DIR_LSD)parallel.o: $(LIB_DIR)parallel.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)parallel.cpp -o $(OBJ_DIR_LSD)parallel.o
 
-$(OBJ_DIR_LSD)run.o: $(LIB_DIR)run.cpp $(DEP_BASE)
+$(OBJ_DIR_LSD)run.o: $(LIB_DIR)run.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)run.cpp -o $(OBJ_DIR_LSD)run.o
 
-$(OBJ_DIR_LSD)stattables.o: $(LIB_DIR)stattables.cpp $(DEP_BASE)
+$(OBJ_DIR_LSD)stattables.o: $(LIB_DIR)stattables.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)stattables.cpp -o $(OBJ_DIR_LSD)stattables.o
 
-$(OBJ_DIR_LSD)utillib.o: $(LIB_DIR)utillib.cpp $(DEP_BASE)
+$(OBJ_DIR_LSD)utillib.o: $(LIB_DIR)utillib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)utillib.cpp -o $(OBJ_DIR_LSD)utillib.o
 
-$(OBJ_DIR_LSD)variab.o: $(LIB_DIR)variab.cpp $(DEP_BASE)
+$(OBJ_DIR_LSD)variab.o: $(LIB_DIR)variab.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)variab.cpp -o $(OBJ_DIR_LSD)variab.o
 
-$(OBJ_DIR_LSD)pugixml.o: $(SRC_DIR)pugixml/pugixml.cpp $(SRC_DIR)pugixml/pugixml.hpp $(SRC_DIR)pugixml/pugiconfig.hpp
+$(OBJ_DIR_LSD)pugixml.o: $(PUGI_DIR)pugixml.cpp $(PUGI_DIR)pugixml.hpp $(PUGI_DIR)pugiconfig.hpp
 	$(MKDIR) $(@D)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(SRC_DIR)pugixml/pugixml.cpp -o $(OBJ_DIR_LSD)pugixml.o
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(PUGI_DIR)pugixml.cpp -o $(OBJ_DIR_LSD)pugixml.o
 
 # LSD executable
 $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT): $(MANIF_LSD) $(LIB_GUI) $(LSDROOT)/lib$(TARGET_LSD)$(DLL_EXT)

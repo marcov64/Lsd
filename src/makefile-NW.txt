@@ -1,6 +1,7 @@
 # specify where are the sources of LSD
 SRC_DIR=$(SRC)/
 LIB_DIR=$(SRC_DIR)lib/
+PUGI_DIR=$(SRC_DIR)pugixml/
 INCLUDE=-I$(SRC) -I$(PATH_HEADER)
 
 # no-window specific variables
@@ -53,69 +54,69 @@ $(TARGET_NW)$(EXE_EXT): $(OBJ_DIR)LSDnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonli
 endif
 
 # executable/DLL modules
-$(OBJ_DIR)$(FUN).o: $(FUN).cpp $(SRC_DIR)libLSD.h $(SRC_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA)
+$(OBJ_DIR)$(FUN).o: $(FUN).cpp $(LIB_DIR)libLSD.h $(LIB_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA)
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(FUN).cpp -o $(OBJ_DIR)$(FUN).o
 
-$(OBJ_DIR)LSDnw.o: $(SRC_DIR)LSDnw.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)LSDnw.o: $(SRC_DIR)LSDnw.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)LSDnw.cpp -o $(OBJ_DIR)LSDnw.o
 
-$(OBJ_DIR)libmain.o: $(LIB_DIR)libmain.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)libmain.o: $(LIB_DIR)libmain.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)libmain.cpp -o $(OBJ_DIR)libmain.o
 
-$(OBJ_DIR)commonlib.o: $(LIB_DIR)commonlib.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)commonlib.o: $(LIB_DIR)commonlib.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)commonlib.cpp -o $(OBJ_DIR)commonlib.o
 
-$(OBJ_DIR)description.o: $(LIB_DIR)description.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)description.o: $(LIB_DIR)description.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)description.cpp -o $(OBJ_DIR)description.o
 
-$(OBJ_DIR)filelib.o: $(LIB_DIR)filelib.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)filelib.o: $(LIB_DIR)filelib.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)filelib.cpp -o $(OBJ_DIR)filelib.o
 
-$(OBJ_DIR)latticelib.o: $(LIB_DIR)latticelib.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)latticelib.o: $(LIB_DIR)latticelib.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)latticelib.cpp -o $(OBJ_DIR)latticelib.o
 
-$(OBJ_DIR)math.o: $(LIB_DIR)math.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)math.o: $(LIB_DIR)math.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)math.cpp -o $(OBJ_DIR)math.o
 
-$(OBJ_DIR)nets.o: $(LIB_DIR)nets.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)nets.o: $(LIB_DIR)nets.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)nets.cpp -o $(OBJ_DIR)nets.o
 
-$(OBJ_DIR)object.o: $(LIB_DIR)object.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)object.o: $(LIB_DIR)object.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)object.cpp -o $(OBJ_DIR)object.o
 
-$(OBJ_DIR)parallel.o: $(LIB_DIR)parallel.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)parallel.o: $(LIB_DIR)parallel.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)parallel.cpp -o $(OBJ_DIR)parallel.o
 
-$(OBJ_DIR)run.o: $(LIB_DIR)run.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)run.o: $(LIB_DIR)run.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)run.cpp -o $(OBJ_DIR)run.o
 
-$(OBJ_DIR)stattables.o: $(LIB_DIR)stattables.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)stattables.o: $(LIB_DIR)stattables.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)stattables.cpp -o $(OBJ_DIR)stattables.o
 
-$(OBJ_DIR)utillib.o: $(LIB_DIR)utillib.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)utillib.o: $(LIB_DIR)utillib.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)utillib.cpp -o $(OBJ_DIR)utillib.o
 
-$(OBJ_DIR)variab.o: $(LIB_DIR)variab.cpp $(SRC_DIR)libLSD.h
+$(OBJ_DIR)variab.o: $(LIB_DIR)variab.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)variab.cpp -o $(OBJ_DIR)variab.o
 
-$(OBJ_DIR)pugixml.o: $(SRC_DIR)pugixml/pugixml.cpp $(SRC_DIR)pugixml/pugixml.hpp $(SRC_DIR)pugixml/pugiconfig.hpp
+$(OBJ_DIR)pugixml.o: $(PUGI_DIR)pugixml.cpp $(PUGI_DIR)pugixml.hpp $(PUGI_DIR)pugiconfig.hpp
 	$(MKDIR) $(@D)
-	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(SRC_DIR)pugixml/pugixml.cpp -o $(OBJ_DIR)pugixml.o
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(PUGI_DIR)pugixml.cpp -o $(OBJ_DIR)pugixml.o
 
 # remove compiled files
 clean:

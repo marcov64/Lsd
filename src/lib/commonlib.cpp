@@ -19,7 +19,7 @@
  stored in COMMON.CPP.
  *************************************************************/
 
-#include "libLSD.h"
+#include "lib/libLSD.h"				// LSD library classes
 
 
 #ifdef _WIN32

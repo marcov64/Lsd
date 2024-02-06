@@ -30,7 +30,7 @@ Relevant macros for conditional compilation (when defined):
 - _NT_: no signal trapping (better when debugging in GDB)
 *************************************************************/
 
-#include "libLSD.h"
+#include "lib/libLSD.h"				// LSD library classes
 
 int load_config( void );
 int parse_cmdline( int argn, const char **argv );

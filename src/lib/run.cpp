@@ -28,7 +28,7 @@ model at run time.
 Prepare variables to store saved data.
 *************************************************************/
 
-#include "libLSD.h"
+#include "lib/libLSD.h"				// LSD library classes
 
 
 /*********************************

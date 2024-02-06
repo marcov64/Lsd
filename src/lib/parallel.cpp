@@ -18,7 +18,7 @@ Contains the functions to run models is parallel using the
 operating system to manage the runs.
 *************************************************************/
 
-#include "libLSD.h"
+#include "lib/libLSD.h"				// LSD library classes
 
 
 #ifndef _NP_

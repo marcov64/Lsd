@@ -266,7 +266,7 @@ METHODS FOR FILE OPERATION
 see file.cpp
 *************************************************************/
 
-#include "libLSD.h"
+#include "lib/libLSD.h"				// LSD library classes
 
 char *qsort_lab;
 char *qsort_lab_secondary;

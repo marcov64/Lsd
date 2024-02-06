@@ -125,7 +125,7 @@ object->search_link_net( destId )
 object->draw_link_net( )
 *************************************************************/
 
-#include "libLSD.h"
+#include "lib/libLSD.h"				// LSD library classes
 
 
 /****************************************************

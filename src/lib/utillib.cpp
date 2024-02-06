@@ -30,7 +30,7 @@ file, recovering LSD configuration to allow for non-crashing
 recovery.
 *************************************************************/
 
-#include "libLSD.h"
+#include "lib/libLSD.h"				// LSD library classes
 
 
 /*********************************
@@ -218,7 +218,7 @@ void set_lab_tit( variable *var )
 	{
 		// this is the Root of the model
 		if ( var->lab_tit != NULL )
-			return; 					// already done in the past
+			return;						// already done in the past
 
 		var->lab_tit = new char[ strlen( "R" ) + 1 ];
 		strcpy( var->lab_tit, "R" );

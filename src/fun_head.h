@@ -25,8 +25,8 @@ model's equation file.
 using namespace Eigen;
 #endif
 
-#include "libLSD.h"										// LSD library classes
-#include "check.h"										// LSD macro check support code
+#include "lib/libLSD.h"									// LSD library classes
+#include "lib/check.h"									// LSD macro check support code
 
 // create and set fast lookup flag
 #if ! defined FAST_LOOKUP
