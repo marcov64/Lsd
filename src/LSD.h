@@ -27,7 +27,7 @@ Global definitions shared by all LSD GUI modules.
 #define _LSD_MAJOR_ 9
 #define _LSD_MINOR_ 0
 #define _LSD_VERSION_ "9.0"
-#define _LSD_DATE_ "January 2 2024"	 // __DATE__
+#define _LSD_DATE_ "February 6 2024"	 // __DATE__
 
 // platform codes
 #define _LIN_	1

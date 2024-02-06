@@ -161,7 +161,7 @@ typedef pid_t handleT;
 #endif
 
 // classes definitions
-struct object
+struct object							// simulation model object class
 {
 	char *label;
 	bool deleting;						// indicate deletion in process
@@ -292,8 +292,8 @@ struct object
 	void update( bool recurse, bool user );
 };
 
-struct variable
-{
+struct variable							// model numeric element (variable,
+{										// parameter, or function) class
 	char *label;
 	char *lab_tit;
 	char deb_mode;
@@ -337,7 +337,7 @@ struct variable
 	void init( object *_up, const char *_label, int _param = -1, int _num_lag = -1, double *_val = NULL );
 };
 
-struct bridge
+struct bridge							// descendant-object container class
 {
 	bool copy;							// just a temporary copy
 	bool counter_updated;
@@ -353,7 +353,7 @@ struct bridge
 	~bridge( void );					// destructor
 };
 
-struct netNode							// network node data
+struct netNode							// network node data class
 {
 	char *name;							// node textual name (not required)
 	double prob;						// assigned node draw probability
@@ -369,7 +369,7 @@ struct netNode							// network node data
 	~netNode( void );					// destructor
 };
 
-struct netLink							// individual outgoing link
+struct netLink							// individual outgoing network link class
 {
 	double probTo;						// destination node draw probability
 	double weight;						// link weight
@@ -384,17 +384,7 @@ struct netLink							// individual outgoing link
 	~netLink( void );					// destructor
 };
 
-struct store
-{
-	char label[ MAX_ELEM_LENGTH ];
-	char tag[ MAX_ELEM_LENGTH ];
-	double *data;
-	int end;
-	int rank;
-	int start;
-};
-
-struct description
+struct description						// model-element description class
 {
 	char *init;
 	char *label;
@@ -405,7 +395,27 @@ struct description
 	description *next;
 };
 
-struct sense
+struct lattice							// model (visual) lattice data class
+{
+	int **array = NULL;					// lattice data colors array
+	int rows = 0;						// lattice size
+	int columns = 0;
+	int errors = 0;						// error counter
+	double width = 0;					// lattice screen size
+	double height = 0;
+};
+
+struct store							// element values container class
+{
+	char label[ MAX_ELEM_LENGTH ];
+	char tag[ MAX_ELEM_LENGTH ];
+	double *data;
+	int end;
+	int rank;
+	int start;
+};
+
+struct sense							// sensitivity analysis container class
 {
 	bool integer;						// integer element
 	char *label;
@@ -423,17 +433,7 @@ struct sense
 
 };
 
-struct lattice							// model (visual) lattice data
-{
-	int **array = NULL;					// lattice data colors array
-	int rows = 0;						// lattice size
-	int columns = 0;
-	int errors = 0;						// error counter
-	double width = 0;					// lattice screen size
-	double height = 0;
-};
-
-struct design							// design of experiment object
+struct design							// design of experiment container class
 {
 	int typ, tab, n, k, *par, *lag, *inst;// experiment parameters
 	double **hi, **lo, ***doe;
@@ -448,7 +448,18 @@ struct design							// design of experiment object
 	void load_design_data( sense *rsens, int n );
 };
 
-struct lsdstack
+struct nolh								// near-orthogonal Latin hypercube class
+{
+	int kMin;
+	int kMax;
+	int n1;
+	int n2;
+	int loLevel;
+	int hiLevel;
+	int *table;
+};
+
+struct lsdstack							// simulation-stack element class
 {
 	char label[ MAX_ELEM_LENGTH ];
 	int ns;
@@ -457,8 +468,7 @@ struct lsdstack
 	variable *vs;
 };
 
-
-class result							// results file object
+class result							// results file container class
 {
 	FILE *f;							// uncompressed file pointer
 	bool docsv;							// comma separated .csv text format
@@ -479,23 +489,12 @@ class result							// results file object
 	void title( object *root, int flag );	// write file header
 };
 
-struct profile							// profiled variable object
+struct profile							// profiled variable class
 {
 	unsigned int comp;
 	unsigned long long ticks;
 
 	profile( ) { ticks = 0; comp = 0; };// constructor
-};
-
-struct nolh								// near-orthogonal Latin hypercube description
-{
-	int kMin;
-	int kMax;
-	int n1;
-	int n2;
-	int loLevel;
-	int hiLevel;
-	int *table;
 };
 
 struct dlliblinkage						// callback references for dynamic link library
