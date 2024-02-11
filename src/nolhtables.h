@@ -13,13 +13,10 @@
  *************************************************************/
 
 /*************************************************************
-NOLHTABLES.CPP
+NOLHTABLES.H
 Contains near-orthogonal Latin hypercube for sensitivity
 designs of experiments (DoE).
 *************************************************************/
-
-#include "LSD.h"
-
 
 // characteristics of NOLH tables
 nolh NOLH[ NOLH_TABS ] =

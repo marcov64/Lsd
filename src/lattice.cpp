@@ -40,8 +40,8 @@ void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, in
 	pixW = min( pixW, hsizeMax );
 	pixH = min( pixH, vsizeMax );
 
-	latt.height = pixH / latt.rows;
-	latt.width = pixW / latt.columns;
+	sim.latt->height = pixH / sim.latt->rows;
+	sim.latt->width = pixW / sim.latt->columns;
 
 	if ( init_color < 0 && ( - init_color ) <= 0xffffff )		// RGB mode selected?
 		snprintf( init_color_string, 32, "#%06x", - init_color );	// yes: just use the positive RGB value
@@ -53,7 +53,7 @@ void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, in
 	}
 
 	// create the window with the lattice, roughly 600 pixels as maximum dimension
-	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" { destroytop .lat } \"\"", unsaved_change() ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME, nrow, ncol );
+	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" { destroytop .lat } \"\"", unsaved_change() ? "*" : " ", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME, nrow, ncol );
 
 	cmd( "ttk::canvas .lat.c -height %d -width %d -entry 0 -dark $darkTheme", ( unsigned int ) pixH, ( unsigned int ) pixW );
 
@@ -85,12 +85,12 @@ void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, in
 				}; \
 				plog \"\nPlot saved: $a\n\" \
 			} \
-		}", strlen( simul_name ) > 0 ? simul_name : "plot", conf_path );
+		}", strlen( sim.conf_name ) > 0 ? sim.conf_name : "plot", sim.conf_path );
 
-	cmd( "set rows %d", latt.rows );
-	cmd( "set columns %d", latt.columns );
-	cmd( "set dimH %.6g", latt.height );
-	cmd( "set dimW %.6g", latt.width );
+	cmd( "set rows %d", sim.latt->rows );
+	cmd( "set columns %d", sim.latt->columns );
+	cmd( "set dimH %.6g", sim.latt->height );
+	cmd( "set dimW %.6g", sim.latt->width );
 
 	cmd( "for { set i 1 } { $i <= $rows } { incr i } { \
 			for { set j 1 } { $j <= $columns } { incr j } { \

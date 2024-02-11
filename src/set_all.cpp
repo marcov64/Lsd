@@ -55,7 +55,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	variable *cv;
 	FILE *f;
 
-	r = root->search( original->label );		// select the first instance
+	r = sim.root->search( original->label );	// select the first instance
 	cv = r->search_var( NULL, lab );
 	if ( cv == NULL )
 		return;
@@ -114,7 +114,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 		cmd( "ttk::label $_w.head.l.c -text \"Variable: \"" );
 		cmd( "ttk::label $_w.head.l.n1 -text \"%s  \" -style hl.TLabel", lab );
 		cmd( "ttk::label $_w.head.l.n2 -text \"\\[	lag \"" );
-		cmd( "ttk::label $_w.head.l.n3 -text \"%d\" -style hl.TLabel", t - cv->last_update + lag + 1  );
+		cmd( "ttk::label $_w.head.l.n3 -text \"%d\" -style hl.TLabel", sim.t - cv->last_update + lag + 1  );
 		cmd( "ttk::label $_w.head.l.n4 -text \"\\]\"" );
 		cmd( "pack $_w.head.l.c $_w.head.l.n1 $_w.head.l.n2 $_w.head.l.n3 $_w.head.l.n4 -side left" );
 	}
@@ -547,16 +547,16 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 
 		default:
-			error_hard( "internal problem in LSD",
-						"if error persists, please contact developers",
-						true,
-						"invalid option for setting values" );
+			sim.error_hard( "internal problem in LSD",
+							"if error persists, please contact developers",
+							true,
+							"invalid option for setting values" );
 			lsd_exit_gui( 22 );
 	}
 
 	if ( update_d )
 	{
-		cd = search_description( lab );
+		cd = sim.search_description( lab );
 
 		if ( step_in > 1 )
 			snprintf( ch, MAX_ELEM_LENGTH, " (every %d instances)", step_in );
@@ -577,7 +577,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 			else
 				snprintf( msg, MAX_LINE_SIZE, "Instances from %d to %d %s%s", cases_from, cases_to, action, ch );
 
-		change_description( lab, NULL, -1, NULL, msg );
+		sim.change_description( lab, NULL, -1, NULL, msg );
 	}
 
 	unsaved_change( true );				// signal unsaved change

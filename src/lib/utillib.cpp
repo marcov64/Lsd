@@ -159,7 +159,7 @@ the results collected up the latest time step available.
 mutex error;
 #endif
 
-void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const char *logFmt, ... )
+void simulation::error_hard( const char *boxTitle, const char *boxText, bool defQuit, const char *logFmt, ... )
 {
 	if ( quit == 2 )		// simulation already being stopped
 		return;
@@ -254,7 +254,7 @@ SET_TIT_COUNTER
 ***************************************************/
 void set_tit_counter( object *o )
 {
-	int i;
+	int i, tGUI;
 	bridge *cb;
 	object *cur;
 
@@ -269,11 +269,12 @@ void set_tit_counter( object *o )
 	if ( cb->counter_updated )
 		return;
 
+	tGUI = sims.size( ) > 0 ? sims[ 0 ]->t : 0;// only do for GUI simulation
 	for ( cur = cb->head, i = 1; cur != NULL; cur = cur->next, ++i )
-		if ( cur->lstCntUpd < t )		// don't update more than once per period
+		if ( cur->lstCntUpd < tGUI )	// don't update more than once per period
 		{								// to avoid deletions to change counters
 			cur->acounter = i;
-			cur->lstCntUpd = t;
+			cur->lstCntUpd = tGUI;
 		}
 
 	cb->counter_updated = true;
@@ -322,7 +323,7 @@ void set_blueprint( object *container, object *r )
 EMPTY_BLUEPRINT
 remove the current blueprint
 ******************************************************************************/
-void empty_blueprint( void )
+void simulation::empty_blueprint( void )
 {
 	if ( blueprint == NULL )
 		return;
@@ -337,7 +338,7 @@ void empty_blueprint( void )
 RESET_BLUEPRINT
 reset the current blueprint
 ******************************************************************************/
-void reset_blueprint( object *r )
+void simulation::reset_blueprint( object *r )
 {
 	empty_blueprint( );
 	blueprint = new object;

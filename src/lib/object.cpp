@@ -377,7 +377,7 @@ void object::recreate_maps( void )
 		v_map.insert( v_pairT( cv->label, cv ) );
 
 	for ( cb = b; cb != NULL; cb = cb->next )
-		b_map.insert( b_pairT( cb->blabel, cb ) );
+		b_map.insert( b_pairT ( cb->blabel, cb ) );
 }
 
 
@@ -519,7 +519,7 @@ Return the total number of Object instances in the
 model with the label lab. The Object is searched
 in the whole model, including different branches
 ****************************************************/
-int hyper_count( const char *lab )
+int simulation::hyper_count( const char *lab )
 {
 	int n;
 	object *cur;
@@ -536,7 +536,7 @@ Return the total number of Object instances in the
 model which contain the variable named lab. The Object
 is searched in the whole model, including different branches
 ****************************************************/
-int hyper_count_var( const char *lab )
+int simulation::hyper_count_var( const char *lab )
 {
 	int n;
 	object *cur;
@@ -560,10 +560,9 @@ Uses the fast bridge look-up map.
 ***************************************************/
 bridge *object::search_bridge( const char *lab, bool no_error )
 {
-	b_mapT::iterator bit;
-
 	// find the bridge which contains the object
-	if ( ( bit = b_map.find( lab ) ) != b_map.end( ) )
+	auto bit = b_map.find( lab );
+	if ( bit != b_map.end( ) )
 		return bit->second;
 
 	if ( ! no_error )
@@ -584,14 +583,14 @@ object *object::search( const char *lab, bool no_search, bool no_search_up )
 {
 	bridge *cb;
 	object *cur;
-	b_mapT::iterator bit;
 
 	// the current object?
 	if ( ! strcmp( label, lab ) )
 		return this;
 
 	// Search among the descendants of current object
-	if ( ( bit = b_map.find( lab ) ) != b_map.end( ) )
+	auto bit = b_map.find( lab );
+	if ( bit != b_map.end( ) )
 		return bit->second->head;
 
 	// stop if search is disabled
@@ -757,7 +756,6 @@ object *object::turbosearch( const char *lab, double tot, double num )
 object *object::turbosearch( const char *lab, double num )
 {
 	bridge *cb;
-	n_mapT::iterator nit;
 
 	cb = search_bridge( lab, true );
 	if ( cb == NULL )
@@ -779,7 +777,8 @@ object *object::turbosearch( const char *lab, double num )
 	}
 
 	// find the object in position
-	if ( ( nit = cb->t_map.find( ( long ) floor ( num ) ) ) != cb->t_map.end( ) )
+	auto nit = cb->t_map.find( ( long ) floor ( num ) );
+	if ( nit != cb->t_map.end( ) )
 		return nit->second;
 	else
 		return NULL;
@@ -893,10 +892,10 @@ variable *object::search_var( object *caller, const char *lab, bool no_error,
 {
 	bridge *cb;
 	variable *cv;
-	v_mapT::iterator vit;
 
 	// Search among the variables of current object
-	if ( ( vit = v_map.find( lab ) ) != v_map.end( ) )
+	auto vit = v_map.find( lab );
+	if ( vit != v_map.end( ) )
 		return vit->second;
 
 	// stop if search is disabled except if direct sons must still be searched
@@ -1027,7 +1026,6 @@ double object::initturbo_cond( const char *lab )
 	bridge *cb;
 	object *cur, *cnext;
 	variable *cv;
-	b_mapT::iterator bit;
 
 	cv = search_var_err( this, lab, no_search, no_search_up, true, "turbo conditional searching" );
 	if ( cv == NULL )
@@ -1043,7 +1041,8 @@ double object::initturbo_cond( const char *lab )
 	}
 
 	// find the bridge which contains the object containing the variable
-	if ( ( bit = cv->up->up->b_map.find( cv->up->label ) ) == cv->up->up->b_map.end( ) )
+	auto bit = cv->up->up->b_map.find( cv->up->label );
+	if ( bit == cv->up->up->b_map.end( ) )
 	{
 		error_hard( "internal problem in LSD",
 					"if error persists, please contact developers",
@@ -1091,7 +1090,6 @@ the number of nodes in map.
 double object::turboset_cond( const char *lab )
 {
 	variable *cv;
-	b_mapT::iterator bit;
 
 	cv = search_var_err( this, lab, no_search, no_search_up, true, "turbo conditional searching" );
 	if ( cv == NULL )
@@ -1107,7 +1105,8 @@ double object::turboset_cond( const char *lab )
 	}
 
 	// find the bridge which contains the object containing the variable
-	if ( ( bit = cv->up->up->b_map.find( cv->up->label ) ) == cv->up->up->b_map.end( ) )
+	auto bit = cv->up->up->b_map.find( cv->up->label );
+	if ( bit == cv->up->up->b_map.end( ) )
 	{
 		error_hard( "internal problem in LSD",
 					"if error persists, please contact developers",
@@ -1130,8 +1129,6 @@ object *object::turbosearch_cond( const char *lab, double value )
 {
 	bridge *cb;
 	variable *cv;
-	b_mapT::iterator bit;
-	o_mapT::iterator oit;
 
 	cv = search_var_err( this, lab, no_search, no_search_up, true, "turbo conditional searching" );
 	if ( cv == NULL )
@@ -1147,7 +1144,8 @@ object *object::turbosearch_cond( const char *lab, double value )
 	}
 
 	// find the bridge which contains the object containing the variable
-	if ( ( bit = cv->up->up->b_map.find( cv->up->label ) ) == cv->up->up->b_map.end( ) )
+	auto bit = cv->up->up->b_map.find( cv->up->label );
+	if ( bit == cv->up->up->b_map.end( ) )
 	{
 		error_hard( "internal problem in LSD",
 					"if error persists, please contact developers",
@@ -1168,7 +1166,8 @@ object *object::turbosearch_cond( const char *lab, double value )
 	}
 
 	// find the object containing the variable
-	if ( ( oit = cb->o_map.find( value ) ) != cb->o_map.end( ) )
+	auto oit = cb->o_map.find( value );
+	if ( oit != cb->o_map.end( ) )
 		return oit->second;
 	else
 		return NULL;
@@ -1347,7 +1346,7 @@ MOVE_OBJ
 Move object in the model structure. The lab object
 is placed below the provided dest object
 ****************************************************/
-void move_obj( const char *lab, const char *dest )
+void simulation::move_obj( const char *lab, const char *dest )
 {
 	bridge *cb, *cb1, *mb = NULL, *nb;
 	object *cur, *cur1, *d, *no, *o, *s;
@@ -1481,7 +1480,7 @@ void object::replicate( int num, bool propagate )
 /****************************************************
 COPY_DESCENDANT
 ****************************************************/
-void copy_descendant( object *from, object *to )
+void simulation::copy_descendant( object *from, object *to )
 {
 	bridge *cb, *cb1;
 	object *cur;
@@ -1896,7 +1895,7 @@ void object::collect_cemetery( variable *caller )
 		cv1 = cv->next;						// pointer to next variable
 
 		// need to save?
-		if ( ( cv->save == true || cv->savei == true ) && running && actual_steps > 0 )
+		if ( ( cv->save == true || cv->savei == true ) && running && eff_t > 0 )
 		{
 			if ( cv->savei )
 				save_single( cv );			// update file
@@ -1928,7 +1927,7 @@ ADD_CEMETERY
 Store the variable in a list of variables in objects deleted
 but to be used for analysis.
 ***************************************************/
-void add_cemetery( variable *v )
+void simulation::add_cemetery( variable *v )
 {
 	if ( cemetery == NULL )
 		cemetery = last_cemetery = v;
@@ -1945,7 +1944,7 @@ void add_cemetery( variable *v )
 /***************************************************
 EMPTY_CEMETERY
 ***************************************************/
-void empty_cemetery( void )
+void simulation::empty_cemetery( void )
 {
 	variable *cv, *cv1;
 
@@ -3420,7 +3419,7 @@ double object::write( const char *lab, double value, int time, int lag )
 		}
 	}
 
-	if ( debug_flag && t == when_debug && cv->deb_mode != 'n' && cv->deb_mode != 'd' )
+	if ( deb_set && t == deb_t && cv->deb_mode != 'n' && cv->deb_mode != 'd' )
 	{
 		watch_trigger = true;
 		watch_write_mode = true;
@@ -3598,7 +3597,7 @@ object *object::lat_left( void )
 BUILD_OBJ_LIST
 Build the object list for user pointer checking
 ****************************************************/
-double build_obj_list( bool set_list )
+double simulation::build_obj_list( bool set_list )
 {
 	if ( no_pointer_check )		// disabled in compilation?
 	{
@@ -3615,7 +3614,7 @@ double build_obj_list( bool set_list )
 
 	if ( set_list )
 	{
-		collect_inst( root, obj_list );
+		root->collect_inst( obj_list );
 		no_ptr_chk = false;
 	}
 	else
@@ -3630,27 +3629,27 @@ COLLECT_INST
 Collect all object under the selected object and
 stores it in the provided C++ set container
 ****************************************************/
-void collect_inst( object *r, o_setT &list )
+void object::collect_inst( o_setT &list )
 {
 	bridge *cb;
 	object *cur;
-	pair < o_setT::iterator, bool > res;
 
 	// collect own address
-	res = list.emplace( r );
+	auto res = list.emplace( this );
 	if ( ! res.second )
 	{
 		error_hard( "LSD internal error",
 					"disable pointer checking by defining 'NO_POINTER_CHECK'",
 					false,
-					"object '%s' cannot be collected for pointer checking", r->label );
+					"object '%s' cannot be collected for pointer checking",
+					label );
 		return;
 	}
 
 	// search among descendants
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 		for ( cur = cb->head; cur != NULL; cur = cur->next )
-			collect_inst( cur, list );
+			cur->collect_inst( list );
 }
 
 
@@ -3719,7 +3718,7 @@ operator code for CHECK_COND
 ****************************************************/
 const unordered_map < string, int > logic_ops = { { "==", 0 }, { "=", 0 }, { "EQ", 0 }, { "!=", 1 }, { "=!", 1 }, { "NE", 1 }, { ">", 2 }, { "GT", 2 }, { ">=", 3 }, { "=>", 3 }, { "GE", 3 }, { "<", 4 }, { "LT", 4 }, { "<=", 5 }, { "=<", 5 }, { "LE", 5 } };
 
-int logic_op_code( const char *lop, const char *errmsg )
+int object::logic_op_code( const char *lop, const char *errmsg )
 {
 	auto lopp = logic_ops.find( lop );
 

@@ -48,7 +48,7 @@ bool open_configuration( object *&r, bool reload )
 	int i;
 	string warnings;
 
-	if ( ! reload || strlen( simul_name ) == 0 )
+	if ( ! reload || strlen( sim.conf_name ) == 0 )
 	{									// ask user the file to use, if not reloading
 		cmd( "set fn [ tk_getOpenFile -parent . -title \"Open Configuration File\"	-defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model file} {.lsd} } } ]" );
 		cmd( "if { [ string length $fn ] > 0 && ! [ fn_spaces \"$fn\" . ] } { \
@@ -66,22 +66,22 @@ bool open_configuration( object *&r, bool reload )
 			if ( lab1 == NULL || lab2 == NULL || strlen( lab2 ) == 0 )
 				return false;
 
-			delete [ ] simul_name;
-			simul_name = new char[ strlen( lab2 ) + 1 ];
-			strcpy( simul_name, lab2 );
+			delete [ ] sim.conf_name;
+			sim.conf_name = new char[ strlen( lab2 ) + 1 ];
+			strcpy( sim.conf_name, lab2 );
 
-			delete [ ] conf_path;
-			conf_path = new char[ strlen( lab1 ) + 1 ];
-			strcpy( conf_path, lab1 );
+			delete [ ] sim.conf_path;
+			sim.conf_path = new char[ strlen( lab1 ) + 1 ];
+			strcpy( sim.conf_path, lab1 );
 
-			if ( strlen( conf_path ) > 0 )
+			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd $path" );
 
 			cmd( "set listfocus 1; set itemfocus 0" );// point for first var in listbox
 			cmd( "set lastObj \"\"" );			// disable last object for reload
 		}
 		else
-			if ( struct_loaded )
+			if ( sim.conf_ok )
 				reload = true;					// try to reload if use cancel load
 			else
 				return false;
@@ -93,17 +93,17 @@ bool open_configuration( object *&r, bool reload )
 	redrawRoot = redrawStruc = true;			// force browser/structure redraw
 	iniShowOnce = false;						// show warning on # of columns in .ini
 
-	switch ( i = load_configuration( reload, &warnings, 0 ) )// try to load the configuration
+	switch ( i = load_configuration_gui( reload, &warnings, 0 ) )// try to load the configuration
 	{
 		case 0:
 			loaded = true;
 			break;
 
 		case 1:									// file/path not found
-			if ( strlen( conf_path ) > 0 )
-				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME, conf_path );
+			if ( strlen( sim.conf_path ) > 0 )
+				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME, sim.conf_path );
 			else
-				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME	 );
+				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME	 );
 			loaded = false;
 			break;
 
@@ -140,7 +140,7 @@ bool open_configuration( object *&r, bool reload )
 		case 23:								// missing XML settings node
 		case 24:								// missing XML equation node
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d :%.24s)\" -detail \"Element descriptions were lost but the configuration can still be used.\n\nPlease check if the desired LSD configuration file was selected or re-enter the description information if needed.\n\nIf this is a sensitivity analysis configuration file, this message is expected, and configuration file is ok.\"", i, warnings.c_str( ) );
-			reset_description( root );
+			sim.reset_description( sim.root );
 			loaded = true;
 			break;
 
@@ -158,15 +158,15 @@ bool open_configuration( object *&r, bool reload )
 			cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"Partially damaged file (%d :%.24s)\" -detail \"Part of the configuration data was missing or invalid and was replaced by default values.\n\nPlease check if the desired LSD configuration file was selected or re-configure the affected parts as needed.\"", i, warnings.c_str( ) );
 
 	if ( loaded && r != NULL && reload )
-		currObj = r = restore_pos( root );		// restore pointed object and variable
+		currObj = r = restore_pos( sim.root );	// restore pointed object and variable
 	else
-		currObj = r = root;						// new structure
+		currObj = r = sim.root;					// new structure
 
 	if ( loaded )
 	{
-		load_elem_lists( root );
+		load_elem_lists( sim.root );
 
-		if ( ! ignore_eq_file && strncmp( lsd_eq_file, eq_file, min( strlen( lsd_eq_file ), strlen( eq_file ) ) ) )
+		if ( ! ignore_eq_file && strncmp( sim.conf_eq_txt, eq_txt, min( strlen( sim.conf_eq_txt ), strlen( eq_txt ) ) ) )
 			plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the LSD model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
 	}
 
@@ -191,7 +191,7 @@ bool load_prev_configuration( void )
 		strcpy( saFile, sens_file );
 	}
 
-	if ( ( i = load_configuration( true, &warnings, 0 ) ) != 0 )
+	if ( ( i = load_configuration_gui( true, &warnings, 0 ) ) != 0 )
 	{
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded (%d :%.24s)\" -detail \"Previously loaded configuration could not be restored. Check if LSD still has access to the model directory.\n\nCurrent configuration will be reset now.\"", i, warnings.c_str( ) );
 
@@ -200,13 +200,13 @@ bool load_prev_configuration( void )
 	}
 	else
 	{
-		load_elem_lists( root );
-		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", model_path, struct_file );
+		load_elem_lists( sim.root );
+		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", model_path, sim.conf_file );
 	}
 
 	if ( saFile != NULL )						// restore SA configuration, if any
 	{
-		empty_sensitivity( );
+		sim.empty_sensitivity( );
 		NOLH_clear( );							// deallocate DoE
 		f = fopen( saFile, "rt" );
 		if ( f == NULL || load_sensitivity( f ) != 0 )
@@ -224,6 +224,65 @@ bool load_prev_configuration( void )
 	findexSens = lstFidx;
 
 	return true;
+}
+
+
+/*****************************************************************************
+LOAD_CONFIGURATION_GUI (DLL WRAPPER)
+	Load configuration
+	If full is false, just the model data is unloaded
+	Returns: pointer to root object
+******************************************************************************/
+int load_configuration_gui( bool reload, string *warnings, int quick )
+{
+	int res = sim.load_configuration( reload, warnings, quick );
+
+	unsavedData = false;						// no unsaved simulation results
+	unsavedSense = false;						// no sensitivity data to save
+
+	return res;
+}
+
+
+/*****************************************************************************
+UNLOAD_CONFIGURATION_GUI (DLL WRAPPER)
+	Unload the current configuration
+	If full is false, just the model data is unloaded
+	Returns: pointer to root object
+******************************************************************************/
+void unload_configuration_gui( bool full )
+{
+	sim.unload_configuration( full );
+
+	currObj = NULL;								// no current object pointer
+	unsaved_change( false );					// signal no unsaved change
+	unsavedData = false;						// no unsaved simulation results
+	unsavedSense = false;						// no sensitivity data to save
+	findexSens = 0;								// reset sensitivity serial number
+
+	NOLH_clear( );								// deallocate DoE
+	sim.empty_sensitivity( );					// discard sensitivity analysis data
+
+	cmd( "destroytop .lat" );					// remove lattice window
+	cmd( "unset -nocomplain modObj modElem modVar modPar modFun" );	// no elements in model structure
+
+	if ( ! sim.running )
+		cmd( "destroytop .plt" );				// remove run-time plot window
+
+	if ( full )									// full unload? (no new config?)
+	{
+		delete sens_file;						// reset sensitivity file name
+		sens_file = NULL;
+
+		cmd( "set path \"%s\"", model_path );
+		if ( strlen( model_path ) > 0 )
+			cmd( "cd \"$path\"" );
+
+		cmd( "unset -nocomplain lastConf" );	// no last configuration to reload
+		cmd( "set listfocus 1; set itemfocus 0" );// point for first var in listbox
+		cmd( "set lastObj \"\"" );				// disable last object for reload
+		redrawRoot = redrawStruc = true;		// force browser/structure redraw
+	}
 }
 
 
@@ -266,39 +325,6 @@ void load_elem_lists( object *r )
 
 
 /*****************************************************************************
-UNLOAD_CONFIGURATION_GUI (DLL WRAPPER)
-	Unload the current configuration
-	If full is false, just the model data is unloaded
-	Returns: pointer to root object
-******************************************************************************/
-void unload_configuration_gui( bool full )
-{
-	unload_configuration( full );
-
-	currObj = NULL;								// no current object pointer
-	unsaved_change( false );					// signal no unsaved change
-	cmd( "destroytop .lat" );					// remove lattice window
-	cmd( "unset -nocomplain modObj modElem modVar modPar modFun" );	// no elements in model structure
-	NOLH_clear( );								// deallocate DoE
-
-	if ( ! running )
-		cmd( "destroytop .plt" );				// remove run-time plot window
-
-	if ( full )									// full unload? (no new config?)
-	{
-		cmd( "set path \"%s\"", model_path );
-		if ( strlen( model_path ) > 0 )
-			cmd( "cd \"$path\"" );
-
-		cmd( "unset -nocomplain lastConf" );	// no last configuration to reload
-		cmd( "set listfocus 1; set itemfocus 0" );// point for first var in listbox
-		cmd( "set lastObj \"\"" );				// disable last object for reload
-		redrawRoot = redrawStruc = true;		// force browser/structure redraw
-	}
-}
-
-
-/*****************************************************************************
 SAVE_XML_CONFIGURATION
 	Save current defined configuration (adding tag index if appropriate) to
 	gzip-compressed xml file
@@ -307,7 +333,7 @@ SAVE_XML_CONFIGURATION
 ******************************************************************************/
 bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 {
-	bool save_ok;
+	bool saved;
 	int delta, indexDig, save_len;
 	char ch[ MAX_PATH_LENGTH ], *save_file, *bak_file;
 	const char *save_path;
@@ -317,35 +343,35 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 	ostringstream buf;
 	xml_doc xf;
 
-	delta = ( findex > 0 ) ? sim_num * ( findex - 1 ) : 0;
+	delta = ( findex > 0 ) ? sim.last_run * ( findex - 1 ) : 0;
 	indexDig = ( findex > 0 ) ? ( int ) floor( log10( findex ) + 2 ) : 0;
 
 	if ( dest_path == NULL )
-		save_path = conf_path;
+		save_path = sim.conf_path;
 	else
 		save_path = dest_path;
 
-	if ( strlen( simul_name ) == 0 )
+	if ( strlen( sim.conf_name ) == 0 )
 	{
-		delete [ ] simul_name;
-		simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
-		strcpy( simul_name, DEF_CONF_FILE );
+		delete [ ] sim.conf_name;
+		sim.conf_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
+		strcpy( sim.conf_name, DEF_CONF_FILE );
 	}
 
-	if ( strlen( name_rep ) == 0 )
-		snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
+	if ( strlen( sim.rep_file ) == 0 )
+		snprintf( sim.rep_file, MAX_PATH_LENGTH, "report_%s.html", sim.conf_name );
 
-	if ( strlen( conf_path ) > 0 )
+	if ( strlen( sim.conf_path ) > 0 )
 	{
-		save_len = strlen( save_path ) + strlen( simul_name ) + 6 + indexDig;
+		save_len = strlen( save_path ) + strlen( sim.conf_name ) + 6 + indexDig;
 		save_file = new char[ save_len ];
-		sprintf( save_file, "%s/%s", save_path, simul_name );
+		sprintf( save_file, "%s/%s", save_path, sim.conf_name );
 	}
 	else
 	{
-		save_len = strlen( simul_name ) + 6 + indexDig;
+		save_len = strlen( sim.conf_name ) + 6 + indexDig;
 		save_file = new char[ save_len ];
-		sprintf( save_file, "%s", simul_name );
+		sprintf( save_file, "%s", sim.conf_name );
 	}
 
 	if ( findex > 0 )
@@ -405,74 +431,74 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 	// add simulation settings
 	xml_node setNode = cfgNode.append_child( "settings" );
 	xml_node simNode = setNode.append_child( "simulation" );
-	simNode.append_attribute( "steps" ) = max_step;
-	simNode.append_attribute( "runs" ) = sim_num;
-	simNode.append_attribute( "seed" ) = seed + delta;
+	simNode.append_attribute( "steps" ) = sim.last_t;
+	simNode.append_attribute( "runs" ) = sim.last_run;
+	simNode.append_attribute( "seed" ) = sim.seed + delta;
 
 	// optional settings (include only if non-default)
-	if ( when_debug > 0 )
-		simNode.append_attribute( "debug_start" ) = when_debug;
+	if ( sim.deb_t > 0 )
+		simNode.append_attribute( "debug_start" ) = sim.deb_t;
 
-	if ( no_ptr_chk )
+	if ( sim.no_ptr_chk )
 		simNode.append_attribute( "ptr_check" ) = false;
 
-	if ( parallel_disable )
+	if ( sim.parallel_disable )
 		simNode.append_attribute( "parallel" ) = false;
 
 	// add profile settings, if any
-	if ( stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time )
+	if ( sim.stack_info > 0 || sim.prof_min_msecs > 0 || sim.prof_obs_only || sim.prof_aggr_time )
 	{
 		xml_node profNode = setNode.append_child( "profiling" );
 
-		if ( stack_info > 0 )
-			profNode.append_attribute( "level" ) = stack_info;
+		if ( sim.stack_info > 0 )
+			profNode.append_attribute( "level" ) = sim.stack_info;
 
-		if ( prof_min_msecs > 0 )
-			profNode.append_attribute( "time" ) = prof_min_msecs;
+		if ( sim.prof_min_msecs > 0 )
+			profNode.append_attribute( "time" ) = sim.prof_min_msecs;
 
-		if ( prof_obs_only )
+		if ( sim.prof_obs_only )
 			profNode.append_attribute( "observed" ) = true;
 
-		if ( prof_aggr_time )
+		if ( sim.prof_aggr_time )
 			profNode.append_attribute( "aggregate" ) = true;
 	}
 
 	// add report file name
-	setNode.append_child( "report_file" ).text( ) = name_rep;
+	setNode.append_child( "report_file" ).text( ) = sim.rep_file;
 
 	// add model structure
 	xml_node strNode = cfgNode.append_child( "structure" );
-	root->save_xml_struct( strNode, node_serial, quick );
+	save_xml_struct( sim.root, strNode, node_serial, quick );
 
 	// add equation file name and content
 	xml_node eqfNode = cfgNode.append_child( "equation_file" );
-	eqfNode.append_child( "filename" ).text( ) = equation_name;
+	eqfNode.append_child( "filename" ).text( ) = eq_file;
 
 	if ( ! quick )
 	{
-		if ( eq_file != NULL && ( strlen( lsd_eq_file ) == 0 || strcmp( lsd_eq_file, eq_file ) != 0 ) )
-			strcpyn( lsd_eq_file, eq_file, MAX_FILE_SIZE );
+		if ( eq_txt != NULL && ( strlen( sim.conf_eq_txt ) == 0 || strcmp( sim.conf_eq_txt, eq_txt ) != 0 ) )
+			strcpyn( sim.conf_eq_txt, eq_txt, MAX_FILE_SIZE );
 
 		// encode xml ]]> escape sequences
-		eqfNode.append_child( "content" ).append_child( pugi::node_cdata ).set_value( strencdata( lsd_eq_file, lsd_eq_file, MAX_FILE_SIZE ) );
+		eqfNode.append_child( "content" ).append_child( pugi::node_cdata ).set_value( strencdata( sim.conf_eq_txt, sim.conf_eq_txt, MAX_FILE_SIZE ) );
 	}
 
 	xf.save( buf );
 
 	if ( ( fz = gzopen( save_file, "wb9" ) ) != Z_NULL )
 	{
-		save_ok = gzputs( fz, buf.str( ).c_str( ) );
-		save_ok = gzclose( fz ) == Z_OK ? save_ok : false;
+		saved = gzputs( fz, buf.str( ).c_str( ) );
+		saved = gzclose( fz ) == Z_OK ? saved : false;
 	}
 	else
-		save_ok = false;
+		saved = false;
 
-	if ( save_ok )
-		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", conf_path, struct_file );
+	if ( saved )
+		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", sim.conf_path, sim.conf_file );
 
 	delete [ ] save_file;
 
-	return save_ok;
+	return saved;
 }
 
 
@@ -770,7 +796,7 @@ SAVE_CONFIGURATION (LEGACY)
 ******************************************************************************/
 bool save_configuration( const char *dest_path, const char *rname, const char *ext )
 {
-	bool save_ok = false;
+	bool saved = false;
 	char *save_file, *bak_file;
 	description *cd;
 	FILE *f;
@@ -810,73 +836,74 @@ bool save_configuration( const char *dest_path, const char *rname, const char *e
 		fprintf( f, "\nDATA\n" );
 		root->save_insts( f );
 
-		fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d", sim_num, seed, max_step );
+		fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d", sim.last_run, sim.seed, sim.last_t );
 
-		if ( when_debug > 0 || stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time || no_ptr_chk || parallel_disable )
-			fprintf( f, " %d %d %d %d %d %d %d", when_debug, stack_info, prof_min_msecs, prof_obs_only ? 1 : 0, prof_aggr_time ? 1 : 0, no_ptr_chk ? 1 : 0, parallel_disable ? 1 : 0 );
+		if ( sim.deb_t > 0 || sim.stack_info > 0 || sim.prof_min_msecs > 0 || sim.prof_obs_only || sim.prof_aggr_time || sim.no_ptr_chk || sim.parallel_disable )
+			fprintf( f, " %d %d %d %d %d %d %d", sim.deb_t, sim.stack_info, sim.prof_min_msecs, sim.prof_obs_only ? 1 : 0, sim.prof_aggr_time ? 1 : 0, sim.no_ptr_chk ? 1 : 0, sim.parallel_disable ? 1 : 0 );
 
-		fprintf( f, "\nEQUATION %s\nMODELREPORT %s\n", equation_name, name_rep );
+		fprintf( f, "\nEQUATION %s\nMODELREPORT %s\n", eq_file, sim.rep_file );
 
 		fprintf( f, "\nDESCRIPTION\n\n" );
-		save_description( root, f );
+		save_description( sim.root, f );
 
 		fprintf( f, "\nDOCUOBSERVE\n" );
-		for ( cd = descr; cd != NULL; cd = cd->next )
+		for ( cd = sim.descr; cd != NULL; cd = cd->next )
 			if ( cd->observe )
 				fprintf( f, "%s\n", cd->label );
 		fprintf( f, "\nEND_DOCUOBSERVE\n\n" );
 
 		fprintf( f, "\nDOCUINITIAL\n" );
-		for ( cd = descr; cd != NULL; cd = cd->next )
+		for ( cd = sim.descr; cd != NULL; cd = cd->next )
 			if ( cd->initial )
 				fprintf( f, "%s\n", cd->label );
 		fprintf( f, "\nEND_DOCUINITIAL\n\n" );
 
 		save_eqfile( f );
 
-		save_ok = ! ferror( f );
+		saved = ! ferror( f );
 		fclose( f );
 	}
 
-	return save_ok;
+	return saved;
 }
 
 
 /****************************************************
 OBJECT::SAVE_STRUCT (LEGACY)
-	Save the object structure tree under this object
+	Save the object structure tree under object r
 	to a LEGACY text file
 ****************************************************/
-void object::save_struct( FILE *f, const char *tab )
+void save_struct( object *r, FILE *f, const char *tab )
 {
 	char tab1[ MAX_ELEM_LENGTH ];
 	bridge *cb;
-	object *o;
 	variable *cv;
 
-	if ( up == NULL )
+	if ( r->up == NULL )
 		fprintf( f, "\t\n" );
 
 	strcpyn( tab1, tab, MAX_ELEM_LENGTH );
-	fprintf( f, "%sLabel %s\n%s{\n", tab1, label, tab1 );
+	fprintf( f, "%sLabel %s\n%s{\n", tab1, r->label, tab1 );
 	strcatn( tab1, "\t", MAX_ELEM_LENGTH );
 
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
 		fprintf( f, "%sSon: %s\n", tab1, cb->blabel );
+
 		if ( cb->head == NULL )
-			o = blueprint->search( cb->blabel );
+			save_struct( sim.blueprint->search( cb->blabel ), f, tab1 );
 		else
-			o = cb->head;
-		o->save_struct( f, tab1 );
+			save_struct( cb->head, f, tab1 );
 	}
 
-	for ( cv = v; cv != NULL; cv = cv->next )
+	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
 		if ( cv->param == 0 )
 			fprintf( f, "%sVar: %s\n", tab1, cv->label );
+		
 		if ( cv->param == 1 )
 			fprintf( f, "%sParam: %s\n", tab1, cv->label );
+		
 		if ( cv->param == 2)
 			fprintf( f, "%sFunc: %s\n", tab1, cv->label );
 	}
@@ -999,7 +1026,7 @@ void save_description( object *r, FILE *f )
 	variable *cv;
 	description *cd;
 
-	cd = search_description( r->label );
+	cd = sim.search_description( r->label );
 
 	if ( strwsp( cd->init ) )
 		fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ] );
@@ -1008,7 +1035,7 @@ void save_description( object *r, FILE *f )
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
-		cd = search_description( cv->label );
+		cd = sim.search_description( cv->label );
 
 		if ( ( cv->param != 1 && cv->num_lag == 0 ) || strwsp( cd->init ) )
 			fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ] );
@@ -1032,23 +1059,23 @@ debugger
 void deb_log( bool on, int time )
 {
 	// check if should turn off
-	if ( ! on || parallel_mode || fast_mode != 0 )
+	if ( ! on || sim.parallel_mode || sim.fast_mode != 0 )
 	{
 		// disable debugging
-		if ( time > t && when_debug >= time )
-			when_debug = 0;
+		if ( time > sim.t && sim.deb_t >= time )
+			sim.deb_t = 0;
 		else
-			if ( ( time == 0 && when_debug == t ) || time == t )
-				debug_flag = false;
+			if ( ( time == 0 && sim.deb_t == sim.t ) || time == sim.t )
+				deb_set = false;
 
 		// act now?
-		if ( time == 0 || t > time )
+		if ( time == 0 || sim.t > time )
 		{
 			// close file if open
-			if ( log_file != NULL )
+			if ( log_file_ptr != NULL )
 			{
-				fclose( log_file );
-				log_file = NULL;
+				fclose( log_file_ptr );
+				log_file_ptr = NULL;
 			}
 		}
 		else
@@ -1056,30 +1083,30 @@ void deb_log( bool on, int time )
 	}
 
 	// check if should turn on
-	if ( on && ! parallel_mode && fast_mode == 0 )
+	if ( on && ! sim.parallel_mode && sim.fast_mode == 0 )
 	{
 		// enable debugging
-		if ( time > t )
-			when_debug = time;
+		if ( time > sim.t )
+			sim.deb_t = time;
 		else
-			if ( time == 0 || time == t )
+			if ( time == 0 || time == sim.t )
 			{
-				when_debug = t;
-				debug_flag = true;
+				sim.deb_t = sim.t;
+				deb_set = true;
 				cmd( "focustop .deb" );
 			}
 
 		// ignore if log already open
-		if ( log_file == NULL )
+		if ( log_file_ptr == NULL )
 		{
-			log_file = fopen( "log.txt", "a" );
+			log_file_ptr = fopen( "log.txt", "a" );
 			log_start = time;
-			log_stop = max_step;
+			log_stop = sim.last_t;
 		}
 	}
 
-	if ( on && ( parallel_mode || fast_mode > 0 ) )
-		plog( "\nWarning: %s is active, debug command ignored", parallel_mode ? "parallel processing" : "fast mode" );
+	if ( on && ( sim.parallel_mode || sim.fast_mode > 0 ) )
+		plog( "\nWarning: %s is active, debug command ignored", sim.parallel_mode ? "parallel processing" : "fast mode" );
 }
 
 
@@ -1254,7 +1281,7 @@ int load_sensitivity( FILE *f )
 		if ( feof( f ) )					// ended too early?
 			break;
 
-		cv = root->search_var( root, lab );
+		cv = sim.root->search_var( sim.root, lab );
 		if ( cv == NULL || ( cv->param != 1 && cv->num_lag == 0 ) )
 			goto error1;					// and not parameter or lagged variable
 
@@ -1326,7 +1353,7 @@ int load_sensitivity( FILE *f )
 
 	error:
 
-	empty_sensitivity( );					// discard read data
+	sim.empty_sensitivity( );					// discard read data
 
 	return i;
 }
@@ -1342,7 +1369,7 @@ bool save_sensitivity( FILE *f )
 	int i;
 	sense *cs;
 
-	for ( cs = rsense; cs != NULL; cs = cs->next )
+	for ( cs = sim.rsense; cs != NULL; cs = cs->next )
 	{
 		if ( cs->param == 1 )
 			fprintf( f, "%s 0 %d %c:", cs->label, cs->numv, cs->integer ? 'i' : 'f' );
@@ -1372,7 +1399,10 @@ char *load_eqfile( void )
 
 	read_eqfile_name( s, MAX_PATH_LENGTH );
 	if ( ( f = fopen( s, "r" ) ) == NULL )
+	{
+		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Equation file not found\" -detail \"File '%s' missing, cannot upload the equation file.\nYou may have to restore your equation file using the copy in the configuration file (menu File > Restore Equation File).\"", s );
 		return NULL;
+	}
 
 	// obtain file size
 	for ( sz = 0, i = 1; i > 0; sz += i )
@@ -1441,11 +1471,11 @@ SAVE_EQFILE
 ***************************************************/
 void save_eqfile( FILE *f )
 {
-	if ( eq_file != NULL && ( strlen( lsd_eq_file ) == 0 || strcmp( lsd_eq_file, eq_file ) != 0 ) )
-		strcpyn( lsd_eq_file, eq_file, MAX_FILE_SIZE );
+	if ( eq_txt != NULL && ( strlen( sim.conf_eq_txt ) == 0 || strcmp( sim.conf_eq_txt, eq_txt ) != 0 ) )
+		strcpyn( sim.conf_eq_txt, eq_txt, MAX_FILE_SIZE );
 
 	fprintf( f, "\nEQ_FILE\n" );
-	fprintf( f, "%s", lsd_eq_file );
+	fprintf( f, "%s", sim.conf_eq_txt );
 	fprintf( f, "\nEND_EQ_FILE\n" );
 }
 
@@ -1467,7 +1497,7 @@ void get_saved( object *n, FILE *out, const char *sep, bool all_var )
 		if ( cv->save || all_var )
 		{
 			// get element description
-			cd = search_description( cv->label, false );
+			cd = sim.search_description( cv->label, false );
 			if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
 			{
 				// select just the first description line
@@ -1489,7 +1519,7 @@ void get_saved( object *n, FILE *out, const char *sep, bool all_var )
 	for ( cb = n->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = blueprint->search( cb->blabel );
+			co = sim.blueprint->search( cb->blabel );
 		else
 			co = cb->head;
 		get_saved( co, out, sep, all_var );
@@ -1515,13 +1545,13 @@ void get_sa_limits( object *r, FILE *out, const char *sep )
 	for ( i = 0; i < META_PAR_NUM; ++i )
 		meta_par_in[ i ] = false;
 
-	for ( cs = rsense; cs != NULL; cs = cs->next )
+	for ( cs = sim.rsense; cs != NULL; cs = cs->next )
 	{
 		// get current value (first object)
 		cv = r->search_var( NULL, cs->label );
 
 		// get element description
-		cd = search_description( cs->label, false );
+		cd = sim.search_description( cs->label, false );
 		if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
 		{
 			// select just the first description line

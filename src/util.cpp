@@ -134,13 +134,13 @@ void print_stack( void )
 {
 	lsdstack *app;
 
-	if ( parallel_mode )
+	if ( sim.parallel_mode )
 	{
 		plog( "\n\nRunning in parallel mode, list of variables under computation not available\n(You may disable parallel computation in menu 'Run', 'Simulation Settings')\n" );
 		return;
 	}
 
-	if ( fast_mode > 0 )
+	if ( sim.fast_mode > 0 )
 	{
 		plog( "\n\nRunning in fast mode, list of variables under computation not available\n(You may temporarily not use fast mode to get additional information)\n" );
 		return;
@@ -149,7 +149,7 @@ void print_stack( void )
 	plog( "\n\nList of variables currently under computation" );
 	plog( "\n\nLevel\tVariable Label" );
 
-	for ( app = stack_log; app != NULL; app = app->prev )
+	for ( app = sim.stack_log; app != NULL; app = app->prev )
 		plog( "\n%d\t%s", app->ns, app->label );
 
 	plog( "\n\n(the zero-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones\nbecause necessary for completing their computation)\n" );
@@ -164,17 +164,17 @@ up the latest time step available.
 *************************************************************/
 void error_hard_helper( const char *boxTitle, const char *boxText, const char *logText, bool defQuit )
 {
-	if ( running )			// handle running events differently
+	if ( sim.running )			// handle running events differently
 	{
 		cmd( "if [ winfo exists .deb ] { destroytop .deb }" );
 		deb_log( false, 0 );// close any open debug log file
 		reset_plot( );		// show & disable run-time plot
 		set_buttons_run( false );
 
-		plog_tag( "\n\nError detected at case (time step): %d", "highlight", t );
+		plog_tag( "\n\nError detected at case (time step): %d", "highlight", sim.t );
 		plog( "\n\nError: %s\nDetails: %s", boxTitle, logText );
-		if ( ! parallel_mode && stack_log != NULL && stack_log->vs != NULL )
-			plog( "\nOffending code contained in the equation for variable: '%s'", stack_log->vs->label );
+		if ( ! sim.parallel_mode && sim.stack_log != NULL && sim.stack_log->vs != NULL )
+			plog( "\nOffending code contained in the equation for variable: '%s'", sim.stack_log->vs->label );
 		plog( "\nSuggestion: %s", boxText );
 		print_stack( );
 		cmd( "focustop .log" );
@@ -187,13 +187,13 @@ void error_hard_helper( const char *boxTitle, const char *boxText, const char *l
 		cmd( "ttk::messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\"", boxTitle, boxText  );
 	}
 
-	if ( ! running )
+	if ( ! sim.running )
 		return;
 
 	uncover_browser( );
 	cmd( "focustop .log" );
 
-	cmd( "set err %d", ( defQuit || worker_errors( ) ) > 0 ? 1 : 2 );
+	cmd( "set err %d", ( defQuit || sim.worker_errors( ) ) > 0 ? 1 : 2 );
 
 	cmd( "newtop .cazzo Error" );
 
@@ -221,10 +221,10 @@ void error_hard_helper( const char *boxTitle, const char *boxText, const char *l
 	cmd( "showtop .cazzo centerW" );
 	cmd( "mousewarpto .cazzo.b.ok" );
 
-	if ( parallel_mode || fast_mode != 0 )
+	if ( sim.parallel_mode || sim.fast_mode != 0 )
 		cmd( ".cazzo.e.b.d configure -state disabled" );
 
-	if ( worker_errors( ) > 0 )
+	if ( sim.worker_errors( ) > 0 )
 		cmd( ".cazzo.e.b.r configure -state disabled" );
 
 	choice = 0;
@@ -237,13 +237,13 @@ void error_hard_helper( const char *boxTitle, const char *boxText, const char *l
 
 	if ( err == 3 )
 	{
-		if ( ! parallel_mode && fast_mode == 0 && stack_log != NULL &&
-			 stack_log->vs != NULL && stack_log->vs->label != NULL )
+		if ( ! sim.parallel_mode && sim.fast_mode == 0 && sim.stack_log != NULL &&
+			 sim.stack_log->vs != NULL && sim.stack_log->vs->label != NULL )
 		{
 			char err_msg[ MAX_LINE_SIZE ];
 			double useless = -1;
-			snprintf( err_msg, MAX_LINE_SIZE, "%s (ERROR)", stack_log->vs->label );
-			deb( stack_log->vs->up, NULL, err_msg, & useless );
+			snprintf( err_msg, MAX_LINE_SIZE, "%s (ERROR)", sim.stack_log->vs->label );
+			deb( sim.stack_log->vs->up, NULL, err_msg, & useless );
 		}
 
 		err = 2;
@@ -252,22 +252,22 @@ void error_hard_helper( const char *boxTitle, const char *boxText, const char *l
 	if ( err == 2 )
 	{
 		// do run( ) cleanup
-		empty_stack( );
+		sim.empty_stack( );
+		sim.running = false;
 		unsavedData = true;				// flag unsaved simulation results
-		running = false;
 
 		// run user closing function, reporting error appropriately
-		user_exception = true;
+		sim.user_exception = true;
 		close_sim( );
-		user_exception = false;
+		sim.user_exception = false;
 
-		reset_end( root );
+		sim.reset_end( sim.root );
 		uncover_browser( );
 
 #ifndef _NP_
 		// stop multi-thread workers
-		delete [ ] workers;
-		workers = NULL;
+		delete [ ] sim.workers;
+		sim.workers = NULL;
 #endif
 		throw ( int ) 919293;			// force end of run() (in lsdmain.cpp)
 	}
@@ -358,7 +358,7 @@ void set_ttip_descr( const char *w, const char *lab, int it, bool init )
 	description *cd;
 
 	// add tooltip only if element has description
-	cd = search_description( lab, false );
+	cd = sim.search_description( lab, false );
 	if ( cd != NULL && strlen( fmt_ttip_descr( desc, cd, MAX_LINE_SIZE + 1, init ) ) > 0 )
 	{
 		if ( it >= 0 )			// listbox/canvas?
@@ -404,7 +404,7 @@ void auto_document( const char *lab, const char *which, bool append )
 	char str1[ MAX_LINE_SIZE ], app[ 10 * MAX_LINE_SIZE ], text[ 2 * MAX_BUFF_SIZE ];
 	description *cd;
 
-	for ( cd = descr; cd != NULL; cd = cd->next )
+	for ( cd = sim.descr; cd != NULL; cd = cd->next )
 	{
 		app[ 0 ] = '\0';
 		if ( ( lab == NULL && ( ! strcmp( which, "ALL" ) || ! strcmp( cd->type, "Variable" ) || ! strcmp( cd->type, "Function" ) ) ) || ( lab != NULL && ! strcmp( lab, cd->label ) ) )
@@ -555,7 +555,7 @@ FILE *search_all_sources( char *str )
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
-	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
+	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", eq_file, eq_file );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = get_int( "res" );
 
@@ -802,7 +802,7 @@ int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char
 		return TCL_ERROR;
 
 	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
-	cur = root->search( vname );
+	cur = sim.root->search( vname );
 
 	if ( cur == NULL )					// variable not found
 		return TCL_ERROR;
@@ -836,7 +836,7 @@ int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char
 		return TCL_ERROR;
 
 	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
-	cur = root->search( vname );
+	cur = sim.root->search( vname );
 
 	if ( cur == NULL )					// variable not found
 		return TCL_ERROR;
@@ -919,7 +919,7 @@ int check_label( const char *lab, object *r )
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = blueprint->search( cb->blabel );
+			cur = sim.blueprint->search( cb->blabel );
 		else
 			cur = cb->head;
 
@@ -958,7 +958,7 @@ void control_to_compute( object *r, const char *lab )
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = blueprint->search( cb->blabel );
+			cur = sim.blueprint->search( cb->blabel );
 		else
 			cur = cb->head;
 
@@ -983,7 +983,7 @@ void count_save( object *n, int *count )
 	for ( cb = n->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = blueprint->search( cb->blabel );
+			co = sim.blueprint->search( cb->blabel );
 		else
 			co = cb->head;
 		count_save( co, count );
@@ -1025,7 +1025,7 @@ void show_save( object *n )
 	for ( cb = n->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = blueprint->search( cb->blabel );
+			co = sim.blueprint->search( cb->blabel );
 		else
 			co = cb->head;
 		show_save( co );
@@ -1078,7 +1078,7 @@ void show_plot( object *n )
 	for ( cb = n->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = blueprint->search( cb->blabel );
+			co = sim.blueprint->search( cb->blabel );
 		else
 			co = cb->head;
 		show_plot( co );
@@ -1150,7 +1150,7 @@ void show_debug( object *n )
 	for ( cb = n->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = blueprint->search( cb->blabel );
+			co = sim.blueprint->search( cb->blabel );
 		else
 			co = cb->head;
 		show_debug( co );
@@ -1196,7 +1196,7 @@ void show_parallel( object *n )
 	for ( cb = n->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = blueprint->search( cb->blabel );
+			co = sim.blueprint->search( cb->blabel );
 		else
 			co = cb->head;
 		show_parallel( co );
@@ -1234,7 +1234,7 @@ void show_observe( object *n )
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
-		cd = search_description( cv->label );
+		cd = sim.search_description( cv->label );
 		if ( cd->observe )
 		{
 			if ( cv->param == 1 )
@@ -1250,7 +1250,7 @@ void show_observe( object *n )
 	for ( cb = n->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = blueprint->search( cb->blabel );
+			co = sim.blueprint->search( cb->blabel );
 		else
 			co = cb->head;
 		show_observe( co );
@@ -1271,7 +1271,7 @@ void show_initial( object *n )
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
-		cd = search_description( cv->label );
+		cd = sim.search_description( cv->label );
 		if ( cd->initial )
 		{
 			if ( cv->param == 1 )
@@ -1330,7 +1330,7 @@ void show_special_updat( object *n )
 	for ( cb = n->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = blueprint->search( cb->blabel );
+			co = sim.blueprint->search( cb->blabel );
 		else
 			co = cb->head;
 		show_special_updat( co );

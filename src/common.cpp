@@ -159,7 +159,7 @@ void update_model_info( bool fix )
 	// ensure model name is set
 	cmd( "if { ! [ info exists modelName ] || $modelName eq \"\" || $modelName eq \"%s\" } { \
 			set modelName [ string map -nocase { fun_ \"\" .cpp \"\" } \"%s\" ] \
-		}", model_defaults[ 0 ], equation_name );
+		}", model_defaults[ 0 ], eq_file );
 
 #endif
 

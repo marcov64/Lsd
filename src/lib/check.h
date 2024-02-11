@@ -19,17 +19,15 @@ by macros to allow inlining the code for max performance.
 Also contains the macro error handlers.
 *************************************************************/
 
+#include "lib/libLSD.h"					// LSD library classes
+
+
 /****************************
 CHK_PTR
 User pointer check
 *****************************/
-inline bool chk_ptr( object *ptr )
+inline bool simulation::chk_ptr( object *ptr )
 {
-	extern bool parallel_mode;			// parallel mode (multithreading) status
-	extern int no_ptr_chk;				// disable user pointer checking
-	extern mutex lock_obj_list;			// lock for object list for parallel manipulation
-	extern o_setT obj_list;				// list with all existing LSD objects
-
 	bool obj_exists;
 
 	if ( ptr == NULL )
@@ -61,13 +59,8 @@ CHK_OBJ
 User pointer check for
 valid or NULL pointer
 *****************************/
-inline bool chk_obj( object *ptr )
+inline bool simulation::chk_obj( object *ptr )
 {
-	extern bool parallel_mode;		// parallel mode (multithreading) status
-	extern int no_ptr_chk;			// disable user pointer checking
-	extern mutex lock_obj_list;		// lock for object list for parallel manipulation
-	extern o_setT obj_list;			// list with all existing LSD objects
-
 	bool obj_exists;
 
 	if ( no_ptr_chk || ptr == NULL )
@@ -95,10 +88,8 @@ inline bool chk_obj( object *ptr )
 CHK_HOOK
 Hook vector bound check
 *****************************/
-inline bool chk_hook( object *ptr, unsigned num )
+inline bool simulation::chk_hook( object *ptr, unsigned num )
 {
-	extern int no_ptr_chk;				// disable user pointer checking
-
 	if ( ptr == NULL )
 		return true;
 
@@ -112,11 +103,80 @@ inline bool chk_hook( object *ptr, unsigned num )
 }
 
 
+/****************************
+CHK_EQ
+Get equation function
+pointer for label
+*****************************/
+inline eq_funcT simulation::chk_eq( const char *lab )
+{
+	auto eq_it = eq_map.find( lab );
+
+	if ( eq_it != eq_map.end( ) )
+		return eq_it->second;
+
+	error_hard( "equation not found",
+				"check your configuration (variable name) or\ncode (equation name) to prevent this situation\nPossible problems:\n- There is no equation for this variable\n- The equation name is different from the variable name (case matters!)",
+				false,
+				"equation not found for variable '%s'",
+				lab );
+	return NULL;
+}
+
+
+/****************************
+CHK_RES
+Check for invalid equation
+result
+*****************************/
+inline double simulation::chk_res( double res, const char *lab )
+{
+	if ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) )
+		error_hard( "invalid equation result",
+					"check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation",
+					true,
+					"equation for '%s' produces the invalid value '%lf' at case %d",
+					lab, res, t );
+	return res;
+}
+
+
+/****************************
+CHK_DUMMY
+Check if dummy must have
+master variable updated
+*****************************/
+inline double variable::chk_dummy( const char *lab )
+{
+	variable *cv;
+
+	if ( strlen( lab ) > 0 )
+	{
+		cv = up->search_var( up, lab, false, false, false );
+
+		if ( cv != NULL )
+		{
+			dummy = true;
+
+			if ( ! cv->up->under_comput_var( lab ) )
+				cv->up->cal( up, lab, 0, true );
+		}
+		else
+			error_hard( "updater variable not found",
+						"check updater variable name or create it in model structure",
+						false,
+						"variable '%s' is missing", lab );
+	}
+
+	return val[ 0 ];
+}
+
+
 /***************************************************
 CYCLE_OBJ
 Support function used in CYCLEx macros
 ***************************************************/
-inline object *cycle_obj( object *parent, const char *label, const char *command )
+inline object *simulation::cycle_obj( object *parent, const char *label, const char *command )
 {
 	object *cur = parent->search_err( label, no_search, no_search_up, "cycling" );
 
@@ -151,12 +211,12 @@ inline object *brother( object *c )
 
 
 /****************************
-BAD_POINTER_*
+BAD_PTR_*
 Bad pointer error message
 Escape function for invalid
 pointers in macros
 *****************************/
-double bad_ptr_dbl( object *ptr, const char *file, int line )
+inline double simulation::bad_ptr_dbl( object *ptr, const char *file, int line )
 {
 	if ( ptr == NULL )
 		error_hard( "invalid pointer operation",
@@ -171,25 +231,25 @@ double bad_ptr_dbl( object *ptr, const char *file, int line )
 	return 0.;
 }
 
-char *bad_ptr_chr( object *ptr, const char *file, int line )
+inline char *simulation::bad_ptr_chr( object *ptr, const char *file, int line )
 {
 	bad_ptr_dbl( ptr, file, line );
 	return NULL;
 }
 
-netLink *bad_ptr_lnk( object *ptr, const char *file, int line )
+inline netLink *simulation::bad_ptr_lnk( object *ptr, const char *file, int line )
 {
 	bad_ptr_dbl( ptr, file, line );
 	return NULL;
 }
 
-object *bad_ptr_obj( object *ptr, const char *file, int line )
+inline object *simulation::bad_ptr_obj( object *ptr, const char *file, int line )
 {
 	bad_ptr_dbl( ptr, file, line );
 	return NULL;
 }
 
-void bad_ptr_void( object *ptr, const char *file, int line )
+inline void simulation::bad_ptr_void( object *ptr, const char *file, int line )
 {
 	bad_ptr_dbl( ptr, file, line );
 	return;
@@ -202,7 +262,7 @@ NULL link error message
 Escape function for invalid
 network link pointers in macros
 *****************************/
-double nul_lnk_dbl( const char *file, int line )
+inline double simulation::nul_lnk_dbl( const char *file, int line )
 {
 	error_hard( "invalid network link",
 				"check your equation code to ensure pointer points\nto a valid link before the operation",
@@ -211,13 +271,13 @@ double nul_lnk_dbl( const char *file, int line )
 	return 0.;
 }
 
-object *nul_lnk_obj( const char *file, int line )
+inline object *simulation::nul_lnk_obj( const char *file, int line )
 {
 	nul_lnk_dbl( file, line );
 	return NULL;
 }
 
-void nul_lnk_void( const char *file, int line )
+inline void simulation::nul_lnk_void( const char *file, int line )
 {
 	nul_lnk_dbl( file, line );
 	return;
@@ -230,11 +290,8 @@ Invalid hook error message
 Escape function for invalid
 hook pointers in macros
 *****************************/
-object *no_hook_obj( object *ptr, unsigned num, const char *file, int line )
+inline object *simulation::no_hook_obj( object *ptr, unsigned num, const char *file, int line )
 {
-	extern mutex lock_obj_list;		// lock for object list for parallel manipulation
-	extern o_setT obj_list;			// list with all existing LSD objects
-
 	bool bad_index = false;
 	char err_msg[ MAX_LINE_SIZE ];
 
@@ -278,7 +335,7 @@ No network node error message
 Escape function for invalid
 network object in macros
 *****************************/
-double no_node_dbl( const char *lab, const char *file, int line )
+inline double simulation::no_node_dbl( const char *lab, const char *file, int line )
 {
 	error_hard( "invalid network object",
 				"check your equation code to add\nthe network structure before using this macro",
@@ -287,7 +344,7 @@ double no_node_dbl( const char *lab, const char *file, int line )
 	return 0.;
 }
 
-char *no_node_chr( const char *lab, const char *file, int line )
+inline char *simulation::no_node_chr( const char *lab, const char *file, int line )
 {
 	no_node_dbl( lab, file, line );
 	return NULL;

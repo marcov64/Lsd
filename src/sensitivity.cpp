@@ -20,6 +20,7 @@ and functions are stored in FILELIB.CPP.
 *************************************************************/
 
 #include "LSD.h"
+#include "nolhtables.h"
 
 
 /*****************************************************************************
@@ -217,7 +218,7 @@ sense *search_sensitivity( const char *lab, int lag )
 {
 	sense *cs;
 
-	for ( cs = rsense; cs != NULL; cs = cs->next )
+	for ( cs = sim.rsense; cs != NULL; cs = cs->next )
 		if ( ! strcmp( cs->label, lab ) &&
 			 ( cs->param == 1 || cs->lag == lag ) )
 			 break;
@@ -235,7 +236,7 @@ long num_sensitivity_points( void )
 	long nv;
 	sense *cs;
 
-	for ( nv = 1, cs = rsense; cs != NULL; cs = cs->next )	// scan the linked-list
+	for ( nv = 1, cs = sim.rsense; cs != NULL; cs = cs->next )	// scan the linked-list
 		nv *= cs->numv;	// update the number of variables
 
 	return nv;
@@ -251,7 +252,7 @@ int num_sensitivity_variables( void )
 	int nv;
 	sense *cs;
 
-	for ( nv = 0, cs = rsense; cs != NULL; cs = cs->next)
+	for ( nv = 0, cs = sim.rsense; cs != NULL; cs = cs->next)
 		if ( cs->numv > 1 )				// count variables with 2 or more values
 			nv++;
 
@@ -301,7 +302,7 @@ object *sensitivity_parallel( object *o, sense *s )
 	for ( i = 0; i < s->numv; ++i )
 	{
 		s->curv = i;
-		for ( cs = rsense; cs != NULL; cs = cs->next )
+		for ( cs = sim.rsense; cs != NULL; cs = cs->next )
 		{
 			cv = cur->search_var( cur, cs->label );
 			if ( cs->param == 0 )				// handle lags > 0
@@ -363,10 +364,10 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl, const char
 	for ( i = 0; i < s->numv && ! stop; ++i )
 	{
 		s->curv = i;
-		for ( nv = 1, cs = rsense; cs != NULL; cs = cs->next )
+		for ( nv = 1, cs = sim.rsense; cs != NULL; cs = cs->next )
 		{
 			nv *= cs->numv;
-			cv = root->search_var( root, cs->label );
+			cv = sim.root->search_var( sim.root, cs->label );
 
 			for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( cur->label ) )
 			{
@@ -481,10 +482,10 @@ bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false )
 	if ( NOLH_0 != NULL )			// table already loaded?
 		NOLH_clear( );
 
-	if ( strlen( conf_path ) > 0 )
+	if ( strlen( sim.conf_path ) > 0 )
 	{
-		fileName = new char[ strlen( conf_path ) + strlen( baseName ) + 2 ];
-		sprintf( fileName, "%s/%s", conf_path, baseName );
+		fileName = new char[ strlen( sim.conf_path ) + strlen( baseName ) + 2 ];
+		sprintf( fileName, "%s/%s", sim.conf_path, baseName );
 	}
 	else
 	{
@@ -494,10 +495,10 @@ bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false )
 	NOLHfile = fopen( fileName, "r" );
 	if ( NOLHfile == NULL )
 	{
-		error_hard( "problem accessing the design of experiment file",
-					"check if the requested file exists",
-					false,
-					"cannot open NOHL design file '%s'", fileName );
+		sim.error_hard( "problem accessing the design of experiment file",
+						"check if the requested file exists",
+						false,
+						"cannot open NOHL design file '%s'", fileName );
 		return false;
 	}
 
@@ -544,10 +545,10 @@ bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false )
 				delete [ ] NOLH_0[ 0 ];
 				delete [ ] NOLH_0;
 				NOLH_0 = NULL;
-				error_hard( "invalid design of experiment file",
-							"check the file contents",
-							false,
-							"invalid format in NOHL file '%s', line=%d", fileName, i + 1 );
+				sim.error_hard( "invalid design of experiment file",
+								"check the file contents",
+								false,
+								"invalid format in NOHL file '%s', line=%d", fileName, i + 1 );
 				goto end;
 			}
 
@@ -725,7 +726,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 	double delta = ( double ) jump / ( p - 1 );	// grid step delta
 
 	// reset random number generator
-	init_random( seed );
+	init_random( sim.seed );
 
 	// allocate all temporary matrices
 	double **B = mat_new( k + 1, k ),
@@ -1126,7 +1127,7 @@ void design::load_design_data( sense *rsens, int n )
 	// define low and high values from sensitivity data for each factor/variable
 	for ( i = 0, cs = rsens; i < k && cs != NULL; ++i, cs = cs->next )
 	{
-		inst[ i ] = hyper_count_var( cs->label );
+		inst[ i ] = sim.hyper_count_var( cs->label );
 		nVal = cs->numv;			// number of data values
 		nVal = nVal % 2 == 0 ? nVal : nVal - 1 ;// discard last unpaired value
 
@@ -1184,7 +1185,7 @@ design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
 	FILE *f;
 
 	// reset random number generator
-	init_random( seed );
+	init_random( sim.seed );
 
 	if ( rsens == NULL )					// valid pointer?
 		typ = 0;							// trigger invalid design
@@ -1203,10 +1204,10 @@ design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
 			{
 				if ( factors != 0 && k > factors )	// invalid # of factors selected?
 				{
-					error_hard( "invalid design of experiment parameters",
-								"check the design",
-								false,
-								"number of NOLH variables selected is too small" );
+					sim.error_hard( "invalid design of experiment parameters",
+									"check the design",
+									false,
+									"number of NOLH variables selected is too small" );
 					goto invalid;
 				}
 
@@ -1222,19 +1223,19 @@ design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
 					tab = NOLH_table( k );	// design table to use
 					if ( tab == -1 )		// still too large?
 					{
-						error_hard( "invalid design of experiment parameters",
-									"check the design",
-									false,
-									"too many variables to test for NOLH.csv size" );
+						sim.error_hard( "invalid design of experiment parameters",
+										"check the design",
+										false,
+										"too many variables to test for NOLH.csv size" );
 						goto invalid;		// abort
 					}
 				}
 				else
 				{
-					error_hard( "invalid design of experiment parameters",
-								"check the design",
-								false,
-								"too many variables to test" );
+					sim.error_hard( "invalid design of experiment parameters",
+									"check the design",
+									false,
+									"too many variables to test" );
 					goto invalid;			// abort
 				}
 			}
@@ -1335,13 +1336,13 @@ design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
 
 	if ( strlen( dest_path ) > 0 )				// non-default folder?
 	{
-		doefname = new char [ strlen( dest_path ) + strlen( simul_name ) + strlen( doeName ) + 10 ];
-		sprintf( doefname, "%s/%s_%s.csv", dest_path, strlen( simul_name ) > 0 ? simul_name : "doe", doeName );
+		doefname = new char [ strlen( dest_path ) + strlen( sim.conf_name ) + strlen( doeName ) + 10 ];
+		sprintf( doefname, "%s/%s_%s.csv", dest_path, strlen( sim.conf_name ) > 0 ? sim.conf_name : "doe", doeName );
 	}
 	else
 	{
-		doefname = new char [ strlen( simul_name ) + strlen( doeName ) + 9 ];
-		sprintf( doefname, "%s_%s.csv", strlen( simul_name ) > 0 ? simul_name : "doe", doeName );
+		doefname = new char [ strlen( sim.conf_name ) + strlen( doeName ) + 9 ];
+		sprintf( doefname, "%s_%s.csv", strlen( sim.conf_name ) > 0 ? sim.conf_name : "doe", doeName );
 	}
 
 	if ( ( f = fopen( doefname, "w" ) ) == NULL )
@@ -1349,10 +1350,10 @@ design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
 		delete [ ] doefname;
 		clear_design( );
 
-		error_hard( "cannot create DoE configuration file",
-					"check if disk is not full or set READ-ONLY",
-					false,
-					"a disk error prevented creating the file" );
+		sim.error_hard( "cannot create DoE configuration file",
+						"check if disk is not full or set READ-ONLY",
+						false,
+						"a disk error prevented creating the file" );
 		return;
 	}
 
@@ -1405,7 +1406,7 @@ void sensitivity_doe( int *findex, design *doe, const char *dest_path )
 		// set up the variables ( factors) with the experiment values
 		for ( j = 0; j < doe->k; j++ )			// run through all factors
 		{
-			cv = root->search_var( root, doe->lab[ j ] );	// find variable to set
+			cv = sim.root->search_var( sim.root, doe->lab[ j ] );// find variable to set
 			for ( h = 0, cur = cv->up; cur != NULL; ++h, cur = cur->hyper_next( cur->label ) )
 			{									// run through all objects containing var
 				cv = cur->search_var( cur, doe->lab[ j ] );
@@ -1436,7 +1437,7 @@ void sensitivity_doe( int *findex, design *doe, const char *dest_path )
 
 	// if succeeded, explain user how to proceed
 	if ( ! stop )
-		sensitivity_created( dest_path, clean_file( strlen( simul_name ) > 0 ? simul_name : "doe" ), inif );
+		sensitivity_created( dest_path, clean_file( strlen( sim.conf_name ) > 0 ? sim.conf_name : "doe" ), inif );
 	else
 		*findex = 0;							// don't consider for appending
 }

@@ -63,11 +63,11 @@ void show_eq( const char *lab, const char *parWnd )
 
 	start:
 
-	fname = equation_name;
+	fname = eq_file;
 	snprintf( full_name, MAX_PATH_LENGTH, "%s/%s", model_path, fname );
 	if ( ( f1 = fopen( full_name, "r" ) ) == NULL )
 	{
-		cmd( "switch [ ttk::messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'OK' to search it.\" ] { ok { set ans 1 } cancel { set ans 0 } }", equation_name  );
+		cmd( "switch [ ttk::messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'OK' to search it.\" ] { ok { set ans 1 } cancel { set ans 0 } }", eq_file  );
 		cmd( "if { $ans } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir \"%s\" -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ]; if [ fn_spaces \"$res\" . ] { set res \"\" } { set res [ file tail $res ] } }", model_path );
 
 		if ( get_bool( "ans" ) )
@@ -76,7 +76,7 @@ void show_eq( const char *lab, const char *parWnd )
 			if ( app == NULL || strlen( app ) == 0 )
 				return;
 
-			strcpyn( equation_name, app, MAX_PATH_LENGTH );
+			strcpyn( eq_file, app, MAX_PATH_LENGTH );
 
 			goto start;
 		}
@@ -88,7 +88,7 @@ void show_eq( const char *lab, const char *parWnd )
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
-	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
+	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", eq_file, eq_file );
 	cmd( "set i [ llength $source_files ]" );
 	i = get_int( "i" );
 
@@ -391,7 +391,7 @@ void scan_used_lab( const char *lab, const char *parWnd )
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
-	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
+	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", eq_file, eq_file );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = get_int( "res" );
 
@@ -506,8 +506,8 @@ void scan_using_lab( const char *lab, const char *parWnd )
 
 	cmd( "done $list b \"destroytop $list\"" );		// done button
 
-	cv = root->search_var( root, lab );
-	find_using( root, cv, NULL, & found );
+	cv = sim.root->search_var( sim.root, lab );
+	find_using( sim.root, cv, NULL, & found );
 
 	cmd( "set res [ $list.l.l size ]" );
 	if ( get_int( "res" ) != 0 )
@@ -538,11 +538,11 @@ void show_descr( const char *lab, const char *parWnd )
 	else
 		cmd( "set parWnd ." );
 
-	cv = root->search_var( NULL, lab );
+	cv = sim.root->search_var( NULL, lab );
 	if ( cv == NULL )
 		return;
 
-	cd = search_description( lab );
+	cd = sim.search_description( lab );
 
 	cmd( "if { [ string equal $parWnd . ] } { \
 			set w .desc_%s \

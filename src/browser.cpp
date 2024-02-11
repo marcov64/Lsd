@@ -85,17 +85,17 @@ int load_gui( const char **argv )
 
 		if ( argv[ i ][ 1 ] == 'f' )
 		{
-			delete [ ] simul_name;
-			simul_name = new char[ strlen( argv[ i + 1 ] ) + 5 ];
+			delete [ ] sim.conf_name;
+			sim.conf_name = new char[ strlen( argv[ i + 1 ] ) + 5 ];
 			str = new char[ strlen( argv[ i + 1 ] ) + 1 ];
-			strcpy( simul_name, argv[ i + 1 ] );
+			strcpy( sim.conf_name, argv[ i + 1 ] );
 			strcpy( str, argv[ i + 1 ] );
 			strupr( str );
 
 			if ( strlen( str ) > 0 && strstr( str, ".LSD" ) != NULL )
-				simul_name[ strstr( str, ".LSD" ) - str ] = '\0';
+				sim.conf_name[ strstr( str, ".LSD" ) - str ] = '\0';
 			else
-				strcpy( simul_name, "" );
+				strcpy( sim.conf_name, "" );
 
 			delete [ ] str;
 			i++;
@@ -126,11 +126,11 @@ int load_gui( const char **argv )
 	init_tcl_tk( argv[ 0 ], "lsd" );
 
 	// global links between C and tcl variables
-	Tcl_LinkVar( interp, "choice", ( char * ) &choice, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "choice_g", ( char * ) &choice_g, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "stop", ( char * ) &stop, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "debug_flag", ( char * ) &debug_flag, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "when_debug", ( char * ) &when_debug, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "choice", ( char * ) & choice, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "choice_g", ( char * ) & choice_g, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "stop", ( char * ) & stop, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "deb_set", ( char * ) & deb_set, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "deb_t", ( char * ) & sim.deb_t, TCL_LINK_INT );
 
 	// set system defaults in tcl
 	cmd( "set LMM_OPTIONS \"%s\"", LMM_OPTIONS );
@@ -188,11 +188,11 @@ int load_gui( const char **argv )
 	cmd( "cd \"$modelDir\"" );
 	app = get_str( "modelDir" );
 
-	delete [ ] conf_path;
+	delete [ ] sim.conf_path;
 	delete [ ] model_path;
-	conf_path = new char[ strlen( app ) + 1 ];
+	sim.conf_path = new char[ strlen( app ) + 1 ];
 	model_path = new char[ strlen( app ) + 1 ];
-	strcpy( conf_path, app );
+	strcpy( sim.conf_path, app );
 	strcpy( model_path, app );
 
 	// check if LSDROOT already exists and use it if so, if not, search the current directory tree
@@ -311,8 +311,8 @@ int load_gui( const char **argv )
 	cmd( "set gpterm \"\"" );
 
 	// load/check model equation file
-	read_eqfile_name( equation_name, MAX_PATH_LENGTH );
-	eq_file = load_eqfile( );
+	read_eqfile_name( eq_file, MAX_PATH_LENGTH );
+	eq_txt = load_eqfile( );
 
 	// load/check model information file and fix if required
 	if ( ! load_model_info( model_path ) )
@@ -321,27 +321,50 @@ int load_gui( const char **argv )
 	// check model configuration file
 	if ( eval_bool( "[ info exists lastConf ] && [ file exists $lastConf ] && [ file isfile $lastConf ]" ) )
 	{
-		delete [ ] simul_name;
+		delete [ ] sim.conf_name;
 		cmd( "set fn [ string map -nocase [ list [ file extension $lastConf ] \"\" ] [ file tail $lastConf ] ]" );
-		simul_name = new char[ eval_int( "[ string length $fn ]" ) + 1 ];
-		strcpy( simul_name, get_str( "fn" ) );
+		sim.conf_name = new char[ eval_int( "[ string length $fn ]" ) + 1 ];
+		strcpy( sim.conf_name, get_str( "fn" ) );
 
 		cmd( "set path [ file normalize [ file dirname $lastConf ] ]" );
 		if ( eval_bool( "$path ne [ pwd ]" ) )
 		{
-			delete [ ] conf_path;
-			conf_path = new char[ eval_int( "[ string length $path ]" ) + 1 ];
-			strcpy( conf_path, get_str( "path" ) );
+			delete [ ] sim.conf_path;
+			sim.conf_path = new char[ eval_int( "[ string length $path ]" ) + 1 ];
+			strcpy( sim.conf_path, get_str( "path" ) );
 			cmd( "cd $path" );
 		}
 	}
 
+	// set dynamic link library (DLL) call-back references
+	inter = interp;
+	liblnk.cmd_backend = & cmd_backend;
+	liblnk.cover_browser = & cover_browser;
+	liblnk.deb = & deb;
+	liblnk.deb_log = & deb_log;
+	liblnk.disable_plot = & disable_plot;
+	liblnk.enable_plot = & enable_plot;
+	liblnk.error_hard_helper = & error_hard_helper;
+	liblnk.init_lattice_helper = & init_lattice_helper;
+	liblnk.log_tcl_error = & log_tcl_error;
+	liblnk.plog_backend = & plog_backend;
+	liblnk.plot_rt = & plot_rt;
+	liblnk.print_stack = & print_stack;
+	liblnk.reset_plot = & reset_plot;
+	liblnk.runtime_buttons = & runtime_buttons;
+	liblnk.runtime_run = & runtime_run;
+	liblnk.runtime_step = & runtime_step;
+	liblnk.save_lattice_helper = & save_lattice_helper;
+	liblnk.show_prof_aggr = & show_prof_aggr;
+	liblnk.uncover_browser = & uncover_browser;
+	liblnk.update_lattice_helper = & update_lattice_helper;
+
 	// try to load model configuration file
-	if ( strlen( simul_name ) > 0 )
+	if ( strlen( sim.conf_name ) > 0 )
 	{
-		struct_file = new char[ strlen( conf_path ) + strlen( simul_name ) + 6 ];
-		sprintf( struct_file, "%s%s%s.lsd", conf_path, strlen( conf_path ) > 0 ? "/" : "", simul_name );
-		snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
+		sim.conf_file = new char[ strlen( sim.conf_path ) + strlen( sim.conf_name ) + 6 ];
+		sprintf( sim.conf_file, "%s%s%s.lsd", sim.conf_path, strlen( sim.conf_path ) > 0 ? "/" : "", sim.conf_name );
+		snprintf( sim.rep_file, MAX_PATH_LENGTH, "report_%s.html", sim.conf_name );
 
 		i = open_configuration( ( r = NULL ), true );
 	}
@@ -351,13 +374,13 @@ int load_gui( const char **argv )
 	// failed configuration
 	if ( i == 0 )
 	{
-		delete [ ] simul_name;
-		delete [ ] struct_file;
-		simul_name = new char[ strlen( "" ) + 1 ];
-		struct_file = new char[ strlen( "" ) + 1 ];
-		strcpy( simul_name, "" );
-		strcpy( struct_file, "" );
-		strcpy( name_rep, "" );
+		delete [ ] sim.conf_name;
+		delete [ ] sim.conf_file;
+		sim.conf_name = new char[ strlen( "" ) + 1 ];
+		sim.conf_file = new char[ strlen( "" ) + 1 ];
+		strcpy( sim.conf_name, "" );
+		strcpy( sim.conf_file, "" );
+		strcpy( sim.rep_file, "" );
 		cmd( "cd \"%s\"", model_path );
 	}
 
@@ -373,43 +396,22 @@ int load_gui( const char **argv )
 
 	create_logwindow( );
 
-	// set dynamic link library (DLL) call-back references
-	inter = interp;
-	liblnk.cmd_backend = & cmd_backend;
-	liblnk.cover_browser = & cover_browser;
-	liblnk.deb = & deb;
-	liblnk.deb_log = & deb_log;
-	liblnk.disable_plot = & disable_plot;
-	liblnk.enable_plot = & enable_plot;
-	liblnk.error_hard_helper = & error_hard_helper;
-	liblnk.init_lattice_helper = & init_lattice_helper;
-	liblnk.log_tcl_error = & log_tcl_error;
-	liblnk.plog_backend = & plog_backend;
-	liblnk.plot_rt = & plot_rt;
-	liblnk.prepare_plot = & prepare_plot;
-	liblnk.print_stack = & print_stack;
-	liblnk.reset_plot = & reset_plot;
-	liblnk.runtime_buttons = & runtime_buttons;
-	liblnk.runtime_step = & runtime_step;
-	liblnk.save_lattice_helper = & save_lattice_helper;
-	liblnk.show_prof_aggr = & show_prof_aggr;
-	liblnk.uncover_browser = & uncover_browser;
-	liblnk.update_lattice_helper = & update_lattice_helper;
-
 	while ( 1 )						// main GUI loop: create/edit configuration - run
 	{
 		create( );					// open LSD browser
 
 		try
 		{
-			if ( ( i = run( ) ) != 0 )
+			if ( ( i = sim.run_sim( ) ) != 0 )
 				return i;
+			else
+				unsavedData = true;	// flag unsaved simulation results
 		}
 		catch( int p )				// return point from error_hard() (in object.cpp)
 		{
 			if ( p != 919293 )		// check throw signature
 				throw;
-			quit = 0;
+			sim.quit = 0;
 		}
 		catch ( ... )				// send the rest upward
 		{
@@ -420,8 +422,8 @@ int load_gui( const char **argv )
 	Tcl_UnlinkVar( interp, "choice" );
 	Tcl_UnlinkVar( interp, "choice_g" );
 	Tcl_UnlinkVar( interp, "stop" );
-	Tcl_UnlinkVar( interp, "debug_flag" );
-	Tcl_UnlinkVar( interp, "when_debug" );
+	Tcl_UnlinkVar( interp, "deb_set" );
+	Tcl_UnlinkVar( interp, "deb_t" );
 
 	set_env( false );
 
@@ -437,7 +439,7 @@ void create( void )
 	object *cur;
 
 	Tcl_LinkVar( interp, "strWindowOn", ( char * ) &strWindowOn, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "actual_steps", ( char * ) &actual_steps, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "eff_t", ( char * ) &sim.eff_t, TCL_LINK_INT );
 
 	// sort the list of choices with existing run data to use later
 	qsort( badChoices, NUM_BAD_CHOICES, sizeof ( int ), comp_ints );
@@ -451,25 +453,25 @@ void create( void )
 	cmd( "set c \"\"" );
 
 	// restore previous object and cursor position in browser, if any
-	cur = restore_pos( root );
+	cur = restore_pos( sim.root );
 	redrawRoot = redrawStruc = true;	// browser/ structure redraw when drawing the first time
 	choice_g = choice = 0;
 
 	// main cycle
 	while ( choice != 1 )
 	{
-		cmd( "wm title . \"%s%s - LSD Browser\"", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
-		cmd( "wm title .log \"%s%s - LSD Log\"", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
+		cmd( "wm title . \"%s%s - LSD Browser\"", unsaved_change( ) ? "*" : " ", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
+		cmd( "wm title .log \"%s%s - LSD Log\"", unsaved_change( ) ? "*" : " ", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
 
 		// find root and minimally check the configuration
-		if ( struct_loaded && root->v == NULL && root->b == NULL )
+		if ( sim.conf_ok && sim.root->v == NULL && sim.root->b == NULL )
 		{
-			error_hard( "corrupted configuration file or internal problem in LSD",
-						"if error persists, please contact developers",
-						false,
-						"invalid model configuration loaded" );
+			sim.error_hard( "corrupted configuration file or internal problem in LSD",
+							"if error persists, please contact developers",
+							false,
+							"invalid model configuration loaded" );
 			unload_configuration_gui( true );
-			cur = root;
+			cur = sim.root;
 		}
 
 		if ( message_logged )
@@ -493,7 +495,7 @@ void create( void )
 	}
 
 	Tcl_UnlinkVar( interp, "strWindowOn" );
-	Tcl_UnlinkVar( interp, "actual_steps" );
+	Tcl_UnlinkVar( interp, "eff_t" );
 }
 
 
@@ -757,7 +759,7 @@ int browse( object *r )
 			cmd( "bind .l.v.c.var_name <F5> { \
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $eff_t == 0 } { \
 						set save [ expr { ! [ get_var_conf $vname save ] } ]; \
 						set ctxMenuCmd \"set_var_conf $vname save $save\"; \
 						set choice 95 \
@@ -769,7 +771,7 @@ int browse( object *r )
 			cmd( "bind .l.v.c.var_name <F6> { \
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $eff_t == 0 } { \
 						set plot [ expr { ! [ get_var_conf $vname plot ] } ]; \
 						set ctxMenuCmd \"set_var_conf $vname plot $plot\"; \
 						set choice 95 \
@@ -782,7 +784,7 @@ int browse( object *r )
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color $colorsTheme(par) ] } { \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $eff_t == 0 && ! [ string equal $color $colorsTheme(par) ] } { \
 						set debug [ expr { ! [ get_var_conf $vname debug ] } ]; \
 						set ctxMenuCmd \"set_var_conf $vname debug $debug\"; \
 						set choice 95 \
@@ -795,7 +797,7 @@ int browse( object *r )
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color $colorsTheme(lfun) ] && ! [ string equal $color $colorsTheme(fun) ] } { \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $eff_t == 0 && ! [ string equal $color $colorsTheme(lfun) ] && ! [ string equal $color $colorsTheme(fun) ] } { \
 						set watch_write 0; \
 						set watch [ expr { ! [ get_var_conf $vname watch ] } ]; \
 						set ctxMenuCmd \"set_var_conf $vname watch $watch\"; \
@@ -809,7 +811,7 @@ int browse( object *r )
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color $colorsTheme(lfun) ] && ! [ string equal $color $colorsTheme(fun) ] } { \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $eff_t == 0 && ! [ string equal $color $colorsTheme(lfun) ] && ! [ string equal $color $colorsTheme(fun) ] } { \
 						set watch 0; \
 						set watch_write [ expr { ! [ get_var_conf $vname watch_write ] } ]; \
 						set ctxMenuCmd \"set_var_conf $vname watch_write $watch_write\"; \
@@ -823,7 +825,7 @@ int browse( object *r )
 					set listfocus 1; \
 					set itemfocus [ .l.v.c.var_name curselection ]; \
 					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 && ! [ string equal $color $colorsTheme(par) ] && ! [ string equal $color $colorsTheme(lfun) ] && ! [ string equal $color $colorsTheme(fun) ] } { \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $eff_t == 0 && ! [ string equal $color $colorsTheme(par) ] && ! [ string equal $color $colorsTheme(lfun) ] && ! [ string equal $color $colorsTheme(fun) ] } { \
 						set parallel [ expr { ! [ get_var_conf $vname parallel ] } ]; \
 						set ctxMenuCmd \"set_var_conf $vname parallel $parallel\"; \
 						set choice 95 \
@@ -1066,7 +1068,7 @@ int browse( object *r )
 			cmd( "bind .l.s.c.son_name <F5> { \
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
-					if { ! ( $upObjItem && $itemfocus == 0 ) && ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $actual_steps == 0 } { \
+					if { ! ( $upObjItem && $itemfocus == 0 ) && ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $eff_t == 0 } { \
 						set nocomp [ expr { ! [ get_obj_conf $vname comp ] } ]; \
 						set ctxMenuCmd \"set_obj_conf $vname comp $nocomp\"; \
 						set choice 95 \
@@ -1476,7 +1478,7 @@ int browse( object *r )
 		}" );
 
 	// if simulation was started, check to see if operation is valid
-	if ( running || actual_steps > 0 )
+	if ( sim.running || sim.eff_t > 0 )
 		// search the sorted list of choices that are bad with existing run data
 		if ( bsearch( & choice, badChoices, NUM_BAD_CHOICES, sizeof ( int ), comp_ints ) != NULL )
 		{
@@ -1499,25 +1501,37 @@ int browse( object *r )
 
 
 /****************************************************
+RUNTIME_RUN
+Updates GUI at the start of each simulation run
+Prepare run-time plots and clear AoR maps
+****************************************************/
+void runtime_run( void )
+{
+	prepare_plot( sim.root, sim.run );
+	par_map.clear( );	// restart variable to parent name map for AoR
+}
+
+
+/****************************************************
 RUNTIME_STEP
 Updates GUI at the start of each time step
 Checks if debug must be invoked and if simulation
 is paused (return FALSE) or not (TRUE)
 ****************************************************/
-bool runtime_step( int &t )
+bool runtime_step( void )
 {
 	cur_plt = 0;			// restart runtime variable color cycle
 
 	if ( pause_run )		// adjust "clock" backwards if simulation is paused
-		t--;
+		--sim.t;
 
-	if ( t == when_debug )	// activate degugger if it's time
+	if ( sim.t == sim.deb_t )// activate degugger if it's time
 	{
-		debug_flag = true;
+		deb_set = true;
 		cmd( "focustop .deb" );
 	}
 	else
-		debug_flag = false;
+		deb_set = false;
 
 	return ! pause_run;		// only update variables if simulation not paused
 }
@@ -1528,7 +1542,7 @@ RUNTIME_BUTTONS
 Handle active buttons during simulation execution
 at the end of each time step
 ****************************************************/
-void runtime_buttons( int cur_sim, int t, clock_t &last_update )
+void runtime_buttons( clock_t &last_update )
 {
 	switch ( done_in )
 	{
@@ -1539,31 +1553,31 @@ void runtime_buttons( int cur_sim, int t, clock_t &last_update )
 				cmd( ".b.r2.pause conf -text Pause" );
 			}
 
-			quit = 2;
+			sim.quit = 2;
 			break;
 
 		case 2:			// Fast button / f/F key
-			set_fast( 1 );
-			debug_flag = false;
+			sim.set_fast( 1 );
+			deb_set = false;
 			break;
 
 		case 3:			// Debug button / d/D key
 			if ( ! pause_run )
 			{
-				when_debug = t + 1;
-				debug_flag = true;
+				sim.deb_t = sim.t + 1;
+				deb_set = true;
 				cmd( "focustop .deb" );
 			}
 			else		// if paused, just call the data browser
 			{
 				double useless = 0;
-				deb( root, NULL, "Paused by User", &useless, false, "" );
+				deb( sim.root, NULL, "Paused by User", &useless, false, "" );
 			}
 
 			break;
 
 		case 4:			// Observe button / o/O key
-			set_fast( 0 );
+			sim.set_fast( 0 );
 			break;
 
 		// runtime plot events
@@ -1580,28 +1594,28 @@ void runtime_buttons( int cur_sim, int t, clock_t &last_update )
 			if ( pause_run )
 			{
 				cmd( "set origLogTit [ wm title .log ]; wm title .log \"$origLogTit (PAUSED)\"" );
-				plog( "\nSimulation %d of %d paused at case %d", cur_sim, sim_num, t );
+				plog( "\nSimulation %d of %d paused at case %d", sim.run, sim.last_run, sim.t );
 				cmd( ".b.r2.pause conf -text Resume" );
 			}
 			else
 			{
 				cmd( "wm title .log \"$origLogTit\"" );
-				plog( "\nSimulation %d of %d resumed at case %d", cur_sim, sim_num, t );
+				plog( "\nSimulation %d of %d resumed at case %d", sim.run, sim.last_run, sim.t );
 				cmd( ".b.r2.pause conf -text Pause" );
 			}
 	}
 
 	done_in = 0;
 
-	if ( cur_sim == 1 && t == 1 )
+	if ( sim.run == 1 && sim.t == 1 )
 		enable_plot( );	// show run time plot if still enabled
 
 	scroll_plot( );		// perform scrolling if enabled
 
 	if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER )
 	{
-		cmd( ".p.b2.b configure -value %d", t );
-		cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", min( t + 1, max_step ), max_step, t, max_step );
+		cmd( ".p.b2.b configure -value %d", sim.t );
+		cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", min( sim.t + 1, sim.last_t ), sim.last_t, sim.t, sim.last_t );
 		cmd( "update" );
 		last_update = clock( );
 	}
@@ -1618,7 +1632,7 @@ void save_pos( object *r )
 		return;										// browser not drawn yet
 
 	// save the current object & cursor position for quick reload
-	cmd( "set lastObj %s", r != NULL ? r->label : root->label );
+	cmd( "set lastObj %s", r != NULL ? r->label : sim.root->label );
 
 	cmd( "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { \
 				set lastList 2 \
@@ -1648,7 +1662,7 @@ object *restore_pos( object *r )
 
 	if ( r != NULL && eval_bool( "$lastObj ne \"\"" ) )
 	{
-		cur = root->search( get_str( "lastObj" ) );
+		cur = sim.root->search( get_str( "lastObj" ) );
 		if ( cur != NULL )
 		{
 			cmd( "if [ info exists lastList ] { set listfocus $lastList }" );
@@ -1707,7 +1721,7 @@ void insert_object( const char *w, object *r, bool netOnly, object *above )
 		if ( above == NULL || strcmp( cb->blabel, above->label ) != 0 )
 		{
 			if ( cb->head == NULL )
-				cur = blueprint->search( cb->blabel );
+				cur = sim.blueprint->search( cb->blabel );
 			else
 				cur = cb->head;
 
@@ -1726,7 +1740,7 @@ void wipe_out( object *d )
 
 	cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", d->label );
 
-	change_description( d->label );
+	sim.change_description( d->label );
 
 	for ( cv = d->v; cv != NULL; cv = cv->next )
 	{
@@ -1736,7 +1750,7 @@ void wipe_out( object *d )
 		cmd( "if [ info exists modPar ] { set pos [ lsearch -exact $modPar %s ]; if { $pos >= 0 } { set modPar [ lreplace $modPar $pos $pos ] } }", cv->label );
 		cmd( "if [ info exists modFun ] { set pos [ lsearch -exact $modFun %s ]; if { $pos >= 0 } { set modFun [ lreplace $modFun $pos $pos ] } }", cv->label );
 
-		change_description( cv->label );
+		sim.change_description( cv->label );
 	}
 
 	cur = d->hyper_next( d->label );
@@ -2098,7 +2112,7 @@ Returns: 0: abort, 1: continue without saving
 bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 {
 	// don't stop if simulation is running
-	if ( running )
+	if ( sim.running )
 	{
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Cannot quit LSD\" -detail \"Cannot quit while simulation is running.\n\n Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' first.\"" );
 		return false;
@@ -2114,8 +2128,8 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 	else
 		if ( ! senseOnly && unsavedChange )
 		{
-			if (  strlen( simul_name ) > 0 )
-				cmd( "set question \"Recent changes to configuration '%s' are not saved!\nDo you want to discard and continue?\"", simul_name );
+			if (  strlen( sim.conf_name ) > 0 )
+				cmd( "set question \"Recent changes to configuration '%s' are not saved!\nDo you want to discard and continue?\"", sim.conf_name );
 			else
 				cmd( "set question \"Recent changes to current configuration are not saved!\nDo you want to discard and continue?\"" );
 		}

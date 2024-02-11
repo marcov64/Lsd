@@ -40,9 +40,7 @@ the function used run time to plot the value of variable v
 #include "LSD.h"
 
 char intval[ 100 ];				// string buffer
-double ymax;
 double ymed;
-double ymin;
 double *old_val;
 variable **list_var;
 
@@ -174,7 +172,7 @@ bool add_rt_plot_tab( const char *w, int id_sim )
 			ttk::notebook::enableTraversal $rtptab; \
 			bind $w <F1> { LsdHelp runtime.html }; \
 			set rtptab_show 0 \
-		}", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
+		}", unsaved_change( ) ? "*" : " ", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
 
 	set_shortcuts_run( "$w" );
 
@@ -261,7 +259,7 @@ void init_plot( int num )
 	if ( ! exists_var( "activeplot" ) || ! exists_window( "$activeplot" ) )
 		return;
 
-	cmd( "if { %d > $hsizeR } { set plot_step 1 } { set plot_step [ expr { $hsizeR / %d.0 } ] }", max_step, max_step );
+	cmd( "if { %d > $hsizeR } { set plot_step 1 } { set plot_step [ expr { $hsizeR / %d.0 } ] }", sim.last_t, sim.last_t );
 
 	cmd( "ttk::frame $activeplot.c" );
 
@@ -278,7 +276,7 @@ void init_plot( int num )
 	cmd( "ttk::frame $activeplot.c.c  " );
 	cmd( "set p $activeplot.c.c.cn" );
 	cmd( "ttk::scrollbar $activeplot.c.c.hscroll -orient horiz -command \"$p xview\"" );
-	cmd( "ttk::canvas $p -width [ expr { $hsizeR + 2 * $cvhmarginR } ] -height [ expr { $vsizeR + $sclvmarginR + $botvmarginR } ] -scrollregion \"0 0 %d [ expr { $vsizeR + $sclvmarginR + $botvmarginR } ]\" -xscrollcommand \"$activeplot.c.c.hscroll set\" -xscrollincrement 1 -yscrollincrement 1 -dark $darkTheme", max_step );
+	cmd( "ttk::canvas $p -width [ expr { $hsizeR + 2 * $cvhmarginR } ] -height [ expr { $vsizeR + $sclvmarginR + $botvmarginR } ] -scrollregion \"0 0 %d [ expr { $vsizeR + $sclvmarginR + $botvmarginR } ]\" -xscrollcommand \"$activeplot.c.c.hscroll set\" -xscrollincrement 1 -yscrollincrement 1 -dark $darkTheme", sim.last_t );
 	cmd( "pack $activeplot.c.c.hscroll -side bottom -expand yes -fill x" );
 	cmd( "mouse_wheel $p" );
 
@@ -291,7 +289,7 @@ void init_plot( int num )
 			}; \
 			$p create line [ expr { $cvhmarginR - $ticmarginR } ] [ expr { $sclvmarginR + $vsizeR * $i / $vticksR } ] [ expr { $cvhmarginR } ] [ expr { $sclvmarginR + $vsizeR * $i / $vticksR } ] -fill $colorsTheme(dfg); \
 			$p create line [ expr { $cvhmarginR } ] [ expr { $sclvmarginR + $vsizeR * $i / $vticksR } ] [ expr { $cvhmarginR + %d * $plot_step } ] [ expr { $sclvmarginR + $vsizeR * $i / $vticksR } ] -fill $color \
-		}", max_step );
+		}", sim.last_t );
 
 	// vertical grid lines
 	cmd( "set k [ expr { $vsizeR + $sclvmarginR } ]" );
@@ -312,7 +310,7 @@ void init_plot( int num )
 				$p create text $j [ expr { $k + $ticmarginR } ] -text $l -anchor n -fill $colorsTheme(dfg); \
 				set u $l \
 			} \
-	}	", max_step, max_step, max_step );
+	}	", sim.last_t, sim.last_t, sim.last_t );
 
 	cmd( "pack $p -anchor nw" );
 	cmd( "pack $activeplot.c.c -anchor nw" );
@@ -376,7 +374,7 @@ void init_plot( int num )
 		cmd( "tooltip::tooltip $activeplot.fond -item  $it \"%d series labels not presented\"", num - i );
 	}
 
-	if ( max_step > get_int( "hsizeR" ) )
+	if ( sim.last_t > get_int( "hsizeR" ) )
 	{
 		cmd( "$activeplot.fond.go conf -state normal" );
 		cmd( "$activeplot.fond.shift conf -state normal" );
@@ -459,7 +457,7 @@ void plot_rt( variable *v )
 		cmd( "$activeplot.c.yscale itemconf ymin -text %.*g", p_digits, fabs( ymin ) < zero_lim ? 0 : ymin );
 	}
 
-	if ( t == 1 )
+	if ( sim.t == 1 )
 	{
 		if ( v->param != 1 && v->num_lag > 0 )
 			old_val[ cur_plt ] = v->val[ 1 ];
@@ -467,8 +465,8 @@ void plot_rt( variable *v )
 			goto end;
 	}
 
-	cmd( "set x1 [ expr { floor( $cvhmarginR + %d * $plot_step ) } ]", t );
-	cmd( "set x2 [ expr { floor( $cvhmarginR + ( %d - 1 ) * $plot_step ) } ]", t );
+	cmd( "set x1 [ expr { floor( $cvhmarginR + %d * $plot_step ) } ]", sim.t );
+	cmd( "set x2 [ expr { floor( $cvhmarginR + ( %d - 1 ) * $plot_step ) } ]", sim.t );
 	cmd( "set y1 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", v->val[ 0 ], ymin, ymax, ymin );
 	cmd( "set y2 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", old_val[ cur_plt ], ymin, ymax, ymin );
 
@@ -498,7 +496,7 @@ void reset_plot( void )
 				deiconifytop $activeplot \
 			}; \
 			update \
-		}", fast ? 1 : 0 );
+		}", sim.fast ? 1 : 0 );
 }
 
 
@@ -542,7 +540,7 @@ void center_plot( void )
 			set newpos [ expr { %lf - $hsizeR / 2 / %lf } ]; \
 			$activeplot.c.c.cn xview moveto $newpos; \
 			update idletasks \
-		}", t, t / ( double ) max_step, ( double ) max_step );
+		}", sim.t, sim.t / ( double ) sim.last_t, ( double ) sim.last_t );
 }
 
 
@@ -554,5 +552,5 @@ void scroll_plot( void )
 	if ( scrollB )
 		cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] && [ winfo ismapped $activeplot ] && %d > [ expr { $hsizeR * 0.8 } ] } { \
 				$activeplot.c.c.cn xview scroll 1 units \
-			}", t );
+			}", sim.t );
 }

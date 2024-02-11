@@ -50,7 +50,6 @@ values
 
 // flags to avoid recursive usage (confusing and tk windows are not ready)
 bool overflow;					// indicate table overflow (>MAX_COLS or >MAX_CELS)
-bool iniShowOnce = false;		// prevent repeating warning on # of columns
 int maxCols;					// maximum number of columns to show (prevent crash)
 
 
@@ -97,7 +96,7 @@ void edit_data( object *r, const char *lab )
 
 	cmd( "set cwidth 11" );
 
-	cmd( "newtop .inid \"%s%s - LSD Initial Values Editor\" { set choice 1 }", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
+	cmd( "newtop .inid \"%s%s - LSD Initial Values Editor\" { set choice 1 }", unsaved_change( ) ? "*" : " ", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
 
 	cmd( "ttk::frame .inid.t" );		// top frame to pack
 

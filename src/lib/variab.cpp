@@ -278,7 +278,7 @@ double variable::cal( object *caller, int lag )
 
 	if ( param == 1 )
 	{
-		if ( debug_flag && t == when_debug && ( deb_mode == 'w' || deb_mode == 'W' ) )
+		if ( deb_set && t == deb_t && ( deb_mode == 'w' || deb_mode == 'W' ) )
 		{
 			watch_trigger = true;
 			watch_write_mode = false;
@@ -329,7 +329,7 @@ double variable::cal( object *caller, int lag )
 			// already calculated this time step or not to be calculated this time step
 			if ( last_update >= t || t < next_update )
 			{
-				if ( debug_flag && t == when_debug && ( deb_mode == 'w' || deb_mode == 'W' ) )
+				if ( deb_set && t == deb_t && ( deb_mode == 'w' || deb_mode == 'W' ) )
 				{
 					watch_trigger = true;
 					watch_write_mode = false;
@@ -509,11 +509,11 @@ double variable::cal( object *caller, int lag )
 		}
 
 		// update debug log file
-		if ( log_file != NULL && t >= log_start && t <= log_stop )
-			fprintf( log_file, "%s\t= %g\t(t=%d)\n", label, val[ 0 ], t );
+		if ( log_file_ptr != NULL && t >= log_start && t <= log_stop )
+			fprintf( log_file_ptr, "%s\t= %g\t(t=%d sim=%d)\n", label, val[ 0 ], t, sim );
 
 		// open the debugger if required
-		if ( debug_flag && t == when_debug && liblnk.deb != NULL && ( watch_trigger || ( deb_cond == 0 && ( deb_mode == 'd' || deb_mode == 'W' || deb_mode == 'R' ) ) ) )
+		if ( deb_set && t == deb_t && liblnk.deb != NULL && ( watch_trigger || ( deb_cond == 0 && ( deb_mode == 'd' || deb_mode == 'W' || deb_mode == 'R' ) ) ) )
 			liblnk.deb( ( object * ) up, caller, label, &val[ 0 ], false, "" );
 		else
 		{
@@ -829,9 +829,9 @@ void worker::signal( int sig )
 	}
 
 	if ( var != NULL && var->label != NULL	)
-		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'. Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, var->label, var->up->label != NULL ? var->up->label : "(none)" );
+		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'\n(simulation %d). Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, var->label, var->up->label != NULL ? var->up->label : "(none)", sim );
 	else
-		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received by a parallel worker thread.\nDisable parallel computation to prevent this situation.", signame );
+		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received by a parallel worker thread\n(simulation %d).\nDisable parallel computation to prevent this situation.", signame, sim );
 
 	// signal & kill thread
 	signum = sig;
@@ -850,11 +850,8 @@ Reformat signal function format to comply with OS
 ****************************************************/
 void worker::signal_wrapper( int signum )
 {
-	// pointer to the appropriate worker object
-	worker *me = thr_ptr[ this_thread::get_id( ) ];
-
-	// call member function
-	me->signal( signum );
+	// call the appropriate worker object member function to handle signal
+	thr_ptr[ this_thread::get_id( ) ]->signal( signum );
 }
 
 
@@ -928,7 +925,7 @@ bool worker::check( void )
 PARALLEL_UPDATE
 Multi-thread scheduler for parallel updating
 ****************************************************/
-void parallel_update( variable *v, object* p, object *caller )
+void simulation::parallel_update( variable *v, object* p, object *caller )
 {
 	bool ready[ max_threads ], wait = false;
 	int i, nt, wait_time;
@@ -1021,7 +1018,7 @@ void parallel_update( variable *v, object* p, object *caller )
 				{
 					unique_lock< mutex > lock_update( update_lock );
 					worker_ready = false;
-					if ( ! upd_workers.wait_for ( lock_update, chrono::milliseconds( MAX_TIMEOUT ), [ ]{ return ! worker_ready; } ) )
+					if ( ! upd_workers.wait_for ( lock_update, chrono::milliseconds( MAX_TIMEOUT ), [ & ]{ return ! worker_ready; } ) )
 						{
 							worker_ready = true;
 							plog( "\nWarning: workers timeout (%d millisecs.), continuing...", MAX_TIMEOUT );
@@ -1100,7 +1097,7 @@ void parallel_update( variable *v, object* p, object *caller )
 WORKER_ERRORS
 Check how many workers are in error condition
 ****************************************************/
-int worker_errors( void )
+int simulation::worker_errors( void )
 {
 #ifndef _NP_
 

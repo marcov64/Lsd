@@ -40,7 +40,7 @@ LOAD_CONFIGURATION
 	If quick is != 0, just the structure and the parameters are retrieved
 	Returns: 0: load ok, 1,2,3,4,...: load failure
 ******************************************************************************/
-int load_configuration( bool reload, string *warnings, int quick )
+int simulation::load_configuration( bool reload, string *warnings, int quick )
 {
 	char *buf = NULL, buf1[ MAX_FILE_SIZE ], msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
 	int i, j, load = 0;
@@ -55,18 +55,18 @@ int load_configuration( bool reload, string *warnings, int quick )
 
 	unload_configuration( false );				// unload current
 
-	if ( strlen( simul_name ) == 0 )
+	if ( strlen( conf_name ) == 0 )
 		return 1;
 
-	if ( ! reload || strlen( struct_file ) == 0 )
+	if ( ! reload || strlen( conf_file ) == 0 )
 	{
-		delete [ ] struct_file;
-		struct_file = new char[ strlen( conf_path ) + strlen( simul_name ) + 6 ];
-		sprintf( struct_file, "%s%s%s.lsd", conf_path, strlen( conf_path ) > 0 ? "/" : "", simul_name );
+		delete [ ] conf_file;
+		conf_file = new char[ strlen( conf_path ) + strlen( conf_name ) + 6 ];
+		sprintf( conf_file, "%s%s%s.lsd", conf_path, strlen( conf_path ) > 0 ? "/" : "", conf_name );
 	}
 
 	// try to open maybe compressed xml configuration
-	fz = gzopen( struct_file, "rb" );
+	fz = gzopen( conf_file, "rb" );
 	if ( fz == Z_NULL )
 		return 1;
 
@@ -114,7 +114,7 @@ int load_configuration( bool reload, string *warnings, int quick )
 		// load non-instanced model structure
 		load = root->load_xml_struct( rootNode, ( reload && quick == 2 ) || quick == 1 );
 		if( load == 0 )
-			struct_loaded = true;
+			conf_ok = true;
 		else
 			goto endLoad;
 
@@ -140,10 +140,10 @@ int load_configuration( bool reload, string *warnings, int quick )
 
 		// get simulation settings
 		xml_attr hint;							// speed-up pointer
-		max_step = simNode.attribute( "steps", hint ).as_uint( MAX_STEPS );
-		sim_num = simNode.attribute( "runs", hint ).as_uint( 1 );
+		last_t = simNode.attribute( "steps", hint ).as_uint( MAX_STEPS );
+		last_run = simNode.attribute( "runs", hint ).as_uint( 1 );
 		seed = simNode.attribute( "seed", hint ).as_uint( 1 );
-		when_debug = simNode.attribute( "debug_start", hint ).as_uint( );
+		deb_t = simNode.attribute( "debug_start", hint ).as_uint( );
 		no_ptr_chk = ! simNode.attribute( "ptr_check", hint ).as_bool( true );
 		parallel_disable = ! simNode.attribute( "parallel", hint ).as_bool( true );
 		stack_info = setNode.child( "profiling" ).attribute( "level", hint ).as_uint( );
@@ -152,8 +152,8 @@ int load_configuration( bool reload, string *warnings, int quick )
 		prof_aggr_time = setNode.child( "profiling" ).attribute( "aggregate", hint ).as_bool( );
 
 		// get report file name
-		snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
-		strcpyn( name_rep, setNode.child( "report_file" ).text( ).as_string( name_rep ), MAX_PATH_LENGTH );
+		snprintf( rep_file, MAX_PATH_LENGTH, "report_%s.html", conf_name );
+		strcpyn( rep_file, setNode.child( "report_file" ).text( ).as_string( rep_file ), MAX_PATH_LENGTH );
 
 		// get equation file name and content
 		xml_node eqfNode = cfgNode.child( "equation_file" );
@@ -167,24 +167,24 @@ int load_configuration( bool reload, string *warnings, int quick )
 		snprintf( full_name, 2 * MAX_PATH_LENGTH, "%s/%s", model_path,
 				  eqfNode.child( "filename" ).text( ).as_string( "NONE" ) );
 		if ( ( f = fopen( full_name, "r" ) ) != NULL )
-			strcpyn( equation_name, eqfNode.child( "filename" ).text( ).get( ), MAX_PATH_LENGTH );
+			strcpyn( conf_eq_file, eqfNode.child( "filename" ).text( ).get( ), MAX_PATH_LENGTH );
 
 		if ( quick != 1 )						// load equation file?
 			// decode xml ]]> escape sequences
-			strdecdata( lsd_eq_file, eqfNode.child( "content" ).text( ).get( ), MAX_FILE_SIZE );
+			strdecdata( conf_eq_txt, eqfNode.child( "content" ).text( ).get( ), MAX_FILE_SIZE );
 		else
-			strcpy( lsd_eq_file, "" );
+			strcpy( conf_eq_txt, "" );
 
 		goto endLoad;
 	}
 
 	// try to read legacy configuration
-	f = fopen( struct_file, "rb" );
+	f = fopen( conf_file, "rb" );
 	if ( f == NULL )
 		return 1;
 
-	struct_loaded = root->load_struct( f );
-	if ( ! struct_loaded )
+	conf_ok = root->load_struct( f );
+	if ( ! conf_ok )
 	{
 		load = 2;
 		goto endLoad;
@@ -192,7 +192,7 @@ int load_configuration( bool reload, string *warnings, int quick )
 
 	strcpy( msg, "" );
 	fscanf( f, "%999s", msg );					// should be DATA
-	if ( ! ( ! strcmp( msg, "DATA" ) && root->load_insts( struct_file, f ) ) )
+	if ( ! ( ! strcmp( msg, "DATA" ) && root->load_insts( conf_file, f ) ) )
 	{
 		load = 3;
 		goto endLoad;
@@ -201,9 +201,9 @@ int load_configuration( bool reload, string *warnings, int quick )
 	if ( reload && quick == 2 )					// just quick reload?
 		goto endLoad;
 
-	sim_num = 1;
+	last_run = 1;
 	fscanf( f, "%999s", msg );					// should be SIM_NUM
-	if ( ! ( ! strcmp( msg, "SIM_NUM" ) && fscanf( f, "%d", & sim_num ) && sim_num > 0 ) )
+	if ( ! ( ! strcmp( msg, "SIM_NUM" ) && fscanf( f, "%d", & last_run ) && last_run > 0 ) )
 	{
 		load = 4;
 		goto endLoad;
@@ -217,8 +217,8 @@ int load_configuration( bool reload, string *warnings, int quick )
 		goto endLoad;
 	}
 
-	max_step = MAX_STEPS;
-	when_debug = stack_info = prof_min_msecs = 0;
+	last_t = MAX_STEPS;
+	deb_t = stack_info = prof_min_msecs = 0;
 	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = 0;
 	fscanf( f, "%999s", msg );					// should be MAX_STEP
 	if ( strcmp( msg, "MAX_STEP" ) )
@@ -233,9 +233,9 @@ int load_configuration( bool reload, string *warnings, int quick )
 		goto endLoad;
 	}
 
-	i = sscanf( msg, "%d %d %d %d %d %d %d %d", & max_step, & when_debug, & stack_info, & prof_min_msecs, & prof_obs_only, & prof_aggr_time, & no_ptr_chk, & parallel_disable );
+	i = sscanf( msg, "%d %d %d %d %d %d %d %d", & last_t, & deb_t, & stack_info, & prof_min_msecs, & prof_obs_only, & prof_aggr_time, & no_ptr_chk, & parallel_disable );
 
-	if ( i < 1 || max_step <= 0 || when_debug < 0 || stack_info < 0 || prof_min_msecs < 0 || prof_obs_only < 0 || prof_obs_only > 1 || prof_aggr_time < 0 || prof_aggr_time > 1 || no_ptr_chk < 0 || no_ptr_chk > 1 || parallel_disable < 0 || parallel_disable > 1 )
+	if ( i < 1 || last_t <= 0 || deb_t < 0 || stack_info < 0 || prof_min_msecs < 0 || prof_obs_only < 0 || prof_obs_only > 1 || prof_aggr_time < 0 || prof_aggr_time > 1 || no_ptr_chk < 0 || no_ptr_chk > 1 || parallel_disable < 0 || parallel_disable > 1 )
 	{
 		load = 6;
 		goto endLoad;
@@ -262,19 +262,19 @@ int load_configuration( bool reload, string *warnings, int quick )
 	if ( g != NULL )
 	{
 		fclose( g );
-		strcpyn( equation_name, name + 1, MAX_PATH_LENGTH );
+		strcpyn( conf_eq_file, name + 1, MAX_PATH_LENGTH );
 	}
 
-	snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", simul_name );
+	snprintf( rep_file, MAX_PATH_LENGTH, "report_%s.html", conf_name );
 	fscanf( f, "%999s", msg );					// should be MODELREPORT
-	if ( ! ( ! strcmp( msg, "MODELREPORT" ) && fscanf( f, "%999s", name_rep ) ) )
+	if ( ! ( ! strcmp( msg, "MODELREPORT" ) && fscanf( f, "%999s", rep_file ) ) )
 	{
 		load = 8;
 		goto endLoad;
 	}
 
 	empty_description( );						// remove existing descriptions
-	strcpy( lsd_eq_file, "" );					// and equation file
+	strcpy( conf_eq_txt, "" );					// and equation file
 
 	if ( quick == 1 )							// no descriptions
 		goto endLoad;
@@ -360,14 +360,14 @@ int load_configuration( bool reload, string *warnings, int quick )
 		goto endLoad;
 	}
 
-	for ( j = 0; fgets( msg, MAX_LINE_SIZE, f ) != NULL && strncmp( msg, "END_EQ_FILE", 11 ) && strlen( lsd_eq_file ) < MAX_FILE_SIZE - MAX_LINE_SIZE && j < MAX_FILE_TRY; ++j )
-		strcatn( lsd_eq_file, msg, MAX_FILE_SIZE );
+	for ( j = 0; fgets( msg, MAX_LINE_SIZE, f ) != NULL && strncmp( msg, "END_EQ_FILE", 11 ) && strlen( conf_eq_txt ) < MAX_FILE_SIZE - MAX_LINE_SIZE && j < MAX_FILE_TRY; ++j )
+		strcatn( conf_eq_txt, msg, MAX_FILE_SIZE );
 
 endLoad:
 
 	// remove extra clear space at the beginning/end and standardize line ends
-	strcln( buf1, lsd_eq_file, MAX_FILE_SIZE );
-	strcpyn( lsd_eq_file, buf1, MAX_FILE_SIZE );
+	strcln( buf1, conf_eq_txt, MAX_FILE_SIZE );
+	strcpyn( conf_eq_txt, buf1, MAX_FILE_SIZE );
 
 	if ( f != NULL )
 		fclose( f );
@@ -391,7 +391,7 @@ UNLOAD_CONFIGURATION
 	If full is false, just the model data is unloaded
 	Returns: pointer to root object
 ******************************************************************************/
-void unload_configuration( bool full )
+void simulation::unload_configuration( bool full )
 {
 	empty_blueprint( );							// remove current model structure
 	root->delete_obj( );
@@ -401,15 +401,11 @@ void unload_configuration( bool full )
 	reset_blueprint( NULL );
 
 	empty_cemetery( );							// garbage collection
-	empty_sensitivity( );						// discard sensitivity analysis data
 
 	save_ok = true;								// valid structure to save
-	unsavedData = false;						// no unsaved simulation results
-	unsavedSense = false;						// no sensitivity data to save
 	rsense = NULL;								// no sense data
 
-	actual_steps = 0;							// reset steps counter
-	findexSens = 0;								// reset sensitivity serial number
+	eff_t = 0;									// reset steps counter
 	nodesSerial = 0;							// reset network node serial number
 
 	if ( full )									// full unload? (no new config?)
@@ -420,21 +416,18 @@ void unload_configuration( bool full )
 		conf_path = new char[ strlen( model_path ) + 1 ];
 		strcpy( conf_path, model_path );
 
-		delete [ ] simul_name;					// reset simulation name to default
-		simul_name = new char[ strlen( "" ) + 1 ];
-		strcpy( simul_name, "" );
+		delete [ ] conf_name;					// reset simulation name to default
+		conf_name = new char[ strlen( "" ) + 1 ];
+		strcpy( conf_name, "" );
 
-		delete [ ] struct_file;					// reset structure
-		struct_file = new char[ strlen( "" ) + 1 ];
+		delete [ ] conf_file;					// reset structure
+		conf_file = new char[ strlen( "" ) + 1 ];
 
-		strcpy( struct_file, "" );
-		strcpy( name_rep, "" );
-		strcpy( lsd_eq_file, "" );
+		strcpy( conf_file, "" );
+		strcpy( rep_file, "" );
+		strcpy( conf_eq_txt, "" );
 
-		struct_loaded = false;
-
-		delete sens_file;						// reset sensitivity file name
-		sens_file = NULL;
+		conf_ok = false;
 	}
 }
 
@@ -1054,7 +1047,7 @@ LOAD_DESCRIPTION (LEGACY)
 	Load the descriptions of elements of tree under
 	this object from a LEGACY text file
 ****************************************************/
-bool load_description( const char *d, FILE *f )
+bool simulation::load_description( const char *d, FILE *f )
 {
 	int j, type, ctype;
 	char label[ MAX_ELEM_LENGTH ], text[ 10 * MAX_LINE_SIZE + 1 ], init[ 10 * MAX_LINE_SIZE + 1 ], str[ 10 * MAX_LINE_SIZE + 1 ];
@@ -1131,7 +1124,7 @@ SAVE_SINGLE
 	Save the value of a single
 	element to file during run
 *********************************/
-void save_single( variable *v )
+void simulation::save_single( variable *v )
 {
 	char fn[ MAX_PATH_LENGTH ];
 	int i;
@@ -1234,7 +1227,7 @@ sense::~sense( void )
 EMPTY_SENSITIVITY
 Deallocate sensitivity analysis memory
 ******************************************************************************/
-void empty_sensitivity( sense *cs )
+void simulation::empty_sensitivity( sense *cs )
 {
 	if ( cs == NULL )
 	{

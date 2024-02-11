@@ -254,11 +254,10 @@ void lsd_exit( int v )
 	fflush( stderr );
 
 #ifndef _NP_
-
 	// stop multi-thread workers, if needed/safe
-	if ( worker_errors( ) == 0 )
-		delete [ ] workers;
-
+	for ( auto sim : sims )
+		if ( sim->worker_errors( ) == 0 )
+			delete [ ] sim->workers;
 #endif
 
 	exit( v );
@@ -271,6 +270,7 @@ void lsd_exit( int v )
  ****************************************************/
 void exception_handler( int signum, const char *what )
 {
+	bool usrExcpt = false;
 	static char msg1[ MAX_LINE_SIZE ], msg2[ MAX_LINE_SIZE ], msg3[ MAX_LINE_SIZE ];
 
 	switch ( signum )
@@ -330,7 +330,11 @@ void exception_handler( int signum, const char *what )
 	if ( liblnk.cmd_backend != NULL )			// Tcl GUI available?
 	{
 #ifndef _LMM_
-		if ( ! user_exception )
+		for ( auto sim : sims )					// search for user exception
+			if ( sim->user_exception )
+				usrExcpt = true;
+
+		if ( ! usrExcpt )
 #endif
 		{
 			strcpyn( msg2, "There is an internal LSD error\n  If error persists, please contact developers", MAX_LINE_SIZE );
@@ -340,13 +344,15 @@ void exception_handler( int signum, const char *what )
 		else
 		{
 			strcpyn( msg3, "Additional information may be obtained running the simulation using the 'Model'/'GDB Debugger' menu option", MAX_LINE_SIZE );
-			if ( quit != 2 )
+
+			if ( sims.size( ) > 0 && sims[ 0 ]->quit != 2 )	// handle GUI sim only
 			{
-				if ( ! parallel_mode && fast_mode == 0 && stack_log != NULL &&
-					 stack_log->vs != NULL && stack_log->vs->label != NULL )
+				if ( ! sims[ 0 ]->parallel_mode && sims[ 0 ]->fast_mode == 0 &&
+					 sims[ 0 ]->stack_log != NULL && sims[ 0 ]->stack_log->vs != NULL &&
+					 sims[ 0 ]->stack_log->vs->label != NULL )
 				{
 					strcatn( msg3, "\n\nAttempting to open the LSD Debugger.\n\nLSD will close immediately after exiting the Debugger.", MAX_LINE_SIZE );
-					plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", stack_log->vs->label );
+					plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", sims[ 0 ]->stack_log->vs->label );
 					if ( liblnk.print_stack != NULL )
 						liblnk.print_stack( );
 				}
@@ -354,10 +360,10 @@ void exception_handler( int signum, const char *what )
 				{
 					strcatn( msg3, "\n\nPlease disable fast mode and parallel processing to get more information about the error.\n\nLSD will close now.", MAX_LINE_SIZE );
 					plog( "\n\nAn unknown problem was detected while executing user's equations code" );
-					plog( "\n\nWarning: %s active, cannot open LSD Debugger", parallel_mode ? "parallel preocessing" : "fast mode" );
+					plog( "\n\nWarning: %s active, cannot open LSD Debugger", sims[ 0 ]->parallel_mode ? "parallel preocessing" : "fast mode" );
 				}
 
-				quit = 2;
+				sims[ 0 ]->quit = 2;
 			}
 		}
 #endif
@@ -367,15 +373,16 @@ void exception_handler( int signum, const char *what )
 				}", msg1, msg2, msg3 );
 
 #ifndef _LMM_
-		if ( user_exception )
+		if ( usrExcpt && sims.size( ) > 0 )				// handle GUI sim only
 		{
-			if ( ! parallel_mode && fast_mode == 0 && stack_log != NULL &&
-				 stack_log->vs != NULL && stack_log->vs->label != NULL )
+			if ( ! sims[ 0 ]->parallel_mode && sims[ 0 ]->fast_mode == 0 &&
+				 sims[ 0 ]->stack_log != NULL && sims[ 0 ]->stack_log->vs != NULL &&
+				 sims[ 0 ]->stack_log->vs->label != NULL )
 			{
 				double useless = -1;
-				snprintf( msg3, MAX_LINE_SIZE, "%s (ERROR)", stack_log->vs->label );
+				snprintf( msg3, MAX_LINE_SIZE, "%s (ERROR)", sims[ 0 ]->stack_log->vs->label );
 				if ( liblnk.deb != NULL )
-					liblnk.deb( stack_log->vs->up, NULL, msg3, & useless, false, "" );
+					liblnk.deb( sims[ 0 ]->stack_log->vs->up, NULL, msg3, & useless, false, "" );
 			}
 		}
 		else

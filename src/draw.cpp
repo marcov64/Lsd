@@ -52,7 +52,7 @@ void show_graph( object *t )
 	object *top;
 	static object *last_t = NULL;
 
-	if ( ! struct_loaded || ! strWindowOn )		// model structure window is deactivated?
+	if ( ! sim.conf_ok || ! strWindowOn )		// model structure window is deactivated?
 	{
 		cmd( "destroytop .str" );
 		return;
@@ -60,7 +60,7 @@ void show_graph( object *t )
 
 	if ( t == NULL )
 		if ( last_t == NULL )
-			t = root;
+			t = sim.root;
 		else
 			t = last_t;
 	else
@@ -77,7 +77,7 @@ void show_graph( object *t )
 	else
 		cmd( "destroy .str.f" );										// or just recreate canvas
 
-	cmd( "wm title .str \"%s%s - LSD Model Structure\"", unsaved_change() ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
+	cmd( "wm title .str \"%s%s - LSD Model Structure\"", unsaved_change() ? "*" : " ", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
 
 	cmd( "ttk::frame .str.f" );
 	cmd( "ttk::canvas .str.f.c -xscrollincrement 1 -entry 0 -dark $darkTheme" );
@@ -342,7 +342,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 			{
 				// must search out of the blueprint, where we are now
 				// may get the wrong parent if the parent is replicated somewhere
-				cur = root->search( t->up->up->label );
+				cur = sim.root->search( t->up->up->label );
 				if ( cur != NULL )
 				{
 					cb = cur->search_bridge( t->up->label );
@@ -483,7 +483,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 			draw_obj( cb->head, sel, level + step_level, i, center, zeroinst );
 		else
 		{	// try to draw zero instance objects
-			cur = blueprint->search( cb->blabel );
+			cur = sim.blueprint->search( cb->blabel );
 			if ( cur != NULL )
 				draw_obj( cur, sel, level + step_level, i, center, true );
 		}

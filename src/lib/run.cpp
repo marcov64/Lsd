@@ -18,7 +18,7 @@ Contains the code to control the simulation run.
 
 The main functions contained here are:
 
-- void run( )
+- void run_sim( )
 Run the loaded simulation model. Running is not only the actual
 simulation run, but also the initialization of result files. Of
 course, it has also to manage the messages from user and from the
@@ -34,11 +34,11 @@ Prepare variables to store saved data.
 /*********************************
 RUN
 *********************************/
-int run( void )
+int simulation::run_sim( void )
 {
 	bool batch_sequential_loop = false;
 	char *path_out = NULL, *name_out, sep_out[ 2 ], fname[ MAX_PATH_LENGTH ], bar_done[ 2 * BAR_DONE_SIZE ];
-	int i, perc_done, last_done;
+	int perc_done, last_done;
 	FILE *f;
 	clock_t start, end, last_update;
 	result *rf;				// pointer for results files (may be zipped or not)
@@ -68,12 +68,12 @@ int run( void )
 	if ( liblnk.cover_browser != NULL )
 		liblnk.cover_browser( "Running...", "Use the buttons to control the simulation:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :	accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables", true );
 #else
-	plog( "\nProcessing configuration file %s...\n", clean_file( struct_file ) );
+	plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
 #endif
 
 	set_fast( 0 );			// should always start on OBSERVE and switch to FAST later
 	res_list.clear( );		// empty list of saved results files
-	strcpy( path_res, "" );	// and clear last saved path to results files
+	strcpy( res_path, "" );	// and clear last saved path to results files
 
 	// prepare progress bar
 	on_bar = false;
@@ -81,27 +81,24 @@ int run( void )
 	last_done = -1;
 	strcpy( bar_done, "" );
 
-	for ( i = 1, quit = 0; i <= sim_num && quit != 2; ++i )
+	for ( run = 1, quit = 0; run <= last_run && quit != 2; ++run )
 	{
 		running = true;		// signal simulation is running
-		cur_sim = i;		// update the current run in the set of runs
-		actual_steps = 0;	// no steps performed yet
+		eff_t = 0;			// no steps performed yet
 		save_ok = true;		// valid structure to save
 
 		empty_cemetery( );	// ensure that previous data are not erroneously mixed
 
 #ifndef _NW_
-		par_map.clear( );	// restart variable to parent name map for AoR
-
-		if ( liblnk.prepare_plot != NULL )
-			liblnk.prepare_plot( root, i );
+		if ( liblnk.runtime_run != NULL )
+			liblnk.runtime_run( );
 #endif
 		if ( fast_mode < 2 )
 		{
 			if ( parallel_mode )
-				plog( "\nSimulation %d of %d running (seed=%d threads=%d)...", i, sim_num, seed, max_threads );
+				plog( "\nSimulation %d of %d running (seed=%d threads=%d)...", run, last_run, seed, max_threads );
 			else
-				plog( "\nSimulation %d of %d running (seed=%d)...", i, sim_num, seed );
+				plog( "\nSimulation %d of %d running (seed=%d)...", run, last_run, seed );
 		}
 
 		// if new batch configuration file, reload all except descriptions
@@ -113,9 +110,9 @@ int run( void )
 				if ( liblnk.log_tcl_error != NULL )
 					liblnk.log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
 
-				cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", struct_file );
+				cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", conf_file );
 #else
-				fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );
+				fprintf( stderr, "\nFile '%s' not found or corrupted.\n", conf_file );
 #endif
 				return 10;
 			}
@@ -123,16 +120,16 @@ int run( void )
 		}
 
 		// if just another run seed, reload just structure & parameters
-		if ( i > 1 )
+		if ( run > 1 )
 			if ( load_configuration( true, NULL, 2 ) != 0 )
 			{
 #ifndef _NW_
 				if ( liblnk.log_tcl_error != NULL )
 					liblnk.log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
 
-				cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", struct_file );
+				cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", conf_file );
 #else
-				fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );
+				fprintf( stderr, "\nFile '%s' not found or corrupted.\n", conf_file );
 #endif
 				return 10;
 			}
@@ -150,9 +147,9 @@ int run( void )
 			if ( liblnk.log_tcl_error != NULL )
 				liblnk.log_tcl_error( true, "Memory allocation", "Not enough memory, too many series saved for the memory available" );
 
-			cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, max_step );
+			cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, last_t );
 #else
-			fprintf( stderr, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, max_step );
+			fprintf( stderr, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, last_t );
 #endif
 			return 11;
 		}
@@ -177,31 +174,30 @@ int run( void )
 		no_search_up = false;
 		start = last_update = clock( );
 
-		for ( t = 1; quit == 0 && t <= max_step; ++t )
+		for ( t = 1; quit == 0 && t <= last_t; ++t )
 		{
 			// update the percentage done bar, if needed
-			if ( liblnk.cmd_backend == NULL && dobar )
+			if ( liblnk.runtime_step == NULL && dobar )
 				update_bar( bar_done, perc_done, last_done, 2 * BAR_DONE_SIZE );
 
 #ifndef _NW_
 			// only update if simulation not paused
-			if ( liblnk.runtime_buttons == NULL || liblnk.runtime_step( t ) )
+			if ( liblnk.runtime_step == NULL || liblnk.runtime_step( ) )
 #endif
 			{
-				actual_steps = t;
+				eff_t = t;
 				root->update( true, false );
 			}
 
-			perc_done = min( 100 * ( ( i - 1 ) + ( double ) t / max_step ) / sim_num, 100 );
+			perc_done = min( 100 * ( ( run - 1 ) + ( double ) t / last_t ) / last_run, 100 );
 
 #ifndef _NW_
 			// handle runtime button pressings
 			if ( liblnk.runtime_buttons != NULL )
-				liblnk.runtime_buttons( i, t, last_update );
+				liblnk.runtime_buttons( last_update );
 #endif
 		}	// end of t
 
-		unsavedData = true;			// flag unsaved simulation results
 		running = false;
 		end = clock( );
 
@@ -212,14 +208,14 @@ int run( void )
 			update_bar( bar_done, perc_done, last_done, 2 * BAR_DONE_SIZE );
 
 		if ( fast_mode < 2 )
-			plog( "\nSimulation %d of %d %s at case %d (%.2f sec.)\n", i, sim_num, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( end - start ) / CLOCKS_PER_SEC );
+			plog( "\nSimulation %d of %d %s at case %d (%.2f sec.)\n", run, last_run, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( end - start ) / CLOCKS_PER_SEC );
 
 		if ( quit == 1 )			// for multiple simulation runs you need to reset quit
 			quit = 0;
 
 #ifndef _NW_
-		cmd_gui( ".p.b1.b configure -value %d", cur_sim );
-		cmd_gui( ".p.b1.i configure -text \"Simulation: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", min( cur_sim + 1, sim_num ), sim_num, cur_sim, sim_num	);
+		cmd_gui( ".p.b1.b configure -value %d", run );
+		cmd_gui( ".p.b1.i configure -text \"Simulation: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", min( run + 1, last_run ), last_run, run, last_run	);
 
 		cmd_gui( "destroytop .deb" );
 		cmd_gui( "update" );
@@ -231,14 +227,14 @@ int run( void )
 
 		reset_end( root );
 
-		if ( quit != 2 && ( sim_num > 1 || liblnk.cmd_backend == NULL ) )
+		if ( quit != 2 && ( last_run > 1 || liblnk.cmd_backend == NULL ) )
 		{
 			// save results for multiple simulation runs, if any
 			if ( series_saved > 0 )
 			{	// remove existing path, if any, from name in case of alternative output path
-				char *alt_name = clean_file( simul_name );
+				char *alt_name = clean_file( conf_name );
 
-				if ( save_alt_path )
+				if ( save_alt )
 				{
 					path_out = alt_path;
 					name_out = alt_name;
@@ -246,7 +242,7 @@ int run( void )
 				else
 				{
 					path_out = conf_path;
-					name_out = simul_name;
+					name_out = conf_name;
 				}
 
 				if ( strlen( path_out ) == 0 )
@@ -271,7 +267,7 @@ int run( void )
 
 					rf = new result( fname, "wt", dozip, docsv );	// create results file object
 					rf->title( root, 1 );						// write header
-					rf->data( root, 0, actual_steps );			// write all data
+					rf->data( root, 0, eff_t );					// write all data
 					delete rf;									// close file and delete object
 
 					if ( fast_mode < 2 )
@@ -283,9 +279,9 @@ int run( void )
 					if ( ! grandTotal || batch_sequential )		// generate partial total files?
 					{
 						if ( ! batch_sequential )
-						  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, seed - i, seed - 1 + sim_num - i, docsv ? "csv" : "tot" );
+						  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, seed - run, seed - 1 + last_run - run, docsv ? "csv" : "tot" );
 						else
-						  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d_%d.%s", path_out, sep_out, name_out, findex, seed - i, seed - 1 + sim_num - i, docsv ? "csv" : "tot" );
+						  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d_%d.%s", path_out, sep_out, name_out, findex, seed - run, seed - 1 + last_run - run, docsv ? "csv" : "tot" );
 					}
 					else										// generate single grand total file
 					{
@@ -295,10 +291,10 @@ int run( void )
 					if ( dozip )
 						strcatn( fname, ".gz", MAX_PATH_LENGTH );
 
-					if ( fast_mode < 2 && i == sim_num )		// print only for last
+					if ( fast_mode < 2 && run == last_run )		// print only for last
 						plog( "\nSaving totals to file %s... ", fname );
 
-					if ( i == 1 && grandTotal && ! add_to_tot )
+					if ( run == 1 && grandTotal && ! add_to_tot )
 					{
 						rf = new result( fname, "wt", dozip, docsv );// create results file object
 						rf->title( root, 0 );					// write header
@@ -306,53 +302,53 @@ int run( void )
 					else
 						rf = new result( fname, "a", dozip, docsv );// add results object to existing file
 
-					rf->data( root, actual_steps );				// write current data data
+					rf->data( root, eff_t );					// write current data data
 					delete rf;									// close file and delete object
 
-					if ( fast_mode < 2 && i == sim_num )		// print only for last
+					if ( fast_mode < 2 && run == last_run )		// print only for last
 						plog( "Done\n" );
 				}
 
-				if ( i == sim_num )								// last run?
-					strcpyn( path_res, path_out, MAX_PATH_LENGTH );
+				if ( run == last_run )							// last run?
+					strcpyn( res_path, path_out, MAX_PATH_LENGTH );
 			}
 			else
 				if ( fast_mode < 2 )
 					plog( "Nothing to save: no element selected\n" );
 
-			if ( i == sim_num )									// last run?
+			if ( run == last_run )								// last run?
 			{
 				if ( batch_sequential )							// last batch file?
 				{
 					findex++;									// try next file
-					snprintf( fname, MAX_PATH_LENGTH, "%s_%d.lsd", simul_name, findex );
-					delete [ ] struct_file;
-					struct_file = new char[ strlen( fname ) + 1 ];
-					strcpy( struct_file, fname );
-					f = fopen( struct_file, "r" );
+					snprintf( fname, MAX_PATH_LENGTH, "%s_%d.lsd", conf_name, findex );
+					delete [ ] conf_file;
+					conf_file = new char[ strlen( fname ) + 1 ];
+					strcpy( conf_file, fname );
+					f = fopen( conf_file, "r" );
 					if ( f == NULL || ( fend != 0 && findex > fend ) )// no more file to process
 					{
 						if ( f != NULL )
 							fclose( f );
 						if ( fast_mode < 2 )
-							plog( "\nFinished processing %s\n", clean_file( struct_file ) );
+							plog( "\nFinished processing %s\n", clean_file( conf_file ) );
 						break;
 					}
 
-					plog( "\nProcessing configuration file %s...\n", clean_file( struct_file ) );
+					plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
 					fclose( f );								// process next file
 
-					i = 0;										// force restarting run count
+					run = 0;										// force restarting run count
 					batch_sequential_loop = true;				// force reloading configuration
 				}
 #ifdef _NW_
 				else
 					if ( fast_mode < 2 )
-						plog( "\nFinished processing %s\n", clean_file( struct_file ) );
+						plog( "\nFinished processing %s\n", clean_file( conf_file ) );
 #endif
 			}
 		}
-	}	// end of run
+	}
 
 	if ( fast_mode == 2 )
 		plog( "\nFinished processing configuration file(s)\n" );
@@ -385,7 +381,7 @@ int run( void )
 /*********************************
 SET_FAST
 *********************************/
-void set_fast( int level )
+void simulation::set_fast( int level )
 {
 	if ( level > 2 )
 		level = 2;
@@ -406,9 +402,9 @@ void set_fast( int level )
 	// remove the variables stack when switching to any fast mode
 	if ( fast_mode == 0 && level > 0 )
 	{
-		if ( when_debug > 0 || stack_info > 0 || prof_aggr_time )
+		if ( deb_t > 0 || stack_info > 0 || prof_aggr_time )
 		{
-			plog( "\nWarning: %s is active, fast mode command ignored", when_debug > 0 ? "debugging" : "profiling" );
+			plog( "\nWarning: %s is active, fast mode command ignored", deb_t > 0 ? "debugging" : "profiling" );
 			return;
 		}
 
@@ -429,7 +425,7 @@ void set_fast( int level )
 /*********************************
 EMPTY_STACK
 *********************************/
-void empty_stack( void )
+void simulation::empty_stack( void )
 {
 	if ( stack_log != NULL )
 	{
@@ -464,9 +460,8 @@ void empty_stack( void )
 /*********************************
 ALLOC_SAVE_MEM
 *********************************/
-bool alloc_save_mem( object *r )
+bool simulation::alloc_save_mem( object *r )
 {
-	int toquit = quit;
 	bridge *cb;
 	object *cur;
 	variable *cv;
@@ -480,7 +475,7 @@ bool alloc_save_mem( object *r )
 						"select the object and choose menu 'Data'/'Initial Values'",
 						false,
 						"%s '%s' in object '%s' has not been initialized", cv->param == 1 ? "parameter" : "variable", cv->label, r->label );
-			toquit = 2;
+			goto error;
 		}
 
 		cv->last_update = 0;
@@ -494,79 +489,68 @@ bool alloc_save_mem( object *r )
 		}
 
 		if ( cv->save || cv->savei )
-			alloc_save_var( cv );
+			if ( ! alloc_save_var( cv ) )
+				goto error;
 
 #ifndef _NW_
-		// variable to parent name map for AoR
-		par_map.insert( make_pair < string, string > ( cv->label, r->label ) );
+		// variable to parent name map for AoR (only in GUI mode)
+		if ( liblnk.runtime_run != NULL )
+			par_map.insert( make_pair < string, string > ( cv->label, r->label ) );
 #endif
 	}
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 		for ( cur = cb->head; cur != NULL && quit != 2; cur = go_brother( cur ) )
-			alloc_save_mem( cur );
+			if ( ! alloc_save_mem( cur ) )
+				goto error;
 
-	if ( quit != 2 )
-		quit = toquit;
+	return true;
 
-	return ! no_more_memory;
+error:
+	quit = 2;
+	return false;
 }
 
 
 /*********************************
 ALLOC_SAVE_VAR
 *********************************/
-bool alloc_save_var( variable *v )
+bool simulation::alloc_save_var( variable *v )
 {
-	bool prev_state = no_more_memory;
-
 	if ( ! running )
 		return true;
 
-	if ( ! no_more_memory )
+	if ( v->num_lag > 0 || v->param == 1 )
+		v->start = t - 1;
+	else
+		v->start = t;
+
+	v->end = last_t;
+
+	// use C stdlib to be able to deallocate memory for deleted objects
+	free( v->data );
+	v->data = ( double * ) malloc( ( v->end - v->start + 1 ) * sizeof( double ) );
+
+	if( v->data == NULL )
 	{
-		if ( v->num_lag > 0 || v->param == 1 )
-			v->start = t - 1;
-		else
-			v->start = t;
-
-		v->end = max_step;
-
-		// use C stdlib to be able to deallocate memory for deleted objects
-		free( v->data );
-		v->data = ( double * ) malloc( ( v->end - v->start + 1 ) * sizeof( double ) );
-
-		if( v->data == NULL )
-		{
-			no_more_memory = true;
-			v->save = v->savei = false;
-			v->start = v->end = 0;
-
-			if ( no_more_memory != prev_state )
-			{
-				set_lab_tit( v );
-				plog( "\nWarning: cannot allocate memory for saving '%s %s' (object '%s')\n Subsequent series will not be saved\n", v->label, v->lab_tit, v->up->label );
-			}
-		}
-		else
-		{
-			if ( v->num_lag > 0	 || v->param == 1 )
-				v->data[ 0 ] = v->val[ 0 ];
-
-			++series_saved;
-		}
+		raise( SIGMEM );
+		return false;
 	}
 	else
-		v->save = v->savei = false;
+	{
+		if ( v->num_lag > 0	 || v->param == 1 )
+			v->data[ 0 ] = v->val[ 0 ];
 
-	return ! no_more_memory;
+		++series_saved;
+		return true;
+	}
 }
 
 
 /*********************************
 RESET_END
 *********************************/
-void reset_end( object *r )
+void simulation::reset_end( object *r )
 {
 	bridge *cb;
 	object *cur;
@@ -594,9 +578,9 @@ void reset_end( object *r )
 RESULTS_ALT_PATH
 simple tool to allow changing where results are saved.
 *********************************/
-bool results_alt_path( const char *altPath )
+bool simulation::results_alt_path( const char *altPath )
 {
-	if ( save_alt_path )
+	if ( save_alt )
 	{
 		delete [ ] alt_path;
 		alt_path = NULL;
@@ -604,7 +588,7 @@ bool results_alt_path( const char *altPath )
 
 	if ( strlen( altPath ) == 0 )
 	{
-		save_alt_path = false;
+		save_alt = false;
 		return false;
 	}
 
@@ -618,14 +602,14 @@ bool results_alt_path( const char *altPath )
 		struct stat sb;
 		if ( stat( alt_path, &sb ) == 0 && S_ISDIR( sb.st_mode ) )
 		{
-			save_alt_path = true;
+			save_alt = true;
 			return true;
 		}
 	}
 
 	delete [ ] alt_path;
 	alt_path = NULL;
-	save_alt_path = false;
+	save_alt = false;
 
 	plog( "\nWarning: could not open results directory '%s', ignoring.\n", altPath );
 
@@ -636,7 +620,7 @@ bool results_alt_path( const char *altPath )
 /*********************************
 UPDATE_BAR
 *********************************/
-void update_bar( char *bar, int done, int & last_done, int bar_sz )
+void simulation::update_bar( char *bar, int done, int & last_done, int bar_sz )
 {
 	char perc[ MAX_ELEM_LENGTH ];
 	int p;
@@ -644,7 +628,7 @@ void update_bar( char *bar, int done, int & last_done, int bar_sz )
 	done = min ( done, 100 );
 	last_done = min ( last_done, 100 );
 
-	if ( done <= last_done || last_done == 100 )
+	if ( sim != 0 || done <= last_done || last_done == 100 )
 		return;
 
 	for ( p = last_done + 1; p <= done; ++p )

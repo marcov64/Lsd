@@ -32,7 +32,7 @@ Relevant macros for conditional compilation (when defined):
 
 #include "lib/libLSD.h"				// LSD library classes
 
-int load_config( void );
+int load_config( & simulation sim );
 int parse_cmdline( int argn, const char **argv );
 
 const char lsdCmdMsg[ ] = "This is the No Window version of LSD.";
@@ -46,6 +46,8 @@ int main( int argn, const char **argv )
 {
 	char cwd[ PATH_MAX ];
 	int res = -1;
+	simulation sim;					// single LSD simulation terminal instance
+
 
 #ifndef _NT_
 
@@ -73,14 +75,14 @@ int main( int argn, const char **argv )
 			lsd_exit( res );
 
 		// load configuration
-		res = load_config( );
+		res = load_config( sim );
 		if ( res != 0 )
 			lsd_exit( res );
 
 #ifndef _NP_
 
 		// if parallel execution is required, just run new instances & wait to finish
-		if ( ! batch_sequential && sim_num > 1 && max_runs > 1 )
+		if ( ! batch_sequential && sim.last_run > 1 && max_runs > 1 )
 		{
 			if ( grandTotal || ! no_tot )
 			{
@@ -89,13 +91,13 @@ int main( int argn, const char **argv )
 				grandTotal = false;
 			}
 
-			res = run_parallel( true, argv[ 0 ], simul_name, seed, sim_num, max_threads, max_runs );
+			res = run_parallel( true, argv[ 0 ], sim.conf_name, sim.seed, sim.last_run, max_threads, max_runs );
 		}
 		else
 
 #endif
 			// execute single simulation
-			res = run( );
+			res = run_sim( );
 
 #ifndef _NT_
 
@@ -144,9 +146,9 @@ int parse_cmdline( int argn, const char **argv )
 		// read -f parameter : file name or base name
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 		{
-			delete [ ] simul_name;
-			simul_name = new char[ strlen( argv[ 1 + i ] ) + 1 ];
-			strcpy( simul_name, argv[ 1 + i ] );
+			delete [ ] sim.conf_name;
+			sim.conf_name = new char[ strlen( argv[ 1 + i ] ) + 1 ];
+			strcpy( sim.conf_name, argv[ 1 + i ] );
 			continue;
 		}
 		// read -o parameter : change the path for the output of result files
@@ -158,9 +160,9 @@ int parse_cmdline( int argn, const char **argv )
 		// read -l parameter : save all output to a (log) file
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'l' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 		{
-			delete [ ] log_filename;
-			log_filename = new char[ strlen( argv[ 1 + i ] ) + 1 ];
-			strcpy( log_filename, argv[ 1 + i ] );
+			delete [ ] sim.log_file;
+			sim.log_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
+			strcpy( sim.log_file, argv[ 1 + i ] );
 			continue;
 		}
 		// read -c parameter : max number of cores
@@ -258,13 +260,13 @@ int parse_cmdline( int argn, const char **argv )
 /*********************************
  LOAD_CONFIGURATION
  *********************************/
-int load_config( void )
+int load_config( & simulation sim )
 {
 	char *str;
 	FILE *f;
 
-	str = new char[ strlen( simul_name ) + 1 ];
-	strcpy( str, simul_name );
+	str = new char[ strlen( sim.conf_name ) + 1 ];
+	strcpy( str, sim.conf_name );
 	strupr( str );
 
 	if ( strlen( str ) == 0 )
@@ -275,7 +277,7 @@ int load_config( void )
 
 	if ( strstr( str, ".LSD" ) == NULL )
 	{
-		batch_sequential = true;
+		sim.batch_sequential = true;
 
 		if ( findex < 0 || fend < 0 || fend < findex )
 		{
@@ -283,54 +285,54 @@ int load_config( void )
 			return 6;
 		}
 
-		struct_file = new char[ strlen( simul_name ) + ( int ) log10( findex ) + 7 ];
-		sprintf( struct_file, "%s_%d.lsd", simul_name, findex );
+		sim.conf_file = new char[ strlen( sim.conf_name ) + ( int ) log10( findex ) + 7 ];
+		sprintf( sim.conf_file, "%s_%d.lsd", sim.conf_name, findex );
 	}
 	else
 	{
 		batch_sequential = false;
-		struct_file = new char[ strlen( simul_name ) + 1 ];
-		strcpy( struct_file, simul_name );
-		simul_name[ strstr( str, ".LSD" ) - str ] = '\0';
+		sim.conf_file = new char[ strlen( sim.conf_name ) + 1 ];
+		strcpy( sim.conf_file, sim.conf_name );
+		sim.conf_name[ strstr( str, ".LSD" ) - str ] = '\0';
 	}
 
 	delete [ ] str;
 
-	if ( ( f = fopen( struct_file, "r" ) ) == NULL )
+	if ( ( f = fopen( sim.conf_file, "r" ) ) == NULL )
 	{
-		fprintf( stderr, "\nFile '%s' not found.\nThis is the no window version of LSD.\nSpecify a -f FILENAME.lsd to run a simulation or -f FILE_BASE_NAME -s 1 for\nbatch sequential simulation mode (requires configuration files:\nFILE_BASE_NAME_1.lsd, FILE_BASE_NAME_2.lsd, etc).\n\n", struct_file );
+		fprintf( stderr, "\nFile '%s' not found.\nThis is the no window version of LSD.\nSpecify a -f FILENAME.lsd to run a simulation or -f FILE_BASE_NAME -s 1 for\nbatch sequential simulation mode (requires configuration files:\nFILE_BASE_NAME_1.lsd, FILE_BASE_NAME_2.lsd, etc).\n\n", sim.conf_file );
 		return 7;
 	}
 
 	fclose( f );
 
-	if ( load_configuration( true, NULL, 1 ) != 0 )
+	if ( sim.load_configuration( true, NULL, 1 ) != 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\nThis is the no window version of LSD.\nCheck if the file is a valid LSD configuration or regenerate it using the\nLSD Browser.\n\n", struct_file );
+		fprintf( stderr, "\nFile '%s' is invalid.\nThis is the no window version of LSD.\nCheck if the file is a valid LSD configuration or regenerate it using the\nLSD Browser.\n\n", sim.conf_file );
 		return 8;
 	}
 
 	if ( ! batch_sequential )
 	{
 		if ( findex > 0 )
-			seed = findex;
+			sim.seed = findex;
 
 		if ( fend > 0 )
-			sim_num = fend;
+			sim.last_run = fend;
 	}
 
-	if ( log_filename != NULL )
+	if ( sim.log_file != NULL )
 	{
-		if ( save_alt_path && strncmp( log_filename, alt_path, strlen( alt_path ) ) != 0 )
+		if ( sim.save_alt && strncmp( sim.log_file, sim.alt_path, strlen( sim.alt_path ) ) != 0 )
 		{
-			str = log_filename;
-			log_filename = new char[ strlen( alt_path ) + strlen( str ) + 2 ];
-			sprintf( log_filename, "%s/%s", alt_path, str );
+			str = sim.log_file;
+			sim.log_file = new char[ strlen( sim.alt_path ) + strlen( str ) + 2 ];
+			sprintf( sim.log_file, "%s/%s", sim.alt_path, str );
 			delete [ ] str;
 		}
 
-		if ( ( f = fopen( log_filename , "w+" ) ) == NULL )
-			printf( "\nCannot create log file '%s', using stdout.\n", log_filename );
+		if ( ( f = fopen( sim.log_file , "w+" ) ) == NULL )
+			printf( "\nCannot create log file '%s', using stdout.\n", sim.log_file );
 		else
 		{
 			dup2( fileno( f ), STDOUT_FILENO );

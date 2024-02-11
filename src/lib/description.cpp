@@ -24,7 +24,7 @@ element textual descriptions.
 /***************************************************
 SEARCH_DESCRIPTION
 ***************************************************/
-description *search_description( const char *lab, bool add_missing )
+description *simulation::search_description( const char *lab, bool add_missing )
 {
 	description *cd;
 	variable *cv;
@@ -50,7 +50,7 @@ description *search_description( const char *lab, bool add_missing )
 /***************************************************
 ADD_DESCRIPTION
 ***************************************************/
-description *add_description( const char *lab, int type, const char *text, const char *init, bool initial, bool observe )
+description *simulation::add_description( const char *lab, int type, const char *text, const char *init, bool initial, bool observe )
 {
 	bool obj = false;
 	char *str, ltype[ MAX_ELEM_LENGTH ];
@@ -140,7 +140,7 @@ description *add_description( const char *lab, int type, const char *text, const
 /***************************************************
 CHANGE_DESCRIPTION
 ***************************************************/
-description *change_description( const char *lab_old, const char *lab, int type, const char *text, const char *init, int initial, int observe )
+description *simulation::change_description( const char *lab_old, const char *lab, int type, const char *text, const char *init, int initial, int observe )
 {
 	bool obj = false;
 	char *str, ltype[ MAX_ELEM_LENGTH ];
@@ -264,7 +264,7 @@ description *change_description( const char *lab_old, const char *lab, int type,
 RESET_DESCRIPTION
 regenerate recur. the descriptions of the model as it is
 ***************************************************/
-void reset_description( object *r )
+void simulation::reset_description( object *r )
 {
 	bridge *cb;
 	variable *cv;
@@ -286,7 +286,7 @@ void reset_description( object *r )
 /*****************************************************************************
 EMPTY_DESCRIPTION
 ******************************************************************************/
-void empty_description( void )
+void simulation::empty_description( void )
 {
 	description *cd, *cd1;
 

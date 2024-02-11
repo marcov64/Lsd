@@ -202,8 +202,8 @@ $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT): $(MANIF_LSD) $(LIB_GUI) $(LSDROOT)
 	$(TOUCH_LSD)
 
 # LSD executable static library
-$(LIB_GUI): $(OBJ_DIR_LSD)LSD.o $(OBJ_DIR_LSD)LSDmain.o $(OBJ_DIR_LSD)analysis.o $(OBJ_DIR_LSD)browser.o $(OBJ_DIR_LSD)common.o $(OBJ_DIR_LSD)debug.o $(OBJ_DIR_LSD)draw.o $(OBJ_DIR_LSD)edit.o $(OBJ_DIR_LSD)edit_dat.o $(OBJ_DIR_LSD)file.o $(OBJ_DIR_LSD)interf.o $(OBJ_DIR_LSD)lattice.o $(OBJ_DIR_LSD)log.o $(OBJ_DIR_LSD)nolhtables.o $(OBJ_DIR_LSD)report.o $(OBJ_DIR_LSD)runtime.o $(OBJ_DIR_LSD)set_all.o $(OBJ_DIR_LSD)sensitivity.o $(OBJ_DIR_LSD)show_eq.o $(OBJ_DIR_LSD)util.o
-	$(AR) $(LIB_GUI) $(OBJ_DIR_LSD)LSD.o $(OBJ_DIR_LSD)LSDmain.o $(OBJ_DIR_LSD)analysis.o $(OBJ_DIR_LSD)browser.o $(OBJ_DIR_LSD)common.o $(OBJ_DIR_LSD)debug.o $(OBJ_DIR_LSD)draw.o $(OBJ_DIR_LSD)edit.o $(OBJ_DIR_LSD)edit_dat.o $(OBJ_DIR_LSD)file.o $(OBJ_DIR_LSD)interf.o $(OBJ_DIR_LSD)lattice.o $(OBJ_DIR_LSD)log.o $(OBJ_DIR_LSD)nolhtables.o $(OBJ_DIR_LSD)report.o $(OBJ_DIR_LSD)runtime.o $(OBJ_DIR_LSD)set_all.o $(OBJ_DIR_LSD)sensitivity.o $(OBJ_DIR_LSD)show_eq.o $(OBJ_DIR_LSD)util.o
+$(LIB_GUI): $(OBJ_DIR_LSD)LSD.o $(OBJ_DIR_LSD)LSDmain.o $(OBJ_DIR_LSD)analysis.o $(OBJ_DIR_LSD)browser.o $(OBJ_DIR_LSD)common.o $(OBJ_DIR_LSD)debug.o $(OBJ_DIR_LSD)draw.o $(OBJ_DIR_LSD)edit.o $(OBJ_DIR_LSD)edit_dat.o $(OBJ_DIR_LSD)file.o $(OBJ_DIR_LSD)interf.o $(OBJ_DIR_LSD)lattice.o $(OBJ_DIR_LSD)log.o $(OBJ_DIR_LSD)report.o $(OBJ_DIR_LSD)runtime.o $(OBJ_DIR_LSD)set_all.o $(OBJ_DIR_LSD)sensitivity.o $(OBJ_DIR_LSD)show_eq.o $(OBJ_DIR_LSD)util.o
+	$(AR) $(LIB_GUI) $(OBJ_DIR_LSD)LSD.o $(OBJ_DIR_LSD)LSDmain.o $(OBJ_DIR_LSD)analysis.o $(OBJ_DIR_LSD)browser.o $(OBJ_DIR_LSD)common.o $(OBJ_DIR_LSD)debug.o $(OBJ_DIR_LSD)draw.o $(OBJ_DIR_LSD)edit.o $(OBJ_DIR_LSD)edit_dat.o $(OBJ_DIR_LSD)file.o $(OBJ_DIR_LSD)interf.o $(OBJ_DIR_LSD)lattice.o $(OBJ_DIR_LSD)log.o $(OBJ_DIR_LSD)report.o $(OBJ_DIR_LSD)runtime.o $(OBJ_DIR_LSD)set_all.o $(OBJ_DIR_LSD)sensitivity.o $(OBJ_DIR_LSD)show_eq.o $(OBJ_DIR_LSD)util.o
 
 # LSD executable static library modules
 $(OBJ_DIR_LSD)LSD.o: $(SRC_DIR)LSD.cpp $(DEP_GUI)
@@ -258,10 +258,6 @@ $(OBJ_DIR_LSD)log.o: $(SRC_DIR)log.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(SRC_DIR)log.cpp -o $(OBJ_DIR_LSD)log.o
 
-$(OBJ_DIR_LSD)nolhtables.o: $(SRC_DIR)nolhtables.cpp $(DEP_GUI)
-	$(MKDIR) $(@D)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(SRC_DIR)nolhtables.cpp -o $(OBJ_DIR_LSD)nolhtables.o
-
 $(OBJ_DIR_LSD)report.o: $(SRC_DIR)report.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(SRC_DIR)report.cpp -o $(OBJ_DIR_LSD)report.o
@@ -270,7 +266,7 @@ $(OBJ_DIR_LSD)runtime.o: $(SRC_DIR)runtime.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(SRC_DIR)runtime.cpp -o $(OBJ_DIR_LSD)runtime.o
 
-$(OBJ_DIR_LSD)sensitivity.o: $(SRC_DIR)sensitivity.cpp $(DEP_GUI)
+$(OBJ_DIR_LSD)sensitivity.o: $(SRC_DIR)sensitivity.cpp $(SRC_DIR)nolhtables.h $(DEP_GUI)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(SRC_DIR)sensitivity.cpp -o $(OBJ_DIR_LSD)sensitivity.o
 

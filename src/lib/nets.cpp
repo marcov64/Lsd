@@ -596,7 +596,7 @@ NODES2CREATE
 	Prints a warning if there are more
 	existing copies than needed and returns 0.
 ****************************************************/
-long nodes2create( object *parent, const char *lab, long numNodes )
+long simulation::nodes2create( object *parent, const char *lab, long numNodes )
 {
 	long count;
 	object *cur;
@@ -1580,7 +1580,7 @@ double object::write_file_net( const char *lab, const char dir[ ], const char ba
 							 int serial, bool append )
 {
 	bool iniSec, noName, noTime, noWeight;
-	int tCur = ( t > max_step ) ? max_step : t;				// effective current time
+	int tCur = ( t > last_t ) ? last_t : t;					// effective current time
 	long l, numNodes, numLinks = 0;
 	char *c, mode[ 2 ], fileName[ MAX_PATH_LENGTH ], name[ MAX_PATH_LENGTH ];
 	object *firstNode, *cur, *cur1;
@@ -1624,7 +1624,7 @@ double object::write_file_net( const char *lab, const char dir[ ], const char ba
 	}
 	else
 		fprintf( pajekFile, "%% %s objects from LSD '%s' configuration\n\n",
-				 lab, strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
+				 lab, strlen( conf_name ) > 0 ? conf_name : NO_CONF_NAME );
 
 	// get network information
 	for ( numNodes = l = 0, noName = noTime = noWeight = true, cur1 = NULL,
@@ -1741,7 +1741,7 @@ CHECK_NET_STRUCT
 	The calling object has to be a immediate parent of the existing object named 'lab'.
 	Root cannot be the calling object (not a valid network container).
 ****************************************************/
-object *check_net_struct( object *caller, const char *nodeLab, bool noErr )
+object *simulation::check_net_struct( object *caller, const char *nodeLab, bool noErr )
 {
 	object *cur = caller->search( nodeLab, no_search, no_search_up );
 

@@ -18,26 +18,17 @@ This file contains all the macros required by the
 model's equation file.
 *************************************************************/
 
-#define _FUN_											// comment this line to access internal LSD functions
-
-#if defined( EIGENLIB ) && __cplusplus >= 201103L		// required C++11
-#include <Eigen/Eigen>									// Eigen linear algebra library
+#if defined( EIGENLIB ) && __cplusplus >= 201103L	// required C++11
+#include <Eigen/Eigen>								// Eigen linear algebra library
 using namespace Eigen;
 #endif
 
-#include "lib/libLSD.h"									// LSD library classes
-#include "lib/check.h"									// LSD macro check support code
+#define _FUN_				// comment this line to access internal LSD functions
 
-// create and set fast lookup flag
-#if ! defined FAST_LOOKUP
-const bool fast_lookup = false;
-void init_map( ) { };
-#else
-const bool fast_lookup = true;
-#endif
+#include "lib/check.h"		// macro check support code
 
-// enable pointer checking to protect users (medium overhead) if not disabled
-#if defined FAST_LOOKUP && ! defined NO_POINTER_CHECK
+/// enable pointer checking to protect users (medium overhead) if not disabled
+#ifndef NO_POINTER_CHECK
 
 const bool no_pointer_check = false;
 
@@ -72,7 +63,7 @@ const bool no_pointer_check = true;
 #endif
 
 // initialize pointers to NULL to protect users (small overhead) if not disabled
-#if defined FAST_LOOKUP && ! defined NO_POINTER_INIT
+#ifndef NO_POINTER_INIT
 
 const bool no_pointer_init = false;
 
@@ -105,28 +96,10 @@ const bool no_pointer_init = true;
 #define EQ_USER_VARS
 #endif
 
-#define EQ_BEGIN \
-	double res = def_res; \
-	object *p = var->up, *c = caller; \
-	int h, i, j, k; \
-	double v[ USER_D_VARS ]; \
-	object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cyccur, *cyccur2, *cyccur3; \
-	netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9; \
-	FILE *f; \
-	INIT_POINTERS \
-	EQ_USER_VARS
-
-#define EQ_NOT_FOUND \
-	error_hard( "equation not found", "check your configuration (variable name) or\ncode (equation name) to prevent this situation\nPossible problems:\n- There is no equation for this variable\n- The equation name is different from the variable name (case matters!)", false, "equation not found for variable '%s'", label ); \
-	return res;
-
-#define EQ_TEST_RESULT \
-	if ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) \
-		error_hard( "invalid equation result", "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation", true, "equation for '%s' produces the invalid value '%lf' at case %d", label, res, t );
-
+// debugger probe variables
 #ifndef _NW_
 #define DEBUG_CODE \
-	if ( debug_flag ) \
+	if ( deb_set ) \
 	{ \
 		for ( int n = 0; n < USER_D_VARS; ++n ) \
 			d_values[ n ] = v[ n ]; \
@@ -160,74 +133,17 @@ const bool no_pointer_init = true;
 #define DEBUG_CODE
 #endif
 
-// handle fast equation look-up if enabled
-#if ! defined FAST_LOOKUP
-// use standard chain method for look-up
+// create map for fast equation look-up
 #define MODELBEGIN \
 	double variable::fun( object *caller ) \
 	{ \
 		if ( quit == 2 ) \
-			return def_res; \
-		variable *var = this; \
-		object app; \
-		EQ_BEGIN
-
-#define MODELEND \
-		EQ_NOT_FOUND \
-		end: \
-		EQ_TEST_RESULT \
-		DEBUG_CODE \
-		return res; \
-	}
-
-#define EQUATION( X ) \
-	if ( ! strcmp( label, X ) ) {
-
-#define RESULT( X ) \
-		res = X; \
-		goto end; \
-	}
-
-#define END_EQUATION( X ) \
-	{ \
-		res = X; \
-		goto end; \
-	}
-
-#define EQUATION_DUMMY( X, Y ) \
-	if ( ! strcmp( label, X ) ) { \
-		if ( strlen( Y ) > 0 && ! var->up->under_comput_var( ( char * ) Y ) ) \
-		{ \
-			var->dummy = true; \
-			p->cal( p, ( char * ) Y, 0, true ); \
-		} \
-		res = var->val[ 0 ]; \
-		goto end; \
-	}
-
-#else
-// use fast map method for equation look-up
-#define MODELBEGIN \
-	double variable::fun( object *caller ) \
-	{ \
-		double res = def_res; \
-		if ( quit == 2 ) \
-			return res; \
+			return val[ 0 ]; \
 		if ( eq_func == NULL ) \
-		{ \
-			auto eq_it = eq_map.find( label ); \
-			if ( eq_it != eq_map.end( ) ) \
-				eq_func = eq_it->second; \
-			else \
-			{ \
-				EQ_NOT_FOUND \
-			} \
-		} \
-		res = ( eq_func )( caller, this ); \
-		EQ_TEST_RESULT \
-		return res; \
+			eq_func = chk_eq( label ); \
+		return chk_res( ( eq_func )( caller, this ), label ); \
 	} \
-	void init_map( ) \
+	void simulation::init_map( ) \
 	{ \
 		eq_map = \
 		{
@@ -237,42 +153,42 @@ const bool no_pointer_init = true;
 	}
 
 #define EQUATION( X ) \
-	{ string( X ), [ ]( object *caller, variable *var ) \
+	{ string( X ), [ & ]( object *caller, variable *var ) \
 		{ \
-			EQ_BEGIN
+			object *p = var->up, *c = caller; \
+			int h, i, j, k; \
+			double v[ USER_D_VARS ]; \
+			object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cyccur, *cyccur2, *cyccur3; \
+			netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9; \
+			FILE *f; \
+			INIT_POINTERS \
+			EQ_USER_VARS
 
 #define RESULT( X ) \
 			; \
-			res = X; \
 			DEBUG_CODE \
-			return res; \
+			return X; \
 		} \
 	},
 
 #define END_EQUATION( X ) \
 	{ \
-		res = X; \
 		DEBUG_CODE \
-		return res; \
+		return X; \
 	}
 
 #define EQUATION_DUMMY( X, Y ) \
-	{ string( X ), [ ]( object *caller, variable *var ) \
+	{ string( X ), [ & ]( object *caller, variable *var ) \
 		{ \
-			if ( strlen( Y ) > 0 && ! var->up->under_comput_var( ( char * ) Y ) ) \
-			{ \
-				var->dummy = true; \
-				var->up->cal( var->up, ( char * ) Y, 0, true ); \
-			} \
-			return var->val[ 0 ]; \
+			return var->chk_dummy( Y ); \
 		} \
 	},
-
-#endif
 
 // redefine as macro to avoid conflicts with C++ version in <cmath.h>
 #define abs( X ) _abs( X )
 #define pi M_PI
+
+// LSD macros
 #define UP "UP"
 #define DOWN "DOWN"
 
@@ -281,7 +197,6 @@ const bool no_pointer_init = true;
 #define DEBUG_START_AT( X ) deb_log( true, X )
 #define DEBUG_STOP deb_log( false, 0 )
 #define DEBUG_STOP_AT( X ) deb_log( false, X )
-#define DEFAULT_RESULT( X ) { def_res = X; }
 
 #define FAST set_fast( 1 )
 #define FAST_FULL set_fast( 2 )
@@ -306,7 +221,7 @@ const bool no_pointer_init = true;
 #define RND_SETSEED( X ) { seed = ( unsigned ) X; init_random( seed ); }
 #define SLEEP( X ) msleep( ( unsigned ) X )
 
-#define CONFIG ( ( const char * ) simul_name )
+#define CONFIG ( ( const char * ) conf_name )
 #define PATH ( ( const char * ) path )
 #define CURRENT ( var->val[ 0 ] )
 #define THIS ( p )
@@ -322,9 +237,9 @@ const bool no_pointer_init = true;
 #define ROOT root
 
 #define T ( ( double ) t )
-#define LAST_T ( ( double ) max_step )
-#define RUN ( ( double ) cur_sim )
-#define LAST_RUN ( ( double ) sim_num )
+#define LAST_T ( ( double ) last_t )
+#define RUN ( ( double ) run )
+#define LAST_RUN ( ( double ) last_run )
 
 #define LOG( ... ) ( ! fast ? plog( __VA_ARGS__ ) : ( void ) NULL )
 #define PLOG( ... ) ( fast_mode < 2 ? plog( __VA_ARGS__ ) : ( void ) NULL )
@@ -675,16 +590,13 @@ const bool no_pointer_init = true;
 
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)
-#ifndef FAST_LOOKUP
+#ifndef NO_LEGACY_CODE
 
 #ifndef _NW_
 #include <tk.h>
 extern Tcl_Interp *inter;
 #endif
 
-double init_lattice( double pixW = 0, double pixH = 0, double nrow = 100, double ncol = 100,
-					 const char lrow[ ] = "y", const char lcol[ ] = "x", const char lvar[ ] = "",
-					 object *p = NULL, int init_color = -0xffffff );
 double poidev( double xm, long *idum_loc = NULL );
 int deb( object *r, object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" );
 object *go_brother( object *c );
@@ -694,14 +606,7 @@ char msg[ MAX_BUFF_SIZE ];							// legacy auxiliary buffer
 
 #define path conf_path
 
-#define FUNCTION( X ) \
-	if ( ! strcmp( label, X ) ) { \
-		last_update--; \
-		if ( c == NULL ) { \
-			res = val[ 0 ]; \
-			goto end; \
-		}
-
+#define FUNCTION( X ) EQUATION( X )
 #define UNIFORM( X, Y ) uniform( X, Y )
 #define rnd_integer( X, Y ) uniform_int( X, Y )
 #define VL_CHEAT( X, Y, C ) V_CHEATL( X, Y, C )

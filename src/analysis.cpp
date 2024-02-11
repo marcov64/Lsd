@@ -69,7 +69,7 @@ used case 47
 #define HISTOGR	4
 #define HISTOCS	5
 
-struct bin
+struct bin							// histogram bin
 {
 	double num;
 	double min;
@@ -78,6 +78,16 @@ struct bin
 	double av;
 	double lowb;
 	double highb;
+};
+
+struct store						// element values container class
+{
+	char label[ MAX_ELEM_LENGTH ];
+	char tag[ MAX_ELEM_LENGTH ];
+	double *data;
+	int end;
+	int rank;
+	int start;
 };
 
 bin *histo_bins;
@@ -123,7 +133,6 @@ int showInit;
 int time_cross;
 int type_plot[ MAX_PLOTS ];
 int var_num;
-int watch;
 int xy;
 store *vs = NULL;
 
@@ -200,7 +209,7 @@ void analysis( bool mc )
 	// save the name of key widgets that manipulate the series lists
 	cmd( "init_series .da.vars.lb.obj .da.vars.lb.flt.str .da.vars.lb.f.v .da.vars.lb.bh.nvar .da.vars.lb.bh.ncas .da.vars.ch.f.v .da.vars.ch.bh.sel .da.vars.pl.f.v .da.vars.pl.bh.plot" );
 
-	cmd( "newtop .da \"%s%s - LSD Analysis of Results\" { set choice 2 } \"\"", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
+	cmd( "newtop .da \"%s%s - LSD Analysis of Results\" { set choice 2 } \"\"", unsaved_change( ) ? "*" : " ", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
 
 	// main menu
 	cmd( "ttk::menu .da.m -tearoff 0" );
@@ -646,21 +655,21 @@ void analysis( bool mc )
 	cmd( "bind .da <Control-m> { set choice 47 }; bind .da <Control-M> { set choice 47 }" );	// create moving average from existing
 
 	// grab focus when called from LSD Debugger
-	cmd( "set running %d", running ? 1 : 0 );
+	cmd( "set running %d", sim.running ? 1 : 0 );
 	cmd( "if $running { showtop .da overM } { showtop .da overM 1 1 0 }" );
 
 	// add time series in memory to listbox
 	update_descr_dict( );
-	if ( actual_steps > 0 )
+	if ( sim.eff_t > 0 )
 	{
-		insert_data_mem( root, &num_var );
+		insert_data_mem( sim.root, &num_var );
 		min_c = max( first_c, showInit ? 0 : 1 );
 		max_c = num_c;
 	}
 	else
 	{	// create parent map from loaded but not run configuration
 		par_map.clear( );
-		create_par_map( root );
+		create_par_map( sim.root );
 	}
 
 	if ( ! mc && num_var == 0 )
@@ -672,7 +681,7 @@ void analysis( bool mc )
 	}
 	else
 	{
-		if ( ! mc && sim_num > 1 && cur_sim > 1 )
+		if ( ! mc && sim.last_run > 1 && sim.run > 1 )
 		  cmd( "ttk::messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"Only series from last run are loaded\" -detail \"Click on button 'Add...' to load series from saved simulation results. You can use 'Ctrl' and 'Shift' keys to select multiple files at once. Avoid selecting the results file from last run, as data is already loaded and would be duplicated.\"" );
 
 		cmd( "selectinlist .da.vars.lb.f.v 0 1" );
@@ -1121,8 +1130,8 @@ void analysis( bool mc )
 					break;
 
 				// make sure there is a path set
-				cmd( "set path \"%s\"", conf_path );
-				if ( strlen( conf_path ) > 0 )
+				cmd( "set path \"%s\"", sim.conf_path );
+				if ( strlen( sim.conf_path ) > 0 )
 					cmd( "cd \"$path\"" );
 
 				cmd( "if [ string equal $pltSavFmt eps ] { \
@@ -1172,7 +1181,7 @@ void analysis( bool mc )
 						$daptab.tab$a.c.f.plots postscript -x $x0 -y $y0 -width [ expr { $x1 - $x0 } ] -height [ expr { $y1 - $y0 } ] -pagewidth $dd -rotate $pltSavRes -colormode $pltSavCmod -file \"$fn\" \
 					} else { \
 						canvas2svg $daptab.tab$a.c.f.plots \"$fn\" \"$x0 $y0 $x1 $y1\" $pltSavCmod \"%s\" \
-					}", strlen( simul_name ) > 0 ? simul_name : "plot" );
+					}", strlen( sim.conf_name ) > 0 ? sim.conf_name : "plot" );
 
 				cmd( "plog \"\nPlot saved: $fn\n\"" );
 
@@ -2664,17 +2673,17 @@ void analysis( bool mc )
 						if ( ! mc || res_list.size( ) <= 1 )
 						{
 							// make sure there is a path set
-							if ( strlen( path_res  ) > 0 )
-								cmd( "set path_res	\"%s\"", path_res );
+							if ( strlen( sim.res_path ) > 0 )
+								cmd( "set res_path	\"%s\"", sim.res_path );
 							else
-								cmd( "set path_res \"%s\"", conf_path );
+								cmd( "set res_path \"%s\"", sim.conf_path );
 
-							cmd( "if { [ string length $path_res ] > 0 } { \
+							cmd( "if { [ string length $res_path ] > 0 } { \
 									set oldpath [ pwd ]; \
-									catch { cd $path_res } \
+									catch { cd $res_path } \
 								}" );
 
-							cmd( "set lab [ tk_getOpenFile -parent .da -title \"Load Results File%s\" -multiple yes -initialdir \"$path_res\" -defaultextension .res.gz -filetypes { %s { {All files} {*} } } -typevariable defaultFileType ]", mc ? "s" : "(s)", platform == _MAC_ ? "" : "{ {LSD result files} {.res.gz .res} } { {LSD total files} {.tot .tot.gz} }" );
+							cmd( "set lab [ tk_getOpenFile -parent .da -title \"Load Results File%s\" -multiple yes -initialdir \"$res_path\" -defaultextension .res.gz -filetypes { %s { {All files} {*} } } -typevariable defaultFileType ]", mc ? "s" : "(s)", platform == _MAC_ ? "" : "{ {LSD result files} {.res.gz .res} } { {LSD total files} {.tot .tot.gz} }" );
 							cmd( "if { ! [ fn_spaces \"$lab\" .da 1 ] } { set choice [ llength $lab ] } { set choice 0 }" );
 							h = choice;		// number of files
 
@@ -3833,10 +3842,10 @@ void plot_tseries( void )
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "internal problem in LSD",
-							"if error persists, please contact developers",
-							true,
-							"invalid series data" );
+				sim.error_hard( "internal problem in LSD",
+								"if error persists, please contact developers",
+								true,
+								"invalid series data" );
 				lsd_exit_gui( 18 );
 			}
 
@@ -4033,10 +4042,10 @@ void plot_cross( void )
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "internal problem in LSD",
-							"if error persists, please contact developers",
-							true,
-							"invalid series data" );
+				sim.error_hard( "internal problem in LSD",
+								"if error persists, please contact developers",
+								true,
+								"invalid series data" );
 				lsd_exit_gui( 18 );
 			}
 
@@ -4422,7 +4431,7 @@ void update_descr_dict( void )
 	char desc[ MAX_LINE_SIZE + 1 ];
 	description *cd;
 
-	for ( cd = descr; cd != NULL; cd = cd->next )
+	for ( cd = sim.descr; cd != NULL; cd = cd->next )
 		cmd( "dict set serDescrDict %s \"%s\"", cd->label, fmt_ttip_descr( desc, cd, MAX_LINE_SIZE + 1, false ) );
 }
 
@@ -4468,10 +4477,10 @@ void insert_data_mem( object *r, int *num_v, const char *lab )
 
 	if ( *num_v != ini_v )
 	{
-		error_hard( "internal problem in LSD",
-					"if error persists, please contact developers",
-					true,
-					"invalid number of series" );
+		sim.error_hard( "internal problem in LSD",
+						"if error persists, please contact developers",
+						true,
+						"invalid number of series" );
 		lsd_exit_gui( 18 );
 	}
 }
@@ -4520,7 +4529,7 @@ void count_labels_mem( object *r, int *count, const char *lab )
 				count_labels_mem( cur, count, lab );
 
 	if ( r->up == NULL && lab == NULL )
-		for ( cv = cemetery; cv != NULL; cv = cv->next )
+		for ( cv = sim.cemetery; cv != NULL; cv = cv->next )
 			++( *count );
 }
 
@@ -4568,7 +4577,7 @@ void insert_labels_mem( object *r, int *num_v, const char *lab )
 				insert_labels_mem( cur, num_v, lab );
 
 	if ( r->up == NULL && lab == NULL )
-		for ( cv = cemetery; cv != NULL && ! stop; cv = cv->next )
+		for ( cv = sim.cemetery; cv != NULL && ! stop; cv = cv->next )
 		{
 			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", cv->label, cv->lab_tit, cv->start, cv->end, *num_v, par_map[ cv->label ].c_str( ) );
 
@@ -4630,7 +4639,7 @@ void insert_store_mem( object *r, int max_v, int *num_v, const char *lab )
 				insert_store_mem( cur, max_v, num_v, lab );
 
 	if ( r->up == NULL && lab == NULL )
-		for ( cv = cemetery; cv != NULL && *num_v < max_v; cv = cv->next )
+		for ( cv = sim.cemetery; cv != NULL && *num_v < max_v; cv = cv->next )
 		{
 			strcpyn( vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
 			strcpyn( vs[ *num_v ].tag, cv->lab_tit, MAX_ELEM_LENGTH );
@@ -4911,10 +4920,10 @@ void statistics( void )
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "internal problem in LSD",
-							"if error persists, please contact developers",
-							true,
-							"invalid series data" );
+				sim.error_hard( "internal problem in LSD",
+								"if error persists, please contact developers",
+								true,
+								"invalid series data" );
 				lsd_exit_gui( 18 );
 			}
 
@@ -5057,10 +5066,10 @@ void statistics_cross( void )
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
 		{
-			error_hard( "internal problem in LSD",
-						"if error persists, please contact developers",
-						true,
-						"invalid series data" );
+			sim.error_hard( "internal problem in LSD",
+							"if error persists, please contact developers",
+							true,
+							"invalid series data" );
 			lsd_exit_gui( 18 );
 		}
 
@@ -5253,10 +5262,10 @@ void plot_gnu( void )
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "internal problem in LSD",
-							"if error persists, please contact developers",
-							true,
-							"invalid series data" );
+				sim.error_hard( "internal problem in LSD",
+								"if error persists, please contact developers",
+								true,
+								"invalid series data" );
 				lsd_exit_gui( 18 );
 			}
 
@@ -5711,10 +5720,10 @@ void plot_cs_xy( void )
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "internal problem in LSD",
-							"if error persists, please contact developers",
-							true,
-							"invalid series data" );
+				sim.error_hard( "internal problem in LSD",
+								"if error persists, please contact developers",
+								true,
+								"invalid series data" );
 				lsd_exit_gui( 18 );
 			}
 
@@ -6133,10 +6142,10 @@ void plot_phase_diagram( void )
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "internal problem in LSD",
-							"if error persists, please contact developers",
-							true,
-							"invalid series data" );
+				sim.error_hard( "internal problem in LSD",
+								"if error persists, please contact developers",
+								true,
+								"invalid series data" );
 				lsd_exit_gui( 18 );
 			}
 
@@ -6718,10 +6727,10 @@ void plot_lattice( void )
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
 		{
-			error_hard( "internal problem in LSD",
-						"if error persists, please contact developers",
-						true,
-						"invalid series data" );
+			sim.error_hard( "internal problem in LSD",
+							"if error persists, please contact developers",
+							true,
+							"invalid series data" );
 			lsd_exit_gui( 18 );
 		}
 
@@ -6890,10 +6899,10 @@ void histograms( void )
 	data = vs[ id ].data;
 	if ( data == NULL )
 	{
-		error_hard( "internal problem in LSD",
-					"if error persists, please contact developers",
-					true,
-					"invalid series data" );
+		sim.error_hard( "internal problem in LSD",
+						"if error persists, please contact developers",
+						true,
+						"invalid series data" );
 		lsd_exit_gui( 18 );
 	}
 
@@ -7155,10 +7164,10 @@ void histograms_cs( void )
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
 		{
-			error_hard( "internal problem in LSD",
-						"if error persists, please contact developers",
-						true,
-						"invalid series data" );
+			sim.error_hard( "internal problem in LSD",
+							"if error persists, please contact developers",
+							true,
+							"invalid series data" );
 			lsd_exit_gui( 18 );
 		}
 
@@ -7631,10 +7640,10 @@ bool create_series( bool mc, vector < string > var_names )
 			if ( data[ i ] == NULL )
 			{
 				cmd( "destroytop .da.pas" );
-				error_hard( "internal problem in LSD",
-							"if error persists, please contact developers",
-							true,
-							"invalid series data" );
+				sim.error_hard( "internal problem in LSD",
+								"if error persists, please contact developers",
+								true,
+								"invalid series data" );
 				lsd_exit_gui( 18 );
 			}
 		}
@@ -8086,10 +8095,10 @@ bool create_maverag( void )
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "internal problem in LSD",
-							"if error persists, please contact developers",
-							true,
-							"invalid series data" );
+				sim.error_hard( "internal problem in LSD",
+								"if error persists, please contact developers",
+								true,
+								"invalid series data" );
 				lsd_exit_gui( 18 );
 			}
 
@@ -8179,7 +8188,7 @@ ADD_UNSAVED
 ****************************************************/
 bool add_unsaved( void )
 {
-	if ( actual_steps == 0 )
+	if ( sim.eff_t == 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Simulation not run\" -detail \"Select menu option Run>Run before using this option.\"" );
 		return false;
@@ -8241,7 +8250,7 @@ bool add_unsaved( void )
 		return false;
 	}
 
-	insert_data_mem( root, &num_var, get_str( "bidi" ) );
+	insert_data_mem( sim.root, &num_var, get_str( "bidi" ) );
 
 	return true;
 }
@@ -8300,10 +8309,10 @@ void save_datazip( void )
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
 		{
-			error_hard( "internal problem in LSD",
-						"if error persists, please contact developers",
-						true,
-						"invalid series data" );
+			sim.error_hard( "internal problem in LSD",
+							"if error persists, please contact developers",
+							true,
+							"invalid series data" );
 			lsd_exit_gui( 18 );
 		}
 
@@ -8454,8 +8463,8 @@ void save_datazip( void )
 	}
 
 	// make sure there is a path set
-	cmd( "set path \"%s\"", conf_path );
-	if ( strlen( conf_path ) > 0 )
+	cmd( "set path \"%s\"", sim.conf_path );
+	if ( strlen( sim.conf_path ) > 0 )
 		cmd( "cd \"$path\"" );
 
 	cmd( "set res [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }	 } ]", ext, desc, ext );
@@ -8756,10 +8765,10 @@ void plog_series( void )
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
 			{
-				error_hard( "internal problem in LSD",
-							"if error persists, please contact developers",
-							true,
-							"invalid series data" );
+				sim.error_hard( "internal problem in LSD",
+								"if error persists, please contact developers",
+								true,
+								"invalid series data" );
 				lsd_exit_gui( 18 );
 			}
 		}
@@ -9740,7 +9749,7 @@ void add_da_plot_tab( const char *w, int id_plot )
 			bind $w <Escape> \"wm withdraw $w\" \
 		} else { \
 			settop $w \
-		}", unsaved_change( ) ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
+		}", unsaved_change( ) ? "*" : " ", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
 
 	// create tab frame with heading
 	cmd( "set t $daptab.tab%d", id_plot );
@@ -9941,10 +9950,10 @@ int store( struct s *c, int x4 )
 		return 1;
 	}
 
-	error_hard( "internal problem in LSD",
-				"if error persists, please contact developers",
-				true,
-				"invalid data structure" );
+	sim.error_hard( "internal problem in LSD",
+					"if error persists, please contact developers",
+					true,
+					"invalid data structure" );
 	lsd_exit_gui( 14 );
 
 	return 0;
@@ -9976,10 +9985,10 @@ int store( struct s *c, int x3, int x4 )
 		return 1;
 	 }
 
-	error_hard( "internal problem in LSD",
-				"if error persists, please contact developers",
-				true,
-				"invalid data structure" );
+	sim.error_hard( "internal problem in LSD",
+					"if error persists, please contact developers",
+					true,
+					"invalid data structure" );
 	lsd_exit_gui( 15 );
 
 	return 0;
@@ -10016,10 +10025,10 @@ int store( struct s *c, int x2, int x3, int x4 )
 		return 1;
 	}
 
-	error_hard( "internal problem in LSD",
-				"if error persists, please contact developers",
-				true,
-				"invalid data structure" );
+	sim.error_hard( "internal problem in LSD",
+					"if error persists, please contact developers",
+					true,
+					"invalid data structure" );
 	lsd_exit_gui( 16 );
 
 	return 0;
@@ -10061,10 +10070,10 @@ int store( int x1, int x2, int x3, int x4 )
 		return 1;
 	}
 
-	error_hard( "internal problem in LSD",
-				"if error persists, please contact developers",
-				true,
-				"invalid data structure" );
+	sim.error_hard( "internal problem in LSD",
+					"if error persists, please contact developers",
+					true,
+					"invalid data structure" );
 	lsd_exit_gui( 17 );
 
 	return 0;

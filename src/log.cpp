@@ -163,16 +163,16 @@ void cover_browser( const char *text1, const char *text2, bool run )
 		cmd( "ttk::label .p.l -text \"Simulation progress\" -anchor center" );
 
 		cmd( "ttk::frame .p.b1" );
-		cmd( "ttk::progressbar .p.b1.b -maximum %d -value 0", sim_num );
-		cmd( "ttk::label .p.b1.i -text \"Simulation: 1 of %d (0%% done)\" -anchor center", sim_num );
+		cmd( "ttk::progressbar .p.b1.b -maximum %d -value 0", sim.last_run );
+		cmd( "ttk::label .p.b1.i -text \"Simulation: 1 of %d (0%% done)\" -anchor center", sim.last_run );
 		cmd( "pack .p.b1.b .p.b1.i -pady 5 -expand yes -fill x" );
 
 		cmd( "ttk::frame .p.b2" );
-		cmd( "ttk::progressbar .p.b2.b -maximum %d -value 0", max_step );
-		cmd( "ttk::label .p.b2.i -text \"Case: 1 of %d (0%% done)\" -anchor center", max_step );
+		cmd( "ttk::progressbar .p.b2.b -maximum %d -value 0", sim.last_t );
+		cmd( "ttk::label .p.b2.i -text \"Case: 1 of %d (0%% done)\" -anchor center", sim.last_t );
 		cmd( "pack .p.b2.b .p.b2.i -pady 5 -expand yes -fill x" );
 
-		if ( sim_num > 1 )
+		if ( sim.last_run > 1 )
 			cmd( "pack .p.l .p.b1 .p.b2 -pady 10 -expand yes -fill x" );
 		else
 			cmd( "pack .p.l .p.b2 -pady 10 -expand yes -fill x" );
@@ -212,7 +212,7 @@ void cover_browser( const char *text1, const char *text2, bool run )
 		set_shortcuts_run( ".str" );
 
 		// disable debug button when running in parallel mode
-		if ( ! parallel_disable && search_parallel( root ) )
+		if ( ! sim.parallel_disable && search_parallel( sim.root ) )
 		{
 			cmd( ".b.r2.deb configure -state disabled" );
 			cmd( "tooltip::tooltip .b.r2.deb \"Disable parallel processing\nto enable debugging\"" );
@@ -236,7 +236,7 @@ UNCOVER_BROWSER
 *********************************/
 void uncover_browser( void )
 {
-	if ( ! brCovered || running )	// ignore if not covered or running
+	if ( ! brCovered || sim.running )	// ignore if not covered or running
 		return;
 
 	unset_shortcuts_run( "." );
@@ -283,7 +283,7 @@ bool comp_item( item& item1, item& item2 )
 
 void show_prof_aggr( void )
 {
-	if ( ! prof_aggr_time )
+	if ( ! sim.prof_aggr_time )
 		return;
 
 	item elem;
@@ -295,10 +295,10 @@ void show_prof_aggr( void )
 	plog( "\nProfiling aggregated results:\n" );
 	plog_tag( "\nObject\tElement\tTime (msec.)\tComputation count", "prof2" );
 
-	for ( it2 = prof.begin(); it2 != prof.end(); ++it2 )
+	for ( it2 = sim.prof.begin(); it2 != sim.prof.end(); ++it2 )
 	{
 		elem.var = it2->first.c_str( );
-		cv = root->search_var( NULL, elem.var );
+		cv = sim.root->search_var( NULL, elem.var );
 		elem.obj = ( cv == NULL ) ? NULL : cv->up->label;
 		elem.time = 1000 * it2->second.ticks / CLOCKS_PER_SEC;
 		elem.count = it2->second.comp;

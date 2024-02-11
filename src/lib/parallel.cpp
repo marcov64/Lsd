@@ -23,6 +23,9 @@ operating system to manage the runs.
 
 #ifndef _NP_
 
+bool parallel_abort;				// indicate parallel threads were aborted
+
+
 /***************************************
 RUN_PARALLEL_EXEC
 ***************************************/
@@ -43,10 +46,22 @@ RUN_PARALLEL
 #define INISTAT -1234
 int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns )
 {
-	char *alt_name;
+	bool save_alt = false;
+	char *alt_name, *alt_path, *def_path;
 	int i, j, k, num, sl;
 
-	int path_len = save_alt_path ? strlen( alt_path ) : strlen( conf_path );
+	alt_path = def_path = exec_path;
+
+	if ( sims.size( ) > 0 )
+	{
+		save_alt = sims[ 0 ]->save_alt;
+		alt_path = sims[ 0 ]->alt_path;
+
+		if ( strlen( sims[ 0 ]->conf_path ) > 0 )
+			def_path = sims[ 0 ]->conf_path;
+	}
+
+	int path_len = save_alt ? strlen( alt_path ) : strlen( def_path );
 	int name_len = strlen( simname ) + ( int ) log10( fseed + runs ) + 2;
 	int dest_len = path_len + 5;
 	int log_len = path_len + name_len + 6;
@@ -56,7 +71,7 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 
 	alt_name = clean_file( simname );
 
-	if ( save_alt_path )
+	if ( save_alt )
 		snprintf( dest_path, path_len + 5, " -o %s", alt_path );
 	else
 		strcpy( dest_path, "" );
@@ -77,13 +92,13 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 		for ( i = fseed, j = 1; j <= parruns; ++j )
 		{
 			// log file name
-			snprintf( log_file, log_len, "%s%s%s_%d.log", save_alt_path ? alt_path : conf_path, strlen( save_alt_path ? alt_path : conf_path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, j );
+			snprintf( log_file, log_len, "%s%s%s_%d.log", save_alt ? alt_path : def_path, strlen( save_alt ? alt_path : def_path ) > 0 ? "/" : "", save_alt ? alt_name : simname, j );
 			run_logs.push_back( log_file );
 
 			// results file names
 			for ( k = i; k < i + num + ( j <= sl ? 1 : 0 ); ++k )
 			{
-				snprintf( res_file, res_len, "%s%s%s_%d.%s", save_alt_path ? alt_path : conf_path, strlen( save_alt_path ? alt_path : conf_path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, k, docsv ? "csv" : "res" );
+				snprintf( res_file, res_len, "%s%s%s_%d.%s", save_alt ? alt_path : def_path, strlen( save_alt ? alt_path : def_path ) > 0 ? "/" : "", save_alt ? alt_name : simname, k, docsv ? "csv" : "res" );
 
 				if ( dozip )
 					strcatn( res_file, ".gz", res_len );
@@ -107,11 +122,11 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 		for ( i = fseed, j = 1; i < fseed + runs; ++i, ++j )
 		{
 			// log file name
-			snprintf( log_file, log_len, "%s%s%s_%d.log", save_alt_path ? alt_path : conf_path, strlen( save_alt_path ? alt_path : conf_path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, i );
+			snprintf( log_file, log_len, "%s%s%s_%d.log", save_alt ? alt_path : def_path, strlen( save_alt ? alt_path : def_path ) > 0 ? "/" : "", save_alt ? alt_name : simname, i );
 			run_logs.push_back( log_file );
 
 			// results file name
-			snprintf( res_file, res_len, "%s%s%s_%d.%s", save_alt_path ? alt_path : conf_path, strlen( save_alt_path ? alt_path : conf_path ) > 0 ? "/" : "", save_alt_path ? alt_name : simname, i, docsv ? "csv" : "res" );
+			snprintf( res_file, res_len, "%s%s%s_%d.%s", save_alt ? alt_path : def_path, strlen( save_alt ? alt_path : def_path ) > 0 ? "/" : "", save_alt ? alt_name : simname, i, docsv ? "csv" : "res" );
 
 			if ( dozip )
 				strcatn( res_file, ".gz", res_len );
@@ -149,7 +164,8 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 					abort = true;
 				}
 
-				update_bar( NULL, num, sl, 2 * BAR_DONE_SIZE );
+				if ( sims.size( ) > 0 )
+					sims[ 0 ]->update_bar( NULL, num, sl, 2 * BAR_DONE_SIZE );
 			}
 			while ( num < 100 && ! abort );
 

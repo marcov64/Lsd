@@ -120,7 +120,90 @@ Global definitions shared by all LSD GUI modules.
 #define LSD_WIN_NUM MODEL_INFO_NUM - 3
 #define LSD_WIN_NAME { "lsd", "log", "str", "da", "deb", "lat", "plt", "dap" }
 
-// standalone internal C functions (not visible to the users)
+// class definitions
+struct design							// design of experiment container class
+{
+	int typ, tab, n, k, *par, *lag, *inst;// experiment parameters
+	double **hi, **lo, ***doe;
+	char **lab;
+	bool *intg;
+
+	design( sense *rsens, int typ, const char *fname, const char *dest_path,
+			int findex, int samples, int factors = 0, int jump = 2, int trajs = 4 );
+										// constructor
+	~design( void );					// destructor
+
+	void clear_design( void );
+	void load_design_data( sense *rsens, int n );
+};
+
+struct nolh								// near-orthogonal Latin hypercube class
+{
+	int kMin;
+	int kMax;
+	int n1;
+	int n2;
+	int loLevel;
+	int hiLevel;
+	int *table;
+};
+
+// GUI global variables
+extern bool brCovered;			// browser cover currently covered
+extern bool check_save;			// saving message inside disabled objects
+extern bool eq_dum;				// current equation is dummy
+extern bool ignore_eq_file;		// configuration files equation updating
+extern bool iniShowOnce;		// prevent repeating warning on # of columns
+extern bool log_ok;				// control for log window available
+extern bool meta_par_in[ ];		// meta variables for simulation settings found
+extern bool pause_run;			// pause running simulation
+extern bool redrawReq;			// flag for asynchronous window redraw request
+extern bool redrawRoot;			// control for redrawing root window (.)
+extern bool redrawStruc;		// control for redrawing model structure window
+extern bool scrollB;			// scroll box state in current runtime plot
+extern bool tk_ok;				// control for tk_ready to operate
+extern bool unsavedData; 		// flag unsaved simulation configurations
+extern bool unsavedSense;		// control for unsaved sensitivity data
+extern char *eq_txt;			// equation file content
+extern char *sens_file;			// current sensitivity analysis file
+extern char eq_file[ ];			// equation file name
+extern char err_file[ ];		// error log file name
+extern char path_sens[ ];		// path of last used sensitivity directory
+extern char tcl_dir[ ];			// Tcl/Tk directory
+extern const char *res_g;		// structure window result variable
+extern double ymax;				// runtime plot max limit
+extern double ymin;				// runtime plot min limit
+extern int choice_g;			// Tcl menu control variable ( structure window)
+extern int cur_plt;				// current graph plot number
+extern int done_in;				// Tcl menu control variable (log window)
+extern int doover;				// overwrite results folder (bool)
+extern int elem_count;			// recursive element counter for show elements menu
+extern int findexSens;			// sequential sensitivity index to filenames
+extern int macro;				// equations style (macros or C++) (bool)
+extern int NOLH_1[ ][ 7 ];		// near-orthogonal Latin hypercube tables
+extern int NOLH_2[ ][ 11 ];
+extern int NOLH_3[ ][ 16 ];
+extern int NOLH_4[ ][ 22 ];
+extern int NOLH_5[ ][ 29 ];
+extern int NOLH_6[ ][ 100 ];
+extern int overwConf;			// overwrite current configuration file on run (bool)
+extern int saveConf;			// save configuration on results saving (bool)
+extern int stop;				// activity interruption flag (Tcl boolean)
+extern int strWindowOn;			// presentation of the model structure window (bool)
+extern int watch;				// allow for graph generation interruption (bool)
+extern nolh NOLH[ ];			// characteristics of NOLH tables
+extern object *currObj;			// pointer to current object in browser
+extern simulation sim;			// the single GUI simulation object
+extern Tcl_Interp *interp;		// Tcl standard interpreter pointer
+
+// GUI constant string arrays
+extern const char *lmm_defaults[ ];
+extern const char *lmm_options[ ];
+extern const char *model_defaults[ ];
+extern const char *model_info[ ];
+extern const char *wnd_names[ ];// LSD main windows' names
+
+// GUI C++ functions
 bool abort_run_threads( void );
 bool add_rt_plot_tab( const char *w, int id_sim );
 bool add_unsaved( void );
@@ -144,7 +227,7 @@ bool load_prev_configuration( void );
 bool make_no_window( void );
 bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz );
 bool open_configuration( object *&r, bool reload );
-bool runtime_step( int &t );
+bool runtime_step( void );
 bool save_configuration( const char *path, const char *rname, const char *ext );
 bool save_sensitivity( FILE *f );
 bool save_xml_configuration( int findex = 0, const char *dest_path = NULL, bool quick = false );
@@ -185,6 +268,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact = fal
 int entry_new_objnum( object *c, const char *tag );
 int eval_int( const char *tcl_exp );
 int get_int( const char *tcl_var, int *var = NULL );
+int load_configuration_gui( bool reload, string *warnings, int quick );
 int load_gui( const char **argv );
 int load_sensitivity( FILE *f );
 int min_hborder( int pdigits, double miny, double maxy );
@@ -248,7 +332,7 @@ void deb_show( object *r, const char *hl_var, int mode );
 void disable_plot( void );
 void draw_buttons( void );
 void draw_obj( object *t, object *sel, int level = 0, int center = 0, int from = 0, bool zeroinst = false );
-void edit_data( object *root, const char *obj_name );
+void edit_data( object *r, const char *obj_name );
 void edit_str( object *r, const char *tag, int *idx, int res, int *done );
 void eliminate_obj( object **c, int actual, int desired );
 void enable_plot( void );
@@ -270,7 +354,7 @@ void insert_labels_mem( object *r, int *num_v, const char *lab = NULL );
 void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int *count );
 void insert_object( const char *w, object *r, bool netOnly = false, object *above = NULL );
 void insert_store_mem( object *r, int max_v, int *num_v, const char *lab = NULL );
-void link_cells( object *root, const char *lab );
+void link_cells( object *r, const char *lab );
 void load_elem_lists( object *r );
 void log_tcl_error( bool show, const char *cm, const char *message, ... );
 void lsd_exit_gui( int v );
@@ -296,7 +380,8 @@ void read_eqfile_name( char *s, int sz );
 void report( object *r );
 void reset_plot( void );
 void return_where_used( char *lab, char *s, int sz );
-void runtime_buttons( int cur_sim, int t, clock_t &last_update );
+void runtime_buttons( clock_t &last_update );
+void runtime_run( void );
 void save_cells( object *r, const char *lab );
 void save_data1( void );
 void save_datazip( void );
@@ -362,7 +447,7 @@ void update_lmm_options( bool justLmmGeom = false );
 void update_model_info( bool fix = false );
 void update_more_tab( bool adding = false );
 void wipe_out( object *d );
-void write_list( FILE *frep, object *root, bool show_all, const char *prefix );
+void write_list( FILE *frep, object *r, bool show_all, const char *prefix );
 void write_obj( object *r, FILE *frep, int *elemDone );
 void write_str( object *r, FILE *frep, int dep, const char *prefix );
 void write_var( object *r, variable *v, FILE *frep );
@@ -375,39 +460,3 @@ bool discard_change( void );
 #else
 bool discard_change( bool checkSense = true, bool senseOnly = false, const char title[ ] = "" );
 #endif
-
-// global internal variables (not visible to the users)
-extern bool brCovered;			// browser cover currently covered
-extern bool check_save;			// control saving message inside disabled objects
-extern bool eq_dum;				// current equation is dummy
-extern bool ignore_eq_file;		// control of configuration files equation updating
-extern bool log_ok;				// control for log window available
-extern bool meta_par_in[ ];		// flag meta variables for simulation settings found
-extern bool pause_run;			// pause running simulation
-extern bool redrawRoot;			// control for redrawing root window (.)
-extern bool redrawStruc;		// control for redrawing model structure window
-extern bool redrawReq;			// flag for asynchronous window redraw request
-extern bool tk_ok;				// control for tk_ready to operate
-extern char err_file[ ];		// error log file name
-extern char path_sens[ ];		// path of last used sensitivity directory
-extern char tcl_dir[ ];			// Tcl/Tk directory
-extern const char *res_g;		// structure window result variable
-extern int choice_g;			// Tcl menu control variable ( structure window)
-extern int cur_plt;				// current graph plot number
-extern int done_in;				// Tcl menu control variable (log window)
-extern int doover;				// overwrite results folder (bool)
-extern int elem_count;			// recursive element counter for show elements menu
-extern int macro;				// equations style (macros or C++) (bool)
-extern int overwConf;			// overwrite current configuration file on run (bool)
-extern int saveConf;			// save configuration on results saving (bool)
-extern int stop;				// activity interruption flag (Tcl boolean)
-extern int strWindowOn;			// control the presentation of the model structure window (bool)
-extern object *currObj;			// pointer to current object in browser
-extern Tcl_Interp *interp;		// Tcl standard interpreter pointer
-
-// common constant string arrays (not visible to the users)
-extern const char *lmm_defaults[ ];
-extern const char *lmm_options[ ];
-extern const char *model_defaults[ ];
-extern const char *model_info[ ];
-extern const char *wnd_names[ ];// LSD main windows' names

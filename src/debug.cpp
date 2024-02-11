@@ -96,7 +96,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 			}; \
 			newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\"; \
 			set newDeb true \
-		}", unsaved_change() ? "*" : " ", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
+		}", unsaved_change() ? "*" : " ", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
 
 	// avoid redrawing the menu if it already exists and is configured
 	if ( ! exists_window( ".deb.m" ) || ! expr_eq( "[ .deb cget -menu ]", ".deb.m" ) )
@@ -193,7 +193,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 		// second row of buttons (if applicable)
 		if ( mode == 1 || mode == 3 )
 		{
-			cmd( "set stack_flag %d", stack_info );
+			cmd( "set stack_flag %d", sim.stack_info );
 
 			cmd( "ttk::frame .deb.b.act" );
 
@@ -255,14 +255,14 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 	Tcl_LinkVar( interp, "value", ( char * ) &app_res, TCL_LINK_DOUBLE );
 	cmd( "set value_change 0" );
 
-	if ( watch_trigger )
+	if ( sim.watch_trigger )
 	{
-		if ( watch_write_mode )
+		if ( sim.watch_write_mode )
 			cmd( "set watch_msg \"      Write watch:\"" );
 		else
 			cmd( "set watch_msg \"      Read watch:\"" );
 
-		cmd( "set watch_name %s", watch_elem );
+		cmd( "set watch_name %s", sim.watch_elem );
 	}
 	else
 	{
@@ -270,7 +270,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 		cmd( "set watch_name \"\"" );
 	}
 
-	watch_trigger = false;		// clears any watch condition already signaled
+	sim.watch_trigger = false;		// clears any watch condition already signaled
 
 	redraw = true;
 	choice = 0;
@@ -342,7 +342,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 					}", interact ? 1 : 0, mode );
 
 				cmd( ".deb.v.v1.name2 configure -text \"%s\"", lab == NULL ? "" : lab );
-				cmd( ".deb.v.v1.time2 configure -text \"%d	   \"", t );
+				cmd( ".deb.v.v1.time2 configure -text \"%d	   \"", sim.t );
 			}
 
 			// create the element list
@@ -486,7 +486,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 		{
 			cmd( "bind .deb <KeyPress-g> { }; bind .deb <KeyPress-G> { }" );
 			cmd( "set stack_flag [ .deb.b.act.stack.e get ]" );
-			stack_info = get_int( "stack_flag" );
+			sim.stack_info = get_int( "stack_flag" );
 
 			cmd( "if { $value_change } { \
 					if [ string is double -strict [ .deb.v.v1.val2 get ] ] { \
@@ -503,11 +503,11 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 		{
 			// Step
 			case 1:
-				if ( t >= max_step )
+				if ( sim.t >= sim.last_t )
 				{
 					cmd( "destroytop .deb" );
 					set_buttons_run( true );
-					debug_flag = false;
+					deb_set = false;
 				}
 				break;
 
@@ -516,7 +516,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				cmd( "destroytop .deb" );
 				set_buttons_run( true );
 				if ( ! interact )
-					debug_flag = false;
+					deb_set = false;
 
 				break;
 
@@ -589,8 +589,8 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				switch ( mode )
 				{
 					case 1:		// prevent changing run parameters when only data browse was called
-						quit = 1;
-						debug_flag = false;
+						sim.quit = 1;
+						deb_set = false;
 						break;
 
 					case 2:
@@ -647,7 +647,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 				cmd( "ttk::frame $e.t" );
 				cmd( "ttk::label $e.t.l -text \"Current case:\"" );
-				cmd( "ttk::label $e.t.v -style hl.TLabel -text %d", t );
+				cmd( "ttk::label $e.t.v -style hl.TLabel -text %d", sim.t );
 				cmd( "pack $e.t.l $e.t.v -side left -padx 2" );
 
 				cmd( "ttk::frame $e.u" );
@@ -657,7 +657,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 				cmd( "ttk::frame $e.x" );
 				cmd( "ttk::label $e.x.l -text \"Next update:\"" );
-				cmd( "ttk::label $e.x.v -style hl.TLabel -text %d", cv->next_update > 0 ? cv->next_update : cv->last_update < t ? t : t + 1 );
+				cmd( "ttk::label $e.x.v -style hl.TLabel -text %d", cv->next_update > 0 ? cv->next_update : cv->last_update < sim.t ? sim.t : sim.t + 1 );
 				cmd( "pack $e.x.l $e.x.v -side left -padx 2" );
 
 				cmd( "ttk::frame $e.v" );
@@ -976,8 +976,8 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 					break;
 				}
 
-				pre_running = running;
-				running = false;
+				pre_running = sim.running;
+				sim.running = false;
 
 				cmd( "set value_search [ .deb.so.v.e get ]" );
 				get_str( "bidi", ch, MAX_ELEM_LENGTH );
@@ -1059,7 +1059,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						cur = NULL;
 				}
 
-				quit = 0;	// if name is mispelled don't stop the simulation!
+				sim.quit = 0;	// if name is mispelled don't stop the simulation!
 				cmd( "destroytop .deb.so" );
 				Tcl_UnlinkVar( interp, "value_search" );
 				Tcl_UnlinkVar( interp, "condition" );
@@ -1075,13 +1075,13 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 					break;
 				}
 
-				running = pre_running;
+				sim.running = pre_running;
 				break;
 
 			// Analysis
 			case 11:
 				for ( cur = r; cur->up != NULL; cur = cur->up );
-				reset_end( cur );
+				sim.reset_end( cur );
 				analysis( );
 				cmd( "focustop .deb" );
 
@@ -1150,7 +1150,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 			// Until
 			case 16:
-				cmd( "set tdebug %d", t + 1 );
+				cmd( "set tdebug %d", sim.t + 1 );
 
 				cmd( "set t .deb.tdeb" );
 				cmd( "newtop $t \"Run Until\" { set choice 2 } .deb" );
@@ -1183,8 +1183,8 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				{
 					// restart execution
 					choice = 2;
-					debug_flag = false;
-					cmd( "if { $tdebug > %d } { set when_debug $tdebug } { set when_debug %d }", t, t + 1 );
+					deb_set = false;
+					cmd( "if { $tdebug > %d } { set deb_t $tdebug } { set deb_t %d }", sim.t, sim.t + 1 );
 					cmd( "destroytop .deb" );
 					set_buttons_run( true );
 				}
@@ -1266,12 +1266,12 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 					break;
 				}
 
-				pre_running = running;
-				running = false;
+				pre_running = sim.running;
+				sim.running = false;
 
 				choice = deb( r, c, lab, res, interact, get_str( "bidi" ) );
 
-				running = pre_running;
+				sim.running = pre_running;
 				break;
 
 			// clear find selection
@@ -1316,7 +1316,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 					for ( i = 0; i < j; ++i )
 						if ( r->hooks[ i ] != NULL )
 						{
-							k = root->search_inst( r->hooks[ i ], false );
+							k = sim.root->search_inst( r->hooks[ i ], false );
 
 							if ( k != 0 )
 							{
@@ -1335,7 +1335,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 					if ( r->hook != NULL )
 					{
-						k = root->search_inst( r->hook, false );
+						k = sim.root->search_inst( r->hook, false );
 
 						if ( k != 0 )
 						{
@@ -1400,7 +1400,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 				else
 					if ( r->hook != NULL )
 					{
-						k = root->search_inst( r->hook, false );
+						k = sim.root->search_inst( r->hook, false );
 
 						if ( k == 0 )
 						{
@@ -1443,7 +1443,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 
 			// double-click (change to) network node
 			case 23:
-				cur = root->search_node_net( get_str( "nodeLab" ), get_long( "nodeId" ) );
+				cur = sim.root->search_node_net( get_str( "nodeLab" ), get_long( "nodeId" ) );
 				if ( cur != NULL )
 					choice = deb( cur, c, lab, res, interact );
 				else
@@ -1457,7 +1457,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 			// double-click (change to) object pointer
 			case 24:
 				i = get_int( "objNum" );
-				cur = root->search( get_str( "objLab" ) );
+				cur = sim.root->search( get_str( "objLab" ) );
 				for ( j = 1; j != i && cur != NULL; ++j, cur = cur->hyper_next( ) );
 				if ( cur != NULL )
 					choice = deb( cur, c, lab, res, interact );
@@ -1493,9 +1493,9 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 					break;
 				}
 
-				if ( asl == NULL && stack_log != NULL )
+				if ( asl == NULL && sim.stack_log != NULL )
 				{
-					asl = stack_log;
+					asl = sim.stack_log;
 					plog( "\nVariable: %s", asl->label );
 					if ( asl->vs != NULL && asl->vs->up != NULL )
 						choice = deb( asl->vs->up, c, lab, res, interact );
@@ -1561,7 +1561,7 @@ int deb( object *r, object *c, const char *lab, double *res, bool interact, cons
 						cmd( "focustop .deb" );
 
 						if ( exists_var( "res_g" ) )
-							cur = root->search(	 get_str( "res_g" ) );
+							cur = sim.root->search(	 get_str( "res_g" ) );
 						else
 							cur = NULL;
 
@@ -1919,7 +1919,7 @@ void show_tmp_vars( object *r, bool update )
 			return;
 		}
 
-	m = root->search_inst( r, true );
+	m = sim.root->search_inst( r, true );
 	cmd( "$in.l1.n.name configure -text \"%s\"", r->label == NULL ? "" : r->label );
 	cmd( "$in.l1.n.id configure -text \"%d\"", m );
 
@@ -1933,16 +1933,16 @@ void show_tmp_vars( object *r, bool update )
 		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"v\\\[%d\\]\"", j );
 		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 
-		if ( is_nan( d_values[ j ] ) )
+		if ( is_nan( sim.d_values[ j ] ) )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NAN" );
 		else
-			if ( is_inf( d_values[ j ] ) )
-				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", d_values[ j ] < 0 ? "-" : "" );
+			if ( is_inf( sim.d_values[ j ] ) )
+				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", sim.d_values[ j ] < 0 ? "-" : "" );
 			else
-				if ( d_values[ j ] != 0 && fabs( d_values[ j ] ) < SIG_MIN )	// insignificant value?
+				if ( sim.d_values[ j ] != 0 && fabs( sim.d_values[ j ] ) < SIG_MIN )// insignificant value?
 					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text ~0" );
 				else
-					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %g", d_values[ j ] );
+					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %g", sim.d_values[ j ] );
 
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 
@@ -1962,7 +1962,7 @@ void show_tmp_vars( object *r, bool update )
 		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"%c\"", i_names[ j ] );
 		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 
-		cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %d", i_values[ j ] );
+		cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %d", sim.i_values[ j ] );
 
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 
@@ -1987,15 +1987,15 @@ void show_tmp_vars( object *r, bool update )
 			cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"cur%d\"", j );
 
 		n = 0;
-		if ( o_values[ j ] == NULL )
+		if ( sim.o_values[ j ] == NULL )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NULL" );
 		else
 		{
 			// search an object pointed by the pointer
-			n = ( int ) root->search_inst( o_values[ j ], false );
+			n = ( int ) sim.root->search_inst( sim.o_values[ j ], false );
 
-			if ( n > 0 && o_values[ j ]->label != NULL )
-				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%d)\"", o_values[ j ]->label, n );
+			if ( n > 0 && sim.o_values[ j ]->label != NULL )
+				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%d)\"", sim.o_values[ j ]->label, n );
 			else
 				if ( n < 0 )
 					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"(unchecked)\"" );
@@ -2011,8 +2011,8 @@ void show_tmp_vars( object *r, bool update )
 
 		if ( n > 0 )
 		{
-			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", o_values[ j ]->label, n );
-			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", o_values[ j ]->label, n );
+			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", sim.o_values[ j ]->label, n );
+			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", sim.o_values[ j ]->label, n );
 		}
 
 		cmd( "$in.n.t window create end -window $in.n.t.n$i" );
@@ -2031,7 +2031,7 @@ void show_tmp_vars( object *r, bool update )
 		else
 			cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"curl%d\"", j );
 
-		if ( n_values[ j ] == NULL )
+		if ( sim.n_values[ j ] == NULL )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NULL" );
 		else
 		{
@@ -2040,7 +2040,7 @@ void show_tmp_vars( object *r, bool update )
 			if ( r->node != NULL )
 			{
 				for ( curLnk = r->node->first; curLnk != NULL; curLnk = curLnk->next )
-					if ( curLnk == n_values[ j ] && curLnk->ptrTo != NULL && curLnk->ptrTo->node != NULL )
+					if ( curLnk == sim.n_values[ j ] && curLnk->ptrTo != NULL && curLnk->ptrTo->node != NULL )
 					{
 						if ( curLnk->ptrTo->label != NULL )
 							cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%ld)\"", curLnk->ptrTo->label, curLnk->ptrTo->node->id );
@@ -2096,7 +2096,7 @@ void show_tmp_vars( object *r, bool update )
 		else
 		{
 			// search an object pointed by the hook
-			n = ( int ) root->search_inst( cur, false );
+			n = ( int ) sim.root->search_inst( cur, false );
 
 			if ( n > 0 && cur->label != NULL )
 				cmd( "ttk::label $in.n.t.n$i.val -width 12 -style hl.TLabel -text \"%s(%d)\"", cur->label, n );
@@ -2131,16 +2131,16 @@ void show_tmp_vars( object *r, bool update )
 		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"v\\\[%d\\]\"", j );
 		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 
-		if ( is_nan( d_values[ j ] ) )
+		if ( is_nan( sim.d_values[ j ] ) )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NAN" );
 		else
-			if ( is_inf( d_values[ j ] ) )
-				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", d_values[ j ] < 0 ? "-" : "" );
+			if ( is_inf( sim.d_values[ j ] ) )
+				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", sim.d_values[ j ] < 0 ? "-" : "" );
 			else
-				if ( d_values[ j ] != 0 && fabs( d_values[ j ] ) < SIG_MIN )	// insignificant value?
+				if ( sim.d_values[ j ] != 0 && fabs( sim.d_values[ j ] ) < SIG_MIN )	// insignificant value?
 					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text ~0" );
 				else
-					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %g", d_values[ j ] );
+					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %g", sim.d_values[ j ] );
 
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 

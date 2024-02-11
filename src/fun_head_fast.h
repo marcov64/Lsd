@@ -18,5 +18,5 @@ Header file to enable fast look-up of equations and enable
 other advanced functions depending on GCC 4.9/C++11.
 *************************************************************/
 
-#define FAST_LOOKUP
+#define NO_LEGACY_CODE
 #include "fun_head.h"

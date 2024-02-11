@@ -69,15 +69,15 @@ void report( object *r )
 
 	file_error = 0;
 
-	if ( ! struct_loaded )
+	if ( ! sim.conf_ok )
 	{
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to create a report.\"" );
 		return;
 	}
 
-	snprintf( name_rep, MAX_PATH_LENGTH, "report_%s.html", strlen( simul_name ) > 0 ? simul_name : "model" );
+	snprintf( sim.rep_file, MAX_PATH_LENGTH, "report_%s.html", strlen( sim.conf_name ) > 0 ? sim.conf_name : "model" );
 
-	cmd( "set mrep %s", name_rep );
+	cmd( "set mrep %s", sim.rep_file );
 	cmd( "set res [ file exists $mrep ]" );
 	if ( get_bool( "res" ) )
 	{
@@ -89,7 +89,7 @@ void report( object *r )
 		eval_str( "[ pwd ]", path_rep, MAX_PATH_LENGTH );
 	}
 	else
-		strcpyn( path_rep, conf_path, MAX_PATH_LENGTH );
+		strcpyn( path_rep, sim.conf_path, MAX_PATH_LENGTH );
 
 	Tcl_LinkVar( interp, "detail", ( char * ) &detail, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( interp, "init", ( char * ) &init, TCL_LINK_BOOLEAN );
@@ -102,7 +102,7 @@ void report( object *r )
 	init = true;
 	detail = true;
 	extra = false;
-	cmd( "set reptit \"%s\"", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
+	cmd( "set reptit \"%s\"", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
 	cmd( "set lmenu 1" );
 	cmd( "set html2 1" );
 	cmd( "set tit2 \"Comments\"" );
@@ -184,15 +184,15 @@ void report( object *r )
 		if ( app == NULL || strlen( app ) == 0 )
 			goto here_create_report;
 
-		strcpyn( name_rep, app, MAX_PATH_LENGTH );
+		strcpyn( sim.rep_file, app, MAX_PATH_LENGTH );
 		eval_str( "[ file dirname  \"$res\" ]", path_rep, MAX_PATH_LENGTH );
 	}
 
 	cmd( "destroytop .w" );
 
-	cmd( "set eqf [ file join \"%s\" \"%s\" ]", model_path, equation_name );
+	cmd( "set eqf [ file join \"%s\" \"%s\" ]", model_path, eq_file );
 
-	while ( strlen( equation_name ) == 0 || ( f = fopen( get_str( "eqf" ), "r" ) ) == NULL )
+	while ( strlen( eq_file ) == 0 || ( f = fopen( get_str( "eqf" ), "r" ) ) == NULL )
 	{
 		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '$eqf' not found\" -detail \"Press 'OK' to select another file.\"]" );
 		cmd( "if [ string equal $answer ok ] { \
@@ -209,7 +209,7 @@ void report( object *r )
 		{
 			app = get_str( "eqf" );
 			if ( app != NULL && strlen( app ) > 0 )
-				strcpyn( equation_name, app, MAX_PATH_LENGTH );
+				strcpyn( eq_file, app, MAX_PATH_LENGTH );
 		}
 		else
 			goto end;
@@ -219,7 +219,7 @@ void report( object *r )
 	cmd( "set l $lmenu" );
 	lmenu = get_int( "l" );
 
-	frep = create_frames( path_rep, name_rep );
+	frep = create_frames( path_rep, sim.rep_file );
 
 	if ( frep == NULL )
 	{
@@ -388,7 +388,7 @@ void report( object *r )
 		write_str( r, frep, 0, "_d_" );
 		write_list( frep, r, true, "_d_" );
 
-		cmd( "set app [ file tail \"%s\" ]", equation_name );
+		cmd( "set app [ file tail \"%s\" ]", eq_file );
 		app = get_str( "app" );
 		fprintf( frep, "<BR><i>Equation file:</i> &nbsp;<TT><u>%s</u></TT><BR><BR>", app );
 
@@ -407,21 +407,21 @@ void report( object *r )
 
 	if ( stop )
 	{
-		cmd( "set fullFileName [ file join \"%s\" \"%s\" ]", path_rep, name_rep );
+		cmd( "set fullFileName [ file join \"%s\" \"%s\" ]", path_rep, sim.rep_file );
 		remove( get_str( "fullFileName" ) );
-		cmd( "set fullFileName [ file join \"%s\" \"head_%s\" ]", path_rep, name_rep );
+		cmd( "set fullFileName [ file join \"%s\" \"head_%s\" ]", path_rep, sim.rep_file );
 		remove( get_str( "fullFileName" ) );
-		cmd( "set fullFileName [ file join \"%s\" \"body_%s\" ]", path_rep, name_rep );
+		cmd( "set fullFileName [ file join \"%s\" \"body_%s\" ]", path_rep, sim.rep_file );
 		remove( get_str( "fullFileName" ) );
 	}
 	else
 	{
 		if ( strlen( path_rep ) > 0 )
-			plog( "\nReport saved in file: %s/%s\n", path_rep, name_rep );
+			plog( "\nReport saved in file: %s/%s\n", path_rep, sim.rep_file );
 		else
-			plog( "\nReport saved in file: %s\n", name_rep );
+			plog( "\nReport saved in file: %s\n", sim.rep_file );
 
-		cmd( "open_browser \"%s\" \"%s\"", path_rep, name_rep );
+		cmd( "open_browser \"%s\" \"%s\"", path_rep, sim.rep_file );
 	}
 
 	end:
@@ -439,7 +439,7 @@ SHOW_REPORT
 **********************************/
 void show_report( const char *par_wnd )
 {
-	cmd( "set res [ open_browser \"%s\" \"%s\" ]", path_rep, name_rep );
+	cmd( "set res [ open_browser \"%s\" \"%s\" ]", path_rep, sim.rep_file );
 
 	if ( ! get_bool( "res" ) )
 	{
@@ -542,7 +542,7 @@ void write_var( object *r, variable *v, FILE *frep )
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
-	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
+	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", eq_file, eq_file );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = get_int( "res" );
 
@@ -586,7 +586,7 @@ void write_var( object *r, variable *v, FILE *frep )
 		fprintf( frep,"<I>Using: &nbsp;</I>" );
 
 		found = false;
-		find_using( root, v, frep, & found );
+		find_using( sim.root, v, frep, & found );
 
 		if ( ! found )
 			fprintf( frep, "(none)" );
@@ -821,7 +821,7 @@ void find_using( object *r, variable *v, FILE *frep, bool *found )
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
-	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
+	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", eq_file, eq_file );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = get_int( "res" );
 
@@ -1057,7 +1057,7 @@ void write_str( object *r, FILE *frep, int dep, const char *prefix )
 /********************************
 WRITE_LIST
 *********************************/
-void write_list( FILE *frep, object *root, bool show_all, const char *prefix )
+void write_list( FILE *frep, object *r, bool show_all, const char *prefix )
 {
 	int num, i;
 	char s1[ 2 * MAX_ELEM_LENGTH ], s2[ MAX_ELEM_LENGTH ];
@@ -1072,18 +1072,18 @@ void write_list( FILE *frep, object *root, bool show_all, const char *prefix )
 	cmd( "set rawlist [ list ]" );			// create an empty list
 
 	if ( strcmp( prefix, "_i_" ) == 0 )
-		fill_list_var( root, show_all, true ); // insert only lagged variables
+		fill_list_var( r, show_all, true ); // insert only lagged variables
 	else
-		fill_list_var( root, show_all, false );	// insert all the variables
+		fill_list_var( r, show_all, false );	// insert all the variables
 
 	cmd( "set alphalist [ lsort -dictionary $rawlist ]" );
 	cmd( "set num [ llength $alphalist ]" );
 
 	// distinguish the case you are compiling the initial list of element (all) or for a single Object)
 	if ( ! show_all )
-		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_v_%s_%s", root->label, prefix );
+		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_v_%s_%s", r->label, prefix );
 	else
-		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_v_all_%s_%s", root->label, prefix );
+		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_v_all_%s_%s", r->label, prefix );
 
 	if ( lmenu )
 		create_form( num, s1, prefix, frep );
@@ -1112,16 +1112,16 @@ void write_list( FILE *frep, object *root, bool show_all, const char *prefix )
 	cmd( "unset rawlist" );					// empty the list
 	cmd( "lappend rawlist" );				// create a surely empty list
 
-	fill_list_par( root, show_all );
+	fill_list_par( r, show_all );
 
 	cmd( "set alphalist [ lsort -dictionary $rawlist ]" );
 	cmd( "set num [ llength $alphalist ]" );
 
 	// distinguish the case you are compiling the initial list of element (all) or for a single Object)
 	if ( ! show_all )
-		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_p_%s_%s", root->label, prefix );
+		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_p_%s_%s", r->label, prefix );
 	else
-		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_p_all_%s_%s", root->label, prefix );
+		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_p_all_%s_%s", r->label, prefix );
 
 	if ( lmenu )
 		create_form( num, s1, prefix, frep );
@@ -1224,7 +1224,7 @@ void create_table_init( object *r, FILE *frep )
 	fprintf( frep, "<BR>\n" );
 	write_list( frep, r, false, "" );
 
-	cd = search_description( r->label );
+	cd = sim.search_description( r->label );
 	if ( has_descr_text ( cd ) )
 	{
 		fprintf( frep, "<i>Description:</i><BR>\n" );
@@ -1280,7 +1280,7 @@ void create_table_init( object *r, FILE *frep )
 					fprintf( frep, "<td></td>\n" );
 			}
 
-			cd = search_description( cv->label );
+			cd = sim.search_description( cv->label );
 
 			fprintf( frep, "<td> " );
 			bool desc_text = false;
@@ -1612,7 +1612,7 @@ void show_rep_observe( FILE *f, object *n, int *begin, FILE *frep )
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
-		cd = search_description( cv->label );
+		cd = sim.search_description( cv->label );
 		if ( cd->observe )
 		{
 			if ( *begin == 1 )
@@ -1688,7 +1688,7 @@ void show_rep_initial( FILE *f, object *n, int *begin, FILE *frep )
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
-		cd = search_description( cv->label );
+		cd = sim.search_description( cv->label );
 		if ( cd->initial )
 		{
 			if ( *begin == 1 )
@@ -1895,7 +1895,7 @@ void tex_report_head( FILE *f, bool table )
 
 	fprintf( f, "\\setlength{\\parindent}{0cm}\n\n" );
 
-	fprintf( f, "\\title{Model: \\lsd{%s}}\n", strlen( simul_name ) > 0 ? simul_name : NO_CONF_NAME );
+	fprintf( f, "\\title{Model: \\lsd{%s}}\n", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
 	fprintf( f, "\\author{Automatically generated LSD report}\n" );
 	fprintf( f, "\\date{}\n\n" );
 
@@ -1937,7 +1937,7 @@ void tex_report_struct( object *r, FILE *f, bool table )
 		fprintf( f, "\n\n" );
 	}
 
-	cd = search_description( r->label );
+	cd = sim.search_description( r->label );
 	if ( has_descr_text ( cd ) )
 		fprintf( f, "\\emph{Description:}\n\n\\detokenize{%s}\n\n", cd->text );
 
@@ -1984,7 +1984,7 @@ void tex_report_struct( object *r, FILE *f, bool table )
 		}
 
 		bool desc_text = false;
-		cd = search_description( cv->label );
+		cd = sim.search_description( cv->label );
 		if ( has_descr_text ( cd ) )
 		{
 			if ( ! table )
@@ -2042,7 +2042,7 @@ void tex_report_observe( object *r, FILE *f, bool table )
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
-		cd = search_description( cv->label );
+		cd = sim.search_description( cv->label );
 		if ( cd->observe )
 		{
 			vl = new char[ 2 * strlen( cv->label ) + 1 ];
@@ -2115,7 +2115,7 @@ void tex_report_init( object *r, FILE *f, bool table )
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
-		cd = search_description( cv->label );
+		cd = sim.search_description( cv->label );
 		if ( cd->initial )
 		{
 			vl = new char[ 2 * strlen( cv->label ) + 1 ];
