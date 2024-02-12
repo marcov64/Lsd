@@ -206,8 +206,9 @@ search_var( caller, label )
 that returns a variable whose name is label and then calls the method
 cal() for that variable (see variable::cal), that returns the desired value.
 
-- void init( object *_up, char *_label, bool _to_compute );
-Initialization for an object. Assigns _up to up and creates the label
+- void init( object *_up, simulation *_sim, char *_label, bool _to_compute );
+Initialization for an object. Assigns _up to up, _sim to sim,
+and creates the label
 
 - void update( bool recurse ) ;
 The recursive function computing the equations for a new time step in the
@@ -339,9 +340,10 @@ bridge::~bridge( void )
 INIT
 Set the basics for a newly created object
 ****************************************************/
-void object::init( object *_up, const char *lab, bool _to_compute )
+void object::init( object *_up, simulation *_sim, const char *lab, bool _to_compute )
 {
 	up = _up;
+	sim = _sim;
 	v = NULL;
 	v_map.clear( );
 	next = NULL;
@@ -400,16 +402,16 @@ void object::update( bool recurse, bool user )
 	deleted = false;
 	del_flag = & deleted;			// register feedback channel
 
-	for ( cv = v; ! deleted && cv != NULL && quit != 2; cv = cv->next )
+	for ( cv = v; ! deleted && cv != NULL && sim->quit != 2; cv = cv->next )
 	{
 		if ( cv->under_computation )// don't update if under computation!
 			continue;
 
-		if ( cv->param == 0 && cv->last_update < t )
+		if ( cv->param == 0 && cv->last_update < sim->t )
 		{
 #ifndef _NP_
-			if ( parallel_ready && cv->parallel && ! cv->dummy )
-				parallel_update( cv, this );
+			if ( sim->parallel_ready && cv->parallel && ! cv->dummy )
+				sim->parallel_update( cv, this );
 			else
 #endif
 				cv->cal( NULL, 0 );
@@ -418,7 +420,7 @@ void object::update( bool recurse, bool user )
 		if ( ! deleted	)
 		{
 			if ( cv->save || cv->savei )
-				cv->data[ t - cv->start ] = cv->val[ 0 ];
+				cv->data[ sim->t - cv->start ] = cv->val[ 0 ];
 #ifndef _NW_
 			if ( ! user && cv->plot == 1 && liblnk.plot_rt != NULL )
 				liblnk.plot_rt( cv );
@@ -427,7 +429,7 @@ void object::update( bool recurse, bool user )
 	}
 
 	if ( recurse )
-		for ( cb = b; ! deleted && cb != NULL && quit != 2; cb = cb1 )
+		for ( cb = b; ! deleted && cb != NULL && sim->quit != 2; cb = cb1 )
 		{
 			cb1 = cb->next;
 			if ( cb->head != NULL && cb->head->to_compute )
@@ -566,10 +568,10 @@ bridge *object::search_bridge( const char *lab, bool no_error )
 		return bit->second;
 
 	if ( ! no_error )
-		error_hard( "internal problem in LSD",
-					"if error persists, please contact developers",
-					true,
-					"invalid data structure (bridge not found)" );
+		sim->error_hard( "internal problem in LSD",
+						 "if error persists, please contact developers",
+						 true,
+						 "invalid data structure (bridge not found)" );
 	return NULL;
 }
 
@@ -630,31 +632,32 @@ object *object::search_err( const char *lab, bool no_search, bool no_search_up, 
 	cur = search( lab, no_search, no_search_up );
 	if ( cur == NULL )
 	{	// check if it is a zero-instance object
-		cur = blueprint->search( lab );
+		cur = sim->blueprint->search( lab );
 
-		if ( ! no_zero_instance && cur != NULL )// zero instance allowed?
+		if ( ! sim->no_zero_instance && cur != NULL )// zero instance allowed?
 			return NULL;						// deleted instance but NULL is ok
 
 		// check if object exists somewhere
-		cur1 = root->search( lab );
+		cur1 = sim->root->search( lab );
 
 		if ( cur1 == NULL )		// doesn't exist in current tree
 			if ( cur == NULL )	// never existed
-				error_hard( "object not found",
-							"create object in model structure",
-							false,
-							"object '%s' is missing for %s", lab, errmsg );
+				sim->error_hard( "object not found",
+								 "create object in model structure",
+								 false,
+								 "object '%s' is missing for %s", lab, errmsg );
 			else 				// exists only in blueprint but no zero instance
-				error_hard( "last object instance deleted",
-							"check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE",
-							true,
-							"all instances of '%s' were deleted", lab );
+				sim->error_hard( "last object instance deleted",
+								 "check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE",
+								 true,
+								 "all instances of '%s' were deleted", lab );
 		else		// exits in current tree but not (directly) below
-			error_hard( "object is not a descending object",
-						"move object in model structure, or specify a parent object",
-						false,
-						"object '%s' not%s under '%s' for %s%s",
-						lab, no_search ? " directly" : "", label == NULL ? "" : label, errmsg, no_search ? " (NO_SEARCH enabled!)" : "" );
+			sim->error_hard( "object is not a descending object",
+							 "move object in model structure, or specify a parent object",
+							 false,
+							 "object '%s' not%s under '%s' for %s%s",
+							 lab, no_search ? " directly" : "", label == NULL ? "" : label, 
+							 errmsg, no_search ? " (NO_SEARCH enabled!)" : "" );
 	}
 
 	return cur;
@@ -682,19 +685,20 @@ double object::initturbo( const char *lab )
 	cb = search_bridge( lab, true );
 	if ( cb == NULL )
 	{
-		error_hard( "object not found",
-					"create object in model structure",
-					false,
-					"object '%s' is missing for turbo search", lab );
+		sim->error_hard( "object not found",
+						 "create object in model structure",
+						 false,
+						 "object '%s' is missing for turbo search", lab );
 		return 0;
 	}
 
 	if ( cb->head == NULL )
 	{
-		error_hard( "object has no instance",
-					"check your equation code to prevent this situation",
-					true,
-					"failure when initializing object '%s' for turbo search", lab );
+		sim->error_hard( "object has no instance",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "failure when initializing object '%s' for turbo search", 
+						 lab );
 		return 0;
 	}
 
@@ -730,10 +734,10 @@ double object::turboset( const char *lab )
 	cb = search_bridge( lab, true );
 	if ( cb == NULL )
 	{
-		error_hard( "object not found",
-					"check your equation code to prevent this situation",
-					true,
-					"cannot find turbo search object '%s'", lab );
+		sim->error_hard( "object not found",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "cannot find turbo search object '%s'", lab );
 		return 0;
 	}
 
@@ -760,19 +764,19 @@ object *object::turbosearch( const char *lab, double num )
 	cb = search_bridge( lab, true );
 	if ( cb == NULL )
 	{
-		error_hard( "object not found",
-					"check your equation code to prevent this situation",
-					true,
-					"failure when turbo searching object '%s'", lab );
+		sim->error_hard( "object not found",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "failure when turbo searching object '%s'", lab );
 		return NULL;
 	}
 
 	if ( cb->t_map.size( ) == 0 )
 	{
-		error_hard( "invalid search operation",
-					"check your equation code to prevent this situation",
-					true,
-					"object '%s' is not initialized for turbo search", lab );
+		sim->error_hard( "invalid search operation",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "object '%s' is not initialized for turbo search", lab );
 		return NULL;
 	}
 
@@ -822,7 +826,7 @@ void object::search_inst( object *obj, long *pos, long *checked )
 		// search among descendants only if object yet not found (speed-up)
 		if ( ! found )
 		{
-			if ( no_ptr_chk || strcmp( cur->label, obj->label ) )
+			if ( sim->no_ptr_chk || strcmp( cur->label, obj->label ) )
 			{
 				for ( cb = cur->b; cb != NULL && *pos == 0; cb = cb->next )
 					if ( cb->head != NULL )
@@ -843,9 +847,9 @@ double object::search_inst( object *obj, bool fun )
 		obj = this;
 
 	// if pointer check available quickly check for non-existing objects
-	if ( obj != this && ! no_ptr_chk )
+	if ( obj != this && ! sim->no_ptr_chk )
 	{
-		if ( obj_list.find( obj ) == obj_list.end( ) )
+		if ( sim->obj_list.find( obj ) == sim->obj_list.end( ) )
 			return 0;
 
 		cur = obj;
@@ -926,10 +930,10 @@ variable *object::search_var( object *caller, const char *lab, bool no_error,
 		if ( up == NULL )
 		{
 			if ( ! no_error )
-				error_hard( "variable or parameter not found",
-							"create variable or parameter in model structure",
-							false,
-							"element '%s' is missing", lab );
+				sim->error_hard( "variable or parameter not found",
+								 "create variable or parameter in model structure",
+								 false,
+								 "element '%s' is missing", lab );
 			return NULL;
 		}
 
@@ -952,33 +956,36 @@ variable *object::search_var_err( object *caller, const char *lab, bool no_searc
 	cv = search_var( caller, lab, true, no_search, no_search_up, search_sons );
 	if ( cv == NULL && label != NULL )
 	{	// check if it is a zero-instance object
-		cur = blueprint->search( label );
+		cur = sim->blueprint->search( label );
 		if ( cur != NULL )
 			cv = cur->search_var( NULL, lab, true, no_search, no_search_up, search_sons );
 
-		if ( ! no_zero_instance && cv != NULL )	// zero instance allowed?
+		if ( ! sim->no_zero_instance && cv != NULL )// zero instance allowed?
 			return NULL;						// deleted instance but NULL is ok
 
 		// check if variable exists somewhere
-		cv1 = root->search_var( NULL, lab, true );
+		cv1 = sim->root->search_var( NULL, lab, true );
 
 		if ( cv1 == NULL )		// doesn't exist in current tree
 			if ( cv == NULL )	// never existed
-				error_hard( "variable or parameter not found",
-							"create variable or parameter in model structure",
-							false,
-							"element '%s' is missing for %s", lab, errmsg );
+				sim->error_hard( "variable or parameter not found",
+								 "create variable or parameter in model structure",
+								 false,
+								 "element '%s' is missing for %s", lab, errmsg );
 			else 				// exists only in blueprint
-				error_hard( "last object instance deleted",
-							"check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE",
-							true,
-							"all instances of the object containing '%s' were deleted", lab );
+				sim->error_hard( "last object instance deleted",
+								 "check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE",
+								 true,
+								 "all instances of the object containing '%s' were deleted", 
+								 lab );
 		else		// exits in current tree but not (directly) below
-			error_hard( "variable or parameter not in a descending object",
-						"move object in model structure, or specify a parent object",
-						false,
-						"'%s' in '%s' not%s under '%s' for %s%s",
-						lab, cv1->up != NULL && cv1->up->label != NULL ? cv1->up->label : "?", no_search ? " directly" : "", label, errmsg, no_search ? " (NO_SEARCH enabled!)" : "" );
+			sim->error_hard( "variable or parameter not in a descending object",
+							 "move object in model structure, or specify a parent object",
+							 false,
+							 "'%s' in '%s' not%s under '%s' for %s%s",
+							 lab, cv1->up != NULL && cv1->up->label != NULL ? cv1->up->label : "?", 
+							 no_search ? " directly" : "", label, errmsg, 
+							 no_search ? " (NO_SEARCH enabled!)" : "" );
 	}
 
 	return cv;
@@ -999,13 +1006,13 @@ object *object::search_var_cond( const char *lab, double value, int lag )
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, no_search_up, true, "conditional searching" );
+	cv = search_var_err( this, lab, sim->no_search, sim->no_search_up, true, "conditional searching" );
 	if ( cv == NULL )
 		return NULL;
 
 	for ( cur = cv->up; cur != NULL; cur = cnext )
 	{
-		cnext = no_search ? cur->next : cur->hyper_next( );	// allow object suicide
+		cnext = sim->no_search ? cur->next : cur->hyper_next( );	// allow object suicide
 
 		res = cur->cal( lab, lag );
 		if ( res == value )
@@ -1027,16 +1034,17 @@ double object::initturbo_cond( const char *lab )
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, no_search_up, true, "turbo conditional searching" );
+	cv = search_var_err( this, lab, sim->no_search, sim->no_search_up, true, "turbo conditional searching" );
 	if ( cv == NULL )
 		return 0;
 
 	if ( cv->up->up == NULL )				// variable at root level?
 	{
-		error_hard( "invalid variable or parameter for turbo search",
-					"check your model structure to prevent this situation",
-					false,
-					"element '%s' is at root level (always single-instanced)", lab );
+		sim->error_hard( "invalid variable or parameter for turbo search",
+						 "check your model structure to prevent this situation",
+						 false,
+						 "element '%s' is at root level (always single-instanced)", 
+						 lab );
 		return 0;
 	}
 
@@ -1044,10 +1052,10 @@ double object::initturbo_cond( const char *lab )
 	auto bit = cv->up->up->b_map.find( cv->up->label );
 	if ( bit == cv->up->up->b_map.end( ) )
 	{
-		error_hard( "internal problem in LSD",
-					"if error persists, please contact developers",
-					true,
-					"invalid data structure (bridge not found)" );
+		sim->error_hard( "internal problem in LSD",
+						 "if error persists, please contact developers",
+						 true,
+						 "invalid data structure (bridge not found)" );
 		return 0;
 	}
 
@@ -1091,16 +1099,17 @@ double object::turboset_cond( const char *lab )
 {
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, no_search_up, true, "turbo conditional searching" );
+	cv = search_var_err( this, lab, sim->no_search, sim->no_search_up, true, "turbo conditional searching" );
 	if ( cv == NULL )
 		return 0;
 
 	if ( cv->up->up == NULL )				// variable at root level?
 	{
-		error_hard( "invalid variable or parameter for turbo search",
-					"check your model structure to prevent this situation",
-					false,
-					"element '%s' is at root level (always single-instanced)", lab );
+		sim->error_hard( "invalid variable or parameter for turbo search",
+						 "check your model structure to prevent this situation",
+						 false,
+						 "element '%s' is at root level (always single-instanced)", 
+						 lab );
 		return 0;
 	}
 
@@ -1108,10 +1117,10 @@ double object::turboset_cond( const char *lab )
 	auto bit = cv->up->up->b_map.find( cv->up->label );
 	if ( bit == cv->up->up->b_map.end( ) )
 	{
-		error_hard( "internal problem in LSD",
-					"if error persists, please contact developers",
-					true,
-					"invalid data structure (bridge not found)" );
+		sim->error_hard( "internal problem in LSD",
+						 "if error persists, please contact developers",
+						 true,
+						 "invalid data structure (bridge not found)" );
 		return 0;
 	}
 
@@ -1130,16 +1139,17 @@ object *object::turbosearch_cond( const char *lab, double value )
 	bridge *cb;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, no_search_up, true, "turbo conditional searching" );
+	cv = search_var_err( this, lab, sim->no_search, sim->no_search_up, true, "turbo conditional searching" );
 	if ( cv == NULL )
 		return NULL;
 
 	if ( cv->up->up == NULL )				// variable at root level?
 	{
-		error_hard( "invalid variable or parameter for turbo search",
-					"check your model structure to prevent this situation",
-					false,
-					"element '%s' is at root level (always single-instanced)", lab );
+		sim->error_hard( "invalid variable or parameter for turbo search",
+						 "check your model structure to prevent this situation",
+						 false,
+						 "element '%s' is at root level (always single-instanced)", 
+						 lab );
 		return NULL;
 	}
 
@@ -1147,10 +1157,10 @@ object *object::turbosearch_cond( const char *lab, double value )
 	auto bit = cv->up->up->b_map.find( cv->up->label );
 	if ( bit == cv->up->up->b_map.end( ) )
 	{
-		error_hard( "internal problem in LSD",
-					"if error persists, please contact developers",
-					true,
-					"invalid data structure (bridge not found)" );
+		sim->error_hard( "internal problem in LSD",
+						 "if error persists, please contact developers",
+						 true,
+						 "invalid data structure (bridge not found)" );
 		return NULL;
 	}
 
@@ -1158,10 +1168,11 @@ object *object::turbosearch_cond( const char *lab, double value )
 
 	if ( cb->o_map.size( ) == 0 || cb->search_var == NULL || strcmp( cb->search_var, lab ) )
 	{
-		error_hard( "invalid search operation",
-					"check your equation code to prevent this situation",
-					true,
-					"element '%s' is not initialized for turbo conditional search", lab );
+		sim->error_hard( "invalid search operation",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "element '%s' is not initialized for turbo conditional search", 
+						 lab );
 		return NULL;
 	}
 
@@ -1185,19 +1196,21 @@ variable *object::add_empty_var( const char *lab )
 
 	if ( search_var( this, lab, true, true ) != NULL )
 	{
-		error_hard( "variable or parameter not added",
-					"choose an unique name for the element",
-					true,
-					"an element named '%s' already exists in the model", lab );
+		sim->error_hard( "variable or parameter not added",
+						 "choose an unique name for the element",
+						 true,
+						 "an element named '%s' already exists in the model", 
+						 lab );
 		return NULL;
 	}
 
 	if ( search( lab ) != NULL )
 	{
-		error_hard( "variable or parameter not added",
-					"choose an unique name for the element",
-					true,
-					"an object named '%s' already exists in the model", lab );
+		sim->error_hard( "variable or parameter not added",
+						 "choose an unique name for the element",
+						 true,
+						 "an object named '%s' already exists in the model", 
+						 lab );
 		return NULL;
 	}
 
@@ -1218,7 +1231,7 @@ variable *object::add_empty_var( const char *lab )
 		cv = cv->next;
 	}
 
-	cv->init( this, lab );
+	cv->init( this, sim, lab );
 	v_map.insert( v_pairT ( lab, cv ) );
 
 	return cv;
@@ -1235,10 +1248,11 @@ variable *object::add_var_from_example( variable *example )
 
 	if ( search_var( this, example->label, true, true ) != NULL )
 	{
-		error_hard( "variable or parameter not added",
-					"choose an unique name for the element",
-					true,
-					"element '%s' already exists in object '%s'", example->label, label );
+		sim->error_hard( "variable or parameter not added",
+						 "choose an unique name for the element",
+						 true,
+						 "element '%s' already exists in object '%s'", 
+						 example->label, label );
 		return NULL;
 	}
 
@@ -1251,10 +1265,10 @@ variable *object::add_var_from_example( variable *example )
 		cv = cv->next;
 	}
 
-	cv->init( this, example->label, example->param, example->num_lag, example->val );
+	cv->init( this, sim, example->label, example->param, example->num_lag, example->val );
 	cv->save = example->save;
 	cv->savei = example->savei;
-	cv->plot = ( ! running ) ? example->plot : false;
+	cv->plot = ( ! sim->running ) ? example->plot : false;
 	cv->parallel = example->parallel;
 	cv->deb_mode = example->deb_mode;
 	cv->initialized = example->initialized;
@@ -1287,19 +1301,21 @@ object *object::add_obj( const char *lab, int num, bool propagate )
 
 	if ( search( lab ) != NULL )
 	{
-		error_hard( "object not added",
-					"choose an unique name for the object",
-					true,
-					"an object named '%s' already exists in the model", lab );
+		sim->error_hard( "object not added",
+						 "choose an unique name for the object",
+						 true,
+						 "an object named '%s' already exists in the model", 
+						 lab );
 		return NULL;
 	}
 
 	if ( search_var( NULL, lab, true ) != NULL )
 	{
-		error_hard( "object not added",
-					"choose an unique name for the object",
-					true,
-					"an element named '%s' already exists in the model", lab );
+		sim->error_hard( "object not added",
+						 "choose an unique name for the object",
+						 true,
+						 "an element named '%s' already exists in the model", 
+						 lab );
 		return NULL;
 	}
 
@@ -1331,7 +1347,7 @@ object *object::add_obj( const char *lab, int num, bool propagate )
 			else
 				cur1 = cur1->next = new object;
 
-			cur1->init( cur, lab );
+			cur1->init( cur, sim, lab );
 		}
 
 		cur->b_map.insert( b_pairT ( lab, cb ) );
@@ -1404,12 +1420,12 @@ void simulation::move_obj( const char *lab, const char *dest )
 				cur1 = no;
 
 				// clone object instance, variables and descending objects
-				cur1->init( d, lab, cur->to_compute );
+				cur1->init( d, d->sim, lab, cur->to_compute );
 
 				for ( cv = cur->v; cv != NULL; cv = cv->next )
 					cur1->add_var_from_example( cv );
 
-				copy_descendant( cur, cur1 );
+				cur->copy_descendant( cur1 );
 			}
 
 			mb = nb;	// bridge clone to move
@@ -1464,7 +1480,7 @@ void object::replicate( int num, bool propagate )
 	{
 		cur1 = cur->next;
 		cur->next = new object;
-		cur->next->init( up, label, to_compute );
+		cur->next->init( up, up->sim, label, to_compute );
 		cur->next->next = cur1;
 		cur->to_compute = to_compute;
 
@@ -1472,7 +1488,7 @@ void object::replicate( int num, bool propagate )
 		for ( cv = v; cv != NULL; cv = cv->next )
 			cur1->add_var_from_example( cv );
 
-		copy_descendant( this, cur1 );
+		copy_descendant( cur1 );
 	}
 }
 
@@ -1480,59 +1496,59 @@ void object::replicate( int num, bool propagate )
 /****************************************************
 COPY_DESCENDANT
 ****************************************************/
-void simulation::copy_descendant( object *from, object *to )
+void object::copy_descendant( object *to )
 {
 	bridge *cb, *cb1;
 	object *cur;
 	variable *cv;
 
-	if ( from->b == NULL )
+	if ( b == NULL )
 	{
 		to->b = NULL;
 		return;
 	}
 
 	// create the first bridge
-	to->b = new bridge( from->b->blabel );
+	to->b = new bridge( b->blabel );
 
 	// add bridge to new object lookup map
 	to->b_map.insert( b_pairT ( to->b->blabel, to->b ) );
 
 	// create the first (head) object
-	if ( from->b->head == NULL )
-		cur = blueprint->search( from->b->blabel );
+	if ( b->head == NULL )
+		cur = sim->blueprint->search( b->blabel );
 	else
-		cur = from->b->head;
+		cur = b->head;
 
 	to->b->head = new object;
-	to->b->head->init( to, cur->label, cur->to_compute );
+	to->b->head->init( to, to->sim, cur->label, cur->to_compute );
 
 	// copy variables of head object
 	for ( cv = cur->v; cv != NULL; cv = cv->next )
 		to->b->head->add_var_from_example( cv );
 
 	// copy head descendants
-	copy_descendant( cur, to->b->head );
+	cur->copy_descendant( to->b->head );
 
 	// create following bridges
-	for ( cb = to->b, cb1 = from->b->next; cb1 != NULL; cb1 = cb1->next )
+	for ( cb = to->b, cb1 = b->next; cb1 != NULL; cb1 = cb1->next )
 	{
 		cb->next = new bridge( cb1->blabel );
 		cb = cb->next;
 		to->b_map.insert( b_pairT ( cb1->blabel, cb ) );
 
 		if ( cb1->head == NULL )
-			cur = blueprint->search( cb1->blabel );
+			cur = sim->blueprint->search( cb1->blabel );
 		else
 			cur = cb1->head;
 
 		cb->head = new object;
-		cb->head->init( to, cur->label, cur->to_compute );
+		cb->head->init( to, to->sim, cur->label, cur->to_compute );
 
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 			cb->head->add_var_from_example( cv );
 
-		copy_descendant( cur, cb->head );
+		cur->copy_descendant( cb->head );
 	}
 }
 
@@ -1547,7 +1563,7 @@ the example object (if >0) or current t (if =0)
 ****************************************************/
 object *object::add_n_objects2( const char *lab, int n, int t_update )
 {
-	return add_n_objects2( lab, n, blueprint->search( lab ), t_update );
+	return add_n_objects2( lab, n, sim->blueprint->search( lab ), t_update );
 }
 
 object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update )
@@ -1563,19 +1579,21 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 
 	if ( cb2 == NULL )
 	{
-		error_hard( "object not found",
-					"create son object in model structure",
-					false,
-					"object '%s' contains no son object '%s' for adding instance(s)", label, lab );
+		sim->error_hard( "object not found",
+						 "create son object in model structure",
+						 false,
+						 "object '%s' contains no son object '%s' for adding instance(s)", 
+						 label, lab );
 		return NULL;
 	}
 
 	if ( ex == NULL || strcmp( ex->label, lab ) )
 	{
-		error_hard( "invalid example object",
-					"check your equation code to prevent this situation",
-					true,
-					"bad example pointer when adding object '%s'", lab );
+		sim->error_hard( "invalid example object",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "bad example pointer when adding object '%s'", 
+						 lab );
 		return NULL;
 	}
 
@@ -1598,10 +1616,10 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 	{
 		// create a new copy of the object
 		cur = new object;
-		cur->init( this, lab );
+		cur->init( this, sim, lab );
 
 		if ( net )						// if objects are nodes in a network
-			cur->node = new netNode( );	// insert new nodes in network (as isolated nodes)
+			cur->node = new netNode( this );// insert new nodes in network (as isolated nodes)
 
 		// create its variables and initialize them
 		for ( cv = ex->v; cv != NULL; cv = cv->next )
@@ -1613,18 +1631,19 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 			// prevent concurrent use by more than one thread
 			rec_lguardT lock( cv->parallel_comp );
 #endif
-			if ( running && cv->param != 1 )
+			if ( sim->running && cv->param != 1 )
 			{
 				if ( t_update < 0 && cv->last_update == 0 )
-					cv->last_update = t;
+					cv->last_update = sim->t;
 				else
 				{
-					if ( t_update >= 0 && t_update < cv->last_update && t > 1 )
+					if ( t_update >= 0 && t_update < cv->last_update && sim->t > 1 )
 					{
-						error_hard( "cannot add object",
-									"check your equation code to prevent this situation",
-									true,
-									"invalid update case (%d) to set object '%s'\nvariable '%s' was updated later (%d)", t_update, lab, cv->label, cv->last_update );
+						sim->error_hard( "cannot add object",
+										 "check your equation code to prevent this situation",
+										 true,
+										 "invalid update case (%d) to set object '%s'\nvariable '%s' was updated later (%d)", 
+										 t_update, lab, cv->label, cv->last_update );
 						return NULL;
 					}
 
@@ -1642,7 +1661,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 			}
 
 			if ( cv->save || cv->savei )
-				alloc_save_var( cv );
+				sim->alloc_save_var( cv );
 		}
 
 		// insert the descending objects in the newly created objects
@@ -1684,13 +1703,13 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 		last = cur;
 
 		// update object list for user pointer checking
-		if ( ! no_ptr_chk )
+		if ( ! sim->no_ptr_chk )
 		{
 #ifndef _NP_
 			// prevent concurrent update by more than one thread
-			lock_guard < mutex > lock( lock_obj_list );
+			lock_guard < mutex > lock( sim->lock_obj_list );
 #endif
-			obj_list.insert( cur );
+			sim->obj_list.insert( cur );
 		}
 	}
 
@@ -1755,35 +1774,36 @@ void object::delete_obj( variable *caller )
 
 		if ( under_computation( ) )
 		{
-			if ( wait_delete != NULL && wait_delete != this )
+			if ( sim->wait_delete != NULL && sim->wait_delete != this )
 			{
-				error_hard( "deletion already pending",
-							"check your equation code to prevent deleting objects recursively",
-							true,
-							"cannot schedule the deletion of object '%s'", label );
+				sim->error_hard( "deletion already pending",
+								 "check your equation code to prevent deleting objects recursively",
+								 true,
+								 "cannot schedule the deletion of object '%s'", 
+								 label );
 				return;
 			}
 			else
 			{
-				wait_delete = this;
+				sim->wait_delete = this;
 				return;
 			}
 		}
 
 		deleting = true;		// signal deletion to other threads
 
-		if ( wait_delete == this )
-			wait_delete = NULL;	// finally deleting pending object
+		if ( sim->wait_delete == this )
+			sim->wait_delete = NULL;// finally deleting pending object
 	}
 
 	// update object list for user pointer checking
-	if ( ! no_ptr_chk )
+	if ( ! sim->no_ptr_chk )
 	{
 #ifndef _NP_
 		// prevent concurrent update by more than one thread
-		lock_guard < mutex > lock( lock_obj_list );
+		lock_guard < mutex > lock( sim->lock_obj_list );
 #endif
-		obj_list.erase( this );
+		sim->obj_list.erase( this );
 	}
 
 	// collect required variables BEFORE removing instances (bridge)
@@ -1803,17 +1823,18 @@ void object::delete_obj( variable *caller )
 				cb->head = next;
 			else
 			{
-				if ( no_zero_instance )
+				if ( sim->no_zero_instance )
 				{
-					error_hard( "last object instance deleted",
-								"check your equation code to ensure at least one instance\nof any object is kept",
-								true,
-								"cannot delete all instances of '%s'", label );
+					sim->error_hard( "last object instance deleted",
+									 "check your equation code to ensure at least one instance\nof any object is kept",
+									 true,
+									 "cannot delete all instances of '%s'", 
+									 label );
 					return;
 				}
 
 				cb->head = NULL;
-				save_ok = false;		// model structure can no longer be saved
+				sim->save_ok = false;// model structure can no longer be saved
 			}
 		}
 		else
@@ -1895,20 +1916,20 @@ void object::collect_cemetery( variable *caller )
 		cv1 = cv->next;						// pointer to next variable
 
 		// need to save?
-		if ( ( cv->save == true || cv->savei == true ) && running && eff_t > 0 )
+		if ( ( cv->save == true || cv->savei == true ) && sim->running && sim->eff_t > 0 )
 		{
 			if ( cv->savei )
-				save_single( cv );			// update file
+				sim->save_single( cv );		// update file
 
 			set_lab_tit( cv );				// update last lab_tit
 
-			cv->end = t;					// define last period,
-			cv->data[ t - cv->start ] = cv->val[ 0 ];	// and last value
+			cv->end = sim->t;				// define last period,
+			cv->data[ sim->t - cv->start ] = cv->val[ 0 ];	// and last value
 
 			// use C stdlib to be able to deallocate memory for deleted objects
-			cv->data = ( double * ) realloc( cv->data, ( t - cv->start + 1 ) * sizeof( double ) );
+			cv->data = ( double * ) realloc( cv->data, ( sim->t - cv->start + 1 ) * sizeof( double ) );
 
-			add_cemetery( cv );				// transfer to cemetery
+			sim->add_cemetery( cv );		// transfer to cemetery
 		}
 		else
 		{
@@ -1968,7 +1989,7 @@ under computation in it finish computation
 ****************************************************/
 double object::to_delete( void )
 {
-	return wait_delete == this;
+	return sim->wait_delete == this;
 }
 
 
@@ -2112,16 +2133,16 @@ double object::cal( object *caller, const char *lab, int lag, bool force_search 
 {
 	variable *cv;
 
-	if ( quit == 2 )
+	if ( sim->quit == 2 )
 		return NAN;
 
-	cv = search_var_err( this, lab, force_search ? false : no_search, false, false, "retrieving" );
+	cv = search_var_err( this, lab, force_search ? false : sim->no_search, false, false, "retrieving" );
 	if ( cv == NULL )
 		return NAN;
 
 #ifndef _NP_
-	if ( lag == 0 && parallel_ready && cv->parallel && cv->last_update < t && ! cv->dummy )
-		parallel_update( cv, this, caller );
+	if ( lag == 0 && sim->parallel_ready && cv->parallel && cv->last_update < sim->t && ! cv->dummy )
+		sim->parallel_update( cv, this, caller );
 #endif
 	return cv->cal( caller, lag );
 }
@@ -2130,16 +2151,16 @@ double object::cal( object *caller, const char *lab, int lag )
 {
 	variable *cv;
 
-	if ( quit == 2 )
+	if ( sim->quit == 2 )
 		return NAN;
 
-	cv = search_var_err( this, lab, no_search, false, false, "retrieving" );
+	cv = search_var_err( this, lab, sim->no_search, false, false, "retrieving" );
 	if ( cv == NULL )
 		return NAN;
 
 #ifndef _NP_
-	if ( lag == 0 && parallel_ready && cv->parallel && cv->last_update < t && ! cv->dummy )
-		parallel_update( cv, this, caller );
+	if ( lag == 0 && sim->parallel_ready && cv->parallel && cv->last_update < sim->t && ! cv->dummy )
+		sim->parallel_update( cv, this, caller );
 #endif
 	return cv->cal( caller, lag );
 }
@@ -2158,7 +2179,7 @@ double object::last_cal( const char *lab )
 {
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, false, false, "last updating" );
+	cv = search_var_err( this, lab, sim->no_search, false, false, "last updating" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -2177,12 +2198,12 @@ double object::recal( const char *lab )
 	double app;
 	variable *cv;
 
-	cv = search_var_err( this, lab, no_search, false, false, "recalculating" );
+	cv = search_var_err( this, lab, sim->no_search, false, false, "recalculating" );
 	if ( cv == NULL )
 		return NAN;
 
 	// don't do anything if not yet computed in t
-	if ( cv->last_update < t )
+	if ( cv->last_update < sim->t )
 		return( cv->val[ 0 ] );
 
 	app = cv->val[ 0 ];
@@ -2190,13 +2211,13 @@ double object::recal( const char *lab )
 	for ( i = 0; i < cv->num_lag; ++i )		// scale up the past values
 		cv->val[ i ] = cv->val[ i + 1 ];
 
-	if ( ( cv->save || cv->savei ) && i + 1 <= t - cv->start )
-		cv->val[ i ] = cv->data[ t - i - 1 - cv->start ];
+	if ( ( cv->save || cv->savei ) && i + 1 <= sim->t - cv->start )
+		cv->val[ i ] = cv->data[ sim->t - i - 1 - cv->start ];
 	else
 		cv->val[ i ] = NAN;
 
-	cv->last_update = t - 1;
-	cv->next_update = t;
+	cv->last_update = sim->t - 1;
+	cv->next_update = sim->t;
 
 	return app;
 }
@@ -2216,14 +2237,14 @@ double object::sum( const char *lab1, int lag, bool cond, const char *lab2, cons
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab1, no_search, no_search_up, true, "summing" );
+	cv = search_var_err( this, lab1, sim->no_search, sim->no_search_up, true, "summing" );
 	if ( cv == NULL )
 		return 0;
 
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "summing" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "summing" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, sim->no_search, sim->no_search_up, true, "summing" ) == NULL )
 			return 0;
 	}
 	else
@@ -2262,14 +2283,14 @@ double object::overall_max( const char *lab1, int lag, bool cond, const char *la
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab1, no_search, no_search_up, true, "maximizing" );
+	cv = search_var_err( this, lab1, sim->no_search, sim->no_search_up, true, "maximizing" );
 	if ( cv == NULL )
 		return NAN;
 
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "maximizing" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "maximizing" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, sim->no_search, sim->no_search_up, true, "maximizing" ) == NULL )
 			return NAN;
 	}
 	else
@@ -2312,14 +2333,14 @@ double object::overall_min( const char *lab1, int lag, bool cond, const char *la
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab1, no_search, no_search_up, true, "minimizing" );
+	cv = search_var_err( this, lab1, sim->no_search, sim->no_search_up, true, "minimizing" );
 	if ( cv == NULL )
 		return NAN;
 
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "minimizing" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "minimizing" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, sim->no_search, sim->no_search_up, true, "minimizing" ) == NULL )
 			return NAN;
 	}
 	else
@@ -2359,16 +2380,17 @@ double object::mav( object *caller, const char *lab, double per, const double we
 	double sumv, sumw;
 	variable *cv;
 
-	if ( ( ! use_nan && is_nan( per ) ) || is_inf( per ) || abs( per ) < 1 )
+	if ( ( ! sim->use_nan && is_nan( per ) ) || is_inf( per ) || abs( per ) < 1 )
 	{
-		error_hard( "invalid moving average period",
-					"check your equation code to prevent this situation",
-					true,
-					"period '%g' is invalid for moving average '%s'", per, lab );
+		sim->error_hard( "invalid moving average period",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "period '%g' is invalid for moving average '%s'", 
+						 per, lab );
 		return NAN;
 	}
 
-	cv = search_var_err( this, lab, no_search, no_search_up, true, "move-averaging" );
+	cv = search_var_err( this, lab, sim->no_search, sim->no_search_up, true, "move-averaging" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -2382,7 +2404,7 @@ double object::mav( object *caller, const char *lab, double per, const double we
 
 	for ( i = sumv = sumw = 0; i < per; ++i )
 	{
-		if ( i + lag - t >= maxlag )
+		if ( i + lag - sim->t >= maxlag )
 			break;
 
 		if ( weight == NULL )
@@ -2416,14 +2438,14 @@ double object::av( const char *lab1, int lag, bool cond, const char *lab2, const
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab1, no_search, no_search_up, true, "averaging" );
+	cv = search_var_err( this, lab1, sim->no_search, sim->no_search_up, true, "averaging" );
 	if ( cv == NULL )
 		return NAN;
 
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "averaging" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "averaging" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, sim->no_search, sim->no_search_up, true, "averaging" ) == NULL )
 			return NAN;
 	}
 	else
@@ -2464,18 +2486,18 @@ double object::whg_av( const char *lab1, const char *lab2, int lag, bool cond, c
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab1, no_search, no_search_up, true, "weighted averaging" );
+	cv = search_var_err( this, lab1, sim->no_search, sim->no_search_up, true, "weighted averaging" );
 	if ( cv == NULL )
 		return 0;
 
-	cv = search_var_err( this, lab2, no_search, no_search_up, true, "weighted averaging" );
+	cv = search_var_err( this, lab2, sim->no_search, sim->no_search_up, true, "weighted averaging" );
 	if ( cv == NULL )
 		return 0;
 
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "weighted averaging" );
-		if ( lopc < 0 || search_var_err( this, lab3, no_search, no_search_up, true, "weighted averaging" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab3, sim->no_search, sim->no_search_up, true, "weighted averaging" ) == NULL )
 			return 0;
 	}
 	else
@@ -2528,22 +2550,22 @@ double object::perc( const char *lab1, double p, int lag, bool cond, const char 
 
 	if ( p < 0 || p > 1 )
 	{
-		error_hard( "invalid value (0 <= p <= 1 required)",
-					"check your equation code to prevent this situation",
-					true,
-					"percentile '%g' is invalid", p );
+		sim->error_hard( "invalid value (0 <= p <= 1 required)",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "percentile '%g' is invalid", p );
 
 		return NAN;
 	}
 
-	cv = search_var_err( this, lab1, no_search, no_search_up, true, "calculating percentile" );
+	cv = search_var_err( this, lab1, sim->no_search, sim->no_search_up, true, "calculating percentile" );
 	if ( cv == NULL )
 		return NAN;
 
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "calculating percentile" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "calculating percentile" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, sim->no_search, sim->no_search_up, true, "calculating percentile" ) == NULL )
 			return NAN;
 	}
 	else
@@ -2595,14 +2617,14 @@ double object::sd( const char *lab1, int lag, bool cond, const char *lab2, const
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab1, no_search, no_search_up, true, "calculating s.d." );
+	cv = search_var_err( this, lab1, sim->no_search, sim->no_search_up, true, "calculating s.d." );
 	if ( cv == NULL )
 		return NAN;
 
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "calculating s.d." );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "calculating s.d." ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, sim->no_search, sim->no_search_up, true, "calculating s.d." ) == NULL )
 			return NAN;
 	}
 	else
@@ -2642,7 +2664,7 @@ double object::count( const char *lab1, int lag, bool cond, const char *lab2, co
 	int n, lopc;
 	object *cur, *cnext;
 
-	cur = search_err( lab1, no_search, no_search_up, "counting" );
+	cur = search_err( lab1, sim->no_search, sim->no_search_up, "counting" );
 
 	if ( cur == NULL )
 		return 0;
@@ -2650,7 +2672,7 @@ double object::count( const char *lab1, int lag, bool cond, const char *lab2, co
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "counting" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "counting" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, sim->no_search, sim->no_search_up, true, "counting" ) == NULL )
 			return NAN;
 	}
 	else
@@ -2681,9 +2703,9 @@ double object::count_all( const char *lab1, int lag, bool cond, const char *lab2
 	object *cur, *cnext;
 
 	if ( up->b->head != NULL )
-		cur = up->b->head->search_err( lab1, no_search, no_search_up, "counting all" );// pick always first instance
+		cur = up->b->head->search_err( lab1, sim->no_search, sim->no_search_up, "counting all" );// pick always first instance
 	else
-		cur = search_err( lab1, no_search, no_search_up, "counting all" );	// count from here (bad)
+		cur = search_err( lab1, sim->no_search, sim->no_search_up, "counting all" );	// count from here (bad)
 
 	if ( cur == NULL )
 		return 0;
@@ -2691,7 +2713,7 @@ double object::count_all( const char *lab1, int lag, bool cond, const char *lab2
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "counting" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "counting all" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, sim->no_search, sim->no_search_up, true, "counting all" ) == NULL )
 			return NAN;
 	}
 	else
@@ -2737,7 +2759,7 @@ double object::stat( const char *lab1, double *r, int lag, bool cond, const char
 	if ( r == NULL )
 		r = r_temp;
 
-	cv = search_var_err( this, lab1, no_search, no_search_up, true, "calculating statistics" );
+	cv = search_var_err( this, lab1, sim->no_search, sim->no_search_up, true, "calculating statistics" );
 	if ( cv == NULL || cv->up == NULL )
 	{
 		r[ 0 ] = 0;
@@ -2748,7 +2770,7 @@ double object::stat( const char *lab1, double *r, int lag, bool cond, const char
 	if ( cond )
 	{
 		lopc = logic_op_code( lop, "calculating statistics" );
-		if ( lopc < 0 || search_var_err( this, lab2, no_search, no_search_up, true, "calculating statistics" ) == NULL )
+		if ( lopc < 0 || search_var_err( this, lab2, sim->no_search, sim->no_search_up, true, "calculating statistics" ) == NULL )
 			return NAN;
 	}
 	else
@@ -2853,26 +2875,27 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 
 	if ( ! useNodeId )
 	{
-		cv = search_var_err( this, var, no_search, no_search_up, true, "sorting" );
+		cv = search_var_err( this, var, sim->no_search, sim->no_search_up, true, "sorting" );
 		if ( cv == NULL )
 			return NULL;
 
 		cur = cv->up;
 		if ( cur == NULL || strcmp( obj, cur->label ) )
 		{
-			error_hard( "variable or parameter not found",
-						"create variable or parameter in model structure",
-						false,
-						"element '%s' is missing (object '%s') for sorting", var, obj );
+			sim->error_hard( "variable or parameter not found",
+							 "create variable or parameter in model structure",
+							 false,
+							 "element '%s' is missing (object '%s') for sorting", 
+							 var, obj );
 			return NULL;
 		}
 
 		if ( cur->up == NULL )
 		{
-			error_hard( "object not found",
-						"create object in model structure",
-						false,
-						"object '%s' is missing for sorting", obj );
+			sim->error_hard( "object not found",
+							 "create object in model structure",
+							 false,
+							 "object '%s' is missing for sorting", obj );
 			return NULL;
 		}
 
@@ -2886,10 +2909,11 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 				cb = cur->up->search_bridge( obj, true );
 			else
 			{
-				error_hard( "invalid network object",
-							"check your equation code to add\nthe network structure before using this macro",
-							true,
-							"object '%s' has no network data structure", obj );
+				sim->error_hard( "invalid network object",
+								 "check your equation code to add\nthe network structure before using this macro",
+								 true,
+								 "object '%s' has no network data structure", 
+								 obj );
 				return NULL;
 			}
 		else
@@ -2898,19 +2922,19 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 
 	if ( cb == NULL )
 	{
-		error_hard( "object not found",
-					"create object in model structure",
-					false,
-					"object '%s' is missing for sorting", obj );
+		sim->error_hard( "object not found",
+						 "create object in model structure",
+						 false,
+						 "object '%s' is missing for sorting", obj );
 		return NULL;
 	}
 
 	if ( cb->head == NULL )
 	{
-		error_hard( "object has no instance",
-					"check your equation code to prevent this situation",
-					true,
-					"all instances of object '%s' were deleted", obj );
+		sim->error_hard( "object has no instance",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "all instances of object '%s' were deleted", obj );
 		return NULL;
 	}
 
@@ -2943,10 +2967,10 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 			qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_down );
 		else
 		{
-			error_hard( "invalid sort option ('UP' or 'DOWN' required)",
-						"check your equation code to prevent this situation",
-						true,
-						"direction '%s' is invalid for sorting", direction );
+			sim->error_hard( "invalid sort option ('UP' or 'DOWN' required)",
+							 "check your equation code to prevent this situation",
+							 true,
+							 "direction '%s' is invalid for sorting", direction );
 			delete [ ] mylist;
 			return NULL;
 		}
@@ -3018,42 +3042,44 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 
 	if ( cb == NULL )
 	{
-		error_hard( "object not found",
-					"create object in model structure",
-					false,
-					"object '%s' is missing for sorting", obj );
+		sim->error_hard( "object not found",
+						 "create object in model structure",
+						 false,
+						 "object '%s' is missing for sorting", obj );
 		return NULL;
 	}
 
 	if ( cb->head == NULL )
 	{
-		error_hard( "object has no instance",
-					"check your equation code to ensure at least one instance\nof any object is kept",
-					true,
-					"all instances of object '%s' were deleted", obj );
+		sim->error_hard( "object has no instance",
+						 "check your equation code to ensure at least one instance\nof any object is kept",
+						 true,
+						 "all instances of object '%s' were deleted", obj );
 		return NULL;
 	}
 
-	cv = search_var_err( this, var1, no_search, no_search_up, true, "sorting" );
+	cv = search_var_err( this, var1, sim->no_search, sim->no_search_up, true, "sorting" );
 	if ( cv == NULL )
 		return NULL;
 
 	cur = cv->up;
 	if ( cur == NULL || strcmp( obj, cur->label ) )
 	{
-		error_hard( "variable or parameter not found",
-					"create variable or parameter in model structure",
-					false,
-					"element '%s' is missing (object '%s') for sorting", var1, obj );
+		sim->error_hard( "variable or parameter not found",
+						 "create variable or parameter in model structure",
+						 false,
+						 "element '%s' is missing (object '%s') for sorting", 
+						 var1, obj );
 		return NULL;
 	}
 
 	if ( cur->up == NULL )
 	{
-		error_hard( "object not found",
-					"create object in model structure",
-					false,
-					"object '%s' is missing for sorting", obj );
+		sim->error_hard( "object not found",
+						 "create object in model structure",
+						 false,
+						 "object '%s' is missing for sorting", 
+						 obj );
 		return NULL;
 	}
 
@@ -3087,10 +3113,10 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 			qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_down_two );
 		else
 		{
-			error_hard( "invalid sort option ('UP' or 'DOWN' required)",
-						"check your equation code to prevent this situation",
-						true,
-						"direction '%s' is invalid for sorting", direction );
+			sim->error_hard( "invalid sort option ('UP' or 'DOWN' required)",
+							 "check your equation code to prevent this situation",
+							 true,
+							 "direction '%s' is invalid for sorting", direction );
 			delete [ ] mylist;
 			return NULL;
 		}
@@ -3119,7 +3145,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag )
 	object *cur, *cur1, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lv, no_search, no_search_up, true, "random drawing" );
+	cv = search_var_err( this, lv, sim->no_search, sim->no_search_up, true, "random drawing" );
 	if ( cv == NULL )
 		return NULL;
 
@@ -3133,19 +3159,21 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag )
 
 	if ( is_nan( a ) || is_inf( a ) )
 	{
-		error_hard( "invalid random draw option",
-					"check your equation code to prevent this situation",
-					true,
-					"element '%s' has invalid value '%g' for random drawing", lv, a );
+		sim->error_hard( "invalid random draw option",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "element '%s' has invalid value '%g' for random drawing", 
+						 lv, a );
 		return NULL;
 	}
 
 	if ( a == 0 )
 	{
-		error_hard( "invalid random draw option",
-					"check your equation code to prevent this situation",
-					true,
-					"element '%s' has only zero values for random drawing", lv );
+		sim->error_hard( "invalid random draw option",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "element '%s' has only zero values for random drawing", 
+						 lv );
 		return NULL;
 	}
 
@@ -3176,7 +3204,7 @@ object *object::draw_rnd( const char *lab )
 	double a, b;
 	object *cur, *cur1;
 
-	cur1 = cur = search_err( lab, no_search, no_search_up, "random drawing" );
+	cur1 = cur = search_err( lab, sim->no_search, sim->no_search_up, "random drawing" );
 
 	if ( cur == NULL )
 		return NULL;
@@ -3186,10 +3214,10 @@ object *object::draw_rnd( const char *lab )
 
 	if ( a == 0 )
 	{
-		error_hard( "object not found",
-					"create object in model structure",
-					false,
-					"object '%s' is missing for random drawing", lab );
+		sim->error_hard( "object not found",
+						 "create object in model structure",
+						 false,
+						 "object '%s' is missing for random drawing", lab );
 		return NULL;
 	}
 
@@ -3221,14 +3249,15 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag, double tot )
 
 	if ( tot <= 0 )
 	{
-		error_hard( "invalid random draw option",
-					"check your equation code to prevent this situation",
-					true,
-					"element '%s' has invalid value '%g' for random drawing", lv, tot );
+		sim->error_hard( "invalid random draw option",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "element '%s' has invalid value '%g' for random drawing", 
+						 lv, tot );
 		return NULL;
 	}
 
-	cv = search_var_err( this, lv, no_search, no_search_up, true, "random drawing" );
+	cv = search_var_err( this, lv, sim->no_search, sim->no_search_up, true, "random drawing" );
 	if ( cv == NULL )
 		return NULL;
 
@@ -3246,10 +3275,11 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag, double tot )
 
 	if ( a > tot )
 	{
-		error_hard( "invalid random draw option",
-					"check your equation code to prevent this situation",
-					true,
-					"element '%s' has invalid value '%g' for random drawing", lv, tot );
+		sim->error_hard( "invalid random draw option",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "element '%s' has invalid value '%g' for random drawing", 
+						 lv, tot );
 		return NULL;
 	}
 
@@ -3267,12 +3297,13 @@ double object::write( const char *lab, double value, int time, int lag )
 	int i, eff_lag, eff_time;
 	variable *cv;
 
-	if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
+	if ( ( ! sim->use_nan && is_nan( value ) ) || is_inf( value ) )
 	{
-		error_hard( "invalid write operation",
-					"check your equation code to prevent this situation",
-					true,
-					"value '%g' is invalid for writing to element '%s'", value, lab );
+		sim->error_hard( "invalid write operation",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "value '%g' is invalid for writing to element '%s'", 
+						 value, lab );
 		return NAN;
 	}
 
@@ -3284,10 +3315,11 @@ double object::write( const char *lab, double value, int time, int lag )
 	{
 		if ( ! cv->dummy )
 		{
-			error_hard( "invalid write operation",
-						"check your equation code to prevent this situation",
-						true,
-						"variable '%s' is under computation and cannot be written", lab );
+			sim->error_hard( "invalid write operation",
+							 "check your equation code to prevent this situation",
+							 true,
+							 "variable '%s' is under computation and cannot be written", 
+							 lab );
 			return NAN;
 		}
 
@@ -3296,10 +3328,11 @@ double object::write( const char *lab, double value, int time, int lag )
 			cv->parallel_comp.unlock( );
 		else
 		{
-			error_hard( "deadlock during parallel computation",
-						"check your equation code to prevent this situation",
-						true,
-						"variable '%s' is under dummy computation and cannot be written", lab );
+			sim->error_hard( "deadlock during parallel computation",
+							 "check your equation code to prevent this situation",
+							 true,
+							 "variable '%s' is under dummy computation and cannot be written", 
+							 lab );
 			return NAN;
 		}
 #endif
@@ -3309,24 +3342,25 @@ double object::write( const char *lab, double value, int time, int lag )
 	// prevent concurrent use by more than one thread
 	rec_lguardT lock( cv->parallel_comp );
 #endif
-	if ( cv->param != 1 && time <= 0 && t > 1 )
+	if ( cv->param != 1 && time <= 0 && sim->t > 1 )
 	{
-		error_hard( "invalid write operation",
-					"check your equation code to prevent this situation",
-					true,
-					"invalid update time (%d) for variable '%s'", time, lab );
+		sim->error_hard( "invalid write operation",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "invalid update time (%d) for variable '%s'", time, lab );
 		return NAN;
 	}
 
 	// allow for change of initial lagged values when starting simulation (t=1)
-	if ( cv->param != 1 && time < 0 && t == 1 )
+	if ( cv->param != 1 && time < 0 && sim->t == 1 )
 	{
 		if ( - time > cv->num_lag )		// check for invalid lag
 		{
-			error_hard( "invalid write operation",
-						"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
-						false,
-						"invalid initial lag (%d) for variable '%s'", time, lab );
+			sim->error_hard( "invalid write operation",
+							 "check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
+							 false,
+							 "invalid initial lag (%d) for variable '%s'", 
+							 time, lab );
 			return NAN;
 		}
 
@@ -3348,10 +3382,11 @@ double object::write( const char *lab, double value, int time, int lag )
 	{
 		if ( lag < 0 || ( cv->param != 1 && lag > cv->num_lag ) || ( cv->param == 1 && lag > 1 ) )
 		{
-			error_hard( "invalid write operation",
-						"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
-						false,
-						"invalid lag (%d) for %s '%s'", lag, cv->param != 1 ? "variable" : "parameter", lab );
+			sim->error_hard( "invalid write operation",
+							 "check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
+							 false,
+							 "invalid lag (%d) for %s '%s'", 
+							 lag, cv->param != 1 ? "variable" : "parameter", lab );
 			return NAN;
 		}
 
@@ -3363,7 +3398,7 @@ double object::write( const char *lab, double value, int time, int lag )
 		else
 		{
 			// if not yet calculated this time step, adjust lagged values
-			if ( time >= t && lag == 0 && cv->last_update < t )
+			if ( time >= sim->t && lag == 0 && cv->last_update < sim->t )
 				for ( i = 0; i < cv->num_lag; ++i )
 					cv->val[ cv->num_lag - i ] = cv->val[ cv->num_lag - i - 1 ];
 
@@ -3375,7 +3410,7 @@ double object::write( const char *lab, double value, int time, int lag )
 				// choose next update step for special updating variables
 				if ( cv->period > 1 || cv->period_range > 0 )
 				{
-					cv->next_update = t + cv->period;
+					cv->next_update = sim->t + cv->period;
 					if ( cv->period_range > 0 )
 						cv->next_update += rnd_int( 0, cv->period_range );
 				}
@@ -3383,23 +3418,24 @@ double object::write( const char *lab, double value, int time, int lag )
 			else
 			{
 				// handle rewriting already computed values
-				if ( time >= t || time >= cv->last_update )
+				if ( time >= sim->t || time >= cv->last_update )
 				{
-					eff_lag = lag - ( t - cv->last_update );	// first write in time t
+					eff_lag = lag - ( sim->t - cv->last_update );	// first write in time t
 					eff_time = time - lag;
 				}
 				else
 				{
-					eff_lag = lag - ( t - time );				// rewrite as t-h in time t
-					eff_time = t - lag;
+					eff_lag = lag - ( sim->t - time );				// rewrite as t-h in time t
+					eff_time = sim->t - lag;
 				}
 
 				if ( eff_lag < 0 || eff_lag > cv->num_lag )
 				{
-					error_hard( "invalid write operation",
-								"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
-								true,
-								"invalid update case (%d) and lag (%d) for variable '%s'", time, lag, lab );
+					sim->error_hard( "invalid write operation",
+									 "check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
+									 true,
+									 "invalid update case (%d) and lag (%d) for variable '%s'", 
+									 time, lag, lab );
 					return NAN;
 				}
 			}
@@ -3419,11 +3455,11 @@ double object::write( const char *lab, double value, int time, int lag )
 		}
 	}
 
-	if ( deb_set && t == deb_t && cv->deb_mode != 'n' && cv->deb_mode != 'd' )
+	if ( deb_set && sim->t == sim->deb_t && cv->deb_mode != 'n' && cv->deb_mode != 'd' )
 	{
-		watch_trigger = true;
-		watch_write_mode = true;
-		strncpy( watch_elem, cv->label, MAX_ELEM_LENGTH );
+		sim->watch_trigger = true;
+		sim->watch_write_mode = true;
+		strncpy( sim->watch_elem, cv->label, MAX_ELEM_LENGTH );
 	}
 
 	return value;
@@ -3441,12 +3477,13 @@ double object::increment( const char *lab, double value )
 	variable *cv;
 	double new_value;
 
-	if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
+	if ( ( ! sim->use_nan && is_nan( value ) ) || is_inf( value ) )
 	{
-		error_hard( "invalid increment operation",
-					"check your equation code to prevent this situation",
-					true,
-					"value '%g' is invalid for incrementing element '%s'", value, lab );
+		sim->error_hard( "invalid increment operation",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "value '%g' is invalid for incrementing element '%s'", 
+						 value, lab );
 		return NAN;
 	}
 
@@ -3454,20 +3491,21 @@ double object::increment( const char *lab, double value )
 	if ( cv == NULL )
 		return NAN;
 
-	if ( ! use_nan && is_nan( cv->val[ 0 ] ) )	// try to recover from RECALC
+	if ( ! sim->use_nan && is_nan( cv->val[ 0 ] ) )	// try to recover from RECALC
 		cv->cal( this, 0 );
 
-	if ( ( ! use_nan && is_nan( cv->val[ 0 ] ) ) || is_inf( cv->val[ 0 ] ) )
+	if ( ( ! sim->use_nan && is_nan( cv->val[ 0 ] ) ) || is_inf( cv->val[ 0 ] ) )
 	{
-		error_hard( "invalid increment operation",
-					"check your equation code to prevent this situation",
-					true,
-					"current value '%g' of element '%s' is invalid for incrementing", cv->val[ 0 ], lab );
+		sim->error_hard( "invalid increment operation",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "current value '%g' of element '%s' is invalid for incrementing", 
+						 cv->val[ 0 ], lab );
 		return NAN;
 	}
 
 	new_value = cv->val[ 0 ] + value;
-	this->write( lab, new_value, t );
+	write( lab, new_value, sim->t );
 
 	return new_value;
 }
@@ -3484,12 +3522,13 @@ double object::multiply( const char *lab, double value )
 	variable *cv;
 	double new_value;
 
-	if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
+	if ( ( ! sim->use_nan && is_nan( value ) ) || is_inf( value ) )
 	{
-		error_hard( "invalid multiply operation",
-					"check your equation code to prevent this situation",
-					true,
-					"value '%g' is invalid for multiplying element '%s'", value, lab );
+		sim->error_hard( "invalid multiply operation",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "value '%g' is invalid for multiplying element '%s'", 
+						 value, lab );
 		return NAN;
 	}
 
@@ -3497,20 +3536,21 @@ double object::multiply( const char *lab, double value )
 	if ( cv == NULL )
 		return NAN;
 
-	if ( ! use_nan && is_nan( cv->val[ 0 ] ) )	// try to recover from RECALC
+	if ( ! sim->use_nan && is_nan( cv->val[ 0 ] ) )	// try to recover from RECALC
 		cv->cal( this, 0 );
 
-	if ( ( ! use_nan && is_nan( cv->val[ 0 ] ) ) || is_inf( cv->val[ 0 ] ) )
+	if ( ( ! sim->use_nan && is_nan( cv->val[ 0 ] ) ) || is_inf( cv->val[ 0 ] ) )
 	{
-		error_hard( "invalid multiply operation",
-					"check your equation code to prevent this situation",
-					true,
-					"current value '%g' of element '%s' is invalid for multiplying", cv->val[ 0 ], lab );
+		sim->error_hard( "invalid multiply operation",
+						 "check your equation code to prevent this situation",
+						 true,
+						 "current value '%g' of element '%s' is invalid for multiplying", 
+						 cv->val[ 0 ], lab );
 		return NAN;
 	}
 
 	new_value = cv->val[ 0 ] * value;
-	this->write( lab, new_value, t );
+	write( lab, new_value, sim->t );
 
 	return new_value;
 }
@@ -3638,11 +3678,11 @@ void object::collect_inst( o_setT &list )
 	auto res = list.emplace( this );
 	if ( ! res.second )
 	{
-		error_hard( "LSD internal error",
-					"disable pointer checking by defining 'NO_POINTER_CHECK'",
-					false,
-					"object '%s' cannot be collected for pointer checking",
-					label );
+		sim->error_hard( "LSD internal error",
+						 "disable pointer checking by defining 'NO_POINTER_CHECK'",
+						 false,
+						 "object '%s' cannot be collected for pointer checking",
+						 label );
 		return;
 	}
 
@@ -3670,35 +3710,35 @@ double object::interact( const char *text, double v, double *tv, int i, int j,
 	int n;
 	double app = v;
 
-	if ( quit == 0 )
+	if ( sim->quit == 0 )
 	{
 		for ( n = 0; n < USER_D_VARS; ++n )
-			d_values[ n ] = tv[ n ];
+			sim->d_values[ n ] = tv[ n ];
 
-		i_values[ 0 ] = i;
-		i_values[ 1 ] = j;
-		i_values[ 2 ] = h;
-		i_values[ 3 ] = k;
-		o_values[ 0 ] = cur;
-		o_values[ 1 ] = cur1;
-		o_values[ 2 ] = cur2;
-		o_values[ 3 ] = cur3;
-		o_values[ 4 ] = cur4;
-		o_values[ 5 ] = cur5;
-		o_values[ 6 ] = cur6;
-		o_values[ 7 ] = cur7;
-		o_values[ 8 ] = cur8;
-		o_values[ 9 ] = cur9;
-		n_values[ 0 ] = curl;
-		n_values[ 1 ] = curl1;
-		n_values[ 2 ] = curl2;
-		n_values[ 3 ] = curl3;
-		n_values[ 4 ] = curl4;
-		n_values[ 5 ] = curl5;
-		n_values[ 6 ] = curl6;
-		n_values[ 7 ] = curl7;
-		n_values[ 8 ] = curl8;
-		n_values[ 9 ] = curl9;
+		sim->i_values[ 0 ] = i;
+		sim->i_values[ 1 ] = j;
+		sim->i_values[ 2 ] = h;
+		sim->i_values[ 3 ] = k;
+		sim->o_values[ 0 ] = cur;
+		sim->o_values[ 1 ] = cur1;
+		sim->o_values[ 2 ] = cur2;
+		sim->o_values[ 3 ] = cur3;
+		sim->o_values[ 4 ] = cur4;
+		sim->o_values[ 5 ] = cur5;
+		sim->o_values[ 6 ] = cur6;
+		sim->o_values[ 7 ] = cur7;
+		sim->o_values[ 8 ] = cur8;
+		sim->o_values[ 9 ] = cur9;
+		sim->n_values[ 0 ] = curl;
+		sim->n_values[ 1 ] = curl1;
+		sim->n_values[ 2 ] = curl2;
+		sim->n_values[ 3 ] = curl3;
+		sim->n_values[ 4 ] = curl4;
+		sim->n_values[ 5 ] = curl5;
+		sim->n_values[ 6 ] = curl6;
+		sim->n_values[ 7 ] = curl7;
+		sim->n_values[ 8 ] = curl8;
+		sim->n_values[ 9 ] = curl9;
 
 		if ( liblnk.deb != NULL )
 			liblnk.deb( this, NULL, text, &app, true, "" );// signals INTERACT macro
@@ -3725,10 +3765,10 @@ int object::logic_op_code( const char *lop, const char *errmsg )
 	if ( lopp != logic_ops.end( ) )
 		return lopp->second;
 
-	error_hard( "invalid logical relational operator",
-				"use a valid operator (== != > >= < <=)",
-				false,
-				"cannot compare with '%s' for %s", lop, errmsg );
+	sim->error_hard( "invalid logical relational operator",
+					 "use a valid operator (== != > >= < <=)",
+					 false,
+					 "cannot compare with '%s' for %s", lop, errmsg );
 	return -1;
 }
 

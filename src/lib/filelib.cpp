@@ -396,7 +396,7 @@ void simulation::unload_configuration( bool full )
 	empty_blueprint( );							// remove current model structure
 	root->delete_obj( );
 	root = new object;
-	root->init( NULL, "Root" );
+	root->init( NULL, this, "Root" );
 	add_description( "Root" );
 	reset_blueprint( NULL );
 
@@ -473,7 +473,7 @@ int object::load_xml_struct( xml_node &n, bool quick )
 			if ( ! quick && ! cn.child( "description" ).empty( ) )
 			{
 				desc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
-				add_description( str, 4, desc );
+				sim->add_description( str, 4, desc );
 				delete [ ] desc;
 			}
 		}
@@ -503,7 +503,7 @@ int object::load_xml_struct( xml_node &n, bool quick )
 						init = strdecdata( NULL, cn.child( "description" ).child( "initialization" ).text( ).get( ) );
 						obs = cn.child( "documentation" ).attribute( "observe" ).as_bool( );
 
-						add_description( str, type, desc, init,
+						sim->add_description( str, type, desc, init,
 										 cn.child( "documentation" ).attribute( "initialization" ).as_bool( ),
 										 obs );
 						cv->observe = obs;
@@ -523,7 +523,7 @@ int object::load_xml_struct( xml_node &n, bool quick )
 							val = strtodsplit( cns.child( "values" ).text( ).get( ), ',' );
 
 							if ( val.size( ) > 1 )
-								new sense( str, type, 0, val.size( ), &val, integer );
+								new sense( str, sim, type, 0, val.size( ), &val, integer );
 						}
 						else
 							if ( type == 0 )
@@ -541,7 +541,7 @@ int object::load_xml_struct( xml_node &n, bool quick )
 									val = strtodsplit( sn.text( ).get( ), ',' );
 
 									if ( val.size( ) > 1 )
-										new sense( str, type, i - 1, val.size( ), &val, integer );
+										new sense( str, sim, type, i - 1, val.size( ), &val, integer );
 								}
 							}
 					}
@@ -1005,7 +1005,7 @@ bool object::load_insts( const char *file_name, FILE *f )
 	}
 
 	if ( up == NULL )	// this is the root, and therefore the end of the loading
-		set_blueprint( blueprint, this );
+		set_blueprint( sim->blueprint, this );
 
 	return true;
 }
@@ -1155,12 +1155,13 @@ void simulation::save_single( variable *v )
 SENSITIVITY CONSTRUCTOR
 Add or update sensitivity settings for a model element
 ******************************************************************************/
-sense::sense( const char *lab, int _param, int _lag, int _numv,
+sense::sense( const char *lab, simulation *_sim, int _param, int _lag, int _numv,
 			  vector < double > *_v, bool _integer )
 {
 	int i;
 	sense *cs;
 
+	sim = _sim;
 	param = _param;
 	lag = _lag;
 	integer = _integer;
@@ -1187,11 +1188,11 @@ sense::sense( const char *lab, int _param, int _lag, int _numv,
 		v = NULL;
 	}
 
-	if ( rsense == NULL )
-		rsense = this;
+	if ( sim->rsense == NULL )
+		sim->rsense = this;
 	else
 	{
-		for ( cs = rsense; cs->next != NULL; cs = cs->next );
+		for ( cs = sim->rsense; cs->next != NULL; cs = cs->next );
 		cs->next = this;
 	}
 
@@ -1210,12 +1211,12 @@ sense::~sense( void )
 	delete [ ] label;
 	delete [ ] v;
 
-	if ( rsense != NULL )
+	if ( sim->rsense != NULL )
 	{
-		for ( cs = rsense, ps = NULL; cs != this && cs != NULL; ps = cs, cs = cs->next );
+		for ( cs = sim->rsense, ps = NULL; cs != this && cs != NULL; ps = cs, cs = cs->next );
 
-		if ( cs == rsense )
-			rsense = next;
+		if ( cs == sim->rsense )
+			sim->rsense = next;
 		else
 			if ( cs == this && ps != NULL )
 				ps->next = next;
@@ -1249,10 +1250,13 @@ void simulation::empty_sensitivity( sense *cs )
 RESULT::CONSTRUCTOR
 	Open the appropriate file for saving the results
 ***************************************************/
-result::result( const char *fname, const char *fmode, bool dozip, bool docsv )
+result::result( const char *fname, const char *fmode, simulation *_sim,
+				bool _dozip, bool _docsv )
 {
-	this->docsv = docsv;
-	this->dozip = dozip;		// save local class flag
+	sim = _sim;
+	docsv = _docsv;
+	dozip = _dozip;
+
 	if ( dozip )
 		fz = gzopen( fname, fmode );
 	else
@@ -1363,7 +1367,7 @@ void result::title_recursive( object *r, int header )
 
 	if ( r->up == NULL )
 	{
-		for ( cv = cemetery; cv != NULL; cv = cv->next )
+		for ( cv = sim->cemetery; cv != NULL; cv = cv->next )
 		{
 			if ( dozip )
 			{
@@ -1477,7 +1481,7 @@ void result::data_recursive( object *r, int i )
 
 	if ( r->up == NULL )
 	{
-		for ( cv = cemetery; cv != NULL; cv = cv->next )
+		for ( cv = sim->cemetery; cv != NULL; cv = cv->next )
 		{
 			if ( cv->start <= i && cv->end >= i && ! is_nan( cv->data[ i - cv->start ] ) )
 			{

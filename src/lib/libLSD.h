@@ -307,10 +307,7 @@ struct simulation						// simulation container class
 	int hyper_count_var( const char *lab );
 	int run_sim( void );
 	int worker_errors( void );
-	long nodes2create( object *parent, const char *lab, long numNodes );
-	object *check_net_struct( object *caller, const char *nodeLab, bool noErr = false );
 	void add_cemetery( variable *v );
-	void copy_descendant( object *from, object *to );
 	void empty_blueprint( void );
 	void empty_cemetery( void );
 	void empty_description( void );
@@ -333,22 +330,22 @@ struct simulation						// simulation container class
 
 struct object							// simulation model object class
 {
-	char *label;
+	bool *del_flag;						// address of flag to signal deletion
 	bool deleting;						// indicate deletion in process
 	bool to_compute;
+	b_mapT b_map;						// fast lookup map to object bridges
+	char *label;
 	int acounter;
 	int lstCntUpd;						// period of last counter update
 	bridge *b;
+	netNode *node;						// pointer to network node data structure
+	object *hook;
 	object *next;
 	object *up;
-	variable *v;
-	object *hook;
-	netNode *node;						// pointer to network node data structure
-	void *cext;							// pointer to C++ object extension
-	bool *del_flag;						// address of flag to signal deletion
-
 	o_vecT hooks;
-	b_mapT b_map;						// fast lookup map to object bridges
+	simulation *sim;					// simulation where object is contained
+	variable *v;
+	void *cext;							// pointer to C++ object extension
 	v_mapT v_map;						// fast lookup map to variables
 
 #ifndef _NP_
@@ -409,6 +406,7 @@ struct object							// simulation model object class
 	long init_small_world_net( const char *lab, long numNodes, long outDeg, double rho );
 	long init_star_net( const char *lab, long numNodes );
 	long init_uniform_net( const char *lab, long numNodes, long outDeg );
+	long nodes2create( const char *lab, long numNodes );
 	int load_xml_insts( xml_node &n, n_mapT &node_map, set < int > &warning );
 	int load_xml_struct( xml_node &n, bool quick );
 	int logic_op_code( const char *lop, const char *errmsg );
@@ -420,6 +418,7 @@ struct object							// simulation model object class
 	object *add_n_objects2( const char *lab, int n, object *ex, int t_update = -1 );
 	object *add_node_net( long id = -1, const char *nodeName = "", bool silent = false );
 	object *add_obj( const char *label, int num = 1, bool propagate = false );
+	object *check_net_struct( const char *nodeLab, bool noErr = false );
 	object *draw_node_net( const char *lab );
 	object *draw_rnd( const char *lo );
 	object *draw_rnd( const char *lo, const char *lv, int lag = 0 );
@@ -448,16 +447,18 @@ struct object							// simulation model object class
 	void chg_var_lab( const char *old, const char *n );
 	void collect_cemetery( variable *caller = NULL );
 	void collect_inst( o_setT &list );
+	void copy_descendant( object *to );
 	void delete_link_net( netLink *ptr );
 	void delete_net( const char *lab );
 	void delete_node_net( void );
 	void delete_obj( variable *caller = NULL );
 	void delete_var( const char *lab );
 	void empty( void );
-	void init( object *_up, const char *_label, bool _to_compute = true );
+	void init( object *_up, simulation *_sim, const char *_label, bool _to_compute = true );
 	void name_node_net( const char *nodeName );
 	void recreate_maps( void );
 	void replicate( int num, bool propagate = false );
+	void save_description( FILE *f );
 	void save_insts( FILE *f );
 	void save_struct( FILE *f, const char *tab );
 	void save_xml_struct( xml_node &pn, long &node_serial, bool quick );
@@ -469,11 +470,11 @@ struct bridge							// descendant-object container class
 {
 	bool copy;							// just a temporary copy
 	bool counter_updated;
+	bridge *next;
 	char *blabel;
 	char *search_var;					// current initialized search variable
-	bridge *next;
-	object *head;
 	n_mapT t_map;						// turbosearch map
+	object *head;
 	o_mapT o_map;						// fast lookup map to object values
 
 	bridge( const char *lab );			// constructor
@@ -494,6 +495,9 @@ struct variable							// model numeric element (variable,
 	bool save;
 	bool savei;
 	bool under_computation;
+	double *data;
+	double *val;
+	double deb_cnd_val;
 	int deb_cond;
 	int delay;
 	int delay_range;
@@ -505,10 +509,8 @@ struct variable							// model numeric element (variable,
 	int period;
 	int period_range;
 	int start;
-	double *data;
-	double *val;
-	double deb_cnd_val;
 	object *up;
+	simulation *sim;					// simulation where object is contained
 	variable *next;
 
 #ifndef _NP_
@@ -524,7 +526,8 @@ struct variable							// model numeric element (variable,
 	double fun( object *caller );
 	inline double chk_dummy( const char *lab );
 	void empty( bool no_lock = false );
-	void init( object *_up, const char *_label, int _param = -1, int _num_lag = -1, double *_val = NULL );
+	void init( object *_up, simulation *_sim, const char *_label, int _param = -1,
+			   int _num_lag = -1, double *_val = NULL );
 };
 
 struct description						// model-element description class
@@ -548,9 +551,10 @@ struct netNode							// network node data class
 	long serNum;						// node serial number (for file save/export)
 	netLink *first;						// first link in the linked list of links
 	netLink *last;						// last link in the linked list of links
+	object *up;							// object containing node
 
-	netNode( long nodeId = -1, const char nodeName[ ] = "", double nodeProb = 1 );
-										// constructor
+	netNode( object *_up, long nodeId = -1, const char nodeName[ ] = "",
+			 double nodeProb = 1 );		// constructor
 	~netNode( void );					// destructor
 };
 
@@ -561,8 +565,8 @@ struct netLink							// individual outgoing network link class
 	int time;							// time of creation/update
 	netLink *next;						// pointer to next link (NULL if last )
 	netLink *prev;						// pointer to previous link (NULL if first )
-	object *ptrFrom;					// network node containing the link
-	object *ptrTo;						// pointer to destination number
+	object *from;						// network node containing the link
+	object *to;							// pointer to destination number
 
 	netLink( object *origNode, object *destNode, double linkWeight = 0, double destProb = 1 );
 										// constructor
@@ -589,8 +593,9 @@ struct sense							// sensitivity analysis container class
 	int numv;							// number of values to test
 	int param;							// element type
 	sense *next;						// sensitivity analysis chain of elements
+	simulation *sim;					// simulation where object is contained
 
-	sense( const char *lab, int _param, int _lag, int _numv = 0,
+	sense( const char *lab, simulation *_sim, int _param, int _lag, int _numv = 0,
 		   vector < double > *_v = NULL, bool _integer = false );// constructor
 	~sense( void );						// destructor
 
@@ -612,6 +617,7 @@ struct worker							// multi-thread parallel worker data structure
 	int signum;
 	jmp_buf env;
 	mutex lock;
+	simulation *sim;					// simulation where object is contained
 	thread thr;
 	thread::id thr_id;
 	variable *var;
@@ -620,7 +626,7 @@ struct worker							// multi-thread parallel worker data structure
 	~worker( void );					// destructor
 
 	bool check( void );					// handle worker problems
-	static void signal_wrapper( int signun );	// wrapper for signal_handler
+	static void signal_wrapper( int signun );// wrapper for signal_handler
 	void cal( variable *var );			// start worker calculation
 	void cal_worker( void );			// worker thread code
 	void signal( int signum );			// signal handler
@@ -638,14 +644,15 @@ struct lsdstack							// simulation-stack element class
 
 struct result							// results file container class
 {
-	FILE *f;							// uncompressed file pointer
 	bool docsv;							// comma separated .csv text format
 	bool dozip;							// compressed file flag
 	bool firstCol;						// flag for first column in line
 	gzFile fz;							// compressed file pointer
+	simulation *sim;					// simulation where object is contained
+	FILE *f;							// uncompressed file pointer
 
-	result( const char *fname, const char *fmode, bool dozip = false, bool docsv = false );
-										// constructor
+	result( const char *fname, const char *fmode, simulation *_sim,
+			bool _dozip = false, bool _docsv = false );// constructor
 	~result( void );					// destructor
 
 	void data( object *root, int initstep, int endtstep = 0 );	// write data

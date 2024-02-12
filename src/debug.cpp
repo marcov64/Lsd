@@ -2040,12 +2040,12 @@ void show_tmp_vars( object *r, bool update )
 			if ( r->node != NULL )
 			{
 				for ( curLnk = r->node->first; curLnk != NULL; curLnk = curLnk->next )
-					if ( curLnk == sim.n_values[ j ] && curLnk->ptrTo != NULL && curLnk->ptrTo->node != NULL )
+					if ( curLnk == sim.n_values[ j ] && curLnk->to != NULL && curLnk->to->node != NULL )
 					{
-						if ( curLnk->ptrTo->label != NULL )
-							cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%ld)\"", curLnk->ptrTo->label, curLnk->ptrTo->node->id );
+						if ( curLnk->to->label != NULL )
+							cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%ld)\"", curLnk->to->label, curLnk->to->node->id );
 						else
-							cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"(%ld)\"", curLnk->ptrTo->node->id );
+							cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"(%ld)\"", curLnk->to->node->id );
 
 						n = 1;
 						break;
@@ -2064,8 +2064,8 @@ void show_tmp_vars( object *r, bool update )
 
 		if ( n > 0 && curLnk != NULL )
 		{
-			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, curLnk->ptrTo->label );
-			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, curLnk->ptrTo->label );
+			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->to->node->id, curLnk->to->label );
+			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->to->node->id, curLnk->to->label );
 		}
 
 		cmd( "$in.n.t window create end -window $in.n.t.n$i" );
@@ -2238,7 +2238,7 @@ void show_neighbors( object *r, bool update )
 	for ( i = 1, curLnk = r->node->first; curLnk != NULL; curLnk = curLnk->next, ++i )
 	{
 		cmd( "ttk::frame $N.n.t.n$i" );
-		cmd( "ttk::label $N.n.t.n$i.nodeto -width 6 -text %ld", curLnk->ptrTo->node->id );
+		cmd( "ttk::label $N.n.t.n$i.nodeto -width 6 -text %ld", curLnk->to->node->id );
 		cmd( "ttk::label $N.n.t.n$i.pad -width 2" );
 		if ( curLnk->weight != 0 )
 			cmd( "ttk::label $N.n.t.n$i.weight -width 12 -style hl.TLabel -text %g", curLnk->weight );
@@ -2251,10 +2251,10 @@ void show_neighbors( object *r, bool update )
 		cmd( "mouse_wheel $N.n.t.n$i.pad" );
 		cmd( "mouse_wheel $N.n.t.n$i.weight" );
 
-		cmd( "bind $N.n.t.n$i.nodeto <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, r->label );
+		cmd( "bind $N.n.t.n$i.nodeto <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->to->node->id, r->label );
 
 		if ( curLnk->weight != 0 )
-			cmd( "bind $N.n.t.n$i.weight <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->ptrTo->node->id, r->label );
+			cmd( "bind $N.n.t.n$i.weight <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->to->node->id, r->label );
 
 		cmd( "$N.n.t window create end -window $N.n.t.n$i" );
 		cmd( "$N.n.t insert end \\n" );

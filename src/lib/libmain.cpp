@@ -139,9 +139,12 @@ void __attribute__( ( destructor ) ) lib_destructor( )
  *********************************/
 simulation::simulation( void )
 {
-#ifndef _NP_
-	parallel_ready = true;
-#endif
+	root = new object;
+	root->init( NULL, this, "Root" );
+	add_description( "Root" );
+	latt = new lattice;
+	reset_blueprint( NULL );
+	init_map( );					// set equation look-up map
 
 	conf_name = new char[ strlen( "" ) + 1 ];
 	conf_path = new char[ strlen( "" ) + 1 ];
@@ -156,14 +159,10 @@ simulation::simulation( void )
 	strcpy( stack_log->label, "LSD Simulation Manager" );
 	stack_level = 0;
 
-	root = new object;
-	root->init( NULL, "Root" );
-	add_description( "Root" );
-	latt = new lattice;
-	reset_blueprint( NULL );
-	init_map( );					// set equation look-up map
-
+#ifndef _NP_
+	parallel_ready = true;
 	lock_guard < mutex > lock( lock_init_sim );// parallel semaphore
+#endif
 
 	sim = sims.size( );				// index por this sim
 	sims.push_back( this );			// add to list of existing simulations

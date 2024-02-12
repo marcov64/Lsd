@@ -38,7 +38,7 @@ int simulation::run_sim( void )
 {
 	bool batch_sequential_loop = false;
 	char *path_out = NULL, *name_out, sep_out[ 2 ], fname[ MAX_PATH_LENGTH ], bar_done[ 2 * BAR_DONE_SIZE ];
-	int perc_done, last_done;
+	int i, perc_done, last_done;
 	FILE *f;
 	clock_t start, end, last_update;
 	result *rf;				// pointer for results files (may be zipped or not)
@@ -55,7 +55,11 @@ int simulation::run_sim( void )
 
 	// start multi-thread workers
 	if ( parallel_mode )
+	{
 		workers = new worker[ max_threads ];
+		for ( i = 0; i < max_threads; ++i )
+			workers[ i ].sim = this;
+	}
 #else
 	if ( search_parallel( root ) )
 		plog( "\nWarning: parallel mode is not supported under current configuration\n" );
@@ -265,7 +269,7 @@ int simulation::run_sim( void )
 					if ( fast_mode < 2 )
 						plog( "Saving results to file %s... ", fname );
 
-					rf = new result( fname, "wt", dozip, docsv );	// create results file object
+					rf = new result( fname, "wt", this, dozip, docsv );	// create results file object
 					rf->title( root, 1 );						// write header
 					rf->data( root, 0, eff_t );					// write all data
 					delete rf;									// close file and delete object
@@ -296,11 +300,11 @@ int simulation::run_sim( void )
 
 					if ( run == 1 && grandTotal && ! add_to_tot )
 					{
-						rf = new result( fname, "wt", dozip, docsv );// create results file object
+						rf = new result( fname, "wt", this, dozip, docsv );// create results file object
 						rf->title( root, 0 );					// write header
 					}
 					else
-						rf = new result( fname, "a", dozip, docsv );// add results object to existing file
+						rf = new result( fname, "a", this, dozip, docsv );// add results object to existing file
 
 					rf->data( root, eff_t );					// write current data data
 					delete rf;									// close file and delete object

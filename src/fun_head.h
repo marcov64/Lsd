@@ -137,11 +137,11 @@ const bool no_pointer_init = true;
 #define MODELBEGIN \
 	double variable::fun( object *caller ) \
 	{ \
-		if ( quit == 2 ) \
+		if ( sim->quit == 2 ) \
 			return val[ 0 ]; \
 		if ( eq_func == NULL ) \
-			eq_func = chk_eq( label ); \
-		return chk_res( ( eq_func )( caller, this ), label ); \
+			eq_func = sim->chk_eq( label ); \
+		return sim->chk_res( ( eq_func )( caller, this ), label ); \
 	} \
 	void simulation::init_map( ) \
 	{ \
@@ -470,8 +470,8 @@ const bool no_pointer_init = true;
 #define DRAWPROB_NODE( X ) ( CHK_NODE_DBL( p ) p->node->prob = X )
 #define DRAWPROB_NODES( O, X ) ( CHK_PTR_DBL( O ) CHK_NODE_DBL( O ) O->node->prob = X )
 #define DRAWPROB_LINK( L, X ) ( CHK_LNK_DBL( L ) L->probTo = X )
-#define LINKTO( L ) ( CHK_LNK_OBJ( L ) L->ptrTo )
-#define LINKFROM( L ) ( CHK_LNK_OBJ( L ) L->ptrFrom )
+#define LINKTO( L ) ( CHK_LNK_OBJ( L ) L->to )
+#define LINKFROM( L ) ( CHK_LNK_OBJ( L ) L->from )
 #define WRITE_NODEID( X ) ( CHK_NODE_DBL( p ) p->node->id = X )
 #define WRITE_NODEIDS( O, X ) ( CHK_PTR_DBL( O ) CHK_NODE_DBL( O ) O->node->id = X )
 #define WRITE_NODENAME( X ) ( p->name_node_net( ( char * ) X ) )
@@ -495,7 +495,7 @@ const bool no_pointer_init = true;
 #define DELETE_NETS( O, X ) ( CHK_PTR_VOID( O ) O->delete_net( ( char * ) X ) )
 #define DELETE_NODE ( p->delete_node_net( ) )
 #define DELETE_NODES( O ) ( CHK_PTR_VOID( O ) O->delete_node_net( ) )
-#define DELETE_LINK( L ) ( CHK_LNK_VOID( L ) L->ptrFrom->delete_link_net( L ) )
+#define DELETE_LINK( L ) ( CHK_LNK_VOID( L ) L->from->delete_link_net( L ) )
 #define SHUFFLE_NET( X ) ( p->shuffle_nodes_net( ( char * ) X ) )
 #define SHUFFLE_NETS( O, X ) ( CHK_PTR_OBJ( O ) O->shuffle_nodes_net( ( char * ) X ) )
 

@@ -385,7 +385,6 @@ void runtime_run( void );
 void save_cells( object *r, const char *lab );
 void save_data1( void );
 void save_datazip( void );
-void save_description( object *r, FILE *f );
 void save_eqfile( FILE *f );
 void save_pos( object * );
 void scan_used_lab( const char *lab, const char *parWnd = NULL );

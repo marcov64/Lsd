@@ -468,7 +468,7 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 
 	// add model structure
 	xml_node strNode = cfgNode.append_child( "structure" );
-	save_xml_struct( sim.root, strNode, node_serial, quick );
+	sim.root->save_xml_struct( strNode, node_serial, quick );
 
 	// add equation file name and content
 	xml_node eqfNode = cfgNode.append_child( "equation_file" );
@@ -547,7 +547,7 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 
 	if ( ! quick )
 	{
-		cd = search_description( label );
+		cd = sim->search_description( label );
 
 		if ( ! strwsp( cd->text ) )
 		{
@@ -603,10 +603,10 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 						lnkwht += ",";
 					}
 
-					if ( curl->ptrTo == NULL || curl->ptrTo->node == NULL )
+					if ( curl->to == NULL || curl->to->node == NULL )
 						continue;				// ignore invalid link
 
-					lnkto += to_string( curl->ptrTo->node->serNum );
+					lnkto += to_string( curl->to->node->serNum );
 					lnkwht += to_string( "%.15g", curl->weight );
 
 					if ( curl->weight != 0 )
@@ -633,7 +633,7 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 	// save son objects recursively
 	for ( cb = b; cb != NULL; cb = cb->next )
 		if ( cb->head == NULL )
-			blueprint->search( cb->blabel )->save_xml_struct( n, node_serial, quick );
+			sim->blueprint->search( cb->blabel )->save_xml_struct( n, node_serial, quick );
 		else
 			cb->head->save_xml_struct( n, node_serial, quick );
 
@@ -721,7 +721,7 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 			continue;
 
 		// add description text
-		cd = search_description( cv->label );
+		cd = sim->search_description( cv->label );
 
 		if ( ! strwsp( cd->text ) || ! strwsp( cd->init ) )
 		{
@@ -755,7 +755,7 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 		}
 
 		// add sensitivity analysis data
-		for ( cs = rsense; cs != NULL; cs = cs->next )
+		for ( cs = sim->rsense; cs != NULL; cs = cs->next )
 			if ( strcmp( cs->label, cv->label ) == 0 )
 			{
 				if ( cs->integer )
@@ -832,9 +832,9 @@ bool save_configuration( const char *dest_path, const char *rname, const char *e
 
 	if ( f != NULL )
 	{
-		root->save_struct( f, "" );
+		sim.root->save_struct( f, "" );
 		fprintf( f, "\nDATA\n" );
-		root->save_insts( f );
+		sim.root->save_insts( f );
 
 		fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d", sim.last_run, sim.seed, sim.last_t );
 
@@ -844,7 +844,7 @@ bool save_configuration( const char *dest_path, const char *rname, const char *e
 		fprintf( f, "\nEQUATION %s\nMODELREPORT %s\n", eq_file, sim.rep_file );
 
 		fprintf( f, "\nDESCRIPTION\n\n" );
-		save_description( sim.root, f );
+		sim.root->save_description( f );
 
 		fprintf( f, "\nDOCUOBSERVE\n" );
 		for ( cd = sim.descr; cd != NULL; cd = cd->next )
@@ -870,40 +870,40 @@ bool save_configuration( const char *dest_path, const char *rname, const char *e
 
 /****************************************************
 OBJECT::SAVE_STRUCT (LEGACY)
-	Save the object structure tree under object r
+	Save the object structure tree under this object
 	to a LEGACY text file
 ****************************************************/
-void save_struct( object *r, FILE *f, const char *tab )
+void object::save_struct( FILE *f, const char *tab )
 {
 	char tab1[ MAX_ELEM_LENGTH ];
 	bridge *cb;
 	variable *cv;
 
-	if ( r->up == NULL )
+	if ( up == NULL )
 		fprintf( f, "\t\n" );
 
 	strcpyn( tab1, tab, MAX_ELEM_LENGTH );
-	fprintf( f, "%sLabel %s\n%s{\n", tab1, r->label, tab1 );
+	fprintf( f, "%sLabel %s\n%s{\n", tab1, label, tab1 );
 	strcatn( tab1, "\t", MAX_ELEM_LENGTH );
 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		fprintf( f, "%sSon: %s\n", tab1, cb->blabel );
 
 		if ( cb->head == NULL )
-			save_struct( sim.blueprint->search( cb->blabel ), f, tab1 );
+			sim->blueprint->search( cb->blabel )->save_struct( f, tab1 );
 		else
-			save_struct( cb->head, f, tab1 );
+			cb->head->save_struct( f, tab1 );
 	}
 
-	for ( cv = r->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		if ( cv->param == 0 )
 			fprintf( f, "%sVar: %s\n", tab1, cv->label );
-		
+
 		if ( cv->param == 1 )
 			fprintf( f, "%sParam: %s\n", tab1, cv->label );
-		
+
 		if ( cv->param == 2)
 			fprintf( f, "%sFunc: %s\n", tab1, cv->label );
 	}
@@ -1020,22 +1020,22 @@ SAVE_DESCRIPTION (LEGACY)
 	save the descriptions of elements of tree under
 	this object to a LEGACY text file
 ****************************************************/
-void save_description( object *r, FILE *f )
+void object::save_description( FILE *f )
 {
 	bridge *cb;
 	variable *cv;
 	description *cd;
 
-	cd = sim.search_description( r->label );
+	cd = sim->search_description( label );
 
 	if ( strwsp( cd->init ) )
 		fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ] );
 	else
 		fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 0 ], cd->init, desc_key_words[ 1 ] );
 
-	for ( cv = r->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		cd = sim.search_description( cv->label );
+		cd = sim->search_description( cv->label );
 
 		if ( ( cv->param != 1 && cv->num_lag == 0 ) || strwsp( cd->init ) )
 			fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ] );
@@ -1043,9 +1043,9 @@ void save_description( object *r, FILE *f )
 			fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ], cd->init, desc_key_words[ 1 ] );
 	}
 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 		if ( cb->head != NULL )
-			save_description( cb->head, f );
+			cb->head->save_description( f );
 }
 
 
@@ -1319,7 +1319,7 @@ int load_sensitivity( FILE *f )
 		if ( ( cs = search_sensitivity( lab, lag ) ) != NULL )
 			delete cs;
 
-		new sense( lab, param, lag, numv, &v, integer );
+		new sense( lab, & sim, param, lag, numv, & v, integer );
 	}
 
 	return 0;

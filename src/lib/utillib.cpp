@@ -342,7 +342,7 @@ void simulation::reset_blueprint( object *r )
 {
 	empty_blueprint( );
 	blueprint = new object;
-	blueprint->init( NULL, "Root" );
+	blueprint->init( NULL, this, "Root" );
 	set_blueprint( blueprint, r );
 }
 

@@ -1720,7 +1720,7 @@ object *operate( object *r )
 			else								// edit sensitivity analysis data
 			{
 				if ( ( cs = search_sensitivity( cv->label, lag ) ) == NULL )
-					cs = new sense( cv->label, cv->param, lag );
+					cs = new sense( cv->label, & sim, cv->param, lag );
 
 				i = cs->dataentry( );
 
@@ -2963,7 +2963,7 @@ object *operate( object *r )
 
 			plog( "\nSaving results to file %s... ", out_file );
 
-			rf = new result( out_file, "wt", dozip, docsv );// create results file object
+			rf = new result( out_file, "wt", & sim, dozip, docsv );// create results file object
 			rf->title( sim.root, 1 );					// write header
 			rf->data( sim.root, 0, sim.eff_t );			// write all data
 			delete rf;									// close file and delete object

@@ -162,10 +162,10 @@ inline double variable::chk_dummy( const char *lab )
 				cv->up->cal( up, lab, 0, true );
 		}
 		else
-			error_hard( "updater variable not found",
-						"check updater variable name or create it in model structure",
-						false,
-						"variable '%s' is missing", lab );
+			sim->error_hard( "updater variable not found",
+							 "check updater variable name or create it in model structure",
+							 false,
+							 "variable '%s' is missing", lab );
 	}
 
 	return val[ 0 ];

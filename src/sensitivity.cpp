@@ -95,7 +95,7 @@ int sense::dataentry( void )
 	cmd( "focus .sens.t.t" );
 
 	// reset random number generator to make random numbers reproducible
-	init_random( seed );
+	init_random( sim->seed );
 
 	choice = 0;
 

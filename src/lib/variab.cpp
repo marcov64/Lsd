@@ -159,6 +159,7 @@ variable::variable( void )
 	period = 1;
 	period_range = 0;
 	up = NULL;
+	sim = NULL;
 	next = NULL;
 	eq_func = NULL;
 }
@@ -196,6 +197,7 @@ variable::variable( const variable &v )
 	period = v.period;
 	period_range = v.period_range;
 	up = v.up;
+	sim = v.sim;
 	next = v.next;
 	eq_func = v.eq_func;
 }
@@ -204,7 +206,8 @@ variable::variable( const variable &v )
 /****************************************************
 INIT
 ****************************************************/
-void variable::init( object *_up, const char *_label, int _param, int _num_lag, double *_val )
+void variable::init( object *_up, simulation *_sim, const char *_label,
+					 int _param, int _num_lag, double *_val )
 {
 	int i;
 
@@ -214,6 +217,7 @@ void variable::init( object *_up, const char *_label, int _param, int _num_lag, 
 #endif
 
 	up = _up;
+	sim = _sim;
 	param = _param;
 	num_lag = _num_lag;
 	label = new char[ strlen( _label ) + 1 ];
@@ -238,7 +242,7 @@ void variable::empty( bool no_lock )
 
 #ifndef _NP_
 
-	if ( running && ! no_lock )
+	if ( sim->running && ! no_lock )
 	{
 		// prevent concurrent use by more than one thread
 		rec_lguardT lock( parallel_comp );
@@ -246,12 +250,12 @@ void variable::empty( bool no_lock )
 
 #endif
 
-	if ( running && ( label == NULL || val == NULL ) )
+	if ( sim->running && ( label == NULL || val == NULL ) )
 	{
-		error_hard( "internal problem in LSD",
-					"if error persists, please contact developers",
-					true,
-					"failure while deallocating variable %s", label );
+		sim->error_hard( "internal problem in LSD",
+						 "if error persists, please contact developers",
+						 true,
+						 "failure while deallocating variable %s", label );
 		return;
 	}
 
@@ -278,11 +282,11 @@ double variable::cal( object *caller, int lag )
 
 	if ( param == 1 )
 	{
-		if ( deb_set && t == deb_t && ( deb_mode == 'w' || deb_mode == 'W' ) )
+		if ( deb_set && sim->t == sim->deb_t && ( deb_mode == 'w' || deb_mode == 'W' ) )
 		{
-			watch_trigger = true;
-			watch_write_mode = false;
-			strncpy( watch_elem, label, MAX_ELEM_LENGTH );
+			sim->watch_trigger = true;
+			sim->watch_write_mode = false;
+			strncpy( sim->watch_elem, label, MAX_ELEM_LENGTH );
 		}
 
 		return val[ 0 ];				// it's a parameter, ignore lags
@@ -296,14 +300,14 @@ double variable::cal( object *caller, int lag )
 	if ( param == 0 )					// it's a variable
 	{
 		// invalid lag or value not saved yet
-		if ( lag > num_lag && ( no_saved || ! ( save || savei ) || t - lag < start ) )
+		if ( lag > num_lag && ( sim->no_saved || ! ( save || savei ) || sim->t - lag < start ) )
 		{
 			eff_lag = lag;
 			goto error;
 		}
 
 		// effective lag for variables (compatible with older versions)
-		eff_lag = ( last_update < t ) ? lag - 1 : lag;
+		eff_lag = ( last_update < sim->t ) ? lag - 1 : lag;
 
 		// check lag error and return past value if available
 		if ( lag != 0 )
@@ -313,13 +317,13 @@ double variable::cal( object *caller, int lag )
 
 			if ( eff_lag > num_lag )	// in principle, invalid lag
 			{
-				if ( no_saved || ! ( save || savei ) )	// and not saved
+				if ( sim->no_saved || ! ( save || savei ) )	// and not saved
 					goto error;
 				else
-					if ( lag > t - start )	// or before there are saved values
+					if ( lag > sim->t - start )	// or before there are saved values
 						goto error;
 
-				return data[ t - lag - start ]; // use saved past value
+				return data[ sim->t - lag - start ]; // use saved past value
 			}
 			else
 				return val[ eff_lag ];	// use regular past value
@@ -327,23 +331,23 @@ double variable::cal( object *caller, int lag )
 		else
 		{
 			// already calculated this time step or not to be calculated this time step
-			if ( last_update >= t || t < next_update )
+			if ( last_update >= sim->t || sim->t < next_update )
 			{
-				if ( deb_set && t == deb_t && ( deb_mode == 'w' || deb_mode == 'W' ) )
+				if ( deb_set && sim->t == sim->deb_t && ( deb_mode == 'w' || deb_mode == 'W' ) )
 				{
-					watch_trigger = true;
-					watch_write_mode = false;
-					strncpy( watch_elem, label, MAX_ELEM_LENGTH );
+					sim->watch_trigger = true;
+					sim->watch_write_mode = false;
+					strncpy( sim->watch_elem, label, MAX_ELEM_LENGTH );
 				}
 
 				return( val[ 0 ] );
 			}
 #ifndef _NP_
 			// wait for computation of this variable by other threads
-			if ( parallel_mode && ! dummy )
+			if ( sim->parallel_mode && ! dummy )
 				guard.lock( );
 
-			if ( last_update >= t )		// recheck if not computed during lock
+			if ( last_update >= sim->t )		// recheck if not computed during lock
 				return( val[ 0 ] );
 #endif
 		}
@@ -361,7 +365,7 @@ double variable::cal( object *caller, int lag )
 
 #ifndef _NP_
 		// wait for computation of this function by other threads
-		if ( parallel_mode && ! dummy )
+		if ( sim->parallel_mode && ! dummy )
 			 guard.lock( );
 #endif
 	}
@@ -370,58 +374,59 @@ double variable::cal( object *caller, int lag )
 
 	if ( under_computation )
 	{
-		error_hard( "deadlock",
-					"check your equation code to prevent this situation\nprobably using the variable lagged value instead",
-					true,
-					"equation for '%s' (object '%s') requested \nits own value while computing its current value", label, up->label );
+		sim->error_hard( "deadlock",
+						 "check your equation code to prevent this situation\nprobably using the variable lagged value instead",
+						 true,
+						 "equation for '%s' (object '%s') requested \nits own value while computing its current value", label, up->label );
 		return 0;
 	}
 
 	under_computation = true;
 
 #ifndef _NP_
-	if ( fast_mode == 0 && ! parallel_mode )
+	if ( sim->fast_mode == 0 && ! sim->parallel_mode )
 #else
-	if ( fast_mode == 0 )
+	if ( sim->fast_mode == 0 )
 #endif
 	{
 		// add the Variable to the stack
-		if ( stack_log != NULL && stack_log->next == NULL )
+		if ( sim->stack_log != NULL && sim->stack_log->next == NULL )
 		{
-			++stack_level;
-			stack_log->next = new lsdstack;
-			stack_log->next->next = NULL;
-			stack_log->next->prev = stack_log;
-			strcpyn( stack_log->next->label, label, MAX_ELEM_LENGTH );
-			stack_log->next->ns = stack_level;
-			stack_log->next->vs = this;
-			stack_log = stack_log->next;
+			sim->stack_level++;
+			sim->stack_log->next = new lsdstack;
+			sim->stack_log->next->next = NULL;
+			sim->stack_log->next->prev = sim->stack_log;
+			strcpyn( sim->stack_log->next->label, label, MAX_ELEM_LENGTH );
+			sim->stack_log->next->ns = sim->stack_level;
+			sim->stack_log->next->vs = this;
+			sim->stack_log = sim->stack_log->next;
 		}
 		else
 		{
-			error_hard( "internal problem in LSD",
-						"if error persists, please contact developers",
-						true,
-						"failure while pushing '%s' (object '%s')", label, up->label );
+			sim->error_hard( "internal problem in LSD",
+							 "if error persists, please contact developers",
+							 true,
+							 "failure while pushing '%s' (object '%s')", 
+							 label, up->label );
 			return 0;
 		}
 
 #ifndef _NW_
-		if ( stack_info >= stack_level && ( ! prof_obs_only || observe ) )
-			start_profile[ stack_level - 1 ] = pstart = clock( );
+		if ( sim->stack_info >= sim->stack_level && ( ! sim->prof_obs_only || observe ) )
+			start_profile[ sim->stack_level - 1 ] = pstart = clock( );
 		else
-			if ( prof_aggr_time )
+			if ( sim->prof_aggr_time )
 				pstart = clock( );
 #endif
 	}
 #ifndef _NW_
 	else
-		if ( prof_aggr_time )
+		if ( sim->prof_aggr_time )
 			pstart = clock( );
 #endif
 
 	// Compute the Variable's equation
-	user_exception = true;			// allow distinguishing among internal & user exceptions
+	sim->user_exception = true;		// allow distinguishing among internal & user exceptions
 	try								// do it while catching exceptions to avoid obscure aborts
 	{
 		app = fun( caller );
@@ -429,91 +434,91 @@ double variable::cal( object *caller, int lag )
 	catch ( exception& exc )
 	{
 		plog( "\n\nAn exception was detected while computing the equation \nfor '%s' requested by object '%s'", label, caller == NULL ? "(none)" : caller->label );
-		quit = 2;
+		sim->quit = 2;
 		throw;
 	}
-	catch ( int p )		// avoid general catch of error_hard() throwing to lsdmain()
+	catch ( int p )					// avoid general catch of error_hard throwing to lsdmain
 	{
 		throw p;
 	}
 	catch ( ... )
 	{
-		if ( quit != 2 )			// error message not already presented?
+		if ( sim->quit != 2 )		// error message not already presented?
 		{
 			plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s' requested by object '%s'", label, caller == NULL ? "(none)" : caller->label );
-			quit = 2;
+			sim->quit = 2;
 			throw;
 		}
 		else
 		{
 			app = NAN;				// mark result as invalid
-			use_nan = true;			// and allow propagation
+			sim->use_nan = true;	// and allow propagation
 		}
 	}
-	user_exception = false;
+	sim->user_exception = false;
 
 	for ( i = 0; i < num_lag; ++i ) // scale down the past values
 		val[ num_lag - i ] = val[ num_lag - i - 1 ];
 
 	val[ 0 ] = app;
 
-	last_update = t;
+	last_update = sim->t;
 
 	// choose next update step for special updating variables
 	if ( period > 1 || period_range > 0 )
 	{
-		next_update = t + period;
+		next_update = sim->t + period;
 		if ( period_range > 0 )
 			next_update += rnd_int( 0, period_range );
 	}
 
 #ifndef _NP_
-	if ( fast_mode == 0 && ! parallel_mode )
+	if ( sim->fast_mode == 0 && ! sim->parallel_mode )
 #else
-	if ( fast_mode == 0 )
+	if ( sim->fast_mode == 0 )
 #endif
 	{
 #ifndef _NW_
-		if ( prof_aggr_time )
+		if ( sim->prof_aggr_time )
 		{
 			pend = clock( );
 			time = pend - pstart;
 
-			if ( ( ! prof_obs_only || observe ) && time > prof_min_msecs )
+			if ( ( ! sim->prof_obs_only || observe ) && time > sim->prof_min_msecs )
 			{
 				string var_name = label;
-				prof[ var_name ].ticks += time;
-				prof[ var_name ].comp++;
+				sim->prof[ var_name ].ticks += time;
+				sim->prof[ var_name ].comp++;
 			}
 		}
 
-		if ( stack_info >= stack_level && ( ! prof_obs_only || observe ) )
+		if ( sim->stack_info >= sim->stack_level && ( ! sim->prof_obs_only || observe ) )
 		{
-			end_profile[ stack_level - 1 ] = prof_aggr_time ? pend : clock( );
+			end_profile[ sim->stack_level - 1 ] = sim->prof_aggr_time ? pend : clock( );
 
-			time = 1000 * ( end_profile[ stack_level - 1 ] - start_profile[ stack_level - 1 ] ) / CLOCKS_PER_SEC;
+			time = 1000 * ( end_profile[ sim->stack_level - 1 ] - start_profile[ sim->stack_level - 1 ] ) / CLOCKS_PER_SEC;
 
-			if ( time >= prof_min_msecs )
+			if ( time >= sim->prof_min_msecs )
 			{
 				set_lab_tit( this );
 				plog_tag( "\n%-12.12s(%-.10s)\t=", "prof1", label, lab_tit );
 				plog_tag( "%.4g\t", "highlight", val[ 0 ] );
 				plog( "t=" );
-				plog_tag( "%d\t", "highlight", t );
+				plog_tag( "%d\t", "highlight", sim->t );
 				plog( "msecs=" );
 				plog_tag( "%d\t", "highlight", time );
 				plog( "stack=" );
-				plog_tag( "%d\t", "highlight", stack_level );
-				plog( "caller=%s%s%s", caller == NULL ? "SYSTEM" : caller->label, caller == NULL ? "" : "\ttrigger=", caller == NULL || stack_log == NULL || stack_log->prev == NULL ? "" : stack_log->prev->label );
+				plog_tag( "%d\t", "highlight", sim->stack_level );
+				plog( "caller=%s%s%s", caller == NULL ? "SYSTEM" : caller->label, caller == NULL ? "" : "\ttrigger=", caller == NULL || sim->stack_log == NULL || sim->stack_log->prev == NULL ? "" : sim->stack_log->prev->label );
 			}
 		}
 
 		// update debug log file
-		if ( log_file_ptr != NULL && t >= log_start && t <= log_stop )
-			fprintf( log_file_ptr, "%s\t= %g\t(t=%d sim=%d)\n", label, val[ 0 ], t, sim );
+		if ( log_file_ptr != NULL && sim->t >= log_start && sim->t <= log_stop )
+			fprintf( log_file_ptr, "%s\t= %g\t(t=%d sim=%d)\n", label, val[ 0 ], sim->t, sim->sim );
 
 		// open the debugger if required
-		if ( deb_set && t == deb_t && liblnk.deb != NULL && ( watch_trigger || ( deb_cond == 0 && ( deb_mode == 'd' || deb_mode == 'W' || deb_mode == 'R' ) ) ) )
+		if ( deb_set && sim->t == sim->deb_t && liblnk.deb != NULL && ( sim->watch_trigger || ( deb_cond == 0 && ( deb_mode == 'd' || deb_mode == 'W' || deb_mode == 'R' ) ) ) )
 			liblnk.deb( ( object * ) up, caller, label, &val[ 0 ], false, "" );
 		else
 		{
@@ -537,28 +542,30 @@ double variable::cal( object *caller, int lag )
 						liblnk.deb( ( object * ) up, caller, label, &val[ 0 ], false, "" );
 					break;
 				default:
-					error_hard( "internal problem in LSD",
-								"if error persists, please contact developers",
-								true,
-								"conditional debug '%d' in variable '%s'", deb_cond, label );
+					sim->error_hard( "internal problem in LSD",
+									 "if error persists, please contact developers",
+									 true,
+									 "conditional debug '%d' in variable '%s'", 
+									 deb_cond, label );
 					return -1;
 			}
 		}
 #endif
 		// remove the element from the stack
-		if ( stack_log != NULL && stack_log->prev != NULL )
+		if ( sim->stack_log != NULL && sim->stack_log->prev != NULL )
 		{
-			stack_log = stack_log->prev;
-			delete stack_log->next;
-			stack_log->next = NULL;
-			stack_level--;
+			sim->stack_log = sim->stack_log->prev;
+			delete sim->stack_log->next;
+			sim->stack_log->next = NULL;
+			sim->stack_level--;
 		}
 		else
 		{
-			error_hard( "internal problem in LSD",
-						"if error persists, please contact developers",
-						true,
-						"failure while poping '%s' (in object '%s')", label, up->label );
+			sim->error_hard( "internal problem in LSD",
+							 "if error persists, please contact developers",
+							 true,
+							 "failure while poping '%s' (in object '%s')", 
+							 label, up->label );
 			return 0;
 		}
 	}
@@ -566,13 +573,13 @@ double variable::cal( object *caller, int lag )
 	under_computation = false;
 
 	// if there is a pending deletion, try to do it now
-	if ( wait_delete != NULL )
+	if ( sim->wait_delete != NULL )
 	{
 #ifndef _NP_
 		if ( guard.owns_lock( ) )
 			guard.unlock( );					// release lock
 #endif
-		wait_delete->delete_obj( this );
+		sim->wait_delete->delete_obj( this );
 	}
 
 	return app; // by default the requested value is the last one, not yet computed
@@ -582,15 +589,17 @@ double variable::cal( object *caller, int lag )
 	eff_lag = ( param == 0 ) ? eff_lag : lag;
 
 	if ( eff_lag > 0 )
-		error_hard( "invalid lag used",
-					"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
-					false,
-					"variable or function '%s' (object '%s') requested \nwith lag=%d but declared with lag=%d\nPossible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the offender equation to request the value of '%s' with lag=%d maximum, or\n- enable USE_SAVED and mark '%s' to be saved (variables only)", label, up->label, eff_lag, num_lag, label, eff_lag, label, num_lag, label );
+		sim->error_hard( "invalid lag used",
+						 "check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
+						 false,
+						 "variable or function '%s' (object '%s') requested \nwith lag=%d but declared with lag=%d\nPossible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the offender equation to request the value of '%s' with lag=%d maximum, or\n- enable USE_SAVED and mark '%s' to be saved (variables only)", 
+						 label, up->label, eff_lag, num_lag, label, eff_lag, 
+						 label, num_lag, label );
 	else
-		error_hard( "invalid lag used",
-					"check your code (used lags in equation) to prevent negative lag",
-					false,
-					"variable or function '%s' (object '%s') requested \nwith lag=%d but negative lags are not allowed here\nPossible fix: use positive lag instead", label, up->label, eff_lag );
+		sim->error_hard( "invalid lag used",
+						 "check your code (used lags in equation) to prevent negative lag",
+						 false,
+						 "variable or function '%s' (object '%s') requested \nwith lag=%d but negative lags are not allowed here\nPossible fix: use positive lag instead", label, up->label, eff_lag );
 
 	return 0;
 }
@@ -628,12 +637,12 @@ void worker::cal_worker( void )
 			run.wait( lock_worker, [ this ]{ return ! free; }  );
 
 			// exit if shutdown or continue if already updated
-			if ( running && var != NULL && var->last_update < t )
+			if ( running && var != NULL && var->last_update < sim->t )
 			{	// prevent parallel computation of the same variable
 				rec_uniqlT guard_var( var->parallel_comp );
 
 				// recheck if not computed during lock
-				if ( var->last_update >= t )
+				if ( var->last_update >= sim->t )
 					goto end;
 
 				if ( var->under_computation )
@@ -643,7 +652,7 @@ void worker::cal_worker( void )
 					snprintf( err_msg3, MAX_BUFF_SIZE, "check your code to prevent this situation" );
 					user_excpt = true;
 
-					if ( worker_errors( ) == 0 )
+					if ( sim->worker_errors( ) == 0 )
 					{
 						errored = true;
 						throw;
@@ -670,7 +679,7 @@ void worker::cal_worker( void )
 				}
 				catch ( ... )
 				{
-					if ( error_hard_thread )
+					if ( sim->error_hard_thread )
 						pexcpt = nullptr;
 					else
 					{
@@ -680,7 +689,7 @@ void worker::cal_worker( void )
 						snprintf( err_msg3, MAX_BUFF_SIZE, "check your code to prevent this situation" );
 					}
 
-					if ( worker_errors( ) == 0 )
+					if ( sim->worker_errors( ) == 0 )
 					{
 						errored = true;
 						throw;
@@ -699,12 +708,12 @@ void worker::cal_worker( void )
 					var->val[ var->num_lag - i ] = var->val[ var->num_lag - i - 1 ];
 				var->val[ 0 ] = app;
 
-				var->last_update = t;
+				var->last_update = sim->t;
 
 				// choose next update step for special updating variables
 				if ( var->period > 1 || var->period_range > 0 )
 				{
-					var->next_update = t + var->period;
+					var->next_update = sim->t + var->period;
 					if ( var->period_range > 0 )
 						var->next_update += rnd_int( 0, var->period_range );
 				}
@@ -712,10 +721,10 @@ void worker::cal_worker( void )
 				var->under_computation = false;
 
 				// if there is a pending object deletion, try to do it now
-				if ( wait_delete != NULL )
+				if ( sim->wait_delete != NULL )
 				{
 					guard_var.unlock( );					// release lock
-					wait_delete->delete_obj( var );
+					sim->wait_delete->delete_obj( var );
 				}
 			}
 
@@ -723,13 +732,13 @@ void worker::cal_worker( void )
 			var = NULL;
 			free = true;
 			// create context to send signal to update scheduler if needed
-			if ( ! worker_ready )
+			if ( ! sim->worker_ready )
 			{
 				unique_lock< mutex > lock_update( update_lock );
 				// recheck if still needed
-				if ( ! worker_ready )
+				if ( ! sim->worker_ready )
 				{
-					worker_ready = true;
+					sim->worker_ready = true;
 					upd_workers.notify_one( );
 				}
 			}
@@ -738,7 +747,7 @@ void worker::cal_worker( void )
 	catch ( ... )
 	{
 		// only capture exception if not already done
-		if ( ! error_hard_thread && pexcpt != nullptr )
+		if ( ! sim->error_hard_thread && pexcpt != nullptr )
 		{
 			pexcpt = current_exception( );
 			snprintf( err_msg1, MAX_BUFF_SIZE, "parallel computation problem" );
@@ -763,6 +772,7 @@ worker::worker( void )
 	pexcpt = nullptr;
 	signum = -1;
 	var = NULL;
+	sim = NULL;
 	strcpy( err_msg1, "" );
 	strcpy( err_msg2, "" );
 	strcpy( err_msg3, "" );
@@ -829,9 +839,9 @@ void worker::signal( int sig )
 	}
 
 	if ( var != NULL && var->label != NULL	)
-		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'\n(simulation %d). Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, var->label, var->up->label != NULL ? var->up->label : "(none)", sim );
+		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'\n(simulation %d). Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, var->label, var->up->label != NULL ? var->up->label : "(none)", sim->sim );
 	else
-		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received by a parallel worker thread\n(simulation %d).\nDisable parallel computation to prevent this situation.", signame, sim );
+		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received by a parallel worker thread\n(simulation %d).\nDisable parallel computation to prevent this situation.", signame, sim->sim );
 
 	// signal & kill thread
 	signum = sig;
@@ -879,10 +889,10 @@ bool worker::check( void )
 
 	// only process first worker crash
 	lock_guard< mutex > lock_crash( crash_lock );
-	if ( ! worker_crashed )
+	if ( ! sim->worker_crashed )
 	{
-		worker_crashed = true;
-		user_exception = user_excpt;
+		sim->worker_crashed = true;
+		sim->user_exception = user_excpt;
 
 		if ( signum >= 0 )
 		{
@@ -891,27 +901,30 @@ bool worker::check( void )
 		}
 		else
 		{
-			if ( error_hard_thread )
-				error_hard( error_hard_msg1, error_hard_msg3, true, error_hard_msg2 );
+			if ( sim->error_hard_thread )
+				sim->error_hard( sim->error_hard_msg1, sim->error_hard_msg3, true,
+								 sim->error_hard_msg2 );
 			else
 			{
 				if ( pexcpt != nullptr )
 				{
-					error_hard( err_msg1, err_msg3, true, err_msg2 );
+					sim->error_hard( err_msg1, err_msg3, true, err_msg2 );
 					rethrow_exception( pexcpt );
 				}
 				else
 				{
 					if ( var != NULL && var->label != NULL )
-						error_hard( "parallel computation problem",
-									"disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
-									true,
-									"while computing variable '%s' (object '%s') a multi-threading worker crashed", var->label, var->up->label != NULL ? var->up->label : "(none)" );
+						sim->error_hard( "parallel computation problem",
+										 "disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
+										 true,
+										 "while computing variable '%s' (object '%s') a multi-threading worker crashed",
+										 var->label, 
+										 var->up->label != NULL ? var->up->label : "(none)" );
 					else
-						error_hard( "parallel computation problem",
-									"disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
-									true,
-									"multi-threading worker crashed" );
+						sim->error_hard( "parallel computation problem",
+										 "disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
+										 true,
+										 "multi-threading worker crashed" );
 				}
 			}
 		}
