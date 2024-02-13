@@ -507,7 +507,7 @@ void scan_using_lab( const char *lab, const char *parWnd )
 	cmd( "done $list b \"destroytop $list\"" );		// done button
 
 	cv = sim.root->search_var( sim.root, lab );
-	find_using( sim.root, cv, NULL, & found );
+	sim.root->find_using( cv, NULL, & found );
 
 	cmd( "set res [ $list.l.l size ]" );
 	if ( get_int( "res" ) != 0 )

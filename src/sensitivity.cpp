@@ -27,7 +27,7 @@ and functions are stored in FILELIB.CPP.
 DATAENTRY_SENSITIVITY
 Get values for sensitivity analysis
 ******************************************************************************/
-int sense::dataentry( void )
+int sensitivity::dataentry( void )
 {
 	int i, j, res, nPar, samples;
 	double temp, start, end;
@@ -214,11 +214,11 @@ int sense::dataentry( void )
 SEARCH_SENSITIVITY
 Find element in sensitivity data linked list
 ******************************************************************************/
-sense *search_sensitivity( const char *lab, int lag )
+sensitivity *search_sensitivity( const char *lab, int lag )
 {
-	sense *cs;
+	sensitivity *cs;
 
-	for ( cs = sim.rsense; cs != NULL; cs = cs->next )
+	for ( cs = sim.sens; cs != NULL; cs = cs->next )
 		if ( ! strcmp( cs->label, lab ) &&
 			 ( cs->param == 1 || cs->lag == lag ) )
 			 break;
@@ -234,9 +234,9 @@ Calculate the sensitivity space size
 long num_sensitivity_points( void )
 {
 	long nv;
-	sense *cs;
+	sensitivity *cs;
 
-	for ( nv = 1, cs = sim.rsense; cs != NULL; cs = cs->next )	// scan the linked-list
+	for ( nv = 1, cs = sim.sens; cs != NULL; cs = cs->next )	// scan the linked-list
 		nv *= cs->numv;	// update the number of variables
 
 	return nv;
@@ -250,9 +250,9 @@ Calculate the number of variables to test
 int num_sensitivity_variables( void )
 {
 	int nv;
-	sense *cs;
+	sensitivity *cs;
 
-	for ( nv = 0, cs = sim.rsense; cs != NULL; cs = cs->next)
+	for ( nv = 0, cs = sim.sens; cs != NULL; cs = cs->next)
 		if ( cs->numv > 1 )				// count variables with 2 or more values
 			nv++;
 
@@ -281,28 +281,28 @@ Options concerning initialization for sensitivity analysis are not saved into
 the model configuration files, and are therefore lost when closing the LSD model
 program if not saved in a .sa file.
 *******************************************************************************/
-object *sensitivity_parallel( object *o, sense *s )
+object *object::sensitivity_parallel( sensitivity *s )
 {
 	int i;
-	sense *cs;
-	object *cur = o;
+	sensitivity *cs;
+	object *cur;
 	variable *cv;
 
 	if ( s->next != NULL )
 	{
-		for ( i = 0; i < s->numv; ++i )
+		for ( cur = this, i = 0; i < s->numv; ++i )
 		{
 			s->curv = i;
-			cur = sensitivity_parallel( cur, s->next );
+			cur = cur->sensitivity_parallel( s->next );
 		}
 
 		return cur;
 	}
 
-	for ( i = 0; i < s->numv; ++i )
+	for ( cur = this, i = 0; i < s->numv; ++i )
 	{
 		s->curv = i;
-		for ( cs = sim.rsense; cs != NULL; cs = cs->next )
+		for ( cs = sim->sens; cs != NULL; cs = cs->next )
 		{
 			cv = cur->search_var( cur, cs->label );
 			if ( cs->param == 0 )				// handle lags > 0
@@ -343,10 +343,11 @@ file. In practice, this allows for the Monte Carlo sampling of the parameter
 space, which is often necessary when the s.a. space is too big to be analyzed
 in its entirety.
 *******************************************************************************/
-void sensitivity_sequential( int *findex, sense *s, double probSampl, const char *dest_path )
+void sensitivity_sequential( int *findex, sensitivity *s, double probSampl,
+							 const char *dest_path )
 {
 	int i, nv;
-	sense *cs;
+	sensitivity *cs;
 	object *cur;
 	variable *cv;
 
@@ -364,7 +365,7 @@ void sensitivity_sequential( int *findex, sense *s, double probSampl, const char
 	for ( i = 0; i < s->numv && ! stop; ++i )
 	{
 		s->curv = i;
-		for ( nv = 1, cs = sim.rsense; cs != NULL; cs = cs->next )
+		for ( nv = 1, cs = sim.sens; cs != NULL; cs = cs->next )
 		{
 			nv *= cs->numv;
 			cv = sim.root->search_var( sim.root, cs->label );
@@ -1109,10 +1110,10 @@ void design::clear_design( void )
 LOAD_DESIGN_DATA
 	Load the design data from sensitivity object
 ******************************************************************************/
-void design::load_design_data( sense *rsens, int n )
+void design::load_design_data( sensitivity *rsens, int n )
 {
 	int h, i, j, nVal;
-	sense *cs;
+	sensitivity *cs;
 
 	// allocate memory for data
 	par = new int [ k ];			// array of variable type (parameter / lagged variable )
@@ -1176,7 +1177,7 @@ DESIGN
 		samples = -1: use extended predefined sample size (n2)
 		factors = 0: use automatic DoE size
 ******************************************************************************/
-design::design( sense *rsens, int typ, const char *fname, const char *dest_path,
+design::design( sensitivity *rsens, int typ, const char *fname, const char *dest_path,
 				int findex, int samples, int factors, int jump, int trajs )
 {
 	int h, i, j, kTab, doeRange, poolSz;

@@ -21,29 +21,81 @@ element textual descriptions.
 #include "lib/libLSD.h"				// LSD library classes
 
 
-/***************************************************
-SEARCH_DESCRIPTION
-***************************************************/
-description *simulation::search_description( const char *lab, bool add_missing )
+/*****************************************************************************
+DESCRIPTION (CONSTRUCTOR)
+******************************************************************************/
+const char *descr_types[ 5 ] = { "Variable", "Parameter", "Function", "",
+								 "Object" };
+
+description::description( const char *_label, int _type, const char *_text,
+						   const char *_init, bool _initial, bool _observe )
 {
-	description *cd;
-	variable *cv;
+	char *str;
+	int i, j;
 
-	for ( cd = descr; cd != NULL; cd = cd->next )
-		if ( ! strcmp( cd->label, lab ) )
-			return cd;
+	label = new char [ strlen( _label ) + 1 ];
+	strcln( label, _label, strlen( _label ) + 1 );
 
-	if ( ! add_missing )
-		return NULL;
+	if ( _type < 0 || _type > 4 )
+		_type = 3;
 
-	if ( root->search( lab ) != NULL )
-		return add_description( lab );
+	type = new char [ strlen( descr_types[ _type ] ) + 1 ];
+	strcpy( type, descr_types[ _type ] );
 
-	cv = root->search_var( NULL, lab );
-	if ( cv != NULL )
-		return add_description( lab, cv->param );
+	if ( ! strwsp( _text ) && strstr( _text, LEGACY_NO_DESCR ) == NULL &&
+		 ( strlen( NO_DESCR ) == 0 || strstr( _text, NO_DESCR ) == NULL ) )
+	{
+		for ( i = 0; i < DESC_KEY_NUM; ++i )
+		{
+			str = ( char * ) strstr( _text, desc_key_words[ i ] );
+			if ( str != NULL )
+				for( j = 0; j < ( int ) strlen( desc_key_words[ i ] ); ++j, ++str )
+					*str = tolower( *str );
+		}
 
-	return NULL;
+		text = new char [ strlen( _text ) + 1 ];
+		strcln( text, _text, strlen( _text ) + 1 );
+	}
+	else
+	{
+		text = new char[ strlen( NO_DESCR ) + 1 ];
+		strcln( text, NO_DESCR, strlen( NO_DESCR ) + 1 );
+	}
+
+	if ( ! strwsp( _init ) )
+	{
+		str = ( char * ) strstr( _init, desc_key_words[ 1 ] );
+		if ( str != NULL )
+			for( j = 0; j < ( int ) strlen( desc_key_words[ 1 ] ); ++j, ++str )
+				*str = tolower( *str );
+
+		init = new char [ strlen( _init ) + 1 ];
+		strcln( init, _init, strlen( _init ) + 1 );
+	}
+	else
+		init = NULL;
+
+	if ( _type != 4 )
+	{
+		initial = _initial;
+		observe = _observe;
+	}
+	else
+		initial = observe = false;
+
+	next = NULL;
+}
+
+
+/*****************************************************************************
+~DESCRIPTION (DESTRUCTOR)
+******************************************************************************/
+description::~description( void )
+{
+	delete [ ] label;
+	delete [ ] type;
+	delete [ ] text;
+	delete [ ] init;
 }
 
 
@@ -52,86 +104,19 @@ ADD_DESCRIPTION
 ***************************************************/
 description *simulation::add_description( const char *lab, int type, const char *text, const char *init, bool initial, bool observe )
 {
-	bool obj = false;
-	char *str, ltype[ MAX_ELEM_LENGTH ];
-	int i, j;
 	description *cd;
 
 	if ( search_description( lab, false ) != NULL )	// already exists?
 		return change_description( lab, NULL, type, text, init, initial, observe );
 
 	if ( descr == NULL )
-		cd = descr = new description;
+		cd = descr = new description( lab, type, text, init, initial, observe );
 	else
 	{
 		for ( cd = descr; cd->next != NULL; cd = cd->next );
-		cd->next = new description;
+		cd->next = new description( lab, type, text, init, initial, observe );
 		cd = cd->next;
 	}
-
-	cd->next = NULL;
-	cd->label = new char [ strlen( lab ) + 1 ];
-	strcln( cd->label, lab, strlen( lab ) + 1 );
-
-	switch ( type )
-	{
-		case 0:
-		default:
-			strcpy( ltype, "Variable" );
-			break;
-		case 1:
-			strcpy( ltype, "Parameter" );
-			break;
-		case 2:
-			strcpy( ltype, "Function" );
-			break;
-		case 4:
-			strcpy( ltype, "Object" );
-			obj = true;
-	}
-
-	cd->type = new char [ strlen( ltype ) + 1 ];
-	strcpy( cd->type, ltype );
-
-	if ( ! strwsp( text ) && strstr( text, LEGACY_NO_DESCR ) == NULL && ( strlen( NO_DESCR ) == 0 || strstr( text, NO_DESCR ) == NULL ) )
-	{
-		for ( i = 0; i < DESC_KEY_NUM; ++i )
-		{
-			str = ( char * ) strstr( text, desc_key_words[ i ] );
-			if ( str != NULL )
-				for( j = 0; j < ( int ) strlen( desc_key_words[ i ] ); ++j, ++str )
-					*str = tolower( *str );
-		}
-
-		cd->text = new char [ strlen( text ) + 1 ];
-		strcln( cd->text, text, strlen( text ) + 1 );
-	}
-	else
-	{
-		cd->text = new char[ strlen( NO_DESCR ) + 1 ];
-		strcln( cd->text, NO_DESCR, strlen( NO_DESCR ) + 1 );
-	}
-
-	if ( ! strwsp( init ) )
-	{
-		str = ( char * ) strstr( init, desc_key_words[ 1 ] );
-		if ( str != NULL )
-			for( j = 0; j < ( int ) strlen( desc_key_words[ 1 ] ); ++j, ++str )
-				*str = tolower( *str );
-
-		cd->init = new char [ strlen( init ) + 1 ];
-		strcln( cd->init, init, strlen( init ) + 1 );
-	}
-	else
-		cd->init = NULL;
-
-	if ( ! obj )
-	{
-		cd->initial = initial;
-		cd->observe = observe;
-	}
-	else
-		cd->initial = cd->observe = false;
 
 	return cd;
 }
@@ -293,10 +278,6 @@ void simulation::empty_description( void )
 	for ( cd = descr; cd != NULL; cd = cd1 )
 	{
 		cd1 = cd->next;
-		delete [ ] cd->label;
-		delete [ ] cd->type;
-		delete [ ] cd->text;
-		delete [ ] cd->init;
 		delete cd;
 	}
 
@@ -305,12 +286,38 @@ void simulation::empty_description( void )
 
 
 /***************************************************
+SEARCH_DESCRIPTION
+***************************************************/
+description *simulation::search_description( const char *lab, bool add_missing )
+{
+	description *cd;
+	variable *cv;
+
+	for ( cd = descr; cd != NULL; cd = cd->next )
+		if ( ! strcmp( cd->label, lab ) )
+			return cd;
+
+	if ( ! add_missing )
+		return NULL;
+
+	if ( root->search( lab ) != NULL )
+		return add_description( lab );
+
+	cv = root->search_var( NULL, lab );
+	if ( cv != NULL )
+		return add_description( lab, cv->param );
+
+	return NULL;
+}
+
+
+/***************************************************
 HAS_DESCR_TEXT
 ***************************************************/
-bool has_descr_text( description *d )
+bool description::has_descr_text( void )
 {
-	if ( d != NULL && d->text != NULL && strlen( d->text ) > 0 && strstr( d->text, LEGACY_NO_DESCR ) == NULL && ( strlen( NO_DESCR ) == 0 || strstr( d->text, NO_DESCR ) == NULL ) )
+	if ( text != NULL && strlen( text ) > 0 && strstr( text, LEGACY_NO_DESCR ) == NULL && ( strlen( NO_DESCR ) == 0 || strstr( text, NO_DESCR ) == NULL ) )
 		return true;
-
-	return false;
+	else
+		return false;
 }

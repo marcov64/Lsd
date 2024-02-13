@@ -403,7 +403,7 @@ void simulation::unload_configuration( bool full )
 	empty_cemetery( );							// garbage collection
 
 	save_ok = true;								// valid structure to save
-	rsense = NULL;								// no sense data
+	sens = NULL;								// no sensitivity data
 
 	eff_t = 0;									// reset steps counter
 	nodesSerial = 0;							// reset network node serial number
@@ -523,7 +523,7 @@ int object::load_xml_struct( xml_node &n, bool quick )
 							val = strtodsplit( cns.child( "values" ).text( ).get( ), ',' );
 
 							if ( val.size( ) > 1 )
-								new sense( str, sim, type, 0, val.size( ), &val, integer );
+								new sensitivity( str, sim, type, 0, val.size( ), &val, integer );
 						}
 						else
 							if ( type == 0 )
@@ -541,7 +541,7 @@ int object::load_xml_struct( xml_node &n, bool quick )
 									val = strtodsplit( sn.text( ).get( ), ',' );
 
 									if ( val.size( ) > 1 )
-										new sense( str, sim, type, i - 1, val.size( ), &val, integer );
+										new sensitivity( str, sim, type, i - 1, val.size( ), &val, integer );
 								}
 							}
 					}
@@ -1135,7 +1135,7 @@ void simulation::save_single( variable *v )
 	rec_lguardT lock( v->parallel_comp );
 #endif
 
-	set_lab_tit( v );
+	v->set_lab_tit( );
 	snprintf( fn, MAX_PATH_LENGTH, "%s_%s-%d_%d_seed-%d.res", v->label, v->lab_tit, v->start, v->end, seed - 1 );
 	f = fopen( fn, "wt" );			// use text mode for Windows better compatibility
 
@@ -1155,11 +1155,11 @@ void simulation::save_single( variable *v )
 SENSITIVITY CONSTRUCTOR
 Add or update sensitivity settings for a model element
 ******************************************************************************/
-sense::sense( const char *lab, simulation *_sim, int _param, int _lag, int _numv,
-			  vector < double > *_v, bool _integer )
+sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, int _lag,
+						  int _numv, vector < double > *_v, bool _integer )
 {
 	int i;
-	sense *cs;
+	sensitivity *cs;
 
 	sim = _sim;
 	param = _param;
@@ -1188,11 +1188,11 @@ sense::sense( const char *lab, simulation *_sim, int _param, int _lag, int _numv
 		v = NULL;
 	}
 
-	if ( sim->rsense == NULL )
-		sim->rsense = this;
+	if ( sim->sens == NULL )
+		sim->sens = this;
 	else
 	{
-		for ( cs = sim->rsense; cs->next != NULL; cs = cs->next );
+		for ( cs = sim->sens; cs->next != NULL; cs = cs->next );
 		cs->next = this;
 	}
 
@@ -1204,19 +1204,19 @@ sense::sense( const char *lab, simulation *_sim, int _param, int _lag, int _numv
 SENSITIVITY DESTRUCTOR
 Add or update sensitivity settings for a model element
 ******************************************************************************/
-sense::~sense( void )
+sensitivity::~sensitivity( void )
 {
-	sense *cs, *ps;
+	sensitivity *cs, *ps;
 
 	delete [ ] label;
 	delete [ ] v;
 
-	if ( sim->rsense != NULL )
+	if ( sim->sens != NULL )
 	{
-		for ( cs = sim->rsense, ps = NULL; cs != this && cs != NULL; ps = cs, cs = cs->next );
+		for ( cs = sim->sens, ps = NULL; cs != this && cs != NULL; ps = cs, cs = cs->next );
 
-		if ( cs == sim->rsense )
-			sim->rsense = next;
+		if ( cs == sim->sens )
+			sim->sens = next;
 		else
 			if ( cs == this && ps != NULL )
 				ps->next = next;
@@ -1228,15 +1228,15 @@ sense::~sense( void )
 EMPTY_SENSITIVITY
 Deallocate sensitivity analysis memory
 ******************************************************************************/
-void simulation::empty_sensitivity( sense *cs )
+void simulation::empty_sensitivity( sensitivity *cs )
 {
 	if ( cs == NULL )
 	{
-		if ( rsense == NULL )
+		if ( sens == NULL )
 			return;
 
-		cs = rsense;
-		rsense = NULL;
+		cs = sens;
+		sens = NULL;
 	}
 
 	if ( cs->next != NULL )
@@ -1309,7 +1309,7 @@ void result::title_recursive( object *r, int header )
 	{
 		if ( cv->save == 1 )
 		{
-			set_lab_tit( cv );
+			cv->set_lab_tit( );
 			if ( ( ! strcmp( cv->lab_tit, "1" ) || ! strcmp( cv->lab_tit, "1_1" ) || ! strcmp( cv->lab_tit, "1_1_1" ) || ! strcmp( cv->lab_tit, "1_1_1_1" ) ) && cv->up->hyper_next( ) == NULL )
 				single = true;					// prevent adding suffix to single objects
 

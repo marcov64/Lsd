@@ -13,28 +13,28 @@
  *************************************************************/
 
 /*************************************************************
-RUN_TIME.CPP
+RUNTIME.CPP
 Contains initialization and management of run-time plotting
 
 The main functions contained here are:
 
-- void prepare_plot( object *r, int id_sim )
+- void object::prepare_plot( int id_sim )
 Checks is there are LSD variables to plot. If not, returns immediately. Otherwise
 initialize the run time global variables. Namely, the vector of the labels for
 the variables of plot. The plot window is initialized according to the id_sim name
 
-- void count( object *r, int *i );
+- void object::count_plot_vars( int *i );
 Recursive function that increments i of one for any variable to plot.
 
-- void assign( object *r, int *i, const char *lab );
+- void object::assign_plot_vars( int *i, const char *lab );
 Create a list of Variables to plot and create the list of labels (adding
 the indexes if necessary) to be used in the plot.
 
 - void init_plot( int i );
 create the canvas for the plot, the lines, button, labels, etc.
 
-- void plot_rt( variable *v )
-the function used run time to plot the value of variable v
+- void variable::plot_runtime( )
+the function used run time to plot the value of this variable
 *************************************************************/
 
 #include "LSD.h"
@@ -48,14 +48,14 @@ variable **list_var;
 /**************************************
 PREPARE_PLOT
 **************************************/
-void prepare_plot( object *r, int id_sim )
+void object::prepare_plot( int id_sim )
 {
 	int i = 0;
 	char lab[ MAX_ELEM_LENGTH ];
 
 	ymax = ymin = 0;
 	strcpy( lab, "" );
-	count( r, &i );
+	count_plot_vars( &i );
 
 	if ( i == 0 )
 		return;
@@ -64,7 +64,7 @@ void prepare_plot( object *r, int id_sim )
 	list_var = new variable *[ i ];
 	old_val = new double [ i ];
 	i = 0;
-	assign( r, &i, lab );
+	assign_plot_vars( &i, lab );
 
 	if ( add_rt_plot_tab( ".plt", id_sim ) )
 		init_plot( i );
@@ -72,57 +72,57 @@ void prepare_plot( object *r, int id_sim )
 
 
 /**************************************
-COUNT
+COUNT_PLOT_VARS
 **************************************/
-void count( object *r, int *i )
+void object::count_plot_vars( int *count )
 {
 	bridge *cb;
-	object *c;
-	variable *a;
+	object *cur;
+	variable *cv;
 
-	for ( a = r->v; a != NULL; a = a->next)
-		if ( a->plot == 1 )
-			*i = *i + 1;
+	for ( cv = v; cv != NULL; cv = cv->next)
+		if ( cv->plot == 1 )
+			++( *count );
 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
-		for ( c = cb->head; c != NULL; c = c->next )
-			count( c, i );
+	for ( cb = b; cb != NULL; cb = cb->next )
+		for ( cur = cb->head; cur != NULL; cur = cur->next )
+			cur->count_plot_vars( count );
 }
 
 
 /**************************************
-ASSIGN
+ASSIGN_PLOT_VARS
 **************************************/
-void assign( object *r, int *i, const char *lab )
+void object::assign_plot_vars( int *i, const char *lab )
 {
 	char cur_lab[ MAX_ELEM_LENGTH ];
 	int j;
 	bridge *cb;
-	object *c, *c1;
-	variable *a;
+	object *cur, *cur1;
+	variable *cv;
 
-	for ( a = r->v; a != NULL; a = a->next )
-		if ( a->plot == 1 )
+	for ( cv = v; cv != NULL; cv = cv->next )
+		if ( cv->plot == 1 )
 		{
-			list_var[ *i ] = a;		// assigns the address of a to the list to plot
-			cmd( "lappend tp \"%s%s\"", a->label, lab );
-			*i = *i + 1;
+			list_var[ *i ] = cv;	// assigns the address of a to the list to plot
+			cmd( "lappend tp \"%s%s\"", cv->label, lab );
+			++( *i );
 		}
 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			continue;
 
-		c = cb->head;
-		if ( c->next != NULL )		// multiple instances
-			for ( j = 1, c1 = c; c1 != NULL; c1 = go_brother( c1 ), ++j )
+		cur = cb->head;
+		if ( cur->next != NULL )		// multiple instances
+			for ( j = 1, cur1 = cur; cur1 != NULL; cur1 = go_brother( cur1 ), ++j )
 			{
 				snprintf( cur_lab, MAX_ELEM_LENGTH, "%s#%d", lab, j );
-				assign( c1, i, cur_lab );
+				cur1->assign_plot_vars( i, cur_lab );
 			}
 		else						// unique instance
-			assign( c, i, lab );
+			cur->assign_plot_vars( i, lab );
 	}
 }
 
@@ -387,9 +387,9 @@ void init_plot( int num )
 
 
 /**************************************
-PLOT_RT
+PLOT_RUNTIME
 **************************************/
-void plot_rt( variable *v )
+void variable::plot_runtime( void )
 {
 	bool relabel = false;
 	int height, p_digits;
@@ -407,12 +407,12 @@ void plot_rt( variable *v )
 
 	if ( ymax == ymin )			// very initial setting
 	{
-		if ( v->val[ 0 ] > 0 )
-			ymax = round_digits( v->val[ 0 ] * ( 1 + MARG ), p_digits );
+		if ( val[ 0 ] > 0 )
+			ymax = round_digits( val[ 0 ] * ( 1 + MARG ), p_digits );
 		else
-			ymax = round_digits( v->val[ 0 ] * ( 1 - MARG ), p_digits );
+			ymax = round_digits( val[ 0 ] * ( 1 - MARG ), p_digits );
 
-		ymin = round_digits( v->val[ 0 ], p_digits );
+		ymin = round_digits( val[ 0 ], p_digits );
 
 		if ( ymax == ymin )
 			ymax += MARG;
@@ -420,9 +420,9 @@ void plot_rt( variable *v )
 		relabel = true;
 	}
 
-	if ( v->val[ 0 ] >= ymax )
+	if ( val[ 0 ] >= ymax )
 	{
-		value = v->val[ 0 ] * ( v->val[ 0 ] > 0 ? 1 + MARG_CONST : 1 - MARG_CONST );
+		value = val[ 0 ] * ( val[ 0 ] > 0 ? 1 + MARG_CONST : 1 - MARG_CONST );
 		value = round_digits( value, p_digits );
 
 		scale = ( ymax - ymin ) / ( value - ymin );
@@ -433,9 +433,9 @@ void plot_rt( variable *v )
 		cmd( "$activeplot.c.c.cn scale punto 0 $vsizeR 1 %lf", scale  < 0.01 ? 0.01 : scale	 );
 	}
 
-	if ( v->val[ 0 ] <= ymin )
+	if ( val[ 0 ] <= ymin )
 	{
-		value = v->val[ 0 ] * ( v->val[ 0 ] > 0 ? 1 - MARG_CONST : 1 + MARG_CONST );
+		value = val[ 0 ] * ( val[ 0 ] > 0 ? 1 - MARG_CONST : 1 + MARG_CONST );
 		value = min( value, ymin - ( ymax - ymin ) / height );
 		value = round_digits( value, p_digits );
 
@@ -457,24 +457,24 @@ void plot_rt( variable *v )
 		cmd( "$activeplot.c.yscale itemconf ymin -text %.*g", p_digits, fabs( ymin ) < zero_lim ? 0 : ymin );
 	}
 
-	if ( sim.t == 1 )
+	if ( sim->t == 1 )
 	{
-		if ( v->param != 1 && v->num_lag > 0 )
-			old_val[ cur_plt ] = v->val[ 1 ];
+		if ( param != 1 && num_lag > 0 )
+			old_val[ cur_plt ] = val[ 1 ];
 		else
 			goto end;
 	}
 
-	cmd( "set x1 [ expr { floor( $cvhmarginR + %d * $plot_step ) } ]", sim.t );
-	cmd( "set x2 [ expr { floor( $cvhmarginR + ( %d - 1 ) * $plot_step ) } ]", sim.t );
-	cmd( "set y1 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", v->val[ 0 ], ymin, ymax, ymin );
+	cmd( "set x1 [ expr { floor( $cvhmarginR + %d * $plot_step ) } ]", sim->t );
+	cmd( "set x2 [ expr { floor( $cvhmarginR + ( %d - 1 ) * $plot_step ) } ]", sim->t );
+	cmd( "set y1 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", val[ 0 ], ymin, ymax, ymin );
 	cmd( "set y2 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", old_val[ cur_plt ], ymin, ymax, ymin );
 
 	cmd( "$activeplot.c.c.cn create line $x2 $y2 $x1 $y1 -tag punto -fill $c%d", cur_plt );
 
 	end:
 
-	old_val[ cur_plt ] = v->val[ 0 ];
+	old_val[ cur_plt ] = val[ 0 ];
 	++cur_plt;
 }
 

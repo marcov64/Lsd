@@ -25,23 +25,23 @@ by this function, use the Data Browse option.
 
 The main functions contained in this file are:
 
-- void edit_data( object *r, const char *lab )
+- void object::edit_data( const char *lab )
 Initialize the window, calls search_title and link_data, then wait for a
 message from user.
 
-- void search_title( object *r, const char *tag, int *i, const char *lab, int *cols )
+- void object::search_title( const char *tag, int *i, const char *lab, int *cols )
 It is a recursive routine. Scan the model structure looking for the object
 of type as r and prepare the relative tag for any object. The tag is then
 used by set_title to be printed as columns headers
 
-- void set_title( object *c, const char *lab, const char *tag, int *cols );
+- void object::set_title( const char *lab, const char *tag, int *cols );
 prints the column headers
 
-- void link_cells( object *r, const char *lab );
+- void object::link_cells( const char *lab );
 prints the line headers and create the cells, each linked to one variable value
 of the model
 
-- void unlink_cells( object *r, const char *tag, const char *lab );
+- void object::unlink_cells( const char *tag, const char *lab );
 called before exiting, removes all the links between tcl variables and model
 values
 *************************************************************/
@@ -56,7 +56,7 @@ int maxCols;					// maximum number of columns to show (prevent crash)
 /****************************************************
 EDIT_DATA
 ****************************************************/
-void edit_data( object *r, const char *lab )
+void object::edit_data( const char *lab )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ], ch1[ MAX_ELEM_LENGTH ];
 	int i, lag, cols, rows;
@@ -64,7 +64,7 @@ void edit_data( object *r, const char *lab )
 	variable *cv;
 
 	// find number of rows to fix max number of columns
-	first = r->search( lab );
+	first = search( lab );
 	if ( first != NULL )
 		for ( cv = first->v, rows = i = 0; cv != NULL; )
 		{
@@ -96,7 +96,7 @@ void edit_data( object *r, const char *lab )
 
 	cmd( "set cwidth 11" );
 
-	cmd( "newtop .inid \"%s%s - LSD Initial Values Editor\" { set choice 1 }", unsaved_change( ) ? "*" : " ", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
+	cmd( "newtop .inid \"%s%s - LSD Initial Values Editor\" { set choice 1 }", unsaved_change( ) ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
 
 	cmd( "ttk::frame .inid.t" );		// top frame to pack
 
@@ -168,8 +168,8 @@ void edit_data( object *r, const char *lab )
 	i = 0;
 	cols = 1;
 	overflow = false;
-	search_title( r, ch, &i, lab, &cols );
-	link_cells( r, lab );
+	search_title( ch, &i, lab, &cols );
+	link_cells( lab );
 
 	cmd( "pack .inid.t -expand 1 -fill both" );
 
@@ -210,14 +210,14 @@ void edit_data( object *r, const char *lab )
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	save_cells( r, lab );
+	save_cells( lab );
 
 	if ( choice == 2 )
 	{
 		if ( get_str( "var_name", ch, 2 * MAX_ELEM_LENGTH ) != NULL )
 		{
-			set_all( first, ch, lag, ".inid" );
-			show_cells( r, lab );
+			first->set_all( ch, lag, ".inid" );
+			show_cells( lab );
 		}
 
 		goto editloop;
@@ -225,7 +225,7 @@ void edit_data( object *r, const char *lab )
 
 	cmd( "destroytop .inid" );
 
-	unlink_cells( r, lab );
+	unlink_cells( lab );
 	Tcl_UnlinkVar( interp, "lag");
 }
 
@@ -233,16 +233,16 @@ void edit_data( object *r, const char *lab )
 /****************************************************
 SEARCH_TITLE
 ****************************************************/
-void search_title( object *r, const char *tag, int *i, const char *lab, int *cols )
+void object::search_title( const char *tag, int *i, const char *lab, int *cols )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ];
 	int multi, counter;
 	bridge *cb;
 	object *c, *cur;
 
-	set_title( r, lab, tag, cols );
+	set_title( lab, tag, cols );
 
-	for ( cb = r->b, counter = 1; cb != NULL; cb = cb->next, counter = 1 )
+	for ( cb = b, counter = 1; cb != NULL; cb = cb->next, counter = 1 )
 	{
 		if ( cb->head == NULL )
 			continue;
@@ -266,7 +266,7 @@ void search_title( object *r, const char *tag, int *i, const char *lab, int *col
 				strcpyn( ch, tag, 2 * MAX_ELEM_LENGTH );
 
 			if ( *cols <= maxCols )
-				search_title( cur, ch, i, lab, cols );
+				cur->search_title( ch, i, lab, cols );
 
 		}
 	}
@@ -276,13 +276,13 @@ void search_title( object *r, const char *tag, int *i, const char *lab, int *col
 /****************************************************
 SET_TITLE
 ****************************************************/
-void set_title( object *c, const char *lab, const char *tag, int *cols )
+void object::set_title( const char *lab, const char *tag, int *cols )
 {
 	char ch1[ MAX_ELEM_LENGTH ], ch2[ MAX_ELEM_LENGTH ];
 
-	if ( ! strcmp( c->label, lab ) )
+	if ( ! strcmp( label, lab ) )
 	{
-		strcpyn( ch1, c->label, MAX_ELEM_LENGTH );
+		strcpyn( ch1, label, MAX_ELEM_LENGTH );
 
 		if ( strlen( tag ) != 0 )
 			strcpyn( ch2, tag, MAX_ELEM_LENGTH );
@@ -308,7 +308,7 @@ void set_title( object *c, const char *lab, const char *tag, int *cols )
 /****************************************************
 LINK_CELLS
 ****************************************************/
-void link_cells( object *r, const char *lab )
+void object::link_cells( const char *lab )
 {
 	int i, j, k;
 	bool lastFocus = false;
@@ -316,7 +316,7 @@ void link_cells( object *r, const char *lab )
 	object *cur, *cur1;
 	variable *cv, *cv1;
 
-	cur1 = r->search( lab );
+	cur1 = search( lab );
 	strcpy( previous, "" );
 
 	for ( cv1 = cur1->v, j = 0, k = 1; cv1 != NULL; )
@@ -489,13 +489,13 @@ void link_cells( object *r, const char *lab )
 /****************************************************
 SHOW_CELLS
 ****************************************************/
-void show_cells( object *r, const char *lab )
+void object::show_cells( const char *lab )
 {
 	int j, i;
 	object *cur;
 	variable *cv;
 
-	cur = r->search( lab );
+	cur = search( lab );
 
 	for ( i = 1; i <= maxCols && cur != NULL; cur = cur->hyper_next( lab ), ++i )
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
@@ -516,13 +516,13 @@ void show_cells( object *r, const char *lab )
 /****************************************************
 SAVE_CELLS
 ****************************************************/
-void save_cells( object *r, const char *lab )
+void object::save_cells( const char *lab )
 {
 	int j, i;
 	object *cur;
 	variable *cv;
 
-	cur = r->search( lab );
+	cur = search( lab );
 
 	for ( i = 1; i <= maxCols && cur != NULL; cur = cur->hyper_next( lab ), ++i )
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
@@ -537,14 +537,14 @@ void save_cells( object *r, const char *lab )
 /****************************************************
 UNLINK_CELLS
 ****************************************************/
-void unlink_cells( object *r, const char *lab )
+void object::unlink_cells( const char *lab )
 {
 	char ch1[ 2 * MAX_ELEM_LENGTH ];
 	int j, i;
 	object *cur;
 	variable *cv;
 
-	cur = r->search( lab );
+	cur = search( lab );
 
 	for ( i = 1; i <= maxCols && cur != NULL; cur = cur->hyper_next( lab ), ++i )
 		for ( cv = cur->v; cv != NULL; cv = cv->next )

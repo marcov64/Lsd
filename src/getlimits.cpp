@@ -89,9 +89,9 @@ object *blueprint = NULL;	// LSD blueprint (effective model in use)
 object *root = NULL;		// LSD root object
 object *wait_delete = NULL;	// LSD object waiting for deletion
 o_setT obj_list;			// set with all existing LSD objects
-sense *rsense = NULL;		// LSD sensitivity analysis structure
+sensitivity *sens = NULL;	// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
-variable *last_cemetery = NULL;	// LSD last saved data from deleted objects
+variable *last_cemetery = NULL;// LSD last saved data from deleted objects
 
 // constant string arrays
 const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
@@ -225,7 +225,7 @@ int lsdmain( int argn, const char **argv )
 		fprintf( f, "Name%sType%sLag%sFormat%sValue%sMinimum%sMaximum%sDescription\n", sep, sep, sep, sep, sep, sep, sep );
 
 		// write all parameters and initial conditions
-		get_sa_limits( root, f, sep );
+		root->get_sa_limits( f, sep );
 
 		// write simulation setting, if not already set
 		if ( ! meta_par_in[ 0 ] )
@@ -244,7 +244,7 @@ int lsdmain( int argn, const char **argv )
 	}
 	else	// send to stdout
 	{
-		get_sa_limits( root, stdout, "\t" );
+		root->get_sa_limits( stdout, "\t" );
 
 		if ( ! meta_par_in[ 0 ] )
 			fprintf( stdout, "_timeSteps_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",

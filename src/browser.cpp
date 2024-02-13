@@ -35,7 +35,7 @@ The main cycle for the Browser, from which it exits only to
 run a simulation or to quit the program. The cycle is just
 once call to browse followed by a call to operate.
 
-- int browse( object *r );
+- int object::browse( );
 build the browser window and waits for an action (on the form of
 values for choice or choice_g different from 0)
 *************************************************************/
@@ -62,7 +62,6 @@ int load_gui( const char **argv )
 	char *str, cwd[ PATH_MAX ];
 	const char *app, *app1;
 	int i, j = 0, k = 0;
-	object *r;
 	FILE *f;
 
 	// assume exec path is current path
@@ -340,7 +339,7 @@ int load_gui( const char **argv )
 	inter = interp;
 	liblnk.cmd_backend = & cmd_backend;
 	liblnk.cover_browser = & cover_browser;
-	liblnk.deb = & deb;
+	liblnk.debugger = & object::debugger;
 	liblnk.deb_log = & deb_log;
 	liblnk.disable_plot = & disable_plot;
 	liblnk.enable_plot = & enable_plot;
@@ -348,7 +347,7 @@ int load_gui( const char **argv )
 	liblnk.init_lattice_helper = & init_lattice_helper;
 	liblnk.log_tcl_error = & log_tcl_error;
 	liblnk.plog_backend = & plog_backend;
-	liblnk.plot_rt = & plot_rt;
+	liblnk.plot_runtime = & variable::plot_runtime;
 	liblnk.print_stack = & print_stack;
 	liblnk.reset_plot = & reset_plot;
 	liblnk.runtime_buttons = & runtime_buttons;
@@ -366,7 +365,7 @@ int load_gui( const char **argv )
 		sprintf( sim.conf_file, "%s%s%s.lsd", sim.conf_path, strlen( sim.conf_path ) > 0 ? "/" : "", sim.conf_name );
 		snprintf( sim.rep_file, MAX_PATH_LENGTH, "report_%s.html", sim.conf_name );
 
-		i = open_configuration( ( r = NULL ), true );
+		i = sim.root->open_configuration( true );
 	}
 	else
 		i = 0;
@@ -453,7 +452,7 @@ void create( void )
 	cmd( "set c \"\"" );
 
 	// restore previous object and cursor position in browser, if any
-	cur = restore_pos( sim.root );
+	cur = sim.root->restore_pos( );
 	redrawRoot = redrawStruc = true;	// browser/ structure redraw when drawing the first time
 	choice_g = choice = 0;
 
@@ -482,7 +481,7 @@ void create( void )
 
 		// browse only if not running two-cycle operations
 		if ( bsearch( & choice, redoChoices, NUM_REDO_CHOICES, sizeof ( int ), comp_ints ) == NULL )
-			choice = browse( cur );
+			choice = cur->browse( );
 
 		// check if configuration was just reloaded
 		if ( choice < 0 )
@@ -491,7 +490,7 @@ void create( void )
 			cur = currObj;				// restore pointed object
 		}
 
-		cur = operate( cur );
+		cur = cur->operate( );
 	}
 
 	Tcl_UnlinkVar( interp, "strWindowOn" );
@@ -502,14 +501,14 @@ void create( void )
 /****************************************************
 BROWSE
 ****************************************************/
-int browse( object *r )
+int object::browse( void )
 {
 	bool done, sp_upd;
 	int i, num;
 	bridge *cb;
 	variable *cv;
 
-	currObj = r;			// global pointer to C Tcl routines
+	currObj = this;			// global pointer to C Tcl routines
 
 	// main LSD window - avoids redrawing if not required
 	if ( redrawRoot )
@@ -526,11 +525,11 @@ int browse( object *r )
 		cmd( "tooltip::tooltip clear .l.v.c.var_name*" );
 
 		// populate the variables panel
-		if ( r->v == NULL )
+		if ( v == NULL )
 			cmd( ".l.v.c.var_name insert end \"(none)\"; set nVar 0" );
 		else
 		{
-			for ( cv = r->v, i = 0; cv != NULL; cv = cv->next, ++i )
+			for ( cv = v, i = 0; cv != NULL; cv = cv->next, ++i )
 			{
 				// special updating scheme?
 				if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 ) )
@@ -611,7 +610,7 @@ int browse( object *r )
 		cmd( ".l.v.c.var_name.v add command -label Sensitivity -state disabled -command { set choice 78 }" );	// entryconfig 22
 
 		// variables panel bindings
-		if ( r->v != NULL )
+		if ( v != NULL )
 		{
 			cmd( "bind .l.v.c.var_name <Return> { \
 					set listfocus 1; \
@@ -889,10 +888,10 @@ int browse( object *r )
 		cmd( "mouse_wheel .l.s.c.son_name" );
 		cmd( "tooltip::tooltip clear .l.s.c.son_name*" );
 
-		if ( r->up != NULL )
+		if ( up != NULL )
 		{
 			cmd( ".l.s.c.son_name insert end \"$upSymbol\"" );
-			cmd( "tooltip::tooltip .l.s.c.son_name -item 0 \"%s\"", r->up->label );
+			cmd( "tooltip::tooltip .l.s.c.son_name -item 0 \"%s\"", up->label );
 			i = 1;
 		}
 		else
@@ -900,12 +899,12 @@ int browse( object *r )
 
 		cmd( "set upObjItem %d", i );
 
-		if ( r->up == NULL && r->b == NULL )
+		if ( up == NULL && b == NULL )
 			cmd( ".l.s.c.son_name insert end \"(none)\"" );
 		else
 		{
 			// populate the objects panel
-			for ( cb = r->b; cb != NULL; cb = cb->next, ++i )
+			for ( cb = b; cb != NULL; cb = cb->next, ++i )
 			{
 				if ( cb->head != NULL )
 				{
@@ -954,7 +953,7 @@ int browse( object *r )
 		cmd( ".l.s.c.son_name.v.a add command -label Object -accelerator \"Ctrl+D\" -command { set choice 3 }" );
 
 		// objects panel bindings
-		if ( r->up != NULL || r->b != NULL )
+		if ( up != NULL || b != NULL )
 		{
 			cmd( "bind .l.s.c.son_name <Return> { \
 					set listfocus 2; \
@@ -1131,9 +1130,9 @@ int browse( object *r )
 
 		cmd( "ttk::frame .l.p.up_name" );
 		cmd( "ttk::label .l.p.up_name.d -text \"Parent object:\" -width 15 -anchor w" );
-		if ( r->up != NULL )
+		if ( up != NULL )
 		{
-			cmd( "ttk::label .l.p.up_name.n -text \" %s \" -anchor w -style hl.TLabel", r->up->label );
+			cmd( "ttk::label .l.p.up_name.n -text \" %s \" -anchor w -style hl.TLabel", up->label );
 			cmd( "bind . <KeyPress-u> { set itemfocus 0; set choice 5 }; bind . <KeyPress-U> { set itemfocus 0; set choice 5 }" );
 		}
 		else
@@ -1144,9 +1143,9 @@ int browse( object *r )
 
 		cmd( "ttk::frame .l.p.tit" );
 		cmd( "ttk::label .l.p.tit.lab -text \"Current object:\" -width 15 -anchor w" );
-		cmd( "ttk::button .l.p.tit.but -width -1 -text \" %s \" -style hlBold.Toolbutton %s", r->label, r->up == NULL ? "" : "-command { set choice 6 }" );
+		cmd( "ttk::button .l.p.tit.but -width -1 -text \" %s \" -style hlBold.Toolbutton %s", label, up == NULL ? "" : "-command { set choice 6 }" );
 
-		if ( r->up != NULL )
+		if ( up != NULL )
 			cmd( "tooltip::tooltip .l.p.tit.but \"Change...\"" );
 		else
 			cmd( ".l.p.tit.but configure -state disabled" );
@@ -1383,7 +1382,7 @@ int browse( object *r )
 
 	if ( redrawStruc )
 	{
-		show_graph( r );
+		show_graph( );
 		redrawStruc = false;
 	}
 
@@ -1478,13 +1477,13 @@ int browse( object *r )
 		}" );
 
 	// if simulation was started, check to see if operation is valid
-	if ( sim.running || sim.eff_t > 0 )
+	if ( sim->running || sim->eff_t > 0 )
 		// search the sorted list of choices that are bad with existing run data
 		if ( bsearch( & choice, badChoices, NUM_BAD_CHOICES, sizeof ( int ), comp_ints ) != NULL )
 		{
 			if ( discard_change( true, false, "Invalid command after a simulation run." ) )	// for sure there are changes, just get the pop-up
 			{
-				if ( open_configuration( r, true ) )
+				if ( open_configuration( true ) )
 					choice = - choice;		// signal the reload
 				else
 					choice = 20;			// reload failed, unload configuration
@@ -1507,7 +1506,7 @@ Prepare run-time plots and clear AoR maps
 ****************************************************/
 void runtime_run( void )
 {
-	prepare_plot( sim.root, sim.run );
+	sim.root->prepare_plot( sim.run );
 	par_map.clear( );	// restart variable to parent name map for AoR
 }
 
@@ -1571,7 +1570,7 @@ void runtime_buttons( clock_t &last_update )
 			else		// if paused, just call the data browser
 			{
 				double useless = 0;
-				deb( sim.root, NULL, "Paused by User", &useless, false, "" );
+				sim.root->debugger( NULL, "Paused by User", &useless, false, "" );
 			}
 
 			break;
@@ -1626,13 +1625,13 @@ void runtime_buttons( clock_t &last_update )
 SAVE_POS
 Save user position in browser
 ****************************************************/
-void save_pos( object *r )
+void object::save_pos( void )
 {
 	if ( ! eval_bool( "[ winfo exists .l.s.c.son_name ]" ) )
-		return;										// browser not drawn yet
+		return;				// browser not drawn yet
 
 	// save the current object & cursor position for quick reload
-	cmd( "set lastObj %s", r != NULL ? r->label : sim.root->label );
+	cmd( "set lastObj %s", label );
 
 	cmd( "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { \
 				set lastList 2 \
@@ -1656,23 +1655,20 @@ void save_pos( object *r )
 RESTORE_POS
 Restore user position in browser
 ****************************************************/
-object *restore_pos( object *r )
+object *object::restore_pos( void )
 {
 	object *cur;
 
-	if ( r != NULL && eval_bool( "$lastObj ne \"\"" ) )
+	if ( eval_bool( "$lastObj ne \"\"" ) &&
+		 ( cur = search( get_str( "lastObj" ) ) ) != NULL )
 	{
-		cur = sim.root->search( get_str( "lastObj" ) );
-		if ( cur != NULL )
-		{
-			cmd( "if [ info exists lastList ] { set listfocus $lastList }" );
-			cmd( "if [ info exists lastItem ] { set itemfocus $lastItem }" );
-			cmd( "if [ info exists lastFirst ] { set itemfirst $lastFirst }" );
-			return cur;
-		}
+		cmd( "if [ info exists lastList ] { set listfocus $lastList }" );
+		cmd( "if [ info exists lastItem ] { set itemfocus $lastItem }" );
+		cmd( "if [ info exists lastFirst ] { set itemfirst $lastFirst }" );
+		return cur;
 	}
 
-	return r;
+	return this;
 }
 
 
@@ -1708,24 +1704,24 @@ void set_shortcuts( const char *window )
 /****************************************************
 INSERT_OBJECT
 ****************************************************/
-void insert_object( const char *w, object *r, bool netOnly, object *above )
+void object::insert_object( const char *w, bool netOnly, object *above )
 {
 	bridge *cb;
 	object *cur;
 
-	if ( ( above == NULL || above->up == NULL || ( strcmp( r->label, above->label ) != 0 && strcmp( r->label, above->up->label ) != 0 ) ) &&
-		 ( ! netOnly || r->node != NULL ) )
-		cmd( "%s insert end %s", w, r->label );
+	if ( ( above == NULL || above->up == NULL || ( strcmp( label, above->label ) != 0 && strcmp( label, above->up->label ) != 0 ) ) &&
+		 ( ! netOnly || node != NULL ) )
+		cmd( "%s insert end %s", w, label );
 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 		if ( above == NULL || strcmp( cb->blabel, above->label ) != 0 )
 		{
 			if ( cb->head == NULL )
-				cur = sim.blueprint->search( cb->blabel );
+				cur = sim->blueprint->search( cb->blabel );
 			else
 				cur = cb->head;
 
-			insert_object( w, cur, netOnly, above );
+			cur->insert_object( w, netOnly, above );
 		}
 }
 
@@ -1733,16 +1729,16 @@ void insert_object( const char *w, object *r, bool netOnly, object *above )
 /****************************************************
 WIPE_OUT
 ****************************************************/
-void wipe_out( object *d )
+void object::wipe_out( void )
 {
 	object *cur;
 	variable *cv;
 
-	cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", d->label );
+	cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", label );
 
-	sim.change_description( d->label );
+	sim->change_description( label );
 
-	for ( cv = d->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		// remove from element lists
 		cmd( "if [ info exists modElem ] { set pos [ lsearch -exact $modElem %s ]; if { $pos >= 0 } { set modElem [ lreplace $modElem $pos $pos ] } }", cv->label );
@@ -1750,40 +1746,41 @@ void wipe_out( object *d )
 		cmd( "if [ info exists modPar ] { set pos [ lsearch -exact $modPar %s ]; if { $pos >= 0 } { set modPar [ lreplace $modPar $pos $pos ] } }", cv->label );
 		cmd( "if [ info exists modFun ] { set pos [ lsearch -exact $modFun %s ]; if { $pos >= 0 } { set modFun [ lreplace $modFun $pos $pos ] } }", cv->label );
 
-		sim.change_description( cv->label );
+		sim->change_description( cv->label );
 	}
 
-	cur = d->hyper_next( d->label );
+	cur = hyper_next( label );
 	if ( cur != NULL )
-		wipe_out( cur );
+		cur->wipe_out( );
 
-	delete_bridge( d );
+	delete_bridge( );
+	delete this;
 }
 
 
 /****************************************************
 SHIFT_VAR
 ****************************************************/
-void shift_var( int direction, const char *vlab, object *r )
+void object::shift_var( int direction, const char *vlab )
 {
 	variable *cv, *cv1 = NULL, *cv2 = NULL;
 
 	if ( direction == -1 )
 	{	// shift up
-		if ( ! strcmp( vlab, r->v->label ) )
+		if ( ! strcmp( vlab, v->label ) )
 			return;		// variable already at the top
 
-		if ( ! strcmp( vlab, r->v->next->label ) )
+		if ( ! strcmp( vlab, v->next->label ) )
 		{	// second var, must become the head of the chain
-			cv = r->v->next->next;	// third
-			cv1 = r->v;				// first
-			r->v = r->v->next;		// shifted up
-			r->v->next = cv1;
+			cv = v->next->next;		// third
+			cv1 = v;				// first
+			v = v->next;			// shifted up
+			v->next = cv1;
 			cv1->next = cv;
 			return;
 		}
 
-		for ( cv = r->v; cv != NULL; cv = cv->next )
+		for ( cv = v; cv != NULL; cv = cv->next )
 		{
 			if ( ! strcmp( vlab, cv->label ) )
 			{
@@ -1800,20 +1797,20 @@ void shift_var( int direction, const char *vlab, object *r )
 
 	if ( direction == 1 )
 	{	// move down
-		if ( ! strcmp( vlab, r->v->label ) )
+		if ( ! strcmp( vlab, v->label ) )
 		{	// it's the first
-			if ( r->v->next == NULL )
+			if ( v->next == NULL )
 				return;				// it is unique
 
-			cv = r->v;				// first
+			cv = v;					// first
 			cv1 = cv->next->next;	// third
-			r->v = cv->next;		// first is former second
-			r->v->next = cv;		// second is former first
+			v = cv->next;			// first is former second
+			v->next = cv;			// second is former first
 			cv->next = cv1;			// second points to third
 			return;
 		}
 
-		for ( cv = r->v; cv != NULL; cv = cv->next )
+		for ( cv = v; cv != NULL; cv = cv->next )
 		{
 			if ( ! strcmp( vlab,cv->label ) )
 			{
@@ -1835,26 +1832,26 @@ void shift_var( int direction, const char *vlab, object *r )
 /****************************************************
 SHIFT_DESC
 ****************************************************/
-void shift_desc( int direction, const char *dlab, object *r )
+void object::shift_desc( int direction, const char *dlab )
 {
 	bridge *cb, *cb1 = NULL, *cb2 = NULL;
 
 	if ( direction == -1 )
 	{	// shift up
-		if ( ! strcmp( dlab, r->b->blabel ) )
+		if ( ! strcmp( dlab, b->blabel ) )
 			return;		// object already at the top
 
-		if ( ! strcmp( dlab, r->b->next->blabel ) )
+		if ( ! strcmp( dlab, b->next->blabel ) )
 		{	// second var, must become the head of the chain
-			cb = r->b->next->next;	// third
-			cb1 = r->b;				// first
-			r->b = r->b->next;		// shifted up
-			r->b->next = cb1;
+			cb = b->next->next;		// third
+			cb1 = b;				// first
+			b = b->next;			// shifted up
+			b->next = cb1;
 			cb1->next = cb;
 			return;
 		}
 
-		for ( cb = r->b; cb != NULL; cb = cb->next )
+		for ( cb = b; cb != NULL; cb = cb->next )
 		{
 			if ( ! strcmp( dlab, cb->blabel ) )
 			{
@@ -1871,20 +1868,20 @@ void shift_desc( int direction, const char *dlab, object *r )
 
 	if ( direction == 1 )
 	{	//move down
-		if ( ! strcmp( dlab, r->b->blabel ) )
+		if ( ! strcmp( dlab, b->blabel ) )
 		{	// it's the first
-			if ( r->b->next == NULL)
+			if ( b->next == NULL)
 				return;				// it is unique
 
-			cb = r->b;				// first
+			cb = b;					// first
 			cb1 = cb->next->next;	// third
-			r->b = cb->next;		// first is former second
-			r->b->next = cb;		// second is former first
+			b = cb->next;			// first is former second
+			b->next = cb;			// second is former first
 			cb->next = cb1;			// second points to third
 			return;
 		}
 
-		for ( cb = r->b; cb != NULL; cb = cb->next )
+		for ( cb = b; cb != NULL; cb = cb->next )
 		{
 			if ( ! strcmp( dlab, cb->blabel ) )
 			{
@@ -1918,14 +1915,14 @@ bool ascending_variables( const variable &a, const variable &b )
 bool descending_variables( const variable &a, const variable &b )
 { return ( strcmp( a.label, b.label ) > 0 ); }
 
-bool sort_listbox( int box, int order, object *r )
+bool object::sort_listbox( int box, int order )
 {
 	bool first;
 
 	// handle variable/parameter list
 	if ( box == 1 )
 	{
-		if ( r->v == NULL || order < 0 || order > 5 )	// invalid sort?
+		if ( v == NULL || order < 0 || order > 5 )	// invalid sort?
 			return false;
 
 		variable *cv, *cv1 = NULL;
@@ -1933,7 +1930,7 @@ bool sort_listbox( int box, int order, object *r )
 		list < variable > :: iterator it;
 
 		// move LSD linked list of variables to a C++ linked list
-		for ( cv = r->v; cv != NULL; cv = cv1 )
+		for ( cv = v; cv != NULL; cv = cv1 )
 		{
 			cv1 = cv->next;
 
@@ -2008,7 +2005,7 @@ bool sort_listbox( int box, int order, object *r )
 			cv = new variable( *it );
 			if ( first )
 			{
-				r->v = cv;
+				v = cv;
 				first = false;
 			}
 			else
@@ -2017,7 +2014,7 @@ bool sort_listbox( int box, int order, object *r )
 		}
 		cv1->next = NULL;
 
-		r->recreate_maps( );		// recreate the fast look-up maps
+		recreate_maps( );		// recreate the fast look-up maps
 
 		return true;
 	}
@@ -2025,7 +2022,7 @@ bool sort_listbox( int box, int order, object *r )
 	// handle object list
 	if ( box == 2 )
 	{
-		if ( r->b == NULL || order < 0 || order > 1 )	// invalid sort?
+		if ( b == NULL || order < 0 || order > 1 )	// invalid sort?
 			return false;
 
 		bridge *cb, *cb1 = NULL;
@@ -2033,7 +2030,7 @@ bool sort_listbox( int box, int order, object *r )
 		list < bridge > :: iterator it;
 
 		// move LSD linked list of objects to a C++ linked list
-		for ( cb = r->b; cb != NULL; cb = cb1 )
+		for ( cb = b; cb != NULL; cb = cb1 )
 		{
 			cb1 = cb->next;
 			newb.push_back( *cb );
@@ -2052,7 +2049,7 @@ bool sort_listbox( int box, int order, object *r )
 			cb = new bridge( *it );
 			if ( first )
 			{
-				r->b = cb;
+				b = cb;
 				first = false;
 			}
 			else
@@ -2062,7 +2059,7 @@ bool sort_listbox( int box, int order, object *r )
 
 		cb1->next = NULL;
 
-		r->recreate_maps( );		// recreate the fast look-up maps
+		recreate_maps( );		// recreate the fast look-up maps
 
 		return true;
 	}
@@ -2133,7 +2130,7 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 			else
 				cmd( "set question \"Recent changes to current configuration are not saved!\nDo you want to discard and continue?\"" );
 		}
-		else						// there is unsaved sense data
+		else						// there is unsaved sensitivity data
 		{
 			if ( checkSense )
 				cmd( "set question \"Recent changes to sensitivity data are not saved!\nDo you want to discard and continue?\"" );
@@ -2165,8 +2162,10 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 
 	end_true:
 
-	save_pos( currObj );	// save browser position in structure
-	update_model_info( );	// save windows positions if appropriate
+	if ( currObj != NULL )
+		currObj->save_pos( );	// save browser position in structure
+
+	update_model_info( );		// save windows positions if appropriate
 
 	return true;
 }

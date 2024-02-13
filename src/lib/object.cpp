@@ -422,8 +422,8 @@ void object::update( bool recurse, bool user )
 			if ( cv->save || cv->savei )
 				cv->data[ sim->t - cv->start ] = cv->val[ 0 ];
 #ifndef _NW_
-			if ( ! user && cv->plot == 1 && liblnk.plot_rt != NULL )
-				liblnk.plot_rt( cv );
+			if ( ! user && cv->plot == 1 && liblnk.plot_runtime != NULL )
+				( cv->*liblnk.plot_runtime )( );
 #endif
 		}
 	}
@@ -656,7 +656,7 @@ object *object::search_err( const char *lab, bool no_search, bool no_search_up, 
 							 "move object in model structure, or specify a parent object",
 							 false,
 							 "object '%s' not%s under '%s' for %s%s",
-							 lab, no_search ? " directly" : "", label == NULL ? "" : label, 
+							 lab, no_search ? " directly" : "", label == NULL ? "" : label,
 							 errmsg, no_search ? " (NO_SEARCH enabled!)" : "" );
 	}
 
@@ -697,7 +697,7 @@ double object::initturbo( const char *lab )
 		sim->error_hard( "object has no instance",
 						 "check your equation code to prevent this situation",
 						 true,
-						 "failure when initializing object '%s' for turbo search", 
+						 "failure when initializing object '%s' for turbo search",
 						 lab );
 		return 0;
 	}
@@ -976,15 +976,15 @@ variable *object::search_var_err( object *caller, const char *lab, bool no_searc
 				sim->error_hard( "last object instance deleted",
 								 "check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE",
 								 true,
-								 "all instances of the object containing '%s' were deleted", 
+								 "all instances of the object containing '%s' were deleted",
 								 lab );
 		else		// exits in current tree but not (directly) below
 			sim->error_hard( "variable or parameter not in a descending object",
 							 "move object in model structure, or specify a parent object",
 							 false,
 							 "'%s' in '%s' not%s under '%s' for %s%s",
-							 lab, cv1->up != NULL && cv1->up->label != NULL ? cv1->up->label : "?", 
-							 no_search ? " directly" : "", label, errmsg, 
+							 lab, cv1->up != NULL && cv1->up->label != NULL ? cv1->up->label : "?",
+							 no_search ? " directly" : "", label, errmsg,
 							 no_search ? " (NO_SEARCH enabled!)" : "" );
 	}
 
@@ -1043,7 +1043,7 @@ double object::initturbo_cond( const char *lab )
 		sim->error_hard( "invalid variable or parameter for turbo search",
 						 "check your model structure to prevent this situation",
 						 false,
-						 "element '%s' is at root level (always single-instanced)", 
+						 "element '%s' is at root level (always single-instanced)",
 						 lab );
 		return 0;
 	}
@@ -1108,7 +1108,7 @@ double object::turboset_cond( const char *lab )
 		sim->error_hard( "invalid variable or parameter for turbo search",
 						 "check your model structure to prevent this situation",
 						 false,
-						 "element '%s' is at root level (always single-instanced)", 
+						 "element '%s' is at root level (always single-instanced)",
 						 lab );
 		return 0;
 	}
@@ -1148,7 +1148,7 @@ object *object::turbosearch_cond( const char *lab, double value )
 		sim->error_hard( "invalid variable or parameter for turbo search",
 						 "check your model structure to prevent this situation",
 						 false,
-						 "element '%s' is at root level (always single-instanced)", 
+						 "element '%s' is at root level (always single-instanced)",
 						 lab );
 		return NULL;
 	}
@@ -1171,7 +1171,7 @@ object *object::turbosearch_cond( const char *lab, double value )
 		sim->error_hard( "invalid search operation",
 						 "check your equation code to prevent this situation",
 						 true,
-						 "element '%s' is not initialized for turbo conditional search", 
+						 "element '%s' is not initialized for turbo conditional search",
 						 lab );
 		return NULL;
 	}
@@ -1199,7 +1199,7 @@ variable *object::add_empty_var( const char *lab )
 		sim->error_hard( "variable or parameter not added",
 						 "choose an unique name for the element",
 						 true,
-						 "an element named '%s' already exists in the model", 
+						 "an element named '%s' already exists in the model",
 						 lab );
 		return NULL;
 	}
@@ -1209,7 +1209,7 @@ variable *object::add_empty_var( const char *lab )
 		sim->error_hard( "variable or parameter not added",
 						 "choose an unique name for the element",
 						 true,
-						 "an object named '%s' already exists in the model", 
+						 "an object named '%s' already exists in the model",
 						 lab );
 		return NULL;
 	}
@@ -1251,7 +1251,7 @@ variable *object::add_var_from_example( variable *example )
 		sim->error_hard( "variable or parameter not added",
 						 "choose an unique name for the element",
 						 true,
-						 "element '%s' already exists in object '%s'", 
+						 "element '%s' already exists in object '%s'",
 						 example->label, label );
 		return NULL;
 	}
@@ -1304,7 +1304,7 @@ object *object::add_obj( const char *lab, int num, bool propagate )
 		sim->error_hard( "object not added",
 						 "choose an unique name for the object",
 						 true,
-						 "an object named '%s' already exists in the model", 
+						 "an object named '%s' already exists in the model",
 						 lab );
 		return NULL;
 	}
@@ -1314,7 +1314,7 @@ object *object::add_obj( const char *lab, int num, bool propagate )
 		sim->error_hard( "object not added",
 						 "choose an unique name for the object",
 						 true,
-						 "an element named '%s' already exists in the model", 
+						 "an element named '%s' already exists in the model",
 						 lab );
 		return NULL;
 	}
@@ -1582,7 +1582,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 		sim->error_hard( "object not found",
 						 "create son object in model structure",
 						 false,
-						 "object '%s' contains no son object '%s' for adding instance(s)", 
+						 "object '%s' contains no son object '%s' for adding instance(s)",
 						 label, lab );
 		return NULL;
 	}
@@ -1592,7 +1592,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 		sim->error_hard( "invalid example object",
 						 "check your equation code to prevent this situation",
 						 true,
-						 "bad example pointer when adding object '%s'", 
+						 "bad example pointer when adding object '%s'",
 						 lab );
 		return NULL;
 	}
@@ -1642,7 +1642,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 						sim->error_hard( "cannot add object",
 										 "check your equation code to prevent this situation",
 										 true,
-										 "invalid update case (%d) to set object '%s'\nvariable '%s' was updated later (%d)", 
+										 "invalid update case (%d) to set object '%s'\nvariable '%s' was updated later (%d)",
 										 t_update, lab, cv->label, cv->last_update );
 						return NULL;
 					}
@@ -1719,29 +1719,31 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 
 /****************************
 DELETE_BRIDGE
-Remove a bridge, used when an object is removed from the model.
+Remove a bridge, used when an
+object is removed from the
+model in browser.
 *****************************/
-void delete_bridge( object *d )
+void object::delete_bridge( void )
 {
 	bridge *cb, *cb1;
 
-	if ( d->up->b == NULL )
+	if ( up->b == NULL )
 		return;
 
-	if ( d->up->b->head == d )
+	if ( up->b->head == this )
 	{	// first bridge in the bridge chain
-		cb = d->up->b;
-		d->up->b = d->up->b->next;
-		d->up->b_map.erase( cb->blabel );
+		cb = up->b;
+		up->b = up->b->next;
+		up->b_map.erase( cb->blabel );
 		delete cb;
 	}
 	else
 	{	// find position in bridge chain (not first)
-		for ( cb = d->up->b, cb1 = NULL; cb != NULL; cb1 = cb, cb = cb->next )
-			if ( cb->head == d && cb1 != NULL )
+		for ( cb = up->b, cb1 = NULL; cb != NULL; cb1 = cb, cb = cb->next )
+			if ( cb->head == this && cb1 != NULL )
 			{
 				cb1->next = cb->next;			// previous bridge points to next
-				d->up->b_map.erase( cb->blabel );
+				up->b_map.erase( cb->blabel );
 				delete cb;
 				break;
 			}
@@ -1779,7 +1781,7 @@ void object::delete_obj( variable *caller )
 				sim->error_hard( "deletion already pending",
 								 "check your equation code to prevent deleting objects recursively",
 								 true,
-								 "cannot schedule the deletion of object '%s'", 
+								 "cannot schedule the deletion of object '%s'",
 								 label );
 				return;
 			}
@@ -1828,7 +1830,7 @@ void object::delete_obj( variable *caller )
 					sim->error_hard( "last object instance deleted",
 									 "check your equation code to ensure at least one instance\nof any object is kept",
 									 true,
-									 "cannot delete all instances of '%s'", 
+									 "cannot delete all instances of '%s'",
 									 label );
 					return;
 				}
@@ -1876,7 +1878,6 @@ void object::empty( void )
 	{
 		cv1 = cv->next;
 		cv->empty( );
-		delete cv;
 	}
 
 	v = NULL;
@@ -1921,7 +1922,7 @@ void object::collect_cemetery( variable *caller )
 			if ( cv->savei )
 				sim->save_single( cv );		// update file
 
-			set_lab_tit( cv );				// update last lab_tit
+			cv->set_lab_tit( );				// update last lab_tit
 
 			cv->end = sim->t;				// define last period,
 			cv->data[ sim->t - cv->start ] = cv->val[ 0 ];	// and last value
@@ -1932,10 +1933,7 @@ void object::collect_cemetery( variable *caller )
 			sim->add_cemetery( cv );		// transfer to cemetery
 		}
 		else
-		{
 			cv->empty( caller == NULL || cv == caller );// disable lock if emptying caller
-			delete cv;
-		}
 	}
 
 	v = NULL;
@@ -1973,7 +1971,6 @@ void simulation::empty_cemetery( void )
 	{
 		cv1 = cv->next;
 		cv->empty( );
-		delete cv;
 		cv = cv1;
 	}
 
@@ -2006,7 +2003,6 @@ void object::delete_var( const char *lab )
 		v_map.erase( lab );
 		cv = v->next;
 		v->empty( );
-		delete v;
 		v = cv;
 	}
 	else		// not first variable, search
@@ -2016,7 +2012,6 @@ void object::delete_var( const char *lab )
 				v_map.erase( lab );
 				cv1 = cv->next->next;
 				cv->next->empty( );
-				delete cv->next;
 				cv->next = cv1;
 				break;
 			}
@@ -2385,7 +2380,7 @@ double object::mav( object *caller, const char *lab, double per, const double we
 		sim->error_hard( "invalid moving average period",
 						 "check your equation code to prevent this situation",
 						 true,
-						 "period '%g' is invalid for moving average '%s'", 
+						 "period '%g' is invalid for moving average '%s'",
 						 per, lab );
 		return NAN;
 	}
@@ -2885,7 +2880,7 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 			sim->error_hard( "variable or parameter not found",
 							 "create variable or parameter in model structure",
 							 false,
-							 "element '%s' is missing (object '%s') for sorting", 
+							 "element '%s' is missing (object '%s') for sorting",
 							 var, obj );
 			return NULL;
 		}
@@ -2912,7 +2907,7 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 				sim->error_hard( "invalid network object",
 								 "check your equation code to add\nthe network structure before using this macro",
 								 true,
-								 "object '%s' has no network data structure", 
+								 "object '%s' has no network data structure",
 								 obj );
 				return NULL;
 			}
@@ -3068,7 +3063,7 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 		sim->error_hard( "variable or parameter not found",
 						 "create variable or parameter in model structure",
 						 false,
-						 "element '%s' is missing (object '%s') for sorting", 
+						 "element '%s' is missing (object '%s') for sorting",
 						 var1, obj );
 		return NULL;
 	}
@@ -3078,7 +3073,7 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 		sim->error_hard( "object not found",
 						 "create object in model structure",
 						 false,
-						 "object '%s' is missing for sorting", 
+						 "object '%s' is missing for sorting",
 						 obj );
 		return NULL;
 	}
@@ -3162,7 +3157,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag )
 		sim->error_hard( "invalid random draw option",
 						 "check your equation code to prevent this situation",
 						 true,
-						 "element '%s' has invalid value '%g' for random drawing", 
+						 "element '%s' has invalid value '%g' for random drawing",
 						 lv, a );
 		return NULL;
 	}
@@ -3172,7 +3167,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag )
 		sim->error_hard( "invalid random draw option",
 						 "check your equation code to prevent this situation",
 						 true,
-						 "element '%s' has only zero values for random drawing", 
+						 "element '%s' has only zero values for random drawing",
 						 lv );
 		return NULL;
 	}
@@ -3252,7 +3247,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag, double tot )
 		sim->error_hard( "invalid random draw option",
 						 "check your equation code to prevent this situation",
 						 true,
-						 "element '%s' has invalid value '%g' for random drawing", 
+						 "element '%s' has invalid value '%g' for random drawing",
 						 lv, tot );
 		return NULL;
 	}
@@ -3278,7 +3273,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag, double tot )
 		sim->error_hard( "invalid random draw option",
 						 "check your equation code to prevent this situation",
 						 true,
-						 "element '%s' has invalid value '%g' for random drawing", 
+						 "element '%s' has invalid value '%g' for random drawing",
 						 lv, tot );
 		return NULL;
 	}
@@ -3302,7 +3297,7 @@ double object::write( const char *lab, double value, int time, int lag )
 		sim->error_hard( "invalid write operation",
 						 "check your equation code to prevent this situation",
 						 true,
-						 "value '%g' is invalid for writing to element '%s'", 
+						 "value '%g' is invalid for writing to element '%s'",
 						 value, lab );
 		return NAN;
 	}
@@ -3318,7 +3313,7 @@ double object::write( const char *lab, double value, int time, int lag )
 			sim->error_hard( "invalid write operation",
 							 "check your equation code to prevent this situation",
 							 true,
-							 "variable '%s' is under computation and cannot be written", 
+							 "variable '%s' is under computation and cannot be written",
 							 lab );
 			return NAN;
 		}
@@ -3331,7 +3326,7 @@ double object::write( const char *lab, double value, int time, int lag )
 			sim->error_hard( "deadlock during parallel computation",
 							 "check your equation code to prevent this situation",
 							 true,
-							 "variable '%s' is under dummy computation and cannot be written", 
+							 "variable '%s' is under dummy computation and cannot be written",
 							 lab );
 			return NAN;
 		}
@@ -3359,7 +3354,7 @@ double object::write( const char *lab, double value, int time, int lag )
 			sim->error_hard( "invalid write operation",
 							 "check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
 							 false,
-							 "invalid initial lag (%d) for variable '%s'", 
+							 "invalid initial lag (%d) for variable '%s'",
 							 time, lab );
 			return NAN;
 		}
@@ -3385,7 +3380,7 @@ double object::write( const char *lab, double value, int time, int lag )
 			sim->error_hard( "invalid write operation",
 							 "check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
 							 false,
-							 "invalid lag (%d) for %s '%s'", 
+							 "invalid lag (%d) for %s '%s'",
 							 lag, cv->param != 1 ? "variable" : "parameter", lab );
 			return NAN;
 		}
@@ -3434,7 +3429,7 @@ double object::write( const char *lab, double value, int time, int lag )
 					sim->error_hard( "invalid write operation",
 									 "check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
 									 true,
-									 "invalid update case (%d) and lag (%d) for variable '%s'", 
+									 "invalid update case (%d) and lag (%d) for variable '%s'",
 									 time, lag, lab );
 					return NAN;
 				}
@@ -3482,7 +3477,7 @@ double object::increment( const char *lab, double value )
 		sim->error_hard( "invalid increment operation",
 						 "check your equation code to prevent this situation",
 						 true,
-						 "value '%g' is invalid for incrementing element '%s'", 
+						 "value '%g' is invalid for incrementing element '%s'",
 						 value, lab );
 		return NAN;
 	}
@@ -3499,7 +3494,7 @@ double object::increment( const char *lab, double value )
 		sim->error_hard( "invalid increment operation",
 						 "check your equation code to prevent this situation",
 						 true,
-						 "current value '%g' of element '%s' is invalid for incrementing", 
+						 "current value '%g' of element '%s' is invalid for incrementing",
 						 cv->val[ 0 ], lab );
 		return NAN;
 	}
@@ -3527,7 +3522,7 @@ double object::multiply( const char *lab, double value )
 		sim->error_hard( "invalid multiply operation",
 						 "check your equation code to prevent this situation",
 						 true,
-						 "value '%g' is invalid for multiplying element '%s'", 
+						 "value '%g' is invalid for multiplying element '%s'",
 						 value, lab );
 		return NAN;
 	}
@@ -3544,7 +3539,7 @@ double object::multiply( const char *lab, double value )
 		sim->error_hard( "invalid multiply operation",
 						 "check your equation code to prevent this situation",
 						 true,
-						 "current value '%g' of element '%s' is invalid for multiplying", 
+						 "current value '%g' of element '%s' is invalid for multiplying",
 						 cv->val[ 0 ], lab );
 		return NAN;
 	}
@@ -3740,8 +3735,8 @@ double object::interact( const char *text, double v, double *tv, int i, int j,
 		sim->n_values[ 8 ] = curl8;
 		sim->n_values[ 9 ] = curl9;
 
-		if ( liblnk.deb != NULL )
-			liblnk.deb( this, NULL, text, &app, true, "" );// signals INTERACT macro
+		if ( liblnk.debugger != NULL )
+			( this ->*liblnk.debugger )( NULL, text, &app, true, "" );// signals INTERACT macro
 	}
 
 	return app;

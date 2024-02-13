@@ -662,14 +662,14 @@ void analysis( bool mc )
 	update_descr_dict( );
 	if ( sim.eff_t > 0 )
 	{
-		insert_data_mem( sim.root, &num_var );
+		sim.root->insert_data_mem( & num_var );
 		min_c = max( first_c, showInit ? 0 : 1 );
 		max_c = num_c;
 	}
 	else
 	{	// create parent map from loaded but not run configuration
 		par_map.clear( );
-		create_par_map( sim.root );
+		sim.root->create_par_map( );
 	}
 
 	if ( ! mc && num_var == 0 )
@@ -3696,7 +3696,7 @@ void analysis( bool mc )
 					// redraw model structure graph
 					case 23:
 
-						show_graph( );
+						( lastObj == NULL ? sim.root : lastObj )->show_graph( );
 						cmd( "focustop .da" );
 
 						break;
@@ -4439,18 +4439,18 @@ void update_descr_dict( void )
 /***************************************************
 INSERT_DATA_MEM
 ****************************************************/
-void insert_data_mem( object *r, int *num_v, const char *lab )
+void object::insert_data_mem( int *num_v, const char *lab )
 {
 	int i = 0, ini_v = *num_v;
 
 	stop = false;
 
-	count_labels_mem( r, &i, lab );
+	count_labels_mem( & i, lab );
 
 	if ( i > PROG_SERIES )
 		cmd( "progressbox .da.ser \"Load Series\" \"Loading saved series\" \"Series\" %d { set stop true } .da", i );
 
-	insert_labels_mem( r, num_v, lab );
+	insert_labels_mem( num_v, lab );
 	cmd( "update_parent" );
 
 	if ( i > PROG_SERIES )
@@ -4471,16 +4471,16 @@ void insert_data_mem( object *r, int *num_v, const char *lab )
 	delete [ ] vs;
 	vs = vs_new;
 
-	insert_store_mem( r, *num_v, &ini_v, lab );
+	insert_store_mem( *num_v, & ini_v, lab );
 
 	cmd( "destroytop .da.ser" );
 
 	if ( *num_v != ini_v )
 	{
-		sim.error_hard( "internal problem in LSD",
-						"if error persists, please contact developers",
-						true,
-						"invalid number of series" );
+		sim->error_hard( "internal problem in LSD",
+						 "if error persists, please contact developers",
+						 true,
+						 "invalid number of series" );
 		lsd_exit_gui( 18 );
 	}
 }
@@ -4489,32 +4489,32 @@ void insert_data_mem( object *r, int *num_v, const char *lab )
 /***************************************************
 CREATE_PAR_MAP
 ****************************************************/
-void create_par_map( object *r )
+void object::create_par_map( void )
 {
 	bridge *cb;
 	object *cur;
 	variable *cv;
 
-	for ( cv = r->v; cv != NULL; cv = cv->next )
-		par_map.insert( make_pair < string, string > ( cv->label, r->label ) );
+	for ( cv = v; cv != NULL; cv = cv->next )
+		par_map.insert( make_pair < string, string > ( cv->label, label ) );
 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 		for ( cur = cb->head; cur != NULL; cur = go_brother( cur ) )
-			create_par_map( cur );
+			cur->create_par_map( );
 }
 
 
 /***************************************************
 COUNT_LABELS_MEM
 ****************************************************/
-void count_labels_mem( object *r, int *count, const char *lab )
+void object::count_labels_mem( int *count, const char *lab )
 {
 	bool found;
 	object *cur;
 	variable *cv;
 	bridge *cb;
 
-	for ( found = false, cv = r->v; cv != NULL; cv = cv->next )
+	for ( found = false, cv = v; cv != NULL; cv = cv->next )
 		if ( ( lab == NULL && cv->save ) || ( lab != NULL && ! strcmp( cv->label, lab ) ) )
 		{
 			if ( ! cv->save )
@@ -4523,13 +4523,13 @@ void count_labels_mem( object *r, int *count, const char *lab )
 			++( *count );
 		}
 
-	for ( cb = r->b; cb != NULL && ! found; cb = cb->next )
+	for ( cb = b; cb != NULL && ! found; cb = cb->next )
 		if ( cb->head != NULL && cb->head->to_compute )
 			for ( cur = cb->head; cur != NULL; cur = cur->next )
-				count_labels_mem( cur, count, lab );
+				cur->count_labels_mem( count, lab );
 
-	if ( r->up == NULL && lab == NULL )
-		for ( cv = sim.cemetery; cv != NULL; cv = cv->next )
+	if ( up == NULL && lab == NULL )
+		for ( cv = sim->cemetery; cv != NULL; cv = cv->next )
 			++( *count );
 }
 
@@ -4537,7 +4537,7 @@ void count_labels_mem( object *r, int *count, const char *lab )
 /***************************************************
 INSERT_LABELS_MEM
 ****************************************************/
-void insert_labels_mem( object *r, int *num_v, const char *lab )
+void object::insert_labels_mem( int *num_v, const char *lab )
 {
 	bool found;
 	char tag_pref[ 3 ];
@@ -4545,7 +4545,7 @@ void insert_labels_mem( object *r, int *num_v, const char *lab )
 	variable *cv;
 	bridge *cb;
 
-	for ( found = false, cv = r->v; cv != NULL && ! stop; cv = cv->next )
+	for ( found = false, cv = v; cv != NULL && ! stop; cv = cv->next )
 		if ( ( lab == NULL && cv->save ) || ( lab != NULL && ! strcmp( cv->label, lab ) ) )
 		{
 			if ( cv->save )
@@ -4558,7 +4558,7 @@ void insert_labels_mem( object *r, int *num_v, const char *lab )
 				cv->end = cv->last_update;
 			}
 
-			set_lab_tit( cv );
+			cv->set_lab_tit( );
 			cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref, cv->lab_tit, cv->start, cv->end, *num_v, cv->up->label );
 
 			if ( cv->end > num_c )
@@ -4571,13 +4571,13 @@ void insert_labels_mem( object *r, int *num_v, const char *lab )
 				cmd( "prgboxupdate .da.ser %d", *num_v - 1 );
 		}
 
-	for ( cb = r->b; cb != NULL && ! found; cb = cb->next )
+	for ( cb = b; cb != NULL && ! found; cb = cb->next )
 		if ( cb->head != NULL && cb->head->to_compute )
 			for ( cur = cb->head; cur != NULL; cur = cur->next )
-				insert_labels_mem( cur, num_v, lab );
+				cur->insert_labels_mem( num_v, lab );
 
-	if ( r->up == NULL && lab == NULL )
-		for ( cv = sim.cemetery; cv != NULL && ! stop; cv = cv->next )
+	if ( up == NULL && lab == NULL )
+		for ( cv = sim->cemetery; cv != NULL && ! stop; cv = cv->next )
 		{
 			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", cv->label, cv->lab_tit, cv->start, cv->end, *num_v, par_map[ cv->label ].c_str( ) );
 
@@ -4596,7 +4596,7 @@ void insert_labels_mem( object *r, int *num_v, const char *lab )
 /***************************************************
 INSERT_STORE_MEM
 ****************************************************/
-void insert_store_mem( object *r, int max_v, int *num_v, const char *lab )
+void object::insert_store_mem( int max_v, int *num_v, const char *lab )
 {
 	bool found;
 	char tag_pref[ 3 ];
@@ -4605,7 +4605,7 @@ void insert_store_mem( object *r, int max_v, int *num_v, const char *lab )
 	variable *cv;
 	bridge *cb;
 
-	for ( found = false, cv = r->v; cv != NULL && *num_v < max_v; cv = cv->next )
+	for ( found = false, cv = v; cv != NULL && *num_v < max_v; cv = cv->next )
 		if ( ( lab == NULL && cv->save ) || ( lab != NULL && ! strcmp( cv->label, lab ) ) )
 		{
 			if ( cv->save )
@@ -4623,7 +4623,7 @@ void insert_store_mem( object *r, int max_v, int *num_v, const char *lab )
 					cv->data[ i ] = cv->val[ cv->num_lag - i ];
 			}
 
-			set_lab_tit( cv );
+			cv->set_lab_tit( );
 			strcpyn( vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
 			snprintf( vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", tag_pref, cv->lab_tit );
 			vs[ *num_v ].start = cv->start;
@@ -4633,13 +4633,13 @@ void insert_store_mem( object *r, int max_v, int *num_v, const char *lab )
 			++( *num_v );
 		}
 
-	for ( cb = r->b; cb != NULL && ! found; cb = cb->next )
+	for ( cb = b; cb != NULL && ! found; cb = cb->next )
 		if ( cb->head != NULL && cb->head->to_compute )
 			for ( cur = cb->head; cur != NULL; cur = cur->next )
-				insert_store_mem( cur, max_v, num_v, lab );
+				cur->insert_store_mem( max_v, num_v, lab );
 
-	if ( r->up == NULL && lab == NULL )
-		for ( cv = sim.cemetery; cv != NULL && *num_v < max_v; cv = cv->next )
+	if ( up == NULL && lab == NULL )
+		for ( cv = sim->cemetery; cv != NULL && *num_v < max_v; cv = cv->next )
 		{
 			strcpyn( vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
 			strcpyn( vs[ *num_v ].tag, cv->lab_tit, MAX_ELEM_LENGTH );
@@ -8250,7 +8250,7 @@ bool add_unsaved( void )
 		return false;
 	}
 
-	insert_data_mem( sim.root, &num_var, get_str( "bidi" ) );
+	sim.root->insert_data_mem( & num_var, get_str( "bidi" ) );
 
 	return true;
 }

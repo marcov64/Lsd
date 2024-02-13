@@ -49,19 +49,19 @@ int simulation::run_sim( void )
 		parallel_mode = parallel_ready = false;
 	else
 	{
-		parallel_mode = search_parallel( root );
+		parallel_mode = root->search_parallel( );
 		parallel_ready = true;
 	}
 
 	// start multi-thread workers
 	if ( parallel_mode )
 	{
-		workers = new worker[ max_threads ];
+		workers = new workerVar[ max_threads ];
 		for ( i = 0; i < max_threads; ++i )
 			workers[ i ].sim = this;
 	}
 #else
-	if ( search_parallel( root ) )
+	if ( root->search_parallel( ) )
 		plog( "\nWarning: parallel mode is not supported under current configuration\n" );
 	parallel_mode = false;
 #endif

@@ -26,30 +26,30 @@ or the set initial values in EDIT.CPP) or going in setting initial values.
 
 The main functions contained in this file are:
 
-- void set_obj_number( object *r )
+- void object::set_obj_number( )
 The main function, called from the browser. Initialize the text widget and wait
 the actions of the users to take place.
 
-- void insert_obj_num( object *r, char *tag, char *indent, int counter, int *idx, int *value );
+- void object::insert_obj_num( char *tag, char *indent, int counter, int *idx, int *value );
 Does the real job. Scan the model from root recursively and for each Object found
 counts the number, prepare its index if the parent has multiple instances,
 and set the indentation. Each label is bound to return a unique integer number
 in case it is clicked. Such number is used as guide for the following function
 
-- void edit_str( object *r, char *tag, int *idx, int res, int *done );
+- void object::edit_str( char *tag, int *idx, int res, int *done );
 Explore recursively the model tree giving a unique number for every group of
 objects encountered. When it finds the one clicked by user prepare the
 window to accept a new value for the number of instances. Passes this value
 to the next function
 
-- void chg_obj_num( object **c, int value, int all );
+- void change_obj_number( object *&c, int value, int all );
 Depending on all (the flag to modify all the values of that type in the model)
 changes only the number of instances following c, or otherwise, every group of
 instances of the type of c. If it has to increase the number of instances,
 it does it directly. If it has to decrease, checks again all. If all is false,
 it activate the routine below, otherwise, it eliminates directly the surplus
 
-- void eliminate_obj( object **c, int actual, int desired );
+- void eliminate_obj( object *&c, int actual, int desired );
 Ask the user whether he wants to eliminate the last object or to choose
 individually the ones to eliminate. In this second case, it asks for a list
 numbers. The list is as long as are the instances to eliminate. Each element
@@ -67,7 +67,7 @@ int max_depth;
 /***************************************************
 SET_OBJ_NUMBER
 ****************************************************/
-void set_obj_number( object *r )
+void object::set_obj_number( void )
 {
 	bool notShown = true;
 	char lab[ MAX_ELEM_LENGTH ];
@@ -82,7 +82,7 @@ void set_obj_number( object *r )
 	level = lowest_level = 1;
 	max_depth = 0;							// start with all levels open
 
-	cmd( "newtop .inin \"%s%s - LSD Object Number Editor\" { set choice 1; set result -1 }", unsaved_change( ) ? "*" : " ", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
+	cmd( "newtop .inin \"%s%s - LSD Object Number Editor\" { set choice 1; set result -1 }", unsaved_change( ) ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
 
 	cmd( "ttk::frame .inin.obj" );
 	cmd( "set f .inin.obj" );
@@ -123,7 +123,7 @@ void set_obj_number( object *r )
 		hid_level = false;
 		cmd( "set ininWid 0" );
 		cmd( "set ininHgt 0" );
-		insert_obj_num( r, "", "", &idx, &count );
+		insert_obj_num( "", "", &idx, &count );
 
 		if ( notShown )
 		{
@@ -160,7 +160,7 @@ void set_obj_number( object *r )
 		{
 			idx = 0;
 			done = 0;
-			edit_str( r, "", &idx, res, &done );
+			edit_str( "", &idx, res, &done );
 			choice = 2;
 
 			if ( done == 2 )
@@ -170,7 +170,7 @@ void set_obj_number( object *r )
 		if ( choice == 3 )
 		{
 			if ( get_str( "obj_name", lab, MAX_ELEM_LENGTH ) != NULL )
-				edit_data( r, lab );
+				edit_data( lab );
 
 			goto noredraw;
 		}
@@ -189,7 +189,7 @@ void set_obj_number( object *r )
 /***************************************************
 INSERT_OBJ_NUM
 ****************************************************/
-void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int *count )
+void object::insert_obj_num( const char *tag, const char *ind, int *idx, int *count )
 {
 	char sInd[ ] = "    \u2219    ";
 	int tagLen = strlen( tag ) + MAX_ELEM_LENGTH + 15;
@@ -202,10 +202,10 @@ void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int 
 	strcpy( newTag, tag );
 	strcpy( newInd, ind );
 
-	if ( r->up != NULL )
+	if ( up != NULL )
 		strcatn( newInd, sInd, indLen );
 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			continue;
@@ -284,7 +284,7 @@ void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int 
 				else
 					snprintf( newTag, tagLen, "#%d", i );
 
-				insert_obj_num( cur, newTag, newInd, idx, count );
+				cur->insert_obj_num( newTag, newInd, idx, count );
 
 				--level;
 			}
@@ -296,7 +296,7 @@ void insert_obj_num( object *r, const char *tag, const char *ind, int *idx, int 
 /***************************************************
 EDIT_STR
 ****************************************************/
-void edit_str( object *r, const char *tag, int *idx, int res, int *done )
+void object::edit_str( const char *tag, int *idx, int res, int *done )
 {
 	int i, sz = strlen( tag ) + 20;
 	char newTag[ sz ];
@@ -305,7 +305,7 @@ void edit_str( object *r, const char *tag, int *idx, int res, int *done )
 
 	strcpy( newTag, tag );
 
-	for ( cb = r->b; cb != NULL && *done == 0; cb = cb->next )
+	for ( cb = b; cb != NULL && *done == 0; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			continue;
@@ -313,7 +313,7 @@ void edit_str( object *r, const char *tag, int *idx, int res, int *done )
 		*idx += 1;
 
 		if ( *idx == res )
-			*done = entry_new_objnum( cb->head, tag );
+			*done = cb->head->entry_new_objnum( tag );
 
 		for ( i = 1, cur = cb->head; cur != NULL && *done == 0; ++i, cur = go_brother( cur ) )
 		{
@@ -325,7 +325,7 @@ void edit_str( object *r, const char *tag, int *idx, int res, int *done )
 			if ( level < max_depth )
 			{
 				level++;
-				edit_str( cur, newTag, idx, res, done );
+				cur->edit_str( newTag, idx, res, done );
 				level--;
 			}
 		}
@@ -336,15 +336,15 @@ void edit_str( object *r, const char *tag, int *idx, int res, int *done )
 /***************************************************
 ENTRY_NEW_OBJNUM
 ****************************************************/
-int entry_new_objnum( object *c, const char *tag )
+int object::entry_new_objnum( const char *tag )
 {
 	int i, j, k, num, cfrom, max_level;
 	object *cur, *first;
 
-	if ( c->up == NULL )
+	if ( up == NULL )
 		return 2;
 
-	skip_next_obj( c->up->search( c->label ), &num );
+	skip_next_obj( up->search( label ), &num );
 	cmd( "set num %d", num );
 	cmd( "set conf 0" );
 	cmd( "set cfrom 1" );
@@ -357,12 +357,12 @@ int entry_new_objnum( object *c, const char *tag )
 
 	cmd( "ttk::frame $T.l.n1" );
 	cmd( "ttk::label $T.l.n1.l1 -text \"Object:\"" );
-	cmd( "ttk::label $T.l.n1.l2 -text \"%s\" -style hl.TLabel", c->label );
+	cmd( "ttk::label $T.l.n1.l2 -text \"%s\" -style hl.TLabel", label );
 	cmd( "pack $T.l.n1.l1 $T.l.n1.l2 -side left" );
 
 	cmd( "ttk::frame $T.l.n2" );
 	cmd( "ttk::label $T.l.n2.l1 -text \"Contained in:\"" );
-	cmd( "ttk::label $T.l.n2.l2 -style hl.TLabel -text \"%s %s\"", c->up->label, tag );
+	cmd( "ttk::label $T.l.n2.l2 -style hl.TLabel -text \"%s %s\"", up->label, tag );
 	cmd( "pack $T.l.n2.l1 $T.l.n2.l2 -side left" );
 
 	cmd( "pack $T.l.n1 $T.l.n2" );
@@ -386,25 +386,25 @@ int entry_new_objnum( object *c, const char *tag )
 
 	cmd( "ttk::frame $T.ef.g -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 
-	for ( j = 1, cur = c->up; cur->up != NULL; cur = cur->up, j++ )
+	for ( j = 1, cur = up; cur->up != NULL; cur = cur->up, j++ )
 	{
 		if ( j == 1 )
 		{
 			first = cur->up->search( cur->label );
 			for ( k = 1; first != cur; first = go_brother( first ), ++k );
 			cmd( "set affect 1.%d", k );
-			cmd( "ttk::radiobutton $T.ef.g.r1 -text \"This group of '%s' contained in '%s' #%d\" -variable affect -value 1.%d", c->label, cur->label, k, k );
+			cmd( "ttk::radiobutton $T.ef.g.r1 -text \"This group of '%s' contained in '%s' #%d\" -variable affect -value 1.%d", label, cur->label, k, k );
 		}
 		else
 		{
 			first = cur->up->search( cur->label );
 			for ( k = 1; first != cur; first = go_brother( first ), ++k );
-			cmd( "ttk::radiobutton $T.ef.g.r%d -text \"All groups of '%s' contained in '%s' #%d\" -variable affect -value %d.%d", j, c->label, cur->label, k, j, k );
+			cmd( "ttk::radiobutton $T.ef.g.r%d -text \"All groups of '%s' contained in '%s' #%d\" -variable affect -value %d.%d", j, label, cur->label, k, j, k );
 		}
 		cmd( "pack $T.ef.g.r%d -anchor w", j );
 	}
 
-	cmd( "ttk::radiobutton $T.ef.g.r%d -text \"All groups of '%s' in the model\" -variable affect -value %d.1", j, c->label, j );
+	cmd( "ttk::radiobutton $T.ef.g.r%d -text \"All groups of '%s' in the model\" -variable affect -value %d.1", j, label, j );
 	cmd( "pack $T.ef.g.r%d -anchor w", j );
 
 	max_level = j;
@@ -451,7 +451,7 @@ int entry_new_objnum( object *c, const char *tag )
 
 	if ( choice == 3 )
 	{
-		k = compute_copyfrom( c, "$T" );
+		k = compute_copyfrom( "$T" );
 		if ( k > 0 )
 			cmd( "set cfrom %d", k );
 
@@ -476,7 +476,7 @@ int entry_new_objnum( object *c, const char *tag )
 	for ( i = 1; i <= max_level; ++i )
 		affected[ i ] = ( i == j ) ? k : -1;
 
-	chg_obj_num( &c, num, j, affected, cfrom );
+	change_obj_number( cur = this, num, j, affected, cfrom );
 
 	unsaved_change( true );				// signal unsaved change
 	redrawRoot = redrawStruc = true;	// update list boxes & structure
@@ -488,12 +488,12 @@ int entry_new_objnum( object *c, const char *tag )
 /***************************************************
 COMPUTE_COPYFROM
 ****************************************************/
-int compute_copyfrom( object *c, const char *parWnd )
+int object::compute_copyfrom( const char *parWnd )
 {
 	object *cur, *cur1, *cur2, *cur3;
 	int i, j, k, h, n, res;
 
-	if ( c == NULL || c->up == NULL )
+	if ( up == NULL )
 	{
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Element in Root object\" -detail \"The Root object is always single-instanced, so any element contained in it has only one instance.\"" );
 		return 1;
@@ -505,12 +505,12 @@ int compute_copyfrom( object *c, const char *parWnd )
 	cmd( "newtop $cc \"Instance Number\" { set cconf 1; set choice 1 } %s", parWnd );
 
 	cmd( "ttk::frame $cc.l" );
-	cmd( "ttk::label $cc.l.l -justify center -text \"Determine the effective instance number of '%s'\nby computing the instance numbers of the containing objects.\nPress 'Done' to use the number and continue.\"", c->label );
+	cmd( "ttk::label $cc.l.l -justify center -text \"Determine the effective instance number of '%s'\nby computing the instance numbers of the containing objects.\nPress 'Done' to use the number and continue.\"", label );
 	cmd( "pack $cc.l.l" );
 
 	cmd( "ttk::frame $cc.f" );
 
-	for ( i = 1, j = 1, cur = c; cur->up != NULL; cur = cur->up, ++j )
+	for ( i = 1, j = 1, cur = this; cur->up != NULL; cur = cur->up, ++j )
 	{
 		cmd( "ttk::frame $cc.f.f%d", j );
 		cmd( "ttk::label $cc.f.f%d.l -text \"Instance # of '%s'\"", j, cur->label );
@@ -524,7 +524,7 @@ int compute_copyfrom( object *c, const char *parWnd )
 
 	cmd( "focus $cc.f.f%d.e; $cc.f.f%d.e selection range 0 end", j - 1, j - 1 );
 
-	for ( --j, cur = c; cur->up != NULL; cur = cur->up, --j )
+	for ( --j, cur = this; cur->up != NULL; cur = cur->up, --j )
 	{	// pack in inverse order
 		cmd( "pack $cc.f.f%d -pady 2 -anchor e", j );
 		cmd( "bind $cc.f.f%d.e <Return> \"focus $cc.f.f%d.e; $cc.f.f%d.e selection range 0 end\"", j, j - 1, j - 1 );
@@ -550,10 +550,10 @@ int compute_copyfrom( object *c, const char *parWnd )
 
 	ccompute:
 
-	for ( cur = c->up; cur->up != NULL; cur = cur->up ); //cur is root
-	cur = cur->search( c->label ); //find the first
+	for ( cur = up; cur->up != NULL; cur = cur->up ); 	// find root
+	cur = cur->search( label );							// find the first
 
-	for ( i = 0, k = 0, cur3 = NULL; k == 0 && cur != NULL ; cur3 = cur, cur = cur->hyper_next( c->label ), ++i )
+	for ( i = 0, k = 0, cur3 = NULL; k == 0 && cur != NULL ; cur3 = cur, cur = cur->hyper_next( label ), ++i )
 	{
 		k = 1;
 		for ( j = 1, cur1 = cur; cur1->up != NULL; cur1 = cur1->up, ++j )
@@ -614,32 +614,32 @@ int compute_copyfrom( object *c, const char *parWnd )
 /***************************************************
 CHG_OBJ_NUM
 ****************************************************/
-void chg_obj_num( object **c, int value, int level, int affected[ ], int cfrom )
+void change_obj_number( object *&c, int value, int level, int affected[ ], int cfrom )
 {
 	int i, num;
 	object *cur, *cur1, *cur2, *first, *last, *pivot;
 
-	for ( cur = *c; cur->up != NULL; cur = cur->up );		// go to root
+	for ( cur = c; cur->up != NULL; cur = cur->up );		// go to root
 
 	// select the object example
-	for ( first = cur->search( ( *c )->label ), i = 1; i < cfrom && first != NULL; first = first->hyper_next( first->label ), ++i );
+	for ( first = cur->search( c->label ), i = 1; i < cfrom && first != NULL; first = first->hyper_next( first->label ), ++i );
 
 	if ( first == NULL )
 	{
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Object instance not found\" -detail \"Instance %d of object '%s' not found.\"", cfrom, ( *c )->label );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Object instance not found\" -detail \"Instance %d of object '%s' not found.\"", cfrom, c->label );
 		return;
 	}
 
 	// select the pivot
-	for ( i = 0, pivot = *c; i < level; ++i )
+	for ( i = 0, pivot = c; i < level; ++i )
 		pivot = pivot->up;
 
 	// select the first object of the type to change under pivot
-	cur = pivot->search( ( *c )->label );
+	cur = pivot->search( c->label );
 
 	while ( cur != NULL )
 	{	// as long as necessary
-		if ( affected == NULL || check_affected( cur, level, affected ) == 1 )
+		if ( affected == NULL || cur->check_affected( level, affected ) == 1 )
 		{
 			skip_next_obj( cur, &num ); 	// count the existing objects
 
@@ -650,8 +650,8 @@ void chg_obj_num( object **c, int value, int level, int affected[ ], int cfrom )
 			{ 	// remove objects
 				if ( level == 1 ) 	// you have the option to choose the items to be removed, only if you operate on one group
 				{
-					eliminate_obj( &cur, num, value );
-					*c = cur;
+					eliminate_obj( cur, num, value );
+					c = cur;
 				}
 				else
 				{	// remove automatically the excess of objects
@@ -693,7 +693,7 @@ void chg_obj_num( object **c, int value, int level, int affected[ ], int cfrom )
 /***************************************************
 ELIMINATE_OBJ
 ****************************************************/
-void eliminate_obj( object **c, int actual, int desired )
+void eliminate_obj( object *&c, int actual, int desired )
 {
 	int i, idx2, val2, last, *del;
 	object *cur, *cur1;
@@ -705,7 +705,7 @@ void eliminate_obj( object **c, int actual, int desired )
 
 	cmd( "ttk::frame $d.l" );
 	cmd( "ttk::label $d.l.l1 -text \"Object:\"" );
-	cmd( "ttk::label $d.l.l2 -style hl.TLabel -text \"%s\"", ( *c )->label );
+	cmd( "ttk::label $d.l.l2 -style hl.TLabel -text \"%s\"", c->label );
 	cmd( "pack $d.l.l1 $d.l.l2 -side left" );
 
 	cmd( "ttk::frame $d.t" );
@@ -738,7 +738,7 @@ void eliminate_obj( object **c, int actual, int desired )
 
 	if ( choice == 1 )
 	{
-		for ( i = 1, cur = *c; i < desired && cur != NULL; ++i, cur = go_brother( cur ) );
+		for ( i = 1, cur = c; i < desired && cur != NULL; ++i, cur = go_brother( cur ) );
 		for ( ; go_brother( cur ) != NULL; )
 			go_brother( cur )->delete_obj( );
 	}
@@ -753,11 +753,11 @@ void eliminate_obj( object **c, int actual, int desired )
 
 		cmd( "ttk::frame $d.l" );
 		cmd( "ttk::label $d.l.l1 -text \"Object:\"" );
-		cmd( "ttk::label $d.l.l2 -style hl.TLabel -text \"%s\"", ( *c )->label );
+		cmd( "ttk::label $d.l.l2 -style hl.TLabel -text \"%s\"", c->label );
 		cmd( "pack $d.l.l1 $d.l.l2 -side left" );
 
 		cmd( "ttk::frame $d.t" );
-		cmd( "ttk::label $d.t.tit -text \"Instance to delete\"", ( *c )->label );
+		cmd( "ttk::label $d.t.tit -text \"Instance to delete\"", c->label );
 		cmd( "ttk::spinbox $d.t.e -width 6 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set val2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $val2; return 0 } } -invalidcommand { bell } -justify center", actual, actual );
 		cmd( "ttk::label $d.t.tit1 -text \"\"" );
 		cmd( "pack $d.t.tit $d.t.e $d.t.tit1" );
@@ -801,11 +801,11 @@ void eliminate_obj( object **c, int actual, int desired )
 			++val2;
 		}
 
-		for ( idx2 = 1, val2 = 0, cur = *c, cur1 = go_brother( cur ); cur != NULL && idx2 <= actual && val2 < actual - desired; ++idx2, cur = cur1, cur1 = go_brother( cur ) )
+		for ( idx2 = 1, val2 = 0, cur = c, cur1 = go_brother( cur ); cur != NULL && idx2 <= actual && val2 < actual - desired; ++idx2, cur = cur1, cur1 = go_brother( cur ) )
 			if ( idx2 == del[ val2 ] )
 			{
-				if ( cur == *c )
-					*c = go_brother( cur );
+				if ( cur == c )
+					c = go_brother( cur );
 
 				cur->delete_obj( );
 				++val2;
@@ -824,12 +824,12 @@ void eliminate_obj( object **c, int actual, int desired )
 /***************************************************
 CHECK_AFFECTED
 ****************************************************/
-int check_affected( object *c, int level, int affected[ ] )
+int object::check_affected( int level, int affected[ ] )
 {
 	int i, j, res;
 	object *cur, *cur1;
 
-	for ( i = 1, res = 1, cur = c->up; i <= level && res == 1; ++i, cur = cur->up )
+	for ( i = 1, res = 1, cur = up; i <= level && res == 1; ++i, cur = cur->up )
 	{
 		// don't check if it is in Root or if there is no constraint
 		if ( affected[ i ] != -1 && cur->up != NULL )

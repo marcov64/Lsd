@@ -77,9 +77,9 @@ object *blueprint = NULL;	// LSD blueprint (effective model in use)
 object *root = NULL;		// LSD root object
 object *wait_delete = NULL;	// LSD object waiting for deletion
 o_setT obj_list;			// set with all existing LSD objects
-sense *rsense = NULL;		// LSD sensitivity analysis structure
+sensitivity *sens = NULL;	// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
-variable *last_cemetery = NULL;	// LSD last saved data from deleted objects
+variable *last_cemetery = NULL;// LSD last saved data from deleted objects
 
 // constant string arrays
 const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
@@ -175,7 +175,7 @@ int lsdmain( int argn, const char **argv )
 		lsd_exit( 5 );
 	}
 
-	count_save( root, & i );
+	root->count_save( & i );
 	if ( ! all_var && i == 0 )
 	{
 		printf( "\n(no variable being saved)\n" );
@@ -196,11 +196,11 @@ int lsdmain( int argn, const char **argv )
 
 		// write .csv header
 		fprintf( f, "Name%sType%sObject%sDescription\n", sep, sep, sep );
-		get_saved( root, f, sep, all_var );
+		root->get_saved( f, sep, all_var );
 		fclose( f );
 	}
 	else	// send to stdout
-		get_saved( root, stdout, "\t", all_var );
+		root->get_saved( stdout, "\t", all_var );
 
 	empty_blueprint( );
 	empty_description( );

@@ -204,6 +204,19 @@ variable::variable( const variable &v )
 
 
 /****************************************************
+~VARIABLE
+desstructor
+****************************************************/
+variable::~variable( void )
+{
+	delete [ ] label;
+	delete [ ] val;
+	delete [ ] lab_tit;
+	free( data );		// use C stdlib to be able to deallocate memory for deleted objects
+}
+
+
+/****************************************************
 INIT
 ****************************************************/
 void variable::init( object *_up, simulation *_sim, const char *_label,
@@ -259,10 +272,7 @@ void variable::empty( bool no_lock )
 		return;
 	}
 
-	delete [ ] label;
-	delete [ ] val;
-	delete [ ] lab_tit;
-	free( data );		// use C stdlib to be able to deallocate memory for deleted objects
+	delete this;
 }
 
 
@@ -406,7 +416,7 @@ double variable::cal( object *caller, int lag )
 			sim->error_hard( "internal problem in LSD",
 							 "if error persists, please contact developers",
 							 true,
-							 "failure while pushing '%s' (object '%s')", 
+							 "failure while pushing '%s' (object '%s')",
 							 label, up->label );
 			return 0;
 		}
@@ -500,7 +510,7 @@ double variable::cal( object *caller, int lag )
 
 			if ( time >= sim->prof_min_msecs )
 			{
-				set_lab_tit( this );
+				set_lab_tit( );
 				plog_tag( "\n%-12.12s(%-.10s)\t=", "prof1", label, lab_tit );
 				plog_tag( "%.4g\t", "highlight", val[ 0 ] );
 				plog( "t=" );
@@ -518,11 +528,11 @@ double variable::cal( object *caller, int lag )
 			fprintf( log_file_ptr, "%s\t= %g\t(t=%d sim=%d)\n", label, val[ 0 ], sim->t, sim->sim );
 
 		// open the debugger if required
-		if ( deb_set && sim->t == sim->deb_t && liblnk.deb != NULL && ( sim->watch_trigger || ( deb_cond == 0 && ( deb_mode == 'd' || deb_mode == 'W' || deb_mode == 'R' ) ) ) )
-			liblnk.deb( ( object * ) up, caller, label, &val[ 0 ], false, "" );
+		if ( deb_set && sim->t == sim->deb_t && liblnk.debugger != NULL && ( sim->watch_trigger || ( deb_cond == 0 && ( deb_mode == 'd' || deb_mode == 'W' || deb_mode == 'R' ) ) ) )
+			( up->*liblnk.debugger )( caller, label, &val[ 0 ], false, "" );
 		else
 		{
-			if ( liblnk.deb == NULL && deb_cond >= 1 && deb_cond <= 3 )
+			if ( liblnk.debugger == NULL && deb_cond >= 1 && deb_cond <= 3 )
 				deb_cond = -1;
 
 			switch ( deb_cond )
@@ -531,21 +541,21 @@ double variable::cal( object *caller, int lag )
 					break;
 				case 1:
 					if ( val[ 0 ] == deb_cnd_val )
-						liblnk.deb( ( object * ) up, caller, label, &val[ 0 ], false, "" );
+						( up->*liblnk.debugger )( caller, label, &val[ 0 ], false, "" );
 					break;
 				case 2:
 					if ( val[ 0 ] > deb_cnd_val )
-						liblnk.deb( ( object * ) up, caller, label, &val[ 0 ], false, "" );
+						( up->*liblnk.debugger )( caller, label, &val[ 0 ], false, "" );
 					break;
 				case 3:
 					if ( val[ 0 ] < deb_cnd_val )
-						liblnk.deb( ( object * ) up, caller, label, &val[ 0 ], false, "" );
+						( up->*liblnk.debugger )( caller, label, &val[ 0 ], false, "" );
 					break;
 				default:
 					sim->error_hard( "internal problem in LSD",
 									 "if error persists, please contact developers",
 									 true,
-									 "conditional debug '%d' in variable '%s'", 
+									 "conditional debug '%d' in variable '%s'",
 									 deb_cond, label );
 					return -1;
 			}
@@ -564,7 +574,7 @@ double variable::cal( object *caller, int lag )
 			sim->error_hard( "internal problem in LSD",
 							 "if error persists, please contact developers",
 							 true,
-							 "failure while poping '%s' (in object '%s')", 
+							 "failure while poping '%s' (in object '%s')",
 							 label, up->label );
 			return 0;
 		}
@@ -592,8 +602,8 @@ double variable::cal( object *caller, int lag )
 		sim->error_hard( "invalid lag used",
 						 "check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
 						 false,
-						 "variable or function '%s' (object '%s') requested \nwith lag=%d but declared with lag=%d\nPossible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the offender equation to request the value of '%s' with lag=%d maximum, or\n- enable USE_SAVED and mark '%s' to be saved (variables only)", 
-						 label, up->label, eff_lag, num_lag, label, eff_lag, 
+						 "variable or function '%s' (object '%s') requested \nwith lag=%d but declared with lag=%d\nPossible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the offender equation to request the value of '%s' with lag=%d maximum, or\n- enable USE_SAVED and mark '%s' to be saved (variables only)",
+						 label, up->label, eff_lag, num_lag, label, eff_lag,
 						 label, num_lag, label );
 	else
 		sim->error_hard( "invalid lag used",
@@ -608,9 +618,9 @@ double variable::cal( object *caller, int lag )
 #ifndef _NP_
 /***************************************************
 CAL_WORKER
-Multi-thread worker for parallel computation
+Multi-thread worker for variable computation
 ****************************************************/
-void worker::cal_worker( void )
+void workerVar::cal_worker( void )
 {
 	int i;
 	double app;
@@ -765,7 +775,7 @@ void worker::cal_worker( void )
 /***************************************************
 WORKER constructor
 ****************************************************/
-worker::worker( void )
+workerVar::workerVar( void )
 {
 	running = false;
 	free = false;
@@ -778,14 +788,14 @@ worker::worker( void )
 	strcpy( err_msg3, "" );
 
 	// launch new thread (waiting mode)
-	thr = thread( & worker::cal_worker, this );
+	thr = thread( & workerVar::cal_worker, this );
 }
 
 
 /***************************************************
 WORKER destructor
 ****************************************************/
-worker::~worker( void )
+workerVar::~workerVar( void )
 {
 	// command thread shutdown if running
 	if ( running && ! errored )
@@ -808,7 +818,7 @@ worker::~worker( void )
 SIGNAL
 Handle system signals in worker
 ****************************************************/
-void worker::signal( int sig )
+void workerVar::signal( int sig )
 {
 	char signame[ 16 ];
 
@@ -858,7 +868,7 @@ void worker::signal( int sig )
 SIGNAL_WRAPPER
 Reformat signal function format to comply with OS
 ****************************************************/
-void worker::signal_wrapper( int signum )
+void workerVar::signal_wrapper( int signum )
 {
 	// call the appropriate worker object member function to handle signal
 	thr_ptr[ this_thread::get_id( ) ]->signal( signum );
@@ -869,7 +879,7 @@ void worker::signal_wrapper( int signum )
 CAL
 Multi-thread CAL version (parallel computation)
 ****************************************************/
-void worker::cal( variable *v )
+void workerVar::cal( variable *v )
 {
 	unique_lock< mutex > worker_lock( lock );
 	var = v;
@@ -882,7 +892,7 @@ void worker::cal( variable *v )
 CHECK
 Check if worker is running and handle problems
 ****************************************************/
-bool worker::check( void )
+bool workerVar::check( void )
 {
 	if ( running && ! errored )				// nothing to do?
 		return true;
@@ -918,7 +928,7 @@ bool worker::check( void )
 										 "disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
 										 true,
 										 "while computing variable '%s' (object '%s') a multi-threading worker crashed",
-										 var->label, 
+										 var->label,
 										 var->up->label != NULL ? var->up->label : "(none)" );
 					else
 						sim->error_hard( "parallel computation problem",

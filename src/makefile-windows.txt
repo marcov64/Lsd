@@ -118,8 +118,8 @@ $(TARGET)$(EXE_EXT): $(OBJ_DIR)LSD.exe.manifest.o $(LIB_GUI) lib$(TARGET)$(DLL_E
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(OBJ_DIR)LSD.exe.manifest.o $(LIB_GUI) -L. -l$(TARGET) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(TARGET)$(EXE_EXT)
 
 # executable static library
-$(LIB_GUI): $(OBJ_DIR)LSD.o $(OBJ_DIR)LSDmain.o $(OBJ_DIR)analysis.o $(OBJ_DIR)browser.o $(OBJ_DIR)common.o $(OBJ_DIR)debug.o $(OBJ_DIR)draw.o $(OBJ_DIR)edit.o $(OBJ_DIR)edit_dat.o $(OBJ_DIR)file.o $(OBJ_DIR)interf.o $(OBJ_DIR)lattice.o $(OBJ_DIR)log.o $(OBJ_DIR)report.o $(OBJ_DIR)runtime.o $(OBJ_DIR)set_all.o $(OBJ_DIR)sensitivity.o $(OBJ_DIR)show_eq.o $(OBJ_DIR)util.o
-	$(AR) $(LIB_GUI) $(OBJ_DIR)LSD.o $(OBJ_DIR)LSDmain.o $(OBJ_DIR)analysis.o $(OBJ_DIR)browser.o $(OBJ_DIR)common.o $(OBJ_DIR)debug.o $(OBJ_DIR)draw.o $(OBJ_DIR)edit.o $(OBJ_DIR)edit_dat.o $(OBJ_DIR)file.o $(OBJ_DIR)interf.o $(OBJ_DIR)lattice.o $(OBJ_DIR)log.o $(OBJ_DIR)report.o $(OBJ_DIR)runtime.o $(OBJ_DIR)set_all.o $(OBJ_DIR)sensitivity.o $(OBJ_DIR)show_eq.o $(OBJ_DIR)util.o
+$(LIB_GUI): $(OBJ_DIR)LSD.o $(OBJ_DIR)LSDmain.o $(OBJ_DIR)analysis.o $(OBJ_DIR)browser.o $(OBJ_DIR)common.o $(OBJ_DIR)debug.o $(OBJ_DIR)draw.o $(OBJ_DIR)edit.o $(OBJ_DIR)edit_dat.o $(OBJ_DIR)file.o $(OBJ_DIR)interf.o $(OBJ_DIR)lattice.o $(OBJ_DIR)log.o $(OBJ_DIR)report.o $(OBJ_DIR)runtime.o $(OBJ_DIR)sensitivity.o $(OBJ_DIR)set_all.o $(OBJ_DIR)show_eq.o $(OBJ_DIR)util.o
+	$(AR) $(LIB_GUI) $(OBJ_DIR)LSD.o $(OBJ_DIR)LSDmain.o $(OBJ_DIR)analysis.o $(OBJ_DIR)browser.o $(OBJ_DIR)common.o $(OBJ_DIR)debug.o $(OBJ_DIR)draw.o $(OBJ_DIR)edit.o $(OBJ_DIR)edit_dat.o $(OBJ_DIR)file.o $(OBJ_DIR)interf.o $(OBJ_DIR)lattice.o $(OBJ_DIR)log.o $(OBJ_DIR)report.o $(OBJ_DIR)runtime.o $(OBJ_DIR)sensitivity.o $(OBJ_DIR)set_all.o $(OBJ_DIR)show_eq.o $(OBJ_DIR)util.o
 
 # executable static library modules
 $(OBJ_DIR)LSD.o: $(SRC_DIR)LSD.cpp $(DEP_GUI)

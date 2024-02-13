@@ -19,7 +19,7 @@ values of a variable with a function, instead of inserting manually.
 
 The functions contained in this file are:
 
-- void set_all( object *r, const char *lab, int lag, const char *parWnd )
+- void object::set_all( const char *lab, int lag, const char *parWnd )
 it allows 5 options to set all values. It uses one value entered by the user
 in this window and, for some option, the first value for this variable in the
 model. That is, the value for this variable contained in the first object of this
@@ -43,7 +43,7 @@ standard deviation is the inserted value.
 SET_ALL
 ****************************************************/
 
-void set_all( object *original, const char *lab, int lag, const char *parWnd )
+void object::set_all( const char *lab, int lag, const char *parWnd )
 {
 	bool selFocus = true;
 	char ch[ MAX_ELEM_LENGTH ], action[ MAX_ELEM_LENGTH ], msg[ MAX_LINE_SIZE ];
@@ -51,12 +51,18 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	double value, value1, value2, step, counter;
 	int res, i, j, kappa = 0, to_all, update_d, cases_from, cases_to, fill, use_seed, rnd_seed, step_in;
 	description *cd;
-	object *cur, *r;
+	object *cur;
 	variable *cv;
 	FILE *f;
 
-	r = sim.root->search( original->label );	// select the first instance
-	cv = r->search_var( NULL, lab );
+	// do on first instance
+	if ( up != NULL && up->search( label ) != this )
+	{
+		up->search( label )->set_all( lab, lag, parWnd );
+		return;
+	}
+
+	cv = search_var( NULL, lab );
 	if ( cv == NULL )
 		return;
 
@@ -114,7 +120,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 		cmd( "ttk::label $_w.head.l.c -text \"Variable: \"" );
 		cmd( "ttk::label $_w.head.l.n1 -text \"%s  \" -style hl.TLabel", lab );
 		cmd( "ttk::label $_w.head.l.n2 -text \"\\[	lag \"" );
-		cmd( "ttk::label $_w.head.l.n3 -text \"%d\" -style hl.TLabel", sim.t - cv->last_update + lag + 1  );
+		cmd( "ttk::label $_w.head.l.n3 -text \"%d\" -style hl.TLabel", sim->t - cv->last_update + lag + 1  );
 		cmd( "ttk::label $_w.head.l.n4 -text \"\\]\"" );
 		cmd( "pack $_w.head.l.c $_w.head.l.n1 $_w.head.l.n2 $_w.head.l.n3 $_w.head.l.n4 -side left" );
 	}
@@ -327,7 +333,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	if ( choice == 9 )
 	{
 		// search instance from
-		i = compute_copyfrom( original, "$_w" );
+		i = compute_copyfrom( "$_w" );
 		cmd( "set cases_from %d", i );
 		goto here_setall;
 	}
@@ -335,7 +341,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	if ( choice == 10 )
 	{
 		// search instance to
-		i = compute_copyfrom( original, "$_w" );
+		i = compute_copyfrom( "$_w" );
 		cmd( "set cases_to %d", i );
 		goto here_setall;
 	}
@@ -386,7 +392,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 	{
 		// equal to
 		case 1:
-			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( label ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -400,13 +406,13 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 		// range
 		case 9:
-			for ( i = 1, cur = r, counter = -1; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = this, counter = -1; cur != NULL; cur = cur->hyper_next( label ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( ( ( i - cases_from ) % step_in == 0 ) ) )
 					counter++;
 
 			value = ( value2 - value1 ) / counter;
 
-			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( label ), ++i )
 			{
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
@@ -426,7 +432,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 		// increasing
 		case 2:
-			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( label ), ++i )
 			{
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
@@ -446,7 +452,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 		// increasing (groups)
 		case 4:
-			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( label ), ++i )
 				if ( to_all == 1 || ( cases_from <= i && cases_to >= i ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -455,7 +461,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 					++j;
 					++step;
 
-					if ( cur->next != cur->hyper_next( r->label ) )
+					if ( cur->next != cur->hyper_next( label ) )
 						step = 0;
 				}
 
@@ -465,7 +471,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 		// random (uniform)
 		case 3:
-			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( label ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -480,7 +486,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 		// random integer (uniform)
 		case 8:
-			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( label ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -495,7 +501,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 		// random (normal)
 		case 5:
-			for ( i = 1, cur = r, step = 0; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( label ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -526,7 +532,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 			if ( fscanf( f, "%99s", ch ) == EOF )				// the label
 				return;
 
-			for ( i = 1, cur = r; cur != NULL; cur = cur->hyper_next( r->label ), ++i )
+			for ( i = 1, cur = this; cur != NULL; cur = cur->hyper_next( label ), ++i )
 				if ( to_all == 1 || ( cases_from <= i && cases_to >= i ) )
 				{
 					kappa = fscanf( f, "%lf", &value );
@@ -547,16 +553,16 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 
 
 		default:
-			sim.error_hard( "internal problem in LSD",
-							"if error persists, please contact developers",
-							true,
-							"invalid option for setting values" );
+			sim->error_hard( "internal problem in LSD",
+							 "if error persists, please contact developers",
+							 true,
+							 "invalid option for setting values" );
 			lsd_exit_gui( 22 );
 	}
 
 	if ( update_d )
 	{
-		cd = sim.search_description( lab );
+		cd = sim->search_description( lab );
 
 		if ( step_in > 1 )
 			snprintf( ch, MAX_ELEM_LENGTH, " (every %d instances)", step_in );
@@ -577,7 +583,7 @@ void set_all( object *original, const char *lab, int lag, const char *parWnd )
 			else
 				snprintf( msg, MAX_LINE_SIZE, "Instances from %d to %d %s%s", cases_from, cases_to, action, ch );
 
-		sim.change_description( lab, NULL, -1, NULL, msg );
+		sim->change_description( lab, NULL, -1, NULL, msg );
 	}
 
 	unsaved_change( true );				// signal unsaved change

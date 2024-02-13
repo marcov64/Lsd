@@ -32,8 +32,8 @@ Relevant macros for conditional compilation (when defined):
 
 #include "lib/libLSD.h"				// LSD library classes
 
-int load_config( & simulation sim );
-int parse_cmdline( int argn, const char **argv );
+int load_config( simulation & sim );
+int parse_cmdline( int argn, const char **argv, simulation & sim );
 
 const char lsdCmdMsg[ ] = "This is the No Window version of LSD.";
 const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd [-s SEED] [-e RUNS] to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-l FILENAME' to save all output to a (log) file\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-p' for skipping the generation of totals file\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-b' for showing a progress bar\n'-c MAX_THREADS[:MAX_RUNS]' to set maximum parallel threads/runs to use\n";
@@ -70,7 +70,7 @@ int main( int argn, const char **argv )
 		}
 
 		// parse command line options
-		res = parse_cmdline( argn, argv );
+		res = parse_cmdline( argn, argv, sim );
 		if ( res != 0 )
 			lsd_exit( res );
 
@@ -97,7 +97,7 @@ int main( int argn, const char **argv )
 
 #endif
 			// execute single simulation
-			res = run_sim( );
+			res = sim.run_sim( );
 
 #ifndef _NT_
 
@@ -125,7 +125,7 @@ int main( int argn, const char **argv )
 /*********************************
  PARSE_CMDLINE
  *********************************/
-int parse_cmdline( int argn, const char **argv )
+int parse_cmdline( int argn, const char **argv, simulation & sim )
 {
 	int i, j = 0, k = 0;
 
@@ -154,7 +154,7 @@ int parse_cmdline( int argn, const char **argv )
 		// read -o parameter : change the path for the output of result files
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 		{
-			results_alt_path( argv[ 1 + i ] );
+			sim.results_alt_path( argv[ 1 + i ] );
 			continue;
 		}
 		// read -l parameter : save all output to a (log) file
@@ -260,7 +260,7 @@ int parse_cmdline( int argn, const char **argv )
 /*********************************
  LOAD_CONFIGURATION
  *********************************/
-int load_config( & simulation sim )
+int load_config( simulation & sim )
 {
 	char *str;
 	FILE *f;
@@ -277,7 +277,7 @@ int load_config( & simulation sim )
 
 	if ( strstr( str, ".LSD" ) == NULL )
 	{
-		sim.batch_sequential = true;
+		batch_sequential = true;
 
 		if ( findex < 0 || fend < 0 || fend < findex )
 		{

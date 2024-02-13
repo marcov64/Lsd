@@ -270,7 +270,6 @@ void lsd_exit( int v )
  ****************************************************/
 void exception_handler( int signum, const char *what )
 {
-	bool usrExcpt = false;
 	static char msg1[ MAX_LINE_SIZE ], msg2[ MAX_LINE_SIZE ], msg3[ MAX_LINE_SIZE ];
 
 	switch ( signum )
@@ -330,6 +329,7 @@ void exception_handler( int signum, const char *what )
 	if ( liblnk.cmd_backend != NULL )			// Tcl GUI available?
 	{
 #ifndef _LMM_
+		bool usrExcpt = false;
 		for ( auto sim : sims )					// search for user exception
 			if ( sim->user_exception )
 				usrExcpt = true;
@@ -381,8 +381,8 @@ void exception_handler( int signum, const char *what )
 			{
 				double useless = -1;
 				snprintf( msg3, MAX_LINE_SIZE, "%s (ERROR)", sims[ 0 ]->stack_log->vs->label );
-				if ( liblnk.deb != NULL )
-					liblnk.deb( sims[ 0 ]->stack_log->vs->up, NULL, msg3, & useless, false, "" );
+				if ( liblnk.debugger != NULL )
+					( sims[ 0 ]->stack_log->vs->up->*liblnk.debugger )( NULL, msg3, & useless, false, "" );
 			}
 		}
 		else

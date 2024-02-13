@@ -14,9 +14,10 @@
 
 /*************************************************************
 FUN_HEAD_FAST.H
-Header file to enable fast look-up of equations and enable
-other advanced functions depending on GCC 4.9/C++11.
+Header file to enable just current LSD syntax. Use fun_head.h
+to keep compatibility with legacy LSD code.
 *************************************************************/
 
 #define NO_LEGACY_CODE
-#include "fun_head.h"
+
+#include "lib/lsdequation.h"

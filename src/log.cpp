@@ -212,7 +212,7 @@ void cover_browser( const char *text1, const char *text2, bool run )
 		set_shortcuts_run( ".str" );
 
 		// disable debug button when running in parallel mode
-		if ( ! sim.parallel_disable && search_parallel( sim.root ) )
+		if ( ! sim.parallel_disable && sim.root->search_parallel( ) )
 		{
 			cmd( ".b.r2.deb configure -state disabled" );
 			cmd( "tooltip::tooltip .b.r2.deb \"Disable parallel processing\nto enable debugging\"" );

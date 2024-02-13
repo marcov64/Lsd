@@ -243,7 +243,7 @@ void error_hard_helper( const char *boxTitle, const char *boxText, const char *l
 			char err_msg[ MAX_LINE_SIZE ];
 			double useless = -1;
 			snprintf( err_msg, MAX_LINE_SIZE, "%s (ERROR)", sim.stack_log->vs->label );
-			deb( sim.stack_log->vs->up, NULL, err_msg, & useless );
+			sim.stack_log->vs->up->debugger( NULL, err_msg, & useless );
 		}
 
 		err = 2;
@@ -274,7 +274,9 @@ void error_hard_helper( const char *boxTitle, const char *boxText, const char *l
 
 	if ( err == 1 )
 	{
-		save_pos( currObj );			// save browser position in structure
+		if ( currObj != NULL )
+			currObj->save_pos( );		// save browser position in structure
+
 		update_model_info( );			// save windows positions if appropriate
 	}
 }
@@ -325,7 +327,7 @@ char *fmt_ttip_descr( char *out, description *d, int outSz, bool init )
 	if ( out == NULL || outSz <= 0 )
 		return NULL;
 
-	if ( has_descr_text ( d ) )
+	if ( d->has_descr_text ( ) )
 		strcln( out, d->text, outSz );
 	else
 		out[ 0 ] = '\0';
@@ -418,7 +420,7 @@ void auto_document( const char *lab, const char *which, bool append )
 				var = false;
 
 			return_where_used( cd->label, str1, MAX_LINE_SIZE );
-			if ( ( append || ! var ) && has_descr_text ( cd ) )
+			if ( ( append || ! var ) && cd->has_descr_text ( ) )
 				if ( strwsp( cd->text ) )
 					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
 				else
@@ -850,7 +852,7 @@ int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char
 			if ( ! cur1->to_compute && check_save )
 			{
 				// control for elements to save in objects to be not computed
-				control_to_compute( cur, cur->label );
+				cur->control_to_compute( );
 				check_save = false;		// do it just once
 			}
 		}
@@ -900,7 +902,7 @@ Control that the label lab does not already exist
 in the model. Also prevents invalid characters in
 the names.
 ****************************************************/
-int check_label( const char *lab, object *r )
+int object::check_label( const char *lab )
 {
 	bridge *cb;
 	object *cur;
@@ -909,21 +911,21 @@ int check_label( const char *lab, object *r )
 	if ( ! valid_label( lab ) )
 		return 2;				// invalid characters (incl. spaces)
 
-	if ( ! strcmp( lab, r->label ) )
+	if ( ! strcmp( lab, label ) )
 		return 1;
 
-	for ( cv = r->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 		if ( ! strcmp( lab, cv->label ) )
 			return 1;
 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim.blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->blabel );
 		else
 			cur = cb->head;
 
-		if ( check_label( lab, cur ) )
+		if ( cur->check_label( lab ) )
 			return 1;
 	}
 
@@ -934,20 +936,20 @@ int check_label( const char *lab, object *r )
 /****************************************************
 CONTROL_TO_COMPUTE
 ****************************************************/
-void control_to_compute( object *r, const char *lab )
+void object::control_to_compute( void )
 {
 	bridge *cb;
 	object *cur;
 	variable *cv;
 
-	for ( cv = r->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		if ( ! check_save )
 			return;
 
 		if ( cv->save == 1 )
 		{
-			cmd( "set res [ ttk::messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->label, lab );
+			cmd( "set res [ ttk::messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->label, label );
 			cmd( "if [ string equal $res cancel ] { set res 1 } { set res 0 }" );
 
 			if ( get_bool( "res" ) )
@@ -955,14 +957,14 @@ void control_to_compute( object *r, const char *lab )
 		}
 	}
 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim.blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->blabel );
 		else
 			cur = cb->head;
 
-		control_to_compute( cur, lab );
+		cur->control_to_compute( );
 	}
 }
 
@@ -970,23 +972,23 @@ void control_to_compute( object *r, const char *lab )
 /****************************************************
 COUNT_SAVE
 ****************************************************/
-void count_save( object *n, int *count )
+void object::count_save( int *count )
 {
 	bridge *cb;
-	object *co;
+	object *cur;
 	variable *cv;
 
-	for ( cv = n->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 		if ( cv->save == 1 || cv->savei == 1 )
 			( *count )++;
 
-	for ( cb = n->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = sim.blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->blabel );
 		else
-			co = cb->head;
-		count_save( co, count );
+			cur = cb->head;
+		cur->count_save( count );
 	}
 }
 
@@ -994,21 +996,21 @@ void count_save( object *n, int *count )
 /****************************************************
 SHOW_SAVE
 ****************************************************/
-void show_save( object *n )
+void object::show_save( void )
 {
 	char out[ 3 * MAX_ELEM_LENGTH ];
 	bridge *cb;
-	object *co;
+	object *cur;
 	variable *cv;
 
-	for ( cv = n->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		if ( cv->save == 1 || cv->savei == 1 )
 		{
 			if ( cv->param == 1 )
-				snprintf( out, 3 * MAX_ELEM_LENGTH, "Object: %s \tParameter:\t", n->label );
+				snprintf( out, 3 * MAX_ELEM_LENGTH, "Object: %s \tParameter:\t", label );
 			else
-				snprintf( out, 3 * MAX_ELEM_LENGTH, "Object: %s \tVariable :\t", n->label );
+				snprintf( out, 3 * MAX_ELEM_LENGTH, "Object: %s \tVariable :\t", label );
 			if ( cv->savei == 1 )
 			{
 				if ( cv->save == 1 )
@@ -1022,13 +1024,13 @@ void show_save( object *n )
 		}
 	}
 
-	for ( cb = n->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = sim.blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->blabel );
 		else
-			co = cb->head;
-		show_save( co );
+			cur = cb->head;
+		cur->show_save( );
 	}
 }
 
@@ -1036,52 +1038,52 @@ void show_save( object *n )
 /****************************************************
 CLEAN_SAVE
 ****************************************************/
-void clean_save( object *n )
+void object::clean_save( void )
 {
 	bridge *cb;
-	object *co;
+	object *cur;
 	variable *cv;
 
-	for ( cv = n->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		cv->save = 0;
 		cv->savei = 0;
 	}
-	for ( cb = n->b; cb != NULL; cb = cb->next )
-		for ( co = cb->head; co != NULL; co = co->next )
-			clean_save( co );
+	for ( cb = b; cb != NULL; cb = cb->next )
+		for ( cur = cb->head; cur != NULL; cur = cur->next )
+			cur->clean_save( );
 }
 
 
 /****************************************************
 SHOW_PLOT
 ****************************************************/
-void show_plot( object *n )
+void object::show_plot( void )
 {
 	bridge *cb;
-	object *co;
+	object *cur;
 	variable *cv;
 
-	for ( cv = n->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 		if ( cv->plot )
 		{
 			if ( cv->param == 1 )
-				plog( "Object: %s \tParameter:\t", n->label );
+				plog( "Object: %s \tParameter:\t", label );
 			if ( cv->param == 0 )
-				plog( "Object: %s \tVariable :\t", n->label );
+				plog( "Object: %s \tVariable :\t", label );
 			if ( cv->param == 2 )
-				plog( "Object: %s \tFunction :\t", n->label );
+				plog( "Object: %s \tFunction :\t", label );
 			plog_tag( "%s\n", "highlight", cv->label );
 			++elem_count;
 		}
 
-	for ( cb = n->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = sim.blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->blabel );
 		else
-			co = cb->head;
-		show_plot( co );
+			cur = cb->head;
+		cur->show_plot( );
 	}
 }
 
@@ -1089,39 +1091,39 @@ void show_plot( object *n )
 /****************************************************
 CLEAN_PLOT
 ****************************************************/
-void clean_plot( object *n )
+void object::clean_plot( void )
 {
 	bridge *cb;
-	object *co;
+	object *cur;
 	variable *cv;
 
-	for ( cv = n->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 		cv->plot = false;
 
-	for ( cb = n->b; cb != NULL; cb = cb->next )
-		for ( co = cb->head; co != NULL; co = co->next )
-			clean_plot( co );
+	for ( cb = b; cb != NULL; cb = cb->next )
+		for ( cur = cb->head; cur != NULL; cur = cur->next )
+			cur->clean_plot( );
 }
 
 
 /****************************************************
 SHOW_DEBUG
 ****************************************************/
-void show_debug( object *n )
+void object::show_debug( void )
 {
 	bridge *cb;
-	object *co;
+	object *cur;
 	variable *cv;
 
-	for ( cv = n->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 		if ( cv->deb_mode != 'n' )
 		{
 			if ( cv->param == 0 )
-				plog( "Object: %s \tVariable:\t", n->label );
+				plog( "Object: %s \tVariable:\t", label );
 			if ( cv->param == 1 )
-				plog( "Object: %s \tParameter:\t", n->label );
+				plog( "Object: %s \tParameter:\t", label );
 			if ( cv->param == 2 )
-				plog( "Object: %s \tFunction:\t", n->label );
+				plog( "Object: %s \tFunction:\t", label );
 
 			plog_tag( "%s\t", "highlight", cv->label );
 
@@ -1147,13 +1149,13 @@ void show_debug( object *n )
 			++elem_count;
 		}
 
-	for ( cb = n->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = sim.blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->blabel );
 		else
-			co = cb->head;
-		show_debug( co );
+			cur = cb->head;
+		cur->show_debug( );
 	}
 }
 
@@ -1161,45 +1163,45 @@ void show_debug( object *n )
 /****************************************************
 CLEAN_DEBUG
 ****************************************************/
-void clean_debug( object *n )
+void object::clean_debug( void )
 {
 	bridge *cb;
-	object *co;
+	object *cur;
 	variable *cv;
 
-	for ( cv = n->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 		cv->deb_mode = 'n';
 
-	for ( cb = n->b; cb != NULL; cb = cb->next )
-		for ( co = cb->head; co != NULL; co = co->next )
-			clean_debug( co );
+	for ( cb = b; cb != NULL; cb = cb->next )
+		for ( cur = cb->head; cur != NULL; cur = cur->next )
+			cur->clean_debug( );
 }
 
 
 /****************************************************
 SHOW_PARALLEL
 ****************************************************/
-void show_parallel( object *n )
+void object::show_parallel( void )
 {
 	bridge *cb;
-	object *co;
+	object *cur;
 	variable *cv;
 
-	for ( cv = n->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 		if ( cv->parallel )
 		{
-			plog( "Object: %s \tVariable:\t", n->label );
+			plog( "Object: %s \tVariable:\t", label );
 			plog_tag( "%s\n", "highlight", cv->label );
 			++elem_count;
 		}
 
-	for ( cb = n->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = sim.blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->blabel );
 		else
-			co = cb->head;
-		show_parallel( co );
+			cur = cb->head;
+		cur->show_parallel( );
 	}
 }
 
@@ -1207,53 +1209,53 @@ void show_parallel( object *n )
 /****************************************************
 CLEAN_PARALLEL
 ****************************************************/
-void clean_parallel( object *n )
+void object::clean_parallel( void )
 {
 	bridge *cb;
-	object *co;
+	object *cur;
 	variable *cv;
 
-	for ( cv = n->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 		cv->parallel = false;
 
-	for ( cb = n->b; cb != NULL; cb = cb->next )
-		for ( co = cb->head; co != NULL; co = co->next )
-			clean_parallel( co );
+	for ( cb = b; cb != NULL; cb = cb->next )
+		for ( cur = cb->head; cur != NULL; cur = cur->next )
+			cur->clean_parallel( );
 }
 
 
 /****************************************************
 SHOW_OBSERVE
 ****************************************************/
-void show_observe( object *n )
+void object::show_observe( void )
 {
 	bridge *cb;
 	description *cd;
-	object *co;
+	object *cur;
 	variable *cv;
 
-	for ( cv = n->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		cd = sim.search_description( cv->label );
+		cd = sim->search_description( cv->label );
 		if ( cd->observe )
 		{
 			if ( cv->param == 1 )
-				plog( "Object: %s \tParameter:\t", n->label );
+				plog( "Object: %s \tParameter:\t", label );
 			else
-				plog( "Object: %s \tVariable :\t", n->label );
+				plog( "Object: %s \tVariable :\t", label );
 
 			plog_tag( "%s (%lf)\n", "highlight", cv->label, cv->val[ 0 ] );
 			++elem_count;
 		}
 	}
 
-	for ( cb = n->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = sim.blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->blabel );
 		else
-			co = cb->head;
-		show_observe( co );
+			cur = cb->head;
+		cur->show_observe( );
 	}
 }
 
@@ -1261,34 +1263,34 @@ void show_observe( object *n )
 /****************************************************
 SHOW_INITIAL
 ****************************************************/
-void show_initial( object *n )
+void object::show_initial( void )
 {
 	char buf_descr[ MAX_BUFF_SIZE ];
 	bridge *cb;
-	object *co;
+	object *cur;
 	description *cd;
 	variable *cv, *cv1;
 
-	for ( cv = n->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		cd = sim.search_description( cv->label );
+		cd = sim->search_description( cv->label );
 		if ( cd->initial )
 		{
 			if ( cv->param == 1 )
-				plog( "Object: %s \tParameter:\t", n->label );
+				plog( "Object: %s \tParameter:\t", label );
 			if ( cv->param == 0 )
-				plog( "Object: %s \tVariable :\t", n->label );
+				plog( "Object: %s \tVariable :\t", label );
 			if ( cv->param == 2 )
-				plog( "Object: %s \tFunction :\t", n->label );
+				plog( "Object: %s \tFunction :\t", label );
 
 			++elem_count;
 			plog_tag( "%s \t", "highlight", cv->label );
 
 			if ( cd->init == NULL || strlen( cd->init ) == 0 )
 			{
-				for ( co = n; co != NULL; co = co->hyper_next( co->label ) )
+				for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				{
-					cv1 = co->search_var( NULL, cv->label );
+					cv1 = cur->search_var( NULL, cv->label );
 					plog( " %g", cv1->val[ 0 ] );
 				}
 			}
@@ -1299,12 +1301,12 @@ void show_initial( object *n )
 		}
 	}
 
-	for ( cb = n->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head != NULL )
 		{
-			co = cb->head;
-			show_initial( co );
+			cur = cb->head;
+			cur->show_initial( );
 		}
 	}
 }
@@ -1313,28 +1315,26 @@ void show_initial( object *n )
 /****************************************************
 SHOW_SPECIAL_UPDAT
 ****************************************************/
-void show_special_updat( object *n )
+void object::show_special_updat( void )
 {
 	bridge *cb;
-	object *co;
+	object *cur;
 	variable *cv;
 
-	for ( cv = n->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 		if ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 )
 		{
-			plog( "Object: %s \tVariable:\t", n->label );
+			plog( "Object: %s \tVariable:\t", label );
 			plog_tag( "%s\n", "highlight", cv->label );
 			++elem_count;
 		}
 
-	for ( cb = n->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = sim.blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->blabel );
 		else
-			co = cb->head;
-		show_special_updat( co );
+			cur = cb->head;
+		cur->show_special_updat( );
 	}
 }
-
-

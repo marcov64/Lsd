@@ -41,14 +41,14 @@ OPEN_CONFIGURATION
 	Open a clean configuration,
 	either the current or not
 ****************************************************/
-bool open_configuration( object *&r, bool reload )
+bool object::open_configuration( bool reload )
 {
 	bool loaded;
 	const char *lab1, *lab2;
 	int i;
 	string warnings;
 
-	if ( ! reload || strlen( sim.conf_name ) == 0 )
+	if ( ! reload || strlen( sim->conf_name ) == 0 )
 	{									// ask user the file to use, if not reloading
 		cmd( "set fn [ tk_getOpenFile -parent . -title \"Open Configuration File\"	-defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model file} {.lsd} } } ]" );
 		cmd( "if { [ string length $fn ] > 0 && ! [ fn_spaces \"$fn\" . ] } { \
@@ -66,29 +66,29 @@ bool open_configuration( object *&r, bool reload )
 			if ( lab1 == NULL || lab2 == NULL || strlen( lab2 ) == 0 )
 				return false;
 
-			delete [ ] sim.conf_name;
-			sim.conf_name = new char[ strlen( lab2 ) + 1 ];
-			strcpy( sim.conf_name, lab2 );
+			delete [ ] sim->conf_name;
+			sim->conf_name = new char[ strlen( lab2 ) + 1 ];
+			strcpy( sim->conf_name, lab2 );
 
-			delete [ ] sim.conf_path;
-			sim.conf_path = new char[ strlen( lab1 ) + 1 ];
-			strcpy( sim.conf_path, lab1 );
+			delete [ ] sim->conf_path;
+			sim->conf_path = new char[ strlen( lab1 ) + 1 ];
+			strcpy( sim->conf_path, lab1 );
 
-			if ( strlen( sim.conf_path ) > 0 )
+			if ( strlen( sim->conf_path ) > 0 )
 				cmd( "cd $path" );
 
 			cmd( "set listfocus 1; set itemfocus 0" );// point for first var in listbox
 			cmd( "set lastObj \"\"" );			// disable last object for reload
 		}
 		else
-			if ( sim.conf_ok )
+			if ( sim->conf_ok )
 				reload = true;					// try to reload if use cancel load
 			else
 				return false;
 	}
 
-	if ( r != NULL && reload )
-		save_pos( r );							// save current position when reloading
+	if ( reload )
+		save_pos( );							// save current position when reloading
 
 	redrawRoot = redrawStruc = true;			// force browser/structure redraw
 	iniShowOnce = false;						// show warning on # of columns in .ini
@@ -100,10 +100,10 @@ bool open_configuration( object *&r, bool reload )
 			break;
 
 		case 1:									// file/path not found
-			if ( strlen( sim.conf_path ) > 0 )
-				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME, sim.conf_path );
+			if ( strlen( sim->conf_path ) > 0 )
+				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME, sim->conf_path );
 			else
-				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME	 );
+				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME	 );
 			loaded = false;
 			break;
 
@@ -140,7 +140,7 @@ bool open_configuration( object *&r, bool reload )
 		case 23:								// missing XML settings node
 		case 24:								// missing XML equation node
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d :%.24s)\" -detail \"Element descriptions were lost but the configuration can still be used.\n\nPlease check if the desired LSD configuration file was selected or re-enter the description information if needed.\n\nIf this is a sensitivity analysis configuration file, this message is expected, and configuration file is ok.\"", i, warnings.c_str( ) );
-			sim.reset_description( sim.root );
+			sim->reset_description( sim->root );
 			loaded = true;
 			break;
 
@@ -157,16 +157,16 @@ bool open_configuration( object *&r, bool reload )
 	if ( i == 0 && warnings.size( ) > 0 )
 			cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"Partially damaged file (%d :%.24s)\" -detail \"Part of the configuration data was missing or invalid and was replaced by default values.\n\nPlease check if the desired LSD configuration file was selected or re-configure the affected parts as needed.\"", i, warnings.c_str( ) );
 
-	if ( loaded && r != NULL && reload )
-		currObj = r = restore_pos( sim.root );	// restore pointed object and variable
+	if ( loaded && reload )
+		currObj = sim->root->restore_pos( );	// restore pointed object and variable
 	else
-		currObj = r = sim.root;					// new structure
+		currObj = sim->root;					// new structure
 
 	if ( loaded )
 	{
-		load_elem_lists( sim.root );
+		sim->root->load_elem_lists( );
 
-		if ( ! ignore_eq_file && strncmp( sim.conf_eq_txt, eq_txt, min( strlen( sim.conf_eq_txt ), strlen( eq_txt ) ) ) )
+		if ( ! ignore_eq_file && strncmp( sim->conf_eq_txt, eq_txt, min( strlen( sim->conf_eq_txt ), strlen( eq_txt ) ) ) )
 			plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the LSD model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
 	}
 
@@ -200,7 +200,7 @@ bool load_prev_configuration( void )
 	}
 	else
 	{
-		load_elem_lists( sim.root );
+		sim.root->load_elem_lists( );
 		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", model_path, sim.conf_file );
 	}
 
@@ -290,18 +290,18 @@ void unload_configuration_gui( bool full )
 LOAD_ELEM_LISTS
 Load tcl lists of model objects and other elements
 ****************************************************/
-void load_elem_lists( object *r )
+void object::load_elem_lists( )
 {
 	bridge *cb;
 	variable *cv;
 
-	if ( r->up == NULL )						// reset lists if root
+	if ( up == NULL )							// reset lists if root
 		cmd( "unset -nocomplain modObj modElem modVar modPar modFun" );
 	else
-		cmd( "lappend modObj %s", r->label );	// register object if not root
+		cmd( "lappend modObj %s", label );		// register object if not root
 
 	// register elements in object
-	for ( cv = r->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		switch( cv->param )
 		{
@@ -319,8 +319,8 @@ void load_elem_lists( object *r )
 	}
 
 	// register son objects
-	for ( cb = r->b; cb != NULL; cb = cb->next )
-		load_elem_lists( cb-> head );
+	for ( cb = b; cb != NULL; cb = cb->next )
+		cb->head->load_elem_lists( );
 }
 
 
@@ -520,7 +520,7 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 	description *cd;
 	netLink *curl;
 	object *cur;
-	sense *cs;
+	sensitivity *cs;
 	variable *cv, *cv1;
 
 	xml_node n = pn.append_child( "object" );
@@ -755,7 +755,7 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 		}
 
 		// add sensitivity analysis data
-		for ( cs = sim->rsense; cs != NULL; cs = cs->next )
+		for ( cs = sim->sens; cs != NULL; cs = cs->next )
 			if ( strcmp( cs->label, cv->label ) == 0 )
 			{
 				if ( cs->integer )
@@ -1264,7 +1264,7 @@ int load_sensitivity( FILE *f )
 	int i, lag, param, numv;
 	char cc, lab[ MAX_ELEM_LENGTH ];
 	variable *cv;
-	sense *cs;
+	sensitivity *cs;
 
 	// read data from file (1 line per element, '#' indicate comment)
 	while ( ! feof( f ) )
@@ -1319,7 +1319,7 @@ int load_sensitivity( FILE *f )
 		if ( ( cs = search_sensitivity( lab, lag ) ) != NULL )
 			delete cs;
 
-		new sense( lab, & sim, param, lag, numv, & v, integer );
+		new sensitivity( lab, & sim, param, lag, numv, & v, integer );
 	}
 
 	return 0;
@@ -1367,9 +1367,9 @@ SAVE_SENSITIVITY
 bool save_sensitivity( FILE *f )
 {
 	int i;
-	sense *cs;
+	sensitivity *cs;
 
-	for ( cs = sim.rsense; cs != NULL; cs = cs->next )
+	for ( cs = sim.sens; cs != NULL; cs = cs->next )
 	{
 		if ( cs->param == 1 )
 			fprintf( f, "%s 0 %d %c:", cs->label, cs->numv, cs->integer ? 'i' : 'f' );
@@ -1479,25 +1479,26 @@ void save_eqfile( FILE *f )
 	fprintf( f, "\nEND_EQ_FILE\n" );
 }
 
+
 /****************************************************
 GET_SAVED
 	Get the set of elements which values are saved
 	during simulation run
 ****************************************************/
-void get_saved( object *n, FILE *out, const char *sep, bool all_var )
+void object::get_saved( FILE *out, const char *sep, bool all_var )
 {
 	int i, sl;
 	char *lab;
 	bridge *cb;
 	description *cd;
-	object *co;
+	object *cur;
 	variable *cv;
 
-	for ( cv = n->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 		if ( cv->save || all_var )
 		{
 			// get element description
-			cd = sim.search_description( cv->label, false );
+			cd = sim->search_description( cv->label, false );
 			if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
 			{
 				// select just the first description line
@@ -1513,16 +1514,17 @@ void get_saved( object *n, FILE *out, const char *sep, bool all_var )
 			else
 				lab = NULL;
 
-			fprintf( out, "%s%s%s%s%s%s%s\n", cv->label, sep, cv->param ? "parameter" : "variable", sep, n->label, sep, lab != NULL ? lab : "" );
+			fprintf( out, "%s%s%s%s%s%s%s\n", cv->label, sep, cv->param ? "parameter" : "variable", sep, label, sep, lab != NULL ? lab : "" );
 		}
 
-	for ( cb = n->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			co = sim.blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->blabel );
 		else
-			co = cb->head;
-		get_saved( co, out, sep, all_var );
+			cur = cb->head;
+
+		cur->get_saved( out, sep, all_var );
 	}
 }
 
@@ -1534,24 +1536,24 @@ GET_SA_LIMITS
 ****************************************************/
 const char *meta_par_name[ META_PAR_NUM ] = META_PAR_NAME;
 
-void get_sa_limits( object *r, FILE *out, const char *sep )
+void object::get_sa_limits( FILE *out, const char *sep )
 {
 	int i, sl;
 	char *lab, type[ 10 ];
 	variable *cv;
 	description *cd;
-	sense *cs;
+	sensitivity *cs;
 
 	for ( i = 0; i < META_PAR_NUM; ++i )
 		meta_par_in[ i ] = false;
 
-	for ( cs = sim.rsense; cs != NULL; cs = cs->next )
+	for ( cs = sim->sens; cs != NULL; cs = cs->next )
 	{
 		// get current value (first object)
-		cv = r->search_var( NULL, cs->label );
+		cv = search_var( NULL, cs->label );
 
 		// get element description
-		cd = sim.search_description( cs->label, false );
+		cd = sim->search_description( cs->label, false );
 		if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
 		{
 			// select just the first description line
@@ -1597,6 +1599,7 @@ void get_sa_limits( object *r, FILE *out, const char *sep )
 		delete [ ] lab;
 	}
 }
+
 
 /***************************************************
 COUNT_LINES

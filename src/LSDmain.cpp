@@ -65,6 +65,7 @@ int platform = 0;				// OS platform (1=Linux, 2=Mac, 3=Windows)
 int stop;						// activity interruption flag (Tcl boolean)
 int watch;						// allow for graph generation interruption (bool)
 object *currObj = NULL;			// pointer to current object in browser
+object *lastObj = NULL;			// pointer to last selected object in structure
 simulation sim;					// the single GUI simulation object
 Tcl_Interp *interp = NULL;		// global Tcl interpreter in LSD
 

@@ -19,10 +19,10 @@ INTERF.CPP only in case a model is loaded.
 
 The main functions contained in this file are:
 
-- void show_graph( object *t )
-initialize the canvas and calls show_obj for the root
+- void object::show_graph( )
+initialize the canvas and calls show_obj for this
 
-- void draw_obj( object *top, object *sel, int level, int center, int from )
+- void object::draw_obj( object *sel, int level, int center, int from )
 recursive function that according to the level of the object type sets the
 distances among the objects. Rather rigid, but it should work nicely
 for most of the model structures. It assigns all the labels (above and below the
@@ -47,26 +47,19 @@ int range_type;
 /****************************************************
 SHOW_GRAPH
 ****************************************************/
-void show_graph( object *t )
+void object::show_graph( void )
 {
 	object *top;
-	static object *last_t = NULL;
 
-	if ( ! sim.conf_ok || ! strWindowOn )		// model structure window is deactivated?
+	if ( ! sim->conf_ok || ! strWindowOn )		// model structure window is deactivated?
 	{
 		cmd( "destroytop .str" );
 		return;
 	}
 
-	if ( t == NULL )
-		if ( last_t == NULL )
-			t = sim.root;
-		else
-			t = last_t;
-	else
-		last_t = t;
+	lastObj = this;
 
-	for ( top = t; top->up != NULL; top = top->up );
+	for ( top = this; top->up != NULL; top = top->up );
 
 	if ( ! exists_window( ".str" ) )			// build window only if needed
 	{
@@ -77,7 +70,7 @@ void show_graph( object *t )
 	else
 		cmd( "destroy .str.f" );										// or just recreate canvas
 
-	cmd( "wm title .str \"%s%s - LSD Model Structure\"", unsaved_change() ? "*" : " ", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
+	cmd( "wm title .str \"%s%s - LSD Model Structure\"", unsaved_change() ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
 
 	cmd( "ttk::frame .str.f" );
 	cmd( "ttk::canvas .str.f.c -xscrollincrement 1 -entry 0 -dark $darkTheme" );
@@ -86,7 +79,7 @@ void show_graph( object *t )
 
 	cmd( "showtop .str current yes yes no 0 0 b" );
 
-	draw_obj( top, t );
+	top->draw_obj( this );
 
 	cmd( "set hrsizeM [ winfo width .str ]" );
 	cmd( "set vrsizeM [ winfo height .str ]" );
@@ -222,17 +215,17 @@ void draw_buttons( void )
 /****************************************************
 CREATE_FLOAT_LIST
 ****************************************************/
-void create_float_list( object *t )
+void object::create_float_list( void )
 {
 	bool sp_upd;
 	variable *cv;
 
 	// element lists used to build floating elements window
-	cmd( "set tlist_%s [ list ]", t->label );
-	cmd( "set slist_%s [ list ]", t->label );
+	cmd( "set tlist_%s [ list ]", label );
+	cmd( "set slist_%s [ list ]", label );
 
-	if ( t->v != NULL )
-		for ( cv = t->v; cv != NULL; cv = cv->next )
+	if ( v != NULL )
+		for ( cv = v; cv != NULL; cv = cv->next )
 		{
 			// special updating scheme?
 			if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 ) )
@@ -247,33 +240,33 @@ void create_float_list( object *t )
 			{
 				if ( cv->num_lag == 0 )
 				{
-					cmd( "lappend tlist_%s \"%s (V$varFlags)\"", t->label, cv->label );
-					cmd( "lappend slist_%s var", t->label );
+					cmd( "lappend tlist_%s \"%s (V$varFlags)\"", label, cv->label );
+					cmd( "lappend slist_%s var", label );
 				}
 				else
 				{
-					cmd( "lappend tlist_%s \"%s (V_%d$varFlags)\"", t->label, cv->label, cv->num_lag );
-					cmd( "lappend slist_%s lvar", t->label );
+					cmd( "lappend tlist_%s \"%s (V_%d$varFlags)\"", label, cv->label, cv->num_lag );
+					cmd( "lappend slist_%s lvar", label );
 				}
 			}
 
 			if ( cv->param == 1 )
 			{
-				cmd( "lappend tlist_%s \"%s (P$varFlags)\"", t->label, cv->label );
-				cmd( "lappend slist_%s par", t->label );
+				cmd( "lappend tlist_%s \"%s (P$varFlags)\"", label, cv->label );
+				cmd( "lappend slist_%s par", label );
 			}
 
 			if ( cv->param == 2 )
 			{
 				if ( cv->num_lag == 0 )
 				{
-					cmd( "lappend tlist_%s \"%s (F$varFlags)\"", t->label, cv->label );
-					cmd( "lappend slist_%s fun", t->label );
+					cmd( "lappend tlist_%s \"%s (F$varFlags)\"", label, cv->label );
+					cmd( "lappend slist_%s fun", label );
 				}
 				else
 				{
-					cmd( "lappend tlist_%s \"%s (F_%d$varFlags)\"", t->label, cv->label, cv->num_lag );
-					cmd( "lappend slist_%s lfun", t->label );
+					cmd( "lappend tlist_%s \"%s (F_%d$varFlags)\"", label, cv->label, cv->num_lag );
+					cmd( "lappend slist_%s lfun", label );
 				}
 			}
 		}
@@ -283,7 +276,7 @@ void create_float_list( object *t )
 /****************************************************
 DRAW_OBJ
 ****************************************************/
-void draw_obj( object *t, object *sel, int level, int center, int from, bool zeroinst )
+void object::draw_obj( object *sel, int level, int center, int from, bool zeroinst )
 {
 	bool fit_wid, to_compute;
 	double h_fact, v_fact, range_fact;
@@ -292,7 +285,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 	object *cur;
 	bridge *cb;
 
-	create_float_list( t );		// create floating element list
+	create_float_list( );		// create floating element list
 
 	h_fact = get_double( "hfactM" );
 	v_fact = get_double( "vfactM" );
@@ -302,16 +295,16 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 	step_level = round( step_level * v_fact );
 
 	// find current tree depth
-	for ( j = 0, cur = t; cur->up != NULL; ++j, cur = cur->up );
+	for ( j = 0, cur = this; cur->up != NULL; ++j, cur = cur->up );
 
 	// draw node only if it is not the root
-	if ( t->up != NULL )
+	if ( up != NULL )
 	{
-		strcpyn( ch, t->label, MAX_ELEM_LENGTH );
+		strcpyn( ch, label, MAX_ELEM_LENGTH );
 		strcpy( ch1, "" );
 
 		// count number of brothers and define maximum width for number string
-		for ( k = 0, cb = t->up->b; cb != NULL; ++k, cb = cb->next );
+		for ( k = 0, cb = up->b; cb != NULL; ++k, cb = cb->next );
 
 		switch ( j )
 		{
@@ -338,14 +331,14 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 			strcpy( ch1, "0" );
 
 			// if parent is multi-instanced, add ellipsis to the zero
-			if ( t->up->up != NULL )
+			if ( up->up != NULL )
 			{
 				// must search out of the blueprint, where we are now
 				// may get the wrong parent if the parent is replicated somewhere
-				cur = sim.root->search( t->up->up->label );
+				cur = sim->root->search( up->up->label );
 				if ( cur != NULL )
 				{
-					cb = cur->search_bridge( t->up->label );
+					cb = cur->search_bridge( up->label );
 					for ( k = 0, cur = cb->head; cur != NULL; ++k, cur = cur->next );
 
 					if ( k > 1 )				// handle multi-instanced parents
@@ -356,7 +349,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 		else									// compute number of groups of this type
 		{
 			fit_wid = to_compute = true;
-			for ( h = 0, cur = t; cur != NULL ; ++h, cur = cur->hyper_next( ) )
+			for ( h = 0, cur = this; cur != NULL ; ++h, cur = cur->hyper_next( ) )
 			{
 				if ( strlen( ch1 ) >= ( unsigned ) max_wid )
 				{
@@ -375,9 +368,9 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 			}
 
 			// count number of instances of parent and check for zero instances
-			if ( fit_wid && t->up->up != NULL )	// first level cannot have multiple zero instances
+			if ( fit_wid && up->up != NULL )	// first level cannot have multiple zero instances
 			{
-				cb = t->up->up->search_bridge( t->up->label );
+				cb = up->up->search_bridge( up->label );
 				for ( k = 0, cur = cb->head; cur != NULL; ++k, cur = cur->next );
 
 				if ( h < k )					// found zero instanced object?
@@ -388,11 +381,11 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 				strcatn( ch1, "-", MAX_LINE_SIZE );
 		}
 
-		if ( t->up->up != NULL )
+		if ( up->up != NULL )
 			put_line( from, level, center );
 
-		put_node( center, level, t->label, t == sel ? true : false );
-		put_text( ch, ch1, center, level, t->label );
+		put_node( center, level, label, this == sel ? true : false );
+		put_text( ch, ch1, center, level, label );
 	}
 	else
 	{
@@ -406,7 +399,7 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 		return;
 
 	// count the number of son object types
-	for ( i = 0, cb = t->b; cb != NULL; ++i, cb = cb->next );
+	for ( i = 0, cb = b; cb != NULL; ++i, cb = cb->next );
 
 	// root? adjust tree begin
 	if ( j == 0 )
@@ -478,14 +471,14 @@ void draw_obj( object *t, object *sel, int level, int center, int from, bool zer
 	}
 
 	// draw sons
-	for ( i = begin, cb = t->b; cb != NULL; i += step_type, cb = cb->next )
+	for ( i = begin, cb = b; cb != NULL; i += step_type, cb = cb->next )
 		if ( cb->head != NULL )
-			draw_obj( cb->head, sel, level + step_level, i, center, zeroinst );
+			cb->head->draw_obj( sel, level + step_level, i, center, zeroinst );
 		else
 		{	// try to draw zero instance objects
-			cur = sim.blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->blabel );
 			if ( cur != NULL )
-				draw_obj( cur, sel, level + step_level, i, center, true );
+				cur->draw_obj( sel, level + step_level, i, center, true );
 		}
 }
 

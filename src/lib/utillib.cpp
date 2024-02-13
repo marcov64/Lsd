@@ -208,28 +208,29 @@ Ensure that all objects on top of the variables have the counter updated,
 and then writes the lab_tit field.
 lab_tit indicates the position of the object containing the variables in the model.
 ***************************************************/
-void set_lab_tit( variable *var )
+void variable::set_lab_tit( void )
 {
 	bool first = true;
 	char app[ MAX_LINE_SIZE ], app1[ 2 * MAX_LINE_SIZE ];
 	object *cur;
 
-	if ( var->up->up == NULL )
+	if ( up->up == NULL )
 	{
 		// this is the Root of the model
-		if ( var->lab_tit != NULL )
+		if ( lab_tit != NULL )
 			return;						// already done in the past
 
-		var->lab_tit = new char[ strlen( "R" ) + 1 ];
-		strcpy( var->lab_tit, "R" );
+		lab_tit = new char[ strlen( "R" ) + 1 ];
+		strcpy( lab_tit, "R" );
 
 		return;
 	}
 
-	for ( cur = var->up; cur->up != NULL; cur = cur->up )
+	for ( cur = up; cur->up != NULL; cur = cur->up )
 	{
 		// find the bridge containing the variable
-		set_tit_counter( cur );
+		cur->set_tit_counter( );
+
 		if ( ! first )
 			snprintf( app1, 2 * MAX_LINE_SIZE, "%d_%s", cur->acounter, app );
 		else
@@ -241,30 +242,30 @@ void set_lab_tit( variable *var )
 		strcpyn( app, app1, MAX_LINE_SIZE );
 	}
 
-	if ( var->lab_tit != NULL )
-		delete [ ] var->lab_tit;
+	if ( lab_tit != NULL )
+		delete [ ] lab_tit;
 
-	var->lab_tit = new char[ strlen( app ) + 1 ];
-	strcpy( var->lab_tit, app );
+	lab_tit = new char[ strlen( app ) + 1 ];
+	strcpy( lab_tit, app );
 }
 
 
 /***************************************************
 SET_TIT_COUNTER
 ***************************************************/
-void set_tit_counter( object *o )
+void object::set_tit_counter( void )
 {
 	int i, tGUI;
 	bridge *cb;
 	object *cur;
 
-	if ( o->up == NULL )
+	if ( up == NULL )
 		return;
 
-	set_tit_counter( o->up );
+	up->set_tit_counter( );
 
 	// find the bridge which contains the object
-	cb = o->up->search_bridge( o->label );
+	cb = up->search_bridge( label );
 
 	if ( cb->counter_updated )
 		return;
@@ -350,20 +351,20 @@ void simulation::reset_blueprint( object *r )
 /***************************************
 SEARCH_PARALLEL
 ***************************************/
-bool search_parallel( object *r )
+bool object::search_parallel( void )
 {
 	bridge *cb;
 	variable *cv;
 
 	// search among the variables
-	for ( cv = r->v; cv != NULL; cv=cv->next )
+	for ( cv = v; cv != NULL; cv=cv->next )
 		if ( cv->parallel )
 			return true;
 
 	// search among descendants
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 		if ( cb->head != NULL )
-			if ( search_parallel( cb->head ) )
+			if ( cb->head->search_parallel( ) )
 				return true;
 
 	return false;

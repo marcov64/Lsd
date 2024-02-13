@@ -74,7 +74,7 @@ const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 
 #ifndef _NP_
 // conditional variables
-map < thread::id, worker * > thr_ptr;// worker thread pointers
+map < thread::id, workerVar * > thr_ptr;// variable worker thread pointers
 mutex lock_init_sim;			// lock simulation constructor
 mutex lock_run_logs;			// lock run_logs for parallel updating
 mutex lock_run_pids;			// lock run_pids for parallel updating

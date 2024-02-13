@@ -136,9 +136,9 @@ struct netLink;
 struct netNode;
 struct object;
 struct profile;
-struct sense;
+struct sensitivity;
 struct variable;
-struct worker;
+struct workerVar;
 
 // special types used for fast equation, object and variable lookup
 typedef function < double( object *caller, variable *var ) > eq_funcT;
@@ -280,14 +280,14 @@ struct simulation						// simulation container class
 	map < string, profile > prof;		// set of saved profiling times
 	object *blueprint = NULL;			// LSD blueprint (effective model in use)
 	object *wait_delete = NULL;			// LSD object waiting for deletion
-	sense *rsense = NULL;				// LSD sensitivity analysis structure
+	sensitivity *sens = NULL;			// LSD sensitivity analysis structure
 	variable *cemetery = NULL;			// LSD saved data from deleted objects
 	variable *last_cemetery = NULL;		// LSD last saved cemetery entry
 
 #ifndef _NP_
 	// simulation-class conditional variables (not used in equations)
 	atomic < bool > parallel_ready;		// indicate variable worker is ready
-	worker *workers = NULL;				// multi-thread parallel worker data
+	workerVar *workers = NULL;			// multi-thread parallel worker data
 #endif
 
 #endif
@@ -312,7 +312,7 @@ struct simulation						// simulation container class
 	void empty_cemetery( void );
 	void empty_description( void );
 	void empty_lattice( void );
-	void empty_sensitivity( sense *cs = NULL );
+	void empty_sensitivity( sensitivity *cs = NULL );
 	void empty_stack( void );
 	void move_obj( const char *lab, const char *dest );
 	void reset_blueprint( object *r );
@@ -326,6 +326,9 @@ struct simulation						// simulation container class
 	void parallel_update( variable *v, object* p, object *caller = NULL );
 #endif
 
+#ifdef SIMULATION_EXT
+	SIMULATION_EXT
+#endif
 };
 
 struct object							// simulation model object class
@@ -355,6 +358,7 @@ struct object							// simulation model object class
 	// object-class methods
 	bool load_insts( const char *file_name, FILE *f );
 	bool load_struct( FILE *f );
+	bool search_parallel( void );
 	bool under_computation( void );
 	bool under_comput_var( const char *lab );
 	bridge *search_bridge( const char *lab, bool no_error = false );
@@ -448,6 +452,7 @@ struct object							// simulation model object class
 	void collect_cemetery( variable *caller = NULL );
 	void collect_inst( o_setT &list );
 	void copy_descendant( object *to );
+	void delete_bridge( void );
 	void delete_link_net( netLink *ptr );
 	void delete_net( const char *lab );
 	void delete_node_net( void );
@@ -458,12 +463,13 @@ struct object							// simulation model object class
 	void name_node_net( const char *nodeName );
 	void recreate_maps( void );
 	void replicate( int num, bool propagate = false );
-	void save_description( FILE *f );
-	void save_insts( FILE *f );
-	void save_struct( FILE *f, const char *tab );
-	void save_xml_struct( xml_node &pn, long &node_serial, bool quick );
 	void search_inst( object *obj, long *pos, long *checked );
+	void set_tit_counter( void );
 	void update( bool recurse, bool user );
+
+#ifdef OBJECT_EXT
+	OBJECT_EXT
+#endif
 };
 
 struct bridge							// descendant-object container class
@@ -521,6 +527,7 @@ struct variable							// model numeric element (variable,
 
 	variable( void );					// empty constructor
 	variable( const variable &v );		// copy constructor
+	~variable( void );					// destructor
 
 	double cal( object *caller, int lag );
 	double fun( object *caller );
@@ -528,6 +535,33 @@ struct variable							// model numeric element (variable,
 	void empty( bool no_lock = false );
 	void init( object *_up, simulation *_sim, const char *_label, int _param = -1,
 			   int _num_lag = -1, double *_val = NULL );
+	void set_lab_tit( void );
+
+#ifdef VARIABLE_EXT
+	VARIABLE_EXT
+#endif
+};
+
+struct sensitivity						// sensitivity analysis container class
+{
+	bool integer;						// integer element
+	char *label;
+	double *v;							// values to test sensitivity
+	int curv;							// index for value in use in combinations
+	int lag;							// lag of initial value
+	int numv;							// number of values to test
+	int param;							// element type
+	sensitivity *next;					// sensitivity analysis chain of elements
+	simulation *sim;					// simulation where object is contained
+
+	sensitivity( const char *lab, simulation *_sim, int _param, int _lag,
+				 int _numv = 0, vector < double > *_v = NULL,
+				 bool _integer = false );// constructor
+	~sensitivity( void );				// destructor
+
+#ifdef SENSITIVITY_EXT
+	SENSITIVITY_EXT
+#endif
 };
 
 struct description						// model-element description class
@@ -539,6 +573,12 @@ struct description						// model-element description class
 	bool initial;
 	bool observe;
 	description *next;
+
+	description( const char *_label, int _type, const char *_text,
+				 const char *_init, bool _initial, bool _observe );// constructor
+	~description( void );
+
+	bool has_descr_text( void );
 };
 
 struct netNode							// network node data class
@@ -583,27 +623,8 @@ struct lattice							// model (visual) lattice data class
 	double height = 0;
 };
 
-struct sense							// sensitivity analysis container class
-{
-	bool integer;						// integer element
-	char *label;
-	double *v;							// values to test sensitivity
-	int curv;							// index for value in use in combinations
-	int lag;							// lag of initial value
-	int numv;							// number of values to test
-	int param;							// element type
-	sense *next;						// sensitivity analysis chain of elements
-	simulation *sim;					// simulation where object is contained
-
-	sense( const char *lab, simulation *_sim, int _param, int _lag, int _numv = 0,
-		   vector < double > *_v = NULL, bool _integer = false );// constructor
-	~sense( void );						// destructor
-
-	int dataentry( void );
-};
-
 #ifndef _NP_
-struct worker							// multi-thread parallel worker data structure
+struct workerVar						// multi-thread variable worker data structure
 {
 	bool free;
 	bool running;
@@ -622,8 +643,8 @@ struct worker							// multi-thread parallel worker data structure
 	thread::id thr_id;
 	variable *var;
 
-	worker( void );						// constructor
-	~worker( void );					// destructor
+	workerVar( void );					// constructor
+	~workerVar( void );					// destructor
 
 	bool check( void );					// handle worker problems
 	static void signal_wrapper( int signun );// wrapper for signal_handler
@@ -632,15 +653,6 @@ struct worker							// multi-thread parallel worker data structure
 	void signal( int signum );			// signal handler
 };
 #endif
-
-struct lsdstack							// simulation-stack element class
-{
-	char label[ MAX_ELEM_LENGTH ];
-	int ns;
-	lsdstack *next;
-	lsdstack *prev;
-	variable *vs;
-};
 
 struct result							// results file container class
 {
@@ -661,6 +673,15 @@ struct result							// results file container class
 	void title_recursive( object *r, int i );	// write file header (recursively)
 };
 
+struct lsdstack							// simulation-stack element class
+{
+	char label[ MAX_ELEM_LENGTH ];
+	int ns;
+	lsdstack *next;
+	lsdstack *prev;
+	variable *vs;
+};
+
 struct profile							// profiled variable class
 {
 	unsigned int comp;
@@ -676,8 +697,8 @@ struct dlliblinkage						// callback references for dynamic link library
 	double ( *update_lattice_helper ) ( double line, double col, double val,
 										int line_int, int col_int,
 										int val_int ) = NULL;
-	int ( * deb ) ( object *r, object *c, const char *lab, double *res,
-					bool interact, const char *hl_var ) = NULL;
+	int ( object::*debugger ) ( object *c, const char *lab, double *res,
+								bool interact, const char *hl_var ) = NULL;
 	void ( *cmd_backend ) ( const char *cm, va_list arg ) = NULL;
 	void ( *cover_browser ) ( const char *text1, const char *text2,
 							  bool run ) = NULL;
@@ -692,7 +713,7 @@ struct dlliblinkage						// callback references for dynamic link library
 							 const char *message, ... ) = NULL;
 	void ( *plog_backend ) ( const char *cm, const char *tag,
 							 va_list arg ) = NULL;
-	void ( *plot_rt ) ( variable *var ) = NULL;
+	void ( variable::*plot_runtime ) ( void ) = NULL;
 	void ( *print_stack ) ( void ) = NULL;
 	void ( *reset_plot ) ( void ) = NULL;
 	void ( *runtime_buttons ) ( clock_t &last_update ) = NULL;
@@ -806,7 +827,7 @@ extern const int signals[ ];			// handled system signal numbers
 
 #ifndef _NP_
 // library conditional variables
-extern map < thread::id, worker * > thr_ptr;// worker thread pointers
+extern map < thread::id, workerVar * > thr_ptr;// worker thread pointers
 extern mutex lock_run_logs;		// lock run_logs for parallel updating
 extern mutex lock_run_pids;		// lock run_pids for parallel updating
 extern mutex lock_run_status;	// lock run_status for parallel updating
@@ -828,8 +849,6 @@ extern Tcl_Interp *inter;		// Tcl interpreter in GUI (for legacy LSD code)
 
 // library C++ functions (not used in equations)
 bool check_cond( double val1, int lopc, double val2 );
-bool has_descr_text( description *d );
-bool search_parallel( object *r );
 bool stop_parallel( void );
 bool strwsp( const char *str );
 bool valid_label( const char *lab );
@@ -858,7 +877,6 @@ vector < long > strtolsplit( const char *in, char sep, long inv = 0 );
 vector < string > strtostrsplit( const char *in, char sep, bool remQuotes = false );
 void close_sim( void );
 void cmd_gui( const char *cm, ... );
-void delete_bridge( object *d );
 void detach_parallel( void );
 void exception_handler( int signum, const char *what );
 void handle_signals( void ( * handler ) ( int signum ) );
@@ -872,8 +890,6 @@ void plog_terminal( const char *cm, va_list arg );
 void run_parallel_exec( bool nw, int id, string cmd );
 void set_blueprint( object *container, object *r );
 void set_exec( const char *path, const char *file );
-void set_lab_tit( variable *var );
-void set_tit_counter( object *o );
 void signal_handler( int signum );
 void warn_distr( int *errCnt, bool *stopErr, const char *distr, const char *msg );
 FILE *search_data_str( const char *name, const char *init, const char *str );

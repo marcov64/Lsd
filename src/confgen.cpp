@@ -102,9 +102,9 @@ object *blueprint = NULL;	// LSD blueprint (effective model in use)
 object *root = NULL;		// LSD root object
 object *wait_delete = NULL;	// LSD object waiting for deletion
 o_setT obj_list;			// set with all existing LSD objects
-sense *rsense = NULL;		// LSD sensitivity analysis structure
+sensitivity *sens = NULL;	// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
-variable *last_cemetery = NULL;	// LSD last saved data from deleted objects
+variable *last_cemetery = NULL;// LSD last saved data from deleted objects
 
 
 char **vars = NULL;			// array of variables/parameters names
