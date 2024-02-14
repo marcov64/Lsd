@@ -18,7 +18,7 @@ Contains the code to control the simulation run.
 
 The main functions contained here are:
 
-- void run_sim( )
+- void simulation::run_simulation( int until_t, int until_run )
 Run the loaded simulation model. Running is not only the actual
 simulation run, but also the initialization of result files. Of
 course, it has also to manage the messages from user and from the
@@ -32,70 +32,69 @@ Prepare variables to store saved data.
 
 
 /*********************************
-RUN
+RUN_SIMULATION
 *********************************/
-int simulation::run_sim( void )
+int simulation::run_simulation( int until_t, int until_run )
 {
-	bool batch_sequential_loop = false;
-	char *path_out = NULL, *name_out, sep_out[ 2 ], fname[ MAX_PATH_LENGTH ], bar_done[ 2 * BAR_DONE_SIZE ];
-	int i, perc_done, last_done;
-	FILE *f;
 	clock_t start, end, last_update;
-	result *rf;				// pointer for results files (may be zipped or not)
+	int i;
+	static char bar_done[ 2 * BAR_DONE_SIZE ];
+	static int perc_done, last_done;
 
+	if ( ! running_seq )			// if not already running sequential run set
+	{
 #ifndef _NP_
-	// check if there are parallel computing variables
-	if ( parallel_disable || max_threads < 2 )
-		parallel_mode = parallel_ready = false;
-	else
-	{
-		parallel_mode = root->search_parallel( );
-		parallel_ready = true;
-	}
+		// check if there are parallel computing variables
+		if ( parallel_disable || max_threads < 2 )
+			parallel_mode = parallel_ready = false;
+		else
+		{
+			parallel_mode = root->search_parallel( );
+			parallel_ready = true;
+		}
 
-	// start multi-thread workers
-	if ( parallel_mode )
-	{
-		workers = new workerVar[ max_threads ];
-		for ( i = 0; i < max_threads; ++i )
-			workers[ i ].sim = this;
-	}
+		// start multi-thread workers
+		if ( parallel_mode )
+		{
+			workers = new workerVar[ max_threads ];
+			for ( i = 0; i < max_threads; ++i )
+				workers[ i ].sim = this;
+		}
 #else
-	if ( root->search_parallel( ) )
-		plog( "\nWarning: parallel mode is not supported under current configuration\n" );
-	parallel_mode = false;
+		if ( root->search_parallel( ) )
+			plog( "\nWarning: parallel mode is not supported under current configuration\n" );
+		parallel_mode = false;
 #endif
 
 #ifndef _NW_
-	prof.clear( );			// reset profiling times
-
-	if ( liblnk.cover_browser != NULL )
-		liblnk.cover_browser( "Running...", "Use the buttons to control the simulation:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :	accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables", true );
+		if ( liblnk.runtime_start != NULL )
+			liblnk.runtime_start( );
 #else
-	plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
+		plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
 #endif
 
-	set_fast( 0 );			// should always start on OBSERVE and switch to FAST later
-	res_list.clear( );		// empty list of saved results files
-	strcpy( res_path, "" );	// and clear last saved path to results files
+		set_fast( 0 );				// should start on OBSERVE and switch to FAST later
+		res_list.clear( );			// empty list of saved results files
+		strcpy( res_path, "" );		// and clear last saved path to results files
 
-	// prepare progress bar
-	on_bar = false;
-	perc_done = 0;
-	last_done = -1;
-	strcpy( bar_done, "" );
+		// prepare progress bar
+		on_bar = false;
+		perc_done = 0;
+		last_done = -1;
+		strcpy( bar_done, "" );
 
+		running_seq = true;
+	}
+
+	// start loop controlling set of sequential simulation runs
 	for ( run = 1, quit = 0; run <= last_run && quit != 2; ++run )
 	{
-		running = true;		// signal simulation is running
-		eff_t = 0;			// no steps performed yet
-		save_ok = true;		// valid structure to save
-
-		empty_cemetery( );	// ensure that previous data are not erroneously mixed
+		running = true;				// signal single simulation is running
+		save_ok = true;				// valid structure to save
 
 #ifndef _NW_
-		if ( liblnk.runtime_run != NULL )
-			liblnk.runtime_run( );
+		if ( liblnk.runtime_run_start != NULL )
+			liblnk.runtime_run_start( );
 #endif
 		if ( fast_mode < 2 )
 		{
@@ -106,45 +105,36 @@ int simulation::run_sim( void )
 		}
 
 		// if new batch configuration file, reload all except descriptions
-		if ( batch_sequential_loop )
+		if ( batch_loop )
 		{
-			if ( load_configuration( true, NULL, 1 ) != 0 )
-			{
-#ifndef _NW_
-				if ( liblnk.log_tcl_error != NULL )
-					liblnk.log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
+			batch_loop = false;
+			i = load_configuration( true, NULL, 1 );
+		}
+		else
+			// if just another run seed, reload just structure & parameters
+			if ( run > 1 )
+				i = load_configuration( true, NULL, 2 );
+			else
+				i = 0;				// use loaded configuration
 
-				cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", conf_file );
+		// abort if configuration cannot be loaded
+		if ( i != 0 )
+		{
+#ifndef _NW_
+			if ( liblnk.log_tcl_error != NULL )
+				liblnk.log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
+
+			cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", conf_file );
 #else
-				fprintf( stderr, "\nFile '%s' not found or corrupted.\n", conf_file );
+			fprintf( stderr, "\nFile '%s' not found or corrupted.\n", conf_file );
 #endif
-				return 10;
-			}
-			batch_sequential_loop = false;
+			return 10;
 		}
 
-		// if just another run seed, reload just structure & parameters
-		if ( run > 1 )
-			if ( load_configuration( true, NULL, 2 ) != 0 )
-			{
-#ifndef _NW_
-				if ( liblnk.log_tcl_error != NULL )
-					liblnk.log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
-
-				cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", conf_file );
-#else
-				fprintf( stderr, "\nFile '%s' not found or corrupted.\n", conf_file );
-#endif
-				return 10;
-			}
-
-		// build initial object list for user pointer checking
-		if ( ! no_ptr_chk )
-			build_obj_list( true );
-
-		series_saved = 0;
+		// pre-allocate memory to save all existing elements for the entire simulation
 		t = 1;
-
+		eff_t = 0;					// no steps performed yet
+		series_saved = 0;
 		if ( ! root->alloc_save_mem( ) )
 		{
 #ifndef _NW_
@@ -158,26 +148,33 @@ int simulation::run_sim( void )
 			return 11;
 		}
 
-		// reset trace stack
+		// build initial object list for user pointer checking
+		if ( ! no_ptr_chk )
+			build_obj_list( true );
+
+		// reset cemetery, trace stack and simulation control
+		empty_cemetery( );
 		empty_stack( );
-
-		// new random routine' initialization
-		init_random( seed );
-
-		// reset math error counters
-		init_math_error( );
-
-		seed++;
+		stack_info = 0;
 		error_hard_thread = false;
 		worker_ready = true;
 		worker_crashed = false;
 		wait_delete = NULL;
-		stack_info = 0;
+
+		// new random routine' initialization
+		init_random( seed );
+		seed++;
+
+		// reset math error counters and defaults
+		init_math_error( );
 		use_nan = false;
 		no_search = false;
 		no_search_up = false;
+
+		// control execution time
 		start = last_update = clock( );
 
+		// start loop controlling a single simulation run
 		for ( t = 1; quit == 0 && t <= last_t; ++t )
 		{
 			// update the percentage done bar, if needed
@@ -190,7 +187,7 @@ int simulation::run_sim( void )
 #endif
 			{
 				eff_t = t;
-				root->update( true, false );
+				root->update( true, false );// simulation step execution
 			}
 
 			perc_done = min( 100 * ( ( run - 1 ) + ( double ) t / last_t ) / last_run, 100 );
@@ -200,7 +197,13 @@ int simulation::run_sim( void )
 			if ( liblnk.runtime_buttons != NULL )
 				liblnk.runtime_buttons( last_update );
 #endif
-		}	// end of t
+
+		}	// end of time step
+
+		// run user closing function, reporting error appropriately
+		user_exception = true;
+		close_sim( );
+		user_exception = false;
 
 		running = false;
 		end = clock( );
@@ -214,160 +217,36 @@ int simulation::run_sim( void )
 		if ( fast_mode < 2 )
 			plog( "\nSimulation %d of %d %s at case %d (%.2f sec.)\n", run, last_run, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( end - start ) / CLOCKS_PER_SEC );
 
-		if ( quit == 1 )			// for multiple simulation runs you need to reset quit
+		if ( quit == 1 )			// multiple simulation runs need to reset quit
 			quit = 0;
 
 #ifndef _NW_
-		cmd_gui( ".p.b1.b configure -value %d", run );
-		cmd_gui( ".p.b1.i configure -text \"Simulation: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", min( run + 1, last_run ), last_run, run, last_run	);
-
-		cmd_gui( "destroytop .deb" );
-		cmd_gui( "update" );
+		if ( liblnk.runtime_run_end != NULL )
+			liblnk.runtime_run_end( );
 #endif
-		// run user closing function, reporting error appropriately
-		user_exception = true;
-		close_sim( );
-		user_exception = false;
 
+		// close simulation data
 		root->reset_end( );
 
-		if ( quit != 2 && ( last_run > 1 || liblnk.cmd_backend == NULL ) )
+		if ( quit != 2 && ( last_run > 1 || liblnk.runtime_run_end == NULL ) )
 		{
-			// save results for multiple simulation runs, if any
-			if ( series_saved > 0 )
-			{	// remove existing path, if any, from name in case of alternative output path
-				char *alt_name = clean_file( conf_name );
+			save_results( );		// save results for multiple runs, if any
 
-				if ( save_alt )
-				{
-					path_out = alt_path;
-					name_out = alt_name;
-				}
-				else
-				{
-					path_out = conf_path;
-					name_out = conf_name;
-				}
-
-				if ( strlen( path_out ) == 0 )
-					strcpy( sep_out, "" );
-				else
-					strcpy( sep_out, "/" );
-
-				if ( ! no_res )
-				{
-					if ( ! batch_sequential )
-						snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d.%s", path_out, sep_out, name_out, seed - 1, docsv ? "csv" : "res" );
-					else
-						snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, findex, seed - 1, docsv ? "csv" : "res" );
-
-					if ( dozip )
-						strcatn( fname, ".gz", MAX_PATH_LENGTH );
-
-					res_list.push_back( fname );
-
-					if ( fast_mode < 2 )
-						plog( "Saving results to file %s... ", fname );
-
-					rf = new result( fname, "wt", this, dozip, docsv );	// create results file object
-					rf->title( root, 1 );						// write header
-					rf->data( root, 0, eff_t );					// write all data
-					delete rf;									// close file and delete object
-
-					if ( fast_mode < 2 )
-						plog( "Done\n" );
-				}
-
-				if ( ! no_tot && ( liblnk.cmd_backend != NULL || max_runs == 1 ) )
-				{
-					if ( ! grandTotal || batch_sequential )		// generate partial total files?
-					{
-						if ( ! batch_sequential )
-						  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, seed - run, seed - 1 + last_run - run, docsv ? "csv" : "tot" );
-						else
-						  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d_%d.%s", path_out, sep_out, name_out, findex, seed - run, seed - 1 + last_run - run, docsv ? "csv" : "tot" );
-					}
-					else										// generate single grand total file
-					{
-						snprintf( fname, MAX_PATH_LENGTH, "%s%s%s.%s", path_out, sep_out, name_out, docsv ? "csv" : "tot" );
-					}
-
-					if ( dozip )
-						strcatn( fname, ".gz", MAX_PATH_LENGTH );
-
-					if ( fast_mode < 2 && run == last_run )		// print only for last
-						plog( "\nSaving totals to file %s... ", fname );
-
-					if ( run == 1 && grandTotal && ! add_to_tot )
-					{
-						rf = new result( fname, "wt", this, dozip, docsv );// create results file object
-						rf->title( root, 0 );					// write header
-					}
-					else
-						rf = new result( fname, "a", this, dozip, docsv );// add results object to existing file
-
-					rf->data( root, eff_t );					// write current data data
-					delete rf;									// close file and delete object
-
-					if ( fast_mode < 2 && run == last_run )		// print only for last
-						plog( "Done\n" );
-				}
-
-				if ( run == last_run )							// last run?
-					strcpyn( res_path, path_out, MAX_PATH_LENGTH );
-			}
-			else
-				if ( fast_mode < 2 )
-					plog( "Nothing to save: no element selected\n" );
-
-			if ( run == last_run )								// last run?
-			{
-				if ( batch_sequential )							// last batch file?
-				{
-					findex++;									// try next file
-					snprintf( fname, MAX_PATH_LENGTH, "%s_%d.lsd", conf_name, findex );
-					delete [ ] conf_file;
-					conf_file = new char[ strlen( fname ) + 1 ];
-					strcpy( conf_file, fname );
-					f = fopen( conf_file, "r" );
-					if ( f == NULL || ( fend != 0 && findex > fend ) )// no more file to process
-					{
-						if ( f != NULL )
-							fclose( f );
-						if ( fast_mode < 2 )
-							plog( "\nFinished processing %s\n", clean_file( conf_file ) );
-						break;
-					}
-
-					plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
-					fclose( f );								// process next file
-
-					run = 0;										// force restarting run count
-					batch_sequential_loop = true;				// force reloading configuration
-				}
-#ifdef _NW_
-				else
-					if ( fast_mode < 2 )
-						plog( "\nFinished processing %s\n", clean_file( conf_file ) );
-#endif
-			}
+			if ( run == last_run )	// last run?
+				if ( ! next_batch( ) )// prepare next batch configuration, if any
+					break;			// nothing else, finish
 		}
-	}
+	}	// end of run
+
+	// set of sequential runs is finished
+	running_seq = false;
 
 	if ( fast_mode == 2 )
 		plog( "\nFinished processing configuration file(s)\n" );
 
 #ifndef _NW_
-	if ( liblnk.reset_plot != NULL )
-		liblnk.reset_plot( );
-
-	if ( liblnk.uncover_browser != NULL )
-		liblnk.uncover_browser( );
-
-	if ( liblnk.show_prof_aggr != NULL )
-		liblnk.show_prof_aggr( );
-
-	cmd_gui( "focustop .log" );
+	if ( liblnk.runtime_end != NULL )
+		liblnk.runtime_end( );
 #endif
 
 #ifndef _NP_
@@ -377,7 +256,6 @@ int simulation::run_sim( void )
 #endif
 
 	quit = 0;
-
 	return 0;
 }
 
@@ -476,8 +354,8 @@ bool object::alloc_save_mem( void )
 		if ( ( cv->num_lag > 0 || cv->param == 1 ) && ! cv->initialized )
 		{
 			sim->error_hard( "required initialization values missing",
-						"select the object and choose menu 'Data'/'Initial Values'",
-						false,
+							 "select the object and choose menu 'Data'/'Initial Values'",
+							 false,
 							 "%s '%s' in object '%s' has not been initialized",
 							 cv->param == 1 ? "parameter" : "variable", cv->label, label );
 			goto error;
@@ -499,7 +377,7 @@ bool object::alloc_save_mem( void )
 
 #ifndef _NW_
 		// variable to parent name map for AoR (only in GUI mode)
-		if ( liblnk.runtime_run != NULL )
+		if ( liblnk.runtime_run_start != NULL )
 			par_map.insert( make_pair < string, string > ( cv->label, label ) );
 #endif
 	}
@@ -580,49 +458,6 @@ void object::reset_end( )
 
 
 /*********************************
-RESULTS_ALT_PATH
-simple tool to allow changing where results are saved.
-*********************************/
-bool simulation::results_alt_path( const char *altPath )
-{
-	if ( save_alt )
-	{
-		delete [ ] alt_path;
-		alt_path = NULL;
-	}
-
-	if ( strlen( altPath ) == 0 )
-	{
-		save_alt = false;
-		return false;
-	}
-
-	alt_path = new char[ strlen( altPath ) + 1 ];
-	if ( sprintf( alt_path, "%s", altPath ) > 0 )
-	{
-		int lstChr = strlen( alt_path ) - 1;
-		if ( alt_path[ lstChr ] == '\\' || alt_path[ lstChr ] == '/' )
-			alt_path[ lstChr ] = '\0';
-
-		struct stat sb;
-		if ( stat( alt_path, &sb ) == 0 && S_ISDIR( sb.st_mode ) )
-		{
-			save_alt = true;
-			return true;
-		}
-	}
-
-	delete [ ] alt_path;
-	alt_path = NULL;
-	save_alt = false;
-
-	plog( "\nWarning: could not open results directory '%s', ignoring.\n", altPath );
-
-	return false;
-}
-
-
-/*********************************
 UPDATE_BAR
 *********************************/
 void simulation::update_bar( char *bar, int done, int & last_done, int bar_sz )
@@ -669,4 +504,191 @@ void simulation::update_bar( char *bar, int done, int & last_done, int bar_sz )
 			}
 
 	last_done = done;
+}
+
+
+/*********************************
+RESULTS_ALT_PATH
+simple tool to allow changing where results are saved.
+*********************************/
+bool simulation::results_alt_path( const char *altPath )
+{
+	if ( save_alt )
+	{
+		delete [ ] alt_path;
+		alt_path = NULL;
+	}
+
+	if ( strlen( altPath ) == 0 )
+	{
+		save_alt = false;
+		return false;
+	}
+
+	alt_path = new char[ strlen( altPath ) + 1 ];
+	if ( sprintf( alt_path, "%s", altPath ) > 0 )
+	{
+		int lstChr = strlen( alt_path ) - 1;
+		if ( alt_path[ lstChr ] == '\\' || alt_path[ lstChr ] == '/' )
+			alt_path[ lstChr ] = '\0';
+
+		struct stat sb;
+		if ( stat( alt_path, &sb ) == 0 && S_ISDIR( sb.st_mode ) )
+		{
+			save_alt = true;
+			return true;
+		}
+	}
+
+	delete [ ] alt_path;
+	alt_path = NULL;
+	save_alt = false;
+
+	plog( "\nWarning: could not open results directory '%s', ignoring.\n", altPath );
+
+	return false;
+}
+
+
+/*********************************
+SAVE_RESULTS
+*********************************/
+void simulation::save_results( void )
+{
+	char *path_out, *name_out, sep_out[ 2 ], fname[ MAX_PATH_LENGTH ];
+	result *rf;				// pointer for results files (may be zipped or not)
+
+	if ( series_saved == 0 )
+	{
+		if ( fast_mode < 2 )
+			plog( "Nothing to save: no element selected\n" );
+
+		return;
+	}
+
+	// remove existing path, if any, from name in case of alternative output path
+	char *alt_name = clean_file( conf_name );
+
+	if ( save_alt )
+	{
+		path_out = alt_path;
+		name_out = alt_name;
+	}
+	else
+	{
+		path_out = conf_path;
+		name_out = conf_name;
+	}
+
+	if ( strlen( path_out ) == 0 )
+		strcpy( sep_out, "" );
+	else
+		strcpy( sep_out, "/" );
+
+	if ( ! no_res )
+	{
+		if ( ! batch_sequential )
+			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d.%s", path_out, sep_out, name_out, seed - 1, docsv ? "csv" : "res" );
+		else
+			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, findex, seed - 1, docsv ? "csv" : "res" );
+
+		if ( dozip )
+			strcatn( fname, ".gz", MAX_PATH_LENGTH );
+
+		res_list.push_back( fname );
+
+		if ( fast_mode < 2 )
+			plog( "Saving results to file %s... ", fname );
+
+		rf = new result( fname, "wt", this, dozip, docsv );// create results file object
+		rf->title( root, 1 );						// write header
+		rf->data( root, 0, eff_t );					// write all data
+		delete rf;									// close file and delete object
+
+		if ( fast_mode < 2 )
+			plog( "Done\n" );
+	}
+
+	if ( ! no_tot && ( liblnk.runtime_run_end != NULL || max_runs == 1 ) )
+	{
+		if ( ! grandTotal || batch_sequential )		// generate partial total files?
+		{
+			if ( ! batch_sequential )
+			  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, seed - run, seed - 1 + last_run - run, docsv ? "csv" : "tot" );
+			else
+			  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d_%d.%s", path_out, sep_out, name_out, findex, seed - run, seed - 1 + last_run - run, docsv ? "csv" : "tot" );
+		}
+		else										// generate single grand total file
+		{
+			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s.%s", path_out, sep_out, name_out, docsv ? "csv" : "tot" );
+		}
+
+		if ( dozip )
+			strcatn( fname, ".gz", MAX_PATH_LENGTH );
+
+		if ( fast_mode < 2 && run == last_run )		// print only for last
+			plog( "\nSaving totals to file %s... ", fname );
+
+		if ( run == 1 && grandTotal && ! add_to_tot )
+		{
+			rf = new result( fname, "wt", this, dozip, docsv );// create results file object
+			rf->title( root, 0 );					// write header
+		}
+		else
+			rf = new result( fname, "a", this, dozip, docsv );// add results object to existing file
+
+		rf->data( root, eff_t );					// write current data data
+		delete rf;									// close file and delete object
+
+		if ( fast_mode < 2 && run == last_run )		// print only for last
+			plog( "Done\n" );
+	}
+
+	if ( run == last_run )							// last run?
+		strcpyn( res_path, path_out, MAX_PATH_LENGTH );
+}
+
+
+/*********************************
+NEXT_BATCH
+*********************************/
+bool simulation::next_batch( void )
+{
+	char fname[ MAX_PATH_LENGTH ];
+	FILE *f;
+
+	if ( batch_sequential )			// last batch file?
+	{
+		// try reading next file
+		snprintf( fname, MAX_PATH_LENGTH, "%s_%d.lsd", conf_name, ++findex );
+		delete [ ] conf_file;
+		conf_file = new char[ strlen( fname ) + 1 ];
+		strcpy( conf_file, fname );
+		f = fopen( conf_file, "r" );
+
+		if ( f == NULL || ( fend != 0 && findex > fend ) )// no more file to process
+		{
+			if ( f != NULL )
+				fclose( f );
+
+			if ( fast_mode < 2 )
+				plog( "\nFinished processing %s\n", clean_file( conf_file ) );
+
+			return false;
+		}
+
+		plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
+		fclose( f );				// process next file
+
+		run = 0;					// force restarting run count
+		batch_loop = true;			// force reloading configuration
+
+		return true;
+	}
+#ifdef _NW_
+	else
+		if ( fast_mode < 2 )
+			plog( "\nFinished processing %s\n", clean_file( conf_file ) );
+#endif
+	return false;
 }

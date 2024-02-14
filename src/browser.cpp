@@ -349,13 +349,13 @@ int load_gui( const char **argv )
 	liblnk.plog_backend = & plog_backend;
 	liblnk.plot_runtime = & variable::plot_runtime;
 	liblnk.print_stack = & print_stack;
-	liblnk.reset_plot = & reset_plot;
 	liblnk.runtime_buttons = & runtime_buttons;
-	liblnk.runtime_run = & runtime_run;
+	liblnk.runtime_end = & runtime_end;
+	liblnk.runtime_run_start = & runtime_run_start;
+	liblnk.runtime_run_end = & runtime_run_end;
+	liblnk.runtime_start = & runtime_start;
 	liblnk.runtime_step = & runtime_step;
 	liblnk.save_lattice_helper = & save_lattice_helper;
-	liblnk.show_prof_aggr = & show_prof_aggr;
-	liblnk.uncover_browser = & uncover_browser;
 	liblnk.update_lattice_helper = & update_lattice_helper;
 
 	// try to load model configuration file
@@ -401,7 +401,7 @@ int load_gui( const char **argv )
 
 		try
 		{
-			if ( ( i = sim.run_sim( ) ) != 0 )
+			if ( ( i = sim.run_simulation( ) ) != 0 )
 				return i;
 			else
 				unsavedData = true;	// flag unsaved simulation results
@@ -1500,14 +1500,54 @@ int object::browse( void )
 
 
 /****************************************************
-RUNTIME_RUN
+RUNTIME_START
+Updates GUI at the start of a set of simulation runs
+****************************************************/
+void runtime_start( void )
+{
+	sim.prof_times.clear( );		// reset profiling times
+
+	cover_browser( "Running...", "Use the buttons to control the simulation:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :	accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables", true );
+}
+
+
+/****************************************************
+RUNTIME_END
+Updates GUI at the end of a set of simulation runs
+****************************************************/
+void runtime_end( void )
+{
+	reset_plot( );
+	uncover_browser( );
+	show_prof_aggr( );
+	cmd( "focustop .log" );
+}
+
+
+/****************************************************
+RUNTIME_RUN_START
 Updates GUI at the start of each simulation run
 Prepare run-time plots and clear AoR maps
 ****************************************************/
-void runtime_run( void )
+void runtime_run_start( void )
 {
 	sim.root->prepare_plot( sim.run );
 	par_map.clear( );	// restart variable to parent name map for AoR
+}
+
+
+/****************************************************
+RUNTIME_RUN_END
+Updates GUI at the end of each simulation run
+Updates the GUI elements
+****************************************************/
+void runtime_run_end( void )
+{
+	cmd( ".p.b1.b configure -value %d", sim.run );
+	cmd( ".p.b1.i configure -text \"Simulation: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"",
+		 min( sim.run + 1, sim.last_run ), sim.last_run, sim.run, sim.last_run );
+	cmd( "destroytop .deb" );
+	cmd( "update" );
 }
 
 

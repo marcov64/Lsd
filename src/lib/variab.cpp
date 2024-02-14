@@ -497,8 +497,8 @@ double variable::cal( object *caller, int lag )
 			if ( ( ! sim->prof_obs_only || observe ) && time > sim->prof_min_msecs )
 			{
 				string var_name = label;
-				sim->prof[ var_name ].ticks += time;
-				sim->prof[ var_name ].comp++;
+				sim->prof_times[ var_name ].ticks += time;
+				sim->prof_times[ var_name ].comp++;
 			}
 		}
 

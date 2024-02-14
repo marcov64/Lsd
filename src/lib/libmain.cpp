@@ -39,7 +39,8 @@ int docsv = false;				// produce .csv text results files (bool)
 int dozip = true;				// compressed results file flag (bool)
 
 // regular library global variables
-bool batch_sequential = false;	// no-window multi configuration job running
+bool batch_sequential = false;	// no-window multi-configuration job
+bool batch_loop = false;		// batch multi-config batch loop in process
 bool grandTotal = false;		// produce grand total in batch processing
 bool idle_loop = true;			// in main idle loop (no running operation)
 bool message_logged = false;	// new message posted in log window

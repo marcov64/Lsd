@@ -272,7 +272,7 @@ struct item
 	unsigned int count;
 };
 
-bool comp_item( item& item1, item& item2 )
+bool comp_item( item & item1, item & item2 )
 {
 	int comp_str = strcmp( item1.obj, item2.obj );
 	if ( ! comp_str )
@@ -283,32 +283,31 @@ bool comp_item( item& item1, item& item2 )
 
 void show_prof_aggr( void )
 {
-	if ( ! sim.prof_aggr_time )
-		return;
-
 	item elem;
 	list < item > vars;
-	list < item >::iterator it1;
 	variable *cv;
-	map < string, profile >::iterator it2;
+
+	if ( ! sim.prof_aggr_time )
+		return;
 
 	plog( "\nProfiling aggregated results:\n" );
 	plog_tag( "\nObject\tElement\tTime (msec.)\tComputation count", "prof2" );
 
-	for ( it2 = sim.prof.begin(); it2 != sim.prof.end(); ++it2 )
+	for ( auto it = sim.prof_times.begin( ); it != sim.prof_times.end( ); ++it )
 	{
-		elem.var = it2->first.c_str( );
+		elem.var = it->first.c_str( );
 		cv = sim.root->search_var( NULL, elem.var );
 		elem.obj = ( cv == NULL ) ? NULL : cv->up->label;
-		elem.time = 1000 * it2->second.ticks / CLOCKS_PER_SEC;
-		elem.count = it2->second.comp;
+		elem.time = 1000 * it->second.ticks / CLOCKS_PER_SEC;
+		elem.count = it->second.comp;
 		vars.push_back( elem );
 	}
 
 	vars.sort( comp_item );
 
-	for ( it1 = vars.begin(); it1 != vars.end(); ++it1 )
-		plog_tag( "\n%-12.12s\t%-12.12s\t%d\t%d", "prof2", it1->obj, it1->var, it1->time, it1->count );
+	for ( auto it = vars.begin(); it != vars.end(); ++it )
+		plog_tag( "\n%-12.12s\t%-12.12s\t%d\t%d", "prof2",
+				  it->obj, it->var, it->time, it->count );
 
 	plog( "\n" );
 }

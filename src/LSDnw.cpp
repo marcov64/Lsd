@@ -97,7 +97,7 @@ int main( int argn, const char **argv )
 
 #endif
 			// execute single simulation
-			res = sim.run_sim( );
+			res = sim.run_simulation( );
 
 #ifndef _NT_
 
