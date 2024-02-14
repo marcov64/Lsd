@@ -44,22 +44,19 @@ void run_parallel_exec( bool nw, int id, string cmd )
 RUN_PARALLEL
 ***************************************/
 #define INISTAT -1234
-int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns )
+int simulation::run_parallel( bool nw, const char *exec, const char *simname,
+							  int fseed, int runs, int thrrun, int parruns )
 {
-	bool save_alt = false;
-	char *alt_name, *alt_path, *def_path;
+	char *alt_name, *def_path;
 	int i, j, k, num, sl;
 
-	alt_path = def_path = exec_path;
+	if ( sim != 0 )						// only first sim object can run OS parallel
+		return -1;
 
-	if ( sims.size( ) > 0 )
-	{
-		save_alt = sims[ 0 ]->save_alt;
-		alt_path = sims[ 0 ]->alt_path;
-
-		if ( strlen( sims[ 0 ]->conf_path ) > 0 )
-			def_path = sims[ 0 ]->conf_path;
-	}
+	if ( strlen( conf_path ) > 0 )
+		def_path = conf_path;
+	else
+		def_path = exec_path;
 
 	int path_len = save_alt ? strlen( alt_path ) : strlen( def_path );
 	int name_len = strlen( simname ) + ( int ) log10( fseed + runs ) + 2;
@@ -165,7 +162,7 @@ int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int
 				}
 
 				if ( sims.size( ) > 0 )
-					sims[ 0 ]->update_bar( NULL, num, sl, 2 * BAR_DONE_SIZE );
+					update_bar( NULL, num, sl, 2 * BAR_DONE_SIZE );
 			}
 			while ( num < 100 && ! abort );
 

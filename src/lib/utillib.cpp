@@ -255,7 +255,7 @@ SET_TIT_COUNTER
 ***************************************************/
 void object::set_tit_counter( void )
 {
-	int i, tGUI;
+	int i;
 	bridge *cb;
 	object *cur;
 
@@ -270,12 +270,11 @@ void object::set_tit_counter( void )
 	if ( cb->counter_updated )
 		return;
 
-	tGUI = sims.size( ) > 0 ? sims[ 0 ]->t : 0;// only do for GUI simulation
 	for ( cur = cb->head, i = 1; cur != NULL; cur = cur->next, ++i )
-		if ( cur->lstCntUpd < tGUI )	// don't update more than once per period
+		if ( cur->lstCntUpd < sim->t )	// don't update more than once per period
 		{								// to avoid deletions to change counters
 			cur->acounter = i;
-			cur->lstCntUpd = tGUI;
+			cur->lstCntUpd = sim->t;
 		}
 
 	cb->counter_updated = true;

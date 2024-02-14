@@ -305,6 +305,7 @@ struct simulation						// simulation container class
 	int load_configuration( bool reload, std::string *warnings, int quick );
 	int hyper_count( const char *lab );
 	int hyper_count_var( const char *lab );
+	int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns );
 	int run_simulation( int until_t = 0, int until_run = 0 );
 	int worker_errors( void );
 	void empty_blueprint( void );
@@ -867,7 +868,6 @@ const char *signal_name( int signum );
 int kill_system( int id );
 int monitor_logs( void );
 int rnd_int( int min, int max );
-int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns );
 int run_system( const char *cmd, int id = -1 );
 int strcln( char *out, const char *str, int outSz );
 int strlf( char *out, const char *str, int outSz );

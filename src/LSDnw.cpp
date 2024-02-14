@@ -91,7 +91,7 @@ int main( int argn, const char **argv )
 				grandTotal = false;
 			}
 
-			res = run_parallel( true, argv[ 0 ], sim.conf_name, sim.seed, sim.last_run, max_threads, max_runs );
+			res = sim.run_parallel( true, argv[ 0 ], sim.conf_name, sim.seed, sim.last_run, max_threads, max_runs );
 		}
 		else
 

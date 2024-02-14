@@ -19,8 +19,8 @@ fun_head_fast.h to ensure just current and faster
 LSD code is used.
 *************************************************************/
 
-#ifdef NO_LEGACY_CODE
-	#undef NO_LEGACY_CODE
+#ifndef LEGACY_CODE
+	#define LEGACY_CODE
 #endif
 
 #include "lib/lsdequation.h"

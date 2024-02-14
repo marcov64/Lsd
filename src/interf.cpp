@@ -5160,7 +5160,7 @@ object *object::operate( void )
 	#else
 
 			plog( "\n\nProcessing parallel background run (threads=%d runs=%d)...", nature, param );
-			run_parallel( false, nw_exe, sim->conf_name, sim->seed, sim->last_run, nature, param );
+			sim->run_parallel( false, nw_exe, sim->conf_name, sim->seed, sim->last_run, nature, param );
 
 	#endif
 

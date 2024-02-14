@@ -590,7 +590,7 @@ const bool no_pointer_init = true;
 
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)
-#ifndef NO_LEGACY_CODE
+#ifdef LEGACY_CODE
 
 #ifndef _NW_
 #include <tk.h>
