@@ -1080,8 +1080,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 
 			// Analysis
 			case 11:
-				for ( cur = this; cur->up != NULL; cur = cur->up );
-				sim->reset_end( cur );
+				sim->root->reset_end( );
 				analysis( );
 				cmd( "focustop .deb" );
 

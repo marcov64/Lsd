@@ -261,7 +261,7 @@ void error_hard_helper( const char *boxTitle, const char *boxText, const char *l
 		close_sim( );
 		sim.user_exception = false;
 
-		sim.reset_end( sim.root );
+		sim.root->reset_end( );
 		uncover_browser( );
 
 #ifndef _NP_

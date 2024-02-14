@@ -287,24 +287,21 @@ SET_BLUEPRINT
 copy the naked structure of the model into another object, called blueprint,
 to be used for adding objects without example
 ******************************************************************************/
-void set_blueprint( object *container, object *r )
+void object::set_blueprint( object *container )
 {
 	bridge *cb, *cb1;
 	object *cur, *cur1;
 	variable *cv;
 
-	if ( r == NULL )
-		return;
-
-	for ( cv = r->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 		container->add_var_from_example( cv );
 
 	delete [ ] container->label;
 
-	container->label = new char[ strlen( r->label ) + 1 ];
-	strcpy( container->label, r->label );
+	container->label = new char[ strlen( label ) + 1 ];
+	strcpy( container->label, label );
 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			continue;
@@ -315,7 +312,7 @@ void set_blueprint( object *container, object *r )
 		for ( cb1 = container->b; strcmp( cb1->blabel, cb->blabel ); cb1 = cb1->next );
 
 		cur = cb1->head;
-		set_blueprint( cur, cur1 );
+		cur1->set_blueprint( cur );
 	}
 }
 
@@ -344,7 +341,9 @@ void simulation::reset_blueprint( object *r )
 	empty_blueprint( );
 	blueprint = new object;
 	blueprint->init( NULL, this, "Root" );
-	set_blueprint( blueprint, r );
+
+	if ( r != NULL )
+		r->set_blueprint( blueprint );
 }
 
 

@@ -466,4 +466,4 @@ double variable::fun( object* r ) { return NAN; }
 /*********************************
 ALLOC_SAVE_VAR
 *********************************/
-bool alloc_save_var( variable *v ) { return true; }
+bool variable::alloc_save_var( void ) { return true; }

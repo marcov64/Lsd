@@ -124,7 +124,7 @@ int simulation::load_configuration( bool reload, string *warnings, int quick )
 			goto endLoad;
 
 		// set blueprint to initial condition
-		set_blueprint( blueprint, root );
+		root->set_blueprint( blueprint );
 
 		if ( reload && quick == 2 )				// just quick reload?
 			goto endLoad;
@@ -1005,7 +1005,7 @@ bool object::load_insts( const char *file_name, FILE *f )
 	}
 
 	if ( up == NULL )	// this is the root, and therefore the end of the loading
-		set_blueprint( sim->blueprint, this );
+		set_blueprint( sim->blueprint );
 
 	return true;
 }
@@ -1124,7 +1124,7 @@ SAVE_SINGLE
 	Save the value of a single
 	element to file during run
 *********************************/
-void simulation::save_single( variable *v )
+void variable::save_single( void )
 {
 	char fn[ MAX_PATH_LENGTH ];
 	int i;
@@ -1132,18 +1132,19 @@ void simulation::save_single( variable *v )
 
 #ifndef _NP_
 	// prevent concurrent use by more than one thread
-	rec_lguardT lock( v->parallel_comp );
+	rec_lguardT lock( parallel_comp );
 #endif
 
-	v->set_lab_tit( );
-	snprintf( fn, MAX_PATH_LENGTH, "%s_%s-%d_%d_seed-%d.res", v->label, v->lab_tit, v->start, v->end, seed - 1 );
+	set_lab_tit( );
+	snprintf( fn, MAX_PATH_LENGTH, "%s_%s-%d_%d_seed-%d.res",
+			  label, lab_tit, start, end, sim->seed - 1 );
 	f = fopen( fn, "wt" );			// use text mode for Windows better compatibility
 
-	fprintf( f, "%s %s (%d %d)\t\n", v->label, v->lab_tit, v->start, v->end );
+	fprintf( f, "%s %s (%d %d)\t\n", label, lab_tit, start, end );
 
-	for ( i = 0; i <= t - 1; ++i )
-		if ( i >= v->start && i <= v->end && ! is_nan( v->data[ i - v->start ] ) )	// save NaN as n/a
-			fprintf( f,"%lf\t\n", v->data[ i - v->start ] );
+	for ( i = 0; i <= sim->t - 1; ++i )
+		if ( i >= start && i <= end && ! is_nan( data[ i - start ] ) )	// save NaN as n/a
+			fprintf( f,"%lf\t\n", data[ i - start ] );
 		else
 			fprintf( f,"%s\t\n", nonavail );
 

@@ -140,7 +140,7 @@ bool object::open_configuration( bool reload )
 		case 23:								// missing XML settings node
 		case 24:								// missing XML equation node
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d :%.24s)\" -detail \"Element descriptions were lost but the configuration can still be used.\n\nPlease check if the desired LSD configuration file was selected or re-enter the description information if needed.\n\nIf this is a sensitivity analysis configuration file, this message is expected, and configuration file is ok.\"", i, warnings.c_str( ) );
-			sim->reset_description( sim->root );
+			sim->root->reset_description( );
 			loaded = true;
 			break;
 

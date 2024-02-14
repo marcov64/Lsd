@@ -295,8 +295,6 @@ struct simulation						// simulation container class
 	simulation( void );					// constructor
 	~simulation( void );				// destructor
 
-	bool alloc_save_mem( object *r );
-	bool alloc_save_var( variable *v );
 	bool load_description( const char *msg, FILE *f );
 	bool results_alt_path( const char *altPath );
 	description *add_description( const char *lab, int type = 4, const char *text = NULL, const char *init = NULL, bool initial = false, bool observe = false );
@@ -307,7 +305,6 @@ struct simulation						// simulation container class
 	int hyper_count_var( const char *lab );
 	int run_sim( void );
 	int worker_errors( void );
-	void add_cemetery( variable *v );
 	void empty_blueprint( void );
 	void empty_cemetery( void );
 	void empty_description( void );
@@ -316,9 +313,6 @@ struct simulation						// simulation container class
 	void empty_stack( void );
 	void move_obj( const char *lab, const char *dest );
 	void reset_blueprint( object *r );
-	void reset_description( object *r );
-	void reset_end( object *r );
-	void save_single( variable *v );
 	void unload_configuration( bool full );
 	void update_bar( char *bar, int done, int & last_done, int bar_sz );
 
@@ -356,6 +350,7 @@ struct object							// simulation model object class
 #endif
 
 	// object-class methods
+	bool alloc_save_mem( void );
 	bool load_insts( const char *file_name, FILE *f );
 	bool load_struct( FILE *f );
 	bool search_parallel( void );
@@ -463,7 +458,10 @@ struct object							// simulation model object class
 	void name_node_net( const char *nodeName );
 	void recreate_maps( void );
 	void replicate( int num, bool propagate = false );
+	void reset_description( void );
+	void reset_end( void );
 	void search_inst( object *obj, long *pos, long *checked );
+	void set_blueprint( object *container );
 	void set_tit_counter( void );
 	void update( bool recurse, bool user );
 
@@ -529,12 +527,15 @@ struct variable							// model numeric element (variable,
 	variable( const variable &v );		// copy constructor
 	~variable( void );					// destructor
 
+	bool alloc_save_var( void );
 	double cal( object *caller, int lag );
 	double fun( object *caller );
 	inline double chk_dummy( const char *lab );
+	void add_cemetery( void );
 	void empty( bool no_lock = false );
 	void init( object *_up, simulation *_sim, const char *_label, int _param = -1,
 			   int _num_lag = -1, double *_val = NULL );
+	void save_single( void );
 	void set_lab_tit( void );
 
 #ifdef VARIABLE_EXT
@@ -888,7 +889,6 @@ void monitor_parallel( bool nw );
 void plog_tag( const char *cm, const char *tag, ... );
 void plog_terminal( const char *cm, va_list arg );
 void run_parallel_exec( bool nw, int id, string cmd );
-void set_blueprint( object *container, object *r );
 void set_exec( const char *path, const char *file );
 void signal_handler( int signum );
 void warn_distr( int *errCnt, bool *stopErr, const char *distr, const char *msg );

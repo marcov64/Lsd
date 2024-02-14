@@ -245,29 +245,6 @@ description *simulation::change_description( const char *lab_old, const char *la
 }
 
 
-/***************************************************
-RESET_DESCRIPTION
-regenerate recur. the descriptions of the model as it is
-***************************************************/
-void simulation::reset_description( object *r )
-{
-	bridge *cb;
-	variable *cv;
-
-	if ( r == NULL )
-		return;
-
-	search_description( r->label );
-
-	for ( cv = r->v; cv != NULL; cv = cv->next )
-		search_description( cv->label );
-
-	for ( cb = r->b; cb != NULL; cb = cb->next )
-		if ( cb->head != NULL )
-			reset_description( cb->head );
-}
-
-
 /*****************************************************************************
 EMPTY_DESCRIPTION
 ******************************************************************************/
@@ -282,6 +259,26 @@ void simulation::empty_description( void )
 	}
 
 	descr = NULL;
+}
+
+
+/***************************************************
+RESET_DESCRIPTION
+regenerate recur. the descriptions of the model as it is
+***************************************************/
+void object::reset_description( void )
+{
+	bridge *cb;
+	variable *cv;
+
+	sim->search_description( label );
+
+	for ( cv = v; cv != NULL; cv = cv->next )
+		sim->search_description( cv->label, true );
+
+	for ( cb = b; cb != NULL; cb = cb->next )
+		if ( cb->head != NULL )
+			cb->head->reset_description( );
 }
 
 

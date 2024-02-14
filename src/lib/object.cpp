@@ -1661,7 +1661,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 			}
 
 			if ( cv->save || cv->savei )
-				sim->alloc_save_var( cv );
+				cv->alloc_save_var( );
 		}
 
 		// insert the descending objects in the newly created objects
@@ -1920,7 +1920,7 @@ void object::collect_cemetery( variable *caller )
 		if ( ( cv->save == true || cv->savei == true ) && sim->running && sim->eff_t > 0 )
 		{
 			if ( cv->savei )
-				sim->save_single( cv );		// update file
+				cv->save_single( );			// update file
 
 			cv->set_lab_tit( );				// update last lab_tit
 
@@ -1930,7 +1930,7 @@ void object::collect_cemetery( variable *caller )
 			// use C stdlib to be able to deallocate memory for deleted objects
 			cv->data = ( double * ) realloc( cv->data, ( sim->t - cv->start + 1 ) * sizeof( double ) );
 
-			sim->add_cemetery( cv );		// transfer to cemetery
+			cv->add_cemetery( );			// transfer to cemetery
 		}
 		else
 			cv->empty( caller == NULL || cv == caller );// disable lock if emptying caller
@@ -1946,17 +1946,17 @@ ADD_CEMETERY
 Store the variable in a list of variables in objects deleted
 but to be used for analysis.
 ***************************************************/
-void simulation::add_cemetery( variable *v )
+void variable::add_cemetery( void )
 {
-	if ( cemetery == NULL )
-		cemetery = last_cemetery = v;
+	if ( sim->cemetery == NULL )
+		sim->cemetery = sim->last_cemetery = this;
 	else
 	{
-		last_cemetery->next = v;
-		last_cemetery = v;
+		sim->last_cemetery->next = this;
+		sim->last_cemetery = this;
 	}
 
-	last_cemetery->next = NULL;
+	sim->last_cemetery->next = NULL;
 }
 
 

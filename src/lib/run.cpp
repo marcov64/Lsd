@@ -24,7 +24,7 @@ simulation run, but also the initialization of result files. Of
 course, it has also to manage the messages from user and from the
 model at run time.
 
-- bool alloc_save_mem( );
+- bool object::alloc_save_mem( );
 Prepare variables to store saved data.
 *************************************************************/
 
@@ -145,7 +145,7 @@ int simulation::run_sim( void )
 		series_saved = 0;
 		t = 1;
 
-		if ( ! alloc_save_mem( root ) )
+		if ( ! root->alloc_save_mem( ) )
 		{
 #ifndef _NW_
 			if ( liblnk.log_tcl_error != NULL )
@@ -229,7 +229,7 @@ int simulation::run_sim( void )
 		close_sim( );
 		user_exception = false;
 
-		reset_end( root );
+		root->reset_end( );
 
 		if ( quit != 2 && ( last_run > 1 || liblnk.cmd_backend == NULL ) )
 		{
@@ -464,21 +464,22 @@ void simulation::empty_stack( void )
 /*********************************
 ALLOC_SAVE_MEM
 *********************************/
-bool simulation::alloc_save_mem( object *r )
+bool object::alloc_save_mem( void )
 {
 	bridge *cb;
 	object *cur;
 	variable *cv;
 
 	// for each variable set the data saving support
-	for ( cv = r->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		if ( ( cv->num_lag > 0 || cv->param == 1 ) && ! cv->initialized )
 		{
-			error_hard( "required initialization values missing",
+			sim->error_hard( "required initialization values missing",
 						"select the object and choose menu 'Data'/'Initial Values'",
 						false,
-						"%s '%s' in object '%s' has not been initialized", cv->param == 1 ? "parameter" : "variable", cv->label, r->label );
+							 "%s '%s' in object '%s' has not been initialized",
+							 cv->param == 1 ? "parameter" : "variable", cv->label, label );
 			goto error;
 		}
 
@@ -493,25 +494,25 @@ bool simulation::alloc_save_mem( object *r )
 		}
 
 		if ( cv->save || cv->savei )
-			if ( ! alloc_save_var( cv ) )
+			if ( ! cv->alloc_save_var( ) )
 				goto error;
 
 #ifndef _NW_
 		// variable to parent name map for AoR (only in GUI mode)
 		if ( liblnk.runtime_run != NULL )
-			par_map.insert( make_pair < string, string > ( cv->label, r->label ) );
+			par_map.insert( make_pair < string, string > ( cv->label, label ) );
 #endif
 	}
 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
-		for ( cur = cb->head; cur != NULL && quit != 2; cur = go_brother( cur ) )
-			if ( ! alloc_save_mem( cur ) )
+	for ( cb = b; cb != NULL; cb = cb->next )
+		for ( cur = cb->head; cur != NULL && sim->quit != 2; cur = go_brother( cur ) )
+			if ( ! cur->alloc_save_mem( ) )
 				goto error;
 
 	return true;
 
 error:
-	quit = 2;
+	sim->quit = 2;
 	return false;
 }
 
@@ -519,33 +520,33 @@ error:
 /*********************************
 ALLOC_SAVE_VAR
 *********************************/
-bool simulation::alloc_save_var( variable *v )
+bool variable::alloc_save_var( void )
 {
-	if ( ! running )
+	if ( ! sim->running )
 		return true;
 
-	if ( v->num_lag > 0 || v->param == 1 )
-		v->start = t - 1;
+	if ( num_lag > 0 || param == 1 )
+		start = sim->t - 1;
 	else
-		v->start = t;
+		start = sim->t;
 
-	v->end = last_t;
+	end = sim->last_t;
 
 	// use C stdlib to be able to deallocate memory for deleted objects
-	free( v->data );
-	v->data = ( double * ) malloc( ( v->end - v->start + 1 ) * sizeof( double ) );
+	free( data );
+	data = ( double * ) malloc( ( end - start + 1 ) * sizeof( double ) );
 
-	if( v->data == NULL )
+	if( data == NULL )
 	{
 		raise( SIGMEM );
 		return false;
 	}
 	else
 	{
-		if ( v->num_lag > 0	 || v->param == 1 )
-			v->data[ 0 ] = v->val[ 0 ];
+		if ( num_lag > 0 || param == 1 )
+			data[ 0 ] = val[ 0 ];
 
-		++series_saved;
+		++( sim->series_saved );
 		return true;
 	}
 }
@@ -554,26 +555,26 @@ bool simulation::alloc_save_var( variable *v )
 /*********************************
 RESET_END
 *********************************/
-void simulation::reset_end( object *r )
+void object::reset_end( )
 {
 	bridge *cb;
 	object *cur;
 	variable *cv;
 
-	for ( cv = r->v; cv != NULL; cv = cv->next )
+	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		if ( cv->save )
-			cv->end = t - 1;
+			cv->end = sim->t - 1;
 		if ( cv->savei == 1 )
-			save_single( cv );
+			cv->save_single( );
 	}
 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		cur = cb->head;
 		if ( cur != NULL && cur->to_compute )
 			for ( ; cur != NULL; cur = go_brother( cur ) )
-				reset_end( cur );
+				cur->reset_end( );
 	}
 }
 
