@@ -620,7 +620,7 @@ double variable::cal( object *caller, int lag )
 CAL_WORKER
 Multi-thread worker for variable computation
 ****************************************************/
-void workerVar::cal_worker( void )
+void worker::cal_worker( void )
 {
 	int i;
 	double app;
@@ -775,7 +775,7 @@ void workerVar::cal_worker( void )
 /***************************************************
 WORKER constructor
 ****************************************************/
-workerVar::workerVar( void )
+worker::worker( void )
 {
 	running = false;
 	free = false;
@@ -788,14 +788,14 @@ workerVar::workerVar( void )
 	strcpy( err_msg3, "" );
 
 	// launch new thread (waiting mode)
-	thr = thread( & workerVar::cal_worker, this );
+	thr = thread( & worker::cal_worker, this );
 }
 
 
 /***************************************************
 WORKER destructor
 ****************************************************/
-workerVar::~workerVar( void )
+worker::~worker( void )
 {
 	// command thread shutdown if running
 	if ( running && ! errored )
@@ -818,7 +818,7 @@ workerVar::~workerVar( void )
 SIGNAL
 Handle system signals in worker
 ****************************************************/
-void workerVar::signal( int sig )
+void worker::signal( int sig )
 {
 	char signame[ 16 ];
 
@@ -868,7 +868,7 @@ void workerVar::signal( int sig )
 SIGNAL_WRAPPER
 Reformat signal function format to comply with OS
 ****************************************************/
-void workerVar::signal_wrapper( int signum )
+void worker::signal_wrapper( int signum )
 {
 	// call the appropriate worker object member function to handle signal
 	thr_ptr[ this_thread::get_id( ) ]->signal( signum );
@@ -879,7 +879,7 @@ void workerVar::signal_wrapper( int signum )
 CAL
 Multi-thread CAL version (parallel computation)
 ****************************************************/
-void workerVar::cal( variable *v )
+void worker::cal( variable *v )
 {
 	unique_lock< mutex > worker_lock( lock );
 	var = v;
@@ -892,7 +892,7 @@ void workerVar::cal( variable *v )
 CHECK
 Check if worker is running and handle problems
 ****************************************************/
-bool workerVar::check( void )
+bool worker::check( void )
 {
 	if ( running && ! errored )				// nothing to do?
 		return true;

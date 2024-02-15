@@ -138,7 +138,7 @@ struct object;
 struct profile;
 struct sensitivity;
 struct variable;
-struct workerVar;
+struct worker;
 
 // special types used for fast equation, object and variable lookup
 typedef function < double( object *caller, variable *var ) > eq_funcT;
@@ -288,7 +288,7 @@ struct simulation						// simulation container class
 #ifndef _NP_
 	// simulation-class conditional variables (not used in equations)
 	atomic < bool > parallel_ready;		// indicate variable worker is ready
-	workerVar *workers = NULL;			// multi-thread parallel worker data
+	worker *workers = NULL;				// multi-thread parallel worker data
 #endif
 
 #endif
@@ -302,6 +302,8 @@ struct simulation						// simulation container class
 	description *add_description( const char *lab, int type = 4, const char *text = NULL, const char *init = NULL, bool initial = false, bool observe = false );
 	description *change_description( const char *lab_old, const char *lab = NULL, int type = -1, const char *text = NULL, const char *init = NULL, int initial = -1, int observe = -1 );
 	description *search_description( const char *lab, bool add_missing = true );
+	int init_new_run( clock_t & start, clock_t & last_update );
+	int init_new_seq( char *bar_done, int & perc_done, int & last_done );
 	int load_configuration( bool reload, std::string *warnings, int quick );
 	int hyper_count( const char *lab );
 	int hyper_count_var( const char *lab );
@@ -629,7 +631,7 @@ struct lattice							// model (visual) lattice data class
 };
 
 #ifndef _NP_
-struct workerVar						// multi-thread variable worker data structure
+struct worker							// multi-thread variable worker data
 {
 	bool free;
 	bool running;
@@ -648,8 +650,8 @@ struct workerVar						// multi-thread variable worker data structure
 	thread::id thr_id;
 	variable *var;
 
-	workerVar( void );					// constructor
-	~workerVar( void );					// destructor
+	worker( void );						// constructor
+	~worker( void );					// destructor
 
 	bool check( void );					// handle worker problems
 	static void signal_wrapper( int signun );// wrapper for signal_handler
@@ -833,7 +835,7 @@ extern const int signals[ ];			// handled system signal numbers
 
 #ifndef _NP_
 // library conditional variables
-extern map < thread::id, workerVar * > thr_ptr;// worker thread pointers
+extern map < thread::id, worker * > thr_ptr;// worker thread pointers
 extern mutex lock_run_logs;		// lock run_logs for parallel updating
 extern mutex lock_run_pids;		// lock run_pids for parallel updating
 extern mutex lock_run_status;	// lock run_status for parallel updating

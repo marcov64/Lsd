@@ -36,146 +36,28 @@ RUN_SIMULATION
 *********************************/
 int simulation::run_simulation( int until_t, int until_run )
 {
-	clock_t start, end, last_update;
 	int i;
 	static char bar_done[ 2 * BAR_DONE_SIZE ];
+	static clock_t start, last_update;
 	static int perc_done, last_done;
 
+	if ( ( until_run > 0 && until_run <= run ) || ( until_t > 0 && until_t <= t &&
+		 ( until_run <= 0 || ( until_run > 0 && until_run <= run ) ) ) )
+		return 0;					// already there, nothing to do
+
 	if ( ! running_seq )			// if not already running sequential run set
-	{
-#ifndef _NP_
-		// check if there are parallel computing variables
-		if ( parallel_disable || max_threads < 2 )
-			parallel_mode = parallel_ready = false;
-		else
-		{
-			parallel_mode = root->search_parallel( );
-			parallel_ready = true;
-		}
-
-		// start multi-thread workers
-		if ( parallel_mode )
-		{
-			workers = new workerVar[ max_threads ];
-			for ( i = 0; i < max_threads; ++i )
-				workers[ i ].sim = this;
-		}
-#else
-		if ( root->search_parallel( ) )
-			plog( "\nWarning: parallel mode is not supported under current configuration\n" );
-		parallel_mode = false;
-#endif
-
-#ifndef _NW_
-		if ( liblnk.runtime_start != NULL )
-			liblnk.runtime_start( );
-#else
-		plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
-#endif
-
-		set_fast( 0 );				// should start on OBSERVE and switch to FAST later
-		res_list.clear( );			// empty list of saved results files
-		strcpy( res_path, "" );		// and clear last saved path to results files
-
-		// prepare progress bar
-		on_bar = false;
-		perc_done = 0;
-		last_done = -1;
-		strcpy( bar_done, "" );
-
-		running_seq = true;
-	}
+		if ( ( i = init_new_seq( bar_done, perc_done, last_done ) ) != 0 )
+			return i;
 
 	// start loop controlling set of sequential simulation runs
-	for ( run = 1, quit = 0; run <= last_run && quit != 2; ++run )
+	for ( ; quit != 2 && run <= last_run; ++run )
 	{
-		running = true;				// signal single simulation is running
-		save_ok = true;				// valid structure to save
-
-#ifndef _NW_
-		if ( liblnk.runtime_run_start != NULL )
-			liblnk.runtime_run_start( );
-#endif
-		if ( fast_mode < 2 )
-		{
-			if ( parallel_mode )
-				plog( "\nSimulation %d of %d running (seed=%d threads=%d)...", run, last_run, seed, max_threads );
-			else
-				plog( "\nSimulation %d of %d running (seed=%d)...", run, last_run, seed );
-		}
-
-		// if new batch configuration file, reload all except descriptions
-		if ( batch_loop )
-		{
-			batch_loop = false;
-			i = load_configuration( true, NULL, 1 );
-		}
-		else
-			// if just another run seed, reload just structure & parameters
-			if ( run > 1 )
-				i = load_configuration( true, NULL, 2 );
-			else
-				i = 0;				// use loaded configuration
-
-		// abort if configuration cannot be loaded
-		if ( i != 0 )
-		{
-#ifndef _NW_
-			if ( liblnk.log_tcl_error != NULL )
-				liblnk.log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
-
-			cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", conf_file );
-#else
-			fprintf( stderr, "\nFile '%s' not found or corrupted.\n", conf_file );
-#endif
-			return 10;
-		}
-
-		// pre-allocate memory to save all existing elements for the entire simulation
-		t = 1;
-		eff_t = 0;					// no steps performed yet
-		series_saved = 0;
-		if ( ! root->alloc_save_mem( ) )
-		{
-#ifndef _NW_
-			if ( liblnk.log_tcl_error != NULL )
-				liblnk.log_tcl_error( true, "Memory allocation", "Not enough memory, too many series saved for the memory available" );
-
-			cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, last_t );
-#else
-			fprintf( stderr, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, last_t );
-#endif
-			return 11;
-		}
-
-		// build initial object list for user pointer checking
-		if ( ! no_ptr_chk )
-			build_obj_list( true );
-
-		// reset cemetery, trace stack and simulation control
-		empty_cemetery( );
-		empty_stack( );
-		stack_info = 0;
-		error_hard_thread = false;
-		worker_ready = true;
-		worker_crashed = false;
-		wait_delete = NULL;
-
-		// new random routine' initialization
-		init_random( seed );
-		seed++;
-
-		// reset math error counters and defaults
-		init_math_error( );
-		use_nan = false;
-		no_search = false;
-		no_search_up = false;
-
-		// control execution time
-		start = last_update = clock( );
+		if ( ! running )			// if not already running single run
+			if ( ( i = init_new_run( start, last_update ) ) != 0 )
+				return i;
 
 		// start loop controlling a single simulation run
-		for ( t = 1; quit == 0 && t <= last_t; ++t )
+		for ( ; quit == 0 && t <= last_t; ++t )
 		{
 			// update the percentage done bar, if needed
 			if ( liblnk.runtime_step == NULL && dobar )
@@ -197,16 +79,19 @@ int simulation::run_simulation( int until_t, int until_run )
 			if ( liblnk.runtime_buttons != NULL )
 				liblnk.runtime_buttons( last_update );
 #endif
-
+			// check if time to pause run (don't pause at last step)
+			if ( run <= until_run && t >= until_t && t + 1 <= last_t )
+				return -2;			// interrupt
 		}	// end of time step
 
 		// run user closing function, reporting error appropriately
 		user_exception = true;
 		close_sim( );
 		user_exception = false;
-
 		running = false;
-		end = clock( );
+
+		// adjust simulation data to early stops and save variables to file
+		root->reset_end( );
 
 		if ( liblnk.deb_log != NULL )
 			liblnk.deb_log( false, 0 );// close debug log file, if any
@@ -215,7 +100,7 @@ int simulation::run_simulation( int until_t, int until_run )
 			update_bar( bar_done, perc_done, last_done, 2 * BAR_DONE_SIZE );
 
 		if ( fast_mode < 2 )
-			plog( "\nSimulation %d of %d %s at case %d (%.2f sec.)\n", run, last_run, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( end - start ) / CLOCKS_PER_SEC );
+			plog( "\nSimulation %d of %d %s at case %d (%.2f sec.)\n", run, last_run, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
 
 		if ( quit == 1 )			// multiple simulation runs need to reset quit
 			quit = 0;
@@ -225,9 +110,6 @@ int simulation::run_simulation( int until_t, int until_run )
 			liblnk.runtime_run_end( );
 #endif
 
-		// close simulation data
-		root->reset_end( );
-
 		if ( quit != 2 && ( last_run > 1 || liblnk.runtime_run_end == NULL ) )
 		{
 			save_results( );		// save results for multiple runs, if any
@@ -236,6 +118,10 @@ int simulation::run_simulation( int until_t, int until_run )
 				if ( ! next_batch( ) )// prepare next batch configuration, if any
 					break;			// nothing else, finish
 		}
+
+		// check if time to pause run (don't pause at last run)
+		if ( run >= until_run && run + 1 <= last_run )
+			return -1;				// interrupt
 	}	// end of run
 
 	// set of sequential runs is finished
@@ -257,6 +143,300 @@ int simulation::run_simulation( int until_t, int until_run )
 
 	quit = 0;
 	return 0;
+}
+
+
+/*********************************
+INIT_NEW_SEQ
+*********************************/
+int simulation::init_new_seq( char *bar_done, int & perc_done, int & last_done )
+{
+	int i;
+
+	run = 1;					// first run in the sequence
+	quit = 0;					// not marked for abortion
+#ifndef _NP_
+	// check if there are parallel computing variables
+	if ( parallel_disable || max_threads < 2 )
+		parallel_mode = parallel_ready = false;
+	else
+	{
+		parallel_mode = root->search_parallel( );
+		parallel_ready = true;
+	}
+
+	// start multi-thread workers
+	if ( parallel_mode )
+	{
+		workers = new worker[ max_threads ];
+		for ( i = 0; i < max_threads; ++i )
+			workers[ i ].sim = this;
+	}
+#else
+	if ( root->search_parallel( ) )
+		plog( "\nWarning: parallel mode is not supported under current configuration\n" );
+	parallel_mode = false;
+#endif
+
+#ifndef _NW_
+	if ( liblnk.runtime_start != NULL )
+		liblnk.runtime_start( );
+#else
+	plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
+#endif
+	set_fast( 0 );				// should start on OBSERVE and switch to FAST later
+	res_list.clear( );			// empty list of saved results files
+	strcpy( res_path, "" );		// and clear last saved path to results files
+
+	// prepare progress bar
+	on_bar = false;
+	perc_done = 0;
+	last_done = -1;
+	strcpy( bar_done, "" );
+
+	running_seq = true;
+
+	return 0;
+}
+
+
+/*********************************
+INIT_NEW_RUN
+*********************************/
+int simulation::init_new_run( clock_t & start, clock_t & last_update )
+{
+	int i;
+
+	t = 1;                  // first time step of run
+	eff_t = 0;				// no steps performed yet
+	save_ok = true;			// valid structure to save
+#ifndef _NW_
+	if ( liblnk.runtime_run_start != NULL )
+		liblnk.runtime_run_start( );
+#endif
+	if ( fast_mode < 2 )
+	{
+		if ( parallel_mode )
+			plog( "\nSimulation %d of %d running (seed=%d threads=%d)...", run, last_run, seed, max_threads );
+		else
+			plog( "\nSimulation %d of %d running (seed=%d)...", run, last_run, seed );
+	}
+
+	// if new batch configuration file, reload all except descriptions
+	if ( batch_loop )
+	{
+		batch_loop = false;
+		i = load_configuration( true, NULL, 1 );
+	}
+	else
+		// if just another run seed, reload just structure & parameters
+		if ( run > 1 )
+			i = load_configuration( true, NULL, 2 );
+		else
+			i = 0;			// use loaded configuration
+
+	// abort if configuration cannot be loaded
+	if ( i != 0 )
+	{
+#ifndef _NW_
+		if ( liblnk.log_tcl_error != NULL )
+			liblnk.log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
+
+		cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", conf_file );
+#else
+		fprintf( stderr, "\nFile '%s' not found or corrupted.\n", conf_file );
+#endif
+		return 10;
+	}
+
+	// pre-allocate memory to save all existing elements for the entire simulation
+	series_saved = 0;
+	if ( ! root->alloc_save_mem( ) )
+	{
+#ifndef _NW_
+		if ( liblnk.log_tcl_error != NULL )
+			liblnk.log_tcl_error( true, "Memory allocation", "Not enough memory, too many series saved for the memory available" );
+
+		cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, last_t );
+#else
+		fprintf( stderr, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, last_t );
+#endif
+		return 11;
+	}
+
+	// build initial object list for user pointer checking
+	if ( ! no_ptr_chk )
+		build_obj_list( true );
+
+	// reset cemetery, trace stack and simulation control
+	empty_cemetery( );
+	empty_stack( );
+	stack_info = 0;
+	error_hard_thread = false;
+	worker_ready = true;
+	worker_crashed = false;
+	wait_delete = NULL;
+
+	// new random routine' initialization
+	init_random( seed );
+	seed++;
+
+	// reset math error counters and defaults
+	init_math_error( );
+	use_nan = false;
+	no_search = false;
+	no_search_up = false;
+
+	// control execution time
+	start = last_update = clock( );
+
+	running = true;
+
+	return 0;
+}
+
+
+/*********************************
+SAVE_RESULTS
+*********************************/
+void simulation::save_results( void )
+{
+	char *path_out, *name_out, sep_out[ 2 ], fname[ MAX_PATH_LENGTH ];
+	result *rf;				// pointer for results files (may be zipped or not)
+
+	if ( series_saved == 0 )
+	{
+		if ( fast_mode < 2 )
+			plog( "Nothing to save: no element selected\n" );
+
+		return;
+	}
+
+	// remove existing path, if any, from name in case of alternative output path
+	char *alt_name = clean_file( conf_name );
+
+	if ( save_alt )
+	{
+		path_out = alt_path;
+		name_out = alt_name;
+	}
+	else
+	{
+		path_out = conf_path;
+		name_out = conf_name;
+	}
+
+	if ( strlen( path_out ) == 0 )
+		strcpy( sep_out, "" );
+	else
+		strcpy( sep_out, "/" );
+
+	if ( ! no_res )
+	{
+		if ( ! batch_sequential )
+			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d.%s", path_out, sep_out, name_out, seed - 1, docsv ? "csv" : "res" );
+		else
+			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, findex, seed - 1, docsv ? "csv" : "res" );
+
+		if ( dozip )
+			strcatn( fname, ".gz", MAX_PATH_LENGTH );
+
+		res_list.push_back( fname );
+
+		if ( fast_mode < 2 )
+			plog( "Saving results to file %s... ", fname );
+
+		rf = new result( fname, "wt", this, dozip, docsv );// create results file object
+		rf->title( root, 1 );						// write header
+		rf->data( root, 0, eff_t );					// write all data
+		delete rf;									// close file and delete object
+
+		if ( fast_mode < 2 )
+			plog( "Done\n" );
+	}
+
+	if ( ! no_tot && ( liblnk.runtime_run_end != NULL || max_runs == 1 ) )
+	{
+		if ( ! grandTotal || batch_sequential )		// generate partial total files?
+		{
+			if ( ! batch_sequential )
+			  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, seed - run, seed - 1 + last_run - run, docsv ? "csv" : "tot" );
+			else
+			  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d_%d.%s", path_out, sep_out, name_out, findex, seed - run, seed - 1 + last_run - run, docsv ? "csv" : "tot" );
+		}
+		else										// generate single grand total file
+		{
+			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s.%s", path_out, sep_out, name_out, docsv ? "csv" : "tot" );
+		}
+
+		if ( dozip )
+			strcatn( fname, ".gz", MAX_PATH_LENGTH );
+
+		if ( fast_mode < 2 && run == last_run )		// print only for last
+			plog( "\nSaving totals to file %s... ", fname );
+
+		if ( run == 1 && grandTotal && ! add_to_tot )
+		{
+			rf = new result( fname, "wt", this, dozip, docsv );// create results file object
+			rf->title( root, 0 );					// write header
+		}
+		else
+			rf = new result( fname, "a", this, dozip, docsv );// add results object to existing file
+
+		rf->data( root, eff_t );					// write current data data
+		delete rf;									// close file and delete object
+
+		if ( fast_mode < 2 && run == last_run )		// print only for last
+			plog( "Done\n" );
+	}
+
+	if ( run == last_run )							// last run?
+		strcpyn( res_path, path_out, MAX_PATH_LENGTH );
+}
+
+
+/*********************************
+NEXT_BATCH
+*********************************/
+bool simulation::next_batch( void )
+{
+	char fname[ MAX_PATH_LENGTH ];
+	FILE *f;
+
+	if ( batch_sequential )			// last batch file?
+	{
+		// try reading next file
+		snprintf( fname, MAX_PATH_LENGTH, "%s_%d.lsd", conf_name, ++findex );
+		delete [ ] conf_file;
+		conf_file = new char[ strlen( fname ) + 1 ];
+		strcpy( conf_file, fname );
+		f = fopen( conf_file, "r" );
+
+		if ( f == NULL || ( fend != 0 && findex > fend ) )// no more file to process
+		{
+			if ( f != NULL )
+				fclose( f );
+
+			if ( fast_mode < 2 )
+				plog( "\nFinished processing %s\n", clean_file( conf_file ) );
+
+			return false;
+		}
+
+		plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
+		fclose( f );				// process next file
+
+		run = 0;					// force restarting run count
+		batch_loop = true;			// force reloading configuration
+
+		return true;
+	}
+#ifdef _NW_
+	else
+		if ( fast_mode < 2 )
+			plog( "\nFinished processing %s\n", clean_file( conf_file ) );
+#endif
+	return false;
 }
 
 
@@ -433,7 +613,7 @@ bool variable::alloc_save_var( void )
 /*********************************
 RESET_END
 *********************************/
-void object::reset_end( )
+void object::reset_end( void )
 {
 	bridge *cb;
 	object *cur;
@@ -442,7 +622,8 @@ void object::reset_end( )
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		if ( cv->save )
-			cv->end = sim->t - 1;
+			cv->end = sim->eff_t;
+
 		if ( cv->savei == 1 )
 			cv->save_single( );
 	}
@@ -546,149 +727,5 @@ bool simulation::results_alt_path( const char *altPath )
 
 	plog( "\nWarning: could not open results directory '%s', ignoring.\n", altPath );
 
-	return false;
-}
-
-
-/*********************************
-SAVE_RESULTS
-*********************************/
-void simulation::save_results( void )
-{
-	char *path_out, *name_out, sep_out[ 2 ], fname[ MAX_PATH_LENGTH ];
-	result *rf;				// pointer for results files (may be zipped or not)
-
-	if ( series_saved == 0 )
-	{
-		if ( fast_mode < 2 )
-			plog( "Nothing to save: no element selected\n" );
-
-		return;
-	}
-
-	// remove existing path, if any, from name in case of alternative output path
-	char *alt_name = clean_file( conf_name );
-
-	if ( save_alt )
-	{
-		path_out = alt_path;
-		name_out = alt_name;
-	}
-	else
-	{
-		path_out = conf_path;
-		name_out = conf_name;
-	}
-
-	if ( strlen( path_out ) == 0 )
-		strcpy( sep_out, "" );
-	else
-		strcpy( sep_out, "/" );
-
-	if ( ! no_res )
-	{
-		if ( ! batch_sequential )
-			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d.%s", path_out, sep_out, name_out, seed - 1, docsv ? "csv" : "res" );
-		else
-			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, findex, seed - 1, docsv ? "csv" : "res" );
-
-		if ( dozip )
-			strcatn( fname, ".gz", MAX_PATH_LENGTH );
-
-		res_list.push_back( fname );
-
-		if ( fast_mode < 2 )
-			plog( "Saving results to file %s... ", fname );
-
-		rf = new result( fname, "wt", this, dozip, docsv );// create results file object
-		rf->title( root, 1 );						// write header
-		rf->data( root, 0, eff_t );					// write all data
-		delete rf;									// close file and delete object
-
-		if ( fast_mode < 2 )
-			plog( "Done\n" );
-	}
-
-	if ( ! no_tot && ( liblnk.runtime_run_end != NULL || max_runs == 1 ) )
-	{
-		if ( ! grandTotal || batch_sequential )		// generate partial total files?
-		{
-			if ( ! batch_sequential )
-			  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, seed - run, seed - 1 + last_run - run, docsv ? "csv" : "tot" );
-			else
-			  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d_%d.%s", path_out, sep_out, name_out, findex, seed - run, seed - 1 + last_run - run, docsv ? "csv" : "tot" );
-		}
-		else										// generate single grand total file
-		{
-			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s.%s", path_out, sep_out, name_out, docsv ? "csv" : "tot" );
-		}
-
-		if ( dozip )
-			strcatn( fname, ".gz", MAX_PATH_LENGTH );
-
-		if ( fast_mode < 2 && run == last_run )		// print only for last
-			plog( "\nSaving totals to file %s... ", fname );
-
-		if ( run == 1 && grandTotal && ! add_to_tot )
-		{
-			rf = new result( fname, "wt", this, dozip, docsv );// create results file object
-			rf->title( root, 0 );					// write header
-		}
-		else
-			rf = new result( fname, "a", this, dozip, docsv );// add results object to existing file
-
-		rf->data( root, eff_t );					// write current data data
-		delete rf;									// close file and delete object
-
-		if ( fast_mode < 2 && run == last_run )		// print only for last
-			plog( "Done\n" );
-	}
-
-	if ( run == last_run )							// last run?
-		strcpyn( res_path, path_out, MAX_PATH_LENGTH );
-}
-
-
-/*********************************
-NEXT_BATCH
-*********************************/
-bool simulation::next_batch( void )
-{
-	char fname[ MAX_PATH_LENGTH ];
-	FILE *f;
-
-	if ( batch_sequential )			// last batch file?
-	{
-		// try reading next file
-		snprintf( fname, MAX_PATH_LENGTH, "%s_%d.lsd", conf_name, ++findex );
-		delete [ ] conf_file;
-		conf_file = new char[ strlen( fname ) + 1 ];
-		strcpy( conf_file, fname );
-		f = fopen( conf_file, "r" );
-
-		if ( f == NULL || ( fend != 0 && findex > fend ) )// no more file to process
-		{
-			if ( f != NULL )
-				fclose( f );
-
-			if ( fast_mode < 2 )
-				plog( "\nFinished processing %s\n", clean_file( conf_file ) );
-
-			return false;
-		}
-
-		plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
-		fclose( f );				// process next file
-
-		run = 0;					// force restarting run count
-		batch_loop = true;			// force reloading configuration
-
-		return true;
-	}
-#ifdef _NW_
-	else
-		if ( fast_mode < 2 )
-			plog( "\nFinished processing %s\n", clean_file( conf_file ) );
-#endif
 	return false;
 }
