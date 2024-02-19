@@ -113,9 +113,7 @@ int simulation::load_configuration( bool reload, string *warnings, int quick )
 
 		// load non-instanced model structure
 		load = root->load_xml_struct( rootNode, ( reload && quick == 2 ) || quick == 1 );
-		if( load == 0 )
-			conf_ok = true;
-		else
+		if( load != 0 )
 			goto endLoad;
 
 		// load model structure instances
@@ -123,8 +121,8 @@ int simulation::load_configuration( bool reload, string *warnings, int quick )
 		if( load != 0 )
 			goto endLoad;
 
-		// set blueprint to initial condition
-		root->set_blueprint( blueprint );
+		conf_ok = true;							// minimum configuration is ok
+		root->set_blueprint( blueprint );		// set blueprint to initial condition
 
 		if ( reload && quick == 2 )				// just quick reload?
 			goto endLoad;
@@ -183,8 +181,7 @@ int simulation::load_configuration( bool reload, string *warnings, int quick )
 	if ( f == NULL )
 		return 1;
 
-	conf_ok = root->load_struct( f );
-	if ( ! conf_ok )
+	if ( ! root->load_struct( f ) )
 	{
 		load = 2;
 		goto endLoad;
@@ -241,7 +238,9 @@ int simulation::load_configuration( bool reload, string *warnings, int quick )
 		goto endLoad;
 	}
 
-	fscanf( f, "%999s", msg );					  // should be EQUATION
+	conf_ok = true;								// basic configuration loaded
+
+	fscanf( f, "%999s", msg );					// should be EQUATION
 	if ( strcmp( msg, "EQUATION" ) )
 	{
 		load = 7;
