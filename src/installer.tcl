@@ -266,7 +266,7 @@ if { [ info exists xcode ] && [ info exists gnuplot ] } {
 	if [ info exists xcode ] {
 		ttk::label .dir.extra -text "Xcode command line tools are\nnot available and will be installed" -justify center
 		pack .dir.extra -pady 5
-	} elseif [ info exists gnuplot ] {
+	} elseif { [ info exists gnuplot ] && $wadmin } {
 		ttk::label .dir.extra -text "Gnuplot graphical terminal seems\nunavailable and will be installed" -justify center
 		pack .dir.extra -pady 5
 	}
@@ -608,30 +608,35 @@ if [ info exists xcode ] {
 if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ info exists multitail ] ) } {
 
 	if [ string equal $CurPlatform windows ] {
-
-		set res [ catch { set f [ open $filesDir/installer/wgnuplot.txt ] } result ]
-
-		if { $res } {
-			ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Gnuplot" -detail "Cannot open 'wgnuplot.txt' ($result).\n\nLSD installer is damaged."
-			lappend issues "Windows Gnuplot not installed (no wgnuplot.txt)"
+	
+		if { ! $wadmin } {
+			ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Cannot install Gnuplot" -detail "Installing without administrator rights prevents installing Gnuplot.\n\nPlease download Gnuplot at http://www.gnuplot.info and install it manually."
+			lappend issues "Windows Gnuplot not installed (no admin rights)"
 		} else {
+			set res [ catch { set f [ open $filesDir/installer/wgnuplot.txt ] } result ]
 
-			set res [ catch { string trim [ gets $f winGnuplot ] } result ]
-
-			if { $res || ! [ file exists $filesDir/installer/$winGnuplot ] } {
-				ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Gnuplot" -detail "Invalid content in 'wgnuplot.txt' ($result).\n\nLSD installer is damaged."
-				lappend issues "Windows Gnuplot not installed (invalid wgnuplot.txt)"
+			if { $res } {
+				ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Gnuplot" -detail "Cannot open 'wgnuplot.txt' ($result).\n\nLSD installer is damaged."
+				lappend issues "Windows Gnuplot not installed (no wgnuplot.txt)"
 			} else {
 
-				set res [ catch { exec $filesDir/installer/$winGnuplot /SILENT /LOADINF=wgnuplot.inf } result ]
+				set res [ catch { string trim [ gets $f winGnuplot ] } result ]
 
-				if { $res } {
-					ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Gnuplot" -detail "The installation of Gnuplot graphical terminal failed ($result).\n\nYou may try to repeat the installation or do a manual install following the steps described in 'Readme.txt'."
-					lappend issues "Windows Gnuplot not installed ($winGnuplot)"
+				if { $res || ! [ file exists $filesDir/installer/$winGnuplot ] } {
+					ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Gnuplot" -detail "Invalid content in 'wgnuplot.txt' ($result).\n\nLSD installer is damaged."
+					lappend issues "Windows Gnuplot not installed (invalid wgnuplot.txt)"
+				} else {
+
+					set res [ catch { exec $filesDir/installer/$winGnuplot /SILENT /LOADINF=wgnuplot.inf } result ]
+
+					if { $res } {
+						ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error installing Gnuplot" -detail "The installation of Gnuplot graphical terminal failed ($result).\n\nYou may try to repeat the installation or do a manual install following the steps described in 'Readme.txt'."
+						lappend issues "Windows Gnuplot not installed ($winGnuplot)"
+					}
 				}
-			}
 
-			close $f
+				close $f
+			}
 		}
 	}
 
