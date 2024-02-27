@@ -20,9 +20,15 @@ LSD and models.
 
 #include "lib/libLSD.h"				// LSD library classes
 
-int	normErrCnt, lnormErrCnt, gammaErrCnt, bernoErrCnt, poissErrCnt;
-int geomErrCnt, binomErrCnt, cauchErrCnt, chisqErrCnt, expErrCnt;
-int fishErrCnt, studErrCnt, weibErrCnt, betaErrCnt, paretErrCnt, alaplErrCnt;
+#ifndef _NP_
+atomic < int >
+#else
+int
+#endif
+				normErrCnt, lnormErrCnt, gammaErrCnt, bernoErrCnt, poissErrCnt,
+				geomErrCnt, binomErrCnt, cauchErrCnt, chisqErrCnt, expErrCnt,
+				fishErrCnt, studErrCnt, weibErrCnt, betaErrCnt, paretErrCnt,
+				alaplErrCnt;
 
 
 /****************************************************
@@ -329,7 +335,6 @@ double z_star( double cl )
 UNIFCDF
 Uniform cumulative distribution function
 ***************************************************/
-
 double unifcdf( double a, double b, double x )
 {
 	if ( a >= b )
@@ -563,28 +568,7 @@ ran_gen_id = 5 : Mersenne-Twister with 64 bits resolution in [0,1)
 ran_gen_id = 6 : Lagged fibonacci with 24 bits resolution in [0,1)
 ran_gen_id = 7 : Lagged fibonacci with 48 bits resolution in [0,1)
 ****************************************************/
-int ran_gen_id = 2;					// ID of initial generator (DO NOT CHANGE)
-long idum = 0;						// Park-Miller default seed (legacy code only)
-
-#ifndef _NP_
-mutex parallel_rd;					// mutex locks for random generator operations
-mutex parallel_lc1;
-mutex parallel_lc2;
-mutex parallel_mt32;
-mutex parallel_mt64;
-mutex parallel_lf24;
-mutex parallel_lf48;
-#endif
-
-random_device rd;					// system random device
-minstd_rand lc1;					// linear congruential generator (internal)
-minstd_rand lc2;					// linear congruential generator (user)
-mt19937 mt32;						// Mersenne-Twister 32 bits generator
-mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
-ranlux24 lf24;						// lagged fibonacci 24 bits generator
-ranlux48 lf48;						// lagged fibonacci 48 bits generator
-
-void init_random( unsigned seed )
+void simulation::init_random( unsigned seed )
 {
 	idum = -seed;					// unused (legacy code only)
 	lc1.seed( seed );				// linear congruential (internal)
@@ -595,67 +579,67 @@ void init_random( unsigned seed )
 	lf48.seed( seed );				// lagged fibonacci 48 bits
 }
 
-template < class distr > double draw_rd( distr &d )
+template < class distr > double draw_rd( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( parallel_rd );
+	lock_guard < mutex > lock( sim->draw_rd_lock );
 #endif
-	return d( rd );
+	return d( sim->rd );
 }
 
-template < class distr > double draw_lc1( distr &d )
+template < class distr > double draw_lc1( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( parallel_lc1 );
+	lock_guard < mutex > lock( sim->draw_lc1_lock );
 #endif
-	return d( lc1 );
+	return d( sim->lc1 );
 }
 
-template < class distr > double draw_lc2( distr &d )
+template < class distr > double draw_lc2( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( parallel_lc2 );
+	lock_guard < mutex > lock( sim->draw_lc2_lock );
 #endif
-	return d( lc2 );
+	return d( sim->lc2 );
 }
 
-template < class distr > double draw_mt32( distr &d )
+template < class distr > double draw_mt32( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( parallel_mt32 );
+	lock_guard < mutex > lock( sim->draw_mt32_lock );
 #endif
-	return d( mt32 );
+	return d( sim->mt32 );
 }
 
-template < class distr > double draw_mt64( distr &d )
+template < class distr > double draw_mt64( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( parallel_mt64 );
+	lock_guard < mutex > lock( sim->draw_mt64_lock );
 #endif
-	return d( mt64 );
+	return d( sim->mt64 );
 }
 
-template < class distr > double draw_lf24( distr &d )
+template < class distr > double draw_lf24( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( parallel_lf24 );
+	lock_guard < mutex > lock( sim->draw_lf24_lock );
 #endif
-	return d( lf24 );
+	return d( sim->lf24 );
 }
 
-template < class distr > double draw_lf48( distr &d )
+template < class distr > double draw_lf48( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( parallel_lf48 );
+	lock_guard < mutex > lock( sim->draw_lf48_lock );
 #endif
-	return d( lf48 );
+	return d( sim->lf48 );
 }
 
 
@@ -663,29 +647,29 @@ template < class distr > double draw_lf48( distr &d )
 DRAW_GEN
 Generate the draw using current generator object
 ***************************************************/
-template < class distr > double draw_gen( distr &d )
+template < class distr > double simulation::draw_gen( distr &d )
 {
 	switch ( ran_gen_id )
 	{
 		case 0:						// system (not pseudo) random generator
-			return draw_rd( d );
+			return draw_rd( this, d );
 		case 1:						// linear congruential in (0,1)
 		case 3:						// linear congruential in [0,1)
 		default:
-			return draw_lc2( d );
+			return draw_lc2( this, d );
 
 		case 2:						// Mersenne-Twister 32 bits in (0,1)
 		case 4:						// Mersenne-Twister 32 bits in [0,1)
-			return draw_mt32( d );
+			return draw_mt32( this, d );
 
 		case 5:						// Mersenne-Twister 64 bits in [0,1)
-			return draw_mt64( d );
+			return draw_mt64( this, d );
 
 		case 6:						// lagged fibonacci 24 bits in [0,1)
-			return draw_lf24( d );
+			return draw_lf24( this, d );
 
 		case 7:						// lagged fibonacci 48 bits in [0,1)
-			return draw_lf48( d );
+			return draw_lf48( this, d );
 	}
 }
 
@@ -694,7 +678,7 @@ template < class distr > double draw_gen( distr &d )
 SET_RANDOM
 Set the generator object to be used in draws
 ***************************************************/
-void *set_random( int gen )
+void *simulation::set_random( int gen )
 {
 	if ( gen >= 0 && gen <= 7 )
 	{
@@ -733,10 +717,10 @@ void *set_random( int gen )
 /****************************************************
 RND_INT
 ****************************************************/
-int rnd_int( int min, int max )
+int simulation::rnd_int( int min, int max )
 {
 	uniform_int_distribution< int > distr( min, max );
-	return draw_lc1( distr );
+	return draw_lc1( this, distr );
 }
 
 
@@ -745,7 +729,7 @@ RAN1
 Call the preset pseudo-random number generator
 Just generates numbers > 0 and < 1
 ***************************************************/
-double ran1( long *unused )
+double simulation::ran1( long *unused )
 {
 	double ran;
 	uniform_real_distribution< double > distr( 0, 1 );
@@ -761,7 +745,7 @@ double ran1( long *unused )
 /****************************************************
 UNIFORM
 ****************************************************/
-double uniform( double min, double max )
+double simulation::uniform( double min, double max )
 {
 	uniform_real_distribution< double > distr( min, max );
 	return draw_gen( distr );
@@ -771,7 +755,7 @@ double uniform( double min, double max )
 /****************************************************
 UNIFORM_INT
 ****************************************************/
-double uniform_int( double min, double max )
+double simulation::uniform_int( double min, double max )
 {
 	uniform_int_distribution< int > distr( ( long ) min, ( long ) max );
 	return draw_gen( distr );
@@ -781,13 +765,13 @@ double uniform_int( double min, double max )
 /***************************************************
 NORM
 ***************************************************/
-double norm( double mean, double dev )
+double simulation::norm( double mean, double dev )
 {
 	static bool normStopErr;
 
 	if ( dev < 0 )
 	{
-		warn_distr( & normErrCnt, & normStopErr, "norm", "negative standard deviation" );
+		warn_distr( normErrCnt, normStopErr, "norm", "negative standard deviation" );
 		return mean;
 	}
 
@@ -800,13 +784,13 @@ double norm( double mean, double dev )
 LNORM
 Return a draw from a lognormal distribution
 ***************************************************/
-double lnorm( double mean, double dev )
+double simulation::lnorm( double mean, double dev )
 {
 	static bool lnormStopErr;
 
 	if ( dev < 0 )
 	{
-		warn_distr( & lnormErrCnt, & lnormStopErr, "lnorm", "negative standard deviation" );
+		warn_distr( lnormErrCnt, lnormStopErr, "lnorm", "negative standard deviation" );
 		return exp( mean );
 	}
 
@@ -818,13 +802,13 @@ double lnorm( double mean, double dev )
 /****************************************************
 GAMMA
 ****************************************************/
-double gamma( double alpha, double beta )
+double simulation::gamma( double alpha, double beta )
 {
 	static bool gammaStopErr;
 
 	if ( alpha <= 0 || beta <= 0 )
 	{
-		warn_distr( & gammaErrCnt, & gammaStopErr, "gamma", "non-positive alpha or beta parameter" );
+		warn_distr( gammaErrCnt, gammaStopErr, "gamma", "non-positive alpha or beta parameter" );
 		return 0.0;
 	}
 
@@ -836,13 +820,13 @@ double gamma( double alpha, double beta )
 /****************************************************
 BERNOULLI
 ****************************************************/
-double bernoulli( double p )
+double simulation::bernoulli( double p )
 {
 	static bool bernoStopErr;
 
 	if ( p < 0 || p > 1 )
 	{
-		warn_distr( & bernoErrCnt, & bernoStopErr, "bernoulli", "probability out of \\[0, 1\\]" );
+		warn_distr( bernoErrCnt, bernoStopErr, "bernoulli", "probability out of \\[0, 1\\]" );
 
 		if ( p < 0 )
 			return 0.0;
@@ -858,13 +842,13 @@ double bernoulli( double p )
 /****************************************************
 POISSON
 ****************************************************/
-double poisson( double mean )
+double simulation::poisson( double mean )
 {
 	static bool poissStopErr;
 
 	if ( mean < 0 )
 	{
-		warn_distr( & poissErrCnt, & poissStopErr, "poisson", "negative mean" );
+		warn_distr( poissErrCnt, poissStopErr, "poisson", "negative mean" );
 		return 0.0;
 	}
 
@@ -876,13 +860,13 @@ double poisson( double mean )
 /****************************************************
 GEOMETRIC
 ****************************************************/
-double geometric( double p )
+double simulation::geometric( double p )
 {
 	static bool geomStopErr;
 
 	if ( p < 0 || p > 1 )
 	{
-		warn_distr( & geomErrCnt, & geomStopErr, "geometric", "probability out of \\[0, 1\\]" );
+		warn_distr( geomErrCnt, geomStopErr, "geometric", "probability out of \\[0, 1\\]" );
 
 		if ( p < 0 )
 			return 0.0;
@@ -898,13 +882,13 @@ double geometric( double p )
 /****************************************************
 BINOMIAL
 ****************************************************/
-double binomial( double p, double t )
+double simulation::binomial( double p, double t )
 {
 	static bool binomStopErr;
 
 	if ( p < 0 || p > 1 || t <= 0 )
 	{
-		warn_distr( & binomErrCnt, & binomStopErr, "binomial", "invalid parameter" );
+		warn_distr( binomErrCnt, binomStopErr, "binomial", "invalid parameter" );
 
 		if ( p < 0 || t <= 0 )
 			return 0.0;
@@ -920,13 +904,13 @@ double binomial( double p, double t )
 /***************************************************
 CAUCHY
 ***************************************************/
-double cauchy( double a, double b )
+double simulation::cauchy( double a, double b )
 {
 	static bool cauchStopErr;
 
 	if ( b <= 0 )
 	{
-		warn_distr( & cauchErrCnt, & cauchStopErr, "cauchy", "non-positive b parameter" );
+		warn_distr( cauchErrCnt, cauchStopErr, "cauchy", "non-positive b parameter" );
 		return a;
 	}
 
@@ -938,13 +922,13 @@ double cauchy( double a, double b )
 /***************************************************
 CHI_SQUARED
 ***************************************************/
-double chi_squared( double n )
+double simulation::chi_squared( double n )
 {
 	static bool chisqStopErr;
 
 	if ( n <= 0 )
 	{
-		warn_distr( & chisqErrCnt, & chisqStopErr, "chi_squared", "non-positive n parameter" );
+		warn_distr( chisqErrCnt, chisqStopErr, "chi_squared", "non-positive n parameter" );
 		return 0.0;
 	}
 
@@ -956,13 +940,13 @@ double chi_squared( double n )
 /***************************************************
 EXPONENTIAL
 ***************************************************/
-double exponential( double lambda )
+double simulation::exponential( double lambda )
 {
 	static bool expStopErr;
 
 	if ( lambda <= 0 )
 	{
-		warn_distr( & expErrCnt, & expStopErr, "exponential", "non-positive lambda parameter" );
+		warn_distr( expErrCnt, expStopErr, "exponential", "non-positive lambda parameter" );
 		return 0.0;
 	}
 
@@ -974,13 +958,13 @@ double exponential( double lambda )
 /***************************************************
 FISHER
 ***************************************************/
-double fisher( double m, double n )
+double simulation::fisher( double m, double n )
 {
 	static bool fishStopErr;
 
 	if ( m <= 0 || n <= 0 )
 	{
-		warn_distr( & fishErrCnt, & fishStopErr, "fisher", "invalid parameter" );
+		warn_distr( fishErrCnt, fishStopErr, "fisher", "invalid parameter" );
 		return 0.0;
 	}
 
@@ -992,13 +976,13 @@ double fisher( double m, double n )
 /***************************************************
 STUDENT
 ***************************************************/
-double student( double n )
+double simulation::student( double n )
 {
 	static bool studStopErr;
 
 	if ( n <= 0 )
 	{
-		warn_distr( & studErrCnt, & studStopErr, "student", "non-positive n parameter" );
+		warn_distr( studErrCnt, studStopErr, "student", "non-positive n parameter" );
 		return 0.0;
 	}
 
@@ -1010,13 +994,13 @@ double student( double n )
 /***************************************************
 WEIBULL
 ***************************************************/
-double weibull( double a, double b )
+double simulation::weibull( double a, double b )
 {
 	static bool weibStopErr;
 
 	if ( a <= 0 || b <= 0 )
 	{
-		warn_distr( & weibErrCnt, & weibStopErr, "weibull", "non-positive a or b parameter" );
+		warn_distr( weibErrCnt, weibStopErr, "weibull", "non-positive a or b parameter" );
 		return 0.0;
 	}
 
@@ -1029,13 +1013,13 @@ double weibull( double a, double b )
 BETA
 Return a draw from a Beta(alfa,beta) distribution
 ***************************************************/
-double beta( double alpha, double beta )
+double simulation::beta( double alpha, double beta )
 {
 	static bool betaStopErr;
 
 	if ( alpha <= 0 || beta <= 0 )
 	{
-		warn_distr( & betaErrCnt, & betaStopErr, "beta", "non-positive alpha or beta parameter" );
+		warn_distr( betaErrCnt, betaStopErr, "beta", "non-positive alpha or beta parameter" );
 
 		if ( alpha < beta )
 			return 0.0;
@@ -1052,13 +1036,13 @@ double beta( double alpha, double beta )
 /****************************************************
 PARETO
 ****************************************************/
-double pareto( double mu, double alpha )
+double simulation::pareto( double mu, double alpha )
 {
 	static bool paretStopErr;
 
 	if ( mu <= 0 || alpha <= 0 )
 	{
-		warn_distr( & paretErrCnt, & paretStopErr, "pareto", "non-positive mu or alpha parameter" );
+		warn_distr( paretErrCnt, paretStopErr, "pareto", "non-positive mu or alpha parameter" );
 		return mu;
 	}
 
@@ -1069,13 +1053,13 @@ double pareto( double mu, double alpha )
 /****************************************************
 BPARETO
 ****************************************************/
-double bpareto( double alpha, double low, double high )
+double simulation::bpareto( double alpha, double low, double high )
 {
 	static bool paretStopErr;
 
 	if ( alpha <= 0 || low <= 0 || low >= high )
 	{
-		warn_distr( & paretErrCnt, & paretStopErr, "bpareto", "non-positive alpha parameter or bounds or invalid bounds" );
+		warn_distr( paretErrCnt, paretStopErr, "bpareto", "non-positive alpha parameter or bounds or invalid bounds" );
 		return max( low, 0 );
 	}
 
@@ -1089,13 +1073,13 @@ double bpareto( double alpha, double low, double high )
 ALAPL
 Return a draw from an asymmetric laplace distribution
 ***************************************************/
-double alapl( double mu, double alpha1, double alpha2 )
+double simulation::alapl( double mu, double alpha1, double alpha2 )
 {
 	static bool alaplStopErr;
 
 	if ( alpha1 <= 0 || alpha2 <= 0 )
 	{
-		warn_distr( & alaplErrCnt, & alaplStopErr, "alapl", "non-positive alpha1 or alpha2 parameter" );
+		warn_distr( alaplErrCnt, alaplStopErr, "alapl", "non-positive alpha1 or alpha2 parameter" );
 		return mu;
 	}
 
@@ -1110,18 +1094,22 @@ double alapl( double mu, double alpha1, double alpha2 )
 /****************************************************
 WARN_DISTR
 ****************************************************/
-void warn_distr( int *errCnt, bool *stopErr, const char *distr, const char *msg )
+#ifndef _NP_
+void warn_distr( atomic < int > & errCnt, bool & stopErr, const char *distr, const char *msg )
+#else
+void warn_distr( int & errCnt, bool & stopErr, const char *distr, const char *msg )
+#endif
 {
-	if ( ++( *errCnt ) < ERR_LIM )	// prevent slow down due to I/O
+	if ( ++errCnt < ERR_LIM )	// prevent slow down due to I/O
 	{
 		plog( "\nWarning: %s in function '%s'", msg, distr );
-		*stopErr = false;
+		stopErr = false;
 	}
 	else
-		if ( ! *stopErr )
+		if ( ! stopErr )
 		{
 			plog( "\nWarning: too many warnings in function '%s', stop reporting...\n", distr );
-			*stopErr = true;
+			stopErr = true;
 		}
 }
 

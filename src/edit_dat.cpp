@@ -48,7 +48,7 @@ values
 
 #include "LSD.h"
 
-// flags to avoid recursive usage (confusing and tk windows are not ready)
+bool iniShowOnce = false;		// prevent repeating warning on # of columns
 bool overflow;					// indicate table overflow (>MAX_COLS or >MAX_CELS)
 int maxCols;					// maximum number of columns to show (prevent crash)
 

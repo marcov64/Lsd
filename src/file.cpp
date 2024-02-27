@@ -41,14 +41,14 @@ OPEN_CONFIGURATION
 	Open a clean configuration,
 	either the current or not
 ****************************************************/
-bool object::open_configuration( bool reload )
+bool open_configuration( object *&r, bool reload )
 {
 	bool loaded;
 	const char *lab1, *lab2;
 	int i;
 	string warnings;
 
-	if ( ! reload || strlen( sim->conf_name ) == 0 )
+	if ( ! reload || strlen( sim.conf_name ) == 0 )
 	{									// ask user the file to use, if not reloading
 		cmd( "set fn [ tk_getOpenFile -parent . -title \"Open Configuration File\"	-defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model file} {.lsd} } } ]" );
 		cmd( "if { [ string length $fn ] > 0 && ! [ fn_spaces \"$fn\" . ] } { \
@@ -66,32 +66,29 @@ bool object::open_configuration( bool reload )
 			if ( lab1 == NULL || lab2 == NULL || strlen( lab2 ) == 0 )
 				return false;
 
-			delete [ ] sim->conf_name;
-			sim->conf_name = new char[ strlen( lab2 ) + 1 ];
-			strcpy( sim->conf_name, lab2 );
+			delete [ ] sim.conf_name;
+			sim.conf_name = new char[ strlen( lab2 ) + 1 ];
+			strcpy( sim.conf_name, lab2 );
 
-			delete [ ] sim->conf_path;
-			sim->conf_path = new char[ strlen( lab1 ) + 1 ];
-			strcpy( sim->conf_path, lab1 );
+			delete [ ] sim.conf_path;
+			sim.conf_path = new char[ strlen( lab1 ) + 1 ];
+			strcpy( sim.conf_path, lab1 );
 
-			if ( strlen( sim->conf_path ) > 0 )
+			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd $path" );
 
 			cmd( "set listfocus 1; set itemfocus 0" );// point for first var in listbox
 			cmd( "set lastObj \"\"" );			// disable last object for reload
 		}
 		else
-			if ( sim->conf_ok )
+			if ( sim.conf_ok )
 				reload = true;					// try to reload if use cancel load
 			else
 				return false;
 	}
 
 	if ( reload )
-		save_pos( );							// save current position when reloading
-
-	redrawRoot = redrawStruc = true;			// force browser/structure redraw
-	iniShowOnce = false;						// show warning on # of columns in .ini
+		r->save_pos( );							// save current position when reloading
 
 	switch ( i = load_configuration_gui( reload, &warnings, 0 ) )// try to load the configuration
 	{
@@ -100,10 +97,10 @@ bool object::open_configuration( bool reload )
 			break;
 
 		case 1:									// file/path not found
-			if ( strlen( sim->conf_path ) > 0 )
-				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME, sim->conf_path );
+			if ( strlen( sim.conf_path ) > 0 )
+				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME, sim.conf_path );
 			else
-				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME	 );
+				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME	 );
 			loaded = false;
 			break;
 
@@ -140,7 +137,7 @@ bool object::open_configuration( bool reload )
 		case 23:								// missing XML settings node
 		case 24:								// missing XML equation node
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d :%.24s)\" -detail \"Element descriptions were lost but the configuration can still be used.\n\nPlease check if the desired LSD configuration file was selected or re-enter the description information if needed.\n\nIf this is a sensitivity analysis configuration file, this message is expected, and configuration file is ok.\"", i, warnings.c_str( ) );
-			sim->root->reset_description( );
+			sim.root->reset_description( );
 			loaded = true;
 			break;
 
@@ -157,18 +154,15 @@ bool object::open_configuration( bool reload )
 	if ( i == 0 && warnings.size( ) > 0 )
 			cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"Partially damaged file (%d :%.24s)\" -detail \"Part of the configuration data was missing or invalid and was replaced by default values.\n\nPlease check if the desired LSD configuration file was selected or re-configure the affected parts as needed.\"", i, warnings.c_str( ) );
 
-	if ( loaded && reload )
-		currObj = sim->root->restore_pos( );	// restore pointed object and variable
+	if ( r != NULL && loaded && reload )
+		currObj = r = sim.root->restore_pos( );	// restore pointed object and variable
 	else
-		currObj = sim->root;					// new structure
+		currObj = r = sim.root;					// new structure
 
-	if ( loaded )
-	{
-		sim->root->load_elem_lists( );
+	if ( loaded && ! ignore_eq_file && strncmp( sim.conf_eq_txt, eq_txt, min( strlen( sim.conf_eq_txt ), strlen( eq_txt ) ) ) )
+		plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the LSD model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
 
-		if ( ! ignore_eq_file && strncmp( sim->conf_eq_txt, eq_txt, min( strlen( sim->conf_eq_txt ), strlen( eq_txt ) ) ) )
-			plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the LSD model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
-	}
+	redrawRoot = redrawStruc = true;			// force browser/structure redraw
 
 	return loaded;
 }
@@ -197,11 +191,6 @@ bool load_prev_configuration( void )
 
 		unload_configuration_gui( true );		// full unload everything
 		return false;
-	}
-	else
-	{
-		sim.root->load_elem_lists( );
-		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", model_path, sim.conf_file );
 	}
 
 	if ( saFile != NULL )						// restore SA configuration, if any
@@ -235,7 +224,13 @@ LOAD_CONFIGURATION_GUI (DLL WRAPPER)
 ******************************************************************************/
 int load_configuration_gui( bool reload, string *warnings, int quick )
 {
-	int res = sim.load_configuration( reload, warnings, quick );
+	int res;
+
+	if( ( res = sim.load_configuration( reload, warnings, quick ) ) == 0 )
+	{
+		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", model_path, sim.conf_file );
+		sim.root->load_elem_lists( );
+	}
 
 	unsavedData = false;						// no unsaved simulation results
 	unsavedSense = false;						// no sensitivity data to save

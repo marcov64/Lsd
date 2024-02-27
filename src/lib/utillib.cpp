@@ -87,21 +87,19 @@ void plog_terminal( const char *cm, va_list arg )
 	static int i, j, reqsz, sz;
 	static va_list argcpy;
 
-#ifndef _NP_
-	// abort if not running in main LSD thread
-	if ( this_thread::get_id( ) != main_thread )
-		return;
-#endif
-
 	buffer = bufstat;
 	message = msgstat;
 	va_copy( argcpy, arg );
 
 	reqsz = vsnprintf( buffer, MAX_BUFF_SIZE, cm, arg );
 
+#ifndef _NP_
+	lock_guard < mutex > lock( lock_plog_term );
+#endif
+
 	if ( reqsz < 0 )
 	{
-		fprintf( stderr, "\nCannot expand message '%s...'\n", cm );
+		fprintf( stderr_ptr, "\nCannot expand message '%s...'\n", cm );
 		return;
 	}
 
@@ -113,7 +111,7 @@ void plog_terminal( const char *cm, va_list arg )
 
 		if ( reqsz < 0 || sz > reqsz )
 		{
-			fprintf( stderr, "\nCannot expand message '%s...'\n", cm );
+			fprintf( stderr_ptr, "\nCannot expand message '%s...'\n", cm );
 			delete [ ] buffer;
 			return;
 		}
@@ -135,8 +133,8 @@ void plog_terminal( const char *cm, va_list arg )
 			message[ j++ ] = buffer[ i ];
 	message[ j ] = '\0';
 
-	printf( "%s", message );
-	fflush( stdout );
+	fprintf( stdout_ptr, "%s", message );
+	fflush( stdout_ptr );
 
 	message_logged = true;
 
@@ -155,10 +153,6 @@ Information about the state of the simulation when the error
 occurred is provided. Users can abort the program or analyze
 the results collected up the latest time step available.
 *************************************************************/
-#ifndef _NP_
-mutex error;
-#endif
-
 void simulation::error_hard( const char *boxTitle, const char *boxText, bool defQuit, const char *logFmt, ... )
 {
 	if ( quit == 2 )		// simulation already being stopped
@@ -173,7 +167,7 @@ void simulation::error_hard( const char *boxTitle, const char *boxText, bool def
 
 #ifndef _NP_
 	// prevent concurrent use by more than one thread
-	lock_guard < mutex > lock( error );
+	lock_guard < mutex > lock( error_lock );
 
 	// abort worker and park message if not running in main LSD thread
 	if ( this_thread::get_id( ) != main_thread )

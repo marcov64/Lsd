@@ -26,6 +26,10 @@ print  message string m in the Log screen.
 
 #include "LSD.h"
 
+#ifndef _NP_
+mutex lock_plog_backend;			// lock lock_plog_backend for parallel access
+#endif
+
 
 /*********************************
 PLOG_BACKEND
@@ -46,16 +50,14 @@ void plog_backend( const char *cm, const char *tag, va_list arg )
 	if ( ! tk_ok || ! log_ok )
 		return;
 
-#ifndef _NP_
-	// abort if not running in main LSD thread
-	if ( this_thread::get_id( ) != main_thread )
-		return;
-#endif
-
 	buffer = bufstat;
 	message = msgstat;
 	va_copy( argcpy, arg );
 	reqsz = vsnprintf( buffer, MAX_BUFF_SIZE, cm, arg );
+
+#ifndef _NP_
+	lock_guard < mutex > lock( lock_plog_backend );
+#endif
 
 	if ( reqsz < 0 )
 	{

@@ -17,7 +17,7 @@ INTERF.CPP
 Respond to the events in the main browser interfaces, that is
 the browser window GUI elements and all the menus.
 
-- object *object::operate( );
+- object *operate( );
 takes the value of choice and operate the relative command on the
 object r. See the switch for the complete list of the available commands
 *************************************************************/
@@ -37,7 +37,7 @@ object *initParent = NULL;			// parent of new variable initial setting
 /****************************************************
 OPERATE
 ****************************************************/
-object *object::operate( void )
+object *operate( object *r )
 {
 	bool observe, initial, saveAs, delVar, renVar, table, subDir, overwDir;
 	char deb_mode, *lab0;
@@ -48,7 +48,7 @@ object *object::operate( void )
 	double fracMC, fake = 0;
 	FILE *f;
 	bridge *cb;
-	object *r = this, *n, *cur, *cur1, *cur2;
+	object *n, *cur, *cur1, *cur2;
 	variable *cv, *cv1;
 	result *rf;					// pointer for results files (may be zipped or not)
 	sensitivity *cs;
@@ -87,7 +87,7 @@ object *object::operate( void )
 					break;
 				sscanf( lab1, "%99s", lab_old );
 
-				n = sim->root->search( lab_old );// set pointer to $vname
+				n = sim.root->search( lab_old );// set pointer to $vname
 				if ( n == NULL )
 					break;
 				cur2 = r;
@@ -282,7 +282,7 @@ object *object::operate( void )
 
 					if ( done == 0 )
 					{
-						sim->add_description( lab, param, eval_str( "[ .addelem.d.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
+						sim.add_description( lab, param, eval_str( "[ .addelem.d.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
 						if ( param == 0 )
 							cmd( "lappend modVar %s", lab );
@@ -318,7 +318,7 @@ object *object::operate( void )
 
 						// update focus memory
 						cmd( "set listfocus 1; set itemfocus [ .l.v.c.var_name index end ]" );
-						sim->conf_ok = true;		// some model structure loaded
+						sim.conf_ok = true;		// some model structure loaded
 						unsaved_change( true );		// signal unsaved change
 						redrawRoot = redrawStruc = true;// force browser/structure redraw
 					}
@@ -372,7 +372,7 @@ object *object::operate( void )
 					break;
 				sscanf( lab1, "%99s", lab_old );
 
-				n = sim->root->search( lab_old );// set pointer to $vname
+				n = sim.root->search( lab_old );// set pointer to $vname
 				if ( n == NULL )
 					break;
 				cur2 = r;
@@ -452,12 +452,12 @@ object *object::operate( void )
 
 				r->add_obj( lab, 1, true );
 
-				sim->add_description( lab, 4, eval_str( "[ .addobj.d.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
+				sim.add_description( lab, 4, eval_str( "[ .addobj.d.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 				cmd( "lappend modObj %s", lab );
 
 				// update focus memory
 				cmd( "set listfocus 2; set itemfocus [ .l.s.c.son_name index end ]; set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]" );
-				sim->conf_ok = true;		// some model structure loaded
+				sim.conf_ok = true;		// some model structure loaded
 				unsaved_change( true );		// signal unsaved change
 				redrawRoot = redrawStruc = true;// force browser/structure redraw
 			}
@@ -487,7 +487,7 @@ object *object::operate( void )
 					break;
 				sscanf( lab1, "%99s", lab_old );
 
-				n = sim->root->search( lab_old );// set pointer to $vname
+				n = sim.root->search( lab_old );// set pointer to $vname
 				if ( n == NULL )
 					break;
 				cur2 = r;
@@ -518,7 +518,7 @@ object *object::operate( void )
 			cmd( "ttk::listbox $TT.v.t.lb -width 25 -selectmode single -yscroll \"$TT.v.t.v_scroll set\" -dark $darkTheme" );
 			cmd( "pack $TT.v.t.lb $TT.v.t.v_scroll -side left -fill y" );
 			cmd( "mouse_wheel $TT.v.t.lb" );
-			sim->root->insert_object( "$TT.v.t.lb", false, r );
+			sim.root->insert_object( "$TT.v.t.lb", false, r );
 			cmd( "pack $TT.v.l $TT.v.t" );
 
 			cmd( "pack $TT.l $TT.v -padx 5 -pady 5" );
@@ -550,8 +550,8 @@ object *object::operate( void )
 			if ( lab1 == NULL || strlen( lab1 ) == 0 )
 				goto endmove;
 
-			i = sim->hyper_count( r->up->label );
-			j = sim->hyper_count( lab1 );
+			i = sim.hyper_count( r->up->label );
+			j = sim.hyper_count( lab1 );
 
 			if ( i != j )
 			{
@@ -563,7 +563,7 @@ object *object::operate( void )
 					goto endmove;
 			}
 
-			sim->move_obj( lab_old, lab1 );
+			sim.move_obj( lab_old, lab1 );
 
 			unsaved_change( true );		// signal unsaved change
 			redrawRoot = redrawStruc = true;	// force browser/structure redraw
@@ -585,7 +585,7 @@ object *object::operate( void )
 
 			sscanf( lab1, "%99s", lab_old );
 
-			n = sim->root->search( lab_old );
+			n = sim.root->search( lab_old );
 			if ( n == NULL )
 				break;
 
@@ -624,7 +624,7 @@ object *object::operate( void )
 			// check if current or pointed object and save current if needed
 			if ( strcmp( r->label, lab_old ) )	// check if not current variable
 			{
-				n = sim->root->search( lab_old );// set pointer to $vname
+				n = sim.root->search( lab_old );// set pointer to $vname
 				if ( n == NULL )
 					break;
 				cur2 = r;
@@ -639,7 +639,7 @@ object *object::operate( void )
 				break;
 			}
 
-			cd = sim->search_description( lab_old );
+			cd = sim.search_description( lab_old );
 			skip_next_obj( r, &num );
 
 			cmd( "set to_compute %d", r->to_compute ? 1 : 0 );
@@ -716,13 +716,13 @@ object *object::operate( void )
 				unsaved_change( true );		// signal unsaved change
 
 				// save description changes
-				sim->change_description( lab_old, NULL, -1, eval_str( "[ .objprop.desc.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
+				sim.change_description( lab_old, NULL, -1, eval_str( "[ .objprop.desc.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
 				cmd( "set choice $to_compute" );
 
 				if ( choice != r->to_compute )
 				{
-					cur = sim->blueprint->search( r->label );
+					cur = sim.blueprint->search( r->label );
 					if ( cur != NULL )
 						cur->to_compute = choice;
 					for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
@@ -770,7 +770,7 @@ object *object::operate( void )
 				break;
 			sscanf( lab1, "%99s", lab_old );
 
-			cur = sim->root->search( lab_old );// get pointer to vname
+			cur = sim.root->search( lab_old );// get pointer to vname
 			if ( cur == NULL )
 				break;
 
@@ -845,7 +845,7 @@ object *object::operate( void )
 						cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", cur->label	);
 						cmd( "lappend modObj %s", lab );
 
-						sim->change_description( cur->label, lab );
+						sim.change_description( cur->label, lab );
 						cur->chg_lab( lab );
 					}
 					else
@@ -855,10 +855,10 @@ object *object::operate( void )
 				cmd( "destroytop .chgnam" );
 			}
 
-			if ( sim->root->v == NULL && sim->root->b == NULL )// if last object
+			if ( sim.root->v == NULL && sim.root->b == NULL )// if last object
 			{
 				unsaved_change( false );				// no unsaved change
-				sim->conf_ok = false;					// no config loaded
+				sim.conf_ok = false;					// no config loaded
 			}
 			else
 				unsaved_change( true );					// signal unsaved change
@@ -886,7 +886,7 @@ object *object::operate( void )
 
 			sscanf( lab1, "%99s", lab_old );
 			cv = r->search_var( NULL, lab_old );
-			cd = sim->search_description( lab_old );
+			cd = sim.search_description( lab_old );
 
 			Tcl_LinkVar( interp, "done", ( char * ) &done, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "save", ( char * ) &save, TCL_LINK_BOOLEAN );
@@ -1212,7 +1212,7 @@ object *object::operate( void )
 
 			if ( done == 9 )
 			{
-				sim->change_description( lab_old, NULL, -1, eval_str( "[ .chgelem.desc.f.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
+				sim.change_description( lab_old, NULL, -1, eval_str( "[ .chgelem.desc.f.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
 				auto_document( lab_old, "ALL", true );
 				cmd( ".chgelem.desc.f.desc.text delete 1.0 end" );
@@ -1270,10 +1270,10 @@ object *object::operate( void )
 				   cv->observe = observe;
 				}
 
-				sim->change_description( lab_old, NULL, -1, eval_str( "[ .chgelem.desc.f.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
+				sim.change_description( lab_old, NULL, -1, eval_str( "[ .chgelem.desc.f.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
 				if ( cv->param == 1 || cv->num_lag > 0 )
-					sim->change_description( lab_old, NULL, -1, NULL, eval_str( "[ .chgelem.desc.i.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
+					sim.change_description( lab_old, NULL, -1, NULL, eval_str( "[ .chgelem.desc.i.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
 				unsaved_change( true );		// signal unsaved change
 
@@ -1431,9 +1431,9 @@ object *object::operate( void )
 			if ( ! delVar && ( nature != cv->param || numlag != cv->num_lag ) )
 			{
 				if ( nature != 1 && numlag == 0 )
-					sim->change_description( lab_old, NULL, nature, NULL, "" );
+					sim.change_description( lab_old, NULL, nature, NULL, "" );
 				else
-					sim->change_description( lab_old, NULL, nature );
+					sim.change_description( lab_old, NULL, nature );
 
 				for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				{
@@ -1522,7 +1522,7 @@ object *object::operate( void )
 					if ( cv->param == 2 )
 						cmd( "lappend modFun %s", lab );
 
-					sim->change_description( lab_old, lab );
+					sim.change_description( lab_old, lab );
 				}
 
 				for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
@@ -1532,10 +1532,10 @@ object *object::operate( void )
 						cur->delete_var( lab_old );
 			}
 
-			if ( sim->root->v == NULL && sim->root->b == NULL )// if last variable
+			if ( sim.root->v == NULL && sim.root->b == NULL )// if last variable
 			{
 				unsaved_change( false );				// no unsaved change
-				sim->conf_ok = false;					// no config loaded
+				sim.conf_ok = false;					// no config loaded
 			}
 			else
 				unsaved_change( true );					// signal unsaved change
@@ -1571,7 +1571,7 @@ object *object::operate( void )
 			cmd( "ttk::listbox $TT.v.t.lb -width 25 -selectmode single -yscroll \"$TT.v.t.v_scroll set\" -dark $darkTheme" );
 			cmd( "pack $TT.v.t.lb $TT.v.t.v_scroll -side left -fill y" );
 			cmd( "mouse_wheel $TT.v.t.lb" );
-			sim->root->insert_object( "$TT.v.t.lb" );
+			sim.root->insert_object( "$TT.v.t.lb" );
 			cmd( "pack $TT.v.l $TT.v.t" );
 
 			cmd( "pack $TT.l $TT.v -padx 5 -pady 5" );
@@ -1602,7 +1602,7 @@ object *object::operate( void )
 
 			cv = r->search_var( NULL, lab_old );
 
-			for ( cur = sim->root->search( lab1 ); cur != NULL; cur = cur->hyper_next( cur->label ) )
+			for ( cur = sim.root->search( lab1 ); cur != NULL; cur = cur->hyper_next( cur->label ) )
 				cur->add_var_from_example( cv );
 
 			for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
@@ -1720,7 +1720,7 @@ object *object::operate( void )
 			else								// edit sensitivity analysis data
 			{
 				if ( ( cs = search_sensitivity( cv->label, lag ) ) == NULL )
-					cs = new sensitivity( cv->label, sim, cv->param, lag );
+					cs = new sensitivity( cv->label, & sim, cv->param, lag );
 
 				i = cs->dataentry( );
 
@@ -1859,7 +1859,7 @@ object *object::operate( void )
 		// Exit the browser and run the simulation
 		case 1:
 
-			if ( sim->conf_ok && strlen( sim->conf_name ) == 0 )
+			if ( sim.conf_ok && strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration not saved\" -detail \"Please save your current configuration before trying to run the simulation.\"" );
 
@@ -1867,7 +1867,7 @@ object *object::operate( void )
 				return r;
 			}
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to run the simulation.\"" );
 				break;
@@ -1875,9 +1875,9 @@ object *object::operate( void )
 
 			// warn about no variable/parameter being saved
 			for ( n = r; n->up != NULL; n = n->up );
-			sim->series_saved = 0;
-			n->count_save( & sim->series_saved );
-			if ( sim->series_saved == 0 )
+			sim.series_saved = 0;
+			n->count_save( & sim.series_saved );
+			if ( sim.series_saved == 0 )
 			{
 				cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"If you proceed, there will be no data to be analyzed after the simulation is run. If this is not the intended behavior, please mark the variables and parameters to be saved before running the simulation.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } " );
 				if ( choice == 2 )
@@ -1885,13 +1885,13 @@ object *object::operate( void )
 			}
 
 			// warn missing debugger
-			if ( ! sim->parallel_disable && sim->root->search_parallel( ) && ( sim->deb_t > 0 || sim->stack_info > 0 || sim->prof_aggr_time ) )
+			if ( ! sim.parallel_disable && sim.root->search_parallel( ) && ( sim.deb_t > 0 || sim.stack_info > 0 || sim.prof_aggr_time ) )
 			{
 				cmd( "set answer [ ttk::messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Debugger/profiler not available\" -detail \"Debugging in parallel mode is not supported, including stack profiling.\n\nPress 'OK' to proceed and disable parallel processing settings or 'Cancel' to return to LSD Browser.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }" );
 				if ( choice == 2 )
 					break;
 
-				sim->parallel_disable = true;
+				sim.parallel_disable = true;
 			}
 
 			// save the current object & cursor position for quick reload
@@ -1901,11 +1901,11 @@ object *object::operate( void )
 			overwConf = unsaved_change( ) ? true : false;
 
 			// avoid showing dialog if configuration already saved and nothing to save to disk
-			if ( ! overwConf && sim->last_run == 1 )
+			if ( ! overwConf && sim.last_run == 1 )
 				goto run;
 
 			// remove any custom save path (save to current by default)
-			sim->results_alt_path( "" );
+			sim.results_alt_path( "" );
 
 			Tcl_LinkVar( interp, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
@@ -1915,9 +1915,9 @@ object *object::operate( void )
 			Tcl_LinkVar( interp, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
 
-			cmd( "set firstFile \"%s_%d\"", sim->conf_name, sim->seed );
-			cmd( "set lastFile \"%s_%d\"", sim->conf_name, sim->seed + sim->last_run - 1 );
-			cmd( "set totFile \"%s\"", sim->conf_name );
+			cmd( "set firstFile \"%s_%d\"", sim.conf_name, sim.seed );
+			cmd( "set lastFile \"%s_%d\"", sim.conf_name, sim.seed + sim.last_run - 1 );
+			cmd( "set totFile \"%s\"", sim.conf_name );
 			cmd( "set resExt %s", docsv ? "csv" : "res" );
 			cmd( "set totExt %s", docsv ? "csv" : "tot" );
 			cmd( "set zipExt \"%s\"", dozip ? ".gz" : "" );
@@ -1928,25 +1928,25 @@ object *object::operate( void )
 
 			cmd( "ttk::frame $T.f1" );
 			cmd( "ttk::label $T.f1.l -text \"Model configuration\"" );
-			cmd( "ttk::label $T.f1.w -text \"%s\" -style hl.TLabel", sim->conf_name );
+			cmd( "ttk::label $T.f1.w -text \"%s\" -style hl.TLabel", sim.conf_name );
 			cmd( "pack $T.f1.l $T.f1.w" );
 
 			cmd( "ttk::frame $T.f2" );
 
 			cmd( "ttk::frame $T.f2.t" );
 			cmd( "ttk::label $T.f2.t.l -text \"Cases:\"" );
-			cmd( "ttk::label $T.f2.t.w -text \"%d\" -style hl.TLabel", sim->last_t );
+			cmd( "ttk::label $T.f2.t.w -text \"%d\" -style hl.TLabel", sim.last_t );
 			cmd( "pack $T.f2.t.l $T.f2.t.w -side left -padx 2" );
 
-			if ( sim->last_run > 1 )
+			if ( sim.last_run > 1 )
 			{
 				// detect the need of a new save path and if it has results files
-				subDir = need_res_dir( sim->conf_path, sim->conf_name, out_dir, MAX_PATH_LENGTH );
+				subDir = need_res_dir( sim.conf_path, sim.conf_name, out_dir, MAX_PATH_LENGTH );
 				overwDir = check_res_dir( out_dir );
 
 				cmd( "ttk::frame $T.f2.n" );
 				cmd( "ttk::label $T.f2.n.l -text \"Number of simulations:\"" );
-				cmd( "ttk::label $T.f2.n.w -text \"%d\" -style hl.TLabel", sim->last_run );
+				cmd( "ttk::label $T.f2.n.w -text \"%d\" -style hl.TLabel", sim.last_run );
 				cmd( "pack $T.f2.n.l $T.f2.n.w -side left -padx 2" );
 
 				cmd( "pack $T.f2.t $T.f2.n" );
@@ -2089,7 +2089,7 @@ object *object::operate( void )
 				break;
 
 			if ( ( ! no_res || ! no_tot ) && subDir )
-				if ( ! create_res_dir( out_dir ) || ! sim->results_alt_path( out_dir ) )
+				if ( ! create_res_dir( out_dir ) || ! sim.results_alt_path( out_dir ) )
 				{
 					cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Subdirectory '%s' cannot be created\" -detail \"Check if the path is set READ-ONLY, or move your configuration file to a different location.\"", out_dir );
 					break;
@@ -2101,13 +2101,13 @@ object *object::operate( void )
 			run:
 
 			for ( n = r; n->up != NULL; n = n->up );
-			sim->reset_blueprint( n );			// update blueprint to consider last changes
+			sim.reset_blueprint( n );			// update blueprint to consider last changes
 
 			if ( overwConf )					// save if needed
 			{
 				if ( ! save_xml_configuration( ) )
 				{
-					cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the file is set READ-ONLY, or try to save to a different location.\"", sim->conf_name );
+					cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the file is set READ-ONLY, or try to save to a different location.\"", sim.conf_name );
 					break;
 				}
 				else
@@ -2128,16 +2128,12 @@ object *object::operate( void )
 		case 38:
 
 			if ( discard_change( ) )	// unsaved configuration changes ?
-			{
-				if ( ! r->open_configuration( choice == 38 ? true : false ) )
+				if ( ! open_configuration( r, choice == 38 ? true : false ) )
 				{
 					unload_configuration_gui( true );
 					choice = 0;
-					return sim->root;
+					return sim.root;
 				}
-				else
-					r = currObj;
-			}
 
 		break;
 
@@ -2147,9 +2143,9 @@ object *object::operate( void )
 		// Save a model as different name
 		case 73:
 
-			saveAs = ( choice == 73 || strlen( sim->conf_name ) == 0 ) ? true : false;
+			saveAs = ( choice == 73 || strlen( sim.conf_name ) == 0 ) ? true : false;
 
-			if ( ! sim->conf_ok )
+			if ( ! sim.conf_ok )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration to save\" -detail \"Create a configuration before saving.\"" );
 				break;
@@ -2157,9 +2153,9 @@ object *object::operate( void )
 
 			Tcl_LinkVar( interp, "done", ( char * ) &done, TCL_LINK_INT );
 
-			if ( sim->eff_t > 0 )
+			if ( sim.eff_t > 0 )
 			{
-				if ( sim->save_ok )
+				if ( sim.save_ok )
 					cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Configuration is the final state of a simulation run\" -detail \"Press 'OK' to save it anyway%s or 'Cancel' to abort saving.\" ]; switch -- $answer { ok { set done 1 } cancel { set done 2 } }", saveAs ? "" : " under a different name" );
 				else
 					cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration cannot be saved\" -detail \"Current configuration is the final state of a simulation run which has an incomplete structure that cannot be reliably saved.\n\nThis is due to the usage of USE_ZERO_INSTANCE macro, which allowed zero-instance objects in the current model structure.\"; set done 2" );
@@ -2175,14 +2171,14 @@ object *object::operate( void )
 			 }
 
 			done = 0;
-			cmd( "set res \"%s\"", strlen( sim->conf_name ) > 0 ? sim->conf_name : DEF_CONF_FILE );
-			cmd( "set path \"%s\"", sim->conf_path );
-			if ( strlen( sim->conf_path ) > 0 )
+			cmd( "set res \"%s\"", strlen( sim.conf_name ) > 0 ? sim.conf_name : DEF_CONF_FILE );
+			cmd( "set path \"%s\"", sim.conf_path );
+			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			if ( saveAs )			// only asks file name if instructed to or necessary
 			{
-				if ( sim->eff_t > 0 )
+				if ( sim.eff_t > 0 )
 				{
 					cmd( "set fn [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
 					cmd( "if { [ string equal -nocase [ file normalize $fn ] [ file normalize \"$path/$res.lsd\" ] ] && [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Overwrite existing configuration?\" -detail \"The original model configuration will be overwritten by the final state of the simulation run and, therefore, lost.\n\nPress 'OK' if you are sure or 'Cancel' to abort saving.\" ] eq \"cancel\" } { set fn \"\" }" );
@@ -2204,18 +2200,18 @@ object *object::operate( void )
 				if ( strlen( lab1 ) == 0 )
 					break;
 
-				delete [ ] sim->conf_name;
-				sim->conf_name = new char[ strlen( lab1 ) + 1 ];
-				strcpy( sim->conf_name, lab1 );
+				delete [ ] sim.conf_name;
+				sim.conf_name = new char[ strlen( lab1 ) + 1 ];
+				strcpy( sim.conf_name, lab1 );
 
 				lab1 = get_str( "path" );
-				delete [ ] sim->conf_path;
-				sim->conf_path = new char[ strlen( lab1 ) + 1 ];
-				strcpy( sim->conf_path, lab1 );
+				delete [ ] sim.conf_path;
+				sim.conf_path = new char[ strlen( lab1 ) + 1 ];
+				strcpy( sim.conf_path, lab1 );
 
-				delete [ ] sim->conf_file;
-				sim->conf_file = new char[ strlen( sim->conf_path ) + strlen( sim->conf_name ) + 6 ];
-				sprintf( sim->conf_file, "%s%s%s.lsd", sim->conf_path, strlen( sim->conf_path ) > 0 ? "/" : "", sim->conf_name );
+				delete [ ] sim.conf_file;
+				sim.conf_file = new char[ strlen( sim.conf_path ) + strlen( sim.conf_name ) + 6 ];
+				sprintf( sim.conf_file, "%s%s%s.lsd", sim.conf_path, strlen( sim.conf_path ) > 0 ? "/" : "", sim.conf_name );
 
 				if ( strlen( lab1 ) > 0 )
 					cmd( "cd $path" );
@@ -2225,7 +2221,7 @@ object *object::operate( void )
 
 			if ( ! save_xml_configuration( ) )
 			{
-				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"The model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", sim->conf_name	);
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"The model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", sim.conf_name	);
 			}
 			else
 				unsaved_change( false );					// signal no unsaved change
@@ -2245,7 +2241,7 @@ object *object::operate( void )
 
 			unload_configuration_gui( true );
 
-			r = sim->root;					// just an empty root exists
+			r = sim.root;					// just an empty root exists
 
 		break;
 
@@ -2256,9 +2252,9 @@ object *object::operate( void )
 			strcpyn( lab, r->label, MAX_BUFF_SIZE );
 
 			choice = 0;
-			sim->root->set_obj_number( );
+			sim.root->set_obj_number( );
 
-			r = sim->root->search( lab );
+			r = sim.root->search( lab );
 
 		break;
 
@@ -2275,7 +2271,7 @@ object *object::operate( void )
 					break;
 				sscanf( lab1, "%99s", lab_old );
 
-				n = sim->root->search( lab_old );// set pointer to $vname
+				n = sim.root->search( lab_old );// set pointer to $vname
 				if ( n == NULL )
 					break;
 				cur2 = r;
@@ -2301,26 +2297,26 @@ object *object::operate( void )
 		case 22:
 
 			// save previous values to allow canceling operation
-			temp[ 1 ] = sim->last_run;
-			temp[ 2 ] = sim->seed;
-			temp[ 3 ] = sim->last_t;
-			temp[ 4 ] = sim->deb_t;
-			temp[ 5 ] = sim->stack_info;
-			temp[ 6 ] = sim->prof_min_msecs;
-			temp[ 7 ] = sim->prof_obs_only;
-			temp[ 8 ] = sim->prof_aggr_time;
-			temp[ 9 ] = sim->no_ptr_chk;
-			temp[ 10 ] = sim->parallel_disable;
+			temp[ 1 ] = sim.last_run;
+			temp[ 2 ] = sim.seed;
+			temp[ 3 ] = sim.last_t;
+			temp[ 4 ] = sim.deb_t;
+			temp[ 5 ] = sim.stack_info;
+			temp[ 6 ] = sim.prof_min_msecs;
+			temp[ 7 ] = sim.prof_obs_only;
+			temp[ 8 ] = sim.prof_aggr_time;
+			temp[ 9 ] = sim.no_ptr_chk;
+			temp[ 10 ] = sim.parallel_disable;
 
-			Tcl_LinkVar( interp, "last_run", ( char * ) & sim->last_run, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "seed", ( char * ) & sim->seed, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "last_t", ( char * ) & sim->last_t, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "stack_info", ( char * ) & sim->stack_info, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "prof_min_msecs", ( char * ) & sim->prof_min_msecs, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "prof_obs_only", ( char * ) & sim->prof_obs_only, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "prof_aggr_time", ( char * ) & sim->prof_aggr_time, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "no_ptr_chk", ( char * ) & sim->no_ptr_chk, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "parallel_disable", ( char * ) & sim->parallel_disable, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "last_run", ( char * ) & sim.last_run, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "seed", ( char * ) & sim.seed, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "last_t", ( char * ) & sim.last_t, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "stack_info", ( char * ) & sim.stack_info, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "prof_min_msecs", ( char * ) & sim.prof_min_msecs, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "prof_obs_only", ( char * ) & sim.prof_obs_only, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "prof_aggr_time", ( char * ) & sim.prof_aggr_time, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "no_ptr_chk", ( char * ) & sim.no_ptr_chk, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "parallel_disable", ( char * ) & sim.parallel_disable, TCL_LINK_BOOLEAN );
 
 			cmd( "set tw 28" );					// text label width
 
@@ -2373,14 +2369,14 @@ object *object::operate( void )
 			cmd( "ttk::checkbutton $T.c.aggr -text \"Show aggregated profiling times\" -variable prof_aggr_time" );
 			cmd( "ttk::checkbutton $T.c.nchk -text \"Disable pointer checks\" -variable no_ptr_chk -state %s", no_pointer_check ? "disabled" : "normal" );
 
-	#ifndef _NP_
+#ifndef _NP_
 			cmd( "ttk::checkbutton $T.c.npar -text \"Disable parallel computation\" -variable parallel_disable" );
-			if ( ! sim->root->search_parallel( ) || max_threads < 2 )
+			if ( ! sim.root->search_parallel( ) || max_threads < 2 )
 				cmd( "$T.c.npar configure -state disabled" );
 			cmd( "pack $T.c.obs $T.c.aggr $T.c.nchk $T.c.npar -anchor w" );
-	#else
+#else
 			cmd( "pack $T.c.obs $T.c.aggr $T.c.nchk -anchor w" );
-	#endif
+#endif
 
 			cmd( "pack $T.f $T.c -padx 5 -pady 5" );
 
@@ -2412,20 +2408,20 @@ object *object::operate( void )
 
 			if ( choice == 2 )	// Escape - revert previous values
 			{
-				sim->last_run = temp[ 1 ];
-				sim->seed = ( unsigned ) temp[ 2 ];
-				sim->last_t = temp[ 3 ];
-				sim->deb_t = temp[ 4 ];
-				sim->stack_info = temp[ 5 ];
-				sim->prof_min_msecs = temp[ 6 ];
-				sim->prof_obs_only = temp[ 7 ];
-				sim->prof_aggr_time = temp[ 8 ];
-				sim->no_ptr_chk = temp[ 9 ];
-				sim->parallel_disable = temp[ 10 ];
+				sim.last_run = temp[ 1 ];
+				sim.seed = ( unsigned ) temp[ 2 ];
+				sim.last_t = temp[ 3 ];
+				sim.deb_t = temp[ 4 ];
+				sim.stack_info = temp[ 5 ];
+				sim.prof_min_msecs = temp[ 6 ];
+				sim.prof_obs_only = temp[ 7 ];
+				sim.prof_aggr_time = temp[ 8 ];
+				sim.no_ptr_chk = temp[ 9 ];
+				sim.parallel_disable = temp[ 10 ];
 			}
 			else
 				// signal unsaved change if anything to be saved
-				if ( temp[ 1 ] != sim->last_run || ( unsigned ) temp[ 2 ] != sim->seed || temp[ 3 ] != sim->last_t || temp[ 4 ] != sim->deb_t || temp[ 5 ] != sim->stack_info || temp[ 6 ] != sim->prof_min_msecs || temp[ 7 ] != sim->prof_obs_only || temp[ 8 ] != sim->prof_aggr_time || temp[ 9 ] != sim->no_ptr_chk || temp[ 10 ] != sim->parallel_disable )
+				if ( temp[ 1 ] != sim.last_run || ( unsigned ) temp[ 2 ] != sim.seed || temp[ 3 ] != sim.last_t || temp[ 4 ] != sim.deb_t || temp[ 5 ] != sim.stack_info || temp[ 6 ] != sim.prof_min_msecs || temp[ 7 ] != sim.prof_obs_only || temp[ 8 ] != sim.prof_aggr_time || temp[ 9 ] != sim.no_ptr_chk || temp[ 10 ] != sim.parallel_disable )
 					unsaved_change( true );
 
 			Tcl_UnlinkVar( interp, "last_run" );
@@ -2447,10 +2443,10 @@ object *object::operate( void )
 			if ( res_g == NULL )
 				break;
 
-			n = sim->root->search( res_g );
+			n = sim.root->search( res_g );
 			if ( n == NULL )
 			{	// check if it is not a zero-instance object
-				n = sim->blueprint->search( res_g );
+				n = sim.blueprint->search( res_g );
 				if ( n != NULL )
 					cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Cannot show no-instance object\" -detail \"All instances of '%s' were deleted.\nSelect another object or reload your configuration and try again.\"", res_g );
 
@@ -2470,7 +2466,7 @@ object *object::operate( void )
 		// Enter the analysis of results module for Monte Carlo analysis
 		case 12:
 			// accept analysis after run only if MC data was just produced
-			if ( sim->eff_t > 0 && res_list.size( ) <= 1 )
+			if ( sim.eff_t > 0 && res_list.size( ) <= 1 )
 			{
 				cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid data for Monte Carlo analysis\" -detail \"Last simulation run did not produce adequate data to perform a Monte Carlo experiment analysis.\n\nPlease reload or unload your configuration and select the appropriate results files, or execute a multi-run configuration before using this option.\"" );
 				break;
@@ -2492,13 +2488,11 @@ object *object::operate( void )
 					break;
 
 			// remove existing results from memory before proceeding
-			if ( ! r->open_configuration( true ) )
+			if ( ! open_configuration( r, true ) )
 			{
 				unload_configuration_gui( true );
-				r = sim->root;
+				r = sim.root;
 			}
-			else
-				r = currObj;
 
 			analysis( true );
 
@@ -2515,7 +2509,7 @@ object *object::operate( void )
 		// Change Equation File from which to take the code to show
 		case 28:
 
-			if ( ! sim->conf_ok )
+			if ( ! sim.conf_ok )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to change the equation file.\"" );
 				break;
@@ -2553,13 +2547,13 @@ object *object::operate( void )
 		case 39:
 
 			i = 0;
-			sim->root->count_save( & i );
+			sim.root->count_save( & i );
 			if ( i == 0 )
 				plog( " \nNo variable or parameter saved." );
 			else
 			{
 				plog( "\n\nVariables and parameters saved (%d):\n", i );
-				sim->root->show_save( );
+				sim.root->show_save( );
 			}
 
 		break;
@@ -2570,7 +2564,7 @@ object *object::operate( void )
 
 			plog( "\n\nVariables and parameters containing results:\n" );
 			elem_count = 0;
-			sim->root->show_observe( );
+			sim.root->show_observe( );
 			if ( elem_count == 0 )
 				plog( "(none)\n" );
 
@@ -2582,7 +2576,7 @@ object *object::operate( void )
 
 			plog( "\n\nVariables and parameters relevant to initialize:\n" );
 			elem_count = 0;
-			sim->root->show_initial( );
+			sim.root->show_initial( );
 			if ( elem_count == 0 )
 				plog( "(none)\n" );
 
@@ -2594,7 +2588,7 @@ object *object::operate( void )
 
 			plog( "\n\nVariables and parameters to plot in run time:\n" );
 			elem_count = 0;
-			sim->root->show_plot( );
+			sim.root->show_plot( );
 			if ( elem_count == 0 )
 				plog( "(none)\n" );
 
@@ -2606,7 +2600,7 @@ object *object::operate( void )
 
 			plog( "\n\nVariables and parameters to debug and watch:\n" );
 			elem_count = 0;
-			sim->root->show_debug( );
+			sim.root->show_debug( );
 			if ( elem_count == 0 )
 				plog( "(none)\n" );
 
@@ -2618,7 +2612,7 @@ object *object::operate( void )
 
 			plog( "\n\nMulti-object variables to run in parallel:\n" );
 			elem_count = 0;
-			sim->root->show_parallel( );
+			sim.root->show_parallel( );
 			if ( elem_count == 0 )
 				plog( "(none)\n" );
 
@@ -2630,7 +2624,7 @@ object *object::operate( void )
 
 			plog( "\n\nVariables with special updating scheme:\n" );
 			elem_count = 0;
-			sim->root->show_special_updat( );
+			sim.root->show_special_updat( );
 			if ( elem_count == 0 )
 				plog( "(none)\n" );
 
@@ -2665,7 +2659,7 @@ object *object::operate( void )
 
 			if ( choice == 1 )
 			{
-				sim->root->clean_save( );
+				sim.root->clean_save( );
 				unsaved_change( true );				// signal unsaved change
 				redrawRoot = redrawStruc = true;	// force browser/structure redraw
 			}
@@ -2680,7 +2674,7 @@ object *object::operate( void )
 
 			if ( choice == 1 )
 			{
-				sim->root->clean_plot( );
+				sim.root->clean_plot( );
 				unsaved_change( true );				// signal unsaved change
 				redrawRoot = redrawStruc = true;	// force browser/structure redraw
 			}
@@ -2695,7 +2689,7 @@ object *object::operate( void )
 
 			if ( choice == 1 )
 			{
-				sim->root->clean_debug( );
+				sim.root->clean_debug( );
 				unsaved_change( true );				// signal unsaved change
 				redrawRoot = redrawStruc = true;	// force browser/structure redraw
 			}
@@ -2710,7 +2704,7 @@ object *object::operate( void )
 
 			if ( choice == 1 )
 			{
-				sim->root->clean_parallel( );
+				sim.root->clean_parallel( );
 				unsaved_change( true );				// signal unsaved change
 				redrawRoot = redrawStruc = true;	// force browser/structure redraw
 			}
@@ -2731,7 +2725,7 @@ object *object::operate( void )
 					break;
 				sscanf( lab1, "%99s", lab_old );
 
-				n = sim->root->search( lab_old );// set pointer to $vname
+				n = sim.root->search( lab_old );	// set pointer to $vname
 				if ( n == NULL )
 					break;
 				cur2 = r;
@@ -2847,7 +2841,7 @@ object *object::operate( void )
 					break;
 				sscanf( lab1, "%99s", lab_old );
 
-				n = sim->root->search( lab_old );// set pointer to $vname
+				n = sim.root->search( lab_old );// set pointer to $vname
 				if ( n == NULL )
 					break;
 				cur2 = r;
@@ -2858,7 +2852,7 @@ object *object::operate( void )
 
 			r->debugger( NULL, NULL, &fake );
 
-			if ( cur2 != NULL )			// restore original current object
+			if ( cur2 != NULL )					// restore original current object
 				r = cur2;
 
 		break;
@@ -2867,7 +2861,7 @@ object *object::operate( void )
 		// Create model report
 		case 36:
 
-			sim->root->report( );
+			sim.root->report( );
 
 		break;
 
@@ -2884,7 +2878,7 @@ object *object::operate( void )
 		case 37:
 
 			choice = 0;
-			if ( sim->eff_t == 0 )
+			if ( sim.eff_t == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Simulation not run, nothing to save\" -detail \"Select menu option Run>Run before using this option.\"" );
 				break;
@@ -2901,7 +2895,7 @@ object *object::operate( void )
 			timeinfo = localtime( &rawtime );
 			strftime ( ftime, 80, "%Y%m%d-%H%M%S", timeinfo );
 
-			cmd( "set lab \"%s_%s\"", strlen( sim->conf_name ) > 0 ? sim->conf_name : "results", ftime );
+			cmd( "set lab \"%s_%s\"", strlen( sim.conf_name ) > 0 ? sim.conf_name : "results", ftime );
 
 			// choose a name
 			cmd( "newtop .n \"Save Results\" { set choice 2 }" );
@@ -2945,33 +2939,33 @@ object *object::operate( void )
 
 			get_str( "lab", ch1, MAX_ELEM_LENGTH );
 
-			if ( saveConf && strlen( sim->conf_name ) > 0 )
+			if ( saveConf && strlen( sim.conf_name ) > 0 )
 			{
-				if ( strlen( sim->conf_path ) == 0 )
+				if ( strlen( sim.conf_path ) == 0 )
 				{
-					cmd( "file copy -force %s.lsd %s.lsd", sim->conf_name, ch1 );
+					cmd( "file copy -force %s.lsd %s.lsd", sim.conf_name, ch1 );
 					plog( "\nSaved configuration to file %s.lsd", ch1 );
 				}
 				else
 				{
-					cmd( "file copy -force %s/%s.lsd %s/%s.lsd", sim->conf_path, sim->conf_name, sim->conf_path, ch1 );
-					plog( "\nSaved configuration to file %s/%s.lsd", sim->conf_path, ch1 );
+					cmd( "file copy -force %s/%s.lsd %s/%s.lsd", sim.conf_path, sim.conf_name, sim.conf_path, ch1 );
+					plog( "\nSaved configuration to file %s/%s.lsd", sim.conf_path, ch1 );
 				}
 			}
 
-			if ( strlen( sim->conf_path ) == 0 )
+			if ( strlen( sim.conf_path ) == 0 )
 				snprintf( out_file, MAX_PATH_LENGTH, "%s.%s", ch1, docsv ? "csv" : "res" );
 			else
-				snprintf( out_file, MAX_PATH_LENGTH, "%s/%s.%s", sim->conf_path, ch1, docsv ? "csv" : "res" );
+				snprintf( out_file, MAX_PATH_LENGTH, "%s/%s.%s", sim.conf_path, ch1, docsv ? "csv" : "res" );
 
 			if ( dozip )
 				strcatn( out_file, ".gz", MAX_PATH_LENGTH );
 
 			plog( "\nSaving results to file %s... ", out_file );
 
-			rf = new result( out_file, "wt", sim, dozip, docsv );// create results file object
-			rf->title( sim->root, 1 );					// write header
-			rf->data( sim->root, 0, sim->eff_t );		// write all data
+			rf = new result( out_file, "wt", & sim, dozip, docsv );// create results file object
+			rf->title( sim.root, 1 );					// write header
+			rf->data( sim.root, 0, sim.eff_t );			// write all data
 			delete rf;									// close file and delete object
 
 			plog( "Done\n" );
@@ -2992,7 +2986,7 @@ object *object::operate( void )
 		// Create automatically the elements descriptions
 		case 43:
 
-			if ( ! sim->conf_ok )
+			if ( ! sim.conf_ok )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to update descriptions.\"" );
 				break;
@@ -3104,7 +3098,7 @@ object *object::operate( void )
 		// find an object or element of the model
 		case 50:
 
-			if ( ! sim->conf_ok )
+			if ( ! sim.conf_ok )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to find elements.\"" );
 				break;
@@ -3161,7 +3155,7 @@ object *object::operate( void )
 			cur = NULL;
 			cv = NULL;
 			if ( eval_bool( "\"$bidi\" eq \"Root\"" ) )
-				cur = sim->root;
+				cur = sim.root;
 			else
 				if ( eval_bool( "\"$bidi\" in $modObj" ) )
 					cur = r->search( get_str( "bidi" ), false, false );
@@ -3198,19 +3192,19 @@ object *object::operate( void )
 			Used to re-generate the equations used for the current configuration file
 			*/
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to offload an equation file.\"" );
 				break;
 			}
 
-			if ( ! strcmp( eq_txt, sim->conf_eq_txt ) )
+			if ( ! strcmp( eq_txt, sim.conf_eq_txt ) )
 			{
 				cmd( "ttk::messageBox -parent . -title \"Offload Equations\" -icon info -message \"Nothing to do\" -detail \"There are no equations to be offloaded differing from the current equation file.\" -type ok" );
 				break;
 			}
 
-			cmd( "set res1 fun_%s.cpp", sim->conf_name );
+			cmd( "set res1 fun_%s.cpp", sim.conf_name );
 			cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ]", model_path );
 
 			cmd( "if { [ string length $bah ] > 0 } { set choice 1; set res1 [ file tail $bah ] } { set choice 0 }" );
@@ -3223,7 +3217,7 @@ object *object::operate( void )
 
 			if ( ( f = fopen( lab, "wb" ) ) != NULL )
 			{
-				fprintf( f, "%s", sim->conf_eq_txt );
+				fprintf( f, "%s", sim.conf_eq_txt );
 				fclose( f );
 				cmd( "ttk::messageBox -parent . -title \"Offload Equations\" -icon info -message \"Equation file '$res1' created\" -detail \"You need to create a new LSD model to use these equations, replacing the name of the equation file in LMM with the command 'Model Compilation Options' (menu Model).\" -type ok" );
 			}
@@ -3236,13 +3230,13 @@ object *object::operate( void )
 		// Compare equation files
 		case 53:
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to compare equation files.\"" );
 				break;
 			}
 
-			if ( strlen( sim->conf_eq_txt ) == 0 )
+			if ( strlen( sim.conf_eq_txt ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon Warning -title Warning -message \"No equations loaded\" -detail \"Please upload an equation file before trying to compare equation files.\"" );
 				break;
@@ -3250,15 +3244,15 @@ object *object::operate( void )
 
 			cmd( "set tmpdir [ temp_dir ]" );
 			lab1 = get_str( "tmpdir" );
-			snprintf( lab_old, 2 * MAX_PATH_LENGTH, "%s/orig-eq_%s.tmp", lab1, sim->conf_name);
+			snprintf( lab_old, 2 * MAX_PATH_LENGTH, "%s/orig-eq_%s.tmp", lab1, sim.conf_name);
 
 			if ( ( f = fopen( lab_old, "wb" ) ) != NULL )
 			{
-				fprintf( f, "%s", sim->conf_eq_txt );
+				fprintf( f, "%s", sim.conf_eq_txt );
 				fclose( f );
 
 				read_eqfile_name( lab, MAX_PATH_LENGTH );
-				cmd( "open_diff %s %s %s %s.lsd", lab, lab_old, eq_file, sim->conf_name  );
+				cmd( "open_diff %s %s %s %s.lsd", lab, lab_old, eq_file, sim.conf_name  );
 			}
 			else
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s' cannot be saved\" -detail \"Check if the file already exists and is set READ-ONLY.\"", lab_old );
@@ -3269,15 +3263,15 @@ object *object::operate( void )
 		// Compare configuration files
 		case 82:
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 || strlen( sim->conf_file ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 || strlen( sim.conf_file ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to compare configuration files.\"" );
 				break;
 			}
 
 			// make sure there is a path set
-			cmd( "set path \"%s\"", sim->conf_path );
-			if ( strlen( sim->conf_path ) > 0 )
+			cmd( "set path \"%s\"", sim.conf_path );
+			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			cmd( "set res1 [ tk_getOpenFile -parent . -title \"Select Configuration File to Compare to\" -initialdir \"$path\" -filetypes { { {LSD configuration files} {.lsd} } } ]" );
@@ -3299,8 +3293,8 @@ object *object::operate( void )
 
 			cmd( "set tmpdir [ temp_dir ]" );
 			cmd( "file copy -force -- $res1 \"$tmpdir/ext-cfg.tmp\"" );
-			cmd( "file copy -force -- %s \"$tmpdir/int-cfg.tmp\"", sim->conf_file );
-			cmd( "open_diff \"$tmpdir/ext-cfg.tmp\" \"$tmpdir/int-cfg.tmp\" %s %s.lsd", lab2, sim->conf_name );
+			cmd( "file copy -force -- %s \"$tmpdir/int-cfg.tmp\"", sim.conf_file );
+			cmd( "open_diff \"$tmpdir/ext-cfg.tmp\" \"$tmpdir/int-cfg.tmp\" %s %s.lsd", lab2, sim.conf_name );
 
 		break;
 
@@ -3321,13 +3315,13 @@ object *object::operate( void )
 
 			table = ( choice == 57 ) ? true : false;
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to create LaTex code.\"" );
 				break;
 			}
 
-			snprintf( out_file, MAX_PATH_LENGTH, "%s%s%s_%s.tex", strlen( sim->conf_path ) > 0 ? sim->conf_path : "", strlen( sim->conf_path ) > 0 ? "/" : "", table ? "table" : "href", sim->conf_name );
+			snprintf( out_file, MAX_PATH_LENGTH, "%s%s%s_%s.tex", strlen( sim.conf_path ) > 0 ? sim.conf_path : "", strlen( sim.conf_path ) > 0 ? "/" : "", table ? "table" : "href", sim.conf_name );
 			cmd( "set choice [ file exists %s ]", out_file );
 			if ( choice == 1 )
 			{
@@ -3352,25 +3346,25 @@ object *object::operate( void )
 			if ( stop )
 				goto end_latex;
 
-			sim->root->tex_report_struct( f, table );
+			sim.root->tex_report_struct( f, table );
 			cmd( "prgboxupdate .ptex 2" );
 
 			if ( stop )
 				goto end_latex;
 
-			sim->root->tex_report_observe( f, table );
+			sim.root->tex_report_observe( f, table );
 			cmd( "prgboxupdate .ptex 3" );
 
 			if ( stop )
 				goto end_latex;
 
-			sim->root->tex_report_init( f, table );
+			sim.root->tex_report_init( f, table );
 			cmd( "prgboxupdate .ptex 4" );
 
 			if ( stop )
 				goto end_latex;
 
-			sim->root->tex_report_initall( f, table );
+			sim.root->tex_report_initall( f, table );
 			cmd( "prgboxupdate .ptex 5" );
 
 			if ( stop )
@@ -3475,7 +3469,7 @@ object *object::operate( void )
 		// Create parallel sensitivity analysis configuration
 		case 62:
 
-			if ( sim->sens != NULL )
+			if ( sim.sens != NULL )
 			{
 				if ( ! discard_change( false ) )	// unsaved configuration?
 					break;
@@ -3491,15 +3485,15 @@ object *object::operate( void )
 					if ( sensitivity_too_large( ptsSa ) )
 						break;
 
-				for ( i = 1, cs = sim->sens; cs!=NULL; cs = cs->next )
+				for ( i = 1, cs = sim.sens; cs!=NULL; cs = cs->next )
 					i *= cs->numv;
-				cur = sim->root->b->head;
-				sim->root->add_n_objects2( cur->label, i - 1, cur );
+				cur = sim.root->b->head;
+				sim.root->add_n_objects2( cur->label, i - 1, cur );
 
 				plog( "\nUpdating configuration... " );
 				cmd( "focustop .log" );
 
-				cur->sensitivity_parallel( sim->sens );
+				cur->sensitivity_parallel( sim.sens );
 
 				plog( "Done\n" );
 
@@ -3517,13 +3511,13 @@ object *object::operate( void )
 		// Create batch sensitivity analysis configuration
 		case 63:
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to create a sensitivity analysis configuration.\"" );
 				break;
 			}
 
-			if ( sim->sens != NULL )
+			if ( sim.sens != NULL )
 			{
 				if ( ! discard_change( false ) )	// unsaved configuration?
 					break;
@@ -3540,12 +3534,12 @@ object *object::operate( void )
 						break;
 
 				// detect the need of a new save path and create it if required
-				if ( need_res_dir( sim->conf_path, sim->conf_name, path_sens, MAX_PATH_LENGTH ) )
+				if ( need_res_dir( sim.conf_path, sim.conf_name, path_sens, MAX_PATH_LENGTH ) )
 					create_res_dir( path_sens );
 
 				// ask to clean existing files before proceeding if required
-				if ( check_res_dir( path_sens, sim->conf_name ) && sensitivity_clean_dir( path_sens ) )
-					clean_res_dir( path_sens, sim->conf_name );
+				if ( check_res_dir( path_sens, sim.conf_name ) && sensitivity_clean_dir( path_sens ) )
+					clean_res_dir( path_sens, sim.conf_name );
 
 				// save the current object & cursor position for quick reload
 				r->save_pos( );
@@ -3557,7 +3551,7 @@ object *object::operate( void )
 				stop = false;
 				cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\"  %d { set stop true }", ptsSa );
 
-				sensitivity_sequential( &findexSens, sim->sens, 1.0, path_sens );
+				sensitivity_sequential( &findexSens, sim.sens, 1.0, path_sens );
 
 				cmd( "destroytop .psa" );
 
@@ -3565,7 +3559,7 @@ object *object::operate( void )
 
 				// if succeeded, explain user how to proceed
 				if ( ! stop )
-					sensitivity_created( path_sens, clean_file( sim->conf_name ), 1 );
+					sensitivity_created( path_sens, clean_file( sim.conf_name ), 1 );
 				else
 					findexSens = 0;					// don't consider for appending
 
@@ -3573,7 +3567,7 @@ object *object::operate( void )
 				if ( ! load_prev_configuration( ) )
 				{
 					choice = 0;
-					return sim->root;
+					return sim.root;
 				}
 
 				// restore pointed object and variable
@@ -3588,13 +3582,13 @@ object *object::operate( void )
 		// Create Monte Carlo (MC) random sensitivity analysis sampling configuration (over user selected point values)
 		case 71:
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to create a sensitivity analysis configuration.\"" );
 				break;
 			}
 
-			if ( sim->sens != NULL )
+			if ( sim.sens != NULL )
 			{
 				if ( ! discard_change( false ) )	// unsaved configuration?
 					break;
@@ -3609,7 +3603,7 @@ object *object::operate( void )
 				Tcl_LinkVar( interp, "fracMC", ( char * ) & fracMC, TCL_LINK_DOUBLE );
 
 				// detect the need of a new save path
-				subDir = need_res_dir( sim->conf_path, sim->conf_name, path_sens, MAX_PATH_LENGTH );
+				subDir = need_res_dir( sim.conf_path, sim.conf_name, path_sens, MAX_PATH_LENGTH );
 
 				cmd( "newtop .s \"MC Point Sampling\" { set choice 2 }" );
 
@@ -3666,8 +3660,8 @@ object *object::operate( void )
 					create_res_dir( path_sens );
 
 				// ask to clean existing files before proceeding if required
-				if ( check_res_dir( path_sens, sim->conf_name ) && sensitivity_clean_dir( path_sens ) )
-					clean_res_dir( path_sens, sim->conf_name );
+				if ( check_res_dir( path_sens, sim.conf_name ) && sensitivity_clean_dir( path_sens ) )
+					clean_res_dir( path_sens, sim.conf_name );
 
 				// save the current object & cursor position for quick reload
 				r->save_pos( );
@@ -3681,8 +3675,8 @@ object *object::operate( void )
 				stop = false;
 				cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\" %ld { set stop true }", ( long ) ( fracMC * maxMC ) );
 
-				init_random( sim->seed );			// reset random number generator
-				sensitivity_sequential( &findexSens, sim->sens, fracMC, path_sens );
+				sim.init_random( sim.seed );		// reset random number generator
+				sensitivity_sequential( &findexSens, sim.sens, fracMC, path_sens );
 
 				cmd( "destroytop .psa" );
 
@@ -3690,7 +3684,7 @@ object *object::operate( void )
 
 				// if succeeded, explain user how to proceed
 				if ( ! stop )
-					sensitivity_created( path_sens, clean_file( sim->conf_name ), 1 );
+					sensitivity_created( path_sens, clean_file( sim.conf_name ), 1 );
 				else
 					findexSens = 0;					// don't consider for appending
 
@@ -3698,7 +3692,7 @@ object *object::operate( void )
 				if ( ! load_prev_configuration( ) )
 				{
 					choice = 0;
-					return sim->root;
+					return sim.root;
 				}
 
 				// restore pointed object and variable
@@ -3713,13 +3707,13 @@ object *object::operate( void )
 		// Create Near Orthogonal Latin Hypercube (NOLH) sensitivity analysis sampling configuration
 		case 72:
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to create a sensitivity analysis configuration.\"" );
 				break;
 			}
 
-			if ( sim->sens != NULL )
+			if ( sim.sens != NULL )
 			{
 				if ( ! discard_change( false ) )	// unsaved configuration?
 					break;
@@ -3729,7 +3723,7 @@ object *object::operate( void )
 				lab1 = NOLH_valid_tables( varSA, ch, 2 * MAX_LINE_SIZE );
 
 				// detect the need of a new save path
-				subDir = need_res_dir( sim->conf_path, sim->conf_name, path_sens, MAX_PATH_LENGTH );
+				subDir = need_res_dir( sim.conf_path, sim.conf_name, path_sens, MAX_PATH_LENGTH );
 
 				cmd( "set extdoe 0" );	// flag for using external DoE file
 				cmd( "set NOLHfile \"NOLH.csv\"" );
@@ -3785,8 +3779,8 @@ object *object::operate( void )
 					create_res_dir( path_sens );
 
 				// ask to clean existing files before proceeding if required
-				if ( check_res_dir( path_sens, sim->conf_name ) && sensitivity_clean_dir( path_sens ) )
-					clean_res_dir( path_sens, sim->conf_name );
+				if ( check_res_dir( path_sens, sim.conf_name ) && sensitivity_clean_dir( path_sens ) )
+					clean_res_dir( path_sens, sim.conf_name );
 
 				if ( ! get_bool( "extdoe" ) )
 					strcpy( NOLHfile, "" );
@@ -3796,7 +3790,7 @@ object *object::operate( void )
 				num = ( sscanf( get_str( "doesize" ), "%d\u00D7", & j ) > 0 ) ? j : 0;
 
 				// adjust an NOLH design of experiment (DoE) for the sensitivity data
-				doe = new design( sim->sens, 1, NOLHfile, path_sens, 1, get_bool( "doeext" ) ? -1 : 0, num );
+				doe = new design( sim.sens, 1, NOLHfile, path_sens, 1, get_bool( "doeext" ) ? -1 : 0, num );
 
 				if ( doe -> n == 0 )					// DoE configuration is not ok?
 				{
@@ -3835,7 +3829,7 @@ object *object::operate( void )
 				if ( ! load_prev_configuration( ) )
 				{
 					choice = 0;
-					return sim->root;
+					return sim.root;
 				}
 
 				// restore pointed object and variable
@@ -3859,13 +3853,13 @@ object *object::operate( void )
 		// Create Monte Carlo (MC) random sensitivity analysis sampling configuration (over selected range values)
 		case 80:
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to create a sensitivity analysis configuration.\"" );
 				break;
 			}
 
-			if ( sim->sens != NULL )
+			if ( sim.sens != NULL )
 			{
 				if ( ! discard_change( false ) )	// unsaved configuration?
 					break;
@@ -3878,7 +3872,7 @@ object *object::operate( void )
 				Tcl_LinkVar( interp, "sizMC", ( char * ) & sizMC, TCL_LINK_INT );
 
 				// detect the need of a new save path
-				subDir = need_res_dir( sim->conf_path, sim->conf_name, path_sens, MAX_PATH_LENGTH );
+				subDir = need_res_dir( sim.conf_path, sim.conf_name, path_sens, MAX_PATH_LENGTH );
 
 				cmd( "set applst 1" );	// flag for appending to existing configuration files
 
@@ -3938,15 +3932,15 @@ object *object::operate( void )
 					create_res_dir( path_sens );
 
 				// ask to clean existing files before proceeding if required
-				if ( findexSens == 1 && check_res_dir( path_sens, sim->conf_name ) && sensitivity_clean_dir( path_sens ) )
-					clean_res_dir( path_sens, sim->conf_name );
+				if ( findexSens == 1 && check_res_dir( path_sens, sim.conf_name ) && sensitivity_clean_dir( path_sens ) )
+					clean_res_dir( path_sens, sim.conf_name );
 
 				// save the current object & cursor position for quick reload
 				r->save_pos( );
 
 				// check if design file numbering should pick-up from previously generated files
 				// adjust a design of experiment (DoE) for the sensitivity data
-				doe = new design( sim->sens, 2, "", path_sens, findexSens, sizMC );
+				doe = new design( sim.sens, 2, "", path_sens, findexSens, sizMC );
 				sensitivity_doe( &findexSens, doe, path_sens );
 				delete doe;
 
@@ -3954,7 +3948,7 @@ object *object::operate( void )
 				if ( ! load_prev_configuration( ) )
 				{
 					choice = 0;
-					return sim->root;
+					return sim.root;
 				}
 
 				// restore pointed object and variable
@@ -3969,13 +3963,13 @@ object *object::operate( void )
 		// Create Elementary Effects (EE) sensitivity analysis sampling configuration (over selected range values)
 		case 81:
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to create a sensitivity analysis configuration.\"" );
 				break;
 			}
 
-			if ( sim->sens != NULL )
+			if ( sim.sens != NULL )
 			{
 				if ( ! discard_change( false ) )	// unsaved configuration?
 					break;
@@ -3992,7 +3986,7 @@ object *object::operate( void )
 				Tcl_LinkVar( interp, "nSampl", ( char * ) & nSampl, TCL_LINK_INT );
 
 				// detect the need of a new save path
-				subDir = need_res_dir( sim->conf_path, sim->conf_name, path_sens, MAX_PATH_LENGTH );
+				subDir = need_res_dir( sim.conf_path, sim.conf_name, path_sens, MAX_PATH_LENGTH );
 
 				cmd( "newtop .s \"Elementary Effects Sampling\" { set choice 2 }" );
 
@@ -4077,15 +4071,15 @@ object *object::operate( void )
 					create_res_dir( path_sens );
 
 				// ask to clean existing files before proceeding if required
-				if ( check_res_dir( path_sens, sim->conf_name ) && sensitivity_clean_dir( path_sens ) )
-					clean_res_dir( path_sens, sim->conf_name );
+				if ( check_res_dir( path_sens, sim.conf_name ) && sensitivity_clean_dir( path_sens ) )
+					clean_res_dir( path_sens, sim.conf_name );
 
 				// save the current object & cursor position for quick reload
 				r->save_pos( );
 				findexSens = 1;
 
 				// adjust a design of experiment (DoE) for the sensitivity data
-				doe = new design( sim->sens, 3, "", path_sens, findexSens, nSampl, nLevels, jumpSz, nTraj );
+				doe = new design( sim.sens, 3, "", path_sens, findexSens, nSampl, nLevels, jumpSz, nTraj );
 				sensitivity_doe( &findexSens, doe, path_sens );
 				delete doe;
 
@@ -4093,7 +4087,7 @@ object *object::operate( void )
 				if ( ! load_prev_configuration( ) )
 				{
 					choice = 0;
-					return sim->root;
+					return sim.root;
 				}
 
 				// restore pointed object and variable
@@ -4109,30 +4103,30 @@ object *object::operate( void )
 		case 64:
 
 			// check a model is already loaded
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to import a sensitivity analysis configuration.\"" );
 				break;
 			}
 
 			// check for existing sensitivity data loaded
-			if ( sim->sens != NULL )
+			if ( sim.sens != NULL )
 			{
 				cmd( "set answer [ ttk::messageBox -parent . -type okcancel -icon warning -default ok -title Warning -message \"Sensitivity data already loaded\" -detail \"Press 'OK' if you want to discard the existing data before importing a new sensitivity configuration.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } }" );
 				if ( choice == 2 )
 					break;
 
 				// empty sensitivity data
-				sim->empty_sensitivity( );				// discard read data
+				sim.empty_sensitivity( );				// discard read data
 				NOLH_clear( );							// deallocate DoE
 				unsavedSense = false;					// nothing to save
 				findexSens = 0;
 			}
 
 			// set default name and path to conf. file folder
-			cmd( "set res \"%s\"", sim->conf_name );
-			cmd( "set path \"%s\"", sim->conf_path );
-			if ( strlen( sim->conf_path ) > 0 )
+			cmd( "set res \"%s\"", sim.conf_name );
+			cmd( "set path \"%s\"", sim.conf_path );
+			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			// open dialog box to get file name & folder
@@ -4169,23 +4163,23 @@ object *object::operate( void )
 		case 65:
 
 			// check a model is already loaded
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to export a sensitivity analysis configuration.\"" );
 				break;
 			}
 
 			// check for existing sensitivity data loaded
-			if ( sim->sens == NULL )
+			if ( sim.sens == NULL )
 			{
 				sensitivity_undefined( );			// throw error
 				break;
 			}
 
 			// default file name and path
-			cmd( "set res %s", sim->conf_name );
-			cmd( "set path \"%s\"", sim->conf_path );
-			if ( strlen( sim->conf_path ) > 0 )
+			cmd( "set res %s", sim.conf_name );
+			cmd( "set path \"%s\"", sim.conf_path );
+			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			// open dialog box to get file name & folder
@@ -4223,18 +4217,18 @@ object *object::operate( void )
 		// export configuration in legacy LSD format
 		case 9:
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration to export\" -detail \"Please load or create and load a configuration before trying to export to legacy LSD format.\"" );
 				break;
 			}
 
 			// default file name
-			cmd( "set res %s-legacy", sim->conf_name );
+			cmd( "set res %s-legacy", sim.conf_name );
 
 			// make sure there is a path set
-			cmd( "set path \"%s\"", sim->conf_path );
-			if ( strlen( sim->conf_path ) > 0 )
+			cmd( "set path \"%s\"", sim.conf_path );
+			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			// open dialog box to get file name & folder
@@ -4255,7 +4249,7 @@ object *object::operate( void )
 		// export saved elements details
 		case 91:
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration to export\" -detail \"Please load or create and load a configuration before trying to export the details on the elements to save.\"" );
 				break;
@@ -4263,7 +4257,7 @@ object *object::operate( void )
 
 			// warn about no variable being saved
 			i = 0;
-			sim->root->count_save( & i );
+			sim.root->count_save( & i );
 			if ( i == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"Please mark the variables and parameters to be saved before trying to export the details on the elements to save.\"" );
@@ -4271,11 +4265,11 @@ object *object::operate( void )
 			}
 
 			// default file name
-			cmd( "set res %s-saved", sim->conf_name );
+			cmd( "set res %s-saved", sim.conf_name );
 
 			// make sure there is a path set
-			cmd( "set path \"%s\"", sim->conf_path );
-			if ( strlen( sim->conf_path ) > 0 )
+			cmd( "set path \"%s\"", sim.conf_path );
+			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			// open dialog box to get file name & folder
@@ -4302,7 +4296,7 @@ object *object::operate( void )
 
 			// write .csv header & content
 			fprintf( f, "Name%sType%sObject%sDescription\n", ch, ch, ch );
-			sim->root->get_saved( f, ch );
+			sim.root->get_saved( f, ch );
 			fclose( f );
 
 		break;
@@ -4311,25 +4305,25 @@ object *object::operate( void )
 		// export sensitivity configuration as a .csv file
 		case 90:
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to save a sensitivity analysis configuration.\"" );
 				break;
 			}
 
 			// check for existing sensitivity data loaded
-			if ( sim->sens == NULL )
+			if ( sim.sens == NULL )
 			{
 				sensitivity_undefined( );			// throw error
 				break;
 			}
 
 			// default file name
-			cmd( "set res %s-limits", sim->conf_name );
+			cmd( "set res %s-limits", sim.conf_name );
 
 			// make sure there is a path set
-			cmd( "set path \"%s\"", sim->conf_path );
-			if ( strlen( sim->conf_path ) > 0 )
+			cmd( "set path \"%s\"", sim.conf_path );
+			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			// open dialog box to get file name & folder
@@ -4370,7 +4364,7 @@ object *object::operate( void )
 			choice = 50;
 
 			// check for existing sensitivity data loaded
-			if ( sim->sens == NULL )
+			if ( sim.sens == NULL )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"There is no sensitivity data to show\"" );
 				break;
@@ -4378,7 +4372,7 @@ object *object::operate( void )
 
 			// print data to log window
 			plog( "\n\nVariables and parameters set for sensitivity analysis :\n" );
-			for ( cs = sim->sens; cs != NULL; cs = cs->next )
+			for ( cs = sim.sens; cs != NULL; cs = cs->next )
 			{
 				if ( cs->param == 1 )
 					plog( "Param: %s\\[%s\\]\t#%d:\t", cs->label, cs->integer ? "int" : "flt", cs->numv );
@@ -4399,7 +4393,7 @@ object *object::operate( void )
 			choice = 0;
 
 			// check for existing sensitivity data loaded
-			if ( sim->sens == NULL )
+			if ( sim.sens == NULL )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No sensitivity data to remove\"" );
 				break;
@@ -4409,7 +4403,7 @@ object *object::operate( void )
 				break;
 
 			// empty sensitivity data
-			sim->empty_sensitivity( );				// discard read data
+			sim.empty_sensitivity( );				// discard read data
 			NOLH_clear( );							// deallocate DoE
 			plog( "\nSensitivity data removed.\n" );
 			unsavedSense = false;					// nothing to save
@@ -4422,14 +4416,14 @@ object *object::operate( void )
 		case 68:
 
 			// check a model is already loaded
-			if ( ! sim->conf_ok )
-				findexSens = 0;									// no sensitivity created
+			if ( ! sim.conf_ok )
+				findexSens = 0;						// no sensitivity created
 			else
-				if ( ! discard_change( false ) )				// unsaved configuration?
+				if ( ! discard_change( false ) )	// unsaved configuration?
 					break;
 
 			// check for existing NW executable
-			snprintf( nw_exe, MAX_PATH_LENGTH, "%s/lsdNW", model_path );	// form full executable name
+			snprintf( nw_exe, MAX_PATH_LENGTH, "%s/lsdNW", model_path );// form full executable name
 			if ( platform == _WIN_ )
 				strcatn( nw_exe, ".exe", MAX_PATH_LENGTH );	// add Windows ending
 
@@ -4468,7 +4462,7 @@ object *object::operate( void )
 			// get configuration files to use
 			if ( choice == 1 )							// use current configuration files
 			{
-				if ( strlen( path_sens ) == 0 || strlen( sim->conf_name ) == 0 )
+				if ( strlen( path_sens ) == 0 || strlen( sim.conf_name ) == 0 )
 				{
 					cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid simulation folder or name\" -detail \"Please try again.\"" );
 					findexSens = 0;						// no sensitivity created
@@ -4478,10 +4472,10 @@ object *object::operate( void )
 				ffirst = fSeq = 1;
 				fnext = findexSens;
 				findexSens = 0;
-				strcpyn( out_file, sim->conf_name, MAX_PATH_LENGTH );
+				strcpyn( out_file, sim.conf_name, MAX_PATH_LENGTH );
 				strcpyn( out_dir, path_sens, MAX_PATH_LENGTH );
-				cmd( "set res \"%s\"", sim->conf_name );
-				cmd( "set path \"%s\"", sim->conf_path );
+				cmd( "set res \"%s\"", sim.conf_name );
+				cmd( "set path \"%s\"", sim.conf_path );
 			}
 			else										// ask for first configuration file
 			{
@@ -4491,13 +4485,13 @@ object *object::operate( void )
 				else
 					fSeq = choice;
 
-				if ( fSeq && strlen( sim->conf_name ) > 0 )// default name
-					cmd( "set res \"%s_1.lsd\"", sim->conf_name );
+				if ( fSeq && strlen( sim.conf_name ) > 0 )// default name
+					cmd( "set res \"%s_1.lsd\"", sim.conf_name );
 				else
 					cmd( "set res \"\"" );
 
-				cmd( "set path \"%s\"", sim->conf_path );
-				if ( strlen( sim->conf_path ) > 0 )
+				cmd( "set path \"%s\"", sim.conf_path );
+				if ( strlen( sim.conf_path ) > 0 )
 					cmd( "cd \"$path\"" );
 
 				// open dialog box to get file name & folder
@@ -4843,7 +4837,7 @@ object *object::operate( void )
 		// Start NO WINDOW job as a separate background process
 		case 69:
 
-	#ifndef _NP_
+#ifndef _NP_
 
 			// check if background are not being run already
 			if ( parallel_monitor )
@@ -4860,10 +4854,10 @@ object *object::operate( void )
 				}
 			}
 
-	#endif
+#endif
 
 			// check a model is already loaded
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 || strlen( sim->conf_file ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 || strlen( sim.conf_file ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to start a parallel run.\"" );
 				break;
@@ -4900,10 +4894,10 @@ object *object::operate( void )
 			}
 
 			// remove any custom save path (save to current by default)
-			sim->results_alt_path( "" );
+			sim.results_alt_path( "" );
 
 			// detect the need of a new save path and if it has results files
-			subDir = need_res_dir( sim->conf_path, sim->conf_name, out_dir, MAX_PATH_LENGTH );
+			subDir = need_res_dir( sim.conf_path, sim.conf_name, out_dir, MAX_PATH_LENGTH );
 			overwDir = check_res_dir( out_dir );
 
 			Tcl_LinkVar( interp, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
@@ -4921,16 +4915,16 @@ object *object::operate( void )
 			if ( no_tot )
 				no_res = false;
 
-	#ifdef _NP_
+#ifdef _NP_
 			param = 1;
-	#else
-			param = min( sim->last_run, max_threads );
-	#endif
+#else
+			param = min( sim.last_run, max_threads );
+#endif
 
-			cmd( "set simNum %d", sim->last_run );
-			cmd( "set firstFile \"%s_%d\"", sim->conf_name, sim->seed );
-			cmd( "set lastFile \"%s_%d\"", sim->conf_name, sim->seed + sim->last_run - 1 );
-			cmd( "set totFile \"%s\"", sim->conf_name );
+			cmd( "set simNum %d", sim.last_run );
+			cmd( "set firstFile \"%s_%d\"", sim.conf_name, sim.seed );
+			cmd( "set lastFile \"%s_%d\"", sim.conf_name, sim.seed + sim.last_run - 1 );
+			cmd( "set totFile \"%s\"", sim.conf_name );
 			cmd( "set resExt %s", docsv ? "csv" : "res" );
 			cmd( "set totExt %s", docsv ? "csv" : "tot" );
 			cmd( "set zipExt %s", dozip ? ".gz" : "" );
@@ -4943,19 +4937,19 @@ object *object::operate( void )
 
 			cmd( "ttk::frame $b.f1" );
 			cmd( "ttk::label $b.f1.l -text \"Model configuration\"" );
-			cmd( "ttk::label $b.f1.w -text \"%s\" -style hl.TLabel", sim->conf_name );
+			cmd( "ttk::label $b.f1.w -text \"%s\" -style hl.TLabel", sim.conf_name );
 			cmd( "pack $b.f1.l $b.f1.w" );
 
 			cmd( "ttk::frame $b.f2" );
 
 			cmd( "ttk::frame $b.f2.t" );
 			cmd( "ttk::label $b.f2.t.l -text \"Cases:\"" );
-			cmd( "ttk::label $b.f2.t.w -text \"%d\" -style hl.TLabel", sim->last_t );
+			cmd( "ttk::label $b.f2.t.w -text \"%d\" -style hl.TLabel", sim.last_t );
 			cmd( "pack $b.f2.t.l $b.f2.t.w -side left -padx 2" );
 
 			cmd( "ttk::frame $b.f2.n" );
 			cmd( "ttk::label $b.f2.n.l -text \"Number of simulations:\"" );
-			cmd( "ttk::label $b.f2.n.w -text \"%d\" -style hl.TLabel", sim->last_run );
+			cmd( "ttk::label $b.f2.n.w -text \"%d\" -style hl.TLabel", sim.last_run );
 			cmd( "pack $b.f2.n.l $b.f2.n.w -side left -padx 2" );
 			cmd( "pack $b.f2.t $b.f2.n" );
 
@@ -4967,7 +4961,7 @@ object *object::operate( void )
 			cmd( "ttk::frame $b.f4" );
 			cmd( "ttk::label $b.f4.l -text \"Results file(s)\"" );
 
-			if ( sim->last_run > 1 )	// multiple runs case
+			if ( sim.last_run > 1 )	// multiple runs case
 			{
 				cmd( "ttk::frame $b.f4.w" );
 
@@ -5003,7 +4997,7 @@ object *object::operate( void )
 
 			cmd( "ttk::frame $b.f6" );
 			cmd( "ttk::label $b.f6.l -text \"Parallel runs\"" );
-			cmd( "ttk::spinbox $b.f6.e -width 5 -from 1 -to %d -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center -state %s", param, ( no_tot && sim->last_run > 1 && param > 1 ) ? "normal" : "disabled" );
+			cmd( "ttk::spinbox $b.f6.e -width 5 -from 1 -to %d -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center -state %s", param, ( no_tot && sim.last_run > 1 && param > 1 ) ? "normal" : "disabled" );
 			cmd( "write_any $b.f6.e $cores" );
 			cmd( "pack $b.f6.l $b.f6.e -side left -padx 2" );
 
@@ -5039,7 +5033,7 @@ object *object::operate( void )
 						$b.f5.l2 configure -style dhl.TLabel; \
 						$b.f5.l3 configure -text \"\n\" \
 					} \
-				}", out_dir, strlen( out_dir ) > 0 ? "/" : "", out_dir, strlen( out_dir ) > 0 ? "/" : "", sim->last_run, param );
+				}", out_dir, strlen( out_dir ) > 0 ? "/" : "", out_dir, strlen( out_dir ) > 0 ? "/" : "", sim.last_run, param );
 			cmd( "ttk::checkbutton $b.f7.dozip -text \"Generate zipped files\" -variable dozip -command { \
 					if $dozip { \
 						set zipExt .gz \
@@ -5109,7 +5103,7 @@ object *object::operate( void )
 				break;
 
 			if ( subDir )
-				if ( ! create_res_dir( out_dir ) || ! sim->results_alt_path( out_dir ) )
+				if ( ! create_res_dir( out_dir ) || ! sim.results_alt_path( out_dir ) )
 				{
 					cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Subdirectory '%s' cannot be created\" -detail \"Check if the path is set READ-ONLY, or move your configuration file to a different location.\"", out_dir );
 					break;
@@ -5118,11 +5112,11 @@ object *object::operate( void )
 			if ( overwDir && doover )
 				clean_res_dir( out_dir );
 
-			if ( sim->last_run > 1 && param > 1 && no_tot )				// parallel runs case
+			if ( sim.last_run > 1 && param > 1 && no_tot )		// parallel runs case
 			{
-				param = min( get_int( "cores" ), sim->last_run );
-				param = min( max( param, 1 ), max_threads );		// parallel runs
-				nature = max( max_threads / param, 1 );				// threads per run
+				param = min( get_int( "cores" ), sim.last_run );
+				param = min( max( param, 1 ), max_threads );	// parallel runs
+				nature = max( max_threads / param, 1 );			// threads per run
 			}
 			else
 			{
@@ -5131,40 +5125,40 @@ object *object::operate( void )
 			}
 
 			for ( n = r; n->up != NULL; n = n->up );
-			sim->reset_blueprint( n );		// update blueprint to consider last changes
+			sim.reset_blueprint( n );		// update blueprint to consider last changes
 
 			if ( overwConf )				// save if needed
 			{
 				if ( ! save_xml_configuration( ) )
 				{
-					cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY, or try to save to a different location.\"", sim->conf_name );
+					cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY, or try to save to a different location.\"", sim.conf_name );
 					break;
 				}
 				else
-					unsaved_change( false );	// signal no unsaved change
+					unsaved_change( false );// signal no unsaved change
 			}
 
 			// start the job
 			cmd( "set oldpath [ pwd ]" );
-			cmd( "set path \"%s\"", sim->conf_path );
-			if ( strlen( sim->conf_path ) > 0 )
+			cmd( "set path \"%s\"", sim.conf_path );
+			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd $path" );
 
-	#ifdef _NP_
+#ifdef _NP_
 
-			snprintf( lab, MAX_PATH_LENGTH, "%s.log", sim->conf_name );
-			cmd( "catch { exec %s -f %s%s%s%s%s%s%s%s -l %s & }", nw_exe, sim->conf_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", dobar ? " -b" : "", subDir ? " -o " : "", subDir ? out_dir : "", lab );
+			snprintf( lab, MAX_PATH_LENGTH, "%s.log", sim.conf_name );
+			cmd( "catch { exec %s -f %s%s%s%s%s%s%s%s -l %s & }", nw_exe, sim.conf_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", dobar ? " -b" : "", subDir ? " -o " : "", subDir ? out_dir : "", lab );
 			run_logs.clear( );
 			run_logs.push_back( lab );
 
-	#else
+#else
 
 			plog( "\n\nProcessing parallel background run (threads=%d runs=%d)...", nature, param );
-			sim->run_parallel( false, nw_exe, sim->conf_name, sim->seed, sim->last_run, nature, param );
+			sim.run_parallel( false, nw_exe, sim.conf_name, sim.seed, sim.last_run, nature, param );
 
-	#endif
+#endif
 
-			show_logs( sim->conf_path, run_logs, true );
+			show_logs( sim.conf_path, run_logs, true );
 
 			cmd( "set path $oldpath" );
 			cmd( "cd $path" );
@@ -5175,17 +5169,17 @@ object *object::operate( void )
 		// import network
 		case 88:
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and load one before trying to import a network structure file.\"" );
 				break;
 			}
 
-			cmd( "set bah \"%s\"", sim->conf_name );
+			cmd( "set bah \"%s\"", sim.conf_name );
 
 			// make sure there is a path set
-			cmd( "set path \"%s\"", sim->conf_path );
-			if ( strlen( sim->conf_path ) > 0 )
+			cmd( "set path \"%s\"", sim.conf_path );
+			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
 			cmd( "set bah [ tk_getOpenFile -parent . -title \"Import Network Structure File\"	 -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } { {All files} {*} } } ]" );
@@ -5244,7 +5238,7 @@ object *object::operate( void )
 			cmd( "ttk::listbox $TT.v.t.lb -width 25 -selectmode single -yscroll \"$TT.v.t.v_scroll set\" -dark $darkTheme" );
 			cmd( "pack $TT.v.t.lb $TT.v.t.v_scroll -side left -fill y" );
 			cmd( "mouse_wheel $TT.v.t.lb" );
-			sim->root->insert_object( "$TT.v.t.lb" );
+			sim.root->insert_object( "$TT.v.t.lb" );
 			cmd( "pack $TT.v.l $TT.v.t" );
 
 			cmd( "pack $TT.l $TT.v -padx 5 -pady 5" );
@@ -5284,7 +5278,7 @@ object *object::operate( void )
 
 			plog( "\nImporting network on object '%s' from file %s%s%s%s%s...\n", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
 
-			cur = sim->root->search( lab4 );
+			cur = sim.root->search( lab4 );
 			if ( cur != NULL && cur->up != NULL )
 			{
 				nLinks = cur->up->read_file_net( lab4, lab1, lab2, -1, lab3 );
@@ -5311,7 +5305,7 @@ object *object::operate( void )
 		// export network
 		case 89:
 
-			if ( ! sim->conf_ok || strlen( sim->conf_name ) == 0 )
+			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to export a network structure file.\"" );
 				break;
@@ -5329,7 +5323,7 @@ object *object::operate( void )
 			cmd( "pack $TT.v.t.lb $TT.v.t.v_scroll -side left -fill y" );
 			cmd( "mouse_wheel $TT.v.t.lb" );
 
-			sim->root->insert_object( "$TT.v.t.lb", true );
+			sim.root->insert_object( "$TT.v.t.lb", true );
 			cmd( "set numNets [ $TT.v.t.lb size ]" );
 			if ( get_int( "numNets" ) == 0 )
 			{
@@ -5364,7 +5358,7 @@ object *object::operate( void )
 				break;
 
 			lab4 = get_str( "nodeObj" );
-			cur = sim->root->search( lab4 );
+			cur = sim.root->search( lab4 );
 			if ( cur == NULL || cur->node == NULL || cur->up == NULL )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid object\" -detail \"Please make sure you select an object which is already a node of an existing network.\"" );
@@ -5372,11 +5366,11 @@ object *object::operate( void )
 			}
 
 			// make sure there is a path set
-			cmd( "set path \"%s\"", sim->conf_path );
-			if ( strlen( sim->conf_path ) > 0 )
+			cmd( "set path \"%s\"", sim.conf_path );
+			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd \"$path\"" );
 
-			cmd( "set bah \"%s-%s\"", sim->conf_name, lab4 );
+			cmd( "set bah \"%s-%s\"", sim.conf_name, lab4 );
 			cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Network Structure File\" -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } } ]" );
 			choice = 0;
 			cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { \
@@ -5419,7 +5413,7 @@ object *object::operate( void )
 		// unload network
 		case 93:
 
-			if ( ! sim->conf_ok )
+			if ( ! sim.conf_ok )
 				break;
 
 			if ( ! discard_change( ) )	// check for unsaved configuration changes
@@ -5437,7 +5431,7 @@ object *object::operate( void )
 			cmd( "pack $TT.v.t.lb $TT.v.t.v_scroll -side left -fill y" );
 			cmd( "mouse_wheel $TT.v.t.lb" );
 
-			sim->root->insert_object( "$TT.v.t.lb", true );
+			sim.root->insert_object( "$TT.v.t.lb", true );
 			cmd( "set numNets [ $TT.v.t.lb size ]" );
 			if ( get_int( "numNets" ) == 0 )
 			{
@@ -5472,7 +5466,7 @@ object *object::operate( void )
 				break;
 
 			lab4 = get_str( "nodeObj" );
-			cur = sim->root->search( lab4 );
+			cur = sim.root->search( lab4 );
 			if ( cur == NULL || cur->node == NULL || cur->up == NULL )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid object\" -detail \"Please make sure you select an object which is already a node of an existing network.\"" );
@@ -5527,7 +5521,7 @@ object *object::operate( void )
 		// present parallel run log
 		case 8:
 
-	#ifndef _NP_
+#ifndef _NP_
 
 			// destroy monitor thread
 			if ( run_monitor.joinable( ) )
@@ -5536,7 +5530,7 @@ object *object::operate( void )
 			plog( "\n%s\n", run_log.c_str( ) );
 			plog( "Finished parallel background run\n" );
 
-	#endif
+#endif
 
 		break;
 

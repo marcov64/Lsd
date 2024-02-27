@@ -21,6 +21,10 @@
 
 #include "LSD.h"
 
+#ifndef _NP_
+mutex lock_log_tcl_err;			// lock log_tcl_error for parallel access
+#endif
+
 
 /****************************************************
  LSD_EXIT_GUI (DLL WRAPPER)
@@ -454,7 +458,10 @@ void cmd_backend( const char *cm, va_list arg )
 	// abort if Tcl interpreter not initialized
 	if ( interp == NULL )
 	{
-		fprintf( stderr, "\nTcl interpreter not initialized. Quitting LSD now.\n" );
+#ifdef _LMM_
+		FILE *stderr_ptr = stderr;
+#endif
+		fprintf( stderr_ptr, "\nTcl interpreter not initialized. Quitting LSD now.\n" );
 		lsd_exit_gui( 24 );
 	}
 
@@ -510,9 +517,7 @@ void log_tcl_error( bool show, const char *cm, const char *message, ... )
 	static bool firstCall = true;
 
 #ifndef _NP_
-	// abort if not running in main LSD thread
-	if ( this_thread::get_id( ) != main_thread )
-		return;
+	lock_guard < mutex > lock( lock_log_tcl_err );
 #endif
 
 	va_start( argptr, message );
@@ -1359,7 +1364,7 @@ bool compile_run( int run_mode, bool nw )
 							break;
 
 						case _WIN_:
-							cmd( "while { [ catch { exec -- %s%s%s & } result ] && $n > 0 } { incr n -1; after 50 }", precompiled ? rootLsd : "", precompiled ? "/" : "", str );
+							cmd( "while { [ catch { exec -- [ file nativename \"%s/%s\" ] & } result ] && $n > 0 } { incr n -1; after 50 }", precompiled ? rootLsd : ".", str );
 							break;
 					}
 				}

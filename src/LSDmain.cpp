@@ -36,7 +36,6 @@ int strWindowOn = true;			// presentation of model structure window (bool)
 bool brCovered = false;			// browser cover currently covered
 bool check_save;				// control saving message inside disabled objects
 bool eq_dum = false;			// current equation is dummy
-bool iniShowOnce = false;		// prevent repeating warning on # of columns
 bool log_ok = false;			// control for log window available
 bool meta_par_in[ META_PAR_NUM ];// meta parameter for simulation settings found
 bool pause_run;					// pause running simulation

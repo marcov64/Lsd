@@ -23,7 +23,7 @@ MODELEND
 
 // do not add Equations in this area
 
-void close_sim( void )
-{
-	// close simulation special commands go here
-}
+
+CLOSEBEGIN
+// close simulation special commands go here
+CLOSEEND

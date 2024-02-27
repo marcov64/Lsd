@@ -316,7 +316,7 @@ netLink *object::draw_link_net( void )
 	}
 
 	do
-		drawPoint = ran1( ) * sum;
+		drawPoint = sim->ran1( ) * sum;
 	while ( drawPoint == sum );					// avoid ran1 == 1
 
 	for ( accProb = 0, cur = cur1 = node->first;// accumulate probabilities
@@ -534,7 +534,7 @@ object *object::draw_node_net( const char *lab )
 	}
 
 	do
-		drawPoint = ran1( ) * sum;
+		drawPoint = sim->ran1( ) * sum;
 	while ( drawPoint == sum );						// avoid ran1 == 1
 
 	for ( accProb = 0, cur = cur2 = cur1;			// accumulate probabilities
@@ -568,7 +568,7 @@ object *object::shuffle_nodes_net( const char *lab )
 
 	for ( i = numNodes; i > 1; i-- )				// run the shuffling
 	{
-		j = ( long ) uniform_int( 1, i );
+		j = ( long ) sim->rnd_int( 1, i );
 		cur = turbosearch( lab, ( double ) i );
 		cur1 = turbosearch( lab, ( double ) j );
 
@@ -972,7 +972,7 @@ long object::init_uniform_net( const char *lab, long numNodes, long outDeg )
 			tryNode = idNode;
 			while ( ! newNode || tryNode == idNode )				// while no new link found
 			{
-				tryNode = ( long ) uniform_int( 1, numNodes );		// draw link (other node ID)
+				tryNode = ( long ) sim->rnd_int( 1, numNodes );		// draw link (other node ID)
 				if ( cur->search_link_net( tryNode ) )				// link already exists?
 					newNode = false;								// yes
 				else
@@ -1026,7 +1026,7 @@ long object::init_renyi_erdos_net( const char *lab, long numNodes, double linkPr
 	{																// for all nodes except last
 		for ( endNode = startNode + 1; endNode <= numNodes; endNode++ )
 		{															// and for all higher numbered nodes
-			if ( ran1( ) < linkProb )								// draws the existence of a link between both
+			if ( sim->ran1( ) < linkProb )							// draws the existence of a link between both
 			{
 				cur = turbosearch( lab, ( double ) startNode );		// searches first node object
 				cur1 = turbosearch( lab, ( double ) endNode );		// searches second node object
@@ -1142,7 +1142,7 @@ long object::init_small_world_net( const char *lab, long numNodes, long outDeg, 
 	for ( ; cur != NULL; cur = go_brother( cur ) )
 																	// scan all nodes
 		for ( link = 1; link <= numNeigh; link++ )					// all possible neighbors' node IDs
-			if ( ran1( ) < rho ) 									// draw rewiring probability
+			if ( sim->ran1( ) < rho ) 								// draw rewiring probability
 			{														// if rewiring
 				idNode = cur->node->id;								// get current node ID
 				tryNode = idNode + link;							// next node to try
@@ -1162,7 +1162,7 @@ long object::init_small_world_net( const char *lab, long numNodes, long outDeg, 
 																	// and the link from this object
 				newNode = idNode;									// look for a new node to create a link
 				while ( newNode == idNode )
-					newNode = (long) uniform_int( 1, numNodes );	// draw a random int different from this agent
+					newNode = ( long ) sim->rnd_int( 1, numNodes );	// draw a random int different from this agent
 				cur1 = turbosearch( lab, newNode );					// and get new linking node object
 
 				cur->add_link_net( cur1 );							// create a new link to the new neighbor

@@ -117,15 +117,6 @@ object::delete_obj to cancel an object.
 
 #include "lib/libLSD.h"				// LSD library classes
 
-clock_t start_profile[ 100 ], end_profile[ 100 ];
-
-#ifndef _NP_
-condition_variable upd_workers;
-mutex thr_ptr_lock;
-mutex update_lock;
-mutex crash_lock;
-#endif
-
 
 /****************************************************
 VARIABLE
@@ -423,7 +414,7 @@ double variable::cal( object *caller, int lag )
 
 #ifndef _NW_
 		if ( sim->stack_info >= sim->stack_level && ( ! sim->prof_obs_only || observe ) )
-			start_profile[ sim->stack_level - 1 ] = pstart = clock( );
+			sim->start_profile[ sim->stack_level - 1 ] = pstart = clock( );
 		else
 			if ( sim->prof_aggr_time )
 				pstart = clock( );
@@ -479,7 +470,7 @@ double variable::cal( object *caller, int lag )
 	{
 		next_update = sim->t + period;
 		if ( period_range > 0 )
-			next_update += rnd_int( 0, period_range );
+			next_update += sim->rnd_int( 0, period_range );
 	}
 
 #ifndef _NP_
@@ -504,9 +495,9 @@ double variable::cal( object *caller, int lag )
 
 		if ( sim->stack_info >= sim->stack_level && ( ! sim->prof_obs_only || observe ) )
 		{
-			end_profile[ sim->stack_level - 1 ] = sim->prof_aggr_time ? pend : clock( );
+			sim->end_profile[ sim->stack_level - 1 ] = sim->prof_aggr_time ? pend : clock( );
 
-			time = 1000 * ( end_profile[ sim->stack_level - 1 ] - start_profile[ sim->stack_level - 1 ] ) / CLOCKS_PER_SEC;
+			time = 1000 * ( sim->end_profile[ sim->stack_level - 1 ] - sim->start_profile[ sim->stack_level - 1 ] ) / CLOCKS_PER_SEC;
 
 			if ( time >= sim->prof_min_msecs )
 			{
@@ -632,7 +623,7 @@ void worker::cal_worker( void )
 		errored = false;
 
 		// update object map and register all signal handlers
-		unique_lock < mutex > lock_map( thr_ptr_lock );
+		unique_lock < mutex > lock_map( sim->thr_ptr_lock );
 		thr_id = this_thread::get_id( );
 		thr_ptr[ thr_id ] = this;
 		lock_map.unlock( );
@@ -725,7 +716,7 @@ void worker::cal_worker( void )
 				{
 					var->next_update = sim->t + var->period;
 					if ( var->period_range > 0 )
-						var->next_update += rnd_int( 0, var->period_range );
+						var->next_update += sim->rnd_int( 0, var->period_range );
 				}
 
 				var->under_computation = false;
@@ -744,12 +735,12 @@ void worker::cal_worker( void )
 			// create context to send signal to update scheduler if needed
 			if ( ! sim->worker_ready )
 			{
-				unique_lock< mutex > lock_update( update_lock );
+				unique_lock< mutex > lock_update( sim->update_lock );
 				// recheck if still needed
 				if ( ! sim->worker_ready )
 				{
 					sim->worker_ready = true;
-					upd_workers.notify_one( );
+					sim->upd_workers.notify_one( );
 				}
 			}
 		}
@@ -786,9 +777,6 @@ worker::worker( void )
 	strcpy( err_msg1, "" );
 	strcpy( err_msg2, "" );
 	strcpy( err_msg3, "" );
-
-	// launch new thread (waiting mode)
-	thr = thread( & worker::cal_worker, this );
 }
 
 
@@ -898,7 +886,7 @@ bool worker::check( void )
 		return true;
 
 	// only process first worker crash
-	lock_guard< mutex > lock_crash( crash_lock );
+	lock_guard< mutex > lock_crash( sim->crash_lock );
 	if ( ! sim->worker_crashed )
 	{
 		sim->worker_crashed = true;
@@ -1041,10 +1029,10 @@ void simulation::parallel_update( variable *v, object* p, object *caller )
 				{
 					unique_lock< mutex > lock_update( update_lock );
 					worker_ready = false;
-					if ( ! upd_workers.wait_for ( lock_update, chrono::milliseconds( MAX_TIMEOUT ), [ & ]{ return ! worker_ready; } ) )
+					if ( ! upd_workers.wait_for ( lock_update, chrono::milliseconds( MAX_VAR_TIMEOUT ), [ & ]{ return ! worker_ready; } ) )
 						{
 							worker_ready = true;
-							plog( "\nWarning: workers timeout (%d millisecs.), continuing...", MAX_TIMEOUT );
+							plog( "\nWarning: workers timeout (%d millisecs.), continuing...", MAX_VAR_TIMEOUT );
 							break;
 						}
 				}

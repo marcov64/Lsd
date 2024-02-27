@@ -384,7 +384,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 	update_d = get_int( "update_d" );
 
 	if ( use_seed )
-		init_random( ( unsigned ) rnd_seed );
+		sim->init_random( ( unsigned ) rnd_seed );
 
 	j = 0;
 
@@ -475,7 +475,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = uniform( value1, value2 );
+					cv->val[ lag ] = sim->uniform( value1, value2 );
 					cv->initialized = true;
 					++j;
 				}
@@ -490,7 +490,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = uniform_int( round( value1 ), round( value2 ) );
+					cv->val[ lag ] = sim->rnd_int( round( value1 ), round( value2 ) );
 					cv->initialized = true;
 					++j;
 				}
@@ -505,7 +505,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = norm( value1, value2 );
+					cv->val[ lag ] = sim->norm( value1, value2 );
 					cv->initialized = true;
 					++j;
 				}

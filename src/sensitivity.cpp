@@ -95,7 +95,7 @@ int sensitivity::dataentry( void )
 	cmd( "focus .sens.t.t" );
 
 	// reset random number generator to make random numbers reproducible
-	init_random( sim->seed );
+	sim->init_random( sim->seed );
 
 	choice = 0;
 
@@ -186,7 +186,7 @@ int sensitivity::dataentry( void )
 				if ( toupper( type ) == 'R' && samples > 0 )// random sampling
 					for ( int j = 0; j < samples; ++j, ++i )
 					{
-						v[ i ] = fmin( start, end ) + ran1( ) * ( fmax( start, end ) - fmin( start, end ) );
+						v[ i ] = fmin( start, end ) + sim->ran1( ) * ( fmax( start, end ) - fmin( start, end ) );
 						v[ i ] = integer ? round( v[ i ] ) : v[ i ];
 					}
 			}
@@ -381,7 +381,7 @@ void sensitivity_sequential( int *findex, sensitivity *s, double probSampl,
 
 		}
 
-		if ( probSampl == 1.0 || ran1( ) <= probSampl )	// if required draw if point will be sampled
+		if ( probSampl == 1.0 || sim.ran1( ) <= probSampl )	// if required draw if point will be sampled
 		{
 			// generate a configuration file for the experiment (no descriptions)
 			if ( ! save_xml_configuration( *findex, dest_path, true ) )
@@ -587,7 +587,7 @@ MAT_*
 Matrix operations support functions for morris_oat() and enhancements
 ******************************************************************************/
 // Random choice between two numbers
-#define RND_CHOICE( o1, o2 ) ( ran1( ) < 0.5 ? o1 : o2 )
+#define RND_CHOICE( o1, o2 ) ( sim.ran1( ) < 0.5 ? o1 : o2 )
 
 // allocate dynamic space for matrix
 double **mat_new( int m, int n )
@@ -727,7 +727,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 	double delta = ( double ) jump / ( p - 1 );	// grid step delta
 
 	// reset random number generator
-	init_random( sim.seed );
+	sim.init_random( sim.seed );
 
 	// allocate all temporary matrices
 	double **B = mat_new( k + 1, k ),
@@ -760,7 +760,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 		for ( i = 0; i < k; ++i )
 			perm [ i ] = i;
 
-		shuffle( & perm[ 0 ], & perm[ k ], mt32 );
+		shuffle( & perm[ 0 ], & perm[ k ], sim.mt32 );
 
 		P = mat_copy_scal( P, k, k, 0 );
 		for ( i = 0; i < k; ++i )
@@ -771,7 +771,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 		// starting point for this trajectory
 		for ( j = 0; j < k; ++j )
 		{
-			double start = uniform_int( 0, p - delta * ( p - 1 ) - 1 ) / ( p - 1 );
+			double start = sim.rnd_int( 0, p - delta * ( p - 1 ) - 1 ) / ( p - 1 );
 			for ( i = 0; i < k + 1; ++i )
 				X_base[ i ][ j ] = start;
 		}
@@ -1186,7 +1186,7 @@ design::design( sensitivity *rsens, int typ, const char *fname, const char *dest
 	FILE *f;
 
 	// reset random number generator
-	init_random( sim.seed );
+	sim.init_random( sim.seed );
 
 	if ( rsens == NULL )					// valid pointer?
 		typ = 0;							// trigger invalid design
@@ -1273,7 +1273,7 @@ design::design( sensitivity *rsens, int typ, const char *fname, const char *dest
 				for ( j = 0; j < k; ++j )	// for all factors
 					for ( h = 0; h < inst[ j ]; ++h )	// for all instances
 						doe[ i ][ j ][ h ] = lo[ j ][ h ] +
-											 ran1( ) * ( hi[ j ][ h ] - lo[ j ][ h ] );
+											 sim.ran1( ) * ( hi[ j ][ h ] - lo[ j ][ h ] );
 
 			break;
 

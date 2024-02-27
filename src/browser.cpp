@@ -35,7 +35,7 @@ The main cycle for the Browser, from which it exits only to
 run a simulation or to quit the program. The cycle is just
 once call to browse followed by a call to operate.
 
-- int object::browse( );
+- int browse( );
 build the browser window and waits for an action (on the form of
 values for choice or choice_g different from 0)
 *************************************************************/
@@ -62,6 +62,7 @@ int load_gui( const char **argv )
 	char *str, cwd[ PATH_MAX ];
 	const char *app, *app1;
 	int i, j = 0, k = 0;
+	object *r;
 	FILE *f;
 
 	// assume exec path is current path
@@ -365,7 +366,7 @@ int load_gui( const char **argv )
 		sprintf( sim.conf_file, "%s%s%s.lsd", sim.conf_path, strlen( sim.conf_path ) > 0 ? "/" : "", sim.conf_name );
 		snprintf( sim.rep_file, MAX_PATH_LENGTH, "report_%s.html", sim.conf_name );
 
-		i = sim.root->open_configuration( true );
+		i = open_configuration( r = NULL, true );
 	}
 	else
 		i = 0;
@@ -395,14 +396,14 @@ int load_gui( const char **argv )
 
 	create_logwindow( );
 
-	while ( 1 )						// main GUI loop: create/edit configuration - run
+	while ( true )					// main GUI loop: create/edit configuration - run
 	{
 		create( );					// open LSD browser
 
 		try
 		{
 			if ( ( i = sim.run_simulation( ) ) != 0 )
-				return i;
+				break;
 			else
 				unsavedData = true;	// flag unsaved simulation results
 		}
@@ -426,7 +427,7 @@ int load_gui( const char **argv )
 
 	set_env( false );
 
-	return 0;
+	return 100 + i;
 }
 
 
@@ -435,7 +436,7 @@ CREATE
 ****************************************************/
 void create( void )
 {
-	object *cur;
+	object *r;
 
 	Tcl_LinkVar( interp, "strWindowOn", ( char * ) &strWindowOn, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( interp, "eff_t", ( char * ) &sim.eff_t, TCL_LINK_INT );
@@ -452,7 +453,7 @@ void create( void )
 	cmd( "set c \"\"" );
 
 	// restore previous object and cursor position in browser, if any
-	cur = sim.root->restore_pos( );
+	r = sim.root->restore_pos( );
 	redrawRoot = redrawStruc = true;	// browser/ structure redraw when drawing the first time
 	choice_g = choice = 0;
 
@@ -470,7 +471,7 @@ void create( void )
 							false,
 							"invalid model configuration loaded" );
 			unload_configuration_gui( true );
-			cur = sim.root;
+			r = sim.root;
 		}
 
 		if ( message_logged )
@@ -481,16 +482,16 @@ void create( void )
 
 		// browse only if not running two-cycle operations
 		if ( bsearch( & choice, redoChoices, NUM_REDO_CHOICES, sizeof ( int ), comp_ints ) == NULL )
-			choice = cur->browse( );
+			choice = browse( r );
 
 		// check if configuration was just reloaded
 		if ( choice < 0 )
 		{
 			choice = - choice;
-			cur = currObj;				// restore pointed object
+			r = currObj;				// restore pointed object
 		}
 
-		cur = cur->operate( );
+		r = operate( r );
 	}
 
 	Tcl_UnlinkVar( interp, "strWindowOn" );
@@ -501,14 +502,14 @@ void create( void )
 /****************************************************
 BROWSE
 ****************************************************/
-int object::browse( void )
+int browse( object *r )
 {
 	bool done, sp_upd;
 	int i, num;
 	bridge *cb;
 	variable *cv;
 
-	currObj = this;			// global pointer to C Tcl routines
+	currObj = r;			// global pointer to C Tcl routines
 
 	// main LSD window - avoids redrawing if not required
 	if ( redrawRoot )
@@ -525,11 +526,11 @@ int object::browse( void )
 		cmd( "tooltip::tooltip clear .l.v.c.var_name*" );
 
 		// populate the variables panel
-		if ( v == NULL )
+		if ( r->v == NULL )
 			cmd( ".l.v.c.var_name insert end \"(none)\"; set nVar 0" );
 		else
 		{
-			for ( cv = v, i = 0; cv != NULL; cv = cv->next, ++i )
+			for ( cv = r->v, i = 0; cv != NULL; cv = cv->next, ++i )
 			{
 				// special updating scheme?
 				if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 ) )
@@ -610,7 +611,7 @@ int object::browse( void )
 		cmd( ".l.v.c.var_name.v add command -label Sensitivity -state disabled -command { set choice 78 }" );	// entryconfig 22
 
 		// variables panel bindings
-		if ( v != NULL )
+		if ( r->v != NULL )
 		{
 			cmd( "bind .l.v.c.var_name <Return> { \
 					set listfocus 1; \
@@ -888,10 +889,10 @@ int object::browse( void )
 		cmd( "mouse_wheel .l.s.c.son_name" );
 		cmd( "tooltip::tooltip clear .l.s.c.son_name*" );
 
-		if ( up != NULL )
+		if ( r->up != NULL )
 		{
 			cmd( ".l.s.c.son_name insert end \"$upSymbol\"" );
-			cmd( "tooltip::tooltip .l.s.c.son_name -item 0 \"%s\"", up->label );
+			cmd( "tooltip::tooltip .l.s.c.son_name -item 0 \"%s\"", r->up->label );
 			i = 1;
 		}
 		else
@@ -899,12 +900,12 @@ int object::browse( void )
 
 		cmd( "set upObjItem %d", i );
 
-		if ( up == NULL && b == NULL )
+		if ( r->up == NULL && r->b == NULL )
 			cmd( ".l.s.c.son_name insert end \"(none)\"" );
 		else
 		{
 			// populate the objects panel
-			for ( cb = b; cb != NULL; cb = cb->next, ++i )
+			for ( cb = r->b; cb != NULL; cb = cb->next, ++i )
 			{
 				if ( cb->head != NULL )
 				{
@@ -953,7 +954,7 @@ int object::browse( void )
 		cmd( ".l.s.c.son_name.v.a add command -label Object -accelerator \"Ctrl+D\" -command { set choice 3 }" );
 
 		// objects panel bindings
-		if ( up != NULL || b != NULL )
+		if ( r->up != NULL || r->b != NULL )
 		{
 			cmd( "bind .l.s.c.son_name <Return> { \
 					set listfocus 2; \
@@ -1130,9 +1131,9 @@ int object::browse( void )
 
 		cmd( "ttk::frame .l.p.up_name" );
 		cmd( "ttk::label .l.p.up_name.d -text \"Parent object:\" -width 15 -anchor w" );
-		if ( up != NULL )
+		if ( r->up != NULL )
 		{
-			cmd( "ttk::label .l.p.up_name.n -text \" %s \" -anchor w -style hl.TLabel", up->label );
+			cmd( "ttk::label .l.p.up_name.n -text \" %s \" -anchor w -style hl.TLabel", r->up->label );
 			cmd( "bind . <KeyPress-u> { set itemfocus 0; set choice 5 }; bind . <KeyPress-U> { set itemfocus 0; set choice 5 }" );
 		}
 		else
@@ -1143,9 +1144,9 @@ int object::browse( void )
 
 		cmd( "ttk::frame .l.p.tit" );
 		cmd( "ttk::label .l.p.tit.lab -text \"Current object:\" -width 15 -anchor w" );
-		cmd( "ttk::button .l.p.tit.but -width -1 -text \" %s \" -style hlBold.Toolbutton %s", label, up == NULL ? "" : "-command { set choice 6 }" );
+		cmd( "ttk::button .l.p.tit.but -width -1 -text \" %s \" -style hlBold.Toolbutton %s", r->label, r->up == NULL ? "" : "-command { set choice 6 }" );
 
-		if ( up != NULL )
+		if ( r->up != NULL )
 			cmd( "tooltip::tooltip .l.p.tit.but \"Change...\"" );
 		else
 			cmd( ".l.p.tit.but configure -state disabled" );
@@ -1382,7 +1383,7 @@ int object::browse( void )
 
 	if ( redrawStruc )
 	{
-		show_graph( );
+		r->show_graph( );
 		redrawStruc = false;
 	}
 
@@ -1477,13 +1478,13 @@ int object::browse( void )
 		}" );
 
 	// if simulation was started, check to see if operation is valid
-	if ( sim->running || sim->eff_t > 0 )
+	if ( sim.running || sim.eff_t > 0 )
 		// search the sorted list of choices that are bad with existing run data
 		if ( bsearch( & choice, badChoices, NUM_BAD_CHOICES, sizeof ( int ), comp_ints ) != NULL )
 		{
 			if ( discard_change( true, false, "Invalid command after a simulation run." ) )	// for sure there are changes, just get the pop-up
 			{
-				if ( open_configuration( true ) )
+				if ( open_configuration( r, true ) )
 					choice = - choice;		// signal the reload
 				else
 					choice = 20;			// reload failed, unload configuration

@@ -398,7 +398,6 @@ void simulation::unload_configuration( bool full )
 	root->init( NULL, this, "Root" );
 	add_description( "Root" );
 	reset_blueprint( NULL );
-
 	empty_cemetery( );							// garbage collection
 
 	save_ok = true;								// valid structure to save

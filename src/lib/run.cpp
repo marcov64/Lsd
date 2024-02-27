@@ -31,30 +31,85 @@ Prepare variables to store saved data.
 #include "lib/libLSD.h"				// LSD library classes
 
 
+#ifndef _NP_
+
+/*********************************
+DISPATCH_RUNS
+*********************************/
+int dispatch_runs( int until_t, int until_run )
+{
+	int nstale, nrun = 0;
+	mutex mtx;
+	unique_lock < mutex > lock( mtx );
+
+	for ( auto sim : sims )
+		if ( ! sim->thr.joinable( ) && sim->conf_ok )
+		{
+			sim->thr = thread( & simulation::run_simulation, sim, until_t, until_run );
+			sim->last_dispatch_time = sim->stale_time = 0;
+			++nrun;
+		}
+
+	do
+	{
+		auto start = chrono::system_clock::now( );
+		seq_end.wait_until( lock, start + chrono::seconds( MAX_SIM_SLEEP ) );
+
+		nstale = 0;
+		for ( auto sim : sims )
+		{
+			if ( sim->thr.joinable( ) && ! sim->running_seq && sim->eff_t > 0 )
+			{
+				sim->thr.join( );
+				--nrun;
+			}
+			else
+				if ( sim->eff_t > sim->last_dispatch_time )
+				{
+					sim->last_dispatch_time = sim->eff_t;
+					sim->stale_time = 0;
+				}
+				else
+				{
+					auto elapsed = chrono::duration_cast < chrono::seconds > ( chrono::system_clock::now( ) - start );
+					sim->stale_time += elapsed.count( );
+				}
+
+			if ( sim->stale_time > MAX_STEP_TIMEOUT )
+				++nstale;
+		}
+	}
+	while ( nstale < nrun );
+
+	return nstale;
+}
+
+#endif
+
 /*********************************
 RUN_SIMULATION
 *********************************/
 int simulation::run_simulation( int until_t, int until_run )
 {
-	int i;
+	int res = 0;
 	static char bar_done[ 2 * BAR_DONE_SIZE ];
 	static clock_t start, last_update;
 	static int perc_done, last_done;
 
 	if ( ( until_run > 0 && until_run <= run ) || ( until_t > 0 && until_t <= t &&
 		 ( until_run <= 0 || ( until_run > 0 && until_run <= run ) ) ) )
-		return 0;					// already there, nothing to do
+		goto end_run;				// already there, nothing to do
 
 	if ( ! running_seq )			// if not already running sequential run set
-		if ( ( i = init_new_seq( bar_done, perc_done, last_done ) ) != 0 )
-			return i;
+		if ( ( res = init_new_seq( bar_done, perc_done, last_done ) ) != 0 )
+			goto end_run;
 
 	// start loop controlling set of sequential simulation runs
 	for ( ; quit != 2 && run <= last_run; ++run )
 	{
 		if ( ! running )			// if not already running single run
-			if ( ( i = init_new_run( start, last_update ) ) != 0 )
-				return i;
+			if ( ( res = init_new_run( start, last_update ) ) != 0 )
+				goto end_run;
 
 		// start loop controlling a single simulation run
 		for ( ; quit == 0 && t <= last_t; ++t )
@@ -80,12 +135,16 @@ int simulation::run_simulation( int until_t, int until_run )
 				liblnk.runtime_buttons( last_update );
 #endif
 			// check if time to pause run (don't pause at last step)
-			if ( run <= until_run && t >= until_t && t + 1 <= last_t )
-				return -2;			// interrupt
+			if ( until_t > 0 && t >= until_t && t + 1 <= last_t )
+			{
+				res = -2;			// interrupt
+				goto end_run;
+			}
 		}	// end of time step
 
 		// run user closing function, reporting error appropriately
 		user_exception = true;
+		::close_sim( );
 		close_sim( );
 		user_exception = false;
 		running = false;
@@ -120,12 +179,12 @@ int simulation::run_simulation( int until_t, int until_run )
 		}
 
 		// check if time to pause run (don't pause at last run)
-		if ( run >= until_run && run + 1 <= last_run )
-			return -1;				// interrupt
+		if ( until_run > 0 && run >= until_run && run + 1 <= last_run )
+		{
+			res = -1;				// interrupt
+			goto end_run;
+		}
 	}	// end of run
-
-	// set of sequential runs is finished
-	running_seq = false;
 
 	if ( fast_mode == 2 )
 		plog( "\nFinished processing configuration file(s)\n" );
@@ -135,14 +194,23 @@ int simulation::run_simulation( int until_t, int until_run )
 		liblnk.runtime_end( );
 #endif
 
+	end_run:
+
+	// set of sequential runs is finished
+	quit = 0;						// ensure no error to handle
+	running_seq = false;
+
 #ifndef _NP_
 	// stop multi-thread workers
 	delete [ ] workers;
 	workers = NULL;
+
+	// wake dispatcher lock
+	lock_guard < mutex > lock( lock_seq_end );
+	seq_end.notify_one( );
 #endif
 
-	quit = 0;
-	return 0;
+	return res;
 }
 
 
@@ -155,6 +223,7 @@ int simulation::init_new_seq( char *bar_done, int & perc_done, int & last_done )
 
 	run = 1;					// first run in the sequence
 	quit = 0;					// not marked for abortion
+
 #ifndef _NP_
 	// check if there are parallel computing variables
 	if ( parallel_disable || max_threads < 2 )
@@ -170,7 +239,10 @@ int simulation::init_new_seq( char *bar_done, int & perc_done, int & last_done )
 	{
 		workers = new worker[ max_threads ];
 		for ( i = 0; i < max_threads; ++i )
+		{
 			workers[ i ].sim = this;
+			workers[ i ].thr = thread( & worker::cal_worker, & workers[ i ] );
+		}
 	}
 #else
 	if ( root->search_parallel( ) )
@@ -250,6 +322,7 @@ int simulation::init_new_run( clock_t & start, clock_t & last_update )
 	}
 
 	// pre-allocate memory to save all existing elements for the entire simulation
+	running = true;
 	series_saved = 0;
 	if ( ! root->alloc_save_mem( ) )
 	{
@@ -289,8 +362,6 @@ int simulation::init_new_run( clock_t & start, clock_t & last_update )
 
 	// control execution time
 	start = last_update = clock( );
-
-	running = true;
 
 	return 0;
 }
@@ -548,7 +619,7 @@ bool object::alloc_save_mem( void )
 		{
 			cv->next_update = cv->delay;
 			if ( cv->delay_range > 0 )
-				cv->next_update += rnd_int( 0, cv->delay_range );
+				cv->next_update += sim->rnd_int( 0, cv->delay_range );
 		}
 
 		if ( cv->save || cv->savei )

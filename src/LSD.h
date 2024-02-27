@@ -19,15 +19,12 @@ Global definitions shared by all LSD GUI modules.
 
 // base class extensions
 #define OBJECT_EXT \
-	bool open_configuration( bool reload ); \
 	bool sort_listbox( int box, int order ); \
-	int browse( void ); \
 	int check_affected( int level, int affected[ ] ); \
 	int check_label( const char *lab ); \
 	int compute_copyfrom( const char *parWnd ); \
 	int debugger( object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" ); \
 	int entry_new_objnum( const char *tag ); \
-	object *operate( void ); \
 	object *restore_pos( void ); \
 	object *sensitivity_parallel( sensitivity *s ); \
 	void ancestors( FILE *f, bool html = true ); \
@@ -233,7 +230,7 @@ struct nolh								// near-orthogonal Latin hypercube class
 	int n2;
 	int loLevel;
 	int hiLevel;
-	int *table;
+	const int *table;
 };
 
 // GUI global variables
@@ -241,7 +238,6 @@ extern bool brCovered;			// browser cover currently covered
 extern bool check_save;			// saving message inside disabled objects
 extern bool eq_dum;				// current equation is dummy
 extern bool ignore_eq_file;		// configuration files equation updating
-extern bool iniShowOnce;		// prevent repeating warning on # of columns
 extern bool log_ok;				// control for log window available
 extern bool meta_par_in[ ];		// meta variables for simulation settings found
 extern bool pause_run;			// pause running simulation
@@ -258,7 +254,18 @@ extern char eq_file[ ];			// equation file name
 extern char err_file[ ];		// error log file name
 extern char path_sens[ ];		// path of last used sensitivity directory
 extern char tcl_dir[ ];			// Tcl/Tk directory
+extern const char *lmm_defaults[ ];// GUI constant string arrays
+extern const char *lmm_options[ ];
+extern const char *model_defaults[ ];
+extern const char *model_info[ ];
 extern const char *res_g;		// structure window result variable
+extern const char *wnd_names[ ];// LSD main windows' names
+extern const int NOLH_1[ ][ 7 ];// near-orthogonal Latin hypercube tables
+extern const int NOLH_2[ ][ 11 ];
+extern const int NOLH_3[ ][ 16 ];
+extern const int NOLH_4[ ][ 22 ];
+extern const int NOLH_5[ ][ 29 ];
+extern const int NOLH_6[ ][ 100 ];
 extern double ymax;				// runtime plot max limit
 extern double ymin;				// runtime plot min limit
 extern int choice_g;			// Tcl menu control variable ( structure window)
@@ -268,29 +275,16 @@ extern int doover;				// overwrite results folder (bool)
 extern int elem_count;			// recursive element counter for show elements menu
 extern int findexSens;			// sequential sensitivity index to filenames
 extern int macro;				// equations style (macros or C++) (bool)
-extern int NOLH_1[ ][ 7 ];		// near-orthogonal Latin hypercube tables
-extern int NOLH_2[ ][ 11 ];
-extern int NOLH_3[ ][ 16 ];
-extern int NOLH_4[ ][ 22 ];
-extern int NOLH_5[ ][ 29 ];
-extern int NOLH_6[ ][ 100 ];
 extern int overwConf;			// overwrite current configuration file on run (bool)
 extern int saveConf;			// save configuration on results saving (bool)
 extern int stop;				// activity interruption flag (Tcl boolean)
 extern int strWindowOn;			// presentation of the model structure window (bool)
 extern int watch;				// allow for graph generation interruption (bool)
-extern nolh NOLH[ ];			// characteristics of NOLH tables
 extern object *currObj;			// pointer to current object in browser
 extern object *lastObj;			// pointer to last selected object in structure
+extern nolh NOLH[ ];			// characteristics of NOLH tables
 extern simulation sim;			// the single GUI simulation object
 extern Tcl_Interp *interp;		// Tcl standard interpreter pointer
-
-// GUI constant string arrays
-extern const char *lmm_defaults[ ];
-extern const char *lmm_options[ ];
-extern const char *model_defaults[ ];
-extern const char *model_info[ ];
-extern const char *wnd_names[ ];// LSD main windows' names
 
 // GUI C++ functions
 bool abort_run_threads( void );
@@ -315,6 +309,7 @@ bool load_model_info( const char *path );
 bool load_prev_configuration( void );
 bool make_no_window( void );
 bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz );
+bool open_configuration( object *&r, bool reload );
 bool runtime_step( void );
 bool save_configuration( const char *path, const char *rname, const char *ext );
 bool save_sensitivity( FILE *f );
@@ -346,6 +341,7 @@ double strtod( const char *in, char** endptr, double inv );
 double update_lattice_helper( double line, double col, double val, int line_int, int col_int, int val_int );
 double upper_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
 double *log_data( double *data, int start, int end, int ser, const char *err_msg );
+int browse( object *r );
 int count_lines( const char *fname, bool dozip = false );
 int eval_int( const char *tcl_exp );
 int get_int( const char *tcl_var, int *var = NULL );
@@ -372,6 +368,7 @@ int Tcl_upload_series( ClientData cd, Tcl_Interp *interp, int oc, Tcl_Obj *CONST
 long eval_long( const char *tcl_exp );
 long get_long( const char *tcl_var, long *var = NULL );
 long num_sensitivity_points( void );
+object *operate( object *r ); \
 sensitivity *search_sensitivity( const char *lab, int lag = 0 );
 string to_string( const char *fmt, double val );
 string win_path( string filepath );

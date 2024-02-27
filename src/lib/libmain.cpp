@@ -66,6 +66,8 @@ int no_tot = true;				// do not produce .tot totals files (bool)
 vector < simulation * > sims;	// vector holding existing simulations
 vector < string > res_list;		// list of results files last saved
 FILE *log_file_ptr = NULL;		// log file pointer, if any
+FILE *stderr_ptr;				// main thread standard error file pointer
+FILE *stdout_ptr;				// main thread standard output file pointer
 
 // constant arrays
 const char *desc_key_words[ DESC_KEY_NUM ] = DESC_KEY_WORDS;
@@ -75,11 +77,14 @@ const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 
 #ifndef _NP_
 // conditional variables
+condition_variable seq_end;		// variable to signal simulation sequence end
 map < thread::id, worker * > thr_ptr;// variable worker thread pointers
 mutex lock_init_sim;			// lock simulation constructor
+mutex lock_plog_term;			// lock plog_terminal for parallel updating
 mutex lock_run_logs;			// lock run_logs for parallel updating
 mutex lock_run_pids;			// lock run_pids for parallel updating
 mutex lock_run_status;			// lock run_status for parallel updating
+mutex lock_seq_end;				// lock seq_end for parallel updating
 string run_log;					// consolidated runs log
 thread run_monitor;				// thread monitoring parallel instances
 thread::id main_thread;			// LSD main thread ID
@@ -118,6 +123,9 @@ void __attribute__( ( constructor ) ) lib_constructor( )
 	strcpy( lib_file, "" );
 	strcpy( lib_path, "" );
 	strcpy( model_path, "" );
+
+	stderr_ptr = stderr;			// capture main thread standard streams
+	stdout_ptr = stdout;
 }
 
 
@@ -126,6 +134,9 @@ void __attribute__( ( constructor ) ) lib_constructor( )
  *********************************/
 void __attribute__( ( destructor ) ) lib_destructor( )
 {
+	if ( log_file_ptr != NULL )
+		fclose( log_file_ptr );
+
 	delete [ ] exec_file;
 	delete [ ] exec_path;
 	delete [ ] lib_file;

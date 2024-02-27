@@ -126,13 +126,13 @@ $(MANIF_LMM): $(SRC_DIR)LMM.exe.manifest.rc $(SRC_DIR)LMM.exe.manifest
 	$(WRC) $(INCLUDE) -i $(SRC_DIR)LMM.exe.manifest.rc -o $(MANIF_LMM)
 
 # LSD dynamic library (removed after executable is built)
-$(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT): $(OBJ_DIR_LSD)fun_dummy.o $(LIB_BASE)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(OBJ_DIR_LSD)fun_dummy.o -Wl,--whole-archive $(LIB_BASE) -Wl,--no-whole-archive -L$(PATH_LIB) $(LIB) -shared -o $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
+$(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT): $(OBJ_DIR_LSD)fun_base.o $(LIB_BASE)
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(OBJ_DIR_LSD)fun_base.o -Wl,--whole-archive $(LIB_BASE) -Wl,--no-whole-archive -L$(PATH_LIB) $(LIB) -shared -o $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
 	$(TOUCH_LSD)
 
-$(OBJ_DIR_LSD)fun_dummy.o: $(SRC_DIR)fun_dummy.cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h
+$(OBJ_DIR_LSD)fun_base.o: $(SRC_DIR)fun_base.cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h
 	$(MKDIR) $(@D)
-	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)fun_dummy.cpp -o $(OBJ_DIR_LSD)fun_dummy.o
+	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)fun_base.cpp -o $(OBJ_DIR_LSD)fun_base.o
 
 # base static library for LSD dynamic library
 $(LIB_BASE): $(OBJ_DIR_LSD)libmain.o $(OBJ_DIR_LSD)commonlib.o $(OBJ_DIR_LSD)description.o $(OBJ_DIR_LSD)filelib.o $(OBJ_DIR_LSD)latticelib.o $(OBJ_DIR_LSD)math.o $(OBJ_DIR_LSD)nets.o $(OBJ_DIR_LSD)object.o $(OBJ_DIR_LSD)parallel.o $(OBJ_DIR_LSD)run.o $(OBJ_DIR_LSD)stattables.o $(OBJ_DIR_LSD)utillib.o $(OBJ_DIR_LSD)variab.o $(OBJ_DIR_LSD)pugixml.o

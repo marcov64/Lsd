@@ -269,10 +269,6 @@ see file.cpp
 
 #include "lib/libLSD.h"				// LSD library classes
 
-char *qsort_lab;
-char *qsort_lab_secondary;
-int qsort_lag;
-
 
 /****************************************************
 BRIDGE
@@ -1656,7 +1652,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 				{
 					cv->next_update = cv->last_update + cv->delay;
 					if ( cv->delay_range > 0 )
-						cv->next_update += rnd_int( 0, cv->delay_range );
+						cv->next_update += sim->rnd_int( 0, cv->delay_range );
 				}
 			}
 
@@ -1917,7 +1913,7 @@ void object::collect_cemetery( variable *caller )
 		cv1 = cv->next;						// pointer to next variable
 
 		// need to save?
-		if ( ( cv->save == true || cv->savei == true ) && sim->running && sim->eff_t > 0 )
+		if ( ( cv->save == true || cv->savei == true ) && sim->running && sim->eff_t > 0 && sim->quit != 2 )
 		{
 			if ( cv->savei )
 				cv->save_single( );			// update file
@@ -1925,7 +1921,7 @@ void object::collect_cemetery( variable *caller )
 			cv->set_lab_tit( );				// update last lab_tit
 
 			cv->end = sim->t;				// define last period,
-			cv->data[ sim->t - cv->start ] = cv->val[ 0 ];	// and last value
+			cv->data[ sim->t - cv->start ] = cv->val[ 0 ];// and last value
 
 			// use C stdlib to be able to deallocate memory for deleted objects
 			cv->data = ( double * ) realloc( cv->data, ( sim->t - cv->start + 1 ) * sizeof( double ) );
@@ -2825,38 +2821,20 @@ Use the qsort function in the standard library to sort
 a group of Object with label obj according to the values of var
 if var is NULL, try sorting using the network node id
 ****************************************************/
-int sort_function_up( const void *a, const void *b )
+bool sort_function_up_1( object *a, object *b, const char *var, int lag )
 {
-	if ( qsort_lab != NULL )		// variable defined?
-	{
-		if ( ( *( object ** ) a )->cal( qsort_lab, qsort_lag ) < ( *( object ** ) b )->cal( qsort_lab, qsort_lag ) )
-			return -1;
-		else
-			return 1;
-	}
-
-	// handles the case of node id comparison
-	if ( ( *( object ** ) a )->node->id < ( *( object ** ) b )->node->id )
-		return -1;
+	if ( var != NULL )				// variable defined?
+		return a->cal( var, lag ) < b->cal( var, lag );
 	else
-		return 1;
+		return a->node->id < b->node->id;
 }
 
-int sort_function_down( const void *a, const void *b )
+bool sort_function_down_1( object *a, object *b, const char *var, int lag )
 {
-	if ( qsort_lab != NULL )		// variable defined?
-	{
-		if ( ( *( object ** ) a )->cal( qsort_lab, qsort_lag ) > ( *( object ** ) b )->cal( qsort_lab, qsort_lag ) )
-			return -1;
-		else
-			return 1;
-	}
-
-	// handles the case of node id comparison
-	if ( ( *( object ** ) a )->node->id > ( *( object ** ) b )->node->id )
-		return -1;
+	if ( var != NULL )				// variable defined?
+		return a->cal( var, lag ) > b->cal( var, lag );
 	else
-		return 1;
+		return a->node->id > b->node->id;
 }
 
 object *object::lsdqsort( const char *obj, const char *var, const char *direction, int lag )
@@ -2864,7 +2842,7 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 	char dir[ 6 ];
 	int num, i;
 	bridge *cb;
-	object *cur, **mylist;
+	object *cur;
 	variable *cv;
 	bool useNodeId = ( var == NULL ) ? true : false;		// sort on node id and not on variable
 
@@ -2941,43 +2919,38 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 	cb->counter_updated = false;
 	cur = cb->head;
 
-	skip_next_obj( cur, &num );
-	mylist = new object *[ num ];
+	skip_next_obj( cur, & num );
+	vector < object * > new_order( num );
 	for ( i = 0; i < num; ++i )
 	{
-		mylist[ i ] = cur;
+		new_order[ i ] = cur;
 		cur = cur->next;
 	}
 
 	strcpyn( dir, direction, 6 );
 	strupr( dir );
 
-	qsort_lag = lag;
-	qsort_lab = ( char * ) var;
-
 	if ( ! strcmp( dir, "UP" ) )
-		qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_up );
+		stable_sort( new_order.begin( ), new_order.end( ), [ var, lag ] ( object *a, object *b ) { return sort_function_up_1( a, b, var, lag ); } );
+
 	else
 		if ( ! strcmp( dir, "DOWN" ) )
-			qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_down );
+			stable_sort( new_order.begin( ), new_order.end( ), [ var, lag ] ( object *a, object *b ) { return sort_function_down_1( a, b, var, lag ); } );
 		else
 		{
 			sim->error_hard( "invalid sort option ('UP' or 'DOWN' required)",
 							 "check your equation code to prevent this situation",
 							 true,
 							 "direction '%s' is invalid for sorting", direction );
-			delete [ ] mylist;
 			return NULL;
 		}
 
-	cb->head = mylist[ 0 ];
+	cb->head = new_order[ 0 ];
 
 	for ( i = 1; i < num; ++i )
-		( mylist[ i - 1 ] )->next = mylist[ i ];
+		( new_order[ i - 1 ] )->next = new_order[ i ];
 
-	mylist[ i - 1 ]->next = NULL;
-
-	delete [ ] mylist;
+	new_order[ i - 1 ]->next = NULL;
 
 	return cb->head;
 }
@@ -2987,42 +2960,36 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 LSDQSORT
 Two stage sorting. Objects with identical values of var1 are sorted according to their value of var2
 ****************************************************/
-int sort_function_up_two( const void *a, const void *b )
+bool sort_function_up_2( object *a, object *b, const char *var1, const char *var2, int lag )
 {
 	double x, y;
 
-	x = ( *( object ** ) a )->cal( qsort_lab, qsort_lag );
-	y = ( *( object ** ) b )->cal( qsort_lab, qsort_lag );
+	x = a->cal( var1, lag );
+	y = b->cal( var1, lag );
 
 	if ( x < y )
-		return -1;
+		return true;
 	else
 		if ( x > y )
-			return 1;
+			return false;
 		else
-			if ( ( * ( object ** ) a )->cal( qsort_lab_secondary, qsort_lag ) < ( *( object ** ) b )->cal( qsort_lab_secondary, qsort_lag ) )
-				return -1;
-			else
-				return 1;
+			return a->cal( var2, lag ) < b->cal( var2, lag );
 }
 
-int sort_function_down_two( const void *a, const void *b )
+bool sort_function_down_2( object *a, object *b, const char *var1, const char *var2, int lag )
 {
 	double x, y;
 
-	x = ( *( object ** ) a )->cal( qsort_lab, qsort_lag );
-	y = ( *( object ** ) b )->cal( qsort_lab, qsort_lag );
+	x = a->cal( var1, lag );
+	y = b->cal( var1, lag );
 
 	if ( x > y )
-		return -1;
+		return true;
 	else
 		if ( x < y )
-			return 1;
+			return false;
 		else
-			if ( ( *( object ** ) a )->cal( qsort_lab_secondary, qsort_lag ) > ( *( object ** ) b )->cal( qsort_lab_secondary, qsort_lag ) )
-				return -1;
-			else
-				return 1;
+			return a->cal( var2, lag ) > b->cal( var2, lag );
 }
 
 object *object::lsdqsort( const char *obj, const char *var1, const char *var2, const char *direction, int lag )
@@ -3030,7 +2997,7 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 	char dir[ 6 ];
 	int num, i;
 	bridge *cb;
-	object *cur, **mylist;
+	object *cur;
 	variable *cv;
 
 	cb = search_bridge( obj, true );			// try to find the bridge
@@ -3086,44 +3053,37 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 	cb->counter_updated = false;
 	cur = cb->head;
 
-	skip_next_obj( cur, &num );
-	mylist = new object *[ num ];
+	skip_next_obj( cur, & num );
+	vector < object * > new_order( num );
 	for ( i = 0; i < num; ++i )
 	{
-		mylist[ i ] = cur;
+		new_order[ i ] = cur;
 		cur = cur->next;
 	}
 
 	strcpyn( dir, direction, 6 );
 	strupr( dir );
 
-	qsort_lag = lag;
-	qsort_lab = ( char * ) var1;
-	qsort_lab_secondary = ( char * ) var2;
-
 	if ( ! strcmp( dir, "UP" ) )
-		qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_up_two );
+		stable_sort( new_order.begin( ), new_order.end( ), [ var1, var2, lag ] ( object *a, object *b ) { return sort_function_up_2( a, b, var1, var2, lag ); } );
 	else
 		if ( ! strcmp( dir, "DOWN" ) )
-			qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_down_two );
+			stable_sort( new_order.begin( ), new_order.end( ), [ var1, var2, lag ] ( object *a, object *b ) { return sort_function_down_2( a, b, var1, var2, lag ); } );
 		else
 		{
 			sim->error_hard( "invalid sort option ('UP' or 'DOWN' required)",
 							 "check your equation code to prevent this situation",
 							 true,
 							 "direction '%s' is invalid for sorting", direction );
-			delete [ ] mylist;
 			return NULL;
 		}
 
-	cb->head = mylist[ 0 ];
+	cb->head = new_order[ 0 ];
 
 	for ( i = 1; i < num; ++i )
-		( mylist[ i - 1 ] )->next = mylist[ i ];
+		( new_order[ i - 1 ] )->next = new_order[ i ];
 
-	mylist[ i - 1 ]->next = NULL;
-
-	delete [ ] mylist;
+	new_order[ i - 1 ]->next = NULL;
 
 	return cb->head;
 }
@@ -3174,7 +3134,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag )
 
 	do
 	{
-		b = ran1( ) * a;
+		b = sim->ran1( ) * a;
 	}
 	while ( b == a );	// avoid ran1 == 1
 
@@ -3218,7 +3178,7 @@ object *object::draw_rnd( const char *lab )
 
 	do
 	{
-		b = ran1( ) * a;
+		b = sim->ran1( ) * a;
 	}
 	while ( b == a );	// avoid ran1 == 1
 
@@ -3258,7 +3218,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag, double tot )
 
 	cur1 = cur = cv->up;
 
-	b = ran1( ) * tot;
+	b = sim->ran1( ) * tot;
 	cnext = cur1->next;
 	a = cur1->cal( lv, lag );
 	for ( cur1 = cnext; a <= b && cur1 != NULL; cur1 = cnext )
@@ -3370,7 +3330,7 @@ double object::write( const char *lab, double value, int time, int lag )
 		{
 			cv->next_update = cv->delay;
 			if ( cv->delay_range > 0 )
-				cv->next_update += rnd_int( 0, cv->delay_range );
+				cv->next_update += sim->rnd_int( 0, cv->delay_range );
 		}
 	}
 	else
@@ -3407,7 +3367,7 @@ double object::write( const char *lab, double value, int time, int lag )
 				{
 					cv->next_update = sim->t + cv->period;
 					if ( cv->period_range > 0 )
-						cv->next_update += rnd_int( 0, cv->period_range );
+						cv->next_update += sim->rnd_int( 0, cv->period_range );
 				}
 			}
 			else

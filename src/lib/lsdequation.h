@@ -24,10 +24,9 @@ using namespace Eigen;
 #endif
 
 #define _FUN_				// comment this line to access internal LSD functions
-
 #include "lib/check.h"		// macro check support code
 
-/// enable pointer checking to protect users (medium overhead) if not disabled
+// enable pointer checking to protect users (medium overhead) if not disabled
 #ifndef NO_POINTER_CHECK
 
 const bool no_pointer_check = false;
@@ -153,7 +152,7 @@ const bool no_pointer_init = true;
 	}
 
 #define EQUATION( X ) \
-	{ string( X ), [ & ]( object *caller, variable *var ) \
+	{ string( X ), [ & ]( object *caller, variable *var ) -> double \
 		{ \
 			object *p = var->up, *c = caller; \
 			int h, i, j, k; \
@@ -178,11 +177,22 @@ const bool no_pointer_init = true;
 	}
 
 #define EQUATION_DUMMY( X, Y ) \
-	{ string( X ), [ & ]( object *caller, variable *var ) \
+	{ string( X ), [ & ]( object *caller, variable *var ) -> double \
 		{ \
 			return var->chk_dummy( Y ); \
 		} \
 	},
+
+// simulation close code
+#ifndef LEGACY_CODE
+#define CLOSEBEGIN \
+void close_sim( void ) { } \
+void simulation::close_sim( void ) \
+{
+
+#define CLOSEEND \
+}
+#endif
 
 // redefine as macro to avoid conflicts with C++ version in <cmath.h>
 #define abs( X ) _abs( X )
@@ -592,19 +602,24 @@ const bool no_pointer_init = true;
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)
 #ifdef LEGACY_CODE
 
+#define path conf_path
+
 #ifndef _NW_
 #include <tk.h>
 extern Tcl_Interp *inter;
 #endif
 
-double poidev( double xm, long *idum_loc = NULL );
-int deb( object *r, object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" ) { r->debugger( c, lab, res, interact, hl_var ); }
-object *go_brother( object *c );
-void cmd( const char *cm, ... ) { cmd_gui( *cm ); )
-
 char msg[ MAX_BUFF_SIZE ];							// legacy auxiliary buffer
 
-#define path conf_path
+extern dlliblinkage liblnk;
+
+double poidev( double xm, long *idum_loc = NULL );
+object *go_brother( object *c );
+void cmd_gui( const char *cm, ... );
+
+int deb( object *r, object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" ) { if ( liblnk.debugger != NULL ) return ( r->*liblnk.dlliblinkage::debugger ) ( c, lab, res, interact, hl_var ); else return -1; }
+void cmd( const char *cm, ... ) { cmd_gui( cm ); }
+void simulation::close_sim( void ) { };
 
 #define FUNCTION( X ) EQUATION( X )
 #define UNIFORM( X, Y ) uniform( X, Y )

@@ -48,15 +48,12 @@ int main( int argn, const char **argv )
 	int res = -1;
 	simulation sim;					// single LSD simulation terminal instance
 
-
 #ifndef _NT_
-
 	// register all signal handlers
 	handle_signals( signal_handler );
 
 	try
 	{
-
 #endif
 
 		// set executable name and path
@@ -80,7 +77,6 @@ int main( int argn, const char **argv )
 			lsd_exit( res );
 
 #ifndef _NP_
-
 		// if parallel execution is required, just run new instances & wait to finish
 		if ( ! batch_sequential && sim.last_run > 1 && max_runs > 1 )
 		{
@@ -94,13 +90,11 @@ int main( int argn, const char **argv )
 			res = sim.run_parallel( true, argv[ 0 ], sim.conf_name, sim.seed, sim.last_run, max_threads, max_runs );
 		}
 		else
-
 #endif
 			// execute single simulation
 			res = sim.run_simulation( );
 
 #ifndef _NT_
-
 	}
 	catch ( std::bad_alloc& exc )	// out of memory conditions
 	{
@@ -114,7 +108,6 @@ int main( int argn, const char **argv )
 	{
 		abort( );				// raises a SIGABRT exception, tell user & close
 	}
-
 #endif
 
 	lsd_exit( res );
@@ -232,7 +225,6 @@ int parse_cmdline( int argn, const char **argv, simulation & sim )
 	}
 
 #ifndef _NP_
-
 	if ( k > 0 )
 		max_runs = min( k, max_threads );
 	else
@@ -245,12 +237,9 @@ int parse_cmdline( int argn, const char **argv, simulation & sim )
 
 	if ( max_runs > 1 )
 		max_threads = max( min( j, max_threads / max_runs ), 1 );
-
 #else
-
 	if ( k != 0 )
 		printf( "\nMulti-run request ignored, running in sequential mode.\n" );
-
 #endif
 
 	return 0;
@@ -331,13 +320,13 @@ int load_config( simulation & sim )
 			delete [ ] str;
 		}
 
-		if ( ( f = fopen( sim.log_file , "w+" ) ) == NULL )
+		if ( ( log_file_ptr = fopen( sim.log_file , "w+" ) ) == NULL )
 			printf( "\nCannot create log file '%s', using stdout.\n", sim.log_file );
 		else
 		{
-			dup2( fileno( f ), STDOUT_FILENO );
-			dup2( fileno( f ), STDERR_FILENO );
-			fclose( f );
+			stdout_ptr = stderr_ptr = log_file_ptr;
+			dup2( fileno( log_file_ptr ), STDOUT_FILENO );
+			dup2( fileno( log_file_ptr ), STDERR_FILENO );
 		}
 	}
 
