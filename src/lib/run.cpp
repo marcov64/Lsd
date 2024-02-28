@@ -43,9 +43,9 @@ int dispatch_runs( int until_t, int until_run )
 	unique_lock < mutex > lock( mtx );
 
 	for ( auto sim : sims )
-		if ( ! sim->thr.joinable( ) && sim->conf_ok )
+		if ( ! sim->sim_thread.joinable( ) && sim->conf_ok )
 		{
-			sim->thr = thread( & simulation::run_simulation, sim, until_t, until_run );
+			sim->sim_thread = thread( & simulation::run_simulation, sim, until_t, until_run );
 			sim->last_dispatch_time = sim->stale_time = 0;
 			++nrun;
 		}
@@ -58,9 +58,9 @@ int dispatch_runs( int until_t, int until_run )
 		nstale = 0;
 		for ( auto sim : sims )
 		{
-			if ( sim->thr.joinable( ) && ! sim->running_seq && sim->eff_t > 0 )
+			if ( sim->sim_thread.joinable( ) && ! sim->running_seq && sim->eff_t > 0 )
 			{
-				sim->thr.join( );
+				sim->sim_thread.join( );
 				--nrun;
 			}
 			else
@@ -206,7 +206,7 @@ int simulation::run_simulation( int until_t, int until_run )
 	workers = NULL;
 
 	// wake dispatcher lock
-	lock_guard < mutex > lock( lock_seq_end );
+	lock_guard < mutex > lock( seq_end_lck );
 	seq_end.notify_one( );
 #endif
 
@@ -241,7 +241,7 @@ int simulation::init_new_seq( char *bar_done, int & perc_done, int & last_done )
 		for ( i = 0; i < max_threads; ++i )
 		{
 			workers[ i ].sim = this;
-			workers[ i ].thr = thread( & worker::cal_worker, & workers[ i ] );
+			workers[ i ].worker_thread = thread( & worker::cal_worker, & workers[ i ] );
 		}
 	}
 #else
@@ -428,7 +428,7 @@ void simulation::save_results( void )
 
 	if ( ! no_tot && ( liblnk.runtime_run_end != NULL || max_runs == 1 ) )
 	{
-		if ( ! grandTotal || batch_sequential )		// generate partial total files?
+		if ( ! grand_total || batch_sequential )	// generate partial total files?
 		{
 			if ( ! batch_sequential )
 			  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, seed - run, seed - 1 + last_run - run, docsv ? "csv" : "tot" );
@@ -446,7 +446,7 @@ void simulation::save_results( void )
 		if ( fast_mode < 2 && run == last_run )		// print only for last
 			plog( "\nSaving totals to file %s... ", fname );
 
-		if ( run == 1 && grandTotal && ! add_to_tot )
+		if ( run == 1 && grand_total && ! add_to_tot )
 		{
 			rf = new result( fname, "wt", this, dozip, docsv );// create results file object
 			rf->title( root, 0 );					// write header
@@ -569,10 +569,11 @@ void simulation::empty_stack( void )
 			stack_log = stack_log->prev;
 			delete cur_stack;
 		}
+
 		// prepare for next run
 		stack_log->next = NULL;
-		stack_log->ns = 0;
-		stack_log->vs = NULL;
+		stack_log->n = 0;
+		stack_log->v = NULL;
 		stack_level = 0;
 	}
 	else
@@ -629,7 +630,7 @@ bool object::alloc_save_mem( void )
 #ifndef _NW_
 		// variable to parent name map for AoR (only in GUI mode)
 		if ( liblnk.runtime_run_start != NULL )
-			par_map.insert( make_pair < string, string > ( cv->label, label ) );
+			sim->par_map.insert( make_pair < string, string > ( cv->label, label ) );
 #endif
 	}
 

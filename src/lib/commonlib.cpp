@@ -30,7 +30,7 @@
  command-prompt window or activating STL mutexes
  spaces in path/file names are not supported
  ****************************************************/
-int run_system( const char *cmd, int id )
+int run_system( const char *cmd, simulation *sim, int id )
 {
 	PROCESS_INFORMATION p_info;
 	STARTUPINFO s_info;
@@ -50,15 +50,13 @@ int run_system( const char *cmd, int id )
 		return -1;
 	}
 
-#ifndef _NP_
-
-	if ( id >= 0 && id < ( int ) run_pids.size( ) )
+#if ! defined( _NP_ ) && ! defined( _LMM_ )
+	if ( id >= 0 && sim != NULL && id < ( int ) sim->run_pids.size( ) )
 	{
 
-		lock_guard < mutex > lock( lock_run_pids );
-		run_pids[ id ] = p_info.hProcess;
+		lock_guard < mutex > lock( sim->run_pids_lck );
+		sim->run_pids[ id ] = p_info.hProcess;
 	}
-
 #endif
 
 	WaitForSingleObject( p_info.hProcess, INFINITE );
@@ -75,24 +73,20 @@ int run_system( const char *cmd, int id )
  KILL_SYSTEM (Windows)
  stops a running command in system
  ****************************************************/
-int kill_system( int id )
+int kill_system( simulation *sim, int id )
 {
 
-#ifndef _NP_
-
+#if ! defined( _NP_ ) && ! defined( _LMM_ )
 	DWORD res;
 
-	if ( id >= 0 && id < ( int ) run_pids.size( ) &&
-		 GetExitCodeProcess( run_pids[ id ], & res ) &&
+	if ( id >= 0 && id < ( int ) sim->run_pids.size( ) &&
+		 GetExitCodeProcess( sim->run_pids[ id ], & res ) &&
 		 res == STILL_ACTIVE &&
-		 ! TerminateProcess( run_pids[ id ], 15 ) )
+		 ! TerminateProcess( sim->run_pids[ id ], 15 ) )
 			return 0;
-
 #endif
-
 	return 1;
 }
-
 #else
 
 extern char ** environ;
@@ -103,7 +97,7 @@ extern char ** environ;
  command-prompt window or activating STL mutexes
  spaces in path/file names are not supported
  ****************************************************/
-int run_system( const char *cmd, int id )
+int run_system( const char *cmd, simulation *sim, int id )
 {
 	char **argv, **envp;
 	int res;
@@ -131,14 +125,12 @@ int run_system( const char *cmd, int id )
 	else
 	{
 
-#ifndef _NP_
-
-		if ( id >= 0 && id < ( int ) run_pids.size( ) )
+#if ! defined( _NP_ ) && ! defined( _LMM_ )
+		if ( id >= 0 && sim != NULL && id < ( int ) sim->run_pids.size( ) )
 		{
-			lock_guard < mutex > lock( lock_run_pids );
-			run_pids[ id ] = pid;
+			lock_guard < mutex > lock( sim->run_pids_lck );
+			sim->run_pids[ id ] = pid;
 		}
-
 #endif
 
 		waitpid( pid, & res, 0 );
@@ -157,18 +149,17 @@ int run_system( const char *cmd, int id )
  stops a running command in system
  ****************************************************/
 #define WAIT_TSECS 10
-int kill_system( int id )
+int kill_system( simulation *sim, int id )
 {
 
-#ifndef _NP_
-
+#if ! defined( _NP_ ) && ! defined( _LMM_ )
 	int res, tsecs = 0;
 
-	if ( id >= 0 && id < ( int ) run_pids.size( ) )
+	if ( id >= 0 && id < ( int ) sim->run_pids.size( ) )
 	{
-		if ( kill( run_pids[ id ], SIGKILL ) == 0 )
+		if ( kill( sim->run_pids[ id ], SIGKILL ) == 0 )
 		{
-			while ( ( res = kill( run_pids[ id ], 0 ) ) == 0 &&
+			while ( ( res = kill( sim->run_pids[ id ], 0 ) ) == 0 &&
 					tsecs++ < WAIT_TSECS )
 				msleep( 100 );
 
@@ -179,7 +170,6 @@ int kill_system( int id )
 			if ( errno != ESRCH )
 				return 0;
 	}
-
 #endif
 
 	return 1;
@@ -348,11 +338,11 @@ void exception_handler( int signum, const char *what )
 			if ( sims.size( ) > 0 && sims[ 0 ]->quit != 2 )	// handle GUI sim only
 			{
 				if ( ! sims[ 0 ]->parallel_mode && sims[ 0 ]->fast_mode == 0 &&
-					 sims[ 0 ]->stack_log != NULL && sims[ 0 ]->stack_log->vs != NULL &&
-					 sims[ 0 ]->stack_log->vs->label != NULL )
+					 sims[ 0 ]->stack_log != NULL && sims[ 0 ]->stack_log->v != NULL &&
+					 sims[ 0 ]->stack_log->v->label != NULL )
 				{
 					strcatn( msg3, "\n\nAttempting to open the LSD Debugger.\n\nLSD will close immediately after exiting the Debugger.", MAX_LINE_SIZE );
-					plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", sims[ 0 ]->stack_log->vs->label );
+					plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", sims[ 0 ]->stack_log->v->label );
 					if ( liblnk.print_stack != NULL )
 						liblnk.print_stack( );
 				}
@@ -376,13 +366,13 @@ void exception_handler( int signum, const char *what )
 		if ( usrExcpt && sims.size( ) > 0 )				// handle GUI sim only
 		{
 			if ( ! sims[ 0 ]->parallel_mode && sims[ 0 ]->fast_mode == 0 &&
-				 sims[ 0 ]->stack_log != NULL && sims[ 0 ]->stack_log->vs != NULL &&
-				 sims[ 0 ]->stack_log->vs->label != NULL )
+				 sims[ 0 ]->stack_log != NULL && sims[ 0 ]->stack_log->v != NULL &&
+				 sims[ 0 ]->stack_log->v->label != NULL )
 			{
 				double useless = -1;
-				snprintf( msg3, MAX_LINE_SIZE, "%s (ERROR)", sims[ 0 ]->stack_log->vs->label );
+				snprintf( msg3, MAX_LINE_SIZE, "%s (ERROR)", sims[ 0 ]->stack_log->v->label );
 				if ( liblnk.debugger != NULL )
-					( sims[ 0 ]->stack_log->vs->up->*liblnk.debugger )( NULL, msg3, & useless, false, "" );
+					( sims[ 0 ]->stack_log->v->up->*liblnk.debugger )( NULL, msg3, & useless, false, "" );
 			}
 		}
 		else

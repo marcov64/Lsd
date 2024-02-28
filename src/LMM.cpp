@@ -1487,7 +1487,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "cd \"$modelDir\"" );
 		s = get_target_name( str, 2 * MAX_PATH_LENGTH );
-		i = get_precompiled_flag( );
+		i = get_precompiled_flag( s );
 
 		if ( ! compile_run( 2 ) )				// recompile if changed
 			goto end_gdb;

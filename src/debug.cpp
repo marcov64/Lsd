@@ -507,7 +507,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				{
 					cmd( "destroytop .deb" );
 					set_buttons_run( true );
-					deb_set = false;
+					sim->deb_set = false;
 				}
 				break;
 
@@ -516,7 +516,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				cmd( "destroytop .deb" );
 				set_buttons_run( true );
 				if ( ! interact )
-					deb_set = false;
+					sim->deb_set = false;
 
 				break;
 
@@ -590,7 +590,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				{
 					case 1:		// prevent changing run parameters when only data browse was called
 						sim->quit = 1;
-						deb_set = false;
+						sim->deb_set = false;
 						break;
 
 					case 2:
@@ -1183,7 +1183,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				{
 					// restart execution
 					choice = 2;
-					deb_set = false;
+					sim->deb_set = false;
 					cmd( "if { $tdebug > %d } { set deb_t $tdebug } { set deb_t %d }", sim->t, sim->t + 1 );
 					cmd( "destroytop .deb" );
 					set_buttons_run( true );
@@ -1497,8 +1497,8 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				{
 					asl = sim->stack_log;
 					plog( "\nVariable: %s", asl->label );
-					if ( asl->vs != NULL && asl->vs->up != NULL )
-						choice = asl->vs->up->debugger( c, lab, res, interact );
+					if ( asl->v != NULL && asl->v->up != NULL )
+						choice = asl->v->up->debugger( c, lab, res, interact );
 					else
 					{
 						choice = 0;
@@ -1512,8 +1512,8 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 						while ( asl->prev->prev != NULL )
 							asl = asl->prev;
 						plog( "\nVariable: %s", asl->label );
-						if ( asl->vs != NULL && asl->vs->up != NULL )
-							choice = asl->vs->up->debugger( c, lab, res, interact );
+						if ( asl->v != NULL && asl->v->up != NULL )
+							choice = asl->v->up->debugger( c, lab, res, interact );
 						else
 						{
 							choice = 0;
@@ -1524,8 +1524,8 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 					{
 						asl = asl->next;
 						plog( "\nVariable: %s", asl->label );
-						if ( asl->vs != NULL && asl->vs->up != NULL )
-							choice = asl->vs->up->debugger( c, lab, res, interact );
+						if ( asl->v != NULL && asl->v->up != NULL )
+							choice = asl->v->up->debugger( c, lab, res, interact );
 						else
 						{
 							choice = 0;

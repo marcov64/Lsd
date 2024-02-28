@@ -1061,20 +1061,20 @@ void deb_log( bool on, int time )
 			sim.deb_t = 0;
 		else
 			if ( ( time == 0 && sim.deb_t == sim.t ) || time == sim.t )
-				deb_set = false;
+				sim.deb_set = false;
 
 		// act now?
 		if ( time == 0 || sim.t > time )
 		{
 			// close file if open
-			if ( log_file_ptr != NULL )
+			if ( sim.log_file_ptr != NULL )
 			{
-				fclose( log_file_ptr );
-				log_file_ptr = NULL;
+				fclose( sim.log_file_ptr );
+				sim.log_file_ptr = NULL;
 			}
 		}
 		else
-			log_stop = time;
+			sim.log_stop = time;
 	}
 
 	// check if should turn on
@@ -1087,16 +1087,16 @@ void deb_log( bool on, int time )
 			if ( time == 0 || time == sim.t )
 			{
 				sim.deb_t = sim.t;
-				deb_set = true;
+				sim.deb_set = true;
 				cmd( "focustop .deb" );
 			}
 
 		// ignore if log already open
-		if ( log_file_ptr == NULL )
+		if ( sim.log_file_ptr == NULL )
 		{
-			log_file_ptr = fopen( "log.txt", "a" );
-			log_start = time;
-			log_stop = sim.last_t;
+			sim.log_file_ptr = fopen( "log.txt", "a" );
+			sim.log_start = time;
+			sim.log_stop = sim.last_t;
 		}
 	}
 
@@ -1649,12 +1649,12 @@ void show_logs( const char *dest_path, vector < string > & logs, bool par_cntl )
 	char exec[ MAX_PATH_LENGTH	];
 	int i, j, n, sz;
 
-	cmd( "switch [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Background run monitor\" -message \"Open the background run monitor?\" -detail \"The selected simulation runs were started as parallel background job(s). Each job progress can be monitored in a separated window results by choosing 'Yes'\n\nLog files are being created in the folder:\n\n[ fn_break [ file nativename \"%s\" ] 40 ]\" ] { yes { set ans 1 } no { set ans 0 } }", dest_path );
+	cmd( "switch [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Background run monitor\" -message \"Open the background run monitor?\" -detail \"The selected simulation runs were started as parallel background job(s). Each job progress can be monitored in a separated window results by choosing 'Yes'\n\nLog files are being created in the folder:\n\n[ fn_break [ file nativename \"%s\" ] 40 ]\" ] { yes { set res 1 } no { set res 0 } }", dest_path );
 
-	if ( ! get_int( "ans" ) || ( par_cntl && ! parallel_monitor ) )
+	if ( ! get_int( "res" ) || ( par_cntl && ! sim.parallel_monitor ) )
 		return;
 
-	lock_guard < mutex > lock( lock_run_logs );
+	lock_guard < mutex > lock( sim.run_logs_lck );
 
 	n = logs.size( );
 	if ( n == 0 )

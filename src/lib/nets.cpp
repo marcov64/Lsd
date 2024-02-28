@@ -145,7 +145,6 @@ netLink::netLink( object *origNode, object *destNode, double linkWeight, double 
 	to = destNode;
 	from = origNode;
 	prev = from->node->last;
-	next = NULL;
 	weight = linkWeight;
 	probTo = destProb;
 
@@ -342,8 +341,6 @@ netNode::netNode( object *_up, long nodeId, const char *nodeName, double nodePro
 	time = up->sim->t;				// save creation time
 	serNum = up->sim->nodesSerial++;
 	prob = nodeProb;
-	nLinks = 0;
-	first = last = NULL;
 
 	if ( id < 0 )					// ID assigned?
 		id = serNum;
@@ -354,12 +351,8 @@ netNode::netNode( object *_up, long nodeId, const char *nodeName, double nodePro
 		strcpy( name, nodeName );
 	}
 	else
-	{
-		name = NULL;
-
 		if ( strcmp( nodeName, "" ) )
 			plog( "\nWarning: network node name '%s' is invalid, ignored.", nodeName );
-	}
 }
 
 

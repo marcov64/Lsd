@@ -72,18 +72,12 @@ description::description( const char *_label, int _type, const char *_text,
 		init = new char [ strlen( _init ) + 1 ];
 		strcln( init, _init, strlen( _init ) + 1 );
 	}
-	else
-		init = NULL;
 
 	if ( _type != 4 )
 	{
 		initial = _initial;
 		observe = _observe;
 	}
-	else
-		initial = observe = false;
-
-	next = NULL;
 }
 
 

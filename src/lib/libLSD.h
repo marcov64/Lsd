@@ -88,31 +88,32 @@ Relevant macros for conditional compilation (when defined):
 
 // global constants
 #define BAR_DONE_SIZE 80				// characters in the percentage done bar
-#define CSV_SEP ","						// single char string with the .csv format separator
+#define CSV_SEP ","						// single char with the .csv format separator
 #define ERR_LIM 5						// maximum number of repeated error messages
 #define LEGACY_NO_DESCR "(no description available)" // legacy description (do not change)
 #define MAX_BUFF_SIZE 10000				// standard Tcl buffer size (>9999)
 #define MAX_CORES 0						// maximum number of cores to use (0=auto )
-#define MAX_ELEM_LENGTH 100				// maximum element (object, variable) name length (>99)
+#define MAX_ELEM_LENGTH 100				// maximum element (obj., var.) name length (>99)
 #define MAX_FILE_SIZE 1000000			// max number of bytes to read from files
 #define MAX_FILE_TRY 100000				// max number of lines to read from files
-#define MAX_LINE_SIZE 1000				// max size of a text line to read from files (>999)
-#define MAX_OBJ_CHK	10000000			// maximum number of objects to check when searching
+#define MAX_LINE_SIZE 1000				// max size of text line to read from file (>999)
+#define MAX_OBJ_CHK	10000000			// maximum object number to check when searching
 #define MAX_PATH_LENGTH 1000			// maximum path length (>999)
 #define MAX_PROF_SIZE 1000				// maximum profile stack size (levels)
 #define MAX_SIM_SLEEP 3					// timeout for MT simulation dispatcher (s)
 #define MAX_STEPS 100					// default number of simulation steps
 #define MAX_STEP_TIMEOUT 60				// timeout for single simulation step (s)
 #define MAX_VAR_TIMEOUT 100				// timeout for MT variable scheduler (ms)
-#define MAX_WAIT_TIME 10				// maximum wait time for a variable computation (sec.)
+#define MAX_WAIT_TIME 10				// maximum time for variable computation (sec.)
 #define NOLH_TABS 7						// number of defined NOLH tables
+#define NON_AVAILABLE "NA"				// unavailable values text (R default)
 #define NO_CONF_NAME "(no name)"		// no configuration file name yet
 #define NO_DESCR ""						// no description available text
 #define SIG_DIG 10						// number of significant digits in data files
 #define UPD_PER 0.2						// update period during simulation run in s
 #define USER_D_VARS 1000				// number of user double variables
-#define T_CLEVS 10						// number of defined t distribution confidence levels
-#define Z_CLEVS 7						// number of defined normal distr. confidence levels
+#define T_CLEVS 10						// number of t distribution confidence levels
+#define Z_CLEVS 7						// number of normal distr. confidence levels
 
 // Choose directory/file separator
 #define foldersep( dir ) ( dir[ 0 ] == '\0' ? "" : "/" )
@@ -177,10 +178,6 @@ typedef pid_t handleT;
 // class definitions
 struct simulation						// simulation container class
 {
-	// simulation-class variables setting defaults (used in equations)
-	int last_t = MAX_STEPS;				// number of simulation steps
-	unsigned seed = 1;					// random number generator initial seed
-
 	// simulation-class variables (used in equations)
 	bool fast;							// safe copy of fast_mode flag
 	bool no_saved = true;				// disable usage of saved values as lagged ones
@@ -191,8 +188,10 @@ struct simulation						// simulation container class
 	bool use_nan;						// flag to allow using Not a Number value
 	char *conf_name = NULL;				// name of current simulation configuration
 	eq_mapT eq_map;						// fast equation look-up map
+	int deb_set = false;				// debug enable control (bool)
 	int fast_mode;						// level of LOG messages & runtime plot
 	int last_run = 1;					// total serial simulation runs
+	int last_t = MAX_STEPS;				// number of simulation steps
 	int no_ptr_chk = false;				// disable user pointer checking
 	int quit = 0;						// simulation interruption mode (0=none)
 	int run;							// current serial simulation run
@@ -200,16 +199,16 @@ struct simulation						// simulation container class
 	int t;								// current time step
 	object *root = NULL;				// LSD root object
 	o_setT obj_list;					// set with all existing LSD objects
+	unsigned seed = 1;					// random number generator initial seed
 
 #ifndef _NP_
-	// simulation-class conditional variables (used in equations)
 	mutex lock_obj_list;				// lock object list for parallel manipulation
 #endif
 
 #ifndef _NW_
 	// simulation-class debugger temporary probe storage (used in equations)
 	double d_values[ USER_D_VARS ];
-	int i_values[ 4 ];					// user temporary variables copy
+	int i_values[ 4 ];
 	netLink *n_values[ 10 ];
 	object *o_values[ 10 ];
 	FILE *f_values[ 1 ];
@@ -217,11 +216,16 @@ struct simulation						// simulation container class
 
 	// simulation-class methods (used in equations)
 	char *no_node_chr( const char *lab, const char *file, int line );
+	double _abs( double a );
 	double alapl( double mu, double alpha1, double alpha2 );// asym. laplace draw
+	double alaplcdf( double mu, double alpha1, double alpha2, double x );// asym. laplace cdf
 	double bernoulli( double p );		// Bernoulli draw
 	double beta( double alpha, double beta );// beta draw
+	double betacdf( double alpha, double beta, double x );// beta cdf
+	double betacf( double a, double b, double x );// beta distribution function
 	double binomial( double p, double t );	// binomial draw
 	double bpareto( double alpha, double low, double high );// bounded pareto draw
+	double bparetocdf( double alpha, double low, double high, double x );
 	double build_obj_list( bool set_list );// build object list for pointer checking
 	double cauchy( double a, double b );// Cauchy draw
 	double chi_squared( double n );		// chi-squared draw
@@ -232,15 +236,20 @@ struct simulation						// simulation container class
 	double init_lattice( int init_color = -0xffffff, double nrow = 100, double ncol = 100, double pixW = 0, double pixH = 0 );
 	double init_lattice( double pixW = 0, double pixH = 0, double nrow = 100, double ncol = 100, const char lrow[ ] = "y", const char lcol[ ] = "x", const char lvar[ ] = "", object *p = NULL, int init_color = -0xffffff );
 	double lnorm( double mu, double sigma );// lognormal draw
+	double lnormcdf( double mu, double sigma, double x );// lognormal cdf
 	double norm( double mean, double dev );// normal draw
+	double normcdf( double mu, double sigma, double x );// normal cdf
 	double pareto( double mu, double alpha );// Pareto draw
+	double paretocdf( double mu, double alpha, double x );
 	double poisson( double m );			// Poisson draw
+	double poissoncdf( double lambda, double k );// poisson cdf
 	double ran1( long *unused = 0 );	// 0-1 uniform draw
 	double read_lattice( double line, double col );
 	double save_lattice( const char fname[ ] = "lattice" );
 	double student( double n );			// Student-T draw
 	double uniform( double min, double max );// uniform draw
 	double uniform_int( double min, double max );// uniform integer draw
+	double unifcdf( double a, double b, double x );// uniform cdf
 	double update_lattice( double line, double col, double val = 1 );
 	double weibull( double a, double b );// Weibull draw
 	inline bool chk_hook( object *ptr, unsigned num );
@@ -273,11 +282,16 @@ struct simulation						// simulation container class
 
 #ifndef _FUN_
 	// simulation-class variables (not used in equations)
+	bool batch_sequential = false;		// no-window multi configuration job running
+	bool batch_loop = false;			// batch multi-config batch loop in process
 	bool conf_ok = false;				// a valid configuration file is loaded
-	bool error_hard_thread;				// flag to error_hard called in worker thread
+	bool error_hard_thread;				// error_hard called in worker thread
+	bool grand_total = false;			// produce grand total in batch processing
+	bool on_bar;						// indicate bar is being draw in log
+	bool parallel_monitor;				// parallel monitor thread status
 	bool running = false;				// single simulation is running
 	bool save_alt = false;				// alternate save path flag
-	bool save_ok = true;				// control saving model configuration possible
+	bool save_ok = true;				// control saving model configuration
 	bool user_exception = false;		// indicate exception generated by user code
 	bool watch_trigger = false;			// indicate that a watch condition was met
 	bool watch_write_mode;				// flag for write-only watch condition
@@ -294,12 +308,24 @@ struct simulation						// simulation container class
 	char error_hard_msg3[ MAX_BUFF_SIZE ];// buffer for parallel worker box msg
 	char rep_file[ MAX_PATH_LENGTH ] = "";// documentation report file name
 	char res_path[ MAX_PATH_LENGTH ] = "";// path of last used results directory
-	char watch_elem[ MAX_ELEM_LENGTH + 1 ] = "";// element triggering watch condition
+	char watch_elem[ MAX_ELEM_LENGTH + 1 ] = "";// elem. triggering watch condition
 	clock_t start_profile[ MAX_PROF_SIZE ];// profile-level start times
 	clock_t end_profile[ MAX_PROF_SIZE ];// profile-level end times
 	description *descr = NULL;			// model description structure
+	int add_to_tot = false;				// type of totals file generated (bool)
 	int deb_t;							// next debug stop time step (0 for none)
+	int dobar = false;					// enable progress bar in log/standard output
+	int docsv = false;					// produce .csv text results files (bool)
+	int dozip = true;					// compressed results file flag (bool)
+	int fend;							// last multi configuration job to run
+	int findex;							// current multi configuration job
 	int last_dispatch_time;				// last time step controlled by dispatcher
+	int log_start;						// first period to start logging to file
+	int log_stop;						// last period to log to file, if any
+	int max_runs;						// maximum number of parallel runs
+	int max_threads;					// maximum parallel threads per run
+	int no_res = false;					// do not produce .res results files (bool)
+	int no_tot = true;					// do not produce .tot totals files (bool)
 	int parallel_disable = false;		// flag to control parallel mode
 	int prof_aggr_time = false;			// show aggregate profiling times
 	int prof_min_msecs = 0;				// profile variables taking more than X msecs.
@@ -326,29 +352,55 @@ struct simulation						// simulation container class
 	sensitivity *sens = NULL;			// LSD sensitivity analysis structure
 	variable *cemetery = NULL;			// LSD saved data from deleted objects
 	variable *last_cemetery = NULL;		// LSD last saved cemetery entry
+	vector < string > res_list;			// list of results files last saved
+	FILE *log_file_ptr;					// log file pointer, if any
 
 #ifndef _NP_
 	// simulation-class conditional variables (not used in equations)
 	atomic < bool > running_seq = false;// set of sequential simulations running
 	atomic < bool > parallel_ready;		// indicate variable worker is ready
 	atomic < int > eff_t = 0;			// number of executed time steps
+	atomic < int > alaplErrCnt, bernoErrCnt, betaErrCnt, binomErrCnt, cauchErrCnt,
+				   chisqErrCnt, expErrCnt, fishErrCnt, gammaErrCnt, geomErrCnt,
+				   lnormErrCnt, normErrCnt, paretErrCnt, poissErrCnt, studErrCnt,
+				   weibErrCnt;			// math error count control
 	condition_variable upd_workers;		// worker schedule update signal
-	mutex crash_lock;					// control worker crash handling
-	mutex error_lock;					// control multiple error_hard calls
-	mutex thr_ptr_lock;					// control worker thread pointers update
-	mutex update_lock;					// control worker variable update
-	mutex draw_lc1_lock;				// locks for random generator operations
-	mutex draw_lc2_lock;
-	mutex draw_lf24_lock;
-	mutex draw_lf48_lock;
-	mutex draw_mt32_lock;
-	mutex draw_mt64_lock;
-	mutex draw_rd_lock;
-	thread thr;							// thread object where simulation is run
+	mutex draw_lc1_lck;					// locks for random generator operations
+	mutex draw_lc2_lck;
+	mutex draw_lf24_lck;
+	mutex draw_lf48_lck;
+	mutex draw_mt32_lck;
+	mutex draw_mt64_lck;
+	mutex draw_rd_lck;
+	mutex error_lck;					// control multiple error_hard calls
+	mutex run_logs_lck;					// lock run_logs for parallel updating
+	mutex run_pids_lck;					// lock run_pids for parallel updating
+	mutex run_status_lck;				// lock run_status for parallel updating
+	mutex seq_end_lck;					// lock seq_end for parallel updating
+	mutex var_update_lck;				// control worker variable update
+	mutex wrk_crash_lck;				// control worker crash handling
+	string run_log;						// consolidated runs log
+	thread run_monitor;					// thread monitoring parallel instances
+	thread sim_thread;					// thread object where simulation is run
+	vector < handleT > run_pids;		// parallel running instances process id's
+	vector < int > run_status;			// parallel running instances status
+	vector < string > run_logs;			// log file list produced in parallel runs
+	vector < string > run_results;		// parallel run results files
+	vector < thread > run_threads;		// parallel running instances
 	worker *workers = NULL;				// multi-thread parallel worker data
 #else
 	bool running_seq = false;			// set of sequential simulations running
 	int eff_t = 0;						// number of executed time steps
+	int alaplErrCnt, bernoErrCnt, betaErrCnt, binomErrCnt, cauchErrCnt,
+		chisqErrCnt, expErrCnt, fishErrCnt, gammaErrCnt, geomErrCnt,
+		lnormErrCnt, normErrCnt, paretErrCnt, poissErrCnt, studErrCnt,
+		weibErrCnt;						// math error count control
+#endif
+
+#ifndef _NW_
+// library Tcl/Tk specific definitions (for the GUI version only)
+	p_mapT par_map;						// variable to parent name map for AoR
+	Tcl_Interp *inter;					// Tcl interpreter (for legacy LSD code)
 #endif
 
 #endif
@@ -359,6 +411,7 @@ struct simulation						// simulation container class
 	bool load_description( const char *msg, FILE *f );
 	bool next_batch( void );
 	bool results_alt_path( const char *altPath );
+	bool stop_parallel( void );
 	description *add_description( const char *lab, int type = 4, const char *text = NULL, const char *init = NULL, bool initial = false, bool observe = false );
 	description *change_description( const char *lab_old, const char *lab = NULL, int type = -1, const char *text = NULL, const char *init = NULL, int initial = -1, int observe = -1 );
 	description *search_description( const char *lab, bool add_missing = true );
@@ -367,25 +420,34 @@ struct simulation						// simulation container class
 	int load_configuration( bool reload, std::string *warnings, int quick );
 	int hyper_count( const char *lab );
 	int hyper_count_var( const char *lab );
+	int monitor_logs( void );
 	int rnd_int( int min, int max );
 	int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns );
 	int run_simulation( int until_t = 0, int until_run = 0 );
 	int worker_errors( void );
 	template < class distr > double draw_gen( distr &d );
+	void detach_parallel( void );
 	void empty_blueprint( void );
 	void empty_cemetery( void );
 	void empty_description( void );
 	void empty_lattice( void );
 	void empty_sensitivity( sensitivity *cs = NULL );
 	void empty_stack( void );
+	void init_math_error( void );
+	void log_parallel( bool nw );
+	void monitor_parallel( bool nw );
 	void move_obj( const char *lab, const char *dest );
 	void reset_blueprint( object *r );
+	void run_parallel_exec( bool nw, int id, string cmd );
 	void save_results( void );
 	void unload_configuration( bool full );
 	void update_bar( char *bar, int done, int & last_done, int bar_sz );
 
 #ifndef _NP_
 	void parallel_update( variable *v, object* p, object *caller = NULL );
+	void warn_distr( atomic < int > & errCnt, bool & stopErr, const char *distr, const char *msg );
+#else
+	void warn_distr( int & errCnt, bool & stopErr, const char *distr, const char *msg );
 #endif
 
 #ifdef SIMULATION_EXT
@@ -395,30 +457,31 @@ struct simulation						// simulation container class
 
 struct object							// simulation model object class
 {
-	bool *del_flag;						// address of flag to signal deletion
-	bool deleting;						// indicate deletion in process
+	bool *del_flag = NULL;				// address of flag to signal deletion
+	bool deleting = false;				// indicate deletion in process
 	bool to_compute;
 	b_mapT b_map;						// fast lookup map to object bridges
 	char *label;
-	int acounter;
-	int lstCntUpd;						// period of last counter update
-	bridge *b;
-	netNode *node;						// pointer to network node data structure
-	object *hook;
-	object *next;
-	object *up;
+	int acounter = 0;					// "fail safe" when creating labels
+	int lstCntUpd = 0;					// period of last counter update
+	bridge *b = NULL;
+	netNode *node = NULL;				// pointer to network node data structure
+	object *hook = NULL;
+	object *next = NULL;
+	object *up;							// parent object
 	o_vecT hooks;
 	simulation *sim;					// simulation where object is contained
-	variable *v;
-	void *cext;							// pointer to C++ object extension
+	variable *v = NULL;
+	void *cext = NULL;					// pointer to C++ object extension
 	v_mapT v_map;						// fast lookup map to variables
 
 #ifndef _NP_
-	mutex parallel_comp;				// mutex lock for parallel computations
+	mutex obj_comp_lck;					// mutex lock for parallel computations
 #endif
 
 	// object-class methods
 	bool alloc_save_mem( void );
+	bool check_cond( double val1, int lopc, double val2 );
 	bool load_insts( const char *file_name, FILE *f );
 	bool load_struct( FILE *f );
 	bool search_parallel( void );
@@ -540,13 +603,13 @@ struct object							// simulation model object class
 
 struct bridge							// descendant-object container class
 {
-	bool copy;							// just a temporary copy
-	bool counter_updated;
-	bridge *next;
-	char *blabel;
-	char *search_var;					// current initialized search variable
+	bool copy = false;					// just a temporary copy
+	bool counter_updated = false;
+	bridge *next = NULL;
+	char *blabel;						// bridge label (same as parent)
+	char *search_var = NULL;			// current initialized search variable
 	n_mapT t_map;						// turbosearch map
-	object *head;
+	object *head = NULL;
 	o_mapT o_map;						// fast lookup map to object values
 
 	bridge( const char *lab );			// constructor
@@ -556,42 +619,41 @@ struct bridge							// descendant-object container class
 
 struct variable							// model numeric element (variable,
 {										// parameter, or function) class
-	char *label;
-	char *lab_tit;
-	char deb_mode;
-	bool dummy;
-	bool initialized;
-	bool observe;
-	bool parallel;
-	bool plot;
-	bool save;
-	bool savei;
-	bool under_computation;
-	double *data;
-	double *val;
-	double deb_cnd_val;
-	int deb_cond;
-	int delay;
-	int delay_range;
-	int end;
-	int last_update;
-	int next_update;
-	int num_lag;
-	int param;
-	int period;
-	int period_range;
-	int start;
-	object *up;
-	simulation *sim;					// simulation where object is contained
-	variable *next;
+	char *label = NULL;
+	char *lab_tit = NULL;
+	char deb_mode = 'n';
+	bool dummy = false;
+	bool initialized = false;
+	bool observe = false;
+	bool parallel = false;
+	bool plot = false;
+	bool save = false;
+	bool savei = false;
+	bool under_computation = false;
+	double *data = NULL;
+	double *val = NULL;
+	double deb_cnd_val = 0;
+	eq_funcT eq_func = NULL;			// pointer to equation function
+	int deb_cond = 0;
+	int delay = 0;
+	int delay_range = 0;
+	int end = 0;
+	int last_update = 0;
+	int next_update = 0;
+	int num_lag = 0;
+	int param = 0;
+	int period = 1;
+	int period_range = 0;
+	int start = 0;
+	object *up = NULL;
+	simulation *sim = NULL;				// simulation where object is contained
+	variable *next = NULL;
 
 #ifndef _NP_
-	recursive_mutex parallel_comp;		// mutex lock for parallel computation
+	recursive_mutex var_comp_lck;		// mutex lock for parallel computation
 #endif
 
-	eq_funcT eq_func;					// pointer to equation function for fast look-up
-
-	variable( void );					// empty constructor
+	variable( void ) { };				// constructor (empty)
 	variable( const variable &v );		// copy constructor
 	~variable( void );					// destructor
 
@@ -614,13 +676,13 @@ struct variable							// model numeric element (variable,
 struct sensitivity						// sensitivity analysis container class
 {
 	bool integer;						// integer element
-	char *label;
-	double *v;							// values to test sensitivity
-	int curv;							// index for value in use in combinations
+	char *label = NULL;					// variable name
+	double *v = NULL;					// values to test sensitivity
+	int curv = 0;						// index for value in use in combinations
 	int lag;							// lag of initial value
-	int numv;							// number of values to test
+	int numv = 0;						// number of values to test
 	int param;							// element type
-	sensitivity *next;					// sensitivity analysis chain of elements
+	sensitivity *next = NULL;			// sensitivity analysis chain of elements
 	simulation *sim;					// simulation where object is contained
 
 	sensitivity( const char *lab, simulation *_sim, int _param, int _lag,
@@ -635,13 +697,13 @@ struct sensitivity						// sensitivity analysis container class
 
 struct description						// model-element description class
 {
-	char *init;
+	char *init = NULL;
 	char *label;
 	char *text;
 	char *type;
-	bool initial;
-	bool observe;
-	description *next;
+	bool initial = false;
+	bool observe = false;
+	description *next = NULL;
 
 	description( const char *_label, int _type, const char *_text,
 				 const char *_init, bool _initial, bool _observe );// constructor
@@ -652,14 +714,14 @@ struct description						// model-element description class
 
 struct netNode							// network node data class
 {
-	char *name;							// node textual name (not required)
+	char *name = NULL;					// node textual name (not required)
 	double prob;						// assigned node draw probability
 	int time;							// time of creation/update
 	long id;							// node unique ID number (reorderable)
-	long nLinks;						// number of arcs FROM node
+	long nLinks = 0;					// number of arcs FROM node
 	long serNum;						// node serial number (for file save/export)
-	netLink *first;						// first link in the linked list of links
-	netLink *last;						// last link in the linked list of links
+	netLink *first = NULL;				// first link in the linked list of links
+	netLink *last = NULL;				// last link in the linked list of links
 	object *up;							// object containing node
 
 	netNode( object *_up, long nodeId = -1, const char nodeName[ ] = "",
@@ -672,7 +734,7 @@ struct netLink							// individual outgoing network link class
 	double probTo;						// destination node draw probability
 	double weight;						// link weight
 	int time;							// time of creation/update
-	netLink *next;						// pointer to next link (NULL if last )
+	netLink *next = NULL;				// pointer to next link (NULL if last )
 	netLink *prev;						// pointer to previous link (NULL if first )
 	object *from;						// network node containing the link
 	object *to;							// pointer to destination number
@@ -695,29 +757,28 @@ struct lattice							// model (visual) lattice data class
 #ifndef _NP_
 struct worker							// multi-thread variable worker data
 {
-	bool free;
-	bool running;
+	bool free = false;
+	bool running = false;
 	bool errored;
 	bool user_excpt;
-	char err_msg1[ MAX_BUFF_SIZE ];
-	char err_msg2[ MAX_BUFF_SIZE ];
-	char err_msg3[ MAX_BUFF_SIZE ];
+	char err_msg1[ MAX_BUFF_SIZE ] = "";
+	char err_msg2[ MAX_BUFF_SIZE ] = "";
+	char err_msg3[ MAX_BUFF_SIZE ] = "";
 	condition_variable run;
-	exception_ptr pexcpt;
-	int signum;
+	exception_ptr pexcpt = nullptr;
+	int signum = -1;
 	jmp_buf env;
-	mutex lock;
-	simulation *sim;					// simulation where object is contained
-	thread thr;
-	thread::id thr_id;
-	variable *var;
+	mutex worker_lck;
+	simulation *sim = NULL;				// simulation where object is contained
+	thread worker_thread;
+	thread::id thread_id;
+	variable *v = NULL;
 
-	worker( void );						// constructor
 	~worker( void );					// destructor
 
 	bool check( void );					// handle worker problems
 	static void signal_wrapper( int signun );// wrapper for signal_handler
-	void cal( variable *var );			// start worker calculation
+	void cal( variable *_v );			// start worker calculation
 	void cal_worker( void );			// worker thread code
 	void signal( int signum );			// signal handler
 };
@@ -728,9 +789,9 @@ struct result							// results file container class
 	bool docsv;							// comma separated .csv text format
 	bool dozip;							// compressed file flag
 	bool firstCol;						// flag for first column in line
-	gzFile fz;							// compressed file pointer
+	gzFile fz = NULL;					// compressed file pointer
 	simulation *sim;					// simulation where object is contained
-	FILE *f;							// uncompressed file pointer
+	FILE *f = NULL;						// uncompressed file pointer
 
 	result( const char *fname, const char *fmode, simulation *_sim,
 			bool _dozip = false, bool _docsv = false );// constructor
@@ -744,19 +805,17 @@ struct result							// results file container class
 
 struct lsdstack							// simulation-stack element class
 {
-	char label[ MAX_ELEM_LENGTH ];
-	int ns;
-	lsdstack *next;
-	lsdstack *prev;
-	variable *vs;
+	char label[ MAX_ELEM_LENGTH ] = "";
+	int n = 0;
+	lsdstack *next = NULL;
+	lsdstack *prev = NULL;
+	variable *v = NULL;
 };
 
 struct profile							// profiled variable class
 {
-	unsigned int comp;
-	unsigned long long ticks;
-
-	profile( ) { ticks = 0; comp = 0; };// constructor
+	unsigned int comp = 0;
+	unsigned long long ticks = 0;
 };
 
 struct dlliblinkage						// callback references for dynamic link library
@@ -794,114 +853,61 @@ struct dlliblinkage						// callback references for dynamic link library
 // library global variables (used in equations)
 extern const bool no_pointer_check;		// user pointer checking static disable
 extern const bool no_pointer_init;		// user pointer initialization disable
-extern int deb_set;						// debug enable control (bool)
 extern int platform;					// OS platform (1=Linux, 2=Mac, 3=Windows)
 
 // library C++ functions (used in equations)
 bool is_finite( double x );
 bool is_inf( double x );
 bool is_nan( double x );
-double _abs( double a );
-double alaplcdf( double mu, double alpha1, double alpha2, double x );// asym. laplace cdf
-double betacdf( double alpha, double beta, double x );// beta cdf
-double betacf( double a, double b, double x );// beta distribution function
-double bparetocdf( double alpha, double low, double high, double x );
 double fact( double x );				// Factorial function
 double ipow( double base, double exp );	// integer exponentiation
-double lnormcdf( double mu, double sigma, double x );// lognormal cdf
 double max( double a, double b );
 double median( vector < double > & v );
 double min( double a, double b );
-double normcdf( double mu, double sigma, double x );// normal cdf
-double paretocdf( double mu, double alpha, double x );
-double poissoncdf( double lambda, double k );// poisson cdf
 double round( double r );
 double round_digits( double value, int digits );
 double t_star( int df, double cl );		// Student-t distribution statistic
 double z_star( double cl );				// Standard normal distribution statistic
-double unifcdf( double a, double b, double x );// uniform cdf
 void deb_log( bool on, int time );		// control debug mode
-void error_hard_helper( const char *boxTitle, const char *boxText, const char *logText, bool defQuit );
 void msleep( unsigned msec = 1000 );	// sleep process for milliseconds
 void plog( const char *msg, ... );		// write on log window
 
 #ifndef _FUN_
 
 // library global variables (not used in equations)
-extern bool batch_sequential;	// no-window multi configuration job running
-extern bool batch_loop;			// batch multi-config batch loop in process
-extern bool grandTotal;			// flag to produce grand total in batch processing
-extern bool idle_loop;			// indicates in main idle loop (no running operation)
+extern bool idle_loop;			// in main idle loop (no running operation)
 extern bool message_logged;		// new message posted in log window
-extern bool on_bar;				// flag to indicate bar is being draw in log
-extern bool parallel_monitor;	// parallel monitor thread status
 extern char *exec_file;			// name of executable file
 extern char *exec_path;			// path of executable file
 extern char *lib_file;			// name of shared library, if any
 extern char *lib_path;			// path of shared library, if any
 extern char *model_path;		// folder where the model files are
 extern char *rootLsd;			// path of LSD root directory
-extern char nonavail[ ];		// string for unavailable values
-extern dlliblinkage liblnk;		// call-back references for DLL
+extern const char nonavail[ ];	// string for unavailable values
+extern const char *desc_key_words[ ];// library constant string arrays
+extern const char *elem_type_names[ ];
+extern const char *signal_names[ ];
 extern const double t_dist_cl[ T_CLEVS ];// t-distribution table confidence levels
 extern const double t_dist_st[ T_CLEVS ][ 36 ];// t-distribution table statistics
 extern const double z_dist_cl[ Z_CLEVS ];// normal distribution table conf. levels
 extern const double z_dist_st[ Z_CLEVS ];// normal distribution table statistics
-extern int add_to_tot;			// type of totals file generated (bool)
+extern const int signals[ ];	// handled system signal numbers
+extern dlliblinkage liblnk;		// call-back references for DLL
 extern int choice;				// Tcl menu control variable (main window)
-extern int dobar;				// output a progress bar to the log/standard output
-extern int docsv;				// produce .csv text results files (bool)
-extern int dozip;				// compressed results file flag (bool)
-extern int fend;				// last multi configuration job to run
-extern int findex;				// current multi configuration job
-extern int log_start;			// first period to start logging to file, if any
-extern int log_stop;			// last period to log to file, if any
-extern int max_runs;			// maximum number of parallel runs
-extern int max_threads;			// maximum parallel threads per run
-extern int no_res;				// do not produce .res results files (bool)
-extern int no_tot;				// do not produce .tot totals files (bool)
-extern mt19937 mt32;			// Mersenne-Twister 32 bits generator
 extern vector < simulation * > sims;// vector holding existing simulations
-extern vector < string > res_list;// list of results files last saved
-extern void *random_engine;		// current random number generator engine
-extern FILE *log_file_ptr;		// log file pointer, if any
 extern FILE *stderr_ptr;		// main thread standard error file pointer
 extern FILE *stdout_ptr;		// main thread standard output file pointer
 
-// library constant string arrays (not visible to the users)
-extern const char *desc_key_words[ ];
-extern const char *elem_type_names[ ];
-extern const char *signal_names[ ];
-extern const int signals[ ];			// handled system signal numbers
-
 #ifndef _NP_
-// library conditional variables
+// library conditional variables (not used in equations)
 extern condition_variable seq_end;// variable to signal simulation sequence end
-extern map < thread::id, worker * > thr_ptr;// worker thread pointers
-extern mutex lock_plog_term;	// lock plog_terminal for parallel updating
-extern mutex lock_run_logs;		// lock run_logs for parallel updating
-extern mutex lock_run_pids;		// lock run_pids for parallel updating
-extern mutex lock_run_status;	// lock run_status for parallel updating
-extern mutex lock_seq_end;		// lock seq_end for parallel updating
-extern string run_log;			// consolidated runs log
-extern thread run_monitor;		// thread monitoring parallel instances
+extern map < thread::id, worker * > worker_thread_ptr;// worker thread pointers
+extern mutex plog_term_lck;		// lock plog_terminal for parallel updating
+extern mutex wrk_thr_ptr_lck;	// lock worker_thread_ptr for parallel updating
 extern thread::id main_thread;	// LSD main thread ID
-extern vector < handleT > run_pids;// parallel running instances process id's
-extern vector < int > run_status;// parallel running instances status
-extern vector < string > run_logs;// log file list produced in parallel runs
-extern vector < string > run_results;// parallel run results files
-extern vector < thread > run_threads;// parallel running instances
-#endif
-
-#ifndef _NW_
-// library Tcl/Tk specific definitions (for the GUI version only)
-extern p_mapT par_map;			// variable to parent name map for AoR
-extern Tcl_Interp *inter;		// Tcl interpreter in GUI (for legacy LSD code)
 #endif
 
 // library C++ functions (not used in equations)
-bool check_cond( double val1, int lopc, double val2 );
-bool stop_parallel( void );
 bool strwsp( const char *str );
 bool valid_label( const char *lab );
 bool valid_xml_string( const char *lab );
@@ -912,9 +918,8 @@ char *strcpyn( char *d, const char *s, size_t dSz );
 char *strdecdata( char *out, const char *in, int outSz = 0 );
 const char *signal_name( int signum );
 int dispatch_runs( int until_t = 0, int until_run = 0 );
-int kill_system( int id );
-int monitor_logs( void );
-int run_system( const char *cmd, int id = -1 );
+int kill_system( simulation *sim, int id );
+int run_system( const char *cmd, simulation *sim = NULL, int id = -1 );
 int strcln( char *out, const char *str, int outSz );
 int strlf( char *out, const char *str, int outSz );
 int strtrim( char *out, const char *str, int outSz );
@@ -928,25 +933,14 @@ vector < long > strtolsplit( const char *in, char sep, long inv = 0 );
 vector < string > strtostrsplit( const char *in, char sep, bool remQuotes = false );
 void close_sim( void );
 void cmd_gui( const char *cm, ... );
-void detach_parallel( void );
 void exception_handler( int signum, const char *what );
 void handle_signals( void ( * handler ) ( int signum ) );
 void init_map( void );
-void init_math_error( void );
-void log_parallel( bool nw );
 void lsd_exit( int v );
-void monitor_parallel( bool nw );
 void plog_tag( const char *cm, const char *tag, ... );
 void plog_terminal( const char *cm, va_list arg );
-void run_parallel_exec( bool nw, int id, string cmd );
 void set_exec( const char *path, const char *file );
 void signal_handler( int signum );
 FILE *search_data_str( const char *name, const char *init, const char *str );
-
-#ifndef _NP_
-void warn_distr( atomic < int > & errCnt, bool & stopErr, const char *distr, const char *msg );
-#else
-void warn_distr( int & errCnt, bool & stopErr, const char *distr, const char *msg );
-#endif
 
 #endif

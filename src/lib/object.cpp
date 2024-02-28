@@ -276,12 +276,6 @@ Constructor
 ****************************************************/
 bridge::bridge( const char *lab )
 {
-	copy = false;
-	counter_updated = false;
-	next = NULL;
-	head = NULL;
-	search_var = NULL;
-
 	blabel = new char[ strlen( lab ) + 1 ];
 	strcpy( blabel, lab );
 }
@@ -340,22 +334,9 @@ void object::init( object *_up, simulation *_sim, const char *lab, bool _to_comp
 {
 	up = _up;
 	sim = _sim;
-	v = NULL;
-	v_map.clear( );
-	next = NULL;
 	to_compute = _to_compute;
 	label = new char[ strlen( lab ) + 1 ];
 	strcpy( label, lab );
-	b = NULL;
-	b_map.clear( );
-	hook = NULL;
-	hooks.clear( );
-	node = NULL;				// not part of a network yet
-	cext = NULL;				// no C++ object extension yet
-	acounter = 0;				// "fail safe" when creating labels
-	lstCntUpd = 0;				// counter never updated
-	del_flag = NULL;			// address of flag to signal deletion
-	deleting = false;			// not being deleted
 }
 
 
@@ -700,7 +681,7 @@ double object::initturbo( const char *lab )
 
 #ifndef _NP_
 	// prevent concurrent initialization by more than one thread
-	lock_guard < mutex > lock( parallel_comp );
+	lock_guard < mutex > lock( obj_comp_lck );
 #endif
 
 	cb->t_map.clear( );
@@ -1057,7 +1038,7 @@ double object::initturbo_cond( const char *lab )
 
 #ifndef _NP_
 	// prevent concurrent initialization by more than one thread
-	lock_guard < mutex > lock( parallel_comp );
+	lock_guard < mutex > lock( obj_comp_lck );
 #endif
 
 	cb = bit->second;
@@ -1595,7 +1576,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 
 #ifndef _NP_
 	// prevent concurrent additions by more than one thread
-	lock_guard < mutex > lock( parallel_comp );
+	lock_guard < mutex > lock( obj_comp_lck );
 #endif
 
 	cb2->counter_updated = false;
@@ -1625,7 +1606,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 		{
 #ifndef _NP_
 			// prevent concurrent use by more than one thread
-			rec_lguardT lock( cv->parallel_comp );
+			rec_lguardT lock( cv->var_comp_lck );
 #endif
 			if ( sim->running && cv->param != 1 )
 			{
@@ -1764,7 +1745,7 @@ void object::delete_obj( variable *caller )
 	{							// create context for lock
 #ifndef _NP_
 		// prevent concurrent deletion by more than one thread
-		lock_guard < mutex > lock( parallel_comp );
+		lock_guard < mutex > lock( obj_comp_lck );
 #endif
 
 		if ( deleting )			// ignore if deleting already going on
@@ -2913,7 +2894,7 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 
 #ifndef _NP_
 	// prevent concurrent sorting by more than one thread
-	lock_guard < mutex > lock( parallel_comp );
+	lock_guard < mutex > lock( obj_comp_lck );
 #endif
 
 	cb->counter_updated = false;
@@ -3047,7 +3028,7 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 
 #ifndef _NP_
 	// prevent concurrent sorting by more than one thread
-	lock_guard < mutex > lock( parallel_comp );
+	lock_guard < mutex > lock( obj_comp_lck );
 #endif
 
 	cb->counter_updated = false;
@@ -3279,8 +3260,8 @@ double object::write( const char *lab, double value, int time, int lag )
 		}
 
 #ifndef _NP_
-		if ( cv->parallel_comp.try_lock( ) )
-			cv->parallel_comp.unlock( );
+		if ( cv->var_comp_lck.try_lock( ) )
+			cv->var_comp_lck.unlock( );
 		else
 		{
 			sim->error_hard( "deadlock during parallel computation",
@@ -3295,7 +3276,7 @@ double object::write( const char *lab, double value, int time, int lag )
 
 #ifndef _NP_
 	// prevent concurrent use by more than one thread
-	rec_lguardT lock( cv->parallel_comp );
+	rec_lguardT lock( cv->var_comp_lck );
 #endif
 	if ( cv->param != 1 && time <= 0 && sim->t > 1 )
 	{
@@ -3410,7 +3391,7 @@ double object::write( const char *lab, double value, int time, int lag )
 		}
 	}
 
-	if ( deb_set && sim->t == sim->deb_t && cv->deb_mode != 'n' && cv->deb_mode != 'd' )
+	if ( sim->deb_set && sim->t == sim->deb_t && cv->deb_mode != 'n' && cv->deb_mode != 'd' )
 	{
 		sim->watch_trigger = true;
 		sim->watch_write_mode = true;
@@ -3733,7 +3714,7 @@ CHECK_COND
 Check if logical condition defined by the logical
 operator code and the two values is true
 ****************************************************/
-bool check_cond( double val1, int lopc, double val2 )
+bool object::check_cond( double val1, int lopc, double val2 )
 {
 	switch ( lopc )
 	{

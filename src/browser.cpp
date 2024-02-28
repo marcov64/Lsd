@@ -117,8 +117,8 @@ int load_gui( const char **argv )
 
 #ifndef _NP_
 
-	if ( j > 0 && j < max_threads )
-		max_threads = j;
+	if ( j > 0 && j < sim.max_threads )
+		sim.max_threads = j;
 
 #endif
 
@@ -129,7 +129,7 @@ int load_gui( const char **argv )
 	Tcl_LinkVar( interp, "choice", ( char * ) & choice, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "choice_g", ( char * ) & choice_g, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "stop", ( char * ) & stop, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "deb_set", ( char * ) & deb_set, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "deb_set", ( char * ) & sim.deb_set, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( interp, "deb_t", ( char * ) & sim.deb_t, TCL_LINK_INT );
 
 	// set system defaults in tcl
@@ -337,7 +337,7 @@ int load_gui( const char **argv )
 	}
 
 	// set dynamic link library (DLL) call-back references
-	inter = interp;
+	sim.inter = interp;
 	liblnk.cmd_backend = & cmd_backend;
 	liblnk.cover_browser = & cover_browser;
 	liblnk.debugger = & object::debugger;
@@ -383,8 +383,6 @@ int load_gui( const char **argv )
 		strcpy( sim.rep_file, "" );
 		cmd( "cd \"%s\"", model_path );
 	}
-
-	grandTotal = true;				// not in parallel mode: use .tot headers
 
 	// configure main window
 	cmd( ". configure -menu .m -background $colorsTheme(bg)" );
@@ -1533,7 +1531,7 @@ Prepare run-time plots and clear AoR maps
 void runtime_run_start( void )
 {
 	sim.root->prepare_plot( sim.run );
-	par_map.clear( );	// restart variable to parent name map for AoR
+	sim.par_map.clear( );			// restart variable to parent name map for AoR
 }
 
 
@@ -1567,11 +1565,11 @@ bool runtime_step( void )
 
 	if ( sim.t == sim.deb_t )// activate degugger if it's time
 	{
-		deb_set = true;
+		sim.deb_set = true;
 		cmd( "focustop .deb" );
 	}
 	else
-		deb_set = false;
+		sim.deb_set = false;
 
 	return ! pause_run;		// only update variables if simulation not paused
 }
@@ -1598,14 +1596,14 @@ void runtime_buttons( clock_t &last_update )
 
 		case 2:			// Fast button / f/F key
 			sim.set_fast( 1 );
-			deb_set = false;
+			sim.deb_set = false;
 			break;
 
 		case 3:			// Debug button / d/D key
 			if ( ! pause_run )
 			{
 				sim.deb_t = sim.t + 1;
-				deb_set = true;
+				sim.deb_set = true;
 				cmd( "focustop .deb" );
 			}
 			else		// if paused, just call the data browser
@@ -2221,33 +2219,31 @@ bool abort_run_threads( void )
 {
 
 #ifndef _NP_
-
-	int ans;
+	int res;
 
 	// confirm aborting running parallel processes
-	if ( parallel_monitor )
+	if ( sim.parallel_monitor )
 	{
 		cmd( "switch [ ttk::messageBox -parent . -type yesnocancel -default yes -icon warning -title Warning -message \"Abort running simulation?\" -detail \"A set of parallel simulation runs is being executed in background. You may choose to interrupt it now, or let it to continue (results and log files will be produced in the configuration file's directory).\n\nChoose 'Yes' to abort before exiting, 'No' to exit without aborting, or 'Cancel' to just return to LSD.\" ] { \
-				yes { set ans 2 } \
-				no { set ans 1 } \
-				cancel { set ans 0 } \
+				yes { set res 2 } \
+				no { set res 1 } \
+				cancel { set res 0 } \
 			}" );
 
-		ans = get_int( "ans" );
+		res = get_int( "res" );
 
-		if ( ans == 2 )
-			if ( ! stop_parallel( ) )
+		if ( res == 2 )
+			if ( ! sim.stop_parallel( ) )
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Failed to abort running simulation\" -detail \"LSD is exiting but the parallel simulation runs will continue (results and log files will be produced in the configuration file's directory).\"" );
 
-		if ( ans == 1 )
-			detach_parallel( );
+		if ( res == 1 )
+			sim.detach_parallel( );
 
-		if ( ans == 0 )
+		if ( res == 0 )
 			return false;
 		else
 			return true;
 	}
-
 #endif
 
 	return true;

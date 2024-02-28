@@ -20,16 +20,6 @@ LSD and models.
 
 #include "lib/libLSD.h"				// LSD library classes
 
-#ifndef _NP_
-atomic < int >
-#else
-int
-#endif
-				normErrCnt, lnormErrCnt, gammaErrCnt, bernoErrCnt, poissErrCnt,
-				geomErrCnt, binomErrCnt, cauchErrCnt, chisqErrCnt, expErrCnt,
-				fishErrCnt, studErrCnt, weibErrCnt, betaErrCnt, paretErrCnt,
-				alaplErrCnt;
-
 
 /****************************************************
 IS_FINITE
@@ -76,7 +66,7 @@ bool is_nan( double x )
 /****************************************************
 _ABS
 ****************************************************/
-double _abs( double a )
+double simulation::_abs( double a )
 {
 	if ( a > 0 )
 		return a;
@@ -335,7 +325,7 @@ double z_star( double cl )
 UNIFCDF
 Uniform cumulative distribution function
 ***************************************************/
-double unifcdf( double a, double b, double x )
+double simulation::unifcdf( double a, double b, double x )
 {
 	if ( a >= b )
 	{
@@ -356,7 +346,7 @@ double unifcdf( double a, double b, double x )
 POISSONCDF
 Poisson cumulative distribution function
 ***************************************************/
-double poissoncdf( double lambda, double k )
+double simulation::poissoncdf( double lambda, double k )
 {
 	k = floor( k );
 	if ( lambda <= 0.0 || k < 0.0 )
@@ -378,7 +368,7 @@ double poissoncdf( double lambda, double k )
 PARETOCDF
 Pareto cumulative distribution function
 ***************************************************/
-double paretocdf( double mu, double alpha, double x )
+double simulation::paretocdf( double mu, double alpha, double x )
 {
 	if ( mu <= 0 || alpha <= 0 )
 	{
@@ -397,7 +387,7 @@ double paretocdf( double mu, double alpha, double x )
 BPARETOCDF
 Bounded Pareto cumulative distribution function
 ***************************************************/
-double bparetocdf( double alpha, double low, double high, double x )
+double simulation::bparetocdf( double alpha, double low, double high, double x )
 {
 	if ( alpha <= 0 || low <= 0 || low >= high )
 	{
@@ -417,7 +407,7 @@ double bparetocdf( double alpha, double low, double high, double x )
 NORMCDF
 Normal cumulative distribution function
 ***************************************************/
-double normcdf( double mu, double sigma, double x )
+double simulation::normcdf( double mu, double sigma, double x )
 {
 	if ( sigma <= 0.0 )
 	{
@@ -433,7 +423,7 @@ double normcdf( double mu, double sigma, double x )
 LNORMCDF
 Lognormal cumulative distribution function
 ***************************************************/
-double lnormcdf( double mu, double sigma, double x )
+double simulation::lnormcdf( double mu, double sigma, double x )
 {
 	if ( sigma <= 0.0 || x <= 0.0 )
 	{
@@ -449,7 +439,7 @@ double lnormcdf( double mu, double sigma, double x )
 ALAPLCDF
 Asymmetric laplace cumulative distribution function
 ***************************************************/
-double alaplcdf( double mu, double alpha1, double alpha2, double x )
+double simulation::alaplcdf( double mu, double alpha1, double alpha2, double x )
 {
 	if ( alpha1 <= 0.0 || alpha2 <= 0.0 )
 	{
@@ -473,7 +463,7 @@ Press et al. (1992) Numerical Recipes in C, 2nd Ed.
 #define BEPS 3.0e-7
 #define FPMIN 1.0e-30
 
-double betacf( double a, double b, double x )
+double simulation::betacf( double a, double b, double x )
 {
 	void nrerror(char error_text[ ]);
 	int m, m2;
@@ -532,7 +522,7 @@ BETACDF
 Beta cumulative distribution function: incomplete beta function
 Press et al. (1992) Numerical Recipes in C, 2nd Ed.
 ***************************************************/
-double betacdf( double alpha, double beta, double x )
+double simulation::betacdf( double alpha, double beta, double x )
 {
 	double bt;
 
@@ -583,7 +573,7 @@ template < class distr > double draw_rd( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( sim->draw_rd_lock );
+	lock_guard < mutex > lock( sim->draw_rd_lck );
 #endif
 	return d( sim->rd );
 }
@@ -592,7 +582,7 @@ template < class distr > double draw_lc1( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( sim->draw_lc1_lock );
+	lock_guard < mutex > lock( sim->draw_lc1_lck );
 #endif
 	return d( sim->lc1 );
 }
@@ -601,7 +591,7 @@ template < class distr > double draw_lc2( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( sim->draw_lc2_lock );
+	lock_guard < mutex > lock( sim->draw_lc2_lck );
 #endif
 	return d( sim->lc2 );
 }
@@ -610,7 +600,7 @@ template < class distr > double draw_mt32( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( sim->draw_mt32_lock );
+	lock_guard < mutex > lock( sim->draw_mt32_lck );
 #endif
 	return d( sim->mt32 );
 }
@@ -619,7 +609,7 @@ template < class distr > double draw_mt64( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( sim->draw_mt64_lock );
+	lock_guard < mutex > lock( sim->draw_mt64_lck );
 #endif
 	return d( sim->mt64 );
 }
@@ -628,7 +618,7 @@ template < class distr > double draw_lf24( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( sim->draw_lf24_lock );
+	lock_guard < mutex > lock( sim->draw_lf24_lck );
 #endif
 	return d( sim->lf24 );
 }
@@ -637,7 +627,7 @@ template < class distr > double draw_lf48( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( sim->draw_lf48_lock );
+	lock_guard < mutex > lock( sim->draw_lf48_lck );
 #endif
 	return d( sim->lf48 );
 }
@@ -1095,9 +1085,9 @@ double simulation::alapl( double mu, double alpha1, double alpha2 )
 WARN_DISTR
 ****************************************************/
 #ifndef _NP_
-void warn_distr( atomic < int > & errCnt, bool & stopErr, const char *distr, const char *msg )
+void simulation::warn_distr( atomic < int > & errCnt, bool & stopErr, const char *distr, const char *msg )
 #else
-void warn_distr( int & errCnt, bool & stopErr, const char *distr, const char *msg )
+void simulation::warn_distr( int & errCnt, bool & stopErr, const char *distr, const char *msg )
 #endif
 {
 	if ( ++errCnt < ERR_LIM )	// prevent slow down due to I/O
@@ -1118,7 +1108,7 @@ void warn_distr( int & errCnt, bool & stopErr, const char *distr, const char *ms
 INIT_MATH_ERROR
 Initialize the math functions error controls
 ***************************************************/
-void init_math_error( void )
+void simulation::init_math_error( void )
 {
 	normErrCnt = lnormErrCnt = gammaErrCnt = bernoErrCnt = poissErrCnt = 0;
 	geomErrCnt = binomErrCnt = cauchErrCnt = chisqErrCnt = expErrCnt = 0;

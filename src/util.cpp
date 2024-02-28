@@ -101,7 +101,7 @@ void plog_backend( const char *cm, const char *tag, va_list arg )
 
 	// handle the "bar" pseudo tag
 	if ( strcmp( tag, "bar" ) )
-		on_bar = false;
+		sim.on_bar = false;
 
 	if ( tag_ok )
 	{
@@ -152,7 +152,7 @@ void print_stack( void )
 	plog( "\n\nLevel\tVariable Label" );
 
 	for ( app = sim.stack_log; app != NULL; app = app->prev )
-		plog( "\n%d\t%s", app->ns, app->label );
+		plog( "\n%d\t%s", app->n, app->label );
 
 	plog( "\n\n(the zero-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones\nbecause necessary for completing their computation)\n" );
 }
@@ -175,8 +175,8 @@ void error_hard_helper( const char *boxTitle, const char *boxText, const char *l
 
 		plog_tag( "\n\nError detected at case (time step): %d", "highlight", sim.t );
 		plog( "\n\nError: %s\nDetails: %s", boxTitle, logText );
-		if ( ! sim.parallel_mode && sim.stack_log != NULL && sim.stack_log->vs != NULL )
-			plog( "\nOffending code contained in the equation for variable: '%s'", sim.stack_log->vs->label );
+		if ( ! sim.parallel_mode && sim.stack_log != NULL && sim.stack_log->v != NULL )
+			plog( "\nOffending code contained in the equation for variable: '%s'", sim.stack_log->v->label );
 		plog( "\nSuggestion: %s", boxText );
 		print_stack( );
 		cmd( "focustop .log" );
@@ -240,12 +240,12 @@ void error_hard_helper( const char *boxTitle, const char *boxText, const char *l
 	if ( err == 3 )
 	{
 		if ( ! sim.parallel_mode && sim.fast_mode == 0 && sim.stack_log != NULL &&
-			 sim.stack_log->vs != NULL && sim.stack_log->vs->label != NULL )
+			 sim.stack_log->v != NULL && sim.stack_log->v->label != NULL )
 		{
 			char err_msg[ MAX_LINE_SIZE ];
 			double useless = -1;
-			snprintf( err_msg, MAX_LINE_SIZE, "%s (ERROR)", sim.stack_log->vs->label );
-			sim.stack_log->vs->up->debugger( NULL, err_msg, & useless );
+			snprintf( err_msg, MAX_LINE_SIZE, "%s (ERROR)", sim.stack_log->v->label );
+			sim.stack_log->v->up->debugger( NULL, err_msg, & useless );
 		}
 
 		err = 2;

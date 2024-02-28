@@ -1032,16 +1032,23 @@ error:
  get current executable pre-
  compilation flag
  *********************************/
-bool get_precompiled_flag( bool warn )
+bool get_precompiled_flag( const char *exec, bool nw )
 {
 	bool deftarg = true, precomp = true;		// defaults if settings are missing
-	char target[ MAX_PATH_LENGTH ], buf[ MAX_PATH_LENGTH ], buf1[ MAX_PATH_LENGTH ];
+	char buf[ MAX_PATH_LENGTH ], buf1[ MAX_PATH_LENGTH ];
 	FILE *f;
 
-	// non default executable name - cannot use precompiled code
-	if ( strcmp( get_target_name( target, MAX_PATH_LENGTH ),
-				 platform == _WIN_ ? "LSD.exe" : "LSD" ) != 0 )
-		deftarg = false;
+	if ( ! nw )
+	{
+		// non default executable name - cannot use precompiled code
+		strcpyn( buf, exec, MAX_PATH_LENGTH );
+
+		if ( platform == _WIN_ )
+			strupr( buf );
+
+		if ( strcmp( buf, platform == _WIN_ ? "LSD.EXE" : "LSD" ) != 0 )
+			deftarg = false;
+	}
 
 	cmd( "set fapp [ file nativename \"$modelDir/makefile\" ]" );
 	f = fopen( get_str( "fapp" ), "r" );
@@ -1054,7 +1061,7 @@ bool get_precompiled_flag( bool warn )
 
 	fclose( f );
 
-	if ( strncmp( buf, "PRECOMPILED=", 12 ) != 0 )
+	if ( deftarg && strncmp( buf, "PRECOMPILED=", 12 ) != 0 )
 		return precomp;
 
 	sscanf( buf + 12, "%989s", buf1 );
@@ -1065,9 +1072,9 @@ bool get_precompiled_flag( bool warn )
 		 strncmp( buf1, "0", MAX_PATH_LENGTH ) == 0 )
 		precomp = false;
 
-	if ( warn && ( ! deftarg && precomp ) )
+	if ( ! deftarg && precomp )
 	{
-		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Cannot use pre-compiled code\" -detail \"Non-default TARGET name '[ file rootname %s ]' cannot be used together with the pre-compiled code option (PRECOMPILED = true).\n\nPlease adjust your model options to avoid this message.\"", target );
+		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Cannot use pre-compiled code\" -detail \"Non-default TARGET name '[ file rootname %s ]' cannot be used together with the pre-compiled code option (PRECOMPILED = true).\n\nPlease adjust your model options to avoid this message.\"", exec );
 		precomp = false;
 	}
 
@@ -1249,9 +1256,9 @@ bool compile_run( int run_mode, bool nw )
 		cmd( "if { [ file exists \"$oldObj\" ] } { file delete \"$oldObj\" }" );
 	}
 
-	precompiled = get_precompiled_flag( ! nw );
+	precompiled = get_precompiled_flag( str, nw );
 #else
-	precompiled = get_precompiled_flag( );
+	precompiled = get_precompiled_flag( str, true );
 #endif
 
 	if ( ! nw && precompiled )	// remove old unused executables

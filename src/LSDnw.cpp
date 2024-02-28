@@ -78,16 +78,16 @@ int main( int argn, const char **argv )
 
 #ifndef _NP_
 		// if parallel execution is required, just run new instances & wait to finish
-		if ( ! batch_sequential && sim.last_run > 1 && max_runs > 1 )
+		if ( ! sim.batch_sequential && sim.last_run > 1 && sim.max_runs > 1 )
 		{
-			if ( grandTotal || ! no_tot )
+			if ( sim.grand_total || ! sim.no_tot )
 			{
 				printf( "\n(Grand) total file(s) request ignored, running in parallel mode.\n" );
-				no_tot = true;
-				grandTotal = false;
+				sim.no_tot = true;
+				sim.grand_total = false;
 			}
 
-			res = sim.run_parallel( true, argv[ 0 ], sim.conf_name, sim.seed, sim.last_run, max_threads, max_runs );
+			res = sim.run_parallel( true, argv[ 0 ], sim.conf_name, sim.seed, sim.last_run, sim.max_threads, sim.max_runs );
 		}
 		else
 #endif
@@ -123,10 +123,10 @@ int parse_cmdline( int argn, const char **argv, simulation & sim )
 	int i, j = 0, k = 0;
 
 	// set default/start-up parameters to preserve compatibility
-	dozip = true;
-	dobar = docsv = no_res = no_tot = grandTotal = false;
-	findex = -1;							// no default
-	fend = 0;								// no file number limit
+	sim.dozip = true;
+	sim.dobar = sim.docsv = sim.no_res = sim.no_tot = sim.grand_total = false;
+	sim.findex = -1;						// no default
+	sim.fend = 0;							// no file number limit
 
 	if ( argn < 3 )
 	{
@@ -167,41 +167,41 @@ int parse_cmdline( int argn, const char **argv, simulation & sim )
 		// read -s parameter : first sequential file to process
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 's' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 		{
-			sscanf( argv[ i + 1 ], "%d", & findex );
+			sscanf( argv[ i + 1 ], "%d", & sim.findex );
 			continue;
 		}
 		// read -e parameter : last sequential file to process
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'e' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 		{
-			sscanf( argv[ i + 1 ], "%d", & fend );
+			sscanf( argv[ i + 1 ], "%d", & sim.fend );
 			continue;
 		}
 		// read -t parameter : produce .csv text results files
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 't' )
 		{
 			i--;					// no parameter for this option
-			docsv = true;
+			sim.docsv = true;
 			continue;
 		}
 		// read -r parameter : do not produce intermediate .res files
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'r' )
 		{
 			i--;					// no parameter for this option
-			no_res = true;
+			sim.no_res = true;
 			continue;
 		}
 		// read -p parameter : do not produce totals .tot files
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'p' )
 		{
 			i--;					// no parameter for this option
-			no_tot = true;
+			sim.no_tot = true;
 			continue;
 		}
 		// read -g parameter : create grand total file (batch only)
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'g' )
 		{
 			i--;					// no parameter for this option
-			grandTotal = true;
+			sim.grand_total = true;
 			printf( "\nGrand total file requested ('-g'), don't run another instance of 'lsdNW' in this folder!\n" );
 			continue;
 		}
@@ -209,14 +209,14 @@ int parse_cmdline( int argn, const char **argv, simulation & sim )
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'z' )
 		{
 			i--;					// no parameter for this option
-			dozip = false;
+			sim.dozip = false;
 			continue;
 		}
 		// read -b parameter : show a progress bar
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'b' )
 		{
 			i--;					// no parameter for this option
-			dobar = true;
+			sim.dobar = true;
 			continue;
 		}
 
@@ -226,17 +226,17 @@ int parse_cmdline( int argn, const char **argv, simulation & sim )
 
 #ifndef _NP_
 	if ( k > 0 )
-		max_runs = min( k, max_threads );
+		sim.max_runs = min( k, sim.max_threads );
 	else
 	{
-		max_runs = 1;
+		sim.max_runs = 1;
 
 		if ( j > 0 )
-			max_threads = j;
+			sim.max_threads = j;
 	}
 
-	if ( max_runs > 1 )
-		max_threads = max( min( j, max_threads / max_runs ), 1 );
+	if ( sim.max_runs > 1 )
+		sim.max_threads = max( min( j, sim.max_threads / sim.max_runs ), 1 );
 #else
 	if ( k != 0 )
 		printf( "\nMulti-run request ignored, running in sequential mode.\n" );
@@ -266,20 +266,20 @@ int load_config( simulation & sim )
 
 	if ( strstr( str, ".LSD" ) == NULL )
 	{
-		batch_sequential = true;
+		sim.batch_sequential = true;
 
-		if ( findex < 0 || fend < 0 || fend < findex )
+		if ( sim.findex < 0 || sim.fend < 0 || sim.fend < sim.findex )
 		{
 			fprintf( stderr, "\nInvalid -s and/or -e values.\n%s\n%s\n", lsdCmdMsg, lsdCmdHlp );
 			return 6;
 		}
 
-		sim.conf_file = new char[ strlen( sim.conf_name ) + ( int ) log10( findex ) + 7 ];
-		sprintf( sim.conf_file, "%s_%d.lsd", sim.conf_name, findex );
+		sim.conf_file = new char[ strlen( sim.conf_name ) + ( int ) log10( sim.findex ) + 7 ];
+		sprintf( sim.conf_file, "%s_%d.lsd", sim.conf_name, sim.findex );
 	}
 	else
 	{
-		batch_sequential = false;
+		sim.batch_sequential = false;
 		sim.conf_file = new char[ strlen( sim.conf_name ) + 1 ];
 		strcpy( sim.conf_file, sim.conf_name );
 		sim.conf_name[ strstr( str, ".LSD" ) - str ] = '\0';
@@ -301,13 +301,13 @@ int load_config( simulation & sim )
 		return 8;
 	}
 
-	if ( ! batch_sequential )
+	if ( ! sim.batch_sequential )
 	{
-		if ( findex > 0 )
-			sim.seed = findex;
+		if ( sim.findex > 0 )
+			sim.seed = sim.findex;
 
-		if ( fend > 0 )
-			sim.last_run = fend;
+		if ( sim.fend > 0 )
+			sim.last_run = sim.fend;
 	}
 
 	if ( sim.log_file != NULL )
@@ -320,13 +320,13 @@ int load_config( simulation & sim )
 			delete [ ] str;
 		}
 
-		if ( ( log_file_ptr = fopen( sim.log_file , "w+" ) ) == NULL )
+		if ( ( sim.log_file_ptr = fopen( sim.log_file , "w+" ) ) == NULL )
 			printf( "\nCannot create log file '%s', using stdout.\n", sim.log_file );
 		else
 		{
-			stdout_ptr = stderr_ptr = log_file_ptr;
-			dup2( fileno( log_file_ptr ), STDOUT_FILENO );
-			dup2( fileno( log_file_ptr ), STDERR_FILENO );
+			stdout_ptr = stderr_ptr = sim.log_file_ptr;
+			dup2( fileno( sim.log_file_ptr ), STDOUT_FILENO );
+			dup2( fileno( sim.log_file_ptr ), STDERR_FILENO );
 		}
 	}
 

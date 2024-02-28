@@ -1130,7 +1130,7 @@ void variable::save_single( void )
 
 #ifndef _NP_
 	// prevent concurrent use by more than one thread
-	rec_lguardT lock( parallel_comp );
+	rec_lguardT lock( var_comp_lck );
 #endif
 
 	set_lab_tit( );
@@ -1164,15 +1164,12 @@ sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, int _la
 	param = _param;
 	lag = _lag;
 	integer = _integer;
-	curv = 0;
 
 	if ( lab != NULL )
 	{
 		label = new char [ strlen( lab ) + 1 ];
 		strcpy( label, lab );
 	}
-	else
-		label = NULL;
 
 	if ( _numv > 0 && _v != NULL )
 	{
@@ -1180,11 +1177,6 @@ sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, int _la
 		v = new double [ _v->size( ) ];
 		for ( i = 0; i < numv; ++i )
 			v[ i ] = integer ? round( ( *_v )[ i ] ) : ( *_v )[ i ];
-	}
-	else
-	{
-		numv = 0;
-		v = NULL;
 	}
 
 	if ( sim->sens == NULL )
@@ -1194,8 +1186,6 @@ sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, int _la
 		for ( cs = sim->sens; cs->next != NULL; cs = cs->next );
 		cs->next = this;
 	}
-
-	next = NULL;
 }
 
 

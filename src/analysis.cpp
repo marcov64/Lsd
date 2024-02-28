@@ -668,7 +668,7 @@ void analysis( bool mc )
 	}
 	else
 	{	// create parent map from loaded but not run configuration
-		par_map.clear( );
+		sim.par_map.clear( );
 		sim.root->create_par_map( );
 	}
 
@@ -2670,7 +2670,7 @@ void analysis( bool mc )
 					case 1:
 
 						// check if MC results were not just created
-						if ( ! mc || res_list.size( ) <= 1 )
+						if ( ! mc || sim.res_list.size( ) <= 1 )
 						{
 							// make sure there is a path set
 							if ( strlen( sim.res_path ) > 0 )
@@ -2698,7 +2698,7 @@ void analysis( bool mc )
 							}
 						}
 						else
-							h = res_list.size( );
+							h = sim.res_list.size( );
 
 						var_names.resize( h );
 
@@ -2714,13 +2714,13 @@ void analysis( bool mc )
 
 						for ( i = 0, stop = gz = false; i < h && ! stop; ++i )
 						{
-							if ( ! mc || res_list.size( ) <= 1 )
+							if ( ! mc || sim.res_list.size( ) <= 1 )
 							{
 								cmd( "set datafile [ lindex $lab %d ]", i );
 								get_str( "datafile", filename, MAX_PATH_LENGTH );
 							}
 							else
-								strcpyn( filename, res_list[ i ].c_str( ), MAX_PATH_LENGTH );
+								strcpyn( filename, sim.res_list[ i ].c_str( ), MAX_PATH_LENGTH );
 
 							if ( strlen( filename ) > 3 && ! strcmp( &filename[ strlen( filename ) - 3 ], ".gz" ) )
 								gz = true;
@@ -4496,7 +4496,7 @@ void object::create_par_map( void )
 	variable *cv;
 
 	for ( cv = v; cv != NULL; cv = cv->next )
-		par_map.insert( make_pair < string, string > ( cv->label, label ) );
+		sim->par_map.insert( make_pair < string, string > ( cv->label, label ) );
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 		for ( cur = cb->head; cur != NULL; cur = go_brother( cur ) )
@@ -4579,7 +4579,7 @@ void object::insert_labels_mem( int *num_v, const char *lab )
 	if ( up == NULL && lab == NULL )
 		for ( cv = sim->cemetery; cv != NULL && ! stop; cv = cv->next )
 		{
-			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", cv->label, cv->lab_tit, cv->start, cv->end, *num_v, par_map[ cv->label ].c_str( ) );
+			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", cv->label, cv->lab_tit, cv->start, cv->end, *num_v, sim->par_map[ cv->label ].c_str( ) );
 
 			if ( cv->end > num_c )
 				num_c = cv->end;
@@ -4782,10 +4782,10 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 					dict set serDescrDict %s \"Loaded from file\n[ file nativename %s ]\" \
 				}", vs[ i ].label, vs[ i ].label, filename );
 
-			if ( par_map.find( vs[ i ].label ) == par_map.end( ) )
+			if ( sim.par_map.find( vs[ i ].label ) == sim.par_map.end( ) )
 				cmd( "add_series \"%s\" %s", da_tmp, filename );
 			else
-				cmd( "add_series \"%s\" %s", da_tmp, par_map[ vs[ i ].label ].c_str( ) );
+				cmd( "add_series \"%s\" %s", da_tmp, sim.par_map[ vs[ i ].label ].c_str( ) );
 		}
 
 		tok = strtok( NULL, "\t" );			// get next token, if any
@@ -7892,8 +7892,8 @@ bool create_series( bool mc, vector < string > var_names )
 				dict set serDescrDict %s \"%s\" \
 			}", vs[ num_var ].label, vs[ num_var ].label, mc ? "Monte Carlo series" : "Created from other series" );
 
-		if ( mc && new_series == 1 && par_map.find( vs[ num_var ].label ) != par_map.end( ) )
-			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank, par_map[ vs[ num_var ].label ].c_str( ) );
+		if ( mc && new_series == 1 && sim.par_map.find( vs[ num_var ].label ) != sim.par_map.end( ) )
+			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank, sim.par_map[ vs[ num_var ].label ].c_str( ) );
 		else
 			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ num_var ].label, vs[ num_var ].tag, vs[ num_var ].start, vs[ num_var ].end, vs[ num_var ].rank, mc ? mc_par[ type_series < 100 ? type_series : 0 ] : "(added)" );
 
@@ -8321,7 +8321,7 @@ void save_datazip( void )
 	}
 
 	Tcl_LinkVar( interp, "fr", ( char * ) &fr, TCL_LINK_BOOLEAN);
-	Tcl_LinkVar( interp, "dozip", ( char * ) &dozip, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( interp, "dozip", ( char * ) &sim.dozip, TCL_LINK_BOOLEAN);
 	Tcl_LinkVar( interp, "typelab", ( char * ) &typelab, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "deli", ( char * ) &del, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "numcol", ( char * ) &numcol, TCL_LINK_INT );
@@ -8448,7 +8448,7 @@ void save_datazip( void )
 	if ( type_res == 4 )
 	{
 		desc = descTxt;
-		if ( ! dozip || platform == _MAC_ )
+		if ( ! sim.dozip || platform == _MAC_ )
 			ext = extTxt;
 		else
 			ext = extTxtZip;
@@ -8456,7 +8456,7 @@ void save_datazip( void )
 	else
 	{
 		desc = descRes;
-		if ( ! dozip || platform == _MAC_ )
+		if ( ! sim.dozip || platform == _MAC_ )
 			ext = extRes;
 		else
 			ext = extResZip;
@@ -8470,7 +8470,7 @@ void save_datazip( void )
 	cmd( "set res [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }	 } ]", ext, desc, ext );
 
 	// add the second extension in macOS only now
-	if ( platform == _MAC_ && dozip )
+	if ( platform == _MAC_ && sim.dozip )
 		cmd( "if { [ string length [ file extension \"$res\" ] ] > 0 } { \
 				set res \"$res.gz\" \
 			} elseif { [ string length \"$res\" ] > 0 } { \
@@ -8482,7 +8482,7 @@ void save_datazip( void )
 	if ( strlen( da_tmp ) == 0 )
 		goto end;
 
-	if ( dozip == 1 )
+	if ( sim.dozip == 1 )
 		fsavez = gzopen( da_tmp, "wt" );
 	else
 		fsave = fopen( da_tmp, "wt" );	// use text mode for Windows better compatibility
@@ -8519,7 +8519,7 @@ void save_datazip( void )
 				case 1:					// Original labels
 					if ( headprefix == 1 )
 					{
-						if ( dozip == 1 )
+						if ( sim.dozip == 1 )
 							gzprintf( fsavez, "#" );
 						else
 							fprintf( fsave, "#" );
@@ -8527,7 +8527,7 @@ void save_datazip( void )
 
 					for ( i = 0; i < nv; ++i )
 					{
-						if ( dozip == 1 )
+						if ( sim.dozip == 1 )
 						{
 							gzprintf( fsavez, "%s_%s", str[ i ], tag[ i ] );
 
@@ -8548,7 +8548,7 @@ void save_datazip( void )
 				case 2:					// New names for labels
 					if ( headprefix == 1 )
 					{
-						if ( dozip == 1 )
+						if ( sim.dozip == 1 )
 							gzprintf( fsavez, "#" );
 						else
 							fprintf( fsave, "#" );
@@ -8556,7 +8556,7 @@ void save_datazip( void )
 
 					for ( i = 0; i < nv; ++i )
 					{
-						if ( dozip == 1 )
+						if ( sim.dozip == 1 )
 						{
 							gzprintf( fsavez, "%s%d", labprefix, i );
 
@@ -8577,7 +8577,7 @@ void save_datazip( void )
 				case 3:					// LSD result files
 					for ( i = 0; i < nv; ++i )
 					{
-						if ( dozip == 1 )
+						if ( sim.dozip == 1 )
 							gzprintf( fsavez, "%s %s (%d %d)\t", str[ i ], tag[ i ], start[ i ], end[ i ] );
 						else
 							fprintf( fsave, "%s %s (%d %d)\t", str[ i ], tag[ i ], start[ i ], end[ i ] );
@@ -8590,7 +8590,7 @@ void save_datazip( void )
 		{
 			if ( headprefix == 1 )
 			{
-				if ( dozip == 1 )
+				if ( sim.dozip == 1 )
 					gzprintf( fsavez, "#" );
 				else
 					fprintf( fsave, "#" );
@@ -8611,14 +8611,14 @@ void save_datazip( void )
 				else
 					da_tmp[ numcol ] = '\0';
 
-				if ( dozip == 1 )
+				if ( sim.dozip == 1 )
 					gzprintf( fsavez, "%s", da_tmp );
 				else
 					fprintf( fsave, "%s", da_tmp );
 			}
 		}
 
-		if ( dozip == 1 )
+		if ( sim.dozip == 1 )
 			gzprintf( fsavez, "\n" );
 		else
 			fprintf( fsave, "\n" );
@@ -8626,7 +8626,7 @@ void save_datazip( void )
 
 	if ( del != 3 )						// data delimited writing
 	{
-		if ( dozip == 1 )
+		if ( sim.dozip == 1 )
 		{
 			for ( j = min_c; j <= max_c; ++j )
 			{
@@ -8682,20 +8682,20 @@ void save_datazip( void )
 					da_tmp[ numcol ] = '\0';
 				}
 
-				if ( dozip == 1 )
+				if ( sim.dozip == 1 )
 					gzprintf( fsavez, "%s", da_tmp );
 				else
 					fprintf( fsave, "%s", da_tmp );
 			}
 
-			if ( dozip == 1 )
+			if ( sim.dozip == 1 )
 				gzprintf( fsavez, "\n" );
 			else
 				fprintf( fsave, "\n" );
 		}
 	}
 
-	if ( dozip == 1 )
+	if ( sim.dozip == 1 )
 		gzclose( fsavez);
 	else
 		fclose( fsave );

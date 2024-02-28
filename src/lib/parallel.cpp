@@ -29,13 +29,13 @@ bool parallel_abort;				// indicate parallel threads were aborted
 /***************************************
 RUN_PARALLEL_EXEC
 ***************************************/
-void run_parallel_exec( bool nw, int id, string cmd )
+void simulation::run_parallel_exec( bool nw, int id, string cmd )
 {
 	int res;
 
-	res = run_system( cmd.c_str( ), id );
+	res = run_system( cmd.c_str( ), this, id );
 
-	lock_guard < mutex > lock( lock_run_status );
+	lock_guard < mutex > lock( run_status_lck );
 	run_status[ id ] = res;
 }
 
@@ -109,7 +109,7 @@ int simulation::run_parallel( bool nw, const char *exec, const char *simname,
 
 			run_pids.resize( run_pids.size( ) + 1 );
 			run_status.push_back( INISTAT );
-			run_threads.push_back( thread( run_parallel_exec, nw, run_status.size( ) - 1, string( cmd ) ) );
+			run_threads.push_back( thread( run_parallel_exec, this, nw, run_status.size( ) - 1, string( cmd ) ) );
 
 			j <= sl ? i += num + 1 : i += num;
 		}
@@ -136,7 +136,7 @@ int simulation::run_parallel( bool nw, const char *exec, const char *simname,
 
 			run_pids.resize( run_pids.size( ) + 1 );
 			run_status.push_back( INISTAT );
-			run_threads.push_back( thread( run_parallel_exec, nw, run_status.size( ) - 1, string( cmd ) ) );
+			run_threads.push_back( thread( run_parallel_exec, this, nw, run_status.size( ) - 1, string( cmd ) ) );
 		}
 	}
 
@@ -186,7 +186,7 @@ int simulation::run_parallel( bool nw, const char *exec, const char *simname,
 		return i;
 	}
 	else
-		run_monitor = thread( monitor_parallel, nw );
+		run_monitor = thread( monitor_parallel, this, nw );
 
 	return 0;
 }
@@ -195,7 +195,7 @@ int simulation::run_parallel( bool nw, const char *exec, const char *simname,
 /***************************************
 MONITOR_LOGS
 ***************************************/
-int monitor_logs( void )
+int simulation::monitor_logs( void )
 {
 	int i, j, k, last, len, thr, threads, n = 0, finished = 0, sum = 0;
 	char *log = NULL, tok[ 4 ];
@@ -270,7 +270,7 @@ int monitor_logs( void )
 STOP_PARALLEL
 ***************************************/
 #define WAIT_SECS 5
-bool stop_parallel( void )
+bool simulation::stop_parallel( void )
 {
 	int id, res = 0, secs = 0;
 
@@ -280,7 +280,7 @@ bool stop_parallel( void )
 		return true;
 
 	for ( id = 0; id < ( int ) run_pids.size( ); ++id )
-		res += kill_system( id );
+		res += kill_system( this, id );
 
 	if ( res < ( int ) run_pids.size( ) )
 		return false;
@@ -316,7 +316,7 @@ bool stop_parallel( void )
 /***************************************
 DETACH_PARALLEL
 ***************************************/
-void detach_parallel( void )
+void simulation::detach_parallel( void )
 {
 	parallel_abort = true;
 
@@ -332,7 +332,7 @@ void detach_parallel( void )
 /***************************************
 MONITOR_PARALLEL
 ***************************************/
-void monitor_parallel( bool nw )
+void simulation::monitor_parallel( bool nw )
 {
 	parallel_monitor = true;
 
@@ -350,7 +350,7 @@ void monitor_parallel( bool nw )
 LOG_PARALLEL
 Consolidate a set of parallel-run logs
 ****************************************************/
-void log_parallel( bool nw )
+void simulation::log_parallel( bool nw )
 {
 	char buf[ MAX_LINE_SIZE ];
 	FILE *f;
@@ -361,7 +361,7 @@ void log_parallel( bool nw )
 		return;
 	else
 	{
-		lock_guard < mutex > lock( lock_run_logs );
+		lock_guard < mutex > lock( run_logs_lck );
 
 		for ( string & log : run_logs )
 		{

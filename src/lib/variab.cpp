@@ -120,44 +120,6 @@ object::delete_obj to cancel an object.
 
 /****************************************************
 VARIABLE
-constructor
-****************************************************/
-variable::variable( void )
-{
-	dummy = false;
-	observe = false;
-	parallel = false;
-	plot = false;
-	save = false;
-	savei = false;
-	under_computation = false;
-	lab_tit = NULL;
-	label = NULL;
-	initialized = false;
-	deb_mode = 'n';
-	data = NULL;
-	val = NULL;
-	deb_cnd_val = 0;
-	deb_cond = 0;
-	end = 0;
-	last_update = 0;
-	next_update = 0;
-	num_lag = 0;
-	param = 0;
-	start = 0;
-	delay = 0;
-	delay_range = 0;
-	period = 1;
-	period_range = 0;
-	up = NULL;
-	sim = NULL;
-	next = NULL;
-	eq_func = NULL;
-}
-
-
-/****************************************************
-VARIABLE
 copy constructor
 ****************************************************/
 variable::variable( const variable &v )
@@ -217,7 +179,7 @@ void variable::init( object *_up, simulation *_sim, const char *_label,
 
 #ifndef _NP_
 	// prevent concurrent use by more than one thread
-	rec_lguardT lock( parallel_comp );
+	rec_lguardT lock( var_comp_lck );
 #endif
 
 	up = _up;
@@ -233,8 +195,6 @@ void variable::init( object *_up, simulation *_sim, const char *_label,
 		for ( i = 0; i <= num_lag; ++i )
 			val[ i ] = _val[ i ];
 	}
-	else
-		val = NULL;
 }
 
 
@@ -249,7 +209,7 @@ void variable::empty( bool no_lock )
 	if ( sim->running && ! no_lock )
 	{
 		// prevent concurrent use by more than one thread
-		rec_lguardT lock( parallel_comp );
+		rec_lguardT lock( var_comp_lck );
 	}
 
 #endif
@@ -283,7 +243,7 @@ double variable::cal( object *caller, int lag )
 
 	if ( param == 1 )
 	{
-		if ( deb_set && sim->t == sim->deb_t && ( deb_mode == 'w' || deb_mode == 'W' ) )
+		if ( sim->deb_set && sim->t == sim->deb_t && ( deb_mode == 'w' || deb_mode == 'W' ) )
 		{
 			sim->watch_trigger = true;
 			sim->watch_write_mode = false;
@@ -295,7 +255,7 @@ double variable::cal( object *caller, int lag )
 
 #ifndef _NP_
 	// prepare mutex for variables and functions updated in multiple threads
-	rec_uniqlT guard( parallel_comp, defer_lock );
+	rec_uniqlT guard( var_comp_lck, defer_lock );
 #endif
 
 	if ( param == 0 )					// it's a variable
@@ -334,7 +294,7 @@ double variable::cal( object *caller, int lag )
 			// already calculated this time step or not to be calculated this time step
 			if ( last_update >= sim->t || sim->t < next_update )
 			{
-				if ( deb_set && sim->t == sim->deb_t && ( deb_mode == 'w' || deb_mode == 'W' ) )
+				if ( sim->deb_set && sim->t == sim->deb_t && ( deb_mode == 'w' || deb_mode == 'W' ) )
 				{
 					sim->watch_trigger = true;
 					sim->watch_write_mode = false;
@@ -395,11 +355,10 @@ double variable::cal( object *caller, int lag )
 		{
 			sim->stack_level++;
 			sim->stack_log->next = new lsdstack;
-			sim->stack_log->next->next = NULL;
 			sim->stack_log->next->prev = sim->stack_log;
 			strcpyn( sim->stack_log->next->label, label, MAX_ELEM_LENGTH );
-			sim->stack_log->next->ns = sim->stack_level;
-			sim->stack_log->next->vs = this;
+			sim->stack_log->next->n = sim->stack_level;
+			sim->stack_log->next->v = this;
 			sim->stack_log = sim->stack_log->next;
 		}
 		else
@@ -515,11 +474,11 @@ double variable::cal( object *caller, int lag )
 		}
 
 		// update debug log file
-		if ( log_file_ptr != NULL && sim->t >= log_start && sim->t <= log_stop )
-			fprintf( log_file_ptr, "%s\t= %g\t(t=%d sim=%d)\n", label, val[ 0 ], sim->t, sim->sim );
+		if ( sim->log_file_ptr != NULL && sim->t >= sim->log_start && sim->t <= sim->log_stop )
+			fprintf( sim->log_file_ptr, "%s\t= %g\t(t=%d sim=%d)\n", label, val[ 0 ], sim->t, sim->sim );
 
 		// open the debugger if required
-		if ( deb_set && sim->t == sim->deb_t && liblnk.debugger != NULL && ( sim->watch_trigger || ( deb_cond == 0 && ( deb_mode == 'd' || deb_mode == 'W' || deb_mode == 'R' ) ) ) )
+		if ( sim->deb_set && sim->t == sim->deb_t && liblnk.debugger != NULL && ( sim->watch_trigger || ( deb_cond == 0 && ( deb_mode == 'd' || deb_mode == 'W' || deb_mode == 'R' ) ) ) )
 			( up->*liblnk.debugger )( caller, label, &val[ 0 ], false, "" );
 		else
 		{
@@ -623,9 +582,9 @@ void worker::cal_worker( void )
 		errored = false;
 
 		// update object map and register all signal handlers
-		unique_lock < mutex > lock_map( sim->thr_ptr_lock );
-		thr_id = this_thread::get_id( );
-		thr_ptr[ thr_id ] = this;
+		unique_lock < mutex > lock_map( wrk_thr_ptr_lck );
+		thread_id = this_thread::get_id( );
+		worker_thread_ptr[ thread_id ] = this;
 		lock_map.unlock( );
 		handle_signals( signal_wrapper );
 
@@ -634,22 +593,22 @@ void worker::cal_worker( void )
 		while ( running )
 		{
 			// wait for variable calculation message
-			unique_lock < mutex > lock_worker( lock );
+			unique_lock < mutex > lock_worker( worker_lck );
 			run.wait( lock_worker, [ this ]{ return ! free; }  );
 
 			// exit if shutdown or continue if already updated
-			if ( running && var != NULL && var->last_update < sim->t )
+			if ( running && v != NULL && v->last_update < sim->t )
 			{	// prevent parallel computation of the same variable
-				rec_uniqlT guard_var( var->parallel_comp );
+				rec_uniqlT guard_var( v->var_comp_lck );
 
 				// recheck if not computed during lock
-				if ( var->last_update >= sim->t )
+				if ( v->last_update >= sim->t )
 					goto end;
 
-				if ( var->under_computation )
+				if ( v->under_computation )
 				{
 					snprintf( err_msg1, MAX_BUFF_SIZE, "deadlock during parallel computation" );
-					snprintf( err_msg2, MAX_BUFF_SIZE, "the equation for '%s' in object '%s' requested its own value\nwhile parallel-computing its current value", var->label, var->up->label );
+					snprintf( err_msg2, MAX_BUFF_SIZE, "the equation for '%s' in object '%s' requested its own value\nwhile parallel-computing its current value", v->label, v->up->label );
 					snprintf( err_msg3, MAX_BUFF_SIZE, "check your code to prevent this situation" );
 					user_excpt = true;
 
@@ -665,7 +624,7 @@ void worker::cal_worker( void )
 					}
 				}
 
-				var->under_computation = true;
+				v->under_computation = true;
 
 				// compute the Variable's equation
 				user_excpt = true;			// allow distinguishing among internal & user exceptions
@@ -676,7 +635,7 @@ void worker::cal_worker( void )
 #endif
 				try							// do it while catching exceptions to avoid obscure aborts
 				{
-					app = var->fun( NULL );
+					app = v->fun( NULL );
 				}
 				catch ( ... )
 				{
@@ -686,7 +645,7 @@ void worker::cal_worker( void )
 					{
 						pexcpt = current_exception( );
 						snprintf( err_msg1, MAX_BUFF_SIZE, "equation error" );
-						snprintf( err_msg2, MAX_BUFF_SIZE, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", var->label, var->up->label );
+						snprintf( err_msg2, MAX_BUFF_SIZE, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", v->label, v->up->label );
 						snprintf( err_msg3, MAX_BUFF_SIZE, "check your code to prevent this situation" );
 					}
 
@@ -705,37 +664,37 @@ void worker::cal_worker( void )
 				user_excpt = errored = false;
 
 				// scale down the past values
-				for ( i = 0; i < var->num_lag; ++i )
-					var->val[ var->num_lag - i ] = var->val[ var->num_lag - i - 1 ];
-				var->val[ 0 ] = app;
+				for ( i = 0; i < v->num_lag; ++i )
+					v->val[ v->num_lag - i ] = v->val[ v->num_lag - i - 1 ];
+				v->val[ 0 ] = app;
 
-				var->last_update = sim->t;
+				v->last_update = sim->t;
 
 				// choose next update step for special updating variables
-				if ( var->period > 1 || var->period_range > 0 )
+				if ( v->period > 1 || v->period_range > 0 )
 				{
-					var->next_update = sim->t + var->period;
-					if ( var->period_range > 0 )
-						var->next_update += sim->rnd_int( 0, var->period_range );
+					v->next_update = sim->t + v->period;
+					if ( v->period_range > 0 )
+						v->next_update += sim->rnd_int( 0, v->period_range );
 				}
 
-				var->under_computation = false;
+				v->under_computation = false;
 
 				// if there is a pending object deletion, try to do it now
 				if ( sim->wait_delete != NULL )
 				{
 					guard_var.unlock( );					// release lock
-					sim->wait_delete->delete_obj( var );
+					sim->wait_delete->delete_obj( v );
 				}
 			}
 
 		end:
-			var = NULL;
+			v = NULL;
 			free = true;
 			// create context to send signal to update scheduler if needed
 			if ( ! sim->worker_ready )
 			{
-				unique_lock< mutex > lock_update( sim->update_lock );
+				unique_lock< mutex > lock_update( sim->var_update_lck );
 				// recheck if still needed
 				if ( ! sim->worker_ready )
 				{
@@ -752,7 +711,7 @@ void worker::cal_worker( void )
 		{
 			pexcpt = current_exception( );
 			snprintf( err_msg1, MAX_BUFF_SIZE, "parallel computation problem" );
-			snprintf( err_msg2, MAX_BUFF_SIZE, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", var->label, var->up->label );
+			snprintf( err_msg2, MAX_BUFF_SIZE, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", v->label, v->up->label );
 			snprintf( err_msg3, MAX_BUFF_SIZE, "disable parallel computation for this variable\nor check your code to prevent this situation" );
 		}
 	}
@@ -764,23 +723,6 @@ void worker::cal_worker( void )
 
 
 /***************************************************
-WORKER constructor
-****************************************************/
-worker::worker( void )
-{
-	running = false;
-	free = false;
-	pexcpt = nullptr;
-	signum = -1;
-	var = NULL;
-	sim = NULL;
-	strcpy( err_msg1, "" );
-	strcpy( err_msg2, "" );
-	strcpy( err_msg3, "" );
-}
-
-
-/***************************************************
 WORKER destructor
 ****************************************************/
 worker::~worker( void )
@@ -788,17 +730,18 @@ worker::~worker( void )
 	// command thread shutdown if running
 	if ( running && ! errored )
 	{
-		unique_lock< mutex > lock_worker( lock );
+		unique_lock< mutex > lock_worker( worker_lck );
 		running = free = false;
 		run.notify_one( );
 	}
 
 	// wait for shutdown and check exception
-	if ( thr.joinable( ) && ! errored )
-		thr.join( );
+	if ( worker_thread.joinable( ) && ! errored )
+		worker_thread.join( );
 
 	// remove thread id from threads map
-	thr_ptr.erase( thr_id );
+	unique_lock < mutex > lock_map( wrk_thr_ptr_lck );
+	worker_thread_ptr.erase( thread_id );
 }
 
 
@@ -836,8 +779,8 @@ void worker::signal( int sig )
 			strcpy( signame, "Unknown signal" );
 	}
 
-	if ( var != NULL && var->label != NULL	)
-		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'\n(simulation %d). Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, var->label, var->up->label != NULL ? var->up->label : "(none)", sim->sim );
+	if ( v != NULL && v->label != NULL	)
+		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'\n(simulation %d). Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, v->label, v->up->label != NULL ? v->up->label : "(none)", sim->sim );
 	else
 		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received by a parallel worker thread\n(simulation %d).\nDisable parallel computation to prevent this situation.", signame, sim->sim );
 
@@ -859,7 +802,7 @@ Reformat signal function format to comply with OS
 void worker::signal_wrapper( int signum )
 {
 	// call the appropriate worker object member function to handle signal
-	thr_ptr[ this_thread::get_id( ) ]->signal( signum );
+	worker_thread_ptr[ this_thread::get_id( ) ]->signal( signum );
 }
 
 
@@ -867,10 +810,10 @@ void worker::signal_wrapper( int signum )
 CAL
 Multi-thread CAL version (parallel computation)
 ****************************************************/
-void worker::cal( variable *v )
+void worker::cal( variable *_v )
 {
-	unique_lock< mutex > worker_lock( lock );
-	var = v;
+	unique_lock< mutex > worker_lock( worker_lck );
+	v = _v;
 	free = false;
 	run.notify_one( );
 }
@@ -886,7 +829,7 @@ bool worker::check( void )
 		return true;
 
 	// only process first worker crash
-	lock_guard< mutex > lock_crash( sim->crash_lock );
+	lock_guard< mutex > lock_crash( sim->wrk_crash_lck );
 	if ( ! sim->worker_crashed )
 	{
 		sim->worker_crashed = true;
@@ -911,13 +854,13 @@ bool worker::check( void )
 				}
 				else
 				{
-					if ( var != NULL && var->label != NULL )
+					if ( v != NULL && v->label != NULL )
 						sim->error_hard( "parallel computation problem",
 										 "disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
 										 true,
 										 "while computing variable '%s' (object '%s') a multi-threading worker crashed",
-										 var->label,
-										 var->up->label != NULL ? var->up->label : "(none)" );
+										 v->label,
+										 v->up->label != NULL ? v->up->label : "(none)" );
 					else
 						sim->error_hard( "parallel computation problem",
 										 "disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
@@ -1027,7 +970,7 @@ void simulation::parallel_update( variable *v, object* p, object *caller )
 				// sleep process until first worker is free
 				if ( nt >= max_threads )
 				{
-					unique_lock< mutex > lock_update( update_lock );
+					unique_lock< mutex > lock_update( var_update_lck );
 					worker_ready = false;
 					if ( ! upd_workers.wait_for ( lock_update, chrono::milliseconds( MAX_VAR_TIMEOUT ), [ & ]{ return ! worker_ready; } ) )
 						{

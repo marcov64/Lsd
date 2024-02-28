@@ -1907,20 +1907,20 @@ object *operate( object *r )
 			// remove any custom save path (save to current by default)
 			sim.results_alt_path( "" );
 
-			Tcl_LinkVar( interp, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "add_to_tot", ( char * ) & add_to_tot, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "no_res", ( char * ) & sim.no_res, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "no_tot", ( char * ) & sim.no_tot, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "add_to_tot", ( char * ) & sim.add_to_tot, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "docsv", ( char * ) & sim.docsv, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "doover", ( char * ) & doover, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "dozip", ( char * ) & sim.dozip, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
 
 			cmd( "set firstFile \"%s_%d\"", sim.conf_name, sim.seed );
 			cmd( "set lastFile \"%s_%d\"", sim.conf_name, sim.seed + sim.last_run - 1 );
 			cmd( "set totFile \"%s\"", sim.conf_name );
-			cmd( "set resExt %s", docsv ? "csv" : "res" );
-			cmd( "set totExt %s", docsv ? "csv" : "tot" );
-			cmd( "set zipExt \"%s\"", dozip ? ".gz" : "" );
+			cmd( "set resExt %s", sim.docsv ? "csv" : "res" );
+			cmd( "set totExt %s", sim.docsv ? "csv" : "tot" );
+			cmd( "set zipExt \"%s\"", sim.dozip ? ".gz" : "" );
 			cmd( "set tot_msg_warn \"(totals file already exists)\"" );
 
 			cmd( "set T .run" );
@@ -1988,14 +1988,14 @@ object *operate( object *r )
 
 				cmd( "pack $T.f5.l1 $T.f5.l2 $T.f5.l3" );
 
-				add_to_tot = ( choice ) ? add_to_tot : false;
+				sim.add_to_tot = ( choice ) ? sim.add_to_tot : false;
 
 				cmd( "ttk::frame $T.f6" );
 				cmd( "ttk::checkbutton $T.f6.a -text \"Append to existing totals file\" -variable add_to_tot -state %s -command { \
 						if { $add_to_tot && $doover } { \
 							set doover 0 \
 						} \
-					}", ( choice && ! no_tot ) ? "normal" : "disabled" );
+					}", ( choice && ! sim.no_tot ) ? "normal" : "disabled" );
 				cmd( "ttk::checkbutton $T.f6.b -text \"Skip generating results files\" -variable no_res" );
 				cmd( "ttk::checkbutton $T.f6.b1 -text \"Skip generating totals file\" -variable no_tot -command { \
 						if { ! $no_tot } { \
@@ -2088,7 +2088,7 @@ object *operate( object *r )
 			if ( choice == 2 )
 				break;
 
-			if ( ( ! no_res || ! no_tot ) && subDir )
+			if ( ( ! sim.no_res || ! sim.no_tot ) && subDir )
 				if ( ! create_res_dir( out_dir ) || ! sim.results_alt_path( out_dir ) )
 				{
 					cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Subdirectory '%s' cannot be created\" -detail \"Check if the path is set READ-ONLY, or move your configuration file to a different location.\"", out_dir );
@@ -2371,7 +2371,7 @@ object *operate( object *r )
 
 #ifndef _NP_
 			cmd( "ttk::checkbutton $T.c.npar -text \"Disable parallel computation\" -variable parallel_disable" );
-			if ( ! sim.root->search_parallel( ) || max_threads < 2 )
+			if ( ! sim.root->search_parallel( ) || sim.max_threads < 2 )
 				cmd( "$T.c.npar configure -state disabled" );
 			cmd( "pack $T.c.obs $T.c.aggr $T.c.nchk $T.c.npar -anchor w" );
 #else
@@ -2466,14 +2466,14 @@ object *operate( object *r )
 		// Enter the analysis of results module for Monte Carlo analysis
 		case 12:
 			// accept analysis after run only if MC data was just produced
-			if ( sim.eff_t > 0 && res_list.size( ) <= 1 )
+			if ( sim.eff_t > 0 && sim.res_list.size( ) <= 1 )
 			{
 				cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid data for Monte Carlo analysis\" -detail \"Last simulation run did not produce adequate data to perform a Monte Carlo experiment analysis.\n\nPlease reload or unload your configuration and select the appropriate results files, or execute a multi-run configuration before using this option.\"" );
 				break;
 			}
 
 			// check if MC results were not just created
-			if ( res_list.size( ) > 1 )
+			if ( sim.res_list.size( ) > 1 )
 			{
 				cmd( "set answer [ ttk::messageBox -parent . -type yesnocancel -icon question -default yes -title \"Results Available\" -message \"Use set of results last created?\" -detail \"A set of results files was previously created and can be used to perform the Monte Carlo experiment analysis.\n\nAny configuration or results not saved will be discarded.\n\nPress 'Yes' to confirm, 'No' to select a different set of files, or 'Cancel' to abort.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 0 } cancel { set choice 2 } }" );
 
@@ -2481,7 +2481,7 @@ object *operate( object *r )
 					break;
 
 				if ( choice == 0 )
-					res_list.clear( );
+					sim.res_list.clear( );
 			}
 			else
 				if ( ! discard_change( ) )		// check for unsaved configuration changes
@@ -2884,8 +2884,8 @@ object *operate( object *r )
 				break;
 			}
 
-			Tcl_LinkVar( interp, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "docsv", ( char * ) & sim.docsv, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "dozip", ( char * ) & sim.dozip, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "saveConf", ( char * ) & saveConf, TCL_LINK_BOOLEAN );
 
 			time_t rawtime;
@@ -2954,16 +2954,16 @@ object *operate( object *r )
 			}
 
 			if ( strlen( sim.conf_path ) == 0 )
-				snprintf( out_file, MAX_PATH_LENGTH, "%s.%s", ch1, docsv ? "csv" : "res" );
+				snprintf( out_file, MAX_PATH_LENGTH, "%s.%s", ch1, sim.docsv ? "csv" : "res" );
 			else
-				snprintf( out_file, MAX_PATH_LENGTH, "%s/%s.%s", sim.conf_path, ch1, docsv ? "csv" : "res" );
+				snprintf( out_file, MAX_PATH_LENGTH, "%s/%s.%s", sim.conf_path, ch1, sim.docsv ? "csv" : "res" );
 
-			if ( dozip )
+			if ( sim.dozip )
 				strcatn( out_file, ".gz", MAX_PATH_LENGTH );
 
 			plog( "\nSaving results to file %s... ", out_file );
 
-			rf = new result( out_file, "wt", & sim, dozip, docsv );// create results file object
+			rf = new result( out_file, "wt", & sim, sim.dozip, sim.docsv );// create results file object
 			rf->title( sim.root, 1 );					// write header
 			rf->data( sim.root, 0, sim.eff_t );			// write all data
 			delete rf;									// close file and delete object
@@ -4562,16 +4562,16 @@ object *operate( object *r )
 			}
 
 			Tcl_LinkVar( interp, "natBat", ( char * ) & natBat, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "no_res", ( char * ) & sim.no_res, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "no_tot", ( char * ) & sim.no_tot, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "docsv", ( char * ) & sim.docsv, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "dozip", ( char * ) & sim.dozip, TCL_LINK_BOOLEAN );
 
-			if ( no_tot )
-				no_res = false;
+			if ( sim.no_tot )
+				sim.no_res = false;
 
 			cmd( "set res2 $res" );
-			cmd( "set cores %d", max_threads );
+			cmd( "set cores %d", sim.max_threads );
 			cmd( "set threads 1" );
 
 			cmd( "newtop .s \"Parallel Batch\" { set choice 2 }" );
@@ -4646,11 +4646,11 @@ object *operate( object *r )
 
 			param = get_int( "cores" );
 			if ( param < 1 || param > SRV_MAX_CORES )
-				param = min( max_threads, SRV_MAX_CORES );
+				param = min( sim.max_threads, SRV_MAX_CORES );
 
 			nature = get_int( "threads" );
 			if ( nature < 1 || nature > SRV_MAX_CORES )
-				nature = min( max_threads, SRV_MAX_CORES );
+				nature = min( sim.max_threads, SRV_MAX_CORES );
 
 			get_str( "res2", out_bat, MAX_PATH_LENGTH );
 
@@ -4749,9 +4749,9 @@ object *operate( object *r )
 					logs.push_back( lab_old );
 
 					if ( choice == 1 || choice == 4 )	// Windows
-						fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s\" -s %d -e %d%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
+						fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s\" -s %d -e %d%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, i, j <= sl ? i + num : i + num - 1, sim.no_res ? " -r" : "", sim.no_tot ? " -p" : "", sim.docsv ? " -t" : "", sim.dozip ? "" : " -z", lab_old );
 					else								// Unix
-						fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s -s %d -e %d%s%s%s%s -l \"$LSD_CONFIG_PATH\"/%s &\n", nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
+						fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s -s %d -e %d%s%s%s%s -l \"$LSD_CONFIG_PATH\"/%s &\n", nature, out_file, i, j <= sl ? i + num : i + num - 1, sim.no_res ? " -r" : "", sim.no_tot ? " -p" : "", sim.docsv ? " -t" : "", sim.dozip ? "" : " -z", lab_old );
 
 					j <= sl ? i += num + 1 : i += num;
 				}
@@ -4765,9 +4765,9 @@ object *operate( object *r )
 						snprintf( lab_old, 2 * MAX_PATH_LENGTH, "%s_%d.log", out_file, i );
 
 						if ( choice == 1 || choice == 4 )	// Windows
-							fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s_%d.lsd\"%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, i, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
+							fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s_%d.lsd\"%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, i, sim.no_res ? " -r" : "", sim.no_tot ? " -p" : "", sim.docsv ? " -t" : "", sim.dozip ? "" : " -z", lab_old );
 						else								// Unix
-							fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s_%d.lsd%s%s%s%s -l \"$LSD_CONFIG_PATH\"/%s &\n", nature, out_file, i, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
+							fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s_%d.lsd%s%s%s%s -l \"$LSD_CONFIG_PATH\"/%s &\n", nature, out_file, i, sim.no_res ? " -r" : "", sim.no_tot ? " -p" : "", sim.docsv ? " -t" : "", sim.dozip ? "" : " -z", lab_old );
 					}
 					else
 					{	// get the selected file names, one by one
@@ -4776,9 +4776,9 @@ object *operate( object *r )
 						snprintf( lab_old, 2 * MAX_PATH_LENGTH, "%s.log", out_file );
 
 						if ( choice == 1 || choice == 4 )	// Windows
-							fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s.lsd\"%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
+							fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s.lsd\"%s%s%s%s -l \"%%LSD_CONFIG_PATH%%\\%s\"\r\n", j, nature, out_file, sim.no_res ? " -r" : "", sim.no_tot ? " -p" : "", sim.docsv ? " -t" : "", sim.dozip ? "" : " -z", lab_old );
 						else								// Unix
-							fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s.lsd%s%s%s%s -l \"$LSD_CONFIG_PATH\"/%s &\n", nature, out_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", lab_old );
+							fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s.lsd%s%s%s%s -l \"$LSD_CONFIG_PATH\"/%s &\n", nature, out_file, sim.no_res ? " -r" : "", sim.no_tot ? " -p" : "", sim.docsv ? " -t" : "", sim.dozip ? "" : " -z", lab_old );
 					}
 
 					logs.push_back( lab_old );
@@ -4840,14 +4840,14 @@ object *operate( object *r )
 #ifndef _NP_
 
 			// check if background are not being run already
-			if ( parallel_monitor )
+			if ( sim.parallel_monitor )
 			{
 				cmd( "if { [ ttk::messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"Abort running simulation?\" -detail \"A set of parallel simulation runs is being executed in background. You may choose to interrupt it now and proceed, or wait until it finishes before running a new one.\" ] eq \"ok\" } { set choice 1 } { set choice 0 }" );
 
 				if ( choice == 0 )
 					break;
 
-				if ( ! stop_parallel( ) )
+				if ( ! sim.stop_parallel( ) )
 				{
 					cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Failed to abort running simulation\" -detail \"Please wait until the current parallel run finishes before trying to start a new one.\"" );
 					break;
@@ -4900,34 +4900,34 @@ object *operate( object *r )
 			subDir = need_res_dir( sim.conf_path, sim.conf_name, out_dir, MAX_PATH_LENGTH );
 			overwDir = check_res_dir( out_dir );
 
-			Tcl_LinkVar( interp, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "no_tot", ( char * ) & no_tot, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "dobar", ( char * ) & dobar, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "no_res", ( char * ) & sim.no_res, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "no_tot", ( char * ) & sim.no_tot, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "dobar", ( char * ) & sim.dobar, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "docsv", ( char * ) & sim.docsv, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "doover", ( char * ) & doover, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "dozip", ( char * ) & sim.dozip, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
 
 			// only ask to overwrite configuration if there are changes
 			overwConf = unsaved_change( ) ? true : false;
-			add_to_tot = false;
+			sim.add_to_tot = false;
 
-			if ( no_tot )
-				no_res = false;
+			if ( sim.no_tot )
+				sim.no_res = false;
 
 #ifdef _NP_
 			param = 1;
 #else
-			param = min( sim.last_run, max_threads );
+			param = min( sim.last_run, sim.max_threads );
 #endif
 
 			cmd( "set simNum %d", sim.last_run );
 			cmd( "set firstFile \"%s_%d\"", sim.conf_name, sim.seed );
 			cmd( "set lastFile \"%s_%d\"", sim.conf_name, sim.seed + sim.last_run - 1 );
 			cmd( "set totFile \"%s\"", sim.conf_name );
-			cmd( "set resExt %s", docsv ? "csv" : "res" );
-			cmd( "set totExt %s", docsv ? "csv" : "tot" );
-			cmd( "set zipExt %s", dozip ? ".gz" : "" );
+			cmd( "set resExt %s", sim.docsv ? "csv" : "res" );
+			cmd( "set totExt %s", sim.docsv ? "csv" : "tot" );
+			cmd( "set zipExt %s", sim.dozip ? ".gz" : "" );
 			cmd( "set cores %d", param );
 			cmd( "set tot_msg_warn \"(WARNING: existing totals file(s) in\noutput path may be overwritten)\"" );
 
@@ -4997,7 +4997,7 @@ object *operate( object *r )
 
 			cmd( "ttk::frame $b.f6" );
 			cmd( "ttk::label $b.f6.l -text \"Parallel runs\"" );
-			cmd( "ttk::spinbox $b.f6.e -width 5 -from 1 -to %d -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center -state %s", param, ( no_tot && sim.last_run > 1 && param > 1 ) ? "normal" : "disabled" );
+			cmd( "ttk::spinbox $b.f6.e -width 5 -from 1 -to %d -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center -state %s", param, ( sim.no_tot && sim.last_run > 1 && param > 1 ) ? "normal" : "disabled" );
 			cmd( "write_any $b.f6.e $cores" );
 			cmd( "pack $b.f6.l $b.f6.e -side left -padx 2" );
 
@@ -5112,16 +5112,16 @@ object *operate( object *r )
 			if ( overwDir && doover )
 				clean_res_dir( out_dir );
 
-			if ( sim.last_run > 1 && param > 1 && no_tot )		// parallel runs case
+			if ( sim.last_run > 1 && param > 1 && sim.no_tot )	// parallel runs case
 			{
 				param = min( get_int( "cores" ), sim.last_run );
-				param = min( max( param, 1 ), max_threads );	// parallel runs
-				nature = max( max_threads / param, 1 );			// threads per run
+				param = min( max( param, 1 ), sim.max_threads );// parallel runs
+				nature = max( sim.max_threads / param, 1 );		// threads per run
 			}
 			else
 			{
 				param = 1;
-				nature = max_threads;
+				nature = sim.max_threads;
 			}
 
 			for ( n = r; n->up != NULL; n = n->up );
@@ -5147,7 +5147,7 @@ object *operate( object *r )
 #ifdef _NP_
 
 			snprintf( lab, MAX_PATH_LENGTH, "%s.log", sim.conf_name );
-			cmd( "catch { exec %s -f %s%s%s%s%s%s%s%s -l %s & }", nw_exe, sim.conf_file, no_res ? " -r" : "", no_tot ? " -p" : "", docsv ? " -t" : "", dozip ? "" : " -z", dobar ? " -b" : "", subDir ? " -o " : "", subDir ? out_dir : "", lab );
+			cmd( "catch { exec %s -f %s%s%s%s%s%s%s%s -l %s & }", nw_exe, sim.conf_file, sim.no_res ? " -r" : "", sim.no_tot ? " -p" : "", sim.docsv ? " -t" : "", sim.dozip ? "" : " -z", dobar ? " -b" : "", subDir ? " -o " : "", subDir ? out_dir : "", lab );
 			run_logs.clear( );
 			run_logs.push_back( lab );
 
@@ -5158,7 +5158,7 @@ object *operate( object *r )
 
 #endif
 
-			show_logs( sim.conf_path, run_logs, true );
+			show_logs( sim.conf_path, sim.run_logs, true );
 
 			cmd( "set path $oldpath" );
 			cmd( "cd $path" );
@@ -5524,10 +5524,10 @@ object *operate( object *r )
 #ifndef _NP_
 
 			// destroy monitor thread
-			if ( run_monitor.joinable( ) )
-				run_monitor.join( );
+			if ( sim.run_monitor.joinable( ) )
+				sim.run_monitor.join( );
 
-			plog( "\n%s\n", run_log.c_str( ) );
+			plog( "\n%s\n", sim.run_log.c_str( ) );
 			plog( "Finished parallel background run\n" );
 
 #endif
