@@ -1102,17 +1102,17 @@ proc get_source_files { path } {
 #************************************************
 # list of commands to search for parameters and objects
 # (X_Y : X=number of macro arguments, Y=position of parameter/object)
-set cmdp_1_1 [ list V SUM MAX MIN AVE MED SD STAT RECALC LAST_CALC INIT_TSEARCH_CND ]
-set cmdp_2_1 [ list VL SUML MAXL MINL AVEL MEDL WHTAVE SDL SEARCH_CND TSEARCH_CND WRITE INCR MULT V_CHEAT ]
-set cmdp_2_2 [ list VS SUMS MAXS MINS AVES MEDS WHTAVE SDS STATS RNDDRAW RECALCS LAST_CALCS INIT_TSEARCH_CNDS ]
-set cmdp_3_1 [ list WRITEL SEARCH_CNDL V_CHEATL ]
-set cmdp_3_2 [ list VLS SUMLS MAXLS MINLS AVELS MEDLS WHTAVES SDLS SEARCH_CNDS TSEARCH_CNDS RNDDRAWL RNDDRAW_TOT WRITES INCRS MULTS SORT V_CHEATS ]
+set cmdp_1_1 [ list V SUM MAX MIN AVE MED SD STAT RECALC LAST_CALC INIT_TSEARCH_CND TSEARCH_CND_SET ]
+set cmdp_2_1 [ list VL SUML MAXL MINL AVEL MEDL WHTAVE MAVE SDL SEARCH_CND TSEARCH_CND WRITE INCR MULT V_CHEAT ]
+set cmdp_2_2 [ list VS SUMS MAXS MINS AVES MEDS WHTAVE SDS STATS RNDDRAW RECALCS LAST_CALCS INIT_TSEARCH_CNDS TSEARCH_CND_SETS ]
+set cmdp_3_1 [ list WRITEL MAVEL WHTMAVE SEARCH_CNDL V_CHEATL ]
+set cmdp_3_2 [ list VLS SUMLS MAXLS MINLS AVELS MEDLS WHTAVES MAVES SDLS SEARCH_CNDS TSEARCH_CNDS RNDDRAWL RNDDRAW_TOT WRITES INCRS MULTS SORT V_CHEATS ]
 set cmdp_3_3 [ list WHTAVES RNDDRAWS ]
-set cmdp_4_1 [ list WRITELL SUM_CND MAX_CND MIN_CND AVE_CND MED_CND SD_CND STAT_CND ]
-set cmdp_4_2 [ list WHTAVELS WRITELS SEARCH_CNDLS RNDDRAW_TOTL SORT2 V_CHEATLS SUM_CND MAX_CND MIN_CND AVE_CND MED_CND SD_CND COUNT_CND COUNT_ALL_CND STAT_CND ]
+set cmdp_4_1 [ list WRITELL WHTMAVEL SUM_CND MAX_CND MIN_CND AVE_CND MED_CND SD_CND STAT_CND ]
+set cmdp_4_2 [ list WHTAVELS MAVELS WHTMAVES WRITELS SEARCH_CNDLS RNDDRAW_TOTL SORT2 V_CHEATLS SUM_CND MAX_CND MIN_CND AVE_CND MED_CND SD_CND COUNT_CND COUNT_ALL_CND STAT_CND ]
 set cmdp_4_3 [ list WHTAVELS RNDDRAWLS RNDDRAW_TOTS SORTS SORT2 ]
 set cmdp_5_1 [ list SUM_CNDL MAX_CNDL MIN_CNDL AVE_CNDL WHTAVE_CND MED_CNDL PERC_CND SD_CNDL STAT_CNDL ]
-set cmdp_5_2 [ list WRITELLS SUM_CNDS SUM_CNDL MAX_CNDS MAX_CNDL MIN_CNDL AVE_CNDL WHTAVE_CND MED_CNDS MED_CNDL SD_CNDS SD_CNDL COUNT_CNDL COUNT_ALL_CNDL STAT_CNDS STAT_CNDL ]
+set cmdp_5_2 [ list WRITELLS WHTMAVELS SUM_CNDS SUM_CNDL MAX_CNDS MAX_CNDL MIN_CNDL AVE_CNDL WHTAVE_CND MED_CNDS MED_CNDL SD_CNDS SD_CNDL COUNT_CNDL COUNT_ALL_CNDL STAT_CNDS STAT_CNDL ]
 set cmdp_5_3 [ list RNDDRAW_TOTLS SORT2S SUM_CNDS MAX_CNDS MIN_CNDS AVE_CNDS WHTAVE_CND MED_CNDS PERC_CND SD_CNDS COUNT_CNDS COUNT_ALL_CNDS STAT_CNDS ]
 set cmdp_5_4 [ list SORT2S ]
 set cmdp_6_1 [ list WHTAVE_CNDL PERC_CNDL ]
@@ -1123,11 +1123,11 @@ set cmdp_7_2 [ list WHTAVE_CNDLS PERC_CNDLS ]
 set cmdp_7_3 [ list WHTAVE_CNDLS ]
 set cmdp_7_4 [ list WHTAVE_CNDLS PERC_CNDLS ]
 
-set cmdo_1_1 [ list COUNT COUNT_ALL SEARCH RNDDRAW_FAIR ADDOBJ DELETE_NET SHUFFLE_NET INIT_TSEARCH ]
-set cmdo_2_1 [ list RNDDRAW ADDOBJL ADDNOBJ ADDOBJ_EX LOAD_NET SAVE_NET SNAP_NET TSEARCH INIT_TSEARCHT ]
-set cmdo_2_2 [ list COUNTS COUNT_ALLS SEARCHS RNDDRAW_FAIRS CYCLE CYCLE_SAFE ADDOBJS DELETE_NETS SHUFFLE_NETS INIT_TSEARCHS ]
+set cmdo_1_1 [ list COUNT COUNT_ALL SEARCH RNDDRAW_FAIR ADDOBJ DELETE_NET SHUFFLE_NET INIT_TSEARCH TSEARCH_SET ]
+set cmdo_2_1 [ list RNDDRAW ADDOBJL ADDNOBJ ADDOBJ_EX LOAD_NET SAVE_NET SNAP_NET TSEARCH ]
+set cmdo_2_2 [ list COUNTS COUNT_ALLS SEARCHS RNDDRAW_FAIRS CYCLE CYCLE_SAFE ADDOBJS DELETE_NETS SHUFFLE_NETS INIT_TSEARCHS TSEARCH_SETS ]
 set cmdo_3_1 [ list RNDDRAWL RNDDRAW_TOT ADDNOBJL ADDOBJ_EXL ADDNOBJ_EX SORT ]
-set cmdo_3_2 [ list RNDDRAWS ADDOBJLS ADDNOBJS ADDOBJ_EXS LOAD_NETS SAVE_NETS SNAP_NETS TSEARCHS INIT_TSEARCHTS ]
+set cmdo_3_2 [ list RNDDRAWS ADDOBJLS ADDNOBJS ADDOBJ_EXS LOAD_NETS SAVE_NETS SNAP_NETS TSEARCHS ]
 set cmdo_3_3 [ list CYCLES CYCLE_SAFES ]
 set cmdo_4_1 [ list COUNT_CND COUNT_ALL_CND RNDDRAW_TOTL ADDNOBJ_EXL SORT2 ]
 set cmdo_4_2 [ list RNDDRAWLS RNDDRAW_TOTS ADDNOBJLS ADDOBJ_EXLS ADDNOBJ_EXS SORTS ]
@@ -1136,13 +1136,24 @@ set cmdo_5_2 [ list COUNT_CNDS COUNT_ALL_CNDS RNDDRAW_TOTLS ADDNOBJ_EXLS SORT2S 
 set cmdo_6_2 [ list COUNT_CNDLS COUNT_ALL_CNDLS INIT_NETS ]
 
 proc create_elem_file { path } {
-	global exeTime cmdp_1_1 cmdp_2_1 cmdp_2_2 cmdp_3_1 cmdp_3_2 cmdp_3_3 cmdp_4_1 cmdp_4_2 cmdp_4_3 cmdp_5_1 cmdp_5_2 cmdp_5_3 cmdp_5_4 cmdp_6_1 cmdp_6_2 cmdp_6_3 cmdp_6_4 cmdp_7_2 cmdp_7_3 cmdp_7_4 cmdo_1_1 cmdo_2_1 cmdo_2_2 cmdo_3_1 cmdo_3_2 cmdo_3_3 cmdo_4_1 cmdo_4_2 cmdo_5_1 cmdo_5_2 cmdo_6_2
+	global exeTime libTime cmdp_1_1 cmdp_2_1 cmdp_2_2 cmdp_3_1 cmdp_3_2 cmdp_3_3 cmdp_4_1 cmdp_4_2 cmdp_4_3 cmdp_5_1 cmdp_5_2 cmdp_5_3 cmdp_5_4 cmdp_6_1 cmdp_6_2 cmdp_6_3 cmdp_6_4 cmdp_7_2 cmdp_7_3 cmdp_7_4 cmdo_1_1 cmdo_2_1 cmdo_2_2 cmdo_3_1 cmdo_3_2 cmdo_3_3 cmdo_4_1 cmdo_4_2 cmdo_5_1 cmdo_5_2 cmdo_6_2
 
 	# don't recreate if executable file was not changed
-	if { [ file exists "$path/elements.txt" ] && [ info exists exeTime ] } {
-		if { [ file mtime "$path/elements.txt" ] >= $exeTime } {
-			return
+	set create 0
+	if { [ file exists "$path/elements.txt" ] } {
+		if { [ info exists libTime ] && $libTime > 0 } {
+			if { [ file mtime "$path/elements.txt" ] < $libTime } {
+				set create 1
+			}
+		} elseif { [ info exists exeTime ] && [ file mtime "$path/elements.txt" ] < $exeTime } {
+			set create 1
 		}
+	} else {
+		set create 1
+	}
+
+	if { ! $create } {
+		return
 	}
 
 	set files [ get_source_files $path ]
