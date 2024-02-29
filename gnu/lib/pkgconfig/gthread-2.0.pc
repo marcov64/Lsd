@@ -4,7 +4,7 @@ libdir=${prefix}/lib
 
 Name: GThread
 Description: Thread support for GLib
-Version: 2.78.3
+Version: 2.78.4
 Requires: glib-2.0
 Libs: -L${libdir} -lgthread-2.0
 Libs.private: -lintl
