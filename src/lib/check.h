@@ -190,7 +190,7 @@ inline object *simulation::cycle_obj( object *parent, const char *label, const c
 			error_hard( "object is not a descending object",
 						"move object in model structure, or specify a parent object",
 						false,
-						"object '%s' not directly under '%s' for cycling (NO_SEARCH enabled!)",
+						"object '%s' not directly under '%s' for cycling\n(NO_SEARCH enabled!)",
 						label, parent->label );
 	}
 
