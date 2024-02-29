@@ -634,7 +634,7 @@ object *object::search_err( const char *lab, bool no_search, bool no_search_up, 
 							 false,
 							 "object '%s' not%s under '%s' for %s%s",
 							 lab, no_search ? " directly" : "", label == NULL ? "" : label,
-							 errmsg, no_search ? " (NO_SEARCH enabled!)" : "" );
+							 errmsg, no_search ? "\n(NO_SEARCH enabled!)" : "" );
 	}
 
 	return cur;
@@ -962,7 +962,7 @@ variable *object::search_var_err( object *caller, const char *lab, bool no_searc
 							 "'%s' in '%s' not%s under '%s' for %s%s",
 							 lab, cv1->up != NULL && cv1->up->label != NULL ? cv1->up->label : "?",
 							 no_search ? " directly" : "", label, errmsg,
-							 no_search ? " (NO_SEARCH enabled!)" : "" );
+							 no_search ? "\n(NO_SEARCH enabled!)" : "" );
 	}
 
 	return cv;
