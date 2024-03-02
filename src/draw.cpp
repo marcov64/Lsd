@@ -70,7 +70,7 @@ void object::show_graph( void )
 	else
 		cmd( "destroy .str.f" );										// or just recreate canvas
 
-	cmd( "wm title .str \"%s%s - LSD Model Structure\"", unsaved_change() ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
+	cmd( "wm title .str \"%s%s - LSD Model Structure\"", unsaved_change( ) ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
 
 	cmd( "ttk::frame .str.f" );
 	cmd( "ttk::canvas .str.f.c -xscrollincrement 1 -entry 0 -dark $darkTheme" );

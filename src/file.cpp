@@ -168,6 +168,50 @@ bool open_configuration( object *&r, bool reload )
 }
 
 
+/*****************************************************************************
+LOAD_CONFIGURATION_GUI (DLL WRAPPER)
+	Load configuration
+	If full is false, just the model data is unloaded
+	Returns: pointer to root object
+******************************************************************************/
+int load_configuration_gui( bool reload, string *warnings, int quick )
+{
+	int res;
+
+	reset_configuration_gui( );
+	
+	if( ( res = sim.load_configuration( reload, warnings, quick ) ) == 0 )
+	{
+		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", model_path, sim.conf_file );
+		sim.root->load_elem_lists( );
+	}
+
+	return res;
+}
+
+
+/*****************************************************************************
+RESET_CONFIGURATION_GUI
+	Reset the GUI part of a loaded configuration
+******************************************************************************/
+void reset_configuration_gui( void )
+{
+	currObj = NULL;								// no current object pointer
+	unsaved_change( false );					// signal no unsaved change
+	unsavedData = false;						// no unsaved simulation results
+	unsavedSense = false;						// no sensitivity data to save
+	findexSens = 0;								// reset sensitivity serial number
+	NOLH_clear( );								// deallocate DoE
+	sim.empty_sensitivity( );					// discard sensitivity analysis data
+
+	cmd( "destroytop .lat" );					// remove lattice window
+	cmd( "unset -nocomplain modObj modElem modVar modPar modFun" );// no elements
+
+	if ( ! sim.running )
+		cmd( "destroytop .plt" );				// remove run-time plot window
+}
+
+
 /****************************************************
 LOAD_PREV_CONFIGURATION
 Restore sensitivity configuration
@@ -217,52 +261,14 @@ bool load_prev_configuration( void )
 
 
 /*****************************************************************************
-LOAD_CONFIGURATION_GUI (DLL WRAPPER)
-	Load configuration
-	If full is false, just the model data is unloaded
-	Returns: pointer to root object
-******************************************************************************/
-int load_configuration_gui( bool reload, string *warnings, int quick )
-{
-	int res;
-
-	if( ( res = sim.load_configuration( reload, warnings, quick ) ) == 0 )
-	{
-		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", model_path, sim.conf_file );
-		sim.root->load_elem_lists( );
-	}
-
-	unsavedData = false;						// no unsaved simulation results
-	unsavedSense = false;						// no sensitivity data to save
-
-	return res;
-}
-
-
-/*****************************************************************************
 UNLOAD_CONFIGURATION_GUI (DLL WRAPPER)
 	Unload the current configuration
 	If full is false, just the model data is unloaded
-	Returns: pointer to root object
 ******************************************************************************/
 void unload_configuration_gui( bool full )
 {
 	sim.unload_configuration( full );
-
-	currObj = NULL;								// no current object pointer
-	unsaved_change( false );					// signal no unsaved change
-	unsavedData = false;						// no unsaved simulation results
-	unsavedSense = false;						// no sensitivity data to save
-	findexSens = 0;								// reset sensitivity serial number
-
-	NOLH_clear( );								// deallocate DoE
-	sim.empty_sensitivity( );					// discard sensitivity analysis data
-
-	cmd( "destroytop .lat" );					// remove lattice window
-	cmd( "unset -nocomplain modObj modElem modVar modPar modFun" );	// no elements in model structure
-
-	if ( ! sim.running )
-		cmd( "destroytop .plt" );				// remove run-time plot window
+	reset_configuration_gui( );
 
 	if ( full )									// full unload? (no new config?)
 	{

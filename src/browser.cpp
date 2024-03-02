@@ -2109,7 +2109,8 @@ bool object::sort_listbox( int box, int order )
 
 /****************************************************
 UNSAVED_CHANGE
-Read or set the UnsavedChange flag and update windows titles accordingly
+Read or set the unsaved change flag and update
+windows titles accordingly
 ****************************************************/
 bool unsavedChange = false;		// control for unsaved changes in configuration
 #define WND_NUM 10				// number of windows to update (in wndName)

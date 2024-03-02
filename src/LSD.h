@@ -419,6 +419,7 @@ void put_line( int x1, int y1, int x2 );
 void put_node( int x, int y, const char *str, bool sel );
 void put_text( const char *str, const char *num, int x, int y, const char *str2 );
 void read_eqfile_name( char *s, int sz );
+void reset_configuration_gui( void );
 void reset_plot( void );
 void return_where_used( char *lab, char *s, int sz );
 void runtime_buttons( clock_t &last_update );
