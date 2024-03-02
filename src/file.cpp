@@ -1035,7 +1035,7 @@ void object::save_description( FILE *f )
 		if ( ( cv->param != 1 && cv->num_lag == 0 ) || strwsp( cd->init ) )
 			fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ] );
 		else
-			fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ], cd->init, desc_key_words[ 1 ] );
+			fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 0 ], cd->init, desc_key_words[ 1 ] );
 	}
 
 	for ( cb = b; cb != NULL; cb = cb->next )

@@ -387,6 +387,7 @@ void cover_browser( const char *text1, const char *text2, bool run );
 void create( void );
 void create_form( int num, const char *title, const char *prefix, FILE *frep );
 void create_logwindow( void );
+void deb_log( bool on, int time );
 void disable_plot( void );
 void draw_buttons( void );
 void eliminate_obj( object *&c, int actual, int desired );

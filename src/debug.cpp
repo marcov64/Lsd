@@ -1755,10 +1755,10 @@ void object::debugger_update( const char *hl_var, int mode )
 			cmd( "ttk::frame $w.e$i" );
 			cmd( "ttk::label $w.e$i.name -width $hnamszD -anchor w -text %s", ap_v->label );
 
-			if ( is_nan( ap_v->val[ 0 ] ) )
+			if ( isnan( ap_v->val[ 0 ] ) )
 				cmd( "ttk::label $w.e$i.val -width $hvalszD -style hl.TLabel -text NAN" );
 			else
-				if ( is_inf( ap_v->val[ 0 ] ) )
+				if ( isinf( ap_v->val[ 0 ] ) )
 					cmd( "ttk::label $w.e$i.val -width $hvalszD -style hl.TLabel -text %sINFINITY", ap_v->val[ 0 ] < 0 ? "-" : "" );
 				else
 					if ( ap_v->val[ 0 ] != 0 && fabs( ap_v->val[ 0 ] ) < SIG_MIN )	// insignificant value?
@@ -1798,10 +1798,10 @@ void object::debugger_update( const char *hl_var, int mode )
 				cmd( "set lvals \"\"" );
 				for ( j = 1; j <= ap_v->num_lag; ++j )
 				{
-					if ( is_nan( ap_v->val[ j ] ) )
+					if ( isnan( ap_v->val[ j ] ) )
 						cmd( "set val NAN" );
 					else
-						if ( is_inf( ap_v->val[ j ] ) )
+						if ( isinf( ap_v->val[ j ] ) )
 							cmd( "set val %sINFINITY", ap_v->val[ j ] < 0 ? "-" : "" );
 						else
 							if ( ap_v->val[ j ] != 0 && fabs( ap_v->val[ j ] ) < SIG_MIN )
@@ -1933,10 +1933,10 @@ void object::show_tmp_vars( bool update )
 		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"v\\\[%d\\]\"", j );
 		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 
-		if ( is_nan( sim->d_values[ j ] ) )
+		if ( isnan( sim->d_values[ j ] ) )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NAN" );
 		else
-			if ( is_inf( sim->d_values[ j ] ) )
+			if ( isinf( sim->d_values[ j ] ) )
 				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", sim->d_values[ j ] < 0 ? "-" : "" );
 			else
 				if ( sim->d_values[ j ] != 0 && fabs( sim->d_values[ j ] ) < SIG_MIN )// insignificant value?
@@ -2131,10 +2131,10 @@ void object::show_tmp_vars( bool update )
 		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"v\\\[%d\\]\"", j );
 		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 
-		if ( is_nan( sim->d_values[ j ] ) )
+		if ( isnan( sim->d_values[ j ] ) )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NAN" );
 		else
-			if ( is_inf( sim->d_values[ j ] ) )
+			if ( isinf( sim->d_values[ j ] ) )
 				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", sim->d_values[ j ] < 0 ? "-" : "" );
 			else
 				if ( sim->d_values[ j ] != 0 && fabs( sim->d_values[ j ] ) < SIG_MIN )	// insignificant value?

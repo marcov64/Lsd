@@ -127,7 +127,7 @@ int simulation::run_simulation( int until_t, int until_run )
 				root->update( true, false );// simulation step execution
 			}
 
-			perc_done = min( 100 * ( ( run - 1 ) + ( double ) t / last_t ) / last_run, 100 );
+			perc_done = min( ( int ) ( 100 * ( ( run - 1 ) + ( double ) t / last_t ) / last_run ), 100 );
 
 #ifndef _NW_
 			// handle runtime button pressings

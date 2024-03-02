@@ -408,11 +408,11 @@ void variable::plot_runtime( void )
 	if ( ymax == ymin )			// very initial setting
 	{
 		if ( val[ 0 ] > 0 )
-			ymax = round_digits( val[ 0 ] * ( 1 + MARG ), p_digits );
+			ymax = sim->round_digits( val[ 0 ] * ( 1 + MARG ), p_digits );
 		else
-			ymax = round_digits( val[ 0 ] * ( 1 - MARG ), p_digits );
+			ymax = sim->round_digits( val[ 0 ] * ( 1 - MARG ), p_digits );
 
-		ymin = round_digits( val[ 0 ], p_digits );
+		ymin = sim->round_digits( val[ 0 ], p_digits );
 
 		if ( ymax == ymin )
 			ymax += MARG;
@@ -423,7 +423,7 @@ void variable::plot_runtime( void )
 	if ( val[ 0 ] >= ymax )
 	{
 		value = val[ 0 ] * ( val[ 0 ] > 0 ? 1 + MARG_CONST : 1 - MARG_CONST );
-		value = round_digits( value, p_digits );
+		value = sim->round_digits( value, p_digits );
 
 		scale = ( ymax - ymin ) / ( value - ymin );
 		ymax = value;
@@ -437,7 +437,7 @@ void variable::plot_runtime( void )
 	{
 		value = val[ 0 ] * ( val[ 0 ] > 0 ? 1 - MARG_CONST : 1 + MARG_CONST );
 		value = min( value, ymin - ( ymax - ymin ) / height );
-		value = round_digits( value, p_digits );
+		value = sim->round_digits( value, p_digits );
 
 		scale = ( ymax - ymin ) / ( ymax - value );
 		ymin = value;
@@ -449,7 +449,7 @@ void variable::plot_runtime( void )
 
 	if ( relabel )
 	{
-		ymed = round_digits( ( ymax - ymin ) / 2 + ymin, p_digits );
+		ymed = sim->round_digits( ( ymax - ymin ) / 2 + ymin, p_digits );
 		zero_lim = ( ymax - ymin ) * MARG;
 
 		cmd( "$activeplot.c.yscale itemconf ymax -text %.*g", p_digits, fabs( ymax ) < zero_lim ? 0 : ymax );

@@ -194,20 +194,18 @@ void simulation::close_sim( void ) \
 }
 #endif
 
-// redefine as macro to avoid conflicts with C++ version in <cmath.h>
-#define abs( X ) _abs( X )
-#define pi M_PI
-
 // LSD macros
+#define pi M_PI
+#define is_finite( x ) isfinite( x )
+#define is_inf( x ) isinf( x )
+#define is_nan( x ) isnan( x )
+#define max( x, y ) fmax( x, y )
+#define min( x, y ) fmin( x, y )
+
 #define UP "UP"
 #define DOWN "DOWN"
 
 #define ABORT { quit = 1; }
-#define DEBUG_START deb_log( true, 0 )
-#define DEBUG_START_AT( X ) deb_log( true, X )
-#define DEBUG_STOP deb_log( false, 0 )
-#define DEBUG_STOP_AT( X ) deb_log( false, X )
-
 #define FAST set_fast( 1 )
 #define FAST_FULL set_fast( 2 )
 #define OBSERVE set_fast( 0 )
@@ -598,6 +596,11 @@ void simulation::close_sim( void ) \
 #define CYCLE_EXT( X, Y, Z ) for ( X = EXEC_EXT( Y, Z, begin ); X != EXEC_EXT( Y, Z, end ); ++X )
 #define CYCLE_EXTS( O, X, Y, Z ) for ( X = EXEC_EXTS( O, Y, Z, begin ); X != EXEC_EXTS( O, Y, Z, end ); ++X )
 
+#define DEBUG_START { if ( liblnk.deb_log != NULL ) liblnk.deb_log( true, 0 ); }
+#define DEBUG_START_AT( X ) { if ( liblnk.deb_log != NULL ) liblnk.deb_log( true, X ); }
+#define DEBUG_STOP { if ( liblnk.deb_log != NULL ) liblnk.deb_log( false, 0 ); }
+#define DEBUG_STOP_AT( X ) { if ( liblnk.deb_log != NULL ) liblnk.deb_log( false, X ); }
+
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)
 #ifdef LEGACY_CODE
@@ -609,18 +612,19 @@ void simulation::close_sim( void ) \
 extern Tcl_Interp *inter;
 #endif
 
-char msg[ MAX_BUFF_SIZE ];							// legacy auxiliary buffer
-
-extern dlliblinkage liblnk;
+extern vector < simulation * > sims;	// vector holding existing simulations
 
 double poidev( double xm, long *idum_loc = NULL );
 object *go_brother( object *c );
 void cmd_gui( const char *cm, ... );
 
+char msg[ MAX_BUFF_SIZE ];				// legacy auxiliary buffer
+
 int deb( object *r, object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" ) { if ( liblnk.debugger != NULL ) return ( r->*liblnk.dlliblinkage::debugger ) ( c, lab, res, interact, hl_var ); else return -1; }
 void cmd( const char *cm, ... ) { cmd_gui( cm ); }
 void simulation::close_sim( void ) { };
 
+#define SIM ( sims[ 0 ] )				// pointer to first simulation
 #define FUNCTION( X ) EQUATION( X )
 #define UNIFORM( X, Y ) uniform( X, Y )
 #define rnd_integer( X, Y ) uniform_int( X, Y )

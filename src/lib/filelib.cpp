@@ -841,7 +841,7 @@ int object::load_xml_insts( xml_node &n, n_mapT &node_map, set < int > &warning 
 
 				for ( i = 0; i < ( cv1->param == 1 ? 1 : cv1->num_lag ); ++i )
 				{
-					if ( i >= ( long ) val1.size( ) || ! is_finite( val1[ i ] ) )
+					if ( i >= ( long ) val1.size( ) || ! isfinite( val1[ i ] ) )
 					{
 						warning.insert( 55 );	// inconsistent values
 						d = 0;
@@ -1141,7 +1141,7 @@ void variable::save_single( void )
 	fprintf( f, "%s %s (%d %d)\t\n", label, lab_tit, start, end );
 
 	for ( i = 0; i <= sim->t - 1; ++i )
-		if ( i >= start && i <= end && ! is_nan( data[ i - start ] ) )	// save NaN as n/a
+		if ( i >= start && i <= end && ! isnan( data[ i - start ] ) )	// save NaN as n/a
 			fprintf( f,"%lf\t\n", data[ i - start ] );
 		else
 			fprintf( f,"%s\t\n", nonavail );
@@ -1418,7 +1418,7 @@ void result::data_recursive( object *r, int i )
 	{
 		if ( cv->save == 1 )
 		{
-			if ( cv->start <= i && cv->end >= i && ! is_nan( cv->data[ i - cv->start ] ) )
+			if ( cv->start <= i && cv->end >= i && ! isnan( cv->data[ i - cv->start ] ) )
 			{
 				if ( dozip )
 				{
@@ -1472,7 +1472,7 @@ void result::data_recursive( object *r, int i )
 	{
 		for ( cv = sim->cemetery; cv != NULL; cv = cv->next )
 		{
-			if ( cv->start <= i && cv->end >= i && ! is_nan( cv->data[ i - cv->start ] ) )
+			if ( cv->start <= i && cv->end >= i && ! isnan( cv->data[ i - cv->start ] ) )
 			{
 				if ( dozip )
 				{

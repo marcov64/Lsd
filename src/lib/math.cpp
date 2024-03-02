@@ -22,75 +22,9 @@ LSD and models.
 
 
 /****************************************************
-IS_FINITE
-function redefinition to handle GCC standard library bugs
-****************************************************/
-bool is_finite( double x )
-{
-#if __GNUC__ > 3
-	return __builtin_isfinite( x );
-#else
-	return isfinite( x );
-#endif
-}
-
-
-/****************************************************
-IS_INF
-function redefinition to handle GCC standard library bugs
-****************************************************/
-bool is_inf( double x )
-{
-#if __GNUC__ > 3
-	return __builtin_isinf( x );
-#else
-	return isinf( x );
-#endif
-}
-
-
-/****************************************************
-IS_NAN
-function redefinition to handle GCC standard library bugs
-****************************************************/
-bool is_nan( double x )
-{
-#if __GNUC__ > 3
-	return __builtin_isnan( x );
-#else
-	return isnan( x );
-#endif
-}
-
-
-/****************************************************
-_ABS
-****************************************************/
-double simulation::_abs( double a )
-{
-	if ( a > 0 )
-		return a;
-	else
-		return ( -1 * a );
-};
-
-
-/****************************************************
-ROUND
-****************************************************/
-double round( double x )
-{
-	if ( ( x - floor( x ) ) > ( ceil( x ) - x ) )
-		return ceil( x );
-
-	return floor( x );
-}
-
-
-/****************************************************
 ROUND_DIGITS
 ****************************************************/
-double round_digits( double value, int digits )
+double simulation::round_digits( double value, int digits )
 {
 	if ( value == 0.0 )
 		return 0.0;
@@ -101,105 +35,11 @@ double round_digits( double value, int digits )
 }
 
 
-/****************************************************
-MAX
-****************************************************/
-double max( double a, double b )
-{
-	if ( a > b )
-		return a;
-	return b;
-}
-
-
-/****************************************************
-MIN
-****************************************************/
-double min ( double a, double b )
-{
-	if ( a < b )
-		return a;
-	return b;
-}
-
-
-/****************************************************
-LOWER_BOUND
-****************************************************/
-double lower_bound( double a, double b, double marg, double marg_eq, int dig )
-{
-	double rmin = round_digits( a, dig );
-	double rmax = round_digits( b, dig );
-
-	if ( rmin > rmax )
-	{
-		double temp = rmin;
-		rmin = rmax;
-		rmax = temp;
-	}
-
-	if ( rmin == rmax )
-	{
-		if ( rmin == 0.0 )
-			return round_digits( - marg_eq, dig );
-		else
-			if ( rmin > 0 )
-				return round_digits( rmin * ( 1 - marg_eq ), dig );
-			else
-				return round_digits( rmin * ( 1 + marg_eq ), dig );
-	}
-
-	if ( rmin == 0.0 )
-		return round_digits( - marg, dig );
-	else
-		if ( rmin > 0 )
-			return round_digits( rmin * ( 1 - marg ), dig );
-		else
-			return round_digits( rmin * ( 1 + marg ), dig );
-}
-
-
-/****************************************************
-UPPER_BOUND
-****************************************************/
-double upper_bound( double a, double b, double marg, double marg_eq, int dig )
-{
-	double rmin = round_digits( a, dig );
-	double rmax = round_digits( b, dig );
-
-	if ( rmin > rmax )
-	{
-		double temp = rmin;
-		rmin = rmax;
-		rmax = temp;
-	}
-
-	if ( rmin == rmax )
-	{
-		if ( rmax == 0.0 )
-			return round_digits( marg_eq, dig );
-		else
-			if ( rmax > 0 )
-				return round_digits( rmax * ( 1 + marg_eq ), dig );
-			else
-				return round_digits( rmax * ( 1 - marg_eq ), dig );
-	}
-
-	if ( rmax == 0.0 )
-		return round_digits( marg, dig );
-	else
-		if ( rmax > 0 )
-			return round_digits( rmax * ( 1 + marg ), dig );
-		else
-			return round_digits( rmax * ( 1 - marg ), dig );
-}
-
-
 /***************************************************
 IPOW
 Integer exponentiation
 ***************************************************/
-double ipow( double base, double exp )
+double simulation::ipow( double base, double exp )
 {
 	long res = 1, lbase = ( long ) floor( base ), lexp = ( long ) floor( exp );
 
@@ -227,7 +67,7 @@ double ipow( double base, double exp )
 FACT
 Factorial function
 ***************************************************/
-double fact( double x )
+double simulation::fact( double x )
 {
 	x = floor( x );
 	if ( x < 0.0 )
@@ -248,7 +88,7 @@ double fact( double x )
 /****************************************************
 MEDIAN
 ****************************************************/
-double median( vector < double > & v )
+double simulation::median( vector < double > & v )
 {
 	int mid;
 	double midVal;
@@ -274,7 +114,7 @@ T_STAR
 Student t distribution  statistic for given
 degrees of freedom and confidence level (in %)
 ****************************************************/
-double t_star( int df, double cl )
+double simulation::t_star( int df, double cl )
 {
 	int i;
 
@@ -309,7 +149,7 @@ Z_STAR
 Standard normal distribution statistic for given
 confidence level (in %)
 ****************************************************/
-double z_star( double cl )
+double simulation::z_star( double cl )
 {
 	int i;
 
@@ -1050,7 +890,7 @@ double simulation::bpareto( double alpha, double low, double high )
 	if ( alpha <= 0 || low <= 0 || low >= high )
 	{
 		warn_distr( paretErrCnt, paretStopErr, "bpareto", "non-positive alpha parameter or bounds or invalid bounds" );
-		return max( low, 0 );
+		return max( low, 0. );
 	}
 
 	return pow( pow( low, alpha ) /

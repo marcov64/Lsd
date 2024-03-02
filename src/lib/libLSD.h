@@ -216,27 +216,29 @@ struct simulation						// simulation container class
 
 	// simulation-class methods (used in equations)
 	char *no_node_chr( const char *lab, const char *file, int line );
-	double _abs( double a );
 	double alapl( double mu, double alpha1, double alpha2 );// asym. laplace draw
 	double alaplcdf( double mu, double alpha1, double alpha2, double x );// asym. laplace cdf
 	double bernoulli( double p );		// Bernoulli draw
 	double beta( double alpha, double beta );// beta draw
 	double betacdf( double alpha, double beta, double x );// beta cdf
 	double betacf( double a, double b, double x );// beta distribution function
-	double binomial( double p, double t );	// binomial draw
+	double binomial( double p, double t );// binomial draw
 	double bpareto( double alpha, double low, double high );// bounded pareto draw
 	double bparetocdf( double alpha, double low, double high, double x );
 	double build_obj_list( bool set_list );// build object list for pointer checking
 	double cauchy( double a, double b );// Cauchy draw
 	double chi_squared( double n );		// chi-squared draw
 	double exponential( double lambda );// exponential draw
+	double fact( double x );			// Factorial function
 	double fisher( double m, double n );// Fisher-F draw
 	double gamma( double alpha, double beta = 1 );// gamma draw
 	double geometric( double p );		// geometric draw
 	double init_lattice( int init_color = -0xffffff, double nrow = 100, double ncol = 100, double pixW = 0, double pixH = 0 );
 	double init_lattice( double pixW = 0, double pixH = 0, double nrow = 100, double ncol = 100, const char lrow[ ] = "y", const char lcol[ ] = "x", const char lvar[ ] = "", object *p = NULL, int init_color = -0xffffff );
+	double ipow( double base, double exp );// integer exponentiation
 	double lnorm( double mu, double sigma );// lognormal draw
 	double lnormcdf( double mu, double sigma, double x );// lognormal cdf
+	double median( vector < double > & v );
 	double norm( double mean, double dev );// normal draw
 	double normcdf( double mu, double sigma, double x );// normal cdf
 	double pareto( double mu, double alpha );// Pareto draw
@@ -245,13 +247,16 @@ struct simulation						// simulation container class
 	double poissoncdf( double lambda, double k );// poisson cdf
 	double ran1( long *unused = 0 );	// 0-1 uniform draw
 	double read_lattice( double line, double col );
+	double round_digits( double value, int digits );
 	double save_lattice( const char fname[ ] = "lattice" );
 	double student( double n );			// Student-T draw
+	double t_star( int df, double cl );	// Student-t distribution statistic
 	double uniform( double min, double max );// uniform draw
 	double uniform_int( double min, double max );// uniform integer draw
 	double unifcdf( double a, double b, double x );// uniform cdf
 	double update_lattice( double line, double col, double val = 1 );
 	double weibull( double a, double b );// Weibull draw
+	double z_star( double cl );			// Standard normal distribution statistic
 	inline bool chk_hook( object *ptr, unsigned num );
 	inline bool chk_obj( object *ptr );
 	inline bool chk_ptr( object *ptr );
@@ -853,58 +858,45 @@ struct dlliblinkage						// callback references for dynamic link library
 // library global variables (used in equations)
 extern const bool no_pointer_check;		// user pointer checking static disable
 extern const bool no_pointer_init;		// user pointer initialization disable
+extern dlliblinkage liblnk;				// call-back references for DLL
 extern int platform;					// OS platform (1=Linux, 2=Mac, 3=Windows)
 
 // library C++ functions (used in equations)
-bool is_finite( double x );
-bool is_inf( double x );
-bool is_nan( double x );
-double fact( double x );				// Factorial function
-double ipow( double base, double exp );	// integer exponentiation
-double max( double a, double b );
-double median( vector < double > & v );
-double min( double a, double b );
-double round( double r );
-double round_digits( double value, int digits );
-double t_star( int df, double cl );		// Student-t distribution statistic
-double z_star( double cl );				// Standard normal distribution statistic
-void deb_log( bool on, int time );		// control debug mode
 void msleep( unsigned msec = 1000 );	// sleep process for milliseconds
 void plog( const char *msg, ... );		// write on log window
 
 #ifndef _FUN_
 
 // library global variables (not used in equations)
-extern bool idle_loop;			// in main idle loop (no running operation)
-extern bool message_logged;		// new message posted in log window
-extern char *exec_file;			// name of executable file
-extern char *exec_path;			// path of executable file
-extern char *lib_file;			// name of shared library, if any
-extern char *lib_path;			// path of shared library, if any
-extern char *model_path;		// folder where the model files are
-extern char *rootLsd;			// path of LSD root directory
-extern const char nonavail[ ];	// string for unavailable values
-extern const char *desc_key_words[ ];// library constant string arrays
+extern bool idle_loop;					// main idle loop (no running operation)
+extern bool message_logged;				// new message posted in log window
+extern char *exec_file;					// name of executable file
+extern char *exec_path;					// path of executable file
+extern char *lib_file;					// name of shared library, if any
+extern char *lib_path;					// path of shared library, if any
+extern char *model_path;				// folder where the model files are
+extern char *rootLsd;					// path of LSD root directory
+extern const char nonavail[ ];			// string for unavailable values
+extern const char *desc_key_words[ ];	// library constant string arrays
 extern const char *elem_type_names[ ];
 extern const char *signal_names[ ];
-extern const double t_dist_cl[ T_CLEVS ];// t-distribution table confidence levels
+extern const double t_dist_cl[ T_CLEVS ];// t-distribution table confidence
 extern const double t_dist_st[ T_CLEVS ][ 36 ];// t-distribution table statistics
-extern const double z_dist_cl[ Z_CLEVS ];// normal distribution table conf. levels
+extern const double z_dist_cl[ Z_CLEVS ];// normal distribution table confidence
 extern const double z_dist_st[ Z_CLEVS ];// normal distribution table statistics
-extern const int signals[ ];	// handled system signal numbers
-extern dlliblinkage liblnk;		// call-back references for DLL
-extern int choice;				// Tcl menu control variable (main window)
-extern vector < simulation * > sims;// vector holding existing simulations
-extern FILE *stderr_ptr;		// main thread standard error file pointer
-extern FILE *stdout_ptr;		// main thread standard output file pointer
+extern const int signals[ ];			// handled system signal numbers
+extern int choice;						// Tcl menu control (main window)
+extern vector < simulation * > sims;	// vector holding existing simulations
+extern FILE *stderr_ptr;				// main thread standard error pointer
+extern FILE *stdout_ptr;				// main thread standard output pointer
 
 #ifndef _NP_
 // library conditional variables (not used in equations)
-extern condition_variable seq_end;// variable to signal simulation sequence end
+extern condition_variable seq_end;		// signal simulation sequence end
 extern map < thread::id, worker * > worker_thread_ptr;// worker thread pointers
-extern mutex plog_term_lck;		// lock plog_terminal for parallel updating
-extern mutex wrk_thr_ptr_lck;	// lock worker_thread_ptr for parallel updating
-extern thread::id main_thread;	// LSD main thread ID
+extern mutex plog_term_lck;				// lock plog_terminal for parallel upd.
+extern mutex wrk_thr_ptr_lck;			// lock worker_thread_ptr for par. upd.
+extern thread::id main_thread;			// LSD main thread ID
 #endif
 
 // library C++ functions (not used in equations)

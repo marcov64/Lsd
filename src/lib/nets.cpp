@@ -305,7 +305,7 @@ netLink *object::draw_link_net( void )
 		if ( cur->to->node != NULL )			// node still exists?
 			sum += cur->probTo;					// add-up probabilities
 
-	if ( ! is_finite( sum ) || sum <= 0 )		// check valid probabilities
+	if ( ! isfinite( sum ) || sum <= 0 )		// check valid probabilities
 	{
 		sim->error_hard( "invalid network operation",
 						 "check your configuration (parameter value) or\ncode (equation constant) to prevent this situation",
@@ -517,7 +517,7 @@ object *object::draw_node_net( const char *lab )
 													// add-up probabilities
 		sum += cur->node->prob;
 
-	if ( ! is_finite( sum ) || sum <= 0 )			// check valid probabilities
+	if ( ! isfinite( sum ) || sum <= 0 )			// check valid probabilities
 	{
 		sim->error_hard( "invalid network operation",
 						 "check your configuration (parameter value) or\ncode (equation constant) to prevent this situation",

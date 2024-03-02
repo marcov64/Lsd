@@ -1670,7 +1670,7 @@ void analysis( bool mc )
 						if ( h >= l && h <= m && ! strcmp( str1, str3 ) )
 						{
 							datum = vs[ k ].data;
-							if ( is_finite( datum[ h - l ] ) )		// ignore NaNs
+							if ( isfinite( datum[ h - l ] ) )		// ignore NaNs
 							{
 								r = 0;
 								switch ( p )
@@ -2215,7 +2215,7 @@ void analysis( bool mc )
 						if ( h >= l && h <= m && ! strcmp( str1, str3 ) )
 						{
 							datum = vs[ k ].data;
-							if ( is_finite( datum[ h - l ] ) )		// ignore NaNs
+							if ( isfinite( datum[ h - l ] ) )		// ignore NaNs
 							{
 								r = 0;
 								switch ( p )
@@ -3788,6 +3788,78 @@ void update_bounds( void )
 }
 
 
+/****************************************************
+LOWER_BOUND
+****************************************************/
+double lower_bound( double a, double b, double marg, double marg_eq, int dig )
+{
+	double rmin = sim.round_digits( a, dig );
+	double rmax = sim.round_digits( b, dig );
+
+	if ( rmin > rmax )
+	{
+		double temp = rmin;
+		rmin = rmax;
+		rmax = temp;
+	}
+
+	if ( rmin == rmax )
+	{
+		if ( rmin == 0.0 )
+			return sim.round_digits( - marg_eq, dig );
+		else
+			if ( rmin > 0 )
+				return sim.round_digits( rmin * ( 1 - marg_eq ), dig );
+			else
+				return sim.round_digits( rmin * ( 1 + marg_eq ), dig );
+	}
+
+	if ( rmin == 0.0 )
+		return sim.round_digits( - marg, dig );
+	else
+		if ( rmin > 0 )
+			return sim.round_digits( rmin * ( 1 - marg ), dig );
+		else
+			return sim.round_digits( rmin * ( 1 + marg ), dig );
+}
+
+
+/****************************************************
+UPPER_BOUND
+****************************************************/
+double upper_bound( double a, double b, double marg, double marg_eq, int dig )
+{
+	double rmin = sim.round_digits( a, dig );
+	double rmax = sim.round_digits( b, dig );
+
+	if ( rmin > rmax )
+	{
+		double temp = rmin;
+		rmin = rmax;
+		rmax = temp;
+	}
+
+	if ( rmin == rmax )
+	{
+		if ( rmax == 0.0 )
+			return sim.round_digits( marg_eq, dig );
+		else
+			if ( rmax > 0 )
+				return sim.round_digits( rmax * ( 1 + marg_eq ), dig );
+			else
+				return sim.round_digits( rmax * ( 1 - marg_eq ), dig );
+	}
+
+	if ( rmax == 0.0 )
+		return sim.round_digits( marg, dig );
+	else
+		if ( rmax > 0 )
+			return sim.round_digits( rmax * ( 1 + marg ), dig );
+		else
+			return sim.round_digits( rmax * ( 1 - marg ), dig );
+}
+
+
 /***************************************************
  PLOT_TSERIES
  ****************************************************/
@@ -3894,16 +3966,16 @@ void plot_tseries( void )
 		for ( done = false, i = 0; i < num_y2 - 1 && i < nv; ++i )
 			for ( j = min_c; j <= max_c; ++j )
 			{
-				if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) )		// ignore NaNs
+				if ( ! done && start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) )		// ignore NaNs
 				{
 					miny = maxy = data[ i ][ j - start[ i ] ];
 					done = true;
 				}
 
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )		// ignore NaNs
+				if ( start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )		// ignore NaNs
 					miny = data[ i ][ j - start[ i ] ];
 
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )		// ignore NaNs
+				if ( start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )		// ignore NaNs
 					maxy = data[ i ][ j - start[ i ] ];
 			}
 
@@ -3924,16 +3996,16 @@ void plot_tseries( void )
 	for ( miny2 = maxy2 = 0, done = false, i = num_y2 - 1; i < nv; ++i )
 		for ( j = min_c; j <= max_c; ++j )
 		{
-			if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) )		// ignore NaNs
+			if ( ! done && start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) )		// ignore NaNs
 			{
 				miny2 = maxy2 = data[ i ][ j - start[ i ] ];
 				done = true;
 			}
 
-			if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny2 )		// ignore NaNs
+			if ( start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny2 )		// ignore NaNs
 				miny2 = data[ i ][ j - start[ i ] ];
 
-			if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy2 )		// ignore NaNs
+			if ( start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy2 )		// ignore NaNs
 				maxy2 = data[ i ][ j - start[ i ] ];
 		}
 
@@ -4066,7 +4138,7 @@ void plot_cross( void )
 	for ( j = 0, first = true, i = 0; j < nv; ++j )
 	{
 		for ( k = 0; k < nt; ++k )
-			if ( erase[ j ] == 0 && is_finite( data[ j ][ list_times[ k ] - start[ j ] ] ) )		// ignore NaNs
+			if ( erase[ j ] == 0 && isfinite( data[ j ][ list_times[ k ] - start[ j ] ] ) )		// ignore NaNs
 			{
 				val[ i ][ k ] = data[ j ][ list_times[ k ] - start[ j ] ];
 
@@ -4401,7 +4473,7 @@ double *log_data( double *data, int start, int end, int ser, const char *err_msg
 	logdata = new double [ end - start + 1 ];
 
 	for ( stopErr = false, errCnt = 0, i = 0; i <= end - start; ++i )
-		if ( ! is_nan( data[ i ] ) && data[ i ] > 0.0 )
+		if ( ! isnan( data[ i ] ) && data[ i ] > 0.0 )
 			logdata[ i ] = log( data[ i ] );
 		else
 		{
@@ -4737,7 +4809,7 @@ void insert_data_file( bool gz, int *num_v, vector < string > *var_names, bool k
 	else
 		fz = gzopen( filename, "rt" );
 
-	linsiz = ( int ) max( linsiz, new_v * ( DBL_DIG + 4 ) ) + 1;
+	linsiz = ( long ) max( linsiz, ( long ) new_v * ( DBL_DIG + 4 ) ) + 1;
 	linbuf = new char[ linsiz ];
 
 	// read header line
@@ -4950,7 +5022,7 @@ void statistics( void )
 
 		for ( av = var = num = 0, j = min_c; j <= max_c; ++j )
 		{
-			if ( j >= start[ i ] && j <= end[ i ] && is_finite( data[ i ][ j - start[ i ] ] ) )	// ignore NaNs
+			if ( j >= start[ i ] && j <= end[ i ] && isfinite( data[ i ][ j - start[ i ] ] ) )	// ignore NaNs
 			{
 				if ( data[ i ][ j - start[ i ] ] < ymin )
 					ymin = data[ i ][ j - start[ i ] ];
@@ -4976,7 +5048,7 @@ void statistics( void )
 
 		if ( num > 0 )
 		{
-			med = median( v );
+			med = sim.median( v );
 
 			snprintf( str1, MAX_LINE_SIZE, "%s %s (%.*g)", str[ i ], tag[ i ], pdigits, num );
 			snprintf( longmsg, 2 * MAX_LINE_SIZE, "%-20s\t", str1 );
@@ -5096,7 +5168,7 @@ void statistics_cross( void )
 
 		for ( av = var = num = i = 0; i < nv; ++i )
 		{
-			if ( h >= start[ i ] && h <= end[ i ] && is_finite( data[ i ][ h - start[ i ] ] ) )		// ignore NaNs
+			if ( h >= start[ i ] && h <= end[ i ] && isfinite( data[ i ][ h - start[ i ] ] ) )		// ignore NaNs
 			{
 				if ( data[ i ][ h - start[ i ] ] < ymin )
 					ymin = data[ i ][ h - start[ i ] ];
@@ -5122,7 +5194,7 @@ void statistics_cross( void )
 
 		if ( num > 0 )
 		{
-			med = median( v );
+			med = sim.median( v );
 
 			snprintf( str1, MAX_LINE_SIZE, "Case %d (%.*g)\t", h, pdigits, num );
 			cmd( ".log.text.text.internal insert end \"%s\" table", str1 );
@@ -5301,16 +5373,16 @@ void plot_gnu( void )
 		for ( done = false, i = 1; i < nv; ++i )
 			for ( j = min_c; j <= max_c; ++j )
 			{
-				if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) )	// ignore NaNs
+				if ( ! done && start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) )	// ignore NaNs
 				{
 					miny = maxy = data[ i ][ j - start[ i ] ];
 					done = true;
 				}
 
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )	// ignore NaNs
+				if ( start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )	// ignore NaNs
 					miny = data[ i ][ j - start[ i ] ];
 
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )	// ignore NaNs
+				if ( start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )	// ignore NaNs
 					maxy = data[ i ][ j - start[ i ] ];
 			}
 
@@ -5323,16 +5395,16 @@ void plot_gnu( void )
 	// check x series max/mins to allow splines
 	for ( minx = maxx = 0, done = false, j = min_c; j <= max_c; ++j )
 	{
-		if ( ! done && start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) )	// ignore NaNs
+		if ( ! done && start[ 0 ] <= j && end[ 0 ] >= j && isfinite( data[ 0 ][ j - start[ 0 ] ] ) )	// ignore NaNs
 		{
 			minx = maxx = data[ 0 ][ j - start[ 0 ] ];
 			done = true;
 		}
 
-		if ( start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] < minx )	// ignore NaNs
+		if ( start[ 0 ] <= j && end[ 0 ] >= j && isfinite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] < minx )	// ignore NaNs
 			minx = data[ 0 ][ j - start[ 0 ] ];
 
-		if ( start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] > maxx )	// ignore NaNs
+		if ( start[ 0 ] <= j && end[ 0 ] >= j && isfinite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] > maxx )	// ignore NaNs
 			maxx = data[ 0 ][ j - start[ 0 ] ];
 	}
 
@@ -5757,16 +5829,16 @@ void plot_cs_xy( void )
 		for ( done = false, i = 1; i < nv; ++i )
 			for ( j = min_c; j <= max_c; ++j )
 			{
-				if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) )	// ignore NaNs
+				if ( ! done && start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) )	// ignore NaNs
 				{
 					miny = maxy = data[ i ][ j - start[ i ] ];
 					done = true;
 				}
 
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )	// ignore NaNs
+				if ( start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )	// ignore NaNs
 					miny = data[ i ][ j - start[ i ] ];
 
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )	// ignore NaNs
+				if ( start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )	// ignore NaNs
 					maxy = data[ i ][ j - start[ i ] ];
 			}
 
@@ -5779,16 +5851,16 @@ void plot_cs_xy( void )
 	// check x series max/mins to allow splines
 	for ( minx = maxx = 0, done = false, j = min_c; j <= max_c; ++j )
 	{
-		if ( ! done && start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) )	// ignore NaNs
+		if ( ! done && start[ 0 ] <= j && end[ 0 ] >= j && isfinite( data[ 0 ][ j - start[ 0 ] ] ) )	// ignore NaNs
 		{
 			minx = maxx = data[ 0 ][ j - start[ 0 ] ];
 			done = true;
 		}
 
-		if ( start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] < minx )	// ignore NaNs
+		if ( start[ 0 ] <= j && end[ 0 ] >= j && isfinite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] < minx )	// ignore NaNs
 			minx = data[ 0 ][ j - start[ 0 ] ];
 
-		if ( start[ 0 ] <= j && end[ 0 ] >= j && is_finite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] > maxx )	// ignore NaNs
+		if ( start[ 0 ] <= j && end[ 0 ] >= j && isfinite( data[ 0 ][ j - start[ 0 ] ] ) && data[ 0 ][ j - start[ 0 ] ] > maxx )	// ignore NaNs
 			maxx = data[ 0 ][ j - start[ 0 ] ];
 	}
 
@@ -6177,16 +6249,16 @@ void plot_phase_diagram( void )
 		for ( done = false, i = 0; i < nv; ++i )
 			for ( j = min_c; j <= max_c; ++j )
 			{
-				if ( ! done && start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) )		// ignore NaNs
+				if ( ! done && start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) )		// ignore NaNs
 				{
 					miny = maxy = data[ i ][ j - start[ i ] ];
 					done = true;
 				}
 
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )		// ignore NaNs
+				if ( start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] < miny )		// ignore NaNs
 					miny = data[ i ][ j - start[ i ] ];
 
-				if ( start[ i ] <= j && end[ i ] >= j && is_finite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )		// ignore NaNs
+				if ( start[ i ] <= j && end[ i ] >= j && isfinite( data[ i ][ j - start[ i ] ] ) && data[ i ][ j - start[ i ] ] > maxy )		// ignore NaNs
 					maxy = data[ i ][ j - start[ i ] ];
 			}
 
@@ -6547,7 +6619,7 @@ void show_plot_gnu( int n, int type, char **str, char **tag )
 			cmd( "set res [ lindex $rang %d ]", i );
 			rang[ i ] = get_double( "res" );
 
-			if ( is_inf( lim[ i ] ) || is_nan( lim[ i ] ) || is_inf( rang[ i ] ) || is_nan( rang[ i ] ) )
+			if ( isinf( lim[ i ] ) || isnan( lim[ i ] ) || isinf( rang[ i ] ) || isnan( rang[ i ] ) )
 				rang[ i ] = lim[ i ] = 0;
 		}
 	}
@@ -6630,7 +6702,7 @@ void plot_lattice( void )
 
 	// find column number suggestion
 	tot = time_cross == 1 ? nv : max_c - min_c + 1;
-	ncol = ( int ) max( sqrt( tot ), 1 );
+	ncol = ( int ) max( sqrt( tot ), 1. );
 	while ( tot % ncol != 0 && ncol > 0 )
 		ncol--;
 
@@ -6763,7 +6835,7 @@ void plot_lattice( void )
 		}
 
 		for ( tot = 0, i = first; i <= last; ++i )	// count number of points excluding NaNs
-			if ( ! is_nan( data[ 0 ][ i - start[ 0 ] ] ) && is_finite( data[ 0 ][ i - start[ 0 ] ] ) )
+			if ( ! isnan( data[ 0 ][ i - start[ 0 ] ] ) && isfinite( data[ 0 ][ i - start[ 0 ] ] ) )
 				tot++;
 	}
 	else
@@ -6821,8 +6893,8 @@ void plot_lattice( void )
 		{
 			val = time_cross == 1 ? data[ ncol * j + i ][ time - start[ ncol * j + i ] ] :
 									data[ 0 ][ first + ncol * j + i - start[ 0 ] ];
-			color = max( 0, min( 1099, round( val * cscale ) ) );
-			if ( is_nan( color ) || ! is_finite( color ) )
+			color = max( 0., min( 1099., round( val * cscale ) ) );
+			if ( isnan( color ) || ! isfinite( color ) )
 			  color = 0;
 
 			cmd( "plot_bars $p %d %d %d %d p%d_%d $c%d %lf $colorsTheme(dfg)",
@@ -6928,7 +7000,7 @@ void histograms( void )
 	}
 
 	for ( j = 0, i = first; i <= last; ++i )	// count number of points excluding NaNs
-		if ( ! is_nan( data[ i - start ] ) && is_finite( data[ i - start ] ) )
+		if ( ! isnan( data[ i - start ] ) && isfinite( data[ i - start ] ) )
 			++j;
 
 	cmd( "set bidi %d", j < 25 ? j : 25 );
@@ -6975,7 +7047,7 @@ void histograms( void )
 	histo_mean = histo_var = histo_cases = 0;
 	for ( i = first; i <= last; ++i )
 	{
-		if ( is_nan( data[ i - start ] ) || ! is_finite( data[ i - start ] ) )	// ignore NaNs
+		if ( isnan( data[ i - start ] ) || ! isfinite( data[ i - start ] ) )	// ignore NaNs
 			continue;
 
 		if ( i == first )
@@ -7024,7 +7096,7 @@ void histograms( void )
 
 	for ( i = first; i <= last; ++i )
 	{
-		if ( is_nan( data[ i - start ] ) || ! is_finite( data[ i - start ] ) )
+		if ( isnan( data[ i - start ] ) || ! isfinite( data[ i - start ] ) )
 			continue;
 
 		a = floor( num_bins * ( data[ i - start ] - mn ) / ( mx - mn ) );
@@ -7230,7 +7302,7 @@ void histograms_cs( void )
 	histo_mean = histo_var = histo_cases = 0;
 	active_v = 0;
 	for ( i = 0; i < nv; ++i )
-		if ( start[ i ] <= histo_cs && end[ i ] >= histo_cs && is_finite( data[ i ][ histo_cs - start[ i ] ] ) )		// ignore NaNs
+		if ( start[ i ] <= histo_cs && end[ i ] >= histo_cs && isfinite( data[ i ][ histo_cs - start[ i ] ] ) )		// ignore NaNs
 		{
 			if ( active_v == 0 )
 				mx = mn = data[ i ][ histo_cs - start[ i ] ];
@@ -7279,7 +7351,7 @@ void histograms_cs( void )
 
 	for ( i = 0; i < nv; ++i )
 	{
-		if ( start[ i ] > histo_cs || end[ i ] < histo_cs || ! is_finite( data[ i ][ histo_cs - start[ i ] ] ) )
+		if ( start[ i ] > histo_cs || end[ i ] < histo_cs || ! isfinite( data[ i ][ histo_cs - start[ i ] ] ) )
 			continue;
 
 		a = floor( num_bins * ( data[ i ][ histo_cs - start[ i ] ] - mn ) / ( mx - mn ) );
@@ -7591,7 +7663,7 @@ bool create_series( bool mc, vector < string > var_names )
 	new_series = get_int( "newSeries" );
 	medCI = get_bool( "medCI" );		// asymptotic median confidence interval?
 	confi = get_double( "confi" );
-	z_crit = z_star( confi );
+	z_crit = sim.z_star( confi );
 
 	data = new double *[ sel_series ];
 	start = new int [ sel_series ];
@@ -7693,7 +7765,7 @@ bool create_series( bool mc, vector < string > var_names )
 
 				for ( first = true, j = 0; j < sel_series; ++j )
 				{
-					if ( i >= start[ j ] && i <= end[ j ] && is_finite( data[ j ][ i - start[ j ] ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i - start[ j ] ] > thflt ) || ( flt == 2 && data[ j ][ i - start[ j ] ] < thflt ) ) )		// ignore NaNs
+					if ( i >= start[ j ] && i <= end[ j ] && isfinite( data[ j ][ i - start[ j ] ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i - start[ j ] ] > thflt ) || ( flt == 2 && data[ j ][ i - start[ j ] ] < thflt ) ) )		// ignore NaNs
 					{
 						if ( first )
 						{
@@ -7724,7 +7796,7 @@ bool create_series( bool mc, vector < string > var_names )
 				else
 				{
 					nmean = sum / nn;
-					nmed = median( v );
+					nmed = sim.median( v );
 
 					// handle sample (MC) x population variance calculation
 					if ( mc && nn >= 2 )
@@ -7781,9 +7853,9 @@ bool create_series( bool mc, vector < string > var_names )
 				if ( mc && nn >= 2 )
 				{
 					if ( type_series == 11 || type_series == 14 )
-						vs[ num_var ].data[ i - min_c ] = cenCI + t_star( nn - 1, confi ) * sqrt( varCI ) / sqrt( nn );
+						vs[ num_var ].data[ i - min_c ] = cenCI + sim.t_star( nn - 1, confi ) * sqrt( varCI ) / sqrt( nn );
 					if ( type_series == 12 )
-						vs[ num_var ].data[ i - min_c ] = cenCI - t_star( nn - 1, confi ) * sqrt( varCI ) / sqrt( nn );
+						vs[ num_var ].data[ i - min_c ] = cenCI - sim.t_star( nn - 1, confi ) * sqrt( varCI ) / sqrt( nn );
 				}
 				else
 				{
@@ -7809,7 +7881,7 @@ bool create_series( bool mc, vector < string > var_names )
 
 				for ( first = true, i = min_c; i <= max_c; ++i )
 				{
-					if ( i >= start[ j ] && i <= end[ j ] && is_finite( data[ j ][ i - start[ j ] ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i - start[ j ] ] > thflt ) || ( flt == 2 && data[ j ][ i - start[ j ] ] < thflt ) ) )
+					if ( i >= start[ j ] && i <= end[ j ] && isfinite( data[ j ][ i - start[ j ] ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i - start[ j ] ] > thflt ) || ( flt == 2 && data[ j ][ i - start[ j ] ] < thflt ) ) )
 					{
 						if ( first )
 						{
@@ -7840,7 +7912,7 @@ bool create_series( bool mc, vector < string > var_names )
 				else
 				{
 					nmean = sum / nn;
-					nmed = median( v );
+					nmed = sim.median( v );
 					nvar /= nn;
 					nvar -= nmean * nmean;
 				}
@@ -8107,7 +8179,7 @@ bool create_maverag( void )
 				for ( k = start[ i ] + flt - 1; k <= end[ i ]; ++k )
 				{
 					for ( xapp = 0, h = 0, j = k - flt + 1; j <= k; ++j )
-						if ( is_finite( data[ i ][ j - start[ i ] ] ) )		// not a NaN?
+						if ( isfinite( data[ i ][ j - start[ i ] ] ) )		// not a NaN?
 						{
 							xapp += data[ i ][ j - start[ i ] ];
 							++h;
@@ -8125,7 +8197,7 @@ bool create_maverag( void )
 			{
 				// average of first period in data
 				for ( xapp = 0, h = 0, j = start[ i ]; j < start[ i ] + flt; ++j )
-					if ( is_finite( data[ i ][ j - start[ i ] ] ) )		// not a NaN?
+					if ( isfinite( data[ i ][ j - start[ i ] ] ) )		// not a NaN?
 					{
 						xapp += data[ i ][ j - start[ i ] ];
 						h++;
@@ -8141,7 +8213,7 @@ bool create_maverag( void )
 
 				for ( ; j < end[ i ] - ( flt - 1 ) / 2; ++j )
 				{
-					if ( is_finite( data[ i ][ j - ( flt - 1 ) / 2 - start[ i ] ] ) && is_finite( data[ i ][ j + ( flt - 1 ) / 2 - start[ i ] ] ) )
+					if ( isfinite( data[ i ][ j - ( flt - 1 ) / 2 - start[ i ] ] ) && isfinite( data[ i ][ j + ( flt - 1 ) / 2 - start[ i ] ] ) )
 						xapp = xapp - data[ i ][ j - ( flt - 1 ) / 2 - start[ i ] ] / flt + data[ i ][ j + ( flt - 1 ) / 2 - start[ i ] ] / flt;
 					else
 						xapp = NAN;
@@ -8632,7 +8704,7 @@ void save_datazip( void )
 			{
 				for ( i = 0; i < nv; ++i )
 				{
-					if ( j >= start[ i ] && j <= end[ i ] && ! is_nan( data[ i ][ j - start[ i ] ] ) )		// write NaN as n/a
+					if ( j >= start[ i ] && j <= end[ i ] && ! isnan( data[ i ][ j - start[ i ] ] ) )		// write NaN as n/a
 						gzprintf( fsavez, "%.*G", SIG_DIG, data[ i ][ j - start[ i ] ] );
 					else
 						gzprintf( fsavez, "%s", misval );
@@ -8650,7 +8722,7 @@ void save_datazip( void )
 			{
 				for ( i = 0; i < nv; ++i )
 				{
-					if ( j >= start[ i ] && j <= end[ i ] && ! is_nan( data[ i ][ j - start[ i ] ] ) )		// write NaN as n/a
+					if ( j >= start[ i ] && j <= end[ i ] && ! isnan( data[ i ][ j - start[ i ] ] ) )		// write NaN as n/a
 						fprintf( fsave, "%.*G", SIG_DIG, data[ i ][ j - start[ i ] ] );
 					else
 						fprintf( fsave, "%s", misval );
@@ -8669,7 +8741,7 @@ void save_datazip( void )
 		{
 			for ( i = 0; i < nv; ++i )
 			{
-				if ( j >= start[ i ] && j <= end[ i ] && ! is_nan( data[ i ][ j - start[ i ] ] ) )		// write NaN as n/a
+				if ( j >= start[ i ] && j <= end[ i ] && ! isnan( data[ i ][ j - start[ i ] ] ) )		// write NaN as n/a
 				{
 					snprintf( da_tmp, MAX_BUFF_SIZE, "%.*G", ( int ) min( numcol - 6, SIG_DIG ), data[ i ][ j - start[ i ] ] );
 					strcatn( da_tmp, str0, MAX_BUFF_SIZE );
@@ -8799,14 +8871,14 @@ void plog_series( void )
 
 	for ( i = min_c; i <= max_c; ++i )
 	{
-		if ( start[ 0 ] <= i && end[ 0 ] >= i && ! is_nan( data[ 0 ][ i - start[ 0 ] ] ) )
+		if ( start[ 0 ] <= i && end[ 0 ] >= i && ! isnan( data[ 0 ][ i - start[ 0 ] ] ) )
 			plog_tag( "%d\t%.*g", "series", i, pdigits, data[ 0 ][ i - start[ 0 ] ] );
 		else
 			plog_tag( "%d\t%s", "series", i, nonavail );		// write NaN as n/a
 
 		for ( j = 1; j < nv; ++j )
 		{
-			if ( start[ j ] <= i && end[ j ] >= i && ! is_nan( data[ j ][ i - start[ j ] ] ) )
+			if ( start[ j ] <= i && end[ j ] >= i && ! isnan( data[ j ][ i - start[ j ] ] ) )
 				plog_tag( "\t%.*g", "series", pdigits, data[ j ][ i - start[ j ] ] );
 			else
 				plog_tag( "\t%s", "series", nonavail );		// write NaN as n/a
@@ -8969,7 +9041,7 @@ void plot( int type, int nv, double **data, const int *start, const int *end, co
 				cmaxy = maxy2;
 			}
 
-			if ( is_finite( yVal ) )
+			if ( isfinite( yVal ) )
 			{
 				if ( tOk )
 				{
@@ -9183,7 +9255,7 @@ void plot( int type, const int *start, const int *end, char **str, char **tag, b
 		{
 			x1 = hbordsize + ( int ) floor( hsize * ( histo_bins[ i ].lowb - histo_bins[ 0 ].lowb ) / ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) );
 			x2 = hbordsize + ( int ) floor( hsize * ( histo_bins[ i ].highb - histo_bins[ 0 ].lowb ) / ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) );
-			y1 = ( int ) min( max( tbordsize + vsize - floor( vsize * ( histo_bins[ i ].num / histo_cases - miny ) / ( maxy - miny ) ), tbordsize ), tbordsize + vsize );
+			y1 = min( max( tbordsize + vsize - ( int ) floor( vsize * ( histo_bins[ i ].num / histo_cases - miny ) / ( maxy - miny ) ), tbordsize ), tbordsize + vsize );
 			y2 = tbordsize + vsize;
 
 			cmd( "plot_bars $p %d %d %d %d p%d $c%d %lf", x1, y1, x2, y2, i, color + 1, point_size );
@@ -9219,26 +9291,20 @@ void plot( int type, const int *start, const int *end, char **str, char **tag, b
 		for ( i = 0; i < num_bins; ++i )
 		{
 			a = histo_bins[ i ].lowb;
-			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) /
-				( sqrt( 2 * M_PI * histo_var ) );
+			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) / ( sqrt( 2 * M_PI * histo_var ) );
 			a = histo_bins[ i ].highb;
-			s = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) /
-				 ( sqrt( 2 * M_PI * histo_var ) );
+			s = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) / ( sqrt( 2 * M_PI * histo_var ) );
 			tot_norm += ( b + s ) / 2;
 		}
 
 		for ( i = 0; i < num_bins; ++i )
 		{
 			a = histo_bins[ i ].center;
-			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) /
-				( sqrt( 2 * M_PI * histo_var ) );
+			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) / ( sqrt( 2 * M_PI * histo_var ) );
 			b /= tot_norm;
-			y2 = ( int ) min( max( tbordsize + vsize - round( vsize * ( b - miny ) / ( maxy - miny ) ),
-								   tbordsize ),
-							  tbordsize + vsize );
+			y2 = min( max( tbordsize + vsize - ( int ) round( vsize * ( b - miny ) / ( maxy - miny ) ), tbordsize ), tbordsize + vsize );
 
-			x2 = hbordsize + ( int ) round( hsize * ( histo_bins[ i ].center - histo_bins[ 0 ].lowb ) /
-											( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) );
+			x2 = hbordsize + ( int ) round( hsize * ( histo_bins[ i ].center - histo_bins[ 0 ].lowb ) / ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) );
 
 			if ( i > 0 && ( y1 > tbordsize || y2 > tbordsize ) &&
 				 ( y1 < tbordsize + vsize || y2 < tbordsize + vsize ) )

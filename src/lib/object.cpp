@@ -2352,7 +2352,7 @@ double object::mav( object *caller, const char *lab, double per, const double we
 	double sumv, sumw;
 	variable *cv;
 
-	if ( ( ! sim->use_nan && is_nan( per ) ) || is_inf( per ) || abs( per ) < 1 )
+	if ( ( ! sim->use_nan && isnan( per ) ) || isinf( per ) || abs( per ) < 1 )
 	{
 		sim->error_hard( "invalid moving average period",
 						 "check your equation code to prevent this situation",
@@ -3093,7 +3093,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag )
 		a += cur->cal( lv, lag );
 	}
 
-	if ( is_nan( a ) || is_inf( a ) )
+	if ( isnan( a ) || isinf( a ) )
 	{
 		sim->error_hard( "invalid random draw option",
 						 "check your equation code to prevent this situation",
@@ -3233,7 +3233,7 @@ double object::write( const char *lab, double value, int time, int lag )
 	int i, eff_lag, eff_time;
 	variable *cv;
 
-	if ( ( ! sim->use_nan && is_nan( value ) ) || is_inf( value ) )
+	if ( ( ! sim->use_nan && isnan( value ) ) || isinf( value ) )
 	{
 		sim->error_hard( "invalid write operation",
 						 "check your equation code to prevent this situation",
@@ -3413,7 +3413,7 @@ double object::increment( const char *lab, double value )
 	variable *cv;
 	double new_value;
 
-	if ( ( ! sim->use_nan && is_nan( value ) ) || is_inf( value ) )
+	if ( ( ! sim->use_nan && isnan( value ) ) || isinf( value ) )
 	{
 		sim->error_hard( "invalid increment operation",
 						 "check your equation code to prevent this situation",
@@ -3427,10 +3427,10 @@ double object::increment( const char *lab, double value )
 	if ( cv == NULL )
 		return NAN;
 
-	if ( ! sim->use_nan && is_nan( cv->val[ 0 ] ) )	// try to recover from RECALC
+	if ( ! sim->use_nan && isnan( cv->val[ 0 ] ) )	// try to recover from RECALC
 		cv->cal( this, 0 );
 
-	if ( ( ! sim->use_nan && is_nan( cv->val[ 0 ] ) ) || is_inf( cv->val[ 0 ] ) )
+	if ( ( ! sim->use_nan && isnan( cv->val[ 0 ] ) ) || isinf( cv->val[ 0 ] ) )
 	{
 		sim->error_hard( "invalid increment operation",
 						 "check your equation code to prevent this situation",
@@ -3458,7 +3458,7 @@ double object::multiply( const char *lab, double value )
 	variable *cv;
 	double new_value;
 
-	if ( ( ! sim->use_nan && is_nan( value ) ) || is_inf( value ) )
+	if ( ( ! sim->use_nan && isnan( value ) ) || isinf( value ) )
 	{
 		sim->error_hard( "invalid multiply operation",
 						 "check your equation code to prevent this situation",
@@ -3472,10 +3472,10 @@ double object::multiply( const char *lab, double value )
 	if ( cv == NULL )
 		return NAN;
 
-	if ( ! sim->use_nan && is_nan( cv->val[ 0 ] ) )	// try to recover from RECALC
+	if ( ! sim->use_nan && isnan( cv->val[ 0 ] ) )	// try to recover from RECALC
 		cv->cal( this, 0 );
 
-	if ( ( ! sim->use_nan && is_nan( cv->val[ 0 ] ) ) || is_inf( cv->val[ 0 ] ) )
+	if ( ( ! sim->use_nan && isnan( cv->val[ 0 ] ) ) || isinf( cv->val[ 0 ] ) )
 	{
 		sim->error_hard( "invalid multiply operation",
 						 "check your equation code to prevent this situation",
