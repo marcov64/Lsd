@@ -495,7 +495,7 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 		saved = false;
 
 	if ( saved )
-		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", sim.conf_path, sim.conf_file );
+		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", model_path, sim.conf_file );
 
 	delete [ ] save_file;
 
