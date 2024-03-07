@@ -1650,7 +1650,7 @@ void runtime_buttons( clock_t &last_update )
 
 	scroll_plot( );		// perform scrolling if enabled
 
-	if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER )
+	if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER && exists_window( ".p" ) )
 	{
 		cmd( ".p.b2.b configure -value %d", sim.t );
 		cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", min( sim.t + 1, sim.last_t ), sim.last_t, sim.t, sim.last_t );

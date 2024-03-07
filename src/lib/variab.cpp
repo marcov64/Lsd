@@ -237,6 +237,7 @@ double variable::cal( object *caller, int lag )
 	double app;
 
 #ifndef _NW_
+	bool tit_updated;
 	int time;
 	clock_t pstart = 0, pend = 0;
 #endif
@@ -452,6 +453,7 @@ double variable::cal( object *caller, int lag )
 			}
 		}
 
+		tit_updated = false;
 		if ( sim->stack_info >= sim->stack_level && ( ! sim->prof_obs_only || observe ) )
 		{
 			sim->end_profile[ sim->stack_level - 1 ] = sim->prof_aggr_time ? pend : clock( );
@@ -461,6 +463,7 @@ double variable::cal( object *caller, int lag )
 			if ( time >= sim->prof_min_msecs )
 			{
 				set_lab_tit( );
+				tit_updated = true;
 				plog_tag( "\n%-12.12s(%-.10s)\t=", "prof1", label, lab_tit );
 				plog_tag( "%.4g\t", "highlight", val[ 0 ] );
 				plog( "t=" );
@@ -475,7 +478,12 @@ double variable::cal( object *caller, int lag )
 
 		// update debug log file
 		if ( sim->log_file_ptr != NULL && sim->t >= sim->log_start && sim->t <= sim->log_stop )
-			fprintf( sim->log_file_ptr, "%s\t= %g\t(t=%d sim=%d)\n", label, val[ 0 ], sim->t, sim->sim );
+		{
+			if ( ! tit_updated )
+				set_lab_tit( );
+
+			fprintf( sim->log_file_ptr, "%s (%s)\t= %.4g\t(t=%d sim=%d caller=%s)\n", label, lab_tit, val[ 0 ], sim->t, sim->sim, caller == NULL ? "SYSTEM" : caller->label );
+		}
 
 		// open the debugger if required
 		if ( sim->deb_set && sim->t == sim->deb_t && liblnk.debugger != NULL && ( sim->watch_trigger || ( deb_cond == 0 && ( deb_mode == 'd' || deb_mode == 'W' || deb_mode == 'R' ) ) ) )
