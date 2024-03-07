@@ -2124,6 +2124,13 @@ object *operate( object *r )
 
 		// Load a model
 		case 17:
+			if ( strlen( sim.conf_path ) > 0 )
+				cmd( "set path \"%s\"", sim.conf_path );
+			else
+				cmd( "set path \"%s\"", model_path );
+
+			cmd( "cd \"$path\"" );
+			
 		// Reload model
 		case 38:
 
