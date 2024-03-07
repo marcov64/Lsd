@@ -130,6 +130,7 @@ Global definitions shared by all LSD GUI modules.
 // global constants
 #define DEF_CONF_FILE "Sim1"			// default new configuration name
 #define FILE_BUF_SIZE 1000000			// buffer size for file reading
+#define LOG_FILE "log.txt"				// name of log file
 #define MARG 0.01						// y-axis % plot clearance margin
 #define MARG_CONST 0.1					// y-axis % plot clearance margin for constant series
 #define MAX_CELS 9000					// max number of cells (rows x columns) in init. editor

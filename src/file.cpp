@@ -1052,13 +1052,15 @@ void object::save_description( FILE *f )
 
 /*******************************************
 DEB_LOG
-Creates/saves the file "log.txt" and
+Creates/saves the log file and
 enable/disable logging the variables
 computation order and enable/disable the
 debugger
 ********************************************/
 void deb_log( bool on, int time )
 {
+	char fname[ MAX_PATH_LENGTH ];
+	
 	// check if should turn off
 	if ( ! on || sim.parallel_mode || sim.fast_mode != 0 )
 	{
@@ -1100,7 +1102,8 @@ void deb_log( bool on, int time )
 		// ignore if log already open
 		if ( sim.log_file_ptr == NULL )
 		{
-			sim.log_file_ptr = fopen( "log.txt", "a" );
+			snprintf( fname, MAX_PATH_LENGTH, "%s/%s", model_path, LOG_FILE );
+			sim.log_file_ptr = fopen( fname, "a" );
 			sim.log_start = time;
 			sim.log_stop = sim.last_t;
 		}
