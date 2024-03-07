@@ -2230,7 +2230,7 @@ double object::sum( const char *lab1, int lag, bool cond, const char *lab2, cons
 	{
 		cnext = go_brother( cur );				// allow object suicide
 
-		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
 			tot += cur->cal( this, lab1, lag );
 			++n;
@@ -2276,7 +2276,7 @@ double object::overall_max( const char *lab1, int lag, bool cond, const char *la
 	{
 		cnext = go_brother( cur );				// allow object suicide
 
-		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
 			if ( tot < ( temp = cur->cal( this, lab1, lag ) ) )
 				tot = temp;
@@ -2326,7 +2326,7 @@ double object::overall_min( const char *lab1, int lag, bool cond, const char *la
 	{
 		cnext = go_brother( cur );				// allow object suicide
 
-		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
 			if ( tot > ( temp = cur->cal( this, lab1, lag ) ) )
 				tot = temp;
@@ -2431,7 +2431,7 @@ double object::av( const char *lab1, int lag, bool cond, const char *lab2, const
 	{
 		cnext = go_brother( cur );				// allow object suicide
 
-		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
 			tot += cur->cal( this, lab1, lag );
 			++n;
@@ -2483,7 +2483,7 @@ double object::whg_av( const char *lab1, const char *lab2, int lag, bool cond, c
 	{
 		cnext = go_brother( cur );				// allow object suicide
 
-		if ( ! cond || check_cond( cur->cal( this, lab3, lag ), lopc, value ) )
+		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
 			tot += cur->cal( this, lab1, lag ) * cur->cal( this, lab2, lag );
 			++n;
@@ -2552,7 +2552,7 @@ double object::perc( const char *lab1, double p, int lag, bool cond, const char 
 	{
 		cnext = go_brother( cur );				// allow object suicide
 
-		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
 			vals.push_back( cur->cal( this, lab1, lag ) );
 			++n;
@@ -2610,7 +2610,7 @@ double object::sd( const char *lab1, int lag, bool cond, const char *lab2, const
 	{
 		cnext = go_brother( cur );				// allow object suicide
 
-		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
 			tot += x = cur->cal( this, lab1, lag );
 			tot2 += x * x;
@@ -2654,7 +2654,7 @@ double object::count( const char *lab1, int lag, bool cond, const char *lab2, co
 	{
 		cnext = go_brother( cur );				// allow object suicide
 
-		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 			++n;
 	}
 
@@ -2695,7 +2695,7 @@ double object::count_all( const char *lab1, int lag, bool cond, const char *lab2
 	{
 		cnext = cur->hyper_next( lab1 );				// allow object suicide
 
-		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 			++n;
 	}
 
@@ -2757,7 +2757,7 @@ double object::stat( const char *lab1, double *r, int lag, bool cond, const char
 	{
 		cnext = go_brother( cur );				// allow object suicide
 
-		if ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) )
+		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
 			val = cur->cal( lab1, lag );
 			r[ 1 ] += val;
