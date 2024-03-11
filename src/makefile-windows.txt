@@ -4,6 +4,7 @@ LIB_DIR=$(SRC_DIR)lib/
 PUGI_DIR=$(SRC_DIR)pugixml/
 OBJ_DIR=$(TMP)/$(TARGET)/
 INCLUDE=-I$(LSDROOT)/$(SRC) -I$(PATH_TCLTK_HEADER) -I$(PATH_HEADER)
+CUR_DIR:=$(notdir $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST))))))/
 
 # check if LSD source must be recompiled
 ifeq ($(findstring $(strip $(TARGET)),LSD lSD LsD LSd Lsd lSd lsD lsd),)
@@ -44,12 +45,12 @@ all: $(TARGET)$(EXE_EXT)
 endif
 
 # dynamic library
-lib$(TARGET)$(DLL_EXT): $(OBJ_DIR)$(FUN).o $(LIB_BASE)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(OBJ_DIR)$(FUN).o -Wl,--whole-archive $(LIB_BASE) -Wl,--no-whole-archive -L$(PATH_LIB) $(LIB) -shared -o lib$(TARGET)$(DLL_EXT)
+lib$(TARGET)$(DLL_EXT): $(OBJ_DIR)$(CUR_DIR)$(FUN).o $(LIB_BASE)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(OBJ_DIR)$(CUR_DIR)$(FUN).o -Wl,--whole-archive $(LIB_BASE) -Wl,--no-whole-archive -L$(PATH_LIB) $(LIB) -shared -o lib$(TARGET)$(DLL_EXT)
 
-$(OBJ_DIR)$(FUN).o: $(FUN).cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA) model_options.txt
+$(OBJ_DIR)$(CUR_DIR)$(FUN).o: $(FUN).cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA) model_options.txt
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(INCLUDE) -c $(FUN).cpp -o $(OBJ_DIR)$(FUN).o
+	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(INCLUDE) -c $(FUN).cpp -o $(OBJ_DIR)$(CUR_DIR)$(FUN).o
 
 ifneq ($(PRECOMP),)
 # base static library for dynamic library
