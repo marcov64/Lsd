@@ -68,7 +68,7 @@ char err_file[ ] = "LMM.err";	// error log file name
 char *exec_file = NULL;			// name of executable file
 char *exec_path = NULL;			// path of executable file
 char *rootLsd = NULL;			// path of LSD root directory
-dlliblinkage liblnk;			// call-back references for DLL (not used)
+dlliblinkage lmm_liblnk;		// call-back references for DLL
 int platform = 0;				// OS platform (1=Linux, 2=Mac, 3=Windows)
 int tosave = false;				// modified file flag
 Tcl_Interp *interp = NULL;		// Tcl standard interpreter pointer
@@ -312,8 +312,8 @@ int modman( int argn, const char **argv )
 	cmd( "setstyles" );					// set ttk custom style
 
 	// set dynamic link library (DLL) call-back references
-	liblnk.cmd_backend = & cmd_backend;
-	liblnk.log_tcl_error = & log_tcl_error;
+	lmm_liblnk.cmd_backend = & cmd_backend;
+	lmm_liblnk.log_tcl_error = & log_tcl_error;
 
 	// main menu
 	cmd( "ttk::menu .m -tearoff 0" );

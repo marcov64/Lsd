@@ -116,7 +116,7 @@ void plog_backend( const char *cm, const char *tag, va_list arg )
 	else
 		plog( "\nError: invalid tag, message ignored:\n%s\n", message );
 
-	message_logged = true;
+	sim.message_logged = true;
 
 	if ( bufdyn )
 	{

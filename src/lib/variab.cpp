@@ -486,11 +486,11 @@ double variable::cal( object *caller, int lag )
 		}
 
 		// open the debugger if required
-		if ( sim->deb_set && sim->t == sim->deb_t && liblnk.debugger != NULL && ( sim->watch_trigger || ( deb_cond == 0 && ( deb_mode == 'd' || deb_mode == 'W' || deb_mode == 'R' ) ) ) )
-			( up->*liblnk.debugger )( caller, label, &val[ 0 ], false, "" );
+		if ( sim->deb_set && sim->t == sim->deb_t && sim->liblnk != NULL && sim->liblnk->debugger != NULL && ( sim->watch_trigger || ( deb_cond == 0 && ( deb_mode == 'd' || deb_mode == 'W' || deb_mode == 'R' ) ) ) )
+			( up->*sim->liblnk->debugger )( caller, label, &val[ 0 ], false, "" );
 		else
 		{
-			if ( liblnk.debugger == NULL && deb_cond >= 1 && deb_cond <= 3 )
+			if ( ( sim->liblnk == NULL || sim->liblnk->debugger == NULL ) && deb_cond >= 1 && deb_cond <= 3 )
 				deb_cond = -1;
 
 			switch ( deb_cond )
@@ -499,15 +499,15 @@ double variable::cal( object *caller, int lag )
 					break;
 				case 1:
 					if ( val[ 0 ] == deb_cnd_val )
-						( up->*liblnk.debugger )( caller, label, &val[ 0 ], false, "" );
+						( up->*sim->liblnk->debugger )( caller, label, &val[ 0 ], false, "" );
 					break;
 				case 2:
 					if ( val[ 0 ] > deb_cnd_val )
-						( up->*liblnk.debugger )( caller, label, &val[ 0 ], false, "" );
+						( up->*sim->liblnk->debugger )( caller, label, &val[ 0 ], false, "" );
 					break;
 				case 3:
 					if ( val[ 0 ] < deb_cnd_val )
-						( up->*liblnk.debugger )( caller, label, &val[ 0 ], false, "" );
+						( up->*sim->liblnk->debugger )( caller, label, &val[ 0 ], false, "" );
 					break;
 				default:
 					sim->error_hard( "internal problem in LSD",

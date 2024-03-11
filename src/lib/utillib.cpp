@@ -44,8 +44,8 @@ void plog( const char *cm, ... )
 
 	va_start( argptr, cm );
 
-	if ( liblnk.plog_backend != NULL )
-		liblnk.plog_backend( cm, "", argptr );
+	if ( sims.size( ) > 0 && sims[ 0 ]->liblnk != NULL && sims[ 0 ]->liblnk->plog_backend != NULL )
+		sims[ 0 ]->liblnk->plog_backend( cm, "", argptr );
 	else
 		plog_terminal( cm, argptr );
 
@@ -66,8 +66,8 @@ void plog_tag( const char *cm, const char *tag, ... )
 
 	va_start( argptr, tag );
 
-	if ( liblnk.plog_backend != NULL )
-		liblnk.plog_backend( cm, tag, argptr );
+	if ( sims.size( ) > 0 && sims[ 0 ]->liblnk != NULL && sims[ 0 ]->liblnk->plog_backend != NULL )
+		sims[ 0 ]->liblnk->plog_backend( cm, tag, argptr );
 	else
 		plog_terminal( cm, argptr );
 
@@ -136,7 +136,8 @@ void plog_terminal( const char *cm, va_list arg )
 	fprintf( stdout_ptr, "%s", message );
 	fflush( stdout_ptr );
 
-	message_logged = true;
+	if ( sims.size( ) > 0 )
+		sims[ 0 ]->message_logged = true;
 
 	if ( bufdyn )
 	{
@@ -187,8 +188,8 @@ void simulation::error_hard( const char *boxTitle, const char *boxText, bool def
 
 	quit = 2;				// do not continue simulation
 
-	if ( liblnk.error_hard_helper != NULL )
-		liblnk.error_hard_helper( boxTitle, boxText, logText, defQuit );
+	if ( liblnk != NULL && liblnk->error_hard_helper != NULL )
+		liblnk->error_hard_helper( boxTitle, boxText, logText, defQuit );
 	else
 		fprintf( stderr, "\nError: %s\n(%s)\n", boxTitle, logText );
 

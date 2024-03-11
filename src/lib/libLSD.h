@@ -135,6 +135,7 @@ using namespace std;
 // classes forward declarations
 struct bridge;
 struct description;
+struct dlliblinkage;
 struct lattice;
 struct lsdstack;
 struct netLink;
@@ -187,6 +188,7 @@ struct simulation						// simulation container class
 	bool parallel_mode;					// parallel mode (multithreading) status
 	bool use_nan;						// flag to allow using Not a Number value
 	char *conf_name = NULL;				// name of current simulation configuration
+	dlliblinkage *liblnk = NULL;		// call-back references for DLL
 	eq_mapT eq_map;						// fast equation look-up map
 	int deb_set = false;				// debug enable control (bool)
 	int fast_mode;						// level of LOG messages & runtime plot
@@ -292,6 +294,8 @@ struct simulation						// simulation container class
 	bool conf_ok = false;				// a valid configuration file is loaded
 	bool error_hard_thread;				// error_hard called in worker thread
 	bool grand_total = false;			// produce grand total in batch processing
+	bool idle_loop = true;				// main idle loop (no running operation)
+	bool message_logged = false;		// new message posted in log window
 	bool on_bar;						// indicate bar is being draw in log
 	bool parallel_monitor;				// parallel monitor thread status
 	bool running = false;				// single simulation is running
@@ -858,7 +862,6 @@ struct dlliblinkage						// callback references for dynamic link library
 // library global variables (used in equations)
 extern const bool no_pointer_check;		// user pointer checking static disable
 extern const bool no_pointer_init;		// user pointer initialization disable
-extern dlliblinkage liblnk;				// call-back references for DLL
 extern int platform;					// OS platform (1=Linux, 2=Mac, 3=Windows)
 
 // library C++ functions (used in equations)
@@ -868,8 +871,6 @@ void plog( const char *msg, ... );		// write on log window
 #ifndef _FUN_
 
 // library global variables (not used in equations)
-extern bool idle_loop;					// main idle loop (no running operation)
-extern bool message_logged;				// new message posted in log window
 extern char *exec_file;					// name of executable file
 extern char *exec_path;					// path of executable file
 extern char *lib_file;					// name of shared library, if any

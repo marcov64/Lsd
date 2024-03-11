@@ -32,7 +32,7 @@ EXE_EXT=.exe
 DLL_EXT=.dll
 AR_DIR=$(LSDROOT)/gnu/x86_64-w64-mingw32/bin/
 AR=$(AR_DIR)ar$(EXE_EXT) -rcs
-RM=@rm$(EXE_EXT) -f
+RM=@rm$(EXE_EXT) -rf
 MKDIR=@mkdir$(EXE_EXT) -p
 
 # targets

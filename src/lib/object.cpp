@@ -399,8 +399,8 @@ void object::update( bool recurse, bool user )
 			if ( cv->save || cv->savei )
 				cv->data[ sim->t - cv->start ] = cv->val[ 0 ];
 #ifndef _NW_
-			if ( ! user && cv->plot == 1 && liblnk.plot_runtime != NULL )
-				( cv->*liblnk.plot_runtime )( );
+			if ( ! user && cv->plot == 1 && sim->liblnk != NULL && sim->liblnk->plot_runtime != NULL )
+				( cv->*sim->liblnk->plot_runtime )( );
 #endif
 		}
 	}
@@ -3676,8 +3676,8 @@ double object::interact( const char *text, double v, double *tv, int i, int j,
 		sim->n_values[ 8 ] = curl8;
 		sim->n_values[ 9 ] = curl9;
 
-		if ( liblnk.debugger != NULL )
-			( this ->*liblnk.debugger )( NULL, text, &app, true, "" );// signals INTERACT macro
+		if ( sim->liblnk != NULL && sim->liblnk->debugger != NULL )
+			( this ->*sim->liblnk->debugger )( NULL, text, &app, true, "" );// signals INTERACT macro
 	}
 
 	return app;

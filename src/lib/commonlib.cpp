@@ -260,13 +260,30 @@ void lsd_exit( int v )
  ****************************************************/
 void exception_handler( int signum, const char *what )
 {
+	dlliblinkage *liblnk = NULL;
 	static char msg1[ MAX_LINE_SIZE ], msg2[ MAX_LINE_SIZE ], msg3[ MAX_LINE_SIZE ];
+
+
+#ifndef _LMM_
+	simulation *sim = NULL;
+
+	if ( sims.size( ) > 0 && sims[ 0 ] != NULL )
+	{
+		sim = sims[ 0 ];						// handle GUI sim only
+
+		if ( sim->liblnk != NULL )
+			liblnk = sim->liblnk;
+	}
+#else
+	extern dlliblinkage lmm_liblnk;
+	liblnk = & lmm_liblnk;
+#endif
 
 	switch ( signum )
 	{
 		case SIGINT:
 		case SIGTERM:
-			if ( liblnk.cmd_backend == NULL )
+			if ( liblnk->cmd_backend == NULL )
 			{
 				snprintf( msg1, MAX_LINE_SIZE, "SIGINT/SIGTERM (%s)", signal_name( signum ) );
 				break;
@@ -316,7 +333,7 @@ void exception_handler( int signum, const char *what )
 			strcpy( msg2, "" );
 	}
 
-	if ( liblnk.cmd_backend != NULL )			// Tcl GUI available?
+	if ( liblnk->cmd_backend != NULL )			// Tcl GUI available?
 	{
 #ifndef _LMM_
 		bool usrExcpt = false;
@@ -335,22 +352,22 @@ void exception_handler( int signum, const char *what )
 		{
 			strcpyn( msg3, "Additional information may be obtained running the simulation using the 'Model'/'GDB Debugger' menu option", MAX_LINE_SIZE );
 
-			if ( sims.size( ) > 0 && sims[ 0 ]->quit != 2 )	// handle GUI sim only
+			if ( sim != NULL && sim->quit != 2 )
 			{
-				if ( ! sims[ 0 ]->parallel_mode && sims[ 0 ]->fast_mode == 0 &&
-					 sims[ 0 ]->stack_log != NULL && sims[ 0 ]->stack_log->v != NULL &&
-					 sims[ 0 ]->stack_log->v->label != NULL )
+				if ( ! sim->parallel_mode && sim->fast_mode == 0 &&
+					 sim->stack_log != NULL && sim->stack_log->v != NULL &&
+					 sim->stack_log->v->label != NULL )
 				{
 					strcatn( msg3, "\n\nAttempting to open the LSD Debugger.\n\nLSD will close immediately after exiting the Debugger.", MAX_LINE_SIZE );
-					plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", sims[ 0 ]->stack_log->v->label );
-					if ( liblnk.print_stack != NULL )
-						liblnk.print_stack( );
+					plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", sim->stack_log->v->label );
+					if ( liblnk->print_stack != NULL )
+						liblnk->print_stack( );
 				}
 				else
 				{
 					strcatn( msg3, "\n\nPlease disable fast mode and parallel processing to get more information about the error.\n\nLSD will close now.", MAX_LINE_SIZE );
 					plog( "\n\nAn unknown problem was detected while executing user's equations code" );
-					plog( "\n\nWarning: %s active, cannot open LSD Debugger", sims[ 0 ]->parallel_mode ? "parallel preocessing" : "fast mode" );
+					plog( "\n\nWarning: %s active, cannot open LSD Debugger", sim->parallel_mode ? "parallel preocessing" : "fast mode" );
 				}
 
 				sims[ 0 ]->quit = 2;
@@ -363,22 +380,22 @@ void exception_handler( int signum, const char *what )
 				}", msg1, msg2, msg3 );
 
 #ifndef _LMM_
-		if ( usrExcpt && sims.size( ) > 0 )				// handle GUI sim only
+		if ( usrExcpt && sim != NULL )
 		{
-			if ( ! sims[ 0 ]->parallel_mode && sims[ 0 ]->fast_mode == 0 &&
-				 sims[ 0 ]->stack_log != NULL && sims[ 0 ]->stack_log->v != NULL &&
-				 sims[ 0 ]->stack_log->v->label != NULL )
+			if ( ! sim->parallel_mode && sim->fast_mode == 0 &&
+				 sim->stack_log != NULL && sim->stack_log->v != NULL &&
+				 sim->stack_log->v->label != NULL )
 			{
 				double useless = -1;
-				snprintf( msg3, MAX_LINE_SIZE, "%s (ERROR)", sims[ 0 ]->stack_log->v->label );
-				if ( liblnk.debugger != NULL )
-					( sims[ 0 ]->stack_log->v->up->*liblnk.debugger )( NULL, msg3, & useless, false, "" );
+				snprintf( msg3, MAX_LINE_SIZE, "%s (ERROR)", sim->stack_log->v->label );
+				if ( liblnk->debugger != NULL )
+					( sim->stack_log->v->up->*liblnk->debugger )( NULL, msg3, & useless, false, "" );
 			}
 		}
 		else
 #endif
-			if ( liblnk.log_tcl_error != NULL )
-				liblnk.log_tcl_error( true, "FATAL ERROR", "System Signal received: %s", msg1 );
+			if ( liblnk->log_tcl_error != NULL )
+				liblnk->log_tcl_error( true, "FATAL ERROR", "System Signal received: %s", msg1 );
 	}
 	else
 		fprintf( stderr, "\nFATAL ERROR: System Signal received: %s\n", msg1 );
@@ -524,8 +541,16 @@ void cmd_gui( const char *cm, ... )
 
 	va_start( argptr, cm );
 
-	if ( liblnk.cmd_backend != NULL )
-		liblnk.cmd_backend( cm, argptr );
+#ifndef _LMM_
+	if ( sims.size( ) > 0 && sims[ 0 ] != NULL && sims[ 0 ]->liblnk != NULL &&
+		 sims[ 0 ]->liblnk->cmd_backend != NULL )
+		sims[ 0 ]->liblnk->cmd_backend( cm, argptr );
+#else
+	extern dlliblinkage lmm_liblnk;
+
+	if ( lmm_liblnk.cmd_backend != NULL )
+		lmm_liblnk.cmd_backend( cm, argptr );
+#endif
 
 	va_end( argptr );
 }

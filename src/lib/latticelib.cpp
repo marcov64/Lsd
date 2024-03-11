@@ -64,8 +64,8 @@ double simulation::init_lattice( double pixW, double pixH, double nrow, double n
 		for ( j = 0; j < latt->columns; ++j )
 			latt->array[ i ][ j ] = init_color;
 
-	if ( liblnk.init_lattice_helper != 0 )
-		liblnk.init_lattice_helper( pixW, pixH, nrow, ncol, init_color );
+	if ( liblnk != NULL && liblnk->init_lattice_helper != NULL )
+		liblnk->init_lattice_helper( pixW, pixH, nrow, ncol, init_color );
 
 	return 0;
 }
@@ -143,8 +143,8 @@ double simulation::update_lattice( double line, double col, double val )
 			latt->array[ line_int ][ col_int ] = val_int;
 	}
 
-	if ( liblnk.update_lattice_helper != 0 )
-		return liblnk.update_lattice_helper( line, col, val, line_int, col_int, val_int );
+	if ( liblnk != NULL && liblnk->update_lattice_helper != NULL )
+		return liblnk->update_lattice_helper( line, col, val, line_int, col_int, val_int );
 	else
 		return 0;
 }
@@ -184,8 +184,8 @@ Save the existing lattice (if any) to the specified file name.
 ***************************************************/
 double simulation::save_lattice( const char *fname )
 {
-	if ( liblnk.save_lattice_helper != 0 )
-		return liblnk.save_lattice_helper( fname );
+	if ( liblnk != NULL && liblnk->save_lattice_helper != NULL )
+		return liblnk->save_lattice_helper( fname );
 	else
 		return 0;
 }

@@ -338,26 +338,28 @@ int load_gui( const char **argv )
 
 	// set dynamic link library (DLL) call-back references
 	sim.inter = interp;
-	liblnk.cmd_backend = & cmd_backend;
-	liblnk.cover_browser = & cover_browser;
-	liblnk.debugger = & object::debugger;
-	liblnk.deb_log = & deb_log;
-	liblnk.disable_plot = & disable_plot;
-	liblnk.enable_plot = & enable_plot;
-	liblnk.error_hard_helper = & error_hard_helper;
-	liblnk.init_lattice_helper = & init_lattice_helper;
-	liblnk.log_tcl_error = & log_tcl_error;
-	liblnk.plog_backend = & plog_backend;
-	liblnk.plot_runtime = & variable::plot_runtime;
-	liblnk.print_stack = & print_stack;
-	liblnk.runtime_buttons = & runtime_buttons;
-	liblnk.runtime_end = & runtime_end;
-	liblnk.runtime_run_start = & runtime_run_start;
-	liblnk.runtime_run_end = & runtime_run_end;
-	liblnk.runtime_start = & runtime_start;
-	liblnk.runtime_step = & runtime_step;
-	liblnk.save_lattice_helper = & save_lattice_helper;
-	liblnk.update_lattice_helper = & update_lattice_helper;
+	sim.liblnk = new dlliblinkage;
+
+	sim.liblnk->cmd_backend = & cmd_backend;
+	sim.liblnk->cover_browser = & cover_browser;
+	sim.liblnk->debugger = & object::debugger;
+	sim.liblnk->deb_log = & deb_log;
+	sim.liblnk->disable_plot = & disable_plot;
+	sim.liblnk->enable_plot = & enable_plot;
+	sim.liblnk->error_hard_helper = & error_hard_helper;
+	sim.liblnk->init_lattice_helper = & init_lattice_helper;
+	sim.liblnk->log_tcl_error = & log_tcl_error;
+	sim.liblnk->plog_backend = & plog_backend;
+	sim.liblnk->plot_runtime = & variable::plot_runtime;
+	sim.liblnk->print_stack = & print_stack;
+	sim.liblnk->runtime_buttons = & runtime_buttons;
+	sim.liblnk->runtime_end = & runtime_end;
+	sim.liblnk->runtime_run_start = & runtime_run_start;
+	sim.liblnk->runtime_run_end = & runtime_run_end;
+	sim.liblnk->runtime_start = & runtime_start;
+	sim.liblnk->runtime_step = & runtime_step;
+	sim.liblnk->save_lattice_helper = & save_lattice_helper;
+	sim.liblnk->update_lattice_helper = & update_lattice_helper;
 
 	// try to load model configuration file
 	if ( strlen( sim.conf_name ) > 0 )
@@ -417,6 +419,8 @@ int load_gui( const char **argv )
 		}
 	}
 
+	delete sim.liblnk;
+
 	Tcl_UnlinkVar( interp, "choice" );
 	Tcl_UnlinkVar( interp, "choice_g" );
 	Tcl_UnlinkVar( interp, "stop" );
@@ -472,10 +476,10 @@ void create( void )
 			r = sim.root;
 		}
 
-		if ( message_logged )
+		if ( sim.message_logged )
 		{
 			cmd( "focustop .log" );
-			message_logged = false;
+			sim.message_logged = false;
 		}
 
 		// browse only if not running two-cycle operations
@@ -1446,13 +1450,13 @@ int browse( object *r )
 	cmd( "set useCurrObj yes" );	// flag to select among the current or the clicked object
 
 	choice = choice_g = 0;
-	idle_loop = true;
+	sim.idle_loop = true;
 
 	// main command loop
 	while ( ! choice && ! choice_g )
 		Tcl_DoOneEvent( 0 );
 
-	idle_loop = false;
+	sim.idle_loop = false;
 
 	// coming from the structure window
 	if ( choice_g )

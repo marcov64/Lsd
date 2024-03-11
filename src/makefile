@@ -91,7 +91,7 @@ DEP_LIB=$(LIB_DIR)libLSD.h
 # OS commands
 CC=g++$(EXE_EXT)
 AR=$(AR_DIR)ar$(EXE_EXT) -rcs
-RM=@rm$(EXE_EXT) -f
+RM=@rm$(EXE_EXT) -rf
 MKDIR=@mkdir$(EXE_EXT) -p
 
 # targets

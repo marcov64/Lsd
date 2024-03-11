@@ -32,15 +32,12 @@
  GLOBAL VARIABLES
  *********************************/
 // regular library global variables
-bool idle_loop = true;			// in main idle loop (no running operation)
-bool message_logged = false;	// new message posted in log window
 char *exec_file = NULL;			// name of executable file
 char *exec_path = NULL;			// path of executable file
 char *lib_file = NULL;			// name of shared library, if any
 char *lib_path = NULL;			// path of shared library, if any
 char *model_path = NULL;		// folder where the model files are
 char *rootLsd = NULL;			// path of LSD root directory
-dlliblinkage liblnk;			// call-back references for DLL
 int choice;						// Tcl menu control variable (main window)
 vector < simulation * > sims;	// vector holding existing simulations
 FILE *stderr_ptr;				// main thread standard error file pointer

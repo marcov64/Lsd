@@ -115,12 +115,12 @@ int simulation::run_simulation( int until_t, int until_run )
 		for ( ; quit == 0 && t <= last_t; ++t )
 		{
 			// update the percentage done bar, if needed
-			if ( liblnk.runtime_step == NULL && dobar )
+			if ( dobar && liblnk != NULL )
 				update_bar( bar_done, perc_done, last_done, 2 * BAR_DONE_SIZE );
 
 #ifndef _NW_
 			// only update if simulation not paused
-			if ( liblnk.runtime_step == NULL || liblnk.runtime_step( ) )
+			if ( liblnk == NULL || liblnk->runtime_step == NULL || liblnk->runtime_step( ) )
 #endif
 			{
 				eff_t = t;
@@ -131,8 +131,8 @@ int simulation::run_simulation( int until_t, int until_run )
 
 #ifndef _NW_
 			// handle runtime button pressings
-			if ( liblnk.runtime_buttons != NULL )
-				liblnk.runtime_buttons( last_update );
+			if ( liblnk != NULL && liblnk->runtime_buttons != NULL )
+				liblnk->runtime_buttons( last_update );
 #endif
 			// check if time to pause run (don't pause at last step)
 			if ( until_t > 0 && t >= until_t && t + 1 <= last_t )
@@ -152,8 +152,8 @@ int simulation::run_simulation( int until_t, int until_run )
 		// adjust simulation data to early stops and save variables to file
 		root->reset_end( );
 
-		if ( liblnk.deb_log != NULL )
-			liblnk.deb_log( false, 0 );// close debug log file, if any
+		if ( liblnk != NULL && liblnk->deb_log != NULL )
+			liblnk->deb_log( false, 0 );// close debug log file, if any
 
 		if ( dobar && on_bar )
 			update_bar( bar_done, perc_done, last_done, 2 * BAR_DONE_SIZE );
@@ -165,11 +165,11 @@ int simulation::run_simulation( int until_t, int until_run )
 			quit = 0;
 
 #ifndef _NW_
-		if ( liblnk.runtime_run_end != NULL )
-			liblnk.runtime_run_end( );
+		if ( liblnk != NULL && liblnk->runtime_run_end != NULL )
+			liblnk->runtime_run_end( );
 #endif
 
-		if ( quit != 2 && ( last_run > 1 || liblnk.runtime_run_end == NULL ) )
+		if ( quit != 2 && ( last_run > 1 || liblnk == NULL || liblnk->runtime_run_end == NULL ) )
 		{
 			save_results( );		// save results for multiple runs, if any
 
@@ -190,8 +190,8 @@ int simulation::run_simulation( int until_t, int until_run )
 		plog( "\nFinished processing configuration file(s)\n" );
 
 #ifndef _NW_
-	if ( liblnk.runtime_end != NULL )
-		liblnk.runtime_end( );
+	if ( liblnk != NULL && liblnk->runtime_end != NULL )
+		liblnk->runtime_end( );
 #endif
 
 	end_run:
@@ -251,8 +251,8 @@ int simulation::init_new_seq( char *bar_done, int & perc_done, int & last_done )
 #endif
 
 #ifndef _NW_
-	if ( liblnk.runtime_start != NULL )
-		liblnk.runtime_start( );
+	if ( liblnk != NULL && liblnk->runtime_start != NULL )
+		liblnk->runtime_start( );
 #else
 	plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
 #endif
@@ -283,8 +283,8 @@ int simulation::init_new_run( clock_t & start, clock_t & last_update )
 	eff_t = 0;				// no steps performed yet
 	save_ok = true;			// valid structure to save
 #ifndef _NW_
-	if ( liblnk.runtime_run_start != NULL )
-		liblnk.runtime_run_start( );
+	if ( liblnk != NULL && liblnk->runtime_run_start != NULL )
+		liblnk->runtime_run_start( );
 #endif
 	if ( fast_mode < 2 )
 	{
@@ -311,8 +311,8 @@ int simulation::init_new_run( clock_t & start, clock_t & last_update )
 	if ( i != 0 )
 	{
 #ifndef _NW_
-		if ( liblnk.log_tcl_error != NULL )
-			liblnk.log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
+		if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
+			liblnk->log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
 
 		cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", conf_file );
 #else
@@ -327,8 +327,8 @@ int simulation::init_new_run( clock_t & start, clock_t & last_update )
 	if ( ! root->alloc_save_mem( ) )
 	{
 #ifndef _NW_
-		if ( liblnk.log_tcl_error != NULL )
-			liblnk.log_tcl_error( true, "Memory allocation", "Not enough memory, too many series saved for the memory available" );
+		if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
+			liblnk->log_tcl_error( true, "Memory allocation", "Not enough memory, too many series saved for the memory available" );
 
 		cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, last_t );
 #else
@@ -426,7 +426,7 @@ void simulation::save_results( void )
 			plog( "Done\n" );
 	}
 
-	if ( ! no_tot && ( liblnk.runtime_run_end != NULL || max_runs == 1 ) )
+	if ( ! no_tot && ( ( liblnk != NULL && liblnk->runtime_run_end != NULL ) || max_runs == 1 ) )
 	{
 		if ( ! grand_total || batch_sequential )	// generate partial total files?
 		{
@@ -524,12 +524,12 @@ void simulation::set_fast( int level )
 #ifndef _NW_
 	if ( level == 0 )
 	{
-		if ( liblnk.enable_plot != 0 )
-			liblnk.enable_plot( );
+		if ( liblnk != NULL && liblnk->enable_plot != NULL )
+			liblnk->enable_plot( );
 	}
 	else
-		if ( liblnk.disable_plot != 0 )
-			liblnk.disable_plot( );
+		if ( liblnk != NULL && liblnk->disable_plot != NULL )
+			liblnk->disable_plot( );
 #endif
 
 	// remove the variables stack when switching to any fast mode
@@ -543,8 +543,8 @@ void simulation::set_fast( int level )
 
 		empty_stack( );
 
-		if ( liblnk.deb_log != NULL )
-			liblnk.deb_log( false, 0 );
+		if ( liblnk != NULL && liblnk->deb_log != NULL )
+			liblnk->deb_log( false, 0 );
 	}
 
 	if ( fast_mode < 2 && level == 2 )
@@ -579,8 +579,8 @@ void simulation::empty_stack( void )
 	else
 	{
 #ifndef _NW_
-		if ( liblnk.log_tcl_error != NULL )
-			liblnk.log_tcl_error( false, "Internal error", "LSD trace stack corrupted" );
+		if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
+			liblnk->log_tcl_error( false, "Internal error", "LSD trace stack corrupted" );
 
 		cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Internal LSD error\" -detail \"The LSD trace stack is corrupted.\nLSD will close now.\"" );
 #else
@@ -629,7 +629,7 @@ bool object::alloc_save_mem( void )
 
 #ifndef _NW_
 		// variable to parent name map for AoR (only in GUI mode)
-		if ( liblnk.runtime_run_start != NULL )
+		if ( sim->liblnk != NULL )
 			sim->par_map.insert( make_pair < string, string > ( cv->label, label ) );
 #endif
 	}
