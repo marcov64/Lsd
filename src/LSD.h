@@ -61,11 +61,7 @@ Global definitions shared by all LSD GUI modules.
 	void prepare_plot( int id_sim ); \
 	void report( void ); \
 	void save_cells( const char *lab ); \
-	void save_description( FILE *f ); \
-	void save_insts( FILE *f ); \
 	void save_pos( void ); \
-	void save_struct( FILE *f, const char *tab ); \
-	void save_xml_struct( xml_node &pn, long &node_serial, bool quick ); \
 	void search_title( const char *tag, int *idx, const char *lab, int *cols ); \
 	void set_all( const char *lab, int lag, const char *parWnd = NULL ); \
 	void set_obj_number( void ); \
@@ -128,7 +124,6 @@ Global definitions shared by all LSD GUI modules.
 #endif
 
 // global constants
-#define DEF_CONF_FILE "Sim1"			// default new configuration name
 #define FILE_BUF_SIZE 1000000			// buffer size for file reading
 #define LOG_FILE "log.txt"				// name of log file
 #define MARG 0.01						// y-axis % plot clearance margin
@@ -312,9 +307,8 @@ bool make_no_window( void );
 bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz );
 bool open_configuration( object *&r, bool reload );
 bool runtime_step( void );
-bool save_configuration( const char *path, const char *rname, const char *ext );
 bool save_sensitivity( FILE *f );
-bool save_xml_configuration( int findex = 0, const char *dest_path = NULL, bool quick = false );
+bool save_xml_configuration_gui( int findex = 0, const char *dest_path = NULL, bool quick = false );
 bool sensitivity_clean_dir( const char *path );
 bool sensitivity_too_large( long numSaPts );
 bool set_env( bool set );
@@ -326,9 +320,7 @@ char *fmt_ttip_descr( char *out, description *d, int outSz, bool init = true );
 char *get_str( const char *tcl_var, char *var, int var_size );
 char *load_eqfile( void );
 char *search_lsd_root( char *buf, int bufSz );
-char *strencdata( char *out, const char *in, int outSz = 0 );
 char *strtcl( char *out, const char *text, int outSz );
-char *strupr( char *s );
 char *NOLH_valid_tables( int k, char *out, int sz );
 const char *eval_str( const char *tcl_exp );
 const char *get_fun_name( char *str, int str_sz, bool nw = false );
@@ -354,7 +346,6 @@ int min_hborder( int pdigits, double miny, double maxy );
 int modman( int argn, const char **argv );
 int num_sensitivity_variables( void );
 int shrink_gnufile( void );
-int strwrap( char *out, const char *str, int outSz, int wid );
 int uniform_int_0( int max );
 int Tcl_abort_run_threads( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 int Tcl_discard_change( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
@@ -372,7 +363,6 @@ long get_long( const char *tcl_var, long *var = NULL );
 long num_sensitivity_points( void );
 object *operate( object *r ); \
 sensitivity *search_sensitivity( const char *lab, int lag = 0 );
-string to_string( const char *fmt, double val );
 string win_path( string filepath );
 void add_da_plot_tab( const char *w, int id_plot );
 void analysis( bool mc = false );
@@ -431,7 +421,6 @@ void runtime_run_end( void );
 void runtime_start( void );
 void save_data1( void );
 void save_datazip( void );
-void save_eqfile( FILE *f );
 void scan_used_lab( const char *lab, const char *parWnd = NULL );
 void scan_using_lab( const char *lab, const char *parWnd = NULL );
 void scroll_plot( void );

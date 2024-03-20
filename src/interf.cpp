@@ -2178,7 +2178,7 @@ object *operate( object *r )
 
 			if ( overwConf )					// save if needed
 			{
-				if ( ! save_xml_configuration( ) )
+				if ( ! save_xml_configuration_gui( ) )
 				{
 					cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the file is set READ-ONLY, or try to save to a different location.\"", sim.conf_name );
 					break;
@@ -2299,7 +2299,7 @@ object *operate( object *r )
 				redrawStruc = true;		// structure redraw because of titlebar
 			}
 
-			if ( ! save_xml_configuration( ) )
+			if ( ! save_xml_configuration_gui( ) )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"The model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", sim.conf_name	);
 			}
@@ -4320,7 +4320,7 @@ object *operate( object *r )
 				break;
 
 			// write export file
-			if ( ! save_configuration( get_str( "path" ), get_str( "res" ), get_str( "ext" ) ) )
+			if ( ! sim.save_txt_configuration( get_str( "path" ), get_str( "res" ), get_str( "ext" ), eq_file, eq_txt ) )
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Legacy configuration file not saved\" -detail \"Please check if the file name and path are valid, or if the drive or the file is set READ-ONLY, or try to save to a different location.\"" );
 
 		break;
@@ -5209,7 +5209,7 @@ object *operate( object *r )
 
 			if ( overwConf )				// save if needed
 			{
-				if ( ! save_xml_configuration( ) )
+				if ( ! save_xml_configuration_gui( ) )
 				{
 					cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY, or try to save to a different location.\"", sim.conf_name );
 					break;

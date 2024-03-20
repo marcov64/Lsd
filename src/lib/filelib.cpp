@@ -42,14 +42,11 @@ LOAD_CONFIGURATION
 ******************************************************************************/
 int simulation::load_configuration( bool reload, string *warnings, int quick )
 {
-	char *buf = NULL, buf1[ MAX_FILE_SIZE ], msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
+	char *buf = NULL, buf1[ MAX_FILE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ];
 	int i, j, load = 0;
 	set < int > warning;
 	n_mapT node_map;
-	object *cur;
-	variable *cv, *cv1;
-	description *cd;
-	FILE *g, *f = NULL;
+	FILE *f = NULL;
 	gzFile fz;
 	xml_doc xf;
 
@@ -172,195 +169,11 @@ int simulation::load_configuration( bool reload, string *warnings, int quick )
 			strdecdata( conf_eq_txt, eqfNode.child( "content" ).text( ).get( ), MAX_FILE_SIZE );
 		else
 			strcpy( conf_eq_txt, "" );
-
-		goto endLoad;
 	}
-
-	// try to read legacy configuration
-	f = fopen( conf_file, "rb" );
-	if ( f == NULL )
-		return 1;
-
-	if ( ! root->load_struct( f ) )
-	{
-		load = 2;
-		goto endLoad;
-	}
-
-	strcpy( msg, "" );
-	fscanf( f, "%999s", msg );					// should be DATA
-	if ( ! ( ! strcmp( msg, "DATA" ) && root->load_insts( conf_file, f ) ) )
-	{
-		load = 3;
-		goto endLoad;
-	}
-
-	if ( reload && quick == 2 )					// just quick reload?
-		goto endLoad;
-
-	last_run = 1;
-	fscanf( f, "%999s", msg );					// should be SIM_NUM
-	if ( ! ( ! strcmp( msg, "SIM_NUM" ) && fscanf( f, "%d", & last_run ) && last_run > 0 ) )
-	{
-		load = 4;
-		goto endLoad;
-	}
-
-	seed = 1;
-	fscanf( f, "%999s", msg );					// should be SEED
-	if ( ! ( ! strcmp( msg, "SEED" ) && fscanf( f, "%d", & seed ) && seed > 0 ) )
-	{
-		load = 5;
-		goto endLoad;
-	}
-
-	last_t = MAX_STEPS;
-	deb_t = stack_info = prof_min_msecs = 0;
-	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = 0;
-	fscanf( f, "%999s", msg );					// should be MAX_STEP
-	if ( strcmp( msg, "MAX_STEP" ) )
-	{
-		load = 6;
-		goto endLoad;
-	}
-
-	if ( fgets( msg, MAX_LINE_SIZE, f ) == NULL )// should be 1 to 8 values
-	{
-		load = 6;
-		goto endLoad;
-	}
-
-	i = sscanf( msg, "%d %d %d %d %d %d %d %d", & last_t, & deb_t, & stack_info, & prof_min_msecs, & prof_obs_only, & prof_aggr_time, & no_ptr_chk, & parallel_disable );
-
-	if ( i < 1 || last_t <= 0 || deb_t < 0 || stack_info < 0 || prof_min_msecs < 0 || prof_obs_only < 0 || prof_obs_only > 1 || prof_aggr_time < 0 || prof_aggr_time > 1 || no_ptr_chk < 0 || no_ptr_chk > 1 || parallel_disable < 0 || parallel_disable > 1 )
-	{
-		load = 6;
-		goto endLoad;
-	}
-
-	conf_ok = true;								// basic configuration loaded
-
-	fscanf( f, "%999s", msg );					// should be EQUATION
-	if ( strcmp( msg, "EQUATION" ) )
-	{
-		load = 7;
-		goto endLoad;
-	}
-
-	strcpy( name, "NONE" );
-	fgets( name, MAX_PATH_LENGTH, f );
-	if ( name[ strlen( name ) - 1 ] == '\n' )
-		name[ strlen( name ) - 1 ] = '\0';
-
-	if ( name[ strlen( name ) - 1 ] == '\r' )
-		name[ strlen( name ) - 1 ] = '\0';
-
-	// use the current equation name only if the file exists
-	snprintf( full_name, 2 * MAX_PATH_LENGTH, "%s/%s", model_path, name + 1 );
-	g = fopen( full_name, "r" );
-	if ( g != NULL )
-	{
-		fclose( g );
-		strcpyn( conf_eq_file, name + 1, MAX_PATH_LENGTH );
-	}
-
-	snprintf( rep_file, MAX_PATH_LENGTH, "report_%s.html", conf_name );
-	fscanf( f, "%999s", msg );					// should be MODELREPORT
-	if ( ! ( ! strcmp( msg, "MODELREPORT" ) && fscanf( f, "%999s", rep_file ) ) )
-	{
-		load = 8;
-		goto endLoad;
-	}
-
-	empty_description( );						// remove existing descriptions
-	strcpy( conf_eq_txt, "" );					// and equation file
-
-	if ( quick == 1 )							// no descriptions
-		goto endLoad;
-
-	fscanf( f, "%999s", msg );					// should be DESCRIPTION
-	if ( strcmp( msg, "DESCRIPTION" ) )
-	{
-		load = 9;
-		goto endLoad;
-	}
-
-	i = fscanf( f, "%999s", msg );				// should be the first description
-	for ( j = 0; strcmp( msg, "DOCUOBSERVE" ) && i == 1 && j < MAX_FILE_TRY; ++j )
-	{
-		i = load_description( msg, f );
-		if ( ! fscanf( f, "%999s", msg ) )
-			i = 0;
-	}
-
-	if ( i == 0 || j >= MAX_FILE_TRY )
-	{
-		load = 10;
-		goto endLoad;
-	}
-
-	fscanf( f, "%999s", msg );
-	for ( j = 0; strcmp( msg, "END_DOCUOBSERVE" ) && j < MAX_FILE_TRY; ++j )
-	{
-		cd = search_description( msg );
-		if ( cd != NULL )
-		{
-			cv = root->search_var( NULL, msg );
-			if ( cv != NULL )
-			{
-				cd->observe = true;
-
-				for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( cv->up->label ) )
-				{
-					cv1 = cur->search_var( NULL, cv->label );
-					if ( cv1 != NULL )
-						cv1->observe = true;
-				}
-			}
-		}
-
-		fscanf( f, "%999s", msg );
-	}
-
-	if ( j >= MAX_FILE_TRY )
-	{
-		load = 11;
-		goto endLoad;
-	}
-
-	fscanf( f, "%999s", msg );					// should be the DOCUINITIAL
-	if ( strcmp( msg, "DOCUINITIAL" ) )
-	{
-		load = 12;
-		goto endLoad;
-	}
-
-	fscanf( f, "%999s", msg );
-	for ( j = 0; strcmp( msg, "END_DOCUINITIAL" ) && j < MAX_FILE_TRY; ++j )
-	{
-		cd = search_description( msg );
-		cv = root->search_var( NULL, msg );
-		if ( cd != NULL && cv != NULL )
-			cd->initial = true;
-
-		fscanf( f, "%999s", msg );
-	}
-
-	if ( j >= MAX_FILE_TRY )
-	{
-		load = 13;
-		goto endLoad;
-	}
-
-	fscanf( f, "%999s\n", msg );				// here is the equation file
-	if ( strcmp( msg, "EQ_FILE" ) )
-	{
-		load = 0;								// optional
-		goto endLoad;
-	}
-
-	for ( j = 0; fgets( msg, MAX_LINE_SIZE, f ) != NULL && strncmp( msg, "END_EQ_FILE", 11 ) && strlen( conf_eq_txt ) < MAX_FILE_SIZE - MAX_LINE_SIZE && j < MAX_FILE_TRY; ++j )
-		strcatn( conf_eq_txt, msg, MAX_FILE_SIZE );
+	else
+		// try to read legacy configuration
+		if ( ( load = load_txt_configuration( reload, quick ) ) == 1 )
+			return load;
 
 endLoad:
 
@@ -548,79 +361,6 @@ int object::load_xml_struct( xml_node &n, bool quick )
 	}
 
 	return 0;
-}
-
-
-/****************************************************
-OBJECT::LOAD_STRUCT (LEGACY)
-	Load the object structure tree under this object
-	from a LEGACY text file
-****************************************************/
-bool object::load_struct( FILE *f )
-{
-	int i = 0;
-	char ch[ MAX_ELEM_LENGTH ];
-	bridge *cb;
-	variable *cv;
-
-	fscanf( f, "%99s", ch );
-	while ( strcmp( ch, "Label" ) && ++i < MAX_FILE_TRY )
-		fscanf( f,"%99s", ch );
-
-	if ( i >= MAX_FILE_TRY )
-		return false;
-
-	fscanf( f, "%99s", ch );
-	if ( label == NULL )
-	{
-		label = new char[ strlen( ch ) + 1 ];
-		strcpy( label, ch );
-	}
-
-	i = 0;
-	fscanf( f, "%*[{\r\t\n]%99s", ch );
-	while ( strcmp( ch, "}" ) && ++i < MAX_FILE_TRY )
-	{
-		if ( ! strcmp( ch, "Son:" ) )
-		{
-			fscanf( f, "%*[ ]%99s", ch );
-			add_obj( ch );
-
-			// find the bridge which contains the object
-			cb = search_bridge( ch );
-
-			if ( cb->head == NULL || ! cb->head->load_struct( f ) )
-				return false;
-		}
-
-		if ( ! strcmp( ch, "Var:" ) )
-		{
-			fscanf( f, "%*[ ]%99s", ch );
-			cv = add_empty_var( ch );
-			cv->param = 0;
-		}
-
-		if ( ! strcmp( ch, "Param:" ) )
-		{
-			fscanf( f, "%*[ ]%99s", ch );
-			cv = add_empty_var( ch );
-			cv->param = 1;
-		}
-
-		if ( ! strcmp( ch, "Func:" ) )
-		{
-			fscanf( f, "%*[ ]%99s", ch );
-			cv = add_empty_var( ch );
-			cv->param = 2;
-		}
-
-		fscanf( f, "%*[{\r\t\n]%99s", ch );
-	}
-
-	if ( i >= MAX_FILE_TRY )
-		return false;
-
-	return true;
 }
 
 
@@ -876,12 +616,766 @@ int object::load_xml_insts( xml_node &n, n_mapT &node_map, set < int > &warning 
 }
 
 
+/*****************************************************************************
+SAVE_XML_CONFIGURATION
+	Save current defined configuration (adding tag index if appropriate) to
+	gzip-compressed xml file
+	If quick is true, just the structure and the parameters are saved
+	Returns: true: save ok, false: save failure
+******************************************************************************/
+bool simulation::save_xml_configuration( int findex, const char *dest_path, bool quick, const char mod_nam[ ], const char mod_ver[ ], const char mod_dat[ ], const char eq_file[ ], const char eq_txt[ ] )
+{
+	bool saved;
+	int delta, indexDig, save_len;
+	char ch[ MAX_PATH_LENGTH ], *save_file, *bak_file;
+	const char *save_path;
+	long node_serial = 1;
+	FILE *f;
+	gzFile fz;
+	ostringstream buf;
+	xml_doc xf;
+
+	delta = ( findex > 0 ) ? last_run * ( findex - 1 ) : 0;
+	indexDig = ( findex > 0 ) ? ( int ) floor( log10( findex ) + 2 ) : 0;
+
+	if ( dest_path == NULL )
+		save_path = conf_path;
+	else
+		save_path = dest_path;
+
+	if ( strlen( conf_name ) == 0 )
+	{
+		delete [ ] conf_name;
+		conf_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
+		strcpy( conf_name, DEF_CONF_FILE );
+	}
+
+	if ( strlen( rep_file ) == 0 )
+		snprintf( rep_file, MAX_PATH_LENGTH, "report_%s.html", conf_name );
+
+	if ( strlen( conf_path ) > 0 )
+	{
+		save_len = strlen( save_path ) + strlen( conf_name ) + 6 + indexDig;
+		save_file = new char[ save_len ];
+		sprintf( save_file, "%s/%s", save_path, conf_name );
+	}
+	else
+	{
+		save_len = strlen( conf_name ) + 6 + indexDig;
+		save_file = new char[ save_len ];
+		sprintf( save_file, "%s", conf_name );
+	}
+
+	if ( findex > 0 )
+	{
+		snprintf( ch, MAX_PATH_LENGTH, "_%d.lsd", findex );
+		strcatn( save_file, ch, save_len );
+	}
+	else
+	{
+		// create backup file when not indexed saving
+		bak_file = new char[ strlen( save_file ) + 5 ];
+		sprintf( bak_file, "%s.bak", save_file );
+
+		strcatn( save_file, ".lsd", save_len );
+
+		f = fopen( save_file, "r" );
+		if ( f != NULL )
+		{
+			fclose( f );
+
+			f = fopen( bak_file, "r" );
+			if ( f != NULL )
+			{
+				fclose( f );
+
+				if( ! remove( bak_file ) )
+					rename( save_file, bak_file );
+			}
+			else
+				rename( save_file, bak_file );
+		}
+
+		delete [ ] bak_file;
+	}
+
+	// add XML declaration, type and root node
+	xml_node declNode = xf.append_child( pugi::node_declaration );
+	declNode.append_attribute( "version" ) = "1.0";
+	declNode.append_attribute( "encoding" ) = "ANSI";
+	declNode.append_attribute( "standalone" ) = "yes";
+	xf.append_child( pugi::node_doctype ).set_value( "LSD [\n \
+	<!ELEMENT LSD (configuration)>\n \
+	<!ELEMENT configuration (settings, structure, equation_file)>\n \
+	<!ELEMENT settings (simulation, profiling?, #PCDATA)>\n \
+	<!ELEMENT structure (object)>\n \
+	<!ELEMENT equation_file (#PCDATA, #CDATA?)>\n \
+	<!ELEMENT object (#PCDATA, description?, nodes?, object*, element*)>\n \
+	<!ELEMENT description (#PCDATA+)>\n \
+	<!ELEMENT nodes (#PCDATA, #PCDATA, #PCDATA?, #PCDATA?, #PCDATA?)>\n \
+	<!ELEMENT element (#PCDATA?, description?, documentation?, sensitivity?)>\n \
+	<!ELEMENT documentation EMPTY>\n \
+	<!ELEMENT sensitivity (#PCDATA+)>\n]" );
+	xml_node lsdNode = xf.append_child( "LSD" );
+	xml_node cfgNode = lsdNode.append_child( "configuration" );
+	cfgNode.append_attribute( "version" ) = "1.0";
+
+	snprintf( ch, MAX_PATH_LENGTH, "LSD configuration file for model '%s', version %s, created in %s", mod_nam, mod_ver, mod_dat );
+	cfgNode.append_attribute( "description" ) = ch;
+
+	// add simulation settings
+	xml_node setNode = cfgNode.append_child( "settings" );
+	xml_node simNode = setNode.append_child( "simulation" );
+	simNode.append_attribute( "steps" ) = last_t;
+	simNode.append_attribute( "runs" ) = last_run;
+	simNode.append_attribute( "seed" ) = seed + delta;
+
+	// optional settings (include only if non-default)
+	if ( deb_t > 0 )
+		simNode.append_attribute( "debug_start" ) = deb_t;
+
+	if ( no_ptr_chk )
+		simNode.append_attribute( "ptr_check" ) = false;
+
+	if ( parallel_disable )
+		simNode.append_attribute( "parallel" ) = false;
+
+	// add profile settings, if any
+	if ( stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time )
+	{
+		xml_node profNode = setNode.append_child( "profiling" );
+
+		if ( stack_info > 0 )
+			profNode.append_attribute( "level" ) = stack_info;
+
+		if ( prof_min_msecs > 0 )
+			profNode.append_attribute( "time" ) = prof_min_msecs;
+
+		if ( prof_obs_only )
+			profNode.append_attribute( "observed" ) = true;
+
+		if ( prof_aggr_time )
+			profNode.append_attribute( "aggregate" ) = true;
+	}
+
+	// add report file name
+	setNode.append_child( "report_file" ).text( ) = rep_file;
+
+	// add model structure
+	xml_node strNode = cfgNode.append_child( "structure" );
+	root->save_xml_struct( strNode, node_serial, quick );
+
+	// add equation file name and content
+	xml_node eqfNode = cfgNode.append_child( "equation_file" );
+	eqfNode.append_child( "filename" ).text( ) = eq_file;
+
+	if ( ! quick )
+	{
+		if ( eq_txt != NULL && ( strlen( conf_eq_txt ) == 0 || strcmp( conf_eq_txt, eq_txt ) != 0 ) )
+			strcpyn( conf_eq_txt, eq_txt, MAX_FILE_SIZE );
+
+		// encode xml ]]> escape sequences
+		eqfNode.append_child( "content" ).append_child( pugi::node_cdata ).set_value( strencdata( conf_eq_txt, conf_eq_txt, MAX_FILE_SIZE ) );
+	}
+
+	xf.save( buf );
+
+	if ( ( fz = gzopen( save_file, "wb9" ) ) != Z_NULL )
+	{
+		saved = gzputs( fz, buf.str( ).c_str( ) );
+		saved = gzclose( fz ) == Z_OK ? saved : false;
+	}
+	else
+		saved = false;
+
+	delete [ ] save_file;
+
+	return saved;
+}
+
+
 /****************************************************
-OBJECT::LOAD_INSTS (LEGACY)
+OBJECT::SAVE_XML_STRUCT
+	Save the object structure tree under this object
+	to an xml object
+	If quick is true, just the structure and the
+	parameters are saved, no descriptions
+****************************************************/
+void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
+{
+	bool init, nodes, noWht;
+	char *str;
+	int i, count;
+	long l, k;
+	string data, text, nser, nid, nnam, lnkto, lnkwht;
+	bridge *cb;
+	description *cd;
+	netLink *curl;
+	object *cur;
+	sensitivity *cs;
+	variable *cv, *cv1;
+
+	xml_node n = pn.append_child( "object" );
+	n.append_attribute( "name" ) = label;
+
+	if ( ! to_compute )
+		n.append_attribute( "compute" ) = false;
+
+	for ( data = "", nodes = false, cur = this; cur != NULL;
+		  cur = cur->hyper_next( cur->label ) )
+	{
+		if ( cur != this )
+			data += ",";
+
+		skip_next_obj( cur, &count );
+		data += to_string( count );
+
+		for ( ; go_brother( cur ) != NULL; cur = cur->next )
+			if ( cur->node != NULL )	// check if object contains network nodes
+				nodes = true;
+	}
+
+	n.append_child( "counts" ).text( ) = data.c_str( );
+
+	if ( ! quick )
+	{
+		cd = sim->search_description( label );
+
+		if ( ! strwsp( cd->text ) )
+		{
+			xml_node nd = n.append_child( "description" );
+			str = strencdata( NULL, cd->text );
+			nd.append_child( "text" ).append_child( pugi::node_cdata ).set_value( str );
+			delete [ ] str;
+		}
+	}
+
+	// save network attributes and links
+	l = k = 0;
+	noWht = true;
+	if ( nodes )
+	{	// first save nodes and attribute serials
+		for ( cur = this; cur != NULL; ++l, cur = cur->hyper_next( cur->label ) )
+		{
+			if ( cur != this )
+			{
+				nser += ",";
+				nid += ",";
+				nnam += ",";
+			}
+
+			if ( cur->node != NULL )
+			{
+				cur->node->serNum = node_serial++;
+				nser += to_string( cur->node->serNum );
+				nid += to_string( cur->node->id );
+
+				if ( cur->node->name != NULL )
+					nnam += "\"" + ( data = cur->node->name ) + "\"";
+				else
+					nnam += "\"\"";
+			}
+		}
+
+		// second save links using serials for destination
+		for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
+		{
+			if ( cur != this )
+			{
+				lnkto += ";";
+				lnkwht += ";";
+			}
+
+			if ( cur->node != NULL )			// scan all links from node
+				for ( curl = cur->node->first; curl != NULL; ++k, curl = curl->next )
+				{
+					if ( curl != cur->node->first )
+					{
+						lnkto += ",";
+						lnkwht += ",";
+					}
+
+					if ( curl->to == NULL || curl->to->node == NULL )
+						continue;				// ignore invalid link
+
+					lnkto += to_string( curl->to->node->serNum );
+					lnkwht += to_string( "%.15g", curl->weight );
+
+					if ( curl->weight != 0 )
+						noWht = false;
+				}
+		}
+
+		xml_node nd = n.append_child( "nodes" );
+		nd.append_child( "serials" ).text( ) = nser.c_str( );
+		nd.append_child( "ids" ).text( ) = nid.c_str( );
+
+		if ( ( long ) nnam.size( ) > l * 3 - 1 )		// don't add if no name
+			nd.append_child( "names" ).text( ) = nnam.c_str( );
+
+		if ( ( long ) lnkto.size( ) > k - 1 )			// don't add if no link
+		{
+			nd.append_child( "linksto" ).text( ) = lnkto.c_str( );
+
+			if ( ! noWht )
+				nd.append_child( "linksweigth" ).text( ) = lnkwht.c_str( );
+		}
+	}
+
+	// save son objects recursively
+	for ( cb = b; cb != NULL; cb = cb->next )
+		if ( cb->head == NULL )
+			sim->blueprint->search( cb->blabel )->save_xml_struct( n, node_serial, quick );
+		else
+			cb->head->save_xml_struct( n, node_serial, quick );
+
+	// save elements (parameters, variables and functions)
+	for ( cv = v; cv != NULL; cv = cv->next )
+	{
+		xml_node cn = n.append_child( "element" );
+		cn.append_attribute( "name" ) = cv->label;
+		cn.append_attribute( "type" ) = elem_type_names[ cv->param ];
+
+		if ( cv->param != 1 )
+			cn.append_attribute( "lags" ) = cv->num_lag;
+
+		// search for uninitialized data
+		if ( cv->param == 1 || cv->num_lag > 0 )
+		{
+			for ( init = true, cur = this; cur != NULL; cur = cur->hyper_next( label ) )
+			{
+				cv1 = cur->search_var( NULL, cv->label );
+				if ( ! cv1->initialized )
+				{
+					init = false;
+					break;
+				}
+			}
+
+			if ( ! init )
+				cn.append_attribute( "initialized" ) = false;
+		}
+
+		// save only non-default values
+		if ( cv->save )
+			cn.append_attribute( "save" ) = true;
+
+		if ( cv->savei )
+			cn.append_attribute( "save_file" ) = true;
+
+		if ( cv->plot )
+			cn.append_attribute( "plot" ) = true;
+
+		if ( cv->integer )
+			cn.append_attribute( "integer" ) = true;
+
+		if ( cv->parallel )
+			cn.append_attribute( "parallel" ) = true;
+
+		if ( ! isnan( cv->max_val ) )
+			cn.append_attribute( "maximum" ) = cv->max_val;
+
+		if ( ! isnan( cv->min_val ) )
+			cn.append_attribute( "minimum" ) = cv->min_val;
+
+		if ( cv->deb_mode != 'n' )
+		{
+			data = cv->deb_mode;
+			cn.append_attribute( "debug" ) = data.c_str( );
+		}
+
+		if ( cv->delay > 0 )
+			cn.append_attribute( "delay" ) = cv->delay;
+
+		if ( cv->delay_range > 0 )
+			cn.append_attribute( "delay_range" ) = cv->delay_range;
+
+		if ( cv->period > 1 )
+			cn.append_attribute( "period" ) = cv->period;
+
+		if ( cv->period_range > 0 )
+			cn.append_attribute( "period_range" ) = cv->period_range;
+
+		// add initial values
+		if ( cv->param == 1 || cv->num_lag > 0 )
+		{
+			for ( data = "", cur = this; cur != NULL;
+				  cur = cur->hyper_next( label ) )
+			{
+				if ( cur != this )
+					data += ";";
+
+				cv1 = cur->search_var( NULL, cv->label );
+				for ( i = 0; i < ( cv1->param == 1 ? 1 : cv1->num_lag ); ++i )
+				{
+					if ( i != 0 )
+						data += ",";
+
+					data += to_string( "%.15g", cv1->initialized ? cv1->chk_val( cv1->val[ i ] ) : 0 );
+				}
+			}
+
+			cn.append_child( "values" ).text( ) = data.c_str( );
+		}
+
+		if ( quick )
+			continue;
+
+		// add description text
+		cd = sim->search_description( cv->label );
+
+		if ( ! strwsp( cd->text ) || ! strwsp( cd->init ) )
+		{
+			xml_node cnd = cn.append_child( "description" );
+
+			if ( ! strwsp( cd->text ) )
+			{
+				str = strencdata( NULL, cd->text );
+				cnd.append_child( "text" ).append_child( pugi::node_cdata ).set_value( str );
+				delete [ ] str;
+			}
+
+			if ( ! strwsp( cd->init ) )
+			{
+				str = strencdata( NULL, cd->init );
+				cnd.append_child( "initialization" ).append_child( pugi::node_cdata ).set_value( str );
+				delete [ ] str;
+			}
+		}
+
+		// add documentation marks
+		if ( cd->observe || cd->initial )
+		{
+			xml_node cnd = cn.append_child( "documentation" );
+
+			if ( cd->observe )
+				cnd.append_attribute( "observe" ) = true;
+
+			if ( cd->initial )
+				cnd.append_attribute( "initialization" ) = true;
+		}
+
+		// add sensitivity analysis data
+		for ( cs = sim->sens; cs != NULL; cs = cs->next )
+			if ( strcmp( cs->label, cv->label ) == 0 )
+			{
+				if ( cs->integer )
+					cn.append_attribute( "integer" ) = true;
+
+				xml_node cns;
+
+				if ( cn.child( "sensitivity" ).empty( ) )
+					cns = cn.append_child( "sensitivity" );
+				else
+					cns = cn.child( "sensitivity" );
+
+				for ( data = "", i = 0; cs->val != NULL && i < cs->num_val; ++i )
+				{
+					if ( i != 0 )
+						data += ",";
+
+					data += to_string( "%.15g", cs->val[ i ] );
+				}
+
+				if ( cv->param )
+					text = "values";
+				else
+					text = "values-" + to_string( cs->lag + 1 );
+
+				cns.append_child( text.c_str( ) ).text( ) = data.c_str( );
+			}
+	}
+}
+
+
+/*****************************************************************************
+LOAD_TXT_CONFIGURATION (LEGACY)
+	Load current defined configuration from file (legacy text only)
+	If quick is != 0, just the structure and the parameters are retrieved
+	Returns: 0: load ok, 1,2,3,4,...: load failure
+	Must be used after/from load_configurations()
+******************************************************************************/
+int simulation::load_txt_configuration( bool reload, int quick )
+{
+	char msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
+	int i, j, load = 0;
+	description *cd;
+	object *cur;
+	variable *cv, *cv1;
+	FILE *g, *f;
+
+	f = fopen( conf_file, "rb" );
+	if ( f == NULL )
+		return 1;
+
+	if ( ! root->load_txt_struct( f ) )
+	{
+		load = 2;
+		goto endLoad;
+	}
+
+	strcpy( msg, "" );
+	fscanf( f, "%999s", msg );					// should be DATA
+	if ( ! ( ! strcmp( msg, "DATA" ) && root->load_txt_insts( conf_file, f ) ) )
+	{
+		load = 3;
+		goto endLoad;
+	}
+
+	if ( reload && quick == 2 )					// just quick reload?
+		goto endLoad;
+
+	last_run = 1;
+	fscanf( f, "%999s", msg );					// should be SIM_NUM
+	if ( ! ( ! strcmp( msg, "SIM_NUM" ) && fscanf( f, "%d", & last_run ) && last_run > 0 ) )
+	{
+		load = 4;
+		goto endLoad;
+	}
+
+	seed = 1;
+	fscanf( f, "%999s", msg );					// should be SEED
+	if ( ! ( ! strcmp( msg, "SEED" ) && fscanf( f, "%d", & seed ) && seed > 0 ) )
+	{
+		load = 5;
+		goto endLoad;
+	}
+
+	last_t = MAX_STEPS;
+	deb_t = stack_info = prof_min_msecs = 0;
+	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = 0;
+	fscanf( f, "%999s", msg );					// should be MAX_STEP
+	if ( strcmp( msg, "MAX_STEP" ) )
+	{
+		load = 6;
+		goto endLoad;
+	}
+
+	if ( fgets( msg, MAX_LINE_SIZE, f ) == NULL )// should be 1 to 8 values
+	{
+		load = 6;
+		goto endLoad;
+	}
+
+	i = sscanf( msg, "%d %d %d %d %d %d %d %d", & last_t, & deb_t, & stack_info, & prof_min_msecs, & prof_obs_only, & prof_aggr_time, & no_ptr_chk, & parallel_disable );
+
+	if ( i < 1 || last_t <= 0 || deb_t < 0 || stack_info < 0 || prof_min_msecs < 0 || prof_obs_only < 0 || prof_obs_only > 1 || prof_aggr_time < 0 || prof_aggr_time > 1 || no_ptr_chk < 0 || no_ptr_chk > 1 || parallel_disable < 0 || parallel_disable > 1 )
+	{
+		load = 6;
+		goto endLoad;
+	}
+
+	conf_ok = true;								// basic configuration loaded
+
+	fscanf( f, "%999s", msg );					// should be EQUATION
+	if ( strcmp( msg, "EQUATION" ) )
+	{
+		load = 7;
+		goto endLoad;
+	}
+
+	strcpy( name, "NONE" );
+	fgets( name, MAX_PATH_LENGTH, f );
+	if ( name[ strlen( name ) - 1 ] == '\n' )
+		name[ strlen( name ) - 1 ] = '\0';
+
+	if ( name[ strlen( name ) - 1 ] == '\r' )
+		name[ strlen( name ) - 1 ] = '\0';
+
+	// use the current equation name only if the file exists
+	snprintf( full_name, 2 * MAX_PATH_LENGTH, "%s/%s", model_path, name + 1 );
+	g = fopen( full_name, "r" );
+	if ( g != NULL )
+	{
+		fclose( g );
+		strcpyn( conf_eq_file, name + 1, MAX_PATH_LENGTH );
+	}
+
+	snprintf( rep_file, MAX_PATH_LENGTH, "report_%s.html", conf_name );
+	fscanf( f, "%999s", msg );					// should be MODELREPORT
+	if ( ! ( ! strcmp( msg, "MODELREPORT" ) && fscanf( f, "%999s", rep_file ) ) )
+	{
+		load = 8;
+		goto endLoad;
+	}
+
+	empty_description( );						// remove existing descriptions
+	strcpy( conf_eq_txt, "" );					// and equation file
+
+	if ( quick == 1 )							// no descriptions
+		goto endLoad;
+
+	fscanf( f, "%999s", msg );					// should be DESCRIPTION
+	if ( strcmp( msg, "DESCRIPTION" ) )
+	{
+		load = 9;
+		goto endLoad;
+	}
+
+	i = fscanf( f, "%999s", msg );				// should be the first description
+	for ( j = 0; strcmp( msg, "DOCUOBSERVE" ) && i == 1 && j < MAX_FILE_TRY; ++j )
+	{
+		i = load_txt_description( msg, f );
+		if ( ! fscanf( f, "%999s", msg ) )
+			i = 0;
+	}
+
+	if ( i == 0 || j >= MAX_FILE_TRY )
+	{
+		load = 10;
+		goto endLoad;
+	}
+
+	fscanf( f, "%999s", msg );
+	for ( j = 0; strcmp( msg, "END_DOCUOBSERVE" ) && j < MAX_FILE_TRY; ++j )
+	{
+		cd = search_description( msg );
+		if ( cd != NULL )
+		{
+			cv = root->search_var( NULL, msg );
+			if ( cv != NULL )
+			{
+				cd->observe = true;
+
+				for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( cv->up->label ) )
+				{
+					cv1 = cur->search_var( NULL, cv->label );
+					if ( cv1 != NULL )
+						cv1->observe = true;
+				}
+			}
+		}
+
+		fscanf( f, "%999s", msg );
+	}
+
+	if ( j >= MAX_FILE_TRY )
+	{
+		load = 11;
+		goto endLoad;
+	}
+
+	fscanf( f, "%999s", msg );					// should be the DOCUINITIAL
+	if ( strcmp( msg, "DOCUINITIAL" ) )
+	{
+		load = 12;
+		goto endLoad;
+	}
+
+	fscanf( f, "%999s", msg );
+	for ( j = 0; strcmp( msg, "END_DOCUINITIAL" ) && j < MAX_FILE_TRY; ++j )
+	{
+		cd = search_description( msg );
+		cv = root->search_var( NULL, msg );
+		if ( cd != NULL && cv != NULL )
+			cd->initial = true;
+
+		fscanf( f, "%999s", msg );
+	}
+
+	if ( j >= MAX_FILE_TRY )
+	{
+		load = 13;
+		goto endLoad;
+	}
+
+	fscanf( f, "%999s\n", msg );				// here is the equation file
+	if ( strcmp( msg, "EQ_FILE" ) )
+	{
+		load = 0;								// optional
+		goto endLoad;
+	}
+
+	for ( j = 0; fgets( msg, MAX_LINE_SIZE, f ) != NULL && strncmp( msg, "END_EQ_FILE", 11 ) && strlen( conf_eq_txt ) < MAX_FILE_SIZE - MAX_LINE_SIZE && j < MAX_FILE_TRY; ++j )
+		strcatn( conf_eq_txt, msg, MAX_FILE_SIZE );
+
+endLoad:
+
+	fclose( f );
+
+	return load;
+}
+
+
+/****************************************************
+OBJECT::LOAD_TXT_STRUCT (LEGACY)
+	Load the object structure tree under this object
+	from a LEGACY text file
+****************************************************/
+bool object::load_txt_struct( FILE *f )
+{
+	int i = 0;
+	char ch[ MAX_ELEM_LENGTH ];
+	bridge *cb;
+	variable *cv;
+
+	fscanf( f, "%99s", ch );
+	while ( strcmp( ch, "Label" ) && ++i < MAX_FILE_TRY )
+		fscanf( f,"%99s", ch );
+
+	if ( i >= MAX_FILE_TRY )
+		return false;
+
+	fscanf( f, "%99s", ch );
+	if ( label == NULL )
+	{
+		label = new char[ strlen( ch ) + 1 ];
+		strcpy( label, ch );
+	}
+
+	i = 0;
+	fscanf( f, "%*[{\r\t\n]%99s", ch );
+	while ( strcmp( ch, "}" ) && ++i < MAX_FILE_TRY )
+	{
+		if ( ! strcmp( ch, "Son:" ) )
+		{
+			fscanf( f, "%*[ ]%99s", ch );
+			add_obj( ch );
+
+			// find the bridge which contains the object
+			cb = search_bridge( ch );
+
+			if ( cb->head == NULL || ! cb->head->load_txt_struct( f ) )
+				return false;
+		}
+
+		if ( ! strcmp( ch, "Var:" ) )
+		{
+			fscanf( f, "%*[ ]%99s", ch );
+			cv = add_empty_var( ch );
+			cv->param = 0;
+		}
+
+		if ( ! strcmp( ch, "Param:" ) )
+		{
+			fscanf( f, "%*[ ]%99s", ch );
+			cv = add_empty_var( ch );
+			cv->param = 1;
+		}
+
+		if ( ! strcmp( ch, "Func:" ) )
+		{
+			fscanf( f, "%*[ ]%99s", ch );
+			cv = add_empty_var( ch );
+			cv->param = 2;
+		}
+
+		fscanf( f, "%*[{\r\t\n]%99s", ch );
+	}
+
+	if ( i >= MAX_FILE_TRY )
+		return false;
+
+	return true;
+}
+
+
+/****************************************************
+OBJECT::LOAD_TXT_INSTS (LEGACY)
 	Load the object instances of tree under this
 	object from a LEGACY text file
 ****************************************************/
-bool object::load_insts( const char *file_name, FILE *f )
+bool object::load_txt_insts( const char *file_name, FILE *f )
 {
 	char str[ MAX_ELEM_LENGTH ], ch1, ch2, ch3, ch4;
 	int num, i;
@@ -892,7 +1386,7 @@ bool object::load_insts( const char *file_name, FILE *f )
 	variable *cv, *cv1;
 
 	if ( f == NULL )
-		f = search_data_str( file_name, "DATA", label );
+		f = search_txt_data( file_name, "DATA", label );
 	else
 	{
 		fscanf( f, "%99s", str );		// skip the 'Object: '
@@ -1000,7 +1494,7 @@ bool object::load_insts( const char *file_name, FILE *f )
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
-		if ( cb->head == NULL || ! cb->head->load_insts( file_name, f ) )
+		if ( cb->head == NULL || ! cb->head->load_txt_insts( file_name, f ) )
 			return false;
 		num = 0;
 	}
@@ -1013,42 +1507,11 @@ bool object::load_insts( const char *file_name, FILE *f )
 
 
 /****************************************************
-SEARCH_DATA_STR (LEGACY)
-****************************************************/
-FILE *search_data_str( const char *name, const char *init, const char *str )
-{
-	FILE *f;
-	char got[ MAX_LINE_SIZE ];
-
-	f = fopen( name, "r" );
-	if ( f == NULL )
-		return NULL;
-
-	fscanf( f, "%999s", got );
-	for ( int i = 0; strcmp( got, init ) && i < MAX_FILE_TRY; ++i )
-		if ( fscanf( f, "%999s", got ) == EOF )
-			return NULL;
-
-	if ( strcmp( got, init ) )
-		return NULL;
-
-	for ( int i = 0; strcmp( got, str ) && i < MAX_FILE_TRY; ++i )
-		if ( fscanf( f, "%999s", got ) == EOF )
-			return NULL;
-
-	if ( ! strcmp( got, str ) )
-		return f;
-	else
-		return NULL;
-}
-
-
-/****************************************************
-LOAD_DESCRIPTION (LEGACY)
+LOAD_TXT_DESCRIPTION (LEGACY)
 	Load the descriptions of elements of tree under
 	this object from a LEGACY text file
 ****************************************************/
-bool simulation::load_description( const char *d, FILE *f )
+bool simulation::load_txt_description( const char *d, FILE *f )
 {
 	int j, type, ctype;
 	char label[ MAX_ELEM_LENGTH ], text[ 10 * MAX_LINE_SIZE + 1 ], init[ 10 * MAX_LINE_SIZE + 1 ], str[ 10 * MAX_LINE_SIZE + 1 ];
@@ -1117,6 +1580,304 @@ bool simulation::load_description( const char *d, FILE *f )
 	add_description( label, type, text, init );
 
 	return true;
+}
+
+
+/****************************************************
+SEARCH_TXT_DATA (LEGACY)
+****************************************************/
+FILE *object::search_txt_data( const char *name, const char *init, const char *str )
+{
+	FILE *f;
+	char got[ MAX_LINE_SIZE ];
+
+	f = fopen( name, "r" );
+	if ( f == NULL )
+		return NULL;
+
+	fscanf( f, "%999s", got );
+	for ( int i = 0; strcmp( got, init ) && i < MAX_FILE_TRY; ++i )
+		if ( fscanf( f, "%999s", got ) == EOF )
+			return NULL;
+
+	if ( strcmp( got, init ) )
+		return NULL;
+
+	for ( int i = 0; strcmp( got, str ) && i < MAX_FILE_TRY; ++i )
+		if ( fscanf( f, "%999s", got ) == EOF )
+			return NULL;
+
+	if ( ! strcmp( got, str ) )
+		return f;
+	else
+		return NULL;
+}
+
+
+/*****************************************************************************
+SAVE_TXT_CONFIGURATION (LEGACY)
+	Save current defined configuration (adding tag index if appropriate) to
+	gzip-compressed xml file
+	If quick is true, just the structure and the parameters are saved
+	Returns: true: save ok, false: save failure
+******************************************************************************/
+bool simulation::save_txt_configuration( const char *dest_path, const char *rname, const char *ext, const char eq_file[ ], const char eq_txt[ ] )
+{
+	bool saved = false;
+	char *save_file, *bak_file;
+	description *cd;
+	FILE *f;
+
+	save_file = new char[ strlen( dest_path ) + strlen( rname ) + strlen( ext ) + 2 ];
+	sprintf( save_file, "%s%s%s%s", dest_path, strlen( dest_path ) > 0 ? "/" : "", rname, ext );
+
+	f = fopen( save_file, "r" );
+	if ( f != NULL )
+	{
+		fclose( f );
+
+		// create backup file
+		bak_file = new char[ strlen( save_file ) - strlen( ext ) + 5 ];
+		sprintf( bak_file, "%s%s%s.bak", dest_path, strlen( dest_path ) > 0 ? "/" : "", rname );
+
+		f = fopen( bak_file, "r" );
+		if ( f != NULL )
+		{
+			fclose( f );
+
+			if( ! remove( bak_file ) )
+				rename( save_file, bak_file );
+		}
+		else
+			rename( save_file, bak_file );
+
+		delete [ ] bak_file;
+	}
+
+	f = fopen( save_file, "wb" );
+	delete [ ] save_file;
+
+	if ( f != NULL )
+	{
+		root->save_txt_struct( f, "" );
+		fprintf( f, "\nDATA\n" );
+		root->save_txt_insts( f );
+
+		fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d", last_run, seed, last_t );
+
+		if ( deb_t > 0 || stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time || no_ptr_chk || parallel_disable )
+			fprintf( f, " %d %d %d %d %d %d %d", deb_t, stack_info, prof_min_msecs, prof_obs_only ? 1 : 0, prof_aggr_time ? 1 : 0, no_ptr_chk ? 1 : 0, parallel_disable ? 1 : 0 );
+
+		fprintf( f, "\nEQUATION %s\nMODELREPORT %s\n", eq_file, rep_file );
+
+		fprintf( f, "\nDESCRIPTION\n\n" );
+		root->save_txt_description( f );
+
+		fprintf( f, "\nDOCUOBSERVE\n" );
+		for ( cd = descr; cd != NULL; cd = cd->next )
+			if ( cd->observe )
+				fprintf( f, "%s\n", cd->label );
+		fprintf( f, "\nEND_DOCUOBSERVE\n\n" );
+
+		fprintf( f, "\nDOCUINITIAL\n" );
+		for ( cd = descr; cd != NULL; cd = cd->next )
+			if ( cd->initial )
+				fprintf( f, "%s\n", cd->label );
+		fprintf( f, "\nEND_DOCUINITIAL\n\n" );
+
+		if ( eq_txt != NULL && ( strlen( conf_eq_txt ) == 0 || strcmp( conf_eq_txt, eq_txt ) != 0 ) )
+			strcpyn( conf_eq_txt, eq_txt, MAX_FILE_SIZE );
+
+		fprintf( f, "\nEQ_FILE\n" );
+		fprintf( f, "%s", conf_eq_txt );
+		fprintf( f, "\nEND_EQ_FILE\n" );
+
+		saved = ! ferror( f );
+		fclose( f );
+	}
+
+	return saved;
+}
+
+
+/****************************************************
+OBJECT::SAVE_TXT_STRUCT (LEGACY)
+	Save the object structure tree under this object
+	to a LEGACY text file
+****************************************************/
+void object::save_txt_struct( FILE *f, const char *tab )
+{
+	char tab1[ MAX_ELEM_LENGTH ];
+	bridge *cb;
+	variable *cv;
+
+	if ( up == NULL )
+		fprintf( f, "\t\n" );
+
+	strcpyn( tab1, tab, MAX_ELEM_LENGTH );
+	fprintf( f, "%sLabel %s\n%s{\n", tab1, label, tab1 );
+	strcatn( tab1, "\t", MAX_ELEM_LENGTH );
+
+	for ( cb = b; cb != NULL; cb = cb->next )
+	{
+		fprintf( f, "%sSon: %s\n", tab1, cb->blabel );
+
+		if ( cb->head == NULL )
+			sim->blueprint->search( cb->blabel )->save_txt_struct( f, tab1 );
+		else
+			cb->head->save_txt_struct( f, tab1 );
+	}
+
+	for ( cv = v; cv != NULL; cv = cv->next )
+	{
+		if ( cv->param == 0 )
+			fprintf( f, "%sVar: %s\n", tab1, cv->label );
+
+		if ( cv->param == 1 )
+			fprintf( f, "%sParam: %s\n", tab1, cv->label );
+
+		if ( cv->param == 2)
+			fprintf( f, "%sFunc: %s\n", tab1, cv->label );
+	}
+
+	fprintf( f, "\n" );
+	fprintf( f, "%s}\n\n", tab );
+}
+
+
+/****************************************************
+OBJECT::SAVE_TXT_INSTS (LEGACY)
+	Save the object instances of tree under this
+	object to a LEGACY text file
+****************************************************/
+void object::save_txt_insts( FILE *f )
+{
+	int i, count;
+	char ch1, ch2, ch3, ch4;
+	bridge *cb;
+	object *cur;
+	variable *cv, *cv1;
+
+	fprintf( f, "\nObject: %s", label );
+
+	if ( to_compute )
+		fprintf( f, " C" );
+	else
+		fprintf( f, " N" );
+
+	for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
+	{
+		skip_next_obj( cur, &count );
+		fprintf( f, "\t%d", count );
+		for ( ; go_brother( cur ) != NULL; cur = cur->next );
+	}
+	fprintf( f, "\n" );
+
+	for ( cv = v; cv != NULL; cv = cv->next )
+	{
+		// search for unloaded data
+		ch2 = '+';
+		if ( cv->param == 1 || cv->num_lag > 0 )
+			for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
+			{
+				cv1 = cur->search_var( NULL, cv->label );
+				if ( ! cv1->initialized )
+				{
+					ch2 = '-';
+					break;
+				}
+			}
+
+		// debug mode: character coding for compatibility
+		// ch1: n = no save
+		//		s = save to memory
+		//		S = save to disk
+		// ch2: + = initialized
+		//		- = not initialized
+		// ch3: n = no debug or watch
+		//		d = debug only
+		//		w = watch only
+		//		W = debug and watch
+		//		r = watch write only
+		//		R = debug and watch write
+		// ch4: n = no runtime plot or parallel update
+		//		N = parallel update only
+		//		p = runtime plot only
+		//		P = runtime plot and parallel update
+
+		ch1 = cv->save ? 's' : 'n';
+		ch1 = cv->savei ? toupper( ch1 ) : ch1;
+		ch3 = cv->deb_mode;
+		ch4 = cv->plot ? 'p' : 'n';
+		ch4 = cv->parallel ? toupper( ch4 ) : ch4;
+
+		if ( cv->param == 0 )
+			fprintf( f, "Var: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch2, ch3, ch4 );
+		if ( cv->param == 1 )
+			fprintf( f, "Param: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch2, ch3, ch4 );
+		if ( cv->param == 2 )
+			fprintf( f, "Func: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch2, ch3, ch4 );
+
+		for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
+		{
+			cv1 = cur->search_var( NULL, cv->label );
+			if ( cv1->param == 1 )
+				if ( cv1->initialized )
+					fprintf( f, "\t%.15g", cv1->chk_val( cv1->val[ 0 ] ) );
+				else
+					fprintf( f, "\t%c", '0' );
+			else
+				for ( i = 0; i < cv->num_lag; ++i )
+					if ( cv1->initialized )
+						fprintf( f, "\t%.15g", cv1->chk_val( cv1->val[ i ] ) );
+					else
+						fprintf( f, "\t%c", '0' );
+		}
+
+		// add optional special updating data
+		if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 ) )
+			fprintf( f, "\t<upd: %d %d %d %d>", cv->delay, cv->delay_range, cv->period, cv->period_range );
+
+		fprintf( f, "\n" );
+	}
+
+	for ( cb = b; cb != NULL; cb = cb->next )
+		if ( cb->head != NULL )
+			cb->head->save_txt_insts( f );
+}
+
+
+/****************************************************
+SAVE_TXT_DESCRIPTION (LEGACY)
+	save the descriptions of elements of tree under
+	this object to a LEGACY text file
+****************************************************/
+void object::save_txt_description( FILE *f )
+{
+	bridge *cb;
+	variable *cv;
+	description *cd;
+
+	cd = sim->search_description( label );
+
+	if ( strwsp( cd->init ) )
+		fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ] );
+	else
+		fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 0 ], cd->init, desc_key_words[ 1 ] );
+
+	for ( cv = v; cv != NULL; cv = cv->next )
+	{
+		cd = sim->search_description( cv->label );
+
+		if ( ( cv->param != 1 && cv->num_lag == 0 ) || strwsp( cd->init ) )
+			fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ] );
+		else
+			fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 0 ], cd->init, desc_key_words[ 1 ] );
+	}
+
+	for ( cb = b; cb != NULL; cb = cb->next )
+		if ( cb->head != NULL )
+			cb->head->save_txt_description( f );
 }
 
 

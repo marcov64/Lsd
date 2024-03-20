@@ -92,6 +92,7 @@ Relevant macros for conditional compilation (when defined):
 #define BAR_DONE_SIZE 80				// characters in the percentage done bar
 #define CSV_SEP ","						// single char with the .csv format separator
 #define ERR_LIM 5						// maximum number of repeated error messages
+#define DEF_CONF_FILE "Sim1"			// default new configuration name
 #define LEGACY_NO_DESCR "(no description available)" // legacy description (do not change)
 #define MAX_BUFF_SIZE 10000				// standard Tcl buffer size (>9999)
 #define MAX_CORES 0						// maximum number of cores to use (0=auto )
@@ -419,9 +420,11 @@ struct simulation						// simulation container class
 	simulation( void );					// constructor
 	~simulation( void );				// destructor
 
-	bool load_description( const char *msg, FILE *f );
+	bool load_txt_description( const char *msg, FILE *f );
 	bool next_batch( void );
 	bool results_alt_path( const char *altPath );
+	bool save_txt_configuration( const char *path, const char *rname, const char *ext, const char eq_file[ ], const char eq_txt[ ] = "" );
+	bool save_xml_configuration( int findex = 0, const char *dest_path = NULL, bool quick = false, const char mod_nam[ ] = "", const char mod_ver[ ] = "", const char mod_dat[ ] = "", const char eq_file[ ] = "", const char eq_txt[ ] = "" );
 	bool stop_parallel( void );
 	description *add_description( const char *lab, int type = 4, const char *text = NULL, const char *init = NULL, bool initial = false, bool observe = false );
 	description *change_description( const char *lab_old, const char *lab = NULL, int type = -1, const char *text = NULL, const char *init = NULL, int initial = -1, int observe = -1 );
@@ -429,6 +432,7 @@ struct simulation						// simulation container class
 	int init_new_run( clock_t & start, clock_t & last_update );
 	int init_new_seq( char *bar_done, int & perc_done, int & last_done );
 	int load_configuration( bool reload, std::string *warnings, int quick );
+	int load_txt_configuration( bool reload, int quick );
 	int hyper_count( const char *lab );
 	int hyper_count_var( const char *lab );
 	int monitor_logs( void );
@@ -493,8 +497,8 @@ struct object							// simulation model object class
 	// object-class methods
 	bool alloc_save_mem( void );
 	bool check_cond( double val1, int lopc, double val2 );
-	bool load_insts( const char *file_name, FILE *f );
-	bool load_struct( FILE *f );
+	bool load_txt_insts( const char *file_name, FILE *f );
+	bool load_txt_struct( FILE *f );
 	bool search_parallel( void );
 	bool under_computation( void );
 	bool under_comput_var( const char *lab );
@@ -602,10 +606,15 @@ struct object							// simulation model object class
 	void replicate( int num, bool propagate = false );
 	void reset_description( void );
 	void reset_end( void );
+	void save_txt_description( FILE *f );
+	void save_txt_insts( FILE *f );
+	void save_txt_struct( FILE *f, const char *tab );
+	void save_xml_struct( xml_node &pn, long &node_serial, bool quick );
 	void search_inst( object *obj, long *pos, long *checked );
 	void set_blueprint( object *container );
 	void set_tit_counter( void );
 	void update( bool recurse, bool user );
+	FILE *search_txt_data( const char *name, const char *init, const char *str );
 
 #ifdef OBJECT_EXT
 	OBJECT_EXT
@@ -916,6 +925,8 @@ char *clean_path( const char *path );
 char *strcatn( char *d, const char *s, size_t dSz );
 char *strcpyn( char *d, const char *s, size_t dSz );
 char *strdecdata( char *out, const char *in, int outSz = 0 );
+char *strencdata( char *out, const char *in, int outSz = 0 );
+char *strupr( char *s );
 const char *signal_name( int signum );
 int dispatch_runs( int until_t = 0, int until_run = 0 );
 int kill_system( simulation *sim, int id );
@@ -924,10 +935,12 @@ int strcln( char *out, const char *str, int outSz );
 int strlf( char *out, const char *str, int outSz );
 int strtrim( char *out, const char *str, int outSz );
 int strtrimin( char *out, const char *str, int outSz );
+int strwrap( char *out, const char *str, int outSz, int wid );
 long strtol( const char *in, char** endptr, int base, long inv );
 object *go_brother( object *c );
 object *skip_next_obj( object *t );
 object *skip_next_obj( object *t, int *count );
+string to_string( const char *fmt, double val );
 vector < double > strtodsplit( const char *in, char sep, double inv = 0. );
 vector < long > strtolsplit( const char *in, char sep, long inv = 0 );
 vector < string > strtostrsplit( const char *in, char sep, bool remQuotes = false );
@@ -941,6 +954,5 @@ void plog_tag( const char *cm, const char *tag, ... );
 void plog_terminal( const char *cm, va_list arg );
 void set_exec( const char *path, const char *file );
 void signal_handler( int signum );
-FILE *search_data_str( const char *name, const char *init, const char *str );
 
 #endif

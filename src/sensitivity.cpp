@@ -392,7 +392,7 @@ void sensitivity_sequential( int *findex, sensitivity *s, double probSampl,
 		if ( probSampl == 1.0 || sim.ran1( ) <= probSampl )	// if required draw if point will be sampled
 		{
 			// generate a configuration file for the experiment (no descriptions)
-			if ( ! save_xml_configuration( *findex, dest_path, true ) )
+			if ( ! sim.save_xml_configuration( *findex, dest_path, true, get_str( model_info[ 0 ] ), get_str( model_info[ 1 ] ), get_str( model_info[ 2 ] ), eq_file ) )
 			{
 				plog( "Aborted\n" );
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
@@ -1427,7 +1427,7 @@ void sensitivity_doe( int *findex, design *doe, const char *dest_path )
 		}
 
 		// generate a configuration file for the experiment (no descriptions)
-		if ( ! save_xml_configuration( *findex, dest_path, true ) )
+		if ( ! sim.save_xml_configuration( *findex, dest_path, true, get_str( model_info[ 0 ] ), get_str( model_info[ 1 ] ), get_str( model_info[ 2 ] ), eq_file ) )
 		{
 			plog( "Aborted\n" );
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
