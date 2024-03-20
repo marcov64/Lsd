@@ -737,7 +737,7 @@ long get_long( const char *tcl_var, long *var )
  GET_DOUBLE
  Set var to NULL to just get the Tcl value
  ***************************************************/
-double get_double( const char *tcl_var, double *var )
+double get_double( const char *tcl_var, double *var, bool no_error )
 {
 	const char *strvar;
 	double dblvar;
@@ -753,7 +753,8 @@ double get_double( const char *tcl_var, double *var )
 
 	if ( Tcl_GetDouble( interp, strvar, & dblvar ) != TCL_OK )
 	{
-		log_tcl_error( true, "Cannot convert to double", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
+		if ( ! no_error )
+			log_tcl_error( true, "Cannot convert to double", "Internal LSD error converting variable '%s' containing '%s'. If the problem persists, please contact developers", tcl_var, strvar );
 		return NAN;
 	}
 

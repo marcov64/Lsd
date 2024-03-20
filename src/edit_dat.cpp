@@ -43,7 +43,7 @@ of the model
 
 - void object::unlink_cells( const char *tag, const char *lab );
 called before exiting, removes all the links between tcl variables and model
-values
+values, and ensure variable constraints (max/min/int) are applied
 *************************************************************/
 
 #include "LSD.h"
@@ -552,11 +552,13 @@ void object::unlink_cells( const char *lab )
 			{
 				snprintf( ch1, 2 * MAX_ELEM_LENGTH,"p%s_%d", cv->label, i );
 				Tcl_UnlinkVar( interp, ch1 );
+				cv->val[ 0 ] = cv->chk_val( cv->val[ 0 ] );
 			}
 			else
 				for ( j = 0; j < cv->num_lag; ++j )
 				{
 					snprintf( ch1, 2 * MAX_ELEM_LENGTH,"v%s_%d_%d", cv->label, i, j );
 					Tcl_UnlinkVar( interp, ch1 );
+					cv->val[ j ] = cv->chk_val( cv->val[ j ] );
 				}
 }

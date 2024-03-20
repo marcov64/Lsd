@@ -3287,6 +3287,9 @@ double object::write( const char *lab, double value, int time, int lag )
 		return NAN;
 	}
 
+	// adjust value if necessary
+	value = cv->chk_val( value );
+
 	// allow for change of initial lagged values when starting simulation (t=1)
 	if ( cv->param != 1 && time < 0 && sim->t == 1 )
 	{
@@ -3440,7 +3443,7 @@ double object::increment( const char *lab, double value )
 		return NAN;
 	}
 
-	new_value = cv->val[ 0 ] + value;
+	new_value = cv->chk_val( cv->val[ 0 ] + value );
 	write( lab, new_value, sim->t );
 
 	return new_value;
@@ -3485,7 +3488,7 @@ double object::multiply( const char *lab, double value )
 		return NAN;
 	}
 
-	new_value = cv->val[ 0 ] * value;
+	new_value = cv->chk_val( cv->val[ 0 ] * value );
 	write( lab, new_value, sim->t );
 
 	return new_value;

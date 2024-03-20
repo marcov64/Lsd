@@ -526,12 +526,24 @@ void variable::write_var( FILE *frep )
 
 	fprintf( frep, "<HR WIDTH=\"100%%\">\n" );
 
-	if ( param == 1 )
-		fprintf( frep, "<A NAME=\"_d_%s\"><H4>Parameter: &nbsp;<TT><U>%s</U></TT></H4></A>", label, label );
 	if ( param == 0 )
 		fprintf( frep, "<A NAME=\"_d_%s\"><H4>Variable: &nbsp;<TT><U>%s</U></TT></H4></A>", label, label );
+	if ( param == 1 )
+		fprintf( frep, "<A NAME=\"_d_%s\"><H4>Parameter: &nbsp;<TT><U>%s</U></TT></H4></A>", label, label );
 	if ( param == 2 )
 		fprintf( frep, "<A NAME=\"_d_%s\"><H4>Function: &nbsp;<TT><U>%s</U></TT></H4></A>", label, label );
+
+	if ( num_lag > 0 )
+		fprintf( frep, "<I>Lags: &nbsp;</I>%d<BR>", num_lag );
+
+	if ( integer )
+		fprintf( frep, "<I>Integer: &nbsp;</I>yes<BR>" );
+
+	if ( ! isnan( min_val ) )
+		fprintf( frep, "<I>Minimum: &nbsp;</I>%g<BR>", min_val );
+
+	if ( ! isnan( max_val ) )
+		fprintf( frep, "<I>Maximum: &nbsp;</I>%g<BR>", max_val );
 
 	fprintf( frep, "<I>Contained in: &nbsp;</I><A HREF=\"#%s\"><TT>%s</TT></A><BR>", up->label, up->label );
 
@@ -1189,6 +1201,7 @@ Create recursively the help table for an Object
 *********************************/
 void object::create_table_init( FILE *frep )
 {
+	char min_val[ 32 ], max_val[ 32 ];
 	int i;
 	bridge *cb;
 	description *cd;
@@ -1252,26 +1265,36 @@ void object::create_table_init( FILE *frep )
 		fprintf( frep, "<tr>" );
 		fprintf( frep, "<td><center><i>Element</i></center></td>" );
 		fprintf( frep, "<td><center><i>Lags</i></center></td>\n" );
+		fprintf( frep, "<td><center><i>Int.</i></center></td>\n" );
+		fprintf( frep, "<td><center><i>Min.</i></center></td>\n" );
+		fprintf( frep, "<td><center><i>Max.</i></center></td>\n" );
 		fprintf( frep, "<td><center><i>Description and initial values comments</i></center></td>\n" );
 		fprintf( frep, "</tr>" );
 
 		for ( cv = v; cv != NULL; cv = cv->next )
 		{
 			fprintf( frep, "<tr VALIGN=TOP>" );
+			fprintf( frep, "<td><a NAME=\"%s\"><A HREF=\"#_d_%s\"><TT>%s</TT></A></a></td>\n", cv->label, cv->label, cv->label );
 
 			if ( cv->param == 1 )
-			{
-				fprintf( frep, "<td><a NAME=\"%s\"><A HREF=\"#_d_%s\"><TT>%s</TT></A></a></td>\n", cv->label, cv->label, cv->label );
 				fprintf( frep, "<td><A HREF=\"#_i_%s\">Par.</A></td>\n", cv->label );
-			}
 			else
-			{
-				fprintf( frep, "<td><a NAME=\"%s\"><A HREF=\"#_d_%s\"><TT>%s</TT></A></a></td>\n", cv->label, cv->label, cv->label );
 				if ( cv->num_lag > 0 )
 					fprintf( frep, "<td><A HREF=\"#_i_%s\">%d</A></td>\n", cv->label, cv->num_lag );
 				else
 					fprintf( frep, "<td></td>\n" );
-			}
+
+			if ( isnan( cv->min_val ) )
+				strcpy( min_val, "" );
+			else
+				snprintf( min_val, 32, "%g", cv->min_val );
+
+			if ( isnan( cv->max_val ) )
+				strcpy( max_val, "" );
+			else
+				snprintf( max_val, 32, "%g", cv->max_val );
+
+			fprintf( frep, "<td>%s</td><td>%s</td><td>%s</td>\n", cv->integer ? "yes" : "", min_val, max_val );
 
 			cd = sim->search_description( cv->label );
 
@@ -1497,29 +1520,6 @@ bool is_equation_header( const char *raw_line, char *var, char *updt_in )
 	delete [ ] line;
 
 	return header;
-}
-
-
-/************
- ANCESTORS
- ************/
-void object::ancestors( FILE *f, bool html )
-{
-	if ( up != NULL )
-		up->ancestors( f, html );
-
-	if ( up->up == NULL )
-	{
-		if ( html )
-			fprintf( f, "<TT><A HREF=\"#%s\">%s</A></TT>", up->label, up->label );
-		else
-			fprintf( f, "\\lsd{%s}", up->label );
-	}
-	else
-		if ( html )
-			fprintf( f, "<TT>&mdash;&gt;<A HREF=\"#%s\">%s</A></TT>", up->label, up->label );
-		else
-			fprintf( f, "$\\rightarrow$\\lsd{%s}", up->label );
 }
 
 
@@ -1777,23 +1777,23 @@ void object::show_rep_initial( FILE *f, int *begin, FILE *frep )
 /****************************************************
  TEX_STRCPY
  ****************************************************/
-void tex_strcpy( char *&s1, char* s2 )
+char *tex_strcpy( char *&out, char *in )
 {
 	int i, j;
 
 	// handle active underscores and other special chars in label references
-	for ( i = 0, j = 0; s2[ j ] != '\0'; ++j )
-		if ( s2[ j ] == '_' || s2[ j ] == '^' || s2[ j ] == '$' || s2[ j ] == '&' )
+	for ( i = 0, j = 0; in[ j ] != '\0'; ++j )
+		if ( in[ j ] == '_' || in[ j ] == '^' || in[ j ] == '$' || in[ j ] == '&' )
 			++i;
 
 	if ( i > 0 )
 	{
-		delete [ ] s1;
-		s1 = new char[ 2 * strlen( s2 ) + 1 + i * 6 ];
+		delete [ ] out;
+		out = new char[ 2 * strlen( in ) + 1 + i * 6 ];
 	}
 
-	for ( i = 0, j = 0; s2[ j ] != '\0'; ++i, ++j )
-		switch ( s2[ j ] )
+	for ( i = 0, j = 0; in[ j ] != '\0'; ++i, ++j )
+		switch ( in[ j ] )
 		{
 			case '\n':
 			case '>':
@@ -1810,13 +1810,15 @@ void tex_strcpy( char *&s1, char* s2 )
 			case '^':
 			case '$':
 			case '&':
-				memcpy( s1 + i, "\\string", 7 );
+				memcpy( out + i, "\\string", 7 );
 				i += 7;
 			default:
-				s1[ i ] = s2[ j ];
+				out[ i ] = in[ j ];
 		}
 
-	s1[ i ] = '\0';
+	out[ i ] = '\0';
+
+	return out;
 }
 
 
@@ -1864,6 +1866,35 @@ void tex_fprintf( FILE *f, char* text )
 }
 
 
+/************
+ ANCESTORS
+ ************/
+void object::ancestors( FILE *f, bool html )
+{
+	char *ol;
+
+	if ( up != NULL )
+	{
+		up->ancestors( f, html );
+		ol = new char[ 2 * strlen( up->label ) + 1 ];
+		tex_strcpy( ol, up->label );
+
+		if ( up->up == NULL )
+			if ( html )
+				fprintf( f, "<TT><A HREF=\"#%s\">%s</A></TT>", up->label, up->label );
+			else
+				fprintf( f, "\\hrf{%s}{%s}", ol, up->label );
+		else
+			if ( html )
+				fprintf( f, "<TT>&mdash;&gt;<A HREF=\"#%s\">%s</A></TT>", up->label, up->label );
+			else
+				fprintf( f, "$\\rightarrow$\\hrf{%s}{%s}", ol, up->label );
+
+		delete [ ] ol;
+	}
+}
+
+
 /****************************************************
  TEX_REPORT_HEAD
  ****************************************************/
@@ -1871,25 +1902,16 @@ void tex_report_head( FILE *f, bool table )
 {
 	fprintf( f, "\\documentclass{article}\n\n" );
 	fprintf( f, "\\usepackage[%s,left=%fcm,right=%fcm,top=%fcm,bottom=%fcm]{geometry}\n", TEX_PAPER, TEX_LEFT, TEX_RIGHT, TEX_TOP, TEX_BOTTOM );
+	fprintf( f, "\\usepackage{color}\n" );
+	fprintf( f, "\\usepackage[colorlinks=true,linkcolor=blue,pdfborder={0 0 0}]{hyperref}\n\n" );
 
 	if ( table )
-	{
-		fprintf( f, "\\usepackage{color}\n" );
-		fprintf( f, "\\usepackage{longtable}\n" );
-		fprintf( f, "\\usepackage{tabu}\n\n" );
-		fprintf( f, "\\newcommand{\\lsd}[1] {\\texttt{\\color{blue}{\\detokenize{#1}}}}\n\n" );
-	}
-	else
-	{
-		fprintf( f, "\\usepackage[colorlinks=true,linkcolor=blue,pdfborder={0 0 0}]{hyperref}\n\n" );
-		fprintf( f, "\\newcommand{\\lsd}[1] {\\texttt{\\detokenize{#1}}}\n" );
-		fprintf( f, "\\newcommand{\\hr}[1] {\\hrf{#1}{#1}}\n" );
-		fprintf( f, "\\newcommand{\\hrf}[2] {\\hyperref[#1]{\\texttt{\\detokenize{#2}}}}\n" );
-	}
+		fprintf( f, "\\usepackage{longtable}\n\n" );
 
+	fprintf( f, "\\newcommand{\\hrf}[2] {\\hyperref[#1]{\\texttt{\\color{blue}{\\detokenize{#2}}}}}\n" );
 	fprintf( f, "\\setlength{\\parindent}{0cm}\n\n" );
 
-	fprintf( f, "\\title{Model: \\lsd{%s}}\n", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
+	fprintf( f, "\\title{Model: %s}\n", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
 	fprintf( f, "\\author{Automatically generated LSD report}\n" );
 	fprintf( f, "\\date{}\n\n" );
 
@@ -1903,7 +1925,7 @@ void tex_report_head( FILE *f, bool table )
  ****************************************************/
 void object::tex_report_struct( FILE *f, bool table )
 {
-	char *ol, *vl;
+	char *ol, *vl, min_val[ 32 ], max_val[ 32 ];
 	bridge *cb;
 	description *cd;
 	variable *cv;
@@ -1913,7 +1935,7 @@ void object::tex_report_struct( FILE *f, bool table )
 
 	ol = new char[ 2 * strlen( label ) + 1 ];
 	tex_strcpy( ol, label );
-	fprintf( f, "\\subsection{Object: \\lsd{%s}} \\label{%s}\n\n", label, ol );
+	fprintf( f, "\\subsection{Object: %s} \\label{%s}\n\n", label, ol );
 	delete [ ] ol;
 
 	if ( up != NULL )
@@ -1925,33 +1947,43 @@ void object::tex_report_struct( FILE *f, bool table )
 
 	if ( b != NULL )
 	{
-		fprintf( f,"\\emph{Containing:} \\lsd{%s}", b->blabel );
+		ol = new char[ 2 * strlen( b->blabel ) + 1 ];
+		tex_strcpy( ol, b->blabel );
+		fprintf( f,"\\emph{Containing:} \\hrf{%s}{%s}", ol, b->blabel );
+		delete [ ] ol;
+
 		for ( cb = b->next; cb != NULL; cb = cb->next )
-			fprintf( f, ",	\\lsd{%s}", cb->blabel );
+		{
+			ol = new char[ 2 * strlen( cb->blabel ) + 1 ];
+			tex_strcpy( ol, cb->blabel );
+			fprintf( f, ",	\\hrf{%s}{%s}", ol, cb->blabel );
+			delete [ ] ol;
+		}
+
 		fprintf( f, "\n\n" );
 	}
 
 	cd = sim->search_description( label );
 	if ( cd->has_descr_text ( ) )
-		fprintf( f, "\\emph{Description:}\n\n\\detokenize{%s}\n\n", cd->text );
+		fprintf( f, "\\emph{Description:}\n\\detokenize{%s}\n\n", cd->text );
 
 	if ( v != NULL )
 	{
 		if ( ! table )
 			fprintf( f,"\\emph{Contained elements:}\n\n" );
 		else
-			fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n	 \\hline\n	\\textbf{Element} & \\textbf{Type} & \\textbf{Lags} & \\textbf{Description and initial values comments} \\\\ \n	 \\hline \\endhead\n  \\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n	\\endfoot\n	 \\endlastfoot\n" );
+			fprintf( f, "\\begin{longtable}{*{6}{|l}|p{7cm}|}\n	 \\hline\n	\\textbf{Element} & \\textbf{Type} & \\textbf{Lags} & \\textbf{Int.} & \\textbf{Min.} & \\textbf{Max.} & \\textbf{Description and initial values comments} \\\\ \n	 \\hline \\endhead\n  \\multicolumn{7}{r}{\\textit{Continued on next page...}} \\\\ \n	\\endfoot\n	 \\endlastfoot\n" );
 	}
 
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		vl = new char[ 2 * strlen( cv->label ) + 1 ];
 		tex_strcpy( vl, cv->label );
-		fprintf( f, "  \\lsd{%s} \\label{%s}", cv->label , vl );
-		delete [ ] vl;
 
 		if ( ! table )
 		{
+			fprintf( f, "  %s \\label{%s}", cv->label, vl );
+
 			if ( cv->param == 0 )
 				fprintf( f, " (variable" );
 			if ( cv->param == 1 )
@@ -1965,18 +1997,34 @@ void object::tex_report_struct( FILE *f, bool table )
 		}
 		else
 		{
+			fprintf( f, "  \\hrf{%s_init}{%s} \\label{%s}", vl, cv->label, vl );
+
 			if ( cv->param == 0 )
 				fprintf( f, " & Variable & " );
 			if ( cv->param == 1 )
 				fprintf( f, " & Parameter & " );
 			if ( cv->param == 2 )
 				fprintf( f, " & Function & " );
+
 			if ( cv->param == 1 || cv->num_lag == 0 )
 				fprintf( f, "& " );
 			else
 				fprintf( f, "%d & ", cv->num_lag );
+
+			if ( isnan( cv->min_val ) )
+				strcpy( min_val, "" );
+			else
+				snprintf( min_val, 32, "%g", cv->min_val );
+
+			if ( isnan( cv->max_val ) )
+				strcpy( max_val, "" );
+			else
+				snprintf( max_val, 32, "%g", cv->max_val );
+
+			fprintf( f, "%s & %s & %s & ", cv->integer ? "yes" : "", min_val, max_val );
 		}
 
+		delete [ ] vl;
 		bool desc_text = false;
 		cd = sim->search_description( cv->label );
 		if ( cd->has_descr_text ( ) )
@@ -2003,7 +2051,7 @@ void object::tex_report_struct( FILE *f, bool table )
 	if ( v != NULL )
 	{
 		if ( table )
-			fprintf( f, "\\end{longtabu}\n\n" );
+			fprintf( f, "\\end{longtable}\n\n" );
 		else
 			fprintf( f, "\n" );
 	}
@@ -2028,7 +2076,7 @@ void object::tex_report_observe( FILE *f, bool table )
 		fprintf( f, "\\section{Relevant elements to observe}\n\n" );
 		tab_lines = 0;
 		if ( table )
-			fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n	 \\hline\n	\\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
+			fprintf( f, "\\begin{longtable}{*{3}{|l}|p{9cm}|}\n	 \\hline\n	\\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
 	}
 
 	ol = new char[ 2 * strlen( label ) + 1 ];
@@ -2046,7 +2094,7 @@ void object::tex_report_observe( FILE *f, bool table )
 				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", vl, cv->label, ol, label );
 			else
 			{
-				fprintf( f, "  \\lsd{%s} & \\lsd{%s} & ", cv->label, label );
+				fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} & ", vl, cv->label, ol, label );
 				if ( cv->param == 0 )
 					fprintf( f, "Variable & " );
 				if ( cv->param == 1 )
@@ -2075,7 +2123,7 @@ void object::tex_report_observe( FILE *f, bool table )
 		{
 			if ( tab_lines == 0 )
 				fprintf( f, "  \\multicolumn{4}{|c|}{(none selected)} \\\\ \n  \\hline \n" );
-			fprintf( f, "\\end{longtabu}\n\n" );
+			fprintf( f, "\\end{longtable}\n\n" );
 		}
 		else
 			if ( tab_lines == 0 )
@@ -2101,7 +2149,7 @@ void object::tex_report_init( FILE *f, bool table )
 		fprintf( f, "\\section{Relevant elements to initialize}\n\n" );
 		tab_lines = 0;
 		if ( table )
-			fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n	 \\hline\n	\\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description and initial values comments} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
+			fprintf( f, "\\begin{longtable}{*{3}{|l}|p{9cm}|}\n	 \\hline\n	\\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description and initial values comments} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
 	}
 
 	ol = new char[ 2 * strlen( label ) + 1 ];
@@ -2119,7 +2167,7 @@ void object::tex_report_init( FILE *f, bool table )
 				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", vl, cv->label, ol, label );
 			else
 			{
-				fprintf( f, "  \\lsd{%s} & \\lsd{%s} & ", cv->label, label );
+				fprintf( f, "  \\hrf{%s_init}{%s} & \\hrf{%s}{%s} & ", vl, cv->label, ol, label );
 				if ( cv->param == 0 )
 					fprintf( f, "Variable & " );
 				if ( cv->param == 1 )
@@ -2160,7 +2208,7 @@ void object::tex_report_init( FILE *f, bool table )
 		{
 			if ( tab_lines == 0 )
 				fprintf( f, "  \\multicolumn{4}{|c|}{(none selected)} \\\\ \n  \\hline \n" );
-			fprintf( f, "\\end{longtabu}\n\n" );
+			fprintf( f, "\\end{longtable}\n\n" );
 		}
 		else
 			if ( tab_lines == 0 )
@@ -2188,7 +2236,7 @@ void object::tex_report_initall( FILE *f, bool table )
 	if ( up == NULL )
 	{
 		fprintf( f, "\\section{Initial values}\n\n" );
-		fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n	 \\hline\n	\\textbf{Object} & \\textbf{Element} & \\textbf{Lag} & \\textbf{Initial values (by instance)} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
+		fprintf( f, "\\begin{longtable}{*{3}{|l}|p{9cm}|}\n	 \\hline\n	\\textbf{Object} & \\textbf{Element} & \\textbf{Lag} & \\textbf{Initial values (by instance)} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
 	}
 
 	ol = new char[ 2 * strlen( label ) + 1 ];
@@ -2201,7 +2249,7 @@ void object::tex_report_initall( FILE *f, bool table )
 
 		if ( cv->param == 1 )
 		{
-			fprintf( f, "  \\lsd{%s} & \\lsd{%s} & & %g", ol, vl, cv->val[ 0 ] );
+			fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} \\label{%s_init} & & %g", ol, label, vl, cv->label, vl, cv->val[ 0 ] );
 			for ( j = 1, cur = hyper_next( label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
 			{
 				cv1 = cur->search_var( cur, cv->label );
@@ -2216,7 +2264,7 @@ void object::tex_report_initall( FILE *f, bool table )
 		{
 			for ( i = 0; i < cv->num_lag; ++i )
 			{
-				fprintf( f, "  \\lsd{%s} & \\lsd{%s} & %d & %g", ol, vl, i + 1, cv->val[ i ] );
+				fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} \\label{%s_init} & %d & %g", ol, label, vl, cv->label, vl, i + 1, cv->val[ i ] );
 				for ( j = 1, cur = hyper_next( label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
 				{
 					cv1 = cur->search_var( cur, cv->label );
@@ -2238,7 +2286,7 @@ void object::tex_report_initall( FILE *f, bool table )
 		cb->head->tex_report_initall( f, table );
 
 	if ( up == NULL )
-		fprintf( f, "\\end{longtabu}\n\n" );
+		fprintf( f, "\\end{longtable}\n\n" );
 }
 
 

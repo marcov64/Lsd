@@ -179,7 +179,7 @@ int load_configuration_gui( bool reload, string *warnings, int quick )
 	int res;
 
 	reset_configuration_gui( );
-	
+
 	if( ( res = sim.load_configuration( reload, warnings, quick ) ) == 0 )
 	{
 		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", model_path, sim.conf_file );
@@ -429,6 +429,9 @@ bool save_xml_configuration( int findex, const char *dest_path, bool quick )
 	xml_node cfgNode = lsdNode.append_child( "configuration" );
 	cfgNode.append_attribute( "version" ) = "1.0";
 
+	snprintf( ch, MAX_PATH_LENGTH, "LSD configuration file for model '%s', version %s, created in %s", get_str( model_info[ 0 ] ), get_str( model_info[ 1 ] ), get_str( model_info[ 2 ] ) );
+	cfgNode.append_attribute( "description" ) = ch;
+
 	// add simulation settings
 	xml_node setNode = cfgNode.append_child( "settings" );
 	xml_node simNode = setNode.append_child( "simulation" );
@@ -675,8 +678,17 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 		if ( cv->plot )
 			cn.append_attribute( "plot" ) = true;
 
+		if ( cv->integer )
+			cn.append_attribute( "integer" ) = true;
+
 		if ( cv->parallel )
 			cn.append_attribute( "parallel" ) = true;
+
+		if ( ! isnan( cv->max_val ) )
+			cn.append_attribute( "maximum" ) = cv->max_val;
+
+		if ( ! isnan( cv->min_val ) )
+			cn.append_attribute( "minimum" ) = cv->min_val;
 
 		if ( cv->deb_mode != 'n' )
 		{
@@ -711,7 +723,7 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 					if ( i != 0 )
 						data += ",";
 
-					data += to_string( "%.15g", cv1->initialized ? cv1->val[ i ] : 0 );
+					data += to_string( "%.15g", cv1->initialized ? cv1->chk_val( cv1->val[ i ] ) : 0 );
 				}
 			}
 
@@ -769,12 +781,12 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 				else
 					cns = cn.child( "sensitivity" );
 
-				for ( data = "", i = 0; cs->v != NULL && i < cs->numv; ++i )
+				for ( data = "", i = 0; cs->val != NULL && i < cs->num_val; ++i )
 				{
 					if ( i != 0 )
 						data += ",";
 
-					data += to_string( "%.15g", cs->v[ i ] );
+					data += to_string( "%.15g", cs->val[ i ] );
 				}
 
 				if ( cv->param )
@@ -992,13 +1004,13 @@ void object::save_insts( FILE *f )
 			cv1 = cur->search_var( NULL, cv->label );
 			if ( cv1->param == 1 )
 				if ( cv1->initialized )
-					fprintf( f, "\t%.15g", cv1->val[ 0 ] );
+					fprintf( f, "\t%.15g", cv1->chk_val( cv1->val[ 0 ] ) );
 				else
 					fprintf( f, "\t%c", '0' );
 			else
 				for ( i = 0; i < cv->num_lag; ++i )
 					if ( cv1->initialized )
-						fprintf( f, "\t%.15g", cv1->val[ i ] );
+						fprintf( f, "\t%.15g", cv1->chk_val( cv1->val[ i ] ) );
 					else
 						fprintf( f, "\t%c", '0' );
 		}
@@ -1060,7 +1072,7 @@ debugger
 void deb_log( bool on, int time )
 {
 	char fname[ MAX_PATH_LENGTH ];
-	
+
 	// check if should turn off
 	if ( ! on || sim.parallel_mode || sim.fast_mode != 0 )
 	{
@@ -1264,8 +1276,8 @@ LOAD_SENSITIVITY
 int load_sensitivity( FILE *f )
 {
 	bool integer;
-	vector < double > v;
-	int i, lag, param, numv;
+	vector < double > val;
+	int i, lag, param, num_val;
 	char cc, lab[ MAX_ELEM_LENGTH ];
 	variable *cv;
 	sensitivity *cs;
@@ -1290,7 +1302,7 @@ int load_sensitivity( FILE *f )
 			goto error1;					// and not parameter or lagged variable
 
 		// get lags and # of values to test
-		if ( fscanf( f, "%d %d ", &lag, &numv ) < 2 )
+		if ( fscanf( f, "%d %d ", & lag, & num_val ) < 2 )
 			goto error2;
 
 		// get variable type (newer versions)
@@ -1316,14 +1328,14 @@ int load_sensitivity( FILE *f )
 			lag = abs( lag ) - 1;
 		}
 
-		for ( v.resize( numv ), i = 0; i < numv; ++i )
-			if ( ! fscanf( f, "%lf", &v[ i ] ) )
+		for ( val.resize( num_val ), i = 0; i < num_val; ++i )
+			if ( ! fscanf( f, "%lf", & val[ i ] ) )
 				goto error5;
 
 		if ( ( cs = search_sensitivity( lab, lag ) ) != NULL )
 			delete cs;
 
-		new sensitivity( lab, & sim, param, lag, numv, & v, integer );
+		new sensitivity( lab, & sim, param, lag, integer, num_val, & val );
 	}
 
 	return 0;
@@ -1376,12 +1388,12 @@ bool save_sensitivity( FILE *f )
 	for ( cs = sim.sens; cs != NULL; cs = cs->next )
 	{
 		if ( cs->param == 1 )
-			fprintf( f, "%s 0 %d %c:", cs->label, cs->numv, cs->integer ? 'i' : 'f' );
+			fprintf( f, "%s 0 %d %c:", cs->label, cs->num_val, cs->integer ? 'i' : 'f' );
 		else
-			fprintf( f, "%s -%d %d %c:", cs->label, cs->lag + 1, cs->numv, cs->integer ? 'i' : 'f' );
+			fprintf( f, "%s -%d %d %c:", cs->label, cs->lag + 1, cs->num_val, cs->integer ? 'i' : 'f' );
 
-		for ( i = 0; cs->v != NULL && i < cs->numv; ++i )
-			fprintf( f," %g", cs->v[ i ] );
+		for ( i = 0; cs->val != NULL && i < cs->num_val; ++i )
+			fprintf( f," %g", cs->val[ i ] );
 
 		fprintf( f,"\n" );
 	}
@@ -1575,12 +1587,12 @@ void object::get_sa_limits( FILE *out, const char *sep )
 
 		// find max and min values
 		double min = HUGE_VAL, max = - HUGE_VAL;
-		for ( i = 0; cs->v != NULL &&  i < cs->numv; ++i )
-			if ( cs->v[ i ] < min )
-				min = cs->v[ i ];
+		for ( i = 0; cs->val != NULL &&  i < cs->num_val; ++i )
+			if ( cs->val[ i ] < min )
+				min = cs->val[ i ];
 			else
-				if ( cs->v[ i ] > max )
-					max = cs->v[ i ];
+				if ( cs->val[ i ] > max )
+					max = cs->val[ i ];
 
 		// check meta-parameters
 		if ( cs->param == 1 )

@@ -521,7 +521,7 @@ int object::load_xml_struct( xml_node &n, bool quick )
 							val = strtodsplit( cns.child( "values" ).text( ).get( ), ',' );
 
 							if ( val.size( ) > 1 )
-								new sensitivity( str, sim, type, 0, val.size( ), &val, integer );
+								new sensitivity( str, sim, type, 0, integer, val.size( ), &val );
 						}
 						else
 							if ( type == 0 )
@@ -539,7 +539,7 @@ int object::load_xml_struct( xml_node &n, bool quick )
 									val = strtodsplit( sn.text( ).get( ), ',' );
 
 									if ( val.size( ) > 1 )
-										new sensitivity( str, sim, type, i - 1, val.size( ), &val, integer );
+										new sensitivity( str, sim, type, i - 1, integer, val.size( ), &val );
 								}
 							}
 					}
@@ -789,7 +789,10 @@ int object::load_xml_insts( xml_node &n, n_mapT &node_map, set < int > &warning 
 		cv->save = cn.attribute( "save" ).as_bool( );
 		cv->savei = cn.attribute( "save_file" ).as_bool( );
 		cv->plot = cn.attribute( "plot" ).as_bool( );
+		cv->integer = cn.attribute( "integer" ).as_bool( );
 		cv->parallel = cn.attribute( "parallel" ).as_bool( );
+		cv->max_val = cn.attribute( "maximum" ).as_double( NAN );
+		cv->min_val = cn.attribute( "minimum" ).as_double( NAN );
 		cv->deb_mode = cn.attribute( "debug" ).as_string( "n" )[ 0 ];
 		cv->initialized = cn.attribute( "initialized" ).as_bool( true );
 
@@ -1155,7 +1158,7 @@ SENSITIVITY CONSTRUCTOR
 Add or update sensitivity settings for a model element
 ******************************************************************************/
 sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, int _lag,
-						  int _numv, vector < double > *_v, bool _integer )
+						  bool _integer, int _num_val, vector < double > *_val )
 {
 	int i;
 	sensitivity *cs;
@@ -1171,12 +1174,12 @@ sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, int _la
 		strcpy( label, lab );
 	}
 
-	if ( _numv > 0 && _v != NULL )
+	if ( _num_val > 0 && _val != NULL )
 	{
-		numv = _numv;
-		v = new double [ _v->size( ) ];
-		for ( i = 0; i < numv; ++i )
-			v[ i ] = integer ? round( ( *_v )[ i ] ) : ( *_v )[ i ];
+		num_val = _num_val;
+		val = new double [ _val->size( ) ];
+		for ( i = 0; i < num_val; ++i )
+			val[ i ] = integer ? round( ( *_val )[ i ] ) : ( *_val )[ i ];
 	}
 
 	if ( sim->sens == NULL )
@@ -1198,7 +1201,7 @@ sensitivity::~sensitivity( void )
 	sensitivity *cs, *ps;
 
 	delete [ ] label;
-	delete [ ] v;
+	delete [ ] val;
 
 	if ( sim->sens != NULL )
 	{

@@ -896,10 +896,12 @@ object *operate( object *r )
 			Tcl_LinkVar( interp, "watch", ( char * ) &watch, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "watch_write", ( char * ) &watch_write, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "parallel", ( char * ) &parallel, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "nature", ( char * ) &nature, TCL_LINK_BOOLEAN );
 
 			save = cv->save;
 			savei = cv->savei;
 			plot = cv->plot;
+			nature = cv->integer;
 			debug = ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? 1 : 0;
 			watch = ( cv->deb_mode == 'w' || cv->deb_mode == 'W' || cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? 1 : 0;
 			watch_write = ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? 1 : 0;
@@ -909,29 +911,42 @@ object *operate( object *r )
 			cmd( "set initial %d", cd->initial ? 1 : 0 );
 			cmd( "set vname %s", lab_old );
 
+			if ( isnan( cv->max_val ) )
+				cmd( "set vmax \"%s\"", NON_AVAILABLE );
+			else
+				cmd( "set vmax %g", cv->max_val );
+
+			if ( isnan( cv->min_val ) )
+				cmd( "set vmin \"%s\"", NON_AVAILABLE );
+			else
+				cmd( "set vmin %g", cv->min_val );
+
 			cmd( "set T .chgelem" );
 			cmd( "newtop $T \"Change Element\" { set done 2 }" );
 
 			cmd( "ttk::frame $T.h" );
 
-			cmd( "ttk::frame $T.h.l" );
+			cmd( "ttk::frame $T.h.o" );
+
+			cmd( "ttk::frame $T.h.o.l" );
 
 			if ( cv->param == 0 )
-				cmd( "ttk::label $T.h.l.lab_ent -text \"Variable:\"" );
+				cmd( "ttk::label $T.h.o.l.lab_ent -text \"Variable:\"" );
 			if ( cv->param == 1 )
-				cmd( "ttk::label $T.h.l.lab_ent -text \"Parameter:\"" );
+				cmd( "ttk::label $T.h.o.l.lab_ent -text \"Parameter:\"" );
 			if ( cv->param == 2 )
-				cmd( "ttk::label $T.h.l.lab_ent -text \"Function:\"" );
+				cmd( "ttk::label $T.h.o.l.lab_ent -text \"Function:\"" );
 
-			cmd( "ttk::label $T.h.l.ent_var -style hl.TLabel -text $vname" );
-			cmd( "pack $T.h.l.lab_ent $T.h.l.ent_var -side left -padx 2" );
+			cmd( "ttk::label $T.h.o.l.ent_var -style hl.TLabel -text $vname" );
+			cmd( "pack $T.h.o.l.lab_ent $T.h.o.l.ent_var -side left -padx 2" );
 
-			cmd( "ttk::frame $T.h.o" );
-			cmd( "ttk::label $T.h.o.l -text \"In object:\"" );
-			cmd( "ttk::label $T.h.o.obj -style hl.TLabel -text \"%s\"", cv->up->label );
-			cmd( "pack $T.h.o.l $T.h.o.obj -side left -padx 2" );
+			cmd( "ttk::frame $T.h.o.o" );
+			cmd( "ttk::label $T.h.o.o.l -text \"In object:\"" );
+			cmd( "ttk::label $T.h.o.o.obj -style hl.TLabel -text \"%s\"", cv->up->label );
+			cmd( "pack $T.h.o.o.l $T.h.o.o.obj -side left -padx 2" );
 
-			cmd( "pack $T.h.l $T.h.o" );
+			cmd( "pack $T.h.o.l $T.h.o.o -side left -padx 5" );
+			cmd( "pack $T.h.o" );
 
 			if ( cv->num_lag > 0 || cv->param == 1 )
 			{
@@ -1024,11 +1039,11 @@ object *operate( object *r )
 			{
 				cmd( "bind $T <Control-g> \"$T.b0.upd invoke\"; bind $T <Control-G> \"$T.b0.upd invoke\"" );
 
-				cmd( "pack $T.b0.prop $T.b0.upd $T.b0.mov $T.b0.del -padx $butSpc -side left" );
+				cmd( "pack $T.b0.prop $T.b0.upd $T.b0.mov $T.b0.del -padx $butSpc -side left -pady 5" );
 				cmd( "tooltip::tooltip $T.b0.upd \"Define special update timing\"" );
 			}
 			else
-				cmd( "pack $T.b0.prop $T.b0.mov $T.b0.del -padx $butSpc -side left" );
+				cmd( "pack $T.b0.prop $T.b0.mov $T.b0.del -padx $butSpc -side left -pady 5" );
 
 			cmd( "tooltip::tooltip $T.b0.prop \"Change name, type or lags\"" );
 			cmd( "tooltip::tooltip $T.b0.mov \"Move to another object\"" );
@@ -1036,82 +1051,106 @@ object *operate( object *r )
 
 			cmd( "ttk::frame $T.b1" );
 
-			cmd( "ttk::frame $T.b1.sav" );
-			cmd( "ttk::checkbutton $T.b1.sav.n -text \"Save: save the series for analysis	   \" -variable save -underline 0 -command { \
+			cmd( "ttk::frame $T.b1.l1" );
+			cmd( "ttk::checkbutton $T.b1.l1.n -text Save -variable save -width 15 -underline 0 -command { \
 					if { $save } { \
-						.chgelem.b1.sav.i configure -state normal \
+						.chgelem.b1.l1.i configure -state normal \
 					} else { \
 						set savei 0; \
-						.chgelem.b1.sav.i configure -state disabled \
+						.chgelem.b1.l1.i configure -state disabled \
 					} \
 				}" );
-			cmd( "ttk::checkbutton $T.b1.sav.i -text \"Save in separate files\" -variable savei -underline 17" );
+			cmd( "ttk::checkbutton $T.b1.l1.i -text \"Save to file\" -variable savei -width 15 -underline 8" );
 			cmd( "if { ! $save } { \
 					set savei 0; \
-					.chgelem.b1.sav.i configure -state disabled \
+					.chgelem.b1.l1.i configure -state disabled \
 				}" );
-			cmd( "pack $T.b1.sav.n $T.b1.sav.i -side left -anchor w" );
+			cmd( "ttk::checkbutton $T.b1.l1.plt -text \"Run-time plot\" -variable plot -width 15 -underline 9" );
+			cmd( "pack $T.b1.l1.n $T.b1.l1.i $T.b1.l1.plt -side left -anchor w -padx 10" );
 
-			cmd( "ttk::checkbutton $T.b1.plt -text \"Run-time plot: observe the series during the simulation execution\" -variable plot -underline 9" );
-			cmd( "ttk::checkbutton $T.b1.deb -text \"Debug: interrupt after variable is updated\" -variable debug -underline 0" );
-
-			cmd( "ttk::frame $T.b1.watch" );
-			cmd( "ttk::checkbutton $T.b1.watch.n -text \"Watch: interrupt when variable is accessed	   \" -variable watch -underline 0 -command { \
+			cmd( "ttk::frame $T.b1.l2" );
+			cmd( "ttk::checkbutton $T.b1.l2.deb -text Debug -variable debug -width 15 -underline 0" );
+			cmd( "ttk::checkbutton $T.b1.l2.w -text Watch -variable watch -width 15 -underline 0 -command { \
 					if { $watch } { \
-						.chgelem.b1.watch.i configure -state normal \
+						.chgelem.b1.l2.ww configure -state normal \
 					} else { \
 						set watch_write 0; \
-						.chgelem.b1.watch.i configure -state disabled \
+						.chgelem.b1.l2.ww configure -state disabled \
 					} \
 				}" );
-			cmd( "ttk::checkbutton $T.b1.watch.i -text \"Watch only writes\" -variable watch_write -underline 4" );
+			cmd( "ttk::checkbutton $T.b1.l2.ww -text \"Watch only writes\" -variable watch_write -width 15 -underline 4" );
 			cmd( "if { ! $watch } { \
 					set watch_write 0; \
-					.chgelem.b1.watch.i configure -state disabled \
+					.chgelem.b1.l2.ww configure -state disabled \
 				}" );
-			cmd( "pack $T.b1.watch.n $T.b1.watch.i -side left -anchor w" );
+			cmd( "pack $T.b1.l2.deb $T.b1.l2.w $T.b1.l2.ww -side left -anchor w -padx 10" );
 
-			cmd( "ttk::checkbutton $T.b1.par -text \"Parallel: allow multi-object parallel updating for this equation\" -variable parallel -underline 0" );
+			cmd( "ttk::frame $T.b1.l3" );
+			cmd( "ttk::checkbutton $T.b1.l3.par -text Parallel -variable parallel -width 15" );
+			cmd( "ttk::checkbutton $T.b1.l3.int -text Integer -variable nature -width 15" );
+			cmd( "pack $T.b1.l3.par $T.b1.l3.int -side left -anchor w -padx 10" );
+
+			cmd( "pack $T.b1.l1 $T.b1.l2 $T.b1.l3 -anchor w -padx 5" );
+
+			cmd( "tooltip::tooltip $T.b1.l1.n \"Save the element series for analysis to memory or results file\"" );
+			cmd( "tooltip::tooltip $T.b1.l1.i \"Save the element series for analysis to a separate file\"" );
+			cmd( "tooltip::tooltip $T.b1.l1.plt \"Observe the element series during simulation execution\"" );
+			cmd( "tooltip::tooltip $T.b1.l2.deb \"Trigger debugger after element is updated\"" );
+			cmd( "tooltip::tooltip $T.b1.l2.w \"Trigger debugger when element is accessed\"" );
+			cmd( "tooltip::tooltip $T.b1.l2.ww \"Trigger debugger only when element is modified\"" );
+			cmd( "tooltip::tooltip $T.b1.l3.par \"Allow multi-object parallel updating of this element\"" );
+			cmd( "tooltip::tooltip $T.b1.l3.int \"Element is integer (round to integer otherwise)\"" );
 
 			switch ( cv->param )
 			{
 				case 1:
-					cmd( "pack $T.b1.sav $T.b1.plt $T.b1.watch -anchor w" );
+					cmd( ".chgelem.b1.l2.deb configure -state disabled" );
+					cmd( ".chgelem.b1.l3.par configure -state disabled" );
 					break;
+
 				case 2:
-					cmd( "pack $T.b1.sav $T.b1.plt $T.b1.deb -anchor w" );
-					cmd( "bind $T <Control-d> \"$T.b1.deb invoke\"; bind $T <Control-D> \"$T.b1.deb invoke\"" );
-					break;
-				case 0:
-					cmd( "pack $T.b1.sav $T.b1.plt $T.b1.deb $T.b1.watch $T.b1.par -anchor w" );
-					cmd( "bind $T <Control-d> \"$T.b1.deb invoke\"; bind $T <Control-D> \"$T.b1.deb invoke\"" );
-					cmd( "bind $T <Control-p> \"$T.b1.par invoke\"; bind $T <Control-P> \"$T.b1.par invoke\"" );
+					cmd( ".chgelem.b1.l2.w configure -state disabled" );
+					cmd( ".chgelem.b1.l3.par configure -state disabled" );
 			}
 
-			cmd( "pack $T.h $T.b0 $T.b1 -pady 5" );
+			cmd( "ttk::frame $T.b2" );
+			cmd( "ttk::label $T.b2.l -text \"Include in documentation to be\"" );
+			cmd( "ttk::checkbutton $T.b2.ini -text \"Initialized\" -variable initial -underline 0" );
+
+			if ( cv->param != 1 && cv->num_lag == 0 )
+				cmd( "$T.b2.ini configure -state disabled" );
+
+			cmd( "ttk::checkbutton $T.b2.obs -text \"Observed\" -variable observe -underline 0" );
+
+			if ( cv->param == 2 )
+				cmd( "$T.b2.obs configure -state disabled" );
+
+			cmd( "pack $T.b2.l $T.b2.obs $T.b2.ini -side left -padx 5" );
+
+			cmd( "ttk::frame $T.b3" );
+			cmd( "ttk::frame $T.b3.min" );
+			cmd( "ttk::label $T.b3.min.l -width 10 -anchor e -text \"Minimum\"" );
+			cmd( "ttk::entry $T.b3.min.e -textvariable vmin -width 15 -justify center" );
+			cmd( "tooltip::tooltip $T.b3.min.e \"Minimum value allowed for element (%s or blank for no limit)\"", NON_AVAILABLE );
+			cmd( "pack $T.b3.min.l $T.b3.min.e -side left -anchor w -padx 2 -pady 2" );
+			cmd( "ttk::frame $T.b3.max" );
+			cmd( "ttk::label $T.b3.max.l -width 10 -anchor e -text \"Maximum\"" );
+			cmd( "ttk::entry $T.b3.max.e -textvariable vmax -width 15 -justify center" );
+			cmd( "tooltip::tooltip $T.b3.max.e \"Maximum value allowed for element (%s or blank for no limit)\"", NON_AVAILABLE );
+			cmd( "pack $T.b3.max.l $T.b3.max.e -side left -anchor w -padx 2 -pady 2" );
+			cmd( "pack $T.b3.min $T.b3.max -anchor w -side left -padx 5" );
+
+			cmd( "pack $T.h $T.b0 $T.b1 $T.b2 $T.b3 -pady 5" );
 
 			cmd( "set Td $T.desc" );
 			cmd( "ttk::frame $Td" );
-
-			cmd( "ttk::frame $Td.opt" );
-			cmd( "ttk::label $Td.opt.l -text \"Include in documentation to be\"" );
-			cmd( "ttk::checkbutton $Td.opt.ini -text \"Initialized\" -variable initial -underline 0" );
-			cmd( "ttk::checkbutton $Td.opt.obs -text \"Observed\" -variable observe -underline 0" );
-
-			if ( cv->param == 1 || cv->num_lag > 0 )
-			{
-				cmd( "pack $Td.opt.l $Td.opt.obs $Td.opt.ini -side left" );
-				cmd( "bind $T <Control-i> \"$Td.opt.ini invoke\"; bind $T <Control-I> \"$Td.opt.ini invoke\"" );
-			}
-			else
-				cmd( "pack $Td.opt.l $Td.opt.obs -side left" );
 
 			cmd( "ttk::frame $Td.f" );
 			cmd( "ttk::label $Td.f.int -text \"Description\"" );
 
 			cmd( "ttk::frame $Td.f.desc" );
 			cmd( "ttk::scrollbar $Td.f.desc.yscroll -command \"$Td.f.desc.text yview\"" );
-			cmd( "ttk::text $Td.f.desc.text -wrap word -width 60 -height 8 -yscrollcommand \"$Td.f.desc.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
+			cmd( "ttk::text $Td.f.desc.text -wrap word -width 60 -height 6 -yscrollcommand \"$Td.f.desc.yscroll set\" -dark $darkTheme -style smallFixed.TText" );
 			cmd( "pack $Td.f.desc.yscroll -side right -fill y" );
 			cmd( "pack $Td.f.desc.text -anchor w -expand yes -fill both" );
 			cmd( "mouse_wheel $Td.f.desc.text" );
@@ -1119,16 +1158,16 @@ object *operate( object *r )
 			cmd( "pack $Td.f.int $Td.f.desc" );
 
 			cmd( "ttk::frame $Td.b" );
-			cmd( "ttk::button $Td.b.eq -width [ expr { $butWid + 2 } ] -text \"Equation\" -command { set done 3 } -underline 1" );
+			cmd( "ttk::button $Td.b.eq -width [ expr { $butWid + 2 } ] -text Equation -command { set done 3 } -underline 1" );
 			cmd( "ttk::button $Td.b.auto_doc -width [ expr { $butWid + 2 } ] -text \"Auto Desc.\" -command { set done 9 } -underline 0" );
 			cmd( "ttk::button $Td.b.us -width [ expr { $butWid + 2 } ] -text \"Using Elem.\" -command { set done 4 } -underline 0" );
-			cmd( "ttk::button $Td.b.using -width [ expr { $butWid + 2 } ] -text \"Elem. Used\" -command { set done	7} -underline 0" );
+			cmd( "ttk::button $Td.b.using -width [ expr { $butWid + 2 } ] -text \"Elem. Used\" -command { set done 7 } -underline 0" );
 
 			if ( ! strcmp( cd->type, "Parameter" ) )
-				cmd( "pack $Td.b.auto_doc $Td.b.us -padx $butSpc -side left" );
+				cmd( "pack $Td.b.auto_doc $Td.b.us -padx $butSpc -side left -pady 5" );
 			else
 			{
-				cmd( "pack $Td.b.eq $Td.b.auto_doc $Td.b.us $Td.b.using -padx $butSpc -side left" );
+				cmd( "pack $Td.b.eq $Td.b.auto_doc $Td.b.us $Td.b.using -padx $butSpc -side left -pady 5" );
 				cmd( "bind $T <Control-q> \"$Td.b.eq invoke\"; bind $T <Control-Q> \"$Td.b.eq invoke\"" );
 				cmd( "bind $T <Control-e> \"$Td.b.using invoke\"; bind $T <Control-E> \"$Td.b.using invoke\"" );
 			}
@@ -1141,7 +1180,7 @@ object *operate( object *r )
 			if ( cv->param == 1 || cv->num_lag > 0 )
 			{
 				cmd( "ttk::frame $Td.i" );
-				cmd( "ttk::label $Td.i.int -text \"Initial values\"" );
+				cmd( "ttk::label $Td.i.int -text \"Initial values description\"" );
 
 				cmd( "ttk::frame $Td.i.desc" );
 				cmd( "ttk::scrollbar $Td.i.desc.yscroll -command \"$Td.i.desc.text yview\"" );
@@ -1155,19 +1194,34 @@ object *operate( object *r )
 				cmd( "ttk::frame $Td.b2" );
 				cmd( "ttk::button $Td.b2.setall -width [ expr { $butWid + 2 } ] -text \"Initial Values\" -command { set done 11 } -underline 1" );
 				cmd( "ttk::button $Td.b2.sens -width [ expr { $butWid + 2 } ] -text \"Sensitivity\" -command { set done 12 } -underline 5" );
-				cmd( "pack $Td.b2.setall $Td.b2.sens -padx $butSpc -side left" );
 
-				cmd( "pack $Td.opt $Td.f $Td.b $Td.i $Td.b2 -pady 5" );
+				if ( cv->param == 0 )
+				{
+					cmd( "ttk::button $Td.b2.da -width [ expr { $butWid + 2 } ] -text \"Assimilation\" -command { set done 15 }" );
+					cmd( "tooltip::tooltip $Td.b2.da \"Set data assimilation values for this element\"" );
+					cmd( "pack $Td.b2.setall $Td.b2.sens $Td.b2.da -padx $butSpc -side left -pady 5" );
+				}
+				else
+					cmd( "pack $Td.b2.setall $Td.b2.sens -padx $butSpc -side left -pady 5" );
+
+				cmd( "pack $Td.f $Td.b $Td.i $Td.b2 -pady 5" );
 
 				cmd( "tooltip::tooltip $Td.b2.setall \"Set initial value(s) of this element\"" );
-				cmd( "tooltip::tooltip $Td.b2.sens \"Set sensitivity analysis values for this element \"" );
+				cmd( "tooltip::tooltip $Td.b2.sens \"Set sensitivity analysis values for this element\"" );
 
 				cmd( "bind $T <Control-n> \"$Td.b2.setall invoke\"; bind $T <Control-N> \"$Td.b2.setall invoke\"" );
 				cmd( "bind $T <Control-t> \"$Td.b2.sens invoke\"; bind $T <Control-T> \"$Td.b2.sens invoke\"" );
-
 			}
 			else
-				cmd( "pack $Td.opt $Td.f $Td.b -pady 5" );
+				if ( cv->param == 0 )
+				{
+					cmd( "ttk::button $Td.da -width [ expr { $butWid + 2 } ] -text \"Assimilation\" -command { set done 15 }" );
+					cmd( "tooltip::tooltip $Td.da \"Set data assimilation values for this element\"" );
+
+					cmd( "pack $Td.f $Td.b $Td.da -pady 5" );
+				}
+				else
+					cmd( "pack $Td.f $Td.b -pady 5" );
 
 			cmd( "pack $Td -pady 5" );
 
@@ -1176,12 +1230,14 @@ object *operate( object *r )
 			cmd( "bind $T <Control-r> \"$T.b0.prop invoke\"; bind $T <Control-R> \"$T.b0.prop invoke\"" );
 			cmd( "bind $T <Control-m> \"$T.b0.mov invoke\"; bind $T <Control-M> \"$T.b0.mov invoke\"" );
 			cmd( "bind $T <Control-l> \"$T.b0.del invoke\"; bind $T <Control-L> \"$T.b0.del invoke\"" );
-			cmd( "bind $T <Control-s> \"$T.b1.sav.n invoke\"; bind $T <Control-S> \"$T.b1.sav.n invoke\"" );
-			cmd( "bind $T <Control-f> \"$T.b1.sav.i invoke\"; bind $T <Control-F> \"$T.b1.sav.i invoke\"" );
-			cmd( "bind $T <Control-p> \"$T.b1.plt invoke\"; bind $T <Control-P> \"$T.b1.plt invoke\"" );
-			cmd( "bind $T <Control-w> \"$T.b1.watch.n invoke\"; bind $T <Control-W> \"$T.b1.watch.n invoke\"" );
-			cmd( "bind $T <Control-h> \"$T.b1.watch.i invoke\"; bind $T <Control-H> \"$T.b1.watch.i invoke\"" );
-			cmd( "bind $T <Control-o> \"$Td.opt.obs invoke\"; bind $T <Control-O> \"$Td.opt.obs invoke\"" );
+			cmd( "bind $T <Control-s> \"$T.b1.l1.n invoke\"; bind $T <Control-S> \"$T.b1.l1.n invoke\"" );
+			cmd( "bind $T <Control-f> \"$T.b1.l1.i invoke\"; bind $T <Control-F> \"$T.b1.l1.i invoke\"" );
+			cmd( "bind $T <Control-p> \"$T.b1.l1.plt invoke\"; bind $T <Control-P> \"$T.b1.l1.plt invoke\"" );
+			cmd( "bind $T <Control-d> \"$T.b1.l2.deb invoke\"; bind $T <Control-D> \"$T.b1.l2.deb invoke\"" );
+			cmd( "bind $T <Control-w> \"$T.b1.l2.w invoke\"; bind $T <Control-W> \"$T.b1.l2.w invoke\"" );
+			cmd( "bind $T <Control-h> \"$T.b1.l2.ww invoke\"; bind $T <Control-H> \"$T.b1.l2.ww invoke\"" );
+			cmd( "bind $T <Control-i> \"$T.b2.ini invoke\"; bind $T <Control-I> \"$T.b2.ini invoke\"" );
+			cmd( "bind $T <Control-o> \"$T.b2.obs invoke\"; bind $T <Control-O> \"$T.b2.obs invoke\"" );
 			cmd( "bind $T <Control-a> \"$Td.b.auto_doc invoke\"; bind $T <Control-A> \"$Td.b.auto_doc invoke\"" );
 			cmd( "bind $T <Control-u> \"$Td.b.us invoke\"; bind $T <Control-U> \"$Td.b.us invoke\"" );
 
@@ -1259,15 +1315,31 @@ object *operate( object *r )
 							deb_mode = 'n';
 				}
 
+				double vmax = get_double( "vmax", NULL, true ),
+					   vmin = get_double( "vmin", NULL, true );
+
+				if ( ! isnan( vmin ) && vmax < vmin )
+				{
+					cmd( "ttk::messageBox -parent .chgelem -type ok -title Warning -icon warning -message \"Invalid maximum value\" -detail \"Maximum element value '%g' is less than the minimum value '%g', discarding.\"", vmax, vmin );
+					vmax = NAN;
+				}
+
 				for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				{
-				   cv = cur->search_var( NULL, lab_old );
-				   cv->save = save;
-				   cv->savei = savei;
-				   cv->deb_mode = deb_mode;
-				   cv->plot = plot;
-				   cv->parallel = parallel;
-				   cv->observe = observe;
+					cv = cur->search_var( NULL, lab_old );
+					cv->save = save;
+					cv->savei = savei;
+					cv->deb_mode = deb_mode;
+					cv->plot = plot;
+					cv->parallel = parallel;
+					cv->observe = observe;
+					cv->integer = nature;
+					cv->max_val = vmax;
+					cv->min_val = vmin;
+
+					// ensure variable constraints are respected
+					for ( i = 0; i < ( cv->param == 1 ? 1 : cv->num_lag ); ++i )
+						cv->val[ i ] = cv->chk_val( cv->val[ i ] );
 				}
 
 				sim.change_description( lab_old, NULL, -1, eval_str( "[ .chgelem.desc.f.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
@@ -1299,6 +1371,7 @@ object *operate( object *r )
 			Tcl_UnlinkVar( interp, "watch" );
 			Tcl_UnlinkVar( interp, "watch_write" );
 			Tcl_UnlinkVar( interp, "parallel" );
+			Tcl_UnlinkVar( interp, "nature" );
 			cmd( "unset done" );
 
 			// options to be handled in a second run of the operate function
@@ -1328,7 +1401,7 @@ object *operate( object *r )
 
 			if ( choice != 0 )
 			{
-				redrawRoot = redrawStruc = false;	// no redraw yet
+				redrawRoot = redrawStruc = false;// no redraw yet
 				return r;					// execute command
 			}
 
@@ -1720,7 +1793,7 @@ object *operate( object *r )
 			else								// edit sensitivity analysis data
 			{
 				if ( ( cs = search_sensitivity( cv->label, lag ) ) == NULL )
-					cs = new sensitivity( cv->label, & sim, cv->param, lag );
+					cs = new sensitivity( cv->label, & sim, cv->param, lag, cv->integer );
 
 				i = cs->dataentry( );
 
@@ -2130,7 +2203,7 @@ object *operate( object *r )
 				cmd( "set path \"%s\"", model_path );
 
 			cmd( "cd \"$path\"" );
-			
+
 		// Reload model
 		case 38:
 
@@ -3493,7 +3566,7 @@ object *operate( object *r )
 						break;
 
 				for ( i = 1, cs = sim.sens; cs!=NULL; cs = cs->next )
-					i *= cs->numv;
+					i *= cs->num_val;
 				cur = sim.root->b->head;
 				sim.root->add_n_objects2( cur->label, i - 1, cur );
 
@@ -4382,12 +4455,12 @@ object *operate( object *r )
 			for ( cs = sim.sens; cs != NULL; cs = cs->next )
 			{
 				if ( cs->param == 1 )
-					plog( "Param: %s\\[%s\\]\t#%d:\t", cs->label, cs->integer ? "int" : "flt", cs->numv );
+					plog( "Param: %s\\[%s\\]\t#%d:\t", cs->label, cs->integer ? "int" : "flt", cs->num_val );
 				else
-					plog( "Var: %s(-%d)\\[%s\\]\t#%d:\t", cs->label, cs->lag + 1, cs->integer ? "int" : "flt", cs->numv );
+					plog( "Var: %s(-%d)\\[%s\\]\t#%d:\t", cs->label, cs->lag + 1, cs->integer ? "int" : "flt", cs->num_val );
 
-				for ( i = 0; i < cs->numv; ++i )
-					plog_tag( "%g\t", "highlight", cs->v[ i ] );
+				for ( i = 0; i < cs->num_val; ++i )
+					plog_tag( "%g\t", "highlight", cs->val[ i ] );
 				plog( "\n" );
 			}
 

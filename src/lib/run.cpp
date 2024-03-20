@@ -596,6 +596,7 @@ ALLOC_SAVE_MEM
 *********************************/
 bool object::alloc_save_mem( void )
 {
+	int i;
 	bridge *cb;
 	object *cur;
 	variable *cv;
@@ -603,14 +604,21 @@ bool object::alloc_save_mem( void )
 	// for each variable set the data saving support
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		if ( ( cv->num_lag > 0 || cv->param == 1 ) && ! cv->initialized )
+		if ( cv->num_lag > 0 || cv->param == 1 )
 		{
-			sim->error_hard( "required initialization values missing",
-							 "select the object and choose menu 'Data'/'Initial Values'",
-							 false,
-							 "%s '%s' in object '%s' has not been initialized",
-							 cv->param == 1 ? "parameter" : "variable", cv->label, label );
-			goto error;
+			if ( ! cv->initialized )
+			{
+				sim->error_hard( "required initialization values missing",
+								 "select the object and choose menu 'Data'/'Initial Values'",
+								 false,
+								 "%s '%s' in object '%s' has not been initialized",
+								 cv->param == 1 ? "parameter" : "variable", cv->label, label );
+				goto error;
+			}
+
+			// ensure variable constraints are respected
+			for ( i = 0; i < ( cv->param == 1 ? 1 : cv->num_lag ); ++i )
+				cv->val[ i ] = cv->chk_val( cv->val[ i ] );
 		}
 
 		cv->last_update = 0;

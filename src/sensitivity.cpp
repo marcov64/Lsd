@@ -29,12 +29,17 @@ Get values for sensitivity analysis
 ******************************************************************************/
 int sensitivity::dataentry( void )
 {
-	int i, j, res, nPar, samples;
-	double temp, start, end;
+	bool int_var = false;
 	char *sss = NULL, *tok = NULL, type;
 	const char *app;
+	double temp, start, end;
+	int i, j, res, nPar, samples;
+	variable *cv = sim->root->search_var( NULL, label, true );
 
-	cmd( "set integer %d", integer );
+	if ( cv != NULL && cv->integer )
+		int_var = true;
+
+	cmd( "set integer %d", int_var ? 1 : integer );
 
 	cmd( "set sens .sens" );
 	cmd( "newtop .sens \"Sensitivity Analysis\" { set choice 2 }" );
@@ -72,19 +77,22 @@ int sensitivity::dataentry( void )
 	cmd( "tooltip::tooltip .sens.fb.del \"Delete all current values\"" );
 	cmd( "tooltip::tooltip .sens.fb.rem \"Remove variable from sensitivity analysis\"" );
 
+	if ( int_var )
+		cmd( ".sens.fb.int configure -state disabled" );
+
 	cmd( "okhelpcancel .sens fb2 { set choice 1 } { LsdHelp menudata_sa.html#entry } { set choice 2 }" );
 	cmd( "bind .sens.fb2.ok <KeyPress-Return> { set choice 1 }" );
 
 	cmd( "showtop .sens topleftW" );
 	cmd( "mousewarpto .sens.fb2.ok 0" );
 
-	sss = new char[ MAX_ELEM_LENGTH * numv + 1 ];	// allocate space for string
+	sss = new char[ MAX_ELEM_LENGTH * num_val + 1 ];// allocate space for string
 	tok = new char[ MAX_ELEM_LENGTH ];
 	strcpy( sss, "" );
-	for ( i = 0; i < numv; i++ )		// pass existing data as a string
+	for ( i = 0; i < num_val; i++ )			// pass existing data as a string
 	{
-		snprintf( tok, MAX_ELEM_LENGTH, "%.15g ", v[ i ] );	// add each value
-		strcatn( sss, tok, MAX_ELEM_LENGTH * numv + 1 );	// to the string
+		snprintf( tok, MAX_ELEM_LENGTH, "%.15g ", val[ i ] );// add each value
+		strcatn( sss, tok, MAX_ELEM_LENGTH * num_val + 1 );// to the string
 	}
 
 	cmd( "set sss \"%s\"", sss );			// pass string to Tk window
@@ -106,7 +114,7 @@ int sensitivity::dataentry( void )
 
 		if ( choice == 2 )
 		{
-			res = numv > 1 ? 1 : 2;
+			res = num_val > 1 ? 1 : 2;
 			goto end;
 		}
 
@@ -146,16 +154,16 @@ int sensitivity::dataentry( void )
 		if ( i < 2 )					// invalid number of elements?
 			i = 2;						// minimum is 2
 
-		if ( numv != i )				// change in space alloc'd?
+		if ( num_val != i )				// change in space alloc'd?
 		{
-			delete [ ] v;				// free old and reallocate enough space
-			v = new double[ i ];
-			numv = i;					// update # of values
+			delete [ ] val;				// free old and reallocate enough space
+			val = new double[ i ];
+			num_val = i;				// update # of values
 		}
 
 		delete [ ] tss;
 
-		for ( i = 0; i < numv; )
+		for ( i = 0; i < num_val; )
 		{
 			tok = strtok( sss, SENS_SEP );	// accepts several separators
 			if ( tok == NULL )				// finished too early?
@@ -175,26 +183,26 @@ int sensitivity::dataentry( void )
 			{
 				if ( toupper( type ) == 'L' && samples > 0 )// linear sampling
 				{
-					v[ i++ ] = integer ? round( fmin( start, end ) ) : fmin( start, end );
+					val[ i++ ] = integer ? round( fmin( start, end ) ) : fmin( start, end );
 					for ( int j = 1; j < samples; ++j, ++i )
 					{
-						v[ i ] = v[ i - 1 ] + ( fmax( start, end ) - fmin( start, end ) ) / ( samples - 1 );
-						v[ i ] = integer ? round( v[ i ] ) : v[ i ];
+						val[ i ] = val[ i - 1 ] + ( fmax( start, end ) - fmin( start, end ) ) / ( samples - 1 );
+						val[ i ] = integer ? round( val[ i ] ) : val[ i ];
 					}
 				}
 
 				if ( toupper( type ) == 'R' && samples > 0 )// random sampling
 					for ( int j = 0; j < samples; ++j, ++i )
 					{
-						v[ i ] = fmin( start, end ) + sim->ran1( ) * ( fmax( start, end ) - fmin( start, end ) );
-						v[ i ] = integer ? round( v[ i ] ) : v[ i ];
+						val[ i ] = fmin( start, end ) + sim->ran1( ) * ( fmax( start, end ) - fmin( start, end ) );
+						val[ i ] = integer ? round( val[ i ] ) : val[ i ];
 					}
 			}
-			else											// no, read as regular double float
+			else							// no, read as regular double float
 			{
 				j = i;
-				i += sscanf( tok, "%lf", &( v[ i ] ) );	// count valid doubles only
-				v[ j ] = integer ? round( v[ j ] ) : v[ j ];
+				i += sscanf( tok, "%lf", &( val[ i ] ) );// count valid doubles only
+				val[ j ] = integer ? round( val[ j ] ) : val[ j ];
 			}
 		}
 	}
@@ -237,7 +245,7 @@ long num_sensitivity_points( void )
 	sensitivity *cs;
 
 	for ( nv = 1, cs = sim.sens; cs != NULL; cs = cs->next )	// scan the linked-list
-		nv *= cs->numv;	// update the number of variables
+		nv *= cs->num_val;	// update the number of variables
 
 	return nv;
 }
@@ -253,7 +261,7 @@ int num_sensitivity_variables( void )
 	sensitivity *cs;
 
 	for ( nv = 0, cs = sim.sens; cs != NULL; cs = cs->next)
-		if ( cs->numv > 1 )				// count variables with 2 or more values
+		if ( cs->num_val > 1 )				// count variables with 2 or more values
 			nv++;
 
 	return nv;
@@ -290,25 +298,25 @@ object *object::sensitivity_parallel( sensitivity *s )
 
 	if ( s->next != NULL )
 	{
-		for ( cur = this, i = 0; i < s->numv; ++i )
+		for ( cur = this, i = 0; i < s->num_val; ++i )
 		{
-			s->curv = i;
+			s->cur_val = i;
 			cur = cur->sensitivity_parallel( s->next );
 		}
 
 		return cur;
 	}
 
-	for ( cur = this, i = 0; i < s->numv; ++i )
+	for ( cur = this, i = 0; i < s->num_val; ++i )
 	{
-		s->curv = i;
+		s->cur_val = i;
 		for ( cs = sim->sens; cs != NULL; cs = cs->next )
 		{
 			cv = cur->search_var( cur, cs->label );
 			if ( cs->param == 0 )				// handle lags > 0
-				cv->val[ cs->lag ] = cs->v[ cs->curv ];
+				cv->val[ cs->lag ] = cs->val[ cs->cur_val ];
 			else
-				cv->val[ 0 ] = cs->v[ cs->curv ];
+				cv->val[ 0 ] = cs->val[ cs->cur_val ];
 		}
 
 		cur = cur->hyper_next( cur->label );
@@ -353,30 +361,30 @@ void sensitivity_sequential( int *findex, sensitivity *s, double probSampl,
 
 	if ( s->next != NULL )
 	{
-		for ( i = 0; i < s->numv && ! stop; ++i )
+		for ( i = 0; i < s->num_val && ! stop; ++i )
 		{
-			s->curv = i;
+			s->cur_val = i;
 			sensitivity_sequential( findex, s->next, probSampl, dest_path );
 		}
 
 		return;
 	}
 
-	for ( i = 0; i < s->numv && ! stop; ++i )
+	for ( i = 0; i < s->num_val && ! stop; ++i )
 	{
-		s->curv = i;
+		s->cur_val = i;
 		for ( nv = 1, cs = sim.sens; cs != NULL; cs = cs->next )
 		{
-			nv *= cs->numv;
+			nv *= cs->num_val;
 			cv = sim.root->search_var( sim.root, cs->label );
 
 			for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( cur->label ) )
 			{
 				cv = cur->search_var( cur, cs->label );
 				if ( cs->param == 1 )				// handle lags > 0
-					cv->val[ 0 ] = cs->v[ cs->curv ];
+					cv->val[ 0 ] = cs->val[ cs->cur_val ];
 				else
-					cv->val[ cs->lag ] = cs->v[ cs->curv ];
+					cv->val[ cs->lag ] = cs->val[ cs->cur_val ];
 			}
 
 		}
@@ -1129,7 +1137,7 @@ void design::load_design_data( sensitivity *rsens, int n )
 	for ( i = 0, cs = rsens; i < k && cs != NULL; ++i, cs = cs->next )
 	{
 		inst[ i ] = sim.hyper_count_var( cs->label );
-		nVal = cs->numv;			// number of data values
+		nVal = cs->num_val;			// number of data values
 		nVal = nVal % 2 == 0 ? nVal : nVal - 1 ;// discard last unpaired value
 
 		if ( inst[ i ] == 0 || nVal < 2 )// only multi-instance/value factor
@@ -1147,8 +1155,8 @@ void design::load_design_data( sensitivity *rsens, int n )
 		{
 			if ( 2 * j + 1 < nVal )	// data available?
 			{
-				hi[ i ][ j ] = max( cs->v[ 2 * j ], cs->v[ 2 * j + 1 ] );
-				lo[ i ][ j ] = min( cs->v[ 2 * j ], cs->v[ 2 * j + 1 ] );
+				hi[ i ][ j ] = max( cs->val[ 2 * j ], cs->val[ 2 * j + 1 ] );
+				lo[ i ][ j ] = min( cs->val[ 2 * j ], cs->val[ 2 * j + 1 ] );
 			}
 			else					// recycle previous data
 			{

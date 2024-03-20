@@ -140,7 +140,7 @@ const bool no_pointer_init = true;
 			return val[ 0 ]; \
 		if ( eq_func == NULL ) \
 			eq_func = sim->chk_eq( label ); \
-		return sim->chk_res( ( eq_func )( caller, this ), label ); \
+		return chk_res( ( eq_func )( caller, this ) ); \
 	} \
 	void simulation::init_map( ) \
 	{ \
@@ -596,10 +596,10 @@ void simulation::close_sim( void ) \
 #define CYCLE_EXT( X, Y, Z ) for ( X = EXEC_EXT( Y, Z, begin ); X != EXEC_EXT( Y, Z, end ); ++X )
 #define CYCLE_EXTS( O, X, Y, Z ) for ( X = EXEC_EXTS( O, Y, Z, begin ); X != EXEC_EXTS( O, Y, Z, end ); ++X )
 
-#define DEBUG_START { if ( liblnk.deb_log != NULL ) liblnk.deb_log( true, 0 ); }
-#define DEBUG_START_AT( X ) { if ( liblnk.deb_log != NULL ) liblnk.deb_log( true, X ); }
-#define DEBUG_STOP { if ( liblnk.deb_log != NULL ) liblnk.deb_log( false, 0 ); }
-#define DEBUG_STOP_AT( X ) { if ( liblnk.deb_log != NULL ) liblnk.deb_log( false, X ); }
+#define DEBUG_START { if ( sims[ 0 ]->liblnk != NULL ) sims[ 0 ]->liblnk->deb_log( true, 0 ); }
+#define DEBUG_START_AT( X ) { if ( sims[ 0 ]->liblnk != NULL ) sims[ 0 ]->liblnk->deb_log( true, X ); }
+#define DEBUG_STOP { if ( sims[ 0 ]->liblnk != NULL ) sims[ 0 ]->liblnk->deb_log( false, 0 ); }
+#define DEBUG_STOP_AT( X ) { if ( sims[ 0 ]->liblnk != NULL ) sims[ 0 ]->liblnk->deb_log( false, X ); }
 
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)
@@ -620,7 +620,7 @@ void cmd_gui( const char *cm, ... );
 
 char msg[ MAX_BUFF_SIZE ];				// legacy auxiliary buffer
 
-int deb( object *r, object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" ) { if ( liblnk.debugger != NULL ) return ( r->*liblnk.dlliblinkage::debugger ) ( c, lab, res, interact, hl_var ); else return -1; }
+int deb( object *r, object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" ) { if ( sims[ 0 ]->liblnk != NULL ) return ( r->*sims[ 0 ]->liblnk->dlliblinkage::debugger ) ( c, lab, res, interact, hl_var ); else return -1; }
 void cmd( const char *cm, ... ) { cmd_gui( cm ); }
 void simulation::close_sim( void ) { };
 

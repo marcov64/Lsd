@@ -19,7 +19,9 @@ by macros to allow inlining the code for max performance.
 Also contains the macro error handlers.
 *************************************************************/
 
-#include "lib/libLSD.h"					// LSD library classes
+#ifndef LIBLSD
+	#include "lib/libLSD.h"				// LSD library classes
+#endif
 
 
 /****************************
@@ -129,14 +131,27 @@ CHK_RES
 Check for invalid equation
 result
 *****************************/
-inline double simulation::chk_res( double res, const char *lab )
+inline double variable::chk_res( double res )
 {
-	if ( quit == 0 && ( ( ! use_nan && isnan( res ) ) || isinf( res ) ) )
-		error_hard( "invalid equation result",
-					"check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation",
-					true,
-					"equation for '%s' produces the invalid value '%lf' at case %d",
-					lab, res, t );
+	if ( isfinite( res ) )
+	{
+		if ( integer )
+			res = round( res );
+
+		if ( ! isnan( max_val ) && res > max_val )
+			res = max_val;
+		else
+			if ( ! isnan( min_val ) && res < min_val )
+				res = min_val;
+	}
+	else
+		if ( sim->quit == 0 && ( ( ! sim->use_nan && isnan( res ) ) || isinf( res ) ) )
+			sim->error_hard( "invalid equation result",
+							 "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation",
+							 true,
+							 "equation for '%s' produces the invalid value '%lf' at case %d",
+							 label, res, sim->t );
+
 	return res;
 }
 

@@ -227,6 +227,31 @@ void variable::empty( bool no_lock )
 }
 
 
+/****************************
+CHK_VAL
+Adjust value for considering
+variable constraints
+*****************************/
+double variable::chk_val( double val )
+{
+	if ( isfinite( val ) )
+	{
+		if ( integer )
+			val = round( val );
+
+		if ( isfinite( max_val ) && val > max_val )
+			val = max_val;
+		else
+			if ( isfinite( min_val ) && val < min_val )
+				val = min_val;
+	}
+	else
+		val = NAN;
+
+	return val;
+}
+
+
 /***************************************************
 CAL
 Standard version (non parallel computation)

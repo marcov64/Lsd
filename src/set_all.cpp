@@ -52,7 +52,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 	int res, i, j, kappa = 0, to_all, update_d, cases_from, cases_to, fill, use_seed, rnd_seed, step_in;
 	description *cd;
 	object *cur;
-	variable *cv;
+	variable *cv = NULL;
 	FILE *f;
 
 	// do on first instance
@@ -396,12 +396,12 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = value1;
+					cv->val[ lag ] = cv->chk_val( value1 );
 					cv->initialized = true;
 					++j;
 				}
 
-			snprintf( action, MAX_ELEM_LENGTH, "equal to %g", value1 );
+			snprintf( action, MAX_ELEM_LENGTH, "equal to %g%s", value1, var_constr( cv, msg, MAX_LINE_SIZE ) );
 			break;
 
 		// range
@@ -417,7 +417,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = value1 + value * step;
+					cv->val[ lag ] = cv->chk_val( value1 + value * step );
 					cv->initialized = true;
 					++j;
 				}
@@ -426,7 +426,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 					++step;
 			}
 
-			snprintf( action, MAX_ELEM_LENGTH, "ranging from %g to %g (increments of %g)", value1, value2, value );
+			snprintf( action, MAX_ELEM_LENGTH, "ranging from %g to %g (increments of %g)%s", value1, value2, value, var_constr( cv, msg, MAX_LINE_SIZE ) );
 			break;
 
 
@@ -437,7 +437,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = value1 + step * value2;
+					cv->val[ lag ] = cv->chk_val( value1 + step * value2 );
 					cv->initialized = true;
 					++j;
 				}
@@ -446,7 +446,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 					++step;
 			}
 
-			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g", value1, value2 );
+			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g%s", value1, value2, var_constr( cv, msg, MAX_LINE_SIZE ) );
 			break;
 
 
@@ -456,7 +456,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 				if ( to_all == 1 || ( cases_from <= i && cases_to >= i ) )
 				{
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = value1 + step * value2;
+					cv->val[ lag ] = cv->chk_val( value1 + step * value2 );
 					cv->initialized = true;
 					++j;
 					++step;
@@ -465,7 +465,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 						step = 0;
 				}
 
-			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g for each group of objects", value1, value2 );
+			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g for each group of objects%s", value1, value2, var_constr( cv, msg, MAX_LINE_SIZE ) );
 			break;
 
 
@@ -475,12 +475,12 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = sim->uniform( value1, value2 );
+					cv->val[ lag ] = cv->chk_val( sim->uniform( value1, value2 ) );
 					cv->initialized = true;
 					++j;
 				}
 
-			snprintf( action, MAX_ELEM_LENGTH, "drawn from uniform distribution between %g and %g", value1, value2 );
+			snprintf( action, MAX_ELEM_LENGTH, "drawn from uniform distribution between %g and %g%s", value1, value2, var_constr( cv, msg, MAX_LINE_SIZE ) );
 			break;
 
 
@@ -490,12 +490,12 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = sim->rnd_int( round( value1 ), round( value2 ) );
+					cv->val[ lag ] = cv->chk_val( sim->rnd_int( round( value1 ), round( value2 ) ) );
 					cv->initialized = true;
 					++j;
 				}
 
-			snprintf( action, MAX_ELEM_LENGTH, "drawn from integer uniform distribution between %g and %g", round( value1 ), round( value2 ) );
+			snprintf( action, MAX_ELEM_LENGTH, "drawn from integer uniform distribution between %g and %g%s", round( value1 ), round( value2 ), var_constr( cv, msg, MAX_LINE_SIZE ) );
 			break;
 
 
@@ -505,12 +505,12 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = sim->norm( value1, value2 );
+					cv->val[ lag ] = cv->chk_val( sim->norm( value1, value2 ) );
 					cv->initialized = true;
 					++j;
 				}
 
-			snprintf( action, MAX_ELEM_LENGTH, "drawn from normal distribution of mean %g and s.d. %g", value1, value2 );
+			snprintf( action, MAX_ELEM_LENGTH, "drawn from normal distribution of mean %g and s.d. %g%s", value1, value2, var_constr( cv, msg, MAX_LINE_SIZE ) );
 			break;
 
 
@@ -540,7 +540,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 						break;
 
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = value;
+					cv->val[ lag ] = cv->chk_val( value );
 					cv->initialized = true;
 					++j;
 				}
@@ -548,7 +548,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 			if ( cur != NULL || kappa == EOF )
 				cmd( "ttk::messageBox -parent $_w -title Error -icon error -type ok -message \"Incomplete data\" -detail \"Problem loading data from file '%s', the file contains fewer values compared to the number of instances to set.\"", app );
 
-			snprintf( action, MAX_ELEM_LENGTH, "set with data from file %s", app );
+			snprintf( action, MAX_ELEM_LENGTH, "set with data from file %s%s", app, var_constr( cv, msg, MAX_LINE_SIZE ) );
 			break;
 
 
@@ -587,4 +587,47 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 	}
 
 	unsaved_change( true );				// signal unsaved change
+}
+
+
+/****************************************************
+VAR_CONSTR
+****************************************************/
+const char *var_constr( variable *var, char *buf, int buf_sz )
+{
+	string text;
+
+	if ( var == NULL || ( ! var->integer && isnan( var->max_val ) && isnan( var->min_val ) ) )
+		strcpy( buf, "" );
+	else
+	{
+		if ( var->integer )
+			text = ",\nrounded to integer";
+
+		if ( ! isnan( var->min_val ) )
+		{
+			if ( text.size( ) > 0 )
+				text += ", ";
+			else
+				text += ",\n";
+
+			snprintf( buf, buf_sz, "greater or equal to %.6g", var->min_val );
+			text += buf;
+		}
+
+		if ( ! isnan( var->max_val ) )
+		{
+			if ( text.size( ) > 0 )
+				text += ", ";
+			else
+				text += ",\n";
+
+			snprintf( buf, buf_sz, "less or equal to %.6g", var->max_val );
+			text += buf;
+		}
+
+		strcpyn( buf, text.c_str( ), buf_sz );
+	}
+
+	return buf;
 }
