@@ -18,13 +18,21 @@ This file contains all the macros required by the LSD
 model's equation file.
 *************************************************************/
 
-#if defined( EIGENLIB ) && __cplusplus >= 201103L	// required C++11
-#include <Eigen/Eigen>								// Eigen linear algebra library
-using namespace Eigen;
-#endif
-
 #define _FUN_				// comment this line to access internal LSD functions
 #include "lib/check.h"		// macro check support code
+
+// name space shortcuts
+#ifdef EIGENLIB
+	using namespace Eigen;
+#endif
+
+#ifdef CSVLIB
+	using namespace rapidcsv;
+#endif
+
+#ifdef XMLLIB
+	using namespace pugixml;
+#endif
 
 // enable pointer checking to protect users (medium overhead) if not disabled
 #ifndef NO_POINTER_CHECK

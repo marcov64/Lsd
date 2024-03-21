@@ -157,9 +157,6 @@ Global definitions shared by all LSD GUI modules.
 #define TCL_EXEC_PATH	"gnu\\bin"		// must use (double) backslashes
 #define TCL_FIND_EXE	"@where wish86.exe > nul 2>&1"
 
-// Eigen library include command
-#define EIGEN "#define EIGENLIB"
-
 // define meta-parameter names for LWI getlimits
 #define META_PAR_NUM 3
 #define META_PAR_NAME { "_timeSteps_", "_numRuns_", "_rndSeed_" }
@@ -314,7 +311,6 @@ bool sensitivity_too_large( long numSaPts );
 bool set_env( bool set );
 bool unsaved_change( bool );
 bool unsaved_change( void );
-bool use_eigen( void );
 char *eval_str( const char *tcl_exp, char *var, int var_size );
 char *fmt_ttip_descr( char *out, description *d, int outSz, bool init = true );
 char *get_str( const char *tcl_var, char *var, int var_size );

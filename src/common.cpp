@@ -1087,40 +1087,6 @@ error:
 }
 
 
-/*********************************
- USE_EIGEN
- detect if Eigen library is in use
- *********************************/
-bool use_eigen( void )
-{
-	bool nfound = true;
-	char full_name[ MAX_PATH_LENGTH ], buf[ 2 * MAX_PATH_LENGTH ];
-	const char *fun_file, *path;
-	FILE *f;
-
-	path = get_str( "modelDir" );
-	fun_file = get_fun_name( buf, 2 * MAX_PATH_LENGTH, true );
-
-	if( path == NULL || fun_file == NULL )
-		return false;
-
-	snprintf( full_name, MAX_PATH_LENGTH, "%s/%s", path, fun_file );
-	f = fopen( full_name, "r" );
-	if( f == NULL )
-		return false;
-
-	while ( fgets( buf, 2 * MAX_PATH_LENGTH, f ) != NULL &&
-			( nfound = strncmp( buf, EIGEN, strlen( EIGEN ) ) ) );
-
-	fclose( f );
-
-	if ( nfound )
-		return false;
-
-	return true;
-}
-
-
 /****************************************************
  MAKE_NO_WINDOW
  create a no-window command-line version of LSD
@@ -1157,16 +1123,10 @@ bool make_no_window( void )
 			file copy -force $f \"$modelDir/$LsdSrc/lib\" \
 		}" );
 
-	// copy pugixml just once
-	cmd( "if { ! [ file exists \"$modelDir/$LsdSrc/pugixml\" ] } { \
-			file copy -force \"$RootLsd/$LsdSrc/pugixml\" \"$modelDir/$LsdSrc\" \
+	// copy 3rd-party C++ libraries just once
+	cmd( "if { ! [ file exists \"$modelDir/$LsdSrc/clib\" ] } { \
+			file copy -force \"$RootLsd/$LsdSrc/clib\" \"$modelDir/$LsdSrc\" \
 		}" );
-
-	// copy Eigen library files if in use, just once to save time
-	if( use_eigen( ) )
-		cmd( "if { ! [ file exists \"$modelDir/$LsdSrc/Eigen\" ] } { \
-				file copy -force \"$RootLsd/$LsdSrc/Eigen\" \"$modelDir/$LsdSrc\" \
-			}" );
 
 	// create makefileNW and compile a local machine version of lsdNW
 	return compile_run( false, true );

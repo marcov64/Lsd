@@ -19,7 +19,7 @@ by macros to allow inlining the code for max performance.
 Also contains the macro error handlers.
 *************************************************************/
 
-#ifndef LIBLSD
+#ifndef LSDLIB
 	#include "lib/libLSD.h"				// LSD library classes
 #endif
 

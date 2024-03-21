@@ -25,9 +25,16 @@ Relevant macros for conditional compilation (when defined):
 - _NT_: no signal trapping (better when debugging in GDB)
 *************************************************************/
 
-#define LIBLSD
+#define LSDLIB
 
-// standard libraries used
+// third-party C++ libraries
+#define PUGIXML_NO_XPATH				// XML library
+#define PUGIXML_COMPACT
+#include "clib/pugixml.hpp"
+#include "clib/rapidcsv.h"				// CSV library
+#include "clib/eigen.h"					// linear algebra library
+
+// standard libraries
 #include <atomic>
 #include <cfloat>
 #include <cmath>
@@ -59,11 +66,6 @@ Relevant macros for conditional compilation (when defined):
 #ifndef _NW_
 	#include <tk.h>
 #endif
-
-// XML library
-#define PUGIXML_NO_XPATH
-#define PUGIXML_COMPACT
-#include "pugixml/pugixml.hpp"
 
 // user defined signals
 #define SIGMEM NSIG + 1					// out of memory signal

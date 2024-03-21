@@ -29,7 +29,7 @@ SWITCH_CC_LSD=
 LSDROOT=..
 SRC_DIR=$(LSDROOT)/src/
 LIB_DIR=$(SRC_DIR)lib/
-PUGI_DIR=$(SRC_DIR)pugixml/
+CLIB_DIR=$(SRC_DIR)clib/
 
 # handle platform-specific stuff
 ifeq ($(OS),Windows_NT)
@@ -191,9 +191,9 @@ $(OBJ_DIR_LSD)variab.o: $(LIB_DIR)variab.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)variab.cpp -o $(OBJ_DIR_LSD)variab.o
 
-$(OBJ_DIR_LSD)pugixml.o: $(PUGI_DIR)pugixml.cpp $(PUGI_DIR)pugixml.hpp $(PUGI_DIR)pugiconfig.hpp
+$(OBJ_DIR_LSD)pugixml.o: $(CLIB_DIR)pugixml.cpp $(CLIB_DIR)pugixml.hpp $(CLIB_DIR)pugiconfig.hpp
 	$(MKDIR) $(@D)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(PUGI_DIR)pugixml.cpp -o $(OBJ_DIR_LSD)pugixml.o
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(CLIB_DIR)pugixml.cpp -o $(OBJ_DIR_LSD)pugixml.o
 
 # LSD executable
 $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT): $(MANIF_LSD) $(LIB_GUI) $(LSDROOT)/lib$(TARGET_LSD)$(DLL_EXT)

@@ -1,7 +1,7 @@
 # specify where are the sources of LSD and destination of temporary files
 SRC_DIR=$(LSDROOT)/$(SRC)/
 LIB_DIR=$(SRC_DIR)lib/
-PUGI_DIR=$(SRC_DIR)pugixml/
+CLIB_DIR=$(SRC_DIR)clib/
 OBJ_DIR=$(TMP)/$(TARGET)/
 INCLUDE=-I$(LSDROOT)/$(SRC) -I$(PATH_TCLTK_HEADER) -I$(PATH_HEADER)
 CUR_DIR:=$(notdir $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST))))))/
@@ -110,9 +110,9 @@ $(OBJ_DIR)variab.o: $(LIB_DIR)variab.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)variab.cpp -o $(OBJ_DIR)variab.o
 
-$(OBJ_DIR)pugixml.o: $(PUGI_DIR)pugixml.cpp $(PUGI_DIR)pugixml.hpp $(PUGI_DIR)pugiconfig.hpp
+$(OBJ_DIR)pugixml.o: $(CLIB_DIR)pugixml.cpp $(CLIB_DIR)pugixml.hpp $(CLIB_DIR)pugiconfig.hpp
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(PUGI_DIR)pugixml.cpp -o $(OBJ_DIR)pugixml.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(CLIB_DIR)pugixml.cpp -o $(OBJ_DIR)pugixml.o
 
 # executable
 $(TARGET)$(EXE_EXT): $(OBJ_DIR)LSD.exe.manifest.o $(LIB_GUI) lib$(TARGET)$(DLL_EXT)

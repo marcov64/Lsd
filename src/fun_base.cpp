@@ -1,5 +1,3 @@
-//#define EIGENLIB			// uncomment to use Eigen linear algebra library
-
 #include "fun_head_fast.h"
 
 // do not add Equations in this area
