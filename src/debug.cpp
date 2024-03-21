@@ -1293,7 +1293,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 
 				if ( j > 0 )
 				{
-					vector < bool > checked( j + 1, false );
+					std::vector < bool > checked( j + 1, false );
 
 					cmd( "set hook 0" );
 
@@ -1755,10 +1755,10 @@ void object::debugger_update( const char *hl_var, int mode )
 			cmd( "ttk::frame $w.e$i" );
 			cmd( "ttk::label $w.e$i.name -width $hnamszD -anchor w -text %s", ap_v->label );
 
-			if ( isnan( ap_v->val[ 0 ] ) )
+			if ( std::isnan( ap_v->val[ 0 ] ) )
 				cmd( "ttk::label $w.e$i.val -width $hvalszD -style hl.TLabel -text NAN" );
 			else
-				if ( isinf( ap_v->val[ 0 ] ) )
+				if ( std::isinf( ap_v->val[ 0 ] ) )
 					cmd( "ttk::label $w.e$i.val -width $hvalszD -style hl.TLabel -text %sINFINITY", ap_v->val[ 0 ] < 0 ? "-" : "" );
 				else
 					if ( ap_v->val[ 0 ] != 0 && fabs( ap_v->val[ 0 ] ) < SIG_MIN )	// insignificant value?
@@ -1798,10 +1798,10 @@ void object::debugger_update( const char *hl_var, int mode )
 				cmd( "set lvals \"\"" );
 				for ( j = 1; j <= ap_v->num_lag; ++j )
 				{
-					if ( isnan( ap_v->val[ j ] ) )
+					if ( std::isnan( ap_v->val[ j ] ) )
 						cmd( "set val NAN" );
 					else
-						if ( isinf( ap_v->val[ j ] ) )
+						if ( std::isinf( ap_v->val[ j ] ) )
 							cmd( "set val %sINFINITY", ap_v->val[ j ] < 0 ? "-" : "" );
 						else
 							if ( ap_v->val[ j ] != 0 && fabs( ap_v->val[ j ] ) < SIG_MIN )
@@ -1933,10 +1933,10 @@ void object::show_tmp_vars( bool update )
 		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"v\\\[%d\\]\"", j );
 		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 
-		if ( isnan( sim->d_values[ j ] ) )
+		if ( std::isnan( sim->d_values[ j ] ) )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NAN" );
 		else
-			if ( isinf( sim->d_values[ j ] ) )
+			if ( std::isinf( sim->d_values[ j ] ) )
 				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", sim->d_values[ j ] < 0 ? "-" : "" );
 			else
 				if ( sim->d_values[ j ] != 0 && fabs( sim->d_values[ j ] ) < SIG_MIN )// insignificant value?
@@ -2125,16 +2125,16 @@ void object::show_tmp_vars( bool update )
 
 	cmd( "$in.n.t insert end \"More temporary storage\n\" bold" );
 
-	for ( j = 10; j < min( 100, USER_D_VARS ); ++i, ++j )
+	for ( j = 10; j < std::min( 100, USER_D_VARS ); ++i, ++j )
 	{
 		cmd( "ttk::frame $in.n.t.n$i" );
 		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"v\\\[%d\\]\"", j );
 		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 
-		if ( isnan( sim->d_values[ j ] ) )
+		if ( std::isnan( sim->d_values[ j ] ) )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NAN" );
 		else
-			if ( isinf( sim->d_values[ j ] ) )
+			if ( std::isinf( sim->d_values[ j ] ) )
 				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", sim->d_values[ j ] < 0 ? "-" : "" );
 			else
 				if ( sim->d_values[ j ] != 0 && fabs( sim->d_values[ j ] ) < SIG_MIN )	// insignificant value?

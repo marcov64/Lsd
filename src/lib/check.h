@@ -42,7 +42,7 @@ inline bool simulation::chk_ptr( object *ptr )
 	{
 #ifndef _NP_
 		// prevent concurrent update by more than one thread
-		lock_guard < mutex > lock( lock_obj_list );
+		l_guardT lock( lock_obj_list );
 #endif
 		obj_exists = obj_list.find( ptr ) != obj_list.end( );
 	}
@@ -72,7 +72,7 @@ inline bool simulation::chk_obj( object *ptr )
 	{
 #ifndef _NP_
 		// prevent concurrent update by more than one thread
-		lock_guard < mutex > lock( lock_obj_list );
+		l_guardT lock( lock_obj_list );
 #endif
 		obj_exists = obj_list.find( ptr ) != obj_list.end( );
 	}
@@ -133,19 +133,19 @@ result
 *****************************/
 inline double variable::chk_res( double res )
 {
-	if ( isfinite( res ) )
+	if ( std::isfinite( res ) )
 	{
 		if ( integer )
 			res = round( res );
 
-		if ( ! isnan( max_val ) && res > max_val )
+		if ( ! std::isnan( max_val ) && res > max_val )
 			res = max_val;
 		else
-			if ( ! isnan( min_val ) && res < min_val )
+			if ( ! std::isnan( min_val ) && res < min_val )
 				res = min_val;
 	}
 	else
-		if ( sim->quit == 0 && ( ( ! sim->use_nan && isnan( res ) ) || isinf( res ) ) )
+		if ( sim->quit == 0 && ( ( ! sim->use_nan && std::isnan( res ) ) || std::isinf( res ) ) )
 			sim->error_hard( "invalid equation result",
 							 "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation",
 							 true,
@@ -316,7 +316,7 @@ inline object *simulation::no_hook_obj( object *ptr, unsigned num, const char *f
 	{
 #ifndef _NP_
 		// prevent concurrent update by more than one thread
-		lock_guard < mutex > lock( lock_obj_list );
+		l_guardT lock( lock_obj_list );
 #endif
 		if ( obj_list.find( ptr ) == obj_list.end( ) )
 			snprintf( err_msg, MAX_LINE_SIZE, "pointer to non-existing object used\nin file '%s', line %d", file, line );

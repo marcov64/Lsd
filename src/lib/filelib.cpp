@@ -40,12 +40,12 @@ LOAD_CONFIGURATION
 	If quick is != 0, just the structure and the parameters are retrieved
 	Returns: 0: load ok, 1,2,3,4,...: load failure
 ******************************************************************************/
-int simulation::load_configuration( bool reload, string *warnings, int quick )
+int simulation::load_configuration( bool reload, std::string *warnings, int quick )
 {
 	char *buf = NULL, buf1[ MAX_FILE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ];
 	int i, j, load = 0;
-	set < int > warning;
 	n_mapT node_map;
+	std::set < int > warning;
 	FILE *f = NULL;
 	gzFile fz;
 	xml_doc xf;
@@ -188,7 +188,7 @@ endLoad:
 	{
 		warnings->clear( );
 		for ( auto i : warning )
-			*warnings += " " + to_string( i );
+			*warnings += " " + std::to_string( i );
 	}
 
 	t = 0;
@@ -255,8 +255,8 @@ int object::load_xml_struct( xml_node &n, bool quick )
 	bool obs, integer;
 	const char *str, *desc, *init;
 	int i, type, lags;
-	vector < double > val;
-	vector < string > data;
+	d_vecT val;
+	s_vecT data;
 	bridge *cb;
 	variable *cv;
 
@@ -369,15 +369,15 @@ OBJECT::LOAD_XML_INSTS
 	Load the object instances of tree under this
 	object from an xml object node
 ****************************************************/
-int object::load_xml_insts( xml_node &n, n_mapT &node_map, set < int > &warning )
+int object::load_xml_insts( xml_node &n, n_mapT &node_map, std::set < int > &warning )
 {
 	int i;
 	double d;
 	long k, l, m, nd;
-	string data;
-	vector < double > wht, val1, lnkwht1;
-	vector < long > num, nser, nid, lnkto1;
-	vector < string > val, nnam, lnkto, lnkwht;
+	d_vecT wht, val1, lnkwht1;
+	s_vecT val, nnam, lnkto, lnkwht;
+	std::string data;
+	std::vector < long > num, nser, nid, lnkto1;
 	bridge *cb;
 	object *cur;
 	variable *cv, *cv1;
@@ -449,7 +449,7 @@ int object::load_xml_insts( xml_node &n, n_mapT &node_map, set < int > &warning 
 				if ( l >= ( long ) nnam.size( ) )
 					warning.insert( 45 );			// inconsistent # of node names
 				else
-					if ( nnam[ l ] != to_string( k ) )// ignore name = ID
+					if ( nnam[ l ] != std::to_string( k ) )// ignore name = ID
 						data = nnam[ l ];
 			}
 
@@ -584,7 +584,7 @@ int object::load_xml_insts( xml_node &n, n_mapT &node_map, set < int > &warning 
 
 				for ( i = 0; i < ( cv1->param == 1 ? 1 : cv1->num_lag ); ++i )
 				{
-					if ( i >= ( long ) val1.size( ) || ! isfinite( val1[ i ] ) )
+					if ( i >= ( long ) val1.size( ) || ! std::isfinite( val1[ i ] ) )
 					{
 						warning.insert( 55 );	// inconsistent values
 						d = 0;
@@ -632,7 +632,7 @@ bool simulation::save_xml_configuration( int findex, const char *dest_path, bool
 	long node_serial = 1;
 	FILE *f;
 	gzFile fz;
-	ostringstream buf;
+	std::ostringstream buf;
 	xml_doc xf;
 
 	delta = ( findex > 0 ) ? last_run * ( findex - 1 ) : 0;
@@ -807,7 +807,7 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 	char *str;
 	int i, count;
 	long l, k;
-	string data, text, nser, nid, nnam, lnkto, lnkwht;
+	std::string data, text, nser, nid, nnam, lnkto, lnkwht;
 	bridge *cb;
 	description *cd;
 	netLink *curl;
@@ -828,7 +828,7 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 			data += ",";
 
 		skip_next_obj( cur, &count );
-		data += to_string( count );
+		data += std::to_string( count );
 
 		for ( ; go_brother( cur ) != NULL; cur = cur->next )
 			if ( cur->node != NULL )	// check if object contains network nodes
@@ -867,8 +867,8 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 			if ( cur->node != NULL )
 			{
 				cur->node->serNum = node_serial++;
-				nser += to_string( cur->node->serNum );
-				nid += to_string( cur->node->id );
+				nser += std::to_string( cur->node->serNum );
+				nid += std::to_string( cur->node->id );
 
 				if ( cur->node->name != NULL )
 					nnam += "\"" + ( data = cur->node->name ) + "\"";
@@ -898,7 +898,7 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 					if ( curl->to == NULL || curl->to->node == NULL )
 						continue;				// ignore invalid link
 
-					lnkto += to_string( curl->to->node->serNum );
+					lnkto += std::to_string( curl->to->node->serNum );
 					lnkwht += to_string( "%.15g", curl->weight );
 
 					if ( curl->weight != 0 )
@@ -972,10 +972,10 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 		if ( cv->parallel )
 			cn.append_attribute( "parallel" ) = true;
 
-		if ( ! isnan( cv->max_val ) )
+		if ( ! std::isnan( cv->max_val ) )
 			cn.append_attribute( "maximum" ) = cv->max_val;
 
-		if ( ! isnan( cv->min_val ) )
+		if ( ! std::isnan( cv->min_val ) )
 			cn.append_attribute( "minimum" ) = cv->min_val;
 
 		if ( cv->deb_mode != 'n' )
@@ -1080,7 +1080,7 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 				if ( cv->param )
 					text = "values";
 				else
-					text = "values-" + to_string( cs->lag + 1 );
+					text = "values-" + std::to_string( cs->lag + 1 );
 
 				cns.append_child( text.c_str( ) ).text( ) = data.c_str( );
 			}
@@ -1905,7 +1905,7 @@ void variable::save_single( void )
 	fprintf( f, "%s %s (%d %d)\t\n", label, lab_tit, start, end );
 
 	for ( i = 0; i <= sim->t - 1; ++i )
-		if ( i >= start && i <= end && ! isnan( data[ i - start ] ) )	// save NaN as n/a
+		if ( i >= start && i <= end && ! std::isnan( data[ i - start ] ) )// save NaN as n/a
 			fprintf( f,"%lf\t\n", data[ i - start ] );
 		else
 			fprintf( f,"%s\t\n", nonavail );
@@ -1919,7 +1919,7 @@ SENSITIVITY CONSTRUCTOR
 Add or update sensitivity settings for a model element
 ******************************************************************************/
 sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, int _lag,
-						  bool _integer, int _num_val, vector < double > *_val )
+						  bool _integer, int _num_val, d_vecT *_val )
 {
 	int i;
 	sensitivity *cs;
@@ -2182,7 +2182,7 @@ void result::data_recursive( object *r, int i )
 	{
 		if ( cv->save == 1 )
 		{
-			if ( cv->start <= i && cv->end >= i && ! isnan( cv->data[ i - cv->start ] ) )
+			if ( cv->start <= i && cv->end >= i && ! std::isnan( cv->data[ i - cv->start ] ) )
 			{
 				if ( dozip )
 				{
@@ -2236,7 +2236,7 @@ void result::data_recursive( object *r, int i )
 	{
 		for ( cv = sim->cemetery; cv != NULL; cv = cv->next )
 		{
-			if ( cv->start <= i && cv->end >= i && ! isnan( cv->data[ i - cv->start ] ) )
+			if ( cv->start <= i && cv->end >= i && ! std::isnan( cv->data[ i - cv->start ] ) )
 			{
 				if ( dozip )
 				{

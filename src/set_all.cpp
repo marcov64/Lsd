@@ -595,16 +595,16 @@ VAR_CONSTR
 ****************************************************/
 const char *var_constr( variable *var, char *buf, int buf_sz )
 {
-	string text;
+	std::string text;
 
-	if ( var == NULL || ( ! var->integer && isnan( var->max_val ) && isnan( var->min_val ) ) )
+	if ( var == NULL || ( ! var->integer && std::isnan( var->max_val ) && std::isnan( var->min_val ) ) )
 		strcpy( buf, "" );
 	else
 	{
 		if ( var->integer )
 			text = ",\nrounded to integer";
 
-		if ( ! isnan( var->min_val ) )
+		if ( ! std::isnan( var->min_val ) )
 		{
 			if ( text.size( ) > 0 )
 				text += ", ";
@@ -615,7 +615,7 @@ const char *var_constr( variable *var, char *buf, int buf_sz )
 			text += buf;
 		}
 
-		if ( ! isnan( var->max_val ) )
+		if ( ! std::isnan( var->max_val ) )
 		{
 			if ( text.size( ) > 0 )
 				text += ", ";

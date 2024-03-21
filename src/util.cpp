@@ -27,7 +27,7 @@ print  message string m in the Log screen.
 #include "LSD.h"
 
 #ifndef _NP_
-mutex lock_plog_backend;			// lock lock_plog_backend for parallel access
+std::mutex lock_plog_backend;	// lock lock_plog_backend for parallel access
 #endif
 
 
@@ -56,7 +56,7 @@ void plog_backend( const char *cm, const char *tag, va_list arg )
 	reqsz = vsnprintf( buffer, MAX_BUFF_SIZE, cm, arg );
 
 #ifndef _NP_
-	lock_guard < mutex > lock( lock_plog_backend );
+	l_guardT lock( lock_plog_backend );
 #endif
 
 	if ( reqsz < 0 )

@@ -54,7 +54,7 @@ int run_system( const char *cmd, simulation *sim, int id )
 	if ( id >= 0 && sim != NULL && id < ( int ) sim->run_pids.size( ) )
 	{
 
-		lock_guard < mutex > lock( sim->run_pids_lck );
+		l_guardT lock( sim->run_pids_lck );
 		sim->run_pids[ id ] = p_info.hProcess;
 	}
 #endif
@@ -128,7 +128,7 @@ int run_system( const char *cmd, simulation *sim, int id )
 #if ! defined( _NP_ ) && ! defined( _LMM_ )
 		if ( id >= 0 && sim != NULL && id < ( int ) sim->run_pids.size( ) )
 		{
-			lock_guard < mutex > lock( sim->run_pids_lck );
+			l_guardT lock( sim->run_pids_lck );
 			sim->run_pids[ id ] = pid;
 		}
 #endif
@@ -182,7 +182,7 @@ int kill_system( simulation *sim, int id )
  *********************************/
 void set_exec( const char *path, const char *file )
 {
-	string exefile, exepath, libfile, libpath, fname;
+	std::string exefile, exepath, libfile, libpath, fname;
 
 	exepath = path;
 	exefile = file;
@@ -198,7 +198,7 @@ void set_exec( const char *path, const char *file )
 	libpath = exec_path;
 	libfile = "lib";
 	libfile += exec_file;						// base library name
-	if ( libfile.find( '.' ) != string::npos )	// remove Windows extension
+	if ( libfile.find( '.' ) != std::string::npos )// remove Windows extension
 		libfile = libfile.substr( 0, libfile.rfind( "." ) );
 
 #ifdef __linux__
@@ -561,7 +561,7 @@ void cmd_gui( const char *cm, ... )
  ****************************************************/
 bool valid_label( const char *lab )
 {
-	return regex_match( lab, regex( "^[a-zA-Z_][a-zA-Z0-9_]*$" ) );
+	return std::regex_match( lab, std::regex( "^[a-zA-Z_][a-zA-Z0-9_]*$" ) );
 }
 
 
@@ -570,7 +570,7 @@ bool valid_label( const char *lab )
  ****************************************************/
 bool valid_xml_string( const char *lab )
 {
-	return regex_match( lab, regex( "[^&<>\"']*" ) );
+	return std::regex_match( lab, std::regex( "[^&<>\"']*" ) );
 }
 
 
@@ -630,13 +630,13 @@ char *strcpyn( char *d, const char *s, size_t dSz )
  ***************************************************/
 char *strdecdata( char *out, const char *in, int outSz )
 {
-	string buf = in;
+	std::string buf = in;
 	int pos = -3;
 
 	if ( out != NULL && outSz <= 0 )
 		return NULL;
 
-	while ( ( pos = buf.find( "]]\x7f>", pos + 3 ) ) != ( int ) string::npos )
+	while ( ( pos = buf.find( "]]\x7f>", pos + 3 ) ) != ( int ) std::string::npos )
 		buf.erase( pos + 2, 1 );		// remove DEL (0x7f) character
 
 	if ( out == NULL )
@@ -658,13 +658,13 @@ char *strdecdata( char *out, const char *in, int outSz )
 ***************************************************/
 char *strencdata( char *out, const char *in, int outSz )
 {
-	string buf = in;
+	std::string buf = in;
 	int pos = -4;
 
 	if ( out != NULL && outSz <= 0 )
 		return NULL;
 
-	while ( ( pos = buf.find( "]]>", pos + 4 ) ) != ( int ) string::npos )
+	while ( ( pos = buf.find( "]]>", pos + 4 ) ) != ( int ) std::string::npos )
 		buf.insert( pos + 2, "\x7f" );		// insert DEL (0x7f) character
 
 	if ( out == NULL )
@@ -846,11 +846,11 @@ double strtod( const char *in, char** endptr, double inv )
  for conversion errors, producing inv as result
  in this case
 ***************************************************/
-vector < double > strtodsplit( const char *in, char sep, double inv )
+d_vecT strtodsplit( const char *in, char sep, double inv )
 {
-	string buf;
-	stringstream ss( in );
-	vector < double > out;
+	d_vecT out;
+	std::string buf;
+	std::stringstream ss( in );
 
 	while ( getline( ss, buf, sep ) )
 		out.push_back( strtod( buf.c_str( ), NULL, inv ) );
@@ -895,11 +895,11 @@ long strtol( const char *in, char** endptr, int base, long inv )
  for conversion errors, producing inv as result
  in this case
 ***************************************************/
-vector < long > strtolsplit( const char *in, char sep, long inv )
+std::vector < long > strtolsplit( const char *in, char sep, long inv )
 {
-	string buf;
-	stringstream ss( in );
-	vector < long > out;
+	std::string buf;
+	std::stringstream ss( in );
+	std::vector < long > out;
 
 	while ( getline( ss, buf, sep ) )
 		out.push_back( strtol( buf.c_str( ), NULL, 10, inv ) );
@@ -913,11 +913,11 @@ vector < long > strtolsplit( const char *in, char sep, long inv )
  split a C string into a vector of strings using
  sep as the separator character
 ***************************************************/
-vector < string > strtostrsplit( const char *in, char sep, bool remQuotes )
+s_vecT strtostrsplit( const char *in, char sep, bool remQuotes )
 {
-	string buf;
-	stringstream ss( in );
-	vector < string > out;
+	std::string buf;
+	std::stringstream ss( in );
+	s_vecT out;
 
 	while ( getline( ss, buf, sep ) )
 	{
@@ -936,10 +936,10 @@ vector < string > strtostrsplit( const char *in, char sep, bool remQuotes )
  convert double to string, allowing for sprintf
  pattern format
 ***************************************************/
-string to_string( const char *fmt, double val )
+std::string to_string( const char *fmt, double val )
 {
 	char buf[ 100 + 1 ];
-	string res;
+	std::string res;
 
 	if ( snprintf( buf, 100, fmt, val ) < 0 )
 		strcpy( buf, "" );
@@ -990,9 +990,9 @@ int strtrim( char *out, const char *str, int outSz )
  ***************************************************/
 int strtrimin( char *out, const char *str, int outSz )
 {
-	string buf, in = str;
+	std::string buf, in = str;
 
-	unique_copy( in.begin( ), in.end( ), back_insert_iterator < string > ( buf ),
+	unique_copy( in.begin( ), in.end( ), std::back_insert_iterator < std::string > ( buf ),
 				 [ ] ( char a, char b ) { return isspace( a ) && isspace( b ); } );
 
 	return strtrim( out, buf.c_str( ), outSz );

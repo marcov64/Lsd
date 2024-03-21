@@ -29,13 +29,13 @@ bool parallel_abort;				// indicate parallel threads were aborted
 /***************************************
 RUN_PARALLEL_EXEC
 ***************************************/
-void simulation::run_parallel_exec( bool nw, int id, string cmd )
+void simulation::run_parallel_exec( bool nw, int id, std::string cmd )
 {
 	int res;
 
 	res = run_system( cmd.c_str( ), this, id );
 
-	lock_guard < mutex > lock( run_status_lck );
+	l_guardT lock( run_status_lck );
 	run_status[ id ] = res;
 }
 
@@ -109,7 +109,7 @@ int simulation::run_parallel( bool nw, const char *exec, const char *simname,
 
 			run_pids.resize( run_pids.size( ) + 1 );
 			run_status.push_back( INISTAT );
-			run_threads.push_back( thread( run_parallel_exec, this, nw, run_status.size( ) - 1, string( cmd ) ) );
+			run_threads.push_back( std::thread( run_parallel_exec, this, nw, run_status.size( ) - 1, std::string( cmd ) ) );
 
 			j <= sl ? i += num + 1 : i += num;
 		}
@@ -136,7 +136,7 @@ int simulation::run_parallel( bool nw, const char *exec, const char *simname,
 
 			run_pids.resize( run_pids.size( ) + 1 );
 			run_status.push_back( INISTAT );
-			run_threads.push_back( thread( run_parallel_exec, this, nw, run_status.size( ) - 1, string( cmd ) ) );
+			run_threads.push_back( std::thread( run_parallel_exec, this, nw, run_status.size( ) - 1, std::string( cmd ) ) );
 		}
 	}
 
@@ -186,7 +186,7 @@ int simulation::run_parallel( bool nw, const char *exec, const char *simname,
 		return i;
 	}
 	else
-		run_monitor = thread( monitor_parallel, this, nw );
+		run_monitor = std::thread( monitor_parallel, this, nw );
 
 	return 0;
 }
@@ -208,7 +208,7 @@ int simulation::monitor_logs( void )
 			++finished;
 
 	thr = 0;
-	for ( string logn : run_logs )
+	for ( std::string logn : run_logs )
 	{
 		// consider just running threads except if all threads are stopped
 		if ( run_status[ thr++ ] != INISTAT && finished < threads )
@@ -235,8 +235,8 @@ int simulation::monitor_logs( void )
 				if ( j > 0 )		// ignore the first '0%' in bar
 				{
 					++j;
-					strncpy( tok, log + i + j, min( last - j, 3 ) );
-					tok[ min( last - j, 3 ) ] = '\0';
+					strncpy( tok, log + i + j, std::min( last - j, 3 ) );
+					tok[ std::min( last - j, 3 ) ] = '\0';
 					if ( sscanf( tok, "%d", & k ) == 1 )
 					{
 						if ( finished < threads )
@@ -246,7 +246,7 @@ int simulation::monitor_logs( void )
 						}
 						else		// all threads stopped, pick the more advanced
 						{
-							sum = max( sum, k );
+							sum = std::max( sum, k );
 							n = 1;
 						}
 					}
@@ -288,10 +288,10 @@ bool simulation::stop_parallel( void )
 	while ( parallel_monitor && secs++ < WAIT_SECS )
 		msleep( 1000 );
 
-	for ( string & results : run_results )
+	for ( std::string & results : run_results )
 		remove( results.c_str( ) );
 
-	for ( string & log : run_logs )
+	for ( std::string & log : run_logs )
 		remove( log.c_str( ) );
 
 	run_results.clear( );
@@ -361,9 +361,9 @@ void simulation::log_parallel( bool nw )
 		return;
 	else
 	{
-		lock_guard < mutex > lock( run_logs_lck );
+		l_guardT lock( run_logs_lck );
 
-		for ( string & log : run_logs )
+		for ( std::string & log : run_logs )
 		{
 			f = fopen( log.c_str( ), "r" );
 			if ( f == NULL )

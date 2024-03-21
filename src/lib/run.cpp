@@ -39,21 +39,21 @@ DISPATCH_RUNS
 int dispatch_runs( int until_t, int until_run )
 {
 	int nstale, nrun = 0;
-	mutex mtx;
-	unique_lock < mutex > lock( mtx );
+	std::mutex mtx;
+	uniq_lT lock( mtx );
 
 	for ( auto sim : sims )
 		if ( ! sim->sim_thread.joinable( ) && sim->conf_ok )
 		{
-			sim->sim_thread = thread( & simulation::run_simulation, sim, until_t, until_run );
+			sim->sim_thread = std::thread( & simulation::run_simulation, sim, until_t, until_run );
 			sim->last_dispatch_time = sim->stale_time = 0;
 			++nrun;
 		}
 
 	do
 	{
-		auto start = chrono::system_clock::now( );
-		seq_end.wait_until( lock, start + chrono::seconds( MAX_SIM_SLEEP ) );
+		auto start = std::chrono::system_clock::now( );
+		seq_end.wait_until( lock, start + std::chrono::seconds( MAX_SIM_SLEEP ) );
 
 		nstale = 0;
 		for ( auto sim : sims )
@@ -71,7 +71,7 @@ int dispatch_runs( int until_t, int until_run )
 				}
 				else
 				{
-					auto elapsed = chrono::duration_cast < chrono::seconds > ( chrono::system_clock::now( ) - start );
+					auto elapsed = std::chrono::duration_cast < std::chrono::seconds > ( std::chrono::system_clock::now( ) - start );
 					sim->stale_time += elapsed.count( );
 				}
 
@@ -127,7 +127,7 @@ int simulation::run_simulation( int until_t, int until_run )
 				root->update( true, false );// simulation step execution
 			}
 
-			perc_done = min( ( int ) ( 100 * ( ( run - 1 ) + ( double ) t / last_t ) / last_run ), 100 );
+			perc_done = std::min( ( int ) ( 100 * ( ( run - 1 ) + ( double ) t / last_t ) / last_run ), 100 );
 
 #ifndef _NW_
 			// handle runtime button pressings
@@ -206,7 +206,7 @@ int simulation::run_simulation( int until_t, int until_run )
 	workers = NULL;
 
 	// wake dispatcher lock
-	lock_guard < mutex > lock( seq_end_lck );
+	l_guardT lock( seq_end_lck );
 	seq_end.notify_one( );
 #endif
 
@@ -241,7 +241,7 @@ int simulation::init_new_seq( char *bar_done, int & perc_done, int & last_done )
 		for ( i = 0; i < max_threads; ++i )
 		{
 			workers[ i ].sim = this;
-			workers[ i ].worker_thread = thread( & worker::cal_worker, & workers[ i ] );
+			workers[ i ].worker_thread = std::thread( & worker::cal_worker, & workers[ i ] );
 		}
 	}
 #else
@@ -638,7 +638,7 @@ bool object::alloc_save_mem( void )
 #ifndef _NW_
 		// variable to parent name map for AoR (only in GUI mode)
 		if ( sim->liblnk != NULL )
-			sim->par_map.insert( make_pair < string, string > ( cv->label, label ) );
+			sim->par_map.insert( std::make_pair < std::string, std::string > ( cv->label, label ) );
 #endif
 	}
 
@@ -726,8 +726,8 @@ void simulation::update_bar( char *bar, int done, int & last_done, int bar_sz )
 	char perc[ MAX_ELEM_LENGTH ];
 	int p;
 
-	done = min ( done, 100 );
-	last_done = min ( last_done, 100 );
+	done = std::min ( done, 100 );
+	last_done = std::min ( last_done, 100 );
 
 	if ( sim != 0 || done <= last_done || last_done == 100 )
 		return;

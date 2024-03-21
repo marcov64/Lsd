@@ -94,7 +94,7 @@ void plog_terminal( const char *cm, va_list arg )
 	reqsz = vsnprintf( buffer, MAX_BUFF_SIZE, cm, arg );
 
 #ifndef _NP_
-	lock_guard < mutex > lock( plog_term_lck );
+	l_guardT lock( plog_term_lck );
 #endif
 
 	if ( reqsz < 0 )
@@ -168,10 +168,10 @@ void simulation::error_hard( const char *boxTitle, const char *boxText, bool def
 
 #ifndef _NP_
 	// prevent concurrent use by more than one thread
-	lock_guard < mutex > lock( error_lck );
+	l_guardT lock( error_lck );
 
 	// abort worker and park message if not running in main LSD thread
-	if ( this_thread::get_id( ) != main_thread )
+	if ( std::this_thread::get_id( ) != main_thread )
 	{
 		if ( ! error_hard_thread )	// handle just first error
 		{

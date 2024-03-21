@@ -1548,7 +1548,7 @@ void runtime_run_end( void )
 {
 	cmd( ".p.b1.b configure -value %d", sim.run );
 	cmd( ".p.b1.i configure -text \"Simulation: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"",
-		 min( sim.run + 1, sim.last_run ), sim.last_run, sim.run, sim.last_run );
+		 std::min( sim.run + 1, sim.last_run ), sim.last_run, sim.run, sim.last_run );
 	cmd( "destroytop .deb" );
 	cmd( "update" );
 }
@@ -1657,7 +1657,7 @@ void runtime_buttons( clock_t &last_update )
 	if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER && exists_window( ".p" ) )
 	{
 		cmd( ".p.b2.b configure -value %d", sim.t );
-		cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", min( sim.t + 1, sim.last_t ), sim.last_t, sim.t, sim.last_t );
+		cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", std::min( sim.t + 1, sim.last_t ), sim.last_t, sim.t, sim.last_t );
 		cmd( "update" );
 		last_update = clock( );
 	}
@@ -1969,8 +1969,8 @@ bool object::sort_listbox( int box, int order )
 			return false;
 
 		variable *cv, *cv1 = NULL;
-		list < variable > newv, newvV, newvP, newvF;
-		list < variable > :: iterator it;
+		std::list < variable > newv, newvV, newvP, newvF;
+		std::list < variable > :: iterator it;
 
 		// move LSD linked list of variables to a C++ linked list
 		for ( cv = v; cv != NULL; cv = cv1 )
@@ -2069,8 +2069,8 @@ bool object::sort_listbox( int box, int order )
 			return false;
 
 		bridge *cb, *cb1 = NULL;
-		list < bridge > newb;
-		list < bridge > :: iterator it;
+		std::list < bridge > newb;
+		std::list < bridge > :: iterator it;
 
 		// move LSD linked list of objects to a C++ linked list
 		for ( cb = b; cb != NULL; cb = cb1 )

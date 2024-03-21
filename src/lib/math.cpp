@@ -88,7 +88,7 @@ double simulation::fact( double x )
 /****************************************************
 MEDIAN
 ****************************************************/
-double simulation::median( vector < double > & v )
+double simulation::median( d_vecT & v )
 {
 	int mid;
 	double midVal;
@@ -413,7 +413,7 @@ template < class distr > double draw_rd( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( sim->draw_rd_lck );
+	l_guardT lock( sim->draw_rd_lck );
 #endif
 	return d( sim->rd );
 }
@@ -422,7 +422,7 @@ template < class distr > double draw_lc1( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( sim->draw_lc1_lck );
+	l_guardT lock( sim->draw_lc1_lck );
 #endif
 	return d( sim->lc1 );
 }
@@ -431,7 +431,7 @@ template < class distr > double draw_lc2( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( sim->draw_lc2_lck );
+	l_guardT lock( sim->draw_lc2_lck );
 #endif
 	return d( sim->lc2 );
 }
@@ -440,7 +440,7 @@ template < class distr > double draw_mt32( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( sim->draw_mt32_lck );
+	l_guardT lock( sim->draw_mt32_lck );
 #endif
 	return d( sim->mt32 );
 }
@@ -449,7 +449,7 @@ template < class distr > double draw_mt64( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( sim->draw_mt64_lck );
+	l_guardT lock( sim->draw_mt64_lck );
 #endif
 	return d( sim->mt64 );
 }
@@ -458,7 +458,7 @@ template < class distr > double draw_lf24( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( sim->draw_lf24_lck );
+	l_guardT lock( sim->draw_lf24_lck );
 #endif
 	return d( sim->lf24 );
 }
@@ -467,7 +467,7 @@ template < class distr > double draw_lf48( simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
-	lock_guard < mutex > lock( sim->draw_lf48_lck );
+	l_guardT lock( sim->draw_lf48_lck );
 #endif
 	return d( sim->lf48 );
 }
@@ -549,7 +549,7 @@ RND_INT
 ****************************************************/
 int simulation::rnd_int( int min, int max )
 {
-	uniform_int_distribution< int > distr( min, max );
+	std::uniform_int_distribution < int > distr( min, max );
 	return draw_lc1( this, distr );
 }
 
@@ -562,7 +562,7 @@ Just generates numbers > 0 and < 1
 double simulation::ran1( long *unused )
 {
 	double ran;
-	uniform_real_distribution< double > distr( 0, 1 );
+	std::uniform_real_distribution < double > distr( 0, 1 );
 
 	do
 		ran = draw_gen( distr );
@@ -577,7 +577,7 @@ UNIFORM
 ****************************************************/
 double simulation::uniform( double min, double max )
 {
-	uniform_real_distribution< double > distr( min, max );
+	std::uniform_real_distribution < double > distr( min, max );
 	return draw_gen( distr );
 }
 
@@ -587,7 +587,7 @@ UNIFORM_INT
 ****************************************************/
 double simulation::uniform_int( double min, double max )
 {
-	uniform_int_distribution< int > distr( ( long ) min, ( long ) max );
+	std::uniform_int_distribution < int > distr( ( long ) min, ( long ) max );
 	return draw_gen( distr );
 }
 
@@ -605,7 +605,7 @@ double simulation::norm( double mean, double dev )
 		return mean;
 	}
 
-	normal_distribution< double > distr( mean, dev );
+	std::normal_distribution < double > distr( mean, dev );
 	return draw_gen( distr );
 }
 
@@ -624,7 +624,7 @@ double simulation::lnorm( double mean, double dev )
 		return exp( mean );
 	}
 
-	lognormal_distribution< double > distr( mean, dev );
+	std::lognormal_distribution < double > distr( mean, dev );
 	return draw_gen( distr );
 }
 
@@ -642,7 +642,7 @@ double simulation::gamma( double alpha, double beta )
 		return 0.0;
 	}
 
-	gamma_distribution< double > distr( alpha, beta );
+	std::gamma_distribution < double > distr( alpha, beta );
 	return draw_gen( distr );
 }
 
@@ -664,7 +664,7 @@ double simulation::bernoulli( double p )
 			return 1.0;
 	}
 
-	bernoulli_distribution distr( p );
+	std::bernoulli_distribution distr( p );
 	return draw_gen( distr );
 }
 
@@ -682,7 +682,7 @@ double simulation::poisson( double mean )
 		return 0.0;
 	}
 
-	poisson_distribution< int > distr( mean );
+	std::poisson_distribution < int > distr( mean );
 	return draw_gen( distr );
 }
 
@@ -704,7 +704,7 @@ double simulation::geometric( double p )
 			return 1.0;
 	}
 
-	geometric_distribution< int > distr( p );
+	std::geometric_distribution < int > distr( p );
 	return draw_gen( distr );
 }
 
@@ -726,7 +726,7 @@ double simulation::binomial( double p, double t )
 			return 1.0;
 	}
 
-	binomial_distribution< int > distr( t, p );
+	std::binomial_distribution < int > distr( t, p );
 	return draw_gen( distr );
 }
 
@@ -744,7 +744,7 @@ double simulation::cauchy( double a, double b )
 		return a;
 	}
 
-	cauchy_distribution< double > distr( a, b );
+	std::cauchy_distribution < double > distr( a, b );
 	return draw_gen( distr );
 }
 
@@ -762,7 +762,7 @@ double simulation::chi_squared( double n )
 		return 0.0;
 	}
 
-	chi_squared_distribution< double > distr( n );
+	std::chi_squared_distribution < double > distr( n );
 	return draw_gen( distr );
 }
 
@@ -780,7 +780,7 @@ double simulation::exponential( double lambda )
 		return 0.0;
 	}
 
-	exponential_distribution< double > distr( lambda );
+	std::exponential_distribution < double > distr( lambda );
 	return draw_gen( distr );
 }
 
@@ -798,7 +798,7 @@ double simulation::fisher( double m, double n )
 		return 0.0;
 	}
 
-	fisher_f_distribution< double > distr( m, n );
+	std::fisher_f_distribution < double > distr( m, n );
 	return draw_gen( distr );
 }
 
@@ -816,7 +816,7 @@ double simulation::student( double n )
 		return 0.0;
 	}
 
-	student_t_distribution< double > distr( n );
+	std::student_t_distribution < double > distr( n );
 	return draw_gen( distr );
 }
 
@@ -834,7 +834,7 @@ double simulation::weibull( double a, double b )
 		return 0.0;
 	}
 
-	weibull_distribution< double > distr( a, b );
+	std::weibull_distribution < double > distr( a, b );
 	return draw_gen( distr );
 }
 
@@ -857,7 +857,7 @@ double simulation::beta( double alpha, double beta )
 			return 1.0;
 	}
 
-	gamma_distribution< double > distr1( alpha, 1.0 ), distr2( beta, 1.0 );
+	std::gamma_distribution < double > distr1( alpha, 1.0 ), distr2( beta, 1.0 );
 	double draw = draw_gen( distr1 );
 	return draw / ( draw + draw_gen( distr2 ) );
 }
@@ -890,7 +890,7 @@ double simulation::bpareto( double alpha, double low, double high )
 	if ( alpha <= 0 || low <= 0 || low >= high )
 	{
 		warn_distr( paretErrCnt, paretStopErr, "bpareto", "non-positive alpha parameter or bounds or invalid bounds" );
-		return max( low, 0. );
+		return std::max( low, 0. );
 	}
 
 	return pow( pow( low, alpha ) /
@@ -925,7 +925,7 @@ double simulation::alapl( double mu, double alpha1, double alpha2 )
 WARN_DISTR
 ****************************************************/
 #ifndef _NP_
-void simulation::warn_distr( atomic < int > & errCnt, bool & stopErr, const char *distr, const char *msg )
+void simulation::warn_distr( std::atomic < int > & errCnt, bool & stopErr, const char *distr, const char *msg )
 #else
 void simulation::warn_distr( int & errCnt, bool & stopErr, const char *distr, const char *msg )
 #endif

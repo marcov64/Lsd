@@ -305,7 +305,7 @@ netLink *object::draw_link_net( void )
 		if ( cur->to->node != NULL )			// node still exists?
 			sum += cur->probTo;					// add-up probabilities
 
-	if ( ! isfinite( sum ) || sum <= 0 )		// check valid probabilities
+	if ( ! std::isfinite( sum ) || sum <= 0 )	// check valid probabilities
 	{
 		sim->error_hard( "invalid network operation",
 						 "check your configuration (parameter value) or\ncode (equation constant) to prevent this situation",
@@ -517,7 +517,7 @@ object *object::draw_node_net( const char *lab )
 													// add-up probabilities
 		sum += cur->node->prob;
 
-	if ( ! isfinite( sum ) || sum <= 0 )			// check valid probabilities
+	if ( ! std::isfinite( sum ) || sum <= 0 )		// check valid probabilities
 	{
 		sim->error_hard( "invalid network operation",
 						 "check your configuration (parameter value) or\ncode (equation constant) to prevent this situation",
@@ -1421,7 +1421,7 @@ double object::read_file_net( const char *lab, const char dir[ ],
 	long idNode, numNodes, countNode, numLinks, startNode, endNode;
 	char fileName[ MAX_PATH_LENGTH ], textLine[ MAX_LINE_SIZE ], nameNode[ MAX_LINE_SIZE ];
 	bool inSection;
-	vector < string > nodes;
+	s_vecT nodes;
 	object *cur;
 	FILE *pajekFile;
 

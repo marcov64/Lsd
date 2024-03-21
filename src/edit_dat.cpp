@@ -90,7 +90,7 @@ void object::edit_data( const char *lab )
 		cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"Too many values to edit\" -detail \"LSD Initial Values editor can reliably edit up to %d elements per object. If LSD crashes, please split elements among children objects to prevent this error.\"", MAX_CELS );
 
 	// limit the total number of cells because of Tcl/Tk bug
-	maxCols = max( min( MAX_COLS, MAX_CELS / rows ), 1 );
+	maxCols = std::max( std::min( MAX_COLS, MAX_CELS / rows ), 1 );
 
 	Tcl_LinkVar( interp, "lag", ( char * ) &lag, TCL_LINK_INT );
 

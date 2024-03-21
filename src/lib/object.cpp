@@ -681,7 +681,7 @@ double object::initturbo( const char *lab )
 
 #ifndef _NP_
 	// prevent concurrent initialization by more than one thread
-	lock_guard < mutex > lock( obj_comp_lck );
+	l_guardT lock( obj_comp_lck );
 #endif
 
 	cb->t_map.clear( );
@@ -1038,7 +1038,7 @@ double object::initturbo_cond( const char *lab )
 
 #ifndef _NP_
 	// prevent concurrent initialization by more than one thread
-	lock_guard < mutex > lock( obj_comp_lck );
+	l_guardT lock( obj_comp_lck );
 #endif
 
 	cb = bit->second;
@@ -1576,7 +1576,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 
 #ifndef _NP_
 	// prevent concurrent additions by more than one thread
-	lock_guard < mutex > lock( obj_comp_lck );
+	l_guardT lock( obj_comp_lck );
 #endif
 
 	cb2->counter_updated = false;
@@ -1684,7 +1684,7 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 		{
 #ifndef _NP_
 			// prevent concurrent update by more than one thread
-			lock_guard < mutex > lock( sim->lock_obj_list );
+			l_guardT lock( sim->lock_obj_list );
 #endif
 			sim->obj_list.insert( cur );
 		}
@@ -1745,7 +1745,7 @@ void object::delete_obj( variable *caller )
 	{							// create context for lock
 #ifndef _NP_
 		// prevent concurrent deletion by more than one thread
-		lock_guard < mutex > lock( obj_comp_lck );
+		l_guardT lock( obj_comp_lck );
 #endif
 
 		if ( deleting )			// ignore if deleting already going on
@@ -1780,7 +1780,7 @@ void object::delete_obj( variable *caller )
 	{
 #ifndef _NP_
 		// prevent concurrent update by more than one thread
-		lock_guard < mutex > lock( sim->lock_obj_list );
+		l_guardT lock( sim->lock_obj_list );
 #endif
 		sim->obj_list.erase( this );
 	}
@@ -2352,7 +2352,7 @@ double object::mav( object *caller, const char *lab, double per, const double we
 	double sumv, sumw;
 	variable *cv;
 
-	if ( ( ! sim->use_nan && isnan( per ) ) || isinf( per ) || abs( per ) < 1 )
+	if ( ( ! sim->use_nan && std::isnan( per ) ) || std::isinf( per ) || abs( per ) < 1 )
 	{
 		sim->error_hard( "invalid moving average period",
 						 "check your equation code to prevent this situation",
@@ -2518,7 +2518,7 @@ double object::perc( const char *lab1, double p, int lag, bool cond, const char 
 	double x, vx, vx1, tmp;
 	object *cur, *cnext;
 	variable *cv;
-	vector < double > vals;
+	d_vecT vals;
 
 	if ( p < 0 || p > 1 )
 	{
@@ -2726,7 +2726,7 @@ double object::stat( const char *lab1, double *r, int lag, bool cond, const char
 	double val, r_temp[ 7 ];
 	object *cur, *cnext;
 	variable *cv;
-	vector < double > vals;
+	d_vecT vals;
 
 	if ( r == NULL )
 		r = r_temp;
@@ -2894,14 +2894,14 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 
 #ifndef _NP_
 	// prevent concurrent sorting by more than one thread
-	lock_guard < mutex > lock( obj_comp_lck );
+	l_guardT lock( obj_comp_lck );
 #endif
 
 	cb->counter_updated = false;
 	cur = cb->head;
 
 	skip_next_obj( cur, & num );
-	vector < object * > new_order( num );
+	o_vecT new_order( num );
 	for ( i = 0; i < num; ++i )
 	{
 		new_order[ i ] = cur;
@@ -2912,11 +2912,11 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 	strupr( dir );
 
 	if ( ! strcmp( dir, "UP" ) )
-		stable_sort( new_order.begin( ), new_order.end( ), [ var, lag ] ( object *a, object *b ) { return sort_function_up_1( a, b, var, lag ); } );
+		std::stable_sort( new_order.begin( ), new_order.end( ), [ var, lag ] ( object *a, object *b ) { return sort_function_up_1( a, b, var, lag ); } );
 
 	else
 		if ( ! strcmp( dir, "DOWN" ) )
-			stable_sort( new_order.begin( ), new_order.end( ), [ var, lag ] ( object *a, object *b ) { return sort_function_down_1( a, b, var, lag ); } );
+			std::stable_sort( new_order.begin( ), new_order.end( ), [ var, lag ] ( object *a, object *b ) { return sort_function_down_1( a, b, var, lag ); } );
 		else
 		{
 			sim->error_hard( "invalid sort option ('UP' or 'DOWN' required)",
@@ -3028,14 +3028,14 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 
 #ifndef _NP_
 	// prevent concurrent sorting by more than one thread
-	lock_guard < mutex > lock( obj_comp_lck );
+	l_guardT lock( obj_comp_lck );
 #endif
 
 	cb->counter_updated = false;
 	cur = cb->head;
 
 	skip_next_obj( cur, & num );
-	vector < object * > new_order( num );
+	o_vecT new_order( num );
 	for ( i = 0; i < num; ++i )
 	{
 		new_order[ i ] = cur;
@@ -3046,10 +3046,10 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 	strupr( dir );
 
 	if ( ! strcmp( dir, "UP" ) )
-		stable_sort( new_order.begin( ), new_order.end( ), [ var1, var2, lag ] ( object *a, object *b ) { return sort_function_up_2( a, b, var1, var2, lag ); } );
+		std::stable_sort( new_order.begin( ), new_order.end( ), [ var1, var2, lag ] ( object *a, object *b ) { return sort_function_up_2( a, b, var1, var2, lag ); } );
 	else
 		if ( ! strcmp( dir, "DOWN" ) )
-			stable_sort( new_order.begin( ), new_order.end( ), [ var1, var2, lag ] ( object *a, object *b ) { return sort_function_down_2( a, b, var1, var2, lag ); } );
+			std::stable_sort( new_order.begin( ), new_order.end( ), [ var1, var2, lag ] ( object *a, object *b ) { return sort_function_down_2( a, b, var1, var2, lag ); } );
 		else
 		{
 			sim->error_hard( "invalid sort option ('UP' or 'DOWN' required)",
@@ -3093,7 +3093,7 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag )
 		a += cur->cal( lv, lag );
 	}
 
-	if ( isnan( a ) || isinf( a ) )
+	if ( std::isnan( a ) || std::isinf( a ) )
 	{
 		sim->error_hard( "invalid random draw option",
 						 "check your equation code to prevent this situation",
@@ -3233,7 +3233,7 @@ double object::write( const char *lab, double value, int time, int lag )
 	int i, eff_lag, eff_time;
 	variable *cv;
 
-	if ( ( ! sim->use_nan && isnan( value ) ) || isinf( value ) )
+	if ( ( ! sim->use_nan && std::isnan( value ) ) || std::isinf( value ) )
 	{
 		sim->error_hard( "invalid write operation",
 						 "check your equation code to prevent this situation",
@@ -3416,7 +3416,7 @@ double object::increment( const char *lab, double value )
 	variable *cv;
 	double new_value;
 
-	if ( ( ! sim->use_nan && isnan( value ) ) || isinf( value ) )
+	if ( ( ! sim->use_nan && std::isnan( value ) ) || std::isinf( value ) )
 	{
 		sim->error_hard( "invalid increment operation",
 						 "check your equation code to prevent this situation",
@@ -3430,10 +3430,10 @@ double object::increment( const char *lab, double value )
 	if ( cv == NULL )
 		return NAN;
 
-	if ( ! sim->use_nan && isnan( cv->val[ 0 ] ) )	// try to recover from RECALC
+	if ( ! sim->use_nan && std::isnan( cv->val[ 0 ] ) )	// try to recover from RECALC
 		cv->cal( this, 0 );
 
-	if ( ( ! sim->use_nan && isnan( cv->val[ 0 ] ) ) || isinf( cv->val[ 0 ] ) )
+	if ( ( ! sim->use_nan && std::isnan( cv->val[ 0 ] ) ) || std::isinf( cv->val[ 0 ] ) )
 	{
 		sim->error_hard( "invalid increment operation",
 						 "check your equation code to prevent this situation",
@@ -3461,7 +3461,7 @@ double object::multiply( const char *lab, double value )
 	variable *cv;
 	double new_value;
 
-	if ( ( ! sim->use_nan && isnan( value ) ) || isinf( value ) )
+	if ( ( ! sim->use_nan && std::isnan( value ) ) || std::isinf( value ) )
 	{
 		sim->error_hard( "invalid multiply operation",
 						 "check your equation code to prevent this situation",
@@ -3475,10 +3475,10 @@ double object::multiply( const char *lab, double value )
 	if ( cv == NULL )
 		return NAN;
 
-	if ( ! sim->use_nan && isnan( cv->val[ 0 ] ) )	// try to recover from RECALC
+	if ( ! sim->use_nan && std::isnan( cv->val[ 0 ] ) )	// try to recover from RECALC
 		cv->cal( this, 0 );
 
-	if ( ( ! sim->use_nan && isnan( cv->val[ 0 ] ) ) || isinf( cv->val[ 0 ] ) )
+	if ( ( ! sim->use_nan && std::isnan( cv->val[ 0 ] ) ) || std::isinf( cv->val[ 0 ] ) )
 	{
 		sim->error_hard( "invalid multiply operation",
 						 "check your equation code to prevent this situation",
@@ -3586,7 +3586,7 @@ double simulation::build_obj_list( bool set_list )
 
 #ifndef _NP_
 	// prevent concurrent update by more than one thread
-	lock_guard < mutex > lock( lock_obj_list );
+	l_guardT lock( lock_obj_list );
 #endif
 
 	obj_list.clear( );			// reset list
@@ -3695,7 +3695,7 @@ LOGIC_OP_CODE
 Check for valid relational operator and return
 operator code for CHECK_COND
 ****************************************************/
-const unordered_map < string, int > logic_ops = { { "==", 0 }, { "=", 0 }, { "EQ", 0 }, { "!=", 1 }, { "=!", 1 }, { "NE", 1 }, { ">", 2 }, { "GT", 2 }, { ">=", 3 }, { "=>", 3 }, { "GE", 3 }, { "<", 4 }, { "LT", 4 }, { "<=", 5 }, { "=<", 5 }, { "LE", 5 } };
+const std::unordered_map < std::string, int > logic_ops = { { "==", 0 }, { "=", 0 }, { "EQ", 0 }, { "!=", 1 }, { "=!", 1 }, { "NE", 1 }, { ">", 2 }, { "GT", 2 }, { ">=", 3 }, { "=>", 3 }, { "GE", 3 }, { "<", 4 }, { "LT", 4 }, { "<=", 5 }, { "=<", 5 }, { "LE", 5 } };
 
 int object::logic_op_code( const char *lop, const char *errmsg )
 {

@@ -54,7 +54,7 @@ object *operate( object *r )
 	sensitivity *cs;
 	description *cd;
 	design *doe;
-	vector < string > logs;
+	s_vecT logs;
 
 	if ( ! redrawReq )
 		redrawRoot = false;		// assume no browser redraw
@@ -911,12 +911,12 @@ object *operate( object *r )
 			cmd( "set initial %d", cd->initial ? 1 : 0 );
 			cmd( "set vname %s", lab_old );
 
-			if ( isnan( cv->max_val ) )
+			if ( std::isnan( cv->max_val ) )
 				cmd( "set vmax \"%s\"", NON_AVAILABLE );
 			else
 				cmd( "set vmax %g", cv->max_val );
 
-			if ( isnan( cv->min_val ) )
+			if ( std::isnan( cv->min_val ) )
 				cmd( "set vmin \"%s\"", NON_AVAILABLE );
 			else
 				cmd( "set vmin %g", cv->min_val );
@@ -957,7 +957,7 @@ object *operate( object *r )
 				{
 					strcpy ( buf_descr, "" );
 
-					j = ( cv->param == 1 ) ? 1 : min( cv->num_lag, 4 );
+					j = ( cv->param == 1 ) ? 1 : std::min( cv->num_lag, 4 );
 					for ( i = 0; i < j; ++i )
 					{
 						cmd( "ttk::frame $T.h.i.v%d", i );
@@ -1318,7 +1318,7 @@ object *operate( object *r )
 				double vmax = get_double( "vmax", NULL, true ),
 					   vmin = get_double( "vmin", NULL, true );
 
-				if ( ! isnan( vmin ) && vmax < vmin )
+				if ( ! std::isnan( vmin ) && vmax < vmin )
 				{
 					cmd( "ttk::messageBox -parent .chgelem -type ok -title Warning -icon warning -message \"Invalid maximum value\" -detail \"Maximum element value '%g' is less than the minimum value '%g', discarding.\"", vmax, vmin );
 					vmax = NAN;
@@ -1526,7 +1526,7 @@ object *operate( object *r )
 						cv->val[ 0 ] = old_val[ 0 ];		// parameter <-> lagged variable
 					else
 						if ( cv->num_lag > 0 && numlag > 0 )// x-lags variable to y-lags variable?
-							for ( i = 0; i < min( cv->num_lag, numlag ); ++i )
+							for ( i = 0; i < std::min( cv->num_lag, numlag ); ++i )
 								cv->val[ i ] = old_val[ i ];
 
 					delete [ ] old_val;
@@ -3560,7 +3560,7 @@ object *operate( object *r )
 				plog( "\nSensitivity analysis space size: %ld", ptsSa );
 
 				// Prevent running into too big sensitivity spaces (high computation times)
-				if ( ptsSa > max( 10, MAX_SENS_POINTS / 10 ) )
+				if ( ptsSa > std::max( 10, MAX_SENS_POINTS / 10 ) )
 					// ask user before proceeding
 					if ( sensitivity_too_large( ptsSa ) )
 						break;
@@ -4726,11 +4726,11 @@ object *operate( object *r )
 
 			param = get_int( "cores" );
 			if ( param < 1 || param > SRV_MAX_CORES )
-				param = min( sim.max_threads, SRV_MAX_CORES );
+				param = std::min( sim.max_threads, SRV_MAX_CORES );
 
 			nature = get_int( "threads" );
 			if ( nature < 1 || nature > SRV_MAX_CORES )
-				nature = min( sim.max_threads, SRV_MAX_CORES );
+				nature = std::min( sim.max_threads, SRV_MAX_CORES );
 
 			get_str( "res2", out_bat, MAX_PATH_LENGTH );
 
@@ -4998,7 +4998,7 @@ object *operate( object *r )
 #ifdef _NP_
 			param = 1;
 #else
-			param = min( sim.last_run, sim.max_threads );
+			param = std::min( sim.last_run, sim.max_threads );
 #endif
 
 			cmd( "set simNum %d", sim.last_run );
@@ -5194,9 +5194,9 @@ object *operate( object *r )
 
 			if ( sim.last_run > 1 && param > 1 && sim.no_tot )	// parallel runs case
 			{
-				param = min( get_int( "cores" ), sim.last_run );
-				param = min( max( param, 1 ), sim.max_threads );// parallel runs
-				nature = max( sim.max_threads / param, 1 );		// threads per run
+				param = std::min( get_int( "cores" ), sim.last_run );
+				param = std::min( std::max( param, 1 ), sim.max_threads );// parallel runs
+				nature = std::max( sim.max_threads / param, 1 );	// threads per run
 			}
 			else
 			{

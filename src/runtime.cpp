@@ -436,7 +436,7 @@ void variable::plot_runtime( void )
 	if ( val[ 0 ] <= ymin )
 	{
 		value = val[ 0 ] * ( val[ 0 ] > 0 ? 1 - MARG_CONST : 1 + MARG_CONST );
-		value = min( value, ymin - ( ymax - ymin ) / height );
+		value = std::min( value, ymin - ( ymax - ymin ) / height );
 		value = sim->round_digits( value, p_digits );
 
 		scale = ( ymax - ymin ) / ( ymax - value );

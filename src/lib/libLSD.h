@@ -134,9 +134,6 @@ Relevant macros for conditional compilation (when defined):
 					   "Floating-point exception", "Illegal instruction", \
 					   "Segmentation violation" }
 
-// set default name spaces (C++ STL)
-using namespace std;
-
 // classes forward declarations
 struct bridge;
 struct description;
@@ -152,27 +149,32 @@ struct variable;
 struct worker;
 
 // special types used for fast equation, object and variable lookup
-typedef function < double( object *caller, variable *var ) > eq_funcT;
-typedef pair < string, bridge * > b_pairT;
-typedef pair < double, object * > o_pairT;
-typedef pair < long, object * > n_pairT;
-typedef pair < string, variable * > v_pairT;
-typedef vector < object * > o_vecT;
-typedef unordered_map < string, eq_funcT > eq_mapT;
-typedef unordered_map < string, bridge * > b_mapT;
-typedef unordered_map < double, object * > o_mapT;
-typedef unordered_map < long, object * > n_mapT;
-typedef unordered_map < string, string > p_mapT;
-typedef unordered_map < string, variable * > v_mapT;
-typedef unordered_set < object * > o_setT;
+typedef std::function < double( object *caller, variable *var ) > eq_funcT;
+typedef std::pair < std::string, bridge * > b_pairT;
+typedef std::pair < double, object * > o_pairT;
+typedef std::pair < long, object * > n_pairT;
+typedef std::pair < std::string, variable * > v_pairT;
+typedef std::vector < double > d_vecT;
+typedef std::vector < int > i_vecT;
+typedef std::vector < object * > o_vecT;
+typedef std::vector < std::string > s_vecT;
+typedef std::unordered_map < std::string, eq_funcT > eq_mapT;
+typedef std::unordered_map < std::string, bridge * > b_mapT;
+typedef std::unordered_map < double, object * > o_mapT;
+typedef std::unordered_map < long, object * > n_mapT;
+typedef std::unordered_map < std::string, std::string > p_mapT;
+typedef std::unordered_map < std::string, variable * > v_mapT;
+typedef std::unordered_set < object * > o_setT;
 
 typedef pugi::xml_document xml_doc;
 typedef pugi::xml_node xml_node;
 typedef pugi::xml_attribute xml_attr;
 
 #ifndef _NP_
-typedef lock_guard < recursive_mutex > rec_lguardT;
-typedef unique_lock < recursive_mutex > rec_uniqlT;
+typedef std::lock_guard < std::mutex > l_guardT;
+typedef std::lock_guard < std::recursive_mutex > rec_lguardT;
+typedef std::unique_lock < std::mutex > uniq_lT;
+typedef std::unique_lock < std::recursive_mutex > rec_uniqlT;
 #endif
 
 #ifdef _WIN32
@@ -209,7 +211,7 @@ struct simulation						// simulation container class
 	unsigned seed = 1;					// random number generator initial seed
 
 #ifndef _NP_
-	mutex lock_obj_list;				// lock object list for parallel manipulation
+	std::mutex lock_obj_list;			// lock object list for parallel manipulation
 #endif
 
 #ifndef _NW_
@@ -245,7 +247,7 @@ struct simulation						// simulation container class
 	double ipow( double base, double exp );// integer exponentiation
 	double lnorm( double mu, double sigma );// lognormal draw
 	double lnormcdf( double mu, double sigma, double x );// lognormal cdf
-	double median( vector < double > & v );
+	double median( d_vecT & v );
 	double norm( double mean, double dev );// normal draw
 	double normcdf( double mu, double sigma, double x );// normal cdf
 	double pareto( double mu, double alpha );// Pareto draw
@@ -351,55 +353,56 @@ struct simulation						// simulation container class
 	long idum = 0;						// Park-Miller default seed (legacy code)
 	long nodesSerial = 1;				// network node serial number counter
 	lsdstack *stack_log = NULL;			// LSD stack
-	map < string, profile > prof_times;	// set of saved profiling times
-	minstd_rand lc1;					// linear congruential generator (internal)
-	minstd_rand lc2;					// linear congruential generator (user)
-	mt19937 mt32;						// Mersenne-Twister 32 bits generator
-	mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
 	object *blueprint = NULL;			// LSD blueprint (effective model in use)
 	object *wait_delete = NULL;			// LSD object waiting for deletion
-	random_device rd;					// simulation random device
-	ranlux24 lf24;						// lagged fibonacci 24 bits generator
-	ranlux48 lf48;						// lagged fibonacci 48 bits generator
 	sensitivity *sens = NULL;			// LSD sensitivity analysis structure
+	std::map < std::string, profile > prof_times;// set of saved profiling times
+	std::minstd_rand lc1;				// linear congruential generator (internal)
+	std::minstd_rand lc2;				// linear congruential generator (user)
+	std::mt19937 mt32;					// Mersenne-Twister 32 bits generator
+	std::mt19937_64 mt64;				// Mersenne-Twister 64 bits generator
+	std::random_device rd;				// simulation random device
+	std::ranlux24 lf24;					// lagged fibonacci 24 bits generator
+	std::ranlux48 lf48;					// lagged fibonacci 48 bits generator
+	std::vector < std::string > res_list;// list of results files last saved
 	variable *cemetery = NULL;			// LSD saved data from deleted objects
 	variable *last_cemetery = NULL;		// LSD last saved cemetery entry
-	vector < string > res_list;			// list of results files last saved
 	FILE *log_file_ptr;					// log file pointer, if any
 
 #ifndef _NP_
 	// simulation-class conditional variables (not used in equations)
-	atomic < bool > running = false;	// single simulation is running
-	atomic < bool > running_seq = false;// set of sequential simulations running
-	atomic < bool > parallel_ready;		// indicate variable worker is ready
-	atomic < int > eff_t = 0;			// number of executed time steps
-	atomic < int > alaplErrCnt, bernoErrCnt, betaErrCnt, binomErrCnt, cauchErrCnt,
-				   chisqErrCnt, expErrCnt, fishErrCnt, gammaErrCnt, geomErrCnt,
-				   lnormErrCnt, normErrCnt, paretErrCnt, poissErrCnt, studErrCnt,
-				   weibErrCnt;			// math error count control
-	condition_variable upd_workers;		// worker schedule update signal
-	mutex draw_lc1_lck;					// locks for random generator operations
-	mutex draw_lc2_lck;
-	mutex draw_lf24_lck;
-	mutex draw_lf48_lck;
-	mutex draw_mt32_lck;
-	mutex draw_mt64_lck;
-	mutex draw_rd_lck;
-	mutex error_lck;					// control multiple error_hard calls
-	mutex run_logs_lck;					// lock run_logs for parallel updating
-	mutex run_pids_lck;					// lock run_pids for parallel updating
-	mutex run_status_lck;				// lock run_status for parallel updating
-	mutex seq_end_lck;					// lock seq_end for parallel updating
-	mutex var_update_lck;				// control worker variable update
-	mutex wrk_crash_lck;				// control worker crash handling
-	string run_log;						// consolidated runs log
-	thread run_monitor;					// thread monitoring parallel instances
-	thread sim_thread;					// thread object where simulation is run
-	vector < handleT > run_pids;		// parallel running instances process id's
-	vector < int > run_status;			// parallel running instances status
-	vector < string > run_logs;			// log file list produced in parallel runs
-	vector < string > run_results;		// parallel run results files
-	vector < thread > run_threads;		// parallel running instances
+	std::atomic < bool > running = false;// single simulation is running
+	std::atomic < bool > running_seq = false;// set of sequential simulations running
+	std::atomic < bool > parallel_ready;// indicate variable worker is ready
+	std::atomic < int > eff_t = 0;		// number of executed time steps
+	std::atomic < int > alaplErrCnt, bernoErrCnt, betaErrCnt, binomErrCnt,
+						cauchErrCnt, chisqErrCnt, expErrCnt, fishErrCnt,
+						gammaErrCnt, geomErrCnt, lnormErrCnt, normErrCnt,
+						paretErrCnt, poissErrCnt, studErrCnt, weibErrCnt;
+										// math error count control
+	std::condition_variable upd_workers;	// worker schedule update signal
+	std::mutex draw_lc1_lck;			// locks for random generator operations
+	std::mutex draw_lc2_lck;
+	std::mutex draw_lf24_lck;
+	std::mutex draw_lf48_lck;
+	std::mutex draw_mt32_lck;
+	std::mutex draw_mt64_lck;
+	std::mutex draw_rd_lck;
+	std::mutex error_lck;				// control multiple error_hard calls
+	std::mutex run_logs_lck;			// lock run_logs for parallel updating
+	std::mutex run_pids_lck;			// lock run_pids for parallel updating
+	std::mutex run_status_lck;			// lock run_status for parallel updating
+	std::mutex seq_end_lck;				// lock seq_end for parallel updating
+	std::mutex var_update_lck;			// control worker variable update
+	std::mutex wrk_crash_lck;			// control worker crash handling
+	std::vector < handleT > run_pids;	// parallel running instances process id's
+	std::vector < std::thread > run_threads;// parallel running instances
+	std::string run_log;				// consolidated runs log
+	std::thread run_monitor;			// thread monitoring parallel instances
+	std::thread sim_thread;				// thread object where simulation is run
+	i_vecT run_status;					// parallel running instances status
+	s_vecT run_logs;					// log file list produced in parallel runs
+	s_vecT run_results;					// parallel run results files
 	worker *workers = NULL;				// multi-thread parallel worker data
 #else
 	bool running = false;				// single simulation is running
@@ -455,14 +458,14 @@ struct simulation						// simulation container class
 	void monitor_parallel( bool nw );
 	void move_obj( const char *lab, const char *dest );
 	void reset_blueprint( object *r );
-	void run_parallel_exec( bool nw, int id, string cmd );
+	void run_parallel_exec( bool nw, int id, std::string cmd );
 	void save_results( void );
 	void unload_configuration( bool full );
 	void update_bar( char *bar, int done, int & last_done, int bar_sz );
 
 #ifndef _NP_
 	void parallel_update( variable *v, object* p, object *caller = NULL );
-	void warn_distr( atomic < int > & errCnt, bool & stopErr, const char *distr, const char *msg );
+	void warn_distr( std::atomic < int > & errCnt, bool & stopErr, const char *distr, const char *msg );
 #else
 	void warn_distr( int & errCnt, bool & stopErr, const char *distr, const char *msg );
 #endif
@@ -493,7 +496,7 @@ struct object							// simulation model object class
 	v_mapT v_map;						// fast lookup map to variables
 
 #ifndef _NP_
-	mutex obj_comp_lck;					// mutex lock for parallel computations
+	std::mutex obj_comp_lck;					// mutex lock for parallel computations
 #endif
 
 	// object-class methods
@@ -542,7 +545,7 @@ struct object							// simulation model object class
 	double whg_av( const char *lab1, const char *lab2, int lag = 0, bool cond = false, const char *lab3 = "", const char *lop = "", double value = NAN );
 	double write( const char *lab, double value, int time, int lag = 0 );
 	double write_file_net( const char *lab, const char *dir = "", const char *base_name = "net", int serial = 1, bool append = false );
-	int load_xml_insts( xml_node &n, n_mapT &node_map, set < int > &warning );
+	int load_xml_insts( xml_node &n, n_mapT &node_map, std::set < int > &warning );
 	int load_xml_struct( xml_node &n, bool quick );
 	int logic_op_code( const char *lop, const char *errmsg );
 	long init_circle_net( const char *lab, long numNodes, long outDeg );
@@ -675,7 +678,7 @@ struct variable							// model numeric element (variable,
 	variable *next = NULL;
 
 #ifndef _NP_
-	recursive_mutex var_comp_lck;		// mutex lock for parallel computation
+	std::recursive_mutex var_comp_lck;	// mutex lock for parallel computation
 #endif
 
 	variable( void ) { };				// constructor (empty)
@@ -713,7 +716,7 @@ struct sensitivity						// sensitivity analysis container class
 	simulation *sim;					// simulation where object is contained
 
 	sensitivity( const char *lab, simulation *_sim, int _param, int _lag,
-				 bool _integer, int _num_val = 0, vector < double > *_val = NULL );
+				 bool _integer, int _num_val = 0, d_vecT *_val = NULL );
 										// constructor
 	~sensitivity( void );				// destructor
 
@@ -791,14 +794,14 @@ struct worker							// multi-thread variable worker data
 	char err_msg1[ MAX_BUFF_SIZE ] = "";
 	char err_msg2[ MAX_BUFF_SIZE ] = "";
 	char err_msg3[ MAX_BUFF_SIZE ] = "";
-	condition_variable run;
-	exception_ptr pexcpt = nullptr;
 	int signum = -1;
 	jmp_buf env;
-	mutex worker_lck;
 	simulation *sim = NULL;				// simulation where object is contained
-	thread worker_thread;
-	thread::id thread_id;
+	std::condition_variable run;
+	std::exception_ptr pexcpt = nullptr;
+	std::mutex worker_lck;
+	std::thread worker_thread;
+	std::thread::id thread_id;
 	variable *v = NULL;
 
 	~worker( void );					// destructor
@@ -905,17 +908,17 @@ extern const double z_dist_cl[ Z_CLEVS ];// normal distribution table confidence
 extern const double z_dist_st[ Z_CLEVS ];// normal distribution table statistics
 extern const int signals[ ];			// handled system signal numbers
 extern int choice;						// Tcl menu control (main window)
-extern vector < simulation * > sims;	// vector holding existing simulations
+extern std::vector < simulation * > sims;	// vector holding existing simulations
 extern FILE *stderr_ptr;				// main thread standard error pointer
 extern FILE *stdout_ptr;				// main thread standard output pointer
 
 #ifndef _NP_
 // library conditional variables (not used in equations)
-extern condition_variable seq_end;		// signal simulation sequence end
-extern map < thread::id, worker * > worker_thread_ptr;// worker thread pointers
-extern mutex plog_term_lck;				// lock plog_terminal for parallel upd.
-extern mutex wrk_thr_ptr_lck;			// lock worker_thread_ptr for par. upd.
-extern thread::id main_thread;			// LSD main thread ID
+extern std::condition_variable seq_end;	// signal simulation sequence end
+extern std::map < std::thread::id, worker * > worker_thread_ptr;// worker thr ptr
+extern std::mutex plog_term_lck;		// lock plog_terminal for parallel upd.
+extern std::mutex wrk_thr_ptr_lck;		// lock worker_thread_ptr for par. upd.
+extern std::thread::id main_thread;		// LSD main thread ID
 #endif
 
 // library C++ functions (not used in equations)
@@ -930,6 +933,7 @@ char *strdecdata( char *out, const char *in, int outSz = 0 );
 char *strencdata( char *out, const char *in, int outSz = 0 );
 char *strupr( char *s );
 const char *signal_name( int signum );
+d_vecT strtodsplit( const char *in, char sep, double inv = 0. );
 int dispatch_runs( int until_t = 0, int until_run = 0 );
 int kill_system( simulation *sim, int id );
 int run_system( const char *cmd, simulation *sim = NULL, int id = -1 );
@@ -942,10 +946,9 @@ long strtol( const char *in, char** endptr, int base, long inv );
 object *go_brother( object *c );
 object *skip_next_obj( object *t );
 object *skip_next_obj( object *t, int *count );
-string to_string( const char *fmt, double val );
-vector < double > strtodsplit( const char *in, char sep, double inv = 0. );
-vector < long > strtolsplit( const char *in, char sep, long inv = 0 );
-vector < string > strtostrsplit( const char *in, char sep, bool remQuotes = false );
+std::string to_string( const char *fmt, double val );
+std::vector < long > strtolsplit( const char *in, char sep, long inv = 0 );
+s_vecT strtostrsplit( const char *in, char sep, bool remQuotes = false );
 void close_sim( void );
 void cmd_gui( const char *cm, ... );
 void exception_handler( int signum, const char *what );

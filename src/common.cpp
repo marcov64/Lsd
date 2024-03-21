@@ -22,7 +22,7 @@
 #include "LSD.h"
 
 #ifndef _NP_
-mutex lock_log_tcl_err;			// lock log_tcl_error for parallel access
+std::mutex lock_log_tcl_err;		// lock log_tcl_error for parallel access
 #endif
 
 
@@ -451,7 +451,7 @@ void cmd_backend( const char *cm, va_list arg )
 
 #ifndef _NP_
 	// abort if not running in main LSD thread
-	if ( this_thread::get_id( ) != main_thread )
+	if ( std::this_thread::get_id( ) != main_thread )
 		return;
 #endif
 
@@ -517,7 +517,7 @@ void log_tcl_error( bool show, const char *cm, const char *message, ... )
 	static bool firstCall = true;
 
 #ifndef _NP_
-	lock_guard < mutex > lock( lock_log_tcl_err );
+	l_guardT lock( lock_log_tcl_err );
 #endif
 
 	va_start( argptr, message );
@@ -1267,7 +1267,7 @@ bool compile_run( int run_mode, bool nw )
 #endif
 
 	// number of cores for make parallelization
-	max_threads = thread::hardware_concurrency( );
+	max_threads = std::thread::hardware_concurrency( );
 
 	// start compilation as a background task
 	res = -1;
@@ -1404,9 +1404,9 @@ void clean_spaces( char *s )
  WIN_PATH
  convert linux path to Windows default, replacing / with \
  ****************************************************/
-string win_path( string filepath )
+std::string win_path( std::string filepath )
 {
-	string winpath;
+	std::string winpath;
 
 	for ( auto c : filepath )
 		if ( c == '/' )

@@ -39,7 +39,7 @@ char *lib_path = NULL;			// path of shared library, if any
 char *model_path = NULL;		// folder where the model files are
 char *rootLsd = NULL;			// path of LSD root directory
 int choice;						// Tcl menu control variable (main window)
-vector < simulation * > sims;	// vector holding existing simulations
+std::vector < simulation * > sims;// vector holding existing simulations
 FILE *stderr_ptr;				// main thread standard error file pointer
 FILE *stdout_ptr;				// main thread standard output file pointer
 
@@ -52,12 +52,12 @@ const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 
 #ifndef _NP_
 // conditional variables
-condition_variable seq_end;		// variable to signal simulation sequence end
-map < thread::id, worker * > worker_thread_ptr;// worker thread pointers
-mutex init_sim_lck;				// lock simulation constructor
-mutex plog_term_lck;			// lock plog_terminal for parallel updating
-mutex wrk_thr_ptr_lck;			// lock worker_thread_ptr for parallel updating
-thread::id main_thread;			// LSD main thread ID
+std::condition_variable seq_end;// variable to signal simulation sequence end
+std::map < std::thread::id, worker * > worker_thread_ptr;// worker thr. pointers
+std::mutex init_sim_lck;		// lock simulation constructor
+std::mutex plog_term_lck;		// lock plog_terminal for parallel updating
+std::mutex wrk_thr_ptr_lck;		// lock worker_thread_ptr for parallel updating
+std::thread::id main_thread;	// LSD main thread ID
 #endif
 
 
@@ -67,7 +67,7 @@ thread::id main_thread;			// LSD main thread ID
 void __attribute__( ( constructor ) ) lib_constructor( )
 {
 #ifndef _NP_
-	main_thread = this_thread::get_id( );
+	main_thread = std::this_thread::get_id( );
 #endif
 
 	exec_file = new char[ strlen( "" ) + 1 ];
@@ -113,7 +113,7 @@ simulation::simulation( void )
 	init_map( );					// set equation look-up map
 
 #ifndef _NP_
-	max_threads = ( MAX_CORES <= 0 ) ? thread::hardware_concurrency( ) : MAX_CORES;
+	max_threads = ( MAX_CORES <= 0 ) ? std::thread::hardware_concurrency( ) : MAX_CORES;
 #else
 	max_threads = ( MAX_CORES <= 0 ) ? 4 : MAX_CORES;
 #endif
@@ -129,7 +129,7 @@ simulation::simulation( void )
 
 #ifndef _NP_
 	parallel_ready = true;
-	lock_guard < mutex > lock( init_sim_lck );// parallel semaphore
+	l_guardT lock( init_sim_lck );	// parallel semaphore
 #endif
 
 	sim = sims.size( );				// index por this sim

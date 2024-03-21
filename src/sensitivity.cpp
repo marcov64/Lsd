@@ -866,17 +866,18 @@ double **compute_distance_matrix( double **sample, int M, int k, double **DM )
 COMBINATIONS
 	Calculate the combinations of indices, r-to-r
 ******************************************************************************/
-vector < vector < int > > combinations( list < int > indices, int r )
+std::vector < i_vecT > combinations( std::list < int > indices, int r )
 {
-	vector < int > comb;
-	vector < vector < int > > combs;
+	i_vecT comb;
+	std::vector < i_vecT > combs;
+
 	// copy list to vector
-	vector < int > ind( indices.begin( ), indices.end( ) );
+	i_vecT ind( indices.begin( ), indices.end( ) );
 	int n = ind.size( );
 	if ( r > n )
 		return combs;
 	// create selection array with r selectors
-	vector < bool > v( n );
+	std::vector < bool > v( n );
 	fill( v.begin( ), v.end( ) - n + r, true );
 	// create all permutations of the selectors
 	do
@@ -901,10 +902,10 @@ SUM_DISTANCES
 	indices: list of candidate pairs of points = list < int >
 	DM: distance matrix = array (M,M)
 ******************************************************************************/
-double sum_distances( list < int > indices, double **DM )
+double sum_distances( std::list < int > indices, double **DM )
 {
 	// get all combination pairs of indices
-	vector < vector < int > > combs = combinations( indices, 2 );
+	std::vector < i_vecT > combs = combinations( indices, 2 );
 
 	// add distance of all points pairs
 	double D = 0;
@@ -919,10 +920,10 @@ double sum_distances( list < int > indices, double **DM )
 TOP_IDX
 	Get the top-i size items index from a unidimensional array
 ******************************************************************************/
-list < int > top_idx( double *a, int n, int i )
+std::list < int > top_idx( double *a, int n, int i )
 {
-	list < int > top;
-	vector < bool > used( n, false );
+	std::list < int > top;
+	std::vector < bool > used( n, false );
 
 	for ( int k = 0; k < i; ++k )
 	{
@@ -948,7 +949,7 @@ GET_MAX_SUM_IND
 	indices_list = list of points
 	distance = array (M)
 ******************************************************************************/
-list < int > get_max_sum_ind( vector < list < int > > indices_list, vector < double > row_maxima_i )
+std::list < int > get_max_sum_ind( std::vector < std::list < int > > indices_list, d_vecT row_maxima_i )
 {
 	int max_idx = -1;
 	double max = -INFINITY;
@@ -969,10 +970,10 @@ ADD_INDICES
 	Adds extra indices for the combinatorial problem.
 	For indices = (1,2 ) and M=5, the method returns [(1,2,3),(1,2,4),(1,2,5)]
 ******************************************************************************/
-vector < list < int > > add_indices( list < int > m_max_ind, int M )
+std::vector < std::list < int > > add_indices( std::list < int > m_max_ind, int M )
 {
-	vector < list < int > > list_new_indices;
-	list < int > copy = m_max_ind;
+	std::vector < std::list < int > > list_new_indices;
+	std::list < int > copy = m_max_ind;
 
 	for ( int i = 0; i < M; ++i )
 		if ( find( m_max_ind.begin( ), m_max_ind.end( ), i ) == m_max_ind.end( ) )
@@ -1001,20 +1002,20 @@ double **opt_trajectories( int k, double **pool, int M, int r, double **X )
 		return X;
 	}
 
-	list < int > indices, i_max_ind, m_max_ind, tot_max;
-	vector < list < int > > tot_indices_list, indices_list, m_ind;
+	std::list < int > indices, i_max_ind, m_max_ind, tot_max;
+	std::vector < std::list < int > > tot_indices_list, indices_list, m_ind;
 
 	double **DM = mat_new( M, M );
 	DM = compute_distance_matrix( pool, M, k, DM );
 
-	vector < double > tot_max_array( r - 1, 0 );
+	d_vecT tot_max_array( r - 1, 0 );
 
 	//#############Loop 'i'#############
 	// i starts at 1
 	for ( int i = 1; i < r; ++i )
 	{
 		indices_list.clear( );
-		vector < double > row_maxima_i( M, 0 );
+		d_vecT row_maxima_i( M, 0 );
 
 		for ( int row = 0; row < M; ++row )
 		{
@@ -1033,7 +1034,7 @@ double **opt_trajectories( int k, double **pool, int M, int r, double **X )
 		for ( int m = 1; m <= r - i - 1; ++m )
 		{
 			m_ind = add_indices( m_max_ind, M );
-			vector < double > m_maxima( m_ind.size( ), 0 );
+			d_vecT m_maxima( m_ind.size( ), 0 );
 
 			for ( unsigned int n = 0; n < m_ind.size( ); ++n )
 				m_maxima[ n ] = sum_distances( m_ind[ n ], DM );
@@ -1046,10 +1047,10 @@ double **opt_trajectories( int k, double **pool, int M, int r, double **X )
 
 	tot_max = get_max_sum_ind( tot_indices_list, tot_max_array );
 	tot_max.sort( );
-	vector < int > max( tot_max.begin( ), tot_max.end( ) );
+	i_vecT max( tot_max.begin( ), tot_max.end( ) );
 
 	// index the submatrix for each trajectory
-	vector < int > index_list( M, 0 );
+	i_vecT index_list( M, 0 );
 	for ( int i = 0; i < M; ++i )
 		index_list[ i ] = i * ( k + 1 );
 
@@ -1155,8 +1156,8 @@ void design::load_design_data( sensitivity *rsens, int n )
 		{
 			if ( 2 * j + 1 < nVal )	// data available?
 			{
-				hi[ i ][ j ] = max( cs->val[ 2 * j ], cs->val[ 2 * j + 1 ] );
-				lo[ i ][ j ] = min( cs->val[ 2 * j ], cs->val[ 2 * j + 1 ] );
+				hi[ i ][ j ] = std::max( cs->val[ 2 * j ], cs->val[ 2 * j + 1 ] );
+				lo[ i ][ j ] = std::min( cs->val[ 2 * j ], cs->val[ 2 * j + 1 ] );
 			}
 			else					// recycle previous data
 			{

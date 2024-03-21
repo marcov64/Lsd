@@ -234,15 +234,15 @@ variable constraints
 *****************************/
 double variable::chk_val( double val )
 {
-	if ( isfinite( val ) )
+	if ( std::isfinite( val ) )
 	{
 		if ( integer )
 			val = round( val );
 
-		if ( isfinite( max_val ) && val > max_val )
+		if ( std::isfinite( max_val ) && val > max_val )
 			val = max_val;
 		else
-			if ( isfinite( min_val ) && val < min_val )
+			if ( std::isfinite( min_val ) && val < min_val )
 				val = min_val;
 	}
 	else
@@ -281,7 +281,7 @@ double variable::cal( object *caller, int lag )
 
 #ifndef _NP_
 	// prepare mutex for variables and functions updated in multiple threads
-	rec_uniqlT guard( var_comp_lck, defer_lock );
+	rec_uniqlT guard( var_comp_lck, std::defer_lock );
 #endif
 
 	if ( param == 0 )					// it's a variable
@@ -417,7 +417,7 @@ double variable::cal( object *caller, int lag )
 	{
 		app = fun( caller );
 	}
-	catch ( exception& exc )
+	catch ( std::exception& exc )
 	{
 		plog( "\n\nAn exception was detected while computing the equation \nfor '%s' requested by object '%s'", label, caller == NULL ? "(none)" : caller->label );
 		sim->quit = 2;
@@ -472,7 +472,7 @@ double variable::cal( object *caller, int lag )
 
 			if ( ( ! sim->prof_obs_only || observe ) && time > sim->prof_min_msecs )
 			{
-				string var_name = label;
+				std::string var_name = label;
 				sim->prof_times[ var_name ].ticks += time;
 				sim->prof_times[ var_name ].comp++;
 			}
@@ -615,8 +615,8 @@ void worker::cal_worker( void )
 		errored = false;
 
 		// update object map and register all signal handlers
-		unique_lock < mutex > lock_map( wrk_thr_ptr_lck );
-		thread_id = this_thread::get_id( );
+		uniq_lT lock_map( wrk_thr_ptr_lck );
+		thread_id = std::this_thread::get_id( );
 		worker_thread_ptr[ thread_id ] = this;
 		lock_map.unlock( );
 		handle_signals( signal_wrapper );
@@ -626,7 +626,7 @@ void worker::cal_worker( void )
 		while ( running )
 		{
 			// wait for variable calculation message
-			unique_lock < mutex > lock_worker( worker_lck );
+			uniq_lT lock_worker( worker_lck );
 			run.wait( lock_worker, [ this ]{ return ! free; }  );
 
 			// exit if shutdown or continue if already updated
@@ -676,7 +676,7 @@ void worker::cal_worker( void )
 						pexcpt = nullptr;
 					else
 					{
-						pexcpt = current_exception( );
+						pexcpt = std::current_exception( );
 						snprintf( err_msg1, MAX_BUFF_SIZE, "equation error" );
 						snprintf( err_msg2, MAX_BUFF_SIZE, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", v->label, v->up->label );
 						snprintf( err_msg3, MAX_BUFF_SIZE, "check your code to prevent this situation" );
@@ -727,7 +727,7 @@ void worker::cal_worker( void )
 			// create context to send signal to update scheduler if needed
 			if ( ! sim->worker_ready )
 			{
-				unique_lock< mutex > lock_update( sim->var_update_lck );
+				uniq_lT lock_update( sim->var_update_lck );
 				// recheck if still needed
 				if ( ! sim->worker_ready )
 				{
@@ -742,7 +742,7 @@ void worker::cal_worker( void )
 		// only capture exception if not already done
 		if ( ! sim->error_hard_thread && pexcpt != nullptr )
 		{
-			pexcpt = current_exception( );
+			pexcpt = std::current_exception( );
 			snprintf( err_msg1, MAX_BUFF_SIZE, "parallel computation problem" );
 			snprintf( err_msg2, MAX_BUFF_SIZE, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", v->label, v->up->label );
 			snprintf( err_msg3, MAX_BUFF_SIZE, "disable parallel computation for this variable\nor check your code to prevent this situation" );
@@ -763,7 +763,7 @@ worker::~worker( void )
 	// command thread shutdown if running
 	if ( running && ! errored )
 	{
-		unique_lock< mutex > lock_worker( worker_lck );
+		uniq_lT lock_worker( worker_lck );
 		running = free = false;
 		run.notify_one( );
 	}
@@ -773,7 +773,7 @@ worker::~worker( void )
 		worker_thread.join( );
 
 	// remove thread id from threads map
-	unique_lock < mutex > lock_map( wrk_thr_ptr_lck );
+	uniq_lT lock_map( wrk_thr_ptr_lck );
 	worker_thread_ptr.erase( thread_id );
 }
 
@@ -835,7 +835,7 @@ Reformat signal function format to comply with OS
 void worker::signal_wrapper( int signum )
 {
 	// call the appropriate worker object member function to handle signal
-	worker_thread_ptr[ this_thread::get_id( ) ]->signal( signum );
+	worker_thread_ptr[ std::this_thread::get_id( ) ]->signal( signum );
 }
 
 
@@ -845,7 +845,7 @@ Multi-thread CAL version (parallel computation)
 ****************************************************/
 void worker::cal( variable *_v )
 {
-	unique_lock< mutex > worker_lock( worker_lck );
+	uniq_lT worker_lock( worker_lck );
 	v = _v;
 	free = false;
 	run.notify_one( );
@@ -862,7 +862,7 @@ bool worker::check( void )
 		return true;
 
 	// only process first worker crash
-	lock_guard< mutex > lock_crash( sim->wrk_crash_lck );
+	l_guardT lock_crash( sim->wrk_crash_lck );
 	if ( ! sim->worker_crashed )
 	{
 		sim->worker_crashed = true;
@@ -1003,9 +1003,9 @@ void simulation::parallel_update( variable *v, object* p, object *caller )
 				// sleep process until first worker is free
 				if ( nt >= max_threads )
 				{
-					unique_lock< mutex > lock_update( var_update_lck );
+					uniq_lT lock_update( var_update_lck );
 					worker_ready = false;
-					if ( ! upd_workers.wait_for ( lock_update, chrono::milliseconds( MAX_VAR_TIMEOUT ), [ & ]{ return ! worker_ready; } ) )
+					if ( ! upd_workers.wait_for ( lock_update, std::chrono::milliseconds( MAX_VAR_TIMEOUT ), [ & ]{ return ! worker_ready; } ) )
 						{
 							worker_ready = true;
 							plog( "\nWarning: workers timeout (%d millisecs.), continuing...", MAX_VAR_TIMEOUT );

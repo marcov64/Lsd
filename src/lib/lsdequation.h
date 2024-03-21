@@ -31,7 +31,7 @@ model's equation file.
 #endif
 
 #ifdef XMLLIB
-	using namespace pugixml;
+	using namespace pugi;
 #endif
 
 // enable pointer checking to protect users (medium overhead) if not disabled
@@ -160,7 +160,7 @@ const bool no_pointer_init = true;
 	}
 
 #define EQUATION( X ) \
-	{ string( X ), [ & ]( object *caller, variable *var ) -> double \
+	{ std::string( X ), [ & ]( object *caller, variable *var ) -> double \
 		{ \
 			object *p = var->up, *c = caller; \
 			int h, i, j, k; \
@@ -185,7 +185,7 @@ const bool no_pointer_init = true;
 	}
 
 #define EQUATION_DUMMY( X, Y ) \
-	{ string( X ), [ & ]( object *caller, variable *var ) -> double \
+	{ std::string( X ), [ & ]( object *caller, variable *var ) -> double \
 		{ \
 			return var->chk_dummy( Y ); \
 		} \
@@ -204,9 +204,9 @@ void simulation::close_sim( void ) \
 
 // LSD macros
 #define pi M_PI
-#define is_finite( x ) isfinite( x )
-#define is_inf( x ) isinf( x )
-#define is_nan( x ) isnan( x )
+#define is_finite( x ) std::isfinite( x )
+#define is_inf( x ) std::isinf( x )
+#define is_nan( x ) std::isnan( x )
 #define max( x, y ) fmax( x, y )
 #define min( x, y ) fmin( x, y )
 
@@ -543,10 +543,10 @@ void simulation::close_sim( void ) \
 #define V_CHEATS( O, X, Y ) ( CHK_PTR_DBL( O ) O->cal( Y, ( char * ) X, 0 ) )
 #define V_CHEATLS( O, X, L, Y ) ( CHK_PTR_DBL( O ) O->cal( Y, ( char * ) X, L ) )
 
-#define ADDEXT( X ) { if ( p->cext != NULL ) DELETE_EXT( X ); p->cext = reinterpret_cast< void * >( new X ); }
-#define ADDEXTS( O, X ) { CHK_PTR_NOP( O ); if ( O->cext != NULL ) DELETE_EXTS( O, X ); O->cext = reinterpret_cast< void * >( new X ); }
-#define ADDEXT_INIT( X, ... ) { if ( p->cext != NULL ) DELETE_EXT( X ); p->cext = reinterpret_cast< void * >( new X( __VA_ARGS__ ) ); }
-#define ADDEXT_INITS( O, X, ... ) { CHK_PTR_NOP( O ); if ( O->cext != NULL ) DELETE_EXTS( O, X ); O->cext = reinterpret_cast< void * >( new X( __VA_ARGS__ ) ); }
+#define ADDEXT( X ) { if ( p->cext != NULL ) DELETE_EXT( X ); p->cext = reinterpret_cast < void * > ( new X ); }
+#define ADDEXTS( O, X ) { CHK_PTR_NOP( O ); if ( O->cext != NULL ) DELETE_EXTS( O, X ); O->cext = reinterpret_cast < void * > ( new X ); }
+#define ADDEXT_INIT( X, ... ) { if ( p->cext != NULL ) DELETE_EXT( X ); p->cext = reinterpret_cast < void * > ( new X( __VA_ARGS__ ) ); }
+#define ADDEXT_INITS( O, X, ... ) { CHK_PTR_NOP( O ); if ( O->cext != NULL ) DELETE_EXTS( O, X ); O->cext = reinterpret_cast < void * > ( new X( __VA_ARGS__ ) ); }
 #define DELETE_EXT( X ) { delete P_EXT( X ); p->cext = NULL; }
 #define DELETE_EXTS( O, X ) { CHK_PTR_NOP( O ); delete P_EXTS( O, X ); O->cext = NULL; }
 #define DO_EXT( X, Y, ... ) ( P_EXT( X ) -> Y( __VA_ARGS__ ) )
@@ -555,8 +555,8 @@ void simulation::close_sim( void ) \
 #define EXEC_EXTS( O, X, Y, Z, ... ) ( P_EXTS( O, X ) -> Y.Z( __VA_ARGS__ ) )
 #define EXT( X ) ( * P_EXT( X ) )
 #define EXTS( O, X ) ( * P_EXTS( O, X ) )
-#define P_EXT( X ) ( reinterpret_cast< X * >( p->cext ) )
-#define P_EXTS( O, X ) ( reinterpret_cast< X * >( O->cext ) )
+#define P_EXT( X ) ( reinterpret_cast < X * > ( p->cext ) )
+#define P_EXTS( O, X ) ( reinterpret_cast < X * > ( O->cext ) )
 #define V_EXT( X, Y ) ( P_EXT( X ) -> Y )
 #define V_EXTS( O, X, Y ) ( P_EXTS( O, X ) -> Y )
 #define WRITE_EXT( X, Y, Z ) ( P_EXT( X ) -> Y = Z )
@@ -620,7 +620,7 @@ void simulation::close_sim( void ) \
 extern Tcl_Interp *inter;
 #endif
 
-extern vector < simulation * > sims;	// vector holding existing simulations
+extern std::vector < simulation * > sims;// vector holding existing simulations
 
 double poidev( double xm, long *idum_loc = NULL );
 object *go_brother( object *c );

@@ -37,8 +37,8 @@ void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, in
 
 	pixW = floor( pixW ) > 0 ? floor( pixW ) : hsize;
 	pixH = floor( pixH ) > 0 ? floor( pixH ) : vsize;
-	pixW = min( pixW, ( double ) hsizeMax );
-	pixH = min( pixH, ( double ) vsizeMax );
+	pixW = std::min( pixW, ( double ) hsizeMax );
+	pixH = std::min( pixH, ( double ) vsizeMax );
 
 	sim.latt->height = pixH / sim.latt->rows;
 	sim.latt->width = pixW / sim.latt->columns;

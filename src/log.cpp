@@ -284,7 +284,7 @@ bool comp_item( item & item1, item & item2 )
 void show_prof_aggr( void )
 {
 	item elem;
-	list < item > vars;
+	std::list < item > vars;
 	variable *cv;
 
 	if ( ! sim.prof_aggr_time )

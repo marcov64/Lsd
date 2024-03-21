@@ -103,11 +103,11 @@ int main( int argn, const char **argv )
 
 #ifndef _NT_
 	}
-	catch ( bad_alloc& exc )	// out of memory conditions
+	catch ( std::bad_alloc& exc )// out of memory conditions
 	{
 		exception_handler( SIGMEM, exc.what( ) );
 	}
-	catch ( exception& exc )	// other known error conditions
+	catch ( std::exception& exc )// other known error conditions
 	{
 		exception_handler( SIGSTL, exc.what( ) );
 	}
@@ -883,7 +883,7 @@ int modman( int argn, const char **argv )
 		{
 			Tcl_DoOneEvent( 0 );
 		}
-		catch ( bad_alloc& )		// raise memory problems
+		catch ( std::bad_alloc& )	// raise memory problems
 		{
 			throw;
 		}

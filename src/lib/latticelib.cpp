@@ -47,12 +47,12 @@ double simulation::init_lattice( double pixW, double pixH, double nrow, double n
 		return -1;
 	}
 
-	init_color = min( init_color, 1099 );	// limit to valid palette
+	init_color = std::min( init_color, 1099 );	// limit to valid palette
 
 	// reset the LSD lattice, if any
 	close_lattice( );
-	latt->rows = max( 0, ( int ) floor( nrow ) );
-	latt->columns = max( 0, ( int ) floor( ncol ) );
+	latt->rows = std::max( 0, ( int ) floor( nrow ) );
+	latt->columns = std::max( 0, ( int ) floor( ncol ) );
 	latt->errors = 0;
 
 	// create the color data matrix
@@ -116,7 +116,7 @@ double simulation::update_lattice( double line, double col, double val )
 
 	line_int = line - 1;
 	col_int = col - 1;
-	val_int = max( 0, ( int ) floor( val ) );
+	val_int = std::max( 0, ( int ) floor( val ) );
 
 	// ignore invalid values
 	if ( line_int < 0 || col_int < 0 || line_int >= latt->rows ||

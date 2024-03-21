@@ -539,10 +539,10 @@ void variable::write_var( FILE *frep )
 	if ( integer )
 		fprintf( frep, "<I>Integer: &nbsp;</I>yes<BR>" );
 
-	if ( ! isnan( min_val ) )
+	if ( ! std::isnan( min_val ) )
 		fprintf( frep, "<I>Minimum: &nbsp;</I>%g<BR>", min_val );
 
-	if ( ! isnan( max_val ) )
+	if ( ! std::isnan( max_val ) )
 		fprintf( frep, "<I>Maximum: &nbsp;</I>%g<BR>", max_val );
 
 	fprintf( frep, "<I>Contained in: &nbsp;</I><A HREF=\"#%s\"><TT>%s</TT></A><BR>", up->label, up->label );
@@ -1284,12 +1284,12 @@ void object::create_table_init( FILE *frep )
 				else
 					fprintf( frep, "<td></td>\n" );
 
-			if ( isnan( cv->min_val ) )
+			if ( std::isnan( cv->min_val ) )
 				strcpy( min_val, "" );
 			else
 				snprintf( min_val, 32, "%g", cv->min_val );
 
-			if ( isnan( cv->max_val ) )
+			if ( std::isnan( cv->max_val ) )
 				strcpy( max_val, "" );
 			else
 				snprintf( max_val, 32, "%g", cv->max_val );
@@ -2011,12 +2011,12 @@ void object::tex_report_struct( FILE *f, bool table )
 			else
 				fprintf( f, "%d & ", cv->num_lag );
 
-			if ( isnan( cv->min_val ) )
+			if ( std::isnan( cv->min_val ) )
 				strcpy( min_val, "" );
 			else
 				snprintf( min_val, 32, "%g", cv->min_val );
 
-			if ( isnan( cv->max_val ) )
+			if ( std::isnan( cv->max_val ) )
 				strcpy( max_val, "" );
 			else
 				snprintf( max_val, 32, "%g", cv->max_val );

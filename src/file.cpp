@@ -46,7 +46,7 @@ bool open_configuration( object *&r, bool reload )
 	bool loaded;
 	const char *lab1, *lab2;
 	int i;
-	string warnings;
+	std::string warnings;
 
 	if ( ! reload || strlen( sim.conf_name ) == 0 )
 	{									// ask user the file to use, if not reloading
@@ -159,7 +159,7 @@ bool open_configuration( object *&r, bool reload )
 	else
 		currObj = r = sim.root;					// new structure
 
-	if ( loaded && ! ignore_eq_file && strncmp( sim.conf_eq_txt, eq_txt, min( strlen( sim.conf_eq_txt ), strlen( eq_txt ) ) ) )
+	if ( loaded && ! ignore_eq_file && strncmp( sim.conf_eq_txt, eq_txt, std::min( strlen( sim.conf_eq_txt ), strlen( eq_txt ) ) ) )
 		plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the LSD model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
 
 	redrawRoot = redrawStruc = true;			// force browser/structure redraw
@@ -174,7 +174,7 @@ LOAD_CONFIGURATION_GUI (DLL WRAPPER)
 	If full is false, just the model data is unloaded
 	Returns: pointer to root object
 ******************************************************************************/
-int load_configuration_gui( bool reload, string *warnings, int quick )
+int load_configuration_gui( bool reload, std::string *warnings, int quick )
 {
 	int res;
 
@@ -220,7 +220,7 @@ bool load_prev_configuration( void )
 {
 	char *saFile = NULL;
 	int i, lstFidx = findexSens;
-	string warnings;
+	std::string warnings;
 	FILE *f;
 
 	if ( sens_file != NULL )					// save SA file name if one is loaded
@@ -559,7 +559,7 @@ LOAD_SENSITIVITY
 int load_sensitivity( FILE *f )
 {
 	bool integer;
-	vector < double > val;
+	d_vecT val;
 	int i, lag, param, num_val;
 	char cc, lab[ MAX_ELEM_LENGTH ];
 	variable *cv;
@@ -932,7 +932,7 @@ int count_lines( const char *fname, bool dozip )
 SHOW_LOGS
 	Open tail/multitail to show log files dynamically
 ****************************************************/
-void show_logs( const char *dest_path, vector < string > & logs, bool par_cntl )
+void show_logs( const char *dest_path, s_vecT & logs, bool par_cntl )
 {
 	char exec[ MAX_PATH_LENGTH	];
 	int i, j, n, sz;
@@ -942,7 +942,7 @@ void show_logs( const char *dest_path, vector < string > & logs, bool par_cntl )
 	if ( ! get_int( "res" ) || ( par_cntl && ! sim.parallel_monitor ) )
 		return;
 
-	lock_guard < mutex > lock( sim.run_logs_lck );
+	l_guardT lock( sim.run_logs_lck );
 
 	n = logs.size( );
 	if ( n == 0 )
