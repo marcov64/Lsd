@@ -195,6 +195,7 @@ struct simulation						// simulation container class
 	bool parallel_mode;					// parallel mode (multithreading) status
 	bool use_nan;						// flag to allow using Not a Number value
 	char *conf_name = NULL;				// name of current simulation configuration
+	char *conf_path = NULL;				// folder where the current configuration is
 	dlliblinkage *liblnk = NULL;		// call-back references for DLL
 	eq_mapT eq_map;						// fast equation look-up map
 	int deb_set = false;				// debug enable control (bool)
@@ -230,7 +231,6 @@ struct simulation						// simulation container class
 	double bernoulli( double p );		// Bernoulli draw
 	double beta( double alpha, double beta );// beta draw
 	double betacdf( double alpha, double beta, double x );// beta cdf
-	double betacf( double a, double b, double x );// beta distribution function
 	double binomial( double p, double t );// binomial draw
 	double bpareto( double alpha, double low, double high );// bounded pareto draw
 	double bparetocdf( double alpha, double low, double high, double x );
@@ -247,7 +247,6 @@ struct simulation						// simulation container class
 	double ipow( double base, double exp );// integer exponentiation
 	double lnorm( double mu, double sigma );// lognormal draw
 	double lnormcdf( double mu, double sigma, double x );// lognormal cdf
-	double median( d_vecT & v );
 	double norm( double mean, double dev );// normal draw
 	double normcdf( double mu, double sigma, double x );// normal cdf
 	double pareto( double mu, double alpha );// Pareto draw
@@ -313,7 +312,6 @@ struct simulation						// simulation container class
 	bool worker_crashed;				// parallel worker crash flag
 	char *alt_path = NULL;				// alternative output path
 	char *conf_file = NULL;				// name of current configuration file
-	char *conf_path = NULL;				// folder where the current configuration is
 	char *log_file = NULL;				// name of log file, if any
 	char conf_eq_txt[ MAX_FILE_SIZE ] = "";// equations saved in configuration file
 	char conf_eq_file[ MAX_PATH_LENGTH ] = "";// equation file name in config. file
@@ -434,6 +432,8 @@ struct simulation						// simulation container class
 	description *add_description( const char *lab, int type = 4, const char *text = NULL, const char *init = NULL, bool initial = false, bool observe = false );
 	description *change_description( const char *lab_old, const char *lab = NULL, int type = -1, const char *text = NULL, const char *init = NULL, int initial = -1, int observe = -1 );
 	description *search_description( const char *lab, bool add_missing = true );
+	double betacf( double a, double b, double x );
+	double median( d_vecT & v );
 	int init_new_run( clock_t & start, clock_t & last_update );
 	int init_new_seq( char *bar_done, int & perc_done, int & last_done );
 	int load_configuration( bool reload, std::string *warnings, int quick );
@@ -518,7 +518,7 @@ struct object							// simulation model object class
 	double initturbo( const char *lab );
 	double initturbo( const char *lab, double tot );
 	double initturbo_cond( const char *label );
-	double init_stub_net( const char *lab, const char* gen, long numNodes = 0, long par1 = 0, double par2 = 0.0 );
+	double init_stub_net( const char *lab, const char gen[ ] = "DISCONNECTED", long numNodes = 0, long par1 = 0, double par2 = 0.0 );
 	double interact( const char *text, double v, double *tv, int i, int j, int h, int k,
 		object *cur, object *cur1, object *cur2, object *cur3, object *cur4, object *cur5,
 		object *cur6, object *cur7, object *cur8, object *cur9, netLink *curl, netLink *curl1,

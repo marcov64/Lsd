@@ -1,0 +1,11 @@
+# LSD options
+TARGET=LSD
+FUN=fun_test
+PRECOMPILED=true
+
+# Additional model files
+FUN_EXTRA=
+
+# Compiler options
+SWITCH_CC=-O3 -Wall -Wextra
+SWITCH_CC_LNK=

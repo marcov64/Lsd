@@ -614,7 +614,7 @@ long object::nodes2create( const char *lab, long numNodes )
 INIT_STUB_NET (*)
 	Stub function to call the appropriate network generator.
 ****************************************************/
-double object::init_stub_net( const char *lab, const char* gen, long numNodes,
+double object::init_stub_net( const char *lab, const char gen[ ], long numNodes,
 							  long par1, double par2 )
 {
 	char option[ 32 ];

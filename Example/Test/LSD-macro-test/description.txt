@@ -1,0 +1,6 @@
+Model LSD macro test (ver. 1.0)
+
+Test compilation of all LSD macros and functions
+
+(PRESS CTRL+E TO EDIT EQUATIONS)
+
