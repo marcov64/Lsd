@@ -450,17 +450,19 @@ void gui::cmd_backend( const char *cm, va_list arg )
 	static int reqsz, sz;
 	static va_list argcpy;
 
+#ifndef _LMM_
 	// abort if not running in main LSD thread
 	if ( std::this_thread::get_id( ) != lsd::main_thread )
 		return;
+#endif
 
 	// abort if Tcl interpreter not initialized
 	if ( interp == NULL )
 	{
-#ifdef _LMM_
-		FILE *stderr_ptr = stderr;
-#else
+#ifndef _LMM_
 		FILE *stderr_ptr = lsd::stderr_ptr;
+#else
+		FILE *stderr_ptr = stderr;
 #endif
 		fprintf( stderr_ptr, "\nTcl interpreter not initialized. Quitting LSD now.\n" );
 		lsd_exit_gui( 24 );
@@ -517,7 +519,7 @@ void gui::log_tcl_error( bool show, const char *cm, const char *message, ... )
 	static FILE *f;
 
 	l_guardT lock( lock_log_tcl_err );
-	
+
 	va_start( argptr, message );
 	vsnprintf( buffer, MAX_BUFF_SIZE, message, argptr );
 	va_end( argptr );

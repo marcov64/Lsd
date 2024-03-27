@@ -243,10 +243,12 @@ void lsd::lsd_exit( int v )
 {
 	fflush( stderr );
 
+#ifndef _LMM_
 	// stop multi-thread workers, if needed/safe
 	for ( auto sim : sims )
 		if ( sim->worker_errors( ) == 0 )
 			delete [ ] sim->workers;
+#endif
 
 	exit( v );
 }
