@@ -21,7 +21,6 @@
 #include "lib/libLSD.h"				// LSD library classes
 
 
-#ifndef _NP_
 /*************************************************************
  RUN_PARALLEL_EXEC
  *************************************************************/
@@ -393,4 +392,3 @@ void lsd::simulation::log_parallel( bool nw )
 #endif
 
 }
-#endif

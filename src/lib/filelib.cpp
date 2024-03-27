@@ -1898,10 +1898,8 @@ void lsd::variable::save_single( void )
 	int i;
 	FILE *f;
 
-#ifndef _NP_
 	// prevent concurrent use by more than one thread
 	rec_lguardT lock( var_comp_lck );
-#endif
 
 	set_lab_tit( );
 	snprintf( fn, MAX_PATH_LENGTH, "%s_%s-%d_%d_seed-%d.res",

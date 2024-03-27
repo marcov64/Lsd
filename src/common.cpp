@@ -21,12 +21,10 @@
 
 #include "LSD.h"
 
-#ifndef _NP_
 namespace gui
 {
 	std::mutex lock_log_tcl_err;	// lock log_tcl_error for parallel access
 }
-#endif
 
 
 /*************************************************************
@@ -452,11 +450,9 @@ void gui::cmd_backend( const char *cm, va_list arg )
 	static int reqsz, sz;
 	static va_list argcpy;
 
-#ifndef _NP_
 	// abort if not running in main LSD thread
 	if ( std::this_thread::get_id( ) != lsd::main_thread )
 		return;
-#endif
 
 	// abort if Tcl interpreter not initialized
 	if ( interp == NULL )
@@ -513,18 +509,15 @@ void gui::cmd_backend( const char *cm, va_list arg )
  *************************************************************/
 void gui::log_tcl_error( bool show, const char *cm, const char *message, ... )
 {
+	static bool firstCall = true;
 	static char *err_path, ftime[ 80 ], fname[ MAX_PATH_LENGTH ], buffer[ MAX_BUFF_SIZE ];
 	static struct tm *timeinfo;
 	static time_t rawtime;
 	static va_list argptr;
 	static FILE *f;
 
-	static bool firstCall = true;
-
-#ifndef _NP_
 	l_guardT lock( lock_log_tcl_err );
-#endif
-
+	
 	va_start( argptr, message );
 	vsnprintf( buffer, MAX_BUFF_SIZE, message, argptr );
 	va_end( argptr );

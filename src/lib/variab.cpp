@@ -188,10 +188,8 @@ void lsd::variable::init( object *_up, simulation *_sim, const char *_label,
 {
 	int i;
 
-#ifndef _NP_
 	// prevent concurrent use by more than one thread
 	rec_lguardT lock( var_comp_lck );
-#endif
 
 	up = _up;
 	sim = _sim;
@@ -215,15 +213,11 @@ void lsd::variable::init( object *_up, simulation *_sim, const char *_label,
 void lsd::variable::empty( bool no_lock )
 {
 
-#ifndef _NP_
-
 	if ( sim->running && ! no_lock )
 	{
 		// prevent concurrent use by more than one thread
 		rec_lguardT lock( var_comp_lck );
 	}
-
-#endif
 
 	if ( sim->running && ( label == NULL || val == NULL ) )
 	{
@@ -290,10 +284,8 @@ double lsd::variable::cal( object *caller, int lag )
 		return val[ 0 ];				// it's a parameter, ignore lags
 	}
 
-#ifndef _NP_
 	// prepare mutex for variables and functions updated in multiple threads
 	rec_uniqlT guard( var_comp_lck, std::defer_lock );
-#endif
 
 	if ( param == 0 )					// it's a variable
 	{
@@ -340,14 +332,13 @@ double lsd::variable::cal( object *caller, int lag )
 
 				return( val[ 0 ] );
 			}
-#ifndef _NP_
+
 			// wait for computation of this variable by other threads
 			if ( sim->parallel_mode && ! dummy )
 				guard.lock( );
 
 			if ( last_update >= sim->t )		// recheck if not computed during lock
 				return( val[ 0 ] );
-#endif
 		}
 	}
 	else								// function
@@ -361,11 +352,9 @@ double lsd::variable::cal( object *caller, int lag )
 		if ( caller == NULL )			// update or inadequate caller
 			return val[ 0 ];
 
-#ifndef _NP_
 		// wait for computation of this function by other threads
 		if ( sim->parallel_mode && ! dummy )
 			 guard.lock( );
-#endif
 	}
 
 	// there is a value to be computed
@@ -381,11 +370,7 @@ double lsd::variable::cal( object *caller, int lag )
 
 	under_computation = true;
 
-#ifndef _NP_
 	if ( sim->fast_mode == 0 && ! sim->parallel_mode )
-#else
-	if ( sim->fast_mode == 0 )
-#endif
 	{
 		// add the Variable to the stack
 		if ( sim->stack_log != NULL && sim->stack_log->next == NULL )
@@ -469,11 +454,7 @@ double lsd::variable::cal( object *caller, int lag )
 			next_update += sim->rnd_int( 0, period_range );
 	}
 
-#ifndef _NP_
 	if ( sim->fast_mode == 0 && ! sim->parallel_mode )
-#else
-	if ( sim->fast_mode == 0 )
-#endif
 	{
 #ifndef _NW_
 		if ( sim->prof_aggr_time )
@@ -579,10 +560,9 @@ double lsd::variable::cal( object *caller, int lag )
 	// if there is a pending deletion, try to do it now
 	if ( sim->wait_delete != NULL )
 	{
-#ifndef _NP_
 		if ( guard.owns_lock( ) )
 			guard.unlock( );					// release lock
-#endif
+
 		sim->wait_delete->delete_obj( this );
 	}
 
@@ -609,7 +589,6 @@ double lsd::variable::cal( object *caller, int lag )
 }
 
 
-#ifndef _NP_
 /*************************************************************
  CAL_WORKER
  Multi-thread worker for variable computation
@@ -1088,7 +1067,7 @@ void lsd::simulation::parallel_update( variable *v, object* p, object *caller )
 	// re-enable concurrent parallel update
 	parallel_ready = true;
 }
-#endif
+
 
 /*************************************************************
  WORKER_ERRORS
@@ -1096,7 +1075,6 @@ void lsd::simulation::parallel_update( variable *v, object* p, object *caller )
  *************************************************************/
 int lsd::simulation::worker_errors( void )
 {
-#ifndef _NP_
 	int i, count;
 
 	if ( workers == NULL )
@@ -1107,7 +1085,4 @@ int lsd::simulation::worker_errors( void )
 			++count;
 
 	return count;
-#else
-	return 0;
-#endif
 }

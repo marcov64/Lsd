@@ -119,10 +119,8 @@ int gui::load_gui( const char **argv )
 		}
 	}
 
-#ifndef _NP_
 	if ( j > 0 && j < sim.max_threads )
 		sim.max_threads = j;
-#endif
 
 	// initialize tcl/tk and set global bidirectional variables
 	init_tcl_tk( argv[ 0 ], "lsd" );
@@ -2221,7 +2219,6 @@ bool gui::discard_change( bool checkSense, bool senseOnly, const char title[ ] )
  *************************************************************/
 bool gui::abort_run_threads( void )
 {
-#ifndef _NP_
 	int res;
 
 	// confirm aborting running parallel processes
@@ -2247,7 +2244,6 @@ bool gui::abort_run_threads( void )
 		else
 			return true;
 	}
-#endif
 
 	return true;
 }

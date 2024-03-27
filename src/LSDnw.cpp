@@ -26,7 +26,6 @@
 
  - _FUN_: user model equation file
  - _NW_: No Window executable
- - _NP_: no parallel (multi-task) processing
  - _NT_: no signal trapping (better when debugging in GDB)
  *************************************************************/
 
@@ -76,7 +75,6 @@ int main( int argn, const char **argv )
 		if ( res != 0 )
 			lsd::lsd_exit( res );
 
-#ifndef _NP_
 		// if parallel execution is required, just run new instances & wait to finish
 		if ( ! sim.batch_sequential && sim.last_run > 1 && sim.max_runs > 1 )
 		{
@@ -90,7 +88,6 @@ int main( int argn, const char **argv )
 			res = sim.run_parallel( true, argv[ 0 ], sim.conf_name, sim.seed, sim.last_run, sim.max_threads, sim.max_runs );
 		}
 		else
-#endif
 			// execute single simulation
 			res = sim.run_simulation( );
 
@@ -225,7 +222,6 @@ int parse_cmdline( int argn, const char **argv, lsd::simulation & sim )
 		return 6;
 	}
 
-#ifndef _NP_
 	if ( k > 0 )
 		sim.max_runs = std::min( k, sim.max_threads );
 	else
@@ -238,10 +234,6 @@ int parse_cmdline( int argn, const char **argv, lsd::simulation & sim )
 
 	if ( sim.max_runs > 1 )
 		sim.max_threads = std::max( std::min( j, sim.max_threads / sim.max_runs ), 1 );
-#else
-	if ( k != 0 )
-		printf( "\nMulti-run request ignored, running in sequential mode.\n" );
-#endif
 
 	return 0;
 }

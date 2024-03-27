@@ -399,11 +399,9 @@ void lsd::object::update( bool recurse, bool user )
 
 		if ( cv->param == 0 && cv->last_update < sim->t )
 		{
-#ifndef _NP_
 			if ( sim->parallel_ready && cv->parallel && ! cv->dummy )
 				sim->parallel_update( cv, this );
 			else
-#endif
 				cv->cal( NULL, 0 );
 		}
 
@@ -693,10 +691,8 @@ double lsd::object::initturbo( const char *lab )
 		return 0;
 	}
 
-#ifndef _NP_
 	// prevent concurrent initialization by more than one thread
 	l_guardT lock( obj_comp_lck );
-#endif
 
 	cb->t_map.clear( );
 
@@ -1048,10 +1044,8 @@ double lsd::object::initturbo_cond( const char *lab )
 		return 0;
 	}
 
-#ifndef _NP_
 	// prevent concurrent initialization by more than one thread
 	l_guardT lock( obj_comp_lck );
-#endif
 
 	cb = bit->second;
 	cb->o_map.clear( );						// remove any existing mapping
@@ -1587,10 +1581,8 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 		return NULL;
 	}
 
-#ifndef _NP_
 	// prevent concurrent additions by more than one thread
 	l_guardT lock( obj_comp_lck );
-#endif
 
 	cb2->counter_updated = false;
 
@@ -1617,10 +1609,9 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 		{
-#ifndef _NP_
 			// prevent concurrent use by more than one thread
 			rec_lguardT lock( cv->var_comp_lck );
-#endif
+
 			if ( sim->running && cv->param != 1 )
 			{
 				if ( t_update < 0 && cv->last_update == 0 )
@@ -1695,10 +1686,9 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 		// update object list for user pointer checking
 		if ( ! sim->no_ptr_chk )
 		{
-#ifndef _NP_
 			// prevent concurrent update by more than one thread
 			l_guardT lock( sim->lock_obj_list );
-#endif
+
 			sim->obj_list.insert( cur );
 		}
 	}
@@ -1756,10 +1746,8 @@ void lsd::object::delete_obj( variable *caller )
 		return;					// ignore deleting null object
 
 	{							// create context for lock
-#ifndef _NP_
 		// prevent concurrent deletion by more than one thread
 		l_guardT lock( obj_comp_lck );
-#endif
 
 		if ( deleting )			// ignore if deleting already going on
 			return;
@@ -1791,10 +1779,9 @@ void lsd::object::delete_obj( variable *caller )
 	// update object list for user pointer checking
 	if ( ! sim->no_ptr_chk )
 	{
-#ifndef _NP_
 		// prevent concurrent update by more than one thread
 		l_guardT lock( sim->lock_obj_list );
-#endif
+
 		sim->obj_list.erase( this );
 	}
 
@@ -2129,10 +2116,9 @@ double lsd::object::cal( object *caller, const char *lab, int lag, bool force_se
 	if ( cv == NULL )
 		return NAN;
 
-#ifndef _NP_
 	if ( lag == 0 && sim->parallel_ready && cv->parallel && cv->last_update < sim->t && ! cv->dummy )
 		sim->parallel_update( cv, this, caller );
-#endif
+
 	return cv->cal( caller, lag );
 }
 
@@ -2147,10 +2133,9 @@ double lsd::object::cal( object *caller, const char *lab, int lag )
 	if ( cv == NULL )
 		return NAN;
 
-#ifndef _NP_
 	if ( lag == 0 && sim->parallel_ready && cv->parallel && cv->last_update < sim->t && ! cv->dummy )
 		sim->parallel_update( cv, this, caller );
-#endif
+
 	return cv->cal( caller, lag );
 }
 
@@ -2952,11 +2937,9 @@ lsd::object *lsd::object::lsdqsort( const char *obj, const char *var, const char
 		return NULL;
 	}
 
-#ifndef _NP_
 	// prevent concurrent sorting by more than one thread
 	l_guardT lock( obj_comp_lck );
-#endif
-
+#
 	cb->counter_updated = false;
 	cur = cb->head;
 
@@ -3055,10 +3038,8 @@ lsd::object *lsd::object::lsdqsort( const char *obj, const char *var1, const cha
 		return NULL;
 	}
 
-#ifndef _NP_
 	// prevent concurrent sorting by more than one thread
 	l_guardT lock( obj_comp_lck );
-#endif
 
 	cb->counter_updated = false;
 	cur = cb->head;
@@ -3292,7 +3273,6 @@ double lsd::object::write( const char *lab, double value, int time, int lag )
 			return NAN;
 		}
 
-#ifndef _NP_
 		if ( cv->var_comp_lck.try_lock( ) )
 			cv->var_comp_lck.unlock( );
 		else
@@ -3304,13 +3284,11 @@ double lsd::object::write( const char *lab, double value, int time, int lag )
 							 lab );
 			return NAN;
 		}
-#endif
 	}
 
-#ifndef _NP_
 	// prevent concurrent use by more than one thread
 	rec_lguardT lock( cv->var_comp_lck );
-#endif
+
 	if ( cv->param != 1 && time <= 0 && sim->t > 1 )
 	{
 		sim->error_hard( "invalid write operation",
@@ -3618,10 +3596,8 @@ double lsd::simulation::build_obj_list( bool set_list )
 		return 0;
 	}
 
-#ifndef _NP_
 	// prevent concurrent update by more than one thread
 	l_guardT lock( lock_obj_list );
-#endif
 
 	obj_list.clear( );			// reset list
 

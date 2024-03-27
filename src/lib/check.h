@@ -41,10 +41,8 @@ namespace lsd
 
 		if ( parallel_mode ) 				// use lock (slow) only if really needed
 		{
-	#ifndef _NP_
 			// prevent concurrent update by more than one thread
 			l_guardT lock( lock_obj_list );
-	#endif
 			obj_exists = obj_list.find( ptr ) != obj_list.end( );
 		}
 		else
@@ -71,10 +69,8 @@ namespace lsd
 
 		if ( parallel_mode ) 			// use lock (slow) only if really needed
 		{
-	#ifndef _NP_
 			// prevent concurrent update by more than one thread
 			l_guardT lock( lock_obj_list );
-	#endif
 			obj_exists = obj_list.find( ptr ) != obj_list.end( );
 		}
 		else
@@ -302,10 +298,8 @@ namespace lsd
 			snprintf( err_msg, MAX_LINE_SIZE, "NULL pointer used in file '%s', line %d", file, line );
 		else
 		{
-#ifndef _NP_
 			// prevent concurrent update by more than one thread
 			l_guardT lock( lock_obj_list );
-#endif
 			if ( obj_list.find( ptr ) == obj_list.end( ) )
 				snprintf( err_msg, MAX_LINE_SIZE, "pointer to non-existing object used\nin file '%s', line %d", file, line );
 			else

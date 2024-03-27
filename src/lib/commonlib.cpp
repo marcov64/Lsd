@@ -53,7 +53,7 @@ int lsd::run_system( const char *cmd, simulation *sim, int id )
 		return -1;
 	}
 
-#if ! defined( _NP_ ) && ! defined( _LMM_ )
+#ifndef _LMM_
 	if ( id >= 0 && sim != NULL && id < ( int ) sim->run_pids.size( ) )
 	{
 
@@ -79,7 +79,7 @@ int lsd::run_system( const char *cmd, simulation *sim, int id )
 int lsd::kill_system( simulation *sim, int id )
 {
 
-#if ! defined( _NP_ ) && ! defined( _LMM_ )
+#ifndef _LMM_
 	DWORD res;
 
 	if ( id >= 0 && id < ( int ) sim->run_pids.size( ) &&
@@ -127,7 +127,7 @@ int lsd::run_system( const char *cmd, simulation *sim, int id )
 	}
 	else
 	{
-#if ! defined( _NP_ ) && ! defined( _LMM_ )
+#ifndef _LMM_
 		if ( id >= 0 && sim != NULL && id < ( int ) sim->run_pids.size( ) )
 		{
 			l_guardT lock( sim->run_pids_lck );
@@ -152,7 +152,7 @@ int lsd::run_system( const char *cmd, simulation *sim, int id )
 #define WAIT_TSECS 10
 int lsd::kill_system( simulation *sim, int id )
 {
-#if ! defined( _NP_ ) && ! defined( _LMM_ )
+#ifndef _LMM_
 	int res, tsecs = 0;
 
 	if ( id >= 0 && id < ( int ) sim->run_pids.size( ) )
@@ -243,12 +243,10 @@ void lsd::lsd_exit( int v )
 {
 	fflush( stderr );
 
-#ifndef _NP_
 	// stop multi-thread workers, if needed/safe
 	for ( auto sim : sims )
 		if ( sim->worker_errors( ) == 0 )
 			delete [ ] sim->workers;
-#endif
 
 	exit( v );
 }

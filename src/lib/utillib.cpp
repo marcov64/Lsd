@@ -93,9 +93,7 @@ void lsd::simulation::plog_terminal( const char *cm, va_list arg )
 
 	reqsz = vsnprintf( buffer, MAX_BUFF_SIZE, cm, arg );
 
-#ifndef _NP_
 	l_guardT lock( plog_term_lck );
-#endif
 
 	if ( reqsz < 0 )
 	{
@@ -166,7 +164,6 @@ void lsd::simulation::error_hard( const char *boxTitle, const char *boxText, boo
 	vsnprintf( logText, MAX_BUFF_SIZE, logFmt, argptr );
 	va_end( argptr );
 
-#ifndef _NP_
 	// prevent concurrent use by more than one thread
 	l_guardT lock( error_lck );
 
@@ -184,7 +181,6 @@ void lsd::simulation::error_hard( const char *boxTitle, const char *boxText, boo
 		else
 			return;
 	}
-#endif
 
 	quit = 2;				// do not continue simulation
 

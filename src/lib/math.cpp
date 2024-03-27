@@ -414,64 +414,57 @@ void lsd::simulation::init_random( unsigned seed )
 
 template < class distr > double draw_rd( lsd::simulation *sim, distr &d )
 {
-#ifndef _NP_
 	// prevent concurrent draw by more than one thread
 	l_guardT lock( sim->draw_rd_lck );
-#endif
+	
 	return d( sim->rd );
 }
 
 template < class distr > double draw_lc1( lsd::simulation *sim, distr &d )
 {
-#ifndef _NP_
 	// prevent concurrent draw by more than one thread
 	l_guardT lock( sim->draw_lc1_lck );
-#endif
+
 	return d( sim->lc1 );
 }
 
 template < class distr > double draw_lc2( lsd::simulation *sim, distr &d )
 {
-#ifndef _NP_
 	// prevent concurrent draw by more than one thread
 	l_guardT lock( sim->draw_lc2_lck );
-#endif
+
 	return d( sim->lc2 );
 }
 
 template < class distr > double draw_mt32( lsd::simulation *sim, distr &d )
 {
-#ifndef _NP_
 	// prevent concurrent draw by more than one thread
 	l_guardT lock( sim->draw_mt32_lck );
-#endif
+
 	return d( sim->mt32 );
 }
 
 template < class distr > double draw_mt64( lsd::simulation *sim, distr &d )
 {
-#ifndef _NP_
 	// prevent concurrent draw by more than one thread
 	l_guardT lock( sim->draw_mt64_lck );
-#endif
+
 	return d( sim->mt64 );
 }
 
 template < class distr > double draw_lf24( lsd::simulation *sim, distr &d )
 {
-#ifndef _NP_
 	// prevent concurrent draw by more than one thread
 	l_guardT lock( sim->draw_lf24_lck );
-#endif
+
 	return d( sim->lf24 );
 }
 
 template < class distr > double draw_lf48( lsd::simulation *sim, distr &d )
 {
-#ifndef _NP_
 	// prevent concurrent draw by more than one thread
 	l_guardT lock( sim->draw_lf48_lck );
-#endif
+
 	return d( sim->lf48 );
 }
 
@@ -927,11 +920,7 @@ double lsd::simulation::alapl( double mu, double alpha1, double alpha2 )
 /*************************************************************
  WARN_DISTR
  *************************************************************/
-#ifndef _NP_
 void lsd::simulation::warn_distr( std::atomic < int > & errCnt, bool & stopErr, const char *distr, const char *msg )
-#else
-void lsd::simulation::warn_distr( int & errCnt, bool & stopErr, const char *distr, const char *msg )
-#endif
 {
 	if ( ++errCnt < ERR_LIM )	// prevent slow down due to I/O
 	{

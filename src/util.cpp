@@ -31,10 +31,7 @@
 namespace gui
 {
 	const char *tags[ NUM_TAGS ] = { "", "highlight", "table", "series", "prof1", "prof2", "bar" };
-
-#ifndef _NP_
 	std::mutex lock_plog_backend;	// lock lock_plog_backend for parallel access
-#endif
 }
 
 
@@ -91,9 +88,7 @@ void gui::plog_backend( const char *cm, const char *tag, va_list arg )
 	va_copy( argcpy, arg );
 	reqsz = vsnprintf( buffer, MAX_BUFF_SIZE, cm, arg );
 
-#ifndef _NP_
 	l_guardT lock( lock_plog_backend );
-#endif
 
 	if ( reqsz < 0 )
 	{
@@ -303,11 +298,10 @@ void gui::error_hard_helper( const char *boxTitle, const char *boxText, const ch
 		sim.root->reset_end( );
 		uncover_browser( );
 
-#ifndef _NP_
 		// stop multi-thread workers
 		delete [ ] sim.workers;
 		sim.workers = NULL;
-#endif
+
 		throw ( int ) 919293;			// force end of run() (in lsdmain.cpp)
 	}
 

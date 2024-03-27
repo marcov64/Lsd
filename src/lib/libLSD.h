@@ -21,7 +21,6 @@
 
  - _FUN_: user model equation file
  - _NW_: No Window executable
- - _NP_: no parallel (multi-task) processing
  - _NT_: no signal trapping (better when debugging in GDB)
  *************************************************************/
 
@@ -161,6 +160,8 @@ namespace lsd
 
 // special types used for fast equation, object and variable lookup
 typedef std::function < double( lsd::object *caller, lsd::variable *var ) > eq_funcT;
+typedef std::lock_guard < std::mutex > l_guardT;
+typedef std::lock_guard < std::recursive_mutex > rec_lguardT;
 typedef std::pair < std::string, lsd::bridge * > b_pairT;
 typedef std::pair < double, lsd::object * > o_pairT;
 typedef std::pair < long, lsd::object * > n_pairT;
@@ -169,6 +170,8 @@ typedef std::vector < double > d_vecT;
 typedef std::vector < int > i_vecT;
 typedef std::vector < lsd::object * > o_vecT;
 typedef std::vector < std::string > s_vecT;
+typedef std::unique_lock < std::mutex > uniq_lT;
+typedef std::unique_lock < std::recursive_mutex > rec_uniqlT;
 typedef std::unordered_map < std::string, eq_funcT > eq_mapT;
 typedef std::unordered_map < std::string, lsd::bridge * > b_mapT;
 typedef std::unordered_map < double, lsd::object * > o_mapT;
@@ -176,17 +179,10 @@ typedef std::unordered_map < long, lsd::object * > n_mapT;
 typedef std::unordered_map < std::string, std::string > p_mapT;
 typedef std::unordered_map < std::string, lsd::variable * > v_mapT;
 typedef std::unordered_set < lsd::object * > o_setT;
-
 typedef pugi::xml_document xml_doc;
 typedef pugi::xml_node xml_node;
 typedef pugi::xml_attribute xml_attr;
 
-#ifndef _NP_
-typedef std::lock_guard < std::mutex > l_guardT;
-typedef std::lock_guard < std::recursive_mutex > rec_lguardT;
-typedef std::unique_lock < std::mutex > uniq_lT;
-typedef std::unique_lock < std::recursive_mutex > rec_uniqlT;
-#endif
 
 #ifdef _WIN32
 typedef HANDLE handleT;
@@ -225,11 +221,9 @@ namespace lsd
 		int t;							// current time step
 		object *root = NULL;			// LSD root object
 		o_setT obj_list;				// set with all existing LSD objects
+		std::mutex lock_obj_list;		// lock object list for parallel manipulation
 		unsigned seed = 1;				// random number generator initial seed
 
-#ifndef _NP_
-		std::mutex lock_obj_list;		// lock object list for parallel manipulation
-#endif
 
 #ifndef _NW_
 		// simulation-class debugger temporary probe storage (used in equations)
@@ -305,11 +299,12 @@ namespace lsd
 		void set_fast( int level );		// enable fast mode
 		void *set_random( int gen );	// set random generator engine
 
+#ifndef _FUN_
+
 #ifdef USER_FUNCS
 		USER_FUNCS
 #endif
 
-#ifndef _FUN_
 		// simulation-class variables (not used in equations)
 		bool batch_sequential = false;	// no-window multi configuration job running
 		bool batch_loop = false;		// batch multi-config batch loop in process
@@ -365,6 +360,7 @@ namespace lsd
 		int stack_level;				// LSD stack call level
 		int stack_info = 0;				// LSD stack control
 		int stale_time;					// time passed from last step computation
+		i_vecT run_status;				// parallel running instances status
 		lattice *latt = NULL;			// model lattice
 		long idum = 0;					// Park-Miller default seed (legacy code)
 		long nodesSerial = 1;			// network node serial number counter
@@ -372,18 +368,6 @@ namespace lsd
 		object *blueprint = NULL;		// LSD blueprint (effective model in use)
 		object *wait_delete = NULL;		// LSD object waiting for deletion
 		sensitivity *sens = NULL;		// LSD sensitivity analysis structure
-		std::map < std::string, profile > prof_times;// set of saved profiling times
-		std::minstd_rand lc1;			// linear congruential generator (internal)
-		std::minstd_rand lc2;			// linear congruential generator (user)
-		std::mt19937 mt32;				// Mersenne-Twister 32 bits generator
-		std::mt19937_64 mt64;			// Mersenne-Twister 64 bits generator
-		std::random_device rd;			// simulation random device
-		std::ranlux24 lf24;				// lagged fibonacci 24 bits generator
-		std::ranlux48 lf48;				// lagged fibonacci 48 bits generator
-		std::vector < std::string > res_list;// list of results files last saved
-		variable *cemetery = NULL;		// LSD saved data from deleted objects
-		variable *last_cemetery = NULL;	// LSD last saved cemetery entry
-		FILE *log_file_ptr;				// log file pointer, if any
 
 #ifndef _NP_
 		// simulation-class conditional variables (not used in equations)
@@ -397,6 +381,11 @@ namespace lsd
 							paretErrCnt, poissErrCnt, studErrCnt, weibErrCnt;
 										// math error count control
 		std::condition_variable upd_workers;// worker schedule update signal
+		std::map < std::string, profile > prof_times;// set of saved profiling times
+		std::minstd_rand lc1;			// linear congruential generator (internal)
+		std::minstd_rand lc2;			// linear congruential generator (user)
+		std::mt19937 mt32;				// Mersenne-Twister 32 bits generator
+		std::mt19937_64 mt64;			// Mersenne-Twister 64 bits generator
 		std::mutex draw_lc1_lck;		// locks for random generator operations
 		std::mutex draw_lc2_lck;
 		std::mutex draw_lf24_lck;
@@ -412,23 +401,20 @@ namespace lsd
 		std::mutex var_update_lck;		// control worker variable update
 		std::mutex wrk_crash_lck;		// control worker crash handling
 		std::vector < handleT > run_pids;// parallel running instances process id's
-		std::vector < std::thread > run_threads;// parallel running instances
+		std::random_device rd;			// simulation random device
+		std::ranlux24 lf24;				// lagged fibonacci 24 bits generator
+		std::ranlux48 lf48;				// lagged fibonacci 48 bits generator
 		std::string run_log;			// consolidated runs log
+		std::vector < std::string > res_list;// list of results files last saved
+		std::vector < std::thread > run_threads;// parallel running instances
 		std::thread run_monitor;		// thread monitoring parallel instances
 		std::thread sim_thread;			// thread object where simulation is run
-		i_vecT run_status;				// parallel running instances status
 		s_vecT run_logs;				// log file list produced in parallel runs
 		s_vecT run_results;				// parallel run results files
 		worker *workers = NULL;			// multi-thread parallel worker data
-#else
-		bool running = false;			// single simulation is running
-		bool running_seq = false;		// set of sequential simulations running
-		int eff_t = 0;					// number of executed time steps
-		int alaplErrCnt, bernoErrCnt, betaErrCnt, binomErrCnt, cauchErrCnt,
-			chisqErrCnt, expErrCnt, fishErrCnt, gammaErrCnt, geomErrCnt,
-			lnormErrCnt, normErrCnt, paretErrCnt, poissErrCnt, studErrCnt,
-			weibErrCnt;					// math error count control
-#endif
+		variable *cemetery = NULL;		// LSD saved data from deleted objects
+		variable *last_cemetery = NULL;	// LSD last saved cemetery entry
+		FILE *log_file_ptr;				// log file pointer, if any
 
 #ifndef _NW_
 		// library Tcl/Tk specific definitions (for the GUI version only)
@@ -475,6 +461,7 @@ namespace lsd
 		void log_parallel( bool nw );
 		void monitor_parallel( bool nw );
 		void move_obj( const char *lab, const char *dest );
+		void parallel_update( variable *v, object* p, object *caller = NULL );
 		void plog_tag( const char *cm, const char *tag, ... );
 		void plog_terminal( const char *cm, va_list arg );
 		void reset_blueprint( object *r );
@@ -482,13 +469,7 @@ namespace lsd
 		void save_results( void );
 		void unload_configuration( bool full );
 		void update_bar( char *bar, int done, int & last_done, int bar_sz );
-
-#ifndef _NP_
-		void parallel_update( variable *v, object* p, object *caller = NULL );
 		void warn_distr( std::atomic < int > & errCnt, bool & stopErr, const char *distr, const char *msg );
-#else
-		void warn_distr( int & errCnt, bool & stopErr, const char *distr, const char *msg );
-#endif
 
 #ifdef SIMULATION_EXT
 		SIMULATION_EXT
@@ -515,13 +496,10 @@ namespace lsd
 		object *up;						// parent object
 		o_vecT hooks;
 		simulation *sim;				// simulation where object is contained
+		std::mutex obj_comp_lck;		// mutex lock for parallel computations
 		variable *v = NULL;
 		void *cext = NULL;				// pointer to C++ object extension
 		v_mapT v_map;					// fast lookup map to variables
-
-#ifndef _NP_
-		std::mutex obj_comp_lck;		// mutex lock for parallel computations
-#endif
 
 		// object-class methods
 		bool alloc_save_mem( void );
@@ -709,11 +687,8 @@ namespace lsd
 		int start = 0;
 		object *up = NULL;
 		simulation *sim = NULL;			// simulation where object is contained
-		variable *next = NULL;
-
-#ifndef _NP_
 		std::recursive_mutex var_comp_lck;// mutex lock for parallel computation
-#endif
+		variable *next = NULL;
 
 		variable( void ) { };			// constructor (empty)
 		variable( const variable &v );	// copy constructor
@@ -838,7 +813,7 @@ namespace lsd
 		double height = 0;
 	};
 
-#ifndef _NP_
+
 /*************************************************************
  WORKER
  *************************************************************/
@@ -869,7 +844,7 @@ namespace lsd
 		void cal_worker( void );		// worker thread code
 		void signal( int signum );		// signal handler
 	};
-#endif
+
 
 /*************************************************************
  RESULT
@@ -985,18 +960,14 @@ namespace lsd
 	extern const double z_dist_st[ Z_CLEVS ];// normal distribution table statistics
 	extern const int signals[ ];		// handled system signal numbers
 	extern const std::unordered_map < std::string, int > logic_ops_map;// cond. ops.
-	extern std::vector < simulation * > sims;// vector holding existing simulations
-	extern FILE *stderr_ptr;			// main thread standard error pointer
-	extern FILE *stdout_ptr;			// main thread standard output pointer
-
-#ifndef _NP_
-	// library conditional variables (not used in equations)
 	extern std::condition_variable seq_end;	// signal simulation sequence end
 	extern std::map < std::thread::id, worker * > worker_thread_ptr;// worker thr ptr
 	extern std::mutex plog_term_lck;	// lock plog_terminal for parallel upd.
 	extern std::mutex wrk_thr_ptr_lck;	// lock worker_thread_ptr for par. upd.
+	extern std::vector < simulation * > sims;// vector holding existing simulations
 	extern std::thread::id main_thread;	// LSD main thread ID
-#endif
+	extern FILE *stderr_ptr;			// main thread standard error pointer
+	extern FILE *stdout_ptr;			// main thread standard output pointer
 
 
 /*************************************************************

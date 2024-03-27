@@ -23,7 +23,6 @@
 
  - _FUN_: user model equation file
  - _NW_: No Window executable
- - _NP_: no parallel (multi-task) processing
  - _NT_: no signal trapping (better when debugging in GDB)
  *************************************************************/
 

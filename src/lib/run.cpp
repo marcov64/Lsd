@@ -31,7 +31,6 @@
 #include "lib/libLSD.h"				// LSD library classes
 
 
-#ifndef _NP_
 /*************************************************************
  DISPATCH_RUNS
  *************************************************************/
@@ -82,7 +81,7 @@ int dispatch_runs( int until_t, int until_run )
 
 	return nstale;
 }
-#endif
+
 
 /*************************************************************
  RUN_SIMULATION
@@ -198,7 +197,6 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 	quit = 0;						// ensure no error to handle
 	running_seq = false;
 
-#ifndef _NP_
 	// stop multi-thread workers
 	delete [ ] workers;
 	workers = NULL;
@@ -206,7 +204,6 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 	// wake dispatcher lock
 	l_guardT lock( seq_end_lck );
 	seq_end.notify_one( );
-#endif
 
 	return res;
 }
@@ -222,7 +219,6 @@ int lsd::simulation::init_new_seq( char *bar_done, int & perc_done, int & last_d
 	run = 1;					// first run in the sequence
 	quit = 0;					// not marked for abortion
 
-#ifndef _NP_
 	// check if there are parallel computing variables
 	if ( parallel_disable || max_threads < 2 )
 		parallel_mode = parallel_ready = false;
@@ -242,11 +238,6 @@ int lsd::simulation::init_new_seq( char *bar_done, int & perc_done, int & last_d
 			workers[ i ].worker_thread = std::thread( & worker::cal_worker, & workers[ i ] );
 		}
 	}
-#else
-	if ( root->search_parallel( ) )
-		plog( "\nWarning: parallel mode is not supported under current configuration\n" );
-	parallel_mode = false;
-#endif
 
 #ifndef _NW_
 	if ( liblnk != NULL && liblnk->runtime_start != NULL )

@@ -2453,14 +2453,10 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::checkbutton $T.c.aggr -text \"Show aggregated profiling times\" -variable prof_aggr_time" );
 			cmd( "ttk::checkbutton $T.c.nchk -text \"Disable pointer checks\" -variable no_ptr_chk -state %s", lsd::no_pointer_check ? "disabled" : "normal" );
 
-#ifndef _NP_
 			cmd( "ttk::checkbutton $T.c.npar -text \"Disable parallel computation\" -variable parallel_disable" );
 			if ( ! sim.root->search_parallel( ) || sim.max_threads < 2 )
 				cmd( "$T.c.npar configure -state disabled" );
 			cmd( "pack $T.c.obs $T.c.aggr $T.c.nchk $T.c.npar -anchor w" );
-#else
-			cmd( "pack $T.c.obs $T.c.aggr $T.c.nchk -anchor w" );
-#endif
 
 			cmd( "pack $T.f $T.c -padx 5 -pady 5" );
 
@@ -4921,8 +4917,6 @@ lsd::object *gui::operate( lsd::object *r )
 		// Start NO WINDOW job as a separate background process
 		case 69:
 
-#ifndef _NP_
-
 			// check if background are not being run already
 			if ( sim.parallel_monitor )
 			{
@@ -4937,8 +4931,6 @@ lsd::object *gui::operate( lsd::object *r )
 					break;
 				}
 			}
-
-#endif
 
 			// check a model is already loaded
 			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 || strlen( sim.conf_file ) == 0 )
@@ -4999,11 +4991,7 @@ lsd::object *gui::operate( lsd::object *r )
 			if ( sim.no_tot )
 				sim.no_res = false;
 
-#ifdef _NP_
-			param = 1;
-#else
 			param = std::min( sim.last_run, sim.max_threads );
-#endif
 
 			cmd( "set simNum %d", sim.last_run );
 			cmd( "set firstFile \"%s_%d\"", sim.conf_name, sim.seed );
@@ -5228,19 +5216,8 @@ lsd::object *gui::operate( lsd::object *r )
 			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd $path" );
 
-#ifdef _NP_
-
-			snprintf( lab, MAX_PATH_LENGTH, "%s.log", sim.conf_name );
-			cmd( "catch { exec %s -f %s%s%s%s%s%s%s%s -l %s & }", nw_exe, sim.conf_file, sim.no_res ? " -r" : "", sim.no_tot ? " -p" : "", sim.docsv ? " -t" : "", sim.dozip ? "" : " -z", dobar ? " -b" : "", subDir ? " -o " : "", subDir ? out_dir : "", lab );
-			run_logs.clear( );
-			run_logs.push_back( lab );
-
-#else
-
 			plog( "\n\nProcessing parallel background run (threads=%d runs=%d)...", nature, param );
 			sim.run_parallel( false, nw_exe, sim.conf_name, sim.seed, sim.last_run, nature, param );
-
-#endif
 
 			show_logs( sim.conf_path, sim.run_logs, true );
 
@@ -5605,16 +5582,12 @@ lsd::object *gui::operate( lsd::object *r )
 		// present parallel run log
 		case 8:
 
-#ifndef _NP_
-
 			// destroy monitor thread
 			if ( sim.run_monitor.joinable( ) )
 				sim.run_monitor.join( );
 
 			plog( "\n%s\n", sim.run_log.c_str( ) );
 			plog( "Finished parallel background run\n" );
-
-#endif
 
 		break;
 

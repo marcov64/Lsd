@@ -40,7 +40,13 @@ namespace lsd
 	char *lib_path = NULL;			// path of shared library, if any
 	char *model_path = NULL;		// folder where the model files are
 	char *root_lsd = NULL;			// path of LSD root directory
+	std::condition_variable seq_end;// variable to signal simulation sequence end
+	std::map < std::thread::id, worker * > worker_thread_ptr;// worker thr. pointers
+	std::mutex init_sim_lck;		// lock simulation constructor
+	std::mutex plog_term_lck;		// lock plog_terminal for parallel updating
+	std::mutex wrk_thr_ptr_lck;		// lock worker_thread_ptr for parallel updating
 	std::vector < simulation * > sims;// vector holding existing simulations
+	std::thread::id main_thread;	// LSD main thread ID
 	FILE *stderr_ptr;				// main thread standard error file pointer
 	FILE *stdout_ptr;				// main thread standard output file pointer
 
@@ -53,16 +59,6 @@ namespace lsd
 	const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
 	const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 	const std::unordered_map < std::string, int > logic_ops_map = LOG_OPS_PAIR;
-
-#ifndef _NP_
-	// conditional variables
-	std::condition_variable seq_end;// variable to signal simulation sequence end
-	std::map < std::thread::id, worker * > worker_thread_ptr;// worker thr. pointers
-	std::mutex init_sim_lck;		// lock simulation constructor
-	std::mutex plog_term_lck;		// lock plog_terminal for parallel updating
-	std::mutex wrk_thr_ptr_lck;		// lock worker_thread_ptr for parallel updating
-	std::thread::id main_thread;	// LSD main thread ID
-#endif
 }
 
 
@@ -71,10 +67,7 @@ namespace lsd
  *************************************************************/
 void __attribute__( ( constructor ) ) lib_constructor( )
 {
-#ifndef _NP_
 	lsd::main_thread = std::this_thread::get_id( );
-#endif
-
 	lsd::exec_file = new char[ strlen( "" ) + 1 ];
 	lsd::exec_path = new char[ strlen( "" ) + 1 ];
 	lsd::lib_file = new char[ strlen( "" ) + 1 ];
@@ -117,11 +110,7 @@ lsd::simulation::simulation( void )
 	reset_blueprint( NULL );
 	init_map( );				// set equation look-up map
 
-#ifndef _NP_
 	max_threads = ( MAX_CORES <= 0 ) ? std::thread::hardware_concurrency( ) : MAX_CORES;
-#else
-	max_threads = ( MAX_CORES <= 0 ) ? 4 : MAX_CORES;
-#endif
 
 	conf_name = new char[ strlen( "" ) + 1 ];
 	conf_path = new char[ strlen( "" ) + 1 ];
@@ -132,10 +121,8 @@ lsd::simulation::simulation( void )
 	stack_log = new lsdstack;
 	strcpy( stack_log->label, "LSD Simulation Manager" );
 
-#ifndef _NP_
 	parallel_ready = true;
 	l_guardT lock( init_sim_lck );// parallel semaphore
-#endif
 
 	sim = sims.size( );			// index por this sim
 	sims.push_back( this );		// add to list of existing simulations
