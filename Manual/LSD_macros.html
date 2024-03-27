@@ -2983,8 +2983,8 @@ lang=EN-US style='font-family:"Courier New";color:gray'><br>
 lang=EN-US style='font-family:"Courier New";color:#00B050'><br>
 <span class=Cdigo><span style='color:#00B050'>Technical initialization
 function. It is computed only once and then it is </span></span><br>
-<span class=Cdigo><span style='color:#00B050'>transformed in a parameter and never
-computed again.</span></span><br>
+<span class=Cdigo><span style='color:#00B050'>transformed in a parameter and
+never computed again.</span></span><br>
 <span class=Cdigo><span style='color:#00B050'>Sets the global pointer 'market'
 pointing to the Object Market, so </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>to speed up the access to this
@@ -4413,8 +4413,8 @@ is contained in. The Equation could be: &nbsp; </span></p>
 lang=EN-US style='font-family:"Courier New";color:gray'><br>
 </span><span class=Cdigo><span lang=EN-US style='color:#00B050'>/***************************
 </span></span><span lang=EN-US style='font-family:"Courier New";color:#00B050'><br>
-<span class=Cdigo><span style='color:#00B050'>Return the Id of a Firm chosen randomly
-with probability </span></span><br>
+<span class=Cdigo><span style='color:#00B050'>Return the Id of a Firm chosen
+randomly with probability </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>equal to the square of the market
 shares. </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>***************************/ </span></span></span></p>
@@ -6495,9 +6495,9 @@ performing Monte Carlo analysis.</span></p>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><a
-  name="_SNAP_NET(_&quot;node_Lab&quot;,_&quot;filename"></a><a
-  name="_SNAP_NET()"></a><span style='font-size:10.0pt;color:black'><a
-  href="#top"><span style='color:red;text-decoration:none'>&#9650;Top</span></a></span></p>
+  name="_SNAP_NET()"></a><a name="_SNAP_NET(_&quot;node_Lab&quot;,_&quot;filename"></a><span
+  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
+  text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -7115,28 +7115,29 @@ the beginning of the simulation</span></span><span lang=EN-US style='font-family
 <p><span class=Cdigo><span lang=EN-US>CYCLE( cur, &quot;Firm&quot; )</span></span><span
 lang=EN-US style='font-family:"Courier New";color:gray'><br>
 <span class=Cdigo>{</span><br>
-<span class=Cdigo>&nbsp; ADDEXTS( cur, MatrixXd );&nbsp; </span></span><span
+<span class=Cdigo>&nbsp; ADDEXTS( cur, Eigen::MatrixXd );&nbsp; </span></span><span
 class=Cdigo><span lang=EN-US style='color:#00B050'>// adds an empty matrix
 extension to each Firm </span></span><span lang=EN-US style='font-family:"Courier New";
 color:#00B050'><br>
-</span><span class=Cdigo><span lang=EN-US>&nbsp; DO_EXTS( cur, MatrixXd,
+</span><span class=Cdigo><span lang=EN-US>&nbsp; DO_EXTS( cur, Eigen::MatrixXd,
 resize, 2, 2 );&nbsp; </span></span><span class=Cdigo><span lang=EN-US
 style='color:#00B050'>// resize the matrix to 2x2</span></span><span
 lang=EN-US style='font-family:"Courier New";color:gray'><br>
-<span class=Cdigo>&nbsp; EXTS( cur, MatrixXd ) &lt;&lt; 0, 0, 0, 0;&nbsp; </span></span><span
-class=Cdigo><span lang=EN-US style='color:#00B050'>// set each matrix element
-to 0</span></span><span lang=EN-US style='font-family:"Courier New";color:#00B050'><br>
-</span><span class=Cdigo><span lang=EN-US>&nbsp; EXTS( cur, MatrixXd ) ( 0, 0 )
-= 1;</span></span><span class=Cdigo><span lang=EN-US style='color:#00B050'>&nbsp;
+<span class=Cdigo>&nbsp; EXTS( cur, Eigen::MatrixXd ) &lt;&lt; 0, 0, 0,
+0;&nbsp; </span></span><span class=Cdigo><span lang=EN-US style='color:#00B050'>//
+set each matrix element to 0</span></span><span lang=EN-US style='font-family:
+"Courier New";color:#00B050'><br>
+</span><span class=Cdigo><span lang=EN-US>&nbsp; EXTS( cur, Eigen::MatrixXd ) (
+0, 0 ) = 1;</span></span><span class=Cdigo><span lang=EN-US style='color:#00B050'>&nbsp;
 // set element a11 to 1</span></span><span lang=EN-US style='font-family:"Courier New";
 color:gray'><br>
-<span class=Cdigo>&nbsp; EXTS( cur, MatrixXd ) ( 0, 1 ) = 2;</span></span><span
+<span class=Cdigo>&nbsp; EXTS( cur, Eigen::MatrixXd ) ( 0, 1 ) = 2;</span></span><span
 class=Cdigo><span lang=EN-US style='color:#00B050'>&nbsp; // set element a12 to
 2</span></span><span lang=EN-US style='font-family:"Courier New";color:gray'><br>
-<span class=Cdigo>&nbsp; EXTS( cur, MatrixXd ) ( 1, 0 ) = 3;</span></span><span
+<span class=Cdigo>&nbsp; EXTS( cur, Eigen::MatrixXd ) ( 1, 0 ) = 3;</span></span><span
 class=Cdigo><span lang=EN-US style='color:#00B050'>&nbsp; // set element a21 to
 3</span></span><span lang=EN-US style='font-family:"Courier New";color:gray'><br>
-<span class=Cdigo>&nbsp; EXTS( cur, MatrixXd ) ( 1, 1 ) = 4;</span></span><span
+<span class=Cdigo>&nbsp; EXTS( cur, Eigen::MatrixXd ) ( 1, 1 ) = 4;</span></span><span
 class=Cdigo><span lang=EN-US style='color:#00B050'>&nbsp; // set element a22 to
 4</span></span><span lang=EN-US style='font-family:"Courier New";color:gray'><br>
 <span class=Cdigo>}</span></span></p>
@@ -7160,11 +7161,11 @@ Equation:</span></p>
 
 <p><span class=Cdigo><span lang=EN-US>…</span></span><span lang=EN-US
 style='font-family:"Courier New";color:gray'><br>
-<span class=Cdigo>v[0] = DO_EXT( MatrixXd, determinant );&nbsp; </span></span><span
+<span class=Cdigo>v[0] = DO_EXT( Eigen::MatrixXd, determinant );&nbsp; </span></span><span
 class=Cdigo><span lang=EN-US style='color:#00B050'>// compute the determinant
 of matrix</span></span><span lang=EN-US style='font-family:"Courier New";
 color:gray'><br>
-<span class=Cdigo>v[11] = EXT( MatrixXd )( 0, 0 );&nbsp; </span></span><span
+<span class=Cdigo>v[11] = EXT( Eigen::MatrixXd )( 0, 0 );&nbsp; </span></span><span
 class=Cdigo><span lang=EN-US style='color:#00B050'>// pick element in the first
 row and column</span></span><span lang=EN-US style='font-family:"Courier New";
 color:#00B050'><br>
@@ -7173,57 +7174,19 @@ color:#00B050'><br>
 <p class=MsoNormal><span lang=EN-US>To use the library many functions, please
 refer to Eigen website and documentation at </span><span class=Cdigo><span
 lang=EN-US><a href="http://eigen.tuxfamily.org">http://eigen.tuxfamily.org</a></span></span><span
-lang=EN-US>. </span></p>
+lang=EN-US>.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+<p><span lang=EN-US>Eigen is free software distributed under the <a
+href="http://www.mozilla.org/MPL/2.0">MPL2</a> license.</span></p>
 
-<div align=center>
-
-<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
- <tr>
-  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><a
-  name="_Advanced_LSD_coding"></a><span style='font-size:10.0pt;color:black'><a
-  href="#top"><span style='color:red;text-decoration:none'>&#9650;Top</span></a></span></p>
-  </td>
- </tr>
-</table>
-
-</div>
-
-<h1><a name="_Advanced_LSD_coding_1"></a><span lang=EN-US>Advanced LSD coding </span></h1>
-
-<p><span lang=EN-US>The commands listed here provide special operations rarely
-necessary for basic models. They normally concern only advanced modelers.</span></p>
-
-<h2><a name="_#define_CSVLIB"></a><span lang=EN-US>#define CSVLIB</span></h2>
-
-<p><span lang=EN-US>The definition adds the Rapidcsv C++ CSV parser library
-namespace to the global model scope, so the prefix </span><span class=Cdigo><span
-lang=EN-US>rapidcsv::</span></span><span lang=EN-US> is not necessary to access
-the library items. It must be placed <i>before</i> the </span><span
-class=Cdigo><span lang=EN-US>#include fun_head_fast.h</span></span><span
-lang=EN-US> line in the equation file.</span></p>
-
-<p class=MsoNormal><span lang=EN-US>To use the library classes, please refer to
-Rapidcsv website and documentation at </span><span class=Cdigo><span
-lang=EN-US><a href="https://github.com/d99kris/rapidcsv">https://github.com/d99kris/rapidcsv</a></span></span><span
-lang=EN-US>. </span></p>
-
-<p class=MsoNormal><span lang=EN-US>Rapidcsv is free software distributed under
-the <a href="https://opensource.org/license/BSD-3-clause">BSD-3-Clause</a>
-license. Copyright (c) 2017 Kristofer Berggren.</span></p>
-
-<h2><span lang=EN-US>#define </span><span lang=EN-US>EIGENLIB</span></h2>
-
-<p><span lang=EN-US>This definition adds the Eigen math library namespace to
-the global model scope, so the prefix </span><span class=Cdigo><span
-lang=EN-US>Eigen::</span></span><span lang=EN-US> is not necessary to access
-the library items. It must be placed <i>before</i> the </span><span
-class=Cdigo><span lang=EN-US>#include fun_head_fast.h</span></span><span
-lang=EN-US> line in the equation file. See <a href="#_Eigen_linear_algebra">details</a>
-above on Eigen usage.</span></p>
+<p><span lang=EN-US>To make the use of Eigen math library simpler, its
+namespace can be added to the global model scope, so the prefix </span><span
+class=Cdigo><span lang=EN-US>Eigen::</span></span><span lang=EN-US> is not
+necessary to access the library items. Just add the line </span><span
+class=Cdigo><span lang=EN-US>using namespace Eigen;</span></span><span
+lang=EN-US> <i>before</i> the </span><span class=Cdigo><span lang=EN-US><a
+href="#MODELBEGIN">MODELBEGIN</a></span></span><span lang=EN-US> line in the
+equation file.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Eigen may have problems when compiled with
 the </span><span class=Cdigo><span lang=EN-US>–O0</span></span><span
@@ -7245,28 +7208,28 @@ EIGEN_DONT_VECTORIZE</span></span><span lang=EN-US style='font-family:"Courier N
 color:gray'><br>
 <span class=Cdigo>#define EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT</span></span></p>
 
-<p><span lang=EN-US>Eigen is free software distributed under the <a
-href="http://www.mozilla.org/MPL/2.0">MPL2</a> license.</span></p>
+<div align=center>
 
-<h2><a name="_#define_XMLLIB"></a><span lang=EN-US>#define XMLLIB</span></h2>
+<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><a
+  name="_Advanced_LSD_coding"></a><span style='font-size:10.0pt;color:black'><a
+  href="#top"><span style='color:red;text-decoration:none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
 
-<p><span lang=EN-US>The definition adds the pugixml C++ XML parser library
-namespace to the global model scope, so the prefix </span><span class=Cdigo><span
-lang=EN-US>pugi::</span></span><span lang=EN-US> is not necessary to access the
-library items. It must be placed <i>before</i> the </span><span class=Cdigo><span
-lang=EN-US>#include fun_head_fast.h</span></span><span lang=EN-US> line in the
-equation file.</span></p>
+</div>
 
-<p class=MsoNormal><span lang=EN-US>To use the library classes, please refer to
-pugixml website and documentation at </span><span class=Cdigo><span lang=EN-US><a
-href="https://pugixml.org/">https://pugixml.org</a></span></span><span
-lang=EN-US>. </span></p>
+<h1><a name="_Advanced_LSD_coding_1"></a><span lang=EN-US>Advanced LSD coding </span></h1>
 
-<p><span lang=EN-US>pugixml is free software distributed under the <a
-href="https://mit-license.org/">MIT</a> license. Copyright (c) 2006-2023 Arseny
-Kapoulkine.</span></p>
+<p><span lang=EN-US>The commands listed here provide special operations rarely
+necessary for basic models. They normally concern only advanced modelers.</span></p>
 
-<h2><a name="_#define_EIGENLIB"></a><a name=eigenlib></a><a name="_EIGENLIB"></a><span
+<h2><a name="_#define_CSVLIB"></a><a name="_#define_XMLLIB"></a><a
+name="_#define_EIGENLIB"></a><a name=eigenlib></a><a name="_EIGENLIB"></a><span
 lang=EN-US>#define EQ_USER_VARS <i>var1</i>; <i>var2</i>; …</span></h2>
 
 <p><span lang=EN-US>The statement allows the definition of user temporary local
@@ -8765,8 +8728,8 @@ lang=EN-US> for more details on C++ data extensions and an example. </span></p>
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><a name="close_sim"></a><a
-  name="_HOOK(_num_),"></a><a name="_Basic_C++_coding"></a><span
+  <p class=MsoNormal align=center style='text-align:center'><a
+  name="_Basic_C++_coding"></a><a name="_HOOK(_num_),"></a><a name="close_sim"></a><span
   style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
   text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>

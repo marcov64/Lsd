@@ -13,50 +13,54 @@
  *************************************************************/
 
 /*************************************************************
-ANALYSIS.CPP
-Contains the routines to manage the data analysis module.
+ ANALYSIS.CPP
+ Contains the routines to manage the data analysis module.
 
-The main functions contained here are:
+ The main functions contained here are:
 
-- void analysis( void )
-Builds the management window, setting all the bindings, and enters in a cycle
-from which can make several choices:
+ - void analysis( void )
+ Builds the management window, setting all the bindings, and
+ enters in a cycle from which can make several choices:
 
-1) Plot the plot as indicated
-2) Exit from data analysis
-3) Brings in foreground the plot on which title it was double clicked
-4) Load a new data file
-5) Sort the labels of the variables
-6) Copy the selection from the list of variables to the list of the variables
-to plot
-7) delete the variables selected in the list of the variables to plot
-9) plot the cross-section plot
+ 1) Plot the plot as indicated
+ 2) Exit from data analysis
+ 3) Brings in foreground the plot on which title it was double
+    clicked
+ 4) Load a new data file
+ 5) Sort the labels of the variables
+ 6) Copy the selection from the list of variables to the list
+    of the variables to plot
+ 7) delete the variables selected in the list of the variables
+    to plot
+ 9) plot the cross-section plot
 
-- void plot_tseries( void );
-Plot the plot with the variable indicated in the list of the variables
-to plot. If the option says to use the automatic y scaling, it makes first
-a scan of the file to spot the maximum and minimum y, then it plots. Otherwise,
-it uses directly the values set by the users.
+ - void plot_tseries( void );
+ Plot the plot with the variable indicated in the list of the
+ variables to plot. If the option says to use the automatic y
+ scaling, it makes first a scan of the file to spot the maximum
+ and minimum y, then it plots. Otherwise, it uses directly the
+ values set by the users.
 
-- void plot_cross( void ) ;
-Plot a plot of cross section data. The variables chosen are plotted along the times
-steps chosen and, on request, they are sorted (descending or ascending) one one of
-time steps. To choose which time to sort on, double-click on the time step.
+ - void plot_cross( void ) ;
+ Plot a plot of cross section data. The variables chosen are
+ plotted along the times steps chosen and, on request, they
+ are sorted (descending or ascending) one one of time steps.
+ To choose which time to sort on, double-click on the time step.
 
-- void set_cs_data( void );
-Interface used to determine the time steps to plot in the cross-section plots
-and the possible sorting.
+ - void set_cs_data( void );
+ Interface used to determine the time steps to plot in the
+ cross-section plots and the possible sorting.
 
-- void sort_cs_asc( char **s, double **v, int nv, int nt, int c );
-Sort in ascending order the variables. Used in plot_cross.
+ - void sort_cs_asc( char **s, double **v, int nv, int nt, int c );
+ Sort in ascending order the variables. Used in plot_cross.
 
-- void sort_cs_desc( char **s, double **v, int nv, int nt, int c );
+ - void sort_cs_desc( char **s, double **v, int nv, int nt, int c );
 
-Sort in descending order the variables. Used in plot_cross.
-*************************************************************/
+ Sort in descending order the variables. Used in plot_cross.
+ *************************************************************/
 
 /*
-used case 47
+cases used up to 47
 */
 
 #include "LSD.h"
@@ -69,78 +73,93 @@ used case 47
 #define HISTOGR	4
 #define HISTOCS	5
 
-struct bin							// histogram bin
+namespace gui
 {
-	double num;
-	double min;
-	double max;
-	double center;
-	double av;
-	double lowb;
-	double highb;
-};
+	struct bin							// histogram bin
+	{
+		double num;
+		double min;
+		double max;
+		double center;
+		double av;
+		double lowb;
+		double highb;
+	};
 
-struct store						// element values container class
-{
-	char label[ MAX_ELEM_LENGTH ];
-	char tag[ MAX_ELEM_LENGTH ];
-	double *data;
-	int end;
-	int rank;
-	int start;
-};
+	struct node							// gnuplot tree node
+	{
+		int x;
+		struct node *son;
+		struct node *next;
+	};
 
-bin *histo_bins;
-bool avgSmplMsg;
-bool first_run = true;
-char da_tmp[ MAX_BUFF_SIZE ];
-char filename[ MAX_PATH_LENGTH ];
-double histo_mean;
-double histo_var;
-double maxy;
-double maxy2;
-double miny;
-double miny2;
-double point_size;
-int allblack;
-int autom;
-int autom_x;
-int avgSmpl;
-int *cdata;
-int cur_plot;
-int dir;
-int file_counter;
-int first_c;
-int grid;
-int gnu;
-int histo_cases;
-int histo_cs;
-int line_point;
-int logs;
-int max_c;
-int min_c;
-int num_bins;
-int num_c;
-int num_var;
-int num_y2;
-int nv;
-int pdigits;
-int plot_l[ MAX_PLOTS ];
-int plot_nl[ MAX_PLOTS ];
-int plot_w[ MAX_PLOTS ];
-int res;
-int showInit;
-int time_cross;
-int type_plot[ MAX_PLOTS ];
-int var_num;
-int xy;
-store *vs = NULL;
+	struct store						// element values container class
+	{
+		char label[ MAX_ELEM_LENGTH ];
+		char tag[ MAX_ELEM_LENGTH ];
+		double *data;
+		int end;
+		int rank;
+		int start;
+	};
+
+	bin *histo_bins;
+	bool avgSmplMsg;
+	bool first_run = true;
+	char da_tmp[ MAX_BUFF_SIZE ];
+	char filename[ MAX_PATH_LENGTH ];
+	double histo_mean;
+	double histo_var;
+	double maxy;
+	double maxy2;
+	double miny;
+	double miny2;
+	double point_size;
+	int allblack;
+	int autom;
+	int autom_x;
+	int avgSmpl;
+	int *cdata;
+	int cur_plot;
+	int dir;
+	int file_counter;
+	int first_c;
+	int grid;
+	int gnu;
+	int histo_cases;
+	int histo_cs;
+	int line_point;
+	int logs;
+	int max_c;
+	int min_c;
+	int num_bins;
+	int num_c;
+	int num_col = 16;
+	int num_var;
+	int num_y2;
+	int nv;
+	int pdigits;
+	int plot_l[ MAX_PLOTS ];
+	int plot_nl[ MAX_PLOTS ];
+	int plot_w[ MAX_PLOTS ];
+	int res;
+	int showInit;
+	int time_cross;
+	int type_plot[ MAX_PLOTS ];
+	int var_num;
+	int xy;
+	node gplot_tree;
+	store *vs = NULL;
+
+	// MC series parent names
+	const char *mc_par[ ] = { "meanMC", "medianMC", "maxMC", "minMC", "varMC", "sumMC", "medianMC", "countMC", "sdMC", "prodMC", "invMC", "ci+MC", "ci-MC", "maxMC", "ci+MC", "medianMC", "medianMC" };
+}
 
 
-/***************************************************
-ANALYSIS
-****************************************************/
-void analysis( bool mc )
+/*************************************************************
+ ANALYSIS
+ *************************************************************/
+void gui::analysis( bool mc )
 {
 	bool gz;
 	char dirname[ MAX_PATH_LENGTH ], str1[ MAX_ELEM_LENGTH ], str2[ MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ];
@@ -2575,7 +2594,7 @@ void analysis( bool mc )
 						cmd( "set medCI 0" );
 						cmd( "set clList [ list ]" );
 						for ( i = 0; i < T_CLEVS; ++i )
-							cmd( "lappend clList %g", 100 * t_dist_cl[ i ] );
+							cmd( "lappend clList %g", 100 * lsd::t_dist_cl[ i ] );
 
 						cmd( "newtop .da.s \"Monte Carlo Options\" { set choice 2 } .da" );
 
@@ -2720,7 +2739,7 @@ void analysis( bool mc )
 								get_str( "datafile", filename, MAX_PATH_LENGTH );
 							}
 							else
-								strcpyn( filename, sim.res_list[ i ].c_str( ), MAX_PATH_LENGTH );
+								lsd::strcpyn( filename, sim.res_list[ i ].c_str( ), MAX_PATH_LENGTH );
 
 							if ( strlen( filename ) > 3 && ! strcmp( &filename[ strlen( filename ) - 3 ], ".gz" ) )
 								gz = true;
@@ -3728,10 +3747,10 @@ void analysis( bool mc )
 }
 
 
-/***************************************************
+/*************************************************************
  UPDATE_BOUNDS
- ****************************************************/
-void update_bounds( void )
+ *************************************************************/
+void gui::update_bounds( void )
 {
 	if ( std::isfinite( miny ) )
 		cmd( "write_any .da.f.h.v.sc.min.min [ format \"%%.${pdigits}g\" $miny ]" );
@@ -3788,10 +3807,10 @@ void update_bounds( void )
 }
 
 
-/****************************************************
-LOWER_BOUND
-****************************************************/
-double lower_bound( double a, double b, double marg, double marg_eq, int dig )
+/*************************************************************
+ LOWER_BOUND
+ *************************************************************/
+double gui::lower_bound( double a, double b, double marg, double marg_eq, int dig )
 {
 	double rmin = sim.round_digits( a, dig );
 	double rmax = sim.round_digits( b, dig );
@@ -3824,10 +3843,10 @@ double lower_bound( double a, double b, double marg, double marg_eq, int dig )
 }
 
 
-/****************************************************
-UPPER_BOUND
-****************************************************/
-double upper_bound( double a, double b, double marg, double marg_eq, int dig )
+/*************************************************************
+ UPPER_BOUND
+ *************************************************************/
+double gui::upper_bound( double a, double b, double marg, double marg_eq, int dig )
 {
 	double rmin = sim.round_digits( a, dig );
 	double rmax = sim.round_digits( b, dig );
@@ -3860,10 +3879,10 @@ double upper_bound( double a, double b, double marg, double marg_eq, int dig )
 }
 
 
-/***************************************************
+/*************************************************************
  PLOT_TSERIES
- ****************************************************/
-void plot_tseries( void )
+ *************************************************************/
+void gui::plot_tseries( void )
 {
 	bool y2on, done;
 	char **str, **tag;
@@ -4046,10 +4065,10 @@ void plot_tseries( void )
 }
 
 
-/***************************************************
-PLOT_CROSS
-****************************************************/
-void plot_cross( void )
+/*************************************************************
+ PLOT_CROSS
+ *************************************************************/
+void gui::plot_cross( void )
 {
 	bool first;
 	char **str, **tag;
@@ -4228,10 +4247,10 @@ void plot_cross( void )
 }
 
 
-/***************************************************
-SET_CS_DATA
-****************************************************/
-void set_cs_data( void )
+/*************************************************************
+ SET_CS_DATA
+ *************************************************************/
+void gui::set_cs_data( void )
 {
 	if ( nv < 2 )
 	{
@@ -4397,10 +4416,10 @@ void set_cs_data( void )
 }
 
 
-/***************************************************
-SORT_CS_DESC
-****************************************************/
-void sort_cs_desc( char **s, char **t, double **v, int nv, int nt, int c )
+/*************************************************************
+ SORT_CS_DESC
+ *************************************************************/
+void gui::sort_cs_desc( char **s, char **t, double **v, int nv, int nt, int c )
 {
 	int i, j, h;
 	double dapp;
@@ -4417,22 +4436,22 @@ void sort_cs_desc( char **s, char **t, double **v, int nv, int nt, int c )
 				v[ j + 1 ][ h ] = dapp;
 			}
 
-			strcpyn( sapp, s[ j ], MAX_ELEM_LENGTH );
-			strcpyn( s[ j ], s[ j + 1 ], MAX_ELEM_LENGTH );
-			strcpyn( s[ j + 1 ], sapp, MAX_ELEM_LENGTH );
+			lsd::strcpyn( sapp, s[ j ], MAX_ELEM_LENGTH );
+			lsd::strcpyn( s[ j ], s[ j + 1 ], MAX_ELEM_LENGTH );
+			lsd::strcpyn( s[ j + 1 ], sapp, MAX_ELEM_LENGTH );
 
-			strcpyn( sapp, t[ j ], MAX_ELEM_LENGTH );
-			strcpyn( t[ j ], t[ j + 1 ], MAX_ELEM_LENGTH );
-			strcpyn( t[ j + 1 ], sapp, MAX_ELEM_LENGTH );
+			lsd::strcpyn( sapp, t[ j ], MAX_ELEM_LENGTH );
+			lsd::strcpyn( t[ j ], t[ j + 1 ], MAX_ELEM_LENGTH );
+			lsd::strcpyn( t[ j + 1 ], sapp, MAX_ELEM_LENGTH );
 		}
 	}
 }
 
 
-/***************************************************
-SORT_CS_ASC
-****************************************************/
-void sort_cs_asc( char **s, char **t, double **v, int nv, int nt, int c )
+/*************************************************************
+ SORT_CS_ASC
+ *************************************************************/
+void gui::sort_cs_asc( char **s, char **t, double **v, int nv, int nt, int c )
 {
 	int i, j, h;
 	double dapp;
@@ -4449,22 +4468,22 @@ void sort_cs_asc( char **s, char **t, double **v, int nv, int nt, int c )
 				v[ j + 1 ][ h ] = dapp;
 			}
 
-			strcpyn( sapp, s[ j ], MAX_ELEM_LENGTH );
-			strcpyn( s[ j ], s[ j + 1 ], MAX_ELEM_LENGTH );
-			strcpyn( s[ j + 1 ], sapp, MAX_ELEM_LENGTH );
+			lsd::strcpyn( sapp, s[ j ], MAX_ELEM_LENGTH );
+			lsd::strcpyn( s[ j ], s[ j + 1 ], MAX_ELEM_LENGTH );
+			lsd::strcpyn( s[ j + 1 ], sapp, MAX_ELEM_LENGTH );
 
-			strcpyn( sapp, t[ j ], MAX_ELEM_LENGTH );
-			strcpyn( t[ j ], t[ j + 1 ], MAX_ELEM_LENGTH );
-			strcpyn( t[ j + 1 ], sapp, MAX_ELEM_LENGTH );
+			lsd::strcpyn( sapp, t[ j ], MAX_ELEM_LENGTH );
+			lsd::strcpyn( t[ j ], t[ j + 1 ], MAX_ELEM_LENGTH );
+			lsd::strcpyn( t[ j + 1 ], sapp, MAX_ELEM_LENGTH );
 		}
 	}
 }
 
 
-/***************************************************
-LOG_DATA
-****************************************************/
-double *log_data( double *data, int start, int end, int ser, const char *err_msg )
+/*************************************************************
+ LOG_DATA
+ *************************************************************/
+double *gui::log_data( double *data, int start, int end, int ser, const char *err_msg )
 {
 	bool stopErr;
 	double *logdata;
@@ -4495,27 +4514,27 @@ double *log_data( double *data, int start, int end, int ser, const char *err_msg
 }
 
 
-/***************************************************
-UPDATE_DESCR_DICT
-****************************************************/
-void update_descr_dict( void )
+/*************************************************************
+ UPDATE_DESCR_DICT
+ *************************************************************/
+void gui::update_descr_dict( void )
 {
 	char desc[ MAX_LINE_SIZE + 1 ];
-	description *cd;
+	lsd::description *cd;
 
 	for ( cd = sim.descr; cd != NULL; cd = cd->next )
 		cmd( "dict set serDescrDict %s \"%s\"", cd->label, fmt_ttip_descr( desc, cd, MAX_LINE_SIZE + 1, false ) );
 }
 
 
-/***************************************************
-INSERT_DATA_MEM
-****************************************************/
-void object::insert_data_mem( int *num_v, const char *lab )
+/*************************************************************
+ INSERT_DATA_MEM
+ *************************************************************/
+void lsd::object::insert_data_mem( int *num_v, const char *lab )
 {
 	int i = 0, ini_v = *num_v;
 
-	stop = false;
+	gui::stop = false;
 
 	count_labels_mem( & i, lab );
 
@@ -4531,17 +4550,17 @@ void object::insert_data_mem( int *num_v, const char *lab )
 		cmd( ".da.ser.b.cancel configure -state disabled" );
 	}
 
-	store *vs_new = new store[ *num_v ];
+	gui::store *vs_new = new gui::store[ *num_v ];
 
 	for ( i = 0; i < ini_v; ++i )
 	{
-		vs_new[ i ] = vs[ i ];
-		strcpy( vs_new[ i ].label, vs[ i ].label );
-		strcpy( vs_new[ i ].tag, vs[ i ].tag );
+		vs_new[ i ] = gui::vs[ i ];
+		strcpy( vs_new[ i ].label, gui::vs[ i ].label );
+		strcpy( vs_new[ i ].tag, gui::vs[ i ].tag );
 	}
 
-	delete [ ] vs;
-	vs = vs_new;
+	delete [ ] gui::vs;
+	gui::vs = vs_new;
 
 	insert_store_mem( *num_v, & ini_v, lab );
 
@@ -4553,15 +4572,15 @@ void object::insert_data_mem( int *num_v, const char *lab )
 						 "if error persists, please contact developers",
 						 true,
 						 "invalid number of series" );
-		lsd_exit_gui( 18 );
+		gui::lsd_exit_gui( 18 );
 	}
 }
 
 
-/***************************************************
-CREATE_PAR_MAP
-****************************************************/
-void object::create_par_map( void )
+/*************************************************************
+ CREATE_PAR_MAP
+ *************************************************************/
+void lsd::object::create_par_map( void )
 {
 	bridge *cb;
 	object *cur;
@@ -4571,15 +4590,15 @@ void object::create_par_map( void )
 		sim->par_map.insert( std::make_pair < std::string, std::string > ( cv->label, label ) );
 
 	for ( cb = b; cb != NULL; cb = cb->next )
-		for ( cur = cb->head; cur != NULL; cur = go_brother( cur ) )
+		for ( cur = cb->head; cur != NULL; cur = BROTHER( cur ) )
 			cur->create_par_map( );
 }
 
 
-/***************************************************
-COUNT_LABELS_MEM
-****************************************************/
-void object::count_labels_mem( int *count, const char *lab )
+/*************************************************************
+ COUNT_LABELS_MEM
+ *************************************************************/
+void lsd::object::count_labels_mem( int *count, const char *lab )
 {
 	bool found;
 	object *cur;
@@ -4606,10 +4625,10 @@ void object::count_labels_mem( int *count, const char *lab )
 }
 
 
-/***************************************************
-INSERT_LABELS_MEM
-****************************************************/
-void object::insert_labels_mem( int *num_v, const char *lab )
+/*************************************************************
+ INSERT_LABELS_MEM
+ *************************************************************/
+void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 {
 	bool found;
 	char tag_pref[ 3 ];
@@ -4617,7 +4636,7 @@ void object::insert_labels_mem( int *num_v, const char *lab )
 	variable *cv;
 	bridge *cb;
 
-	for ( found = false, cv = v; cv != NULL && ! stop; cv = cv->next )
+	for ( found = false, cv = v; cv != NULL && ! gui::stop; cv = cv->next )
 		if ( ( lab == NULL && cv->save ) || ( lab != NULL && ! strcmp( cv->label, lab ) ) )
 		{
 			if ( cv->save )
@@ -4633,11 +4652,11 @@ void object::insert_labels_mem( int *num_v, const char *lab )
 			cv->set_lab_tit( );
 			cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref, cv->lab_tit, cv->start, cv->end, *num_v, cv->up->label );
 
-			if ( cv->end > num_c )
-				num_c = cv->end;
+			if ( cv->end > gui::num_c )
+				gui::num_c = cv->end;
 
-			if ( cv->start < first_c )
-				first_c = cv->start;
+			if ( cv->start < gui::first_c )
+				gui::first_c = cv->start;
 
 			if ( ++( *num_v ) % PROG_SERIES == 0 )
 				cmd( "prgboxupdate .da.ser %d", *num_v - 1 );
@@ -4649,15 +4668,15 @@ void object::insert_labels_mem( int *num_v, const char *lab )
 				cur->insert_labels_mem( num_v, lab );
 
 	if ( up == NULL && lab == NULL )
-		for ( cv = sim->cemetery; cv != NULL && ! stop; cv = cv->next )
+		for ( cv = sim->cemetery; cv != NULL && ! gui::stop; cv = cv->next )
 		{
 			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", cv->label, cv->lab_tit, cv->start, cv->end, *num_v, sim->par_map[ cv->label ].c_str( ) );
 
-			if ( cv->end > num_c )
-				num_c = cv->end;
+			if ( cv->end > gui::num_c )
+				gui::num_c = cv->end;
 
-			if ( cv->start < first_c )
-				first_c = cv->start;
+			if ( cv->start < gui::first_c )
+				gui::first_c = cv->start;
 
 			if ( ++( *num_v ) % PROG_SERIES == 0 )
 				cmd( "prgboxupdate .da.ser %d", *num_v - 1 );
@@ -4665,10 +4684,10 @@ void object::insert_labels_mem( int *num_v, const char *lab )
 }
 
 
-/***************************************************
-INSERT_STORE_MEM
-****************************************************/
-void object::insert_store_mem( int max_v, int *num_v, const char *lab )
+/*************************************************************
+ INSERT_STORE_MEM
+ *************************************************************/
+void lsd::object::insert_store_mem( int max_v, int *num_v, const char *lab )
 {
 	bool found;
 	char tag_pref[ 3 ];
@@ -4696,12 +4715,12 @@ void object::insert_store_mem( int max_v, int *num_v, const char *lab )
 			}
 
 			cv->set_lab_tit( );
-			strcpyn( vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
-			snprintf( vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", tag_pref, cv->lab_tit );
-			vs[ *num_v ].start = cv->start;
-			vs[ *num_v ].end = cv->end;
-			vs[ *num_v ].rank = *num_v;
-			vs[ *num_v ].data = cv->data;
+			strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
+			snprintf( gui::vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", tag_pref, cv->lab_tit );
+			gui::vs[ *num_v ].start = cv->start;
+			gui::vs[ *num_v ].end = cv->end;
+			gui::vs[ *num_v ].rank = *num_v;
+			gui::vs[ *num_v ].data = cv->data;
 			++( *num_v );
 		}
 
@@ -4713,21 +4732,21 @@ void object::insert_store_mem( int max_v, int *num_v, const char *lab )
 	if ( up == NULL && lab == NULL )
 		for ( cv = sim->cemetery; cv != NULL && *num_v < max_v; cv = cv->next )
 		{
-			strcpyn( vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
-			strcpyn( vs[ *num_v ].tag, cv->lab_tit, MAX_ELEM_LENGTH );
-			vs[ *num_v ].start = cv->start;
-			vs[ *num_v ].end = cv->end;
-			vs[ *num_v ].rank = *num_v;
-			vs[ *num_v ].data = cv->data;
+			strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
+			strcpyn( gui::vs[ *num_v ].tag, cv->lab_tit, MAX_ELEM_LENGTH );
+			gui::vs[ *num_v ].start = cv->start;
+			gui::vs[ *num_v ].end = cv->end;
+			gui::vs[ *num_v ].rank = *num_v;
+			gui::vs[ *num_v ].data = cv->data;
 			++( *num_v );
 		}
 }
 
 
-/***************************************************
-INSERT_DATA_FILE
-****************************************************/
-void insert_data_file( bool gz, int *num_v, s_vecT *var_names, bool keep_vars )
+/*************************************************************
+ INSERT_DATA_FILE
+ *************************************************************/
+void gui::insert_data_file( bool gz, int *num_v, s_vecT *var_names, bool keep_vars )
 {
 	FILE *f = NULL;
 	gzFile fz = Z_NULL;
@@ -4832,7 +4851,7 @@ void insert_data_file( bool gz, int *num_v, s_vecT *var_names, bool keep_vars )
 
 		tag = new char [ strlen( vs[ i ].tag ) + 10 ];
 		sprintf( tag, "F_%d_%s", file_counter, vs[ i ].tag );
-		strcpyn( vs[ i ].tag, tag, MAX_ELEM_LENGTH );
+		lsd::strcpyn( vs[ i ].tag, tag, MAX_ELEM_LENGTH );
 		delete [ ] tag;
 
 		if ( vs[ i ].start != -1 )
@@ -4903,7 +4922,7 @@ void insert_data_file( bool gz, int *num_v, s_vecT *var_names, bool keep_vars )
 			// ignore not started / already ended series' column
 			if ( j >= vs[ i ].start && j <= vs[ i ].end )
 			{
-				if ( ! strcmp( tok, nonavail ) )// it's a non-available observation
+				if ( ! strcmp( tok, lsd::nonavail ) )// it's a non-available observation
 					vs[ i ].data[ j - vs[ i ].start ] = NAN;
 				else
 				{
@@ -4947,10 +4966,10 @@ void insert_data_file( bool gz, int *num_v, s_vecT *var_names, bool keep_vars )
 }
 
 
-/************************
-STATISTICS
-************************/
-void statistics( void )
+/*************************************************************
+ STATISTICS
+ *************************************************************/
+void gui::statistics( void )
 {
 	char **str, **tag, str1[ MAX_LINE_SIZE ], longmsg[ 2 * MAX_LINE_SIZE ];
 	double **data, av, med, var, sd, ymin, ymax, num;
@@ -5079,10 +5098,10 @@ void statistics( void )
 }
 
 
-/************************
-STATISTICS_CROSS
-************************/
-void statistics_cross( void )
+/*************************************************************
+ STATISTICS_CROSS
+ *************************************************************/
+void gui::statistics_cross( void )
 {
 	char **str, **tag, str1[ MAX_LINE_SIZE ], longmsg[ 2 * MAX_LINE_SIZE ];
 	double **data, av, med, var, sd, ymin, ymax, num;
@@ -5225,11 +5244,12 @@ void statistics_cross( void )
 }
 
 
-/***************************************************
-PLOT_GNU
-Draws the XY plots, with the first series as X and the others as Y's
-****************************************************/
-void plot_gnu( void )
+/*************************************************************
+ PLOT_GNU
+ Draws the XY plots, with the first series as X
+ and the others as Y's
+ *************************************************************/
+void gui::plot_gnu( void )
 {
 	bool done;
 	char **str, **tag, str1[ MAX_ELEM_LENGTH ], str2[ 2 * MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ], dirname[ MAX_PATH_LENGTH ];
@@ -5652,7 +5672,7 @@ void plot_gnu( void )
 		snprintf( da_tmp, MAX_BUFF_SIZE, "plot 'data.gp' using 1:2 %s t \"%s_%s\"", str1, str[ 1 ], tag[ 1 ] );
 
 		if ( allblack )
-			strcatn( da_tmp, str3, MAX_BUFF_SIZE );
+			lsd::strcatn( da_tmp, str3, MAX_BUFF_SIZE );
 
 		i = 2;
 	}
@@ -5704,7 +5724,7 @@ void plot_gnu( void )
 			}
 
 			if ( strlen( str2 ) > 0 && allblack )
-				strcatn( str2, str3, 2 * MAX_ELEM_LENGTH );
+				lsd::strcatn( str2, str3, 2 * MAX_ELEM_LENGTH );
 
 			fprintf( f, "%s", str2 );
 			fprintf( f2, "%s", str2 );
@@ -5744,10 +5764,10 @@ void plot_gnu( void )
 }
 
 
-/*****************************************
-PLOT_CS_XY
-*****************************************/
-void plot_cs_xy( void )
+/*************************************************************
+ PLOT_CS_XY
+ *************************************************************/
+void gui::plot_cs_xy( void )
 {
 	bool done;
 	char **str, **tag, str1[ 2 * MAX_ELEM_LENGTH ], str2[ MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ], dirname[ MAX_PATH_LENGTH ];
@@ -6098,7 +6118,7 @@ void plot_cs_xy( void )
 		snprintf( da_tmp, MAX_BUFF_SIZE, "plot 'data.gp' using 1:2 %s t \"%s_%s(%d)\"", str2, str[ block_length ], tag[ block_length ], time_sel );
 
 		if ( allblack )
-			strcatn( da_tmp, str3, MAX_BUFF_SIZE );
+			lsd::strcatn( da_tmp, str3, MAX_BUFF_SIZE );
 
 		i = 2;			// init from the second variable
 	}
@@ -6120,16 +6140,16 @@ void plot_cs_xy( void )
 				snprintf( str1, 2 * MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d %s t \"%s_%s(%d)\"", i + 1, str2, str[ j ], tag[ j ], time_sel );
 
 				if ( allblack )
-					strcatn( str1, str3, 2 * MAX_ELEM_LENGTH );
+					lsd::strcatn( str1, str3, 2 * MAX_ELEM_LENGTH );
 			}
 			else
 				snprintf( str1, 2 * MAX_ELEM_LENGTH, ", 'data.gp' using 1:2:%d %s t \"%s_%s(%d)\"", i + 1, str2, str[ j ], tag[ j ], time_sel );
 
-			strcatn( da_tmp, str1, MAX_BUFF_SIZE );
+			lsd::strcatn( da_tmp, str1, MAX_BUFF_SIZE );
 		}
 	}
 
-	strcatn( da_tmp, "\n", MAX_BUFF_SIZE );
+	lsd::strcatn( da_tmp, "\n", MAX_BUFF_SIZE );
 	fprintf( f, "%s", da_tmp );
 	fprintf( f2, "%s", da_tmp );
 
@@ -6166,10 +6186,10 @@ void plot_cs_xy( void )
 }
 
 
-/***************************************************
-PLOT_PHASE_DIAGRAM
-****************************************************/
-void plot_phase_diagram( void )
+/*************************************************************
+ PLOT_PHASE_DIAGRAM
+ *************************************************************/
+void gui::plot_phase_diagram( void )
 {
 	bool done;
 	char **str, **tag, str1[ MAX_ELEM_LENGTH ], str2[ 2 * MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ], dirname[ MAX_PATH_LENGTH ];
@@ -6392,19 +6412,19 @@ void plot_phase_diagram( void )
 	snprintf( da_tmp, MAX_BUFF_SIZE, "plot 'data.gp' using 1:2 %s t \"t + 1\"", str1 );
 
 	if ( allblack )
-		strcatn( da_tmp, str3, MAX_BUFF_SIZE );
+		lsd::strcatn( da_tmp, str3, MAX_BUFF_SIZE );
 
 	for ( i = 2; i <= nlags; ++i )
 		if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
 		{
 			snprintf( str2, 2 * MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d %s t \"t+%d\"", i + 1, str1, i );
-			strcatn( da_tmp, str2, MAX_BUFF_SIZE );
+			lsd::strcatn( da_tmp, str2, MAX_BUFF_SIZE );
 
 			if ( allblack )
-				strcatn( da_tmp, str3, MAX_BUFF_SIZE );
+				lsd::strcatn( da_tmp, str3, MAX_BUFF_SIZE );
 		}
 
-	strcatn( da_tmp, "\n", MAX_BUFF_SIZE );
+	lsd::strcatn( da_tmp, "\n", MAX_BUFF_SIZE );
 	fprintf( f, "%s", da_tmp );
 	fprintf( f2, "%s", da_tmp );
 
@@ -6437,10 +6457,10 @@ void plot_phase_diagram( void )
 }
 
 
-/***************************************************
-SHOW_PLOT_GNU
-****************************************************/
-void show_plot_gnu( int n, int type, char **str, char **tag )
+/*************************************************************
+ SHOW_PLOT_GNU
+ *************************************************************/
+void gui::show_plot_gnu( int n, int type, char **str, char **tag )
 {
 	int i, hsize, vsize, sbordsize, lim[ 4 ];
 	double rang[ 4 ];
@@ -6665,10 +6685,10 @@ void show_plot_gnu( int n, int type, char **str, char **tag )
 }
 
 
-/***************************************************
-PLOT_LATTICE
-****************************************************/
-void plot_lattice( void )
+/*************************************************************
+ PLOT_LATTICE
+ *************************************************************/
+void gui::plot_lattice( void )
 {
 	char **str, **tag;
 	double val, color, cscale, **data;
@@ -6940,10 +6960,10 @@ void plot_lattice( void )
 }
 
 
-/***************************************************
-HISTOGRAMS
-****************************************************/
-void histograms( void )
+/*************************************************************
+ HISTOGRAMS
+ *************************************************************/
+void gui::histograms( void )
 {
 	bool norm;
 	char **str, **tag;
@@ -7190,10 +7210,10 @@ void histograms( void )
 }
 
 
-/***************************************************
-HISTOGRAMS CS
-****************************************************/
-void histograms_cs( void )
+/*************************************************************
+ HISTOGRAMS CS
+ *************************************************************/
+void gui::histograms_cs( void )
 {
 	bool norm;
 	char **str, **tag;
@@ -7450,13 +7470,10 @@ void histograms_cs( void )
 }
 
 
-/***************************************************
-CREATE_SERIES
-****************************************************/
-// define MC series parent names for AoR
-const char *mc_par[ ] = { "meanMC", "medianMC", "maxMC", "minMC", "varMC", "sumMC", "medianMC", "countMC", "sdMC", "prodMC", "invMC", "ci+MC", "ci-MC", "maxMC", "ci+MC", "medianMC", "medianMC" };
-
-bool create_series( bool mc, s_vecT var_names )
+/*************************************************************
+ CREATE_SERIES
+ *************************************************************/
+bool gui::create_series( bool mc, s_vecT var_names )
 {
 	bool first, medCI = false, done = true;
 	char **str, **tag;
@@ -7488,8 +7505,9 @@ bool create_series( bool mc, s_vecT var_names )
 		cmd( "set confi 95" );
 		cmd( "set medCI 0" );
 		cmd( "set clList [ list ]" );
+
 		for ( i = 0; i < Z_CLEVS; ++i )
-			cmd( "lappend clList %g", 100 * z_dist_cl[ i ] );
+			cmd( "lappend clList %g", 100 * lsd::z_dist_cl[ i ] );
 
 		cmd( "newtop .da.s \"New Series Options\" { set choice 2 } .da" );
 
@@ -7697,7 +7715,7 @@ bool create_series( bool mc, s_vecT var_names )
 		data[ i ] = NULL;
 
 		if ( mc )
-			strcpyn( da_tmp, var_names[ i ].c_str( ), MAX_BUFF_SIZE );
+			lsd::strcpyn( da_tmp, var_names[ i ].c_str( ), MAX_BUFF_SIZE );
 		else
 		{
 			cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
@@ -8026,10 +8044,10 @@ bool create_series( bool mc, s_vecT var_names )
 }
 
 
-/***************************************************
-CREATE_MAVERAG
-****************************************************/
-bool create_maverag( void )
+/*************************************************************
+ CREATE_MAVERAG
+ *************************************************************/
+bool gui::create_maverag( void )
 {
 	bool done = true;
 	char **str, **tag;
@@ -8255,10 +8273,10 @@ bool create_maverag( void )
 }
 
 
-/***************************************************
-ADD_UNSAVED
-****************************************************/
-bool add_unsaved( void )
+/*************************************************************
+ ADD_UNSAVED
+ *************************************************************/
+bool gui::add_unsaved( void )
 {
 	if ( sim.eff_t == 0 )
 	{
@@ -8328,12 +8346,10 @@ bool add_unsaved( void )
 }
 
 
-/************************
+/*************************************************************
  SAVE_DATAzip
- ************************/
-int numcol = 16;
-
-void save_datazip( void )
+ *************************************************************/
+void gui::save_datazip( void )
 {
 	char **str, **tag, delimiter[ 10 ], misval[ 10 ], labprefix[ MAX_ELEM_LENGTH ];
 	const char *desc, *ext;
@@ -8396,9 +8412,9 @@ void save_datazip( void )
 	Tcl_LinkVar( interp, "dozip", ( char * ) &sim.dozip, TCL_LINK_BOOLEAN);
 	Tcl_LinkVar( interp, "typelab", ( char * ) &typelab, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "deli", ( char * ) &del, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "numcol", ( char * ) &numcol, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "num_col", ( char * ) &num_col, TCL_LINK_INT );
 
-	strcpyn( misval, nonavail, 10 );
+	lsd::strcpyn( misval, lsd::nonavail, 10 );
 	typelab = 3;
 	fr = 1;
 	del = 1;
@@ -8444,7 +8460,7 @@ void save_datazip( void )
 		cmd( "if { ! [ info exists labprefix ] } { set labprefix \"V\" }" );
 		cmd( "if { ! [ info exists headprefix ] } { set headprefix 0 }" );
 		cmd( "if { ! [ info exists delimiter ] } { set delimiter \"%s\" }", CSV_SEP );
-		cmd( "if { ! [ info exists misval ] } { set misval \"%s\" }", nonavail );
+		cmd( "if { ! [ info exists misval ] } { set misval \"%s\" }", lsd::nonavail );
 
 		cmd( "newtop .da.lab \"Data Save Options\" { set choice 2 } .da" );
 
@@ -8484,8 +8500,8 @@ void save_datazip( void )
 
 		cmd( "ttk::frame .da.lab.e" );
 		cmd( "ttk::label .da.lab.e.l -text \"Column width (chars)\"" );
-		cmd( "ttk::spinbox .da.lab.e.ecol -width 5 -from 10 -to 80 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 10 && $n <= 80 } { set numcol %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numcol; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-		cmd( "write_disabled .da.lab.e.ecol $numcol" );
+		cmd( "ttk::spinbox .da.lab.e.ecol -width 5 -from 10 -to 80 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 10 && $n <= 80 } { set num_col %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num_col; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
+		cmd( "write_disabled .da.lab.e.ecol $num_col" );
 		cmd( "pack .da.lab.e.l .da.lab.e.ecol" );
 
 		cmd( "ttk::frame .da.lab.gen" );
@@ -8507,7 +8523,7 @@ void save_datazip( void )
 		if ( choice == 2 )
 			goto end;
 
-		cmd( "set numcol [ .da.lab.e.ecol get ]" );
+		cmd( "set num_col [ .da.lab.e.ecol get ]" );
 		cmd( "set choice $headprefix" );
 
 		headprefix = choice;
@@ -8580,7 +8596,7 @@ void save_datazip( void )
 			strcpy( labprefix, "V" );
 	}
 
-	numcol = ( int ) std::max( 10, std::min( numcol, 80 ) );
+	num_col = ( int ) std::max( 10, std::min( num_col, 80 ) );
 
 	if ( fr == 1 )
 	{
@@ -8675,13 +8691,13 @@ void save_datazip( void )
 				else
 					snprintf( da_tmp, MAX_BUFF_SIZE, "%s_%s", str[ i ], tag[ i ] );
 
-				if ( strlen( da_tmp ) < ( unsigned ) numcol )
-					strcatn( da_tmp, strsp, MAX_BUFF_SIZE );
+				if ( strlen( da_tmp ) < ( unsigned ) num_col )
+					lsd::strcatn( da_tmp, strsp, MAX_BUFF_SIZE );
 
 				if ( i == 0 && headprefix == 1 )
-					da_tmp[ numcol - 1 ] = '\0';
+					da_tmp[ num_col - 1 ] = '\0';
 				else
-					da_tmp[ numcol ] = '\0';
+					da_tmp[ num_col ] = '\0';
 
 				if ( sim.dozip == 1 )
 					gzprintf( fsavez, "%s", da_tmp );
@@ -8743,15 +8759,15 @@ void save_datazip( void )
 			{
 				if ( j >= start[ i ] && j <= end[ i ] && ! std::isnan( data[ i ][ j - start[ i ] ] ) )		// write NaN as n/a
 				{
-					snprintf( da_tmp, MAX_BUFF_SIZE, "%.*G", ( int ) std::min( numcol - 6, SIG_DIG ), data[ i ][ j - start[ i ] ] );
-					strcatn( da_tmp, str0, MAX_BUFF_SIZE );
-					da_tmp[ numcol ] = '\0';
+					snprintf( da_tmp, MAX_BUFF_SIZE, "%.*G", ( int ) std::min( num_col - 6, SIG_DIG ), data[ i ][ j - start[ i ] ] );
+					lsd::strcatn( da_tmp, str0, MAX_BUFF_SIZE );
+					da_tmp[ num_col ] = '\0';
 				}
 				else
 				{
-					strcpyn( da_tmp, misval, MAX_BUFF_SIZE );
-					strcatn( da_tmp, strsp, MAX_BUFF_SIZE );
-					da_tmp[ numcol ] = '\0';
+					lsd::strcpyn( da_tmp, misval, MAX_BUFF_SIZE );
+					lsd::strcatn( da_tmp, strsp, MAX_BUFF_SIZE );
+					da_tmp[ num_col ] = '\0';
 				}
 
 				if ( sim.dozip == 1 )
@@ -8777,7 +8793,7 @@ void save_datazip( void )
 	cmd( "destroytop .da.lab" );
 	Tcl_UnlinkVar( interp, "typelab" );
 	Tcl_UnlinkVar( interp, "dozip" );
-	Tcl_UnlinkVar( interp, "numcol" );
+	Tcl_UnlinkVar( interp, "num_col" );
 	Tcl_UnlinkVar( interp, "deli" );
 	Tcl_UnlinkVar( interp, "fr" );
 
@@ -8798,10 +8814,10 @@ void save_datazip( void )
 }
 
 
-/************************
+/*************************************************************
  PLOG_SERIES
- ************************/
-void plog_series( void )
+ *************************************************************/
+void gui::plog_series( void )
 {
 	char **str, **tag;
 	double **data;
@@ -8874,14 +8890,14 @@ void plog_series( void )
 		if ( start[ 0 ] <= i && end[ 0 ] >= i && ! std::isnan( data[ 0 ][ i - start[ 0 ] ] ) )
 			plog_tag( "%d\t%.*g", "series", i, pdigits, data[ 0 ][ i - start[ 0 ] ] );
 		else
-			plog_tag( "%d\t%s", "series", i, nonavail );		// write NaN as n/a
+			plog_tag( "%d\t%s", "series", i, lsd::nonavail );	// write NaN as n/a
 
 		for ( j = 1; j < nv; ++j )
 		{
 			if ( start[ j ] <= i && end[ j ] >= i && ! std::isnan( data[ j ][ i - start[ j ] ] ) )
 				plog_tag( "\t%.*g", "series", pdigits, data[ j ][ i - start[ j ] ] );
 			else
-				plog_tag( "\t%s", "series", nonavail );		// write NaN as n/a
+				plog_tag( "\t%s", "series", lsd::nonavail );		// write NaN as n/a
 		}
 
 		plog( "\n" );
@@ -8902,11 +8918,11 @@ void plog_series( void )
 }
 
 
- /*****************************************
+/*************************************************************
  PLOT (curves)
  Effectively create the plot in canvas
- *****************************************/
-void plot( int type, int nv, double **data, const int *start, const int *end, const int *id, char **str, char **tag )
+ *************************************************************/
+void gui::plot( int type, int nv, double **data, const int *start, const int *end, const int *id, char **str, char **tag )
 {
 	int h, i, j, k, color, hsize, vsize, hbordsize, tbordsize, lheight, hcanvas, vcanvas, nLine, endCase, iniCase;
 	double x1, x2, *y, yVal, cminy, cmaxy, step;
@@ -9220,11 +9236,11 @@ void plot( int type, int nv, double **data, const int *start, const int *end, co
 }
 
 
- /*****************************************
+/*************************************************************
  PLOT (histogram)
  Effectively create the histogram in canvas
- *****************************************/
-void plot( int type, const int *start, const int *end, char **str, char **tag, bool norm )
+ *************************************************************/
+void gui::plot( int type, const int *start, const int *end, char **str, char **tag, bool norm )
 {
 	int i, x1, x2, y1, y2, color, hsize, vsize, hbordsize, tbordsize, lheight, hcanvas, vcanvas;
 	char txtLab[ 2 * MAX_ELEM_LENGTH ];
@@ -9375,11 +9391,11 @@ void plot( int type, const int *start, const int *end, char **str, char **tag, b
 }
 
 
-/*****************************
+/*************************************************************
  PLOT_CANVAS
  create the plot window & canvas
- *****************************/
-void plot_canvas( int type, int nv, const int *start, const int *end, char **str, char **tag )
+ *************************************************************/
+void gui::plot_canvas( int type, int nv, const int *start, const int *end, char **str, char **tag )
 {
 	bool tOk, y2on;
 	char *txtValue, *txtCase, *txtLine, txtLab[ 2 * MAX_ELEM_LENGTH ];
@@ -9677,11 +9693,11 @@ void plot_canvas( int type, int nv, const int *start, const int *end, char **str
 }
 
 
-/*******************************************************
+/*************************************************************
  CANVAS_BINDS
  create canvas context menu and common bindings
- *******************************************************/
-void canvas_binds( int n )
+ *************************************************************/
+void gui::canvas_binds( int n )
 {
 	cmd( "set p $daptab.tab%d.c.f.plots", n );		// plot canvas
 
@@ -9793,11 +9809,11 @@ void canvas_binds( int n )
 }
 
 
-/*******************************************************
+/*************************************************************
  ADD_DA_PLOT_TAB
  add new plot tab to data analysis notepad
- *******************************************************/
-void add_da_plot_tab( const char *w, int id_plot )
+ *************************************************************/
+void gui::add_da_plot_tab( const char *w, int id_plot )
 {
 	int n;
 
@@ -9868,11 +9884,11 @@ void add_da_plot_tab( const char *w, int id_plot )
 }
 
 
-/*******************************************************
+/*************************************************************
  UPDATE_MORE_TAB
  update the plots index tab, if it exists
- *******************************************************/
-void update_more_tab( bool adding )
+ *************************************************************/
+void gui::update_more_tab( bool adding )
 {
 	int i, j, k, n, cols;
 
@@ -9932,11 +9948,11 @@ void update_more_tab( bool adding )
 }
 
 
-/*******************************************************
+/*************************************************************
  MIN_HBORDER
  calculate horizontal borders required for legends
- *******************************************************/
-int min_hborder( int pdigits, double miny, double maxy )
+ *************************************************************/
+int gui::min_hborder( int pdigits, double miny, double maxy )
 {
 	int vticks, largest = 0;
 
@@ -9954,11 +9970,11 @@ int min_hborder( int pdigits, double miny, double maxy )
 }
 
 
-/*****************************
+/*************************************************************
  TCL_UPLOAD_SERIES
  data transfer routine from C to Tcl
- *****************************/
-int Tcl_upload_series( ClientData cd, Tcl_Interp *interp, int oc, Tcl_Obj *CONST ov[ ] )
+ *************************************************************/
+int gui::Tcl_upload_series( ClientData cd, Tcl_Interp *interp, int oc, Tcl_Obj *CONST ov[ ] )
 {
 	int size, *data;
 
@@ -9984,20 +10000,14 @@ int Tcl_upload_series( ClientData cd, Tcl_Interp *interp, int oc, Tcl_Obj *CONST
 }
 
 
-/***************************************************
-SHRINK_GNUFILE
-Prepare gnuplot file
-***************************************************/
-struct s
+/*************************************************************
+ STORE_GNUFILE
+ set of functions to read gnuplot output file and
+ store its contents into a data tree
+ *************************************************************/
+int gui::store_gnufile( struct node *c, int x4 )
 {
-	int x;
-	struct s *son;
-	struct s *next;
-} d;
-
-int store( struct s *c, int x4 )
-{
-	struct s *app, *prev;
+	struct node *app, *prev;
 
 	for ( prev = NULL, app = c; app != NULL; app = app->next )
 		if ( app->x == x4 )
@@ -10007,7 +10017,7 @@ int store( struct s *c, int x4 )
 
 	if ( app == NULL && prev != NULL )
 	{
-		prev->next = new struct s;
+		prev->next = new struct node;
 		app = prev->next;
 		app->x = x4;
 		app->next = NULL;
@@ -10025,24 +10035,24 @@ int store( struct s *c, int x4 )
 	return 0;
 }
 
-int store( struct s *c, int x3, int x4 )
+int gui::store_gnufile( struct node *c, int x3, int x4 )
 {
-	struct s *app, *prev;
+	struct node *app, *prev;
 
 	for ( prev = NULL, app = c; app != NULL; app = app->next )
 		if ( app->x == x3 )
-			return store( app->son, x4 );
+			return store_gnufile( app->son, x4 );
 		else
 			prev = app;
 
 	if ( app == NULL && prev != NULL )
 	{
-		prev->next = new struct s;
+		prev->next = new struct node;
 		app = prev->next;
 		app->x = x3;
 		app->next = NULL;
 
-		app->son = new struct s;
+		app->son = new struct node;
 		app = app->son;
 		app->x = x4;
 		app->next = NULL;
@@ -10060,29 +10070,29 @@ int store( struct s *c, int x3, int x4 )
 	return 0;
 }
 
-int store( struct s *c, int x2, int x3, int x4 )
+int gui::store_gnufile( struct node *c, int x2, int x3, int x4 )
 {
-	struct s *app, *prev;
+	struct node *app, *prev;
 
 	for ( prev = NULL, app = c; app != NULL; app = app->next )
 		if ( app->x == x2 )
-			return store( app->son, x3, x4 );
+			return store_gnufile( app->son, x3, x4 );
 		else
 			prev = app;
 
 	if ( app == NULL && prev != NULL )
 	{
-		prev->next = new struct s;
+		prev->next = new struct node;
 		app = prev->next;
 		app->x = x2;
 		app->next = NULL;
 
-		app->son = new struct s;
+		app->son = new struct node;
 		app = app->son;
 		app->x = x3;
 		app->next = NULL;
 
-		app->son = new struct s;
+		app->son = new struct node;
 		app = app->son;
 		app->x = x4;
 		app->next = NULL;
@@ -10100,34 +10110,34 @@ int store( struct s *c, int x2, int x3, int x4 )
 	return 0;
 }
 
-int store( int x1, int x2, int x3, int x4 )
+int gui::store_gnufile( int x1, int x2, int x3, int x4 )
 {
-	struct s *app, *prev;
+	struct node *app, *prev;
 
-	for ( prev = NULL, app = &d; app != NULL; app = app->next )
+	for ( prev = NULL, app = & gplot_tree; app != NULL; app = app->next )
 		if ( app->x == x1 )
-			return store( app->son, x2, x3, x4 );
+			return store_gnufile( app->son, x2, x3, x4 );
 		else
 			prev = app;
 
 	if ( app == NULL && prev != NULL )
 	{
-		prev->next = new struct s;
+		prev->next = new struct node;
 		app = prev->next;
 		app->x = x1;
 		app->next = NULL;
 
-		app->son = new struct s;
+		app->son = new struct node;
 		app = app->son;
 		app->x = x2;
 		app->next = NULL;
 
-		app->son = new struct s;
+		app->son = new struct node;
 		app = app->son;
 		app->x = x3;
 		app->next = NULL;
 
-		app->son = new struct s;
+		app->son = new struct node;
 		app = app->son;
 		app->x = x4;
 		app->next = NULL;
@@ -10145,31 +10155,41 @@ int store( int x1, int x2, int x3, int x4 )
 	return 0;
 }
 
-void free_storage( struct s *c )
+
+/*************************************************************
+ FREE_STORAGE
+ delete gnuplot file storage tree
+ *************************************************************/
+void gui::free_gnufile_storage( struct node *n )
 {
-	if ( c->next != NULL )
-		free_storage( c->next );
+	if ( n->next != NULL )
+		free_gnufile_storage( n->next );
 
-	if ( c->son != NULL )
-		free_storage( c->son );
+	if ( n->son != NULL )
+		free_gnufile_storage( n->son );
 
-	delete c;
+	delete n;
 }
 
-int shrink_gnufile( void )
+
+/*************************************************************
+ SHRINK_GNUFILE
+ Prepare gnuplot file
+ *************************************************************/
+int gui::shrink_gnufile( void )
 {
 	char str[ 2 * MAX_ELEM_LENGTH ], str1[ 2 * MAX_ELEM_LENGTH ], str2[ 2 * MAX_ELEM_LENGTH ], str3[ 2 * MAX_ELEM_LENGTH ], str4[ 2 * MAX_ELEM_LENGTH ];
 
 	int x1, x2, x3, x4, i, j, h = 0, count = 0;
 	FILE *f, *f1;
 
-	d.son = NULL;
-	d.next = NULL;
-	d.x = -1;
+	gplot_tree.son = NULL;
+	gplot_tree.next = NULL;
+	gplot_tree.x = -1;
 
 	// wait some time for the file to be ready in macOS
 	while ( ( f = fopen( "plot.file", "r" ) ) == NULL && count++ < 10 )
-		msleep( 1000 );
+		lsd::msleep( 1000 );
 
 	if ( f == NULL )
 	{
@@ -10222,7 +10242,7 @@ int shrink_gnufile( void )
 			sscanf( str4, "[ expr { $cmy * %d / 1000 } ]", &x4 );
 
 			// if new data are stored, then add it to the cleaned file
-			if ( store( x1, x2, x3, x4 ) == 1 )
+			if ( store_gnufile( x1, x2, x3, x4 ) == 1 )
 				fprintf( f1, "%s", str );
 		}
 		else
@@ -10232,10 +10252,10 @@ int shrink_gnufile( void )
 	fclose( f );
 	fclose( f1 );
 
-	if ( d.next != NULL )
-		free_storage( d.next );
-	if ( d.son != NULL )
-		free_storage( d.son );
+	if ( gplot_tree.next != NULL )
+		free_gnufile_storage( gplot_tree.next );
+	if ( gplot_tree.son != NULL )
+		free_gnufile_storage( gplot_tree.son );
 
 	return 0;
 }

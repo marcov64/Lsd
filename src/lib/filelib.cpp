@@ -13,34 +13,36 @@
  *************************************************************/
 
 /*************************************************************
-FILELIB.CPP
-Contains the basic functions used to access files in DLL or
-no-window executables. The remaining file-oriented functions
-are stored in FILE.CPP.
+ FILELIB.CPP
+ Contains the basic functions used to access files in DLL or
+ no-window executables. The remaining file-oriented functions
+ are stored in FILE.CPP.
 
-The main methods of object contained in this file are:
+ The main methods of object contained in this file are:
 
-- void object::load_struct( FILE *f )
-Initialize a model by creating one as defined in the data file.
-The model, after this stage, has only one instance for each
-object type and variables and parameters are not configured.
+ - void object::load_struct( FILE *f )
+ Initialize a model by creating one as defined in the data file.
+ The model, after this stage, has only one instance for each
+ object type and variables and parameters are not configured.
 
-- int object::load_insts( const char *file_name )
-It loads from the file named as specified the instance data
-for the objects. It is made in specular way in respect of
-save_insts.
-*************************************************************/
+ - int object::load_insts( const char *file_name )
+ It loads from the file named as specified the instance data
+ for the objects. It is made in specular way in respect of
+ save_insts.
+ *************************************************************/
 
 #include "lib/libLSD.h"				// LSD library classes
 
 
-/*****************************************************************************
-LOAD_CONFIGURATION
-	Load current defined configuration from file (xml, gzip xml or legacy text)
-	If quick is != 0, just the structure and the parameters are retrieved
-	Returns: 0: load ok, 1,2,3,4,...: load failure
-******************************************************************************/
-int simulation::load_configuration( bool reload, std::string *warnings, int quick )
+/*************************************************************
+ LOAD_CONFIGURATION
+ Load current defined configuration from file (xml, gzip xml
+ or legacy text)
+ If quick is != 0, just the structure and the parameters are
+ retrieved
+ Returns: 0: load ok, 1,2,3,4,...: load failure
+ *************************************************************/
+int lsd::simulation::load_configuration( bool reload, std::string *warnings, int quick )
 {
 	char *buf = NULL, buf1[ MAX_FILE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ];
 	int i, j, load = 0;
@@ -197,13 +199,13 @@ endLoad:
 }
 
 
-/*****************************************************************************
-UNLOAD_CONFIGURATION
-	Unload the current configuration
-	If full is false, just the model data is unloaded
-	Returns: pointer to root object
-******************************************************************************/
-void simulation::unload_configuration( bool full )
+/*************************************************************
+ UNLOAD_CONFIGURATION
+ Unload the current configuration
+ If full is false, just the model data is unloaded
+ Returns: pointer to root object
+ *************************************************************/
+void lsd::simulation::unload_configuration( bool full )
 {
 	empty_blueprint( );							// remove current model structure
 	root->delete_obj( );
@@ -243,14 +245,14 @@ void simulation::unload_configuration( bool full )
 }
 
 
-/****************************************************
-OBJECT::LOAD_XML_STRUCT
-	Load the object structure tree under this object
-	from an xml object node
-	If quick is true, just the structure and the
-	parameters are retrieved, no descriptions
-****************************************************/
-int object::load_xml_struct( xml_node &n, bool quick )
+/*************************************************************
+ OBJECT::LOAD_XML_STRUCT
+ Load the object structure tree under this object
+ from an xml object node
+ If quick is true, just the structure and the
+ parameters are retrieved, no descriptions
+ *************************************************************/
+int lsd::object::load_xml_struct( xml_node &n, bool quick )
 {
 	bool obs, integer;
 	const char *str, *desc, *init;
@@ -364,12 +366,12 @@ int object::load_xml_struct( xml_node &n, bool quick )
 }
 
 
-/****************************************************
-OBJECT::LOAD_XML_INSTS
-	Load the object instances of tree under this
-	object from an xml object node
-****************************************************/
-int object::load_xml_insts( xml_node &n, n_mapT &node_map, std::set < int > &warning )
+/*************************************************************
+ OBJECT::LOAD_XML_INSTS
+ Load the object instances of tree under this
+ object from an xml object node
+ *************************************************************/
+int lsd::object::load_xml_insts( xml_node &n, n_mapT &node_map, std::set < int > &warning )
 {
 	int i;
 	double d;
@@ -403,7 +405,7 @@ int object::load_xml_insts( xml_node &n, n_mapT &node_map, std::set < int > &war
 		cur->to_compute = to_compute;
 		cur->replicate( m );
 
-		for ( ; go_brother( cur ) != NULL; cur = cur->next );// go next group
+		for ( ; BROTHER( cur ) != NULL; cur = cur->next );// go next group
 	}
 
 	if ( l < ( long ) num.size( ) || nd != reduce( num.begin( ), num.end( ) ) )
@@ -616,14 +618,15 @@ int object::load_xml_insts( xml_node &n, n_mapT &node_map, std::set < int > &war
 }
 
 
-/*****************************************************************************
-SAVE_XML_CONFIGURATION
-	Save current defined configuration (adding tag index if appropriate) to
-	gzip-compressed xml file
-	If quick is true, just the structure and the parameters are saved
-	Returns: true: save ok, false: save failure
-******************************************************************************/
-bool simulation::save_xml_configuration( int findex, const char *dest_path, bool quick, const char mod_nam[ ], const char mod_ver[ ], const char mod_dat[ ], const char eq_file[ ], const char eq_txt[ ] )
+/*************************************************************
+ SAVE_XML_CONFIGURATION
+ Save current defined configuration (adding tag index if
+ appropriate) to gzip-compressed xml file
+ If quick is true, just the structure and the parameters are
+ saved
+ Returns: true: save ok, false: save failure
+ *************************************************************/
+bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path, bool quick, const char mod_nam[ ], const char mod_ver[ ], const char mod_dat[ ], const char eq_file[ ], const char eq_txt[ ] )
 {
 	bool saved;
 	int delta, indexDig, save_len;
@@ -794,14 +797,14 @@ bool simulation::save_xml_configuration( int findex, const char *dest_path, bool
 }
 
 
-/****************************************************
-OBJECT::SAVE_XML_STRUCT
-	Save the object structure tree under this object
-	to an xml object
-	If quick is true, just the structure and the
-	parameters are saved, no descriptions
-****************************************************/
-void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
+/*************************************************************
+ OBJECT::SAVE_XML_STRUCT
+ Save the object structure tree under this object
+ to an xml object
+ If quick is true, just the structure and the
+ parameters are saved, no descriptions
+ *************************************************************/
+void lsd::object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 {
 	bool init, nodes, noWht;
 	char *str;
@@ -827,10 +830,10 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 		if ( cur != this )
 			data += ",";
 
-		skip_next_obj( cur, &count );
+		next_count( cur, &count );
 		data += std::to_string( count );
 
-		for ( ; go_brother( cur ) != NULL; cur = cur->next )
+		for ( ; BROTHER( cur ) != NULL; cur = cur->next )
 			if ( cur->node != NULL )	// check if object contains network nodes
 				nodes = true;
 	}
@@ -1088,14 +1091,16 @@ void object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 }
 
 
-/*****************************************************************************
-LOAD_TXT_CONFIGURATION (LEGACY)
-	Load current defined configuration from file (legacy text only)
-	If quick is != 0, just the structure and the parameters are retrieved
-	Returns: 0: load ok, 1,2,3,4,...: load failure
-	Must be used after/from load_configurations()
-******************************************************************************/
-int simulation::load_txt_configuration( bool reload, int quick )
+/*************************************************************
+ LOAD_TXT_CONFIGURATION (LEGACY)
+ Load current defined configuration from file (legacy text
+ only)
+ If quick is != 0, just the structure and the parameters are
+ retrieved
+ Returns: 0: load ok, 1,2,3,4,...: load failure
+ Must be used after/from load_configurations()
+ *************************************************************/
+int lsd::simulation::load_txt_configuration( bool reload, int quick )
 {
 	char msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
 	int i, j, load = 0;
@@ -1297,12 +1302,12 @@ endLoad:
 }
 
 
-/****************************************************
-OBJECT::LOAD_TXT_STRUCT (LEGACY)
-	Load the object structure tree under this object
-	from a LEGACY text file
-****************************************************/
-bool object::load_txt_struct( FILE *f )
+/*************************************************************
+ OBJECT::LOAD_TXT_STRUCT (LEGACY)
+ Load the object structure tree under this object
+ from a LEGACY text file
+ *************************************************************/
+bool lsd::object::load_txt_struct( FILE *f )
 {
 	int i = 0;
 	char ch[ MAX_ELEM_LENGTH ];
@@ -1370,12 +1375,12 @@ bool object::load_txt_struct( FILE *f )
 }
 
 
-/****************************************************
-OBJECT::LOAD_TXT_INSTS (LEGACY)
-	Load the object instances of tree under this
-	object from a LEGACY text file
-****************************************************/
-bool object::load_txt_insts( const char *file_name, FILE *f )
+/*************************************************************
+ OBJECT::LOAD_TXT_INSTS (LEGACY)
+ Load the object instances of tree under this
+ object from a LEGACY text file
+ *************************************************************/
+bool lsd::object::load_txt_insts( const char *file_name, FILE *f )
 {
 	char str[ MAX_ELEM_LENGTH ], ch1, ch2, ch3, ch4;
 	int num, i;
@@ -1412,7 +1417,7 @@ bool object::load_txt_insts( const char *file_name, FILE *f )
 		cur->to_compute = to_compute;
 		cur->replicate( num );
 
-		for ( ; go_brother( cur ) != NULL; cur = cur->next );
+		for ( ; BROTHER( cur ) != NULL; cur = cur->next );
 	}
 
 	for ( cv = v; cv != NULL; cv = cv->next )
@@ -1506,12 +1511,12 @@ bool object::load_txt_insts( const char *file_name, FILE *f )
 }
 
 
-/****************************************************
-LOAD_TXT_DESCRIPTION (LEGACY)
-	Load the descriptions of elements of tree under
-	this object from a LEGACY text file
-****************************************************/
-bool simulation::load_txt_description( const char *d, FILE *f )
+/*************************************************************
+ LOAD_TXT_DESCRIPTION (LEGACY)
+ Load the descriptions of elements of tree under
+ this object from a LEGACY text file
+ *************************************************************/
+bool lsd::simulation::load_txt_description( const char *d, FILE *f )
 {
 	int j, type, ctype;
 	char label[ MAX_ELEM_LENGTH ], text[ 10 * MAX_LINE_SIZE + 1 ], init[ 10 * MAX_LINE_SIZE + 1 ], str[ 10 * MAX_LINE_SIZE + 1 ];
@@ -1583,10 +1588,10 @@ bool simulation::load_txt_description( const char *d, FILE *f )
 }
 
 
-/****************************************************
-SEARCH_TXT_DATA (LEGACY)
-****************************************************/
-FILE *object::search_txt_data( const char *name, const char *init, const char *str )
+/*************************************************************
+ SEARCH_TXT_DATA (LEGACY)
+ *************************************************************/
+FILE *lsd::object::search_txt_data( const char *name, const char *init, const char *str )
 {
 	FILE *f;
 	char got[ MAX_LINE_SIZE ];
@@ -1614,14 +1619,15 @@ FILE *object::search_txt_data( const char *name, const char *init, const char *s
 }
 
 
-/*****************************************************************************
-SAVE_TXT_CONFIGURATION (LEGACY)
-	Save current defined configuration (adding tag index if appropriate) to
-	gzip-compressed xml file
-	If quick is true, just the structure and the parameters are saved
-	Returns: true: save ok, false: save failure
-******************************************************************************/
-bool simulation::save_txt_configuration( const char *dest_path, const char *rname, const char *ext, const char eq_file[ ], const char eq_txt[ ] )
+/*************************************************************
+ SAVE_TXT_CONFIGURATION (LEGACY)
+ Save current defined configuration (adding tag index if
+ appropriate) to gzip-compressed xml file
+ If quick is true, just the structure and the parameters are
+ saved
+ Returns: true: save ok, false: save failure
+ *************************************************************/
+bool lsd::simulation::save_txt_configuration( const char *dest_path, const char *rname, const char *ext, const char eq_file[ ], const char eq_txt[ ] )
 {
 	bool saved = false;
 	char *save_file, *bak_file;
@@ -1700,12 +1706,12 @@ bool simulation::save_txt_configuration( const char *dest_path, const char *rnam
 }
 
 
-/****************************************************
-OBJECT::SAVE_TXT_STRUCT (LEGACY)
-	Save the object structure tree under this object
-	to a LEGACY text file
-****************************************************/
-void object::save_txt_struct( FILE *f, const char *tab )
+/*************************************************************
+ OBJECT::SAVE_TXT_STRUCT (LEGACY)
+ Save the object structure tree under this object
+ to a LEGACY text file
+ *************************************************************/
+void lsd::object::save_txt_struct( FILE *f, const char *tab )
 {
 	char tab1[ MAX_ELEM_LENGTH ];
 	bridge *cb;
@@ -1745,12 +1751,12 @@ void object::save_txt_struct( FILE *f, const char *tab )
 }
 
 
-/****************************************************
-OBJECT::SAVE_TXT_INSTS (LEGACY)
-	Save the object instances of tree under this
-	object to a LEGACY text file
-****************************************************/
-void object::save_txt_insts( FILE *f )
+/*************************************************************
+ OBJECT::SAVE_TXT_INSTS (LEGACY)
+ Save the object instances of tree under this
+ object to a LEGACY text file
+ *************************************************************/
+void lsd::object::save_txt_insts( FILE *f )
 {
 	int i, count;
 	char ch1, ch2, ch3, ch4;
@@ -1767,9 +1773,9 @@ void object::save_txt_insts( FILE *f )
 
 	for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
 	{
-		skip_next_obj( cur, &count );
+		next_count( cur, &count );
 		fprintf( f, "\t%d", count );
-		for ( ; go_brother( cur ) != NULL; cur = cur->next );
+		for ( ; BROTHER( cur ) != NULL; cur = cur->next );
 	}
 	fprintf( f, "\n" );
 
@@ -1847,12 +1853,12 @@ void object::save_txt_insts( FILE *f )
 }
 
 
-/****************************************************
-SAVE_TXT_DESCRIPTION (LEGACY)
-	save the descriptions of elements of tree under
-	this object to a LEGACY text file
-****************************************************/
-void object::save_txt_description( FILE *f )
+/*************************************************************
+ SAVE_TXT_DESCRIPTION (LEGACY)
+ save the descriptions of elements of tree under
+ this object to a LEGACY text file
+ *************************************************************/
+void lsd::object::save_txt_description( FILE *f )
 {
 	bridge *cb;
 	variable *cv;
@@ -1881,12 +1887,12 @@ void object::save_txt_description( FILE *f )
 }
 
 
-/*********************************
-SAVE_SINGLE
-	Save the value of a single
-	element to file during run
-*********************************/
-void variable::save_single( void )
+/*************************************************************
+ SAVE_SINGLE
+ Save the value of a single
+ element to file during run
+ *************************************************************/
+void lsd::variable::save_single( void )
 {
 	char fn[ MAX_PATH_LENGTH ];
 	int i;
@@ -1914,12 +1920,11 @@ void variable::save_single( void )
 }
 
 
-/*****************************************************************************
-SENSITIVITY CONSTRUCTOR
-Add or update sensitivity settings for a model element
-******************************************************************************/
-sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, int _lag,
-						  bool _integer, int _num_val, d_vecT *_val )
+/*************************************************************
+ SENSITIVITY CONSTRUCTOR
+ Add or update sensitivity settings for a model element
+ *************************************************************/
+lsd::sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, int _lag, bool _integer, int _num_val, d_vecT *_val )
 {
 	int i;
 	sensitivity *cs;
@@ -1953,11 +1958,11 @@ sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, int _la
 }
 
 
-/*****************************************************************************
-SENSITIVITY DESTRUCTOR
-Add or update sensitivity settings for a model element
-******************************************************************************/
-sensitivity::~sensitivity( void )
+/*************************************************************
+ SENSITIVITY DESTRUCTOR
+ Add or update sensitivity settings for a model element
+ *************************************************************/
+lsd::sensitivity::~sensitivity( void )
 {
 	sensitivity *cs, *ps;
 
@@ -1977,11 +1982,11 @@ sensitivity::~sensitivity( void )
 }
 
 
-/*****************************************************************************
-EMPTY_SENSITIVITY
-Deallocate sensitivity analysis memory
-******************************************************************************/
-void simulation::empty_sensitivity( sensitivity *cs )
+/*************************************************************
+ EMPTY_SENSITIVITY
+ Deallocate sensitivity analysis memory
+ *************************************************************/
+void lsd::simulation::empty_sensitivity( sensitivity *cs )
 {
 	if ( cs == NULL )
 	{
@@ -1999,12 +2004,11 @@ void simulation::empty_sensitivity( sensitivity *cs )
 }
 
 
-/***************************************************
-RESULT::CONSTRUCTOR
-	Open the appropriate file for saving the results
-***************************************************/
-result::result( const char *fname, const char *fmode, simulation *_sim,
-				bool _dozip, bool _docsv )
+/*************************************************************
+ RESULT::CONSTRUCTOR
+ Open the appropriate file for saving the results
+ *************************************************************/
+lsd::result::result( const char *fname, const char *fmode, simulation *_sim, bool _dozip, bool _docsv )
 {
 	sim = _sim;
 	docsv = _docsv;
@@ -2017,11 +2021,11 @@ result::result( const char *fname, const char *fmode, simulation *_sim,
 }
 
 
-/***************************************************
-RESULT::DESTRUCTOR
-	Close the results file
-***************************************************/
-result::~result( void )
+/*************************************************************
+ RESULT::DESTRUCTOR
+ Close the results file
+ *************************************************************/
+lsd::result::~result( void )
 {
 	if ( dozip )
 		gzclose( fz );
@@ -2030,11 +2034,11 @@ result::~result( void )
 }
 
 
-/***************************************************
-RESULT::TITLE
-	Creates header in results file
-***************************************************/
-void result::title( object *root, int flag )
+/*************************************************************
+ RESULT::TITLE
+ Creates header in results file
+ *************************************************************/
+void lsd::result::title( object *root, int flag )
 {
 	firstCol = true;
 
@@ -2047,11 +2051,11 @@ void result::title( object *root, int flag )
 }
 
 
-/***************************************************
-RESULT::TITLE_RECURSIVE
-	Recursively add elements to header of results file
-***************************************************/
-void result::title_recursive( object *r, int header )
+/*************************************************************
+ RESULT::TITLE_RECURSIVE
+ Recursively add elements to header of results file
+ *************************************************************/
+void lsd::result::title_recursive( object *r, int header )
 {
 	bool single = false;
 	bridge *cb;
@@ -2143,11 +2147,11 @@ void result::title_recursive( object *r, int header )
 }
 
 
-/***************************************************
-RESULT::DATA
-	Adds data to results file in the specified period
-***************************************************/
-void result::data( object *root, int initstep, int endtstep )
+/*************************************************************
+ RESULT::DATA
+ Adds data to results file in the specified period
+ *************************************************************/
+void lsd::result::data( object *root, int initstep, int endtstep )
 {
 	// don't include initialization (t=0) in .csv format
 	initstep = ( docsv && initstep < 1 ) ? 1 : initstep;
@@ -2168,11 +2172,11 @@ void result::data( object *root, int initstep, int endtstep )
 }
 
 
-/***************************************************
-RESULT::DATA_RECURSIVE
-	Recursively add data to results file
-***************************************************/
-void result::data_recursive( object *r, int i )
+/*************************************************************
+ RESULT::DATA_RECURSIVE
+ Recursively add data to results file
+ *************************************************************/
+void lsd::result::data_recursive( object *r, int i )
 {
 	bridge *cb;
 	object *cur;

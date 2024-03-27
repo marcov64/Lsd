@@ -13,50 +13,56 @@
  *************************************************************/
 
 /*************************************************************
-EDIT_DAT.CPP
-Called by INTERF.CPP shows all the lagged variables and parameters
-to be initialized for one object. Prepares the spread-sheet window
-and the bindings.
+ EDIT_DAT.CPP
+ Called by INTERF.CPP shows all the lagged variables and
+ parameters to be initialized for one object. Prepares the
+ spread-sheet window and the bindings.
 
-This interface shows a maximum of 100 columns, though it allows to set all
-the initial values of the model by using the setall options. In case
-you need to individually observe and edit the data of objects not shown
-by this function, use the Data Browse option.
+ This interface shows a maximum of 100 columns, though it
+ allows to set all the initial values of the model by using
+ the setall options. In case you need to individually observe
+ and edit the data of objects not shown by this function,
+ use the Data Browse option.
 
-The main functions contained in this file are:
+ The main functions contained in this file are:
 
-- void object::edit_data( const char *lab )
-Initialize the window, calls search_title and link_data, then wait for a
-message from user.
+ - void lsd::object::edit_data( const char *lab )
+ Initialize the window, calls search_title and link_data,
+ then wait for a message from user.
 
-- void object::search_title( const char *tag, int *i, const char *lab, int *cols )
-It is a recursive routine. Scan the model structure looking for the object
-of type as r and prepare the relative tag for any object. The tag is then
-used by set_title to be printed as columns headers
+ - void lsd::object::search_title( const char *tag, int *i, const char *lab, int *cols )
+ It is a recursive routine. Scan the model structure looking
+ for the object of type as r and prepare the relative tag
+ for any object. The tag is then used by set_title to be
+ printed as columns headers
 
-- void object::set_title( const char *lab, const char *tag, int *cols );
-prints the column headers
+ - void lsd::object::set_title( const char *lab, const char *tag, int *cols );
+ prints the column headers
 
-- void object::link_cells( const char *lab );
-prints the line headers and create the cells, each linked to one variable value
-of the model
+ - void lsd::object::link_cells( const char *lab );
+ prints the line headers and create the cells, each linked
+ to one variable value of the model
 
-- void object::unlink_cells( const char *tag, const char *lab );
-called before exiting, removes all the links between tcl variables and model
-values, and ensure variable constraints (max/min/int) are applied
-*************************************************************/
+ - void lsd::object::unlink_cells( const char *tag, const char *lab );
+ called before exiting, removes all the links between tcl
+ variables and model values, and ensure variable constraints
+ (max/min/int) are applied
+ *************************************************************/
 
 #include "LSD.h"
 
-bool iniShowOnce = false;		// prevent repeating warning on # of columns
-bool overflow;					// indicate table overflow (>MAX_COLS or >MAX_CELS)
-int maxCols;					// maximum number of columns to show (prevent crash)
+namespace lsd
+{
+	bool iniShowOnce = false;	// prevent repeating warning on # of columns
+	bool overflow;				// indicate table overflow (>MAX_COLS or >MAX_CELS)
+	int maxCols;				// maximum number of columns to show (prevent crash)
+}
 
 
-/****************************************************
-EDIT_DATA
-****************************************************/
-void object::edit_data( const char *lab )
+/*************************************************************
+ EDIT_DATA
+ *************************************************************/
+void lsd::object::edit_data( const char *lab )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ], ch1[ MAX_ELEM_LENGTH ];
 	int i, lag, cols, rows;
@@ -92,11 +98,11 @@ void object::edit_data( const char *lab )
 	// limit the total number of cells because of Tcl/Tk bug
 	maxCols = std::max( std::min( MAX_COLS, MAX_CELS / rows ), 1 );
 
-	Tcl_LinkVar( interp, "lag", ( char * ) &lag, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "lag", ( char * ) &lag, TCL_LINK_INT );
 
 	cmd( "set cwidth 11" );
 
-	cmd( "newtop .inid \"%s%s - LSD Initial Values Editor\" { set choice 1 }", unsaved_change( ) ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
+	cmd( "newtop .inid \"%s%s - LSD Initial Values Editor\" { set choice 1 }", gui::unsaved_change( ) ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
 
 	cmd( "ttk::frame .inid.t" );		// top frame to pack
 
@@ -206,15 +212,15 @@ void object::edit_data( const char *lab )
 	cmd( "if { [ info exists lastFocus ] && $lastFocus != \"\" && [ winfo exists $lastFocus ] } { focus $lastFocus; $lastFocus selection range 0 end; unset lastFocus }" );
 
 	// editor main command loop
-	choice = 0;
-	while ( choice == 0 )
+	gui::choice = 0;
+	while ( gui::choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	save_cells( lab );
 
-	if ( choice == 2 )
+	if ( gui::choice == 2 )
 	{
-		if ( get_str( "var_name", ch, 2 * MAX_ELEM_LENGTH ) != NULL )
+		if ( gui::get_str( "var_name", ch, 2 * MAX_ELEM_LENGTH ) != NULL )
 		{
 			first->set_all( ch, lag, ".inid" );
 			show_cells( lab );
@@ -226,14 +232,14 @@ void object::edit_data( const char *lab )
 	cmd( "destroytop .inid" );
 
 	unlink_cells( lab );
-	Tcl_UnlinkVar( interp, "lag");
+	Tcl_UnlinkVar( gui::interp, "lag");
 }
 
 
-/****************************************************
-SEARCH_TITLE
-****************************************************/
-void object::search_title( const char *tag, int *i, const char *lab, int *cols )
+/*************************************************************
+ SEARCH_TITLE
+ *************************************************************/
+void lsd::object::search_title( const char *tag, int *i, const char *lab, int *cols )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ];
 	int multi, counter;
@@ -255,7 +261,7 @@ void object::search_title( const char *tag, int *i, const char *lab, int *cols )
 		else
 			multi = 0;
 
-		for ( cur = c; cur != NULL; ++counter, cur = go_brother( cur ) )
+		for ( cur = c; cur != NULL; ++counter, cur = BROTHER( cur ) )
 		{
 			if ( multi == 1 )
 				if ( strlen( tag ) != 0 )
@@ -273,10 +279,10 @@ void object::search_title( const char *tag, int *i, const char *lab, int *cols )
 }
 
 
-/****************************************************
-SET_TITLE
-****************************************************/
-void object::set_title( const char *lab, const char *tag, int *cols )
+/*************************************************************
+ SET_TITLE
+ *************************************************************/
+void lsd::object::set_title( const char *lab, const char *tag, int *cols )
 {
 	char ch1[ MAX_ELEM_LENGTH ], ch2[ MAX_ELEM_LENGTH ];
 
@@ -305,10 +311,10 @@ void object::set_title( const char *lab, const char *tag, int *cols )
 }
 
 
-/****************************************************
-LINK_CELLS
-****************************************************/
-void object::link_cells( const char *lab )
+/*************************************************************
+ LINK_CELLS
+ *************************************************************/
+void lsd::object::link_cells( const char *lab )
 {
 	int i, j, k;
 	bool lastFocus = false;
@@ -336,7 +342,7 @@ void object::link_cells( const char *lab )
 			cmd( "mouse_wheel $w.t%s", cv1->label );
 
 			cmd( "set tit $w.tit_t%s", cv1->label );
-			set_ttip_descr( get_str( "tit" ), cv1->label, -1, false );
+			gui::set_ttip_descr( gui::get_str( "tit" ), cv1->label, -1, false );
 			cmd( "tooltip::tooltip $w.typ_t%s \"Parameter '%s'\nin object '%s'\"", cv1->label, cv1->label, cur1->label );
 			cmd( "tooltip::tooltip $w.t%s \"Set all or a subset of\n'%s' instances\"", cv1->label, cv1->label );
 		}
@@ -357,7 +363,7 @@ void object::link_cells( const char *lab )
 				cmd( "mouse_wheel $w.t%s_%d", cv1->label, j );
 
 				cmd( "set tit $w.tit_t%s_%d", cv1->label, j );
-				set_ttip_descr( get_str( "tit" ), cv1->label, -1, false );
+				gui::set_ttip_descr( gui::get_str( "tit" ), cv1->label, -1, false );
 				cmd( "tooltip::tooltip $w.typ_t%s_%d \"Variable '%s' (lag %d)\nin object '%s'\"", cv1->label, j, cv1->label, j + 1, cur1->label );
 				cmd( "tooltip::tooltip $w.t%s_%d \"Set all or a subset of\n'%s' instances\"", cv1->label, j, cv1->label );
 			}
@@ -371,7 +377,7 @@ void object::link_cells( const char *lab )
 			if ( cv->param == 1 )
 			{
 				snprintf( ch1, MAX_ELEM_LENGTH, "p%s_%d", cv->label, i );
-				Tcl_LinkVar( interp, ch1, ( char * ) &( cv->val[ 0 ] ), TCL_LINK_DOUBLE );
+				Tcl_LinkVar( gui::interp, ch1, ( char * ) &( cv->val[ 0 ] ), TCL_LINK_DOUBLE );
 
 				cmd( "ttk::entry $w.c%d_v%sp -width $cwidth -justify center -validate focusout -validatecommand { set n %%P; if [ string is double -strict $n ] { set p%s_%d $n; return 1 } { %%W delete 0 end; %%W insert 0 ${p%s_%d}; return 0 } } -invalidcommand { bell }", i, cv->label, cv->label, i, cv->label, i, cv->label, i );
 				cmd( "$w.c%d_v%sp insert 0 [ formatfloat ${p%s_%d} ]", i, cv->label, cv->label, i );
@@ -413,7 +419,7 @@ void object::link_cells( const char *lab )
 				if ( j < cv->num_lag )
 				{
 					snprintf( ch1, MAX_ELEM_LENGTH, "v%s_%d_%d", cv->label, i, j );
-					Tcl_LinkVar( interp, ch1, ( char * ) &( cv->val[ j ] ), TCL_LINK_DOUBLE );
+					Tcl_LinkVar( gui::interp, ch1, ( char * ) &( cv->val[ j ] ), TCL_LINK_DOUBLE );
 
 					cmd( "ttk::entry $w.c%d_v%s_%d -width $cwidth -justify center -validate focusout -validatecommand { set n %%P; if [ string is double -strict $n ] { set v%s_%d_%d $n; return 1 } { %%W delete 0 end; %%W insert 0 ${v%s_%d_%d}; return 0 } } -invalidcommand { bell }", i, cv->label, j, cv->label, i, j, cv->label, i, j, cv->label, i, j );
 					cmd( "$w.c%d_v%s_%d insert 0 [ formatfloat ${v%s_%d_%d} ]", i, cv->label, j, cv->label, i, j );
@@ -486,10 +492,10 @@ void object::link_cells( const char *lab )
 }
 
 
-/****************************************************
-SHOW_CELLS
-****************************************************/
-void object::show_cells( const char *lab )
+/*************************************************************
+ SHOW_CELLS
+ *************************************************************/
+void lsd::object::show_cells( const char *lab )
 {
 	int j, i;
 	object *cur;
@@ -513,10 +519,10 @@ void object::show_cells( const char *lab )
 }
 
 
-/****************************************************
-SAVE_CELLS
-****************************************************/
-void object::save_cells( const char *lab )
+/*************************************************************
+ SAVE_CELLS
+ *************************************************************/
+void lsd::object::save_cells( const char *lab )
 {
 	int j, i;
 	object *cur;
@@ -534,10 +540,10 @@ void object::save_cells( const char *lab )
 }
 
 
-/****************************************************
-UNLINK_CELLS
-****************************************************/
-void object::unlink_cells( const char *lab )
+/*************************************************************
+ UNLINK_CELLS
+ *************************************************************/
+void lsd::object::unlink_cells( const char *lab )
 {
 	char ch1[ 2 * MAX_ELEM_LENGTH ];
 	int j, i;
@@ -551,14 +557,14 @@ void object::unlink_cells( const char *lab )
 			if ( cv->param == 1 )
 			{
 				snprintf( ch1, 2 * MAX_ELEM_LENGTH,"p%s_%d", cv->label, i );
-				Tcl_UnlinkVar( interp, ch1 );
+				Tcl_UnlinkVar( gui::interp, ch1 );
 				cv->val[ 0 ] = cv->chk_val( cv->val[ 0 ] );
 			}
 			else
 				for ( j = 0; j < cv->num_lag; ++j )
 				{
 					snprintf( ch1, 2 * MAX_ELEM_LENGTH,"v%s_%d_%d", cv->label, i, j );
-					Tcl_UnlinkVar( interp, ch1 );
+					Tcl_UnlinkVar( gui::interp, ch1 );
 					cv->val[ j ] = cv->chk_val( cv->val[ j ] );
 				}
 }

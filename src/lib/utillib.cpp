@@ -13,39 +13,39 @@
  *************************************************************/
 
 /*************************************************************
-UTILLIB.CPP
-Contains the basic set of utilities used in DLL or no-window
-executables. The remaining functions are stored in
-UTIL.CPP.
+ UTILLIB.CPP
+ Contains the basic set of utilities used in DLL or no-window
+ executables. The remaining functions are stored in
+ UTIL.CPP.
 
-The main functions contained in this file are:
+ The main functions contained in this file are:
 
-- void plog( const char *m, ... );
-print  message string m in the Log screen or the console.
+ - void plog( const char *m, ... );
+ print  message string m in the Log screen or the console.
 
-- void error_hard( const char *boxTitle, const char *boxText,
-				   bool defQuit, const char *logFmt, ... );
-print error messages to the log screen, console and error
-file, recovering LSD configuration to allow for non-crashing
-recovery.
-*************************************************************/
+ - void error_hard( const char *boxTitle, const char *boxText,
+ 				   bool defQuit, const char *logFmt, ... );
+ print error messages to the log screen, console and error
+ file, recovering LSD configuration to allow for non-crashing
+ recovery.
+ *************************************************************/
 
 #include "lib/libLSD.h"				// LSD library classes
 
 
-/*********************************
-PLOG
-Print message on the log window,
-if GUI is available, or console
-*********************************/
-void plog( const char *cm, ... )
+/*************************************************************
+ PLOG
+ Print message on the log window,
+ if GUI is available, or console
+ *************************************************************/
+void lsd::simulation::plog( const char *cm, ... )
 {
 	static va_list argptr;
 
 	va_start( argptr, cm );
 
-	if ( sims.size( ) > 0 && sims[ 0 ]->liblnk != NULL && sims[ 0 ]->liblnk->plog_backend != NULL )
-		sims[ 0 ]->liblnk->plog_backend( cm, "", argptr );
+	if ( liblnk != NULL )
+		liblnk->plog_backend( cm, "", argptr );
 	else
 		plog_terminal( cm, argptr );
 
@@ -53,21 +53,21 @@ void plog( const char *cm, ... )
 }
 
 
-/*********************************
-PLOG_TAG
-The optional tag parameter has to
-correspond to the log window
-existing tags, if GUI is available,
-or console
-*********************************/
-void plog_tag( const char *cm, const char *tag, ... )
+/*************************************************************
+ PLOG_TAG
+ The optional tag parameter has to
+ correspond to the log window
+ existing tags, if GUI is available,
+ or console
+ *************************************************************/
+void lsd::simulation::plog_tag( const char *cm, const char *tag, ... )
 {
 	static va_list argptr;
 
 	va_start( argptr, tag );
 
-	if ( sims.size( ) > 0 && sims[ 0 ]->liblnk != NULL && sims[ 0 ]->liblnk->plog_backend != NULL )
-		sims[ 0 ]->liblnk->plog_backend( cm, tag, argptr );
+	if ( liblnk != NULL )
+		liblnk->plog_backend( cm, tag, argptr );
 	else
 		plog_terminal( cm, argptr );
 
@@ -75,12 +75,12 @@ void plog_tag( const char *cm, const char *tag, ... )
 }
 
 
-/*********************************
-PLOG_TERMINAL
-Back-end to plog and plog_tag on
-console
-*********************************/
-void plog_terminal( const char *cm, va_list arg )
+/*************************************************************
+ PLOG_TERMINAL
+ Back-end to plog and plog_tag on
+ console
+ *************************************************************/
+void lsd::simulation::plog_terminal( const char *cm, va_list arg )
 {
 	static bool bufdyn;
 	static char *buffer, *message, bufstat[ MAX_BUFF_SIZE ], msgstat[ MAX_BUFF_SIZE ];
@@ -148,13 +148,13 @@ void plog_terminal( const char *cm, va_list arg )
 
 
 /*************************************************************
-ERROR_HARD
-Procedure called when an unrecoverable error occurs.
-Information about the state of the simulation when the error
-occurred is provided. Users can abort the program or analyze
-the results collected up the latest time step available.
-*************************************************************/
-void simulation::error_hard( const char *boxTitle, const char *boxText, bool defQuit, const char *logFmt, ... )
+ ERROR_HARD
+ Procedure called when an unrecoverable error occurs.
+ Information about the state of the simulation when the error
+ occurred is provided. Users can abort the program or analyze
+ the results collected up the latest time step available.
+ *************************************************************/
+void lsd::simulation::error_hard( const char *boxTitle, const char *boxText, bool defQuit, const char *logFmt, ... )
 {
 	if ( quit == 2 )		// simulation already being stopped
 		return;
@@ -197,13 +197,15 @@ void simulation::error_hard( const char *boxTitle, const char *boxText, bool def
 }
 
 
-/***************************************************
-SET_LAB_TIT
-Ensure that all objects on top of the variables have the counter updated,
-and then writes the lab_tit field.
-lab_tit indicates the position of the object containing the variables in the model.
-***************************************************/
-void variable::set_lab_tit( void )
+/*************************************************************
+ SET_LAB_TIT
+ Ensure that all objects on top of the variables
+ have the counter updated, and then writes the
+ lab_tit field.
+ lab_tit indicates the position of the object
+ containing the variables in the model.
+ *************************************************************/
+void lsd::variable::set_lab_tit( void )
 {
 	bool first = true;
 	char app[ MAX_LINE_SIZE ], app1[ 2 * MAX_LINE_SIZE ];
@@ -245,10 +247,10 @@ void variable::set_lab_tit( void )
 }
 
 
-/***************************************************
-SET_TIT_COUNTER
-***************************************************/
-void object::set_tit_counter( void )
+/*************************************************************
+ SET_TIT_COUNTER
+ *************************************************************/
+void lsd::object::set_tit_counter( void )
 {
 	int i;
 	bridge *cb;
@@ -276,12 +278,13 @@ void object::set_tit_counter( void )
 }
 
 
-/*****************************************************************************
-SET_BLUEPRINT
-copy the naked structure of the model into another object, called blueprint,
-to be used for adding objects without example
-******************************************************************************/
-void object::set_blueprint( object *container )
+/*************************************************************
+ SET_BLUEPRINT
+ copy the naked structure of the model into another object,
+ called blueprint, to be used for adding objects without
+ example
+ *************************************************************/
+void lsd::object::set_blueprint( object *container )
 {
 	bridge *cb, *cb1;
 	object *cur, *cur1;
@@ -311,11 +314,11 @@ void object::set_blueprint( object *container )
 }
 
 
-/*****************************************************************************
-EMPTY_BLUEPRINT
-remove the current blueprint
-******************************************************************************/
-void simulation::empty_blueprint( void )
+/*************************************************************
+ EMPTY_BLUEPRINT
+ remove the current blueprint
+ *************************************************************/
+void lsd::simulation::empty_blueprint( void )
 {
 	if ( blueprint == NULL )
 		return;
@@ -326,11 +329,11 @@ void simulation::empty_blueprint( void )
 }
 
 
-/*****************************************************************************
-RESET_BLUEPRINT
-reset the current blueprint
-******************************************************************************/
-void simulation::reset_blueprint( object *r )
+/*************************************************************
+ RESET_BLUEPRINT
+ reset the current blueprint
+ *************************************************************/
+void lsd::simulation::reset_blueprint( object *r )
 {
 	empty_blueprint( );
 	blueprint = new object;
@@ -341,10 +344,10 @@ void simulation::reset_blueprint( object *r )
 }
 
 
-/***************************************
-SEARCH_PARALLEL
-***************************************/
-bool object::search_parallel( void )
+/*************************************************************
+ SEARCH_PARALLEL
+ *************************************************************/
+bool lsd::object::search_parallel( void )
 {
 	bridge *cb;
 	variable *cv;

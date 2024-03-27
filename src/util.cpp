@@ -13,33 +13,69 @@
  *************************************************************/
 
 /*************************************************************
-UTIL.CPP
-Contains a set of utilities for different parts of the
-program. The basic set of utilities used in DLL or no-window
-executables are stored in UTILLIB.CPP.
+ UTIL.CPP
+ Contains a set of utilities for different parts of the
+ program. The basic set of utilities used in DLL or no-window
+ executables are stored in UTILLIB.CPP.
 
-The main functions contained in this file are:
+ The main functions contained in this file are:
 
-- void plog_backend( const char *cm, ... );
-print  message string m in the Log screen.
-*************************************************************/
+ - void plog_backend( const char *cm, ... );
+ print  message string m in the Log screen.
+ *************************************************************/
 
 #include "LSD.h"
 
-#ifndef _NP_
-std::mutex lock_plog_backend;	// lock lock_plog_backend for parallel access
-#endif
-
-
-/*********************************
-PLOG_BACKEND
-Back-end to plog and plog_tag on
-log window
-*********************************/
 #define NUM_TAGS 7
-const char *tags[ NUM_TAGS ] = { "", "highlight", "table", "series", "prof1", "prof2", "bar" };
 
-void plog_backend( const char *cm, const char *tag, va_list arg )
+namespace gui
+{
+	const char *tags[ NUM_TAGS ] = { "", "highlight", "table", "series", "prof1", "prof2", "bar" };
+
+#ifndef _NP_
+	std::mutex lock_plog_backend;	// lock lock_plog_backend for parallel access
+#endif
+}
+
+
+/*************************************************************
+ PLOG
+ Print message on the log window,
+ if GUI is available, or console
+ *************************************************************/
+void gui::plog( const char *cm, ... )
+{
+	static va_list argptr;
+
+	va_start( argptr, cm );
+	plog_backend( cm, "", argptr );
+	va_end( argptr );
+}
+
+
+/*************************************************************
+ PLOG_TAG
+ The optional tag parameter has to
+ correspond to the log window
+ existing tags, if GUI is available,
+ or console
+ *************************************************************/
+void gui::plog_tag( const char *cm, const char *tag, ... )
+{
+	static va_list argptr;
+
+	va_start( argptr, tag );
+	plog_backend( cm, tag, argptr );
+	va_end( argptr );
+}
+
+
+/*************************************************************
+ PLOG_BACKEND
+ Back-end to plog and plog_tag on
+ log window
+ *************************************************************/
+void gui::plog_backend( const char *cm, const char *tag, va_list arg )
 {
 	static bool bufdyn;
 	static char *buffer, *message, bufstat[ MAX_BUFF_SIZE ], msgstat[ MAX_BUFF_SIZE ];
@@ -126,15 +162,15 @@ void plog_backend( const char *cm, const char *tag, va_list arg )
 }
 
 
-/****************************
-PRINT_STACK
-Print the state of the stack in the log window.
-This tells the user which variable is computed
-because of other equations' request.
-*****************************/
-void print_stack( void )
+/*************************************************************
+ PRINT_STACK
+ Print the state of the stack in the log window.
+ This tells the user which variable is computed
+ because of other equations' request.
+ *************************************************************/
+void gui::print_stack( void )
 {
-	lsdstack *app;
+	lsd::lsdstack *app;
 
 	if ( sim.parallel_mode )
 	{
@@ -159,12 +195,12 @@ void print_stack( void )
 
 
 /*************************************************************
-ERROR_HARD_HELPER
-Helper function to handle unrecoverable errors at the GUI.
-Users can abort the program or analyze the results collected
-up the latest time step available.
-*************************************************************/
-void error_hard_helper( const char *boxTitle, const char *boxText, const char *logText, bool defQuit )
+ ERROR_HARD_HELPER
+ Helper function to handle unrecoverable errors at the GUI.
+ Users can abort the program or analyze the results collected
+ up the latest time step available.
+ *************************************************************/
+void gui::error_hard_helper( const char *boxTitle, const char *boxText, const char *logText, bool defQuit )
 {
 	if ( sim.running )			// handle running events differently
 	{
@@ -260,7 +296,8 @@ void error_hard_helper( const char *boxTitle, const char *boxText, const char *l
 
 		// run user closing function, reporting error appropriately
 		sim.user_exception = true;
-		close_sim( );
+		sim.close_sim( );
+		::close_sim( );
 		sim.user_exception = false;
 
 		sim.root->reset_end( );
@@ -284,13 +321,13 @@ void error_hard_helper( const char *boxTitle, const char *boxText, const char *l
 }
 
 
-/*********************************
-TCL_SET_C_VAR
-Function to set a c variable when
-not in a Tcl idle loop (hardcoded
-vars only)
-*********************************/
-int Tcl_set_c_var( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+/*************************************************************
+ TCL_SET_C_VAR
+ Function to set a c variable when
+ not in a Tcl idle loop (hardcoded
+ vars only)
+ *************************************************************/
+int gui::Tcl_set_c_var( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	char vname[ MAX_ELEM_LENGTH ];
 	int value;
@@ -319,10 +356,10 @@ int Tcl_set_c_var( ClientData cdata, Tcl_Interp *interp, int argc, const char *a
 }
 
 
-/***************************************************
-FMT_TTIP_DESCR
-***************************************************/
-char *fmt_ttip_descr( char *out, description *d, int outSz, bool init )
+/*************************************************************
+ FMT_TTIP_DESCR
+ *************************************************************/
+char *gui::fmt_ttip_descr( char *out, lsd::description *d, int outSz, bool init )
 {
 	char out1[ outSz ];
 
@@ -330,22 +367,22 @@ char *fmt_ttip_descr( char *out, description *d, int outSz, bool init )
 		return NULL;
 
 	if ( d->has_descr_text ( ) )
-		strcln( out, d->text, outSz );
+		lsd::strcln( out, d->text, outSz );
 	else
 		out[ 0 ] = '\0';
 
 	if ( init && d != NULL && d->init != NULL && strlen( d->init ) > 0 )
 	{
 		if ( strlen( out ) > 0 )
-			strcatn( out, "\n\u2500\u2500\u2500\n", outSz );
+			lsd::strcatn( out, "\n\u2500\u2500\u2500\n", outSz );
 
-		strcln( out1, d->init, outSz );
-		strcatn( out, out1, outSz );
+		lsd::strcln( out1, d->init, outSz );
+		lsd::strcatn( out, out1, outSz );
 	}
 
 	if ( strlen( out ) > 0 )
 	{
-		strwrap( out1, out, outSz - 1, 60 );
+		lsd::strwrap( out1, out, outSz - 1, 60 );
 		strtcl( out, out1, outSz - 1 );
 	}
 
@@ -353,13 +390,13 @@ char *fmt_ttip_descr( char *out, description *d, int outSz, bool init )
 }
 
 
-/***************************************************
-SET_TTIP_DESCR
-***************************************************/
-void set_ttip_descr( const char *w, const char *lab, int it, bool init )
+/*************************************************************
+ SET_TTIP_DESCR
+ *************************************************************/
+void gui::set_ttip_descr( const char *w, const char *lab, int it, bool init )
 {
 	char desc[ MAX_LINE_SIZE + 1 ];
-	description *cd;
+	lsd::description *cd;
 
 	// add tooltip only if element has description
 	cd = sim.search_description( lab, false );
@@ -373,10 +410,10 @@ void set_ttip_descr( const char *w, const char *lab, int it, bool init )
 }
 
 
-/***************************************************
-TCL_SET_TTIP_DESCR
-***************************************************/
-int Tcl_set_ttip_descr( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+/*************************************************************
+ TCL_SET_TTIP_DESCR
+ *************************************************************/
+int gui::Tcl_set_ttip_descr( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	int it, init;
 
@@ -399,14 +436,14 @@ int Tcl_set_ttip_descr( ClientData cdata, Tcl_Interp *interp, int argc, const ch
 }
 
 
-/***************************************************
-AUTO_DOCUMENT
-***************************************************/
-void auto_document( const char *lab, const char *which, bool append )
+/*************************************************************
+ AUTO_DOCUMENT
+ *************************************************************/
+void gui::auto_document( const char *lab, const char *which, bool append )
 {
 	bool var;
 	char str1[ MAX_LINE_SIZE ], app[ 10 * MAX_LINE_SIZE ], text[ 2 * MAX_BUFF_SIZE ];
-	description *cd;
+	lsd::description *cd;
 
 	for ( cd = sim.descr; cd != NULL; cd = cd->next )
 	{
@@ -423,7 +460,7 @@ void auto_document( const char *lab, const char *which, bool append )
 
 			return_where_used( cd->label, str1, MAX_LINE_SIZE );
 			if ( ( append || ! var ) && cd->has_descr_text ( ) )
-				if ( strwsp( cd->text ) )
+				if ( lsd::strwsp( cd->text ) )
 					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
 				else
 					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
@@ -438,10 +475,10 @@ void auto_document( const char *lab, const char *which, bool append )
 }
 
 
-/***************************************************
-RETURN_WHERE_USED
-***************************************************/
-void return_where_used( char *lab, char *s, int sz )
+/*************************************************************
+ RETURN_WHERE_USED
+ *************************************************************/
+void gui::return_where_used( char *lab, char *s, int sz )
 {
 	const char *app;
 
@@ -449,16 +486,16 @@ void return_where_used( char *lab, char *s, int sz )
 	app = get_str( "list_used" );
 
 	if ( app != NULL )
-		strcpyn( s, app, sz );
+		lsd::strcpyn( s, app, sz );
 	else
 		strcpy( s, "" );
 }
 
 
-/***************************************************
-GET_VAR_DESCR
-***************************************************/
-void get_var_descr( const char *lab, char *desc, int descr_len )
+/*************************************************************
+ GET_VAR_DESCR
+ *************************************************************/
+void gui::get_var_descr( const char *lab, char *desc, int descr_len )
 {
 	char str[ 2 * MAX_ELEM_LENGTH ], str1[ MAX_LINE_SIZE ], str2[ descr_len ];
 	int i, j = 0, done = -1;
@@ -543,14 +580,14 @@ void get_var_descr( const char *lab, char *desc, int descr_len )
 	}
 
 	str2[ j ] = '\0';
-	strcln( desc, str2, descr_len );
+	lsd::strcln( desc, str2, descr_len );
 }
 
 
-/****************************************************
-SEARCH_ALL_SOURCES
-****************************************************/
-FILE *search_all_sources( char *str )
+/*************************************************************
+ SEARCH_ALL_SOURCES
+ *************************************************************/
+FILE *gui::search_all_sources( char *str )
 {
 	char got[ MAX_LINE_SIZE ];
 	const char *fname;
@@ -558,7 +595,7 @@ FILE *search_all_sources( char *str )
 	FILE *f;
 
 	// search in all source files
-	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
+	cmd( "set source_files [ get_source_files \"%s\" ]", lsd::model_path );
 	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", eq_file, eq_file );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = get_int( "res" );
@@ -566,7 +603,7 @@ FILE *search_all_sources( char *str )
 	for ( i = 0; i < nfiles; ++i )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", i );
-		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", model_path, model_path );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", lsd::model_path, lsd::model_path );
 		fname = get_str( "brr" );
 		if ( ( f = fopen( fname, "r" ) ) == NULL )
 			continue;
@@ -590,12 +627,12 @@ FILE *search_all_sources( char *str )
 }
 
 
-/****************************************************
-TCL_GET_VAR_DESCR
-Function to get variable description on
-equation file(s) from Tcl
-****************************************************/
-int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+/*************************************************************
+ TCL_GET_VAR_DESCR
+ Function to get variable description on
+ equation file(s) from Tcl
+ *************************************************************/
+int gui::Tcl_get_var_descr( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	char vname[ MAX_ELEM_LENGTH ], desc[ MAX_BUFF_SIZE ];
 
@@ -615,14 +652,14 @@ int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *interp, int argc, const cha
 }
 
 
-/****************************************************
-TCL_GET_VAR_CONF
-Function to get variable configuration from Tcl
-****************************************************/
-int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+/*************************************************************
+ TCL_GET_VAR_CONF
+ Function to get variable configuration from Tcl
+ *************************************************************/
+int gui::Tcl_get_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	char vname[ MAX_ELEM_LENGTH ], res[ 2 ];
-	variable *cv;
+	lsd::variable *cv;
 
 	if ( argc != 3 )					// require 2 parameters: variable name and property
 		return TCL_ERROR;
@@ -664,15 +701,15 @@ int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char
 }
 
 
-/****************************************************
-TCL_SET_VAR_CONF
-Function to set variable configuration from Tcl
-****************************************************/
-int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+/*************************************************************
+ TCL_SET_VAR_CONF
+ Function to set variable configuration from Tcl
+ *************************************************************/
+int gui::Tcl_set_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	char vname[ MAX_ELEM_LENGTH ];
-	variable *cv;
-	object *cur;
+	lsd::object *cur;
+	lsd::variable *cv;
 
 	if ( argc != 4 )					// require 3 parameters: variable name, property and value
 		return TCL_ERROR;
@@ -790,14 +827,14 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char
 }
 
 
-/****************************************************
-TCL_GET_OBJ_CONF
-Function to get object configuration from Tcl
-****************************************************/
-int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+/*************************************************************
+ TCL_GET_OBJ_CONF
+ Function to get object configuration from Tcl
+ *************************************************************/
+int gui::Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	char vname[ MAX_ELEM_LENGTH ], res[ 2 ];
-	object *cur;
+	lsd::object *cur;
 
 	if ( argc != 3 )					// require 2 parameters: variable name and property
 		return TCL_ERROR;
@@ -823,14 +860,14 @@ int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char
 }
 
 
-/****************************************************
-TCL_SET_OBJ_CONF
-Function to set object configuration from Tcl
-****************************************************/
-int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+/*************************************************************
+ TCL_SET_OBJ_CONF
+ Function to set object configuration from Tcl
+ *************************************************************/
+int gui::Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	char vname[ MAX_ELEM_LENGTH ];
-	object *cur, *cur1;
+	lsd::object *cur, *cur1;
 
 	if ( argc != 4 )					// require 3 parameters: variable name, property and value
 		return TCL_ERROR;
@@ -868,25 +905,25 @@ int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char
 }
 
 
-/****************************************************
-CHECK_NW_EXEC
-Check if NW executable/lib files are older than
-running executable file
-****************************************************/
-bool check_nw_exec( const char *nw_exe )
+/*************************************************************
+ CHECK_NW_EXEC
+ Check if NW executable/lib files are older than
+ running executable file
+ *************************************************************/
+bool gui::check_nw_exec( const char *nw_exe )
 {
 	char exe[ MAX_PATH_LENGTH ], lib[ MAX_PATH_LENGTH ];
 	struct stat stNWexe, stLib, stExe;
 
-	if ( strlen( lib_path ) > 0 )
-		snprintf( lib, MAX_PATH_LENGTH, "%s/%s", lib_path, lib_file );// full lib name
+	if ( strlen( lsd::lib_path ) > 0 )
+		snprintf( lib, MAX_PATH_LENGTH, "%s/%s", lsd::lib_path, lsd::lib_file );// full lib name
 	else
-		strcpyn( lib, lib_file, MAX_PATH_LENGTH );
+		lsd::strcpyn( lib, lsd::lib_file, MAX_PATH_LENGTH );
 
-	if ( strlen( exec_path ) > 0 )
-		snprintf( exe, MAX_PATH_LENGTH, "%s/%s", exec_path, exec_file );// full exe name
+	if ( strlen( lsd::exec_path ) > 0 )
+		snprintf( exe, MAX_PATH_LENGTH, "%s/%s", lsd::exec_path, lsd::exec_file );// full exe name
 	else
-		strcpyn( exe, exec_file, MAX_PATH_LENGTH );
+		lsd::strcpyn( exe, lsd::exec_file, MAX_PATH_LENGTH );
 
 	// get OS info for files
 	if ( stat( nw_exe, &stNWexe ) == 0 && ( stat( lib, &stLib ) == 0 || ( stat( lib, &stExe ) == 0 ) ) )
@@ -898,13 +935,13 @@ bool check_nw_exec( const char *nw_exe )
 }
 
 
-/****************************************************
-CHECK_LABEL
-Control that the label lab does not already exist
-in the model. Also prevents invalid characters in
-the names.
-****************************************************/
-int object::check_label( const char *lab )
+/*************************************************************
+ CHECK_LABEL
+ Control that the label lab does not already exist
+ in the model. Also prevents invalid characters in
+ the names.
+ *************************************************************/
+int lsd::object::check_label( const char *lab )
 {
 	bridge *cb;
 	object *cur;
@@ -935,10 +972,10 @@ int object::check_label( const char *lab )
 }
 
 
-/****************************************************
-CONTROL_TO_COMPUTE
-****************************************************/
-void object::control_to_compute( void )
+/*************************************************************
+ CONTROL_TO_COMPUTE
+ *************************************************************/
+void lsd::object::control_to_compute( void )
 {
 	bridge *cb;
 	object *cur;
@@ -946,7 +983,7 @@ void object::control_to_compute( void )
 
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		if ( ! check_save )
+		if ( ! gui::check_save )
 			return;
 
 		if ( cv->save == 1 )
@@ -954,8 +991,8 @@ void object::control_to_compute( void )
 			cmd( "set res [ ttk::messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->label, label );
 			cmd( "if [ string equal $res cancel ] { set res 1 } { set res 0 }" );
 
-			if ( get_bool( "res" ) )
-				check_save = false;
+			if ( gui::get_bool( "res" ) )
+				gui::check_save = false;
 		}
 	}
 
@@ -971,10 +1008,10 @@ void object::control_to_compute( void )
 }
 
 
-/****************************************************
-COUNT_SAVE
-****************************************************/
-void object::count_save( int *count )
+/*************************************************************
+ COUNT_SAVE
+ *************************************************************/
+void lsd::object::count_save( int *count )
 {
 	bridge *cb;
 	object *cur;
@@ -995,10 +1032,10 @@ void object::count_save( int *count )
 }
 
 
-/****************************************************
-SHOW_SAVE
-****************************************************/
-void object::show_save( void )
+/*************************************************************
+ SHOW_SAVE
+ *************************************************************/
+void lsd::object::show_save( void )
 {
 	char out[ 3 * MAX_ELEM_LENGTH ];
 	bridge *cb;
@@ -1020,9 +1057,9 @@ void object::show_save( void )
 				else
 				   strcatn( out, " (disk only)", 3 * MAX_ELEM_LENGTH );
 			}
-			plog( out );
-			plog_tag( "%s\n", "highlight", cv->label );
-			++elem_count;
+			gui::plog( out );
+			gui::plog_tag( "%s\n", "highlight", cv->label );
+			++gui::elem_count;
 		}
 	}
 
@@ -1037,10 +1074,10 @@ void object::show_save( void )
 }
 
 
-/****************************************************
-CLEAN_SAVE
-****************************************************/
-void object::clean_save( void )
+/*************************************************************
+ CLEAN_SAVE
+ *************************************************************/
+void lsd::object::clean_save( void )
 {
 	bridge *cb;
 	object *cur;
@@ -1057,10 +1094,10 @@ void object::clean_save( void )
 }
 
 
-/****************************************************
-SHOW_PLOT
-****************************************************/
-void object::show_plot( void )
+/*************************************************************
+ SHOW_PLOT
+ *************************************************************/
+void lsd::object::show_plot( void )
 {
 	bridge *cb;
 	object *cur;
@@ -1070,13 +1107,13 @@ void object::show_plot( void )
 		if ( cv->plot )
 		{
 			if ( cv->param == 1 )
-				plog( "Object: %s \tParameter:\t", label );
+				gui::plog( "Object: %s \tParameter:\t", label );
 			if ( cv->param == 0 )
-				plog( "Object: %s \tVariable :\t", label );
+				gui::plog( "Object: %s \tVariable :\t", label );
 			if ( cv->param == 2 )
-				plog( "Object: %s \tFunction :\t", label );
-			plog_tag( "%s\n", "highlight", cv->label );
-			++elem_count;
+				gui::plog( "Object: %s \tFunction :\t", label );
+			gui::plog_tag( "%s\n", "highlight", cv->label );
+			++gui::elem_count;
 		}
 
 	for ( cb = b; cb != NULL; cb = cb->next )
@@ -1090,10 +1127,10 @@ void object::show_plot( void )
 }
 
 
-/****************************************************
-CLEAN_PLOT
-****************************************************/
-void object::clean_plot( void )
+/*************************************************************
+ CLEAN_PLOT
+ *************************************************************/
+void lsd::object::clean_plot( void )
 {
 	bridge *cb;
 	object *cur;
@@ -1108,10 +1145,10 @@ void object::clean_plot( void )
 }
 
 
-/****************************************************
-SHOW_DEBUG
-****************************************************/
-void object::show_debug( void )
+/*************************************************************
+ SHOW_DEBUG
+ *************************************************************/
+void lsd::object::show_debug( void )
 {
 	bridge *cb;
 	object *cur;
@@ -1121,34 +1158,34 @@ void object::show_debug( void )
 		if ( cv->deb_mode != 'n' )
 		{
 			if ( cv->param == 0 )
-				plog( "Object: %s \tVariable:\t", label );
+				gui::plog( "Object: %s \tVariable:\t", label );
 			if ( cv->param == 1 )
-				plog( "Object: %s \tParameter:\t", label );
+				gui::plog( "Object: %s \tParameter:\t", label );
 			if ( cv->param == 2 )
-				plog( "Object: %s \tFunction:\t", label );
+				gui::plog( "Object: %s \tFunction:\t", label );
 
-			plog_tag( "%s\t", "highlight", cv->label );
+			gui::plog_tag( "%s\t", "highlight", cv->label );
 
 			switch ( cv->deb_mode )
 			{
 				default:
 				case 'd':
-					plog( "(debug)\n" );
+					gui::plog( "(debug)\n" );
 					break;
 				case 'w':
-					plog( "(watch)\n" );
+					gui::plog( "(watch)\n" );
 					break;
 				case 'D':
-					plog( "(debug and watch)\n" );
+					gui::plog( "(debug and watch)\n" );
 					break;
 				case 'r':
-					plog( "(watch write)\n" );
+					gui::plog( "(watch write)\n" );
 					break;
 				case 'R':
-					plog( "(debug and watch write)\n" );
+					gui::plog( "(debug and watch write)\n" );
 			}
 
-			++elem_count;
+			++gui::elem_count;
 		}
 
 	for ( cb = b; cb != NULL; cb = cb->next )
@@ -1162,10 +1199,10 @@ void object::show_debug( void )
 }
 
 
-/****************************************************
-CLEAN_DEBUG
-****************************************************/
-void object::clean_debug( void )
+/*************************************************************
+ CLEAN_DEBUG
+ *************************************************************/
+void lsd::object::clean_debug( void )
 {
 	bridge *cb;
 	object *cur;
@@ -1180,10 +1217,10 @@ void object::clean_debug( void )
 }
 
 
-/****************************************************
-SHOW_PARALLEL
-****************************************************/
-void object::show_parallel( void )
+/*************************************************************
+ SHOW_PARALLEL
+ *************************************************************/
+void lsd::object::show_parallel( void )
 {
 	bridge *cb;
 	object *cur;
@@ -1192,9 +1229,9 @@ void object::show_parallel( void )
 	for ( cv = v; cv != NULL; cv = cv->next )
 		if ( cv->parallel )
 		{
-			plog( "Object: %s \tVariable:\t", label );
-			plog_tag( "%s\n", "highlight", cv->label );
-			++elem_count;
+			gui::plog( "Object: %s \tVariable:\t", label );
+			gui::plog_tag( "%s\n", "highlight", cv->label );
+			++gui::elem_count;
 		}
 
 	for ( cb = b; cb != NULL; cb = cb->next )
@@ -1208,10 +1245,10 @@ void object::show_parallel( void )
 }
 
 
-/****************************************************
-CLEAN_PARALLEL
-****************************************************/
-void object::clean_parallel( void )
+/*************************************************************
+ CLEAN_PARALLEL
+ *************************************************************/
+void lsd::object::clean_parallel( void )
 {
 	bridge *cb;
 	object *cur;
@@ -1226,10 +1263,10 @@ void object::clean_parallel( void )
 }
 
 
-/****************************************************
-SHOW_OBSERVE
-****************************************************/
-void object::show_observe( void )
+/*************************************************************
+ SHOW_OBSERVE
+ *************************************************************/
+void lsd::object::show_observe( void )
 {
 	bridge *cb;
 	description *cd;
@@ -1242,12 +1279,12 @@ void object::show_observe( void )
 		if ( cd->observe )
 		{
 			if ( cv->param == 1 )
-				plog( "Object: %s \tParameter:\t", label );
+				gui::plog( "Object: %s \tParameter:\t", label );
 			else
-				plog( "Object: %s \tVariable :\t", label );
+				gui::plog( "Object: %s \tVariable :\t", label );
 
-			plog_tag( "%s (%lf)\n", "highlight", cv->label, cv->val[ 0 ] );
-			++elem_count;
+			gui::plog_tag( "%s (%lf)\n", "highlight", cv->label, cv->val[ 0 ] );
+			++gui::elem_count;
 		}
 	}
 
@@ -1262,10 +1299,10 @@ void object::show_observe( void )
 }
 
 
-/****************************************************
-SHOW_INITIAL
-****************************************************/
-void object::show_initial( void )
+/*************************************************************
+ SHOW_INITIAL
+ *************************************************************/
+void lsd::object::show_initial( void )
 {
 	char buf_descr[ MAX_BUFF_SIZE ];
 	bridge *cb;
@@ -1279,27 +1316,27 @@ void object::show_initial( void )
 		if ( cd->initial )
 		{
 			if ( cv->param == 1 )
-				plog( "Object: %s \tParameter:\t", label );
+				gui::plog( "Object: %s \tParameter:\t", label );
 			if ( cv->param == 0 )
-				plog( "Object: %s \tVariable :\t", label );
+				gui::plog( "Object: %s \tVariable :\t", label );
 			if ( cv->param == 2 )
-				plog( "Object: %s \tFunction :\t", label );
+				gui::plog( "Object: %s \tFunction :\t", label );
 
-			++elem_count;
-			plog_tag( "%s \t", "highlight", cv->label );
+			++gui::elem_count;
+			gui::plog_tag( "%s \t", "highlight", cv->label );
 
 			if ( cd->init == NULL || strlen( cd->init ) == 0 )
 			{
 				for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				{
 					cv1 = cur->search_var( NULL, cv->label );
-					plog( " %g", cv1->val[ 0 ] );
+					gui::plog( " %g", cv1->val[ 0 ] );
 				}
 			}
 			else
-				plog( "%s", strtcl( buf_descr, cd->init, MAX_BUFF_SIZE ) );
+				gui::plog( "%s", gui::strtcl( buf_descr, cd->init, MAX_BUFF_SIZE ) );
 
-			plog( "\n" );
+			gui::plog( "\n" );
 		}
 	}
 
@@ -1314,10 +1351,10 @@ void object::show_initial( void )
 }
 
 
-/****************************************************
-SHOW_SPECIAL_UPDAT
-****************************************************/
-void object::show_special_updat( void )
+/*************************************************************
+ SHOW_SPECIAL_UPDAT
+ *************************************************************/
+void lsd::object::show_special_updat( void )
 {
 	bridge *cb;
 	object *cur;
@@ -1326,9 +1363,9 @@ void object::show_special_updat( void )
 	for ( cv = v; cv != NULL; cv = cv->next )
 		if ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 )
 		{
-			plog( "Object: %s \tVariable:\t", label );
-			plog_tag( "%s\n", "highlight", cv->label );
-			++elem_count;
+			gui::plog( "Object: %s \tVariable:\t", label );
+			gui::plog_tag( "%s\n", "highlight", cv->label );
+			++gui::elem_count;
 		}
 
 	for ( cb = b; cb != NULL; cb = cb->next )

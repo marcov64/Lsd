@@ -13,44 +13,44 @@
  *************************************************************/
 
 /*************************************************************
-LSDNW.CPP
-The LSD No Window (terminal) program entry point.
+ LSDNW.CPP
+ The LSD No Window (terminal) program entry point.
 
-This file can be compiled with the command:
+ This file can be compiled with the command:
 
- make -f makefileNW
+  make -f makefileNW
 
-in the corresponding model directory.
+ in the corresponding model directory.
 
-Relevant macros for conditional compilation (when defined):
+ Relevant macros for conditional compilation (when defined):
 
-- _FUN_: user model equation file
-- _NW_: No Window executable
-- _NP_: no parallel (multi-task) processing
-- _NT_: no signal trapping (better when debugging in GDB)
-*************************************************************/
+ - _FUN_: user model equation file
+ - _NW_: No Window executable
+ - _NP_: no parallel (multi-task) processing
+ - _NT_: no signal trapping (better when debugging in GDB)
+ *************************************************************/
 
 #include "lib/libLSD.h"				// LSD library classes
 
-int load_config( simulation & sim );
-int parse_cmdline( int argn, const char **argv, simulation & sim );
+int load_config( lsd::simulation & sim );
+int parse_cmdline( int argn, const char **argv, lsd::simulation & sim );
 
 const char lsdCmdMsg[ ] = "This is the No Window version of LSD.";
 const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd [-s SEED] [-e RUNS] to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-l FILENAME' to save all output to a (log) file\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-p' for skipping the generation of totals file\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-b' for showing a progress bar\n'-c MAX_THREADS[:MAX_RUNS]' to set maximum parallel threads/runs to use\n";
 
 
-/*************************************
+/*************************************************************
  MAIN
- *************************************/
+ *************************************************************/
 int main( int argn, const char **argv )
 {
 	char cwd[ PATH_MAX ];
 	int res = -1;
-	simulation sim;					// single LSD simulation terminal instance
+	lsd::simulation sim;			// single LSD simulation terminal instance
 
 #ifndef _NT_
 	// register all signal handlers
-	handle_signals( signal_handler );
+	lsd::handle_signals( lsd::signal_handler );
 
 	try
 	{
@@ -58,23 +58,23 @@ int main( int argn, const char **argv )
 
 		// set executable name and path
 		getcwd( cwd, PATH_MAX );
-		set_exec( cwd, argv[ 0 ] );
+		lsd::set_exec( cwd, argv[ 0 ] );
 
-		if ( exec_file == NULL || exec_path == NULL )
+		if ( lsd::exec_file == NULL || lsd::exec_path == NULL )
 		{
 			fprintf( stderr, "\nInvalid LSD executable name or path.\n%s\nMake sure the LSD directory is not too deep into the disk directory tree (over %d chars).\n\n", lsdCmdMsg, PATH_MAX );
-			lsd_exit( 5 );
+			lsd::lsd_exit( 5 );
 		}
 
 		// parse command line options
 		res = parse_cmdline( argn, argv, sim );
 		if ( res != 0 )
-			lsd_exit( res );
+			lsd::lsd_exit( res );
 
 		// load configuration
 		res = load_config( sim );
 		if ( res != 0 )
-			lsd_exit( res );
+			lsd::lsd_exit( res );
 
 #ifndef _NP_
 		// if parallel execution is required, just run new instances & wait to finish
@@ -98,11 +98,11 @@ int main( int argn, const char **argv )
 	}
 	catch ( std::bad_alloc& exc )	// out of memory conditions
 	{
-		exception_handler( SIGMEM, exc.what( ) );
+		lsd::exception_handler( SIGMEM, exc.what( ) );
 	}
 	catch ( std::exception& exc )	// other known error conditions
 	{
-		exception_handler( SIGSTL, exc.what( ) );
+		lsd::exception_handler( SIGSTL, exc.what( ) );
 	}
 	catch ( ... )				// other unknown error conditions
 	{
@@ -110,15 +110,16 @@ int main( int argn, const char **argv )
 	}
 #endif
 
-	lsd_exit( res );
+	lsd::lsd_exit( res );
+
 	return res;
 }
 
 
-/*********************************
+/*************************************************************
  PARSE_CMDLINE
- *********************************/
-int parse_cmdline( int argn, const char **argv, simulation & sim )
+ *************************************************************/
+int parse_cmdline( int argn, const char **argv, lsd::simulation & sim )
 {
 	int i, j = 0, k = 0;
 
@@ -226,7 +227,7 @@ int parse_cmdline( int argn, const char **argv, simulation & sim )
 
 #ifndef _NP_
 	if ( k > 0 )
-		sim.max_runs = min( k, sim.max_threads );
+		sim.max_runs = std::min( k, sim.max_threads );
 	else
 	{
 		sim.max_runs = 1;
@@ -236,7 +237,7 @@ int parse_cmdline( int argn, const char **argv, simulation & sim )
 	}
 
 	if ( sim.max_runs > 1 )
-		sim.max_threads = max( min( j, sim.max_threads / sim.max_runs ), 1 );
+		sim.max_threads = std::max( std::min( j, sim.max_threads / sim.max_runs ), 1 );
 #else
 	if ( k != 0 )
 		printf( "\nMulti-run request ignored, running in sequential mode.\n" );
@@ -246,10 +247,10 @@ int parse_cmdline( int argn, const char **argv, simulation & sim )
 }
 
 
-/*********************************
+/*************************************************************
  LOAD_CONFIGURATION
- *********************************/
-int load_config( simulation & sim )
+ *************************************************************/
+int load_config( lsd::simulation & sim )
 {
 	char *str;
 	FILE *f;
@@ -324,7 +325,7 @@ int load_config( simulation & sim )
 			printf( "\nCannot create log file '%s', using stdout.\n", sim.log_file );
 		else
 		{
-			stdout_ptr = stderr_ptr = sim.log_file_ptr;
+			lsd::stdout_ptr = lsd::stderr_ptr = sim.log_file_ptr;
 			dup2( fileno( sim.log_file_ptr ), STDOUT_FILENO );
 			dup2( fileno( sim.log_file_ptr ), STDERR_FILENO );
 		}

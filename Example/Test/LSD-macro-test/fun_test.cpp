@@ -13,23 +13,23 @@
  *************************************************************/
 
 /*************************************************************
-FUN_TEST.CPP
-Macro compilation test file.
-*************************************************************/
+ FUN_TEST.CPP
+ Macro compilation test file.
+ *************************************************************/
 
-#define CSVLIB
-#define EIGENLIB
-#define XMLLIB
+//#define NO_POINTER_CHECK
+//#define NO_POINTER_INIT
+//#define LEGACY_CODE
 
 #define EQ_USER_VARS int a; double b;
 #define USER_FUNCS void x( void ) { };
 
-#include "fun_head.h"
+#include "lib/lsdequation.h"
 
 struct e
 {
 	int n;
-	vector < int > p;
+	std::vector < int > p;
 	e( int m = 0 ) : n( m ), p( 1, 0 ) { }
 	int r( int m ) { n = m; return n; }
 };
@@ -42,7 +42,7 @@ EQUATION( "X" )
 // Test variable
 
 e g, *l;
-string s;
+std::string s;
 
 pi;
 
@@ -496,25 +496,35 @@ a = WRITE_EXTS( cur, e, n, 0 );
 a = WRITE_ARG_EXT( e, p.at, 0, 0 );
 a = WRITE_ARG_EXTS( cur, e, p.at, 0, 0 );
 
-CYCLE( cur, "Y" );
-CYCLE_SAFE( cur, "Y" );
-CYCLE2_SAFE( cur, "Y" );
-CYCLE3_SAFE( cur, "Y" );
+CYCLE( cur, "Y" ) { }
+CYCLE_SAFE( cur, "Y" ) { }
+CYCLE2_SAFE( cur, "Y" ) { }
+CYCLE3_SAFE( cur, "Y" ) { }
 
 cur = p;
-CYCLES( cur, cur1, "Y" );
-CYCLE_SAFES( cur, cur1, "Y" );
-CYCLE2_SAFES( cur, cur1, "Y" );
-CYCLE3_SAFES( cur, cur1, "Y" );
+CYCLES( cur, cur1, "Y" ) { }
+CYCLE_SAFES( cur, cur1, "Y" ) { }
+CYCLE2_SAFES( cur, cur1, "Y" ) { }
+CYCLE3_SAFES( cur, cur1, "Y" ) { }
 
-CYCLE_LINK( curl );
-CYCLE_LINKS( cur, curl );
+CYCLE_LINK( curl ) { }
+CYCLE_LINKS( cur, curl ) { }
 
-vector < int >::iterator q;
-CYCLE_EXT( q, e, p );
-CYCLE_EXTS( cur, q, e, p );
+std::vector < int >::iterator q;
+CYCLE_EXT( q, e, p ) { }
+CYCLE_EXTS( cur, q, e, p ) { }
 
+#ifdef LEGACY_CODE
 simulation *z = SIM;
+s = msg;
+a = deb( p, caller, "X", & b );
+a = deb( p, caller, "X", & b, false );
+a = deb( p, caller, "X", & b, false, "" );
+cmd( "X" );
+cmd( "%g", 1. );
+s = path;
+b = poidev( 1. );
+cur = go_brother( cur1 );
 b = UNIFORM( 0., 1. );
 b = rnd_integer( 0, 1 );
 b = VL_CHEAT( "X", 1, cur1 );
@@ -570,11 +580,11 @@ l = PS_EXT( cur, e );
 a = VS_EXT( cur, e, n );
 a = WRITES_EXT( cur, e, n, 0 );
 a = EXECS_EXT( cur, e, p, size );
-CYCLES_EXT( cur, q, e, p );
 DEBUG;
 DEBUG_AT( 1 );
-CYCLES_LINK( cur, curl )
-;
+CYCLES_EXT( cur, q, e, p ) { }
+CYCLES_LINK( cur, curl ) { }
+#endif
 
 END_EQUATION( 0 );
 
@@ -585,11 +595,18 @@ EQUATION_DUMMY( "Y", "X" )
 // Test dummy equation
 
 
+#ifdef LEGACY_CODE
 FUNCTION( "Z" )
 // Test function
 RESULT( 0 )
+#endif
 
 
 MODELEND
 
+#ifndef LEGACY_CODE
+CLOSEBEGIN
+CLOSEEND
+#else
 void close_sim( void ) { }
+#endif

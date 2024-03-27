@@ -13,116 +13,128 @@
  *************************************************************/
 
 /*************************************************************
-VARIAB.CPP
-The (C++) object variable is devoted to contain numerical values
-of the model. Only double precision floating point numbers are used
-in LSD. Variables are mainly storages for information. Actually, all
-the work is done by LSD objects.
+ VARIAB.CPP
+ The (C++) object variable is devoted to contain numerical
+ values of the model. Only double precision floating point
+ numbers are used in LSD. Variables are mainly storages for
+ information. Actually, all the work is done by LSD objects.
 
-The most important task of variables is to return their value when requested.
-It is done by comparing the global time of the simulation with the time
-the variable was most recently updated. If the value requested (considering the
-lag ) is already available, that is returned. Otherwise, the variable shifts
-its lagged values, and calls its equation to compute the new value.
+ The most important task of variables is to return their
+ value when requested. It is done by comparing the global time
+ of the simulation with the time the variable was most
+ recently updated. If the value requested (considering the lag)
+ is already available, that is returned. Otherwise, the
+ variable shifts its lagged values, and calls its equation to
+ compute the new value.
 
-All fields and functions in variables are public, so that users may override
-the default mechanism.
+ All fields and functions in variables are public, so that
+ users may override the default mechanism.
 
-The fields composing a variables are
+ The fields composing a variables are
 
-- char *label;
-name of the variable. It needs to be unique in the model
+ - char *label;
+ name of the variable. It needs to be unique in the model
 
-- object *up;
-address of the object containing the variable
+ - object *up;
+ address of the object containing the variable
 
-- variable *next;
-pointer to the next variable contained in the object. Variables in an object
-are organized as a linked chain, and can be reached only  via their fields
-next
+ - variable *next;
+ pointer to the next variable contained in the object.
+ Variables in an object are organized as a linked chain, and
+ can be reached only  via their fields next
 
-- double *val;
-vector of numerical values. val[ 0 ] is the most recent value computed by the
-equation, that is, computed at time last_update. val[1] is the value computed
-at time last_update - 1; val[2] at time last_update - 2 and so on.
+ - double *val;
+ vector of numerical values. val[ 0 ] is the most recent value
+ computed by the equation, that is, computed at time last_update.
+ val[1] is the value computed at time last_update - 1; val[2] at
+ time last_update - 2 and so on.
 
-- int num_lag;
-number of lagged values stored for the variable
+ - int num_lag;
+ number of lagged values stored for the variable
 
-- int save;
-flag identifying whether the variable has to be saved or not in the result file
+ - int save;
+ flag identifying whether the variable has to be saved or not in
+ the result file
 
-- int plot;
-Flag used to indicate variables that are plotted in the run time graph.
+ - int plot;
+ Flag used to indicate variables that are plotted in the run-
+ time graph.
 
-- char deb_mode;
-flag used to indicate the variables to debug. If this flag is equal 'd', when the
-simulation is run in debug mode it stops immediately after the computation of
-its value.
+ - char deb_mode;
+ flag used to indicate the variables to debug. If this flag is
+ equal 'd', when the simulation is run in debug mode it stops
+ immediately after the computation of its value.
 
-- int deb_cond;
-Like the flag deb_mode, but it stops the simulation if the attached condition is
-satisfied. It does not require that the simulation is run in debug mode.
-Its different values represent the different conditions for stopping: <, > or ==
+ - int deb_cond;
+ Like the flag deb_mode, but it stops the simulation if the
+ attached condition is satisfied. It does not require that the
+ simulation is run in debug mode. Its different values represent
+ the different conditions for stopping: <, > or ==
 
-- double deb_cnd_val;
-numerical value used for the conditional stop
+ - double deb_cnd_val;
+ numerical value used for the conditional stop
 
-- int under_computation;
-control flag used to avoid infinite recursion of an equation calling itself.
-Used to issue a message of error
+ - int under_computation;
+ control flag used to avoid infinite recursion of an equation
+ calling itself. Used to issue a message of error
 
-- int last_update;
-contain the global time when it was lastly computed the equation for the variable
+ - int last_update;
+ contain the global time when it was lastly computed the
+ equation for the variable
 
-- int param;
-Flag set to 1, in case the variable is considered a parameter. In case it is,
-when requested the value it is always returned its field val[ 0 ].
+ - int param;
+ Flag set to 1, in case the variable is considered a parameter.
+ In case it is, when requested the value it is always returned
+ its field val[ 0 ].
 
-- char initialized;
-flag indicative whether the variable has been initialized with numerical values
-set as default by the system or if they were actually chosen by the user.
-The flag is 0 in case of newly created objects and 1 in case the variable's
-values has been at least shown once in the initial values editor window.
-This flag is also saved in the data file, so that this information is not lost.
-The flag prevents to run a simulation if the data where not confirmed by users.
+ - char initialized;
+ flag indicative whether the variable has been initialized with
+ numerical values set as default by the system or if they were
+ actually chosen by the user. The flag is 0 in case of newly
+ created objects and 1 in case the variable's values has been
+ at least shown once in the initial values editor window. This
+ flag is also saved in the data file, so that this information
+ is not lost. The flag prevents to run a simulation if the data
+ where not confirmed by users.
 
-The main methods of the (C++) object variable are:
+ The main methods of the (C++) object variable are:
 
-- void init( object *_up, char *_label, int_param, int _num_lag, double *_val );
-perform the initialization.
+ - void init( object *_up, char *_label, int_param, int _num_lag, double *_val );
+ perform the initialization.
 
-- double cal( object *caller, int lag );
-it is its main function. Return the numerical value
+ - double cal( object *caller, int lag );
+ it is its main function. Return the numerical value
 
-	   val[last_update+lag-t]
+ 	   val[last_update+lag-t]
 
-if the condition
+ if the condition
 
-	   t-lag<=last_update
+ 	   t-lag<=last_update
 
-is satisfied. That means that either the variable has already been updated,
-and therefore the requested value is available, or that, though the variable
-has not been still updated in the time step, the value requested is a lagged one
-and therefore can be retrived from the vector of the past values.
+ is satisfied. That means that either the variable has already
+ been updated, and therefore the requested value is available,
+ or that, though the variable has not been still updated in the
+ time step, the value requested is a lagged one and therefore
+ can be retrieved from the vector of the past values.
 
-Only in case the lag requested is zero and the variable has not been computed
-at the present time step, the method shifts its lagged values and calls the
-method fun that perform the equation computation.
+ Only in case the lag requested is zero and the variable has
+ not been computed at the present time step, the method shifts
+ its lagged values and calls the method fun that perform the
+ equation computation.
 
-- void empty( void ) ;
-It is used to free all the memory assigned to the variable. Used by
-object::delete_obj to cancel an object.
-*************************************************************/
+ - void empty( void ) ;
+ It is used to free all the memory assigned to the variable.
+ Used by object::delete_obj to cancel an object.
+ *************************************************************/
 
 #include "lib/libLSD.h"				// LSD library classes
 
 
-/****************************************************
-VARIABLE
-copy constructor
-****************************************************/
-variable::variable( const variable &v )
+/*************************************************************
+ VARIABLE
+ copy constructor
+ *************************************************************/
+lsd::variable::variable( const variable &v )
 {
 	dummy = v.dummy;
 	observe = v.observe;
@@ -156,11 +168,10 @@ variable::variable( const variable &v )
 }
 
 
-/****************************************************
-~VARIABLE
-desstructor
-****************************************************/
-variable::~variable( void )
+/*************************************************************
+ ~VARIABLE destructor
+ *************************************************************/
+lsd::variable::~variable( void )
 {
 	delete [ ] label;
 	delete [ ] val;
@@ -169,10 +180,10 @@ variable::~variable( void )
 }
 
 
-/****************************************************
-INIT
-****************************************************/
-void variable::init( object *_up, simulation *_sim, const char *_label,
+/*************************************************************
+ INIT
+ *************************************************************/
+void lsd::variable::init( object *_up, simulation *_sim, const char *_label,
 					 int _param, int _num_lag, double *_val )
 {
 	int i;
@@ -198,10 +209,10 @@ void variable::init( object *_up, simulation *_sim, const char *_label,
 }
 
 
-/****************************************************
-EMPTY
-****************************************************/
-void variable::empty( bool no_lock )
+/*************************************************************
+ EMPTY
+ *************************************************************/
+void lsd::variable::empty( bool no_lock )
 {
 
 #ifndef _NP_
@@ -227,12 +238,12 @@ void variable::empty( bool no_lock )
 }
 
 
-/****************************
-CHK_VAL
-Adjust value for considering
-variable constraints
-*****************************/
-double variable::chk_val( double val )
+/*************************************************************
+ CHK_VAL
+ Adjust value for considering
+ variable constraints
+ *************************************************************/
+double lsd::variable::chk_val( double val )
 {
 	if ( std::isfinite( val ) )
 	{
@@ -252,11 +263,11 @@ double variable::chk_val( double val )
 }
 
 
-/***************************************************
-CAL
-Standard version (non parallel computation)
-****************************************************/
-double variable::cal( object *caller, int lag )
+/*************************************************************
+ CAL
+ Standard version (non parallel computation)
+ *************************************************************/
+double lsd::variable::cal( object *caller, int lag )
 {
 	int i, eff_lag;
 	double app;
@@ -419,7 +430,7 @@ double variable::cal( object *caller, int lag )
 	}
 	catch ( std::exception& exc )
 	{
-		plog( "\n\nAn exception was detected while computing the equation \nfor '%s' requested by object '%s'", label, caller == NULL ? "(none)" : caller->label );
+		sim->plog( "\n\nAn exception was detected while computing the equation \nfor '%s' requested by object '%s'", label, caller == NULL ? "(none)" : caller->label );
 		sim->quit = 2;
 		throw;
 	}
@@ -431,7 +442,7 @@ double variable::cal( object *caller, int lag )
 	{
 		if ( sim->quit != 2 )		// error message not already presented?
 		{
-			plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s' requested by object '%s'", label, caller == NULL ? "(none)" : caller->label );
+			sim->plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s' requested by object '%s'", label, caller == NULL ? "(none)" : caller->label );
 			sim->quit = 2;
 			throw;
 		}
@@ -489,15 +500,15 @@ double variable::cal( object *caller, int lag )
 			{
 				set_lab_tit( );
 				tit_updated = true;
-				plog_tag( "\n%-12.12s(%-.10s)\t=", "prof1", label, lab_tit );
-				plog_tag( "%.4g\t", "highlight", val[ 0 ] );
-				plog( "t=" );
-				plog_tag( "%d\t", "highlight", sim->t );
-				plog( "msecs=" );
-				plog_tag( "%d\t", "highlight", time );
-				plog( "stack=" );
-				plog_tag( "%d\t", "highlight", sim->stack_level );
-				plog( "caller=%s%s%s", caller == NULL ? "SYSTEM" : caller->label, caller == NULL ? "" : "\ttrigger=", caller == NULL || sim->stack_log == NULL || sim->stack_log->prev == NULL ? "" : sim->stack_log->prev->label );
+				sim->plog_tag( "\n%-12.12s(%-.10s)\t=", "prof1", label, lab_tit );
+				sim->plog_tag( "%.4g\t", "highlight", val[ 0 ] );
+				sim->plog( "t=" );
+				sim->plog_tag( "%d\t", "highlight", sim->t );
+				sim->plog( "msecs=" );
+				sim->plog_tag( "%d\t", "highlight", time );
+				sim->plog( "stack=" );
+				sim->plog_tag( "%d\t", "highlight", sim->stack_level );
+				sim->plog( "caller=%s%s%s", caller == NULL ? "SYSTEM" : caller->label, caller == NULL ? "" : "\ttrigger=", caller == NULL || sim->stack_log == NULL || sim->stack_log->prev == NULL ? "" : sim->stack_log->prev->label );
 			}
 		}
 
@@ -599,11 +610,11 @@ double variable::cal( object *caller, int lag )
 
 
 #ifndef _NP_
-/***************************************************
-CAL_WORKER
-Multi-thread worker for variable computation
-****************************************************/
-void worker::cal_worker( void )
+/*************************************************************
+ CAL_WORKER
+ Multi-thread worker for variable computation
+ *************************************************************/
+void lsd::worker::cal_worker( void )
 {
 	int i;
 	double app;
@@ -755,10 +766,10 @@ void worker::cal_worker( void )
 }
 
 
-/***************************************************
-WORKER destructor
-****************************************************/
-worker::~worker( void )
+/*************************************************************
+ WORKER destructor
+ *************************************************************/
+lsd::worker::~worker( void )
 {
 	// command thread shutdown if running
 	if ( running && ! errored )
@@ -778,11 +789,11 @@ worker::~worker( void )
 }
 
 
-/***************************************************
-SIGNAL
-Handle system signals in worker
-****************************************************/
-void worker::signal( int sig )
+/*************************************************************
+ SIGNAL
+ Handle system signals in worker
+ *************************************************************/
+void lsd::worker::signal( int sig )
 {
 	char signame[ 16 ];
 
@@ -828,22 +839,22 @@ void worker::signal( int sig )
 }
 
 
-/***************************************************
-SIGNAL_WRAPPER
-Reformat signal function format to comply with OS
-****************************************************/
-void worker::signal_wrapper( int signum )
+/*************************************************************
+ SIGNAL_WRAPPER
+ Reformat signal function format to comply with OS
+ *************************************************************/
+void lsd::worker::signal_wrapper( int signum )
 {
 	// call the appropriate worker object member function to handle signal
 	worker_thread_ptr[ std::this_thread::get_id( ) ]->signal( signum );
 }
 
 
-/***************************************************
-CAL
-Multi-thread CAL version (parallel computation)
-****************************************************/
-void worker::cal( variable *_v )
+/*************************************************************
+ CAL
+ Multi-thread CAL version (parallel computation)
+ *************************************************************/
+void lsd::worker::cal( variable *_v )
 {
 	uniq_lT worker_lock( worker_lck );
 	v = _v;
@@ -852,11 +863,11 @@ void worker::cal( variable *_v )
 }
 
 
-/****************************************************
-CHECK
-Check if worker is running and handle problems
-****************************************************/
-bool worker::check( void )
+/*************************************************************
+ CHECK
+ Check if worker is running and handle problems
+ *************************************************************/
+bool lsd::worker::check( void )
 {
 	if ( running && ! errored )				// nothing to do?
 		return true;
@@ -870,7 +881,7 @@ bool worker::check( void )
 
 		if ( signum >= 0 )
 		{
-			plog( err_msg1 );
+			sim->plog( err_msg1 );
 			signal_handler( signum );
 		}
 		else
@@ -908,11 +919,11 @@ bool worker::check( void )
 }
 
 
-/***************************************************
-PARALLEL_UPDATE
-Multi-thread scheduler for parallel updating
-****************************************************/
-void simulation::parallel_update( variable *v, object* p, object *caller )
+/*************************************************************
+ PARALLEL_UPDATE
+ Multi-thread scheduler for parallel updating
+ *************************************************************/
+void lsd::simulation::parallel_update( variable *v, object* p, object *caller )
 {
 	bool ready[ max_threads ], wait = false;
 	int i, nt, wait_time;
@@ -1077,17 +1088,15 @@ void simulation::parallel_update( variable *v, object* p, object *caller )
 	// re-enable concurrent parallel update
 	parallel_ready = true;
 }
-
 #endif
 
-/****************************************************
-WORKER_ERRORS
-Check how many workers are in error condition
-****************************************************/
-int simulation::worker_errors( void )
+/*************************************************************
+ WORKER_ERRORS
+ Check how many workers are in error condition
+ *************************************************************/
+int lsd::simulation::worker_errors( void )
 {
 #ifndef _NP_
-
 	int i, count;
 
 	if ( workers == NULL )
@@ -1098,10 +1107,7 @@ int simulation::worker_errors( void )
 			++count;
 
 	return count;
-
 #else
-
 	return 0;
-
 #endif
 }

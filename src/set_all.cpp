@@ -13,37 +13,38 @@
  *************************************************************/
 
 /*************************************************************
-SETALL.CPP
-It contains the routine called from the edit_dat file for setting all the
-values of a variable with a function, instead of inserting manually.
+ SETALL.CPP
+ It contains the routine called from the edit_dat file for
+ setting all the values of a variable with a function, instead
+ of inserting manually.
 
-The functions contained in this file are:
+ The functions contained in this file are:
 
-- void object::set_all( const char *lab, int lag, const char *parWnd )
-it allows 5 options to set all values. It uses one value entered by the user
-in this window and, for some option, the first value for this variable in the
-model. That is, the value for this variable contained in the first object of this
-type.
-The options are the following:
-1) set all values equal to the entered value
-2 ) the first value is not changed and all the others are computed as the previous
-plus the entered object.
-3) as before, but instead of producing a ever increasing series, it re-initialize
-any new group.
-4) random numbers, drawn by a uniform value whose min is the first value
-and max is the inserted value
-5) random numbers, drawn by a normal whose mean is the first value and
-standard deviation is the inserted value.
-*************************************************************/
+ - void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
+ it allows 5 options to set all values. It uses one value
+ entered by the user in this window and, for some option, the
+ first value for this variable in the model. That is, the
+ value for this variable contained in the first object of
+ this type.
+ The options are the following:
+ 1) set all values equal to the entered value
+ 2) the first value is not changed and all the others are
+    computed as the previous plus the entered object.
+ 3) as before, but instead of producing a ever increasing
+    series, it re-initialize any new group.
+ 4) random numbers, drawn by a uniform value whose min is the
+    first value and max is the inserted value
+ 5) random numbers, drawn by a normal whose mean is the first
+    value and standard deviation is the inserted value.
+ *************************************************************/
 
 #include "LSD.h"
 
 
-/****************************************************
-SET_ALL
-****************************************************/
-
-void object::set_all( const char *lab, int lag, const char *parWnd )
+/*************************************************************
+ SET_ALL
+ *************************************************************/
+void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 {
 	bool selFocus = true;
 	char ch[ MAX_ELEM_LENGTH ], action[ MAX_ELEM_LENGTH ], msg[ MAX_LINE_SIZE ];
@@ -69,9 +70,9 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 	if ( cv->param == 1 )
 		lag = 0;
 
-	Tcl_LinkVar( interp, "res", ( char * ) &res, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "value1", ( char * ) &value1, TCL_LINK_DOUBLE );
-	Tcl_LinkVar( interp, "value2", ( char * ) &value2, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( gui::interp, "res", ( char * ) &res, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "value1", ( char * ) &value1, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( gui::interp, "value2", ( char * ) &value2, TCL_LINK_DOUBLE );
 
 	// default values
 	res = 1;
@@ -326,11 +327,11 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 		selFocus = false;
 	}
 
-	choice = 0;
-	while ( choice == 0 )
+	gui::choice = 0;
+	while ( gui::choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	if ( choice == 9 )
+	if ( gui::choice == 9 )
 	{
 		// search instance from
 		i = compute_copyfrom( "$_w" );
@@ -338,7 +339,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 		goto here_setall;
 	}
 
-	if ( choice == 10 )
+	if ( gui::choice == 10 )
 	{
 		// search instance to
 		i = compute_copyfrom( "$_w" );
@@ -359,7 +360,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 			set choice 0 \
 		}" );
 
-	if ( choice == 0 )
+	if ( gui::choice == 0 )
 	{
 		selFocus = true;
 		goto here_setall;
@@ -367,21 +368,21 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 
 	cmd( "destroytop $_w" );
 
-	Tcl_UnlinkVar( interp, "value1" );
-	Tcl_UnlinkVar( interp, "value2" );
-	Tcl_UnlinkVar( interp, "res" );
+	Tcl_UnlinkVar( gui::interp, "value1" );
+	Tcl_UnlinkVar( gui::interp, "value2" );
+	Tcl_UnlinkVar( gui::interp, "res" );
 
-	if ( choice == 2 )
+	if ( gui::choice == 2 )
 		return;
 
-	step_in = get_int( "step_in" );
-	fill = get_int( "fill" );
-	to_all = get_int( "to_all" );
-	cases_from = get_int( "cases_from" );
-	cases_to = get_int( "cases_to" );
-	use_seed = get_int( "use_seed" );
-	rnd_seed = get_int( "rnd_seed" );
-	update_d = get_int( "update_d" );
+	step_in = gui::get_int( "step_in" );
+	fill = gui::get_int( "fill" );
+	to_all = gui::get_int( "to_all" );
+	cases_from = gui::get_int( "cases_from" );
+	cases_to = gui::get_int( "cases_to" );
+	use_seed = gui::get_int( "use_seed" );
+	rnd_seed = gui::get_int( "rnd_seed" );
+	update_d = gui::get_int( "update_d" );
 
 	if ( use_seed )
 		sim->init_random( ( unsigned ) rnd_seed );
@@ -401,7 +402,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 					++j;
 				}
 
-			snprintf( action, MAX_ELEM_LENGTH, "equal to %g%s", value1, var_constr( cv, msg, MAX_LINE_SIZE ) );
+			snprintf( action, MAX_ELEM_LENGTH, "equal to %g%s", value1, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
 		// range
@@ -426,7 +427,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 					++step;
 			}
 
-			snprintf( action, MAX_ELEM_LENGTH, "ranging from %g to %g (increments of %g)%s", value1, value2, value, var_constr( cv, msg, MAX_LINE_SIZE ) );
+			snprintf( action, MAX_ELEM_LENGTH, "ranging from %g to %g (increments of %g)%s", value1, value2, value, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
 
@@ -446,7 +447,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 					++step;
 			}
 
-			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g%s", value1, value2, var_constr( cv, msg, MAX_LINE_SIZE ) );
+			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g%s", value1, value2, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
 
@@ -465,7 +466,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 						step = 0;
 				}
 
-			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g for each group of objects%s", value1, value2, var_constr( cv, msg, MAX_LINE_SIZE ) );
+			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g for each group of objects%s", value1, value2, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
 
@@ -480,7 +481,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 					++j;
 				}
 
-			snprintf( action, MAX_ELEM_LENGTH, "drawn from uniform distribution between %g and %g%s", value1, value2, var_constr( cv, msg, MAX_LINE_SIZE ) );
+			snprintf( action, MAX_ELEM_LENGTH, "drawn from uniform distribution between %g and %g%s", value1, value2, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
 
@@ -495,7 +496,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 					++j;
 				}
 
-			snprintf( action, MAX_ELEM_LENGTH, "drawn from integer uniform distribution between %g and %g%s", round( value1 ), round( value2 ), var_constr( cv, msg, MAX_LINE_SIZE ) );
+			snprintf( action, MAX_ELEM_LENGTH, "drawn from integer uniform distribution between %g and %g%s", round( value1 ), round( value2 ), cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
 
@@ -510,7 +511,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 					++j;
 				}
 
-			snprintf( action, MAX_ELEM_LENGTH, "drawn from normal distribution of mean %g and s.d. %g%s", value1, value2, var_constr( cv, msg, MAX_LINE_SIZE ) );
+			snprintf( action, MAX_ELEM_LENGTH, "drawn from normal distribution of mean %g and s.d. %g%s", value1, value2, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
 
@@ -518,12 +519,12 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 		case 7:
 			cmd( "set oldpath [ pwd ]" );
 			cmd( "set filename [ tk_getOpenFile -parent . -title \"File to Import Data\" -filetypes { { {Text Files} {.txt} } { {All Files} {*} } } ]" );
-			app = get_str( "filename" );
+			app = gui::get_str( "filename" );
 			if ( app == NULL || ! strcmp( app, "" ) )
 				return;
 
 			cmd( "cd [ file dirname $filename ]" );
-			app = eval_str( "[ file tail $filename ]" );
+			app = gui::eval_str( "[ file tail $filename ]" );
 			f = fopen( app, "r" );
 			cmd( "cd $oldpath" );
 			if ( f == NULL )
@@ -548,7 +549,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 			if ( cur != NULL || kappa == EOF )
 				cmd( "ttk::messageBox -parent $_w -title Error -icon error -type ok -message \"Incomplete data\" -detail \"Problem loading data from file '%s', the file contains fewer values compared to the number of instances to set.\"", app );
 
-			snprintf( action, MAX_ELEM_LENGTH, "set with data from file %s%s", app, var_constr( cv, msg, MAX_LINE_SIZE ) );
+			snprintf( action, MAX_ELEM_LENGTH, "set with data from file %s%s", app, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
 
@@ -557,7 +558,7 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 							 "if error persists, please contact developers",
 							 true,
 							 "invalid option for setting values" );
-			lsd_exit_gui( 22 );
+			gui::lsd_exit_gui( 22 );
 	}
 
 	if ( update_d )
@@ -586,43 +587,43 @@ void object::set_all( const char *lab, int lag, const char *parWnd )
 		sim->change_description( lab, NULL, -1, NULL, msg );
 	}
 
-	unsaved_change( true );				// signal unsaved change
+	gui::unsaved_change( true );			// signal unsaved change
 }
 
 
-/****************************************************
-VAR_CONSTR
-****************************************************/
-const char *var_constr( variable *var, char *buf, int buf_sz )
+/*************************************************************
+ VAR_CONSTR
+ *************************************************************/
+const char *lsd::variable::print_constr( char *buf, int buf_sz )
 {
 	std::string text;
 
-	if ( var == NULL || ( ! var->integer && std::isnan( var->max_val ) && std::isnan( var->min_val ) ) )
+	if ( ! integer && std::isnan( max_val ) && std::isnan( min_val ) )
 		strcpy( buf, "" );
 	else
 	{
-		if ( var->integer )
+		if ( integer )
 			text = ",\nrounded to integer";
 
-		if ( ! std::isnan( var->min_val ) )
+		if ( ! std::isnan( min_val ) )
 		{
 			if ( text.size( ) > 0 )
 				text += ", ";
 			else
 				text += ",\n";
 
-			snprintf( buf, buf_sz, "greater or equal to %.6g", var->min_val );
+			snprintf( buf, buf_sz, "greater or equal to %.6g", min_val );
 			text += buf;
 		}
 
-		if ( ! std::isnan( var->max_val ) )
+		if ( ! std::isnan( max_val ) )
 		{
 			if ( text.size( ) > 0 )
 				text += ", ";
 			else
 				text += ",\n";
 
-			snprintf( buf, buf_sz, "less or equal to %.6g", var->max_val );
+			snprintf( buf, buf_sz, "less or equal to %.6g", max_val );
 			text += buf;
 		}
 

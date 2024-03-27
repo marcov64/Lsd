@@ -13,26 +13,26 @@
  *************************************************************/
 
 /*************************************************************
-LSD.CPP
-The LSD Browser GUI program entry point.
+ LSD.CPP
+ The LSD Browser GUI program entry point.
 
-This file can be compiled with the command make in the src
-directory.
+ This file can be compiled with the command make in the src
+ directory.
 
-Relevant macros for conditional compilation (when defined):
+ Relevant macros for conditional compilation (when defined):
 
-- _FUN_: user model equation file
-- _NW_: No Window executable
-- _NP_: no parallel (multi-task) processing
-- _NT_: no signal trapping (better when debugging in GDB)
-*************************************************************/
+ - _FUN_: user model equation file
+ - _NW_: No Window executable
+ - _NP_: no parallel (multi-task) processing
+ - _NT_: no signal trapping (better when debugging in GDB)
+ *************************************************************/
 
 #include "LSD.h"
 
 
-/*************************************
+/*************************************************************
  MAIN
- *************************************/
+ *************************************************************/
 int main( int argn, const char **argv )
 {
 	int res = -1;
@@ -40,7 +40,7 @@ int main( int argn, const char **argv )
 #ifndef _NT_
 
 	// register all signal handlers
-	handle_signals( signal_handler );
+	lsd::handle_signals( lsd::signal_handler );
 
 	try
 	{
@@ -48,18 +48,18 @@ int main( int argn, const char **argv )
 #endif
 
 		// start of GUI load
-		res = load_gui( argv );
+		res = gui::load_gui( argv );
 
 #ifndef _NT_
 
 	}
 	catch ( std::bad_alloc& exc )	// out of memory conditions
 	{
-		exception_handler( SIGMEM, exc.what( ) );
+		lsd::exception_handler( SIGMEM, exc.what( ) );
 	}
 	catch ( std::exception& exc )	// other known error conditions
 	{
-		exception_handler( SIGSTL, exc.what( ) );
+		lsd::exception_handler( SIGSTL, exc.what( ) );
 	}
 	catch ( ... )				// other unknown error conditions
 	{
@@ -68,6 +68,7 @@ int main( int argn, const char **argv )
 
 #endif
 
-	lsd_exit( res );
+	lsd::lsd_exit( res );
+
 	return res;
 }

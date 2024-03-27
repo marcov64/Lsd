@@ -13,354 +13,343 @@
  *************************************************************/
 
 /*************************************************************
-CHECK.H
-This file contains all the checking support functions required
-by macros to allow inlining the code for max performance.
-Also contains the macro error handlers.
-*************************************************************/
+ CHECK.H
+ This file contains all the checking support functions required
+ by macros to allow inlining the code for max performance.
+ Also contains the macro error handlers.
+ *************************************************************/
 
 #ifndef LSDLIB
 	#include "lib/libLSD.h"				// LSD library classes
 #endif
 
-
-/****************************
-CHK_PTR
-User pointer check
-*****************************/
-inline bool simulation::chk_ptr( object *ptr )
+namespace lsd
 {
-	bool obj_exists;
-
-	if ( ptr == NULL )
-		return true;
-
-	if ( no_ptr_chk )
-		return false;
-
-	if ( parallel_mode ) 				// use lock (slow) only if really needed
+/*************************************************************
+ CHK_PTR
+ User pointer check
+ *************************************************************/
+	inline bool simulation::chk_ptr( object *ptr )
 	{
-#ifndef _NP_
-		// prevent concurrent update by more than one thread
-		l_guardT lock( lock_obj_list );
-#endif
-		obj_exists = obj_list.find( ptr ) != obj_list.end( );
-	}
-	else
-		obj_exists = obj_list.find( ptr ) != obj_list.end( );
+		bool obj_exists;
 
-	if ( obj_exists )
-		return false;
+		if ( ptr == NULL )
+			return true;
 
-	return true;
-}
+		if ( no_ptr_chk )
+			return false;
 
-
-/****************************
-CHK_OBJ
-User pointer check for
-valid or NULL pointer
-*****************************/
-inline bool simulation::chk_obj( object *ptr )
-{
-	bool obj_exists;
-
-	if ( no_ptr_chk || ptr == NULL )
-		return false;
-
-	if ( parallel_mode ) 			// use lock (slow) only if really needed
-	{
-#ifndef _NP_
-		// prevent concurrent update by more than one thread
-		l_guardT lock( lock_obj_list );
-#endif
-		obj_exists = obj_list.find( ptr ) != obj_list.end( );
-	}
-	else
-		obj_exists = obj_list.find( ptr ) != obj_list.end( );
-
-	if ( obj_exists )
-		return false;
-
-	return true;
-}
-
-
-/****************************
-CHK_HOOK
-Hook vector bound check
-*****************************/
-inline bool simulation::chk_hook( object *ptr, unsigned num )
-{
-	if ( ptr == NULL )
-		return true;
-
-	if ( no_ptr_chk )
-		return false;
-
-	if ( num < ptr->hooks.size( ) )
-		return false;
-
-	return true;
-}
-
-
-/****************************
-CHK_EQ
-Get equation function
-pointer for label
-*****************************/
-inline eq_funcT simulation::chk_eq( const char *lab )
-{
-	auto eq_it = eq_map.find( lab );
-
-	if ( eq_it != eq_map.end( ) )
-		return eq_it->second;
-
-	error_hard( "equation not found",
-				"check your configuration (variable name) or\ncode (equation name) to prevent this situation\nPossible problems:\n- There is no equation for this variable\n- The equation name is different from the variable name (case matters!)",
-				false,
-				"equation not found for variable '%s'",
-				lab );
-	return NULL;
-}
-
-
-/****************************
-CHK_RES
-Check for invalid equation
-result
-*****************************/
-inline double variable::chk_res( double res )
-{
-	if ( std::isfinite( res ) )
-	{
-		if ( integer )
-			res = round( res );
-
-		if ( ! std::isnan( max_val ) && res > max_val )
-			res = max_val;
-		else
-			if ( ! std::isnan( min_val ) && res < min_val )
-				res = min_val;
-	}
-	else
-		if ( sim->quit == 0 && ( ( ! sim->use_nan && std::isnan( res ) ) || std::isinf( res ) ) )
-			sim->error_hard( "invalid equation result",
-							 "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation",
-							 true,
-							 "equation for '%s' produces the invalid value '%lf' at case %d",
-							 label, res, sim->t );
-
-	return res;
-}
-
-
-/****************************
-CHK_DUMMY
-Check if dummy must have
-master variable updated
-*****************************/
-inline double variable::chk_dummy( const char *lab )
-{
-	variable *cv;
-
-	if ( strlen( lab ) > 0 )
-	{
-		cv = up->search_var( up, lab, false, false, false );
-
-		if ( cv != NULL )
+		if ( parallel_mode ) 				// use lock (slow) only if really needed
 		{
-			dummy = true;
-
-			if ( ! cv->up->under_comput_var( lab ) )
-				cv->up->cal( up, lab, 0, true );
+	#ifndef _NP_
+			// prevent concurrent update by more than one thread
+			l_guardT lock( lock_obj_list );
+	#endif
+			obj_exists = obj_list.find( ptr ) != obj_list.end( );
 		}
 		else
-			sim->error_hard( "updater variable not found",
-							 "check updater variable name or create it in model structure",
-							 false,
-							 "variable '%s' is missing", lab );
+			obj_exists = obj_list.find( ptr ) != obj_list.end( );
+
+		if ( obj_exists )
+			return false;
+
+		return true;
 	}
 
-	return val[ 0 ];
-}
 
-
-/***************************************************
-CYCLE_OBJ
-Support function used in CYCLEx macros
-***************************************************/
-inline object *simulation::cycle_obj( object *parent, const char *label, const char *command )
-{
-	object *cur = parent->search_err( label, no_search, no_search_up, "cycling" );
-
-	if ( cur == NULL )   // invalid cyclable object, even if in blueprint
+/*************************************************************
+ CHK_OBJ
+ User pointer check for valid or
+ NULL pointer
+ *************************************************************/
+	inline bool simulation::chk_obj( object *ptr )
 	{
-		object *cur1 = root->search( label );
+		bool obj_exists;
 
-		if ( no_search && cur1 != NULL && parent->label != NULL &&
-			 cur1->up != NULL && cur1->up->label != NULL &&
-			 strcmp( parent->label, cur1->up->label ) )
-			error_hard( "object is not a descending object",
-						"move object in model structure, or specify a parent object",
-						false,
-						"object '%s' not directly under '%s' for cycling\n(NO_SEARCH enabled!)",
-						label, parent->label );
+		if ( no_ptr_chk || ptr == NULL )
+			return false;
+
+		if ( parallel_mode ) 			// use lock (slow) only if really needed
+		{
+	#ifndef _NP_
+			// prevent concurrent update by more than one thread
+			l_guardT lock( lock_obj_list );
+	#endif
+			obj_exists = obj_list.find( ptr ) != obj_list.end( );
+		}
+		else
+			obj_exists = obj_list.find( ptr ) != obj_list.end( );
+
+		if ( obj_exists )
+			return false;
+
+		return true;
 	}
 
-	return cur;
-}
+
+/*************************************************************
+ CHK_HOOK
+ Hook vector bound check
+ *************************************************************/
+	inline bool simulation::chk_hook( object *ptr, unsigned num )
+	{
+		if ( ptr == NULL )
+			return true;
+
+		if ( no_ptr_chk )
+			return false;
+
+		if ( num < ptr->hooks.size( ) )
+			return false;
+
+		return true;
+	}
 
 
-/****************************************************
-BROTHER
-****************************************************/
-inline object *brother( object *c )
-{
-	if ( c == NULL || c->next == NULL )
+/*************************************************************
+ CHK_EQ
+ Get equation function pointer
+ for label
+ *************************************************************/
+	inline eq_funcT simulation::chk_eq( const char *lab )
+	{
+		auto eq_it = eq_map.find( lab );
+
+		if ( eq_it != eq_map.end( ) )
+			return eq_it->second;
+
+		error_hard( "equation not found",
+					"check your configuration (variable name) or\ncode (equation name) to prevent this situation\nPossible problems:\n- There is no equation for this variable\n- The equation name is different from the variable name (case matters!)",
+					false,
+					"equation not found for variable '%s'",
+					lab );
 		return NULL;
-
-	return c->next;
-}
-
-
-/****************************
-BAD_PTR_*
-Bad pointer error message
-Escape function for invalid
-pointers in macros
-*****************************/
-inline double simulation::bad_ptr_dbl( object *ptr, const char *file, int line )
-{
-	if ( ptr == NULL )
-		error_hard( "invalid pointer operation",
-				"check your equation code to ensure pointer points\nto a valid object before the operation",
-				true,
-				"NULL pointer used in file '%s', line %d", file, line );
-	else
-		error_hard( "invalid pointer operation",
-				"check your equation code to ensure pointer points\nto a valid object before the operation",
-				true,
-				"pointer to non-existing object used\nin file '%s', line %d", file, line );
-	return 0.;
-}
-
-inline char *simulation::bad_ptr_chr( object *ptr, const char *file, int line )
-{
-	bad_ptr_dbl( ptr, file, line );
-	return NULL;
-}
-
-inline netLink *simulation::bad_ptr_lnk( object *ptr, const char *file, int line )
-{
-	bad_ptr_dbl( ptr, file, line );
-	return NULL;
-}
-
-inline object *simulation::bad_ptr_obj( object *ptr, const char *file, int line )
-{
-	bad_ptr_dbl( ptr, file, line );
-	return NULL;
-}
-
-inline void simulation::bad_ptr_void( object *ptr, const char *file, int line )
-{
-	bad_ptr_dbl( ptr, file, line );
-	return;
-}
-
-
-/****************************
-NUL_LINK_*
-NULL link error message
-Escape function for invalid
-network link pointers in macros
-*****************************/
-inline double simulation::nul_lnk_dbl( const char *file, int line )
-{
-	error_hard( "invalid network link",
-				"check your equation code to ensure pointer points\nto a valid link before the operation",
-				true,
-				"NULL network link pointer used\nin file '%s', line %d", file, line );
-	return 0.;
-}
-
-inline object *simulation::nul_lnk_obj( const char *file, int line )
-{
-	nul_lnk_dbl( file, line );
-	return NULL;
-}
-
-inline void simulation::nul_lnk_void( const char *file, int line )
-{
-	nul_lnk_dbl( file, line );
-	return;
-}
-
-
-/****************************
-NO_HOOK_OBJ
-Invalid hook error message
-Escape function for invalid
-hook pointers in macros
-*****************************/
-inline object *simulation::no_hook_obj( object *ptr, unsigned num, const char *file, int line )
-{
-	bool bad_index = false;
-	char err_msg[ MAX_LINE_SIZE ];
-
-	if ( ptr == NULL )
-		snprintf( err_msg, MAX_LINE_SIZE, "NULL pointer used in file '%s', line %d", file, line );
-	else
-	{
-#ifndef _NP_
-		// prevent concurrent update by more than one thread
-		l_guardT lock( lock_obj_list );
-#endif
-		if ( obj_list.find( ptr ) == obj_list.end( ) )
-			snprintf( err_msg, MAX_LINE_SIZE, "pointer to non-existing object used\nin file '%s', line %d", file, line );
-		else
-			bad_index = true;
 	}
 
-	if ( ! bad_index )
-		error_hard( "invalid pointer operation",
+
+/*************************************************************
+ CHK_RES
+ Check for invalid equation result
+ *************************************************************/
+	inline double variable::chk_res( double res )
+	{
+		if ( std::isfinite( res ) )
+		{
+			if ( integer )
+				res = round( res );
+
+			if ( ! std::isnan( max_val ) && res > max_val )
+				res = max_val;
+			else
+				if ( ! std::isnan( min_val ) && res < min_val )
+					res = min_val;
+		}
+		else
+			if ( sim->quit == 0 && ( ( ! sim->use_nan && std::isnan( res ) ) || std::isinf( res ) ) )
+				sim->error_hard( "invalid equation result",
+								 "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation",
+								 true,
+								 "equation for '%s' produces the invalid value '%lf' at case %d",
+								 label, res, sim->t );
+
+		return res;
+	}
+
+
+/*************************************************************
+ CHK_DUMMY
+ Check if dummy must have master
+ variable updated
+ *************************************************************/
+	inline double variable::chk_dummy( const char *lab )
+	{
+		variable *cv;
+
+		if ( strlen( lab ) > 0 )
+		{
+			cv = up->search_var( up, lab, false, false, false );
+
+			if ( cv != NULL )
+			{
+				dummy = true;
+
+				if ( ! cv->up->under_comput_var( lab ) )
+					cv->up->cal( up, lab, 0, true );
+			}
+			else
+				sim->error_hard( "updater variable not found",
+								 "check updater variable name or create it in model structure",
+								 false,
+								 "variable '%s' is missing", lab );
+		}
+
+		return val[ 0 ];
+	}
+
+
+/*************************************************************
+ CYCLE_OBJ
+ Support function used in CYCLEx macros
+ *************************************************************/
+	inline object *simulation::cycle_obj( object *parent, const char *label, const char *command )
+	{
+		object *cur = parent->search_err( label, no_search, no_search_up, "cycling" );
+
+		if ( cur == NULL )   // invalid cyclable object, even if in blueprint
+		{
+			object *cur1 = root->search( label );
+
+			if ( no_search && cur1 != NULL && parent->label != NULL &&
+				 cur1->up != NULL && cur1->up->label != NULL &&
+				 strcmp( parent->label, cur1->up->label ) )
+				error_hard( "object is not a descending object",
+							"move object in model structure, or specify a parent object",
+							false,
+							"object '%s' not directly under '%s' for cycling\n(NO_SEARCH enabled!)",
+							label, parent->label );
+		}
+
+		return cur;
+	}
+
+
+/*************************************************************
+ BAD_PTR_*
+ Bad pointer error message
+ Escape function for invalid
+ pointers in macros
+ *************************************************************/
+	inline double simulation::bad_ptr_dbl( object *ptr, const char *file, int line )
+	{
+		if ( ptr == NULL )
+			error_hard( "invalid pointer operation",
 					"check your equation code to ensure pointer points\nto a valid object before the operation",
-					true, err_msg );
-	else
-	{
-		if ( ptr->hooks.size( ) > 0 )
-			snprintf( err_msg, MAX_LINE_SIZE, "hook number %d over maximum set (%d)\nin file '%s', line %d", num, ( int ) ptr->hooks.size( ) - 1, file, line );
+					true,
+					"NULL pointer used in file '%s', line %d", file, line );
 		else
-			snprintf( err_msg, MAX_LINE_SIZE, "hook used but none is allocated\nin file '%s', line %d", file, line );
-
-		error_hard( "invalid hook index",
-					"check your equation code to ensure setting hook indexes\nto valid values (0 to n-1, n is the number of hooks)\nor use ADDHOOK to allocate the requested hook",
-					true, err_msg );
+			error_hard( "invalid pointer operation",
+					"check your equation code to ensure pointer points\nto a valid object before the operation",
+					true,
+					"pointer to non-existing object used\nin file '%s', line %d", file, line );
+		return 0.;
 	}
 
-	return NULL;
-}
+	inline char *simulation::bad_ptr_chr( object *ptr, const char *file, int line )
+	{
+		bad_ptr_dbl( ptr, file, line );
+		return NULL;
+	}
+
+	inline netLink *simulation::bad_ptr_lnk( object *ptr, const char *file, int line )
+	{
+		bad_ptr_dbl( ptr, file, line );
+		return NULL;
+	}
+
+	inline object *simulation::bad_ptr_obj( object *ptr, const char *file, int line )
+	{
+		bad_ptr_dbl( ptr, file, line );
+		return NULL;
+	}
+
+	inline void simulation::bad_ptr_void( object *ptr, const char *file, int line )
+	{
+		bad_ptr_dbl( ptr, file, line );
+		return;
+	}
 
 
-/****************************
-NO_NODE_*
-No network node error message
-Escape function for invalid
-network object in macros
-*****************************/
-inline double simulation::no_node_dbl( const char *lab, const char *file, int line )
-{
-	error_hard( "invalid network object",
-				"check your equation code to add\nthe network structure before using this macro",
-				true,
-				"object '%s' has no network data structure\nin file '%s', line %d", lab, file, line );
-	return 0.;
-}
+/*************************************************************
+ NUL_LINK_*
+ NULL link error message
+ Escape function for invalid
+ network link pointers in macros
+ *************************************************************/
+	inline double simulation::nul_lnk_dbl( const char *file, int line )
+	{
+		error_hard( "invalid network link",
+					"check your equation code to ensure pointer points\nto a valid link before the operation",
+					true,
+					"NULL network link pointer used\nin file '%s', line %d", file, line );
+		return 0.;
+	}
 
-inline char *simulation::no_node_chr( const char *lab, const char *file, int line )
-{
-	no_node_dbl( lab, file, line );
-	return NULL;
+	inline object *simulation::nul_lnk_obj( const char *file, int line )
+	{
+		nul_lnk_dbl( file, line );
+		return NULL;
+	}
+
+	inline void simulation::nul_lnk_void( const char *file, int line )
+	{
+		nul_lnk_dbl( file, line );
+		return;
+	}
+
+
+/*************************************************************
+ NO_HOOK_OBJ
+ Invalid hook error message
+ Escape function for invalid
+ hook pointers in macros
+ *************************************************************/
+	inline object *simulation::no_hook_obj( object *ptr, unsigned num, const char *file, int line )
+	{
+		bool bad_index = false;
+		char err_msg[ MAX_LINE_SIZE ];
+
+		if ( ptr == NULL )
+			snprintf( err_msg, MAX_LINE_SIZE, "NULL pointer used in file '%s', line %d", file, line );
+		else
+		{
+#ifndef _NP_
+			// prevent concurrent update by more than one thread
+			l_guardT lock( lock_obj_list );
+#endif
+			if ( obj_list.find( ptr ) == obj_list.end( ) )
+				snprintf( err_msg, MAX_LINE_SIZE, "pointer to non-existing object used\nin file '%s', line %d", file, line );
+			else
+				bad_index = true;
+		}
+
+		if ( ! bad_index )
+			error_hard( "invalid pointer operation",
+						"check your equation code to ensure pointer points\nto a valid object before the operation",
+						true, err_msg );
+		else
+		{
+			if ( ptr->hooks.size( ) > 0 )
+				snprintf( err_msg, MAX_LINE_SIZE, "hook number %d over maximum set (%d)\nin file '%s', line %d", num, ( int ) ptr->hooks.size( ) - 1, file, line );
+			else
+				snprintf( err_msg, MAX_LINE_SIZE, "hook used but none is allocated\nin file '%s', line %d", file, line );
+
+			error_hard( "invalid hook index",
+						"check your equation code to ensure setting hook indexes\nto valid values (0 to n-1, n is the number of hooks)\nor use ADDHOOK to allocate the requested hook",
+						true, err_msg );
+		}
+
+		return NULL;
+	}
+
+
+/*************************************************************
+ NO_NODE_*
+ No network node error message
+ Escape function for invalid
+ network object in macros
+ *************************************************************/
+	inline double simulation::no_node_dbl( const char *lab, const char *file, int line )
+	{
+		error_hard( "invalid network object",
+					"check your equation code to add\nthe network structure before using this macro",
+					true,
+					"object '%s' has no network data structure\nin file '%s', line %d", lab, file, line );
+		return 0.;
+	}
+
+	inline char *simulation::no_node_chr( const char *lab, const char *file, int line )
+	{
+		no_node_dbl( lab, file, line );
+		return NULL;
+	}
 }

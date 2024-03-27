@@ -13,23 +13,19 @@
  *************************************************************/
 
 /*************************************************************
-PARALLEL.CPP
-Contains the functions to run models is parallel using the
-operating system to manage the runs.
-*************************************************************/
+ PARALLEL.CPP
+ Contains the functions to run models is parallel using the
+ operating system to manage the runs.
+ *************************************************************/
 
 #include "lib/libLSD.h"				// LSD library classes
 
 
 #ifndef _NP_
-
-bool parallel_abort;				// indicate parallel threads were aborted
-
-
-/***************************************
-RUN_PARALLEL_EXEC
-***************************************/
-void simulation::run_parallel_exec( bool nw, int id, std::string cmd )
+/*************************************************************
+ RUN_PARALLEL_EXEC
+ *************************************************************/
+void lsd::simulation::run_parallel_exec( bool nw, int id, std::string cmd )
 {
 	int res;
 
@@ -40,12 +36,11 @@ void simulation::run_parallel_exec( bool nw, int id, std::string cmd )
 }
 
 
-/***************************************
-RUN_PARALLEL
-***************************************/
+/*************************************************************
+ RUN_PARALLEL
+ *************************************************************/
 #define INISTAT -1234
-int simulation::run_parallel( bool nw, const char *exec, const char *simname,
-							  int fseed, int runs, int thrrun, int parruns )
+int lsd::simulation::run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns )
 {
 	char *alt_name, *def_path;
 	int i, j, k, num, sl;
@@ -192,10 +187,10 @@ int simulation::run_parallel( bool nw, const char *exec, const char *simname,
 }
 
 
-/***************************************
-MONITOR_LOGS
-***************************************/
-int simulation::monitor_logs( void )
+/*************************************************************
+ MONITOR_LOGS
+ *************************************************************/
+int lsd::simulation::monitor_logs( void )
 {
 	int i, j, k, last, len, thr, threads, n = 0, finished = 0, sum = 0;
 	char *log = NULL, tok[ 4 ];
@@ -266,11 +261,11 @@ int simulation::monitor_logs( void )
 }
 
 
-/***************************************
-STOP_PARALLEL
-***************************************/
+/*************************************************************
+ STOP_PARALLEL
+ *************************************************************/
 #define WAIT_SECS 5
-bool simulation::stop_parallel( void )
+bool lsd::simulation::stop_parallel( void )
 {
 	int id, res = 0, secs = 0;
 
@@ -304,19 +299,17 @@ bool simulation::stop_parallel( void )
 		run_monitor.join( );
 
 #ifndef _NW_
-
 	plog( "\nParallel background run aborted!\n" );
-
 #endif
 
 	return true;
 }
 
 
-/***************************************
-DETACH_PARALLEL
-***************************************/
-void simulation::detach_parallel( void )
+/*************************************************************
+ DETACH_PARALLEL
+ *************************************************************/
+void lsd::simulation::detach_parallel( void )
 {
 	parallel_abort = true;
 
@@ -329,10 +322,10 @@ void simulation::detach_parallel( void )
 }
 
 
-/***************************************
-MONITOR_PARALLEL
-***************************************/
-void simulation::monitor_parallel( bool nw )
+/*************************************************************
+ MONITOR_PARALLEL
+ *************************************************************/
+void lsd::simulation::monitor_parallel( bool nw )
 {
 	parallel_monitor = true;
 
@@ -346,11 +339,11 @@ void simulation::monitor_parallel( bool nw )
 }
 
 
-/****************************************************
-LOG_PARALLEL
-Consolidate a set of parallel-run logs
-****************************************************/
-void simulation::log_parallel( bool nw )
+/*************************************************************
+ LOG_PARALLEL
+ Consolidate a set of parallel-run logs
+ *************************************************************/
+void lsd::simulation::log_parallel( bool nw )
 {
 	char buf[ MAX_LINE_SIZE ];
 	FILE *f;
@@ -390,16 +383,14 @@ void simulation::log_parallel( bool nw )
 	}
 
 #ifndef _NW_
-
 	while ( ! idle_loop )
 		msleep( 100 );
 
 	res_list = run_results;
-	choice = 8;
 
+	if ( liblnk != NULL )
+		*( liblnk->choice ) = 8;
 #endif
 
 }
-
 #endif
-

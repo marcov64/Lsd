@@ -21,16 +21,19 @@
 
 #include "lib/libLSD.h"				// LSD library classes
 
+#ifdef _LMM_
+extern lsd::dlliblinkage lmm_liblnk;
+#endif
+
 
 #ifdef _WIN32
-
-/****************************************************
+/*************************************************************
  RUN_SYSTEM (Windows)
  executes run command in system without opening
  command-prompt window or activating STL mutexes
  spaces in path/file names are not supported
- ****************************************************/
-int run_system( const char *cmd, simulation *sim, int id )
+ *************************************************************/
+int lsd::run_system( const char *cmd, simulation *sim, int id )
 {
 	PROCESS_INFORMATION p_info;
 	STARTUPINFO s_info;
@@ -69,11 +72,11 @@ int run_system( const char *cmd, simulation *sim, int id )
 }
 
 
-/****************************************************
+/*************************************************************
  KILL_SYSTEM (Windows)
  stops a running command in system
- ****************************************************/
-int kill_system( simulation *sim, int id )
+ *************************************************************/
+int lsd::kill_system( simulation *sim, int id )
 {
 
 #if ! defined( _NP_ ) && ! defined( _LMM_ )
@@ -91,13 +94,13 @@ int kill_system( simulation *sim, int id )
 
 extern char ** environ;
 
-/****************************************************
+/*************************************************************
  RUN_SYSTEM (Unix)
  executes run command in system without opening
  command-prompt window or activating STL mutexes
  spaces in path/file names are not supported
- ****************************************************/
-int run_system( const char *cmd, simulation *sim, int id )
+ *************************************************************/
+int lsd::run_system( const char *cmd, simulation *sim, int id )
 {
 	char **argv, **envp;
 	int res;
@@ -124,7 +127,6 @@ int run_system( const char *cmd, simulation *sim, int id )
 	}
 	else
 	{
-
 #if ! defined( _NP_ ) && ! defined( _LMM_ )
 		if ( id >= 0 && sim != NULL && id < ( int ) sim->run_pids.size( ) )
 		{
@@ -132,7 +134,6 @@ int run_system( const char *cmd, simulation *sim, int id )
 			sim->run_pids[ id ] = pid;
 		}
 #endif
-
 		waitpid( pid, & res, 0 );
 		wordfree( & p );
 
@@ -144,14 +145,13 @@ int run_system( const char *cmd, simulation *sim, int id )
 }
 
 
-/****************************************************
+/*************************************************************
  KILL_SYSTEM (Unix)
  stops a running command in system
- ****************************************************/
+ *************************************************************/
 #define WAIT_TSECS 10
-int kill_system( simulation *sim, int id )
+int lsd::kill_system( simulation *sim, int id )
 {
-
 #if ! defined( _NP_ ) && ! defined( _LMM_ )
 	int res, tsecs = 0;
 
@@ -177,10 +177,10 @@ int kill_system( simulation *sim, int id )
 
 #endif
 
-/*********************************
+/*************************************************************
  SET_EXEC
- *********************************/
-void set_exec( const char *path, const char *file )
+ *************************************************************/
+void lsd::set_exec( const char *path, const char *file )
 {
 	std::string exefile, exepath, libfile, libpath, fname;
 
@@ -235,11 +235,11 @@ void set_exec( const char *path, const char *file )
 }
 
 
-/****************************************************
+/*************************************************************
  LSD_EXIT
  exit LSD
- ****************************************************/
-void lsd_exit( int v )
+ *************************************************************/
+void lsd::lsd_exit( int v )
 {
 	fflush( stderr );
 
@@ -254,15 +254,14 @@ void lsd_exit( int v )
 }
 
 
-/****************************************************
+/*************************************************************
  EXCEPTION_HANDLER
  handle exceptions and system signals
- ****************************************************/
-void exception_handler( int signum, const char *what )
+ *************************************************************/
+void lsd::exception_handler( int signum, const char *what )
 {
 	dlliblinkage *liblnk = NULL;
 	static char msg1[ MAX_LINE_SIZE ], msg2[ MAX_LINE_SIZE ], msg3[ MAX_LINE_SIZE ];
-
 
 #ifndef _LMM_
 	simulation *sim = NULL;
@@ -275,8 +274,7 @@ void exception_handler( int signum, const char *what )
 			liblnk = sim->liblnk;
 	}
 #else
-	extern dlliblinkage lmm_liblnk;
-	liblnk = & lmm_liblnk;
+	liblnk = & ::lmm_liblnk;
 #endif
 
 	switch ( signum )
@@ -289,13 +287,13 @@ void exception_handler( int signum, const char *what )
 				break;
 			}
 			else
-				cmd_gui( "set choice 1" );		// regular quit (checking for save)
+				cmd( "set choice 1" );		// regular quit (checking for save)
 
 			return;
 #ifdef SIGWINCH
 		case SIGWINCH:
-			cmd_gui( "sizetop all" );			// readjust windows size/positions
-			cmd_gui( "update" );
+			cmd( "sizetop all" );			// readjust windows size/positions
+			cmd( "update" );
 
 			return;
 #endif
@@ -337,8 +335,8 @@ void exception_handler( int signum, const char *what )
 	{
 #ifndef _LMM_
 		bool usrExcpt = false;
-		for ( auto sim : sims )					// search for user exception
-			if ( sim->user_exception )
+		for ( auto s : sims )					// search for user exception
+			if ( s->user_exception )
 				usrExcpt = true;
 
 		if ( ! usrExcpt )
@@ -359,23 +357,22 @@ void exception_handler( int signum, const char *what )
 					 sim->stack_log->v->label != NULL )
 				{
 					strcatn( msg3, "\n\nAttempting to open the LSD Debugger.\n\nLSD will close immediately after exiting the Debugger.", MAX_LINE_SIZE );
-					plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", sim->stack_log->v->label );
+					sim->plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", sim->stack_log->v->label );
 					if ( liblnk->print_stack != NULL )
 						liblnk->print_stack( );
 				}
 				else
 				{
 					strcatn( msg3, "\n\nPlease disable fast mode and parallel processing to get more information about the error.\n\nLSD will close now.", MAX_LINE_SIZE );
-					plog( "\n\nAn unknown problem was detected while executing user's equations code" );
-					plog( "\n\nWarning: %s active, cannot open LSD Debugger", sim->parallel_mode ? "parallel preocessing" : "fast mode" );
+					sim->plog( "\n\nAn unknown problem was detected while executing user's equations code" );
+					sim->plog( "\n\nWarning: %s active, cannot open LSD Debugger", sim->parallel_mode ? "parallel preocessing" : "fast mode" );
 				}
 
-				sims[ 0 ]->quit = 2;
+				sim->quit = 2;
 			}
 		}
 #endif
-
-		cmd_gui( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { \
+		cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { \
 				catch { ttk::messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s:\n  %s\n\n%s\" } \
 				}", msg1, msg2, msg3 );
 
@@ -404,30 +401,30 @@ void exception_handler( int signum, const char *what )
 }
 
 
-/****************************************************
+/*************************************************************
  HANDLE_SIGNALS
- ****************************************************/
-void handle_signals( void ( * handler )( int signum ) )
+ *************************************************************/
+void lsd::handle_signals( void ( * handler )( int signum ) )
 {
 	for ( int i = 0; i < REG_SIG_NUM; ++i )
 		signal( signals[ i ], handler );
 }
 
 
-/****************************************************
+/*************************************************************
  SIGNAL_HANDLER
  handle critical system signals
- ****************************************************/
-void signal_handler( int signum )
+ *************************************************************/
+void lsd::signal_handler( int signum )
 {
 	exception_handler( signum, NULL );
 }
 
 
-/****************************************************
+/*************************************************************
  SIGNAL_NAME
- ****************************************************/
-const char *signal_name( int signum )
+ *************************************************************/
+const char *lsd::signal_name( int signum )
 {
 	int i;
 	for ( i = 0; i < REG_SIG_NUM && signals[ i ] != signum; ++i );
@@ -437,11 +434,11 @@ const char *signal_name( int signum )
 }
 
 
-/****************************************************
+/*************************************************************
  MSLEEP
  stop execution for a given period
- ****************************************************/
-void msleep( unsigned msec )
+ *************************************************************/
+void lsd::msleep( unsigned msec )
 {
 	if ( msec <= 0 )
 		return;
@@ -455,11 +452,11 @@ void msleep( unsigned msec )
 }
 
 
-/****************************************************
+/*************************************************************
  CLEAN_FILE
  remove any path prefixes to filename, if present
- ****************************************************/
-char *clean_file( const char *filename )
+ *************************************************************/
+char *lsd::clean_file( const char *filename )
 {
 	char *name, *newname;
 
@@ -481,11 +478,12 @@ char *clean_file( const char *filename )
 }
 
 
-/****************************************************
+/*************************************************************
  CLEAN_PATH
- remove cygwin/MSYS path prefixes, if present, and replace \ with /
- ****************************************************/
-char *clean_path( const char *filepath )
+ remove cygwin/MSYS path prefixes, if present,
+ and replace \ with /
+ *************************************************************/
+char *lsd::clean_path( const char *filepath )
 {
 	int i, drvpos, pathpos;
 	char *newpath, oldpath[ strlen( filepath ) + 1 ];
@@ -506,23 +504,23 @@ char *clean_path( const char *filepath )
 
 		if ( i == 0 )	// Cygwin
 		{
-			drvpos = strlen( pref[ i ] );				// drive letter position
-			pathpos = drvpos + 1;						// path start
+			drvpos = strlen( pref[ i ] );		// drive letter position
+			pathpos = drvpos + 1;				// path start
 		}
 		else			// MSYS
 		{
-			drvpos = 1;									// drive letter position
-			pathpos = 2;								// path start
+			drvpos = 1;							// drive letter position
+			pathpos = 2;						// path start
 		}
 
-		temp[ 0 ] = toupper( oldpath[ drvpos ] );		// copy drive letter
-		temp[ 1 ] = ':';								// insert ':' drive separator
+		temp[ 0 ] = toupper( oldpath[ drvpos ] );// copy drive letter
+		temp[ 1 ] = ':';						// insert ':' drive separator
 		strcpyn( temp + 2, oldpath + pathpos, strlen( oldpath ) - 1 );
 		strcpyn( oldpath, temp, strlen( oldpath ) + 1 );
 	}
 
 	for ( i = 0; i < ( int ) strlen( oldpath ); ++i )
-		if ( oldpath[ i ] == '\\' )						// replace \ with /
+		if ( oldpath[ i ] == '\\' )				// replace \ with /
 			oldpath[ i ] = '/';
 
 	newpath = new char [ strlen( oldpath ) + 1 ];
@@ -532,53 +530,50 @@ char *clean_path( const char *filepath )
 }
 
 
-/****************************************************
+/*************************************************************
  CMD_GUI
- ****************************************************/
-void cmd_gui( const char *cm, ... )
+ *************************************************************/
+void lsd::cmd( const char *cm, ... )
 {
 	static va_list argptr;
 
 	va_start( argptr, cm );
 
 #ifndef _LMM_
-	if ( sims.size( ) > 0 && sims[ 0 ] != NULL && sims[ 0 ]->liblnk != NULL &&
-		 sims[ 0 ]->liblnk->cmd_backend != NULL )
+	if ( sims.size( ) > 0 && sims[ 0 ] != NULL && sims[ 0 ]->liblnk != NULL )
 		sims[ 0 ]->liblnk->cmd_backend( cm, argptr );
 #else
-	extern dlliblinkage lmm_liblnk;
-
 	if ( lmm_liblnk.cmd_backend != NULL )
-		lmm_liblnk.cmd_backend( cm, argptr );
+		::lmm_liblnk.cmd_backend( cm, argptr );
 #endif
 
 	va_end( argptr );
 }
 
 
-/****************************************************
+/*************************************************************
  VALID_LABEL
- ****************************************************/
-bool valid_label( const char *lab )
+ *************************************************************/
+bool lsd::valid_label( const char *lab )
 {
 	return std::regex_match( lab, std::regex( "^[a-zA-Z_][a-zA-Z0-9_]*$" ) );
 }
 
 
-/****************************************************
+/*************************************************************
  VALID_XML_STRING
- ****************************************************/
-bool valid_xml_string( const char *lab )
+ *************************************************************/
+bool lsd::valid_xml_string( const char *lab )
 {
 	return std::regex_match( lab, std::regex( "[^&<>\"']*" ) );
 }
 
 
-/****************************************************
+/*************************************************************
  STRCATN
  Concatenate strings respecting total size of first one
- ****************************************************/
-char *strcatn( char *d, const char *s, size_t dSz )
+ *************************************************************/
+char *lsd::strcatn( char *d, const char *s, size_t dSz )
 {
 	if ( dSz <= 0 || d == NULL || strlen( d ) >= dSz - 1 || s == NULL || strlen( s ) == 0 )
 		return d;
@@ -587,12 +582,12 @@ char *strcatn( char *d, const char *s, size_t dSz )
 }
 
 
-/***************************************************
+/*************************************************************
  STRCLN
  trim whitespace from the beginning/end of string
  and convert line ends to LF only (unix-like)
- ***************************************************/
-int strcln( char *out, const char *str, int outSz )
+ *************************************************************/
+int lsd::strcln( char *out, const char *str, int outSz )
 {
 	char buf[ strlen( str ) + 1 ];
 	strlf( buf, str, strlen( str ) + 1 );
@@ -600,11 +595,12 @@ int strcln( char *out, const char *str, int outSz )
 }
 
 
-/****************************************************
+/*************************************************************
  STRCPYN
- Copy string respecting total size of destination one
- ****************************************************/
-char *strcpyn( char *d, const char *s, size_t dSz )
+ Copy string respecting total size of destination
+ one
+ *************************************************************/
+char *lsd::strcpyn( char *d, const char *s, size_t dSz )
 {
 	if ( dSz <= 0 || d == NULL || s == NULL )
 		return d;
@@ -621,14 +617,14 @@ char *strcpyn( char *d, const char *s, size_t dSz )
 }
 
 
-/***************************************************
+/*************************************************************
  STRDECDATA
  decode string from a XML CDATA value
  out and in strings can be the same
  if out is NULL, space is allocated to the result,
  which MUST be deallocated by the caller
- ***************************************************/
-char *strdecdata( char *out, const char *in, int outSz )
+ *************************************************************/
+char *lsd::strdecdata( char *out, const char *in, int outSz )
 {
 	std::string buf = in;
 	int pos = -3;
@@ -649,14 +645,14 @@ char *strdecdata( char *out, const char *in, int outSz )
 }
 
 
-/***************************************************
+/*************************************************************
  STRENCDATA
  encode string for a XML CDATA value
  out and in strings can be the same
  if out is NULL, space is allocated to the result,
  which MUST be deallocated by the caller
-***************************************************/
-char *strencdata( char *out, const char *in, int outSz )
+ *************************************************************/
+char *lsd::strencdata( char *out, const char *in, int outSz )
 {
 	std::string buf = in;
 	int pos = -4;
@@ -677,11 +673,11 @@ char *strencdata( char *out, const char *in, int outSz )
 }
 
 
-/***************************************************
+/*************************************************************
  STRLF
  replace CR-LF pairs with LF only on C string
- ***************************************************/
-int strlf( char *out, const char *str, int outSz )
+ *************************************************************/
+int lsd::strlf( char *out, const char *str, int outSz )
 {
 	int i, j;
 
@@ -700,12 +696,41 @@ int strlf( char *out, const char *str, int outSz )
 }
 
 
-/***************************************************
+/*************************************************************
+ STRWRDS
+ count words in a string
+ *************************************************************/
+int lsd::strwrds( const char *s )
+{
+	char lst = '\0';
+	int i = 0, wrd = 0;
+
+	if ( s == NULL )
+		return 0;
+
+	while ( isspace( s[ i ] ) )
+		++i;
+
+	if ( s[ i ] == '\0' )
+		return 0;
+
+	for ( ; s[ i ] != '\0'; lst = s[ i++ ] )
+		if ( isspace( s[ i ] ) && ! isspace( lst ) )
+			wrd++;
+
+	if ( isspace( lst ) )
+		return wrd;
+
+	return wrd + 1;
+}
+
+
+/*************************************************************
  STRWRAP
  insert line breaks in string to wrap text at given width
  based on code from ulf.astrom@gmail.com
- ***************************************************/
-int strwrap( char *out, const char *str, int outSz, int wid )
+ *************************************************************/
+int lsd::strwrap( char *out, const char *str, int outSz, int wid )
 {
 	int i, lines, tlen, len, pos, close_word, open_word;
 
@@ -786,11 +811,11 @@ int strwrap( char *out, const char *str, int outSz, int wid )
 }
 
 
-/****************************************************
+/*************************************************************
  STRUPR
  convert string to upper case
- ****************************************************/
-char *strupr( char *s )
+ *************************************************************/
+char *lsd::strupr( char *s )
 {
 	char *p;
 
@@ -804,13 +829,13 @@ char *strupr( char *s )
 }
 
 
-/***************************************************
+/*************************************************************
  STRTOD
  split a C string into a double float,
  controlling for conversion errors, producing
  inv as result in this case
-***************************************************/
-double strtod( const char *in, char** endptr, double inv )
+ *************************************************************/
+double lsd::strtod( const char *in, char** endptr, double inv )
 {
 	double d;;
 
@@ -818,7 +843,7 @@ double strtod( const char *in, char** endptr, double inv )
 	if ( strlen( in ) == 0 )
 		d = inv;
 	else
-		d = strtod( in, endptr );
+		d = ::strtod( in, endptr );
 
 	if ( errno != 0 )
 	{
@@ -831,7 +856,8 @@ double strtod( const char *in, char** endptr, double inv )
 				if ( d == - HUGE_VAL )
 					d = - DBL_MAX;
 #ifndef _LMM_
-		plog( "\nWarning: invalid double float (%s), adjusted to %g", in, d );
+	if ( sims.size( ) == 1 && sims[ 0 ] != NULL )
+		sims[ 0 ]->plog( "\nWarning: invalid double float (%s), adjusted to %g", in, d );
 #endif
 	}
 
@@ -839,14 +865,14 @@ double strtod( const char *in, char** endptr, double inv )
 }
 
 
-/***************************************************
+/*************************************************************
  STRTODSPLIT
  split a C string into a vector of double floats
  using sep as the separator character, controlling
  for conversion errors, producing inv as result
  in this case
-***************************************************/
-d_vecT strtodsplit( const char *in, char sep, double inv )
+ *************************************************************/
+d_vecT lsd::strtodsplit( const char *in, char sep, double inv )
 {
 	d_vecT out;
 	std::string buf;
@@ -859,13 +885,13 @@ d_vecT strtodsplit( const char *in, char sep, double inv )
 }
 
 
-/***************************************************
+/*************************************************************
  STRTOL
  split a C string into a long integer,
  controlling for conversion errors, producing
  inv as result in this case
-***************************************************/
-long strtol( const char *in, char** endptr, int base, long inv )
+ *************************************************************/
+long lsd::strtol( const char *in, char** endptr, int base, long inv )
 {
 	long l;
 
@@ -873,14 +899,15 @@ long strtol( const char *in, char** endptr, int base, long inv )
 	if ( strlen( in ) == 0 )
 		l = inv;
 	else
-		l = strtol( in, endptr, base );
+		l = ::strtol( in, endptr, base );
 
 	if ( errno != 0 )
 	{
 		if ( l == 0 )
 			l = inv;
 #ifndef _LMM_
-		plog( "\nWarning: invalid long integer (%s), adjusted to %d", in, l );
+		if ( sims.size( ) == 1 && sims[ 0 ] != NULL )
+			sims[ 0 ]->plog( "\nWarning: invalid long integer (%s), adjusted to %d", in, l );
 #endif
 	}
 
@@ -888,14 +915,14 @@ long strtol( const char *in, char** endptr, int base, long inv )
 }
 
 
-/***************************************************
+/*************************************************************
  STRTOLSPLIT
  split a C string into a vector of long integers
  using sep as the separator character, controlling
  for conversion errors, producing inv as result
  in this case
-***************************************************/
-std::vector < long > strtolsplit( const char *in, char sep, long inv )
+ *************************************************************/
+std::vector < long > lsd::strtolsplit( const char *in, char sep, long inv )
 {
 	std::string buf;
 	std::stringstream ss( in );
@@ -908,12 +935,12 @@ std::vector < long > strtolsplit( const char *in, char sep, long inv )
 }
 
 
-/***************************************************
+/*************************************************************
  STRTOSTRSPLIT
  split a C string into a vector of strings using
  sep as the separator character
-***************************************************/
-s_vecT strtostrsplit( const char *in, char sep, bool remQuotes )
+ *************************************************************/
+s_vecT lsd::strtostrsplit( const char *in, char sep, bool remQuotes )
 {
 	std::string buf;
 	std::stringstream ss( in );
@@ -931,12 +958,12 @@ s_vecT strtostrsplit( const char *in, char sep, bool remQuotes )
 }
 
 
-/***************************************************
+/*************************************************************
  TO_STRING
  convert double to string, allowing for sprintf
  pattern format
-***************************************************/
-std::string to_string( const char *fmt, double val )
+ *************************************************************/
+std::string lsd::to_string( const char *fmt, double val )
 {
 	char buf[ 100 + 1 ];
 	std::string res;
@@ -948,11 +975,11 @@ std::string to_string( const char *fmt, double val )
 }
 
 
-/***************************************************
+/*************************************************************
  STRTRIM
  trim whitespace from the beginning/end of string
- ***************************************************/
-int strtrim( char *out, const char *str, int outSz )
+ *************************************************************/
+int lsd::strtrim( char *out, const char *str, int outSz )
 {
 	char *end;
 	int size;
@@ -983,12 +1010,12 @@ int strtrim( char *out, const char *str, int outSz )
 }
 
 
-/***************************************************
+/*************************************************************
  STRTRIMIN
  trim whitespace from the beginning/end of string,
  and also remove duplicated whitespace inside
- ***************************************************/
-int strtrimin( char *out, const char *str, int outSz )
+ *************************************************************/
+int lsd::strtrimin( char *out, const char *str, int outSz )
 {
 	std::string buf, in = str;
 
@@ -999,11 +1026,11 @@ int strtrimin( char *out, const char *str, int outSz )
 }
 
 
-/***************************************************
+/*************************************************************
  STRWSP
  check for a string of just whitespace
- ***************************************************/
-bool strwsp( const char *str )
+ *************************************************************/
+bool lsd::strwsp( const char *str )
 {
 	if ( str == NULL )
 		return true;

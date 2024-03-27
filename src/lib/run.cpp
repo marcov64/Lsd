@@ -13,39 +13,38 @@
  *************************************************************/
 
 /*************************************************************
-RUN.CPP
-Contains the code to control the simulation run.
+ RUN.CPP
+ Contains the code to control the simulation run.
 
-The main functions contained here are:
+ The main functions contained here are:
 
-- void simulation::run_simulation( int until_t, int until_run )
-Run the loaded simulation model. Running is not only the actual
-simulation run, but also the initialization of result files. Of
-course, it has also to manage the messages from user and from the
-model at run time.
+ - void simulation::run_simulation( int until_t, int until_run )
+ Run the loaded simulation model. Running is not only the actual
+ simulation run, but also the initialization of result files. Of
+ course, it has also to manage the messages from user and from
+ the model at run time.
 
-- bool object::alloc_save_mem( );
-Prepare variables to store saved data.
-*************************************************************/
+ - bool object::alloc_save_mem( );
+ Prepare variables to store saved data.
+ *************************************************************/
 
 #include "lib/libLSD.h"				// LSD library classes
 
 
 #ifndef _NP_
-
-/*********************************
-DISPATCH_RUNS
-*********************************/
+/*************************************************************
+ DISPATCH_RUNS
+ *************************************************************/
 int dispatch_runs( int until_t, int until_run )
 {
 	int nstale, nrun = 0;
 	std::mutex mtx;
 	uniq_lT lock( mtx );
 
-	for ( auto sim : sims )
+	for ( auto sim : lsd::sims )
 		if ( ! sim->sim_thread.joinable( ) && sim->conf_ok )
 		{
-			sim->sim_thread = std::thread( & simulation::run_simulation, sim, until_t, until_run );
+			sim->sim_thread = std::thread( & lsd::simulation::run_simulation, sim, until_t, until_run );
 			sim->last_dispatch_time = sim->stale_time = 0;
 			++nrun;
 		}
@@ -53,10 +52,10 @@ int dispatch_runs( int until_t, int until_run )
 	do
 	{
 		auto start = std::chrono::system_clock::now( );
-		seq_end.wait_until( lock, start + std::chrono::seconds( MAX_SIM_SLEEP ) );
+		lsd::seq_end.wait_until( lock, start + std::chrono::seconds( MAX_SIM_SLEEP ) );
 
 		nstale = 0;
-		for ( auto sim : sims )
+		for ( auto sim : lsd::sims )
 		{
 			if ( sim->sim_thread.joinable( ) && ! sim->running_seq && sim->eff_t > 0 )
 			{
@@ -83,13 +82,12 @@ int dispatch_runs( int until_t, int until_run )
 
 	return nstale;
 }
-
 #endif
 
-/*********************************
-RUN_SIMULATION
-*********************************/
-int simulation::run_simulation( int until_t, int until_run )
+/*************************************************************
+ RUN_SIMULATION
+ *************************************************************/
+int lsd::simulation::run_simulation( int until_t, int until_run )
 {
 	int res = 0;
 	static char bar_done[ 2 * BAR_DONE_SIZE ];
@@ -144,8 +142,8 @@ int simulation::run_simulation( int until_t, int until_run )
 
 		// run user closing function, reporting error appropriately
 		user_exception = true;
-		::close_sim( );
 		close_sim( );
+		::close_sim( );
 		user_exception = false;
 		running = false;
 
@@ -214,10 +212,10 @@ int simulation::run_simulation( int until_t, int until_run )
 }
 
 
-/*********************************
-INIT_NEW_SEQ
-*********************************/
-int simulation::init_new_seq( char *bar_done, int & perc_done, int & last_done )
+/*************************************************************
+ INIT_NEW_SEQ
+ *************************************************************/
+int lsd::simulation::init_new_seq( char *bar_done, int & perc_done, int & last_done )
 {
 	int i;
 
@@ -272,10 +270,10 @@ int simulation::init_new_seq( char *bar_done, int & perc_done, int & last_done )
 }
 
 
-/*********************************
-INIT_NEW_RUN
-*********************************/
-int simulation::init_new_run( clock_t & start, clock_t & last_update )
+/*************************************************************
+ INIT_NEW_RUN
+ *************************************************************/
+int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update )
 {
 	int i;
 
@@ -314,7 +312,7 @@ int simulation::init_new_run( clock_t & start, clock_t & last_update )
 		if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
 			liblnk->log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
 
-		cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", conf_file );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", conf_file );
 #else
 		fprintf( stderr, "\nFile '%s' not found or corrupted.\n", conf_file );
 #endif
@@ -330,7 +328,7 @@ int simulation::init_new_run( clock_t & start, clock_t & last_update )
 		if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
 			liblnk->log_tcl_error( true, "Memory allocation", "Not enough memory, too many series saved for the memory available" );
 
-		cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, last_t );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, last_t );
 #else
 		fprintf( stderr, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, last_t );
 #endif
@@ -367,10 +365,10 @@ int simulation::init_new_run( clock_t & start, clock_t & last_update )
 }
 
 
-/*********************************
-SAVE_RESULTS
-*********************************/
-void simulation::save_results( void )
+/*************************************************************
+ SAVE_RESULTS
+ *************************************************************/
+void lsd::simulation::save_results( void )
 {
 	char *path_out, *name_out, sep_out[ 2 ], fname[ MAX_PATH_LENGTH ];
 	result *rf;				// pointer for results files (may be zipped or not)
@@ -466,10 +464,10 @@ void simulation::save_results( void )
 }
 
 
-/*********************************
-NEXT_BATCH
-*********************************/
-bool simulation::next_batch( void )
+/*************************************************************
+ NEXT_BATCH
+ *************************************************************/
+bool lsd::simulation::next_batch( void )
 {
 	char fname[ MAX_PATH_LENGTH ];
 	FILE *f;
@@ -511,10 +509,10 @@ bool simulation::next_batch( void )
 }
 
 
-/*********************************
-SET_FAST
-*********************************/
-void simulation::set_fast( int level )
+/*************************************************************
+ SET_FAST
+ *************************************************************/
+void lsd::simulation::set_fast( int level )
 {
 	if ( level > 2 )
 		level = 2;
@@ -555,10 +553,10 @@ void simulation::set_fast( int level )
 }
 
 
-/*********************************
-EMPTY_STACK
-*********************************/
-void simulation::empty_stack( void )
+/*************************************************************
+ EMPTY_STACK
+ *************************************************************/
+void lsd::simulation::empty_stack( void )
 {
 	if ( stack_log != NULL )
 	{
@@ -582,7 +580,7 @@ void simulation::empty_stack( void )
 		if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
 			liblnk->log_tcl_error( false, "Internal error", "LSD trace stack corrupted" );
 
-		cmd_gui( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Internal LSD error\" -detail \"The LSD trace stack is corrupted.\nLSD will close now.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Internal LSD error\" -detail \"The LSD trace stack is corrupted.\nLSD will close now.\"" );
 #else
 		fprintf( stderr, "\nLSD trace stack corrupted.\n" );
 #endif
@@ -591,10 +589,10 @@ void simulation::empty_stack( void )
 }
 
 
-/*********************************
-ALLOC_SAVE_MEM
-*********************************/
-bool object::alloc_save_mem( void )
+/*************************************************************
+ ALLOC_SAVE_MEM
+ *************************************************************/
+bool lsd::object::alloc_save_mem( void )
 {
 	int i;
 	bridge *cb;
@@ -643,7 +641,7 @@ bool object::alloc_save_mem( void )
 	}
 
 	for ( cb = b; cb != NULL; cb = cb->next )
-		for ( cur = cb->head; cur != NULL && sim->quit != 2; cur = go_brother( cur ) )
+		for ( cur = cb->head; cur != NULL && sim->quit != 2; cur = BROTHER( cur ) )
 			if ( ! cur->alloc_save_mem( ) )
 				goto error;
 
@@ -655,10 +653,10 @@ error:
 }
 
 
-/*********************************
-ALLOC_SAVE_VAR
-*********************************/
-bool variable::alloc_save_var( void )
+/*************************************************************
+ ALLOC_SAVE_VAR
+ *************************************************************/
+bool lsd::variable::alloc_save_var( void )
 {
 	if ( ! sim->running )
 		return true;
@@ -690,10 +688,10 @@ bool variable::alloc_save_var( void )
 }
 
 
-/*********************************
-RESET_END
-*********************************/
-void object::reset_end( void )
+/*************************************************************
+ RESET_END
+ *************************************************************/
+void lsd::object::reset_end( void )
 {
 	bridge *cb;
 	object *cur;
@@ -712,16 +710,16 @@ void object::reset_end( void )
 	{
 		cur = cb->head;
 		if ( cur != NULL && cur->to_compute )
-			for ( ; cur != NULL; cur = go_brother( cur ) )
+			for ( ; cur != NULL; cur = BROTHER( cur ) )
 				cur->reset_end( );
 	}
 }
 
 
-/*********************************
-UPDATE_BAR
-*********************************/
-void simulation::update_bar( char *bar, int done, int & last_done, int bar_sz )
+/*************************************************************
+ UPDATE_BAR
+ *************************************************************/
+void lsd::simulation::update_bar( char *bar, int done, int & last_done, int bar_sz )
 {
 	char perc[ MAX_ELEM_LENGTH ];
 	int p;
@@ -768,11 +766,12 @@ void simulation::update_bar( char *bar, int done, int & last_done, int bar_sz )
 }
 
 
-/*********************************
-RESULTS_ALT_PATH
-simple tool to allow changing where results are saved.
-*********************************/
-bool simulation::results_alt_path( const char *altPath )
+/*************************************************************
+ RESULTS_ALT_PATH
+ simple tool to allow changing
+ where results are saved.
+ *************************************************************/
+bool lsd::simulation::results_alt_path( const char *altPath )
 {
 	if ( save_alt )
 	{

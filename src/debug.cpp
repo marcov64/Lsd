@@ -13,58 +13,67 @@
  *************************************************************/
 
 /*************************************************************
-DEBUG.CPP
-Builds and manages the debug window.
+ DEBUG.CPP
+ Builds and manages the debug window.
 
-This window appears under two conditions:
-- Simulation running in debug mode AND an equation for one of the variables
-to be debugged has just been computed, or
-- One conditional stop is met, whatever type of running mode is enabled
-Moreover, it can be used to explore thoughrouly a model by choosing
-the option Data Browse from the main Browser.
+ This window appears under two conditions:
+ - Simulation running in debug mode AND an equation for one
+ of the variables to be debugged has just been computed, or
+ - One conditional stop is met, whatever type of running mode
+ is enabled Moreover, it can be used to explore thoroughly
+ a model by choosing the option Data Browse from the main
+ Browser.
 
-When the simulation is stopped by the debugger,	 shows all the contents of the
-objects, that is, it lists the Variables and Parameters of the object, their
-value and their time of last updating, for Variables. User are then allowed
-to set or remove conditional break and debug flags on any variable in the model.
-Note that the browsing mode in the debugger is different from the main Browser,
-since in the debugger you move along the physical model, hence you have
-to browse through all the instances, instead of moving along object types.
+ When the simulation is stopped by the debugger, shows all
+ the contents of the objects, that is, it lists the Variables
+ and Parameters of the object, their value and their time of
+ last updating, for Variables. User are then allowed to set
+ or remove conditional break and debug flags on any variable
+ in the model.
+ Note that the browsing mode in the debugger is different from
+ the main Browser, since in the debugger you move along the
+ physical model, hence you have to browse through all the
+ instances, instead of moving along object types.
 
-The main functions contained in this file are:
+ The main functions contained in this file are:
 
-- int object::debugger( object *c, char *lab, double *res, bool interact )
-initialize the debugging window and calls deb_show below. Then it waits for a
-command from user. The available actions are
+ - int lsd::object::debugger( object *c, char *lab, double *res, bool interact )
+ initialize the debugging window and calls deb_show below.
+ Then it waits for a command from user. The available actions
+ are
 
-1) make a step. That is, continue till next stop, if any
-2) disable debug mode and continue to run the simulation
-3) observe the parent object of the current one
-4) observe the object next to the current one
-5) observe next type of object
-6) observe the first descendant
-7) stop the simulation and return to the browser
-8) observe the variable detailed content (binding to clicking on the variable
-   label).
-9) observe the object from which this equation was triggered, if any.
-10) Search for an Object containing a specific Variable with a specific value
+ 1) make a step. That is, continue till next stop, if any
+ 2) disable debug mode and continue to run the simulation
+ 3) observe the parent object of the current one
+ 4) observe the object next to the current one
+ 5) observe next type of object
+ 6) observe the first descendant
+ 7) stop the simulation and return to the browser
+ 8) observe the variable detailed content (binding to
+    clicking on the variable label).
+ 9) observe the object from which this equation was triggered, if any.
+ 10) Search for an Object containing a specific Variable with
+     a specific value
 
-- void object::debugger_update( const char *hl_var, int mode )
-updates all the content of the object.
-*************************************************************/
+ - void lsd::object::debugger_update( const char *hl_var, int mode )
+ updates all the content of the object.
+ *************************************************************/
 
 #include "LSD.h"
 
-char inst_msg[ MAX_BUFF_SIZE ];	// instances string
-int inst_dpth;					// instance depth
-lsdstack *asl = NULL;			// debug stack
-object *debLstObj;				// last object shown
+namespace lsd
+{
+	char inst_msg[ MAX_BUFF_SIZE ];			// instances string
+	int inst_dpth;							// instance depth
+	lsdstack *asl = NULL;					// debug stack
+	object *debLstObj;						// last object shown
+}
 
 
-/*******************************************
-DEBUG
-********************************************/
-int object::debugger( object *c, const char *lab, double *res, bool interact, const char *hl_var )
+/*************************************************************
+ DEBUG
+ *************************************************************/
+int lsd::object::debugger( object *c, const char *lab, double *res, bool interact, const char *hl_var )
 {
 	bool pre_running, redraw;
 	char ch[ 4 * MAX_ELEM_LENGTH ], ch1[ MAX_ELEM_LENGTH ];
@@ -78,12 +87,12 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 	int mode = ( lab == NULL ) ? 2 : ( ! strcmp( lab, "Paused by User" ) ) ? 3 : ( strstr( lab, "(ERROR)" ) != NULL ) ? 4 : 1;
 
 	if ( mode == 2 )
-		cover_browser( "Data Browser...", "Please exit Data Browser\nbefore using the LSD Browser.", false );
+		gui::cover_browser( "Data Browser...", "Please exit Data Browser\nbefore using the LSD Browser.", false );
 
-	set_buttons_run( false );
+	gui::set_buttons_run( false );
 
 	// destroy existing window if INTERACT happens while debugger is stepping
-	if ( interact && exists_var( "interacting" ) && ! get_bool( "interacting" ) )
+	if ( interact && gui::exists_var( "interacting" ) && ! gui::get_bool( "interacting" ) )
 		cmd( "destroytop .deb" );
 
 	cmd( "set deb .deb" );
@@ -96,10 +105,10 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 			}; \
 			newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\"; \
 			set newDeb true \
-		}", unsaved_change() ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
+		}", gui::unsaved_change( ) ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
 
 	// avoid redrawing the menu if it already exists and is configured
-	if ( ! exists_window( ".deb.m" ) || ! expr_eq( "[ .deb cget -menu ]", ".deb.m" ) )
+	if ( ! gui::exists_window( ".deb.m" ) || ! gui::expr_eq( "[ .deb cget -menu ]", ".deb.m" ) )
 	{
 		cmd( "destroy .deb.m" );
 		cmd( "ttk::menu .deb.m -tearoff 0" );
@@ -139,7 +148,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 	}
 
 	// avoid redrawing the buttons if they already exist
-	if ( ! exists_window( ".deb.b" ) )
+	if ( ! gui::exists_window( ".deb.b" ) )
 	{
 		cmd( "if [ string equal $CurPlatform mac ] { \
 				set butWidD [ expr { $butWid - 1 } ] \
@@ -252,7 +261,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 	}
 
 	app_res = *res;
-	Tcl_LinkVar( interp, "value", ( char * ) &app_res, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( gui::interp, "value", ( char * ) & app_res, TCL_LINK_DOUBLE );
 	cmd( "set value_change 0" );
 
 	if ( sim->watch_trigger )
@@ -273,9 +282,9 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 	sim->watch_trigger = false;		// clears any watch condition already signaled
 
 	redraw = true;
-	choice = 0;
+	gui::choice = 0;
 
-	while ( choice == 0 )
+	while ( gui::choice == 0 )
 	{
 		if ( redraw )
 		{
@@ -394,7 +403,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				cmd( ".deb.b.move.hook configure -state normal" );
 
 			// update the temporary variables watch window
-			if ( exists_window( ".deb.val" ) )
+			if ( gui::exists_window( ".deb.val" ) )
 				show_tmp_vars( true );
 
 			// remove or update the network window
@@ -405,7 +414,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 			}
 			else
 			{
-				if ( exists_window( ".deb.net" ) )
+				if ( gui::exists_window( ".deb.net" ) )
 					show_neighbors( true );
 
 				cmd( ".deb.b.move.net configure -state normal" );
@@ -474,19 +483,19 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 		redraw = true;
 
 		// debugger command loop
-		choice_g = 0;
-		while ( ! choice && ! choice_g )
+		gui::choice_g = 0;
+		while ( ! gui::choice && ! gui::choice_g )
 			Tcl_DoOneEvent( 0 );
 
 		// coming from the structure window
-		if ( choice_g )
-			choice = 26;
+		if ( gui::choice_g )
+			gui::choice = 26;
 
 		if ( mode == 1 )
 		{
 			cmd( "bind .deb <KeyPress-g> { }; bind .deb <KeyPress-G> { }" );
 			cmd( "set stack_flag [ .deb.b.act.stack.e get ]" );
-			sim->stack_info = get_int( "stack_flag" );
+			sim->stack_info = gui::get_int( "stack_flag" );
 
 			cmd( "if { $value_change } { \
 					if [ string is double -strict [ .deb.v.v1.val2 get ] ] { \
@@ -499,14 +508,14 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				}" );
 		}
 
-		switch ( choice )
+		switch ( gui::choice )
 		{
 			// Step
 			case 1:
 				if ( sim->t >= sim->last_t )
 				{
 					cmd( "destroytop .deb" );
-					set_buttons_run( true );
+					gui::set_buttons_run( true );
 					sim->deb_set = false;
 				}
 				break;
@@ -514,7 +523,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 			// Run
 			case 2:
 				cmd( "destroytop .deb" );
-				set_buttons_run( true );
+				gui::set_buttons_run( true );
 				if ( ! interact )
 					sim->deb_set = false;
 
@@ -523,32 +532,32 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 			// Up
 			case 3:
 				if ( up != NULL )
-					choice = up->debugger( c, lab, res, interact );
+					gui::choice = up->debugger( c, lab, res, interact );
 				else
-					choice = 0;
+					gui::choice = 0;
 				break;
 
 			// Next
 			case 4:
 				if ( next != NULL )
-					choice = next->debugger( c, lab, res, interact );
+					gui::choice = next->debugger( c, lab, res, interact );
 				else
 				{
-					cur = skip_next_obj( this );
+					cur = next_obj( this );
 					if ( cur != NULL )
-						choice = cur->debugger( c, lab, res, interact );
+						gui::choice = cur->debugger( c, lab, res, interact );
 					else
-						choice = 0;
+						gui::choice = 0;
 				}
 				break;
 
 			// Next Type
 			case 5:
-				cur = skip_next_obj( this, &count );
+				cur = next_obj( this );
 				if ( cur != NULL )
-					choice = cur->debugger( c, lab, res, interact );
+					gui::choice = cur->debugger( c, lab, res, interact );
 				else
-					choice = 0;
+					gui::choice = 0;
 
 				break;
 
@@ -558,12 +567,12 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				for ( cb = b; cb != NULL; cb = cb->next )
 					if ( cb->head != NULL )
 					{
-						choice = cb->head->debugger( c, lab, res, interact );
+						gui::choice = cb->head->debugger( c, lab, res, interact );
 						break;
 					}
 
 				if ( cb == NULL )
-					choice = 0;
+					gui::choice = 0;
 
 				break;
 
@@ -574,17 +583,17 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 					cmd( "set answer [ ttk::messageBox -parent .deb -type okcancel -default ok -icon warning -title Warning -message \"Stop simulation\" -detail \"Quitting the simulation run.\nPress 'OK' to confirm.\" ]; if [ string equal $answer ok ] { set choice 0 } { set choice 1 }" );
 				}
 				else
-					choice = 0;
+					gui::choice = 0;
 
-				if ( choice == 1 )
+				if ( gui::choice == 1 )
 				{
-					choice = debugger( c, lab, res, interact );
+					gui::choice = debugger( c, lab, res, interact );
 					break;
 				}
 
 				cmd( "destroytop .deb" );
-				set_buttons_run( true );
-				choice = 1;
+				gui::set_buttons_run( true );
+				gui::choice = 1;
 
 				switch ( mode )
 				{
@@ -594,7 +603,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 						break;
 
 					case 2:
-						uncover_browser( );
+						gui::uncover_browser( );
 						break;
 
 					case 3:
@@ -607,14 +616,14 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 			case 8:
 				if ( mode != 1 && mode != 3 )		// do only if debugger is active
 				{
-					choice = 0;
+					gui::choice = 0;
 					break;
 				}
 
-				Tcl_LinkVar( interp, "debug", ( char * ) &debug, TCL_LINK_INT );
-				Tcl_LinkVar( interp, "i", ( char * ) &i, TCL_LINK_INT );
+				Tcl_LinkVar( gui::interp, "debug", ( char * ) & debug, TCL_LINK_INT );
+				Tcl_LinkVar( gui::interp, "i", ( char * ) & i, TCL_LINK_INT );
 
-				cv = search_var( NULL, get_str( "res" ) );
+				cv = search_var( NULL, gui::get_str( "res" ) );
 				i = cv->last_update;
 				debug = ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? 1 : 0;
 				eff_lags = ( cv->last_update >= cv->num_lag ) ? cv->num_lag : cv->num_lag - 1;
@@ -667,7 +676,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 					cmd( "set val%d %g", i, cv->val[ i ] );
 					app_values[ i ] = cv->val[ i ];
 					snprintf( ch, MAX_ELEM_LENGTH, "val%d", i );
-					Tcl_LinkVar( interp, ch, ( char * ) &( app_values[ i ] ), TCL_LINK_DOUBLE );
+					Tcl_LinkVar( gui::interp, ch, ( char * ) &( app_values[ i ] ), TCL_LINK_DOUBLE );
 
 					cmd( "ttk::frame $e.v.l$i" );
 
@@ -728,8 +737,8 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				cmd( "$e.v.l0.e selection range 0 end" );
 				cmd( "focus $e.v.l0.e" );
 
-				choice = 0;
-				while ( choice == 0 )
+				gui::choice = 0;
+				while ( gui::choice == 0 )
 					Tcl_DoOneEvent( 0 );
 
 				cv->initialized = true;
@@ -747,13 +756,13 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 						cmd( ".deb.v.v1.val2 configure -text [ format %%g $value ]" );
 					}
 
-					Tcl_UnlinkVar( interp, ch );
+					Tcl_UnlinkVar( gui::interp, ch );
 					cmd( "unset val$i" );
 				}
 
 				delete [ ] app_values;
-				Tcl_UnlinkVar( interp, "i" );
-				Tcl_UnlinkVar( interp, "debug" );
+				Tcl_UnlinkVar( gui::interp, "i" );
+				Tcl_UnlinkVar( gui::interp, "debug" );
 
 				cmd( "destroytop $e" );
 
@@ -780,18 +789,18 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 								cv->deb_mode = 'r';
 				}
 
-				count = choice;
+				count = gui::choice;
 
 				cmd( "if { $debugall || $undebugall } { set choice 1 } { set choice 0 }" );
-				if ( choice == 1 )
+				if ( gui::choice == 1 )
 					for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
 					{
 						cv1 = cur->search_var( cur, cv->label );
 						cv1->deb_mode = cv->deb_mode;
 					}
 
-				choice = count;
-				if ( choice == 7 )
+				gui::choice = count;
+				if ( gui::choice == 7 )
 				{
 					cmd( "set cond %d", cv->deb_cond );
 					cmd( "set cond_val %4g", cv->deb_cnd_val );
@@ -834,52 +843,52 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 
 					cmd( "tooltip::tooltip $cb.v.e \"Value to use with condition\"" );
 
-					choice = 0;
-					while ( choice == 0 )
+					gui::choice = 0;
+					while ( gui::choice == 0 )
 						Tcl_DoOneEvent( 0 );
 
 					cmd( "set cond_val [ $cb.v.e get ]" );
 
 					cmd( "destroytop $cb" );
 
-					if ( choice == 1 )
+					if ( gui::choice == 1 )
 					{
-						cv->deb_cond = get_int( "cond" );
-						cv->deb_cnd_val = get_double( "cond_val" );
+						cv->deb_cond = gui::get_int( "cond" );
+						cv->deb_cnd_val = gui::get_double( "cond_val" );
 					}
 				}
 
-				if ( choice == 8 )
+				if ( gui::choice == 8 )
 				{
-					show_eq( cv->label, ".deb" );
-					choice = 8;
+					gui::show_eq( cv->label, ".deb" );
+					gui::choice = 8;
 				}
 
-				if ( choice == 9 )
+				if ( gui::choice == 9 )
 				{
 					cur = cv->up;
 					cur->cal( cv->label, 0 );
 				}
 
-				if ( choice == 10 )
+				if ( gui::choice == 10 )
 				{
-					get_str( "res", ch, MAX_ELEM_LENGTH );
+					gui::get_str( "res", ch, MAX_ELEM_LENGTH );
 
 					cmd( "set choice $sa" );
-					i = choice;
+					i = gui::choice;
 
 					set_all( ch, i, ".deb" );
 				}
 
-				choice = 0;
+				gui::choice = 0;
 				break;
 
 			// Caller
 			case 9:
 				if ( c != NULL )
-					choice = c->debugger( this, lab, res, interact );
+					gui::choice = c->debugger( this, lab, res, interact );
 				else
-					choice = 0;
+					gui::choice = 0;
 				break;
 
 			// Search
@@ -889,13 +898,13 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 						set choice 0 \
 					}" );
 
-				if ( choice == 0 )
+				if ( gui::choice == 0 )
 					break;
 
-				Tcl_LinkVar( interp, "value_search", ( char * ) &value_search, TCL_LINK_DOUBLE );
-				Tcl_LinkVar( interp, "condition", ( char * ) &cond, TCL_LINK_INT );
+				Tcl_LinkVar( gui::interp, "value_search", ( char * ) &value_search, TCL_LINK_DOUBLE );
+				Tcl_LinkVar( gui::interp, "condition", ( char * ) &cond, TCL_LINK_INT );
 				cond = 0;
-				choice = 0;
+				gui::choice = 0;
 				value_search = 0;
 				i = 1;
 
@@ -956,22 +965,22 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				cmd( "focus $s.l.e" );
 				cmd( "$s.l.e selection range 0 end" );
 
-				while ( choice == 0 )
+				while ( gui::choice == 0 )
 					Tcl_DoOneEvent( 0 );
 
-				if ( choice == 1 )
+				if ( gui::choice == 1 )
 					cmd( "if { [ lsearch -exact $modElem $bidi ] < 0 } { \
 							ttk::messageBox -parent .deb.so -type ok -icon error -title Error -message \"Variable or parameter not found\" -detail \"No element in any object with the name provided was found. Check the spelling of the element name.\"; \
 							set choice 2 \
 						}" );
 
-				if ( choice == 2 )
+				if ( gui::choice == 2 )
 				{
 					cmd( "destroytop .deb.so" );
-					Tcl_UnlinkVar( interp, "value_search" );
-					Tcl_UnlinkVar( interp, "condition" );
+					Tcl_UnlinkVar( gui::interp, "value_search" );
+					Tcl_UnlinkVar( gui::interp, "condition" );
 
-					choice = 0;
+					gui::choice = 0;
 					redraw = false;
 					break;
 				}
@@ -980,7 +989,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				sim->running = false;
 
 				cmd( "set value_search [ .deb.so.v.e get ]" );
-				get_str( "bidi", ch, MAX_ELEM_LENGTH );
+				gui::get_str( "bidi", ch, MAX_ELEM_LENGTH );
 
 				cur = NULL;
 				switch ( cond )
@@ -1061,16 +1070,16 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 
 				sim->quit = 0;	// if name is mispelled don't stop the simulation!
 				cmd( "destroytop .deb.so" );
-				Tcl_UnlinkVar( interp, "value_search" );
-				Tcl_UnlinkVar( interp, "condition" );
+				Tcl_UnlinkVar( gui::interp, "value_search" );
+				Tcl_UnlinkVar( gui::interp, "condition" );
 
 				if ( cur != NULL )
-					choice = cur->debugger( this, lab, res, interact, ch );
+					gui::choice = cur->debugger( this, lab, res, interact, ch );
 				else
 				{
 					cmd( "ttk::messageBox -parent .deb -type ok -icon error -title Error -message \"Variable or parameter not found\" -detail \"No object containing an element satisfying the condition provided could be found.\"" );
 
-					choice = 0;
+					gui::choice = 0;
 					redraw = false;
 					break;
 				}
@@ -1081,10 +1090,10 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 			// Analysis
 			case 11:
 				sim->root->reset_end( );
-				analysis( );
+				gui::analysis( );
 				cmd( "focustop .deb" );
 
-				choice = 0;
+				gui::choice = 0;
 				redraw = false;
 				break;
 
@@ -1092,7 +1101,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 			case 12:
 				if ( up == NULL )
 				{
-					choice = 0;
+					gui::choice = 0;
 					break;
 				}
 
@@ -1107,16 +1116,16 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 						if ( cb1 != NULL && cb1->head != NULL )
 						{
 							for ( cur = cb1->head; cur->next != NULL; cur = cur->next );
-							choice = cur->debugger( c, lab, res, interact );
+							gui::choice = cur->debugger( c, lab, res, interact );
 							break;
 						}
 						else
-							choice = 0;
+							gui::choice = 0;
 						break;
 					}
 
 					for ( ; cur->next != this; cur = cur->next );
-					choice = cur->debugger( c, lab, res, interact );
+					gui::choice = cur->debugger( c, lab, res, interact );
 				}
 
 				break;
@@ -1124,10 +1133,10 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 
 			// Print Stack
 			case 13:
-				print_stack( );
+				gui::print_stack( );
 				cmd( "focustop .log" );
 
-				choice = 0;
+				gui::choice = 0;
 				redraw = false;
 				break;
 
@@ -1136,7 +1145,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				for ( cur = this, cur1 = NULL; cur != NULL; cur = cur->next )
 					cur1 = cur;
 
-				choice = cur1->debugger( c, lab, res, interact );
+				gui::choice = cur1->debugger( c, lab, res, interact );
 				break;
 
 			// show v[...] variables
@@ -1144,7 +1153,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				show_tmp_vars( false );
 				cmd( "focustop .deb" );
 
-				choice = 0;
+				gui::choice = 0;
 				redraw = false;
 				break;
 
@@ -1172,24 +1181,24 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				cmd( "$t.t.val selection range 0 end" );
 				cmd( "focus $t.t.val" );
 
-				choice = 0;
-				while ( choice == 0 )
+				gui::choice = 0;
+				while ( gui::choice == 0 )
 					Tcl_DoOneEvent( 0 );
 
 				cmd( "set tdebug [ $t.t.val get ]" );
 				cmd( "destroytop $t" );
 
-				if ( choice == 1 )
+				if ( gui::choice == 1 )
 				{
 					// restart execution
-					choice = 2;
+					gui::choice = 2;
 					sim->deb_set = false;
 					cmd( "if { $tdebug > %d } { set deb_t $tdebug } { set deb_t %d }", sim->t, sim->t + 1 );
 					cmd( "destroytop .deb" );
-					set_buttons_run( true );
+					gui::set_buttons_run( true );
 				}
 				else
-					choice = 0;
+					gui::choice = 0;
 
 				break;
 
@@ -1199,7 +1208,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 					if ( up != NULL )
 						entry_new_objnum( "" );
 
-				choice = 0;
+				gui::choice = 0;
 				break;
 
 			// find element
@@ -1210,7 +1219,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 						set choice 0 \
 					}" );
 
-				if ( choice == 0 )
+				if ( gui::choice == 0 )
 					break;
 
 				cmd( "set bidi \"\"" );
@@ -1247,11 +1256,11 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				cmd( "showtop .deb.sv" );
 				cmd( "focus .deb.sv.i.e" );
 
-				choice = 0;
-				while ( choice == 0 )
+				gui::choice = 0;
+				while ( gui::choice == 0 )
 					Tcl_DoOneEvent( 0 );
 
-				if ( choice == 1 )
+				if ( gui::choice == 1 )
 					cmd( "if { [ lsearch -exact $curElem $bidi ] < 0 } { \
 							ttk::messageBox -parent .deb.sv -type ok -icon error -title Error -message \"Variable or parameter not found\" -detail \"Check the spelling of the element name.\"; \
 							set choice 2 \
@@ -1259,9 +1268,9 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 
 				cmd( "destroytop .deb.sv" );
 
-				if ( choice == 2 )
+				if ( gui::choice == 2 )
 				{
-					choice = 0;
+					gui::choice = 0;
 					redraw = false;
 					break;
 				}
@@ -1269,7 +1278,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				pre_running = sim->running;
 				sim->running = false;
 
-				choice = debugger( c, lab, res, interact, get_str( "bidi" ) );
+				gui::choice = debugger( c, lab, res, interact, gui::get_str( "bidi" ) );
 
 				sim->running = pre_running;
 				break;
@@ -1283,7 +1292,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 						set lastHl \"\" \
 					}" );
 
-				choice = 0;
+				gui::choice = 0;
 				redraw = false;
 				break;
 
@@ -1368,32 +1377,32 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 					cmd( "showtop $hk" );
 					cmd( "mousewarpto $hk.b.ok" );
 
-					choice = 0;
-					while ( choice == 0 )
+					gui::choice = 0;
+					while ( gui::choice == 0 )
 						Tcl_DoOneEvent( 0 );
 
 					cmd( "destroytop $hk" );
 
-					if ( choice == 1 )
+					if ( gui::choice == 1 )
 					{
-						i = get_int( "hook" );
+						i = gui::get_int( "hook" );
 
 						if ( ! checked[ i ] )
 						{
 							cmd( "if [ string equal [ ttk::messageBox -parent .deb -type okcancel -icon warning -title Warning -default cancel -message \"Cannot check hook pointer\" -detail \"Cannot check if hook points to a valid object. LSD may crash if jumping to an invalid hook pointer.\" ] ok ] { set choice 1 } { set choice 0 }" );
 
-							if ( choice == 0 )
+							if ( gui::choice == 0 )
 								break;
 						}
 
 						if ( i < j )
-							choice = hooks[ i ]->debugger( c, lab, res, interact );
+							gui::choice = hooks[ i ]->debugger( c, lab, res, interact );
 						else
-							choice = hook->debugger( c, lab, res, interact );
+							gui::choice = hook->debugger( c, lab, res, interact );
 					}
 					else
 					{
-						choice = 0;
+						gui::choice = 0;
 						redraw = false;
 					}
 				}
@@ -1406,7 +1415,7 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 						{
 							cmd( "ttk::messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to LSD objects or avoid using this option.\"" );
 
-							choice = 0;
+							gui::choice = 0;
 							redraw = false;
 							break;
 						}
@@ -1415,18 +1424,18 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 						{
 							cmd( "if [ string equal [ ttk::messageBox -parent .deb -type okcancel -icon warning -title Warning -default cancel -message \"Cannot check hook pointer\" -detail \"Cannot check if hook points to a valid object. LSD may crash if jumping to an invalid hook pointer.\" ] ok ] { set choice 1 } { set choice 0 }" );
 
-							if ( choice == 0 )
+							if ( gui::choice == 0 )
 							{
 								redraw = false;
 								break;
 							}
 						}
 
-						choice = hook->debugger( c, lab, res, interact );
+						gui::choice = hook->debugger( c, lab, res, interact );
 					}
 					else
 					{
-						choice = 0;
+						gui::choice = 0;
 						redraw = false;
 					}
 
@@ -1437,18 +1446,18 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 				show_neighbors( false );
 				cmd( "focustop .deb" );
 
-				choice = 0;
+				gui::choice = 0;
 				redraw = false;
 				break;
 
 			// double-click (change to) network node
 			case 23:
-				cur = sim->root->search_node_net( get_str( "nodeLab" ), get_long( "nodeId" ) );
+				cur = sim->root->search_node_net( gui::get_str( "nodeLab" ), gui::get_long( "nodeId" ) );
 				if ( cur != NULL )
-					choice = cur->debugger( c, lab, res, interact );
+					gui::choice = cur->debugger( c, lab, res, interact );
 				else
 				{
-					choice = 0;
+					gui::choice = 0;
 					redraw = false;
 				}
 
@@ -1456,14 +1465,14 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 
 			// double-click (change to) object pointer
 			case 24:
-				i = get_int( "objNum" );
-				cur = sim->root->search( get_str( "objLab" ) );
+				i = gui::get_int( "objNum" );
+				cur = sim->root->search( gui::get_str( "objLab" ) );
 				for ( j = 1; j != i && cur != NULL; ++j, cur = cur->hyper_next( ) );
 				if ( cur != NULL )
-					choice = cur->debugger( c, lab, res, interact );
+					gui::choice = cur->debugger( c, lab, res, interact );
 				else
 				{
-					choice = 0;
+					gui::choice = 0;
 					redraw = false;
 				}
 
@@ -1472,16 +1481,16 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 			// right-click (set all) on multi-instanced parameter or variable
 			case 25:
 				if ( mode == 1 || mode == 3 )		// do only if debugger is active
-					set_all( get_str( "res" ), 0, ".deb" );
+					set_all( gui::get_str( "res" ), 0, ".deb" );
 
-				choice = 0;
+				gui::choice = 0;
 				break;
 
 			// model Report
 			case 27:
-				show_report( ".deb" );
+				gui::show_report( ".deb" );
 
-				choice = 0;
+				gui::choice = 0;
 				redraw = false;
 				break;
 
@@ -1489,19 +1498,19 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 			case 28:
 				if ( mode != 1 && mode != 3 )		// do only if debugger is active
 				{
-					choice = 0;
+					gui::choice = 0;
 					break;
 				}
 
 				if ( asl == NULL && sim->stack_log != NULL )
 				{
 					asl = sim->stack_log;
-					plog( "\nVariable: %s", asl->label );
+					gui::plog( "\nVariable: %s", asl->label );
 					if ( asl->v != NULL && asl->v->up != NULL )
-						choice = asl->v->up->debugger( c, lab, res, interact );
+						gui::choice = asl->v->up->debugger( c, lab, res, interact );
 					else
 					{
-						choice = 0;
+						gui::choice = 0;
 						redraw = false;
 					}
 				}
@@ -1511,24 +1520,24 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 					{
 						while ( asl->prev->prev != NULL )
 							asl = asl->prev;
-						plog( "\nVariable: %s", asl->label );
+						gui::plog( "\nVariable: %s", asl->label );
 						if ( asl->v != NULL && asl->v->up != NULL )
-							choice = asl->v->up->debugger( c, lab, res, interact );
+							gui::choice = asl->v->up->debugger( c, lab, res, interact );
 						else
 						{
-							choice = 0;
+							gui::choice = 0;
 							redraw = false;
 						}
 					}
 					else
 					{
 						asl = asl->next;
-						plog( "\nVariable: %s", asl->label );
+						gui::plog( "\nVariable: %s", asl->label );
 						if ( asl->v != NULL && asl->v->up != NULL )
-							choice = asl->v->up->debugger( c, lab, res, interact );
+							gui::choice = asl->v->up->debugger( c, lab, res, interact );
 						else
 						{
-							choice = 0;
+							gui::choice = 0;
 							redraw = false;
 						}
 					}
@@ -1541,15 +1550,15 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 
 			case 26:
 
-				switch ( choice_g )
+				switch ( gui::choice_g )
 				{
 					// redraw model structure graph
 					case 23:
 
-						( lastObj == NULL ? sim->root : lastObj )->show_graph( );
+						( gui::lastObj == NULL ? sim->root : gui::lastObj )->show_graph( );
 						cmd( "focustop .deb" );
 
-						choice = 0;
+						gui::choice = 0;
 						redraw = false;
 
 						break;
@@ -1560,47 +1569,47 @@ int object::debugger( object *c, const char *lab, double *res, bool interact, co
 
 						cmd( "focustop .deb" );
 
-						if ( exists_var( "res_g" ) )
-							cur = sim->root->search(	 get_str( "res_g" ) );
+						if ( gui::exists_var( "res_g" ) )
+							cur = sim->root->search( gui::get_str( "res_g" ) );
 						else
 							cur = NULL;
 
 						// handle zero instanced objects
 						if ( cur != NULL )
-							choice = cur->debugger( c, lab, res, interact );
+							gui::choice = cur->debugger( c, lab, res, interact );
 						else
 						{
-							choice = 0;
+							gui::choice = 0;
 							redraw = false;
 						}
 
 						break;
 
 					default:
-						choice = 0;
+						gui::choice = 0;
 						redraw = false;
 				}
 
 				break;
 
 			default:
-				choice = 0;
+				gui::choice = 0;
 				redraw = false;
 		}
 	}
 
 	*res = app_res;
 
-	Tcl_UnlinkVar( interp, "value" );
+	Tcl_UnlinkVar( gui::interp, "value" );
 
-	return choice;
+	return gui::choice;
 }
 
 
-/*******************************************
-DEBUG_UPDATE
-********************************************/
-void object::debugger_update( const char *hl_var, int mode )
+/*************************************************************
+ DEBUG_UPDATE
+ *************************************************************/
+void lsd::object::debugger_update( const char *hl_var, int mode )
 {
 	char ch[ MAX_LINE_SIZE ], ch1[ MAX_LINE_SIZE ];
 	variable *ap_v;
@@ -1737,7 +1746,7 @@ void object::debugger_update( const char *hl_var, int mode )
 	}
 	else
 	{
-		Tcl_LinkVar( interp, "i", ( char * ) &i, TCL_LINK_INT );
+		Tcl_LinkVar( gui::interp, "i", ( char * ) & i, TCL_LINK_INT );
 
 		// single frame ($w=.deb.cc.grid.can.f) in canvas to hold all cells
 		cmd( "set w $g.can.f" );
@@ -1791,7 +1800,7 @@ void object::debugger_update( const char *hl_var, int mode )
 			cmd( "mouse_wheel $w.e$i.val" );
 			cmd( "mouse_wheel $w.e$i.last" );
 
-			set_ttip_descr( "$w.e$i.name", ap_v->label, -1, false );
+			gui::set_ttip_descr( "$w.e$i.name", ap_v->label, -1, false );
 
 			if ( mode != 2 && ap_v->num_lag > 0 )
 			{
@@ -1846,7 +1855,7 @@ void object::debugger_update( const char *hl_var, int mode )
 				set lastHl \"\"; \
 			}", hl_var, hl_var, hl_var, hl_var );
 
-		Tcl_UnlinkVar( interp, "i" );
+		Tcl_UnlinkVar( gui::interp, "i" );
 
 		// force scrollbar cursor to show (Tk bug)
 		cmd( "update idletasks" );
@@ -1855,10 +1864,10 @@ void object::debugger_update( const char *hl_var, int mode )
 }
 
 
-/*******************************************
-SHOW_TMP_VARS
-********************************************/
-void object::show_tmp_vars( bool update )
+/*************************************************************
+ SHOW_TMP_VARS
+ *************************************************************/
+void lsd::object::show_tmp_vars( bool update )
 {
 	char i_names[ ] = { 'i', 'j', 'h', 'k' };
 	int i, j, m, n;
@@ -1866,7 +1875,7 @@ void object::show_tmp_vars( bool update )
 	object *cur;
 
 	cmd( "set in .deb.val" );
-	if ( ! exists_window( "$in" ) )
+	if ( ! gui::exists_window( "$in" ) )
 	{
 		cmd( "newtop $in \"v\\[...\\]\" { destroytop .deb.val } .deb" );
 
@@ -1923,7 +1932,7 @@ void object::show_tmp_vars( bool update )
 	cmd( "$in.l1.n.name configure -text \"%s\"", label == NULL ? "" : label );
 	cmd( "$in.l1.n.id configure -text \"%d\"", m );
 
-	Tcl_LinkVar( interp, "i", ( char * ) &i, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "i", ( char * ) & i, TCL_LINK_INT );
 
 	cmd( "$in.n.t insert end \"Temporary storage\n\" bold" );
 
@@ -2152,15 +2161,15 @@ void object::show_tmp_vars( bool update )
 		cmd( "$in.n.t insert end \\n" );
 	}
 
-	Tcl_UnlinkVar( interp, "i" );
+	Tcl_UnlinkVar( gui::interp, "i" );
 	cmd( "$in.n.t configure -state disabled" );
 }
 
 
-/*******************************************
-SHOW_NEIGHBORS
-********************************************/
-void object::show_neighbors( bool update )
+/*************************************************************
+ SHOW_NEIGHBORS
+ *************************************************************/
+void lsd::object::show_neighbors( bool update )
 {
 	int i;
 	netLink *curLnk;
@@ -2169,7 +2178,7 @@ void object::show_neighbors( bool update )
 		return;
 
 	cmd( "set N .deb.net" );
-	if ( ! exists_window( "$N" ) )
+	if ( ! gui::exists_window( "$N" ) )
 	{
 		cmd( "newtop $N \"Network\" { destroytop .deb.net } .deb" );
 
@@ -2233,7 +2242,7 @@ void object::show_neighbors( bool update )
 	cmd( "$N.l1.n.name configure -text \"%s\"", node->name == NULL ? "" : node->name );
 	cmd( "$N.l2.n configure -text %ld", node->nLinks );
 
-	Tcl_LinkVar( interp, "i", ( char * ) &i, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "i", ( char * ) & i, TCL_LINK_INT );
 
 	for ( i = 1, curLnk = node->first; curLnk != NULL; curLnk = curLnk->next, ++i )
 	{
@@ -2260,15 +2269,15 @@ void object::show_neighbors( bool update )
 		cmd( "$N.n.t insert end \\n" );
 	}
 
-	Tcl_UnlinkVar( interp, "i" );
+	Tcl_UnlinkVar( gui::interp, "i" );
 	cmd( "$N.n.t configure -state disabled" );
 }
 
 
-/*******************************************
-ATTACH_INSTANCE_NUMBER
-********************************************/
-void object::attach_instance_number( char *outh, char *outv, int outSz )
+/*************************************************************
+ ATTACH_INSTANCE_NUMBER
+ *************************************************************/
+void lsd::object::attach_instance_number( char *outh, char *outv, int outSz )
 {
 	int i = 1, j = 1;
 	object *cur;
@@ -2277,7 +2286,7 @@ void object::attach_instance_number( char *outh, char *outv, int outSz )
 	{
 		up->attach_instance_number( outh, outv, outSz );
 
-		for ( cur = up->search( label ); cur != NULL; cur = go_brother( cur ) )
+		for ( cur = up->search( label ); cur != NULL; cur = BROTHER( cur ) )
 		{
 			if ( cur == this )
 				j = i;

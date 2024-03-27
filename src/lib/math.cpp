@@ -13,18 +13,18 @@
  *************************************************************/
 
 /*************************************************************
-MATH.CPP
-Contains the mathematical and statistical functions used in
-LSD and models.
-*************************************************************/
+ MATH.CPP
+ Contains the mathematical and statistical functions used in
+ LSD and models.
+ *************************************************************/
 
 #include "lib/libLSD.h"				// LSD library classes
 
 
-/****************************************************
-ROUND_DIGITS
-****************************************************/
-double simulation::round_digits( double value, int digits )
+/*************************************************************
+ ROUND_DIGITS
+ *************************************************************/
+double lsd::simulation::round_digits( double value, int digits )
 {
 	if ( value == 0.0 )
 		return 0.0;
@@ -35,11 +35,11 @@ double simulation::round_digits( double value, int digits )
 }
 
 
-/***************************************************
-IPOW
-Integer exponentiation
-***************************************************/
-double simulation::ipow( double base, double exp )
+/*************************************************************
+ IPOW
+ Integer exponentiation
+ *************************************************************/
+double lsd::simulation::ipow( double base, double exp )
 {
 	long res = 1, lbase = ( long ) floor( base ), lexp = ( long ) floor( exp );
 
@@ -63,11 +63,11 @@ double simulation::ipow( double base, double exp )
 }
 
 
-/***************************************************
-FACT
-Factorial function
-***************************************************/
-double simulation::fact( double x )
+/*************************************************************
+ FACT
+ Factorial function
+ *************************************************************/
+double lsd::simulation::fact( double x )
 {
 	x = floor( x );
 	if ( x < 0.0 )
@@ -85,10 +85,10 @@ double simulation::fact( double x )
 }
 
 
-/****************************************************
-MEDIAN
-****************************************************/
-double simulation::median( d_vecT & v )
+/*************************************************************
+ MEDIAN
+ *************************************************************/
+double lsd::simulation::median( d_vecT & v )
 {
 	int mid;
 	double midVal;
@@ -109,12 +109,12 @@ double simulation::median( d_vecT & v )
 }
 
 
-/****************************************************
-T_STAR
-Student t distribution  statistic for given
-degrees of freedom and confidence level (in %)
-****************************************************/
-double simulation::t_star( int df, double cl )
+/*************************************************************
+ T_STAR
+ Student t distribution  statistic for given
+ degrees of freedom and confidence level (in %)
+ *************************************************************/
+double lsd::simulation::t_star( int df, double cl )
 {
 	int i;
 
@@ -144,12 +144,12 @@ double simulation::t_star( int df, double cl )
 }
 
 
-/****************************************************
-Z_STAR
-Standard normal distribution statistic for given
-confidence level (in %)
-****************************************************/
-double simulation::z_star( double cl )
+/*************************************************************
+ Z_STAR
+ Standard normal distribution statistic for given
+ confidence level (in %)
+ *************************************************************/
+double lsd::simulation::z_star( double cl )
 {
 	int i;
 
@@ -161,11 +161,11 @@ double simulation::z_star( double cl )
 }
 
 
-/***************************************************
-UNIFCDF
-Uniform cumulative distribution function
-***************************************************/
-double simulation::unifcdf( double a, double b, double x )
+/*************************************************************
+ UNIFCDF
+ Uniform cumulative distribution function
+ *************************************************************/
+double lsd::simulation::unifcdf( double a, double b, double x )
 {
 	if ( a >= b )
 	{
@@ -182,11 +182,11 @@ double simulation::unifcdf( double a, double b, double x )
 }
 
 
-/***************************************************
-POISSONCDF
-Poisson cumulative distribution function
-***************************************************/
-double simulation::poissoncdf( double lambda, double k )
+/*************************************************************
+ POISSONCDF
+ Poisson cumulative distribution function
+ *************************************************************/
+double lsd::simulation::poissoncdf( double lambda, double k )
 {
 	k = floor( k );
 	if ( lambda <= 0.0 || k < 0.0 )
@@ -204,11 +204,11 @@ double simulation::poissoncdf( double lambda, double k )
 }
 
 
-/***************************************************
-PARETOCDF
-Pareto cumulative distribution function
-***************************************************/
-double simulation::paretocdf( double mu, double alpha, double x )
+/*************************************************************
+ PARETOCDF
+ Pareto cumulative distribution function
+ *************************************************************/
+double lsd::simulation::paretocdf( double mu, double alpha, double x )
 {
 	if ( mu <= 0 || alpha <= 0 )
 	{
@@ -223,11 +223,11 @@ double simulation::paretocdf( double mu, double alpha, double x )
 }
 
 
-/***************************************************
-BPARETOCDF
-Bounded Pareto cumulative distribution function
-***************************************************/
-double simulation::bparetocdf( double alpha, double low, double high, double x )
+/*************************************************************
+ BPARETOCDF
+ Bounded Pareto cumulative distribution function
+ *************************************************************/
+double lsd::simulation::bparetocdf( double alpha, double low, double high, double x )
 {
 	if ( alpha <= 0 || low <= 0 || low >= high )
 	{
@@ -243,11 +243,11 @@ double simulation::bparetocdf( double alpha, double low, double high, double x )
 }
 
 
-/***************************************************
-NORMCDF
-Normal cumulative distribution function
-***************************************************/
-double simulation::normcdf( double mu, double sigma, double x )
+/*************************************************************
+ NORMCDF
+ Normal cumulative distribution function
+ *************************************************************/
+double lsd::simulation::normcdf( double mu, double sigma, double x )
 {
 	if ( sigma <= 0.0 )
 	{
@@ -259,11 +259,11 @@ double simulation::normcdf( double mu, double sigma, double x )
 }
 
 
-/***************************************************
-LNORMCDF
-Lognormal cumulative distribution function
-***************************************************/
-double simulation::lnormcdf( double mu, double sigma, double x )
+/*************************************************************
+ LNORMCDF
+ Lognormal cumulative distribution function
+ *************************************************************/
+double lsd::simulation::lnormcdf( double mu, double sigma, double x )
 {
 	if ( sigma <= 0.0 || x <= 0.0 )
 	{
@@ -275,11 +275,12 @@ double simulation::lnormcdf( double mu, double sigma, double x )
 }
 
 
-/***************************************************
-ALAPLCDF
-Asymmetric laplace cumulative distribution function
-***************************************************/
-double simulation::alaplcdf( double mu, double alpha1, double alpha2, double x )
+/*************************************************************
+ ALAPLCDF
+ Asymmetric laplace cumulative distribution
+ function
+ *************************************************************/
+double lsd::simulation::alaplcdf( double mu, double alpha1, double alpha2, double x )
 {
 	if ( alpha1 <= 0.0 || alpha2 <= 0.0 )
 	{
@@ -294,16 +295,17 @@ double simulation::alaplcdf( double mu, double alpha1, double alpha2, double x )
 }
 
 
-/***************************************************
-BETACF
-Beta distribution: continued fraction evaluation function
-Press et al. (1992) Numerical Recipes in C, 2nd Ed.
-***************************************************/
+/*************************************************************
+ BETACF
+ Beta distribution: continued fraction evaluation
+ function
+ Press et al. (1992) Numerical Recipes in C, 2nd Ed.
+ *************************************************************/
 #define MAXIT 100
 #define BEPS 3.0e-7
 #define FPMIN 1.0e-30
 
-double simulation::betacf( double a, double b, double x )
+double lsd::simulation::betacf( double a, double b, double x )
 {
 	void nrerror(char error_text[ ]);
 	int m, m2;
@@ -357,12 +359,13 @@ double simulation::betacf( double a, double b, double x )
 }
 
 
-/***************************************************
-BETACDF
-Beta cumulative distribution function: incomplete beta function
-Press et al. (1992) Numerical Recipes in C, 2nd Ed.
-***************************************************/
-double simulation::betacdf( double alpha, double beta, double x )
+/*************************************************************
+ BETACDF
+ Beta cumulative distribution function: incomplete
+ beta function
+ Press et al. (1992) Numerical Recipes in C, 2nd Ed.
+ *************************************************************/
+double lsd::simulation::betacdf( double alpha, double beta, double x )
 {
 	double bt;
 
@@ -385,20 +388,20 @@ double simulation::betacdf( double alpha, double beta, double x )
 }
 
 
-/****************************************************
-INIT_RANDOM
-Set seed to all random generators
-Pseudo-random number generator to extract draws
-ran_gen_id = 0 : system (not pseudo) random device in (0,1)
-ran_gen_id = 1 : Linear congruential in (0,1)
-ran_gen_id = 2 : Mersenne-Twister in (0,1)
-ran_gen_id = 3 : Linear congruential in [0,1)
-ran_gen_id = 4 : Mersenne-Twister in [0,1)
-ran_gen_id = 5 : Mersenne-Twister with 64 bits resolution in [0,1)
-ran_gen_id = 6 : Lagged fibonacci with 24 bits resolution in [0,1)
-ran_gen_id = 7 : Lagged fibonacci with 48 bits resolution in [0,1)
-****************************************************/
-void simulation::init_random( unsigned seed )
+/*************************************************************
+ INIT_RANDOM
+ Set seed to all random generators
+ Pseudo-random number generator to extract draws
+ ran_gen_id = 0 : system (not pseudo) random device in (0,1)
+ ran_gen_id = 1 : Linear congruential in (0,1)
+ ran_gen_id = 2 : Mersenne-Twister in (0,1)
+ ran_gen_id = 3 : Linear congruential in [0,1)
+ ran_gen_id = 4 : Mersenne-Twister in [0,1)
+ ran_gen_id = 5 : Mersenne-Twister with 64 bits resolution in [0,1)
+ ran_gen_id = 6 : Lagged fibonacci with 24 bits resolution in [0,1)
+ ran_gen_id = 7 : Lagged fibonacci with 48 bits resolution in [0,1)
+ *************************************************************/
+void lsd::simulation::init_random( unsigned seed )
 {
 	idum = -seed;					// unused (legacy code only)
 	lc1.seed( seed );				// linear congruential (internal)
@@ -409,7 +412,7 @@ void simulation::init_random( unsigned seed )
 	lf48.seed( seed );				// lagged fibonacci 48 bits
 }
 
-template < class distr > double draw_rd( simulation *sim, distr &d )
+template < class distr > double draw_rd( lsd::simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
@@ -418,7 +421,7 @@ template < class distr > double draw_rd( simulation *sim, distr &d )
 	return d( sim->rd );
 }
 
-template < class distr > double draw_lc1( simulation *sim, distr &d )
+template < class distr > double draw_lc1( lsd::simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
@@ -427,7 +430,7 @@ template < class distr > double draw_lc1( simulation *sim, distr &d )
 	return d( sim->lc1 );
 }
 
-template < class distr > double draw_lc2( simulation *sim, distr &d )
+template < class distr > double draw_lc2( lsd::simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
@@ -436,7 +439,7 @@ template < class distr > double draw_lc2( simulation *sim, distr &d )
 	return d( sim->lc2 );
 }
 
-template < class distr > double draw_mt32( simulation *sim, distr &d )
+template < class distr > double draw_mt32( lsd::simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
@@ -445,7 +448,7 @@ template < class distr > double draw_mt32( simulation *sim, distr &d )
 	return d( sim->mt32 );
 }
 
-template < class distr > double draw_mt64( simulation *sim, distr &d )
+template < class distr > double draw_mt64( lsd::simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
@@ -454,7 +457,7 @@ template < class distr > double draw_mt64( simulation *sim, distr &d )
 	return d( sim->mt64 );
 }
 
-template < class distr > double draw_lf24( simulation *sim, distr &d )
+template < class distr > double draw_lf24( lsd::simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
@@ -463,7 +466,7 @@ template < class distr > double draw_lf24( simulation *sim, distr &d )
 	return d( sim->lf24 );
 }
 
-template < class distr > double draw_lf48( simulation *sim, distr &d )
+template < class distr > double draw_lf48( lsd::simulation *sim, distr &d )
 {
 #ifndef _NP_
 	// prevent concurrent draw by more than one thread
@@ -473,11 +476,11 @@ template < class distr > double draw_lf48( simulation *sim, distr &d )
 }
 
 
-/***************************************************
-DRAW_GEN
-Generate the draw using current generator object
-***************************************************/
-template < class distr > double simulation::draw_gen( distr &d )
+/*************************************************************
+ DRAW_GEN
+ Generate the draw using current generator object
+ *************************************************************/
+template < class distr > double lsd::simulation::draw_gen( distr &d )
 {
 	switch ( ran_gen_id )
 	{
@@ -504,11 +507,11 @@ template < class distr > double simulation::draw_gen( distr &d )
 }
 
 
-/***************************************************
-SET_RANDOM
-Set the generator object to be used in draws
-***************************************************/
-void *simulation::set_random( int gen )
+/*************************************************************
+ SET_RANDOM
+ Set the generator object to be used in draws
+ *************************************************************/
+void *lsd::simulation::set_random( int gen )
 {
 	if ( gen >= 0 && gen <= 7 )
 	{
@@ -544,22 +547,22 @@ void *simulation::set_random( int gen )
 }
 
 
-/****************************************************
-RND_INT
-****************************************************/
-int simulation::rnd_int( int min, int max )
+/*************************************************************
+ RND_INT
+ *************************************************************/
+int lsd::simulation::rnd_int( int min, int max )
 {
 	std::uniform_int_distribution < int > distr( min, max );
 	return draw_lc1( this, distr );
 }
 
 
-/***************************************************
-RAN1
-Call the preset pseudo-random number generator
-Just generates numbers > 0 and < 1
-***************************************************/
-double simulation::ran1( long *unused )
+/*************************************************************
+ RAN1
+ Call the preset pseudo-random number generator
+ Just generates numbers > 0 and < 1
+ *************************************************************/
+double lsd::simulation::ran1( long *unused )
 {
 	double ran;
 	std::uniform_real_distribution < double > distr( 0, 1 );
@@ -572,30 +575,30 @@ double simulation::ran1( long *unused )
 }
 
 
-/****************************************************
-UNIFORM
-****************************************************/
-double simulation::uniform( double min, double max )
+/*************************************************************
+ UNIFORM
+ *************************************************************/
+double lsd::simulation::uniform( double min, double max )
 {
 	std::uniform_real_distribution < double > distr( min, max );
 	return draw_gen( distr );
 }
 
 
-/****************************************************
-UNIFORM_INT
-****************************************************/
-double simulation::uniform_int( double min, double max )
+/*************************************************************
+ UNIFORM_INT
+ *************************************************************/
+double lsd::simulation::uniform_int( double min, double max )
 {
 	std::uniform_int_distribution < int > distr( ( long ) min, ( long ) max );
 	return draw_gen( distr );
 }
 
 
-/***************************************************
-NORM
-***************************************************/
-double simulation::norm( double mean, double dev )
+/*************************************************************
+ NORM
+ *************************************************************/
+double lsd::simulation::norm( double mean, double dev )
 {
 	static bool normStopErr;
 
@@ -610,11 +613,11 @@ double simulation::norm( double mean, double dev )
 }
 
 
-/***************************************************
-LNORM
-Return a draw from a lognormal distribution
-***************************************************/
-double simulation::lnorm( double mean, double dev )
+/*************************************************************
+ LNORM
+ Return a draw from a lognormal distribution
+ *************************************************************/
+double lsd::simulation::lnorm( double mean, double dev )
 {
 	static bool lnormStopErr;
 
@@ -629,10 +632,10 @@ double simulation::lnorm( double mean, double dev )
 }
 
 
-/****************************************************
-GAMMA
-****************************************************/
-double simulation::gamma( double alpha, double beta )
+/*************************************************************
+ GAMMA
+ *************************************************************/
+double lsd::simulation::gamma( double alpha, double beta )
 {
 	static bool gammaStopErr;
 
@@ -647,10 +650,10 @@ double simulation::gamma( double alpha, double beta )
 }
 
 
-/****************************************************
-BERNOULLI
-****************************************************/
-double simulation::bernoulli( double p )
+/*************************************************************
+ BERNOULLI
+ *************************************************************/
+double lsd::simulation::bernoulli( double p )
 {
 	static bool bernoStopErr;
 
@@ -669,10 +672,10 @@ double simulation::bernoulli( double p )
 }
 
 
-/****************************************************
-POISSON
-****************************************************/
-double simulation::poisson( double mean )
+/*************************************************************
+ POISSON
+ *************************************************************/
+double lsd::simulation::poisson( double mean )
 {
 	static bool poissStopErr;
 
@@ -687,10 +690,10 @@ double simulation::poisson( double mean )
 }
 
 
-/****************************************************
-GEOMETRIC
-****************************************************/
-double simulation::geometric( double p )
+/*************************************************************
+ GEOMETRIC
+ *************************************************************/
+double lsd::simulation::geometric( double p )
 {
 	static bool geomStopErr;
 
@@ -709,10 +712,10 @@ double simulation::geometric( double p )
 }
 
 
-/****************************************************
-BINOMIAL
-****************************************************/
-double simulation::binomial( double p, double t )
+/*************************************************************
+ BINOMIAL
+ *************************************************************/
+double lsd::simulation::binomial( double p, double t )
 {
 	static bool binomStopErr;
 
@@ -731,10 +734,10 @@ double simulation::binomial( double p, double t )
 }
 
 
-/***************************************************
-CAUCHY
-***************************************************/
-double simulation::cauchy( double a, double b )
+/*************************************************************
+ CAUCHY
+ *************************************************************/
+double lsd::simulation::cauchy( double a, double b )
 {
 	static bool cauchStopErr;
 
@@ -749,10 +752,10 @@ double simulation::cauchy( double a, double b )
 }
 
 
-/***************************************************
-CHI_SQUARED
-***************************************************/
-double simulation::chi_squared( double n )
+/*************************************************************
+ CHI_SQUARED
+ *************************************************************/
+double lsd::simulation::chi_squared( double n )
 {
 	static bool chisqStopErr;
 
@@ -767,10 +770,10 @@ double simulation::chi_squared( double n )
 }
 
 
-/***************************************************
-EXPONENTIAL
-***************************************************/
-double simulation::exponential( double lambda )
+/*************************************************************
+ EXPONENTIAL
+ *************************************************************/
+double lsd::simulation::exponential( double lambda )
 {
 	static bool expStopErr;
 
@@ -785,10 +788,10 @@ double simulation::exponential( double lambda )
 }
 
 
-/***************************************************
-FISHER
-***************************************************/
-double simulation::fisher( double m, double n )
+/*************************************************************
+ FISHER
+ *************************************************************/
+double lsd::simulation::fisher( double m, double n )
 {
 	static bool fishStopErr;
 
@@ -803,10 +806,10 @@ double simulation::fisher( double m, double n )
 }
 
 
-/***************************************************
-STUDENT
-***************************************************/
-double simulation::student( double n )
+/*************************************************************
+ STUDENT
+ *************************************************************/
+double lsd::simulation::student( double n )
 {
 	static bool studStopErr;
 
@@ -821,10 +824,10 @@ double simulation::student( double n )
 }
 
 
-/***************************************************
-WEIBULL
-***************************************************/
-double simulation::weibull( double a, double b )
+/*************************************************************
+ WEIBULL
+ *************************************************************/
+double lsd::simulation::weibull( double a, double b )
 {
 	static bool weibStopErr;
 
@@ -839,11 +842,11 @@ double simulation::weibull( double a, double b )
 }
 
 
-/***************************************************
-BETA
-Return a draw from a Beta(alfa,beta) distribution
-***************************************************/
-double simulation::beta( double alpha, double beta )
+/*************************************************************
+ BETA
+ Return a draw from a Beta(alfa,beta) distribution
+ *************************************************************/
+double lsd::simulation::beta( double alpha, double beta )
 {
 	static bool betaStopErr;
 
@@ -863,10 +866,10 @@ double simulation::beta( double alpha, double beta )
 }
 
 
-/****************************************************
-PARETO
-****************************************************/
-double simulation::pareto( double mu, double alpha )
+/*************************************************************
+ PARETO
+ *************************************************************/
+double lsd::simulation::pareto( double mu, double alpha )
 {
 	static bool paretStopErr;
 
@@ -880,10 +883,10 @@ double simulation::pareto( double mu, double alpha )
 }
 
 
-/****************************************************
-BPARETO
-****************************************************/
-double simulation::bpareto( double alpha, double low, double high )
+/*************************************************************
+ BPARETO
+ *************************************************************/
+double lsd::simulation::bpareto( double alpha, double low, double high )
 {
 	static bool paretStopErr;
 
@@ -899,11 +902,11 @@ double simulation::bpareto( double alpha, double low, double high )
 }
 
 
-/***************************************************
-ALAPL
-Return a draw from an asymmetric laplace distribution
-***************************************************/
-double simulation::alapl( double mu, double alpha1, double alpha2 )
+/*************************************************************
+ ALAPL
+ Return a draw from an asymmetric laplace distribution
+ *************************************************************/
+double lsd::simulation::alapl( double mu, double alpha1, double alpha2 )
 {
 	static bool alaplStopErr;
 
@@ -921,13 +924,13 @@ double simulation::alapl( double mu, double alpha1, double alpha2 )
 }
 
 
-/****************************************************
-WARN_DISTR
-****************************************************/
+/*************************************************************
+ WARN_DISTR
+ *************************************************************/
 #ifndef _NP_
-void simulation::warn_distr( std::atomic < int > & errCnt, bool & stopErr, const char *distr, const char *msg )
+void lsd::simulation::warn_distr( std::atomic < int > & errCnt, bool & stopErr, const char *distr, const char *msg )
 #else
-void simulation::warn_distr( int & errCnt, bool & stopErr, const char *distr, const char *msg )
+void lsd::simulation::warn_distr( int & errCnt, bool & stopErr, const char *distr, const char *msg )
 #endif
 {
 	if ( ++errCnt < ERR_LIM )	// prevent slow down due to I/O
@@ -944,11 +947,11 @@ void simulation::warn_distr( int & errCnt, bool & stopErr, const char *distr, co
 }
 
 
-/***************************************************
-INIT_MATH_ERROR
-Initialize the math functions error controls
-***************************************************/
-void simulation::init_math_error( void )
+/*************************************************************
+ INIT_MATH_ERROR
+ Initialize the math functions error controls
+ *************************************************************/
+void lsd::simulation::init_math_error( void )
 {
 	normErrCnt = lnormErrCnt = gammaErrCnt = bernoErrCnt = poissErrCnt = 0;
 	geomErrCnt = binomErrCnt = cauchErrCnt = chisqErrCnt = expErrCnt = 0;

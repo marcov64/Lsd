@@ -13,48 +13,52 @@
  *************************************************************/
 
 /*************************************************************
-INTERF.CPP
-Respond to the events in the main browser interfaces, that is
-the browser window GUI elements and all the menus.
+ INTERF.CPP
+ Respond to the events in the main browser interfaces, that is
+ the browser window GUI elements and all the menus.
 
-- object *operate( );
-takes the value of choice and operate the relative command on the
-object r. See the switch for the complete list of the available commands
-*************************************************************/
+ - object *operate( );
+ takes the value of choice and operate the relative command on
+ the object r. See the switch for the complete list of the
+ available commands
+ *************************************************************/
 
 /*
-LAST USED CASE 97, FREE 15, 16, 25, 35, 40, 45, 51
+cases used up to 97
+cases free 15, 16, 25, 35, 40, 45, 51
 */
 
 #include "LSD.h"
 
-bool initVal = false;				// new variable initial setting going on
-int natBat = true;					// native (Windows/Linux) batch format flag (bool)
-int next_lag;						// new variable initial setting next lag to set
-object *initParent = NULL;			// parent of new variable initial setting
+namespace gui
+{
+	bool initVal = false;			// new variable initial setting going on
+	int natBat = true;				// native (Windows/Linux) batch format flag (bool)
+	int next_lag;					// new variable initial setting next lag to set
+	lsd::object *initParent = NULL;	// parent of new variable initial setting
+}
 
 
-/****************************************************
-OPERATE
-****************************************************/
-object *operate( object *r )
+/*************************************************************
+ OPERATE
+ *************************************************************/
+lsd::object *gui::operate( lsd::object *r )
 {
 	bool observe, initial, saveAs, delVar, renVar, table, subDir, overwDir;
-	char deb_mode, *lab0;
+	char deb_mode, *lab0, lab[ MAX_BUFF_SIZE ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_LINE_SIZE ], ch1[ MAX_ELEM_LENGTH ], NOLHfile[ MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], nw_exe[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ], buf_descr[ MAX_BUFF_SIZE ];
 	const char *lab1, *lab2, *lab3, *lab4;
-	char lab[ MAX_BUFF_SIZE ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_LINE_SIZE ], ch1[ MAX_ELEM_LENGTH ], NOLHfile[ MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], nw_exe[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ], buf_descr[ MAX_BUFF_SIZE ];
+	design *doe;
+	double fracMC, fake = 0;
 	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, temp[ 11 ], done = 0;
 	long nLinks, ptsSa, maxMC;
-	double fracMC, fake = 0;
-	FILE *f;
-	bridge *cb;
-	object *n, *cur, *cur1, *cur2;
-	variable *cv, *cv1;
-	result *rf;					// pointer for results files (may be zipped or not)
-	sensitivity *cs;
-	description *cd;
-	design *doe;
+	lsd::bridge *cb;
+	lsd::description *cd;
+	lsd::object *n, *cur, *cur1, *cur2;
+	lsd::result *rf;			// pointer for results files (may be zipped or not)
+	lsd::sensitivity *cs;
+	lsd::variable *cv, *cv1;
 	s_vecT logs;
+	FILE *f;
 
 	if ( ! redrawReq )
 		redrawRoot = false;		// assume no browser redraw
@@ -98,7 +102,7 @@ object *operate( object *r )
 
 			// read the lists of variables/functions, parameters and objects in model program
 			// from disk, if needed, or just update the missing elements lists
-			cmd( "if { [ llength $missVar ] == 0 || [ llength $missPar ] == 0 } { read_elem_file %s } { upd_miss_elem }", model_path );
+			cmd( "if { [ llength $missVar ] == 0 || [ llength $missPar ] == 0 } { read_elem_file %s } { upd_miss_elem }", lsd::model_path );
 
 			Tcl_LinkVar( interp, "done", ( char * ) &done, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "num", ( char * ) &num, TCL_LINK_INT );
@@ -383,7 +387,7 @@ object *operate( object *r )
 
 			// read the lists of variables/functions, parameters and objects in model program
 			// from disk, if needed, or just update the missing elements lists
-			cmd( "if { [ llength $missObj ] == 0 } { read_elem_file %s } { upd_miss_elem }", model_path );
+			cmd( "if { [ llength $missObj ] == 0 } { read_elem_file %s } { upd_miss_elem }", lsd::model_path );
 
 			Tcl_LinkVar( interp, "done", ( char * ) &done, TCL_LINK_INT );
 
@@ -640,7 +644,7 @@ object *operate( object *r )
 			}
 
 			cd = sim.search_description( lab_old );
-			skip_next_obj( r, &num );
+			r->next_count( r, & num );
 
 			cmd( "set to_compute %d", r->to_compute ? 1 : 0 );
 
@@ -972,7 +976,7 @@ object *operate( object *r )
 							cmd( "pack $T.h.i.v%d.val", i );
 
 						snprintf( lab, MAX_ELEM_LENGTH, " $T.h.i.v%d", i );
-						strcatn( buf_descr, lab, MAX_BUFF_SIZE );
+						lsd::strcatn( buf_descr, lab, MAX_BUFF_SIZE );
 					}
 
 					cmd( "pack $T.h.i.l %s -side left -padx 1", buf_descr );
@@ -1792,8 +1796,8 @@ object *operate( object *r )
 			}
 			else								// edit sensitivity analysis data
 			{
-				if ( ( cs = search_sensitivity( cv->label, lag ) ) == NULL )
-					cs = new sensitivity( cv->label, & sim, cv->param, lag, cv->integer );
+				if ( ( cs = sim.search_sensitivity( cv->label, lag ) ) == NULL )
+					cs = new lsd::sensitivity( cv->label, & sim, cv->param, lag, cv->integer );
 
 				i = cs->dataentry( );
 
@@ -2200,7 +2204,7 @@ object *operate( object *r )
 			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "set path \"%s\"", sim.conf_path );
 			else
-				cmd( "set path \"%s\"", model_path );
+				cmd( "set path \"%s\"", lsd::model_path );
 
 			cmd( "cd \"$path\"" );
 
@@ -2329,7 +2333,7 @@ object *operate( object *r )
 		// Edit Objects' numbers
 		case 19:
 
-			strcpyn( lab, r->label, MAX_BUFF_SIZE );
+			lsd::strcpyn( lab, r->label, MAX_BUFF_SIZE );
 
 			choice = 0;
 			sim.root->set_obj_number( );
@@ -2447,7 +2451,7 @@ object *operate( object *r )
 
 			cmd( "ttk::checkbutton $T.c.obs -text \"Profile observed variables only\" -variable prof_obs_only" );
 			cmd( "ttk::checkbutton $T.c.aggr -text \"Show aggregated profiling times\" -variable prof_aggr_time" );
-			cmd( "ttk::checkbutton $T.c.nchk -text \"Disable pointer checks\" -variable no_ptr_chk -state %s", no_pointer_check ? "disabled" : "normal" );
+			cmd( "ttk::checkbutton $T.c.nchk -text \"Disable pointer checks\" -variable no_ptr_chk -state %s", lsd::no_pointer_check ? "disabled" : "normal" );
 
 #ifndef _NP_
 			cmd( "ttk::checkbutton $T.c.npar -text \"Disable parallel computation\" -variable parallel_disable" );
@@ -2597,7 +2601,7 @@ object *operate( object *r )
 
 			cmd( "set res %s", eq_file );
 
-			cmd( "set res1 [ file tail [ tk_getOpenFile -parent . -title \"Select New Equation File\" -initialfile \"$res\" -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ] ]", model_path );
+			cmd( "set res1 [ file tail [ tk_getOpenFile -parent . -title \"Select New Equation File\" -initialfile \"$res\" -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ] ]", lsd::model_path );
 			cmd( "if [ fn_spaces \"$res1\" . ] { set res1 \"\" } { set res1 [ file tail $res1 ] }" );
 
 			lab1 = get_str( "res1" );
@@ -2716,7 +2720,7 @@ object *operate( object *r )
 
 			// read the lists of variables/functions, parameters and objects in model program
 			// from disk, if needed, or just update the missing elements lists
-			cmd( "if { [ llength $unusVar ] == 0 || [ llength $unusFun ] == 0 || [ llength $unusPar ] == 0 || [ llength $unusObj ] == 0 } { read_elem_file %s } { upd_unus_elem }", model_path );
+			cmd( "if { [ llength $unusVar ] == 0 || [ llength $unusFun ] == 0 || [ llength $unusPar ] == 0 || [ llength $unusObj ] == 0 } { read_elem_file %s } { upd_unus_elem }", lsd::model_path );
 
 			plog( "\n\nElements/objects apparently unused/missing in equation file(s):\n" );
 
@@ -2820,7 +2824,7 @@ object *operate( object *r )
 				goto endinst;
 			}
 
-			skip_next_obj( r, &num );
+			r->next_count( r, & num );
 			cmd( "set num %d", num );
 			cmd( "set cfrom 1" );
 
@@ -3039,11 +3043,11 @@ object *operate( object *r )
 				snprintf( out_file, MAX_PATH_LENGTH, "%s/%s.%s", sim.conf_path, ch1, sim.docsv ? "csv" : "res" );
 
 			if ( sim.dozip )
-				strcatn( out_file, ".gz", MAX_PATH_LENGTH );
+				lsd::strcatn( out_file, ".gz", MAX_PATH_LENGTH );
 
 			plog( "\nSaving results to file %s... ", out_file );
 
-			rf = new result( out_file, "wt", & sim, sim.dozip, sim.docsv );// create results file object
+			rf = new lsd::result( out_file, "wt", & sim, sim.dozip, sim.docsv );// create results file object
 			rf->title( sim.root, 1 );					// write header
 			rf->data( sim.root, 0, sim.eff_t );			// write all data
 			delete rf;									// close file and delete object
@@ -3285,7 +3289,7 @@ object *operate( object *r )
 			}
 
 			cmd( "set res1 fun_%s.cpp", sim.conf_name );
-			cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ]", model_path );
+			cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ]", lsd::model_path );
 
 			cmd( "if { [ string length $bah ] > 0 } { set choice 1; set res1 [ file tail $bah ] } { set choice 0 }" );
 			if ( choice == 0 )
@@ -3420,7 +3424,7 @@ object *operate( object *r )
 			stop = false;
 			cmd( "progressbox .ptex \"Creating LaTex\" \"LaTex code generation steps\" \"Step\" 6 { set stop true }" );
 
-			tex_report_head( f, table );
+			sim.root->tex_report_head( f, table );
 			cmd( "prgboxupdate .ptex 1" );
 
 			if ( stop )
@@ -3450,7 +3454,7 @@ object *operate( object *r )
 			if ( stop )
 				goto end_latex;
 
-			tex_report_end( f );
+			sim.root->tex_report_end( f );
 			cmd( "prgboxupdate .ptex 6" );
 
 			end_latex:
@@ -3554,9 +3558,9 @@ object *operate( object *r )
 				if ( ! discard_change( false ) )	// unsaved configuration?
 					break;
 
-				varSA = num_sensitivity_variables( );// number of variables to test
+				varSA = sim.num_sensitivity_variables( );// number of variables to test
 				plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
-				ptsSa = num_sensitivity_points( );	// total number of points in sensitivity space
+				ptsSa = sim.num_sensitivity_points( );// total number of points in sensitivity space
 				plog( "\nSensitivity analysis space size: %ld", ptsSa );
 
 				// Prevent running into too big sensitivity spaces (high computation times)
@@ -3602,9 +3606,9 @@ object *operate( object *r )
 				if ( ! discard_change( false ) )	// unsaved configuration?
 					break;
 
-				varSA = num_sensitivity_variables( );// number of variables to test
+				varSA = sim.num_sensitivity_variables( );// number of variables to test
 				plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
-				ptsSa = num_sensitivity_points( );	// total number of points in sensitivity space
+				ptsSa = sim.num_sensitivity_points( );// total number of points in sensitivity space
 				plog( "\nSensitivity analysis space size: %ld", ptsSa );
 
 				// Prevent running into too big sensitivity spaces (high computation times)
@@ -3639,7 +3643,7 @@ object *operate( object *r )
 
 				// if succeeded, explain user how to proceed
 				if ( ! stop )
-					sensitivity_created( path_sens, clean_file( sim.conf_name ), 1 );
+					sensitivity_created( path_sens, lsd::clean_file( sim.conf_name ), 1 );
 				else
 					findexSens = 0;					// don't consider for appending
 
@@ -3673,9 +3677,9 @@ object *operate( object *r )
 				if ( ! discard_change( false ) )	// unsaved configuration?
 					break;
 
-				varSA = num_sensitivity_variables( );// number of variables to test
+				varSA = sim.num_sensitivity_variables( );// number of variables to test
 				plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
-				maxMC = num_sensitivity_points( );	// total number of points in sensitivity space
+				maxMC = sim.num_sensitivity_points( );// total number of points in sensitivity space
 				plog( "\nSensitivity analysis space size: %ld", maxMC );
 
 				// get the number of Monte Carlo samples to produce
@@ -3764,7 +3768,7 @@ object *operate( object *r )
 
 				// if succeeded, explain user how to proceed
 				if ( ! stop )
-					sensitivity_created( path_sens, clean_file( sim.conf_name ), 1 );
+					sensitivity_created( path_sens, lsd::clean_file( sim.conf_name ), 1 );
 				else
 					findexSens = 0;					// don't consider for appending
 
@@ -3798,7 +3802,7 @@ object *operate( object *r )
 				if ( ! discard_change( false ) )	// unsaved configuration?
 					break;
 
-				varSA = num_sensitivity_variables( );	// number of variables to test
+				varSA = sim.num_sensitivity_variables( );// number of variables to test
 				plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 				lab1 = NOLH_valid_tables( varSA, ch, 2 * MAX_LINE_SIZE );
 
@@ -3944,7 +3948,7 @@ object *operate( object *r )
 				if ( ! discard_change( false ) )	// unsaved configuration?
 					break;
 
-				varSA = num_sensitivity_variables( );	// number of variables to test
+				varSA = sim.num_sensitivity_variables( );// number of variables to test
 				plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 
 				// get the number of Monte Carlo samples to produce
@@ -4054,7 +4058,7 @@ object *operate( object *r )
 				if ( ! discard_change( false ) )	// unsaved configuration?
 					break;
 
-				varSA = num_sensitivity_variables( );	// number of variables to test
+				varSA = sim.num_sensitivity_variables( );// number of variables to test
 				plog( "\nNumber of elements for sensitivity analysis: %d", varSA );
 
 				// get the number of Monte Carlo samples to produce
@@ -4503,9 +4507,9 @@ object *operate( object *r )
 					break;
 
 			// check for existing NW executable
-			snprintf( nw_exe, MAX_PATH_LENGTH, "%s/lsdNW", model_path );// form full executable name
+			snprintf( nw_exe, MAX_PATH_LENGTH, "%s/lsdNW", lsd::model_path );// form full executable name
 			if ( platform == _WIN_ )
-				strcatn( nw_exe, ".exe", MAX_PATH_LENGTH );	// add Windows ending
+				lsd::strcatn( nw_exe, ".exe", MAX_PATH_LENGTH );	// add Windows ending
 
 			if ( ( f = fopen( nw_exe, "rb" ) ) == NULL )
 			{
@@ -4552,8 +4556,8 @@ object *operate( object *r )
 				ffirst = fSeq = 1;
 				fnext = findexSens;
 				findexSens = 0;
-				strcpyn( out_file, sim.conf_name, MAX_PATH_LENGTH );
-				strcpyn( out_dir, path_sens, MAX_PATH_LENGTH );
+				lsd::strcpyn( out_file, sim.conf_name, MAX_PATH_LENGTH );
+				lsd::strcpyn( out_dir, path_sens, MAX_PATH_LENGTH );
 				cmd( "set res \"%s\"", sim.conf_name );
 				cmd( "set path \"%s\"", sim.conf_path );
 			}
@@ -4762,7 +4766,7 @@ object *operate( object *r )
 					if ( nw_exe[ i ] == '/' )
 						nw_exe[ i ] = '\\';
 
-				strcpyn( win_dir, out_dir, MAX_PATH_LENGTH );
+				lsd::strcpyn( win_dir, out_dir, MAX_PATH_LENGTH );
 
 				for ( i = 0; ( unsigned ) i < strlen( win_dir ); ++i )
 					if ( win_dir[ i ] == '/' )
@@ -4784,14 +4788,14 @@ object *operate( object *r )
 				{
 					if ( strchr( nw_exe, ':' ) != NULL )	// remove Windows drive letter
 					{
-						strcpyn( lab_old, strchr( nw_exe, ':' ) + 1, 2 * MAX_PATH_LENGTH );
-						strcpyn( nw_exe, lab_old, MAX_PATH_LENGTH );
+						lsd::strcpyn( lab_old, strchr( nw_exe, ':' ) + 1, 2 * MAX_PATH_LENGTH );
+						lsd::strcpyn( nw_exe, lab_old, MAX_PATH_LENGTH );
 					}
 
 					if ( strchr( out_dir, ':' ) != NULL )	// remove Windows drive letter
 					{
-						strcpyn( lab_old, strchr( out_dir, ':' ) + 1, 2 * MAX_PATH_LENGTH );
-						strcpyn( out_dir, lab_old, MAX_PATH_LENGTH );
+						lsd::strcpyn( lab_old, strchr( out_dir, ':' ) + 1, 2 * MAX_PATH_LENGTH );
+						lsd::strcpyn( out_dir, lab_old, MAX_PATH_LENGTH );
 					}
 
 					if ( ( lab0 = strstr( nw_exe, ".exe" ) ) != NULL )	// remove Windows extension, if present
@@ -4805,7 +4809,7 @@ object *operate( object *r )
 				if ( nature > SRV_MIN_CORES || ( param > SRV_MIN_CORES && fnext - ffirst > SRV_MIN_CORES ) )
 				{
 					snprintf( lab_old, 2 * MAX_PATH_LENGTH, "nice %s", nw_exe );
-					strcpyn( nw_exe, lab_old, MAX_PATH_LENGTH );
+					lsd::strcpyn( nw_exe, lab_old, MAX_PATH_LENGTH );
 				}
 
 				fprintf( f, "#!/bin/bash\n# Script generated by LSD\n" );
@@ -4944,9 +4948,9 @@ object *operate( object *r )
 			}
 
 			// check for existing NW executable
-			snprintf( nw_exe, MAX_PATH_LENGTH, "%s/lsdNW", model_path );// form full executable name
+			snprintf( nw_exe, MAX_PATH_LENGTH, "%s/lsdNW", lsd::model_path );// form full executable name
 			if ( platform == _WIN_ )
-				strcatn( nw_exe, ".exe", MAX_PATH_LENGTH );	// add Windows ending
+				lsd::strcatn( nw_exe, ".exe", MAX_PATH_LENGTH );	// add Windows ending
 
 			if ( ( f = fopen( nw_exe, "rb" ) ) == NULL )
 			{
@@ -5335,7 +5339,7 @@ object *operate( object *r )
 			if ( ! strcmp( lab_old, "(none)" ) )
 			{
 				if ( r != NULL )
-					strcpyn( lab_old, r->label, MAX_ELEM_LENGTH );
+					lsd::strcpyn( lab_old, r->label, MAX_ELEM_LENGTH );
 				else
 					strcpy( lab_old, "" );
 			}
@@ -5623,10 +5627,10 @@ object *operate( object *r )
 }
 
 
-/****************************************************
-SENSITIVITY_TOO_LARGE
-****************************************************/
-bool sensitivity_too_large( long numSaPts )
+/*************************************************************
+ SENSITIVITY_TOO_LARGE
+ *************************************************************/
+bool gui::sensitivity_too_large( long numSaPts )
 {
 	cmd( "set answer [ ttk::messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"The required	 number (%ld) of configuration points to perform sensitivity analysis is likely too large to be processed in reasonable time.\n\nPress 'OK' if you want to continue anyway or 'Cancel' to abort the command now.\" ]; switch -- $answer { ok { set choice 0 } cancel { set choice 1 } }", numSaPts );
 
@@ -5634,10 +5638,10 @@ bool sensitivity_too_large( long numSaPts )
 }
 
 
-/****************************************************
-SENSITIVITY_CLEAN
-****************************************************/
-bool sensitivity_clean_dir( const char *path )
+/*************************************************************
+ SENSITIVITY_CLEAN
+ *************************************************************/
+bool gui::sensitivity_clean_dir( const char *path )
 {
 	cmd( "set answer [ ttk::messageBox -parent . -type yesno -icon info -default yes -title \"Sensitivity Analysis\" -message \"Clean output path before proceeding?\" -detail \"The configuration files (.lsd) for sensitivity analysis will be created at:\n\n[ fn_break [ file nativename \"%s\" ] 40 ]\n\nThis subdirectory already contains LSD produced files. Click on 'Yes' to delete the existing files before proceeding or 'No' to just continue without deleting.\" ]; switch -- $answer { no { set choice 0 } yes { set choice 1 } }", path );
 
@@ -5645,19 +5649,19 @@ bool sensitivity_clean_dir( const char *path )
 }
 
 
-/****************************************************
-SENSITIVITY_CREATED
-****************************************************/
-void sensitivity_created( const char *path, const char *sim_name, int findex )
+/*************************************************************
+ SENSITIVITY_CREATED
+ *************************************************************/
+void gui::sensitivity_created( const char *path, const char *sim_name, int findex )
 {
 	cmd( "ttk::messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis you have to start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsdNW	 -f	 [ fn_break [ file nativename \"%s/%s\" ] 40 ]	-s	%d\"", path, sim_name, findex );
 }
 
 
-/****************************************************
-SENSITIVITY_UNDEFINED
-****************************************************/
-void sensitivity_undefined( void )
+/*************************************************************
+ SENSITIVITY_UNDEFINED
+ *************************************************************/
+void gui::sensitivity_undefined( void )
 {
 	cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis items not found\" -detail \"Before using this option you have to select at least one parameter or lagged variable initial value to perform the sensitivity analysis and inform the corresponding values to be explored.\n\nTo set the sensitivity analysis values (or ranges), use the 'Sensitivity Analysis' button in the 'Model'/'Change Element...' menu option (or the corresponding context menu option) and inform the values or range(s) using the syntax explained in the 'Sensitivity Analysis' entry window (it is possible to paste a list of values from the clipboard). You can repeat this procedure for each required parameter or initial value.\n\nSensitivity Analysis values are NOT saved in the standard LSD configuration file (.lsd) and if needed they MUST be saved in a LSD sensitivity analysis file (.sa) using the 'File'/'Save Sensitivity...' menu option.\"" );
 }

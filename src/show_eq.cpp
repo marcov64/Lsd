@@ -13,37 +13,42 @@
  *************************************************************/
 
 /*************************************************************
-SHOW_EQ.CPP
-Show one window containig the equation for the label clicked on.
-
-Less simple as it seems, given that it has to deal with all weird characters
-like parenthesis, quotes, brakets, that tk commands consider as special
-characters. The basic trick is that it loads one line per time. If it finds
-the name of the variable following the command "strcmp" than starts sending the
-line to be printed. Lines are printed character per character, so that it can
-deal with special characters. While printing it computes the number of parenthesis
-open and closed, and when it meets the last parenthesis exits.
-
-Everything is within just one single function:
-
-- void show_eq( const char *lab, const char *parWnd )
-
-- void scan_used_lab( const char *lab, const char *parWnd )
-Looks in the equation file whether the variable or parameter lab is contained
-in some equations. It creates a window containing the list of the equations
-using in any way the variable indicated. By clicking on the names in the
-list the code for that variable is shown.
-It is based on the recognition of the string lab between quotes, thus any function
-is recognized.
-*************************************************************/
+ SHOW_EQ.CPP
+ Show one window containig the equation for the label clicked 
+ on.
+ 
+ Less simple as it seems, given that it has to deal with all 
+ weird characters  like parenthesis, quotes, brakets, that 
+ tk commands consider as special  characters. The basic trick 
+ is that it loads one line per time. If it finds the name of 
+ the variable following the command "strcmp" than starts 
+ sending the line to be printed. 
+ Lines are printed character per character, so that it can deal 
+ with special characters. While printing it computes the number 
+ of parenthesis open and closed, and when it meets the last 
+ parenthesis exits.
+ 
+ Everything is within just one single function:
+ 
+ - void show_eq( const char *lab, const char *parWnd )
+ 
+ - void scan_used_lab( const char *lab, const char *parWnd )
+ Looks in the equation file whether the variable or parameter 
+ lab is contained in some equations. It creates a window 
+ containing the list of the equations using in any way the 
+ variable indicated. By clicking on the names in the list 
+ the code for that variable is shown. It is based on the 
+ recognition of the string lab between quotes, thus any 
+ function is recognized.
+ *************************************************************/
 
 #include "LSD.h"
 
 
-/****************************************************
-SHOW_EQ
-****************************************************/
-void show_eq( const char *lab, const char *parWnd )
+/*************************************************************
+ SHOW_EQ
+ ****************************************************/
+void gui::show_eq( const char *lab, const char *parWnd )
 {
 	bool done;
 	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ], c3_lab[ MAX_LINE_SIZE ], full_name[ MAX_PATH_LENGTH ], updt_in[ MAX_ELEM_LENGTH ];
@@ -64,11 +69,11 @@ void show_eq( const char *lab, const char *parWnd )
 	start:
 
 	fname = eq_file;
-	snprintf( full_name, MAX_PATH_LENGTH, "%s/%s", model_path, fname );
+	snprintf( full_name, MAX_PATH_LENGTH, "%s/%s", lsd::model_path, fname );
 	if ( ( f1 = fopen( full_name, "r" ) ) == NULL )
 	{
 		cmd( "switch [ ttk::messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'OK' to search it.\" ] { ok { set ans 1 } cancel { set ans 0 } }", eq_file  );
-		cmd( "if { $ans } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir \"%s\" -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ]; if [ fn_spaces \"$res\" . ] { set res \"\" } { set res [ file tail $res ] } }", model_path );
+		cmd( "if { $ans } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir \"%s\" -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ]; if [ fn_spaces \"$res\" . ] { set res \"\" } { set res [ file tail $res ] } }", lsd::model_path );
 
 		if ( get_bool( "ans" ) )
 		{
@@ -76,7 +81,7 @@ void show_eq( const char *lab, const char *parWnd )
 			if ( app == NULL || strlen( app ) == 0 )
 				return;
 
-			strcpyn( eq_file, app, MAX_PATH_LENGTH );
+			lsd::strcpyn( eq_file, app, MAX_PATH_LENGTH );
 
 			goto start;
 		}
@@ -87,7 +92,7 @@ void show_eq( const char *lab, const char *parWnd )
 		fclose( f1 );
 
 	// search in all source files
-	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
+	cmd( "set source_files [ get_source_files \"%s\" ]", lsd::model_path );
 	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", eq_file, eq_file );
 	cmd( "set i [ llength $source_files ]" );
 	i = get_int( "i" );
@@ -95,13 +100,13 @@ void show_eq( const char *lab, const char *parWnd )
 	for ( done = false, k = 0; done == false && k < i; ++k )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", k );
-		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", model_path, model_path );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", lsd::model_path, lsd::model_path );
 		fname = get_str( "brr" );
 		if ( ( f2 = fopen( fname, "r" ) ) == NULL )
 			continue;
 
 		while ( ! done && fgets( c1_lab, MAX_LINE_SIZE - 1, f2 ) != NULL )
-			if ( is_equation_header( c1_lab, c2_lab, updt_in ) )
+			if ( eq_header( c1_lab, c2_lab, updt_in ) )
 				if ( ! strcmp( c2_lab, lab ) )
 					done = true;
 
@@ -213,11 +218,11 @@ void show_eq( const char *lab, const char *parWnd )
 		bra = 2;
 	}
 
-	strcpyn( c3_lab, c1_lab, MAX_LINE_SIZE );			// save original first line
+	lsd::strcpyn( c3_lab, c1_lab, MAX_LINE_SIZE );			// save original first line
 
 	do
 	{
-		strcpyn( c2_lab, c1_lab, MAX_LINE_SIZE );
+		lsd::strcpyn( c2_lab, c1_lab, MAX_LINE_SIZE );
 		clean_spaces( c2_lab );
 
 		// handle dummy equations without RESULT closing
@@ -338,10 +343,10 @@ void show_eq( const char *lab, const char *parWnd )
 }
 
 
-/****************************************************
-SCAN_USED_LAB
-****************************************************/
-void scan_used_lab( const char *lab, const char *parWnd )
+/*************************************************************
+ SCAN_USED_LAB
+ ****************************************************/
+void gui::scan_used_lab( const char *lab, const char *parWnd )
 {
 	bool exist, no_win;
 	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ];
@@ -390,7 +395,7 @@ void scan_used_lab( const char *lab, const char *parWnd )
 	}
 
 	// search in all source files
-	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
+	cmd( "set source_files [ get_source_files \"%s\" ]", lsd::model_path );
 	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", eq_file, eq_file );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = get_int( "res" );
@@ -400,7 +405,7 @@ void scan_used_lab( const char *lab, const char *parWnd )
 	for ( exist = false, k = 0; k < nfiles; ++k )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", k );
-		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", model_path, model_path );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", lsd::model_path, lsd::model_path );
 		fname = get_str( "brr" );
 
 		if ( ( f = fopen( fname, "r" ) ) != NULL )
@@ -428,7 +433,7 @@ void scan_used_lab( const char *lab, const char *parWnd )
 						c2_lab[ j ] = c1_lab[ i + 1 + j ];	// prepare the c2_lab to store the var's label
 					c2_lab[ j ] = '\0';
 
-					done = contains( f, lab, strlen( lab ) );
+					done = eq_contains( f, lab, strlen( lab ) );
 					if ( done == 1 )
 					{
 						if ( no_win )
@@ -463,13 +468,13 @@ void scan_used_lab( const char *lab, const char *parWnd )
 }
 
 
-/****************************************************
-SCAN_USING_LAB
-****************************************************/
-void scan_using_lab( const char *lab, const char *parWnd )
+/*************************************************************
+ SCAN_USING_LAB
+ ****************************************************/
+void gui::scan_using_lab( const char *lab, const char *parWnd )
 {
 	bool found = false;
-	variable *cv;
+	lsd::variable *cv;
 
 	if ( exists_window( "$list" ) )
 		return;
@@ -523,14 +528,14 @@ void scan_using_lab( const char *lab, const char *parWnd )
 }
 
 
-/****************************************************
-SHOW_DESCR
-****************************************************/
-void show_descr( const char *lab, const char *parWnd )
+/*************************************************************
+ SHOW_DESCR
+ ****************************************************/
+void gui::show_descr( const char *lab, const char *parWnd )
 {
 	char buf_descr[ MAX_BUFF_SIZE ];
-	description *cd;
-	variable *cv;
+	lsd::description *cd;
+	lsd::variable *cv;
 
 	// define the correct parent window
 	if ( parWnd != NULL && strlen( parWnd ) > 0 )

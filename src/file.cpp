@@ -13,35 +13,35 @@
  *************************************************************/
 
 /*************************************************************
-FILE.CPP
-Contains the non-basic methods and functions used to access
-files. The remaining file-oriented functions are stored in
-FILELIB.CPP.
+ FILE.CPP
+ Contains the non-basic methods and functions used to access
+ files. The remaining file-oriented functions are stored in
+ FILELIB.CPP.
 
-The main methods of object contained in this file are:
+ The main methods of object contained in this file are:
 
-- void object::save_struct( FILE *f, char *tab )
-Saves the structure of the object (that is, the label,
-variables and parameters and descendants, not number of
-objects). Calls the save_struct for all the descendant types.
+ - void lsd::object::save_struct( FILE *f, char *tab )
+ Saves the structure of the object (that is, the label,
+ variables and parameters and descendants, not number of
+ objects). Calls the save_struct for all the descendant types.
 
-- void object::save_insts( FILE *f )
-Save the numerical values for object instances (one number
-for each group of object of this type) and the initial values
-for variables. It save also option information, that is
-whether to save, plot or debug the variables.
-It calls the save_insts for all the descendant types.
-*************************************************************/
+ - void lsd::object::save_insts( FILE *f )
+ Save the numerical values for object instances (one number
+ for each group of object of this type) and the initial values
+ for variables. It save also option information, that is
+ whether to save, plot or debug the variables.
+ It calls the save_insts for all the descendant types.
+ *************************************************************/
 
 #include "LSD.h"
 
 
-/****************************************************
-OPEN_CONFIGURATION
-	Open a clean configuration,
-	either the current or not
-****************************************************/
-bool open_configuration( object *&r, bool reload )
+/*************************************************************
+ OPEN_CONFIGURATION
+ Open a clean configuration,
+ either the current or not
+ *************************************************************/
+bool gui::open_configuration( lsd::object *&r, bool reload )
 {
 	bool loaded;
 	const char *lab1, *lab2;
@@ -168,13 +168,13 @@ bool open_configuration( object *&r, bool reload )
 }
 
 
-/*****************************************************************************
-LOAD_CONFIGURATION_GUI (DLL WRAPPER)
-	Load configuration
-	If full is false, just the model data is unloaded
-	Returns: pointer to root object
-******************************************************************************/
-int load_configuration_gui( bool reload, std::string *warnings, int quick )
+/*************************************************************
+ LOAD_CONFIGURATION_GUI (DLL WRAPPER)
+ Load configuration
+ If full is false, just the model data is unloaded
+ Returns: pointer to root object
+ *************************************************************/
+int gui::load_configuration_gui( bool reload, std::string *warnings, int quick )
 {
 	int res;
 
@@ -182,7 +182,7 @@ int load_configuration_gui( bool reload, std::string *warnings, int quick )
 
 	if( ( res = sim.load_configuration( reload, warnings, quick ) ) == 0 )
 	{
-		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", model_path, sim.conf_file );
+		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", lsd::model_path, sim.conf_file );
 		sim.root->load_elem_lists( );
 	}
 
@@ -190,11 +190,11 @@ int load_configuration_gui( bool reload, std::string *warnings, int quick )
 }
 
 
-/*****************************************************************************
-RESET_CONFIGURATION_GUI
-	Reset the GUI part of a loaded configuration
-******************************************************************************/
-void reset_configuration_gui( void )
+/*************************************************************
+ RESET_CONFIGURATION_GUI
+ Reset the GUI part of a loaded configuration
+ *************************************************************/
+void gui::reset_configuration_gui( void )
 {
 	currObj = NULL;								// no current object pointer
 	unsaved_change( false );					// signal no unsaved change
@@ -212,11 +212,11 @@ void reset_configuration_gui( void )
 }
 
 
-/****************************************************
-LOAD_PREV_CONFIGURATION
-Restore sensitivity configuration
-****************************************************/
-bool load_prev_configuration( void )
+/*************************************************************
+ LOAD_PREV_CONFIGURATION
+ Restore sensitivity configuration
+ *************************************************************/
+bool gui::load_prev_configuration( void )
 {
 	char *saFile = NULL;
 	int i, lstFidx = findexSens;
@@ -260,12 +260,12 @@ bool load_prev_configuration( void )
 }
 
 
-/*****************************************************************************
-UNLOAD_CONFIGURATION_GUI (DLL WRAPPER)
-	Unload the current configuration
-	If full is false, just the model data is unloaded
-******************************************************************************/
-void unload_configuration_gui( bool full )
+/*************************************************************
+ UNLOAD_CONFIGURATION_GUI (DLL WRAPPER)
+ 	Unload the current configuration
+ 	If full is false, just the model data is unloaded
+ *************************************************************/
+void gui::unload_configuration_gui( bool full )
 {
 	sim.unload_configuration( full );
 	reset_configuration_gui( );
@@ -275,8 +275,8 @@ void unload_configuration_gui( bool full )
 		delete sens_file;						// reset sensitivity file name
 		sens_file = NULL;
 
-		cmd( "set path \"%s\"", model_path );
-		if ( strlen( model_path ) > 0 )
+		cmd( "set path \"%s\"", lsd::model_path );
+		if ( strlen( lsd::model_path ) > 0 )
 			cmd( "cd \"$path\"" );
 
 		cmd( "unset -nocomplain lastConf" );	// no last configuration to reload
@@ -287,11 +287,11 @@ void unload_configuration_gui( bool full )
 }
 
 
-/****************************************************
-LOAD_ELEM_LISTS
-Load tcl lists of model objects and other elements
-****************************************************/
-void object::load_elem_lists( )
+/*************************************************************
+ LOAD_ELEM_LISTS
+ Load tcl lists of model objects and other elements
+ *************************************************************/
+void lsd::object::load_elem_lists( )
 {
 	bridge *cb;
 	variable *cv;
@@ -325,34 +325,34 @@ void object::load_elem_lists( )
 }
 
 
-/*****************************************************************************
-SAVE_XML_CONFIGURATION_GUI (DLL WRAPPER)
-	Save current defined configuration (adding tag index if appropriate) to
-	gzip-compressed xml file
-	If quick is true, just the structure and the parameters are saved
-	Returns: true: save ok, false: save failure
-******************************************************************************/
-bool save_xml_configuration_gui( int findex, const char *dest_path, bool quick )
+/*************************************************************
+ SAVE_XML_CONFIGURATION_GUI (DLL WRAPPER)
+ Save current defined configuration (adding tag index if appropriate) to
+ gzip-compressed xml file
+ If quick is true, just the structure and the parameters are saved
+ Returns: true: save ok, false: save failure
+ *************************************************************/
+bool gui::save_xml_configuration_gui( int findex, const char *dest_path, bool quick )
 {
 	bool saved;
 
 	saved = sim.save_xml_configuration( findex, dest_path, quick, get_str( model_info[ 0 ] ), get_str( model_info[ 1 ] ), get_str( model_info[ 2 ] ), eq_file, eq_txt );
 
 	if ( saved )
-		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", model_path, sim.conf_file );
+		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", lsd::model_path, sim.conf_file );
 
 	return saved;
 }
 
 
-/*******************************************
-DEB_LOG
-Creates/saves the log file and
-enable/disable logging the variables
-computation order and enable/disable the
-debugger
-********************************************/
-void deb_log( bool on, int time )
+/*************************************************************
+ DEB_LOG
+ Creates/saves the log file and
+ enable/disable logging the variables
+ computation order and enable/disable the
+ debugger
+ *************************************************************/
+void gui::deb_log( bool on, int time )
 {
 	char fname[ MAX_PATH_LENGTH ];
 
@@ -397,7 +397,7 @@ void deb_log( bool on, int time )
 		// ignore if log already open
 		if ( sim.log_file_ptr == NULL )
 		{
-			snprintf( fname, MAX_PATH_LENGTH, "%s/%s", model_path, LOG_FILE );
+			snprintf( fname, MAX_PATH_LENGTH, "%s/%s", lsd::model_path, LOG_FILE );
 			sim.log_file_ptr = fopen( fname, "a" );
 			sim.log_start = time;
 			sim.log_stop = sim.last_t;
@@ -409,13 +409,13 @@ void deb_log( bool on, int time )
 }
 
 
-/****************************************************
-NEED_RES_DIR
-Evaluate if a separated results directory must be
-created according to a set of criteria
-****************************************************/
+/*************************************************************
+ NEED_RES_DIR
+ Evaluate if a separated results directory must be
+ created according to a set of criteria
+ *************************************************************/
 #define RES_AVOID_PATTERN "*.cpp *.h *.txt *.R *.o *.exe *.html"
-bool need_res_dir( const char *dest_path, const char *sim_name, char *buf, int buf_sz )
+bool gui::need_res_dir( const char *dest_path, const char *sim_name, char *buf, int buf_sz )
 {
 	bool newDir = false;
 
@@ -434,7 +434,7 @@ bool need_res_dir( const char *dest_path, const char *sim_name, char *buf, int b
 	if ( get_bool( "res" ) )
 	{
 		// check if in the main model directory
-		cmd( "if { $d eq [ file normalize \"%s\" ] } { set res 1 } { set res 0 }", model_path );
+		cmd( "if { $d eq [ file normalize \"%s\" ] } { set res 1 } { set res 0 }", lsd::model_path );
 		if ( get_bool( "res" ) )
 			newDir = true;
 
@@ -465,19 +465,19 @@ bool need_res_dir( const char *dest_path, const char *sim_name, char *buf, int b
 }
 
 
-/****************************************************
-CHECK_RES_DIR
-Check if the results directory exists and
-contains files to be deleted
-****************************************************/
+/*************************************************************
+ CHECK_RES_DIR
+ Check if the results directory exists and
+ contains files to be deleted
+ *************************************************************/
 #define RES_CLEAR_PATTERN "*.res *.tot *.csv *.gz *.log *.bat *.pdf *.eps *.svg *.Rdata *.bak"
-bool check_res_dir( const char *dest_path, const char *sim_name )
+bool gui::check_res_dir( const char *dest_path, const char *sim_name )
 {
 	bool done;
 
 	cmd( "set d \"%s\"", dest_path );
 
-	cmd( "if { [ file exists $d ] && [ file isdirectory $d ] && [ file normalize $d ] ne [ file normalize \"%s\" ] && [ llength [ glob -nocomplain -directory $d %s ] ] > 0 } { set res 1 } { set res 0 }", model_path, RES_CLEAR_PATTERN );
+	cmd( "if { [ file exists $d ] && [ file isdirectory $d ] && [ file normalize $d ] ne [ file normalize \"%s\" ] && [ llength [ glob -nocomplain -directory $d %s ] ] > 0 } { set res 1 } { set res 0 }", lsd::model_path, RES_CLEAR_PATTERN );
 	done = get_bool( "res" );
 
 	if ( sim_name != NULL )
@@ -492,7 +492,7 @@ bool check_res_dir( const char *dest_path, const char *sim_name )
 				} else { \
 					set res 0 \
 				} \
-			}", clean_file( sim_name ) );
+			}", lsd::clean_file( sim_name ) );
 
 		done |= get_bool( "res" );
 	}
@@ -501,11 +501,11 @@ bool check_res_dir( const char *dest_path, const char *sim_name )
 }
 
 
-/****************************************************
-CREATE_RES_DIR
-Create the results directory, if not exists yet
-****************************************************/
-bool create_res_dir( const char *dest_path )
+/*************************************************************
+ CREATE_RES_DIR
+ Create the results directory, if not exists yet
+ *************************************************************/
+bool gui::create_res_dir( const char *dest_path )
 {
 	cmd( "set d \"%s\"", dest_path );
 
@@ -523,12 +523,12 @@ bool create_res_dir( const char *dest_path )
 }
 
 
-/****************************************************
-CLEAN_RES_DIR
-Clear LSD produced files in the results directory,
-if existent,
-****************************************************/
-void clean_res_dir( const char *dest_path, const char *sim_name )
+/*************************************************************
+ CLEAN_RES_DIR
+ Clear LSD produced files in the results directory,
+ if existent,
+ *************************************************************/
+void gui::clean_res_dir( const char *dest_path, const char *sim_name )
 {
 	cmd( "set d \"%s\"", dest_path );
 
@@ -547,23 +547,23 @@ void clean_res_dir( const char *dest_path, const char *sim_name )
 						catch { file delete -force $f } \
 					} \
 				} \
-			}", clean_file( sim_name ) );
+			}", lsd::clean_file( sim_name ) );
 }
 
 
-/*****************************************************************************
-LOAD_SENSITIVITY
-	Load defined sensitivity analysis configuration
-	Returns: 0: load ok, 1,2,3,4,...: load failure
-******************************************************************************/
-int load_sensitivity( FILE *f )
+/*************************************************************
+ LOAD_SENSITIVITY
+ Load defined sensitivity analysis configuration
+ Returns: 0: load ok, 1,2,3,4,...: load failure
+ *************************************************************/
+int gui::load_sensitivity( FILE *f )
 {
 	bool integer;
 	d_vecT val;
 	int i, lag, param, num_val;
 	char cc, lab[ MAX_ELEM_LENGTH ];
-	variable *cv;
-	sensitivity *cs;
+	lsd::variable *cv;
+	lsd::sensitivity *cs;
 
 	// read data from file (1 line per element, '#' indicate comment)
 	while ( ! feof( f ) )
@@ -615,10 +615,10 @@ int load_sensitivity( FILE *f )
 			if ( ! fscanf( f, "%lf", & val[ i ] ) )
 				goto error5;
 
-		if ( ( cs = search_sensitivity( lab, lag ) ) != NULL )
+		if ( ( cs = sim.search_sensitivity( lab, lag ) ) != NULL )
 			delete cs;
 
-		new sensitivity( lab, & sim, param, lag, integer, num_val, & val );
+		new lsd::sensitivity( lab, & sim, param, lag, integer, num_val, & val );
 	}
 
 	return 0;
@@ -658,15 +658,15 @@ int load_sensitivity( FILE *f )
 }
 
 
-/*****************************************************************************
-SAVE_SENSITIVITY
-	Save current sensitivity configuration to file
-	Returns: true: save ok, false: save failure
-******************************************************************************/
-bool save_sensitivity( FILE *f )
+/*************************************************************
+ SAVE_SENSITIVITY
+ Save current sensitivity configuration to file
+ Returns: true: save ok, false: save failure
+ *************************************************************/
+bool gui::save_sensitivity( FILE *f )
 {
 	int i;
-	sensitivity *cs;
+	lsd::sensitivity *cs;
 
 	for ( cs = sim.sens; cs != NULL; cs = cs->next )
 	{
@@ -685,11 +685,11 @@ bool save_sensitivity( FILE *f )
 }
 
 
-/***************************************************
-LOAD_EQFILE
-	Load from disk the current equation file
-***************************************************/
-char *load_eqfile( void )
+/*************************************************************
+ LOAD_EQFILE
+ Load from disk the current equation file
+ *************************************************************/
+char *gui::load_eqfile( void )
 {
 	char s[ MAX_FILE_SIZE ], *buf1, *buf2, *eq;
 	int i;
@@ -717,10 +717,10 @@ char *load_eqfile( void )
 
 	// remove extra clear space at the beginning/end and standardize line ends
 	buf2 = new char[ sz + 1 ];
-	sz = strcln( buf2, buf1, sz + 1 );
+	sz = lsd::strcln( buf2, buf1, sz + 1 );
 
 	eq = new char[ sz + 1 ];
-	strcpyn( eq, buf2, sz + 1 );
+	lsd::strcpyn( eq, buf2, sz + 1 );
 
 	delete [ ] buf1;
 	delete [ ] buf2;
@@ -729,16 +729,16 @@ char *load_eqfile( void )
 }
 
 
-/***************************************************
-READ_EQFILE_NAME
-	Get the file name of the current equation file
-***************************************************/
-void read_eqfile_name( char *s, int sz )
+/*************************************************************
+ READ_EQFILE_NAME
+ Get the file name of the current equation file
+ *************************************************************/
+void gui::read_eqfile_name( char *s, int sz )
 {
 	char lab[ MAX_PATH_LENGTH ];
 	FILE *f;
 
-	snprintf( lab, MAX_PATH_LENGTH, "%s/%s", model_path, MODEL_OPTIONS );
+	snprintf( lab, MAX_PATH_LENGTH, "%s/%s", lsd::model_path, MODEL_OPTIONS );
 	f = fopen( lab, "r" );
 
 	if ( f == NULL )
@@ -756,19 +756,19 @@ void read_eqfile_name( char *s, int sz )
 		return;
 	}
 
-	strcpyn( s, lab + 4, sz );
-	strcatn( s, ".cpp", sz );
+	lsd::strcpyn( s, lab + 4, sz );
+	lsd::strcatn( s, ".cpp", sz );
 
 	return;
 }
 
 
-/****************************************************
-GET_SAVED
-	Get the set of elements which values are saved
-	during simulation run
-****************************************************/
-void object::get_saved( FILE *out, const char *sep, bool all_var )
+/*************************************************************
+ GET_SAVED
+ Get the set of elements which values are saved
+ during simulation run
+ *************************************************************/
+void lsd::object::get_saved( FILE *out, const char *sep, bool all_var )
 {
 	int i, sl;
 	char *lab;
@@ -812,14 +812,12 @@ void object::get_saved( FILE *out, const char *sep, bool all_var )
 }
 
 
-/****************************************************
-GET_SA_LIMITS
-	Get the max-min limits used for sensitivity
-	analysis of variables
-****************************************************/
-const char *meta_par_name[ META_PAR_NUM ] = META_PAR_NAME;
-
-void object::get_sa_limits( FILE *out, const char *sep )
+/*************************************************************
+ GET_SA_LIMITS
+ Get the max-min limits used for sensitivity
+ analysis of variables
+ *************************************************************/
+void lsd::object::get_sa_limits( FILE *out, const char *sep )
 {
 	int i, sl;
 	char *lab, type[ 10 ];
@@ -828,7 +826,7 @@ void object::get_sa_limits( FILE *out, const char *sep )
 	sensitivity *cs;
 
 	for ( i = 0; i < META_PAR_NUM; ++i )
-		meta_par_in[ i ] = false;
+		gui::meta_par_in[ i ] = false;
 
 	for ( cs = sim->sens; cs != NULL; cs = cs->next )
 	{
@@ -867,10 +865,10 @@ void object::get_sa_limits( FILE *out, const char *sep )
 			strcpy( type, "parameter" );
 
 			for ( i = 0; i < META_PAR_NUM; ++i )
-				if ( ! strcmp( cs->label, meta_par_name[ i ] ) )
+				if ( ! strcmp( cs->label, meta_par_names[ i ] ) )
 				{
 					strcpy( type, "setting" );
-					meta_par_in[ i ] = true;
+					gui::meta_par_in[ i ] = true;
 					break;
 				}
 		}
@@ -884,11 +882,11 @@ void object::get_sa_limits( FILE *out, const char *sep )
 }
 
 
-/***************************************************
-COUNT_LINES
-	Counts the number of lines in a text file
-***************************************************/
-int count_lines( const char *fname, bool dozip )
+/*************************************************************
+ COUNT_LINES
+ 	Counts the number of lines in a text file
+ *************************************************************/
+int gui::count_lines( const char *fname, bool dozip )
 {
 	char *res, buf[ FILE_BUF_SIZE ];
 	int fend, n = 0;
@@ -928,11 +926,11 @@ int count_lines( const char *fname, bool dozip )
 }
 
 
-/****************************************************
-SHOW_LOGS
-	Open tail/multitail to show log files dynamically
-****************************************************/
-void show_logs( const char *dest_path, s_vecT & logs, bool par_cntl )
+/*************************************************************
+ SHOW_LOGS
+ Open tail/multitail to show log files dynamically
+ *************************************************************/
+void gui::show_logs( const char *dest_path, s_vecT & logs, bool par_cntl )
 {
 	char exec[ MAX_PATH_LENGTH	];
 	int i, j, n, sz;
@@ -957,10 +955,10 @@ void show_logs( const char *dest_path, s_vecT & logs, bool par_cntl )
 
 	for ( i = 0; i < n; ++i )
 	{
-		strcatn( logs_str, logs[ i ].c_str( ), sz );
+		lsd::strcatn( logs_str, logs[ i ].c_str( ), sz );
 
 		if ( i < n - 1 )
-			strcatn( logs_str, " ", sz );
+			lsd::strcatn( logs_str, " ", sz );
 	}
 
 	if ( n == 1 )

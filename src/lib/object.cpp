@@ -13,282 +13,296 @@
  *************************************************************/
 
 /*************************************************************
-OBJECT.CPP
-It contains the core code for LSD, together with VARIAB.CPP.
+ OBJECT.CPP
+ It contains the core code for LSD, together with VARIAB.CPP.
 
-A model is nothing but a link of objects, whose behavior is defined here.
-Only the methods for saving a loading a model are placed in another file, FILE.CPP.
+ A model is nothing but a link of objects, whose behavior is
+ defined here. Only the methods for saving a loading a model
+ are placed in another file, FILE.CPP.
 
-An object is composed by some fields and a set of methods. The fields are
-used to identify the object type and to insert it in a model.
+ An object is composed by some fields and a set of methods.
+ The fields are used to identify the object type and to insert
+ it in a model.
 
-- char *label;
-Name of the object. The name is used indicate one specific type of object in the
-model. Two objects are always identical in their definition. Inheritance is not
-used in LSD, yet.
+ - char *label;
+ Name of the object. The name is used indicate one specific
+ type of object in the model. Two objects are always identical
+ in their definition. Inheritance is not used in LSD, yet.
 
-- variable *v;
-the first element of a linked chain of variable. They are the computational content
-of the model
+ - variable *v;
+ the first element of a linked chain of variable. They are
+ the computational content of the model
 
-- bool to_compute;
-flag set by default to 1. If it is zero, the system will not compute the equations
-of this object as a default, but only if they are requested by other equations.
-Used to speed up the simulation.
+ - bool to_compute;
+ flag set by default to 1. If it is zero, the system will not
+ compute the equations of this object as a default, but only
+ if they are requested by other equations. Used to speed up
+ the simulation.
 
-- object *b;
-pointer to the object's linked-list of bridges. The bridges connect the object with
-its sons. There is one bridge for each son object (even if it has many instances).
-The bridge points to the head of a linked list of the son instances.
+ - object *b;
+ pointer to the object's linked-list of bridges. The bridges
+ connect the object with its sons. There is one bridge for
+ each son object (even if it has many instances). The bridge
+ points to the head of a linked list of the son instances.
 
-- object *up;
-pointer to the parent object. Root is the only object having no parent (the
-value of up is then NULL).
+ - object *up;
+ pointer to the parent object. Root is the only object
+ having no parent (the value of up is then NULL).
 
-- object *next;
-pointer to the next object in the linked chain of the descendant of the parent
-of this object.
+ - object *next;
+ pointer to the next object in the linked chain of the
+ descendant of the parent of this object.
 
-- network *node;
-pointer to the data structure containing the network links from the object
-(see nets.cpp for the details)
+ - network *node;
+ pointer to the data structure containing the network links
+ from the object (see nets.cpp for the details)
 
-The drawing below sketches one object. All the object of the same chain
-same parent, that is up. They can only provide a way to continue along the
-linked chain (via next). The only way to "go back" is by starting again: go
-"up", pick the bridge to the desired son object and pick the head of the
-corresponding linked list and then follow all the chain again.
+ The drawing below sketches one object. All the object of
+ the same chain same parent, that is up. They can only
+ provide a way to continue along the linked chain (via next).
+ The only way to "go back" is by starting again: go "up",
+ pick the bridge to the desired son object and pick the head
+ of the corresponding linked list and then follow all the
+ chain again.
 
+    object *up
+ 		   /\
+ 	   ||
+ 	   ||___________
+ 	  |				|
+ 	  |char *label	|------> object *next
+ 	  |variable *v	|
+ 	  |_____________|
+ 	   ||
+ 	   ||-----> bridge *b -----> object *b->head ------> *b->head->next ----> ...
+ 	   ||
+ 	   ||-----> bridge *b->next --> object *b->next->head --> *b->next->head->next --> ...
+ 	   ..
+ 	   ..
 
-   object *up
-		   /\
-	   ||
-	   ||___________
-	  |				|
-	  |char *label	|------> object *next
-	  |variable *v	|
-	  |_____________|
-	   ||
-	   ||-----> bridge *b -----> object *b->head ------> *b->head->next ----> ...
-	   ||
-	   ||-----> bridge *b->next --> object *b->next->head --> *b->next->head->next --> ...
-	   ..
-	   ..
+ This definition of object allows to define a model as a
+ multiple dimensional tree, where it is possible to browse
+ the model with very limited code.
 
-This definition of object allows to define a model as a multiple dimensional
-tree, where it is possible to browse the model with very limited code.
+ METHODS
+ The methods for object implemented here all refer always to
+ the "this" object. That is, if you consider the following as
+ functions, then they have always as parameter the address of
+ one object, refer to as "this", whose fields are addressed as
+ if they were public variables.
 
-METHODS
-The methods for object implemented here all refer always to the "this" object.
-That is, if you consider the following as functions, then they have always as
-parameter the address of one object, refer to as "this", whose fields are
-addressed as if they were public variables.
+ Methods as listed in two groups: the ones that can be used as
+ functions in LSD and the ones used for management of the model.
+ This distinction is only because of the functionalities, since
+ all the methods are actually public, and could be used anyway.
+ It is just that you wouldn't like to, say, save a model in the
+ middle of an equation.
 
-Methods as listed in two groups: the ones that can be used as functions in LSD
-and the ones used for management of the model. This distinction is only
-because of the functionalities, since all the methods are actually public, and
-could be used anyway. It is just that you wouldn't like to, say, save a model
-in the middle of an equation.
+ METHODS FOR EQUATIONS (marked with an *)
 
-METHODS FOR EQUATIONS (marked with an *)
+ - double cal( char *l, int lag );
+ Interface to another type of cal(see below), that uses also
+ the address of this. Provides the value of one variable whose
+ label is lab. The value corresponds to the time t-lag, where
+ t is the global time value when the cal is
+ made.
+ If there is only one variale l in the model, that one is
+ found, wherever is placed in the model. If, instead, there
+ are many variables l, the variable returned depends on the
+ position of this in the model, in respect of the position of
+ the objects owning l. If l is in the same object "this", then
+ this is returned. Otherwise, is returned the first l found
+ following the strategy used in search_var (see below for a
+ detailed description of search_var). In general, this means
+ to return the intuitively correct variable. The case for
+ errors is when the variable l is in objects not directly
+ related with "this" in the hierarchical structure of the model.
 
-- double cal( char *l, int lag );
-Interface to another type of cal(see below), that uses also the address of this.
-Provides the value of one variable whose label is lab. The value corresponds
-to the gloable time t-lag, where t is the global time value when the cal is
-made.
-If there is only one variale l in the model, that one is found, wherever is
-placed in the model.
-If, instead, there are many variables l, the variable returned depends
-on the position of this in the model, in respect of the position of the
-objects owning l.
-If l is in the same object "this", then this is returned. Otherwise, is returned
-the first l found following the strategy used in search_var (see below for
-a detailed description of search_var).
-In general, this means to return the intuitively correct variable. The
-case for errors is when the variable l is in objects not directly related
-with "this" in the hierarchical structure of the model.
+ - variable *search_var(object *caller,char *label);
+ It explores the model starting from this and gradually
+ extending till considering the whole model.
+ It searches for an object having a variable whose label is l
+ and returns the first found.
+ The research strategy used by this method is simple:
+ 1) search among the variables of this. If not found
+ 2) search among the variables of the descending objects.
+    If not found
+ 3) search among the variables of parent object.
+ Each object encountered during a search perform the same
+ search strategy. The strategy ensures that the whole model
+ is searched, hence always returns a value, provided that
+ variable l exists. The problem is to be sure that, in case
+ of multiple instances of variable l, the correct one is
+ returned. This depends on the right choice of "this", that
+ is, where the search is starting from.
+ The field caller is used to avoid deadlocks when from
+ descendants the search goes up again, or from the parent down.
 
-- variable *search_var(object *caller,char *label);
-It explores the model starting from this and
-gradually extending till considering the whole model.
-It searches for an object having a variable whose label is l and returns the
-first found.
-The research strategy used by this method is simple:
-1) search among the variables of this. If not found
-2) search among the variables of the descending objects. If not found
-3) search among the variables of parent object.
-Each object encountered during a search perform the same search strategy.
-The strategy ensures that the whole model is searched, hence always returns
-a value, provided that variable l exists. The problem is
-to be sure that, in case of multiple instances of variable l, the correct one
-is returned. This depends on the right choice of "this", that is, where the
-search is starting from.
-The field caller is used to avoid deadlocks when
-from descendants the search goes up again, or from the parent down.
+ - object *search_var_cond( char *lab, double value, int lag );
+ Uses search_var, but returns the instance of the object that
+ has the searched variable with the desired value equal to value.
 
-- object *search_var_cond( char *lab, double value, int lag );
-Uses search_var, but returns the instance of the object that has the searched
-variable with the desired value equal to value.
+ - double overall_max( char *lab, int lag );
+ Searches for the object having the variable lab. From that
+ object, it considers the whole group of object of the same type
+ as the one found, and searches the maximum value of the
+ variables lab with lag lag there contained
 
-- double overall_max( char *lab, int lag );
-Searches for the object having the variable lab. From that object, it considers
-the whole group of object of the same type as the one found, and searches the
-maximum value of the variables lab with lag lag there contained
+ - double sum( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value );
+ Searches for the object having the variable lab1. From that
+ object, it considers the whole group of object of the same type
+ as the one found, and returns the sum of all the variables lab
+ with lag lag in that group. If cond is true, only objects
+ satisfying the logical condition 'V( "lab2" ) lop value' will
+ be considered form summing. lab2 should be in the same object as
+ lab1 or be the same as lab1.
 
-- double sum( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value );
-Searches for the object having the variable lab1. From that object, it considers
-the whole group of object of the same type as the one found, and returns
-the sum of all the variables lab with lag lag in that group. If cond is true,
-only objects satisfying the logical condition 'V( "lab2" ) lop value' will be
-considered form summing. lab2 should be in the same object as lab1 or be the same
-as lab1.
+ - double whg_av( char *lab1, char *lab2, int lag, bool cond, const char *lab2, const char *lop, double value );
+ Same as sum, but it adds up the product between variables lab
+ and lab2 for each object. lab and lab2 must be in the same object.
 
-- double whg_av( char *lab1, char *lab2, int lag, bool cond, const char *lab2, const char *lop, double value );
-Same as sum, but it adds up the product between variables lab and lab2 for each
-object. lab and lab2 must be in the same object.
+ - void lsdqsort( char *obj, char *var, char *dir, int lag );
+ Sorts the Objects whose label is obj according to the values of
+ their variable var. The direction of sorting can be UP or DOWN.
+ The method is just an interface for sort_asc and sort_desc below.
 
-- void lsdqsort( char *obj, char *var, char *dir, int lag );
-Sorts the Objects whose label is obj according to the values of their
-variable var. The direction of sorting can be UP or DOWN. The method
-is just an interface for sort_asc and sort_desc below.
+ IMPORTANT:
+ The initial Object must be the first element of the set of
+ Objects to be sorted, and hence is must contain a Variable or
+ Parameter labeled Var_label. The field from must be either the
+ Object whose "next" is this, or, in case this is the first element
+ of descendants from some Objects and hence it is a son, it must be
+ the address of the parent of this.
 
-IMPORTANT:
-The initial Object must be the first element of the set of Objects to be sorted,
-and hence is must contain a Variable or Parameter labeled Var_label.
-The field from must be either the Object whose "next" is this, or, in case this
-is the first element of descendants from some Objects and hence it is a son,
-it must be the address of the parent of this.
+ - void delete_obj( void ) ;
+ Eliminate the object, keeping in order the chain list.
 
-- void delete_obj( void ) ;
-eliminate the object, keeping in order the chain list.
+ - void stat( char *lab, double *v, int lag, bool cond, const char *lab2, const char *lop, double value );
+ Reports some statistics on the values of variable named lab
+ contained in one group of object descending from the this. The
+ results are stored in the vector v, with the following order:
+ v[0]=number of instances;
+ v[1]=average
+ v[2]=variance
+ v[3]=max
+ v[4]=min
 
-- void stat( char *lab, double *v, int lag, bool cond, const char *lab2, const char *lop, double value );
-Reports some statistics on the values of variable named lab contained
-in one group of object descending from the this. The results are stored in the
-vector v, with the following order:
-v[ 0 ]=number of instances;
-v[ 1 ]=average
-v[ 2 ]=variance
-v[ 3 ]=max
-v[ 4 ]=min
+ - void write( char *lab, double value, int time, int lag )
+ Assign the value value to the variable lab, resulting as if this
+ was the value at gloabal time time. It does not make a search
+ looking for lab. Lab must be a variable of this.
+ The function allows to override the default system to update
+ variables in LSD during a simulation time step.
+ In general, through update, a variable is computed either
+ because the system requests its value via the "update" method,
+ or because, before "update", another equation needs its updated
+ value. An equation can instead call "write"
 
-- void write( char *lab, double value, int time, int lag )
-Assign the value value to the variable lab, resulting as if this was the
-value at gloabal time time. It does not make a search looking for lab. Lab
-must be a variable of this.
-The function allows to override the default system to update variables in LSD
-during a simulation time step.
-In general, through update, a variable is computed either because the system
-requests its value via the "update" method, or because, before "update", another
-equation needs its updated value.
-An equation can instead call "write"
+ For sake of completeness, here are other two functions, not
+ members of object, that are extensively used in equations, besides
+ in the following code
 
-For sake of completeness, here are other two functions, not members of object,
-that are extensively used in equations, besides in the following code.
+ - object *next_count( object *t, int *count );
+ Counts how many types of objects equal to t are in this group.
+ count returns such value, and the whole function returns the
+ next object after the last of the series of t.
 
-- object *skip_next_obj( object *t, int *count );
-Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series of t.
+ METHODS NOT USED IN THE EQUATIONS
 
-- object *go_brother( object *c );
-returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
+ - double cal( object *caller, char *l, int lag, int *done );
+ It is the basic function used in the equations for LSD variables.
+ It is called by the former type of method cal(l,lag ), because
+ that is simpler to be used in the equation code. It activates
+ the method search_var( caller, label ) that returns a variable
+ whose name is label and then calls the method cal() for that
+ variable (see variable::cal), that returns the desired value.
 
-METHODS NOT USED IN THE EQUATIONS
+ - void init( object *_up, simulation *_sim, char *_label, bool _to_compute );
+ Initialization for an object. Assigns _up to up, _sim to sim,
+ and creates the label
 
-- double cal( object *caller, char *l, int lag, int *done );
-It is the basic function used in the equations for LSD variables.
-It is called by the former type of method cal(l,lag ), because that
-is simpler to be used in the equation code. It activates the method
-search_var( caller, label )
-that returns a variable whose name is label and then calls the method
-cal() for that variable (see variable::cal), that returns the desired value.
+ - void update( bool recurse ) ;
+ The recursive function computing the equations for a new time
+ step in the simulation. It first requests the values for its
+ own variables. Then calls update for all the descendants if
+ recurse is true.
 
-- void init( object *_up, simulation *_sim, char *_label, bool _to_compute );
-Initialization for an object. Assigns _up to up, _sim to sim,
-and creates the label
+ - object *hyper_next( char *lab );
+ Returns the next object whose name is lab. That is, it makes
+ a search only down and up, but does never consider objects
+ before the one from which the search starts from. It is used to
+ chase objects of lab type even when they are scattered in
+ different groups.
 
-- void update( bool recurse ) ;
-The recursive function computing the equations for a new time step in the
-simulation. It first requests the values for its own variables. Then calls update
-for all the descendants if recurse is true.
+ - void add_empty_var( char *label );
+ Add a variable to the object
 
-- object *hyper_next( char *lab );
-Returns the next object whose name is lab. That is, it makes a search only down
-and up, but does never consider objects before the one from which the search
-starts from. It is used to chase objects of lab type even when they are scattered
-in different groups.
+ - object *add_obj( char *label, int num, bool propagate );
+ Add a new object type in the model as descendant of current one
+ and initialize its name. It makes num copiesof it, and can
+ propagate to other instances of the same parent object.
 
-- void add_empty_var( char *label );
-Add a variable to the object
+ - void move_obj( char *lab );
+ Move the current object as descendant to a new parent
 
-- object *add_obj( char *label, int num, bool propagate );
-Add a new object type in the model as descendant of current one
-and initialize its name. It makes num copiesof it, and can propagate to other
-instances of the same parent object.
+ - object *search( char *lab );
+ Explores one branch of the model to find for an object whose
+ label is lab. It searches only down and next. Only for Root,
+ the search is extensive on the whole model.
 
-- void move_obj( char *lab );
-Move the current object as descendant to a new parent
+ - void chg_lab( char *lab );
+ Changes the name of an object type, that is for all the
+ object of this type in the model
 
-- object *search( char *lab );
-Explores one branch of the model to find for an object whose label is lab.
-It searches only down and next. Only for Root, the search is extensive on the
-whole model.
+ - void chg_var_lab( char *old, char *n );
+ Only to this object, changes the label of the variable whose
+ label is old, and it si changed in n
 
-- void chg_lab( char *lab );
-Changes the name of an object type, that is for all the object of this type in
-the model
+ - variable *add_empty_var( char *str );
+ Add a variable before knowing its contents, setting to a
+ default initialization values all the fields in the variable.
+ It operates only on object this
 
-- void chg_var_lab( char *old, char *n );
-Only to this object, changes the label of the variable whose label is old,
-and it si changed in n
+ - variable *add_var_from_example( variable *example );
+ Add a variable instance copying all the fields by the variable
+ example. It operates only on object this
 
-- variable *add_empty_var( char *str );
-Add a variable before knowing its contents, setting to a default initialization
-values all the fields in the variable. It operates only on object this
+ - void empty( void ) ;
+ Deletes all the contents of the object, freeing its memory.
+ Used in delete_obj just before suicide with delete this;
 
-- variable *add_var_from_example( variable *example );
-Add a variable instance copying all the fields by the variable example.
-It operates only on object this
+ METHODS FOR NETWORK OPERATION
 
-- void empty( void ) ;
-Deletes all the contents of the object, freeing its memory. Used in delete_obj
-just before suicide with
-delete this;
+ see nets.cpp
 
-METHODS FOR NETWORK OPERATION
+ METHODS FOR FILE OPERATION
 
-see nets.cpp
-
-METHODS FOR FILE OPERATION
-
-see file.cpp
-*************************************************************/
+ see file.cpp
+ *************************************************************/
 
 #include "lib/libLSD.h"				// LSD library classes
 
 
-/****************************************************
-BRIDGE
-Constructor
-****************************************************/
-bridge::bridge( const char *lab )
+/*************************************************************
+ BRIDGE
+ Constructor
+ *************************************************************/
+lsd::bridge::bridge( const char *lab )
 {
 	blabel = new char[ strlen( lab ) + 1 ];
 	strcpy( blabel, lab );
 }
 
-/****************************************************
-BRIDGE
-Copy (MOVE!) constructor
-This is not really a copy constructor, once it does
-not reallocate space for the pointed contents.
-It can be used ONLY for moving content from one
-instance to another using iterators
-****************************************************/
-bridge::bridge( const bridge &b )
+
+/*************************************************************
+ BRIDGE
+ Copy (MOVE!) constructor
+ This is not really a copy constructor, once it does
+ not reallocate space for the pointed contents.
+ It can be used ONLY for moving content from one
+ instance to another using iterators
+ *************************************************************/
+lsd::bridge::bridge( const bridge &b )
 {
 	copy = true;
 	counter_updated = b.counter_updated;
@@ -301,11 +315,11 @@ bridge::bridge( const bridge &b )
 }
 
 
-/****************************************************
-BRIDGE
-Destructor
-****************************************************/
-bridge::~bridge( void )
+/*************************************************************
+ BRIDGE
+ Destructor
+ *************************************************************/
+lsd::bridge::~bridge( void )
 {
 	object *cur, *cnext;
 
@@ -326,11 +340,11 @@ bridge::~bridge( void )
 }
 
 
-/****************************************************
-INIT
-Set the basics for a newly created object
-****************************************************/
-void object::init( object *_up, simulation *_sim, const char *lab, bool _to_compute )
+/*************************************************************
+ INIT
+ Set the basics for a newly created object
+ *************************************************************/
+void lsd::object::init( object *_up, simulation *_sim, const char *lab, bool _to_compute )
 {
 	up = _up;
 	sim = _sim;
@@ -340,11 +354,11 @@ void object::init( object *_up, simulation *_sim, const char *lab, bool _to_comp
 }
 
 
-/****************************************************
-RECREATE_MAPS
-Recreate both fast look-up maps
-****************************************************/
-void object::recreate_maps( void )
+/*************************************************************
+ RECREATE_MAPS
+ Recreate both fast look-up maps
+ *************************************************************/
+void lsd::object::recreate_maps( void )
 {
 	bridge *cb;
 	variable *cv;
@@ -360,16 +374,15 @@ void object::recreate_maps( void )
 }
 
 
-/****************************************************
-UPDATE (*)
-Compute the value of all the Variables in the Object, saving the values
-and updating the runtime plot.
-
-For optimization purposes the system tries to ignores descending objects
-marked to be not computed. The implementation is quite baroque, but it
-should be the fastest.
-****************************************************/
-void object::update( bool recurse, bool user )
+/*************************************************************
+ UPDATE (*)
+ Compute the value of all the Variables in the Object, saving
+ the values and updating the runtime plot.
+ For optimization purposes the system tries to ignores
+ descending objects marked to be not computed. The
+ implementation is quite baroque, but it should be the fastest.
+ *************************************************************/
+void lsd::object::update( bool recurse, bool user )
 {
 	static bool deleted;
 	bridge *cb, *cb1;
@@ -422,38 +435,19 @@ void object::update( bool recurse, bool user )
 }
 
 
-/****************************************************
-GO_BROTHER
-****************************************************/
-object *go_brother( object *c )
-{
-	if ( c == NULL || c->next == NULL )
-		return NULL;
-
-	return c->next;
-}
-
-
-/****************************************************
-SKIP_NEXT_OBJ
-****************************************************/
-object *skip_next_obj( object *tr, int *count )
-{
-	object *cur;
-
-	for ( cur = tr, *count = 0; cur != NULL; cur = cur->next, *count += 1 );
-
-	return skip_next_obj( tr );
-}
-
-object *skip_next_obj( object *tr )
+/*************************************************************
+ NEXT_OBJ
+ Return the next (different) object under the same
+ parent. Search doesn't move to different branches.
+ *************************************************************/
+lsd::object *lsd::object::next_obj( object *obj )
 {
 	bridge *cb;
 
-	if ( tr == NULL || tr->up == NULL )
+	if ( obj == NULL || obj->up == NULL )
 		return NULL;
 
-	cb = tr->up->search_bridge( tr->label );
+	cb = obj->up->search_bridge( obj->label );
 
 	if ( cb == NULL || cb->next == NULL )
 		return NULL;
@@ -462,17 +456,34 @@ object *skip_next_obj( object *tr )
 }
 
 
-/****************************************************
-HYPER_NEXT
-Return the next Object in the model with the label
-lab. The Object is searched in the whole model,
-including different branches
-****************************************************/
-object *object::hyper_next( const char *lab )
+/*************************************************************
+ NEXT_COUNT
+ Counts the number of instances of the given object
+ obj before the the next (different) object under
+ the same parent, returning it. Search doesn't move
+ to different branches.
+ *************************************************************/
+lsd::object *lsd::object::next_count( object *obj, int *count )
+{
+	object *cur;
+
+	for ( cur = obj, *count = 0; cur != NULL; cur = cur->next, ++( *count ) );
+
+	return next_obj( obj );
+}
+
+
+/*************************************************************
+ HYPER_NEXT
+ Return the next Object in the model with the label
+ lab. The Object is searched in the whole model,
+ including different branches
+ *************************************************************/
+lsd::object *lsd::object::hyper_next( const char *lab )
 {
 	object *cur, *cur1;
 
-	for ( cur1 = NULL, cur = next; cur != NULL; cur = skip_next_obj( cur ) )
+	for ( cur1 = NULL, cur = next; cur != NULL; cur = next_obj( cur ) )
 	{
 		cur1 = cur->search( lab );
 		if ( cur1 != NULL )
@@ -486,19 +497,19 @@ object *object::hyper_next( const char *lab )
 }
 
 // search object with same name as the current object
-object *object::hyper_next( void )
+lsd::object *lsd::object::hyper_next( void )
 {
 	return hyper_next( label );
 }
 
 
-/****************************************************
-HYPER_COUNT
-Return the total number of Object instances in the
-model with the label lab. The Object is searched
-in the whole model, including different branches
-****************************************************/
-int simulation::hyper_count( const char *lab )
+/*************************************************************
+ HYPER_COUNT
+ Return the total number of Object instances in the
+ model with the label lab. The Object is searched
+ in the whole model, including different branches
+ *************************************************************/
+int lsd::simulation::hyper_count( const char *lab )
 {
 	int n;
 	object *cur;
@@ -509,13 +520,14 @@ int simulation::hyper_count( const char *lab )
 }
 
 
-/****************************************************
-HYPER_COUNT_VAR
-Return the total number of Object instances in the
-model which contain the variable named lab. The Object
-is searched in the whole model, including different branches
-****************************************************/
-int simulation::hyper_count_var( const char *lab )
+/*************************************************************
+ HYPER_COUNT_VAR
+ Return the total number of Object instances in the
+ model which contain the variable named lab.
+ The Object is searched in the whole model, including
+ different branches
+ *************************************************************/
+int lsd::simulation::hyper_count_var( const char *lab )
 {
 	int n;
 	object *cur;
@@ -532,12 +544,13 @@ int simulation::hyper_count_var( const char *lab )
 }
 
 
-/****************************************************
-SEARCH_BRIDGE
-Search the bridge which contains the Object lab in this.
-Uses the fast bridge look-up map.
-***************************************************/
-bridge *object::search_bridge( const char *lab, bool no_error )
+/*************************************************************
+ SEARCH_BRIDGE
+ Search the bridge which contains the Object lab
+ in this.
+ Uses the fast bridge look-up map.
+ *************************************************************/
+lsd::bridge *lsd::object::search_bridge( const char *lab, bool no_error )
 {
 	// find the bridge which contains the object
 	auto bit = b_map.find( lab );
@@ -553,12 +566,13 @@ bridge *object::search_bridge( const char *lab, bool no_error )
 }
 
 
-/****************************************************
-SEARCH (*)
-Search the first Object lab in the branch of the model below this.
-Uses the fast bridge look-up map.
-***************************************************/
-object *object::search( const char *lab, bool no_search, bool no_search_up )
+/*************************************************************
+ SEARCH (*)
+ Search the first Object lab in the branch of the
+ model below this.
+ Uses the fast bridge look-up map.
+ *************************************************************/
+lsd::object *lsd::object::search( const char *lab, bool no_search, bool no_search_up )
 {
 	bridge *cb;
 	object *cur;
@@ -599,10 +613,10 @@ object *object::search( const char *lab, bool no_search, bool no_search_up )
 }
 
 
-/************************************************
-SEARCH_ERR
-*************************************************/
-object *object::search_err( const char *lab, bool no_search, bool no_search_up, const char *errmsg )
+/*************************************************************
+ SEARCH_ERR
+ *************************************************************/
+lsd::object *lsd::object::search_err( const char *lab, bool no_search, bool no_search_up, const char *errmsg )
 {
 	object *cur, *cur1;
 
@@ -641,19 +655,19 @@ object *object::search_err( const char *lab, bool no_search, bool no_search_up, 
 }
 
 
-/****************************
-INITTURBO (*)
-Generate the map required to use the turbosearch.
-lab must be the label of the descending object
-whose set is to be organized
-num is not used (legacy code compatibility)
-*****************************/
-double object::initturbo( const char *lab, double tot )
+/*************************************************************
+ INITTURBO (*)
+ Generate the map required to use the turbosearch.
+ lab must be the label of the descending object
+ whose set is to be organized
+ num is not used (legacy code compatibility)
+ *************************************************************/
+double lsd::object::initturbo( const char *lab, double tot )
 {
 	return initturbo( lab );
 }
 
-double object::initturbo( const char *lab )
+double lsd::object::initturbo( const char *lab )
 {
 	long l;
 	bridge *cb;
@@ -687,24 +701,21 @@ double object::initturbo( const char *lab )
 	cb->t_map.clear( );
 
 	// fill the map with the object positions
-	for ( l = 1, cur = search( lab ); cur != NULL; ++l, cur = go_brother( cur ) )
+	for ( l = 1, cur = search( lab ); cur != NULL; ++l, cur = BROTHER( cur ) )
 		cb->t_map.insert( n_pairT( l, cur ) );
 
 	return ( double ) cb->t_map.size( );
 }
 
 
-/****************************
-TURBOSET (*)
-Check if the turbosearch for
-object lab was set with initturbo
-and is still valid. Object instance
-creation and destruction destroy
-the turbosearch map.
-returns 0 if there is no map or
-the number of objects in map.
-*****************************/
-double object::turboset( const char *lab )
+/*************************************************************
+ TURBOSET (*)
+ Check if the turbosearch for object lab was set with
+ initturbo and is still valid. Object instance creation and
+ destruction destroy the turbosearch map.
+ returns 0 if there is no map or the number of objects in map.
+ *************************************************************/
+double lsd::object::turboset( const char *lab )
 {
 	bridge *cb;
 
@@ -722,19 +733,18 @@ double object::turboset( const char *lab )
 }
 
 
-/****************************
-TURBOSEARCH (*)
-Search the object lab placed in num position.
-This search requires the map
-previously created with 'initturbo'.
-tot is ignored (legacy code compatibility)
-*****************************/
-object *object::turbosearch( const char *lab, double tot, double num )
+/*************************************************************
+ TURBOSEARCH (*)
+ Search the object lab placed in num position.
+ This search requires the map previously created with
+ 'initturbo'. tot is ignored (legacy code compatibility)
+ *************************************************************/
+lsd::object *lsd::object::turbosearch( const char *lab, double tot, double num )
 {
 	return turbosearch( lab, num );
 }
 
-object *object::turbosearch( const char *lab, double num )
+lsd::object *lsd::object::turbosearch( const char *lab, double num )
 {
 	bridge *cb;
 
@@ -766,15 +776,14 @@ object *object::turbosearch( const char *lab, double num )
 }
 
 
-/*******************************************
-SEARCH_INST (*)
-Searches the model for an object instance
-pointed by 'obj' searching first among the
-calling object instances and then into its
-descendants, returning the instance number
-or 0 if not found
-********************************************/
-void object::search_inst( object *obj, long *pos, long *checked )
+/*************************************************************
+ SEARCH_INST (*)
+ Searches the model for an object instance pointed by 'obj'
+ searching first among the calling object instances and then
+ into its descendants, returning the instance number or 0 if
+ not found
+ *************************************************************/
+void lsd::object::search_inst( object *obj, long *pos, long *checked )
 {
 	bool found;
 	long i;
@@ -815,7 +824,7 @@ void object::search_inst( object *obj, long *pos, long *checked )
 	}
 }
 
-double object::search_inst( object *obj, bool fun )
+double lsd::object::search_inst( object *obj, bool fun )
 {
 	long pos, checked;
 	object *cur;
@@ -847,29 +856,31 @@ double object::search_inst( object *obj, bool fun )
 }
 
 
-/************************************************
-SEARCH_VAR
-Explore the model starting from this and
-gradually extending till considering the whole model.
-It searches for an object having a variable whose label is l and returns the
-first found.
-The research strategy used by this method is simple:
-1) search among the variables of this. If not found:
-2) search among the variables of the descending objects. If not found:
-3) search among the variables of parent object. If not found return NULL
+/*************************************************************
+ SEARCH_VAR
+ Explore the model starting from this and
+ gradually extending till considering the whole model.
+ It searches for an object having a variable whose label is l
+ and returns the first found.
+ The research strategy used by this method is simple:
+ 1) search among the variables of this. If not found:
+ 2) search among the variables of the descending objects.
+    If not found:
+ 3) search among the variables of parent object. If not found
+    return NULL
 
-Each object encountered during a search perform the same search strategy.
-The strategy ensures that the whole model is searched, hence always returns
-a value, provided that variable l exists. The problem is
-to be sure that, in case of multiple instances of variable l, the correct one
-is returned. This depends on the right choice of "this", that is, where the
-search is starting from.
-The field caller is used to avoid deadlocks when
-from descendants the search goes up again, or from the parent down.
-Uses the fast variable look-up map of the searched variables.
-*************************************************/
-variable *object::search_var( object *caller, const char *lab, bool no_error,
-							  bool no_search, bool no_search_up, bool search_sons )
+ Each object encountered during a search perform the same
+ search strategy. The strategy ensures that the whole model
+ is searched, hence always returns a value, provided that
+ variable l exists. The problem is to be sure that, in case
+ of multiple instances of variable l, the correct one is
+ returned. This depends on the right choice of "this", that
+ is, where the search is starting from.
+ The field caller is used to avoid deadlocks when from
+ descendants the search goes up again, or from the parent down.
+ Uses the fast variable look-up map of the searched variables.
+ *************************************************************/
+lsd::variable *lsd::object::search_var( object *caller, const char *lab, bool no_error, bool no_search, bool no_search_up, bool search_sons )
 {
 	bridge *cb;
 	variable *cv;
@@ -921,11 +932,10 @@ variable *object::search_var( object *caller, const char *lab, bool no_error,
 }
 
 
-/************************************************
-SEARCH_VAR_ERR
-*************************************************/
-variable *object::search_var_err( object *caller, const char *lab, bool no_search,
-								  bool no_search_up, bool search_sons, const char *errmsg )
+/*************************************************************
+ SEARCH_VAR_ERR
+ *************************************************************/
+lsd::variable *lsd::object::search_var_err( object *caller, const char *lab, bool no_search, bool no_search_up, bool search_sons, const char *errmsg )
 {
 	object *cur;
 	variable *cv, *cv1;
@@ -969,15 +979,17 @@ variable *object::search_var_err( object *caller, const char *lab, bool no_searc
 }
 
 
-/****************************************************
-SEARCH_VAR_COND (*)
-Search for the Variable or Parameter lab with value value and return it, if found.
-Normally searches all branches of the object containing the variable, except
-if the NO_SEARCH command is issued before the macro, when it only search the
-current branch of the model.
-Return NULL if not found.
-****************************************************/
-object *object::search_var_cond( const char *lab, double value, int lag )
+/*************************************************************
+ SEARCH_VAR_COND (*)
+ Search for the Variable or Parameter lab with
+ value value and return it, if found.
+ Normally searches all branches of the object
+ containing the variable, except if the NO_SEARCH
+ command is issued before the macro, when it only
+ search the current branch of the model.
+ Return NULL if not found.
+ *************************************************************/
+lsd::object *lsd::object::search_var_cond( const char *lab, double value, int lag )
 {
 	double res;
 	object *cur, *cnext;
@@ -1000,12 +1012,12 @@ object *object::search_var_cond( const char *lab, double value, int lag )
 }
 
 
-/****************************
-INITTURBO_COND (*)
-Generate the data structure required
-to use the turbosearch with condition.
-*****************************/
-double object::initturbo_cond( const char *lab )
+/*************************************************************
+ INITTURBO_COND (*)
+ Generate the data structure required
+ to use the turbosearch with condition.
+ *************************************************************/
+double lsd::object::initturbo_cond( const char *lab )
 {
 	bridge *cb;
 	object *cur, *cnext;
@@ -1060,19 +1072,15 @@ double object::initturbo_cond( const char *lab )
 }
 
 
-/****************************
-TURBOSET_COND (*)
-Check if the turbosearch for
-object lab with a condition
-was set with initturbo_cond on
-on variable lab and is still
-valid. Object instance creation
-and destruction destroy the
-turbosearch map.
-returns 0 if there is no map or
-the number of nodes in map.
-*****************************/
-double object::turboset_cond( const char *lab )
+/*************************************************************
+ TURBOSET_COND (*)
+ Check if the turbosearch for object lab with a condition
+ was set with initturbo_cond on on variable lab and is still
+ valid. Object instance creation and destruction destroy the
+ turbosearch map.
+ returns 0 if there is no map or the number of nodes in map.
+ *************************************************************/
+double lsd::object::turboset_cond( const char *lab )
 {
 	variable *cv;
 
@@ -1105,13 +1113,16 @@ double object::turboset_cond( const char *lab )
 }
 
 
-/****************************
-TURBOSEARCH_COND (*)
-Search the object instance containing a variable label with given value.
-Return the containing object instance, if found, or NULL if not found.
-This search exploits the structure created with 'initturbo_cond'.
-*****************************/
-object *object::turbosearch_cond( const char *lab, double value )
+/*************************************************************
+ TURBOSEARCH_COND (*)
+ Search the object instance containing a variable
+ label with given value.
+ Return the containing object instance, if found,
+ or NULL if not found.
+ This search exploits the structure created with
+ 'initturbo_cond'.
+ *************************************************************/
+lsd::object *lsd::object::turbosearch_cond( const char *lab, double value )
 {
 	bridge *cb;
 	variable *cv;
@@ -1162,12 +1173,12 @@ object *object::turbosearch_cond( const char *lab, double value )
 }
 
 
-/****************************************************
-ADD_EMPTY_VAR
-Add a new (empty) element, used in the creation
-of the model structure
-****************************************************/
-variable *object::add_empty_var( const char *lab )
+/*************************************************************
+ ADD_EMPTY_VAR
+ Add a new (empty) element, used in the creation
+ of the model structure
+ *************************************************************/
+lsd::variable *lsd::object::add_empty_var( const char *lab )
 {
 	variable *cv;
 
@@ -1194,8 +1205,8 @@ variable *object::add_empty_var( const char *lab )
 #ifndef _NW_
 	if ( ! valid_label( lab ) )
 	{
-		plog( "\nWarning: invalid variable name '%s', please rename", lab );
-		cmd_gui( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Invalid characters in variable name\" -detail \"Variable '%s' has an invalid name. Please rename it to prevent problems.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
+		sim->plog( "\nWarning: invalid variable name '%s', please rename", lab );
+		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Invalid characters in variable name\" -detail \"Variable '%s' has an invalid name. Please rename it to prevent problems.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
 	}
 #endif
 
@@ -1215,11 +1226,11 @@ variable *object::add_empty_var( const char *lab )
 }
 
 
-/****************************************************
-ADD_VAR_FROM_EXAMPLE
-Add a new element instance identical to the example
-****************************************************/
-variable *object::add_var_from_example( variable *example )
+/*************************************************************
+ ADD_VAR_FROM_EXAMPLE
+ Add a new element instance identical to the example
+ *************************************************************/
+lsd::variable *lsd::object::add_var_from_example( variable *example )
 {
 	variable *cv;
 
@@ -1264,13 +1275,13 @@ variable *object::add_var_from_example( variable *example )
 }
 
 
-/****************************************************
-ADD_OBJ
-Add num new sons with label lab, to ANY object like
-this one if propagate = true, wherever is on the
-tree
-****************************************************/
-object *object::add_obj( const char *lab, int num, bool propagate )
+/*************************************************************
+ ADD_OBJ
+ Add num new sons with label lab, to ANY object like
+ this one if propagate = true, wherever is on the
+ tree
+ *************************************************************/
+lsd::object *lsd::object::add_obj( const char *lab, int num, bool propagate )
 {
 	int i;
 	bridge *cb;
@@ -1299,8 +1310,8 @@ object *object::add_obj( const char *lab, int num, bool propagate )
 #ifndef _NW_
 	if ( ! valid_label( lab ) )
 	{
-		plog( "\nWarning: invalid object name '%s', please rename", lab );
-		cmd_gui( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Invalid characters in object name\" -detail \"Object '%s' has an invalid name. Please rename it to prevent problems.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
+		sim->plog( "\nWarning: invalid object name '%s', please rename", lab );
+		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Invalid characters in object name\" -detail \"Object '%s' has an invalid name. Please rename it to prevent problems.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
 	}
 #endif
 
@@ -1334,12 +1345,12 @@ object *object::add_obj( const char *lab, int num, bool propagate )
 }
 
 
-/****************************************************
-MOVE_OBJ
-Move object in the model structure. The lab object
-is placed below the provided dest object
-****************************************************/
-void simulation::move_obj( const char *lab, const char *dest )
+/*************************************************************
+ MOVE_OBJ
+ Move object in the model structure. The lab object
+ is placed below the provided dest object
+ *************************************************************/
+void lsd::simulation::move_obj( const char *lab, const char *dest )
 {
 	bridge *cb, *cb1, *mb = NULL, *nb;
 	object *cur, *cur1, *d, *no, *o, *s;
@@ -1433,10 +1444,10 @@ void simulation::move_obj( const char *lab, const char *dest )
 }
 
 
-/****************************************************
-REPLICATE
-****************************************************/
-void object::replicate( int num, bool propagate )
+/*************************************************************
+ REPLICATE
+ *************************************************************/
+void lsd::object::replicate( int num, bool propagate )
 {
 	object *cur, *cur1;
 	variable *cv;
@@ -1450,7 +1461,7 @@ void object::replicate( int num, bool propagate )
 	if ( cur != NULL )
 		cur->replicate( num, true );
 
-	skip_next_obj( this, &usl );
+	next_count( this, & usl );
 	for ( cur = this, i = 1; i < usl; cur = cur->next, ++i );
 
 	for ( i = usl; i < num; ++i )
@@ -1470,10 +1481,10 @@ void object::replicate( int num, bool propagate )
 }
 
 
-/****************************************************
-COPY_DESCENDANT
-****************************************************/
-void object::copy_descendant( object *to )
+/*************************************************************
+ COPY_DESCENDANT
+ *************************************************************/
+void lsd::object::copy_descendant( object *to )
 {
 	bridge *cb, *cb1;
 	object *cur;
@@ -1530,20 +1541,22 @@ void object::copy_descendant( object *to )
 }
 
 
-/****************************************************
-ADD_N_OBJECTS2 (*)
-As the type with the example, but the example is taken from the blueprint
-In respect of the original version, it allows for the specification
-of the time of last update if t_update is positive or zero. If
-t_update is negative (<0) it takes the time of last update from
-the example object (if >0) or current t (if =0)
-****************************************************/
-object *object::add_n_objects2( const char *lab, int n, int t_update )
+/*************************************************************
+ ADD_N_OBJECTS2 (*)
+ As the type with the example, but the example is
+ taken from the blueprint
+ In respect of the original version, it allows for
+ the specification of the time of last update if
+ t_update is positive or zero. If t_update is
+ negative (<0) it takes the time of last update from
+ the example object (if >0) or current t (if =0)
+ *************************************************************/
+lsd::object *lsd::object::add_n_objects2( const char *lab, int n, int t_update )
 {
 	return add_n_objects2( lab, n, sim->blueprint->search( lab ), t_update );
 }
 
-object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update )
+lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, int t_update )
 {
 	bool net;
 	int i;
@@ -1694,13 +1707,13 @@ object *object::add_n_objects2( const char *lab, int n, object *ex, int t_update
 }
 
 
-/****************************
-DELETE_BRIDGE
-Remove a bridge, used when an
-object is removed from the
-model in browser.
-*****************************/
-void object::delete_bridge( void )
+/*************************************************************
+ DELETE_BRIDGE
+ Remove a bridge, used when an
+ object is removed from the
+ model in browser.
+ *************************************************************/
+void lsd::object::delete_bridge( void )
 {
 	bridge *cb, *cb1;
 
@@ -1728,13 +1741,13 @@ void object::delete_bridge( void )
 }
 
 
-/****************************************************
-DELETE_OBJ (*)
-Remove the object from the model
-Before killing the Variables data to be saved are stored
-in the "cemetery", a linked chain storing data to be analyzed.
-****************************************************/
-void object::delete_obj( variable *caller )
+/*************************************************************
+ DELETE_OBJ (*)
+ Remove the object from the model
+ Before killing the Variables data to be saved are stored
+ in the "cemetery", a linked chain storing data to be analyzed.
+ *************************************************************/
+void lsd::object::delete_obj( variable *caller )
 {
 	object *cur = this;
 	bridge *cb;
@@ -1840,12 +1853,12 @@ void object::delete_obj( variable *caller )
 }
 
 
-/****************************************************
-EMPTY
-Garbage collection for objects
-Delete the entire son tree below
-****************************************************/
-void object::empty( void )
+/*************************************************************
+ EMPTY
+ Garbage collection for objects
+ Delete the entire son tree below
+ *************************************************************/
+void lsd::object::empty( void )
 {
 	bridge *cb, *cb1;
 	variable *cv, *cv1;
@@ -1880,12 +1893,13 @@ void object::empty( void )
 }
 
 
-/***************************************************
-COLLECT_CEMETERY
-Processes variables from an object required to go to cemetery
-Also destroy variables not requiring saving
-***************************************************/
-void object::collect_cemetery( variable *caller )
+/*************************************************************
+ COLLECT_CEMETERY
+ Processes variables from an object required to
+ go to cemetery
+ Also destroy variables not requiring saving
+ *************************************************************/
+void lsd::object::collect_cemetery( variable *caller )
 {
 	variable *cv, *cv1;
 
@@ -1918,12 +1932,12 @@ void object::collect_cemetery( variable *caller )
 }
 
 
-/***************************************************
-ADD_CEMETERY
-Store the variable in a list of variables in objects deleted
-but to be used for analysis.
-***************************************************/
-void variable::add_cemetery( void )
+/*************************************************************
+ ADD_CEMETERY
+ Store the variable in a list of variables in
+ objects deleted but to be used for analysis.
+ *************************************************************/
+void lsd::variable::add_cemetery( void )
 {
 	if ( sim->cemetery == NULL )
 		sim->cemetery = sim->last_cemetery = this;
@@ -1937,10 +1951,10 @@ void variable::add_cemetery( void )
 }
 
 
-/***************************************************
-EMPTY_CEMETERY
-***************************************************/
-void simulation::empty_cemetery( void )
+/*************************************************************
+ EMPTY_CEMETERY
+ *************************************************************/
+void lsd::simulation::empty_cemetery( void )
 {
 	variable *cv, *cv1;
 
@@ -1955,23 +1969,23 @@ void simulation::empty_cemetery( void )
 }
 
 
-/****************************************************
-TO_DELETE (*)
-Check if the object is scheduled for deletion
-Objects are only deleted when all variables
-under computation in it finish computation
-****************************************************/
-double object::to_delete( void )
+/*************************************************************
+ TO_DELETE (*)
+ Check if the object is scheduled for deletion
+ Objects are only deleted when all variables
+ under computation in it finish computation
+ *************************************************************/
+double lsd::object::to_delete( void )
 {
 	return sim->wait_delete == this;
 }
 
 
-/****************************************************
-DELETE_VAR
-Remove the variable from the object
-****************************************************/
-void object::delete_var( const char *lab )
+/*************************************************************
+ DELETE_VAR
+ Remove the variable from the object
+ *************************************************************/
+void lsd::object::delete_var( const char *lab )
 {
 	variable *cv, *cv1;
 
@@ -1995,11 +2009,12 @@ void object::delete_var( const char *lab )
 }
 
 
-/****************************************************
-CHG_LAB
-Change the label of the Object, for all the instances
-****************************************************/
-void object::chg_lab( const char *lab )
+/*************************************************************
+ CHG_LAB
+ Change the label of the Object, for all the
+ instances
+ *************************************************************/
+void lsd::object::chg_lab( const char *lab )
 {
 	object *cur;
 	bridge *cb;
@@ -2031,11 +2046,11 @@ void object::chg_lab( const char *lab )
 }
 
 
-/****************************************************
-CHG_VAR_LAB
-Change the label of the Variable from old to new
-****************************************************/
-void object::chg_var_lab( const char *old, const char *newname )
+/*************************************************************
+ CHG_VAR_LAB
+ Change the label of the Variable from old to new
+ *************************************************************/
+void lsd::object::chg_var_lab( const char *old, const char *newname )
 {
 	variable *cv;
 
@@ -2052,12 +2067,12 @@ void object::chg_var_lab( const char *old, const char *newname )
 }
 
 
-/****************************************************
-UNDER_COMPUTATION
-Check if any variable in or below the object is
-still under computation.
-****************************************************/
-bool object::under_computation( void )
+/*************************************************************
+ UNDER_COMPUTATION
+ Check if any variable in or below the object is
+ still under computation.
+ *************************************************************/
+bool lsd::object::under_computation( void )
 {
 	bridge *cb;
 	object *cur;
@@ -2078,11 +2093,11 @@ bool object::under_computation( void )
 }
 
 
-/****************************************************
-UNDER_COMPUT_VAR
-Check if a variable in object is under computation
-****************************************************/
-bool object::under_comput_var( const char *lab )
+/*************************************************************
+ UNDER_COMPUT_VAR
+ Check if a variable in object is under computation
+ *************************************************************/
+bool lsd::object::under_comput_var( const char *lab )
 {
 	variable *cv;
 
@@ -2095,13 +2110,15 @@ bool object::under_comput_var( const char *lab )
 }
 
 
-/****************************************************
-CAL (*)
-Return the value of Variable or Parameter with label lab with lag lag.
-The method search for the Variable starting from this Object and then calls
-the function variable->cal(caller, lag )
-***************************************************/
-double object::cal( object *caller, const char *lab, int lag, bool force_search )
+/*************************************************************
+ CAL (*)
+ Return the value of Variable or Parameter with
+ label lab with lag lag.
+ The method search for the Variable starting from
+ this Object and then calls the function
+ variable->cal(caller, lag )
+ *************************************************************/
+double lsd::object::cal( object *caller, const char *lab, int lag, bool force_search )
 {
 	variable *cv;
 
@@ -2119,7 +2136,7 @@ double object::cal( object *caller, const char *lab, int lag, bool force_search 
 	return cv->cal( caller, lag );
 }
 
-double object::cal( object *caller, const char *lab, int lag )
+double lsd::object::cal( object *caller, const char *lab, int lag )
 {
 	variable *cv;
 
@@ -2137,17 +2154,17 @@ double object::cal( object *caller, const char *lab, int lag )
 	return cv->cal( caller, lag );
 }
 
-double object::cal( const char *lab, int lag )
+double lsd::object::cal( const char *lab, int lag )
 {
 	return cal( this, lab, lag );
 }
 
 
-/****************************************************
-LAST_CAL (*)
-Return the last time the variable was calculated
-****************************************************/
-double object::last_cal( const char *lab )
+/*************************************************************
+ LAST_CAL (*)
+ Return the last time the variable was calculated
+ *************************************************************/
+double lsd::object::last_cal( const char *lab )
 {
 	variable *cv;
 
@@ -2159,12 +2176,12 @@ double object::last_cal( const char *lab )
 }
 
 
-/****************************************************
-RECAL (*)
-Mark variable as not calculated in the current time,
-forcing recalculation if already calculated
-****************************************************/
-double object::recal( const char *lab )
+/*************************************************************
+ RECAL (*)
+ Mark variable as not calculated in the current time,
+ forcing recalculation if already calculated
+ *************************************************************/
+double lsd::object::recal( const char *lab )
 {
 	int i;
 	double app;
@@ -2195,14 +2212,16 @@ double object::recal( const char *lab )
 }
 
 
-/****************************************************
-SUM (*)
-Compute the sum of Variables or Parameters lab1 with lag lag.
-If cond is true check if expression 'V("lab2") lop value'
-is true before adding each instance of the object.
-The sum is computed over the elements in a single branch of the model.
-****************************************************/
-double object::sum( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
+/*************************************************************
+ SUM (*)
+ Compute the sum of Variables or Parameters lab1
+ with lag lag.
+ If cond is true check if expression 'V("lab2") lop value'
+ is true before adding each instance of the object.
+ The sum is computed over the elements in a single
+ branch of the model.
+ *************************************************************/
+double lsd::object::sum( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
 {
 	int n, lopc;
 	double tot;
@@ -2228,7 +2247,7 @@ double object::sum( const char *lab1, int lag, bool cond, const char *lab2, cons
 
 	for ( tot = n = 0; cur != NULL; cur = cnext )
 	{
-		cnext = go_brother( cur );				// allow object suicide
+		cnext = BROTHER( cur );				// allow object suicide
 
 		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
@@ -2241,14 +2260,14 @@ double object::sum( const char *lab1, int lag, bool cond, const char *lab2, cons
 }
 
 
-/****************************************************
-OVERALL_MAX (*)
-Compute the maximum of lab1, considering only the
-objects in a single branch of the model.
-If cond is true check if expression 'V("lab2") lop value'
-is true before considering each instance of the object.
-****************************************************/
-double object::overall_max( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
+/*************************************************************
+ OVERALL_MAX (*)
+ Compute the maximum of lab1, considering only the
+ objects in a single branch of the model.
+ If cond is true check if expression 'V("lab2") lop value'
+ is true before considering each instance of the object.
+ *************************************************************/
+double lsd::object::overall_max( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
 {
 	int n, lopc;
 	double tot, temp;
@@ -2274,7 +2293,7 @@ double object::overall_max( const char *lab1, int lag, bool cond, const char *la
 
 	for ( tot = -DBL_MAX, n = 0; cur != NULL; cur = cnext )
 	{
-		cnext = go_brother( cur );				// allow object suicide
+		cnext = BROTHER( cur );				// allow object suicide
 
 		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
@@ -2291,14 +2310,14 @@ double object::overall_max( const char *lab1, int lag, bool cond, const char *la
 }
 
 
-/****************************************************
-OVERALL_MIN (*)
-Compute the minimum of lab1, considering only the
-objects in a single branch of the model.
-If cond is true check if expression 'V("lab2") lop value'
-is true before considering each instance of the object.
-****************************************************/
-double object::overall_min( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
+/*************************************************************
+ OVERALL_MIN (*)
+ Compute the minimum of lab1, considering only the
+ objects in a single branch of the model.
+ If cond is true check if expression 'V("lab2") lop value'
+ is true before considering each instance of the object.
+ *************************************************************/
+double lsd::object::overall_min( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
 {
 	int n, lopc;
 	double tot, temp;
@@ -2324,7 +2343,7 @@ double object::overall_min( const char *lab1, int lag, bool cond, const char *la
 
 	for ( tot = DBL_MAX, n = 0; cur != NULL; cur = cnext )
 	{
-		cnext = go_brother( cur );				// allow object suicide
+		cnext = BROTHER( cur );				// allow object suicide
 
 		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
@@ -2341,12 +2360,12 @@ double object::overall_min( const char *lab1, int lag, bool cond, const char *la
 }
 
 
-/****************************************************
-MAVE (*)
-Return the moving average of Variable with label lab
-with period per and computed from lag to lag+per
-***************************************************/
-double object::mav( object *caller, const char *lab, double per, const double weight[ ], int lag )
+/*************************************************************
+ MAVE (*)
+ Return the moving average of Variable with label lab
+ with period per and computed from lag to lag+per
+ *************************************************************/
+double lsd::object::mav( object *caller, const char *lab, double per, const double weight[ ], int lag )
 {
 	int i, maxlag;
 	double sumv, sumw;
@@ -2391,19 +2410,19 @@ double object::mav( object *caller, const char *lab, double per, const double we
 	return weight == NULL ? sumv / i : sumv / sumw;
 }
 
-double object::mav( object *caller, const char *lab, double per, int lag )
+double lsd::object::mav( object *caller, const char *lab, double per, int lag )
 {
 	return mav( caller, lab, per, NULL, lag );
 }
 
 
-/****************************************************
-AVE (*)
-Compute the average of lab1.
-If cond is true check if expression 'V("lab2") lop value'
-is true before considering each instance of the object.
-****************************************************/
-double object::av( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
+/*************************************************************
+ AVE (*)
+ Compute the average of lab1.
+ If cond is true check if expression 'V("lab2") lop value'
+ is true before considering each instance of the object.
+ *************************************************************/
+double lsd::object::av( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
 {
 	int n, lopc;
 	double tot;
@@ -2429,7 +2448,7 @@ double object::av( const char *lab1, int lag, bool cond, const char *lab2, const
 
 	for ( tot = n = 0; cur != NULL; cur = cnext )
 	{
-		cnext = go_brother( cur );				// allow object suicide
+		cnext = BROTHER( cur );				// allow object suicide
 
 		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
@@ -2445,13 +2464,13 @@ double object::av( const char *lab1, int lag, bool cond, const char *lab2, const
 }
 
 
-/****************************************************
-WHTAVE (*)
-Compute the weighted average (or product sum) of lab1 and lab2.
-If cond is true check if expression 'V("lab3") lop value'
-is true before considering each instance of the object.
-****************************************************/
-double object::whg_av( const char *lab1, const char *lab2, int lag, bool cond, const char *lab3, const char *lop, double value )
+/*************************************************************
+ WHTAVE (*)
+ Compute the weighted average (or product sum) of lab1 and lab2.
+ If cond is true check if expression 'V("lab3") lop value'
+ is true before considering each instance of the object.
+ *************************************************************/
+double lsd::object::whg_av( const char *lab1, const char *lab2, int lag, bool cond, const char *lab3, const char *lop, double value )
 {
 	int n, lopc;
 	double tot;
@@ -2481,7 +2500,7 @@ double object::whg_av( const char *lab1, const char *lab2, int lag, bool cond, c
 
 	for ( tot = n = 0; cur != NULL; cur = cnext )
 	{
-		cnext = go_brother( cur );				// allow object suicide
+		cnext = BROTHER( cur );				// allow object suicide
 
 		if ( ( ! cond || check_cond( cur->cal( this, lab3, lag ), lopc, value ) ) && ! cur->deleting )
 		{
@@ -2494,25 +2513,25 @@ double object::whg_av( const char *lab1, const char *lab2, int lag, bool cond, c
 }
 
 
-/****************************************************
-MED (*)
-Compute the median of lab1.
-If cond is true check if expression 'V("lab2") lop value'
-is true before considering each instance of the object.
-****************************************************/
-double object::med( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
+/*************************************************************
+ MED (*)
+ Compute the median of lab1.
+ If cond is true check if expression 'V("lab2") lop value'
+ is true before considering each instance of the object.
+ *************************************************************/
+double lsd::object::med( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
 {
 	return perc( lab1, 0.5, lag, cond, lab2, lop, value );
 }
 
 
-/****************************************************
-PERC (*)
-Compute the percentile p of lab1.
-If cond is true check if expression 'V("lab2") lop value'
-is true before considering each instance of the object.
-****************************************************/
-double object::perc( const char *lab1, double p, int lag, bool cond, const char *lab2, const char *lop, double value )
+/*************************************************************
+ PERC (*)
+ Compute the percentile p of lab1.
+ If cond is true check if expression 'V("lab2") lop value'
+ is true before considering each instance of the object.
+ *************************************************************/
+double lsd::object::perc( const char *lab1, double p, int lag, bool cond, const char *lab2, const char *lop, double value )
 {
 	int n, lopc, floor_x;
 	double x, vx, vx1, tmp;
@@ -2550,7 +2569,7 @@ double object::perc( const char *lab1, double p, int lag, bool cond, const char 
 	// copy selected data series to vector
 	for ( n = 0; cur != NULL; cur = cnext )
 	{
-		cnext = go_brother( cur );				// allow object suicide
+		cnext = BROTHER( cur );				// allow object suicide
 
 		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
@@ -2576,13 +2595,13 @@ double object::perc( const char *lab1, double p, int lag, bool cond, const char 
 }
 
 
-/****************************************************
-SD (*)
-Compute the (population) standard deviation of lab1.
-If cond is true check if expression 'V("lab2") lop value'
-is true before considering each instance of the object.
-****************************************************/
-double object::sd( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
+/*************************************************************
+ SD (*)
+ Compute the (population) standard deviation of lab1.
+ If cond is true check if expression 'V("lab2") lop value'
+ is true before considering each instance of the object.
+ *************************************************************/
+double lsd::object::sd( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
 {
 	int n, lopc;
 	double x, tot, tot2;
@@ -2608,7 +2627,7 @@ double object::sd( const char *lab1, int lag, bool cond, const char *lab2, const
 
 	for ( tot = tot2 = n = 0; cur != NULL; cur = cnext )
 	{
-		cnext = go_brother( cur );				// allow object suicide
+		cnext = BROTHER( cur );				// allow object suicide
 
 		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
@@ -2625,13 +2644,13 @@ double object::sd( const char *lab1, int lag, bool cond, const char *lab2, const
 }
 
 
-/****************************************************
-COUNT (*)
-Count the number of object lab1 instances below this.
-If cond is true check if expression 'V("lab2") lop value'
-is true before considering each instance of the object.
-****************************************************/
-double object::count( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
+/*************************************************************
+ COUNT (*)
+ Count the number of object lab1 instances below this.
+ If cond is true check if expression 'V("lab2") lop value'
+ is true before considering each instance of the object.
+ *************************************************************/
+double lsd::object::count( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
 {
 	int n, lopc;
 	object *cur, *cnext;
@@ -2652,7 +2671,7 @@ double object::count( const char *lab1, int lag, bool cond, const char *lab2, co
 
 	for ( n = 0; cur != NULL; cur = cnext )
 	{
-		cnext = go_brother( cur );				// allow object suicide
+		cnext = BROTHER( cur );				// allow object suicide
 
 		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 			++n;
@@ -2662,14 +2681,14 @@ double object::count( const char *lab1, int lag, bool cond, const char *lab2, co
 }
 
 
-/****************************************************
-COUNT_ALL (*)
-Count the number of all object lab1 instances below
-and besides the current object type (include siblings).
-If cond is true check if expression 'V("lab2") lop value'
-is true before considering each instance of the object.
-****************************************************/
-double object::count_all( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
+/*************************************************************
+ COUNT_ALL (*)
+ Count the number of all object lab1 instances below
+ and besides the current object type (include siblings).
+ If cond is true check if expression 'V("lab2") lop value'
+ is true before considering each instance of the object.
+ *************************************************************/
+double lsd::object::count_all( const char *lab1, int lag, bool cond, const char *lab2, const char *lop, double value )
 {
 	int n, lopc;
 	object *cur, *cnext;
@@ -2703,24 +2722,25 @@ double object::count_all( const char *lab1, int lag, bool cond, const char *lab2
 }
 
 
-/****************************************************
-STAT (*)
-Compute some basic statistics of a group of Variables or
-Paramters with label lab1 and storing the results in a vector of double.
-If cond is true check if expression 'V("lab2") lop value'
-is true before considering each instance of the object.
-Return the number of element instances counted (same as r[ 0 ]).
+/*************************************************************
+ STAT (*)
+ Compute some basic statistics of a group of Variables or
+ Paramters with label lab1 and storing the results in a
+ vector of double.
+ If cond is true check if expression 'V("lab2") lop value'
+ is true before considering each instance of the object.
+ Return the number of element instances counted (same as
+ r[ 0 ]).
 
-r[ 0 ]=num;
-r[ 1 ]=average
-r[ 2 ]=variance
-r[ 3 ]=max
-r[ 4 ]=min
-r[ 5 ]=median
-r[ 6 ]=standard deviation
-
-****************************************************/
-double object::stat( const char *lab1, double *r, int lag, bool cond, const char *lab2, const char *lop, double value )
+ r[ 0 ]=num;
+ r[ 1 ]=average
+ r[ 2 ]=variance
+ r[ 3 ]=max
+ r[ 4 ]=min
+ r[ 5 ]=median
+ r[ 6 ]=standard deviation
+ *************************************************************/
+double lsd::object::stat( const char *lab1, double *r, int lag, bool cond, const char *lab2, const char *lop, double value )
 {
 	int n, lopc;
 	double val, r_temp[ 7 ];
@@ -2755,7 +2775,7 @@ double object::stat( const char *lab1, double *r, int lag, bool cond, const char
 
 	for ( n = 0; cur != NULL; cur = cnext )
 	{
-		cnext = go_brother( cur );				// allow object suicide
+		cnext = BROTHER( cur );				// allow object suicide
 
 		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
 		{
@@ -2796,29 +2816,69 @@ double object::stat( const char *lab1, double *r, int lag, bool cond, const char
 }
 
 
-/****************************************************
-LSDQSORT (*)
-Use the qsort function in the standard library to sort
-a group of Object with label obj according to the values of var
-if var is NULL, try sorting using the network node id
-****************************************************/
-bool sort_function_up_1( object *a, object *b, const char *var, int lag )
+/*************************************************************
+ SORT_*_*
+ support comparison functions for object sorting
+ *************************************************************/
+namespace lsd
 {
-	if ( var != NULL )				// variable defined?
-		return a->cal( var, lag ) < b->cal( var, lag );
-	else
-		return a->node->id < b->node->id;
+	bool sort_up_1( object *a, object *b, const char *var, int lag )
+	{
+		if ( var != NULL )				// variable defined?
+			return a->cal( var, lag ) < b->cal( var, lag );
+		else
+			return a->node->id < b->node->id;
+	}
+
+	bool sort_down_1( object *a, object *b, const char *var, int lag )
+	{
+		if ( var != NULL )				// variable defined?
+			return a->cal( var, lag ) > b->cal( var, lag );
+		else
+			return a->node->id > b->node->id;
+	}
+
+	bool sort_up_2( object *a, object *b, const char *var1, const char *var2, int lag )
+	{
+		double x, y;
+
+		x = a->cal( var1, lag );
+		y = b->cal( var1, lag );
+
+		if ( x < y )
+			return true;
+		else
+			if ( x > y )
+				return false;
+			else
+				return a->cal( var2, lag ) < b->cal( var2, lag );
+	}
+
+	bool sort_down_2( object *a, object *b, const char *var1, const char *var2, int lag )
+	{
+		double x, y;
+
+		x = a->cal( var1, lag );
+		y = b->cal( var1, lag );
+
+		if ( x > y )
+			return true;
+		else
+			if ( x < y )
+				return false;
+			else
+				return a->cal( var2, lag ) > b->cal( var2, lag );
+	}
 }
 
-bool sort_function_down_1( object *a, object *b, const char *var, int lag )
-{
-	if ( var != NULL )				// variable defined?
-		return a->cal( var, lag ) > b->cal( var, lag );
-	else
-		return a->node->id > b->node->id;
-}
 
-object *object::lsdqsort( const char *obj, const char *var, const char *direction, int lag )
+/*************************************************************
+ LSDQSORT (*)
+ Use the qsort function in the standard library to sort
+ a group of Object with label obj according to the values of var
+ if var is NULL, try sorting using the network node id
+ *************************************************************/
+lsd::object *lsd::object::lsdqsort( const char *obj, const char *var, const char *direction, int lag )
 {
 	char dir[ 6 ];
 	int num, i;
@@ -2900,7 +2960,7 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 	cb->counter_updated = false;
 	cur = cb->head;
 
-	skip_next_obj( cur, & num );
+	next_count( cur, & num );
 	o_vecT new_order( num );
 	for ( i = 0; i < num; ++i )
 	{
@@ -2912,11 +2972,11 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 	strupr( dir );
 
 	if ( ! strcmp( dir, "UP" ) )
-		std::stable_sort( new_order.begin( ), new_order.end( ), [ var, lag ] ( object *a, object *b ) { return sort_function_up_1( a, b, var, lag ); } );
+		std::stable_sort( new_order.begin( ), new_order.end( ), [ var, lag ] ( object *a, object *b ) { return sort_up_1( a, b, var, lag ); } );
 
 	else
 		if ( ! strcmp( dir, "DOWN" ) )
-			std::stable_sort( new_order.begin( ), new_order.end( ), [ var, lag ] ( object *a, object *b ) { return sort_function_down_1( a, b, var, lag ); } );
+			std::stable_sort( new_order.begin( ), new_order.end( ), [ var, lag ] ( object *a, object *b ) { return sort_down_1( a, b, var, lag ); } );
 		else
 		{
 			sim->error_hard( "invalid sort option ('UP' or 'DOWN' required)",
@@ -2937,43 +2997,12 @@ object *object::lsdqsort( const char *obj, const char *var, const char *directio
 }
 
 
-/****************************************************
-LSDQSORT
-Two stage sorting. Objects with identical values of var1 are sorted according to their value of var2
-****************************************************/
-bool sort_function_up_2( object *a, object *b, const char *var1, const char *var2, int lag )
-{
-	double x, y;
-
-	x = a->cal( var1, lag );
-	y = b->cal( var1, lag );
-
-	if ( x < y )
-		return true;
-	else
-		if ( x > y )
-			return false;
-		else
-			return a->cal( var2, lag ) < b->cal( var2, lag );
-}
-
-bool sort_function_down_2( object *a, object *b, const char *var1, const char *var2, int lag )
-{
-	double x, y;
-
-	x = a->cal( var1, lag );
-	y = b->cal( var1, lag );
-
-	if ( x > y )
-		return true;
-	else
-		if ( x < y )
-			return false;
-		else
-			return a->cal( var2, lag ) > b->cal( var2, lag );
-}
-
-object *object::lsdqsort( const char *obj, const char *var1, const char *var2, const char *direction, int lag )
+/*************************************************************
+ LSDQSORT
+ Two stage sorting. Objects with identical values of
+ var1 are sorted according to their value of var2
+ *************************************************************/
+lsd::object *lsd::object::lsdqsort( const char *obj, const char *var1, const char *var2, const char *direction, int lag )
 {
 	char dir[ 6 ];
 	int num, i;
@@ -3034,7 +3063,7 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 	cb->counter_updated = false;
 	cur = cb->head;
 
-	skip_next_obj( cur, & num );
+	next_count( cur, & num );
 	o_vecT new_order( num );
 	for ( i = 0; i < num; ++i )
 	{
@@ -3046,10 +3075,10 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 	strupr( dir );
 
 	if ( ! strcmp( dir, "UP" ) )
-		std::stable_sort( new_order.begin( ), new_order.end( ), [ var1, var2, lag ] ( object *a, object *b ) { return sort_function_up_2( a, b, var1, var2, lag ); } );
+		std::stable_sort( new_order.begin( ), new_order.end( ), [ var1, var2, lag ] ( object *a, object *b ) { return sort_up_2( a, b, var1, var2, lag ); } );
 	else
 		if ( ! strcmp( dir, "DOWN" ) )
-			std::stable_sort( new_order.begin( ), new_order.end( ), [ var1, var2, lag ] ( object *a, object *b ) { return sort_function_down_2( a, b, var1, var2, lag ); } );
+			std::stable_sort( new_order.begin( ), new_order.end( ), [ var1, var2, lag ] ( object *a, object *b ) { return sort_down_2( a, b, var1, var2, lag ); } );
 		else
 		{
 			sim->error_hard( "invalid sort option ('UP' or 'DOWN' required)",
@@ -3070,12 +3099,13 @@ object *object::lsdqsort( const char *obj, const char *var1, const char *var2, c
 }
 
 
-/*********************
-DRAW_RND (*)
-Draw randomly an object with label lo with probabilities proportional
-to the values of their Variables or Parameters lv
-*********************/
-object *object::draw_rnd( const char *lo, const char *lv, int lag )
+/*************************************************************
+ DRAW_RND (*)
+ Draw randomly an object with label lo with
+ probabilities proportional to the values of their
+ Variables or Parameters lv
+ *************************************************************/
+lsd::object *lsd::object::draw_rnd( const char *lo, const char *lv, int lag )
 {
 	double a, b;
 	object *cur, *cur1, *cnext;
@@ -3131,11 +3161,12 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag )
 }
 
 
-/*********************
-DRAW_RND (*)
-Draw randomly an object with label lab with identical probabilities
-*********************/
-object *object::draw_rnd( const char *lab )
+/*************************************************************
+ DRAW_RND (*)
+ Draw randomly an object with label lab with
+ identical probabilities
+ *************************************************************/
+lsd::object *lsd::object::draw_rnd( const char *lab )
 {
 	double a, b;
 	object *cur, *cur1;
@@ -3173,11 +3204,12 @@ object *object::draw_rnd( const char *lab )
 }
 
 
-/*************
-DRAW_RND (*)
-Same as draw_rnd but faster, assuming the sum of the probabilities to be tot
-***************/
-object *object::draw_rnd( const char *lo, const char *lv, int lag, double tot )
+/*************************************************************
+ DRAW_RND (*)
+ Same as draw_rnd but faster, assuming the sum of the
+ probabilities to be tot
+ *************************************************************/
+lsd::object *lsd::object::draw_rnd( const char *lo, const char *lv, int lag, double tot )
 {
 	double a, b;
 	object *cur, *cur1, *cnext;
@@ -3223,12 +3255,13 @@ object *object::draw_rnd( const char *lo, const char *lv, int lag, double tot )
 }
 
 
-/****************************************************
+/*************************************************************
  WRITE (*)
- Write the value in the Variable or Parameter lab, making it appearing as if
- it was computed at time lag and the variable updated at time time.
- ***************************************************/
-double object::write( const char *lab, double value, int time, int lag )
+ Write the value in the Variable or Parameter lab,
+ making it appearing as if it was computed at time
+ lag and the variable updated at time time.
+ *************************************************************/
+double lsd::object::write( const char *lab, double value, int time, int lag )
 {
 	int i, eff_lag, eff_time;
 	variable *cv;
@@ -3405,13 +3438,13 @@ double object::write( const char *lab, double value, int time, int lag )
 }
 
 
-/************************************************
-INCREMENT (*)
-Increment the value of the variable lab with value.
-Mark variable as computed in t.
-Return the new value.
-*************************************************/
-double object::increment( const char *lab, double value )
+/*************************************************************
+ INCREMENT (*)
+ Increment the value of the variable lab with value.
+ Mark variable as computed in t.
+ Return the new value.
+ *************************************************************/
+double lsd::object::increment( const char *lab, double value )
 {
 	variable *cv;
 	double new_value;
@@ -3450,13 +3483,13 @@ double object::increment( const char *lab, double value )
 }
 
 
-/************************************************
-MULTIPLY (*)
-Multiply the value of the variable lv with value.
-Mark variable as computed in t.
-Return the new value.
-*************************************************/
-double object::multiply( const char *lab, double value )
+/*************************************************************
+ MULTIPLY (*)
+ Multiply the value of the variable lv with value.
+ Mark variable as computed in t.
+ Return the new value.
+ *************************************************************/
+double lsd::object::multiply( const char *lab, double value )
 {
 	variable *cv;
 	double new_value;
@@ -3495,88 +3528,89 @@ double object::multiply( const char *lab, double value )
 }
 
 
-/****************************
-LAT_DOWN (*)
-return the object "up" the cell of a lattice
-*****************************/
-object *object::lat_down( void )
+/*************************************************************
+ LAT_DOWN (*)
+ return the object "up"
+ the cell of a lattice
+ *************************************************************/
+lsd::object *lsd::object::lat_down( void )
 {
 	int i, j;
 	object *cur;
 
-	for ( i = 1, cur = up->search( label ); cur != this; cur = go_brother( cur ), ++i );
+	for ( i = 1, cur = up->search( label ); cur != this; cur = BROTHER( cur ), ++i );
 
-	cur = go_brother( up );
+	cur = BROTHER( up );
 	if ( cur == NULL )
 		cur = up->up->search( up->label );
 
-	for ( j = 1, cur = cur->search( label ); j < i; cur = go_brother( cur ), ++j );
+	for ( j = 1, cur = cur->search( label ); j < i; cur = BROTHER( cur ), ++j );
 
 	return cur;
 }
 
 
-/****************************
-LAT_UP (*)
-return the object "down" the cell of a lattice
-*****************************/
-object *object::lat_up( void )
+/*************************************************************
+ LAT_UP (*)
+ return the object "down"
+ the cell of a lattice
+ *************************************************************/
+lsd::object *lsd::object::lat_up( void )
 {
 	int i, k;
 	object *cur, *cur1, *cur2;
 
-	for ( i = 1, cur = up->search( label ); cur != this; cur = go_brother( cur ), ++i );
+	for ( i = 1, cur = up->search( label ); cur != this; cur = BROTHER( cur ), ++i );
 
 	cur = up->up->search( up->label );
 	if ( cur == up )
-		for ( cur1 = up; go_brother( cur1 ) != NULL; cur1 = go_brother( cur1 ) );
+		for ( cur1 = up; BROTHER( cur1 ) != NULL; cur1 = BROTHER( cur1 ) );
 	else
-		for ( cur1 = cur; go_brother( cur1 ) != up; cur1 = go_brother( cur1 ) );
+		for ( cur1 = cur; BROTHER( cur1 ) != up; cur1 = BROTHER( cur1 ) );
 
-	for ( cur2 = cur1->search( label ), k = 1; k < i; cur2 = go_brother( cur2 ), ++k );
+	for ( cur2 = cur1->search( label ), k = 1; k < i; cur2 = BROTHER( cur2 ), ++k );
 
 	return cur2;
 }
 
 
-/****************************
-LAT_RIGHT (*)
-return the object "right" the cell of a lattice
-*****************************/
-object *object::lat_right( void )
+/*************************************************************
+ LAT_RIGHT (*)
+ return the object "right"
+ the cell of a lattice
+ *************************************************************/
+lsd::object *lsd::object::lat_right( void )
 {
-	object *cur;
-
-	cur = go_brother( this );
-	if ( cur == NULL )
-	 cur = up->search( label );
-
-	return cur;
+	if ( next == NULL )
+		return up->search( label );
+	else
+		return next;
 }
 
 
-/****************************
-LAT_LEFT (*)
-return the object "left" the cell of a lattice
-*****************************/
-object *object::lat_left( void )
+/*************************************************************
+ LAT_LEFT (*)
+ return the object "left"
+ the cell of a lattice
+ *************************************************************/
+lsd::object *lsd::object::lat_left( void )
 {
 	object *cur;
 
 	if ( up->search( label ) == this )
-		for ( cur = this; go_brother( cur ) != NULL; cur = go_brother( cur ) );
+		for ( cur = this; BROTHER( cur ) != NULL; cur = BROTHER( cur ) );
 	else
-		for ( cur = up->search( label ); go_brother( cur ) != this; cur = go_brother( cur ) );
+		for ( cur = up->search( label ); BROTHER( cur ) != this; cur = BROTHER( cur ) );
 
 	return cur;
 }
 
 
-/****************************************************
-BUILD_OBJ_LIST
-Build the object list for user pointer checking
-****************************************************/
-double simulation::build_obj_list( bool set_list )
+/*************************************************************
+ BUILD_OBJ_LIST
+ Build the object list for user pointer checking
+ *************************************************************/
+double lsd::simulation::build_obj_list( bool set_list )
 {
 	if ( no_pointer_check )		// disabled in compilation?
 	{
@@ -3603,12 +3637,12 @@ double simulation::build_obj_list( bool set_list )
 }
 
 
-/****************************************************
-COLLECT_INST
-Collect all object under the selected object and
-stores it in the provided C++ set container
-****************************************************/
-void object::collect_inst( o_setT &list )
+/*************************************************************
+ COLLECT_INST
+ Collect all object under the selected object and
+ stores it in the provided C++ set container
+ *************************************************************/
+void lsd::object::collect_inst( o_setT &list )
 {
 	bridge *cb;
 	object *cur;
@@ -3632,12 +3666,14 @@ void object::collect_inst( o_setT &list )
 }
 
 
-/*******************************************
-INTERACT (*)
-Interrupt the simulation, as for the debugger, allowing the insertion of a value.
-Note that the debugging window, in this model, accept the entry key stroke as a run.
-********************************************/
-double object::interact( const char *text, double v, double *tv, int i, int j,
+/*************************************************************
+ INTERACT (*)
+ Interrupt the simulation, as for the debugger,
+ allowing the insertion of a value.
+ Note that the debugging window, in this model,
+ accept the entry key stroke as a run.
+ *************************************************************/
+double lsd::object::interact( const char *text, double v, double *tv, int i, int j,
 						 int h, int k, object *cur, object *cur1, object *cur2,
 						 object *cur3, object *cur4, object *cur5, object *cur6,
 						 object *cur7, object *cur8, object *cur9, netLink *curl,
@@ -3690,18 +3726,16 @@ double object::interact( const char *text, double v, double *tv, int i, int j,
 }
 
 
-/****************************************************
-LOGIC_OP_CODE
-Check for valid relational operator and return
-operator code for CHECK_COND
-****************************************************/
-const std::unordered_map < std::string, int > logic_ops = { { "==", 0 }, { "=", 0 }, { "EQ", 0 }, { "!=", 1 }, { "=!", 1 }, { "NE", 1 }, { ">", 2 }, { "GT", 2 }, { ">=", 3 }, { "=>", 3 }, { "GE", 3 }, { "<", 4 }, { "LT", 4 }, { "<=", 5 }, { "=<", 5 }, { "LE", 5 } };
-
-int object::logic_op_code( const char *lop, const char *errmsg )
+/*************************************************************
+ LOGIC_OP_CODE
+ Check for valid relational operator and return
+ operator code for CHECK_COND
+ *************************************************************/
+int lsd::object::logic_op_code( const char *lop, const char *errmsg )
 {
-	auto lopp = logic_ops.find( lop );
+	auto lopp = logic_ops_map.find( lop );
 
-	if ( lopp != logic_ops.end( ) )
+	if ( lopp != logic_ops_map.end( ) )
 		return lopp->second;
 
 	sim->error_hard( "invalid logical relational operator",
@@ -3712,12 +3746,12 @@ int object::logic_op_code( const char *lop, const char *errmsg )
 }
 
 
-/****************************************************
-CHECK_COND
-Check if logical condition defined by the logical
-operator code and the two values is true
-****************************************************/
-bool object::check_cond( double val1, int lopc, double val2 )
+/*************************************************************
+ CHECK_COND
+ Check if logical condition defined by the logical
+ operator code and the two values is true
+ *************************************************************/
+bool lsd::object::check_cond( double val1, int lopc, double val2 )
 {
 	switch ( lopc )
 	{

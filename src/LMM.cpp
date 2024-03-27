@@ -13,87 +13,105 @@
  *************************************************************/
 
 /*************************************************************
-LMM.CPP
-This program is a front end for dealing with LSD models code
-(running, compiling, editing, debugging LSD model programs).
-See the manual for help on its use.
+ LMM.CPP
+ This program is a front end for dealing with LSD models code
+ (running, compiling, editing, debugging LSD model programs).
+ See the manual for help on its use.
 
-IMPORTANT: this is _NOT_ a LSD model, but the best we could
-produce of something similar to a development environment for
-LSD model programs.
+ IMPORTANT: this is _NOT_ a LSD model, but the best we could
+ produce of something similar to a development environment for
+ LSD model programs.
 
-This file can be compiled with the command make in the src
-directory.
+ This file can be compiled with the command make in the src
+ directory.
 
-LMM reads all the directories that are not: Manual, gnu,
-installer, LMM.app, lwi, Rpkg and src as model directories,
-where it expect to find certain files. At any given moment
-a model name is stored, together with its directory and the
-file shown.
+ LMM reads all the directories that are not: Manual, gnu,
+ installer, LMM.app, lwi, Rpkg and src as model directories,
+ where it expect to find certain files. At any given moment
+ a model name is stored, together with its directory and the
+ file shown.
 
-Any internal command is executed in a condition like this:
+ Any internal command is executed in a condition like this:
 
-if ( choice == x )
- do_this_and_that
+ if ( choice == x )
+  do_this_and_that
 
-and returned to the main cycle. After each block the flow
-returns to "loop" where the main Tcl_DoOneEvent loop sits.
+ and returned to the main cycle. After each block the flow
+ returns to "loop" where the main Tcl_DoOneEvent loop sits.
 
-The widget of importance are:
-- .f.t.t is the main text editor
-- .f.m is the frame containing the upper buttons, models
-list and help window
+ The widget of importance are:
+ - .f.t.t is the main text editor
+ - .f.m is the frame containing the upper buttons, models
+ list and help window
 
-Relevant macros for conditional compilation (when defined):
+ Relevant macros for conditional compilation (when defined):
 
-- _LMM_: Model Manager executable
-- _NT_: no signal trapping (better when debugging in GDB)
-*************************************************************/
+ - _LMM_: Model Manager executable
+ - _NT_: no signal trapping (better when debugging in GDB)
+ *************************************************************/
 
-/*****
-used up to 88 options
-*******/
+/*
+options used up to 88
+*/
 
 // common definitions for LMM and LSD
 #include "LSD.h"
 
-// auxiliary C procedures
+// LMM global variables
+bool sourcefile = false;		// current file type
+int tosave = false;				// modified file flag
+lsd::dlliblinkage lmm_liblnk;	// call-back references for DLL
+
+// LMM constant string arrays
+const char *lsd_dir[ LSD_DIR_NUM ] = LSD_DIR_NAME;
+const char *wnd_names[ LSD_WIN_NUM ] = LSD_WIN_NAME;
+
+// library global variable dummies
+namespace lsd
+{
+	char *exec_file = NULL;		// name of executable file
+	char *exec_path = NULL;		// path of executable file
+	char *root_lsd = NULL;		// path of LSD root directory
+
+	const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
+	const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
+}
+
+// GUI global variable dummies
+namespace gui
+{
+	bool tk_ok = false;			// control for tk_ready to operate
+	char err_file[ ] = "LMM.err";// error log file name
+	int platform = 0;			// OS platform (1=Linux, 2=Mac, 3=Windows)
+	Tcl_Interp *interp = NULL;	// Tcl standard interpreter pointer
+
+	const char *model_info[ MODEL_INFO_NUM ] = MODEL_INFO_NAME;
+	const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;
+	const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
+	const char *lsd_nw_src[ LSD_NW_NUM ] = LSD_NW_SRC;
+	const char *model_defaults[ MODEL_INFO_NUM ] = MODEL_INFO_DEFAULT;
+}
+
+// global functions
+bool discard_change( void );
 bool is_source_file( const char *fname );
+int comphit( const void *p1, const void *p2 );
+int map_color( int hiLev );
+int modman( int argn, const char **argv );
+void cmd( const char *cm, ... );
 void color( int hiLev, long iniLin, long finLin );
 
-// global variables
-bool sourcefile = false;		// current file type
-bool tk_ok = false;				// control for tk_ready to operate
-char err_file[ ] = "LMM.err";	// error log file name
-char *exec_file = NULL;			// name of executable file
-char *exec_path = NULL;			// path of executable file
-char *rootLsd = NULL;			// path of LSD root directory
-dlliblinkage lmm_liblnk;		// call-back references for DLL
-int platform = 0;				// OS platform (1=Linux, 2=Mac, 3=Windows)
-int tosave = false;				// modified file flag
-Tcl_Interp *interp = NULL;		// Tcl standard interpreter pointer
 
-// constant string arrays
-const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
-const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;
-const char *model_info[ MODEL_INFO_NUM ] = MODEL_INFO_NAME;
-const char *model_defaults[ MODEL_INFO_NUM ] = MODEL_INFO_DEFAULT;
-const char *lsd_dir[ LSD_DIR_NUM ] = LSD_DIR_NAME;
-const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
-const char *wnd_names[ LSD_WIN_NUM ] = LSD_WIN_NAME;
-const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
-
-
-/*************************************
+/*************************************************************
  MAIN
- *************************************/
+ *************************************************************/
 int main( int argn, const char **argv )
 {
 	int res = -1;
 
 #ifndef _NT_
 	// register all signal handlers
-	handle_signals( signal_handler );
+	lsd::handle_signals( lsd::signal_handler );
 
 	try
 	{
@@ -105,11 +123,11 @@ int main( int argn, const char **argv )
 	}
 	catch ( std::bad_alloc& exc )// out of memory conditions
 	{
-		exception_handler( SIGMEM, exc.what( ) );
+		lsd::exception_handler( SIGMEM, exc.what( ) );
 	}
 	catch ( std::exception& exc )// other known error conditions
 	{
-		exception_handler( SIGSTL, exc.what( ) );
+		lsd::exception_handler( SIGSTL, exc.what( ) );
 	}
 	catch ( ... )				// other unknown error conditions
 	{
@@ -118,14 +136,15 @@ int main( int argn, const char **argv )
 
 #endif
 
-	lsd_exit( res );
+	lsd::lsd_exit( res );
+
 	return res;
 }
 
 
-/*************************************
+/*************************************************************
  MODMAN
- *************************************/
+ *************************************************************/
 int modman( int argn, const char **argv )
 {
 	bool found, recolor = false;
@@ -135,12 +154,12 @@ int modman( int argn, const char **argv )
 	FILE *f;
 
 	// initialize tcl/tk and set global bidirectional variables
-	init_tcl_tk( argv[ 0 ], "lmm" );
-	Tcl_LinkVar( interp, "num", ( char * ) &num, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "shigh", ( char * ) &shigh, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "choice", ( char * ) &choice, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "tosave", ( char * ) &tosave, TCL_LINK_BOOLEAN);
-	Tcl_LinkVar( interp, "recolor_all", ( char * ) &recolor_all, TCL_LINK_BOOLEAN);
+	gui::init_tcl_tk( argv[ 0 ], "lmm" );
+	Tcl_LinkVar( gui::interp, "num", ( char * ) &num, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "shigh", ( char * ) &shigh, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "choice", ( char * ) &choice, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "tosave", ( char * ) &tosave, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( gui::interp, "recolor_all", ( char * ) &recolor_all, TCL_LINK_BOOLEAN);
 
 	// set system defaults in tcl
 	cmd( "set LMM_OPTIONS \"%s\"", LMM_OPTIONS );
@@ -175,13 +194,13 @@ int modman( int argn, const char **argv )
 			set path \"[ pwd ]\"; \
 			set exec \"\" \
 		}" );
-	s = get_str( "path" );
-	t = get_str( "exec" );
+	s = gui::get_str( "path" );
+	t = gui::get_str( "exec" );
 	if ( s != NULL && t != NULL && strlen( t ) > 0 )
-		set_exec( s, t );
+		lsd::set_exec( s, t );
 	else
 	{
-		log_tcl_error( false, "LMM executable check", "Cannot locate LSD executable on disk, check the installation of LSD and reinstall LSD if the problem persists" );
+		gui::log_tcl_error( false, "LMM executable check", "Cannot locate LSD executable on disk, check the installation of LSD and reinstall LSD if the problem persists" );
 		cmd( "tk_messageBox -type ok -icon error -title Error -message \"LMM executable not found\" -detail \"Cannot locate the LMM executable folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
 		return 5;
 	}
@@ -192,7 +211,7 @@ int modman( int argn, const char **argv )
 	if ( choice )
 	{
 		choice = 0;
-		cmd( "set RootLsd [ file normalize \"%s\" ]", exec_path );
+		cmd( "set RootLsd [ file normalize \"%s\" ]", lsd::exec_path );
 		// check if directory is ok and if executable is inside a macOS package
 		cmd( "if [ file exists \"$RootLsd/Manual/LMM.html\" ] { \
 				cd \"$RootLsd\" \
@@ -207,7 +226,7 @@ int modman( int argn, const char **argv )
 			}" );
 		if ( choice )
 		{
-			log_tcl_error( false, "Source files check", "Required LSD source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
+			gui::log_tcl_error( false, "Source files check", "Required LSD source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
 			cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
 			return 6;
 		}
@@ -215,24 +234,24 @@ int modman( int argn, const char **argv )
 		cmd( "set env(LSDROOT) $RootLsd" );
 	}
 
-	s =	 get_str( "RootLsd" );
+	s =	 gui::get_str( "RootLsd" );
 	if ( s != NULL && strlen( s ) > 0 )
 	{
-		rootLsd = new char[ strlen( s ) + 1 ];
-		strcpy( rootLsd, s );
-		rootLsd = clean_path( rootLsd );
-		cmd( "set RootLsd \"%s\"", rootLsd );
+		lsd::root_lsd = new char[ strlen( s ) + 1 ];
+		strcpy( lsd::root_lsd, s );
+		lsd::root_lsd = lsd::clean_path( lsd::root_lsd );
+		cmd( "set RootLsd \"%s\"", lsd::root_lsd );
 	}
 	else
 	{
-		log_tcl_error( false, "LSD directory check", "Cannot locate LSD folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
+		gui::log_tcl_error( false, "LSD directory check", "Cannot locate LSD folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
 		cmd( "tk_messageBox -type ok -icon error -title Error -message \"LSD directory missing\" -detail \"Cannot locate the LSD installation folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
 		return 7;
 	}
 
 	// load/check configuration files
-	i = load_lmm_options( );
-	check_option_files( true );
+	i = gui::load_lmm_options( );
+	gui::check_option_files( true );
 
 	// load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 	choice = 0;
@@ -251,36 +270,36 @@ int modman( int argn, const char **argv )
 
 	if ( choice != 0 )
 	{
-		log_tcl_error( false, "Source files check failed", "Required Tcl/Tk source file(s) missing or corrupted (0x%04x), check your installation and reinstall LSD if the problem persists\n\n0x01: %s\n\n0x02: %s\n\n0x04: %s\n\n0x08: %s", choice, get_str( "err0x01" ), get_str( "err0x02" ), get_str( "err0x04" ), get_str( "err0x08" ) );
+		gui::log_tcl_error( false, "Source files check failed", "Required Tcl/Tk source file(s) missing or corrupted (0x%04x), check your installation and reinstall LSD if the problem persists\n\n0x01: %s\n\n0x02: %s\n\n0x04: %s\n\n0x08: %s", choice, gui::get_str( "err0x01" ), gui::get_str( "err0x02" ), gui::get_str( "err0x04" ), gui::get_str( "err0x08" ) );
 		cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
 		return 10 + choice;
 	}
 
-	s = get_str( "CurPlatform" );
+	s = gui::get_str( "CurPlatform" );
 	if ( ! strcmp( s, "linux" ) )
-		platform = _LIN_;
+		gui::platform = _LIN_;
 	else
 		if ( ! strcmp( s, "mac" ) )
-			platform = _MAC_;
+			gui::platform = _MAC_;
 		else
 			if ( ! strcmp( s, "windows" ) )
-				platform = _WIN_;
+				gui::platform = _WIN_;
 			else
 			{
-				log_tcl_error( false, "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
+				gui::log_tcl_error( false, "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
 				cmd( "ttk::messageBox -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"", choice );
 				return 10;
 			}
 
 	// create a Tcl command that calls the C discard_change function before killing LMM
-	Tcl_CreateCommand( interp, "discard_change", Tcl_discard_change, NULL, NULL );
+	Tcl_CreateCommand( gui::interp, "discard_change", gui::Tcl_discard_change, NULL, NULL );
 
 	// Tcl command to save message to LSD log
-	Tcl_CreateCommand( interp, "log_tcl_error", Tcl_log_tcl_error, NULL, NULL );
+	Tcl_CreateCommand( gui::interp, "log_tcl_error", gui::Tcl_log_tcl_error, NULL, NULL );
 
 	// fix non-existent or old options file for new options
 	if ( i == 0 )
-		update_lmm_options( );				// update config file
+		gui::update_lmm_options( );				// update config file
 
 	// Tcl global variables
 	cmd( "set choice 0" );
@@ -312,8 +331,8 @@ int modman( int argn, const char **argv )
 	cmd( "setstyles" );					// set ttk custom style
 
 	// set dynamic link library (DLL) call-back references
-	lmm_liblnk.cmd_backend = & cmd_backend;
-	lmm_liblnk.log_tcl_error = & log_tcl_error;
+	lmm_liblnk.cmd_backend = & gui::cmd_backend;
+	lmm_liblnk.log_tcl_error = & gui::log_tcl_error;
 
 	// main menu
 	cmd( "ttk::menu .m -tearoff 0" );
@@ -825,7 +844,7 @@ int modman( int argn, const char **argv )
 			cmd( "set fileDir [ file dirname \"$filetoload\" ]" );
 			cmd( "set before [ .f.t.t get 1.0 end ]" );
 
-			recolor_all = sourcefile = is_source_file( get_str( "filetoload" ) );
+			recolor_all = sourcefile = is_source_file( gui::get_str( "filetoload" ) );
 		}
 		else
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" );
@@ -839,21 +858,21 @@ int modman( int argn, const char **argv )
 
 	// check required components for compilation
 	cmd( "check_components" );
-	if ( platform == _LIN_ && exists_var( "linuxMissing" ) )
+	if ( gui::platform == _LIN_ && gui::exists_var( "linuxMissing" ) )
 	{
-		log_tcl_error( false, "C++ compiler and/or tools unavailable", "g++, make and zlib packages must be installed for model compilation" );
+		gui::log_tcl_error( false, "C++ compiler and/or tools unavailable", "g++, make and zlib packages must be installed for model compilation" );
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"C++ compiler and/or tools unavailable\" -detail \"g++, make and zlib packages must be installed for model compilation.\n\nSee 'Readme.txt' for details on how to install them manually, or run the LSD installer again and make sure the indicated steps are fully performed.\"" );
 	}
 	else
-		if ( platform == _MAC_ && exists_var( "xcode" ) )
+		if ( gui::platform == _MAC_ && gui::exists_var( "xcode" ) )
 		{
-			log_tcl_error( false, "C++ compiler unavailable", "Xcode command line tools must be installed for model compilation" );
+			gui::log_tcl_error( false, "C++ compiler unavailable", "Xcode command line tools must be installed for model compilation" );
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"C++ compiler unavailable\" -detail \"Xcode command line tools must be installed for model compilation.\n\nSee 'Readme.txt' for details on how to install it manually, or run the LSD installer again and make sure the indicated steps are fully performed.\"" );
 		}
 		else
-			if ( platform == _WIN_ && exists_var( "winConflict" ) )
+			if ( gui::platform == _WIN_ && gui::exists_var( "winConflict" ) )
 			{
-				log_tcl_error( false, "Potentially conflicting software installed", "Software components included in LSD were also installed by another package" );
+				gui::log_tcl_error( false, "Potentially conflicting software installed", "Software components included in LSD were also installed by another package" );
 				cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Potentially conflicting software installed\" -detail \"Software components included in LSD were also installed by another package.\n\nIf you have compilation problems, please check 'Readme.txt' for details on how to adjust the PATH environment variable manually, or run the LSD installer again and make sure accepting LSD components to be the system default.\"" );
 			}
 
@@ -910,7 +929,7 @@ int modman( int argn, const char **argv )
 	// exit LMM
 	if ( choice == 1 )
 	{
-		update_lmm_options( true );		// update window position, if required
+		gui::update_lmm_options( true );		// update window position, if required
 		return 0;
 	}
 
@@ -926,7 +945,7 @@ int modman( int argn, const char **argv )
 
 		if ( choice != 0 )
 		{
-			compile_run( choice == 2 ? 1 : 0 );
+			gui::compile_run( choice == 2 ? 1 : 0 );
 			choice = 0;
 		}
 
@@ -937,7 +956,7 @@ int modman( int argn, const char **argv )
 	if ( choice == 3 )
 	{
 		cmd( ".f.t.t delete 0.0 end" );
-		s = get_str( "modelName" );
+		s = gui::get_str( "modelName" );
 		if ( s == NULL || ! strcmp( s, "" ) )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
@@ -946,7 +965,7 @@ int modman( int argn, const char **argv )
 		}
 
 		cmd( "cd \"$modelDir\"" );
-		make_makefile( );
+		gui::make_makefile( );
 		cmd( "cd \"$RootLsd\"" );
 		cmd( "if { [ file exists \"$modelDir/makefile\" ] } { set choice 1 } { set choice 0 }" );
 		if ( choice == 1 )
@@ -972,7 +991,7 @@ int modman( int argn, const char **argv )
 	if ( choice == 4 )
 	{
 		cmd( "set curfilename [ tk_getSaveFile -parent . -title \"Save File\" -initialfile $fileName -initialdir $fileDir ]" );
-		s = get_str( "curfilename" );
+		s = gui::get_str( "curfilename" );
 		if ( s != NULL && strcmp( s, "" ) )
 		{
 			cmd( "if [ file exist \"$fileDir/$fileName\" ] { file copy -force \"$fileDir/$fileName\" \"$fileDir/[file rootname \"$fileName\"].bak\" }" );
@@ -991,7 +1010,7 @@ int modman( int argn, const char **argv )
 	/* Load the description file */
 	if ( choice == 5 || choice == 50 )
 	{
-		s = get_str( "modelName" );
+		s = gui::get_str( "modelName" );
 		if ( s == NULL || ! strcmp( s, "" ) )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
@@ -1045,7 +1064,7 @@ int modman( int argn, const char **argv )
 	/* Show compilation result */
 	if ( choice == 7 )
 	{
-		s = get_str( "modelName" );
+		s = gui::get_str( "modelName" );
 		if ( s == NULL || ! strcmp( s, "" ) )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
@@ -1053,7 +1072,7 @@ int modman( int argn, const char **argv )
 			goto loop;
 		}
 
-		show_comp_result( );
+		gui::show_comp_result( );
 		choice = 0;
 		goto loop;
 	}
@@ -1061,7 +1080,7 @@ int modman( int argn, const char **argv )
 	/* Insert in the text window the main equation file */
 	if ( choice == 8 )
 	{
-		s = get_str( "modelName" );
+		s = gui::get_str( "modelName" );
 		if ( s == NULL || ! strcmp( s, "" ) )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
@@ -1069,7 +1088,7 @@ int modman( int argn, const char **argv )
 			goto loop;
 		}
 
-		s = get_fun_name( str, MAX_PATH_LENGTH );
+		s = gui::get_fun_name( str, MAX_PATH_LENGTH );
 		if ( s == NULL || ! strcmp( s, "" ) )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid equation file name\" -detail \"Check the 'FUN' field in menu 'Model', 'Model Options' for a valid equation file name.\"" );
@@ -1454,7 +1473,7 @@ int modman( int argn, const char **argv )
 	// Run the model in the gdb debugger
 	if ( choice == 13 || choice == 58 )
 	{
-		s = get_str( "modelName" );
+		s = gui::get_str( "modelName" );
 		if ( s == NULL || ! strcmp( s, "" ) )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
@@ -1486,10 +1505,10 @@ int modman( int argn, const char **argv )
 			goto loop;
 
 		cmd( "cd \"$modelDir\"" );
-		s = get_target_name( str, 2 * MAX_PATH_LENGTH );
-		i = get_precompiled_flag( s );
+		s = gui::get_target_name( str, 2 * MAX_PATH_LENGTH );
+		i = gui::get_precompiled_flag( s );
 
-		if ( ! compile_run( 2 ) )				// recompile if changed
+		if ( ! gui::compile_run( 2 ) )				// recompile if changed
 			goto end_gdb;
 
 		if ( choice == 58 )
@@ -1521,15 +1540,15 @@ int modman( int argn, const char **argv )
 					set cmdbreak \"-q -ex run\" \
 				}" );
 
-		switch( platform )
+		switch( gui::platform )
 		{
 			case _WIN_:
 			case _LIN_:
-				snprintf( tmp, MAX_BUFF_SIZE, "$DbgExe $cmdbreak %s%s%s", i ? rootLsd : "", i ? "/" : "", s );
+				snprintf( tmp, MAX_BUFF_SIZE, "$DbgExe $cmdbreak %s%s%s", i ? lsd::root_lsd : "", i ? "/" : "", s );
 				break;
 
 			case _MAC_:
-				snprintf( tmp, MAX_BUFF_SIZE, "cd $fileDir; clear; $DbgExe $cmdbreak -f %s%s%s.app/Contents/MacOS/%s", s, i ? rootLsd : "", i ? "/" : "", s );
+				snprintf( tmp, MAX_BUFF_SIZE, "cd $fileDir; clear; $DbgExe $cmdbreak -f %s%s%s.app/Contents/MacOS/%s", s, i ? lsd::root_lsd : "", i ? "/" : "", s );
 				break;
 
 			default:
@@ -1781,7 +1800,7 @@ int modman( int argn, const char **argv )
 		for ( i = 0; i < num; ++i )
 		{
 			cmd( "if [ file isdirectory [ lindex $dir %d ] ] { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
-			get_str( "curdir", str, MAX_PATH_LENGTH );
+			gui::get_str( "curdir", str, MAX_PATH_LENGTH );
 
 			// check for invalid directories (LSD managed)
 			for ( found = false, j = 0; j < LSD_DIR_NUM; ++j )
@@ -1790,7 +1809,7 @@ int modman( int argn, const char **argv )
 
 			if ( ! found )
 			{
-				if ( ! load_model_info( str ) )
+				if ( ! gui::load_model_info( str ) )
 					cmd( "set modelName $curdir; set modelVersion \"1.0\"" );
 
 				cmd( "set comp [ string compare $modelName $mname ]" );
@@ -1838,8 +1857,8 @@ int modman( int argn, const char **argv )
 		cmd( "file copy \"$RootLsd/$LsdSrc/fun_base.cpp\" \"$modelDir/fun_$mdir.cpp\"" );
 
 		// create the model options and info files
-		check_option_files( );
-		update_model_info( true );
+		gui::check_option_files( );
+		gui::update_model_info( true );
 
 		cmd( ".m.file entryconf 2 -state normal" );
 		cmd( ".m.file entryconf 3 -state normal" );
@@ -1903,7 +1922,7 @@ int modman( int argn, const char **argv )
 		cmd( "upd_cursor" );
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
 
-		recolor_all = sourcefile = is_source_file( get_str( "fileName" ) );
+		recolor_all = sourcefile = is_source_file( gui::get_str( "fileName" ) );
 
 		if ( sourcefile )
 		{
@@ -1926,7 +1945,7 @@ int modman( int argn, const char **argv )
 		cmd( "scan $in %%d.%%d line col" );
 		cmd( "set line [ expr { $line - 1 } ]" );
 
-		s = eval_str( "[ .f.t.t get $line.0 $line.end ]" );
+		s = gui::eval_str( "[ .f.t.t get $line.0 $line.end ]" );
 		for ( i = 0; s[ i ] == ' ' || s[ i ] == '\t'; ++i )
 		  str[ i ] = s[ i ];
 
@@ -2314,7 +2333,7 @@ int modman( int argn, const char **argv )
 		cmd( "scan $in %%d.%%d line col" );
 		cmd( "set line [ expr { $line -1 } ]" );
 
-		s = eval_str( "[ .f.t.t get $line.0 $line.end ]" );
+		s = gui::eval_str( "[ .f.t.t get $line.0 $line.end ]" );
 		for ( i = 0; s[ i ] == ' ' || s[ i ] == '\t'; ++i )
 			str[ i ] = s[ i ];
 
@@ -3736,7 +3755,7 @@ int modman( int argn, const char **argv )
 		cmd( "set in [ .f.t.t index insert ]" );
 		cmd( "scan $in %%d.%%d line col" );
 		cmd( "set line [ expr { $line - 1 } ]" );
-		s = eval_str( "[ .f.t.t get $line.0 $line.end ]" );
+		s = gui::eval_str( "[ .f.t.t get $line.0 $line.end ]" );
 		for ( i = 0; s[ i ] == ' ' || s[ i ] == '\t'; ++i )
 			str[ i ] = s[ i ];
 
@@ -4276,7 +4295,7 @@ int modman( int argn, const char **argv )
 	{
 		cmd( "destroytop .mm" );					// close compilation results, if open
 
-		Tcl_LinkVar( interp, "choiceSM", ( char * ) & num, TCL_LINK_INT );
+		Tcl_LinkVar( gui::interp, "choiceSM", ( char * ) & num, TCL_LINK_INT );
 		num = 0;
 
 		cmd( "showmodel $groupDir" );
@@ -4290,7 +4309,7 @@ int modman( int argn, const char **argv )
 		cmd( "focustop .f.t.t" );
 
 		choice = num;
-		Tcl_UnlinkVar( interp, "choiceSM" );
+		Tcl_UnlinkVar( gui::interp, "choiceSM" );
 
 		if ( choice == 2 || choice == 0 )
 		{
@@ -4305,7 +4324,7 @@ int modman( int argn, const char **argv )
 		cmd( "set modelDir [ lindex $ldn $result ]" );
 		cmd( "set fileDir $modelDir" );
 
-		load_model_info( get_str( "modelDir" ) );
+		gui::load_model_info( gui::get_str( "modelDir" ) );
 
 		cmd( ".m.file entryconf 2 -state normal" );
 		cmd( ".m.file entryconf 3 -state normal" );
@@ -4415,7 +4434,7 @@ int modman( int argn, const char **argv )
 		for ( i = 0; i < num && choice != 3; ++i )
 		{
 			cmd( "if [ file isdirectory [ lindex $dir %d ] ] { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
-			get_str( "curdir", str, MAX_PATH_LENGTH );
+			gui::get_str( "curdir", str, MAX_PATH_LENGTH );
 
 			// check for invalid directories (LSD managed)
 			for ( found = false, j = 0; j < LSD_DIR_NUM; ++j )
@@ -4424,7 +4443,7 @@ int modman( int argn, const char **argv )
 
 			if ( ! found )
 			{
-				if ( ! load_model_info( str ) )
+				if ( ! gui::load_model_info( str ) )
 					cmd( "set modelName $curdir; set modelVersion \"1.0\"" );
 
 				cmd( "set comp [ string compare $modelName $mname ]" );
@@ -4452,7 +4471,7 @@ int modman( int argn, const char **argv )
 		cmd( "set modelDate \"\"" );
 
 		// create the model info file
-		update_model_info( true );
+		gui::update_model_info( true );
 
 		cmd( "ttk::messageBox -parent . -type ok -title \"Save Model As...\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: [ file nativename $modelDir ]\"" );
 
@@ -4464,16 +4483,16 @@ int modman( int argn, const char **argv )
 	if ( choice == 42 )
 	{
 		cmd( "set in [ .f.t.t tag range sel ]" );
-		if ( eval_int( "[ string length $in ]" ) == 0 )
+		if ( gui::eval_int( "[ string length $in ]" ) == 0 )
 			goto loop;
 
 		cmd( "scan $in \"%%d.%%d %%d.%%d\" line1 col1 line2 col2" );
 		cmd( "set num $line2" );
 
-		for ( i = get_int( "line1" ); i <= num; ++i )
+		for ( i = gui::get_int( "line1" ); i <= num; ++i )
 		{
 			cmd( "set c [ .f.t.t get %d.0 ]", i );
-			if ( expr_eq( "$c", "\t" ) )
+			if ( gui::expr_eq( "$c", "\t" ) )
 				cmd( ".f.t.t insert %d.0 \\t", i );
 			else
 				cmd( ".f.t.t insert %d.0 \" \"", i );
@@ -4487,16 +4506,16 @@ int modman( int argn, const char **argv )
 	if ( choice == 43 )
 	{
 		cmd( "set in [ .f.t.t tag range sel ]" );
-		if ( eval_int( "[ string length $in ]" ) == 0 )
+		if ( gui::eval_int( "[ string length $in ]" ) == 0 )
 			goto loop;
 
 		cmd( "scan $in \"%%d.%%d %%d.%%d\" line1 col1 line2 col2" );
 		cmd( "set num $line2" );
 
-		for (  i = get_int( "line1" ); i <= num; ++i )
+		for (  i = gui::get_int( "line1" ); i <= num; ++i )
 		{
 			cmd( "set c [ .f.t.t get %d.0 ]", i );
-			if ( expr_eq( "$c", " " ) || expr_eq( "$c", "\t" ) )
+			if ( gui::expr_eq( "$c", " " ) || gui::expr_eq( "$c", "\t" ) )
 				cmd( ".f.t.t delete %d.0 ", i );
 		}
 
@@ -4507,7 +4526,7 @@ int modman( int argn, const char **argv )
 	// show and edit model info
 	if ( choice == 44 )
 	{
-		s = get_str( "modelName" );
+		s = gui::get_str( "modelName" );
 		if ( s == NULL || ! strcmp( s, "" ) )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
@@ -4515,8 +4534,8 @@ int modman( int argn, const char **argv )
 			goto loop;
 		}
 
-		if ( ! load_model_info( get_str( "modelDir" ) ) )
-			update_model_info( true );			// fix the model info file
+		if ( ! gui::load_model_info( gui::get_str( "modelDir" ) ) )
+			gui::update_model_info( true );			// fix the model info file
 
 		cmd( "set mname $modelName" );
 		cmd( "set mver $modelVersion" );
@@ -4524,7 +4543,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "set complete_dir [ file nativename [ file join [ pwd ] \"$modelDir\" ] ]" );
 
-		s = get_fun_name( str, MAX_PATH_LENGTH );
+		s = gui::get_fun_name( str, MAX_PATH_LENGTH );
 		if ( s == NULL || ! strcmp( s, "" ) )
 		{
 			cmd( "set eqname \"\"" );
@@ -4585,7 +4604,7 @@ int modman( int argn, const char **argv )
 			cmd( "if { [ string is print -strict $mdate ] } { set modelDate \"$mdate\" } { set modelDate \"[ current_date ]\" }" );
 
 			// update the model info file
-			update_model_info( true );
+			gui::update_model_info( true );
 		}
 
 		choice = 0;
@@ -4611,7 +4630,7 @@ int modman( int argn, const char **argv )
 	// create the makefile
 	if ( choice == 46 || choice == 49 )
 	{
-		make_makefile( );
+		gui::make_makefile( );
 
 		if ( choice == 46 )
 			choice = 0;		//just create the makefile
@@ -4703,7 +4722,7 @@ int modman( int argn, const char **argv )
 	// Model Options
 	if ( choice == 48 )
 	{
-		s = get_str( "modelName" );
+		s = gui::get_str( "modelName" );
 		if ( s == NULL || ! strcmp( s, "" ) )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
@@ -4711,9 +4730,9 @@ int modman( int argn, const char **argv )
 			goto loop;
 		}
 
-		s = get_fun_name( str, MAX_PATH_LENGTH );
+		s = gui::get_fun_name( str, MAX_PATH_LENGTH );
 		if ( s == NULL || ! strcmp( s, "" ) )
-			check_option_files( );
+			gui::check_option_files( );
 
 		cmd( "cd \"$modelDir\"" );
 
@@ -4854,7 +4873,7 @@ int modman( int argn, const char **argv )
 						} \
 					} \
 				} \
-			}", get_target_name( str, MAX_PATH_LENGTH ) );
+			}", gui::get_target_name( str, MAX_PATH_LENGTH ) );
 		cmd( "pack .l.d.opt.debug .l.d.opt.ext .l.d.opt.def .l.d.opt.cle -padx $butSpc -side left" );
 
 		cmd( "tooltip::tooltip .l.d.opt.debug \"Enable using GDB/LLDB debugger\"" );
@@ -4907,13 +4926,13 @@ int modman( int argn, const char **argv )
 		cmd( "set eqname \"\"" );
 		cmd( "set complete_dir \"\"" );
 
-		s = get_str( "modelName" );
+		s = gui::get_str( "modelName" );
 		if ( s != NULL && strcmp( s, "" ) )
 		{
-			if ( ! load_model_info( get_str( "modelDir" ) ) )
-				update_model_info( true );			// fix the model info file
+			if ( ! gui::load_model_info( gui::get_str( "modelDir" ) ) )
+				gui::update_model_info( true );			// fix the model info file
 
-			s = get_fun_name( str, MAX_PATH_LENGTH );
+			s = gui::get_fun_name( str, MAX_PATH_LENGTH );
 			if ( s != NULL && strcmp( s, "" ) )
 			{
 				cmd( "set eqname \"%s\"", s );
@@ -4946,8 +4965,8 @@ int modman( int argn, const char **argv )
 
 		for ( i = 1; i <= LMM_OPTIONS_NUM; ++i )
 		{
-			cmd( "set temp_var%d \"$%s\"", i, lmm_options[ i - 1 ] );
-			cmd( "set default_var%d \"%s\"", i, lmm_defaults[ i - 1 ] );
+			cmd( "set temp_var%d \"$%s\"", i, gui::lmm_options[ i - 1 ] );
+			cmd( "set default_var%d \"%s\"", i, gui::lmm_defaults[ i - 1 ] );
 		}
 
 		cmd( "set temp_var16 \"[ dict get $themeToName $temp_var16 ]\"" );
@@ -5106,9 +5125,9 @@ int modman( int argn, const char **argv )
 				}" );
 
 			for ( i = 1; i <= LMM_OPTIONS_NUM; ++i )
-				cmd( "set %s \"$temp_var%d\"", lmm_options[ i - 1 ], i );
+				cmd( "set %s \"$temp_var%d\"", gui::lmm_options[ i - 1 ], i );
 
-			update_lmm_options( );					// update config file
+			gui::update_lmm_options( );					// update config file
 
 			// adjust text styles and apply
 			cmd( "ttk::style configure fixed.TText -font [ font create -family \"$fonttype\" -size $dim_character ]" );
@@ -5126,7 +5145,7 @@ int modman( int argn, const char **argv )
 	if ( choice == 62 )
 	{
 		// copy files, create makefileNW and compile a local machine version of lsdNW
-		make_no_window( );
+		gui::make_no_window( );
 
 		choice = 0;
 		goto loop;
@@ -5135,7 +5154,7 @@ int modman( int argn, const char **argv )
 	// Show extra source files
 	if ( choice == 70 )
 	{
-		s = get_str( "modelName" );
+		s = gui::get_str( "modelName" );
 		if ( s == NULL || ! strcmp( s, "" ) )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
@@ -5146,10 +5165,10 @@ int modman( int argn, const char **argv )
 		// Create model options file if it doesn't exist
 		cmd( "set choice [ file exists \"$modelDir/$MODEL_OPTIONS\" ]" );
 		if ( choice == 0 )
-			make_makefile( );
+			gui::make_makefile( );
 
 		choice = 0;
-		s = eval_str( "[ file nativename \"$modelDir/$MODEL_OPTIONS\" ]" );
+		s = gui::eval_str( "[ file nativename \"$modelDir/$MODEL_OPTIONS\" ]" );
 		if ( s == NULL || ( f = fopen( s, "r" ) ) == NULL )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
@@ -5214,7 +5233,7 @@ int modman( int argn, const char **argv )
 		cmd( "destroytop $e" );
 
 		cmd( "if { $i eq \"\" } { set brr \"\" } { set brr [ lindex $extra_files $i ] }" );
-		s = get_str( "brr" );
+		s = gui::get_str( "brr" );
 		if ( choice == 1 && s != NULL && strlen( s ) > 0 )
 		{
 			cmd( "if { ! [ file exists \"$brr\" ] && [ file exists \"$modelDir/$brr\" ] } { set brr \"$modelDir/$brr\" }" );
@@ -5261,14 +5280,14 @@ int modman( int argn, const char **argv )
 		if ( choice == 0 )
 		{
 			// check if main equation file is not the current file
-			s = get_fun_name( str, MAX_PATH_LENGTH );
+			s = gui::get_fun_name( str, MAX_PATH_LENGTH );
 			if ( s != NULL && strlen( s ) > 0 )
 				cmd( "if [ string equal \"$errfil\" \"[ file normalize \"$modelDir/%s\" ]\" ] { set choice 8 }", s );		// open main equation file
 
 			// try to open an extra file defined by the user
 			if ( choice == 0 )
 			{	// open the configuration file
-				s = eval_str( "[ file nativename \"$modelDir/$MODEL_OPTIONS\" ]" );
+				s = gui::eval_str( "[ file nativename \"$modelDir/$MODEL_OPTIONS\" ]" );
 				if ( s == NULL || strlen( s ) == 0 || ( f = fopen( s, "r" ) ) == NULL )
 				{
 					cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model' and then try again.\"" );
@@ -5342,7 +5361,7 @@ int modman( int argn, const char **argv )
 		if ( sourcefile != 0 )
 		{
 			// text window not ready?
-			if ( get_str( "curPosIni" ) == NULL || get_str( "curPosFin" ) == NULL || strlen( get_str( "curPosIni" ) ) == 0 || strlen( get_str( "curPosFin" ) ) == 0 )
+			if ( gui::get_str( "curPosIni" ) == NULL || gui::get_str( "curPosFin" ) == NULL || strlen( gui::get_str( "curPosIni" ) ) == 0 || strlen( gui::get_str( "curPosFin" ) ) == 0 )
 				goto loop;
 
 			// check if inside or close to multi-line comment and enlarge region appropriately
@@ -5366,10 +5385,10 @@ int modman( int argn, const char **argv )
 					}" );
 
 			// find the range of lines to reeval the coloring
-			const char *curPosIni = get_str( "curPosIni" );		// position before insertion
-			const char *curPosFin = get_str( "curPosFin" );		// position after insertion
-			const char *curSelIni = get_str( "curSelIni" );		// selection before insertion
-			const char *curSelFin = get_str( "curSelFin" );		// selection after insertion
+			const char *curPosIni = gui::get_str( "curPosIni" );		// position before insertion
+			const char *curPosFin = gui::get_str( "curPosFin" );		// position after insertion
+			const char *curSelIni = gui::get_str( "curSelIni" );		// selection before insertion
+			const char *curSelFin = gui::get_str( "curSelFin" );		// selection after insertion
 
 			// collect all selection positions, before and after change
 			float curPos[ 6 ];
@@ -5408,29 +5427,42 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	Tcl_UnlinkVar( interp, "num");
-	Tcl_UnlinkVar( interp, "shigh");
-	Tcl_UnlinkVar( interp, "choice");
-	Tcl_UnlinkVar( interp, "tosave");
-	Tcl_UnlinkVar( interp, "recolor_all");
+	Tcl_UnlinkVar( gui::interp, "num");
+	Tcl_UnlinkVar( gui::interp, "shigh");
+	Tcl_UnlinkVar( gui::interp, "choice");
+	Tcl_UnlinkVar( gui::interp, "tosave");
+	Tcl_UnlinkVar( gui::interp, "recolor_all");
 
-	set_env( false );
+	gui::set_env( false );
 
-	delete [ ] rootLsd;
-	delete [ ] exec_file;
-	delete [ ] exec_path;
+	delete [ ] lsd::root_lsd;
+	delete [ ] lsd::exec_file;
+	delete [ ] lsd::exec_path;
 
 	return 0;
 }
 
 
-/*********************************
+/*************************************************************
+ CMD
+ *************************************************************/
+void cmd( const char *cm, ... )
+{
+	static va_list argptr;
+
+	va_start( argptr, cm );
+	gui::cmd_backend( cm, argptr );
+	va_end( argptr );
+}
+
+
+/*************************************************************
  IS_SOURCE_FILE
- *********************************/
+ *************************************************************/
 bool is_source_file( const char *fname )
 {
 	cmd( "set ext \"[ file extension \"%s\" ]\"", fname );
-	const char *ext = get_str( "ext" );
+	const char *ext = gui::get_str( "ext" );
 
 	return ! strcmp( ext, ".cpp" ) || ! strcmp( ext, ".c" )	  || ! strcmp( ext, ".C" )	 || \
 		   ! strcmp( ext, ".CPP" ) || ! strcmp( ext, ".Cpp" ) || ! strcmp( ext, ".c++" ) || \
@@ -5439,18 +5471,20 @@ bool is_source_file( const char *fname )
 }
 
 
-/*********************************
- COLOR
- *********************************/
-// data structures for color syntax (used by color/rm_color)
+/*************************************************************
+ COLOR data
+ data structures for color syntax
+ *************************************************************/
 struct hit
 {
 	int type, count;
 	long iniLin, iniCol;
 	char previous, next;
 };
+
 // color types (0-n) to Tk tags mapping
 const char *cTypes[ ] = { "comment1", "comment2", "cprep", "str", "lsdvar", "lsdmacro", "ctype", "ckword" };
+
 // regular expressions identifying colored text types
 const char *cRegex[ ] = {
 	"/\[*].*\[*]/",		// each item define one different color
@@ -5458,37 +5492,17 @@ const char *cRegex[ ] = {
 	"^(\\s)*#\[^/]*",
 	"\\\"\[^\\\"]*\\\"",
 	"v\\[\[0-9]{1,3}]|curl?\[1-9]?|root|up|next|hook",
-	"(MODEL|CLOSE)(BEGIN|END)|(END_)?EQUATION(_DUMMY)?|RESULT|ABORT|DEBUG_(START|STOP)(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM(_CND)?L?S?|COUNT(_ALL|_CNDL?|_ALL_CNDL?|_HOOK)?S?|STAT(_CND)?L?S?|STAT_(NETS?|NODES?)|(M|WHT|WHTM)?AVE(_CND)?L?S?|MED(_CND)?L?S?|PERC(_CND)?L?S?|SD(_CND)?L?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAX(_CND)?L?S?|MIN(_CND)?L?S?|HOOKS?|SHOOKS?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|ARG_EXTS?|LAT|HOOKS?|SHOOKS?)|SEARCH(_CNDL?|_INST|_NODE|_LINK)?S?|SEARCHS?|TSEARCH(_CND)?(_SET)?S?|SORT2?L?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?|EXT_INITS?|HOOKS?)|DELETE|DELETE_(EXTS?|LAT|NETS?|NODES?|LINKS?)|DELETINGS?|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCH(_CND)?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(DOWN|UP|LEFT|RIGHT)_LATS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|(USE|NO)_POINTER_CHECK|(USE|NO)_SAVED|(USE|NO)_SEARCH(_UP)?|(USE|NO)_ZERO_INSTANCE|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|LAST_CALCS?|RECALCS?|UPDATE(S|_RECS?)?|DEFAULT_RESULT|THIS|CALLER|NAMES?|NEXTS?|(GRAND)?PARENTS?|ROOT|UP|DOWN|RUN|LAST_RUN|(CSV|EIGEN|XML)LIB|close_sim|pi|abs|exp|fact|log(10)?|min|max|i?pow|round(_digits)?|a?sin|a?cos|a?tan|(sq|cb)rt|(t|l)?gamma|(t|z)_star|is_(finite|inf|nan)|alapl(cdf)?|bernoulli|beta(cdf)?|binomial|b?pareto(cdf)?|cauchy|chi_squared|exponential|fisher|gamma|geometric|l?norm(cdf)?|poisson(cdf)?|student|uniform(_int)?|unifcdf|weibull",
+	"(MODEL|CLOSE)(BEGIN|END)|(END_)?EQUATION(_DUMMY)?|RESULT|ABORT|DEBUG_(START|STOP)(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM(_CND)?L?S?|COUNT(_ALL|_CNDL?|_ALL_CNDL?|_HOOK)?S?|STAT(_CND)?L?S?|STAT_(NETS?|NODES?)|(M|WHT|WHTM)?AVE(_CND)?L?S?|MED(_CND)?L?S?|PERC(_CND)?L?S?|SD(_CND)?L?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAX(_CND)?L?S?|MIN(_CND)?L?S?|HOOKS?|SHOOKS?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|ARG_EXTS?|LAT|HOOKS?|SHOOKS?)|SEARCH(_CNDL?|_INST|_NODE|_LINK)?S?|SEARCHS?|TSEARCH(_CND)?(_SET)?S?|SORT2?L?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?|EXT_INITS?|HOOKS?)|DELETE|DELETE_(EXTS?|LAT|NETS?|NODES?|LINKS?)|DELETINGS?|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCH(_CND)?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(DOWN|UP|LEFT|RIGHT)_LATS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|(USE|NO)_POINTER_CHECK|(USE|NO)_SAVED|(USE|NO)_SEARCH(_UP)?|(USE|NO)_ZERO_INSTANCE|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|LAST_CALCS?|RECALCS?|UPDATE(S|_RECS?)?|DEFAULT_RESULT|THIS|CALLER|NAMES?|NEXTS?|(GRAND)?PARENTS?|ROOT|UP|DOWN|RUN|LAST_RUN|(CSV|EIGEN|XML)LIB|pi|abs|exp|fact|log(10)?|min|max|i?pow|round(_digits)?|a?sin|a?cos|a?tan|(sq|cb)rt|(t|l)?gamma|(t|z)_star|is_(finite|inf|nan)|alapl(cdf)?|bernoulli|beta(cdf)?|binomial|b?pareto(cdf)?|cauchy|chi_squared|exponential|fisher|gamma|geometric|l?norm(cdf)?|poisson(cdf)?|student|uniform(_int)?|unifcdf|weibull",
 	"auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
 	"break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
 };
 
-// count words in a string (used by color)
-int strwrds( const char string[ ] )
-{
-	int i = 0, words = 0;
-	char lastC = '\0';
 
-	if ( string == NULL )
-		return 0;
-
-	while ( isspace( string[ i ] ) )
-		++i;
-
-	if ( string[ i ] == '\0' )
-		return 0;
-
-	for ( ; string[ i ] != '\0'; lastC = string[ i++ ] )
-		if ( isspace( string[ i ] ) && ! isspace( lastC ) )
-			words++;
-
-	if ( isspace( lastC ) )
-		return words;
-
-	return words + 1;
-}
-
-// map syntax highlight level to the number of color types to use
+/*************************************************************
+ MAP_COLOR
+ map syntax highlight level to the
+ number of color types to use
+ *************************************************************/
 #define ITEM_COUNT( ptrArray )	( sizeof( ptrArray ) / sizeof( ptrArray[0] ) )
 int map_color( int hiLev )
 {
@@ -5504,8 +5518,13 @@ int map_color( int hiLev )
 	return ITEM_COUNT( cTypes );
 }
 
-// compare function for qsort to compare different color hits (used by color)
-int comphit(const void *p1, const void *p2)
+
+/*************************************************************
+ COMPHIT
+ compare function for qsort to
+ compare different color hits
+ *************************************************************/
+int comphit( const void *p1, const void *p2 )
 {
 	if ( ( ( hit * ) p1 )->iniLin < ( ( hit * ) p2 )->iniLin )
 		return -1;
@@ -5528,7 +5547,11 @@ int comphit(const void *p1, const void *p2)
 	return 0;
 }
 
-// color routine
+
+/*************************************************************
+ COLOR
+ Colors equation text syntax
+ *************************************************************/
 #define TOT_COLOR ITEM_COUNT( cTypes )
 void color( int hiLev, long iniLin, long finLin )
 {
@@ -5560,8 +5583,8 @@ void color( int hiLev, long iniLin, long finLin )
 			cmd( "set pos [ .f.t.t search -regexp -all -count ccount -- {%s} %ld.0 %s ]", cRegex[ i ], iniLin == 0 ? 1 : iniLin, finStr );
 
 		// check number of ocurrences
-		pcount = get_str( "ccount" );
-		size[ i ] = strwrds( pcount );
+		pcount = gui::get_str( "ccount" );
+		size[ i ] = lsd::strwrds( pcount );
 		if ( size[ i ] == 0 )			// nothing to do?
 			continue;
 
@@ -5570,7 +5593,7 @@ void color( int hiLev, long iniLin, long finLin )
 		// do intermediate store in C memory
 		count[ i ] = new char[ strlen( pcount ) + 1 ];
 		strcpy( count[ i ], pcount );
-		ppos = get_str( "pos" );
+		ppos = gui::get_str( "pos" );
 		pos[ i ] = new char[ strlen( ppos ) + 1 ];
 		strcpy( pos[ i ], ppos );
 	}
@@ -5604,9 +5627,9 @@ void color( int hiLev, long iniLin, long finLin )
 	qsort( ( void * ) hits, tsize, sizeof( hit ), comphit );
 
 	// process each occurrence, if applicable
-	Tcl_LinkVar( interp, "lin", ( char * ) &newLin, TCL_LINK_LONG | TCL_LINK_READ_ONLY );
-	Tcl_LinkVar( interp, "col", ( char * ) &newCol, TCL_LINK_LONG | TCL_LINK_READ_ONLY );
-	Tcl_LinkVar( interp, "cnt", ( char * ) &newCnt, TCL_LINK_INT | TCL_LINK_READ_ONLY );
+	Tcl_LinkVar( gui::interp, "lin", ( char * ) &newLin, TCL_LINK_LONG | TCL_LINK_READ_ONLY );
+	Tcl_LinkVar( gui::interp, "col", ( char * ) &newCol, TCL_LINK_LONG | TCL_LINK_READ_ONLY );
+	Tcl_LinkVar( gui::interp, "cnt", ( char * ) &newCnt, TCL_LINK_INT | TCL_LINK_READ_ONLY );
 
 	for ( k = 0; k < tsize; ++k )
 		// skip occurrences inside other occurrence
@@ -5622,182 +5645,23 @@ void color( int hiLev, long iniLin, long finLin )
 			else							// token - should not be inside another word
 				cmd( "if { [ regexp {\\w} [ .f.t.t get \"$lin.$col - 1 any chars\" ] ] == 0 && [ regexp {\\w} [ .f.t.t get $end ] ] == 0 } { .f.t.t tag add %s $lin.$col $end }", cTypes[ hits[ k ].type ] );
 			// next search position
-			ppos = get_str( "end" );
+			ppos = gui::get_str( "end" );
 			sscanf( ppos, "%ld.%ld", &curLin, &curCol );
 		}
 
-	Tcl_UnlinkVar( interp, "lin");
-	Tcl_UnlinkVar( interp, "col");
-	Tcl_UnlinkVar( interp, "cnt");
+	Tcl_UnlinkVar( gui::interp, "lin");
+	Tcl_UnlinkVar( gui::interp, "col");
+	Tcl_UnlinkVar( gui::interp, "cnt");
 	delete [ ] hits;
 }
 
 
-/*********************************
- SHOW_COMP_RESULT
- *********************************/
-void show_comp_result( bool nw )
-{
-	cmd( "set cerr 1.0" );						// search start position in file
-	cmd( "set error \" error:\"" );				// error string to be searched
-	cmd( "set errfil \"\"" );
-	cmd( "set errlin \"\"" );
-	cmd( "set errcol \"\"" );
-
-	cmd( "newtop .mm \"Compilation Errors%s\" { .mm.b.close invoke } \"\"", nw ? " (No Window Version)" : "" );
-
-	cmd( "ttk::label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Click on 'Go to Error' to open the equation file on the indicated line.\n- Consider that the error may have been originated in the previous lines.\n- Start fixing errors at the beginning of the list, subsequent errors may be due to previous ones.\"" );
-	cmd( "pack .mm.lab" );
-
-	cmd( "ttk::frame .mm.t" );
-	cmd( "ttk::scrollbar .mm.t.yscroll -command \".mm.t.t yview\"" );
-	cmd( "ttk::text .mm.t.t -yscrollcommand \".mm.t.yscroll set\" -wrap word -entry 0 -dark $darkTheme -style smallFixed.TText" );
-	cmd( "pack .mm.t.yscroll -side right -fill y" );
-	cmd( "pack .mm.t.t -expand yes -fill both" );
-	cmd( "mouse_wheel .mm.t.t" );
-
-	cmd( "pack .mm.t -expand yes -fill both" );
-
-	cmd( "ttk::frame .mm.i" );
-
-	cmd( "ttk::frame .mm.i.f" );
-	cmd( "ttk::label .mm.i.f.l -text \"File:\"" );
-	cmd( "ttk::label .mm.i.f.n -anchor w -width 50 -style hl.TLabel" );
-	cmd( "pack .mm.i.f.l .mm.i.f.n -side left" );
-
-	cmd( "ttk::frame .mm.i.l" );
-	cmd( "ttk::label .mm.i.l.l -text \"Line:\"" );
-	cmd( "ttk::label .mm.i.l.n -anchor w -width 5 -style hl.TLabel" );
-	cmd( "pack .mm.i.l.l .mm.i.l.n -side left" );
-
-	cmd( "ttk::frame .mm.i.c" );
-	cmd( "ttk::label .mm.i.c.l -text \"Column:\"" );
-	cmd( "ttk::label .mm.i.c.n -anchor w -width 5 -style hl.TLabel" );
-	cmd( "pack .mm.i.c.l .mm.i.c.n -side left" );
-
-	cmd( "pack .mm.i.f .mm.i.l .mm.i.c -padx 10 -pady 5 -side left" );
-	cmd( "pack .mm.i" );
-
-	cmd( "tooltip::tooltip .mm.i \"File, line and column of error\"" );
-
-	cmd( "ttk::frame .mm.b" );
-
-	cmd( "ttk::button .mm.b.perr -width [ expr { $butWid + 4 } ] -text \"Previous Error\" -underline 0 -command { \
-			focus .mm.t.t; \
-			set start \"$cerr linestart\"; \
-			set errtemp [ .mm.t.t search -nocase -regexp -count errlen -backward -- $error $start 1.0];	 \
-			if { [ string length $errtemp ] != 0 } { \
-				set cerr $errtemp; \
-				.mm.t.t mark set insert $errtemp; \
-				.mm.t.t tag remove sel 1.0 end; \
-				.mm.t.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; \
-				.mm.t.t see $errtemp; \
-				set errdat [ split [ .mm.t.t get \"$errtemp linestart\" \"$errtemp lineend\" ] : ]; \
-				if { [ string length [ lindex $errdat 0 ] ] == 1 } { \
-					set errfil \"[ lindex $errdat 0 ]:[ lindex $errdat 1 ]\"; \
-					set idxfil 2 \
-				} else { \
-					set errfil \"[ lindex $errdat 0 ]\"; \
-					set idxfil 1 \
-				}; \
-				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
-					set errlin [ lindex $errdat $idxfil ] \
-				} else { \
-					set errlin	\"\" \
-				}; \
-				incr idxfil; \
-				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
-					set errcol [ lindex $errdat $idxfil ] \
-				} else { \
-					set errcol \"\" \
-				}; \
-				.mm.i.f.n configure -text $errfil; \
-				.mm.i.l.n configure -text $errlin; \
-				.mm.i.c.n configure -text $errcol; \
-			} \
-		}" );
-	cmd( "ttk::button .mm.b.gerr -width [ expr { $butWid + 4 } ] -text \"Go to Error\" -underline 0 -command { set choice 87 }" );
-	cmd( "ttk::button .mm.b.ferr -width [ expr { $butWid + 4 } ] -text \"Next Error\" -underline 0 -command { \
-			focus .mm.t.t; \
-			if { ! [ string equal $cerr 1.0 ] } { \
-				set start \"$cerr lineend\" \
-			} else { \
-				set start 1.0 \
-			}; \
-			set errtemp [ .mm.t.t search -nocase -regexp -count errlen -- $error $start end ]; \
-			if { [ string length $errtemp ] != 0 } { \
-				set cerr $errtemp; \
-				.mm.t.t mark set insert \"$errtemp + $errlen ch\"; \
-				.mm.t.t tag remove sel 1.0 end; \
-				.mm.t.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; \
-				.mm.t.t see $errtemp; \
-				set errdat [ split [ .mm.t.t get \"$errtemp linestart\" \"$errtemp lineend\" ] : ]; \
-				if { [ string length [ lindex $errdat 0 ] ] == 1 } { \
-					set errfil \"[ lindex $errdat 0 ]:[ lindex $errdat 1 ]\"; \
-					set idxfil 2 \
-				} else { \
-					set errfil \"[ lindex $errdat 0 ]\"; \
-					set idxfil 1 \
-				}; \
-				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
-					set errlin [ lindex $errdat $idxfil ] \
-				} else { \
-					set errlin	\"\" \
-				}; \
-				incr idxfil; \
-				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
-					set errcol [ lindex $errdat $idxfil ] \
-				} else { \
-					set errcol \"\" \
-				}; \
-				.mm.i.f.n configure -text $errfil; \
-				.mm.i.l.n configure -text $errlin; \
-				.mm.i.c.n configure -text $errcol; \
-			} \
-		}" );
-	cmd( "ttk::button .mm.b.close -width [ expr { $butWid + 4 } ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; focustop .f.t.t; set keepfocus 0 }" );
-	cmd( "pack .mm.b.perr .mm.b.gerr .mm.b.ferr .mm.b.close -padx $butSpc -expand yes -fill x -side left" );
-	cmd( "pack .mm.b -padx $butPad -pady $butPad -side right" );
-
-	cmd( "tooltip::tooltip .mm.b.perr \"Show previous error line\"" );
-	cmd( "tooltip::tooltip .mm.b.gerr \"Edit error line in LMM\"" );
-	cmd( "tooltip::tooltip .mm.b.ferr \"Show next error line\"" );
-	cmd( "tooltip::tooltip .mm.b.close \"Close this window\"" );
-
-	cmd( "bind .mm <p> { .mm.b.perr invoke }; bind .mm <P> { .mm.b.perr invoke }" );
-	cmd( "bind .mm.t.t <Up> { .mm.b.perr invoke; break }" );
-	cmd( "bind .mm.t.t <Left> { .mm.b.perr invoke; break }" );
-	cmd( "bind .mm <g> { .mm.b.gerr invoke }; bind .mm <G> { .mm.b.gerr invoke }" );
-	cmd( "bind .mm <n> { .mm.b.ferr invoke }; bind .mm <N> { .mm.b.ferr invoke }" );
-	cmd( "bind .mm.t.t <Down> { .mm.b.ferr invoke; break }" );
-	cmd( "bind .mm.t.t <Right> { .mm.b.ferr invoke; break }" );
-	cmd( "bind .mm <d> { .mm.b.close invoke }; bind .mm <D> { .mm.b.close invoke }" );
-	cmd( "bind .mm.t.t <KeyPress-Return> { .mm.b.gerr invoke }" );
-	cmd( "bind .mm <KeyPress-Escape> { .mm.b.close invoke }" );
-	cmd( "bind .mm.b.perr <KeyPress-Return> { .mm.b.perr invoke }" );
-	cmd( "bind .mm.b.gerr <KeyPress-Return> { .mm.b.gerr invoke }" );
-	cmd( "bind .mm.b.ferr <KeyPress-Return> { .mm.b.ferr invoke }" );
-	cmd( "bind .mm.b.close <KeyPress-Return> { .mm.b.close invoke }" );
-
-	cmd( "showtop .mm lefttoW no no no" );
-	cmd( "mousewarpto .mm.b.gerr 0" );
-
-	cmd( "if [ file exists \"$modelDir/makemessage.txt\" ] { set file [ open \"$modelDir/makemessage.txt\" ]; .mm.t.t insert end [ read -nonewline $file ]; close $file } { .mm.t.t insert end \"(no compilation errors)\" }" );
-	cmd( ".mm.t.t mark set insert \"1.0\"" );
-	cmd( ".mm.b.ferr invoke" );
-
-	cmd( ".mm.t.t configure -state disabled" );
-	cmd( "focustop .mm.t.t" );
-	cmd( "set keepfocus 1" );
-	cmd( "update" );
-}
-
-
-/****************************************************
-DISCARD_CHANGE
-Ask user to discard changes in edited file, if applicable
-Returns: 0: abort, 1: continue
-****************************************************/
+/*************************************************************
+ DISCARD_CHANGE
+ Ask user to discard changes in edited file, if
+ applicable
+ Returns: 0: abort, 1: continue
+ *************************************************************/
 bool discard_change( void )
 {
 	if ( ! tosave )
@@ -5820,7 +5684,7 @@ bool discard_change( void )
 			set ans 1 \
 		}" );
 
-	if ( ! get_bool( "ans" ) )
+	if ( ! gui::get_bool( "ans" ) )
 		return false;
 
 	return true;

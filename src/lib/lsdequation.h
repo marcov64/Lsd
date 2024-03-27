@@ -13,138 +13,118 @@
  *************************************************************/
 
 /*************************************************************
-LSDEQUATION.H
-This file contains all the macros required by the LSD
-model's equation file.
-*************************************************************/
+ LSDEQUATION.H
+ This file contains all the macros required by the LSD
+ model's equation file.
+ *************************************************************/
 
 #define _FUN_				// comment this line to access internal LSD functions
 #include "lib/check.h"		// macro check support code
 
-// name space shortcuts
-using namespace std;
-
-#ifdef EIGENLIB
-	using namespace Eigen;
-#endif
-
-#ifdef CSVLIB
-	using namespace rapidcsv;
-#endif
-
-#ifdef XMLLIB
-	using namespace pugi;
-#endif
-
+namespace lsd				// create the config variables in proper namespace
+{
 // enable pointer checking to protect users (medium overhead) if not disabled
 #ifndef NO_POINTER_CHECK
+	const bool no_pointer_check = false;
 
-const bool no_pointer_check = false;
-
-#define CHK_PTR_NOP( O ) if ( chk_ptr( O ) ) bad_ptr_void( O, __FILE__, __LINE__ );
-#define CHK_PTR_CHR( O ) chk_ptr( O ) ? bad_ptr_chr( O, __FILE__, __LINE__ ) :
-#define CHK_PTR_DBL( O ) chk_ptr( O ) ? bad_ptr_dbl( O, __FILE__, __LINE__ ) :
-#define CHK_PTR_LNK( O ) chk_ptr( O ) ? bad_ptr_lnk( O, __FILE__, __LINE__ ) :
-#define CHK_PTR_OBJ( O ) chk_ptr( O ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
-#define CHK_PTR_POBJ( O ) chk_ptr( O ) || chk_ptr( O->up ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
-#define CHK_PTR_VOID( O ) chk_ptr( O ) ? bad_ptr_void( O, __FILE__, __LINE__ ) :
-#define CHK_OBJ_OBJ( O ) chk_obj( O ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
-#define CHK_HK_OBJ( O, X ) chk_hook( O, X ) ? no_hook_obj( O, X, __FILE__, __LINE__ ) :
-
+	#define CHK_PTR_NOP( O ) if ( chk_ptr( O ) ) bad_ptr_void( O, __FILE__, __LINE__ );
+	#define CHK_PTR_CHR( O ) chk_ptr( O ) ? bad_ptr_chr( O, __FILE__, __LINE__ ) :
+	#define CHK_PTR_DBL( O ) chk_ptr( O ) ? bad_ptr_dbl( O, __FILE__, __LINE__ ) :
+	#define CHK_PTR_LNK( O ) chk_ptr( O ) ? bad_ptr_lnk( O, __FILE__, __LINE__ ) :
+	#define CHK_PTR_OBJ( O ) chk_ptr( O ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
+	#define CHK_PTR_POBJ( O ) chk_ptr( O ) || chk_ptr( O->up ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
+	#define CHK_PTR_VOID( O ) chk_ptr( O ) ? bad_ptr_void( O, __FILE__, __LINE__ ) :
+	#define CHK_OBJ_OBJ( O ) chk_obj( O ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
+	#define CHK_HK_OBJ( O, X ) chk_hook( O, X ) ? no_hook_obj( O, X, __FILE__, __LINE__ ) :
 #else
+	const bool no_pointer_check = true;
 
-const bool no_pointer_check = true;
+	#define CHK_PTR_NOP( O )
+	#define CHK_PTR_CHR( O )
+	#define CHK_PTR_DBL( O )
+	#define CHK_PTR_LNK( O )
+	#define CHK_PTR_OBJ( O )
+	#define CHK_PTR_POBJ( O )
+	#define CHK_PTR_VOID( O )
+	#define CHK_OBJ_OBJ( O )
+	#define CHK_HK_OBJ( O, X )
 
-#define CHK_PTR_NOP( O )
-#define CHK_PTR_CHR( O )
-#define CHK_PTR_DBL( O )
-#define CHK_PTR_LNK( O )
-#define CHK_PTR_OBJ( O )
-#define CHK_PTR_POBJ( O )
-#define CHK_PTR_VOID( O )
-#define CHK_OBJ_OBJ( O )
-#define CHK_HK_OBJ( O, X )
-
-#ifdef NO_POINTER_CHECK
-#undef NO_POINTER_CHECK
-#endif
-
+	#ifdef NO_POINTER_CHECK
+		#undef NO_POINTER_CHECK
+	#endif
 #endif
 
 // initialize pointers to NULL to protect users (small overhead) if not disabled
 #ifndef NO_POINTER_INIT
+	const bool no_pointer_init = false;
 
-const bool no_pointer_init = false;
-
-#define INIT_POINTERS \
-	h = i = j = k = 0; \
-	cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cyccur = cyccur2 = cyccur3 = NULL; \
-	curl = curl1 = curl2 = curl3 = curl4 = curl5 = curl6 = curl7 = curl8 = curl9 = NULL; \
-	f = NULL;
-#define CHK_LNK_DBL( O ) O == NULL ? nul_lnk_dbl( __FILE__, __LINE__ ) :
-#define CHK_LNK_OBJ( O ) O == NULL ? nul_lnk_obj( __FILE__, __LINE__ ) :
-#define CHK_LNK_VOID( O ) O == NULL ? nul_lnk_void( __FILE__, __LINE__ ) :
-#define CHK_NODE_CHR( O ) O->node == NULL ? no_node_chr( O->label, __FILE__, __LINE__ ) :
-#define CHK_NODE_DBL( O ) O->node == NULL ? no_node_dbl( O->label, __FILE__, __LINE__ ) :
-
+	#define INIT_POINTERS \
+		h = i = j = k = 0; \
+		cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cyccur = cyccur2 = cyccur3 = NULL; \
+		curl = curl1 = curl2 = curl3 = curl4 = curl5 = curl6 = curl7 = curl8 = curl9 = NULL; \
+		f = NULL;
+	#define CHK_LNK_DBL( O ) O == NULL ? nul_lnk_dbl( __FILE__, __LINE__ ) :
+	#define CHK_LNK_OBJ( O ) O == NULL ? nul_lnk_obj( __FILE__, __LINE__ ) :
+	#define CHK_LNK_VOID( O ) O == NULL ? nul_lnk_void( __FILE__, __LINE__ ) :
+	#define CHK_NODE_CHR( O ) O->node == NULL ? no_node_chr( O->label, __FILE__, __LINE__ ) :
+	#define CHK_NODE_DBL( O ) O->node == NULL ? no_node_dbl( O->label, __FILE__, __LINE__ ) :
 #else
+	const bool no_pointer_init = true;
 
-const bool no_pointer_init = true;
-
-#define INIT_POINTERS
-#define CHK_LNK_DBL( O )
-#define CHK_LNK_OBJ( O )
-#define CHK_LNK_VOID( O )
-#define CHK_NODE_CHR( O )
-#define CHK_NODE_DBL( O )
-
+	#define INIT_POINTERS
+	#define CHK_LNK_DBL( O )
+	#define CHK_LNK_OBJ( O )
+	#define CHK_LNK_VOID( O )
+	#define CHK_NODE_CHR( O )
+	#define CHK_NODE_DBL( O )
 #endif
+}
 
 // user defined variables for all equations (to be defined in equation file)
 #ifndef EQ_USER_VARS
-#define EQ_USER_VARS
+	#define EQ_USER_VARS
 #endif
 
 // debugger probe variables
 #ifndef _NW_
-#define DEBUG_CODE \
-	if ( deb_set ) \
-	{ \
-		for ( int n = 0; n < USER_D_VARS; ++n ) \
-			d_values[ n ] = v[ n ]; \
-		i_values[ 0 ] = i; \
-		i_values[ 1 ] = j; \
-		i_values[ 2 ] = h; \
-		i_values[ 3 ] = k; \
-		o_values[ 0 ] = cur; \
-		o_values[ 1 ] = cur1; \
-		o_values[ 2 ] = cur2; \
-		o_values[ 3 ] = cur3; \
-		o_values[ 4 ] = cur4; \
-		o_values[ 5 ] = cur5; \
-		o_values[ 6 ] = cur6; \
-		o_values[ 7 ] = cur7; \
-		o_values[ 8 ] = cur8; \
-		o_values[ 9 ] = cur9; \
-		n_values[ 0 ] = curl; \
-		n_values[ 1 ] = curl1; \
-		n_values[ 2 ] = curl2; \
-		n_values[ 3 ] = curl3; \
-		n_values[ 4 ] = curl4; \
-		n_values[ 5 ] = curl5; \
-		n_values[ 6 ] = curl6; \
-		n_values[ 7 ] = curl7; \
-		n_values[ 8 ] = curl8; \
-		n_values[ 9 ] = curl9; \
-		f_values[ 0 ] = f; \
-	};
+	#define DEBUG_CODE \
+		if ( deb_set ) \
+		{ \
+			for ( int n = 0; n < USER_D_VARS; ++n ) \
+				d_values[ n ] = v[ n ]; \
+			i_values[ 0 ] = i; \
+			i_values[ 1 ] = j; \
+			i_values[ 2 ] = h; \
+			i_values[ 3 ] = k; \
+			o_values[ 0 ] = cur; \
+			o_values[ 1 ] = cur1; \
+			o_values[ 2 ] = cur2; \
+			o_values[ 3 ] = cur3; \
+			o_values[ 4 ] = cur4; \
+			o_values[ 5 ] = cur5; \
+			o_values[ 6 ] = cur6; \
+			o_values[ 7 ] = cur7; \
+			o_values[ 8 ] = cur8; \
+			o_values[ 9 ] = cur9; \
+			n_values[ 0 ] = curl; \
+			n_values[ 1 ] = curl1; \
+			n_values[ 2 ] = curl2; \
+			n_values[ 3 ] = curl3; \
+			n_values[ 4 ] = curl4; \
+			n_values[ 5 ] = curl5; \
+			n_values[ 6 ] = curl6; \
+			n_values[ 7 ] = curl7; \
+			n_values[ 8 ] = curl8; \
+			n_values[ 9 ] = curl9; \
+			f_values[ 0 ] = f; \
+		};
 #else
-#define DEBUG_CODE
+	#define DEBUG_CODE
 #endif
 
 // create map for fast equation look-up
 #define MODELBEGIN \
-	double variable::fun( object *caller ) \
+	double lsd::variable::fun( object *caller ) \
 	{ \
 		if ( sim->quit == 2 ) \
 			return val[ 0 ]; \
@@ -152,7 +132,7 @@ const bool no_pointer_init = true;
 			eq_func = sim->chk_eq( label ); \
 		return chk_res( ( eq_func )( caller, this ) ); \
 	} \
-	void simulation::init_map( ) \
+	void lsd::simulation::init_map( ) \
 	{ \
 		eq_map = \
 		{
@@ -196,12 +176,12 @@ const bool no_pointer_init = true;
 // simulation close code
 #ifndef LEGACY_CODE
 #define CLOSEBEGIN \
-void close_sim( void ) { } \
-void simulation::close_sim( void ) \
-{
+	void lsd::simulation::close_sim( void ) \
+	{
 
 #define CLOSEEND \
-}
+	} \
+	void close_sim( void ) { }
 #endif
 
 // LSD macros
@@ -253,7 +233,7 @@ void simulation::close_sim( void ) \
 #define NAME ( ( const char * ) p->label )
 #define NAMES( O ) ( chk_ptr( O ) ? NULL : ( const char * ) O->label )
 #define CONFIG ( ( const char * ) conf_name )
-#define PATH ( ( const char * ) path )
+#define PATH ( ( const char * ) conf_path )
 
 #define CURRENT ( var->val[ 0 ] )
 #define T ( ( double ) t )
@@ -270,10 +250,10 @@ void simulation::close_sim( void ) \
 #define UPDATE_REC ( p->update( true, true ) )
 #define UPDATE_RECS( O ) ( CHK_PTR_VOID( O ) O->update( true, true ) )
 
-#define DEBUG_START { if ( sims[ 0 ]->liblnk != NULL ) sims[ 0 ]->liblnk->deb_log( true, 0 ); }
-#define DEBUG_START_AT( X ) { if ( sims[ 0 ]->liblnk != NULL ) sims[ 0 ]->liblnk->deb_log( true, X ); }
-#define DEBUG_STOP { if ( sims[ 0 ]->liblnk != NULL ) sims[ 0 ]->liblnk->deb_log( false, 0 ); }
-#define DEBUG_STOP_AT( X ) { if ( sims[ 0 ]->liblnk != NULL ) sims[ 0 ]->liblnk->deb_log( false, X ); }
+#define DEBUG_START { if ( liblnk != NULL ) liblnk->deb_log( true, 0 ); }
+#define DEBUG_START_AT( X ) { if ( liblnk != NULL ) liblnk->deb_log( true, X ); }
+#define DEBUG_STOP { if ( liblnk != NULL ) liblnk->deb_log( false, 0 ); }
+#define DEBUG_STOP_AT( X ) { if ( liblnk != NULL ) liblnk->deb_log( false, X ); }
 
 #define LOG( ... ) ( ! fast ? plog( __VA_ARGS__ ) : ( void ) NULL )
 #define PLOG( ... ) ( fast_mode < 2 ? plog( __VA_ARGS__ ) : ( void ) NULL )
@@ -599,27 +579,30 @@ void simulation::close_sim( void ) \
 #define WRITE_ARG_EXT( C, X, Y, ... ) ( P_EXT( C ) -> X( __VA_ARGS__ ) = Y )
 #define WRITE_ARG_EXTS( O, C, X, Y, ... ) ( P_EXTS( O, C ) -> X( __VA_ARGS__ ) = Y )
 
-#define CYCLE( X, Y ) for ( X = cycle_obj( p, Y, "CYCLE" ); X != NULL; X = brother( X ) )
+#define CYCLE( X, Y ) for ( X = cycle_obj( p, Y, "CYCLE" ); X != NULL; X = BROTHER( X ) )
 #define CYCLE_SAFE( X, Y ) for ( X = cycle_obj( p, Y, "CYCLE_SAFE" ), \
-								 cyccur = brother( X ); X != NULL; X = cyccur, \
-								 cyccur != NULL ? cyccur = brother( cyccur ) : cyccur = cyccur )
+								 cyccur = BROTHER( X ); X != NULL; X = cyccur, \
+								 cyccur != NULL ? cyccur = BROTHER( cyccur ) : cyccur = cyccur )
 #define CYCLE2_SAFE( X, Y ) for ( X = cycle_obj( p, Y, "CYCLE_SAFE" ), \
-								  cyccur2 = brother( X ); X != NULL; X = cyccur2, \
-								  cyccur2 != NULL ? cyccur2 = brother( cyccur2 ) : cyccur2 = cyccur2 )
+								  cyccur2 = BROTHER( X ); X != NULL; X = cyccur2, \
+								  cyccur2 != NULL ? cyccur2 = BROTHER( cyccur2 ) : cyccur2 = cyccur2 )
 #define CYCLE3_SAFE( X, Y ) for ( X = cycle_obj( p, Y, "CYCLE_SAFE" ), \
-								  cyccur3 = brother( X ); X != NULL; X = cyccur3, \
-								  cyccur3 != NULL ? cyccur3 = brother( cyccur3 ) : cyccur3 = cyccur3 )
+								  cyccur3 = BROTHER( X ); X != NULL; X = cyccur3, \
+								  cyccur3 != NULL ? cyccur3 = BROTHER( cyccur3 ) : cyccur3 = cyccur3 )
 
-#define CYCLES( O, X, Y ) for ( X = cycle_obj( O, Y, "CYCLES" ); X != NULL; X = brother( X ) )
+#define CYCLES( O, X, Y ) for ( X = cycle_obj( O, Y, "CYCLES" ); X != NULL; X = BROTHER( X ) )
 #define CYCLE_SAFES( O, X, Y ) for ( X = cycle_obj( O, Y, "CYCLE_SAFES" ), \
-									 cyccur = brother( X ); X != NULL; X = cyccur, \
-									 cyccur != NULL ? cyccur = brother( cyccur ) : cyccur = cyccur )
+									 cyccur = BROTHER( X ); X != NULL; X = cyccur, \
+									 cyccur != NULL ? cyccur = BROTHER( cyccur ) : cyccur = cyccur )
 #define CYCLE2_SAFES( O, X, Y ) for ( X = cycle_obj( O, Y, "CYCLE_SAFES" ), \
-									  cyccur2 = brother( X ); X != NULL; X = cyccur2, \
-									  cyccur2 != NULL ? cyccur2 = brother( cyccur2 ) : cyccur2 = cyccur2 )
+									  cyccur2 = BROTHER( X ); X != NULL; X = cyccur2, \
+									  cyccur2 != NULL ? cyccur2 = BROTHER( cyccur2 ) : cyccur2 = cyccur2 )
 #define CYCLE3_SAFES( O, X, Y ) for ( X = cycle_obj( O, Y, "CYCLE_SAFES" ), \
-									  cyccur3 = brother( X ); X != NULL; X = cyccur3, \
-									  cyccur3 != NULL ? cyccur3 = brother( cyccur3 ) : cyccur3 = cyccur3 )
+									  cyccur3 = BROTHER( X ); X != NULL; X = cyccur3, \
+									  cyccur3 != NULL ? cyccur3 = BROTHER( cyccur3 ) : cyccur3 = cyccur3 )
+
+#define CYCLE_EXT( X, Y, Z ) for ( X = EXEC_EXT( Y, Z, begin ); X != EXEC_EXT( Y, Z, end ); ++X )
+#define CYCLE_EXTS( O, X, Y, Z ) for ( X = EXEC_EXTS( O, Y, Z, begin ); X != EXEC_EXTS( O, Y, Z, end ); ++X )
 
 #ifdef NO_POINTER_INIT
 	#define CYCLE_LINK( O ) for ( O = p->node->first; O != NULL; O = O->next )
@@ -638,101 +621,93 @@ void simulation::close_sim( void ) \
 										for ( X = O->node->first; X != NULL; X = X->next )
 #endif
 
-#define CYCLE_EXT( X, Y, Z ) for ( X = EXEC_EXT( Y, Z, begin ); X != EXEC_EXT( Y, Z, end ); ++X )
-#define CYCLE_EXTS( O, X, Y, Z ) for ( X = EXEC_EXTS( O, Y, Z, begin ); X != EXEC_EXTS( O, Y, Z, end ); ++X )
-
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)
 #ifdef LEGACY_CODE
+	namespace lsd
+	{
+	#ifndef _NW_
+		#include <tk.h>
+		extern Tcl_Interp *inter;
+	#endif
 
-#ifndef _NW_
-#include <tk.h>
-extern Tcl_Interp *inter;
-#endif
+		extern std::vector < simulation * > sims;// vector holding existing simulations
+		char msg[ MAX_BUFF_SIZE ];			// legacy auxiliary buffer
+		void simulation::close_sim( void ) { }
+	}
 
-extern std::vector < simulation * > sims;// vector holding existing simulations
+	inline int deb( lsd::object *r, lsd::object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" ) { if ( lsd::sims[ 0 ]->liblnk != NULL ) return ( r->*lsd::sims[ 0 ]->liblnk->dlliblinkage::debugger ) ( c, lab, res, interact, hl_var ); else return -1; }
+	inline void cmd( const char *cm, ... ) { if ( lsd::sims[ 0 ]->liblnk != NULL ) { va_list argptr; va_start( argptr, cm ); lsd::sims[ 0 ]->liblnk->cmd_backend( cm, argptr ); va_end( argptr ); } }
 
-double poidev( double xm, long *idum_loc = NULL );
-object *go_brother( object *c );
-void cmd_gui( const char *cm, ... );
-
-char msg[ MAX_BUFF_SIZE ];				// legacy auxiliary buffer
-
-int deb( object *r, object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" ) { if ( sims[ 0 ]->liblnk != NULL ) return ( r->*sims[ 0 ]->liblnk->dlliblinkage::debugger ) ( c, lab, res, interact, hl_var ); else return -1; }
-void cmd( const char *cm, ... ) { cmd_gui( cm ); }
-void simulation::close_sim( void ) { };
-
-#define SIM ( sims[ 0 ] )				// pointer to first simulation
-#define path SIM->conf_path
-#define FUNCTION( X ) EQUATION( X )
-#define UNIFORM( X, Y ) uniform( X, Y )
-#define rnd_integer( X, Y ) uniform_int( X, Y )
-#define VL_CHEAT( X, Y, C ) V_CHEATL( X, Y, C )
-#define VS_CHEAT( X, Y, C ) V_CHEATS( X, Y, C )
-#define VLS_CHEAT( X, Y, Z, C ) V_CHEATLS( X, Y, Z, C )
-#define ADDOBJL_EX( X, Y, Z ) ADDOBJ_EXL( X, Y, Z )
-#define ADDOBJS_EX( O, X, Y ) ADDOBJ_EXS( O, X, Y )
-#define ADDOBJLS_EX( O, X, Y, Z ) ADDOBJ_EXLS( O, X, Y, Z )
-#define ADDNOBJL_EX( X, Y, Z, W ) ADDNOBJ_EXL( X, Y, Z, W )
-#define ADDNOBJS_EX( O, X, Y, Z ) ADDNOBJ_EXS( O, X, Y, Z )
-#define ADDNOBJLS_EX( O, X, Y, Z, W ) ADDNOBJ_EXLS( O, X, Y, Z, W )
-#define INIT_TSEARCHT( X, Y ) INIT_TSEARCH( X )
-#define INIT_TSEARCHTS( O, X, Y ) INIT_TSEARCHS( O, X )
-#define TSEARCH_INI( X ) INIT_TSEARCH( X )
-#define TSEARCHS_INI( O, X ) INIT_TSEARCHS( O, X )
-#define TSEARCHT_INI( X, Y ) INIT_TSEARCH( X )
-#define TSEARCHTS_INI( O, X, Y ) INIT_TSEARCHS( O, X )
-#define TSEARCHT( X, Y, Z ) TSEARCH( X, Z )
-#define TSEARCHTS( O, X, Y, Z ) TSEARCHS( O, X, Z )
-#define SORTS2( O, X, Y, L, Z ) SORT2S( O, X, Y, L, Z )
-#define RNDDRAWFAIR( X ) RNDDRAW_FAIR( X )
-#define RNDDRAWFAIRS( Z, X ) RNDDRAW_FAIRS( Z, X )
-#define RNDDRAWTOT( X, Y,T ) RNDDRAW_TOT( X, Y,T )
-#define RNDDRAWTOTL( X, Y, Z, T ) RNDDRAW_TOTL( X, Y, Z, T )
-#define RNDDRAWTOTS( Z, X, Y, T ) RNDDRAW_TOTS( Z, X, Y, T )
-#define RNDDRAWTOTLS( O, X, Y, Z, T ) RNDDRAW_TOTLS( O, X, Y, Z, T )
-#define NETWORK_INI( X, Y, Z, ... ) INIT_NET( X, Y, Z, __VA_ARGS__ )
-#define NETWORKS_INI( O, X, Y, Z, ... ) INIT_NETS( O, X, Y, Z, __VA_ARGS__ )
-#define NETWORK_LOAD( X, Y, Z ) ( p->read_file_net( X, Y, Z, seed-1, "net" ) )
-#define NETWORKS_LOAD( O, X, Y, Z ) ( O == NULL ? 0. : O->read_file_net( X, Y, Z, seed-1, "net" ) )
-#define NETWORK_SAVE( X, Y, Z ) ( p->write_file_net( X, Y, Z, seed-1, false ) )
-#define NETWORKS_SAVE( O, X, Y, Z ) ( O == NULL ? 0. : O->write_file_net( X, Y, Z , seed-1, false ) )
-#define STATS_NET( O, X ) STAT_NETS( O, X )
-#define SHUFFLE( X ) SHUFFLE_NET( X )
-#define SHUFFLES( O, X ) SHUFFLE_NETS( O, X )
-#define RNDDRAW_NET( X ) RNDDRAW_NODE( X )
-#define RNDDRAWS_NET( O, X ) RNDDRAW_NODES( O, X )
-#define SEARCH_NET( X, Y ) SEARCH_NODE( X, Y )
-#define SEARCHS_NET( O, X, Y ) SEARCH_NODES( O, X, Y )
-#define VS_NODEID( O ) V_NODEIDS( O )
-#define VS_NODENAME( O ) V_NODENAMES( O )
-#define WRITES_NODEID( O, X ) WRITE_NODEIDS( O, X )
-#define WRITES_NODENAME( O, X ) WRITE_NODENAMES( O, X )
-#define STATS_NODE( O ) STAT_NODES( O )
-#define DELETELINK( O ) DELETE_LINK( O )
-#define SEARCHS_LINK( O, X ) SEARCH_LINKS( O, X )
-#define VS_WEIGHT( O ) V_LINK( O )
-#define WRITES_WEIGHT( O, X ) WRITE_LINK( O, X )
-#define ADD_EXT( CLASS ) ADDEXT( CLASS )
-#define ADDS_EXT( O, CLASS ) ADDEXTS( O, CLASS )
-#define DELETES_EXT( O, CLASS ) DELETE_EXTS( O, CLASS )
-#define PS_EXT( O, CLASS ) P_EXTS( O, CLASS )
-#define VS_EXT( O, CLASS, OBJ ) V_EXTS( O, CLASS, OBJ )
-#define WRITES_EXT( O, CLASS, OBJ, VAL ) WRITE_EXTS( O, CLASS, OBJ, VAL )
-#define EXECS_EXT( O, CLASS, OBJ, METHOD, ... ) EXEC_EXTS( O, CLASS, OBJ, METHOD, __VA_ARGS__ )
-#define CYCLES_EXT( O, ITER, CLASS, OBJ ) CYCLE_EXTS( O, ITER, CLASS, OBJ )
-
-#define DEBUG \
-	f = fopen( "log.txt", "a" ); \
-	fprintf( f, "t=%d\t%s\t(cur=%g)\n", t, var->label, var->val[0] ); \
-	fclose( f );
-
-#define DEBUG_AT( X ) \
-	if ( t >= X ) \
-	{ \
-		DEBUG \
-	};
-
-#define CYCLES_LINK( C, O ) CYCLE_LINKS( C, O )
-
+	#define SIM ( sims[ 0 ] )				// pointer to first simulation
+	#define path ( SIM->conf_path )
+	#define poidev( ... ) ( SIM->poisson( __VA_ARGS__ ) )
+	#define go_brother( O ) BROTHER( O )
+	#define FUNCTION( X ) EQUATION( X )
+	#define UNIFORM( X, Y ) uniform( X, Y )
+	#define rnd_integer( X, Y ) uniform_int( X, Y )
+	#define VL_CHEAT( X, Y, C ) V_CHEATL( X, Y, C )
+	#define VS_CHEAT( X, Y, C ) V_CHEATS( X, Y, C )
+	#define VLS_CHEAT( X, Y, Z, C ) V_CHEATLS( X, Y, Z, C )
+	#define ADDOBJL_EX( X, Y, Z ) ADDOBJ_EXL( X, Y, Z )
+	#define ADDOBJS_EX( O, X, Y ) ADDOBJ_EXS( O, X, Y )
+	#define ADDOBJLS_EX( O, X, Y, Z ) ADDOBJ_EXLS( O, X, Y, Z )
+	#define ADDNOBJL_EX( X, Y, Z, W ) ADDNOBJ_EXL( X, Y, Z, W )
+	#define ADDNOBJS_EX( O, X, Y, Z ) ADDNOBJ_EXS( O, X, Y, Z )
+	#define ADDNOBJLS_EX( O, X, Y, Z, W ) ADDNOBJ_EXLS( O, X, Y, Z, W )
+	#define INIT_TSEARCHT( X, Y ) INIT_TSEARCH( X )
+	#define INIT_TSEARCHTS( O, X, Y ) INIT_TSEARCHS( O, X )
+	#define TSEARCH_INI( X ) INIT_TSEARCH( X )
+	#define TSEARCHS_INI( O, X ) INIT_TSEARCHS( O, X )
+	#define TSEARCHT_INI( X, Y ) INIT_TSEARCH( X )
+	#define TSEARCHTS_INI( O, X, Y ) INIT_TSEARCHS( O, X )
+	#define TSEARCHT( X, Y, Z ) TSEARCH( X, Z )
+	#define TSEARCHTS( O, X, Y, Z ) TSEARCHS( O, X, Z )
+	#define SORTS2( O, X, Y, L, Z ) SORT2S( O, X, Y, L, Z )
+	#define RNDDRAWFAIR( X ) RNDDRAW_FAIR( X )
+	#define RNDDRAWFAIRS( Z, X ) RNDDRAW_FAIRS( Z, X )
+	#define RNDDRAWTOT( X, Y,T ) RNDDRAW_TOT( X, Y,T )
+	#define RNDDRAWTOTL( X, Y, Z, T ) RNDDRAW_TOTL( X, Y, Z, T )
+	#define RNDDRAWTOTS( Z, X, Y, T ) RNDDRAW_TOTS( Z, X, Y, T )
+	#define RNDDRAWTOTLS( O, X, Y, Z, T ) RNDDRAW_TOTLS( O, X, Y, Z, T )
+	#define NETWORK_INI( X, Y, Z, ... ) INIT_NET( X, Y, Z, __VA_ARGS__ )
+	#define NETWORKS_INI( O, X, Y, Z, ... ) INIT_NETS( O, X, Y, Z, __VA_ARGS__ )
+	#define NETWORK_LOAD( X, Y, Z ) ( p->read_file_net( X, Y, Z, seed-1, "net" ) )
+	#define NETWORKS_LOAD( O, X, Y, Z ) ( O == NULL ? 0. : O->read_file_net( X, Y, Z, seed-1, "net" ) )
+	#define NETWORK_SAVE( X, Y, Z ) ( p->write_file_net( X, Y, Z, seed-1, false ) )
+	#define NETWORKS_SAVE( O, X, Y, Z ) ( O == NULL ? 0. : O->write_file_net( X, Y, Z , seed-1, false ) )
+	#define STATS_NET( O, X ) STAT_NETS( O, X )
+	#define SHUFFLE( X ) SHUFFLE_NET( X )
+	#define SHUFFLES( O, X ) SHUFFLE_NETS( O, X )
+	#define RNDDRAW_NET( X ) RNDDRAW_NODE( X )
+	#define RNDDRAWS_NET( O, X ) RNDDRAW_NODES( O, X )
+	#define SEARCH_NET( X, Y ) SEARCH_NODE( X, Y )
+	#define SEARCHS_NET( O, X, Y ) SEARCH_NODES( O, X, Y )
+	#define VS_NODEID( O ) V_NODEIDS( O )
+	#define VS_NODENAME( O ) V_NODENAMES( O )
+	#define WRITES_NODEID( O, X ) WRITE_NODEIDS( O, X )
+	#define WRITES_NODENAME( O, X ) WRITE_NODENAMES( O, X )
+	#define STATS_NODE( O ) STAT_NODES( O )
+	#define DELETELINK( O ) DELETE_LINK( O )
+	#define SEARCHS_LINK( O, X ) SEARCH_LINKS( O, X )
+	#define VS_WEIGHT( O ) V_LINK( O )
+	#define WRITES_WEIGHT( O, X ) WRITE_LINK( O, X )
+	#define ADD_EXT( CLASS ) ADDEXT( CLASS )
+	#define ADDS_EXT( O, CLASS ) ADDEXTS( O, CLASS )
+	#define DELETES_EXT( O, CLASS ) DELETE_EXTS( O, CLASS )
+	#define PS_EXT( O, CLASS ) P_EXTS( O, CLASS )
+	#define VS_EXT( O, CLASS, OBJ ) V_EXTS( O, CLASS, OBJ )
+	#define WRITES_EXT( O, CLASS, OBJ, VAL ) WRITE_EXTS( O, CLASS, OBJ, VAL )
+	#define EXECS_EXT( O, CLASS, OBJ, METHOD, ... ) EXEC_EXTS( O, CLASS, OBJ, METHOD, __VA_ARGS__ )
+	#define DEBUG \
+		f = fopen( "log.txt", "a" ); \
+		fprintf( f, "t=%d\t%s\t(cur=%g)\n", t, var->label, var->val[0] ); \
+		fclose( f );
+	#define DEBUG_AT( X ) \
+		if ( t >= X ) \
+		{ \
+			DEBUG \
+		};
+	#define CYCLES_EXT( O, ITER, CLASS, OBJ ) CYCLE_EXTS( O, ITER, CLASS, OBJ )
+	#define CYCLES_LINK( C, O ) CYCLE_LINKS( C, O )
 #endif

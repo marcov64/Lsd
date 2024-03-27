@@ -22,15 +22,18 @@
 #include "LSD.h"
 
 #ifndef _NP_
-std::mutex lock_log_tcl_err;		// lock log_tcl_error for parallel access
+namespace gui
+{
+	std::mutex lock_log_tcl_err;	// lock log_tcl_error for parallel access
+}
 #endif
 
 
-/****************************************************
+/*************************************************************
  LSD_EXIT_GUI (DLL WRAPPER)
  exit LSD after the GUI is launched
- ****************************************************/
-void lsd_exit_gui( int v )
+ *************************************************************/
+void gui::lsd_exit_gui( int v )
 {
 	if ( interp != NULL )
 	{
@@ -40,14 +43,14 @@ void lsd_exit_gui( int v )
 		Tcl_Finalize( );
 	}
 
-	lsd_exit( v );
+	lsd::lsd_exit( v );
 }
 
 
-/*********************************
+/*************************************************************
  LOAD_LMM_OPTIONS
- *********************************/
-bool load_lmm_options( void )
+ *************************************************************/
+bool gui::load_lmm_options( void )
 {
 	cmd( "set res [ file exists \"$RootLsd/$LMM_OPTIONS\" ]" );
 
@@ -76,10 +79,10 @@ bool load_lmm_options( void )
 }
 
 
-/*********************************
+/*************************************************************
  UPDATE_LMM_OPTIONS
- *********************************/
-void update_lmm_options( bool justLmmGeom )
+ *************************************************************/
+void gui::update_lmm_options( bool justLmmGeom )
 {
 	if ( justLmmGeom )
 	{
@@ -109,10 +112,10 @@ void update_lmm_options( bool justLmmGeom )
 }
 
 
-/*********************************
+/*************************************************************
  LOAD_MODEL_INFO
- *********************************/
-bool load_model_info( const char *path )
+ *************************************************************/
+bool gui::load_model_info( const char *path )
 {
 	cmd( "set res [ file exists \"%s/$MODEL_INFO\" ]", path );
 
@@ -133,10 +136,10 @@ bool load_model_info( const char *path )
 }
 
 
-/*********************************
+/*************************************************************
  UPDATE_MODEL_INFO
- *********************************/
-void update_model_info( bool fix )
+ *************************************************************/
+void gui::update_model_info( bool fix )
 {
 	int i;
 
@@ -182,11 +185,11 @@ void update_model_info( bool fix )
 }
 
 
-/****************************************************
+/*************************************************************
  INIT_TCL_TK
  initializes the Tcl/Tk environment
- ****************************************************/
-void init_tcl_tk( const char *exec, const char *tcl_app_name )
+ *************************************************************/
+void gui::init_tcl_tk( const char *exec, const char *tcl_app_name )
 {
 	int num, res;
 
@@ -265,13 +268,13 @@ void init_tcl_tk( const char *exec, const char *tcl_app_name )
 }
 
 
-/****************************************************
+/*************************************************************
  SET_ENV
  sets the required environment variables
  it does nothing if the variables already exist
  and Windows PATH has a compiler in it
- ****************************************************/
-bool set_env( bool set )
+ *************************************************************/
+bool gui::set_env( bool set )
 {
 	bool res = true;
 	char *lsd_root, cur_path[ PATH_MAX ];
@@ -284,7 +287,7 @@ bool set_env( bool set )
 		if ( lsd_root == NULL )
 		{
 			if ( getcwd( cur_path, PATH_MAX ) != NULL )
-				lsd_root = search_lsd_root( clean_path( cur_path ), PATH_MAX );
+				lsd_root = search_lsd_root( lsd::clean_path( cur_path ), PATH_MAX );
 
 			if ( lsd_root != NULL )
 			{
@@ -308,7 +311,7 @@ bool set_env( bool set )
 
 		if ( lsd_root != NULL && getenv( TCL_LIB_VAR ) == NULL )
 		{
-			lsd_root = clean_path( lsd_root );
+			lsd_root = lsd::clean_path( lsd_root );
 
 			file = new char[ strlen( lsd_root ) + strlen( TCL_LIB_PATH ) + strlen( TCL_LIB_INIT ) + 3 ];
 			sprintf( file, "%s/%s/%s", lsd_root, TCL_LIB_PATH, TCL_LIB_INIT );
@@ -324,7 +327,7 @@ bool set_env( bool set )
 				res = ! ( bool ) putenv( tcl_lib_env );
 			}
 			else
-				if ( run_system( TCL_FIND_EXE ) != 0 )
+				if ( lsd::run_system( TCL_FIND_EXE ) != 0 )
 					res = false;	// just stop if Tcl/Tk is not on path
 		}
 
@@ -369,11 +372,11 @@ bool set_env( bool set )
 }
 
 
-/****************************************************
+/*************************************************************
  SEARCH_LSD_ROOT
  searches LSD root directory upwards to the root
- ****************************************************/
-char *search_lsd_root( char *path, int pathSz )
+ *************************************************************/
+char *gui::search_lsd_root( char *path, int pathSz )
 {
 	bool miss;
 	const char *files[ ] = LSD_MIN_FILES;
@@ -391,7 +394,7 @@ char *search_lsd_root( char *path, int pathSz )
 
 	do
 	{
-		if ( getcwd( cur_dir, PATH_MAX ) == NULL || ! strcmp( clean_path( cur_dir ), last_dir ) )
+		if ( getcwd( cur_dir, PATH_MAX ) == NULL || ! strcmp( lsd::clean_path( cur_dir ), last_dir ) )
 			goto end;
 
 		for ( i = 0, miss = false; i < LSD_MIN_NUM; ++i )
@@ -410,12 +413,12 @@ char *search_lsd_root( char *path, int pathSz )
 
 		if ( ! miss )
 		{
-			strcpyn( path, cur_dir, pathSz );
+			lsd::strcpyn( path, cur_dir, pathSz );
 			found = path;
 			break;
 		}
 
-		strcpyn( last_dir, cur_dir, PATH_MAX );
+		lsd::strcpyn( last_dir, cur_dir, PATH_MAX );
 	}
 	while ( ! chdir( ".." ) );
 
@@ -426,10 +429,10 @@ char *search_lsd_root( char *path, int pathSz )
 }
 
 
-/****************************************************
+/*************************************************************
  CMD
- ****************************************************/
-void cmd( const char *cm, ... )
+ *************************************************************/
+void gui::cmd( const char *cm, ... )
 {
 	static va_list argptr;
 
@@ -439,10 +442,10 @@ void cmd( const char *cm, ... )
 }
 
 
-/****************************************************
+/*************************************************************
  CMD_BACKEND
- ****************************************************/
-void cmd_backend( const char *cm, va_list arg )
+ *************************************************************/
+void gui::cmd_backend( const char *cm, va_list arg )
 {
 	static bool bufdyn;
 	static char *buffer, bufstat[ MAX_BUFF_SIZE ];
@@ -451,7 +454,7 @@ void cmd_backend( const char *cm, va_list arg )
 
 #ifndef _NP_
 	// abort if not running in main LSD thread
-	if ( std::this_thread::get_id( ) != main_thread )
+	if ( std::this_thread::get_id( ) != lsd::main_thread )
 		return;
 #endif
 
@@ -460,6 +463,8 @@ void cmd_backend( const char *cm, va_list arg )
 	{
 #ifdef _LMM_
 		FILE *stderr_ptr = stderr;
+#else
+		FILE *stderr_ptr = lsd::stderr_ptr;
 #endif
 		fprintf( stderr_ptr, "\nTcl interpreter not initialized. Quitting LSD now.\n" );
 		lsd_exit_gui( 24 );
@@ -503,10 +508,10 @@ void cmd_backend( const char *cm, va_list arg )
 }
 
 
-/****************************************************
+/*************************************************************
  LOG_TCL_ERROR
- ****************************************************/
-void log_tcl_error( bool show, const char *cm, const char *message, ... )
+ *************************************************************/
+void gui::log_tcl_error( bool show, const char *cm, const char *message, ... )
 {
 	static char *err_path, ftime[ 80 ], fname[ MAX_PATH_LENGTH ], buffer[ MAX_BUFF_SIZE ];
 	static struct tm *timeinfo;
@@ -525,9 +530,9 @@ void log_tcl_error( bool show, const char *cm, const char *message, ... )
 	va_end( argptr );
 
 #ifdef _LMM_
-	err_path = rootLsd;
+	err_path = lsd::root_lsd;
 #else
-	err_path = model_path;
+	err_path = lsd::model_path;
 #endif
 
 	if ( err_path != NULL && strlen( err_path ) > 0 )
@@ -560,11 +565,11 @@ void log_tcl_error( bool show, const char *cm, const char *message, ... )
 }
 
 
-/****************************************************
+/*************************************************************
  TCL_LOG_TCL_ERROR
  Entry point function for access from the Tcl interpreter
- ****************************************************/
-int Tcl_log_tcl_error( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+ *************************************************************/
+int gui::Tcl_log_tcl_error( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	if ( argc != 4 || argv[ 1 ] == NULL || argv[ 2 ] == NULL || argv[ 3 ] == NULL )	// require 3 parameters
 		return TCL_ERROR;
@@ -577,11 +582,11 @@ int Tcl_log_tcl_error( ClientData cdata, Tcl_Interp *interp, int argc, const cha
 }
 
 
-/****************************************************
+/*************************************************************
  SHOW_TCL_ERROR
  Show the error message to the user
- ****************************************************/
-void show_tcl_error( const char *boxTitle, const char *errMsg, ... )
+ *************************************************************/
+void gui::show_tcl_error( const char *boxTitle, const char *errMsg, ... )
 {
 	static char logText[ MAX_LINE_SIZE ];
 	static va_list argptr;
@@ -605,13 +610,19 @@ void show_tcl_error( const char *boxTitle, const char *errMsg, ... )
 }
 
 
-/****************************************************
+/*************************************************************
  TCL_DISCARD_CHANGE
  Entry point function for access from the Tcl interpreter
- ****************************************************/
-int Tcl_discard_change( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+ *************************************************************/
+extern bool discard_change( void );
+
+int gui::Tcl_discard_change( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
+#ifdef _LMM_
+	if ( ::discard_change( ) == 1 )
+#else
 	if ( discard_change( ) == 1 )
+#endif
 		Tcl_SetResult( interp, ( char * ) "ok", TCL_VOLATILE );
 	else
 		Tcl_SetResult( interp, ( char * ) "cancel", TCL_VOLATILE );
@@ -619,31 +630,31 @@ int Tcl_discard_change( ClientData cdata, Tcl_Interp *interp, int argc, const ch
 }
 
 
-/****************************************************
+/*************************************************************
  EXISTS_VAR
- ****************************************************/
-bool exists_var( const char *lab )
+ *************************************************************/
+bool gui::exists_var( const char *lab )
 {
 	cmd( "set res [ info exists \"%s\" ]", lab );
 	return get_bool( "res" );
 }
 
 
-/****************************************************
+/*************************************************************
  EXISTS_WINDOW
- ****************************************************/
-bool exists_window( const char *lab )
+ *************************************************************/
+bool gui::exists_window( const char *lab )
 {
 	cmd( "set res [ winfo exists \"%s\" ]", lab );
 	return get_bool( "res" );
 }
 
 
-/***************************************************
+/*************************************************************
  GET_BOOL
  Set var to NULL to just get the Tcl value
- ***************************************************/
-bool get_bool( const char *tcl_var, bool *var )
+ *************************************************************/
+bool gui::get_bool( const char *tcl_var, bool *var )
 {
 	const char *strvar;
 	int intvar;
@@ -671,11 +682,11 @@ bool get_bool( const char *tcl_var, bool *var )
 }
 
 
-/***************************************************
+/*************************************************************
  GET_INT
  Set var to NULL to just get the Tcl value
- ***************************************************/
-int get_int( const char *tcl_var, int *var )
+ *************************************************************/
+int gui::get_int( const char *tcl_var, int *var )
 {
 	const char *strvar;
 	int intvar;
@@ -702,11 +713,11 @@ int get_int( const char *tcl_var, int *var )
 }
 
 
-/***************************************************
+/*************************************************************
  GET_LONG
  Set var to NULL to just get the Tcl value
- ***************************************************/
-long get_long( const char *tcl_var, long *var )
+ *************************************************************/
+long gui::get_long( const char *tcl_var, long *var )
 {
 	const char *strvar;
 	long longvar;
@@ -733,11 +744,11 @@ long get_long( const char *tcl_var, long *var )
 }
 
 
-/***************************************************
+/*************************************************************
  GET_DOUBLE
  Set var to NULL to just get the Tcl value
- ***************************************************/
-double get_double( const char *tcl_var, double *var, bool no_error )
+ *************************************************************/
+double gui::get_double( const char *tcl_var, double *var, bool no_error )
 {
 	const char *strvar;
 	double dblvar;
@@ -765,11 +776,11 @@ double get_double( const char *tcl_var, double *var, bool no_error )
 }
 
 
-/***************************************************
+/*************************************************************
  GET_STR
  Set var to NULL to just get the Tcl pointer
- ***************************************************/
-char *get_str( const char *tcl_var, char *var, int var_size )
+ *************************************************************/
+char *gui::get_str( const char *tcl_var, char *var, int var_size )
 {
 	const char *strvar = Tcl_GetVar( interp, tcl_var, 0 );
 
@@ -781,25 +792,25 @@ char *get_str( const char *tcl_var, char *var, int var_size )
 
 	if ( var != NULL && var_size > 0 )
 	{
-		strcpyn( var, strvar, var_size );
+		lsd::strcpyn( var, strvar, var_size );
 		return var;
 	}
 	else
 		return ( char * ) strvar;
 }
 
-const char *get_str( const char *tcl_var )
+const char *gui::get_str( const char *tcl_var )
 {
 	return ( const char * ) get_str( tcl_var, NULL, 0 );
 }
 
 
-/***************************************************
+/*************************************************************
  EQ_STR
  Compare if Tcl expression, evaluating it
  before comparison, is equal to C string
- ***************************************************/
-bool expr_eq( const char *tcl_exp, const char *c_str )
+ *************************************************************/
+bool gui::expr_eq( const char *tcl_exp, const char *c_str )
 {
 	const char *strvar = eval_str( tcl_exp );
 
@@ -810,13 +821,13 @@ bool expr_eq( const char *tcl_exp, const char *c_str )
 }
 
 
-/***************************************************
+/*************************************************************
  EVAL_STR
  Evaluate Tcl expression to C string
  ATTENTION: if var is NULL, the returned result
  string buffer is valid only until next Tcl invocation
- ***************************************************/
-char *eval_str( const char *tcl_exp, char *var, int var_size )
+ *************************************************************/
+char *gui::eval_str( const char *tcl_exp, char *var, int var_size )
 {
 	if ( Tcl_ExprString( interp, tcl_exp ) != TCL_OK )
 	{
@@ -826,24 +837,24 @@ char *eval_str( const char *tcl_exp, char *var, int var_size )
 
 	if ( var != NULL && var_size > 0 )
 	{
-		strcpyn( var, Tcl_GetStringResult( interp ), var_size );
+		lsd::strcpyn( var, Tcl_GetStringResult( interp ), var_size );
 		return var;
 	}
 	else
 		return ( char * ) Tcl_GetStringResult( interp );
 }
 
-const char *eval_str( const char *tcl_exp )
+const char *gui::eval_str( const char *tcl_exp )
 {
 	return ( const char * ) eval_str( tcl_exp, NULL, 0 );
 }
 
 
-/***************************************************
+/*************************************************************
  EVAL_BOOL
  Evaluate Tcl expression to C boolean
- ***************************************************/
-bool eval_bool( const char *tcl_exp )
+ *************************************************************/
+bool gui::eval_bool( const char *tcl_exp )
 {
 	int intvar;
 	long longvar;
@@ -861,21 +872,21 @@ bool eval_bool( const char *tcl_exp )
 }
 
 
-/***************************************************
+/*************************************************************
  EVAL_INT
  Evaluate Tcl expression to C integer
- ***************************************************/
-int eval_int( const char *tcl_exp )
+ *************************************************************/
+int gui::eval_int( const char *tcl_exp )
 {
 	return ( int ) eval_long( tcl_exp );
 }
 
 
-/***************************************************
+/*************************************************************
  EVAL_LONG
  Evaluate Tcl expression to C long
- ***************************************************/
-long eval_long( const char *tcl_exp )
+ *************************************************************/
+long gui::eval_long( const char *tcl_exp )
 {
 	long longvar;
 
@@ -889,11 +900,11 @@ long eval_long( const char *tcl_exp )
 }
 
 
-/***************************************************
+/*************************************************************
  EVAL_DOUBLE
  Evaluate Tcl expression to C double
- ***************************************************/
-double eval_double( const char *tcl_exp )
+ *************************************************************/
+double gui::eval_double( const char *tcl_exp )
 {
 	double dblvar;
 
@@ -907,12 +918,12 @@ double eval_double( const char *tcl_exp )
 }
 
 
-/*********************************
+/*************************************************************
  CHECK_OPTION_FILES
  check if model and system option
  files exist and create them if not
- *********************************/
-void check_option_files( bool sys )
+ *************************************************************/
+void gui::check_option_files( bool sys )
 {
 	if ( ! sys && ! eval_bool( "[ file exists \"$modelDir/$MODEL_OPTIONS\" ]" ) && eval_bool( "$modelDir ne \"\"" ) && eval_bool( "$modelDir ne $RootLsd" ) )
 	{
@@ -945,11 +956,11 @@ void check_option_files( bool sys )
 }
 
 
-/*********************************
+/*************************************************************
  GET_FUN_NAME
  get current equation file name
- *********************************/
-const char *get_fun_name( char *str, int str_sz, bool nw )
+ *************************************************************/
+const char *gui::get_fun_name( char *str, int str_sz, bool nw )
 {
 	char buf[ MAX_PATH_LENGTH ];
 	FILE *f;
@@ -981,11 +992,11 @@ error:
 }
 
 
-/*********************************
+/*************************************************************
  GET_TARGET_NAME
  get current executable file name
- *********************************/
-const char *get_target_name( char *str, int str_sz, bool nw )
+ *************************************************************/
+const char *gui::get_target_name( char *str, int str_sz, bool nw )
 {
 	char buf[ MAX_PATH_LENGTH ], buf1[ MAX_PATH_LENGTH ];
 	FILE *f;
@@ -1013,7 +1024,7 @@ const char *get_target_name( char *str, int str_sz, bool nw )
 		goto error;
 
 	sscanf( str + 7, "%994s", buf );
-	strcpyn( buf1, buf, MAX_PATH_LENGTH );
+	lsd::strcpyn( buf1, buf, MAX_PATH_LENGTH );
 
 	if ( strcmp( strupr( buf1 ), "LSD" ) == 0 )
 		strcpy( buf, "LSD" );			// LSD default target is case insensitive
@@ -1028,12 +1039,12 @@ error:
 }
 
 
-/*********************************
+/*************************************************************
  GET_PRECOMPILED_FLAG
  get current executable pre-
  compilation flag
- *********************************/
-bool get_precompiled_flag( const char *exec, bool nw )
+ *************************************************************/
+bool gui::get_precompiled_flag( const char *exec, bool nw )
 {
 	bool deftarg = true, precomp = true;		// defaults if settings are missing
 	char buf[ MAX_PATH_LENGTH ], buf1[ MAX_PATH_LENGTH ];
@@ -1042,7 +1053,7 @@ bool get_precompiled_flag( const char *exec, bool nw )
 	if ( ! nw )
 	{
 		// non default executable name - cannot use precompiled code
-		strcpyn( buf, exec, MAX_PATH_LENGTH );
+		lsd::strcpyn( buf, exec, MAX_PATH_LENGTH );
 
 		if ( platform == _WIN_ )
 			strupr( buf );
@@ -1087,13 +1098,11 @@ error:
 }
 
 
-/****************************************************
+/*************************************************************
  MAKE_NO_WINDOW
  create a no-window command-line version of LSD
- ****************************************************/
-const char *lsd_nw_src[ LSD_NW_NUM ] = LSD_NW_SRC;
-
-bool make_no_window( void )
+ *************************************************************/
+bool gui::make_no_window( void )
 {
 	int i;
 
@@ -1133,11 +1142,11 @@ bool make_no_window( void )
 }
 
 
-/*********************************
+/*************************************************************
  MAKE_MAKEFILE
  create makefiles to compile LSD
- *********************************/
-void make_makefile( bool nw )
+ *************************************************************/
+void gui::make_makefile( bool nw )
 {
 	check_option_files( );
 
@@ -1161,12 +1170,12 @@ void make_makefile( bool nw )
 }
 
 
-/*********************************
+/*************************************************************
  COMPILE_RUN
  compile LSD, GUI or command line
  and optionally execute it
- *********************************/
-bool compile_run( int run_mode, bool nw )
+ *************************************************************/
+bool gui::compile_run( int run_mode, bool nw )
 {
 	bool precompiled, ret = false;
 	char str[ 2 * MAX_PATH_LENGTH ];
@@ -1213,7 +1222,8 @@ bool compile_run( int run_mode, bool nw )
 #ifdef _LMM_
 	if ( run_mode == 0 && ! nw )// delete existing object file if it's just compiling
 	{							// to force recompilation
-		cmd( "set oldObj \"[ temp_dir ]/[ file rootname $mainExe ]/[ file rootname [ lindex [ glob -nocomplain fun_*.cpp ] 0 ] ].o\"" );
+
+		cmd( "set oldObj \"[ temp_dir ]/[ file rootname $mainExe ]/[ file tail $modelDir ]/[ file rootname [ lindex [ glob -nocomplain fun_*.cpp ] 0 ] ].o\"" );
 		cmd( "if { [ file exists \"$oldObj\" ] } { file delete \"$oldObj\" }" );
 	}
 
@@ -1324,15 +1334,15 @@ bool compile_run( int run_mode, bool nw )
 					switch ( platform )
 					{
 						case _LIN_:
-							cmd( "while { [ catch { exec -- %s/%s & } result ] && $n > 0 } { incr n -1; after 50 }", precompiled ? rootLsd : ".", str );
+							cmd( "while { [ catch { exec -- %s/%s & } result ] && $n > 0 } { incr n -1; after 50 }", precompiled ? lsd::root_lsd : ".", str );
 							break;
 
 						case _MAC_:
-							cmd( "while { [ catch { exec -- open -F -n %s/%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", precompiled ? rootLsd : ".", str );
+							cmd( "while { [ catch { exec -- open -F -n %s/%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", precompiled ? lsd::root_lsd : ".", str );
 							break;
 
 						case _WIN_:
-							cmd( "while { [ catch { exec -- [ file nativename \"%s/%s\" ] & } result ] && $n > 0 } { incr n -1; after 50 }", precompiled ? rootLsd : ".", str );
+							cmd( "while { [ catch { exec -- [ file nativename \"%s/%s\" ] & } result ] && $n > 0 } { incr n -1; after 50 }", precompiled ? lsd::root_lsd : ".", str );
 							break;
 					}
 				}
@@ -1369,10 +1379,170 @@ end:
 }
 
 
-/***************************************************
+/*************************************************************
+ SHOW_COMP_RESULT
+ *************************************************************/
+void gui::show_comp_result( bool nw )
+{
+	cmd( "set cerr 1.0" );						// search start position in file
+	cmd( "set error \" error:\"" );				// error string to be searched
+	cmd( "set errfil \"\"" );
+	cmd( "set errlin \"\"" );
+	cmd( "set errcol \"\"" );
+
+	cmd( "newtop .mm \"Compilation Errors%s\" { .mm.b.close invoke } \"\"", nw ? " (No Window Version)" : "" );
+
+	cmd( "ttk::label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Click on 'Go to Error' to open the equation file on the indicated line.\n- Consider that the error may have been originated in the previous lines.\n- Start fixing errors at the beginning of the list, subsequent errors may be due to previous ones.\"" );
+	cmd( "pack .mm.lab" );
+
+	cmd( "ttk::frame .mm.t" );
+	cmd( "ttk::scrollbar .mm.t.yscroll -command \".mm.t.t yview\"" );
+	cmd( "ttk::text .mm.t.t -yscrollcommand \".mm.t.yscroll set\" -wrap word -entry 0 -dark $darkTheme -style smallFixed.TText" );
+	cmd( "pack .mm.t.yscroll -side right -fill y" );
+	cmd( "pack .mm.t.t -expand yes -fill both" );
+	cmd( "mouse_wheel .mm.t.t" );
+
+	cmd( "pack .mm.t -expand yes -fill both" );
+
+	cmd( "ttk::frame .mm.i" );
+
+	cmd( "ttk::frame .mm.i.f" );
+	cmd( "ttk::label .mm.i.f.l -text \"File:\"" );
+	cmd( "ttk::label .mm.i.f.n -anchor w -width 50 -style hl.TLabel" );
+	cmd( "pack .mm.i.f.l .mm.i.f.n -side left" );
+
+	cmd( "ttk::frame .mm.i.l" );
+	cmd( "ttk::label .mm.i.l.l -text \"Line:\"" );
+	cmd( "ttk::label .mm.i.l.n -anchor w -width 5 -style hl.TLabel" );
+	cmd( "pack .mm.i.l.l .mm.i.l.n -side left" );
+
+	cmd( "ttk::frame .mm.i.c" );
+	cmd( "ttk::label .mm.i.c.l -text \"Column:\"" );
+	cmd( "ttk::label .mm.i.c.n -anchor w -width 5 -style hl.TLabel" );
+	cmd( "pack .mm.i.c.l .mm.i.c.n -side left" );
+
+	cmd( "pack .mm.i.f .mm.i.l .mm.i.c -padx 10 -pady 5 -side left" );
+	cmd( "pack .mm.i" );
+
+	cmd( "tooltip::tooltip .mm.i \"File, line and column of error\"" );
+
+	cmd( "ttk::frame .mm.b" );
+
+	cmd( "ttk::button .mm.b.perr -width [ expr { $butWid + 4 } ] -text \"Previous Error\" -underline 0 -command { \
+			focus .mm.t.t; \
+			set start \"$cerr linestart\"; \
+			set errtemp [ .mm.t.t search -nocase -regexp -count errlen -backward -- $error $start 1.0];	 \
+			if { [ string length $errtemp ] != 0 } { \
+				set cerr $errtemp; \
+				.mm.t.t mark set insert $errtemp; \
+				.mm.t.t tag remove sel 1.0 end; \
+				.mm.t.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; \
+				.mm.t.t see $errtemp; \
+				set errdat [ split [ .mm.t.t get \"$errtemp linestart\" \"$errtemp lineend\" ] : ]; \
+				if { [ string length [ lindex $errdat 0 ] ] == 1 } { \
+					set errfil \"[ lindex $errdat 0 ]:[ lindex $errdat 1 ]\"; \
+					set idxfil 2 \
+				} else { \
+					set errfil \"[ lindex $errdat 0 ]\"; \
+					set idxfil 1 \
+				}; \
+				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
+					set errlin [ lindex $errdat $idxfil ] \
+				} else { \
+					set errlin	\"\" \
+				}; \
+				incr idxfil; \
+				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
+					set errcol [ lindex $errdat $idxfil ] \
+				} else { \
+					set errcol \"\" \
+				}; \
+				.mm.i.f.n configure -text $errfil; \
+				.mm.i.l.n configure -text $errlin; \
+				.mm.i.c.n configure -text $errcol; \
+			} \
+		}" );
+	cmd( "ttk::button .mm.b.gerr -width [ expr { $butWid + 4 } ] -text \"Go to Error\" -underline 0 -command { set choice 87 }" );
+	cmd( "ttk::button .mm.b.ferr -width [ expr { $butWid + 4 } ] -text \"Next Error\" -underline 0 -command { \
+			focus .mm.t.t; \
+			if { ! [ string equal $cerr 1.0 ] } { \
+				set start \"$cerr lineend\" \
+			} else { \
+				set start 1.0 \
+			}; \
+			set errtemp [ .mm.t.t search -nocase -regexp -count errlen -- $error $start end ]; \
+			if { [ string length $errtemp ] != 0 } { \
+				set cerr $errtemp; \
+				.mm.t.t mark set insert \"$errtemp + $errlen ch\"; \
+				.mm.t.t tag remove sel 1.0 end; \
+				.mm.t.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; \
+				.mm.t.t see $errtemp; \
+				set errdat [ split [ .mm.t.t get \"$errtemp linestart\" \"$errtemp lineend\" ] : ]; \
+				if { [ string length [ lindex $errdat 0 ] ] == 1 } { \
+					set errfil \"[ lindex $errdat 0 ]:[ lindex $errdat 1 ]\"; \
+					set idxfil 2 \
+				} else { \
+					set errfil \"[ lindex $errdat 0 ]\"; \
+					set idxfil 1 \
+				}; \
+				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
+					set errlin [ lindex $errdat $idxfil ] \
+				} else { \
+					set errlin	\"\" \
+				}; \
+				incr idxfil; \
+				if { $errfil ne \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
+					set errcol [ lindex $errdat $idxfil ] \
+				} else { \
+					set errcol \"\" \
+				}; \
+				.mm.i.f.n configure -text $errfil; \
+				.mm.i.l.n configure -text $errlin; \
+				.mm.i.c.n configure -text $errcol; \
+			} \
+		}" );
+	cmd( "ttk::button .mm.b.close -width [ expr { $butWid + 4 } ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; focustop .f.t.t; set keepfocus 0 }" );
+	cmd( "pack .mm.b.perr .mm.b.gerr .mm.b.ferr .mm.b.close -padx $butSpc -expand yes -fill x -side left" );
+	cmd( "pack .mm.b -padx $butPad -pady $butPad -side right" );
+
+	cmd( "tooltip::tooltip .mm.b.perr \"Show previous error line\"" );
+	cmd( "tooltip::tooltip .mm.b.gerr \"Edit error line in LMM\"" );
+	cmd( "tooltip::tooltip .mm.b.ferr \"Show next error line\"" );
+	cmd( "tooltip::tooltip .mm.b.close \"Close this window\"" );
+
+	cmd( "bind .mm <p> { .mm.b.perr invoke }; bind .mm <P> { .mm.b.perr invoke }" );
+	cmd( "bind .mm.t.t <Up> { .mm.b.perr invoke; break }" );
+	cmd( "bind .mm.t.t <Left> { .mm.b.perr invoke; break }" );
+	cmd( "bind .mm <g> { .mm.b.gerr invoke }; bind .mm <G> { .mm.b.gerr invoke }" );
+	cmd( "bind .mm <n> { .mm.b.ferr invoke }; bind .mm <N> { .mm.b.ferr invoke }" );
+	cmd( "bind .mm.t.t <Down> { .mm.b.ferr invoke; break }" );
+	cmd( "bind .mm.t.t <Right> { .mm.b.ferr invoke; break }" );
+	cmd( "bind .mm <d> { .mm.b.close invoke }; bind .mm <D> { .mm.b.close invoke }" );
+	cmd( "bind .mm.t.t <KeyPress-Return> { .mm.b.gerr invoke }" );
+	cmd( "bind .mm <KeyPress-Escape> { .mm.b.close invoke }" );
+	cmd( "bind .mm.b.perr <KeyPress-Return> { .mm.b.perr invoke }" );
+	cmd( "bind .mm.b.gerr <KeyPress-Return> { .mm.b.gerr invoke }" );
+	cmd( "bind .mm.b.ferr <KeyPress-Return> { .mm.b.ferr invoke }" );
+	cmd( "bind .mm.b.close <KeyPress-Return> { .mm.b.close invoke }" );
+
+	cmd( "showtop .mm lefttoW no no no" );
+	cmd( "mousewarpto .mm.b.gerr 0" );
+
+	cmd( "if [ file exists \"$modelDir/makemessage.txt\" ] { set file [ open \"$modelDir/makemessage.txt\" ]; .mm.t.t insert end [ read -nonewline $file ]; close $file } { .mm.t.t insert end \"(no compilation errors)\" }" );
+	cmd( ".mm.t.t mark set insert \"1.0\"" );
+	cmd( ".mm.b.ferr invoke" );
+
+	cmd( ".mm.t.t configure -state disabled" );
+	cmd( "focustop .mm.t.t" );
+	cmd( "set keepfocus 1" );
+	cmd( "update" );
+}
+
+
+/*************************************************************
  CLEAN_SPACES
- ***************************************************/
-void clean_spaces( char *s )
+ *************************************************************/
+void gui::clean_spaces( char *s )
 {
 	int i, j, len;
 
@@ -1396,15 +1566,15 @@ void clean_spaces( char *s )
 		}
 
 	app[ j ] = '\0';
-	strcpyn( s, app, len + 1 );
+	lsd::strcpyn( s, app, len + 1 );
 }
 
 
-/****************************************************
+/*************************************************************
  WIN_PATH
  convert linux path to Windows default, replacing / with \
- ****************************************************/
-std::string win_path( std::string filepath )
+ *************************************************************/
+std::string gui::win_path( std::string filepath )
 {
 	std::string winpath;
 
@@ -1418,11 +1588,11 @@ std::string win_path( std::string filepath )
 }
 
 
-/***************************************************
+/*************************************************************
  STRTCL
  convert a string to proper Tcl format
- ***************************************************/
-char *strtcl( char *out, const char *text, int outSz )
+ *************************************************************/
+char *gui::strtcl( char *out, const char *text, int outSz )
 {
 	int i, j;
 

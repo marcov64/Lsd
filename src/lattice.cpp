@@ -13,19 +13,19 @@
  *************************************************************/
 
 /*************************************************************
-LATTICE.CPP
-Contains the functions to work with graphical lattices on the
-GUI. The basic functions are stored in LATTICELIB.CPP.
-*************************************************************/
+ LATTICE.CPP
+ Contains the functions to work with graphical lattices on the
+ GUI. The basic functions are stored in LATTICELIB.CPP.
+ *************************************************************/
 
 #include "LSD.h"
 
 
-/***************************************************
-INIT_LATTICE_HELPER (DLL WRAPPER)
-Initialize the GUI part of the lattice.
-***************************************************/
-void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, int init_color )
+/*************************************************************
+ INIT_LATTICE_HELPER (DLL WRAPPER)
+ Initialize the GUI part of the lattice.
+ *************************************************************/
+void gui::init_lattice_helper( double pixW, double pixH, double nrow, double ncol, int init_color )
 {
 	char init_color_string[ 32 ];	// the final string to be used to define tk color to use
 	int hsize, vsize, hsizeMax, vsizeMax;
@@ -113,11 +113,11 @@ void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, in
 }
 
 
-/***************************************************
-UPDATE_LATTICE_HELPER (DLL WRAPPER)
-Update the GUI part of the lattice.
-***************************************************/
-double update_lattice_helper( double line, double col, double val, int line_int, int col_int, int val_int )
+/*************************************************************
+ UPDATE_LATTICE_HELPER (DLL WRAPPER)
+ Update the GUI part of the lattice.
+ *************************************************************/
+double gui::update_lattice_helper( double line, double col, double val, int line_int, int col_int, int val_int )
 {
 	char val_string[ 32 ];		// the final string to be used to define tk color to use
 
@@ -140,11 +140,11 @@ double update_lattice_helper( double line, double col, double val, int line_int,
 }
 
 
-/***************************************************
-SAVE_LATTICE_HELPER (DLL WRAPPER)
-Save the existing GUI lattice (if any).
-***************************************************/
-double save_lattice_helper( const char *fname )
+/*************************************************************
+ SAVE_LATTICE_HELPER (DLL WRAPPER)
+ Save the existing GUI lattice (if any).
+ *************************************************************/
+double gui::save_lattice_helper( const char *fname )
 {
 	// avoid operation if no canvas or no file name
 	if ( ! exists_window( ".lat.c" ) || fname == NULL || strlen( fname ) == 0 )

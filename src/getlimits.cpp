@@ -13,11 +13,11 @@
  *************************************************************/
 
 /*************************************************************
-GETLIMITS.CPP
-Executes the lsd_getlimits command line utility.
+ GETLIMITS.CPP
+ Executes the lsd_getlimits command line utility.
 
-Lists all initial values ranges and configuration.
-*************************************************************/
+ Lists all initial values ranges and configuration.
+ *************************************************************/
 
 #include "lib/libLSD.h"		// LSD library classes
 
@@ -32,9 +32,7 @@ Lists all initial values ranges and configuration.
 #define MAX_SEED 100000
 #define DESC_SEED "First seed to be used to initialize the pseudorandom number generator"
 
-
 #define SEP	",;\t"			// column separators to use
-
 
 bool conf_ok = false;		// a valid configuration file is loaded
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
@@ -83,11 +81,11 @@ int stack_level;			// LSD stack call level
 int stack_info = 0;			// LSD stack control
 long nodesSerial = 1;		// network node's serial number global counter
 unsigned seed = 1;			// random number generator initial seed
-description *descr = NULL;	// model description structure
+lsd::description *descr = NULL;	// model description structure
 lsdstack *stack_log = NULL;	// LSD stack
-object *blueprint = NULL;	// LSD blueprint (effective model in use)
-object *root = NULL;		// LSD root object
-object *wait_delete = NULL;	// LSD object waiting for deletion
+lsd::object *blueprint = NULL;	// LSD blueprint (effective model in use)
+lsd::object *root = NULL;		// LSD root object
+lsd::object *wait_delete = NULL;	// LSD object waiting for deletion
 o_setT obj_list;			// set with all existing LSD objects
 sensitivity *sens = NULL;	// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
@@ -106,9 +104,9 @@ const char lsdCmdDsc[ ] = "It reads a LSD configuration file (.lsd) and a LSD se
 const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd' the configuration file to use\n'-s FILENAME.sa' the sensitivity analysis file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n";
 
 
-/*********************************
+/*************************************************************
  LSDMAIN
- *********************************/
+ *************************************************************/
 int lsdmain( int argn, const char **argv )
 {
 	int i, confs;
@@ -175,7 +173,7 @@ int lsdmain( int argn, const char **argv )
 	i = strlen( conf_name );
 	conf_name[ i > 4 ? i - 4 : i ] = '\0';
 
-	root = new object;
+	root = new lsd::object;
 	root->init( NULL, "Root" );
 	add_description( "Root" );
 	reset_blueprint( NULL );
@@ -272,14 +270,14 @@ int lsdmain( int argn, const char **argv )
 }
 
 
-/*********************************
-FUN
-Dummy for linking
-*********************************/
-double variable::fun( object* r ) { return NAN; }
+/*************************************************************
+ FUN
+ Dummy for linking
+ *************************************************************/
+double variable::fun( lsd::object* r ) { return NAN; }
 
 
-/*********************************
-ALLOC_SAVE_VAR
-*********************************/
+/*************************************************************
+ ALLOC_SAVE_VAR
+ *************************************************************/
 bool variable::alloc_save_var( void ) { return true; }

@@ -13,64 +13,69 @@
  *************************************************************/
 
 /*************************************************************
-DRAW.CPP
-Draws the graphical representation of the model. It is activated by
-INTERF.CPP only in case a model is loaded.
+ DRAW.CPP
+ Draws the graphical representation of the model. It is
+ activated by INTERF.CPP only in case a model is loaded.
 
-The main functions contained in this file are:
+ The main functions contained in this file are:
 
-- void object::show_graph( )
-initialize the canvas and calls show_obj for this
+ - void lsd::object::show_graph( )
+ initialize the canvas and calls show_obj for this
 
-- void object::draw_obj( object *sel, int level, int center, int from )
-recursive function that according to the level of the object type sets the
-distances among the objects. Rather rigid, but it should work nicely
-for most of the model structures. It assigns all the labels (above and below the
-symbols) and the writing bound to the mouse.
+ - void lsd::object::draw_obj( object *sel, int level, int center, int from )
+ recursive function that according to the level of the object
+ type sets the distances among the objects. Rather rigid, but
+ it should work nicely for most of the model structures. It
+ assigns all the labels (above and below the symbols) and the
+ writing bound to the mouse.
 
-- void put_node( int x1, int y1, int x2, int y2, const char *str, bool sel )
-Draw the circle.
+ - void lsd::put_node( int x1, int y1, int x2, int y2, const char *str, bool sel )
+ Draw the circle.
 
-- void put_line( int x1, int y1, int x2, int y2 )
-draw the line
+ - void lsd::put_line( int x1, int y1, int x2, int y2 )
+ draw the line
 
-- void put_text( const char *str, const char *num, int x, int y, const char *str2 );
-Draw the different texts and sets the bindings
-*************************************************************/
+ - void lsd::put_text( const char *str, const char *num, int x, int y, const char *str2 );
+ Draw the different texts and sets the bindings
+ *************************************************************/
 
 #include "LSD.h"
 
-float level_factor[ MAX_LEVEL ];
-int range;
-int range_type;
+namespace lsd
+{
+	float level_factor[ MAX_LEVEL ];
+	int range;
+	int range_type;
+}
 
-/****************************************************
-SHOW_GRAPH
-****************************************************/
-void object::show_graph( void )
+
+/*************************************************************
+ SHOW_GRAPH
+ *************************************************************/
+void lsd::object::show_graph( void )
 {
 	object *top;
 
-	if ( ! sim->conf_ok || ! strWindowOn )		// model structure window is deactivated?
+	if ( ! sim->conf_ok || ! gui::strWindowOn )// model structure window is deactivated?
 	{
 		cmd( "destroytop .str" );
 		return;
 	}
 
-	lastObj = this;
+	gui::lastObj = this;
 
 	for ( top = this; top->up != NULL; top = top->up );
 
-	if ( ! exists_window( ".str" ) )			// build window only if needed
+	if ( ! gui::exists_window( ".str" ) )	// build window only if needed
 	{
 		cmd( "newtop .str \"\" { set strWindowOn 0; set choice 23 } \"\"" );
 		cmd( "wm transient .str ." );
 		cmd( "sizetop .str" );
 	}
 	else
-		cmd( "destroy .str.f" );										// or just recreate canvas
+		cmd( "destroy .str.f" );			// or just recreate canvas
 
-	cmd( "wm title .str \"%s%s - LSD Model Structure\"", unsaved_change( ) ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
+	cmd( "wm title .str \"%s%s - LSD Model Structure\"", gui::unsaved_change( ) ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
 
 	cmd( "ttk::frame .str.f" );
 	cmd( "ttk::canvas .str.f.c -xscrollincrement 1 -entry 0 -dark $darkTheme" );
@@ -139,7 +144,7 @@ void object::show_graph( void )
 	cmd( ".str.f.c.v.a add command -label Object -command { set choice 3 }" );
 
 	cmd( "bind .str <F1> { LsdHelp graphrep.html }" );
-	set_shortcuts( ".str" );
+	gui::set_shortcuts( ".str" );
 
 	cmd( "if { [ winfo exists .plt ] } { lower .str .plt }" );
 
@@ -147,10 +152,10 @@ void object::show_graph( void )
 }
 
 
-/****************************************************
-DRAW_BUTTONS
-****************************************************/
-void draw_buttons( void )
+/*************************************************************
+ DRAW_BUTTONS
+ *************************************************************/
+void lsd::object::draw_buttons( void )
 {
 	cmd( "set n [ scan [ .str.f.c bbox all ] \"%%d %%d %%d %%d\" x1 y1 x2 y2 ]" );
 	cmd( "set cx1 [ .str.f.c canvasx 0 ]" );
@@ -212,10 +217,10 @@ void draw_buttons( void )
 }
 
 
-/****************************************************
-CREATE_FLOAT_LIST
-****************************************************/
-void object::create_float_list( void )
+/*************************************************************
+ CREATE_FLOAT_LIST
+ *************************************************************/
+void lsd::object::create_float_list( void )
 {
 	bool sp_upd;
 	variable *cv;
@@ -273,10 +278,10 @@ void object::create_float_list( void )
 }
 
 
-/****************************************************
-DRAW_OBJ
-****************************************************/
-void object::draw_obj( object *sel, int level, int center, int from, bool zeroinst )
+/*************************************************************
+ DRAW_OBJ
+ *************************************************************/
+void lsd::object::draw_obj( object *sel, int level, int center, int from, bool zeroinst )
 {
 	bool fit_wid, to_compute;
 	double h_fact, v_fact, range_fact;
@@ -287,11 +292,11 @@ void object::draw_obj( object *sel, int level, int center, int from, bool zeroin
 
 	create_float_list( );		// create floating element list
 
-	h_fact = get_double( "hfactM" );
-	v_fact = get_double( "vfactM" );
-	range_fact = get_double( "rfactM" );
-	range_init = get_int( "rinitM" );
-	step_level = get_int( "vstepM" );
+	h_fact = gui::get_double( "hfactM" );
+	v_fact = gui::get_double( "vfactM" );
+	range_fact = gui::get_double( "rfactM" );
+	range_init = gui::get_int( "rinitM" );
+	step_level = gui::get_int( "vstepM" );
 	step_level = round( step_level * v_fact );
 
 	// find current tree depth
@@ -358,7 +363,7 @@ void object::draw_obj( object *sel, int level, int center, int from, bool zeroin
 					break;
 				}
 
-				skip_next_obj( cur, &count );
+				next_count( cur, & count );
 				snprintf( str, MAX_LINE_SIZE, "%s%d", strlen( ch1 ) > 0 ? " " : "", count );
 				strcatn( ch1, str, MAX_LINE_SIZE );
 
@@ -390,7 +395,7 @@ void object::draw_obj( object *sel, int level, int center, int from, bool zeroin
 	else
 	{
 		cmd( ".str.f.c delete all" );
-		level = get_int( "borderM" );
+		level = gui::get_int( "borderM" );
 		center = 0;
 	}
 
@@ -483,28 +488,28 @@ void object::draw_obj( object *sel, int level, int center, int from, bool zeroin
 }
 
 
-/****************************************************
-PUT_NODE
-****************************************************/
-void put_node( int x, int y, const char *str, bool sel )
+/*************************************************************
+ PUT_NODE
+ *************************************************************/
+void lsd::object::put_node( int x, int y, const char *str, bool sel )
 {
 	cmd( ".str.f.c create oval [ expr { %d - $nsizeM / 2 } ] [ expr { %d + $vmarginM - $nsizeM / 2 } ] [ expr { %d + $nsizeM / 2 } ] [ expr { %d + $vmarginM + $nsizeM / 2 } ] -fill $colorsTheme(%s) -outline $colorsTheme(dfg) -tags %s", x, y, x, y, sel ? "hc" : "isbg", str );
 }
 
 
-/****************************************************
-PUT_LINE
-****************************************************/
-void put_line( int x1, int y1, int x2 )
+/*************************************************************
+ PUT_LINE
+ *************************************************************/
+void lsd::object::put_line( int x1, int y1, int x2 )
 {
 	cmd( ".str.f.c create line %d [ expr { round ( %d - $vstepM * $vfactM + $vmarginM + $nsizeM / 2 ) } ] %d [ expr { round ( %d + $nsizeM / 2 ) } ] -fill $colorsTheme(dfg)", x1, y1, x2, y1 );
 }
 
 
-/****************************************************
-PUT_TEXT
-****************************************************/
-void put_text( const char *str, const char *n, int x, int y, const char *str2 )
+/*************************************************************
+ PUT_TEXT
+ *************************************************************/
+void lsd::object::put_text( const char *str, const char *n, int x, int y, const char *str2 )
 {
 	cmd( ".str.f.c create text %d %d -text \"%s\" -fill $colorsTheme(hl) -tags %s", x, y - 1, str, str2 );
 

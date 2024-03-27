@@ -13,11 +13,11 @@
  *************************************************************/
 
 /*************************************************************
-MCSTATS.CPP
-Execute the lsd_mcstats command line utility.
+ MCSTATS.CPP
+ Execute the lsd_mcstats command line utility.
 
-Generate Monte Carlo experiment statistic files.
-*************************************************************/
+ Generate Monte Carlo experiment statistic files.
+ *************************************************************/
 
 #include "lib/libLSD.h"		// LSD library classes
 
@@ -85,7 +85,7 @@ class vector2D
 		vector < T > data;
 };
 
-void save_csv( const char *base, const char *suffix, vector < string > header, vector2D < double > data, int rows, int cols );
+void gui::save_csv( const char *base, const char *suffix, vector < string > header, vector2D < double > data, int rows, int cols );
 
 // constant string arrays
 const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
@@ -101,10 +101,10 @@ const char lsdCmdDsc[ ] = "It reads a set of CSV (comma separated values) result
 const char lsdCmdHlp[ ] = "Command line options:\n'-o OUTPUT' base name for the comma separated output text files\n'-f FILENAME1.csv FILENAME2.csv ...' the MC experiment result files to use\n";
 
 
-/*********************************
+/*************************************************************
  LSDMAIN
- *********************************/
-int lsdmain( int argn, const char **argv )
+ *************************************************************/
+int gui::lsdmain( int argn, const char **argv )
 {
 	char ch, *linbuf, *tok;
 	double val, sum, sumsq, maxv, minv;
@@ -319,11 +319,11 @@ int lsdmain( int argn, const char **argv )
 }
 
 
-/***************************************************
+/*************************************************************
  SAVE_CSV
  save table to CSV file
- ***************************************************/
-void save_csv( const char *base, const char *suffix, vector < string > header, vector2D < double > data, int rows, int cols )
+ *************************************************************/
+void gui::save_csv( const char *base, const char *suffix, vector < string > header, vector2D < double > data, int rows, int cols )
 {
 	char fn[ strlen( base ) + strlen( suffix ) + 6 ];
 	int i, j, k;

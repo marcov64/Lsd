@@ -13,42 +13,47 @@
  *************************************************************/
 
 /*************************************************************
-RUNTIME.CPP
-Contains initialization and management of run-time plotting
+ RUNTIME.CPP
+ Contains initialization and management of run-time plotting
 
-The main functions contained here are:
+ The main functions contained here are:
 
-- void object::prepare_plot( int id_sim )
-Checks is there are LSD variables to plot. If not, returns immediately. Otherwise
-initialize the run time global variables. Namely, the vector of the labels for
-the variables of plot. The plot window is initialized according to the id_sim name
+ - void lsd::object::prepare_plot( int id_sim )
+ Checks is there are LSD variables to plot. If not, returns
+ immediately. Otherwise initialize the run time global variables.
+ Namely, the vector of the labels for the variables of plot.
+ The plot window is initialized according to the id_sim name
 
-- void object::count_plot_vars( int *i );
-Recursive function that increments i of one for any variable to plot.
+ - void lsd::object::count_plot_vars( int *i );
+ Recursive function that increments i of one for any variable
+ to plot.
 
-- void object::assign_plot_vars( int *i, const char *lab );
-Create a list of Variables to plot and create the list of labels (adding
-the indexes if necessary) to be used in the plot.
+ - void lsd::object::assign_plot_vars( int *i, const char *lab );
+ Create a list of Variables to plot and create the list of labels
+ (adding the indexes if necessary) to be used in the plot.
 
-- void init_plot( int i );
-create the canvas for the plot, the lines, button, labels, etc.
+ - void init_plot( int i );
+ create the canvas for the plot, the lines, button, labels, etc.
 
-- void variable::plot_runtime( )
-the function used run time to plot the value of this variable
-*************************************************************/
+ - void variable::plot_runtime( )
+ the function used run time to plot the value of this variable
+ *************************************************************/
 
 #include "LSD.h"
 
-char intval[ 100 ];				// string buffer
-double ymed;
-double *old_val;
-variable **list_var;
+namespace lsd
+{
+	double ymax;					// runtime plot limits
+	double ymin;
+	double *old_val;
+	variable **list_var;
+}
 
 
-/**************************************
-PREPARE_PLOT
-**************************************/
-void object::prepare_plot( int id_sim )
+/*************************************************************
+ PREPARE_PLOT
+ *************************************************************/
+void lsd::object::prepare_plot( int id_sim )
 {
 	int i = 0;
 	char lab[ MAX_ELEM_LENGTH ];
@@ -66,15 +71,15 @@ void object::prepare_plot( int id_sim )
 	i = 0;
 	assign_plot_vars( &i, lab );
 
-	if ( add_rt_plot_tab( ".plt", id_sim ) )
-		init_plot( i );
+	if ( gui::add_rt_plot_tab( ".plt", id_sim ) )
+		gui::init_plot( i );
 }
 
 
-/**************************************
-COUNT_PLOT_VARS
-**************************************/
-void object::count_plot_vars( int *count )
+/*************************************************************
+ COUNT_PLOT_VARS
+ *************************************************************/
+void lsd::object::count_plot_vars( int *count )
 {
 	bridge *cb;
 	object *cur;
@@ -90,10 +95,10 @@ void object::count_plot_vars( int *count )
 }
 
 
-/**************************************
-ASSIGN_PLOT_VARS
-**************************************/
-void object::assign_plot_vars( int *i, const char *lab )
+/*************************************************************
+ ASSIGN_PLOT_VARS
+ *************************************************************/
+void lsd::object::assign_plot_vars( int *i, const char *lab )
 {
 	char cur_lab[ MAX_ELEM_LENGTH ];
 	int j;
@@ -116,7 +121,7 @@ void object::assign_plot_vars( int *i, const char *lab )
 
 		cur = cb->head;
 		if ( cur->next != NULL )		// multiple instances
-			for ( j = 1, cur1 = cur; cur1 != NULL; cur1 = go_brother( cur1 ), ++j )
+			for ( j = 1, cur1 = cur; cur1 != NULL; cur1 = BROTHER( cur1 ), ++j )
 			{
 				snprintf( cur_lab, MAX_ELEM_LENGTH, "%s#%d", lab, j );
 				cur1->assign_plot_vars( i, cur_lab );
@@ -127,10 +132,10 @@ void object::assign_plot_vars( int *i, const char *lab )
 }
 
 
-/**************************************
-ADD_RT_PLOT_TAB
-**************************************/
-bool add_rt_plot_tab( const char *w, int id_sim )
+/*************************************************************
+ ADD_RT_PLOT_TAB
+ *************************************************************/
+bool gui::add_rt_plot_tab( const char *w, int id_sim )
 {
 	int i, j, k, cols, rows, dbut, tabs;
 
@@ -249,10 +254,10 @@ bool add_rt_plot_tab( const char *w, int id_sim )
 }
 
 
-/**************************************
-INIT_PLOT
-**************************************/
-void init_plot( int num )
+/*************************************************************
+ INIT_PLOT
+ *************************************************************/
+void gui::init_plot( int num )
 {
 	int i;
 
@@ -386,23 +391,23 @@ void init_plot( int num )
 }
 
 
-/**************************************
-PLOT_RUNTIME
-**************************************/
-void variable::plot_runtime( void )
+/*************************************************************
+ PLOT_RUNTIME
+ *************************************************************/
+void lsd::variable::plot_runtime( void )
 {
 	bool relabel = false;
 	int height, p_digits;
-	double value, scale, zero_lim;
+	double value, scale, zero_lim, ymed;
 
-	if ( ! exists_var( "activeplot" ) || ! exists_window( "$activeplot.c.c.cn" ) )
+	if ( ! gui::exists_var( "activeplot" ) || ! gui::exists_window( "$activeplot.c.c.cn" ) )
 		return;
 
-	height = get_int( "vsizeR" );
-	p_digits = get_int( "pdigitsR" );
+	height = gui::get_int( "vsizeR" );
+	p_digits = gui::get_int( "pdigitsR" );
 
 	// limit the number of run-time plot variables
-	if ( cur_plt > 100 )
+	if ( gui::cur_plt > 100 )
 		return;
 
 	if ( ymax == ymin )			// very initial setting
@@ -460,7 +465,7 @@ void variable::plot_runtime( void )
 	if ( sim->t == 1 )
 	{
 		if ( param != 1 && num_lag > 0 )
-			old_val[ cur_plt ] = val[ 1 ];
+			old_val[ gui::cur_plt ] = val[ 1 ];
 		else
 			goto end;
 	}
@@ -468,21 +473,21 @@ void variable::plot_runtime( void )
 	cmd( "set x1 [ expr { floor( $cvhmarginR + %d * $plot_step ) } ]", sim->t );
 	cmd( "set x2 [ expr { floor( $cvhmarginR + ( %d - 1 ) * $plot_step ) } ]", sim->t );
 	cmd( "set y1 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", val[ 0 ], ymin, ymax, ymin );
-	cmd( "set y2 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", old_val[ cur_plt ], ymin, ymax, ymin );
+	cmd( "set y2 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", old_val[ gui::cur_plt ], ymin, ymax, ymin );
 
-	cmd( "$activeplot.c.c.cn create line $x2 $y2 $x1 $y1 -tag punto -fill $c%d", cur_plt );
+	cmd( "$activeplot.c.c.cn create line $x2 $y2 $x1 $y1 -tag punto -fill $c%d", gui::cur_plt );
 
 	end:
 
-	old_val[ cur_plt ] = val[ 0 ];
-	++cur_plt;
+	old_val[ gui::cur_plt ] = val[ 0 ];
+	++gui::cur_plt;
 }
 
 
-/**************************************
-RESET_PLOT
-**************************************/
-void reset_plot( void )
+/*************************************************************
+ RESET_PLOT
+ *************************************************************/
+void gui::reset_plot( void )
 {
 	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] } { \
 			$activeplot.fond.go conf -state disabled; \
@@ -500,10 +505,10 @@ void reset_plot( void )
 }
 
 
-/**************************************
-ENABLE_PLOT
-**************************************/
-void enable_plot( void )
+/*************************************************************
+ ENABLE_PLOT
+ *************************************************************/
+void gui::enable_plot( void )
 {
 	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] } { \
 			$rtptab select $activeplot; \
@@ -519,10 +524,10 @@ void enable_plot( void )
 }
 
 
-/**************************************
-DISABLE_PLOT
-**************************************/
-void disable_plot( void )
+/*************************************************************
+ DISABLE_PLOT
+ *************************************************************/
+void gui::disable_plot( void )
 {
 	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] } { \
 			wm withdraw [ winfo toplevel $activeplot ]; \
@@ -531,10 +536,10 @@ void disable_plot( void )
 }
 
 
-/**************************************
-CENTER_PLOT
-**************************************/
-void center_plot( void )
+/*************************************************************
+ CENTER_PLOT
+ *************************************************************/
+void gui::center_plot( void )
 {
 	cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] && %d > [ expr { $hsizeR / 2 } ] } { \
 			set newpos [ expr { %lf - $hsizeR / 2 / %lf } ]; \
@@ -544,10 +549,10 @@ void center_plot( void )
 }
 
 
-/**************************************
-SCROLL_PLOT
-**************************************/
-void scroll_plot( void )
+/*************************************************************
+ SCROLL_PLOT
+ *************************************************************/
+void gui::scroll_plot( void )
 {
 	if ( scrollB )
 		cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] && [ winfo ismapped $activeplot ] && %d > [ expr { $hsizeR * 0.8 } ] } { \

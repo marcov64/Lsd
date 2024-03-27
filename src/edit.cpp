@@ -13,76 +13,85 @@
  *************************************************************/
 
 /*************************************************************
-EDIT.CPP
-This functions manage the computation, display and modification of
-objects' number. Any call to these module starts by scanning the whole
-model tree, counts the number of each type of objects and displays orderly
-the information.
+ EDIT.CPP
+ This functions manage the computation, display and
+ modification of objects' number. Any call to these module
+ starts by scanning the whole model tree, counts the number
+ of each type of objects and displays orderly the information.
 
-On request, it is possible to change these values, either for single "branches"
-of the model or for the whole set of one type of Objects.
-It can exit to return to the calling function (either the browser in INTERF.CPP
-or the set initial values in EDIT.CPP) or going in setting initial values.
+ On request, it is possible to change these values, either
+ for single "branches" of the model or for the whole set of
+ one type of Objects. It can exit to return to the calling
+ function (either the browser in INTERF.CPP or the set
+ initial values in EDIT.CPP) or going in setting initial values.
 
-The main functions contained in this file are:
+ The main functions contained in this file are:
 
-- void object::set_obj_number( )
-The main function, called from the browser. Initialize the text widget and wait
-the actions of the users to take place.
+ - void lsd::object::set_obj_number( )
+ The main function, called from the browser. Initialize the
+ text widget and wait the actions of the users to take place.
 
-- void object::insert_obj_num( char *tag, char *indent, int counter, int *idx, int *value );
-Does the real job. Scan the model from root recursively and for each Object found
-counts the number, prepare its index if the parent has multiple instances,
-and set the indentation. Each label is bound to return a unique integer number
-in case it is clicked. Such number is used as guide for the following function
+ - void lsd::object::insert_obj_num( char *tag, char *indent, int counter, int *idx, int *value );
+ Does the real job. Scan the model from root recursively and
+ for each Object found counts the number, prepare its index
+ if the parent has multiple instances, and set the indentation.
+ Each label is bound to return a unique integer number in case
+ it is clicked. Such number is used as guide for the following
+ function
 
-- void object::edit_str( char *tag, int *idx, int res, int *done );
-Explore recursively the model tree giving a unique number for every group of
-objects encountered. When it finds the one clicked by user prepare the
-window to accept a new value for the number of instances. Passes this value
-to the next function
+ - void lsd::object::edit_str( char *tag, int *idx, int res, int *done );
+ Explore recursively the model tree giving a unique number for
+ every group of objects encountered. When it finds the one
+ clicked by user prepare the window to accept a new value for
+ the number of instances. Passes this value to the next function
 
-- void change_obj_number( object *&c, int value, int all );
-Depending on all (the flag to modify all the values of that type in the model)
-changes only the number of instances following c, or otherwise, every group of
-instances of the type of c. If it has to increase the number of instances,
-it does it directly. If it has to decrease, checks again all. If all is false,
-it activate the routine below, otherwise, it eliminates directly the surplus
+ - void change_obj_number( lsd::object *&c, int value, int all );
+ Depending on all (the flag to modify all the values of that
+ type in the model) changes only the number of instances
+ following c, or otherwise, every group of instances of the
+ type of c. If it has to increase the number of instances, it
+ does it directly. If it has to decrease, checks again all.
+ If all is false, it activate the routine below, otherwise,
+ it eliminates directly the surplus
 
-- void eliminate_obj( object *&c, int actual, int desired );
-Ask the user whether he wants to eliminate the last object or to choose
-individually the ones to eliminate. In this second case, it asks for a list
-numbers. The list is as long as are the instances to eliminate. Each element
-is the ordinal number of one instance to eliminate
-*************************************************************/
+ - void eliminate_obj( lsd::object *&c, int actual, int desired );
+ Ask the user whether he wants to eliminate the last object or
+ to choose individually the ones to eliminate. In this second
+ case, it asks for a list numbers. The list is as long as are
+ the instances to eliminate. Each element is the ordinal number
+ of one instance to eliminate
+ *************************************************************/
 
 #include "LSD.h"
 
-bool hid_level;
-int level;
-int lowest_level;
-int max_depth;
+namespace lsd
+{
+	bool hid_level;
+	int level;
+	int lowest_level;
+	int max_depth;
+}
 
 
-/***************************************************
-SET_OBJ_NUMBER
-****************************************************/
-void object::set_obj_number( void )
+/*************************************************************
+ SET_OBJ_NUMBER
+ *************************************************************/
+void lsd::object::set_obj_number( void )
 {
 	bool notShown = true;
 	char lab[ MAX_ELEM_LENGTH ];
 	int idx, res, count, done;
 
-	Tcl_LinkVar( interp, "idx", ( char * ) &idx, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "val", ( char * ) &count, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "result", ( char * ) &res, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "hid_level", ( char * ) &hid_level, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "max_depth", ( char * ) &max_depth, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "idx", ( char * ) & idx, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "val", ( char * ) & count, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "result", ( char * ) & res, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "hid_level", ( char * ) & hid_level, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( gui::interp, "max_depth", ( char * ) & max_depth, TCL_LINK_INT );
 
 	level = lowest_level = 1;
 	max_depth = 0;							// start with all levels open
 
-	cmd( "newtop .inin \"%s%s - LSD Object Number Editor\" { set choice 1; set result -1 }", unsaved_change( ) ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
+	cmd( "newtop .inin \"%s%s - LSD Object Number Editor\" { set choice 1; set result -1 }", gui::unsaved_change( ) ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
 
 	cmd( "ttk::frame .inin.obj" );
 	cmd( "set f .inin.obj" );
@@ -147,29 +156,29 @@ void object::set_obj_number( void )
 		noredraw:
 
 		// editor command loop
-		choice = 0;
-		while ( ! choice )
+		gui::choice = 0;
+		while ( ! gui::choice )
 			Tcl_DoOneEvent( 0 );
 
-		if ( choice == 1 )
+		if ( gui::choice == 1 )
 			break;
 
 		cmd( "set ininLastY [ lindex [ $t yview ] 0 ]" );
 
-		if ( choice == 2 )
+		if ( gui::choice == 2 )
 		{
 			idx = 0;
 			done = 0;
 			edit_str( "", &idx, res, &done );
-			choice = 2;
+			gui::choice = 2;
 
 			if ( done == 2 )
 				goto noredraw;
 		}
 
-		if ( choice == 3 )
+		if ( gui::choice == 3 )
 		{
-			if ( get_str( "obj_name", lab, MAX_ELEM_LENGTH ) != NULL )
+			if ( gui::get_str( "obj_name", lab, MAX_ELEM_LENGTH ) != NULL )
 				edit_data( lab );
 
 			goto noredraw;
@@ -178,18 +187,18 @@ void object::set_obj_number( void )
 
 	cmd( "destroytop .inin" );
 
-	Tcl_UnlinkVar( interp, "idx" );
-	Tcl_UnlinkVar( interp, "val" );
-	Tcl_UnlinkVar( interp, "result" );
-	Tcl_UnlinkVar( interp, "hid_level" );
-	Tcl_UnlinkVar( interp, "max_depth" );
+	Tcl_UnlinkVar( gui::interp, "idx" );
+	Tcl_UnlinkVar( gui::interp, "val" );
+	Tcl_UnlinkVar( gui::interp, "result" );
+	Tcl_UnlinkVar( gui::interp, "hid_level" );
+	Tcl_UnlinkVar( gui::interp, "max_depth" );
 }
 
 
-/***************************************************
-INSERT_OBJ_NUM
-****************************************************/
-void object::insert_obj_num( const char *tag, const char *ind, int *idx, int *count )
+/*************************************************************
+ INSERT_OBJ_NUM
+ *************************************************************/
+void lsd::object::insert_obj_num( const char *tag, const char *ind, int *idx, int *count )
 {
 	char sInd[ ] = "    \u2219    ";
 	int tagLen = strlen( tag ) + MAX_ELEM_LENGTH + 15;
@@ -274,7 +283,7 @@ void object::insert_obj_num( const char *tag, const char *ind, int *idx, int *co
 
 		if ( max_depth < 1 || level < max_depth )
 		{
-			for ( i = 1, cur = cb->head; cur != NULL; ++i, cur = go_brother( cur ) )
+			for ( i = 1, cur = cb->head; cur != NULL; ++i, cur = BROTHER( cur ) )
 			{
 				++level;
 				lowest_level = level > lowest_level ? level : lowest_level;
@@ -293,10 +302,10 @@ void object::insert_obj_num( const char *tag, const char *ind, int *idx, int *co
 }
 
 
-/***************************************************
-EDIT_STR
-****************************************************/
-void object::edit_str( const char *tag, int *idx, int res, int *done )
+/*************************************************************
+ EDIT_STR
+ *************************************************************/
+void lsd::object::edit_str( const char *tag, int *idx, int res, int *done )
 {
 	int i, sz = strlen( tag ) + 20;
 	char newTag[ sz ];
@@ -315,7 +324,7 @@ void object::edit_str( const char *tag, int *idx, int res, int *done )
 		if ( *idx == res )
 			*done = cb->head->entry_new_objnum( tag );
 
-		for ( i = 1, cur = cb->head; cur != NULL && *done == 0; ++i, cur = go_brother( cur ) )
+		for ( i = 1, cur = cb->head; cur != NULL && *done == 0; ++i, cur = BROTHER( cur ) )
 		{
 			if ( strlen( tag ) != 0 )
 				snprintf( newTag, sz, "%s-%d", tag, i );
@@ -333,10 +342,10 @@ void object::edit_str( const char *tag, int *idx, int res, int *done )
 }
 
 
-/***************************************************
-ENTRY_NEW_OBJNUM
-****************************************************/
-int object::entry_new_objnum( const char *tag )
+/*************************************************************
+ ENTRY_NEW_OBJNUM
+ *************************************************************/
+int lsd::object::entry_new_objnum( const char *tag )
 {
 	int i, j, k, num, cfrom, max_level;
 	object *cur, *first;
@@ -344,7 +353,7 @@ int object::entry_new_objnum( const char *tag )
 	if ( up == NULL )
 		return 2;
 
-	skip_next_obj( up->search( label ), &num );
+	next_count( up->search( label ), & num );
 	cmd( "set num %d", num );
 	cmd( "set conf 0" );
 	cmd( "set cfrom 1" );
@@ -391,14 +400,14 @@ int object::entry_new_objnum( const char *tag )
 		if ( j == 1 )
 		{
 			first = cur->up->search( cur->label );
-			for ( k = 1; first != cur; first = go_brother( first ), ++k );
+			for ( k = 1; first != cur; first = BROTHER( first ), ++k );
 			cmd( "set affect 1.%d", k );
 			cmd( "ttk::radiobutton $T.ef.g.r1 -text \"This group of '%s' contained in '%s' #%d\" -variable affect -value 1.%d", label, cur->label, k, k );
 		}
 		else
 		{
 			first = cur->up->search( cur->label );
-			for ( k = 1; first != cur; first = go_brother( first ), ++k );
+			for ( k = 1; first != cur; first = BROTHER( first ), ++k );
 			cmd( "ttk::radiobutton $T.ef.g.r%d -text \"All groups of '%s' contained in '%s' #%d\" -variable affect -value %d.%d", j, label, cur->label, k, j, k );
 		}
 		cmd( "pack $T.ef.g.r%d -anchor w", j );
@@ -435,21 +444,21 @@ int object::entry_new_objnum( const char *tag )
 		j = 0;
 	}
 
-	choice = 0;
-	while ( choice == 0 )
+	gui::choice = 0;
+	while ( gui::choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "set num [ $T.e.e get ]" );
 	cmd( "set cfrom [ $T.cp.e get ]" );
 
-	k = choice;
+	k = gui::choice;
 
-	if ( ! get_bool( "conf" ) )
+	if ( ! gui::get_bool( "conf" ) )
 		goto objec_num;
 	else
-		choice = k;
+		gui::choice = k;
 
-	if ( choice == 3 )
+	if ( gui::choice == 3 )
 	{
 		k = compute_copyfrom( "$T" );
 		if ( k > 0 )
@@ -461,34 +470,34 @@ int object::entry_new_objnum( const char *tag )
 
 	cmd( "destroytop $T" );
 
-	if ( choice == 2 )
+	if ( gui::choice == 2 )
 		return 2;
 
-	cfrom = get_int( "cfrom" );
-	num = get_int( "num" );
+	cfrom = gui::get_int( "cfrom" );
+	num = gui::get_int( "num" );
 
 	cmd( "set j [ lindex [ split $affect . ] 0 ]" );
-	j = get_int( "j" );
+	j = gui::get_int( "j" );
 	cmd( "set k [ lindex [ split $affect . ] 1 ]" );
-	k = get_int( "k" );
+	k = gui::get_int( "k" );
 
 	int affected[ max_level + 1 ];
 	for ( i = 1; i <= max_level; ++i )
 		affected[ i ] = ( i == j ) ? k : -1;
 
-	change_obj_number( cur = this, num, j, affected, cfrom );
+	gui::change_obj_number( cur = this, num, j, affected, cfrom );
 
-	unsaved_change( true );				// signal unsaved change
-	redrawRoot = redrawStruc = true;	// update list boxes & structure
+	gui::unsaved_change( true );				// signal unsaved change
+	gui::redrawRoot = gui::redrawStruc = true;	// update list boxes & structure
 
 	return 1;
 }
 
 
-/***************************************************
-COMPUTE_COPYFROM
-****************************************************/
-int object::compute_copyfrom( const char *parWnd )
+/*************************************************************
+ COMPUTE_COPYFROM
+ *************************************************************/
+int lsd::object::compute_copyfrom( const char *parWnd )
 {
 	object *cur, *cur1, *cur2, *cur3;
 	int i, j, k, h, n, res;
@@ -559,7 +568,7 @@ int object::compute_copyfrom( const char *parWnd )
 		for ( j = 1, cur1 = cur; cur1->up != NULL; cur1 = cur1->up, ++j )
 		{
 			cmd( "if [ string is integer -strict $num%d ] { set n $num%d } { set n -1 }", j, j );
-			n = get_int( "n" );
+			n = gui::get_int( "n" );
 			if ( n < 0 )
 				break;
 
@@ -591,18 +600,18 @@ int object::compute_copyfrom( const char *parWnd )
 
 	cmd( "set ccfrom 0" );
 
-	choice = 0;
-	while ( choice == 0 )
+	gui::choice = 0;
+	while ( gui::choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	i = choice;
+	i = gui::choice;
 	cmd( "set choice $cconf" );
-	if ( choice == 0 )
+	if ( gui::choice == 0 )
 		goto cfrom;
 	else
-		choice = i;
+		gui::choice = i;
 
-	if ( choice == 2 )
+	if ( gui::choice == 2 )
 		goto ccompute;
 
 	cmd( "destroytop $cc" );
@@ -611,13 +620,13 @@ int object::compute_copyfrom( const char *parWnd )
 }
 
 
-/***************************************************
-CHG_OBJ_NUM
-****************************************************/
-void change_obj_number( object *&c, int value, int level, int affected[ ], int cfrom )
+/*************************************************************
+ CHG_OBJ_NUM
+ *************************************************************/
+void gui::change_obj_number( lsd::object *&c, int value, int level, int affected[ ], int cfrom )
 {
 	int i, num;
-	object *cur, *cur1, *cur2, *first, *last, *pivot;
+	lsd::object *cur, *cur1, *cur2, *first, *last, *pivot;
 
 	for ( cur = c; cur->up != NULL; cur = cur->up );		// go to root
 
@@ -641,14 +650,14 @@ void change_obj_number( object *&c, int value, int level, int affected[ ], int c
 	{	// as long as necessary
 		if ( affected == NULL || cur->check_affected( level, affected ) == 1 )
 		{
-			skip_next_obj( cur, &num ); 	// count the existing objects
+			cur->next_count( cur, & num );	// count the existing objects
 
 			if ( num <= value )
 				// add objects
 				cur->up->add_n_objects2( first->label, value - num, first ); //add the necessary num of objects
 			else
 			{ 	// remove objects
-				if ( level == 1 ) 	// you have the option to choose the items to be removed, only if you operate on one group
+				if ( level == 1 ) 		// you have the option to choose the items to be removed, only if you operate on one group
 				{
 					eliminate_obj( cur, num, value );
 					c = cur;
@@ -656,7 +665,7 @@ void change_obj_number( object *&c, int value, int level, int affected[ ], int c
 				else
 				{	// remove automatically the excess of objects
 					for ( i = 1, cur1 = cur; i < value; ++i, cur1 = cur1->next );
-					while ( go_brother( cur1 ) != NULL )
+					while ( BROTHER( cur1 ) != NULL )
 					{
 						cur2 = cur1->next->next;
 						cur1->next->delete_obj( );
@@ -666,7 +675,7 @@ void change_obj_number( object *&c, int value, int level, int affected[ ], int c
 			}
 		}
 
-		for ( last = NULL, cur1 = cur; cur1 != NULL; cur1 = go_brother( cur1 ) )
+		for ( last = NULL, cur1 = cur; cur1 != NULL; cur1 = BROTHER( cur1 ) )
 			last = cur1 ; 	// skip the just updated group of objects
 
 		if ( last == NULL )
@@ -690,13 +699,13 @@ void change_obj_number( object *&c, int value, int level, int affected[ ], int c
 }
 
 
-/***************************************************
-ELIMINATE_OBJ
-****************************************************/
-void eliminate_obj( object *&c, int actual, int desired )
+/*************************************************************
+ ELIMINATE_OBJ
+ *************************************************************/
+void gui::eliminate_obj( lsd::object *&c, int actual, int desired )
 {
 	int i, idx2, val2, last, *del;
-	object *cur, *cur1;
+	lsd::object *cur, *cur1;
 
 	cmd( "if [ winfo exists .inin ] { set p .inin } { set p . }" );
 	cmd( "if { $p != \".\" } { set d $p.delobj } { set d .delobj }" );
@@ -738,9 +747,9 @@ void eliminate_obj( object *&c, int actual, int desired )
 
 	if ( choice == 1 )
 	{
-		for ( i = 1, cur = c; i < desired && cur != NULL; ++i, cur = go_brother( cur ) );
-		for ( ; go_brother( cur ) != NULL; )
-			go_brother( cur )->delete_obj( );
+		for ( i = 1, cur = c; i < desired && cur != NULL; ++i, cur = BROTHER( cur ) );
+		for ( ; BROTHER( cur ) != NULL; )
+			BROTHER( cur )->delete_obj( );
 	}
 	else
 	{
@@ -801,11 +810,11 @@ void eliminate_obj( object *&c, int actual, int desired )
 			++val2;
 		}
 
-		for ( idx2 = 1, val2 = 0, cur = c, cur1 = go_brother( cur ); cur != NULL && idx2 <= actual && val2 < actual - desired; ++idx2, cur = cur1, cur1 = go_brother( cur ) )
+		for ( idx2 = 1, val2 = 0, cur = c, cur1 = BROTHER( c ); cur != NULL && idx2 <= actual && val2 < actual - desired; ++idx2, cur = cur1, cur1 = BROTHER( cur ) )
 			if ( idx2 == del[ val2 ] )
 			{
 				if ( cur == c )
-					c = go_brother( cur );
+					c = BROTHER( cur );
 
 				cur->delete_obj( );
 				++val2;
@@ -821,10 +830,10 @@ void eliminate_obj( object *&c, int actual, int desired )
 }
 
 
-/***************************************************
-CHECK_AFFECTED
-****************************************************/
-int object::check_affected( int level, int affected[ ] )
+/*************************************************************
+ CHECK_AFFECTED
+ *************************************************************/
+int lsd::object::check_affected( int level, int affected[ ] )
 {
 	int i, j, res;
 	object *cur, *cur1;

@@ -48,7 +48,6 @@ A -2, 5	  , 6
 
 #define SEP	",;\t"			// column separators to use
 
-
 bool conf_ok = false;		// a valid configuration file is loaded
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
 bool message_logged = false;// new message posted in log window
@@ -96,11 +95,11 @@ int stack_level;			// LSD stack call level
 int stack_info = 0;			// LSD stack control
 long nodesSerial = 1;		// network node's serial number global counter
 unsigned seed = 1;			// random number generator initial seed
-description *descr = NULL;	// model description structure
+lsd::description *descr = NULL;	// model description structure
 lsdstack *stack_log = NULL;	// LSD stack
-object *blueprint = NULL;	// LSD blueprint (effective model in use)
-object *root = NULL;		// LSD root object
-object *wait_delete = NULL;	// LSD object waiting for deletion
+lsd::object *blueprint = NULL;	// LSD blueprint (effective model in use)
+lsd::object *root = NULL;		// LSD root object
+lsd::object *wait_delete = NULL;	// LSD object waiting for deletion
 o_setT obj_list;			// set with all existing LSD objects
 sensitivity *sens = NULL;	// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
@@ -118,7 +117,7 @@ const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
 const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 
 
-bool change_configuration( object *root, int findex );
+bool change_configuration( lsd::object *root, int findex );
 int load_confs_csv( char *config );
 
 // command line strings
@@ -127,9 +126,9 @@ const char lsdCmdDsc[ ] = "It creates new LSD configuration file(s) (.lsd) based
 const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd' the original configuration file to use as base\n'-c CONFIG.csv' comma separated text file with new configuration values\n'-o FILE_BASE_NAME' base name (no extension) to save new configuration file(s)\n";
 
 
-/*********************************
+/*************************************************************
  LSDMAIN
- *********************************/
+ *************************************************************/
 int lsdmain( int argn, const char **argv )
 {
 	int i, confs;
@@ -216,7 +215,7 @@ int lsdmain( int argn, const char **argv )
 		conf_name[ i > 4 ? i - 4 : i ] = '\0'; 	// remove extension
 	}
 
-	root = new object;
+	root = new lsd::object;
 	root->init( NULL, "Root" );
 	add_description( "Root" );
 	reset_blueprint( NULL );
@@ -269,7 +268,7 @@ int lsdmain( int argn, const char **argv )
 }
 
 
-/*********************************
+/*************************************************************
 LOAD_CONFS_CSV
 *********************************/
 int load_confs_csv( char *config )
@@ -381,15 +380,15 @@ int load_confs_csv( char *config )
 }
 
 
-/*********************************
+/*************************************************************
 CHANGE_CONFIGURATION
 *********************************/
-bool change_configuration( object *root, int findex )
+bool change_configuration( lsd::object *root, int findex )
 {
 	int i, lag;
 	char *lab;
 	variable *cv;
-	object *cur;
+	lsd::object *cur;
 
 	if ( root == NULL || findex < 1 || findex > num_vars )
 		return false;
@@ -456,14 +455,14 @@ bool change_configuration( object *root, int findex )
 }
 
 
-/*********************************
+/*************************************************************
 FUN
 Dummy for linking
 *********************************/
-double variable::fun( object* r ) { return NAN; }
+double variable::fun( lsd::object* r ) { return NAN; }
 
 
-/*********************************
+/*************************************************************
 ALLOC_SAVE_VAR
 *********************************/
 bool variable::alloc_save_var( void ) { return true; }

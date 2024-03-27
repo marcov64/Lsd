@@ -13,21 +13,18 @@
  *************************************************************/
 
 /*************************************************************
-DESCRIPTION.CPP
-Contains the functions to operate on model's object and
-element textual descriptions.
-*************************************************************/
+ DESCRIPTION.CPP
+ Contains the functions to operate on model's object and
+ element textual descriptions.
+ *************************************************************/
 
 #include "lib/libLSD.h"				// LSD library classes
 
 
-/*****************************************************************************
-DESCRIPTION (CONSTRUCTOR)
-******************************************************************************/
-const char *descr_types[ 5 ] = { "Variable", "Parameter", "Function", "",
-								 "Object" };
-
-description::description( const char *_label, int _type, const char *_text,
+/*************************************************************
+ DESCRIPTION (CONSTRUCTOR)
+ *************************************************************/
+lsd::description::description( const char *_label, int _type, const char *_text,
 						   const char *_init, bool _initial, bool _observe )
 {
 	char *str;
@@ -39,8 +36,8 @@ description::description( const char *_label, int _type, const char *_text,
 	if ( _type < 0 || _type > 4 )
 		_type = 3;
 
-	type = new char [ strlen( descr_types[ _type ] ) + 1 ];
-	strcpy( type, descr_types[ _type ] );
+	type = new char [ strlen( desc_type_names[ _type ] ) + 1 ];
+	strcpy( type, desc_type_names[ _type ] );
 
 	if ( ! strwsp( _text ) && strstr( _text, LEGACY_NO_DESCR ) == NULL &&
 		 ( strlen( NO_DESCR ) == 0 || strstr( _text, NO_DESCR ) == NULL ) )
@@ -81,10 +78,10 @@ description::description( const char *_label, int _type, const char *_text,
 }
 
 
-/*****************************************************************************
-~DESCRIPTION (DESTRUCTOR)
-******************************************************************************/
-description::~description( void )
+/*************************************************************
+ ~DESCRIPTION (DESTRUCTOR)
+ *************************************************************/
+lsd::description::~description( void )
 {
 	delete [ ] label;
 	delete [ ] type;
@@ -93,10 +90,10 @@ description::~description( void )
 }
 
 
-/***************************************************
-ADD_DESCRIPTION
-***************************************************/
-description *simulation::add_description( const char *lab, int type, const char *text, const char *init, bool initial, bool observe )
+/*************************************************************
+ ADD_DESCRIPTION
+ *************************************************************/
+lsd::description *lsd::simulation::add_description( const char *lab, int type, const char *text, const char *init, bool initial, bool observe )
 {
 	description *cd;
 
@@ -116,10 +113,10 @@ description *simulation::add_description( const char *lab, int type, const char 
 }
 
 
-/***************************************************
-CHANGE_DESCRIPTION
-***************************************************/
-description *simulation::change_description( const char *lab_old, const char *lab, int type, const char *text, const char *init, int initial, int observe )
+/*************************************************************
+ CHANGE_DESCRIPTION
+ *************************************************************/
+lsd::description *lsd::simulation::change_description( const char *lab_old, const char *lab, int type, const char *text, const char *init, int initial, int observe )
 {
 	bool obj = false;
 	char *str, ltype[ MAX_ELEM_LENGTH ];
@@ -239,10 +236,10 @@ description *simulation::change_description( const char *lab_old, const char *la
 }
 
 
-/*****************************************************************************
-EMPTY_DESCRIPTION
-******************************************************************************/
-void simulation::empty_description( void )
+/*************************************************************
+ EMPTY_DESCRIPTION
+ *************************************************************/
+void lsd::simulation::empty_description( void )
 {
 	description *cd, *cd1;
 
@@ -256,11 +253,11 @@ void simulation::empty_description( void )
 }
 
 
-/***************************************************
-RESET_DESCRIPTION
-regenerate recur. the descriptions of the model as it is
-***************************************************/
-void object::reset_description( void )
+/*************************************************************
+ RESET_DESCRIPTION
+	regenerate recur. the descriptions of the model as it is
+ *************************************************************/
+void lsd::object::reset_description( void )
 {
 	bridge *cb;
 	variable *cv;
@@ -276,10 +273,10 @@ void object::reset_description( void )
 }
 
 
-/***************************************************
-SEARCH_DESCRIPTION
-***************************************************/
-description *simulation::search_description( const char *lab, bool add_missing )
+/*************************************************************
+ SEARCH_DESCRIPTION
+ *************************************************************/
+lsd::description *lsd::simulation::search_description( const char *lab, bool add_missing )
 {
 	description *cd;
 	variable *cv;
@@ -302,10 +299,10 @@ description *simulation::search_description( const char *lab, bool add_missing )
 }
 
 
-/***************************************************
-HAS_DESCR_TEXT
-***************************************************/
-bool description::has_descr_text( void )
+/*************************************************************
+ HAS_DESCR_TEXT
+ *************************************************************/
+bool lsd::description::has_descr_text( void )
 {
 	if ( text != NULL && strlen( text ) > 0 && strstr( text, LEGACY_NO_DESCR ) == NULL && ( strlen( NO_DESCR ) == 0 || strstr( text, NO_DESCR ) == NULL ) )
 		return true;

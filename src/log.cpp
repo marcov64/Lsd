@@ -13,20 +13,39 @@
  *************************************************************/
 
 /*************************************************************
-LOG.CPP
-Contains the functions to create and interface with the Log
-window, including when Browser is running model.
-*************************************************************/
+ LOG.CPP
+ Contains the functions to create and interface with the Log
+ window, including when Browser is running model.
+ *************************************************************/
 
 #include "LSD.h"
 
-char tabs[ ] = "5c 7.5c 10c 12.5c 15c 17.5c 20c";	// Log window tabs
+namespace gui
+{
+	const char tabs[ ] = "5c 7.5c 10c 12.5c 15c 17.5c 20c";	// Log window tabs
+
+	struct item
+	{
+		const char *var, *obj;
+		unsigned int time;
+		unsigned int count;
+	};
+
+	bool comp_item( item & item1, item & item2 )
+	{
+		int comp_str = strcmp( item1.obj, item2.obj );
+		if ( ! comp_str )
+			return item1.time > item2.time;
+		else
+			return comp_str < 0;
+	}
+}
 
 
-/*********************************
-CREATE_LOGWINDOW
-*********************************/
-void create_logwindow( void )
+/*************************************************************
+ CREATE_LOGWINDOW
+ *************************************************************/
+void gui::create_logwindow( void )
 {
 	if ( ! tk_ok )
 		lsd_exit_gui( 7 );
@@ -84,10 +103,10 @@ void create_logwindow( void )
 }
 
 
-/*********************************
-SET_SHORTCUTS_RUN
-*********************************/
-void set_shortcuts_run( const char *window )
+/*************************************************************
+ SET_SHORTCUTS_RUN
+ *************************************************************/
+void gui::set_shortcuts_run( const char *window )
 {
 	if ( exists_window( window ) )
 	{
@@ -101,10 +120,10 @@ void set_shortcuts_run( const char *window )
 }
 
 
-/*********************************
-UNSET_SHORTCUTS_RUN
-*********************************/
-void unset_shortcuts_run( const char *window )
+/*************************************************************
+ UNSET_SHORTCUTS_RUN
+ *************************************************************/
+void gui::unset_shortcuts_run( const char *window )
 {
 	if ( exists_window( window ) )
 	{
@@ -118,10 +137,10 @@ void unset_shortcuts_run( const char *window )
 }
 
 
-/*********************************
-SET_BUTTONS_RUN
-*********************************/
-void set_buttons_run( bool enable )
+/*************************************************************
+ SET_BUTTONS_RUN
+ *************************************************************/
+void gui::set_buttons_run( bool enable )
 {
 	char state[ MAX_ELEM_LENGTH ];
 
@@ -141,10 +160,10 @@ void set_buttons_run( bool enable )
 }
 
 
-/*********************************
-COVER_BROWSER
-*********************************/
-void cover_browser( const char *text1, const char *text2, bool run )
+/*************************************************************
+ COVER_BROWSER
+ *************************************************************/
+void gui::cover_browser( const char *text1, const char *text2, bool run )
 {
 	if ( brCovered )		// ignore if already covered
 		return;
@@ -231,10 +250,10 @@ void cover_browser( const char *text1, const char *text2, bool run )
 }
 
 
-/*********************************
-UNCOVER_BROWSER
-*********************************/
-void uncover_browser( void )
+/*************************************************************
+ UNCOVER_BROWSER
+ *************************************************************/
+void gui::uncover_browser( void )
 {
 	if ( ! brCovered || sim.running )	// ignore if not covered or running
 		return;
@@ -262,30 +281,14 @@ void uncover_browser( void )
 }
 
 
-/*********************************
-SHOW_PROF_AGGR
-*********************************/
-struct item
-{
-	const char *var, *obj;
-	unsigned int time;
-	unsigned int count;
-};
-
-bool comp_item( item & item1, item & item2 )
-{
-	int comp_str = strcmp( item1.obj, item2.obj );
-	if ( ! comp_str )
-		return item1.time > item2.time;
-	else
-		return comp_str < 0;
-}
-
-void show_prof_aggr( void )
+/*************************************************************
+ SHOW_PROF_AGGR
+ *************************************************************/
+void gui::show_prof_aggr( void )
 {
 	item elem;
+	lsd::variable *cv;
 	std::list < item > vars;
-	variable *cv;
 
 	if ( ! sim.prof_aggr_time )
 		return;

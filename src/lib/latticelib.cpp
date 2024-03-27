@@ -13,30 +13,34 @@
  *************************************************************/
 
 /*************************************************************
-LATTICELIB.CPP
-Contains the functions to work with lattices in DLL and
-no-window executables. The graphical GUI code is stored in
-LATTICE.CPP.
-*************************************************************/
+ LATTICELIB.CPP
+ Contains the functions to work with lattices in DLL and
+ no-window executables. The graphical GUI code is stored in
+ LATTICE.CPP.
+ *************************************************************/
 
 #include "lib/libLSD.h"				// LSD library classes
 
 
-/***************************************************
-INIT_LATTICE
-Create a new run time lattice having:
-- pix= maximum pixel (600 should fit in typical screens, 0=default size)
-- nrow= number of rows
-- ncol= number of columns
-- lrow= label of variable or parameter indicating the row value
-- lcol= label of variable or parameter indicating the column value
-- lvar= label of variable or parameter from which to read the color of the cell
-- p= pointer of the object containing the initial color of the cell (if flag==-1)
-- init_color= indicate the type of initialization.
-  If init_color < 0, the (positive) RGB equivalent to init_color is used.
-  Otherwise, the lattice is homogeneously initialized to the palette color specified by init_color.
-***************************************************/
-double simulation::init_lattice( double pixW, double pixH, double nrow, double ncol, const char lrow[ ], const char lcol[ ], const char lvar[ ], object *p, int init_color )
+/*************************************************************
+ INIT_LATTICE
+ Create a new run time lattice having:
+ - pix= maximum pixel (600 should fit in typical screens,
+        0=default size)
+ - nrow= number of rows
+ - ncol= number of columns
+ - lrow= label of variable or parameter indicating the row value
+ - lcol= label of variable or parameter indicating the column value
+ - lvar= label of variable or parameter from which to read the
+         color of the cell
+ - p= pointer of the object containing the initial color of the
+      cell (if flag==-1)
+ - init_color= indicate the type of initialization.
+   If init_color < 0, the (positive) RGB equivalent to init_color
+   is used. Otherwise, the lattice is homogeneously initialized
+   to the palette color specified by init_color.
+ *************************************************************/
+double lsd::simulation::init_lattice( double pixW, double pixH, double nrow, double ncol, const char lrow[ ], const char lcol[ ], const char lvar[ ], object *p, int init_color )
 {
 	int i, j;
 
@@ -71,16 +75,16 @@ double simulation::init_lattice( double pixW, double pixH, double nrow, double n
 }
 
 // call for macro
-double simulation::init_lattice( int init_color, double nrow, double ncol, double pixW, double pixH )
+double lsd::simulation::init_lattice( int init_color, double nrow, double ncol, double pixW, double pixH )
 {
 	return init_lattice( pixW, pixH, nrow, ncol, "y", "x", "", NULL, init_color );
 }
 
 
-/***************************************************
-EMPTY_LATTICE
-***************************************************/
-void simulation::empty_lattice( void )
+/*************************************************************
+ EMPTY_LATTICE
+ *************************************************************/
+void lsd::simulation::empty_lattice( void )
 {
 	if ( latt->array != NULL && latt->rows > 0 )
 	{
@@ -95,22 +99,24 @@ void simulation::empty_lattice( void )
 }
 
 
-/***************************************************
-CLOSE_LATTICE
-***************************************************/
-void simulation::close_lattice( void )
+/*************************************************************
+ CLOSE_LATTICE
+ *************************************************************/
+void lsd::simulation::close_lattice( void )
 {
 	empty_lattice( );
-	cmd_gui( "destroytop .lat" );
+	cmd( "destroytop .lat" );
 }
 
 
-/***************************************************
-UPDATE_LATTICE
-update the cell line.col to the color val (1 to 21 as set in default.tcl palette)
-negative values of val prompt for the use of the (positive) RGB equivalent
-***************************************************/
-double simulation::update_lattice( double line, double col, double val )
+/*************************************************************
+ UPDATE_LATTICE
+ update the cell line.col to the color val (1 to 21
+ as set in default.tcl palette)
+ negative values of val prompt for the use of the
+ (positive) RGB equivalent
+ *************************************************************/
+double lsd::simulation::update_lattice( double line, double col, double val )
 {
 	int line_int, col_int, val_int;
 
@@ -150,12 +156,14 @@ double simulation::update_lattice( double line, double col, double val )
 }
 
 
-/***************************************************
-READ_LATTICE
-read the cell line.col color val (1 to 21 as set in default.tcl palette)
-negative values of val mean the use of the (positive) RGB equivalent
-***************************************************/
-double simulation::read_lattice( double line, double col )
+/*************************************************************
+ READ_LATTICE
+ read the cell line.col color val (1 to 21 as set in
+ default.tcl palette)
+ negative values of val mean the use of the (positive)
+ RGB equivalent
+ *************************************************************/
+double lsd::simulation::read_lattice( double line, double col )
 {
 	// ignore invalid values
 	if ( ( int ) line <= 0 || ( int ) col <= 0 || ( int ) line > latt->rows || ( int ) col > latt->columns )
@@ -178,11 +186,12 @@ double simulation::read_lattice( double line, double col )
 }
 
 
-/***************************************************
-SAVE_LATTICE
-Save the existing lattice (if any) to the specified file name.
-***************************************************/
-double simulation::save_lattice( const char *fname )
+/*************************************************************
+ SAVE_LATTICE
+ Save the existing lattice (if any) to the specified
+ file name.
+ *************************************************************/
+double lsd::simulation::save_lattice( const char *fname )
 {
 	if ( liblnk != NULL && liblnk->save_lattice_helper != NULL )
 		return liblnk->save_lattice_helper( fname );

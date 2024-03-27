@@ -13,25 +13,32 @@
  *************************************************************/
 
 /*************************************************************
-REPORT.CPP
-This file contains the code for the report generating routines.
+ REPORT.CPP
+ This file contains the code for the report generating
+ routines.
 
-The main function, (report) needs the pointer to the root of the model.
-It also needs the equation file name to be correctly set (if the file
-does not exist, the routine ask for it). The output of the routine is
-a html file containing the main information on the model. This file is
-meant to be used as basic structure to be filled with modellers' comments
-in order to obtain the complete documentation of the model.
+ The main function, (report) needs the pointer to the root of
+ the model. It also needs the equation file name to be
+ correctly set (if  the file does not exist, the routine ask
+ for it). The output of the routine is a html file containing
+ the main information on the model. This file is meant to be
+ used as basic structure to be filled with modelers'
+ comments in order to obtain the complete documentation of
+ the model.
 
-The report lists all the objects, variables and parameters, all linked with
-pointers, so that readers can easily jump hypertextually through the whole report.
+ The report lists all the objects, variables and parameters,
+ all linked with pointers, so that readers can easily jump
+ hyper-textually through the whole report.
 
-- Each object is listed with indication of its ancestors.
-- For each object, the set of variables and parameters is listed.
-- For each parameter is listed the set of variables whose equations make use of its value.
-- For each variables is listed the set of variables whose equations make use of its values,
-and also the whole set of variables and parameters used in the its own equation.
-*************************************************************/
+ - Each object is listed with indication of its ancestors.
+ - For each object, the set of variables and parameters is
+   listed.
+ - For each parameter is listed the set of variables whose
+   equations make use of its value.
+ - For each variables is listed the set of variables whose
+   equations make use of its values, and also the whole set
+   of variables and parameters used in the its own equation.
+ *************************************************************/
 
 #include "LSD.h"
 
@@ -42,24 +49,27 @@ and also the whole set of variables and parameters used in the its own equation.
 #define TEX_TOP 2.5
 #define TEX_BOTTOM 2.5
 
-bool table;
-char path_rep[ MAX_PATH_LENGTH ] = "";
-char tmp_rep[ MAX_BUFF_SIZE ];
-int detail;
-int desc;
-int extra;
-int file_error;
-int ini;
-int lmenu;
-int obs;
-int pos;
-int tab_lines;
+namespace lsd
+{
+	bool table;
+	char path_rep[ MAX_PATH_LENGTH ] = "";
+	char tmp_rep[ MAX_BUFF_SIZE ];
+	int detail;
+	int desc;
+	int extra;
+	int file_error;
+	int ini;
+	int lmenu;
+	int obs;
+	int pos;
+	int tab_lines;
+}
 
 
-/******************************
-REPORT
-*******************************/
-void object::report( void )
+/*************************************************************
+ REPORT
+ *************************************************************/
+void lsd::object::report( void )
 {
 	bool html2;
 	char ch, fname[ MAX_PATH_LENGTH ];
@@ -79,23 +89,23 @@ void object::report( void )
 
 	cmd( "set mrep %s", sim->rep_file );
 	cmd( "set res [ file exists $mrep ]" );
-	if ( get_bool( "res" ) )
+	if ( gui::get_bool( "res" ) )
 	{
 		cmd( "set answer [ ttk::messageBox -parent . -message \"Model report already exists\" -detail \"Please confirm overwriting it.\" -type okcancel -title Warning -icon warning -default ok ]" );
 		cmd( "if { ! [ string compare -nocase $answer ok ] } { set res 0 } { set res 1 }" );
-		if ( get_bool( "res" ) )
+		if ( gui::get_bool( "res" ) )
 			return;
 
-		eval_str( "[ pwd ]", path_rep, MAX_PATH_LENGTH );
+		gui::eval_str( "[ pwd ]", path_rep, MAX_PATH_LENGTH );
 	}
 	else
 		strcpyn( path_rep, sim->conf_path, MAX_PATH_LENGTH );
 
-	Tcl_LinkVar( interp, "detail", ( char * ) &detail, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "ini", ( char * ) &ini, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "desc", ( char * ) &desc, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "extra", ( char * ) &extra, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "obs", ( char * ) &obs, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( gui::interp, "detail", ( char * ) &detail, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( gui::interp, "ini", ( char * ) &ini, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( gui::interp, "desc", ( char * ) &desc, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( gui::interp, "extra", ( char * ) &extra, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( gui::interp, "obs", ( char * ) &obs, TCL_LINK_BOOLEAN );
 
 	desc = true;
 	obs = true;
@@ -168,31 +178,31 @@ void object::report( void )
 
 	here_create_report:
 
-	choice = 0;
-	while ( choice == 0 )
+	gui::choice = 0;
+	while ( gui::choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	if ( choice == 3 )
+	if ( gui::choice == 3 )
 	{
 		cmd( "destroytop .w" );
 		goto end;
 	}
 
-	if ( choice == 2 )
+	if ( gui::choice == 2 )
 	{
-		app = eval_str( "[ file tail \"$res\" ]" );
+		app = gui::eval_str( "[ file tail \"$res\" ]" );
 		if ( app == NULL || strlen( app ) == 0 )
 			goto here_create_report;
 
 		strcpyn( sim->rep_file, app, MAX_PATH_LENGTH );
-		eval_str( "[ file dirname  \"$res\" ]", path_rep, MAX_PATH_LENGTH );
+		gui::eval_str( "[ file dirname  \"$res\" ]", path_rep, MAX_PATH_LENGTH );
 	}
 
 	cmd( "destroytop .w" );
 
-	cmd( "set eqf [ file join \"%s\" \"%s\" ]", model_path, eq_file );
+	cmd( "set eqf [ file join \"%s\" \"%s\" ]", model_path, gui::eq_file );
 
-	while ( strlen( eq_file ) == 0 || ( f = fopen( get_str( "eqf" ), "r" ) ) == NULL )
+	while ( strlen( gui::eq_file ) == 0 || ( f = fopen( gui::get_str( "eqf" ), "r" ) ) == NULL )
 	{
 		cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '$eqf' not found\" -detail \"Press 'OK' to select another file.\"]" );
 		cmd( "if [ string equal $answer ok ] { \
@@ -205,11 +215,11 @@ void object::report( void )
 				set res 0 \
 			}" );
 
-		if ( get_bool( "res" ) )
+		if ( gui::get_bool( "res" ) )
 		{
-			app = get_str( "eqf" );
+			app = gui::get_str( "eqf" );
 			if ( app != NULL && strlen( app ) > 0 )
-				strcpyn( eq_file, app, MAX_PATH_LENGTH );
+				strcpyn( gui::eq_file, app, MAX_PATH_LENGTH );
 		}
 		else
 			goto end;
@@ -217,7 +227,7 @@ void object::report( void )
 
 	fclose( f );
 	cmd( "set l $lmenu" );
-	lmenu = get_int( "l" );
+	lmenu = gui::get_int( "l" );
 
 	frep = create_frames( path_rep, sim->rep_file );
 
@@ -227,7 +237,7 @@ void object::report( void )
 		goto end;
 	}
 
-	stop = false;
+	gui::stop = false;
 	step = 1;
 	cmd( "set nElem [ llength $modElem ]" );
 	cmd( "progressbox .prep \"Creating Report\" \"Report generation steps\" \"Step\" %d { set stop true } \".\" \"Element\" $nElem", desc + extra + obs + ini + detail );
@@ -236,7 +246,7 @@ void object::report( void )
 	fprintf( frep, "<HTML>\n<HEAD> <META NAME=\"Author\" CONTENT=\"Automatically generated by LSD - Laboratory for Simulation Development, copyright by Marco Valente\">\n" );
 	fprintf( frep, "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=iso-8859-1\">  <style> table {border-collapse: collapse} td, th {border: 1px solid #dddddd; padding: 8px;} tr:nth-child(even) {background-color: #dddddd;} </style> </HEAD> <BODY>" );
 
-	app = get_str( "reptit" );
+	app = gui::get_str( "reptit" );
 
 	fprintf( frep, "<TITLE>LSD Report - Model: \"%s\"</TITLE>", app );
 	fprintf( frep, "<I>Automatically generated LSD report.</I><BR>" );
@@ -274,29 +284,29 @@ void object::report( void )
 		else
 		{
 			fprintf( frep, "No description file available.<BR>\n" );
-			plog( "\nFile description.txt not found. Description section skipped... " );
+			gui::plog( "\nFile description.txt not found. Description section skipped... " );
 		}
 
 		cmd( "prgboxupdate .prep %d", step++ );
 	}
 
-	if ( stop )
+	if ( gui::stop )
 		goto end_report;
 
 	if ( extra )
 	{
-		app = get_str( "file2" );
+		app = gui::get_str( "file2" );
 		if ( app == NULL )
-			plog( "\nMissing file name for user section. Skipped... " );
+			gui::plog( "\nMissing file name for user section. Skipped... " );
 		else
 		{
 			f = fopen( app, "r" );
 			if ( f != NULL )
 			{
-				app = get_str( "tit2" );
+				app = gui::get_str( "tit2" );
 				fprintf( frep, "<H3>%s</H3>", app );
 
-				html2 = get_bool( "html2" );
+				html2 = gui::get_bool( "html2" );
 				for ( ch = fgetc( f ); ch != EOF; ch = fgetc( f ) )
 				{
 					if ( ! html2 )
@@ -327,14 +337,14 @@ void object::report( void )
 			else
 			{
 				fprintf( frep, "User section file not available.<BR>\n" );
-				plog( "\nFile %s not found. User section skipped... ", app );
+				gui::plog( "\nFile %s not found. User section skipped... ", app );
 			}
 		}
 
 		cmd( "prgboxupdate .prep %d", step++ );
 	}
 
-	if ( stop )
+	if ( gui::stop )
 		goto end_report;
 
 	if ( obs )
@@ -348,7 +358,7 @@ void object::report( void )
 		cmd( "prgboxupdate .prep %d", step++ );
 	}
 
-	if ( stop )
+	if ( gui::stop )
 		goto end_report;
 
 	fprintf( frep, "<HR WIDTH=\"100%%\">\n" );
@@ -375,7 +385,7 @@ void object::report( void )
 		cmd( "prgboxupdate .prep %d", step++ );
 	}
 
-	if ( stop )
+	if ( gui::stop )
 		goto end_report;
 
 	if ( detail )
@@ -388,8 +398,8 @@ void object::report( void )
 		write_str( frep, 0, "_d_" );
 		write_list( frep, true, "_d_" );
 
-		cmd( "set app [ file tail \"%s\" ]", eq_file );
-		app = get_str( "app" );
+		cmd( "set app [ file tail \"%s\" ]", gui::eq_file );
+		app = gui::get_str( "app" );
 		fprintf( frep, "<BR><i>Equation file:</i> &nbsp;<TT><u>%s</u></TT><BR><BR>", app );
 
 		elemDone = 0;
@@ -405,41 +415,41 @@ void object::report( void )
 
 	cmd( "destroytop .prep" );
 
-	if ( stop )
+	if ( gui::stop )
 	{
 		cmd( "set fullFileName [ file join \"%s\" \"%s\" ]", path_rep, sim->rep_file );
-		remove( get_str( "fullFileName" ) );
+		remove( gui::get_str( "fullFileName" ) );
 		cmd( "set fullFileName [ file join \"%s\" \"head_%s\" ]", path_rep, sim->rep_file );
-		remove( get_str( "fullFileName" ) );
+		remove( gui::get_str( "fullFileName" ) );
 		cmd( "set fullFileName [ file join \"%s\" \"body_%s\" ]", path_rep, sim->rep_file );
-		remove( get_str( "fullFileName" ) );
+		remove( gui::get_str( "fullFileName" ) );
 	}
 	else
 	{
 		if ( strlen( path_rep ) > 0 )
-			plog( "\nReport saved in file: %s/%s\n", path_rep, sim->rep_file );
+			gui::plog( "\nReport saved in file: %s/%s\n", path_rep, sim->rep_file );
 		else
-			plog( "\nReport saved in file: %s\n", sim->rep_file );
+			gui::plog( "\nReport saved in file: %s\n", sim->rep_file );
 
 		cmd( "open_browser \"%s\" \"%s\"", path_rep, sim->rep_file );
 	}
 
 	end:
 
-	Tcl_UnlinkVar( interp, "detail" );
-	Tcl_UnlinkVar( interp, "ini" );
-	Tcl_UnlinkVar( interp, "desc" );
-	Tcl_UnlinkVar( interp, "extra" );
-	Tcl_UnlinkVar( interp, "obs" );
+	Tcl_UnlinkVar( gui::interp, "detail" );
+	Tcl_UnlinkVar( gui::interp, "ini" );
+	Tcl_UnlinkVar( gui::interp, "desc" );
+	Tcl_UnlinkVar( gui::interp, "extra" );
+	Tcl_UnlinkVar( gui::interp, "obs" );
 }
 
 
-/**********************************
-SHOW_REPORT
-**********************************/
-void show_report( const char *par_wnd )
+/*************************************************************
+ SHOW_REPORT
+ *************************************************************/
+void gui::show_report( const char *par_wnd )
 {
-	cmd( "set res [ open_browser \"%s\" \"%s\" ]", path_rep, sim.rep_file );
+	cmd( "set res [ open_browser \"%s\" \"%s\" ]", lsd::path_rep, sim.rep_file );
 
 	if ( ! get_bool( "res" ) )
 	{
@@ -448,8 +458,8 @@ void show_report( const char *par_wnd )
 		if ( ! get_bool( "res" ) )
 			return;
 
-		if ( strlen( path_rep ) > 0 )
-			cmd( "set fname [ tk_getOpenFile -parent %s -title \"Load Report File\" -defaultextension \".html\" -initialdir \"%s\" -filetypes { {{HTML files} {.html}} } ]", par_wnd, path_rep );
+		if ( strlen( lsd::path_rep ) > 0 )
+			cmd( "set fname [ tk_getOpenFile -parent %s -title \"Load Report File\" -defaultextension \".html\" -initialdir \"%s\" -filetypes { {{HTML files} {.html}} } ]", par_wnd, lsd::path_rep );
 		else
 			cmd( "set fname [ tk_getOpenFile -parent %s -title \"Load Report File\" -defaultextension \".html\" -filetypes { {{HTML files} {.html}} } ]", par_wnd );
 
@@ -462,17 +472,17 @@ void show_report( const char *par_wnd )
 }
 
 
-/**********************************
-WRITE_OBJ
-**********************************/
-void object::write_obj( FILE *frep, int *elemDone )
+/*************************************************************
+ WRITE_OBJ
+ *************************************************************/
+void lsd::object::write_obj( FILE *frep, int *elemDone )
 {
 	int count;
 	bridge *cb;
 	object *cur;
 	variable *cv;
 
-	for ( count = 0, cur = this; cur != NULL && ! stop; cur = skip_next_obj( cur, &count ) )
+	for ( count = 0, cur = this; cur != NULL && ! gui::stop; cur = next_count( cur, & count ) )
 	{
 		fprintf( frep, "<HR WIDTH=\"100%%\">\n" );
 
@@ -497,22 +507,22 @@ void object::write_obj( FILE *frep, int *elemDone )
 		fprintf( frep, "<BR>\n" );
 		cur->write_list( frep, false, "_d_" );
 
-		for ( cv = cur->v; cv != NULL && ! stop; cv = cv->next )
+		for ( cv = cur->v; cv != NULL && ! gui::stop; cv = cv->next )
 		{
 			cv->write_var( frep );
 			cmd( "prgboxupdate .prep \"\" %d", ( *elemDone )++ );
 		}
 
-		if ( cur->b != NULL && ! stop )
+		if ( cur->b != NULL && ! gui::stop )
 			cur->b->head->write_obj( frep, elemDone );
 	}
 }
 
 
-/******************************
-WRITE_VAR
-*******************************/
-void variable::write_var( FILE *frep )
+/*************************************************************
+ WRITE_VAR
+ *************************************************************/
+void lsd::variable::write_var( FILE *frep )
 {
 	bool one, found;
 	char *app, c1_lab[ 2 * MAX_LINE_SIZE ], c2_lab[ 2 * MAX_LINE_SIZE ], c3_lab[ 2 * MAX_LINE_SIZE ], updt_in[ MAX_ELEM_LENGTH ];
@@ -551,28 +561,28 @@ void variable::write_var( FILE *frep )
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
-	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", eq_file, eq_file );
+	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", gui::eq_file, gui::eq_file );
 	cmd( "set res [ llength $source_files ]" );
-	nfiles = get_int( "res" );
+	nfiles = gui::get_int( "res" );
 
 	for ( one = false, k = 0; k < nfiles; ++k )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", k );
 		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", model_path, model_path );
-		fname = get_str( "brr" );
+		fname = gui::get_str( "brr" );
 
 		if ( ( ffun = fopen( fname, "r" ) ) == NULL )
 		{
 			if ( ++file_error < ERR_LIM )
-				plog( "\nError opening file '%s': %s", fname, strerror( errno ) );
+				gui::plog( "\nError opening file '%s': %s", fname, strerror( errno ) );
 			continue;
 		}
 
 		while ( fgets( c1_lab, 2 * MAX_LINE_SIZE, ffun ) != NULL )
 		{
-			if ( is_equation_header( c1_lab, c2_lab, updt_in ) )
+			if ( gui::eq_header( c1_lab, c2_lab, updt_in ) )
 			{
-				done = contains( ffun, label, strlen( label ) );
+				done = gui::eq_contains( ffun, label, strlen( label ) );
 
 				if ( done )
 				{
@@ -654,12 +664,12 @@ void variable::write_var( FILE *frep )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", k );
 		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", model_path, model_path );
-		fname = get_str( "brr" );
+		fname = gui::get_str( "brr" );
 
 		if ( ( ffun = fopen( fname, "r" ) ) == NULL )
 		{
 			if ( ++file_error < ERR_LIM )
-				plog( "\nError opening file '%s': %s", fname, strerror( errno ) );
+				gui::plog( "\nError opening file '%s': %s", fname, strerror( errno ) );
 			continue;
 		}
 
@@ -667,9 +677,9 @@ void variable::write_var( FILE *frep )
 
 		while ( fgets( c1_lab, 2 * MAX_LINE_SIZE, ffun ) != NULL  )
 		{
-			if ( is_equation_header( c1_lab, c2_lab, updt_in ) )
+			if ( gui::eq_header( c1_lab, c2_lab, updt_in ) )
 			{
-				if ( ! macro )
+				if ( ! gui::macro )
 					done = 0;
 				else
 					done = 1;		// will never stop with {} only
@@ -691,10 +701,10 @@ void variable::write_var( FILE *frep )
 						found = true;
 						fgets( c1_lab, 2 * MAX_LINE_SIZE, ffun );
 						strcpyn( c3_lab, c1_lab, 2 * MAX_LINE_SIZE );
-						clean_spaces( c3_lab );
+						gui::clean_spaces( c3_lab );
 
 						// handle dummy equations without RESULT closing
-						if ( eq_dum && ( ! strncmp( c1_lab, "EQUATION(", 9 ) || ! strncmp( c1_lab, "EQUATION_DUMMY(", 15 ) || ! strncmp( c1_lab, "FUNCTION(", 9 ) || ! strncmp( c1_lab, "MODELEND", 8 ) ) )
+						if ( gui::eq_dum && ( ! strncmp( c1_lab, "EQUATION(", 9 ) || ! strncmp( c1_lab, "EQUATION_DUMMY(", 15 ) || ! strncmp( c1_lab, "FUNCTION(", 9 ) || ! strncmp( c1_lab, "MODELEND", 8 ) ) )
 						{
 							if ( strlen( updt_in ) > 0 )
 								snprintf( c1_lab, 2 * MAX_LINE_SIZE, "(DUMMY EQUATION: variable '%s' updated in '%s')", label, updt_in );
@@ -797,7 +807,7 @@ void variable::write_var( FILE *frep )
 
 						fprintf( frep, "</TT>\n" );
 
-						if ( ! strncmp( c3_lab, "RESULT(", 7 ) && macro )
+						if ( ! strncmp( c3_lab, "RESULT(", 7 ) && gui::macro )
 							done = 0;		// force it to stop
 					}
 
@@ -815,13 +825,13 @@ void variable::write_var( FILE *frep )
 }
 
 
-/******************************
-FIND_USING
-*******************************/
-void object::find_using( variable *v, FILE *frep, bool *found )
+/*************************************************************
+ FIND_USING
+ *************************************************************/
+void lsd::object::find_using( variable *v, FILE *frep, bool *found )
 {
 	bool one;
-	int count, done, i, nfiles;
+	int done, i, nfiles;
 	char c1_lab[ 2 * MAX_LINE_SIZE ], c2_lab[ 2 * MAX_LINE_SIZE ], updt_in[ MAX_ELEM_LENGTH ];
 	const char *fname;
 	object *cur;
@@ -830,27 +840,27 @@ void object::find_using( variable *v, FILE *frep, bool *found )
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
-	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", eq_file, eq_file );
+	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", gui::eq_file, gui::eq_file );
 	cmd( "set res [ llength $source_files ]" );
-	nfiles = get_int( "res" );
+	nfiles = gui::get_int( "res" );
 
 	// first check if variable has a dummy equation and abort if so
 	for ( i = 0; i < nfiles; ++i )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", i );
 		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", model_path, model_path );
-		fname = get_str( "brr" );
+		fname = gui::get_str( "brr" );
 
 		if ( ( ffun = fopen( fname, "r" ) ) == NULL )
 		{
 			if ( ++file_error < ERR_LIM )
-				plog( "\nError opening file '%s': %s", fname, strerror( errno ) );
+				gui::plog( "\nError opening file '%s': %s", fname, strerror( errno ) );
 			continue;
 		}
 
 		while ( fgets( c1_lab, 2 * MAX_LINE_SIZE, ffun ) != NULL )
-			if ( is_equation_header( c1_lab, c2_lab, updt_in ) )
-				if ( eq_dum && ! strcmp( c2_lab, v->label ) )
+			if ( gui::eq_header( c1_lab, c2_lab, updt_in ) )
+				if ( gui::eq_dum && ! strcmp( c2_lab, v->label ) )
 				{
 					fclose( ffun );
 					return;
@@ -860,7 +870,7 @@ void object::find_using( variable *v, FILE *frep, bool *found )
 	}
 
 	// now search for all elements in all objects in all files
-	for ( one = false, cur = this; cur != NULL; cur = skip_next_obj( cur, &count ) )
+	for ( one = false, cur = this; cur != NULL; cur = next_obj( cur ) )
 	{
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 		{
@@ -870,27 +880,27 @@ void object::find_using( variable *v, FILE *frep, bool *found )
 			{
 				cmd( "set brr [ lindex $source_files %d ]", i );
 				cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", model_path, model_path );
-				fname = get_str( "brr" );
+				fname = gui::get_str( "brr" );
 
 				if ( ( ffun = fopen( fname, "r" ) ) == NULL )
 				{
 					if ( ++file_error < ERR_LIM )
-						plog( "\nError opening file '%s': %s", fname, strerror( errno ) );
+						gui::plog( "\nError opening file '%s': %s", fname, strerror( errno ) );
 					continue;
 				}
 
 				while ( fgets( c1_lab, 2 * MAX_LINE_SIZE, ffun ) != NULL )
 				{
-					if ( is_equation_header( c1_lab, c2_lab, updt_in ) )
+					if ( gui::eq_header( c1_lab, c2_lab, updt_in ) )
 					{
 						done = false;
 						if ( ! strcmp( c2_lab, v->label ) )
-							done = contains( ffun, cv->label, strlen( cv->label ) );
+							done = gui::eq_contains( ffun, cv->label, strlen( cv->label ) );
 						if ( done )
 						{
 							// avoid duplicated variable equations
 							cmd( "if { [ lsearch -exact $usingList %s ] >= 0 } { set res 1 } { set res 0 }", cv->label );
-							if ( get_int( "res", & done ) )
+							if ( gui::get_int( "res", & done ) )
 								continue;
 							else
 								cmd( "lappend usingList %s", cv->label );
@@ -918,14 +928,15 @@ void object::find_using( variable *v, FILE *frep, bool *found )
 }
 
 
-/****************************************************
-CONTAINS
+/*************************************************************
+ EQ_CONTAINS
  scans an equation checking if it contains anywhere the string
  lab between quotes. Returns 1 if found, and 0 otherwise.
  The file passed is moved to point to the next equation
- It correctly skip the commented text, either by // or by / * ... * /
-****************************************************/
-bool contains( FILE *f, const char *lab, int len )
+ It correctly skip the commented text, either by // or
+ by / * ... * /
+ *************************************************************/
+bool gui::eq_contains( FILE *f, const char *lab, int len )
 {
 	bool found = false;
 	int bra, start, i, j, got, comm = 0;
@@ -948,7 +959,7 @@ bool contains( FILE *f, const char *lab, int len )
 		if ( comm == 1 )
 			comm = 0;
 
-		strcpyn( pot, c1_lab, MAX_LINE_SIZE );
+		lsd::strcpyn( pot, c1_lab, MAX_LINE_SIZE );
 		clean_spaces( pot );
 
 		if ( ! strncmp( pot, "RESULT(", 7 ) )
@@ -1004,15 +1015,14 @@ bool contains( FILE *f, const char *lab, int len )
 }
 
 
-/******************************
-WRITE_STR
-*******************************/
-void object::write_str( FILE *frep, int dep, const char *prefix )
+/*************************************************************
+ WRITE_STR
+ *************************************************************/
+void lsd::object::write_str( FILE *frep, int dep, const char *prefix )
 {
-	int len, i, j, trash;
+	int len, i, j, count = 0;
 	bridge *cb;
 
-	trash = 0;
 	if ( up != NULL )
 	{
 		if ( up->b->head != this )
@@ -1026,20 +1036,20 @@ void object::write_str( FILE *frep, int dep, const char *prefix )
 
 		fprintf( frep, "<TT>&mdash;&gt;</TT>" );
 
-		if ( skip_next_obj( this, &trash ) != NULL )
+		if ( next_count( this, & count ) != NULL )
 			tmp_rep[ dep ] = '|';
 		else
 			tmp_rep[ dep ] = ' ';
 
 		tmp_rep[ ++dep ] = ' ';
-		trash = 1;
+		count = 1;
 	}
 
 	fprintf( frep, "<TT><A HREF=\"#%s%s\">%s</A></TT>", prefix, label, label );
 	len = strlen( label );
 	for ( i = 0; i < len; ++i )
-		tmp_rep[ dep + i + trash ] = ' ';
-	dep = dep + len + trash;
+		tmp_rep[ dep + i + count ] = ' ';
+	dep = dep + len + count;
 	j = dep;
 
 	for ( cb = b; cb != NULL; cb = cb->next )
@@ -1059,15 +1069,15 @@ void object::write_str( FILE *frep, int dep, const char *prefix )
 }
 
 
-/********************************
-WRITE_LIST
-*********************************/
-void object::write_list( FILE *frep, bool show_all, const char *prefix )
+/*************************************************************
+ WRITE_LIST
+ *************************************************************/
+void lsd::object::write_list( FILE *frep, bool show_all, const char *prefix )
 {
 	int num, i;
 	char s1[ 2 * MAX_ELEM_LENGTH ], s2[ MAX_ELEM_LENGTH ];
 
-	Tcl_LinkVar( interp, "num", ( char * ) &num, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "num", ( char * ) &num, TCL_LINK_INT );
 
 	if ( show_all )							// initial listing?
 		fprintf( frep, "<H3>Variables</H3>\n" );
@@ -1096,7 +1106,7 @@ void object::write_list( FILE *frep, bool show_all, const char *prefix )
 		for ( i = 0; i < num; ++i )
 		{
 			cmd( "set app [ lindex $alphalist %d ]", i );
-			sscanf( get_str( "app" ), "%s %s", s1, s2);
+			sscanf( gui::get_str( "app" ), "%s %s", s1, s2);
 			fprintf( frep, "<TT><A HREF=\"#%s%s\">%s</A></TT>", prefix, s1, s1 );
 
 			if ( i < num - 1 )
@@ -1134,7 +1144,7 @@ void object::write_list( FILE *frep, bool show_all, const char *prefix )
 		for ( i = 0; i < num; ++i )
 		{
 			cmd( "set app [ lindex $alphalist %d ]", i );
-			fprintf( frep, "<TT><A HREF=\"#%s%s\">%s</A></TT>", prefix, get_str( "app" ), get_str( "app" ) );
+			fprintf( frep, "<TT><A HREF=\"#%s%s\">%s</A></TT>", prefix, gui::get_str( "app" ), gui::get_str( "app" ) );
 
 			if ( i < num - 1 )
 				fprintf( frep, "<TT>, </TT>" );
@@ -1148,13 +1158,13 @@ void object::write_list( FILE *frep, bool show_all, const char *prefix )
 	if ( ! show_all )
 		fprintf( frep, "<BR>\n" );
 
-	Tcl_UnlinkVar( interp, "num" );
+	Tcl_UnlinkVar( gui::interp, "num" );
 }
 
-/********************************
-FILL_LIST_VAR
-*********************************/
-void object::fill_list_var( bool show_all, bool lag_only )
+/*************************************************************
+ FILL_LIST_VAR
+ *************************************************************/
+void lsd::object::fill_list_var( bool show_all, bool lag_only )
 {
 	bridge *cb;
 	variable *cv;
@@ -1173,10 +1183,10 @@ void object::fill_list_var( bool show_all, bool lag_only )
 }
 
 
-/********************************
-FILL_LIST_PAR
-*********************************/
-void object::fill_list_par( bool show_all )
+/*************************************************************
+ FILL_LIST_PAR
+ *************************************************************/
+void lsd::object::fill_list_par( bool show_all )
 {
 	bridge *cb;
 	variable *cv;
@@ -1195,11 +1205,11 @@ void object::fill_list_par( bool show_all )
 }
 
 
-/********************************
-CREATE_TABLE_INIT
-Create recursively the help table for an Object
-*********************************/
-void object::create_table_init( FILE *frep )
+/*************************************************************
+ CREATE_TABLE_INIT
+ Create recursively the help table for an Object
+ *************************************************************/
+void lsd::object::create_table_init( FILE *frep )
 {
 	char min_val[ 32 ], max_val[ 32 ];
 	int i;
@@ -1357,11 +1367,12 @@ void object::create_table_init( FILE *frep )
 }
 
 
-/********************************
-CREATE_INITIAL_VALUES
-Create recursively the help table for the initial values of an Object
-*********************************/
-void object::create_initial_values( FILE *frep )
+/*************************************************************
+ CREATE_INITIAL_VALUES
+ Create recursively the help table
+ for the initial values of an Object
+ *************************************************************/
+void lsd::object::create_initial_values( FILE *frep )
 {
 	int count = 0, i, j;
 	bridge *cb;
@@ -1465,12 +1476,14 @@ void object::create_initial_values( FILE *frep )
 }
 
 
-/********************************
-IS_EQUATION_HEADER
-Squeeze the spaces out of line and returns 1 if the line is an equation header,
-placing the Variable label in Var
-*********************************/
-bool is_equation_header( const char *raw_line, char *var, char *updt_in )
+/*************************************************************
+ IS_EQUATION_HEADER
+ Squeeze the spaces out of line and
+ returns 1 if the line is an equation
+ header, placing the Variable label
+ in Var
+ *************************************************************/
+bool gui::eq_header( const char *raw_line, char *var, char *updt_in )
 {
 	bool header;
 	int i, j;
@@ -1523,15 +1536,15 @@ bool is_equation_header( const char *raw_line, char *var, char *updt_in )
 }
 
 
-/************
+/*************************************************************
  CREATE_FRAMES
- ************/
-FILE *create_frames( const char *dest_path, const char *fname )
+ *************************************************************/
+FILE *lsd::object::create_frames( const char *dest_path, const char *fname )
 {
 	FILE *f;
 
 	cmd( "set fullFileName [ file join \"%s\" \"%s\" ]", dest_path, fname );
-	f = fopen( get_str( "fullFileName" ), "w" );
+	f = fopen( gui::get_str( "fullFileName" ), "w" );
 	if ( f == NULL )
 		return NULL;
 
@@ -1543,7 +1556,7 @@ FILE *create_frames( const char *dest_path, const char *fname )
 	fclose( f );
 
 	cmd( "set fullFileName [ file join \"%s\" \"head_%s\" ]", dest_path, fname );
-	f = fopen( get_str( "fullFileName" ), "w" );
+	f = fopen( gui::get_str( "fullFileName" ), "w" );
 	if ( f == NULL )
 		return NULL;
 
@@ -1561,16 +1574,17 @@ FILE *create_frames( const char *dest_path, const char *fname )
 	fclose( f );
 
 	cmd( "set fullFileName [ file join \"%s\" \"body_%s\" ]", dest_path, fname );
-	f = fopen( get_str( "fullFileName" ), "w" );
+	f = fopen( gui::get_str( "fullFileName" ), "w" );
 
 	return f;
 }
 
 
-/************
-CREATE LIST FORMS FOR LABELS.
-**********/
-void create_form( int num, const char *title, const char *prefix, FILE *frep )
+/*************************************************************
+ CREATE_FORM
+ create list forms for labels.
+ *************************************************************/
+void lsd::object::create_form( int num, const char *title, const char *prefix, FILE *frep )
 {
 	int i;
 	char s1[ 2 * MAX_ELEM_LENGTH ], s2[ 2 * MAX_ELEM_LENGTH ];
@@ -1584,7 +1598,7 @@ void create_form( int num, const char *title, const char *prefix, FILE *frep )
 	for ( i = 0; i < num; ++i )
 	{
 		cmd( "set app [ lindex $alphalist %d ]", i );
-		sscanf( get_str( "app" ), "%s %s", s1, s2 );
+		sscanf( gui::get_str( "app" ), "%s %s", s1, s2 );
 		fprintf( frep, "<option value=\"#%s%s\">%s</option>\n", prefix, s1, s1 );
 	}
 
@@ -1594,10 +1608,10 @@ void create_form( int num, const char *title, const char *prefix, FILE *frep )
 }
 
 
-/****************************************************
-SHOW_REP_OBSERVE
-****************************************************/
-void object::show_rep_observe( FILE *f, int *begin, FILE *frep )
+/*************************************************************
+ SHOW_REP_OBSERVE
+ *************************************************************/
+void lsd::object::show_rep_observe( FILE *f, int *begin, FILE *frep )
 {
 	int i;
 	bridge *cb;
@@ -1670,10 +1684,10 @@ if ( up == NULL && table )
 }
 
 
-/****************************************************
+/*************************************************************
  SHOW_REP_INITIAL
- ****************************************************/
-void object::show_rep_initial( FILE *f, int *begin, FILE *frep )
+ *************************************************************/
+void lsd::object::show_rep_initial( FILE *f, int *begin, FILE *frep )
 {
 	int i;
 	bridge *cb;
@@ -1774,9 +1788,9 @@ void object::show_rep_initial( FILE *f, int *begin, FILE *frep )
 }
 
 
-/****************************************************
+/*************************************************************
  TEX_STRCPY
- ****************************************************/
+ *************************************************************/
 char *tex_strcpy( char *&out, char *in )
 {
 	int i, j;
@@ -1822,10 +1836,10 @@ char *tex_strcpy( char *&out, char *in )
 }
 
 
-/****************************************************
+/*************************************************************
  TEX_FPRINTF
- ****************************************************/
-void tex_fprintf( FILE *f, char* text )
+ *************************************************************/
+void lsd::object::tex_fprintf( FILE *f, char* text )
 {
 	bool newline = false;
 
@@ -1866,10 +1880,10 @@ void tex_fprintf( FILE *f, char* text )
 }
 
 
-/************
+/*************************************************************
  ANCESTORS
- ************/
-void object::ancestors( FILE *f, bool html )
+ *************************************************************/
+void lsd::object::ancestors( FILE *f, bool html )
 {
 	char *ol;
 
@@ -1895,10 +1909,10 @@ void object::ancestors( FILE *f, bool html )
 }
 
 
-/****************************************************
+/*************************************************************
  TEX_REPORT_HEAD
- ****************************************************/
-void tex_report_head( FILE *f, bool table )
+ *************************************************************/
+void lsd::object::tex_report_head( FILE *f, bool table )
 {
 	fprintf( f, "\\documentclass{article}\n\n" );
 	fprintf( f, "\\usepackage[%s,left=%fcm,right=%fcm,top=%fcm,bottom=%fcm]{geometry}\n", TEX_PAPER, TEX_LEFT, TEX_RIGHT, TEX_TOP, TEX_BOTTOM );
@@ -1911,7 +1925,7 @@ void tex_report_head( FILE *f, bool table )
 	fprintf( f, "\\newcommand{\\hrf}[2] {\\hyperref[#1]{\\texttt{\\color{blue}{\\detokenize{#2}}}}}\n" );
 	fprintf( f, "\\setlength{\\parindent}{0cm}\n\n" );
 
-	fprintf( f, "\\title{Model: %s}\n", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
+	fprintf( f, "\\title{Model: %s}\n", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
 	fprintf( f, "\\author{Automatically generated LSD report}\n" );
 	fprintf( f, "\\date{}\n\n" );
 
@@ -1920,10 +1934,10 @@ void tex_report_head( FILE *f, bool table )
 }
 
 
-/****************************************************
+/*************************************************************
  TEX_REPORT_STRUCT
- ****************************************************/
-void object::tex_report_struct( FILE *f, bool table )
+ *************************************************************/
+void lsd::object::tex_report_struct( FILE *f, bool table )
 {
 	char *ol, *vl, min_val[ 32 ], max_val[ 32 ];
 	bridge *cb;
@@ -2061,10 +2075,10 @@ void object::tex_report_struct( FILE *f, bool table )
 }
 
 
-/****************************************************
+/*************************************************************
  TEX_REPORT_OBSERVE
- ****************************************************/
-void object::tex_report_observe( FILE *f, bool table )
+ *************************************************************/
+void lsd::object::tex_report_observe( FILE *f, bool table )
 {
 	char *ol, *vl;
 	bridge *cb;
@@ -2134,10 +2148,10 @@ void object::tex_report_observe( FILE *f, bool table )
 }
 
 
-/****************************************************
+/*************************************************************
  TEX_REPORT_INIT
- ****************************************************/
-void object::tex_report_init( FILE *f, bool table )
+ *************************************************************/
+void lsd::object::tex_report_init( FILE *f, bool table )
 {
 	char *ol, *vl;
 	bridge *cb;
@@ -2219,10 +2233,10 @@ void object::tex_report_init( FILE *f, bool table )
 }
 
 
-/****************************************************
+/*************************************************************
  TEX_REPORT_INITALL
- ****************************************************/
-void object::tex_report_initall( FILE *f, bool table )
+ *************************************************************/
+void lsd::object::tex_report_initall( FILE *f, bool table )
 {
 	int i, j;
 	char *ol, *vl;
@@ -2290,10 +2304,10 @@ void object::tex_report_initall( FILE *f, bool table )
 }
 
 
-/****************************************************
+/*************************************************************
  TEX_REPORT_END
- ****************************************************/
-void tex_report_end( FILE *f )
+ *************************************************************/
+void lsd::object::tex_report_end( FILE *f )
 {
 	fprintf( f, "\\end{document}\n" );
 }

@@ -13,63 +13,67 @@
  *************************************************************/
 
 /*************************************************************
-BROWSER.CPP
-Contains the code that manages the LSD Browser, the main GUI
-element. It performs:
-- early initialization (Tcl/Tk GUI).
-- the main cycle: browse a model, configure it, run simulation,
-return to the browser, and so on.
+ BROWSER.CPP
+ Contains the code that manages the LSD Browser, the main GUI
+ element. It performs:
+ - early initialization (Tcl/Tk GUI).
+ - the main cycle: browse a model, configure it, run simulation,
+ return to the browser, and so on.
 
-It is re-build any time the browser window changes. There are
-many actions that are commanded from the browser window,
-implemented as a switch in operate (INTERF.CPP).
+ It is re-build any time the browser window changes. There are
+ many actions that are commanded from the browser window,
+ implemented as a switch in operate (INTERF.CPP).
 
-The main functions contained in this file are:
+ The main functions contained in this file are:
 
-- load_gui( argv )
-Initializes the Tcl/Tk environment and passes control to the
-LSD browser.
+ - load_gui( argv )
+ Initializes the Tcl/Tk environment and passes control to the
+ LSD browser.
 
-- object *create( void )
-The main cycle for the Browser, from which it exits only to
-run a simulation or to quit the program. The cycle is just
-once call to browse followed by a call to operate.
+ - lsd::object *create( void )
+ The main cycle for the Browser, from which it exits only to
+ run a simulation or to quit the program. The cycle is just
+ once call to browse followed by a call to operate.
 
-- int browse( );
-build the browser window and waits for an action (on the form of
-values for choice or choice_g different from 0)
-*************************************************************/
+ - int browse( );
+ build the browser window and waits for an action (on the form
+ of values for choice or choice_g different from 0)
+ *************************************************************/
 
 #include "LSD.h"
 
-// list of choices that are bad with existing run data
-int badChoices[ ] = { 1, 2, 3, 6, 7, 9, 19, 21, 22, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95, 96 };
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
-
-// list of choices that are run twice (called from another choice)
-int redoChoices[ ] = { 32, 33, 55, 73, 74, 75, 76, 77, 78, 79, 80, 83, 96 };
 #define NUM_REDO_CHOICES ( sizeof( redoChoices ) / sizeof( redoChoices[ 0 ] ) )
 
-// comparison function for bsearch and qsort
-int comp_ints ( const void *a, const void *b ) { return ( *( int * ) a - *( int * ) b ); }
+namespace gui
+{
+	// list of choices that are bad with existing run data
+	int badChoices[ ] = { 1, 2, 3, 6, 7, 9, 19, 21, 22, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95, 96 };
+
+	// list of choices that are run twice (called from another choice)
+	int redoChoices[ ] = { 32, 33, 55, 73, 74, 75, 76, 77, 78, 79, 80, 83, 96 };
+
+	// comparison functions
+	int comp_ints ( const void *a, const void *b ) { return ( *( int * ) a - *( int * ) b ); }
+}
 
 
-/*********************************
+/*************************************************************
  LOAD_GUI
- *********************************/
-int load_gui( const char **argv )
+ *************************************************************/
+int gui::load_gui( const char **argv )
 {
 	char *str, cwd[ PATH_MAX ];
 	const char *app, *app1;
 	int i, j = 0, k = 0;
-	object *r;
+	lsd::object *r;
 	FILE *f;
 
 	// assume exec path is current path
 	getcwd( cwd, PATH_MAX );
-	set_exec( cwd, argv[ 0 ] );
+	lsd::set_exec( cwd, argv[ 0 ] );
 
-	if ( exec_file == NULL || exec_path == NULL )
+	if ( lsd::exec_file == NULL || lsd::exec_path == NULL )
 	{
 		log_tcl_error( true, "Invalid LSD executable name or path", "Make sure the LSD directory is not too deep into the disk directory tree" );
 		return 1;
@@ -103,7 +107,7 @@ int load_gui( const char **argv )
 
 		if ( argv[ i ][ 1 ] == 'i' )
 		{
-			strcpyn( tcl_dir, argv[ i + 1 ] + 2, MAX_PATH_LENGTH );
+			lsd::strcpyn( tcl_dir, argv[ i + 1 ] + 2, MAX_PATH_LENGTH );
 			i++;
 		}
 
@@ -116,10 +120,8 @@ int load_gui( const char **argv )
 	}
 
 #ifndef _NP_
-
 	if ( j > 0 && j < sim.max_threads )
 		sim.max_threads = j;
-
 #endif
 
 	// initialize tcl/tk and set global bidirectional variables
@@ -143,16 +145,16 @@ int load_gui( const char **argv )
 	cmd( "set DATE_FMT \"%s\"", DATE_FMT );
 
 	// check if exec file is in current path
-	i = strlen( exec_path ) + strlen( exec_file ) + 2;
+	i = strlen( lsd::exec_path ) + strlen( lsd::exec_file ) + 2;
 	str = new char[ i ];
-	snprintf( str, i, "%s/%s", exec_path, exec_file );
+	snprintf( str, i, "%s/%s", lsd::exec_path, lsd::exec_file );
 	f = fopen( str, "r" );
 	delete [ ] str;
 	if ( f != NULL )
 		fclose( f );
 
 	// try to use exec_path to change to the model directory
-	if ( f == NULL || strlen( exec_path ) == 0 || ! strcmp( exec_path, "/" ) )
+	if ( f == NULL || strlen( lsd::exec_path ) == 0 || ! strcmp( lsd::exec_path, "/" ) )
 	{	// try to get name from Tcl
 		cmd( "if { [ info nameofexecutable ] != \"\" } { \
 				set path [ file dirname [ info nameofexecutable ] ]; \
@@ -165,11 +167,11 @@ int load_gui( const char **argv )
 		app = get_str( "path" );
 		app1 = get_str( "exec" );
 		if ( app != NULL && app1 != NULL && strlen( app1 ) > 0 )
-			set_exec( app, app1 );
+			lsd::set_exec( app, app1 );
 	}
 
 	// check if executable is inside a macOS package
-	cmd( "set path [ file normalize \"%s\" ]", exec_path );
+	cmd( "set path [ file normalize \"%s\" ]", lsd::exec_path );
 	cmd( "if { $tcl_platform(os) eq \"Darwin\" } { \
 			set pathsplit [ file split \"$path\" ]; \
 			if { [ lindex $pathsplit end ] eq \"MacOS\" && [ lindex $pathsplit end-1 ] eq \"Contents\" } { \
@@ -189,11 +191,11 @@ int load_gui( const char **argv )
 	app = get_str( "modelDir" );
 
 	delete [ ] sim.conf_path;
-	delete [ ] model_path;
+	delete [ ] lsd::model_path;
 	sim.conf_path = new char[ strlen( app ) + 1 ];
-	model_path = new char[ strlen( app ) + 1 ];
+	lsd::model_path = new char[ strlen( app ) + 1 ];
 	strcpy( sim.conf_path, app );
-	strcpy( model_path, app );
+	strcpy( lsd::model_path, app );
 
 	// check if LSDROOT already exists and use it if so, if not, search the current directory tree
 	cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if { ! [ file exists \"$RootLsd/src/interf.cpp\" ] } { unset RootLsd } }" );
@@ -225,10 +227,10 @@ int load_gui( const char **argv )
 	app = get_str( "RootLsd" );
 	if ( app != NULL && strlen( app ) > 0 )
 	{
-		rootLsd = new char[ strlen( app ) + 1 ];
-		strcpy( rootLsd, app );
-		rootLsd = clean_path( rootLsd );
-		cmd( "set RootLsd \"%s\"", rootLsd );
+		lsd::root_lsd = new char[ strlen( app ) + 1 ];
+		strcpy( lsd::root_lsd, app );
+		lsd::root_lsd = lsd::clean_path( lsd::root_lsd );
+		cmd( "set RootLsd \"%s\"", lsd::root_lsd );
 	}
 	else
 	{
@@ -315,7 +317,7 @@ int load_gui( const char **argv )
 	eq_txt = load_eqfile( );
 
 	// load/check model information file and fix if required
-	if ( ! load_model_info( model_path ) )
+	if ( ! load_model_info( lsd::model_path ) )
 		update_model_info( true );
 
 	// check model configuration file
@@ -338,11 +340,12 @@ int load_gui( const char **argv )
 
 	// set dynamic link library (DLL) call-back references
 	sim.inter = interp;
-	sim.liblnk = new dlliblinkage;
+	sim.liblnk = new lsd::dlliblinkage;
 
+	sim.liblnk->choice = & choice;
 	sim.liblnk->cmd_backend = & cmd_backend;
 	sim.liblnk->cover_browser = & cover_browser;
-	sim.liblnk->debugger = & object::debugger;
+	sim.liblnk->debugger = & lsd::object::debugger;
 	sim.liblnk->deb_log = & deb_log;
 	sim.liblnk->disable_plot = & disable_plot;
 	sim.liblnk->enable_plot = & enable_plot;
@@ -350,7 +353,7 @@ int load_gui( const char **argv )
 	sim.liblnk->init_lattice_helper = & init_lattice_helper;
 	sim.liblnk->log_tcl_error = & log_tcl_error;
 	sim.liblnk->plog_backend = & plog_backend;
-	sim.liblnk->plot_runtime = & variable::plot_runtime;
+	sim.liblnk->plot_runtime = & lsd::variable::plot_runtime;
 	sim.liblnk->print_stack = & print_stack;
 	sim.liblnk->runtime_buttons = & runtime_buttons;
 	sim.liblnk->runtime_end = & runtime_end;
@@ -383,7 +386,7 @@ int load_gui( const char **argv )
 		strcpy( sim.conf_name, "" );
 		strcpy( sim.conf_file, "" );
 		strcpy( sim.rep_file, "" );
-		cmd( "cd \"%s\"", model_path );
+		cmd( "cd \"%s\"", lsd::model_path );
 	}
 
 	// configure main window
@@ -433,12 +436,12 @@ int load_gui( const char **argv )
 }
 
 
-/****************************************************
-CREATE
-****************************************************/
-void create( void )
+/*************************************************************
+ CREATE
+ *************************************************************/
+void gui::create( void )
 {
-	object *r;
+	lsd::object *r;
 
 	Tcl_LinkVar( interp, "strWindowOn", ( char * ) &strWindowOn, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( interp, "eff_t", ( char * ) &sim.eff_t, TCL_LINK_INT );
@@ -501,15 +504,15 @@ void create( void )
 }
 
 
-/****************************************************
-BROWSE
-****************************************************/
-int browse( object *r )
+/*************************************************************
+ BROWSE
+ *************************************************************/
+int gui::browse( lsd::object *r )
 {
 	bool done, sp_upd;
 	int i, num;
-	bridge *cb;
-	variable *cv;
+	lsd::bridge *cb;
+	lsd::variable *cv;
 
 	currObj = r;			// global pointer to C Tcl routines
 
@@ -911,7 +914,7 @@ int browse( object *r )
 			{
 				if ( cb->head != NULL )
 				{
-					skip_next_obj( cb->head, &num );
+					cb->head->next_count( cb->head, & num );
 					done = cb->head->to_compute;
 				}
 				else
@@ -1502,11 +1505,11 @@ int browse( object *r )
 }
 
 
-/****************************************************
-RUNTIME_START
-Updates GUI at the start of a set of simulation runs
-****************************************************/
-void runtime_start( void )
+/*************************************************************
+ RUNTIME_START
+ Updates GUI at the start of a set of simulation runs
+ *************************************************************/
+void gui::runtime_start( void )
 {
 	sim.prof_times.clear( );		// reset profiling times
 
@@ -1514,11 +1517,11 @@ void runtime_start( void )
 }
 
 
-/****************************************************
-RUNTIME_END
-Updates GUI at the end of a set of simulation runs
-****************************************************/
-void runtime_end( void )
+/*************************************************************
+ RUNTIME_END
+ Updates GUI at the end of a set of simulation runs
+ *************************************************************/
+void gui::runtime_end( void )
 {
 	reset_plot( );
 	uncover_browser( );
@@ -1527,24 +1530,24 @@ void runtime_end( void )
 }
 
 
-/****************************************************
-RUNTIME_RUN_START
-Updates GUI at the start of each simulation run
-Prepare run-time plots and clear AoR maps
-****************************************************/
-void runtime_run_start( void )
+/*************************************************************
+ RUNTIME_RUN_START
+ Updates GUI at the start of each simulation run
+ Prepare run-time plots and clear AoR maps
+ *************************************************************/
+void gui::runtime_run_start( void )
 {
 	sim.root->prepare_plot( sim.run );
 	sim.par_map.clear( );			// restart variable to parent name map for AoR
 }
 
 
-/****************************************************
-RUNTIME_RUN_END
-Updates GUI at the end of each simulation run
-Updates the GUI elements
-****************************************************/
-void runtime_run_end( void )
+/*************************************************************
+ RUNTIME_RUN_END
+ Updates GUI at the end of each simulation run
+ Updates the GUI elements
+ *************************************************************/
+void gui::runtime_run_end( void )
 {
 	cmd( ".p.b1.b configure -value %d", sim.run );
 	cmd( ".p.b1.i configure -text \"Simulation: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"",
@@ -1554,13 +1557,13 @@ void runtime_run_end( void )
 }
 
 
-/****************************************************
-RUNTIME_STEP
-Updates GUI at the start of each time step
-Checks if debug must be invoked and if simulation
-is paused (return FALSE) or not (TRUE)
-****************************************************/
-bool runtime_step( void )
+/*************************************************************
+ RUNTIME_STEP
+ Updates GUI at the start of each time step
+ Checks if debug must be invoked and if simulation
+ is paused (return FALSE) or not (TRUE)
+ *************************************************************/
+bool gui::runtime_step( void )
 {
 	cur_plt = 0;			// restart runtime variable color cycle
 
@@ -1579,12 +1582,12 @@ bool runtime_step( void )
 }
 
 
-/****************************************************
-RUNTIME_BUTTONS
-Handle active buttons during simulation execution
-at the end of each time step
-****************************************************/
-void runtime_buttons( clock_t &last_update )
+/*************************************************************
+ RUNTIME_BUTTONS
+ Handle active buttons during simulation execution
+ at the end of each time step
+ *************************************************************/
+void gui::runtime_buttons( clock_t &last_update )
 {
 	switch ( done_in )
 	{
@@ -1664,13 +1667,13 @@ void runtime_buttons( clock_t &last_update )
 }
 
 
-/****************************************************
-SAVE_POS
-Save user position in browser
-****************************************************/
-void object::save_pos( void )
+/*************************************************************
+ SAVE_POS
+ Save user position in browser
+ *************************************************************/
+void lsd::object::save_pos( void )
 {
-	if ( ! eval_bool( "[ winfo exists .l.s.c.son_name ]" ) )
+	if ( ! gui::eval_bool( "[ winfo exists .l.s.c.son_name ]" ) )
 		return;				// browser not drawn yet
 
 	// save the current object & cursor position for quick reload
@@ -1694,16 +1697,15 @@ void object::save_pos( void )
 }
 
 
-/****************************************************
-RESTORE_POS
-Restore user position in browser
-****************************************************/
-object *object::restore_pos( void )
+/*************************************************************
+ RESTORE_POS
+ Restore user position in browser
+ *************************************************************/
+lsd::object *lsd::object::restore_pos( void )
 {
 	object *cur;
 
-	if ( eval_bool( "$lastObj ne \"\"" ) &&
-		 ( cur = search( get_str( "lastObj" ) ) ) != NULL )
+	if ( gui::eval_bool( "$lastObj ne \"\"" ) && ( cur = search( gui::get_str( "lastObj" ) ) ) != NULL )
 	{
 		cmd( "if [ info exists lastList ] { set listfocus $lastList }" );
 		cmd( "if [ info exists lastItem ] { set itemfocus $lastItem }" );
@@ -1715,11 +1717,11 @@ object *object::restore_pos( void )
 }
 
 
-/****************************************************
-SET_SHORTCUTS
-Define keyboard shortcuts to menu items
-****************************************************/
-void set_shortcuts( const char *window )
+/*************************************************************
+ SET_SHORTCUTS
+ Define keyboard shortcuts to menu items
+ *************************************************************/
+void gui::set_shortcuts( const char *window )
 {
 	cmd( "bind %s <Control-l> { set choice 17 }; bind %s <Control-L> { set choice 17 }", window, window	 );
 	cmd( "bind %s <Control-s> { set choice 18 }; bind %s <Control-S> { set choice 18 }", window, window	 );
@@ -1744,10 +1746,10 @@ void set_shortcuts( const char *window )
 }
 
 
-/****************************************************
-INSERT_OBJECT
-****************************************************/
-void object::insert_object( const char *w, bool netOnly, object *above )
+/*************************************************************
+ INSERT_OBJECT
+ *************************************************************/
+void lsd::object::insert_object( const char *w, bool netOnly, object *above )
 {
 	bridge *cb;
 	object *cur;
@@ -1769,10 +1771,10 @@ void object::insert_object( const char *w, bool netOnly, object *above )
 }
 
 
-/****************************************************
-WIPE_OUT
-****************************************************/
-void object::wipe_out( void )
+/*************************************************************
+ WIPE_OUT
+ *************************************************************/
+void lsd::object::wipe_out( void )
 {
 	object *cur;
 	variable *cv;
@@ -1801,10 +1803,10 @@ void object::wipe_out( void )
 }
 
 
-/****************************************************
-SHIFT_VAR
-****************************************************/
-void object::shift_var( int direction, const char *vlab )
+/*************************************************************
+ SHIFT_VAR
+ *************************************************************/
+ void lsd::object::shift_var( int direction, const char *vlab )
 {
 	variable *cv, *cv1 = NULL, *cv2 = NULL;
 
@@ -1872,10 +1874,10 @@ void object::shift_var( int direction, const char *vlab )
 }
 
 
-/****************************************************
-SHIFT_DESC
-****************************************************/
-void object::shift_desc( int direction, const char *dlab )
+/*************************************************************
+ SHIFT_DESC
+ *************************************************************/
+void lsd::object::shift_desc( int direction, const char *dlab )
 {
 	bridge *cb, *cb1 = NULL, *cb2 = NULL;
 
@@ -1943,22 +1945,23 @@ void object::shift_desc( int direction, const char *dlab )
 }
 
 
-/****************************************************
-SORT_LISTBOX
-****************************************************/
-bool ascending_objects( const bridge &a, const bridge &b )
-{ return ( strcmp( a.blabel, b.blabel ) < 0 ); }
+/*************************************************************
+ ASCENDING/DESCENDING_OBJECTS/VARIABLES
+ comparison functions for sorting objects and variables
+ *************************************************************/
+namespace lsd
+{
+	bool ascending_objects( const bridge &a, const bridge &b ) { return ( strcmp( a.blabel, b.blabel ) < 0 ); }
+	bool descending_objects( const bridge &a, const bridge &b ) { return ( strcmp( a.blabel, b.blabel ) > 0 ); }
+	bool ascending_variables( const variable &a, const variable &b ) { return ( strcmp( a.label, b.label ) < 0 ); }
+	bool descending_variables( const variable &a, const variable &b ) { return ( strcmp( a.label, b.label ) > 0 ); }
+}
 
-bool descending_objects( const bridge &a, const bridge &b )
-{ return ( strcmp( a.blabel, b.blabel ) > 0 ); }
 
-bool ascending_variables( const variable &a, const variable &b )
-{ return ( strcmp( a.label, b.label ) < 0 ); }
-
-bool descending_variables( const variable &a, const variable &b )
-{ return ( strcmp( a.label, b.label ) > 0 ); }
-
-bool object::sort_listbox( int box, int order )
+/*************************************************************
+ SORT_LISTBOX
+ *************************************************************/
+bool lsd::object::sort_listbox( int box, int order )
 {
 	bool first;
 
@@ -2111,16 +2114,12 @@ bool object::sort_listbox( int box, int order )
 }
 
 
-/****************************************************
-UNSAVED_CHANGE
-Read or set the unsaved change flag and update
-windows titles accordingly
-****************************************************/
-bool unsavedChange = false;		// control for unsaved changes in configuration
-#define WND_NUM 10				// number of windows to update (in wndName)
-const char *wndName[ ] = { ".", ".log", ".str", ".inid", ".inin", ".da", ".deb", ".lat", ".plt", ".dap" };
-
-bool unsaved_change( bool val )
+/*************************************************************
+ UNSAVED_CHANGE
+ Read or set the unsaved change flag and update
+ windows titles accordingly
+ *************************************************************/
+bool gui::unsaved_change( bool val )
 {
 	if ( unsavedChange != val )
 	{
@@ -2130,27 +2129,27 @@ bool unsaved_change( bool val )
 		chgMark[ 0 ] = unsavedChange ? '*' : ' ';
 
 		// change all the possibly open (single) windows
-		for ( int i = 0; i < WND_NUM; ++i )
+		for ( int i = 0; i < TK_WIN_NUM; ++i )
 		{
-			cmd( "if [ winfo exist %s ] { wm title %s \"%s[ string range [ wm title %s ] 1 end ]\" }", wndName[ i ], wndName[ i ], chgMark, wndName[ i ]  );
+			cmd( "if [ winfo exist %s ] { wm title %s \"%s[ string range [ wm title %s ] 1 end ]\" }", tk_wnd_names[ i ], tk_wnd_names[ i ], chgMark, tk_wnd_names[ i ]  );
 		}
 	}
 
 	return unsavedChange;
 }
 
-bool unsaved_change( void )
+bool gui::unsaved_change( void )
 {
 	return unsavedChange;
 }
 
 
-/****************************************************
-DISCARD_CHANGE
-Ask user to discard changes in configuration, if applicable
-Returns: 0: abort, 1: continue without saving
-****************************************************/
-bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
+/*************************************************************
+ DISCARD_CHANGE
+ Ask user to discard changes in configuration, if applicable
+ Returns: 0: abort, 1: continue without saving
+ *************************************************************/
+bool gui::discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 {
 	// don't stop if simulation is running
 	if ( sim.running )
@@ -2215,14 +2214,13 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 }
 
 
-/****************************************************
-ABORT_RUN_THREADS
-Confirm exiting when there are running threads
-Returns: 0: cancel, 1: continue with exit
-****************************************************/
-bool abort_run_threads( void )
+/*************************************************************
+ ABORT_RUN_THREADS
+ Confirm exiting when there are running threads
+ Returns: 0: cancel, 1: continue with exit
+ *************************************************************/
+bool gui::abort_run_threads( void )
 {
-
 #ifndef _NP_
 	int res;
 
@@ -2255,11 +2253,12 @@ bool abort_run_threads( void )
 }
 
 
-/****************************************************
+/*************************************************************
  TCL_ABORT_RUN_THREADS
- Entry point function for access from the Tcl interpreter
- ****************************************************/
-int Tcl_abort_run_threads( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+ Entry point function for access from the Tcl
+ interpreter
+ *************************************************************/
+int gui::Tcl_abort_run_threads( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	if ( abort_run_threads( ) == 1 )
 		Tcl_SetResult( interp, ( char * ) "ok", TCL_VOLATILE );
