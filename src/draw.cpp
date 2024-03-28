@@ -481,7 +481,7 @@ void lsd::object::draw_obj( object *sel, int level, int center, int from, bool z
 			cb->head->draw_obj( sel, level + step_level, i, center, zeroinst );
 		else
 		{	// try to draw zero instance objects
-			cur = sim->blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->label );
 			if ( cur != NULL )
 				cur->draw_obj( sel, level + step_level, i, center, true );
 		}

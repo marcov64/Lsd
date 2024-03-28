@@ -1105,7 +1105,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					break;
 				}
 
-				for ( cb1 = NULL, cb = up->b; strcmp( label, cb->blabel ); cb1 = cb, cb = cb->next );
+				for ( cb1 = NULL, cb = up->b; strcmp( label, cb->label ); cb1 = cb, cb = cb->next );
 
 				if ( cb->head != NULL )
 				{
@@ -1871,7 +1871,7 @@ void lsd::object::show_tmp_vars( bool update )
 {
 	char i_names[ ] = { 'i', 'j', 'h', 'k' };
 	int i, j, m, n;
-	netLink *curLnk = NULL;
+	netlink *curLnk = NULL;
 	object *cur;
 
 	cmd( "set in .deb.val" );
@@ -2172,7 +2172,7 @@ void lsd::object::show_tmp_vars( bool update )
 void lsd::object::show_neighbors( bool update )
 {
 	int i;
-	netLink *curLnk;
+	netlink *curLnk;
 
 	if ( node == NULL )
 		return;
@@ -2240,7 +2240,7 @@ void lsd::object::show_neighbors( bool update )
 
 	cmd( "$N.l1.n.id configure -text \"%ld\"", node->id );
 	cmd( "$N.l1.n.name configure -text \"%s\"", node->name == NULL ? "" : node->name );
-	cmd( "$N.l2.n configure -text %ld", node->nLinks );
+	cmd( "$N.l2.n configure -text %ld", node->nlinks );
 
 	Tcl_LinkVar( gui::interp, "i", ( char * ) & i, TCL_LINK_INT );
 

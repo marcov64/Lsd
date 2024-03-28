@@ -803,7 +803,7 @@ void lsd::object::get_saved( FILE *out, const char *sep, bool all_var )
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->label );
 		else
 			cur = cb->head;
 

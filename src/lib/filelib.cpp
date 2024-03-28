@@ -608,7 +608,7 @@ int lsd::object::load_xml_insts( xml_node &n, n_mapT &node_map, std::set < int >
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
-		xml_node cn = n.find_child_by_attribute( "object", "name", cb->blabel );
+		xml_node cn = n.find_child_by_attribute( "object", "name", cb->label );
 		i = cb->head->load_xml_insts( cn, node_map, warning );
 		if ( i != 0 )
 			return i;
@@ -813,7 +813,7 @@ void lsd::object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 	std::string data, text, nser, nid, nnam, lnkto, lnkwht;
 	bridge *cb;
 	description *cd;
-	netLink *curl;
+	netlink *curl;
 	object *cur;
 	sensitivity *cs;
 	variable *cv, *cv1;
@@ -869,8 +869,8 @@ void lsd::object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 
 			if ( cur->node != NULL )
 			{
-				cur->node->serNum = node_serial++;
-				nser += std::to_string( cur->node->serNum );
+				cur->node->serial = node_serial++;
+				nser += std::to_string( cur->node->serial );
 				nid += std::to_string( cur->node->id );
 
 				if ( cur->node->name != NULL )
@@ -901,7 +901,7 @@ void lsd::object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 					if ( curl->to == NULL || curl->to->node == NULL )
 						continue;				// ignore invalid link
 
-					lnkto += std::to_string( curl->to->node->serNum );
+					lnkto += std::to_string( curl->to->node->serial );
 					lnkwht += to_string( "%.15g", curl->weight );
 
 					if ( curl->weight != 0 )
@@ -928,7 +928,7 @@ void lsd::object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 	// save son objects recursively
 	for ( cb = b; cb != NULL; cb = cb->next )
 		if ( cb->head == NULL )
-			sim->blueprint->search( cb->blabel )->save_xml_struct( n, node_serial, quick );
+			sim->blueprint->search( cb->label )->save_xml_struct( n, node_serial, quick );
 		else
 			cb->head->save_xml_struct( n, node_serial, quick );
 
@@ -1726,10 +1726,10 @@ void lsd::object::save_txt_struct( FILE *f, const char *tab )
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
-		fprintf( f, "%sSon: %s\n", tab1, cb->blabel );
+		fprintf( f, "%sSon: %s\n", tab1, cb->label );
 
 		if ( cb->head == NULL )
-			sim->blueprint->search( cb->blabel )->save_txt_struct( f, tab1 );
+			sim->blueprint->search( cb->label )->save_txt_struct( f, tab1 );
 		else
 			cb->head->save_txt_struct( f, tab1 );
 	}

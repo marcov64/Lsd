@@ -954,7 +954,7 @@ int lsd::object::check_label( const char *lab )
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->label );
 		else
 			cur = cb->head;
 
@@ -993,7 +993,7 @@ void lsd::object::control_to_compute( void )
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->label );
 		else
 			cur = cb->head;
 
@@ -1018,7 +1018,7 @@ void lsd::object::count_save( int *count )
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->label );
 		else
 			cur = cb->head;
 		cur->count_save( count );
@@ -1060,7 +1060,7 @@ void lsd::object::show_save( void )
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->label );
 		else
 			cur = cb->head;
 		cur->show_save( );
@@ -1113,7 +1113,7 @@ void lsd::object::show_plot( void )
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->label );
 		else
 			cur = cb->head;
 		cur->show_plot( );
@@ -1185,7 +1185,7 @@ void lsd::object::show_debug( void )
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->label );
 		else
 			cur = cb->head;
 		cur->show_debug( );
@@ -1231,7 +1231,7 @@ void lsd::object::show_parallel( void )
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->label );
 		else
 			cur = cb->head;
 		cur->show_parallel( );
@@ -1285,7 +1285,7 @@ void lsd::object::show_observe( void )
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->label );
 		else
 			cur = cb->head;
 		cur->show_observe( );
@@ -1365,7 +1365,7 @@ void lsd::object::show_special_updat( void )
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->blabel );
+			cur = sim->blueprint->search( cb->label );
 		else
 			cur = cb->head;
 		cur->show_special_updat( );

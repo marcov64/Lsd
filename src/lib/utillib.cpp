@@ -264,10 +264,10 @@ void lsd::object::set_tit_counter( void )
 		return;
 
 	for ( cur = cb->head, i = 1; cur != NULL; cur = cur->next, ++i )
-		if ( cur->lstCntUpd < sim->t )	// don't update more than once per period
+		if ( cur->lst_cnt_upd < sim->t )// don't update more than once per period
 		{								// to avoid deletions to change counters
 			cur->acounter = i;
-			cur->lstCntUpd = sim->t;
+			cur->lst_cnt_upd = sim->t;
 		}
 
 	cb->counter_updated = true;
@@ -302,7 +302,7 @@ void lsd::object::set_blueprint( object *container )
 		cur1 = cb->head;
 		container->add_obj( cur1->label );
 
-		for ( cb1 = container->b; strcmp( cb1->blabel, cb->blabel ); cb1 = cb1->next );
+		for ( cb1 = container->b; strcmp( cb1->label, cb->label ); cb1 = cb1->next );
 
 		cur = cb1->head;
 		cur1->set_blueprint( cur );

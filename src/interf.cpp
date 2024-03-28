@@ -50,7 +50,7 @@ lsd::object *gui::operate( lsd::object *r )
 	design *doe;
 	double fracMC, fake = 0;
 	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, temp[ 11 ], done = 0;
-	long nLinks, ptsSa, maxMC;
+	long nlinks, ptsSa, maxMC;
 	lsd::bridge *cb;
 	lsd::description *cd;
 	lsd::object *n, *cur, *cur1, *cur2;
@@ -5342,15 +5342,15 @@ lsd::object *gui::operate( lsd::object *r )
 			cur = sim.root->search( lab4 );
 			if ( cur != NULL && cur->up != NULL )
 			{
-				nLinks = cur->up->read_file_net( lab4, lab1, lab2, -1, lab3 );
-				if ( nLinks < 0 )
+				nlinks = cur->up->read_file_net( lab4, lab1, lab2, -1, lab3 );
+				if ( nlinks < 0 )
 				{
 					cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or object\" -detail \"Please check the file contents for a valid Pajek network structure file (Pajek .net format) and make sure you select a valid object for attributing the network's nodes role.\"" );
 					plog( "\nError: Network file not imported\n" );
 				}
 				else
 				{
-					plog( "\n%ld network links imported\n", nLinks );
+					plog( "\n%ld network links imported\n", nlinks );
 					redrawRoot = redrawStruc = true;			// force browser/structure redraw
 				}
 			}
@@ -5459,14 +5459,14 @@ lsd::object *gui::operate( lsd::object *r )
 
 			plog( "\nExporting network on object '%s' to file %s%s%s%s%s...\n", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
 
-			nLinks = cur->up->write_file_net( lab4, lab1, lab2, -1 );
-			if ( nLinks < 0 )
+			nlinks = cur->up->write_file_net( lab4, lab1, lab2, -1 );
+			if ( nlinks < 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or object\" -detail \"Please check the chosen directory/file for WRITE access and make sure you select a valid object for retrieving the network's nodes.\"" );
 				plog( "\nError: Network file not exported\n" );
 			}
 			else
-				plog( "\n%ld network links exported\n", nLinks );
+				plog( "\n%ld network links exported\n", nlinks );
 
 		break;
 

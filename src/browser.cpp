@@ -921,10 +921,10 @@ int gui::browse( lsd::object *r )
 					done = true;
 				}
 
-				cmd( ".l.s.c.son_name insert end \"%s (#%d%s)\"", cb->blabel, num, done ? "" : "-" );
+				cmd( ".l.s.c.son_name insert end \"%s (#%d%s)\"", cb->label, num, done ? "" : "-" );
 				cmd( ".l.s.c.son_name itemconf %d -fg $colorsTheme(obj)", i );
 
-				set_ttip_descr( ".l.s.c.son_name", cb->blabel, i );
+				set_ttip_descr( ".l.s.c.son_name", cb->label, i );
 			}
 		}
 
@@ -1757,10 +1757,10 @@ void lsd::object::insert_object( const char *w, bool netOnly, object *above )
 		cmd( "%s insert end %s", w, label );
 
 	for ( cb = b; cb != NULL; cb = cb->next )
-		if ( above == NULL || strcmp( cb->blabel, above->label ) != 0 )
+		if ( above == NULL || strcmp( cb->label, above->label ) != 0 )
 		{
 			if ( cb->head == NULL )
-				cur = sim->blueprint->search( cb->blabel );
+				cur = sim->blueprint->search( cb->label );
 			else
 				cur = cb->head;
 
@@ -1881,10 +1881,10 @@ void lsd::object::shift_desc( int direction, const char *dlab )
 
 	if ( direction == -1 )
 	{	// shift up
-		if ( ! strcmp( dlab, b->blabel ) )
+		if ( ! strcmp( dlab, b->label ) )
 			return;		// object already at the top
 
-		if ( ! strcmp( dlab, b->next->blabel ) )
+		if ( ! strcmp( dlab, b->next->label ) )
 		{	// second var, must become the head of the chain
 			cb = b->next->next;		// third
 			cb1 = b;				// first
@@ -1896,7 +1896,7 @@ void lsd::object::shift_desc( int direction, const char *dlab )
 
 		for ( cb = b; cb != NULL; cb = cb->next )
 		{
-			if ( ! strcmp( dlab, cb->blabel ) )
+			if ( ! strcmp( dlab, cb->label ) )
 			{
 				cb2->next = cb;
 				cb1->next = cb->next;
@@ -1911,7 +1911,7 @@ void lsd::object::shift_desc( int direction, const char *dlab )
 
 	if ( direction == 1 )
 	{	//move down
-		if ( ! strcmp( dlab, b->blabel ) )
+		if ( ! strcmp( dlab, b->label ) )
 		{	// it's the first
 			if ( b->next == NULL)
 				return;				// it is unique
@@ -1926,7 +1926,7 @@ void lsd::object::shift_desc( int direction, const char *dlab )
 
 		for ( cb = b; cb != NULL; cb = cb->next )
 		{
-			if ( ! strcmp( dlab, cb->blabel ) )
+			if ( ! strcmp( dlab, cb->label ) )
 			{
 				if ( cb->next == NULL )
 					return;			// already at the end
@@ -1949,8 +1949,8 @@ void lsd::object::shift_desc( int direction, const char *dlab )
  *************************************************************/
 namespace lsd
 {
-	bool ascending_objects( const bridge &a, const bridge &b ) { return ( strcmp( a.blabel, b.blabel ) < 0 ); }
-	bool descending_objects( const bridge &a, const bridge &b ) { return ( strcmp( a.blabel, b.blabel ) > 0 ); }
+	bool ascending_objects( const bridge &a, const bridge &b ) { return ( strcmp( a.label, b.label ) < 0 ); }
+	bool descending_objects( const bridge &a, const bridge &b ) { return ( strcmp( a.label, b.label ) > 0 ); }
 	bool ascending_variables( const variable &a, const variable &b ) { return ( strcmp( a.label, b.label ) < 0 ); }
 	bool descending_variables( const variable &a, const variable &b ) { return ( strcmp( a.label, b.label ) > 0 ); }
 }

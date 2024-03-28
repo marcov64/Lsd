@@ -19,98 +19,103 @@
 
 // base class extensions
 #define SIMULATION_EXT \
-	long num_sensitivity_points( void ); \
+	public: \
 	int num_sensitivity_variables( void ); \
-	sensitivity *search_sensitivity( const char *lab, int lag = 0 );
+	sensitivity *search_sensitivity( const char *lab, int lag = 0 ); \
+	long num_sensitivity_points( void );
 
 #define OBJECT_EXT \
+	public: \
 	bool sort_listbox( int box, int order ); \
 	int check_affected( int level, int affected[ ] ); \
 	int check_label( const char *lab ); \
 	int compute_copyfrom( const char *parWnd ); \
 	int debugger( object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" ); \
-	int entry_new_objnum( const char *tag ); \
 	object *restore_pos( void ); \
 	object *sensitivity_parallel( sensitivity *s ); \
-	void ancestors( FILE *f, bool html = true ); \
-	void assign_plot_vars( int *idx, const char *lab ); \
-	void attach_instance_number( char *outh, char *outv, int outSz ); \
 	void clean_debug( void ); \
 	void clean_parallel( void ); \
 	void clean_plot( void ); \
 	void clean_save( void ); \
 	void control_to_compute( void ); \
-	void count_labels_mem( int *count, const char *lab = NULL ); \
-	void count_plot_vars( int *count ); \
 	void count_save( int *count ); \
-	void create_float_list( void ); \
-	void create_form( int num, const char *title, const char *prefix, FILE *frep ); \
-	void create_initial_values( FILE *frep ); \
 	void create_par_map( void ); \
-	void create_table_init( FILE *frep ); \
-	void draw_buttons( void ); \
-	void draw_obj( object *sel, int level = 0, int center = 0, int from = 0, bool zeroinst = false ); \
 	void edit_data( const char *lab ); \
-	void edit_str( const char *tag, int *idx, int res, int *done ); \
-	void debugger_update( const char *hl_var, int mode ); \
-	void fill_list_par( bool show_all ); \
-	void fill_list_var( bool show_all, bool lag_only ); \
 	void find_using( variable *v, FILE *frep, bool *found ); \
-	void get_sa_limits( FILE *out, const char *sep ); \
 	void get_saved( FILE *out, const char *sep, bool all_var = false ); \
+	void get_sa_limits( FILE *out, const char *sep ); \
 	void insert_data_mem( int *num_v, const char *lab = NULL ); \
-	void insert_labels_mem( int *num_v, const char *lab = NULL ); \
-	void insert_obj_num( const char *tag, const char *ind, int *idx, int *count ); \
 	void insert_object( const char *w, bool netOnly = false, object *above = NULL ); \
-	void insert_store_mem( int max_v, int *num_v, const char *lab = NULL ); \
-	void link_cells( const char *lab ); \
 	void load_elem_lists( void ); \
 	void prepare_plot( int id_sim ); \
-	void put_line( int x1, int y1, int x2 ); \
-	void put_node( int x, int y, const char *str, bool sel ); \
-	void put_text( const char *str, const char *n, int x, int y, const char *str2 ); \
 	void report( void ); \
-	void save_cells( const char *lab ); \
 	void save_pos( void ); \
-	void search_title( const char *tag, int *idx, const char *lab, int *cols ); \
 	void set_all( const char *lab, int lag, const char *parWnd = NULL ); \
 	void set_obj_number( void ); \
-	void set_title( const char *lab, const char *tag, int *cols ); \
 	void shift_desc( int direction, const char *dlab ); \
 	void shift_var( int direction, const char *vlab ); \
-	void show_cells( const char *lab ); \
 	void show_debug( void ); \
 	void show_graph( void ); \
 	void show_initial( void ); \
-	void show_neighbors( bool update ); \
 	void show_observe( void ); \
 	void show_parallel( void ); \
 	void show_plot( void ); \
-	void show_rep_initial( FILE *f, int *begin, FILE *frep ); \
-	void show_rep_observe( FILE *f, int *begin, FILE *frep ); \
 	void show_save( void ); \
 	void show_special_updat( void ); \
-	void show_tmp_vars( bool update ); \
-	void tex_fprintf( FILE *f, char* text ); \
 	void tex_report_end( FILE *f ); \
 	void tex_report_head( FILE *f, bool table = true ); \
 	void tex_report_init( FILE *f, bool table = true ); \
 	void tex_report_initall( FILE *f, bool table = true ); \
 	void tex_report_observe( FILE *f, bool table = true ); \
 	void tex_report_struct( FILE *f, bool table = true ); \
-	void unlink_cells( const char *lab ); \
 	void wipe_out( void ); \
+	private:\
+	int entry_new_objnum( const char *tag ); \
+	void ancestors( FILE *f, bool html = true ); \
+	void assign_plot_vars( int *idx, const char *lab ); \
+	void attach_instance_number( char *outh, char *outv, int outSz ); \
+	void count_labels_mem( int *count, const char *lab = NULL ); \
+	void count_plot_vars( int *count ); \
+	void create_float_list( void ); \
+	void create_form( int num, const char *title, const char *prefix, FILE *frep ); \
+	void create_initial_values( FILE *frep ); \
+	void create_table_init( FILE *frep ); \
+	void draw_buttons( void ); \
+	void draw_obj( object *sel, int level = 0, int center = 0, int from = 0, bool zeroinst = false ); \
+	void edit_str( const char *tag, int *idx, int res, int *done ); \
+	void debugger_update( const char *hl_var, int mode ); \
+	void fill_list_par( bool show_all ); \
+	void fill_list_var( bool show_all, bool lag_only ); \
+	void insert_labels_mem( int *num_v, const char *lab = NULL ); \
+	void insert_obj_num( const char *tag, const char *ind, int *idx, int *count ); \
+	void insert_store_mem( int max_v, int *num_v, const char *lab = NULL ); \
+	void link_cells( const char *lab ); \
+	void put_line( int x1, int y1, int x2 ); \
+	void put_node( int x, int y, const char *str, bool sel ); \
+	void put_text( const char *str, const char *n, int x, int y, const char *str2 ); \
+	void save_cells( const char *lab ); \
+	void search_title( const char *tag, int *idx, const char *lab, int *cols ); \
+	void set_title( const char *lab, const char *tag, int *cols ); \
+	void show_cells( const char *lab ); \
+	void show_neighbors( bool update ); \
+	void show_rep_initial( FILE *f, int *begin, FILE *frep ); \
+	void show_rep_observe( FILE *f, int *begin, FILE *frep ); \
+	void show_tmp_vars( bool update ); \
+	void tex_fprintf( FILE *f, char* text ); \
+	void unlink_cells( const char *lab ); \
 	void write_list( FILE *frep, bool show_all, const char *prefix ); \
 	void write_obj( FILE *frep, int *elemDone ); \
 	void write_str( FILE *frep, int dep, const char *prefix ); \
 	FILE *create_frames( const char *path, const char *fname );
 
 #define VARIABLE_EXT \
-	const char *print_constr( char *buf, int buf_sz ); \
+	public: \
 	void plot_runtime( void ); \
-	void write_var( FILE *frep );
+	void write_var( FILE *frep ); \
+	const char *print_constr( char *buf, int buf_sz );
 
 #define SENSITIVITY_EXT \
+	public: \
 	int dataentry( void );
 
 // definitions from LSD library

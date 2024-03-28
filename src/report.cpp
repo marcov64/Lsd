@@ -498,9 +498,9 @@ void lsd::object::write_obj( FILE *frep, int *elemDone )
 		if ( cur->b != NULL )
 		{
 			fprintf( frep,"<i>Containing: &nbsp;</i>" );
-			fprintf( frep, "<TT><A HREF=\"#%s\">%s</A></TT>", cur->b->blabel, cur->b->blabel );
+			fprintf( frep, "<TT><A HREF=\"#%s\">%s</A></TT>", cur->b->label, cur->b->label );
 			for ( cb = cur->b->next; cb != NULL; cb = cb->next )
-				fprintf( frep, "<TT>,  <A HREF=\"#%s\">%s</A></TT>", cb->blabel, cb->blabel );
+				fprintf( frep, "<TT>,  <A HREF=\"#%s\">%s</A></TT>", cb->label, cb->label );
 			fprintf( frep, "<BR>\n" );
 		}
 
@@ -1231,9 +1231,9 @@ void lsd::object::create_table_init( FILE *frep )
 	if ( b != NULL )
 	{
 		fprintf( frep, "<i>Containing: &nbsp;</i>" );
-		fprintf( frep, "<TT><a HREF=\"#%s\">%s</a></TT>", b->blabel, b->blabel );
+		fprintf( frep, "<TT><a HREF=\"#%s\">%s</a></TT>", b->label, b->label );
 		for ( cb = b->next ; cb != NULL; cb = cb->next )
-			fprintf( frep, "<TT>,  <a HREF=\"#%s\">%s</a></TT>", cb->blabel, cb->blabel );
+			fprintf( frep, "<TT>,  <a HREF=\"#%s\">%s</a></TT>", cb->label, cb->label );
 		fprintf( frep, "<BR>\n" );
 	}
 
@@ -1961,16 +1961,16 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
 
 	if ( b != NULL )
 	{
-		ol = new char[ 2 * strlen( b->blabel ) + 1 ];
-		tex_strcpy( ol, b->blabel );
-		fprintf( f,"\\emph{Containing:} \\hrf{%s}{%s}", ol, b->blabel );
+		ol = new char[ 2 * strlen( b->label ) + 1 ];
+		tex_strcpy( ol, b->label );
+		fprintf( f,"\\emph{Containing:} \\hrf{%s}{%s}", ol, b->label );
 		delete [ ] ol;
 
 		for ( cb = b->next; cb != NULL; cb = cb->next )
 		{
-			ol = new char[ 2 * strlen( cb->blabel ) + 1 ];
-			tex_strcpy( ol, cb->blabel );
-			fprintf( f, ",	\\hrf{%s}{%s}", ol, cb->blabel );
+			ol = new char[ 2 * strlen( cb->label ) + 1 ];
+			tex_strcpy( ol, cb->label );
+			fprintf( f, ",	\\hrf{%s}{%s}", ol, cb->label );
 			delete [ ] ol;
 		}
 

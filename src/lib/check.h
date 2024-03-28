@@ -236,7 +236,7 @@ namespace lsd
 		return NULL;
 	}
 
-	inline netLink *simulation::bad_ptr_lnk( object *ptr, const char *file, int line )
+	inline netlink *simulation::bad_ptr_lnk( object *ptr, const char *file, int line )
 	{
 		bad_ptr_dbl( ptr, file, line );
 		return NULL;

@@ -148,7 +148,7 @@ namespace lsd				// create the config variables in proper namespace
 			int h, i, j, k; \
 			double v[ USER_D_VARS ]; \
 			object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cyccur, *cyccur2, *cyccur3; \
-			netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9; \
+			netlink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9; \
 			FILE *f; \
 			INIT_POINTERS \
 			EQ_USER_VARS
@@ -482,8 +482,8 @@ namespace lsd				// create the config variables in proper namespace
 
 #define STAT_NET( X ) ( p->stats_net( X, v ) )
 #define STAT_NETS( O, X ) ( CHK_PTR_DBL( O ) O->stats_net( X, v ) )
-#define STAT_NODE ( CHK_NODE_DBL( p ) p->node->nLinks )
-#define STAT_NODES( O ) ( CHK_PTR_DBL( O ) CHK_NODE_DBL( O ) O->node->nLinks )
+#define STAT_NODE ( CHK_NODE_DBL( p ) p->node->nlinks )
+#define STAT_NODES( O ) ( CHK_PTR_DBL( O ) CHK_NODE_DBL( O ) O->node->nlinks )
 
 #define SEARCH_NODE( X, Y ) ( p->search_node_net( X, Y ) )
 #define SEARCH_NODES( O, X, Y ) ( CHK_PTR_OBJ( O ) O->search_node_net( X, Y ) )

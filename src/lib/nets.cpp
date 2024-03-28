@@ -25,8 +25,8 @@
  organization:
 
  object --+-- node --+- nodeID (long) : node unique ID number (re-orderable)
- 					+- serNum (long) : node sequential serial number (reset on save)
- 					+- nLinks (long) : number of arcs FROM node
+ 					+- serial (long) : node sequential serial number (reset on save)
+ 					+- nlinks (long) : number of arcs FROM node
  					+- first (ptr) : pointer to the first outgoing link
  					+- last(ptr) : pointer to the last outgoing link
  					+- prob (double) : assigned node probability (power-law)
@@ -134,15 +134,15 @@
  NETLINK
  Initialize new link, at the end of linked list.
  *************************************************************/
-lsd::netLink::netLink( object *origNode, object *destNode, double linkWeight, double destProb )
+lsd::netlink::netlink( object *origNode, object *destNode, double linkWeight, double destProb )
 {
 	time = origNode->sim->t;						// save creation time
 
 	if ( origNode->node == NULL )					// origin is not yet a node?
-		origNode->node = new netNode( origNode );// create one
+		origNode->node = new netnode( origNode );	// create one
 
 	if ( destNode->node == NULL )					// destination is not yet a node?
-		destNode->node = new netNode( destNode );// create one
+		destNode->node = new netnode( destNode );	// create one
 
 	to = destNode;
 	from = origNode;
@@ -155,7 +155,7 @@ lsd::netLink::netLink( object *origNode, object *destNode, double linkWeight, do
 	else											// insert after last
 		from->node->last->next = this;
 	from->node->last = this;
-	from->node->nLinks++;
+	from->node->nlinks++;
 }
 
 
@@ -163,7 +163,7 @@ lsd::netLink::netLink( object *origNode, object *destNode, double linkWeight, do
  ~NETLINK
  Destroy link, preserving linked list integrity.
  *************************************************************/
-lsd::netLink::~netLink( void )
+lsd::netlink::~netlink( void )
 {
 	if ( from->node->first != this && from->node->last != this )
 	{												// not first nor last link?
@@ -186,7 +186,7 @@ lsd::netLink::~netLink( void )
 				prev->next = NULL;
 			}
 
-	from->node->nLinks--;
+	from->node->nlinks--;
 }
 
 
@@ -196,12 +196,12 @@ lsd::netLink::~netLink( void )
  the link already exists. So, if multiple links
  are to be prevented, caller has to check before calling.
  *************************************************************/
-lsd::netLink *lsd::object::add_link_net( object *destPtr, double weight, double probTo )
+lsd::netlink *lsd::object::add_link_net( object *destPtr, double weight, double probTo )
 {
-	netLink *cur;
+	netlink *cur;
 	if ( up != destPtr->up || strcmp( label, destPtr->label ) )
 		return NULL;								// different parent or object type?
-	cur = new netLink( this, destPtr, weight, probTo );
+	cur = new netlink( this, destPtr, weight, probTo );
 
 	return cur;
 }
@@ -217,9 +217,9 @@ lsd::netLink *lsd::object::add_link_net( object *destPtr, double weight, double 
  numbers refer to the object position in the
  nodes' brotherhood.
  *************************************************************/
-lsd::netLink *lsd::object::add_link_net( const char *nodeName, long startNode, long endNode, double weight, double probTo, bool edge )
+lsd::netlink *lsd::object::add_link_net( const char *nodeName, long startNode, long endNode, double weight, double probTo, bool edge )
 {
-	netLink *curl = NULL;
+	netlink *curl = NULL;
 	object *cur, *cur1;
 
 	if ( ! turboset( nodeName ) )					// initialize if needed
@@ -254,9 +254,9 @@ lsd::netLink *lsd::object::add_link_net( const char *nodeName, long startNode, l
  DELETE_LINK_NET (*)
  Remove link from LSD object.
  *************************************************************/
-void lsd::object::delete_link_net( netLink *ptr )
+void lsd::object::delete_link_net( netlink *ptr )
 {
-	netLink *cur;
+	netlink *cur;
 	if ( node == NULL || ptr == NULL )		// no network structure or invalid ptr?
 		return;
 	for ( cur = node->first; 				// scan all links from node
@@ -273,9 +273,9 @@ void lsd::object::delete_link_net( netLink *ptr )
  Return pointer to the first link found or NULL
  if link to destination does not exist.
  *************************************************************/
-lsd::netLink *lsd::object::search_link_net( long destId )
+lsd::netlink *lsd::object::search_link_net( long destId )
 {
-	netLink *cur;
+	netlink *cur;
 	if ( node == NULL )								// no network structure?
 		return NULL;
 	for ( cur = node->first; 						// scan all links from node
@@ -294,10 +294,10 @@ lsd::netLink *lsd::object::search_link_net( long destId )
  with probability equal to probTo.
  Returns NULL if no link exists.
  *************************************************************/
-lsd::netLink *lsd::object::draw_link_net( void )
+lsd::netlink *lsd::object::draw_link_net( void )
 {
 	double sum, drawPoint, accProb;
-	netLink *cur, *cur1;
+	netlink *cur, *cur1;
 
 	if ( node == NULL || node->first == NULL )		// no network structure?
 		return NULL;
@@ -333,18 +333,18 @@ lsd::netLink *lsd::object::draw_link_net( void )
 
 /*************************************************************
  NETNODE
- Initialize netNode struct (no links).
+ Initialize netnode struct (no links).
  *************************************************************/
-lsd::netNode::netNode( object *_up, long nodeId, const char *nodeName, double nodeProb )
+lsd::netnode::netnode( object *_up, long nodeId, const char *nodeName, double nodeProb )
 {
 	up = _up;
 	id = nodeId;
 	time = up->sim->t;								// save creation time
-	serNum = up->sim->nodesSerial++;
+	serial = up->sim->nodesSerial++;
 	prob = nodeProb;
 
 	if ( id < 0 )									// ID assigned?
-		id = serNum;
+		id = serial;
 
 	if ( strcmp( nodeName, "" ) && valid_xml_string( nodeName ) )// valid name assigned?
 	{
@@ -359,9 +359,9 @@ lsd::netNode::netNode( object *_up, long nodeId, const char *nodeName, double no
 
 /*************************************************************
  ~NETNODE
- Destroy netNode struct.
+ Destroy netnode struct.
  *************************************************************/
-lsd::netNode::~netNode( void )
+lsd::netnode::~netnode( void )
 {
 	if ( name != NULL )								// name assigned?
 		delete name;
@@ -373,28 +373,28 @@ lsd::netNode::~netNode( void )
 
 /*************************************************************
  ADD_NODE_NET (*)
- Add netNode data structure to LSD object
+ Add netnode data structure to LSD object
  *************************************************************/
 lsd::object *lsd::object::add_node_net( long id, const char nodeName[ ],
 							  bool silent )
 {
-	long serNumOld = -1;
+	long serialOld = -1;
 
 	if ( node != NULL )
 	{
 		if ( ! silent )
 			sim->plog( "\nWarning: existing network data discarded from object." );
 
-		serNumOld = node->serNum;					// save serial number
+		serialOld = node->serial;					// save serial number
 		delete node;
 	}
 
-	node = new netNode( this, id, nodeName );
+	node = new netnode( this, id, nodeName );
 
 	// prevent replacing the serial number
-	if ( serNumOld > 0 )
+	if ( serialOld > 0 )
 	{
-		node->serNum = serNumOld;
+		node->serial = serialOld;
 		sim->nodesSerial--;
 	}
 
@@ -404,7 +404,7 @@ lsd::object *lsd::object::add_node_net( long id, const char nodeName[ ],
 
 /*************************************************************
  DELETE_NODE_NET (*)
- Remove netNode data structure from LSD object.
+ Remove netnode data structure from LSD object.
  *************************************************************/
 void lsd::object::delete_node_net( void )
 {
@@ -481,15 +481,15 @@ double lsd::object::stats_net( const char *lab, double *r )
 	for ( ; cur != NULL; cur = BROTHER( cur ) )	// scan all nodes
 		if ( cur->node != NULL )					// valid node?
 		{
-			double nLinks = ( double ) cur->node->nLinks;
+			double nlinks = ( double ) cur->node->nlinks;
 			if ( r[ 0 ] == 0. )						// first node?
-				r[ 3 ] = nLinks;					// update minimum
+				r[ 3 ] = nlinks;					// update minimum
 			else
-				r[ 3 ] = r[ 3 ] < nLinks ? r[ 3 ] : nLinks;
+				r[ 3 ] = r[ 3 ] < nlinks ? r[ 3 ] : nlinks;
 
 			r[ 0 ]++;
-			r[ 1 ] += nLinks;
-			r[ 4 ] = r[ 4 ] > nLinks ? r[ 4 ] : nLinks;
+			r[ 1 ] += nlinks;
+			r[ 4 ] = r[ 4 ] > nlinks ? r[ 4 ] : nlinks;
 		}
 
 	if ( r[ 0 ] > 0. )
@@ -1121,7 +1121,7 @@ long lsd::object::init_small_world_net( const char *lab, long numNodes, long out
 {
 	long link, idNode, numLinks, numNeigh, tryNode, newNode;
 	object *cur, *cur1;
-	netLink *curl;
+	netlink *curl;
 
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || rho < 0 || rho > 1 || lab == NULL )
 	{
@@ -1195,11 +1195,11 @@ long lsd::object::init_small_world_net( const char *lab, long numNodes, long out
  *************************************************************/
 long lsd::object::init_scale_free_net( const char *lab, long numNodes, long outDeg, double expLink )
 {
-	long idNode, numLinks, nLinks, i;
+	long idNode, numLinks, nlinks, i;
 	double curProb;
 	bool node1;
 	object *firstNode, *cur, *cur1;
-	netLink *cur2;
+	netlink *cur2;
 
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || expLink <= 0 || lab == NULL )
 	{
@@ -1242,11 +1242,11 @@ long lsd::object::init_scale_free_net( const char *lab, long numNodes, long outD
 			cur->node->prob = curProb;				// restore probability
 		}
 
-		nLinks = cur1->node->nLinks + 1;			// updated link counter of new destination
-		cur1->node->prob = pow( nLinks, expLink );	// update link probability (new dest. node)
+		nlinks = cur1->node->nlinks + 1;			// updated link counter of new destination
+		cur1->node->prob = pow( nlinks, expLink );	// update link probability (new dest. node)
 		cur1->add_link_net( cur );					// and add node ID to link in new node
-		nLinks = cur->node->nLinks + 1;				// updated link counter of origin
-		cur->node->prob = pow( nLinks, expLink );	// update origin node the same way
+		nlinks = cur->node->nlinks + 1;				// updated link counter of origin
+		cur->node->prob = pow( nlinks, expLink );	// update origin node the same way
 		cur->add_link_net( cur1 );					// as the destination node
 
 		numLinks += 2;								// two more links in the network
@@ -1281,7 +1281,7 @@ long lsd::object::init_scale_free_net( const char *lab, long numNodes, long outD
 	for ( cur = firstNode, cur1 = BROTHER( cur ); cur != NULL;
 		  cur = cur1, cur1 != NULL ? cur1 = BROTHER( cur1 ) : cur = cur1 )
 													// then safely remove isolated nodes
-		if ( cur->node->nLinks == 0 )				// no links?
+		if ( cur->node->nlinks == 0 )				// no links?
 			cur->delete_obj( );						// remove node
 
 	for ( idNode = 1, cur = firstNode; cur != NULL; idNode++, cur = BROTHER( cur ) )
@@ -1620,7 +1620,7 @@ double lsd::object::write_file_net( const char *lab, const char dir[ ], const ch
 	long l, numNodes, numLinks = 0;
 	char *c, mode[ 2 ], fileName[ MAX_PATH_LENGTH ], name[ MAX_PATH_LENGTH ];
 	object *firstNode, *cur, *cur1;
-	netLink *curl;
+	netlink *curl;
 	FILE *pajekFile;
 
 	// make sure this is being called from the parent (container) object
@@ -1722,7 +1722,7 @@ double lsd::object::write_file_net( const char *lab, const char dir[ ], const ch
 				fprintf( pajekFile, "\n" );
 			}
 
-			cur->node->serNum = l++;				// reset serials
+			cur->node->serial = l++;				// reset serials
 		}
 	}
 
@@ -1738,8 +1738,8 @@ double lsd::object::write_file_net( const char *lab, const char dir[ ], const ch
 
 				if ( curl->to->node != NULL )
 				{
-					fprintf( pajekFile, "%ld %ld", cur->node->serNum,
-							 curl->to->node->serNum );
+					fprintf( pajekFile, "%ld %ld", cur->node->serial,
+							 curl->to->node->serial );
 
 					if ( ! noWeight )
 						fprintf( pajekFile, " %g", curl->weight );

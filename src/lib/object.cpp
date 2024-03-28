@@ -289,8 +289,8 @@
  *************************************************************/
 lsd::bridge::bridge( const char *lab )
 {
-	blabel = new char[ strlen( lab ) + 1 ];
-	strcpy( blabel, lab );
+	label = new char[ strlen( lab ) + 1 ];
+	strcpy( label, lab );
 }
 
 
@@ -306,7 +306,7 @@ lsd::bridge::bridge( const bridge &b )
 {
 	copy = true;
 	counter_updated = b.counter_updated;
-	blabel = b.blabel;
+	label = b.label;
 	search_var = b.search_var;
 	next = b.next;
 	head = b.head;
@@ -336,7 +336,7 @@ lsd::bridge::~bridge( void )
 
 	delete [ ] search_var;
 
-	delete [ ] blabel;
+	delete [ ] label;
 }
 
 
@@ -370,7 +370,7 @@ void lsd::object::recreate_maps( void )
 		v_map.insert( v_pairT( cv->label, cv ) );
 
 	for ( cb = b; cb != NULL; cb = cb->next )
-		b_map.insert( b_pairT ( cb->blabel, cb ) );
+		b_map.insert( b_pairT ( cb->label, cb ) );
 }
 
 
@@ -1369,7 +1369,7 @@ void lsd::simulation::move_obj( const char *lab, const char *dest )
 		if ( s != NULL )
 		{
 			// find bridge to object being copied in source parent
-			for ( cb1 = NULL, cb = s->b; cb != NULL && strcmp( cb->blabel, lab ) != 0; cb1 = cb, cb = cb->next );
+			for ( cb1 = NULL, cb = s->b; cb != NULL && strcmp( cb->label, lab ) != 0; cb1 = cb, cb = cb->next );
 
 			// remove from the source parent's bridge linked list
 			if ( cb1 == NULL )	// head of list?
@@ -1491,14 +1491,14 @@ void lsd::object::copy_descendant( object *to )
 	}
 
 	// create the first bridge
-	to->b = new bridge( b->blabel );
+	to->b = new bridge( b->label );
 
 	// add bridge to new object lookup map
-	to->b_map.insert( b_pairT ( to->b->blabel, to->b ) );
+	to->b_map.insert( b_pairT ( to->b->label, to->b ) );
 
 	// create the first (head) object
 	if ( b->head == NULL )
-		cur = sim->blueprint->search( b->blabel );
+		cur = sim->blueprint->search( b->label );
 	else
 		cur = b->head;
 
@@ -1515,12 +1515,12 @@ void lsd::object::copy_descendant( object *to )
 	// create following bridges
 	for ( cb = to->b, cb1 = b->next; cb1 != NULL; cb1 = cb1->next )
 	{
-		cb->next = new bridge( cb1->blabel );
+		cb->next = new bridge( cb1->label );
 		cb = cb->next;
-		to->b_map.insert( b_pairT ( cb1->blabel, cb ) );
+		to->b_map.insert( b_pairT ( cb1->label, cb ) );
 
 		if ( cb1->head == NULL )
-			cur = sim->blueprint->search( cb1->blabel );
+			cur = sim->blueprint->search( cb1->label );
 		else
 			cur = cb1->head;
 
@@ -1559,7 +1559,7 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 	variable *cv;
 
 	// check the labels and prepare the bridge to attach to
-	for ( cb2 = b; cb2 != NULL && strcmp( cb2->blabel, lab ); cb2 = cb2->next );
+	for ( cb2 = b; cb2 != NULL && strcmp( cb2->label, lab ); cb2 = cb2->next );
 
 	if ( cb2 == NULL )
 	{
@@ -1601,7 +1601,7 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 		cur->init( this, sim, lab );
 
 		if ( net )						// if objects are nodes in a network
-			cur->node = new netNode( this );// insert new nodes in network (as isolated nodes)
+			cur->node = new netnode( this );// insert new nodes in network (as isolated nodes)
 
 		// create its variables and initialize them
 		for ( cv = ex->v; cv != NULL; cv = cv->next )
@@ -1649,12 +1649,12 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 		for ( cb1 = NULL, cb = ex->b; cb != NULL; cb = cb->next )
 		{
 			if ( cb1 == NULL )
-				cb1 = cur->b = new bridge( cb->blabel );
+				cb1 = cur->b = new bridge( cb->label );
 			else
-				cb1 = cb1->next = new bridge( cb->blabel );
+				cb1 = cb1->next = new bridge( cb->label );
 
 			// add bridge to new object lookup map
-			cur->b_map.insert( b_pairT ( cb->blabel, cb1 ) );
+			cur->b_map.insert( b_pairT ( cb->label, cb1 ) );
 
 			for ( cur1 = cb->head; cur1 != NULL; cur1 = cur1->next )
 				cur->add_n_objects2( cur1->label, 1, cur1, t_update );
@@ -1714,7 +1714,7 @@ void lsd::object::delete_bridge( void )
 	{	// first bridge in the bridge chain
 		cb = up->b;
 		up->b = up->b->next;
-		up->b_map.erase( cb->blabel );
+		up->b_map.erase( cb->label );
 		delete cb;
 	}
 	else
@@ -1723,7 +1723,7 @@ void lsd::object::delete_bridge( void )
 			if ( cb->head == this && cb1 != NULL )
 			{
 				cb1->next = cb->next;			// previous bridge points to next
-				up->b_map.erase( cb->blabel );
+				up->b_map.erase( cb->label );
 				delete cb;
 				break;
 			}
@@ -2018,10 +2018,10 @@ void lsd::object::chg_lab( const char *lab )
 
 	cb = up->search_bridge( label );
 
-	up->b_map.erase( cb->blabel );
-	delete [ ] cb->blabel;
-	cb->blabel = new char[ strlen( lab ) + 1 ];
-	strcpy( cb->blabel, lab );
+	up->b_map.erase( cb->label );
+	delete [ ] cb->label;
+	cb->label = new char[ strlen( lab ) + 1 ];
+	strcpy( cb->label, lab );
 	up->b_map.insert( b_pairT ( lab, cb ) );
 
 	for ( cur = this; cur != NULL; cur = cur->next )
@@ -3652,10 +3652,10 @@ void lsd::object::collect_inst( o_setT &list )
 double lsd::object::interact( const char *text, double v, double *tv, int i, int j,
 						 int h, int k, object *cur, object *cur1, object *cur2,
 						 object *cur3, object *cur4, object *cur5, object *cur6,
-						 object *cur7, object *cur8, object *cur9, netLink *curl,
-						 netLink *curl1, netLink *curl2, netLink *curl3,
-						 netLink *curl4, netLink *curl5, netLink *curl6,
-						 netLink *curl7, netLink *curl8, netLink *curl9 )
+						 object *cur7, object *cur8, object *cur9, netlink *curl,
+						 netlink *curl1, netlink *curl2, netlink *curl3,
+						 netlink *curl4, netlink *curl5, netlink *curl6,
+						 netlink *curl7, netlink *curl8, netlink *curl9 )
 {
 #ifndef _NW_
 	int n;
