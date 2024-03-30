@@ -596,7 +596,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
  *************************************************************/
 const char *lsd::variable::print_constr( char *buf, int buf_sz )
 {
-	std::string text;
+	strT text;
 
 	if ( ! integer && std::isnan( max_val ) && std::isnan( min_val ) )
 		strcpy( buf, "" );

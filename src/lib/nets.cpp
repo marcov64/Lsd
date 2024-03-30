@@ -1436,7 +1436,7 @@ double lsd::object::read_file_net( const char *lab, const char dir[ ], const cha
 	long idNode, numNodes, countNode, numLinks, startNode, endNode;
 	char fileName[ MAX_PATH_LENGTH ], textLine[ MAX_LINE_SIZE ], nameNode[ MAX_LINE_SIZE ];
 	bool inSection;
-	s_vecT nodes;
+	str_vecT nodes;
 	object *cur;
 	FILE *pajekFile;
 

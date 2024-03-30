@@ -42,15 +42,15 @@
  retrieved
  Returns: 0: load ok, 1,2,3,4,...: load failure
  *************************************************************/
-int lsd::simulation::load_configuration( bool reload, std::string *warnings, int quick )
+int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick )
 {
 	char *buf = NULL, buf1[ MAX_FILE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ];
 	int i, j, load = 0;
 	n_mapT node_map;
-	std::set < int > warning;
+	i_setT warning;
 	FILE *f = NULL;
 	gzFile fz;
-	xml_doc xf;
+	x_docT xf;
 
 	unload_configuration( false );				// unload current
 
@@ -93,16 +93,16 @@ int lsd::simulation::load_configuration( bool reload, std::string *warnings, int
 										   pugi::parse_trim_pcdata );
 	if ( res.status == pugi::status_ok )
 	{
-		xml_node typeNode = xf.first_child( );	// document type node
-		xml_node lsdNode = xf.document_element( );	// LSD top element
+		x_nodeT typeNode = xf.first_child( );	// document type node
+		x_nodeT lsdNode = xf.document_element( );	// LSD top element
 
 		if ( strstr( typeNode.value( ), "LSD " ) != typeNode.value( ) ||
 			 strcmp( lsdNode.name( ), "LSD" ) != 0 )
 			return 21;							// invalid xml type/format
 
 		// get model structure
-		xml_node cfgNode = lsdNode.child( "configuration" );// load config.
-		xml_node rootNode = cfgNode.child( "structure" ).child( "object" );
+		x_nodeT cfgNode = lsdNode.child( "configuration" );// load config.
+		x_nodeT rootNode = cfgNode.child( "structure" ).child( "object" );
 
 		if ( rootNode.empty( ) )
 			return 22;							// missing root
@@ -126,8 +126,8 @@ int lsd::simulation::load_configuration( bool reload, std::string *warnings, int
 		if ( reload && quick == 2 )				// just quick reload?
 			goto endLoad;
 
-		xml_node setNode = cfgNode.child( "settings" );
-		xml_node simNode = setNode.child( "simulation" );
+		x_nodeT setNode = cfgNode.child( "settings" );
+		x_nodeT simNode = setNode.child( "simulation" );
 
 		if ( setNode.empty( ) || simNode.empty( ) )	// missing settings
 		{
@@ -136,7 +136,7 @@ int lsd::simulation::load_configuration( bool reload, std::string *warnings, int
 		}
 
 		// get simulation settings
-		xml_attr hint;							// speed-up pointer
+		x_attrT hint;							// speed-up pointer
 		last_t = simNode.attribute( "steps", hint ).as_uint( MAX_STEPS );
 		last_run = simNode.attribute( "runs", hint ).as_uint( 1 );
 		seed = simNode.attribute( "seed", hint ).as_uint( 1 );
@@ -153,7 +153,7 @@ int lsd::simulation::load_configuration( bool reload, std::string *warnings, int
 		strcpyn( rep_file, setNode.child( "report_file" ).text( ).as_string( rep_file ), MAX_PATH_LENGTH );
 
 		// get equation file name and content
-		xml_node eqfNode = cfgNode.child( "equation_file" );
+		x_nodeT eqfNode = cfgNode.child( "equation_file" );
 		if ( eqfNode.empty( ) )
 		{
 			load = 24;
@@ -252,13 +252,13 @@ void lsd::simulation::unload_configuration( bool full )
  If quick is true, just the structure and the
  parameters are retrieved, no descriptions
  *************************************************************/
-int lsd::object::load_xml_struct( xml_node &n, bool quick )
+int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 {
 	bool obs, integer;
 	const char *str, *desc, *init;
 	int i, type, lags;
 	d_vecT val;
-	s_vecT data;
+	str_vecT data;
 	bridge *cb;
 	variable *cv;
 
@@ -268,7 +268,7 @@ int lsd::object::load_xml_struct( xml_node &n, bool quick )
 	to_compute = n.attribute( "compute" ).as_bool( true );
 
 	// scan contained child objects and elements
-	for ( xml_node cn : n.children( ) )
+	for ( x_nodeT cn : n.children( ) )
 	{
 		if ( ! strcmp( cn.name( ), "object" ) )			// add object?
 		{
@@ -327,7 +327,7 @@ int lsd::object::load_xml_struct( xml_node &n, bool quick )
 
 					if ( ! cn.child( "sensitivity" ).empty( ) )
 					{
-						xml_node cns = cn.child( "sensitivity" );
+						x_nodeT cns = cn.child( "sensitivity" );
 						integer = cn.attribute( "integer" ).as_bool( );
 						lags = cn.attribute( "lags" ).as_uint( );
 
@@ -341,7 +341,7 @@ int lsd::object::load_xml_struct( xml_node &n, bool quick )
 						else
 							if ( type == 0 )
 							{
-								for ( xml_node sn : cns.children( ) )
+								for ( x_nodeT sn : cns.children( ) )
 								{
 									data = strtostrsplit( sn.name( ), '-' );
 
@@ -371,15 +371,15 @@ int lsd::object::load_xml_struct( xml_node &n, bool quick )
  Load the object instances of tree under this
  object from an xml object node
  *************************************************************/
-int lsd::object::load_xml_insts( xml_node &n, n_mapT &node_map, std::set < int > &warning )
+int lsd::object::load_xml_insts( x_nodeT &n, n_mapT &node_map, i_setT &warning )
 {
 	int i;
 	double d;
 	long k, l, m, nd;
 	d_vecT wht, val1, lnkwht1;
-	s_vecT val, nnam, lnkto, lnkwht;
-	std::string data;
-	std::vector < long > num, nser, nid, lnkto1;
+	str_vecT val, nnam, lnkto, lnkwht;
+	strT data;
+	l_vecT num, nser, nid, lnkto1;
 	bridge *cb;
 	object *cur;
 	variable *cv, *cv1;
@@ -414,7 +414,7 @@ int lsd::object::load_xml_insts( xml_node &n, n_mapT &node_map, std::set < int >
 	// load network attributes and links
 	if ( up != NULL && ! n.child( "nodes" ).empty( ) )
 	{
-		xml_node nn = n.child( "nodes" );
+		x_nodeT nn = n.child( "nodes" );
 		nser = strtolsplit( nn.child( "serials" ).text( ).get( ), ',', -1 );
 		nid = strtolsplit( nn.child( "ids" ).text( ).get( ), ',', -1 );
 		if ( ( long ) nser.size( ) != nd || ( long ) nid.size( ) != nd )
@@ -523,7 +523,7 @@ int lsd::object::load_xml_insts( xml_node &n, n_mapT &node_map, std::set < int >
 	// load elements (parameters, variables and functions)
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		xml_node cn = n.find_child_by_attribute( "element", "name", cv->label );
+		x_nodeT cn = n.find_child_by_attribute( "element", "name", cv->label );
 		if ( cn.empty( ) )
 			warning.insert( 52 );				// missing element data
 
@@ -608,7 +608,7 @@ int lsd::object::load_xml_insts( xml_node &n, n_mapT &node_map, std::set < int >
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
-		xml_node cn = n.find_child_by_attribute( "object", "name", cb->label );
+		x_nodeT cn = n.find_child_by_attribute( "object", "name", cb->label );
 		i = cb->head->load_xml_insts( cn, node_map, warning );
 		if ( i != 0 )
 			return i;
@@ -636,7 +636,7 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	FILE *f;
 	gzFile fz;
 	std::ostringstream buf;
-	xml_doc xf;
+	x_docT xf;
 
 	delta = ( findex > 0 ) ? last_run * ( findex - 1 ) : 0;
 	indexDig = ( findex > 0 ) ? ( int ) floor( log10( findex ) + 2 ) : 0;
@@ -703,7 +703,7 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	}
 
 	// add XML declaration, type and root node
-	xml_node declNode = xf.append_child( pugi::node_declaration );
+	x_nodeT declNode = xf.append_child( pugi::node_declaration );
 	declNode.append_attribute( "version" ) = "1.0";
 	declNode.append_attribute( "encoding" ) = "ANSI";
 	declNode.append_attribute( "standalone" ) = "yes";
@@ -719,16 +719,16 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	<!ELEMENT element (#PCDATA?, description?, documentation?, sensitivity?)>\n \
 	<!ELEMENT documentation EMPTY>\n \
 	<!ELEMENT sensitivity (#PCDATA+)>\n]" );
-	xml_node lsdNode = xf.append_child( "LSD" );
-	xml_node cfgNode = lsdNode.append_child( "configuration" );
+	x_nodeT lsdNode = xf.append_child( "LSD" );
+	x_nodeT cfgNode = lsdNode.append_child( "configuration" );
 	cfgNode.append_attribute( "version" ) = "1.0";
 
 	snprintf( ch, MAX_PATH_LENGTH, "LSD configuration file for model '%s', version %s, created in %s", mod_nam, mod_ver, mod_dat );
 	cfgNode.append_attribute( "description" ) = ch;
 
 	// add simulation settings
-	xml_node setNode = cfgNode.append_child( "settings" );
-	xml_node simNode = setNode.append_child( "simulation" );
+	x_nodeT setNode = cfgNode.append_child( "settings" );
+	x_nodeT simNode = setNode.append_child( "simulation" );
 	simNode.append_attribute( "steps" ) = last_t;
 	simNode.append_attribute( "runs" ) = last_run;
 	simNode.append_attribute( "seed" ) = seed + delta;
@@ -746,7 +746,7 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	// add profile settings, if any
 	if ( stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time )
 	{
-		xml_node profNode = setNode.append_child( "profiling" );
+		x_nodeT profNode = setNode.append_child( "profiling" );
 
 		if ( stack_info > 0 )
 			profNode.append_attribute( "level" ) = stack_info;
@@ -765,11 +765,11 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	setNode.append_child( "report_file" ).text( ) = rep_file;
 
 	// add model structure
-	xml_node strNode = cfgNode.append_child( "structure" );
+	x_nodeT strNode = cfgNode.append_child( "structure" );
 	root->save_xml_struct( strNode, node_serial, quick );
 
 	// add equation file name and content
-	xml_node eqfNode = cfgNode.append_child( "equation_file" );
+	x_nodeT eqfNode = cfgNode.append_child( "equation_file" );
 	eqfNode.append_child( "filename" ).text( ) = eq_file;
 
 	if ( ! quick )
@@ -804,13 +804,13 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
  If quick is true, just the structure and the
  parameters are saved, no descriptions
  *************************************************************/
-void lsd::object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
+void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 {
 	bool init, nodes, noWht;
 	char *str;
 	int i, count;
 	long l, k;
-	std::string data, text, nser, nid, nnam, lnkto, lnkwht;
+	strT data, text, nser, nid, nnam, lnkto, lnkwht;
 	bridge *cb;
 	description *cd;
 	netlink *curl;
@@ -818,7 +818,7 @@ void lsd::object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 	sensitivity *cs;
 	variable *cv, *cv1;
 
-	xml_node n = pn.append_child( "object" );
+	x_nodeT n = pn.append_child( "object" );
 	n.append_attribute( "name" ) = label;
 
 	if ( ! to_compute )
@@ -846,7 +846,7 @@ void lsd::object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 
 		if ( ! strwsp( cd->text ) )
 		{
-			xml_node nd = n.append_child( "description" );
+			x_nodeT nd = n.append_child( "description" );
 			str = strencdata( NULL, cd->text );
 			nd.append_child( "text" ).append_child( pugi::node_cdata ).set_value( str );
 			delete [ ] str;
@@ -909,7 +909,7 @@ void lsd::object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 				}
 		}
 
-		xml_node nd = n.append_child( "nodes" );
+		x_nodeT nd = n.append_child( "nodes" );
 		nd.append_child( "serials" ).text( ) = nser.c_str( );
 		nd.append_child( "ids" ).text( ) = nid.c_str( );
 
@@ -935,7 +935,7 @@ void lsd::object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 	// save elements (parameters, variables and functions)
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		xml_node cn = n.append_child( "element" );
+		x_nodeT cn = n.append_child( "element" );
 		cn.append_attribute( "name" ) = cv->label;
 		cn.append_attribute( "type" ) = elem_type_names[ cv->param ];
 
@@ -1029,7 +1029,7 @@ void lsd::object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 
 		if ( ! strwsp( cd->text ) || ! strwsp( cd->init ) )
 		{
-			xml_node cnd = cn.append_child( "description" );
+			x_nodeT cnd = cn.append_child( "description" );
 
 			if ( ! strwsp( cd->text ) )
 			{
@@ -1049,7 +1049,7 @@ void lsd::object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 		// add documentation marks
 		if ( cd->observe || cd->initial )
 		{
-			xml_node cnd = cn.append_child( "documentation" );
+			x_nodeT cnd = cn.append_child( "documentation" );
 
 			if ( cd->observe )
 				cnd.append_attribute( "observe" ) = true;
@@ -1065,7 +1065,7 @@ void lsd::object::save_xml_struct( xml_node &pn, long &node_serial, bool quick )
 				if ( cs->integer )
 					cn.append_attribute( "integer" ) = true;
 
-				xml_node cns;
+				x_nodeT cns;
 
 				if ( cn.child( "sensitivity" ).empty( ) )
 					cns = cn.append_child( "sensitivity" );

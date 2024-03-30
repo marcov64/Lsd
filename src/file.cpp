@@ -46,7 +46,7 @@ bool gui::open_configuration( lsd::object *&r, bool reload )
 	bool loaded;
 	const char *lab1, *lab2;
 	int i;
-	std::string warnings;
+	strT warnings;
 
 	if ( ! reload || strlen( sim.conf_name ) == 0 )
 	{									// ask user the file to use, if not reloading
@@ -174,7 +174,7 @@ bool gui::open_configuration( lsd::object *&r, bool reload )
  If full is false, just the model data is unloaded
  Returns: pointer to root object
  *************************************************************/
-int gui::load_configuration_gui( bool reload, std::string *warnings, int quick )
+int gui::load_configuration_gui( bool reload, strT *warnings, int quick )
 {
 	int res;
 
@@ -220,7 +220,7 @@ bool gui::load_prev_configuration( void )
 {
 	char *saFile = NULL;
 	int i, lstFidx = findexSens;
-	std::string warnings;
+	strT warnings;
 	FILE *f;
 
 	if ( sens_file != NULL )					// save SA file name if one is loaded
@@ -930,7 +930,7 @@ int gui::count_lines( const char *fname, bool dozip )
  SHOW_LOGS
  Open tail/multitail to show log files dynamically
  *************************************************************/
-void gui::show_logs( const char *dest_path, s_vecT & logs, bool par_cntl )
+void gui::show_logs( const char *dest_path, str_vecT & logs, bool par_cntl )
 {
 	char exec[ MAX_PATH_LENGTH	];
 	int i, j, n, sz;

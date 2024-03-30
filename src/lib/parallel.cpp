@@ -24,7 +24,7 @@
 /*************************************************************
  RUN_PARALLEL_EXEC
  *************************************************************/
-void lsd::simulation::run_parallel_exec( bool nw, int id, std::string cmd )
+void lsd::simulation::run_parallel_exec( bool nw, int id, strT cmd )
 {
 	int res;
 
@@ -103,7 +103,7 @@ int lsd::simulation::run_parallel( bool nw, const char *exec, const char *simnam
 
 			run_pids.resize( run_pids.size( ) + 1 );
 			run_status.push_back( INISTAT );
-			run_threads.push_back( std::thread( run_parallel_exec, this, nw, run_status.size( ) - 1, std::string( cmd ) ) );
+			run_threads.push_back( thrT( run_parallel_exec, this, nw, run_status.size( ) - 1, strT( cmd ) ) );
 
 			j <= sl ? i += num + 1 : i += num;
 		}
@@ -130,7 +130,7 @@ int lsd::simulation::run_parallel( bool nw, const char *exec, const char *simnam
 
 			run_pids.resize( run_pids.size( ) + 1 );
 			run_status.push_back( INISTAT );
-			run_threads.push_back( std::thread( run_parallel_exec, this, nw, run_status.size( ) - 1, std::string( cmd ) ) );
+			run_threads.push_back( thrT( run_parallel_exec, this, nw, run_status.size( ) - 1, strT( cmd ) ) );
 		}
 	}
 
@@ -180,7 +180,7 @@ int lsd::simulation::run_parallel( bool nw, const char *exec, const char *simnam
 		return i;
 	}
 	else
-		run_monitor = std::thread( monitor_parallel, this, nw );
+		run_monitor = thrT( monitor_parallel, this, nw );
 
 	return 0;
 }
@@ -202,7 +202,7 @@ int lsd::simulation::monitor_logs( void )
 			++finished;
 
 	thr = 0;
-	for ( std::string logn : run_logs )
+	for ( strT logn : run_logs )
 	{
 		// consider just running threads except if all threads are stopped
 		if ( run_status[ thr++ ] != INISTAT && finished < threads )
@@ -282,10 +282,10 @@ bool lsd::simulation::stop_parallel( void )
 	while ( parallel_monitor && secs++ < WAIT_SECS )
 		msleep( 1000 );
 
-	for ( std::string & results : run_results )
+	for ( strT & results : run_results )
 		remove( results.c_str( ) );
 
-	for ( std::string & log : run_logs )
+	for ( strT & log : run_logs )
 		remove( log.c_str( ) );
 
 	run_results.clear( );
@@ -355,7 +355,7 @@ void lsd::simulation::log_parallel( bool nw )
 	{
 		l_guardT lock( run_logs_lck );
 
-		for ( std::string & log : run_logs )
+		for ( strT & log : run_logs )
 		{
 			f = fopen( log.c_str( ), "r" );
 			if ( f == NULL )

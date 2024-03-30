@@ -912,10 +912,10 @@ double **gui::compute_distance_matrix( double **sample, int M, int k, double **D
  COMBINATIONS
  Calculate the combinations of indices, r-to-r
  *************************************************************/
-std::vector < i_vecT > gui::combinations( std::list < int > indices, int r )
+i2_vecT gui::combinations( i_listT indices, int r )
 {
 	i_vecT comb;
-	std::vector < i_vecT > combs;
+	i2_vecT combs;
 
 	// copy list to vector
 	i_vecT ind( indices.begin( ), indices.end( ) );
@@ -923,7 +923,7 @@ std::vector < i_vecT > gui::combinations( std::list < int > indices, int r )
 	if ( r > n )
 		return combs;
 	// create selection array with r selectors
-	std::vector < bool > v( n );
+	b_vecT v( n );
 	fill( v.begin( ), v.end( ) - n + r, true );
 	// create all permutations of the selectors
 	do
@@ -948,10 +948,10 @@ std::vector < i_vecT > gui::combinations( std::list < int > indices, int r )
  indices: list of candidate pairs of points = list < int >
  	DM: distance matrix = array (M,M)
  *************************************************************/
-double gui::sum_distances( std::list < int > indices, double **DM )
+double gui::sum_distances( i_listT indices, double **DM )
 {
 	// get all combination pairs of indices
-	std::vector < i_vecT > combs = combinations( indices, 2 );
+	i2_vecT combs = combinations( indices, 2 );
 
 	// add distance of all points pairs
 	double D = 0;
@@ -966,10 +966,10 @@ double gui::sum_distances( std::list < int > indices, double **DM )
  TOP_IDX
  	Get the top-i size items index from a unidimensional array
  *************************************************************/
-std::list < int > gui::top_idx( double *a, int n, int i )
+i_listT gui::top_idx( double *a, int n, int i )
 {
-	std::list < int > top;
-	std::vector < bool > used( n, false );
+	b_vecT used( n, false );
+	i_listT top;
 
 	for ( int k = 0; k < i; ++k )
 	{
@@ -995,7 +995,7 @@ std::list < int > gui::top_idx( double *a, int n, int i )
  indices_list = list of points
  distance = array (M)
  *************************************************************/
-std::list < int > gui::get_max_sum_ind( std::vector < std::list < int > > indices_list, d_vecT row_maxima_i )
+i_listT gui::get_max_sum_ind( i_list_vecT indices_list, d_vecT row_maxima_i )
 {
 	int max_idx = -1;
 	double max = -INFINITY;
@@ -1016,10 +1016,10 @@ std::list < int > gui::get_max_sum_ind( std::vector < std::list < int > > indice
  Adds extra indices for the combinatorial problem.
  For indices = (1,2 ) and M=5, the method returns [(1,2,3),(1,2,4),(1,2,5)]
  *************************************************************/
-std::vector < std::list < int > > gui::add_indices( std::list < int > m_max_ind, int M )
+i_list_vecT gui::add_indices( i_listT m_max_ind, int M )
 {
-	std::vector < std::list < int > > list_new_indices;
-	std::list < int > copy = m_max_ind;
+	i_list_vecT list_new_indices;
+	i_listT copy = m_max_ind;
 
 	for ( int i = 0; i < M; ++i )
 		if ( find( m_max_ind.begin( ), m_max_ind.end( ), i ) == m_max_ind.end( ) )
@@ -1048,8 +1048,8 @@ double **gui::opt_trajectories( int k, double **pool, int M, int r, double **X )
 		return X;
 	}
 
-	std::list < int > indices, i_max_ind, m_max_ind, tot_max;
-	std::vector < std::list < int > > tot_indices_list, indices_list, m_ind;
+	i_listT indices, i_max_ind, m_max_ind, tot_max;
+	i_list_vecT tot_indices_list, indices_list, m_ind;
 
 	double **DM = mat_new( M, M );
 	DM = compute_distance_matrix( pool, M, k, DM );

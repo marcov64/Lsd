@@ -182,7 +182,7 @@ int lsd::kill_system( simulation *sim, int id )
  *************************************************************/
 void lsd::set_exec( const char *path, const char *file )
 {
-	std::string exefile, exepath, libfile, libpath, fname;
+	strT exefile, exepath, libfile, libpath, fname;
 
 	exepath = path;
 	exefile = file;
@@ -198,7 +198,7 @@ void lsd::set_exec( const char *path, const char *file )
 	libpath = exec_path;
 	libfile = "lib";
 	libfile += exec_file;						// base library name
-	if ( libfile.find( '.' ) != std::string::npos )// remove Windows extension
+	if ( libfile.find( '.' ) != strT::npos )// remove Windows extension
 		libfile = libfile.substr( 0, libfile.rfind( "." ) );
 
 #ifdef __linux__
@@ -636,13 +636,13 @@ char *lsd::strcpyn( char *d, const char *s, size_t dSz )
  *************************************************************/
 char *lsd::strdecdata( char *out, const char *in, int outSz )
 {
-	std::string buf = in;
+	strT buf = in;
 	int pos = -3;
 
 	if ( out != NULL && outSz <= 0 )
 		return NULL;
 
-	while ( ( pos = buf.find( "]]\x7f>", pos + 3 ) ) != ( int ) std::string::npos )
+	while ( ( pos = buf.find( "]]\x7f>", pos + 3 ) ) != ( int ) strT::npos )
 		buf.erase( pos + 2, 1 );		// remove DEL (0x7f) character
 
 	if ( out == NULL )
@@ -664,13 +664,13 @@ char *lsd::strdecdata( char *out, const char *in, int outSz )
  *************************************************************/
 char *lsd::strencdata( char *out, const char *in, int outSz )
 {
-	std::string buf = in;
+	strT buf = in;
 	int pos = -4;
 
 	if ( out != NULL && outSz <= 0 )
 		return NULL;
 
-	while ( ( pos = buf.find( "]]>", pos + 4 ) ) != ( int ) std::string::npos )
+	while ( ( pos = buf.find( "]]>", pos + 4 ) ) != ( int ) strT::npos )
 		buf.insert( pos + 2, "\x7f" );		// insert DEL (0x7f) character
 
 	if ( out == NULL )
@@ -885,7 +885,7 @@ double lsd::strtod( const char *in, char** endptr, double inv )
 d_vecT lsd::strtodsplit( const char *in, char sep, double inv )
 {
 	d_vecT out;
-	std::string buf;
+	strT buf;
 	std::stringstream ss( in );
 
 	while ( getline( ss, buf, sep ) )
@@ -932,11 +932,11 @@ long lsd::strtol( const char *in, char** endptr, int base, long inv )
  for conversion errors, producing inv as result
  in this case
  *************************************************************/
-std::vector < long > lsd::strtolsplit( const char *in, char sep, long inv )
+l_vecT lsd::strtolsplit( const char *in, char sep, long inv )
 {
-	std::string buf;
+	strT buf;
 	std::stringstream ss( in );
-	std::vector < long > out;
+	l_vecT out;
 
 	while ( getline( ss, buf, sep ) )
 		out.push_back( strtol( buf.c_str( ), NULL, 10, inv ) );
@@ -950,11 +950,11 @@ std::vector < long > lsd::strtolsplit( const char *in, char sep, long inv )
  split a C string into a vector of strings using
  sep as the separator character
  *************************************************************/
-s_vecT lsd::strtostrsplit( const char *in, char sep, bool remQuotes )
+str_vecT lsd::strtostrsplit( const char *in, char sep, bool remQuotes )
 {
-	std::string buf;
+	strT buf;
 	std::stringstream ss( in );
-	s_vecT out;
+	str_vecT out;
 
 	while ( getline( ss, buf, sep ) )
 	{
@@ -973,10 +973,10 @@ s_vecT lsd::strtostrsplit( const char *in, char sep, bool remQuotes )
  convert double to string, allowing for sprintf
  pattern format
  *************************************************************/
-std::string lsd::to_string( const char *fmt, double val )
+strT lsd::to_string( const char *fmt, double val )
 {
 	char buf[ 100 + 1 ];
-	std::string res;
+	strT res;
 
 	if ( snprintf( buf, 100, fmt, val ) < 0 )
 		strcpy( buf, "" );
@@ -1027,9 +1027,9 @@ int lsd::strtrim( char *out, const char *str, int outSz )
  *************************************************************/
 int lsd::strtrimin( char *out, const char *str, int outSz )
 {
-	std::string buf, in = str;
+	strT buf, in = str;
 
-	unique_copy( in.begin( ), in.end( ), std::back_insert_iterator < std::string > ( buf ),
+	unique_copy( in.begin( ), in.end( ), std::back_insert_iterator < strT > ( buf ),
 				 [ ] ( char a, char b ) { return isspace( a ) && isspace( b ); } );
 
 	return strtrim( out, buf.c_str( ), outSz );

@@ -920,7 +920,7 @@ double lsd::equation::alapl( double mu, double alpha1, double alpha2 )
 /*************************************************************
  WARN_DISTR
  *************************************************************/
-void lsd::simulation::warn_distr( std::atomic < int > & errCnt, bool & stopErr, const char *distr, const char *msg )
+void lsd::simulation::warn_distr( i_atomT & errCnt, bool & stopErr, const char *distr, const char *msg )
 {
 	if ( ++errCnt < ERR_LIM )	// prevent slow down due to I/O
 	{

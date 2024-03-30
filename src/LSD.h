@@ -221,38 +221,10 @@
 namespace gui
 {
 /*************************************************************
- DESIGN
+ CLASSES
  *************************************************************/
-	struct design						// design of experiment container class
-	{
-		int typ, tab, n, k, *par, *lag, *inst;// experiment parameters
-		double **hi, **lo, ***doe;
-		char **lab;
-		bool *intg;
-
-		design( lsd::sensitivity *rsens, int typ, const char *fname, const char *dest_path,
-				int findex, int samples, int factors = 0, int jump = 2, int trajs = 4 );
-										// constructor
-		~design( void );				// destructor
-
-		void clear_design( void );
-		void load_design_data( lsd::sensitivity *rsens, int n );
-	};
-
-
-/*************************************************************
- NOLH
- *************************************************************/
-	struct nolh							// near-orthogonal Latin hypercube class
-	{
-		int kMin;
-		int kMax;
-		int n1;
-		int n2;
-		int loLevel;
-		int hiLevel;
-		const int *table;
-	};
+	struct design;
+	struct nolh;
 
 
 /*************************************************************
@@ -325,7 +297,7 @@ namespace gui
 	bool compile_run( int run_mode, bool nw = false );
 	bool create_maverag( void );
 	bool create_res_dir( const char *path );
-	bool create_series( bool mc, s_vecT var_names );
+	bool create_series( bool mc, str_vecT var_names );
 	bool discard_change( bool checkSense = true, bool senseOnly = false, const char title[ ] = "" );
 	bool eq_contains( FILE *f, const char *lab, int len );
 	bool eq_header( const char *line, char *var, char *updt_in );
@@ -366,7 +338,7 @@ namespace gui
 	double lower_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
 	double mat_sum_dists( double **a, int m, int n, double **b );
 	double save_lattice_helper( const char *fname );
-	double sum_distances( std::list < int > indices, double **DM );
+	double sum_distances( i_listT indices, double **DM );
 	double update_lattice_helper( double line, double col, double val, int line_int, int col_int, int val_int );
 	double upper_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
 	double *log_data( double *data, int start, int end, int ser, const char *err_msg );
@@ -387,7 +359,7 @@ namespace gui
 	int eval_int( const char *tcl_exp );
 	int get_int( const char *tcl_var, int *var = NULL );
 	int intmin_hborder( int pdigits, double miny, double maxy );
-	int load_configuration_gui( bool reload, std::string *warnings, int quick );
+	int load_configuration_gui( bool reload, strT *warnings, int quick );
 	int load_gui( const char **argv );
 	int load_sensitivity( FILE *f );
 	int min_hborder( int pdigits, double miny, double maxy );
@@ -409,14 +381,14 @@ namespace gui
 	int Tcl_set_ttip_descr( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_upload_series( ClientData cd, Tcl_Interp *interp, int oc, Tcl_Obj *CONST ov[ ] );
+	i_listT get_max_sum_ind( i_list_vecT indices_list, d_vecT row_maxima_i );
+	i_listT top_idx( double *a, int n, int i );
+	i_list_vecT add_indices( i_listT m_max_ind, int M );
+	i2_vecT combinations( i_listT indices, int r );
 	long eval_long( const char *tcl_exp );
 	long get_long( const char *tcl_var, long *var = NULL );
 	lsd::object *operate( lsd::object *r ); \
-	std::list < int > get_max_sum_ind( std::vector < std::list < int > > indices_list, d_vecT row_maxima_i );
-	std::list < int > top_idx( double *a, int n, int i );
-	std::string win_path( std::string filepath );
-	std::vector < std::list < int > > add_indices( std::list < int > m_max_ind, int M );
-	std::vector < i_vecT > combinations( std::list < int > indices, int r );
+	strT win_path( strT filepath );
 	void add_da_plot_tab( const char *w, int id_plot );
 	void analysis( bool mc = false );
 	void auto_document( const char *lab, const char *which, bool append = false );
@@ -444,7 +416,7 @@ namespace gui
 	void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, int init_color );
 	void init_plot( int i );
 	void init_tcl_tk( const char *exec, const char *tcl_app_name );
-	void insert_data_file( bool gz, int *num_v, s_vecT *var_names, bool keep_vars );
+	void insert_data_file( bool gz, int *num_v, str_vecT *var_names, bool keep_vars );
 	void log_tcl_error( bool show, const char *cm, const char *message, ... );
 	void lsd_exit_gui( int v );
 	void make_makefile( bool nw = false );
@@ -493,7 +465,7 @@ namespace gui
 	void show_comp_result( bool nw = false );
 	void show_descr( const char *lab, const char *parWnd = NULL );
 	void show_eq( const char *lab, const char *parWnd = NULL );
-	void show_logs( const char *path, s_vecT & logs, bool par_cntl = false );
+	void show_logs( const char *path, str_vecT & logs, bool par_cntl = false );
 	void show_plot_gnu( int n, int type, char **str, char **tag );
 	void show_prof_aggr( void );
 	void show_report( const char *par_wnd );
@@ -513,3 +485,38 @@ namespace gui
 	void NOLH_clear( void );
 	FILE *search_all_sources( char *str );
 }
+
+
+/*************************************************************
+ DESIGN
+ *************************************************************/
+struct gui::design						// design of experiment container class
+{
+	int typ, tab, n, k, *par, *lag, *inst;// experiment parameters
+	double **hi, **lo, ***doe;
+	char **lab;
+	bool *intg;
+
+	design( lsd::sensitivity *rsens, int typ, const char *fname, const char *dest_path,
+			int findex, int samples, int factors = 0, int jump = 2, int trajs = 4 );
+										// constructor
+	~design( void );					// destructor
+
+	void clear_design( void );
+	void load_design_data( lsd::sensitivity *rsens, int n );
+};
+
+
+/*************************************************************
+ NOLH
+ *************************************************************/
+struct gui::nolh						// near-orthogonal Latin hypercube class
+{
+	int kMin;
+	int kMax;
+	int n1;
+	int n2;
+	int loLevel;
+	int hiLevel;
+	const int *table;
+};

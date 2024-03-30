@@ -37,13 +37,13 @@
 int dispatch_runs( int until_t, int until_run )
 {
 	int nstale, nrun = 0;
-	std::mutex mtx;
+	mtxT mtx;
 	uniq_lT lock( mtx );
 
 	for ( auto sim : lsd::sims )
 		if ( ! sim->sim_thread.joinable( ) && sim->conf_ok )
 		{
-			sim->sim_thread = std::thread( & lsd::simulation::run_simulation, sim, until_t, until_run );
+			sim->sim_thread = thrT( & lsd::simulation::run_simulation, sim, until_t, until_run );
 			sim->last_dispatch_time = sim->stale_time = 0;
 			++nrun;
 		}
@@ -235,7 +235,7 @@ int lsd::simulation::init_new_seq( char *bar_done, int & perc_done, int & last_d
 		for ( i = 0; i < max_threads; ++i )
 		{
 			workers[ i ].sim = this;
-			workers[ i ].worker_thread = std::thread( & worker::cal_worker, & workers[ i ] );
+			workers[ i ].worker_thread = thrT( & worker::cal_worker, & workers[ i ] );
 		}
 	}
 
@@ -627,7 +627,7 @@ bool lsd::object::alloc_save_mem( void )
 #ifndef _NW_
 		// variable to parent name map for AoR (only in GUI mode)
 		if ( sim->liblnk != NULL )
-			sim->par_map.insert( std::make_pair < std::string, std::string > ( cv->label, label ) );
+			sim->par_map.insert( std::make_pair < strT, strT > ( cv->label, label ) );
 #endif
 	}
 

@@ -21,11 +21,9 @@
 #define _FUN_				// comment this line to access internal LSD functions
 #include "lib/check.h"		// macro check support code
 
-namespace lsd				// create the config variables in proper namespace
-{
 // enable pointer checking to protect users (medium overhead) if not disabled
 #ifndef NO_POINTER_CHECK
-	const bool no_pointer_check = false;
+	const bool lsd::no_pointer_check = false;
 
 	#define CHK_PTR_NOP( O ) if ( _chk_ptr_( O ) ) _bad_ptr_void_( O, __FILE__, __LINE__ );
 	#define CHK_PTR_CHR( O ) _chk_ptr_( O ) ? _bad_ptr_chr_( O, __FILE__, __LINE__ ) :
@@ -37,7 +35,7 @@ namespace lsd				// create the config variables in proper namespace
 	#define CHK_OBJ_OBJ( O ) _chk_obj_( O ) ? _bad_ptr_obj_( O, __FILE__, __LINE__ ) :
 	#define CHK_HK_OBJ( O, X ) _chk_hook_( O, X ) ? _no_hook_obj_( O, X, __FILE__, __LINE__ ) :
 #else
-	const bool no_pointer_check = true;
+	const bool lsd::no_pointer_check = true;
 
 	#define CHK_PTR_NOP( O )
 	#define CHK_PTR_CHR( O )
@@ -56,7 +54,7 @@ namespace lsd				// create the config variables in proper namespace
 
 // initialize pointers to NULL to protect users (small overhead) if not disabled
 #ifndef NO_POINTER_INIT
-	const bool no_pointer_init = false;
+	const bool lsd::no_pointer_init = false;
 
 	#define INIT_POINTERS \
 		h = i = j = k = 0; \
@@ -69,7 +67,7 @@ namespace lsd				// create the config variables in proper namespace
 	#define CHK_NODE_CHR( O ) O->node == NULL ? _no_node_chr_( O->label, __FILE__, __LINE__ ) :
 	#define CHK_NODE_DBL( O ) O->node == NULL ? _no_node_dbl_( O->label, __FILE__, __LINE__ ) :
 #else
-	const bool no_pointer_init = true;
+	const bool lsd::no_pointer_init = true;
 
 	#define INIT_POINTERS
 	#define CHK_LNK_DBL( O )
@@ -78,7 +76,6 @@ namespace lsd				// create the config variables in proper namespace
 	#define CHK_NODE_CHR( O )
 	#define CHK_NODE_DBL( O )
 #endif
-}
 
 // user defined variables for all equations (to be defined in equation file)
 #ifndef EQ_USER_VARS
@@ -142,7 +139,7 @@ namespace lsd				// create the config variables in proper namespace
 	}
 
 #define EQUATION( X ) \
-	{ std::string( X ), [ this ]( const variable *_v_, object *c ) -> double \
+	{ strT( X ), [ this ]( const variable *_v_, object *c ) -> double \
 		{ \
 			object *p = _v_->up; \
 			int h, i, j, k; \
@@ -167,7 +164,7 @@ namespace lsd				// create the config variables in proper namespace
 	}
 
 #define EQUATION_DUMMY( X, Y ) \
-	{ std::string( X ), [ ]( const variable *_v_, object *c ) -> double \
+	{ strT( X ), [ ]( const variable *_v_, object *c ) -> double \
 		{ \
 			return ( ( variable * ) _v_ )->chk_dummy( Y ); \
 		} \
@@ -627,7 +624,7 @@ namespace lsd				// create the config variables in proper namespace
 		extern Tcl_Interp *inter;
 	#endif
 
-		extern std::vector < simulation * > sims;// vector holding existing simulations
+		extern sim_vecT sims;				// vector holding existing simulations
 		char msg[ MAX_BUFF_SIZE ];			// legacy auxiliary buffer
 		void equation::_close_sim_( void ) { }
 	}

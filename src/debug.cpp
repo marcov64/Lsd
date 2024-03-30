@@ -1302,7 +1302,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 
 				if ( j > 0 )
 				{
-					std::vector < bool > checked( j + 1, false );
+					b_vecT checked( j + 1, false );
 
 					cmd( "set hook 0" );
 

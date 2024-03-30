@@ -464,7 +464,7 @@ double lsd::variable::cal( object *caller, int lag )
 
 			if ( ( ! sim->prof_obs_only || observe ) && time > sim->prof_min_msecs )
 			{
-				std::string var_name = label;
+				strT var_name = label;
 				sim->prof_times[ var_name ].ticks += time;
 				sim->prof_times[ var_name ].comp++;
 			}

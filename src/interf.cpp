@@ -57,7 +57,7 @@ lsd::object *gui::operate( lsd::object *r )
 	lsd::result *rf;			// pointer for results files (may be zipped or not)
 	lsd::sensitivity *cs;
 	lsd::variable *cv, *cv1;
-	s_vecT logs;
+	str_vecT logs;
 	FILE *f;
 
 	if ( ! redrawReq )

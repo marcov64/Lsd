@@ -23,7 +23,7 @@
 
 namespace gui
 {
-	std::mutex lock_log_tcl_err;	// lock log_tcl_error for parallel access
+	mtxT lock_log_tcl_err;			// lock log_tcl_error for parallel access
 }
 
 
@@ -1272,7 +1272,7 @@ bool gui::compile_run( int run_mode, bool nw )
 #endif
 
 	// number of cores for make parallelization
-	max_threads = std::thread::hardware_concurrency( );
+	max_threads = thrT::hardware_concurrency( );
 
 	// start compilation as a background task
 	res = -1;
@@ -1569,9 +1569,9 @@ void gui::clean_spaces( char *s )
  WIN_PATH
  convert linux path to Windows default, replacing / with \
  *************************************************************/
-std::string gui::win_path( std::string filepath )
+strT gui::win_path( strT filepath )
 {
-	std::string winpath;
+	strT winpath;
 
 	for ( auto c : filepath )
 		if ( c == '/' )

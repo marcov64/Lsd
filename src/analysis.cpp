@@ -165,8 +165,8 @@ void gui::analysis( bool mc )
 	char dirname[ MAX_PATH_LENGTH ], str1[ MAX_ELEM_LENGTH ], str2[ MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ];
 	double *datum, compvalue;
 	int h, i, j, k, l, m, p, r;
-	s_vecT cur_var;
-	std::vector < s_vecT > var_names;
+	str_vecT cur_var;
+	str2_vecT var_names;
 	FILE *f;
 
 	cover_browser( "Analysis of Results...", "Please exit Analysis of Results\nbefore using the LSD Browser.", false );
@@ -4587,7 +4587,7 @@ void lsd::object::create_par_map( void )
 	variable *cv;
 
 	for ( cv = v; cv != NULL; cv = cv->next )
-		sim->par_map.insert( std::make_pair < std::string, std::string > ( cv->label, label ) );
+		sim->par_map.insert( std::make_pair < strT, strT > ( cv->label, label ) );
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 		for ( cur = cb->head; cur != NULL; cur = BROTHER( cur ) )
@@ -4746,7 +4746,7 @@ void lsd::object::insert_store_mem( int max_v, int *num_v, const char *lab )
 /*************************************************************
  INSERT_DATA_FILE
  *************************************************************/
-void gui::insert_data_file( bool gz, int *num_v, s_vecT *var_names, bool keep_vars )
+void gui::insert_data_file( bool gz, int *num_v, str_vecT *var_names, bool keep_vars )
 {
 	FILE *f = NULL;
 	gzFile fz = Z_NULL;
@@ -7473,7 +7473,7 @@ void gui::histograms_cs( void )
 /*************************************************************
  CREATE_SERIES
  *************************************************************/
-bool gui::create_series( bool mc, s_vecT var_names )
+bool gui::create_series( bool mc, str_vecT var_names )
 {
 	bool first, medCI = false, done = true;
 	char **str, **tag;

@@ -40,13 +40,13 @@ namespace lsd
 	char *lib_path = NULL;			// path of shared library, if any
 	char *model_path = NULL;		// folder where the model files are
 	char *root_lsd = NULL;			// path of LSD root directory
-	std::condition_variable seq_end;// variable to signal simulation sequence end
-	std::map < std::thread::id, worker * > worker_thread_ptr;// worker thr. pointers
-	std::mutex init_sim_lck;		// lock simulation constructor
-	std::mutex plog_term_lck;		// lock plog_terminal for parallel updating
-	std::mutex wrk_thr_ptr_lck;		// lock worker_thread_ptr for parallel updating
-	std::vector < simulation * > sims;// vector holding existing simulations
-	std::thread::id main_thread;	// LSD main thread ID
+	cond_vT seq_end;				// variable to signal simulation sequence end
+	mtxT init_sim_lck;				// lock simulation constructor
+	mtxT plog_term_lck;				// lock plog_terminal for parallel updating
+	mtxT wrk_thr_ptr_lck;			// lock worker_thread_ptr for parallel updating
+	sim_vecT sims;					// vector holding existing simulations
+	thr_idT main_thread;			// LSD main thread ID
+	wrk_mapT worker_thread_ptr;		// worker thread pointers
 	FILE *stderr_ptr;				// main thread standard error file pointer
 	FILE *stdout_ptr;				// main thread standard output file pointer
 
@@ -58,7 +58,7 @@ namespace lsd
 	const char *meta_par_names[ META_PAR_NUM ] = META_PAR_NAME;
 	const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
 	const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
-	const std::unordered_map < std::string, int > logic_ops_map = LOG_OPS_PAIR;
+	const i_mapT logic_ops_map = LOG_OPS_PAIR;
 }
 
 
@@ -118,7 +118,7 @@ lsd::simulation::simulation( void )
 	latt = new lattice;
 	reset_blueprint( NULL );
 
-	max_threads = ( MAX_CORES <= 0 ) ? std::thread::hardware_concurrency( ) : MAX_CORES;
+	max_threads = ( MAX_CORES <= 0 ) ? thrT::hardware_concurrency( ) : MAX_CORES;
 
 	conf_name = new char[ strlen( "" ) + 1 ];
 	conf_path = new char[ strlen( "" ) + 1 ];

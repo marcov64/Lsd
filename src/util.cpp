@@ -31,7 +31,7 @@
 namespace gui
 {
 	const char *tags[ NUM_TAGS ] = { "", "highlight", "table", "series", "prof1", "prof2", "bar" };
-	std::mutex lock_plog_backend;	// lock lock_plog_backend for parallel access
+	mtxT lock_plog_backend;		// lock lock_plog_backend for parallel access
 }
 
 
