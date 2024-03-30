@@ -250,7 +250,6 @@ namespace gui
 	extern char eq_file[ ];				// equation file name
 	extern char err_file[ ];			// error log file name
 	extern char path_sens[ ];			// path of last used sensitivity directory
-	extern char tcl_dir[ ];				// Tcl/Tk directory
 	extern const char *lmm_defaults[ ];	// GUI constant string arrays
 	extern const char *lmm_options[ ];
 	extern const char *lsd_nw_src[ ];
@@ -358,11 +357,13 @@ namespace gui
 	int count_lines( const char *fname, bool dozip = false );
 	int eval_int( const char *tcl_exp );
 	int get_int( const char *tcl_var, int *var = NULL );
+	int init_lsd_env( const char **argv );
 	int intmin_hborder( int pdigits, double miny, double maxy );
 	int load_configuration_gui( bool reload, strT *warnings, int quick );
 	int load_gui( const char **argv );
 	int load_sensitivity( FILE *f );
 	int min_hborder( int pdigits, double miny, double maxy );
+	int set_platform( void );
 	int shrink_gnufile( void );
 	int store_gnufile( struct node *c, int x4 );
 	int store_gnufile( struct node *c, int x3, int x4 );

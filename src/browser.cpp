@@ -63,28 +63,24 @@ namespace gui
  *************************************************************/
 int gui::load_gui( const char **argv )
 {
-	char *str, cwd[ PATH_MAX ];
-	const char *app, *app1;
+	char *str;
 	int i, j = 0, k = 0;
 	lsd::object *r;
-	FILE *f;
 
-	// assume exec path is current path
-	getcwd( cwd, PATH_MAX );
-	lsd::set_exec( cwd, argv[ 0 ] );
+	// initialize tcl/tk
+	init_tcl_tk( argv[ 0 ], "lsd" );
 
-	if ( lsd::exec_file == NULL || lsd::exec_path == NULL )
-	{
-		log_tcl_error( true, "Invalid LSD executable name or path", "Make sure the LSD directory is not too deep into the disk directory tree" );
-		return 1;
-	}
+	// initialize LSD path and environment variables
+	if ( ( i = init_lsd_env( argv ) ) != 0 )
+		return i;
 
+	// read command line parameters
 	for ( i = 1; argv[ i ] != NULL; i++ )
 	{
-		if ( argv[ i ][ 0 ] != '-' || ( argv[ i ][ 1 ] != 'f' && argv[ i ][ 1 ] != 'i' && argv[ i ][ 1 ] != 'c' ) )
+		if ( argv[ i ][ 0 ] != '-' || ( argv[ i ][ 1 ] != 'f' && argv[ i ][ 1 ] != 'c' ) )
 		{
-			log_tcl_error( true, "Command line parameters", "Invalid option, available options: -i TCL_DIRECTORY / -f MODEL_NAME / -c MAX_THREADS" );
-			return 1;
+			log_tcl_error( true, "Command line parameters", "Invalid option, available options: -f MODEL_NAME / -c MAX_THREADS" );
+			return 5;
 		}
 
 		if ( argv[ i ][ 1 ] == 'f' )
@@ -105,12 +101,6 @@ int gui::load_gui( const char **argv )
 			i++;
 		}
 
-		if ( argv[ i ][ 1 ] == 'i' )
-		{
-			lsd::strcpyn( tcl_dir, argv[ i + 1 ] + 2, MAX_PATH_LENGTH );
-			i++;
-		}
-
 		// read -c parameter : max number of cores
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'c' )
 		{
@@ -122,120 +112,12 @@ int gui::load_gui( const char **argv )
 	if ( j > 0 && j < sim.max_threads )
 		sim.max_threads = j;
 
-	// initialize tcl/tk and set global bidirectional variables
-	init_tcl_tk( argv[ 0 ], "lsd" );
-
 	// global links between C and tcl variables
 	Tcl_LinkVar( interp, "choice", ( char * ) & choice, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "choice_g", ( char * ) & choice_g, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "stop", ( char * ) & stop, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( interp, "deb_set", ( char * ) & sim.deb_set, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( interp, "deb_t", ( char * ) & sim.deb_t, TCL_LINK_INT );
-
-	// set system defaults in tcl
-	cmd( "set LMM_OPTIONS \"%s\"", LMM_OPTIONS );
-	cmd( "set SYSTEM_OPTIONS \"%s\"", SYSTEM_OPTIONS );
-	cmd( "set MODEL_OPTIONS \"%s\"", MODEL_OPTIONS );
-	cmd( "set GROUP_INFO \"%s\"", GROUP_INFO );
-	cmd( "set MODEL_INFO \"%s\"", MODEL_INFO );
-	cmd( "set MODEL_INFO_NUM %d", MODEL_INFO_NUM );
-	cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
-	cmd( "set DATE_FMT \"%s\"", DATE_FMT );
-
-	// check if exec file is in current path
-	i = strlen( lsd::exec_path ) + strlen( lsd::exec_file ) + 2;
-	str = new char[ i ];
-	snprintf( str, i, "%s/%s", lsd::exec_path, lsd::exec_file );
-	f = fopen( str, "r" );
-	delete [ ] str;
-	if ( f != NULL )
-		fclose( f );
-
-	// try to use exec_path to change to the model directory
-	if ( f == NULL || strlen( lsd::exec_path ) == 0 || ! strcmp( lsd::exec_path, "/" ) )
-	{	// try to get name from Tcl
-		cmd( "if { [ info nameofexecutable ] != \"\" } { \
-				set path [ file dirname [ info nameofexecutable ] ]; \
-				set exec [ file rootname [ info nameofexecutable ] ] \
-			} { \
-				set path \"\"; \
-				set exec \"\" \
-			}" );
-
-		app = get_str( "path" );
-		app1 = get_str( "exec" );
-		if ( app != NULL && app1 != NULL && strlen( app1 ) > 0 )
-			lsd::set_exec( app, app1 );
-	}
-
-	// check if executable is inside a macOS package
-	cmd( "set path [ file normalize \"%s\" ]", lsd::exec_path );
-	cmd( "if { $tcl_platform(os) eq \"Darwin\" } { \
-			set pathsplit [ file split \"$path\" ]; \
-			if { [ lindex $pathsplit end ] eq \"MacOS\" && [ lindex $pathsplit end-1 ] eq \"Contents\" } { \
-				set path [ file normalize \"$path/../../..\" ] \
-			}; \
-			unset pathsplit \
-		}" );
-
-	// only use the exec path if not already in a model directory
-	cmd( "if { [ file exists $MODEL_OPTIONS ] } { \
-			set modelDir \"[ pwd ]\" \
-		} { \
-			set modelDir \"$path\"; \
-		}" );
-
-	cmd( "cd \"$modelDir\"" );
-	app = get_str( "modelDir" );
-
-	delete [ ] sim.conf_path;
-	delete [ ] lsd::model_path;
-	sim.conf_path = new char[ strlen( app ) + 1 ];
-	lsd::model_path = new char[ strlen( app ) + 1 ];
-	strcpy( sim.conf_path, app );
-	strcpy( lsd::model_path, app );
-
-	// check if LSDROOT already exists and use it if so, if not, search the current directory tree
-	cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if { ! [ file exists \"$RootLsd/src/interf.cpp\" ] } { unset RootLsd } }" );
-
-	// do some search for the right path to cope with Mac Acqua package
-	choice = 0;
-	cmd( "if { ! [ info exists RootLsd ] } { \
-			set here [ pwd ]; \
-			while { ! [ file exists \"src/interf.cpp\" ] && ! [ string equal [ pwd ] \"/\" ] && [ string length [ pwd ] ] > 3 } { \
-				cd .. \
-			}; \
-			if [ file exists \"src/LSD.h\" ] { \
-				set RootLsd [ pwd ] \
-			} { \
-				set choice 1 \
-			}; \
-			cd $here; \
-		}" );
-
-	if ( choice )
-	{
-		log_tcl_error( false, "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where LSD is installed" );
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where LSD is installed.\n\nLSD is aborting now.\"" );
-		return 9;
-	}
-
-	cmd( "set env(LSDROOT) $RootLsd" );
-
-	app = get_str( "RootLsd" );
-	if ( app != NULL && strlen( app ) > 0 )
-	{
-		lsd::root_lsd = new char[ strlen( app ) + 1 ];
-		strcpy( lsd::root_lsd, app );
-		lsd::root_lsd = lsd::clean_path( lsd::root_lsd );
-		cmd( "set RootLsd \"%s\"", lsd::root_lsd );
-	}
-	else
-	{
-		log_tcl_error( false, "LSD directory check", "Cannot locate LSD folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSD directory missing\" -detail \"Cannot locate the LSD installation folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
-		return 9;
-	}
 
 	// load/check LMM configuration file
 	i = load_lmm_options( );
@@ -259,21 +141,9 @@ int gui::load_gui( const char **argv )
 		return 200 + choice;
 	}
 
-	app = get_str( "CurPlatform" );
-	if ( ! strcmp( app, "linux" ) )
-		platform = _LIN_;
-	else
-		if ( ! strcmp( app, "mac" ) )
-			platform = _MAC_;
-		else
-			if ( ! strcmp( app, "windows" ) )
-				platform = _WIN_;
-			else
-			{
-				log_tcl_error( false, "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
-				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"", choice );
-				return 200;
-			}
+	// set and check to OS platform
+	if ( ( j = set_platform( ) ) != 0 )
+		return j;
 
 	// fix non-existent or old options file for new options
 	if ( i == 0 )

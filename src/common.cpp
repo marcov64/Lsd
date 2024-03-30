@@ -28,6 +28,194 @@ namespace gui
 
 
 /*************************************************************
+ INIT_LSD_ENV
+ initialize LSD path and environment variables
+ *************************************************************/
+int gui::init_lsd_env( const char **argv )
+{
+	char *str, cwd[ PATH_MAX ];
+	const char *app, *app1;
+	int i;
+	FILE *f;
+
+	// set system defaults in tcl
+	cmd( "set LMM_OPTIONS \"%s\"", LMM_OPTIONS );
+	cmd( "set SYSTEM_OPTIONS \"%s\"", SYSTEM_OPTIONS );
+	cmd( "set MODEL_OPTIONS \"%s\"", MODEL_OPTIONS );
+	cmd( "set GROUP_INFO \"%s\"", GROUP_INFO );
+	cmd( "set MODEL_INFO \"%s\"", MODEL_INFO );
+	cmd( "set MODEL_INFO_NUM %d", MODEL_INFO_NUM );
+	cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
+	cmd( "set DATE_FMT \"%s\"", DATE_FMT );
+
+	// assume exec path is current path
+	getcwd( cwd, PATH_MAX );
+	lsd::set_exec( cwd, argv[ 0 ] );
+
+	if ( lsd::exec_file == NULL || lsd::exec_path == NULL )
+	{
+		log_tcl_error( true, "Invalid LSD executable name or path", "Make sure the LSD directory is not too deep into the disk directory tree" );
+		return 1;
+	}
+
+	// check if exec file is in current path
+	i = strlen( lsd::exec_path ) + strlen( lsd::exec_file ) + 2;
+	str = new char[ i ];
+	snprintf( str, i, "%s%s%s", lsd::exec_path, strlen( lsd::exec_path ) > 0 ? "/" : "", lsd::exec_file );
+	f = fopen( str, "r" );
+	delete [ ] str;
+	if ( f != NULL )
+		fclose( f );
+
+	// try to recover from failures
+	if ( f == NULL || strlen( lsd::exec_path ) == 0 || ! strcmp( lsd::exec_path, "/" ) )
+	{	// try to get exec name from Tcl
+		cmd( "if { [ info nameofexecutable ] ne \"\" } { \
+				set path [ file dirname [ info nameofexecutable ] ]; \
+				set exec [ file rootname [ info nameofexecutable ] ] \
+			} { \
+				set path \"[ pwd ]\"; \
+				set exec \"\" \
+			}" );
+
+		app = get_str( "path" );
+		app1 = get_str( "exec" );
+		if ( app != NULL && app1 != NULL && strlen( app1 ) > 0 )
+			lsd::set_exec( app, app1 );
+		else
+		{
+			gui::log_tcl_error( false, "LSD executable check", "Cannot locate LSD executable on disk, check the installation of LSD and reinstall LSD if the problem persists" );
+			cmd( "tk_messageBox -type ok -icon error -title Error -message \"LSD executable not found\" -detail \"Cannot locate the LSD executable folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+			return 2;
+		}
+	}
+
+#ifndef _LMM_
+	// check if executable is inside a macOS package
+	cmd( "set path [ file normalize \"%s\" ]", lsd::exec_path );
+	cmd( "if { $tcl_platform(os) eq \"Darwin\" } { \
+			set pathsplit [ file split \"$path\" ]; \
+			if { [ lindex $pathsplit end ] eq \"MacOS\" && [ lindex $pathsplit end-1 ] eq \"Contents\" } { \
+				set path [ file normalize \"$path/../../..\" ] \
+			}; \
+			unset pathsplit \
+		}" );
+
+	// only use the exec path if not already in a model directory
+	cmd( "if { [ file exists $MODEL_OPTIONS ] } { \
+			set modelDir \"[ pwd ]\" \
+		} { \
+			set modelDir \"$path\"; \
+		}" );
+
+	cmd( "cd \"$modelDir\"" );
+	app = get_str( "modelDir" );
+
+	delete [ ] sim.conf_path;
+	delete [ ] lsd::model_path;
+	sim.conf_path = new char[ strlen( app ) + 1 ];
+	lsd::model_path = new char[ strlen( app ) + 1 ];
+	strcpy( sim.conf_path, app );
+	strcpy( lsd::model_path, app );
+#endif
+
+	// check if LSDROOT environment variable exists and use it if so
+	cmd( "if [ info exists env(LSDROOT) ] { \
+			set RootLsd [ file normalize $env(LSDROOT) ]; \
+			if [ file exists \"$RootLsd/src/LSD.h\" ] { \
+				set choice 0 \
+			} { \
+				set choice 1 \
+			} \
+		} { \
+			set choice 1 \
+		}" );
+
+	// do some search for the right path to cope with macOS package
+	if ( get_bool( "choice" ) )
+	{
+		cmd( "set here [ pwd ]" );
+		cmd( "while { ! [ file exists \"src/LSD.h\" ] && ! [ string equal [ pwd ] \"/\" ] && [ string length [ pwd ] ] > 3 } { \
+				cd .. \
+			}" );
+		cmd( "if [ file exists \"src/LSD.h\" ] { \
+				set RootLsd \"[ pwd ]\"; \
+				cd $here; \
+				set choice 0 \
+			} { \
+				set choice 1 \
+			}" );
+		cmd( "unset here" );
+
+		if ( get_bool( "choice" ) )
+		{
+#ifdef _LMM_
+			log_tcl_error( false, "Source files check", "Required LSD source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
+			cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+#else
+			log_tcl_error( false, "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where LSD is installed" );
+			cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where LSD is installed.\n\nLSD is aborting now.\"" );
+#endif
+			return 3;
+		}
+
+		cmd( "set env(LSDROOT) $RootLsd" );
+	}
+
+	app = get_str( "RootLsd" );
+	if ( app != NULL && strlen( app ) > 0 )
+	{
+		lsd::root_lsd = new char[ strlen( app ) + 1 ];
+		strcpy( lsd::root_lsd, app );
+		lsd::root_lsd = lsd::clean_path( lsd::root_lsd );
+		cmd( "set RootLsd \"%s\"", lsd::root_lsd );
+	}
+	else
+	{
+		log_tcl_error( false, "LSD directory check", "Cannot locate LSD folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSD directory missing\" -detail \"Cannot locate the LSD installation folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+		return 4;
+	}
+
+#ifdef _LMM_
+	// change path to the LSD root directory in LMM
+	cmd( "cd \"$RootLsd\"" );
+#endif
+
+	return 0;
+}
+
+
+/*************************************************************
+ SET_PLATFORM
+ set and check to OS platform
+ requires that gui.tcl script has been executed before
+ *************************************************************/
+int gui::set_platform( void )
+{
+	const char *app;
+
+	app = get_str( "CurPlatform" );
+	if ( ! strcmp( app, "linux" ) )
+		platform = _LIN_;
+	else
+		if ( ! strcmp( app, "mac" ) )
+			platform = _MAC_;
+		else
+			if ( ! strcmp( app, "windows" ) )
+				platform = _WIN_;
+			else
+			{
+				log_tcl_error( false, "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"" );
+				return 6;
+			}
+
+	return 0;
+}
+
+
+/*************************************************************
  LSD_EXIT_GUI (DLL WRAPPER)
  exit LSD after the GUI is launched
  *************************************************************/

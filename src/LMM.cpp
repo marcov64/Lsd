@@ -92,7 +92,7 @@ namespace gui
 	const char *model_defaults[ MODEL_INFO_NUM ] = MODEL_INFO_DEFAULT;
 }
 
-// global functions
+// LMM functions
 bool discard_change( void );
 bool is_source_file( const char *fname );
 int comphit( const void *p1, const void *p2 );
@@ -149,29 +149,18 @@ int modman( int argn, const char **argv )
 {
 	bool found, recolor = false;
 	int i, j, num, choice, shigh, recolor_all = 0, v_counter = 0;
-	const char *s, *t;
+	const char *s;
 	char str[ 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], tmp[ MAX_BUFF_SIZE ];
 	FILE *f;
 
-	// initialize tcl/tk and set global bidirectional variables
+	// initialize tcl/tk
 	gui::init_tcl_tk( argv[ 0 ], "lmm" );
-	Tcl_LinkVar( gui::interp, "num", ( char * ) &num, TCL_LINK_INT );
-	Tcl_LinkVar( gui::interp, "shigh", ( char * ) &shigh, TCL_LINK_INT );
-	Tcl_LinkVar( gui::interp, "choice", ( char * ) &choice, TCL_LINK_INT );
-	Tcl_LinkVar( gui::interp, "tosave", ( char * ) &tosave, TCL_LINK_BOOLEAN);
-	Tcl_LinkVar( gui::interp, "recolor_all", ( char * ) &recolor_all, TCL_LINK_BOOLEAN);
 
-	// set system defaults in tcl
-	cmd( "set LMM_OPTIONS \"%s\"", LMM_OPTIONS );
-	cmd( "set SYSTEM_OPTIONS \"%s\"", SYSTEM_OPTIONS );
-	cmd( "set MODEL_OPTIONS \"%s\"", MODEL_OPTIONS );
-	cmd( "set GROUP_INFO \"%s\"", GROUP_INFO );
-	cmd( "set MODEL_INFO \"%s\"", MODEL_INFO );
-	cmd( "set MODEL_INFO_NUM %d", MODEL_INFO_NUM );
-	cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
-	cmd( "set DATE_FMT \"%s\"", DATE_FMT );
+	// initialize LSD path and environment variables
+	if ( ( i = gui::init_lsd_env( argv ) ) != 0 )
+		return i;
 
-	// try to open text file if name is provided in the command line
+	// read command line parameters
 	if ( argn > 1 )
 	{
 		for ( i = 0; argv[ 1 ][ i ] != '\0'; ++i )
@@ -181,73 +170,20 @@ int modman( int argn, const char **argv )
 			else
 				tmp[ i ] = argv[ 1 ][ i ];
 		}
+
 		tmp[ i ] = '\0';
+
+		// try to open text file if name is provided
 		cmd( "set filetoload \"%s\"", tmp );
 		cmd( "if { ! [ file pathtype \"$filetoload\" ] eq \"absolute\" } { set filetoload \"[ pwd ]/$filetoload\" }" );
 	}
 
-	// prepare to use exec path to find LSD directory
-	cmd( "if { [ info nameofexecutable ] ne \"\" } { \
-			set path [ file dirname [ info nameofexecutable ] ]; \
-			set exec [ file rootname [ info nameofexecutable ] ] \
-		} { \
-			set path \"[ pwd ]\"; \
-			set exec \"\" \
-		}" );
-	s = gui::get_str( "path" );
-	t = gui::get_str( "exec" );
-	if ( s != NULL && t != NULL && strlen( t ) > 0 )
-		lsd::set_exec( s, t );
-	else
-	{
-		gui::log_tcl_error( false, "LMM executable check", "Cannot locate LSD executable on disk, check the installation of LSD and reinstall LSD if the problem persists" );
-		cmd( "tk_messageBox -type ok -icon error -title Error -message \"LMM executable not found\" -detail \"Cannot locate the LMM executable folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
-		return 5;
-	}
-
-	// check if LSDROOT environment variable exists and use it if so
-	cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if [ file exists \"$RootLsd/Manual/LMM.html\" ] { cd \"$RootLsd\"; set choice 0 } { set choice 1 } } { set choice 1 }" );
-
-	if ( choice )
-	{
-		choice = 0;
-		cmd( "set RootLsd [ file normalize \"%s\" ]", lsd::exec_path );
-		// check if directory is ok and if executable is inside a macOS package
-		cmd( "if [ file exists \"$RootLsd/Manual/LMM.html\" ] { \
-				cd \"$RootLsd\" \
-			} { \
-				if [ file exists \"$RootLsd/../../../Manual/LMM.html\" ] { \
-					cd \"$RootLsd/../../..\"; \
-					set RootLsd \"[ pwd ]\" \
-				} { \
-					unset -nocomplain RootLsd; \
-					set choice 1 \
-				} \
-			}" );
-		if ( choice )
-		{
-			gui::log_tcl_error( false, "Source files check", "Required LSD source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
-			cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
-			return 6;
-		}
-
-		cmd( "set env(LSDROOT) $RootLsd" );
-	}
-
-	s =	 gui::get_str( "RootLsd" );
-	if ( s != NULL && strlen( s ) > 0 )
-	{
-		lsd::root_lsd = new char[ strlen( s ) + 1 ];
-		strcpy( lsd::root_lsd, s );
-		lsd::root_lsd = lsd::clean_path( lsd::root_lsd );
-		cmd( "set RootLsd \"%s\"", lsd::root_lsd );
-	}
-	else
-	{
-		gui::log_tcl_error( false, "LSD directory check", "Cannot locate LSD folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
-		cmd( "tk_messageBox -type ok -icon error -title Error -message \"LSD directory missing\" -detail \"Cannot locate the LSD installation folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
-		return 7;
-	}
+	// global links between C and tcl variables
+	Tcl_LinkVar( gui::interp, "num", ( char * ) &num, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "shigh", ( char * ) &shigh, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "choice", ( char * ) &choice, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "tosave", ( char * ) &tosave, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( gui::interp, "recolor_all", ( char * ) &recolor_all, TCL_LINK_BOOLEAN);
 
 	// load/check configuration files
 	i = gui::load_lmm_options( );
@@ -275,31 +211,19 @@ int modman( int argn, const char **argv )
 		return 10 + choice;
 	}
 
-	s = gui::get_str( "CurPlatform" );
-	if ( ! strcmp( s, "linux" ) )
-		gui::platform = _LIN_;
-	else
-		if ( ! strcmp( s, "mac" ) )
-			gui::platform = _MAC_;
-		else
-			if ( ! strcmp( s, "windows" ) )
-				gui::platform = _WIN_;
-			else
-			{
-				gui::log_tcl_error( false, "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
-				cmd( "ttk::messageBox -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"", choice );
-				return 10;
-			}
+	// set and check to OS platform
+	if ( ( j = gui::set_platform( ) ) != 0 )
+		return j;
+
+	// fix non-existent or old options file for new options
+	if ( i == 0 )
+		gui::update_lmm_options( );				// update config file
 
 	// create a Tcl command that calls the C discard_change function before killing LMM
 	Tcl_CreateCommand( gui::interp, "discard_change", gui::Tcl_discard_change, NULL, NULL );
 
 	// Tcl command to save message to LSD log
 	Tcl_CreateCommand( gui::interp, "log_tcl_error", gui::Tcl_log_tcl_error, NULL, NULL );
-
-	// fix non-existent or old options file for new options
-	if ( i == 0 )
-		gui::update_lmm_options( );				// update config file
 
 	// Tcl global variables
 	cmd( "set choice 0" );

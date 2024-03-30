@@ -52,7 +52,6 @@ namespace gui
 	char *sens_file = NULL;			// current sensitivity analysis file
 	char eq_file[ MAX_PATH_LENGTH ] = "";// equation file name
 	char path_sens[ MAX_PATH_LENGTH ] = "";	// path of last used sensitivity directory
-	char tcl_dir[ MAX_PATH_LENGTH ] = "";// Tcl/Tk directory
 	const char *res_g = NULL;		// structure window result variable
 	int choice;						// Tcl menu control variable (main window)
 	int choice_g;					// Tcl menu control variable (structure window)
