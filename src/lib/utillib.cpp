@@ -54,6 +54,33 @@ void lsd::simulation::plog( const char *cm, ... )
 
 
 /*************************************************************
+ _PLOG_
+ Print message in equations according
+ to simulation flags
+ *************************************************************/
+double lsd::equation::_plog_( bool p, const char *cm, ... )
+{
+	static va_list argptr;
+
+	if ( ( ! p && ! _sim_->fast ) || ( p && _sim_->fast_mode < 2 ) )
+	{
+		va_start( argptr, cm );
+
+		if ( _sim_->liblnk != NULL )
+			_sim_->liblnk->plog_backend( cm, "", argptr );
+		else
+			_sim_->plog_terminal( cm, argptr );
+
+		va_end( argptr );
+
+		return 1;
+	}
+	else
+		return 0;
+}
+
+
+/*************************************************************
  PLOG_TAG
  The optional tag parameter has to
  correspond to the log window
@@ -360,4 +387,230 @@ bool lsd::object::search_parallel( void )
 				return true;
 
 	return false;
+}
+
+
+/*************************************************************
+ _QUIT_ (*)
+ *************************************************************/
+double lsd::equation::_quit_( int new_value )
+{
+	if ( new_value >= 0 && new_value <= 2 )
+		return ( _sim_->quit = new_value );
+	else
+		return _sim_->quit;
+}
+
+
+/*************************************************************
+ _FAST_ (*)
+ *************************************************************/
+double lsd::equation::_fast_( int new_value )
+{
+	if ( new_value >= 0 && new_value <= 2 )
+		return ( _sim_->fast = new_value );
+	else
+		return _sim_->fast;
+}
+
+
+/*************************************************************
+ _PARAM_ (*)
+ *************************************************************/
+double lsd::equation::_param_( const variable *v, int new_value )
+{
+	if ( v == NULL )
+		return -1;
+
+	if ( new_value >= 0 && new_value <= 2 )
+		return ( ( ( variable * ) v )->param = new_value );
+	else
+		return v->param;
+}
+
+
+/*************************************************************
+ _USE_NAN_ (*)
+ *************************************************************/
+double lsd::equation::_use_nan_( int new_value )
+{
+	if ( new_value == 0 || new_value == 1 )
+		return ( _sim_->use_nan = new_value == 1 ? true : false );
+	else
+		return _sim_->use_nan;
+}
+
+
+/*************************************************************
+ _USE_POINTER_CHECK_ (*)
+ *************************************************************/
+double lsd::equation::_use_pointer_check_( bool new_value )
+{
+	return _sim_->build_obj_list( new_value );
+}
+
+
+/*************************************************************
+ _NO_SAVED_ (*)
+ *************************************************************/
+double lsd::equation::_no_saved_( int new_value )
+{
+	if ( new_value == 0 || new_value == 1 )
+		return ( _sim_->no_saved = new_value == 1 ? true : false );
+	else
+		return _sim_->no_saved;
+}
+
+
+/*************************************************************
+ _NO_SEARCH_ (*)
+ *************************************************************/
+double lsd::equation::_no_search_( int new_value )
+{
+	if ( new_value == 0 || new_value == 1 )
+		return ( _sim_->no_search = new_value == 1 ? true : false );
+	else
+		return _sim_->no_search;
+}
+
+
+/*************************************************************
+ _NO_SEARCH_UP_ (*)
+ *************************************************************/
+double lsd::equation::_no_search_up_( int new_value )
+{
+	if ( new_value == 0 || new_value == 1 )
+		return ( _sim_->no_search_up = new_value == 1 ? true : false );
+	else
+		return _sim_->no_search_up;
+}
+
+
+/*************************************************************
+ _NO_ZERO_INST_ (*)
+ *************************************************************/
+double lsd::equation::_no_zero_inst_( int new_value )
+{
+	if ( new_value == 0 || new_value == 1 )
+		return ( _sim_->no_zero_instance = new_value == 1 ? true : false );
+	else
+		return _sim_->no_zero_instance;
+}
+
+
+/*************************************************************
+ _SEED_ (*)
+ *************************************************************/
+double lsd::equation::_seed_( int new_value )
+{
+	if ( new_value >= 0 )
+	{
+		_sim_->seed = ( unsigned ) new_value;
+		_sim_->init_random( _sim_->seed );
+		return _sim_->seed;
+	}
+	else
+		return _sim_->seed - 1;
+}
+
+
+/*************************************************************
+ _RANDOM_ (*)
+ *************************************************************/
+double lsd::equation::_random_( int new_value )
+{
+	if ( new_value >= 0 && new_value <= 7 )
+		_sim_->set_random( ( unsigned ) new_value );
+
+	return _sim_->ran_gen_id;
+}
+
+
+/*************************************************************
+ _DEBUG_ (*)
+ *************************************************************/
+double lsd::equation::_debug_( bool start, int time )
+{
+	if ( time >= 0 && _sim_->liblnk != NULL )
+		_sim_->liblnk->deb_log( start, time );
+
+	if ( start )
+		return _sim_->deb_t;
+	else
+		return _sim_->log_stop;
+}
+
+
+/*************************************************************
+ _ROOT_ (*)
+ *************************************************************/
+lsd::object *lsd::equation::_root_( void )
+{
+	return _sim_->root;
+}
+
+
+/*************************************************************
+  _CONF_NAME_ (*)
+ *************************************************************/
+const char *lsd::equation::_conf_name_( void )
+{
+	return _sim_->conf_name;
+}
+
+
+/*************************************************************
+ _CONF_PATH_ (*)
+ *************************************************************/
+const char *lsd::equation::_conf_path_( void )
+{
+	return _sim_->conf_path;
+}
+
+
+/*************************************************************
+ _CURRENT_ (*)
+ *************************************************************/
+double lsd::equation::_current_( const variable *v )
+{
+	if ( v != NULL && v->val != NULL )
+		return v->val[ 0 ];
+	else
+		return NAN;
+}
+
+
+/*************************************************************
+ _T_ (*)
+ *************************************************************/
+double lsd::equation::_t_( void )
+{
+	return _sim_->t;
+}
+
+
+/*************************************************************
+ _LAST_ (*)
+ *************************************************************/
+double lsd::equation::_last_t_( void )
+{
+	return _sim_->last_t;
+}
+
+
+/*************************************************************
+ _RUN_ (*)
+ *************************************************************/
+double lsd::equation::_run_( void )
+{
+	return _sim_->run;
+}
+
+
+/*************************************************************
+ _LAST_RUN_ (*)
+ *************************************************************/
+double lsd::equation::_last_run_( void )
+{
+	return _sim_->last_run;
 }

@@ -141,7 +141,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 
 		// run user closing function, reporting error appropriately
 		user_exception = true;
-		close_sim( );
+		_close_sim_( );
 		::close_sim( );
 		user_exception = false;
 		running = false;
@@ -718,7 +718,7 @@ void lsd::simulation::update_bar( char *bar, int done, int & last_done, int bar_
 	done = std::min ( done, 100 );
 	last_done = std::min ( last_done, 100 );
 
-	if ( sim != 0 || done <= last_done || last_done == 100 )
+	if ( nsim != 0 || done <= last_done || last_done == 100 )
 		return;
 
 	for ( p = last_done + 1; p <= done; ++p )

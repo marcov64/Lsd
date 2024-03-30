@@ -199,7 +199,7 @@ int lsd::sensitivity::dataentry( void )
 				if ( toupper( type ) == 'R' && samples > 0 )// random sampling
 					for ( int j = 0; j < samples; ++j, ++i )
 					{
-						val[ i ] = fmin( start, end ) + sim->ran1( ) * ( fmax( start, end ) - fmin( start, end ) );
+						val[ i ] = fmin( start, end ) + sim->_ran1_( ) * ( fmax( start, end ) - fmin( start, end ) );
 						val[ i ] = integer ? round( val[ i ] ) : val[ i ];
 					}
 			}
@@ -393,7 +393,7 @@ void gui::sensitivity_sequential( int *findex, lsd::sensitivity *s, double probS
 
 		}
 
-		if ( probSampl == 1.0 || sim.ran1( ) <= probSampl )	// if required draw if point will be sampled
+		if ( probSampl == 1.0 || sim._ran1_( ) <= probSampl )	// if required draw if point will be sampled
 		{
 			// generate a configuration file for the experiment (no descriptions)
 			if ( ! sim.save_xml_configuration( *findex, dest_path, true, get_str( model_info[ 0 ] ), get_str( model_info[ 1 ] ), get_str( model_info[ 2 ] ), eq_file ) )
@@ -597,7 +597,7 @@ end:
  *************************************************************/
 
 // Random choice between two numbers
-#define RND_CHOICE( o1, o2 ) ( sim.ran1( ) < 0.5 ? o1 : o2 )
+#define RND_CHOICE( o1, o2 ) ( sim._ran1_( ) < 0.5 ? o1 : o2 )
 
 
 /*************************************************************
@@ -1331,7 +1331,7 @@ gui::design::design( lsd::sensitivity *rsens, int typ, const char *fname, const 
 				for ( j = 0; j < k; ++j )	// for all factors
 					for ( h = 0; h < inst[ j ]; ++h )	// for all instances
 						doe[ i ][ j ][ h ] = lo[ j ][ h ] +
-											 sim.ran1( ) * ( hi[ j ][ h ] - lo[ j ][ h ] );
+											 sim._ran1_( ) * ( hi[ j ][ h ] - lo[ j ][ h ] );
 
 			break;
 

@@ -27,15 +27,15 @@ namespace lsd				// create the config variables in proper namespace
 #ifndef NO_POINTER_CHECK
 	const bool no_pointer_check = false;
 
-	#define CHK_PTR_NOP( O ) if ( chk_ptr( O ) ) bad_ptr_void( O, __FILE__, __LINE__ );
-	#define CHK_PTR_CHR( O ) chk_ptr( O ) ? bad_ptr_chr( O, __FILE__, __LINE__ ) :
-	#define CHK_PTR_DBL( O ) chk_ptr( O ) ? bad_ptr_dbl( O, __FILE__, __LINE__ ) :
-	#define CHK_PTR_LNK( O ) chk_ptr( O ) ? bad_ptr_lnk( O, __FILE__, __LINE__ ) :
-	#define CHK_PTR_OBJ( O ) chk_ptr( O ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
-	#define CHK_PTR_POBJ( O ) chk_ptr( O ) || chk_ptr( O->up ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
-	#define CHK_PTR_VOID( O ) chk_ptr( O ) ? bad_ptr_void( O, __FILE__, __LINE__ ) :
-	#define CHK_OBJ_OBJ( O ) chk_obj( O ) ? bad_ptr_obj( O, __FILE__, __LINE__ ) :
-	#define CHK_HK_OBJ( O, X ) chk_hook( O, X ) ? no_hook_obj( O, X, __FILE__, __LINE__ ) :
+	#define CHK_PTR_NOP( O ) if ( _chk_ptr_( O ) ) _bad_ptr_void_( O, __FILE__, __LINE__ );
+	#define CHK_PTR_CHR( O ) _chk_ptr_( O ) ? _bad_ptr_chr_( O, __FILE__, __LINE__ ) :
+	#define CHK_PTR_DBL( O ) _chk_ptr_( O ) ? _bad_ptr_dbl_( O, __FILE__, __LINE__ ) :
+	#define CHK_PTR_LNK( O ) _chk_ptr_( O ) ? _bad_ptr_lnk_( O, __FILE__, __LINE__ ) :
+	#define CHK_PTR_OBJ( O ) _chk_ptr_( O ) ? _bad_ptr_obj_( O, __FILE__, __LINE__ ) :
+	#define CHK_PTR_POBJ( O ) _chk_ptr_( O ) || _chk_ptr_( O->up ) ? _bad_ptr_obj_( O, __FILE__, __LINE__ ) :
+	#define CHK_PTR_VOID( O ) _chk_ptr_( O ) ? _bad_ptr_void_( O, __FILE__, __LINE__ ) :
+	#define CHK_OBJ_OBJ( O ) _chk_obj_( O ) ? _bad_ptr_obj_( O, __FILE__, __LINE__ ) :
+	#define CHK_HK_OBJ( O, X ) _chk_hook_( O, X ) ? _no_hook_obj_( O, X, __FILE__, __LINE__ ) :
 #else
 	const bool no_pointer_check = true;
 
@@ -63,11 +63,11 @@ namespace lsd				// create the config variables in proper namespace
 		cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cyccur = cyccur2 = cyccur3 = NULL; \
 		curl = curl1 = curl2 = curl3 = curl4 = curl5 = curl6 = curl7 = curl8 = curl9 = NULL; \
 		f = NULL;
-	#define CHK_LNK_DBL( O ) O == NULL ? nul_lnk_dbl( __FILE__, __LINE__ ) :
-	#define CHK_LNK_OBJ( O ) O == NULL ? nul_lnk_obj( __FILE__, __LINE__ ) :
-	#define CHK_LNK_VOID( O ) O == NULL ? nul_lnk_void( __FILE__, __LINE__ ) :
-	#define CHK_NODE_CHR( O ) O->node == NULL ? no_node_chr( O->label, __FILE__, __LINE__ ) :
-	#define CHK_NODE_DBL( O ) O->node == NULL ? no_node_dbl( O->label, __FILE__, __LINE__ ) :
+	#define CHK_LNK_DBL( O ) O == NULL ? _nul_lnk_dbl_( __FILE__, __LINE__ ) :
+	#define CHK_LNK_OBJ( O ) O == NULL ? _nul_lnk_obj_( __FILE__, __LINE__ ) :
+	#define CHK_LNK_VOID( O ) O == NULL ? _nul_lnk_void_( __FILE__, __LINE__ ) :
+	#define CHK_NODE_CHR( O ) O->node == NULL ? _no_node_chr_( O->label, __FILE__, __LINE__ ) :
+	#define CHK_NODE_DBL( O ) O->node == NULL ? _no_node_dbl_( O->label, __FILE__, __LINE__ ) :
 #else
 	const bool no_pointer_init = true;
 
@@ -88,35 +88,35 @@ namespace lsd				// create the config variables in proper namespace
 // debugger probe variables
 #ifndef _NW_
 	#define DEBUG_CODE \
-		if ( deb_set ) \
+		if ( _sim_->deb_set ) \
 		{ \
 			for ( int n = 0; n < USER_D_VARS; ++n ) \
-				d_values[ n ] = v[ n ]; \
-			i_values[ 0 ] = i; \
-			i_values[ 1 ] = j; \
-			i_values[ 2 ] = h; \
-			i_values[ 3 ] = k; \
-			o_values[ 0 ] = cur; \
-			o_values[ 1 ] = cur1; \
-			o_values[ 2 ] = cur2; \
-			o_values[ 3 ] = cur3; \
-			o_values[ 4 ] = cur4; \
-			o_values[ 5 ] = cur5; \
-			o_values[ 6 ] = cur6; \
-			o_values[ 7 ] = cur7; \
-			o_values[ 8 ] = cur8; \
-			o_values[ 9 ] = cur9; \
-			n_values[ 0 ] = curl; \
-			n_values[ 1 ] = curl1; \
-			n_values[ 2 ] = curl2; \
-			n_values[ 3 ] = curl3; \
-			n_values[ 4 ] = curl4; \
-			n_values[ 5 ] = curl5; \
-			n_values[ 6 ] = curl6; \
-			n_values[ 7 ] = curl7; \
-			n_values[ 8 ] = curl8; \
-			n_values[ 9 ] = curl9; \
-			f_values[ 0 ] = f; \
+				_d_values_[ n ] = v[ n ]; \
+			_i_values_[ 0 ] = i; \
+			_i_values_[ 1 ] = j; \
+			_i_values_[ 2 ] = h; \
+			_i_values_[ 3 ] = k; \
+			_o_values_[ 0 ] = cur; \
+			_o_values_[ 1 ] = cur1; \
+			_o_values_[ 2 ] = cur2; \
+			_o_values_[ 3 ] = cur3; \
+			_o_values_[ 4 ] = cur4; \
+			_o_values_[ 5 ] = cur5; \
+			_o_values_[ 6 ] = cur6; \
+			_o_values_[ 7 ] = cur7; \
+			_o_values_[ 8 ] = cur8; \
+			_o_values_[ 9 ] = cur9; \
+			_n_values_[ 0 ] = curl; \
+			_n_values_[ 1 ] = curl1; \
+			_n_values_[ 2 ] = curl2; \
+			_n_values_[ 3 ] = curl3; \
+			_n_values_[ 4 ] = curl4; \
+			_n_values_[ 5 ] = curl5; \
+			_n_values_[ 6 ] = curl6; \
+			_n_values_[ 7 ] = curl7; \
+			_n_values_[ 8 ] = curl8; \
+			_n_values_[ 9 ] = curl9; \
+			_f_values_[ 0 ] = f; \
 		};
 #else
 	#define DEBUG_CODE
@@ -124,17 +124,17 @@ namespace lsd				// create the config variables in proper namespace
 
 // create map for fast equation look-up
 #define MODELBEGIN \
-	double lsd::variable::fun( object *caller ) \
+	double lsd::equation::_fun_( variable *v, object *caller ) \
 	{ \
-		if ( sim->quit == 2 ) \
-			return val[ 0 ]; \
-		if ( eq_func == NULL ) \
-			eq_func = sim->chk_eq( label ); \
-		return chk_res( ( eq_func )( caller, this ) ); \
+		if ( _sim_->quit == 2 ) \
+			return v->val[ 0 ]; \
+		if ( v->eq_func == NULL ) \
+			v->eq_func = _chk_eq_( v->label ); \
+		return v->chk_res( ( v->eq_func )( v, caller ) ); \
 	} \
-	void lsd::simulation::init_map( ) \
+	void lsd::equation::_init_map_( ) \
 	{ \
-		eq_map = \
+		_eq_map_ = \
 		{
 
 #define MODELEND \
@@ -142,9 +142,9 @@ namespace lsd				// create the config variables in proper namespace
 	}
 
 #define EQUATION( X ) \
-	{ std::string( X ), [ & ]( object *caller, variable *var ) -> double \
+	{ std::string( X ), [ this ]( const variable *_v_, object *c ) -> double \
 		{ \
-			object *p = var->up, *c = caller; \
+			object *p = _v_->up; \
 			int h, i, j, k; \
 			double v[ USER_D_VARS ]; \
 			object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cyccur, *cyccur2, *cyccur3; \
@@ -167,16 +167,16 @@ namespace lsd				// create the config variables in proper namespace
 	}
 
 #define EQUATION_DUMMY( X, Y ) \
-	{ std::string( X ), [ & ]( object *caller, variable *var ) -> double \
+	{ std::string( X ), [ ]( const variable *_v_, object *c ) -> double \
 		{ \
-			return var->chk_dummy( Y ); \
+			return ( ( variable * ) _v_ )->chk_dummy( Y ); \
 		} \
 	},
 
 // simulation close code
 #ifndef LEGACY_CODE
 #define CLOSEBEGIN \
-	void lsd::simulation::close_sim( void ) \
+	void lsd::equation::_close_sim_( void ) \
 	{
 
 #define CLOSEEND \
@@ -195,34 +195,55 @@ namespace lsd				// create the config variables in proper namespace
 #define UP "UP"
 #define DOWN "DOWN"
 
-#define ABORT { quit = 1; }
-#define FAST set_fast( 1 )
-#define FAST_FULL set_fast( 2 )
-#define OBSERVE set_fast( 0 )
-#define PARAMETER { var->param = 1; }
+#define ABORT _quit_( 1 );
+#define FAST _fast_( 1 )
+#define FAST_FULL _fast_( 2 )
+#define OBSERVE _fast_( 0 )
+#define PARAMETER _param_( _v_, 1 )
 
-#define NO_NAN { use_nan = false; }
-#define USE_NAN { use_nan = true; }
-#define NO_POINTER_CHECK build_obj_list( false )
-#define USE_POINTER_CHECK build_obj_list( true )
-#define NO_SAVED { no_saved = true; }
-#define USE_SAVED { no_saved = false; }
-#define NO_SEARCH { no_search = true; }
-#define USE_SEARCH { no_search = false; }
-#define NO_SEARCH_UP { no_search_up = true; }
-#define USE_SEARCH_UP { no_search_up = false; }
-#define NO_ZERO_INSTANCE { no_zero_instance = true; }
-#define USE_ZERO_INSTANCE { no_zero_instance = false; }
+#define NO_NAN _use_nan_( false )
+#define USE_NAN _use_nan_( true )
+#define NO_POINTER_CHECK _use_pointer_check_( false )
+#define USE_POINTER_CHECK _use_pointer_check_( true )
+#define NO_SAVED _no_saved_( true )
+#define USE_SAVED _no_saved_( false )
+#define NO_SEARCH _no_search_( true )
+#define USE_SEARCH _no_search_( false )
+#define NO_SEARCH_UP _no_search_up_( true )
+#define USE_SEARCH_UP _no_search_up_( false )
+#define NO_ZERO_INSTANCE _no_zero_inst_( true )
+#define USE_ZERO_INSTANCE _no_zero_inst_( false )
 
-#define RND ( ran1( ) )
-#define RND_SEED ( ( double ) seed - 1 )
-#define RND_SETSEED( X ) { seed = ( unsigned ) X; init_random( seed ); }
-#define RND_GENERATOR( X ) set_random( ( int ) X )
-#define SLEEP( X ) msleep( ( unsigned ) X )
+#define RND _ran1_( )
+#define RND_SEED _seed_( -1 )
+#define RND_SETSEED( X ) _seed_( ( unsigned ) X )
+#define RND_GENERATOR( X ) _random_( ( unsigned ) X )
+#define SLEEP( X ) _msleep_( X )
 
-#define ROOT root
-#define THIS ( p )
-#define CALLER ( c )
+#define DEBUG_START _debug_( true, 0 )
+#define DEBUG_START_AT( X ) _debug_( true, ( unsigned ) X )
+#define DEBUG_STOP _debug_( false, 0 )
+#define DEBUG_STOP_AT( X ) _debug_( false, ( unsigned ) X )
+
+#define LOG( ... ) _plog_( false, __VA_ARGS__ )
+#define PLOG( ... ) _plog_( true, __VA_ARGS__ )
+
+#define NAME ( ( const char * ) p->label )
+#define NAMES( O ) ( _chk_ptr_( O ) ? NULL : ( const char * ) O->label )
+#define CONFIG _conf_name_( )
+#define PATH _conf_path_( )
+
+#define CURRENT _current_( _v_ )
+#define T _t_( )
+#define LAST_T _last_t_( )
+#define RUN _run_( )
+#define LAST_RUN _last_run_( )
+#define LAST_CALC( X ) ( p->last_cal( X ) )
+#define LAST_CALCS( O, X ) ( CHK_PTR_DBL( O ) O->last_cal( X ) )
+
+#define ROOT _root_( )
+#define THIS p
+#define CALLER c
 #define NEXT ( p->next )
 #define NEXTS( O ) ( CHK_PTR_OBJ( O ) O->next )
 #define PARENT ( p->up )
@@ -230,33 +251,12 @@ namespace lsd				// create the config variables in proper namespace
 #define GRANDPARENT ( CHK_PTR_POBJ( p ) p->up->up )
 #define GRANDPARENTS( O ) ( CHK_PTR_POBJ( O ) O->up->up )
 
-#define NAME ( ( const char * ) p->label )
-#define NAMES( O ) ( chk_ptr( O ) ? NULL : ( const char * ) O->label )
-#define CONFIG ( ( const char * ) conf_name )
-#define PATH ( ( const char * ) conf_path )
-
-#define CURRENT ( var->val[ 0 ] )
-#define T ( ( double ) t )
-#define LAST_T ( ( double ) last_t )
-#define RUN ( ( double ) run )
-#define LAST_RUN ( ( double ) last_run )
-#define LAST_CALC( X ) ( p->last_cal( X ) )
-#define LAST_CALCS( O, X ) ( CHK_PTR_DBL( O ) O->last_cal( X ) )
-
 #define RECALC( X ) ( p->recal( X ) )
 #define RECALCS( O, X ) ( CHK_PTR_DBL( O ) O->recal( X ) )
 #define UPDATE ( p->update( false, true ) )
 #define UPDATES( O ) ( CHK_PTR_VOID( O ) O->update( false, true ) )
 #define UPDATE_REC ( p->update( true, true ) )
 #define UPDATE_RECS( O ) ( CHK_PTR_VOID( O ) O->update( true, true ) )
-
-#define DEBUG_START { if ( liblnk != NULL ) liblnk->deb_log( true, 0 ); }
-#define DEBUG_START_AT( X ) { if ( liblnk != NULL ) liblnk->deb_log( true, X ); }
-#define DEBUG_STOP { if ( liblnk != NULL ) liblnk->deb_log( false, 0 ); }
-#define DEBUG_STOP_AT( X ) { if ( liblnk != NULL ) liblnk->deb_log( false, X ); }
-
-#define LOG( ... ) ( ! fast ? plog( __VA_ARGS__ ) : ( void ) NULL )
-#define PLOG( ... ) ( fast_mode < 2 ? plog( __VA_ARGS__ ) : ( void ) NULL )
 
 #define V( X ) ( p->cal( p, X, 0 ) )
 #define VL( X, L ) ( p->cal( p, X, L ) )
@@ -368,12 +368,8 @@ namespace lsd				// create the config variables in proper namespace
 #define STAT_CNDS( O, X, T, R, V ) ( CHK_PTR_DBL( O ) O->stat( X, v, 0, true, T, R, V ) )
 #define STAT_CNDLS( O, X, T, R, V, L ) ( CHK_PTR_DBL( O ) O->stat( X, v, L, true, T, R, V ) )
 
-#define INTERACT( X, Y ) ( p->interact( X, Y, v, i, j, h, k, \
-	cur, cur1, cur2, cur3, cur4, cur5, cur6, cur7, cur8, cur9, \
-	curl, curl1, curl2, curl3, curl4, curl5, curl6, curl7, curl8, curl9 ) )
-#define INTERACTS( O, X, Y ) ( CHK_PTR_DBL( O ) O->interact( X, Y, v, i, j, h, k, \
-	cur, cur1, cur2, cur3, cur4, cur5, cur6, cur7, cur8, cur9, \
-	curl, curl1, curl2, curl3, curl4, curl5, curl6, curl7, curl8, curl9 ) )
+#define INTERACT( X, Y ) ( p->interact( X, Y, v, i, j, h, k, cur, cur1, cur2, cur3, cur4, cur5, cur6, cur7, cur8, cur9, curl, curl1, curl2, curl3, curl4, curl5, curl6, curl7, curl8, curl9, f ) )
+#define INTERACTS( O, X, Y ) ( CHK_PTR_DBL( O ) O->interact( X, Y, v, i, j, h, k, cur, cur1, cur2, cur3, cur4, cur5, cur6, cur7, cur8, cur9, curl, curl1, curl2, curl3, curl4, curl5, curl6, curl7, curl8, curl9, f ) )
 
 #define SEARCH( X ) ( p->search( X, false ) )
 #define SEARCHS( O, X ) ( CHK_PTR_OBJ( O ) O->search( X, false ) )
@@ -397,10 +393,10 @@ namespace lsd				// create the config variables in proper namespace
 #define RNDDRAW_TOTS( O, X, Y, Z ) ( CHK_PTR_OBJ( O ) O->draw_rnd( X, Y, 0, Z ) )
 #define RNDDRAW_TOTLS( O, X, Y, L, Z ) ( CHK_PTR_OBJ( O ) O->draw_rnd( X, Y, L, Z ) )
 
-#define WRITE( X, Y ) ( p->write( X, Y, t, 0 ) )
+#define WRITE( X, Y ) ( p->write( X, Y, T, 0 ) )
 #define WRITEL( X, Y, L ) ( p->write( X, Y, L, 0 ) )
 #define WRITELL( X, Y, Z, L ) ( p->write( X, Y, Z, L ) )
-#define WRITES( O, X, Y ) ( CHK_PTR_DBL( O ) O->write( X, Y, t, 0 ) )
+#define WRITES( O, X, Y ) ( CHK_PTR_DBL( O ) O->write( X, Y, T, 0 ) )
 #define WRITELS( O, X, Y, L ) ( CHK_PTR_DBL( O ) O->write( X, Y, L, 0 ) )
 #define WRITELLS( O, X, Y, Z, L ) ( CHK_PTR_DBL( O ) O->write( X, Y, Z, L ) )
 
@@ -428,7 +424,7 @@ namespace lsd				// create the config variables in proper namespace
 #define ADDNOBJ_EXS( O, X, N, E ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( X, N, E, -1 ) )
 #define ADDNOBJ_EXLS( O, X, N, E, L ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( X, N, E, L ) )
 
-#define DELETE( O ) ( CHK_PTR_VOID( O ) O->delete_obj( var ) )
+#define DELETE( O ) ( CHK_PTR_VOID( O ) O->delete_obj( _v_ ) )
 #define DELETING ( p->to_delete( ) )
 #define DELETINGS( O ) ( CHK_PTR_DBL( O ) O->to_delete( ) )
 
@@ -467,12 +463,12 @@ namespace lsd				// create the config variables in proper namespace
 #define UP_LAT ( p->lat_up( ) )
 #define UP_LATS( O ) ( CHK_PTR_OBJ( O ) O->lat_up( ) )
 
-#define INIT_LAT( ... ) init_lattice( __VA_ARGS__ )
-#define SAVE_LAT( ... ) save_lattice( __VA_ARGS__ )
-#define DELETE_LAT close_lattice( )
+#define INIT_LAT( ... ) _init_lattice_( __VA_ARGS__ )
+#define SAVE_LAT( ... ) _save_lattice_( __VA_ARGS__ )
+#define DELETE_LAT _close_lattice_( )
 
-#define V_LAT( X, Y ) read_lattice( X, Y )
-#define WRITE_LAT( X, ... ) update_lattice( X, __VA_ARGS__ )
+#define V_LAT( X, Y ) _read_lattice_( X, Y )
+#define WRITE_LAT( X, ... ) _update_lattice_( X, __VA_ARGS__ )
 
 #define V_NODEID ( CHK_NODE_DBL( p ) p->node->id )
 #define V_NODEIDS( O ) ( CHK_PTR_DBL( O ) CHK_NODE_DBL( O ) O->node->id )
@@ -511,12 +507,12 @@ namespace lsd				// create the config variables in proper namespace
 #define INIT_NET( ... ) ( p->init_stub_net( __VA_ARGS__ ) )
 #define INIT_NETS( O, ... ) ( CHK_PTR_DBL( O ) O->init_stub_net( __VA_ARGS__ ) )
 
-#define LOAD_NET( X, Y ) ( p->read_file_net( X, "", Y, seed - 1, "net" ) )
-#define LOAD_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->read_file_net( X, "", Y, seed - 1, "net" ) )
-#define SAVE_NET( X, Y ) ( p->write_file_net( X, "", Y, seed - 1, false ) )
-#define SAVE_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->write_file_net( X, "", Y , seed - 1, false ) )
-#define SNAP_NET( X, Y ) ( p->write_file_net( X, "", Y, seed - 1, true ) )
-#define SNAP_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->write_file_net( X, "", Y, seed - 1, true ) )
+#define LOAD_NET( X, Y ) ( p->read_file_net( X, "", Y, RND_SEED, "net" ) )
+#define LOAD_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->read_file_net( X, "", Y, RND_SEED, "net" ) )
+#define SAVE_NET( X, Y ) ( p->write_file_net( X, "", Y, RND_SEED, false ) )
+#define SAVE_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->write_file_net( X, "", Y , RND_SEED, false ) )
+#define SNAP_NET( X, Y ) ( p->write_file_net( X, "", Y, RND_SEED, true ) )
+#define SNAP_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->write_file_net( X, "", Y, RND_SEED, true ) )
 
 #define ADDNODE( X, Y ) ( p->add_node_net( X, Y, false ) )
 #define ADDNODES( O, X, Y ) ( CHK_PTR_OBJ( O ) O->add_node_net( X, Y, false ) )
@@ -579,25 +575,25 @@ namespace lsd				// create the config variables in proper namespace
 #define WRITE_ARG_EXT( C, X, Y, ... ) ( P_EXT( C ) -> X( __VA_ARGS__ ) = Y )
 #define WRITE_ARG_EXTS( O, C, X, Y, ... ) ( P_EXTS( O, C ) -> X( __VA_ARGS__ ) = Y )
 
-#define CYCLE( X, Y ) for ( X = cycle_obj( p, Y, "CYCLE" ); X != NULL; X = BROTHER( X ) )
-#define CYCLE_SAFE( X, Y ) for ( X = cycle_obj( p, Y, "CYCLE_SAFE" ), \
+#define CYCLE( X, Y ) for ( X = _cycle_obj_( p, Y, "CYCLE" ); X != NULL; X = BROTHER( X ) )
+#define CYCLE_SAFE( X, Y ) for ( X = _cycle_obj_( p, Y, "CYCLE_SAFE" ), \
 								 cyccur = BROTHER( X ); X != NULL; X = cyccur, \
 								 cyccur != NULL ? cyccur = BROTHER( cyccur ) : cyccur = cyccur )
-#define CYCLE2_SAFE( X, Y ) for ( X = cycle_obj( p, Y, "CYCLE_SAFE" ), \
+#define CYCLE2_SAFE( X, Y ) for ( X = _cycle_obj_( p, Y, "CYCLE_SAFE" ), \
 								  cyccur2 = BROTHER( X ); X != NULL; X = cyccur2, \
 								  cyccur2 != NULL ? cyccur2 = BROTHER( cyccur2 ) : cyccur2 = cyccur2 )
-#define CYCLE3_SAFE( X, Y ) for ( X = cycle_obj( p, Y, "CYCLE_SAFE" ), \
+#define CYCLE3_SAFE( X, Y ) for ( X = _cycle_obj_( p, Y, "CYCLE_SAFE" ), \
 								  cyccur3 = BROTHER( X ); X != NULL; X = cyccur3, \
 								  cyccur3 != NULL ? cyccur3 = BROTHER( cyccur3 ) : cyccur3 = cyccur3 )
 
-#define CYCLES( O, X, Y ) for ( X = cycle_obj( O, Y, "CYCLES" ); X != NULL; X = BROTHER( X ) )
-#define CYCLE_SAFES( O, X, Y ) for ( X = cycle_obj( O, Y, "CYCLE_SAFES" ), \
+#define CYCLES( O, X, Y ) for ( X = _cycle_obj_( O, Y, "CYCLES" ); X != NULL; X = BROTHER( X ) )
+#define CYCLE_SAFES( O, X, Y ) for ( X = _cycle_obj_( O, Y, "CYCLE_SAFES" ), \
 									 cyccur = BROTHER( X ); X != NULL; X = cyccur, \
 									 cyccur != NULL ? cyccur = BROTHER( cyccur ) : cyccur = cyccur )
-#define CYCLE2_SAFES( O, X, Y ) for ( X = cycle_obj( O, Y, "CYCLE_SAFES" ), \
+#define CYCLE2_SAFES( O, X, Y ) for ( X = _cycle_obj_( O, Y, "CYCLE_SAFES" ), \
 									  cyccur2 = BROTHER( X ); X != NULL; X = cyccur2, \
 									  cyccur2 != NULL ? cyccur2 = BROTHER( cyccur2 ) : cyccur2 = cyccur2 )
-#define CYCLE3_SAFES( O, X, Y ) for ( X = cycle_obj( O, Y, "CYCLE_SAFES" ), \
+#define CYCLE3_SAFES( O, X, Y ) for ( X = _cycle_obj_( O, Y, "CYCLE_SAFES" ), \
 									  cyccur3 = BROTHER( X ); X != NULL; X = cyccur3, \
 									  cyccur3 != NULL ? cyccur3 = BROTHER( cyccur3 ) : cyccur3 = cyccur3 )
 
@@ -609,14 +605,14 @@ namespace lsd				// create the config variables in proper namespace
 	#define CYCLE_LINKS( C, O ) for ( O = C->node->first; O != NULL; O = O->next )
 #else
 	#define CYCLE_LINK( X ) if ( p->node == NULL ) \
-								no_node_dbl( p->label, __FILE__, __LINE__ ); \
+								_no_node_dbl_( p->label, __FILE__, __LINE__ ); \
 							else \
 								for ( X = p->node->first; X != NULL; X = X->next )
 	#define CYCLE_LINKS( O, X ) if ( O == NULL ) \
-									bad_ptr_dbl( O, __FILE__, __LINE__ ); \
+									_bad_ptr_dbl_( O, __FILE__, __LINE__ ); \
 								else \
 									if ( O->node == NULL ) \
-										no_node_dbl( O->label, __FILE__, __LINE__ ); \
+										_no_node_dbl_( O->label, __FILE__, __LINE__ ); \
 									else \
 										for ( X = O->node->first; X != NULL; X = X->next )
 #endif
@@ -633,13 +629,17 @@ namespace lsd				// create the config variables in proper namespace
 
 		extern std::vector < simulation * > sims;// vector holding existing simulations
 		char msg[ MAX_BUFF_SIZE ];			// legacy auxiliary buffer
-		void simulation::close_sim( void ) { }
+		void equation::_close_sim_( void ) { }
 	}
 
 	inline int deb( lsd::object *r, lsd::object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" ) { if ( lsd::sims[ 0 ]->liblnk != NULL ) return ( r->*lsd::sims[ 0 ]->liblnk->dlliblinkage::debugger ) ( c, lab, res, interact, hl_var ); else return -1; }
 	inline void cmd( const char *cm, ... ) { if ( lsd::sims[ 0 ]->liblnk != NULL ) { va_list argptr; va_start( argptr, cm ); lsd::sims[ 0 ]->liblnk->cmd_backend( cm, argptr ); va_end( argptr ); } }
+	inline void plog( const char *cm, ... ) { if ( lsd::sims[ 0 ]->liblnk != NULL ) { va_list argptr; va_start( argptr, cm ); lsd::sims[ 0 ]->liblnk->plog_backend( cm, "", argptr ); va_end( argptr ); } }
 
 	#define SIM ( sims[ 0 ] )				// pointer to first simulation
+	#define var _v_
+	#define caller c
+	#define root ROOT
 	#define path ( SIM->conf_path )
 	#define poidev( ... ) ( SIM->poisson( __VA_ARGS__ ) )
 	#define go_brother( O ) BROTHER( O )
@@ -672,10 +672,10 @@ namespace lsd				// create the config variables in proper namespace
 	#define RNDDRAWTOTLS( O, X, Y, Z, T ) RNDDRAW_TOTLS( O, X, Y, Z, T )
 	#define NETWORK_INI( X, Y, Z, ... ) INIT_NET( X, Y, Z, __VA_ARGS__ )
 	#define NETWORKS_INI( O, X, Y, Z, ... ) INIT_NETS( O, X, Y, Z, __VA_ARGS__ )
-	#define NETWORK_LOAD( X, Y, Z ) ( p->read_file_net( X, Y, Z, seed-1, "net" ) )
-	#define NETWORKS_LOAD( O, X, Y, Z ) ( O == NULL ? 0. : O->read_file_net( X, Y, Z, seed-1, "net" ) )
-	#define NETWORK_SAVE( X, Y, Z ) ( p->write_file_net( X, Y, Z, seed-1, false ) )
-	#define NETWORKS_SAVE( O, X, Y, Z ) ( O == NULL ? 0. : O->write_file_net( X, Y, Z , seed-1, false ) )
+	#define NETWORK_LOAD( X, Y, Z ) ( p->read_file_net( X, Y, Z, RND_SEED, "net" ) )
+	#define NETWORKS_LOAD( O, X, Y, Z ) ( O == NULL ? 0. : O->read_file_net( X, Y, Z, RND_SEED, "net" ) )
+	#define NETWORK_SAVE( X, Y, Z ) ( p->write_file_net( X, Y, Z, RND_SEED, false ) )
+	#define NETWORKS_SAVE( O, X, Y, Z ) ( O == NULL ? 0. : O->write_file_net( X, Y, Z , RND_SEED, false ) )
 	#define STATS_NET( O, X ) STAT_NETS( O, X )
 	#define SHUFFLE( X ) SHUFFLE_NET( X )
 	#define SHUFFLES( O, X ) SHUFFLE_NETS( O, X )
@@ -701,10 +701,10 @@ namespace lsd				// create the config variables in proper namespace
 	#define EXECS_EXT( O, CLASS, OBJ, METHOD, ... ) EXEC_EXTS( O, CLASS, OBJ, METHOD, __VA_ARGS__ )
 	#define DEBUG \
 		f = fopen( "log.txt", "a" ); \
-		fprintf( f, "t=%d\t%s\t(cur=%g)\n", t, var->label, var->val[0] ); \
+		fprintf( f, "t=%g\t%s\t(cur=%g)\n", T, _v_->label, _v_->val[0] ); \
 		fclose( f );
 	#define DEBUG_AT( X ) \
-		if ( t >= X ) \
+		if ( T >= X ) \
 		{ \
 			DEBUG \
 		};

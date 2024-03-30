@@ -174,7 +174,7 @@
  of descendants from some Objects and hence it is a son, it must be
  the address of the parent of this.
 
- - void delete_obj( void ) ;
+ - void delete_obj( const variable *caller ) ;
  Eliminate the object, keeping in order the chain list.
 
  - void stat( char *lab, double *v, int lag, bool cond, const char *lab2, const char *lop, double value );
@@ -1687,7 +1687,7 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 		if ( ! sim->no_ptr_chk )
 		{
 			// prevent concurrent update by more than one thread
-			l_guardT lock( sim->lock_obj_list );
+			l_guardT lock( sim->obj_list_lck );
 
 			sim->obj_list.insert( cur );
 		}
@@ -1737,7 +1737,7 @@ void lsd::object::delete_bridge( void )
  Before killing the Variables data to be saved are stored
  in the "cemetery", a linked chain storing data to be analyzed.
  *************************************************************/
-void lsd::object::delete_obj( variable *caller )
+void lsd::object::delete_obj( const variable *caller )
 {
 	object *cur = this;
 	bridge *cb;
@@ -1780,7 +1780,7 @@ void lsd::object::delete_obj( variable *caller )
 	if ( ! sim->no_ptr_chk )
 	{
 		// prevent concurrent update by more than one thread
-		l_guardT lock( sim->lock_obj_list );
+		l_guardT lock( sim->obj_list_lck );
 
 		sim->obj_list.erase( this );
 	}
@@ -1886,7 +1886,7 @@ void lsd::object::empty( void )
  go to cemetery
  Also destroy variables not requiring saving
  *************************************************************/
-void lsd::object::collect_cemetery( variable *caller )
+void lsd::object::collect_cemetery( const variable *caller )
 {
 	variable *cv, *cv1;
 
@@ -2805,55 +2805,52 @@ double lsd::object::stat( const char *lab1, double *r, int lag, bool cond, const
  SORT_*_*
  support comparison functions for object sorting
  *************************************************************/
-namespace lsd
+bool lsd::object::sort_up_1( object *a, object *b, const char *var, int lag )
 {
-	bool sort_up_1( object *a, object *b, const char *var, int lag )
-	{
-		if ( var != NULL )				// variable defined?
-			return a->cal( var, lag ) < b->cal( var, lag );
-		else
-			return a->node->id < b->node->id;
-	}
+	if ( var != NULL )					// variable defined?
+		return a->cal( var, lag ) < b->cal( var, lag );
+	else
+		return a->node->id < b->node->id;
+}
 
-	bool sort_down_1( object *a, object *b, const char *var, int lag )
-	{
-		if ( var != NULL )				// variable defined?
-			return a->cal( var, lag ) > b->cal( var, lag );
-		else
-			return a->node->id > b->node->id;
-	}
+bool lsd::object::sort_down_1( object *a, object *b, const char *var, int lag )
+{
+	if ( var != NULL )					// variable defined?
+		return a->cal( var, lag ) > b->cal( var, lag );
+	else
+		return a->node->id > b->node->id;
+}
 
-	bool sort_up_2( object *a, object *b, const char *var1, const char *var2, int lag )
-	{
-		double x, y;
+bool lsd::object::sort_up_2( object *a, object *b, const char *var1, const char *var2, int lag )
+{
+	double x, y;
 
-		x = a->cal( var1, lag );
-		y = b->cal( var1, lag );
+	x = a->cal( var1, lag );
+	y = b->cal( var1, lag );
 
-		if ( x < y )
-			return true;
-		else
-			if ( x > y )
-				return false;
-			else
-				return a->cal( var2, lag ) < b->cal( var2, lag );
-	}
-
-	bool sort_down_2( object *a, object *b, const char *var1, const char *var2, int lag )
-	{
-		double x, y;
-
-		x = a->cal( var1, lag );
-		y = b->cal( var1, lag );
-
+	if ( x < y )
+		return true;
+	else
 		if ( x > y )
-			return true;
+			return false;
 		else
-			if ( x < y )
-				return false;
-			else
-				return a->cal( var2, lag ) > b->cal( var2, lag );
-	}
+			return a->cal( var2, lag ) < b->cal( var2, lag );
+}
+
+bool lsd::object::sort_down_2( object *a, object *b, const char *var1, const char *var2, int lag )
+{
+	double x, y;
+
+	x = a->cal( var1, lag );
+	y = b->cal( var1, lag );
+
+	if ( x > y )
+		return true;
+	else
+		if ( x < y )
+			return false;
+		else
+			return a->cal( var2, lag ) > b->cal( var2, lag );
 }
 
 
@@ -2955,11 +2952,11 @@ lsd::object *lsd::object::lsdqsort( const char *obj, const char *var, const char
 	strupr( dir );
 
 	if ( ! strcmp( dir, "UP" ) )
-		std::stable_sort( new_order.begin( ), new_order.end( ), [ var, lag ] ( object *a, object *b ) { return sort_up_1( a, b, var, lag ); } );
+		std::stable_sort( new_order.begin( ), new_order.end( ), [ & ] ( object *a, object *b ) { return sort_up_1( a, b, var, lag ); } );
 
 	else
 		if ( ! strcmp( dir, "DOWN" ) )
-			std::stable_sort( new_order.begin( ), new_order.end( ), [ var, lag ] ( object *a, object *b ) { return sort_down_1( a, b, var, lag ); } );
+			std::stable_sort( new_order.begin( ), new_order.end( ), [ & ] ( object *a, object *b ) { return sort_down_1( a, b, var, lag ); } );
 		else
 		{
 			sim->error_hard( "invalid sort option ('UP' or 'DOWN' required)",
@@ -3056,10 +3053,10 @@ lsd::object *lsd::object::lsdqsort( const char *obj, const char *var1, const cha
 	strupr( dir );
 
 	if ( ! strcmp( dir, "UP" ) )
-		std::stable_sort( new_order.begin( ), new_order.end( ), [ var1, var2, lag ] ( object *a, object *b ) { return sort_up_2( a, b, var1, var2, lag ); } );
+		std::stable_sort( new_order.begin( ), new_order.end( ), [ & ] ( object *a, object *b ) { return sort_up_2( a, b, var1, var2, lag ); } );
 	else
 		if ( ! strcmp( dir, "DOWN" ) )
-			std::stable_sort( new_order.begin( ), new_order.end( ), [ var1, var2, lag ] ( object *a, object *b ) { return sort_down_2( a, b, var1, var2, lag ); } );
+			std::stable_sort( new_order.begin( ), new_order.end( ), [ & ] ( object *a, object *b ) { return sort_down_2( a, b, var1, var2, lag ); } );
 		else
 		{
 			sim->error_hard( "invalid sort option ('UP' or 'DOWN' required)",
@@ -3126,7 +3123,7 @@ lsd::object *lsd::object::draw_rnd( const char *lo, const char *lv, int lag )
 
 	do
 	{
-		b = sim->ran1( ) * a;
+		b = sim->_ran1_( ) * a;
 	}
 	while ( b == a );	// avoid ran1 == 1
 
@@ -3171,7 +3168,7 @@ lsd::object *lsd::object::draw_rnd( const char *lab )
 
 	do
 	{
-		b = sim->ran1( ) * a;
+		b = sim->_ran1_( ) * a;
 	}
 	while ( b == a );	// avoid ran1 == 1
 
@@ -3212,7 +3209,7 @@ lsd::object *lsd::object::draw_rnd( const char *lo, const char *lv, int lag, dou
 
 	cur1 = cur = cv->up;
 
-	b = sim->ran1( ) * tot;
+	b = sim->_ran1_( ) * tot;
 	cnext = cur1->next;
 	a = cur1->cal( lv, lag );
 	for ( cur1 = cnext; a <= b && cur1 != NULL; cur1 = cnext )
@@ -3597,7 +3594,7 @@ double lsd::simulation::build_obj_list( bool set_list )
 	}
 
 	// prevent concurrent update by more than one thread
-	l_guardT lock( lock_obj_list );
+	l_guardT lock( obj_list_lck );
 
 	obj_list.clear( );			// reset list
 
@@ -3649,13 +3646,7 @@ void lsd::object::collect_inst( o_setT &list )
  Note that the debugging window, in this model,
  accept the entry key stroke as a run.
  *************************************************************/
-double lsd::object::interact( const char *text, double v, double *tv, int i, int j,
-						 int h, int k, object *cur, object *cur1, object *cur2,
-						 object *cur3, object *cur4, object *cur5, object *cur6,
-						 object *cur7, object *cur8, object *cur9, netlink *curl,
-						 netlink *curl1, netlink *curl2, netlink *curl3,
-						 netlink *curl4, netlink *curl5, netlink *curl6,
-						 netlink *curl7, netlink *curl8, netlink *curl9 )
+double lsd::object::interact( const char *text, double v, double *tv, int i, int j, int h, int k, object *cur, object *cur1, object *cur2, object *cur3, object *cur4, object *cur5, object *cur6, object *cur7, object *cur8, object *cur9, netlink *curl, netlink *curl1, netlink *curl2, netlink *curl3, netlink *curl4, netlink *curl5, netlink *curl6, netlink *curl7, netlink *curl8, netlink *curl9, FILE *f )
 {
 #ifndef _NW_
 	int n;
@@ -3664,32 +3655,33 @@ double lsd::object::interact( const char *text, double v, double *tv, int i, int
 	if ( sim->quit == 0 )
 	{
 		for ( n = 0; n < USER_D_VARS; ++n )
-			sim->d_values[ n ] = tv[ n ];
+			sim->_d_values_[ n ] = tv[ n ];
 
-		sim->i_values[ 0 ] = i;
-		sim->i_values[ 1 ] = j;
-		sim->i_values[ 2 ] = h;
-		sim->i_values[ 3 ] = k;
-		sim->o_values[ 0 ] = cur;
-		sim->o_values[ 1 ] = cur1;
-		sim->o_values[ 2 ] = cur2;
-		sim->o_values[ 3 ] = cur3;
-		sim->o_values[ 4 ] = cur4;
-		sim->o_values[ 5 ] = cur5;
-		sim->o_values[ 6 ] = cur6;
-		sim->o_values[ 7 ] = cur7;
-		sim->o_values[ 8 ] = cur8;
-		sim->o_values[ 9 ] = cur9;
-		sim->n_values[ 0 ] = curl;
-		sim->n_values[ 1 ] = curl1;
-		sim->n_values[ 2 ] = curl2;
-		sim->n_values[ 3 ] = curl3;
-		sim->n_values[ 4 ] = curl4;
-		sim->n_values[ 5 ] = curl5;
-		sim->n_values[ 6 ] = curl6;
-		sim->n_values[ 7 ] = curl7;
-		sim->n_values[ 8 ] = curl8;
-		sim->n_values[ 9 ] = curl9;
+		sim->_i_values_[ 0 ] = i;
+		sim->_i_values_[ 1 ] = j;
+		sim->_i_values_[ 2 ] = h;
+		sim->_i_values_[ 3 ] = k;
+		sim->_o_values_[ 0 ] = cur;
+		sim->_o_values_[ 1 ] = cur1;
+		sim->_o_values_[ 2 ] = cur2;
+		sim->_o_values_[ 3 ] = cur3;
+		sim->_o_values_[ 4 ] = cur4;
+		sim->_o_values_[ 5 ] = cur5;
+		sim->_o_values_[ 6 ] = cur6;
+		sim->_o_values_[ 7 ] = cur7;
+		sim->_o_values_[ 8 ] = cur8;
+		sim->_o_values_[ 9 ] = cur9;
+		sim->_n_values_[ 0 ] = curl;
+		sim->_n_values_[ 1 ] = curl1;
+		sim->_n_values_[ 2 ] = curl2;
+		sim->_n_values_[ 3 ] = curl3;
+		sim->_n_values_[ 4 ] = curl4;
+		sim->_n_values_[ 5 ] = curl5;
+		sim->_n_values_[ 6 ] = curl6;
+		sim->_n_values_[ 7 ] = curl7;
+		sim->_n_values_[ 8 ] = curl8;
+		sim->_n_values_[ 9 ] = curl9;
+		sim->_f_values_[ 0 ] = f;
 
 		if ( sim->liblnk != NULL && sim->liblnk->debugger != NULL )
 			( this ->*sim->liblnk->debugger )( NULL, text, &app, true, "" );// signals INTERACT macro

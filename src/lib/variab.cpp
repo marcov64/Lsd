@@ -119,7 +119,7 @@
 
  Only in case the lag requested is zero and the variable has
  not been computed at the present time step, the method shifts
- its lagged values and calls the method fun that perform the
+ its lagged values and calls the method _fun_ that perform the
  equation computation.
 
  - void empty( void ) ;
@@ -411,7 +411,7 @@ double lsd::variable::cal( object *caller, int lag )
 	sim->user_exception = true;		// allow distinguishing among internal & user exceptions
 	try								// do it while catching exceptions to avoid obscure aborts
 	{
-		app = fun( caller );
+		app = sim->_fun_( this, caller );
 	}
 	catch ( std::exception& exc )
 	{
@@ -499,7 +499,7 @@ double lsd::variable::cal( object *caller, int lag )
 			if ( ! tit_updated )
 				set_lab_tit( );
 
-			fprintf( sim->log_file_ptr, "%s (%s)\t= %.4g\t(t=%d sim=%d caller=%s)\n", label, lab_tit, val[ 0 ], sim->t, sim->sim, caller == NULL ? "SYSTEM" : caller->label );
+			fprintf( sim->log_file_ptr, "%s (%s)\t= %.4g\t(t=%d sim=%d caller=%s)\n", label, lab_tit, val[ 0 ], sim->t, sim->nsim, caller == NULL ? "SYSTEM" : caller->label );
 		}
 
 		// open the debugger if required
@@ -658,7 +658,7 @@ void lsd::worker::cal_worker( void )
 #endif
 				try							// do it while catching exceptions to avoid obscure aborts
 				{
-					app = v->fun( NULL );
+					app = sim->_fun_( v, NULL );
 				}
 				catch ( ... )
 				{
@@ -803,9 +803,9 @@ void lsd::worker::signal( int sig )
 	}
 
 	if ( v != NULL && v->label != NULL	)
-		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'\n(simulation %d). Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, v->label, v->up->label != NULL ? v->up->label : "(none)", sim->sim );
+		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'\n(simulation %d). Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, v->label, v->up->label != NULL ? v->up->label : "(none)", sim->nsim );
 	else
-		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received by a parallel worker thread\n(simulation %d).\nDisable parallel computation to prevent this situation.", signame, sim->sim );
+		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received by a parallel worker thread\n(simulation %d).\nDisable parallel computation to prevent this situation.", signame, sim->nsim );
 
 	// signal & kill thread
 	signum = sig;

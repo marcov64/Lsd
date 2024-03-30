@@ -19,7 +19,7 @@
 
 //#define NO_POINTER_CHECK
 //#define NO_POINTER_INIT
-//#define LEGACY_CODE
+#define LEGACY_CODE
 
 #define EQ_USER_VARS int a; double b;
 #define USER_FUNCS void x( void ) { };
@@ -128,15 +128,15 @@ RND_SETSEED( 1 );
 RND_GENERATOR( 0 );
 SLEEP( 1 );
 
-cur = ROOT;
-cur = THIS;
-cur = CALLER;
-cur = NEXT;
-cur = NEXTS( cur );
-cur = PARENT;
-cur = PARENTS( cur );
-cur = GRANDPARENT;
-cur = GRANDPARENTS( cur );
+DEBUG_START;
+DEBUG_START_AT( 1 );
+DEBUG_STOP;
+DEBUG_STOP_AT( 1 );
+
+LOG( "X" );
+LOG( "%g", 1. );
+PLOG( "X" );
+PLOG( "%g", 1. );
 
 s = NAME;
 s = NAMES( cur );
@@ -151,22 +151,22 @@ a = LAST_RUN;
 a = LAST_CALC( "X" );
 a = LAST_CALCS( cur, "X" );
 
+cur = ROOT;
+cur = THIS;
+cur = CALLER;
+cur = NEXT;
+cur = NEXTS( cur );
+cur = PARENT;
+cur = PARENTS( cur );
+cur = GRANDPARENT;
+cur = GRANDPARENTS( cur );
+
 b = RECALC( "X" );
 b = RECALCS( cur, "X" );
 UPDATE;
 UPDATES( cur );
 UPDATE_REC;
 UPDATE_RECS( cur );
-
-DEBUG_START;
-DEBUG_START_AT( 1 );
-DEBUG_STOP;
-DEBUG_STOP_AT( 1 );
-
-LOG( "X" );
-LOG( "%g", 1. );
-PLOG( "X" );
-PLOG( "%g", 1. );
 
 b = V( "X" );
 b = VL( "X", 1 );
@@ -515,13 +515,18 @@ CYCLE_EXT( q, e, p ) { }
 CYCLE_EXTS( cur, q, e, p ) { }
 
 #ifdef LEGACY_CODE
-simulation *z = SIM;
 s = msg;
-a = deb( p, caller, "X", & b );
-a = deb( p, caller, "X", & b, false );
-a = deb( p, caller, "X", & b, false, "" );
+a = deb( p, c, "X", & b );
+a = deb( p, c, "X", & b, false );
+a = deb( p, c, "X", & b, false, "" );
+simulation *z = SIM;
+variable *w = var;
+cur = caller;
+cur = root;
 cmd( "X" );
 cmd( "%g", 1. );
+plog( "X" );
+plog( "%g", 1. );
 s = path;
 b = poidev( 1. );
 cur = go_brother( cur1 );

@@ -291,7 +291,7 @@ void gui::error_hard_helper( const char *boxTitle, const char *boxText, const ch
 
 		// run user closing function, reporting error appropriately
 		sim.user_exception = true;
-		sim.close_sim( );
+		sim._close_sim_( );
 		::close_sim( );
 		sim.user_exception = false;
 

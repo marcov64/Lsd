@@ -23,7 +23,7 @@
 
 
 /*************************************************************
- INIT_LATTICE
+ _INIT_LATTICE_ (*)
  Create a new run time lattice having:
  - pix= maximum pixel (600 should fit in typical screens,
         0=default size)
@@ -40,83 +40,75 @@
    is used. Otherwise, the lattice is homogeneously initialized
    to the palette color specified by init_color.
  *************************************************************/
-double lsd::simulation::init_lattice( double pixW, double pixH, double nrow, double ncol, const char lrow[ ], const char lcol[ ], const char lvar[ ], object *p, int init_color )
+double lsd::equation::_init_lattice_( double pixW, double pixH, double nrow, double ncol, const char lrow[ ], const char lcol[ ], const char lvar[ ], object *p, int init_color )
 {
 	int i, j;
 
 	// ignore invalid values
 	if ( ( int ) nrow < 1 || ( int ) ncol < 1 || ( int ) nrow > INT_MAX || ( int ) ncol > INT_MAX )
 	{
-		plog( "\nError: invalid lattice initialization values, ignoring.\n");
+		_sim_->plog( "\nError: invalid lattice initialization values, ignoring.\n");
 		return -1;
 	}
 
 	init_color = std::min( init_color, 1099 );	// limit to valid palette
 
 	// reset the LSD lattice, if any
-	close_lattice( );
-	latt->rows = std::max( 0, ( int ) floor( nrow ) );
-	latt->columns = std::max( 0, ( int ) floor( ncol ) );
-	latt->errors = 0;
+	_close_lattice_( );
+	_sim_->latt->rows = std::max( 0, ( int ) floor( nrow ) );
+	_sim_->latt->columns = std::max( 0, ( int ) floor( ncol ) );
+	_sim_->latt->errors = 0;
 
 	// create the color data matrix
-	latt->array = new int *[ latt->rows ];
-	for ( i = 0; i < latt->rows; ++i )
-		latt->array[ i ] = new int [ latt->columns ];
+	_sim_->latt->array = new int *[ _sim_->latt->rows ];
+	for ( i = 0; i < _sim_->latt->rows; ++i )
+		_sim_->latt->array[ i ] = new int [ _sim_->latt->columns ];
 
-	for ( i = 0; i < latt->rows; ++i )
-		for ( j = 0; j < latt->columns; ++j )
-			latt->array[ i ][ j ] = init_color;
+	for ( i = 0; i < _sim_->latt->rows; ++i )
+		for ( j = 0; j < _sim_->latt->columns; ++j )
+			_sim_->latt->array[ i ][ j ] = init_color;
 
-	if ( liblnk != NULL && liblnk->init_lattice_helper != NULL )
-		liblnk->init_lattice_helper( pixW, pixH, nrow, ncol, init_color );
+	if ( _sim_->liblnk != NULL )
+		_sim_->liblnk->init_lattice_helper( pixW, pixH, nrow, ncol, init_color );
 
 	return 0;
 }
 
 // call for macro
-double lsd::simulation::init_lattice( int init_color, double nrow, double ncol, double pixW, double pixH )
+double lsd::equation::_init_lattice_( int init_color, double nrow, double ncol, double pixW, double pixH )
 {
-	return init_lattice( pixW, pixH, nrow, ncol, "y", "x", "", NULL, init_color );
+	return _init_lattice_( pixW, pixH, nrow, ncol, "y", "x", "", NULL, init_color );
 }
 
 
 /*************************************************************
- EMPTY_LATTICE
+ _CLOSE_LATTICE_ (*)
  *************************************************************/
-void lsd::simulation::empty_lattice( void )
+void lsd::equation::_close_lattice_( void )
 {
-	if ( latt->array != NULL && latt->rows > 0 )
-	{
-		for ( int i = 0; i < latt->rows; ++i )
-			delete [ ] latt->array[ i ];
+	cmd( "destroytop .lat" );
 
-		delete [ ] latt->array;
+	if ( _sim_->latt->array != NULL && _sim_->latt->rows > 0 )
+	{
+		for ( int i = 0; i < _sim_->latt->rows; ++i )
+			delete [ ] _sim_->latt->array[ i ];
+
+		delete [ ] _sim_->latt->array;
 	}
 
-	latt->array = NULL;
-	latt->rows = latt->columns = 0;
+	_sim_->latt->array = NULL;
+	_sim_->latt->rows = _sim_->latt->columns = 0;
 }
 
 
 /*************************************************************
- CLOSE_LATTICE
- *************************************************************/
-void lsd::simulation::close_lattice( void )
-{
-	empty_lattice( );
-	cmd( "destroytop .lat" );
-}
-
-
-/*************************************************************
- UPDATE_LATTICE
+ _UPDATE_LATTICE_ (*)
  update the cell line.col to the color val (1 to 21
  as set in default.tcl palette)
  negative values of val prompt for the use of the
  (positive) RGB equivalent
  *************************************************************/
-double lsd::simulation::update_lattice( double line, double col, double val )
+double lsd::equation::_update_lattice_( double line, double col, double val )
 {
 	int line_int, col_int, val_int;
 
@@ -125,76 +117,76 @@ double lsd::simulation::update_lattice( double line, double col, double val )
 	val_int = std::max( 0, ( int ) floor( val ) );
 
 	// ignore invalid values
-	if ( line_int < 0 || col_int < 0 || line_int >= latt->rows ||
-		 col_int >= latt->columns || ( int ) fabs( val ) > INT_MAX )
+	if ( line_int < 0 || col_int < 0 || line_int >= _sim_->latt->rows ||
+		 col_int >= _sim_->latt->columns || ( int ) fabs( val ) > INT_MAX )
 	{
-		if ( latt->errors == ERR_LIM )
-			plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");
+		if ( _sim_->latt->errors == ERR_LIM )
+			_sim_->plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");
 		else
-			if ( latt->errors < ERR_LIM )
-				plog( "\nError: invalid lattice update values, ignoring." );
+			if ( _sim_->latt->errors < ERR_LIM )
+				_sim_->plog( "\nError: invalid lattice update values, ignoring." );
 
-		++latt->errors;
+		++_sim_->latt->errors;
 
 		return -1;
 	}
 
 	// save lattice color data
 
-	if ( latt->array != NULL && latt->rows > 0 && latt->columns > 0 )
+	if ( _sim_->latt->array != NULL && _sim_->latt->rows > 0 && _sim_->latt->columns > 0 )
 	{
-		if ( val >= 0 && latt->array[ line_int ][ col_int ] == val_int )
+		if ( val >= 0 && _sim_->latt->array[ line_int ][ col_int ] == val_int )
 			return 0;
 		else
-			latt->array[ line_int ][ col_int ] = val_int;
+			_sim_->latt->array[ line_int ][ col_int ] = val_int;
 	}
 
-	if ( liblnk != NULL && liblnk->update_lattice_helper != NULL )
-		return liblnk->update_lattice_helper( line, col, val, line_int, col_int, val_int );
+	if ( _sim_->liblnk != NULL )
+		return _sim_->liblnk->update_lattice_helper( line, col, val, line_int, col_int, val_int );
 	else
 		return 0;
 }
 
 
 /*************************************************************
- READ_LATTICE
+ _READ_LATTICE_ (*)
  read the cell line.col color val (1 to 21 as set in
  default.tcl palette)
  negative values of val mean the use of the (positive)
  RGB equivalent
  *************************************************************/
-double lsd::simulation::read_lattice( double line, double col )
+double lsd::equation::_read_lattice_( double line, double col )
 {
 	// ignore invalid values
-	if ( ( int ) line <= 0 || ( int ) col <= 0 || ( int ) line > latt->rows || ( int ) col > latt->columns )
+	if ( ( int ) line <= 0 || ( int ) col <= 0 || ( int ) line > _sim_->latt->rows || ( int ) col > _sim_->latt->columns )
 	{
-		if ( latt->errors == ERR_LIM )
-			plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");
+		if ( _sim_->latt->errors == ERR_LIM )
+			_sim_->plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");
 		else
-			if ( latt->errors < ERR_LIM )
-				plog( "\nError: invalid lattice update values, ignoring." );
+			if ( _sim_->latt->errors < ERR_LIM )
+				_sim_->plog( "\nError: invalid lattice update values, ignoring." );
 
-		++latt->errors;
+		++_sim_->latt->errors;
 
 		return -1;
 	}
 
-	if ( latt->array != NULL && latt->rows > 0 && latt->columns > 0 )
-		return latt->array[ ( int ) line - 1 ][ ( int ) col - 1 ];
+	if ( _sim_->latt->array != NULL && _sim_->latt->rows > 0 && _sim_->latt->columns > 0 )
+		return _sim_->latt->array[ ( int ) line - 1 ][ ( int ) col - 1 ];
 	else
 		return 0;
 }
 
 
 /*************************************************************
- SAVE_LATTICE
+ _SAVE_LATTICE_ (*)
  Save the existing lattice (if any) to the specified
  file name.
  *************************************************************/
-double lsd::simulation::save_lattice( const char *fname )
+double lsd::equation::_save_lattice_( const char *fname )
 {
-	if ( liblnk != NULL && liblnk->save_lattice_helper != NULL )
-		return liblnk->save_lattice_helper( fname );
+	if ( _sim_->liblnk != NULL )
+		return _sim_->liblnk->save_lattice_helper( fname );
 	else
 		return 0;
 }

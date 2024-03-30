@@ -1942,16 +1942,16 @@ void lsd::object::show_tmp_vars( bool update )
 		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"v\\\[%d\\]\"", j );
 		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 
-		if ( std::isnan( sim->d_values[ j ] ) )
+		if ( std::isnan( sim->_d_values_[ j ] ) )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NAN" );
 		else
-			if ( std::isinf( sim->d_values[ j ] ) )
-				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", sim->d_values[ j ] < 0 ? "-" : "" );
+			if ( std::isinf( sim->_d_values_[ j ] ) )
+				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", sim->_d_values_[ j ] < 0 ? "-" : "" );
 			else
-				if ( sim->d_values[ j ] != 0 && fabs( sim->d_values[ j ] ) < SIG_MIN )// insignificant value?
+				if ( sim->_d_values_[ j ] != 0 && fabs( sim->_d_values_[ j ] ) < SIG_MIN )// insignificant value?
 					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text ~0" );
 				else
-					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %g", sim->d_values[ j ] );
+					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %g", sim->_d_values_[ j ] );
 
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 
@@ -1971,7 +1971,7 @@ void lsd::object::show_tmp_vars( bool update )
 		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"%c\"", i_names[ j ] );
 		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 
-		cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %d", sim->i_values[ j ] );
+		cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %d", sim->_i_values_[ j ] );
 
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 
@@ -1996,15 +1996,15 @@ void lsd::object::show_tmp_vars( bool update )
 			cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"cur%d\"", j );
 
 		n = 0;
-		if ( sim->o_values[ j ] == NULL )
+		if ( sim->_o_values_[ j ] == NULL )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NULL" );
 		else
 		{
 			// search an object pointed by the pointer
-			n = ( int ) sim->root->search_inst( sim->o_values[ j ], false );
+			n = ( int ) sim->root->search_inst( sim->_o_values_[ j ], false );
 
-			if ( n > 0 && sim->o_values[ j ]->label != NULL )
-				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%d)\"", sim->o_values[ j ]->label, n );
+			if ( n > 0 && sim->_o_values_[ j ]->label != NULL )
+				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%d)\"", sim->_o_values_[ j ]->label, n );
 			else
 				if ( n < 0 )
 					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"(unchecked)\"" );
@@ -2020,8 +2020,8 @@ void lsd::object::show_tmp_vars( bool update )
 
 		if ( n > 0 )
 		{
-			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", sim->o_values[ j ]->label, n );
-			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", sim->o_values[ j ]->label, n );
+			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", sim->_o_values_[ j ]->label, n );
+			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", sim->_o_values_[ j ]->label, n );
 		}
 
 		cmd( "$in.n.t window create end -window $in.n.t.n$i" );
@@ -2040,7 +2040,7 @@ void lsd::object::show_tmp_vars( bool update )
 		else
 			cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"curl%d\"", j );
 
-		if ( sim->n_values[ j ] == NULL )
+		if ( sim->_n_values_[ j ] == NULL )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NULL" );
 		else
 		{
@@ -2049,7 +2049,7 @@ void lsd::object::show_tmp_vars( bool update )
 			if ( node != NULL )
 			{
 				for ( curLnk = node->first; curLnk != NULL; curLnk = curLnk->next )
-					if ( curLnk == sim->n_values[ j ] && curLnk->to != NULL && curLnk->to->node != NULL )
+					if ( curLnk == sim->_n_values_[ j ] && curLnk->to != NULL && curLnk->to->node != NULL )
 					{
 						if ( curLnk->to->label != NULL )
 							cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%ld)\"", curLnk->to->label, curLnk->to->node->id );
@@ -2140,16 +2140,16 @@ void lsd::object::show_tmp_vars( bool update )
 		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"v\\\[%d\\]\"", j );
 		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 
-		if ( std::isnan( sim->d_values[ j ] ) )
+		if ( std::isnan( sim->_d_values_[ j ] ) )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NAN" );
 		else
-			if ( std::isinf( sim->d_values[ j ] ) )
-				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", sim->d_values[ j ] < 0 ? "-" : "" );
+			if ( std::isinf( sim->_d_values_[ j ] ) )
+				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", sim->_d_values_[ j ] < 0 ? "-" : "" );
 			else
-				if ( sim->d_values[ j ] != 0 && fabs( sim->d_values[ j ] ) < SIG_MIN )	// insignificant value?
+				if ( sim->_d_values_[ j ] != 0 && fabs( sim->_d_values_[ j ] ) < SIG_MIN )	// insignificant value?
 					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text ~0" );
 				else
-					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %g", sim->d_values[ j ] );
+					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %g", sim->_d_values_[ j ] );
 
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 

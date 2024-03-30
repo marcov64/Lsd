@@ -63,7 +63,7 @@ namespace lsd
 
 
 /*************************************************************
- LIB_CONSTRUCTOR
+ LIB CONSTRUCTOR
  *************************************************************/
 void __attribute__( ( constructor ) ) lib_constructor( )
 {
@@ -85,7 +85,7 @@ void __attribute__( ( constructor ) ) lib_constructor( )
 
 
 /*************************************************************
- LIB_DESTRUCTOR
+ LIB DESTRUCTOR
  *************************************************************/
 void __attribute__( ( destructor ) ) lib_destructor( )
 {
@@ -99,7 +99,16 @@ void __attribute__( ( destructor ) ) lib_destructor( )
 
 
 /*************************************************************
- SIMULATION_CONSTRUCTOR
+ EQUATION CONSTRUCTOR
+ *************************************************************/
+lsd::equation::equation( void )
+{
+	_init_map_( );				// set equation look-up map
+}
+
+
+/*************************************************************
+ SIMULATION CONSTRUCTOR
  *************************************************************/
 lsd::simulation::simulation( void )
 {
@@ -108,7 +117,6 @@ lsd::simulation::simulation( void )
 	add_description( "Root" );
 	latt = new lattice;
 	reset_blueprint( NULL );
-	init_map( );				// set equation look-up map
 
 	max_threads = ( MAX_CORES <= 0 ) ? std::thread::hardware_concurrency( ) : MAX_CORES;
 
@@ -124,13 +132,14 @@ lsd::simulation::simulation( void )
 	parallel_ready = true;
 	l_guardT lock( init_sim_lck );// parallel semaphore
 
-	sim = sims.size( );			// index por this sim
+	_sim_ = this;				// register pointer to base equation class
+	nsim = sims.size( );		// index por this sim
 	sims.push_back( this );		// add to list of existing simulations
 }
 
 
 /*************************************************************
- SIMULATION_DESTRUCTOR
+ SIMULATION DESTRUCTOR
  *************************************************************/
 lsd::simulation::~simulation( void )
 {
@@ -140,8 +149,8 @@ lsd::simulation::~simulation( void )
 	empty_stack( );
 	empty_cemetery( );
 	empty_blueprint( );
-	empty_lattice( );
 	empty_description( );
+	_close_lattice_( );
 	root->delete_obj( );
 
 	if ( log_file_ptr != NULL )

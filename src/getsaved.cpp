@@ -217,7 +217,7 @@ int lsdmain( int argn, const char **argv )
  FUN
  Dummy for linking
  *************************************************************/
-double variable::fun( lsd::object* r ) { return NAN; }
+double equation::_fun_( lsd::object* r ) { return NAN; }
 
 
 /*************************************************************

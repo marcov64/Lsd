@@ -24,7 +24,7 @@
 /*************************************************************
  ROUND_DIGITS
  *************************************************************/
-double lsd::simulation::round_digits( double value, int digits )
+double lsd::equation::round_digits( double value, int digits )
 {
 	if ( value == 0.0 )
 		return 0.0;
@@ -39,7 +39,7 @@ double lsd::simulation::round_digits( double value, int digits )
  IPOW
  Integer exponentiation
  *************************************************************/
-double lsd::simulation::ipow( double base, double exp )
+double lsd::equation::ipow( double base, double exp )
 {
 	long res = 1, lbase = ( long ) floor( base ), lexp = ( long ) floor( exp );
 
@@ -67,12 +67,12 @@ double lsd::simulation::ipow( double base, double exp )
  FACT
  Factorial function
  *************************************************************/
-double lsd::simulation::fact( double x )
+double lsd::equation::fact( double x )
 {
 	x = floor( x );
 	if ( x < 0.0 )
 	{
-		plog( "\nWarning: bad x in function: fact" );
+		_sim_->plog( "\nWarning: bad x in function: fact" );
 		return 0.0;
 	}
 
@@ -114,7 +114,7 @@ double lsd::simulation::median( d_vecT & v )
  Student t distribution  statistic for given
  degrees of freedom and confidence level (in %)
  *************************************************************/
-double lsd::simulation::t_star( int df, double cl )
+double lsd::equation::t_star( int df, double cl )
 {
 	int i;
 
@@ -149,7 +149,7 @@ double lsd::simulation::t_star( int df, double cl )
  Standard normal distribution statistic for given
  confidence level (in %)
  *************************************************************/
-double lsd::simulation::z_star( double cl )
+double lsd::equation::z_star( double cl )
 {
 	int i;
 
@@ -165,11 +165,11 @@ double lsd::simulation::z_star( double cl )
  UNIFCDF
  Uniform cumulative distribution function
  *************************************************************/
-double lsd::simulation::unifcdf( double a, double b, double x )
+double lsd::equation::unifcdf( double a, double b, double x )
 {
 	if ( a >= b )
 	{
-		plog( "\nWarning: bad a or b in function: uniformcdf" );
+		_sim_->plog( "\nWarning: bad a or b in function: uniformcdf" );
 		return 0.0;
 	}
 
@@ -186,12 +186,12 @@ double lsd::simulation::unifcdf( double a, double b, double x )
  POISSONCDF
  Poisson cumulative distribution function
  *************************************************************/
-double lsd::simulation::poissoncdf( double lambda, double k )
+double lsd::equation::poissoncdf( double lambda, double k )
 {
 	k = floor( k );
 	if ( lambda <= 0.0 || k < 0.0 )
 	{
-		plog( "\nWarning: bad lambda or k in function: poissoncdf" );
+		_sim_->plog( "\nWarning: bad lambda or k in function: poissoncdf" );
 		return 0.0;
 	}
 
@@ -208,11 +208,11 @@ double lsd::simulation::poissoncdf( double lambda, double k )
  PARETOCDF
  Pareto cumulative distribution function
  *************************************************************/
-double lsd::simulation::paretocdf( double mu, double alpha, double x )
+double lsd::equation::paretocdf( double mu, double alpha, double x )
 {
 	if ( mu <= 0 || alpha <= 0 )
 	{
-		plog( "\nWarning: bad mu, alpha in function: paretocdf" );
+		_sim_->plog( "\nWarning: bad mu, alpha in function: paretocdf" );
 		return 0.0;
 	}
 
@@ -227,11 +227,11 @@ double lsd::simulation::paretocdf( double mu, double alpha, double x )
  BPARETOCDF
  Bounded Pareto cumulative distribution function
  *************************************************************/
-double lsd::simulation::bparetocdf( double alpha, double low, double high, double x )
+double lsd::equation::bparetocdf( double alpha, double low, double high, double x )
 {
 	if ( alpha <= 0 || low <= 0 || low >= high )
 	{
-		plog( "\nWarning: bad alpha, low or high in function: bparetocdf" );
+		_sim_->plog( "\nWarning: bad alpha, low or high in function: bparetocdf" );
 		return 0.0;
 	}
 
@@ -247,11 +247,11 @@ double lsd::simulation::bparetocdf( double alpha, double low, double high, doubl
  NORMCDF
  Normal cumulative distribution function
  *************************************************************/
-double lsd::simulation::normcdf( double mu, double sigma, double x )
+double lsd::equation::normcdf( double mu, double sigma, double x )
 {
 	if ( sigma <= 0.0 )
 	{
-		plog( "\nWarning: bad sigma in function: normalcdf" );
+		_sim_->plog( "\nWarning: bad sigma in function: normalcdf" );
 		return 0.0;
 	}
 
@@ -263,11 +263,11 @@ double lsd::simulation::normcdf( double mu, double sigma, double x )
  LNORMCDF
  Lognormal cumulative distribution function
  *************************************************************/
-double lsd::simulation::lnormcdf( double mu, double sigma, double x )
+double lsd::equation::lnormcdf( double mu, double sigma, double x )
 {
 	if ( sigma <= 0.0 || x <= 0.0 )
 	{
-		plog( "\nWarning: bad sigma or x in function: lnormalcdf" );
+		_sim_->plog( "\nWarning: bad sigma or x in function: lnormalcdf" );
 		return 0.0;
 	}
 
@@ -280,11 +280,11 @@ double lsd::simulation::lnormcdf( double mu, double sigma, double x )
  Asymmetric laplace cumulative distribution
  function
  *************************************************************/
-double lsd::simulation::alaplcdf( double mu, double alpha1, double alpha2, double x )
+double lsd::equation::alaplcdf( double mu, double alpha1, double alpha2, double x )
 {
 	if ( alpha1 <= 0.0 || alpha2 <= 0.0 )
 	{
-		plog( "\nWarning: bad alpha in function: alaplcdf" );
+		_sim_->plog( "\nWarning: bad alpha in function: alaplcdf" );
 		return 0.0;
 	}
 
@@ -365,13 +365,13 @@ double lsd::simulation::betacf( double a, double b, double x )
  beta function
  Press et al. (1992) Numerical Recipes in C, 2nd Ed.
  *************************************************************/
-double lsd::simulation::betacdf( double alpha, double beta, double x )
+double lsd::equation::betacdf( double alpha, double beta, double x )
 {
 	double bt;
 
 	if ( alpha <= 0.0 || beta <= 0.0 || x < 0.0 || x > 1.0 )
 	{
-		plog( "\nWarning: bad alpha, beta or x in function: betacdf" );
+		_sim_->plog( "\nWarning: bad alpha, beta or x in function: betacdf" );
 		return 0.0;
 	}
 
@@ -382,9 +382,9 @@ double lsd::simulation::betacdf( double alpha, double beta, double x )
 				 + alpha * log( x ) + beta * log( 1.0 - x ) );
 
 	if ( x < ( alpha + 1.0 ) / ( alpha + beta + 2.0 ) )
-		return bt * betacf( alpha, beta, x ) / alpha;
+		return bt * _sim_->betacf( alpha, beta, x ) / alpha;
 	else
-		return 1.0 - bt * betacf( beta, alpha, 1.0 - x ) / beta;
+		return 1.0 - bt * _sim_->betacf( beta, alpha, 1.0 - x ) / beta;
 }
 
 
@@ -412,60 +412,60 @@ void lsd::simulation::init_random( unsigned seed )
 	lf48.seed( seed );				// lagged fibonacci 48 bits
 }
 
-template < class distr > double draw_rd( lsd::simulation *sim, distr &d )
+template < class distr > double lsd::simulation::draw_rd( distr &d )
 {
 	// prevent concurrent draw by more than one thread
-	l_guardT lock( sim->draw_rd_lck );
-	
-	return d( sim->rd );
+	l_guardT lock( draw_rd_lck );
+
+	return d( rd );
 }
 
-template < class distr > double draw_lc1( lsd::simulation *sim, distr &d )
+template < class distr > double lsd::simulation::draw_lc1( distr &d )
 {
 	// prevent concurrent draw by more than one thread
-	l_guardT lock( sim->draw_lc1_lck );
+	l_guardT lock( draw_lc1_lck );
 
-	return d( sim->lc1 );
+	return d( lc1 );
 }
 
-template < class distr > double draw_lc2( lsd::simulation *sim, distr &d )
+template < class distr > double lsd::simulation::draw_lc2( distr &d )
 {
 	// prevent concurrent draw by more than one thread
-	l_guardT lock( sim->draw_lc2_lck );
+	l_guardT lock( draw_lc2_lck );
 
-	return d( sim->lc2 );
+	return d( lc2 );
 }
 
-template < class distr > double draw_mt32( lsd::simulation *sim, distr &d )
+template < class distr > double lsd::simulation::draw_mt32( distr &d )
 {
 	// prevent concurrent draw by more than one thread
-	l_guardT lock( sim->draw_mt32_lck );
+	l_guardT lock( draw_mt32_lck );
 
-	return d( sim->mt32 );
+	return d( mt32 );
 }
 
-template < class distr > double draw_mt64( lsd::simulation *sim, distr &d )
+template < class distr > double lsd::simulation::draw_mt64( distr &d )
 {
 	// prevent concurrent draw by more than one thread
-	l_guardT lock( sim->draw_mt64_lck );
+	l_guardT lock( draw_mt64_lck );
 
-	return d( sim->mt64 );
+	return d( mt64 );
 }
 
-template < class distr > double draw_lf24( lsd::simulation *sim, distr &d )
+template < class distr > double lsd::simulation::draw_lf24( distr &d )
 {
 	// prevent concurrent draw by more than one thread
-	l_guardT lock( sim->draw_lf24_lck );
+	l_guardT lock( draw_lf24_lck );
 
-	return d( sim->lf24 );
+	return d( lf24 );
 }
 
-template < class distr > double draw_lf48( lsd::simulation *sim, distr &d )
+template < class distr > double lsd::simulation::draw_lf48( distr &d )
 {
 	// prevent concurrent draw by more than one thread
-	l_guardT lock( sim->draw_lf48_lck );
+	l_guardT lock( draw_lf48_lck );
 
-	return d( sim->lf48 );
+	return d( lf48 );
 }
 
 
@@ -478,24 +478,24 @@ template < class distr > double lsd::simulation::draw_gen( distr &d )
 	switch ( ran_gen_id )
 	{
 		case 0:						// system (not pseudo) random generator
-			return draw_rd( this, d );
+			return draw_rd( d );
 		case 1:						// linear congruential in (0,1)
 		case 3:						// linear congruential in [0,1)
 		default:
-			return draw_lc2( this, d );
+			return draw_lc2( d );
 
 		case 2:						// Mersenne-Twister 32 bits in (0,1)
 		case 4:						// Mersenne-Twister 32 bits in [0,1)
-			return draw_mt32( this, d );
+			return draw_mt32( d );
 
 		case 5:						// Mersenne-Twister 64 bits in [0,1)
-			return draw_mt64( this, d );
+			return draw_mt64( d );
 
 		case 6:						// lagged fibonacci 24 bits in [0,1)
-			return draw_lf24( this, d );
+			return draw_lf24( d );
 
 		case 7:						// lagged fibonacci 48 bits in [0,1)
-			return draw_lf48( this, d );
+			return draw_lf48( d );
 	}
 }
 
@@ -546,7 +546,7 @@ void *lsd::simulation::set_random( int gen )
 int lsd::simulation::rnd_int( int min, int max )
 {
 	std::uniform_int_distribution < int > distr( min, max );
-	return draw_lc1( this, distr );
+	return draw_lc1( distr );
 }
 
 
@@ -555,14 +555,14 @@ int lsd::simulation::rnd_int( int min, int max )
  Call the preset pseudo-random number generator
  Just generates numbers > 0 and < 1
  *************************************************************/
-double lsd::simulation::ran1( long *unused )
+double lsd::equation::_ran1_( long *unused )
 {
 	double ran;
 	std::uniform_real_distribution < double > distr( 0, 1 );
 
 	do
-		ran = draw_gen( distr );
-	while ( ran == 0.0 && ran_gen_id < 3 );
+		ran = _sim_->draw_gen( distr );
+	while ( ran == 0.0 && _sim_->ran_gen_id < 3 );
 
 	return ran;
 }
@@ -571,38 +571,38 @@ double lsd::simulation::ran1( long *unused )
 /*************************************************************
  UNIFORM
  *************************************************************/
-double lsd::simulation::uniform( double min, double max )
+double lsd::equation::uniform( double min, double max )
 {
 	std::uniform_real_distribution < double > distr( min, max );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
 /*************************************************************
  UNIFORM_INT
  *************************************************************/
-double lsd::simulation::uniform_int( double min, double max )
+double lsd::equation::uniform_int( double min, double max )
 {
 	std::uniform_int_distribution < int > distr( ( long ) min, ( long ) max );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
 /*************************************************************
  NORM
  *************************************************************/
-double lsd::simulation::norm( double mean, double dev )
+double lsd::equation::norm( double mean, double dev )
 {
 	static bool normStopErr;
 
 	if ( dev < 0 )
 	{
-		warn_distr( normErrCnt, normStopErr, "norm", "negative standard deviation" );
+		_sim_->warn_distr( _sim_->normErrCnt, normStopErr, "norm", "negative standard deviation" );
 		return mean;
 	}
 
 	std::normal_distribution < double > distr( mean, dev );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
@@ -610,49 +610,49 @@ double lsd::simulation::norm( double mean, double dev )
  LNORM
  Return a draw from a lognormal distribution
  *************************************************************/
-double lsd::simulation::lnorm( double mean, double dev )
+double lsd::equation::lnorm( double mean, double dev )
 {
 	static bool lnormStopErr;
 
 	if ( dev < 0 )
 	{
-		warn_distr( lnormErrCnt, lnormStopErr, "lnorm", "negative standard deviation" );
+		_sim_->warn_distr( _sim_->lnormErrCnt, lnormStopErr, "lnorm", "negative standard deviation" );
 		return exp( mean );
 	}
 
 	std::lognormal_distribution < double > distr( mean, dev );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
 /*************************************************************
  GAMMA
  *************************************************************/
-double lsd::simulation::gamma( double alpha, double beta )
+double lsd::equation::gamma( double alpha, double beta )
 {
 	static bool gammaStopErr;
 
 	if ( alpha <= 0 || beta <= 0 )
 	{
-		warn_distr( gammaErrCnt, gammaStopErr, "gamma", "non-positive alpha or beta parameter" );
+		_sim_->warn_distr( _sim_->gammaErrCnt, gammaStopErr, "gamma", "non-positive alpha or beta parameter" );
 		return 0.0;
 	}
 
 	std::gamma_distribution < double > distr( alpha, beta );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
 /*************************************************************
  BERNOULLI
  *************************************************************/
-double lsd::simulation::bernoulli( double p )
+double lsd::equation::bernoulli( double p )
 {
 	static bool bernoStopErr;
 
 	if ( p < 0 || p > 1 )
 	{
-		warn_distr( bernoErrCnt, bernoStopErr, "bernoulli", "probability out of \\[0, 1\\]" );
+		_sim_->warn_distr( _sim_->bernoErrCnt, bernoStopErr, "bernoulli", "probability out of \\[0, 1\\]" );
 
 		if ( p < 0 )
 			return 0.0;
@@ -661,38 +661,38 @@ double lsd::simulation::bernoulli( double p )
 	}
 
 	std::bernoulli_distribution distr( p );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
 /*************************************************************
  POISSON
  *************************************************************/
-double lsd::simulation::poisson( double mean )
+double lsd::equation::poisson( double mean )
 {
 	static bool poissStopErr;
 
 	if ( mean < 0 )
 	{
-		warn_distr( poissErrCnt, poissStopErr, "poisson", "negative mean" );
+		_sim_->warn_distr( _sim_->poissErrCnt, poissStopErr, "poisson", "negative mean" );
 		return 0.0;
 	}
 
 	std::poisson_distribution < int > distr( mean );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
 /*************************************************************
  GEOMETRIC
  *************************************************************/
-double lsd::simulation::geometric( double p )
+double lsd::equation::geometric( double p )
 {
 	static bool geomStopErr;
 
 	if ( p < 0 || p > 1 )
 	{
-		warn_distr( geomErrCnt, geomStopErr, "geometric", "probability out of \\[0, 1\\]" );
+		_sim_->warn_distr( _sim_->geomErrCnt, geomStopErr, "geometric", "probability out of \\[0, 1\\]" );
 
 		if ( p < 0 )
 			return 0.0;
@@ -701,20 +701,20 @@ double lsd::simulation::geometric( double p )
 	}
 
 	std::geometric_distribution < int > distr( p );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
 /*************************************************************
  BINOMIAL
  *************************************************************/
-double lsd::simulation::binomial( double p, double t )
+double lsd::equation::binomial( double p, double t )
 {
 	static bool binomStopErr;
 
 	if ( p < 0 || p > 1 || t <= 0 )
 	{
-		warn_distr( binomErrCnt, binomStopErr, "binomial", "invalid parameter" );
+		_sim_->warn_distr( _sim_->binomErrCnt, binomStopErr, "binomial", "invalid parameter" );
 
 		if ( p < 0 || t <= 0 )
 			return 0.0;
@@ -723,115 +723,115 @@ double lsd::simulation::binomial( double p, double t )
 	}
 
 	std::binomial_distribution < int > distr( t, p );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
 /*************************************************************
  CAUCHY
  *************************************************************/
-double lsd::simulation::cauchy( double a, double b )
+double lsd::equation::cauchy( double a, double b )
 {
 	static bool cauchStopErr;
 
 	if ( b <= 0 )
 	{
-		warn_distr( cauchErrCnt, cauchStopErr, "cauchy", "non-positive b parameter" );
+		_sim_->warn_distr( _sim_->cauchErrCnt, cauchStopErr, "cauchy", "non-positive b parameter" );
 		return a;
 	}
 
 	std::cauchy_distribution < double > distr( a, b );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
 /*************************************************************
  CHI_SQUARED
  *************************************************************/
-double lsd::simulation::chi_squared( double n )
+double lsd::equation::chi_squared( double n )
 {
 	static bool chisqStopErr;
 
 	if ( n <= 0 )
 	{
-		warn_distr( chisqErrCnt, chisqStopErr, "chi_squared", "non-positive n parameter" );
+		_sim_->warn_distr( _sim_->chisqErrCnt, chisqStopErr, "chi_squared", "non-positive n parameter" );
 		return 0.0;
 	}
 
 	std::chi_squared_distribution < double > distr( n );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
 /*************************************************************
  EXPONENTIAL
  *************************************************************/
-double lsd::simulation::exponential( double lambda )
+double lsd::equation::exponential( double lambda )
 {
 	static bool expStopErr;
 
 	if ( lambda <= 0 )
 	{
-		warn_distr( expErrCnt, expStopErr, "exponential", "non-positive lambda parameter" );
+		_sim_->warn_distr( _sim_->expErrCnt, expStopErr, "exponential", "non-positive lambda parameter" );
 		return 0.0;
 	}
 
 	std::exponential_distribution < double > distr( lambda );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
 /*************************************************************
  FISHER
  *************************************************************/
-double lsd::simulation::fisher( double m, double n )
+double lsd::equation::fisher( double m, double n )
 {
 	static bool fishStopErr;
 
 	if ( m <= 0 || n <= 0 )
 	{
-		warn_distr( fishErrCnt, fishStopErr, "fisher", "invalid parameter" );
+		_sim_->warn_distr( _sim_->fishErrCnt, fishStopErr, "fisher", "invalid parameter" );
 		return 0.0;
 	}
 
 	std::fisher_f_distribution < double > distr( m, n );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
 /*************************************************************
  STUDENT
  *************************************************************/
-double lsd::simulation::student( double n )
+double lsd::equation::student( double n )
 {
 	static bool studStopErr;
 
 	if ( n <= 0 )
 	{
-		warn_distr( studErrCnt, studStopErr, "student", "non-positive n parameter" );
+		_sim_->warn_distr( _sim_->studErrCnt, studStopErr, "student", "non-positive n parameter" );
 		return 0.0;
 	}
 
 	std::student_t_distribution < double > distr( n );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
 /*************************************************************
  WEIBULL
  *************************************************************/
-double lsd::simulation::weibull( double a, double b )
+double lsd::equation::weibull( double a, double b )
 {
 	static bool weibStopErr;
 
 	if ( a <= 0 || b <= 0 )
 	{
-		warn_distr( weibErrCnt, weibStopErr, "weibull", "non-positive a or b parameter" );
+		_sim_->warn_distr( _sim_->weibErrCnt, weibStopErr, "weibull", "non-positive a or b parameter" );
 		return 0.0;
 	}
 
 	std::weibull_distribution < double > distr( a, b );
-	return draw_gen( distr );
+	return _sim_->draw_gen( distr );
 }
 
 
@@ -839,13 +839,13 @@ double lsd::simulation::weibull( double a, double b )
  BETA
  Return a draw from a Beta(alfa,beta) distribution
  *************************************************************/
-double lsd::simulation::beta( double alpha, double beta )
+double lsd::equation::beta( double alpha, double beta )
 {
 	static bool betaStopErr;
 
 	if ( alpha <= 0 || beta <= 0 )
 	{
-		warn_distr( betaErrCnt, betaStopErr, "beta", "non-positive alpha or beta parameter" );
+		_sim_->warn_distr( _sim_->betaErrCnt, betaStopErr, "beta", "non-positive alpha or beta parameter" );
 
 		if ( alpha < beta )
 			return 0.0;
@@ -854,43 +854,43 @@ double lsd::simulation::beta( double alpha, double beta )
 	}
 
 	std::gamma_distribution < double > distr1( alpha, 1.0 ), distr2( beta, 1.0 );
-	double draw = draw_gen( distr1 );
-	return draw / ( draw + draw_gen( distr2 ) );
+	double draw = _sim_->draw_gen( distr1 );
+	return draw / ( draw + _sim_->draw_gen( distr2 ) );
 }
 
 
 /*************************************************************
  PARETO
  *************************************************************/
-double lsd::simulation::pareto( double mu, double alpha )
+double lsd::equation::pareto( double mu, double alpha )
 {
 	static bool paretStopErr;
 
 	if ( mu <= 0 || alpha <= 0 )
 	{
-		warn_distr( paretErrCnt, paretStopErr, "pareto", "non-positive mu or alpha parameter" );
+		_sim_->warn_distr( _sim_->paretErrCnt, paretStopErr, "pareto", "non-positive mu or alpha parameter" );
 		return mu;
 	}
 
-	return mu / pow( 1 - ran1( ), 1 / alpha );
+	return mu / pow( 1 - _ran1_( ), 1 / alpha );
 }
 
 
 /*************************************************************
  BPARETO
  *************************************************************/
-double lsd::simulation::bpareto( double alpha, double low, double high )
+double lsd::equation::bpareto( double alpha, double low, double high )
 {
 	static bool paretStopErr;
 
 	if ( alpha <= 0 || low <= 0 || low >= high )
 	{
-		warn_distr( paretErrCnt, paretStopErr, "bpareto", "non-positive alpha parameter or bounds or invalid bounds" );
+		_sim_->warn_distr( _sim_->paretErrCnt, paretStopErr, "bpareto", "non-positive alpha parameter or bounds or invalid bounds" );
 		return std::max( low, 0. );
 	}
 
 	return pow( pow( low, alpha ) /
-				( ran1( ) * ( pow( low / high, alpha ) - 1 ) + 1 ),
+				( _ran1_( ) * ( pow( low / high, alpha ) - 1 ) + 1 ),
 				1 / alpha );
 }
 
@@ -899,17 +899,17 @@ double lsd::simulation::bpareto( double alpha, double low, double high )
  ALAPL
  Return a draw from an asymmetric laplace distribution
  *************************************************************/
-double lsd::simulation::alapl( double mu, double alpha1, double alpha2 )
+double lsd::equation::alapl( double mu, double alpha1, double alpha2 )
 {
 	static bool alaplStopErr;
 
 	if ( alpha1 <= 0 || alpha2 <= 0 )
 	{
-		warn_distr( alaplErrCnt, alaplStopErr, "alapl", "non-positive alpha1 or alpha2 parameter" );
+		_sim_->warn_distr( _sim_->alaplErrCnt, alaplStopErr, "alapl", "non-positive alpha1 or alpha2 parameter" );
 		return mu;
 	}
 
-	double draw = ran1( );
+	double draw = _ran1_( );
 	if ( draw < ( alpha1 / ( alpha1 + alpha2 ) ) )
 		return mu + alpha1 * log( draw * ( 1 + alpha1 / alpha2 ) );
 	else

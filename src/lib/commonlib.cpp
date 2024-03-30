@@ -453,6 +453,16 @@ void lsd::msleep( unsigned msec )
 
 
 /*************************************************************
+ _MSLEEP_
+ stop execution for a given period in equations
+ *************************************************************/
+void lsd::equation::_msleep_( unsigned msec )
+{
+	msleep( msec );
+}
+
+
+/*************************************************************
  CLEAN_FILE
  remove any path prefixes to filename, if present
  *************************************************************/

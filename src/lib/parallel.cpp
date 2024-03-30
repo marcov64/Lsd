@@ -44,7 +44,7 @@ int lsd::simulation::run_parallel( bool nw, const char *exec, const char *simnam
 	char *alt_name, *def_path;
 	int i, j, k, num, sl;
 
-	if ( sim != 0 )						// only first sim object can run OS parallel
+	if ( nsim != 0 )						// only first sim object can run OS parallel
 		return -1;
 
 	if ( strlen( conf_path ) > 0 )

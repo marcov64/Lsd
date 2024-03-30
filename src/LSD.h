@@ -21,8 +21,8 @@
 #define SIMULATION_EXT \
 	public: \
 	int num_sensitivity_variables( void ); \
-	sensitivity *search_sensitivity( const char *lab, int lag = 0 ); \
-	long num_sensitivity_points( void );
+	long num_sensitivity_points( void ); \
+	sensitivity *search_sensitivity( const char *lab, int lag = 0 );
 
 #define OBJECT_EXT \
 	public: \
@@ -111,6 +111,7 @@
 #define VARIABLE_EXT \
 	public: \
 	void plot_runtime( void ); \
+	private: \
 	void write_var( FILE *frep ); \
 	const char *print_constr( char *buf, int buf_sz );
 
