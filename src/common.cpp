@@ -28,418 +28,6 @@ namespace gui
 
 
 /*************************************************************
- INIT_LSD_ENV
- initialize LSD path and environment variables
- *************************************************************/
-int gui::init_lsd_env( const char **argv )
-{
-	char *str, cwd[ PATH_MAX ];
-	const char *app, *app1;
-	int i;
-	FILE *f;
-
-	// set system defaults in tcl
-	cmd( "set LMM_TXT_OPTIONS \"%s\"", LMM_TXT_OPTIONS );
-	cmd( "set LSD_XML_OPTIONS \"%s\"", LSD_XML_OPTIONS );
-	cmd( "set SYSTEM_TXT_OPTIONS \"%s\"", SYSTEM_TXT_OPTIONS );
-	cmd( "set MODEL_TXT_OPTIONS \"%s\"", MODEL_TXT_OPTIONS );
-	cmd( "set MODEL_XML_OPTIONS \"%s\"", MODEL_XML_OPTIONS );
-	cmd( "set MODEL_TXT_INFO \"%s\"", MODEL_TXT_INFO );
-	cmd( "set MODEL_TXT_INFO_NUM %d", MODEL_TXT_INFO_NUM );
-	cmd( "set GROUP_TXT_INFO \"%s\"", GROUP_TXT_INFO );
-	cmd( "set GROUP_XML_INFO \"%s\"", GROUP_XML_INFO );
-	cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
-	cmd( "set DATE_FMT \"%s\"", DATE_FMT );
-
-	// assume exec path is current path
-	getcwd( cwd, PATH_MAX );
-	lsd::set_exec( cwd, argv[ 0 ] );
-
-	if ( lsd::exec_file == NULL || lsd::exec_path == NULL )
-	{
-		log_tcl_error( true, "Invalid LSD executable name or path", "Make sure the LSD directory is not too deep into the disk directory tree" );
-		return 1;
-	}
-
-	// check if exec file is in current path
-	i = strlen( lsd::exec_path ) + strlen( lsd::exec_file ) + 2;
-	str = new char[ i ];
-	snprintf( str, i, "%s%s%s", lsd::exec_path, strlen( lsd::exec_path ) > 0 ? "/" : "", lsd::exec_file );
-	f = fopen( str, "r" );
-	delete [ ] str;
-	if ( f != NULL )
-		fclose( f );
-
-	// try to recover from failures
-	if ( f == NULL || strlen( lsd::exec_path ) == 0 || ! strcmp( lsd::exec_path, "/" ) )
-	{	// try to get exec name from Tcl
-		cmd( "if { [ info nameofexecutable ] ne \"\" } { \
-				set path [ file dirname [ info nameofexecutable ] ]; \
-				set exec [ file rootname [ info nameofexecutable ] ] \
-			} { \
-				set path [ pwd ]; \
-				set exec \"\" \
-			}" );
-
-		app = get_str( "path" );
-		app1 = get_str( "exec" );
-		if ( app != NULL && app1 != NULL && strlen( app1 ) > 0 )
-			lsd::set_exec( app, app1 );
-		else
-		{
-			gui::log_tcl_error( false, "LSD executable check", "Cannot locate LSD executable on disk, check the installation of LSD and reinstall LSD if the problem persists" );
-			cmd( "tk_messageBox -type ok -icon error -title Error -message \"LSD executable not found\" -detail \"Cannot locate the LSD executable folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
-			return 2;
-		}
-	}
-
-	// check if executable is inside a macOS package
-	cmd( "set path [ file normalize \"%s\" ]", lsd::exec_path );
-	cmd( "if { $tcl_platform(os) eq \"Darwin\" } { \
-			set pathsplit [ file split $path ]; \
-			if { [ lindex $pathsplit end ] eq \"MacOS\" && [ lindex $pathsplit end-1 ] eq \"Contents\" } { \
-				set path [ file normalize \"$path/../../..\" ] \
-			}; \
-			unset pathsplit \
-		}" );
-
-#ifndef _LMM_
-	// only use the exec path if not already in a model directory
-	cmd( "if { [ file exists $MODEL_TXT_OPTIONS ] || [ file exists $MODEL_XML_OPTIONS ] } { \
-			set modelDir [ pwd ] \
-		} { \
-			set modelDir $path; \
-		}" );
-
-	cmd( "cd $modelDir" );
-	app = get_str( "modelDir" );
-
-	if ( app != NULL && strlen( app ) > 0 )
-	{
-		delete [ ] sim.conf_path;
-		delete [ ] lsd::model_path;
-		sim.conf_path = new char[ strlen( app ) + 1 ];
-		lsd::model_path = new char[ strlen( app ) + 1 ];
-		strcpy( sim.conf_path, app );
-		strcpy( lsd::model_path, app );
-	}
-	else
-	{
-		log_tcl_error( false, "LSD model directory check", "Cannot locate LSD model folder on disk, check your model directory, or recreate the model" );
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSD model directory missing\" -detail \"Cannot locate the LSD model folder on disk.\nPlease check your model directory and recreate your model if the problem persists.\n\nLSD is aborting now.\"" );
-		return 3;
-	}
-#endif
-
-	// check if LSDROOT environment variable exists and use it if so
-	cmd( "if [ info exists env(LSDROOT) ] { \
-			set RootLsd [ file normalize $env(LSDROOT) ]; \
-			if [ file exists \"$RootLsd/src/LSD.h\" ] { \
-				set res 0 \
-			} { \
-				set res 1 \
-			} \
-		} { \
-			set res 1 \
-		}" );
-
-	// do some search for the right path to cope with macOS package
-	if ( get_bool( "res" ) )
-	{
-		cmd( "set here [ pwd ]" );
-		cmd( "while { ! [ file exists \"src/LSD.h\" ] && ! [ string equal [ pwd ] \"/\" ] && [ string length [ pwd ] ] > 3 } { \
-				cd .. \
-			}" );
-		cmd( "if [ file exists \"src/LSD.h\" ] { \
-				set RootLsd [ pwd ]; \
-				cd $here; \
-				set res 0 \
-			} { \
-				set res 1 \
-			}" );
-		cmd( "unset here" );
-
-		if ( get_bool( "res" ) )
-		{
-#ifdef _LMM_
-			log_tcl_error( false, "Source files check", "Required LSD source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
-			cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
-#else
-			log_tcl_error( false, "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where LSD is installed" );
-			cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where LSD is installed.\n\nLSD is aborting now.\"" );
-#endif
-			return 4;
-		}
-
-		cmd( "set env(LSDROOT) \"$RootLsd\"" );
-	}
-
-	app = get_str( "RootLsd" );
-	if ( app != NULL && strlen( app ) > 0 )
-	{
-		lsd::root_lsd = new char[ strlen( app ) + 1 ];
-		strcpy( lsd::root_lsd, app );
-		lsd::root_lsd = lsd::clean_path( lsd::root_lsd );
-		cmd( "set RootLsd [ file normalize \"%s\" ]", lsd::root_lsd );
-	}
-	else
-	{
-		log_tcl_error( false, "LSD directory check", "Cannot locate LSD folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSD directory missing\" -detail \"Cannot locate the LSD installation folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
-		return 5;
-	}
-
-	// set default LSD XML configuration path (same as LSDROOT if in home directory)
-	cmd( "if { [ string first [ file normalize ~ ] $RootLsd ] == 0 } { \
-				set cfgDir $RootLsd \
-			} { \
-				if { $tcl_platform(os) eq \"Windows NT\" } { \
-					set cfgDir [ file normalize \"~/AppData/Local/LSD\" ] \
-				} { \
-					if { [ info exists env(XDG_CONFIG_HOME) ] && $env(XDG_CONFIG_HOME) ne \"\" } { \
-						set cfgDir [ file normalize \"$env(XDG_CONFIG_HOME)/LSD\" ] \
-					} { \
-						set cfgDir [ file normalize \"~/.config/LSD\" ] \
-					} \
-				} \
-			}" );
-
-	app = get_str( "cfgDir" );
-	lsd::strcpyn( cfg_path, app, MAX_PATH_LENGTH );
-
-	// create directory if it doesn't exist and check it
-	cmd( "file mkdir $cfgDir" );
-	cmd( "if { [ file exists $cfgDir ] && [ file isdirectory $cfgDir ] } { \
-			set res 0 \
-		} { \
-			set res 1 \
-		}" );
-
-	if ( get_bool( "res" ) )
-	{
-		log_tcl_error( false, "Configuration directory check", "Cannot locate or create LSD configuration folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Cannot create LSD configuration directory\" -detail \"Cannot create or access the LSD configuration folder on disk (%s).\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", get_str( "cfgDir" ) );
-		return 6;
-	}
-
-#ifdef _LMM_
-	// change path to the LSD root directory in LMM
-	cmd( "cd $RootLsd" );
-#endif
-
-	return 0;
-}
-
-
-/*************************************************************
- SET_PLATFORM
- set and check to OS platform
- requires that gui.tcl script has been executed before
- *************************************************************/
-int gui::set_platform( void )
-{
-	const char *app;
-
-	app = get_str( "CurPlatform" );
-	if ( ! strcmp( app, "linux" ) )
-		platform = _LIN_;
-	else
-		if ( ! strcmp( app, "mac" ) )
-			platform = _MAC_;
-		else
-			if ( ! strcmp( app, "windows" ) )
-				platform = _WIN_;
-			else
-			{
-				log_tcl_error( false, "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
-				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"" );
-				return 8;
-			}
-
-	return 0;
-}
-
-
-/*************************************************************
- LSD_EXIT_GUI (DLL WRAPPER)
- exit LSD after the GUI is launched
- *************************************************************/
-void gui::lsd_exit_gui( int v )
-{
-	if ( interp != NULL )
-	{
-		if ( tk_ok )
-			cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { \
-					catch { destroy . } \
-				}" );
-
-		Tcl_Finalize( );
-	}
-
-	lsd::lsd_exit( v );
-}
-
-
-/*************************************************************
- LOAD_LSD_OPTIONS
- *************************************************************/
-bool gui::load_lsd_options( void )
-{
-	int res;
-	const char *path = cfg_path;			// default path
-	
-	cmd( "if [ file exists \"$cfgDir/$LSD_XML_OPTIONS\" ] { \
-			set res 1 \
-		} elseif [ file exists \"$RootLsd/$LSD_XML_OPTIONS\" ] { \
-			set res 2 \
-		} elseif [ file exists \"$cfgDir/$LMM_TXT_OPTIONS\" ] { \
-			set f [ open \"$cfgDir/$LMM_TXT_OPTIONS\" r ]; \
-			set res 3 \
-		} elseif [ file exists \"$RootLsd/$LMM_TXT_OPTIONS\" ] { \
-			set f [ open \"$RootLsd/$LMM_TXT_OPTIONS\" r ]; \
-			set res 3 \
-		} else { \
-			set res 0 \
-		}" );
-	
-	switch ( ( res = get_int( "res" ) ) )
-	{
-		case 2:								// xml format in LSD root
-			path = lsd::root_lsd;
-			
-		case 1:								// xml format in default path
-			
-			break;
-		
-		case 3:								// legacy file format
-			for ( int i = 0; i < LMM_TXT_OPTIONS_NUM; ++i )	// read parameters, returning 1 if incomplete
-			{
-				cmd( "gets $f %s", lmm_options[ i ] );
-				cmd( "if { $%s == \"\" } { set res 0 }", lmm_options[ i ] );
-			}
-
-			cmd( "close $f" );
-			break;
-
-		default:
-			for ( int i = 0; i < LMM_TXT_OPTIONS_NUM; ++i )
-				cmd( "set %s \"\"", lmm_options[ i ] );
-
-			// fix now missing source directory name
-			cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ 4 ], lmm_options[ 4 ], lmm_defaults[ 4 ] );
-	}
-
-	return res;
-}
-
-
-/*************************************************************
- UPDATE_LSD_OPTIONS
- *************************************************************/
-void gui::update_lsd_options( bool justLmmGeom )
-{
-	if ( justLmmGeom )
-	{
-		cmd( "set done 1" );
-		cmd( "if { $restoreWin } { set curGeom [ geomtosave .lmm ]; if { $curGeom != \"\" && ! [ string equal $lmmGeom $curGeom ] } { set done 0 } }" );
-
-		if ( get_bool( "done" ) )	// nothing to save?
-			return;
-
-		load_lsd_options( );		// if just saving window geometry, first reload from disk
-
-		cmd( "set lmmGeom $curGeom" );
-	}
-
-	// save options to disk
-	cmd( "set f [ open \"$cfgDir/$LMM_TXT_OPTIONS\" w ]" );
-
-	// set undefined parameters to defaults
-	for ( int i = 0; i < LMM_TXT_OPTIONS_NUM; ++i )
-	{
-		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", lmm_options[ i ], lmm_options[ i ] );
-		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ i ], lmm_options[ i ], lmm_defaults[ i ] );
-		cmd( "puts $f \"$%s\"", lmm_options[ i ] );
-	}
-
-	cmd( "close $f" );
-}
-
-
-/*************************************************************
- LOAD_MODEL_OPTIONS
- *************************************************************/
-bool gui::load_model_options( const char *path )
-{
-	cmd( "set res [ file exists \"%s/$MODEL_TXT_INFO\" ]", path );
-
-	if ( get_bool( "res" ) )						// file exists?
-	{
-		cmd( "set f [ open \"%s/$MODEL_TXT_INFO\" r ]", path );
-
-		for ( int i = 0; i < MODEL_TXT_INFO_NUM; ++i )	// read parameters, returning 1 if incomplete
-		{
-			cmd( "gets $f %s", model_info[ i ] );
-			cmd( "if { $%s == \"\" } { set res 0 }", model_info[ i ] );
-		}
-
-		cmd( "close $f" );
-	}
-
-	return get_bool( "res" );
-}
-
-
-/*************************************************************
- UPDATE_MODEL_OPTIONS
- *************************************************************/
-void gui::update_model_options( bool fix )
-{
-	int i;
-
-	// set undefined parameters to defaults
-	if ( fix )
-		for ( i = 0; i < MODEL_TXT_INFO_NUM; ++i )
-		{
-			cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
-			cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
-		}
-
-#ifndef _LMM_
-
-	else
-		// update existing windows positions
-		for ( i = 0; i < LSD_WIN_NUM; ++i )
-			cmd( "if { $restoreWin } { \
-					set curGeom [ geomtosave .%s ]; \
-					if { $curGeom != \"\" } { \
-						set %s $curGeom \
-					} \
-				}", wnd_names[ i ], model_info[ i + 3 ] );
-
-	// ensure model name is set
-	cmd( "if { ! [ info exists modelName ] || $modelName eq \"\" || $modelName eq \"%s\" } { \
-			set modelName [ string map -nocase { fun_ \"\" .cpp \"\" } \"%s\" ] \
-		}", model_defaults[ 0 ], eq_file );
-
-#endif
-
-	// save info to disk
-	cmd( "set f [ open \"$modelDir/$MODEL_TXT_INFO\" w ]" );
-
-	// set undefined parameters to defaults before saving
-	for ( i = 0; i < MODEL_TXT_INFO_NUM; ++i )
-	{
-		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
-		cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
-		cmd( "puts $f \"$%s\"", model_info[ i ] );
-	}
-
-	cmd( "close $f" );
-}
-
-
-/*************************************************************
  INIT_TCL_TK
  initializes the Tcl/Tk environment
  *************************************************************/
@@ -519,6 +107,210 @@ void gui::init_tcl_tk( const char *exec, const char *tcl_app_name )
 	}
 
 	Tcl_UnlinkVar( interp, "res" );
+}
+
+
+/*************************************************************
+ INIT_LSD_ENV
+ initialize LSD path and environment variables
+ *************************************************************/
+int gui::init_lsd_env( const char **argv )
+{
+	char *str, cwd[ PATH_MAX ];
+	const char *app, *app1;
+	int i;
+	FILE *f;
+
+	// set system defaults in tcl
+	cmd( "set LMM_TXT_OPTIONS \"%s\"", LMM_TXT_OPTIONS );
+	cmd( "set LSD_XML_OPTIONS \"%s\"", LSD_XML_OPTIONS );
+	cmd( "set SYSTEM_TXT_OPTIONS \"%s\"", SYSTEM_TXT_OPTIONS );
+	cmd( "set MODEL_TXT_OPTIONS \"%s\"", MODEL_TXT_OPTIONS );
+	cmd( "set MODEL_XML_OPTIONS \"%s\"", MODEL_XML_OPTIONS );
+	cmd( "set MODEL_TXT_INFO \"%s\"", MODEL_TXT_INFO );
+	cmd( "set MODEL_TXT_INFO_NUM %d", MODEL_TXT_INFO_NUM );
+	cmd( "set GROUP_TXT_INFO \"%s\"", GROUP_TXT_INFO );
+	cmd( "set GROUP_XML_INFO \"%s\"", GROUP_XML_INFO );
+	cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
+	cmd( "set DATE_FMT \"%s\"", DATE_FMT );
+
+	// assume exec path is current path
+	getcwd( cwd, PATH_MAX );
+	lsd::set_exec( cwd, argv[ 0 ] );
+
+	if ( lsd::exec_file == NULL || lsd::exec_path == NULL )
+	{
+		log_tcl_error( true, "Invalid LSD executable name or path", "Make sure the LSD directory is not too deep into the disk directory tree" );
+		return 1;
+	}
+
+	// check if exec file is in current path
+	i = strlen( lsd::exec_path ) + strlen( lsd::exec_file ) + 2;
+	str = new char[ i ];
+	snprintf( str, i, "%s%s%s", lsd::exec_path, strlen( lsd::exec_path ) > 0 ? "/" : "", lsd::exec_file );
+	f = fopen( str, "r" );
+	delete [ ] str;
+	if ( f != NULL )
+		fclose( f );
+
+	// try to recover from failures
+	if ( f == NULL || strlen( lsd::exec_path ) == 0 || ! strcmp( lsd::exec_path, "/" ) )
+	{	// try to get exec name from Tcl
+		cmd( "if { [ info nameofexecutable ] ne \"\" } { \
+				set path [ file dirname [ info nameofexecutable ] ]; \
+				set exec [ file rootname [ info nameofexecutable ] ] \
+			} { \
+				set path [ pwd ]; \
+				set exec \"\" \
+			}" );
+
+		app = get_str( "path" );
+		app1 = get_str( "exec" );
+		if ( app != NULL && app1 != NULL && strlen( app1 ) > 0 )
+			lsd::set_exec( app, app1 );
+		else
+		{
+			gui::log_tcl_error( false, "LSD executable check", "Cannot locate LSD executable on disk, check the installation of LSD and reinstall LSD if the problem persists" );
+			cmd( "tk_messageBox -type ok -icon error -title Error -message \"LSD executable not found\" -detail \"Cannot locate the LSD executable folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+			return 5;
+		}
+	}
+
+	// check if executable is inside a macOS package
+	cmd( "set path [ file normalize \"%s\" ]", lsd::exec_path );
+	cmd( "if { $tcl_platform(os) eq \"Darwin\" } { \
+			set pathsplit [ file split $path ]; \
+			if { [ lindex $pathsplit end ] eq \"MacOS\" && [ lindex $pathsplit end-1 ] eq \"Contents\" } { \
+				set path [ file normalize \"$path/../../..\" ] \
+			}; \
+			unset pathsplit \
+		}" );
+
+#ifndef _LMM_
+	// only use the exec path if not already in a model directory
+	cmd( "if { [ file exists $MODEL_TXT_OPTIONS ] || [ file exists $MODEL_XML_OPTIONS ] } { \
+			set modelDir [ pwd ] \
+		} { \
+			set modelDir $path; \
+		}" );
+
+	cmd( "cd $modelDir" );
+	app = get_str( "modelDir" );
+
+	if ( app != NULL && strlen( app ) > 0 )
+	{
+		delete [ ] sim.conf_path;
+		delete [ ] lsd::model_path;
+		sim.conf_path = new char[ strlen( app ) + 1 ];
+		lsd::model_path = new char[ strlen( app ) + 1 ];
+		strcpy( sim.conf_path, app );
+		strcpy( lsd::model_path, app );
+	}
+	else
+	{
+		log_tcl_error( false, "LSD model directory check", "Cannot locate LSD model folder on disk, check your model directory, or recreate the model" );
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSD model directory missing\" -detail \"Cannot locate the LSD model folder on disk.\nPlease check your model directory and recreate your model if the problem persists.\n\nLSD is aborting now.\"" );
+		return 6;
+	}
+#endif
+
+	// check if LSDROOT environment variable exists and use it if so
+	cmd( "if [ info exists env(LSDROOT) ] { \
+			set RootLsd [ file normalize $env(LSDROOT) ]; \
+			if [ file exists \"$RootLsd/src/LSD.h\" ] { \
+				set res 0 \
+			} { \
+				set res 1 \
+			} \
+		} { \
+			set res 1 \
+		}" );
+
+	// do some search for the right path to cope with macOS package
+	if ( get_bool( "res" ) )
+	{
+		cmd( "set here [ pwd ]" );
+		cmd( "while { ! [ file exists \"src/LSD.h\" ] && ! [ string equal [ pwd ] \"/\" ] && [ string length [ pwd ] ] > 3 } { \
+				cd .. \
+			}" );
+		cmd( "if [ file exists \"src/LSD.h\" ] { \
+				set RootLsd [ pwd ]; \
+				cd $here; \
+				set res 0 \
+			} { \
+				set res 1 \
+			}" );
+		cmd( "unset here" );
+
+		if ( get_bool( "res" ) )
+		{
+#ifdef _LMM_
+			log_tcl_error( false, "Source files check", "Required LSD source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
+			cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+#else
+			log_tcl_error( false, "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where LSD is installed" );
+			cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where LSD is installed.\n\nLSD is aborting now.\"" );
+#endif
+			return 5;
+		}
+
+		cmd( "set env(LSDROOT) \"$RootLsd\"" );
+	}
+
+	app = get_str( "RootLsd" );
+	if ( app != NULL && strlen( app ) > 0 )
+	{
+		lsd::root_lsd = new char[ strlen( app ) + 1 ];
+		strcpy( lsd::root_lsd, app );
+		lsd::root_lsd = lsd::clean_path( lsd::root_lsd );
+		cmd( "set RootLsd [ file normalize \"%s\" ]", lsd::root_lsd );
+	}
+	else
+	{
+		log_tcl_error( false, "LSD directory check", "Cannot locate LSD folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSD directory missing\" -detail \"Cannot locate the LSD installation folder on disk.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+		return 1;
+	}
+
+	// set default LSD XML configuration path (same as LSDROOT if in home directory)
+	cmd( "if { [ string first [ file normalize ~ ] $RootLsd ] == 0 } { \
+				set cfgDir $RootLsd \
+			} { \
+				if { $tcl_platform(os) eq \"Windows NT\" } { \
+					set cfgDir [ file normalize \"~/AppData/Local/LSD\" ] \
+				} { \
+					if { [ info exists env(XDG_CONFIG_HOME) ] && $env(XDG_CONFIG_HOME) ne \"\" } { \
+						set cfgDir [ file normalize \"$env(XDG_CONFIG_HOME)/LSD\" ] \
+					} { \
+						set cfgDir [ file normalize \"~/.config/LSD\" ] \
+					} \
+				} \
+			}" );
+
+	app = get_str( "cfgDir" );
+	lsd::strcpyn( cfg_path, app, MAX_PATH_LENGTH );
+
+	// create directory if it doesn't exist and check it
+	cmd( "file mkdir $cfgDir" );
+	cmd( "if { [ file exists $cfgDir ] && [ file isdirectory $cfgDir ] } { \
+			set res 0 \
+		} { \
+			set res 1 \
+		}" );
+
+	if ( get_bool( "res" ) )
+	{
+		log_tcl_error( false, "Configuration directory check", "Cannot locate or create LSD configuration folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Cannot create LSD configuration directory\" -detail \"Cannot create or access the LSD configuration folder on disk (%s).\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", get_str( "cfgDir" ) );
+		return 1;
+	}
+
+#ifdef _LMM_
+	// change path to the LSD root directory in LMM
+	cmd( "cd $RootLsd" );
+#endif
+
+	return 0;
 }
 
 
@@ -680,6 +472,194 @@ char *gui::search_lsd_root( char *path, int pathSz )
 	chdir( orig_dir );
 
 	return found;
+}
+
+
+/*************************************************************
+ SET_PLATFORM
+ set and check to OS platform
+ requires that gui.tcl script has been executed before
+ *************************************************************/
+int gui::set_platform( void )
+{
+	const char *app;
+
+	app = get_str( "CurPlatform" );
+	if ( ! strcmp( app, "linux" ) )
+		platform = _LIN_;
+	else
+		if ( ! strcmp( app, "mac" ) )
+			platform = _MAC_;
+		else
+			if ( ! strcmp( app, "windows" ) )
+				platform = _WIN_;
+			else
+			{
+				log_tcl_error( false, "Unsupported platform", "Your computer operating system is not supported by this LSD version, you may try an older version compatible with legacy systems (Windows 32-bit, Mac OS X, etc.)" );
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Unsupported platform\" -detail \"Your computer operating system is not supported by this LSD version,\nyou may try an older version compatible with legacy systems\n(Windows 32-bit, Mac OS X, etc.)\n\nLSD is aborting now.\"" );
+				return 7;
+			}
+
+	return 0;
+}
+
+
+/*************************************************************
+ LOAD_LSD_OPTIONS
+ *************************************************************/
+bool gui::load_lsd_options( void )
+{
+	int res;
+	const char *path = cfg_path;			// default path
+
+	cmd( "if [ file exists \"$cfgDir/$LSD_XML_OPTIONS\" ] { \
+			set res 1 \
+		} elseif [ file exists \"$RootLsd/$LSD_XML_OPTIONS\" ] { \
+			set res 2 \
+		} elseif [ file exists \"$cfgDir/$LMM_TXT_OPTIONS\" ] { \
+			set f [ open \"$cfgDir/$LMM_TXT_OPTIONS\" r ]; \
+			set res 3 \
+		} elseif [ file exists \"$RootLsd/$LMM_TXT_OPTIONS\" ] { \
+			set f [ open \"$RootLsd/$LMM_TXT_OPTIONS\" r ]; \
+			set res 3 \
+		} else { \
+			set res 0 \
+		}" );
+
+	switch ( ( res = get_int( "res" ) ) )
+	{
+		case 2:								// xml format in LSD root
+			path = lsd::root_lsd;
+
+		case 1:								// xml format in default path
+
+			break;
+
+		case 3:								// legacy file format
+			for ( int i = 0; i < LMM_TXT_OPTIONS_NUM; ++i )	// read parameters, returning 1 if incomplete
+			{
+				cmd( "gets $f %s", lmm_options[ i ] );
+				cmd( "if { $%s == \"\" } { set res 0 }", lmm_options[ i ] );
+			}
+
+			cmd( "close $f" );
+			break;
+
+		default:
+			for ( int i = 0; i < LMM_TXT_OPTIONS_NUM; ++i )
+				cmd( "set %s \"\"", lmm_options[ i ] );
+
+			// fix now missing source directory name
+			cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ 4 ], lmm_options[ 4 ], lmm_defaults[ 4 ] );
+	}
+
+	return res;
+}
+
+
+/*************************************************************
+ UPDATE_LSD_OPTIONS
+ *************************************************************/
+void gui::update_lsd_options( bool justLmmGeom )
+{
+	if ( justLmmGeom )
+	{
+		cmd( "set done 1" );
+		cmd( "if { $restoreWin } { set curGeom [ geomtosave .lmm ]; if { $curGeom != \"\" && ! [ string equal $lmmGeom $curGeom ] } { set done 0 } }" );
+
+		if ( get_bool( "done" ) )	// nothing to save?
+			return;
+
+		load_lsd_options( );		// if just saving window geometry, first reload from disk
+
+		cmd( "set lmmGeom $curGeom" );
+	}
+
+	// save options to disk
+	cmd( "set f [ open \"$cfgDir/$LMM_TXT_OPTIONS\" w ]" );
+
+	// set undefined parameters to defaults
+	for ( int i = 0; i < LMM_TXT_OPTIONS_NUM; ++i )
+	{
+		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", lmm_options[ i ], lmm_options[ i ] );
+		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ i ], lmm_options[ i ], lmm_defaults[ i ] );
+		cmd( "puts $f \"$%s\"", lmm_options[ i ] );
+	}
+
+	cmd( "close $f" );
+}
+
+
+/*************************************************************
+ LOAD_MODEL_OPTIONS
+ *************************************************************/
+bool gui::load_model_options( const char *path )
+{
+	cmd( "set res [ file exists \"%s/$MODEL_TXT_INFO\" ]", path );
+
+	if ( get_bool( "res" ) )						// file exists?
+	{
+		cmd( "set f [ open \"%s/$MODEL_TXT_INFO\" r ]", path );
+
+		for ( int i = 0; i < MODEL_TXT_INFO_NUM; ++i )	// read parameters, returning 1 if incomplete
+		{
+			cmd( "gets $f %s", model_info[ i ] );
+			cmd( "if { $%s == \"\" } { set res 0 }", model_info[ i ] );
+		}
+
+		cmd( "close $f" );
+	}
+
+	return get_bool( "res" );
+}
+
+
+/*************************************************************
+ UPDATE_MODEL_OPTIONS
+ *************************************************************/
+void gui::update_model_options( bool fix )
+{
+	int i;
+
+	// set undefined parameters to defaults
+	if ( fix )
+		for ( i = 0; i < MODEL_TXT_INFO_NUM; ++i )
+		{
+			cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
+			cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
+		}
+
+#ifndef _LMM_
+
+	else
+		// update existing windows positions
+		for ( i = 0; i < LSD_WIN_NUM; ++i )
+			cmd( "if { $restoreWin } { \
+					set curGeom [ geomtosave .%s ]; \
+					if { $curGeom != \"\" } { \
+						set %s $curGeom \
+					} \
+				}", wnd_names[ i ], model_info[ i + 3 ] );
+
+	// ensure model name is set
+	cmd( "if { ! [ info exists modelName ] || $modelName eq \"\" || $modelName eq \"%s\" } { \
+			set modelName [ string map -nocase { fun_ \"\" .cpp \"\" } \"%s\" ] \
+		}", model_defaults[ 0 ], eq_file );
+
+#endif
+
+	// save info to disk
+	cmd( "set f [ open \"$modelDir/$MODEL_TXT_INFO\" w ]" );
+
+	// set undefined parameters to defaults before saving
+	for ( i = 0; i < MODEL_TXT_INFO_NUM; ++i )
+	{
+		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
+		cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
+		cmd( "puts $f \"$%s\"", model_info[ i ] );
+	}
+
+	cmd( "close $f" );
 }
 
 
@@ -878,6 +858,26 @@ int gui::Tcl_discard_change( ClientData cdata, Tcl_Interp *interp, int argc, con
 	else
 		Tcl_SetResult( interp, ( char * ) "cancel", TCL_VOLATILE );
 	return TCL_OK;
+}
+
+
+/*************************************************************
+ LSD_EXIT_GUI (DLL WRAPPER)
+ exit LSD after the GUI is launched
+ *************************************************************/
+void gui::lsd_exit_gui( int v )
+{
+	if ( interp != NULL )
+	{
+		if ( tk_ok )
+			cmd( "if { ! [ catch { package present Tk 8.6 } ] && ! [ catch { set tk_ok [ winfo exists . ] } ] && $tk_ok } { \
+					catch { destroy . } \
+				}" );
+
+		Tcl_Finalize( );
+	}
+
+	lsd::lsd_exit( v );
 }
 
 

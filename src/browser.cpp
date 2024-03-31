@@ -80,7 +80,7 @@ int gui::load_gui( const char **argv )
 		if ( argv[ i ][ 0 ] != '-' || ( argv[ i ][ 1 ] != 'f' && argv[ i ][ 1 ] != 'c' ) )
 		{
 			log_tcl_error( true, "Command line parameters", "Invalid option, available options: -f MODEL_NAME / -c MAX_THREADS" );
-			return 7;
+			return 6;
 		}
 
 		if ( argv[ i ][ 1 ] == 'f' )
