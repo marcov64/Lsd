@@ -35,7 +35,7 @@ set months [ list January February March April May June July August September Oc
 # SHOWMODEL
 #************************************************
 proc showmodel pippo {
-	global lmn lmd ldn lrn lbn group result choiceSM lver rootname modelGroup upSymbol groupSymbol RootLsd memory fonttype small_character GROUP_INFO MODEL_INFO DESCRIPTION colorsTheme darkTheme
+	global lmn lmd ldn lrn lbn group result choiceSM lver rootname modelGroup upSymbol groupSymbol RootLsd memory fonttype small_character GROUP_TXT_INFO MODEL_TXT_INFO DESCRIPTION colorsTheme darkTheme
 
 	unset -nocomplain lmn lver lmd ldn lrn lbn group
 	lappend lmn
@@ -304,8 +304,8 @@ proc showmodel pippo {
 	cd "$pippo"
 	if { ! [ string equal -nocase "$pippo" "$RootLsd" ] } {
 		set updir "[ file dirname "[ pwd ]" ]"
-		if { ! [ string equal -nocase "$updir" "$RootLsd" ] && [ file exists "$updir/$GROUP_INFO" ] } {
-			set f [ open "$updir/$GROUP_INFO" r ]
+		if { ! [ string equal -nocase "$updir" "$RootLsd" ] && [ file exists "$updir/$GROUP_TXT_INFO" ] } {
+			set f [ open "$updir/$GROUP_TXT_INFO" r ]
 			set upgroup "[ gets $f ]"
 			close $f
 		} else {
@@ -328,8 +328,8 @@ proc showmodel pippo {
 
 	# list groups
 	foreach i $dir {
-		if { ! [ file exists "$i/$MODEL_INFO" ] && [ file exists "$i/$GROUP_INFO" ] } {
-			set f [ open "$i/$GROUP_INFO" r ]
+		if { ! [ file exists "$i/$MODEL_TXT_INFO" ] && [ file exists "$i/$GROUP_TXT_INFO" ] } {
+			set f [ open "$i/$GROUP_TXT_INFO" r ]
 			set app "[ gets $f ]"
 			close $f
 
@@ -355,10 +355,10 @@ proc showmodel pippo {
 
 	# list files
 	foreach i $dir {
-		if [ file exists "$i/$MODEL_INFO" ] {
+		if [ file exists "$i/$MODEL_TXT_INFO" ] {
 			fix_info $i
 
-			set f [ open "$i/$MODEL_INFO" r ]
+			set f [ open "$i/$MODEL_TXT_INFO" r ]
 			set app1 "[ gets $f ]"
 			set app2 "[ gets $f ]"
 			set app3 "[ gets $f ]"
@@ -423,7 +423,7 @@ proc mcopy i {
 # Remove a model/group, placing it in a trashbin
 #************************************************
 proc mdelete i {
-	global lrn ldn lmn group RootLsd memory  GROUP_INFO DESCRIPTION
+	global lrn ldn lmn group RootLsd memory  GROUP_TXT_INFO DESCRIPTION
 
 	set memory 0
 	.l.m.edit entryconf 2 -state disabled
@@ -445,8 +445,8 @@ proc mdelete i {
 			if { ! [ file exists "$RootLsd/trashbin" ] } {
 				file mkdir "$RootLsd/trashbin"
 			}
-			if { ! [ file exists "$RootLsd/trashbin/$GROUP_INFO" ] } {
-				set f [ open "$RootLsd/trashbin/$GROUP_INFO" w ]
+			if { ! [ file exists "$RootLsd/trashbin/$GROUP_TXT_INFO" ] } {
+				set f [ open "$RootLsd/trashbin/$GROUP_TXT_INFO" w ]
 				puts $f "Deleted Models"
 				close $f
 				set f [ open "$RootLsd/trashbin/$DESCRIPTION" w ]
@@ -473,7 +473,7 @@ proc mdelete i {
 # Edit the model/group name and description
 #************************************************
 proc medit i {
-	global lrn ldn lmn group lmd result memory fonttype small_character darkTheme GROUP_INFO MODEL_INFO DESCRIPTION
+	global lrn ldn lmn group lmd result memory fonttype small_character darkTheme GROUP_TXT_INFO MODEL_TXT_INFO DESCRIPTION
 
 	set memory 0
 	.l.m.edit entryconf 2 -state disabled
@@ -513,9 +513,9 @@ proc medit i {
 
 	okcancel .l.e b {
 		if { [ lindex $group $result ] == 0 } {
-			if [ file exists "[ lindex $ldn $result ]/$MODEL_INFO" ] {
+			if [ file exists "[ lindex $ldn $result ]/$MODEL_TXT_INFO" ] {
 				set a [ list ]
-				set f [ open "[ lindex $ldn $result ]/$MODEL_INFO" r ]
+				set f [ open "[ lindex $ldn $result ]/$MODEL_TXT_INFO" r ]
 				gets $f line
 				for { set i 1 } { $line != "" } { incr i } {
 					lappend a "$line"
@@ -526,14 +526,14 @@ proc medit i {
 				set i 1
 			}
 
-			set f [ open "[ lindex $ldn $result ]/$MODEL_INFO" w ]
+			set f [ open "[ lindex $ldn $result ]/$MODEL_TXT_INFO" w ]
 			puts -nonewline $f "[ .l.e.n.n get ]"
 			for { set j 1 } { $j < $i } { incr j } {
 				puts -nonewline $f "\n[ lindex $a $j ]"
 			}
 			close $f
 		} else {
-			set f [ open "[ lindex $ldn $result ]/$GROUP_INFO" w ]
+			set f [ open "[ lindex $ldn $result ]/$GROUP_TXT_INFO" w ]
 			puts -nonewline $f "[ .l.e.n.n get ]"
 			close $f
 		}
@@ -565,7 +565,7 @@ proc medit i {
 # Paste a previously copied model/group
 #************************************************
 proc mpaste i {
-	global copydir copyver copylabel copydscr lrn modelGroup lmn lver lmd choiceSM fonttype small_character darkTheme MODEL_INFO DESCRIPTION
+	global copydir copyver copylabel copydscr lrn modelGroup lmn lver lmd choiceSM fonttype small_character darkTheme MODEL_TXT_INFO DESCRIPTION
 
 	set pastedir [ lindex $lrn $i ]
 
@@ -650,7 +650,7 @@ proc mpaste i {
 				set f [ open "$pastedir/$appd/$DESCRIPTION" w ]
 				puts -nonewline $f "$appdsc"
 				close $f
-				set f [ open "$pastedir/$appd/$MODEL_INFO" w ]
+				set f [ open "$pastedir/$appd/$MODEL_TXT_INFO" w ]
 				puts $f "$appl"
 				puts $f "$appv"
 				set frmt "%d %B, %Y"
@@ -671,9 +671,9 @@ proc mpaste i {
 # Fix invalid information in model info file
 #************************************************
 proc fix_info { fi } {
-	global MODEL_INFO MODEL_INFO_NUM DATE_FMT
+	global MODEL_TXT_INFO MODEL_TXT_INFO_NUM DATE_FMT
 
-	set f [ open "$fi/$MODEL_INFO" r ]
+	set f [ open "$fi/$MODEL_TXT_INFO" r ]
 	set l1 "[ gets $f ]"
 	set l2 "[ gets $f ]"
 	set l3 "[ gets $f ]"
@@ -702,7 +702,7 @@ proc fix_info { fi } {
 	}
 
 	if { $fix } {
-		set f [ open "$fi/$MODEL_INFO" w ]
+		set f [ open "$fi/$MODEL_TXT_INFO" w ]
 		puts $f $newName
 		puts $f $newVer
 		puts $f $newDate

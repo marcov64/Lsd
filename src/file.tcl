@@ -660,11 +660,11 @@ proc choose_models { curdir curfile } {
 # Support procedure to choose_models
 #************************************************
 proc list_models { } {
-	global lmod ldir lgroup cgroup GROUP_INFO MODEL_INFO
+	global lmod ldir lgroup cgroup GROUP_TXT_INFO MODEL_TXT_INFO
 
-	if [ file exists $MODEL_INFO ] {
+	if [ file exists $MODEL_TXT_INFO ] {
 		lappend ldir [ pwd ]
-		set f [ open $MODEL_INFO r ]
+		set f [ open $MODEL_TXT_INFO r ]
 		set mod [ gets $f ]
 		set ver [ gets $f ]
 		close $f
@@ -684,8 +684,8 @@ proc list_models { } {
 		set flag 0
 		if [ file isdirectory $i ] {
 			cd $i
-			if [ file exists $GROUP_INFO ] {
-				set f [ open $GROUP_INFO r ]
+			if [ file exists $GROUP_TXT_INFO ] {
+				set f [ open $GROUP_TXT_INFO r ]
 				set group [ gets $f ]
 				close $f
 				if { $cgroup != "." } {
@@ -1060,13 +1060,13 @@ proc make_background { target threads nw precompiled } {
 # Get the list of source files, including the main and extra files
 #************************************************
 proc get_source_files { path } {
-	global MODEL_OPTIONS
+	global MODEL_TXT_OPTIONS
 
-	if { ! [ file exists "$path/$MODEL_OPTIONS" ] } {
+	if { ! [ file exists "$path/$MODEL_TXT_OPTIONS" ] } {
 		return [ list ]
 	}
 
-	set f [ open "$path/$MODEL_OPTIONS" r ]
+	set f [ open "$path/$MODEL_TXT_OPTIONS" r ]
 	set options [ read -nonewline $f ]
 	close $f
 

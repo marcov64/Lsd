@@ -164,11 +164,14 @@
 #define SRV_MIN_CORES 12				// minimum number of cores to consider a server
 
 // configuration files details
-#define LMM_OPTIONS "lmm_options.txt"
-#define SYSTEM_OPTIONS "system_options.txt"
-#define MODEL_OPTIONS "model_options.txt"
-#define GROUP_INFO "groupinfo.txt"
-#define MODEL_INFO "modelinfo.txt"
+#define LMM_TXT_OPTIONS "lmm_options.txt"
+#define LSD_XML_OPTIONS "LSD.cfg"
+#define GROUP_TXT_INFO "groupinfo.txt"
+#define GROUP_XML_INFO "group.cfg"
+#define MODEL_TXT_OPTIONS "model_options.txt"
+#define MODEL_XML_OPTIONS "model.cfg"
+#define MODEL_TXT_INFO "modelinfo.txt"
+#define SYSTEM_TXT_OPTIONS "system_options.txt"
 #define DESCRIPTION "description.txt"
 
 // special file names/locations in Windows
@@ -179,18 +182,18 @@
 #define TCL_FIND_EXE	"@where wish86.exe > nul 2>&1"
 
 // constant string arrays
-#define LMM_OPTIONS_NUM 16
-#define LMM_OPTIONS_NAME { "sysTerm", "HtmlBrowser", "fonttype", \
-						   "wish", "LsdSrc", "dim_character", \
-						   "tabsize", "wrap", "shigh", \
-						   "autoHide", "showFileCmds", "LsdNew", \
-						   "DbgExe", "restoreWin", "lmmGeom", \
-						   "lsdTheme" }
-#define LMM_OPTIONS_DEFAULT { "$DefaultSysTerm", "$DefaultHtmlBrowser", \
-							  "$DefaultFont", "$DefaultWish", "src", \
-							  "$DefaultFontSize", "4", "1", "2", "0", "0", \
-							  "Work", "$DefaultDbgExe", "1", "#", \
-							  "$DefaultTheme" }
+#define LMM_TXT_OPTIONS_NUM 16
+#define LMM_TXT_OPTIONS_NAME { "sysTerm", "HtmlBrowser", "fonttype", \
+							   "wish", "LsdSrc", "dim_character", \
+							   "tabsize", "wrap", "shigh", \
+							   "autoHide", "showFileCmds", "LsdNew", \
+							   "DbgExe", "restoreWin", "lmmGeom", \
+							   "lsdTheme" }
+#define LMM_TXT_OPTIONS_DEFAULT { "$DefaultSysTerm", "$DefaultHtmlBrowser", \
+								  "$DefaultFont", "$DefaultWish", "src", \
+								  "$DefaultFontSize", "4", "1", "2", "0", "0", \
+								  "Work", "$DefaultDbgExe", "1", "#", \
+								  "$DefaultTheme" }
 #define LSD_NW_NUM 3
 #define LSD_NW_SRC { "lsdnw.cpp", "fun_head.h", "fun_head_fast.h" }
 #define LSD_DIR_NUM 8
@@ -199,19 +202,19 @@
 #define LSD_MIN_NUM 3
 #define LSD_MIN_FILES { "src/icons", "src/themes", "src/interf.cpp", \
 						"src/analysis.cpp" }
-#define LSD_WIN_NUM MODEL_INFO_NUM - 3
+#define LSD_WIN_NUM MODEL_TXT_INFO_NUM - 3
 #define LSD_WIN_NAME { "lsd", "log", "str", "da", "deb", "lat", "plt", "dap" }
-#define MODEL_INFO_NUM 16
-#define MODEL_INFO_NAME { "modelName", "modelVersion", "modelDate", \
-						  "lsdGeom", "logGeom", "strGeom", \
-						  "daGeom", "debGeom", "latGeom", \
-						  "pltGeom", "dapGeom", "lastConf", \
-						  "lastObj", "lastList", "lastItem", "lastFirst" }
-#define MODEL_INFO_DEFAULT { "(no name)", "1.0", "[ current_date ]", \
-							 "#", "#", "#", \
-							 "#", "#", "#", \
-							 "#", "#", "#", \
-							 "Root", "1", "0", "0" }
+#define MODEL_TXT_INFO_NUM 16
+#define MODEL_TXT_INFO_NAME { "modelName", "modelVersion", "modelDate", \
+							  "lsdGeom", "logGeom", "strGeom", \
+							  "daGeom", "debGeom", "latGeom", \
+							  "pltGeom", "dapGeom", "lastConf", \
+							  "lastObj", "lastList", "lastItem", "lastFirst" }
+#define MODEL_TXT_INFO_DEFAULT { "(no name)", "1.0", "[ current_date ]", \
+								 "#", "#", "#", \
+								 "#", "#", "#", \
+								 "#", "#", "#", \
+								 "Root", "1", "0", "0" }
 #define TK_WIN_NUM 10
 #define TK_WIN_NAME { ".", ".log", ".str", ".inid", ".inin", ".da", ".deb", ".lat", ".plt", ".dap" }
 #define WIN_COMP_NUM 2
@@ -247,9 +250,10 @@ namespace gui
 	extern bool unsavedSense;			// control for unsaved sensitivity data
 	extern char *eq_txt;				// equation file content
 	extern char *sens_file;				// current sensitivity analysis file
+	extern char cfg_path[ ];			// path of LSD configuration file
 	extern char eq_file[ ];				// equation file name
 	extern char err_file[ ];			// error log file name
-	extern char path_sens[ ];			// path of last used sensitivity directory
+	extern char sens_path[ ];			// path of last used sensitivity directory
 	extern const char *lmm_defaults[ ];	// GUI constant string arrays
 	extern const char *lmm_options[ ];
 	extern const char *lsd_nw_src[ ];
@@ -306,8 +310,8 @@ namespace gui
 	bool expr_eq( const char *tcl_exp, const char *c_str );
 	bool get_bool( const char *tcl_var, bool *var = NULL );
 	bool get_precompiled_flag( const char *exec, bool nw = false );
-	bool load_lmm_options( void );
-	bool load_model_info( const char *path );
+	bool load_lsd_options( void );
+	bool load_model_options( const char *path );
 	bool load_prev_configuration( void );
 	bool make_no_window( void );
 	bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz );
@@ -480,8 +484,8 @@ namespace gui
 	void unset_shortcuts_run( const char *window );
 	void update_bounds( void );
 	void update_descr_dict( void );
-	void update_lmm_options( bool justLmmGeom = false );
-	void update_model_info( bool fix = false );
+	void update_lsd_options( bool justLmmGeom = false );
+	void update_model_options( bool fix = false );
 	void update_more_tab( bool adding = false );
 	void NOLH_clear( void );
 	FILE *search_all_sources( char *str );

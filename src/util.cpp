@@ -310,7 +310,7 @@ void gui::error_hard_helper( const char *boxTitle, const char *boxText, const ch
 		if ( currObj != NULL )
 			currObj->save_pos( );		// save browser position in structure
 
-		update_model_info( );			// save windows positions if appropriate
+		update_model_options( );		// save windows positions if appropriate
 	}
 }
 

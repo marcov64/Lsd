@@ -80,7 +80,7 @@ int gui::load_gui( const char **argv )
 		if ( argv[ i ][ 0 ] != '-' || ( argv[ i ][ 1 ] != 'f' && argv[ i ][ 1 ] != 'c' ) )
 		{
 			log_tcl_error( true, "Command line parameters", "Invalid option, available options: -f MODEL_NAME / -c MAX_THREADS" );
-			return 5;
+			return 7;
 		}
 
 		if ( argv[ i ][ 1 ] == 'f' )
@@ -120,7 +120,7 @@ int gui::load_gui( const char **argv )
 	Tcl_LinkVar( interp, "deb_t", ( char * ) & sim.deb_t, TCL_LINK_INT );
 
 	// load/check LMM configuration file
-	i = load_lmm_options( );
+	i = load_lsd_options( );
 
 	// load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 	choice = 0;
@@ -147,7 +147,7 @@ int gui::load_gui( const char **argv )
 
 	// fix non-existent or old options file for new options
 	if ( i == 0 )
-		update_lmm_options( );			// update config file
+		update_lsd_options( );			// update config file
 
 	// create a Tcl command that calls the C discard_change function before killing LSD
 	Tcl_CreateCommand( interp, "discard_change", Tcl_discard_change, NULL, NULL );
@@ -185,8 +185,8 @@ int gui::load_gui( const char **argv )
 	eq_txt = load_eqfile( );
 
 	// load/check model information file and fix if required
-	if ( ! load_model_info( lsd::model_path ) )
-		update_model_info( true );
+	if ( ! load_model_options( lsd::model_path ) )
+		update_model_options( true );
 
 	// check model configuration file
 	if ( eval_bool( "[ info exists lastConf ] && [ file exists $lastConf ] && [ file isfile $lastConf ]" ) )
@@ -2076,7 +2076,7 @@ bool gui::discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 	if ( currObj != NULL )
 		currObj->save_pos( );	// save browser position in structure
 
-	update_model_info( );		// save windows positions if appropriate
+	update_model_options( );	// save windows positions if appropriate
 
 	return true;
 }

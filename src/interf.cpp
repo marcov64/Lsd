@@ -3614,12 +3614,12 @@ lsd::object *gui::operate( lsd::object *r )
 						break;
 
 				// detect the need of a new save path and create it if required
-				if ( need_res_dir( sim.conf_path, sim.conf_name, path_sens, MAX_PATH_LENGTH ) )
-					create_res_dir( path_sens );
+				if ( need_res_dir( sim.conf_path, sim.conf_name, sens_path, MAX_PATH_LENGTH ) )
+					create_res_dir( sens_path );
 
 				// ask to clean existing files before proceeding if required
-				if ( check_res_dir( path_sens, sim.conf_name ) && sensitivity_clean_dir( path_sens ) )
-					clean_res_dir( path_sens, sim.conf_name );
+				if ( check_res_dir( sens_path, sim.conf_name ) && sensitivity_clean_dir( sens_path ) )
+					clean_res_dir( sens_path, sim.conf_name );
 
 				// save the current object & cursor position for quick reload
 				r->save_pos( );
@@ -3631,7 +3631,7 @@ lsd::object *gui::operate( lsd::object *r )
 				stop = false;
 				cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\"  %d { set stop true }", ptsSa );
 
-				sensitivity_sequential( &findexSens, sim.sens, 1.0, path_sens );
+				sensitivity_sequential( &findexSens, sim.sens, 1.0, sens_path );
 
 				cmd( "destroytop .psa" );
 
@@ -3639,7 +3639,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 				// if succeeded, explain user how to proceed
 				if ( ! stop )
-					sensitivity_created( path_sens, lsd::clean_file( sim.conf_name ), 1 );
+					sensitivity_created( sens_path, lsd::clean_file( sim.conf_name ), 1 );
 				else
 					findexSens = 0;					// don't consider for appending
 
@@ -3683,13 +3683,13 @@ lsd::object *gui::operate( lsd::object *r )
 				Tcl_LinkVar( interp, "fracMC", ( char * ) & fracMC, TCL_LINK_DOUBLE );
 
 				// detect the need of a new save path
-				subDir = need_res_dir( sim.conf_path, sim.conf_name, path_sens, MAX_PATH_LENGTH );
+				subDir = need_res_dir( sim.conf_path, sim.conf_name, sens_path, MAX_PATH_LENGTH );
 
 				cmd( "newtop .s \"MC Point Sampling\" { set choice 2 }" );
 
 				cmd( "ttk::frame .s.p" );
 				cmd( "ttk::label .s.p.l -text \"Output path\"" );
-				cmd( "ttk::label .s.p.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", path_sens );
+				cmd( "ttk::label .s.p.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", sens_path );
 				cmd( "pack .s.p.l .s.p.w" );
 
 				cmd( "ttk::frame .s.i" );
@@ -3737,11 +3737,11 @@ lsd::object *gui::operate( lsd::object *r )
 
 				// create a new save path if required
 				if ( subDir )
-					create_res_dir( path_sens );
+					create_res_dir( sens_path );
 
 				// ask to clean existing files before proceeding if required
-				if ( check_res_dir( path_sens, sim.conf_name ) && sensitivity_clean_dir( path_sens ) )
-					clean_res_dir( path_sens, sim.conf_name );
+				if ( check_res_dir( sens_path, sim.conf_name ) && sensitivity_clean_dir( sens_path ) )
+					clean_res_dir( sens_path, sim.conf_name );
 
 				// save the current object & cursor position for quick reload
 				r->save_pos( );
@@ -3756,7 +3756,7 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\" %ld { set stop true }", ( long ) ( fracMC * maxMC ) );
 
 				sim.init_random( sim.seed );		// reset random number generator
-				sensitivity_sequential( &findexSens, sim.sens, fracMC, path_sens );
+				sensitivity_sequential( &findexSens, sim.sens, fracMC, sens_path );
 
 				cmd( "destroytop .psa" );
 
@@ -3764,7 +3764,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 				// if succeeded, explain user how to proceed
 				if ( ! stop )
-					sensitivity_created( path_sens, lsd::clean_file( sim.conf_name ), 1 );
+					sensitivity_created( sens_path, lsd::clean_file( sim.conf_name ), 1 );
 				else
 					findexSens = 0;					// don't consider for appending
 
@@ -3803,7 +3803,7 @@ lsd::object *gui::operate( lsd::object *r )
 				lab1 = NOLH_valid_tables( varSA, ch, 2 * MAX_LINE_SIZE );
 
 				// detect the need of a new save path
-				subDir = need_res_dir( sim.conf_path, sim.conf_name, path_sens, MAX_PATH_LENGTH );
+				subDir = need_res_dir( sim.conf_path, sim.conf_name, sens_path, MAX_PATH_LENGTH );
 
 				cmd( "set extdoe 0" );	// flag for using external DoE file
 				cmd( "set NOLHfile \"NOLH.csv\"" );
@@ -3815,7 +3815,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 				cmd( "ttk::frame .s.p" );
 				cmd( "ttk::label .s.p.l -text \"Output path\"" );
-				cmd( "ttk::label .s.p.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", path_sens );
+				cmd( "ttk::label .s.p.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", sens_path );
 				cmd( "pack .s.p.l .s.p.w" );
 
 				cmd( "ttk::frame .s.o" );
@@ -3856,11 +3856,11 @@ lsd::object *gui::operate( lsd::object *r )
 
 				// create a new save path if required
 				if ( subDir )
-					create_res_dir( path_sens );
+					create_res_dir( sens_path );
 
 				// ask to clean existing files before proceeding if required
-				if ( check_res_dir( path_sens, sim.conf_name ) && sensitivity_clean_dir( path_sens ) )
-					clean_res_dir( path_sens, sim.conf_name );
+				if ( check_res_dir( sens_path, sim.conf_name ) && sensitivity_clean_dir( sens_path ) )
+					clean_res_dir( sens_path, sim.conf_name );
 
 				if ( ! get_bool( "extdoe" ) )
 					strcpy( NOLHfile, "" );
@@ -3870,14 +3870,14 @@ lsd::object *gui::operate( lsd::object *r )
 				num = ( sscanf( get_str( "doesize" ), "%d\u00D7", & j ) > 0 ) ? j : 0;
 
 				// adjust an NOLH design of experiment (DoE) for the sensitivity data
-				doe = new design( sim.sens, 1, NOLHfile, path_sens, 1, get_bool( "doeext" ) ? -1 : 0, num );
+				doe = new design( sim.sens, 1, NOLHfile, sens_path, 1, get_bool( "doeext" ) ? -1 : 0, num );
 
 				if ( doe -> n == 0 )					// DoE configuration is not ok?
 				{
 					cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration error\" -detail \"It was not possible to create a Non Orthogonal Latin Hypercube (NOLH) Design of Experiment (DoE) for the current sensitivity configuration. If the number of variables (factors) is large than 29, an external NOLH has to be provided in the file NOLH.csv (empty lines not allowed).\"" );
 
 					if ( subDir )
-						cmd( "catch { file delete -force \"%s\" }", path_sens );
+						cmd( "catch { file delete -force \"%s\" }", sens_path );
 
 					delete doe;
 					break;
@@ -3889,7 +3889,7 @@ lsd::object *gui::operate( lsd::object *r )
 					if ( sensitivity_too_large( doe -> n ) )
 					{
 						if ( subDir )
-							cmd( "catch { file delete -force \"%s\" }", path_sens );
+							cmd( "catch { file delete -force \"%s\" }", sens_path );
 
 						delete doe;
 						break;
@@ -3902,7 +3902,7 @@ lsd::object *gui::operate( lsd::object *r )
 				// create a design of experiment (DoE) for the sensitivity data
 				cmd( "focustop .log" );
 
-				sensitivity_doe( &findexSens, doe, path_sens );
+				sensitivity_doe( &findexSens, doe, sens_path );
 				delete doe;
 
 				// now reload the previously existing configuration
@@ -3952,7 +3952,7 @@ lsd::object *gui::operate( lsd::object *r )
 				Tcl_LinkVar( interp, "sizMC", ( char * ) & sizMC, TCL_LINK_INT );
 
 				// detect the need of a new save path
-				subDir = need_res_dir( sim.conf_path, sim.conf_name, path_sens, MAX_PATH_LENGTH );
+				subDir = need_res_dir( sim.conf_path, sim.conf_name, sens_path, MAX_PATH_LENGTH );
 
 				cmd( "set applst 1" );	// flag for appending to existing configuration files
 
@@ -3960,7 +3960,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 				cmd( "ttk::frame .s.p" );
 				cmd( "ttk::label .s.p.l -text \"Output path\"" );
-				cmd( "ttk::label .s.p.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", path_sens );
+				cmd( "ttk::label .s.p.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", sens_path );
 				cmd( "pack .s.p.l .s.p.w" );
 
 				cmd( "ttk::frame .s.i" );
@@ -4009,19 +4009,19 @@ lsd::object *gui::operate( lsd::object *r )
 
 				// create a new save path if required
 				if ( subDir )
-					create_res_dir( path_sens );
+					create_res_dir( sens_path );
 
 				// ask to clean existing files before proceeding if required
-				if ( findexSens == 1 && check_res_dir( path_sens, sim.conf_name ) && sensitivity_clean_dir( path_sens ) )
-					clean_res_dir( path_sens, sim.conf_name );
+				if ( findexSens == 1 && check_res_dir( sens_path, sim.conf_name ) && sensitivity_clean_dir( sens_path ) )
+					clean_res_dir( sens_path, sim.conf_name );
 
 				// save the current object & cursor position for quick reload
 				r->save_pos( );
 
 				// check if design file numbering should pick-up from previously generated files
 				// adjust a design of experiment (DoE) for the sensitivity data
-				doe = new design( sim.sens, 2, "", path_sens, findexSens, sizMC );
-				sensitivity_doe( &findexSens, doe, path_sens );
+				doe = new design( sim.sens, 2, "", sens_path, findexSens, sizMC );
+				sensitivity_doe( &findexSens, doe, sens_path );
 				delete doe;
 
 				// now reload the previously existing configuration
@@ -4066,13 +4066,13 @@ lsd::object *gui::operate( lsd::object *r )
 				Tcl_LinkVar( interp, "nSampl", ( char * ) & nSampl, TCL_LINK_INT );
 
 				// detect the need of a new save path
-				subDir = need_res_dir( sim.conf_path, sim.conf_name, path_sens, MAX_PATH_LENGTH );
+				subDir = need_res_dir( sim.conf_path, sim.conf_name, sens_path, MAX_PATH_LENGTH );
 
 				cmd( "newtop .s \"Elementary Effects Sampling\" { set choice 2 }" );
 
 				cmd( "ttk::frame .s.o" );
 				cmd( "ttk::label .s.o.l -text \"Output path\"" );
-				cmd( "ttk::label .s.o.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", path_sens );
+				cmd( "ttk::label .s.o.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", sens_path );
 				cmd( "pack .s.o.l .s.o.w" );
 
 				cmd( "ttk::frame .s.i" );
@@ -4148,19 +4148,19 @@ lsd::object *gui::operate( lsd::object *r )
 
 				// create a new save path if required
 				if ( subDir )
-					create_res_dir( path_sens );
+					create_res_dir( sens_path );
 
 				// ask to clean existing files before proceeding if required
-				if ( check_res_dir( path_sens, sim.conf_name ) && sensitivity_clean_dir( path_sens ) )
-					clean_res_dir( path_sens, sim.conf_name );
+				if ( check_res_dir( sens_path, sim.conf_name ) && sensitivity_clean_dir( sens_path ) )
+					clean_res_dir( sens_path, sim.conf_name );
 
 				// save the current object & cursor position for quick reload
 				r->save_pos( );
 				findexSens = 1;
 
 				// adjust a design of experiment (DoE) for the sensitivity data
-				doe = new design( sim.sens, 3, "", path_sens, findexSens, nSampl, nLevels, jumpSz, nTraj );
-				sensitivity_doe( &findexSens, doe, path_sens );
+				doe = new design( sim.sens, 3, "", sens_path, findexSens, nSampl, nLevels, jumpSz, nTraj );
+				sensitivity_doe( &findexSens, doe, sens_path );
 				delete doe;
 
 				// now reload the previously existing configuration
@@ -4542,7 +4542,7 @@ lsd::object *gui::operate( lsd::object *r )
 			// get configuration files to use
 			if ( choice == 1 )							// use current configuration files
 			{
-				if ( strlen( path_sens ) == 0 || strlen( sim.conf_name ) == 0 )
+				if ( strlen( sens_path ) == 0 || strlen( sim.conf_name ) == 0 )
 				{
 					cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid simulation folder or name\" -detail \"Please try again.\"" );
 					findexSens = 0;						// no sensitivity created
@@ -4553,7 +4553,7 @@ lsd::object *gui::operate( lsd::object *r )
 				fnext = findexSens;
 				findexSens = 0;
 				lsd::strcpyn( out_file, sim.conf_name, MAX_PATH_LENGTH );
-				lsd::strcpyn( out_dir, path_sens, MAX_PATH_LENGTH );
+				lsd::strcpyn( out_dir, sens_path, MAX_PATH_LENGTH );
 				cmd( "set res \"%s\"", sim.conf_name );
 				cmd( "set path \"%s\"", sim.conf_path );
 			}

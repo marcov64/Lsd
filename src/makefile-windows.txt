@@ -3,6 +3,7 @@ SRC_DIR=$(LSDROOT)/$(SRC)/
 LIB_DIR=$(SRC_DIR)lib/
 CLIB_DIR=$(SRC_DIR)clib/
 OBJ_DIR=$(TMP)/$(TARGET)/
+CFG_DIR=$(USERPROFILE)/AppData/Local/LSD/
 INCLUDE=-I$(LSDROOT)/$(SRC) -I$(PATH_TCLTK_HEADER) -I$(PATH_HEADER)
 CUR_DIR:=$(notdir $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST))))))/
 
@@ -24,8 +25,8 @@ else
 endif
 
 # set general dependencies
-DEP_GUI=$(SRC_DIR)LSD.h $(SRC_DIR)system_options.txt
-DEP_LIB=$(LIB_DIR)libLSD.h $(SRC_DIR)system_options.txt
+DEP_GUI=$(SRC_DIR)LSD.h $(CFG_DIR)system_options.txt
+DEP_LIB=$(LIB_DIR)libLSD.h $(CFG_DIR)system_options.txt
 
 # OS commands and definitions
 EXE_EXT=.exe

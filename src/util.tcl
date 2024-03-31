@@ -63,13 +63,13 @@ proc LsdEnv { sep } {
 # Get GCC compiler version string
 #************************************************
 proc gccVersion { } {
-	global RootLsd LsdSrc SYSTEM_OPTIONS gccCmd
+	global cfgDir SYSTEM_TXT_OPTIONS gccCmd
 
-	if { ! [ file exists "$RootLsd/$LsdSrc/$SYSTEM_OPTIONS" ] } {
+	if { ! [ file exists "$cfgDir/$SYSTEM_TXT_OPTIONS" ] } {
 		return "(system options missing)"
 	}
 
-	set f [ open "$RootLsd/$LsdSrc/$SYSTEM_OPTIONS" r ]
+	set f [ open "$cfgDir/$SYSTEM_TXT_OPTIONS" r ]
 	set a [ read -nonewline $f ]
 	close $f
 
@@ -1038,13 +1038,13 @@ set macYes [ list "-framework" "-lz" "-lpthread" "LSDROOT" "SRC" "PATH_TCL_HEADE
 set macNo  [ list "86" "8.6" "windres" "-mthreads" "-mwindows" "PATH_TCLTK_HEADER" "PATH_TCL_LIB" "PATH_TK_LIB" "TCL_LIB" "LIBS" "WRC" ]
 
 proc check_sys_opt { } {
-	global RootLsd LsdSrc CurPlatform winYes winNo winYes winNo linuxYes linuxNo macYes macNo SYSTEM_OPTIONS
+	global CurPlatform winYes winNo winYes winNo linuxYes linuxNo macYes macNo cfgDir SYSTEM_TXT_OPTIONS
 
-	if { ! [ file exists "$RootLsd/$LsdSrc/$SYSTEM_OPTIONS" ] } {
-		return "File '$SYSTEM_OPTIONS' not found (click 'Default' button to recreate it)"
+	if { ! [ file exists "$cfgDir/$SYSTEM_TXT_OPTIONS" ] } {
+		return "File '$SYSTEM_TXT_OPTIONS' not found (click 'Default' button to recreate it)"
 	}
 
-	set f [ open "$RootLsd/$LsdSrc/$SYSTEM_OPTIONS" r ]
+	set f [ open "$cfgDir/$SYSTEM_TXT_OPTIONS" r ]
 	set options [ read -nonewline $f ]
 	close $f
 

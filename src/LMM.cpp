@@ -81,15 +81,16 @@ namespace lsd
 namespace gui
 {
 	bool tk_ok = false;			// control for tk_ready to operate
+	char cfg_path[ MAX_PATH_LENGTH ] = "";// path of LSD configuration file
 	char err_file[ ] = "LMM.err";// error log file name
 	int platform = 0;			// OS platform (1=Linux, 2=Mac, 3=Windows)
 	Tcl_Interp *interp = NULL;	// Tcl standard interpreter pointer
 
-	const char *model_info[ MODEL_INFO_NUM ] = MODEL_INFO_NAME;
-	const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;
-	const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
+	const char *model_info[ MODEL_TXT_INFO_NUM ] = MODEL_TXT_INFO_NAME;
+	const char *lmm_defaults[ LMM_TXT_OPTIONS_NUM ] = LMM_TXT_OPTIONS_DEFAULT;
+	const char *lmm_options[ LMM_TXT_OPTIONS_NUM ] = LMM_TXT_OPTIONS_NAME;
 	const char *lsd_nw_src[ LSD_NW_NUM ] = LSD_NW_SRC;
-	const char *model_defaults[ MODEL_INFO_NUM ] = MODEL_INFO_DEFAULT;
+	const char *model_defaults[ MODEL_TXT_INFO_NUM ] = MODEL_TXT_INFO_DEFAULT;
 }
 
 // LMM functions
@@ -186,7 +187,7 @@ int modman( int argn, const char **argv )
 	Tcl_LinkVar( gui::interp, "recolor_all", ( char * ) &recolor_all, TCL_LINK_BOOLEAN);
 
 	// load/check configuration files
-	i = gui::load_lmm_options( );
+	i = gui::load_lsd_options( );
 	gui::check_option_files( true );
 
 	// load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
@@ -217,7 +218,7 @@ int modman( int argn, const char **argv )
 
 	// fix non-existent or old options file for new options
 	if ( i == 0 )
-		gui::update_lmm_options( );				// update config file
+		gui::update_lsd_options( );				// update config file
 
 	// create a Tcl command that calls the C discard_change function before killing LMM
 	Tcl_CreateCommand( gui::interp, "discard_change", gui::Tcl_discard_change, NULL, NULL );
@@ -853,7 +854,7 @@ int modman( int argn, const char **argv )
 	// exit LMM
 	if ( choice == 1 )
 	{
-		gui::update_lmm_options( true );		// update window position, if required
+		gui::update_lsd_options( true );		// update window position, if required
 		return 0;
 	}
 
@@ -1405,7 +1406,7 @@ int modman( int argn, const char **argv )
 			goto loop;
 		}
 
-		cmd( "if { ! [ catch { set f [ open $modelDir/$MODEL_OPTIONS r ] } ] } { \
+		cmd( "if { ! [ catch { set f [ open $modelDir/$MODEL_TXT_OPTIONS r ] } ] } { \
 				set a [ string trim [ read $f ] ]; \
 				close $f; \
 				set pos [ string first \"SWITCH_CC=\" $a ]; \
@@ -1497,13 +1498,13 @@ int modman( int argn, const char **argv )
 		cmd( "destroytop .mm" );	// close compilation results, if open
 
 		// prevent creating new groups in LSD directory
-		cmd( "if { [ string equal $groupDir [ pwd ] ] && [ file exists \"$groupDir/$LsdNew/$GROUP_INFO\" ] } \
+		cmd( "if { [ string equal $groupDir [ pwd ] ] && [ file exists \"$groupDir/$LsdNew/$GROUP_TXT_INFO\" ] } \
 				{	set answer [ ttk::messageBox -parent . -type okcancel -title Warning \
 					-icon warning -default ok -message \"Invalid parent group\" \
 					-detail \"Cannot create group/model in the Root group. Press 'OK' to change to the '$LsdNew' group before proceeding.\" ]; \
 					if [ string equal $answer ok ] { \
 						set groupDir \"$groupDir/$LsdNew\"; \
-						set f [ open \"$groupDir/$GROUP_INFO\" r ]; \
+						set f [ open \"$groupDir/$GROUP_TXT_INFO\" r ]; \
 						set modelGroup \"[ gets $f ]\"; \
 						close $f; \
 						set choice 1 \
@@ -1628,7 +1629,7 @@ int modman( int argn, const char **argv )
 			cmd( "file mkdir \"$groupDir/$mdir\"" );
 			cmd( "cd \"$groupDir/$mdir\"" );
 			cmd( "set groupDir \"$groupDir/$mdir\"" );
-			cmd( "set f [ open $GROUP_INFO w ]" );
+			cmd( "set f [ open $GROUP_TXT_INFO w ]" );
 			cmd( "puts -nonewline $f \"$mname\"" );
 			cmd( "close $f" );
 			cmd( "set f [ open $DESCRIPTION w ]" );
@@ -1733,7 +1734,7 @@ int modman( int argn, const char **argv )
 
 			if ( ! found )
 			{
-				if ( ! gui::load_model_info( str ) )
+				if ( ! gui::load_model_options( str ) )
 					cmd( "set modelName $curdir; set modelVersion \"1.0\"" );
 
 				cmd( "set comp [ string compare $modelName $mname ]" );
@@ -1782,7 +1783,7 @@ int modman( int argn, const char **argv )
 
 		// create the model options and info files
 		gui::check_option_files( );
-		gui::update_model_info( true );
+		gui::update_model_options( true );
 
 		cmd( ".m.file entryconf 2 -state normal" );
 		cmd( ".m.file entryconf 3 -state normal" );
@@ -4248,7 +4249,7 @@ int modman( int argn, const char **argv )
 		cmd( "set modelDir [ lindex $ldn $result ]" );
 		cmd( "set fileDir $modelDir" );
 
-		gui::load_model_info( gui::get_str( "modelDir" ) );
+		gui::load_model_options( gui::get_str( "modelDir" ) );
 
 		cmd( ".m.file entryconf 2 -state normal" );
 		cmd( ".m.file entryconf 3 -state normal" );
@@ -4367,7 +4368,7 @@ int modman( int argn, const char **argv )
 
 			if ( ! found )
 			{
-				if ( ! gui::load_model_info( str ) )
+				if ( ! gui::load_model_options( str ) )
 					cmd( "set modelName $curdir; set modelVersion \"1.0\"" );
 
 				cmd( "set comp [ string compare $modelName $mname ]" );
@@ -4395,7 +4396,7 @@ int modman( int argn, const char **argv )
 		cmd( "set modelDate \"\"" );
 
 		// create the model info file
-		gui::update_model_info( true );
+		gui::update_model_options( true );
 
 		cmd( "ttk::messageBox -parent . -type ok -title \"Save Model As...\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: [ file nativename $modelDir ]\"" );
 
@@ -4458,8 +4459,8 @@ int modman( int argn, const char **argv )
 			goto loop;
 		}
 
-		if ( ! gui::load_model_info( gui::get_str( "modelDir" ) ) )
-			gui::update_model_info( true );			// fix the model info file
+		if ( ! gui::load_model_options( gui::get_str( "modelDir" ) ) )
+			gui::update_model_options( true );			// fix the model info file
 
 		cmd( "set mname $modelName" );
 		cmd( "set mver $modelVersion" );
@@ -4528,7 +4529,7 @@ int modman( int argn, const char **argv )
 			cmd( "if { [ string is print -strict $mdate ] } { set modelDate \"$mdate\" } { set modelDate \"[ current_date ]\" }" );
 
 			// update the model info file
-			gui::update_model_info( true );
+			gui::update_model_options( true );
 		}
 
 		choice = 0;
@@ -4567,10 +4568,10 @@ int modman( int argn, const char **argv )
 	// System Options
 	if ( choice == 47 )
 	{
-		cmd( "set choice [ file exists \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" ]" );
+		cmd( "set choice [ file exists \"$cfgDir/$SYSTEM_TXT_OPTIONS\" ]" );
 		if ( choice == 1 )
 		{
-			cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" r ]" );
+			cmd( "set f [ open \"$cfgDir/$SYSTEM_TXT_OPTIONS\" r ]" );
 			cmd( "set a [ string trim [ read $f ] ]" );
 			cmd( "close $f" );
 			choice = 0;
@@ -4630,7 +4631,7 @@ int modman( int argn, const char **argv )
 
 		if ( choice == 1 )
 		{
-			cmd( "set f [ open \"$RootLsd/$LsdSrc/$SYSTEM_OPTIONS\" w ]" );
+			cmd( "set f [ open \"$cfgDir/$SYSTEM_TXT_OPTIONS\" w ]" );
 			cmd( "puts $f [ string trim [ .l.t.text get 1.0 end ] ]" );
 			cmd( "close $f" );
 			choice = 46;	//go to create makefile
@@ -4661,7 +4662,7 @@ int modman( int argn, const char **argv )
 		cmd( "cd \"$modelDir\"" );
 
 		cmd( "set b \"%s\"", s );
-		cmd( "set f [ open $MODEL_OPTIONS r ]" );
+		cmd( "set f [ open $MODEL_TXT_OPTIONS r ]" );
 		cmd( "set a [ string trim [ read $f ] ]" );
 		cmd( "close $f" );
 
@@ -4827,7 +4828,7 @@ int modman( int argn, const char **argv )
 
 		if ( choice == 1 )
 		{
-			cmd( "set f [ open $MODEL_OPTIONS w ]" );
+			cmd( "set f [ open $MODEL_TXT_OPTIONS w ]" );
 			cmd( "puts $f [ string trim [ .l.t.text get 1.0 end ] ]" );
 			cmd( "close $f" );
 			choice = 46;		//go to create makefile
@@ -4853,8 +4854,8 @@ int modman( int argn, const char **argv )
 		s = gui::get_str( "modelName" );
 		if ( s != NULL && strcmp( s, "" ) )
 		{
-			if ( ! gui::load_model_info( gui::get_str( "modelDir" ) ) )
-				gui::update_model_info( true );			// fix the model info file
+			if ( ! gui::load_model_options( gui::get_str( "modelDir" ) ) )
+				gui::update_model_options( true );	// fix the model info file
 
 			s = gui::get_fun_name( str, MAX_PATH_LENGTH );
 			if ( s != NULL && strcmp( s, "" ) )
@@ -4887,7 +4888,7 @@ int modman( int argn, const char **argv )
 	{
 		cmd( "updateTheme" );
 
-		for ( i = 1; i <= LMM_OPTIONS_NUM; ++i )
+		for ( i = 1; i <= LMM_TXT_OPTIONS_NUM; ++i )
 		{
 			cmd( "set temp_var%d \"$%s\"", i, gui::lmm_options[ i - 1 ] );
 			cmd( "set default_var%d \"%s\"", i, gui::lmm_defaults[ i - 1 ] );
@@ -5048,10 +5049,10 @@ int modman( int argn, const char **argv )
 					ttk::messageBox -parent . -icon warning -title Warning -type ok -message \"LMM restart required\" -detail \"Please restart LMM for changes to be applied.\" \
 				}" );
 
-			for ( i = 1; i <= LMM_OPTIONS_NUM; ++i )
+			for ( i = 1; i <= LMM_TXT_OPTIONS_NUM; ++i )
 				cmd( "set %s \"$temp_var%d\"", gui::lmm_options[ i - 1 ], i );
 
-			gui::update_lmm_options( );					// update config file
+			gui::update_lsd_options( );					// update config file
 
 			// adjust text styles and apply
 			cmd( "ttk::style configure fixed.TText -font [ font create -family \"$fonttype\" -size $dim_character ]" );
@@ -5087,12 +5088,12 @@ int modman( int argn, const char **argv )
 		}
 
 		// Create model options file if it doesn't exist
-		cmd( "set choice [ file exists \"$modelDir/$MODEL_OPTIONS\" ]" );
+		cmd( "set choice [ file exists \"$modelDir/$MODEL_TXT_OPTIONS\" ]" );
 		if ( choice == 0 )
 			gui::make_makefile( );
 
 		choice = 0;
-		s = gui::eval_str( "[ file nativename \"$modelDir/$MODEL_OPTIONS\" ]" );
+		s = gui::eval_str( "[ file nativename \"$modelDir/$MODEL_TXT_OPTIONS\" ]" );
 		if ( s == NULL || ( f = fopen( s, "r" ) ) == NULL )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
@@ -5211,7 +5212,7 @@ int modman( int argn, const char **argv )
 			// try to open an extra file defined by the user
 			if ( choice == 0 )
 			{	// open the configuration file
-				s = gui::eval_str( "[ file nativename \"$modelDir/$MODEL_OPTIONS\" ]" );
+				s = gui::eval_str( "[ file nativename \"$modelDir/$MODEL_TXT_OPTIONS\" ]" );
 				if ( s == NULL || strlen( s ) == 0 || ( f = fopen( s, "r" ) ) == NULL )
 				{
 					cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model' and then try again.\"" );

@@ -738,12 +738,12 @@ void gui::read_eqfile_name( char *s, int sz )
 	char lab[ MAX_PATH_LENGTH ];
 	FILE *f;
 
-	snprintf( lab, MAX_PATH_LENGTH, "%s/%s", lsd::model_path, MODEL_OPTIONS );
+	snprintf( lab, MAX_PATH_LENGTH, "%s/%s", lsd::model_path, MODEL_TXT_OPTIONS );
 	f = fopen( lab, "r" );
 
 	if ( f == NULL )
 	{
-		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"File not found\" -detail \"File '$MODEL_OPTIONS' missing, cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"File not found\" -detail \"File '$MODEL_TXT_OPTIONS' at '%s' missing, cannot upload the equation file.\nYou may have to recreate your model configuration.\"", lsd::model_path );
 		return;
 	}
 
@@ -752,7 +752,7 @@ void gui::read_eqfile_name( char *s, int sz )
 	fclose( f );
 	if ( strncmp( lab, "FUN=", 4 ) != 0 )
 	{
-		cmd( "ttk::messageBox -parent . -type ok -title -title Error -icon error -message \"File corrupted\" -detail \"File '$MODEL_OPTIONS' has invalid contents, cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -title -title Error -icon error -message \"File corrupted\" -detail \"File '$MODEL_TXT_OPTIONS' at '%s' has invalid contents, cannot upload the equation file.\nYou may have to recreate your model configuration.\"", lsd::model_path );
 		return;
 	}
 
