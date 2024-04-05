@@ -79,7 +79,7 @@ It returns an object of class \code{state.sa.lsd}, which has \code{print}- and \
   \item{var.irf}{character: the name of the variable used in the impulse-response analysis (same as the \code{var.irf} argument in \code{\link{irf.lsd}}).
   }
 
-  \item{var.ref}{var.ref}{character: the name of the scale-reference variable used in the analysis (same as the \code{var.ref} argument in \code{\link{irf.lsd}}).
+  \item{var.ref}{character: the name of the scale-reference variable used in the analysis (same as the \code{var.ref} argument in \code{\link{irf.lsd}}).
   }
 
   \item{stat}{character: the Monte Carlo statistic used in the analysis (same as the \code{stat} argument in \code{\link{irf.lsd}}).
@@ -164,7 +164,7 @@ for( n in 1 : 500 ) {
 }
 # another uncorrelated var
 dataNoShock[ , "X4sq", ] <- dataShock[ , "X4sq", ] <- dataShock[ , "X4", ] ^ 2
-
+\donttest{
 # linear IRF analysis
 linearIRF <- irf.lsd( data = dataNoShock,       # non-shocked MC data
                       data.shock = dataShock,   # shocked data
@@ -181,6 +181,7 @@ stateSens <- state.sa.lsd( data = dataNoShock,  # non-shocked MC data
                            mtry = 3 )           # number of samples per node
 
 print( stateSens )                              # show sensitivity data
+}
 }
 
 \keyword{methods}

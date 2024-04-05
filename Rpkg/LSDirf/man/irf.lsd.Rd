@@ -219,7 +219,7 @@ for( n in 1 : 500 ) {
 }
 # another uncorrelated var
 dataNoShock[ , "X4sq", ] <- dataShock[ , "X4sq", ] <- dataShock[ , "X4", ] ^ 2
-
+\donttest{
 # linear IRF analysis
 linearIRF <- irf.lsd( data = dataNoShock,     # non-shocked MC data
                       data.shock = dataShock, # shocked data
@@ -230,6 +230,7 @@ linearIRF <- irf.lsd( data = dataNoShock,     # non-shocked MC data
 plot( linearIRF, irf.type = "cum.irf" )       # cumulative IRF plot
 
 print( linearIRF )                            # show IRF data
+}
 }
 
 \keyword{methods}
