@@ -22,7 +22,7 @@
 # Procedure to create top level new windows
 #************************************************
 proc newtop { w { name "" } { destroy { } } { par "." } { noglobkeys 0 } } {
-	global CurPlatform RootLsd parWndLst grabLst noParLst logWndFn colorsTheme activeplot
+	global CurPlatform lsd_root parWndLst grabLst noParLst logWndFn colorsTheme activeplot
 
 	destroytop $w
 	toplevel $w -background $colorsTheme(bg)
@@ -289,14 +289,14 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 # Destroy window, if it exists
 #************************************************
 proc destroytop w {
-	global restoreWin wndLst defaultFocus parWndLst grabLst noParLst logWndFn
+	global restore_geom wndLst defaultFocus parWndLst grabLst noParLst logWndFn
 
 	if { $w == "" || ! [ winfo exists $w ] } {
 		return
 	}
 
 	# save main windows sizes/positions
-	if { [ winfo viewable $w ] && [ info exists restoreWin ] && $restoreWin && [ lsearch $wndLst $w ] >= 0 } {
+	if { [ winfo viewable $w ] && [ info exists restore_geom ] && $restore_geom && [ lsearch $wndLst $w ] >= 0 } {
 		set curGeom [ geomtosave $w ]
 
 		if { $curGeom != "" } {
@@ -453,9 +453,9 @@ proc geomtosave { { w . } } {
 # screen or invalid and use the default if needed
 #************************************************
 proc checkgeom { geom defGeom screenWidth screenHeight } {
-	global restoreWin hfactMmin vfactMmin
+	global restore_geom hfactMmin vfactMmin
 
-	if { ! $restoreWin || $geom == "#" } {
+	if { ! $restore_geom || $geom == "#" } {
 		return $defGeom
 	} else {
 		set n [ scan $geom "%dx%d+%d+%d:%f+%f" width height decorationLeft decorationTop hScale vScale ]
@@ -485,7 +485,7 @@ proc checkgeom { geom defGeom screenWidth screenHeight } {
 # Adjust main windows to default size & positions
 #************************************************
 proc sizetop { { w all } } {
-	global wndLst hsizeBmin vsizeBmin hsizeL vsizeL hsizeLmin vsizeLmin hsizeGmin vsizeGmin hsizeAmin vsizeAmin hsizePmin vsizePmin hsizeDmin vsizeDmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn lmmGeom lsdGeom logGeom strGeom daGeom debGeom latGeom pltGeom dapGeom hfactM vfactM wndMenuHeight
+	global wndLst hsizeBmin vsizeBmin hsizeL vsizeL hsizeLmin vsizeLmin hsizeGmin vsizeGmin hsizeAmin vsizeAmin hsizePmin vsizePmin hsizeDmin vsizeDmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn lmm_geom lsdGeom logGeom strGeom daGeom debGeom latGeom pltGeom dapGeom hfactM vfactM wndMenuHeight
 
 	update idletasks
 
@@ -538,7 +538,7 @@ proc sizetop { { w all } } {
 
 					set defGeom "${W}x$H+$X+$Y"
 
-					wm geometry . [ checkgeom $lmmGeom $defGeom $screenWidth $screenHeight ]
+					wm geometry . [ checkgeom $lmm_geom $defGeom $screenWidth $screenHeight ]
 					wm minsize . $hsizeLmin $vsizeLmin
 					wm maxsize . [ winfo vrootwidth . ] [ winfo vrootheight . ]
 				}
@@ -718,7 +718,7 @@ proc deiconifytop { w { force no } } {
 # Set window icon
 #************************************************
 proc icontop { w type } {
-	global CurPlatform RootLsd LsdSrc lmmImg lsdImg iconExt
+	global CurPlatform lsd_root lsd_src lmmImg lsdImg iconExt
 
 	if { $type == "" } {
 		wm iconbitmap $w ""
@@ -727,17 +727,17 @@ proc icontop { w type } {
 
 	if [ string equal $CurPlatform windows ] {
 		if [ string equal $w . ] {
-			wm iconbitmap $w -default $RootLsd/$LsdSrc/icons/$type.ico
+			wm iconbitmap $w -default $lsd_root/$lsd_src/icons/$type.ico
 		} else {
-			wm iconbitmap $w $RootLsd/$LsdSrc/icons/$type.ico
+			wm iconbitmap $w $lsd_root/$lsd_src/icons/$type.ico
 		}
 	} elseif [ string equal $CurPlatform linux ] {
 		if [ string equal $w . ] {
 			wm iconphoto $w -default ${type}Img
-			wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
+			wm iconbitmap $w @$lsd_root/$lsd_src/icons/$type.xbm
 		} else {
 			wm iconphoto $w ${type}Img
-			wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
+			wm iconbitmap $w @$lsd_root/$lsd_src/icons/$type.xbm
 		}
 	}
 }

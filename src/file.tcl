@@ -23,7 +23,7 @@
 # are available and on the proper versions
 #************************************************
 proc check_components { } {
-	global CurPlatform RootLsd winGCC winDLL winTcl winTk linuxPkg linuxTyp inclPkg inclFile libPkg libFile linuxMissing xcode gnuplot multitail linuxPkgMiss linuxInclude linuxLib pathInclude pathLib existGCC existGCCsys existDLL existDLLsys msgGCC msgDLL winConflict gccInclude gccLib
+	global CurPlatform lsd_root winGCC winDLL winTcl winTk linuxPkg linuxTyp inclPkg inclFile libPkg libFile linuxMissing xcode gnuplot multitail linuxPkgMiss linuxInclude linuxLib pathInclude pathLib existGCC existGCCsys existDLL existDLLsys msgGCC msgDLL winConflict gccInclude gccLib
 
 	if { $CurPlatform eq "mac" } {
 
@@ -140,7 +140,7 @@ proc check_components { } {
 		set msgGCC ""
 		if { ! [ catch { set res [ exec where g++ ] } ] } {
 			foreach f [ split $res ] {
-				if { [ file dirname $f ] eq "$RootLsd/gnu/bin" } {
+				if { [ file dirname $f ] eq "$lsd_root/gnu/bin" } {
 					break
 				} else {
 					set existGCC [ lappend existGCC $f ]
@@ -175,7 +175,7 @@ proc check_components { } {
 		foreach dll $winDLL {
 			if { ! [ catch { set res [ exec where $dll ] } ] } {
 				foreach f [ split $res ] {
-					if { [ file dirname $f ] eq "$RootLsd/gnu/bin" } {
+					if { [ file dirname $f ] eq "$lsd_root/gnu/bin" } {
 						break
 					} else {
 						set existDLL [ lappend existDLL $f ]
@@ -769,12 +769,12 @@ proc browse_model { panel } {
 # OPEN_DIFF
 #************************************************
 proc open_diff { file1 file2 { file1name "" } { file2name "" } } {
-	global wish RootLsd LsdSrc diffApp diffAppType diffFile1name diffFile2name diffFile1 diffFile2 diffOptions termResult
+	global wish_exe lsd_root lsd_src diffApp diffAppType diffFile1name diffFile2name diffFile1 diffFile2 diffOptions termResult
 
-	set cmdline "$RootLsd/$LsdSrc/$diffApp $diffFile1 $file1 $diffFile2 $file2 $diffOptions $diffFile1name $file1name $diffFile2name $file2name"
+	set cmdline "$lsd_root/$lsd_src/$diffApp $diffFile1 $file1 $diffFile2 $file2 $diffOptions $diffFile1name $file1name $diffFile2name $file2name"
 
 	if { $diffAppType == 0 } {
-		set error [ open_terminal $cmdline $wish ]
+		set error [ open_terminal $cmdline $wish_exe ]
 	} elseif { $diffAppType == 1 } {
 		set error [ open_terminal $cmdline ]
 	}
@@ -792,7 +792,7 @@ proc open_diff { file1 file2 { file1name "" } { file2name "" } } {
 # Open external gnuplot application
 #************************************************
 proc open_gnuplot { { script "" } { errmsg "" } { persist false } { par ".da" } } {
-	global CurPlatform sysTerm gnuplotExe termResult
+	global CurPlatform sys_term gnuplotExe termResult
 
 	if { $persist } {
 		set opt ""
@@ -822,7 +822,7 @@ proc open_gnuplot { { script "" } { errmsg "" } { persist false } { par ".da" } 
 # OPEN_BROWSER
 #************************************************
 proc open_browser { dir fn } {
-	global HtmlBrowser CurPlatform termResult
+	global html_browser CurPlatform termResult
 
 	if { $dir eq "" } {
 		set fqn "$fn"
@@ -832,9 +832,9 @@ proc open_browser { dir fn } {
 
 	if { ! [ catch { set fqn [ file normalize "$fqn" ] } ] && [ file exists "$fqn" ] } {
 		if { $CurPlatform in [ list linux mac ] } {
-			set error [ open_terminal $fqn $HtmlBrowser ]
+			set error [ open_terminal $fqn $html_browser ]
 		} else {
-			set error [ open_terminal "$HtmlBrowser $fqn" ]
+			set error [ open_terminal "$html_browser $fqn" ]
 		}
 
 		if { $error } {
@@ -853,10 +853,10 @@ proc open_browser { dir fn } {
 # OPEN_TERMINAL
 #************************************************
 proc open_terminal { cmd { term "" } } {
-	global sysTerm CurPlatform termResult
+	global sys_term CurPlatform termResult
 
 	if { $term eq "" } {
-		set term $sysTerm
+		set term $sys_term
 	}
 
 	# separate command from options
@@ -884,9 +884,9 @@ proc open_terminal { cmd { term "" } } {
 # LSDHELP
 #************************************************
 proc LsdHelp { fn } {
-	global RootLsd
+	global lsd_root
 
-	open_browser "$RootLsd/Manual" "$fn"
+	open_browser "$lsd_root/Manual" "$fn"
 }
 
 
@@ -975,7 +975,7 @@ proc make_wait { } {
 # Start a makefile as a background task
 #************************************************
 proc make_background { target threads nw precompiled } {
-	global CurPlatform DefaultMakeExe RootLsd LsdGnu mainExe targetExe targetLib nwTarget prcmpTarget iniTime makePipe res
+	global CurPlatform DefaultMakeExe lsd_root mainExe targetExe targetLib nwTarget prcmpTarget iniTime makePipe res
 
 	if { $nw } {
 		set nwTarget 1

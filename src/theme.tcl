@@ -28,7 +28,7 @@
 # In Linux, only some themes are detected
 #************************************************
 proc isDarkTheme { } {
-	global tcl_platform CurPlatform darkThemeSuffixes winManLinux RootLsd LsdSrc env
+	global tcl_platform CurPlatform darkThemeSuffixes winManLinux lsd_root lsd_src env
 
 	if [ string equal $CurPlatform mac ] {
 		update idletasks
@@ -77,7 +77,7 @@ proc isDarkTheme { } {
 
 		} elseif { ( $wm eq "" || $wm eq "kde" || $wm eq "plasma" ) && \
 				   [ file exists "~/.config/kdeglobals" ] } {
-			source "$RootLsd/$LsdSrc/tklib/ini.tcl" ;	# load config file reader
+			source "$lsd_root/$lsd_src/tklib/ini.tcl" ;	# load config file reader
 			if { ! [ catch { set f [ ini::open "~/.config/kdeglobals" ] } ] && \
 				 ! [ catch { ini::value $f General Name } results ] } {
 				set theme $results
@@ -113,7 +113,7 @@ proc isDarkTheme { } {
 			}
 		} elseif { ( $wm eq "" || $wm eq "lxqt" ) && \
 				   [ file exists "~/.config/lxqt/lxqt.conf" ] } {
-			source "$RootLsd/$LsdSrc/tklib/ini.tcl" ;	# load config file reader
+			source "$lsd_root/$lsd_src/tklib/ini.tcl" ;	# load config file reader
 			if { ! [ catch { set f [ ini::open "~/.config/lxqt/lxqt.conf" ] } ] && \
 				 ! [ catch { ini::value $f Qt style } results ] } {
 				set theme $results
@@ -144,7 +144,7 @@ proc isDarkTheme { } {
 # if default theme is selected
 #************************************************
 proc updateTheme { } {
-	global CurPlatform DefaultTheme lsdTheme themeMac themeLinux \
+	global CurPlatform DefaultTheme lsd_theme themeMac themeLinux \
 		   themeLinuxDark themeWindows themeWindowsDark
 
 	if [ string equal $CurPlatform mac ] {
@@ -154,36 +154,36 @@ proc updateTheme { } {
 		set dark [ isDarkTheme ]
 		if { $dark == 1 } {
 			set DefaultTheme $themeWindowsDark
-			if { ! [ info exists lsdTheme ] || $lsdTheme eq $themeWindows } {
-				set lsdTheme $themeWindowsDark
+			if { ! [ info exists lsd_theme ] || $lsd_theme eq $themeWindows } {
+				set lsd_theme $themeWindowsDark
 			}
 		} elseif { $dark == 0 } {
 			set DefaultTheme $themeWindows
-			if { ! [ info exists lsdTheme ] || $lsdTheme eq $themeWindowsDark } {
-				set lsdTheme $themeWindows
+			if { ! [ info exists lsd_theme ] || $lsd_theme eq $themeWindowsDark } {
+				set lsd_theme $themeWindows
 			}
 		} else {
 			set DefaultTheme $themeWindows
-			if { ! [ info exists lsdTheme ] } {
-				set lsdTheme $themeWindows
+			if { ! [ info exists lsd_theme ] } {
+				set lsd_theme $themeWindows
 			}
 		}
 	} elseif [ string equal $CurPlatform linux ] {
 		set dark [ isDarkTheme ]
 		if { $dark == 1 } {
 			set DefaultTheme $themeLinuxDark
-			if { ! [ info exists lsdTheme ] || $lsdTheme eq $themeLinux } {
-				set lsdTheme $themeLinuxDark
+			if { ! [ info exists lsd_theme ] || $lsd_theme eq $themeLinux } {
+				set lsd_theme $themeLinuxDark
 			}
 		} elseif { $dark == 0 } {
 			set DefaultTheme $themeLinux
-			if { ! [ info exists lsdTheme ] || $lsdTheme eq $themeLinuxDark } {
-				set lsdTheme $themeLinux
+			if { ! [ info exists lsd_theme ] || $lsd_theme eq $themeLinuxDark } {
+				set lsd_theme $themeLinux
 			}
 		} else {
 			set DefaultTheme $themeLinux
-			if { ! [ info exists lsdTheme ] } {
-				set lsdTheme $themeLinux
+			if { ! [ info exists lsd_theme ] } {
+				set lsd_theme $themeLinux
 			}
 		}
 	}
@@ -196,12 +196,12 @@ proc updateTheme { } {
 # Redefine standard styles when necessary
 #************************************************
 proc setstyles { } {
-	global lsdTheme themeTable colorsTheme fonttype dim_character small_character
+	global lsd_theme themeTable colorsTheme font_type dim_character small_character
 
 	# toolbutton widget styles
-	if { [ array names themeTable -exact $lsdTheme ] != "" } {
-		set tbpadh [ lindex $themeTable($lsdTheme) 4 ]
-		set tbpadv [ lindex $themeTable($lsdTheme) 5 ]
+	if { [ array names themeTable -exact $lsd_theme ] != "" } {
+		set tbpadh [ lindex $themeTable($lsd_theme) 4 ]
+		set tbpadv [ lindex $themeTable($lsd_theme) 5 ]
 	} else {
 		set tbpadh 3
 		set tbpadv 3
@@ -230,9 +230,9 @@ proc setstyles { } {
 	ttk::style configure boldSmallProp.TText \
 		-font [ font create -family TkDefaultFont -size $small_character -weight bold ]
 	ttk::style configure fixed.TText \
-		-font [ font create -family "$fonttype" -size $dim_character ]
+		-font [ font create -family $font_type -size $dim_character ]
 	ttk::style configure smallFixed.TText \
-		-font [ font create -family "$fonttype" -size $small_character ]
+		-font [ font create -family $font_type -size $small_character ]
 
 	# label widget styles
 	ttk::style configure TLabel -anchor center

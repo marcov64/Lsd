@@ -81,16 +81,18 @@ namespace lsd
 namespace gui
 {
 	bool tk_ok = false;			// control for tk_ready to operate
+	char *sys_options = NULL;	// system makefile options
 	char cfg_path[ MAX_PATH_LENGTH ] = "";// path of LSD configuration file
 	char err_file[ ] = "LMM.err";// error log file name
 	int platform = 0;			// OS platform (1=Linux, 2=Mac, 3=Windows)
 	Tcl_Interp *interp = NULL;	// Tcl standard interpreter pointer
 
 	const char *model_info[ MODEL_TXT_INFO_NUM ] = MODEL_TXT_INFO_NAME;
-	const char *lmm_defaults[ LMM_TXT_OPTIONS_NUM ] = LMM_TXT_OPTIONS_DEFAULT;
-	const char *lmm_options[ LMM_TXT_OPTIONS_NUM ] = LMM_TXT_OPTIONS_NAME;
+	const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;
+	const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
 	const char *lsd_nw_src[ LSD_NW_NUM ] = LSD_NW_SRC;
 	const char *model_defaults[ MODEL_TXT_INFO_NUM ] = MODEL_TXT_INFO_DEFAULT;
+	const char lmm_types[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_TYPE;
 }
 
 // LMM functions
@@ -149,7 +151,7 @@ int main( int argn, const char **argv )
 int modman( int argn, const char **argv )
 {
 	bool found, recolor = false;
-	int i, j, num, choice, shigh, recolor_all = 0, v_counter = 0;
+	int i, j, num, choice, synt_high, recolor_all = 0, v_counter = 0;
 	const char *s;
 	char str[ 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], tmp[ MAX_BUFF_SIZE ];
 	FILE *f;
@@ -176,34 +178,35 @@ int modman( int argn, const char **argv )
 
 		// try to open text file if name is provided
 		cmd( "set filetoload \"%s\"", tmp );
-		cmd( "if { ! [ file pathtype \"$filetoload\" ] eq \"absolute\" } { set filetoload \"[ pwd ]/$filetoload\" }" );
+		cmd( "if { ! ( [ file pathtype \"$filetoload\" ] eq \"absolute\" ) } { \
+				set filetoload \"[ pwd ]/$filetoload\" \
+			}" );
 	}
 
 	// global links between C and tcl variables
 	Tcl_LinkVar( gui::interp, "num", ( char * ) &num, TCL_LINK_INT );
-	Tcl_LinkVar( gui::interp, "shigh", ( char * ) &shigh, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "synt_high", ( char * ) &synt_high, TCL_LINK_INT );
 	Tcl_LinkVar( gui::interp, "choice", ( char * ) &choice, TCL_LINK_INT );
 	Tcl_LinkVar( gui::interp, "tosave", ( char * ) &tosave, TCL_LINK_BOOLEAN);
 	Tcl_LinkVar( gui::interp, "recolor_all", ( char * ) &recolor_all, TCL_LINK_BOOLEAN);
 
 	// load/check configuration files
-	i = gui::load_lsd_options( );
-	gui::check_option_files( true );
+	gui::load_lsd_options( );
 
 	// load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 	choice = 0;
 
 	// load native Tk procedures for graphical user interface management
-	cmd( "if [ file exists \"$RootLsd/$LsdSrc/gui.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/gui.tcl\" } err0x01 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0100, 0x01 );
+	cmd( "if [ file exists \"$lsd_root/$lsd_src/gui.tcl\" ] { if [ catch { source \"$lsd_root/$lsd_src/gui.tcl\" } err0x01 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0100, 0x01 );
 
 	// load native Tcl procedures for external files handling
-	cmd( "if [ file exists \"$RootLsd/$LsdSrc/file.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/file.tcl\" } err0x02 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0200, 0x02 );
+	cmd( "if [ file exists \"$lsd_root/$lsd_src/file.tcl\" ] { if [ catch { source \"$lsd_root/$lsd_src/file.tcl\" } err0x02 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0200, 0x02 );
 
 	// load native Tcl procedures for general utilities
-	cmd( "if [ file exists \"$RootLsd/$LsdSrc/util.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/util.tcl\" } err0x04 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0400, 0x04 );
+	cmd( "if [ file exists \"$lsd_root/$lsd_src/util.tcl\" ] { if [ catch { source \"$lsd_root/$lsd_src/util.tcl\" } err0x04 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0400, 0x04 );
 
 	// load the native model browser module
-	cmd( "if [ file exists \"$RootLsd/$LsdSrc/model.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/model.tcl\" } err0x08 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0800, 0x08 );
+	cmd( "if [ file exists \"$lsd_root/$lsd_src/model.tcl\" ] { if [ catch { source \"$lsd_root/$lsd_src/model.tcl\" } err0x08 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0800, 0x08 );
 
 	if ( choice != 0 )
 	{
@@ -215,10 +218,6 @@ int modman( int argn, const char **argv )
 	// set and check to OS platform
 	if ( ( j = gui::set_platform( ) ) != 0 )
 		return j;
-
-	// fix non-existent or old options file for new options
-	if ( i == 0 )
-		gui::update_lsd_options( );				// update config file
 
 	// create a Tcl command that calls the C discard_change function before killing LMM
 	Tcl_CreateCommand( gui::interp, "discard_change", gui::Tcl_discard_change, NULL, NULL );
@@ -240,13 +239,16 @@ int modman( int argn, const char **argv )
 	cmd( "set alignMode \"LMM\"" );
 	cmd( "set small_character [ expr { $dim_character - $deltaSize } ]" );
 
+	// current model info
 	cmd( "set modelGroup \"$rootname\"" );
 	cmd( "set modelName \"(no model)\"" );
 	cmd( "set modelVersion \"\"" );
 	cmd( "set fileName \"(no name)\"" );
-	cmd( "set groupDir \"[ pwd ]\"" );
-	cmd( "set modelDir \"[ pwd ]\"" );
 	cmd( "set fileDir \"[ pwd ]\"" );
+
+	// allow reloading last model
+	cmd( "if { ! [ info exists groupDir ] } { set groupDir \"[ pwd ]\" }" );
+	cmd( "if { ! [ info exists modelDir ] } { set modelDir \"[ pwd ]\" }" );
 
 	// configure main window
 	cmd( ". configure -menu .m -background $colorsTheme(bg)" );
@@ -286,9 +288,9 @@ int modman( int argn, const char **argv )
 	cmd( "$w add command -label \"Compare Models...\" -underline 3 -command { set choice 61 } -underline 0" );		// entryconfig 5
 	cmd( "$w add separator" );		// entryconfig 6
 
-	cmd( "if { $showFileCmds } { $w add command -label \"New Text File\" -command { set choice 39 } -underline 4 }" );		// entryconfig (7)
-	cmd( "if { $showFileCmds } { $w add command -label \"Open Text File...\" -command { set choice 15 } -underline 0 -accelerator Ctrl+o }" );		// entryconfig (8)
-	cmd( "if { $showFileCmds == 1 } { \
+	cmd( "if { $file_cmds } { $w add command -label \"New Text File\" -command { set choice 39 } -underline 4 }" );		// entryconfig (7)
+	cmd( "if { $file_cmds } { $w add command -label \"Open Text File...\" -command { set choice 15 } -underline 0 -accelerator Ctrl+o }" );		// entryconfig (8)
+	cmd( "if { $file_cmds == 1 } { \
 			$w add command -label \"Save Text File\" -command { \
 				if { [ string length \"$fileName\" ] > 0 } { \
 					if [ file exist \"$fileDir/$fileName\" ] { \
@@ -303,8 +305,8 @@ int modman( int argn, const char **argv )
 					set choice 999 \
 				} \
 			} -underline 2 }" );		// entryconfig (9)
-	cmd( "if { $showFileCmds } { $w add command -label \"Save Text File As...\" -command { set choice 4 } -underline 3 }" );		// entryconfig (10)
-	cmd( "if { $showFileCmds } { $w add separator }" );		// entryconfig (11)
+	cmd( "if { $file_cmds } { $w add command -label \"Save Text File As...\" -command { set choice 4 } -underline 3 }" );		// entryconfig (10)
+	cmd( "if { $file_cmds } { $w add separator }" );		// entryconfig (11)
 
 	cmd( "$w add command -label \"Options...\" -command { set choice 60 } -underline 1" );		// entryconfig 7/(12)
 	cmd( "$w add separator" );		// entryconfig 8/(13)
@@ -328,6 +330,7 @@ int modman( int argn, const char **argv )
 			} \
 		} -underline 2 -accelerator Ctrl+y" );	// entryconfig 1
 	cmd( "$w add separator" );	// entryconfig 2
+
 	// collect information to focus recoloring
 	cmd( "$w add command -label Cut -command { \
 			sav_cur_ini; \
@@ -367,18 +370,19 @@ int modman( int argn, const char **argv )
 	cmd( "$w add command -label \"Larger Font\" -command { \
 			if { $dim_character < 60 } { \
 				incr dim_character 1; \
-				ttk::style configure fixed.TText -font [ font create -family \"$fonttype\" -size $dim_character ]; \
-				settab .f.t.t $tabsize fixed.TText \
+				ttk::style configure fixed.TText -font [ font create -family $font_type -size $dim_character ]; \
+				settab .f.t.t $tab_size fixed.TText \
 			} \
 		} -accelerator \"Ctrl +\"" );	// entryconfig 22
 	cmd( "$w add command -label \"Smaller Font\" -command { \
 			if { $dim_character > 4 } { \
 				incr dim_character -1; \
-				ttk::style configure fixed.TText -font [ font create -family \"$fonttype\" -size $dim_character ]; \
-				settab .f.t.t $tabsize fixed.TText \
+				ttk::style configure fixed.TText -font [ font create -family $font_type -size $dim_character ]; \
+				settab .f.t.t $tab_size fixed.TText \
 			} \
 		} -accelerator \"Ctrl -\"" );	// entryconfig 23
 	cmd( "$w add separator" );	// entryconfig 24
+
 	// add option to ajust syntax highlighting (word coloring)
 	cmd( "$w add check -label \"Wrap/Unwrap\" -variable wrap -command { setwrap .f.t.t $wrap } -underline 1 -accelerator Ctrl+w " );
 	cmd( "$w add command -label \"LSD Macros...\" -command { set choice 28 } -underline 0 -accelerator Ctrl+i" );
@@ -388,7 +392,7 @@ int modman( int argn, const char **argv )
 	cmd( ".m add cascade -label Model -menu $w -underline 0" );
 	cmd( "$w add command -label \"Compile and Run...\" -state disabled -underline 0 -command { set choice 2 } -accelerator F5" );	// entryconfig 0
 	cmd( "$w add command -label \"Recompile\" -state disabled -underline 0 -command { set choice 6 } -accelerator F6" );	// entryconfig 1
-	cmd( "$w add command -label \"[ string toupper $DbgExe ] Debugger\" -state disabled -underline 0 -command { set choice 13 } -accelerator F7" );	// entryconfig 2
+	cmd( "$w add command -label \"[ string toupper $debug_exe ] Debugger\" -state disabled -underline 0 -command { set choice 13 } -accelerator F7" );	// entryconfig 2
 	cmd( "$w add command -label \"Create 'No Window' Version\" -underline 8 -state disabled -command { set choice 62 }" );	// entryconfig 3
 	cmd( "$w add command -label \"Model Info...\" -underline 6 -state disabled -command { set choice 44 }" );	// entryconfig 4
 	cmd( "$w add separator" );	// entryconfig 5
@@ -401,8 +405,8 @@ int modman( int argn, const char **argv )
 	cmd( "$w add command -label \"Model Options...\" -underline 4 -state disabled -command { set choice 48 }" );	// entryconfig 12
 	cmd( "$w add command -label \"System Options...\" -underline 0 -command { set choice 47 }" );	// entryconfig 13
 	cmd( "$w add separator" );	// entryconfig 14
-	cmd( "$w add check -label \"Auto-hide LMM\" -variable autoHide -underline 0 -command { \
-			if { $autoHide } { \
+	cmd( "$w add check -label \"Auto-hide LMM\" -variable auto_hide -underline 0 -command { \
+			if { $auto_hide } { \
 				tooltip::tooltip .bbar.hide \"Not Auto-hide LMM\" \
 			} else { \
 				tooltip::tooltip .bbar.hide \"Auto-hide LMM\" \
@@ -455,11 +459,11 @@ int modman( int argn, const char **argv )
 	cmd( "ttk::button .bbar.extra -image extraImg -style Toolbutton -command { set choice 70 }" );
 	cmd( "ttk::button .bbar.set -image setImg -style Toolbutton -command { set choice 48 }" );
 	cmd( "ttk::button .bbar.hide -image hideImg -style Toolbutton -command { \
-			if { $autoHide } { \
-				set autoHide 0; \
+			if { $auto_hide } { \
+				set auto_hide 0; \
 				tooltip::tooltip .bbar.hide \"Auto-hide LMM\" \
 			} else { \
-				set autoHide 1; \
+				set auto_hide 1; \
 				tooltip::tooltip .bbar.hide \"Not Auto-hide LMM\" \
 			} \
 		}" );
@@ -483,14 +487,14 @@ int modman( int argn, const char **argv )
 		}" );
 	cmd( "tooltip::tooltip .bbar.compile \"Recompile\"" );
 	cmd( "tooltip::tooltip .bbar.comprun \"Compile and Run...\"" );
-	cmd( "tooltip::tooltip .bbar.gdb \"[ string toupper $DbgExe ] Debugger\"" );
+	cmd( "tooltip::tooltip .bbar.gdb \"[ string toupper $debug_exe ] Debugger\"" );
 	cmd( "tooltip::tooltip .bbar.info \"Model Info...\"" );
 	cmd( "tooltip::tooltip .bbar.descr \"Show Description\"" );
 	cmd( "tooltip::tooltip .bbar.equation \"Show Equations\"" );
 	cmd( "tooltip::tooltip .bbar.extra \"Show Extra Files...\"" );
 	cmd( "tooltip::tooltip .bbar.set \"Model Options...\"" );
 	cmd( "tooltip::tooltip .bbar.help \"Help on Macros for LSD Equations\"" );
-	cmd( "if { $autoHide } { \
+	cmd( "if { $auto_hide } { \
 			tooltip::tooltip .bbar.hide \"Not Auto-hide LMM\" \
 		} else { \
 			tooltip::tooltip .bbar.hide \"Auto-hide LMM\" \
@@ -507,7 +511,7 @@ int modman( int argn, const char **argv )
 	cmd( "mouse_wheel .f.t.t" );
 
 	// set preferred tab size and wrap option
-	cmd( "settab .f.t.t $tabsize fixed.TText" );	// adjust tabs size to font type/size
+	cmd( "settab .f.t.t $tab_size fixed.TText" );	// adjust tabs size to font type/size
 	cmd( "setwrap .f.t.t $wrap" );		// adjust text wrap
 
 	// set colors
@@ -615,7 +619,7 @@ int modman( int argn, const char **argv )
 	cmd( "bind .f.t.t <Control-g> { set choice 13 }; bind .f.t.t <Control-G> { set choice 13 }; bind .f.t.t <F7> { set choice 13 }" );
 	cmd( "bind .f.t.t <Control-e> { set choice 8 }" );
 	cmd( "bind .f.t.t <Control-j> { set choice 70 }" );
-	cmd( "bind .f.t.t <Control-o> { if { $showFileCmds } { set choice 8; break } { break } }" );
+	cmd( "bind .f.t.t <Control-o> { if { $file_cmds } { set choice 8; break } { break } }" );
 	cmd( "bind .f.t.t <Control-q> { set choice 1 }; bind .f.t.t <Control-Q> { set choice 1 }" );
 	cmd( "bind .f.t.t <Control-u> { set choice 32 }" );
 	cmd( "bind .f.t.t <Control-m> { set choice 17 }" );
@@ -680,7 +684,7 @@ int modman( int argn, const char **argv )
 	cmd( ".v add cascade -label \"LSD Macros\" -accelerator Ctrl+i -menu .v.i" );
 	cmd( ".v add command -label \"Indent\" -accelerator Ctrl+> -command { set choice 42 }" );
 	cmd( ".v add command -label \"De-indent\" -accelerator Ctrl+< -command { set choice 43 }" );
-	cmd( ".v add command -label \"Place Break & Run [ string toupper $DbgExe ]\" -command { set choice 58 }" );
+	cmd( ".v add command -label \"Place Break & Run [ string toupper $debug_exe ]\" -command { set choice 58 }" );
 
 	cmd( ".v add separator" );
 	cmd( ".v add command -label \"Find...\" -accelerator Ctrl+f -command { set choice 11 }" );
@@ -775,7 +779,10 @@ int modman( int argn, const char **argv )
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" );
 	}
 	else
-		choice = 33;				// open model browser
+		if ( gui::eval_bool( "[ file exists \"$modelDir/$MODEL_TXT_INFO\" ]" ) && gui::eval_bool( "[ file exists \"$groupDir/$GROUP_TXT_INFO\" ]" ) )
+			choice = 18;				// reload previous model
+		else
+			choice = 33;				// open model browser
 
 	cmd( "settop . no { set choice 1 } no yes" );
 	cmd( "focus .f.t.t" );
@@ -809,7 +816,7 @@ int modman( int argn, const char **argv )
 	if ( recolor_all )				// all text?
 	{
 		cmd( "sav_cur_ini; sav_cur_end" );	// save data for recolor
-		color( shigh, 0, 0 );		// set color types (all text)
+		color( synt_high, 0, 0 );		// set color types (all text)
 	}
 	else
 		if ( recolor )				// just around cursor?
@@ -854,12 +861,12 @@ int modman( int argn, const char **argv )
 	// exit LMM
 	if ( choice == 1 )
 	{
-		gui::update_lsd_options( true );		// update window position, if required
+		gui::update_lsd_options( false );		// update except settings
 		return 0;
 	}
 
 	// compile the model, invoking make
-	// Run the model
+	// run the model
 	if ( choice == 2 || choice == 6 )
 	{
 		cmd( "if { [ check_sys_opt ] ne \"\" } { \
@@ -877,23 +884,20 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	/* Insert in the text window the makefile of the selected model */
+	/* insert in the text window the makefile of the selected model */
 	if ( choice == 3 )
 	{
+		choice = 0;
 		cmd( ".f.t.t delete 0.0 end" );
 		s = gui::get_str( "modelName" );
-		if ( s == NULL || ! strcmp( s, "" ) )
+		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
-			choice = 0;
 			goto loop;
 		}
 
-		cmd( "cd \"$modelDir\"" );
 		gui::make_makefile( );
-		cmd( "cd \"$RootLsd\"" );
-		cmd( "if { [ file exists \"$modelDir/makefile\" ] } { set choice 1 } { set choice 0 }" );
-		if ( choice == 1 )
+		if ( gui::eval_bool( "[ file exists \"$modelDir/makefile\" ]" ) )
 		{
 			cmd( "set file [ open \"$modelDir/makefile\" r ]" );
 			cmd( ".f.t.t insert end [ read -nonewline $file ]" );
@@ -908,11 +912,10 @@ int modman( int argn, const char **argv )
 		cmd( ".f.t.t mark set insert 1.0" );
 		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Makefile should not be changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Please check 'Model Options' and 'System Options' in menu 'Model' to change compilation options.\"" );
 
-		choice = 0;
 		goto loop;
 	}
 
-	/* Save the file currently shown */
+	/* save the file currently shown */
 	if ( choice == 4 )
 	{
 		cmd( "set curfilename [ tk_getSaveFile -parent . -title \"Save File\" -initialfile $fileName -initialdir $fileDir ]" );
@@ -932,11 +935,11 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	/* Load the description file */
+	/* load the description file */
 	if ( choice == 5 || choice == 50 )
 	{
 		s = gui::get_str( "modelName" );
-		if ( s == NULL || ! strcmp( s, "" ) )
+		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 			choice = 0;
@@ -986,11 +989,11 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	/* Show compilation result */
+	/* show compilation result */
 	if ( choice == 7 )
 	{
 		s = gui::get_str( "modelName" );
-		if ( s == NULL || ! strcmp( s, "" ) )
+		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 			choice = 0;
@@ -1002,11 +1005,11 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	/* Insert in the text window the main equation file */
+	/* insert in the text window the main equation file */
 	if ( choice == 8 )
 	{
 		s = gui::get_str( "modelName" );
-		if ( s == NULL || ! strcmp( s, "" ) )
+		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 			choice = 0;
@@ -1072,7 +1075,7 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	/* Find a line in the text */
+	/* find a line in the text */
 	if ( choice == 10 )
 	{
 		cmd( "set line \"\"" );
@@ -1116,7 +1119,7 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	/* Find a text pattern in the text */
+	/* find a text pattern in the text */
 	if ( choice == 11 )
 	{
 		cmd( "if [ string equal $dirsearch \"-backwards\" ] { set endsearch 1.0 } { set endsearch end }" );
@@ -1204,7 +1207,7 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	/* Search again the same pattern in the text */
+	/* search again the same pattern in the text */
 	if ( choice == 12 || choice == 88 )
 	{
 		if ( choice == 12 )
@@ -1238,7 +1241,7 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	/* Find and replace a text pattern in the text */
+	/* find and replace a text pattern in the text */
 	if ( choice == 21 )
 	{
 		cmd( "if [ string equal $dirsearch \"-backwards\" ] { set endsearch 1.0 } { set endsearch end }" );
@@ -1395,11 +1398,11 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	// Run the model in the gdb debugger
+	// run the model in the gdb debugger
 	if ( choice == 13 || choice == 58 )
 	{
 		s = gui::get_str( "modelName" );
-		if ( s == NULL || ! strcmp( s, "" ) )
+		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 			choice = 0;
@@ -1439,7 +1442,7 @@ int modman( int argn, const char **argv )
 		if ( choice == 58 )
 		{
 			cmd( "scan $vmenuInsert %%d.%%d line col" );
-			cmd( "if [ string equal -nocase $DbgExe lldb ] { \
+			cmd( "if [ string equal -nocase $debug_exe lldb ] { \
 					set breakExt lldb; \
 					set breakTxt \"breakpoint set -f $fileName -l$line\nrun\n\" \
 				} else { \
@@ -1452,14 +1455,14 @@ int modman( int argn, const char **argv )
 					close $f \
 				}" );
 
-			cmd( "if [ string equal -nocase $DbgExe lldb ] { \
+			cmd( "if [ string equal -nocase $debug_exe lldb ] { \
 					set cmdbreak \"-s break.lldb\" \
 				} else { \
 					set cmdbreak \"-q -x break.gdb\" \
 				}" );
 		}
 		else
-			cmd( "if [ string equal -nocase $DbgExe lldb ] { \
+			cmd( "if [ string equal -nocase $debug_exe lldb ] { \
 					set cmdbreak \"-o run\" \
 				} else { \
 					set cmdbreak \"-q -ex run\" \
@@ -1469,11 +1472,11 @@ int modman( int argn, const char **argv )
 		{
 			case _WIN_:
 			case _LIN_:
-				snprintf( tmp, MAX_BUFF_SIZE, "$DbgExe $cmdbreak %s%s%s", i ? lsd::root_lsd : "", i ? "/" : "", s );
+				snprintf( tmp, MAX_BUFF_SIZE, "$debug_exe $cmdbreak %s%s%s", i ? lsd::root_lsd : "", i ? "/" : "", s );
 				break;
 
 			case _MAC_:
-				snprintf( tmp, MAX_BUFF_SIZE, "cd $fileDir; clear; $DbgExe $cmdbreak -f %s%s%s.app/Contents/MacOS/%s", s, i ? lsd::root_lsd : "", i ? "/" : "", s );
+				snprintf( tmp, MAX_BUFF_SIZE, "cd $fileDir; clear; $debug_exe $cmdbreak -f %s%s%s.app/Contents/MacOS/%s", s, i ? lsd::root_lsd : "", i ? "/" : "", s );
 				break;
 
 			default:
@@ -1481,12 +1484,12 @@ int modman( int argn, const char **argv )
 		}
 
 		cmd( "if { [ open_terminal \"%s\" ] != 0 } { \
-			ttk::messageBox -parent . -title Error -icon error -type ok -message \"Debugger failed to launch\" -detail \"Please check if [ string toupper $DbgExe ] debugger is installed and set up properly.\n\nDetail:\n$termResult\" \
+			ttk::messageBox -parent . -title Error -icon error -type ok -message \"Debugger failed to launch\" -detail \"Please check if [ string toupper $debug_exe ] debugger is installed and set up properly.\n\nDetail:\n$termResult\" \
 			}", tmp );					// if all ok, run debug command
 
 		end_gdb:
 
-		cmd( "cd \"$RootLsd\"" );
+		cmd( "cd \"$lsd_root\"" );
 
 		choice = 0;
 		goto loop;
@@ -1498,12 +1501,12 @@ int modman( int argn, const char **argv )
 		cmd( "destroytop .mm" );	// close compilation results, if open
 
 		// prevent creating new groups in LSD directory
-		cmd( "if { [ string equal $groupDir [ pwd ] ] && [ file exists \"$groupDir/$LsdNew/$GROUP_TXT_INFO\" ] } \
+		cmd( "if { [ string equal $groupDir [ pwd ] ] && [ file exists \"$groupDir/$group_new/$GROUP_TXT_INFO\" ] } \
 				{	set answer [ ttk::messageBox -parent . -type okcancel -title Warning \
 					-icon warning -default ok -message \"Invalid parent group\" \
-					-detail \"Cannot create group/model in the Root group. Press 'OK' to change to the '$LsdNew' group before proceeding.\" ]; \
+					-detail \"Cannot create group/model in the Root group. Press 'OK' to change to the '$group_new' group before proceeding.\" ]; \
 					if [ string equal $answer ok ] { \
-						set groupDir \"$groupDir/$LsdNew\"; \
+						set groupDir \"$groupDir/$group_new\"; \
 						set f [ open \"$groupDir/$GROUP_TXT_INFO\" r ]; \
 						set modelGroup \"[ gets $f ]\"; \
 						close $f; \
@@ -1578,7 +1581,7 @@ int modman( int argn, const char **argv )
 
 			cmd( "ttk::frame .a.tdes" );
 			cmd( "ttk::label .a.tdes.l -text \"Group description\"" );
-			cmd( "set a [ list \"$fonttype\" $small_character ]" );
+			cmd( "set a [ list $font_type $small_character ]" );
 			cmd( "ttk::text .a.tdes.e -width 60 -height 15 -dark $darkTheme -style smallFixed.TText" );
 			cmd( "pack .a.tdes.l .a.tdes.e" );
 
@@ -1779,10 +1782,10 @@ int modman( int argn, const char **argv )
 		cmd( "file mkdir \"$fileDir\"" );
 
 		// create the empty equation file
-		cmd( "file copy \"$RootLsd/$LsdSrc/fun_base.cpp\" \"$modelDir/fun_$mdir.cpp\"" );
+		cmd( "file copy \"$lsd_root/$lsd_src/fun_base.cpp\" \"$modelDir/fun_$mdir.cpp\"" );
 
 		// create the model options and info files
-		gui::check_option_files( );
+		gui::reset_make_options( 2 );
 		gui::update_model_options( true );
 
 		cmd( ".m.file entryconf 2 -state normal" );
@@ -1923,7 +1926,7 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	// Insert a LSD macro, to be used in LSD equations' code
+	// insert a LSD macro, to be used in LSD equations' code
 	if ( choice == 28 )
 	{
 		cmd( "set res 26" );
@@ -4215,38 +4218,43 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	// select a model
-	if ( choice == 33 )
+	// select previous model
+	// select model in model browser
+	if ( choice == 18 || choice == 33 )
 	{
-		cmd( "destroytop .mm" );					// close compilation results, if open
+		cmd( "destroytop .mm" );			// close compilation results, if open
 
-		Tcl_LinkVar( gui::interp, "choiceSM", ( char * ) & num, TCL_LINK_INT );
-		num = 0;
-
-		cmd( "showmodel $groupDir" );
-
-		while ( num == 0 )
-			Tcl_DoOneEvent( 0 );
-
-		cmd( "destroytop .l" );
-		cmd( "tooltip::hide" );
-		cmd( "bind .f.t.t <Enter> { }" );
-		cmd( "focustop .f.t.t" );
-
-		choice = num;
-		Tcl_UnlinkVar( gui::interp, "choiceSM" );
-
-		if ( choice == 2 || choice == 0 )
+		if ( choice == 33 )
 		{
-			choice = 0;
-			goto loop;
+			Tcl_LinkVar( gui::interp, "choiceSM", ( char * ) & num, TCL_LINK_INT );
+			num = 0;
+
+			cmd( "showmodel $groupDir" );
+
+			while ( num == 0 )
+				Tcl_DoOneEvent( 0 );
+
+			cmd( "destroytop .l" );
+			cmd( "tooltip::hide" );
+			cmd( "bind .f.t.t <Enter> { }" );
+			cmd( "focustop .f.t.t" );
+
+			choice = num;
+			Tcl_UnlinkVar( gui::interp, "choiceSM" );
+
+			if ( choice == 2 || choice == 0 )
+			{
+				choice = 0;
+				goto loop;
+			}
+
+			cmd( "set groupDir [ lindex $lrn 0 ]" );	// the group dir is the same for every element
+			if ( choice == 14 )
+				goto loop;							// create a new model/group
+
+			cmd( "set modelDir [ lindex $ldn $result ]" );
 		}
 
-		cmd( "set groupDir [ lindex $lrn 0 ]" );	// the group dir is the same for every element
-		if ( choice == 14 )
-			goto loop;								// create a new model/group
-
-		cmd( "set modelDir [ lindex $ldn $result ]" );
 		cmd( "set fileDir $modelDir" );
 
 		gui::load_model_options( gui::get_str( "modelDir" ) );
@@ -4452,7 +4460,7 @@ int modman( int argn, const char **argv )
 	if ( choice == 44 )
 	{
 		s = gui::get_str( "modelName" );
-		if ( s == NULL || ! strcmp( s, "" ) )
+		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 			choice = 0;
@@ -4555,29 +4563,27 @@ int modman( int argn, const char **argv )
 	// create the makefile
 	if ( choice == 46 || choice == 49 )
 	{
-		gui::make_makefile( );
+		s = gui::get_str( "modelName" );
+		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
+			choice = 0;
+		else
+		{
+			gui::make_makefile( );
 
-		if ( choice == 46 )
-			choice = 0;		//just create the makefile
-		if ( choice == 49 )	//after this show the description file (and a model is created)
-			choice = 50;
+			if ( choice == 46 )
+				choice = 0;		//just create the makefile
 
+			if ( choice == 49 )	//after this show the description file (and a model is created)
+				choice = 50;
+		}
 		goto loop;
 	}
 
-	// System Options
+	// system options
 	if ( choice == 47 )
 	{
-		cmd( "set choice [ file exists \"$cfgDir/$SYSTEM_TXT_OPTIONS\" ]" );
-		if ( choice == 1 )
-		{
-			cmd( "set f [ open \"$cfgDir/$SYSTEM_TXT_OPTIONS\" r ]" );
-			cmd( "set a [ string trim [ read $f ] ]" );
-			cmd( "close $f" );
-			choice = 0;
-		}
-		else
-			cmd( "set a \"\"" );
+		if ( gui::sys_options == NULL || strlen( gui::sys_options ) == 0 )
+			gui::load_lsd_options( );
 
 		cmd( "newtop .l \"System Options\" { set choice 2 }" );
 
@@ -4596,19 +4602,19 @@ int modman( int argn, const char **argv )
 
 		cmd( "okXhelpcancel .l b Default { \
 				.l.t.text delete 1.0 end; \
-				if [ file exists \"$RootLsd/$LsdSrc/system_options-$CurPlatform.txt\" ] { \
-					set file [ open \"$RootLsd/$LsdSrc/system_options-$CurPlatform.txt\" r ]; \
+				if [ file exists \"$lsd_root/$lsd_src/system_options-$CurPlatform.txt\" ] { \
+					set file [ open \"$lsd_root/$lsd_src/system_options-$CurPlatform.txt\" r ]; \
 					set a [ string trim [ read $file ] ]; \
 					close $file \
 				} { \
 					set a \"File $DefaultSysOpt is missing\nPlease reinstall LSD\" \
 				}; \
 				.l.t.text insert end \"# LSD options\n\"; \
-				.l.t.text insert end \"LSDROOT=$RootLsd\n\"; \
-				.l.t.text insert end \"SRC=$LsdSrc\n\n\"; \
-				.l.t.text insert end \"$a\"; \
+				.l.t.text insert end \"LSDROOT=$lsd_root\n\"; \
+				.l.t.text insert end \"SRC=$lsd_src\n\n\"; \
+				.l.t.text insert end $a; \
 				.l.d.msg configure -text \"\"; \
-				if { ! [ string equal -nocase \"$modelDir\" \"$RootLsd\" ] } { \
+				if { ! [ string equal -nocase \"$modelDir\" \"$lsd_root\" ] } { \
 					set objs [ glob -nocomplain -directory \"$modelDir\" *.o *.a src makefile* makemessage.txt lsd* *.exe *.dll *.so *.app ]; \
 					foreach i $objs { \
 						catch { \
@@ -4622,7 +4628,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "showtop .l" );
 		cmd( "mousewarpto .l.b.ok 0" );
-		cmd( ".l.t.text insert end $a" );
+		cmd( ".l.t.text insert end {%s}", gui::sys_options );
 		cmd( "focus .l.t.text" );
 
 		choice = 0;
@@ -4631,10 +4637,16 @@ int modman( int argn, const char **argv )
 
 		if ( choice == 1 )
 		{
-			cmd( "set f [ open \"$cfgDir/$SYSTEM_TXT_OPTIONS\" w ]" );
-			cmd( "puts $f [ string trim [ .l.t.text get 1.0 end ] ]" );
-			cmd( "close $f" );
-			choice = 46;	//go to create makefile
+			cmd( "set systemOptions [ string trim [ .l.t.text get 1.0 end ] ]");
+			if ( ( s = gui::get_str( "systemOptions" ) ) != NULL )
+			{
+				delete [ ] gui::sys_options;
+				gui::sys_options = new char [ strlen( s ) + 1 ];
+				strcpy( gui::sys_options, s );
+				gui::update_lsd_options( false );
+			}
+
+			choice = 46;	// go to create makefile
 		}
 		else
 			choice = 0;
@@ -4644,11 +4656,11 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	// Model Options
+	// model options
 	if ( choice == 48 )
 	{
 		s = gui::get_str( "modelName" );
-		if ( s == NULL || ! strcmp( s, "" ) )
+		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 			choice = 0;
@@ -4657,7 +4669,7 @@ int modman( int argn, const char **argv )
 
 		s = gui::get_fun_name( str, MAX_PATH_LENGTH );
 		if ( s == NULL || ! strcmp( s, "" ) )
-			gui::check_option_files( );
+			gui::reset_make_options( 2 );
 
 		cmd( "cd \"$modelDir\"" );
 
@@ -4831,12 +4843,12 @@ int modman( int argn, const char **argv )
 			cmd( "set f [ open $MODEL_TXT_OPTIONS w ]" );
 			cmd( "puts $f [ string trim [ .l.t.text get 1.0 end ] ]" );
 			cmd( "close $f" );
-			choice = 46;		//go to create makefile
+			choice = 46;		// go to create makefile
 		}
 		else
 			choice = 0;
 
-		cmd( "cd \"$RootLsd\"" );
+		cmd( "cd $lsd_root" );
 
 		cmd( "destroytop .l" );
 
@@ -4852,7 +4864,7 @@ int modman( int argn, const char **argv )
 		cmd( "set complete_dir \"\"" );
 
 		s = gui::get_str( "modelName" );
-		if ( s != NULL && strcmp( s, "" ) )
+		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
 		{
 			if ( ! gui::load_model_options( gui::get_str( "modelDir" ) ) )
 				gui::update_model_options( true );	// fix the model info file
@@ -4888,7 +4900,7 @@ int modman( int argn, const char **argv )
 	{
 		cmd( "updateTheme" );
 
-		for ( i = 1; i <= LMM_TXT_OPTIONS_NUM; ++i )
+		for ( i = 1; i <= LMM_OPTIONS_NUM; ++i )
 		{
 			cmd( "set temp_var%d \"$%s\"", i, gui::lmm_options[ i - 1 ] );
 			cmd( "set default_var%d \"%s\"", i, gui::lmm_defaults[ i - 1 ] );
@@ -5040,24 +5052,24 @@ int modman( int argn, const char **argv )
 
 		if ( choice == 1 )
 		{
-			cmd( "if { ! ( \"$temp_var3\" in [ font families ] ) } { set temp_var3 \"$fonttype\"; bell }" );
+			cmd( "if { ! ( \"$temp_var3\" in [ font families ] ) } { set temp_var3 $font_type; bell }" );
 			cmd( "if { ! [ string is integer -strict $temp_var6 ] || $temp_var6 < 4 || $temp_var6 > 60 } { set temp_var6 $dim_character; bell }" );
-			cmd( "if { ! [ string is integer -strict $temp_var7 ] || $temp_var7 < 1 || $temp_var7 > 99 } { set temp_var7 $tabsize; bell }" );
-			cmd( "if { ! ( \"$temp_var16\" in $themeNames ) } { set temp_var16 \"$lsdTheme\"; bell } { set temp_var16 [ dict get $nameToTheme $temp_var16 ] }" );
+			cmd( "if { ! [ string is integer -strict $temp_var7 ] || $temp_var7 < 1 || $temp_var7 > 99 } { set temp_var7 $tab_size; bell }" );
+			cmd( "if { ! ( \"$temp_var16\" in $themeNames ) } { set temp_var16 \"$lsd_theme\"; bell } { set temp_var16 [ dict get $nameToTheme $temp_var16 ] }" );
 
-			cmd( "if { $showFileCmds != $temp_var11 || $lsdTheme != $temp_var16 } { \
+			cmd( "if { $file_cmds != $temp_var11 || $lsd_theme != $temp_var16 } { \
 					ttk::messageBox -parent . -icon warning -title Warning -type ok -message \"LMM restart required\" -detail \"Please restart LMM for changes to be applied.\" \
 				}" );
 
-			for ( i = 1; i <= LMM_TXT_OPTIONS_NUM; ++i )
+			for ( i = 1; i <= LMM_OPTIONS_NUM; ++i )
 				cmd( "set %s \"$temp_var%d\"", gui::lmm_options[ i - 1 ], i );
 
 			gui::update_lsd_options( );					// update config file
 
 			// adjust text styles and apply
-			cmd( "ttk::style configure fixed.TText -font [ font create -family \"$fonttype\" -size $dim_character ]" );
-			cmd( "ttk::style configure smallFixed.TText -font [ font create -family \"$fonttype\" -size $small_character ]" );
-			cmd( "settab .f.t.t $tabsize fixed.TText" );	// adjust tabs size to font type/size
+			cmd( "ttk::style configure fixed.TText -font [ font create -family $font_type -size $dim_character ]" );
+			cmd( "ttk::style configure smallFixed.TText -font [ font create -family $font_type -size $small_character ]" );
+			cmd( "settab .f.t.t $tab_size fixed.TText" );	// adjust tabs size to font type/size
 			cmd( "setwrap .f.t.t $wrap" );			// adjust text wrap
 			recolor_all = true;
 		}
@@ -5076,23 +5088,21 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	// Show extra source files
+	// show extra source files
 	if ( choice == 70 )
 	{
+		choice = 0;
 		s = gui::get_str( "modelName" );
-		if ( s == NULL || ! strcmp( s, "" ) )
+		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
-			choice = 0;
 			goto loop;
 		}
 
 		// Create model options file if it doesn't exist
-		cmd( "set choice [ file exists \"$modelDir/$MODEL_TXT_OPTIONS\" ]" );
-		if ( choice == 0 )
-			gui::make_makefile( );
+		if ( ! gui::eval_bool( "[ file exists \"$modelDir/$MODEL_TXT_OPTIONS\" ]" ) )
+			gui::reset_make_options( 2 );
 
-		choice = 0;
 		s = gui::eval_str( "[ file nativename \"$modelDir/$MODEL_TXT_OPTIONS\" ]" );
 		if ( s == NULL || ( f = fopen( s, "r" ) ) == NULL )
 		{
@@ -5338,7 +5348,7 @@ int modman( int argn, const char **argv )
 					nextLin = ( long ) floor( curPos[ i ] ) + 1;
 			}
 
-			color( shigh, prevLin, nextLin );
+			color( synt_high, prevLin, nextLin );
 		}
 
 		choice = 0;
@@ -5353,13 +5363,14 @@ int modman( int argn, const char **argv )
 	}
 
 	Tcl_UnlinkVar( gui::interp, "num");
-	Tcl_UnlinkVar( gui::interp, "shigh");
+	Tcl_UnlinkVar( gui::interp, "synt_high");
 	Tcl_UnlinkVar( gui::interp, "choice");
 	Tcl_UnlinkVar( gui::interp, "tosave");
 	Tcl_UnlinkVar( gui::interp, "recolor_all");
 
 	gui::set_env( false );
 
+	delete [ ] gui::sys_options;
 	delete [ ] lsd::root_lsd;
 	delete [ ] lsd::exec_file;
 	delete [ ] lsd::exec_path;

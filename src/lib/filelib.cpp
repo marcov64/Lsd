@@ -93,15 +93,13 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 										   pugi::parse_trim_pcdata );
 	if ( res.status == pugi::status_ok )
 	{
-		x_nodeT typeNode = xf.first_child( );	// document type node
-		x_nodeT lsdNode = xf.document_element( );	// LSD top element
+		x_nodeT lsdNode = xf.document_element( );// LSD top element
+		x_nodeT cfgNode = lsdNode.child( "configuration" );// load config.
 
-		if ( strstr( typeNode.value( ), "LSD " ) != typeNode.value( ) ||
-			 strcmp( lsdNode.name( ), "LSD" ) != 0 )
+		if ( strcmp( lsdNode.name( ), "LSD" ) != 0 || strcmp( cfgNode.name( ), "configuration" ) != 0 )
 			return 21;							// invalid xml type/format
 
 		// get model structure
-		x_nodeT cfgNode = lsdNode.child( "configuration" );// load config.
 		x_nodeT rootNode = cfgNode.child( "structure" ).child( "object" );
 
 		if ( rootNode.empty( ) )

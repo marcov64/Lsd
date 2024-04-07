@@ -3147,7 +3147,7 @@ lsd::object *gui::operate( lsd::object *r )
 		// Set the Html browser for Unix systems
 		case 48:
 
-			cmd( "set temp_var $HtmlBrowser" );
+			cmd( "set temp_var $html_browser" );
 
 			cmd( "newtop .a \"Set Browser\" { set choice 2 }" );
 
@@ -3168,7 +3168,7 @@ lsd::object *gui::operate( lsd::object *r )
 				Tcl_DoOneEvent( 0 );
 
 			if ( choice == 1 )
-				cmd( "set HtmlBrowser $temp_var" );
+				cmd( "set html_browser $temp_var" );
 
 			cmd( "destroytop .a" );
 

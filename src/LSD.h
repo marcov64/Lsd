@@ -145,6 +145,7 @@
 #endif
 
 // global constants
+#define DEFAULT_SRC_DIR "src"			// default source files directory
 #define FILE_BUF_SIZE 1000000			// buffer size for file reading
 #define LOG_FILE "log.txt"				// name of log file
 #define MARG 0.01						// y-axis % plot clearance margin
@@ -164,6 +165,7 @@
 #define SRV_MIN_CORES 12				// minimum number of cores to consider a server
 
 // configuration files details
+#define DESCRIPTION "description.txt"
 #define LMM_TXT_OPTIONS "lmm_options.txt"
 #define LSD_XML_OPTIONS "LSD.cfg"
 #define GROUP_TXT_INFO "groupinfo.txt"
@@ -172,7 +174,6 @@
 #define MODEL_XML_OPTIONS "model.cfg"
 #define MODEL_TXT_INFO "modelinfo.txt"
 #define SYSTEM_TXT_OPTIONS "system_options.txt"
-#define DESCRIPTION "description.txt"
 
 // special file names/locations in Windows
 #define TCL_LIB_VAR		"TCL_LIBRARY"
@@ -182,26 +183,27 @@
 #define TCL_FIND_EXE	"@where wish86.exe > nul 2>&1"
 
 // constant string arrays
-#define LMM_TXT_OPTIONS_NUM 16
-#define LMM_TXT_OPTIONS_NAME { "sysTerm", "HtmlBrowser", "fonttype", \
-							   "wish", "LsdSrc", "dim_character", \
-							   "tabsize", "wrap", "shigh", \
-							   "autoHide", "showFileCmds", "LsdNew", \
-							   "DbgExe", "restoreWin", "lmmGeom", \
-							   "lsdTheme" }
-#define LMM_TXT_OPTIONS_DEFAULT { "$DefaultSysTerm", "$DefaultHtmlBrowser", \
-								  "$DefaultFont", "$DefaultWish", "src", \
-								  "$DefaultFontSize", "4", "1", "2", "0", "0", \
-								  "Work", "$DefaultDbgExe", "1", "#", \
-								  "$DefaultTheme" }
+#define LMM_OPTIONS_NUM 16
+#define LMM_OPTIONS_NAME { "sys_term", "html_browser", "font_type", \
+						   "wish_exe", "lsd_src", "dim_character", \
+						   "tab_size", "wrap", "synt_high", \
+						   "auto_hide", "file_cmds", "group_new", \
+						   "debug_exe", "restore_geom", "lmm_geom", \
+						   "lsd_theme" }
+#define LMM_OPTIONS_DEFAULT { "$DefaultSysTerm", "$DefaultHtmlBrowser", \
+							  "$DefaultFont", "$DefaultWish", DEFAULT_SRC_DIR, \
+							  "$DefaultFontSize", "4", "1", "2", "0", "0", \
+							  "Work", "$DefaultDbgExe", "1", "#", \
+							  "$DefaultTheme" }
+#define LMM_OPTIONS_TYPE { 'p', 'p', 'p', 'p', 'p', 'a', 'a', 'a', 'a', 'a', \
+						   'a', 'p', 'p', 'a', 'g', 'p' }
 #define LSD_NW_NUM 3
 #define LSD_NW_SRC { "lsdnw.cpp", "fun_head.h", "fun_head_fast.h" }
 #define LSD_DIR_NUM 8
-#define LSD_DIR_NAME { "src", "gnu", "installer", "Manual", "LMM.app", "Rpkg", \
-					   "lwi", "___" }
-#define LSD_MIN_NUM 3
-#define LSD_MIN_FILES { "src/icons", "src/themes", "src/interf.cpp", \
-						"src/analysis.cpp" }
+#define LSD_DIR_NAME { DEFAULT_SRC_DIR, "gnu", "installer", "Manual", \
+					   "LMM.app", "Rpkg", "lwi", "___" }
+#define LSD_MIN_NUM 5
+#define LSD_MIN_FILES { "icons", "themes", "LSD.h", "interf.cpp", "analysis.cpp" }
 #define LSD_WIN_NUM MODEL_TXT_INFO_NUM - 3
 #define LSD_WIN_NAME { "lsd", "log", "str", "da", "deb", "lat", "plt", "dap" }
 #define MODEL_TXT_INFO_NUM 16
@@ -249,19 +251,22 @@ namespace gui
 	extern bool unsavedData; 			// flag unsaved simulation configurations
 	extern bool unsavedSense;			// control for unsaved sensitivity data
 	extern char *eq_txt;				// equation file content
+	extern char *mod_options;			// model makefile options
 	extern char *sens_file;				// current sensitivity analysis file
+	extern char *sys_options;			// system makefile options
 	extern char cfg_path[ ];			// path of LSD configuration file
 	extern char eq_file[ ];				// equation file name
 	extern char err_file[ ];			// error log file name
 	extern char sens_path[ ];			// path of last used sensitivity directory
-	extern const char *lmm_defaults[ ];	// GUI constant string arrays
-	extern const char *lmm_options[ ];
+	extern const char *lmm_defaults[ ];	// default values for LMM parameter list
+	extern const char *lmm_options[ ];	// LMM save parameter list
 	extern const char *lsd_nw_src[ ];
 	extern const char *model_defaults[ ];
 	extern const char *model_info[ ];
 	extern const char *res_g;			// structure window result variable
 	extern const char *tk_wnd_names[ ];	// Tk names of main windows
 	extern const char *wnd_names[ ];	// LSD main windows' names
+	extern const char lmm_types[ ];		// types of LMM parameters
 	extern const int NOLH_1[ ][ 7 ];	// near-orthogonal Latin hypercube tables
 	extern const int NOLH_2[ ][ 11 ];
 	extern const int NOLH_3[ ][ 16 ];
@@ -310,7 +315,6 @@ namespace gui
 	bool expr_eq( const char *tcl_exp, const char *c_str );
 	bool get_bool( const char *tcl_var, bool *var = NULL );
 	bool get_precompiled_flag( const char *exec, bool nw = false );
-	bool load_lsd_options( void );
 	bool load_model_options( const char *path );
 	bool load_prev_configuration( void );
 	bool make_no_window( void );
@@ -329,7 +333,7 @@ namespace gui
 	char *fmt_ttip_descr( char *out, lsd::description *d, int outSz, bool init = true );
 	char *get_str( const char *tcl_var, char *var, int var_size );
 	char *load_eqfile( void );
-	char *search_lsd_root( char *buf, int bufSz );
+	char *search_lsdroot( char *buf, int bufSz );
 	char *strtcl( char *out, const char *text, int outSz );
 	char *NOLH_valid_tables( int k, char *out, int sz );
 	const char *eval_str( const char *tcl_exp );
@@ -400,7 +404,7 @@ namespace gui
 	void canvas_binds( int n );
 	void center_plot( void );
 	void change_obj_number( lsd::object *&c, int value, int all, int pippo[ ], int cfrom );
-	void check_option_files( bool sys = false );
+	void reset_make_options( int which = 0 );
 	void clean_res_dir( const char *path, const char *sim_name = NULL );
 	void clean_spaces( char *s );
 	void cmd( const char *cm, ... );
@@ -422,6 +426,7 @@ namespace gui
 	void init_plot( int i );
 	void init_tcl_tk( const char *exec, const char *tcl_app_name );
 	void insert_data_file( bool gz, int *num_v, str_vecT *var_names, bool keep_vars );
+	void load_lsd_options( void );
 	void log_tcl_error( bool show, const char *cm, const char *message, ... );
 	void lsd_exit_gui( int v );
 	void make_makefile( bool nw = false );
@@ -484,7 +489,7 @@ namespace gui
 	void unset_shortcuts_run( const char *window );
 	void update_bounds( void );
 	void update_descr_dict( void );
-	void update_lsd_options( bool justLmmGeom = false );
+	void update_lsd_options( bool save_settings = true );
 	void update_model_options( bool fix = false );
 	void update_more_tab( bool adding = false );
 	void NOLH_clear( void );

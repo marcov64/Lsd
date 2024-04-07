@@ -32,66 +32,25 @@ package require Tk 8.6
 #************************************************
 
 # load extra code
-lappend auto_path "$RootLsd/$LsdSrc/themes"
-source "$RootLsd/$LsdSrc/defaults.tcl" ;		# load LSD defaults
-source "$RootLsd/$LsdSrc/window.tcl" ;			# load LSD gui management
-source "$RootLsd/$LsdSrc/theme.tcl" ;			# load LSD gui theming
-source "$RootLsd/$LsdSrc/tklib/wgtclone.tcl" ;	# load LSD widget cloning tools
-source "$RootLsd/$LsdSrc/tklib/tooltip.tcl" ;	# tklib tootip management
-source "$RootLsd/$LsdSrc/tklib/dblclick.tcl" ;	# enhancements to double-click in text widgets
+lappend auto_path "$lsd_root/$lsd_src/themes"
+
+if { ! [ info exists CurPlatform ] } {
+	source "$lsd_root/$lsd_src/defaults.tcl" ;	# load LSD defaults if not yet
+}
+
+source "$lsd_root/$lsd_src/window.tcl" ;		# load LSD gui management
+source "$lsd_root/$lsd_src/theme.tcl" ;			# load LSD gui theming
+source "$lsd_root/$lsd_src/tklib/wgtclone.tcl" ;# load LSD widget cloning tools
+source "$lsd_root/$lsd_src/tklib/tooltip.tcl" ;	# tklib tootip management
+source "$lsd_root/$lsd_src/tklib/dblclick.tcl" ;# enhancements to double-click
 
 # optional development tools
 set conWnd		false ;	# enable console window to be opened with CTRL+ALT+J
 set logWndFn	false ;	# enable window functions operation logging
 set testWnd		false ;	# enable coordinates test window
 
-# detect current platform
-if [ string equal $tcl_platform(platform) unix ] {
-	if [ string equal $tcl_platform(os) Darwin ] {
-		set CurPlatform mac
-	} else {
-		set CurPlatform linux
-	}
-} else {
-	if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } {
-		set CurPlatform windows
-	} else {
-		set CurPlatform unsupported
-	}
-}
-
 # register static special, OS-dependent configurations
 if [ string equal $CurPlatform mac ] {
-	set DefaultSysTerm $sysTermMac
-	set DefaultExe $exeMac
-	set DefaultMakeExe $makeMac
-	set DefaultWish $wishMac
-	set DefaultDbgExe $dbgMac
-	set DefaultHtmlBrowser $browserMac
-	set DefaultFont $fontMac
-	set DefaultFontSize $fontSizeMac
-	set gnuplotExe $gnuplotMac
-	set deltaSize $deltaSizeMac
-	set hsizeLmin $hsizeLminMac
-	set vsizeLmin $vsizeLminMac
-	set hsizeBmin $hsizeBminMac
-	set vsizeBmin $vsizeBminMac
-	set hsizeAmin $hsizeAminMac
-	set vsizeAmin $vsizeAminMac
-	set hsizeDmin $hsizeDminMac
-	set vsizeDmin $vsizeDminMac
-	set hsizePmin $hsizePminMac
-	set vsizePmin $vsizePminMac
-	set hsizeGmin $hsizeGminMac
-	set vsizeGmin $vsizeGminMac
-	set corrX $corrXmac
-	set corrY $corrYmac
-	set butPad $butPadMac
-	set butSpc $butSpcMac
-	set butWid $butWidMac
-	set bhstepM $bhstepMac
-	set bvstepM $bvstepMac
-	set borderMadj $bborderMac
 
 	# enable Ctrl+click as replacement for right-shift
 	bind all <Control-ButtonPress-1> {
@@ -103,36 +62,6 @@ if [ string equal $CurPlatform mac ] {
 		set env(PATH) "/usr/local/bin:$env(PATH)"
 	}
 } elseif [ string equal $CurPlatform linux ] {
-	set DefaultSysTerm $sysTermLinux
-	set DefaultExe $exeLinux
-	set DefaultMakeExe $makeLinux
-	set DefaultWish $wishLinux
-	set DefaultDbgExe $dbgLinux
-	set DefaultHtmlBrowser $browserLinux
-	set DefaultFont $fontLinux
-	set DefaultFontSize $fontSizeLinux
-	set gnuplotExe $gnuplotLinux
-	set deltaSize $deltaSizeLinux
-	set hsizeLmin $hsizeLminLinux
-	set vsizeLmin $vsizeLminLinux
-	set hsizeBmin $hsizeBminLinux
-	set vsizeBmin $vsizeBminLinux
-	set hsizeAmin $hsizeAminLinux
-	set vsizeAmin $vsizeAminLinux
-	set hsizeDmin $hsizeDminLinux
-	set vsizeDmin $vsizeDminLinux
-	set hsizePmin $hsizePminLinux
-	set vsizePmin $vsizePminLinux
-	set hsizeGmin $hsizeGminLinux
-	set vsizeGmin $vsizeGminLinux
-	set corrX $corrXlinux
-	set corrY $corrYlinux
-	set butPad $butPadLinux
-	set butSpc $butSpcLinux
-	set butWid $butWidLinux
-	set bhstepM $bhstepLinux
-	set bvstepM $bvstepLinux
-	set borderMadj $bborderLinux
 
 	# use xterm as alternative for missing default/alternative terminals
 	if { [ catch { exec which [ lindex $DefaultSysTerm 0 ] } ] } {
@@ -144,40 +73,8 @@ if [ string equal $CurPlatform mac ] {
 			}
 		}
 	}
-
 } elseif [ string equal $CurPlatform windows ] {
 	package require registry
-
-	set DefaultSysTerm $sysTermWindows
-	set DefaultExe $exeWindows
-	set DefaultMakeExe $makeWinCygwin
-	set DefaultWish $wishWindows
-	set DefaultDbgExe $dbgWindows
-	set DefaultHtmlBrowser $browserWindows
-	set DefaultFont $fontWindows
-	set DefaultFontSize $fontSizeWindows
-	set gnuplotExe $gnuplotWindows
-	set deltaSize $deltaSizeWindows
-	set hsizeLmin $hsizeLminWindows
-	set vsizeLmin $vsizeLminWindows
-	set hsizeBmin $hsizeBminWindows
-	set vsizeBmin $vsizeBminWindows
-	set hsizeAmin $hsizeAminWindows
-	set vsizeAmin $vsizeAminWindows
-	set hsizeDmin $hsizeDminWindows
-	set vsizeDmin $vsizeDminWindows
-	set hsizePmin $hsizePminWindows
-	set vsizePmin $vsizePminWindows
-	set hsizeGmin $hsizeGminWindows
-	set vsizeGmin $vsizeGminWindows
-	set corrX $corrXwindows
-	set corrY $corrYwindows
-	set butPad $butPadWindows
-	set butSpc $butSpcWindows
-	set butWid $butWidWindows
-	set bhstepM $bhstepWindows
-	set bvstepM $bvstepWindows
-	set borderMadj $bborderWindows
 
 	# inherit OS setting
 	set mouseWarp [ ismousesnapon $CurPlatform ]
@@ -202,16 +99,16 @@ if [ string equal $CurPlatform mac ] {
 }
 
 # check old incompatible options and fix with defaults
-if { ! [ info exists sysTerm ] || ( $CurPlatform in [ list linux windows ] && [ llength $sysTerm ] < 2 ) } { \
-	set sysTerm $DefaultSysTerm
+if { ! [ info exists sys_term ] || ( $CurPlatform in [ list linux windows ] && [ llength $sys_term ] < 2 ) } {
+	set sys_term $DefaultSysTerm
 }
 
-if { $CurPlatform eq "mac" && ( ! [ info exists wish ] || $wish eq "wish8.6" ) } { \
-	set wish $wishMac
+if { ! [ info exists wish_exe ] || ( $CurPlatform eq "mac" && $wish_exe eq "wish8.6" ) } {
+	set wish_exe $DefaultWish
 }
 
-if { $CurPlatform eq "windows" && ( ! [ info exists HtmlBrowser ] || $HtmlBrowser eq "open" ) } { \
-	set HtmlBrowser $browserWindows
+if { ! [ info exists html_browser ] || ( $CurPlatform eq "windows" && $html_browser eq "open" ) } {
+	set html_browser $DefaultHtmlBrowser
 }
 
 # detect and update OS-dependent current/default theme configurations
@@ -230,22 +127,22 @@ foreach theme [ array names themeTable ] {
 set themeNames [ lsort $themeNames ]
 
 # try to set tk theme (ttk), falling back to the set default
-if { ! [ info exists lsdTheme ] || \
-	 [ array names themeTable -exact $lsdTheme ] == "" || \
-	 [ catch { package require [ lindex $themeTable($lsdTheme) 1 ] } ] ||
-	 [ catch { ttk::style theme use $lsdTheme } ] } {
+if { ! [ info exists lsd_theme ] || \
+	 [ array names themeTable -exact $lsd_theme ] == "" || \
+	 [ catch { package require [ lindex $themeTable($lsd_theme) 1 ] } ] ||
+	 [ catch { ttk::style theme use $lsd_theme } ] } {
 	if { [ array names themeTable -exact $DefaultTheme ] == "" || \
 		 [ catch { package require [ lindex $themeTable($DefaultTheme) 1 ] } ] || \
 		 [ catch { ttk::style theme use $DefaultTheme } ] } {
-		set lsdTheme [ ttk::style theme use ]
+		set lsd_theme [ ttk::style theme use ]
 	} else {
-		set lsdTheme $DefaultTheme
+		set lsd_theme $DefaultTheme
 	}
 }
 
 # define dark mode based on theme except on mac system-managed native theme
 # also use special aqua theme-automatic colors
-if { [ string equal $lsdTheme aqua ] } {
+if { [ string equal $lsd_theme aqua ] } {
 	set darkTheme [ isDarkTheme ]
 
 	set colorsTheme(bg) systemWindowBackgroundColor					; # non-entry light/dark text background
@@ -256,7 +153,7 @@ if { [ string equal $lsdTheme aqua ] } {
 	set colorsTheme(sbg) systemSelectedTextBackgroundColor			; # selected text background
 	set colorsTheme(sfg) systemSelectedTextColor					; # selected text foreground
 } else {
-	set darkTheme [ lindex $themeTable($lsdTheme) 3 ]
+	set darkTheme [ lindex $themeTable($lsd_theme) 3 ]
 	set colorsTheme(bg) [ ttk::style lookup . -background ]			; # non-entry light/dark text background
 	set colorsTheme(fg) [ ttk::style lookup . -foreground ]			; # entry/non-entry dark text foreground
 	set colorsTheme(dbg) [ ttk::style lookup . -troughcolor ]		; # entry dark text background
@@ -293,7 +190,7 @@ foreach color [ array names colorsTheme ] {
 		if { $color in [ list sfg efg dfg hc ] } {
 			set colorsTheme($color) $colorsTheme(fg)
 		}
-		tk_messageBox -icon warning -title Warning -message "Incomplete color palette" -detail "Color '$color' is missing or invalid in current theme '$lsdTheme', replacing with gray shade."
+		tk_messageBox -icon warning -title Warning -message "Incomplete color palette" -detail "Color '$color' is missing or invalid in current theme '$lsd_theme', replacing with gray shade."
 	}
 }
 
@@ -381,54 +278,54 @@ set posXstr 0
 set posYstr 0
 
 # load icon images
-catch { image create photo lsdImg -file "$RootLsd/$LsdSrc/icons/lsd.png" }
-catch { image create photo lmmImg -file "$RootLsd/$LsdSrc/icons/lmm.png" }
-catch { image create photo newImg -file "$RootLsd/$LsdSrc/icons/new.png" }
-catch { image create photo openImg -file "$RootLsd/$LsdSrc/icons/open.png" }
-catch { image create photo saveImg -file "$RootLsd/$LsdSrc/icons/save.png" }
-catch { image create photo undoImg -file "$RootLsd/$LsdSrc/icons/undo.png" }
-catch { image create photo redoImg -file "$RootLsd/$LsdSrc/icons/redo.png" }
-catch { image create photo cutImg -file "$RootLsd/$LsdSrc/icons/cut.png" }
-catch { image create photo deleteImg -file "$RootLsd/$LsdSrc/icons/delete.png" }
-catch { image create photo copyImg -file "$RootLsd/$LsdSrc/icons/copy.png" }
-catch { image create photo pasteImg -file "$RootLsd/$LsdSrc/icons/paste.png" }
-catch { image create photo editImg -file "$RootLsd/$LsdSrc/icons/edit.png" }
-catch { image create photo findImg -file "$RootLsd/$LsdSrc/icons/find.png" }
-catch { image create photo replaceImg -file "$RootLsd/$LsdSrc/icons/replace.png" }
-catch { image create photo indentImg -file "$RootLsd/$LsdSrc/icons/indent.png" }
-catch { image create photo deindentImg -file "$RootLsd/$LsdSrc/icons/deindent.png" }
-catch { image create photo wrapImg -file "$RootLsd/$LsdSrc/icons/wrap.png" }
-catch { image create photo compileImg -file "$RootLsd/$LsdSrc/icons/compile.png" }
-catch { image create photo comprunImg -file "$RootLsd/$LsdSrc/icons/comprun.png" }
-catch { image create photo gdbImg -file "$RootLsd/$LsdSrc/icons/gdb.png" }
-catch { image create photo infoImg -file "$RootLsd/$LsdSrc/icons/info.png" }
-catch { image create photo descrImg -file "$RootLsd/$LsdSrc/icons/descr.png" }
-catch { image create photo equationImg -file "$RootLsd/$LsdSrc/icons/equation.png" }
-catch { image create photo extraImg -file "$RootLsd/$LsdSrc/icons/extra.png" }
-catch { image create photo setImg -file "$RootLsd/$LsdSrc/icons/set.png" }
-catch { image create photo hideImg -file "$RootLsd/$LsdSrc/icons/hide.png" }
-catch { image create photo helpImg -file "$RootLsd/$LsdSrc/icons/help.png" }
-catch { image create photo reloadImg -file "$RootLsd/$LsdSrc/icons/reload.png" }
-catch { image create photo structImg -file "$RootLsd/$LsdSrc/icons/struct.png" }
-catch { image create photo addvarImg -file "$RootLsd/$LsdSrc/icons/addvar.png" }
-catch { image create photo addparImg -file "$RootLsd/$LsdSrc/icons/addpar.png" }
-catch { image create photo addobjImg -file "$RootLsd/$LsdSrc/icons/addobj.png" }
-catch { image create photo initImg -file "$RootLsd/$LsdSrc/icons/init.png" }
-catch { image create photo numberImg -file "$RootLsd/$LsdSrc/icons/number.png" }
-catch { image create photo runImg -file "$RootLsd/$LsdSrc/icons/run.png" }
-catch { image create photo dataImg -file "$RootLsd/$LsdSrc/icons/data.png" }
-catch { image create photo resultImg -file "$RootLsd/$LsdSrc/icons/result.png" }
-catch { image create photo errorDlgImg -file "$RootLsd/$LsdSrc/icons/error.png" }
-catch { image create photo infoDlgImg -file "$RootLsd/$LsdSrc/icons/information.png" }
-catch { image create photo questDlgImg -file "$RootLsd/$LsdSrc/icons/question.png" }
-catch { image create photo warnDlgImg -file "$RootLsd/$LsdSrc/icons/warning.png" }
+catch { image create photo lsdImg -file "$lsd_root/$lsd_src/icons/lsd.png" }
+catch { image create photo lmmImg -file "$lsd_root/$lsd_src/icons/lmm.png" }
+catch { image create photo newImg -file "$lsd_root/$lsd_src/icons/new.png" }
+catch { image create photo openImg -file "$lsd_root/$lsd_src/icons/open.png" }
+catch { image create photo saveImg -file "$lsd_root/$lsd_src/icons/save.png" }
+catch { image create photo undoImg -file "$lsd_root/$lsd_src/icons/undo.png" }
+catch { image create photo redoImg -file "$lsd_root/$lsd_src/icons/redo.png" }
+catch { image create photo cutImg -file "$lsd_root/$lsd_src/icons/cut.png" }
+catch { image create photo deleteImg -file "$lsd_root/$lsd_src/icons/delete.png" }
+catch { image create photo copyImg -file "$lsd_root/$lsd_src/icons/copy.png" }
+catch { image create photo pasteImg -file "$lsd_root/$lsd_src/icons/paste.png" }
+catch { image create photo editImg -file "$lsd_root/$lsd_src/icons/edit.png" }
+catch { image create photo findImg -file "$lsd_root/$lsd_src/icons/find.png" }
+catch { image create photo replaceImg -file "$lsd_root/$lsd_src/icons/replace.png" }
+catch { image create photo indentImg -file "$lsd_root/$lsd_src/icons/indent.png" }
+catch { image create photo deindentImg -file "$lsd_root/$lsd_src/icons/deindent.png" }
+catch { image create photo wrapImg -file "$lsd_root/$lsd_src/icons/wrap.png" }
+catch { image create photo compileImg -file "$lsd_root/$lsd_src/icons/compile.png" }
+catch { image create photo comprunImg -file "$lsd_root/$lsd_src/icons/comprun.png" }
+catch { image create photo gdbImg -file "$lsd_root/$lsd_src/icons/gdb.png" }
+catch { image create photo infoImg -file "$lsd_root/$lsd_src/icons/info.png" }
+catch { image create photo descrImg -file "$lsd_root/$lsd_src/icons/descr.png" }
+catch { image create photo equationImg -file "$lsd_root/$lsd_src/icons/equation.png" }
+catch { image create photo extraImg -file "$lsd_root/$lsd_src/icons/extra.png" }
+catch { image create photo setImg -file "$lsd_root/$lsd_src/icons/set.png" }
+catch { image create photo hideImg -file "$lsd_root/$lsd_src/icons/hide.png" }
+catch { image create photo helpImg -file "$lsd_root/$lsd_src/icons/help.png" }
+catch { image create photo reloadImg -file "$lsd_root/$lsd_src/icons/reload.png" }
+catch { image create photo structImg -file "$lsd_root/$lsd_src/icons/struct.png" }
+catch { image create photo addvarImg -file "$lsd_root/$lsd_src/icons/addvar.png" }
+catch { image create photo addparImg -file "$lsd_root/$lsd_src/icons/addpar.png" }
+catch { image create photo addobjImg -file "$lsd_root/$lsd_src/icons/addobj.png" }
+catch { image create photo initImg -file "$lsd_root/$lsd_src/icons/init.png" }
+catch { image create photo numberImg -file "$lsd_root/$lsd_src/icons/number.png" }
+catch { image create photo runImg -file "$lsd_root/$lsd_src/icons/run.png" }
+catch { image create photo dataImg -file "$lsd_root/$lsd_src/icons/data.png" }
+catch { image create photo resultImg -file "$lsd_root/$lsd_src/icons/result.png" }
+catch { image create photo errorDlgImg -file "$lsd_root/$lsd_src/icons/error.png" }
+catch { image create photo infoDlgImg -file "$lsd_root/$lsd_src/icons/information.png" }
+catch { image create photo questDlgImg -file "$lsd_root/$lsd_src/icons/question.png" }
+catch { image create photo warnDlgImg -file "$lsd_root/$lsd_src/icons/warning.png" }
 
 # load and set console configuration
 if $conWnd {
 	set msg "File(s) missing or corrupted"
 	set det "Tcl/Tk console file 'tkcon.tcl' is missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is continuing without console support."
-	if [ file exists "$RootLsd/$LsdSrc/tklib/tkcon.tcl" ] {
-		if { [ catch { source "$RootLsd/$LsdSrc/tklib/tkcon.tcl" } ] == 0 } {
+	if [ file exists "$lsd_root/$lsd_src/tklib/tkcon.tcl" ] {
+		if { [ catch { source "$lsd_root/$lsd_src/tklib/tkcon.tcl" } ] == 0 } {
 			set tkcon::PRIV(showOnStartup) 0
 			set tkcon::PRIV(root) .console
 			set tkcon::PRIV(protocol) { tkcon hide }
@@ -510,7 +407,7 @@ if $testWnd {
 }
 
 
-#		ttk::messageBox -message "lsdTheme:$lsdTheme x [ ttk::style theme use ]\n\nThemes:\n[ ttk::style theme names ]\n\nthemeList:\n[ array names themeTable ]\n\npackages:\n[ package names ]\n\nColors:\n[ array get colorsTheme ]\n\nStyles:\n[ ttk::style element names ]"
+#		ttk::messageBox -message "lsd_theme:$lsd_theme x [ ttk::style theme use ]\n\nThemes:\n[ ttk::style theme names ]\n\nthemeList:\n[ array names themeTable ]\n\npackages:\n[ package names ]\n\nColors:\n[ array get colorsTheme ]\n\nStyles:\n[ ttk::style element names ]"
 
 
 

@@ -35,7 +35,7 @@ set months [ list January February March April May June July August September Oc
 # SHOWMODEL
 #************************************************
 proc showmodel pippo {
-	global lmn lmd ldn lrn lbn group result choiceSM lver rootname modelGroup upSymbol groupSymbol RootLsd memory fonttype small_character GROUP_TXT_INFO MODEL_TXT_INFO DESCRIPTION colorsTheme darkTheme
+	global lmn lmd ldn lrn lbn group result choiceSM lver rootname modelGroup upSymbol groupSymbol lsd_root memory small_character GROUP_TXT_INFO MODEL_TXT_INFO DESCRIPTION colorsTheme darkTheme
 
 	unset -nocomplain lmn lver lmd ldn lrn lbn group
 	lappend lmn
@@ -298,13 +298,13 @@ proc showmodel pippo {
 	set curdir [ pwd ]
 	if { ! [ file isdirectory "$pippo" ] } {
 		# recover from invalid folders
-		set pippo $RootLsd
+		set pippo $lsd_root
 	}
 
 	cd "$pippo"
-	if { ! [ string equal -nocase "$pippo" "$RootLsd" ] } {
+	if { ! [ string equal -nocase "$pippo" "$lsd_root" ] } {
 		set updir "[ file dirname "[ pwd ]" ]"
-		if { ! [ string equal -nocase "$updir" "$RootLsd" ] && [ file exists "$updir/$GROUP_TXT_INFO" ] } {
+		if { ! [ string equal -nocase "$updir" "$lsd_root" ] && [ file exists "$updir/$GROUP_TXT_INFO" ] } {
 			set f [ open "$updir/$GROUP_TXT_INFO" r ]
 			set upgroup "[ gets $f ]"
 			close $f
@@ -423,7 +423,7 @@ proc mcopy i {
 # Remove a model/group, placing it in a trashbin
 #************************************************
 proc mdelete i {
-	global lrn ldn lmn group RootLsd memory  GROUP_TXT_INFO DESCRIPTION
+	global lrn ldn lmn group lsd_root memory  GROUP_TXT_INFO DESCRIPTION
 
 	set memory 0
 	.l.m.edit entryconf 2 -state disabled
@@ -434,7 +434,7 @@ proc mdelete i {
 		set item group
 	}
 
-	if { [ string match -nocase $RootLsd/trashbin* [ lindex $ldn $i ] ] } {
+	if { [ string match -nocase $lsd_root/trashbin* [ lindex $ldn $i ] ] } {
 		set answer [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n([ file nativename [ lindex $ldn $i ] ])?" ]
 		file delete -force [ lindex $ldn $i ]
 		showmodel [ lindex $lrn $i ]
@@ -442,23 +442,23 @@ proc mdelete i {
 		set answer [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n([ file nativename [ lindex $ldn $i ] ])?" ]
 
 		if { $answer == "yes" } {
-			if { ! [ file exists "$RootLsd/trashbin" ] } {
-				file mkdir "$RootLsd/trashbin"
+			if { ! [ file exists "$lsd_root/trashbin" ] } {
+				file mkdir "$lsd_root/trashbin"
 			}
-			if { ! [ file exists "$RootLsd/trashbin/$GROUP_TXT_INFO" ] } {
-				set f [ open "$RootLsd/trashbin/$GROUP_TXT_INFO" w ]
+			if { ! [ file exists "$lsd_root/trashbin/$GROUP_TXT_INFO" ] } {
+				set f [ open "$lsd_root/trashbin/$GROUP_TXT_INFO" w ]
 				puts $f "Deleted Models"
 				close $f
-				set f [ open "$RootLsd/trashbin/$DESCRIPTION" w ]
+				set f [ open "$lsd_root/trashbin/$DESCRIPTION" w ]
 				puts $f "Folder containing deleted models.\n"
 				close $f
 			}
 			set name [ string range [ lindex $ldn $i ] [ expr { [ string last / [ lindex $ldn $i ] ] + 1 } ] end ]
-			if { [ file exists "$RootLsd/trashbin/$name" ] } {
-				catch { file delete -force "$RootLsd/trashbin/$name" }
+			if { [ file exists "$lsd_root/trashbin/$name" ] } {
+				catch { file delete -force "$lsd_root/trashbin/$name" }
 			}
 
-			if { [ catch { file rename -force [ lindex $ldn $i ] "$RootLsd/trashbin/$name" } ] } {
+			if { [ catch { file rename -force [ lindex $ldn $i ] "$lsd_root/trashbin/$name" } ] } {
 				ttk::messageBox -parent .l -title Error -icon error -type ok -message "Delete error" -detail "Directory [ file nativename [ lindex $ldn $i ] ] cannot be deleted now.\nYou may try again later."
 			}
 
@@ -473,7 +473,7 @@ proc mdelete i {
 # Edit the model/group name and description
 #************************************************
 proc medit i {
-	global lrn ldn lmn group lmd result memory fonttype small_character darkTheme GROUP_TXT_INFO MODEL_TXT_INFO DESCRIPTION
+	global lrn ldn lmn group lmd result memory small_character darkTheme GROUP_TXT_INFO MODEL_TXT_INFO DESCRIPTION
 
 	set memory 0
 	.l.m.edit entryconf 2 -state disabled
@@ -565,7 +565,7 @@ proc medit i {
 # Paste a previously copied model/group
 #************************************************
 proc mpaste i {
-	global copydir copyver copylabel copydscr lrn modelGroup lmn lver lmd choiceSM fonttype small_character darkTheme MODEL_TXT_INFO DESCRIPTION
+	global copydir copyver copylabel copydscr lrn modelGroup lmn lver lmd choiceSM small_character darkTheme MODEL_TXT_INFO DESCRIPTION
 
 	set pastedir [ lindex $lrn $i ]
 

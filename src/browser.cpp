@@ -119,20 +119,20 @@ int gui::load_gui( const char **argv )
 	Tcl_LinkVar( interp, "deb_set", ( char * ) & sim.deb_set, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( interp, "deb_t", ( char * ) & sim.deb_t, TCL_LINK_INT );
 
-	// load/check LMM configuration file
-	i = load_lsd_options( );
+	// load/check configuration file
+	load_lsd_options( );
 
 	// load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 	choice = 0;
 
 	// load native Tk procedures for graphical user interface management
-	cmd( "if [ file exists \"$RootLsd/$LsdSrc/gui.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/gui.tcl\" } err0x01 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0100, 0x01 );
+	cmd( "if [ file exists \"$lsd_root/$lsd_src/gui.tcl\" ] { if [ catch { source \"$lsd_root/$lsd_src/gui.tcl\" } err0x01 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0100, 0x01 );
 
 	// load native Tcl procedures for general utilities
-	cmd( "if [ file exists \"$RootLsd/$LsdSrc/file.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/file.tcl\" } err0x02 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0200, 0x02 );
+	cmd( "if [ file exists \"$lsd_root/$lsd_src/file.tcl\" ] { if [ catch { source \"$lsd_root/$lsd_src/file.tcl\" } err0x02 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0200, 0x02 );
 
 	// load additional native Tcl procedures for external files handling
-	cmd( "if [ file exists \"$RootLsd/$LsdSrc/util.tcl\" ] { if [ catch { source \"$RootLsd/$LsdSrc/util.tcl\" } err0x04 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0400, 0x04 );
+	cmd( "if [ file exists \"$lsd_root/$lsd_src/util.tcl\" ] { if [ catch { source \"$lsd_root/$lsd_src/util.tcl\" } err0x04 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0400, 0x04 );
 
 	if ( choice != 0 )
 	{
@@ -144,10 +144,6 @@ int gui::load_gui( const char **argv )
 	// set and check to OS platform
 	if ( ( j = set_platform( ) ) != 0 )
 		return j;
-
-	// fix non-existent or old options file for new options
-	if ( i == 0 )
-		update_lsd_options( );			// update config file
 
 	// create a Tcl command that calls the C discard_change function before killing LSD
 	Tcl_CreateCommand( interp, "discard_change", Tcl_discard_change, NULL, NULL );

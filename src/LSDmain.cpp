@@ -49,7 +49,9 @@ namespace gui
 	bool unsavedData = false;		// flag unsaved simulation configurations
 	bool unsavedSense = false;		// control for unsaved sensitivity data
 	char *eq_txt = NULL;			// equation file content
+	char *mod_options = NULL;		// model makefile options
 	char *sens_file = NULL;			// current sensitivity analysis file
+	char *sys_options = NULL;		// system makefile options
 	char cfg_path[ MAX_PATH_LENGTH ] = "";// path of LSD configuration file
 	char eq_file[ MAX_PATH_LENGTH ] = "";// equation file name
 	char sens_path[ MAX_PATH_LENGTH ] = "";// path of last used sensitivity directory
@@ -70,11 +72,12 @@ namespace gui
 	Tcl_Interp *interp = NULL;		// global Tcl interpreter in LSD
 
 	// constant arrays
-	const char *lmm_defaults[ LMM_TXT_OPTIONS_NUM ] = LMM_TXT_OPTIONS_DEFAULT;
-	const char *lmm_options[ LMM_TXT_OPTIONS_NUM ] = LMM_TXT_OPTIONS_NAME;
+	const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;
+	const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
 	const char *lsd_nw_src[ LSD_NW_NUM ] = LSD_NW_SRC;
 	const char *model_defaults[ MODEL_TXT_INFO_NUM ] = MODEL_TXT_INFO_DEFAULT;
 	const char *model_info[ MODEL_TXT_INFO_NUM ] = MODEL_TXT_INFO_NAME;
 	const char *tk_wnd_names[ TK_WIN_NUM ] = TK_WIN_NAME;
 	const char *wnd_names[ LSD_WIN_NUM ] = LSD_WIN_NAME;
+	const char lmm_types[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_TYPE;
 }

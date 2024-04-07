@@ -102,7 +102,7 @@ void gui::init_tcl_tk( const char *exec, const char *tcl_app_name )
 	if ( res )
 	{
 		log_tcl_error( false, "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
-		cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If it exists, delete the '%s' file from the sources (src) directory.\n\nLSD is aborting now.\"", SYSTEM_TXT_OPTIONS );
+		cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nPlease reinstall LSD in a proper directory.\n\nLSD is aborting now.\"" );
 		lsd_exit_gui( 4 );
 	}
 
@@ -215,9 +215,10 @@ int gui::init_lsd_env( const char **argv )
 #endif
 
 	// check if LSDROOT environment variable exists and use it if so
+	cmd( "set lsd_src \"%s\"", DEFAULT_SRC_DIR );	// default initial source dir
 	cmd( "if [ info exists env(LSDROOT) ] { \
-			set RootLsd [ file normalize $env(LSDROOT) ]; \
-			if [ file exists \"$RootLsd/src/LSD.h\" ] { \
+			set lsd_root [ file normalize $env(LSDROOT) ]; \
+			if [ file exists \"$lsd_root/$lsd_src/LSD.h\" ] { \
 				set res 0 \
 			} { \
 				set res 1 \
@@ -230,11 +231,11 @@ int gui::init_lsd_env( const char **argv )
 	if ( get_bool( "res" ) )
 	{
 		cmd( "set here [ pwd ]" );
-		cmd( "while { ! [ file exists \"src/LSD.h\" ] && ! [ string equal [ pwd ] \"/\" ] && [ string length [ pwd ] ] > 3 } { \
+		cmd( "while { ! [ file exists \"$lsd_src/LSD.h\" ] && ! [ string equal [ pwd ] \"/\" ] && [ string length [ pwd ] ] > 3 } { \
 				cd .. \
 			}" );
-		cmd( "if [ file exists \"src/LSD.h\" ] { \
-				set RootLsd [ pwd ]; \
+		cmd( "if [ file exists \"$lsd_src/LSD.h\" ] { \
+				set lsd_root [ pwd ]; \
 				cd $here; \
 				set res 0 \
 			} { \
@@ -254,16 +255,16 @@ int gui::init_lsd_env( const char **argv )
 			return 5;
 		}
 
-		cmd( "set env(LSDROOT) \"$RootLsd\"" );
+		cmd( "set env(LSDROOT) \"$lsd_root\"" );
 	}
 
-	app = get_str( "RootLsd" );
+	app = get_str( "lsd_root" );
 	if ( app != NULL && strlen( app ) > 0 )
 	{
 		lsd::root_lsd = new char[ strlen( app ) + 1 ];
 		strcpy( lsd::root_lsd, app );
 		lsd::root_lsd = lsd::clean_path( lsd::root_lsd );
-		cmd( "set RootLsd [ file normalize \"%s\" ]", lsd::root_lsd );
+		cmd( "set lsd_root [ file normalize \"%s\" ]", lsd::root_lsd );
 	}
 	else
 	{
@@ -273,8 +274,8 @@ int gui::init_lsd_env( const char **argv )
 	}
 
 	// set default LSD XML configuration path (same as LSDROOT if in home directory)
-	cmd( "if { [ string first [ file normalize ~ ] $RootLsd ] == 0 } { \
-				set cfgDir $RootLsd \
+	cmd( "if { [ string first [ file normalize ~ ] $lsd_root ] == 0 } { \
+				set cfgDir $lsd_root \
 			} { \
 				if { $tcl_platform(os) eq \"Windows NT\" } { \
 					set cfgDir [ file normalize \"~/AppData/Local/LSD\" ] \
@@ -307,7 +308,7 @@ int gui::init_lsd_env( const char **argv )
 
 #ifdef _LMM_
 	// change path to the LSD root directory in LMM
-	cmd( "cd $RootLsd" );
+	cmd( "cd $lsd_root" );
 #endif
 
 	return 0;
@@ -323,25 +324,25 @@ int gui::init_lsd_env( const char **argv )
 bool gui::set_env( bool set )
 {
 	bool res = true;
-	char *lsd_root, cur_path[ PATH_MAX ];
-	static char *lsd_root_env = NULL, *tcl_lib_env = NULL, *path_env = NULL;
+	char *lsdroot, cur_path[ PATH_MAX ];
+	static char *lsdroot_env = NULL, *tcl_lib_env = NULL, *path_env = NULL;
 
 	if ( set )
 	{
-		lsd_root = getenv( "LSDROOT" );
+		lsdroot = getenv( "LSDROOT" );
 
-		if ( lsd_root == NULL )
+		if ( lsdroot == NULL )
 		{
 			if ( getcwd( cur_path, PATH_MAX ) != NULL )
-				lsd_root = search_lsd_root( lsd::clean_path( cur_path ), PATH_MAX );
+				lsdroot = search_lsdroot( lsd::clean_path( cur_path ), PATH_MAX );
 
-			if ( lsd_root != NULL )
+			if ( lsdroot != NULL )
 			{
-				delete [ ] lsd_root_env;
-				lsd_root_env = new char[ strlen( "LSDROOT" ) + strlen( lsd_root ) + 2 ];
-				sprintf( lsd_root_env, "LSDROOT=%s", lsd_root );
+				delete [ ] lsdroot_env;
+				lsdroot_env = new char[ strlen( "LSDROOT" ) + strlen( lsdroot ) + 2 ];
+				sprintf( lsdroot_env, "LSDROOT=%s", lsdroot );
 
-				res = ! ( bool ) putenv( lsd_root_env );
+				res = ! ( bool ) putenv( lsdroot_env );
 			}
 			else
 				res = false;
@@ -355,20 +356,20 @@ bool gui::set_env( bool set )
 
 		path = getenv( "PATH" );
 
-		if ( lsd_root != NULL && getenv( TCL_LIB_VAR ) == NULL )
+		if ( lsdroot != NULL && getenv( TCL_LIB_VAR ) == NULL )
 		{
-			lsd_root = lsd::clean_path( lsd_root );
+			lsdroot = lsd::clean_path( lsdroot );
 
-			file = new char[ strlen( lsd_root ) + strlen( TCL_LIB_PATH ) + strlen( TCL_LIB_INIT ) + 3 ];
-			sprintf( file, "%s/%s/%s", lsd_root, TCL_LIB_PATH, TCL_LIB_INIT );
+			file = new char[ strlen( lsdroot ) + strlen( TCL_LIB_PATH ) + strlen( TCL_LIB_INIT ) + 3 ];
+			sprintf( file, "%s/%s/%s", lsdroot, TCL_LIB_PATH, TCL_LIB_INIT );
 			st = stat( file, &info );
 			delete [ ] file;
 
 			if ( st == 0 )
 			{
 				delete [ ] tcl_lib_env;
-				tcl_lib_env = new char[ strlen( TCL_LIB_VAR ) + strlen( lsd_root ) + strlen( TCL_LIB_PATH ) + 3 ];
-				sprintf( tcl_lib_env, "%s=%s/%s", TCL_LIB_VAR, lsd_root, TCL_LIB_PATH );
+				tcl_lib_env = new char[ strlen( TCL_LIB_VAR ) + strlen( lsdroot ) + strlen( TCL_LIB_PATH ) + 3 ];
+				sprintf( tcl_lib_env, "%s=%s/%s", TCL_LIB_VAR, lsdroot, TCL_LIB_PATH );
 
 				res = ! ( bool ) putenv( tcl_lib_env );
 			}
@@ -377,11 +378,11 @@ bool gui::set_env( bool set )
 					res = false;	// just stop if Tcl/Tk is not on path
 		}
 
-		if ( lsd_root != NULL && path != NULL )
+		if ( lsdroot != NULL && path != NULL )
 		{
 			// check if not already in path and add it in the adequate order
-			lsd_bin = new char[ win_path( lsd_root ).size( ) + strlen( TCL_EXEC_PATH ) + 2 ];
-			sprintf( lsd_bin, "%s\\%s", win_path( lsd_root ).c_str( ), TCL_EXEC_PATH );
+			lsd_bin = new char[ win_path( lsdroot ).size( ) + strlen( TCL_EXEC_PATH ) + 2 ];
+			sprintf( lsd_bin, "%s\\%s", win_path( lsdroot ).c_str( ), TCL_EXEC_PATH );
 
 			if ( strstr( path, lsd_bin ) == NULL )
 			{
@@ -410,7 +411,7 @@ bool gui::set_env( bool set )
 	else
 	{
 		delete [ ] tcl_lib_env;
-		delete [ ] lsd_root_env;
+		delete [ ] lsdroot_env;
 		delete [ ] path_env;
 	}
 
@@ -422,11 +423,11 @@ bool gui::set_env( bool set )
  SEARCH_LSD_ROOT
  searches LSD root directory upwards to the root
  *************************************************************/
-char *gui::search_lsd_root( char *path, int pathSz )
+char *gui::search_lsdroot( char *path, int pathSz )
 {
 	bool miss;
 	const char *files[ ] = LSD_MIN_FILES;
-	char *file, cur_dir[ PATH_MAX ], last_dir[ PATH_MAX ], orig_dir[ PATH_MAX ], *found = NULL;
+	char *file, cur_dir[ PATH_MAX ], last_dir[ PATH_MAX ], orig_dir[ PATH_MAX ], src_dir[ PATH_MAX ], *found = NULL;
 	int i, st;
 	struct stat info;
 
@@ -443,10 +444,11 @@ char *gui::search_lsd_root( char *path, int pathSz )
 		if ( getcwd( cur_dir, PATH_MAX ) == NULL || ! strcmp( lsd::clean_path( cur_dir ), last_dir ) )
 			goto end;
 
+		snprintf( src_dir, PATH_MAX, "%s/%s", cur_dir, DEFAULT_SRC_DIR );
 		for ( i = 0, miss = false; i < LSD_MIN_NUM; ++i )
 		{
-			file = new char[ strlen( cur_dir ) + strlen( files[ i ] ) + 2 ];
-			sprintf( file, "%s/%s", cur_dir, files[ i ] );
+			file = new char[ strlen( src_dir ) + strlen( files[ i ] ) + 2 ];
+			sprintf( file, "%s/%s", src_dir, files[ i ] );
 			st = stat( file, &info );
 			delete [ ] file;
 
@@ -505,88 +507,362 @@ int gui::set_platform( void )
 
 
 /*************************************************************
+ RESET_MAKE_OPTIONS
+ check if model and system options
+ are set and reset to defaults if not
+ *************************************************************/
+void gui::reset_make_options( int which )
+{
+	const char *s;
+
+	// model makefile options
+	if ( which != 1 && ! eval_bool( "[ file exists \"$modelDir/$MODEL_TXT_OPTIONS\" ]" ) && eval_bool( "$modelDir ne \"\"" ) && eval_bool( "$modelDir ne $lsd_root" ) )
+	{
+		cmd( "set dir [ glob -nocomplain \"$modelDir/fun_*.cpp\" ]" );
+		cmd( "if { $dir ne \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
+		cmd( "set a \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\nPRECOMPILED=true\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
+		cmd( "set f [ open \"$modelDir/$MODEL_TXT_OPTIONS\" w ]" );
+		cmd( "puts $f $a" );
+		cmd( "close $f" );
+	}
+
+	// system makefile options
+	if ( which != 2 )
+	{
+        cmd( "if [ string equal $tcl_platform(platform) windows ] { \
+                set sysfile \"[ file rootname $SYSTEM_TXT_OPTIONS ]-windows.txt\" \
+            } elseif { [ string equal $tcl_platform(os) Darwin ] } { \
+                set sysfile \"[ file rootname $SYSTEM_TXT_OPTIONS ]-mac.txt\" \
+            } else { \
+                set sysfile \"[ file rootname $SYSTEM_TXT_OPTIONS ]-linux.txt\" \
+            }" );
+
+		cmd( "set f [ open \"$lsd_root/$lsd_src/$sysfile\" r ]" );
+		cmd( "set systemOptions \"# LSD options\n\"" );
+		cmd( "append systemOptions \"LSDROOT=$lsd_root\n\"" );
+		cmd( "append systemOptions \"SRC=$lsd_src\n\n\"" );
+		cmd( "append systemOptions [ string trim [ read $f ] ]" );
+		cmd( "close $f" );
+
+		if ( ( s = get_str( "systemOptions" ) ) != NULL )
+		{
+			delete [ ] sys_options;
+			sys_options = new char [ strlen( s ) + 1 ];
+			strcpy( sys_options, s );
+		}
+	}
+}
+
+
+/*************************************************************
  LOAD_LSD_OPTIONS
  *************************************************************/
-bool gui::load_lsd_options( void )
+void gui::load_lsd_options( void )
 {
+	char fName[ MAX_PATH_LENGTH ];
+	const char *s, *path = cfg_path;		// default path
 	int res;
-	const char *path = cfg_path;			// default path
+	x_docT sysCfg;
 
 	cmd( "if [ file exists \"$cfgDir/$LSD_XML_OPTIONS\" ] { \
 			set res 1 \
-		} elseif [ file exists \"$RootLsd/$LSD_XML_OPTIONS\" ] { \
+		} elseif [ file exists \"$lsd_root/$LSD_XML_OPTIONS\" ] { \
 			set res 2 \
 		} elseif [ file exists \"$cfgDir/$LMM_TXT_OPTIONS\" ] { \
 			set f [ open \"$cfgDir/$LMM_TXT_OPTIONS\" r ]; \
 			set res 3 \
-		} elseif [ file exists \"$RootLsd/$LMM_TXT_OPTIONS\" ] { \
-			set f [ open \"$RootLsd/$LMM_TXT_OPTIONS\" r ]; \
+		} elseif [ file exists \"$lsd_root/$LMM_TXT_OPTIONS\" ] { \
+			set f [ open \"$lsd_root/$LMM_TXT_OPTIONS\" r ]; \
 			set res 3 \
 		} else { \
 			set res 0 \
 		}" );
 
-	switch ( ( res = get_int( "res" ) ) )
+	if ( ( res = get_int( "res" ) ) == 2 )
+		path = lsd::root_lsd;						// xml format in LSD root
+
+	// load legacy configuration (one-time migration)
+	if ( res == 3 )
 	{
-		case 2:								// xml format in LSD root
-			path = lsd::root_lsd;
+		for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )		// read parameters
+		{
+			cmd( "gets $f %s", lmm_options[ i ] );
+			cmd( "if { $%s == \"\" } { set res 0 }", lmm_options[ i ] );
+		}
 
-		case 1:								// xml format in default path
-
-			break;
-
-		case 3:								// legacy file format
-			for ( int i = 0; i < LMM_TXT_OPTIONS_NUM; ++i )	// read parameters, returning 1 if incomplete
-			{
-				cmd( "gets $f %s", lmm_options[ i ] );
-				cmd( "if { $%s == \"\" } { set res 0 }", lmm_options[ i ] );
-			}
-
-			cmd( "close $f" );
-			break;
-
-		default:
-			for ( int i = 0; i < LMM_TXT_OPTIONS_NUM; ++i )
-				cmd( "set %s \"\"", lmm_options[ i ] );
-
-			// fix now missing source directory name
-			cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ 4 ], lmm_options[ 4 ], lmm_defaults[ 4 ] );
+		cmd( "close $f" );
 	}
 
-	return res;
+	snprintf( fName, MAX_PATH_LENGTH, "%s%s%s", path, strlen( path ) > 0 ? "/" : "", LSD_XML_OPTIONS );
+
+	// try to load XML file
+	if ( sysCfg.load_file( fName ).status != pugi::status_ok )
+	{
+		update_lsd_options( );		// rebuild configuration file
+		sysCfg.load_file( fName );	// reload
+	}
+
+	// load XML file structure
+	x_nodeT lsdNode = sysCfg.document_element( );	// LSD top element
+	x_nodeT sysNode = lsdNode.child( "system" );	// load system config.
+	x_nodeT lmmNode = sysNode.child( "LMM" );		// LMM configuration
+	x_nodeT setNode = lmmNode.child( "settings" );	// LMM settings
+	x_nodeT geoNode = lmmNode.child( "geometry" );	// LMM current geometry
+	x_nodeT modNode = lmmNode.child( "model" );		// LMM current model
+	x_nodeT makNode = sysNode.child( "makefile" );	// LMM configuration
+
+	// load LMM settings
+	for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )
+	{
+		switch ( lmm_types[ i ] )
+		{
+			case 'a':								// attribute
+				cmd( "set %s \"%s\"", lmm_options[ i ], setNode.attribute( lmm_options[ i ] ).as_string( lmm_defaults[ i ] ) );
+				break;
+
+			case 'p':								// PCDATA text node
+				cmd( "set %s \"%s\"", lmm_options[ i ], setNode.child( lmm_options[ i ] ).text( ).as_string( lmm_defaults[ i ] ) );
+				break;
+
+			case 'g':								// geometry
+				cmd( "set %s \"%s\"", lmm_options[ i ], geoNode.text( ).as_string( lmm_defaults[ i ] ) );
+				break;
+		}
+	}
+
+	// load system makefile options
+	s = makNode.text( ).as_string( );
+	if ( strlen( s ) == 0 )
+	{
+		// try to read legacy files
+		if ( eval_bool( "[ file exists \"$cfgDir/$SYSTEM_TXT_OPTIONS\" ]" ) )
+			cmd( "set sysfile \"$cfgDir/$SYSTEM_TXT_OPTIONS\"" );
+		else
+			if ( eval_bool( "[ file exists \"$lsd_root/$lsd_src/$SYSTEM_TXT_OPTIONS\" ]" ) )
+				cmd( "set sysfile \"$lsd_root/$lsd_src/$SYSTEM_TXT_OPTIONS\"" );
+			else	// if not, use default settings for platform
+			{
+				reset_make_options( 1 );
+				cmd( "set sysfile \"\"" );
+			}
+
+		if ( strlen( get_str( "sysfile" ) ) > 0 )
+		{
+			cmd( "set f [ open $sysfile r ]" );
+			cmd( "set systemOptions [ string trim [ read $f ] ]" );
+			cmd( "close $f" );
+			if ( ( s = get_str( "systemOptions" ) ) != NULL )
+			{
+				delete [ ] sys_options;
+				sys_options = new char [ strlen( s ) + 1 ];
+				strcpy( sys_options, s );
+			}
+		}
+	}
+	else
+	{
+		delete [ ] sys_options;
+		sys_options = new char [ strlen( s ) + 1 ];
+		strcpy( sys_options, s );
+		cmd( "set systemOptions {%s}", sys_options );
+	}
+
+	// load previous model
+	cmd( "set m {%s}", modNode.child( "path" ).text( ).as_string( ) );
+	if ( eval_bool( "[ file exists \"$m/$MODEL_TXT_INFO\" ]" ) )
+	{
+		cmd( "set g [ file normalize \"$m/..\" ]" );
+		if ( eval_bool( "[ file exists \"$g/$GROUP_TXT_INFO\" ]" ) )
+		{
+			cmd( "set modelDir $m" );
+			cmd( "set groupDir $g" );
+		}
+	}
 }
 
 
 /*************************************************************
  UPDATE_LSD_OPTIONS
  *************************************************************/
-void gui::update_lsd_options( bool justLmmGeom )
+void gui::update_lsd_options( bool save_settings )
 {
-	if ( justLmmGeom )
+	bool save_attr;
+	char *s, fName[ MAX_PATH_LENGTH ];
+	x_attrT attr;
+	x_docT sysCfg;
+	x_nodeT child;
+
+	// ensure defaults are loaded
+	cmd( "if { ! [ info exists CurPlatform ] } { \
+			source \"$lsd_root/$lsd_src/defaults.tcl\" \
+		}" );
+
+	// update current geometry if no saving just settings
+	if ( ! save_settings )
 	{
-		cmd( "set done 1" );
-		cmd( "if { $restoreWin } { set curGeom [ geomtosave .lmm ]; if { $curGeom != \"\" && ! [ string equal $lmmGeom $curGeom ] } { set done 0 } }" );
-
-		if ( get_bool( "done" ) )	// nothing to save?
-			return;
-
-		load_lsd_options( );		// if just saving window geometry, first reload from disk
-
-		cmd( "set lmmGeom $curGeom" );
+		cmd( "if { $restore_geom } { \
+				set curGeom [ geomtosave .lmm ]; \
+				if { $curGeom != \"\" && ! [ string equal $lmm_geom $curGeom ] } { \
+					set lmm_geom $curGeom \
+				} \
+			}" );
 	}
 
-	// save options to disk
-	cmd( "set f [ open \"$cfgDir/$LMM_TXT_OPTIONS\" w ]" );
+	// try to load existing XML as base
+	snprintf( fName, MAX_PATH_LENGTH, "%s%s%s", cfg_path, strlen( cfg_path ) > 0 ? "/" : "", LSD_XML_OPTIONS );
 
-	// set undefined parameters to defaults
-	for ( int i = 0; i < LMM_TXT_OPTIONS_NUM; ++i )
+	if ( sysCfg.load_file( fName, pugi::parse_declaration | pugi::parse_doctype ).status != pugi::status_ok )
+		sysCfg.reset( );							// recreate XML structure
+
+	// try to read configuration nodes
+	x_nodeT lsdNode = sysCfg.document_element( );	// LSD top element
+	x_nodeT sysNode = lsdNode.child( "system" );	// load system config.
+	x_nodeT lmmNode = sysNode.child( "LMM" );		// LMM configuration
+	x_nodeT setNode = lmmNode.child( "settings" );	// LMM settings
+	x_nodeT geoNode = lmmNode.child( "geometry" );	// LMM current geometry
+	x_nodeT modNode = lmmNode.child( "model" );		// LMM current model
+	x_nodeT makNode = sysNode.child( "makefile" );	// LMM configuration
+
+	// recreate XML structure if wrong format XML
+	if ( strcmp( lsdNode.name( ), "LSD" ) != 0 || strcmp( sysNode.name( ), "system" ) != 0 )
 	{
+		sysCfg.reset( );			// recreate all
+		x_nodeT typeNode = sysCfg.append_child( pugi::node_declaration );
+		typeNode.append_attribute( "version" ) = "1.0";
+		typeNode.append_attribute( "encoding" ) = "ANSI";
+		typeNode.append_attribute( "standalone" ) = "yes";
+		sysCfg.append_child( pugi::node_doctype ).set_value( "LSD [\n \
+		<!ELEMENT LSD (system)>\n \
+		<!ELEMENT system (LMM, makefile)>\n \
+		<!ELEMENT LMM (settings, geometry, model)>\n \
+		<!ELEMENT settings (#PCDATA+)>\n \
+		<!ELEMENT geometry (#PCDATA?)>\n \
+		<!ELEMENT model (#PCDATA?)>\n \
+		<!ELEMENT makefile (#CDATA)>\n]" );
+		lsdNode = sysCfg.append_child( "LSD" );
+		sysNode = lsdNode.append_child( "system" );
+	}
+
+	// add/update system configuration attributes
+	if ( ( attr = sysNode.attribute( "version" ) ) == NULL )
+		attr = sysNode.append_attribute( "version" );
+
+	attr = "1.0";
+
+	if ( ( attr = sysNode.attribute( "description" ) ) == NULL )
+		attr = sysNode.append_attribute( "description" );
+
+	attr = "LSD system settings file";
+
+	// add/update LMM settings and geometry (legacy configuration content)
+	if ( lmmNode.empty( ) )
+		lmmNode = sysNode.append_child( "LMM" );
+
+	if ( setNode.empty( ) )
+		setNode = lmmNode.append_child( "settings" );
+
+	if ( geoNode.empty( ) )
+		geoNode = lmmNode.append_child( "geometry" );
+
+	for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )
+	{
+		// set undefined parameters to defaults
 		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", lmm_options[ i ], lmm_options[ i ] );
 		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ i ], lmm_options[ i ], lmm_defaults[ i ] );
-		cmd( "puts $f \"$%s\"", lmm_options[ i ] );
+
+		save_attr = save_settings;					// save default
+
+		switch ( lmm_types[ i ] )
+		{
+			case 'a':								// attribute
+				if ( ( attr = setNode.attribute( lmm_options[ i ] ) ) == NULL )
+				{
+					attr = setNode.append_attribute( lmm_options[ i ] );
+					save_attr = true;				// save because missing
+				}
+
+				if ( save_attr )
+					attr = get_str( lmm_options[ i ] );
+
+				break;
+
+			case 'p':								// PCDATA text node
+				if ( ( child = setNode.child( lmm_options[ i ] ) ) == NULL )
+				{
+					child = setNode.append_child( lmm_options[ i ] );
+					save_attr = true;				// save because missing
+				}
+
+				if ( save_attr )
+					child.text( ).set( get_str( lmm_options[ i ] ) );
+
+				break;
+
+			case 'g':								// geometry
+				geoNode.text( ).set( get_str( lmm_options[ i ] ) );
+				break;
+		}
 	}
 
-	cmd( "close $f" );
+	// save current model info
+	if ( ! save_settings && exists_var( "modelName" ) && strcmp( get_str( "modelName" ), "(no model)" ) != 0 && exists_var( "modelDir" ) && eval_bool( "[ file exists $modelDir ] && [ file isdirectory $modelDir ]" ) )
+	{
+		if ( modNode.empty( ) )
+			modNode = lmmNode.append_child( "model" );
+
+		if ( exists_var( "modelGroup" ) )
+		{
+			if ( ( attr = modNode.attribute( "group" ) ) == NULL )
+				attr = modNode.append_attribute( "group" );
+
+			attr = get_str( "modelGroup" );
+		}
+
+		if ( exists_var( "modelName" ) )
+		{
+			if ( ( attr = modNode.attribute( "name" ) ) == NULL )
+				attr = modNode.append_attribute( "name" );
+
+			attr = get_str( "modelName" );
+		}
+
+		if ( exists_var( "modelVersion" ) )
+		{
+			if ( ( attr = modNode.attribute( "version" ) ) == NULL )
+				attr = modNode.append_attribute( "version" );
+
+			attr = get_str( "modelVersion" );
+		}
+
+		if ( ( child = modNode.child( "path" ) ) == NULL )
+			child = modNode.append_child( "path" );
+
+		child.text( ).set( get_str( "modelDir" ) );
+	}
+	else
+		lmmNode.remove_child( "model" );
+
+
+	// save system makefile options
+	if ( makNode.empty( ) )
+		makNode = sysNode.append_child( "makefile" );
+
+	if ( ( child = makNode.first_child( ) ) == NULL )
+		child = makNode.append_child( pugi::node_cdata );
+
+	if ( sys_options != NULL && strlen( sys_options ) > 0 )
+	{
+		s = lsd::strencdata( NULL, sys_options );
+		child.set_value( s );
+		delete [ ] s;
+	}
+
+	// save to file
+	if ( ! sysCfg.save_file( fName ) )
+	{
+		gui::log_tcl_error( false, "Cannot save LSD configuration", "LSD configuration file cannot be saved to the user directory.\nnCheck if the user home directory is not set READ-ONLY or if it has enough space, and try again" );
+		cmd( "tk_messageBox -type ok -icon error -title Error -message \"Cannot save LSD configuration\" -detail \"File '%s' cannot be saved to directory '%s'.\nnCheck if the user home directory is not set READ-ONLY or if it is not full, and try again.\"", LSD_XML_OPTIONS, cfg_path );
+	}
 }
 
 
@@ -634,7 +910,7 @@ void gui::update_model_options( bool fix )
 	else
 		// update existing windows positions
 		for ( i = 0; i < LSD_WIN_NUM; ++i )
-			cmd( "if { $restoreWin } { \
+			cmd( "if { $restore_geom } { \
 					set curGeom [ geomtosave .%s ]; \
 					if { $curGeom != \"\" } { \
 						set %s $curGeom \
@@ -1170,49 +1446,6 @@ double gui::eval_double( const char *tcl_exp )
 
 
 /*************************************************************
- CHECK_OPTION_FILES
- check if model and system option
- files exist and create them if not
- *************************************************************/
-void gui::check_option_files( bool sys )
-{
-	if ( ! sys && ! eval_bool( "[ file exists \"$modelDir/$MODEL_TXT_OPTIONS\" ]" ) && eval_bool( "$modelDir ne \"\"" ) && eval_bool( "$modelDir ne $RootLsd" ) )
-	{
-		cmd( "set dir [ glob -nocomplain \"$modelDir/fun_*.cpp\" ]" );
-		cmd( "if { $dir ne \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
-		cmd( "set a \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\nPRECOMPILED=true\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
-		cmd( "set f [ open \"$modelDir/$MODEL_TXT_OPTIONS\" w ]" );
-		cmd( "puts $f $a" );
-		cmd( "close $f" );
-	}
-
-	if ( ! eval_bool( "[ file exists \"$cfgDir/$SYSTEM_TXT_OPTIONS\" ]" ) )
-	{
-		if ( eval_bool( "[ file exists \"$RootLsd/$LsdSrc/$SYSTEM_TXT_OPTIONS\" ]" ) )
-			cmd( "file copy -force \"$RootLsd/$LsdSrc/$SYSTEM_TXT_OPTIONS\" \"$cfgDir/$SYSTEM_TXT_OPTIONS\"" );
-		else
-		{
-			cmd( "if [ string equal $tcl_platform(platform) windows ] { \
-					set sysfile \"system_options-windows.txt\" \
-				} elseif { [ string equal $tcl_platform(os) Darwin ] } { \
-					set sysfile \"system_options-mac.txt\" \
-				} else { \
-					set sysfile \"system_options-linux.txt\" \
-				}" );
-			cmd( "set f [ open \"$cfgDir/$SYSTEM_TXT_OPTIONS\" w ]" );
-			cmd( "set f1 [ open \"$RootLsd/$LsdSrc/$sysfile\" r ]" );
-			cmd( "puts $f \"# LSD options\"" );
-			cmd( "puts $f \"LSDROOT=$RootLsd\"" );
-			cmd( "puts $f \"SRC=$LsdSrc\n\"" );
-			cmd( "puts $f [ string trim [ read $f1 ] ]" );
-			cmd( "close $f" );
-			cmd( "close $f1" );
-		}
-	}
-}
-
-
-/*************************************************************
  GET_FUN_NAME
  get current equation file name
  *************************************************************/
@@ -1372,25 +1605,25 @@ bool gui::make_no_window( void )
 		return false;
 
 	// copy the base LSD source files to distribution directory
-	cmd( "if { ! [ file exists \"$modelDir/$LsdSrc\" ] } { \
-			file mkdir \"$modelDir/$LsdSrc\" \
+	cmd( "if { ! [ file exists \"$modelDir/$lsd_src\" ] } { \
+			file mkdir \"$modelDir/$lsd_src\" \
 		}" );
 
 	for ( i = 0; i < LSD_NW_NUM; ++i )
-		cmd( "file copy -force \"$RootLsd/$LsdSrc/%s\" \"$modelDir/$LsdSrc\"", lsd_nw_src[ i ] );
+		cmd( "file copy -force \"$lsd_root/$lsd_src/%s\" \"$modelDir/$lsd_src\"", lsd_nw_src[ i ] );
 
 	// copy LSD library files always
-	cmd( "if { ! [ file exists \"$modelDir/$LsdSrc/lib\" ] } { \
-			file mkdir \"$modelDir/$LsdSrc/lib\" \
+	cmd( "if { ! [ file exists \"$modelDir/$lsd_src/lib\" ] } { \
+			file mkdir \"$modelDir/$lsd_src/lib\" \
 		}" );
 
-	cmd( "foreach f [ glob -nocomplain -directory \"$RootLsd/$LsdSrc/lib\" * ] { \
-			file copy -force $f \"$modelDir/$LsdSrc/lib\" \
+	cmd( "foreach f [ glob -nocomplain -directory \"$lsd_root/$lsd_src/lib\" * ] { \
+			file copy -force $f \"$modelDir/$lsd_src/lib\" \
 		}" );
 
 	// copy 3rd-party C++ libraries just once
-	cmd( "if { ! [ file exists \"$modelDir/$LsdSrc/clib\" ] } { \
-			file copy -force \"$RootLsd/$LsdSrc/clib\" \"$modelDir/$LsdSrc\" \
+	cmd( "if { ! [ file exists \"$modelDir/$lsd_src/clib\" ] } { \
+			file copy -force \"$lsd_root/$lsd_src/clib\" \"$modelDir/$lsd_src\" \
 		}" );
 
 	// create makefileNW and compile a local machine version of lsdNW
@@ -1404,24 +1637,23 @@ bool gui::make_no_window( void )
  *************************************************************/
 void gui::make_makefile( bool nw )
 {
-	check_option_files( );
+	if ( sys_options == NULL || strlen( sys_options ) == 0 )
+		load_lsd_options( );
+
+reset_make_options( 2 );
 
 	cmd( "set f [ open \"$modelDir/$MODEL_TXT_OPTIONS\" r ]" );
 	cmd( "set a [ string trim [ read $f ] ]" );
 	cmd( "close $f" );
 
-	cmd( "set f [ open \"$cfgDir/$SYSTEM_TXT_OPTIONS\" r ]" );
-	cmd( "set d [ string trim [ read $f ] ]" );
-	cmd( "close $f" );
-
-	cmd( "set f [ open \"$RootLsd/$LsdSrc/makefile-%s.txt\" r ]", nw ? "NW" : get_str( "CurPlatform" ) );
-
+	cmd( "set f [ open \"$lsd_root/$lsd_src/makefile-%s.txt\" r ]", nw ? "NW" : get_str( "CurPlatform" ) );
 	cmd( "set b [ string trim [ read $f ] ]" );
 	cmd( "close $f" );
 
-	cmd( "set c \"# Model compilation options\\n$a\\n\\n# System compilation options\\n$d\\n\\n# Body of makefile%s (from makefile_%s.txt)\\n$b\"", nw ? "NW" : "", nw ? "NW" : get_str( "CurPlatform" ) );
 	cmd( "set f [ open \"$modelDir/makefile%s\" w ]", nw ? "NW" : "" );
-	cmd( "puts $f $c" );
+	cmd( "puts $f \"# Model compilation options\n\n$a\n\"" );
+	cmd( "puts $f {# System compilation options\n\n%s\n}", sys_options );
+	cmd( "puts $f \"# Body of makefile%s (from makefile_%s.txt)\n\n$b\"", nw ? "NW" : "", nw ? "NW" : get_str( "CurPlatform" ) );
 	cmd( "close $f" );
 }
 
@@ -1492,7 +1724,7 @@ bool gui::compile_run( int run_mode, bool nw )
 		cmd( "if { [ file exists %s ] } { file delete %s }", str, str );
 
 	// show compilation banner
-	cmd( "if { ( [ info exists autoHide ] && ! $autoHide ) || %d == 0 } { \
+	cmd( "if { ( [ info exists auto_hide ] && ! $auto_hide ) || %d == 0 } { \
 			set parWnd .; \
 			set posWnd centerW \
 		} else { \
@@ -1526,7 +1758,7 @@ bool gui::compile_run( int run_mode, bool nw )
 #ifdef _LMM_
 
 	// minimize LMM if required
-	cmd( "set res $autoHide" );				// get auto hide status
+	cmd( "set res $auto_hide" );				// get auto hide status
 	if ( res && run_mode != 0 )				// hide LMM?
 		cmd( "wm iconify ." );
 
@@ -1565,7 +1797,7 @@ bool gui::compile_run( int run_mode, bool nw )
 
 	if ( res == 0 )							// compilation failure?
 	{
-		cmd( "set res $autoHide" );			// get auto hide status
+		cmd( "set res $auto_hide" );			// get auto hide status
 		if ( run_mode != 0 && res )			// auto unhide LMM if necessary
 			cmd( "focustop .f.t.t" );		// only reopen if error
 		show_comp_result( nw );				// show errors
@@ -1573,7 +1805,7 @@ bool gui::compile_run( int run_mode, bool nw )
 	else
 	{
 		if ( nw )
-			cmd( "ttk::messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n[ fn_break [ file nativename \"$modelDir\" ] 40 ]\n\nto another computer (including the subdirectory '$LsdSrc'). After the copy, use the following steps to use it:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n[ fn_break [ file nativename \"$modelDir\" ] 40 ]\n\nto another computer (including the subdirectory '$lsd_src'). After the copy, use the following steps to use it:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\"" );
 		else
 		{
 			if ( run_mode != 0 )				// no problem - execute

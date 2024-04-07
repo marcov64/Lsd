@@ -64,10 +64,10 @@ set macZip [ file normalize "$scptDir/../Package/LSD-archive-mac.zip" ]
 #
 
 # load support tools
-set RootLsd "$scptDir"
-source "$RootLsd/$LsdSrc/gui.tcl"
-source "$RootLsd/$LsdSrc/file.tcl"
-source "$RootLsd/$LsdSrc/util.tcl"
+set LsdRoot "$scptDir"
+source "$LsdRoot/$LsdSrc/gui.tcl"
+source "$LsdRoot/$LsdSrc/file.tcl"
+source "$LsdRoot/$LsdSrc/util.tcl"
 
 # register the Tcl error handler
 proc log_tcl_error { show errorInfo message } {
@@ -77,7 +77,7 @@ proc log_tcl_error { show errorInfo message } {
 }
 
 # set main window
-set fonttype $DefaultFontSize
+set font_type $DefaultFont
 set dim_character $DefaultFontSize
 set small_character [ expr { $dim_character - $deltaSize } ]
 
@@ -129,27 +129,27 @@ if { $CurPlatform eq "mac" } {
 
 if { [ info exists env(LSDROOT) ] && [ file exists [ file dirname $env(LSDROOT) ] ] } {
 	set homeDir [ file dirname $env(LSDROOT) ]
-	set RootLsd [ file normalize $env(LSDROOT) ]
+	set LsdRoot [ file normalize $env(LSDROOT) ]
 
 } else {
 	if { [ string equal $CurPlatform mac ] || [ string equal $CurPlatform linux ] } {
 		if { [ string first " " "$homeDir" ] < 0 } {
-			set RootLsd "~/$LsdDir"
+			set LsdRoot "~/$LsdDir"
 		} else {
 			ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Home directory includes space(s)" -detail "The system directory '$homeDir' is invalid for installing LSD.\nLSD subdirectory must be located in a directory with no spaces in the full path name.\n\nYou may use another directory if you have write permissions to it.\n\nExiting now."
 			set homeDir "/"
-			set RootLsd "/$LsdDir"
+			set LsdRoot "/$LsdDir"
 		}
 
 	} else {
 		if { [ string first " " "$homeDir" ] < 0 } {
-			set RootLsd [ file normalize "~/$LsdDir" ]
+			set LsdRoot [ file normalize "~/$LsdDir" ]
 		} elseif [ file exists $winRoot ] {
 			set homeDir "$winRoot"
-			set RootLsd "${winRoot}$LsdDir"
+			set LsdRoot "${winRoot}$LsdDir"
 		} else {
 			set homeDir "/"
-			set RootLsd "/$LsdDir"
+			set LsdRoot "/$LsdDir"
 		}
 	}
 }
@@ -203,7 +203,7 @@ ttk::frame .dir
 ttk::frame .dir.choice
 ttk::frame .dir.choice.blk
 ttk::label .dir.choice.blk.lab -text "Directory to install LSD"
-ttk::entry .dir.choice.blk.where -textvariable RootLsd -width 40 -justify center
+ttk::entry .dir.choice.blk.where -textvariable LsdRoot -width 40 -justify center
 pack .dir.choice.blk.lab .dir.choice.blk.where
 bind .dir.choice.blk.where <Return> { .b.ok invoke }
 ttk::frame .dir.choice.but
@@ -211,7 +211,7 @@ ttk::label .dir.choice.but.lab
 ttk::button .dir.choice.but.browse -text Browse -width -1 -command {
 	set dir [ tk_chooseDirectory -initialdir "$homeDir" -title "Choose a directory" ]
 	if { $dir != "" } {
-		set RootLsd "$dir"
+		set LsdRoot "$dir"
 	}
 	.dir.choice.blk.where selection range 0 end
 	focus .dir.choice.blk.where
@@ -226,9 +226,9 @@ if [ string equal $CurPlatform windows ] {
 		set wadmin 1
 		set wall 1
 		if [ file exists $winRoot ] {
-			set RootLsd "${winRoot}$LsdDir"
+			set LsdRoot "${winRoot}$LsdDir"
 		} else {
-			set RootLsd "/$LsdDir"
+			set LsdRoot "/$LsdDir"
 		}
 	} else {
 		set wadmin 0
@@ -238,12 +238,12 @@ if [ string equal $CurPlatform windows ] {
 	ttk::checkbutton .dir.wall -variable wall -text "Install for all users" -command {
 		if { $wall } {
 			if [ file exists $winRoot ] {
-				set RootLsd "${winRoot}$LsdDir"
+				set LsdRoot "${winRoot}$LsdDir"
 			} else {
-				set RootLsd "/$LsdDir"
+				set LsdRoot "/$LsdDir"
 			}
 		} elseif { [ string first " " "$homeDir" ] < 0 } {
-			set RootLsd [ file normalize "~/$LsdDir" ]
+			set LsdRoot [ file normalize "~/$LsdDir" ]
 		}
 	}
 
@@ -307,29 +307,29 @@ while 1 {
 			break
 		}
 
-		if { [ catch { set RootLsd [ file normalize $RootLsd ] } ] || ! [ file exists [ file dirname "$RootLsd" ] ] } {
-			ttk::messageBox -type ok -title Error -icon error -message "Invalid directory path/name" -detail "The directory path '$RootLsd' is invalid.\nA valid directory path and names must be supplied. Only valid characters for directory names are accepted. The parent directory to the LSD subdirectory must exist.\n\nPlease choose another path/name."
+		if { [ catch { set LsdRoot [ file normalize $LsdRoot ] } ] || ! [ file exists [ file dirname "$LsdRoot" ] ] } {
+			ttk::messageBox -type ok -title Error -icon error -message "Invalid directory path/name" -detail "The directory path '$LsdRoot' is invalid.\nA valid directory path and names must be supplied. Only valid characters for directory names are accepted. The parent directory to the LSD subdirectory must exist.\n\nPlease choose another path/name."
 			continue
 		}
 
-		if { [ string first " " "$RootLsd" ] >= 0 } {
-			ttk::messageBox -type ok -title Error -icon error -message "Directory includes space(s)" -detail "The chosen directory '$RootLsd' is invalid for installing LSD.\nLSD subdirectory must be located in a directory with no spaces in the full path name.\n\nPlease choose another directory."
+		if { [ string first " " "$LsdRoot" ] >= 0 } {
+			ttk::messageBox -type ok -title Error -icon error -message "Directory includes space(s)" -detail "The chosen directory '$LsdRoot' is invalid for installing LSD.\nLSD subdirectory must be located in a directory with no spaces in the full path name.\n\nPlease choose another directory."
 			continue
 		}
 
-		if { ! [ file writable [ file dirname "$RootLsd" ] ] } {
-			ttk::messageBox -type ok -title Error -icon error -message "Directory not writable" -detail "The chosen directory '[ file dirname "$RootLsd" ]' is invalid for installing LSD.\nLSD subdirectory must be located in a directory where the user has write permission.\n\nPlease choose another directory."
+		if { ! [ file writable [ file dirname "$LsdRoot" ] ] } {
+			ttk::messageBox -type ok -title Error -icon error -message "Directory not writable" -detail "The chosen directory '[ file dirname "$LsdRoot" ]' is invalid for installing LSD.\nLSD subdirectory must be located in a directory where the user has write permission.\n\nPlease choose another directory."
 		} else {
 			break
 		}
 	}
 
-	if { $done == 1 && [ file exists $RootLsd ] } {
-		if { ! [ string equal [ ttk::messageBox -type okcancel -title Warning -icon warning -default ok -message "Directory already exists" -detail "Directory '$RootLsd' already exists.\n\nPress 'OK' to continue and update installed files or 'Cancel' to abort installation." ] ok ] } {
+	if { $done == 1 && [ file exists $LsdRoot ] } {
+		if { ! [ string equal [ ttk::messageBox -type okcancel -title Warning -icon warning -default ok -message "Directory already exists" -detail "Directory '$LsdRoot' already exists.\n\nPress 'OK' to continue and update installed files or 'Cancel' to abort installation." ] ok ] } {
 			continue
 		} else {
 			set newInst 0
-			if [ catch { file delete -force "$RootLsd/lmm" "$RootLsd/lmm.exe" "$RootLsd/lmm64.exe" "$RootLsd/run.bat" "$RootLsd/run.sh" "$RootLsd/$LsdSrc/system_options.txt" {*}[ glob -nocomplain -directory "$RootLsd/$LsdSrc" *.o ] "$env(HOME)/Desktop/lsd.desktop" } ] {
+			if [ catch { file delete -force "$LsdRoot/lmm" "$LsdRoot/lmm.exe" "$LsdRoot/lmm64.exe" "$LsdRoot/run.bat" "$LsdRoot/run.sh" "$LsdRoot/$LsdSrc/system_options.txt" {*}[ glob -nocomplain -directory "$LsdRoot/$LsdSrc" *.o ] "$env(HOME)/Desktop/lsd.desktop" } ] {
 				ttk::messageBox -type ok -title Error -icon error -message "Cannot remove old files" -detail "Cannot replace the existing LSD files by the upgraded ones.\n\nPlease try reinstalling after closing any open instance of LSD/LMM.\n\nExiting now."
 
 				exit 5
@@ -346,13 +346,13 @@ while 1 {
 	}
 }
 
-if { [ info exists env(LSDROOT) ] && [ file normalize $env(LSDROOT) ] ne [ file normalize $RootLsd ] } {
+if { [ info exists env(LSDROOT) ] && [ file normalize $env(LSDROOT) ] ne [ file normalize $LsdRoot ] } {
 	ttk::messageBox -parent "" -type ok -title Error -icon error -message "Invalid LSDROOT value" -detail "Please make sure the environment variable LSDROOT points to the directory where LSD is going to be installed.\n\nPlease try reinstalling after changing the LSDROOT variable or install to the directory it points to (the default).\n\nExiting now."
 	exit 7
 }
 
-if { ! [ file exists "$RootLsd" ] && [ catch { file mkdir "$RootLsd" } ] } {
-	ttk::messageBox -type ok -title Error -icon error -message "Cannot create LSD directory" -detail "The chosen directory '$RootLsd' could not be created.\nLSD subdirectory must be located in a directory where the user has write permission.\n\nExiting now."
+if { ! [ file exists "$LsdRoot" ] && [ catch { file mkdir "$LsdRoot" } ] } {
+	ttk::messageBox -type ok -title Error -icon error -message "Cannot create LSD directory" -detail "The chosen directory '$LsdRoot' could not be created.\nLSD subdirectory must be located in a directory where the user has write permission.\n\nExiting now."
 	exit 7
 }
 
@@ -370,8 +370,8 @@ set inst [ progressbox .inst "LSD Installer" "Copying files" "File" $nFiles { se
 
 foreach f $files {
 	try {
-		file mkdir [ file dirname "$RootLsd/$f" ]
-		file copy -force "$filesDir/$f" "$RootLsd/$f"
+		file mkdir [ file dirname "$LsdRoot/$f" ]
+		file copy -force "$filesDir/$f" "$LsdRoot/$f"
 	} on error result {
 		break
 	}
@@ -409,7 +409,7 @@ if { $n != $nFiles } {
 	ttk::messageBox -parent "" -type ok -title Error -icon error -message "Incomplete installation" -detail "The installation could not copy the required files to run LSD ([ expr { $nFiles - $n } ] files failed).\n\nError detail:\n$result\n\nPlease try reinstalling after closing any open instance of LSD/LMM or download again the installation package.\n\nExiting now."
 
 	if { $newInst } {
-		catch { file delete -force $RootLsd }
+		catch { file delete -force $LsdRoot }
 	}
 
 	exit 9
@@ -428,14 +428,14 @@ if [ string equal $CurPlatform windows ] {
 	if { $wall } {
 		set sysPath 1
 		if { [ llength $existGCCsys ] == 0 && [ llength $existDLLsys ] == 0 } {
-			set res [ add_win_path "$RootLsd/gnu/bin" system end ]
+			set res [ add_win_path "$LsdRoot/gnu/bin" system end ]
 			set wconfl 0
 		} else {
 			if [ string equal [ ttk::messageBox -parent "" -type yesno -default yes -title Warning -icon warning -message "Potentially conflicting software installed" -detail "Software components included in LSD are already installed in the computer.\n\nYou may want to set the software components included in LSD as the new system default. If not, LSD will use the existing software components but it is not guaranteed they are compatible with LSD.\n\nPress 'Yes' to set LSD components as the system default, or 'No' to continue the installation anyway." ] yes ] {
-				set res [ add_win_path "$RootLsd/gnu/bin" system begin ]
+				set res [ add_win_path "$LsdRoot/gnu/bin" system begin ]
 				set wconfl 0
 			} else {
-				set res [ add_win_path "$RootLsd/gnu/bin" system end ]
+				set res [ add_win_path "$LsdRoot/gnu/bin" system end ]
 				set wconfl 1
 			}
 		}
@@ -444,37 +444,37 @@ if [ string equal $CurPlatform windows ] {
 		# ask about changing the system PATH if potential conflicts exist
 		set sysPath 0
 		if { [ llength $existGCC ] == 0 && [ llength $existDLL ] == 0 } {
-			set res [ add_win_path "$RootLsd/gnu/bin" user end ]
+			set res [ add_win_path "$LsdRoot/gnu/bin" user end ]
 			set wconfl 0
 		} elseif { [ llength $existGCCsys ] == 0 && [ llength $existDLLsys ] == 0 } {
-			set res [ add_win_path "$RootLsd/gnu/bin" user begin ]
+			set res [ add_win_path "$LsdRoot/gnu/bin" user begin ]
 			set wconfl 0
 		} elseif { $wadmin } {
 			if [ string equal [ ttk::messageBox -parent "" -type yesno -default yes -title Warning -icon warning -message "Potentially conflicting software installed" -detail "Software components included in LSD are already installed in the computer.\n\nYou may want to set the software components included in LSD as the new system default. If not, LSD will use the existing software components but it is not guaranteed they are compatible with LSD.\n\nPress 'Yes' to set LSD components as the system default, or 'No' to continue the installation anyway." ] yes ] {
-				set res [ add_win_path "$RootLsd/gnu/bin" system begin ]
+				set res [ add_win_path "$LsdRoot/gnu/bin" system begin ]
 				set sysPath 1
 				set wconfl 0
 			} else {
-				set res [ add_win_path "$RootLsd/gnu/bin" user end ]
+				set res [ add_win_path "$LsdRoot/gnu/bin" user end ]
 				set wconfl 1
 			}
 		} else {
 			ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Potentially conflicting software installed" -detail "Software components included in LSD are already installed in the computer.\n\nLSD will use the existing software components but it is not guaranteed they are compatible with LSD.\n\nIf LSD does not perform as expected, you may try to re-run LSD installer as administrator, and then choose to set the software components included in LSD as the new system default."
-			set res [ add_win_path "$RootLsd/gnu/bin" user end ]
+			set res [ add_win_path "$LsdRoot/gnu/bin" user end ]
 			set wconfl 1
 		}
 	}
 
 	if { ! $res } {
-		if [ string equal [ ttk::messageBox -parent "" -type okcancel -default ok -title Error -icon error -message "Cannot add LSD to PATH" -detail "LSD libraries folder could not be added to the user PATH environment variable.\n\nYou may try to repeat the installation or manually add the folder '$RootLsd/gnu/bin' to the PATH variable following the steps described in 'Readme.txt'.\n\nPress 'OK' if you want to continue the installation anyway or 'Cancel' to exit." ] ok ] {
+		if [ string equal [ ttk::messageBox -parent "" -type okcancel -default ok -title Error -icon error -message "Cannot add LSD to PATH" -detail "LSD libraries folder could not be added to the user PATH environment variable.\n\nYou may try to repeat the installation or manually add the folder '$LsdRoot/gnu/bin' to the PATH variable following the steps described in 'Readme.txt'.\n\nPress 'OK' if you want to continue the installation anyway or 'Cancel' to exit." ] ok ] {
 			if { $sysPath } {
-				lappend issues "LSD libraries not in PATH (setx PATH \"%PATH%;$RootLsd/gnu/bin /m\")"
+				lappend issues "LSD libraries not in PATH (setx PATH \"%PATH%;$LsdRoot/gnu/bin /m\")"
 			} else {
-				lappend issues "LSD libraries not in PATH (setx PATH \"%PATH%;$RootLsd/gnu/bin\")"
+				lappend issues "LSD libraries not in PATH (setx PATH \"%PATH%;$LsdRoot/gnu/bin\")"
 			}
 		} else {
 			if { $newInst } {
-				catch { file delete -force $RootLsd }
+				catch { file delete -force $LsdRoot }
 			}
 
 			exit 10
@@ -503,7 +503,7 @@ if [ string equal $CurPlatform windows ] {
 # add icons to desktop and program menu, perform registration if needed
 #
 
-cd $RootLsd
+cd $LsdRoot
 if [ string equal $CurPlatform windows ] {
 
 	if { $wall } {
@@ -514,23 +514,23 @@ if [ string equal $CurPlatform windows ] {
 		set regPath "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\LSD"
 	}
 
-	set res [ catch { exec $RootLsd/add-shortcut-windows.bat $wopt } result ]
+	set res [ catch { exec $LsdRoot/add-shortcut-windows.bat $wopt } result ]
 
 	catch {
-		registry set $regPath DisplayIcon "[ file nativename $RootLsd/$LsdIco ]\\lsd.ico" sz
+		registry set $regPath DisplayIcon "[ file nativename $LsdRoot/$LsdIco ]\\lsd.ico" sz
 		registry set $regPath DisplayName "$_LSD_NAME_" sz
 		registry set $regPath DisplayVersion "$_LSD_VERSION_" sz
 		registry set $regPath Publisher "$_LSD_PUBLISHER_" sz
 		registry set $regPath EstimatedSize $_LSD_SIZE_KB_ dword
-		registry set $regPath InstallLocation "[ file nativename $RootLsd ]" sz
+		registry set $regPath InstallLocation "[ file nativename $LsdRoot ]" sz
 		registry set $regPath VersionMajor [ lindex [ split $_LSD_VERSION_ . ] 0 ] dword
 		registry set $regPath VersionMinor [ lindex [ split $_LSD_VERSION_ . ] 1 ] dword
 		registry set $regPath NoModify 1 dword
 		registry set $regPath NoRepair 1 dword
-		registry set $regPath UninstallString "[ file nativename $RootLsd ]\\uninstall-windows.bat /s" sz
+		registry set $regPath UninstallString "[ file nativename $LsdRoot ]\\uninstall-windows.bat /s" sz
 	}
 } elseif [ string equal $CurPlatform linux ] {
-	set res [ catch { exec $RootLsd/add-shortcut-linux.sh } result ]
+	set res [ catch { exec $LsdRoot/add-shortcut-linux.sh } result ]
 } else {
 	ttk::messageBox -parent "" -type ok -title "LSD Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to provide the system password.\n\nA Terminal window will open and the interaction must be performed there.\n\nThis is required so LSD can be installed out of the macOS quarantine zone for new executable files."
 	set wait [ waitbox .wait "Installing..." "Installing LSD" "1. type the macOS user password and press <Return>\n2. if required, allow the Terminal to control Finder\n3. Terminal window will close/disable when done\n" 1 "" ]
@@ -538,7 +538,7 @@ if [ string equal $CurPlatform windows ] {
 	set scpt [ open "$env(TMPDIR)/add_shortcut.as" w ]
 	puts $scpt "tell application \"Terminal\""
 	set openMsg "clear; echo \\\"Installing LSD\\nPlease wait for this window to close/deactivate automatically.\\nType your password and press <Return>:\\\"; "
-	set shortcutInsta "/bin/bash -c \\\"${RootLsd}/add-shortcut-mac.sh 2>&1 /dev/nul\\\"; "
+	set shortcutInsta "/bin/bash -c \\\"${LsdRoot}/add-shortcut-mac.sh 2>&1 /dev/nul\\\"; "
 	set closeMsg "touch \$TMPDIR/shortcut-done.tmp; exit"
 	puts $scpt "\tdo script \"${openMsg}${shortcutInsta}${closeMsg}\""
 	puts $scpt "end tell"
@@ -577,7 +577,7 @@ if { $res } {
 		lappend issues "LSD program shortcuts missing (add-shortcut-$CurPlatform)"
 	} else {
 		if { $newInst } {
-			catch { file delete -force $RootLsd }
+			catch { file delete -force $LsdRoot }
 		}
 
 		exit 11
@@ -811,8 +811,8 @@ if [ string equal $CurPlatform linux ] {
 	}
 
 	# update include/libs paths in makefile-linux and system_options-linux.txt
-	set mkFile [ open "$RootLsd/$LsdSrc/$linuxMkFile" r ]
-	set soFile [ open "$RootLsd/$LsdSrc/$linuxOptFile" r ]
+	set mkFile [ open "$LsdRoot/$LsdSrc/$linuxMkFile" r ]
+	set soFile [ open "$LsdRoot/$LsdSrc/$linuxOptFile" r ]
 	set mk [ read $mkFile ]
 	set so [ read $soFile ]
 	close $mkFile
@@ -828,8 +828,8 @@ if [ string equal $CurPlatform linux ] {
 		set so [ sed "s|[ lindex $linuxLib 0 ]|[ lindex $pathLib 0 ]" $so ]
 	}
 
-	set mkFile [ open "$RootLsd/$LsdSrc/$linuxMkFile" w ]
-	set soFile [ open "$RootLsd/$LsdSrc/$linuxOptFile" w ]
+	set mkFile [ open "$LsdRoot/$LsdSrc/$linuxMkFile" w ]
+	set soFile [ open "$LsdRoot/$LsdSrc/$linuxOptFile" w ]
 	puts -nonewline $mkFile $mk
 	puts -nonewline $soFile $so
 	close $mkFile
@@ -860,18 +860,18 @@ if [ string equal $CurPlatform linux ] {
 
 		waitbox .wait "Compiling LMM..." "Compiling LSD Model Manager (LMM)\nfor your Linux distribution.\n\nPlease wait..." "" 0 ""
 
-		file copy -force "$RootLsd/LMM" "/tmp/"
-		cd "$RootLsd/$LsdSrc"
+		file copy -force "$LsdRoot/LMM" "/tmp/"
+		cd "$LsdRoot/$LsdSrc"
 
 		set res [ catch { exec make } result ]
 
-		file delete -force {*}[ glob -nocomplain -directory "$RootLsd/$LsdSrc" *.o ]
+		file delete -force {*}[ glob -nocomplain -directory "$LsdRoot/$LsdSrc" *.o ]
 		destroytop .wait
 
 		if { $res } {
 			ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error compiling LMM" -detail "The compilation of LSD Model Manager (LMM) failed ($result).\n\nYou may try to do a manual compilation following the steps described in 'Readme.txt' and also may have to."
 			lappend issues "Cannot recompile LMM (make -f $linuxMkFile)"
-			file copy -force "/tmp/LMM" "/$RootLsd/"
+			file copy -force "/tmp/LMM" "/$LsdRoot/"
 		} else {
 			file delete -force "/tmp/LMM"
 		}
@@ -893,11 +893,11 @@ if { [ llength $issues ] == 0 } {
 	ttk::label .end.msg1 -justify center -text "LSD installation completed\nwith warnings, some issues remain.\n\nYou may try to repeat the installation or do a manual\ninstall following the steps described in 'Readme.txt'."
 
 	catch {
-		set f [ open "$RootLsd/installer.err" a ]
+		set f [ open "$LsdRoot/installer.err" a ]
 		puts $f ""
 		puts $f "====================> [ clock format [ clock seconds ] -format "%Y-%m-%d %H:%M:%S" ]"
 		puts $f "LSD Installer completed with errors."
-		puts $f "The installation directory is '$RootLsd'."
+		puts $f "The installation directory is '$LsdRoot'."
 		puts $f "Please check 'Readme.txt' for instructions on"
 		puts $f "how to solve the issues before using LSD."
 		puts $f ""
@@ -912,7 +912,7 @@ if { [ llength $issues ] == 0 } {
 }
 
 ttk::label .end.msg2 -text "LSD/LMM can be run using the created desktop icon,\nor using the computer's program menu."  -justify center
-ttk::label .end.msg3 -text "The installation directory is '$RootLsd'"
+ttk::label .end.msg3 -text "The installation directory is '$LsdRoot'"
 pack .end.msg1 .end.msg2 .end.msg3 -pady 5
 
 if { [ llength $issues ] > 0 } {
@@ -964,11 +964,11 @@ tkwait variable done
 
 if { $done == 1 } {
 	if [ string equal $CurPlatform windows ] {
-		catch { exec $RootLsd/LMM.exe & }
+		catch { exec $LsdRoot/LMM.exe & }
 	} elseif [ string equal $CurPlatform linux ] {
-		catch { exec $RootLsd/LMM & }
+		catch { exec $LsdRoot/LMM & }
 	} else {
-		catch { exec open -F -n $RootLsd/LMM.app & }
+		catch { exec open -F -n $LsdRoot/LMM.app & }
 	}
 }
 

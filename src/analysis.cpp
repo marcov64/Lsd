@@ -2884,7 +2884,7 @@ void gui::analysis( bool mc )
 
 			// set options for gnuplot
 			case 37:
-				cmd( "set sysTermTmp $sysTerm" );
+				cmd( "set sys_termTmp $sys_term" );
 				cmd( "set gptermTmp $gpterm" );
 				cmd( "set gpdgrid3dTmp $gpdgrid3d" );
 
@@ -2893,7 +2893,7 @@ void gui::analysis( bool mc )
 
 				cmd( "ttk::frame .da.a.st" );
 				cmd( "ttk::label .da.a.st.l -text \"System terminal\"" );
-				cmd( "ttk::entry .da.a.st.e -textvariable sysTermTmp -width 20 -justify center" );
+				cmd( "ttk::entry .da.a.st.e -textvariable sys_termTmp -width 20 -justify center" );
 				cmd( "pack .da.a.st.l .da.a.st.e -side left" );
 
 				cmd( "ttk::frame .da.a.t" );
@@ -2927,7 +2927,7 @@ void gui::analysis( bool mc )
 
 				if ( choice == 3 )
 				{
-					cmd( "set sysTermTmp $DefaultSysTerm" );
+					cmd( "set sys_termTmp $DefaultSysTerm" );
 					cmd( "set gptermTmp \"\"" );
 					cmd( "set gpdgrid3dTmp \"$gnuplotGrid3D\"" );
 					cmd( ".da.a.o.t delete 1.0 end; .da.a.o.t insert end \"$gnuplotOptions\"" );
@@ -2936,7 +2936,7 @@ void gui::analysis( bool mc )
 
 				if ( choice == 1 )
 				{
-					cmd( "set sysTerm $sysTermTmp" );
+					cmd( "set sys_term $sys_termTmp" );
 					cmd( "set gpterm $gptermTmp" );
 					cmd( "set gpdgrid3d $gpdgrid3dTmp" );
 					cmd( "set gpoptions [ .da.a.o.t get 0.0 end ]" );

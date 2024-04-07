@@ -14,31 +14,31 @@
 
 /*************************************************************
  SHOW_EQ.CPP
- Show one window containig the equation for the label clicked 
+ Show one window containig the equation for the label clicked
  on.
- 
- Less simple as it seems, given that it has to deal with all 
- weird characters  like parenthesis, quotes, brakets, that 
- tk commands consider as special  characters. The basic trick 
- is that it loads one line per time. If it finds the name of 
- the variable following the command "strcmp" than starts 
- sending the line to be printed. 
- Lines are printed character per character, so that it can deal 
- with special characters. While printing it computes the number 
- of parenthesis open and closed, and when it meets the last 
+
+ Less simple as it seems, given that it has to deal with all
+ weird characters  like parenthesis, quotes, brakets, that
+ tk commands consider as special  characters. The basic trick
+ is that it loads one line per time. If it finds the name of
+ the variable following the command "strcmp" than starts
+ sending the line to be printed.
+ Lines are printed character per character, so that it can deal
+ with special characters. While printing it computes the number
+ of parenthesis open and closed, and when it meets the last
  parenthesis exits.
- 
+
  Everything is within just one single function:
- 
+
  - void show_eq( const char *lab, const char *parWnd )
- 
+
  - void scan_used_lab( const char *lab, const char *parWnd )
- Looks in the equation file whether the variable or parameter 
- lab is contained in some equations. It creates a window 
- containing the list of the equations using in any way the 
- variable indicated. By clicking on the names in the list 
- the code for that variable is shown. It is based on the 
- recognition of the string lab between quotes, thus any 
+ Looks in the equation file whether the variable or parameter
+ lab is contained in some equations. It creates a window
+ containing the list of the equations using in any way the
+ variable indicated. By clicking on the names in the list
+ the code for that variable is shown. It is based on the
+ recognition of the string lab between quotes, thus any
  function is recognized.
  *************************************************************/
 
@@ -135,7 +135,7 @@ void gui::show_eq( const char *lab, const char *parWnd )
 	cmd( "ttk::scrollbar $w.f.xscroll -orient horiz -command \"$w.f.text xview\"" );
 	cmd( "ttk::text $w.f.text -wrap none -tabstyle wordprocessor -yscrollcommand \"$w.f.yscroll set\" -xscrollcommand \"$w.f.xscroll set\" -entry 0 -dark $darkTheme -style smallFixed.TText" );
 	cmd( "mouse_wheel $w.f.text" );
-	cmd( "settab $w.f.text $tabsize smallFixed.TText" );
+	cmd( "settab $w.f.text $tab_size smallFixed.TText" );
 	cmd( "pack $w.f.yscroll -side right -fill y" );
 	cmd( "pack $w.f.xscroll -side bottom -fill x" );
 	cmd( "pack $w.f.text -expand yes -fill both" );

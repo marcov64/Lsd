@@ -447,3 +447,116 @@ set allcolors {
 	purple1 purple2 purple3 purple4 MediumPurple1 MediumPurple2
 	MediumPurple3 MediumPurple4 thistle1 thistle2 thistle3 thistle4
 }
+
+# detect current platform
+if [ string equal $tcl_platform(platform) unix ] {
+	if [ string equal $tcl_platform(os) Darwin ] {
+		set CurPlatform mac
+	} else {
+		set CurPlatform linux
+	}
+} else {
+	if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } {
+		set CurPlatform windows
+	} else {
+		set CurPlatform unsupported
+	}
+}
+
+# set OS defaults
+if [ string equal $CurPlatform mac ] {
+	set DefaultSysTerm $sysTermMac
+	set DefaultExe $exeMac
+	set DefaultMakeExe $makeMac
+	set DefaultWish $wishMac
+	set DefaultDbgExe $dbgMac
+	set DefaultHtmlBrowser $browserMac
+	set DefaultFont $fontMac
+	set DefaultFontSize $fontSizeMac
+	set gnuplotExe $gnuplotMac
+	set deltaSize $deltaSizeMac
+	set hsizeLmin $hsizeLminMac
+	set vsizeLmin $vsizeLminMac
+	set hsizeBmin $hsizeBminMac
+	set vsizeBmin $vsizeBminMac
+	set hsizeAmin $hsizeAminMac
+	set vsizeAmin $vsizeAminMac
+	set hsizeDmin $hsizeDminMac
+	set vsizeDmin $vsizeDminMac
+	set hsizePmin $hsizePminMac
+	set vsizePmin $vsizePminMac
+	set hsizeGmin $hsizeGminMac
+	set vsizeGmin $vsizeGminMac
+	set corrX $corrXmac
+	set corrY $corrYmac
+	set butPad $butPadMac
+	set butSpc $butSpcMac
+	set butWid $butWidMac
+	set bhstepM $bhstepMac
+	set bvstepM $bvstepMac
+	set borderMadj $bborderMac
+
+} elseif [ string equal $CurPlatform linux ] {
+	set DefaultSysTerm $sysTermLinux
+	set DefaultExe $exeLinux
+	set DefaultMakeExe $makeLinux
+	set DefaultWish $wishLinux
+	set DefaultDbgExe $dbgLinux
+	set DefaultHtmlBrowser $browserLinux
+	set DefaultFont $fontLinux
+	set DefaultFontSize $fontSizeLinux
+	set gnuplotExe $gnuplotLinux
+	set deltaSize $deltaSizeLinux
+	set hsizeLmin $hsizeLminLinux
+	set vsizeLmin $vsizeLminLinux
+	set hsizeBmin $hsizeBminLinux
+	set vsizeBmin $vsizeBminLinux
+	set hsizeAmin $hsizeAminLinux
+	set vsizeAmin $vsizeAminLinux
+	set hsizeDmin $hsizeDminLinux
+	set vsizeDmin $vsizeDminLinux
+	set hsizePmin $hsizePminLinux
+	set vsizePmin $vsizePminLinux
+	set hsizeGmin $hsizeGminLinux
+	set vsizeGmin $vsizeGminLinux
+	set corrX $corrXlinux
+	set corrY $corrYlinux
+	set butPad $butPadLinux
+	set butSpc $butSpcLinux
+	set butWid $butWidLinux
+	set bhstepM $bhstepLinux
+	set bvstepM $bvstepLinux
+	set borderMadj $bborderLinux
+
+} elseif [ string equal $CurPlatform windows ] {
+	set DefaultSysTerm $sysTermWindows
+	set DefaultExe $exeWindows
+	set DefaultMakeExe $makeWinCygwin
+	set DefaultWish $wishWindows
+	set DefaultDbgExe $dbgWindows
+	set DefaultHtmlBrowser $browserWindows
+	set DefaultFont $fontWindows
+	set DefaultFontSize $fontSizeWindows
+	set gnuplotExe $gnuplotWindows
+	set deltaSize $deltaSizeWindows
+	set hsizeLmin $hsizeLminWindows
+	set vsizeLmin $vsizeLminWindows
+	set hsizeBmin $hsizeBminWindows
+	set vsizeBmin $vsizeBminWindows
+	set hsizeAmin $hsizeAminWindows
+	set vsizeAmin $vsizeAminWindows
+	set hsizeDmin $hsizeDminWindows
+	set vsizeDmin $vsizeDminWindows
+	set hsizePmin $hsizePminWindows
+	set vsizePmin $vsizePminWindows
+	set hsizeGmin $hsizeGminWindows
+	set vsizeGmin $vsizeGminWindows
+	set corrX $corrXwindows
+	set corrY $corrYwindows
+	set butPad $butPadWindows
+	set butSpc $butSpcWindows
+	set butWid $butWidWindows
+	set bhstepM $bhstepWindows
+	set bvstepM $bvstepWindows
+	set borderMadj $bborderWindows
+}
