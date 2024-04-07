@@ -128,7 +128,6 @@ int gui::init_lsd_env( const char **argv )
 	cmd( "set MODEL_TXT_OPTIONS \"%s\"", MODEL_TXT_OPTIONS );
 	cmd( "set MODEL_XML_OPTIONS \"%s\"", MODEL_XML_OPTIONS );
 	cmd( "set MODEL_TXT_INFO \"%s\"", MODEL_TXT_INFO );
-	cmd( "set MODEL_TXT_INFO_NUM %d", MODEL_TXT_INFO_NUM );
 	cmd( "set GROUP_TXT_INFO \"%s\"", GROUP_TXT_INFO );
 	cmd( "set GROUP_XML_INFO \"%s\"", GROUP_XML_INFO );
 	cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
@@ -189,13 +188,13 @@ int gui::init_lsd_env( const char **argv )
 #ifndef _LMM_
 	// only use the exec path if not already in a model directory
 	cmd( "if { [ file exists $MODEL_TXT_OPTIONS ] || [ file exists $MODEL_XML_OPTIONS ] } { \
-			set modelDir [ pwd ] \
+			set model_dir [ pwd ] \
 		} { \
-			set modelDir $path; \
+			set model_dir $path; \
 		}" );
 
-	cmd( "cd $modelDir" );
-	app = get_str( "modelDir" );
+	cmd( "cd $model_dir" );
+	app = get_str( "model_dir" );
 
 	if ( app != NULL && strlen( app ) > 0 )
 	{
@@ -516,12 +515,12 @@ void gui::reset_make_options( int which )
 	const char *s;
 
 	// model makefile options
-	if ( which != 1 && ! eval_bool( "[ file exists \"$modelDir/$MODEL_TXT_OPTIONS\" ]" ) && eval_bool( "$modelDir ne \"\"" ) && eval_bool( "$modelDir ne $lsd_root" ) )
+	if ( which != 1 && ! eval_bool( "[ file exists \"$model_dir/$MODEL_TXT_OPTIONS\" ]" ) && eval_bool( "$model_dir ne \"\"" ) && eval_bool( "$model_dir ne $lsd_root" ) )
 	{
-		cmd( "set dir [ glob -nocomplain \"$modelDir/fun_*.cpp\" ]" );
+		cmd( "set dir [ glob -nocomplain \"$model_dir/fun_*.cpp\" ]" );
 		cmd( "if { $dir ne \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
 		cmd( "set a \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\nPRECOMPILED=true\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
-		cmd( "set f [ open \"$modelDir/$MODEL_TXT_OPTIONS\" w ]" );
+		cmd( "set f [ open \"$model_dir/$MODEL_TXT_OPTIONS\" w ]" );
 		cmd( "puts $f $a" );
 		cmd( "close $f" );
 	}
@@ -674,8 +673,8 @@ void gui::load_lsd_options( void )
 		cmd( "set g [ file normalize \"$m/..\" ]" );
 		if ( eval_bool( "[ file exists \"$g/$GROUP_TXT_INFO\" ]" ) )
 		{
-			cmd( "set modelDir $m" );
-			cmd( "set groupDir $g" );
+			cmd( "set model_dir $m" );
+			cmd( "set group_dir $g" );
 		}
 	}
 }
@@ -699,14 +698,12 @@ void gui::update_lsd_options( bool save_settings )
 
 	// update current geometry if no saving just settings
 	if ( ! save_settings )
-	{
 		cmd( "if { $restore_geom } { \
 				set curGeom [ geomtosave .lmm ]; \
 				if { $curGeom != \"\" && ! [ string equal $lmm_geom $curGeom ] } { \
 					set lmm_geom $curGeom \
 				} \
 			}" );
-	}
 
 	// try to load existing XML as base
 	snprintf( fName, MAX_PATH_LENGTH, "%s%s%s", cfg_path, strlen( cfg_path ) > 0 ? "/" : "", LSD_XML_OPTIONS );
@@ -805,39 +802,39 @@ void gui::update_lsd_options( bool save_settings )
 	}
 
 	// save current model info
-	if ( ! save_settings && exists_var( "modelName" ) && strcmp( get_str( "modelName" ), "(no model)" ) != 0 && exists_var( "modelDir" ) && eval_bool( "[ file exists $modelDir ] && [ file isdirectory $modelDir ]" ) )
+	if ( ! save_settings && exists_var( "model_name" ) && strcmp( get_str( "model_name" ), "(no model)" ) != 0 && exists_var( "model_dir" ) && eval_bool( "[ file exists $model_dir ] && [ file isdirectory $model_dir ]" ) )
 	{
 		if ( modNode.empty( ) )
 			modNode = lmmNode.append_child( "model" );
 
-		if ( exists_var( "modelGroup" ) )
+		if ( exists_var( "model_group" ) )
 		{
 			if ( ( attr = modNode.attribute( "group" ) ) == NULL )
 				attr = modNode.append_attribute( "group" );
 
-			attr = get_str( "modelGroup" );
+			attr = get_str( "model_group" );
 		}
 
-		if ( exists_var( "modelName" ) )
+		if ( exists_var( "model_name" ) )
 		{
 			if ( ( attr = modNode.attribute( "name" ) ) == NULL )
 				attr = modNode.append_attribute( "name" );
 
-			attr = get_str( "modelName" );
+			attr = get_str( "model_name" );
 		}
 
-		if ( exists_var( "modelVersion" ) )
+		if ( exists_var( "model_version" ) )
 		{
 			if ( ( attr = modNode.attribute( "version" ) ) == NULL )
 				attr = modNode.append_attribute( "version" );
 
-			attr = get_str( "modelVersion" );
+			attr = get_str( "model_version" );
 		}
 
 		if ( ( child = modNode.child( "path" ) ) == NULL )
 			child = modNode.append_child( "path" );
 
-		child.text( ).set( get_str( "modelDir" ) );
+		child.text( ).set( get_str( "model_dir" ) );
 	}
 	else
 		lmmNode.remove_child( "model" );
@@ -877,7 +874,7 @@ bool gui::load_model_options( const char *path )
 	{
 		cmd( "set f [ open \"%s/$MODEL_TXT_INFO\" r ]", path );
 
-		for ( int i = 0; i < MODEL_TXT_INFO_NUM; ++i )	// read parameters, returning 1 if incomplete
+		for ( int i = 0; i < MODEL_OPTIONS_NUM; ++i )	// read parameters, returning 1 if incomplete
 		{
 			cmd( "gets $f %s", model_info[ i ] );
 			cmd( "if { $%s == \"\" } { set res 0 }", model_info[ i ] );
@@ -897,9 +894,14 @@ void gui::update_model_options( bool fix )
 {
 	int i;
 
+	// ensure defaults are loaded
+	cmd( "if { ! [ info exists CurPlatform ] } { \
+			source \"$lsd_root/$lsd_src/defaults.tcl\" \
+		}" );
+
 	// set undefined parameters to defaults
 	if ( fix )
-		for ( i = 0; i < MODEL_TXT_INFO_NUM; ++i )
+		for ( i = 0; i < MODEL_OPTIONS_NUM; ++i )
 		{
 			cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
 			cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
@@ -918,17 +920,17 @@ void gui::update_model_options( bool fix )
 				}", wnd_names[ i ], model_info[ i + 3 ] );
 
 	// ensure model name is set
-	cmd( "if { ! [ info exists modelName ] || $modelName eq \"\" || $modelName eq \"%s\" } { \
-			set modelName [ string map -nocase { fun_ \"\" .cpp \"\" } \"%s\" ] \
+	cmd( "if { ! [ info exists model_name ] || $model_name eq \"\" || $model_name eq \"%s\" } { \
+			set model_name [ string map -nocase { fun_ \"\" .cpp \"\" } \"%s\" ] \
 		}", model_defaults[ 0 ], eq_file );
 
 #endif
 
 	// save info to disk
-	cmd( "set f [ open \"$modelDir/$MODEL_TXT_INFO\" w ]" );
+	cmd( "set f [ open \"$model_dir/$MODEL_TXT_INFO\" w ]" );
 
 	// set undefined parameters to defaults before saving
-	for ( i = 0; i < MODEL_TXT_INFO_NUM; ++i )
+	for ( i = 0; i < MODEL_OPTIONS_NUM; ++i )
 	{
 		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
 		cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
@@ -1456,7 +1458,7 @@ const char *gui::get_fun_name( char *str, int str_sz, bool nw )
 
 	make_makefile( nw );
 
-	cmd( "set fapp [ file nativename \"$modelDir/makefile%s\" ]", nw ? "NW" : "" );
+	cmd( "set fapp [ file nativename \"$model_dir/makefile%s\" ]", nw ? "NW" : "" );
 	f = fopen( get_str( "fapp" ), "r" );
 	if ( f == NULL )
 		goto error;
@@ -1498,7 +1500,7 @@ const char *gui::get_target_name( char *str, int str_sz, bool nw )
 
 	make_makefile( nw );
 
-	cmd( "set fapp [ file nativename \"$modelDir/makefile%s\" ]", nw ? "NW" : "" );
+	cmd( "set fapp [ file nativename \"$model_dir/makefile%s\" ]", nw ? "NW" : "" );
 	f = fopen( get_str( "fapp" ), "r" );
 	if ( f == NULL )
 		goto error;
@@ -1551,7 +1553,7 @@ bool gui::get_precompiled_flag( const char *exec, bool nw )
 			deftarg = false;
 	}
 
-	cmd( "set fapp [ file nativename \"$modelDir/makefile\" ]" );
+	cmd( "set fapp [ file nativename \"$model_dir/makefile\" ]" );
 	f = fopen( get_str( "fapp" ), "r" );
 	if ( f == NULL )
 		goto error;
@@ -1605,25 +1607,25 @@ bool gui::make_no_window( void )
 		return false;
 
 	// copy the base LSD source files to distribution directory
-	cmd( "if { ! [ file exists \"$modelDir/$lsd_src\" ] } { \
-			file mkdir \"$modelDir/$lsd_src\" \
+	cmd( "if { ! [ file exists \"$model_dir/$lsd_src\" ] } { \
+			file mkdir \"$model_dir/$lsd_src\" \
 		}" );
 
 	for ( i = 0; i < LSD_NW_NUM; ++i )
-		cmd( "file copy -force \"$lsd_root/$lsd_src/%s\" \"$modelDir/$lsd_src\"", lsd_nw_src[ i ] );
+		cmd( "file copy -force \"$lsd_root/$lsd_src/%s\" \"$model_dir/$lsd_src\"", lsd_nw_src[ i ] );
 
 	// copy LSD library files always
-	cmd( "if { ! [ file exists \"$modelDir/$lsd_src/lib\" ] } { \
-			file mkdir \"$modelDir/$lsd_src/lib\" \
+	cmd( "if { ! [ file exists \"$model_dir/$lsd_src/lib\" ] } { \
+			file mkdir \"$model_dir/$lsd_src/lib\" \
 		}" );
 
 	cmd( "foreach f [ glob -nocomplain -directory \"$lsd_root/$lsd_src/lib\" * ] { \
-			file copy -force $f \"$modelDir/$lsd_src/lib\" \
+			file copy -force $f \"$model_dir/$lsd_src/lib\" \
 		}" );
 
 	// copy 3rd-party C++ libraries just once
-	cmd( "if { ! [ file exists \"$modelDir/$lsd_src/clib\" ] } { \
-			file copy -force \"$lsd_root/$lsd_src/clib\" \"$modelDir/$lsd_src\" \
+	cmd( "if { ! [ file exists \"$model_dir/$lsd_src/clib\" ] } { \
+			file copy -force \"$lsd_root/$lsd_src/clib\" \"$model_dir/$lsd_src\" \
 		}" );
 
 	// create makefileNW and compile a local machine version of lsdNW
@@ -1642,7 +1644,7 @@ void gui::make_makefile( bool nw )
 
 reset_make_options( 2 );
 
-	cmd( "set f [ open \"$modelDir/$MODEL_TXT_OPTIONS\" r ]" );
+	cmd( "set f [ open \"$model_dir/$MODEL_TXT_OPTIONS\" r ]" );
 	cmd( "set a [ string trim [ read $f ] ]" );
 	cmd( "close $f" );
 
@@ -1650,7 +1652,7 @@ reset_make_options( 2 );
 	cmd( "set b [ string trim [ read $f ] ]" );
 	cmd( "close $f" );
 
-	cmd( "set f [ open \"$modelDir/makefile%s\" w ]", nw ? "NW" : "" );
+	cmd( "set f [ open \"$model_dir/makefile%s\" w ]", nw ? "NW" : "" );
 	cmd( "puts $f \"# Model compilation options\n\n$a\n\"" );
 	cmd( "puts $f {# System compilation options\n\n%s\n}", sys_options );
 	cmd( "puts $f \"# Body of makefile%s (from makefile_%s.txt)\n\n$b\"", nw ? "NW" : "", nw ? "NW" : get_str( "CurPlatform" ) );
@@ -1674,13 +1676,13 @@ bool gui::compile_run( int run_mode, bool nw )
 	Tcl_LinkVar( interp, "res", ( char * ) &res, TCL_LINK_INT );
 
 	cmd( "set oldpath [ pwd ]" );
-	cmd( "cd \"$modelDir\"" );
+	cmd( "cd \"$model_dir\"" );
 
 #ifdef _LMM_
 
 	cmd( "destroytop .mm" );	// close any open compilation results window
 
-	s = get_str( "modelName" );
+	s = get_str( "model_name" );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
 		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
@@ -1693,7 +1695,7 @@ bool gui::compile_run( int run_mode, bool nw )
 	s = get_fun_name( str, 2 * MAX_PATH_LENGTH, nw );
 	if ( s == NULL || ! strcmp( s, "" ) || ( f = fopen( s, "r" ) ) == NULL )
 	{
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Equation file not found\" -detail \"File '%s' is no longer available in directory '$modelDir'.\" ", s );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Equation file not found\" -detail \"File '%s' is no longer available in directory '$model_dir'.\" ", s );
 		goto end;
 	}
 	else
@@ -1711,7 +1713,7 @@ bool gui::compile_run( int run_mode, bool nw )
 	if ( run_mode == 0 && ! nw )// delete existing object file if it's just compiling
 	{							// to force recompilation
 
-		cmd( "set oldObj \"[ temp_dir ]/[ file rootname $mainExe ]/[ file tail $modelDir ]/[ file rootname [ lindex [ glob -nocomplain fun_*.cpp ] 0 ] ].o\"" );
+		cmd( "set oldObj \"[ temp_dir ]/[ file rootname $mainExe ]/[ file tail $model_dir ]/[ file rootname [ lindex [ glob -nocomplain fun_*.cpp ] 0 ] ].o\"" );
 		cmd( "if { [ file exists \"$oldObj\" ] } { file delete \"$oldObj\" }" );
 	}
 
@@ -1805,13 +1807,13 @@ bool gui::compile_run( int run_mode, bool nw )
 	else
 	{
 		if ( nw )
-			cmd( "ttk::messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n[ fn_break [ file nativename \"$modelDir\" ] 40 ]\n\nto another computer (including the subdirectory '$lsd_src'). After the copy, use the following steps to use it:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n[ fn_break [ file nativename \"$model_dir\" ] 40 ]\n\nto another computer (including the subdirectory '$lsd_src'). After the copy, use the following steps to use it:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\"" );
 		else
 		{
 			if ( run_mode != 0 )				// no problem - execute
 			{
 				// create the element list file in background and try to open 10 times every 50 ms
-				cmd( "after 0 { create_elem_file $modelDir }" );
+				cmd( "after 0 { create_elem_file $model_dir }" );
 				cmd( "update" );
 
 				if ( run_mode == 1 )			// run executable directly (not debugger)
@@ -1836,7 +1838,7 @@ bool gui::compile_run( int run_mode, bool nw )
 				}
 			}
 			else
-				cmd( "create_elem_file $modelDir" );
+				cmd( "create_elem_file $model_dir" );
 		}
 
 		ret = true;
@@ -2016,7 +2018,7 @@ void gui::show_comp_result( bool nw )
 	cmd( "showtop .mm lefttoW no no no" );
 	cmd( "mousewarpto .mm.b.gerr 0" );
 
-	cmd( "if [ file exists \"$modelDir/makemessage.txt\" ] { set file [ open \"$modelDir/makemessage.txt\" ]; .mm.t.t insert end [ read -nonewline $file ]; close $file } { .mm.t.t insert end \"(no compilation errors)\" }" );
+	cmd( "if [ file exists \"$model_dir/makemessage.txt\" ] { set file [ open \"$model_dir/makemessage.txt\" ]; .mm.t.t insert end [ read -nonewline $file ]; close $file } { .mm.t.t insert end \"(no compilation errors)\" }" );
 	cmd( ".mm.t.t mark set insert \"1.0\"" );
 	cmd( ".mm.b.ferr invoke" );
 

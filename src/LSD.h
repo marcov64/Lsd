@@ -204,19 +204,19 @@
 					   "LMM.app", "Rpkg", "lwi", "___" }
 #define LSD_MIN_NUM 5
 #define LSD_MIN_FILES { "icons", "themes", "LSD.h", "interf.cpp", "analysis.cpp" }
-#define LSD_WIN_NUM MODEL_TXT_INFO_NUM - 3
+#define LSD_WIN_NUM MODEL_OPTIONS_NUM - 3
 #define LSD_WIN_NAME { "lsd", "log", "str", "da", "deb", "lat", "plt", "dap" }
-#define MODEL_TXT_INFO_NUM 16
-#define MODEL_TXT_INFO_NAME { "modelName", "modelVersion", "modelDate", \
-							  "lsdGeom", "logGeom", "strGeom", \
-							  "daGeom", "debGeom", "latGeom", \
-							  "pltGeom", "dapGeom", "lastConf", \
-							  "lastObj", "lastList", "lastItem", "lastFirst" }
-#define MODEL_TXT_INFO_DEFAULT { "(no name)", "1.0", "[ current_date ]", \
-								 "#", "#", "#", \
-								 "#", "#", "#", \
-								 "#", "#", "#", \
-								 "Root", "1", "0", "0" }
+#define MODEL_OPTIONS_NUM 16
+#define MODEL_OPTIONS_NAME { "model_name", "model_version", "model_date", \
+							 "lsd_geom", "log_geom", "str_geom", \
+							 "da_geom", "deb_geom", "lat_geom", \
+							 "plt_geom", "dap_geom", "last_conf", \
+							 "last_obj", "last_list", "last_item", "last_first" }
+#define MODEL_OPTIONS_DEFAULT { "(no name)", "1.0", "[ current_date ]", \
+								"#", "#", "#", \
+								"#", "#", "#", \
+								"#", "#", "#", \
+								"Root", "1", "0", "0" }
 #define TK_WIN_NUM 10
 #define TK_WIN_NAME { ".", ".log", ".str", ".inid", ".inin", ".da", ".deb", ".lat", ".plt", ".dap" }
 #define WIN_COMP_NUM 2
@@ -287,8 +287,8 @@ namespace gui
 	extern int stop;					// activity interruption flag (Tcl boolean)
 	extern int strWindowOn;				// presentation of the model structure window (bool)
 	extern int watch;					// allow for graph generation interruption (bool)
-	extern lsd::object *currObj;		// pointer to current object in browser
-	extern lsd::object *lastObj;		// pointer to last selected object in structure
+	extern lsd::object *curr_obj;		// pointer to current object in browser
+	extern lsd::object *last_obj;		// pointer to last selected object in structure
 	extern lsd::simulation sim;			// the single GUI simulation object
 	extern nolh NOLH[ ];				// characteristics of NOLH tables
 	extern Tcl_Interp *interp;			// Tcl standard interpreter pointer

@@ -62,7 +62,7 @@ void lsd::object::show_graph( void )
 		return;
 	}
 
-	gui::lastObj = this;
+	gui::last_obj = this;
 
 	for ( top = this; top->up != NULL; top = top->up );
 

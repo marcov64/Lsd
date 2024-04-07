@@ -485,7 +485,7 @@ proc checkgeom { geom defGeom screenWidth screenHeight } {
 # Adjust main windows to default size & positions
 #************************************************
 proc sizetop { { w all } } {
-	global wndLst hsizeBmin vsizeBmin hsizeL vsizeL hsizeLmin vsizeLmin hsizeGmin vsizeGmin hsizeAmin vsizeAmin hsizePmin vsizePmin hsizeDmin vsizeDmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn lmm_geom lsdGeom logGeom strGeom daGeom debGeom latGeom pltGeom dapGeom hfactM vfactM wndMenuHeight
+	global wndLst hsizeBmin vsizeBmin hsizeL vsizeL hsizeLmin vsizeLmin hsizeGmin vsizeGmin hsizeAmin vsizeAmin hsizePmin vsizePmin hsizeDmin vsizeDmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn lmm_geom lsd_geom log_geom str_geom da_geom deb_geom lat_geom plt_geom dap_geom hfactM vfactM wndMenuHeight
 
 	update idletasks
 
@@ -514,7 +514,7 @@ proc sizetop { { w all } } {
 
 				.lsd {
 					set defGeom "${hsizeBmin}x${vsizeBmin}+[ getx . topleftS ]+[ gety . topleftS ]"
-					wm geometry . [ checkgeom $lsdGeom $defGeom $screenWidth $screenHeight ]
+					wm geometry . [ checkgeom $lsd_geom $defGeom $screenWidth $screenHeight ]
 					wm minsize . $hsizeBmin $vsizeBmin
 					wm maxsize . [ winfo vrootwidth . ] [ winfo vrootheight . ]
 				}
@@ -545,7 +545,7 @@ proc sizetop { { w all } } {
 
 				.log {
 					set defGeom "+[ expr { $screenWidth - $hmargin - $bordsize - $hsizeGmin } ]+[ gety .log bottomrightS ]"
-					wm geometry .log [ checkgeom $logGeom $defGeom $screenWidth $screenHeight ]
+					wm geometry .log [ checkgeom $log_geom $defGeom $screenWidth $screenHeight ]
 					wm minsize .log $hsizeGmin $vsizeGmin
 					wm maxsize .log [ winfo vrootwidth .log ] [ winfo vrootheight .log ]
 				}
@@ -562,7 +562,7 @@ proc sizetop { { w all } } {
 					set defGeom "${hsizeM}x${vsizeM}+${X}+[ gety .str righttoM ]"
 
 					# handle the extra scaling parameters
-					set geom [ split [ checkgeom $strGeom $defGeom $screenWidth $screenHeight ] ":" ]
+					set geom [ split [ checkgeom $str_geom $defGeom $screenWidth $screenHeight ] ":" ]
 					wm geometry .str [ lindex $geom 0 ]
 					if { [ lindex $geom 1 ] != "" } {
 						scan [ lindex $geom 1 ] "%f+%f" hfactM vfactM
@@ -574,7 +574,7 @@ proc sizetop { { w all } } {
 
 				.da {
 					set defGeom "+[ getx .da overM ]+[ gety .da overM ]"
-					wm geometry .da [ checkgeom $daGeom $defGeom $screenWidth $screenHeight ]
+					wm geometry .da [ checkgeom $da_geom $defGeom $screenWidth $screenHeight ]
 					wm minsize .da $hsizeAmin $vsizeAmin
 					wm maxsize .da [ winfo vrootwidth .da ] [ winfo vrootheight .da ]
 					wm resizable .da 1 1
@@ -582,14 +582,14 @@ proc sizetop { { w all } } {
 
 				.deb {
 					set defGeom "${hsizeDmin}x${vsizeDmin}+[ getx .deb topleftW ]+[ gety .deb topleftW ]"
-					set n [ scan $debGeom "%dx%d+%d+%d" width height x y ]
+					set n [ scan $deb_geom "%dx%d+%d+%d" width height x y ]
 					if { $n < 4 } {
-						set debGeom $defGeom
+						set deb_geom $defGeom
 					} else {
-						set debGeom "${hsizeDmin}x[ expr { max ( $height, $vsizeDmin ) } ]+${x}+${y}"
+						set deb_geom "${hsizeDmin}x[ expr { max ( $height, $vsizeDmin ) } ]+${x}+${y}"
 					}
 
-					wm geometry .deb [ checkgeom $debGeom $defGeom $screenWidth $screenHeight ]
+					wm geometry .deb [ checkgeom $deb_geom $defGeom $screenWidth $screenHeight ]
 					wm minsize .deb $hsizeDmin $vsizeDmin
 					wm maxsize .deb [ winfo vrootwidth .deb ] [ winfo vrootheight .deb ]
 					wm resizable .deb 0 1
@@ -597,7 +597,7 @@ proc sizetop { { w all } } {
 
 				.lat {
 					set defGeom "+[ getx .lat centerS ]+[ gety .lat centerS ]"
-					wm geometry .lat [ checkgeom $latGeom $defGeom $screenWidth $screenHeight ]
+					wm geometry .lat [ checkgeom $lat_geom $defGeom $screenWidth $screenHeight ]
 					wm minsize .lat [ winfo reqwidth .lat ] [ winfo reqheight .lat ]
 					wm maxsize .lat [ winfo vrootwidth .lat ] [ winfo vrootheight .lat ]
 					wm resizable .lat 0 0
@@ -605,7 +605,7 @@ proc sizetop { { w all } } {
 
 				.plt {
 					set defGeom "+[ getx .plt righttoM ]+[ gety .plt righttoM ]"
-					wm geometry .plt [ checkgeom $pltGeom $defGeom $screenWidth $screenHeight ]
+					wm geometry .plt [ checkgeom $plt_geom $defGeom $screenWidth $screenHeight ]
 					wm minsize .plt [ winfo reqwidth .plt ] [ winfo reqheight .plt ]
 					wm maxsize .plt [ winfo vrootwidth .plt ] [ winfo vrootheight .plt ]
 					wm resizable .plt 0 0
@@ -613,7 +613,7 @@ proc sizetop { { w all } } {
 
 				.dap {
 					set defGeom "+[ getx .dap centerS ]+[ gety .dap centerS ]"
-					wm geometry .dap [ checkgeom $dapGeom $defGeom $screenWidth $screenHeight ]
+					wm geometry .dap [ checkgeom $dap_geom $defGeom $screenWidth $screenHeight ]
 					wm minsize .dap $hsizePmin $vsizePmin
 					wm maxsize .dap [ winfo vrootwidth .dap ] [ winfo vrootheight .dap ]
 					wm resizable .dap 1 1

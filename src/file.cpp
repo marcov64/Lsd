@@ -78,7 +78,7 @@ bool gui::open_configuration( lsd::object *&r, bool reload )
 				cmd( "cd $path" );
 
 			cmd( "set listfocus 1; set itemfocus 0" );// point for first var in listbox
-			cmd( "set lastObj \"\"" );			// disable last object for reload
+			cmd( "set last_obj \"\"" );			// disable last object for reload
 		}
 		else
 			if ( sim.conf_ok )
@@ -155,9 +155,9 @@ bool gui::open_configuration( lsd::object *&r, bool reload )
 			cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"Partially damaged file (%d :%.24s)\" -detail \"Part of the configuration data was missing or invalid and was replaced by default values.\n\nPlease check if the desired LSD configuration file was selected or re-configure the affected parts as needed.\"", i, warnings.c_str( ) );
 
 	if ( r != NULL && loaded && reload )
-		currObj = r = sim.root->restore_pos( );	// restore pointed object and variable
+		curr_obj = r = sim.root->restore_pos( );	// restore pointed object and variable
 	else
-		currObj = r = sim.root;					// new structure
+		curr_obj = r = sim.root;					// new structure
 
 	if ( loaded && ! ignore_eq_file && strncmp( sim.conf_eq_txt, eq_txt, std::min( strlen( sim.conf_eq_txt ), strlen( eq_txt ) ) ) )
 		plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the LSD model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
@@ -182,7 +182,7 @@ int gui::load_configuration_gui( bool reload, strT *warnings, int quick )
 
 	if( ( res = sim.load_configuration( reload, warnings, quick ) ) == 0 )
 	{
-		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", lsd::model_path, sim.conf_file );
+		cmd( "set last_conf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", lsd::model_path, sim.conf_file );
 		sim.root->load_elem_lists( );
 	}
 
@@ -196,7 +196,7 @@ int gui::load_configuration_gui( bool reload, strT *warnings, int quick )
  *************************************************************/
 void gui::reset_configuration_gui( void )
 {
-	currObj = NULL;								// no current object pointer
+	curr_obj = NULL;							// no current object pointer
 	unsaved_change( false );					// signal no unsaved change
 	unsavedData = false;						// no unsaved simulation results
 	unsavedSense = false;						// no sensitivity data to save
@@ -279,9 +279,9 @@ void gui::unload_configuration_gui( bool full )
 		if ( strlen( lsd::model_path ) > 0 )
 			cmd( "cd \"$path\"" );
 
-		cmd( "unset -nocomplain lastConf" );	// no last configuration to reload
+		cmd( "unset -nocomplain last_conf" );	// no last configuration to reload
 		cmd( "set listfocus 1; set itemfocus 0" );// point for first var in listbox
-		cmd( "set lastObj \"\"" );				// disable last object for reload
+		cmd( "set last_obj \"\"" );				// disable last object for reload
 		redrawRoot = redrawStruc = true;		// force browser/structure redraw
 	}
 }
@@ -339,7 +339,7 @@ bool gui::save_xml_configuration_gui( int findex, const char *dest_path, bool qu
 	saved = sim.save_xml_configuration( findex, dest_path, quick, get_str( model_info[ 0 ] ), get_str( model_info[ 1 ] ), get_str( model_info[ 2 ] ), eq_file, eq_txt );
 
 	if ( saved )
-		cmd( "set lastConf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", lsd::model_path, sim.conf_file );
+		cmd( "set last_conf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", lsd::model_path, sim.conf_file );
 
 	return saved;
 }

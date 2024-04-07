@@ -185,14 +185,14 @@ int gui::load_gui( const char **argv )
 		update_model_options( true );
 
 	// check model configuration file
-	if ( eval_bool( "[ info exists lastConf ] && [ file exists $lastConf ] && [ file isfile $lastConf ]" ) )
+	if ( eval_bool( "[ info exists last_conf ] && [ file exists $last_conf ] && [ file isfile $last_conf ]" ) )
 	{
 		delete [ ] sim.conf_name;
-		cmd( "set fn [ string map -nocase [ list [ file extension $lastConf ] \"\" ] [ file tail $lastConf ] ]" );
+		cmd( "set fn [ string map -nocase [ list [ file extension $last_conf ] \"\" ] [ file tail $last_conf ] ]" );
 		sim.conf_name = new char[ eval_int( "[ string length $fn ]" ) + 1 ];
 		strcpy( sim.conf_name, get_str( "fn" ) );
 
-		cmd( "set path [ file normalize [ file dirname $lastConf ] ]" );
+		cmd( "set path [ file normalize [ file dirname $last_conf ] ]" );
 		if ( eval_bool( "$path ne [ pwd ]" ) )
 		{
 			delete [ ] sim.conf_path;
@@ -357,7 +357,7 @@ void gui::create( void )
 		if ( choice < 0 )
 		{
 			choice = - choice;
-			r = currObj;				// restore pointed object
+			r = curr_obj;				// restore pointed object
 		}
 
 		r = operate( r );
@@ -378,7 +378,7 @@ int gui::browse( lsd::object *r )
 	lsd::bridge *cb;
 	lsd::variable *cv;
 
-	currObj = r;			// global pointer to C Tcl routines
+	curr_obj = r;			// global pointer to C Tcl routines
 
 	// main LSD window - avoids redrawing if not required
 	if ( redrawRoot )
@@ -1541,23 +1541,23 @@ void lsd::object::save_pos( void )
 		return;				// browser not drawn yet
 
 	// save the current object & cursor position for quick reload
-	cmd( "set lastObj %s", label );
+	cmd( "set last_obj %s", label );
 
 	cmd( "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { \
-				set lastList 2 \
+				set last_list 2 \
 			} else { \
-				set lastList 1 \
+				set last_list 1 \
 			}" );
 
-	cmd( "if { $lastList == 1 } { \
-			set lastItem [ .l.v.c.var_name curselection ]; \
-			set lastFirst [ lindex [ .l.v.c.var_name yview ] 0 ] \
+	cmd( "if { $last_list == 1 } { \
+			set last_item [ .l.v.c.var_name curselection ]; \
+			set last_first [ lindex [ .l.v.c.var_name yview ] 0 ] \
 		} else { \
-			set lastItem [ .l.s.c.son_name curselection ]; \
-			set lastFirst [ lindex [ .l.s.c.son_name yview ] 0 ] \
+			set last_item [ .l.s.c.son_name curselection ]; \
+			set last_first [ lindex [ .l.s.c.son_name yview ] 0 ] \
 		}" );
 
-	cmd( "if { $lastItem == \"\" } { set lastItem 0 }" );
+	cmd( "if { $last_item == \"\" } { set last_item 0 }" );
 }
 
 
@@ -1569,11 +1569,11 @@ lsd::object *lsd::object::restore_pos( void )
 {
 	object *cur;
 
-	if ( gui::eval_bool( "$lastObj ne \"\"" ) && ( cur = search( gui::get_str( "lastObj" ) ) ) != NULL )
+	if ( gui::eval_bool( "$last_obj ne \"\"" ) && ( cur = search( gui::get_str( "last_obj" ) ) ) != NULL )
 	{
-		cmd( "if [ info exists lastList ] { set listfocus $lastList }" );
-		cmd( "if [ info exists lastItem ] { set itemfocus $lastItem }" );
-		cmd( "if [ info exists lastFirst ] { set itemfirst $lastFirst }" );
+		cmd( "if [ info exists last_list ] { set listfocus $last_list }" );
+		cmd( "if [ info exists last_item ] { set itemfocus $last_item }" );
+		cmd( "if [ info exists last_first ] { set itemfirst $last_first }" );
 		return cur;
 	}
 
@@ -2069,8 +2069,8 @@ bool gui::discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 
 	end_true:
 
-	if ( currObj != NULL )
-		currObj->save_pos( );	// save browser position in structure
+	if ( curr_obj != NULL )
+		curr_obj->save_pos( );	// save browser position in structure
 
 	update_model_options( );	// save windows positions if appropriate
 

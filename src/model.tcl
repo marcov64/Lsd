@@ -35,7 +35,7 @@ set months [ list January February March April May June July August September Oc
 # SHOWMODEL
 #************************************************
 proc showmodel pippo {
-	global lmn lmd ldn lrn lbn group result choiceSM lver rootname modelGroup upSymbol groupSymbol lsd_root memory small_character GROUP_TXT_INFO MODEL_TXT_INFO DESCRIPTION colorsTheme darkTheme
+	global lmn lmd ldn lrn lbn group result choiceSM lver rootname model_group upSymbol groupSymbol lsd_root memory small_character GROUP_TXT_INFO MODEL_TXT_INFO DESCRIPTION colorsTheme darkTheme
 
 	unset -nocomplain lmn lver lmd ldn lrn lbn group
 	lappend lmn
@@ -66,7 +66,7 @@ proc showmodel pippo {
 			if { [ lindex $group $result ] == 0 } {
 				set choiceSM 1
 			} else {
-				set modelGroup "[ lindex $lmn $result ]"
+				set model_group "[ lindex $lmn $result ]"
 				showmodel [ lindex $ldn $result ]
 			}
 		}
@@ -293,7 +293,7 @@ proc showmodel pippo {
 
 	tooltip::tooltip clear .l.l.l*
 
-	.l.l.tit.n conf -text "$modelGroup"
+	.l.l.tit.n conf -text "$model_group"
 
 	set curdir [ pwd ]
 	if { ! [ file isdirectory "$pippo" ] } {
@@ -315,7 +315,7 @@ proc showmodel pippo {
 		lappend lver -1
 		lappend lmd "Return to group: $upgroup"
 		lappend lrn "[ pwd ]"
-		lappend lbn "$modelGroup"
+		lappend lbn "$model_group"
 		lappend ldn "[ file dirname "$pippo" ]"
 		lappend lmn "$upgroup"
 		lappend group -1
@@ -337,7 +337,7 @@ proc showmodel pippo {
 			lappend lver -1
 			lappend ldn "$pippo/$i"
 			lappend lrn "[ pwd ]"
-			lappend lbn "$modelGroup"
+			lappend lbn "$model_group"
 			if [ file exists "$i/$DESCRIPTION" ] {
 				set f [ open "$i/$DESCRIPTION" ]
 				lappend lmd "[ read -nonewline $f ]"
@@ -368,7 +368,7 @@ proc showmodel pippo {
 			lappend lver "$app2"
 			lappend ldn "$pippo/$i"
 			lappend lrn "[ pwd ]"
-			lappend lbn "$modelGroup"
+			lappend lbn "$model_group"
 
 			if [ file exists "$i/$DESCRIPTION" ] {
 				set f [ open "$i/$DESCRIPTION" ]
@@ -565,7 +565,7 @@ proc medit i {
 # Paste a previously copied model/group
 #************************************************
 proc mpaste i {
-	global copydir copyver copylabel copydscr lrn modelGroup lmn lver lmd choiceSM small_character darkTheme MODEL_TXT_INFO DESCRIPTION
+	global copydir copyver copylabel copydscr lrn lmn lver lmd choiceSM small_character darkTheme MODEL_TXT_INFO DESCRIPTION
 
 	set pastedir [ lindex $lrn $i ]
 
@@ -671,7 +671,7 @@ proc mpaste i {
 # Fix invalid information in model info file
 #************************************************
 proc fix_info { fi } {
-	global MODEL_TXT_INFO MODEL_TXT_INFO_NUM DATE_FMT
+	global MODEL_TXT_INFO
 
 	set f [ open "$fi/$MODEL_TXT_INFO" r ]
 	set l1 "[ gets $f ]"

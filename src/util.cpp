@@ -307,8 +307,8 @@ void gui::error_hard_helper( const char *boxTitle, const char *boxText, const ch
 
 	if ( err == 1 )
 	{
-		if ( currObj != NULL )
-			currObj->save_pos( );		// save browser position in structure
+		if ( curr_obj != NULL )
+			curr_obj->save_pos( );		// save browser position in structure
 
 		update_model_options( );		// save windows positions if appropriate
 	}
@@ -658,12 +658,12 @@ int gui::Tcl_get_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const
 	if ( argc != 3 )					// require 2 parameters: variable name and property
 		return TCL_ERROR;
 
-	if ( currObj == NULL || argv[ 1 ] == NULL || argv[ 2 ] == NULL ||
+	if ( curr_obj == NULL || argv[ 1 ] == NULL || argv[ 2 ] == NULL ||
 		 ! strcmp( argv[ 1 ], "(none)" ) )
 		return TCL_ERROR;
 
 	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
-	cv = currObj->search_var( NULL, vname );
+	cv = curr_obj->search_var( NULL, vname );
 
 	if ( cv == NULL )					// variable not found
 		return TCL_ERROR;
@@ -708,18 +708,18 @@ int gui::Tcl_set_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const
 	if ( argc != 4 )					// require 3 parameters: variable name, property and value
 		return TCL_ERROR;
 
-	if ( currObj == NULL || argv[ 1 ] == NULL || argv[ 2 ] == NULL ||
+	if ( curr_obj == NULL || argv[ 1 ] == NULL || argv[ 2 ] == NULL ||
 		 argv[ 3 ] == NULL || ! strcmp( argv[ 1 ], "(none)" ) )
 		return TCL_ERROR;
 
 	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
-	cv = currObj->search_var( NULL, vname );
+	cv = curr_obj->search_var( NULL, vname );
 
 	if ( cv == NULL )					// variable not found
 		return TCL_ERROR;
 
 	// set the appropriate value for variable (all instances)
-	for ( cur = currObj; cur != NULL; cur = cur->hyper_next( cur->label ) )
+	for ( cur = curr_obj; cur != NULL; cur = cur->hyper_next( cur->label ) )
 	{
 		cv = cur->search_var( NULL, vname );
 		if ( ! strcmp( argv[ 2 ], "save" ) )
@@ -809,7 +809,7 @@ int gui::Tcl_set_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const
 	if ( ( ! strcmp( argv[ 2 ], "save" ) && cv->save ) ||
 		 ( ! strcmp( argv[ 2 ], "savei" ) && cv->savei ) )
 	{
-		for ( cur = currObj; cur != NULL; cur = cur->up )
+		for ( cur = curr_obj; cur != NULL; cur = cur->up )
 			if ( ! cur->to_compute )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\"", vname, cur->label );

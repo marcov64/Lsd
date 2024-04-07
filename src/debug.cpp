@@ -1555,7 +1555,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					// redraw model structure graph
 					case 23:
 
-						( gui::lastObj == NULL ? sim->root : gui::lastObj )->show_graph( );
+						( gui::last_obj == NULL ? sim->root : gui::last_obj )->show_graph( );
 						cmd( "focustop .deb" );
 
 						gui::choice = 0;

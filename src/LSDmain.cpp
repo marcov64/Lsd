@@ -66,8 +66,8 @@ namespace gui
 	int platform = 0;				// OS platform (1=Linux, 2=Mac, 3=Windows)
 	int stop;						// activity interruption flag (Tcl boolean)
 	int watch;						// allow for graph generation interruption (bool)
-	lsd::object *currObj = NULL;	// pointer to current object in browser
-	lsd::object *lastObj = NULL;	// pointer to last selected object in structure
+	lsd::object *curr_obj = NULL;	// pointer to current object in browser
+	lsd::object *last_obj = NULL;	// pointer to last selected object in structure
 	lsd::simulation sim;			// the single GUI simulation object
 	Tcl_Interp *interp = NULL;		// global Tcl interpreter in LSD
 
@@ -75,8 +75,8 @@ namespace gui
 	const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;
 	const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
 	const char *lsd_nw_src[ LSD_NW_NUM ] = LSD_NW_SRC;
-	const char *model_defaults[ MODEL_TXT_INFO_NUM ] = MODEL_TXT_INFO_DEFAULT;
-	const char *model_info[ MODEL_TXT_INFO_NUM ] = MODEL_TXT_INFO_NAME;
+	const char *model_defaults[ MODEL_OPTIONS_NUM ] = MODEL_OPTIONS_DEFAULT;
+	const char *model_info[ MODEL_OPTIONS_NUM ] = MODEL_OPTIONS_NAME;
 	const char *tk_wnd_names[ TK_WIN_NUM ] = TK_WIN_NAME;
 	const char *wnd_names[ LSD_WIN_NUM ] = LSD_WIN_NAME;
 	const char lmm_types[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_TYPE;

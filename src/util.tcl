@@ -1145,7 +1145,7 @@ proc upd_cursor { } {
 # Update LMM main window title and info bars
 #************************************************
 proc upd_bars { } {
-	global tosave before modelGroup modelName modelVersion fileName groupDir modelDir fileDir
+	global tosave before model_group model_name model_version file_name group_dir model_dir file_dir
 
 	if { [ winfo exists .f.t.t ] } {
 		set after [ .f.t.t get 1.0 end ]
@@ -1156,42 +1156,42 @@ proc upd_bars { } {
 	# update title bar
 	if { $before ne $after } {
 		set tosave 1
-		wm title . "*$fileName - LMM"
+		wm title . "*$file_name - LMM"
 	} else {
 		set tosave 0
-		wm title . "  $fileName - LMM"
+		wm title . "  $file_name - LMM"
 	}
 
 	# update model information
-	if { $modelGroup ne [ .f.hea.info.grp.dat configure -text ] } {
-		.f.hea.info.grp.dat configure -text "$modelGroup"
+	if { $model_group ne [ .f.hea.info.grp.dat configure -text ] } {
+		.f.hea.info.grp.dat configure -text "$model_group"
 
-		if { [ file exists "$groupDir" ] } {
-			tooltip::tooltip .f.hea.info.grp.dat [ file nativename "$groupDir" ]
+		if { [ file exists "$group_dir" ] } {
+			tooltip::tooltip .f.hea.info.grp.dat [ file nativename "$group_dir" ]
 		} else {
 			tooltip::tooltip clear .f.hea.info.grp.dat
 		}
 	}
 
-	if { $modelName ne [ .f.hea.info.mod.dat configure -text ] } {
-		.f.hea.info.mod.dat configure -text "$modelName"
+	if { $model_name ne [ .f.hea.info.mod.dat configure -text ] } {
+		.f.hea.info.mod.dat configure -text "$model_name"
 
-		if { [ file exists "$modelDir" ] } {
-			tooltip::tooltip .f.hea.info.mod.dat [ file nativename "$modelDir" ]
+		if { [ file exists "$model_dir" ] } {
+			tooltip::tooltip .f.hea.info.mod.dat [ file nativename "$model_dir" ]
 		} else {
 			tooltip::tooltip clear .f.hea.info.mod.dat
 		}
 	}
 
-	if { $modelVersion ne [ .f.hea.info.ver.dat configure -text ] } {
-		.f.hea.info.ver.dat configure -text "$modelVersion"
+	if { $model_version ne [ .f.hea.info.ver.dat configure -text ] } {
+		.f.hea.info.ver.dat configure -text "$model_version"
 	}
 
-	if { $fileName ne [ .f.hea.info.file.dat configure -text ] } {
-		.f.hea.info.file.dat configure -text "$fileName"
+	if { $file_name ne [ .f.hea.info.file.dat configure -text ] } {
+		.f.hea.info.file.dat configure -text "$file_name"
 
-		if { [ file exists "$fileDir/$fileName" ] } {
-			tooltip::tooltip .f.hea.info.file.dat [ file nativename "$fileDir/$fileName" ]
+		if { [ file exists "$file_dir/$file_name" ] } {
+			tooltip::tooltip .f.hea.info.file.dat [ file nativename "$file_dir/$file_name" ]
 		} else {
 			tooltip::tooltip clear .f.hea.info.file.dat
 		}

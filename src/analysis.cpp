@@ -3715,7 +3715,7 @@ void gui::analysis( bool mc )
 					// redraw model structure graph
 					case 23:
 
-						( lastObj == NULL ? sim.root : lastObj )->show_graph( );
+						( last_obj == NULL ? sim.root : last_obj )->show_graph( );
 						cmd( "focustop .da" );
 
 						break;

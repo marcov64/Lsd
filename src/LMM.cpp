@@ -87,11 +87,11 @@ namespace gui
 	int platform = 0;			// OS platform (1=Linux, 2=Mac, 3=Windows)
 	Tcl_Interp *interp = NULL;	// Tcl standard interpreter pointer
 
-	const char *model_info[ MODEL_TXT_INFO_NUM ] = MODEL_TXT_INFO_NAME;
 	const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;
 	const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
 	const char *lsd_nw_src[ LSD_NW_NUM ] = LSD_NW_SRC;
-	const char *model_defaults[ MODEL_TXT_INFO_NUM ] = MODEL_TXT_INFO_DEFAULT;
+	const char *model_defaults[ MODEL_OPTIONS_NUM ] = MODEL_OPTIONS_DEFAULT;
+	const char *model_info[ MODEL_OPTIONS_NUM ] = MODEL_OPTIONS_NAME;
 	const char lmm_types[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_TYPE;
 }
 
@@ -241,15 +241,15 @@ int modman( int argn, const char **argv )
 	cmd( "set small_character [ expr { $dim_character - $deltaSize } ]" );
 
 	// current model info
-	cmd( "set modelGroup \"$rootname\"" );
-	cmd( "set modelName \"(no model)\"" );
-	cmd( "set modelVersion \"\"" );
-	cmd( "set fileName \"(no name)\"" );
-	cmd( "set fileDir \"[ pwd ]\"" );
+	cmd( "set model_group \"$rootname\"" );
+	cmd( "set model_name \"(no model)\"" );
+	cmd( "set model_version \"\"" );
+	cmd( "set file_name \"(no name)\"" );
+	cmd( "set file_dir \"[ pwd ]\"" );
 
 	// allow reloading last model
-	cmd( "if { ! [ info exists groupDir ] } { set groupDir \"[ pwd ]\" }" );
-	cmd( "if { ! [ info exists modelDir ] } { set modelDir \"[ pwd ]\" }" );
+	cmd( "if { ! [ info exists group_dir ] } { set group_dir \"[ pwd ]\" }" );
+	cmd( "if { ! [ info exists model_dir ] } { set model_dir \"[ pwd ]\" }" );
 
 	// configure main window
 	cmd( ". configure -menu .m -background $colorsTheme(bg)" );
@@ -271,13 +271,13 @@ int modman( int argn, const char **argv )
 	cmd( "$w add command -label \"New Model/Group...\" -underline 0 -command { set choice 14 }" );	// entryconfig 0
 	cmd( "$w add command -label \"Browse Models...\" -underline 0 -command { set choice 33 } -accelerator Ctrl+b" );	// entryconfig 1
 	cmd( "$w add command -label \"Save Model\" -underline 0 -state disabled -command { \
-			if { [ string length \"$fileName\" ] > 0 } { \
-				if [ file exist \"$fileDir/$fileName\" ] { \
+			if { [ string length \"$file_name\" ] > 0 } { \
+				if [ file exist \"$file_dir/$file_name\" ] { \
 					catch { \
-						file copy -force \"$fileDir/$fileName\" \"$fileDir/[ file rootname \"$fileName\" ].bak\" \
+						file copy -force \"$file_dir/$file_name\" \"$file_dir/[ file rootname \"$file_name\" ].bak\" \
 					} \
 				}; \
-				set f [ open \"$fileDir/$fileName\" w ]; \
+				set f [ open \"$file_dir/$file_name\" w ]; \
 				puts -nonewline $f [ .f.t.t get 0.0 end ]; \
 				close $f; \
 				set before [ .f.t.t get 0.0 end ]; \
@@ -293,13 +293,13 @@ int modman( int argn, const char **argv )
 	cmd( "if { $file_cmds } { $w add command -label \"Open Text File...\" -command { set choice 15 } -underline 0 -accelerator Ctrl+o }" );		// entryconfig (8)
 	cmd( "if { $file_cmds == 1 } { \
 			$w add command -label \"Save Text File\" -command { \
-				if { [ string length \"$fileName\" ] > 0 } { \
-					if [ file exist \"$fileDir/$fileName\" ] { \
+				if { [ string length \"$file_name\" ] > 0 } { \
+					if [ file exist \"$file_dir/$file_name\" ] { \
 						catch { \
-							file copy -force \"$fileDir/$fileName\" \"$fileDir/[ file rootname \"$fileName\" ].bak\" \
+							file copy -force \"$file_dir/$file_name\" \"$file_dir/[ file rootname \"$file_name\" ].bak\" \
 						} \
 					}; \
-					set f [ open \"$fileDir/$fileName\" w ]; \
+					set f [ open \"$file_dir/$file_name\" w ]; \
 					puts -nonewline $f [ .f.t.t get 0.0 end ]; \
 					close $f; \
 					set before [ .f.t.t get 0.0 end ]; \
@@ -770,8 +770,8 @@ int modman( int argn, const char **argv )
 			cmd( ".f.t.t edit reset" );
 			cmd( "close $file" );
 			cmd( ".f.t.t mark set insert 1.0" );
-			cmd( "set fileName \"[ file tail \"$filetoload\" ]\"" );
-			cmd( "set fileDir [ file dirname \"$filetoload\" ]" );
+			cmd( "set file_name \"[ file tail \"$filetoload\" ]\"" );
+			cmd( "set file_dir [ file dirname \"$filetoload\" ]" );
 			cmd( "set before [ .f.t.t get 1.0 end ]" );
 
 			recolor_all = sourcefile = source_file( gui::get_str( "filetoload" ) );
@@ -780,7 +780,7 @@ int modman( int argn, const char **argv )
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" );
 	}
 	else
-		if ( gui::eval_bool( "[ file exists \"$modelDir/$MODEL_TXT_INFO\" ]" ) && gui::eval_bool( "[ file exists \"$groupDir/$GROUP_TXT_INFO\" ]" ) )
+		if ( gui::eval_bool( "[ file exists \"$model_dir/$MODEL_TXT_INFO\" ]" ) && gui::eval_bool( "[ file exists \"$group_dir/$GROUP_TXT_INFO\" ]" ) )
 			choice = 18;				// reload previous model
 		else
 			choice = 33;				// open model browser
@@ -895,9 +895,9 @@ int modman( int argn, const char **argv )
 			goto loop;
 
 		gui::make_makefile( );
-		if ( gui::eval_bool( "[ file exists \"$modelDir/makefile\" ]" ) )
+		if ( gui::eval_bool( "[ file exists \"$model_dir/makefile\" ]" ) )
 		{
-			cmd( "set file [ open \"$modelDir/makefile\" r ]" );
+			cmd( "set file [ open \"$model_dir/makefile\" r ]" );
 			cmd( ".f.t.t insert end [ read -nonewline $file ]" );
 			cmd( ".f.t.t edit reset" );
 			cmd( "close $file" );
@@ -906,7 +906,7 @@ int modman( int argn, const char **argv )
 		sourcefile = 0;
 
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
-		cmd( "set fileName makefile" );
+		cmd( "set file_name makefile" );
 		cmd( ".f.t.t mark set insert 1.0" );
 		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Makefile should not be changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Please check 'Model Options' and 'System Options' in menu 'Model' to change compilation options.\"" );
 
@@ -916,17 +916,17 @@ int modman( int argn, const char **argv )
 	/* save the file currently shown */
 	if ( choice == 4 )
 	{
-		cmd( "set curfilename [ tk_getSaveFile -parent . -title \"Save File\" -initialfile $fileName -initialdir $fileDir ]" );
+		cmd( "set curfilename [ tk_getSaveFile -parent . -title \"Save File\" -initialfile $file_name -initialdir $file_dir ]" );
 		s = gui::get_str( "curfilename" );
 		if ( s != NULL && strlen( s ) > 0 )
 		{
-			cmd( "if [ file exist \"$fileDir/$fileName\" ] { file copy -force \"$fileDir/$fileName\" \"$fileDir/[file rootname \"$fileName\"].bak\" }" );
+			cmd( "if [ file exist \"$file_dir/$file_name\" ] { file copy -force \"$file_dir/$file_name\" \"$file_dir/[file rootname \"$file_name\"].bak\" }" );
 			cmd( "set file [ open \"$curfilename\" w ]" );
 			cmd( "puts -nonewline $file [ .f.t.t get 0.0 end ]" );
 			cmd( "close $file" );
 			cmd( "set before [ .f.t.t get 0.0 end ]" );
-			cmd( "set fileDir [ file dirname \"$curfilename\" ]" );
-			cmd( "set fileName [ file tail \"$curfilename\" ]" );
+			cmd( "set file_dir [ file dirname \"$curfilename\" ]" );
+			cmd( "set file_name [ file tail \"$curfilename\" ]" );
 		}
 
 		choice = 0;
@@ -942,14 +942,14 @@ int modman( int argn, const char **argv )
 			goto loop;
 		}
 
-		cmd( "set fileDir \"$modelDir\"" );
-		cmd( "set fileName $DESCRIPTION" );
+		cmd( "set file_dir \"$model_dir\"" );
+		cmd( "set file_name $DESCRIPTION" );
 
 		cmd( ".f.t.t delete 0.0 end" );
-		cmd( "set choice 0; if { [ file exists \"$fileDir/$fileName\" ] } { set choice 1; if { [ file size \"$fileDir/$fileName\" ] <= 2 } { set choice 0; file delete \"$fileDir/$fileName\" } }" );
+		cmd( "set choice 0; if { [ file exists \"$file_dir/$file_name\" ] } { set choice 1; if { [ file size \"$file_dir/$file_name\" ] <= 2 } { set choice 0; file delete \"$file_dir/$file_name\" } }" );
 		if ( choice == 1 )
 		{
-			cmd( "set file [ open \"$fileDir/$DESCRIPTION\" r ]" );
+			cmd( "set file [ open \"$file_dir/$DESCRIPTION\" r ]" );
 			cmd( ".f.t.t insert end [ read -nonewline $file ]" );
 			cmd( "close $file" );
 			cmd( "set before [ .f.t.t get 1.0 end ]" );
@@ -960,12 +960,12 @@ int modman( int argn, const char **argv )
 			cmd( " if [ string equal $answer yes ] { set choice 1 } { set choice 2 } " );
 			if ( choice == 2 )
 			{
-				cmd( " set fileName \"\" " );
+				cmd( " set file_name \"\" " );
 				cmd( "set before [ .f.t.t get 0.0 end ]" );
 				choice = 8;		// load equations file
 				goto loop;
 			}
-			cmd( ".f.t.t insert end \"Model $modelName (ver. $modelVersion)\n\n(Enter the Model description text here)\n\n(PRESS CTRL+E TO EDIT EQUATIONS)\n\"" );
+			cmd( ".f.t.t insert end \"Model $model_name (ver. $model_version)\n\n(Enter the Model description text here)\n\n(PRESS CTRL+E TO EDIT EQUATIONS)\n\"" );
 		}
 
 		sourcefile = 0;
@@ -1011,12 +1011,12 @@ int modman( int argn, const char **argv )
 			goto loop;
 		}
 
-		cmd( "set oldfile \"$fileName\"" );
-		cmd( "set olddir \"$fileDir\"" );
-		cmd( "set fileName \"%s\"", s );
-		cmd( "set fileDir \"$modelDir\"" );
-		cmd( "if [ file exist \"$fileDir/$fileName\" ] { \
-				set file [ open \"$fileDir/$fileName\" r ]; \
+		cmd( "set oldfile \"$file_name\"" );
+		cmd( "set olddir \"$file_dir\"" );
+		cmd( "set file_name \"%s\"", s );
+		cmd( "set file_dir \"$model_dir\"" );
+		cmd( "if [ file exist \"$file_dir/$file_name\" ] { \
+				set file [ open \"$file_dir/$file_name\" r ]; \
 				.f.t.t delete 1.0 end; \
 				.f.t.t insert end [ read -nonewline $file ]; \
 				close $file; \
@@ -1024,8 +1024,8 @@ int modman( int argn, const char **argv )
 				.f.t.t tag remove sel 1.0 end; \
 				set choice 1 \
 			} { \
-				set fileName \"$oldfile\"; \
-				set fileDir \"$olddir\"; \
+				set file_name \"$oldfile\"; \
+				set file_dir \"$olddir\"; \
 				ttk::messageBox -parent . -title Error -icon error -type ok -message \"Equation file not found\" -detail \"If equation file has been renamed, update the 'FUN' field in menu 'Model', 'Model Options'.\"; \
 				set choice 0 \
 			}" );
@@ -1035,7 +1035,7 @@ int modman( int argn, const char **argv )
 			goto loop;
 
 		// handle the opening of files from the compilation error window
-		cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$modelDir/$fileName\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
+		cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$model_dir/$file_name\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
 				.f.t.t tag add sel $errlin.0 $errlin.end; \
 				if { [ info exists errcol ] && $errcol ne \"\" && [ string is integer -strict $errcol ] } { \
 					.f.t.t see $errlin.$errcol; \
@@ -1394,7 +1394,7 @@ int modman( int argn, const char **argv )
 			goto loop;
 		}
 
-		cmd( "if { ! [ catch { set f [ open $modelDir/$MODEL_TXT_OPTIONS r ] } ] } { \
+		cmd( "if { ! [ catch { set f [ open $model_dir/$MODEL_TXT_OPTIONS r ] } ] } { \
 				set a [ string trim [ read $f ] ]; \
 				close $f; \
 				set pos [ string first \"SWITCH_CC=\" $a ]; \
@@ -1417,7 +1417,7 @@ int modman( int argn, const char **argv )
 		if ( choice == 0 )
 			goto loop;
 
-		cmd( "cd \"$modelDir\"" );
+		cmd( "cd \"$model_dir\"" );
 		s = gui::get_target_name( str, 2 * MAX_PATH_LENGTH );
 		i = gui::get_precompiled_flag( s );
 
@@ -1429,10 +1429,10 @@ int modman( int argn, const char **argv )
 			cmd( "scan $vmenuInsert %%d.%%d line col" );
 			cmd( "if [ string equal -nocase $debug_exe lldb ] { \
 					set breakExt lldb; \
-					set breakTxt \"breakpoint set -f $fileName -l$line\nrun\n\" \
+					set breakTxt \"breakpoint set -f $file_name -l$line\nrun\n\" \
 				} else { \
 					set breakExt gdb; \
-					set breakTxt \"set breakpoint pending on\nbreak $fileName:$line\nrun\n\" \
+					set breakTxt \"set breakpoint pending on\nbreak $file_name:$line\nrun\n\" \
 				}" );
 			cmd( "catch { \
 					set f [ open break.$breakExt w ]; \
@@ -1461,7 +1461,7 @@ int modman( int argn, const char **argv )
 				break;
 
 			case _MAC_:
-				snprintf( tmp, MAX_BUFF_SIZE, "cd $fileDir; clear; $debug_exe $cmdbreak -f %s%s%s.app/Contents/MacOS/%s", s, i ? lsd::root_lsd : "", i ? "/" : "", s );
+				snprintf( tmp, MAX_BUFF_SIZE, "cd $file_dir; clear; $debug_exe $cmdbreak -f %s%s%s.app/Contents/MacOS/%s", s, i ? lsd::root_lsd : "", i ? "/" : "", s );
 				break;
 
 			default:
@@ -1486,14 +1486,14 @@ int modman( int argn, const char **argv )
 		cmd( "destroytop .mm" );	// close compilation results, if open
 
 		// prevent creating new groups in LSD directory
-		cmd( "if { [ string equal $groupDir [ pwd ] ] && [ file exists \"$groupDir/$group_new/$GROUP_TXT_INFO\" ] } \
+		cmd( "if { [ string equal $group_dir [ pwd ] ] && [ file exists \"$group_dir/$group_new/$GROUP_TXT_INFO\" ] } \
 				{	set answer [ ttk::messageBox -parent . -type okcancel -title Warning \
 					-icon warning -default ok -message \"Invalid parent group\" \
 					-detail \"Cannot create group/model in the Root group. Press 'OK' to change to the '$group_new' group before proceeding.\" ]; \
 					if [ string equal $answer ok ] { \
-						set groupDir \"$groupDir/$group_new\"; \
-						set f [ open \"$groupDir/$GROUP_TXT_INFO\" r ]; \
-						set modelGroup \"[ gets $f ]\"; \
+						set group_dir \"$group_dir/$group_new\"; \
+						set f [ open \"$group_dir/$GROUP_TXT_INFO\" r ]; \
+						set model_group \"[ gets $f ]\"; \
 						close $f; \
 						set choice 1 \
 					} else { \
@@ -1510,7 +1510,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "ttk::frame .a.tit" );
 		cmd( "ttk::label .a.tit.l -text \"Current group:\"" );
-		cmd( "ttk::label .a.tit.n -style hl.TLabel -text \"$modelGroup\"" );
+		cmd( "ttk::label .a.tit.n -style hl.TLabel -text \"$model_group\"" );
 		cmd( "pack .a.tit.l .a.tit.n" );
 
 		cmd( "ttk::frame .a.f -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
@@ -1551,7 +1551,7 @@ int modman( int argn, const char **argv )
 
 			cmd( "ttk::frame .a.tit" );
 			cmd( "ttk::label .a.tit.l -text \"Current group:\"" );
-			cmd( "ttk::label .a.tit.n -style hl.TLabel -text \"$modelGroup\"" );
+			cmd( "ttk::label .a.tit.n -style hl.TLabel -text \"$model_group\"" );
 			cmd( "pack .a.tit.l .a.tit.n" );
 
 			cmd( "ttk::frame .a.mname" );
@@ -1606,7 +1606,7 @@ int modman( int argn, const char **argv )
 			}
 
 			// control for existing directory
-			cmd( "if [ file exists \"$groupDir/$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"[ file nativename $groupDir/$mdir ]\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+			cmd( "if [ file exists \"$group_dir/$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"[ file nativename $group_dir/$mdir ]\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 			if ( choice == 3 )
 			{
 				cmd( "focus .a.mdir.e" );
@@ -1614,22 +1614,22 @@ int modman( int argn, const char **argv )
 				goto here_newgroup;
 			}
 
-			cmd( "file mkdir \"$groupDir/$mdir\"" );
-			cmd( "cd \"$groupDir/$mdir\"" );
-			cmd( "set groupDir \"$groupDir/$mdir\"" );
+			cmd( "file mkdir \"$group_dir/$mdir\"" );
+			cmd( "cd \"$group_dir/$mdir\"" );
+			cmd( "set group_dir \"$group_dir/$mdir\"" );
 			cmd( "set f [ open $GROUP_TXT_INFO w ]" );
 			cmd( "puts -nonewline $f \"$mname\"" );
 			cmd( "close $f" );
 			cmd( "set f [ open $DESCRIPTION w ]" );
 			cmd( "puts -nonewline $f \"[ .a.tdes.e get 0.0 end ]\"" );
 			cmd( "close $f" );
-			cmd( "set modelGroup \"$mname\"" );
+			cmd( "set model_group \"$mname\"" );
 
 			cmd( "destroytop .a" );
 			//end of creation of a new group
 		}
 		else
-			cmd( "cd \"$groupDir\"" );	// if no group is created, move in the current group
+			cmd( "cd \"$group_dir\"" );	// if no group is created, move in the current group
 
 		// create a new model
 		cmd( "set mname \"New model\"" );
@@ -1641,7 +1641,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "ttk::frame .a.tit" );
 		cmd( "ttk::label .a.tit.l -text \"Current group:\"" );
-		cmd( "ttk::label .a.tit.n -style hl.TLabel -text \"$modelGroup\"" );
+		cmd( "ttk::label .a.tit.n -style hl.TLabel -text \"$model_group\"" );
 		cmd( "pack .a.tit.l .a.tit.n" );
 
 		cmd( "ttk::frame .a.mname" );
@@ -1681,8 +1681,8 @@ int modman( int argn, const char **argv )
 		if ( choice == 2 )
 		{
 			cmd( "destroytop .a" );
-			cmd( "set modelName \"\"" );
-			cmd( "set modelVersion \"\"" );
+			cmd( "set model_name \"\"" );
+			cmd( "set model_version \"\"" );
 			choice = 0;
 			goto loop;
 		}
@@ -1697,7 +1697,7 @@ int modman( int argn, const char **argv )
 		}
 
 		// control for existing directory
-		cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"[ file nativename $groupDir/$mdir ]\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+		cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"[ file nativename $group_dir/$mdir ]\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 		if ( choice == 3 )
 		{
 			cmd( "focus .a.mdir.e" );
@@ -1723,10 +1723,10 @@ int modman( int argn, const char **argv )
 			if ( ! found )
 			{
 				if ( ! gui::load_model_options( str ) )
-					cmd( "set modelName $curdir; set modelVersion \"1.0\"" );
+					cmd( "set model_name $curdir; set model_version \"1.0\"" );
 
-				cmd( "set comp [ string compare $modelName $mname ]" );
-				cmd( "set comp1 [ string compare $modelVersion $mver ]" );
+				cmd( "set comp [ string compare $model_name $mname ]" );
+				cmd( "set comp1 [ string compare $model_version $mver ]" );
 				cmd( "if { $comp == 0 && $comp1 == 0 } { set choice 3 }" );
 				cmd( "if { $comp == 0 } { set choice 4 }" );
 			}
@@ -1749,8 +1749,8 @@ int modman( int argn, const char **argv )
 			if ( choice == 0 )
 			{
 				cmd( "destroytop .a" );
-				cmd( "set modelName \"\"" );
-				cmd( "set modelVersion \"\"" );
+				cmd( "set model_name \"\"" );
+				cmd( "set model_version \"\"" );
 				goto loop;
 			}
 		}
@@ -1758,16 +1758,16 @@ int modman( int argn, const char **argv )
 		cmd( "destroytop .a" );
 
 		// create a new empty model
-		cmd( "set fileDir $groupDir/$mdir" );
-		cmd( "set modelDir $groupDir/$mdir" );
-		cmd( "set modelName $mname" );
-		cmd( "set modelVersion $mver" );
-		cmd( "set modelDate \"\"" );
+		cmd( "set file_dir $group_dir/$mdir" );
+		cmd( "set model_dir $group_dir/$mdir" );
+		cmd( "set model_name $mname" );
+		cmd( "set model_version $mver" );
+		cmd( "set model_date \"\"" );
 
-		cmd( "file mkdir \"$fileDir\"" );
+		cmd( "file mkdir \"$file_dir\"" );
 
 		// create the empty equation file
-		cmd( "file copy \"$lsd_root/$lsd_src/fun_base.cpp\" \"$modelDir/fun_$mdir.cpp\"" );
+		cmd( "file copy \"$lsd_root/$lsd_src/fun_base.cpp\" \"$model_dir/fun_$mdir.cpp\"" );
 
 		// create the model options and info files
 		gui::reset_make_options( 2 );
@@ -1787,7 +1787,7 @@ int modman( int argn, const char **argv )
 		cmd( ".m.model entryconf 10 -state normal" );
 		cmd( ".m.model entryconf 12 -state normal" );
 
-		cmd( "ttk::messageBox -parent . -type ok -title \"New Model\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: [ file nativename $modelDir ]\"" );
+		cmd( "ttk::messageBox -parent . -type ok -title \"New Model\" -icon info -message \"Model '$model_name' created\" -detail \"Version: $model_version\nDirectory: [ file nativename $model_dir ]\"" );
 
 		cmd( "set before [ .f.t.t get 1.0 end ]" ); //avoid to re-issue a warning for non saved files
 
@@ -1800,7 +1800,7 @@ int modman( int argn, const char **argv )
 	{
 		if ( choice == 15 )
 		{
-			cmd( "set brr [ tk_getOpenFile -parent . -title \"Load Text File\" -initialdir $fileDir ]" );
+			cmd( "set brr [ tk_getOpenFile -parent . -title \"Load Text File\" -initialdir $file_dir ]" );
 			cmd( "if { [ string length $brr ] == 0 } { set choice 0 } { set choice 1 }" );
 			if ( choice == 0 )
 				goto loop;
@@ -1811,8 +1811,8 @@ int modman( int argn, const char **argv )
 			goto loop;
 
 		cmd( ".f.t.t delete 1.0 end" );
-		cmd( "set fileDir [ file dirname \"$brr\" ]" );
-		cmd( "set fileName [ file tail \"$brr\" ]" );
+		cmd( "set file_dir [ file dirname \"$brr\" ]" );
+		cmd( "set file_name [ file tail \"$brr\" ]" );
 		cmd( "set file [ open \"$brr\" r ]" );
 		cmd( ".f.t.t insert end [ read -nonewline $file ]" );
 		cmd( "close $file" );
@@ -1820,7 +1820,7 @@ int modman( int argn, const char **argv )
 		cmd( ".f.t.t tag remove sel 1.0 end" );
 
 		// handle the opening of files from the compilation error window
-		cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$fileDir/$fileName\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
+		cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$file_dir/$file_name\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
 				.f.t.t tag add sel $errlin.0 $errlin.end; \
 				if { [ info exists errcol ] && $errcol ne \"\" && [ string is integer -strict $errcol ] } { \
 					.f.t.t see $errlin.$errcol; \
@@ -1835,7 +1835,7 @@ int modman( int argn, const char **argv )
 		cmd( "upd_cursor" );
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
 
-		recolor_all = sourcefile = source_file( gui::get_str( "fileName" ) );
+		recolor_all = sourcefile = source_file( gui::get_str( "file_name" ) );
 
 		if ( sourcefile )
 		{
@@ -4214,7 +4214,7 @@ int modman( int argn, const char **argv )
 			Tcl_LinkVar( gui::interp, "choiceSM", ( char * ) & num, TCL_LINK_INT );
 			num = 0;
 
-			cmd( "showmodel $groupDir" );
+			cmd( "showmodel $group_dir" );
 
 			while ( num == 0 )
 				Tcl_DoOneEvent( 0 );
@@ -4233,16 +4233,16 @@ int modman( int argn, const char **argv )
 				goto loop;
 			}
 
-			cmd( "set groupDir [ lindex $lrn 0 ]" );	// the group dir is the same for every element
+			cmd( "set group_dir [ lindex $lrn 0 ]" );	// the group dir is the same for every element
 			if ( choice == 14 )
 				goto loop;							// create a new model/group
 
-			cmd( "set modelDir [ lindex $ldn $result ]" );
+			cmd( "set model_dir [ lindex $ldn $result ]" );
 		}
 
-		cmd( "set fileDir $modelDir" );
+		cmd( "set file_dir $model_dir" );
 
-		gui::load_model_options( gui::get_str( "modelDir" ) );
+		gui::load_model_options( gui::get_str( "model_dir" ) );
 
 		cmd( ".m.file entryconf 2 -state normal" );
 		cmd( ".m.file entryconf 3 -state normal" );
@@ -4265,11 +4265,11 @@ int modman( int argn, const char **argv )
 	// create a new version of the current model
 	if ( choice == 41 )
 	{
-		cmd( "set oldModelName $modelName" );
-		cmd( "set oldModelVersion $modelVersion" );
-		cmd( "set mname $modelName" );
-		cmd( "set mver $modelVersion" );
-		cmd( "set mdir $fileDir" );
+		cmd( "set oldModelName $model_name" );
+		cmd( "set oldModelVersion $model_version" );
+		cmd( "set mname $model_name" );
+		cmd( "set mver $model_version" );
+		cmd( "set mdir $file_dir" );
 
 		cmd( "newtop .a \"Save Model As...\" { set choice 2 }" );
 
@@ -4277,9 +4277,9 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::label .a.tit.l -text \"Original model:\"" );
 
 		cmd( "ttk::frame .a.tit.n" );
-		cmd( "ttk::label .a.tit.n.n -style hl.TLabel -text \"$modelName\"" );
+		cmd( "ttk::label .a.tit.n.n -style hl.TLabel -text \"$model_name\"" );
 		cmd( "ttk::label .a.tit.n.l1 -text \"( version\"" );
-		cmd( "ttk::label .a.tit.n.v -style hl.TLabel -text \"$modelVersion\"" );
+		cmd( "ttk::label .a.tit.n.v -style hl.TLabel -text \"$model_version\"" );
 		cmd( "ttk::label .a.tit.n.l2 -text \")\"" );
 		cmd( "pack .a.tit.n.n .a.tit.n.l1 .a.tit.n.v .a.tit.n.l2 -side left" );
 
@@ -4320,8 +4320,8 @@ int modman( int argn, const char **argv )
 		if ( choice == 2 )
 		{
 			cmd( "destroytop .a" );
-			cmd( "set modelName $oldModelName" );
-			cmd( "set modelVersion $oldModelVersion" );
+			cmd( "set model_name $oldModelName" );
+			cmd( "set model_version $oldModelVersion" );
 			choice = 0;
 			goto loop;
 		}
@@ -4336,7 +4336,7 @@ int modman( int argn, const char **argv )
 		}
 
 		// control for existing directory
-		cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"[ file nativename $groupDir/$mdir ]\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+		cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"[ file nativename $group_dir/$mdir ]\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
 		if ( choice == 3 )
 		{
 			cmd( "focus .a.mdir.e" );
@@ -4362,10 +4362,10 @@ int modman( int argn, const char **argv )
 			if ( ! found )
 			{
 				if ( ! gui::load_model_options( str ) )
-					cmd( "set modelName $curdir; set modelVersion \"1.0\"" );
+					cmd( "set model_name $curdir; set model_version \"1.0\"" );
 
-				cmd( "set comp [ string compare $modelName $mname ]" );
-				cmd( "set comp1 [ string compare $modelVersion $mver ]" );
+				cmd( "set comp [ string compare $model_name $mname ]" );
+				cmd( "set comp1 [ string compare $model_version $mver ]" );
 				cmd( "if { $comp == 0 && $comp1 == 0 } { set choice 3 }" );
 			}
 		}
@@ -4381,17 +4381,17 @@ int modman( int argn, const char **argv )
 		cmd( "destroytop .a" );
 
 		// create a new copycat model
-		cmd( "file copy \"$fileDir\" \"$mdir\"" );
-		cmd( "set fileDir \"$mdir\"" );
-		cmd( "set modelDir \"$mdir\"" );
-		cmd( "set modelName \"$mname\"" );
-		cmd( "set modelVersion \"$mver\"" );
-		cmd( "set modelDate \"\"" );
+		cmd( "file copy \"$file_dir\" \"$mdir\"" );
+		cmd( "set file_dir \"$mdir\"" );
+		cmd( "set model_dir \"$mdir\"" );
+		cmd( "set model_name \"$mname\"" );
+		cmd( "set model_version \"$mver\"" );
+		cmd( "set model_date \"\"" );
 
 		// create the model info file
 		gui::update_model_options( true );
 
-		cmd( "ttk::messageBox -parent . -type ok -title \"Save Model As...\" -icon info -message \"Model '$modelName' created\" -detail \"Version: $modelVersion\nDirectory: [ file nativename $modelDir ]\"" );
+		cmd( "ttk::messageBox -parent . -type ok -title \"Save Model As...\" -icon info -message \"Model '$model_name' created\" -detail \"Version: $model_version\nDirectory: [ file nativename $model_dir ]\"" );
 
 		choice = 49;
 		goto loop;
@@ -4449,14 +4449,14 @@ int modman( int argn, const char **argv )
 		if ( ! model_loaded( ) )
 			goto loop;
 
-		if ( ! gui::load_model_options( gui::get_str( "modelDir" ) ) )
+		if ( ! gui::load_model_options( gui::get_str( "model_dir" ) ) )
 			gui::update_model_options( true );			// fix the model info file
 
-		cmd( "set mname $modelName" );
-		cmd( "set mver $modelVersion" );
-		cmd( "set mdate $modelDate" );
+		cmd( "set mname $model_name" );
+		cmd( "set mver $model_version" );
+		cmd( "set mdate $model_date" );
 
-		cmd( "set complete_dir [ file nativename [ file join [ pwd ] \"$modelDir\" ] ]" );
+		cmd( "set complete_dir [ file nativename [ file join [ pwd ] \"$model_dir\" ] ]" );
 
 		s = gui::get_fun_name( str, MAX_PATH_LENGTH );
 		if ( s == NULL || strlen( s ) == 0 )
@@ -4467,7 +4467,7 @@ int modman( int argn, const char **argv )
 		else
 		{
 			cmd( "set eqname \"%s\"", s );
-			cmd( "if [ file exists \"$modelDir/$eqname\" ] { set edate \"[ clock format [ file mtime \"$modelDir/$eqname\" ] -format \"$DATE_FMT\" ]\" } { set edate \"\" }" );
+			cmd( "if [ file exists \"$model_dir/$eqname\" ] { set edate \"[ clock format [ file mtime \"$model_dir/$eqname\" ] -format \"$DATE_FMT\" ]\" } { set edate \"\" }" );
 		}
 
 		cmd( "newtop .a \"Model Info\" { set choice 2 }" );
@@ -4513,9 +4513,9 @@ int modman( int argn, const char **argv )
 
 		if ( choice == 1 )
 		{
-			cmd( "set modelName $mname" );
-			cmd( "set modelVersion $mver" );
-			cmd( "if { [ string is print -strict $mdate ] } { set modelDate \"$mdate\" } { set modelDate \"[ current_date ]\" }" );
+			cmd( "set model_name $mname" );
+			cmd( "set model_version $mver" );
+			cmd( "if { [ string is print -strict $mdate ] } { set model_date \"$mdate\" } { set model_date \"[ current_date ]\" }" );
 
 			// update the model info file
 			gui::update_model_options( true );
@@ -4530,8 +4530,8 @@ int modman( int argn, const char **argv )
 	{
 		cmd( ".f.t.t delete 1.0 end" );
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
-		cmd( "set fileName newfile.txt" );
-		cmd( "set fileDir [ pwd ]" );
+		cmd( "set file_name newfile.txt" );
+		cmd( "set file_dir [ pwd ]" );
 		cmd( ".f.t.t mark set insert 1.0" );
 		cmd( "unset -nocomplain ud udi rd rdi" );
 		cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
@@ -4595,8 +4595,8 @@ int modman( int argn, const char **argv )
 				.l.t.text insert end \"SRC=$lsd_src\n\n\"; \
 				.l.t.text insert end $a; \
 				.l.d.msg configure -text \"\"; \
-				if { ! [ string equal -nocase \"$modelDir\" \"$lsd_root\" ] } { \
-					set objs [ glob -nocomplain -directory \"$modelDir\" *.o *.a src makefile* makemessage.txt lsd* *.exe *.dll *.so *.app ]; \
+				if { ! [ string equal -nocase \"$model_dir\" \"$lsd_root\" ] } { \
+					set objs [ glob -nocomplain -directory \"$model_dir\" *.o *.a src makefile* makemessage.txt lsd* *.exe *.dll *.so *.app ]; \
 					foreach i $objs { \
 						catch { \
 							file delete -force \"$i\" \
@@ -4649,7 +4649,7 @@ int modman( int argn, const char **argv )
 		if ( s == NULL || strlen( s ) == 0 )
 			gui::reset_make_options( 2 );
 
-		cmd( "cd \"$modelDir\"" );
+		cmd( "cd \"$model_dir\"" );
 
 		cmd( "set b \"%s\"", s );
 		cmd( "set f [ open $MODEL_TXT_OPTIONS r ]" );
@@ -4738,14 +4738,14 @@ int modman( int argn, const char **argv )
 					set a [.l.t.text get 1.0 end]; \
 					set pos [ string first \"FUN_EXTRA=\" $a ]; \
 				}; \
-				set fun_extra [ tk_getOpenFile -parent .l -title \"Select Additional Source Files\" -multiple yes -initialdir \"$modelDir\" -filetypes { { {C++ header files} {.h .hpp .h++} } { {C++ source files} {.c .cpp .c++} } { {All files} {*} } } ]; \
+				set fun_extra [ tk_getOpenFile -parent .l -title \"Select Additional Source Files\" -multiple yes -initialdir \"$model_dir\" -filetypes { { {C++ header files} {.h .hpp .h++} } { {C++ source files} {.c .cpp .c++} } { {All files} {*} } } ]; \
 				if { $fun_extra eq \"\" } { \
 					return \
 				}; \
 				set extra_files [ list ]; \
 				foreach x $fun_extra { \
-					set dirlen [ string length $modelDir ]; \
-					if { [ string equal -length $dirlen $modelDir $x ] } { \
+					set dirlen [ string length $model_dir ]; \
+					if { [ string equal -length $dirlen $model_dir $x ] } { \
 						if { [ string index $x $dirlen ] eq \"/\" || [ string index $x $dirlen ] eq \"\\\\\" } {  \
 							incr dirlen; \
 						}; \
@@ -4773,7 +4773,7 @@ int modman( int argn, const char **argv )
 				.l.t.text insert end \"$default\" \
 			}" );
 		cmd( "ttk::button .l.d.opt.cle -width $butWid -text \"Clean Obj.\" -command { \
-				set objs [ glob -nocomplain -directory \"$modelDir\" *.o *.a src break.gdb makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.dll *.so *.app *.bak *.err ]; \
+				set objs [ glob -nocomplain -directory \"$model_dir\" *.o *.a src break.gdb makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.dll *.so *.app *.bak *.err ]; \
 				foreach i $objs { \
 					catch { \
 						file delete -force \"$i\" \
@@ -4842,14 +4842,14 @@ int modman( int argn, const char **argv )
 
 		if ( ! model_loaded( true ) )
 		{
-			if ( ! gui::load_model_options( gui::get_str( "modelDir" ) ) )
+			if ( ! gui::load_model_options( gui::get_str( "model_dir" ) ) )
 				gui::update_model_options( true );	// fix the model info file
 
 			s = gui::get_fun_name( str, MAX_PATH_LENGTH );
 			if ( s != NULL && strlen( s ) > 0 )
 			{
 				cmd( "set eqname \"%s\"", s );
-				cmd( "set complete_dir [ file nativename [ file join [ pwd ] \"$modelDir\" ] ]" );
+				cmd( "set complete_dir [ file nativename [ file join [ pwd ] \"$model_dir\" ] ]" );
 			}
 		}
 
@@ -5073,10 +5073,10 @@ int modman( int argn, const char **argv )
 			goto loop;
 
 		// Create model options file if it doesn't exist
-		if ( ! gui::eval_bool( "[ file exists \"$modelDir/$MODEL_TXT_OPTIONS\" ]" ) )
+		if ( ! gui::eval_bool( "[ file exists \"$model_dir/$MODEL_TXT_OPTIONS\" ]" ) )
 			gui::reset_make_options( 2 );
 
-		s = gui::eval_str( "[ file nativename \"$modelDir/$MODEL_TXT_OPTIONS\" ]" );
+		s = gui::eval_str( "[ file nativename \"$model_dir/$MODEL_TXT_OPTIONS\" ]" );
 		if ( s == NULL || ( f = fopen( s, "r" ) ) == NULL )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
@@ -5097,7 +5097,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "set fun_extra [ split [ string trim \"%s\" ] \" \t\" ]", str + 10 );
 		cmd( "set extra_files [ list ]" );
-		cmd( "foreach x $fun_extra { if { [ string trim $x ] ne \"\" && ( [ file exists \"$x\" ] || [ file exists \"$modelDir/$x\" ] ) } { lappend extra_files \"$x\" } }" );
+		cmd( "foreach x $fun_extra { if { [ string trim $x ] ne \"\" && ( [ file exists \"$x\" ] || [ file exists \"$model_dir/$x\" ] ) } { lappend extra_files \"$x\" } }" );
 		cmd( "set brr \"\"" );
 		cmd( "set e .extra" );
 
@@ -5105,7 +5105,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "ttk::frame $e.lf " );
 		cmd( "ttk::label $e.lf.l1 -justify center -text \"Show additional\nsource files for model:\"" );
-		cmd( "ttk::label $e.lf.l2 -style hl.TLabel -text \"$modelName\"" );
+		cmd( "ttk::label $e.lf.l2 -style hl.TLabel -text \"$model_name\"" );
 		cmd( "pack $e.lf.l1 $e.lf.l2" );
 
 		cmd( "ttk::frame $e.l" );
@@ -5144,7 +5144,7 @@ int modman( int argn, const char **argv )
 		s = gui::get_str( "brr" );
 		if ( choice == 1 && s != NULL && strlen( s ) > 0 )
 		{
-			cmd( "if { ! [ file exists \"$brr\" ] && [ file exists \"$modelDir/$brr\" ] } { set brr \"$modelDir/$brr\" }" );
+			cmd( "if { ! [ file exists \"$brr\" ] && [ file exists \"$model_dir/$brr\" ] } { set brr \"$model_dir/$brr\" }" );
 			choice = 71;
 		}
 		else
@@ -5159,8 +5159,8 @@ int modman( int argn, const char **argv )
 		// check if file exists and normalize name for comparisons
 		cmd( "if { [ file exists \"$errfil\" ] } { \
 				set errfil \"[ file normalize \"$errfil\" ]\" \
-			} elseif { $errfil ne \"\" && [ file exists \"$modelDir/$errfil\" ] } { \
-				set errfil \"[ file normalize \"$modelDir/$errfil\" ]\" \
+			} elseif { $errfil ne \"\" && [ file exists \"$model_dir/$errfil\" ] } { \
+				set errfil \"[ file normalize \"$model_dir/$errfil\" ]\" \
 			} else { \
 				set errfil \"\" \
 			}" );
@@ -5179,7 +5179,7 @@ int modman( int argn, const char **argv )
 			goto loop;				// insufficient data to show error
 
 		// check if file is already loaded
-		cmd( "if { [ string equal \"$errfil\" \"[ file normalize \"$fileDir/$fileName\" ]\" ] } { \
+		cmd( "if { [ string equal \"$errfil\" \"[ file normalize \"$file_dir/$file_name\" ]\" ] } { \
 				set choice 1 \
 			} { \
 				set choice 0 \
@@ -5190,12 +5190,12 @@ int modman( int argn, const char **argv )
 			// check if main equation file is not the current file
 			s = gui::get_fun_name( str, MAX_PATH_LENGTH );
 			if ( s != NULL && strlen( s ) > 0 )
-				cmd( "if [ string equal \"$errfil\" \"[ file normalize \"$modelDir/%s\" ]\" ] { set choice 8 }", s );		// open main equation file
+				cmd( "if [ string equal \"$errfil\" \"[ file normalize \"$model_dir/%s\" ]\" ] { set choice 8 }", s );		// open main equation file
 
 			// try to open an extra file defined by the user
 			if ( choice == 0 )
 			{	// open the configuration file
-				s = gui::eval_str( "[ file nativename \"$modelDir/$MODEL_TXT_OPTIONS\" ]" );
+				s = gui::eval_str( "[ file nativename \"$model_dir/$MODEL_TXT_OPTIONS\" ]" );
 				if ( s == NULL || strlen( s ) == 0 || ( f = fopen( s, "r" ) ) == NULL )
 				{
 					cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model' and then try again.\"" );
@@ -5205,7 +5205,7 @@ int modman( int argn, const char **argv )
 					fclose( f );
 
 				// search in all source files (except main, already done)
-				cmd( "set source_files [ get_source_files $modelDir ]" );
+				cmd( "set source_files [ get_source_files $model_dir ]" );
 				cmd( "if { [ llength $source_files ] > 1 } { set fun_extra [ lreplace $source_files 0 0 ]; set choice [ llength $fun_extra ] } { set choice 0 }" );
 
 				if ( choice > 0 )
@@ -5215,8 +5215,8 @@ int modman( int argn, const char **argv )
 							if { $x ne \"\" } { \
 								if { [ file exists \"$x\" ] } { \
 									set x \"[ file normalize \"$x\" ]\" \
-								} elseif { [ file exists \"$modelDir/$x\" ] } { \
-									set x \"[ file normalize \"$modelDir/$x\" ]\" \
+								} elseif { [ file exists \"$model_dir/$x\" ] } { \
+									set x \"[ file normalize \"$model_dir/$x\" ]\" \
 								} else { \
 									set x \"\" \
 								}; \
@@ -5370,7 +5370,7 @@ void cmd( const char *cm, ... )
  *************************************************************/
 bool model_loaded( bool no_error )
 {
-	const char *s = gui::get_str( "modelName" );
+	const char *s = gui::get_str( "model_name" );
 
 	if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
 	{
@@ -5596,9 +5596,9 @@ bool discard_change( void )
 		return true;					// yes: simply discard configuration
 
 	// ask for confirmation
-	cmd( "set answer [ ttk::messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save current file?\" -detail \"Recent changes to file '$fileName' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\" ]" );
+	cmd( "set answer [ ttk::messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save current file?\" -detail \"Recent changes to file '$file_name' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\" ]" );
 	cmd( "if [ string equal $answer yes ] { \
-			set curfile [ file join \"$fileDir\" \"$fileName\" ]; \
+			set curfile [ file join \"$file_dir\" \"$file_name\" ]; \
 			set file [ open \"$curfile\" w ]; \
 			puts -nonewline $file [ .f.t.t get 0.0 end ]; \
 			close $file; \
