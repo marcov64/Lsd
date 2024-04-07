@@ -97,7 +97,8 @@ namespace gui
 
 // LMM functions
 bool discard_change( void );
-bool is_source_file( const char *fname );
+bool model_loaded( bool no_error = false );
+bool source_file( const char *fname );
 int comphit( const void *p1, const void *p2 );
 int map_color( int hiLev );
 int modman( int argn, const char **argv );
@@ -773,7 +774,7 @@ int modman( int argn, const char **argv )
 			cmd( "set fileDir [ file dirname \"$filetoload\" ]" );
 			cmd( "set before [ .f.t.t get 1.0 end ]" );
 
-			recolor_all = sourcefile = is_source_file( gui::get_str( "filetoload" ) );
+			recolor_all = sourcefile = source_file( gui::get_str( "filetoload" ) );
 		}
 		else
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" );
@@ -889,12 +890,9 @@ int modman( int argn, const char **argv )
 	{
 		choice = 0;
 		cmd( ".f.t.t delete 0.0 end" );
-		s = gui::get_str( "modelName" );
-		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
-		{
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+
+		if ( ! model_loaded( ) )
 			goto loop;
-		}
 
 		gui::make_makefile( );
 		if ( gui::eval_bool( "[ file exists \"$modelDir/makefile\" ]" ) )
@@ -920,7 +918,7 @@ int modman( int argn, const char **argv )
 	{
 		cmd( "set curfilename [ tk_getSaveFile -parent . -title \"Save File\" -initialfile $fileName -initialdir $fileDir ]" );
 		s = gui::get_str( "curfilename" );
-		if ( s != NULL && strcmp( s, "" ) )
+		if ( s != NULL && strlen( s ) > 0 )
 		{
 			cmd( "if [ file exist \"$fileDir/$fileName\" ] { file copy -force \"$fileDir/$fileName\" \"$fileDir/[file rootname \"$fileName\"].bak\" }" );
 			cmd( "set file [ open \"$curfilename\" w ]" );
@@ -938,10 +936,8 @@ int modman( int argn, const char **argv )
 	/* load the description file */
 	if ( choice == 5 || choice == 50 )
 	{
-		s = gui::get_str( "modelName" );
-		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
+		if ( ! model_loaded( ) )
 		{
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 			choice = 0;
 			goto loop;
 		}
@@ -992,35 +988,26 @@ int modman( int argn, const char **argv )
 	/* show compilation result */
 	if ( choice == 7 )
 	{
-		s = gui::get_str( "modelName" );
-		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
-		{
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
-			choice = 0;
-			goto loop;
-		}
-
-		gui::show_comp_result( );
 		choice = 0;
+
+		if ( model_loaded( ) )
+			gui::show_comp_result( );
+
 		goto loop;
 	}
 
 	/* insert in the text window the main equation file */
 	if ( choice == 8 )
 	{
-		s = gui::get_str( "modelName" );
-		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
-		{
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
-			choice = 0;
+		choice = 0;
+
+		if ( ! model_loaded( ) )
 			goto loop;
-		}
 
 		s = gui::get_fun_name( str, MAX_PATH_LENGTH );
-		if ( s == NULL || ! strcmp( s, "" ) )
+		if ( s == NULL || strlen( s ) == 0 )
 		{
 			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid equation file name\" -detail \"Check the 'FUN' field in menu 'Model', 'Model Options' for a valid equation file name.\"" );
-			choice = 0;
 			goto loop;
 		}
 
@@ -1401,10 +1388,8 @@ int modman( int argn, const char **argv )
 	// run the model in the gdb debugger
 	if ( choice == 13 || choice == 58 )
 	{
-		s = gui::get_str( "modelName" );
-		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
+		if ( ! model_loaded( ) )
 		{
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 			choice = 0;
 			goto loop;
 		}
@@ -1732,7 +1717,7 @@ int modman( int argn, const char **argv )
 
 			// check for invalid directories (LSD managed)
 			for ( found = false, j = 0; j < LSD_DIR_NUM; ++j )
-				if ( ! strcmp( str, lsd_dir[ j ] ) )
+				if ( strcmp( str, lsd_dir[ j ] ) == 0 )
 					found = true;
 
 			if ( ! found )
@@ -1850,7 +1835,7 @@ int modman( int argn, const char **argv )
 		cmd( "upd_cursor" );
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
 
-		recolor_all = sourcefile = is_source_file( gui::get_str( "fileName" ) );
+		recolor_all = sourcefile = source_file( gui::get_str( "fileName" ) );
 
 		if ( sourcefile )
 		{
@@ -4371,7 +4356,7 @@ int modman( int argn, const char **argv )
 
 			// check for invalid directories (LSD managed)
 			for ( found = false, j = 0; j < LSD_DIR_NUM; ++j )
-				if ( ! strcmp( str, lsd_dir[ j ] ) )
+				if ( strcmp( str, lsd_dir[ j ] ) == 0 )
 					found = true;
 
 			if ( ! found )
@@ -4459,13 +4444,10 @@ int modman( int argn, const char **argv )
 	// show and edit model info
 	if ( choice == 44 )
 	{
-		s = gui::get_str( "modelName" );
-		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
-		{
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
-			choice = 0;
+		choice = 0;
+
+		if ( ! model_loaded( ) )
 			goto loop;
-		}
 
 		if ( ! gui::load_model_options( gui::get_str( "modelDir" ) ) )
 			gui::update_model_options( true );			// fix the model info file
@@ -4477,7 +4459,7 @@ int modman( int argn, const char **argv )
 		cmd( "set complete_dir [ file nativename [ file join [ pwd ] \"$modelDir\" ] ]" );
 
 		s = gui::get_fun_name( str, MAX_PATH_LENGTH );
-		if ( s == NULL || ! strcmp( s, "" ) )
+		if ( s == NULL || strlen( s ) == 0 )
 		{
 			cmd( "set eqname \"\"" );
 			cmd( "set edate \"\"" );
@@ -4524,7 +4506,6 @@ int modman( int argn, const char **argv )
 		cmd( "showtop .a" );
 		cmd( "mousewarpto .a.b.ok" );
 
-		choice = 0;
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
@@ -4563,8 +4544,7 @@ int modman( int argn, const char **argv )
 	// create the makefile
 	if ( choice == 46 || choice == 49 )
 	{
-		s = gui::get_str( "modelName" );
-		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
+		if ( ! model_loaded( ) )
 			choice = 0;
 		else
 		{
@@ -4576,6 +4556,7 @@ int modman( int argn, const char **argv )
 			if ( choice == 49 )	//after this show the description file (and a model is created)
 				choice = 50;
 		}
+
 		goto loop;
 	}
 
@@ -4659,16 +4640,13 @@ int modman( int argn, const char **argv )
 	// model options
 	if ( choice == 48 )
 	{
-		s = gui::get_str( "modelName" );
-		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
-		{
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
-			choice = 0;
+		choice = 0;
+
+		if ( ! model_loaded( ) )
 			goto loop;
-		}
 
 		s = gui::get_fun_name( str, MAX_PATH_LENGTH );
-		if ( s == NULL || ! strcmp( s, "" ) )
+		if ( s == NULL || strlen( s ) == 0 )
 			gui::reset_make_options( 2 );
 
 		cmd( "cd \"$modelDir\"" );
@@ -4834,7 +4812,6 @@ int modman( int argn, const char **argv )
 		cmd( ".l.t.text insert end $a" );
 		cmd( "focus .l.t.text" );
 
-		choice = 0;
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
@@ -4863,14 +4840,13 @@ int modman( int argn, const char **argv )
 		cmd( "set eqname \"\"" );
 		cmd( "set complete_dir \"\"" );
 
-		s = gui::get_str( "modelName" );
-		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
+		if ( ! model_loaded( true ) )
 		{
 			if ( ! gui::load_model_options( gui::get_str( "modelDir" ) ) )
 				gui::update_model_options( true );	// fix the model info file
 
 			s = gui::get_fun_name( str, MAX_PATH_LENGTH );
-			if ( s != NULL && strcmp( s, "" ) )
+			if ( s != NULL && strlen( s ) > 0 )
 			{
 				cmd( "set eqname \"%s\"", s );
 				cmd( "set complete_dir [ file nativename [ file join [ pwd ] \"$modelDir\" ] ]" );
@@ -5092,12 +5068,9 @@ int modman( int argn, const char **argv )
 	if ( choice == 70 )
 	{
 		choice = 0;
-		s = gui::get_str( "modelName" );
-		if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
-		{
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+
+		if ( ! model_loaded( ) )
 			goto loop;
-		}
 
 		// Create model options file if it doesn't exist
 		if ( ! gui::eval_bool( "[ file exists \"$modelDir/$MODEL_TXT_OPTIONS\" ]" ) )
@@ -5393,9 +5366,28 @@ void cmd( const char *cm, ... )
 
 
 /*************************************************************
- IS_SOURCE_FILE
+ MODEL_LOADED
  *************************************************************/
-bool is_source_file( const char *fname )
+bool model_loaded( bool no_error )
+{
+	const char *s = gui::get_str( "modelName" );
+
+	if ( s == NULL || strlen( s ) == 0 || strcmp( s, "(no model)" ) == 0 )
+	{
+		if ( ! no_error )
+			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+
+		return false;
+	}
+	else
+		return true;
+}
+
+
+/*************************************************************
+ SOURCE_FILE
+ *************************************************************/
+bool source_file( const char *fname )
 {
 	cmd( "set ext \"[ file extension \"%s\" ]\"", fname );
 	const char *ext = gui::get_str( "ext" );
@@ -5513,7 +5505,7 @@ void color( int hiLev, long iniLin, long finLin )
 	{
 		// locate all occurrences of each color group
 		cmd( "set ccount \"\"" );
-		if ( ! strcmp( cTypes[ i ], "comment1" ) )	// multi line search element?
+		if ( strcmp( cTypes[ i ], "comment1" ) == 0 )// multi line search element?
 			cmd( "set pos [ .f.t.t search -regexp -all -nolinestop -count ccount -- {%s} %ld.0 %s ]", cRegex[ i ], iniLin == 0 ? 1 : iniLin, finStr );
 		else
 			cmd( "set pos [ .f.t.t search -regexp -all -count ccount -- {%s} %ld.0 %s ]", cRegex[ i ], iniLin == 0 ? 1 : iniLin, finStr );
