@@ -847,7 +847,7 @@ int modman( int argn, const char **argv )
 	cmd( "upd_bars" );
 
 	// verify if saving before command is necessary
-	if ( choice == 1 || choice == 2 || choice == 3 || choice == 5 || choice == 6 || choice == 8 || choice == 13 || choice == 14 || choice == 15 || choice == 33 || choice == 39 || choice == 41 || choice == 58 || choice == 71 )
+	if ( choice == 1 || choice == 2 || choice == 3 || choice == 5 || choice == 6 || choice == 8 || choice == 13 || choice == 14 || choice == 15 || choice == 19 || choice == 33 || choice == 39 || choice == 41 || choice == 58 || choice == 71 )
 		if ( ! discard_change( ) )
 			goto loop;
 
@@ -858,9 +858,14 @@ int modman( int argn, const char **argv )
 	// start evaluating the executed command
 
 	// exit LMM
-	if ( choice == 1 )
+	// exit LMM but launch a new instance before exiting
+	if ( choice == 1 || choice == 19 )
 	{
 		gui::update_lsd_options( false );		// update except settings
+
+		if ( choice == 19 )
+			cmd( "catch { exec -- %s/%s & }", lsd::exec_path, lsd::exec_file );
+
 		return 0;
 	}
 
@@ -5037,13 +5042,43 @@ int modman( int argn, const char **argv )
 
 		if ( choice == 1 )
 		{
-			cmd( "if { ! ( \"$temp_var3\" in [ font families ] ) } { set temp_var3 $font_type; bell }" );
-			cmd( "if { ! [ string is integer -strict $temp_var6 ] || $temp_var6 < 4 || $temp_var6 > 60 } { set temp_var6 $dim_character; bell }" );
-			cmd( "if { ! [ string is integer -strict $temp_var7 ] || $temp_var7 < 1 || $temp_var7 > 99 } { set temp_var7 $tab_size; bell }" );
-			cmd( "if { ! ( \"$temp_var16\" in $themeNames ) } { set temp_var16 \"$lsd_theme\"; bell } { set temp_var16 [ dict get $nameToTheme $temp_var16 ] }" );
+			choice = 0;
+
+			cmd( "if { ! ( \"$temp_var3\" in [ font families ] ) } { \
+					set temp_var3 $font_type; \
+					bell \
+				}" );
+
+			cmd( "if { ! [ string is integer -strict $temp_var6 ] || $temp_var6 < 4 || $temp_var6 > 60 } { \
+					set temp_var6 $dim_character; \
+					bell \
+				}" );
+
+			cmd( "if { ! [ string is integer -strict $temp_var7 ] || $temp_var7 < 1 || $temp_var7 > 99 } { \
+					set temp_var7 $tab_size; \
+					bell \
+				}" );
+
+			cmd( "set temp_work [ file normalize $temp_var12 ]" );
+			cmd( "catch { file mkdir $temp_work }" );
+			cmd( "if { ! [ file exists $temp_work ] || ! [ file isdirectory $temp_work ] } { \
+					ttk::messageBox -parent . -icon error -title Error -type ok -message \"Invalid new models subdirectory\" -detail \"The path\n[ file nativename $temp_work ]\nis invalid.\n\nPlease chose a valid directory to store new LSD models.\"; \
+					set temp_var12 $default_var12 \
+				} elseif { ! [ file exists \"$temp_work/%s\" ] } { \
+					set_group_setting $temp_work name [ file tail $temp_work ]; \
+					set_group_setting $temp_work description \"Group for new models.\"; \
+					set choice 1 \
+				}", GROUP_XML_CONFIG );
+
+			cmd( "if { ! ( \"$temp_var16\" in $themeNames ) } { \
+					set temp_var16 \"$lsd_theme\"; \
+					bell \
+				} { \
+					set temp_var16 [ dict get $nameToTheme $temp_var16 ] \
+				}" );
 
 			cmd( "if { $file_cmds != $temp_var11 || $lsd_theme != $temp_var16 } { \
-					ttk::messageBox -parent . -icon warning -title Warning -type ok -message \"LMM restart required\" -detail \"Please restart LMM for changes to be applied.\" \
+					set choice 2 \
 				}" );
 
 			for ( i = 1; i <= LMM_OPTIONS_NUM; ++i )
@@ -5057,6 +5092,17 @@ int modman( int argn, const char **argv )
 			cmd( "settab .f.t.t $tab_size fixed.TText" );	// adjust tabs size to font type/size
 			cmd( "setwrap .f.t.t $wrap" );			// adjust text wrap
 			recolor_all = true;
+
+			if ( choice != 0 )
+			{
+				cmd( "set res [ ttk::messageBox -parent . -icon warning -title Warning -type yesno -default yes -message \"LMM restart required\" -detail \"You must restart LMM for changes to be applied.\n\nPress 'Yes' to restart now, or 'No' to restart later.\" ]" );
+
+				if ( gui::get_bool( "res" ) )
+				{
+					choice = 19;
+					goto loop;
+				}
+			}
 		}
 
 		choice = 0;

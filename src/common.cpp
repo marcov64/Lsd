@@ -2469,7 +2469,7 @@ bool gui::compile_run( int run_mode, bool nw )
 
 	if ( res == 0 )							// compilation failure?
 	{
-		cmd( "set res $auto_hide" );			// get auto hide status
+		cmd( "set res $auto_hide" );		// get auto hide status
 		if ( run_mode != 0 && res )			// auto unhide LMM if necessary
 			cmd( "focustop .f.t.t" );		// only reopen if error
 		show_comp_result( nw );				// show errors
