@@ -3331,7 +3331,7 @@ lsd::object *gui::operate( lsd::object *r )
 				fprintf( f, "%s", sim.conf_eq_txt );
 				fclose( f );
 
-				read_eqfile_name( lab, MAX_PATH_LENGTH );
+				get_eqfile_name( lab, MAX_PATH_LENGTH );
 				cmd( "open_diff %s %s %s %s.lsd", lab, lab_old, eq_file, sim.conf_name  );
 			}
 			else

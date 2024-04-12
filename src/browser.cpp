@@ -112,6 +112,19 @@ int gui::load_gui( const char **argv )
 	if ( j > 0 && j < sim.max_threads )
 		sim.max_threads = j;
 
+	// create Tcl commands that call a C++ function
+	Tcl_CreateCommand( interp, "abort_run_threads", Tcl_abort_run_threads, NULL, NULL );
+	Tcl_CreateCommand( interp, "discard_change", Tcl_discard_change, NULL, NULL );
+	Tcl_CreateCommand( interp, "get_obj_conf", Tcl_get_obj_conf, NULL, NULL );
+	Tcl_CreateCommand( interp, "get_var_conf", Tcl_get_var_conf, NULL, NULL );
+	Tcl_CreateCommand( interp, "get_var_descr", Tcl_get_var_descr, NULL, NULL );
+	Tcl_CreateCommand( interp, "log_tcl_error", Tcl_log_tcl_error, NULL, NULL );
+	Tcl_CreateCommand( interp, "set_c_var", Tcl_set_c_var, NULL, NULL );
+	Tcl_CreateCommand( interp, "set_obj_conf", Tcl_set_obj_conf, NULL, NULL );
+	Tcl_CreateCommand( interp, "set_ttip_descr", Tcl_set_ttip_descr, NULL, NULL );
+	Tcl_CreateCommand( interp, "set_var_conf", Tcl_set_var_conf, NULL, NULL );
+	Tcl_CreateObjCommand( interp, "upload_series", Tcl_upload_series, NULL, NULL );
+
 	// global links between C and tcl variables
 	Tcl_LinkVar( interp, "choice", ( char * ) & choice, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "choice_g", ( char * ) & choice_g, TCL_LINK_INT );
@@ -124,14 +137,8 @@ int gui::load_gui( const char **argv )
 
 	// load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 	choice = 0;
-
-	// load native Tk procedures for graphical user interface management
 	cmd( "if [ file exists \"$lsd_root/$lsd_src/gui.tcl\" ] { if [ catch { source \"$lsd_root/$lsd_src/gui.tcl\" } err0x01 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0100, 0x01 );
-
-	// load native Tcl procedures for general utilities
 	cmd( "if [ file exists \"$lsd_root/$lsd_src/file.tcl\" ] { if [ catch { source \"$lsd_root/$lsd_src/file.tcl\" } err0x02 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0200, 0x02 );
-
-	// load additional native Tcl procedures for external files handling
 	cmd( "if [ file exists \"$lsd_root/$lsd_src/util.tcl\" ] { if [ catch { source \"$lsd_root/$lsd_src/util.tcl\" } err0x04 ] { set choice [ expr { $choice + %d } ] } } { set choice [ expr { $choice + %d } ] }", 0x0400, 0x04 );
 
 	if ( choice != 0 )
@@ -145,44 +152,17 @@ int gui::load_gui( const char **argv )
 	if ( ( j = set_platform( ) ) != 0 )
 		return j;
 
-	// create a Tcl command that calls the C discard_change function before killing LSD
-	Tcl_CreateCommand( interp, "discard_change", Tcl_discard_change, NULL, NULL );
-
-	// Tcl command to check before exiting with running background threads
-	Tcl_CreateCommand( interp, "abort_run_threads", Tcl_abort_run_threads, NULL, NULL );
-
-	// create Tcl commands that get and set LSD object/variable properties
-	Tcl_CreateCommand( interp, "get_obj_conf", Tcl_get_obj_conf, NULL, NULL );
-	Tcl_CreateCommand( interp, "set_obj_conf", Tcl_set_obj_conf, NULL, NULL );
-	Tcl_CreateCommand( interp, "get_var_conf", Tcl_get_var_conf, NULL, NULL );
-	Tcl_CreateCommand( interp, "set_var_conf", Tcl_set_var_conf, NULL, NULL );
-
-	// create a Tcl command to set a c variable when not in a Tcl idle loop
-	Tcl_CreateCommand( interp, "set_c_var", Tcl_set_c_var, NULL, NULL );
-
-	// create a Tcl command to get LSD variable description from equation file(s)
-	Tcl_CreateCommand( interp, "get_var_descr", Tcl_get_var_descr, NULL, NULL );
-
-	// create a Tcl command to set tooltip from LSD variable description
-	Tcl_CreateCommand( interp, "set_ttip_descr", Tcl_set_ttip_descr, NULL, NULL );
-
-	// create Tcl command to upload series data
-	Tcl_CreateObjCommand( interp, "upload_series", Tcl_upload_series, NULL, NULL );
-
-	// Tcl command to save message to LSD log
-	Tcl_CreateCommand( interp, "log_tcl_error", Tcl_log_tcl_error, NULL, NULL );
-
 	// Tcl global variables
 	cmd( "set small_character [ expr { $dim_character - $deltaSize } ]" );
 	cmd( "set gpterm \"\"" );
 
-	// load/check model equation file
-	read_eqfile_name( eq_file, MAX_PATH_LENGTH );
-	eq_txt = load_eqfile( );
-
 	// load/check model information file and fix if required
 	if ( ! load_model_options( lsd::model_path ) )
-		update_model_options( true );
+		return 9;
+
+	// load/check model equation file
+	get_eqfile_name( eq_file, MAX_PATH_LENGTH );
+	eq_txt = load_eqfile( );
 
 	// check model configuration file
 	if ( eval_bool( "[ info exists last_conf ] && [ file exists $last_conf ] && [ file isfile $last_conf ]" ) )

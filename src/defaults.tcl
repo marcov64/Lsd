@@ -473,6 +473,7 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultHtmlBrowser $browserMac
 	set DefaultFont $fontMac
 	set DefaultFontSize $fontSizeMac
+	set DefaultTheme $themeMac
 	set gnuplotExe $gnuplotMac
 	set deltaSize $deltaSizeMac
 	set hsizeLmin $hsizeLminMac
@@ -505,6 +506,7 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultHtmlBrowser $browserLinux
 	set DefaultFont $fontLinux
 	set DefaultFontSize $fontSizeLinux
+	set DefaultTheme $themeLinux
 	set gnuplotExe $gnuplotLinux
 	set deltaSize $deltaSizeLinux
 	set hsizeLmin $hsizeLminLinux
@@ -537,6 +539,7 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultHtmlBrowser $browserWindows
 	set DefaultFont $fontWindows
 	set DefaultFontSize $fontSizeWindows
+	set DefaultTheme $themeWindows
 	set gnuplotExe $gnuplotWindows
 	set deltaSize $deltaSizeWindows
 	set hsizeLmin $hsizeLminWindows

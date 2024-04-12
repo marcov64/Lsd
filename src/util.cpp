@@ -590,7 +590,6 @@ FILE *gui::search_all_sources( char *str )
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", lsd::model_path );
-	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", eq_file, eq_file );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = get_int( "res" );
 

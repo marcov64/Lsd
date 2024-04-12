@@ -336,7 +336,7 @@ bool gui::save_xml_configuration_gui( int findex, const char *dest_path, bool qu
 {
 	bool saved;
 
-	saved = sim.save_xml_configuration( findex, dest_path, quick, get_str( model_info[ 0 ] ), get_str( model_info[ 1 ] ), get_str( model_info[ 2 ] ), eq_file, eq_txt );
+	saved = sim.save_xml_configuration( findex, dest_path, quick, get_str( model_options[ 0 ] ), get_str( model_options[ 1 ] ), get_str( model_options[ 2 ] ), eq_file, eq_txt );
 
 	if ( saved )
 		cmd( "set last_conf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", lsd::model_path, sim.conf_file );
@@ -696,7 +696,7 @@ char *gui::load_eqfile( void )
 	long sz;
 	FILE *f;
 
-	read_eqfile_name( s, MAX_PATH_LENGTH );
+	get_eqfile_name( s, MAX_PATH_LENGTH );
 	if ( ( f = fopen( s, "r" ) ) == NULL )
 	{
 		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Equation file not found\" -detail \"File '%s' missing, cannot upload the equation file.\nYou may have to restore your equation file using the copy in the configuration file (menu File > Restore Equation File).\"", s );
@@ -726,40 +726,6 @@ char *gui::load_eqfile( void )
 	delete [ ] buf2;
 
 	return eq;
-}
-
-
-/*************************************************************
- READ_EQFILE_NAME
- Get the file name of the current equation file
- *************************************************************/
-void gui::read_eqfile_name( char *s, int sz )
-{
-	char lab[ MAX_PATH_LENGTH ];
-	FILE *f;
-
-	snprintf( lab, MAX_PATH_LENGTH, "%s/%s", lsd::model_path, MODEL_TXT_OPTIONS );
-	f = fopen( lab, "r" );
-
-	if ( f == NULL )
-	{
-		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"File not found\" -detail \"File '$MODEL_TXT_OPTIONS' at '%s' missing, cannot upload the equation file.\nYou may have to recreate your model configuration.\"", lsd::model_path );
-		return;
-	}
-
-	fscanf( f, "%999s", lab );
-	for ( int i = 0; strncmp( lab, "FUN=", 4 ) && fscanf( f, "%999s", lab ) != EOF && i < MAX_FILE_TRY; ++i );
-	fclose( f );
-	if ( strncmp( lab, "FUN=", 4 ) != 0 )
-	{
-		cmd( "ttk::messageBox -parent . -type ok -title -title Error -icon error -message \"File corrupted\" -detail \"File '$MODEL_TXT_OPTIONS' at '%s' has invalid contents, cannot upload the equation file.\nYou may have to recreate your model configuration.\"", lsd::model_path );
-		return;
-	}
-
-	lsd::strcpyn( s, lab + 4, sz );
-	lsd::strcatn( s, ".cpp", sz );
-
-	return;
 }
 
 

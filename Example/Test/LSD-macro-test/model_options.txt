@@ -1,7 +1,7 @@
 # LSD options
 TARGET=LSD
 FUN=fun_test
-PRECOMPILED=true
+PRECOMPILED=false
 
 # Additional model files
 FUN_EXTRA=

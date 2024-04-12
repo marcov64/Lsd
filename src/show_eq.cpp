@@ -93,7 +93,6 @@ void gui::show_eq( const char *lab, const char *parWnd )
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", lsd::model_path );
-	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", eq_file, eq_file );
 	cmd( "set i [ llength $source_files ]" );
 	i = get_int( "i" );
 
@@ -396,7 +395,6 @@ void gui::scan_used_lab( const char *lab, const char *parWnd )
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", lsd::model_path );
-	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", eq_file, eq_file );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = get_int( "res" );
 

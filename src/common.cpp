@@ -123,13 +123,13 @@ int gui::init_lsd_env( const char **argv )
 
 	// set system defaults in tcl
 	cmd( "set LMM_TXT_OPTIONS \"%s\"", LMM_TXT_OPTIONS );
-	cmd( "set LSD_XML_OPTIONS \"%s\"", LSD_XML_OPTIONS );
+	cmd( "set LSD_XML_CONFIG \"%s\"", LSD_XML_CONFIG );
 	cmd( "set SYSTEM_TXT_OPTIONS \"%s\"", SYSTEM_TXT_OPTIONS );
 	cmd( "set MODEL_TXT_OPTIONS \"%s\"", MODEL_TXT_OPTIONS );
-	cmd( "set MODEL_XML_OPTIONS \"%s\"", MODEL_XML_OPTIONS );
+	cmd( "set MODEL_XML_CONFIG \"%s\"", MODEL_XML_CONFIG );
 	cmd( "set MODEL_TXT_INFO \"%s\"", MODEL_TXT_INFO );
 	cmd( "set GROUP_TXT_INFO \"%s\"", GROUP_TXT_INFO );
-	cmd( "set GROUP_XML_INFO \"%s\"", GROUP_XML_INFO );
+	cmd( "set GROUP_XML_CONFIG \"%s\"", GROUP_XML_CONFIG );
 	cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
 	cmd( "set DATE_FMT \"%s\"", DATE_FMT );
 
@@ -187,7 +187,7 @@ int gui::init_lsd_env( const char **argv )
 
 #ifndef _LMM_
 	// only use the exec path if not already in a model directory
-	cmd( "if { [ file exists $MODEL_TXT_OPTIONS ] || [ file exists $MODEL_XML_OPTIONS ] } { \
+	cmd( "if { [ file exists $MODEL_TXT_OPTIONS ] || [ file exists $MODEL_XML_CONFIG ] } { \
 			set model_dir [ pwd ] \
 		} { \
 			set model_dir $path; \
@@ -515,14 +515,22 @@ void gui::reset_make_options( int which )
 	const char *s;
 
 	// model makefile options
-	if ( which != 1 && ! eval_bool( "[ file exists \"$model_dir/$MODEL_TXT_OPTIONS\" ]" ) && eval_bool( "$model_dir ne \"\"" ) && eval_bool( "$model_dir ne $lsd_root" ) )
+	if ( which != 1 && eval_bool( "$model_dir ne \"\"" ) && eval_bool( "$model_dir ne $lsd_root" ) )
 	{
-		cmd( "set dir [ glob -nocomplain \"$model_dir/fun_*.cpp\" ]" );
-		cmd( "if { $dir ne \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
-		cmd( "set a \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\nPRECOMPILED=true\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
-		cmd( "set f [ open \"$model_dir/$MODEL_TXT_OPTIONS\" w ]" );
-		cmd( "puts $f $a" );
-		cmd( "close $f" );
+		cmd( "set a [ glob -nocomplain \"$model_dir/fun_*.cpp\" ]" );
+		cmd( "if { $a ne \"\" } { \
+				set b [ file tail [ lindex $a 0 ] ] \
+			} { \
+				set b \"fun_UNKNOWN.cpp\" \
+			}" );
+		cmd( "set model_make \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\nPRECOMPILED=true\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
+
+		if ( ( s = get_str( "model_make" ) ) != NULL )
+		{
+			delete [ ] model_make;
+			model_make = new char [ strlen( s ) + 1 ];
+			strcpy( model_make, s );
+		}
 	}
 
 	// system makefile options
@@ -537,17 +545,17 @@ void gui::reset_make_options( int which )
             }" );
 
 		cmd( "set f [ open \"$lsd_root/$lsd_src/$sysfile\" r ]" );
-		cmd( "set systemOptions \"# LSD options\n\"" );
-		cmd( "append systemOptions \"LSDROOT=$lsd_root\n\"" );
-		cmd( "append systemOptions \"SRC=$lsd_src\n\n\"" );
-		cmd( "append systemOptions [ string trim [ read $f ] ]" );
+		cmd( "set system_make \"# LSD options\n\"" );
+		cmd( "append system_make \"LSDROOT=$lsd_root\n\"" );
+		cmd( "append system_make \"SRC=$lsd_src\n\n\"" );
+		cmd( "append system_make [ string trim [ read $f ] ]" );
 		cmd( "close $f" );
 
-		if ( ( s = get_str( "systemOptions" ) ) != NULL )
+		if ( ( s = get_str( "system_make" ) ) != NULL )
 		{
-			delete [ ] sys_options;
-			sys_options = new char [ strlen( s ) + 1 ];
-			strcpy( sys_options, s );
+			delete [ ] system_make;
+			system_make = new char [ strlen( s ) + 1 ];
+			strcpy( system_make, s );
 		}
 	}
 }
@@ -556,16 +564,26 @@ void gui::reset_make_options( int which )
 /*************************************************************
  LOAD_LSD_OPTIONS
  *************************************************************/
+#define PUGI_LOAD_OPTIONS pugi::parse_default | \
+						  pugi::parse_declaration | \
+						  pugi::parse_doctype | \
+						  pugi::parse_trim_pcdata
+
 void gui::load_lsd_options( void )
 {
 	char fName[ MAX_PATH_LENGTH ];
-	const char *s, *path = cfg_path;		// default path
-	int res;
+	const char *s, *path = cfg_path;				// default path
+	int i;
 	x_docT sysCfg;
 
-	cmd( "if [ file exists \"$cfgDir/$LSD_XML_OPTIONS\" ] { \
+	// ensure defaults are loaded
+	cmd( "if { ! [ info exists CurPlatform ] } { \
+			source \"$lsd_root/$lsd_src/defaults.tcl\" \
+		}" );
+
+	cmd( "if [ file exists \"$cfgDir/$LSD_XML_CONFIG\" ] { \
 			set res 1 \
-		} elseif [ file exists \"$lsd_root/$LSD_XML_OPTIONS\" ] { \
+		} elseif [ file exists \"$lsd_root/$LSD_XML_CONFIG\" ] { \
 			set res 2 \
 		} elseif [ file exists \"$cfgDir/$LMM_TXT_OPTIONS\" ] { \
 			set f [ open \"$cfgDir/$LMM_TXT_OPTIONS\" r ]; \
@@ -577,28 +595,28 @@ void gui::load_lsd_options( void )
 			set res 0 \
 		}" );
 
-	if ( ( res = get_int( "res" ) ) == 2 )
+	if ( ( i = get_int( "res" ) ) == 2 )
 		path = lsd::root_lsd;						// xml format in LSD root
 
 	// load legacy configuration (one-time migration)
-	if ( res == 3 )
+	if ( i == 3 )
 	{
-		for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )		// read parameters
+		for ( i = 0; i < LMM_OPTIONS_NUM; ++i )		// read all parameters
 		{
 			cmd( "gets $f %s", lmm_options[ i ] );
-			cmd( "if { $%s == \"\" } { set res 0 }", lmm_options[ i ] );
+			cmd( "if { $%s eq \"#\" } { set %s \"\" }", lmm_options[ i ], lmm_options[ i ] );
 		}
 
 		cmd( "close $f" );
 	}
 
-	snprintf( fName, MAX_PATH_LENGTH, "%s%s%s", path, strlen( path ) > 0 ? "/" : "", LSD_XML_OPTIONS );
+	snprintf( fName, MAX_PATH_LENGTH, "%s%s%s", path, strlen( path ) > 0 ? "/" : "", LSD_XML_CONFIG );
 
 	// try to load XML file
-	if ( sysCfg.load_file( fName ).status != pugi::status_ok )
+	if ( sysCfg.load_file( fName, PUGI_LOAD_OPTIONS ).status != pugi::status_ok )
 	{
-		update_lsd_options( );		// rebuild configuration file
-		sysCfg.load_file( fName );	// reload
+		update_lsd_options( );						// rebuild configuration file
+		sysCfg.load_file( fName, PUGI_LOAD_OPTIONS );
 	}
 
 	// load XML file structure
@@ -607,29 +625,33 @@ void gui::load_lsd_options( void )
 	x_nodeT lmmNode = sysNode.child( "LMM" );		// LMM configuration
 	x_nodeT setNode = lmmNode.child( "settings" );	// LMM settings
 	x_nodeT geoNode = lmmNode.child( "geometry" );	// LMM current geometry
-	x_nodeT modNode = lmmNode.child( "model" );		// LMM current model
-	x_nodeT makNode = sysNode.child( "makefile" );	// LMM configuration
 
 	// load LMM settings
-	for ( int i = 0; i < LMM_OPTIONS_NUM; ++i )
+	for ( i = 0; i < LMM_OPTIONS_NUM; ++i )
 	{
+		cmd( "set s \"%s\"", lmm_defaults[ i ] );
+		s = get_str( "s" );
+		if ( strcmp( s, "#" ) == 0 )
+			s = "";									// handle empty items
+
 		switch ( lmm_types[ i ] )
 		{
 			case 'a':								// attribute
-				cmd( "set %s \"%s\"", lmm_options[ i ], setNode.attribute( lmm_options[ i ] ).as_string( lmm_defaults[ i ] ) );
+				cmd( "set %s \"%s\"", lmm_options[ i ], setNode.attribute( lmm_options[ i ] ).as_string( s ) );
 				break;
 
 			case 'p':								// PCDATA text node
-				cmd( "set %s \"%s\"", lmm_options[ i ], setNode.child( lmm_options[ i ] ).text( ).as_string( lmm_defaults[ i ] ) );
+				cmd( "set %s \"%s\"", lmm_options[ i ], setNode.child( lmm_options[ i ] ).text( ).as_string( s ) );
 				break;
 
 			case 'g':								// geometry
-				cmd( "set %s \"%s\"", lmm_options[ i ], geoNode.text( ).as_string( lmm_defaults[ i ] ) );
+				cmd( "set %s \"%s\"", lmm_options[ i ], geoNode.text( ).as_string( s ) );
 				break;
 		}
 	}
 
 	// load system makefile options
+	x_nodeT makNode = sysNode.child( "makefile" );	// makefile configuration
 	s = makNode.text( ).as_string( );
 	if ( strlen( s ) == 0 )
 	{
@@ -648,35 +670,39 @@ void gui::load_lsd_options( void )
 		if ( strlen( get_str( "sysfile" ) ) > 0 )
 		{
 			cmd( "set f [ open $sysfile r ]" );
-			cmd( "set systemOptions [ string trim [ read $f ] ]" );
+			cmd( "set system_make [ string trim [ read $f ] ]" );
 			cmd( "close $f" );
-			if ( ( s = get_str( "systemOptions" ) ) != NULL )
+			if ( ( s = get_str( "system_make" ) ) != NULL )
 			{
-				delete [ ] sys_options;
-				sys_options = new char [ strlen( s ) + 1 ];
-				strcpy( sys_options, s );
+				delete [ ] system_make;
+				system_make = new char [ strlen( s ) + 1 ];
+				strcpy( system_make, s );
 			}
 		}
+
+		update_lsd_options( );						// update configuration file
 	}
 	else
 	{
-		delete [ ] sys_options;
-		sys_options = new char [ strlen( s ) + 1 ];
-		strcpy( sys_options, s );
-		cmd( "set systemOptions {%s}", sys_options );
+		delete [ ] system_make;
+		system_make = lsd::strdecdata( NULL, s );
+		cmd( "set system_make {%s}", system_make );
 	}
 
+#ifdef _LMM_
 	// load previous model
+	x_nodeT modNode = lmmNode.child( "model" );		// LMM current model
 	cmd( "set m {%s}", modNode.child( "path" ).text( ).as_string( ) );
-	if ( eval_bool( "[ file exists \"$m/$MODEL_TXT_INFO\" ]" ) )
+	if ( eval_bool( "[ file exists \"$m/$MODEL_XML_CONFIG\" ]" ) )
 	{
 		cmd( "set g [ file normalize \"$m/..\" ]" );
-		if ( eval_bool( "[ file exists \"$g/$GROUP_TXT_INFO\" ]" ) )
+		if ( eval_bool( "[ file exists \"$g/$GROUP_TXT_INFO\" ] || [ file exists \"$g/$GROUP_XML_CONFIG\" ]" ) )
 		{
 			cmd( "set model_dir $m" );
 			cmd( "set group_dir $g" );
 		}
 	}
+#endif
 }
 
 
@@ -686,15 +712,11 @@ void gui::load_lsd_options( void )
 void gui::update_lsd_options( bool save_settings )
 {
 	bool save_attr;
-	char *s, fName[ MAX_PATH_LENGTH ];
+	char fName[ MAX_PATH_LENGTH ];
+	const char *s;
 	x_attrT attr;
 	x_docT sysCfg;
 	x_nodeT child;
-
-	// ensure defaults are loaded
-	cmd( "if { ! [ info exists CurPlatform ] } { \
-			source \"$lsd_root/$lsd_src/defaults.tcl\" \
-		}" );
 
 	// update current geometry if no saving just settings
 	if ( ! save_settings )
@@ -706,9 +728,9 @@ void gui::update_lsd_options( bool save_settings )
 			}" );
 
 	// try to load existing XML as base
-	snprintf( fName, MAX_PATH_LENGTH, "%s%s%s", cfg_path, strlen( cfg_path ) > 0 ? "/" : "", LSD_XML_OPTIONS );
+	snprintf( fName, MAX_PATH_LENGTH, "%s%s%s", cfg_path, strlen( cfg_path ) > 0 ? "/" : "", LSD_XML_CONFIG );
 
-	if ( sysCfg.load_file( fName, pugi::parse_declaration | pugi::parse_doctype ).status != pugi::status_ok )
+	if ( sysCfg.load_file( fName, PUGI_LOAD_OPTIONS ).status != pugi::status_ok )
 		sysCfg.reset( );							// recreate XML structure
 
 	// try to read configuration nodes
@@ -717,13 +739,11 @@ void gui::update_lsd_options( bool save_settings )
 	x_nodeT lmmNode = sysNode.child( "LMM" );		// LMM configuration
 	x_nodeT setNode = lmmNode.child( "settings" );	// LMM settings
 	x_nodeT geoNode = lmmNode.child( "geometry" );	// LMM current geometry
-	x_nodeT modNode = lmmNode.child( "model" );		// LMM current model
-	x_nodeT makNode = sysNode.child( "makefile" );	// LMM configuration
 
 	// recreate XML structure if wrong format XML
 	if ( strcmp( lsdNode.name( ), "LSD" ) != 0 || strcmp( sysNode.name( ), "system" ) != 0 )
 	{
-		sysCfg.reset( );			// recreate all
+		sysCfg.reset( );							// recreate all
 		x_nodeT typeNode = sysCfg.append_child( pugi::node_declaration );
 		typeNode.append_attribute( "version" ) = "1.0";
 		typeNode.append_attribute( "encoding" ) = "ANSI";
@@ -731,10 +751,10 @@ void gui::update_lsd_options( bool save_settings )
 		sysCfg.append_child( pugi::node_doctype ).set_value( "LSD [\n \
 		<!ELEMENT LSD (system)>\n \
 		<!ELEMENT system (LMM, makefile)>\n \
-		<!ELEMENT LMM (settings, geometry, model)>\n \
+		<!ELEMENT LMM (settings, geometry, model?)>\n \
 		<!ELEMENT settings (#PCDATA+)>\n \
 		<!ELEMENT geometry (#PCDATA?)>\n \
-		<!ELEMENT model (#PCDATA?)>\n \
+		<!ELEMENT model? (#PCDATA?)>\n \
 		<!ELEMENT makefile (#CDATA)>\n]" );
 		lsdNode = sysCfg.append_child( "LSD" );
 		sysNode = lsdNode.append_child( "system" );
@@ -749,7 +769,7 @@ void gui::update_lsd_options( bool save_settings )
 	if ( ( attr = sysNode.attribute( "description" ) ) == NULL )
 		attr = sysNode.append_attribute( "description" );
 
-	attr = "LSD system settings file";
+	attr = "LSD system configuration file";
 
 	// add/update LMM settings and geometry (legacy configuration content)
 	if ( lmmNode.empty( ) )
@@ -765,7 +785,11 @@ void gui::update_lsd_options( bool save_settings )
 	{
 		// set undefined parameters to defaults
 		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", lmm_options[ i ], lmm_options[ i ] );
-		cmd( "if { $%s == \"\" } { set %s \"%s\" }", lmm_options[ i ], lmm_options[ i ], lmm_defaults[ i ] );
+		cmd( "if { $%s eq \"\" && \"%s\" ne \"#\" } { set %s \"%s\" }", lmm_options[ i ], lmm_defaults[ i ], lmm_options[ i ], lmm_defaults[ i ] );
+
+		s = get_str( lmm_options[ i ] );
+		if ( strcmp( s, "#" ) == 0 )
+			s = "";									// handle empty items
 
 		save_attr = save_settings;					// save default
 
@@ -779,7 +803,7 @@ void gui::update_lsd_options( bool save_settings )
 				}
 
 				if ( save_attr )
-					attr = get_str( lmm_options[ i ] );
+					attr = s;
 
 				break;
 
@@ -791,19 +815,21 @@ void gui::update_lsd_options( bool save_settings )
 				}
 
 				if ( save_attr )
-					child.text( ).set( get_str( lmm_options[ i ] ) );
+					child.text( ) = s;
 
 				break;
 
 			case 'g':								// geometry
-				geoNode.text( ).set( get_str( lmm_options[ i ] ) );
+				geoNode.text( ) = s;
 				break;
 		}
 	}
 
+#ifdef _LMM_
 	// save current model info
 	if ( ! save_settings && exists_var( "model_name" ) && strcmp( get_str( "model_name" ), "(no model)" ) != 0 && exists_var( "model_dir" ) && eval_bool( "[ file exists $model_dir ] && [ file isdirectory $model_dir ]" ) )
 	{
+		x_nodeT modNode = lmmNode.child( "model" );	// LMM current model
 		if ( modNode.empty( ) )
 			modNode = lmmNode.append_child( "model" );
 
@@ -834,22 +860,23 @@ void gui::update_lsd_options( bool save_settings )
 		if ( ( child = modNode.child( "path" ) ) == NULL )
 			child = modNode.append_child( "path" );
 
-		child.text( ).set( get_str( "model_dir" ) );
+		child.text( ) = get_str( "model_dir" );
 	}
 	else
 		lmmNode.remove_child( "model" );
-
+#endif
 
 	// save system makefile options
+	x_nodeT makNode = sysNode.child( "makefile" );	// makefile configuration
 	if ( makNode.empty( ) )
 		makNode = sysNode.append_child( "makefile" );
 
 	if ( ( child = makNode.first_child( ) ) == NULL )
 		child = makNode.append_child( pugi::node_cdata );
 
-	if ( sys_options != NULL && strlen( sys_options ) > 0 )
+	if ( system_make != NULL && strlen( system_make ) > 0 )
 	{
-		s = lsd::strencdata( NULL, sys_options );
+		s = lsd::strencdata( NULL, system_make );
 		child.set_value( s );
 		delete [ ] s;
 	}
@@ -858,7 +885,7 @@ void gui::update_lsd_options( bool save_settings )
 	if ( ! sysCfg.save_file( fName ) )
 	{
 		gui::log_tcl_error( false, "Cannot save LSD configuration", "LSD configuration file cannot be saved to the user directory.\nnCheck if the user home directory is not set READ-ONLY or if it has enough space, and try again" );
-		cmd( "tk_messageBox -type ok -icon error -title Error -message \"Cannot save LSD configuration\" -detail \"File '%s' cannot be saved to directory '%s'.\nnCheck if the user home directory is not set READ-ONLY or if it is not full, and try again.\"", LSD_XML_OPTIONS, cfg_path );
+		cmd( "tk_messageBox -type ok -icon error -title Error -message \"Cannot save LSD configuration\" -detail \"File '%s' cannot be saved to directory '%s'.\nnCheck if the user home directory is not set READ-ONLY or if it is not full, and try again.\"", LSD_XML_CONFIG, cfg_path );
 	}
 }
 
@@ -866,24 +893,130 @@ void gui::update_lsd_options( bool save_settings )
 /*************************************************************
  LOAD_MODEL_OPTIONS
  *************************************************************/
-bool gui::load_model_options( const char *path )
+bool gui::load_model_options( const char *path, bool fix )
 {
-	cmd( "set res [ file exists \"%s/$MODEL_TXT_INFO\" ]", path );
+	char fName[ MAX_PATH_LENGTH ];
+	const char *s;
+	int i;
+	x_docT modCfg;
 
-	if ( get_bool( "res" ) )						// file exists?
+	if ( path == NULL && exists_var( "model_dir" ) )
+		path = get_str( "model_dir" );
+
+	if ( path != NULL )
+		cmd( "set model_dir \"%s\"", path );
+
+	if ( path == NULL || ! eval_bool( "[ file exists $model_dir ] && [ file isdirectory $model_dir ]" ) )
 	{
-		cmd( "set f [ open \"%s/$MODEL_TXT_INFO\" r ]", path );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Cannot load configuration\" -detail \"Choose an existing model or create a new one.\"" );
+		return false;
+	}
 
-		for ( int i = 0; i < MODEL_OPTIONS_NUM; ++i )	// read parameters, returning 1 if incomplete
+	cmd( "if [ file exists \"%s/$MODEL_XML_CONFIG\" ] { \
+			set res 1 \
+		} elseif [ file exists \"%s/$MODEL_TXT_INFO\" ] { \
+			set f [ open \"%s/$MODEL_TXT_INFO\" r ]; \
+			set res 2 \
+		} else { \
+			set res 0 \
+		}", path, path, path );
+
+	if ( ( i = get_int( "res" ) ) == 0 && ! fix )
+		return false;
+
+	// load legacy configuration (one-time migration)
+	if ( i == 2 )
+	{
+		for ( i = 0; i < MODEL_OPTIONS_NUM; ++i )	// read all parameters
 		{
-			cmd( "gets $f %s", model_info[ i ] );
-			cmd( "if { $%s == \"\" } { set res 0 }", model_info[ i ] );
+			cmd( "gets $f %s", model_options[ i ] );
+			cmd( "if { $%s eq \"#\" } { set %s \"\" }", model_options[ i ], model_options[ i ] );
 		}
 
 		cmd( "close $f" );
 	}
 
-	return get_bool( "res" );
+	snprintf( fName, MAX_PATH_LENGTH, "%s%s%s", path, strlen( path ) > 0 ? "/" : "", MODEL_XML_CONFIG );
+
+	// try to load XML file
+	if ( modCfg.load_file( fName, PUGI_LOAD_OPTIONS ).status != pugi::status_ok )
+	{
+		update_model_options( true );				// rebuild configuration file
+		modCfg.load_file( fName, PUGI_LOAD_OPTIONS );
+	}
+
+	// try to read configuration nodes
+	x_nodeT lsdNode = modCfg.document_element( );	// LSD top element
+	x_nodeT modNode = lsdNode.child( "model" );		// load model data
+	x_nodeT setNode = modNode.child( "settings" );	// model settings
+	x_nodeT geoNode = modNode.child( "geometry" );	// model current geometry
+	x_nodeT cfgNode = modNode.child( "configuration" );// model current config.
+
+	// load model settings
+	for ( i = 0; i < LMM_OPTIONS_NUM; ++i )
+	{
+		cmd( "set s \"%s\"", model_defaults[ i ] );
+		s = get_str( "s" );
+		if ( strcmp( s, "#" ) == 0 )
+			s = "";									// handle empty items
+
+		switch ( model_types[ i ] )
+		{
+			case 's':								// setting node
+				cmd( "set %s \"%s\"", model_options[ i ], setNode.child( model_options[ i ] ).text( ).as_string( s ) );
+				break;
+
+			case 'g':								// geometry
+				cmd( "set %s \"%s\"", model_options[ i ], geoNode.child( model_options[ i ] ).text( ).as_string( s ) );
+				break;
+
+			case 'a':								// configuration attribute
+				cmd( "set %s \"%s\"", model_options[ i ], cfgNode.attribute( model_options[ i ] ).as_string( s ) );
+				break;
+
+			case 'c':								// configuration node
+				cmd( "set %s \"%s\"", model_options[ i ], cfgNode.child( model_options[ i ] ).text( ).as_string( s ) );
+				break;
+		}
+	}
+
+	// load model makefile options
+	x_nodeT makNode = modNode.child( "makefile" );	// makefile configuration
+	s = makNode.text( ).as_string( );
+	if ( strlen( s ) == 0 )
+	{
+		// try to read legacy file
+		cmd( "if { [ file exists \"%s/$MODEL_TXT_OPTIONS\" ] } { \
+				set sysfile \"%s/$MODEL_TXT_OPTIONS\" \
+			} { \
+				set sysfile \"\" \
+			}", path, path );
+
+		if ( strlen( get_str( "sysfile" ) ) > 0 )
+		{
+			cmd( "set f [ open $sysfile r ]" );
+			cmd( "set model_make [ string trim [ read $f ] ]" );
+			cmd( "close $f" );
+			if ( ( s = get_str( "model_make" ) ) != NULL )
+			{
+				delete [ ] model_make;
+				model_make = new char [ strlen( s ) + 1 ];
+				strcpy( model_make, s );
+			}
+		}
+		else
+			reset_make_options( 2 );			// if not, use default settings
+
+		update_model_options( );				// update configuration file
+	}
+	else
+	{
+		delete [ ] model_make;
+		model_make = lsd::strdecdata( NULL, s );
+		cmd( "set model_make {%s}", model_make );
+	}
+
+	return true;
 }
 
 
@@ -892,7 +1025,12 @@ bool gui::load_model_options( const char *path )
  *************************************************************/
 void gui::update_model_options( bool fix )
 {
+	char fName[ MAX_PATH_LENGTH ];
+	const char *s;
 	int i;
+	x_attrT attr;
+	x_docT modCfg;
+	x_nodeT child;
 
 	// ensure defaults are loaded
 	cmd( "if { ! [ info exists CurPlatform ] } { \
@@ -903,12 +1041,11 @@ void gui::update_model_options( bool fix )
 	if ( fix )
 		for ( i = 0; i < MODEL_OPTIONS_NUM; ++i )
 		{
-			cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
-			cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
+			cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_options[ i ], model_options[ i ] );
+			cmd( "if { $%s eq \"\" && \"%s\" ne \"#\" } { set %s \"%s\" }", model_options[ i ], model_defaults[ i ], model_options[ i ], model_defaults[ i ] );
 		}
 
 #ifndef _LMM_
-
 	else
 		// update existing windows positions
 		for ( i = 0; i < LSD_WIN_NUM; ++i )
@@ -917,27 +1054,557 @@ void gui::update_model_options( bool fix )
 					if { $curGeom != \"\" } { \
 						set %s $curGeom \
 					} \
-				}", wnd_names[ i ], model_info[ i + 3 ] );
+				}", wnd_names[ i ], model_options[ i + 3 ] );
 
 	// ensure model name is set
 	cmd( "if { ! [ info exists model_name ] || $model_name eq \"\" || $model_name eq \"%s\" } { \
 			set model_name [ string map -nocase { fun_ \"\" .cpp \"\" } \"%s\" ] \
 		}", model_defaults[ 0 ], eq_file );
-
 #endif
 
-	// save info to disk
-	cmd( "set f [ open \"$model_dir/$MODEL_TXT_INFO\" w ]" );
+	if ( exists_var( "model_dir" ) )
+		s = get_str( "model_dir" );
+	else
+		s = NULL;
 
-	// set undefined parameters to defaults before saving
-	for ( i = 0; i < MODEL_OPTIONS_NUM; ++i )
+	if ( s == NULL || ! exists_var( "model_name" ) || strlen( get_str( "model_name" ) ) == 0 || strcmp( get_str( "model_name" ), "(no model)" ) == 0 || ! exists_var( "model_version" ) || ! exists_var( "model_date" ) )
 	{
-		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_info[ i ], model_info[ i ] );
-		cmd( "if { $%s == \"\" } { set %s \"%s\" }", model_info[ i ], model_info[ i ], model_defaults[ i ] );
-		cmd( "puts $f \"$%s\"", model_info[ i ] );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Cannot save configuration\" -detail \"Choose an existing model or create a new one.\"" );
+		return;
 	}
 
-	cmd( "close $f" );
+	// try to load existing XML as base
+	snprintf( fName, MAX_PATH_LENGTH, "%s%s%s", s, strlen( s ) > 0 ? "/" : "", MODEL_XML_CONFIG );
+
+	if ( modCfg.load_file( fName, PUGI_LOAD_OPTIONS ).status != pugi::status_ok )
+		modCfg.reset( );								// recreate XML structure
+
+	// try to read configuration nodes
+	x_nodeT lsdNode = modCfg.document_element( );		// LSD top element
+	x_nodeT modNode = lsdNode.child( "model" );			// load model data
+	x_nodeT setNode = modNode.child( "settings" );		// model settings
+	x_nodeT geoNode = modNode.child( "geometry" );		// model current geometry
+	x_nodeT cfgNode = modNode.child( "configuration" );	// model current config.
+
+	// recreate XML structure if wrong format XML
+	if ( strcmp( lsdNode.name( ), "LSD" ) != 0 || strcmp( modNode.name( ), "model" ) != 0 )
+	{
+		modCfg.reset( );								// recreate all
+		x_nodeT typeNode = modCfg.append_child( pugi::node_declaration );
+		typeNode.append_attribute( "version" ) = "1.0";
+		typeNode.append_attribute( "encoding" ) = "ANSI";
+		typeNode.append_attribute( "standalone" ) = "yes";
+		modCfg.append_child( pugi::node_doctype ).set_value( "LSD [\n \
+		<!ELEMENT LSD (model)>\n \
+		<!ELEMENT model (settings, geometry, configuration?, makefile)>\n \
+		<!ELEMENT settings (#PCDATA+)>\n \
+		<!ELEMENT geometry (#PCDATA+)>\n \
+		<!ELEMENT configuration? (#PCDATA)>\n \
+		<!ELEMENT makefile (#CDATA)>\n]" );
+		lsdNode = modCfg.append_child( "LSD" );
+		modNode = lsdNode.append_child( "model" );
+	}
+
+	// add/update model configuration attributes
+	if ( ( attr = modNode.attribute( "version" ) ) == NULL )
+		attr = modNode.append_attribute( "version" );
+
+	attr = "1.0";
+
+	if ( ( attr = modNode.attribute( "description" ) ) == NULL )
+		attr = modNode.append_attribute( "description" );
+
+	attr = "LSD model configuration file";
+
+	// add/update model settings and geometry (legacy configuration content)
+	if ( setNode.empty( ) )
+		setNode = modNode.append_child( "settings" );
+
+	if ( geoNode.empty( ) )
+		geoNode = modNode.append_child( "geometry" );
+
+	if ( cfgNode.empty( ) && exists_var( "last_conf" ) && eval_bool( "$last_conf ne \"\" && $last_conf ne \"#\"" ) )
+		cfgNode = modNode.append_child( "configuration" );
+
+	for ( i = 0; i < MODEL_OPTIONS_NUM; ++i )
+	{
+		cmd( "if { ! [ info exists %s ] } { set %s \"\" }", model_options[ i ], model_options[ i ] );
+		cmd( "if { $%s eq \"\" && \"%s\" ne \"#\" } { set %s \"%s\" }", model_options[ i ], model_defaults[ i ], model_options[ i ], model_defaults[ i ] );
+
+		s = get_str( model_options[ i ] );
+		if ( strcmp( s, "#" ) == 0 )
+			s = "";									// handle empty items
+
+		switch ( model_types[ i ] )
+		{
+			case 's':								// setting node
+				if ( ( child = setNode.child( model_options[ i ] ) ) == NULL )
+					child = setNode.append_child( model_options[ i ] );
+
+				child.text( ) = s;
+				break;
+
+			case 'g':								// geometry node
+				if ( ( child = geoNode.child( model_options[ i ] ) ) == NULL )
+					child = geoNode.append_child( model_options[ i ] );
+
+				child.text( ) = s;
+				break;
+
+			case 'a':								// configuration attribute
+				if ( cfgNode.empty( ) )
+					break;
+
+				if ( ( attr = cfgNode.attribute( model_options[ i ] ) ) == NULL )
+					attr = cfgNode.append_attribute( model_options[ i ] );
+
+				attr = s;
+				break;
+
+			case 'c':								// configuration node
+				if ( cfgNode.empty( ) )
+					break;
+
+				if ( ( child = cfgNode.child( model_options[ i ] ) ) == NULL )
+					child = cfgNode.append_child( model_options[ i ] );
+
+				child.text( ) = s;
+				break;
+		}
+	}
+
+	// save additonal model info
+	if ( exists_var( "model_dir" ) )
+	{
+		if ( ( child = setNode.child( "model_path" ) ) == NULL )
+			child = setNode.append_child( "model_path" );
+
+		child.text( ).set( get_str( "model_dir" ) );
+	}
+
+	// save model makefile options
+	x_nodeT makNode = modNode.child( "makefile" );	// LMM configuration
+	if ( makNode.empty( ) )
+		makNode = modNode.append_child( "makefile" );
+
+	if ( ( child = makNode.first_child( ) ) == NULL )
+		child = makNode.append_child( pugi::node_cdata );
+
+	if ( model_make != NULL && strlen( model_make ) > 0 )
+	{
+		s = lsd::strencdata( NULL, model_make );
+		child.text( ) = s;
+		delete [ ] s;
+	}
+
+	// save to file
+	if ( ! modCfg.save_file( fName ) )
+	{
+		gui::log_tcl_error( false, "Cannot save model configuration", "Model configuration file cannot be saved to the model directory.\nnCheck if the model home directory is not set READ-ONLY or if it has enough space, and try again" );
+		cmd( "tk_messageBox -type ok -icon error -title Error -message \"Cannot save model configuration\" -detail \"File '%s' cannot be saved to directory '%s'.\nnCheck if the user model directory is not set READ-ONLY or if it is not full, and try again.\"", MODEL_XML_CONFIG, get_str( "model_dir" ) );
+	}
+}
+
+
+/*************************************************************
+ TCL_GET_MODEL_SETTING
+ Entry point function for access from the Tcl interpreter
+ to get the specified setting for a given model folder
+ containing the proper XML configuration file
+ *************************************************************/
+int gui::Tcl_get_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+{
+	char fName[ MAX_PATH_LENGTH ], line[ MAX_LINE_SIZE ], set_val[ MAX_LINE_SIZE ] = "";
+	int setID, i;
+	x_docT modCfg;
+	FILE *f;
+
+	if ( argc != 3 || argv[ 1 ] == NULL || argv[ 2 ] == NULL || strlen( argv[ 1 ] ) == 0 || strlen( argv[ 2 ] ) == 0 )// require 2 param.
+		return TCL_ERROR;
+
+	cmd( "set __fn__ \"%s\"", argv[ 1 ] );
+	if ( ! eval_bool( "[ file exists __fn__ ] || ! [ file isdirectory __fn__ ]" ) )
+		return TCL_ERROR;
+
+	cmd( "unset __fn__" );
+
+	for ( setID = 0; setID < MODEL_OPTIONS_NUM; ++setID )
+		if ( strcmp( argv[ 2 ], model_options[ setID ] ) == 0 )
+			break;
+
+	if ( setID == MODEL_OPTIONS_NUM )
+		return TCL_ERROR;
+
+	snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], MODEL_XML_CONFIG );
+	if ( modCfg.load_file( fName, PUGI_LOAD_OPTIONS ).status == pugi::status_ok )
+	{
+		x_nodeT lsdNode = modCfg.document_element( );	// LSD top element
+		x_nodeT modNode = lsdNode.child( "model" );		// load model data
+		x_nodeT setNode = modNode.child( "settings" );	// model settings
+
+		if ( strcmp( lsdNode.name( ), "LSD" ) == 0 && setNode.child( argv[ 2 ] ) != NULL )
+			lsd::strcpyn( set_val, setNode.child( argv[ 2 ] ).text( ).as_string( ), MAX_LINE_SIZE );
+		else
+			std::remove( fName );						// remove corrupt file
+	}
+
+	if ( strlen( set_val ) == 0 )
+	{
+		snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], MODEL_TXT_INFO );
+		if ( ( f = fopen( fName, "r" ) ) != NULL )
+		{
+			for ( i = 0; i <= setID && fgets( line, MAX_LINE_SIZE, f ) != NULL; ++i )
+				if ( i == setID )
+					lsd::strtrim( set_val, line, MAX_LINE_SIZE );
+
+			fclose( f );
+		}
+	}
+
+	Tcl_SetResult( interp, set_val, TCL_VOLATILE );
+	return TCL_OK;
+}
+
+
+/*************************************************************
+ TCL_SET_MODEL_SETTING
+ Entry point function for access from the Tcl interpreter
+ to set the specified setting for a given model folder
+ containing the proper XML configuration file
+ *************************************************************/
+int gui::Tcl_set_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+{
+	char fName[ MAX_PATH_LENGTH ], line[ MAX_LINE_SIZE ], buf[ MAX_BUFF_SIZE ];
+	int  setID, i;
+	x_docT modCfg;
+	x_nodeT child;
+	FILE *f;
+
+	if ( argc != 4 || argv[ 1 ] == NULL || argv[ 2 ] == NULL || argv[ 3 ] == NULL || strlen( argv[ 1 ] ) == 0 || strlen( argv[ 2 ] ) == 0 || strlen( argv[ 3 ] ) == 0 )// require 3 param.
+		return TCL_ERROR;
+
+	cmd( "set __fn__ \"%s\"", argv[ 1 ] );
+	if ( ! eval_bool( "[ file exists __fn__ ] || ! [ file isdirectory __fn__ ]" ) )
+		return TCL_ERROR;
+
+	cmd( "unset __fn__" );
+
+	for ( setID = 0; setID < MODEL_OPTIONS_NUM; ++setID )
+		if ( strcmp( argv[ 2 ], model_options[ setID ] ) == 0 )
+			break;
+
+	if ( setID == MODEL_OPTIONS_NUM )
+		return TCL_ERROR;
+
+	snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], MODEL_XML_CONFIG );
+	if ( modCfg.load_file( fName, PUGI_LOAD_OPTIONS ).status == pugi::status_ok )
+	{
+		x_nodeT lsdNode = modCfg.document_element( );	// LSD top element
+		x_nodeT modNode = lsdNode.child( "model" );		// load model data
+		x_nodeT setNode = modNode.child( "settings" );	// model settings
+
+		if ( strcmp( lsdNode.name( ), "LSD" ) != 0 || strcmp( modNode.name( ), "model" ) != 0 || strcmp( setNode.name( ), "settings" ) != 0 )
+			std::remove( fName );						// remove corrupt file
+		else
+		{
+			if ( ( child = setNode.child( argv[ 2 ] ) ) == NULL )
+				child = setNode.append_child( argv[ 2 ] );
+
+			child.text( ) = argv[ 3 ];
+			modCfg.save_file( fName );
+		}
+	}
+
+	snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], MODEL_TXT_INFO );
+	if ( ( f = fopen( fName, "r" ) ) != NULL )
+	{
+		for ( i = 0; i < MODEL_OPTIONS_NUM && fgets( line, MAX_LINE_SIZE, f ) != NULL; ++i )
+			if ( i != setID )
+				lsd::strcatn( buf, line, MAX_BUFF_SIZE );
+			else
+			{
+				lsd::strcatn( buf, argv[ 3 ], MAX_BUFF_SIZE );
+				lsd::strcatn( buf, "\n", MAX_BUFF_SIZE );
+			}
+
+		fclose( f );
+
+		if ( i >= setID )								// ignore corrupt file
+		{
+			f = fopen( fName, "w" );
+			fputs( buf, f );
+			fclose( f );
+		}
+	}
+
+	return TCL_OK;
+}
+
+
+/*************************************************************
+ TCL_GET_GROUP_SETTING
+ Entry point function for access from the Tcl interpreter
+ to get the specified setting for a given group folder
+ containing the proper XML configuration file
+ *************************************************************/
+int gui::Tcl_get_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+{
+	bool rebuild_xml = true;
+	char fNameXML[ MAX_PATH_LENGTH ], fNameTXT[ MAX_PATH_LENGTH ], line[ MAX_LINE_SIZE ], buf[ MAX_BUFF_SIZE ], desc[ MAX_BUFF_SIZE ] = "", set_val[ MAX_BUFF_SIZE ] = "";
+	int setID, i;
+	x_docT grpCfg;
+	x_nodeT child, dscNode, grpNode, lsdNode;
+ 	FILE *f;
+
+	if ( argc != 3 || argv[ 1 ] == NULL || argv[ 2 ] == NULL || strlen( argv[ 1 ] ) == 0 || strlen( argv[ 2 ] ) == 0 )// require 2 param.
+		return TCL_ERROR;
+
+	for ( setID = 0; setID < GROUP_OPTIONS_NUM; ++setID )
+		if ( strcmp( argv[ 2 ], group_options[ setID ] ) == 0 )
+			break;
+
+	if ( setID == GROUP_OPTIONS_NUM )
+		return TCL_ERROR;
+
+	if ( strcmp( argv[ 1 ], get_str( "lsd_root" ) ) == 0 )
+	{
+		if ( strcmp( argv[ 2 ], "name" ) == 0 )
+			lsd::strcpyn( set_val, get_str( "rootname" ), MAX_BUFF_SIZE );
+
+		if ( strcmp( argv[ 2 ], "description" ) == 0 )
+			snprintf( set_val, MAX_BUFF_SIZE, "%s group.\n\nAll groups are descendants of this group.", get_str( "rootname" ) );
+
+		goto end;
+	}
+
+	snprintf( fNameXML, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], GROUP_XML_CONFIG );
+	if ( grpCfg.load_file( fNameXML, PUGI_LOAD_OPTIONS ).status == pugi::status_ok )
+	{
+		lsdNode = grpCfg.document_element( );			// LSD top element
+		grpNode = lsdNode.child( "group" );				// load group data
+
+		if ( strcmp( lsdNode.name( ), "LSD" ) == 0 && strcmp( grpNode.name( ), "group" ) == 0 )
+		{
+			rebuild_xml = false;
+			switch ( group_types[ setID ] )
+			{
+				case 'p':								// PCDATA text node
+					lsd::strcpyn( set_val, grpNode.child( argv[ 2 ] ).text( ).as_string( group_defaults[ setID ] ), MAX_BUFF_SIZE );
+					break;
+
+				case 'c':								// CDATA text node
+					lsd::strdecdata( set_val, grpNode.child( argv[ 2 ] ).first_child( ).text( ).as_string( group_defaults[ setID ] ), MAX_BUFF_SIZE );
+					break;
+			}
+		}
+	}
+
+	// (re)create XML file using legacy file information
+	if ( rebuild_xml )
+	{
+		grpCfg.reset( );
+		x_nodeT typeNode = grpCfg.append_child( pugi::node_declaration );
+		typeNode.append_attribute( "version" ) = "1.0";
+		typeNode.append_attribute( "encoding" ) = "ANSI";
+		typeNode.append_attribute( "standalone" ) = "yes";
+		grpCfg.append_child( pugi::node_doctype ).set_value( "LSD [\n \
+		<!ELEMENT LSD (model)>\n \
+		<!ELEMENT group (name, description)>\n \
+		<!ELEMENT name (#PCDATA)>\n \
+		<!ELEMENT description (#CDATA)>\n]" );
+		lsdNode = grpCfg.append_child( "LSD" );
+		grpNode = lsdNode.append_child( "group" );
+
+		str_vecT grpOptions( GROUP_OPTIONS_NUM, "" );
+		snprintf( fNameTXT, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], GROUP_TXT_INFO );
+		if ( ( f = fopen( fNameTXT, "r" ) ) != NULL )
+		{
+			for ( i = 0; i < GROUP_OPTIONS_NUM && fgets( line, MAX_LINE_SIZE, f ) != NULL; ++i )
+				if ( strcmp( group_options[ i ], "description" ) != 0 )
+				{
+					lsd::strtrim( buf, line, MAX_LINE_SIZE );
+					grpOptions[ i ] = buf;
+
+					if ( i == setID )
+						strcpy( set_val, buf );
+				}
+
+			fclose( f );
+		}
+
+		snprintf( fNameTXT, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], DESCRIPTION );
+		if ( ( f = fopen( fNameTXT, "r" ) ) != NULL )
+		{
+			i = fread( ( void * ) buf, sizeof ( char ), MAX_BUFF_SIZE - 1, f );
+			fclose( f );
+
+			if ( i > 0 )
+			{
+				buf[ i ] = '\0';
+				lsd::strtrim( desc, buf, MAX_BUFF_SIZE );
+
+				if ( strcmp( argv[ 2 ], "description" ) == 0 )
+					strcpy( set_val, desc );
+			}
+		}
+
+		for ( i = 0; i < GROUP_OPTIONS_NUM; ++i )
+		{
+			if ( strcmp( group_options[ i ], "description" ) == 0 )
+				grpOptions[ i ] = desc;
+
+			if ( i == 0 )
+			{
+				if ( grpOptions[ 0 ].size( ) == 0 )
+				{
+					cmd( "set __fn__ [ file tail \"%s\" ]", argv[ 1 ] );
+					grpOptions[ 0 ] = get_str( "__fn__" );
+					cmd( "unset __fn__" );
+				}
+			}
+			else
+				if ( grpOptions[ i ].size( ) == 0 )
+					grpOptions[ i ] = group_defaults[ i ];
+
+			switch ( group_types[ i ] )
+			{
+				case 'p':
+					grpNode.append_child( group_options[ i ] ).text( ) = grpOptions[ i ].c_str( );
+					break;
+
+				case 'c':
+					child = grpNode.append_child( group_options[ i ] );
+					child = child.append_child( pugi::node_cdata );
+					child.text( ) = grpOptions[ i ].c_str( );
+					break;
+			}
+		}
+
+		grpCfg.save_file( fNameXML );
+	}
+
+	end:
+
+	Tcl_SetResult( interp, set_val, TCL_VOLATILE );
+	return TCL_OK;
+}
+
+
+/*************************************************************
+ TCL_SET_GROUP_SETTING
+ Entry point function for access from the Tcl interpreter
+ to set the specified setting for a given group folder
+ containing the proper XML configuration file
+ *************************************************************/
+int gui::Tcl_set_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+{
+	bool rebuild_xml = true;
+	char fName[ MAX_PATH_LENGTH ], line[ MAX_LINE_SIZE ], buf[ MAX_BUFF_SIZE ];
+	int setID, i;
+	x_docT grpCfg;
+	x_nodeT child;
+	FILE *f;
+
+	if ( argc != 4 || argv[ 1 ] == NULL || argv[ 2 ] == NULL || argv[ 3 ] == NULL || strlen( argv[ 1 ] ) == 0 || strlen( argv[ 2 ] ) == 0 || strlen( argv[ 3 ] ) == 0 )// require 3 param.
+		return TCL_ERROR;
+
+	if ( strcmp( argv[ 1 ], get_str( "lsd_root" ) ) == 0 )
+		return TCL_ERROR;
+
+	for ( setID = 0; setID < GROUP_OPTIONS_NUM; ++setID )
+		if ( strcmp( argv[ 2 ], group_options[ setID ] ) == 0 )
+			break;
+
+	if ( setID == GROUP_OPTIONS_NUM )
+		return TCL_ERROR;
+
+	snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], GROUP_XML_CONFIG );
+	if ( grpCfg.load_file( fName, PUGI_LOAD_OPTIONS ).status == pugi::status_ok )
+	{
+		x_nodeT lsdNode = grpCfg.document_element( );	// LSD top element
+		x_nodeT grpNode = lsdNode.child( "group" );		// load group data
+
+		if ( strcmp( lsdNode.name( ), "LSD" ) == 0 && strcmp( grpNode.name( ), "group" ) == 0 )
+		{
+			rebuild_xml = false;
+			switch ( group_types[ setID ] )
+			{
+				case 'p':								// PCDATA text node
+					if ( ( child = grpNode.child( argv[ 2 ] ) ) == NULL )
+						child = grpNode.append_child( argv[ 2 ] );
+
+					child.text( ) = argv[ 3 ];
+					break;
+
+				case 'c':								// CDATA text node
+					if ( ( child = grpNode.child( argv[ 2 ] ) ) == NULL )
+						child = grpNode.append_child( argv[ 2 ] );
+
+					if ( child.first_child( ) == NULL )
+						child = grpNode.append_child( pugi::node_cdata );
+					else
+						child = child.first_child( );
+
+					lsd::strtrim( buf, argv[ 3 ], MAX_BUFF_SIZE );
+					char *desc = lsd::strencdata( NULL, argv[ 3 ] );
+					child.text( ) = desc;
+					delete [ ] desc;
+					break;
+			}
+
+			grpCfg.save_file( fName );
+		}
+	}
+
+	if ( strcmp( argv[ 2 ], "description" ) != 0 )
+	{
+		snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], GROUP_TXT_INFO );
+		if ( ( f = fopen( fName, "r" ) ) != NULL )
+		{
+			for ( i = 0; i < GROUP_OPTIONS_NUM && fgets( line, MAX_LINE_SIZE, f ) != NULL; ++i )
+				if ( i != setID )
+					lsd::strcatn( buf, line, MAX_BUFF_SIZE );
+				else
+				{
+					lsd::strcatn( buf, argv[ 3 ], MAX_BUFF_SIZE );
+					lsd::strcatn( buf, "\n", MAX_BUFF_SIZE );
+				}
+
+			fclose( f );
+
+			if ( i >= setID )							// ignore corrupt file
+			{
+				if ( ( f = fopen( fName, "w" ) ) != NULL )
+				{
+					fputs( buf, f );
+					fclose( f );
+				}
+			}
+		}
+	}
+	else
+	{
+		snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], DESCRIPTION );
+		if ( ( f = fopen( fName, "r" ) ) != NULL )		// update only if exists
+		{
+			fclose( f );
+
+			if ( ( f = fopen( fName, "w" ) ) != NULL )
+			{
+				lsd::strtrim( buf, argv[ 3 ], MAX_BUFF_SIZE );
+				fputs( buf, f );
+				fclose( f );
+			}
+		}
+	}
+
+	if ( rebuild_xml )
+	{
+		cmd( "get_group_setting \"%s\" %s", argv[ 1 ], group_options[ 0 ] );
+		cmd( "set_group_setting \"%s\" %s \"%s\"", argv[ 1 ], argv[ 2 ], argv[ 3 ] );
+	}
+
+	return TCL_OK;
 }
 
 
@@ -1448,38 +2115,46 @@ double gui::eval_double( const char *tcl_exp )
 
 
 /*************************************************************
- GET_FUN_NAME
- get current equation file name
+ GET_MAKE_VAR
+ Get the named variable from a make-formated string buffer
  *************************************************************/
-const char *gui::get_fun_name( char *str, int str_sz, bool nw )
+const char *gui::get_make_var( const char *var, const char *buf, char *dest, int sz )
 {
-	char buf[ MAX_PATH_LENGTH ];
-	FILE *f;
+	std::regex regex;
+	std::smatch match;
+	std::string buffer, pattern;
 
-	make_makefile( nw );
+	buffer = buf;
+	pattern = "(^|\n)[ \t]*";
+	pattern	+= var;
+	pattern += "[ \t]*=[ \t]*(.*)[ \t]*(?=\n|$)";
+	regex = pattern;
 
-	cmd( "set fapp [ file nativename \"$model_dir/makefile%s\" ]", nw ? "NW" : "" );
-	f = fopen( get_str( "fapp" ), "r" );
-	if ( f == NULL )
-		goto error;
+	if ( ! std::regex_search( buffer, match, regex ) )
+		return NULL;
 
-	do
-		fgets( str, str_sz, f );
-	while ( strncmp( str, "FUN=", 4 ) && ! feof( f ) );
+	snprintf( dest, sz, "%s", match.str( 2 ).c_str( ) );
 
-	fclose( f );
+	return dest;
+}
 
-	if ( strncmp( str, "FUN=", 4 ) != 0 )
-		goto error;
 
-	sscanf( str + 4, "%994s", buf );
-	snprintf( str, str_sz, "%s.cpp", buf );
+/*************************************************************
+ GET_EQFILE_NAME
+ Get the file name of the current equation file
+ *************************************************************/
+const char *gui::get_eqfile_name( char *s, int sz )
+{
+	if ( get_make_var( "FUN", model_make, s, sz ) == NULL || strlen( s ) == 0 )
+	{
+		cmd( "ttk::messageBox -parent . -type ok -title -title Error -icon error -message \"Configuration corrupted\" -detail \"Please check 'Model Options' and 'System Options' in LMM menu 'Model'.\"" );
 
-	return str;
+		return NULL;
+	}
 
-error:
-	cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not found or corrupted\" -detail \"Please check 'Model Options' and 'System Options' in LMM menu 'Model'.\"" );
-	return NULL;
+	lsd::strcatn( s, ".cpp", sz );
+
+	return s;
 }
 
 
@@ -1639,22 +2314,19 @@ bool gui::make_no_window( void )
  *************************************************************/
 void gui::make_makefile( bool nw )
 {
-	if ( sys_options == NULL || strlen( sys_options ) == 0 )
+	if ( system_make == NULL || strlen( system_make ) == 0 )
 		load_lsd_options( );
 
-reset_make_options( 2 );
-
-	cmd( "set f [ open \"$model_dir/$MODEL_TXT_OPTIONS\" r ]" );
-	cmd( "set a [ string trim [ read $f ] ]" );
-	cmd( "close $f" );
+	if ( model_make == NULL || strlen( model_make ) == 0 )
+		load_model_options( get_str( "model_dir" ) );
 
 	cmd( "set f [ open \"$lsd_root/$lsd_src/makefile-%s.txt\" r ]", nw ? "NW" : get_str( "CurPlatform" ) );
 	cmd( "set b [ string trim [ read $f ] ]" );
 	cmd( "close $f" );
 
 	cmd( "set f [ open \"$model_dir/makefile%s\" w ]", nw ? "NW" : "" );
-	cmd( "puts $f \"# Model compilation options\n\n$a\n\"" );
-	cmd( "puts $f {# System compilation options\n\n%s\n}", sys_options );
+	cmd( "puts $f \"# Model compilation options\n\n%s\n\"", model_make );
+	cmd( "puts $f {# System compilation options\n\n%s\n}", system_make );
 	cmd( "puts $f \"# Body of makefile%s (from makefile_%s.txt)\n\n$b\"", nw ? "NW" : "", nw ? "NW" : get_str( "CurPlatform" ) );
 	cmd( "close $f" );
 }
@@ -1682,8 +2354,7 @@ bool gui::compile_run( int run_mode, bool nw )
 
 	cmd( "destroytop .mm" );	// close any open compilation results window
 
-	s = get_str( "model_name" );
-	if ( s == NULL || ! strcmp( s, "" ) )
+	if ( ( s = get_str( "model_name" ) ) == NULL || ! strcmp( s, "" ) )
 	{
 		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 		goto end;
@@ -1692,8 +2363,7 @@ bool gui::compile_run( int run_mode, bool nw )
 #endif
 
 	// get source name
-	s = get_fun_name( str, 2 * MAX_PATH_LENGTH, nw );
-	if ( s == NULL || ! strcmp( s, "" ) || ( f = fopen( s, "r" ) ) == NULL )
+	if ( ( s = get_eqfile_name( str, 2 * MAX_PATH_LENGTH ) ) == NULL || ( f = fopen( s, "r" ) ) == NULL )
 	{
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Equation file not found\" -detail \"File '%s' is no longer available in directory '$model_dir'.\" ", s );
 		goto end;

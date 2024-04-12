@@ -167,12 +167,12 @@
 // configuration files details
 #define DESCRIPTION "description.txt"
 #define LMM_TXT_OPTIONS "lmm_options.txt"
-#define LSD_XML_OPTIONS "LSD.cfg"
+#define LSD_XML_CONFIG "LSD.cfg"
 #define GROUP_TXT_INFO "groupinfo.txt"
-#define GROUP_XML_INFO "group.cfg"
-#define MODEL_TXT_OPTIONS "model_options.txt"
-#define MODEL_XML_OPTIONS "model.cfg"
+#define GROUP_XML_CONFIG "group.cfg"
 #define MODEL_TXT_INFO "modelinfo.txt"
+#define MODEL_TXT_OPTIONS "model_options.txt"
+#define MODEL_XML_CONFIG "model.cfg"
 #define SYSTEM_TXT_OPTIONS "system_options.txt"
 
 // special file names/locations in Windows
@@ -183,20 +183,26 @@
 #define TCL_FIND_EXE	"@where wish86.exe > nul 2>&1"
 
 // constant string arrays
+#define GROUP_OPTIONS_NUM 2
+#define GROUP_OPTIONS_NAME { "name", "description" }
+#define GROUP_OPTIONS_DEFAULT { "(no name)", "(no description)" }
+#define GROUP_OPTIONS_TYPE { 'p', 'c' }
 #define LMM_OPTIONS_NUM 16
-#define LMM_OPTIONS_NAME { "sys_term", "html_browser", "font_type", \
-						   "wish_exe", "lsd_src", "dim_character", \
-						   "tab_size", "wrap", "synt_high", \
-						   "auto_hide", "file_cmds", "group_new", \
-						   "debug_exe", "restore_geom", "lmm_geom", \
-						   "lsd_theme" }
+#define LMM_OPTIONS_NAME { "sys_term", "html_browser", \
+						   "font_type", "wish_exe", "lsd_src", \
+						   "dim_character", "tab_size", "wrap", "synt_high", \
+						   "auto_hide", "file_cmds", "group_new", "debug_exe", \
+						   "restore_geom", "lmm_geom", "lsd_theme" }
 #define LMM_OPTIONS_DEFAULT { "$DefaultSysTerm", "$DefaultHtmlBrowser", \
 							  "$DefaultFont", "$DefaultWish", DEFAULT_SRC_DIR, \
-							  "$DefaultFontSize", "4", "1", "2", "0", "0", \
-							  "Work", "$DefaultDbgExe", "1", "#", \
-							  "$DefaultTheme" }
-#define LMM_OPTIONS_TYPE { 'p', 'p', 'p', 'p', 'p', 'a', 'a', 'a', 'a', 'a', \
-						   'a', 'p', 'p', 'a', 'g', 'p' }
+							  "$DefaultFontSize", "4", "1", "2", \
+							  "0", "0", "Work", "$DefaultDbgExe", \
+							  "1", "#", "$DefaultTheme" }
+#define LMM_OPTIONS_TYPE { 'p', 'p', \
+						   'p', 'p', 'p', \
+						   'a', 'a', 'a', 'a', \
+						   'a', 'a', 'p', 'p', \
+						   'a', 'g', 'p' }
 #define LSD_NW_NUM 3
 #define LSD_NW_SRC { "lsdnw.cpp", "fun_head.h", "fun_head_fast.h" }
 #define LSD_DIR_NUM 8
@@ -204,7 +210,7 @@
 					   "LMM.app", "Rpkg", "lwi", "___" }
 #define LSD_MIN_NUM 5
 #define LSD_MIN_FILES { "icons", "themes", "LSD.h", "interf.cpp", "analysis.cpp" }
-#define LSD_WIN_NUM MODEL_OPTIONS_NUM - 3
+#define LSD_WIN_NUM 8
 #define LSD_WIN_NAME { "lsd", "log", "str", "da", "deb", "lat", "plt", "dap" }
 #define MODEL_OPTIONS_NUM 16
 #define MODEL_OPTIONS_NAME { "model_name", "model_version", "model_date", \
@@ -217,6 +223,11 @@
 								"#", "#", "#", \
 								"#", "#", "#", \
 								"Root", "1", "0", "0" }
+#define MODEL_OPTIONS_TYPE { 's', 's', 's', \
+							 'g', 'g', 'g', \
+							 'g', 'g', 'g', \
+							 'g', 'g', 'c', \
+							 'a', 'a', 'a', 'a' }
 #define TK_WIN_NUM 10
 #define TK_WIN_NAME { ".", ".log", ".str", ".inid", ".inin", ".da", ".deb", ".lat", ".plt", ".dap" }
 #define WIN_COMP_NUM 2
@@ -251,22 +262,26 @@ namespace gui
 	extern bool unsavedData; 			// flag unsaved simulation configurations
 	extern bool unsavedSense;			// control for unsaved sensitivity data
 	extern char *eq_txt;				// equation file content
-	extern char *mod_options;			// model makefile options
+	extern char *model_make;			// model makefile options
 	extern char *sens_file;				// current sensitivity analysis file
-	extern char *sys_options;			// system makefile options
+	extern char *system_make;			// system makefile options
 	extern char cfg_path[ ];			// path of LSD configuration file
 	extern char eq_file[ ];				// equation file name
 	extern char err_file[ ];			// error log file name
 	extern char sens_path[ ];			// path of last used sensitivity directory
+	extern const char *group_defaults[ ];// default values for group configurations
+	extern const char *group_options[ ];// list of options in group configurations
 	extern const char *lmm_defaults[ ];	// default values for LMM parameter list
 	extern const char *lmm_options[ ];	// LMM save parameter list
 	extern const char *lsd_nw_src[ ];
 	extern const char *model_defaults[ ];
-	extern const char *model_info[ ];
+	extern const char *model_options[ ];
 	extern const char *res_g;			// structure window result variable
 	extern const char *tk_wnd_names[ ];	// Tk names of main windows
 	extern const char *wnd_names[ ];	// LSD main windows' names
-	extern const char lmm_types[ ];		// types of LMM parameters
+	extern const char group_types[ ];	// types of group options
+	extern const char lmm_types[ ];		// types of LMM options
+	extern const char model_types[ ];	// types of model options
 	extern const int NOLH_1[ ][ 7 ];	// near-orthogonal Latin hypercube tables
 	extern const int NOLH_2[ ][ 11 ];
 	extern const int NOLH_3[ ][ 16 ];
@@ -315,7 +330,7 @@ namespace gui
 	bool expr_eq( const char *tcl_exp, const char *c_str );
 	bool get_bool( const char *tcl_var, bool *var = NULL );
 	bool get_precompiled_flag( const char *exec, bool nw = false );
-	bool load_model_options( const char *path );
+	bool load_model_options( const char *path, bool fix = true );
 	bool load_prev_configuration( void );
 	bool make_no_window( void );
 	bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz );
@@ -337,7 +352,8 @@ namespace gui
 	char *strtcl( char *out, const char *text, int outSz );
 	char *NOLH_valid_tables( int k, char *out, int sz );
 	const char *eval_str( const char *tcl_exp );
-	const char *get_fun_name( char *str, int str_sz, bool nw = false );
+	const char *get_eqfile_name( char *s, int sz );
+	const char *get_make_var( const char *var, const char *buf, char *dest, int sz );
 	const char *get_str( const char *tcl_var );
 	const char *get_target_name( char *str, int str_sz, bool nw = false );
 	double eval_double( const char *tcl_exp );
@@ -381,11 +397,15 @@ namespace gui
 	int NOLH_table( int k );
 	int Tcl_abort_run_threads( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_discard_change( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
+	int Tcl_get_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
+	int Tcl_get_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_log_tcl_error( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_set_c_var( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
+	int Tcl_set_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
+	int Tcl_set_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_set_ttip_descr( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
@@ -449,7 +469,6 @@ namespace gui
 	void put_line( int x1, int y1, int x2 );
 	void put_node( int x, int y, const char *str, bool sel );
 	void put_text( const char *str, const char *num, int x, int y, const char *str2 );
-	void read_eqfile_name( char *s, int sz );
 	void reset_configuration_gui( void );
 	void reset_plot( void );
 	void return_where_used( char *lab, char *s, int sz );

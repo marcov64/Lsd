@@ -63,24 +63,24 @@ proc LsdEnv { sep } {
 # Get GCC compiler version string
 #************************************************
 proc gccVersion { } {
-	global systemOptions gccCmd
+	global system_make gccCmd
 
-	if { ! [ info exists systemOptions ] } {
+	if { ! [ info exists system_make ] } {
 		return "(system options missing)"
 	}
 
-	set p [ string first "CC=" [ string toupper $systemOptions ] ]
-	if { $p < 0 || [ string index $systemOptions [ expr { $p - 1 } ] ] == "_" } {
+	set p [ string first "CC=" [ string toupper $system_make ] ]
+	if { $p < 0 || [ string index $system_make [ expr { $p - 1 } ] ] == "_" } {
 		return "(invalid system options)"
 	}
 
 	set p [ expr { $p + [ string length "CC=" ] } ]
-	set e [ string first "\n" $systemOptions $p ]
+	set e [ string first "\n" $system_make $p ]
 	if { $e < 0 } {
 		set e end
 	}
 
-	set gccCmd [ string trim [ string range $systemOptions $p $e ] ]
+	set gccCmd [ string trim [ string range $system_make $p $e ] ]
 	if { [ string length $gccCmd ] == 0 } {
 		return "(invalid system options)"
 	}
@@ -1034,9 +1034,9 @@ set macYes [ list "-framework" "-lz" "-lpthread" "LSDROOT" "SRC" "PATH_TCL_HEADE
 set macNo  [ list "86" "8.6" "windres" "-mthreads" "-mwindows" "PATH_TCLTK_HEADER" "PATH_TCL_LIB" "PATH_TK_LIB" "TCL_LIB" "LIBS" "WRC" ]
 
 proc check_sys_opt { } {
-	global CurPlatform winYes winNo winYes winNo linuxYes linuxNo macYes macNo systemOptions
+	global CurPlatform winYes winNo winYes winNo linuxYes linuxNo macYes macNo system_make
 
-	if { ! [ info exists systemOptions ] } {
+	if { ! [ info exists system_make ] } {
 		return "Options missing (click 'Default' button to recreate options)"
 	}
 
@@ -1058,7 +1058,7 @@ proc check_sys_opt { } {
 	set missingItems ""
 	set yesCount 0
 	foreach yesItem $yes {
-		if { [ string first $yesItem $systemOptions ] >= 0 } {
+		if { [ string first $yesItem $system_make ] >= 0 } {
 			incr yesCount
 		} else {
 			lappend missingItems $yesItem
@@ -1068,7 +1068,7 @@ proc check_sys_opt { } {
 	set invalidItems ""
 	set noCount 0
 	foreach noItem $no {
-		if { [ string first $noItem $systemOptions ] >= 0 } {
+		if { [ string first $noItem $system_make ] >= 0 } {
 			incr noCount
 			lappend invalidItems $noItem
 		}

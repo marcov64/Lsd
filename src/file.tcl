@@ -656,26 +656,30 @@ proc choose_models { curdir curfile } {
 
 #************************************************
 # LIST_MODELS
-# List models returning the list a exploring directory b
+# List models returning the list a exploring
+# directory b
 # Support procedure to choose_models
 #************************************************
 proc list_models { } {
-	global lmod ldir lgroup cgroup GROUP_TXT_INFO MODEL_TXT_INFO
+	global lmod ldir lgroup cgroup MODEL_TXT_INFO MODEL_XML_CONFIG GROUP_TXT_INFO GROUP_XML_CONFIG
 
-	if [ file exists $MODEL_TXT_INFO ] {
-		lappend ldir [ pwd ]
-		set f [ open $MODEL_TXT_INFO r ]
-		set mod [ gets $f ]
-		set ver [ gets $f ]
-		close $f
-		if { $ver != "" } {
-			set mod "$mod (v. $ver)"
+	if { [ file exists $MODEL_TXT_INFO ] || [ file exists $MODEL_XML_CONFIG ] } {
+		set mod [ get_model_setting [ pwd ] "model_name" ]
+		if { $mod ne "" } {
+
+			set ver [ get_model_setting [ pwd ] "model_version" ]
+			if { $ver ne "" } {
+				set mod "$mod (v. $ver)"
+			}
+
+			if { [ lsearch $lmod $mod ] != -1 } {
+				set mod "$mod #[ expr { int( rand( ) * 1000 ) } ]"
+			}
+
+			lappend ldir [ pwd ]
+			lappend lmod "$mod"
+			lappend lgroup $cgroup
 		}
-		if { [ lsearch $lmod $mod ] >= 0 } {
-			set mod "$mod																											#[ expr { int( rand( ) * 1000 ) } ]"
-		}
-		lappend lmod "$mod"
-		lappend lgroup $cgroup
 	}
 
 	set dirs [ glob -nocomplain -types d * ]
@@ -684,15 +688,19 @@ proc list_models { } {
 		set flag 0
 		if [ file isdirectory $i ] {
 			cd $i
-			if [ file exists $GROUP_TXT_INFO ] {
-				set f [ open $GROUP_TXT_INFO r ]
-				set group [ gets $f ]
-				close $f
-				if { $cgroup != "." } {
+			if { [ file exists $GROUP_TXT_INFO ] || [ file exists $GROUP_XML_CONFIG ] } {
+				
+				set group [ get_group_setting [ pwd ] name ]
+				if { $group eq "" } {
+					set group [ file tail [ pwd ] ]
+				}
+				
+				if { $cgroup ne "." } {
 					set cgroup [ file join "$cgroup" "$group" ]
 				} else {
 					set cgroup "$group"
 				}
+				
 				set flag 1
 			}
 
@@ -1057,37 +1065,29 @@ proc make_background { target threads nw precompiled } {
 
 #************************************************
 # GET_SOURCE_FILES
-# Get the list of source files, including the main and extra files
+# Get the list of source files, including
+# the main and extra files
 #************************************************
-proc get_source_files { path } {
-	global MODEL_TXT_OPTIONS
+proc get_source_files { path { onlyExtra 0 } } {
+	global model_make
 
-	if { ! [ file exists "$path/$MODEL_TXT_OPTIONS" ] } {
-		return [ list ]
+	set files [ list ]
+
+	if { ! $onlyExtra } {
+		regexp -line {^[ \t]*FUN[ \t]*=[ \t]*(.*)[ \t]*$} $model_make all match
+		if { [ info exists match ] && $match ne "" && ( [ file exists $match ] || [ file exists "$path/$match" ] ) } {
+			lappend files [ string trim $match ]
+		}
 	}
 
-	set f [ open "$path/$MODEL_TXT_OPTIONS" r ]
-	set options [ read -nonewline $f ]
-	close $f
-
-	set ini [ expr { [ string first "FUN=" "$options" ] + 4 } ]
-	set end [ expr { $ini + [ string first "\n" [ string range "$options" $ini end ] ] - 1 } ]
-	set files [ list "[ string trim [ lindex [ split [ string range "$options" $ini $end ] ] 0 ] ].cpp" ]
-
-	if { [ llength $files ] != 1 } {
-		return [ list ]
-	}
-
-	set ini [ expr { [ string first "FUN_EXTRA=" "$options" ] + 10 } ]
-	if { $ini != -1 } {
-		set end [ expr { $ini + [ string first "\n" [ string range "$options" $ini end ] ] - 1 } ]
-		set extra [ string trim [ string range "$options" $ini $end ] ]
-		regsub -all { +} $extra { } extra
-		set extra [ split $extra " \t" ]
-
-		foreach x $extra {
-			if { [ file exists $x ] || [ file exists "$path/$x" ] } {
-				lappend files $x
+	regexp -line {^[ \t]*FUN_EXTRA[ \t]*=[ \t]*(.*)[ \t]*$} $model_make all match
+	if { [ info exists match ] && $match ne "" } {
+		set match [ string trim $match ]
+		regsub -all { +} $match { } match
+		set match [ split $match " \t" ]
+		foreach f $match {
+			if { [ file exists $f ] || [ file exists "$path/$f" ] } {
+				lappend files [ string trim $f ]
 			}
 		}
 	}

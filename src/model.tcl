@@ -35,7 +35,7 @@ set months [ list January February March April May June July August September Oc
 # SHOWMODEL
 #************************************************
 proc showmodel pippo {
-	global lmn lmd ldn lrn lbn group result choiceSM lver rootname model_group upSymbol groupSymbol lsd_root memory small_character GROUP_TXT_INFO MODEL_TXT_INFO DESCRIPTION colorsTheme darkTheme
+	global lmn lmd ldn lrn lbn group result choiceSM lver rootname model_group upSymbol groupSymbol lsd_root memory small_character GROUP_TXT_INFO MODEL_TXT_INFO GROUP_XML_CONFIG MODEL_XML_CONFIG DESCRIPTION colorsTheme darkTheme
 
 	unset -nocomplain lmn lver lmd ldn lrn lbn group
 	lappend lmn
@@ -217,7 +217,7 @@ proc showmodel pippo {
 			set app [ .l.l.l curselection ]
 			.l.t.text conf -state normal
 			.l.t.text delete 0.0 end
-			.l.t.text insert end "[ lindex $lmd $app ]"
+			.l.t.text insert end [ lindex $lmd $app ]
 			.l.t.text conf -state disable
 		}
 
@@ -225,7 +225,7 @@ proc showmodel pippo {
 			set app [ .l.l.l curselection ]
 			.l.t.text conf -state normal
 			.l.t.text delete 0.0 end
-			.l.t.text insert end "[ lindex $lmd $app ]"
+			.l.t.text insert end [ lindex $lmd $app ]
 			.l.t.text conf -state disable
 		}
 
@@ -234,7 +234,7 @@ proc showmodel pippo {
 			selectinlist .l.l.l $app
 			.l.t.text conf -state normal
 			.l.t.text delete 0.0 end
-			.l.t.text insert end "[ lindex $lmd $app ]"
+			.l.t.text insert end [ lindex $lmd $app ]
 			.l.t.text conf -state disable
 			break
 		}
@@ -244,7 +244,7 @@ proc showmodel pippo {
 			selectinlist .l.l.l $app
 			.l.t.text conf -state normal
 			.l.t.text delete 0.0 end
-			.l.t.text insert end "[ lindex $lmd $app ]"
+			.l.t.text insert end [ lindex $lmd $app ]
 			.l.t.text conf -state disable
 			break
 		}
@@ -259,7 +259,7 @@ proc showmodel pippo {
 				selectinlist .l.l.l $app
 				.l.t.text conf -state normal
 				.l.t.text delete 0.0 end
-				.l.t.text insert end "[ lindex $lmd $app ]"
+				.l.t.text insert end [ lindex $lmd $app ]
 				.l.t.text conf -state disable
 			}
 		}
@@ -268,7 +268,7 @@ proc showmodel pippo {
 			.l.l.l selection clear 0 end
 			.l.l.l selection set [ .l.l.l nearest %y ]
 			if { ! [ catch { set name [ selection get ] } ] } {
-				if { [ string equal -length [ string length "$groupSymbol" ] $name "$groupSymbol" ] || [ string equal -length [ string length "$upSymbol" ] $name "$upSymbol" ] } {
+				if { [ string equal -length [ string length $groupSymbol ] $name $groupSymbol ] || [ string equal -length [ string length $upSymbol ] $name $upSymbol ] } {
 					.l.l.l.m entryconf 4 -state disabled
 				} else {
 					.l.l.l.m entryconf 4 -state normal
@@ -293,58 +293,48 @@ proc showmodel pippo {
 
 	tooltip::tooltip clear .l.l.l*
 
-	.l.l.tit.n conf -text "$model_group"
+	.l.l.tit.n conf -text $model_group
 
 	set curdir [ pwd ]
-	if { ! [ file isdirectory "$pippo" ] } {
+	if { ! [ file isdirectory $pippo ] } {
 		# recover from invalid folders
 		set pippo $lsd_root
 	}
 
-	cd "$pippo"
-	if { ! [ string equal -nocase "$pippo" "$lsd_root" ] } {
-		set updir "[ file dirname "[ pwd ]" ]"
-		if { ! [ string equal -nocase "$updir" "$lsd_root" ] && [ file exists "$updir/$GROUP_TXT_INFO" ] } {
-			set f [ open "$updir/$GROUP_TXT_INFO" r ]
-			set upgroup "[ gets $f ]"
-			close $f
-		} else {
-			set upgroup "$rootname"
-		}
+	cd $pippo
+	if { ! [ string equal -nocase $pippo $lsd_root ] } {
+		set updir [ file dirname [ pwd ] ]
+		set upgroup [ get_group_setting $updir name ]
 
 		lappend lver -1
 		lappend lmd "Return to group: $upgroup"
-		lappend lrn "[ pwd ]"
-		lappend lbn "$model_group"
-		lappend ldn "[ file dirname "$pippo" ]"
-		lappend lmn "$upgroup"
+		lappend lrn [ pwd ]
+		lappend lbn $model_group
+		lappend ldn [ file dirname $pippo ]
+		lappend lmn $upgroup
 		lappend group -1
-		.l.l.l insert end "$upSymbol"
+		.l.l.l insert end $upSymbol
 
-		tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] "$upgroup"
+		tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] $upgroup
 	}
 
 	set dir [ lsort -dictionary [ glob -nocomplain -type d * ] ]
 
 	# list groups
 	foreach i $dir {
-		if { ! [ file exists "$i/$MODEL_TXT_INFO" ] && [ file exists "$i/$GROUP_TXT_INFO" ] } {
-			set f [ open "$i/$GROUP_TXT_INFO" r ]
-			set app "[ gets $f ]"
-			close $f
+		if { ! ( [ file exists "$i/$MODEL_TXT_INFO" ] || [ file exists "$i/$MODEL_XML_CONFIG" ] ) && ( [ file exists "$i/$GROUP_TXT_INFO" ] || [ file exists "$i/$GROUP_XML_CONFIG" ] ) } {
+			set app [ get_group_setting $i name ]
+			set appd [ get_group_setting $i description ]
+			if { $appd eq "" } {
+				set appd "Group: $app\n(description not available)"
+			}
 
-			lappend lmn "$app"
+			lappend lmn $app
 			lappend lver -1
 			lappend ldn "$pippo/$i"
-			lappend lrn "[ pwd ]"
-			lappend lbn "$model_group"
-			if [ file exists "$i/$DESCRIPTION" ] {
-				set f [ open "$i/$DESCRIPTION" ]
-				lappend lmd "[ read -nonewline $f ]"
-				close $f
-			} else {
-				lappend lmd "Group: $app\n(description not available)"
-			}
+			lappend lrn [ pwd ]
+			lappend lbn $model_group
+			lappend lmd $appd
 			lappend group 1
 			.l.l.l insert end "$groupSymbol$app"
 			.l.l.l itemconf end -fg $colorsTheme(grp)
@@ -355,38 +345,41 @@ proc showmodel pippo {
 
 	# list files
 	foreach i $dir {
-		if [ file exists "$i/$MODEL_TXT_INFO" ] {
-			fix_info $i
+		if { [ file exists "$i/$MODEL_TXT_INFO" ] || [ file exists "$i/$MODEL_XML_CONFIG" ] } {
 
-			set f [ open "$i/$MODEL_TXT_INFO" r ]
-			set app1 "[ gets $f ]"
-			set app2 "[ gets $f ]"
-			set app3 "[ gets $f ]"
-			close $f
+			set mn [ get_model_setting $i "model_name" ]
+			if { $mn eq "" } {
+				set mn [ file tail $i ]
+			}
 
-			lappend lmn "$app1"
-			lappend lver "$app2"
+			set ver [ get_model_setting $i "model_version" ]
+			if { $ver eq "" } {
+				set ver "0.0"
+			}
+
+			lappend lmn $mn
+			lappend lver $ver
 			lappend ldn "$pippo/$i"
-			lappend lrn "[ pwd ]"
-			lappend lbn "$model_group"
+			lappend lrn [ pwd ]
+			lappend lbn $model_group
 
 			if [ file exists "$i/$DESCRIPTION" ] {
 				set f [ open "$i/$DESCRIPTION" ]
 				lappend lmd "[ read -nonewline $f ]"
 				close $f
 			} else {
-				lappend lmd "Model: $app1\nin directory: [ file nativename $pippo/$i ]\n(description not available)"
+				lappend lmd "Model: $mn\nin directory: [ file nativename $pippo/$i ]\n(description not available)"
 			}
 
 			lappend group 0
-			.l.l.l insert end "$app1 (v. $app2)"
+			.l.l.l insert end "$mn (v. $ver)"
 			.l.l.l itemconf end -fg $colorsTheme(mod)
 
-			tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] "[ file nativename $pippo/$i ]"
+			tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] [ file nativename $pippo/$i ]
 		}
 	}
 
-	.l.t.text insert end "[ lindex $lmd 0 ]"
+	.l.t.text insert end [ lindex $lmd 0 ]
 	.l.t.text conf -state disable
 	.l.l.l selection set 0
 	focus .l.l.l
@@ -423,7 +416,7 @@ proc mcopy i {
 # Remove a model/group, placing it in a trashbin
 #************************************************
 proc mdelete i {
-	global lrn ldn lmn group lsd_root memory  GROUP_TXT_INFO DESCRIPTION
+	global lrn ldn lmn group lsd_root memory model_name model_group GROUP_TXT_INFO GROUP_XML_CONFIG
 
 	set memory 0
 	.l.m.edit entryconf 2 -state disabled
@@ -434,30 +427,39 @@ proc mdelete i {
 		set item group
 	}
 
-	if { [ string match -nocase $lsd_root/trashbin* [ lindex $ldn $i ] ] } {
+	if { [ string match -nocase "$lsd_root/trashbin*" [ lindex $ldn $i ] ] } {
 		set answer [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n([ file nativename [ lindex $ldn $i ] ])?" ]
-		file delete -force [ lindex $ldn $i ]
+		catch { file delete -force [ lindex $ldn $i ] }
 		showmodel [ lindex $lrn $i ]
 	} else {
+		if { $item eq "model" && $model_name eq [ lindex $lmn $i ] } {
+			ttk::messageBox -parent .l -title Error -icon error -type ok -message "Cannot delete model" -detail "The current model\n[ lindex $lmn $i ]\n([ file nativename [ lindex $ldn $i ] ])\ncannot be deleted.\nPlease close it or choose another model, and try again."
+			return
+		}
+
+		if { $item eq "group" && $model_group eq [ get_group_setting [ lindex $ldn $i ] name ] } {
+			ttk::messageBox -parent .l -title Error -icon error -type ok -message "Cannot delete group" -detail "The group containing the current model\n[ get_group_setting [ lindex $ldn $i ] name ]\n([ file nativename [ lindex $ldn $i ] ])\ncannot be deleted.\nPlease close current or choose another model in a different group, and try again."
+			return
+		}
+
 		set answer [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n([ file nativename [ lindex $ldn $i ] ])?" ]
 
-		if { $answer == "yes" } {
+		if { $answer eq "yes" } {
 			if { ! [ file exists "$lsd_root/trashbin" ] } {
 				file mkdir "$lsd_root/trashbin"
 			}
-			if { ! [ file exists "$lsd_root/trashbin/$GROUP_TXT_INFO" ] } {
-				set f [ open "$lsd_root/trashbin/$GROUP_TXT_INFO" w ]
-				puts $f "Deleted Models"
-				close $f
-				set f [ open "$lsd_root/trashbin/$DESCRIPTION" w ]
-				puts $f "Folder containing deleted models.\n"
-				close $f
-			}
-			set name [ string range [ lindex $ldn $i ] [ expr { [ string last / [ lindex $ldn $i ] ] + 1 } ] end ]
-			if { [ file exists "$lsd_root/trashbin/$name" ] } {
-				catch { file delete -force "$lsd_root/trashbin/$name" }
+
+			if { ! [ file exists "$lsd_root/trashbin/$GROUP_XML_CONFIG" ] } {
+				set_group_setting "$lsd_root/trashbin" name "Deleted Models"
+				set_group_setting "$lsd_root/trashbin" description "Deleted Models: folder containing deleted models.\n\nModels here can be recovered by moving them back to any existing group."
 			}
 
+			set name [ string range [ lindex $ldn $i ] [ expr { [ string last / [ lindex $ldn $i ] ] + 1 } ] end ]
+			if { [ file exists "$lsd_root/trashbin/$name" ] } {
+				if { [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Duplicated deleted model or group" -detail "There is another item named\n[ lindex $lmn $i ]\n([ file nativename [ lindex $ldn $i ] ])\nin the deleted models group.\n\nDo you want to proceed and permanently delete the older item?" ] } {
+					catch { file delete -force "$lsd_root/trashbin/$name" }
+				}
+			}
 			if { [ catch { file rename -force [ lindex $ldn $i ] "$lsd_root/trashbin/$name" } ] } {
 				ttk::messageBox -parent .l -title Error -icon error -type ok -message "Delete error" -detail "Directory [ file nativename [ lindex $ldn $i ] ] cannot be deleted now.\nYou may try again later."
 			}
@@ -473,7 +475,7 @@ proc mdelete i {
 # Edit the model/group name and description
 #************************************************
 proc medit i {
-	global lrn ldn lmn group lmd result memory small_character darkTheme GROUP_TXT_INFO MODEL_TXT_INFO DESCRIPTION
+	global lrn ldn lmn group lmd result memory small_character darkTheme MODEL_TXT_INFO MODEL_XML_CONFIG DESCRIPTION
 
 	set memory 0
 	.l.m.edit entryconf 2 -state disabled
@@ -513,33 +515,18 @@ proc medit i {
 
 	okcancel .l.e b {
 		if { [ lindex $group $result ] == 0 } {
-			if [ file exists "[ lindex $ldn $result ]/$MODEL_TXT_INFO" ] {
-				set a [ list ]
-				set f [ open "[ lindex $ldn $result ]/$MODEL_TXT_INFO" r ]
-				gets $f line
-				for { set i 1 } { $line != "" } { incr i } {
-					lappend a "$line"
-					gets $f line
-				}
-				close $f
-			} else {
-				set i 1
+			if { [ file exists "[ lindex $ldn $result ]/$MODEL_TXT_INFO" ] || [ file exists "[ lindex $ldn $result ]/$MODEL_XML_CONFIG" ] } {
+				set_model_setting [ lindex $ldn $result ] "model_name" [ .l.e.n.n get ]
 			}
 
-			set f [ open "[ lindex $ldn $result ]/$MODEL_TXT_INFO" w ]
-			puts -nonewline $f "[ .l.e.n.n get ]"
-			for { set j 1 } { $j < $i } { incr j } {
-				puts -nonewline $f "\n[ lindex $a $j ]"
-			}
+			set f [ open "[ lindex $ldn $result ]/$DESCRIPTION" w ]
+			puts -nonewline $f [ .l.e.t.t.text get 0.0 end ]
 			close $f
 		} else {
-			set f [ open "[ lindex $ldn $result ]/$GROUP_TXT_INFO" w ]
-			puts -nonewline $f "[ .l.e.n.n get ]"
-			close $f
+			set_group_setting [ lindex $ldn $result ] name [ .l.e.n.n get ]
+			set_group_setting [ lindex $ldn $result ] description [ .l.e.t.t.text get 0.0 end ]
 		}
-		set f [ open "[ lindex $ldn $result ]/$DESCRIPTION" w ]
-		puts -nonewline $f [ .l.e.t.t.text get 0.0 end ]
-		close $f
+
 		destroytop .l.e
 		showmodel [ lindex $lrn $result ]
 	} {
@@ -554,7 +541,7 @@ proc medit i {
 
 	showtop .l.e
 	mousewarpto .l.e.b.ok 0
-	.l.e.t.t.text insert end "[ lindex $lmd $i ]"
+	.l.e.t.t.text insert end [ lindex $lmd $i ]
 	.l.e.n.n selection range 0 end
 	focus .l.e.n.n
 }
@@ -565,7 +552,7 @@ proc medit i {
 # Paste a previously copied model/group
 #************************************************
 proc mpaste i {
-	global copydir copyver copylabel copydscr lrn lmn lver lmd choiceSM small_character darkTheme MODEL_TXT_INFO DESCRIPTION
+	global copydir copyver copylabel copydscr lrn lmn lver lmd choiceSM small_character darkTheme MODEL_TXT_INFO MODEL_XML_CONFIG DESCRIPTION
 
 	set pastedir [ lindex $lrn $i ]
 
@@ -575,12 +562,12 @@ proc mpaste i {
 
 	ttk::frame .l.p.tit.t1
 	ttk::label .l.p.tit.t1.l -text "Original model:"
-	ttk::label .l.p.tit.t1.n -text "$copylabel" -style hl.TLabel
+	ttk::label .l.p.tit.t1.n -text $copylabel -style hl.TLabel
 	pack .l.p.tit.t1.l  .l.p.tit.t1.n -side left -padx 2
 
 	ttk::frame .l.p.tit.t2
 	ttk::label .l.p.tit.t2.l -text "Current group:"
-	ttk::label .l.p.tit.t2.n -text "[ lindex $lrn $i ]" -style hl.TLabel
+	ttk::label .l.p.tit.t2.n -text [ lindex $lrn $i ] -style hl.TLabel
 	pack .l.p.tit.t2.l  .l.p.tit.t2.n -side left -padx 2
 
 	pack .l.p.tit.t1  .l.p.tit.t2
@@ -588,19 +575,19 @@ proc mpaste i {
 	ttk::frame .l.p.n
 	ttk::label .l.p.n.l -text "New name"
 	ttk::entry .l.p.n.n -width 25 -justify center
-	.l.p.n.n insert 0 "$copylabel"
+	.l.p.n.n insert 0 $copylabel
 	pack .l.p.n.l  .l.p.n.n
 
 	ttk::frame .l.p.v
 	ttk::label .l.p.v.l -text "Version"
 	ttk::entry .l.p.v.v -width 10 -justify center
-	.l.p.v.v insert 0 "$copyver"
+	.l.p.v.v insert 0 $copyver
 	pack .l.p.v.l  .l.p.v.v
 
 	ttk::frame .l.p.d
 	ttk::label .l.p.d.l -text "New (non-existing) home directory name"
 	ttk::entry .l.p.d.d -width 35 -justify center
-	.l.p.d.d insert 0 "[ file tail $copydir ]"
+	.l.p.d.d insert 0 [ file tail $copydir ]
 	pack .l.p.d.l  .l.p.d.d
 
 	ttk::frame .l.p.t
@@ -624,7 +611,7 @@ proc mpaste i {
 
 	showtop .l.p
 	mousewarpto .l.p.b.ok 0
-	.l.p.t.t.text insert end "$copydscr"
+	.l.p.t.t.text insert end $copydscr
 	.l.p.n.n selection range 0 end
 	focus .l.p.n.n
 
@@ -635,26 +622,25 @@ proc mpaste i {
 		set appd [ .l.p.d.d get ]
 		set appv [ .l.p.v.v get ]
 		set appl [ .l.p.n.n get ]
-		set appdsc "[ .l.p.t.t.text get 1.0 end ]"
+		set appdsc [ .l.p.t.t.text get 1.0 end ]
 
 		set confirm [ ttk::messageBox -parent .l.p -type okcancel -icon question -title Confirmation -default ok -message "Confirm copy?" -detail "Every file in dir.:\n[ file nativename $copydir ]\n is going to be copied in dir.:\n[ file nativename $pastedir/$appd ]" ]
 		if { $confirm == "ok" } {
-			set app [ file exists $pastedir/$appd ]
-			if { $app == 1 } {
+			if { [ file exists $pastedir/$appd ] } {
 				ttk::messageBox -parent .l.p -title Error -icon error -type ok -message "Copy error" -detail "Directory [ file nativename $pastedir/$appd ] already exists.\nSpecify a different directory."
 			} else {
-				#viable directory name
 				file mkdir $pastedir/$appd
-				set copylist [ glob -nocomplain $copydir/* ]
-				foreach a $copylist { catch [ file copy -force "$a" "$pastedir/$appd" ] }
+				set copylist [ glob -nocomplain "$copydir/*" ]
+				foreach a $copylist { catch [ file copy -force $a "$pastedir/$appd" ] }
+
+				if { [ file exists "$pastedir/$appd/$MODEL_TXT_INFO" ] || [ file exists "$pastedir/$appd/$MODEL_XML_CONFIG" ] } {
+					set_model_setting "$pastedir/$appd" "model_name" $appl
+					set_model_setting "$pastedir/$appd" "model_version" $appv
+					set_model_setting "$pastedir/$appd" "model_date" [ clock format [ clock seconds ] -format "%d %B, %Y" ]
+				}
+
 				set f [ open "$pastedir/$appd/$DESCRIPTION" w ]
 				puts -nonewline $f "$appdsc"
-				close $f
-				set f [ open "$pastedir/$appd/$MODEL_TXT_INFO" w ]
-				puts $f "$appl"
-				puts $f "$appv"
-				set frmt "%d %B, %Y"
-				puts $f "[ clock format [ clock seconds ] -format "$frmt" ]"
 				close $f
 			}
 		}
@@ -663,49 +649,4 @@ proc mpaste i {
 	destroytop .l.p
 	set choiceSM 0
 	showmodel [ lindex $lrn $i ]
-}
-
-
-#************************************************
-# FIX_INFO
-# Fix invalid information in model info file
-#************************************************
-proc fix_info { fi } {
-	global MODEL_TXT_INFO
-
-	set f [ open "$fi/$MODEL_TXT_INFO" r ]
-	set l1 "[ gets $f ]"
-	set l2 "[ gets $f ]"
-	set l3 "[ gets $f ]"
-	close $f
-
-	if { $l1 == "" } {
-		set newName "$fi"
-		set fix 1
-	} else {
-		set newName $l1
-		set fix 0
-	}
-
-	if { $l2 == "" } {
-		set newVer "1.0"
-		set fix 1
-	} else {
-		set newVer $l2
-	}
-
-	if { ! [ string is print $l3 ] } {
-		set newDate ""
-		set fix 1
-	} else {
-		set newDate $l3
-	}
-
-	if { $fix } {
-		set f [ open "$fi/$MODEL_TXT_INFO" w ]
-		puts $f $newName
-		puts $f $newVer
-		puts $f $newDate
-		close $f
-	}
 }

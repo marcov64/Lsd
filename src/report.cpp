@@ -561,7 +561,6 @@ void lsd::variable::write_var( FILE *frep )
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
-	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", gui::eq_file, gui::eq_file );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = gui::get_int( "res" );
 
@@ -840,7 +839,6 @@ void lsd::object::find_using( variable *v, FILE *frep, bool *found )
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", model_path );
-	cmd( "if { [ lsearch -exact -nocase $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", gui::eq_file, gui::eq_file );
 	cmd( "set res [ llength $source_files ]" );
 	nfiles = gui::get_int( "res" );
 

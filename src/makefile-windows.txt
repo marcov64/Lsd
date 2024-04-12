@@ -48,7 +48,7 @@ endif
 lib$(TARGET)$(DLL_EXT): $(OBJ_DIR)$(CUR_DIR)$(FUN).o $(LIB_BASE)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(OBJ_DIR)$(CUR_DIR)$(FUN).o -Wl,--whole-archive $(LIB_BASE) -Wl,--no-whole-archive -L$(PATH_LIB) $(LIB) -shared -o lib$(TARGET)$(DLL_EXT)
 
-$(OBJ_DIR)$(CUR_DIR)$(FUN).o: $(FUN).cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA) model_options.txt
+$(OBJ_DIR)$(CUR_DIR)$(FUN).o: $(FUN).cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(INCLUDE) -c $(FUN).cpp -o $(OBJ_DIR)$(CUR_DIR)$(FUN).o
 
