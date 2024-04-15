@@ -239,15 +239,15 @@ int modman( int argn, const char **argv )
 	cmd( "set small_character [ expr { $dim_character - $deltaSize } ]" );
 
 	// current model info
-	cmd( "set model_group \"$rootname\"" );
+	cmd( "set model_group $rootname" );
 	cmd( "set model_name \"(no model)\"" );
 	cmd( "set model_version \"\"" );
-	cmd( "set file_name \"(no name)\"" );
-	cmd( "set file_dir \"[ pwd ]\"" );
 
 	// allow reloading last model
-	cmd( "if { ! [ info exists group_dir ] } { set group_dir \"[ pwd ]\" }" );
-	cmd( "if { ! [ info exists model_dir ] } { set model_dir \"[ pwd ]\" }" );
+	cmd( "if { ! [ info exists group_dir ] } { set group_dir [ pwd ] }" );
+	cmd( "if { ! [ info exists model_dir ] } { set model_dir [ pwd ] }" );
+	cmd( "if { ! [ info exists file_dir ] } { set file_dir [ pwd ] }" );
+	cmd( "if { ! [ info exists file_name ] } { set file_name \"(no name)\" }" );
 
 	// configure main window
 	cmd( ". configure -menu .m -background $colorsTheme(bg)" );
@@ -759,24 +759,10 @@ int modman( int argn, const char **argv )
 	cmd( "set before [ .f.t.t get 1.0 end ]" );
 
 	if ( argn > 1 )
-	{
-		cmd( "if [ file exists \"$filetoload\" ] { set choice 0 } { set choice -2 }" );
-		if ( choice == 0 )
-		{
-			cmd( "set file [ open \"$filetoload\" ]" );
-			cmd( ".f.t.t insert end [ read $file ]" );
-			cmd( ".f.t.t edit reset" );
-			cmd( "close $file" );
-			cmd( ".f.t.t mark set insert 1.0" );
-			cmd( "set file_name \"[ file tail \"$filetoload\" ]\"" );
-			cmd( "set file_dir [ file dirname \"$filetoload\" ]" );
-			cmd( "set before [ .f.t.t get 1.0 end ]" );
-
-			recolor_all = sourcefile = source_file( gui::get_str( "filetoload" ) );
-		}
+		if ( gui::eval_bool( "[ file exists \"$filetoload\" ]" ) )
+			choice = 71;				// load command line file
 		else
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" );
-	}
 	else
 		if ( gui::eval_bool( "[ file exists \"$model_dir/$MODEL_XML_CONFIG\" ]" ) && gui::eval_bool( "[ file exists \"$group_dir/$GROUP_XML_CONFIG\" ]" ) )
 			choice = 18;				// reload previous model
@@ -891,26 +877,20 @@ int modman( int argn, const char **argv )
 	if ( choice == 3 )
 	{
 		choice = 0;
-		cmd( ".f.t.t delete 0.0 end" );
 
 		if ( ! model_loaded( ) )
 			goto loop;
 
 		gui::make_makefile( );
-		if ( gui::eval_bool( "[ file exists \"$model_dir/makefile\" ]" ) )
-		{
-			cmd( "set file [ open \"$model_dir/makefile\" r ]" );
-			cmd( ".f.t.t insert end [ read -nonewline $file ]" );
-			cmd( ".f.t.t edit reset" );
-			cmd( "close $file" );
-		}
 
-		sourcefile = 0;
+		if ( ! gui::eval_bool( "[ file exists \"$model_dir/makefile\" ]" ) )
+			goto loop;
 
-		cmd( "set before [ .f.t.t get 1.0 end ]" );
-		cmd( "set file_name makefile" );
-		cmd( ".f.t.t mark set insert 1.0" );
 		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Makefile should not be changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Please check 'Model Options' and 'System Options' in menu 'Model' to change compilation options.\"" );
+
+		cmd( "set filetoload \"$model_dir/makefile\"" );
+		cmd( "unset -nocomplain errfil errlin" );
+		choice = 71;
 
 		goto loop;
 	}
@@ -927,6 +907,7 @@ int modman( int argn, const char **argv )
 			cmd( "puts -nonewline $file [ .f.t.t get 0.0 end ]" );
 			cmd( "close $file" );
 			cmd( "set before [ .f.t.t get 0.0 end ]" );
+
 			cmd( "set file_dir [ file dirname \"$curfilename\" ]" );
 			cmd( "set file_name [ file tail \"$curfilename\" ]" );
 		}
@@ -944,15 +925,11 @@ int modman( int argn, const char **argv )
 			goto loop;
 		}
 
-		cmd( "set file_dir \"$model_dir\"" );
-		cmd( "set file_name $DESCRIPTION" );
-
-		cmd( ".f.t.t delete 0.0 end" );
-		cmd( "if { [ file exists \"$file_dir/$file_name\" ] } { \
+		cmd( "if { [ file exists \"$model_dir/$DESCRIPTION\" ] } { \
 				set res 1; \
-				if { [ file size \"$file_dir/$file_name\" ] <= 2 } { \
+				if { [ file size \"$model_dir/$DESCRIPTION\" ] <= 2 } { \
 					set res 0; \
-					file delete \"$file_dir/$file_name\" \
+					catch { file delete \"$model_dir/$DESCRIPTION\" } \
 				} \
 			} { \
 				set res 0 \
@@ -960,39 +937,24 @@ int modman( int argn, const char **argv )
 
 		if ( gui::get_bool( "res" ) )
 		{
-			cmd( "set file [ open \"$file_dir/$DESCRIPTION\" r ]" );
-			cmd( ".f.t.t insert end [ read -nonewline $file ]" );
-			cmd( "close $file" );
-			cmd( "set before [ .f.t.t get 1.0 end ]" );
+			cmd( "set filetoload \"$model_dir/$DESCRIPTION\"" );
+			cmd( "unset -nocomplain errfil errlin" );
+			choice = 71;
 		}
 		else		// if no description, ask if the user wants to create it or not
 		{
-			cmd( "set res [ ttk::messageBox -parent . -type yesno -default no -icon question -title \"Create Description\" -message \"Create a description file?\" -detail \"There is no valid description file ('$DESCRIPTION') set for the model\n\nDo you want to create a description file now?\n\nPress 'No' to just show the equations file.\" ]" );
-
-			if ( ! gui::get_bool( "res" ) )
-			{
-				cmd( " set file_name \"\" " );
-				cmd( "set before [ .f.t.t get 0.0 end ]" );
+			if ( ! gui::eval_bool( "[ ttk::messageBox -parent . -type yesno -default no -icon question -title \"Create Description\" -message \"Create a description file?\" -detail \"There is no valid description file ('$DESCRIPTION') set for the model\n\nDo you want to create a description file now?\n\nPress 'No' to just show the equations file.\" ]" ) )
 				choice = 8;		// load equations file
-				goto loop;
+			else
+			{
+				cmd( "set filetoload \"$model_dir/$DESCRIPTION\"" );
+				cmd( "set file [ open \"$filetoload\" w ]" );
+				cmd( "puts $file \"Model $model_name (ver. $model_version)\n\n(Enter the Model description text here)\n\n(PRESS CTRL+E TO EDIT EQUATIONS)\"" );
+				cmd( "close $file" );
+				cmd( "unset -nocomplain errfil errlin" );
+				choice = 71;
 			}
-
-			cmd( ".f.t.t insert end \"Model $model_name (ver. $model_version)\n\n(Enter the Model description text here)\n\n(PRESS CTRL+E TO EDIT EQUATIONS)\n\"" );
 		}
-
-		sourcefile = 0;
-
-		cmd( ".f.t.t edit reset" );
-		cmd( ".f.t.t mark set insert 1.0" );
-
-		cmd( "unset -nocomplain ud udi rd rdi" );
-		cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
-		cmd( "lappend udi [ .f.t.t index insert ]" );
-
-		if ( choice == 50 )
-			choice = 46;			// go to create makefile, after the model selection
-		else
-			choice = 0;
 
 		goto loop;
 	}
@@ -1016,54 +978,12 @@ int modman( int argn, const char **argv )
 		if ( ! model_loaded( ) || ( s = gui::get_eqfile_name( str, MAX_PATH_LENGTH ) ) == NULL )
 			goto loop;
 
-		cmd( "set oldfile \"$file_name\"" );
-		cmd( "set olddir \"$file_dir\"" );
-		cmd( "set file_name \"%s\"", s );
-		cmd( "set file_dir \"$model_dir\"" );
-		cmd( "if [ file exist \"$file_dir/$file_name\" ] { \
-				set file [ open \"$file_dir/$file_name\" r ]; \
-				.f.t.t delete 1.0 end; \
-				.f.t.t insert end [ read -nonewline $file ]; \
-				close $file; \
-				.f.t.t edit reset; \
-				.f.t.t tag remove sel 1.0 end; \
-				set choice 1 \
-			} { \
-				set file_name \"$oldfile\"; \
-				set file_dir \"$olddir\"; \
-				ttk::messageBox -parent . -title Error -icon error -type ok -message \"Equation file not found\" -detail \"If equation file has been renamed, update the 'FUN' field in menu 'Model', 'Model Options'.\"; \
-				set choice 0 \
-			}" );
-		cmd( "unset -nocomplain oldfile olddir" );
+		cmd( "set filetoload \"$model_dir/%s\"", s );
+		if ( gui::eval_bool( "[ file exists $filetoload ]" ) )
+			choice = 71;
+		else
+			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Equation file not found\" -detail \"If equation file has been renamed, update the 'FUN' field in menu 'Model', 'Model Options'.\"" );
 
-		if ( ! choice )
-			goto loop;
-
-		// handle the opening of files from the compilation error window
-		cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$model_dir/$file_name\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
-				.f.t.t tag add sel $errlin.0 $errlin.end; \
-				if { [ info exists errcol ] && $errcol ne \"\" && [ string is integer -strict $errcol ] } { \
-					.f.t.t see $errlin.$errcol; \
-					.f.t.t mark set insert $errlin.$errcol \
-				} else { \
-					.f.t.t see $errlin.0; \
-					.f.t.t mark set insert $errlin.0 \
-				} \
-			} else { \
-				.f.t.t mark set insert 1.0 \
-			}" );
-		cmd( "upd_cursor" );
-
-		cmd( "set before [ .f.t.t get 1.0 end ]" );
-		cmd( ".f.t.t tag add bc \"1.0\"" );
-		cmd( ".f.t.t tag add fc \"1.0\"" );
-		cmd( "unset -nocomplain ud udi rd rdi" );
-		cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
-		cmd( "lappend udi [ .f.t.t index insert ]" );
-
-		sourcefile = 1;
-		recolor_all = true;
-		choice = 0;
 		goto loop;
 	}
 
@@ -1791,54 +1711,54 @@ int modman( int argn, const char **argv )
 	{
 		if ( choice == 15 )
 		{
-			cmd( "set brr [ tk_getOpenFile -parent . -title \"Load Text File\" -initialdir $file_dir ]" );
-			cmd( "if { [ string length $brr ] == 0 } { set choice 0 } { set choice 1 }" );
-			if ( choice == 0 )
+			cmd( "set filetoload [ tk_getOpenFile -parent . -title \"Load Text File\" -initialdir $file_dir ]" );
+			if ( strlen( gui::get_str( "filetoload" ) ) == 0 )
+			{
+				choice = 0;
 				goto loop;
+			}
 		}
 
-		cmd( "if [ file exists \"$brr\" ] { set choice 1 } { set choice 0 }" );
-		if ( choice == 0 )
+		choice = 0;
+
+		if ( ! gui::eval_bool( "[ info exists filetoload ] && [ file exists $filetoload ]" ) )
 			goto loop;
 
+		cmd( "set file [ open $filetoload r ]" );
 		cmd( ".f.t.t delete 1.0 end" );
-		cmd( "set file_dir [ file dirname \"$brr\" ]" );
-		cmd( "set file_name [ file tail \"$brr\" ]" );
-		cmd( "set file [ open \"$brr\" r ]" );
 		cmd( ".f.t.t insert end [ read -nonewline $file ]" );
 		cmd( "close $file" );
 		cmd( ".f.t.t edit reset" );
 		cmd( ".f.t.t tag remove sel 1.0 end" );
 
+		cmd( "set file_dir [ file dirname [ file normalize $filetoload ] ]" );
+		cmd( "set file_name [ file tail $filetoload ]" );
+		cmd( "unset filetoload" );
+
 		// handle the opening of files from the compilation error window
-		cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$file_dir/$file_name\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
-				.f.t.t tag add sel $errlin.0 $errlin.end; \
-				if { [ info exists errcol ] && $errcol ne \"\" && [ string is integer -strict $errcol ] } { \
-					.f.t.t see $errlin.$errcol; \
-					.f.t.t mark set insert $errlin.$errcol \
-				} else { \
-					.f.t.t see $errlin.0; \
-					.f.t.t mark set insert $errlin.0 \
-				} \
-			} else { \
-				.f.t.t mark set insert 1.0 \
-			}" );
+		if ( gui::eval_bool( "[ info exists errfil ] && [ string equal $errfil [ file normalize \"$file_dir/$file_name\" ] ] && [ info exists errlin ] && [ string is integer -strict $errlin ]" ) )
+		{
+			cmd( ".f.t.t tag add sel $errlin.0 $errlin.end" );
+			if ( gui::eval_bool( "[ info exists errcol ] && $errcol ne \"\" && [ string is integer -strict $errcol ]" ) )
+			{
+				cmd( ".f.t.t see $errlin.$errcol" );
+				cmd( ".f.t.t mark set insert $errlin.$errcol" );
+			}
+			else
+			{
+				cmd( ".f.t.t see $errlin.0" );
+				cmd( ".f.t.t mark set insert $errlin.0" );
+			}
+		}
+		else
+			cmd( ".f.t.t mark set insert 1.0" );
+
 		cmd( "upd_cursor" );
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
 
 		recolor_all = sourcefile = source_file( gui::get_str( "file_name" ) );
 
-		if ( sourcefile )
-		{
-			cmd( ".f.t.t tag add bc \"1.0\"" );
-			cmd( ".f.t.t tag add fc \"1.0\"" );
-		}
 
-		cmd( "unset -nocomplain ud udi rd rdi" );
-		cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
-		cmd( "lappend udi [ .f.t.t index insert ]" );
-
-		choice = 0;
 		goto loop;
 	}
 
@@ -4215,7 +4135,6 @@ int modman( int argn, const char **argv )
 			cmd( "bind .f.t.t <Enter> { }" );
 			cmd( "focustop .f.t.t" );
 
-			choice = num;
 			Tcl_UnlinkVar( gui::interp, "choiceSM" );
 
 			cmd( "if { $model_name eq \"(no model)\" } { \
@@ -4226,13 +4145,13 @@ int modman( int argn, const char **argv )
 
 			cmd( "set model_group [ get_group_setting $group_dir name ]" );
 
-			if ( choice == 0 || choice == 2 )
+			if ( num == 0 || num == 2 )
 			{
 				choice = 0;
 				goto loop;
 			}
 
-			if ( choice == 14 )
+			if ( num == 14 )
 				goto loop;							// create a new model/group
 
 			cmd( "set model_dir [ lindex $ldn $result ]" );
@@ -4262,7 +4181,15 @@ int modman( int argn, const char **argv )
 		cmd( ".m.model entryconf 10 -state normal" );
 		cmd( ".m.model entryconf 12 -state normal" );
 
+		if ( choice == 18 && gui::eval_bool( "[ file exists \"$file_dir/$file_name\" ] && [ file isfile \"$file_dir/$file_name\" ]" ) )
+		{
+			cmd( "set filetoload \"$file_dir/$file_name\"" );
+			choice = 71;							// load last file
+			goto loop;
+		}
+
 		choice = 50;								// load description file
+
 		goto loop;
 	}
 
@@ -4533,13 +4460,17 @@ int modman( int argn, const char **argv )
 	if ( choice == 39 )
 	{
 		cmd( ".f.t.t delete 1.0 end" );
+		cmd( ".f.t.t edit reset" );
+		cmd( ".f.t.t tag remove sel 1.0 end" );
+		cmd( ".f.t.t mark set insert 1.0" );
+		cmd( "upd_cursor" );
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
+
 		cmd( "set file_name newfile.txt" );
 		cmd( "set file_dir [ pwd ]" );
-		cmd( ".f.t.t mark set insert 1.0" );
-		cmd( "unset -nocomplain ud udi rd rdi" );
-		cmd( "lappend ud [ .f.t.t get 0.0 end ]" );
-		cmd( "lappend udi [ .f.t.t index insert ]" );
+
+		recolor_all = sourcefile = false;
+
 
 		choice = 0;
 		goto loop;
@@ -5139,7 +5070,7 @@ int modman( int argn, const char **argv )
 			goto loop;
 		}
 
-		cmd( "set brr \"\"" );
+		cmd( "set filetoload \"\"" );
 		cmd( "set e .extra" );
 
 		cmd( "newtop $e \"Extra Files\" { set choice 2 }"  );
@@ -5160,7 +5091,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "set choice [ $e.l.l size ]" );
 		if ( choice > 0 )
-			cmd( "bind $e.l.l <Double-Button-1> { set brr [ .extra.l.l curselection ]; set choice 1 }" );
+			cmd( "bind $e.l.l <Double-Button-1> { set filetoload [ .extra.l.l curselection ]; set choice 1 }" );
 		else
 			cmd( "$e.l.l insert end \"(none)\"" );
 
@@ -5181,11 +5112,17 @@ int modman( int argn, const char **argv )
 		cmd( "set i [ $e.l.l curselection ]" );
 		cmd( "destroytop $e" );
 
-		cmd( "if { $i eq \"\" } { set brr \"\" } { set brr [ lindex $extra_files $i ] }" );
-		s = gui::get_str( "brr" );
-		if ( choice == 1 && s != NULL && strlen( s ) > 0 )
+		cmd( "if { $i eq \"\" } { \
+				set filetoload \"\" \
+			} { \
+				set filetoload [ lindex $extra_files $i ] \
+			}" );
+
+		if ( choice == 1 && strlen( gui::get_str( "filetoload" ) ) > 0 )
 		{
-			cmd( "if { ! [ file exists \"$brr\" ] && [ file exists \"$model_dir/$brr\" ] } { set brr \"$model_dir/$brr\" }" );
+			cmd( "if { ! [ file exists \"$filetoload\" ] && [ file exists \"$model_dir/$filetoload\" ] } { \
+					set filetoload \"$model_dir/$filetoload\" \
+				}" );
 			choice = 71;
 		}
 		else
@@ -5216,33 +5153,28 @@ int modman( int argn, const char **argv )
 						set choice 1 \
 					} \
 				}" );
+
 		if ( choice == 0 )
-			goto loop;				// insufficient data to show error
+			goto loop;					// insufficient data to show error
 
 		// check if file is already loaded
-		cmd( "if { [ string equal \"$errfil\" \"[ file normalize \"$file_dir/$file_name\" ]\" ] } { \
-				set choice 1 \
-			} { \
-				set choice 0 \
-			}" );
-
-		if ( choice == 0 )
+		if ( gui::eval_bool( "$errfil ne [ file normalize \"$file_dir/$file_name\" ]" ) )
 		{
 			// check if main equation file is not the current file
+			choice = 0;
 			if ( ( s = gui::get_eqfile_name( str, MAX_PATH_LENGTH ) ) != NULL )
-				cmd( "if { [ string equal \"$errfil\" \"[ file normalize \"$model_dir/%s\" ]\" ] } { \
-						set choice 8 \
-					}", s );// open main equation file
+			{
+				cmd( "set a \"%s\"", s );
+				if ( gui::eval_bool( "$errfil eq [ file normalize \"$model_dir/$a\" ]" ) )
+					choice = 8;			// open main equation file
+			}
 
 			// try to open an extra file defined by the user
 			if ( choice == 0 )
 			{
 				cmd( "set extra_files [ get_source_files $model_dir 1 ]" );
-				cmd( "set choice [ llength $extra_files ]" );
-
-				if ( choice > 0 )
+				if ( gui::eval_int( "[ llength $extra_files ]" ) > 0 )
 				{
-					choice = 0;
 					cmd( "foreach x $extra_files { \
 							set x \"[ string trim $x ]\"; \
 							if { $x ne \"\" } { \
@@ -5291,7 +5223,7 @@ int modman( int argn, const char **argv )
 		}
 		else
 			// load the found extra file as correct "choice" is already set
-			cmd( "set brr \"$errfil\"" );
+			cmd( "set filetoload \"$errfil\"" );
 
 		goto loop;
 	}

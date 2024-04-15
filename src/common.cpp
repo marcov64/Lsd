@@ -702,6 +702,13 @@ void gui::load_lsd_options( void )
 			cmd( "set group_dir $g" );
 		}
 	}
+
+	cmd( "set f {%s}", modNode.child( "file" ).text( ).as_string( ) );
+	if ( eval_bool( "[ file exists $f ] && [ file isfile $f ]" ) )
+	{
+		cmd( "set file_dir [ file normalize [ file dirname $f ] ]" );
+		cmd( "set file_name [ file tail $f ]" );
+	}
 #endif
 }
 
@@ -754,7 +761,7 @@ void gui::update_lsd_options( bool save_settings )
 		<!ELEMENT LMM (settings, geometry, model?)>\n \
 		<!ELEMENT settings (#PCDATA+)>\n \
 		<!ELEMENT geometry (#PCDATA?)>\n \
-		<!ELEMENT model? (#PCDATA?)>\n \
+		<!ELEMENT model? (#PCDATA+?)>\n \
 		<!ELEMENT makefile (#CDATA)>\n]" );
 		lsdNode = sysCfg.append_child( "LSD" );
 		sysNode = lsdNode.append_child( "system" );
@@ -861,6 +868,14 @@ void gui::update_lsd_options( bool save_settings )
 			child = modNode.append_child( "path" );
 
 		child.text( ) = get_str( "model_dir" );
+
+		if ( exists_var( "file_dir" ) && exists_var( "file_name" ) )
+		{
+			if ( ( child = modNode.child( "file" ) ) == NULL )
+				child = modNode.append_child( "file" );
+
+			child.text( ) = eval_str( "[ file normalize \"$file_dir/$file_name\" ]" );
+		}
 	}
 	else
 		lmmNode.remove_child( "model" );
