@@ -196,7 +196,7 @@
 #define LMM_OPTIONS_DEFAULT { "$DefaultSysTerm", "$DefaultHtmlBrowser", \
 							  "$DefaultFont", "$DefaultWish", DEFAULT_SRC_DIR, \
 							  "$DefaultFontSize", "4", "1", "2", \
-							  "0", "0", "Work", "$DefaultDbgExe", \
+							  "0", "0", "~/LSD/Work", "$DefaultDbgExe", \
 							  "1", "#", "$DefaultTheme" }
 #define LMM_OPTIONS_TYPE { 'p', 'p', \
 						   'p', 'p', 'p', \
