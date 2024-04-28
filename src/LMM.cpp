@@ -196,15 +196,16 @@ int modman( int argn, const char **argv )
 	Tcl_CreateCommand( gui::interp, "set_group_setting", gui::Tcl_set_group_setting, NULL, NULL );
 	Tcl_CreateCommand( gui::interp, "set_model_setting", gui::Tcl_set_model_setting, NULL, NULL );
 
+	// load/check configuration files
+	gui::load_lsd_options( );
+	synt_high = gui::get_int( "synt_high" );				// prevent overwriting read value
+
 	// global links between C and tcl variables
 	Tcl_LinkVar( gui::interp, "num", ( char * ) &num, TCL_LINK_INT );
 	Tcl_LinkVar( gui::interp, "synt_high", ( char * ) &synt_high, TCL_LINK_INT );
 	Tcl_LinkVar( gui::interp, "choice", ( char * ) &choice, TCL_LINK_INT );
 	Tcl_LinkVar( gui::interp, "tosave", ( char * ) &tosave, TCL_LINK_BOOLEAN);
 	Tcl_LinkVar( gui::interp, "recolor_all", ( char * ) &recolor_all, TCL_LINK_BOOLEAN);
-
-	// load/check configuration files
-	gui::load_lsd_options( );
 
 	// load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 	choice = 0;
@@ -1408,14 +1409,12 @@ int modman( int argn, const char **argv )
 	{
 		cmd( "destroytop .mm" );	// close compilation results, if open
 
-		// prevent creating new groups in LSD directory
-		cmd( "if { [ string equal $group_dir [ pwd ] ] && ( [ file exists \"$group_dir/$group_new/$GROUP_TXT_INFO\" ] || [ file exists \"$group_dir/$group_new/$GROUP_XML_CONFIG\" ] ) } \
-				{	set answer [ ttk::messageBox -parent . -type okcancel -title Warning \
-					-icon warning -default ok -message \"Invalid parent group\" \
-					-detail \"Cannot create group/model in the Root group. Press 'OK' to change to the '$group_new' group before proceeding.\" ]; \
+		// prevent creating new groups outside the new groups directory
+		cmd( "if { [ string first [ file normalize $group_new ] [ file normalize $group_dir ] ] != 0 } { \
+				set answer [ ttk::messageBox -parent . -type okcancel -title Warning -icon warning -default ok -message \"Invalid parent group directory\" -detail \"Cannot create group/model in [ pwd ]'.\n\nPress 'OK' to change to the '$group_new' directory before proceeding.\" ]; \
 					if [ string equal $answer ok ] { \
-						set group_dir \"$group_dir/$group_new\"; \
-						set model_group [ get_group_setting $group_dir name ]; \
+						set group_dir $group_new; \
+						set model_group [ get_group_setting $group_new name ]; \
 						set choice 1 \
 					} else { \
 						set choice 0 \

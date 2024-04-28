@@ -690,6 +690,20 @@ void gui::load_lsd_options( void )
 	}
 
 #ifdef _LMM_
+	// fix new model directory if needed
+	if ( eval_bool( "[ file normalize $group_new ] eq \"/\" ] || [ file normalize $group_new ] eq $lsd_root ] || ( ! [ file exists $group_new ] && [ catch { file mkdir $group_new } )" ) )
+	{
+		cmd( "set group_new \"%s\"", DEFAULT_GROUP_DIR );
+		if ( ! eval_bool( "[ file exists $group_new ]" ) )
+			cmd( "catch { file mkdir $group_new }" );
+	}
+
+	if ( ! eval_bool( "[ file exists \"$group_new/$GROUP_TXT_INFO\" ] || [ file exists \"$group_new/$GROUP_XML_CONFIG\" ]" ) )
+	{
+		cmd( "set_group_setting $group_new name \"Work in Progress\"" );
+		cmd( "set_group_setting $group_new description \"Models under development.\"" );
+	}
+
 	// load previous model
 	x_nodeT modNode = lmmNode.child( "model" );		// LMM current model
 	cmd( "set m {%s}", modNode.child( "path" ).text( ).as_string( ) );
@@ -1289,7 +1303,7 @@ int gui::Tcl_get_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
  *************************************************************/
 int gui::Tcl_set_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
-	char fName[ MAX_PATH_LENGTH ], line[ MAX_LINE_SIZE ], buf[ MAX_BUFF_SIZE ];
+	char fName[ MAX_PATH_LENGTH ], line[ MAX_LINE_SIZE ], buf[ MAX_BUFF_SIZE ] = "";
 	int  setID, i;
 	x_docT modCfg;
 	x_nodeT child;
@@ -1573,6 +1587,7 @@ int gui::Tcl_set_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 
 	if ( strcmp( argv[ 2 ], "description" ) != 0 )
 	{
+		strcpy( buf, "" );
 		snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], GROUP_TXT_INFO );
 		if ( ( f = fopen( fName, "r" ) ) != NULL )
 		{

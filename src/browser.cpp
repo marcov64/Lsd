@@ -125,15 +125,15 @@ int gui::load_gui( const char **argv )
 	Tcl_CreateCommand( interp, "set_var_conf", Tcl_set_var_conf, NULL, NULL );
 	Tcl_CreateObjCommand( interp, "upload_series", Tcl_upload_series, NULL, NULL );
 
+	// load/check configuration file
+	load_lsd_options( );
+
 	// global links between C and tcl variables
 	Tcl_LinkVar( interp, "choice", ( char * ) & choice, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "choice_g", ( char * ) & choice_g, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "stop", ( char * ) & stop, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( interp, "deb_set", ( char * ) & sim.deb_set, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( interp, "deb_t", ( char * ) & sim.deb_t, TCL_LINK_INT );
-
-	// load/check configuration file
-	load_lsd_options( );
 
 	// load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 	choice = 0;

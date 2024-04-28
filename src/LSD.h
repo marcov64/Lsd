@@ -145,6 +145,7 @@
 #endif
 
 // global constants
+#define DEFAULT_GROUP_DIR "~/LSD/Work"	// default new group directory
 #define DEFAULT_SRC_DIR "src"			// default source files directory
 #define FILE_BUF_SIZE 1000000			// buffer size for file reading
 #define LOG_FILE "log.txt"				// name of log file
@@ -196,7 +197,7 @@
 #define LMM_OPTIONS_DEFAULT { "$DefaultSysTerm", "$DefaultHtmlBrowser", \
 							  "$DefaultFont", "$DefaultWish", DEFAULT_SRC_DIR, \
 							  "$DefaultFontSize", "4", "1", "2", \
-							  "0", "0", "~/LSD/Work", "$DefaultDbgExe", \
+							  "0", "0", DEFAULT_GROUP_DIR, "$DefaultDbgExe", \
 							  "1", "#", "$DefaultTheme" }
 #define LMM_OPTIONS_TYPE { 'p', 'p', \
 						   'p', 'p', 'p', \

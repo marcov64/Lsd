@@ -631,13 +631,13 @@ proc mpaste i {
 			} else {
 				file mkdir $pastedir/$appd
 				set copylist [ glob -nocomplain "$copydir/*" ]
-				foreach a $copylist { catch [ file copy -force $a "$pastedir/$appd" ] }
-
-				if { [ file exists "$pastedir/$appd/$MODEL_TXT_INFO" ] || [ file exists "$pastedir/$appd/$MODEL_XML_CONFIG" ] } {
-					set_model_setting "$pastedir/$appd" "model_name" $appl
-					set_model_setting "$pastedir/$appd" "model_version" $appv
-					set_model_setting "$pastedir/$appd" "model_date" [ clock format [ clock seconds ] -format "%d %B, %Y" ]
+				foreach a $copylist {
+					catch [ file copy -force $a "$pastedir/$appd" ]
 				}
+
+				set_model_setting "$pastedir/$appd" "model_name" $appl
+				set_model_setting "$pastedir/$appd" "model_version" $appv
+				set_model_setting "$pastedir/$appd" "model_date" [ clock format [ clock seconds ] -format "%d %B, %Y" ]
 
 				set f [ open "$pastedir/$appd/$DESCRIPTION" w ]
 				puts -nonewline $f "$appdsc"
