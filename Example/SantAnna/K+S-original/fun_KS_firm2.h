@@ -572,7 +572,7 @@ if ( v[2] + v[3] > 0 )
 	v[4] = floor( ( v[2] + v[3] ) / v[1] );		// total number of new machines
 
 	if ( v[4] > 0 )								// new machines to install?
-		add_vintage( THIS, v[4], false );		// create vintage
+		add_vintage( _v_, THIS, v[4], false );		// create vintage
 }
 
 v[5] = max( VL( "_K", 1 ) + v[3] - V( "_Kd" ), 0 );// desired capital shrinkage
@@ -600,7 +600,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 			}
 			else								// scrap entire vintage
 			{
-				if ( scrap_vintage( var, cur ) >= 0 )// not last vintage?
+				if ( scrap_vintage( _v_, cur ) >= 0 )// not last vintage?
 				{
 					v[6] -= v[8];
 					continue;					// don't consider for old vint.
@@ -625,7 +625,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 		}
 		else									// scrap entire vintage
 		{
-			if ( scrap_vintage( var, cur ) >= 0 )// not last vintage?
+			if ( scrap_vintage( _v_, cur ) >= 0 )// not last vintage?
 			{
 				v[7] -= v[8];
 				continue;						// don't consider for old vint.
