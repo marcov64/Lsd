@@ -691,7 +691,7 @@ void gui::load_lsd_options( void )
 
 #ifdef _LMM_
 	// fix new model directory if needed
-	if ( eval_bool( "[ file normalize $group_new ] eq \"/\" ] || [ file normalize $group_new ] eq $lsd_root ] || ( ! [ file exists $group_new ] && [ catch { file mkdir $group_new } )" ) )
+	if ( eval_bool( "[ file normalize $group_new ] eq \"/\" || [ file normalize $group_new ] eq $lsd_root || ( ! [ file exists $group_new ] && [ catch { file mkdir $group_new } ] )" ) )
 	{
 		cmd( "set group_new \"%s\"", DEFAULT_GROUP_DIR );
 		if ( ! eval_bool( "[ file exists $group_new ]" ) )
@@ -700,8 +700,8 @@ void gui::load_lsd_options( void )
 
 	if ( ! eval_bool( "[ file exists \"$group_new/$GROUP_TXT_INFO\" ] || [ file exists \"$group_new/$GROUP_XML_CONFIG\" ]" ) )
 	{
-		cmd( "set_group_setting $group_new name \"Work in Progress\"" );
-		cmd( "set_group_setting $group_new description \"Models under development.\"" );
+		cmd( "set_group_setting [ file normalize $group_new ] name \"Work in Progress\"" );
+		cmd( "set_group_setting [ file normalize $group_new ] description \"Models under development.\"" );
 	}
 
 	// load previous model

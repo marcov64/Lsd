@@ -636,6 +636,7 @@
 	#define SIM ( sims[ 0 ] )				// pointer to first simulation
 	#define var _v_
 	#define caller c
+	#define t T
 	#define root ROOT
 	#define path ( SIM->conf_path )
 	#define poidev( ... ) ( SIM->poisson( __VA_ARGS__ ) )
