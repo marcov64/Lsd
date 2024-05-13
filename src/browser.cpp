@@ -989,7 +989,7 @@ int gui::browse( lsd::object *r )
 			cmd( "ttk::label .l.p.up_name.n -anchor w -text \"\"" );
 
 		cmd( "pack .l.p.up_name.d .l.p.up_name.n -side left" );
-		cmd( "pack .l.p.up_name -padx 5 -anchor w" );
+		cmd( "pack .l.p.up_name -padx $_5 -anchor w" );
 
 		cmd( "ttk::frame .l.p.tit" );
 		cmd( "ttk::label .l.p.tit.lab -text \"Current object:\" -width 15 -anchor w" );
@@ -1001,7 +1001,7 @@ int gui::browse( lsd::object *r )
 			cmd( ".l.p.tit.but configure -state disabled" );
 
 		cmd( "pack .l.p.tit.lab .l.p.tit.but -side left" );
-		cmd( "pack .l.p.tit -padx 5 -anchor w" );
+		cmd( "pack .l.p.tit -padx $_5 -anchor w" );
 
 		// main menu - avoid redrawing the menu if it already exists and is configured
 		if ( ! exists_window( ".m" ) || ! expr_eq( "[ . cget -menu ]", ".m" ) )
@@ -1207,7 +1207,7 @@ int gui::browse( lsd::object *r )
 			cmd( "tooltip::tooltip .bbar.result \"Analysis of Results...\"" );
 
 			cmd( "pack .bbar.open .bbar.reload .bbar.save .bbar.struct .bbar.find .bbar.addvar .bbar.addpar .bbar.addobj .bbar.init .bbar.number .bbar.set .bbar.run .bbar.data .bbar.result -side left" );
-			cmd( "pack .bbar -padx 3 -anchor w -fill x" );
+			cmd( "pack .bbar -padx $_3 -anchor w -fill x" );
 		}
 
 		cmd( "pack .l.v.lab" );
@@ -1221,7 +1221,7 @@ int gui::browse( lsd::object *r )
 		cmd( "pack .l.s.c -fill both -expand yes" );
 
 		cmd( "pack .l.p.up_name .l.p.tit" );
-		cmd( "pack .l.p -pady 3 -fill x" );
+		cmd( "pack .l.p -pady $_3 -fill x" );
 
 		cmd( "pack .l.s .l.v -side left -fill both -expand yes" );
 

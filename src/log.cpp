@@ -173,8 +173,8 @@ void gui::cover_browser( const char *text1, const char *text2, bool run )
 
 	cmd( "ttk::frame .t1" );
 	cmd( "ttk::label .t1.l1 -justify center -text \"%s\" -style bold.TLabel", text1	 );
-	cmd( "pack .t1.l1 -pady 10 -expand yes -fill y" );
-	cmd( "pack .t1 -fill both -expand yes -padx 10 -pady 10" );
+	cmd( "pack .t1.l1 -pady $_10 -expand yes -fill y" );
+	cmd( "pack .t1 -fill both -expand yes -padx $_10 -pady $_10" );
 
 	if ( run )
 	{
@@ -184,25 +184,25 @@ void gui::cover_browser( const char *text1, const char *text2, bool run )
 		cmd( "ttk::frame .p.b1" );
 		cmd( "ttk::progressbar .p.b1.b -maximum %d -value 0", sim.last_run );
 		cmd( "ttk::label .p.b1.i -text \"Simulation: 1 of %d (0%% done)\" -anchor center", sim.last_run );
-		cmd( "pack .p.b1.b .p.b1.i -pady 5 -expand yes -fill x" );
+		cmd( "pack .p.b1.b .p.b1.i -pady $_5 -expand yes -fill x" );
 
 		cmd( "ttk::frame .p.b2" );
 		cmd( "ttk::progressbar .p.b2.b -maximum %d -value 0", sim.last_t );
 		cmd( "ttk::label .p.b2.i -text \"Case: 1 of %d (0%% done)\" -anchor center", sim.last_t );
-		cmd( "pack .p.b2.b .p.b2.i -pady 5 -expand yes -fill x" );
+		cmd( "pack .p.b2.b .p.b2.i -pady $_5 -expand yes -fill x" );
 
 		if ( sim.last_run > 1 )
-			cmd( "pack .p.l .p.b1 .p.b2 -pady 10 -expand yes -fill x" );
+			cmd( "pack .p.l .p.b1 .p.b2 -pady $_10 -expand yes -fill x" );
 		else
-			cmd( "pack .p.l .p.b2 -pady 10 -expand yes -fill x" );
+			cmd( "pack .p.l .p.b2 -pady $_10 -expand yes -fill x" );
 
-		cmd( "pack .p -fill x -expand yes -padx 20 -pady 5" );
+		cmd( "pack .p -fill x -expand yes -padx $_20 -pady $_5" );
 	}
 
 	cmd( "ttk::frame .t2" );
 	cmd( "ttk::label .t2.l1 -justify left -text \"\n%s\"", text2 );
 	cmd( "pack .t2.l1 -expand yes -fill y" );
-	cmd( "pack .t2 -fill both -expand yes -padx 10 -pady 10" );
+	cmd( "pack .t2 -fill both -expand yes -padx $_10 -pady $_10" );
 
 	if ( run )
 	{

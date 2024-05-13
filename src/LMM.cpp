@@ -501,7 +501,7 @@ int modman( int argn, const char **argv )
 		}" );
 
 	cmd( "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.wrap .bbar.compile .bbar.comprun .bbar.gdb .bbar.info .bbar.descr .bbar.equation .bbar.extra .bbar.set .bbar.hide .bbar.help -side left" );
-	cmd( "pack .bbar -padx 3 -anchor w -fill x" );
+	cmd( "pack .bbar -padx $_3 -anchor w -fill x" );
 
 	cmd( "ttk::frame .f" );
 	cmd( "ttk::frame .f.t" );
@@ -574,7 +574,7 @@ int modman( int argn, const char **argv )
 
 	cmd( "pack .f.hea.cur -side left -anchor e" );
 
-	cmd( "pack .f.hea -padx 5 -pady 3 -fill x" );
+	cmd( "pack .f.hea -padx $_5 -pady $_3 -fill x" );
 
 	cmd( "pack .f.t -expand yes -fill both" );
 	cmd( "pack .f.t.vs -side right -fill y" );
@@ -1000,7 +1000,7 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::entry .search_line.l.e -justify center -width 10" );
 		cmd( "pack .search_line.l.l .search_line.l.e" );
 
-		cmd( "pack .search_line.l -padx 5 -pady 5" );
+		cmd( "pack .search_line.l -padx $_5 -pady $_5" );
 
 		cmd( "okcancel .search_line b { \
 				set line [ .search_line.l.e get ]; \
@@ -1053,7 +1053,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "ttk::checkbutton .find.c -text \"Case sensitive\" -variable docase" );
 
-		cmd( "pack .find.l .find.r .find.c -padx 5 -pady 5" );
+		cmd( "pack .find.l .find.r .find.c -padx $_5 -pady $_5" );
 
 		cmd( "Xcancel .find b Find { \
 				if { $textsearch ne \"\" } { \
@@ -1181,10 +1181,10 @@ int modman( int argn, const char **argv )
 
 		cmd( "ttk::checkbutton .l.c -text \"Case sensitive\" -variable docase" );
 
-		cmd( "pack .l.l .l.p .l.r .l.c -padx 5 -pady 5" );
+		cmd( "pack .l.l .l.p .l.r .l.c -padx $_5 -pady $_5" );
 
 		cmd( "ttk::frame .l.pad" );
-		cmd( "pack .l.pad -pady 5" );
+		cmd( "pack .l.pad -pady $_5" );
 
 		cmd( "ttk::frame .l.b1" );
 		cmd( "ttk::button .l.b1.repl -width $butWid -state disabled -text Replace -command { \
@@ -1438,7 +1438,7 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::radiobutton .a.f.r2 -variable temp -value 2 -text \"Create a new model in a new group\"" );
 		cmd( "pack .a.f.r1 .a.f.r2 -anchor w" );
 
-		cmd( "pack .a.tit .a.f -padx 5 -pady 5" );
+		cmd( "pack .a.tit .a.f -padx $_5 -pady $_5" );
 
 		cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
 
@@ -1490,7 +1490,7 @@ int modman( int argn, const char **argv )
 			cmd( "ttk::text .a.tdes.e -width 60 -height 15 -dark $darkTheme -style smallFixed.TText" );
 			cmd( "pack .a.tdes.l .a.tdes.e" );
 
-			cmd( "pack .a.tit .a.mname .a.mdir .a.tdes -padx 5 -pady 5" );
+			cmd( "pack .a.tit .a.mname .a.mdir .a.tdes -padx $_5 -pady $_5" );
 
 			cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
 			cmd( "bind .a.mname.e <Return> { focus .a.mdir.e; .a.mdir.e selection range 0 end }" );
@@ -1570,7 +1570,7 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::entry .a.mdir.e -width 35 -textvariable mdir -justify center" );
 		cmd( "pack .a.mdir.l .a.mdir.e" );
 
-		cmd( "pack .a.tit .a.mname .a.mver .a.mdir -padx 5 -pady 5" );
+		cmd( "pack .a.tit .a.mname .a.mver .a.mdir -padx $_5 -pady $_5" );
 
 		cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
 		cmd( "bind .a.mname.e <Return> { focus .a.mver.e; .a.mver.e selection range 0 end }" );
@@ -1848,7 +1848,7 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::radiobutton .a.r.math -text \"Mathematical and statistical functions\" -underline 11 -variable res -value 51" );
 
 		cmd( "pack .a.r.equ .a.r.cal .a.r.for .a.r.sum .a.r.incr .a.r.mult .a.r.sear .a.r.scnd .a.r.lqs .a.r.rndo .a.r.wri .a.r.addo .a.r.delo .a.r.net .a.r.math -anchor w" );
-		cmd( "pack .a.tit .a.r -padx 5 -pady 5" );
+		cmd( "pack .a.tit .a.r -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LMM.html#LsdScript } { set choice 2 }" );
 
@@ -1916,7 +1916,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.e.e.e2.e <Return> { .a.b.ok invoke }" );
 		cmd( "pack .a.e.e.e2.l .a.e.e.e2.e" );
 
-		cmd( "pack .a.e.e.e1 .a.e.e.e2 -padx 5 -pady 5" );
+		cmd( "pack .a.e.e.e1 .a.e.e.e2 -padx $_5 -pady $_5" );
 
 		cmd( "pack .a.e.l .a.e.e" );
 
@@ -1943,7 +1943,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "ttk::label .a.more -text \"(see Help for more functions/distributions)\"" );
 
-		cmd( "pack .a.e .a.f .a.more -padx 5 -pady 5" );
+		cmd( "pack .a.e .a.f .a.more -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LSD_macros.html#Math } { set choice 2 }" );
 
@@ -1985,7 +1985,7 @@ int modman( int argn, const char **argv )
 		cmd( "pack .a.label.l .a.label.n" );
 
 		cmd( "bind .a.label.n <Return> { focus .a.b.ok }" );
-		cmd( "pack .a.label -padx 5 -pady 5" );
+		cmd( "pack .a.label -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LSD_macros.html#EQUATION } { set choice 2 }" );
 
@@ -2058,7 +2058,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.v .a.n .a.l .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.v .a.n .a.l .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#V } { set choice 2 }" );
 
@@ -2128,7 +2128,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.p.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.p.l .a.p.e" );
 
-		cmd( "pack .a.o .a.c .a.p -padx 5 -pady 5" );
+		cmd( "pack .a.o .a.c .a.p -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#CYCLE } { set choice 2 }" );
 
@@ -2219,7 +2219,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.v .a.n .a.a .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.v .a.n .a.a .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#INCR } { set choice 2 }" );
 
@@ -2292,7 +2292,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.v .a.n .a.a .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.v .a.n .a.a .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#MULT } { set choice 2 }" );
 
@@ -2364,7 +2364,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.v .a.n .a.l .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.v .a.n .a.l .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#WRITE } { set choice 2 }" );
 
@@ -2439,7 +2439,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.d .a.v .a.n .a.l .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.d .a.v .a.n .a.l .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SEARCH_CND } { set choice 2 }" );
 
@@ -2517,7 +2517,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.d .a.n .a.s .a.l .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.d .a.n .a.s .a.l .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SORT } { set choice 2 }" );
 
@@ -2598,7 +2598,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.d .a.n .a.x .a.v .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.d .a.n .a.x .a.v .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#ADDOBJ } { set choice 2 }" );
 
@@ -2657,7 +2657,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.d.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.d.l .a.d.e" );
 
-		cmd( "pack .a.d -padx 5 -pady 5" );
+		cmd( "pack .a.d -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#DELETE } { set choice 2 }" );
 
@@ -2736,7 +2736,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.d .a.v .a.n .a.l .a.t .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.d .a.v .a.n .a.l .a.t .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#RNDDRAW } { set choice 2 }" );
 
@@ -2811,7 +2811,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.d .a.n .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.d .a.n .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LSD_macros.html#SEARCH } { set choice 2 }" );
 
@@ -2877,7 +2877,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.v .a.n .a.l .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.v .a.n .a.l .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SUM } { set choice 2 }" );
 
@@ -2948,7 +2948,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "pack .a.f.r1 .a.f.r2 .a.f.r3 .a.f.r4 .a.f.r5 .a.f.r6 .a.f.r7 .a.f.r8 .a.f.r9 .a.f.r10 .a.f.r11 .a.f.r12 .a.f.r13 .a.f.r14 -anchor w" );
 
-		cmd( "pack .a.tit .a.f -padx 5 -pady 5" );
+		cmd( "pack .a.tit .a.f -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LSD_macros.html#Networks } { set choice 2 }" );
 
@@ -3042,7 +3042,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.d .a.x .a.p1 .a.p2 .a.n .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.d .a.x .a.p1 .a.p2 .a.n .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#INIT_NET } { set choice 2 }" );
 
@@ -3108,7 +3108,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.d .a.n .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.d .a.n .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#LOAD_NET } { set choice 2 }" );
 
@@ -3165,7 +3165,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.d .a.n .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.d .a.n .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SAVE_NET } { set choice 2 }" );
 
@@ -3222,7 +3222,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.d .a.n .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.d .a.n .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SNAP_NET } { set choice 2 }" );
 
@@ -3299,7 +3299,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.c .a.d .a.i .a.n .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.c .a.d .a.i .a.n .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#ADDNODE } { set choice 2 }" );
 
@@ -3380,7 +3380,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.c .a.v .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.c .a.v .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#V_NODEID } { set choice 2 }" );
 
@@ -3480,7 +3480,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.c .a.v .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.c .a.v .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#WRITE_NODEID } { set choice 2 }" );
 
@@ -3550,7 +3550,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.p.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.p.l .a.p.e" );
 
-		cmd( "pack .a.c .a.p -padx 5 -pady 5" );
+		cmd( "pack .a.c .a.p -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#CYCLE_LINK } { set choice 2 }" );
 
@@ -3653,7 +3653,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.c .a.d .a.v .a.n .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.c .a.d .a.v .a.n .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LSD_macros.html#SEARCH_NODE } { set choice 2 }" );
 
@@ -3730,7 +3730,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.v.e <Return>	{ focus .a.f.ok }" );
 		cmd( "pack .a.v.l .a.v.e" );
 
-		cmd( "pack .a.c .a.d .a.v -padx 5 -pady 5" );
+		cmd( "pack .a.c .a.d .a.v -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#LINKTO } { set choice 2 }" );
 
@@ -3787,7 +3787,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.n .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.n .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SHUFFLE_NET } { set choice 2 }" );
 
@@ -3857,7 +3857,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.c .a.d .a.n .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.c .a.d .a.n .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#RNDDRAW_NODE } { set choice 2 }" );
 
@@ -3936,7 +3936,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.c .a.n .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.c .a.n .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#DELETE_NET } { set choice 2 }" );
 
@@ -4019,7 +4019,7 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.c .a.n .a.o -padx 5 -pady 5" );
+		cmd( "pack .a.c .a.n .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#STAT_NET } { set choice 2 }" );
 
@@ -4230,7 +4230,7 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::entry .a.mdir.e -width 35 -textvariable mdir -justify center" );
 		cmd( "pack .a.mdir.l .a.mdir.e" );
 
-		cmd( "pack .a.tit .a.mname .a.mver .a.mdir -padx 5 -pady 5" );
+		cmd( "pack .a.tit .a.mname .a.mver .a.mdir -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LMM.html#copy } { set choice 2 }" );
 		cmd( "bind .a.mname.e <Return> { focus .a.mver.e; .a.mver.e selection range 0 end }" );
@@ -4427,7 +4427,7 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::entry .a.edate.e -width 20 -state disabled -textvariable edate -justify center" );
 		cmd( "pack .a.edate.l .a.edate.e" );
 
-		cmd( "pack .a.mname .a.mver .a.mdir .a.date .a.edate -padx 5 -pady 5" );
+		cmd( "pack .a.mname .a.mver .a.mdir .a.date .a.edate -padx $_5 -pady $_5" );
 
 		cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
 		cmd( "bind .a.mname.e <Return> { focus .a.mver.e; .a.mver.e selection range 0 end }" );
@@ -4614,7 +4614,7 @@ int modman( int argn, const char **argv )
 		cmd( "mouse_wheel .l.t.text" );
 
 		cmd( "ttk::frame .l.pad" );
-		cmd( "pack .l.pad -pady 5" );
+		cmd( "pack .l.pad -pady $_5" );
 
 		cmd( "ttk::frame .l.d" );
 
@@ -4871,9 +4871,9 @@ int modman( int argn, const char **argv )
 		cmd( "pack .a.f.c1.num5.l .a.f.c1.num5.v" );
 		cmd( "bind .a.f.c1.num5.v <Return> { focus .a.f.c2.num16.v; .a.f.c2.num16.v selection range 0 end }" );
 
-		cmd( "pack .a.f.c1.num .a.f.c1.num13 .a.f.c1.num2 .a.f.c1.num4 .a.f.c1.num12 .a.f.c1.num5 -padx 5 -pady 5" );
+		cmd( "pack .a.f.c1.num .a.f.c1.num13 .a.f.c1.num2 .a.f.c1.num4 .a.f.c1.num12 .a.f.c1.num5 -padx $_5 -pady $_5" );
 
-		cmd( "pack .a.f.c1 -padx 10 -side left" );
+		cmd( "pack .a.f.c1 -padx $_10 -side left" );
 
 		cmd( "ttk::frame .a.f.c2" );					// column 2
 
@@ -4928,9 +4928,9 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.f.c2.num8.v_num11 <Return> { focus .a.f.c2.num8.v_num14 }" );
 		cmd( "bind .a.f.c2.num8.v_num14 <Return> { focus .a.b.ok }" );
 
-		cmd( "pack .a.f.c2.num16 .a.f.c2.num3 .a.f.c2.num7 .a.f.c2.num9 .a.f.c2.num8 -padx 5 -pady 5" );
+		cmd( "pack .a.f.c2.num16 .a.f.c2.num3 .a.f.c2.num7 .a.f.c2.num9 .a.f.c2.num8 -padx $_5 -pady $_5" );
 
-		cmd( "pack .a.f.c2 -padx 10 -side left" );
+		cmd( "pack .a.f.c2 -padx $_10 -side left" );
 
 		cmd( "pack .a.f" );
 
@@ -5097,7 +5097,7 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::label $e.l3 -text \"(double-click to show the file)\"" );
 		cmd( "ttk::label $e.l4 -justify center -text \"Extra files are added using\n'Model Options' in menu 'Model'\"" );
 
-		cmd( "pack $e.lf $e.l $e.l3 $e.l4 -pady 5 -padx 5" );
+		cmd( "pack $e.lf $e.l $e.l3 $e.l4 -pady $_5 -padx $_5" );
 
 		cmd( "okcancel $e b { set choice 1 } { set choice 2 }" );
 

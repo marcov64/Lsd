@@ -157,7 +157,7 @@ void gui::show_eq( const char *lab, const char *parWnd )
 					update idletasks \
 				} \
 			}; \
-			pack $W.s.l $W.s.e -padx 5; \
+			pack $W.s.l $W.s.e -padx $_5; \
 			pack $W.s.b -padx $butPad -pady $butPad -side right; \
 			bind $W.s <KeyPress-Return> { $W.s.b invoke }; \
 			showtop $W.s centerW; \
@@ -388,7 +388,7 @@ void gui::scan_used_lab( const char *lab, const char *parWnd )
 		else
 			cmd( "ttk::label $list.l3" );
 
-		cmd( "pack $list.lf $list.l $list.l3 -padx 5 -pady 5 -expand yes -fill both" );
+		cmd( "pack $list.lf $list.l $list.l3 -padx $_5 -pady $_5 -expand yes -fill both" );
 
 		cmd( "done $list b \"destroytop $list\"" );		// done button
 	}
@@ -505,7 +505,7 @@ void gui::scan_using_lab( const char *lab, const char *parWnd )
 	else
 		cmd( "ttk::label $list.l3" );
 
-	cmd( "pack $list.lf $list.l $list.l3 -padx 5 -pady 5 -expand yes -fill both" );
+	cmd( "pack $list.lf $list.l $list.l3 -padx $_5 -pady $_5 -expand yes -fill both" );
 
 	cmd( "done $list b \"destroytop $list\"" );		// done button
 
@@ -564,7 +564,7 @@ void gui::show_descr( const char *lab, const char *parWnd )
 	cmd( "pack $w.f.d.yscroll -side right -fill y" );
 	cmd( "pack $w.f.d.text -expand yes -fill both" );
 	cmd( "pack $w.f.l $w.f.d" );
-	cmd( "pack $w.f -expand yes -fill both -pady 5" );
+	cmd( "pack $w.f -expand yes -fill both -pady $_5" );
 
 	if ( ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL )
 	{
@@ -577,7 +577,7 @@ void gui::show_descr( const char *lab, const char *parWnd )
 		cmd( "pack $w.i.d.yscroll -side right -fill y" );
 		cmd( "pack $w.i.d.text -expand yes -fill both" );
 		cmd( "pack $w.i.l $w.i.d" );
-		cmd( "pack $w.i -expand yes -fill both -pady 5" );
+		cmd( "pack $w.i -expand yes -fill both -pady $_5" );
 	}
 
 	cmd( "done $w b \"destroytop $w; focus $parWnd\"" );

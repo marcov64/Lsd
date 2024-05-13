@@ -121,7 +121,7 @@ lsd::object *gui::operate( lsd::object *r )
 					cmd( "ttk::frame $T.l" );
 					cmd( "ttk::label $T.l.l1 -text \"New variable in object:\"" );
 					cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
-					cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
+					cmd( "pack $T.l.l1 $T.l.l2 -side left -padx $_2" );
 
 					cmd( "ttk::frame $T.f" );
 					cmd( "ttk::label $T.f.lab_ent -text \"Variable name\"" );
@@ -130,7 +130,7 @@ lsd::object *gui::operate( lsd::object *r )
 					cmd( "ttk::combobox $T.f.ent_var -width 20 -textvariable lab -justify center -values $missVar" );
 					cmd( "ttk::spinbox $T.f.ent_num -width 3 -from 0 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set num %%P; if { $num > 0 } { $T.b.x configure -state normal } { $T.b.x configure -state disabled }; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -command { if { [ $T.f.ent_num get ] > 0 } { $T.b.x configure -state normal } { $T.b.x configure -state disabled } } -invalidcommand { bell } -justify center" );
 					cmd( "write_any $T.f.ent_num $num" );
-					cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left -padx 2" );
+					cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left -padx $_2" );
 
 					cmd( "tooltip::tooltip $T.f.ent_num \"Maximum lag used in equations\"" );
 
@@ -161,12 +161,12 @@ lsd::object *gui::operate( lsd::object *r )
 					cmd( "ttk::frame $T.l" );
 					cmd( "ttk::label $T.l.l1 -text \"New function in object:\"" );
 					cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
-					cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
+					cmd( "pack $T.l.l1 $T.l.l2 -side left -padx $_2" );
 
 					cmd( "ttk::frame $T.f" );
 					cmd( "ttk::label $T.f.lab_ent -text \"Function name\"" );
 					cmd( "ttk::combobox $T.f.ent_var -width 20 -textvariable lab -justify center -values $missVar" );
-					cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
+					cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx $_2" );
 					cmd( "bind $T.f.ent_var <KeyRelease> { \
 							if { %%N < 256 } { \
 								set b [ .addelem.f.ent_var index insert ]; \
@@ -194,12 +194,12 @@ lsd::object *gui::operate( lsd::object *r )
 					cmd( "ttk::frame $T.l" );
 					cmd( "ttk::label $T.l.l1 -text \"New parameter in object:\"" );
 					cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
-					cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
+					cmd( "pack $T.l.l1 $T.l.l2 -side left -padx $_2" );
 
 					cmd( "ttk::frame $T.f" );
 					cmd( "ttk::label $T.f.lab_ent -text \"Parameter name\"" );
 					cmd( "ttk::combobox $T.f.ent_var -width 20 -textvariable lab -justify center -values $missPar" );
-					cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
+					cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx $_2" );
 					cmd( "bind $T.f.ent_var <KeyRelease> { \
 							if { %%N < 256 } { \
 								set b [ .addelem.f.ent_var index insert ]; \
@@ -235,7 +235,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "mouse_wheel $w.f.text" );
 			cmd( "pack $w.lab $w.f" );
 
-			cmd( "pack $T.l $T.f $T.d -pady 5" );
+			cmd( "pack $T.l $T.f $T.d -pady $_5" );
 
 			cmd( "okXhelpcancel $T b \"Initial Values\" { set done 3 } { set done 1 } { LsdHelp $help } { set done 2 }" );
 
@@ -399,12 +399,12 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $T.l" );
 			cmd( "ttk::label $T.l.l1 -text \"New object descending from:\"" );
 			cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
-			cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
+			cmd( "pack $T.l.l1 $T.l.l2 -side left -padx $_2" );
 
 			cmd( "ttk::frame $T.f" );
 			cmd( "ttk::label $T.f.lab_ent -text \"Object name\"" );
 			cmd( "ttk::combobox $T.f.ent_var -width 20 -textvariable lab -justify center -values $missObj" );
-			cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
+			cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx $_2" );
 			cmd( "bind $T.f.ent_var <KeyPress-Return> {focus $T.b.ok}" );
 
 			cmd( "set w $T.d" );
@@ -418,7 +418,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "mouse_wheel $w.f.text" );
 			cmd( "pack $w.lab $w.f" );
 
-			cmd( "pack $T.l $T.f $w -pady 5" );
+			cmd( "pack $T.l $T.f $w -pady $_5" );
 			cmd( "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#AddADesc } { set done 2 }" );
 
 			cmd( "showtop $T topleftW" );
@@ -512,7 +512,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $TT.l" );
 			cmd( "ttk::label $TT.l.l -text \"Object:\"" );
 			cmd( "ttk::label $TT.l.n -style hl.TLabel -text \"%s\"", lab_old );
-			cmd( "pack $TT.l.l $TT.l.n -side left -padx 2" );
+			cmd( "pack $TT.l.l $TT.l.n -side left -padx $_2" );
 
 			cmd( "ttk::frame $TT.v" );
 			cmd( "ttk::label $TT.v.l -text \"Move to\"" );
@@ -525,7 +525,7 @@ lsd::object *gui::operate( lsd::object *r )
 			sim.root->insert_object( "$TT.v.t.lb", false, r );
 			cmd( "pack $TT.v.l $TT.v.t" );
 
-			cmd( "pack $TT.l $TT.v -padx 5 -pady 5" );
+			cmd( "pack $TT.l $TT.v -padx $_5 -pady $_5" );
 
 			cmd( "okcancel $TT b { set choice 1 } { set choice 2 }" );// insert ok button
 
@@ -656,12 +656,12 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $T.h.o" );
 			cmd( "ttk::label $T.h.o.lab -text \"Object:\"" );
 			cmd( "ttk::label $T.h.o.ent -style hl.TLabel -text $lab" );
-			cmd( "pack $T.h.o.lab $T.h.o.ent -side left -padx 2" );
+			cmd( "pack $T.h.o.lab $T.h.o.ent -side left -padx $_2" );
 
 			cmd( "ttk::frame $T.h.i" );
 			cmd( "ttk::label $T.h.i.lab -text \"Number of instances:\"" );
 			cmd( "ttk::label $T.h.i.ent -style hl.TLabel -text %d", num );
-			cmd( "pack $T.h.i.lab $T.h.i.ent -side left -padx 2" );
+			cmd( "pack $T.h.i.lab $T.h.i.ent -side left -padx $_2" );
 
 			cmd( "pack $T.h.o $T.h.i" );
 
@@ -694,7 +694,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "pack $w.int $w.f -fill x -expand yes" );
 
-			cmd( "pack $T.h $T.b0 $T.b1 $w -pady 5" );
+			cmd( "pack $T.h $T.b0 $T.b1 $w -pady $_5" );
 
 			cmd( "bind $T <Control-r> \"$T.b0.prop invoke\"; bind $T <Control-R> \"$T.b0.prop invoke\"" );
 			cmd( "bind $T <Control-n> \"$T.b0.num invoke\"; bind $T <Control-N> \"$T.b0.num invoke\"" );
@@ -796,14 +796,14 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "ttk::frame $T.l" );
 				cmd( "ttk::label $T.l.l -text \"Object:\"" );
 				cmd( "ttk::label $T.l.n -style hl.TLabel -text \"$vname\"" );
-				cmd( "pack $T.l.l $T.l.n -side left -padx 2" );
+				cmd( "pack $T.l.l $T.l.n -side left -padx $_2" );
 
 				cmd( "ttk::frame $T.e" );
 				cmd( "ttk::label $T.e.l -text \"New name\"" );
 				cmd( "ttk::entry $T.e.e -width 20 -textvariable vname -justify center" );
-				cmd( "pack $T.e.l $T.e.e -side left -padx 2" );
+				cmd( "pack $T.e.l $T.e.e -side left -padx $_2" );
 
-				cmd( "pack $T.l $T.e -padx 5 -pady 5" );
+				cmd( "pack $T.l $T.e -padx $_5 -pady $_5" );
 
 				cmd( "okcancel $T b { set choice 1 } { set choice 2 }" );
 
@@ -942,14 +942,14 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "ttk::label $T.h.o.l.lab_ent -text \"Function:\"" );
 
 			cmd( "ttk::label $T.h.o.l.ent_var -style hl.TLabel -text $vname" );
-			cmd( "pack $T.h.o.l.lab_ent $T.h.o.l.ent_var -side left -padx 2" );
+			cmd( "pack $T.h.o.l.lab_ent $T.h.o.l.ent_var -side left -padx $_2" );
 
 			cmd( "ttk::frame $T.h.o.o" );
 			cmd( "ttk::label $T.h.o.o.l -text \"In object:\"" );
 			cmd( "ttk::label $T.h.o.o.obj -style hl.TLabel -text \"%s\"", cv->up->label );
-			cmd( "pack $T.h.o.o.l $T.h.o.o.obj -side left -padx 2" );
+			cmd( "pack $T.h.o.o.l $T.h.o.o.obj -side left -padx $_2" );
 
-			cmd( "pack $T.h.o.l $T.h.o.o -side left -padx 5" );
+			cmd( "pack $T.h.o.l $T.h.o.o -side left -padx $_5" );
 			cmd( "pack $T.h.o" );
 
 			if ( cv->num_lag > 0 || cv->param == 1 )
@@ -979,12 +979,12 @@ lsd::object *gui::operate( lsd::object *r )
 						lsd::strcatn( buf_descr, lab, MAX_BUFF_SIZE );
 					}
 
-					cmd( "pack $T.h.i.l %s -side left -padx 1", buf_descr );
+					cmd( "pack $T.h.i.l %s -side left -padx $_1", buf_descr );
 				}
 				else
 				{
 					cmd( "ttk::label $T.h.i.val -style hl.TLabel -text \"(uninitialized)\"" );
-					cmd( "pack $T.h.i.l $T.h.i.val -side left -padx 2" );
+					cmd( "pack $T.h.i.l $T.h.i.val -side left -padx $_2" );
 				}
 
 				cmd( "pack $T.h.i" );
@@ -999,7 +999,7 @@ lsd::object *gui::operate( lsd::object *r )
 					cmd( "ttk::frame $T.h.u.d" );
 					cmd( "ttk::label $T.h.u.d.l -text \"Initial updating delay:\"" );
 					cmd( "ttk::label $T.h.u.d.v -style hl.TLabel -text \"%d\"", cv->delay );
-					cmd( "pack $T.h.u.d.l $T.h.u.d.v -side left -padx 2" );
+					cmd( "pack $T.h.u.d.l $T.h.u.d.v -side left -padx $_2" );
 					cmd( "pack $T.h.u.d" );
 				}
 
@@ -1008,7 +1008,7 @@ lsd::object *gui::operate( lsd::object *r )
 					cmd( "ttk::frame $T.h.u.dr" );
 					cmd( "ttk::label $T.h.u.dr.l -text \"Random updating delay range:\"" );
 					cmd( "ttk::label $T.h.u.dr.v -style hl.TLabel -text \"%d\"", cv->delay_range );
-					cmd( "pack $T.h.u.dr.l $T.h.u.dr.v -side left -padx 2" );
+					cmd( "pack $T.h.u.dr.l $T.h.u.dr.v -side left -padx $_2" );
 					cmd( "pack $T.h.u.dr" );
 				}
 
@@ -1017,7 +1017,7 @@ lsd::object *gui::operate( lsd::object *r )
 					cmd( "ttk::frame $T.h.u.p" );
 					cmd( "ttk::label $T.h.u.p.l -text \"Updating period:\"" );
 					cmd( "ttk::label $T.h.u.p.v -style hl.TLabel -text \"%d\"", cv->period );
-					cmd( "pack $T.h.u.p.l $T.h.u.p.v -side left -padx 2" );
+					cmd( "pack $T.h.u.p.l $T.h.u.p.v -side left -padx $_2" );
 					cmd( "pack $T.h.u.p" );
 				}
 
@@ -1026,7 +1026,7 @@ lsd::object *gui::operate( lsd::object *r )
 					cmd( "ttk::frame $T.h.u.pr" );
 					cmd( "ttk::label $T.h.u.pr.l -text \"Random updating period range:\"" );
 					cmd( "ttk::label $T.h.u.pr.v -style hl.TLabel -text \"%d\"", cv->period_range );
-					cmd( "pack $T.h.u.pr.l $T.h.u.pr.v -side left -padx 2" );
+					cmd( "pack $T.h.u.pr.l $T.h.u.pr.v -side left -padx $_2" );
 					cmd( "pack $T.h.u.pr" );
 				}
 
@@ -1043,11 +1043,11 @@ lsd::object *gui::operate( lsd::object *r )
 			{
 				cmd( "bind $T <Control-g> \"$T.b0.upd invoke\"; bind $T <Control-G> \"$T.b0.upd invoke\"" );
 
-				cmd( "pack $T.b0.prop $T.b0.upd $T.b0.mov $T.b0.del -padx $butSpc -side left -pady 5" );
+				cmd( "pack $T.b0.prop $T.b0.upd $T.b0.mov $T.b0.del -padx $butSpc -side left -pady $_5" );
 				cmd( "tooltip::tooltip $T.b0.upd \"Define special update timing\"" );
 			}
 			else
-				cmd( "pack $T.b0.prop $T.b0.mov $T.b0.del -padx $butSpc -side left -pady 5" );
+				cmd( "pack $T.b0.prop $T.b0.mov $T.b0.del -padx $butSpc -side left -pady $_5" );
 
 			cmd( "tooltip::tooltip $T.b0.prop \"Change name, type or lags\"" );
 			cmd( "tooltip::tooltip $T.b0.mov \"Move to another object\"" );
@@ -1070,7 +1070,7 @@ lsd::object *gui::operate( lsd::object *r )
 					.chgelem.b1.l1.i configure -state disabled \
 				}" );
 			cmd( "ttk::checkbutton $T.b1.l1.plt -text \"Run-time plot\" -variable plot -width 15 -underline 9" );
-			cmd( "pack $T.b1.l1.n $T.b1.l1.i $T.b1.l1.plt -side left -anchor w -padx 10" );
+			cmd( "pack $T.b1.l1.n $T.b1.l1.i $T.b1.l1.plt -side left -anchor w -padx $_10" );
 
 			cmd( "ttk::frame $T.b1.l2" );
 			cmd( "ttk::checkbutton $T.b1.l2.deb -text Debug -variable debug -width 15 -underline 0" );
@@ -1087,14 +1087,14 @@ lsd::object *gui::operate( lsd::object *r )
 					set watch_write 0; \
 					.chgelem.b1.l2.ww configure -state disabled \
 				}" );
-			cmd( "pack $T.b1.l2.deb $T.b1.l2.w $T.b1.l2.ww -side left -anchor w -padx 10" );
+			cmd( "pack $T.b1.l2.deb $T.b1.l2.w $T.b1.l2.ww -side left -anchor w -padx $_10" );
 
 			cmd( "ttk::frame $T.b1.l3" );
 			cmd( "ttk::checkbutton $T.b1.l3.par -text Parallel -variable parallel -width 15" );
 			cmd( "ttk::checkbutton $T.b1.l3.int -text Integer -variable nature -width 15" );
-			cmd( "pack $T.b1.l3.par $T.b1.l3.int -side left -anchor w -padx 10" );
+			cmd( "pack $T.b1.l3.par $T.b1.l3.int -side left -anchor w -padx $_10" );
 
-			cmd( "pack $T.b1.l1 $T.b1.l2 $T.b1.l3 -anchor w -padx 5" );
+			cmd( "pack $T.b1.l1 $T.b1.l2 $T.b1.l3 -anchor w -padx $_5" );
 
 			cmd( "tooltip::tooltip $T.b1.l1.n \"Save the element series for analysis to memory or results file\"" );
 			cmd( "tooltip::tooltip $T.b1.l1.i \"Save the element series for analysis to a separate file\"" );
@@ -1129,22 +1129,22 @@ lsd::object *gui::operate( lsd::object *r )
 			if ( cv->param == 2 )
 				cmd( "$T.b2.obs configure -state disabled" );
 
-			cmd( "pack $T.b2.l $T.b2.obs $T.b2.ini -side left -padx 5" );
+			cmd( "pack $T.b2.l $T.b2.obs $T.b2.ini -side left -padx $_5" );
 
 			cmd( "ttk::frame $T.b3" );
 			cmd( "ttk::frame $T.b3.min" );
 			cmd( "ttk::label $T.b3.min.l -width 10 -anchor e -text \"Minimum\"" );
 			cmd( "ttk::entry $T.b3.min.e -textvariable vmin -width 15 -justify center" );
 			cmd( "tooltip::tooltip $T.b3.min.e \"Minimum value allowed for element (%s or blank for no limit)\"", NON_AVAILABLE );
-			cmd( "pack $T.b3.min.l $T.b3.min.e -side left -anchor w -padx 2 -pady 2" );
+			cmd( "pack $T.b3.min.l $T.b3.min.e -side left -anchor w -padx $_2 -pady $_2" );
 			cmd( "ttk::frame $T.b3.max" );
 			cmd( "ttk::label $T.b3.max.l -width 10 -anchor e -text \"Maximum\"" );
 			cmd( "ttk::entry $T.b3.max.e -textvariable vmax -width 15 -justify center" );
 			cmd( "tooltip::tooltip $T.b3.max.e \"Maximum value allowed for element (%s or blank for no limit)\"", NON_AVAILABLE );
-			cmd( "pack $T.b3.max.l $T.b3.max.e -side left -anchor w -padx 2 -pady 2" );
-			cmd( "pack $T.b3.min $T.b3.max -anchor w -side left -padx 5" );
+			cmd( "pack $T.b3.max.l $T.b3.max.e -side left -anchor w -padx $_2 -pady $_2" );
+			cmd( "pack $T.b3.min $T.b3.max -anchor w -side left -padx $_5" );
 
-			cmd( "pack $T.h $T.b0 $T.b1 $T.b2 $T.b3 -pady 5" );
+			cmd( "pack $T.h $T.b0 $T.b1 $T.b2 $T.b3 -pady $_5" );
 
 			cmd( "set Td $T.desc" );
 			cmd( "ttk::frame $Td" );
@@ -1168,10 +1168,10 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::button $Td.b.using -width [ expr { $butWid + 2 } ] -text \"Elem. Used\" -command { set done 7 } -underline 0" );
 
 			if ( ! strcmp( cd->type, "Parameter" ) )
-				cmd( "pack $Td.b.auto_doc $Td.b.us -padx $butSpc -side left -pady 5" );
+				cmd( "pack $Td.b.auto_doc $Td.b.us -padx $butSpc -side left -pady $_5" );
 			else
 			{
-				cmd( "pack $Td.b.eq $Td.b.auto_doc $Td.b.us $Td.b.using -padx $butSpc -side left -pady 5" );
+				cmd( "pack $Td.b.eq $Td.b.auto_doc $Td.b.us $Td.b.using -padx $butSpc -side left -pady $_5" );
 				cmd( "bind $T <Control-q> \"$Td.b.eq invoke\"; bind $T <Control-Q> \"$Td.b.eq invoke\"" );
 				cmd( "bind $T <Control-e> \"$Td.b.using invoke\"; bind $T <Control-E> \"$Td.b.using invoke\"" );
 			}
@@ -1203,12 +1203,12 @@ lsd::object *gui::operate( lsd::object *r )
 				{
 					cmd( "ttk::button $Td.b2.da -width [ expr { $butWid + 2 } ] -text \"Assimilation\" -command { set done 15 }" );
 					cmd( "tooltip::tooltip $Td.b2.da \"Set data assimilation values for this element\"" );
-					cmd( "pack $Td.b2.setall $Td.b2.sens $Td.b2.da -padx $butSpc -side left -pady 5" );
+					cmd( "pack $Td.b2.setall $Td.b2.sens $Td.b2.da -padx $butSpc -side left -pady $_5" );
 				}
 				else
-					cmd( "pack $Td.b2.setall $Td.b2.sens -padx $butSpc -side left -pady 5" );
+					cmd( "pack $Td.b2.setall $Td.b2.sens -padx $butSpc -side left -pady $_5" );
 
-				cmd( "pack $Td.f $Td.b $Td.i $Td.b2 -pady 5" );
+				cmd( "pack $Td.f $Td.b $Td.i $Td.b2 -pady $_5" );
 
 				cmd( "tooltip::tooltip $Td.b2.setall \"Set initial value(s) of this element\"" );
 				cmd( "tooltip::tooltip $Td.b2.sens \"Set sensitivity analysis values for this element\"" );
@@ -1222,12 +1222,12 @@ lsd::object *gui::operate( lsd::object *r )
 					cmd( "ttk::button $Td.da -width [ expr { $butWid + 2 } ] -text \"Assimilation\" -command { set done 15 }" );
 					cmd( "tooltip::tooltip $Td.da \"Set data assimilation values for this element\"" );
 
-					cmd( "pack $Td.f $Td.b $Td.da -pady 5" );
+					cmd( "pack $Td.f $Td.b $Td.da -pady $_5" );
 				}
 				else
-					cmd( "pack $Td.f $Td.b -pady 5" );
+					cmd( "pack $Td.f $Td.b -pady $_5" );
 
-			cmd( "pack $Td -pady 5" );
+			cmd( "pack $Td -pady $_5" );
 
 			cmd( "okhelpcancel $T b { set done 1 } { LsdHelp browser.html#changeelement } { set done 2 }" );
 
@@ -1448,7 +1448,7 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "ttk::frame $T.h" );
 				cmd( "ttk::label $T.h.l1 -text \"Element:\"" );
 				cmd( "ttk::label $T.h.l2 -text \"%s\" -style hl.TLabel", cv->label );
-				cmd( "pack $T.h.l1 $T.h.l2 -side left -padx 2" );
+				cmd( "pack $T.h.l1 $T.h.l2 -side left -padx $_2" );
 
 				cmd( "ttk::frame $T.n" );
 				cmd( "ttk::label $T.n.var -text \"Name\"" );
@@ -1458,7 +1458,7 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "ttk::spinbox $T.n.lag -justify center -width 3 -from 0 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set numlag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numlag; return 0 } } -invalidcommand { bell }" );
 				cmd( "$T.n.lag insert 0 $numlag" );
 				cmd( "if { $nature != 0 } { $T.n.lag configure -state disabled }" );
-				cmd( "pack $T.n.var $T.n.e $T.n.sp $T.n.l $T.n.lag -side left -padx 2" );
+				cmd( "pack $T.n.var $T.n.e $T.n.sp $T.n.l $T.n.lag -side left -padx $_2" );
 
 				cmd( "tooltip::tooltip $T.n.lag \"Maximum lag used in equations\"" );
 
@@ -1473,7 +1473,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 				cmd( "pack $T.v.l $T.v.o" );
 
-				cmd( "pack $T.h $T.n $T.v -padx 5 -pady 5" );
+				cmd( "pack $T.h $T.n $T.v -padx $_5 -pady $_5" );
 
 				cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#change_nature } { set choice 2 }" );
 
@@ -1638,7 +1638,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $TT.l" );
 			cmd( "ttk::label $TT.l.l -text \"Element:\"" );
 			cmd( "ttk::label $TT.l.n -style hl.TLabel -text \"%s\"", lab_old );
-			cmd( "pack $TT.l.l $TT.l.n -side left -padx 2" );
+			cmd( "pack $TT.l.l $TT.l.n -side left -padx $_2" );
 
 			cmd( "ttk::frame $TT.v" );
 			cmd( "ttk::label $TT.v.l -text \"Move to\"" );
@@ -1651,7 +1651,7 @@ lsd::object *gui::operate( lsd::object *r )
 			sim.root->insert_object( "$TT.v.t.lb" );
 			cmd( "pack $TT.v.l $TT.v.t" );
 
-			cmd( "pack $TT.l $TT.v -padx 5 -pady 5" );
+			cmd( "pack $TT.l $TT.v -padx $_5 -pady $_5" );
 
 			cmd( "okcancel $TT b { set choice 1 } { set choice 2 }" );	// insert ok button
 
@@ -1725,7 +1725,7 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "ttk::label $T.i.l -text \"Use lag\"" );
 				cmd( "ttk::spinbox $T.i.e -justify center -width 3 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= %d } { set lag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lag; return 0 } } -invalidcommand { bell }", cv->num_lag, cv->num_lag );
 				cmd( "$T.i.e insert 0 $lag" );
-				cmd( "pack $T.i.l $T.i.e -side left -padx 2" );
+				cmd( "pack $T.i.l $T.i.e -side left -padx $_2" );
 
 				cmd( "ttk::frame $T.o" );
 				cmd( "ttk::label $T.o.l1 -text \"( valid values:\"" );
@@ -1733,9 +1733,9 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "ttk::label $T.o.l2 -text to" );
 				cmd( "ttk::label $T.o.w2 -text %d -style hl.TLabel", cv->num_lag );
 				cmd( "ttk::label $T.o.l3 -text \")\"" );
-				cmd( "pack $T.o.l1 $T.o.w1 $T.o.l2 $T.o.w2 $T.o.l3 -side left -padx 2" );
+				cmd( "pack $T.o.l1 $T.o.w1 $T.o.l2 $T.o.w2 $T.o.l3 -side left -padx $_2" );
 
-				cmd( "pack $T.i $T.o -padx 5 -pady 5" );
+				cmd( "pack $T.i $T.o -padx $_5 -pady $_5" );
 
 				cmd( "okcancel $T b { set choice $lag } { set choice 0 }" );
 				cmd( "bind $T <KeyPress-Return> { set choice $lag }" );
@@ -1841,7 +1841,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $T.h" );
 			cmd( "ttk::label $T.h.l1 -text \"Variable:\"" );
 			cmd( "ttk::label $T.h.l2 -text \"%s\" -style hl.TLabel", cv->label );
-			cmd( "pack $T.h.l1 $T.h.l2 -side left -padx 2" );
+			cmd( "pack $T.h.l1 $T.h.l2 -side left -padx $_2" );
 
 			cmd( "ttk::frame $T.f" );
 
@@ -1849,29 +1849,29 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::label $T.f.c.l2 -width 20 -anchor e -text \"Initial delay\"" );
 			cmd( "ttk::spinbox $T.f.c.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set delay %%P; return 1 } { %%W delete 0 end; %%W insert 0 $delay; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( "$T.f.c.e2 insert 0 $delay" );
-			cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx 2 -pady 2" );
+			cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx $_2 -pady $_2" );
 
 			cmd( "ttk::frame $T.f.a" );
 			cmd( "ttk::label $T.f.a.l -width 20 -anchor e -text \"Random delay range\"" );
 			cmd( "ttk::spinbox $T.f.a.e -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set delay_range %%P; return 1 } { %%W delete 0 end; %%W insert 0 $delay_range; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( "$T.f.a.e insert 0 $delay_range" );
-			cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx 2 -pady 2" );
+			cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx $_2 -pady $_2" );
 
 			cmd( "ttk::frame $T.f.b" );
 			cmd( "ttk::label $T.f.b.l1 -width 20 -anchor e -text \"Period\"" );
 			cmd( "ttk::spinbox $T.f.b.e1 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set period %%P; return 1 } { %%W delete 0 end; %%W insert 0 $period; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( "$T.f.b.e1 insert 0 $period" );
-			cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx 2 -pady 2" );
+			cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx $_2 -pady $_2" );
 
 			cmd( "ttk::frame $T.f.d" );
 			cmd( "ttk::label $T.f.d.l2 -width 20 -anchor e -text \"Random period range\"" );
 			cmd( "ttk::spinbox $T.f.d.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set period_range %%P; return 1 } { %%W delete 0 end; %%W insert 0 $period_range; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( "$T.f.d.e2 insert 0 $period_range" );
-			cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w -padx 2 -pady 2" );
+			cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w -padx $_2 -pady $_2" );
 
 			cmd( "pack $T.f.c $T.f.a $T.f.b $T.f.d -anchor w" );
 
-			cmd( "pack $T.h $T.f -padx 5 -pady 5" );
+			cmd( "pack $T.h $T.f -padx $_5 -pady $_5" );
 
 			cmd( "tooltip::tooltip $T.f.c \"First case (time step) to compute the variable\"" );
 			cmd( "tooltip::tooltip $T.f.a \"Maximum case (time step) for uniform random first computation\"" );
@@ -2013,7 +2013,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $T.f2.t" );
 			cmd( "ttk::label $T.f2.t.l -text \"Cases:\"" );
 			cmd( "ttk::label $T.f2.t.w -text \"%d\" -style hl.TLabel", sim.last_t );
-			cmd( "pack $T.f2.t.l $T.f2.t.w -side left -padx 2" );
+			cmd( "pack $T.f2.t.l $T.f2.t.w -side left -padx $_2" );
 
 			if ( sim.last_run > 1 )
 			{
@@ -2024,7 +2024,7 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "ttk::frame $T.f2.n" );
 				cmd( "ttk::label $T.f2.n.l -text \"Number of simulations:\"" );
 				cmd( "ttk::label $T.f2.n.w -text \"%d\" -style hl.TLabel", sim.last_run );
-				cmd( "pack $T.f2.n.l $T.f2.n.w -side left -padx 2" );
+				cmd( "pack $T.f2.n.l $T.f2.n.w -side left -padx $_2" );
 
 				cmd( "pack $T.f2.t $T.f2.n" );
 
@@ -2041,12 +2041,12 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "ttk::frame $T.f4.w.l1" );
 				cmd( "ttk::label $T.f4.w.l1.l -text \"from:\"" );
 				cmd( "ttk::label $T.f4.w.l1.w -style hl.TLabel -text \"$firstFile.$resExt$zipExt\"" );
-				cmd( "pack $T.f4.w.l1.l $T.f4.w.l1.w -side left -padx 2" );
+				cmd( "pack $T.f4.w.l1.l $T.f4.w.l1.w -side left -padx $_2" );
 
 				cmd( "ttk::frame $T.f4.w.l2" );
 				cmd( "ttk::label $T.f4.w.l2.l -text \"to:\"" );
 				cmd( "ttk::label $T.f4.w.l2.w -style hl.TLabel -text \"$lastFile.$resExt$zipExt\"" );
-				cmd( "pack $T.f4.w.l2.l $T.f4.w.l2.w -side left -padx 2" );
+				cmd( "pack $T.f4.w.l2.l $T.f4.w.l2.w -side left -padx $_2" );
 
 				cmd( "pack $T.f4.w.l1 $T.f4.w.l2" );
 
@@ -2128,7 +2128,7 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "ttk::checkbutton $T.f6.e -text \"Update configuration file\" -variable overwConf -state %s", overwConf ? "normal" : "disabled" );
 				cmd( "pack $T.f6.a $T.f6.b $T.f6.b1 $T.f6.c $T.f6.d $T.f6.o $T.f6.e -anchor w" );
 
-				cmd( "pack $T.f1 $T.f2 $T.f3 $T.f4 $T.f5 $T.f6 -padx 5 -pady 5" );
+				cmd( "pack $T.f1 $T.f2 $T.f3 $T.f4 $T.f5 $T.f6 -padx $_5 -pady $_5" );
 			}
 			else
 			{
@@ -2140,7 +2140,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 				cmd( "ttk::checkbutton $T.f6 -text \"Update configuration file\" -variable overwConf -state %s", overwConf ? "normal" : "disabled" );
 
-				cmd( "pack $T.f1 $T.f2 $T.f4 $T.f6 -padx 5 -pady 5" );
+				cmd( "pack $T.f1 $T.f2 $T.f4 $T.f6 -padx $_5 -pady $_5" );
 			}
 
 			cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#run } { set choice 2 }" );
@@ -2413,37 +2413,37 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::label $T.f.c.l2 -width $tw -anchor e -text \"Simulation steps\"" );
 			cmd( "ttk::spinbox $T.f.c.e2 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set last_t %%P; return 1 } { %%W delete 0 end; %%W insert 0 $last_t; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( "$T.f.c.e2 insert 0 $last_t" );
-			cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx 2 -pady 2" );
+			cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx $_2 -pady $_2" );
 
 			cmd( "ttk::frame $T.f.a" );
 			cmd( "ttk::label $T.f.a.l -width $tw -anchor e -text \"Number of simulation runs\"" );
 			cmd( "ttk::spinbox $T.f.a.e -width 7 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set last_run %%P; return 1 } { %%W delete 0 end; %%W insert 0 $last_run; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( "$T.f.a.e insert 0 $last_run" );
-			cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx 2 -pady 2" );
+			cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx $_2 -pady $_2" );
 
 			cmd( "ttk::frame $T.f.b" );
 			cmd( "ttk::label $T.f.b.l1 -width $tw -anchor e -text \"Random numbers initial seed\"" );
 			cmd( "ttk::spinbox $T.f.b.e1 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( "$T.f.b.e1 insert 0 $seed" );
-			cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx 2 -pady 2" );
+			cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx $_2 -pady $_2" );
 
 			cmd( "ttk::frame $T.f.d" );
 			cmd( "ttk::label $T.f.d.l2 -width $tw -anchor e -text \"Start debugger at step (0:none)\"" );
 			cmd( "ttk::spinbox $T.f.d.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set deb_t %%P; return 1 } { %%W delete 0 end; %%W insert 0 $deb_t; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( "$T.f.d.e2 insert 0 $deb_t" );
-			cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w -padx 2 -pady 2" );
+			cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w -padx $_2 -pady $_2" );
 
 			cmd( "ttk::frame $T.f.e" );
 			cmd( "ttk::label $T.f.e.l2 -width $tw -anchor e -text \"Profile up to stack level (0:none)\"" );
 			cmd( "ttk::spinbox $T.f.e.e2 -width 7 -from 0 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99 } { set stack_info %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_info; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( "$T.f.e.e2 insert 0 $stack_info" );
-			cmd( "pack $T.f.e.l2 $T.f.e.e2 -side left -anchor w -padx 2 -pady 2" );
+			cmd( "pack $T.f.e.l2 $T.f.e.e2 -side left -anchor w -padx $_2 -pady $_2" );
 
 			cmd( "ttk::frame $T.f.f" );
 			cmd( "ttk::label $T.f.f.l2 -width $tw -anchor e -text \"Profile minimum time (0:all)\"" );
 			cmd( "ttk::spinbox $T.f.f.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set prof_min_msecs %%P; return 1 } { %%W delete 0 end; %%W insert 0 $prof_min_msecs; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( "$T.f.f.e2 insert 0 $prof_min_msecs" );
-			cmd( "pack $T.f.f.l2 $T.f.f.e2 -side left -anchor w -padx 2 -pady 2" );
+			cmd( "pack $T.f.f.l2 $T.f.f.e2 -side left -anchor w -padx $_2 -pady $_2" );
 
 			cmd( "pack $T.f.c $T.f.a $T.f.b $T.f.d $T.f.e $T.f.f -anchor w" );
 
@@ -2458,7 +2458,7 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "$T.c.npar configure -state disabled" );
 			cmd( "pack $T.c.obs $T.c.aggr $T.c.nchk $T.c.npar -anchor w" );
 
-			cmd( "pack $T.f $T.c -padx 5 -pady 5" );
+			cmd( "pack $T.f $T.c -padx $_5 -pady $_5" );
 
 			cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#simsetting } { set choice 2 }" );
 			cmd( "bind $T.f.c.e2 <KeyPress-Return> { focus $T.f.a.e; $T.f.a.e selection range 0 end }" );
@@ -2838,7 +2838,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $T.e.e" );
 			cmd( "ttk::label $T.e.e.l -text \"Number of instances\"" );
 			cmd( "ttk::spinbox $T.e.e.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( "pack $T.e.e.l $T.e.e.e -side left -padx 2" );
+			cmd( "pack $T.e.e.l $T.e.e.e -side left -padx $_2" );
 
 			cmd( "ttk::label $T.e.l -text \"(all groups of this object will be affected)\"" );
 			cmd( "pack $T.e.e $T.e.l" );
@@ -2847,9 +2847,9 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::label $T.cp.l -text \"Copy from instance\"" );
 			cmd( "ttk::spinbox $T.cp.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invalidcommand { bell } -justify center", num, num );
 			cmd( "ttk::button $T.cp.compute -width $butWid -text Compute -command { set choice 3; .numinst.cp.e selection range 0 end; focus .numinst.cp.e }" );
-			cmd( "pack $T.cp.l $T.cp.e $T.cp.compute -side left -padx 2" );
+			cmd( "pack $T.cp.l $T.cp.e $T.cp.compute -side left -padx $_2" );
 
-			cmd( "pack $T.l $T.e $T.cp -pady 5 -padx 5" );
+			cmd( "pack $T.l $T.e $T.cp -pady $_5 -padx $_5" );
 
 			cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menudata_objn.html#this } { set choice 2 }" );
 			cmd( "bind $T.e.e.e <Return> { set choice 1 }" );
@@ -2991,7 +2991,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::checkbutton .n.do.conf -text \"Save associated configuration\" -variable saveConf" );
 			cmd( "pack .n.do.zip .n.do.csv .n.do.conf -anchor w" );
 
-			cmd( "pack .n.n .n.do -padx 5 -pady 5" );
+			cmd( "pack .n.n .n.do -padx $_5 -pady $_5" );
 
 			cmd( "okcancel .n b { set choice 1 } { set choice 2 }" );
 			cmd( "bind .n <KeyPress-Return> { set choice 1 }" );
@@ -3092,7 +3092,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "pack .warn.m.l .warn.m.o" );
 
-			cmd( "pack .warn.m -padx 5 -pady 5" );
+			cmd( "pack .warn.m -padx $_5 -pady $_5" );
 
 			cmd( "okhelpcancel .warn b { set choice 1 } { LsdHelp menumodel.html#auto_docu } { set choice 2 }" );
 
@@ -3154,7 +3154,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::label .a.l2 -text \"HTML browser for help pages\"" );
 			cmd( "ttk::entry .a.v_num2 -width 20 -textvariable temp_var -justify center" );
 			cmd( "bind .a.v_num2 <Return> { set choice 1 }" );
-			cmd( "pack .a.l2 .a.v_num2 -padx 5" );
+			cmd( "pack .a.l2 .a.v_num2 -padx $_5" );
 
 			cmd( "okXhelpcancel .a b Default { set temp_var mozilla } { set choice 1 } { LsdHelp LSD_macros.html#V } { set choice 2 }" );
 
@@ -3195,7 +3195,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "pack .srch.i.l .srch.i.e" );
 
 			cmd( "ttk::label .srch.o -justify center -text \"(type the initial letters of the\nname, LSD will complete it)\"" );
-			cmd( "pack .srch.i .srch.o -padx 5 -pady 5" );
+			cmd( "pack .srch.i .srch.o -padx $_5 -pady $_5" );
 			cmd( "pack .srch.i" );
 
 			cmd( "okcancel .srch b { set choice 1 } { set choice 2 }" );
@@ -3700,7 +3700,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 				cmd( "ttk::label .s.w -text \"(large samples are not recommended)\"" );
 
-				cmd( "pack .s.p .s.i .s.w -padx 5 -pady 5" );
+				cmd( "pack .s.p .s.i .s.w -padx $_5 -pady $_5" );
 
 				cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#mcpoint } { set choice 2 }" );
 
@@ -3837,7 +3837,7 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "ttk::label .s.i.w -justify center -text \"(file must be in the same folder\nas the configuration file; CSV\nformat with NO empty lines)\"" );
 				cmd( "pack .s.i.l .s.i.e .s.i.w" );
 
-				cmd( "pack .s.p .s.o .s.e .s.d .s.i -padx 5 -pady 5" );
+				cmd( "pack .s.p .s.o .s.e .s.d .s.i -padx $_5 -pady $_5" );
 
 				cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#nolh } { set choice 2 }" );
 
@@ -3970,7 +3970,7 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "pack .s.i.l .s.i.e" );
 
 				cmd( "ttk::checkbutton .s.c -text \"Append to existing configuration files\" -variable applst -state %s", findexSens > 1 ? "normal" : "disabled" );
-				cmd( "pack .s.p .s.i .s.c -padx 5 -pady 5" );
+				cmd( "pack .s.p .s.i .s.c -padx $_5 -pady $_5" );
 
 				cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#mcrange } { set choice 2 }" );
 
@@ -4105,7 +4105,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 				cmd( "ttk::label .s.t -justify center -text \"(for details on setting Elementary Effects\nsampling parameters see Morris (1991),\nCampolongo et al. (2007) and Ruano et al. (2012))\"" );
 
-				cmd( "pack .s.o .s.i .s.p .s.l .s.j .s.t -padx 5 -pady 5" );
+				cmd( "pack .s.o .s.i .s.p .s.l .s.j .s.t -padx $_5 -pady $_5" );
 
 				cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menudata_sa.html#ee } { set choice 2 }" );
 
@@ -4696,7 +4696,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::checkbutton .s.o.docsv -text \"Comma-separated text format (.csv)\" -variable docsv" );
 			cmd( "pack .s.o.nores .s.o.notot .s.o.n .s.o.dozip .s.o.docsv -anchor w" );
 
-			cmd( "pack .s.u .s.t .s.c .s.p .s.o -padx 5 -pady 5" );
+			cmd( "pack .s.u .s.t .s.c .s.p .s.o -padx $_5 -pady $_5" );
 
 			cmd( "okhelpcancel .s b { set choice 1 } { LsdHelp menurun.html#parallel } { set choice 2 }" );
 			cmd( "bind .s.c.e <KeyPress-Return> { .s.b.ok invoke }" );
@@ -5017,12 +5017,12 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $b.f2.t" );
 			cmd( "ttk::label $b.f2.t.l -text \"Cases:\"" );
 			cmd( "ttk::label $b.f2.t.w -text \"%d\" -style hl.TLabel", sim.last_t );
-			cmd( "pack $b.f2.t.l $b.f2.t.w -side left -padx 2" );
+			cmd( "pack $b.f2.t.l $b.f2.t.w -side left -padx $_2" );
 
 			cmd( "ttk::frame $b.f2.n" );
 			cmd( "ttk::label $b.f2.n.l -text \"Number of simulations:\"" );
 			cmd( "ttk::label $b.f2.n.w -text \"%d\" -style hl.TLabel", sim.last_run );
-			cmd( "pack $b.f2.n.l $b.f2.n.w -side left -padx 2" );
+			cmd( "pack $b.f2.n.l $b.f2.n.w -side left -padx $_2" );
 			cmd( "pack $b.f2.t $b.f2.n" );
 
 			cmd( "ttk::frame $b.f3" );
@@ -5040,12 +5040,12 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "ttk::frame $b.f4.w.l1" );
 				cmd( "ttk::label $b.f4.w.l1.l -text \"from:\"" );
 				cmd( "ttk::label $b.f4.w.l1.w -style hl.TLabel -text \"$firstFile.$resExt$zipExt\"" );
-				cmd( "pack $b.f4.w.l1.l $b.f4.w.l1.w -side left -padx 2" );
+				cmd( "pack $b.f4.w.l1.l $b.f4.w.l1.w -side left -padx $_2" );
 
 				cmd( "ttk::frame $b.f4.w.l2" );
 				cmd( "ttk::label $b.f4.w.l2.l -text \"to:\"" );
 				cmd( "ttk::label $b.f4.w.l2.w -style hl.TLabel -text \"$lastFile.$resExt$zipExt\"" );
-				cmd( "pack $b.f4.w.l2.l $b.f4.w.l2.w -side left -padx 2" );
+				cmd( "pack $b.f4.w.l2.l $b.f4.w.l2.w -side left -padx $_2" );
 
 				cmd( "pack $b.f4.w.l1 $b.f4.w.l2" );
 			}
@@ -5071,7 +5071,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::label $b.f6.l -text \"Parallel runs\"" );
 			cmd( "ttk::spinbox $b.f6.e -width 5 -from 1 -to %d -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center -state %s", param, ( sim.no_tot && sim.last_run > 1 && param > 1 ) ? "normal" : "disabled" );
 			cmd( "write_any $b.f6.e $cores" );
-			cmd( "pack $b.f6.l $b.f6.e -side left -padx 2" );
+			cmd( "pack $b.f6.l $b.f6.e -side left -padx $_2" );
 
 			cmd( "ttk::frame $b.f7" );
 			cmd( "ttk::checkbutton $b.f7.nores -text \"Skip generating results files\" -variable no_res -command { \
@@ -5148,7 +5148,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::checkbutton $b.f7.tosave -text \"Update configuration file\" -variable overwConf -state %s", overwConf ? "normal" : "disabled" );
 			cmd( "pack $b.f7.nores $b.f7.notot $b.f7.dozip $b.f7.docsv $b.f7.dobar $b.f7.doover $b.f7.tosave -anchor w" );
 
-			cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f5 $b.f6 $b.f7 -padx 5 -pady 5" );
+			cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f5 $b.f6 $b.f7 -padx $_5 -pady $_5" );
 
 			cmd( "okhelpcancel $b b { set choice 1 } { LsdHelp menurun.html#batch } { set choice 2 }" );
 
@@ -5289,7 +5289,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $TT.l" );
 			cmd( "ttk::label $TT.l.l -text \"Suggested object:\"" );
 			cmd( "ttk::label $TT.l.n -style hl.TLabel -text \"%s\"", lab_old );
-			cmd( "pack $TT.l.l $TT.l.n -padx 2" );
+			cmd( "pack $TT.l.l $TT.l.n -padx $_2" );
 
 			cmd( "ttk::frame $TT.v" );
 			cmd( "ttk::label $TT.v.l -justify center -text \"Object representing\nthe network nodes\"" );
@@ -5302,7 +5302,7 @@ lsd::object *gui::operate( lsd::object *r )
 			sim.root->insert_object( "$TT.v.t.lb" );
 			cmd( "pack $TT.v.l $TT.v.t" );
 
-			cmd( "pack $TT.l $TT.v -padx 5 -pady 5" );
+			cmd( "pack $TT.l $TT.v -padx $_5 -pady $_5" );
 
 			cmd( "okcancel $TT b { set choice 1 } { set choice 2 }" );	// insert ok button
 
@@ -5395,7 +5395,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "pack $TT.v.l $TT.v.t" );
 
-			cmd( "pack $TT.v -padx 5 -pady 5" );
+			cmd( "pack $TT.v -padx $_5 -pady $_5" );
 
 			cmd( "okcancel $TT b { set choice 1 } { set choice 2 }" );	// insert ok button
 
@@ -5503,7 +5503,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "pack $TT.v.l $TT.v.t" );
 
-			cmd( "pack $TT.v -padx 5 -pady 5" );
+			cmd( "pack $TT.v -padx $_5 -pady $_5" );
 
 			cmd( "okcancel $TT b { set choice 1 } { set choice 2 }" );	// insert ok button
 

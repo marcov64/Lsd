@@ -217,7 +217,7 @@ ttk::button .dir.choice.but.browse -text Browse -width -1 -command {
 	focus .dir.choice.blk.where
 }
 pack .dir.choice.but.lab .dir.choice.but.browse
-pack .dir.choice.blk .dir.choice.but -padx 5 -side left
+pack .dir.choice.blk .dir.choice.but -padx $_5 -side left
 ttk::label .dir.obs -text "If LSD is already installed in the\nselected directory, it will be updated" -justify center
 
 if [ string equal $CurPlatform windows ] {
@@ -247,7 +247,7 @@ if [ string equal $CurPlatform windows ] {
 		}
 	}
 
-	pack .dir.choice .dir.wall .dir.obs -pady 5
+	pack .dir.choice .dir.wall .dir.obs -pady $_5
 
 	if { $wadmin } {
 		tooltip::tooltip .dir.wall "Allow any user logged in this computer to use LSD"
@@ -256,30 +256,30 @@ if [ string equal $CurPlatform windows ] {
 		.dir.wall configure -state disabled
 	}
 } else {
-	pack .dir.choice .dir.obs -pady 5
+	pack .dir.choice .dir.obs -pady $_5
 }
 
 if { [ info exists xcode ] && [ info exists gnuplot ] } {
 	ttk::label .dir.extra -text "Xcode command line tools and\nGnuplot graphical terminal\nare not available and will be installed" -justify center
-	pack .dir.extra -pady 5
+	pack .dir.extra -pady $_5
 } else {
 	if [ info exists xcode ] {
 		ttk::label .dir.extra -text "Xcode command line tools are\nnot available and will be installed" -justify center
-		pack .dir.extra -pady 5
+		pack .dir.extra -pady $_5
 	} elseif { [ info exists gnuplot ] && $wadmin } {
 		ttk::label .dir.extra -text "Gnuplot graphical terminal seems\nunavailable and will be installed" -justify center
-		pack .dir.extra -pady 5
+		pack .dir.extra -pady $_5
 	}
 }
 
 if { [ info exists linuxPkgMiss ] && [ llength $linuxPkgMiss ] > 0 } {
 	ttk::label .dir.extra -text "Some Linux packages are not\navailable and will be installed:\n$linuxPkgMiss" -justify center
-	pack .dir.extra -pady 5
+	pack .dir.extra -pady $_5
 }
 
 ttk::label .dir.lic -text "LSD is free software and comes\nwith ABSOLUTELY NO WARRANTY\nSee Readme.txt for copyright information" -justify center
-pack .dir.lic -pady 5
-pack .dir -padx 10 -pady 10
+pack .dir.lic -pady $_5
+pack .dir -padx $_10 -pady $_10
 
 okcancel . b { set done 1 } { set done 2 }
 
@@ -608,7 +608,7 @@ if [ info exists xcode ] {
 if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ info exists multitail ] ) } {
 
 	if [ string equal $CurPlatform windows ] {
-	
+
 		if { ! $wadmin } {
 			ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Cannot install Gnuplot" -detail "Installing without administrator rights prevents installing Gnuplot.\n\nPlease download Gnuplot at http://www.gnuplot.info and install it manually."
 			lappend issues "Windows Gnuplot not installed (no admin rights)"
@@ -913,7 +913,7 @@ if { [ llength $issues ] == 0 } {
 
 ttk::label .end.msg2 -text "LSD/LMM can be run using the created desktop icon,\nor using the computer's program menu."  -justify center
 ttk::label .end.msg3 -text "The installation directory is '$LsdRoot'"
-pack .end.msg1 .end.msg2 .end.msg3 -pady 5
+pack .end.msg1 .end.msg2 .end.msg3 -pady $_5
 
 if { [ llength $issues ] > 0 } {
 
@@ -928,10 +928,10 @@ if { [ llength $issues ] > 0 } {
 	}
 
 	ttk::label .end.err3 -justify center -text "Please try to solve the issues before using LSD.\nThis list is saved in 'installer.err'"
-	pack .end.err1 .end.err2 .end.err3 -pady 5
+	pack .end.err1 .end.err2 .end.err3 -pady $_5
 }
 
-pack .end -padx 10 -pady 10
+pack .end -padx $_10 -pady $_10
 
 ttk::frame .b
 ttk::button .b.finish -width $butWid -text Finish -command { set done 2 }
@@ -942,11 +942,11 @@ tooltip::tooltip .b.finish "Close LSD installer"
 if { [ llength $issues ] == 0 && ( ! [ info exists sysPath ] || ! $sysPath ) } {
 	ttk::button .b.run -width $butWid -text "Run Now" -command { set done 1 }
 	bind .b.run <Return> { .b.run invoke }
-	pack .b.run .b.finish -padx 10 -pady 10 -side left
+	pack .b.run .b.finish -padx $_10 -pady $_10 -side left
 	focus .b.run
 	tooltip::tooltip .b.run "Close installer and launch LSD"
 } else {
-	pack .b.finish -padx 10 -pady 10 -side left
+	pack .b.finish -padx $_10 -pady $_10 -side left
 	focus .b.finish
 }
 

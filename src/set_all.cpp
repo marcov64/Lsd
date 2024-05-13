@@ -152,7 +152,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 	cmd( "ttk::entry $_w.m.f1.val.i.l2.e2 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set value2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value2; set err $_w.m.f1.val.i.l2.e2; set choice 1; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 	cmd( "pack $_w.m.f1.val.i.l2.l2 $_w.m.f1.val.i.l2.e2" );
 
-	cmd( "pack $_w.m.f1.val.i.l1 $_w.m.f1.val.i.l2 -expand yes -fill x	-ipadx 5 -ipady 2" );
+	cmd( "pack $_w.m.f1.val.i.l1 $_w.m.f1.val.i.l2 -expand yes -fill x -ipadx $_5 -ipady $_2" );
 
 	cmd( "pack $_w.m.f1.val.l $_w.m.f1.val.i" );
 
@@ -211,7 +211,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 
 	cmd( "pack $_w.m.f1.rd.l $_w.m.f1.rd.i" );
 
-	cmd( "pack $_w.m.f1.val $_w.m.f1.rd -expand yes -fill x -padx 5 -pady 5" );
+	cmd( "pack $_w.m.f1.val $_w.m.f1.rd -expand yes -fill x -padx $_5 -pady $_5" );
 
 	cmd( "ttk::frame $_w.m.f2" );					// right column
 
@@ -226,11 +226,11 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 	cmd( "ttk::label $_w.m.f2.s.i.l.a.l -text \"Apply every\"" );
 	cmd( "ttk::spinbox $_w.m.f2.s.i.l.a.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; set err $_w.m.f2.s.i.l.a.e; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "ttk::label $_w.m.f2.s.i.l.a.l1 -text \"instance( s)\"" );
-	cmd( "pack $_w.m.f2.s.i.l.a.l $_w.m.f2.s.i.l.a.e $_w.m.f2.s.i.l.a.l1 -side left -padx 1" );
+	cmd( "pack $_w.m.f2.s.i.l.a.l $_w.m.f2.s.i.l.a.e $_w.m.f2.s.i.l.a.l1 -side left -padx $_1" );
 
 	cmd( "ttk::checkbutton $_w.m.f2.s.i.l.f -text \"Fill-in\" -variable fill" );
-	cmd( "pack	$_w.m.f2.s.i.l.a $_w.m.f2.s.i.l.f -padx 5 -side left" );
-	cmd( "pack	$_w.m.f2.s.i.l -pady 2" );
+	cmd( "pack	$_w.m.f2.s.i.l.a $_w.m.f2.s.i.l.f -padx $_5 -side left" );
+	cmd( "pack	$_w.m.f2.s.i.l -pady $_2" );
 
 	cmd( "tooltip::tooltip $_w.m.f2.s.i.l.a \"Number of instances to skip from initializing\"" );
 	cmd( "tooltip::tooltip $_w.m.f2.s.i.l.f \"Fill intermediate instances with same value\"" );
@@ -243,7 +243,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 	cmd( "tooltip::tooltip $_w.m.f2.s.i.sel.all \"Apply initialization to all instances\"" );
 	cmd( "tooltip::tooltip $_w.m.f2.s.i.sel.sel \"Apply initialization to a range of instances\"" );
 
-	cmd( "pack $_w.m.f2.s.i.sel -pady 2" );
+	cmd( "pack $_w.m.f2.s.i.sel -pady $_2" );
 
 	cmd( "ttk::frame $_w.m.f2.s.i.sel2" );
 
@@ -252,11 +252,11 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 	cmd( "ttk::spinbox $_w.m.f2.s.i.sel2.c.from -width 5 -from 1 -to 9999 -state disabled -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; set err $_w.m.f2.s.i.sel2.c.from; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "ttk::label $_w.m.f2.s.i.sel2.c.lto -text \"to\"" );
 	cmd( "ttk::spinbox $_w.m.f2.s.i.sel2.c.to -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; set err $_w.m.f2.s.i.sel2.c.to; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( "pack $_w.m.f2.s.i.sel2.c.lfrom $_w.m.f2.s.i.sel2.c.from $_w.m.f2.s.i.sel2.c.lto $_w.m.f2.s.i.sel2.c.to -side left -pady 1" );
+	cmd( "pack $_w.m.f2.s.i.sel2.c.lfrom $_w.m.f2.s.i.sel2.c.from $_w.m.f2.s.i.sel2.c.lto $_w.m.f2.s.i.sel2.c.to -side left -pady $_1" );
 
 	cmd( "ttk::label $_w.m.f2.s.i.sel2.obs -text \"(use right button on cells for options)\"" );
 	cmd( "pack $_w.m.f2.s.i.sel2.c $_w.m.f2.s.i.sel2.obs" );
-	cmd( "pack $_w.m.f2.s.i.sel2 -pady 2" );
+	cmd( "pack $_w.m.f2.s.i.sel2 -pady $_2" );
 
 	cmd( "tooltip::tooltip $_w.m.f2.s.i.sel2 \"Select first and last instance to initialize\"" );
 
@@ -274,11 +274,11 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 	cmd( "ttk::frame $_w.m.f2.rnd.i.le.s" );
 	cmd( "ttk::label $_w.m.f2.rnd.i.le.s.l1 -text \"Seed\"" );
 	cmd( "ttk::spinbox $_w.m.f2.rnd.i.le.s.e1 -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; set err $_w.m.f2.rnd.i.le.s.e1; set choice 1; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( "pack $_w.m.f2.rnd.i.le.s.l1 $_w.m.f2.rnd.i.le.s.e1 -side left -padx 1" );
+	cmd( "pack $_w.m.f2.rnd.i.le.s.l1 $_w.m.f2.rnd.i.le.s.e1 -side left -padx $_1" );
 
-	cmd( "pack $_w.m.f2.rnd.i.le.f $_w.m.f2.rnd.i.le.s -side left -padx 5" );
+	cmd( "pack $_w.m.f2.rnd.i.le.f $_w.m.f2.rnd.i.le.s -side left -padx $_5" );
 
-	cmd( "pack $_w.m.f2.rnd.i.le -pady 2" );
+	cmd( "pack $_w.m.f2.rnd.i.le -pady $_2" );
 
 	cmd( "tooltip::tooltip $_w.m.f2.rnd.i.le.f \"Ensure the generator starts from a known condition\"" );
 	cmd( "tooltip::tooltip $_w.m.f2.rnd.i.le.s \"Choose the random number generator seed\"" );
@@ -291,8 +291,8 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 
 	cmd( "pack $_w.m.f2.s $_w.m.f2.rnd $_w.m.f2.ud -expand yes -fill x" );
 
-	cmd( "pack $_w.m.f1 $_w.m.f2 -side left -expand yes -fill both -padx 5 -pady 5" );
-	cmd( "pack $_w.head $_w.m -pady 5" );
+	cmd( "pack $_w.m.f1 $_w.m.f2 -side left -expand yes -fill both -padx $_5 -pady $_5" );
+	cmd( "pack $_w.head $_w.m -pady $_5" );
 
 	cmd( "okhelpcancel $_w b { set choice 1 } { LsdHelp menudata_init.html#setall } { set choice 2 }" );
 

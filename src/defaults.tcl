@@ -58,6 +58,11 @@ set modcolorD	SlateGray3	; # color of model label (dark mode)
 set ttipcolorL	LightYellow	; # color of tooltip background (light mode)
 set ttipcolorD	SteelBlue4	; # color of tooltip background (dark mode)
 
+# OS specific reference dot-per-inch (DPI) screen resolution
+set refDPImac			96	; # the reference DPI of the below sizes
+set refDPIlinux			96
+set refDPIwindows		96
+
 # OS specific minimum window sizes (horizontal & vertical) (must be even numbers)
 set hsizeLminMac		800	; # LMM window
 set vsizeLminMac		600
@@ -128,15 +133,15 @@ set borderM		20	; # open space to border
 set nsizeM		20	; # node size (diameter)
 set vmarginM	20	; # labels margins to nodes
 set vstepM		75	; # vertical absolute step
+set rinitM		750	; # horizontal initial width (4 root sons)
+set rincrM		100	; # horizontal width increase step
+set rootyM		15	; # vertical height of the root object click area
 set hfactM		1.0	; # initial horizontal scaling factor
 set vfactM		1.0	; # initial vertical scaling factor
 set hfactMmin	0.5	; # minimum horizontal scaling factor
 set vfactMmin	0.7	; # minimum vertical scaling factor
 set rstepM		0.1	; # relative scaling factor step step
 set rfactM		0.3	; # horizontal range exponential factor
-set rinitM		750	; # horizontal initial width (4 root sons)
-set rincrM		100	; # horizontal width increase step
-set rootyM		15	; # vertical height of the root object click area
 
 # runtime windows margins and defaults
 set hsizeR		500	; # horizontal size in pixels
@@ -146,14 +151,14 @@ set sclhsizeR	75	; # scale width
 set cvhmarginR	8	; # horizontal margin for canvas
 set botvmarginR	30	; # vertical margin for bottom part
 set sclvmarginR	3	; # vertical margin for scale
+set labvpadR	3	; # vertical label padding
+set labhpadR	10	; # horizontal label padding
+set shiftR		20	; # new window shift
 set hticksR		5	; # number of horizontal run-time plot legend ticks
 set vticksR		2	; # number of vertical run-time plot legend ticks
 set ticmarginR	5	; # margin for legend ticks
 set linlabR		3	; # lines of label
-set labvpadR	3	; # vertical label padding
-set labhpadR	10	; # horizontal label padding
 set pdigitsR	3	; # default precision digits
-set shiftR		20	; # new window shift
 
 # debug/data browse windows margins and defaults
 set vspcszD		5	; # line horizontal space size (pixels)
@@ -448,6 +453,49 @@ set allcolors {
 	MediumPurple3 MediumPurple4 thistle1 thistle2 thistle3 thistle4
 }
 
+# icon images
+image create photo lsdImgF		-file "$lsd_root/$lsd_src/icons/lsd.png"
+image create photo lmmImgF		-file "$lsd_root/$lsd_src/icons/lmm.png"
+image create photo newImgF		-file "$lsd_root/$lsd_src/icons/new.png"
+image create photo openImgF		-file "$lsd_root/$lsd_src/icons/open.png"
+image create photo saveImgF		-file "$lsd_root/$lsd_src/icons/save.png"
+image create photo undoImgF		-file "$lsd_root/$lsd_src/icons/undo.png"
+image create photo redoImgF		-file "$lsd_root/$lsd_src/icons/redo.png"
+image create photo cutImgF		-file "$lsd_root/$lsd_src/icons/cut.png"
+image create photo deleteImgF	-file "$lsd_root/$lsd_src/icons/delete.png"
+image create photo copyImgF		-file "$lsd_root/$lsd_src/icons/copy.png"
+image create photo pasteImgF	-file "$lsd_root/$lsd_src/icons/paste.png"
+image create photo editImgF		-file "$lsd_root/$lsd_src/icons/edit.png"
+image create photo findImgF		-file "$lsd_root/$lsd_src/icons/find.png"
+image create photo replaceImgF	-file "$lsd_root/$lsd_src/icons/replace.png"
+image create photo indentImgF	-file "$lsd_root/$lsd_src/icons/indent.png"
+image create photo deindentImgF	-file "$lsd_root/$lsd_src/icons/deindent.png"
+image create photo wrapImgF		-file "$lsd_root/$lsd_src/icons/wrap.png"
+image create photo compileImgF	-file "$lsd_root/$lsd_src/icons/compile.png"
+image create photo comprunImgF	-file "$lsd_root/$lsd_src/icons/comprun.png"
+image create photo gdbImgF		-file "$lsd_root/$lsd_src/icons/gdb.png"
+image create photo infoImgF		-file "$lsd_root/$lsd_src/icons/info.png"
+image create photo descrImgF	-file "$lsd_root/$lsd_src/icons/descr.png"
+image create photo equationImgF	-file "$lsd_root/$lsd_src/icons/equation.png"
+image create photo extraImgF	-file "$lsd_root/$lsd_src/icons/extra.png"
+image create photo setImgF		-file "$lsd_root/$lsd_src/icons/set.png"
+image create photo hideImgF		-file "$lsd_root/$lsd_src/icons/hide.png"
+image create photo helpImgF		-file "$lsd_root/$lsd_src/icons/help.png"
+image create photo reloadImgF	-file "$lsd_root/$lsd_src/icons/reload.png"
+image create photo structImgF	-file "$lsd_root/$lsd_src/icons/struct.png"
+image create photo addvarImgF	-file "$lsd_root/$lsd_src/icons/addvar.png"
+image create photo addparImgF	-file "$lsd_root/$lsd_src/icons/addpar.png"
+image create photo addobjImgF	-file "$lsd_root/$lsd_src/icons/addobj.png"
+image create photo initImgF		-file "$lsd_root/$lsd_src/icons/init.png"
+image create photo numberImgF	-file "$lsd_root/$lsd_src/icons/number.png"
+image create photo runImgF		-file "$lsd_root/$lsd_src/icons/run.png"
+image create photo dataImgF		-file "$lsd_root/$lsd_src/icons/data.png"
+image create photo resultImgF	-file "$lsd_root/$lsd_src/icons/result.png"
+image create photo errorDlgImgF	-file "$lsd_root/$lsd_src/icons/error.png"
+image create photo infoDlgImgF	-file "$lsd_root/$lsd_src/icons/information.png"
+image create photo questDlgImgF	-file "$lsd_root/$lsd_src/icons/question.png"
+image create photo warnDlgImgF	-file "$lsd_root/$lsd_src/icons/warning.png"
+
 # detect current platform
 if [ string equal $tcl_platform(platform) unix ] {
 	if [ string equal $tcl_platform(os) Darwin ] {
@@ -476,6 +524,7 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultTheme $themeMac
 	set gnuplotExe $gnuplotMac
 	set deltaSize $deltaSizeMac
+	set refDPI $refDPImac
 	set hsizeLmin $hsizeLminMac
 	set vsizeLmin $vsizeLminMac
 	set hsizeBmin $hsizeBminMac
@@ -509,6 +558,7 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultTheme $themeLinux
 	set gnuplotExe $gnuplotLinux
 	set deltaSize $deltaSizeLinux
+	set refDPI $refDPIlinux
 	set hsizeLmin $hsizeLminLinux
 	set vsizeLmin $vsizeLminLinux
 	set hsizeBmin $hsizeBminLinux
@@ -542,6 +592,7 @@ if [ string equal $CurPlatform mac ] {
 	set DefaultTheme $themeWindows
 	set gnuplotExe $gnuplotWindows
 	set deltaSize $deltaSizeWindows
+	set refDPI $refDPIwindows
 	set hsizeLmin $hsizeLminWindows
 	set vsizeLmin $vsizeLminWindows
 	set hsizeBmin $hsizeBminWindows
@@ -562,4 +613,58 @@ if [ string equal $CurPlatform mac ] {
 	set bhstepM $bhstepWindows
 	set bvstepM $bvstepWindows
 	set borderMadj $bborderWindows
+}
+
+# adjust screen measures to effective display DPI
+proc scaleScreen { x } {
+	global screenScaling
+	return [ expr { int( $screenScaling * $x ) } ]
+}
+
+set effDPI [ expr 72 * [ tk scaling ] ]
+set screenScaling [ expr $effDPI / $refDPI ]
+set allScreenMeasures {
+	hsizeLmin vsizeLmin hsizeBmin vsizeBmin hsizeAmin vsizeAmin hsizeDmin
+	vsizeDmin hsizePmin vsizePmin hsizeGmin vsizeGmin corrX corrY butPad
+	butSpc bhstepM bvstepM borderMadj
+
+	hsizeL vsizeL hsizeM vsizeM hsizeNmin vsizeNmin hsizeImin vsizeImin hsizeP
+	vsizeP hsizePxy vsizePxy hsizeLatMax vsizeLatMax hsizeLat vsizeLat
+
+	hmargin vmargin bordsize vmenusize tbarsize frPadX frPadY
+
+	borderM nsizeM vmarginM vstepM rinitM rincrM rootyM
+
+	hsizeR vsizeR botvsizeR sclhsizeR cvhmarginR botvmarginR sclvmarginR
+	labvpadR labhpadR shiftR
+
+	vspcszD
+
+	hmbordsizeP tbordsizeP bbordsizeP sbordsizeP htmarginP vtmarginP
+}
+set allPhotoImages {
+	lsdImg lmmImg newImg openImg saveImg undoImg redoImg cutImg deleteImg copyImg
+	pasteImg editImg findImg replaceImg indentImg deindentImg wrapImg compileImg
+	comprunImg gdbImg infoImg descrImg equationImg extraImg setImg hideImg helpImg
+	reloadImg structImg addvarImg addparImg addobjImg initImg numberImg runImg
+	dataImg resultImg errorDlgImg infoDlgImg questDlgImg warnDlgImg
+}
+
+# general padding values
+for { set x 1 } { $x < 30 } { incr x } {
+	set _$x [ scaleScreen $x ]
+}
+
+# GUI dimensions
+foreach x $allScreenMeasures {
+	set $x [ scaleScreen [ set $x ] ]
+}
+
+# GUI icons
+foreach x $allPhotoImages {
+	image create photo $x
+	catch {
+		$x copy ${x}F -zoom [ expr { round( $screenScaling ) } ]
+		image delete ${x}F
+	}
 }

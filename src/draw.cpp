@@ -539,12 +539,12 @@ void lsd::object::put_text( const char *str, const char *n, int x, int y, const 
 				wm positionfrom .list program; \
 				wm withdraw .list; \
 				label .list.t -text \"%s (#%s)\" -font \"$ttfontB\" -foreground $colorsTheme(obj) -background $colorsTheme(ttip); \
-				pack .list.t -anchor w -ipadx 1; \
+				pack .list.t -anchor w -ipadx $_1; \
 				set res_g_i 0; \
 				if { [ llength $tlist_%s ] > 0 } { \
 					foreach res_g_t $tlist_%s res_g_s $slist_%s { \
 						label .list.e$res_g_i -text \"$res_g_t\" -font \"$ttfont\" -foreground $colorsTheme($res_g_s) -background $colorsTheme(ttip); \
-						pack .list.e$res_g_i -anchor w -ipadx 1; \
+						pack .list.e$res_g_i -anchor w -ipadx $_1; \
 						incr res_g_i \
 					} \
 				}; \

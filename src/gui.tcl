@@ -277,49 +277,6 @@ set hbordsizeP	$hmbordsizeP
 set posXstr 0
 set posYstr 0
 
-# load icon images
-catch { image create photo lsdImg -file "$lsd_root/$lsd_src/icons/lsd.png" }
-catch { image create photo lmmImg -file "$lsd_root/$lsd_src/icons/lmm.png" }
-catch { image create photo newImg -file "$lsd_root/$lsd_src/icons/new.png" }
-catch { image create photo openImg -file "$lsd_root/$lsd_src/icons/open.png" }
-catch { image create photo saveImg -file "$lsd_root/$lsd_src/icons/save.png" }
-catch { image create photo undoImg -file "$lsd_root/$lsd_src/icons/undo.png" }
-catch { image create photo redoImg -file "$lsd_root/$lsd_src/icons/redo.png" }
-catch { image create photo cutImg -file "$lsd_root/$lsd_src/icons/cut.png" }
-catch { image create photo deleteImg -file "$lsd_root/$lsd_src/icons/delete.png" }
-catch { image create photo copyImg -file "$lsd_root/$lsd_src/icons/copy.png" }
-catch { image create photo pasteImg -file "$lsd_root/$lsd_src/icons/paste.png" }
-catch { image create photo editImg -file "$lsd_root/$lsd_src/icons/edit.png" }
-catch { image create photo findImg -file "$lsd_root/$lsd_src/icons/find.png" }
-catch { image create photo replaceImg -file "$lsd_root/$lsd_src/icons/replace.png" }
-catch { image create photo indentImg -file "$lsd_root/$lsd_src/icons/indent.png" }
-catch { image create photo deindentImg -file "$lsd_root/$lsd_src/icons/deindent.png" }
-catch { image create photo wrapImg -file "$lsd_root/$lsd_src/icons/wrap.png" }
-catch { image create photo compileImg -file "$lsd_root/$lsd_src/icons/compile.png" }
-catch { image create photo comprunImg -file "$lsd_root/$lsd_src/icons/comprun.png" }
-catch { image create photo gdbImg -file "$lsd_root/$lsd_src/icons/gdb.png" }
-catch { image create photo infoImg -file "$lsd_root/$lsd_src/icons/info.png" }
-catch { image create photo descrImg -file "$lsd_root/$lsd_src/icons/descr.png" }
-catch { image create photo equationImg -file "$lsd_root/$lsd_src/icons/equation.png" }
-catch { image create photo extraImg -file "$lsd_root/$lsd_src/icons/extra.png" }
-catch { image create photo setImg -file "$lsd_root/$lsd_src/icons/set.png" }
-catch { image create photo hideImg -file "$lsd_root/$lsd_src/icons/hide.png" }
-catch { image create photo helpImg -file "$lsd_root/$lsd_src/icons/help.png" }
-catch { image create photo reloadImg -file "$lsd_root/$lsd_src/icons/reload.png" }
-catch { image create photo structImg -file "$lsd_root/$lsd_src/icons/struct.png" }
-catch { image create photo addvarImg -file "$lsd_root/$lsd_src/icons/addvar.png" }
-catch { image create photo addparImg -file "$lsd_root/$lsd_src/icons/addpar.png" }
-catch { image create photo addobjImg -file "$lsd_root/$lsd_src/icons/addobj.png" }
-catch { image create photo initImg -file "$lsd_root/$lsd_src/icons/init.png" }
-catch { image create photo numberImg -file "$lsd_root/$lsd_src/icons/number.png" }
-catch { image create photo runImg -file "$lsd_root/$lsd_src/icons/run.png" }
-catch { image create photo dataImg -file "$lsd_root/$lsd_src/icons/data.png" }
-catch { image create photo resultImg -file "$lsd_root/$lsd_src/icons/result.png" }
-catch { image create photo errorDlgImg -file "$lsd_root/$lsd_src/icons/error.png" }
-catch { image create photo infoDlgImg -file "$lsd_root/$lsd_src/icons/information.png" }
-catch { image create photo questDlgImg -file "$lsd_root/$lsd_src/icons/question.png" }
-catch { image create photo warnDlgImg -file "$lsd_root/$lsd_src/icons/warning.png" }
-
 # load and set console configuration
 if $conWnd {
 	set msg "File(s) missing or corrupted"
@@ -349,42 +306,42 @@ if $testWnd {
 	ttk::label .tst.xy.v1 -anchor w -style hl.TLabel
 	ttk::label .tst.xy.l2 -anchor e -text "   Y:"
 	ttk::label .tst.xy.v2 -anchor w -style hl.TLabel
-	pack .tst.xy.l1 .tst.xy.v1 .tst.xy.l2 .tst.xy.v2 -side left -padx 2 -pady 2
+	pack .tst.xy.l1 .tst.xy.v1 .tst.xy.l2 .tst.xy.v2 -side left -padx $::_2 -pady $::_2
 
 	ttk::frame .tst.r
 	ttk::label .tst.r.l1 -anchor e -text "rootx:"
 	ttk::label .tst.r.v1 -anchor w -style hl.TLabel
 	ttk::label .tst.r.l2 -anchor e -text "   rooty:"
 	ttk::label .tst.r.v2 -anchor w -style hl.TLabel
-	pack .tst.r.l1 .tst.r.v1 .tst.r.l2 .tst.r.v2 -side left -padx 2 -pady 2
+	pack .tst.r.l1 .tst.r.v1 .tst.r.l2 .tst.r.v2 -side left -padx $::_2 -pady $::_2
 
 	ttk::frame .tst.v
 	ttk::label .tst.v.l1 -anchor e -text "vrootx:"
 	ttk::label .tst.v.v1 -anchor w -style hl.TLabel
 	ttk::label .tst.v.l2 -anchor e -text "   vrooty:"
 	ttk::label .tst.v.v2 -anchor w -style hl.TLabel
-	pack .tst.v.l1 .tst.v.v1 .tst.v.l2 .tst.v.v2 -side left -padx 2 -pady 2
+	pack .tst.v.l1 .tst.v.v1 .tst.v.l2 .tst.v.v2 -side left -padx $::_2 -pady $::_2
 
 	ttk::frame .tst.s
 	ttk::label .tst.s.l1 -anchor e -text "screenwidth:"
 	ttk::label .tst.s.v1 -anchor w -style hl.TLabel
 	ttk::label .tst.s.l2 -anchor e -text "   screenheight:"
 	ttk::label .tst.s.v2 -anchor w -style hl.TLabel
-	pack .tst.s.l1 .tst.s.v1 .tst.s.l2 .tst.s.v2 -side left -padx 2 -pady 2
+	pack .tst.s.l1 .tst.s.v1 .tst.s.l2 .tst.s.v2 -side left -padx $::_2 -pady $::_2
 
 	ttk::frame .tst.t
 	ttk::label .tst.t.l1 -anchor e -text "vrootwidth:"
 	ttk::label .tst.t.v1 -anchor w -style hl.TLabel
 	ttk::label .tst.t.l2 -anchor e -text "   vrootheight:"
 	ttk::label .tst.t.v2 -anchor w -style hl.TLabel
-	pack .tst.t.l1 .tst.t.v1 .tst.t.l2 .tst.t.v2 -side left -padx 2 -pady 2
+	pack .tst.t.l1 .tst.t.v1 .tst.t.l2 .tst.t.v2 -side left -padx $::_2 -pady $::_2
 
 	ttk::frame .tst.m
 	ttk::label .tst.m.l1 -anchor e -text "maxwidth:"
 	ttk::label .tst.m.v1 -anchor w -style hl.TLabel
 	ttk::label .tst.m.l2 -anchor e -text "   maxheight:"
 	ttk::label .tst.m.v2 -anchor w -style hl.TLabel
-	pack .tst.m.l1 .tst.m.v1 .tst.m.l2 .tst.m.v2 -side left -padx 2 -pady 2
+	pack .tst.m.l1 .tst.m.v1 .tst.m.l2 .tst.m.v2 -side left -padx $::_2 -pady $::_2
 
 	pack .tst.xy .tst.r .tst.v .tst.s .tst.t .tst.m
 

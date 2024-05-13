@@ -53,11 +53,11 @@ int lsd::sensitivity::dataentry( void )
 	cmd( "ttk::label .sens.lab.l1 -text \"Enter the desired values (at least 2) for:\"" );
 
 	cmd( "ttk::label .sens.lab.l2 -style hl.TLabel -text \"%s\"", label );
-	cmd( "pack .sens.lab.l1 .sens.lab.l2 -side left -padx 2" );
+	cmd( "pack .sens.lab.l1 .sens.lab.l2 -side left -padx $_2" );
 
 	cmd( "ttk::label .sens.obs1 -text \"Paste of clipboard data is allowed, most separators are accepted\"" );
 	cmd( "ttk::label .sens.obs2 -text \"Use a \'=BEGIN:END@SAMPLES%%TYPE\' clause\nto specify a number of samples within a range.\nSpaces are not allowed within clauses.\nTYPE values are \'L\' for linear and \'R\' for random samples.\" -justify center" );
-	cmd( "pack .sens.lab .sens.obs1 .sens.obs2 -pady 5" );
+	cmd( "pack .sens.lab .sens.obs1 .sens.obs2 -pady $_5" );
 
 	cmd( "ttk::frame .sens.t" );
 	cmd( "ttk::scrollbar .sens.t.v_scroll -command \".sens.t.t yview\"" );
@@ -67,7 +67,7 @@ int lsd::sensitivity::dataentry( void )
 	cmd( "pack .sens.t" );
 
 	cmd( "ttk::frame .sens.pad" );
-	cmd( "pack .sens.pad -pady 5" );
+	cmd( "pack .sens.pad -pady $_5" );
 
 	cmd( "ttk::frame .sens.fb" );
 	cmd( "ttk::checkbutton .sens.fb.int -variable integer -text \"Round to integer\"" );

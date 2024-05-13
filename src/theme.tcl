@@ -206,9 +206,10 @@ proc setstyles { } {
 		set tbpadh 3
 		set tbpadv 3
 	}
-	ttk::style configure Toolbutton -anchor center -padding "$tbpadh $tbpadv"
+	
+	ttk::style configure Toolbutton -anchor center -padding "[ scaleScreen $tbpadh ] [ scaleScreen $tbpadv ]"
 	ttk::style configure bold.Toolbutton \
-		-font [ font create -weight bold ]
+		-font [ font create -size $dim_character -weight bold ]
 	ttk::style configure hlBold.Toolbutton -anchor w -foreground $colorsTheme(hl) \
 		-font [ font create -size $small_character -weight bold ]
 	ttk::style map hlBold.Toolbutton -foreground [ list disabled $colorsTheme(hl) ] \
@@ -243,9 +244,9 @@ proc setstyles { } {
 	ttk::style configure selHl.TLabel -foreground $colorsTheme(hl) \
 		-background $colorsTheme(sbg)
 	ttk::style configure bold.TLabel \
-		-font [ font create -weight bold ]
+		-font [ font create -size $dim_character -weight bold ]
 	ttk::style configure hlBold.TLabel -foreground $colorsTheme(hl) \
-		-font [ font create -weight bold ]
+		-font [ font create -size $dim_character -weight bold ]
 	ttk::style configure boldSmall.TLabel \
 		-font [ font create -size $small_character -weight bold ]
 	ttk::style configure hlBoldSmall.TLabel -foreground $colorsTheme(hl) \
@@ -529,7 +530,7 @@ proc ttk::messageBox_draw { name icon title parent message detail type default }
 		}
 	}
 
-	pack $name.top.icon.label -pady 5 -anchor nw
+	pack $name.top.icon.label -pady $::_5 -anchor nw
 
 	ttk::frame $name.top.text
 	ttk::label $name.top.text.message -wraplength 300 -anchor w \
@@ -537,11 +538,11 @@ proc ttk::messageBox_draw { name icon title parent message detail type default }
 	ttk::label $name.top.text.details -wraplength 300 -anchor w \
 				-justify left -text $detail
 	pack $name.top.text.message \
-		 $name.top.text.details -pady 5 -anchor nw
+		 $name.top.text.details -pady $::_5 -anchor nw
 
 	pack $name.top.icon $name.top.text \
-		 -padx 5 -side left -anchor nw
-	pack $name.top -padx 15 -pady 15
+		 -padx $::_5 -side left -anchor nw
+	pack $name.top -padx $::_15 -pady $::_15
 
 	switch $type {
 		abortretryignore {

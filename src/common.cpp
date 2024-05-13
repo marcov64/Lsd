@@ -2453,7 +2453,7 @@ bool gui::compile_run( int run_mode, bool nw )
 		else
 			cmd( "ttk::label .t.l2 -justify center -text \"Recompiling the entire model program.\nOn success, the new program will NOT be launched.\nOn failure, a new window will show the compilation errors.\"" );
 
-	cmd( "pack .t.l1 .t.l2 -padx 5 -pady 5" );
+	cmd( "pack .t.l1 .t.l2 -padx $_5 -pady $_5" );
 	cmd( "cancel .t b { set res 2 }");
 	cmd( "showtop .t $posWnd" );
 
@@ -2611,7 +2611,7 @@ void gui::show_comp_result( bool nw )
 	cmd( "ttk::label .mm.i.c.n -anchor w -width 5 -style hl.TLabel" );
 	cmd( "pack .mm.i.c.l .mm.i.c.n -side left" );
 
-	cmd( "pack .mm.i.f .mm.i.l .mm.i.c -padx 10 -pady 5 -side left" );
+	cmd( "pack .mm.i.f .mm.i.l .mm.i.c -padx $_10 -pady $_5 -side left" );
 	cmd( "pack .mm.i" );
 
 	cmd( "tooltip::tooltip .mm.i \"File, line and column of error\"" );

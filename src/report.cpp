@@ -157,19 +157,19 @@ void lsd::object::report( void )
 	cmd( "ttk::frame .w.s.e2.header" );
 	cmd( "ttk::label .w.s.e2.header.tlab -text \"Title\"" );
 	cmd( "ttk::entry .w.s.e2.header.tit -width 30 -state disabled -textvariable tit2 -justify center" );
-	cmd( "pack .w.s.e2.header.tlab .w.s.e2.header.tit -side left -padx 2" );
+	cmd( "pack .w.s.e2.header.tlab .w.s.e2.header.tit -side left -padx $_2" );
 
 	cmd( "ttk::frame .w.s.e2.file" );
 	cmd( "ttk::label .w.s.e2.file.tlab -text \"Get from file\"" );
 	cmd( "ttk::entry .w.s.e2.file.tit -width 25 -state disabled -textvariable file2 -justify center" );
 	cmd( "ttk::button .w.s.e2.file.new -width 5 -state disabled -text Search -command { set file2 [ tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} } -initialdir \"%s\" ]; if [ fn_spaces \"$file2\" .w ] { set file2 \"\" } }", model_path );
-	cmd( "pack .w.s.e2.file.tlab .w.s.e2.file.tit .w.s.e2.file.new -side left -padx 2" );
+	cmd( "pack .w.s.e2.file.tlab .w.s.e2.file.tit .w.s.e2.file.new -side left -padx $_2" );
 
-	cmd( "pack .w.s.e2.h .w.s.e2.header .w.s.e2.file -padx 5 -pady 2" );
+	cmd( "pack .w.s.e2.h .w.s.e2.header .w.s.e2.file -padx $_5 -pady $_2" );
 
 	cmd( "pack .w.s.lab .w.s.e2" );
 
-	cmd( "pack .w.f .w.l .w.g .w.s -padx 5 -pady 5" );
+	cmd( "pack .w.f .w.l .w.g .w.s -padx $_5 -pady $_5" );
 
 	cmd( "okXhelpcancel .w b Search { set res [ tk_getSaveFile -parent .w -title \"Existing Report File\" -filetypes { { {HTML files} {.html} } } -initialdir \"%s\" ]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }", model_path );
 

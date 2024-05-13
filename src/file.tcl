@@ -580,7 +580,7 @@ proc choose_models { curdir curfile } {
 	ttk::label .l.t.l.gt.t -style hl.TLabel
 	pack .l.t.l.gt.l .l.t.l.gt.t
 
-	pack .l.t.l.tit .l.t.l.l .l.t.l.gt -pady 5
+	pack .l.t.l.tit .l.t.l.l .l.t.l.gt -pady $::_5
 
 	# 2nd column
 	ttk::frame .l.t.t
@@ -600,7 +600,7 @@ proc choose_models { curdir curfile } {
 	pack .l.t.t.f1.m1.i.ins .l.t.t.f1.m1.i.brw -padx $butSpc -pady $butPad -side left
 
 	pack .l.t.t.f1.m1.d .l.t.t.f1.m1.f .l.t.t.f1.m1.i
-	pack .l.t.t.f1.l .l.t.t.f1.m1 -pady 3
+	pack .l.t.t.f1.l .l.t.t.f1.m1 -pady $::_3
 
 	ttk::frame .l.t.t.f2
 	ttk::label .l.t.t.f2.l -text "Second model"
@@ -615,11 +615,11 @@ proc choose_models { curdir curfile } {
 	pack .l.t.t.f2.m2.i.ins .l.t.t.f2.m2.i.brw -padx $butSpc -pady $butPad -side left
 
 	pack .l.t.t.f2.m2.d .l.t.t.f2.m2.f .l.t.t.f2.m2.i
-	pack .l.t.t.f2.l .l.t.t.f2.m2 -pady 3
+	pack .l.t.t.f2.l .l.t.t.f2.m2 -pady $::_3
 
-	pack .l.t.t.tit .l.t.t.f1 .l.t.t.f2 -pady 5
+	pack .l.t.t.tit .l.t.t.f1 .l.t.t.f2 -pady $::_5
 
-	pack .l.t.l .l.t.t -padx 5 -side left
+	pack .l.t.l .l.t.t -padx $::_5 -side left
 
 	pack .l.t
 

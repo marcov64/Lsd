@@ -229,15 +229,15 @@ bool gui::add_rt_plot_tab( const char *w, int id_sim )
 						}; \
 						$rtptab select $rtptab.tab%d \
 					}", i, k, k, k, tabs, k, k, k );
-				cmd( "pack $rtptab.more.b.l%d.b%d -side left -padx 2", i, k );
+				cmd( "pack $rtptab.more.b.l%d.b%d -side left -padx $_2", i, k );
 
 				++k;
 			}
 
-			cmd( "pack $rtptab.more.b.l%d -anchor w -pady 2", i );
+			cmd( "pack $rtptab.more.b.l%d -anchor w -pady $_2", i );
 		}
 
-		cmd( "pack $rtptab.more.b -padx 20 -pady 20" );
+		cmd( "pack $rtptab.more.b -padx $_20 -pady $_20" );
 	}
 
 	if ( id_sim < 10 )
@@ -387,7 +387,7 @@ void gui::init_plot( int num )
 		cmd( "tooltip::tooltip $activeplot.fond.shift \"Automatic scrolling\"" );
 	}
 
-	cmd( "pack $activeplot.fond -expand yes -fill both -pady 7" );
+	cmd( "pack $activeplot.fond -expand yes -fill both -pady $_7" );
 }
 
 

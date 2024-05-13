@@ -159,11 +159,11 @@ void lsd::object::edit_data( const char *lab )
 	strcpyn( ch1, lab, MAX_ELEM_LENGTH );
 
 	cmd( "ttk::label $w.tit_empty -style boldSmall.TLabel -text %s", ch1 );
-	cmd( "grid $w.tit_empty -sticky w -padx { 2 5 }" );
+	cmd( "grid $w.tit_empty -sticky w -padx [ list $_2 $_5 ]" );
 	cmd( "mouse_wheel $w.tit_empty" );
 
 	cmd( "ttk::label $w.tit_typ -style hl.TLabel -text (Obj)" );
-	cmd( "grid $w.tit_typ -row 0 -column 1 -padx 1" );
+	cmd( "grid $w.tit_typ -row 0 -column 1 -padx $_1" );
 	cmd( "mouse_wheel $w.tit_typ" );
 
 	// explore the tree searching for each instance of such object and create:
@@ -180,7 +180,7 @@ void lsd::object::edit_data( const char *lab )
 	cmd( "pack .inid.t -expand 1 -fill both" );
 
 	cmd( "ttk::label .inid.err -text \"\"" );
-	cmd( "pack .inid.err -padx 5 -pady 5" );
+	cmd( "pack .inid.err -padx $_5 -pady $_5" );
 
 	cmd( "donehelp .inid b { set choice 1 } { LsdHelp menudata_init.html }" );
 
@@ -332,10 +332,10 @@ void lsd::object::link_cells( const char *lab )
 			strcpyn( ch1, cv1->label, MAX_ELEM_LENGTH );
 
 			cmd( "ttk::label $w.tit_t%s -text %s", cv1->label, ch1 );
-			cmd( "grid $w.tit_t%s -row %d -sticky w -padx { 2 5 }", cv1->label, k );
+			cmd( "grid $w.tit_t%s -row %d -sticky w -padx [ list $_2 $_5 ]", cv1->label, k );
 			cmd( "mouse_wheel $w.tit_t%s", cv1->label );
 			cmd( "ttk::label $w.typ_t%s -text (P) -style hl.TLabel", cv1->label );
-			cmd( "grid $w.typ_t%s -row %d -column 1 -padx 1", cv1->label, k );
+			cmd( "grid $w.typ_t%s -row %d -column 1 -padx $_1", cv1->label, k );
 			cmd( "mouse_wheel $w.typ_t%s", cv1->label );
 			cmd( "ttk::button $w.t%s -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set var_name %s; set lag %d; set lastFocus $w.c1_v%sp; set choice 2 }", cv1->label, cv1->label, j, cv1->label );
 			cmd( "grid $w.t%s -row %d -column 2", cv1->label, k );
@@ -353,10 +353,10 @@ void lsd::object::link_cells( const char *lab )
 				strcpyn( ch1, cv1->label, MAX_ELEM_LENGTH );
 
 				cmd( "ttk::label $w.tit_t%s_%d -text %s", cv1->label, j, ch1 );
-				cmd( "grid $w.tit_t%s_%d -row %d -sticky w -padx { 2 5 }", cv1->label, j, k );
+				cmd( "grid $w.tit_t%s_%d -row %d -sticky w -padx [ list $_2 $_5 ]", cv1->label, j, k );
 				cmd( "mouse_wheel $w.tit_t%s_%d", cv1->label, j );
 				cmd( "ttk::label $w.typ_t%s_%d -text (V_%d) -style hl.TLabel", cv1->label, j, j + 1 );
-				cmd( "grid $w.typ_t%s_%d -row %d -column 1 -padx 1", cv1->label, j, k );
+				cmd( "grid $w.typ_t%s_%d -row %d -column 1 -padx $_1", cv1->label, j, k );
 				cmd( "mouse_wheel $w.typ_t%s_%d", cv1->label, j );
 				cmd( "ttk::button $w.t%s_%d -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set var_name %s; set lag %d; set lastFocus $w.c1_v%s_%d; set choice 2 }", cv1->label, j, cv1->label, j, cv1->label, j );
 				cmd( "grid $w.t%s_%d -row %d -column 2", cv1->label, j, k );
@@ -381,7 +381,7 @@ void lsd::object::link_cells( const char *lab )
 
 				cmd( "ttk::entry $w.c%d_v%sp -width $cwidth -justify center -validate focusout -validatecommand { set n %%P; if [ string is double -strict $n ] { set p%s_%d $n; return 1 } { %%W delete 0 end; %%W insert 0 ${p%s_%d}; return 0 } } -invalidcommand { bell }", i, cv->label, cv->label, i, cv->label, i, cv->label, i );
 				cmd( "$w.c%d_v%sp insert 0 [ formatfloat ${p%s_%d} ]", i, cv->label, cv->label, i );
-				cmd( "grid $w.c%d_v%sp -row %d -column [ expr { 2 + %d } ] -padx 1", i, cv->label, k, i );
+				cmd( "grid $w.c%d_v%sp -row %d -column [ expr { 2 + %d } ] -padx $_1", i, cv->label, k, i );
 				cmd( "mouse_wheel $w.c%d_v%sp", i, cv->label );
 
 				cmd( "if { [ info exists tag_%d ] && $tag_%d ne \"\" } { \
@@ -423,7 +423,7 @@ void lsd::object::link_cells( const char *lab )
 
 					cmd( "ttk::entry $w.c%d_v%s_%d -width $cwidth -justify center -validate focusout -validatecommand { set n %%P; if [ string is double -strict $n ] { set v%s_%d_%d $n; return 1 } { %%W delete 0 end; %%W insert 0 ${v%s_%d_%d}; return 0 } } -invalidcommand { bell }", i, cv->label, j, cv->label, i, j, cv->label, i, j, cv->label, i, j );
 					cmd( "$w.c%d_v%s_%d insert 0 [ formatfloat ${v%s_%d_%d} ]", i, cv->label, j, cv->label, i, j );
-					cmd( "grid $w.c%d_v%s_%d -row %d -column [ expr { 2 + %d } ] -padx 1", i, cv->label, j, k, i );
+					cmd( "grid $w.c%d_v%s_%d -row %d -column [ expr { 2 + %d } ] -padx $_1", i, cv->label, j, k, i );
 					cmd( "mouse_wheel $w.c%d_v%s_%d", i, cv->label, j );
 
 					cmd( "if { [ info exists tag_%d ] && $tag_%d ne \"\" } { \

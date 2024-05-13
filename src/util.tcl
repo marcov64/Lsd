@@ -230,7 +230,7 @@ proc progressbox { w tit lab elem1 { max1 1 } { destroy "" } { par . } { elem2 "
 
 	ttk::frame $w.main
 	ttk::label $w.main.lab -text $lab
-	pack $w.main.lab -pady 10
+	pack $w.main.lab -pady $::_10
 
 	if { $max1 <= 0 } {
 		set max1 1
@@ -241,11 +241,11 @@ proc progressbox { w tit lab elem1 { max1 1 } { destroy "" } { par . } { elem2 "
 	ttk::frame $w.main.p1.info
 	ttk::label $w.main.p1.info.elem -text "[ string totitle $elem1 ]:"
 	ttk::label $w.main.p1.info.val
-	pack $w.main.p1.info.elem $w.main.p1.info.val -padx 1 -side left
-	pack $w.main.p1.scale $w.main.p1.info -pady 2
+	pack $w.main.p1.info.elem $w.main.p1.info.val -padx $::_1 -side left
+	pack $w.main.p1.scale $w.main.p1.info -pady $::_2
 
 	if { $elem1 != "" } {
-		pack $w.main.p1 -pady 5
+		pack $w.main.p1 -pady $::_5
 	}
 
 	if { $max2 <= 0 } {
@@ -257,14 +257,14 @@ proc progressbox { w tit lab elem1 { max1 1 } { destroy "" } { par . } { elem2 "
 	ttk::frame $w.main.p2.info
 	ttk::label $w.main.p2.info.elem -text "[ string totitle $elem2 ]:"
 	ttk::label $w.main.p2.info.val
-	pack $w.main.p2.info.elem $w.main.p2.info.val -padx 1 -side left
-	pack $w.main.p2.scale $w.main.p2.info -pady 2
+	pack $w.main.p2.info.elem $w.main.p2.info.val -padx $::_1 -side left
+	pack $w.main.p2.scale $w.main.p2.info -pady $::_2
 
 	if { $elem2 != "" } {
-		pack $w.main.p2 -pady 5
+		pack $w.main.p2 -pady $::_5
 	}
 
-	pack $w.main -padx 10 -pady 10
+	pack $w.main -padx $::_10 -pady $::_10
 
 	if { $destroy != "" } {
 		cancel $w b $destroy
@@ -328,27 +328,27 @@ proc waitbox { w tit msg { steps "" } { timer no } { par . } } {
 
 	ttk::frame $w.main
 	ttk::label $w.main.msg -justify center -text "$msg"
-	pack $w.main.msg -pady 10
+	pack $w.main.msg -pady $::_10
 
 	if { $steps != "" } {
 		ttk::frame $w.main.steps -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]
 		ttk::label $w.main.steps.txt -text $steps
-		pack $w.main.steps.txt -padx 5 -pady 5
-		pack $w.main.steps -pady 10
+		pack $w.main.steps.txt -padx $::_5 -pady $::_5
+		pack $w.main.steps -pady $::_10
 	}
 
 	if { $timer } {
 		ttk::frame $w.main.time
 		ttk::label $w.main.time.lab -text "Elapsed time:"
 		ttk::label $w.main.time.val -style hl.TLabel -text "00:00"
-		pack $w.main.time.lab $w.main.time.val -padx 5 -side left
-		pack $w.main.time -pady 10
+		pack $w.main.time.lab $w.main.time.val -padx $::_5 -side left
+		pack $w.main.time -pady $::_10
 		set retVal $w.main.time.val
 	} else {
 		set retVal ""
 	}
 
-	pack $w.main -padx 20 -pady 20
+	pack $w.main -padx $::_20 -pady $::_20
 
 	# handle installer with main window withdrawn
 	if { $par == "" } {
@@ -1341,7 +1341,7 @@ proc get_series { size data } {
 	}
 
 	# Convert the list to a byte array
-	set c_data [ intsToByteArray $_data ]
+	set c_data [ intsToByteArray $::_data ]
 
 	# Call the C routine - that will fill the byte array
 	upload_series $size $c_data

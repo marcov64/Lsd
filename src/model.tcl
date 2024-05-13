@@ -34,7 +34,7 @@ set months [ list January February March April May June July August September Oc
 #************************************************
 # SHOWMODEL
 #************************************************
-proc showmodel pippo {
+proc showmodel group_dir {
 	global lmn lmd ldn lrn lbn group result choiceSM lver rootname model_group upSymbol groupSymbol lsd_root memory small_character GROUP_TXT_INFO MODEL_TXT_INFO GROUP_XML_CONFIG MODEL_XML_CONFIG DESCRIPTION colorsTheme darkTheme
 
 	unset -nocomplain lmn lver lmd ldn lrn lbn group
@@ -142,7 +142,7 @@ proc showmodel pippo {
 		tooltip::tooltip .l.bbar.help "Help"
 
 		pack .l.bbar.new .l.bbar.edit .l.bbar.copy .l.bbar.paste .l.bbar.delete .l.bbar.help -side left
-		pack .l.bbar -padx 3 -anchor w -fill x
+		pack .l.bbar -padx $::_3 -anchor w -fill x
 
 		ttk::frame .l.l
 
@@ -151,7 +151,7 @@ proc showmodel pippo {
 		ttk::label .l.l.tit.n -style hl.TLabel
 		pack .l.l.tit.g .l.l.tit.n -side left
 
-		pack .l.l.tit -pady 3 -anchor w
+		pack .l.l.tit -pady $::_3 -anchor w
 
 		ttk::scrollbar .l.l.vs -command ".l.l.l yview"
 		ttk::listbox .l.l.l -height 15 -width 30 -yscroll ".l.l.vs set" -selectmode browse -dark $darkTheme
@@ -170,7 +170,7 @@ proc showmodel pippo {
 
 		ttk::frame .l.t
 		ttk::label .l.t.tit -text Description -anchor center
-		pack .l.t.tit -pady 3 -expand yes -fill x
+		pack .l.t.tit -pady $::_3 -expand yes -fill x
 		ttk::scrollbar .l.t.yscroll -command ".l.t.text yview"
 		ttk::text .l.t.text -wrap word -width 60 -yscrollcommand ".l.t.yscroll set" -entry 0 -dark $darkTheme -style smallFixed.TText
 		pack .l.t.yscroll -side right -fill y
@@ -296,13 +296,13 @@ proc showmodel pippo {
 	.l.l.tit.n conf -text $model_group
 
 	set curdir [ pwd ]
-	if { ! [ file isdirectory $pippo ] } {
+	if { ! [ file isdirectory $group_dir ] } {
 		# recover from invalid folders
-		set pippo $lsd_root
+		set group_dir $lsd_root
 	}
 
-	cd $pippo
-	if { ! [ string equal -nocase $pippo $lsd_root ] } {
+	cd $group_dir
+	if { ! [ string equal -nocase $group_dir $lsd_root ] } {
 		set updir [ file dirname [ pwd ] ]
 		set upgroup [ get_group_setting $updir name ]
 
@@ -310,7 +310,7 @@ proc showmodel pippo {
 		lappend lmd "Return to group: $upgroup"
 		lappend lrn [ pwd ]
 		lappend lbn $model_group
-		lappend ldn [ file dirname $pippo ]
+		lappend ldn [ file dirname $group_dir ]
 		lappend lmn $upgroup
 		lappend group -1
 		.l.l.l insert end $upSymbol
@@ -331,7 +331,7 @@ proc showmodel pippo {
 
 			lappend lmn $app
 			lappend lver -1
-			lappend ldn "$pippo/$i"
+			lappend ldn "$group_dir/$i"
 			lappend lrn [ pwd ]
 			lappend lbn $model_group
 			lappend lmd $appd
@@ -339,7 +339,7 @@ proc showmodel pippo {
 			.l.l.l insert end "$groupSymbol$app"
 			.l.l.l itemconf end -fg $colorsTheme(grp)
 
-			tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] "[ file nativename $pippo/$i ]"
+			tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] "[ file nativename $group_dir/$i ]"
 		}
 	}
 
@@ -359,7 +359,7 @@ proc showmodel pippo {
 
 			lappend lmn $mn
 			lappend lver $ver
-			lappend ldn "$pippo/$i"
+			lappend ldn "$group_dir/$i"
 			lappend lrn [ pwd ]
 			lappend lbn $model_group
 
@@ -368,14 +368,14 @@ proc showmodel pippo {
 				lappend lmd "[ read -nonewline $f ]"
 				close $f
 			} else {
-				lappend lmd "Model: $mn\nin directory: [ file nativename $pippo/$i ]\n(description not available)"
+				lappend lmd "Model: $mn\nin directory: [ file nativename $group_dir/$i ]\n(description not available)"
 			}
 
 			lappend group 0
 			.l.l.l insert end "$mn (v. $ver)"
 			.l.l.l itemconf end -fg $colorsTheme(mod)
 
-			tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] [ file nativename $pippo/$i ]
+			tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] [ file nativename $group_dir/$i ]
 		}
 	}
 
@@ -493,7 +493,7 @@ proc medit i {
 	ttk::frame .l.e.tit
 	ttk::label .l.e.tit.l -text "Current $item:"
 	ttk::label .l.e.tit.n -text "[ lindex $lmn $i ]" -style hl.TLabel
-	pack .l.e.tit.l  .l.e.tit.n -side left -padx 2
+	pack .l.e.tit.l  .l.e.tit.n -side left -padx $::_2
 
 	ttk::frame .l.e.n
 	ttk::label .l.e.n.l -text "Name"
@@ -511,7 +511,7 @@ proc medit i {
 	mouse_wheel .l.e.t.t.text
 	pack .l.e.t.l .l.e.t.t
 
-	pack .l.e.tit .l.e.n .l.e.t -padx 5 -pady 5
+	pack .l.e.tit .l.e.n .l.e.t -padx $::_5 -pady $::_5
 
 	okcancel .l.e b {
 		if { [ lindex $group $result ] == 0 } {
@@ -563,12 +563,12 @@ proc mpaste i {
 	ttk::frame .l.p.tit.t1
 	ttk::label .l.p.tit.t1.l -text "Original model:"
 	ttk::label .l.p.tit.t1.n -text $copylabel -style hl.TLabel
-	pack .l.p.tit.t1.l  .l.p.tit.t1.n -side left -padx 2
+	pack .l.p.tit.t1.l  .l.p.tit.t1.n -side left -padx $::_2
 
 	ttk::frame .l.p.tit.t2
 	ttk::label .l.p.tit.t2.l -text "Current group:"
 	ttk::label .l.p.tit.t2.n -text [ lindex $lrn $i ] -style hl.TLabel
-	pack .l.p.tit.t2.l  .l.p.tit.t2.n -side left -padx 2
+	pack .l.p.tit.t2.l  .l.p.tit.t2.n -side left -padx $::_2
 
 	pack .l.p.tit.t1  .l.p.tit.t2
 
@@ -601,7 +601,7 @@ proc mpaste i {
 	mouse_wheel .l.p.t.t.text
 	pack .l.p.t.l .l.p.t.t
 
-	pack .l.p.tit .l.p.n .l.p.v .l.p.d .l.p.t -padx 5 -pady 5
+	pack .l.p.tit .l.p.n .l.p.v .l.p.d .l.p.t -padx $::_5 -pady $::_5
 
 	okcancel .l.p b { set choiceSM 1 } { set choiceSM 2 }
 

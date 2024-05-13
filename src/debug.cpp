@@ -240,7 +240,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 			cmd( "ttk::label .deb.b.act.stack.l -text \"Stack level\"" );
 			cmd( "ttk::spinbox .deb.b.act.stack.e -width 3 -from 0 -to 99 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= 99 } { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( ".deb.b.act.stack.e insert 0 $stack_flag" );
-			cmd( "pack .deb.b.act.stack.l .deb.b.act.stack.e -padx 2 -side left" );
+			cmd( "pack .deb.b.act.stack.l .deb.b.act.stack.e -padx $_2 -side left" );
 
 			cmd( "tooltip::tooltip .deb.b.act.stack \"Maximum level of computation stack\"" );
 
@@ -652,22 +652,22 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				}
 
 				cmd( "ttk::label $e.n.v -style hl.TLabel -text $res" );
-				cmd( "pack $e.n.l $e.n.v -side left -padx 2" );
+				cmd( "pack $e.n.l $e.n.v -side left -padx $_2" );
 
 				cmd( "ttk::frame $e.t" );
 				cmd( "ttk::label $e.t.l -text \"Current case:\"" );
 				cmd( "ttk::label $e.t.v -style hl.TLabel -text %d", sim->t );
-				cmd( "pack $e.t.l $e.t.v -side left -padx 2" );
+				cmd( "pack $e.t.l $e.t.v -side left -padx $_2" );
 
 				cmd( "ttk::frame $e.u" );
 				cmd( "ttk::label $e.u.l -text \"Last update:\"" );
 				cmd( "ttk::label $e.u.v -style hl.TLabel -text %d", cv->last_update );
-				cmd( "pack $e.u.l $e.u.v -side left -padx 2" );
+				cmd( "pack $e.u.l $e.u.v -side left -padx $_2" );
 
 				cmd( "ttk::frame $e.x" );
 				cmd( "ttk::label $e.x.l -text \"Next update:\"" );
 				cmd( "ttk::label $e.x.v -style hl.TLabel -text %d", cv->next_update > 0 ? cv->next_update : cv->last_update < sim->t ? sim->t : sim->t + 1 );
-				cmd( "pack $e.x.l $e.x.v -side left -padx 2" );
+				cmd( "pack $e.x.l $e.x.v -side left -padx $_2" );
 
 				cmd( "ttk::frame $e.v" );
 
@@ -689,7 +689,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					cmd( "$e.v.l%d.e insert 0 $val%d", i, i );
 
 					cmd( "ttk::button $e.v.l$i.sa -width -1 -text \"Set All\" -command { set sa %i; set choice 10 }", i );
-					cmd( "pack $e.v.l$i.l $e.v.l$i.e $e.v.l$i.sa -side left -padx 2" );
+					cmd( "pack $e.v.l$i.l $e.v.l$i.e $e.v.l$i.sa -side left -padx $_2" );
 					cmd( "pack $e.v.l$i" );
 
 					if ( i == 0 )
@@ -701,7 +701,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				if ( cv->param == 1 )
 				{
 					cmd( "pack $e.n $e.t" );
-					cmd( "pack $e.v -pady 5 -padx 5" );
+					cmd( "pack $e.v -pady $_5 -padx $_5" );
 				}
 				else
 				{
@@ -715,7 +715,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					cmd( "ttk::checkbutton $e.d.deball -text \"Debug all instances\" -variable debugall -command { if { $debugall == 1 } { set debug 1; set undebugall 0; .deb.stat.d.deb configure -state disabled } { set debug 0; set undebugall 1; .deb.stat.d.deb configure -state normal } }" );
 					cmd( "pack $e.d.deb $e.d.deball" );
 
-					cmd( "pack $e.v $e.d -pady 5 -padx 5" );
+					cmd( "pack $e.v $e.d -pady $_5 -padx $_5" );
 
 					cmd( "ttk::frame $e.b1" );
 					cmd( "ttk::button $e.b1.eq -width $butWid -text Equation -command { set choice 8 }" );
@@ -812,7 +812,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					cmd( "ttk::frame $cb.l" );
 					cmd( "ttk::label $cb.l.l -text \"Variable:\"" );
 					cmd( "ttk::label $cb.l.n -style hl.TLabel -text %s", cv->label );
-					cmd( "pack $cb.l.l $cb.l.n -side left -padx 2" );
+					cmd( "pack $cb.l.l $cb.l.n -side left -padx $_2" );
 
 					cmd( "ttk::frame $cb.t" );
 					cmd( "ttk::label $cb.t.l -text \"Type of break\"" );
@@ -833,7 +833,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					cmd( "if { $cond != 0 } { $cb.v.e configure -state normal; $cb.v.e selection range 0 end; focus $cb.v.e }" );
 					cmd( "pack $cb.v.l $cb.v.e" );
 
-					cmd( "pack $cb.l $cb.t $cb.v -padx 5 -pady 5" );
+					cmd( "pack $cb.l $cb.t $cb.v -padx $_5 -pady $_5" );
 
 					cmd( "okhelpcancel $cb b { set choice 1 } { LsdHelp debug.html#cond } { set choice 2 }" );
 					cmd( "bind $cb.v.e <Return> { set choice 1 }" );
@@ -940,7 +940,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				cmd( "write_any $s.v.e $value_search" );
 				cmd( "pack $s.v.l $s.v.e" );
 
-				cmd( "pack $s.l $s.c $s.v -padx 5 -pady 5" );
+				cmd( "pack $s.l $s.c $s.v -padx $_5 -pady $_5" );
 
 				cmd( "okhelpcancel $s b { set choice 1 } { LsdHelp debug.html#find } { set choice 2 }" );
 
@@ -1170,7 +1170,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				cmd( "$t.t.val insert 0 $tdebug" );
 				cmd( "pack $t.t.l $t.t.val" );
 
-				cmd( "pack $t.t -padx 5 -pady 5" );
+				cmd( "pack $t.t -padx $_5 -pady $_5" );
 
 				cmd( "okhelpcancel $t b { set choice 1 } { LsdHelp debug.html#until } { set choice 2 }" );
 
@@ -1232,7 +1232,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				cmd( "pack .deb.sv.i.l .deb.sv.i.e" );
 
 				cmd( "ttk::label .deb.sv.o -justify center -text \"(type the initial letters of the\nname, LSD will complete it)\"" );
-				cmd( "pack .deb.sv.i .deb.sv.o -padx 5 -pady 5" );
+				cmd( "pack .deb.sv.i .deb.sv.o -padx $_5 -pady $_5" );
 				cmd( "pack .deb.sv.i" );
 
 				cmd( "okcancel .deb.sv b { set choice 1 } { set choice 2 }" );
@@ -1313,7 +1313,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					cmd( "ttk::frame $hk.l" );
 					cmd( "ttk::label $hk.l.l -text \"Object:\"" );
 					cmd( "ttk::label $hk.l.n -style hl.TLabel -text %s", label );
-					cmd( "pack $hk.l.l $hk.l.n -side left -padx 2" );
+					cmd( "pack $hk.l.l $hk.l.n -side left -padx $_2" );
 
 					cmd( "ttk::frame $hk.t" );
 					cmd( "ttk::label $hk.t.l -text \"Available hooks\"" );
@@ -1370,7 +1370,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					cmd( "ttk::label $hk.m.l -text \"(invalid and NULL hooks not shown)\"" );
 					cmd( "pack $hk.m.l" );
 
-					cmd( "pack $hk.l $hk.t $hk.m -padx 5 -pady 5" );
+					cmd( "pack $hk.l $hk.t $hk.m -padx $_5 -pady $_5" );
 
 					cmd( "okhelpcancel $hk b { set choice 1 } { LsdHelp debug.html#hooks } { set choice 2 }" );
 
@@ -1625,9 +1625,9 @@ void lsd::object::debugger_update( const char *hl_var, int mode )
 			ttk::label .deb.v.v2.instance -style hl.TLabel; \
 			pack .deb.v.v2.obj .deb.v.v2.instance -side left; \
 			if [ winfo exists .deb.v.v1 ] { \
-				pack .deb.v.v1 .deb.v.v2 -padx 5 -pady 5 -anchor w \
+				pack .deb.v.v1 .deb.v.v2 -padx $_5 -pady $_5 -anchor w \
 			} { \
-				pack .deb.v.v2 -padx 5 -pady 5 -anchor w \
+				pack .deb.v.v2 -padx $_5 -pady $_5 -anchor w \
 			}; \
 			pack .deb.v -anchor w \
 		}" );
@@ -1894,7 +1894,7 @@ void lsd::object::show_tmp_vars( bool update )
 		cmd( "ttk::label $in.l2.val -width 14 -style hl.TLabel -text Value" );
 		cmd( "pack $in.l2.id $in.l2.pad $in.l2.val -side left" );
 
-		cmd( "pack $in.l1 $in.l2 -pady 2" );
+		cmd( "pack $in.l1 $in.l2 -pady $_2" );
 
 		cmd( "ttk::frame $in.n" );
 		cmd( "ttk::scrollbar $in.n.yscroll -command \"$in.n.t yview\"" );
@@ -1905,7 +1905,7 @@ void lsd::object::show_tmp_vars( bool update )
 		cmd( "pack $in.n -expand yes -fill both" );
 
 		cmd( "ttk::label $in.l3 -justify center -text \"(double-click name to\nchange to object)\"" );
-		cmd( "pack $in.l3 -pady 5" );
+		cmd( "pack $in.l3 -pady $_5" );
 
 		cmd( "showtop $in topleftW 0 1 0" );
 		cmd( "wm minsize $in [ winfo reqwidth $in ] [ expr { $vsizeDmin + $vmenusize } ]" );
@@ -2207,7 +2207,7 @@ void lsd::object::show_neighbors( bool update )
 
 		cmd( "pack $N.l3.l $N.l3.h" );
 
-		cmd( "pack $N.l1 $N.l2 $N.l3 -pady 2" );
+		cmd( "pack $N.l1 $N.l2 $N.l3 -pady $_2" );
 
 		cmd( "ttk::frame $N.n" );
 		cmd( "ttk::scrollbar $N.n.yscroll -command \".deb.net.n.t yview\"" );
@@ -2218,7 +2218,7 @@ void lsd::object::show_neighbors( bool update )
 		cmd( "pack $N.n -expand yes -fill both" );
 
 		cmd( "ttk::label $N.l4 -justify center -text \"(double-click ID to\nchange to node)\"" );
-		cmd( "pack $N.l4 -pady 5" );
+		cmd( "pack $N.l4 -pady $_5" );
 
 		cmd( "showtop $N topleftW 0 1 0" );
 		cmd( "wm minsize $N [ winfo reqwidth $N ] [ expr { $vsizeDmin + $vmenusize } ]" );

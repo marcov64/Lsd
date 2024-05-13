@@ -369,7 +369,7 @@ void gui::analysis( bool mc )
 	cmd( "ttk::button $f.add -width 6 -style Toolbutton -text \"Add...\" -command { set choice 24 } -underline 0" );
 	cmd( "ttk::button $f.empty -width 6 -style Toolbutton -text Clear -command { set choice 8 } -underline 0" );
 	cmd( "ttk::label $f.pad2" );
-	cmd( "pack $f.pad1 $f.in $f.out $f.sort $f.sortdesc $f.sortend $f.unsort $f.search $f.add $f.empty $f.pad2 -padx 2 -pady 1 -fill y" );
+	cmd( "pack $f.pad1 $f.in $f.out $f.sort $f.sortdesc $f.sortend $f.unsort $f.search $f.add $f.empty $f.pad2 -padx $_2 -pady $_1 -fill y" );
 
 	cmd( "tooltip::tooltip $f.in \"Add highlighted series to seleced\"" );
 	cmd( "tooltip::tooltip $f.out \"Remove highlighted selected series\"" );
@@ -485,7 +485,7 @@ void gui::analysis( bool mc )
 	cmd( "pack .da.vars.lb -side left -expand 1 -fill both" );
 	cmd( "pack .da.vars.b -side left -anchor n" );
 	cmd( "pack .da.vars.ch .da.vars.pl -side left -expand 1 -fill both" );
-	cmd( "pack .da.vars -pady 5 -expand 1 -fill both" );
+	cmd( "pack .da.vars -pady $_5 -expand 1 -fill both" );
 
 	// controls band
 	cmd( "ttk::frame .da.f" );
@@ -501,14 +501,14 @@ void gui::analysis( bool mc )
 	cmd( "ttk::frame .da.f.h.v.ft.from" );
 	cmd( "ttk::label .da.f.h.v.ft.from.minc -text \"From case\"" );
 	cmd( "ttk::entry .da.f.h.v.ft.from.mnc -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= $numc } { set minc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $minc; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-	cmd( "pack .da.f.h.v.ft.from.minc .da.f.h.v.ft.from.mnc -ipadx 5 -side left" );
+	cmd( "pack .da.f.h.v.ft.from.minc .da.f.h.v.ft.from.mnc -ipadx $_5 -side left" );
 
 	cmd( "ttk::frame .da.f.h.v.ft.to" );
 	cmd( "ttk::label .da.f.h.v.ft.to.maxc -text \"to case\"" );
 	cmd( "ttk::entry .da.f.h.v.ft.to.mxc -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= $minc && $n <= $numc } { set maxc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $maxc; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-	cmd( "pack	.da.f.h.v.ft.to.maxc .da.f.h.v.ft.to.mxc -ipadx 5 -side left" );
+	cmd( "pack	.da.f.h.v.ft.to.maxc .da.f.h.v.ft.to.mxc -ipadx $_5 -side left" );
 
-	cmd( "pack .da.f.h.v.ft.auto .da.f.h.v.ft.from .da.f.h.v.ft.to -side left -padx 5 -expand 1 -fill x" );
+	cmd( "pack .da.f.h.v.ft.auto .da.f.h.v.ft.from .da.f.h.v.ft.to -side left -padx $_5 -expand 1 -fill x" );
 
 	cmd( "tooltip::tooltip .da.f.h.v.ft \"Choose cases (time steps) to use\"" );
 
@@ -519,14 +519,14 @@ void gui::analysis( bool mc )
 	cmd( "ttk::frame .da.f.h.v.sc.min" );
 	cmd( "ttk::label .da.f.h.v.sc.min.lmin -text \"Min. Y\"" );
 	cmd( "ttk::entry .da.f.h.v.sc.min.min -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set miny %%P; return 1 } { %%W delete 0 end; %%W insert 0 $miny; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-	cmd( "pack .da.f.h.v.sc.min.lmin .da.f.h.v.sc.min.min -ipadx 5 -side left" );
+	cmd( "pack .da.f.h.v.sc.min.lmin .da.f.h.v.sc.min.min -ipadx $_5 -side left" );
 
 	cmd( "ttk::frame .da.f.h.v.sc.max" );
 	cmd( "ttk::label .da.f.h.v.sc.max.lmax -text \"Max. Y\"" );
 	cmd( "ttk::entry .da.f.h.v.sc.max.max -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set maxy %%P; return 1 } { %%W delete 0 end; %%W insert 0 $maxy; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-	cmd( "pack .da.f.h.v.sc.max.lmax .da.f.h.v.sc.max.max -ipadx 5 -side left" );
+	cmd( "pack .da.f.h.v.sc.max.lmax .da.f.h.v.sc.max.max -ipadx $_5 -side left" );
 
-	cmd( "pack .da.f.h.v.sc.auto .da.f.h.v.sc.min .da.f.h.v.sc.max -side left -padx 5 -expand 1 -fill x" );
+	cmd( "pack .da.f.h.v.sc.auto .da.f.h.v.sc.min .da.f.h.v.sc.max -side left -padx $_5 -expand 1 -fill x" );
 
 	cmd( "tooltip::tooltip .da.f.h.v.sc.auto \"Automatic vertical axis limits\"" );
 	cmd( "tooltip::tooltip .da.f.h.v.sc.min \"Minimum (lower) vertical axis limit\"" );
@@ -540,9 +540,9 @@ void gui::analysis( bool mc )
 	cmd( "ttk::frame .da.f.h.v.y2.f" );
 	cmd( "ttk::label .da.f.h.v.y2.f.l -text \"First series in Y2 axis\"" );
 	cmd( "ttk::spinbox .da.f.h.v.y2.f.e -width 4 -from 2 -to 999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n > 1 } { set num_y2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num_y2; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-	cmd( "pack .da.f.h.v.y2.f.l .da.f.h.v.y2.f.e -ipadx 5 -side left" );
+	cmd( "pack .da.f.h.v.y2.f.l .da.f.h.v.y2.f.e -ipadx $_5 -side left" );
 
-	cmd( "pack .da.f.h.v.y2.logs .da.f.h.v.y2.pad .da.f.h.v.y2.y2 .da.f.h.v.y2.f -side left -padx 5 -expand 1 -fill x" );
+	cmd( "pack .da.f.h.v.y2.logs .da.f.h.v.y2.pad .da.f.h.v.y2.y2 .da.f.h.v.y2.f -side left -padx $_5 -expand 1 -fill x" );
 
 	cmd( "pack .da.f.h.v.ft .da.f.h.v.sc .da.f.h.v.y2 -anchor w -expand 1 -fill x" );
 
@@ -568,7 +568,7 @@ void gui::analysis( bool mc )
 	cmd( "tooltip::tooltip .da.f.h.xy.xy \"Scatter plot (series in both axes)\"" );
 
 	// pack first horizontal group of controls
-	cmd( "pack .da.f.h.v .da.f.h.tc .da.f.h.xy -padx 20 -side left -expand 1 -fill x" );
+	cmd( "pack .da.f.h.v .da.f.h.tc .da.f.h.xy -padx $_20 -side left -expand 1 -fill x" );
 
 	// second horizontal group of controls
 	cmd( "ttk::frame .da.f.tit" );
@@ -576,7 +576,7 @@ void gui::analysis( bool mc )
 	cmd( "ttk::frame .da.f.tit.t" );				// title box
 	cmd( "ttk::label .da.f.tit.t.l -text Title" );
 	cmd( "ttk::entry .da.f.tit.t.e -textvariable tit -width 35 -justify center" );
-	cmd( "pack .da.f.tit.t.l .da.f.tit.t.e -ipadx 5 -side left" );
+	cmd( "pack .da.f.tit.t.l .da.f.tit.t.e -ipadx $_5 -side left" );
 
 	cmd( "tooltip::tooltip .da.f.tit.t \"Title (name) to use in plot tab/window\"" );
 
@@ -621,11 +621,11 @@ void gui::analysis( bool mc )
 	cmd( "tooltip::tooltip .da.f.tit.lp.point \"Represent data points with markers\"" );
 
 	// pack second horizontal group of controls
-	cmd( "pack .da.f.tit.t .da.f.tit.chk .da.f.tit.run .da.f.tit.pr .da.f.tit.ps .da.f.tit.lp -padx 10 -pady 5 -side left -expand 1 -fill x" );
+	cmd( "pack .da.f.tit.t .da.f.tit.chk .da.f.tit.run .da.f.tit.pr .da.f.tit.ps .da.f.tit.lp -padx $_10 -pady $_5 -side left -expand 1 -fill x" );
 
 	// pack controls band
 	cmd( "pack .da.f.h .da.f.tit" );
-	cmd( "pack .da.f -padx 5 -pady 5" );
+	cmd( "pack .da.f -padx $_5 -pady $_5" );
 
 	// button bar
 	cmd( "ttk::frame .da.b" );
@@ -1024,7 +1024,7 @@ void gui::analysis( bool mc )
 							choice = 0;
 							cmd( "newtop .da.a \"Save Plot\" { set choice 2 } .da" );
 							cmd( "ttk::label .da.a.l -justify center -text \"Select one plot from the \nPlots listbox before clicking 'OK'\"" );
-							cmd( "pack .da.a.l -pady 10 -padx 5" );
+							cmd( "pack .da.a.l -pady $_10 -padx $_5" );
 							cmd( "okhelpcancel .da.a b { set choice 1 } { LsdHelp menudata_res.html#postscript } { set choice 2 }" );
 							cmd( "showtop .da.a centerW 0 0 0" );
 							cmd( "mousewarpto .da.a.b.ok" );
@@ -1084,20 +1084,20 @@ void gui::analysis( bool mc )
 						.da.file.opt.pos.p2 configure -state normal;  \
 						.da.file.dim.n configure -state normal	\
 					}" );
-				cmd( "pack .da.file.opt.fmt.p1 .da.file.opt.fmt.p2 -side left -ipadx 5" );
+				cmd( "pack .da.file.opt.fmt.p1 .da.file.opt.fmt.p2 -side left -ipadx $_5" );
 
 				cmd( "ttk::frame .da.file.opt.col -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 				cmd( "ttk::radiobutton .da.file.opt.col.r1 -text Color -variable pltSavCmod -value color" );
 				cmd( "ttk::radiobutton .da.file.opt.col.r2 -text Grayscale -variable pltSavCmod -value gray" );
 				cmd( "ttk::radiobutton .da.file.opt.col.r3 -text Mono -variable pltSavCmod -value mono" );
-				cmd( "pack .da.file.opt.col.r1 .da.file.opt.col.r2 .da.file.opt.col.r3 -side left -ipadx 5" );
+				cmd( "pack .da.file.opt.col.r1 .da.file.opt.col.r2 .da.file.opt.col.r3 -side left -ipadx $_5" );
 
 				cmd( "ttk::frame .da.file.opt.pos -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 				cmd( "ttk::radiobutton .da.file.opt.pos.p1 -text Landscape -variable pltSavRes -value 0" );
 				cmd( "ttk::radiobutton .da.file.opt.pos.p2 -text Portrait -variable pltSavRes -value 1" );
-				cmd( "pack .da.file.opt.pos.p1 .da.file.opt.pos.p2 -side left -ipadx 5" );
+				cmd( "pack .da.file.opt.pos.p1 .da.file.opt.pos.p2 -side left -ipadx $_5" );
 
-				cmd( "pack .da.file.opt.fmt .da.file.opt.col .da.file.opt.pos -pady 5" );
+				cmd( "pack .da.file.opt.fmt .da.file.opt.col .da.file.opt.pos -pady $_5" );
 
 				cmd( "ttk::frame .da.file.dim" );
 				cmd( "ttk::label .da.file.dim.l1 -text Dimension" );
@@ -1122,7 +1122,7 @@ void gui::analysis( bool mc )
 				if ( plot_l[ choice ] == plot_nl[ choice ] )
 					cmd( ".da.file.lab conf -state disabled" );
 
-				cmd( "pack .da.file.l .da.file.opt .da.file.dim .da.file.lab -pady 5 -padx 5" );
+				cmd( "pack .da.file.l .da.file.opt .da.file.dim .da.file.lab -pady $_5 -padx $_5" );
 				cmd( "okhelpcancel .da.file b { set choice 1 } { LsdHelp menudata_res.html#postscript } { set choice 2 }" );
 				cmd( "showtop .da.file" );
 				cmd( "mousewarpto .da.file.b.ok" );
@@ -1300,7 +1300,7 @@ void gui::analysis( bool mc )
 					}" );
 				cmd( "for { set x 0 } { $x < $ntag } { incr x } { \
 						if { $x > 0 } { \
-							pack .da.a.q.f.l.s$x -padx 2 -side left \
+							pack .da.a.q.f.l.s$x -padx $_2 -side left \
 						}; \
 						pack .da.a.q.f.l.e$x -side left; \
 						bind .da.a.q.f.l.e$x <Return> [ subst -nocommand { focus .da.a.q.f.l.e[ expr { $x + 1 } ]; \
@@ -1308,7 +1308,7 @@ void gui::analysis( bool mc )
 						bind .da.a.q.f.l.e$x <KeyRelease> { .da.a.q.f.c invoke } }; \
 						incr x -1; \
 						bind .da.a.q.f.l.e$x <Return> { focus .da.a.b.r2.ok }" );
-				cmd( "pack .da.a.q.f.l -anchor w -padx 25" );
+				cmd( "pack .da.a.q.f.l -anchor w -padx $_25" );
 				cmd( "pack .da.a.q.f -anchor w" );
 
 				// select cases
@@ -1347,13 +1347,13 @@ void gui::analysis( bool mc )
 				cmd( "ttk::entry .da.a.q.f4.l.e1 -width 5 -textvariable ca1 -justify center -state disabled" );
 				cmd( "ttk::label .da.a.q.f4.l.s -text to" );
 				cmd( "ttk::entry .da.a.q.f4.l.e2 -width 5 -textvariable ca2 -justify center -state disabled" );
-				cmd( "pack .da.a.q.f4.l.e1 .da.a.q.f4.l.s .da.a.q.f4.l.e2 -padx 2 -side left" );
+				cmd( "pack .da.a.q.f4.l.e1 .da.a.q.f4.l.s .da.a.q.f4.l.e2 -padx $_2 -side left" );
 				cmd( "bind .da.a.q.f4.l.e1 <Return> { \
 						focus .da.a.q.f4.l.e2; \
 						.da.a.q.f4.l.e2 selection range 0 end \
 					}" );
 				cmd( "bind .da.a.q.f4.l.e2 <Return> { focus .da.a.b.r2.ok }" );
-				cmd( "pack .da.a.q.f4.l -anchor w -padx 25" );
+				cmd( "pack .da.a.q.f4.l -anchor w -padx $_25" );
 
 				cmd( "pack .da.a.q.f4 -anchor w" );
 
@@ -1439,7 +1439,7 @@ void gui::analysis( bool mc )
 						.da.a.c.v.c.e selection range 0 end \
 					}" );
 				cmd( "pack .da.a.q.f2.f.l .da.a.q.f2.f.e -anchor w -side left" );
-				cmd( "pack .da.a.q.f2.f -anchor w -padx 22" );
+				cmd( "pack .da.a.q.f2.f -anchor w -padx $_22" );
 				cmd( "pack .da.a.q.f2 -anchor w" );
 
 				cmd( "ttk::frame .da.a.c -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
@@ -1464,9 +1464,9 @@ void gui::analysis( bool mc )
 				cmd( "write_any .da.a.c.v.t.e2 $tvar" );
 				cmd( "bind .da.a.c.v.t.e2 <Return> { focus .da.a.b.r2.ok }" );
 				cmd( "pack .da.a.c.v.t.t .da.a.c.v.t.e2" );
-				cmd( "pack .da.a.c.v.c .da.a.c.v.t -ipady 10" );
-				cmd( "pack .da.a.c.o .da.a.c.v -anchor w -side left -ipadx 5" );
-				cmd( "pack .da.a.tit .da.a.q .da.a.c -expand yes -fill x -padx 5 -pady 5" );
+				cmd( "pack .da.a.c.v.c .da.a.c.v.t -ipady $_10" );
+				cmd( "pack .da.a.c.o .da.a.c.v -anchor w -side left -ipadx $_5" );
+				cmd( "pack .da.a.tit .da.a.q .da.a.c -expand yes -fill x -padx $_5 -pady $_5" );
 
 				cmd( "XYokhelpcancel .da.a b Description Equation { set choice 3 } { set choice 4 } { set choice 1 } { LsdHelp menudata_res.html#batch_sel } { set choice 2 }" );
 				cmd( "showtop .da.a topleftW 0 0" );
@@ -1828,7 +1828,7 @@ void gui::analysis( bool mc )
 					}" );
 				cmd( "for { set x 0 } { $x < $ntag } { incr x } { \
 						if { $x > 0 } { \
-							pack .da.a.q.f.l.s$x -padx 2 -side left \
+							pack .da.a.q.f.l.s$x -padx $_2 -side left \
 						}; \
 						pack .da.a.q.f.l.e$x -side left; \
 						bind .da.a.q.f.l.e$x <Return> [ subst -nocommand { focus .da.a.q.f.l.e[ expr { $x + 1 } ]; \
@@ -1836,7 +1836,7 @@ void gui::analysis( bool mc )
 						bind .da.a.q.f.l.e$x <KeyRelease> { .da.a.q.f.c invoke } }; \
 						incr x -1; \
 						bind .da.a.q.f.l.e$x <Return> { focus .da.a.b.r2.ok }" );
-				cmd( "pack .da.a.q.f.l -anchor w -padx 25" );
+				cmd( "pack .da.a.q.f.l -anchor w -padx $_25" );
 				cmd( "pack .da.a.q.f -anchor w" );
 
 				// unselect cases
@@ -1875,13 +1875,13 @@ void gui::analysis( bool mc )
 				cmd( "ttk::entry .da.a.q.f4.l.e1 -width 5 -textvariable ca1 -justify center -state disabled" );
 				cmd( "ttk::label .da.a.q.f4.l.s -text to" );
 				cmd( "ttk::entry .da.a.q.f4.l.e2 -width 5 -textvariable ca2 -justify center -state disabled" );
-				cmd( "pack .da.a.q.f4.l.e1 .da.a.q.f4.l.s .da.a.q.f4.l.e2 -padx 2 -side left" );
+				cmd( "pack .da.a.q.f4.l.e1 .da.a.q.f4.l.s .da.a.q.f4.l.e2 -padx $_2 -side left" );
 				cmd( "bind .da.a.q.f4.l.e1 <Return> { \
 						focus .da.a.q.f4.l.e2; \
 						.da.a.q.f4.l.e2 selection range 0 end \
 					}" );
 				cmd( "bind .da.a.q.f4.l.e2 <Return> { focus .da.a.b.r2.ok }" );
-				cmd( "pack .da.a.q.f4.l -anchor w -padx 25" );
+				cmd( "pack .da.a.q.f4.l -anchor w -padx $_25" );
 
 				cmd( "pack .da.a.q.f4 -anchor w" );
 
@@ -1967,7 +1967,7 @@ void gui::analysis( bool mc )
 						.da.a.c.v.c.e selection range 0 end \
 					}" );
 				cmd( "pack .da.a.q.f2.f.l .da.a.q.f2.f.e -anchor w -side left" );
-				cmd( "pack .da.a.q.f2.f -anchor w -padx 22" );
+				cmd( "pack .da.a.q.f2.f -anchor w -padx $_22" );
 				cmd( "pack .da.a.q.f2 -anchor w" );
 				cmd( "ttk::frame .da.a.c -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
 				cmd( "ttk::frame .da.a.c.o" );
@@ -1991,12 +1991,12 @@ void gui::analysis( bool mc )
 				cmd( "write_any .da.a.c.v.t.e2 $tvar" );
 				cmd( "bind .da.a.c.v.t.e2 <Return> { focus .da.a.b.r2.ok }" );
 				cmd( "pack .da.a.c.v.t.t .da.a.c.v.t.e2" );
-				cmd( "pack .da.a.c.v.c .da.a.c.v.t -ipady 10" );
-				cmd( "pack .da.a.c.o .da.a.c.v -anchor w -side left -ipadx 5" );
+				cmd( "pack .da.a.c.v.c .da.a.c.v.t -ipady $_10" );
+				cmd( "pack .da.a.c.o .da.a.c.v -anchor w -side left -ipadx $_5" );
 				cmd( "ttk::frame .da.a.s" );
 				cmd( "ttk::checkbutton .da.a.s.b -text \"Only mark items\" -variable selOnly" );
 				cmd( "pack .da.a.s.b" );
-				cmd( "pack .da.a.tit .da.a.q .da.a.c .da.a.s -expand yes -fill x -padx 5 -pady 5" );
+				cmd( "pack .da.a.tit .da.a.q .da.a.c .da.a.s -expand yes -fill x -padx $_5 -pady $_5" );
 
 				cmd( "XYokhelpcancel .da.a b Description Equation { set choice 3 } { set choice 4 } { set choice 1 } { LsdHelp menudata_res.html#batch_sel } { set choice 2 }" );
 				cmd( "showtop .da.a topleftW 0 0" );
@@ -2397,7 +2397,7 @@ void gui::analysis( bool mc )
 				cmd( "ttk::label .da.a.v.n -justify center -text \"(finds first instance only,\nuse 'F3' or 'Ctrl+N' to find others)\"" );
 
 				cmd( "pack .da.a.v.l .da.a.v.e .da.a.v.n" );
-				cmd( "pack .da.a.v -pady 5 -padx 5" );
+				cmd( "pack .da.a.v -pady $_5 -padx $_5" );
 
 				cmd( "bind .da.a.v.e <Return> { set choice 1 }" );
 				cmd( "bind .da.a.v.e <Escape> { set choice 2 }" );
@@ -2515,7 +2515,7 @@ void gui::analysis( bool mc )
 						cmd( "bind .da.s <KeyPress-e> { set bidi 0 }; bind .da.s <KeyPress-E> { set bidi 0 }" );
 						cmd( "bind .da.s <KeyPress-f> { set bidi 1 }; bind .da.s <KeyPress-F> { set bidi 1 }" );
 
-						cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady 5 -padx 5" );
+						cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady $_5 -padx $_5" );
 
 						if ( nv == 0 )
 						{
@@ -2538,7 +2538,7 @@ void gui::analysis( bool mc )
 						cmd( "bind .da.s <KeyPress-f> { set bidi 1 }; bind .da.s <KeyPress-F> { set bidi 1 }" );
 						cmd( "bind .da.s <KeyPress-m> { set bidi 3 }; bind .da.s <KeyPress-M> { set bidi 3 }" );
 
-						cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady 5 -padx 5" );
+						cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady $_5 -padx $_5" );
 					}
 
 					cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#add_series } { set choice 2 }" );
@@ -2661,7 +2661,7 @@ void gui::analysis( bool mc )
 						cmd( "ttk::checkbutton .da.s.s.k -text \"Keep original series\" -variable keepSeries" );
 						cmd( "pack .da.s.s.c .da.s.s.k" );
 
-						cmd( "pack .da.s.i .da.s.ci .da.s.s -padx 5 -pady 5" );
+						cmd( "pack .da.s.i .da.s.ci .da.s.s -padx $_5 -pady $_5" );
 
 						cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#createmc } { set choice 2 }" );
 
@@ -2911,7 +2911,7 @@ void gui::analysis( bool mc )
 				cmd( "ttk::text .da.a.o.t -height 10 -width 50 -dark $darkTheme -style smallFixed.TText" );
 				cmd( "pack .da.a.o.l .da.a.o.t" );
 
-				cmd( "pack .da.a.l .da.a.st .da.a.t .da.a.d .da.a.o -pady 5 -padx 5" );
+				cmd( "pack .da.a.l .da.a.st .da.a.t .da.a.d .da.a.o -pady $_5 -padx $_5" );
 				cmd( "okXhelpcancel .da.a b	 { Default } { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#gpoptions } { set choice 2 }" );
 
 				cmd( "showtop .da.a" );
@@ -2986,8 +2986,8 @@ void gui::analysis( bool mc )
 					cmd( "pack .da.a.o.l2.c%d -anchor e", i );
 				}
 
-				cmd( "pack .da.a.o.l1 .da.a.o.l2 -side left -pady 5 -padx 15" );
-				cmd( "pack .da.a.l .da.a.o -pady 5 -padx 5" );
+				cmd( "pack .da.a.o.l1 .da.a.o.l2 -side left -pady $_5 -padx $_15" );
+				cmd( "pack .da.a.l .da.a.o -pady $_5 -padx $_5" );
 
 				cmd( "okXhelpcancel .da.a b Default { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#colors } { set choice 2 }" );
 				cmd( "showtop .da.a" );
@@ -3064,7 +3064,7 @@ void gui::analysis( bool mc )
 				cmd( "set lx2 $hsizePxy" );
 				cmd( "ttk::entry .da.s.x.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set lx2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lx2; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.x.e2 insert 0 $lx2" );
-				cmd( "pack .da.s.x.l0 .da.s.x.l1 .da.s.x.e1 .da.s.x.l2 .da.s.x.e2 -side left -padx 2 -pady 2" );
+				cmd( "pack .da.s.x.l0 .da.s.x.l1 .da.s.x.e1 .da.s.x.l2 .da.s.x.e2 -side left -padx $_2 -pady $_2" );
 
 				cmd( "ttk::frame .da.s.y" );
 				cmd( "ttk::label .da.s.y.l0 -anchor e -text \"Plot height:\"" );
@@ -3076,14 +3076,14 @@ void gui::analysis( bool mc )
 				cmd( "set ly2 $vsizePxy" );
 				cmd( "ttk::entry .da.s.y.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set ly2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ly2; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.y.e2 insert 0 $ly2" );
-				cmd( "pack .da.s.y.l0 .da.s.y.l1 .da.s.y.e1 .da.s.y.l2 .da.s.y.e2 -side left -padx 2 -pady 2" );
+				cmd( "pack .da.s.y.l0 .da.s.y.l1 .da.s.y.e1 .da.s.y.l2 .da.s.y.e2 -side left -padx $_2 -pady $_2" );
 
 				cmd( "ttk::frame .da.s.h" );
 				cmd( "ttk::label .da.s.h.l -anchor e -text \"Horizontal borders\"" );
 				cmd( "set hb $hmbordsizeP" );
 				cmd( "ttk::entry .da.s.h.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set hb %%P; return 1 } { %%W delete 0 end; %%W insert 0 $hb; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.h.e insert 0 $hb" );
-				cmd( "pack .da.s.h.l .da.s.h.e -side left -padx 2 -pady 2" );
+				cmd( "pack .da.s.h.l .da.s.h.e -side left -padx $_2 -pady $_2" );
 
 				cmd( "ttk::frame .da.s.v" );
 				cmd( "ttk::label .da.s.v.l0 -anchor e -text \"Vertical borders:\"" );
@@ -3095,7 +3095,7 @@ void gui::analysis( bool mc )
 				cmd( "set bb $bbordsizeP" );
 				cmd( "ttk::entry .da.s.v.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set bb %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bb; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.v.e2 insert 0 $bb" );
-				cmd( "pack .da.s.v.l0 .da.s.v.l1 .da.s.v.e1 .da.s.v.l2 .da.s.v.e2 -side left -padx 2 -pady 2" );
+				cmd( "pack .da.s.v.l0 .da.s.v.l1 .da.s.v.e1 .da.s.v.l2 .da.s.v.e2 -side left -padx $_2 -pady $_2" );
 
 				cmd( "ttk::label .da.s.obs -text \"( all sizes are measured in screen pixels)\"" );
 
@@ -3109,7 +3109,7 @@ void gui::analysis( bool mc )
 				cmd( "set vt $vticksP" );
 				cmd( "ttk::entry .da.s.t.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set vt %%P; return 1 } { %%W delete 0 end; %%W insert 0 $vt; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.t.e2 insert 0 $vt" );
-				cmd( "pack .da.s.t.l0 .da.s.t.l1 .da.s.t.e1 .da.s.t.l2 .da.s.t.e2 -side left -padx 2 -pady 2" );
+				cmd( "pack .da.s.t.l0 .da.s.t.l1 .da.s.t.e1 .da.s.t.l2 .da.s.t.e2 -side left -padx $_2 -pady $_2" );
 
 				cmd( "ttk::frame .da.s.s" );
 				cmd( "ttk::label .da.s.s.l1 -anchor e -text \"Smoothing\"" );
@@ -3121,7 +3121,7 @@ void gui::analysis( bool mc )
 				cmd( "ttk::entry .da.s.s.e2 -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set ss %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ss; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 				cmd( "if { $sm == \"raw\" } { .da.s.s.e2 configure -state normal }" );
 				cmd( "write_any .da.s.s.e2 $ss" );
-				cmd( "pack .da.s.s.l1 .da.s.s.e1 .da.s.s.l2 .da.s.s.e2 -side left -padx 2 -pady 2" );
+				cmd( "pack .da.s.s.l1 .da.s.s.e1 .da.s.s.l2 .da.s.s.e2 -side left -padx $_2 -pady $_2" );
 
 				cmd( "ttk::frame .da.s.f" );
 				cmd( "ttk::label .da.s.f.l -text \"Font name, size and style\"" );
@@ -3136,11 +3136,11 @@ void gui::analysis( bool mc )
 				cmd( "set istyle [ lindex $fontP 2 ]" );
 				cmd( "ttk::combobox .da.s.f.e.sty -values [ list normal bold italic \"bold italic\" ] -width 10 -justify center -validate focusout -validatecommand { set n %%P; if { $n in [ list normal bold italic \"bold italic\" ] } { set istyle %%P; return 1 } { %%W delete 0 end; %%W insert 0 $istyle; return 0 } } -invalidcommand { bell }" );
 				cmd( "write_any .da.s.f.e.sty $istyle" );
-				cmd( "pack .da.s.f.e.font .da.s.f.e.dim .da.s.f.e.sty -padx 2 -side left" );
+				cmd( "pack .da.s.f.e.font .da.s.f.e.dim .da.s.f.e.sty -padx $_2 -side left" );
 
-				cmd( "pack .da.s.f.l .da.s.f.e -side left -padx 2 -pady 2" );
+				cmd( "pack .da.s.f.l .da.s.f.e -side left -padx $_2 -pady $_2" );
 
-				cmd( "pack .da.s.x .da.s.y .da.s.h .da.s.v .da.s.obs .da.s.t .da.s.s .da.s.f -padx 5 -pady 5" );
+				cmd( "pack .da.s.x .da.s.y .da.s.h .da.s.v .da.s.obs .da.s.t .da.s.s .da.s.f -padx $_5 -pady $_5" );
 
 				cmd( "okXhelpcancel .da.s b Default { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#plotparameters } { set choice 2 }" );
 
@@ -3220,23 +3220,23 @@ void gui::analysis( bool mc )
 				cmd( "set cs $cscaleLat" );
 				cmd( "ttk::entry .da.s.s.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n > 0 } { set cs %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cs; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.s.e insert 0 $cs" );
-				cmd( "pack .da.s.s.l .da.s.s.e -side left -anchor w -padx 2 -pady 2" );
+				cmd( "pack .da.s.s.l .da.s.s.e -side left -anchor w -padx $_2 -pady $_2" );
 
 				cmd( "ttk::frame .da.s.x" );
 				cmd( "ttk::label .da.s.x.l -width 30 -anchor e -text \"Lattice width (pixels)\"" );
 				cmd( "set lx $hsizeLat" );
 				cmd( "ttk::entry .da.s.x.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set lx %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lx; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.x.e insert 0 $lx" );
-				cmd( "pack .da.s.x.l .da.s.x.e -side left -anchor w -padx 2 -pady 2" );
+				cmd( "pack .da.s.x.l .da.s.x.e -side left -anchor w -padx $_2 -pady $_2" );
 
 				cmd( "ttk::frame .da.s.y" );
 				cmd( "ttk::label .da.s.y.l -width 30 -anchor e -text \"Lattice heigth (pixels)\"" );
 				cmd( "set ly $vsizeLat" );
 				cmd( "ttk::entry .da.s.y.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set ly %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ly; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( ".da.s.y.e insert 0 $ly" );
-				cmd( "pack .da.s.y.l .da.s.y.e -side left -anchor w -padx 2 -pady 2" );
+				cmd( "pack .da.s.y.l .da.s.y.e -side left -anchor w -padx $_2 -pady $_2" );
 
-				cmd( "pack .da.s.s .da.s.x .da.s.y -anchor w -padx 5 -pady 5" );
+				cmd( "pack .da.s.s .da.s.x .da.s.y -anchor w -padx $_5 -pady $_5" );
 
 				cmd( "okXhelpcancel .da.s b Default { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#latticeparameters } { set choice 2 }" );
 
@@ -3318,7 +3318,7 @@ void gui::analysis( bool mc )
 				cmd( "write_any $wid.format.e.dim $idim" );
 				cmd( "ttk::combobox $wid.format.e.sty -values [ list normal bold italic \"bold italic\" ] -width 10 -justify center -validate focusout -validatecommand { set n %%P; if { $n in [ list normal bold italic \"bold italic\" ] } { set istyle %%P; return 1 } { %%W delete 0 end; %%W insert 0 $istyle; return 0 } } -invalidcommand { bell }" );
 				cmd( "write_any $wid.format.e.sty $istyle" );
-				cmd( "pack $wid.format.e.font $wid.format.e.dim $wid.format.e.sty -padx 2 -side left" );
+				cmd( "pack $wid.format.e.font $wid.format.e.dim $wid.format.e.sty -padx $_2 -side left" );
 
 				cmd( "pack $wid.format.tit $wid.format.e" );
 
@@ -3332,14 +3332,14 @@ void gui::analysis( bool mc )
 						}; \
 						ttk::style configure icolor.TButton -foreground [ invert_color $icolor ] -background $icolor \
 					}" );
-				cmd( "pack $wid.c.l $wid.c.color -padx 2 -side left" );
+				cmd( "pack $wid.c.l $wid.c.color -padx $_2 -side left" );
 
 				cmd( "ttk::frame $wid.fall" );
 				cmd( "ttk::checkbutton $wid.fall.font -text \"Apply font to all text items\" -variable fontall" );
 				cmd( "ttk::checkbutton $wid.fall.color -text \"Apply color to all text items\" -variable colorall" );
 				cmd( "pack $wid.fall.font $wid.fall.color" );
 
-				cmd( "pack $wid.l $wid.format $wid.c $wid.fall -padx 5 -pady 5" );
+				cmd( "pack $wid.l $wid.format $wid.c $wid.fall -padx $_5 -pady $_5" );
 
 				cmd( "okXhelpcancel $wid b Delete { set itext \"\"; set choice 1 } { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
 
@@ -3393,7 +3393,7 @@ void gui::analysis( bool mc )
 				cmd( "ttk::label $wid.l.t -text \"New text\"" );
 				cmd( "ttk::entry $wid.l.e -textvariable itext -width 30 -justify center" );
 				cmd( "pack $wid.l.t $wid.l.e" );
-				cmd( "pack $wid.l -padx 5 -pady 5" );
+				cmd( "pack $wid.l -padx $_5 -pady $_5" );
 
 				cmd( "okhelpcancel $wid b { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
 
@@ -3439,7 +3439,7 @@ void gui::analysis( bool mc )
 				cmd( "ttk::frame $wid.l" );
 				cmd( "ttk::label $wid.l.t -text \"Width\"" );
 				cmd( "ttk::spinbox $wid.l.e -textvariable iwidth -width 5 -from 1.0 -to 10.0 -justify center -state disabled -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n > 0 && $n < 100 } { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invalidcommand { bell }" );
-				cmd( "pack $wid.l.t $wid.l.e -padx 2 -side left" );
+				cmd( "pack $wid.l.t $wid.l.e -padx $_2 -side left" );
 
 				cmd( "ttk::frame $wid.c" );
 				cmd( "ttk::label $wid.c.l -text \"Color\"" );
@@ -3455,20 +3455,20 @@ void gui::analysis( bool mc )
 				cmd( "ttk::label $wid.c.t -text \"Dash pattern\"" );
 				cmd( "ttk::combobox $wid.c.e -values [ list \"\" \". \" \"- \" \"-.\" \"-..\" ] -width 3 -justify center -state disabled -validate focusout -validatecommand { set n %%P; if { $n in [ list \"\" \". \" \"- \" \"-.\" \"-..\" ] } { set idash %%P; return 1 } { %%W delete 0 end; %%W insert 0 $idash; return 0 } } -invalidcommand { bell }" );
 				cmd( "write_any $wid.c.e $idash" );
-				cmd( "pack $wid.c.l $wid.c.color $wid.c.pad $wid.c.t $wid.c.e -padx 2 -side left" );
+				cmd( "pack $wid.c.l $wid.c.color $wid.c.pad $wid.c.t $wid.c.e -padx $_2 -side left" );
 
 				cmd( "ttk::frame $wid.d" );
 				cmd( "ttk::label $wid.d.t -text \"Line-end arrow( s)\"" );
 				cmd( "ttk::combobox $wid.d.e -values [ list none first last both ] -width 7 -justify center -state disabled -validate focusout -validatecommand { set n %%P; if { $n in [ list none first last both ] } { set iarrow %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iarrow; return 0 } } -invalidcommand { bell }" );
 				cmd( "write_any $wid.d.e $iarrow" );
-				cmd( "pack $wid.d.t $wid.d.e -padx 2 -side left" );
+				cmd( "pack $wid.d.t $wid.d.e -padx $_2 -side left" );
 
 				cmd( "ttk::frame $wid.fall" );
 				cmd( "ttk::checkbutton $wid.fall.font -text \"Apply width to all line items\" -variable widthall -state disabled" );
 				cmd( "ttk::checkbutton $wid.fall.color -text \"Apply color to all line items\" -variable colorall" );
 				cmd( "pack $wid.fall.font $wid.fall.color" );
 
-				cmd( "pack $wid.l $wid.c $wid.d $wid.fall -padx 5 -pady 5" );
+				cmd( "pack $wid.l $wid.c $wid.d $wid.fall -padx $_5 -pady $_5" );
 
 				cmd( "okXhelpcancel $wid b Delete { set iwidth 0; set choice 1 } { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
 
@@ -3644,7 +3644,7 @@ void gui::analysis( bool mc )
 						}; \
 						ttk::style configure icolor2.TButton -foreground [ invert_color $icolor2 ] -background $icolor2 \
 					}" );
-				cmd( "pack $wid.c.l $wid.c.color -padx 2 -side left" );
+				cmd( "pack $wid.c.l $wid.c.color -padx $_2 -side left" );
 
 				cmd( "ttk::frame $wid.l" );
 				cmd( "ttk::label $wid.l.t -text \"Outline width\"" );
@@ -3658,14 +3658,14 @@ void gui::analysis( bool mc )
 						}; \
 						ttk::style configure icolor1.TButton -foreground [ invert_color $icolor1 ] -background $icolor1 \
 					}" );
-				cmd( "pack $wid.l.t $wid.l.e $wid.l.l $wid.l.color -padx 2 -side left" );
+				cmd( "pack $wid.l.t $wid.l.e $wid.l.l $wid.l.color -padx $_2 -side left" );
 
 				cmd( "ttk::frame $wid.fall" );
 				cmd( "ttk::checkbutton $wid.fall.color -text \"Apply fill to all bar items\" -variable colorall" );
 				cmd( "ttk::checkbutton $wid.fall.font -text \"Apply outline to all bar items\" -variable widthall" );
 				cmd( "pack $wid.fall.color $wid.fall.font" );
 
-				cmd( "pack $wid.c $wid.l $wid.fall -padx 5 -pady 5" );
+				cmd( "pack $wid.c $wid.l $wid.fall -padx $_5 -pady $_5" );
 
 				cmd( "okXhelpcancel $wid b Delete { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#graph } { set choice 2 }" );
 
@@ -4300,7 +4300,7 @@ void gui::set_cs_data( void )
 
 	cmd( "pack $p.u.i.lb.l $p.u.i.lb.lb" );
 
-	cmd( "pack $p.u.i.e $p.u.i.lb -padx 5 -pady 5" );
+	cmd( "pack $p.u.i.e $p.u.i.lb -padx $_5 -pady $_5" );
 
 	cmd( "ttk::frame $p.u.s" );
 	cmd( "ttk::label $p.u.s.l -text \"\nTime series order\"" );
@@ -4311,17 +4311,17 @@ void gui::set_cs_data( void )
 	cmd( "ttk::radiobutton $p.u.s.b.up -text \"Ascending order\" -variable dir -value 1 -command { set sel [ .da.s.u.i.lb.lb.lb curselection ]; if { [ llength $sel ] == 1 } { set res [ lindex $list_times $sel ] } { set res $maxc }; .da.s.u.s.r.e configure -state normal; .da.s.u.s.r.e delete 0 end; .da.s.u.s.r.e insert 0 $res; .da.s.u.s.r.e selection range 0 end; focus .da.s.u.s.r.e }" );
 	cmd( "ttk::radiobutton $p.u.s.b.down -text \"Descending order\" -variable dir -value \"-1\" -command { set sel [ .da.s.u.i.lb.lb.lb curselection ]; if { [ llength $sel ] == 1 } { set res [ lindex $list_times $sel ] } { set res $maxc }; .da.s.u.s.r.e configure -state normal; .da.s.u.s.r.e delete 0 end; .da.s.u.s.r.e insert 0 $res; .da.s.u.s.r.e selection range 0 end; focus .da.s.u.s.r.e }" );
 	cmd( "pack $p.u.s.b.nosort $p.u.s.b.up $p.u.s.b.down -anchor w" );
-	cmd( "pack $p.u.s.b -padx 5" );
+	cmd( "pack $p.u.s.b -padx $_5" );
 
 	cmd( "ttk::frame $p.u.s.r" );
 	cmd( "ttk::label $p.u.s.r.l -justify center -text \"Case reference\nfor series sorting\"" );
 	cmd( "ttk::entry $p.u.s.r.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && ( $n in $list_times ) } { set res %%P; return 1 } { %%W delete 0 end; %%W insert 0 $res; return 0 } } -justify center -state disabled" );
 	cmd( "write_disabled $p.u.s.r.e $res" );
 	cmd( "pack $p.u.s.r.l $p.u.s.r.e" );
-	cmd( "pack $p.u.s.r -pady 10" );
+	cmd( "pack $p.u.s.r -pady $_10" );
 
 	cmd( "pack $p.u.i $p.u.s -side left -anchor n" );
-	cmd( "pack $p.u -pady 5" );
+	cmd( "pack $p.u -pady $_5" );
 
 	cmd( "bind $p.u.i.e.e <KeyPress-Return> { .da.s.fb.r1.x invoke }" );
 	cmd( "bind $p.u.i.lb.lb.lb <Delete> { .da.s.fb.r1.y invoke }" );
@@ -5298,7 +5298,7 @@ void gui::plot_gnu( void )
 		cmd( "if { ! $gnu } { .da.s.o.g configure -state disabled; .da.s.o.p configure -state disabled } { .da.s.o.g configure -state normal; .da.s.o.p configure -state normal }" );
 		cmd( "pack .da.s.o.g .da.s.o.p" );
 
-		cmd( "pack .da.s.t .da.s.d .da.s.o -padx 5 -pady 5" );
+		cmd( "pack .da.s.t .da.s.d .da.s.o -padx $_5 -pady $_5" );
 
 		cmd( "if { $ndim == 2 } { .da.s.d.o.a configure -state disabled; .da.s.d.o.c configure -state disabled; .da.s.d.o.b configure -state disabled; .da.s.o.g configure -state disabled; .da.s.o.p configure -state disabled; set box 0; set gridd 0; set pm3d 0 } { .da.s.d.o.a configure -state normal; .da.s.d.o.c configure -state normal; .da.s.d.o.b configure -state normal; .da.s.o.g configure -state normal; .da.s.o.p configure -state normal }" );
 
@@ -5929,7 +5929,7 @@ void gui::plot_cs_xy( void )
 	cmd( "ttk::label .da.s.v.n -text \"Block length: $blength\"" );
 	cmd( "pack .da.s.v.l .da.s.v.e .da.s.v.n" );
 
-	cmd( "pack .da.s.i .da.s.d .da.s.o .da.s.v -padx 5 -pady 5" );
+	cmd( "pack .da.s.i .da.s.d .da.s.o .da.s.v -padx $_5 -pady $_5" );
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#3dCrossSection } { set choice 2 }" );
 
@@ -6299,7 +6299,7 @@ void gui::plot_phase_diagram( void )
 
 	cmd( "if { ! [ info exists dia ] } { set dia 0 }" );
 	cmd( "ttk::checkbutton .da.s.arrow -text \"Plot 45\u00B0 diagonal\" -variable dia" );
-	cmd( "pack .da.s.i .da.s.arrow -padx 5 -pady 5" );
+	cmd( "pack .da.s.i .da.s.arrow -padx $_5 -pady $_5" );
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#phaseplot } { set choice 2 }" );
 
@@ -6580,7 +6580,7 @@ void gui::show_plot_gnu( int n, int type, char **str, char **tag )
 			open_gnuplot gnuplot.gp; \
 			cd $oldpath; \
 		}", n );
-	cmd( "pack $w.b.s.save $w.b.s.gnu -pady 4" );
+	cmd( "pack $w.b.s.save $w.b.s.gnu -pady $_4" );
 
 	cmd( "ttk::label $w.b.pad -width 6" );
 
@@ -6590,11 +6590,11 @@ void gui::show_plot_gnu( int n, int type, char **str, char **tag )
 	cmd( "ttk::frame $w.b.z.b" );
 	cmd( "ttk::button $w.b.z.b.p -width 3 -text + -command { scale_canvas $daptab.tab%d.c.f.plots \"+\" zoomLevel%d } -state disabled", n, n );
 	cmd( "ttk::button $w.b.z.b.m -width 3 -text - -command { scale_canvas $daptab.tab%d.c.f.plots \"-\" zoomLevel%d } -state disabled", n, n  );
-	cmd( "pack $w.b.z.b.p $w.b.z.b.m -pady 4" );
+	cmd( "pack $w.b.z.b.p $w.b.z.b.m -pady $_4" );
 
-	cmd( "pack	$w.b.z.l $w.b.z.b -side left -padx 2" );
+	cmd( "pack	$w.b.z.l $w.b.z.b -side left -padx $_2" );
 
-	cmd( "pack $w.b.c $w.b.o $w.b.pad $w.b.s $w.b.z -padx 10 -pady 5 -side left" );
+	cmd( "pack $w.b.c $w.b.o $w.b.pad $w.b.s $w.b.z -padx $_10 -pady $_5 -side left" );
 	cmd( "pack $w.b -side right" );
 
 	cmd( "$p xview moveto 0; $p yview moveto 0" );
@@ -6743,29 +6743,29 @@ void gui::plot_lattice( void )
 	cmd( "ttk::label .da.s.t.l -width 22 -anchor e -text \"Cross-section case\"" );
 	cmd( "ttk::entry .da.s.t.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= $numc } { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.t.e insert 0 $time" );
-	cmd( "pack .da.s.t.l .da.s.t.e -side left -anchor w -padx 2 -pady 2" );
+	cmd( "pack .da.s.t.l .da.s.t.e -side left -anchor w -padx $_2 -pady $_2" );
 
 	cmd( "ttk::frame .da.s.i" );
 	cmd( "ttk::label .da.s.i.l -width 22 -anchor e -text \"Data columns\"" );
 	cmd( "ttk::spinbox .da.s.i.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center", num_c, num_c );
 	cmd( ".da.s.i.e insert 0 $bidi" );
-	cmd( "pack .da.s.i.l .da.s.i.e -side left -anchor w -padx 2 -pady 2" );
+	cmd( "pack .da.s.i.l .da.s.i.e -side left -anchor w -padx $_2 -pady $_2" );
 
 	cmd( "ttk::frame .da.s.s" );
 	cmd( "ttk::label .da.s.s.l -width 22 -anchor e -text \"Color scale\"" );
 	cmd( "ttk::entry .da.s.s.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] && $n > 0 } { set cscale %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cscale; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.s.e insert 0 $cscale" );
-	cmd( "pack .da.s.s.l .da.s.s.e -side left -anchor w -padx 2 -pady 2" );
+	cmd( "pack .da.s.s.l .da.s.s.e -side left -anchor w -padx $_2 -pady $_2" );
 
 	if ( time_cross == 1 )
 	{
-		cmd( "pack .da.s.t .da.s.i .da.s.s -anchor w -padx 5 -pady 5" );
+		cmd( "pack .da.s.t .da.s.i .da.s.s -anchor w -padx $_5 -pady $_5" );
 		cmd( "bind .da.s.t.e <KeyPress-Return> { focus .da.s.i.e; .da.s.i.e selection range 0 end }" );
 		cmd( "focus .da.s.t.e; .da.s.t.e selection range 0 end" );
 	}
 	else
 	{
-		cmd( "pack .da.s.i .da.s.s -anchor w -padx 5 -pady 5" );
+		cmd( "pack .da.s.i .da.s.s -anchor w -padx $_5 -pady $_5" );
 		cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
 	}
 
@@ -6901,11 +6901,11 @@ void gui::plot_lattice( void )
 	cmd( "ttk::button $w.b.s.det -width $butWid -text Detach -command { \
 			detach_tab $daptab tab%d c.b.s.det c.b.s.save .da %d \
 		}", cur_plot, MAX_TAB_LEN - 1 );
-	cmd( "pack $w.b.s.save $w.b.s.det -pady 3" );
+	cmd( "pack $w.b.s.save $w.b.s.det -pady $_3" );
 
 	cmd( "ttk::label $w.b.pad -width 30" );
 
-	cmd( "pack $w.b.o $w.b.pad $w.b.s -padx 10 -pady 5 -side left" );
+	cmd( "pack $w.b.o $w.b.pad $w.b.s -padx $_10 -pady $_5 -side left" );
 	cmd( "pack $w.b" );
 
 	for ( j = 0; j < nlin; ++j )
@@ -7033,14 +7033,14 @@ void gui::histograms( void )
 	cmd( "ttk::label .da.s.i.l -text \"Classes/bins\"" );
 	cmd( "ttk::spinbox .da.s.i.e -width 5 -from $minc -to $maxc -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= $minc && $n <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.i.e insert 0 $bidi" );
-	cmd( "pack .da.s.i.l .da.s.i.e -side left -padx 2" );
+	cmd( "pack .da.s.i.l .da.s.i.e -side left -padx $_2" );
 
 	cmd( "ttk::frame .da.s.o" );
 	cmd( "ttk::checkbutton .da.s.o.norm -text \"Fit a Normal\" -variable norm" );
 	cmd( "ttk::checkbutton .da.s.o.st -text \"Show statistics\" -variable stat" );
 	cmd( "pack .da.s.o.norm .da.s.o.st -anchor w" );
 
-	cmd( "pack .da.s.i .da.s.o -pady 10" );
+	cmd( "pack .da.s.i .da.s.o -pady $_10" );
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#histogram } { set choice 2 }" );
 
@@ -7278,20 +7278,20 @@ void gui::histograms_cs( void )
 	cmd( "ttk::label .da.s.t.l -text \"Cross-section case\"" );
 	cmd( "ttk::entry .da.s.t.e -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= $numc } { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( ".da.s.t.e insert 0 $time" );
-	cmd( "pack .da.s.t.l .da.s.t.e -side left -padx 2" );
+	cmd( "pack .da.s.t.l .da.s.t.e -side left -padx $_2" );
 
 	cmd( "ttk::frame .da.s.i" );
 	cmd( "ttk::label .da.s.i.l -text \"Classes/bins\"" );
 	cmd( "ttk::spinbox .da.s.i.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center", nv, nv );
 	cmd( ".da.s.i.e insert 0 $bidi" );
-	cmd( "pack .da.s.i.l .da.s.i.e -side left -padx 2" );
+	cmd( "pack .da.s.i.l .da.s.i.e -side left -padx $_2" );
 
 	cmd( "ttk::frame .da.s.o" );
 	cmd( "ttk::checkbutton .da.s.o.norm -text \"Fit a Normal\" -variable norm" );
 	cmd( "ttk::checkbutton .da.s.o.st -text \"Show statistics\" -variable stat" );
 	cmd( "pack .da.s.o.norm .da.s.o.st -anchor w" );
 
-	cmd( "pack .da.s.t .da.s.i .da.s.o -pady 10" );
+	cmd( "pack .da.s.t .da.s.i .da.s.o -pady $_10" );
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#histogram } { set choice 2 }" );
 
@@ -7524,7 +7524,7 @@ bool gui::create_series( bool mc, str_vecT var_names )
 		cmd( "ttk::label .da.s.f.t.l -text \"Threshold\"" );
 		cmd( "ttk::entry .da.s.f.t.th -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set thflt %%P; return 1 } { %%W delete 0 end; %%W insert 0 $thflt; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
 		cmd( "write_disabled .da.s.f.t.th $thflt" );
-		cmd( "pack .da.s.f.t.l .da.s.f.t.th -side left -padx 2" );
+		cmd( "pack .da.s.f.t.l .da.s.f.t.th -side left -padx $_2" );
 
 		cmd( "pack .da.s.f.l .da.s.f.r .da.s.f.t" );
 
@@ -7563,7 +7563,7 @@ bool gui::create_series( bool mc, str_vecT var_names )
 		cmd( "ttk::radiobutton .da.s.i.r.c.r.s -text \"Standard deviation\" -variable bidi -value 8 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_sd\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
 		cmd( "pack .da.s.i.r.c.r.d .da.s.i.r.c.r.x .da.s.i.r.c.r.g .da.s.i.r.c.r.n .da.s.i.r.c.r.t .da.s.i.r.c.r.s -anchor w" );
 
-		cmd( "pack .da.s.i.r.c.l .da.s.i.r.c.r -side left -ipadx 7" );
+		cmd( "pack .da.s.i.r.c.l .da.s.i.r.c.r -side left -ipadx $_7" );
 
 		cmd( "ttk::radiobutton .da.s.i.r.cia -text \"Average confidence interval (3 series)\" -variable bidi -value 111 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state readonly; set vname \"${basename}\"; set newSeries 3; set medCI 0; .da.s.n.nv selection range 0 end }" );
 		cmd( "ttk::radiobutton .da.s.i.r.cim -text \"Median confidence interval (3 series)\" -variable bidi -value 6 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state readonly; set vname \"${basename}\"; set newSeries 3; set medCI 1; .da.s.n.nv selection range 0 end }" );
@@ -7588,7 +7588,7 @@ bool gui::create_series( bool mc, str_vecT var_names )
 		cmd( "ttk::entry .da.s.t.tv -width 20 -textvariable ftag -justify center" );
 		cmd( "pack .da.s.t.tnv .da.s.t.tv" );
 
-		cmd( "pack .da.s.f .da.s.o .da.s.i .da.s.ci .da.s.n .da.s.t -padx 5 -pady 5" );
+		cmd( "pack .da.s.f .da.s.o .da.s.i .da.s.ci .da.s.n .da.s.t -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#createselection } { set choice 2 }" );
 
@@ -8080,7 +8080,7 @@ bool gui::create_maverag( void )
 	cmd( "ttk::radiobutton .da.s.t.c -variable ma_type -value 1 -text \"Central moving average\"" );
 	cmd( "pack .da.s.t.s .da.s.t.c -anchor w" );
 
-	cmd( "pack .da.s.o .da.s.t -padx 5 -pady 5" );
+	cmd( "pack .da.s.o .da.s.t -padx $_5 -pady $_5" );
 
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#createmavg } { set choice 2 }" );
 
@@ -8300,7 +8300,7 @@ bool gui::add_unsaved( void )
 	cmd( "ttk::combobox .da.s.i.e -width 20 -justify center -values $unSavElem -validate focusout -validatecommand { set n %%P; if { $n in $unSavElem } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } }" );
 	cmd( "write_any .da.s.i.e $bidi" );
 	cmd( "pack .da.s.i.l .da.s.i.e" );
-	cmd( "pack .da.s.i -pady 5 -padx 5" );
+	cmd( "pack .da.s.i -pady $_5 -padx $_5" );
 
 	cmd( "bind .da.s.i.e <Return> { set choice 1 }" );
 	cmd( "bind .da.s.i.e <Escape> { set choice 2 }" );
@@ -8433,7 +8433,7 @@ void gui::save_datazip( void )
 
 	cmd( "ttk::checkbutton .da.lab.dozip -text \"Generate zipped file\" -variable dozip" );
 
-	cmd( "pack .da.lab.f .da.lab.dozip -padx 5 -pady 5" );
+	cmd( "pack .da.lab.f .da.lab.dozip -padx $_5 -pady $_5" );
 
 	cmd( "okhelpcancel .da.lab b { set choice 1 } { LsdHelp menudata_res.html#save } { set choice 2 }" );
 
@@ -8509,7 +8509,7 @@ void gui::save_datazip( void )
 		cmd( "ttk::entry .da.lab.gen.mis_val -width 5 -textvariable misval -justify center" );
 		cmd( "pack .da.lab.gen.miss .da.lab.gen.mis_val" );
 
-		cmd( "pack .da.lab.fr .da.lab.gp .da.lab.f .da.lab.n .da.lab.d .da.lab.c .da.lab.e .da.lab.gen -padx 5 -pady 5" );
+		cmd( "pack .da.lab.fr .da.lab.gp .da.lab.f .da.lab.n .da.lab.d .da.lab.c .da.lab.e .da.lab.gen -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .da.lab b { set choice 1 } { LsdHelp menudata_res.html#save } { set choice 2 }" );
 
@@ -9547,7 +9547,7 @@ void gui::plot_canvas( int type, int nv, const int *start, const int *end, char 
 				detach_tab $daptab tab%d c.b.s.det c.b.s.save .da %d \
 			} \
 		}", cur_plot, cur_plot, MAX_TAB_LEN - 1	);
-	cmd( "pack $w.b.s.save $w.b.s.det -pady 4" );
+	cmd( "pack $w.b.s.save $w.b.s.det -pady $_4" );
 
 	cmd( "ttk::frame $w.b.z" );
 	cmd( "ttk::label $w.b.z.l -text Zoom" );
@@ -9555,13 +9555,13 @@ void gui::plot_canvas( int type, int nv, const int *start, const int *end, char 
 	cmd( "ttk::frame $w.b.z.b" );
 	cmd( "ttk::button $w.b.z.b.p -width 3 -text + -command { scale_canvas $daptab.tab%d.c.f.plots \"+\" zoomLevel%d } -state disabled", cur_plot, cur_plot );
 	cmd( "ttk::button $w.b.z.b.m -width 3 -text - -command { scale_canvas $daptab.tab%d.c.f.plots \"-\" zoomLevel%d } -state disabled", cur_plot, cur_plot	);
-	cmd( "pack $w.b.z.b.p $w.b.z.b.m -pady 4" );
+	cmd( "pack $w.b.z.b.p $w.b.z.b.m -pady $_4" );
 
-	cmd( "pack	$w.b.z.l $w.b.z.b -side left -padx 2" );
+	cmd( "pack	$w.b.z.l $w.b.z.b -side left -padx $_2" );
 
 	cmd( "ttk::label $w.b.pad -width $pad1" );
 
-	cmd( "pack $w.b.c $w.b.o $w.b.pad $w.b.s $w.b.z -padx $pad2 -pady 5 -side left" );
+	cmd( "pack $w.b.c $w.b.o $w.b.pad $w.b.s $w.b.z -padx $pad2 -pady $_5 -side left" );
 	cmd( "pack $w.b -side right" );
 
 	cmd( "tooltip::tooltip $w.b.s.save \"Save plot to file\"" );
@@ -9938,13 +9938,13 @@ void gui::update_more_tab( bool adding )
 						$daptab select $_w \
 					} \
 				}", i, k, get_int( "m" ), MAX_PLOT_TABS, get_str( "tt" ) );
-			cmd( "pack $daptab.more.b.l%d.b%d -side left -padx 2", i, k );
+			cmd( "pack $daptab.more.b.l%d.b%d -side left -padx $_2", i, k );
 		}
 
-		cmd( "pack $daptab.more.b.l%d -anchor w -pady 2", i );
+		cmd( "pack $daptab.more.b.l%d -anchor w -pady $_2", i );
 	}
 
-	cmd( "pack $daptab.more.b -padx 20 -pady 20" );
+	cmd( "pack $daptab.more.b -padx $_20 -pady $_20" );
 }
 
 

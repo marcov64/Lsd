@@ -232,7 +232,7 @@ void gui::error_hard_helper( const char *boxTitle, const char *boxText, const ch
 
 	cmd( "ttk::frame .cazzo.t" );
 	cmd( "ttk::label .cazzo.t.l -style hl.TLabel -text \"An error occurred during the simulation\"" );
-	cmd( "pack .cazzo.t.l -pady 10" );
+	cmd( "pack .cazzo.t.l -pady $_10" );
 	cmd( "ttk::label .cazzo.t.l1 -justify center -text \"Information about the error is reported in the log window.\nPartial results are available in the LSD browser.\"" );
 	cmd( "pack .cazzo.t.l1" );
 
@@ -247,7 +247,7 @@ void gui::error_hard_helper( const char *boxTitle, const char *boxText, const ch
 
 	cmd( "pack .cazzo.e.l .cazzo.e.b" );
 
-	cmd( "pack .cazzo.t .cazzo.e -padx 5 -pady 5" );
+	cmd( "pack .cazzo.t .cazzo.e -padx $_5 -pady $_5" );
 
 	cmd( "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
 

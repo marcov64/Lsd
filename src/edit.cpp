@@ -112,7 +112,7 @@ void lsd::object::set_obj_number( void )
 	cmd( "ttk::button .inin.l.mn -width 2 -text \"-\" -command { if { $max_depth > 1 } { incr max_depth -1; set choice 4 } }" );
 	cmd( "ttk::button .inin.l.pl -width 2 -text \"+\" -command { if { $hid_level } { incr max_depth; set choice 4 } }" );
 	cmd( "pack .inin.l.tmd .inin.l.emd .inin.l.mn .inin.l.pl -side left" );
-	cmd( "pack .inin.l -anchor e -padx 10 -pady 5" );
+	cmd( "pack .inin.l -anchor e -padx $_10 -pady $_5" );
 
 	cmd( "tooltip::tooltip .inin.l \"Maximum depth in object\ntree structure to show\"" );
 
@@ -380,13 +380,13 @@ int lsd::object::entry_new_objnum( const char *tag )
 
 	cmd( "ttk::label $T.e.l -text \"Number of instances\"" );
 	cmd( "ttk::spinbox $T.e.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center" );
-	cmd( "pack $T.e.l $T.e.e -side left -padx 2" );
+	cmd( "pack $T.e.l $T.e.e -side left -padx $_2" );
 
 	cmd( "ttk::frame $T.cp" );
 	cmd( "ttk::label $T.cp.l -text \"Copy from instance\"" );
 	cmd( "ttk::spinbox $T.cp.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invalidcommand { bell } -justify center", num, num );
 	cmd( "ttk::button $T.cp.compute -width $butWid -text Compute -command \"set conf 1; set choice 3; $T.cp.e selection range 0 end; focus $T.cp.e\"" );
-	cmd( "pack $T.cp.l $T.cp.e $T.cp.compute -side left -padx 2" );
+	cmd( "pack $T.cp.l $T.cp.e $T.cp.compute -side left -padx $_2" );
 
 	cmd( "tooltip::tooltip $T.cp.compute \"Define the effective instance to copy\"" );
 
@@ -422,7 +422,7 @@ int lsd::object::entry_new_objnum( const char *tag )
 
 	cmd( "pack $T.ef.l $T.ef.g" );
 
-	cmd( "pack $T.l $T.e $T.cp $T.ef -pady 5 -padx 5" );
+	cmd( "pack $T.l $T.e $T.cp $T.ef -pady $_5 -padx $_5" );
 
 	cmd( "okhelpcancel $T b { set conf 1; set choice 1 } { LsdHelp menudata_objn.html#modifyNumberObj } { set conf 1; set choice 2 }" );
 	cmd( "bind $T.e.e <Return> { set conf 1; set choice 1 }" );
@@ -524,7 +524,7 @@ int lsd::object::compute_copyfrom( const char *parWnd )
 		cmd( "ttk::frame $cc.f.f%d", j );
 		cmd( "ttk::label $cc.f.f%d.l -text \"Instance # of '%s'\"", j, cur->label );
 		cmd( "ttk::entry $cc.f.f%d.e -width 5 -textvariable num%d -justify center", j, j );
-		cmd( "pack $cc.f.f%d.l $cc.f.f%d.e -side left -padx 2", j, j );
+		cmd( "pack $cc.f.f%d.l $cc.f.f%d.e -side left -padx $_2", j, j );
 
 		for ( i = 1, cur1 = cur->up->search( cur->label ); cur1 != cur; cur1 = cur1->next, ++i );
 
@@ -535,7 +535,7 @@ int lsd::object::compute_copyfrom( const char *parWnd )
 
 	for ( --j, cur = this; cur->up != NULL; cur = cur->up, --j )
 	{	// pack in inverse order
-		cmd( "pack $cc.f.f%d -pady 2 -anchor e", j );
+		cmd( "pack $cc.f.f%d -pady $_2 -anchor e", j );
 		cmd( "bind $cc.f.f%d.e <Return> \"focus $cc.f.f%d.e; $cc.f.f%d.e selection range 0 end\"", j, j - 1, j - 1 );
 	}
 
@@ -544,9 +544,9 @@ int lsd::object::compute_copyfrom( const char *parWnd )
 	cmd( "ttk::frame $cc.r" );
 	cmd( "ttk::label $cc.r.l -text \"Global instance number:\"" );
 	cmd( "ttk::label $cc.r.res -style hl.TLabel -text %d", i );
-	cmd( "pack $cc.r.l $cc.r.res -side left -padx 2" );
+	cmd( "pack $cc.r.l $cc.r.res -side left -padx $_2" );
 
-	cmd( "pack $cc.l $cc.f $cc.r -pady 5 -padx 5" );
+	cmd( "pack $cc.l $cc.f $cc.r -pady $_5 -padx $_5" );
 
 	cmd( "comphelpdone $cc b { set cconf 1; set choice 2 } { LsdHelp menudata_objn.html#compute } { set cconf 1; set choice 1 }" );
 
@@ -723,7 +723,7 @@ void gui::eliminate_obj( lsd::object *&c, int actual, int desired )
 	cmd( "ttk::label $d.t.txt2 -text \"%d instances(s)\" -style hl.TLabel", actual - desired );
 	cmd( "ttk::label $d.t.txt3 -text \"or you want to choose them?\"" );
 	cmd( "pack $d.t.txt1 $d.t.txt2 $d.t.txt3" );
-	cmd( "pack $d.l $d.t -padx 5 -pady 5" );
+	cmd( "pack $d.l $d.t -padx $_5 -pady $_5" );
 
 	cmd( "ttk::frame $d.b" );
 	cmd( "ttk::button $d.b.last -width $butWid -text Last -command { set choice 1 }" );
@@ -770,7 +770,7 @@ void gui::eliminate_obj( lsd::object *&c, int actual, int desired )
 		cmd( "ttk::spinbox $d.t.e -width 6 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set val2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $val2; return 0 } } -invalidcommand { bell } -justify center", actual, actual );
 		cmd( "ttk::label $d.t.tit1 -text \"\"" );
 		cmd( "pack $d.t.tit $d.t.e $d.t.tit1" );
-		cmd( "pack $d.l $d.t -padx 5 -pady 5" );
+		cmd( "pack $d.l $d.t -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel $d b { set choice 1 } { LsdHelp menudata_objn.html#pick_remove } { set choice 2 }" );
 		cmd( "bind $d.t.e <Return> { set choice 1 }" );
