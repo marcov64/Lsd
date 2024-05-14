@@ -146,6 +146,8 @@
 
 // global constants
 #define DEFAULT_GROUP_DIR "~/LSD/Work"	// default new group directory
+#define DEFAULT_EXAMPLE_DIR "Example"	// default example group directory
+#define DEFAULT_TRASH_DIR "TrashBin"	// default trash bin group directory
 #define DEFAULT_SRC_DIR "src"			// default source files directory
 #define FILE_BUF_SIZE 1000000			// buffer size for file reading
 #define LOG_FILE "log.txt"				// name of log file

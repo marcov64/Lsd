@@ -1409,12 +1409,20 @@ int modman( int argn, const char **argv )
 	{
 		cmd( "destroytop .mm" );	// close compilation results, if open
 
+		// prevent creating new groups in example groups
+		cmd( "if { [ string first \"$lsd_root/$lsd_example\" [ file normalize $browser_dir ] ] == 0 } { \
+				ttk::messageBox -parent . -type ok -title Error -icon error -message \"Invalid parent group directory\" -detail \"Cannot create group/model in Examples group, please select another group.\"; \
+				set choice 0 \
+			}" );
+
+		if ( choice == 0 )
+			goto loop;
+
 		// prevent creating new groups outside the new groups directory
-		cmd( "if { [ string first [ file normalize $group_new ] [ file normalize $group_dir ] ] != 0 } { \
-				set answer [ ttk::messageBox -parent . -type okcancel -title Warning -icon warning -default ok -message \"Invalid parent group directory\" -detail \"Cannot create group/model in [ pwd ]'.\n\nPress 'OK' to change to the '$group_new' directory before proceeding.\" ]; \
+		cmd( "if { [ string first [ file normalize $group_new ] [ file normalize $browser_dir ] ] != 0 } { \
+				set answer [ ttk::messageBox -parent . -type okcancel -title Warning -icon warning -default ok -message \"Invalid parent group directory\" -detail \"Cannot create group/model in\n\n$browser_dir\n\nPress 'OK' to change to the '$group_new' directory before proceeding.\nUse menu File > Options to change the location of new models.\" ]; \
 					if [ string equal $answer ok ] { \
-						set group_dir $group_new; \
-						set model_group [ get_group_setting $group_new name ]; \
+						set browser_dir $group_new; \
 						set choice 1 \
 					} else { \
 						set choice 0 \
@@ -1424,13 +1432,14 @@ int modman( int argn, const char **argv )
 		if ( choice == 0 )
 			goto loop;
 
+		cmd( "set model_group [ get_group_setting $browser_dir name ]" );
 		cmd( "set temp 1" );
 
 		cmd( "newtop .a \"New Model\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.tit" );
 		cmd( "ttk::label .a.tit.l -text \"Current group:\"" );
-		cmd( "ttk::label .a.tit.n -style hl.TLabel -text \"$model_group\"" );
+		cmd( "ttk::label .a.tit.n -style hl.TLabel -text $model_group" );
 		cmd( "pack .a.tit.l .a.tit.n" );
 
 		cmd( "ttk::frame .a.f -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
@@ -1457,14 +1466,16 @@ int modman( int argn, const char **argv )
 
 		if ( choice == 2 )
 		{
+			cmd( "set model_group [ get_group_setting $group_dir name ]" );
 			choice = 0;
 			goto loop;
 		}
 
 		cmd( "set choice $temp" );
-		if ( choice == 2 )
+		j = choice;
+		if ( j == 2 )
 		{
-			cmd( "set mname \"New group\"" );
+			cmd( "set gname \"New group\"" );
 			cmd( "set mdir \"newgroup\"" );
 
 			cmd( "newtop .a \"New Group\" { set choice 2 }" );
@@ -1474,10 +1485,10 @@ int modman( int argn, const char **argv )
 			cmd( "ttk::label .a.tit.n -style hl.TLabel -text \"$model_group\"" );
 			cmd( "pack .a.tit.l .a.tit.n" );
 
-			cmd( "ttk::frame .a.mname" );
-			cmd( "ttk::label .a.mname.l -text \"New group name\"" );
-			cmd( "ttk::entry .a.mname.e -width 25 -textvariable mname -justify center" );
-			cmd( "pack .a.mname.l .a.mname.e" );
+			cmd( "ttk::frame .a.gname" );
+			cmd( "ttk::label .a.gname.l -text \"New group name\"" );
+			cmd( "ttk::entry .a.gname.e -width 25 -textvariable gname -justify center" );
+			cmd( "pack .a.gname.l .a.gname.e" );
 
 			cmd( "ttk::frame .a.mdir" );
 			cmd( "ttk::label .a.mdir.l -text \"New (non-existing) subdirectory name\"" );
@@ -1490,15 +1501,15 @@ int modman( int argn, const char **argv )
 			cmd( "ttk::text .a.tdes.e -width 60 -height 15 -dark $darkTheme -style smallFixed.TText" );
 			cmd( "pack .a.tdes.l .a.tdes.e" );
 
-			cmd( "pack .a.tit .a.mname .a.mdir .a.tdes -padx $_5 -pady $_5" );
+			cmd( "pack .a.tit .a.gname .a.mdir .a.tdes -padx $_5 -pady $_5" );
 
 			cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
-			cmd( "bind .a.mname.e <Return> { focus .a.mdir.e; .a.mdir.e selection range 0 end }" );
+			cmd( "bind .a.gname.e <Return> { focus .a.mdir.e; .a.mdir.e selection range 0 end }" );
 			cmd( "bind .a.mdir.e <Return> { focus .a.tdes.e }" );
 
 			cmd( "showtop .a" );
-			cmd( ".a.mname.e selection range 0 end" );
-			cmd( "focus .a.mname.e" );
+			cmd( ".a.gname.e selection range 0 end" );
+			cmd( "focus .a.gname.e" );
 
 			here_newgroup:
 
@@ -1506,11 +1517,12 @@ int modman( int argn, const char **argv )
 			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
-			cmd( "if { [ string length $mdir ] == 0 || [ string length $mname ] == 0 } { set choice 2 }" );
+			cmd( "if { [ string length $mdir ] == 0 || [ string length $gname ] == 0 } { set choice 2 }" );
 
 			if ( choice == 2 )
 			{
 				cmd( "destroytop .a" );
+				cmd( "set model_group [ get_group_setting $group_dir name ]" );
 				choice = 0;
 				goto loop;
 			}
@@ -1525,21 +1537,23 @@ int modman( int argn, const char **argv )
 			}
 
 			// control for existing directory
-			cmd( "if [ file exists \"$group_dir/$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"[ file nativename $group_dir/$mdir ]\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
-			if ( choice == 3 )
+			cmd( "if [ file exists \"$browser_dir/$mdir\" ] { \
+					ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"[ file nativename $browser_dir/$mdir ]\\n\\nPossibly there is already such a directory, please try a new directory.\"; \
+					set choice -2 \
+				}" );
+			if ( choice == -2 )
 			{
 				cmd( "focus .a.mdir.e" );
 				cmd( ".a.mdir.e selection range 0 end" );
 				goto here_newgroup;
 			}
 
-			cmd( "file mkdir \"$group_dir/$mdir\"" );
-			cmd( "set group_dir \"$group_dir/$mdir\"" );
-			cmd( "set_group_setting $group_dir name $mname" );
-			cmd( "set_group_setting $group_dir description [ .a.tdes.e get 0.0 end ]" );
-			cmd( "set model_group \"$mname\"" );
-
 			cmd( "destroytop .a" );
+
+			cmd( "set browser_dir \"$browser_dir/$mdir\"" );
+			cmd( "file mkdir $browser_dir" );
+			cmd( "set_group_setting $browser_dir name $gname" );
+			cmd( "set_group_setting $browser_dir description [ .a.tdes.e get 0.0 end ]" );
 		}	//end of creation of a new group
 
 		// create a new model
@@ -1591,8 +1605,7 @@ int modman( int argn, const char **argv )
 		if ( choice == 2 )
 		{
 			cmd( "destroytop .a" );
-			cmd( "set model_name \"\"" );
-			cmd( "set model_version \"\"" );
+			cmd( "set model_group [ get_group_setting $group_dir name ]" );
 			choice = 0;
 			goto loop;
 		}
@@ -1607,8 +1620,11 @@ int modman( int argn, const char **argv )
 		}
 
 		// control for existing directory
-		cmd( "if [ file exists \"$mdir\" ] { ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"[ file nativename $group_dir/$mdir ]\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
-		if ( choice == 3 )
+		cmd( "if [ file exists \"browser_dir/$mdir\" ] { \
+				ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"[ file nativename \"$browser_dir/$mdir\" ]\\n\\nPossibly there is already such a directory, please try a new directory.\"; \
+				set choice -2 \
+			}" );
+		if ( choice == -2 )
 		{
 			cmd( "focus .a.mdir.e" );
 			cmd( ".a.mdir.e selection range 0 end" );
@@ -1616,13 +1632,17 @@ int modman( int argn, const char **argv )
 		}
 
 		// control for an existing model with the same name AND same version
-		cmd( "set dir [ glob -nocomplain * ]" );
+		cmd( "set dir [ glob -directory $browser_dir -types d -nocomplain * ]" );
 		cmd( "set num [ llength $dir ]" );
 		strcpy( str, " " );
 
 		for ( i = 0; i < num; ++i )
 		{
-			cmd( "if [ file isdirectory [ lindex $dir %d ] ] { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
+			cmd( "if { [ file isdirectory [ lindex $dir %d ] ] } { \
+					set curdir [ lindex $dir %i ] \
+				} { \
+					set curdir ___ \
+				}", i, i );
 			gui::get_str( "curdir", str, MAX_PATH_LENGTH );
 
 			// check for invalid directories (LSD managed)
@@ -1632,17 +1652,17 @@ int modman( int argn, const char **argv )
 
 			if ( ! found )
 			{
-				if ( ! gui::load_model_options( str, false ) )
-					cmd( "set model_name $curdir; set model_version \"1.0\"" );
-
-				cmd( "set comp [ string compare $model_name $mname ]" );
-				cmd( "set comp1 [ string compare $model_version $mver ]" );
-				cmd( "if { $comp == 0 && $comp1 == 0 } { set choice 3 }" );
-				cmd( "if { $comp == 0 } { set choice 4 }" );
+				cmd( "set a [ get_model_setting $curdir model_name ]" );
+				cmd( "set b [ get_model_setting $curdir model_version ]" );
+				cmd( "if { $a eq $mname && $b eq $mver } { \
+						set choice -3 \
+					} elseif { $a eq $mname } { \
+						set choice -4 \
+					}" );
 			}
 		}
 
-		if ( choice == 3 )
+		if ( choice == -3 )
 		{
 			cmd( "ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: [ file nativename $curdir ]).\"" );
 			cmd( ".a.mname.e selection range 0 end" );
@@ -1650,22 +1670,28 @@ int modman( int argn, const char **argv )
 			goto loop_copy_new;
 		}
 
-		if ( choice == 4 )
+		if ( choice == -4 )
 		{
 			choice = 0;
 			cmd( "set answer [ ttk::messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' (ver. $mver) already exists in directory: [ file nativename $curdir ].\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you may cancel this operation, and use the 'Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname'.\" ]" );
 
-			cmd( "if { ! [ string compare $answer ok ] } { set choice 1 } { set choice 0 }" );
+			cmd( "if { $answer ne \"ok\" } { set choice 0 }" );
 			if ( choice == 0 )
 			{
 				cmd( "destroytop .a" );
-				cmd( "set model_name \"\"" );
-				cmd( "set model_version \"\"" );
+				cmd( "set model_group [ get_group_setting $group_dir name ]" );
 				goto loop;
 			}
 		}
 
 		cmd( "destroytop .a" );
+
+		// finally change to new directory if all good
+		if ( j == 2 )
+		{
+			cmd( "set group_dir $browser_dir" );
+			cmd( "set model_group $gname" );
+		}
 
 		// create a new empty model
 		cmd( "set file_dir $group_dir/$mdir" );
@@ -1674,7 +1700,7 @@ int modman( int argn, const char **argv )
 		cmd( "set model_version $mver" );
 		cmd( "set model_date \"\"" );
 
-		cmd( "file mkdir \"$file_dir\"" );
+		cmd( "file mkdir $file_dir" );
 
 		// create the empty equation file
 		cmd( "file copy \"$lsd_root/$lsd_src/fun_base.cpp\" \"$model_dir/fun_$mdir.cpp\"" );
@@ -4121,39 +4147,39 @@ int modman( int argn, const char **argv )
 
 		if ( choice == 33 )
 		{
-			Tcl_LinkVar( gui::interp, "choiceSM", ( char * ) & num, TCL_LINK_INT );
+			Tcl_LinkVar( gui::interp, "choiceSM", ( char * ) & i, TCL_LINK_INT );
 
 			cmd( "showmodel $group_dir" );
 
-			num = 0;
-			while ( num == 0 )
+			i = 0;
+			while ( i == 0 )
 				Tcl_DoOneEvent( 0 );
 
 			cmd( "destroytop .l" );
 			cmd( "tooltip::hide" );
-			cmd( "bind .f.t.t <Enter> { }" );
 			cmd( "focustop .f.t.t" );
 
 			Tcl_UnlinkVar( gui::interp, "choiceSM" );
 
+			switch ( i )
+			{
+				case 0:					// cancel
+				case 2:
+					choice = 0;
+					goto loop;
+
+				case 14:				// create a new model/group
+					choice = 14;
+					goto loop;
+
+				case 1:					// select model
 			cmd( "if { $model_name eq \"(no model)\" } { \
 					set group_dir [ lindex $lrn 0 ] \
 				} { \
 					set group_dir [ file normalize \"$model_dir/..\" ] \
 				}" );
-
 			cmd( "set model_group [ get_group_setting $group_dir name ]" );
-
-			if ( num == 0 || num == 2 )
-			{
-				choice = 0;
-				goto loop;
 			}
-
-			if ( num == 14 )
-				goto loop;							// create a new model/group
-
-			cmd( "set model_dir [ lindex $ldn $result ]" );
 		}
 		else
 			cmd( "set model_group [ get_group_setting $group_dir name ]" );

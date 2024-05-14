@@ -213,9 +213,12 @@ int gui::init_lsd_env( const char **argv )
 	}
 #endif
 
-	// check if LSDROOT environment variable exists and use it if so
 	cmd( "set lsd_src \"%s\"", DEFAULT_SRC_DIR );	// default initial source dir
-	cmd( "if [ info exists env(LSDROOT) ] { \
+	cmd( "set lsd_example \"%s\"", DEFAULT_EXAMPLE_DIR );// examples group dir
+	cmd( "set lsd_trash \"%s\"", DEFAULT_TRASH_DIR );// trash bin group dir
+
+	// check if LSDROOT environment variable exists and use it if so
+	cmd( "if { [ info exists env(LSDROOT) ] } { \
 			set lsd_root [ file normalize $env(LSDROOT) ]; \
 			if [ file exists \"$lsd_root/$lsd_src/LSD.h\" ] { \
 				set res 0 \
@@ -1395,7 +1398,13 @@ int gui::Tcl_get_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 	if ( setID == GROUP_OPTIONS_NUM )
 		return TCL_ERROR;
 
-	if ( strcmp( argv[ 1 ], get_str( "lsd_root" ) ) == 0 )
+	cmd( "if { [ file normalize \"%s\" ] eq \"$lsd_root\" || [ file normalize \"%s\" ] eq [ file dirname [ file normalize \"$group_new\" ] ] } { \
+			set a 1 \
+		} { \
+			set a 0 \
+		}", argv[ 1 ], argv[ 1 ] );
+
+	if ( get_bool( "a" ) )
 	{
 		if ( strcmp( argv[ 2 ], "name" ) == 0 )
 			lsd::strcpyn( set_val, get_str( "rootname" ), MAX_BUFF_SIZE );
