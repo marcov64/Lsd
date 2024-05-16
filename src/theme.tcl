@@ -206,7 +206,7 @@ proc setstyles { } {
 		set tbpadh 3
 		set tbpadv 3
 	}
-	
+
 	ttk::style configure Toolbutton -anchor center -padding "[ scaleScreen $tbpadh ] [ scaleScreen $tbpadv ]"
 	ttk::style configure bold.Toolbutton \
 		-font [ font create -size $dim_character -weight bold ]
@@ -501,7 +501,7 @@ proc ttk::messageBox_exit { value } {
 }
 
 proc ttk::messageBox_draw { name icon title parent message detail type default } {
-	global ttk::msgBoxName ttk::msgBoxValue errorDlgImg infoDlgImg questDlgImg warnDlgImg
+	global ttk::msgBoxName ttk::msgBoxValue errorDlgImg infoDlgImg questDlgImg warnDlgImg labwrapMB
 
 	destroytop $ttk::msgBoxName
 	set ttk::msgBoxName $name
@@ -533,9 +533,9 @@ proc ttk::messageBox_draw { name icon title parent message detail type default }
 	pack $name.top.icon.label -pady $::_5 -anchor nw
 
 	ttk::frame $name.top.text
-	ttk::label $name.top.text.message -wraplength 300 -anchor w \
+	ttk::label $name.top.text.message -wraplength $labwrapMB -anchor w \
 				-justify left -text $message -style boldSmall.TLabel
-	ttk::label $name.top.text.details -wraplength 300 -anchor w \
+	ttk::label $name.top.text.details -wraplength $labwrapMB -anchor w \
 				-justify left -text $detail
 	pack $name.top.text.message \
 		 $name.top.text.details -pady $::_5 -anchor nw

@@ -101,6 +101,9 @@ set vsizeDminLinux		400
 set hsizeDminWindows	740
 set vsizeDminWindows	400
 
+# message box sizes
+set labwrapMB	300	; # label horizontal wrap size
+
 # main windows size (must be even numbers)
 set hsizeL		800	; # LMM horizontal size in pixels
 set vsizeL		600	; # LMM vertical size in pixels
@@ -627,6 +630,8 @@ set allScreenMeasures {
 	hsizeLmin vsizeLmin hsizeBmin vsizeBmin hsizeAmin vsizeAmin hsizeDmin
 	vsizeDmin hsizePmin vsizePmin hsizeGmin vsizeGmin corrX corrY butPad
 	butSpc bhstepM bvstepM borderMadj
+
+	labwrapMB
 
 	hsizeL vsizeL hsizeM vsizeM hsizeNmin vsizeNmin hsizeImin vsizeImin hsizeP
 	vsizeP hsizePxy vsizePxy hsizeLatMax vsizeLatMax hsizeLat vsizeLat
