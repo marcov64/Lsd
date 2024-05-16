@@ -102,7 +102,7 @@ void gui::init_tcl_tk( const char *exec, const char *tcl_app_name )
 	if ( res )
 	{
 		log_tcl_error( false, "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
-		cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nPlease reinstall LSD in a proper directory.\n\nLSD is aborting now.\"" );
+		cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is\n\n[ pwd ]\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\n\nPlease reinstall LSD in a proper directory.\nLSD is aborting now.\"" );
 		lsd_exit_gui( 4 );
 	}
 
@@ -194,7 +194,8 @@ int gui::init_lsd_env( const char **argv )
 		}" );
 
 	cmd( "cd $model_dir" );
-	app = get_str( "model_dir" );
+	cmd( "set a [ file normalize $model_dir ]" );
+	app = get_str( "a" );
 
 	if ( app != NULL && strlen( app ) > 0 )
 	{
@@ -304,7 +305,7 @@ int gui::init_lsd_env( const char **argv )
 	if ( get_bool( "res" ) )
 	{
 		log_tcl_error( false, "Configuration directory check", "Cannot locate or create LSD configuration folder on disk, check the installation of LSD and reinstall LSD if the problem persists" );
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Cannot create LSD configuration directory\" -detail \"Cannot create or access the LSD configuration folder on disk (%s).\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", get_str( "cfgDir" ) );
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Cannot create LSD configuration directory\" -detail \"Cannot create or access the LSD configuration folder on disk\n\n%s\n\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", get_str( "cfgDir" ) );
 		return 1;
 	}
 
@@ -917,7 +918,7 @@ void gui::update_lsd_options( bool save_settings )
 	if ( ! sysCfg.save_file( fName ) )
 	{
 		gui::log_tcl_error( false, "Cannot save LSD configuration", "LSD configuration file cannot be saved to the user directory.\nnCheck if the user home directory is not set READ-ONLY or if it has enough space, and try again" );
-		cmd( "tk_messageBox -type ok -icon error -title Error -message \"Cannot save LSD configuration\" -detail \"File '%s' cannot be saved to directory '%s'.\nnCheck if the user home directory is not set READ-ONLY or if it is not full, and try again.\"", LSD_XML_CONFIG, cfg_path );
+		cmd( "tk_messageBox -type ok -icon error -title Error -message \"Cannot save LSD configuration\" -detail \"File '%s' cannot be saved to directory\n\n%s\n\nCheck if the user home directory is not set READ-ONLY or if it is not full, and try again.\"", LSD_XML_CONFIG, cfg_path );
 	}
 }
 
@@ -936,7 +937,11 @@ bool gui::load_model_options( const char *path, bool fix )
 		path = get_str( "model_dir" );
 
 	if ( path != NULL )
+	{
 		cmd( "set model_dir \"%s\"", path );
+		cmd( "set a [ file normalize $model_dir ]" );
+		path = get_str( "a" );
+	}
 
 	if ( path == NULL || ! eval_bool( "[ file exists $model_dir ] && [ file isdirectory $model_dir ]" ) )
 	{
@@ -1095,7 +1100,10 @@ void gui::update_model_options( bool fix )
 #endif
 
 	if ( exists_var( "model_dir" ) )
-		s = get_str( "model_dir" );
+	{
+		cmd( "set a [ file normalize $model_dir ]" );
+		s = get_str( "a" );
+	}
 	else
 		s = NULL;
 
@@ -1233,7 +1241,7 @@ void gui::update_model_options( bool fix )
 	if ( ! modCfg.save_file( fName ) )
 	{
 		gui::log_tcl_error( false, "Cannot save model configuration", "Model configuration file cannot be saved to the model directory.\nnCheck if the model home directory is not set READ-ONLY or if it has enough space, and try again" );
-		cmd( "tk_messageBox -type ok -icon error -title Error -message \"Cannot save model configuration\" -detail \"File '%s' cannot be saved to directory '%s'.\nnCheck if the user model directory is not set READ-ONLY or if it is not full, and try again.\"", MODEL_XML_CONFIG, get_str( "model_dir" ) );
+		cmd( "tk_messageBox -type ok -icon error -title Error -message \"Cannot save model configuration\" -detail \"File '%s' cannot be saved to directory\n\n[ file nativename [ file normalize $model_dir ] ]\n\nCheck if the user model directory is not set READ-ONLY or if it is not full, and try again.\"", MODEL_XML_CONFIG );
 	}
 }
 
@@ -1247,6 +1255,7 @@ void gui::update_model_options( bool fix )
 int gui::Tcl_get_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	char fName[ MAX_PATH_LENGTH ], line[ MAX_LINE_SIZE ], set_val[ MAX_LINE_SIZE ] = "";
+	const char *dir;
 	int setID, i;
 	x_docT modCfg;
 	FILE *f;
@@ -1254,11 +1263,10 @@ int gui::Tcl_get_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 	if ( argc != 3 || argv[ 1 ] == NULL || argv[ 2 ] == NULL || strlen( argv[ 1 ] ) == 0 || strlen( argv[ 2 ] ) == 0 )// require 2 param.
 		return TCL_ERROR;
 
-	cmd( "set __fn__ \"%s\"", argv[ 1 ] );
-	if ( ! eval_bool( "[ file exists __fn__ ] || ! [ file isdirectory __fn__ ]" ) )
+	cmd( "set f [ file normalize \"%s\" ]", argv[ 1 ] );
+	dir = get_str( "f" );
+	if ( ! eval_bool( "[ file exists $f ] || ! [ file isdirectory $f ]" ) )
 		return TCL_ERROR;
-
-	cmd( "unset __fn__" );
 
 	for ( setID = 0; setID < MODEL_OPTIONS_NUM; ++setID )
 		if ( strcmp( argv[ 2 ], model_options[ setID ] ) == 0 )
@@ -1267,7 +1275,7 @@ int gui::Tcl_get_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 	if ( setID == MODEL_OPTIONS_NUM )
 		return TCL_ERROR;
 
-	snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], MODEL_XML_CONFIG );
+	snprintf( fName, MAX_PATH_LENGTH, "%s/%s", dir, MODEL_XML_CONFIG );
 	if ( modCfg.load_file( fName, PUGI_LOAD_OPTIONS ).status == pugi::status_ok )
 	{
 		x_nodeT lsdNode = modCfg.document_element( );	// LSD top element
@@ -1282,7 +1290,7 @@ int gui::Tcl_get_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 
 	if ( strlen( set_val ) == 0 )
 	{
-		snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], MODEL_TXT_INFO );
+		snprintf( fName, MAX_PATH_LENGTH, "%s/%s", dir, MODEL_TXT_INFO );
 		if ( ( f = fopen( fName, "r" ) ) != NULL )
 		{
 			for ( i = 0; i <= setID && fgets( line, MAX_LINE_SIZE, f ) != NULL; ++i )
@@ -1307,6 +1315,7 @@ int gui::Tcl_get_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 int gui::Tcl_set_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
 {
 	char fName[ MAX_PATH_LENGTH ], line[ MAX_LINE_SIZE ], buf[ MAX_BUFF_SIZE ] = "";
+	const char *dir;
 	int  setID, i;
 	x_docT modCfg;
 	x_nodeT child;
@@ -1315,11 +1324,10 @@ int gui::Tcl_set_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 	if ( argc != 4 || argv[ 1 ] == NULL || argv[ 2 ] == NULL || argv[ 3 ] == NULL || strlen( argv[ 1 ] ) == 0 || strlen( argv[ 2 ] ) == 0 || strlen( argv[ 3 ] ) == 0 )// require 3 param.
 		return TCL_ERROR;
 
-	cmd( "set __fn__ \"%s\"", argv[ 1 ] );
-	if ( ! eval_bool( "[ file exists __fn__ ] || ! [ file isdirectory __fn__ ]" ) )
+	cmd( "set f [ file normalize \"%s\" ]", argv[ 1 ] );
+	dir = get_str( "f" );
+	if ( ! eval_bool( "[ file exists $f ] || ! [ file isdirectory $f ]" ) )
 		return TCL_ERROR;
-
-	cmd( "unset __fn__" );
 
 	for ( setID = 0; setID < MODEL_OPTIONS_NUM; ++setID )
 		if ( strcmp( argv[ 2 ], model_options[ setID ] ) == 0 )
@@ -1328,7 +1336,7 @@ int gui::Tcl_set_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 	if ( setID == MODEL_OPTIONS_NUM )
 		return TCL_ERROR;
 
-	snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], MODEL_XML_CONFIG );
+	snprintf( fName, MAX_PATH_LENGTH, "%s/%s", dir, MODEL_XML_CONFIG );
 	if ( modCfg.load_file( fName, PUGI_LOAD_OPTIONS ).status == pugi::status_ok )
 	{
 		x_nodeT lsdNode = modCfg.document_element( );	// LSD top element
@@ -1347,7 +1355,7 @@ int gui::Tcl_set_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 		}
 	}
 
-	snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], MODEL_TXT_INFO );
+	snprintf( fName, MAX_PATH_LENGTH, "%s/%s", dir, MODEL_TXT_INFO );
 	if ( ( f = fopen( fName, "r" ) ) != NULL )
 	{
 		for ( i = 0; i < MODEL_OPTIONS_NUM && fgets( line, MAX_LINE_SIZE, f ) != NULL; ++i )
@@ -1383,6 +1391,7 @@ int gui::Tcl_get_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 {
 	bool rebuild_xml = true;
 	char fNameXML[ MAX_PATH_LENGTH ], fNameTXT[ MAX_PATH_LENGTH ], line[ MAX_LINE_SIZE ], buf[ MAX_BUFF_SIZE ], desc[ MAX_BUFF_SIZE ] = "", set_val[ MAX_BUFF_SIZE ] = "";
+	const char *dir;
 	int setID, i;
 	x_docT grpCfg;
 	x_nodeT child, dscNode, grpNode, lsdNode;
@@ -1398,24 +1407,20 @@ int gui::Tcl_get_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 	if ( setID == GROUP_OPTIONS_NUM )
 		return TCL_ERROR;
 
-	cmd( "if { [ file normalize \"%s\" ] eq \"$lsd_root\" || [ file normalize \"%s\" ] eq [ file dirname [ file normalize \"$group_new\" ] ] } { \
-			set a 1 \
-		} { \
-			set a 0 \
-		}", argv[ 1 ], argv[ 1 ] );
-
-	if ( get_bool( "a" ) )
+	cmd( "set f [ file normalize \"%s\" ]", argv[ 1 ] );
+	dir = get_str( "f" );
+	if ( strcmp( dir, get_str( "::lsd_root") ) == 0 || strcmp( dir, eval_str( "[ file dirname [ file normalize $::group_new ] ]" ) ) == 0 )
 	{
 		if ( strcmp( argv[ 2 ], "name" ) == 0 )
-			lsd::strcpyn( set_val, get_str( "rootname" ), MAX_BUFF_SIZE );
+			lsd::strcpyn( set_val, get_str( "::rootname" ), MAX_BUFF_SIZE );
 
 		if ( strcmp( argv[ 2 ], "description" ) == 0 )
-			snprintf( set_val, MAX_BUFF_SIZE, "%s group.\n\nAll groups are descendants of this group.", get_str( "rootname" ) );
+			snprintf( set_val, MAX_BUFF_SIZE, "%s group.\n\nAll groups are descendants of this group.", get_str( "::rootname" ) );
 
 		goto end;
 	}
 
-	snprintf( fNameXML, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], GROUP_XML_CONFIG );
+	snprintf( fNameXML, MAX_PATH_LENGTH, "%s/%s", dir, GROUP_XML_CONFIG );
 	if ( grpCfg.load_file( fNameXML, PUGI_LOAD_OPTIONS ).status == pugi::status_ok )
 	{
 		lsdNode = grpCfg.document_element( );			// LSD top element
@@ -1454,7 +1459,7 @@ int gui::Tcl_get_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 		grpNode = lsdNode.append_child( "group" );
 
 		str_vecT grpOptions( GROUP_OPTIONS_NUM, "" );
-		snprintf( fNameTXT, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], GROUP_TXT_INFO );
+		snprintf( fNameTXT, MAX_PATH_LENGTH, "%s/%s", dir, GROUP_TXT_INFO );
 		if ( ( f = fopen( fNameTXT, "r" ) ) != NULL )
 		{
 			for ( i = 0; i < GROUP_OPTIONS_NUM && fgets( line, MAX_LINE_SIZE, f ) != NULL; ++i )
@@ -1470,7 +1475,7 @@ int gui::Tcl_get_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 			fclose( f );
 		}
 
-		snprintf( fNameTXT, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], DESCRIPTION );
+		snprintf( fNameTXT, MAX_PATH_LENGTH, "%s/%s", dir, DESCRIPTION );
 		if ( ( f = fopen( fNameTXT, "r" ) ) != NULL )
 		{
 			i = fread( ( void * ) buf, sizeof ( char ), MAX_BUFF_SIZE - 1, f );
@@ -1495,9 +1500,8 @@ int gui::Tcl_get_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 			{
 				if ( grpOptions[ 0 ].size( ) == 0 )
 				{
-					cmd( "set __fn__ [ file tail \"%s\" ]", argv[ 1 ] );
-					grpOptions[ 0 ] = get_str( "__fn__" );
-					cmd( "unset __fn__" );
+					cmd( "set f [ file tail \"%s\" ]", dir );
+					grpOptions[ 0 ] = get_str( "f" );
 				}
 			}
 			else
@@ -1538,6 +1542,7 @@ int gui::Tcl_set_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 {
 	bool rebuild_xml = true;
 	char fName[ MAX_PATH_LENGTH ], line[ MAX_LINE_SIZE ], buf[ MAX_BUFF_SIZE ];
+	const char *dir;
 	int setID, i;
 	x_docT grpCfg;
 	x_nodeT child;
@@ -1546,7 +1551,9 @@ int gui::Tcl_set_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 	if ( argc != 4 || argv[ 1 ] == NULL || argv[ 2 ] == NULL || argv[ 3 ] == NULL || strlen( argv[ 1 ] ) == 0 || strlen( argv[ 2 ] ) == 0 || strlen( argv[ 3 ] ) == 0 )// require 3 param.
 		return TCL_ERROR;
 
-	if ( strcmp( argv[ 1 ], get_str( "lsd_root" ) ) == 0 )
+	cmd( "set f [ file normalize \"%s\" ]", argv[ 1 ] );
+	dir = get_str( "f" );
+	if ( strcmp( dir, get_str( "::lsd_root" ) ) == 0 )
 		return TCL_ERROR;
 
 	for ( setID = 0; setID < GROUP_OPTIONS_NUM; ++setID )
@@ -1556,7 +1563,7 @@ int gui::Tcl_set_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 	if ( setID == GROUP_OPTIONS_NUM )
 		return TCL_ERROR;
 
-	snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], GROUP_XML_CONFIG );
+	snprintf( fName, MAX_PATH_LENGTH, "%s/%s", dir, GROUP_XML_CONFIG );
 	if ( grpCfg.load_file( fName, PUGI_LOAD_OPTIONS ).status == pugi::status_ok )
 	{
 		x_nodeT lsdNode = grpCfg.document_element( );	// LSD top element
@@ -1597,7 +1604,7 @@ int gui::Tcl_set_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 	if ( strcmp( argv[ 2 ], "description" ) != 0 )
 	{
 		strcpy( buf, "" );
-		snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], GROUP_TXT_INFO );
+		snprintf( fName, MAX_PATH_LENGTH, "%s/%s", dir, GROUP_TXT_INFO );
 		if ( ( f = fopen( fName, "r" ) ) != NULL )
 		{
 			for ( i = 0; i < GROUP_OPTIONS_NUM && fgets( line, MAX_LINE_SIZE, f ) != NULL; ++i )
@@ -1623,7 +1630,7 @@ int gui::Tcl_set_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 	}
 	else
 	{
-		snprintf( fName, MAX_PATH_LENGTH, "%s/%s", argv[ 1 ], DESCRIPTION );
+		snprintf( fName, MAX_PATH_LENGTH, "%s/%s", dir, DESCRIPTION );
 		if ( ( f = fopen( fName, "r" ) ) != NULL )		// update only if exists
 		{
 			fclose( f );
@@ -2214,7 +2221,7 @@ const char *gui::get_target_name( char *str, int str_sz, bool nw )
 
 	make_makefile( nw );
 
-	cmd( "set fapp [ file nativename \"$model_dir/makefile%s\" ]", nw ? "NW" : "" );
+	cmd( "set fapp [ file normalize \"$model_dir/makefile%s\" ]", nw ? "NW" : "" );
 	f = fopen( get_str( "fapp" ), "r" );
 	if ( f == NULL )
 		goto error;
@@ -2267,7 +2274,7 @@ bool gui::get_precompiled_flag( const char *exec, bool nw )
 			deftarg = false;
 	}
 
-	cmd( "set fapp [ file nativename \"$model_dir/makefile\" ]" );
+	cmd( "set fapp [ file normalize \"$model_dir/makefile\" ]" );
 	f = fopen( get_str( "fapp" ), "r" );
 	if ( f == NULL )
 		goto error;
@@ -2357,7 +2364,10 @@ void gui::make_makefile( bool nw )
 		load_lsd_options( );
 
 	if ( model_make == NULL || strlen( model_make ) == 0 )
-		load_model_options( get_str( "model_dir" ) );
+	{
+		cmd( "set fapp [ file normalize $model_dir ]" );
+		load_model_options( get_str( "fapp" ) );
+	}
 
 	cmd( "set f [ open \"$lsd_root/$lsd_src/makefile-%s.txt\" r ]", nw ? "NW" : get_str( "CurPlatform" ) );
 	cmd( "set b [ string trim [ read $f ] ]" );
@@ -2387,10 +2397,9 @@ bool gui::compile_run( int run_mode, bool nw )
 	Tcl_LinkVar( interp, "res", ( char * ) &res, TCL_LINK_INT );
 
 	cmd( "set oldpath [ pwd ]" );
-	cmd( "cd \"$model_dir\"" );
+	cmd( "cd $model_dir" );
 
 #ifdef _LMM_
-
 	cmd( "destroytop .mm" );	// close any open compilation results window
 
 	if ( ( s = get_str( "model_name" ) ) == NULL || ! strcmp( s, "" ) )
@@ -2398,13 +2407,12 @@ bool gui::compile_run( int run_mode, bool nw )
 		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
 		goto end;
 	}
-
 #endif
 
 	// get source name
 	if ( ( s = get_eqfile_name( str, 2 * MAX_PATH_LENGTH ) ) == NULL || ( f = fopen( s, "r" ) ) == NULL )
 	{
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Equation file not found\" -detail \"File '%s' is no longer available in directory '$model_dir'.\" ", s );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Equation file not found\" -detail \"File '%s' is no longer available in directory\n\n'[ file nativename $model_dir ]'\" ", s );
 		goto end;
 	}
 	else

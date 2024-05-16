@@ -35,16 +35,18 @@ set months [ list January February March April May June July August September Oc
 # SHOWMODEL
 #************************************************
 proc showmodel groupdir {
-	global lmn lmd ldn lrn lbn result choiceSM lver rootname group group_new group_dir model_group model_dir browser_dir upSymbol groupSymbol lsd_root lsd_example lsd_trash pastestate memory small_character GROUP_TXT_INFO MODEL_TXT_INFO GROUP_XML_CONFIG MODEL_XML_CONFIG DESCRIPTION colorsTheme darkTheme
+	global lmn lmd ldn lrn lbn result choiceSM lver rootname group group_new group_dir model_group model_dir browser_dir upSymbol groupSymbol lsd_root lsd_example lsd_trash selstate newstate editstate copystate pastestate delstate curpastestate curcopystate memory small_character GROUP_TXT_INFO MODEL_TXT_INFO GROUP_XML_CONFIG MODEL_XML_CONFIG DESCRIPTION colorsTheme darkTheme
 
 	unset -nocomplain lmn lver lmd ldn lrn lbn group
-	lappend lmn
-	lappend lver
-	lappend lmd
-	lappend ldn
-	lappend lrn
-	lappend lbn
-	lappend group
+
+	# lists to hold directory model and group data for each entry
+	lappend lmn		; # model/group name
+	lappend lver	; # model version (-1 for groups)
+	lappend lmd		; # model/group description
+	lappend ldn		; # model/group directory
+	lappend lrn		; # model/group parent directory
+	lappend lbn		; # model/group parent name
+	lappend group	; # model = 0 / group = 1 flag
 
 	set browser_dir $groupdir
 
@@ -60,32 +62,43 @@ proc showmodel groupdir {
 		set trash 0
 	}
 
-	if { $example } {
-		set delstate disabled
+	if { [ get_group_setting $groupdir name ] eq $rootname } {
+		set root 1
 	} else {
-		set delstate normal
+		set root 0
+	}
+
+	set selstate normal
+	set newstate normal
+	set editstate normal
+	set copystate normal
+	set pastestate normal
+	set delstate normal
+
+	set curpastestate disabled
+	set curcopystate normal
+
+	if { $example } {
+		set newstate disabled
+		set editstate disabled
+		set pastestate disabled
+		set delstate disabled
 	}
 
 	if { $trash } {
 		set selstate disabled
-	} else {
-		set selstate normal
-	}
-
-	if { $example || $trash } {
 		set newstate disabled
 		set editstate disabled
 		set pastestate disabled
-	} else {
-		set newstate normal
-		set editstate normal
-		set pastestate normal
+	}
+
+	if { $root } {
+		set copystate disabled
+		set pastestate disabled
 	}
 
 	if { $memory } {
 		set curpastestate $pastestate
-	} else {
-		set curpastestate disabled
 	}
 
 	if [ winfo exists .l ] {
@@ -93,11 +106,17 @@ proc showmodel groupdir {
 		.l.t.text conf -state normal
 		.l.t.text delete 1.0 end
 
-		.l.m.file entryconf 0 -state $selstate
 		.l.m.file entryconf 1 -state $newstate
 		.l.m.edit entryconf 0 -state $editstate
+		.l.m.edit entryconf 1 -state $curcopystate
 		.l.m.edit entryconf 2 -state $curpastestate
 		.l.m.edit entryconf 3 -state $delstate
+
+		.l.l.l.m entryconf 1 -state $newstate
+		.l.l.l.m entryconf 3 -state $editstate
+		.l.l.l.m entryconf 4 -state $curcopystate
+		.l.l.l.m entryconf 5 -state $curpastestate
+		.l.l.l.m entryconf 6 -state $delstate
 
 		# close tool tip if still showing
 		tooltip::hide
@@ -109,13 +128,14 @@ proc showmodel groupdir {
 		set m .l.m.file
 		ttk::menu $m -tearoff 0
 		.l.m add cascade -label File -menu $m -underline 0
-		$m add command -label "Select Model/Group" -underline 0 -state $selstate -accelerator Enter -command {
+		$m add command -label "Select Model/Group" -underline 0 -accelerator Enter -command {
 			set result [ .l.l.l curselection ]
 			if { [ lindex $group $result ] == 0 } {
-				set model_dir [ lindex $ldn $result ]
-				set choiceSM 1
+				if { $selstate eq "normal" } {
+					set model_dir [ lindex $ldn $result ]
+					set choiceSM 1
+				}
 			} else {
-				set model_group "[ lindex $lmn $result ]"
 				showmodel [ lindex $ldn $result ]
 			}
 		}
@@ -139,14 +159,17 @@ proc showmodel groupdir {
 			set result [ .l.l.l curselection ]
 			medit $result
 		}
-		$m add command -label "Copy" -underline 0 -accelerator Ctrl+C -command {
+
+		$m add command -label "Copy" -underline 0 -state $curcopystate -accelerator Ctrl+C -command {
 			set result [ .l.l.l curselection ]
 			mcopy $result
 		}
+
 		$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -state $curpastestate -command {
 			set result [ .l.l.l curselection ]
 			mpaste $result
 		}
+
 		$m add command -label "Delete..." -underline 0 -state $delstate -accelerator Del -command {
 			set result [ .l.l.l curselection ]
 			if { [ lindex $group $result ] != -1 } {
@@ -160,10 +183,13 @@ proc showmodel groupdir {
 		$m add command -label "Help" -underline 0 -accelerator F1 -command {
 			LsdHelp modelbrowser.html
 		}
+
 		$m add command -label "LSD Documentation" -underline 4 -command {
 			LsdHelp LSD_documentation.html
 		}
+
 		$m add separator
+
 		$m add command -label "About LSD..." -underline 0 -command { LsdAbout $_LSD_VERSION_ $_LSD_DATE_ .l }
 
 		.l configure -menu .l.m
@@ -202,11 +228,11 @@ proc showmodel groupdir {
 		pack .l.l.l -expand yes -fill both
 
 		ttk::menu .l.l.l.m -tearoff 0
-		.l.l.l.m  add command -label Select -accelerator Enter -state $selstate -command { .l.m.file invoke 0 }; #entryconfig 0
+		.l.l.l.m  add command -label Select -accelerator Enter -command { .l.m.file invoke 0 }; #entryconfig 0
 		.l.l.l.m  add command -label New -accelerator Ins -state $newstate -command { .l.m.file invoke 1 }; #entryconfig 1
 		.l.l.l.m  add separator; #entryconfig 2
 		.l.l.l.m  add command -label Edit -accelerator Ctrl+E -state $editstate -command { .l.m.edit invoke 0 }; #entryconfig 3
-		.l.l.l.m  add command -label Copy -accelerator Ctrl+C -command { .l.m.edit invoke 1 }; #entryconfig 4
+		.l.l.l.m  add command -label Copy -accelerator Ctrl+C -state $curcopystate -command { .l.m.edit invoke 1 }; #entryconfig 4
 		.l.l.l.m  add command -label Paste -accelerator Ctrl+V -state $curpastestate -command { .l.m.edit invoke 2 }; #entryconfig 5
 		.l.l.l.m  add command -label Delete -accelerator Del -state $delstate -command { .l.m.edit invoke 3 }; #entryconfig 6
 
@@ -313,7 +339,7 @@ proc showmodel groupdir {
 				if { [ string equal -length [ string length $groupSymbol ] $name $groupSymbol ] || [ string equal -length [ string length $upSymbol ] $name $upSymbol ] } {
 					.l.l.l.m entryconf 4 -state disabled
 				} else {
-					.l.l.l.m entryconf 4 -state normal
+					.l.l.l.m entryconf 4 -state $copystate
 				}
 			} else {
 				.l.l.l.m entryconf 4 -state disabled
@@ -335,18 +361,20 @@ proc showmodel groupdir {
 
 	tooltip::tooltip clear .l.l.l*
 
-	.l.l.tit.n conf -text $model_group
-
 	set root_groupdir [ file dirname [ file normalize $group_new ] ]
-
 	if { ! [ file isdirectory $groupdir ] || ( [ string first $root_groupdir [ file normalize $groupdir ] ] != 0 && ! $example && ! $trash ) } {
-		ttk::messageBox -parent . -type ok -title Warning -icon warning -message "Invalid group directory" -detail "Cannot browse group in\n\n$groupdir\n\nChanging to '[ file dirname $group_new ]' directory before proceeding.\nUse menu File > Options to change the location of new models."
 		set groupdir $root_groupdir
+		set groupname $rootname
+	} else {
+		set groupname [ get_group_setting $groupdir name ]
 	}
+
+	.l.l.tit.n conf -text $groupname
 
 	set curdir [ pwd ]
 	cd $groupdir
-	if { $groupdir eq $root_groupdir } {
+
+	if { [ file normalize $groupdir ] eq $root_groupdir } {
 		# show examples tree that is in main LSD directory
 		if { [ file exists "$lsd_root/$lsd_example/$GROUP_TXT_INFO" ] || [ file exists "$lsd_root/$lsd_example/$GROUP_XML_CONFIG" ] } {
 			set app [ get_group_setting "$lsd_root/$lsd_example" name ]
@@ -359,7 +387,7 @@ proc showmodel groupdir {
 			lappend lver -1
 			lappend ldn "$lsd_root/$lsd_example"
 			lappend lrn $root_groupdir
-			lappend lbn $model_group
+			lappend lbn $groupname
 			lappend lmd $appd
 			lappend group 1
 			.l.l.l insert end "$groupSymbol$app"
@@ -374,8 +402,8 @@ proc showmodel groupdir {
 
 		lappend lver -1
 		lappend lmd "Return to group: $upgroup"
-		lappend lrn [ pwd ]
-		lappend lbn $model_group
+		lappend lrn $groupdir
+		lappend lbn $groupname
 		lappend lmn $upgroup
 		lappend group -1
 		.l.l.l insert end $upSymbol
@@ -403,8 +431,8 @@ proc showmodel groupdir {
 			lappend lmn $app
 			lappend lver -1
 			lappend ldn "$groupdir/$i"
-			lappend lrn [ pwd ]
-			lappend lbn $model_group
+			lappend lrn $groupdir
+			lappend lbn $groupname
 			lappend lmd $appd
 			lappend group 1
 			.l.l.l insert end "$groupSymbol$app"
@@ -431,8 +459,8 @@ proc showmodel groupdir {
 			lappend lmn $mn
 			lappend lver $ver
 			lappend ldn "$groupdir/$i"
-			lappend lrn [ pwd ]
-			lappend lbn $model_group
+			lappend lrn $groupdir
+			lappend lbn $groupname
 
 			if [ file exists "$i/$DESCRIPTION" ] {
 				set f [ open "$i/$DESCRIPTION" ]
@@ -450,13 +478,12 @@ proc showmodel groupdir {
 		}
 	}
 
+	cd $curdir
+
 	.l.t.text insert end [ lindex $lmd 0 ]
 	.l.t.text conf -state disable
 	.l.l.l selection set 0
 	focus .l.l.l
-
-	cd $curdir
-
 	update
 }
 
@@ -488,10 +515,12 @@ proc mcopy i {
 # Remove a model/group, placing it in a trashbin
 #************************************************
 proc mdelete i {
-	global lrn ldn lmn group group_new lsd_trash memory model_name model_group GROUP_TXT_INFO GROUP_XML_CONFIG
+	global lrn ldn lmn group group_new group_new lsd_root lsd_example lsd_trash memory model_name model_group GROUP_TXT_INFO GROUP_XML_CONFIG
 
-	set memory 0
-	.l.m.edit entryconf 2 -state disabled
+	if { [ file normalize [ lindex $ldn $i ] ] eq [ file normalize "$lsd_root/$lsd_example" ] || [ file normalize [ lindex $ldn $i ] ] eq [ file normalize $group_new ] } {
+		ttk::messageBox -parent .l -title Error -icon error -type ok -message "Cannot delete group" -detail "The group '[ lindex $lmn $i ]' cannot be deleted."
+		return
+	}
 
 	if { [ lindex $group $i ] == 0 } {
 		set item model
@@ -502,21 +531,24 @@ proc mdelete i {
 	set trashbin "[ file dirname [ file normalize $group_new ] ]/$lsd_trash"
 
 	if { [ string match -nocase "$trashbin*" [ lindex $ldn $i ] ] } {
-		set answer [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n([ file nativename [ lindex $ldn $i ] ])?" ]
+		set answer [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item '[ lindex $lmn $i ]' at\n\n[ file nativename [ lindex $ldn $i ] ]" ]
 		catch { file delete -force [ lindex $ldn $i ] }
 		showmodel [ lindex $lrn $i ]
 	} else {
 		if { $item eq "model" && $model_name eq [ lindex $lmn $i ] } {
-			ttk::messageBox -parent .l -title Error -icon error -type ok -message "Cannot delete model" -detail "The current model\n[ lindex $lmn $i ]\n([ file nativename [ lindex $ldn $i ] ])\ncannot be deleted.\nPlease close it or choose another model, and try again."
+			ttk::messageBox -parent .l -title Error -icon error -type ok -message "Cannot delete model" -detail "The current model '[ lindex $lmn $i ]' at\n\n[ file nativename [ lindex $ldn $i ] ]\n\ncannot be deleted.\n\nPlease close it or choose another model, and try again."
 			return
 		}
 
 		if { $item eq "group" && $model_group eq [ get_group_setting [ lindex $ldn $i ] name ] } {
-			ttk::messageBox -parent .l -title Error -icon error -type ok -message "Cannot delete group" -detail "The group containing the current model\n[ get_group_setting [ lindex $ldn $i ] name ]\n([ file nativename [ lindex $ldn $i ] ])\ncannot be deleted.\nPlease close current or choose another model in a different group, and try again."
+			ttk::messageBox -parent .l -title Error -icon error -type ok -message "Cannot delete group" -detail "The group containing the current model '[ get_group_setting [ lindex $ldn $i ] name ]' at\n\n[ file nativename [ lindex $ldn $i ] ]\n\ncannot be deleted.\n\nPlease close current or choose another model in a different group, and try again."
 			return
 		}
 
-		set answer [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[ lindex $lmn $i ]\n([ file nativename [ lindex $ldn $i ] ])?" ]
+		set answer [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item '[ lindex $lmn $i ]' at\n\n[ file nativename [ lindex $ldn $i ] ]" ]
+
+		set memory 0
+		.l.m.edit entryconf 2 -state disabled
 
 		if { $answer eq "yes" } {
 			if { ! [ file exists $trashbin ] } {
@@ -530,12 +562,12 @@ proc mdelete i {
 
 			set name [ string range [ lindex $ldn $i ] [ expr { [ string last / [ lindex $ldn $i ] ] + 1 } ] end ]
 			if { [ file exists "$trashbin/$name" ] } {
-				if { [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Duplicated deleted model or group" -detail "There is another item named\n[ lindex $lmn $i ]\n([ file nativename [ lindex $ldn $i ] ])\nin the deleted models group.\n\nDo you want to proceed and permanently delete the older item?" ] } {
+				if { [ ttk::messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Duplicated deleted model or group" -detail "There is another item named '[ lindex $lmn $i ]' at\n\n[ file nativename [ lindex $ldn $i ] ]\n\nin the deleted models group.\n\nDo you want to proceed and permanently delete the older item?" ] } {
 					catch { file delete -force "$trashbin/$name" }
 				}
 			}
 			if { [ catch { file rename -force [ lindex $ldn $i ] "$trashbin/$name" } ] } {
-				ttk::messageBox -parent .l -title Error -icon error -type ok -message "Delete error" -detail "Directory [ file nativename [ lindex $ldn $i ] ] cannot be deleted now.\nYou may try again later."
+				ttk::messageBox -parent .l -title Error -icon error -type ok -message "Delete error" -detail "Directory\n\n[ file nativename [ lindex $ldn $i ] ]\n\ncannot be deleted now.\n\nYou may try again later."
 			}
 
 			showmodel [ lindex $lrn $i ]
@@ -698,10 +730,10 @@ proc mpaste i {
 		set appl [ .l.p.n.n get ]
 		set appdsc [ .l.p.t.t.text get 1.0 end ]
 
-		set confirm [ ttk::messageBox -parent .l.p -type okcancel -icon question -title Confirmation -default ok -message "Confirm copy?" -detail "Every file in dir.:\n[ file nativename $copydir ]\n is going to be copied in dir.:\n[ file nativename $pastedir/$appd ]" ]
+		set confirm [ ttk::messageBox -parent .l.p -type okcancel -icon question -title Confirmation -default ok -message "Confirm copy?" -detail "Every file in directory\n\n[ file nativename $copydir ]\n\nis going to be copied to directory\n\n[ file nativename $pastedir/$appd ]" ]
 		if { $confirm == "ok" } {
 			if { [ file exists $pastedir/$appd ] } {
-				ttk::messageBox -parent .l.p -title Error -icon error -type ok -message "Copy error" -detail "Directory [ file nativename $pastedir/$appd ] already exists.\nSpecify a different directory."
+				ttk::messageBox -parent .l.p -title Error -icon error -type ok -message "Copy error" -detail "Directory\n\n[ file nativename $pastedir/$appd ]\n\nalready exists.\n\nSpecify a different directory and try again."
 			} else {
 				file mkdir $pastedir/$appd
 				set copylist [ glob -nocomplain "$copydir/*" ]

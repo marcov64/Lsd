@@ -847,7 +847,6 @@ proc sort_series { lbox ord } {
 proc comp_rank { a b } {
 	scan $a "%*s %*s %*s #%d" ar
 	scan $b "%*s %*s %*s #%d" br
-if { ! [ info exists ar ] } { tk_messageBox -message "$a\n$b" }
 	return [ expr { $ar - $br } ]
 }
 

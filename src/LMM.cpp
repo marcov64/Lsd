@@ -245,8 +245,8 @@ int modman( int argn, const char **argv )
 	cmd( "set model_version \"\"" );
 
 	// allow reloading last model
-	cmd( "if { ! [ info exists group_dir ] } { set group_dir [ pwd ] }" );
-	cmd( "if { ! [ info exists model_dir ] } { set model_dir [ pwd ] }" );
+	cmd( "if { ! [ info exists group_dir ] } { set group_dir [ file dirname $group_new ] }" );
+	cmd( "if { ! [ info exists model_dir ] } { set model_dir [ file dirname $group_new ] }" );
 	cmd( "if { ! [ info exists file_dir ] } { set file_dir [ pwd ] }" );
 	cmd( "if { ! [ info exists file_name ] } { set file_name \"(no name)\" }" );
 
@@ -1318,8 +1318,11 @@ int modman( int argn, const char **argv )
 			goto end_gdb;
 
 		if ( gui::model_make == NULL || strlen( gui::model_make ) == 0 )
-			if ( ! gui::load_model_options( gui::get_str( "model_dir" ) ) )
+		{
+			cmd( "set fapp [ file normalize $model_dir ]" );
+			if ( ! gui::load_model_options( gui::get_str( "fapp" ) ) )
 				goto end_gdb;
+		}
 
 		cmd( "set model_make {%s}", gui::model_make );
 		cmd( "set pos [ string first \"SWITCH_CC=\" $model_make ]" );
@@ -1419,8 +1422,8 @@ int modman( int argn, const char **argv )
 			goto loop;
 
 		// prevent creating new groups outside the new groups directory
-		cmd( "if { [ string first [ file normalize $group_new ] [ file normalize $browser_dir ] ] != 0 } { \
-				set answer [ ttk::messageBox -parent . -type okcancel -title Warning -icon warning -default ok -message \"Invalid parent group directory\" -detail \"Cannot create group/model in\n\n$browser_dir\n\nPress 'OK' to change to the '$group_new' directory before proceeding.\nUse menu File > Options to change the location of new models.\" ]; \
+		cmd( "if { [ string first [ file dirname [ file normalize $group_new ] ] [ file normalize $browser_dir ] ] != 0 } { \
+				set answer [ ttk::messageBox -parent . -type okcancel -title Warning -icon warning -default ok -message \"Invalid parent group directory\" -detail \"Cannot create group/model in\n\n$browser_dir\n\nUse menu File > Options to change the location of new models\n\nPress 'OK' to change to the '$group_new' directory before proceeding.\" ]; \
 					if [ string equal $answer ok ] { \
 						set browser_dir $group_new; \
 						set choice 1 \
@@ -1433,7 +1436,6 @@ int modman( int argn, const char **argv )
 			goto loop;
 
 		cmd( "set model_group [ get_group_setting $browser_dir name ]" );
-		cmd( "set temp 1" );
 
 		cmd( "newtop .a \"New Model\" { set choice 2 }" );
 
@@ -1455,6 +1457,15 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a <Up> { .a.f.r1 invoke }" );
 		cmd( "bind .a <Down> { .a.f.r2 invoke }" );
 
+		// on root group, must create new son group, so no option
+		if ( gui::eval_bool( "[ file normalize $browser_dir ] ne [ file dirname [ file normalize $group_new ] ]" ) )
+			cmd( "set temp 1" );
+		else
+		{
+			cmd( "set temp 2" );
+			cmd( ".a.f.r1 configure -state disabled" );
+		}
+
 		cmd( "showtop .a" );
 		cmd( "mousewarpto .a.b.ok" );
 
@@ -1472,8 +1483,7 @@ int modman( int argn, const char **argv )
 		}
 
 		cmd( "set choice $temp" );
-		j = choice;
-		if ( j == 2 )
+		if ( choice == 2 )
 		{
 			cmd( "set gname \"New group\"" );
 			cmd( "set mdir \"newgroup\"" );
@@ -1548,12 +1558,13 @@ int modman( int argn, const char **argv )
 				goto here_newgroup;
 			}
 
+			cmd( "set d [ .a.tdes.e get 0.0 end ]" );
 			cmd( "destroytop .a" );
 
 			cmd( "set browser_dir \"$browser_dir/$mdir\"" );
 			cmd( "file mkdir $browser_dir" );
 			cmd( "set_group_setting $browser_dir name $gname" );
-			cmd( "set_group_setting $browser_dir description [ .a.tdes.e get 0.0 end ]" );
+			cmd( "set_group_setting $browser_dir description $d" );
 		}	//end of creation of a new group
 
 		// create a new model
@@ -1601,7 +1612,6 @@ int modman( int argn, const char **argv )
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
-		cmd( "if { [ string length $mdir ] == 0 || [ string length $mname ] == 0 } { set choice 2 }" );
 		if ( choice == 2 )
 		{
 			cmd( "destroytop .a" );
@@ -1610,8 +1620,17 @@ int modman( int argn, const char **argv )
 			goto loop;
 		}
 
-		cmd( "if { [ llength [ split $mdir ] ] > 1 } { set choice -1 }" );
+		cmd( "if { [ string length $mdir ] == 0 || [ string length $mname ] == 0 } { set choice -1 }" );
 		if ( choice == -1 )
+		{
+			cmd( "destroytop .a" );
+			cmd( "set model_group [ get_group_setting $group_dir name ]" );
+			choice = 0;
+			goto loop;
+		}
+
+		cmd( "if { [ llength [ split $mdir ] ] > 1 } { set choice -2 }" );
+		if ( choice == -2 )
 		{
 			cmd( "ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
 		   cmd( "focus .a.mdir.e" );
@@ -1622,9 +1641,9 @@ int modman( int argn, const char **argv )
 		// control for existing directory
 		cmd( "if [ file exists \"browser_dir/$mdir\" ] { \
 				ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"[ file nativename \"$browser_dir/$mdir\" ]\\n\\nPossibly there is already such a directory, please try a new directory.\"; \
-				set choice -2 \
+				set choice -3 \
 			}" );
-		if ( choice == -2 )
+		if ( choice == -3 )
 		{
 			cmd( "focus .a.mdir.e" );
 			cmd( ".a.mdir.e selection range 0 end" );
@@ -1655,27 +1674,27 @@ int modman( int argn, const char **argv )
 				cmd( "set a [ get_model_setting $curdir model_name ]" );
 				cmd( "set b [ get_model_setting $curdir model_version ]" );
 				cmd( "if { $a eq $mname && $b eq $mver } { \
-						set choice -3 \
-					} elseif { $a eq $mname } { \
 						set choice -4 \
+					} elseif { $a eq $mname } { \
+						set choice -5 \
 					}" );
 			}
 		}
 
-		if ( choice == -3 )
+		if ( choice == -4 )
 		{
-			cmd( "ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: [ file nativename $curdir ]).\"" );
+			cmd( "ttk::messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because a model with same name and version already exists at\n\n[ file nativename $curdir ]\"" );
 			cmd( ".a.mname.e selection range 0 end" );
 			cmd( "focus .a.mname.e" );
 			goto loop_copy_new;
 		}
 
-		if ( choice == -4 )
+		if ( choice == -5 )
 		{
-			choice = 0;
-			cmd( "set answer [ ttk::messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' (ver. $mver) already exists in directory: [ file nativename $curdir ].\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you may cancel this operation, and use the 'Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname'.\" ]" );
+			cmd( "if { [ ttk::messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' (ver. $b) already exists at\n\n[ file nativename $curdir ]\n\nIf you want the new model to inherit the same equations, data, etc. of that model you may cancel this operation, and use the 'File > Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname' (ver. $mver).\" ] ne \"ok\" } { \
+					set choice 0 \
+				}" );
 
-			cmd( "if { $answer ne \"ok\" } { set choice 0 }" );
 			if ( choice == 0 )
 			{
 				cmd( "destroytop .a" );
@@ -1687,11 +1706,8 @@ int modman( int argn, const char **argv )
 		cmd( "destroytop .a" );
 
 		// finally change to new directory if all good
-		if ( j == 2 )
-		{
-			cmd( "set group_dir $browser_dir" );
-			cmd( "set model_group $gname" );
-		}
+		cmd( "set group_dir $browser_dir" );
+		cmd( "set model_group [ get_group_setting $browser_dir name ]" );
 
 		// create a new empty model
 		cmd( "set file_dir $group_dir/$mdir" );
@@ -4173,20 +4189,19 @@ int modman( int argn, const char **argv )
 					goto loop;
 
 				case 1:					// select model
-			cmd( "if { $model_name eq \"(no model)\" } { \
-					set group_dir [ lindex $lrn 0 ] \
-				} { \
-					set group_dir [ file normalize \"$model_dir/..\" ] \
-				}" );
-			cmd( "set model_group [ get_group_setting $group_dir name ]" );
+					cmd( "if { $model_name eq \"(no model)\" } { \
+							set group_dir [ lindex $lrn 0 ] \
+						} { \
+							set group_dir [ file normalize \"$model_dir/..\" ] \
+						}" );
+					cmd( "set model_group [ get_group_setting $group_dir name ]" );
 			}
 		}
 		else
 			cmd( "set model_group [ get_group_setting $group_dir name ]" );
 
-		cmd( "set file_dir $model_dir" );
-
-		if ( ! gui::load_model_options( gui::get_str( "model_dir" ) ) )
+		cmd( "set file_dir [ file normalize $model_dir ]" );
+		if ( ! gui::load_model_options( gui::get_str( "file_dir" ) ) )
 		{
 			choice = 0;
 			goto loop;
@@ -4405,7 +4420,8 @@ int modman( int argn, const char **argv )
 		if ( ! model_loaded( ) )
 			goto loop;
 
-		if ( ! gui::load_model_options( gui::get_str( "model_dir" ) ) )
+		cmd( "set fapp [ file normalize $model_dir ]" );
+		if ( ! gui::load_model_options( gui::get_str( "fapp" ) ) )
 			goto loop;
 
 		cmd( "set mname $model_name" );
@@ -4607,7 +4623,8 @@ int modman( int argn, const char **argv )
 
 		if ( ( s = gui::get_eqfile_name( str, MAX_PATH_LENGTH ) ) == NULL || gui::model_make == NULL || strlen( gui::model_make ) == 0 )
 		{
-			if ( ! gui::load_model_options( gui::get_str( "model_dir" ) ) )
+			cmd( "set fapp [ file normalize $model_dir ]" );
+			if ( ! gui::load_model_options( gui::get_str( "fapp" ) ) )
 				goto loop;
 
 			if ( ( s = gui::get_eqfile_name( str, MAX_PATH_LENGTH ) ) == NULL || gui::model_make == NULL || strlen( gui::model_make ) == 0 )
@@ -4809,7 +4826,8 @@ int modman( int argn, const char **argv )
 
 		if ( ! model_loaded( true ) )
 		{
-			if ( ! gui::load_model_options( gui::get_str( "model_dir" ) ) )
+			cmd( "set fapp [ file normalize $model_dir ]" );
+			if ( ! gui::load_model_options( gui::get_str( "fapp" ) ) )
 			{
 				choice = 0;
 				goto loop;
@@ -5084,8 +5102,11 @@ int modman( int argn, const char **argv )
 			goto loop;
 
 		if ( gui::model_make == NULL || strlen( gui::model_make ) == 0 )
-			if ( ! gui::load_model_options( gui::get_str( "model_dir" ) ) )
+		{
+			cmd( "set fapp [ file normalize $model_dir ]" );
+			if ( ! gui::load_model_options( gui::get_str( "fapp" ) ) )
 				goto loop;
+		}
 
 		cmd( "set extra_files [ get_source_files $model_dir 1 ]" );
 
