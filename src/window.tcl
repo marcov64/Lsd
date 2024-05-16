@@ -301,7 +301,7 @@ proc destroytop w {
 
 		if { $curGeom != "" } {
 			set wName [ string range $w 1 3 ]
-			set ::${wName}Geom $curGeom
+			set ::${wName}_geom $curGeom
 		}
 	}
 

@@ -2206,7 +2206,7 @@ lsd::object *gui::operate( lsd::object *r )
 			else
 				cmd( "set path \"%s\"", lsd::model_path );
 
-			cmd( "cd \"$path\"" );
+			cmd( "cd $path" );
 
 		// Reload model
 		case 38:
@@ -2258,17 +2258,17 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "set res \"%s\"", strlen( sim.conf_name ) > 0 ? sim.conf_name : DEF_CONF_FILE );
 			cmd( "set path \"%s\"", sim.conf_path );
 			if ( strlen( sim.conf_path ) > 0 )
-				cmd( "cd \"$path\"" );
+				cmd( "cd $path" );
 
 			if ( saveAs )			// only asks file name if instructed to or necessary
 			{
 				if ( sim.eff_t > 0 )
 				{
-					cmd( "set fn [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
+					cmd( "set fn [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialdir $path -filetypes { { {LSD model files} {.lsd} } } ]" );
 					cmd( "if { [ string equal -nocase [ file normalize $fn ] [ file normalize \"$path/$res.lsd\" ] ] && [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Overwrite existing configuration?\" -detail \"The original model configuration will be overwritten by the final state of the simulation run and, therefore, lost.\n\nPress 'OK' if you are sure or 'Cancel' to abort saving.\" ] eq \"cancel\" } { set fn \"\" }" );
 				}
 				else
-					cmd( "set fn [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
+					cmd( "set fn [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir $path -filetypes { { {LSD model files} {.lsd} } } ]" );
 
 				cmd( "if { [ string length $fn ] > 0 && ! [ fn_spaces \"$fn\" . ] } { \
 							set path [ file dirname $fn ]; \
@@ -3352,9 +3352,9 @@ lsd::object *gui::operate( lsd::object *r )
 			// make sure there is a path set
 			cmd( "set path \"%s\"", sim.conf_path );
 			if ( strlen( sim.conf_path ) > 0 )
-				cmd( "cd \"$path\"" );
+				cmd( "cd $path" );
 
-			cmd( "set res1 [ tk_getOpenFile -parent . -title \"Select Configuration File to Compare to\" -initialdir \"$path\" -filetypes { { {LSD configuration files} {.lsd} } } ]" );
+			cmd( "set res1 [ tk_getOpenFile -parent . -title \"Select Configuration File to Compare to\" -initialdir $path -filetypes { { {LSD configuration files} {.lsd} } } ]" );
 			cmd( "set res2 [ file tail $res1 ]" );
 			cmd( "if [ fn_spaces \"$res1\" . ] { set res1 \"\"; set res2 \"\" }" );
 
@@ -4207,10 +4207,10 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "set res \"%s\"", sim.conf_name );
 			cmd( "set path \"%s\"", sim.conf_path );
 			if ( strlen( sim.conf_path ) > 0 )
-				cmd( "cd \"$path\"" );
+				cmd( "cd $path" );
 
 			// open dialog box to get file name & folder
-			cmd( "set bah [ tk_getOpenFile -parent . -title \"Import Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile \"$res\" -initialdir \"$path\"  -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
+			cmd( "set bah [ tk_getOpenFile -parent . -title \"Import Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile \"$res\" -initialdir $path -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
 			cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr { [ string last .sa $res ] - 1 } ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
 			if ( choice == 2 )
 				break;
@@ -4260,11 +4260,11 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "set res %s", sim.conf_name );
 			cmd( "set path \"%s\"", sim.conf_path );
 			if ( strlen( sim.conf_path ) > 0 )
-				cmd( "cd \"$path\"" );
+				cmd( "cd $path" );
 
 			// open dialog box to get file name & folder
 			choice = 0;
-			cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -initialdir \"$path\" -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
+			cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -initialdir $path -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
 			cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ]; set last [ expr { [ string last .sa $res ] - 1 } ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
 			if ( choice == 2 )
 				break;
@@ -4309,11 +4309,11 @@ lsd::object *gui::operate( lsd::object *r )
 			// make sure there is a path set
 			cmd( "set path \"%s\"", sim.conf_path );
 			if ( strlen( sim.conf_path ) > 0 )
-				cmd( "cd \"$path\"" );
+				cmd( "cd $path" );
 
 			// open dialog box to get file name & folder
 			choice = 0;
-			cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Configuration in Legacy LSD Format\" -defaultextension \".csv\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD configuration files} {.lsd} } } ]" );
+			cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Configuration in Legacy LSD Format\" -defaultextension \".csv\" -initialfile $res -initialdir $path -filetypes { { {LSD configuration files} {.lsd} } } ]" );
 			cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file rootname [ file tail $bah ] ]; set ext [ file extension $bah ] } { set choice 2 }" );
 
 			if ( choice == 2 )
@@ -4350,11 +4350,11 @@ lsd::object *gui::operate( lsd::object *r )
 			// make sure there is a path set
 			cmd( "set path \"%s\"", sim.conf_path );
 			if ( strlen( sim.conf_path ) > 0 )
-				cmd( "cd \"$path\"" );
+				cmd( "cd $path" );
 
 			// open dialog box to get file name & folder
 			choice = 0;
-			cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Saved Elements Configuration as Comma-separated Text File\" -defaultextension \".csv\" -initialfile $res -initialdir \"$path\" -filetypes { { {Comma-separated files} {.csv} } } ]" );
+			cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Saved Elements Configuration as Comma-separated Text File\" -defaultextension \".csv\" -initialfile $res -initialdir $path -filetypes { { {Comma-separated files} {.csv} } } ]" );
 			cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ] } { set choice 2 }" );
 			if ( choice == 2 )
 				break;
@@ -4404,11 +4404,11 @@ lsd::object *gui::operate( lsd::object *r )
 			// make sure there is a path set
 			cmd( "set path \"%s\"", sim.conf_path );
 			if ( strlen( sim.conf_path ) > 0 )
-				cmd( "cd \"$path\"" );
+				cmd( "cd $path" );
 
 			// open dialog box to get file name & folder
 			choice = 0;
-			cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Sensitivity Limits as Comma-separated Text File\" -defaultextension \".csv\" -initialfile $res -initialdir \"$path\" -filetypes { { {Comma-separated files} {.csv} } } ]" );
+			cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Sensitivity Limits as Comma-separated Text File\" -defaultextension \".csv\" -initialfile $res -initialdir $path -filetypes { { {Comma-separated files} {.csv} } } ]" );
 			cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ] } { set choice 2 }" );
 			if ( choice == 2 )
 				break;
@@ -4572,12 +4572,12 @@ lsd::object *gui::operate( lsd::object *r )
 
 				cmd( "set path \"%s\"", sim.conf_path );
 				if ( strlen( sim.conf_path ) > 0 )
-					cmd( "cd \"$path\"" );
+					cmd( "cd $path" );
 
 				// open dialog box to get file name & folder
 				if ( fSeq )								// file sequence?
 				{
-					cmd( "set bah [ tk_getOpenFile -parent . -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } -multiple no ]" );
+					cmd( "set bah [ tk_getOpenFile -parent . -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir $path -filetypes { { {LSD model files} {.lsd} } } -multiple no ]" );
 					cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { \
 							set res $bah; \
 							set path [ file dirname $res ]; \
@@ -4619,7 +4619,7 @@ lsd::object *gui::operate( lsd::object *r )
 				}
 				else									// bunch of files?
 				{
-					cmd( "set bah [ tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } -multiple yes ]" );
+					cmd( "set bah [ tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialdir $path -filetypes { { {LSD model files} {.lsd} } } -multiple yes ]" );
 					cmd( "set choice [ llength $bah ]" );
 					cmd( "if { $choice > 0 && ! [ fn_spaces [ lindex $bah 0 ] . 1 ] } { \
 							set res [ lindex $bah 0 ]; \
@@ -4909,7 +4909,8 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "catch { exec %s & }", lab );
 			show_logs( out_dir, logs );
 
-			cmd( "set path $oldpath; cd $path" );
+			cmd( "set path $oldpath" );
+			cmd( "cd $path" );
 
 		break;
 
@@ -5241,9 +5242,9 @@ lsd::object *gui::operate( lsd::object *r )
 			// make sure there is a path set
 			cmd( "set path \"%s\"", sim.conf_path );
 			if ( strlen( sim.conf_path ) > 0 )
-				cmd( "cd \"$path\"" );
+				cmd( "cd $path" );
 
-			cmd( "set bah [ tk_getOpenFile -parent . -title \"Import Network Structure File\"	 -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } { {All files} {*} } } ]" );
+			cmd( "set bah [ tk_getOpenFile -parent . -title \"Import Network Structure File\"	 -defaultextension \".net\" -initialdir $path -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } { {All files} {*} } } ]" );
 			choice = 0;
 			cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { \
 					set netPath [ file dirname $bah ]; \
@@ -5429,10 +5430,10 @@ lsd::object *gui::operate( lsd::object *r )
 			// make sure there is a path set
 			cmd( "set path \"%s\"", sim.conf_path );
 			if ( strlen( sim.conf_path ) > 0 )
-				cmd( "cd \"$path\"" );
+				cmd( "cd $path" );
 
 			cmd( "set bah \"%s-%s\"", sim.conf_name, lab4 );
-			cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Network Structure File\" -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } } ]" );
+			cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Network Structure File\" -defaultextension \".net\" -initialdir $path -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } } ]" );
 			choice = 0;
 			cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { \
 					set netPath [ file dirname $bah ]; \

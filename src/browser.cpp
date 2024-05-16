@@ -1393,9 +1393,12 @@ void gui::runtime_run_start( void )
  *************************************************************/
 void gui::runtime_run_end( void )
 {
-	cmd( ".p.b1.b configure -value %d", sim.run );
-	cmd( ".p.b1.i configure -text \"Simulation: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"",
-		 std::min( sim.run + 1, sim.last_run ), sim.last_run, sim.run, sim.last_run );
+	cmd( "if { [ winfo exists .p.b1.b ] } { \
+			.p.b1.b configure -value %d \
+		}", sim.run );
+	cmd( "if { [ winfo exists .p.b1.i ] } { \
+			.p.b1.i configure -text \"Simulation: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\" \
+		}", std::min( sim.run + 1, sim.last_run ), sim.last_run, sim.run, sim.last_run );
 	cmd( "destroytop .deb" );
 	cmd( "update" );
 }

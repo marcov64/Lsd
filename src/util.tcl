@@ -1340,7 +1340,7 @@ proc get_series { size data } {
 	}
 
 	# Convert the list to a byte array
-	set c_data [ intsToByteArray $::_data ]
+	set c_data [ intsToByteArray $_data ]
 
 	# Call the C routine - that will fill the byte array
 	upload_series $size $c_data

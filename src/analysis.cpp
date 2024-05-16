@@ -1151,7 +1151,7 @@ void gui::analysis( bool mc )
 				// make sure there is a path set
 				cmd( "set path \"%s\"", sim.conf_path );
 				if ( strlen( sim.conf_path ) > 0 )
-					cmd( "cd \"$path\"" );
+					cmd( "cd $path" );
 
 				cmd( "if [ string equal $pltSavFmt eps ] { \
 						set t \"Encapsulated Postscript\" \
@@ -1159,7 +1159,7 @@ void gui::analysis( bool mc )
 						set t \"Scalable Vector Graphics\" \
 					}" );
 
-				cmd( "set fn [ tk_getSaveFile -parent .da -title \"Save Plot to File\" -defaultextension .$pltSavFmt -initialfile $b.$pltSavFmt -initialdir \"$path\" -filetypes { { {Scalable Vector Graphics} {.svg} } { {Encapsulated Postscript} {.eps} } { {All files} {*} } } -typevariable t ]; if { [ string length $fn ] == 0 } { set choice 2 }" );
+				cmd( "set fn [ tk_getSaveFile -parent .da -title \"Save Plot to File\" -defaultextension .$pltSavFmt -initialfile $b.$pltSavFmt -initialdir $path -filetypes { { {Scalable Vector Graphics} {.svg} } { {Encapsulated Postscript} {.eps} } { {All files} {*} } } -typevariable t ]; if { [ string length $fn ] == 0 } { set choice 2 }" );
 
 				if ( choice == 2 )
 					break;
@@ -8553,9 +8553,9 @@ void gui::save_datazip( void )
 	// make sure there is a path set
 	cmd( "set path \"%s\"", sim.conf_path );
 	if ( strlen( sim.conf_path ) > 0 )
-		cmd( "cd \"$path\"" );
+		cmd( "cd $path" );
 
-	cmd( "set res [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }	 } ]", ext, desc, ext );
+	cmd( "set res [ tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir $path -defaultextension \"%s\" -filetypes { { {%s} {%s} } { {All files}  {*} }	 } ]", ext, desc, ext );
 
 	// add the second extension in macOS only now
 	if ( platform == _MAC_ && sim.dozip )

@@ -689,18 +689,18 @@ proc list_models { } {
 		if [ file isdirectory $i ] {
 			cd $i
 			if { [ file exists $GROUP_TXT_INFO ] || [ file exists $GROUP_XML_CONFIG ] } {
-				
+
 				set group [ get_group_setting [ pwd ] name ]
 				if { $group eq "" } {
 					set group [ file tail [ pwd ] ]
 				}
-				
+
 				if { $cgroup ne "." } {
 					set cgroup [ file join "$cgroup" "$group" ]
 				} else {
 					set cgroup "$group"
 				}
-				
+
 				set flag 1
 			}
 
@@ -1075,8 +1075,11 @@ proc get_source_files { path { onlyExtra 0 } } {
 
 	if { ! $onlyExtra } {
 		regexp -line {^[ \t]*FUN[ \t]*=[ \t]*(.*)[ \t]*$} $model_make all match
-		if { [ info exists match ] && $match ne "" && ( [ file exists $match ] || [ file exists "$path/$match" ] ) } {
-			lappend files [ string trim $match ]
+		if { [ info exists match ] && $match ne "" } {
+			set match "[ string trim $match ].cpp"
+			if { [ file exists $match ] || [ file exists "$path/$match" ] } {
+				lappend files $match
+			}
 		}
 	}
 
@@ -1087,7 +1090,7 @@ proc get_source_files { path { onlyExtra 0 } } {
 		set match [ split $match " \t" ]
 		foreach f $match {
 			if { [ file exists $f ] || [ file exists "$path/$f" ] } {
-				lappend files [ string trim $f ]
+				lappend files $f
 			}
 		}
 	}

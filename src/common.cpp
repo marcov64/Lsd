@@ -188,7 +188,8 @@ int gui::init_lsd_env( const char **argv )
 #ifndef _LMM_
 	// only use the exec path if not already in a model directory
 	cmd( "if { [ file exists $MODEL_TXT_OPTIONS ] || [ file exists $MODEL_XML_CONFIG ] } { \
-			set model_dir [ pwd ] \
+			set model_dir [ pwd ]; \
+			set path [ pwd ] \
 		} { \
 			set model_dir $path; \
 		}" );
@@ -2477,7 +2478,7 @@ bool gui::compile_run( int run_mode, bool nw )
 #ifdef _LMM_
 
 	// minimize LMM if required
-	cmd( "set res $auto_hide" );				// get auto hide status
+	cmd( "set res $auto_hide" );			// get auto hide status
 	if ( res && run_mode != 0 )				// hide LMM?
 		cmd( "wm iconify ." );
 

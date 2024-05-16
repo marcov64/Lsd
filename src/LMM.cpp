@@ -4804,7 +4804,7 @@ int modman( int argn, const char **argv )
 			}
 
 			// force recompilation
-			cmd( "file mtime \"$model_dir/%s\" [ clock seconds ]", gui::get_eqfile_name( str, MAX_PATH_LENGTH ) );
+			cmd( "catch { file mtime \"$model_dir/%s\" [ clock seconds ] }", gui::get_eqfile_name( str, MAX_PATH_LENGTH ) );
 
 			choice = 46;		// go to create makefile
 		}

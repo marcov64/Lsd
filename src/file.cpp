@@ -50,7 +50,14 @@ bool gui::open_configuration( lsd::object *&r, bool reload )
 
 	if ( ! reload || strlen( sim.conf_name ) == 0 )
 	{									// ask user the file to use, if not reloading
-		cmd( "set fn [ tk_getOpenFile -parent . -title \"Open Configuration File\"	-defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model file} {.lsd} } } ]" );
+		if ( strlen( sim.conf_path ) > 0 )
+			cmd( "set path \"%s\"", sim.conf_path );
+		else
+			cmd( "set path \"%s\"", lsd::model_path );
+
+		cmd( "cd $path" );
+
+		cmd( "set fn [ tk_getOpenFile -parent . -title \"Open Configuration File\" -defaultextension \".lsd\" -initialdir $path -filetypes { { {LSD model file} {.lsd} } } ]" );
 		cmd( "if { [ string length $fn ] > 0 && ! [ fn_spaces \"$fn\" . ] } { \
 				set path [ file dirname $fn ]; \
 				set fn [ string map -nocase [ list [ file extension $fn ] \"\" ] [ file tail $fn ] ]; \
@@ -277,7 +284,7 @@ void gui::unload_configuration_gui( bool full )
 
 		cmd( "set path \"%s\"", lsd::model_path );
 		if ( strlen( lsd::model_path ) > 0 )
-			cmd( "cd \"$path\"" );
+			cmd( "cd $path" );
 
 		cmd( "unset -nocomplain last_conf" );	// no last configuration to reload
 		cmd( "set listfocus 1; set itemfocus 0" );// point for first var in listbox
