@@ -25,7 +25,7 @@
 
 /*
 cases used up to 97
-cases free 15, 16, 25, 35, 40, 45, 51
+cases free 16, 25, 35, 40, 45, 51
 */
 
 #include "LSD.h"
@@ -51,6 +51,7 @@ lsd::object *gui::operate( lsd::object *r )
 	double fracMC, fake = 0;
 	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, temp[ 11 ], done = 0;
 	long nlinks, ptsSa, maxMC;
+	lsd::assimilation *ca;
 	lsd::bridge *cb;
 	lsd::description *cd;
 	lsd::object *n, *cur, *cur1, *cur2;
@@ -70,7 +71,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 	switch ( choice )
 	{
-		// Exit LSD
+		// exit LSD
 		case 11:
 
 			if ( discard_change( ) && abort_run_threads( ) )
@@ -79,7 +80,7 @@ lsd::object *gui::operate( lsd::object *r )
 		break;
 
 
-		// Add an element to the current or the pointed object (defined in tcl $vname)
+		// add an element to the current or the pointed object (defined in tcl $vname)
 		case 2:
 
 			// check if current or pointed object and save current if needed
@@ -1399,6 +1400,9 @@ lsd::object *gui::operate( lsd::object *r )
 				case 14:
 					choice = 96;			// change updating scheme
 					break;
+				case 15:					// assimilation settings
+					choice = 15;
+					break;
 				default:
 					choice = 0;
 			}
@@ -1412,9 +1416,9 @@ lsd::object *gui::operate( lsd::object *r )
 		break;
 
 
-		// Edit variable/parameter (defined by tcl $vname) properties
+		// edit variable/parameter (defined by tcl $vname) properties
 		case 75:
-		// Delete variable/parameter (defined by tcl $vname)
+		// delete variable/parameter (defined by tcl $vname)
 		case 76:
 
 			lab1 = get_str( "vname" );
@@ -1806,14 +1810,37 @@ lsd::object *gui::operate( lsd::object *r )
 				else
 					if ( i == 0 )
 						unsavedSense = true;	// signal unsaved change
-
-				choice = 0;
 			}
 
 		break;
 
 
-		// Change variable (defined by tcl $vname) updating scheme
+		// add data assimilation settings to variable
+		case 15:
+
+			lab1 = get_str( "vname" );
+			if ( lab1 == NULL || ! strcmp( lab1, "" ) )
+				break;
+			sscanf( lab1, "%99s", lab_old );	// get var/par name in lab_old
+			cv = r->search_var( NULL, lab_old );// get var/par pointer
+			if ( cv == NULL )
+				break;
+
+			if ( ( ca = sim.search_assimilation( cv->label ) ) == NULL )
+				ca = new lsd::assimilation( cv->label, & sim );
+
+			i = ca->config( );
+
+			if ( i == 2 )						// configuration failed, no data?
+				delete ca;
+			else
+				if ( i == 0 )
+					unsavedChange = true;		// signal unsaved change
+
+		break;
+
+
+		// change variable (defined by tcl $vname) updating scheme
 		case 96:
 
 			lab1 = get_str( "vname" );
@@ -1933,7 +1960,7 @@ lsd::object *gui::operate( lsd::object *r )
 		break;
 
 
-		// Exit the browser and run the simulation
+		// exit the browser and run the simulation
 		case 1:
 
 			if ( sim.conf_ok && strlen( sim.conf_name ) == 0 )

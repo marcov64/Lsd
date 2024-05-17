@@ -48,10 +48,10 @@
 namespace gui
 {
 	// list of choices that are bad with existing run data
-	int badChoices[ ] = { 1, 2, 3, 6, 7, 9, 19, 21, 22, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95, 96 };
+	int badChoices[ ] = { 1, 2, 3, 6, 7, 9, 15, 19, 21, 22, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94, 95, 96 };
 
 	// list of choices that are run twice (called from another choice)
-	int redoChoices[ ] = { 32, 33, 55, 73, 74, 75, 76, 77, 78, 79, 80, 83, 96 };
+	int redoChoices[ ] = { 15, 32, 33, 55, 73, 74, 75, 76, 77, 78, 79, 80, 83, 96 };
 
 	// comparison functions
 	int comp_ints ( const void *a, const void *b ) { return ( *( int * ) a - *( int * ) b ); }

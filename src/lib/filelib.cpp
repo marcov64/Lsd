@@ -356,6 +356,22 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 								}
 							}
 					}
+
+					if ( ! cn.child( "assimilation" ).empty( ) )
+					{
+						x_nodeT cna = cn.child( "assimilation" );
+
+						const char *csv = cna.attribute( "csv_file" ).value( );
+						if ( strlen( csv ) != 0 )
+						{
+							const char *data_col_name = cna.attribute( "data_column_name" ).value( );
+							const char *t_col_name = cna.attribute( "t_column_name" ).value( );
+							int data_col_num = cna.attribute( "data_column_number" ).as_uint( );
+							int t_col_num = cna.attribute( "t_column_number" ).as_uint( );
+
+							new assimilation( str, sim, csv, data_col_name, t_col_name, data_col_num, t_col_num );
+						}
+					}
 				}
 			}
 	}
@@ -714,9 +730,10 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	<!ELEMENT object (#PCDATA, description?, nodes?, object*, element*)>\n \
 	<!ELEMENT description (#PCDATA+)>\n \
 	<!ELEMENT nodes (#PCDATA, #PCDATA, #PCDATA?, #PCDATA?, #PCDATA?)>\n \
-	<!ELEMENT element (#PCDATA?, description?, documentation?, sensitivity?)>\n \
+	<!ELEMENT element (#PCDATA?, description?, documentation?, sensitivity?, assimilation?)>\n \
 	<!ELEMENT documentation EMPTY>\n \
-	<!ELEMENT sensitivity (#PCDATA+)>\n]" );
+	<!ELEMENT sensitivity (#PCDATA+)>\n \
+	<!ELEMENT assimilation EMPTY>\n]" );
 	x_nodeT lsdNode = xf.append_child( "LSD" );
 	x_nodeT cfgNode = lsdNode.append_child( "configuration" );
 	cfgNode.append_attribute( "version" ) = "1.0";
@@ -809,6 +826,7 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 	int i, count;
 	long l, k;
 	strT data, text, nser, nid, nnam, lnkto, lnkwht;
+	assimilation *ca;
 	bridge *cb;
 	description *cd;
 	netlink *curl;
@@ -1085,6 +1103,26 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 
 				cns.append_child( text.c_str( ) ).text( ) = data.c_str( );
 			}
+
+		// add data assimilation settings
+		ca = sim->search_assimilation( cv->label );
+		if ( ca != NULL && ca->csv != NULL )
+		{
+			x_nodeT cna = cn.append_child( "assimilation" );
+			cna.append_attribute( "csv_file" ) = ca->csv;
+
+			if ( ca->data_col_name != NULL )
+				cna.append_attribute( "data_column_name" ) = ca->data_col_name;
+			else
+				if ( ca->data_col_num != 0 )
+					cna.append_attribute( "data_column_number" ) = ca->data_col_num;
+
+			if ( ca->t_col_name != NULL )
+				cna.append_attribute( "t_column_name" ) = ca->t_col_name;
+			else
+				if ( ca->t_col_num != 0 )
+					cna.append_attribute( "t_column_number" ) = ca->t_col_num;
+		}
 	}
 }
 
@@ -1956,7 +1994,7 @@ lsd::sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, in
 
 /*************************************************************
  SENSITIVITY DESTRUCTOR
- Add or update sensitivity settings for a model element
+ Remove sensitivity settings for a model element
  *************************************************************/
 lsd::sensitivity::~sensitivity( void )
 {
@@ -1997,6 +2035,97 @@ void lsd::simulation::empty_sensitivity( sensitivity *cs )
 		empty_sensitivity( cs->next );
 
 	delete cs;				// suicide
+}
+
+
+/*************************************************************
+ ASSIMILATION CONSTRUCTOR
+ Add or update data assimilation settings for a model element
+ *************************************************************/
+lsd::assimilation::assimilation( const char *lab, simulation *_sim, const char *_csv, const char *_data_col_name, const char *_t_col_name, int _data_col_num, int _t_col_num )
+{
+	assimilation *ca;
+
+	sim = _sim;
+
+	if ( lab != NULL )
+	{
+		label = new char [ strlen( lab ) + 1 ];
+		strcpy( label, lab );
+	}
+
+	if ( _csv != NULL && strlen( _csv ) > 0 )
+	{
+		csv = new char [ strlen( _csv ) + 1 ];
+		strcpy( csv, _csv );
+
+		if ( _data_col_name != NULL && strlen( _data_col_name ) > 0 )
+		{
+			data_col_name = new char [ strlen( _data_col_name ) + 1 ];
+			strcpy( data_col_name, _data_col_name );
+		}
+		else
+			data_col_num = _data_col_num;
+
+		if ( _t_col_name != NULL && strlen( _t_col_name ) > 0 )
+		{
+			t_col_name = new char [ strlen( _t_col_name ) + 1 ];
+			strcpy( t_col_name, _t_col_name );
+		}
+		else
+			t_col_num = _t_col_num;
+	}
+
+	if ( sim->assim == NULL )
+		sim->assim = this;
+	else
+	{
+		for ( ca = sim->assim; ca->next != NULL; ca = ca->next );
+		ca->next = this;
+	}
+}
+
+
+/*************************************************************
+ SEARCH_ASSIMILATION
+ Find element in data assimilation linked list
+ *************************************************************/
+lsd::assimilation *lsd::simulation::search_assimilation( const char *lab )
+{
+	assimilation *ca;
+
+	for ( ca = assim; ca != NULL; ca = ca->next )
+		if ( ! strcmp( ca->label, lab ) )
+			 break;
+
+	return ca;
+}
+
+
+/*************************************************************
+ ASSIMILATION DESTRUCTOR
+ Remove data assimilation settings for a model element
+ *************************************************************/
+lsd::assimilation::~assimilation( void )
+{
+	assimilation *ca, *pa;
+
+	delete [ ] csv;
+	delete [ ] data_col_name;
+	delete [ ] label;
+	delete [ ] t_col_name;
+	delete [ ] val;
+
+	if ( sim->assim != NULL )
+	{
+		for ( ca = sim->assim, pa = NULL; ca != this && ca != NULL; pa = ca, ca = ca->next );
+
+		if ( ca == sim->assim )
+			sim->assim = next;
+		else
+			if ( ca == this && pa != NULL )
+				pa->next = next;
+	}
 }
 
 

@@ -119,6 +119,10 @@
 	public: \
 	int dataentry( void );
 
+#define ASSIMILATION_EXT \
+	public: \
+	int config( const char *parWnd = NULL );
+
 // definitions from LSD library
 #include "lib/libLSD.h"
 

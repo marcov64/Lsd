@@ -632,3 +632,71 @@ const char *lsd::variable::print_constr( char *buf, int buf_sz )
 
 	return buf;
 }
+
+
+/*************************************************************
+ CONFIG
+ Configure element for data assimilation
+ *************************************************************/
+int lsd::assimilation::config( const char *parWnd )
+{
+	variable *cv;
+
+	cv = sim->root->search_var( NULL, label );
+	if ( cv == NULL )
+		return 2;
+
+	// define the correct parent window
+	if ( parWnd != NULL && strlen( parWnd ) > 0 )
+		cmd( "set parWnd %s", parWnd );
+	else
+		cmd( "set parWnd ." );
+
+	cmd( "if { [ string equal $parWnd . ] } { \
+			set _w .as \
+		} else { \
+			set _w $parWnd.as \
+		}" );
+
+	cmd( "newtop $_w \"Data Assimilation Settings\" { set choice 2 } $parWnd" );
+
+	cmd( "ttk::frame $_w.head" );
+	cmd( "ttk::label $_w.head.lg -text \"Set data assimilation settings for\"" );
+
+	cmd( "ttk::frame $_w.head.l" );
+	cmd( "ttk::label $_w.head.l.c -text \"Variable: \"" );
+	cmd( "ttk::label $_w.head.l.n -text \"%s  \" -style hl.TLabel", label );
+	cmd( "pack $_w.head.l.c $_w.head.l.n -side left" );
+
+	cmd( "ttk::frame $_w.head.lo" );
+	cmd( "ttk::label $_w.head.lo.l -text \"Contained in object: \"" );
+	cmd( "ttk::label $_w.head.lo.o -text \"%s\" -style hl.TLabel", cv->up->label  );
+	cmd( "pack $_w.head.lo.l $_w.head.lo.o -side left" );
+
+	cmd( "pack $_w.head.lg $_w.head.l $_w.head.lo" );
+	cmd( "pack $_w.head" );
+
+	cmd( "okhelpcancel $_w b { set choice 1 } { LsdHelp menudata_init.html#assimilation } { set choice 2 }" );
+
+	cmd( "showtop $_w centerW" );
+	cmd( "mousewarpto $_w.b.ok 0" );
+
+	gui::choice = 0;
+	while ( gui::choice == 0 )
+		Tcl_DoOneEvent( 0 );
+
+	cmd( "destroytop $_w" );
+
+	if ( gui::choice == 1 )
+	{
+		csv = new char [ 100 ];
+		data_col_name = new char [ 100 ];
+		strcpy( csv, "test.csv" );
+		strcpy( data_col_name, "x" );
+		t_col_num = 1;
+
+		gui::choice = 0;
+	}
+
+	return gui::choice;
+}

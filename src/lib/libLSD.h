@@ -187,6 +187,7 @@ namespace lsd
 /*************************************************************
  CLASSES
  *************************************************************/
+	class assimilation;
 	class bridge;
 	class description;
 	class dlliblinkage;
@@ -422,6 +423,7 @@ class lsd::simulation : public equation	// simulation container class
 	friend class worker;
 
 	public:
+		assimilation *assim = NULL;		// data assimilation linked-list head
 		bool batch_sequential = false;	// no-window multi configuration job running
 		bool conf_ok = false;			// a valid configuration file is loaded
 		bool fast;						// safe copy of fast_mode flag
@@ -489,7 +491,7 @@ class lsd::simulation : public equation	// simulation container class
 		object *root = NULL;			// LSD root object
 		o_setT obj_list;				// set with all existing LSD objects
 		prof_mapT prof_times;			// set of saved profiling times
-		sensitivity *sens = NULL;		// LSD sensitivity analysis structure
+		sensitivity *sens = NULL;		// sensitivity analysis linked-list head
 		std::mt19937 mt32;				// Mersenne-Twister 32 bits generator
 		strT run_log;					// consolidated runs log
 		str_vecT res_list;				// list of results files last saved
@@ -558,6 +560,7 @@ class lsd::simulation : public equation	// simulation container class
 		bool save_txt_configuration( const char *path, const char *rname, const char *ext, const char eq_file[ ], const char eq_txt[ ] = "" );
 		bool save_xml_configuration( int findex = 0, const char *dest_path = NULL, bool quick = false, const char mod_nam[ ] = "", const char mod_ver[ ] = "", const char mod_dat[ ] = "", const char eq_file[ ] = "", const char eq_txt[ ] = "" );
 		bool stop_parallel( void );
+		assimilation *search_assimilation( const char *lab );
 		description *add_description( const char *lab, int type = 4, const char *text = NULL, const char *init = NULL, bool initial = false, bool observe = false );
 		description *change_description( const char *lab_old, const char *lab = NULL, int type = -1, const char *text = NULL, const char *init = NULL, int initial = -1, int observe = -1 );
 		description *search_description( const char *lab, bool add_missing = true );
@@ -1000,6 +1003,37 @@ class lsd::sensitivity					// sensitivity analysis container class
 
 #ifdef SENSITIVITY_EXT
 		SENSITIVITY_EXT
+#endif
+};
+
+
+/*************************************************************
+ ASSIMILATION
+ *************************************************************/
+class lsd::assimilation					// data assimilation container class
+{
+	friend class object;
+	friend class simulation;
+
+	public:
+		char *csv = NULL;				// name of source data CSV file
+		char *data_col_name = NULL;		// name of data value column
+		char *label = NULL;				// variable name
+		char *t_col_name = NULL;		// name of time value column
+		double *val = NULL;				// assimilation values
+		int data_col_num = 0;			// number of data value column
+		int t_col_num = 0;				// number of time value column
+		assimilation *next = NULL;		// data assimilation chain of elements
+
+		assimilation( const char *lab, simulation *_sim, const char *_csv = NULL, const char *_data_col_name = NULL, const char *_t_col_name = NULL, int _data_col_num = 0, int _t_col_num = 0 );
+										// constructor
+		~assimilation( void );			// destructor
+
+	private:
+		simulation *sim;				// simulation where object is contained
+
+#ifdef ASSIMILATION_EXT
+		ASSIMILATION_EXT
 #endif
 };
 
