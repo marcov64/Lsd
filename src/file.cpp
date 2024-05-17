@@ -58,7 +58,7 @@ bool gui::open_configuration( lsd::object *&r, bool reload )
 		cmd( "cd $path" );
 
 		cmd( "set fn [ tk_getOpenFile -parent . -title \"Open Configuration File\" -defaultextension \".lsd\" -initialdir $path -filetypes { { {LSD model file} {.lsd} } } ]" );
-		cmd( "if { [ string length $fn ] > 0 && ! [ fn_spaces \"$fn\" . ] } { \
+		cmd( "if { [ string length $fn ] > 0 && ! [ fn_spaces $fn ] } { \
 				set path [ file dirname $fn ]; \
 				set fn [ string map -nocase [ list [ file extension $fn ] \"\" ] [ file tail $fn ] ]; \
 				set res 0 \
@@ -300,11 +300,12 @@ void gui::unload_configuration_gui( bool full )
  *************************************************************/
 void lsd::object::load_elem_lists( )
 {
+	assimilation *ca;
 	bridge *cb;
 	variable *cv;
 
 	if ( up == NULL )							// reset lists if root
-		cmd( "unset -nocomplain modObj modElem modVar modPar modFun" );
+		cmd( "unset -nocomplain modObj modElem modVar modPar modFun modCSV" );
 	else
 		cmd( "lappend modObj %s", label );		// register object if not root
 
@@ -324,6 +325,10 @@ void lsd::object::load_elem_lists( )
 		}
 
 		cmd( "lappend modElem %s", cv->label );
+
+		ca = sim->search_assimilation( cv->label );
+		if ( ca != NULL )
+			cmd( "lappend modCSV \"%s\"", ca->csv );
 	}
 
 	// register son objects

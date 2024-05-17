@@ -54,13 +54,17 @@ $(OBJ_DIR)$(CUR_DIR)$(FUN).o: $(FUN).cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)
 
 ifneq ($(PRECOMP),)
 # base static library for dynamic library
-$(LIB_BASE): $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o
-	$(AR) $(LIB_BASE) $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o
+$(LIB_BASE): $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o
+	$(AR) $(LIB_BASE) $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o
 
 # base static library modules
 $(OBJ_DIR)libmain.o: $(LIB_DIR)libmain.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)libmain.cpp -o $(OBJ_DIR)libmain.o
+
+$(OBJ_DIR)assimlib.o: $(LIB_DIR)assimlib.cpp $(DEP_LIB)
+	$(MKDIR) $(@D)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)assimlib.cpp -o $(OBJ_DIR)assimlib.o
 
 $(OBJ_DIR)commonlib.o: $(LIB_DIR)commonlib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)

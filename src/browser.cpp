@@ -458,6 +458,7 @@ int gui::browse( lsd::object *r )
 		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 20
 		cmd( ".l.v.c.var_name.v add command -label \"Initial Values\" -state disabled -command { set choice 77 }" );	// entryconfig 21
 		cmd( ".l.v.c.var_name.v add command -label Sensitivity -state disabled -command { set choice 78 }" );	// entryconfig 22
+		cmd( ".l.v.c.var_name.v add command -label Assimilation -state disabled -command { set choice 15 }" );	// entryconfig 23
 
 		// variables panel bindings
 		if ( r->v != NULL )
@@ -499,6 +500,7 @@ int gui::browse( lsd::object *r )
 						.l.v.c.var_name.v entryconfig 19 -state normal; \
 						.l.v.c.var_name.v entryconfig 21 -state normal; \
 						.l.v.c.var_name.v entryconfig 22 -state normal; \
+						.l.v.c.var_name.v entryconfig 23 -state disabled; \
 						set save [ get_var_conf $vname save ]; \
 						set plot [ get_var_conf $vname plot ]; \
 						set debug [ get_var_conf $vname debug ]; \
@@ -508,6 +510,7 @@ int gui::browse( lsd::object *r )
 						if [ string equal $color $colorsTheme(var) ] { \
 							.l.v.c.var_name.v entryconfig 21 -state disabled; \
 							.l.v.c.var_name.v entryconfig 22 -state disabled; \
+							.l.v.c.var_name.v entryconfig 23 -state normal \
 						} elseif [ string equal $color $colorsTheme(par) ] { \
 							.l.v.c.var_name.v entryconfig 2 -state disabled; \
 							.l.v.c.var_name.v entryconfig 6 -state disabled; \
@@ -525,7 +528,7 @@ int gui::browse( lsd::object *r )
 							.l.v.c.var_name.v entryconfig 8 -state disabled; \
 							.l.v.c.var_name.v entryconfig 9 -state disabled; \
 							.l.v.c.var_name.v entryconfig 21 -state disabled; \
-							.l.v.c.var_name.v entryconfig 22 -state disabled; \
+							.l.v.c.var_name.v entryconfig 22 -state disabled \
 						}; \
 						if { $itemfocus == 0 } { \
 							.l.v.c.var_name.v entryconfig 11 -state disabled \
@@ -1244,6 +1247,7 @@ int gui::browse( lsd::object *r )
 	cmd( "if [ info exists modVar ] { set modVar [ lsort -dictionary -unique $modVar ] }" );
 	cmd( "if [ info exists modPar ] { set modPar [ lsort -dictionary -unique $modPar ] }" );
 	cmd( "if [ info exists modFun ] { set modFun [ lsort -dictionary -unique $modFun ] }" );
+	cmd( "if [ info exists modCSV ] { set modCSV [ lsort -dictionary -unique $modCSV ] }" );
 
 	// restore correct selection on list boxes
 	cmd( "if { $listfocus == 1 } { \

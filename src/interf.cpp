@@ -1829,13 +1829,10 @@ lsd::object *gui::operate( lsd::object *r )
 			if ( ( ca = sim.search_assimilation( cv->label ) ) == NULL )
 				ca = new lsd::assimilation( cv->label, & sim );
 
-			i = ca->config( );
-
-			if ( i == 2 )						// configuration failed, no data?
-				delete ca;
+			if ( ! ca->config( ) )
+				delete ca;						// configuration failed, no data
 			else
-				if ( i == 0 )
-					unsavedChange = true;		// signal unsaved change
+				unsavedChange = true;			// signal unsaved change
 
 		break;
 

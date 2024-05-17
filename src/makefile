@@ -139,13 +139,17 @@ $(OBJ_DIR_LSD)fun_base.o: $(SRC_DIR)fun_base.cpp $(DEP_LIB) $(LIB_DIR)check.h $(
 	$(CC) $(SWITCH_CC) $(INCLUDE) -c $(SRC_DIR)fun_base.cpp -o $(OBJ_DIR_LSD)fun_base.o
 
 # base static library for LSD dynamic library
-$(LIB_BASE): $(OBJ_DIR_LSD)libmain.o $(OBJ_DIR_LSD)commonlib.o $(OBJ_DIR_LSD)description.o $(OBJ_DIR_LSD)filelib.o $(OBJ_DIR_LSD)latticelib.o $(OBJ_DIR_LSD)math.o $(OBJ_DIR_LSD)nets.o $(OBJ_DIR_LSD)object.o $(OBJ_DIR_LSD)parallel.o $(OBJ_DIR_LSD)run.o $(OBJ_DIR_LSD)stattables.o $(OBJ_DIR_LSD)utillib.o $(OBJ_DIR_LSD)variab.o $(OBJ_DIR_LSD)pugixml.o
-	$(AR) $(LIB_BASE) $(OBJ_DIR_LSD)libmain.o $(OBJ_DIR_LSD)commonlib.o $(OBJ_DIR_LSD)description.o $(OBJ_DIR_LSD)filelib.o $(OBJ_DIR_LSD)latticelib.o $(OBJ_DIR_LSD)math.o $(OBJ_DIR_LSD)nets.o $(OBJ_DIR_LSD)object.o $(OBJ_DIR_LSD)parallel.o $(OBJ_DIR_LSD)run.o $(OBJ_DIR_LSD)stattables.o $(OBJ_DIR_LSD)utillib.o $(OBJ_DIR_LSD)variab.o $(OBJ_DIR_LSD)pugixml.o
+$(LIB_BASE): $(OBJ_DIR_LSD)libmain.o $(OBJ_DIR_LSD)assimlib.o $(OBJ_DIR_LSD)commonlib.o $(OBJ_DIR_LSD)description.o $(OBJ_DIR_LSD)filelib.o $(OBJ_DIR_LSD)latticelib.o $(OBJ_DIR_LSD)math.o $(OBJ_DIR_LSD)nets.o $(OBJ_DIR_LSD)object.o $(OBJ_DIR_LSD)parallel.o $(OBJ_DIR_LSD)run.o $(OBJ_DIR_LSD)stattables.o $(OBJ_DIR_LSD)utillib.o $(OBJ_DIR_LSD)variab.o $(OBJ_DIR_LSD)pugixml.o
+	$(AR) $(LIB_BASE) $(OBJ_DIR_LSD)libmain.o $(OBJ_DIR_LSD)assimlib.o $(OBJ_DIR_LSD)commonlib.o $(OBJ_DIR_LSD)description.o $(OBJ_DIR_LSD)filelib.o $(OBJ_DIR_LSD)latticelib.o $(OBJ_DIR_LSD)math.o $(OBJ_DIR_LSD)nets.o $(OBJ_DIR_LSD)object.o $(OBJ_DIR_LSD)parallel.o $(OBJ_DIR_LSD)run.o $(OBJ_DIR_LSD)stattables.o $(OBJ_DIR_LSD)utillib.o $(OBJ_DIR_LSD)variab.o $(OBJ_DIR_LSD)pugixml.o
 
 # LSD base static library modules
 $(OBJ_DIR_LSD)libmain.o: $(LIB_DIR)libmain.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)libmain.cpp -o $(OBJ_DIR_LSD)libmain.o
+
+$(OBJ_DIR_LSD)assimlib.o: $(LIB_DIR)assimlib.cpp $(DEP_LIB)
+	$(MKDIR) $(@D)
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(INCLUDE) -c $(LIB_DIR)assimlib.cpp -o $(OBJ_DIR_LSD)assimlib.o
 
 $(OBJ_DIR_LSD)commonlib.o: $(LIB_DIR)commonlib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)

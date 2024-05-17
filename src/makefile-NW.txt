@@ -41,16 +41,16 @@ all: $(TARGET_NW)$(EXE_EXT)
 
 ifeq ($(DLL),)
 # dynamic library
-lib$(TARGET_NW)$(DLL_EXT): $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o -L$(PATH_LIB) $(LIB_NW) -shared -o lib$(TARGET_NW)$(DLL_EXT)
+lib$(TARGET_NW)$(DLL_EXT): $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o -L$(PATH_LIB) $(LIB_NW) -shared -o lib$(TARGET_NW)$(DLL_EXT)
 
 # No Window executable (small file)
 $(TARGET_NW)$(EXE_EXT): $(OBJ_DIR)LSDnw.o lib$(TARGET_NW)$(DLL_EXT)
 	$(CC_NW) $(SWITCH_CC_NW) $(SWITCH_CC_LNK) $(OBJ_DIR)LSDnw.o -L. -l$(TARGET_NW) -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)$(EXE_EXT)
 else
 # No Window executable (single file)
-$(TARGET_NW)$(EXE_EXT): $(OBJ_DIR)LSDnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o
-	$(CC_NW) $(SWITCH_CC_NW) $(SWITCH_CC_LNK) $(OBJ_DIR)LSDnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)$(EXE_EXT)
+$(TARGET_NW)$(EXE_EXT): $(OBJ_DIR)LSDnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o
+	$(CC_NW) $(SWITCH_CC_NW) $(SWITCH_CC_LNK) $(OBJ_DIR)LSDnw.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o -L$(PATH_LIB) $(LIB_NW) -o $(TARGET_NW)$(EXE_EXT)
 endif
 
 # executable/DLL modules
@@ -65,6 +65,10 @@ $(OBJ_DIR)LSDnw.o: $(SRC_DIR)LSDnw.cpp $(LIB_DIR)libLSD.h
 $(OBJ_DIR)libmain.o: $(LIB_DIR)libmain.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)
 	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)libmain.cpp -o $(OBJ_DIR)libmain.o
+
+$(OBJ_DIR)assimlib.o: $(LIB_DIR)assimlib.cpp $(LIB_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CC_NW) $(SWITCH_CC_NW) $(INCLUDE) -c $(LIB_DIR)assimlib.cpp -o $(OBJ_DIR)assimlib.o
 
 $(OBJ_DIR)commonlib.o: $(LIB_DIR)commonlib.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)

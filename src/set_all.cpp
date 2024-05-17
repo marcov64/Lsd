@@ -638,13 +638,21 @@ const char *lsd::variable::print_constr( char *buf, int buf_sz )
  CONFIG
  Configure element for data assimilation
  *************************************************************/
-int lsd::assimilation::config( const char *parWnd )
+bool lsd::assimilation::config( const char *parWnd )
 {
+	bool res = false;
 	variable *cv;
 
 	cv = sim->root->search_var( NULL, label );
 	if ( cv == NULL )
-		return 2;
+		return res;
+
+	cmd( "set path \"%s\"", sim->conf_path );
+	if ( strlen( sim->conf_path ) > 0 )
+		cmd( "cd $path" );
+
+	cmd( "set csv \"\"" );
+	cmd( "if { ! [ info exists modCSV ] } { set modCSV [ list ] }" );
 
 	// define the correct parent window
 	if ( parWnd != NULL && strlen( parWnd ) > 0 )
@@ -676,6 +684,29 @@ int lsd::assimilation::config( const char *parWnd )
 	cmd( "pack $_w.head.lg $_w.head.l $_w.head.lo" );
 	cmd( "pack $_w.head" );
 
+	cmd( "ttk::frame $_w.csv" );
+	cmd( "ttk::frame $_w.csv.l" );
+	cmd( "ttk::label $_w.csv.l.l -text \"Data file (CSV only)\"" );
+	cmd( "ttk::label $_w.csv.l.pad -width 6" );
+	cmd( "pack $_w.csv.l.l $_w.csv.l.pad -side left -padx $_5" );
+
+	cmd( "ttk::frame $_w.csv.file" );
+	cmd( "ttk::combobox $_w.csv.file.e -width 40 -textvariable csv -justify center -values $modCSV" );
+	cmd( "ttk::button $_w.csv.file.brw -text Browse -command { \
+			set fn [ tk_getOpenFile -parent $_w -title \"Select Data File\" -defaultextension \".csv\" -initialdir $path -filetypes { { {Comma-separated file} {.csv} } } ]; \
+			if { [ string length $fn ] > 0 && ! [ fn_spaces $fn ] } { \
+				set csv [ file nativename $fn ] \
+			} \
+		}" );
+	cmd( "pack $_w.csv.file.e $_w.csv.file.brw -side left -padx $_5" );
+
+	cmd( "pack $_w.csv.l $_w.csv.file" );
+	cmd( "pack $_w.csv -padx $_5 -pady $_10" );
+
+
+
+
+
 	cmd( "okhelpcancel $_w b { set choice 1 } { LsdHelp menudata_init.html#assimilation } { set choice 2 }" );
 
 	cmd( "showtop $_w centerW" );
@@ -685,18 +716,24 @@ int lsd::assimilation::config( const char *parWnd )
 	while ( gui::choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	cmd( "destroytop $_w" );
-
 	if ( gui::choice == 1 )
 	{
-		csv = new char [ 100 ];
-		data_col_name = new char [ 100 ];
-		strcpy( csv, "test.csv" );
-		strcpy( data_col_name, "x" );
-		t_col_num = 1;
+		csv = new char [ strlen( gui::get_str( "csv" ) ) + 1 ];
+		strcpy( csv, gui::get_str( "csv" ) );
+		cmd( "lappend modCSV [ file nativename $csv ]" );
+		cmd( "set modCSV [ lsort -dictionary -unique $modCSV ] " );
 
-		gui::choice = 0;
+		if ( strlen( csv ) > 0 )
+		{
+			data_col_name = new char [ 2 ];
+			strcpy( data_col_name, "x" );
+			t_col_num = 1;
+
+			res = true;
+		}
 	}
 
-	return gui::choice;
+	cmd( "destroytop $_w" );
+
+	return res;
 }
