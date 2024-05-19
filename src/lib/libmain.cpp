@@ -145,6 +145,7 @@ lsd::simulation::~simulation( void )
 {
 	sims.erase( find( sims.begin( ), sims.end( ), this ) );
 
+	empty_assimilation( );
 	empty_sensitivity( );
 	empty_stack( );
 	empty_cemetery( );

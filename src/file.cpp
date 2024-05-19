@@ -209,6 +209,7 @@ void gui::reset_configuration_gui( void )
 	unsavedSense = false;						// no sensitivity data to save
 	findexSens = 0;								// reset sensitivity serial number
 	NOLH_clear( );								// deallocate DoE
+	sim.empty_assimilation( );					// discard assimilation data
 	sim.empty_sensitivity( );					// discard sensitivity analysis data
 
 	cmd( "destroytop .lat" );					// remove lattice window

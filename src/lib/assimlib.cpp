@@ -97,6 +97,28 @@ lsd::assimilation::~assimilation( void )
 
 
 /*************************************************************
+ EMPTY_ASSIMILATION
+ Deallocate data assimilation settings memory
+ *************************************************************/
+void lsd::simulation::empty_assimilation( assimilation *ca )
+{
+	if ( ca == NULL )
+	{
+		if ( assim == NULL )
+			return;
+
+		ca = assim;
+		assim = NULL;
+	}
+
+	if ( ca->next != NULL )
+		empty_assimilation( ca->next );
+
+	delete ca;				// suicide
+}
+
+
+/*************************************************************
  SEARCH_ASSIMILATION
  Find element in data assimilation linked list
  *************************************************************/

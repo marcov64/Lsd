@@ -573,6 +573,7 @@ class lsd::simulation : public equation	// simulation container class
 		int run_simulation( int until_t = 0, int until_run = 0 );
 		int worker_errors( void );
 		void detach_parallel( void );
+		void empty_assimilation( assimilation *ca = NULL );
 		void empty_sensitivity( sensitivity *cs = NULL );
 		void empty_stack( void );
 		void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const char *logFmt, ... );

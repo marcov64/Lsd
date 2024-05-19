@@ -651,7 +651,11 @@ bool lsd::assimilation::config( const char *parWnd )
 	if ( strlen( sim->conf_path ) > 0 )
 		cmd( "cd $path" );
 
-	cmd( "set csv \"\"" );
+	cmd( "set csv \"%s\"", csv == NULL ? "" : csv );
+	cmd( "if { [ string first / $csv ] != -1 } { \
+			set csv [ file nativename $csv ] \
+		}" );
+
 	cmd( "if { ! [ info exists modCSV ] } { set modCSV [ list ] }" );
 
 	// define the correct parent window
@@ -695,7 +699,13 @@ bool lsd::assimilation::config( const char *parWnd )
 	cmd( "ttk::button $_w.csv.file.brw -text Browse -command { \
 			set fn [ tk_getOpenFile -parent $_w -title \"Select Data File\" -defaultextension \".csv\" -initialdir $path -filetypes { { {Comma-separated file} {.csv} } } ]; \
 			if { [ string length $fn ] > 0 && ! [ fn_spaces $fn ] } { \
-				set csv [ file nativename $fn ] \
+				set csv [ file normalize $fn ]; \
+				if { [ string first [ file normalize $model_dir ] $csv ] == 0 } { \
+					set csv [ string map [ list \"[ file normalize $model_dir ]/\" \"\" ] $csv ] \
+				}; \
+				if { [ string first / $csv ] != -1 } { \
+					set csv [ file nativename $csv ] \
+				} \
 			} \
 		}" );
 	cmd( "pack $_w.csv.file.e $_w.csv.file.brw -side left -padx $_5" );
@@ -716,21 +726,16 @@ bool lsd::assimilation::config( const char *parWnd )
 	while ( gui::choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	if ( gui::choice == 1 )
+	if ( gui::choice == 1 && strlen( gui::get_str( "csv" ) ) > 0 )
 	{
-		csv = new char [ strlen( gui::get_str( "csv" ) ) + 1 ];
-		strcpy( csv, gui::get_str( "csv" ) );
-		cmd( "lappend modCSV [ file nativename $csv ]" );
+		cmd( "lappend modCSV $csv" );
 		cmd( "set modCSV [ lsort -dictionary -unique $modCSV ] " );
 
-		if ( strlen( csv ) > 0 )
-		{
-			data_col_name = new char [ 2 ];
-			strcpy( data_col_name, "x" );
-			t_col_num = 1;
+		cmd( "set csv [ string map {\\\\ /} $csv ]" );
+		csv = new char [ strlen( gui::get_str( "csv" ) ) + 1 ];
+		strcpy( csv, gui::get_str( "csv" ) );
 
-			res = true;
-		}
+		res = true;
 	}
 
 	cmd( "destroytop $_w" );

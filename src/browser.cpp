@@ -498,7 +498,7 @@ int gui::browse( lsd::object *r )
 						.l.v.c.var_name.v entryconfig 19 -state normal; \
 						.l.v.c.var_name.v entryconfig 21 -state normal; \
 						.l.v.c.var_name.v entryconfig 22 -state normal; \
-						.l.v.c.var_name.v entryconfig 23 -state disabled; \
+						.l.v.c.var_name.v entryconfig 23 -state normal; \
 						set save [ get_var_conf $vname save ]; \
 						set plot [ get_var_conf $vname plot ]; \
 						set debug [ get_var_conf $vname debug ]; \
@@ -507,26 +507,28 @@ int gui::browse( lsd::object *r )
 						set parallel [ get_var_conf $vname parallel ]; \
 						if [ string equal $color $colorsTheme(var) ] { \
 							.l.v.c.var_name.v entryconfig 21 -state disabled; \
-							.l.v.c.var_name.v entryconfig 22 -state disabled; \
-							.l.v.c.var_name.v entryconfig 23 -state normal \
+							.l.v.c.var_name.v entryconfig 22 -state disabled \
 						} elseif [ string equal $color $colorsTheme(par) ] { \
 							.l.v.c.var_name.v entryconfig 2 -state disabled; \
 							.l.v.c.var_name.v entryconfig 6 -state disabled; \
 							.l.v.c.var_name.v entryconfig 9 -state disabled; \
 							.l.v.c.var_name.v entryconfig 17 -state disabled; \
-							.l.v.c.var_name.v entryconfig 18 -state disabled \
+							.l.v.c.var_name.v entryconfig 18 -state disabled; \
+							.l.v.c.var_name.v entryconfig 23 -state disabled \
 						} elseif [ string equal $color $colorsTheme(lfun) ] { \
 							.l.v.c.var_name.v entryconfig 2 -state disabled; \
 							.l.v.c.var_name.v entryconfig 7 -state disabled; \
 							.l.v.c.var_name.v entryconfig 8 -state disabled; \
-							.l.v.c.var_name.v entryconfig 9 -state disabled \
+							.l.v.c.var_name.v entryconfig 9 -state disabled; \
+							.l.v.c.var_name.v entryconfig 23 -state disabled \
 						} elseif [ string equal $color $colorsTheme(fun) ] { \
 							.l.v.c.var_name.v entryconfig 2 -state disabled; \
 							.l.v.c.var_name.v entryconfig 7 -state disabled; \
 							.l.v.c.var_name.v entryconfig 8 -state disabled; \
 							.l.v.c.var_name.v entryconfig 9 -state disabled; \
 							.l.v.c.var_name.v entryconfig 21 -state disabled; \
-							.l.v.c.var_name.v entryconfig 22 -state disabled \
+							.l.v.c.var_name.v entryconfig 22 -state disabled; \
+							.l.v.c.var_name.v entryconfig 23 -state disabled \
 						}; \
 						if { $itemfocus == 0 } { \
 							.l.v.c.var_name.v entryconfig 11 -state disabled \
