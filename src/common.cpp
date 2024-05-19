@@ -991,7 +991,7 @@ bool gui::load_model_options( const char *path, bool fix )
 	x_nodeT cfgNode = modNode.child( "configuration" );// model current config.
 
 	// load model settings
-	for ( i = 0; i < LMM_OPTIONS_NUM; ++i )
+	for ( i = 0; i < MODEL_OPTIONS_NUM; ++i )
 	{
 		cmd( "set s \"%s\"", model_defaults[ i ] );
 		s = get_str( "s" );

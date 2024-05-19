@@ -725,6 +725,8 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	<!ELEMENT LSD (configuration)>\n \
 	<!ELEMENT configuration (settings, structure, equation_file)>\n \
 	<!ELEMENT settings (simulation, profiling?, #PCDATA)>\n \
+	<!ELEMENT simulation EMPTY>\n \
+	<!ELEMENT profiling EMPTY>\n \
 	<!ELEMENT structure (object)>\n \
 	<!ELEMENT equation_file (#PCDATA, #CDATA?)>\n \
 	<!ELEMENT object (#PCDATA, description?, nodes?, object*, element*)>\n \

@@ -5583,12 +5583,12 @@ lsd::object *gui::operate( lsd::object *r )
 		// toggle the state of the model structure windows, refresh window
 		case 70:
 
-			strWindowOn = strWindowOn ? 0 : 1;
-			cmd( "set strWindowChk $strWindowOn" );
+			str_wnd = str_wnd ? 0 : 1;
+			cmd( "set strWindowChk $str_wnd" );
 			cmd( "if { [ winfo exists .m.model ] } { .m.model entryconfig 15 -indicatoron $strWindowChk }" );
 			redrawStruc = true;
 
-			if ( strWindowOn )
+			if ( str_wnd )
 				cmd( "tooltip::tooltip .bbar.struct \"Hide structure\"" );
 			else
 				cmd( "tooltip::tooltip .bbar.struct \"Show structure\"" );

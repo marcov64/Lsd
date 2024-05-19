@@ -219,22 +219,25 @@
 #define LSD_MIN_FILES { "icons", "themes", "LSD.h", "interf.cpp", "analysis.cpp" }
 #define LSD_WIN_NUM 8
 #define LSD_WIN_NAME { "lsd", "log", "str", "da", "deb", "lat", "plt", "dap" }
-#define MODEL_OPTIONS_NUM 16
+#define MODEL_OPTIONS_NUM 17
 #define MODEL_OPTIONS_NAME { "model_name", "model_version", "model_date", \
 							 "lsd_geom", "log_geom", "str_geom", \
 							 "da_geom", "deb_geom", "lat_geom", \
 							 "plt_geom", "dap_geom", "last_conf", \
-							 "last_obj", "last_list", "last_item", "last_first" }
+							 "last_obj", "last_list", "last_item", \
+							 "last_first", "str_wnd" }
 #define MODEL_OPTIONS_DEFAULT { "(no name)", "1.0", "[ current_date ]", \
 								"#", "#", "#", \
 								"#", "#", "#", \
 								"#", "#", "#", \
-								"Root", "1", "0", "0" }
+								"Root", "1", "0", \
+								"0", "1" }
 #define MODEL_OPTIONS_TYPE { 's', 's', 's', \
 							 'g', 'g', 'g', \
 							 'g', 'g', 'g', \
 							 'g', 'g', 'c', \
-							 'a', 'a', 'a', 'a' }
+							 'a', 'a', 'a', \
+							 'a', 'a' }
 #define TK_WIN_NUM 10
 #define TK_WIN_NAME { ".", ".log", ".str", ".inid", ".inin", ".da", ".deb", ".lat", ".plt", ".dap" }
 #define WIN_COMP_NUM 2
@@ -307,7 +310,7 @@ namespace gui
 	extern int platform;				// OS platform (1=Linux, 2=Mac, 3=Windows)
 	extern int saveConf;				// save configuration on results saving (bool)
 	extern int stop;					// activity interruption flag (Tcl boolean)
-	extern int strWindowOn;				// presentation of the model structure window (bool)
+	extern int str_wnd;					// presentation of the model structure window (bool)
 	extern int watch;					// allow for graph generation interruption (bool)
 	extern lsd::object *curr_obj;		// pointer to current object in browser
 	extern lsd::object *last_obj;		// pointer to last selected object in structure

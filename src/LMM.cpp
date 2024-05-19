@@ -198,7 +198,7 @@ int modman( int argn, const char **argv )
 
 	// load/check configuration files
 	gui::load_lsd_options( );
-	synt_high = gui::get_int( "synt_high" );				// prevent overwriting read value
+	synt_high = gui::get_int( "synt_high" );		// prevent overwriting read value
 
 	// global links between C and tcl variables
 	Tcl_LinkVar( gui::interp, "num", ( char * ) &num, TCL_LINK_INT );

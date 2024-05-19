@@ -56,7 +56,7 @@ void lsd::object::show_graph( void )
 {
 	object *top;
 
-	if ( ! sim->conf_ok || ! gui::strWindowOn )// model structure window is deactivated?
+	if ( ! sim->conf_ok || ! gui::str_wnd )// model structure window is deactivated?
 	{
 		cmd( "destroytop .str" );
 		return;
@@ -68,7 +68,7 @@ void lsd::object::show_graph( void )
 
 	if ( ! gui::exists_window( ".str" ) )	// build window only if needed
 	{
-		cmd( "newtop .str \"\" { set strWindowOn 0; set choice 23 } \"\"" );
+		cmd( "newtop .str \"\" { set str_wnd 0; set choice 23 } \"\"" );
 		cmd( "wm transient .str ." );
 		cmd( "sizetop .str" );
 	}

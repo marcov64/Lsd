@@ -131,6 +131,8 @@ int gui::load_gui( const char **argv )
 	// global links between C and tcl variables
 	Tcl_LinkVar( interp, "choice", ( char * ) & choice, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "choice_g", ( char * ) & choice_g, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "str_wnd", ( char * ) &str_wnd, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "eff_t", ( char * ) &sim.eff_t, TCL_LINK_INT );
 	Tcl_LinkVar( interp, "stop", ( char * ) & stop, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( interp, "deb_set", ( char * ) & sim.deb_set, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( interp, "deb_t", ( char * ) & sim.deb_t, TCL_LINK_INT );
@@ -270,6 +272,8 @@ int gui::load_gui( const char **argv )
 
 	Tcl_UnlinkVar( interp, "choice" );
 	Tcl_UnlinkVar( interp, "choice_g" );
+	Tcl_UnlinkVar( interp, "str_wnd" );
+	Tcl_UnlinkVar( interp, "eff_t" );
 	Tcl_UnlinkVar( interp, "stop" );
 	Tcl_UnlinkVar( interp, "deb_set" );
 	Tcl_UnlinkVar( interp, "deb_t" );
@@ -286,9 +290,6 @@ int gui::load_gui( const char **argv )
 void gui::create( void )
 {
 	lsd::object *r;
-
-	Tcl_LinkVar( interp, "strWindowOn", ( char * ) &strWindowOn, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "eff_t", ( char * ) &sim.eff_t, TCL_LINK_INT );
 
 	// sort the list of choices with existing run data to use later
 	qsort( badChoices, NUM_BAD_CHOICES, sizeof ( int ), comp_ints );
@@ -342,9 +343,6 @@ void gui::create( void )
 
 		r = operate( r );
 	}
-
-	Tcl_UnlinkVar( interp, "strWindowOn" );
-	Tcl_UnlinkVar( interp, "eff_t" );
 }
 
 
@@ -1077,7 +1075,7 @@ int gui::browse( lsd::object *r )
 
 			cmd( "$w add separator" );	// entryconfig 14
 
-			cmd( "set strWindowChk $strWindowOn" );
+			cmd( "set strWindowChk $str_wnd" );
 			cmd( "$w add checkbutton -label \"Enable Structure Window\" -underline 17 -accelerator Ctrl+Tab -variable strWindowChk -command { set choice 70 }" );	// entryconfig 15
 			cmd( "$w add checkbutton -label \"Ignore Equation File\" -underline 0 -variable ignore_eq_file -command { set choice 54 }" );	// entryconfig 16
 
@@ -1193,7 +1191,7 @@ int gui::browse( lsd::object *r )
 			cmd( "tooltip::tooltip .bbar.open \"Load...\"" );
 			cmd( "tooltip::tooltip .bbar.reload \"Reload\"" );
 			cmd( "tooltip::tooltip .bbar.save \"Save\"" );
-			cmd( "if { $strWindowOn } { \
+			cmd( "if { $str_wnd } { \
 					tooltip::tooltip .bbar.struct \"Hide Structure\" \
 				} else { \
 					tooltip::tooltip .bbar.struct \"Show Sstructure\" \

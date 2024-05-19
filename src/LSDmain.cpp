@@ -31,7 +31,7 @@ namespace gui
 	int doover = false;				// overwrite results folder (bool)
 	int overwConf = true;			// overwrite configuration on run flag (bool)
 	int saveConf = false;			// save configuration on results saving (bool)
-	int strWindowOn = true;			// presentation of model structure window (bool)
+	int str_wnd = true;				// presentation of model structure window (bool)
 
 	// regular program global variables
 	bool brCovered = false;			// browser cover currently covered
