@@ -1127,7 +1127,7 @@ int gui::browse( lsd::object *r )
 			cmd( "$w add separator" );
 
 			cmd( "$w add cascade -label \"Show Elements to\" -underline 17 -menu $w.show" );
-			cmd( "$w add cascade -label \"Remove Flags to\" -underline 15 -menu $w.rem" );
+			cmd( "$w add cascade -label \"Remove Settings to\" -underline 15 -menu $w.rem" );
 
 			cmd( "set w .m.run.show" );
 			cmd( "ttk::menu $w -tearoff 0" );
@@ -1139,6 +1139,7 @@ int gui::browse( lsd::object *r )
 			cmd( "$w add command -label Parallelize -underline 0 -command { set choice 86 }" );
 			cmd( "$w add command -label \"Special Updating\" -underline 8 -command { set choice 97 }" );
 			cmd( "$w add command -label \"Sensitivity Analysis\" -underline 1 -command { set choice 66 }" );
+			cmd( "$w add command -label \"Data Assimilation\" -underline 5 -command { set choice 16 }" );
 			cmd( "$w add command -label Unused -underline 1 -command { set choice 56 }" );
 
 			cmd( "set w .m.run.rem" );
@@ -1147,6 +1148,7 @@ int gui::browse( lsd::object *r )
 			cmd( "$w add command -label \"Run-time Plot\" -underline 0 -command { set choice 31 }" );
 			cmd( "$w add command -label \"Debug and Watch\" -underline 0 -accelerator Ctrl+F -command { set choice 27 }" );
 			cmd( "$w add command -label Parallelize -underline 0 -command { set choice 87 }" );
+			cmd( "$w add command -label \"Data Assimilation\" -underline 5 -command { set choice 25 }" );
 
 			cmd( "set w .m.help" );
 			cmd( "ttk::menu $w -tearoff 0" );

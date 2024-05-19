@@ -25,7 +25,7 @@
 
 /*
 cases used up to 97
-cases free 16, 25, 35, 40, 45, 51
+cases free 35, 40, 45, 51
 */
 
 #include "LSD.h"
@@ -4465,7 +4465,7 @@ lsd::object *gui::operate( lsd::object *r )
 		// Show sensitivity analysis configuration
 		case 66:
 
-			choice = 50;
+			choice = 0;
 
 			// check for existing sensitivity data loaded
 			if ( sim.sens == NULL )
@@ -4475,7 +4475,7 @@ lsd::object *gui::operate( lsd::object *r )
 			}
 
 			// print data to log window
-			plog( "\n\nVariables and parameters set for sensitivity analysis :\n" );
+			plog( "\n\nVariables and parameters set for sensitivity analysis:\n" );
 			for ( cs = sim.sens; cs != NULL; cs = cs->next )
 			{
 				if ( cs->param == 1 )
@@ -4510,8 +4510,71 @@ lsd::object *gui::operate( lsd::object *r )
 			sim.empty_sensitivity( );				// discard read data
 			NOLH_clear( );							// deallocate DoE
 			plog( "\nSensitivity data removed.\n" );
-			unsavedSense = false;					// nothing to save
+			unsavedChange = true;
+			unsavedSense = false;
 			findexSens = 0;
+
+		break;
+
+
+		// Show variables for data assimilation
+		case 16:
+
+			choice = 0;
+
+			// check for existing assimilation settings loaded
+			if ( sim.assim == NULL )
+			{
+				cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"There is no data assimilation settings to show\"" );
+				break;
+			}
+
+			// print data to log window
+			plog( "\n\nVariables set for data assimilation:\n" );
+			for ( ca = sim.assim; ca != NULL; ca = ca->next )
+			{
+				plog( "Var: %s \t%s\t(col=", ca->label, ca->csv );
+
+				if ( ca->data_col_name != NULL && strlen( ca->data_col_name ) != 0 )
+					plog_tag( "'%s'", "highlight", ca->data_col_name );
+				else
+					plog_tag( "%d", "highlight", ca->data_col_num );
+
+				if ( ( ca->t_col_name != NULL && strlen( ca->t_col_name ) != 0 ) || ca->t_col_num > 0 )
+				{
+					plog( " t_col=" );
+
+					if ( ca->t_col_name != NULL && strlen( ca->t_col_name ) != 0 )
+						plog_tag( "'%s'", "highlight", ca->t_col_name );
+					else
+						plog_tag( "%d", "highlight", ca->t_col_num );
+				}
+
+				plog( ")\n" );
+			}
+
+		break;
+
+
+		// Remove variables from data assimilation
+		case 25:
+
+			choice = 0;
+
+			// check for existing assimilation settings loaded
+			if ( sim.assim == NULL )
+			{
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No data assimilation settings to remove\"" );
+				break;
+			}
+
+			if ( ! discard_change( true, true ) )	// unsaved configuration?
+				break;
+
+			// empty data assimilation
+			sim.empty_assimilation( );
+			plog( "\nData assimilation settings removed.\n" );
+			unsavedChange = true;
 
 		break;
 
