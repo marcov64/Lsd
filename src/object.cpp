@@ -2487,7 +2487,7 @@ double object::whg_av( const char *lab1, const char *lab2, int lag, bool cond, c
 	{
 		cnext = go_brother( cur );				// allow object suicide
 
-		if ( ( ! cond || check_cond( cur->cal( this, lab2, lag ), lopc, value ) ) && ! cur->deleting )
+		if ( ( ! cond || check_cond( cur->cal( this, lab3, lag ), lopc, value ) ) && ! cur->deleting )
 		{
 			tot += cur->cal( this, lab1, lag ) * cur->cal( this, lab2, lag );
 			++n;
