@@ -2623,7 +2623,7 @@ double object::sd( const char *lab1, int lag, bool cond, const char *lab2, const
 	}
 
 	if ( n > 0 )
-		return sqrt( tot2 / n - pow( tot / n, 2 ) );
+		return sqrt( max( tot2 / n - pow( tot / n, 2 ), 0 ) );
 	else
 		return NAN;
 }
@@ -3713,7 +3713,7 @@ LOGIC_OP_CODE
 Check for valid relational operator and return
 operator code for CHECK_COND
 ****************************************************/
-const unordered_map < string, int > logic_ops = { { "==", 0 }, { "=", 0 }, { "EQ", 0 }, { "!=", 1 }, { "=!", 1 }, { "NE", 1 }, { ">", 2 }, { "GT", 2 }, { ">=", 3 }, { "=>", 3 }, { "GE", 3 }, { "<", 4 }, { "LT", 4 }, { "<=", 5 }, { "=<", 5 }, { "LE", 5 } };
+const unordered_map < string, int > logic_ops = { { "==", 0 }, { "=", 0 }, { "EQ", 0 }, { "!=", 1 }, { "=!", 1 }, { "NE", 1 }, { ">", 2 }, { "GT", 2 }, { ">=", 3 }, { "=>", 3 }, { "GE", 3 }, { "<", 4 }, { "LT", 4 }, { "<=", 5 }, { "=<", 5 }, { "LE", 5 }, { "NNAN", 6 } };
 
 int logic_op_code( const char *lop, const char *errmsg )
 {
@@ -3751,6 +3751,8 @@ bool check_cond( double val1, int lopc, double val2 )
 			return val1 < val2;
 		case 5:
 			return val1 <= val2;
+		case 6:
+			return ! isnan( val1 );
 		default:
 			return false;
 	}
