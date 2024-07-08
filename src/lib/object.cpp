@@ -2623,7 +2623,7 @@ double lsd::object::sd( const char *lab1, int lag, bool cond, const char *lab2, 
 	}
 
 	if ( n > 0 )
-		return sqrt( tot2 / n - pow( tot / n, 2 ) );
+		return sqrt( std::max( tot2 / n - pow( tot / n, 2 ), 0. ) );
 	else
 		return NAN;
 }
@@ -3735,6 +3735,18 @@ bool lsd::object::check_cond( double val1, int lopc, double val2 )
 			return val1 < val2;
 		case 5:
 			return val1 <= val2;
+		case 6:
+			return ! std::isnan( val1 );
+		case 7:
+			return std::isnan( val1 );
+		case 8:
+			return ! std::isinf( val1 );
+		case 9:
+			return std::isinf( val1 );
+		case 10:
+			return ! std::isfinite( val1 );
+		case 11:
+			return std::isfinite( val1 );
 		default:
 			return false;
 	}

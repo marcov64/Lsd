@@ -129,7 +129,7 @@
 #define DESC_TYPE_NAME { "Variable", "Parameter", "Function", "", "Object" }
 #define ELEM_TYPE_NUM 3
 #define ELEM_TYPE_NAME { "variable", "parameter", "function" }
-#define LOG_OPS_PAIR { { "==", 0 }, { "=", 0 }, { "EQ", 0 }, { "!=", 1 }, { "=!", 1 }, { "NE", 1 }, { ">", 2 }, { "GT", 2 }, { ">=", 3 }, { "=>", 3 }, { "GE", 3 }, { "<", 4 }, { "LT", 4 }, { "<=", 5 }, { "=<", 5 }, { "LE", 5 } }
+#define LOG_OPS_PAIR { { "==", 0 }, { "=", 0 }, { "EQ", 0 }, { "!=", 1 }, { "=!", 1 }, { "NE", 1 }, { ">", 2 }, { "GT", 2 }, { ">=", 3 }, { "=>", 3 }, { "GE", 3 }, { "<", 4 }, { "LT", 4 }, { "<=", 5 }, { "=<", 5 }, { "LE", 5 }, { "NNAN", 6 }, { "NAN", 7 }, { "NINF", 8 }, { "INF", 9 }, { "NFIN", 10 }, { "FIN", 11 } }
 #define META_PAR_NUM 3
 #define META_PAR_NAME { "_timeSteps_", "_numRuns_", "_rndSeed_" }
 #define REG_SIG_NUM 6
