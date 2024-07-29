@@ -59,7 +59,7 @@ read.raw.lsd <- function( file, nrows = -1, skip = 0, col.names = NULL,
 
   # nrows = 0 : get initial values only
   if ( nrows > 0 )
-    nLines <- nrows - skip
+    nLines <- nrows
   else
     if ( nrows < 0 )
       nLines <- num.lines( file ) - 2 - skip
@@ -90,7 +90,7 @@ read.raw.lsd <- function( file, nrows = -1, skip = 0, col.names = NULL,
 
     # check column names to adjust to R imported column names
     if( check.names && ! is.null( col.names ) )
-      col.names <- names.in.set( col.names, header )
+      col.names <- name.in.set( col.names, header )
 
     dataSet <- select.colnames.lsd( dataSet, col.names = col.names,
                                     instance = instance,

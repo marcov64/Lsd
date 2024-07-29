@@ -83,7 +83,7 @@ name.check.lsd <- function( file, col.names = NULL, check.names = TRUE ) {
     col.names <- unique( make.names( info.names.lsd( file ) ) )
   else
     if( check.names )
-      col.names <- names.in.set( col.names, info.names.lsd( file ) )
+      col.names <- name.in.set( col.names, info.names.lsd( file ) )
 
   return( name.var.lsd( col.names ) )
 }
@@ -117,7 +117,7 @@ name.r <- function( r.name ) {
 
 # ==== check is all given variable names are in the larger set ====
 
-names.in.set <- function( sel.names, all.names ) {
+name.in.set <- function( sel.names, all.names ) {
 
   sel.names <- sel.names[ sel.names != "" ]
   sel.names <- unique( make.names( sel.names ) )
