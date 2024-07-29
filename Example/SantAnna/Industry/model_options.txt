@@ -1,5 +1,5 @@
 TARGET=LSD
-FUN=fun_FatTail
+FUN=fun_industry
 FUN_EXTRA=
 SWITCH_CC=-O3
 SWITCH_CC_LNK=

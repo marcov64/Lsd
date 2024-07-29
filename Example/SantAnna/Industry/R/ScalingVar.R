@@ -54,6 +54,12 @@ share <- read.list.lsd( readFiles, "_s", skip = iniDrop, nrows = nKeep,
 
 numCases <- length( share )
 
+for( i in 1 : numCases ) {
+  if( is.null( share[[i]] ) ) {
+    stop( "Inconsistent data, check if variable '_s' is saved on data" )
+  }
+}
+
 # ---- Verify an/or create labels for each case ----
 
 numNames <- length( caseNames )
@@ -73,11 +79,11 @@ growth <- list( )
 
 for( i in 1 : numCases )
 {
-  obs <- nrow(share[[i]] )                      # number of observations in i
-  firms <- ncol(share[[i]] )                    # number of firms in i
+  obs <- nrow( share[[i]] )                     # number of observations in i
+  firms <- ncol( share[[i]] )                   # number of firms in i
 
   # compute normalized log size, if required
-  if( useLogSize ){
+  if( useLogSize ) {
     for( j in 1 : obs ){                        # compute normalized size line-wise
       sizes <- share[[i]][ j, ]
       avgSlog <- mean( sizes[ ! is.na( sizes ) ] )

@@ -1,5 +1,5 @@
-Industry Model (ver. 2)
-=======================
+Industry Model (ver. 2.1)
+=========================
 
 Written by Marcelo C. Pereira, University of Campinas
 Copyright Marcelo C. Pereira
@@ -16,9 +16,9 @@ Dosi, Pereira and Virgilito 2018, On the robustness of the fat-tailed distributi
 Timeline and model organization
 ===============================
 
-a) At time 0= There are N initial incumbent firms. They have at time 0 equal productivity and equal market shares.
+a) At time = 0 there are N initial incumbent firms. They have at time 0 equal productivity and equal market shares.
 
-b) At time 1= During the first period, if not under regime Mk I, they learn according to the dynamic of the specified process on competitiveness. Hence they acquire or loose market share according to the quasi replicator. The replicator is applied BEFORE firms die.
+b) At time = 1, the first period, if not under regime Mk I, firms learn according to the dynamic of the specified process on competitiveness. Hence they acquire or loose market share according to the quasi replicator. The replicator is applied BEFORE firms die.
 
 c) Moroever they may die according to the "two" rules of death: too small market shares and/or very very low competitiveness.
 
@@ -28,7 +28,7 @@ e) The competitiveness of the entrants is chosen according to the selected arriv
 
 f) Attribute an initial small share to the entrants and recalculate accordingly the share of surviving incumbents. The initial small share is transfered from the incumbents proportionally to their market share (if possible).
 
-g) At time 2= repeat the process starting from the new initial conditions and the level of competitiveness inherited from period 1. Entrants older than 1 period (or as set in the AgeEntrant parameter) become incumbents. During the entrant phase of life, firms don't learn.
+g) At time = 2 and on, repeat the process starting from the new initial conditions and the level of competitiveness inherited from period 1. Entrants older than 1 period (or as set in the AgeEntrant parameter) become incumbents. During the entrant phase of life, firms don't learn.
 
 h) The three market regimes are mutually exclusive (may be analyzed in independent markets).
 
@@ -44,7 +44,7 @@ l) Firm level statistics: market share, productivity, normalized productivity, g
 Ready to use configurations
 ===========================
 
-In the model home directory (usually in ~/Lsd/Example/SantAnna/Fat-Tail) there are three LSD configuration files pre-configured for each of the regimes using beta innovation shocks: Baseline-Beta.lsd, MarkI-Beta.lsd and MarkII-Beta.lsd. Just load them in LSD, choose menu Run>Run (or click on the blue triangle icon), wait for the simulation to finish, and analyze the results using menu Data>Analysis of Results (or click on the chart icon).
+In the model home directory there are three LSD configuration files pre-configured for each of the regimes using beta innovation shocks: Baseline-Beta.lsd, MarkI-Beta.lsd and MarkII-Beta.lsd. Just load them in LSD, choose menu Run>Run (or click on the blue triangle icon), wait for the simulation to finish, and analyze the results using menu Data>Analysis of Results (or click on the chart icon).
 
 
 Sensitivity analysis

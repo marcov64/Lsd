@@ -75,7 +75,7 @@ eval.b <- function( dataSet, allVars ) {
   fitSubbo <- fit_subbotin( data )
 
   # remove non significant results at the selected confidence%
-  if( fitSubbo[ 1 ] / fitSubbo[ 4 ] <
+  if( is.na( fitSubbo[ 1 ] / fitSubbo[ 4 ] ) || fitSubbo[ 1 ] / fitSubbo[ 4 ] <
       qt( ( 1 - conf ) / 2, length( data ), lower.tail = FALSE ) )
     bSubbo <- NA
   else
@@ -352,7 +352,7 @@ exec_subbofit <- function( x, type  = "symmetric" ) {
 
   cat( "Running external SubboFit on a MC run ... " )
 
-  outStr <- system2( command, args = "-O 3", input = as.character( x ), 
+  outStr <- system2( command, args = "-O 3", input = as.character( x ),
                      stdout = TRUE, stderr = FALSE )
   try( subboFit <- scan( textConnection ( outStr ), quiet = TRUE ), silent = TRUE )
 
