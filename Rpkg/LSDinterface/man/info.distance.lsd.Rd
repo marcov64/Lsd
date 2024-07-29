@@ -23,7 +23,7 @@ a 2D matrix containing the reference time series, time in rows and variable valu
 integer: the instance of the variable to be read, for variables that exist in more than one object (4D \code{array} only). The default (1) is to read first instances.
 }
   \item{distance}{
-string: the distance measure to be used. The default is to compute the Euclidean distance (\code{"euclidean"}). For a comprehensive list of measure options, please refer to \code{\link{TSDistances}}. Measure names can be abbreviated.
+string: the distance measure to be used. The default is to compute the Euclidean distance (\code{"euclidean"}). For a comprehensive list of measure options, please refer to \code{TSdist} package. Measure names can be abbreviated.
 }
   \item{std.dist}{
 a logical value indicating, if \code{TRUE}, that the computed distances must be standardized with respect of the number of time steps involved. The default, \code{FALSE}, is not standardizing distances. This is relevant for properly comparing the metrics of series containing \code{NA}s.
@@ -41,13 +41,13 @@ a numerical vector containing the weights to be used for each variable in \code{
 a single value, interpreted as an integer to define the pseudo-random number generator state used when sampling data, or \code{NULL}, to re-initialize the generator as if no seed had yet been set (a new state is created from the current time and the process ID).
 }
   \item{...}{
-additional parameters required by the specific method (see \code{\link{TSDistances}}).
+additional parameters required by the specific method (see \code{TSdist} package).
 }
 }
 \details{
-This function is a front-end to the extensive \link[=TSdist-package]{TSdist package} for interfacing it with LSD generated data. Please check the associated documentation for further information.
+This function is a front-end to the extensive \code{TSdist} package for interfacing it with LSD generated data. Please check the associated documentation for further information.
 
-\link[=TSdist-package]{TSdist package} provides many different distance measure alternatives, including many that allow for different number of time steps among runs and references.
+\code{TSdist} package provides many different distance measure alternatives, including many that allow for different number of time steps among runs and references.
 
 This function may also search the Monte Carlo run which has the overall smallest (standardized) distances from the given \code{references}. Irrespective of the options \code{std.dist} and \code{std.val}, the search uses always standardized values and distances for computation (this does not affect the distance measure matrix values).
 
