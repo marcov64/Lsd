@@ -1,6 +1,6 @@
 #******************************************************************
 #
-# --- Industry Model: c. s. productivity distribution analysis ---
+# ------------ Industry Model: size growth analysis --------------
 #
 #   Written by Marcelo C. Pereira, University of Campinas
 #
@@ -22,17 +22,15 @@ folder   <- "MarkII/Beta"       # subfolder of working dir containing data
 baseName <- "MarkII-Beta"       # data files base name
 poolData <- FALSE               # pool all data files (T) or treat separately (F)
 plotQQ <- FALSE                 # plot quartile to quartile fit graphs or not
-crossT <- 100                   # period to do cross section analysis
+iniDrop <- 0                    # initial time steps to drop from analysis (0=none)
 plotRows <- 1					          # number of plots per row in a page
 plotCols <- 1					          # number of plots per column in a page
 plotW <- 10                     # plot window width
 plotH <- 7                      # plot window height
 
-chartTitle <- "Productivity distribution (cross section)"
-xAxisLabel <- "log(Productivity)"
-xAxisLabelNlog <- "Productivity"
+chartTitle <- "Pooled market share growth rate distribution"
+xAxisLabel <- "Size growth rate"
 yAxisLabel <- "Binned density (log scale)"
-yAxisLabelNlog <- "Binned density"
 
 caseNames <- c( )               # enter custom cases names here
 
@@ -46,12 +44,13 @@ source( "StatFuncs.R" )
 
 # ---- Read data files ----
 
-readFiles <- list.files( path = folder, pattern = paste0( baseName, "_[0-9]+.res"),
+readFiles <- list.files( path = folder, pattern = paste0( baseName, "_[0-9]+.res" ),
                          full.names = TRUE )
 
-dataSeries <- read.list.lsd( readFiles, "_a", instance = 0, pool = poolData )
+growth_mkt <- read.list.lsd( readFiles, "_growth", skip = iniDrop,
+                             instance = 0, pool = poolData )
 
-numCases <- length( dataSeries )
+numCases <- length( growth_mkt )
 
 # ---- Verify an/or create labels for each case (for plots) ----
 
@@ -61,13 +60,17 @@ if( numNames < numCases )
   for( i in ( numNames + 1 ) : numCases )
     caseNames[i] <- paste( "Run", i )
 
-# ---- Select cross section data ----
+# ---- Order data, remove outliers and generate some statistics ----
 
-for( i in 1 : numCases )
-{
-  dataSeries[[i]] <- dataSeries[[i]][ crossT, ]
-  dataSeries[[i]] <- sort( dataSeries[[i]][!is.na( dataSeries[[i]] )] )  # ascending order, strip NAs
-  dataSeries[[i]] <- dataSeries[[i]][ dataSeries[[i]] > -outLim ]  # remove negative outliers
+dataSeries <- list( )
+
+for( i in 1: numCases ){
+  obs <- nrow( growth_mkt[[i]] )                # number of observations in i
+
+  dataSeries[[i]] <- sort( as.vector( growth_mkt[[i]][!is.na( growth_mkt[[i]] )] ) )  # ascending order
+  iniLen <- length( dataSeries[[i]] )
+  dataSeries[[i]] <- dataSeries[[i]][abs( dataSeries[[i]] ) < outLim]  # remove outliers (inserted as artifacts by LSD)
+  finLen <- length( dataSeries[[i]] )
 }
 
 # ---- Enter error handling mode so PDF can be closed in case of error/interruption ----
@@ -76,33 +79,48 @@ tryCatch({
 
   # ---- Open PDF plot file for output ----
 
-  pdf( paste0( folder, "/", baseName, "_ProdDist.pdf" ),
+  pdf( paste0( folder, "/", baseName, "_SizeGrowth.pdf" ),
        width = plotW, height = plotH )
   options( scipen = 5 )                 # max 5 digits
   par( mfrow = c ( plotRows, plotCols ) )             # define plots per page
 
   # ---- Fit data to all used distributions ----
 
-  normFit <- lognormFit <- lapFit <- aLapFit <- subboFit <- aSubboFit <- list( )
+  normFit <- lapFit <- aLapFit <- subboFit <- aSubboFit <- list( )
+  fileData <- paste0( folder, "/", "data_sg_", baseName, ".csv" )
+  fileFit <- paste0( folder, "/", "subbofit_sg_", baseName, ".csv" )
+  notFirst <- FALSE
 
   for( i in 1 : numCases ){
     normFit[[i]] <- fit_normal( dataSeries[[i]] )
-    lognormFit[[i]] <- fit_lognormal( dataSeries[[i]] )
-    lapFit[[i]] <- fit_laplace( log( dataSeries[[i]][ dataSeries[[i]] > 0 ] ) )
-    aLapFit[[i]] <- fit_alaplace( log( dataSeries[[i]][ dataSeries[[i]] > 0 ] ) )
-    subboFit[[i]] <- fit_subbotin( log( dataSeries[[i]][ dataSeries[[i]] > 0 ] ) )
-    aSubboFit[[i]] <- fit_asubbotin( log( dataSeries[[i]][ dataSeries[[i]] > 0 ] ) )
+    lapFit[[i]] <- fit_laplace( dataSeries[[i]] )
+    aLapFit[[i]] <- fit_alaplace( dataSeries[[i]] )
+    subboFit[[i]] <- fit_subbotin( dataSeries[[i]] )
+    aSubboFit[[i]] <- fit_asubbotin( dataSeries[[i]] )
+
+    write.table( t( matrix( dataSeries[[i]] ) ), fileData, append = notFirst,
+                 sep = ",", row.names = FALSE, col.names = FALSE )
+    if( ! notFirst )
+      write.table( t( matrix( c( "b", "a", "m" ) ) ), fileFit,
+                   sep = ",", row.names = FALSE, col.names = FALSE )
+    notFirst <- TRUE
+    write.table( t( matrix( subboFit[[i]][c(1:3)] ) ), fileFit, sep = ",",
+                 append = TRUE, row.names = FALSE, col.names = FALSE )
   }
 
   # ---- Plot growth rates against all fits ----
 
-  statsNorm <- statsLognorm <- statsALap <- statsASubbo <- list( )
+  statsNorm <- statsLap <- statsALap <- statsSubbo <- statsASubbo <- list( )
 
   for( i in 1 : numCases ){
-    statsNorm[[i]] <- plot_normal( dataSeries[[i]], normFit[[i]], xAxisLabelNlog, yAxisLabelNlog, chartTitle, caseNames[i] )
-    statsLognorm[[i]] <- plot_lognormal( dataSeries[[i]], lognormFit[[i]], xAxisLabel, yAxisLabel, chartTitle, caseNames[i] )
-    statsALap[[i]] <- plot_alaplace( log( dataSeries[[i]][ dataSeries[[i]] > 0 ] ), aLapFit[[i]], xAxisLabel, yAxisLabel, chartTitle, caseNames[i] )
-    statsASubbo[[i]] <- plot_asubbotin( log( dataSeries[[i]][ dataSeries[[i]] > 0 ] ), aSubboFit[[i]], xAxisLabel, yAxisLabel, chartTitle, caseNames[i] )
+    statsNorm[[i]] <- plot_lognormal( exp( dataSeries[[i]] ), normFit[[i]], xAxisLabel, yAxisLabel, chartTitle, caseNames[i] )
+    statsLap[[i]] <- plot_laplace( dataSeries[[i]], lapFit[[i]], xAxisLabel, yAxisLabel, chartTitle, caseNames[i] )
+    if( ! useASubbotin )
+      statsSubbo[[i]] <- plot_subbotin( dataSeries[[i]], subboFit[[i]], xAxisLabel, yAxisLabel, chartTitle, caseNames[i] )
+    else
+      statsASubbo[[i]] <- plot_asubbotin( dataSeries[[i]], aSubboFit[[i]], xAxisLabel, yAxisLabel, chartTitle, caseNames[i] )
+
+    plot_all( dataSeries[[i]], normFit[[i]], lapFit[[i]], subboFit[[i]], xAxisLabel, yAxisLabel, chartTitle, caseNames[i] )
   }
 
   # ------------- Exception handling code (tryCatch) -------------

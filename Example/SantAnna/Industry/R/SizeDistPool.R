@@ -1,6 +1,6 @@
 #******************************************************************
 #
-# ------ Industry Model: pool. prod. growth distr. analysis ------
+# ------- Industry Model: pooled size distribution analysis ------
 #
 #   Written by Marcelo C. Pereira, University of Campinas
 #
@@ -20,7 +20,7 @@
 
 folder   <- "MarkII/Beta"       # subfolder of working dir containing data
 baseName <- "MarkII-Beta"       # data files base name
-poolData <- FALSE               # pool all data files (T) or treat separately (F)
+poolData <- TRUE               # pool all data files (T) or treat separately (F)
 plotQQ <- FALSE                 # plot quartile to quartile fit graphs or not
 iniDrop <- 0                    # initial time steps to drop from analysis (0=none)
 nKeep <- -1                     # number of time steps to keep (-1=all)
@@ -29,11 +29,11 @@ plotCols <- 1					          # number of plots per column in a page
 plotW <- 10                     # plot window width
 plotH <- 7                      # plot window height
 
-chartTitle <- "Pooled productivity growth rate distribution"
-xAxisLabel <- "log(Productivity growth)"
-xAxisLabelNlog <- "Productivity growth"
-yAxisLabel <- "Binned density (log scale)"
-yAxisLabelNlog <- "Binned density"
+chartTitle <- "Size (market share) distribution (pooled data)"
+xAxisLabel <- "log(Size)"
+xAxisLabelNlog <- "Size"
+yAxisLabel <- "log(Rank)"
+yAxisLabelNlog <- "Rank"
 
 caseNames <- c( )               # enter custom cases names here
 
@@ -47,13 +47,13 @@ source( "StatFuncs.R" )
 
 # ---- Read data files ----
 
-readFiles <- list.files( path = folder, pattern = paste0( baseName, "_[0-9]+.res"),
+readFiles <- list.files( path = folder, pattern = paste0( baseName, "_[0-9]+.res" ),
                          full.names = TRUE )
 
-growth_mkt <- read.list.lsd( readFiles, "_aGrowth", skip = iniDrop,
-                             nrows= nKeep, instance = 0, pool = poolData )
+size_mkt <- read.list.lsd( readFiles, "_s", skip = iniDrop, nrows= nKeep,
+                           instance = 0, pool = poolData )
 
-numCases <- length( growth_mkt )
+numCases <- length( size_mkt )
 
 # ---- Verify an/or create labels for each case (for plots) ----
 
@@ -68,11 +68,11 @@ if( numNames < numCases )
 dataSeries <- list( )
 
 for( i in 1: numCases ){
-  obs <- nrow( growth_mkt[[i]] )               # number of observations in i
+  obs <- nrow( size_mkt[[i]] )               # number of observations in i
 
-  dataSeries[[i]] <- sort( as.vector( growth_mkt[[i]][ !is.na( growth_mkt[[i]] ) ] ) )  # ascending order
+  dataSeries[[i]] <- sort( as.vector( size_mkt[[i]][!is.na( size_mkt[[i]] )] ) )  # ascending order
   iniLen <- length( dataSeries[[i]] )
-  dataSeries[[i]] <- dataSeries[[i]][ abs( dataSeries[[i]] ) < outLim ]  # remove outliers (inserted as artifacts by LSD)
+  dataSeries[[i]] <- dataSeries[[i]][abs( dataSeries[[i]] ) < outLim]  # remove outliers (inserted as artifacts by LSD)
   finLen <- length( dataSeries[[i]] )
 }
 
@@ -82,34 +82,37 @@ tryCatch({
 
   # ---- Open PDF plot file for output ----
 
-  pdf( paste0( folder, "/", baseName, "_ProdGrowth.pdf" ),
-       width = plotW, height = plotH )
+  pdf( paste0( folder, "/", baseName, "_SizeDistPool.pdf" ),
+       width = 8, height = 12 )
   options( scipen = 5 )                 # max 5 digits
   par( mfrow = c ( plotRows, plotCols ) )             # define plots per page
 
-  # ---- Fit data to all used distributions ----
+  # ---- Fit data to lognormal distribution ----
 
-  normFit <- lognormFit <- lapFit <- aLapFit <- subboFit <- aSubboFit <- list( )
+  lognormFit <- list( )
+  fileData <- paste0( folder, "/", "data_rs_", baseName, ".csv" )
+  fileFit <- paste0( folder, "/", "lnormfit_rs_", baseName, ".csv" )
+  notFirst <- FALSE
 
   for( i in 1 : numCases ){
-    normFit[[i]] <- fit_normal( dataSeries[[i]] )
     lognormFit[[i]] <- fit_lognormal( dataSeries[[i]] )
-    lapFit[[i]] <- fit_laplace( log( dataSeries[[i]][ dataSeries[[i]] > 0 ] ) )
-    aLapFit[[i]] <- fit_alaplace( log( dataSeries[[i]][ dataSeries[[i]] > 0 ] ) )
-    subboFit[[i]] <- fit_subbotin( log( dataSeries[[i]][ dataSeries[[i]] > 0 ] ) )
-    aSubboFit[[i]] <- fit_asubbotin( log( dataSeries[[i]][ dataSeries[[i]] > 0 ] ) )
+
+    write.table( t( matrix( dataSeries[[i]] ) ), fileData, sep = ",",
+                 append = notFirst, row.names = FALSE, col.names = FALSE )
+    if( ! notFirst )
+      write.table( t( matrix( c( "sd", "avg" ) ) ), fileFit,
+                   sep = ",", row.names = FALSE, col.names = FALSE )
+    notFirst <- TRUE
+    write.table( t( matrix( lognormFit[[i]][c(1:2)] ) ), fileFit, sep = ",",
+                 append = TRUE, row.names = FALSE, col.names = FALSE )
   }
 
-  # ---- Plot growth rates against all fits ----
+  # ---- Plot size rank against lognormal fit ----
 
-  statsNorm <- statsLognorm <- statsALap <- statsSubbo <- statsASubbo <- list( )
-
-  for( i in 1 : numCases ){
-    statsNorm[[i]] <- plot_normal( dataSeries[[i]], normFit[[i]], xAxisLabelNlog, yAxisLabelNlog, chartTitle, caseNames[i] )
-    statsLognorm[[i]] <- plot_lognormal( dataSeries[[i]], lognormFit[[i]], xAxisLabel, yAxisLabel, chartTitle, caseNames[i] )
-    statsALap[[i]] <- plot_alaplace( log( dataSeries[[i]][ dataSeries[[i]] > 0 ] ), aLapFit[[i]], xAxisLabel, yAxisLabel, chartTitle, caseNames[i] )
-    statsASubbo[[i]] <- plot_asubbotin( log( dataSeries[[i]][ dataSeries[[i]] > 0 ] ), aSubboFit[[i]], xAxisLabel, yAxisLabel, chartTitle, caseNames[i] )
-  }
+   for( i in 1 : numCases ){
+     plot_rankLognormal( dataSeries[[i]], lognormFit[[i]], xAxisLabel,
+                         yAxisLabel, chartTitle, caseNames[i] )
+   }
 
   # ------------- Exception handling code (tryCatch) -------------
 

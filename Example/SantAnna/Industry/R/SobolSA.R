@@ -274,7 +274,7 @@ tryCatch({
   }
 
   # ---- Save results to file ----
-  
+
   write.csv( mModel$comparison, paste0( folder, "/", baseName,
                                         "_Kriging_models_", varName, ".csv" ) )
   write.csv( mModel$estimation.std, paste0( folder, "/", baseName,
