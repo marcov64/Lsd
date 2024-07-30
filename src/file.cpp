@@ -237,6 +237,9 @@ bool gui::load_prev_configuration( void )
 		strcpy( saFile, sens_file );
 	}
 
+	sim.empty_sensitivity( );					// remove sensitivity
+	NOLH_clear( );								// deallocate DoE
+
 	if ( ( i = load_configuration_gui( true, &warnings, 0 ) ) != 0 )
 	{
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded (%d :%.24s)\" -detail \"Previously loaded configuration could not be restored. Check if LSD still has access to the model directory.\n\nCurrent configuration will be reset now.\"", i, warnings.c_str( ) );
@@ -245,10 +248,14 @@ bool gui::load_prev_configuration( void )
 		return false;
 	}
 
-	if ( saFile != NULL )						// restore SA configuration, if any
+	if ( sim.sens != NULL )						// sensitivity loaded from xml
 	{
-		sim.empty_sensitivity( );
-		NOLH_clear( );							// deallocate DoE
+		delete [ ] saFile;						// ignore existing SA file
+		saFile = NULL;
+	}
+
+	if ( saFile != NULL )						// reload SA file if loaded before
+	{
 		f = fopen( saFile, "rt" );
 		if ( f == NULL || load_sensitivity( f ) != 0 )
 		{
