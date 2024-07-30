@@ -223,6 +223,7 @@ namespace lsd
 	typedef std::unordered_map < strT, bridge * > b_mapT;
 	typedef std::unordered_map < strT, variable * > v_mapT;
 	typedef std::unordered_set < object * > o_setT;
+	typedef const variable c_varT;
 
 
 /*************************************************************
