@@ -92,7 +92,7 @@ namespace gui
 	const char *group_options[ GROUP_OPTIONS_NUM ] = GROUP_OPTIONS_NAME;
 	const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;
 	const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
-	const char *lsd_nw_src[ LSD_NW_NUM ] = LSD_NW_SRC;
+	const char *lsd_term_src[ LSD_TERM_NUM ] = LSD_TERM_SRC;
 	const char *model_defaults[ MODEL_OPTIONS_NUM ] = MODEL_OPTIONS_DEFAULT;
 	const char *model_options[ MODEL_OPTIONS_NUM ] = MODEL_OPTIONS_NAME;
 	const char group_types[ GROUP_OPTIONS_NUM ] = GROUP_OPTIONS_TYPE;
@@ -393,7 +393,7 @@ int modman( int argn, const char **argv )
 	cmd( "$w add command -label \"Compile and Run...\" -state disabled -underline 0 -command { set choice 2 } -accelerator F5" );	// entryconfig 0
 	cmd( "$w add command -label \"Recompile\" -state disabled -underline 0 -command { set choice 6 } -accelerator F6" );	// entryconfig 1
 	cmd( "$w add command -label \"[ string toupper $debug_exe ] Debugger\" -state disabled -underline 0 -command { set choice 13 } -accelerator F7" );	// entryconfig 2
-	cmd( "$w add command -label \"Create 'No Window' Version\" -underline 8 -state disabled -command { set choice 62 }" );	// entryconfig 3
+	cmd( "$w add command -label \"Create Terminal Executable\" -underline 7 -state disabled -command { set choice 62 }" );	// entryconfig 3
 	cmd( "$w add command -label \"Model Info...\" -underline 6 -state disabled -command { set choice 44 }" );	// entryconfig 4
 	cmd( "$w add separator" );	// entryconfig 5
 	cmd( "$w add command -label \"Show Description\" -underline 5 -state disabled -command { set choice 5 } -accelerator Ctrl+d" );	// entryconfig 6
@@ -884,12 +884,12 @@ int modman( int argn, const char **argv )
 
 		gui::make_makefile( );
 
-		if ( ! gui::eval_bool( "[ file exists \"$model_dir/makefile\" ]" ) )
+		if ( ! gui::eval_bool( "[ file exists \"$model_dir/makefile.gui\" ]" ) )
 			goto loop;
 
 		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Makefile should not be changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Please check 'Model Options' and 'System Options' in menu 'Model' to change compilation options.\"" );
 
-		cmd( "set filetoload \"$model_dir/makefile\"" );
+		cmd( "set filetoload \"$model_dir/makefile.gui\"" );
 		cmd( "unset -nocomplain errfil errlin" );
 		choice = 71;
 
@@ -4527,9 +4527,9 @@ int modman( int argn, const char **argv )
 			gui::make_makefile( );
 
 			if ( choice == 46 )
-				choice = 0;		//just create the makefile
+				choice = 0;		// just create the makefile
 
-			if ( choice == 49 )	//after this show the description file (and a model is created)
+			if ( choice == 49 )	// after this show the description file (and a model is created)
 				choice = 50;
 		}
 
@@ -4759,14 +4759,14 @@ int modman( int argn, const char **argv )
 				}; \
 				set tmpDir [ temp_dir ]; \
 				if { $tmpDir ne \"\" } { \
-					set objs [ glob -nocomplain -directory $tmpDir LMM lsdNW [ file rootname %s ] ]; \
+					set objs [ glob -nocomplain -directory $tmpDir LMM %s [ file rootname %s ] ]; \
 					foreach i $objs { \
 						catch { \
 							file delete -force \"$i\" \
 						} \
 					} \
 				} \
-			}", gui::get_target_name( str, MAX_PATH_LENGTH ) );
+			}", LSD_TERM, gui::get_target_name( str, MAX_PATH_LENGTH ) );
 		cmd( "pack .l.d.opt.debug .l.d.opt.ext .l.d.opt.def .l.d.opt.cle -padx $butSpc -side left" );
 
 		cmd( "tooltip::tooltip .l.d.opt.debug \"Enable using GDB/LLDB debugger\"" );
@@ -5083,11 +5083,11 @@ int modman( int argn, const char **argv )
 		goto loop;
 	}
 
-	// generate the no window distribution
+	// generate the terminal executable
 	if ( choice == 62 )
 	{
-		// copy files, create makefileNW and compile a local machine version of lsdNW
-		gui::make_no_window( );
+		// copy files, create makefile and compile a local machine version of LSD_TERM
+		gui::make_terminal( );
 
 		choice = 0;
 		goto loop;

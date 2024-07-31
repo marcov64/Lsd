@@ -13,28 +13,30 @@
  *************************************************************/
 
 /*************************************************************
- LSDNW.CPP
- The LSD No Window (terminal) program entry point.
+ LSDTERM.CPP
+ The LSD terminal program entry point.
 
  This file can be compiled with the command:
 
-  make -f makefileNW
+  make [-f makefile]
 
  in the corresponding model directory.
 
  Relevant macros for conditional compilation (when defined):
 
  - _FUN_: user model equation file
- - _NW_: No Window executable
+ - _TERM_: terminal executable
  - _NT_: no signal trapping (better when debugging in GDB)
  *************************************************************/
 
 #include "lib/libLSD.h"				// LSD library classes
 
+#define LSD_TERM "lsd_term"			// LSD terminal executable name
+
 int load_config( lsd::simulation & sim );
 int parse_cmdline( int argn, const char **argv, lsd::simulation & sim );
 
-const char lsdCmdMsg[ ] = "This is the No Window version of LSD.";
+const char lsdCmdMsg[ ] = "This is the terminal version of LSD.";
 const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd [-s SEED] [-e RUNS] to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-l FILENAME' to save all output to a (log) file\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-p' for skipping the generation of totals file\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-b' for showing a progress bar\n'-c MAX_THREADS[:MAX_RUNS]' to set maximum parallel threads/runs to use\n";
 
 
@@ -200,7 +202,7 @@ int parse_cmdline( int argn, const char **argv, lsd::simulation & sim )
 		{
 			i--;					// no parameter for this option
 			sim.grand_total = true;
-			printf( "\nGrand total file requested ('-g'), don't run another instance of 'lsdNW' in this folder!\n" );
+			printf( "\nGrand total file requested ('-g'), don't run another instance of '%s' in this folder!\n", LSD_TERM );
 			continue;
 		}
 		// read -z parameter : don't create compressed result files
@@ -282,7 +284,7 @@ int load_config( lsd::simulation & sim )
 
 	if ( ( f = fopen( sim.conf_file, "r" ) ) == NULL )
 	{
-		fprintf( stderr, "\nFile '%s' not found.\nThis is the no window version of LSD.\nSpecify a -f FILENAME.lsd to run a simulation or -f FILE_BASE_NAME -s 1 for\nbatch sequential simulation mode (requires configuration files:\nFILE_BASE_NAME_1.lsd, FILE_BASE_NAME_2.lsd, etc).\n\n", sim.conf_file );
+		fprintf( stderr, "\nFile '%s' not found.\nThis is the terminal version of LSD.\nSpecify a -f FILENAME.lsd to run a simulation or -f FILE_BASE_NAME -s 1 for\nbatch sequential simulation mode (requires configuration files:\nFILE_BASE_NAME_1.lsd, FILE_BASE_NAME_2.lsd, etc).\n\n", sim.conf_file );
 		return 7;
 	}
 
@@ -290,7 +292,7 @@ int load_config( lsd::simulation & sim )
 
 	if ( sim.load_configuration( true, NULL, 1 ) != 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\nThis is the no window version of LSD.\nCheck if the file is a valid LSD configuration or regenerate it using the\nLSD Browser.\n\n", sim.conf_file );
+		fprintf( stderr, "\nFile '%s' is invalid.\nThis is the terminal version of LSD.\nCheck if the file is a valid LSD configuration or regenerate it using the\nLSD Browser.\n\n", sim.conf_file );
 		return 8;
 	}
 

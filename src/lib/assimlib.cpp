@@ -14,7 +14,7 @@
 
 /*************************************************************
  ASSIMLIB.CPP
- Data assimilation code used in DLL or no-window executables.
+ Data assimilation code used in DLL or terminal executables.
  The remaining DA code is stored in SET_ALL.CPP.
  *************************************************************/
 

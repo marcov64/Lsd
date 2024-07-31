@@ -409,7 +409,7 @@ void lsd::object::update( bool recurse, bool user )
 		{
 			if ( cv->save || cv->savei )
 				cv->data[ sim->t - cv->start ] = cv->val[ 0 ];
-#ifndef _NW_
+#ifndef _TERM_
 			if ( ! user && cv->plot == 1 && sim->liblnk != NULL && sim->liblnk->plot_runtime != NULL )
 				( cv->*sim->liblnk->plot_runtime )( );
 #endif
@@ -1196,7 +1196,7 @@ lsd::variable *lsd::object::add_empty_var( const char *lab )
 		return NULL;
 	}
 
-#ifndef _NW_
+#ifndef _TERM_
 	if ( ! valid_label( lab ) )
 	{
 		sim->plog( "\nWarning: invalid variable name '%s', please rename", lab );
@@ -1301,7 +1301,7 @@ lsd::object *lsd::object::add_obj( const char *lab, int num, bool propagate )
 		return NULL;
 	}
 
-#ifndef _NW_
+#ifndef _TERM_
 	if ( ! valid_label( lab ) )
 	{
 		sim->plog( "\nWarning: invalid object name '%s', please rename", lab );
@@ -3648,7 +3648,7 @@ void lsd::object::collect_inst( o_setT &list )
  *************************************************************/
 double lsd::object::interact( const char *text, double v, double *tv, int i, int j, int h, int k, object *cur, object *cur1, object *cur2, object *cur3, object *cur4, object *cur5, object *cur6, object *cur7, object *cur8, object *cur9, netlink *curl, netlink *curl1, netlink *curl2, netlink *curl3, netlink *curl4, netlink *curl5, netlink *curl6, netlink *curl7, netlink *curl8, netlink *curl9, FILE *f )
 {
-#ifndef _NW_
+#ifndef _TERM_
 	int n;
 	double app = v;
 

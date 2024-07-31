@@ -15,7 +15,7 @@
 /*************************************************************
  COMMON.CPP
  Code common between LMM and LSD Browser. The basic set of
- common code used in DLL or no-window executables are stored
+ common code used in DLL or terminal executables are stored
  COMMONLIB.CPP.
  *************************************************************/
 
@@ -2209,20 +2209,20 @@ const char *gui::get_eqfile_name( char *s, int sz )
  GET_TARGET_NAME
  get current executable file name
  *************************************************************/
-const char *gui::get_target_name( char *str, int str_sz, bool nw )
+const char *gui::get_target_name( char *str, int str_sz, bool term )
 {
 	char buf[ MAX_PATH_LENGTH ], buf1[ MAX_PATH_LENGTH ];
 	FILE *f;
 
-	make_makefile( nw );
+	make_makefile( term );
 
-	if ( nw )					// NW version use fixed name because of batches
+	if ( term )					// term version use fixed name because of batches
 	{
-		snprintf( str, str_sz, "lsdNW%s", platform == _WIN_ ? ".exe" : "" );
+		snprintf( str, str_sz, "%s%s", LSD_TERM, platform == _WIN_ ? ".exe" : "" );
 		return str;
 	}
 
-	cmd( "set fapp [ file normalize \"$model_dir/makefile%s\" ]", nw ? "NW" : "" );
+	cmd( "set fapp [ file normalize \"$model_dir/makefile%s\" ]", term ? "" : ".gui" );
 	f = fopen( get_str( "fapp" ), "r" );
 	if ( f == NULL )
 		goto error;
@@ -2257,13 +2257,13 @@ error:
  get current executable pre-
  compilation flag
  *************************************************************/
-bool gui::get_precompiled_flag( const char *exec, bool nw )
+bool gui::get_precompiled_flag( const char *exec, bool term )
 {
 	bool deftarg = true, precomp = true;		// defaults if settings are missing
 	char buf[ MAX_PATH_LENGTH ], buf1[ MAX_PATH_LENGTH ];
 	FILE *f;
 
-	if ( ! nw )
+	if ( ! term )
 	{
 		// non default executable name - cannot use precompiled code
 		lsd::strcpyn( buf, exec, MAX_PATH_LENGTH );
@@ -2275,7 +2275,7 @@ bool gui::get_precompiled_flag( const char *exec, bool nw )
 			deftarg = false;
 	}
 
-	cmd( "set fapp [ file normalize \"$model_dir/makefile\" ]" );
+	cmd( "set fapp [ file normalize \"$model_dir/makefile.gui\" ]" );
 	f = fopen( get_str( "fapp" ), "r" );
 	if ( f == NULL )
 		goto error;
@@ -2312,10 +2312,10 @@ error:
 
 
 /*************************************************************
- MAKE_NO_WINDOW
- create a no-window command-line version of LSD
+ MAKE_TERMINAL
+ create a terminal version of LSD
  *************************************************************/
-bool gui::make_no_window( void )
+bool gui::make_terminal( void )
 {
 	int i;
 
@@ -2333,8 +2333,8 @@ bool gui::make_no_window( void )
 			file mkdir \"$model_dir/$lsd_src\" \
 		}" );
 
-	for ( i = 0; i < LSD_NW_NUM; ++i )
-		cmd( "file copy -force \"$lsd_root/$lsd_src/%s\" \"$model_dir/$lsd_src\"", lsd_nw_src[ i ] );
+	for ( i = 0; i < LSD_TERM_NUM; ++i )
+		cmd( "file copy -force \"$lsd_root/$lsd_src/%s\" \"$model_dir/$lsd_src\"", lsd_term_src[ i ] );
 
 	// copy LSD library files always
 	cmd( "if { ! [ file exists \"$model_dir/$lsd_src/lib\" ] } { \
@@ -2350,7 +2350,7 @@ bool gui::make_no_window( void )
 			file copy -force \"$lsd_root/$lsd_src/clib\" \"$model_dir/$lsd_src\" \
 		}" );
 
-	// create makefileNW and compile a local machine version of lsdNW
+	// create makefile and compile a local machine version of LSD_TERM
 	return compile_run( false, true );
 }
 
@@ -2359,7 +2359,7 @@ bool gui::make_no_window( void )
  MAKE_MAKEFILE
  create makefiles to compile LSD
  *************************************************************/
-void gui::make_makefile( bool nw )
+void gui::make_makefile( bool term )
 {
 	if ( system_make == NULL || strlen( system_make ) == 0 )
 		load_lsd_options( );
@@ -2370,14 +2370,14 @@ void gui::make_makefile( bool nw )
 		load_model_options( get_str( "fapp" ) );
 	}
 
-	cmd( "set f [ open \"$lsd_root/$lsd_src/makefile-%s.txt\" r ]", nw ? "NW" : get_str( "CurPlatform" ) );
+	cmd( "set f [ open \"$lsd_root/$lsd_src/makefile-%s.txt\" r ]", term ? "term" : get_str( "CurPlatform" ) );
 	cmd( "set b [ string trim [ read $f ] ]" );
 	cmd( "close $f" );
 
-	cmd( "set f [ open \"$model_dir/makefile%s\" w ]", nw ? "NW" : "" );
+	cmd( "set f [ open \"$model_dir/makefile%s\" w ]", term ? "" : ".gui" );
 	cmd( "puts $f \"# Model compilation options\n\n%s\n\"", model_make );
 	cmd( "puts $f {# System compilation options\n\n%s\n}", system_make );
-	cmd( "puts $f \"# Body of makefile%s (from makefile_%s.txt)\n\n$b\"", nw ? "NW" : "", nw ? "NW" : get_str( "CurPlatform" ) );
+	cmd( "puts $f \"# Body of makefile%s (from makefile_%s.txt)\n\n$b\"", term ? "" : ".gui", term ? "term" : get_str( "CurPlatform" ) );
 	cmd( "close $f" );
 }
 
@@ -2387,7 +2387,7 @@ void gui::make_makefile( bool nw )
  compile LSD, GUI or command line
  and optionally execute it
  *************************************************************/
-bool gui::compile_run( int run_mode, bool nw )
+bool gui::compile_run( int run_mode, bool term )
 {
 	bool precompiled, ret = false;
 	char str[ 2 * MAX_PATH_LENGTH ];
@@ -2424,23 +2424,23 @@ bool gui::compile_run( int run_mode, bool nw )
 	// get executable name
 	cmd( "set mainExe %s", get_target_name( str, 2 * MAX_PATH_LENGTH ) );
 
-	if ( nw )
-		get_target_name( str, 2 * MAX_PATH_LENGTH, nw );
+	if ( term )
+		get_target_name( str, 2 * MAX_PATH_LENGTH, term );
 
 #ifdef _LMM_
-	if ( run_mode == 0 && ! nw )// delete existing object file if it's just compiling
-	{							// to force recompilation
+	if ( run_mode == 0 && ! term )// delete existing object file if it's just compiling
+	{							  // to force recompilation
 
 		cmd( "set oldObj \"[ temp_dir ]/[ file rootname $mainExe ]/[ file tail $model_dir ]/[ file rootname [ lindex [ glob -nocomplain fun_*.cpp ] 0 ] ].o\"" );
 		cmd( "if { [ file exists \"$oldObj\" ] } { file delete \"$oldObj\" }" );
 	}
 
-	precompiled = get_precompiled_flag( str, nw );
+	precompiled = get_precompiled_flag( str, term );
 #else
 	precompiled = get_precompiled_flag( str, true );
 #endif
 
-	if ( ! nw && precompiled )	// remove old unused executables
+	if ( ! term && precompiled )	// remove old unused executables
 		cmd( "if { [ file exists %s ] } { file delete %s }", str, str );
 
 	// show compilation banner
@@ -2454,19 +2454,19 @@ bool gui::compile_run( int run_mode, bool nw )
 
 	cmd( "newtop .t \"Please Wait\" \"\" $parWnd" );
 
-	if ( nw )
-		cmd( "ttk::label .t.l1 -style bold.TLabel -justify center -text \"Compiling 'No Window' model...\"" );
+	if ( term )
+		cmd( "ttk::label .t.l1 -style bold.TLabel -justify center -text \"Compiling terminal model executable...\"" );
 	else
 		cmd( "ttk::label .t.l1 -style bold.TLabel -justify center -text \"Compiling model...\"" );
 
 	if ( run_mode != 0 )
 		cmd( "ttk::label .t.l2 -justify center -text \"Just recompiling equation file(s) changes.\nOn success, the %s will be launched.\nOn failure, a new window will show the compilation errors.\"", run_mode != 2 ? "new model program" : "debugger" );
 	else
-		if ( nw )
+		if ( term )
 #ifdef _LMM_
-			cmd( "ttk::label .t.l2 -justify center -text \"Creating command-line model program ('lsdNW').\nOn success, the model directory can be also ported to any computer.\nOn failure, a new window will show the compilation errors.\"" );
+			cmd( "ttk::label .t.l2 -justify center -text \"Creating terminal model executable ('%s').\nOn success, the model directory can be also ported to any computer.\nOn failure, a new window will show the compilation errors.\"", LSD_TERM );
 #else
-			cmd( "ttk::label .t.l2 -justify center -text \"Creating updated command-line model program ('lsdNW').\nOn success, the requested operation will continue.\"" );
+			cmd( "ttk::label .t.l2 -justify center -text \"Creating updated terminal model executable ('%s').\nOn success, the requested operation will continue.\"", LSD_TERM );
 #endif
 		else
 			cmd( "ttk::label .t.l2 -justify center -text \"Recompiling the entire model program.\nOn success, the new program will NOT be launched.\nOn failure, a new window will show the compilation errors.\"" );
@@ -2489,7 +2489,7 @@ bool gui::compile_run( int run_mode, bool nw )
 
 	// start compilation as a background task
 	res = -1;
-	cmd( "make_background %s %d %d %d ", str, max_threads, nw, precompiled );
+	cmd( "make_background %s %d %d %d ", str, max_threads, term, precompiled );
 
 	// loop to wait compilation to finish or be aborted
 	while ( res < 0 )
@@ -2520,12 +2520,12 @@ bool gui::compile_run( int run_mode, bool nw )
 		cmd( "set res $auto_hide" );		// get auto hide status
 		if ( run_mode != 0 && res )			// auto unhide LMM if necessary
 			cmd( "focustop .f.t.t" );		// only reopen if error
-		show_comp_result( nw );				// show errors
+		show_comp_result( term );			// show errors
 	}
 	else
 	{
-		if ( nw )
-			cmd( "ttk::messageBox -parent . -type ok -icon info -title \"'No Window' Model\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable 'lsdNW\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n[ fn_break [ file nativename \"$model_dir\" ] 40 ]\n\nto another computer (including the subdirectory '$lsd_src'). After the copy, use the following steps to use it:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake -f makefileNW\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./lsdNW -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\"" );
+		if ( term )
+			cmd( "ttk::messageBox -parent . -type ok -icon info -title \"Terminal Model Executable\" -message \"Compilation successful\" -detail \"A non-graphical, command-line model program was created.\n\nThe executable '%s\\[.exe\\]' for this computer was generated in your model directory. It can be ported to any computer with a GCC-compatible compiler, like a high-performance server.\n\nTo port the model, copy the entire model directory:\n\n[ fn_break [ file nativename \"$model_dir\" ] 40 ]\n\nto another computer (including the subdirectory '$lsd_src'). After the copy, use the following steps to use it:\n\n- open the command-line terminal/shell\n- change to the copied model directory ('cd')\n- recompile with the command:\n\nmake\n\n- run the model program with a preexisting model configuration file ('.lsd' extension) using the command:\n\n./%s -f CONF_NAME.lsd\n\n(you may have to remove the './' in Windows)\n\nSimulations run in the command-line will save the results into files with '.res\\[.gz\\]' and '.tot\\[.gz\\]' extensions.\"", LSD_TERM, LSD_TERM );
 		else
 		{
 			if ( run_mode != 0 )				// no problem - execute
@@ -2566,15 +2566,15 @@ bool gui::compile_run( int run_mode, bool nw )
 
 	if ( res == 0 )							// compilation failure?
 	{
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Compilation failed\" -detail \"The command-line model program	('lsdNW') could not be compiled, likely due to a syntax problem.\n\nPlease go to LMM,  choose menu 'Model'/'Generate 'No Window' Version' to recompile, and check the Compilation Errors window for details on the problem(s).\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Compilation failed\" -detail \"The terminal model executable ('%s') could not be compiled, likely due to a syntax problem.\n\nPlease go to LMM, choose menu 'Model'/'Create Terminal Executable' to recompile, and check the Compilation Errors window for details on the problem(s).\"", LSD_TERM );
 	}
 	else
 		ret = true;
 
 #endif
 
-	// update no-window executable time if not recompiled
-	if ( nw && ret )
+	// update terminal executable time if not recompiled
+	if ( term && ret )
 		cmd( "if { [ file exists $mainExe ] && [ file exists $targetExe ] && [ file mtime $mainExe ] > [ file mtime $targetExe ] } { \
 				file mtime $targetExe [ file mtime $mainExe ] \
 			}" );
@@ -2590,7 +2590,7 @@ end:
 /*************************************************************
  SHOW_COMP_RESULT
  *************************************************************/
-void gui::show_comp_result( bool nw )
+void gui::show_comp_result( bool term )
 {
 	cmd( "set cerr 1.0" );						// search start position in file
 	cmd( "set error \" error:\"" );				// error string to be searched
@@ -2598,7 +2598,7 @@ void gui::show_comp_result( bool nw )
 	cmd( "set errlin \"\"" );
 	cmd( "set errcol \"\"" );
 
-	cmd( "newtop .mm \"Compilation Errors%s\" { .mm.b.close invoke } \"\"", nw ? " (No Window Version)" : "" );
+	cmd( "newtop .mm \"Compilation Errors%s\" { .mm.b.close invoke } \"\"", term ? " (Terminal executable)" : "" );
 
 	cmd( "ttk::label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Click on 'Go to Error' to open the equation file on the indicated line.\n- Consider that the error may have been originated in the previous lines.\n- Start fixing errors at the beginning of the list, subsequent errors may be due to previous ones.\"" );
 	cmd( "pack .mm.lab" );

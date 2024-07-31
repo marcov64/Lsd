@@ -41,7 +41,7 @@ $config_pref = "../tmp/";       // prefix to intermediate configuration files
 $flag_pref = "../tmp/";         // prefix to execution flag files (server control)
 
 // file names (relative to index.php path)
-$lsd_exec = "../lsdNW";             // model executable command
+$lsd_exec = "../lsd_term";          // model executable command
 $lsd_config = "../lwi.lsd";         // LSD model configuration file to use
 $sa_config = "../lwi.sa";           // LSD model parameter-range file to use
 $limits_exec = "../lsd_getlimits";  // LSD getlimits executable (no extension)

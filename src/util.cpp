@@ -15,7 +15,7 @@
 /*************************************************************
  UTIL.CPP
  Contains a set of utilities for different parts of the
- program. The basic set of utilities used in DLL or no-window
+ program. The basic set of utilities used in DLL or terminal
  executables are stored in UTILLIB.CPP.
 
  The main functions contained in this file are:
@@ -899,14 +899,14 @@ int gui::Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const
 
 
 /*************************************************************
- CHECK_NW_EXEC
- Check if NW executable/lib files are older than
+ CHECK_TERM_EXEC
+ Check if terminal executable/lib files are older than
  running executable file
  *************************************************************/
-bool gui::check_nw_exec( const char *nw_exe )
+bool gui::check_term_exec( const char *term_exe )
 {
 	char exe[ MAX_PATH_LENGTH ], lib[ MAX_PATH_LENGTH ];
-	struct stat stNWexe, stLib, stExe;
+	struct stat stTermExe, stLib, stExe;
 
 	if ( strlen( lsd::lib_path ) > 0 )
 		snprintf( lib, MAX_PATH_LENGTH, "%s/%s", lsd::lib_path, lsd::lib_file );// full lib name
@@ -919,9 +919,9 @@ bool gui::check_nw_exec( const char *nw_exe )
 		lsd::strcpyn( exe, lsd::exec_file, MAX_PATH_LENGTH );
 
 	// get OS info for files
-	if ( stat( nw_exe, &stNWexe ) == 0 && ( stat( lib, &stLib ) == 0 || ( stat( lib, &stExe ) == 0 ) ) )
-		if ( ( stat( lib, &stLib ) == 0 && difftime( stNWexe.st_mtime, stLib.st_mtime ) < 0 ) ||
-			 ( stat( lib, &stExe ) == 0 && difftime( stNWexe.st_mtime, stExe.st_mtime ) < 0 ) )
+	if ( stat( term_exe, &stTermExe ) == 0 && ( stat( lib, &stLib ) == 0 || ( stat( lib, &stExe ) == 0 ) ) )
+		if ( ( stat( lib, &stLib ) == 0 && difftime( stTermExe.st_mtime, stLib.st_mtime ) < 0 ) ||
+			 ( stat( lib, &stExe ) == 0 && difftime( stTermExe.st_mtime, stExe.st_mtime ) < 0 ) )
 			return true;
 
 	return false;

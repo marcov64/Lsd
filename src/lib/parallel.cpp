@@ -24,7 +24,7 @@
 /*************************************************************
  RUN_PARALLEL_EXEC
  *************************************************************/
-void lsd::simulation::run_parallel_exec( bool nw, int id, strT cmd )
+void lsd::simulation::run_parallel_exec( bool term, int id, strT cmd )
 {
 	int res;
 
@@ -39,7 +39,7 @@ void lsd::simulation::run_parallel_exec( bool nw, int id, strT cmd )
  RUN_PARALLEL
  *************************************************************/
 #define INISTAT -1234
-int lsd::simulation::run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns )
+int lsd::simulation::run_parallel( bool term, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns )
 {
 	char *alt_name, *def_path;
 	int i, j, k, num, sl;
@@ -103,7 +103,7 @@ int lsd::simulation::run_parallel( bool nw, const char *exec, const char *simnam
 
 			run_pids.resize( run_pids.size( ) + 1 );
 			run_status.push_back( INISTAT );
-			run_threads.push_back( thrT( run_parallel_exec, this, nw, run_status.size( ) - 1, strT( cmd ) ) );
+			run_threads.push_back( thrT( run_parallel_exec, this, term, run_status.size( ) - 1, strT( cmd ) ) );
 
 			j <= sl ? i += num + 1 : i += num;
 		}
@@ -130,11 +130,11 @@ int lsd::simulation::run_parallel( bool nw, const char *exec, const char *simnam
 
 			run_pids.resize( run_pids.size( ) + 1 );
 			run_status.push_back( INISTAT );
-			run_threads.push_back( thrT( run_parallel_exec, this, nw, run_status.size( ) - 1, strT( cmd ) ) );
+			run_threads.push_back( thrT( run_parallel_exec, this, term, run_status.size( ) - 1, strT( cmd ) ) );
 		}
 	}
 
-	if ( nw )
+	if ( term )
 	{
 		// create an overall progress bar, using the average progress of threads
 		if ( dobar )
@@ -167,7 +167,7 @@ int lsd::simulation::run_parallel( bool nw, const char *exec, const char *simnam
 			if ( thr.joinable( ) )
 				thr.join( );
 
-		log_parallel( nw );
+		log_parallel( term );
 
 		i = 0;
 		for ( int status : run_status )
@@ -180,7 +180,7 @@ int lsd::simulation::run_parallel( bool nw, const char *exec, const char *simnam
 		return i;
 	}
 	else
-		run_monitor = thrT( monitor_parallel, this, nw );
+		run_monitor = thrT( monitor_parallel, this, term );
 
 	return 0;
 }
@@ -297,7 +297,7 @@ bool lsd::simulation::stop_parallel( void )
 	if ( run_monitor.joinable( ) )
 		run_monitor.join( );
 
-#ifndef _NW_
+#ifndef _TERM_
 	plog( "\nParallel background run aborted!\n" );
 #endif
 
@@ -324,7 +324,7 @@ void lsd::simulation::detach_parallel( void )
 /*************************************************************
  MONITOR_PARALLEL
  *************************************************************/
-void lsd::simulation::monitor_parallel( bool nw )
+void lsd::simulation::monitor_parallel( bool term )
 {
 	parallel_monitor = true;
 
@@ -332,7 +332,7 @@ void lsd::simulation::monitor_parallel( bool nw )
 		if ( thr.joinable( ) )
 			thr.join( );
 
-	log_parallel( nw );
+	log_parallel( term );
 
 	parallel_monitor = false;
 }
@@ -342,7 +342,7 @@ void lsd::simulation::monitor_parallel( bool nw )
  LOG_PARALLEL
  Consolidate a set of parallel-run logs
  *************************************************************/
-void lsd::simulation::log_parallel( bool nw )
+void lsd::simulation::log_parallel( bool term )
 {
 	char buf[ MAX_LINE_SIZE ];
 	FILE *f;
@@ -375,13 +375,13 @@ void lsd::simulation::log_parallel( bool nw )
 		run_logs.clear( );
 	}
 
-	if ( nw )
+	if ( term )
 	{
 		puts( run_log.c_str( ) );
 		return;
 	}
 
-#ifndef _NW_
+#ifndef _TERM_
 	while ( ! idle_loop )
 		msleep( 100 );
 

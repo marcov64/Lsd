@@ -6,7 +6,7 @@
 #
 #	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
-#	
+#
 #**************************************************************
 
 #**************************************************************
@@ -17,9 +17,9 @@
 #  make -f makefile.getsaved
 #**************************************************************
 
-CC=g++	
+CC=g++
 TARGET=lsd_getsaved
-SWITCH_CC=-D_NW_ -D_NP_ -std=c++11 -Wno-unused-result -O3
+SWITCH_CC=-D_TERM_ -D_NP_ -std=c++11 -Wno-unused-result -O3
 
 # from here you should not need to modify anything
 
@@ -45,7 +45,7 @@ endif
 INCLUDE=-I$(LSDROOT)/$(SRC)
 
 $(EXEC): $(SRC_DIR)common.o $(SRC_DIR)getsaved.o $(SRC_DIR)file.o \
-$(SRC_DIR)object.o $(SRC_DIR)variab.o $(SRC_DIR)nets.o $(SRC_DIR)util.o 
+$(SRC_DIR)object.o $(SRC_DIR)variab.o $(SRC_DIR)nets.o $(SRC_DIR)util.o
 	$(CC) $(SWITCH_CC) $(SRC_DIR)common.o $(SRC_DIR)getsaved.o $(SRC_DIR)file.o \
 	$(SRC_DIR)object.o $(SRC_DIR)variab.o $(SRC_DIR)nets.o $(SRC_DIR)util.o \
 	$(LIB) -o $(EXEC)

@@ -22,7 +22,7 @@
  Relevant macros for conditional compilation (when defined):
 
  - _FUN_: user model equation file
- - _NW_: No Window executable
+ - _TERM_: terminal executable
  - _NT_: no signal trapping (better when debugging in GDB)
  *************************************************************/
 

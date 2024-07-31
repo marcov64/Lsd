@@ -83,7 +83,7 @@
 #endif
 
 // debugger probe variables
-#ifndef _NW_
+#ifndef _TERM_
 	#define DEBUG_CODE \
 		if ( _sim_->deb_set ) \
 		{ \
@@ -619,7 +619,7 @@
 #ifdef LEGACY_CODE
 	namespace lsd
 	{
-	#ifndef _NW_
+	#ifndef _TERM_
 		#include <tk.h>
 		extern Tcl_Interp *inter;
 	#endif

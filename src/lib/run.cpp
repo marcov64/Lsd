@@ -115,7 +115,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 			if ( dobar && liblnk != NULL )
 				update_bar( bar_done, perc_done, last_done, 2 * BAR_DONE_SIZE );
 
-#ifndef _NW_
+#ifndef _TERM_
 			// only update if simulation not paused
 			if ( liblnk == NULL || liblnk->runtime_step == NULL || liblnk->runtime_step( ) )
 #endif
@@ -126,7 +126,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 
 			perc_done = std::min( ( int ) ( 100 * ( ( run - 1 ) + ( double ) t / last_t ) / last_run ), 100 );
 
-#ifndef _NW_
+#ifndef _TERM_
 			// handle runtime button pressings
 			if ( liblnk != NULL && liblnk->runtime_buttons != NULL )
 				liblnk->runtime_buttons( last_update );
@@ -161,7 +161,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 		if ( quit == 1 )			// multiple simulation runs need to reset quit
 			quit = 0;
 
-#ifndef _NW_
+#ifndef _TERM_
 		if ( liblnk != NULL && liblnk->runtime_run_end != NULL )
 			liblnk->runtime_run_end( );
 #endif
@@ -186,7 +186,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 	if ( fast_mode == 2 )
 		plog( "\nFinished processing configuration file(s)\n" );
 
-#ifndef _NW_
+#ifndef _TERM_
 	if ( liblnk != NULL && liblnk->runtime_end != NULL )
 		liblnk->runtime_end( );
 #endif
@@ -239,7 +239,7 @@ int lsd::simulation::init_new_seq( char *bar_done, int & perc_done, int & last_d
 		}
 	}
 
-#ifndef _NW_
+#ifndef _TERM_
 	if ( liblnk != NULL && liblnk->runtime_start != NULL )
 		liblnk->runtime_start( );
 #else
@@ -271,7 +271,7 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update )
 	t = 1;                  // first time step of run
 	eff_t = 0;				// no steps performed yet
 	save_ok = true;			// valid structure to save
-#ifndef _NW_
+#ifndef _TERM_
 	if ( liblnk != NULL && liblnk->runtime_run_start != NULL )
 		liblnk->runtime_run_start( );
 #endif
@@ -299,7 +299,7 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update )
 	// abort if configuration cannot be loaded
 	if ( i != 0 )
 	{
-#ifndef _NW_
+#ifndef _TERM_
 		if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
 			liblnk->log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
 
@@ -315,7 +315,7 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update )
 	series_saved = 0;
 	if ( ! root->alloc_save_mem( ) )
 	{
-#ifndef _NW_
+#ifndef _TERM_
 		if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
 			liblnk->log_tcl_error( true, "Memory allocation", "Not enough memory, too many series saved for the memory available" );
 
@@ -491,7 +491,7 @@ bool lsd::simulation::next_batch( void )
 
 		return true;
 	}
-#ifdef _NW_
+#ifdef _TERM_
 	else
 		if ( fast_mode < 2 )
 			plog( "\nFinished processing %s\n", clean_file( conf_file ) );
@@ -510,7 +510,7 @@ void lsd::simulation::set_fast( int level )
 	if ( level < 0 )
 		level = 0;
 
-#ifndef _NW_
+#ifndef _TERM_
 	if ( level == 0 )
 	{
 		if ( liblnk != NULL && liblnk->enable_plot != NULL )
@@ -567,7 +567,7 @@ void lsd::simulation::empty_stack( void )
 	}
 	else
 	{
-#ifndef _NW_
+#ifndef _TERM_
 		if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
 			liblnk->log_tcl_error( false, "Internal error", "LSD trace stack corrupted" );
 
@@ -624,7 +624,7 @@ bool lsd::object::alloc_save_mem( void )
 			if ( ! cv->alloc_save_var( ) )
 				goto error;
 
-#ifndef _NW_
+#ifndef _TERM_
 		// variable to parent name map for AoR (only in GUI mode)
 		if ( sim->liblnk != NULL )
 			sim->par_map.insert( std::make_pair < strT, strT > ( cv->label, label ) );

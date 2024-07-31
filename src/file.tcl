@@ -934,7 +934,7 @@ proc temp_dir { } {
 # Set 'res' to 1 if compilation succeeds and 0 otherwise
 #************************************************
 proc make_wait { } {
-	global targetExe targetLib nwTarget prcmpTarget iniTime makePipe exeTime libTime res
+	global targetExe targetLib termTarget prcmpTarget iniTime makePipe exeTime libTime res
 
 	if { [ eof $makePipe ] } {
 		fileevent $makePipe readable ""
@@ -965,7 +965,7 @@ proc make_wait { } {
 				after 100
 				incr t 100
 			}
-		} elseif { ( $nwTarget || $iniTime <= $libTime ) && ( $prcmpTarget || $iniTime <= $exeTime ) } {
+		} elseif { ( $termTarget || $iniTime <= $libTime ) && ( $prcmpTarget || $iniTime <= $exeTime ) } {
 			set res 1
 		} else {
 			set res 0
@@ -982,23 +982,23 @@ proc make_wait { } {
 # MAKE_BACKGROUND
 # Start a makefile as a background task
 #************************************************
-proc make_background { target threads nw precompiled } {
-	global CurPlatform DefaultMakeExe lsd_root mainExe targetExe targetLib nwTarget prcmpTarget iniTime makePipe res
+proc make_background { target threads term precompiled } {
+	global CurPlatform DefaultMakeExe lsd_root mainExe targetExe targetLib termTarget prcmpTarget iniTime makePipe res
 
-	if { $nw } {
-		set nwTarget 1
-		set makeSuffix "NW"
+	if { $term } {
+		set termTarget 1
+		set makeSuffix ""
 		set prcmpTarget 0
 	} else {
-		set nwTarget 0
-		set makeSuffix ""
+		set termTarget 0
+		set makeSuffix ".gui"
 		set prcmpTarget $precompiled
 	}
 
 	set targetExe "$target"
 	set targetLib ""
 
-	if { ! $nw } {
+	if { ! $term } {
 		if { $CurPlatform eq "mac" } {
 			set targetExe "$target.app/Contents/MacOS/$target"
 			set targetLib "$target.app/Contents/MacOS/lib$target.dylib"

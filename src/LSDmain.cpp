@@ -76,7 +76,7 @@ namespace gui
 	const char *group_options[ GROUP_OPTIONS_NUM ] = GROUP_OPTIONS_NAME;
 	const char *lmm_defaults[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_DEFAULT;
 	const char *lmm_options[ LMM_OPTIONS_NUM ] = LMM_OPTIONS_NAME;
-	const char *lsd_nw_src[ LSD_NW_NUM ] = LSD_NW_SRC;
+	const char *lsd_term_src[ LSD_TERM_NUM ] = LSD_TERM_SRC;
 	const char *model_defaults[ MODEL_OPTIONS_NUM ] = MODEL_OPTIONS_DEFAULT;
 	const char *model_options[ MODEL_OPTIONS_NUM ] = MODEL_OPTIONS_NAME;
 	const char *tk_wnd_names[ TK_WIN_NUM ] = TK_WIN_NAME;

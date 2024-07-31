@@ -14,7 +14,7 @@
 
 /*************************************************************
  UTILLIB.CPP
- Contains the basic set of utilities used in DLL or no-window
+ Contains the basic set of utilities used in DLL or terminal
  executables. The remaining functions are stored in
  UTIL.CPP.
 

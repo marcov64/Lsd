@@ -15,7 +15,7 @@
 /*************************************************************
  COMMONLIB.CPP
  Basic code common between LMM and LSD Browser used in DLL
- or no-window executables. The remaining common code is
+ or terminal executables. The remaining common code is
  stored in COMMON.CPP.
  *************************************************************/
 

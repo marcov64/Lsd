@@ -266,7 +266,7 @@ double lsd::variable::cal( object *caller, int lag )
 	int i, eff_lag;
 	double app;
 
-#ifndef _NW_
+#ifndef _TERM_
 	bool tit_updated;
 	int time;
 	clock_t pstart = 0, pend = 0;
@@ -393,7 +393,7 @@ double lsd::variable::cal( object *caller, int lag )
 			return 0;
 		}
 
-#ifndef _NW_
+#ifndef _TERM_
 		if ( sim->stack_info >= sim->stack_level && ( ! sim->prof_obs_only || observe ) )
 			sim->start_profile[ sim->stack_level - 1 ] = pstart = clock( );
 		else
@@ -401,7 +401,7 @@ double lsd::variable::cal( object *caller, int lag )
 				pstart = clock( );
 #endif
 	}
-#ifndef _NW_
+#ifndef _TERM_
 	else
 		if ( sim->prof_aggr_time )
 			pstart = clock( );
@@ -456,7 +456,7 @@ double lsd::variable::cal( object *caller, int lag )
 
 	if ( sim->fast_mode == 0 && ! sim->parallel_mode )
 	{
-#ifndef _NW_
+#ifndef _TERM_
 		if ( sim->prof_aggr_time )
 		{
 			pend = clock( );
@@ -652,7 +652,7 @@ void lsd::worker::cal_worker( void )
 				// compute the Variable's equation
 				user_excpt = true;			// allow distinguishing among internal & user exceptions
 
-#ifndef _NW_
+#ifndef _TERM_
 				if ( setjmp( env ) )		// allow recovering from signals
 					return;
 #endif
@@ -812,7 +812,7 @@ void lsd::worker::signal( int sig )
 	free = false;
 	running = false;
 
-#ifndef _NW_
+#ifndef _TERM_
 	longjmp( env, 1 );				// recover from crash on user code
 #endif
 }

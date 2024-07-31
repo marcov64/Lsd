@@ -15,7 +15,7 @@
 /*************************************************************
  FILELIB.CPP
  Contains the basic functions used to access files in DLL or
- no-window executables. The remaining file-oriented functions
+ terminal executables. The remaining file-oriented functions
  are stored in FILE.CPP.
 
  The main methods of object contained in this file are:

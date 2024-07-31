@@ -119,6 +119,14 @@ p.msonormal0, li.msonormal0, div.msonormal0
 	margin-left:0cm;
 	font-size:12.0pt;
 	font-family:"Arial",sans-serif;}
+span.HeaderChar
+	{mso-style-name:"Header Char";
+	mso-style-link:Header;
+	font-family:"Arial",sans-serif;}
+span.FooterChar
+	{mso-style-name:"Footer Char";
+	mso-style-link:Footer;
+	font-family:"Arial",sans-serif;}
 span.TitleChar
 	{mso-style-name:"Title Char";
 	mso-style-link:Title;
@@ -217,14 +225,6 @@ span.Cdigo
 	{mso-style-name:Código;
 	font-family:"Courier New";
 	color:gray;}
-span.HeaderChar
-	{mso-style-name:"Header Char";
-	mso-style-link:Header;
-	font-family:"Arial",sans-serif;}
-span.FooterChar
-	{mso-style-name:"Footer Char";
-	mso-style-link:Footer;
-	font-family:"Arial",sans-serif;}
 .MsoChpDefault
 	{font-size:10.0pt;}
  /* Page Definitions */
@@ -1271,7 +1271,7 @@ menu operate in the current open model only and are organized in four groups: </
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span lang=EN-US><a href="#run">Compile and Run</a>, <a
 href="#_Recompile_Model">Recompile</a>, <a href="#_GDB/LLDB_Debugger">GDB/LLDB
-Debugger</a>, <a href="#_Create_‘No_Window’">Create ‘No Window’ Version</a>, <a
+Debugger</a>, <a href="#_Create_‘No_Window’">Create Terminal Executable</a>, <a
 href="#_Model_Info">Model Info</a> </span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -1554,10 +1554,10 @@ lang=EN-US> for </span><span class=Cdigo><span lang=EN-US>step</span></span><spa
 lang=EN-US>) can be always used.</span></p>
 
 <h2><a name="_Create_‘No_Window’"></a><a name=nowindow></a><span lang=EN-US>Create
-‘No Window’ Version</span></h2>
+Terminal Executable</span></h2>
 
-<p class=MsoNormal><span lang=EN-US>Generate a command-line version (no
-graphical interface) of the <a href="src/src/LSD_faqs.html#modelprogram">LSD
+<p class=MsoNormal><span lang=EN-US>Generate a command-line/terminal version
+(no graphical interface) of the <a href="src/src/LSD_faqs.html#modelprogram">LSD
 model program</a>, including the source code to recompile it in other computers
 and operating systems. This is useful to run the simulation in servers or
 computer clusters, allowing the processing of huge numbers of <a
@@ -1572,7 +1572,7 @@ color:gray'>Run</span><span lang=EN-US> of <a href="src/src/browser.html">LSD
 Browser</a>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Since there is no graphical interface, the
-No Window version needs a <a href="src/src/LSD_faqs.html#modelsetting">model
+terminal executable needs a <a href="src/src/LSD_faqs.html#modelsetting">model
 configuration file</a> (</span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
 lang=EN-US> extension) already prepared using the graphical <a
 href="src/src/LSD_windows.html#browser">LSD Browser</a>. The simulation results
@@ -1589,7 +1589,7 @@ which can be opened in any text editor, spreadsheet or statistical software
 lang=EN-US> and </span><span class=Cdigo><span lang=EN-US>-z</span></span><span
 lang=EN-US> below).</span></p>
 
-<p class=MsoNormal><span lang=EN-US>To move the non-graphical LSD model program
+<p class=MsoNormal><span lang=EN-US>To move the terminal LSD model executable
 to another operating system (or sometimes a different version of the same
 operating system), you need to copy the <a
 href="src/src/LSD_faqs.html#modelhome">model home directory</a> to the
@@ -1613,7 +1613,7 @@ lang=EN-US>.lsd</span></span><span lang=EN-US> extension)</span></p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US>3)<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
 lang=EN-US>The special make file named </span><span class=Cdigo><span
-lang=EN-US>makefileNW</span></span></p>
+lang=EN-US>makefile</span></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US>4)<span
@@ -1632,9 +1632,9 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><b><span
 lang=EN-US>Compile the LSD model program:</span></b><span lang=EN-US> at the
 command line (terminal) prompt, make sure the copied model home directory is
 the current one and use the command</span><span class=Cdigo><span lang=EN-US>
-make -f makefileNW </span></span><span lang=EN-US>to generate a new executable
-file. If you get an error and compilation fails, you may have to adjust some of
-the variables in the </span><span class=Cdigo><span lang=EN-US>makefileNW</span></span><span
+make </span></span><span lang=EN-US>to generate a new executable file. If you
+get an error and compilation fails, you may have to adjust some of the
+variables in the </span><span class=Cdigo><span lang=EN-US>makefile</span></span><span
 lang=EN-US> file for the characteristics of your system.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -1659,7 +1659,7 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><b><span
 lang=EN-US>Analyze the results:</span></b><span lang=EN-US> use the produced
 results files in the desired program (LSD, R etc.).</span></p>
 
-<p class=MsoNormal><span lang=EN-US>The non-graphical LSD model program can be
+<p class=MsoNormal><span lang=EN-US>The terminal LSD model executable can be
 run under two different setups: single or multiple configurations. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>The first setup uses a single configuration
@@ -1670,10 +1670,10 @@ lang=EN-US>XXXXX</span></span><span lang=EN-US> and the current directory set
 to the model home) is:</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Windows:</span><span class=Cdigo><span
-lang=EN-US> lsdNW -f XXXXX.lsd [-s YY] [-e ZZ]</span></span></p>
+lang=EN-US> lsd_term -f XXXXX.lsd [-s YY] [-e ZZ]</span></span></p>
 
-<p class=MsoNormal>Linux/macOS:<span class=Cdigo> ./lsdNW -f XXXXX.lsd [-s YY]
-[-e ZZ]</span></p>
+<p class=MsoNormal>Linux/macOS:<span class=Cdigo> ./lsd_term -f XXXXX.lsd [-s
+YY] [-e ZZ]</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Optionally, is possible to specify in the
 command line exactly which simulation runs are to be executed, by redefining
@@ -1692,9 +1692,11 @@ lang=EN-US>XXXXX</span></span><span lang=EN-US>, the first sequential number
 set to </span><span class=Cdigo><span lang=EN-US>N</span></span><span
 lang=EN-US> and the current directory set to the model home) is:</span></p>
 
-<p class=MsoNormal>Windows:<span class=Cdigo> lsdNW -f XXXXX –s N [-e M]</span></p>
+<p class=MsoNormal><span lang=EN-US>Windows:</span><span class=Cdigo><span
+lang=EN-US> lsd_term -f XXXXX –s N [-e M]</span></span></p>
 
-<p class=MsoNormal>Linux/macOS:<span class=Cdigo> ./lsdNW -f XXXXX –s N [-e M]</span></p>
+<p class=MsoNormal>Linux/macOS:<span class=Cdigo> ./lsd_term -f XXXXX –s N [-e
+M]</span></p>
 
 <p class=MsoNormal><span class=Cdigo><span lang=EN-US>N</span></span><span
 lang=EN-US> is an integer used to choose the initial configuration file, which
@@ -1723,7 +1725,7 @@ have no space in it).</span></p>
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>-l FILE</span></b></span><span
-lang=EN-US>: save all </span><span class=Cdigo><span lang=EN-US>lsdNW</span></span><span
+lang=EN-US>: save all </span><span class=Cdigo><span lang=EN-US>lsd_term</span></span><span
 lang=EN-US> output to a (log) file named by </span><span class=Cdigo><b><span
 lang=EN-US>FILE</span></b></span><span lang=EN-US> (name/path must have no
 space in it).</span></p>
@@ -2016,8 +2018,8 @@ LSD model. Each of the required entries is described in the table below. </span>
   lang=EN-US>.exe</span></span><span lang=EN-US> extension is automatically
   appended.</span></p>
   <p class=MsoNormal><span lang=EN-US>If precompiled code is to be used (see
-  below), this value must stay at the default (</span><span class=Cdigo>LSD</span><span
-  lang=EN-US>).</span></p>
+  below), this value must stay at the default (</span><span class=Cdigo><span
+  lang=EN-US>LSD</span></span><span lang=EN-US>).</span></p>
   </td>
  </tr>
  <tr>
@@ -2051,10 +2053,10 @@ LSD model. Each of the required entries is described in the table below. </span>
   <p class=MsoNormal><span class=Cdigo><span lang=EN-US>t</span>rue</span></p>
   </td>
   <td style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><span lang=EN-US>To speed-up compilation, LSD comes with pre-compiled
-  code that may not work with your specific model. You can disable the use of
-  pre-compiled code on a model basis, by adding/changing the value in this line
-  to </span><span class=Cdigo><span lang=EN-US>false</span></span><span
+  <p class=MsoNormal><span lang=EN-US>To speed-up compilation, LSD comes with
+  pre-compiled code that may not work with your specific model. You can disable
+  the use of pre-compiled code on a model basis, by adding/changing the value
+  in this line to </span><span class=Cdigo><span lang=EN-US>false</span></span><span
   lang=EN-US> and recompiling the model. </span></p>
   <p class=MsoNormal><span lang=EN-US>Please note that the value </span><span
   class=Cdigo><span lang=EN-US>true</span></span><span lang=EN-US> can be only

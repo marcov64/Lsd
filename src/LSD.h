@@ -155,6 +155,7 @@
 #define DEFAULT_SRC_DIR "src"			// default source files directory
 #define FILE_BUF_SIZE 1000000			// buffer size for file reading
 #define LOG_FILE "log.txt"				// name of log file
+#define LSD_TERM "lsd_term"				// LSD terminal executable name
 #define MARG 0.01						// y-axis % plot clearance margin
 #define MARG_CONST 0.1					// y-axis % plot clearance margin/constant series
 #define MAX_CELS 9000					// max number of cells (row x column) init. editor
@@ -210,8 +211,8 @@
 						   'a', 'a', 'a', 'a', \
 						   'a', 'a', 'p', 'p', \
 						   'a', 'g', 'p' }
-#define LSD_NW_NUM 3
-#define LSD_NW_SRC { "lsdnw.cpp", "fun_head.h", "fun_head_fast.h" }
+#define LSD_TERM_NUM 3
+#define LSD_TERM_SRC { "LSDterm.cpp", "fun_head.h", "fun_head_fast.h" }
 #define LSD_DIR_NUM 8
 #define LSD_DIR_NAME { DEFAULT_SRC_DIR, "gnu", "installer", "Manual", \
 					   "LMM.app", "Rpkg", "lwi", "___" }
@@ -283,7 +284,7 @@ namespace gui
 	extern const char *group_options[ ];// list of options in group configurations
 	extern const char *lmm_defaults[ ];	// default values for LMM parameter list
 	extern const char *lmm_options[ ];	// LMM save parameter list
-	extern const char *lsd_nw_src[ ];
+	extern const char *lsd_term_src[ ];
 	extern const char *model_defaults[ ];
 	extern const char *model_options[ ];
 	extern const char *res_g;			// structure window result variable
@@ -325,9 +326,9 @@ namespace gui
 	bool abort_run_threads( void );
 	bool add_rt_plot_tab( const char *w, int id_sim );
 	bool add_unsaved( void );
-	bool check_nw_exec( const char *nw_exe );
+	bool check_term_exec( const char *term_exe );
 	bool check_res_dir( const char *path, const char *sim_name = NULL );
-	bool compile_run( int run_mode, bool nw = false );
+	bool compile_run( int run_mode, bool term = false );
 	bool create_maverag( void );
 	bool create_res_dir( const char *path );
 	bool create_series( bool mc, str_vecT var_names );
@@ -339,10 +340,10 @@ namespace gui
 	bool exists_window( const char *lab );
 	bool expr_eq( const char *tcl_exp, const char *c_str );
 	bool get_bool( const char *tcl_var, bool *var = NULL );
-	bool get_precompiled_flag( const char *exec, bool nw = false );
+	bool get_precompiled_flag( const char *exec, bool term = false );
 	bool load_model_options( const char *path, bool fix = true );
 	bool load_prev_configuration( void );
-	bool make_no_window( void );
+	bool make_terminal( void );
 	bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz );
 	bool open_configuration( lsd::object *&r, bool reload );
 	bool runtime_step( void );
@@ -365,7 +366,7 @@ namespace gui
 	const char *get_eqfile_name( char *s, int sz );
 	const char *get_make_var( const char *var, const char *buf, char *dest, int sz );
 	const char *get_str( const char *tcl_var );
-	const char *get_target_name( char *str, int str_sz, bool nw = false );
+	const char *get_target_name( char *str, int str_sz, bool term = false );
 	double eval_double( const char *tcl_exp );
 	double get_double( const char *tcl_var, double *var = NULL, bool no_error = false );
 	double lower_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
@@ -459,7 +460,7 @@ namespace gui
 	void load_lsd_options( void );
 	void log_tcl_error( bool show, const char *cm, const char *message, ... );
 	void lsd_exit_gui( int v );
-	void make_makefile( bool nw = false );
+	void make_makefile( bool term = false );
 	void mat_del( double **a, int m );
 	void plog( const char *msg, ... );
 	void plog_backend( const char *cm, const char *tag, va_list arg );
@@ -501,7 +502,7 @@ namespace gui
 	void set_shortcuts( const char *window );
 	void set_shortcuts_run( const char *window );
 	void set_ttip_descr( const char *w, const char *lab, int it = -1, bool init = true );
-	void show_comp_result( bool nw = false );
+	void show_comp_result( bool term = false );
 	void show_descr( const char *lab, const char *parWnd = NULL );
 	void show_eq( const char *lab, const char *parWnd = NULL );
 	void show_logs( const char *path, str_vecT & logs, bool par_cntl = false );

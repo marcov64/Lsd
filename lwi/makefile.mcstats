@@ -6,7 +6,7 @@
 #
 #	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
-#	
+#
 #**************************************************************
 
 #**************************************************************
@@ -17,9 +17,9 @@
 #  make -f makefile.mcstats
 #**************************************************************
 
-CC=g++	
+CC=g++
 TARGET=lsd_mcstats
-SWITCH_CC=-D_NW_ -D_NP_ -std=c++11 -Wno-unused-result -O3
+SWITCH_CC=-D_TERM_ -D_NP_ -std=c++11 -Wno-unused-result -O3
 
 # from here you should not need to modify anything
 
@@ -44,7 +44,7 @@ endif
 # variable to search for the tcl and tk headers
 INCLUDE=-I$(LSDROOT)/$(SRC)
 
-$(EXEC): $(SRC_DIR)common.o $(SRC_DIR)mcstats.o 
+$(EXEC): $(SRC_DIR)common.o $(SRC_DIR)mcstats.o
 	$(CC) $(SWITCH_CC) $(SRC_DIR)common.o $(SRC_DIR)mcstats.o \
 	$(LIB) -o $(EXEC)
 

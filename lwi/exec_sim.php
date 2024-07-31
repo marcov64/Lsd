@@ -130,10 +130,10 @@ if ( file_exists( $lsd_exec ) && file_exists( $filename_conf ) ) {
         $command = "exec " . $command;
     }
 
-    $lsdNW = proc_open( $command, $descriptorspec, $pipes );
+    $lsd_term = proc_open( $command, $descriptorspec, $pipes );
 
-    if ( ! $lsdNW ) {
-        echo "Error: cannot run lsdNW";
+    if ( ! $lsd_term ) {
+        echo "Error: cannot run lsd_term";
         return;
     }
 
@@ -149,12 +149,12 @@ if ( file_exists( $lsd_exec ) && file_exists( $filename_conf ) ) {
 
     $abort = $timeout = false;
     $start = time( );
-    while ( $status = proc_get_status( $lsdNW )[ "running" ] && ! $abort && ! $timeout ) {
+    while ( $status = proc_get_status( $lsd_term )[ "running" ] && ! $abort && ! $timeout ) {
         sleep( $sleep_interval );
 
         // abort if semaphore file is present
         if ( file_exists( $filename_abort ) ) {
-            proc_tree_terminate( $lsdNW, 15 );
+            proc_tree_terminate( $lsd_term, 15 );
             unlink( $filename_abort );
             $abort = true;
         }
@@ -172,7 +172,7 @@ if ( file_exists( $lsd_exec ) && file_exists( $filename_conf ) ) {
         }
     }
 
-    proc_close( $lsdNW );
+    proc_close( $lsd_term );
 
     // remove LSD configuration and grand total results files
     unlink( $filename_flag );
@@ -187,7 +187,7 @@ if ( file_exists( $lsd_exec ) && file_exists( $filename_conf ) ) {
     }
 
     if ( $status[ "exitcode" ] != 0 ) {
-        echo "Aborted: lsdNW error=" . $status[ "exitcode" ];
+        echo "Aborted: lsd_term error=" . $status[ "exitcode" ];
         return;
     }
 

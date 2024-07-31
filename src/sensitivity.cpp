@@ -347,7 +347,7 @@ lsd::object *lsd::object::sensitivity_parallel( sensitivity *s )
  main LSD Browser.
 
  Options concerning initialization for sensitivity analysis are saved into model
- configuration files, to be executed with a No Window version of the LSD model.
+ configuration files, to be executed with a terminal version of the LSD model.
  One configuration file is created for each possible combination of the
  sensitivity analysis values (parameters and initial conditions). Optionally, it
  is possible to define the parameter "probSampl" with the (uniform) probability

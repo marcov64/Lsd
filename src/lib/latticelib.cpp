@@ -15,7 +15,7 @@
 /*************************************************************
  LATTICELIB.CPP
  Contains the functions to work with lattices in DLL and
- no-window executables. The graphical GUI code is stored in
+ terminal executables. The graphical GUI code is stored in
  LATTICE.CPP.
  *************************************************************/
 

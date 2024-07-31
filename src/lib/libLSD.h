@@ -15,12 +15,12 @@
 /*************************************************************
  LIBLSD.H
  Global definitions shared by all LSD modules contained in
- LSD dynamic link library (.dll/.so) and LSD No Window.
+ LSD dynamic link library (.dll/.so) and LSD terminal executable.
 
  Relevant macros for conditional compilation (when defined):
 
  - _FUN_: user model equation file
- - _NW_: No Window executable
+ - _TERM_: terminal executable
  - _NT_: no signal trapping (better when debugging in GDB)
  *************************************************************/
 
@@ -62,7 +62,7 @@
 	#include <wordexp.h>
 #endif
 
-#ifndef _NW_
+#ifndef _TERM_
 	#include <tk.h>
 #endif
 
@@ -308,7 +308,7 @@ class lsd::equation						// simulation model equation class
 {
 	protected:
 		simulation *_sim_;				// pointer to derived class
-#ifndef _NW_
+#ifndef _TERM_
 		double _d_values_[ USER_D_VARS ];// debugger probe variables
 		int _i_values_[ 4 ];
 		netlink *_n_values_[ 10 ];
@@ -425,7 +425,7 @@ class lsd::simulation : public equation	// simulation container class
 
 	public:
 		assimilation *assim = NULL;		// data assimilation linked-list head
-		bool batch_sequential = false;	// no-window multi configuration job running
+		bool batch_sequential = false;	// terminal multi configuration job running
 		bool conf_ok = false;			// a valid configuration file is loaded
 		bool fast;						// safe copy of fast_mode flag
 		bool grand_total = false;		// produce grand total in batch processing
@@ -503,7 +503,7 @@ class lsd::simulation : public equation	// simulation container class
 		variable *cemetery = NULL;		// LSD saved data from deleted objects
 		worker *workers = NULL;			// multi-thread parallel worker data
 		FILE *log_file_ptr;				// log file pointer, if any
-#ifndef _NW_
+#ifndef _TERM_
 		p_mapT par_map;					// variable to parent name map for AoR
 		Tcl_Interp *inter;				// Tcl interpreter (for legacy LSD code)
 #endif
@@ -570,7 +570,7 @@ class lsd::simulation : public equation	// simulation container class
 		int hyper_count_var( const char *lab );
 		int load_configuration( bool reload, strT *warnings, int quick );
 		int rnd_int( int min, int max );
-		int run_parallel( bool nw, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns );
+		int run_parallel( bool term, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns );
 		int run_simulation( int until_t = 0, int until_run = 0 );
 		int worker_errors( void );
 		void detach_parallel( void );
@@ -611,12 +611,12 @@ class lsd::simulation : public equation	// simulation container class
 		void empty_description( void );
 		void empty_lattice( void );
 		void init_math_error( void );
-		void log_parallel( bool nw );
-		void monitor_parallel( bool nw );
+		void log_parallel( bool term );
+		void monitor_parallel( bool term );
 		void parallel_update( variable *v, object* p, object *caller = NULL );
 		void plog_tag( const char *cm, const char *tag, ... );
 		void plog_terminal( const char *cm, va_list arg );
-		void run_parallel_exec( bool nw, int id, strT cmd );
+		void run_parallel_exec( bool term, int id, strT cmd );
 		void save_results( void );
 		void update_bar( char *bar, int done, int & last_done, int bar_sz );
 		void warn_distr( i_atomT & errCnt, bool & stopErr, const char *distr, const char *msg );
