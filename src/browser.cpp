@@ -1558,7 +1558,7 @@ lsd::object *lsd::object::restore_pos( void )
 {
 	object *cur;
 
-	if ( gui::eval_bool( "$last_obj ne \"\"" ) && ( cur = search( gui::get_str( "last_obj" ) ) ) != NULL )
+	if ( gui::eval_bool( "$last_obj ne \"\"" ) && ( cur = sim->root->search( gui::get_str( "last_obj" ) ) ) != NULL )
 	{
 		cmd( "if [ info exists last_list ] { set listfocus $last_list }" );
 		cmd( "if [ info exists last_item ] { set itemfocus $last_item }" );

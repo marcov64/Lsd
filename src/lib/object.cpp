@@ -576,7 +576,7 @@ lsd::object *lsd::object::search( const char *lab, bool no_search, bool no_searc
 	object *cur;
 
 	// the current object?
-	if ( ! strcmp( label, lab ) )
+	if ( label != NULL && ! strcmp( label, lab ) )
 		return this;
 
 	// Search among the descendants of current object
