@@ -2214,13 +2214,13 @@ const char *gui::get_target_name( char *str, int str_sz, bool nw )
 	char buf[ MAX_PATH_LENGTH ], buf1[ MAX_PATH_LENGTH ];
 	FILE *f;
 
+	make_makefile( nw );
+
 	if ( nw )					// NW version use fixed name because of batches
 	{
 		snprintf( str, str_sz, "lsdNW%s", platform == _WIN_ ? ".exe" : "" );
 		return str;
 	}
-
-	make_makefile( nw );
 
 	cmd( "set fapp [ file normalize \"$model_dir/makefile%s\" ]", nw ? "NW" : "" );
 	f = fopen( get_str( "fapp" ), "r" );
