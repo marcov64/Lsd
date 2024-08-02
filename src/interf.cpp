@@ -4755,7 +4755,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "ttk::frame .s.c" );
 			cmd( "ttk::label .s.c.l -justify center -text \"Number of parallel\nLSD runs\"" );
-			cmd( "ttk::spinbox .s.c.e -width 5 -from 1 -to 99 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center" );
+			cmd( "ttk::spinbox .s.c.e -width 5 -from 1 -to 999 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( ".s.c.e insert 0 $cores" );
 			cmd( "ttk::label .s.c.w -justify center -text \"(a number higher than the\nnumber of processors/cores\nis not recommended)\"" );
 			cmd( "pack .s.c.l .s.c.e .s.c.w" );

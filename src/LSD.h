@@ -169,7 +169,7 @@
 #define PROG_SERIES 10000				// AoR progress bar when loading series limit
 #define SENS_SEP " ,;|/#\t\n"			// sensitivity data valid separators
 #define SIG_MIN 1e-100					// Minimum significant value (different than zero)
-#define SRV_MAX_CORES 64				// maximum number of cores to use in a server
+#define SRV_MAX_CORES 256				// maximum number of cores to use in a server
 #define SRV_MIN_CORES 12				// minimum number of cores to consider a server
 
 // configuration files details
