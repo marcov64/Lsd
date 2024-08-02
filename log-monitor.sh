@@ -18,7 +18,7 @@
 # Open multiple log windows on parallel run folders
 #**************************************************************
 
-if [[ "$1" = "-h" ]]; then
+if [[ "$1" == "-h" ]]; then
 	echo "Open multiple log windows on parallel run folders"
 	echo "Usage: ./log-monitor.sh [path to log directory] [log name extension]"
 	exit 0
@@ -31,6 +31,11 @@ if [[ "$OSTYPE" == "darwin" ]]; then
 	N=$(find $DIR -maxdepth 1 -name "$FILES" -exec stat -f "." {} \; | wc -l)
 else
 	N=$(find $DIR -maxdepth 1 -name "$FILES" -printf "." | wc -m)
+fi
+
+if [[ "$N" == "0" ]]; then
+	echo "No file corresponds to pattern '$DIR/$FILES'"
+	exit 0
 fi
 
 if [[ $N > 30 ]]; then

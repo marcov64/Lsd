@@ -14,14 +14,14 @@ rem
 rem *************************************************************
 
 rem *************************************************************
-rem LOG-MONITOR.SH
+rem LOG-MONITOR.BAT
 rem Open multiple log windows
 rem *************************************************************
 
 IF "%1"=="/?" (
 	ECHO Open multiple log windows on parallel run folders
 	ECHO Usage: log-monitor [path to log directory] [log name extension]
-	GOTO end
+	GOTO END
 )
 
 IF "%1"=="" (SET DIR=.) else (SET DIR=%1)
@@ -29,6 +29,11 @@ IF "%2"=="" (SET FILES=*.log) else (SET FILES=*%2)
 
 FOR /F "tokens=* USEBACKQ" %%F IN (`DIR /a-d "%DIR%\%FILES%" ^| FIND /C "/"`) DO (
 	SET N=%%F
+)
+
+IF %N% EQU 0 (
+	ECHO No file corresponds to pattern '%DIR%\%FILES%'
+	GOTO END
 )
 
 IF %N% GTR 30 (
@@ -55,6 +60,8 @@ IF %N% GTR 30 (
 
 IF "%COLS%"=="1" (
 	multitail --basename -P r -Ec "Finished processing .*" -i %DIR%/%FILES%
-) else (
+) ELSE (
 	multitail --basename -P r -Ec "Finished processing .*" -s %COLS% -i %DIR%/%FILES%
 )
+
+:END
