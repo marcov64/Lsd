@@ -952,12 +952,12 @@ void gui::show_logs( const char *dest_path, str_vecT & logs, bool par_cntl )
 	else
 	{
 		// number of terminal columns
-		j = n > 4 ? ( n > 8 ? ( n > 12 ? 4 : 3 ) : 2 ) : 1;
+		j = n > 4 ? ( n > 8 ? ( n > 12 ? ( n > 20 ? n > 30 ? 6 : 5 ) : 4 ) : 3 ) : 2 ) : 1;
 
 		if ( j == 1 )
-			snprintf( exec, MAX_PATH_LENGTH , "multitail%s", platform == _WIN_ ? "" : " --retry-all" );
+			snprintf( exec, MAX_PATH_LENGTH , "multitail%s --basename -P r -Ec 'Finished processing .*' -i", platform == _WIN_ ? "" : " --retry-all" );
 		else
-			snprintf( exec, MAX_PATH_LENGTH , "multitail%s -s %d", platform == _WIN_ ? "" : " --retry-all", j );
+			snprintf( exec, MAX_PATH_LENGTH , "multitail%s --basename -P r -Ec 'Finished processing .*' -s %d -i", platform == _WIN_ ? "" : " --retry-all", j );
 	}
 
 	cmd( "if { [ open_terminal \"%s %s\" ] != 0 } { \
