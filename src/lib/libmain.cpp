@@ -50,6 +50,10 @@ namespace lsd
 	FILE *stderr_ptr;				// main thread standard error file pointer
 	FILE *stdout_ptr;				// main thread standard output file pointer
 
+#ifdef __APPLE__
+	IOPMAssertionID mac_pwr_assert = kIOPMNullAssertionID;// mac sleep control
+#endif
+
 	// constant arrays
 	const char nonavail[ ] = NON_AVAILABLE;// unavailable values text (R default)
 	const char *desc_key_words[ DESC_KEY_NUM ] = DESC_KEY_WORD;

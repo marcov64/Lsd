@@ -28,6 +28,26 @@ extern lsd::dlliblinkage lmm_liblnk;
 
 #ifdef _WIN32
 /*************************************************************
+ INHIBIT_SYSTEM_SLEEP (Windows)
+ disables system from entering sleep if left unattended
+ *************************************************************/
+void lsd::inhibit_system_sleep( void )
+{
+	SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED );
+}
+
+
+/*************************************************************
+ RESTORE_SYSTEM_SLEEP (Windows)
+ disables system from entering sleep if left unattended
+ *************************************************************/
+void lsd::restore_system_sleep( void )
+{
+	SetThreadExecutionState( ES_CONTINUOUS );
+}
+
+
+/*************************************************************
  RUN_SYSTEM (Windows)
  executes run command in system without opening
  command-prompt window or activating STL mutexes
@@ -93,6 +113,41 @@ int lsd::kill_system( simulation *sim, int id )
 #else
 
 extern char ** environ;
+
+/*************************************************************
+ INHIBIT_SYSTEM_SLEEP (Unix)
+ disables system from entering sleep if left unattended
+ *************************************************************/
+int lsd::inhibit_system_sleep( void )
+{
+#ifdef __APPLE__
+	CFStringRef name = CFSTR( "Metashape processing" );
+
+	if ( IOPMAssertionCreateWithName( kIOPMAssertionTypePreventUserIdleSystemSleep, kIOPMAssertionLevelOn, name, &mac_pwr_assert ) != kIOReturnSuccess )
+		mac_pwr_assert = kIOPMNullAssertionID;
+#else
+	// a simple general method was not found
+#endif
+}
+
+
+/*************************************************************
+ RESTORE_SYSTEM_SLEEP (Unix)
+ disables system from entering sleep if left unattended
+ *************************************************************/
+int lsd::restore_system_sleep( void )
+{
+#ifdef __APPLE__
+	if ( mac_pwr_assert != kIOPMNullAssertionID )
+	{
+		IOPMAssertionRelease( mac_pwr_assert );
+		mac_pwr_assert = kIOPMNullAssertionID;
+	}
+#else
+	// a simple general method was not found
+#endif
+}
+
 
 /*************************************************************
  RUN_SYSTEM (Unix)

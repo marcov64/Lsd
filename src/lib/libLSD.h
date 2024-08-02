@@ -62,6 +62,10 @@
 	#include <wordexp.h>
 #endif
 
+#ifdef __APPLE__
+	#include <IOKit/pwr_mgt/IOPMLib.h>
+#endif
+
 #ifndef _TERM_
 	#include <tk.h>
 #endif
@@ -260,6 +264,10 @@ namespace lsd
 	extern FILE *stderr_ptr;				// main thread standard error pointer
 	extern FILE *stdout_ptr;				// main thread standard output pointer
 
+#ifdef __APPLE__
+	extern IOPMAssertionID mac_pwr_assert;	// mac sleep control
+#endif
+
 
 /*************************************************************
  GLOBAL FUNCTIONS
@@ -293,8 +301,10 @@ namespace lsd
 	void cmd( const char *cm, ... );
 	void exception_handler( int signum, const char *what );
 	void handle_signals( void ( * handler ) ( int signum ) );
+	void inhibit_system_sleep( void );
 	void lsd_exit( int v );
 	void msleep( unsigned msec = 1000 );
+	void restore_system_sleep( void );
 	void set_exec( const char *path, const char *file );
 	void signal_handler( int signum );
 #endif

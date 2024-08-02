@@ -93,6 +93,8 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 	static clock_t start, last_update;
 	static int perc_done, last_done;
 
+	lsd::inhibit_system_sleep( );	// prevent system sleep during run
+
 	if ( ( until_run > 0 && until_run <= run ) || ( until_t > 0 && until_t <= t &&
 		 ( until_run <= 0 || ( until_run > 0 && until_run <= run ) ) ) )
 		goto end_run;				// already there, nothing to do
@@ -192,6 +194,8 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 #endif
 
 	end_run:
+
+	lsd::restore_system_sleep( );	// allow sleep again
 
 	// set of sequential runs is finished
 	quit = 0;						// ensure no error to handle
