@@ -38,15 +38,15 @@ if [[ "$N" == "0" ]]; then
 	exit 0
 fi
 
-if [[ $N > 30 ]]; then
+if [[ $N -gt 30 ]]; then
 	COLS=6
-elif [[ $N > 20 ]]; then
+elif [[ $N -gt 20 ]]; then
 	COLS=5
-elif [[ $N > 12 ]]; then
+elif [[ $N -gt 12 ]]; then
 	COLS=4
-elif [[ $N > 8 ]]; then
+elif [[ $N -gt 8 ]]; then
 	COLS=3
-elif [[ $N > 4 ]]; then
+elif [[ $N -gt 4 ]]; then
 	COLS=2
 else
 	COLS=1
