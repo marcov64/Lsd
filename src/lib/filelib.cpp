@@ -719,22 +719,22 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	// add XML declaration, type and root node
 	x_nodeT declNode = xf.append_child( pugi::node_declaration );
 	declNode.append_attribute( "version" ) = "1.0";
-	declNode.append_attribute( "encoding" ) = "ANSI";
+	declNode.append_attribute( "encoding" ) = "ISO-8859-1";
 	declNode.append_attribute( "standalone" ) = "yes";
 	xf.append_child( pugi::node_doctype ).set_value( "LSD [\n \
 	<!ELEMENT LSD (configuration)>\n \
 	<!ELEMENT configuration (settings, structure, equation_file)>\n \
-	<!ELEMENT settings (simulation, profiling?, #PCDATA)>\n \
+	<!ELEMENT settings (simulation, profiling?)>\n \
 	<!ELEMENT simulation EMPTY>\n \
 	<!ELEMENT profiling EMPTY>\n \
 	<!ELEMENT structure (object)>\n \
-	<!ELEMENT equation_file (#PCDATA, #CDATA?)>\n \
-	<!ELEMENT object (#PCDATA, description?, nodes?, object*, element*)>\n \
-	<!ELEMENT description (#PCDATA+)>\n \
-	<!ELEMENT nodes (#PCDATA, #PCDATA, #PCDATA?, #PCDATA?, #PCDATA?)>\n \
-	<!ELEMENT element (#PCDATA?, description?, documentation?, sensitivity?, assimilation?)>\n \
+	<!ELEMENT equation_file (#PCDATA)>\n \
+	<!ELEMENT object (description?, nodes?, object*, element*)>\n \
+	<!ELEMENT description (#PCDATA)>\n \
+	<!ELEMENT nodes (#PCDATA)>\n \
+	<!ELEMENT element (description?, documentation?, sensitivity?, assimilation?)>\n \
 	<!ELEMENT documentation EMPTY>\n \
-	<!ELEMENT sensitivity (#PCDATA+)>\n \
+	<!ELEMENT sensitivity (#PCDATA)>\n \
 	<!ELEMENT assimilation EMPTY>\n]" );
 	x_nodeT lsdNode = xf.append_child( "LSD" );
 	x_nodeT cfgNode = lsdNode.append_child( "configuration" );

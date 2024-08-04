@@ -772,16 +772,16 @@ void gui::update_lsd_options( bool save_settings )
 		sysCfg.reset( );							// recreate all
 		x_nodeT typeNode = sysCfg.append_child( pugi::node_declaration );
 		typeNode.append_attribute( "version" ) = "1.0";
-		typeNode.append_attribute( "encoding" ) = "ANSI";
+		typeNode.append_attribute( "encoding" ) = "ISO-8859-1";
 		typeNode.append_attribute( "standalone" ) = "yes";
 		sysCfg.append_child( pugi::node_doctype ).set_value( "LSD [\n \
 		<!ELEMENT LSD (system)>\n \
 		<!ELEMENT system (LMM, makefile)>\n \
 		<!ELEMENT LMM (settings, geometry, model?)>\n \
-		<!ELEMENT settings (#PCDATA+)>\n \
-		<!ELEMENT geometry (#PCDATA?)>\n \
-		<!ELEMENT model? (#PCDATA+?)>\n \
-		<!ELEMENT makefile (#CDATA)>\n]" );
+		<!ELEMENT settings (#PCDATA)>\n \
+		<!ELEMENT geometry (#PCDATA)>\n \
+		<!ELEMENT model (#PCDATA)>\n \
+		<!ELEMENT makefile (#PCDATA)>\n]" );
 		lsdNode = sysCfg.append_child( "LSD" );
 		sysNode = lsdNode.append_child( "system" );
 	}
@@ -1133,15 +1133,15 @@ void gui::update_model_options( bool fix )
 		modCfg.reset( );								// recreate all
 		x_nodeT typeNode = modCfg.append_child( pugi::node_declaration );
 		typeNode.append_attribute( "version" ) = "1.0";
-		typeNode.append_attribute( "encoding" ) = "ANSI";
+		typeNode.append_attribute( "encoding" ) = "ISO-8859-1";
 		typeNode.append_attribute( "standalone" ) = "yes";
 		modCfg.append_child( pugi::node_doctype ).set_value( "LSD [\n \
 		<!ELEMENT LSD (model)>\n \
 		<!ELEMENT model (settings, geometry, configuration?, makefile)>\n \
-		<!ELEMENT settings (#PCDATA+)>\n \
-		<!ELEMENT geometry (#PCDATA+)>\n \
-		<!ELEMENT configuration? (#PCDATA)>\n \
-		<!ELEMENT makefile (#CDATA)>\n]" );
+		<!ELEMENT settings (#PCDATA)>\n \
+		<!ELEMENT geometry (#PCDATA)>\n \
+		<!ELEMENT configuration (#PCDATA)>\n \
+		<!ELEMENT makefile (#PCDATA)>\n]" );
 		lsdNode = modCfg.append_child( "LSD" );
 		modNode = lsdNode.append_child( "model" );
 	}
@@ -1449,13 +1449,13 @@ int gui::Tcl_get_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, 
 		grpCfg.reset( );
 		x_nodeT typeNode = grpCfg.append_child( pugi::node_declaration );
 		typeNode.append_attribute( "version" ) = "1.0";
-		typeNode.append_attribute( "encoding" ) = "ANSI";
+		typeNode.append_attribute( "encoding" ) = "ISO-8859-1";
 		typeNode.append_attribute( "standalone" ) = "yes";
 		grpCfg.append_child( pugi::node_doctype ).set_value( "LSD [\n \
 		<!ELEMENT LSD (model)>\n \
 		<!ELEMENT group (name, description)>\n \
 		<!ELEMENT name (#PCDATA)>\n \
-		<!ELEMENT description (#CDATA)>\n]" );
+		<!ELEMENT description (#PCDATA)>\n]" );
 		lsdNode = grpCfg.append_child( "LSD" );
 		grpNode = lsdNode.append_child( "group" );
 
