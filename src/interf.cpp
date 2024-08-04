@@ -4475,7 +4475,8 @@ lsd::object *gui::operate( lsd::object *r )
 			}
 
 			// print data to log window
-			plog( "\n\nVariables and parameters set for sensitivity analysis:\n" );
+			for ( i = 0, cs = sim.sens; cs != NULL; cs = cs->next, ++i );
+			plog( "\n\nVariables and parameters set for sensitivity analysis (%d):\n", i );
 			for ( cs = sim.sens; cs != NULL; cs = cs->next )
 			{
 				if ( cs->param == 1 )
