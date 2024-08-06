@@ -337,8 +337,56 @@ read.doe <- function( fileName, instance ) {
 
 read.config <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
+  file <- config.file( folder, baseName, fileName )
+  if( length( file ) == 0 )
+      stop( "LSD configuration file missing or non existing" )
+
+  lsd <- NA
+  tryCatch( utils::capture.output( lsd <- XML::xmlParse( file, getDTD = FALSE,
+                                                         isHTML = FALSE ) ),
+            error = function( e ) { cat( ) } )
+
+  if( "XMLInternalDocument" %in% class( lsd ) ) {
+    set <- XML::getNodeSet( lsd, "/LSD/configuration/structure//element[ values[ string-length( text( ) ) > 0 ] ]" )
+    config <- data.frame( matrix( nrow = length( set ), ncol = 2 ) )
+    colnames( config ) <- c( "Par", "Val" )
+    for( i in 1 : length( set ) ) {
+      values <- XML::xmlValue( XML::getNodeSet( set[[ i ]], "values" )[[ 1 ]] )
+      values <- as.numeric( unlist( strsplit( values, split = ",|;" ) ) )
+      config[ i, ] <- list( XML::xmlGetAttr( set[[ i ]], "name" ), values[ 1 ] )
+    }
+  } else {
+    config <- data.frame( stringsAsFactors = FALSE )
+    lsd <- readLines( file )
+    i <- 1
+    while( lsd[ i ] != "DATA" )
+      i <- i + 1                # jump lines until DATA section
+
+    while( lsd[ i ] != "DESCRIPTION" ) {
+      tok <- unlist( strsplit( lsd[ i ], split = " " ) )
+      if( length( tok ) > 0 && ( tok[ 1 ] == "Param:" || tok[ 1 ] == "Var:" ) ) {
+        endtok <- unlist( strsplit( tok[ length( tok ) ], split = "\t" ) )
+        if( length( endtok ) > 1 ) {    # there is a value
+          param <- as.data.frame( list( tok[2], as.numeric( endtok[ 2 ] ) ),
+                                  stringsAsFactors = FALSE )
+          colnames( param ) <- c( "Par", "Val" )
+          config <- rbind( config, param )
+        }
+      }
+      i <- i + 1                # jump lines until DESCRIPTION section
+    }
+  }
+
+  return( config )
+}
+
+
+# ==== Get valid LSD configuration .lsd file name ====
+
+config.file <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
+
   if( is.null( fileName ) && is.null( baseName ) )
-    stop( "LSD configuration file name missing" )
+    return( "" )
 
   if( is.null( fileName ) )
     file <- paste0( baseName, ".lsd" )
@@ -358,31 +406,11 @@ read.config <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
     if( file.exists( paste0( par, "/", file ) ) ) {
       file <- paste0( par, "/", file )
     } else {
-      stop( "LSD configuration file does not exist" )
+      file <- ""
     }
   }
 
-  lsd <- readLines( file )
-  config <- data.frame( stringsAsFactors = FALSE )
-  i <- 1
-  while( lsd[ i ] != "DATA" )
-    i <- i + 1                # jump lines until DATA section
-
-  while( lsd[ i ] != "DESCRIPTION" ) {
-    tok <- unlist( strsplit( lsd[ i ], split = " " ) )
-    if( length( tok ) > 0 && ( tok[ 1 ] == "Param:" || tok[ 1 ] == "Var:" ) ) {
-      endtok <- unlist( strsplit( tok[ length( tok ) ], split = "\t" ) )
-      if( length( endtok ) > 1 ) {    # there is a value
-        param <- as.data.frame( list( tok[2], as.numeric( endtok[ 2 ] ) ),
-                                stringsAsFactors = FALSE )
-        colnames( param ) <- c( "Par", "Val" )
-        config <- rbind( config, param )
-      }
-    }
-    i <- i + 1                # jump lines until DESCRIPTION section
-  }
-
-  return( config )
+  return( file )
 }
 
 
@@ -390,48 +418,95 @@ read.config <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
 read.sens <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
-  if( is.null( fileName ) && is.null( baseName ) )
-    stop( "LSD sensitivity file name (or parts) missing" )
+  file <- config.file( folder, baseName, fileName )
+  if( length( file ) > 0 ) {
 
-  if( is.null( fileName ) )
-    file <- paste0( baseName, ".sa" )
-  else
-    file <- fileName
+    lsd <- NA
+    tryCatch( utils::capture.output( lsd <- XML::xmlParse( file, getDTD = FALSE,
+                                                           isHTML = FALSE ) ),
+              error = function( e ) { cat( ) } )
 
-  if( ! is.null( folder ) && file.exists( folder ) )
-    dir <- normalizePath( folder, winslash = "/", mustWork = TRUE )
-  else
-    dir <- getwd( )
+    if( "XMLInternalDocument" %in% class( lsd ) ) {
+      set <- XML::getNodeSet( lsd, "/LSD/configuration/structure//element/sensitivity[ values[ string-length( text( ) ) > 0 ] ]" )
+      if( length( set ) > 0 ) {
+        warn <- FALSE
+        wid <- 0
+        for( elem in set ) {
+          values <- XML::xmlValue( XML::getNodeSet( elem, "values" )[[ 1 ]] )
+          values <- unlist( strsplit( values, split = "," ) )
 
-  par <- dirname( dir )
+          if( length( values ) %% 2 > 0 ) {
+            if( ! warn ) {
+              warning( "Unused sensitivity values for element(s), discarding last one(s)",
+                       call. = FALSE )
+              warn <- TRUE
+            }
+            wid <- max( wid, length( values ) - 1 )
+          } else
+            wid <- max( wid, length( values ) )
+        }
+        if( wid > 0 ) {
+          limits <- data.frame( matrix( nrow = length( set ), ncol = wid + 1 ) )
+          for( i in 1 : length( set ) ) {
+            values <- XML::xmlValue( XML::getNodeSet( set[[ i ]], "values" )[[ 1 ]] )
+            values <- as.numeric( unlist( strsplit( values, split = ",|;" ) ) )
 
-  if( file.exists( paste0( dir, "/", file ) ) ) {
-    file <- paste0( dir, "/", file )
-  } else {
-    if( file.exists( paste0( dir, "/", file, "n" ) ) ) {    # accept .san extension (CRAN bug)
-      file <- paste0( dir, "/", file, "n" )
-    } else {
-      if( file.exists( paste0( par, "/", file ) ) ) {
-        file <- paste0( par, "/", file )
-      } else {
-        if( file.exists( paste0( par, "/", file, "n" ) ) ) {
-          file <- paste0( par, "/", file, "n" )
-        } else {
-          stop( "LSD sensitivity file does not exist" )
+            if( length( values ) %% 2 > 0 )
+              values <- values[ 1 : ( length( values ) - 1 ) ]
+
+            length( values ) <- wid
+            limits[ i, ] <- c( XML::xmlGetAttr( XML::xmlParent( set[[ i ]] ), "name" ),
+                                  as.list( values ) )
+          }
         }
       }
     }
   }
 
-  limits <- utils::read.table( file, stringsAsFactors = FALSE, fill = TRUE )
-  limits <- limits[ -2 : -3 ]
-  if( ! is.numeric( limits[ 1, 2 ] ) )  # handle newer LSD versions bringing extra col
-    limits <- limits[ -2 ]
+  if( ! exists( "limits" ) ) {
+    if( is.null( fileName ) && is.null( baseName ) )
+      stop( "LSD sensitivity file name (or parts) missing" )
 
-  if( ( ncol( limits ) - 1 ) %% 2 > 0 ) {
-    warning( "Unused sensitivity values for parameter(s), discarding last one(s)",
-             call. = FALSE )
-    limits <- limits[ - ncol( limits ) ]
+    if( is.null( fileName ) )
+      file <- paste0( baseName, ".sa" )
+    else
+      file <- fileName
+
+    if( ! is.null( folder ) && file.exists( folder ) )
+      dir <- normalizePath( folder, winslash = "/", mustWork = TRUE )
+    else
+      dir <- getwd( )
+
+    par <- dirname( dir )
+
+    if( file.exists( paste0( dir, "/", file ) ) ) {
+      file <- paste0( dir, "/", file )
+    } else {
+      if( file.exists( paste0( dir, "/", file, "n" ) ) ) {    # accept .san extension (CRAN bug)
+        file <- paste0( dir, "/", file, "n" )
+      } else {
+        if( file.exists( paste0( par, "/", file ) ) ) {
+          file <- paste0( par, "/", file )
+        } else {
+          if( file.exists( paste0( par, "/", file, "n" ) ) ) {
+            file <- paste0( par, "/", file, "n" )
+          } else {
+            stop( "LSD sensitivity file does not exist" )
+          }
+        }
+      }
+    }
+
+    limits <- utils::read.table( file, stringsAsFactors = FALSE, fill = TRUE )
+    limits <- limits[ -2 : -3 ]
+    if( ! is.numeric( limits[ 1, 2 ] ) )  # handle newer LSD versions bringing extra col
+      limits <- limits[ -2 ]
+
+    if( ( ncol( limits ) - 1 ) %% 2 > 0 ) {
+      warning( "Unused sensitivity values for element(s), discarding last one(s)",
+               call. = FALSE )
+      limits <- limits[ - ncol( limits ) ]
+    }
   }
 
   tit <- inst <- c( )
