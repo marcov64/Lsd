@@ -190,6 +190,7 @@ proc showmodel groupdir {
 
 		$m add separator
 
+		$m add command -label "Citing LSD..." -underline 0 -command { LsdCiting $_LSD_DATE_ .l }
 		$m add command -label "About LSD..." -underline 0 -command { LsdAbout $_LSD_VERSION_ $_LSD_DATE_ .l }
 
 		.l configure -menu .l.m

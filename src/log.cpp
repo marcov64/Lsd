@@ -97,7 +97,7 @@ void gui::create_logwindow( void )
 	cmd( "rename .log.text.text .log.text.text.internal" );
 	cmd( "proc .log.text.text { args } { switch -exact -- [ lindex $args 0 ] { insert { } delete { } replace { } default { return [ eval .log.text.text.internal $args] } } }" );
 
-	cmd( "plog \"LSD Version %s (%s)\nCopyright Marco Valente and Marcelo Pereira\nLSD is distributed under the GNU General Public License\nLSD is free software and comes with ABSOLUTELY NO WARRANTY\n[ LsdEnv {	} ]\n\"", _LSD_VERSION_, _LSD_DATE_ );
+	cmd( "plog \"LSD Version %s (%s)\nCopyright Marco Valente and Marcelo Pereira\nLSD is distributed under the GNU General Public License\nPlease see on menu Help how to cite LSD in publications\nLSD is free software and comes with ABSOLUTELY NO WARRANTY\n\n[ LsdEnv {	} ]\n\"", _LSD_VERSION_, _LSD_DATE_ );
 
 	log_ok = true;
 }

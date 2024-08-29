@@ -139,6 +139,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 		cmd( "$w add separator" );
 		cmd( "$w add command -label \"Model Report\" -underline 0 -command { set choice 27 }" );
 		cmd( "$w add separator" );
+		cmd( "$w add command -label \"Citing LSD...\" -underline 0 -command { LsdCiting {%s} .deb }", _LSD_DATE_ );
 		cmd( "$w add command -label \"About LSD...\" -underline 0 -command { LsdAbout {%s} {%s} .deb }", _LSD_VERSION_, _LSD_DATE_ );
 		cmd( ".deb configure -menu .deb.m" );
 

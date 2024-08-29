@@ -41,6 +41,20 @@ proc LsdAbout { ver dat { parWnd "." } } {
 
 
 #************************************************
+# LSDCITING
+# Show LSD Citing dialog box
+#************************************************
+proc LsdCiting { dat { parWnd "." } } {
+
+	set year [ lindex $dat end ]
+
+	ttk::messageBox -parent $parWnd -type ok -icon info -title "Citing LSD" \
+		-message "To cite LSD in publications" \
+		-detail "Please use (or adapt to your format):\n\n Valente, M. and M. C. Pereira ($year).\n \"LSD: Laboratory for Simulation Development\".\n Universita' dell'Aquila\n  and Universidade Estadual de Campinas,\n Aquila, Italy and Campinas, Brazil.\n <https://www.labsimdev.org/>.\n\nBibTex entry:\n\n @Manual{LSD,\n  title = {LSD: Laboratory for Simulation Development},\n  author = {Valente, Marco and Pereira, Marcelo C.},\n  organization = {Universita' dell'Aquila and\n   Universidade Estadual de Campinas},\n  address = {Aquila, Italy and Campinas, Brazil},\n  year = {$year},\n  url = {https://www.labsimdev.org/}\n }"
+}
+
+
+#************************************************
 # LSDENV
 # Return current LSD working environment
 #************************************************

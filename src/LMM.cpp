@@ -424,6 +424,7 @@ int modman( int argn, const char **argv )
 	cmd( "$w add command -label \"Using LSD Models Tutorial\" -underline 0 -command { LsdHelp model_using.html }" );
 	cmd( "$w add command -label \"Writing LSD Models Tutorial\" -underline 0 -command { LsdHelp model_writing.html }" );
 	cmd( "$w add separator" );
+	cmd( "$w add command -label \"Citing LSD...\" -underline 0 -command { LsdCiting {%s} }", _LSD_DATE_ );
 	cmd( "$w add command -label \"About LSD...\" -underline 0 -command { LsdAbout {%s} {%s} }", _LSD_VERSION_, _LSD_DATE_  );
 
 	// Button bar

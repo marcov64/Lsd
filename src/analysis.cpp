@@ -266,6 +266,7 @@ void gui::analysis( bool mc )
 	cmd( "$w add separator" );
 	cmd( "$w add command -label \"Model Report\" -underline 0 -command { set choice 43 }" );
 	cmd( "$w add separator" );
+	cmd( "$w add command -label \"Citing LSD...\" -underline 0 -command { LsdCiting {%s} .da }", _LSD_DATE_ );
 	cmd( "$w add command -label \"About LSD...\" -underline 0 -command { LsdAbout {%s} {%s} .da }", _LSD_VERSION_, _LSD_DATE_  );
 
 	cmd( ".da configure -menu .da.m" );

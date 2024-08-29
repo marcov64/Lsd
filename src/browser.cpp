@@ -1164,6 +1164,7 @@ int gui::browse( lsd::object *r )
 			cmd( "if { ! [ string equal $CurPlatform windows ] } { $w add command -label \"Set Browser\" -command { set choice 48 } -underline 0 }" );
 			cmd( "$w add command -label \"Model Report\" -underline 0 -command { set choice 44 }" );
 			cmd( "$w add separator" );
+			cmd( "$w add command -label \"Citing LSD...\" -underline 0 -command { LsdCiting {%s} }", _LSD_DATE_ );
 			cmd( "$w add command -label \"About LSD...\" -underline 0 -command { LsdAbout {%s} {%s} }", _LSD_VERSION_, _LSD_DATE_  );
 
 			// set shortcuts on open windows
