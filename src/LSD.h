@@ -121,7 +121,7 @@
 
 #define ASSIMILATION_EXT \
 	public: \
-	bool config( const char *parWnd = NULL );
+	int dataentry( const char *parWnd = NULL );
 
 // definitions from LSD library
 #include "lib/libLSD.h"

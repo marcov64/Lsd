@@ -635,17 +635,17 @@ const char *lsd::variable::print_constr( char *buf, int buf_sz )
 
 
 /*************************************************************
- CONFIG
+ DATAENTRY
  Configure element for data assimilation
  *************************************************************/
-bool lsd::assimilation::config( const char *parWnd )
+int lsd::assimilation::dataentry( const char *parWnd )
 {
-	bool res = false;
+	int res;
 	variable *cv;
 
 	cv = sim->root->search_var( NULL, label );
 	if ( cv == NULL )
-		return res;
+		return 2;
 
 	cmd( "set path \"%s\"", sim->conf_path );
 	if ( strlen( sim->conf_path ) > 0 )
@@ -669,6 +669,11 @@ bool lsd::assimilation::config( const char *parWnd )
 		} else { \
 			set _w $parWnd.as \
 		}" );
+
+	cmd( "set data_col_name %s", label );
+	cmd( "set data_col_num 0" );
+	cmd( "set t_col_name \"\"" );
+	cmd( "set t_col_num 0" );
 
 	cmd( "newtop $_w \"Data Assimilation Settings\" { set choice 2 } $parWnd" );
 
@@ -711,13 +716,81 @@ bool lsd::assimilation::config( const char *parWnd )
 	cmd( "pack $_w.csv.file.e $_w.csv.file.brw -side left -padx $_5" );
 
 	cmd( "pack $_w.csv.l $_w.csv.file" );
-	cmd( "pack $_w.csv -padx $_5 -pady $_10" );
 
+	cmd( "ttk::frame $_w.dcol" );
+	cmd( "ttk::label $_w.dcol.l -text \"Data column\"" );
 
+	cmd( "ttk::frame $_w.dcol.d" );
+	cmd( "ttk::label $_w.dcol.d.l1 -text Name" );
+	cmd( "ttk::entry $_w.dcol.d.n1 -width 15 -justify center -textvariable data_col_name -validate focusout -validatecommand { \
+			if { [ string length $data_col_name ] > 0 } { \
+				set data_col_num 0; \
+				$_w.dcol.d.n2 delete 0 end; \
+				$_w.dcol.d.n2 insert 0 0 \
+			}; \
+			return 1 \
+		}" );
+	cmd( "ttk::label $_w.dcol.d.l2 -text \"or number\"" );
+	cmd( "ttk::spinbox $_w.dcol.d.n2 -width 4 -justify center -from 0 -to 999 -validate focusout -validatecommand { \
+			set n %%P; \
+			if { [ string is integer -strict $n ] && $n >= 0 } { \
+				set data_col_num %%P; \
+				if { $n == 0 } { \
+					set data_col_name %s \
+				} { \
+					set data_col_name \"\" \
+				}; \
+				$_w.dcol.d.n1 delete 0 end; \
+				$_w.dcol.d.n1 insert 0 $data_col_name; \
+				return 1 \
+			} { \
+				%%W delete 0 end; \
+				%%W insert 0 $data_col_num; \
+				return 0 \
+			} \
+		} -invalidcommand { bell }", label );
+	cmd( "$_w.dcol.d.n2 insert 0 $data_col_num" );
+	cmd( "ttk::label $_w.dcol.d.l3 -text \"(0 : none)\"" );
 
+	cmd( "pack $_w.dcol.d.l1 $_w.dcol.d.n1 $_w.dcol.d.l2 $_w.dcol.d.n2 $_w.dcol.d.l3 -side left" );
+	cmd( "pack $_w.dcol.l $_w.dcol.d" );
 
+	cmd( "ttk::frame $_w.tcol" );
+	cmd( "ttk::label $_w.tcol.l -text \"Time reference column\"" );
 
-	cmd( "okhelpcancel $_w b { set choice 1 } { LsdHelp menudata_init.html#assimilation } { set choice 2 }" );
+	cmd( "ttk::frame $_w.tcol.d" );
+	cmd( "ttk::label $_w.tcol.d.l1 -text Name" );
+	cmd( "ttk::entry $_w.tcol.d.n1 -width 15 -justify center -textvariable t_col_name -validate focusout -validatecommand { \
+			if { [ string length $t_col_name ] > 0 } { \
+				set t_col_num 0; \
+				$_w.tcol.d.n2 delete 0 end; \
+				$_w.tcol.d.n2 insert 0 0 \
+			}; \
+			return 1 \
+		}" );
+	cmd( "ttk::label $_w.tcol.d.l2 -text \"or number\"" );
+	cmd( "ttk::spinbox $_w.tcol.d.n2 -width 4 -justify center -from 0 -to 999 -validate focusout -validatecommand { \
+			set n %%P; \
+			if { [ string is integer -strict $n ] && $n >= 0 } { \
+				set t_col_num %%P; \
+				set t_col_name \"\"; \
+				$_w.tcol.d.n1 delete 0 end; \
+				return 1 \
+			} { \
+				%%W delete 0 end; \
+				%%W insert 0 $t_col_num; \
+				return 0 \
+			} \
+		} -invalidcommand { bell }" );
+	cmd( "$_w.tcol.d.n2 insert 0 $t_col_num" );
+	cmd( "ttk::label $_w.tcol.d.l3 -text \"(0 : none)\"" );
+
+	cmd( "pack $_w.tcol.d.l1 $_w.tcol.d.n1 $_w.tcol.d.l2 $_w.tcol.d.n2 $_w.tcol.d.l3 -side left" );
+	cmd( "pack $_w.tcol.l $_w.tcol.d" );
+
+	cmd( "pack $_w.csv $_w.dcol $_w.tcol -padx $_5 -pady $_10" );
+
+	cmd( "okXhelpcancel $_w b Remove { set choice 3 } { set choice 1 } { LsdHelp menudata_init.html#assimilation } { set choice 2 }" );
 
 	cmd( "showtop $_w centerW" );
 	cmd( "mousewarpto $_w.b.ok 0" );
@@ -726,17 +799,49 @@ bool lsd::assimilation::config( const char *parWnd )
 	while ( gui::choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	if ( gui::choice == 1 && strlen( gui::get_str( "csv" ) ) > 0 )
+	res = gui::choice - 1;
+
+	if ( strlen( gui::get_str( "csv" ) ) == 0 )
+		res = 2;
+
+	if ( res > 0 )
+		goto end;
+
+	cmd( "lappend modCSV $csv" );
+	cmd( "set modCSV [ lsort -dictionary -unique $modCSV ] " );
+
+	cmd( "set csv [ string map {\\\\ /} $csv ]" );
+	delete [ ] csv;
+	csv = new char [ strlen( gui::get_str( "csv" ) ) + 1 ];
+	strcpy( csv, gui::get_str( "csv" ) );
+
+	data_col_num = 0;
+	delete [ ] data_col_name;
+	if ( strlen( gui::get_str( "data_col_name" ) ) > 0 )
 	{
-		cmd( "lappend modCSV $csv" );
-		cmd( "set modCSV [ lsort -dictionary -unique $modCSV ] " );
-
-		cmd( "set csv [ string map {\\\\ /} $csv ]" );
-		csv = new char [ strlen( gui::get_str( "csv" ) ) + 1 ];
-		strcpy( csv, gui::get_str( "csv" ) );
-
-		res = true;
+		data_col_name = new char [ strlen( gui::get_str( "data_col_name" ) ) + 1 ];
+		strcpy( data_col_name, gui::get_str( "data_col_name" ) );
 	}
+	else
+	{
+		data_col_name = NULL;
+		data_col_num = gui::get_int( "data_col_num" );
+	}
+
+	t_col_num = 0;
+	delete [ ] t_col_name;
+	if ( strlen( gui::get_str( "t_col_name" ) ) > 0 )
+	{
+		t_col_name = new char [ strlen( gui::get_str( "t_col_name" ) ) + 1 ];
+		strcpy( t_col_name, gui::get_str( "t_col_name" ) );
+	}
+	else
+	{
+		t_col_name = NULL;
+		t_col_num = gui::get_int( "t_col_num" );
+	}
+
+	end:
 
 	cmd( "destroytop $_w" );
 
