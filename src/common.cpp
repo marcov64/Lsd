@@ -972,6 +972,9 @@ bool gui::load_model_options( const char *path, bool fix )
 		}
 
 		cmd( "close $f" );
+
+		// load corresponding legacy makefile, if any
+		load_legacy_makefile( path );
 	}
 
 	snprintf( fName, MAX_PATH_LENGTH, "%s%s%s", path, strlen( path ) > 0 ? "/" : "", MODEL_XML_CONFIG );
@@ -1023,29 +1026,10 @@ bool gui::load_model_options( const char *path, bool fix )
 	s = makNode.text( ).as_string( );
 	if ( strlen( s ) == 0 )
 	{
-		// try to read legacy file
-		cmd( "if { [ file exists \"%s/$MODEL_TXT_OPTIONS\" ] } { \
-				set sysfile \"%s/$MODEL_TXT_OPTIONS\" \
-			} { \
-				set sysfile \"\" \
-			}", path, path );
+		if ( ! load_legacy_makefile( path ) )		// try to read legacy file
+			reset_make_options( 2 );				// use default settings
 
-		if ( strlen( get_str( "sysfile" ) ) > 0 )
-		{
-			cmd( "set f [ open $sysfile r ]" );
-			cmd( "set model_make [ string trim [ read $f ] ]" );
-			cmd( "close $f" );
-			if ( ( s = get_str( "model_make" ) ) != NULL )
-			{
-				delete [ ] model_make;
-				model_make = new char [ strlen( s ) + 1 ];
-				strcpy( model_make, s );
-			}
-		}
-		else
-			reset_make_options( 2 );			// if not, use default settings
-
-		update_model_options( );				// update configuration file
+		update_model_options( );					// update configuration file
 	}
 	else
 	{
@@ -1055,6 +1039,40 @@ bool gui::load_model_options( const char *path, bool fix )
 	}
 
 	return true;
+}
+
+
+/*************************************************************
+ LOAD_LEGACY_MAKEFILE
+ *************************************************************/
+bool gui::load_legacy_makefile( const char *path )
+{
+	const char *s;
+
+	delete [ ] model_make;
+	model_make = NULL;
+	cmd( "set model_make \"\"" );
+
+	cmd( "if { [ file exists \"%s/$MODEL_TXT_OPTIONS\" ] } { \
+			set sysfile \"%s/$MODEL_TXT_OPTIONS\" \
+		} { \
+			set sysfile \"\" \
+		}", path, path );
+
+	if ( strlen( get_str( "sysfile" ) ) > 0 )
+	{
+		cmd( "set f [ open $sysfile r ]" );
+		cmd( "set model_make [ string trim [ read $f ] ]" );
+		cmd( "close $f" );
+		if ( ( s = get_str( "model_make" ) ) != NULL )
+		{
+			model_make = new char [ strlen( s ) + 1 ];
+			strcpy( model_make, s );
+			return true;
+		}
+	}
+
+	return false;
 }
 
 

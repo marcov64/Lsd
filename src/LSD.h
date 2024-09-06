@@ -341,6 +341,7 @@ namespace gui
 	bool expr_eq( const char *tcl_exp, const char *c_str );
 	bool get_bool( const char *tcl_var, bool *var = NULL );
 	bool get_precompiled_flag( const char *exec, bool term = false );
+	bool load_legacy_makefile( const char *path );
 	bool load_model_options( const char *path, bool fix = true );
 	bool load_prev_configuration( void );
 	bool make_terminal( void );
