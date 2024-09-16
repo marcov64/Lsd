@@ -104,7 +104,7 @@ CYCLE_SAFE( cur, "Firm1" )
 			if ( VS( cur, "_NW1" ) < 0 )		// count bankruptcies
 				++v[6];
 
-			exit_firm( var, cur );				// del obj & collect liq. value
+			exit_firm( _v_, cur );				// del obj & collect liq. value
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
@@ -124,7 +124,7 @@ CYCLE_SAFE( cur, "Firm1" )
 V( "f1rescale" );								// redistribute exiting m.s.
 
 // replace exiting firms by entrants
-entry_firm1( var, THIS, j, false );				// add entrant-firm objects
+entry_firm1( _v_, THIS, j, false );				// add entrant-firm objects
 
 INCR( "cEntry1", v[1] );						// add cost of additional equity
 WRITES( SECSTAL1, "exit1fail", v[6] / F1 );

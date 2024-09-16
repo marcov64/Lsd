@@ -445,7 +445,7 @@ for( k in 1 : nExp ){
                     sector, sep ="\n" )
   title( main = title, sub = subTitle )
 
-  if( ! is.na( bins[[ k ]] ) ) {
+  if( ! all( is.na( bins[[ k ]] ) ) ) {
 
     # ------ Gibrat law test plot ------
 

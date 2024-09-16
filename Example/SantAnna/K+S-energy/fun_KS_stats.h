@@ -39,21 +39,24 @@ EQUATION( "CD" )
 /*
 Total credit demand
 */
-RESULT( VS( SECSTAL2, "CD1" ) + VS( SECSTAL2, "CD2" ) )
+RESULT( VS( SECSTAL2, "CD1" ) + VS( SECSTAL2, "CD2" ) +
+		VS( ENESTAL2, "CDe" ) + VS( ENESTAL2, "CDge" ) )
 
 
 EQUATION( "CDc" )
 /*
 Total credit demand constraint
 */
-RESULT( VS( SECSTAL2, "CD1c" ) + VS( SECSTAL2, "CD2c" ) )
+RESULT( VS( SECSTAL2, "CD1c" ) + VS( SECSTAL2, "CD2c" ) +
+		VS( ENESTAL2, "CDeC" ) + VS( ENESTAL2, "CDgeC" )  )
 
 
 EQUATION( "CS" )
 /*
 Total credit supplied
 */
-RESULT( VS( SECSTAL2, "CS1" ) + VS( SECSTAL2, "CS2" ) )
+RESULT( VS( SECSTAL2, "CS1" ) + VS( SECSTAL2, "CS2" ) +
+		VS( ENESTAL2, "CSe" ) + VS( ENESTAL2, "CSge" )  )
 
 
 EQUATION( "DefGDP" )
@@ -176,7 +179,7 @@ RESULT( v[0] )
 
 EQUATION( "TC" )
 /*
-Total credit supply provided by financial sector
+Total regular credit supply provided by financial sector
 Negative value (-1) means unlimited credit
 */
 
@@ -184,6 +187,17 @@ if ( VS( GRANDPARENT, "flagCreditRule" ) < 1 )
 	END_EQUATION( -1 );
 
 RESULT( SUMS( FINSECL2, "_TC" ) )
+
+
+EQUATION( "TCge" )
+/*
+Total credit provided by financial sector to green energy project finance
+*/
+
+if ( VS( GRANDPARENT, "flagProjFinGE" ) < 3 )
+	END_EQUATION( -1 );
+
+RESULT( SUMS( FINSECL2, "_TCge" ) )
 
 
 /*=========================== ENERGY SECTOR STATS ============================*/
@@ -210,6 +224,13 @@ Total credit demand in energy sector
 RESULT( SUMS( ENESECL2, "_CDe" ) )
 
 
+EQUATION( "CDge" )
+/*
+Total credit demand in energy sector to green power plant project finance
+*/
+RESULT( SUMS( ENESECL2, "_CDge" ) )
+
+
 EQUATION( "CDeC" )
 /*
 Total credit demand constraint in energy sector
@@ -217,11 +238,25 @@ Total credit demand constraint in energy sector
 RESULT( SUMS( ENESECL2, "_CDeC" ) )
 
 
+EQUATION( "CDgeC" )
+/*
+Total credit demand constraint in energy sector to green power plant project finance
+*/
+RESULT( SUMS( ENESECL2, "_CDgeC" ) )
+
+
 EQUATION( "CSe" )
 /*
 Total credit supplied in energy sector
 */
 RESULT( SUMS( ENESECL2, "_CSe" ) )
+
+
+EQUATION( "CSge" )
+/*
+Total credit supplied in energy sector to green power plant project finance
+*/
+RESULT( SUMS( ENESECL2, "_CSge" ) )
 
 
 EQUATION( "DebEmax" )
@@ -266,6 +301,42 @@ Average unit installation cost of a new green power plant in energy sector
 RESULT( AVES( ENESECL2, "_ICtauGE" ) )
 
 
+EQUATION( "ICtauGEeff" )
+/*
+Machine-modularity efficiency of a new green power plant in energy sector
+*/
+
+v[1] = v[2] = 0;
+CYCLES( ENESECL2, cur, "FirmE" )
+	CYCLES( cur, cur1, "Green" )
+		if ( VS( cur1, "__tGE" ) == T )
+		{
+			v[1] += VS( cur1, "__Kge" );
+			v[2] += VS( cur1, "__ICge" ) / VS( cur, "_ICtauGE" );
+		}
+
+RESULT( v[2] > 0 ? v[1] / v[2] : 0 )
+
+
+EQUATION( "IgeDEratio" )
+/*
+Average ICtauGE over ( bE * ( pF / AtauDE + w ( mDE - mGE) ) investment decision
+*/
+RESULT( V( "ICtauGEavg" ) /
+		( VS( ENESECL2, "bE" ) *
+		  ( VS( ENESECL2, "pF" ) / V( "AtauDEavg" ) ) +
+			VS( LABSUPL2, "w" ) *
+			( VS( ENESECL2, "mDE" ) - VS( ENESECL2, "mGE" ) ) ) )
+
+
+EQUATION( "NPVgeAvg" )
+/*
+Average net present value of green energy project finance
+*/
+v[1] = SUMS( ENESECL2, "_IgeD" );
+RESULT( v[1] > 0 ? WHTAVES( ENESECL2, "_NPVge", "_IgeD" ) / v[1] : 0 )
+
+
 EQUATION( "RDe" )
 /*
 R&D expenditure of energy sector
@@ -280,6 +351,14 @@ Power plant (planned) scrapping rate of energy sector
 v[1] = SUMLS( ENESECL2, "_Ke", 1 );
 RESULT( T > 1 && v[1] > 0 ? ( SUMS( ENESECL2, "_SIdeD" ) +
 							  SUMS( ENESECL2, "_SIgeD" ) ) / v[1] : 0 )
+
+
+EQUATION( "SNPVgeAvg" )
+/*
+Average strategic net present value of green energy project finance
+*/
+v[1] = SUMS( ENESECL2, "_IgeD" );
+RESULT( v[1] > 0 ? WHTAVES( ENESECL2, "_SNPVge", "_IgeD" ) / v[1] : 0 )
 
 
 EQUATION( "ageEavg" )
@@ -347,6 +426,37 @@ Share of green energy power plants in installed generation capacity
 */
 v[1] = VS( ENESECL2, "Kge" );
 RESULT( v[1] > 0 ? v[1] / ( v[1] + VS( ENESECL2, "Kde" ) ) : 0 )
+
+
+EQUATION( "fKpfinGE" )
+/*
+Share of power plants using project finance in green energy installed capacity
+*/
+
+v[1] = v[2] = 0;
+CYCLES( ENESECL2, cur, "FirmE" )
+{
+	v[1] += SUM_CNDS( cur, "__Kge", "__pfinGE", "==", 1 );
+	v[2] += SUM_CNDS( cur, "__Kge", "__pfinGE", "!=", 1 );
+}
+
+RESULT( v[1] + v[2] > 0 ? v[1] / ( v[1] + v[2] ) : 0 )
+
+
+EQUATION( "pfinGEexe" )
+/*
+Share of project finance loans with canceled option exercised
+*/
+
+v[1] = v[2] = 0;
+
+CYCLES( ENESECL2, cur, "FirmE" )
+{
+	v[1] += COUNT_CNDS( cur, "Green", "__pfinGE", "==", 1 );
+	v[2] += COUNT_CNDS( cur, "Green", "__pfinGE", "==", 2 );
+}
+
+RESULT( v[1] > 0 ? v[2] / ( v[1] + v[2] ) : 0 )
 
 
 /*======================= CAPITAL-GOOD SECTOR STATS ==========================*/
@@ -635,7 +745,7 @@ EQUATION( "_Ade" )
 Thermal efficiency of energy producer
 */
 v[1] = SUM( "__Qde" );
-RESULT( v[1] > 0 ? WHTAVE( "__Ade", "__Qde" ) / v[1] : CURRENT )
+RESULT( v[1] > 0 ? WHTAVE( "__Ade", "__Qde" ) / v[1] : V( "_AtauDE" ) )
 
 
 EQUATION( "_A2e" )

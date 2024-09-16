@@ -451,10 +451,10 @@ VS( cur3, "banksMaps" );						// update the mapping vectors
 DELETE( SEARCHS( cur1, "Firm1" ) );				// remove empty firm instances
 DELETE( SEARCHS( cur2, "Firm2" ) );
 
-v[1] = entry_firm1( var, cur1, F1, true );		// add capital-good firms
+v[1] = entry_firm1( _v_, cur1, F1, true );		// add capital-good firms
 INIT_TSEARCHS( cur1, "Firm1" );					// prepare turbo search indexing
 
-v[1] += entry_firm2( var, cur2, F2, true );		// add consumer-good firms
+v[1] += entry_firm2( _v_, cur2, F2, true );		// add consumer-good firms
 VS( cur2, "firm2maps" );						// update the mapping vectors
 
 WRITEL( "Eq", v[1], -1 );						// save existing equity

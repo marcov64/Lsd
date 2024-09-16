@@ -36,6 +36,7 @@ Label Root
 				Func: _cScores
 				Var: _BD
 				Var: _BadDebE
+				Var: _BadDebGE
 				Var: _BadDeb1
 				Var: _BadDeb2
 				Var: _Bda
@@ -50,11 +51,14 @@ Label Root
 				Var: _Gbail
 				Var: _Loans
 				Var: _LoansCB
+				Var: _LoansGE
 				Var: _NWb
 				Var: _PiB
 				Var: _Res
 				Var: _TC
 				Var: _TCeFree
+				Var: _TCge
+				Var: _TCgeFree
 				Var: _TC1free
 				Var: _TC2free
 				Var: _TaxB
@@ -91,6 +95,7 @@ Label Root
 			Param: rT
 			Param: rhoBonds
 			Param: tauB
+			Param: tauBge
 			Param: thetaBonds
 			Func: banksMaps
 			Func: cScores
@@ -99,6 +104,7 @@ Label Root
 			Var: BS
 			Var: BadDeb
 			Var: BadDebE
+			Var: BadDebGE
 			Var: BadDeb1
 			Var: BadDeb2
 			Var: BondsB
@@ -111,6 +117,7 @@ Label Root
 			Var: Gbail
 			Var: Loans
 			Var: LoansCB
+			Var: LoansGE
 			Var: NWb
 			Var: PiB
 			Var: PiCB
@@ -220,6 +227,7 @@ Label Root
 					Var: __QdeU
 					Var: __RSde
 					Var: __cDE
+					Var: __lifeDEcycle
 
 				}
 
@@ -235,13 +243,20 @@ Label Root
 				{
 					Param: __ICge
 					Param: __Kge
+					Param: __TfinGE
 					Param: __mGE
+					Param: __pfinGE
+					Param: __rGEdeb
 					Param: __tGE
+					Var: __DebGE
 					Var: __LgeD
 					Var: __Qge
 					Var: __QgeU
 					Var: __RSge
+					Var: __amtGE
 					Var: __cGE
+					Var: __iGE
+					Var: __lifeGEcycle
 
 				}
 
@@ -251,16 +266,21 @@ Label Root
 				Param: _pOrdE
 				Param: _tEent
 				Func: _CSeA
+				Func: _CSgeA
 				Var: _Ade
 				Var: _AtauDE
 				Var: _Ce
 				Var: _CDe
 				Var: _CDeC
+				Var: _CDge
+				Var: _CDgeC
 				Var: _CIe
 				Var: _CSe
+				Var: _CSge
 				Var: _De
 				Var: _DeE
 				Var: _DebE
+				Var: _DebGE
 				Var: _DebEmax
 				Var: _Df
 				Var: _DivE
@@ -268,6 +288,11 @@ Label Root
 				Var: _EIeD
 				Var: _EmE
 				Var: _ICtauGE
+				Var: _IgeD
+				Var: _IgeDnom
+				Var: _IdeCon
+				Var: _IgeCon
+				Var: _IeCon
 				Var: _IeNom
 				Var: _JOe
 				Var: _Ke
@@ -278,6 +303,7 @@ Label Root
 				Var: _LeD
 				Var: _LeDrd
 				Var: _LeRD
+				Var: _NPVge
 				Var: _NWe
 				Var: _PiE
 				Var: _Qe
@@ -290,19 +316,23 @@ Label Root
 				Var: _SIgeD
 				Var: _SIe
 				Var: _SIeD
+				Var: _SNPVge
 				Var: _TaxE
 				Var: _We
 				Var: _allocE
+				Var: _amtGE
 				Var: _emTauDE
 				Var: _fE
 				Var: _fKge
 				Var: _iDe
 				Var: _iE
+				Var: _iGE
 				Var: _innDE
 				Var: _innGE
 				Var: _muE
 				Var: _pE
 				Var: _qcE
+				Var: _rEdeb
 				Var: _supplierE
 
 			}
@@ -318,23 +348,32 @@ Label Root
 			Param: NWe0
 			Param: Phi5
 			Param: Phi6
+			Param: Tcon
+			Param: Tfin
+			Param: Tplan
 			Param: alpha3
 			Param: beta3
 			Param: alphaE
 			Param: betaE
 			Param: bE
 			Param: dE
+			Param: deltaAe
+			Param: deltaP
+			Param: deltaU
+			Param: deltaW
 			Param: emDE0
 			Param: etaE
 			Param: fEmin
 			Param: fGE0
 			Param: iotaE
-			Param: kappaE
+			Param: kappaEmax
+			Param: kappaEmin
 			Param: lastIDe
 			Param: mDE
 			Param: mGE
 			Param: mEmin
 			Param: muE0
+			Param: muEmax
 			Param: nE
 			Param: nuE
 			Param: pF0
@@ -353,12 +392,15 @@ Label Root
 			Param: zetaGE
 			Func: fErescale
 			Func: firmEmaps
+			Var: Ae
+			Var: AeMavg
 			Var: Ce
 			Var: CeEq
 			Var: CIe
 			Var: De
 			Var: DeE
 			Var: DebE
+			Var: DebGE
 			Var: Df
 			Var: DivE
 			Var: EIe
@@ -381,6 +423,7 @@ Label Root
 			Var: PiE
 			Var: Qe
 			Var: QeO
+			Var: Qge
 			Var: SIe
 			Var: SIeD
 			Var: Se
@@ -388,13 +431,19 @@ Label Root
 			Var: We
 			Var: cEntryE
 			Var: cExitE
+			Var: dDeMavg
 			Var: entryE
 			Var: entryEexit
 			Var: exitE
 			Var: iDe
 			Var: iE
+			Var: iGE
 			Var: pE
+			Var: pEmavg
 			Var: pF
+			Var: uE
+			Var: uEmavg
+			Var: wEmavg
 
 		}
 
@@ -777,6 +826,7 @@ Label Root
 				Var: HHb
 				Var: HPb
 				Var: TC
+				Var: TCge
 				Var: TaxCO2
 				Var: dA
 				Var: dEm
@@ -791,14 +841,21 @@ Label Root
 				Var: AtauDEavg
 				Var: CDe
 				Var: CDeC
+				Var: CDge
+				Var: CDgeC
 				Var: CSe
+				Var: CSge
 				Var: DebEmax
 				Var: EnGDP
 				Var: HHe
 				Var: HPe
 				Var: ICtauGEavg
+				Var: ICtauGEeff
+				Var: IgeDEratio
+				Var: NPVgeAvg
 				Var: RDe
 				Var: RSe
+				Var: SNPVgeAvg
 				Var: ageEavg
 				Var: dEmE
 				Var: dEn
@@ -806,9 +863,11 @@ Label Root
 				Var: exitEfail
 				Var: fGE
 				Var: fKge
+				Var: fKpfinGE
 				Var: innDE
 				Var: innGE
 				Var: muEavg
+				Var: pfinGEexe
 
 			}
 
@@ -908,6 +967,7 @@ Label Root
 		Param: flagExpect
 		Param: flagFiscalRule
 		Param: flagGovExp
+		Param: flagProjFinGE
 		Param: flagTax
 		Param: Crec
 		Param: gG
@@ -971,6 +1031,7 @@ Param: flagEnRDshare 0 n + n n	0
 Param: flagExpect 0 n + n n	0
 Param: flagFiscalRule 0 n + n n	0
 Param: flagGovExp 0 n + n n	2
+Param: flagProjFinGE 0 n + n n	0
 Param: flagTax 0 n + n n	0
 Param: Crec 0 n + n n	0.2
 Param: gG 0 n + n n	0.005
@@ -1038,6 +1099,7 @@ Param: rAdj 0 n + n n	0.0025
 Param: rT 0 n + n n	0.01
 Param: rhoBonds 0 n + n n	0
 Param: tauB 0 n + n n	0.08
+Param: tauBge 0 n + n n	5
 Param: thetaBonds 0 n + n n	12
 Func: banksMaps 0 n + n n
 Func: cScores 0 n + n n
@@ -1046,6 +1108,7 @@ Var: BD 1 s + n n	0
 Var: BS 1 s + n n	0
 Var: BadDeb 1 s + n n	0
 Var: BadDebE 1 n + n n	0
+Var: BadDebGE 1 n + n n	0
 Var: BadDeb1 1 n + n n	0
 Var: BadDeb2 1 n + n n	0
 Var: BondsB 1 s + n n	0
@@ -1058,6 +1121,7 @@ Var: ExRes 1 s + n n	0
 Var: Gbail 1 s + n n	0
 Var: Loans 1 s + n n	0
 Var: LoansCB 1 s + n n	0
+Var: LoansGE 1 s + n n	0
 Var: NWb 1 s + n n	0
 Var: PiB 0 s + n n
 Var: PiCB 0 s + n n
@@ -1077,6 +1141,7 @@ Param: _fD 0 n + n n	0
 Func: _cScores 0 n + n n
 Var: _BD 0 n + n n
 Var: _BadDebE 1 n + n n	0
+Var: _BadDebGE 1 n + n n	0
 Var: _BadDeb1 1 n + n n	0
 Var: _BadDeb2 1 n + n n	0
 Var: _Bda 4 n + n n	0	0	0	0
@@ -1091,11 +1156,14 @@ Var: _ExRes 1 n + n n	0
 Var: _Gbail 0 n + n n
 Var: _Loans 1 n + n N	0
 Var: _LoansCB 1 n + n n	0
+Var: _LoansGE 1 n + n n	0
 Var: _NWb 1 n + n n	0
 Var: _PiB 0 n + n N
 Var: _Res 1 n + n n	0
 Var: _TC 0 n + n n
 Var: _TCeFree 0 n + n n
+Var: _TCge 0 n + n n
+Var: _TCgeFree 0 n + n n
 Var: _TC1free 0 n + n n
 Var: _TC2free 0 n + n n
 Var: _TaxB 0 n + n n
@@ -1194,23 +1262,32 @@ Param: LeShortMax 0 n + n n	1
 Param: NWe0 0 n + n n	100
 Param: Phi5 0 n + n n	0.1
 Param: Phi6 0 n + n n	0.9
+Param: Tcon 0 n + n n	1
+Param: Tfin 0 n + n n	40
+Param: Tplan 0 n + n n	1
 Param: alpha3 0 n + n n	2
 Param: beta3 0 n + n n	4
 Param: alphaE 0 n + n n	3
 Param: betaE 0 n + n n	3
 Param: bE 0 n + n n	10
 Param: dE 0 n + n n	0
+Param: deltaAe 0 n + n n	0.16
+Param: deltaP 0 n + n n	0.28
+Param: deltaU 0 n + n n	0.08
+Param: deltaW 0 n + n n	0.16
 Param: emDE0 0 n + n n	20
 Param: etaE 0 n + n n	80
 Param: fEmin 0 n + n n	1e-05
 Param: fGE0 0 n + n n	0.1
 Param: iotaE 0 n + n n	0.1
-Param: kappaE 0 n + n n	0.1
+Param: kappaEmax 0 n + n n	0.1
+Param: kappaEmin 0 n + n n	0
 Param: lastIDe 0 n + n n	0
 Param: mDE 0 n + n n	0
 Param: mGE 0 n + n n	0
 Param: mEmin 0 n + n n	0
 Param: muE0 0 n + n n	0.0008
+Param: muEmax 0 n + n n	10
 Param: nE 0 n + n n	4
 Param: nuE 0 n + n n	0.01
 Param: pF0 0 n + n n	0.0005
@@ -1229,13 +1306,16 @@ Param: zetaDE 0 n + n n	0.05
 Param: zetaGE 0 n + n n	0.05
 Func: fErescale 0 n + n n
 Func: firmEmaps 0 n + n n
+Var: Ae 4 s + n n	0	0	0	0
+Var: AeMavg 1 s + n n	0
 Var: Ce 0 s + n n
 Var: CeEq 0 s + n n
 Var: CIe 0 s + n n
-Var: De 0 s + n n
+Var: De 4 s + n n	0	0	0	0
 Var: DeE 0 s + n n
 Var: DebE 1 s + n n	0
-Var: Df 0 s + n n
+Var: DebGE 1 s + n n	0
+Var: Df 5 s + n n	0	0	0	0	0
 Var: DivE 1 s + n n	0
 Var: EIe 0 s + n n
 Var: EIeD 0 s + n n
@@ -1257,6 +1337,7 @@ Var: NWe 1 s + n n	0
 Var: PiE 0 s + n n
 Var: Qe 0 s + n n
 Var: QeO 0 s + n n
+Var: Qge 0 s + n n
 Var: SIe 0 s + n n
 Var: SIeD 0 s + n n
 Var: Se 0 s + n n
@@ -1264,13 +1345,19 @@ Var: TaxE 0 s + n n
 Var: We 0 s + n n
 Var: cEntryE 1 s + n n	0
 Var: cExitE 1 s + n n	0
+Var: dDeMavg 1 s + n n	0
 Var: entryE 0 s + n n
 Var: entryEexit 0 s + n n
 Var: exitE 0 s + n n
 Var: iDe 0 s + n n
 Var: iE 0 s + n n
-Var: pE 1 s + n n	0
+Var: iGE 0 s + n n
+Var: pE 5 s + n n	0	0	0	0	0
+Var: pEmavg 1 s + n n	0
 Var: pF 1 s + n n	0
+Var: uE 4 s + n n	0	0	0	0
+Var: uEmavg 1 s + n n	0
+Var: wEmavg 1 s + n n	0
 
 Object: FirmE C	1
 Param: _EqE 0 n + n n	0
@@ -1279,16 +1366,21 @@ Param: _bankE 0 n + n n	0
 Param: _pOrdE 0 n + n n	0
 Param: _tEent 0 n + n n	0
 Func: _CSeA 0 n + n n
+Func: _CSgeA 0 n + n n
 Var: _Ade 0 s + n n
 Var: _AtauDE 1 n + n n	0
 Var: _Ce 1 n + n n	0
 Var: _CDe 0 n + n n
 Var: _CDeC 0 n + n n
+Var: _CDge 0 n + n n
+Var: _CDgeC 0 n + n n
 Var: _CIe 0 n + n n
 Var: _CSe 0 n + n n
-Var: _De 1 n + n n	0
+Var: _CSge 0 n + n n
+Var: _De 4 n + n n	0	0	0	0
 Var: _DeE 1 n + n n	0
 Var: _DebE 1 n + n n	0
+Var: _DebGE 1 n + n n	0
 Var: _DebEmax 0 n + n n
 Var: _Df 0 n + n n
 Var: _DivE 1 n + n n	0
@@ -1296,6 +1388,11 @@ Var: _EIe 0 n + n n
 Var: _EIeD 0 n + n n
 Var: _EmE 1 n + n n	0
 Var: _ICtauGE 1 n + n n	0
+Var: _IgeD 0 n + n n
+Var: _IgeDnom 0 n + n n
+Var: _IdeCon 1 n + n n	0
+Var: _IgeCon 1 n + n n	0
+Var: _IeCon 1 n + n n	0
 Var: _IeNom 0 n + n n
 Var: _JOe 0 n + n n
 Var: _Ke 1 n + n n	0
@@ -1306,6 +1403,7 @@ Var: _Le 1 n + n n	0
 Var: _LeD 1 n + n n	0
 Var: _LeDrd 1 n + n n	0
 Var: _LeRD 0 n + n n
+Var: _NPVge 0 n + n n
 Var: _NWe 1 n + n n	0
 Var: _PiE 0 n + n n
 Var: _Qe 1 n + n n	0
@@ -1318,19 +1416,23 @@ Var: _SIdeD 0 n + n n
 Var: _SIgeD 0 n + n n
 Var: _SIe 0 n + n n
 Var: _SIeD 0 n + n n
+Var: _SNPVge 0 n + n n
 Var: _TaxE 0 n + n n
 Var: _We 0 n + n n
 Var: _allocE 0 n + n n
+Var: _amtGE 0 n + n n
 Var: _emTauDE 1 n + n n	0
 Var: _fE 7 n + n n	0	0	0	0	0	0	0
 Var: _fKge 1 n + n n	0
 Var: _iDe 0 n + n n
 Var: _iE 0 n + n n
+Var: _iGE 0 n + n n
 Var: _innDE 0 n + n n
 Var: _innGE 0 n + n n
 Var: _muE 1 n + n n	0
 Var: _pE 1 n + n n	0
 Var: _qcE 1 n + n n	0
+Var: _rEdeb 0 n + n n
 Var: _supplierE 0 n + n n
 
 Object: Dirty C	1
@@ -1345,6 +1447,7 @@ Var: __Qde 0 n + n n
 Var: __QdeU 1 n + n n	0
 Var: __RSde 0 n + n n
 Var: __cDE 0 n + n n
+Var: __lifeDEcycle 1 n + n n	0
 
 Object: BrE N	1
 Param: __IDsE 0 n + n n	0
@@ -1352,13 +1455,20 @@ Param: __IDsE 0 n + n n	0
 Object: Green C	1
 Param: __ICge 0 n + n n	0
 Param: __Kge 0 n + n n	0
+Param: __TfinGE 0 n + n n	0
 Param: __mGE 0 n + n n	0
+Param: __pfinGE 0 n + n n	0
+Param: __rGEdeb 0 n + n n	0
 Param: __tGE 0 n + n n	0
+Var: __DebGE 1 n + n n	0
 Var: __LgeD 0 n + n n
 Var: __Qge 0 n + d n
 Var: __QgeU 1 n + n n	0
 Var: __RSge 0 n + n n
+Var: __amtGE 1 n + n n	0
 Var: __cGE 0 n + n n
+Var: __iGE 0 n + n n
+Var: __lifeGEcycle 1 n + n n	0
 
 Object: Labor C	1
 Param: Ls0 0 n + n n	250000
@@ -1374,7 +1484,7 @@ Var: TaxW 0 s + n n
 Var: U 4 s + n p	0	0	0	0
 Var: W 0 s + n n
 Var: dUb 1 s + n n	0
-Var: w 1 s + n n	0
+Var: w 4 s + n n	0	0	0	0
 Var: wReal 1 s + n n	0
 Var: wU 0 s + n n
 
@@ -1737,6 +1847,7 @@ Var: GDI 0 s + n n
 Var: HHb 0 s + n n
 Var: HPb 0 s + n n
 Var: TC 0 s + n n
+Var: TCge 0 s + n n
 Var: TaxCO2 0 s + n n
 Var: dA 0 s + n n
 Var: dEm 0 s + n n
@@ -1747,14 +1858,21 @@ Var: Ade 0 s + n n
 Var: AtauDEavg 0 s + n n
 Var: CDe 0 s + n n
 Var: CDeC 0 s + n n
+Var: CDge 0 s + n n
+Var: CDgeC 0 s + n n
 Var: CSe 0 s + n n
+Var: CSge 0 s + n n
 Var: DebEmax 0 s + n n
 Var: EnGDP 0 s + n n
 Var: HHe 0 s + n n
 Var: HPe 0 s + n n
 Var: ICtauGEavg 0 s + n n
+Var: ICtauGEeff 0 s + n n
+Var: IgeDEratio 0 s + n n
+Var: NPVgeAvg 0 s + n n
 Var: RDe 0 s + n n
 Var: RSe 0 s + n n
+Var: SNPVgeAvg 0 s + n n
 Var: ageEavg 0 s + n n
 Var: dEmE 0 s + n n
 Var: dEn 0 s + n n
@@ -1762,9 +1880,11 @@ Var: emTauDEavg 0 s + n n
 Var: exitEfail 0 s + n n
 Var: fGE 0 s + n n
 Var: fKge 0 s + n p
+Var: fKpfinGE 0 s + n n
 Var: innDE 0 s + n n
 Var: innGE 0 s + n n
 Var: muEavg 0 s + n n
+Var: pfinGEexe 0 s + n n
 
 Object: Sec C	1
 Var: A1ee 0 s + n n
@@ -1884,7 +2004,7 @@ R&D expenditure share in energy sector bounded to [fGE0, 1-fGE0]
 0 = fixed (as per parameter xiDE)
 1 = current installed capacity share
 _INIT_
-All 1 instances equal to 0.
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Parameter_flagExpect
@@ -1917,6 +2037,17 @@ Government expenditure
 3 = pay unemployment benefit and spend government superavit if no public debt
 _INIT_
 All 1 instances equal to 2.
+END_DESCRIPTION
+
+Parameter_flagProjFinGE
+Project-finance rule
+0 = no project finance (regular credit rules still apply)
+1 = unlimited NPV project finance available for green power plants
+2 = unlimited SNPV/RO project finance available for green power plants
+3 = NPV project finance available but under capital adequacy rule
+4 = SNPV/RO project finance available but under capital adequacy rule
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Parameter_flagTax
@@ -2333,10 +2464,17 @@ All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_tauB
-Minimum bank capital adequacy rate
+Minimum bank capital adequacy rate for regular loans
 (]0,1[)
 _INIT_
 All 1 instances equal to 0.08.
+END_DESCRIPTION
+
+Parameter_tauBge
+Minimum bank capital adequacy rate for green power project finance
+(]0,1[)
+_INIT_
+All 1 instances equal to 5
 END_DESCRIPTION
 
 Parameter_thetaBonds
@@ -2376,7 +2514,13 @@ All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable_BadDebE
-Total bad debt (defaults) in financial sector from energy sector
+Total regular bad debt (defaults) in financial sector from energy sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable_BadDebGE
+Total project finance bad debt (defaults) in financial sector from energy sector
 _INIT_
 All 1 instances equal to 0
 END_DESCRIPTION
@@ -2443,7 +2587,7 @@ All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable_Loans
-Total loans (not defaulted) from financial sector
+Total regular loans (not defaulted) from financial sector
 Net loans to exiting and entering firms in period not considered
 _INIT_
 All 1 instances equal to 0
@@ -2453,6 +2597,12 @@ Variable_LoansCB
 Total liquidity loans from central bank to financial sector
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_LoansGE
+Total banking sector loans to green energy project finance (non-defaulted)
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable_NWb
@@ -2545,7 +2695,13 @@ Sovereign bonds demand from bank
 END_DESCRIPTION
 
 Variable__BadDebE
-Bank bad debt (defaults) from energy sector
+Bank regular bad debt (defaults) from energy sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable__BadDebGE
+Bank project finance bad debt (defaults) from energy sector
 _INIT_
 All 1 instances equal to 0
 END_DESCRIPTION
@@ -2620,7 +2776,7 @@ Government bailout funds to bank
 END_DESCRIPTION
 
 Variable__Loans
-Loans (not defaulted) from bank
+Regular loans (not defaulted) from bank
 Net loans to exiting and entering firms in period not considered
 _INIT_
 All 1 instances equal to 0.
@@ -2630,6 +2786,13 @@ Variable__LoansCB
 Liquidity loans from central bank to bank
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__LoansGE
+Bank loans (non-defaulted) to green energy project finance
+Net loans to exiting and entering firms in period not considered
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable__NWb
@@ -2653,7 +2816,15 @@ Total credit supply provided by bank
 END_DESCRIPTION
 
 Variable__TCeFree
-Available credit supply by bank to firms in energy sector
+Available credit supply by bank to green energy project finance
+END_DESCRIPTION
+
+Variable__TCge
+Total credit supply provided by bank to green power plant project finance
+END_DESCRIPTION
+
+Variable__TCgeFree
+Bank total credit supply to green energy project finance
 END_DESCRIPTION
 
 Variable__TC1free
@@ -3188,6 +3359,26 @@ _INIT_
 All 1 instances equal to 0.9.
 END_DESCRIPTION
 
+Parameter_Tcon
+Construction time of green energy plant
+(>0)
+_INIT_
+All 1 instances equal to 1
+END_DESCRIPTION
+
+Parameter_Tfin
+Principal amortization time of green energy plant
+(>0)
+_INIT_
+All 1 instances equal to 40
+END_DESCRIPTION
+
+Parameter_Tplan
+Backward planning horizon for greeen energy project finance (>0)
+_INIT_
+All 1 instances equal to 1
+END_DESCRIPTION
+
 Parameter_alpha3
 First Beta distribution parameter for imitation drawing
 (>0)
@@ -3220,7 +3411,7 @@ Parameter_bE
 Number of pay-back periods for green energy investment
 (>0)
 _INIT_
-All 1 instances equal to 10.
+All 1 instances equal to 10
 END_DESCRIPTION
 
 Parameter_dE
@@ -3228,6 +3419,34 @@ Dividend rate in energy sector
 ([0,1])
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_deltaAe
+Project finance risk parameter for productivity
+(>=0)
+_INIT_
+All 1 instances equal to 0.16
+END_DESCRIPTION
+
+Parameter_deltaP
+Project finance risk parameter for price
+(>=0)
+_INIT_
+All 1 instances equal to 0.28
+END_DESCRIPTION
+
+Parameter_deltaU
+Project finance risk parameter for plant utilization
+(>=0)
+_INIT_
+All 1 instances equal to 0.08
+END_DESCRIPTION
+
+Parameter_deltaW
+Project finance risk parameter for wage
+(>=0)
+_INIT_
+All 1 instances equal to 0.16
 END_DESCRIPTION
 
 Parameter_emDE0
@@ -3264,11 +3483,18 @@ _INIT_
 All 1 instances equal to 0.1
 END_DESCRIPTION
 
-Parameter_kappaE
+Parameter_kappaEmax
 Installed power plant capacity maximum growth per type
 (>0, 0=no limit)
 _INIT_
-All 1 instances equal to 0.1.
+All 1 instances equal to 0.1
+END_DESCRIPTION
+
+Parameter_kappaEmin
+Power plant capacity minimum investment size
+(0<=kappaEmin<kappaEmax)
+_INIT_
+All 1 instances equal to 0.05
 END_DESCRIPTION
 
 Parameter_lastIDe
@@ -3303,6 +3529,13 @@ Initial mark-up of energy producer as share of real wage
 (>0)
 _INIT_
 All 1 instances equal to 0.0008
+END_DESCRIPTION
+
+Parameter_muEmax
+Maximum mark-up as a multiple of initial mark-up in energy sector
+(>0)
+_INIT_
+All 1 instances equal to 10
 END_DESCRIPTION
 
 Parameter_nE
@@ -3341,7 +3574,7 @@ All 1 instances equal to 0
 END_DESCRIPTION
 
 Parameter_upsilonF
-Sensitivity of fossil fuel price to energy price adjustment (>=0)
+Sensitivity of fossil fuel price to energy price and demand adjustment (>=0)
 _INIT_
 All 1 instances equal to 0.9
 END_DESCRIPTION
@@ -3357,14 +3590,14 @@ Parameter_xEinfIC
 Lower support for new green plant installation cost innovation draw
 (xEinfIC < xEsupIC)
 _INIT_
-All 1 instances equal to -0.05.
+All 1 instances equal to -0.05
 END_DESCRIPTION
 
 Parameter_xEinfTE
 Lower support for new power plant thermal efficiency innovation draw
 (xEinfTE < xEsupTE)
 _INIT_
-All 1 instances equal to -0.03.
+All 1 instances equal to -0.03
 END_DESCRIPTION
 
 Parameter_xEsupEm
@@ -3378,14 +3611,14 @@ Parameter_xEsupIC
 Upper support for new green plant installation cost innovation draw
 (xEinfIC < xEsupIC)
 _INIT_
-All 1 instances equal to 0.05.
+All 1 instances equal to 0.05
 END_DESCRIPTION
 
 Parameter_xEsupTE
 Upper support for new power plant thermal efficiency innovation draw
 (xEinfTE < xEsupTE)
 _INIT_
-All 1 instances equal to 0.03.
+All 1 instances equal to 0.03
 END_DESCRIPTION
 
 Parameter_x6
@@ -3399,7 +3632,7 @@ Parameter_xiDE
 Share of R&D expenses allocated to dirty energy innovation
 [0, 1]
 _INIT_
-All 1 instances equal to 0.6.
+All 1 instances equal to 0.6
 END_DESCRIPTION
 
 Parameter_zetaDE
@@ -3424,6 +3657,16 @@ Function_firmEmaps
 Updates the static maps of firms in energy sector
 END_DESCRIPTION
 
+Variable_Ae
+Labor productivity of energy sector
+END_DESCRIPTION
+
+Variable_AeMavg
+Moving average of labor productivity in energy sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Variable_Ce
 Total generation costs of energy sector
 END_DESCRIPTION
@@ -3445,9 +3688,15 @@ Demand expectation of energy sector
 END_DESCRIPTION
 
 Variable_DebE
-Total debt of energy sector
+Total debt in regular loans of energy sector
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable_DebGE
+Total debt in green energy project finance of energy sector
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable_Df
@@ -3543,11 +3792,15 @@ Cash flow ("profits") of energy producer
 END_DESCRIPTION
 
 Variable_Qe
-Total generation of energy producer
+Total generation of energy sector
 END_DESCRIPTION
 
 Variable_QeO
 Total generation offered by energy sector
+END_DESCRIPTION
+
+Variable_Qge
+Total green energy generation of energy sector
 END_DESCRIPTION
 
 Variable_SIe
@@ -3582,6 +3835,12 @@ _INIT_
 All 1 instances equal to 0
 END_DESCRIPTION
 
+Variable_dDeMavg
+Moving average of growth rate of energy demand
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Variable_entryE
 Rate of firms entering the energy sector
 END_DESCRIPTION
@@ -3599,7 +3858,11 @@ Interest received from deposits by energy sector
 END_DESCRIPTION
 
 Variable_iE
-Interest paid by energy sector
+Interest on regular debt paid by energy sector
+END_DESCRIPTION
+
+Variable_iGE
+Interest on green energy project finance debt paid by energy sector
 END_DESCRIPTION
 
 Variable_pE
@@ -3608,11 +3871,31 @@ _INIT_
 All 1 instances equal to 0
 END_DESCRIPTION
 
+Variable_pEmavg
+Moving average of energy price
+END_DESCRIPTION
+
 Variable_pF
 Price of fossil fuel
 (>0)
 _INIT_
 All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable_uE
+Green power plant utilization in energy sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable_uEmavg
+Moving average of green power plant utilization in energy sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable_wEmavg
+Moving average of wage in energy sector
 END_DESCRIPTION
 
 Object_FirmE
@@ -3658,6 +3941,10 @@ Function__CSeA
 Bank credit supply available to energy producer
 END_DESCRIPTION
 
+Function__CSgeA
+Bank credit supply available (new debt) to green energy project finance
+END_DESCRIPTION
+
 Variable__Ade
 Thermal efficiency of energy producer
 END_DESCRIPTION
@@ -3682,12 +3969,24 @@ Variable__CDeC
 Credit demand constraint of energy producer
 END_DESCRIPTION
 
+Variable__CDge
+Green energy project finance demand for energy producer
+END_DESCRIPTION
+
+Variable__CDgeC
+Green energy project finance demand constraint for energy producer
+END_DESCRIPTION
+
 Variable__CIe
 Canceled investment of firm in energy sector
 END_DESCRIPTION
 
 Variable__CSe
 Credit supplied to energy supplier
+END_DESCRIPTION
+
+Variable__CSge
+Green energy project finance supplied to energy producer
 END_DESCRIPTION
 
 Variable__De
@@ -3706,6 +4005,13 @@ Variable__DebE
 Debt of energy producer
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__DebGE
+Stock of green energy project finance debt of energy producer
+Updated in '_EIe'
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable__DebEmax
@@ -3740,6 +4046,32 @@ Variable__ICtauGE
 Installation cost per unit of capacity of green energy power plant
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__IgeD
+Desired investment (in capacity terms) in green power of energy producer
+END_DESCRIPTION
+
+Variable__IgeDnom
+Desired investment (in money terms) in green power of energy producer
+END_DESCRIPTION
+
+Variable__IdeCon
+Investment (in capacity terms) in dirty energy under construction
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable__IgeCon
+Investment (in capacity terms) in green energy under construction of energy producer
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Variable__IeCon
+Investment (in capacity terms) in construction of energy producer
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable__IeNom
@@ -3792,6 +4124,10 @@ END_DESCRIPTION
 
 Variable__LeRD
 R&D labor employed by energy producer
+END_DESCRIPTION
+
+Variable__NPVge
+Net present value of green energy project finance
 END_DESCRIPTION
 
 Variable__NWe
@@ -3850,6 +4186,10 @@ Variable__SIeD
 Desired substitution investment (in capacity terms) of energy producer
 END_DESCRIPTION
 
+Variable__SNPVge
+Strategic net present value of green energy project finance
+END_DESCRIPTION
+
 Variable__TaxE
 Taxes paid by energy producer
 END_DESCRIPTION
@@ -3860,6 +4200,10 @@ END_DESCRIPTION
 
 Variable__allocE
 Allocate generation among power plants of energy producer
+END_DESCRIPTION
+
+Variable__amtGE
+Amortization of green energy project finance debt of energy producer
 END_DESCRIPTION
 
 Variable__emTauDE
@@ -3885,7 +4229,11 @@ Interest received from deposits by firm in energy sector
 END_DESCRIPTION
 
 Variable__iE
-Interest paid by energy producer
+Interest on regular debt paid by energy producer
+END_DESCRIPTION
+
+Variable__iGE
+Interest on green energy project finance debt paid by energy producer
 END_DESCRIPTION
 
 Variable__innDE
@@ -3912,6 +4260,10 @@ Variable__qcE
 Credit class of energy producer (1,2,3,4)
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__rEdeb
+Interest rate applicable to energy producer
 END_DESCRIPTION
 
 Variable__supplierE
@@ -3976,6 +4328,16 @@ Variable___cDE
 Production unit cost of dirty power plant
 END_DESCRIPTION
 
+Variable___lifeDEcycle
+Stage in life cycle of dirty energy plant:
+0 = in construction phase
+1 = available for operation
+2 = in scrapping process (next period)
+3 = scrapped
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Object_BrE
 Known capital supplier firm object
 
@@ -4004,8 +4366,29 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
+Parameter___TfinGE
+Project finance amortization period after construction
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Parameter___mGE
 Machine output in power units per period in cenergy sector
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Parameter___pfinGE
+Project finance state of green energy power plant
+0 = no project finance
+1 = active project finance
+2 = cancelled project finance (option exrcised)
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
+Parameter___rGEdeb
+Interest rate of project finance debt of green power plant
 _INIT_
 All 1 instances equal to 0
 END_DESCRIPTION
@@ -4014,6 +4397,13 @@ Parameter___tGE
 Time the green power plant was build
 _INIT_
 All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable___DebGE
+Stock of project finance debt of green power plant
+Also updated in '_EIe'
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable___LgeD
@@ -4034,8 +4424,28 @@ Variable___RSge
 Capacity to scrap of green power plant
 END_DESCRIPTION
 
+Variable___amtGE
+Amortization of of project finance debt of green power plant
+_INIT_
+All 1 instances equal to 0
+END_DESCRIPTION
+
 Variable___cGE
 Production unit cost of green power plant
+END_DESCRIPTION
+
+Variable___iGE
+Interest paid on project finance of green power plant
+END_DESCRIPTION
+
+Variable___lifeGEcycle
+Stage in life cycle of green energy plant:
+0 = in construction phase
+1 = available for operation
+2 = in scrapping process (next period)
+3 = scrapped
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Object_Labor
@@ -6028,6 +6438,10 @@ Variable_TC
 Total credit supply provided by financial sector
 END_DESCRIPTION
 
+Variable_TCge
+Total credit provided by financial sector to green project finance in energy sector
+END_DESCRIPTION
+
 Variable_TaxCO2
 Government CO2 (carbon) tax income
 END_DESCRIPTION
@@ -6064,8 +6478,20 @@ Variable_CDeC
 Total credit demand constraint in energy sector
 END_DESCRIPTION
 
+Variable_CDge
+Total credit demand in energy sector to green power plant project finance
+END_DESCRIPTION
+
+Variable_CDgeC
+Total credit demand constraint in energy sector to green power plant project finance
+END_DESCRIPTION
+
 Variable_CSe
 Total credit supplied in energy sector
+END_DESCRIPTION
+
+Variable_CSge
+Total credit supplied in energy sector to green power plant project finance
 END_DESCRIPTION
 
 Variable_DebEmax
@@ -6088,12 +6514,28 @@ Variable_ICtauGEavg
 Average unit installation cost of a new green power plant in energy sector
 END_DESCRIPTION
 
+Variable_ICtauGEeff
+Machine-modularity efficiency of a new green power plant in energy sector
+END_DESCRIPTION
+
+Variable_IgeDEratio
+Average ICtauGE over ( bE * pF / AtauDE ) for investment decision
+END_DESCRIPTION
+
+Variable_NPVgeAvg
+Average net present value of green energy project finance
+END_DESCRIPTION
+
 Variable_RDe
 R&D expenditure of energy sector
 END_DESCRIPTION
 
 Variable_RSe
 Power plant (planned) scrapping rate of energy producer
+END_DESCRIPTION
+
+Variable_SNPVgeAvg
+Average strategic net present value of green energy project finance
 END_DESCRIPTION
 
 Variable_ageEavg
@@ -6124,6 +6566,10 @@ Variable_fKge
 Share of green energy power plants in installed generation capacity
 END_DESCRIPTION
 
+Variable_fKpfinGE
+Share of power plants using project finance in green energy installed capacity
+END_DESCRIPTION
+
 Variable_innDE
 Rate of firms successfully innovating in dirty energy
 END_DESCRIPTION
@@ -6134,6 +6580,10 @@ END_DESCRIPTION
 
 Variable_muEavg
 Weighted average markup in energy sector
+END_DESCRIPTION
+
+Variable_pfinGEexe
+Share of project finance loans with canceled option exercised
 END_DESCRIPTION
 
 Object_Sec

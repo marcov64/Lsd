@@ -22,10 +22,11 @@ bad debt (loans in default) and total bank assets
 */
 
 // losses with bad debt, discarding negative losses (proceedings)
-v[1] = VL( "_BadDebE", 1 ) + VL( "_BadDeb1", 1 ) + VL( "_BadDeb1", 1 );
+v[1] = VL( "_BadDebE", 1 ) + VL( "_BadDebGE", 1 ) +
+	   VL( "_BadDeb1", 1 ) + VL( "_BadDeb1", 1 );
 
-v[2] = VL( "_Loans", 1 ) + VL( "_BondsB", 1 ) +	// bank assets
-	   VL( "_Res", 1 ) + VL( "_ExRes", 1 );
+v[2] = VL( "_Loans", 1 ) + VL( "_LoansGE", 1 ) + VL( "_BondsB", 1 ) +
+	   VL( "_Res", 1 ) + VL( "_ExRes", 1 );		// bank assets
 
 RESULT( v[2] > 0 ? v[1] / v[2] : 0 )
 
@@ -104,8 +105,8 @@ Also updates '_Gbail', '_ExRes', '_LoansCB'
 */
 
 // net worth as assets minus liabilities (deposits) ('_ExRes' before '_BondsB'!)
-v[0] = V( "_Loans" ) + V( "_Res" ) + V( "_ExRes" ) + V( "_BondsB" ) -
-	   V( "_Depo" ) - V( "_LoansCB" );
+v[0] = V( "_Loans" ) + V( "_LoansGE" ) + V( "_Res" ) + V( "_ExRes" ) +
+	   V( "_BondsB" ) - V( "_Depo" ) - V( "_LoansCB" );
 
 // government rescue bank when net worth is negative (Basel-like rule)
 if ( v[0] < 0 && VS( GRANDPARENT, "flagCreditRule" ) == 2 )
@@ -123,7 +124,8 @@ if ( v[0] < 0 && VS( GRANDPARENT, "flagCreditRule" ) == 2 )
 	v[3] = VS( PARENT, "PhiB" ) * v[1] * v[2];
 
 	// ensure respecting the capital adequacy rate
-	v[4] = max( v[3], VS( PARENT, "tauB" ) * V( "_Loans" ) );
+	v[4] = max( v[3], VS( PARENT, "tauB" ) * V( "_Loans" ) +
+					  VS( PARENT, "tauBge" ) * V( "_LoansGE" )  );
 
 	v[5] = - v[0] + v[4];						// government bailout
 	v[0] = v[4];								// assets after bailout
@@ -139,8 +141,8 @@ RESULT( v[0] )
 
 EQUATION( "_TC" )
 /*
-Total credit supply provided by bank to firms.
-Negative value (-1) means unlimited credit.
+Total regular credit supply provided by bank to firms
+Negative value (-1) means unlimited credit
 */
 
 k = VS( GRANDPARENT, "flagCreditRule" );		// credit limit & bail-out rule
@@ -150,10 +152,7 @@ if ( k == 1 )									// deposits multiplier rule?
 else
 	if ( k == 2 )								// Basel-like credit rule?
 	{
-		h = VS( PARENT, "mPerB" );
-		for ( v[1] = i = 0; i < h; ++i )
-			v[1] += VL( "_Bda", i ) / h;		// bank fragility moving average
-
+		v[1] = MAVE( "_Bda", VS( PARENT, "mPerB" ) );// bank fragility effect
 		v[0] = VL( "_NWb", 1 ) / ( VS( PARENT, "tauB" ) *
 								 ( 1 + VS( PARENT, "betaB" ) * v[1] ) );
 	}
@@ -163,10 +162,33 @@ else
 RESULT( v[0] )
 
 
+EQUATION( "_TCge" )
+/*
+Total credit supply provided by bank to green energy project finance
+Negative value (-1) means unlimited credit
+*/
+
+k = VS( GRANDPARENT, "flagProjFinGE" );			// project finance rule
+
+if ( k == 1 || k == 2 )							// no-limit project finance?
+	v[0] = -1;
+else
+	if ( k == 3 || k == 4 )						// Basel-like bounded proj. fin.?
+	{
+		v[1] = MAVE( "_Bda", VS( PARENT, "mPerB" ) );// bank fragility effect
+		v[0] = VL( "_NWb", 1 ) / ( VS( PARENT, "tauBge" ) *
+								 ( 1 + VS( PARENT, "betaB" ) * v[1] ) );
+	}
+	else
+		v[0] = 0;								// no project finance
+
+RESULT( v[0] )
+
+
 EQUATION( "_TCeFree" )
 /*
 Minimum bank total credit supply to firms in energy sector
-Updated in 'update_debtE' support function
+Updated in 'update_debt' support function
 */
 
 if ( VS( GRANDPARENT, "flagCreditRule" ) > 0 )
@@ -191,7 +213,7 @@ RESULT( v[0] )
 EQUATION( "_TC1free" )
 /*
 Minimum bank total credit supply to firms in capital-good sector
-Updated in 'update_debt1' support function
+Updated in 'update_debt' support function
 */
 
 if ( VS( GRANDPARENT, "flagCreditRule" ) > 0 )
@@ -216,6 +238,7 @@ RESULT( v[0] )
 EQUATION( "_TC2free" )
 /*
 Maximum bank total credit supply to firms in consumption-good sector
+Updated in 'update_debt' support function
 */
 
 if ( VS( GRANDPARENT, "flagCreditRule" ) > 0 )
@@ -237,45 +260,19 @@ else
 RESULT( v[0] )
 
 
-EQUATION( "_iB" )
-/*
-Bank interest income from loans
-*/
-
-v[1] = VLS( PARENT, "rDeb", 1 );				// interest on debt
-v[2] = VS( PARENT, "kConst" );					// interest scaling
-
-// compute the firm-specific interest income
-v[0] = 0;										// interest accumulator
-CYCLE( cur, "CliE" )							// energy sector
-{
-	j = VLS( SHOOKS( cur ), "_qcE", 1 );		// firm credit class
-	v[3] = VLS( SHOOKS( cur ), "_DebE", 1 );	// firm debt
-	v[0] += v[3] * v[1] * ( 1 + ( j - 1 ) * v[2] );// interest received
-}
-
-CYCLE( cur, "Cli1" )							// sector 1
-{
-	j = VLS( SHOOKS( cur ), "_qc1", 1 );		// firm credit class
-	v[3] = VLS( SHOOKS( cur ), "_Deb1", 1 );	// firm debt
-	v[0] += v[3] * v[1] * ( 1 + ( j - 1 ) * v[2] );// interest received
-}
-
-CYCLE( cur, "Cli2" )							// sector 2
-{
-	j = VLS( SHOOKS( cur ), "_qc2", 1 );		// firm credit class
-	v[3] = VLS( SHOOKS( cur ), "_Deb2", 1 );	// firm debt
-	v[0] += v[3] * v[1] * ( 1 + ( j - 1 ) * v[2] );// interest received
-}
-
-RESULT( v[0] )
-
-
 /*============================ SUPPORT EQUATIONS =============================*/
 
 EQUATION( "_BadDebE" )
 /*
-Bank bad debt (defaults) from energy sector
+Bank regular bad debt (defaults) from energy sector
+Just reset once per period, updated in 'entryEexit'
+*/
+RESULT( 0 )
+
+
+EQUATION( "_BadDebGE" )
+/*
+Bank project finance bad debt (defaults) from energy sector
 Just reset once per period, updated in 'entryEexit'
 */
 RESULT( 0 )
@@ -353,7 +350,7 @@ Net deposits from exiting and entering firms in period not considered
 */
 
 VS( GRANDPARENT, "Sav" );						// ensure savings are calculated
-V( "_Loans" );									// ensure all transactions done
+V( "_LoansGE" );								// ensure all transactions done
 
 v[0] = V( "_fD" ) * VS( GRANDPARENT, "SavAcc" );// workers deposits
 
@@ -371,7 +368,7 @@ RESULT( max( v[0], 0 ) )
 
 EQUATION( "_Loans" )
 /*
-Bank loans (non-defaulted)
+Bank regular loans (non-defaulted)
 Net loans to exiting and entering firms in period not considered
 */
 
@@ -393,6 +390,22 @@ CYCLE( cur, "Cli2" )							// sector 2 debt
 RESULT( v[0] )
 
 
+EQUATION( "_LoansGE" )
+/*
+Bank loans (non-defaulted) to green energy project finance
+Net loans to exiting and entering firms in period not considered
+*/
+
+V( "_Loans" );									// ensure transactions are done
+
+v[0] = 0;										// accumulator
+
+CYCLE( cur, "CliE" )							// green energy project debt
+	v[0] += VS( SHOOKS( cur ), "_DebGE" );
+
+RESULT( v[0] )
+
+
 EQUATION( "_PiB" )
 /*
 Bank gross profits (losses) before dividends/taxes
@@ -401,7 +414,8 @@ RESULT( V( "_iB" ) - V( "_iDb" ) +
 		VLS( PARENT, "rRes", 1 ) * VL( "_Res", 1 ) +
 		VLS( PARENT, "rBonds", 1 ) * VL( "_BondsB", 1 ) -
 		VLS( PARENT, "r", 1 ) * VL( "_LoansCB", 1 ) -
-		VL( "_BadDebE", 1 ) - VL( "_BadDeb1", 1 ) - VL( "_BadDeb2", 1 ) )
+		VL( "_BadDebE", 1 ) - VL( "_BadDebGE", 1 ) -
+		VL( "_BadDeb1", 1 ) - VL( "_BadDeb2", 1 ) )
 
 
 EQUATION( "_Res" )
@@ -409,6 +423,15 @@ EQUATION( "_Res" )
 Bank required reserves hold at the central bank
 */
 RESULT( VS( PARENT, "tauB" ) * V( "_Depo" ) )
+
+
+EQUATION( "_TCgeFree" )
+/*
+Bank total credit supply to green energy project finance
+Updated in 'update_debt_ge' support function
+*/
+v[1] = V( "_TCge" );							// total credit for green energy
+RESULT( v[1] > -0.1 ? max( 0, v[1] - VL( "_LoansGE", 1 ) ) : -1 )
 
 
 EQUATION( "_TaxB" )
@@ -425,23 +448,45 @@ Bank effective market share (in number of customers)
 RESULT( V( "_Cl" ) / VS( PARENT, "Cl" ) )
 
 
+EQUATION( "_iB" )
+/*
+Bank interest income from loans
+*/
+
+v[0] = 0;										// interest accumulator
+CYCLE( cur, "CliE" )							// energy sector
+{
+	v[0] += VS( SHOOKS( cur ), "_iE" );			// firm interest payment
+	v[0] += VS( SHOOKS( cur ), "_iGE" );
+}
+
+CYCLE( cur, "Cli1" )							// sector 1
+	v[0] += VS( SHOOKS( cur ), "_i1" );			// firm interest payment
+
+CYCLE( cur, "Cli2" )							// sector 2
+	v[0] += VS( SHOOKS( cur ), "_i2" );			// firm interest payment
+
+RESULT( v[0] )
+
+
 EQUATION( "_iDb" )
 /*
 Bank interest payments from deposits
 */
 
-v[0] = V( "_fD" ) * VLS( GRANDPARENT, "SavAcc", 1 );// workers deposits
+v[0] = V( "_fD" ) * VLS( GRANDPARENT, "SavAcc", 1 ) * VLS( PARENT, "rD", 1 );
+												// workers deposits
 
 CYCLE( cur, "CliE" )							// energy sector deposits
-	v[0] += max( VLS( SHOOKS( cur ), "_NWe", 1 ), 0 );
+	v[0] += VS( SHOOKS( cur ), "_iDe" );
 
 CYCLE( cur, "Cli1" )							// sector 1 deposits
-	v[0] += max( VLS( SHOOKS( cur ), "_NW1", 1 ), 0 );
+	v[0] += VS( SHOOKS( cur ), "_iD1" );
 
 CYCLE( cur, "Cli2" )							// sector 2 deposits
-	v[0] += max( VLS( SHOOKS( cur ), "_NW2", 1 ), 0 );
+	v[0] += VS( SHOOKS( cur ), "_iD2" );
 
-RESULT( VLS( PARENT, "rD", 1 ) * v[0] )
+RESULT( v[0] )
 
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/

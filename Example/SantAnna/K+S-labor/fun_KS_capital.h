@@ -115,7 +115,7 @@ CYCLE_SAFE( cur, "Firm1" )
 			if ( VS( cur, "_NW1" ) < 0 )		// count bankruptcies
 				++v[6];
 
-			exit_firm( var, cur, NULL );		// del obj & collect liq. value
+			exit_firm( _v_, cur, NULL );		// del obj & collect liq. value
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
@@ -150,7 +150,7 @@ if ( F1 - j + k < F1min )
 if ( F1 + k > F1max )
 	k = F1max - F1 + j;
 
-entry_firm1( var, THIS, k, false );				// add entrant-firm objects
+entry_firm1( _v_, THIS, k, false );				// add entrant-firm objects
 
 v[0] = k - j;									// net number of entrants
 i = INCR( "F1", v[0] );							// update the number of firms
@@ -161,7 +161,7 @@ WRITES( SECSTAL1, "exit1fail", v[6] / F1 );
 RECALCS( FINSECL1, "BadDeb1" );					// update bad debt after exits
 
 V( "f1rescale" );								// redistribute entrant m.s.
-INIT_TSEARCHT( "Firm1", i );					// prepare turbo search indexing
+INIT_TSEARCH( "Firm1" );						// prepare turbo search indexing
 
 RESULT( v[0] )
 
@@ -209,7 +209,7 @@ CYCLE_SAFE( cur, "Wrk1" )
 		if ( VLS( cur1, "_Te", 1 ) + 1 < VS( cur1, "_Tc" ) )// contract not over?
 			continue;							// go to next worker
 
-		fire_worker( var, cur1 );				// register fire
+		fire_worker( _v_, cur1 );				// register fire
 		++i;									// scaled equivalent fires
 	}
 	else
@@ -246,7 +246,7 @@ while ( j - i > 0 && ita != appl->end( ) )
 	if ( ROUND( ita->w, v[2], 0.01 ) <= v[2] )
 	{
 		// flag hiring and set wage, employer and vintage to be used by worker
-		hire_worker( var, ita->wrk, 1, THIS, v[2] );// set firm, vintage & wage
+		hire_worker( _v_, ita->wrk, 1, THIS, v[2] );// set firm, vintage & wage
 		++i;									// scaled count hire
 	}
 
@@ -513,7 +513,7 @@ i = 0;
 CYCLE_SAFE( cur, "Wrk1" )
 	if ( VS( SHOOKS( cur ), "_w" ) <= v[1] )	// wage under unemp. benefit?
 	{
-		fire_worker( var, SHOOKS( cur ) );		// register quit
+		fire_worker( _v_, SHOOKS( cur ) );		// register quit
 		++i;									// scaled equivalent fires
 	}
 
@@ -532,7 +532,7 @@ i = 0;
 CYCLE_SAFE( cur, "Wrk1" )
 	if ( VS( SHOOKS( cur ), "_age" ) == 1 )		// is a "reborn"?
 	{
-		fire_worker( var, SHOOKS( cur ) );		// register retirement
+		fire_worker( _v_, SHOOKS( cur ) );		// register retirement
 		++i;									// scaled equivalent fires
 	}
 

@@ -6,7 +6,7 @@ The original K+S code was developed by Andrea Roventini, Mauro Napoletano, Tania
 
 This is a full rewrite of the original "Schumpeter meeting Keynes" (K+S) model, plus the finance extensions and a variable number of firms in both sectors. Differently from original versions, the entire the model was recoded into regular LSD equations.
 
-LSD version 8.0 or higher is required. Download at: https://github.com/SantAnnaKS/LSD
+LSD version 9.0 or higher is required. Download at: https://github.com/SantAnnaKS/LSD
 
 
 Change log

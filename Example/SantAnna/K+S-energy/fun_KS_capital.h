@@ -120,7 +120,7 @@ CYCLE_SAFE( cur, "Firm1" )
 			if ( VS( cur, "_NW1" ) < 0 )		// count bankruptcies
 				++v[6];
 
-			exit_firm( var, cur );				// del obj & collect liq. value
+			exit_firm( _v_, cur );				// del obj & collect liq. value
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
@@ -155,7 +155,7 @@ if ( F1 - j + k < F1min )
 if ( F1 + k > F1max )
 	k = F1max - F1 + j;
 
-entry_firm1( var, THIS, k, false );				// add entrant-firm objects
+entry_firm1( _v_, THIS, k, false );				// add entrant-firm objects
 
 v[0] = k - j;									// net number of entrants
 i = INCR( "F1", v[0] );							// update the number of firms
@@ -166,7 +166,7 @@ WRITES( SECSTAL1, "exit1fail", v[6] / F1 );
 RECALCS( FINSECL1, "BadDeb1" );					// update bad debt after exits
 
 V( "f1rescale" );								// redistribute entrant m.s.
-INIT_TSEARCHT( "Firm1", i );					// prepare turbo search indexing
+INIT_TSEARCH( "Firm1" );						// prepare turbo search indexing
 
 RESULT( v[0] )
 

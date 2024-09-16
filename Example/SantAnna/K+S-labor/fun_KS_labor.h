@@ -59,7 +59,6 @@ for ( ; h < j ; h += v[1] )						// add missing workers
 
 	WRITES( cur, "_ID", ++i );					// new ID
 	WRITES( cur, "_Tc", v[3] );					// set work contract term,
-	WRITES( cur, "_wRes", v[2] );				// reservation wage
 	WRITES( cur, "_employed", 0 );
 
 	for ( i = 1; i <= 8; ++i )					// lagged wage memory
@@ -141,9 +140,10 @@ RESULT( v[0] < v[8] ? v[8] : v[0] )
 
 EQUATION( "wU" )
 /*
-Unemployment benefit ("wage") paid by government
+Unemployment benefit ("wage") paid by government (or minimum income otherwise)
 */
-RESULT( V( "phi" ) * VL( "wAvg", 1 ) )
+RESULT( VS( PARENT, "flagGovExp" ) >= 2 ? V( "phi" ) * VL( "wAvg", 1 ) :
+										  V( "w0min" ) )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/

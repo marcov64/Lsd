@@ -498,7 +498,7 @@ double rRes = rT * ( 1 - VS( cur3, "muRes" ) );	// initial interest on reserves
 double G0 = V( "gG" ) * Ls0;					// initial public spending
 double sV0 = ( flagWorkerLBU == 0 || flagWorkerLBU == 2 ) ?
 			 INISKILL : VS( cur4, "sigma" );	// initial vintage skills
-double wRes = phi * INIWAGE;					// initial reservation wage
+double wU = V( "flagGovExp" ) >= 2 ? phi * INIWAGE : w0min;// initial un. benefit
 
 // reserve space for country-level non-initialized vectors
 EXEC_EXT( countryE, firm2ptr, reserve, F2max );	// sector 2 firm objects
@@ -540,6 +540,7 @@ WRITELS( cur4, "sTmin", INISKILL, -1 );
 WRITELS( cur4, "wAvg", INIWAGE, -1 );
 WRITELS( cur4, "wCent", INIWAGE, -1 );
 WRITELS( cur4, "wMinPol", w0min, -1 );
+WRITELS( cur4, "wU", wU, -1 );
 
 // create banks' objects and set initial values
 k = 1;											// initial bank ID
@@ -576,7 +577,6 @@ CYCLES( cur4, cur, "Worker" )
 	WRITES( cur, "_ID", k );
 	WRITES( cur, "_Tc", Tc );
 	WRITES( cur, "_age", v[1] );
-	WRITES( cur, "_wRes", wRes );
 	WRITES( cur, "_employed", 0 );
 	WRITELS( cur, "_sT", INISKILL, -1 );
 	WRITELS( cur, "_sV", sV0, -1 );
@@ -589,10 +589,10 @@ DELETE( SEARCHS( cur1, "Firm1" ) );				// remove empty instances
 DELETE( SEARCHS( cur2, "Firm2" ) );
 DELETE( SEARCHS( cur1, "Wrk1" ) );
 
-v[1] = entry_firm1( var, cur1, F10, true );		// add capital-good firms
-INIT_TSEARCHTS( cur1, "Firm1", F10 );			// prepare turbo search indexing
+v[1] = entry_firm1( _v_, cur1, F10, true );		// add capital-good firms
+INIT_TSEARCHS( cur1, "Firm1" );					// prepare turbo search indexing
 
-v[1] += entry_firm2( var, cur2, F20, true );	// add consumer-good firms
+v[1] += entry_firm2( _v_, cur2, F20, true );	// add consumer-good firms
 VS( cur2, "firm2maps" );						// update the mapping vectors
 
 WRITEL( "Eq", v[1], -1 );						// save existing equity

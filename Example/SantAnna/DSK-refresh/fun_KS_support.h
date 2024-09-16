@@ -13,19 +13,22 @@
 
  ******************************************************************************/
 
+#define EQ equation								// shortcut for the class to use
+
+
 /*======================== GENERAL SUPPORT C FUNCTIONS =======================*/
 
 // calculate the bounded, moving-average growth rate of variable
 // if lim is zero, there is no bounding
 
-double mov_avg_bound( object *obj, const char *var, double lim, double per )
+double EQ::mov_avg_bound( object *obj, const char *var, double lim, double per )
 {
 	double prev, g, sum_g;
 	int i;
 
 	for ( sum_g = i = 0; i < per; ++i )
 	{
-		if ( t - i <= 0 )						// just go to t=0
+		if ( T - i <= 0 )						// just go to t=0
 			break;
 
 		prev = VLS( obj, var, i + 1 );
@@ -43,7 +46,7 @@ double mov_avg_bound( object *obj, const char *var, double lim, double per )
 
 // append error messages and increment error counter
 
-void check_error( bool cond, const char* errMsg, int errCount, int *errCounter )
+void EQ::check_error( bool cond, const char* errMsg, int errCount, int *errCounter )
 {
 	if ( ! cond )
 		return;
@@ -74,7 +77,7 @@ const char *bankPar[ ] = { "_bank1", "_bank2" },
 		   *_IDpar[ ] = { "_ID1","_ID2" },
 		   *__IDpar[ ] = { "__ID1","__ID2" };
 
-object *set_bank( object *firm )
+object *EQ::set_bank( object *firm )
 {
 	int _IDb, sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 : 1;
 	object *bank, *cli, *fin = V_EXTS( GRANDPARENTS( firm ), countryE, finSec );
@@ -102,7 +105,7 @@ const char *_CDvar[ ] = { "_CD1", "_CD2" },
 		   *_NWvar[ ] = { "_NW1", "_NW2" },
 		   *_TCfreeVar[ ] = { "_TC1free", "_TC2free" };
 
-double update_debt( object *firm, double desired, double loan )
+double EQ::update_debt( object *firm, double desired, double loan )
 {
 	double Deb, TCfree;
 	object *bank;
@@ -139,7 +142,7 @@ double update_debt( object *firm, double desired, double loan )
 
 // update firm deposits in equations '_Q1', '_Tax1', '_Q2', '_EI', '_SI', '_Tax2'
 
-double update_depo( object *firm, double depo, bool incr )
+double EQ::update_depo( object *firm, double depo, bool incr )
 {
 	double NW;
 	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 : 1;
@@ -166,7 +169,7 @@ const char *_CIvar[ ] = { "", "_CI" },
 		   *_DivVar[ ] = { "_Div1", "_Div2" },
 		   *_NWpVar[ ] = { "_NW1p", "_NW2p" };
 
-double cash_flow( object *firm, double profit, double tax )
+double EQ::cash_flow( object *firm, double profit, double tax )
 {
 	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
 			  strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
@@ -225,7 +228,7 @@ double cash_flow( object *firm, double profit, double tax )
 // send machine brochure to consumption-good client firm in equations '_NC',
 // '_supplier'
 
-object *send_brochure( object *suppl, object *client )
+object *EQ::send_brochure( object *suppl, object *client )
 {
 	object *broch, *cli;
 
@@ -244,7 +247,7 @@ object *send_brochure( object *suppl, object *client )
 
 // set initial supplier for entrant in equations 'entry2exit'
 
-object *set_supplier( object *firm )
+object *EQ::set_supplier( object *firm )
 {
 	object *broch, *suppl,
 		   *cap = V_EXTS( GRANDPARENTS( firm ), countryE, capSec );
@@ -260,7 +263,7 @@ object *set_supplier( object *firm )
 
 // send new machine order in equations '_EI', '_SI'
 
-void send_order( object *firm, double nMach )
+void EQ::send_order( object *firm, double nMach )
 {
 	// find firm entry on supplier client list
 	object *cli = SHOOKS( HOOKS( firm, SUPPL ) );
@@ -278,7 +281,7 @@ void send_order( object *firm, double nMach )
 
 // perform investment according to available funding in equations '_EI', '_SI'
 
-double invest( object *firm, double desired )
+double EQ::invest( object *firm, double desired )
 {
 	double invest, invCost, loan, loanDes;
 
@@ -344,7 +347,7 @@ double invest( object *firm, double desired )
 
 // add new vintage to the capital stock of a firm in equation 'K' and 'initCountry'
 
-void add_vintage( object *firm, double nMach, bool newInd )
+void EQ::add_vintage( object *firm, double nMach, bool newInd )
 {
 	double __AeeVint, __AefVint, __AlpVint, __pVint;
 	int __ageVint, __nMach, __nVint;
@@ -415,7 +418,7 @@ void add_vintage( object *firm, double nMach, bool newInd )
 // scrap (remove) vintage from capital stock in equation 'K'
 // return -1 if last vintage (not removed but shrank to 1 machine)
 
-double scrap_vintage( variable *var, object *vint )
+double EQ::scrap_vintage( c_varT *_v_, object *vint )
 {
 	double RS;
 
@@ -443,7 +446,7 @@ double scrap_vintage( variable *var, object *vint )
 // add and configure entrant capital-good firm object(s) and required hooks
 // in equations 'entry1exit' and 'initCountry'
 
-double entry_firm1( variable *var, object *sector, int n, bool newInd )
+double EQ::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 {
 	double _AtauEE, _AtauEF, _AtauLP, _BtauEE, _BtauEF, _BtauLP, _D10, _Deb1,
 		   _Eq1, _L1rd, _NW1, _NW10, _RD0, _c1, _cTau, _f1, _p1, AtauLPmax,
@@ -608,7 +611,7 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 // add and configure entrant consumer-good firm object(s) and required hooks
 // in equations 'entry2exit' and 'initCountry'
 
-double entry_firm2( variable *var, object *sector, int n, bool newInd )
+double EQ::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 {
 	double _A2, _D20, _D2e, _Deb2, _E, _Eq2, _K, _N, _NW2, _NW2f, _NW20, _Q2u,
 		   _c2, _f2, _life2cycle, _p2, Deb2, Eq2, K, N, NW2, mult;
@@ -783,7 +786,7 @@ const char *_BadDebVar[ ] = { "_BadDeb1", "_BadDeb2" },
 		   *cExitVar[ ] = { "cExit1", "cExit2" },
 		   *CliBrochObj[ ] = { "Cli", "Broch" };
 
-double exit_firm( variable *var, object *firm )
+double EQ::exit_firm( c_varT *_v_, object *firm )
 {
 	double liqEq, liqVal;
 	object *bank, *cli;

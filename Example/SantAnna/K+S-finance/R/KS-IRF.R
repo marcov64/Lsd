@@ -81,7 +81,6 @@ mcShock <- read.3d.lsd( list.files.lsd( folder, paste0( baseName, "2" ) ),
 # ===================== User parameters =========================
 
 irfHor    <- 20                     # time horizon to compute IRF
-irfRel    <- TRUE                   # F=absolute deviation, T=relative deviation
 
 limOutl   <- 3                      # limit threshold multiple for outliers (0=off)
 
@@ -156,7 +155,6 @@ library( LSDirf )
 # ==== Support stuff ====
 
 if( repName == "" ) repName <- baseName
-if( irfRel ) irType <- "Relative" else irType <- "Absolute"
 
 
 # ====== Analyze IRF data ======

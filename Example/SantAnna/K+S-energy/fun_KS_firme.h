@@ -110,7 +110,11 @@ EQUATION( "_DeE" )
 /*
 Adaptive demand expectation of of energy producer
 */
-RESULT( V( "_tEent" ) < T - 1 ? VL( "_De", 1 ) : CURRENT )
+h = VS( PARENT, "Tplan" );						// planning horizon
+RESULT( V( "_tEent" ) < T - h ? MAVEL( "_De", h, 1 ) *
+								pow( 1 + VLS( PARENT, "dDeMavg", 1 ),
+									 VS( PARENT, "Tplan" ) )
+							  : CURRENT )
 
 
 EQUATION( "_EIe" )
@@ -118,143 +122,115 @@ EQUATION( "_EIe" )
 Expansion investment (in capacity terms) of energy producer
 Chooses between technologies and deploys new plants
 Manages finance for investment if required
-Also updates '_NWe', '_DebE', '_CDe', 'CDeC', 'CSe'
+Also updates '_NWe', '_DebE', '_CDe', 'CDeC', 'CSe',
+'_DebGE', '_CDge', 'CDgeC', 'CSge'
 */
 
-v[1] = V( "_EIeD" );							// desired expansion investment
-v[2] = v[1] + V( "_SIe" );						// total investment in capacity
+double _CD, _CDc, _CSeA, _CSgeA, _EIeD, _IeD, _IeOrd, _IdeD, _IgeD, _IgeDnom,
+	   _NWe, _p1, mMach, nMach, pfinGE;
 
-if ( v[2] < 1 )									// ignore too small expansions
-	END_EQUATION( 0 );							// nothing to invest
+_EIeD = V( "_EIeD" );							// desired expansion investment
+_IeD = _EIeD + V( "_SIe" );						// desired total investment
+_IgeDnom = V( "_IgeDnom" );						// desired green investment in $
+_IeOrd = VL( "_Ke", 1 ) + VL( "_IeCon", 1 );	// total ordered capacity
 
-v[3] = V( "_AtauDE" );							// dirty unit efficiency
-v[4] = V( "_ICtauGE" );							// green unit install cost
-v[5] = VS( PARENT, "kappaE" );					// max capacity growth rate
-v[6] = VL( "_Kge", 1 );							// current green capacity
-v[7] = VL( "_Kde", 1 );							// current dirty capacity
-v[8] = V( "_CSeA" );							// available credit supply
-v[9] = VL( "_NWe", 1 );							// net worth (cash available)
-
-// try to keep fix share until atmospheric CO2 reference time
-if ( T <= VS( CLIMATL2, "tA0" ) )
+if ( _IeOrd > 0 )								// don't apply limit for entrant
 {
-	v[0] = max( ( 1 + VS( PARENT, "iotaE" ) ) * V( "_DeE" ) *
-				VS( PARENT, "fGE0" ) - v[6] + V( "_SIgeD" ), 0 );
-												// green new capacity
-	v[10] = v[2] - v[0];						// dirty new capacity
+	if ( _IeD < VS( PARENT, "kappaEmin" ) * _IeOrd )// below minimum threshold?
+		_EIeD = _IeD = _IgeDnom = 0;			// discard too small expansion
+	else										// cap too large investment
+		_IeD = min( _IeD, VS( PARENT, "kappaEmax" ) * _IeOrd );
 }
-else
-	// if green plants are cheaper
-	if ( v[4] <= VS( PARENT, "bE") * VS( PARENT, "pF" ) / v[3] )
-		// if cap is disabled or new green plants capacity is under cap
-		if ( v[5] == 0 || v[6] + v[7] == 0 || v[2] <= v[5] * v[6] )
-		{
-			v[0] = v[2];						// only green new plants
-			v[10] = 0;							// no dirty new plants
-		}
-		else									// cap limits new green plants
-		{
-			if ( v[2] - v[5] * v[6] <= v[5] * v[7] )// dirty growth cap ok?
-				v[0] = v[5] * v[6];				// invest in green to the cap
-			else								// both caps can't be enforced
-				v[0] = v[2] * v[6] / ( v[6] + v[7] );// keep green share
 
-			v[10] = v[2] - v[0];				// dirty complements investment
-		}
-	else										// dirty plants are cheaper
-		// if cap is disabled or new dirty plants capacity is under cap
-		if ( v[5] == 0 || v[6] + v[7] == 0 || v[2] <= v[5] * v[7] )
-		{
-			v[10] = v[2];						// only dirty new plants
-			v[0] = 0;							// no green new plants
-		}
-		else									// cap limits new dirty plants
-		{
-			if ( v[2] - v[5] * v[7] <= v[5] * v[6] )// green growth cap ok?
-				v[10] = v[5] * v[7];			// invest in dirty to the cap
-			else								// both caps can't be enforced
-				v[10] = v[2] * v[7] / ( v[6] + v[7] );// keep dirty share
-
-			v[0] = v[2] - v[10];				// green complements investment
-		}
-
-if ( v[0] >= 1 )								// invest in new green plants?
+if ( _IgeDnom > 0 )								// invest in new green plants?
 {
-	V( "_supplierE" );							// ensure supplier is selected
+	_IgeD = V( "_IgeD" );						// effective capacity investment
+	_NWe = VL( "_NWe", 1 );						// net worth (cash available)
+	_p1 = VS( PARENTS( SHOOKS( HOOK( SUPPL ) ) ), "_p1" );// machine price
+	nMach = round( _IgeDnom / _p1 );			// # of machines required
 
-	v[11] = VS( PARENTS( SHOOKS( HOOK( SUPPL ) ) ), "_p1" );
-	v[12] = ceil( v[4] * v[0] / v[11] );		// rounded-up machines
-	v[13] = v[0] / v[12];						// unit (machine) power capacity
-
-	v[14] = v[11] * v[12];						// desired investment cost
-
-	if ( v[14] <= v[9] )						// can invest with own funds?
-		v[9] -= v[14];							// remove plant cost from cash
-	else
+	// if no project finance or above limit, work with regular credit
+	if ( _IgeDnom > V( "_CSgeA" ) )
 	{
-		if ( v[14] <= v[9] + v[8] )				// possible to finance all?
-		{
-			v[15] = v[16] = v[14] - v[9];		// finance the difference
-			v[9] = 0;							// no cash
-		}
-		else									// credit constrained firm
-		{
-			// invest as much as the available finance allows, rounded # machines
-			v[17] = max( floor( ( v[9] + v[8] ) / v[11] ) * v[13], 0 );
-			v[16] = v[14] - v[9];				// desired credit
+		pfinGE = false;
 
-			if ( v[17] == 0 )
-				v[15] = 0;						// no finance
-			else
+		if ( _IgeDnom <= _NWe )					// can invest with own funds?
+			_NWe -= _IgeDnom;					// remove plant cost from cash
+		else
+		{
+			_CSeA = V( "_CSeA" );				// available credit supply
+
+			if ( _IgeDnom <= _NWe + _CSeA )		// possible to finance all?
 			{
-				v[12] = v[17] / v[13];			// reduced machine number
-				v[14] = v[11] * v[12];			// reduced investment cost
-				if ( v[14] <= v[9] )			// just own funds?
-				{
-					v[15] = 0;
-					v[9] -= v[14];				// remove machines cost from cash
-				}
+				_CD = _CDc = _IgeDnom - _NWe;	// finance the difference
+				_NWe = 0;						// no cash
+			}
+			else								// credit constrained firm
+			{
+				// invest as the available finance allows, rounded # machines
+				mMach = _IgeD * _p1 / _IgeDnom; // single machine power capacity
+				_IgeD = max( floor( ( _NWe + _CSeA ) / _p1 ) * mMach, 0 );
+				_CD = _IgeDnom - _NWe;			// original desired credit
+
+				if ( _IgeD == 0 )
+					_CDc = 0;					// no finance
 				else
 				{
-					v[15] = v[14] - v[9];		// finance the difference
-					v[9] = 0;					// no cash
+					nMach = round( _IgeD / mMach );// reduced machine number
+					_IgeDnom = _p1 * nMach;		// reduced investment cost
+					if ( _IgeDnom <= _NWe )		// just own funds?
+					{
+						_CDc = 0;
+						_NWe -= _IgeDnom;		// remove machines cost from cash
+					}
+					else
+					{
+						_CDc = _IgeDnom - _NWe;	// finance the difference
+						_NWe = 0;				// no cash
+					}
 				}
 			}
 
-			v[10] += v[0] - v[17];				// increase dirty generation
-			v[0] = v[17];						// reduce green generation
-
-			if ( v[2] - v[1] > v[0] )			// cannot cover substitution?
-				WRITE( "_SIe", v[0] );			// adjust substitution
+			update_debt( THIS, _CD, _CDc );		// update debt (desired/granted)
 		}
-
-		update_debt( THIS, v[16], v[15] );		// update debt (desired/granted)
 	}
+	else
+		pfinGE = true;
 
-	if ( v[0] > 0 )								// investment to do?
+	if ( _IgeD > 0 )							// investment to do?
 	{
-		update_depo( THIS, v[9], false );		// update the firm net worth
-		send_order( THIS, v[12] );				// send order to sector 1
-		add_green_plant( THIS, v[0], v[12], false );// create green plant object
+		send_order( THIS, nMach );				// send order to sector 1
+		cur = add_green_plant( THIS, _IgeD, nMach, false );// create object
+
+		if ( pfinGE )							// update debt (project finance)?
+			update_debt( THIS, _IgeDnom, _IgeDnom, cur );
+		else
+			update_depo( THIS, _NWe, false );	// update the firm net worth
 	}
 }
 else
-{
-	v[10] += v[0];								// consolidate too small plants
-	v[0] = 0;
-}
+	_IgeD = 0;									// no green investment
 
-if ( v[10] > 0 )								// new dirty plant?
-	add_dirty_plant( THIS, v[10], false );		// create dirty plant object
+_IdeD = _IeD - _IgeD;							// desired dirty investment
 
-RESULT( v[0] + v[10] - V( "_SIe" ) )
+if ( _IdeD >= 1 )								// new dirty plant?
+	add_dirty_plant( THIS, _IdeD, false );		// create dirty plant object
+else
+	_IdeD = 0;									// don't build if too small
+
+if ( _IeD - _EIeD >= _IdeD + _IgeD )			// cannot cover substitution?
+	WRITE( "_SIe", _IdeD + _IgeD );				// adjust substitution
+
+RESULT( _IdeD + _IgeD - V( "_SIe" ) )
 
 
 EQUATION( "_EIeD" )
 /*
 Desired expansion investment (in capacity terms) of energy producer
 */
-RESULT( max( ( 1 + VS( PARENT, "iotaE" ) ) * V( "_DeE" ) - VL( "_Ke", 1 ), 0 ) )
+// if desired expansion is negative, reduction is applied to _SIe as possible
+RESULT( max( ( 1 + VS( PARENT, "iotaE" ) ) * V( "_DeE" ) -
+			 VL( "_Ke", 1 ) - VL( "_IeCon", 1 ), 0 ) )
 
 
 EQUATION( "_ICtauGE" )
@@ -309,11 +285,54 @@ WRITE( "_innGE", v[10] );
 RESULT( v[0] )
 
 
+EQUATION( "_IgeD" )
+/*
+Desired investment (in capacity terms) in green power of energy producer
+*/
+
+v[0] = V( "_EIeD" ) + V( "_SIe" );				// desired total investment
+v[1] = VL( "_Ke", 1 ) + VL( "_IeCon", 1 );		// total ordered capacity
+
+if ( v[1] > 0 )									// don't apply limit for entrant
+{
+	if ( v[0] < VS( PARENT, "kappaEmin" ) * v[1] )// below minimum threshold?
+		v[0] = 0;								// discard too small expansion
+	else										// cap too large investment
+		v[0] = min( v[0], VS( PARENT, "kappaEmax" ) * v[1] );
+}
+
+if ( T <= VS( CLIMATL2, "tA0" ) )				// before CO2 reference time?
+	v[0] *= VS( PARENT, "fGE0" );				// fixed share of green
+else											// regular periods
+	// if green plants are more expensive to built and operate than dirty ones
+	if ( V( "_ICtauGE" ) >
+		 VS( PARENT, "bE") * ( VS( PARENT, "pF" ) / V( "_AtauDE" ) +
+							   VS( LABSUPL2, "w" ) *
+							   ( VS( PARENT, "mDE" ) - VS( PARENT, "mGE" ) ) ) )
+		v[0] = 0;								// no green new plants
+
+RESULT( v[0] >= 1 ? v[0] : 0 )					// ignore too small expansions
+
+
+EQUATION( "_NPVge" )
+/*
+Net present value of green energy project finance
+*/
+RESULT( V( "_IgeD" ) * npv( VLS( PARENT, "pEmavg", 1 ) *
+							VLS( PARENT, "uEmavg", 1 ) -
+							VLS( PARENT, "wEmavg", 1 ) /
+							VLS( PARENT, "AeMavg", 1 ),
+							V( "_rEdeb" ),
+							VS( PARENT, "etaE" ), VS( PARENT, "Tcon" ) ) -
+		V( "_IgeDnom" ) )
+
+
 EQUATION( "_QeO" )
 /*
 Generation offered (bid) by energy producer
 */
-RESULT( VL( "_Ke", 1 ) )						// all operating capacity
+RESULT( SUM_CND( "__Kde", "__lifeDEcycle", "==", 2 ) +
+		SUM_CND( "__Kge", "__lifeGEcycle", "==", 2 ) )// all operating capacity
 
 
 EQUATION( "_RDe" )
@@ -329,8 +348,74 @@ EQUATION( "_SIe" )
 /*
 Substitution investment (in capacity terms) of energy producer
 */
-RESULT( max( V( "_SIeD" ) - max( VL( "_Ke", 1 ) -
+// if desired expansion would be negative, deduce from desired substitution
+RESULT( max( V( "_SIeD" ) - max( VL( "_Ke", 1 ) + VL( "_IeCon", 1 ) -
 			 ( 1 + VS( PARENT, "iotaE" ) ) * V( "_DeE" ), 0 ), 0 ) )
+
+
+EQUATION( "_SNPVge" )
+/*
+Strategic net present value of green energy project finance
+*/
+
+double NPV1d, NPV1u, NPV2dd, NPV2ud, NPV2uu, OV0, OV1d, OV1u,
+	   PiWorst, PiBest, q1, q2, sigma;
+
+int pfinGE = VS( GRANDPARENT, "flagProjFinGE" );
+
+if ( pfinGE == 0 || T <= VS( CLIMATL2, "tA0" ) )
+	END_EQUATION( -1 );							// SNPV disabled
+
+double _NPVge = V( "_NPVge" );					// expected net present value
+
+if ( pfinGE == 1 || pfinGE == 3 )
+	END_EQUATION( _NPVge );						// just regular NPV
+
+int Tcon = VS( PARENT, "Tcon" );				// power plant construction time
+int Tplan = VS( PARENT, "Tplan" );				// expectation planning horizon
+int etaE = VS( PARENT, "etaE" );				// plant operational life time
+double deltaP = VS( PARENT, "deltaP" );			// energy tariff uncertainty
+double deltaU = VS( PARENT, "deltaU" );			// plant utilization uncertainty
+double deltaW = VS( PARENT, "deltaW" );			// wage uncertainty
+double deltaAe = VS( PARENT, "deltaAe" );		// labor productivity uncertainty
+double pEmavg = VLS( PARENT, "pEmavg", 1 );		// expected tariff
+double uEmavg = VLS( PARENT, "uEmavg", 1 );		// expected plant utilization
+double wEmavg = VLS( PARENT, "wEmavg", 1 );		// expected wage
+double AeMavg = VLS( PARENT, "AeMavg", 1 );		// expected productivity
+double _rEdeb = V( "_rEdeb" );					// expected firm interest rate
+
+// compute the expected standard deviation of the project value
+PiWorst = npv( ( 1 - deltaP ) * pEmavg * ( 1 - deltaU ) * uEmavg -
+			   ( ( 1 + deltaW ) * wEmavg ) / ( ( 1 - deltaAe ) * AeMavg ),
+			   _rEdeb, etaE );
+PiBest = npv( ( 1 + deltaP ) * pEmavg * ( 1 + deltaU ) * uEmavg -
+			  ( ( 1 - deltaW ) * wEmavg ) / ( ( 1 + deltaAe ) * AeMavg ),
+			  _rEdeb, etaE );
+
+if ( PiBest - PiWorst <= 0 )					// no variance?
+	END_EQUATION( _NPVge );						// no option value
+
+sigma = log( PiBest - PiWorst ) / pow( etaE, 1. / 4. );// lognormal dist. sdev.
+
+// build the project-valuation binomial tree
+NPV1u = _NPVge * exp( sigma * sqrt( Tplan / 2. ) );// risk-adjustment at n=1
+NPV1d = _NPVge * exp( - sigma * sqrt( Tplan / 2. ) );
+
+NPV2uu = NPV1u * exp( sigma * sqrt( Tcon ) );	// risk-adjustment at n=2
+NPV2ud = NPV1d * exp( sigma * sqrt( Tcon ) );
+NPV2dd = NPV1d * exp( - sigma * sqrt( Tcon ) );
+
+// intermediate option values
+q2 = ( exp( - _rEdeb * Tcon ) - exp( - sigma * sqrt( Tcon ) ) ) /
+	 ( exp( sigma * sqrt( Tcon ) ) - exp( - sigma * sqrt( Tcon ) ) );
+OV1u = exp( - _rEdeb * Tcon ) * ( q2 * NPV2uu + ( 1 - q2 ) * NPV2ud );
+OV1d = exp( - _rEdeb * Tcon ) * ( q2 * NPV2ud + ( 1 - q2 ) * NPV2dd );
+
+q1 = ( exp( - _rEdeb * Tplan / 2. ) - exp( - sigma * sqrt( Tplan / 2. ) ) ) /
+	 ( exp( sigma * sqrt( Tplan / 2. ) ) - exp( - sigma * sqrt( Tplan / 2. ) ) );
+OV0 = exp( - _rEdeb * Tplan / 2. ) *( q1 * NPV1u + ( 1 - q1 ) * NPV1d );
+
+RESULT( _NPVge + OV0 + max( OV1u, OV1d ) )
 
 
 EQUATION( "_TaxE" )
@@ -363,8 +448,8 @@ VS( PARENT, "De" );								// ensure demand is allocated
 V( "_SIeD" );									// ensure scrapping is done
 
 v[1] = V( "_De" );								// energy demand for producer
-v[2] = SUM_CND( "__Kge", "__tGE", "<", T );		// available green capacity
-v[3] = SUM_CND( "__Kde", "__tDE", "<", T );		// available dirty capacity
+v[2] = SUM_CND( "__Kge", "__lifeGEcycle", ">", 1 );// available green capacity
+v[3] = SUM_CND( "__Kde", "__lifeDEcycle", ">", 1 );// available dirty capacity
 v[4] = min( v[1], v[2] );						// green generation demand
 v[5] = max( v[1] - v[4], 0 );					// dirty generation demand
 v[6] = max( v[2] - v[4], 0 );					// green capacity not to use
@@ -385,49 +470,55 @@ i = j = 0;										// plants installed/used
 SORT( "Green", "__Kge", "UP" );					// sort smaller plants first
 CYCLE( cur, "Green" )							// turn on required green plants
 {
-	if ( VS( cur, "__tGE" ) == T )				// in installation?
-		continue;
-
-	v[10] = VS( cur, "__Kge" );					// plant notional capacity
-
-	if( v[6] >= v[10] )							// no use for this plant?
+	if ( VS( cur, "__lifeGEcycle" ) == 2 )		// in operation?
 	{
-		v[11] = 0;								// no generation for plant
-		v[6] -= v[10];							// less capacity not to use
+		v[10] = VS( cur, "__Kge" );				// plant notional capacity
+
+		if( v[6] >= v[10] )						// no use for this plant?
+		{
+			v[11] = 0;							// no generation for plant
+			v[6] -= v[10];						// less capacity not to use
+		}
+		else									// use plant (full or partial)
+		{
+			v[11] = v[10] * v[8] - v[6];		// generate what is needed
+			v[6] = 0;							// no more plants not to use
+			++j;								// one more plant used
+		}
+
+		++i;
 	}
-	else										// use plant (full or partial)
-	{
-		v[11] = v[10] * v[8] - v[6];			// generate what is needed
-		v[6] = 0;								// no more plants not to use
-		++j;									// one more plant used
-	}
+	else
+		v[11] = 0;								// no generation possible
 
 	WRITES( cur, "__Qge", v[11] );				// generation for plant
-	++i;
 }
 
 // allocate remaining generation among dirty plants, favoring cheaper (newer)
 CYCLE( cur, "Dirty" )							// turn on required dirty plants
 {
-	if ( VS( cur, "__tDE" ) == T )				// in installation?
-		continue;
-
-	v[12] = VS( cur, "__Kde" );					// plant notional capacity
-
-	if( v[7] >= v[12] )							// no use for this plant?
+	if ( VS( cur, "__lifeDEcycle" ) == 2 )		// in operation?
 	{
-		v[13] = 0;								// no generation for plant
-		v[7] -= v[12];							// less capacity not to use
+		v[12] = VS( cur, "__Kde" );				// plant notional capacity
+
+		if( v[7] >= v[12] )						// no use for this plant?
+		{
+			v[13] = 0;							// no generation for plant
+			v[7] -= v[12];						// less capacity not to use
+		}
+		else									// use plant (full or partial)
+		{
+			v[13] = v[12] * v[9] - v[7];		// generate what is needed
+			v[7] = 0;							// no more plants not to use
+			++j;								// one more plant used
+		}
+
+		++i;
 	}
-	else										// use plant (full or partial)
-	{
-		v[13] = v[12] * v[9] - v[7];			// generate what is needed
-		v[7] = 0;								// no more plants not to use
-		++j;									// one more plant used
-	}
+	else
+		v[13] = 0;								// no generation possible
 
 	WRITES( cur, "__Qde", v[13] );				// generation for plant
-	++i;
 }
 
 RESULT( i > 0 ? ( double ) j / i : 0 )
@@ -448,10 +539,11 @@ v[3] = VL( "_fE", 2 );
 v[4] = VS( PARENT, "fEmin" );					// market exit share threshold
 
 if ( v[2] < v[4] || v[3] < v[4] )				// just entered firms keep floor
-	END_EQUATION( v[1] );
+	v[0] = v[1];
+else
+	v[0] = CURRENT * ( 1 + VS( PARENT, "upsilonE" ) * ( v[2] / v[3] - 1 ) );
 
-RESULT( max( CURRENT * ( 1 + VS( PARENT, "upsilonE" ) * ( v[2] / v[3] - 1 ) ),
-			 v[1] ) )
+RESULT( min( max( v[0], v[1] ), v[1] * VS( PARENT, "muEmax" ) ) )
 
 
 EQUATION( "_pE" )
@@ -479,9 +571,9 @@ Also set firm 'hook' pointers to supplier firm object
 
 VS( CAPSECL2, "inn" );							// ensure brochures distributed
 
-v[2] = VS( PARENT, "bE" );						// required payback period
+v[1] = VS( PARENT, "bE" );						// required payback period
 
-v[4] = DBL_MAX;									// supplier price/cost ratio
+v[2] = DBL_MAX;									// supplier price/cost ratio
 i = 0;
 cur2 = cur3 = NULL;
 CYCLE( cur, "BrE" )								// use brochures to find supplier
@@ -489,10 +581,10 @@ CYCLE( cur, "BrE" )								// use brochures to find supplier
 	cur1 = PARENTS( SHOOKS( cur ) );			// pointer to supplier object
 
 	// compare total machine unit cost (acquisition + operation for payback period)
-	v[5] = VS( cur1, "_p1" ) + VS( cur1, "_cTau" ) * v[2];
-	if ( v[5] < v[4] )							// best so far?
+	v[3] = VS( cur1, "_p1" ) + VS( cur1, "_cTau" ) * v[1];
+	if ( v[3] < v[2] )							// best so far?
 	{
-		v[4] = v[5];							// save current best supplier
+		v[2] = v[3];							// save current best supplier
 		i = VS( cur1, "_ID1" );					// supplier ID
 		cur2 = SHOOKS( cur );					// own entry on supplier list
 		cur3 = cur;								// best supplier brochure
@@ -545,7 +637,8 @@ if ( k == T && v[1] > 0 )
 	else
 		INCR( "_EIe", - v[0] );					// shrink expansion investment
 
-	v[7] = v[1] * VS( PARENTS( SHOOKS( cur ) ), "_p1" );// paid machine value
+	v[3] = v[1] * VS( PARENTS( SHOOKS( cur ) ), "_p1" );// paid machine value
+	h = VS( HOOK( TOPVINT ), "__pfinGE" );		// project finance?
 
 	if ( INCRS( HOOK( TOPVINT ), "__Kge", - v[0] ) < 1 )// full cancel?
 	{
@@ -553,9 +646,18 @@ if ( k == T && v[1] > 0 )
 		WRITE_HOOK( TOPVINT, NULL );
 	}
 	else
-		INCRS( HOOK( TOPVINT ), "__ICge", - v[7] );// update plant investment
+	{
+		INCRS( HOOK( TOPVINT ), "__ICge", - v[3] );// update plant investment
 
-	update_depo( THIS, v[7], true );			// recover paid machines value
+		if ( h == 1 )							// project finance?
+		{
+			v[4] = INCRS( HOOK( TOPVINT ), "__DebGE", - v[3] );// update debt
+			WRITES( HOOK( TOPVINT ), "__amtGE", v[4] / VS( PARENT, "Tfin" ) );
+		}
+	}
+
+	if ( h != 1 )
+		update_depo( THIS, v[3], true );		// recover paid machines value
 }
 else
 	v[0] = 0;
@@ -569,6 +671,13 @@ Operational costs of energy producer
 */
 RESULT( V( "_Df" ) * VS( PARENT, "pF" ) + V( "_We" ) +
 		V( "_EmE" ) * VS( PARENT, "trCO2e" ) )
+
+
+EQUATION( "_DebGE" )
+/*
+Stock of green energy project finance debt of energy producer
+*/
+RESULT( SUM( "__DebGE" ) )
 
 
 EQUATION( "_Df" )
@@ -585,6 +694,39 @@ CO2 (carbon) emissions of energy producer
 */
 V( "_allocE" );									// ensure generation is assigned
 RESULT( SUM( "__EmDE" ) )
+
+
+EQUATION( "_IgeDnom" )
+/*
+Desired investment (in money terms) in green power of energy producer
+Machine modularity is enforced, without adjustment to plant planned capacity
+*/
+V( "_supplierE" );								// ensure supplier is selected
+v[2] = VS( PARENTS( SHOOKS( HOOK( SUPPL ) ) ), "_p1" );
+RESULT( v[2] * ceil( V( "_ICtauGE" ) * V( "_IgeD" ) / v[2] ) )
+
+
+EQUATION( "_IeCon" )
+/*
+Investment (in capacity terms) in construction of energy producer
+*/
+RESULT( V( "_IdeCon" ) + V( "_IgeCon" ) )
+
+
+EQUATION( "_IdeCon" )
+/*
+Investment (in capacity terms) in dirty energy under construction
+*/
+V( "_CIe" );									// ensure capital is deployed
+RESULT( SUM_CND( "__Kde", "__lifeDEcycle", "==", 0 ) )
+
+
+EQUATION( "_IgeCon" )
+/*
+Investment (in capacity terms) in green energy under construction of energy producer
+*/
+V( "_CIe" );									// ensure capital is deployed
+RESULT( SUM_CND( "__Kge", "__lifeGEcycle", "==", 0 ) )
 
 
 EQUATION( "_IeNom" )
@@ -631,7 +773,7 @@ EQUATION( "_Kde" )
 Total generation capacity of dirty power plants of energy producer
 */
 V( "_EIe" );									// ensure capital is deployed
-RESULT( SUM_CND( "__Kde", "__RSde", "==", 0 ) )	// sum non-deprecated capacity
+RESULT( SUM_CND( "__Kde", "__lifeDEcycle", ">", 0 ) )// end of period available
 
 
 EQUATION( "_Kge" )
@@ -639,7 +781,7 @@ EQUATION( "_Kge" )
 Total generation capacity of green power plants of energy producer
 */
 V( "_EIe" );									// ensure capital is deployed
-RESULT( SUM_CND( "__Kge", "__RSge", "==", 0 ) )	// sum non-deprecated capacity
+RESULT( SUM_CND( "__Kge", "__lifeGEcycle", ">", 0 ) )// end of period available
 
 
 EQUATION( "_Le" )
@@ -684,6 +826,13 @@ v[1] = VS( PARENT, "LeDrd" );
 RESULT( v[1] > 0 ? V( "_LeDrd" ) * VS( PARENT, "LeRD" ) / v[1] : 0 )
 
 
+EQUATION( "_PiE" )
+/*
+Profit (before taxes) of energy producer
+*/
+RESULT( V( "_Se" ) - V( "_Ce" ) + V( "_iDe" ) - V( "_iE" ) - V( "_iGE" ) )
+
+
 EQUATION( "_Qe" )
 /*
 Total generation of energy producer
@@ -707,23 +856,11 @@ V( "_allocE" );									// ensure green usage is comput.
 RESULT( SUM( "__Qge" ) )
 
 
-EQUATION( "_PiE" )
-/*
-Profit (before taxes) of energy producer
-*/
-
-v[1] = V( "_Se" ) - V( "_Ce" );					// gross operating margin
-v[2] = VS( FINSECL2, "rD" ) * VL( "_NWe", 1 );	// financial income
-v[3] = V( "_iE" );								// financial expense
-
-RESULT( v[1] + v[2] - v[3] )					// firm profits before taxes
-
-
 EQUATION( "_SIeD" )
 /*
 Desired substitution investment (in capacity terms) of energy producer
 */
-RESULT( V( "_SIgeD" ) + V( "_SIdeD" ) )
+RESULT( V( "_SIdeD" ) + V( "_SIgeD" ) )
 
 
 EQUATION( "_SIdeD" )
@@ -756,6 +893,14 @@ Total wages paid by energy producer
 RESULT( V( "_Le" ) * VS( LABSUPL2, "w" ) )
 
 
+EQUATION( "_amtGE" )
+/*
+Amortization of green energy project finance debt of energy producer
+*/
+V( "_DebGE" );									// ensure exit options exercised
+RESULT( SUM( "__amtGE" ) )
+
+
 EQUATION( "_fE" )
 /*
 Market share of energy producer
@@ -766,26 +911,40 @@ RESULT( v[1] > 0 ? V( "_De" ) / v[1] : CURRENT )
 
 EQUATION( "_fKge" )
 /*
-Share of green energy power plants in installed generation capacity
+Share of green energy power plants in operating generation capacity
 of energy producer
 */
 v[1] = V( "_Kge" );
 RESULT( v[1] > 0 ? v[1] / ( v[1] + V( "_Kde" ) ) : 0 )
 
 
-EQUATION( "_iE" )
-/*
-Interest paid by energy producer
-*/
-RESULT( VL( "_DebE", 1 ) * VS( FINSECL2, "rDeb" ) *
-		( 1 + ( VL( "_qcE", 1 ) - 1 ) * VS( FINSECL2, "kConst" ) ) )
-
-
 EQUATION( "_iDe" )
 /*
 Interest received from deposits by firm in energy sector
 */
-RESULT( VL( "_NWe", 1 ) * VLS( FINSECL2, "rD", 1 ) )
+RESULT( max( VL( "_NWe", 1 ) * VLS( FINSECL2, "rD", 1 ), 0 ) )
+
+
+EQUATION( "_iE" )
+/*
+Interest on regular debt paid by energy producer
+*/
+RESULT( VL( "_DebE", 1 ) * V( "_rEdeb" ) )
+
+
+EQUATION( "_iGE" )
+/*
+Interest on green energy project finance debt paid by energy producer
+*/
+RESULT( SUM( "__iGE" ) )
+
+
+EQUATION( "_rEdeb" )
+/*
+Interest rate applicable to energy producer
+*/
+RESULT( VS( FINSECL2, "rDeb" ) * ( 1 + ( VL( "_qcE", 1 ) - 1 ) *
+		VS( FINSECL2, "kConst" ) ) )
 
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/
@@ -796,21 +955,38 @@ Bank credit supply available (new debt) to energy producer
 Function called multiple times in single time step
 */
 
+V( "_DebGE" );									// ensure exit options exercised
+
 v[1] = V( "_DebE" );							// current firm debt
 v[2] = V( "_DebEmax" );							// maximum prudential credit
 
 if ( v[2] > v[1] )								// more credit possible?
 {
 	v[0] = v[2] - v[1];							// potential free credit
+	v[3] = VS( HOOK( BANK ), "_TCeFree" );		// bank's available credit
 
-	cur = HOOK( BANK );							// firm's bank
-	v[3] = VS( cur, "_TCeFree" );				// bank's available credit
-
-	if ( v[3] > -0.1 )							// credit limit active
+	if ( v[3] > -0.1 )							// credit limit active?
 		v[0] = min( v[0], v[3] );				// take just what is possible
 }
 else
 	v[0] = 0;									// no credit available
+
+RESULT( v[0] )
+
+
+EQUATION( "_CSgeA" )
+/*
+Bank credit supply available (new debt) to green energy project finance
+*/
+
+v[0] = V( "_IgeDnom" );							// desired project finance
+v[1] = VS( HOOK( BANK ), "_TCgeFree" );			// bank's available credit
+
+if ( VS( GRANDPARENT, "flagProjFinGE" ) == 0 || ( v[1] >= 0 && v[1] < v[0] ) )
+	v[0] = 0;									// no (partial) project finance
+else
+	if ( V( "_SNPVge" ) < 0 )					// project inviable?
+		v[0] = 0;
 
 RESULT( v[0] )
 
@@ -829,10 +1005,28 @@ Credit demand constraint for energy producer
 Updated in '_DebEmax', '_EIe', '_TaxE'
 */
 
+EQUATION_DUMMY( "_CDge", "" )
+/*
+Green energy project finance demand for energy producer
+Updated in '_EIe'
+*/
+
+EQUATION_DUMMY( "_CDgeC", "" )
+/*
+Green energy project finance demand constraint for energy producer
+Updated in '_EIe'
+*/
+
 EQUATION_DUMMY( "_CSe", "" )
 /*
 Credit supplied to energy producer
 Updated in '_DebEmax', '_EIe', '_TaxE'
+*/
+
+EQUATION_DUMMY( "_CSge", "" )
+/*
+Green energy project finance supplied to energy producer
+Updated in '_EIe'
 */
 
 EQUATION_DUMMY( "_De", "" )
@@ -843,8 +1037,8 @@ Updated in 'De'
 
 EQUATION_DUMMY( "_DebE", "" )
 /*
-Stock of bank debt of energy producer
-Updated in '_EIe', '_TaxE'
+Stock of regular bank debt of energy producer
+Updated in '__DebGE', '_EIe', '_TaxE'
 */
 
 EQUATION_DUMMY( "_NWe", "" )

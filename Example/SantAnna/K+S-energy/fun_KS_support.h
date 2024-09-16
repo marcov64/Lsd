@@ -13,23 +13,27 @@
 
  ******************************************************************************/
 
+#define EQ equation								// shortcut for the class to use
+
+
 /*======================== GENERAL SUPPORT C FUNCTIONS =======================*/
 
 // calculate the bounded, moving-average growth rate of variable
 // if lim is zero, there is no bounding
 
-double mov_avg_bound( object *obj, const char *var, double lim, double per )
+double EQ::mov_avg_bound( object *obj, const char *var, double lim, double per,
+					  	  int lag = 0 )
 {
 	double prev, g, sum_g;
 	int i;
 
 	for ( sum_g = i = 0; i < per; ++i )
 	{
-		if ( t - i <= 0 )						// just go to t=0
+		if ( T - i + lag <= 0 )						// just go to t=1
 			break;
 
-		prev = VLS( obj, var, i + 1 );
-		g = ( prev != 0 ) ? VLS( obj, var, i ) / prev - 1 : 0;
+		prev = VLS( obj, var, i + lag + 1 );
+		g = ( prev != 0 ) ? VLS( obj, var, i + lag ) / prev - 1 : 0;
 
 		if ( lim > 0 )
 			g = max( min( g, lim ), - lim );	// apply bounds
@@ -43,7 +47,7 @@ double mov_avg_bound( object *obj, const char *var, double lim, double per )
 
 // append error messages and increment error counter
 
-void check_error( bool cond, const char* errMsg, int errCount, int *errCounter )
+void EQ::check_error( bool cond, const char* errMsg, int errCount, int *errCounter )
 {
 	if ( ! cond )
 		return;
@@ -67,6 +71,20 @@ bool rank_desc_NWtoS( firmRank e1, firmRank e2 )
 }
 
 
+// compute the net present value of N equal payments PMT and interest rate r,
+// with initial payment optionally deferred by def periods
+
+double npv( double pmt, double r, double n, double def = 0 )
+{
+	double npv = 0 ;
+
+	for ( double i = 1; i <= n; ++i )
+		npv += pmt / pow( 1 + r, i + def );
+
+	return npv;
+}
+
+
 // set initial bank for entrant in equations 'entry1exit', 'entry2exit',
 // 'entryEexit'
 
@@ -75,7 +93,7 @@ const char *bankPar[ ] = { "_bank1", "_bank2", "_bankE" },
 		   *_IDpar[ ] = { "_ID1","_ID2", "_IDe" },
 		   *__IDpar[ ] = { "__ID1","__ID2", "__IDe" };
 
-object *set_bank( object *firm )
+object *EQ::set_bank( object *firm )
 {
 	int _IDb, sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
 					strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
@@ -98,43 +116,54 @@ object *set_bank( object *firm )
 // update firm debt in equations '_Q1', '_Tax1', '_Q2', '_EI', '_SI', '_Tax2',
 // '_EIe', '_TaxE'
 
-const char *_CDvar[ ] = { "_CD1", "_CD2", "_CDe" },
-		   *_CDcVar[ ] = { "_CD1c", "_CD2c", "_CDeC" },
-		   *_CSvar[ ] = { "_CS1", "_CS2", "_CSe" },
-		   *_DebVar[ ] = { "_Deb1", "_Deb2", "_DebE" },
-		   *_NWvar[ ] = { "_NW1", "_NW2", "_NWe" },
-		   *_TCfreeVar[ ] = { "_TC1free", "_TC2free", "_TCeFree" };
+const char *_CDvar[ ] = { "_CD1", "_CD2", "_CDe", "_CDge" },
+		   *_CDcVar[ ] = { "_CD1c", "_CD2c", "_CDeC", "_CDgeC" },
+		   *_CSvar[ ] = { "_CS1", "_CS2", "_CSe", "_CSge" },
+		   *_DebVar[ ] = { "_Deb1", "_Deb2", "_DebE", "__DebGE" },
+		   *_TCfreeVar[ ] = { "_TC1free", "_TC2free", "_TCeFree", "_TCgeFree" };
 
-double update_debt( object *firm, double desired, double loan )
+double EQ::update_debt( object *firm, double desired, double loan,
+						object *plant = NULL )
 {
 	double Deb, TCfree;
-	object *bank;
-	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
-			  strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
+	object *bank, *debObj = plant == NULL ? firm : plant;
+	int TfinGE, dest = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
+					   strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 :
+					   plant == NULL ? 2 : 3;
 
 	if ( desired > 0 )							// ignore loan repayment
 	{
-		INCRS( firm, _CDvar[ sec ], desired );	// desired credit
-		INCRS( firm, _CDcVar[ sec ], desired - loan );// credit constraint
-		INCRS( firm, _CSvar[ sec ], loan );		// supplied credit
+		INCRS( firm, _CDvar[ dest ], desired );	// desired credit
+		INCRS( firm, _CDcVar[ dest ], desired - loan );// credit constraint
+		INCRS( firm, _CSvar[ dest ], loan );	// supplied credit
 	}
 
-	Deb = VS( firm, _DebVar[ sec ] );
+	Deb = VS( debObj, _DebVar[ dest ] );
 
 	// take new loan/repay debt from/to bank
 	if ( loan != 0 )
 	{
-		if ( Deb + loan < 0.001 )				// write-off small debt?
-			Deb = WRITES( firm, _DebVar[ sec ], 0 );
+		if ( Deb + loan < 0.001 )			// write-off small debt?
+			Deb = WRITES( debObj, _DebVar[ dest ], 0 );
 		else
-			Deb = INCRS( firm, _DebVar[ sec ], loan );
+			Deb = INCRS( debObj, _DebVar[ dest ], loan );
+
+		if ( dest == 3 )
+		{
+			TfinGE = min( VS( PARENTS( firm ), "Tfin" ),
+						  VS( PARENTS( firm ), "etaE" ) );// viable period
+
+			WRITES( plant, "__TfinGE", TfinGE );
+			WRITES( plant, "__rGEdeb", VS( firm, "_rEdeb" ) );
+			WRITES( plant, "__pfinGE", 1 );
+		}
 
 		bank = HOOKS( firm, BANK );				// firm's bank
 
 		// if credit limit active, adjust bank's available credit
-		TCfree = VS( bank, _TCfreeVar[ sec ] );	// available credit firm's bank
+		TCfree = VS( bank, _TCfreeVar[ dest ] );// available credit firm's bank
 		if ( TCfree > -0.1 )
-			WRITES( bank, _TCfreeVar[ sec ], max( TCfree - loan, 0 ) );
+			WRITES( bank, _TCfreeVar[ dest ], max( TCfree - loan, 0 ) );
 	}
 
 	return Deb;
@@ -144,7 +173,9 @@ double update_debt( object *firm, double desired, double loan )
 // update firm deposits in equations '_Q1', '_Tax1', '_Q2', '_EI', '_SI',
 // '_Tax2', 'EIe', '_TaxE'
 
-double update_depo( object *firm, double depo, bool incr )
+const char *_NWvar[ ] = { "_NW1", "_NW2", "_NWe" };
+
+double EQ::update_depo( object *firm, double depo, bool incr )
 {
 	double NW;
 	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
@@ -172,14 +203,15 @@ const char *_CIvar[ ] = { "", "_CI", "_CIe" },
 		   *_DivVar[ ] = { "_Div1", "_Div2", "_DivE" },
 		   *_NWpVar[ ] = { "_NW1p", "_NW2p", "" };
 
-double cash_flow( object *firm, double profit, double tax )
+double EQ::cash_flow( object *firm, double profit, double tax )
 {
 	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
 			  strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
 	object *fin = V_EXTS( GRANDPARENTS( firm ), countryE, finSec );
 
 	double dividends = VLS( firm, _DivVar[ sec ], 1 );// shareholder dividends
-	double cashFree = profit - tax - dividends;	// final free cash flow
+	double amort = sec < 2 ? 0 : VS( firm, "_amtGE" );// proj. fin. amortization
+	double cashFree = profit - tax - dividends - amort;	// final free cash flow
 
 	if ( sec > 0 )
 		VS( firm, _CIvar[ sec ] );				// ensure canc. invest. reimbursed
@@ -237,7 +269,7 @@ const char *Cli1Obj[ ] = { "", "Cli", "CliEn" },
 		   *__IDsPar[ ] = { "", "__IDs", "__IDsE" },
 		   *__tSelPar[ ] = { "", "__tSel", "__tSelE" };
 
-object *send_brochure( object *suppl, object *client )
+object *EQ::send_brochure( object *suppl, object *client )
 {
 	object *broch, *cli;
 	int sec = strcmp( NAMES( client ), "Firm2" ) == 0 ? 1 : 2;
@@ -257,7 +289,7 @@ object *send_brochure( object *suppl, object *client )
 
 // set initial supplier for entrant in equations 'entry2exit', 'entryEexit'
 
-object *set_supplier( object *firm )
+object *EQ::set_supplier( object *firm )
 {
 	object *broch, *suppl,
 		   *cap = V_EXTS( GRANDPARENTS( firm ), countryE, capSec );
@@ -277,7 +309,7 @@ const char *__nCanPar[ ] = { "", "__nCan", "__nCanE" },
 		   *__nOrdPar[ ] = { "", "__nOrd", "__nOrdE" },
 		   *__tOrdPar[ ] = { "", "__tOrd", "__tOrdE" };
 
-void send_order( object *firm, double nMach )
+void EQ::send_order( object *firm, double nMach )
 {
 	int sec = strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
 
@@ -297,7 +329,7 @@ void send_order( object *firm, double nMach )
 
 // perform investment according to available funding in equations '_EI', '_SI'
 
-double invest( object *firm, double desired )
+double EQ::invest( object *firm, double desired )
 {
 	double invest, invCost, loan, loanDes;
 
@@ -363,7 +395,7 @@ double invest( object *firm, double desired )
 
 // add new vintage to the capital stock of a firm in equation 'K' and 'initCountry'
 
-void add_vintage( object *firm, double nMach, bool newInd )
+void EQ::add_vintage( object *firm, double nMach, bool newInd )
 {
 	double __AeeVint, __AefVint, __AlpVint, __pVint;
 	int __ageVint, __nMach, __nVint;
@@ -434,7 +466,7 @@ void add_vintage( object *firm, double nMach, bool newInd )
 // scrap (remove) vintage from capital stock in equation 'K'
 // return -1 if last vintage (not removed but shrank to 1 machine)
 
-double scrap_vintage( variable *var, object *vint )
+double EQ::scrap_vintage( c_varT *_v_, object *vint )
 {
 	double RS;
 
@@ -459,7 +491,7 @@ double scrap_vintage( variable *var, object *vint )
 
 // add new green power plant to energy firm in equation 'EIe' and 'initCountry'
 
-void add_green_plant( object *firm, double cap, double nMach, bool newInd )
+object *EQ::add_green_plant( object *firm, double cap, double nMach, bool newInd )
 {
 	object *plant;
 	double u = 1 / ( 1 + VS( PARENTS( firm ), "iotaE" ) );
@@ -468,12 +500,14 @@ void add_green_plant( object *firm, double cap, double nMach, bool newInd )
 	if ( newInd )
 	{
 		plant = ADDOBJLS( firm, "Green", T - 1 );// recalculate in t
+		WRITES( plant, "__lifeGEcycle", 2 );	// already operational
 		WRITES( plant, "__tGE", T - 1 );		// installation time
 		WRITELS( plant, "__QgeU", u, 1 );		// planned utilization
 	}
 	else
 	{
 		plant = ADDOBJS( firm, "Green" );		// recalculate only in t+1
+		RECALCS( plant, "__lifeGEcycle" );		// except for status
 		WRITES( plant, "__tGE", T );
 		WRITES( plant, "__QgeU", u );
 	}
@@ -483,12 +517,14 @@ void add_green_plant( object *firm, double cap, double nMach, bool newInd )
 	WRITES( plant, "__mGE", cap / nMach );		// unit (machine) power capacity
 
 	WRITE_HOOKS( firm, TOPVINT, plant );		// new top green vintage
+
+	return plant;
 }
 
 
 // add new dirty power plant to energy firm in equation 'EIe' and 'initCountry'
 
-void add_dirty_plant( object *firm, double cap, bool newInd )
+void EQ::add_dirty_plant( object *firm, double cap, bool newInd )
 {
 	object *plant;
 	double u = 1 / ( 1 + VS( PARENTS( firm ), "iotaE" ) );
@@ -496,12 +532,14 @@ void add_dirty_plant( object *firm, double cap, bool newInd )
 	if ( newInd )
 	{
 		plant = ADDOBJLS( firm, "Dirty", T - 1 );// recalculate in t
+		WRITES( plant, "__lifeDEcycle", 2 );	// already operational
 		WRITES( plant, "__tDE", T - 1 );		// installation time
 		WRITELS( plant, "__QdeU", u, 1 );		// planned utilization
 	}
 	else
 	{
 		plant = ADDOBJS( firm, "Dirty" );		// recalculate only in t+1
+		RECALCS( plant, "__lifeDEcycle" );		// except for status
 		WRITES( plant, "__tDE", T );
 		WRITES( plant, "__QdeU", u );
 	}
@@ -517,7 +555,7 @@ void add_dirty_plant( object *firm, double cap, bool newInd )
 // add and configure entrant capital-good firm object(s) and required hooks
 // in equations 'entry1exit' and 'initCountry'
 
-double entry_firm1( variable *var, object *sector, int n, bool newInd )
+double EQ::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 {
 	double _AtauEE, _AtauEF, _AtauLP, _BtauEE, _BtauEF, _BtauLP, _D10, _Deb1,
 		   _Eq1, _L1rd, _NW1, _NW10, _RD0, _c1, _cTau, _f1, _p1, AtauLPmax,
@@ -683,7 +721,7 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 // add and configure entrant consumer-good firm object(s) and required hooks
 // in equations 'entry2exit' and 'initCountry'
 
-double entry_firm2( variable *var, object *sector, int n, bool newInd )
+double EQ::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 {
 	double _A2, _D20, _D2e, _Deb2, _E, _Eq2, _K, _N, _NW2, _NW2f, _NW20, _Q2u,
 		   _c2, _f2, _life2cycle, _p2, Deb2, Eq2, K, N, NW2, mult;
@@ -853,15 +891,16 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 // add and configure entrant energy producer firm object(s) and required hooks
 // in equations 'entryEexit' and 'initCountry'
 
-double entry_firmE( variable *var, object *sector, int n, bool newInd )
+double EQ::entry_firmE( c_varT *_v_, object *sector, int n, bool newInd )
 {
 	double _AtauDE, _DeE, _DebE, _EqE, _ICtauGE, _Kde, _Kge, _KgeD, _NWe,
-		   _emTauDE, _fE, _fKge, _pE, _p1, AtauDEmax, AtauDEmin, DebE, EqE,
-		   ICtauGEmax, ICtauGEmin, Kde, Kge, NWe, NWe0, emTauDEavg, mult;
+		   _emTauDE, _fE, _fKge, _pE, _p1, _rEdeb, AtauDEmax, AtauDEmin, DebE,
+		   EqE, ICtauGEmax, ICtauGEmin, Kde, Kge, NWe, NWe0, emTauDEavg, mult;
 	int _IDe, _nMach, _tEent;
 	object *firm, *bank, *plant, *suppl,
 		   *cap = V_EXTS( PARENTS( sector ), countryE, capSec ),
 		   *cons = V_EXTS( PARENTS( sector ), countryE, conSec ),
+		   *fin = V_EXTS( PARENTS( sector ), countryE, finSec ),
 		   *lab = V_EXTS( PARENTS( sector ), countryE, labSup );
 
 	double DebE0ratio = VS( sector, "DebE0ratio" );// bank fin. to equity ratio
@@ -872,11 +911,13 @@ double entry_firmE( variable *var, object *sector, int n, bool newInd )
 	double bE = VS( sector, "bE" );				// required payback period
 	double fGE0 = VS( sector, "fGE0" );			// initial green energy share
 	double iotaE = VS( sector, "iotaE" );		// planned reserve capacity
+	double kConst = VS( fin, "kConst" );		// debt interest scale factor
 	double pF = VS( sector, "pF" );				// fossil fuel price
 	double x6 = VS( sector, "x6" );				// entrant upper advantage
 	int flagEnClim = VS( PARENTS( sector ), "flagEnClim" );// energy enable flag
 
 	double _muE = VS( sector, "muE0" ) * VLS( lab, "wReal", 1 );// mark-up floor
+	int _qc0 = 4;								// start at end of pecking order
 
 	if ( newInd )
 	{
@@ -894,6 +935,7 @@ double entry_firmE( variable *var, object *sector, int n, bool newInd )
 		_fE = 1.0 / n;							// fair share
 		_fKge = VS( sector, "fGE0" );			// initial share of green plants
 		_pE = _muE + ( _fKge == 1 ? 0 : pF / _AtauDE );// initial price
+		_rEdeb = VLS( fin, "rDeb", 1 ) * ( 1 + ( _qc0 - 1 ) * kConst );// interest
 		_tEent = 0;								// entered before t=1
 		NWe0 = VS( sector, "NWe0" );			// initial wealth in energy sec.
 	}
@@ -904,6 +946,7 @@ double entry_firmE( variable *var, object *sector, int n, bool newInd )
 		_fE = 0;								// no market share
 		_fKge = WHTAVES( sector, "_fKge", "_fE" );// average share of green plants
 		_pE = WHTAVES( sector, "_pE", "_fE" );	// average power price
+		_rEdeb = VS( fin, "rDeb" ) * ( 1 + ( _qc0 - 1 ) * kConst );// interest
 		_tEent = T;								// entered now
 		AtauDEmax = MAXS( sector, "_AtauDE" );	// max dirty energy efficiency
 		AtauDEmin = MINS( sector, "_AtauDE" );	// min dirty energy efficiency
@@ -992,7 +1035,7 @@ double entry_firmE( variable *var, object *sector, int n, bool newInd )
 		WRITELLS( firm, "_fKge", _fKge, _tEent, 1 );
 		WRITELLS( firm, "_muE", _muE, _tEent, 1 );
 		WRITELLS( firm, "_pE", _pE, _tEent, 1 );
-		WRITELLS( firm, "_qcE", 4, _tEent, 1 );
+		WRITELLS( firm, "_qcE", _qc0, _tEent, 1 );
 
 		if ( newInd )
 		{
@@ -1011,6 +1054,7 @@ double entry_firmE( variable *var, object *sector, int n, bool newInd )
 		else
 		{
 			WRITES( firm, "_AtauDE", _AtauDE );
+			WRITES( firm, "_Ade", _AtauDE );
 			WRITES( firm, "_DeE", _DeE );
 			WRITES( firm, "_DebE", _DebE );
 			WRITES( firm, "_ICtauGE", _ICtauGE );
@@ -1020,6 +1064,7 @@ double entry_firmE( variable *var, object *sector, int n, bool newInd )
 			WRITES( firm, "_fKge", _fKge );
 			WRITES( firm, "_muE", _muE );
 			WRITES( firm, "_pE", _pE );
+			WRITES( firm, "_rEdeb", _rEdeb );
 
 			// compute variables requiring calculation in t
 			RECALCS( firm, "_DebEmax" );		// prudential credit limit
@@ -1047,14 +1092,14 @@ double entry_firmE( variable *var, object *sector, int n, bool newInd )
 // remove firm object and existing hooks in equation 'entry1exit', 'entry2exit',
 // entryEexit
 
-const char *_BadDebVar[ ] = { "_BadDeb1", "_BadDeb2", "_BadDebE" },
+const char *_BadDebVar[ ] = { "_BadDeb1", "_BadDeb2", "_BadDebE", "_BadDebGE" },
 		   *_EqVar[ ] = { "_Eq1", "_Eq2", "_EqE" },
 		   *EqVar[ ] = { "Eq1", "Eq2", "EqE" },
 		   *cExitVar[ ] = { "cExit1", "cExit2", "cExitE" };
 
-double exit_firm( variable *var, object *firm )
+double EQ::exit_firm( c_varT *_v_, object *firm )
 {
-	double liqEq, liqVal;
+	double liqEq, liqVal, DebGE;
 	object *bank, *cli;
 	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
 			  strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
@@ -1064,17 +1109,24 @@ double exit_firm( variable *var, object *firm )
 
 	// account liquidation equity credit of shareholder or bad debt cost of bank
 	liqVal = VS( firm, _NWvar[ sec ] ) - VS( firm, _DebVar[ sec ] );
+	DebGE = sec == 2 ? VS( firm, "_DebGE" ) : 0;// green project finance
 
-	if ( liqVal < 0 )							// account bank losses, if any
+	if ( liqVal - DebGE < 0 )					// account bank losses, if any
 	{
 		liqEq = 0;								// no liquidation equity
 		bank = HOOKS( firm, BANK );				// exiting firm bank
 		VS( bank, _BadDebVar[ sec ] );			// ensure reset in t
 		INCRS( bank, _BadDebVar[ sec ], - liqVal );// accumulate bank losses
+
+		if ( sec == 2 )
+		{
+			VS( bank, _BadDebVar[ 3 ] );		// account project finance
+			INCRS( bank, _BadDebVar[ 3 ], - DebGE );// separately
+		}
 	}
 	else
 	{
-		liqEq = ROUND( liqVal, 0, 0.01 );		// no liquidation equity credit
+		liqEq = ROUND( liqVal - DebGE, 0, 0.01 );// liquidation equity credit
 		INCRS( PARENTS( firm ), cExitVar[ sec ], liqEq );
 	}
 

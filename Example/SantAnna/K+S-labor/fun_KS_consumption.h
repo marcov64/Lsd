@@ -172,7 +172,7 @@ CYCLE_SAFE( cur, "Firm2" )
 			if ( VS( cur, "_NW2" ) < 0 )		// count bankruptcies
 				++v[6];
 
-			exit_firm( var, cur, & v[2] );		// del obj & collect liq. val.
+			exit_firm( _v_, cur, & v[2] );		// del obj & collect liq. val.
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
@@ -207,7 +207,7 @@ if ( F2 - j + k < F2min )
 if ( F2 + k > F2max )
 	k = F2max - F2 + j;
 
-entry_firm2( var, THIS, k, false );				// add entrant-firm objects
+entry_firm2( _v_, THIS, k, false );				// add entrant-firm objects
 
 v[0] = k - j;									// net number of entrants
 INCR( "F2", v[0] );								// update the number of firms
@@ -273,7 +273,7 @@ for ( auto ito = offers->begin( ); ito != offers->end( ); ++ito )
 			if ( ROUND( ita->w, ito->offer, 0.01 ) <= ito->offer )
 			{
 				// flag hiring and set wage, employer and vintage to be used by worker
-				hire_worker( var, ita->wrk, 2, ito->firm, ito->offer );
+				hire_worker( _v_, ita->wrk, 2, ito->firm, ito->offer );
 				++h;							// scaled count hire (firm)
 			}
 			else
@@ -290,7 +290,7 @@ for ( auto ito = offers->begin( ); ito != offers->end( ); ++ito )
 	// try to hire at least one worker, at any wage
 	if ( j - h > 0 && h == 0 && cur != NULL )	// none hired but someone avail?
 	{
-		hire_worker( var, cur, 2, ito->firm, v[4] );// pay requested wage
+		hire_worker( _v_, cur, 2, ito->firm, v[4] );// pay requested wage
 		++h;
 	}
 

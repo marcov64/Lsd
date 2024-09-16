@@ -139,8 +139,8 @@ RESULT( v[0] )
 
 EQUATION( "_TC" )
 /*
-Total credit supply provided by bank to firms.
-Negative value (-1) means unlimited credit.
+Total credit supply provided by bank to firms
+Negative value (-1) means unlimited credit
 */
 
 k = VS( GRANDPARENT, "flagCreditRule" );		// credit limit & bail-out rule

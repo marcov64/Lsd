@@ -126,15 +126,23 @@ EQUATION( "BadDeb" )
 Total losses from bad debt in financial sector
 This variable must be explicitly recalculated after entry/exit
 */
-RESULT( V( "BadDebE" ) + V( "BadDeb1" ) + V( "BadDeb2" ) )
+RESULT( V( "BadDebE" ) + V( "BadDebGE" ) + V( "BadDeb1" ) + V( "BadDeb2" ) )
 
 
 EQUATION( "BadDebE" )
 /*
-Total bad debt (defaults) in financial sector from energy sector
+Total regular bad debt (defaults) in financial sector from energy sector
 This variable must be explicitly recalculated after entry/exit
 */
 RESULT( SUM( "_BadDebE" ) )
+
+
+EQUATION( "BadDebGE" )
+/*
+Total project finance bad debt (defaults) in financial sector from energy sector
+This variable must be explicitly recalculated after entry/exit
+*/
+RESULT( SUM( "_BadDebGE" ) )
 
 
 EQUATION( "BadDeb1" )
@@ -211,7 +219,7 @@ RESULT( SUM( "_Gbail" ) )						// sum-up banks bailouts
 
 EQUATION( "Loans" )
 /*
-Total banking sector loans (non-defaulted)
+Total banking sector regular loans (non-defaulted)
 Net loans to exiting and entering firms in period not considered
 */
 RESULT( SUM( "_Loans" ) )
@@ -222,6 +230,13 @@ EQUATION( "LoansCB" )
 Total liquidity loans from central bank to banking sector
 */
 RESULT( SUM( "_LoansCB" ) )
+
+
+EQUATION( "LoansGE" )
+/*
+Total banking sector loans to green energy project finance (non-defaulted)
+*/
+RESULT( SUM( "_LoansGE" ) )
 
 
 EQUATION( "NWb" )

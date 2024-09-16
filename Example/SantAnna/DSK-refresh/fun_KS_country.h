@@ -413,7 +413,7 @@ int Ls0 = VS( cur4, "Ls0" );					// initial labor supply
 double Btau0 = ( 1 + mu1 ) * INIPROD /			// initial productivity in sec. 1
 			   ( m1 * m2 * VS( cur2, "b" ) );
 double ICge0 = VS( cur5, "bE" ) * pF / Ade0;	// initial green plant unit cost
-double pE0 = INIWAGE * VS( cur5, "muE0" ) + 
+double pE0 = INIWAGE * VS( cur5, "muE0" ) +
 			 ( fGE0 == 1 ? 0 : pF / Ade0 );		// init. energy price
 double c10 = ( INIWAGE / Btau0 + ( pE0 + trCO2 * INIEFRI ) / INIEEFF ) / m1;
 												// initial unit cost in sector 1
@@ -504,10 +504,10 @@ VS( cur3, "banksMaps" );						// update the mapping vectors
 DELETE( SEARCHS( cur1, "Firm1" ) );				// remove empty firm instances
 DELETE( SEARCHS( cur2, "Firm2" ) );
 
-v[1] = entry_firm1( var, cur1, F10, true );		// add capital-good firms
-INIT_TSEARCHTS( cur1, "Firm1", F10 );			// prepare turbo search indexing
+v[1] = entry_firm1( _v_, cur1, F10, true );		// add capital-good firms
+INIT_TSEARCHS( cur1, "Firm1" );					// prepare turbo search indexing
 
-v[1] += entry_firm2( var, cur2, F20, true );	// add consumer-good firms
+v[1] += entry_firm2( _v_, cur2, F20, true );	// add consumer-good firms
 VS( cur2, "firm2maps" );						// update the mapping vectors
 
 WRITEL( "Eq", v[1], -1 );						// save existing equity

@@ -36,7 +36,11 @@ v[0] = 0;										// fulfilled demand accumulator
 if ( v[1] >= v[2] )								// demand requires all capacity?
 	CYCLE( cur, "FirmE" )						// no auction necessary
 	{
-		v[3] = VS( cur, "_QeO" ) / v[2];		// producer capacity share
+		if ( v[2] > 0 )
+			v[3] = VS( cur, "_QeO" ) / v[2];	// producer capacity share
+		else
+			v[3] = 1 / V( "Fe" );				// fair share
+
 		v[0] += v[4] = v[1] * v[3];				// producer supply allocation
 		WRITES( cur, "_De", v[4] );
 	}
@@ -98,7 +102,8 @@ EQUATION( "MCe" )
 /*
 Market entry conditions index in energy sector
 */
-RESULT( log( max( VL( "NWe", 1 ), 0 ) + 1 ) - log( VL( "DebE", 1 ) + 1 ) )
+RESULT( log( max( VL( "NWe", 1 ), 0 ) + 1 ) -
+		log( VL( "DebE", 1 ) + VL( "DebGE", 1 ) + 1 ) )
 
 
 EQUATION( "entryEexit" )
@@ -125,6 +130,7 @@ int Fe = V( "Fe" );								// current number of firms
 int Fe0 = V( "Fe0" );							// initial number of firms
 int FeMax = V( "FeMax" );						// max firms in energy sector
 int FeMin = V( "FeMin" );						// min firms in energy sector
+int Tcon = V( "Tcon" );							// plant construction time
 
 vector < bool > quit( Fe, false );				// vector of firms' quit status
 
@@ -136,9 +142,10 @@ h = Fe;											// initial number of firms
 v[1] = v[3] = i = k = 0;						// accum., counters, registers
 CYCLE( cur, "FirmE" )
 {
+	j = VS( cur, "_tEent" );					// time of entry
 	v[4] = VS( cur, "_NWe" );					// current net wealth
 
-	if ( v[4] < 0 || T >= VS( cur, "_tEent" ) + nE )// bankrupt or incumbent?
+	if ( ( T > j + Tcon && v[4] < 0 ) || T >= j + Tcon + nE )// bankrupt/incumb.?
 	{
 		for ( v[5] = j = 0; j < nE; ++j )
 			v[5] += VLS( cur, "_fE", j ) / nE;	// nE periods market share
@@ -171,15 +178,21 @@ CYCLE_SAFE( cur, "FirmE" )
 			if ( VS( cur, "_NWe" ) < 0 )		// count bankruptcies
 				++v[6];
 
-			exit_firm( var, cur );				// del obj & collect liq. value
+			exit_firm( _v_, cur );				// del obj & collect liq. value
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
 			{
 				// new equity required
-				v[1] += v[7] = NWe0u + VS( cur, "_DebE" ) - VS( cur, "_NWe" );
+				v[1] += v[7] = NWe0u + VS( cur, "_DebE" ) + VS( cur, "_DebGE" ) -
+							   VS( cur, "_NWe" );
 
 				WRITES( cur, "_DebE", 0 );		// reset debt
+				CYCLES( cur, cur1, "Green" )	// reset project finance debt
+				{
+					WRITES( cur1, "__DebGE", 0 );
+					WRITES( cur1, "__amtGE", 0 );
+				}
 				INCRS( cur, "_EqE", v[7] );		// add new equity
 				INCRS( cur, "_NWe", v[7] );
 			}
@@ -206,7 +219,7 @@ if ( Fe - j + k < FeMin )
 if ( Fe + k > FeMax )
 	k = FeMax - Fe + j;
 
-entry_firmE( var, THIS, k, false );				// add entrant-firm objects
+entry_firmE( _v_, THIS, k, false );				// add entrant-firm objects
 
 v[0] = k - j;									// net number of entrants
 INCR( "Fe", v[0] );								// update the number of firms
@@ -215,6 +228,7 @@ WRITE( "exitE", ( double ) j / Fe );
 WRITE( "entryE", ( double ) k / Fe );
 WRITES( ENESTAL1, "exitEfail", v[6] / Fe );
 RECALCS( FINSECL1, "BadDebE" );					// update bad debt after exits
+RECALCS( FINSECL1, "BadDebGE" );
 
 V( "fErescale" );								// redistribute entrant m.s.
 V( "firmEmaps" );								// update firm mapping vectors
@@ -233,9 +247,11 @@ EQUATION( "pF" )
 /*
 Price of fossil fuel
 */
-v[1] = VL( "pE", 1 );							// previous price of energy
-RESULT( v[1] > 0 ? CURRENT * ( 1 + V( "upsilonF" ) * ( V( "pE" ) / v[1] - 1 ) ) :
-				   CURRENT )
+v[1] = VS( PARENT, "mLim" );					// growth rate limit
+v[2] = V( "Tplan" );							// moving average period
+RESULT( CURRENT * ( 1 + V( "upsilonF" ) *
+					( mov_avg_bound( THIS, "pE", v[1], v[2], 1 ) +
+					  mov_avg_bound( THIS, "Df", v[1], v[2], 1 ) ) ) )
 
 
 EQUATION( "CeEq" )
@@ -246,6 +262,21 @@ RESULT( V( "Se" ) - V( "De" ) * V( "pE" ) )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/
+
+EQUATION( "Ae" )
+/*
+Labor productivity of energy sector
+*/
+v[1] = V( "Le" );
+RESULT( v[1] > 0 ? V( "Qe" ) / v[1] : VL( "AeMavg", 1 ) )
+
+
+EQUATION( "AeMavg" )
+/*
+Moving average of labor productivity in energy sector
+*/
+RESULT( MAVE( "Ae", V( "Tplan" ) ) )
+
 
 EQUATION( "Ce" )
 /*
@@ -270,10 +301,17 @@ RESULT( SUM( "_DeE" ) )
 
 EQUATION( "DebE" )
 /*
-Total debt of energy sector
+Total regular debt of energy sector
 */
 V( "TaxE" );									// ensure debt is updated
 RESULT( SUM( "_DebE" ) )
+
+
+EQUATION( "DebGE" )
+/*
+Total debt in green energy project finance of energy sector
+*/
+RESULT( SUM( "_DebGE" ) )
 
 
 EQUATION( "Df" )
@@ -413,6 +451,14 @@ V( "De" );										// ensure demand is allocated
 RESULT( SUM( "_Qe" ) )
 
 
+EQUATION( "Qge" )
+/*
+Total green energy generation of energy sector
+*/
+V( "De" );										// ensure demand is allocated
+RESULT( SUM( "_Qge" ) )
+
+
 EQUATION( "QeO" )
 /*
 Total generation offered by energy sector
@@ -458,6 +504,13 @@ V( "TaxE" );									// ensure accounting is updated
 RESULT( SUM( "_We" ) )
 
 
+EQUATION( "dDeMavg" )
+/*
+Moving average of growth rate of energy demand
+*/
+RESULT( mov_avg_bound( THIS, "De", VS( PARENT, "mLim" ), V( "Tplan" ) ) )
+
+
 EQUATION( "iDe" )
 /*
 Interest received from deposits by energy sector
@@ -467,9 +520,45 @@ RESULT( SUM( "_iDe" ) )
 
 EQUATION( "iE" )
 /*
-Interest paid by energy sector
+Interest on regular debt paid by energy sector
 */
 RESULT( SUM( "_iE" ) )
+
+
+EQUATION( "iGE" )
+/*
+Interest on green energy project finance debt paid by energy sector
+*/
+RESULT( SUM( "_iGE" ) )
+
+
+EQUATION( "pEmavg" )
+/*
+Moving average of energy price
+*/
+RESULT( MAVE( "pE", V( "Tplan" ) ) )
+
+
+EQUATION( "uE" )
+/*
+Green power plant utilization in energy sector
+*/
+v[1] = V( "Ke" );								// total green power capacity
+RESULT( v[1] > 0 ? V( "Qe" ) / v[1] : 0 )
+
+
+EQUATION( "uEmavg" )
+/*
+Moving average of green power plant utilization in energy sector
+*/
+RESULT( MAVE( "uE", V( "Tplan" ) ) )
+
+
+EQUATION( "wEmavg" )
+/*
+Moving average of wage in energy sector
+*/
+RESULT( MAVES( LABSUPL1, "w", V( "Tplan" ) ) )
 
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/

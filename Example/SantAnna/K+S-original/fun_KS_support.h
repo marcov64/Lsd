@@ -299,7 +299,7 @@ double EQ::invest( object *firm, double desired )
 
 // add new vintage to the capital stock of a firm in equation 'K' and 'initCountry'
 
-void EQ::add_vintage( cVarT *_v_, object *firm, double nMach, bool newInd )
+void EQ::add_vintage( object *firm, double nMach, bool newInd )
 {
 	double __Avint, __pVint;
 	int __ageVint, __nMach, __nVint;
@@ -364,7 +364,7 @@ void EQ::add_vintage( cVarT *_v_, object *firm, double nMach, bool newInd )
 // scrap (remove) vintage from capital stock in equation 'K'
 // return -1 if last vintage (not removed but shrank to 1 machine)
 
-double EQ::scrap_vintage( cVarT *_v_, object *vint )
+double EQ::scrap_vintage( c_varT *_v_, object *vint )
 {
 	double RS;
 
@@ -392,7 +392,7 @@ double EQ::scrap_vintage( cVarT *_v_, object *vint )
 // add and configure entrant capital-good firm object(s) and required hooks
 // in equations 'entry1exit' and 'initCountry'
 
-double EQ::entry_firm1( cVarT *_v_, object *sector, int n, bool newInd )
+double EQ::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 {
 	double _Atau, _Btau, _D10, _Deb1, _Eq1, _L1rd, _NW1, _NW10, _RD0, _c1, _f1,
 		   _p1, AtauMax, BtauMax, Deb1, Eq1, NW1, mult;
@@ -533,7 +533,7 @@ double EQ::entry_firm1( cVarT *_v_, object *sector, int n, bool newInd )
 // add and configure entrant consumer-good firm object(s) and required hooks
 // in equations 'entry2exit' and 'initCountry'
 
-double EQ::entry_firm2( cVarT *_v_, object *sector, int n, bool newInd )
+double EQ::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 {
 	double _A2, _D20, _D2e, _Deb2, _E, _Eq2, _K, _N, _NW2, _NW2f, _NW20, _Q2u,
 		   _c2, _f2, _life2cycle, _p2, Deb2, Eq2, K, N, NW2, mult;
@@ -652,7 +652,7 @@ double EQ::entry_firm2( cVarT *_v_, object *sector, int n, bool newInd )
 			WRITELLS( firm, "_N", _N, _t2ent, 1 );
 			WRITELLS( firm, "_NW2", _NW2, _t2ent, 1 );
 
-			add_vintage( _v_, firm, _K / m2, newInd );// first machine vintages
+			add_vintage( firm, _K / m2, newInd );// first machine vintages
 		}
 		else
 		{
@@ -700,7 +700,7 @@ const char *BadDebVar[ ] = { "BadDeb1", "BadDeb2" },
 		   *cExitVar[ ] = { "cExit1", "cExit2" },
 		   *CliBrochObj[ ] = { "Cli", "Broch" };
 
-double EQ::exit_firm( cVarT *_v_, object *firm )
+double EQ::exit_firm( c_varT *_v_, object *firm )
 {
 	double liqEq, liqVal;
 	object *cli, *fin = SEARCHS( GRANDPARENTS( firm ), "Financial" );

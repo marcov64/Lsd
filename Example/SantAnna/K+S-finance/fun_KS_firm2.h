@@ -600,7 +600,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 			}
 			else								// scrap entire vintage
 			{
-				if ( scrap_vintage( var, cur ) >= 0 )// not last vintage?
+				if ( scrap_vintage( _v_, cur ) >= 0 )// not last vintage?
 				{
 					v[6] -= v[8];
 					continue;					// don't consider for old vint.
@@ -625,7 +625,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 		}
 		else									// scrap entire vintage
 		{
-			if ( scrap_vintage( var, cur ) >= 0 )// not last vintage?
+			if ( scrap_vintage( _v_, cur ) >= 0 )// not last vintage?
 			{
 				v[7] -= v[8];
 				continue;						// don't consider for old vint.
@@ -796,7 +796,7 @@ EQUATION( "_iD2" )
 /*
 Interest received from deposits by firm in consumption-good sector
 */
-RESULT( VL( "_NW2", 1 ) * VLS( FINSECL2, "rD", 1 ) )
+RESULT( max( VL( "_NW2", 1 ) * VLS( FINSECL2, "rD", 1 ), 0 ) )
 
 
 EQUATION( "_life2cycle" )

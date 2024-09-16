@@ -139,8 +139,8 @@ RESULT( v[0] )
 
 EQUATION( "_TC" )
 /*
-Total credit supply provided by bank to firms.
-Negative value (-1) means unlimited credit.
+Total credit supply provided by bank to firms
+Negative value (-1) means unlimited credit
 */
 
 k = VS( GRANDPARENT, "flagCreditRule" );		// credit limit & bail-out rule
@@ -150,10 +150,7 @@ if ( k == 1 )									// deposits multiplier rule?
 else
 	if ( k == 2 )								// Basel-like credit rule?
 	{
-		h = VS( PARENT, "mPerB" );
-		for ( v[1] = i = 0; i < h; ++i )
-			v[1] += VL( "_Bda", i ) / h;		// bank fragility moving average
-
+		v[1] = MAVE( "_Bda", VS( PARENT, "mPerB" ) );// bank fragility effect
 		v[0] = VL( "_NWb", 1 ) / ( VS( PARENT, "tauB" ) *
 								 ( 1 + VS( PARENT, "betaB" ) * v[1] ) );
 	}
@@ -206,33 +203,6 @@ if ( VS( GRANDPARENT, "flagCreditRule" ) > 0 )
 }
 else
 	v[0] = -1;									// no limit
-
-RESULT( v[0] )
-
-
-EQUATION( "_iB" )
-/*
-Bank interest income from loans
-*/
-
-v[1] = VLS( PARENT, "rDeb", 1 );				// interest on debt
-v[2] = VS( PARENT, "kConst" );					// interest scaling
-
-// compute the firm-specific interest income
-v[0] = 0;										// interest accumulator
-CYCLE( cur, "Cli1" )							// sector 1
-{
-	j = VLS( SHOOKS( cur ), "_qc1", 1 );		// firm credit class
-	v[3] = VLS( SHOOKS( cur ), "_Deb1", 1 );	// firm debt
-	v[0] += v[3] * v[1] * ( 1 + ( j - 1 ) * v[2] );// interest received
-}
-
-CYCLE( cur, "Cli2" )							// sector 2
-{
-	j = VLS( SHOOKS( cur ), "_qc2", 1 );		// firm credit class
-	v[3] = VLS( SHOOKS( cur ), "_Deb2", 1 );	// firm debt
-	v[0] += v[3] * v[1] * ( 1 + ( j - 1 ) * v[2] );// interest received
-}
 
 RESULT( v[0] )
 
@@ -362,20 +332,36 @@ Bank effective market share (in number of customers)
 RESULT( V( "_Cl" ) / VS( PARENT, "Cl" ) )
 
 
+EQUATION( "_iB" )
+/*
+Bank interest income from loans
+*/
+
+v[0] = 0;										// interest accumulator
+CYCLE( cur, "Cli1" )							// sector 1
+	v[0] += VS( SHOOKS( cur ), "_i1" );			// firm interest payment
+
+CYCLE( cur, "Cli2" )							// sector 2
+	v[0] += VS( SHOOKS( cur ), "_i2" );			// firm interest payment
+
+RESULT( v[0] )
+
+
 EQUATION( "_iDb" )
 /*
 Bank interest payments from deposits
 */
 
-v[0] = V( "_fD" ) * VLS( GRANDPARENT, "SavAcc", 1 );// workers deposits
+v[0] = V( "_fD" ) * VLS( GRANDPARENT, "SavAcc", 1 ) * VLS( PARENT, "rD", 1 );
+												// workers deposits
 
 CYCLE( cur, "Cli1" )							// sector 1 deposits
-	v[0] += max( VLS( SHOOKS( cur ), "_NW1", 1 ), 0 );
+	v[0] += VS( SHOOKS( cur ), "_iD1" );
 
 CYCLE( cur, "Cli2" )							// sector 2 deposits
-	v[0] += max( VLS( SHOOKS( cur ), "_NW2", 1 ), 0 );
+	v[0] += VS( SHOOKS( cur ), "_iD2" );
 
-RESULT( VLS( PARENT, "rD", 1 ) * v[0] )
+RESULT( v[0] )
 
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/

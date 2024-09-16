@@ -8,7 +8,7 @@
 	Copyright Marcelo C. Pereira
 	Distributed under the GNU General Public License
 
-	VERSION: 5.1.3 - Full LSD version
+	VERSION: 5.1.4 - Full LSD version
 
 	This is the topmost code file for the K+S coded in LSD.
 	It contains only the scheduling equations 'runCountry' and 'timeStep',
@@ -21,17 +21,14 @@
 #define FASTMODE 0
 
 // do not initialize and check LSD pointers (comment for debugging!)
-//#define NO_POINTER_INIT
+#define NO_POINTER_INIT
+#define NO_POINTER_CHECK
 
 
 /*======================== ADDITIONAL CODE TO INCLUDE ========================*/
 
-// LSD and K+S macros and objects definition and support code
-#include <fun_head_fast.h>						// LSD definitions
-
-mt19937_64 random_engine;						// K+S random engine (!= LSD)
-
 #include "fun_KS_class.h"						// K+S class/macro definitions
+#include <fun_head_fast.h>						// LSD definitions
 #include "fun_KS_support.h"						// K+S support C++ functions
 
 
@@ -66,9 +63,9 @@ Also configures LSD main flags.
 
 PARAMETER;										// execute only once
 
-DEFAULT_RESULT( NAN );							// default equation result
 USE_ZERO_INSTANCE;								// allow zero-instance objects
 NO_SEARCH;										// don't perform variable search
+NO_SEARCH_UP;
 RND_GENERATOR( 2 );								// LSD source of randomness
 
 random_engine.seed( RND_SEED );					// sync seeds between engines
@@ -92,7 +89,7 @@ if ( RUN == 1 )									// first run only
 #endif
 }
 
-CYCLES( root, cur, "Country" )					// scan all country objects
+CYCLES( ROOT, cur, "Country" )					// scan all country objects
 	VS( cur, "initCountry" );					// initialize country
 
 RESULT( 1 )
@@ -198,16 +195,17 @@ MODELEND
 
 /*=========================== GARBAGE COLLECTION =============================*/
 
-void close_sim( void )
+CLOSEBEGIN
+
+object *cur, *cur1, *cur2;
+
+CYCLES( ROOT, cur, "Country" )					// scan all country objects
 {
-	object *cur, *cur1, *cur2;
+	CYCLES( cur, cur1, "Consumption" )
+		CYCLES( cur1, cur2, "Firm2" )			// free Firm2 extensions
+			DELETE_EXTS( cur2, firm2E );
 
-	CYCLES( root, cur, "Country" )				// scan all country objects
-	{
-		CYCLES( cur, cur1, "Consumption" )
-			CYCLES( cur1, cur2, "Firm2" )		// free Firm2 extensions
-				DELETE_EXTS( cur2, firm2E );
-
-		DELETE_EXTS( cur, countryE );			// reclaim allocated memory
-	}
+	DELETE_EXTS( cur, countryE );				// reclaim allocated memory
 }
+
+CLOSEEND

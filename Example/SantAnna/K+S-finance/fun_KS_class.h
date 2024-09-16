@@ -13,6 +13,24 @@
 
  ******************************************************************************/
 
+// K+S additional C++ STL containers and utilities
+#include <list>
+#include <map>
+#include <set>
+#include <vector>
+
+// LSD classes forward declarations
+namespace lsd
+{
+	class object;
+	class variable;
+}
+
+// set default name spaces (C++ STL, LSD)
+using namespace std;
+using namespace lsd;
+
+
 /*============================= GENERAL CLASSES ==============================*/
 
 struct firmRank									// element of pecking order rank
@@ -115,3 +133,22 @@ struct countryE
 // macros to work with standard C arrays
 #define LEN_ARR( A ) ( ( int ) ( sizeof A / sizeof A[0] ) )
 #define END_ARR( A ) ( A + LEN_ARR( A ) )
+
+/*================== FORWARD DECLARATION OF C++ EXTENSIONS ===================*/
+
+#define USER_FUNCS \
+double cash_flow( object *firm, double profit, double tax ); \
+double entry_firm1( c_varT *_v_, object *sector, int n, bool newInd ); \
+double entry_firm2( c_varT *_v_, object *sector, int n, bool newInd ); \
+double exit_firm( c_varT *_v_, object *firm ); \
+double invest( object *firm, double desired ); \
+double mov_avg_bound( object *obj, const char *var, double lim, double per ); \
+double scrap_vintage( c_varT *_v_, object *vint ); \
+double update_debt( object *firm, double desired, double loan ); \
+double update_depo( object *firm, double depo, bool incr ); \
+object *send_brochure( object *suppl, object *client ); \
+object *set_bank( object *firm ); \
+object *set_supplier( object *firm ); \
+void add_vintage( object *firm, double nMach, bool newInd ); \
+void check_error( bool cond, const char* errMsg, int errCount, int *errCounter ); \
+void send_order( object *firm, double nMach );

@@ -1,4 +1,4 @@
-Labor- and finance-augmented K+S Model (version 5.1.3)
+Labor- and finance-augmented K+S Model (version 5.1.4)
 ======================================================
 
 This version copyright by Marcelo C. Pereira.
@@ -6,7 +6,7 @@ The original K+S code was developed by Andrea Roventini and other contributors.
 
 This is a full rewrite of the original "Schumpeter meeting Keynes" (K+S) model, plus the labor and finance extensions, to LSD. There is no guarantee this version matches the results of original versions, due to the additions and the intrinsic differences between the programming approach from legacy versions.
 
-LSD version 8.0 or higher is required. Download at: https://github.com/SantAnnaKS/LSD
+LSD version 9.0 or higher is required. Download at: https://github.com/SantAnnaKS/LSD
 
 
 Change log
@@ -38,6 +38,9 @@ v5.1.3 (01/01/22) - fix equation computation order in some cases
                     improve real GDP calculation
                     add full dynamic multi-level SFC testing
                     improve tests
+v5.1.4 (01/10/22) - fix reservation wage calculation
+                    fix minimum income scenarios (flagGovExp <= 1)
+
 
 Relevant references
 ===================

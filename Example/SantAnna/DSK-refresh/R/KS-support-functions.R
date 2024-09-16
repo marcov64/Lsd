@@ -437,13 +437,19 @@ fit_subbotin <- function( x ){
   if( useSubbotools && length( x ) >= 50 )
     subboFit <- exec_subbofit( x )
   else{       # Alternative calculation using the normalp package
-    sf <- paramp( x )
-    sf$p <- estimatep( x, mu = sf$mean, p = sf$p, method = "inverse" )
-    # use Subbotools when p < 1, as normalp doesn't work in this condition
-    if( sf$p <= 1.01 )
-      subboFit <- exec_subbofit( x )
-    else
-      subboFit <- c( sf$p, sf$sp, sf$mp )
+    sf <- try( paramp( x ), silent = TRUE )
+
+    if( class( sf ) != "try-error" ) {
+      sf$p <- estimatep( x, mu = sf$mean, p = sf$p, method = "inverse" )
+      # use Subbotools when p < 1, as normalp doesn't work in this condition
+      if( sf$p <= 1.01 )
+        subboFit <- exec_subbofit( x )
+      else
+        subboFit <- c( sf$p, sf$sp, sf$mp )
+    } else {
+      if( useSubbotools )
+        subboFit <- exec_subbofit( x )
+    }
   }
 
   # check for degenerated distribution
@@ -1183,7 +1189,7 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
       }
 
       # treat zeros as NAs
-      if( na0 && plt[[ k ]][[ j ]] <= 0 ) {
+      if( na0 && any( plt[[ k ]][[ j ]] ) <= 0 ) {
         plt[[ k ]][[ j ]] <- min[[ k ]][[ j ]] <- max[[ k ]][[ j ]] <-
           CIlo[[ k ]][[ j ]] <- CIhi[[ k ]][[ j ]] <- NA
       }

@@ -598,7 +598,7 @@ EQUATION( "_iD1" )
 /*
 Interest received from deposits by firm in capital-good sector
 */
-RESULT( VL( "_NW1", 1 ) * VLS( FINSECL2, "rD", 1 ) )
+RESULT( max( VL( "_NW1", 1 ) * VLS( FINSECL2, "rD", 1 ), 0 ) )
 
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/

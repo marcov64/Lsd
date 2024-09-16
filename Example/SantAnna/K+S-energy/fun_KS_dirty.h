@@ -19,8 +19,9 @@ EQUATION( "__LdeD" )
 /*
 Labor required for operation of dirty power plant
 */
-RESULT( max( VL( "__QdeU", 1 ), VS( GRANDPARENT, "mEmin" ) ) *
-		V( "__Kde" ) * VS( GRANDPARENT, "mDE" ) )
+RESULT( V( "__lifeDEcycle" ) > 0 ?
+			max( VL( "__QdeU", 1 ), VS( GRANDPARENT, "mEmin" ) ) *
+			V( "__Kde" ) * VS( GRANDPARENT, "mDE" ) : 0 )
 
 
 EQUATION( "__RSde" )
@@ -28,15 +29,52 @@ EQUATION( "__RSde" )
 Capacity to scrap of dirty power plant
 */
 
-v[0] = 0;										// assume no or done scrapping
-
-if ( CURRENT > 0 )								// scrapped last period?
-	DELETE( THIS );								// delete plant object (suicide)
+// request scrapping Tcon-1 periods before end of technical life
+if ( T - V( "__tDE" ) == VS( GRANDPARENT, "etaE" ) -
+						 ( VS( GRANDPARENT, "Tcon" ) - 1 ) )
+	v[0] = V( "__Kde" );					// request scrap
 else
-	if ( T - V( "__tDE" ) > VS( GRANDPARENT, "etaE" ) )// over technical life
-		v[0] = V( "__Kde" );					// scrap entire plant
+	v[0] = 0;
 
 RESULT( v[0] )
+
+
+EQUATION( "__lifeDEcycle" )
+/*
+Stage in life cycle of dirty energy plant:
+0 = in construction
+1 = available for operation next period
+2 = operating
+-1 = scrapped
+-2 = object removed
+Also remove scrapped-plant object in next period
+*/
+
+h = CURRENT;									// current state
+
+switch( h )
+{
+	case 0:										// non-operational
+		if ( T == V( "__tDE" ) + VS( GRANDPARENT, "Tcon" ) - 1 )
+			h = 1;
+		break;
+
+	case 1:										// available next period
+		h = 2;
+		break;
+
+	case 2:										// operating
+		if ( T - V( "__tDE" ) > VS( GRANDPARENT, "Tcon" ) +
+								VS( GRANDPARENT, "etaE" ) )
+			h = -1;								// scrap plant
+		break;
+
+	case -1:									// scrapped
+		h = -2;
+		DELETE( THIS );							// delete plant object (suicide)
+}
+
+RESULT( h )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/

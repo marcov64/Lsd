@@ -68,7 +68,8 @@ double netPi2 = VS( CONSECL1, "Pi2" ) - Tax2;	// net profits
 
 // matrices data - energy sector
 double CeEq = VS( ENESECL1, "CeEq" );			// energy price equalization
-double DebE = VS( ENESECL1, "DebE" );			// bank debt/loans
+double DebE = VS( ENESECL1, "DebE" );			// bank regular debt/loans
+double DebGE = VS( ENESECL1, "DebGE" );			// bank project finance debt
 double Df = VS( ENESECL1, "Df" );				// demand for fuel
 double DivE_1 = VLS( ENESECL1, "DivE", 1 );		// dividends
 double EqE = VS( ENESECL1, "EqE" );				// equity
@@ -80,9 +81,11 @@ double TaxE = VS( ENESECL1, "TaxE" );			// taxes
 double We = VS( ENESECL1, "We" );				// wages
 double cEntryE_1 = VLS( ENESECL1, "cEntryE", 1 );// new equity
 double cExitE_1 = VLS( ENESECL1, "cExitE", 1 );	// liquidation payouts
-double dDebE = DebE - VLS( ENESECL1, "DebE", 1 );// change in debt/loans
+double dDebE = DebE - VLS( ENESECL1, "DebE", 1 );// change in regular debt/loans
+double dDebGE = DebGE - VLS( ENESECL1, "DebGE", 1 );// change in proj. fin. debt
 double dNWe = NWe - VLS( ENESECL1, "NWe", 1 );	// change in deposits
-double iE = VS( ENESECL1, "iE" );				// interest paid on debt
+double iE = VS( ENESECL1, "iE" );				// interest paid on regular debt
+double iGE = VS( ENESECL1, "iGE" );				// interest on green en. p. fin.
 double iDe = VS( ENESECL1, "iDe" );				// interest got on deposits
 double netPiE = VS( ENESECL1, "PiE" ) - TaxE;	// net profits
 double pE = VS( ENESECL1, "pE" );				// price of energy
@@ -92,7 +95,8 @@ double pF = VS( ENESECL1, "pF" );				// price of fuel
 double BadDeb_1 = VLS( FINSECL1, "BadDeb", 1 );	// bank bad debt
 double BadDeb1_1 = VLS( FINSECL1, "BadDeb1", 1 );// bank bad debt in sector 1
 double BadDeb2_1 = VLS( FINSECL1, "BadDeb2", 1 );// bank bad debt in sector 2
-double BadDebE_1 = VLS( FINSECL1, "BadDebE", 1 );// bank bad debt in en. sector
+double BadDebE_1 = VLS( FINSECL1, "BadDebE", 1 );// regular bad debt en. sector
+double BadDebGE_1 = VLS( FINSECL1, "BadDebGE", 1 );// proj. fin. bad debt en. sec.
 double BondsB = VS( FINSECL1, "BondsB" );		// bank gov. bond stock
 double BondsB_1 = VLS( FINSECL1, "BondsB", 1 );
 double BondsCB = VS( FINSECL1, "BondsCB" );		// central bank gov. bond stock
@@ -106,10 +110,11 @@ double ExRes = VS( FINSECL1, "ExRes" );			// bank excess reserves
 double ExRes_1 = VLS( FINSECL1, "ExRes", 1 );
 double Gbail = VS( FINSECL1, "Gbail" );			// government bail-out funds
 double Gbail_1 = VLS( FINSECL1, "Gbail", 1 );
-double Loans = VS( FINSECL1, "Loans" );			// bank loans
+double Loans = VS( FINSECL1, "Loans" );			// bank regular loans
+double LoansGE = VS( FINSECL1, "LoansGE" );		// green energy proj. fin. loans
 double LoansCB = VS( FINSECL1, "LoansCB" );		// central liquidity loans
 double LoansCB_1 = VLS( FINSECL1, "LoansCB", 1 );
-double MB = Loans - Depo;						// credit-money supply
+double MB = Loans + LoansGE - Depo;				// credit-money supply
 double PiCB = VS( FINSECL1, "PiCB" );			// central bank oper. result
 double Res = VS( FINSECL1, "Res" );				// bank reserves at central bank
 double Res_1 = VLS( FINSECL1, "Res", 1 );
@@ -119,9 +124,10 @@ double dBondsCB = BondsCB - BondsCB_1;			// change in bonds (c.b.)
 double dDepo = Depo - Depo_1;					// change in deposits
 double dDepoG = DepoG - DepoG_1;				// change in gov. deposits c.b.
 double dExRes = ExRes - ExRes_1;				// change in excess reserves
-double dLoans = Loans - VLS( FINSECL1, "Loans", 1 );// change in loans
+double dLoans = Loans - VLS( FINSECL1, "Loans", 1 );// change in regular loans
+double dLoansGE = LoansGE - VLS( FINSECL1, "LoansGE", 1 );// change in g.e. loans
 double dLoansCB = LoansCB - LoansCB_1;			// change in c.b. loans
-double dMB = dLoans - dDepo;					// change in monetary base
+double dMB = dLoans + dLoansGE - dDepo;			// change in monetary base
 double dRes = Res - Res_1;						// change in reserves at c.b.
 double iB = VS( FINSECL1, "iB" );				// interest received on loans
 double iDb = VS( FINSECL1, "iDb" );				// interest paid on deposits
@@ -154,7 +160,7 @@ double dDeb = Deb - Deb_1;						// change in debt (bond) stock
 // balance-sheet row sums (accounting identities)
 double Equities = + Eq - Eq1 - Eq2 - EqE;
 double Deposits = + SavAcc + NW1 + NW2 + NWe - Depo;
-double BankLoans = - Deb1 - Deb2 - DebE + Loans;
+double BankLoans = - Deb1 - Deb2 - DebE - DebGE + Loans + LoansGE;
 double CreditMoney = + MB - MB;
 double Reserves = + Res - Res;
 double ExReserves = + ExRes - ExRes;
@@ -170,9 +176,9 @@ v[1] = abs( Equities ) + abs( Deposits ) + abs( BankLoans ) +
 double Bal = + SavAcc + Eq;
 double Bal1 = + NW1 - Deb1 - Eq1;
 double Bal2 = + Knom + NW2 - Deb2 - Eq2;
-double BalB = - Depo + Loans + MB + Res + ExRes - LoansCB + BondsB;
+double BalB = - Depo + Loans + LoansGE + MB + Res + ExRes - LoansCB + BondsB;
 double BalCB = - MB - Res - ExRes + LoansCB + BondsCB - DepoG;
-double BalE = + KeNom + NWe - DebE - EqE;
+double BalE = + KeNom + NWe - DebE - DebGE - EqE;
 double BalG = - Deb + DepoG;
 
 v[2] = - Bal - Bal1 - Bal2 - BalB - BalCB - BalE - BalG + Knom + KeNom;
@@ -190,12 +196,12 @@ double Profits = - netPi1 + netPi1 - netPi2 + netPi2 - netPiE + netPiE
 double Dividends = + Div_1 - Div1_1 - Div2_1 - DivE_1 - DivB_1;
 double NewEquity = - cEntry_1 + cEntry1_1 + cEntry2_1 + cEntryE_1;
 double LiqEquity = + cExit_1 - cExit1_1 - cExit2_1 - cExitE_1;
-double BadDebt = + BadDeb1_1 + BadDeb2_1 + BadDebE_1 - BadDeb_1;
+double BadDebt = + BadDeb1_1 + BadDeb2_1 + BadDebE_1 + BadDebGE_1 - BadDeb_1;
 double Bailout = + Gbail - Gbail + Gbail_1 - Gbail_1;
 double CBprofit = - PiCB + PiCB;
 
 double DepoIntrst = + rD_1 * SavAcc_1 + iD1 + iD2 + iDe - iDb;
-double LoanIntrst = - i1 - i2 - iE + iB;
+double LoanIntrst = - i1 - i2 - iE - iGE + iB;
 double ResIntrst = + rRes_1 * Res_1 - rRes_1 * Res_1;
 double LiqFacIntrst = - r_1 * LoansCB_1 + r_1 * LoansCB_1;
 double BondIntrst = + rBonds_1 * BondsB_1 + rBonds_1 * BondsCB_1
@@ -203,7 +209,7 @@ double BondIntrst = + rBonds_1 * BondsB_1 + rBonds_1 * BondsCB_1
 double GovDepoIntrst = - rRes_1 * DepoG_1 + rRes_1 * DepoG_1;
 
 double DepoChg = - dSavAcc - dNW1 - dNW2 - dNWe + dDepo;
-double LoanChg = + dDeb1 + dDeb2 + dDebE - dLoans;
+double LoanChg = + dDeb1 + dDeb2 + dDebE + dDebGE - dLoans - dLoansGE;
 double MBchg = + dMB - dMB;
 double ResChg = - dRes + dRes;
 double ExResChg = - dExRes + dExRes;
@@ -227,7 +233,7 @@ double firms1nl = + netPi1 - Div1_1 + cEntry1_1 - cExit1_1 + BadDeb1_1;
 double firms2nl = - Inom + netPi2 - Div2_1 + cEntry2_1 - cExit2_1
 				  + BadDeb2_1;
 double firmsEnl = - IeNom + netPiE - DivE_1 + cEntryE_1 - cExitE_1
-				  + BadDebE_1;
+				  + BadDebE_1 + BadDebGE_1;
 double banksNL = + netPiB - DivB_1 + Gbail;
 double cBankNL = - PiCB - Gbail + Gbail_1 - rRes_1 * Res_1 + r_1 * LoansCB_1
 				 + rBonds_1 * BondsCB_1 - rRes_1 * DepoG_1;
@@ -242,12 +248,12 @@ double firms1c = + S1 - pE * En1 - W1 - Tax1 - netPi1 + iD1 - i1;
 double firms1k = + firms1nl - dNW1 + dDeb1;
 double firms2c = + S2 - pE * En2 - W2 - Tax2 - netPi2 + iD2 - i2;
 double firms2k = + firms2nl - dNW2 + dDeb2;
-double firmsEc = + Se - pF * Df - We - TaxE - netPiE + iDe - iE;
-double firmsEk = + firmsEnl - dNWe + dDebE;
+double firmsEc = + Se - pF * Df - We - TaxE - netPiE + iDe - iE - iGE;
+double firmsEk = + firmsEnl - dNWe + dDebE + dDebGE;
 double banksC = - TaxB - netPiB - BadDeb_1 - iDb + iB + rRes_1 * Res_1
 				- r_1 * LoansCB_1 + rBonds_1 * BondsB_1;
-double banksK = + banksNL + dDepo - dLoans + dMB - dRes - dExRes + dLoansCB
-				- dBondsB;
+double banksK = + banksNL + dDepo - dLoans - dLoansGE + dMB - dRes
+				- dExRes + dLoansCB - dBondsB;
 double cBank = + cBankNL - dMB + dRes + dExRes - dLoansCB - dBondsCB + dDepoG;
 double govt = + govtNL + dDeb - dDepoG;
 
@@ -482,7 +488,7 @@ double rRes_1 = VLS( FINSECL1, "rRes", 1 );
 objVecT TCerr, sfcCerr, sfcKerr;				// vector to save TC error banks
 int errors = 0;									// error counter
 k = v[4] = v[5] = v[6] = v[7] = v[8] = v[9] = 0;// accumulators
-v[10] = v[11] = v[12] = v[13] = 0;
+v[10] = v[11] = v[12] = v[13] = v[14] = 0;
 
 CYCLES( FINSECL1, cur, "Bank" )
 {
@@ -493,16 +499,18 @@ CYCLES( FINSECL1, cur, "Bank" )
 	v[8] += VS( cur, "_BondsB" );
 	v[9] += VS( cur, "_Depo" );
 	v[10] += VS( cur, "_Loans" );
-	v[11] += VS( cur, "_LoansCB" );
-	v[12] += VS( cur, "_Res" );
-	v[13] += VS( cur, "_ExRes" );
+	v[11] += VS( cur, "_LoansGE" );
+	v[12] += VS( cur, "_LoansCB" );
+	v[13] += VS( cur, "_Res" );
+	v[14] += VS( cur, "_ExRes" );
 
-	if ( VS( cur, "_TC1free" ) + VS( cur, "_TC2free" ) >
+	if ( VS( cur, "_TC1free" ) + VS( cur, "_TC2free" ) + VS( cur, "_TCeFree" ) >
 		 ( 1 + TOL / 10 ) * VS( cur, "_TC" ) )
 		TCerr.push_back( cur );
 
 	if ( abs( - VS( cur, "_TaxB" ) - ( VS( cur, "_PiB" ) - VS( cur, "_TaxB" ) )
-			  - ( VLS( cur, "_BadDeb1", 1 ) + VLS( cur, "_BadDeb2", 1 ) )
+			  - ( VLS( cur, "_BadDeb1", 1 ) + VLS( cur, "_BadDeb2", 1 )
+				  + VLS( cur, "_BadDebE", 1 ) + VLS( cur, "_BadDebGE", 1 ) )
 			  - VS( cur, "_iDb" ) + VS( cur, "_iB" )
 			  + rRes_1 * VLS( cur, "_Res", 1 ) - r_1 * VLS( cur, "_LoansCB", 1 )
 			  + rBonds_1 * VLS( cur, "_BondsB", 1 ) ) > TOL )
@@ -511,8 +519,10 @@ CYCLES( FINSECL1, cur, "Bank" )
 	if ( abs( + VS( cur, "_Gbail" ) + ( VS( cur, "_PiB" ) - VS( cur, "_TaxB" ) )
 			  - VLS( cur, "_DivB", 1 )
 			  + ( VS( cur, "_Depo" ) - VLS( cur, "_Depo", 1 ) )
-			  - ( VS( cur, "_Loans" ) - VLS( cur, "_Loans", 1 ) )
-			  + ( ( VS( cur, "_Loans" ) - VLS( cur, "_Loans", 1 ) )
+			  - ( VS( cur, "_Loans" ) - VLS( cur, "_Loans", 1 )
+			      + VS( cur, "_LoansGE" ) - VLS( cur, "_LoansGE", 1 ) )
+			  + ( ( VS( cur, "_Loans" ) - VLS( cur, "_Loans", 1 )
+				    + VS( cur, "_LoansGE" ) - VLS( cur, "_LoansGE", 1 ) )
 			  - ( VS( cur, "_Depo" ) - VLS( cur, "_Depo", 1 ) ) )
 			  - ( VS( cur, "_Res" ) - VLS( cur, "_Res", 1 ) )
 			  - ( VS( cur, "_ExRes" ) - VLS( cur, "_ExRes", 1 ) )
@@ -526,6 +536,8 @@ CYCLES( FINSECL1, cur, "Bank" )
 double BD = VS( FINSECL1, "BD" );
 double BS = VS( FINSECL1, "BS" );
 double BadDeb = VS( FINSECL1, "BadDeb" );
+double BadDebE = VS( FINSECL1, "BadDebE" );
+double BadDebGE = VS( FINSECL1, "BadDebGE" );
 double BadDeb1 = VS( FINSECL1, "BadDeb1" );
 double BadDeb2 = VS( FINSECL1, "BadDeb2" );
 double BondsB = VS( FINSECL1, "BondsB" );
@@ -538,6 +550,7 @@ double ExRes = VS( FINSECL1, "ExRes" );
 double Gbail = VS( FINSECL1, "Gbail" );
 double Loans = VS( FINSECL1, "Loans" );
 double LoansCB = VS( FINSECL1, "LoansCB" );
+double LoansGE = VS( FINSECL1, "LoansGE" );
 double NWb = VS( FINSECL1, "NWb" );
 double PiB = VS( FINSECL1, "PiB" );
 double PiCB = VS( FINSECL1, "PiCB" );
@@ -557,6 +570,7 @@ double CD = VS( MACSTAL1, "CD" );
 double CDc = VS( MACSTAL1, "CDc" );
 double CS = VS( MACSTAL1, "CS" );
 double TC = VS( MACSTAL1, "TC" );
+double TCge = VS( MACSTAL1, "TCge" );
 double Bda = VS( SECSTAL1, "Bda" );
 double Bfail = VS( SECSTAL1, "Bfail" );
 double HHb = VS( SECSTAL1, "HHb" );
@@ -589,15 +603,16 @@ double DivB_1 = VLS( FINSECL1, "DivB", 1 );
 double ExRes_1 = VLS( FINSECL1, "ExRes", 1 );
 double Loans_1 = VLS( FINSECL1, "Loans", 1 );
 double LoansCB_1 = VLS( FINSECL1, "LoansCB", 1 );
+double LoansGE_1 = VLS( FINSECL1, "LoansGE", 1 );
 double Res_1 = VLS( FINSECL1, "Res", 1 );
 
 double nonNeg[ ] = { BS, BondsB, BondsCB, CD, CDc, CS, Deb1, Deb2, Depo, DepoG,
-					 DivB, ExRes, Gbail, Loans, LoansCB, Res, TaxB, Bda, Bfail,
-					 BadDeb, BadDeb1, BadDeb2, HHb, HPb, SavAcc, NW1, NW2, iB,
-					 iDb, r, rD, rRes };
+					 DivB, ExRes, Gbail, Loans, LoansCB, LoansGE, Res, TaxB,
+					 Bda, Bfail, BadDeb, BadDebE, BadDebGE, BadDeb1, BadDeb2,
+					 HHb, HPb, SavAcc, NW1, NW2, iB, iDb, r, rD, rRes };
 double posit[ ] = { Cl, rBonds, rDeb, F1, F2 };
-double finite[ ] = { BD, Deb, TC, PiB, PiCB, NW1, NW2, entry1, exit1, entry2,
-					 exit2 };
+double finite[ ] = { BD, Deb, TC, TCge, PiB, PiCB, NW1, NW2, entry1, exit1,
+					 entry2, exit2 };
 
 dblVecT all ( nonNeg, END_ARR( nonNeg ) );
 all.insert( all.end( ), posit, END_ARR( posit ) );
@@ -624,11 +639,11 @@ check_error( rD > rRes || rD > rBonds || rRes > r || r > rDeb ||
 LOG( "\n   $$ Res=%.3g ExRes=%.3g LoansCB=%.3g BondsCB=%.3g DepoG=%.3g Gbail=%.3g",
 	 Res, ExRes, LoansCB, BondsCB, DepoG, Gbail );
 
-check_error( Res > Depo || round( Res ) != round( v[12] ) ||
-			 round( ExRes ) != round( v[13] ),
+check_error( Res > Depo || round( Res ) != round( v[13] ) ||
+			 round( ExRes ) != round( v[14] ),
 			 "INCONSISTENT-RESERVES", 0, & errors );
 
-check_error( round( LoansCB ) != round ( v[11] ),
+check_error( round( LoansCB ) != round ( v[12] ),
 			 "INCONSISTENT-CB-LOANS", 0, & errors );
 
 check_error( round( BondsCB ) < round( BS - BD ),
@@ -663,21 +678,25 @@ check_error( v[7] < 1 - TOL / 10 || v[7] > 1 + TOL / 10,
 			 "INCONSISTENT-SHARES", 0, & errors );
 
 // bank assets and liabilities, credit dynamic
-LOG( "\n   $$ Depo=%.3g Loans=%.3g CD=%.3g CS=%.3g CDc=%.3g",
-	 Depo, Loans, CD, CS, CDc );
+LOG( "\n   $$ Depo=%.3g Loans=%.3g LoansGE=%.3g CD=%.3g CS=%.3g CDc=%.3g",
+	 Depo, Loans, LoansGE, CD, CS, CDc );
 
-check_error( round( Depo ) != round( v[9] ) || round( Loans ) != round( v[10] ),
+check_error( round( Depo ) != round( v[9] ) ||
+			 round( Loans ) != round( v[10] ) ||
+			 round( LoansGE ) != round( v[11] ),
 			 "INCONSISTENT-BANK-ACCOUNTS", 0, & errors );
 
 // try to account for deposits from loans of entrant firms (very crude)
-check_error( abs( NW1 + NW2 + SavAcc - Depo - Deb1 - Deb2 + Loans ) / Depo > TOL,
+check_error( abs( NW1 + NW2 + SavAcc - Depo - Deb1 - Deb2 +
+				  Loans + LoansGE ) / Depo > TOL,
 			 "LARGE-DEPO-LOANS-GAP", 0, & errors );
 
 check_error( CS > CD || CDc > CD, "INCONSISTENT-FINANCE", 0, & errors );
 
 check_error( abs( + Gbail + ( PiB - TaxB ) - DivB_1 + ( Depo - Depo_1 )
-				  - ( Loans - Loans_1 )
-				  + ( ( Loans - Loans_1 ) - ( Depo - Depo_1 ) )
+				  - ( Loans - Loans_1 ) - ( LoansGE - LoansGE_1 )
+				  + ( ( Loans - Loans_1 ) + ( LoansGE - LoansGE_1 ) -
+					  ( Depo - Depo_1 ) )
 				  - ( Res - Res_1 ) - ( ExRes - ExRes_1 )
 				  + ( LoansCB - LoansCB_1 ) - ( BondsB - BondsB_1 ) ) > TOL,
 				 "INCONSISTENT-SFC-CAPITAL", 0, & errors );
@@ -685,10 +704,10 @@ check_error( abs( + Gbail + ( PiB - TaxB ) - DivB_1 + ( Depo - Depo_1 )
 check_error( sfcKerr.size( ) > 0, "SFC-CAP-ERR-BANK", sfcKerr.size( ), & errors );
 
 // banks cash-flow
-LOG( "\n   $$ TC=%.2g BadDeb=%.2g iB=%.2g TaxB=%.2g PiB=%.2g NWb=%.2g",
-	 TC, BadDeb1 + BadDeb2, iB, TaxB, PiB, NWb );
+LOG( "\n   $$ TC+TCge=%.2g BadDeb=%.2g iB=%.2g TaxB=%.2g PiB=%.2g NWb=%.2g",
+	 TC + TCge, BadDeb, iB, TaxB, PiB, NWb );
 
-check_error( TC < -1, "NEGATIVE-TOTAL-CREDIT", 0, & errors );
+check_error( TC < -1 || TCge < -1, "NEGATIVE-TOTAL-CREDIT", 0, & errors );
 
 check_error( PiB - TaxB > iB + rRes_1 * Res_1 + rBonds_1 * BondsB_1,
 			 "INCONSISTENT-BANK-PROFIT", 0, & errors );
@@ -857,85 +876,134 @@ if ( T == v[1] )
 	LOG( "\n EEE TESTING OF ENERGY SECTOR STARTED" );
 
 // scan firms for severe problems
+double Tcon = VS( ENESECL1, "Tcon" );			// plant construction time
+double Tfin = VS( ENESECL1, "Tfin" );			// project finance period
+double etaE = VS( ENESECL1, "etaE" );			// plant lifetime
 double muEavg = VS( ENESTAL1, "muEavg" );		// average mark-up
 double pF = VS( ENESECL1, "pF" );				// price of fossil fuel
 
-objVecT Derr, EmErr, Kerr, Lerr, Oerr, Qerr,	// vectors to save error firms
-		cErr, perr, muerr, sfcCerr, sfcKerr;
+objVecT Derr, EmErr, FinErr, Kerr, Lerr, Oerr,	// vectors to save error firms
+		Qerr, cErr, perr, muerr, pfinErr, sfcCerr, sfcKerr, tErr;
 
 int errors = 0;									// error counter
-h = j = k = v[4] = v[5] = v[6] = v[7] = v[8] = v[9] = v[10] = 0;// accumulators
+h = v[4] = v[5] = v[6] = v[7] = v[8] = v[9] = 0;// accumulators
+v[10] = v[11] = v[12] = v[13] = v[14] = 0;
 
 CYCLES( ENESECL1, cur, "FirmE" )
 {
-	v[11] = v[12] = v[13] = v[14] = v[15] = 0;
+	j = k = 0;
+	v[20] = v[21] = v[22] = v[23] = v[31] = v[32] = v[33] = v[34] = v[35] = 0;
 
 	// scan power plants for severe problems
 	CYCLES( cur, cur1, "Dirty" )
 	{
-		v[11] += VS( cur1, "__EmDE" );
-		v[12] += VS( cur1, "__Kde" );
-		v[13] += VS( cur1, "__Qde" );
+		int __lifeDEcycle = VS( cur1, "__lifeDEcycle" );
+		int __tDE = VS( cur1, "__tDE" );
+
+		v[20] += VS( cur1, "__EmDE" );
+		v[21] += __lifeDEcycle > 0 ? VS( cur1, "__Kde" ) : 0;
+		v[22] += VS( cur1, "__RSde" );
+		v[23] += VS( cur1, "__Qde" );
+
+		if ( ( __tDE > 0 && T < __tDE + Tcon - 1 && __lifeDEcycle > 0 ) ||
+			 ( __tDE > 0 && T == __tDE + Tcon - 1 && __lifeDEcycle != 1 ) ||
+			 ( T >= __tDE + Tcon && __lifeDEcycle == 0 ) ||
+			 ( T > __tDE + Tcon + etaE && __lifeDEcycle >= 0 ) )
+			tErr.push_back( cur1 );
 
 		if ( VS( cur1, "__EmDE" ) < 0 ||
-			 ( VS( cur1, "__Qde" ) == 0 && VS( cur1, "__EmDE" ) > 0 ) )
+			 ( VS( cur1, "__Qde" ) == 0 && VS( cur1, "__EmDE" ) > 0 ) ||
+			 ( VS( cur1, "__EmDE" ) > 0 && __lifeDEcycle >= 0 && __lifeDEcycle < 2 ) )
 			EmErr.push_back( cur1 );
 
 		if ( VS( cur1, "__Qde" ) < 0 ||
-			 ( VS( cur1, "__Qde" ) > 0 && VS( cur1, "__EmDE" ) == 0 ) )
+			 ( VS( cur1, "__Qde" ) > 0 && VS( cur1, "__EmDE" ) == 0 ) ||
+			 ( VS( cur1, "__Qde" ) > 0 && __lifeDEcycle >= 0 && __lifeDEcycle < 2 ) )
 			Qerr.push_back( cur1 );
 
 		if ( VS( cur1, "__cDE" ) < 0 ||
 			 ( VS( cur1, "__Qde" ) > 0 && VS( cur1, "__cDE" ) == 0 ) )
 			cErr.push_back( cur1 );
 
-		if ( VS( cur1, "__Qde" ) > 0 && VS( cur1, "__LdeD" ) == 0 )
+		if ( ( VS( cur1, "__Qde" ) > 0 && VS( cur1, "__LdeD" ) == 0 ) ||
+			 ( VS( cur1, "__LdeD" ) > 0 && __lifeDEcycle <= 0 ) )
 			Lerr.push_back( cur1 );
+
+		if ( T - __tDE != etaE - ( Tcon - 1 ) && VS( cur1, "__RSde" ) != 0 )
+			FinErr.push_back( cur1 );
 
 		++j;
 	}
 
 	CYCLES( cur, cur1, "Green" )
 	{
-		v[14] += VS( cur1, "__Kge" );
-		v[15] += VS( cur1, "__Qge" );
+		int __lifeGEcycle = VS( cur1, "__lifeGEcycle" );
+		int __pfinGE = VS( cur1, "__pfinGE" );
+		int __tGE = VS( cur1, "__tGE" );
 
-		if ( VS( cur1, "__Qge" ) < 0 )
+		v[31] += __lifeGEcycle > 0 ? VS( cur1, "__Kge" ) : 0;
+		v[32] += VS( cur1, "__RSge" );
+		v[33] += VS( cur1, "__Qge" );
+		v[34] += VS( cur1, "__DebGE" );
+		v[35] += VS( cur1, "__iGE" );
+
+		if ( ( __tGE > 0 && T < __tGE + Tcon - 1 && __lifeGEcycle > 0 ) ||
+			 ( __tGE > 0 && T == __tGE + Tcon - 1 && __lifeGEcycle != 1 ) ||
+			 ( T >= __tGE + Tcon && __lifeGEcycle == 0 ) ||
+			 ( T > __tGE + Tcon + etaE && __lifeGEcycle >= 0 ) )
+			tErr.push_back( cur1 );
+
+		if ( VS( cur1, "__Qge" ) < 0 ||
+			 ( VS( cur1, "__Qge" ) > 0 && __lifeGEcycle >= 0 && __lifeGEcycle < 2 ) )
 			Qerr.push_back( cur1 );
 
 		if ( VS( cur1, "__cGE" ) < 0 ||
 			 ( VS( cur1, "__Qge" ) > 0 && VS( cur1, "__cGE" ) == 0 ) )
 			cErr.push_back( cur1 );
 
-		if ( VS( cur1, "__Qge" ) > 0 && VS( cur1, "__LgeD" ) == 0 )
+		if ( ( VS( cur1, "__Qge" ) > 0 && VS( cur1, "__LgeD" ) == 0 ) ||
+			 ( VS( cur1, "__LgeD" ) > 0 && __lifeGEcycle <= 0 ) )
 			Lerr.push_back( cur1 );
+
+		if ( ( VS( cur1, "__amtGE" ) > 0 && __pfinGE == 0 ) ||
+			 ( T - __tGE > Tcon && VS( cur1, "__iGE" ) == 0 && __pfinGE == 1 ) ||
+			 ( T - __tGE > Tcon + Tfin && VS( cur1, "__DebGE" ) > 0 ) ||
+			 ( T - __tGE != etaE - ( Tcon - 1 ) && VS( cur1, "__RSge" ) != 0 ) )
+			FinErr.push_back( cur1 );
 
 		++k;
 	}
 
-	v[4] += v[11];
-	v[5] += v[12];
-	v[6] += v[13];
-	v[7] += v[14];
-	v[8] += v[15];
-	v[9] += VS( cur, "_fE" );
-	v[10] += VS( cur, "_De" );
+	v[4] += v[20];
+	v[5] += v[21];
+	v[6] += v[22];
+	v[7] += v[23];
+	v[8] += v[31];
+	v[9] += v[32];
+	v[10] += v[33];
+	v[11] += v[34];
+	v[12] += v[35];
+	v[13] += VS( cur, "_fE" );
+	v[14] += VS( cur, "_De" );
 
-	if ( VS( cur, "_tEent" ) < T - 1 && VS( cur, "_QeO" ) <= 0 )
+	if ( T > VS( cur, "_tEent" ) + Tcon && VS( cur, "_QeO" ) <= 0 )
 		Oerr.push_back( cur );
 
-	if ( ( VS( cur, "_tEent" ) < T && VS( cur, "_Ke" ) <= 0 ) ||
-		 round( VS( cur, "_Ke" ) ) != round( v[12] + v[14] ) )
+	if ( ( T > VS( cur, "_tEent" ) + Tcon - 1 && VS( cur, "_Ke" ) <= 0 ) ||
+		 round( VS( cur, "_Ke" ) ) != round( v[21] + v[31] ) ||
+		 round( VS( cur, "_SIdeD" ) ) != round( v[22] ) ||
+		 round( VS( cur, "_SIgeD" ) ) != round( v[32] ) ||
+		 round( VS( cur, "_SIeD" ) ) != round( v[22] + v[32] ) )
 		Kerr.push_back( cur );
 
 	if ( round( VS( cur, "_De" ) ) != round( VS( cur, "_Qe" ) ) ||
-		 round( VS( cur, "_Qe" ) ) != round( v[13] + v[15] ) )
+		 round( VS( cur, "_Qe" ) ) != round( v[23] + v[33] ) )
 		Derr.push_back( cur );
 
 	if ( ( VS( cur, "_Qe" ) > 0 && VS( cur, "_Le" ) - VS( cur, "_LeRD" ) <= 0 ) )
 		Lerr.push_back( cur );
 
-	if ( round( VS( cur, "_EmE" ) ) != round( v[11] ) )
+	if ( round( VS( cur, "_EmE" ) ) != round( v[20] ) )
 		EmErr.push_back( cur );
 
 	if ( VS( cur, "_muE" ) < muEavg * TOL || VS( cur, "_muE" ) > muEavg / TOL )
@@ -947,26 +1015,39 @@ CYCLES( ENESECL1, cur, "FirmE" )
 	if ( abs( + VS( cur, "_Se" ) - pF * VS( cur, "_Df" )
 			  - VS( cur, "_We" ) - VS( cur, "_TaxE" )
 			  - ( VS( cur, "_PiE" ) - VS( cur, "_TaxE" ) )
-			  + VS( cur, "_iDe" ) - VS( cur, "_iE" ) ) > TOL )
+			  + VS( cur, "_iDe" ) - VS( cur, "_iE" ) - VS( cur, "_iGE" ) ) > TOL )
 		sfcCerr.push_back( cur );
 
 	if ( abs( - VS( cur, "_IeNom" ) + ( VS( cur, "_PiE" ) - VS( cur, "_TaxE" ) )
 			  - VLS( cur, "_DivE", 1 )
 			  - ( VS( cur, "_NWe" ) - VLS( cur, "_NWe", 1 ) )
 			  + ( VS( cur, "_DebE" ) - VLS( cur, "_DebE", 1 ) )
+			  + ( VS( cur, "_DebGE" ) - VLS( cur, "_DebGE", 1 ) )
 			  + ( VS( cur, "_tEent" ) == T ? VS( cur, "_EqE" ) : 0 ) ) > TOL )
 		sfcKerr.push_back( cur );
+
+	if ( VS( cur, "_DebGE" ) - VLS( cur, "_DebGE", 1 ) > 0 &&
+		 VS( cur, "_SNPVge" ) < 0 )
+		pfinErr.push_back( cur );
 
 	++h;
 }
 
+double Ae = VS( ENESECL1, "Ae" );
+double AeMavg = VS( ENESECL1, "AeMavg" );
 double Ce = VS( ENESECL1, "Ce" );
+double CeEq = VS( ENESECL1, "CeEq" );
+double CIe = VS( ENESECL1, "CIe" );
 double De = VS( ENESECL1, "De" );
-double Df = VS( ENESECL1, "Df" );
+double DeE = VS( ENESECL1, "DeE" );
 double DebE = VS( ENESECL1, "DebE" );
+double DebGE = VS( ENESECL1, "DebGE" );
+double Df = VS( ENESECL1, "Df" );
 double DivE = VS( ENESECL1, "DivE" );
 double EIe = VS( ENESECL1, "EIe" );
+double EIeD = VS( ENESECL1, "EIeD" );
 double EmE = VS( ENESECL1, "EmE" );
+double EqE = VS( ENESECL1, "EqE" );
 double Fe = VS( ENESECL1, "Fe" );
 double IeNom = VS( ENESECL1, "IeNom" );
 double JOe = VS( ENESECL1, "JOe" );
@@ -983,6 +1064,7 @@ double NWe = VS( ENESECL1, "NWe" );
 double PiE = VS( ENESECL1, "PiE" );
 double Qe = VS( ENESECL1, "Qe" );
 double QeO = VS( ENESECL1, "QeO" );
+double Qge = VS( ENESECL1, "Qge" );
 double SIe = VS( ENESECL1, "SIe" );
 double SIeD = VS( ENESECL1, "SIeD" );
 double Se = VS( ENESECL1, "Se" );
@@ -990,25 +1072,37 @@ double TaxE = VS( ENESECL1, "TaxE" );
 double We = VS( ENESECL1, "We" );
 double cEntryE = VS( ENESECL1, "cEntryE" );
 double cExitE = VS( ENESECL1, "cExitE" );
+double dDeMavg = VS( ENESECL1, "dDeMavg" );
 double entryE = VS( ENESECL1, "entryE" );
 double entryEexit = VS( ENESECL1, "entryEexit" );
 double exitE = VS( ENESECL1, "exitE" );
 double iDe = VS( ENESECL1, "iDe" );
 double iE = VS( ENESECL1, "iE" );
+double iGE = VS( ENESECL1, "iGE" );
 double pE = VS( ENESECL1, "pE" );
+double pEmavg = VS( ENESECL1, "pEmavg" );
+double uE = VS( ENESECL1, "uE" );
+double uEmavg = VS( ENESECL1, "uEmavg" );
+double wEmavg = VS( ENESECL1, "wEmavg" );
 
 double DebE_1 = VLS( ENESECL1, "DebE", 1 );
+double DebGE_1 = VLS( ENESECL1, "DebGE", 1 );
 double DivE_1 = VLS( ENESECL1, "DivE", 1 );
 double NWe_1 = VLS( ENESECL1, "NWe", 1 );
 double cEntryE_1 = VLS( ENESECL1, "cEntryE", 1 );
 double cExitE_1 = VLS( ENESECL1, "cExitE", 1 );
 
 double BadDebE_1 = VLS( FINSECL1, "BadDebE", 1 );
+double BadDebGE_1 = VLS( FINSECL1, "BadDebGE", 1 );
 
+double Ade = VS( ENESTAL1, "Ade" );
 double AtauDEavg = VS( ENESTAL1, "AtauDEavg" );
 double CDe = VS( ENESTAL1, "CDe" );
 double CDeC = VS( ENESTAL1, "CDeC" );
+double CDge = VS( ENESTAL1, "CDge" );
+double CDgeC = VS( ENESTAL1, "CDgeC" );
 double CSe = VS( ENESTAL1, "CSe" );
+double CSge = VS( ENESTAL1, "CSge" );
 double DebEmax = VS( ENESTAL1, "DebEmax" );
 double EnGDP = VS( ENESTAL1, "EnGDP" );
 double HHe = VS( ENESTAL1, "HHe" );
@@ -1023,19 +1117,22 @@ double emTauDEavg = VS( ENESTAL1, "emTauDEavg" );
 double exitEfail = VS( ENESTAL1, "exitEfail" );
 double fGE = VS( ENESTAL1, "fGE" );
 double fKge = VS( ENESTAL1, "fKge" );
+double fKpfinGE = VS( ENESTAL1, "fKpfinGE" );
 double innDE = VS( ENESTAL1, "innDE" );
 double innGE = VS( ENESTAL1, "innGE" );
+double pfinGEexe = VS( ENESTAL1, "pfinGEexe" );
 
 double Ls = VS( LABSUPL1, "Ls" );
 
-double nonNeg[ ] = { CDe, CDeC, Ce, CSe, DebE, DebEmax, Df, DivE, EIe, EmE,
-					 EnGDP, Fe, HHe, HPe, IeNom, JOe, Ke, KeNom, Kde, Kge, Le,
-					 LeD, LeDrd, LeRD, Qe, RDe, RSe, SIe, SIeD, Se, TaxE, We,
-					 cEntryE, cExitE, entryE, exitE, exitEfail, fGE, fKge, iDe,
-					 iE, innDE, innGE };
-double posit[ ] = { AtauDEavg, De, ICtauGEavg, QeO, ageEavg, emTauDEavg,
-					muEavg, pE };
-double finite[ ] = { MCe, NWe, PiE, dEmE, dEn, entryEexit };
+double nonNeg[ ] = { CDe, CDeC, CDge, CDgeC, Ce, CIe, CSe, CSge, De, DeE, DebE,
+					 DebGE, DebEmax, Df, DivE, EIe, EIeD, EmE, EnGDP, EqE,
+					 Fe, HHe, HPe, IeNom, JOe, Ke, KeNom, Kde, Kge, Le, LeD,
+					 LeDrd, LeRD, Qe, Qge, RDe, RSe, SIe, SIeD, Se, TaxE, We,
+					 cEntryE, cExitE, entryE, exitE, exitEfail, fGE, fKge,
+					 fKpfinGE, iDe, iE, iGE, innDE, innGE, pfinGEexe };
+double posit[ ] = { Ade, Ae, AeMavg, AtauDEavg, ICtauGEavg, QeO, ageEavg,
+					emTauDEavg, muEavg, pE, pEmavg, uE, uEmavg, wEmavg };
+double finite[ ] = { CeEq, MCe, NWe, PiE, dDeMavg, dEmE, dEn, entryEexit };
 
 dblVecT all ( nonNeg, END_ARR( nonNeg ) );
 all.insert( all.end( ), posit, END_ARR( posit ) );
@@ -1054,16 +1151,24 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
-check_error( Kerr.size( ) > 0, "NO-CAPITAL-FIRMS", Kerr.size( ), & errors );
+check_error( tErr.size( ) > 0, "INCONSISTENT-LIFE-CYCLE", tErr.size( ), & errors );
+
+check_error( Kerr.size( ) > 0, "INCONSISTENT-CAPITAL", Kerr.size( ), & errors );
 
 LOG( "\n   E fGE=%.2g fKge=%.2g IeNom=%.3g SIeD=%.3g SIe=%.3g EIe=%.3g",
 	 fGE, fKge, IeNom, SIeD, SIe, EIe );
 
-check_error( Kde < floor( v[5] ) || Kge < floor( v[7] ) ||
+check_error( Kde < floor( v[5] ) || Kge < floor( v[8] ) ||
 			 round( Ke ) != round( Kde + Kge ) || floor( SIeD ) > ceil( Ke ),
 			 "INCONSISTENT-CAPITAL", 0, & errors );
 
-check_error( ceil( SIeD ) < SIe, "INCONSISTENT-INVESTMENT", 0, & errors );
+check_error( SIe > SIeD || floor( SIeD ) > ceil( v[6] + v[9] ),
+			 "INCONSISTENT-SCRAPPING", 0, & errors );
+
+check_error( ceil( SIeD ) < SIe || ceil( EIeD ) < EIe,
+			 "INCONSISTENT-INVESTMENT", 0, & errors );
+
+check_error( floor( CIe ) > EIe + SIe, "INCONSISTENT-CANCELING", 0, & errors );
 
 // innovation, productivity
 LOG( "\n   E RDe=%.3g AtauDEavg=%.3g emTauDEavg=%.3g ICtauGEavg=%.3g",
@@ -1083,8 +1188,8 @@ check_error( ceil( EmE ) < v[4], "INCONSISTENT-EMISSIONS", 0, & errors );
 
 check_error( Derr.size( ) > 0, "BAD-GEN-FIRMS", Derr.size( ), & errors );
 
-check_error( round( Qe ) != round( De ) || ceil( De ) < v[10] ||
-			 ceil( Qe ) < v[6] + v[8],
+check_error( round( Qe ) != round( De ) || floor( Qge ) > Qe ||
+			 ceil( De ) < v[14] || ceil( Qe ) < v[7] + v[10],
 			 "INCONSISTENT-GENERATION", 0, & errors );
 
 // labor
@@ -1106,20 +1211,33 @@ LOG( "\n   E We=%g Cf=%.3g Ce=%.3g TaxE=%.3g PiE=%.3g DivE=%.3g",
 check_error( RDe > We || floor( Df * pF + We ) > Ce || We + PiE > Se ||
 			 TaxE > Se || PiE > Se, "INCONSISTENT-COST", 0, & errors );
 
-check_error( abs( Se - pF * Df - We - TaxE - ( PiE - TaxE ) + iDe - iE ) > TOL,
+check_error( abs( Se - pF * Df - We - TaxE - ( PiE - TaxE ) +
+				  iDe - iE - iGE ) > TOL,
 			 "INCONSISTENT-SFC-FLOW", 0, & errors );
 
 check_error( sfcCerr.size( ) > 0, "SFC-FLOW-ERR-FIRM", sfcCerr.size( ), & errors );
 
 // finance
-LOG( "\n   E NWe=%.3g DebE=%.3g DebEmax=%.3g CDe=%.3g CDeC=%.3g CSe=%.3g",
-	 NWe, DebE, DebEmax, CDe, CDeC, CSe );
+LOG( "\n   E NWe=%.3g DebGE=%.3g CDge=%.3g CDgeC=%.3g CSge=%.3g",
+	 NWe, DebGE, CDge, CDgeC, CSge );
+LOG( "\n   E DebE=%.3g DebEmax=%.3g CDe=%.3g CDeC=%.3g CSe=%.3g",
+	 DebE, DebEmax, CDe, CDeC, CSe );
 
-check_error( CSe > CDe || CDeC > CDe, "INCONSISTENT-FINANCE", 0, & errors );
+check_error( FinErr.size( ) > 0,
+			 "INCONSISTENT-FINANCE-TIMING", FinErr.size( ), & errors );
+
+check_error( pfinErr.size( ) > 0,
+			 "INCONSISTENT-SNPV", pfinErr.size( ), & errors );
+
+check_error( CSe > CDe || CDeC > CDe ||
+			 CSge > CDge || CDgeC > CDge, "INCONSISTENT-FINANCE", 0, & errors );
+
+check_error( round( DebGE ) != round( v[11] ) || round( iGE ) != round( v[12] ),
+			 "INCONSISTENT-PROJECT-FINANCE", 0, & errors );
 
 check_error( abs( - IeNom + ( PiE - TaxE ) - DivE_1 + cEntryE_1
-				  - cExitE_1 + BadDebE_1 - ( NWe - NWe_1 )
-				  + ( DebE - DebE_1 ) ) > TOL,
+				  - cExitE_1 + BadDebE_1 + BadDebGE_1 - ( NWe - NWe_1 )
+				  + ( DebE - DebE_1 ) + ( DebGE - DebGE_1 ) ) > TOL,
 			 "INCONSISTENT-SFC-CAPITAL", 0, & errors );
 
 check_error( sfcKerr.size( ) > 0, "SFC-CAP-ERR-FIRM", sfcKerr.size( ), & errors );
@@ -1133,15 +1251,17 @@ check_error( perr.size( ) > 0, "ZERO-PRICE-FIRMS", perr.size( ), & errors );
 check_error( muerr.size( ) > 0, "HI-LO-MARKUP-FIRMS", muerr.size( ), & errors );
 
 // competition
-LOG( "\n   E ageEavg=%g MCe=%.2g entryEexit=%g HHe=%.2g HPe=%.2g",
-	 ageEavg, MCe, entryEexit, HHe, HPe );
+LOG( "\n   E ageEavg=%g uE=%.2g MCe=%.2g entryEexit=%g HHe=%.2g HPe=%.2g",
+	 ageEavg, uE, MCe, entryEexit, HHe, HPe );
 
 check_error( Oerr.size( ) > 0, "ZERO-OFFER-FIRMS", Oerr.size( ), & errors );
 
-check_error( v[9] < 1 - TOL / 10 || v[9] > 1 + TOL / 10,
+check_error( v[13] < 1 - TOL / 10 || v[13] > 1 + TOL / 10,
 			 "INCONSISTENT-SHARES", 0, & errors );
 
 check_error( HHe > 1.001 || HPe > 2.001, "INCONSISTENT-STATS", 0, & errors );
+
+check_error( uEmavg < 0.3, "LO-PLANT-UTILIZATION", 0, & errors );
 
 errorsTot += errors;
 
@@ -1723,7 +1843,7 @@ v[4] = V( "testEidEnd" );
 h = v[5] = 1 + v[2] - v[1];						// number of periods
 k = v[6] = v[3] > 0 ? 1 + v[4] - v[3] : v[4];	// number of firms
 
-static double iniAtauDE, iniICtauGE, iniEmTauDE, iniKe, iniNWe, iniDebE;
+static double iniAtauDE, iniICtauGE, iniEmTauDE, iniKe, iniNWe, iniDebE, iniDebGE;
 static int errorsTot = 0;						// all runs error accumulator
 static firmMapT entr;
 
@@ -1741,14 +1861,16 @@ if ( T == v[1] )
 	if ( firmsE == NULL )						// don't reopen if already open
 	{
 		firmsE = fopen( TESTEFILE, "w" );		// (re)create the file
-		fprintf( firmsE, "%s,%s,%s,%s,%s,%s\n",	// file header
+		fprintf( firmsE, "%s,%s,%s,%s,%s,%s,%s\n",	// file header
 				 "t,IDe,tEent,#Dirty,#Green", "AtauDE,ICtauGE,emTauDE,RDe",
 				 "Ke,Kde,Kge,SIeD,SIe,EIe", "De,Qe,Qde,Qge,LeD,Le,LeRD",
-				 "PiE,NWe,DebE,DebEmax,CSe,CDeC",
+				 "PiE,NWe,DebGE,CSge,CDgeC", "DebE,DebEmax,CSe,CDeC",
 				 "muE,pE,Se,We,Ce,Cf,fE" );
 	}
 }
 
+double Tcon = VS( ENESECL1, "Tcon" );			// plant construction time
+double Tfin = VS( ENESECL1, "Tfin" );			// project finance period
 double etaE = VS( ENESECL1, "etaE" );			// plant technical life
 double muEavg = VS( ENESTAL1, "muEavg" );		// average mark-up
 double pF = VS( ENESECL1, "pF" );				// price of fossil fuel
@@ -1777,72 +1899,119 @@ CYCLES( ENESECL1, cur, "FirmE" )
 		}
 
 	// scan power plants for severe problems
-	objVecT EmErr, Lerr, Qerr, cErr, tErr;		// vectors to save error plants
+	objVecT EmErr, FinErr, Lerr, Qerr, cErr, tErr;// vectors to save error plants
 
 	v[7] = v[8] = v[9] = v[10] = v[11] = 0;		// accumulators
+	v[12] = v[13] = v[14] =v[15] = 0;
 	CYCLES( cur, cur1, "Dirty" )
 	{
-		v[7] += VS( cur1, "__Kde" );
-		v[8] += VS( cur1, "__Qde" );
-		v[9] += VS( cur1, "__EmDE" );
+		int __lifeDEcycle = VS( cur1, "__lifeDEcycle" );
+		int __tDE = VS( cur1, "__tDE" );
 
-		if ( ( h == 1 && VS( cur1, "__tDE" ) < 1 - etaE ) ||
-			 ( h > 1 && VS( cur1, "__tDE" ) < h ) || VS( cur1, "__tDE" ) > T )
+		v[7] += VS( cur1, "__EmDE" );
+		v[8] += __lifeDEcycle > 0 ? VS( cur1, "__Kde" ) : 0;
+		v[9] += VS( cur1, "__RSde" );
+		v[10] += VS( cur1, "__Qde" );
+
+		if ( ( h == 1 && __tDE < 1 - etaE ) ||
+			 ( h > 1 && __tDE < h ) || __tDE > T ||
+			 ( __tDE > 0 && Tcon > 1 && T < __tDE + Tcon - 1 && __lifeDEcycle > 0 ) ||
+			 ( __tDE > 0 && Tcon == 1 && T < __tDE + Tcon && __lifeDEcycle != 1 ) ||
+			 ( __tDE > 0 && T >= __tDE + Tcon && __lifeDEcycle == 0 ) ||
+			 ( __tDE > 0 && T > __tDE + Tcon + etaE && __lifeDEcycle >= 0 ))
 			tErr.push_back( cur1 );
 
 		if ( VS( cur1, "__EmDE" ) < 0 ||
-			 ( VS( cur1, "__Qde" ) == 0 && VS( cur1, "__EmDE" ) > 0 ) )
+			 ( VS( cur1, "__Qde" ) == 0 && VS( cur1, "__EmDE" ) > 0 ) ||
+			 ( VS( cur1, "__EmDE" ) > 0 && __lifeDEcycle >= 0 && __lifeDEcycle < 2 ) )
 			EmErr.push_back( cur1 );
 
 		if ( VS( cur1, "__Qde" ) < 0 ||
-			 ( VS( cur1, "__Qde" ) > 0 && VS( cur1, "__EmDE" ) == 0 ) )
+			 ( VS( cur1, "__Qde" ) > 0 && VS( cur1, "__EmDE" ) == 0 ) ||
+			 ( VS( cur1, "__Qde" ) > 0 && __lifeDEcycle >= 0 && __lifeDEcycle < 2 ) )
 			Qerr.push_back( cur1 );
 
 		if ( VS( cur1, "__cDE" ) < 0 ||
 			 ( VS( cur1, "__Qde" ) > 0 && VS( cur1, "__cDE" ) == 0 ) )
 			cErr.push_back( cur1 );
 
-		if ( VS( cur1, "__Qde" ) > 0 && VS( cur1, "__LdeD" ) == 0 )
+		if ( VS( cur1, "__Qde" ) > 0 && VS( cur1, "__LdeD" ) == 0 ||
+			 ( VS( cur1, "__LdeD" ) > 0 && __lifeDEcycle <= 0 ) )
 			Lerr.push_back( cur1 );
+
+		if ( T - __tDE != etaE - ( Tcon - 1 ) && VS( cur1, "__RSde" ) != 0 )
+			FinErr.push_back( cur1 );
 	}
 
 	CYCLES( cur, cur1, "Green" )
 	{
-		v[10] += VS( cur1, "__Kge" );
-		v[11] += VS( cur1, "__Qge" );
+		int __lifeGEcycle = VS( cur1, "__lifeGEcycle" );
+		int __pfinGE = VS( cur1, "__pfinGE" );
+		int __tGE = VS( cur1, "__tGE" );
 
-		if ( ( h == 1 && VS( cur1, "__tGE" ) < 1 - etaE ) ||
-			 ( h > 1 && VS( cur1, "__tGE" ) < h ) || VS( cur1, "__tGE" ) > T )
-			tErr.push_back( cur1 );
+		v[11] += __lifeGEcycle > 0 ? VS( cur1, "__Kge" ) : 0;
+		v[12] += VS( cur1, "__RSge" );
+		v[13] += VS( cur1, "__Qge" );
+		v[14] += VS( cur1, "__DebGE" );
+		v[15] += VS( cur1, "__iGE" );
 
-		if ( VS( cur1, "__Qge" ) < 0 )
+		if ( VS( cur1, "__Qge" ) < 0 ||
+			 ( VS( cur1, "__Qge" ) > 0 && __lifeGEcycle >= 0 && __lifeGEcycle < 2 ) )
 			Qerr.push_back( cur1 );
 
 		if ( VS( cur1, "__cGE" ) < 0 ||
 			 ( VS( cur1, "__Qge" ) > 0 && VS( cur1, "__cGE" ) == 0 ) )
 			cErr.push_back( cur1 );
 
-		if ( VS( cur1, "__Qge" ) > 0 && VS( cur1, "__LgeD" ) == 0 )
+		if ( VS( cur1, "__Qge" ) > 0 && VS( cur1, "__LgeD" ) == 0 ||
+			 ( VS( cur1, "__LgeD" ) > 0 && __lifeGEcycle <= 0 ) )
 			Lerr.push_back( cur1 );
+
+		if ( ( h == 1 && VS( cur1, "__tGE" ) < 1 - etaE ) ||
+			 ( h > 1 && VS( cur1, "__tGE" ) < h ) || VS( cur1, "__tGE" ) > T ||
+			 ( __tGE > 0 && Tcon > 1 && T < __tGE + Tcon - 1 && __lifeGEcycle > 0 ) ||
+			 ( __tGE > 0 && Tcon == 1 && T < __tGE + Tcon && __lifeGEcycle != 1 ) ||
+			 ( __tGE > 0 && T == __tGE + Tcon - 1 && __lifeGEcycle != 1 ) ||
+			 ( __tGE > 0 && T >= __tGE + Tcon && __lifeGEcycle == 0 ) ||
+			 ( __tGE > 0 && T > __tGE + Tcon + etaE && __lifeGEcycle >= 0 ) )
+			tErr.push_back( cur1 );
+
+		if ( ( VS( cur1, "__amtGE" ) > 0 && __pfinGE == 0 ) ||
+			 ( T - __tGE > Tcon && VS( cur1, "__iGE" ) == 0 && __pfinGE == 1 ) ||
+			 ( T - __tGE > Tcon + Tfin && VS( cur1, "__DebGE" ) > 0 ) ||
+			 ( T - __tGE != etaE - ( Tcon - 1 ) && VS( cur1, "__RSge" ) != 0 ) )
+			FinErr.push_back( cur1 );
 	}
 
-	v[18] = COUNTS( cur, "Dirty" );
-	v[19] = COUNTS( cur, "Green" );
+	v[16] = COUNTS( cur, "Dirty" );
+	v[17] = COUNTS( cur, "Green" );
 
+	double _Ade = VS( cur, "_Ade" );
 	double _AtauDE = VS( cur, "_AtauDE" );
 	double _Ce = VS( cur, "_Ce" );
 	double _CDe = VS( cur, "_CDe" );
 	double _CDeC = VS( cur, "_CDeC" );
+	double _CDge = VS( cur, "_CDge" );
+	double _CDgeC = VS( cur, "_CDgeC" );
+	double _CIe = VS( cur, "_CIe" );
 	double _CSe = VS( cur, "_CSe" );
+	double _CSge = VS( cur, "_CSge" );
 	double _De = VS( cur, "_De" );
-	double _Df = VS( cur, "_Df" );
 	double _DebE = VS( cur, "_DebE" );
 	double _DebEmax = VS( cur, "_DebEmax" );
+	double _DebGE = VS( cur, "_DebGE" );
 	double _DivE = VS( cur, "_DivE" );
+	double _Df = VS( cur, "_Df" );
 	double _EqE = VS( cur, "_EqE" );
 	double _EIe = VS( cur, "_EIe" );
+	double _EIeD = VS( cur, "_EIeD" );
 	double _EmE = VS( cur, "_EmE" );
 	double _ICtauGE = VS( cur, "_ICtauGE" );
+	double _IgeD = VS( cur, "_IgeD" );
+	double _IgeDnom = VS( cur, "_IgeDnom" );
+	double _IeCon = VS( cur, "_IeCon" );
+	double _IdeCon = VS( cur, "_IdeCon" );
+	double _IgeCon = VS( cur, "_IgeCon" );
 	double _IeNom = VS( cur, "_IeNom" );
 	double _JOe = VS( cur, "_JOe" );
 	double _Ke = VS( cur, "_Ke" );
@@ -1853,6 +2022,7 @@ CYCLES( ENESECL1, cur, "FirmE" )
 	double _LeD = VS( cur, "_LeD" );
 	double _LeDrd = VS( cur, "_LeDrd" );
 	double _LeRD = VS( cur, "_LeRD" );
+	double _NPVge = VS( cur, "_NPVge" );
 	double _NWe = VS( cur, "_NWe" );
 	double _PiE = VS( cur, "_PiE" );
 	double _Qe = VS( cur, "_Qe" );
@@ -1861,34 +2031,43 @@ CYCLES( ENESECL1, cur, "FirmE" )
 	double _QeO = VS( cur, "_QeO" );
 	double _RDe = VS( cur, "_RDe" );
 	double _Se = VS( cur, "_Se" );
+	double _SIdeD = VS( cur, "_SIdeD" );
 	double _SIe = VS( cur, "_SIe" );
 	double _SIeD = VS( cur, "_SIeD" );
-	double _SIdeD = VS( cur, "_SIdeD" );
 	double _SIgeD = VS( cur, "_SIgeD" );
+	double _SNPVge = VS( cur, "_SNPVge" );
 	double _TaxE = VS( cur, "_TaxE" );
 	double _We = VS( cur, "_We" );
+	double _allocE = VS( cur, "_allocE" );
+	double _amtGE = VS( cur, "_amtGE" );
 	double _emTauDE = VS( cur, "_emTauDE" );
 	double _fE = VS( cur, "_fE" );
 	double _fKge = VS( cur, "_fE" );
 	double _iDe = VS( cur, "_iDe" );
 	double _iE = VS( cur, "_iE" );
+	double _iGE = VS( cur, "_iGE" );
 	double _innDE = VS( cur, "_innDE" );
 	double _innGE = VS( cur, "_innGE" );
 	double _muE = VS( cur, "_muE" );
 	double _pE = VS( cur, "_pE" );
+	double _qcE = VS( cur, "_qcE" );
+	double _rEdeb = VS( cur, "_rEdeb" );
 	double _tEent = VS( cur, "_tEent" );
 
 	double _DebE_1 = VLS( cur, "_DebE", 1 );
+	double _DebGE_1 = VLS( cur, "_DebGE", 1 );
 	double _DivE_1 = VLS( cur, "_DivE", 1 );
 	double _NWe_1 = VLS( cur, "_NWe", 1 );
 
-	double nonNeg[ ] = { _CDe, _CDeC, _CSe, _Ce, _De, _DebE, _DebEmax, _Df,
-						 _DivE, _EIe, _EmE, _fE, _IeNom, _JOe, _Ke, _KeNom,
-						 _Kde, _Kge, _Le, _LeD, _LeDrd, _LeRD, _Qe, _Qde, _Qge,
-						 _QeO, _RDe, _Se, _SIe, _SIeD, _SIdeD, _SIgeD, _TaxE,
-						 _We, _fKge, _iDe, _iE, _innDE, _innGE, _tEent };
-	double posit[ ] = { _muE, _AtauDE, _ICtauGE, _emTauDE, _pE };
-	double finite[ ] = { _NWe, _PiE };
+	double nonNeg[ ] = { _CDe, _CDeC, _CDge, _CDgeC, _CSe, _CSge, _Ce, _De,
+						 _DebE, _DebEmax, _DebGE, _Df, _DivE, _EIe, _EIeD, _EmE,
+						 _fE, _IgeD, _IgeDnom, _IeCon, _IdeCon, _IgeCon, _IeNom,
+						 _JOe, _Ke, _KeNom, _Kde, _Kge, _Le, _LeD, _LeDrd,
+						 _LeRD, _Qe, _Qde, _Qge, _QeO, _RDe, _Se, _SIe, _SIeD,
+						 _SIdeD, _SIgeD, _TaxE, _We, _allocE, _amtGE, _fKge,
+						 _iDe, _iE, _iGE, _innDE, _innGE, _qcE, _tEent };
+	double posit[ ] = { _Ade, _AtauDE, _ICtauGE, _emTauDE, _pE, _muE, _rEdeb };
+	double finite[ ] = { _NPVge, _SNPVge, _NWe, _PiE };
 
 	dblVecT all ( nonNeg, END_ARR( nonNeg ) );
 	all.insert( all.end( ), posit, END_ARR( posit ) );
@@ -1903,11 +2082,12 @@ CYCLES( ENESECL1, cur, "FirmE" )
 		iniKe = _Ke;
 		iniNWe = _NWe;
 		iniDebE = _DebE;
+		iniDebGE = _DebGE;
 	}
 
 	LOG( "\n  ee (t=%g) IDe=%d tEent=%d #Dirty=%g #Green=%g",
-		 T, j, h, v[18], v[19] );
-	fprintf( firmsE, "%g,%d,%d,%g,%g", T, j, h, v[18], v[19] );
+		 T, j, h, v[16], v[17] );
+	fprintf( firmsE, "%g,%d,%d,%g,%g", T, j, h, v[16], v[17] );
 
 	for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
 		check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
@@ -1918,7 +2098,7 @@ CYCLES( ENESECL1, cur, "FirmE" )
 	for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
 		check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
-	check_error( h > T && v[18] + v[19] == 0, "NO-PLANTS", 0, & errors );
+	check_error( h > T && v[16] + v[17] == 0, "NO-PLANTS", 0, & errors );
 
 	// innovation, productivity
 	LOG( "\n   e AtauDE=%.3g ICtauGE=%.3g emTauDE=%.3g RDe=%.3g",
@@ -1936,9 +2116,9 @@ CYCLES( ENESECL1, cur, "FirmE" )
 
 	check_error( tErr.size( ) > 0, "INVALID-T-PLANT", tErr.size( ), & errors );
 
-	check_error( _Kde < floor( v[7] ) || _Kge < floor( v[10] ) ||
-				 round( _Ke ) != round( _Kde + _Kge ) || _SIeD > _Ke ||
-				 _SIdeD > _Kde || _SIgeD > _Kge || _Ke < _EIe + _SIe,
+	check_error( _Kde < floor( v[8] ) || _Kge < floor( v[11] ) ||
+				 round( _Ke ) != round( _Kde + _Kge ) ||
+				 _Ke + _IeCon < _EIe + _SIe,
 				 "INCONSISTENT-CAPITAL", 0, & errors );
 
 	LOG( "\n   e De=%g Qe=%g Qde=%g Qge=%g LeD=%g Le=%g LeRD=%g",
@@ -1952,12 +2132,25 @@ CYCLES( ENESECL1, cur, "FirmE" )
 
 	check_error( Lerr.size( ) > 0, "INVALID-LABOR-PLANT", Lerr.size( ), & errors );
 
-	check_error( _EmE < floor( v[9] ), "INCONSISTENT-EMISSIONS", 0, & errors );
+	check_error( _EmE < floor( v[7] ), "INCONSISTENT-EMISSIONS", 0, & errors );
 
-	check_error( _Qe > ceil( _Ke ) || round( _Qe ) != round( _De ) ||
-				 _Qde < floor( v[8] ) || _Qge < floor( v[11] ) ||
-				 round( _Qe ) != round( _Qde + _Qge ),
+	check_error( _SIe > _SIeD || floor( _SIeD ) > ceil( v[9] + v[12] ),
+				 "INCONSISTENT-SCRAPPING", 0, & errors );
+
+	check_error( ceil( _SIeD ) < _SIe || ceil( _EIeD ) < _EIe ||
+				 floor( _IgeD ) > _SIeD + _EIeD ||
+				 ( Tcon > 1 && ceil( _IeCon ) < _SIe + _EIe ) ||
+				 ( Tcon == 1 && _IeCon != 0 ),
+				 "INCONSISTENT-INVESTMENT", 0, & errors );
+
+	check_error( floor( _CIe ) > _EIe + _SIe,
+				 "INCONSISTENT-CANCELING", 0, & errors );
+
+	check_error( round( _Qe ) != round( _De ) || _Qde < floor( v[10] ) ||
+				 _Qge < floor( v[13] ) || round( _Qe ) != round( _Qde + _Qge ),
 				 "INCONSISTENT-GENERATION", 0, & errors );
+
+	check_error( _Qe > ( 1 + TOL ) * _Ke, "OVER-GENERATION", 0, & errors );
 
 	check_error( _LeD < _JOe || _Le > _LeD || _LeDrd > _LeD || _LeRD > _Le,
 				 "INCONSISTENT-LABOR", 0, & errors );
@@ -1965,22 +2158,35 @@ CYCLES( ENESECL1, cur, "FirmE" )
 	check_error( _LeD > 0 && _Le == 0, "NO-WORKER", 0, & errors );
 
 	// finance
-	LOG( "\n   e PiE=%g NWe=%g DebE=%g DebEmax=%g CSe=%g CDeC=%g",
-		 round( _PiE ), round( _NWe ), round( _DebE ), round( _DebEmax ),
-		 round( _CSe ), round( _CDeC ) );
-	fprintf( firmsE, ",%g,%g,%g,%g,%g,%g",
-			 _PiE, _NWe, _DebE, _DebEmax, _CSe, _CDeC );
+	LOG( "\n   e PiE=%g NWe=%g DebGE=%g CSge=%g CDgeC=%g",
+		 round( _PiE ), round( _NWe ), round( _DebGE ), round( _CSge ),
+		 round( _CDgeC ) );
+	fprintf( firmsE, ",%g,%g,%g,%g,%g", _PiE, _NWe, _DebGE, _CSge, _CDgeC );
+	LOG( "\n   e DebE=%g DebEmax=%g CSe=%g CDeC=%g",
+		 round( _DebE ), round( _DebEmax ), round( _CSe ), round( _CDeC ) );
+	fprintf( firmsE, ",%g,%g,%g,%g", _DebE, _DebEmax, _CSe, _CDeC );
 
 	check_error( cErr.size( ) > 0, "INVALID-COST-PLANT", cErr.size( ), & errors );
 
-	check_error( _CSe > _CDe || _CDeC > _CDe, "INCONSISTENT-FINANCE", 0, & errors );
+	check_error( FinErr.size( ) > 0,
+				 "INCONSISTENT-FINANCE-TIMING", FinErr.size( ), & errors );
+
+	check_error( _CSe > _CDe || _CDeC > _CDe ||
+				 _CSge > _CDge || _CDgeC > _CDge,
+				 "INCONSISTENT-FINANCE", 0, & errors );
+
+	check_error( round( _DebGE ) != round( v[14] ) ||
+				 round( _iGE ) != round( v[15] ) ||
+				 _DebGE - _DebGE_1 > 0 && _SNPVge < 0,
+				 "INCONSISTENT-PROJECT-FINANCE", 0, & errors );
 
 	check_error( abs( + _Se - pF * _Df - _We - _TaxE
-					  - ( _PiE - _TaxE ) + _iDe - _iE ) > TOL,
+					  - ( _PiE - _TaxE ) + _iDe - _iE - _iGE ) > TOL,
 				 "INCONSISTENT-SFC-FLOW", 0, & errors );
 
 	check_error( abs( - _IeNom + ( _PiE - _TaxE ) - _DivE_1
-					  - ( _NWe - _NWe_1 ) + ( _DebE - _DebE_1 )
+					  - ( _NWe - _NWe_1 )
+					  + ( _DebE - _DebE_1 ) + ( _DebGE - _DebGE_1 )
 					  + ( h == T ? + _EqE : 0 ) ) > TOL,
 				 "INCONSISTENT-SFC-CAPITAL", 0, & errors );
 
@@ -1997,13 +2203,14 @@ CYCLES( ENESECL1, cur, "FirmE" )
 	// last period actions (single-firm analysis only)
 	if ( k == 1 && T == v[2] )
 	{
-		LOG( "\n   # Ag=%.2g ICg=%.2g emG=%.2g Kg=%.2g NWg=%.2g DebG=%.2g",
+		LOG( "\n   # Ag=%.2g ICg=%.2g emG=%.2g Kg=%.2g NWg=%.2g DebG=%.2g DebGE=%.2g",
 			 ( log( _AtauDE + 1 ) - log( iniAtauDE + 1 ) ) / v[5],
 			 ( log( _ICtauGE + 1 ) - log( iniICtauGE + 1 ) ) / v[5],
 			 ( log( _emTauDE + 1 ) - log( iniEmTauDE + 1 ) ) / v[5],
 			 ( log( _Ke + 1 ) - log( iniKe + 1 ) ) / v[5],
 			 ( log( _NWe + 1 ) - log( iniNWe + 1 ) ) / v[5],
-			 ( log( _DebE + 1 ) - log( iniDebE + 1 ) ) / v[5] );
+			 ( log( _DebE + 1 ) - log( iniDebE + 1 ) ) / v[5],
+			 ( log( _DebGE + 1 ) - log( iniDebGE + 1 ) ) / v[5] );
 	}
 
 	fputs( "\n", firmsE );

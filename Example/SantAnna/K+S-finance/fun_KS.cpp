@@ -26,11 +26,8 @@
 
 /*======================== ADDITIONAL CODE TO INCLUDE ========================*/
 
-#include <list>									// C++ list data structure
-
-// LSD and K+S macros and objects definition and support code
-#include <fun_head_fast.h>						// LSD definitions
 #include "fun_KS_class.h"						// K+S class/macro definitions
+#include <fun_head_fast.h>						// LSD definitions
 #include "fun_KS_support.h"						// K+S support C++ functions
 
 
@@ -64,9 +61,9 @@ Also configures LSD main flags.
 
 PARAMETER;										// execute only once
 
-DEFAULT_RESULT( NAN );							// default equation result
 USE_ZERO_INSTANCE;								// allow zero-instance objects
 NO_SEARCH;										// don't perform variable search
+NO_SEARCH_UP;
 
 if ( RUN == 1 )									// first run only
 {
@@ -87,7 +84,7 @@ if ( RUN == 1 )									// first run only
 #endif
 }
 
-CYCLES( root, cur, "Country" )					// scan all country objects
+CYCLES( ROOT, cur, "Country" )					// scan all country objects
 	VS( cur, "initCountry" );					// initialize country
 
 RESULT( 1 )
@@ -188,10 +185,11 @@ MODELEND
 
 /*=========================== GARBAGE COLLECTION =============================*/
 
-void close_sim( void )
-{
-	object *cur;
+CLOSEBEGIN
 
-	CYCLES( root, cur, "Country" )				// scan all country objects
-		DELETE_EXTS( cur, countryE );			// reclaim allocated memory
-}
+object *cur;
+
+CYCLES( ROOT, cur, "Country" )					// scan all country objects
+	DELETE_EXTS( cur, countryE );				// reclaim allocated memory
+
+CLOSEEND

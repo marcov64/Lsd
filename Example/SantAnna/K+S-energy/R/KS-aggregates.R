@@ -57,7 +57,9 @@ logVars <- c( "Creal", "GDPreal", "GDPnom", "G", "Gbail", "Tax", "Deb", "Def",
               "DefP", "dN", "Ireal", "EI", "A", "A1", "A2", "Ade", "Se", "S1",
               "S2", "DebE", "Deb1", "Deb2", "NWb", "NWe", "NW1", "NW2", "We",
               "W1", "W2", "wReal", "BadDeb", "TC", "Loans", "CD", "CS", "Aee",
-              "Aef", "Em", "EmE", "Em1", "Em2", "En" )
+              "Aef", "Em", "EmE", "Em1", "Em2", "En", "iE", "iGE", "pEmavg",
+              "wEmavg", "CDe", "CDge", "CDeC", "CDgeC", "CSe", "CSge",
+              "NPVgeAvg", "SNPVgeAvg" )
 aggrVars <- append( logVars, c( "dGDP", "dCPI", "dA", "dw", "CPI", "Q2u",
                                 "Fe", "F1", "F2", "entryE", "entry1", "entry2",
                                 "entryEexit", "entry1exit", "entry2exit",
@@ -66,7 +68,11 @@ aggrVars <- append( logVars, c( "dGDP", "dCPI", "dA", "dw", "CPI", "Q2u",
                                 "innGE", "HHe", "HH1", "HH2", "muEavg", "mu2avg",
                                 "U", "V", "r", "Bda", "Bfail", "DebGDP",
                                 "DefGDP", "DefPgdp", "CO2a", "EnGDP","Tm", "dEm",
-                                "dEn","fGE", "fKge", "pE", "shockAavg" ) )
+                                "dEn","fGE", "fKge", "pE", "shockAavg",
+                                "AeMavg", "dDeMavg","uEmavg", "AtauDEavg",
+                                "ICtauGEavg", "ICtauGEeff", "IgeDEratio",
+                                "emTauDEavg", "fGE", "fKge", "fKpfinGE",
+                                "pfinGEexe" ) )
 
 
 # ==== Process LSD result files ====

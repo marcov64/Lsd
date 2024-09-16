@@ -425,7 +425,8 @@ int Ls0 = VS( cur4, "Ls0" );					// initial labor supply
 
 double Btau0 = ( 1 + mu1 ) * INIPROD /			// initial productivity in sec. 1
 			   ( m1 * m2 * VS( cur2, "b" ) );
-double ICge0 = VS( cur5, "bE" ) * pF0 / Ade0;	// initial green plant unit cost
+double ICge0 = ( 1 + log( VS( cur6, "tA0" ) + 1 ) ) *
+			   VS( cur5, "bE" ) * pF0 / Ade0;	// initial green plant unit cost
 double pE0 = INIWAGE * VS( cur5, "muE0" ) +
 			 ( fGE0 == 1 ? 0 : pF0 / Ade0 );	// init. energy price
 double c10 = ( INIWAGE / Btau0 + ( pE0 + trCO2 * INIEFRI ) / INIEEFF ) / m1;
@@ -483,6 +484,7 @@ WRITELS( cur3, "rRes", rRes, -1 );
 WRITELS( cur4, "Ls", Ls0, -1 );
 WRITELS( cur4, "w", INIWAGE, -1 );
 WRITELS( cur4, "wReal", INIWAGE, -1 );
+WRITELS( cur5, "AeMavg", A0, -1 );
 WRITELS( cur5, "pE", pE0, -1 );
 WRITELS( cur5, "pF", pF0, -1 );
 
@@ -521,13 +523,13 @@ DELETE( SEARCHS( cur1, "Firm1" ) );				// remove empty firm instances
 DELETE( SEARCHS( cur2, "Firm2" ) );
 DELETE( SEARCHS( cur5, "FirmE" ) );
 
-v[1] = entry_firm1( var, cur1, F10, true );		// add capital-good firms
-INIT_TSEARCHTS( cur1, "Firm1", F10 );			// prepare turbo search indexing
+v[1] = entry_firm1( _v_, cur1, F10, true );		// add capital-good firms
+INIT_TSEARCHS( cur1, "Firm1" );					// prepare turbo search indexing
 
-v[1] += entry_firm2( var, cur2, F20, true );	// add consumer-good firms
+v[1] += entry_firm2( _v_, cur2, F20, true );	// add consumer-good firms
 VS( cur2, "firm2maps" );						// update the mapping vectors
 
-v[1] += entry_firmE( var, cur5, Fe0, true );	// add energy producers
+v[1] += entry_firmE( _v_, cur5, Fe0, true );	// add energy producers
 VS( cur5, "firmEmaps" );						// update the mapping vectors
 
 WRITEL( "Eq", v[1], -1 );						// save existing equity

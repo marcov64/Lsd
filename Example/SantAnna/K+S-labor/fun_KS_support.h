@@ -13,19 +13,22 @@
 
  ******************************************************************************/
 
+#define EQ equation								// shortcut for the class to use
+
+
 /*======================== GENERAL SUPPORT C FUNCTIONS =======================*/
 
 // calculate the bounded, moving-average growth rate of variable
 // if lim is zero, there is no bounding
 
-double mov_avg_bound( object *obj, const char *var, double lim, double per )
+double EQ::mov_avg_bound( object *obj, const char *var, double lim, double per )
 {
 	double prev, g, sum_g;
 	int i;
 
 	for ( sum_g = i = 0; i < per; ++i )
 	{
-		if ( t - i <= 0 )						// just go to t=0
+		if ( T - i <= 0 )						// just go to t=0
 			break;
 
 		prev = VLS( obj, var, i + 1 );
@@ -43,7 +46,7 @@ double mov_avg_bound( object *obj, const char *var, double lim, double per )
 
 // append error messages and increment error counter
 
-void check_error( bool cond, const char* errMsg, int errCount, int *errCounter )
+void EQ::check_error( bool cond, const char* errMsg, int errCount, int *errCounter )
 {
 	if ( ! cond )
 		return;
@@ -74,7 +77,7 @@ const char *bankPar[ ] = { "_bank1", "_bank2" },
 		   *_IDpar[ ] = { "_ID1","_ID2" },
 		   *__IDpar[ ] = { "__ID1","__ID2" };
 
-object *set_bank( object *firm )
+object *EQ::set_bank( object *firm )
 {
 	int _IDb, sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 : 1;
 	object *bank, *cli, *fin = V_EXTS( GRANDPARENTS( firm ), countryE, finSec );
@@ -102,7 +105,7 @@ const char *_CDvar[ ] = { "_CD1", "_CD2" },
 		   *_NWvar[ ] = { "_NW1", "_NW2" },
 		   *_TCfreeVar[ ] = { "_TC1free", "_TC2free" };
 
-double update_debt( object *firm, double desired, double loan )
+double EQ::update_debt( object *firm, double desired, double loan )
 {
 	double Deb, TCfree;
 	object *bank;
@@ -139,7 +142,7 @@ double update_debt( object *firm, double desired, double loan )
 
 // update firm deposits in equations '_Q1', '_Tax1', '_Q2', '_EI', '_SI', '_Tax2'
 
-double update_depo( object *firm, double depo, bool incr )
+double EQ::update_depo( object *firm, double depo, bool incr )
 {
 	double NW;
 	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 : 1;
@@ -166,7 +169,7 @@ const char *_CIvar[ ] = { "", "_CI" },
 		   *_DivVar[ ] = { "_Div1", "_Div2" },
 		   *_NWpVar[ ] = { "_NW1p", "_NW2p" };
 
-double cash_flow( object *firm, double profit, double tax )
+double EQ::cash_flow( object *firm, double profit, double tax )
 {
 	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
 			  strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
@@ -226,7 +229,7 @@ double cash_flow( object *firm, double profit, double tax )
 // send machine brochure to consumption-good client firm in equations '_NC',
 // '_supplier'
 
-object *send_brochure( object *suppl, object *client )
+object *EQ::send_brochure( object *suppl, object *client )
 {
 	object *broch, *cli;
 
@@ -245,7 +248,7 @@ object *send_brochure( object *suppl, object *client )
 
 // set initial supplier for entrant in equations 'entry2exit'
 
-object *set_supplier( object *firm )
+object *EQ::set_supplier( object *firm )
 {
 	object *broch, *suppl,
 		   *cap = V_EXTS( GRANDPARENTS( firm ), countryE, capSec );
@@ -261,7 +264,7 @@ object *set_supplier( object *firm )
 
 // send new machine order in equations '_EI', '_SI'
 
-void send_order( object *firm, double nMach )
+void EQ::send_order( object *firm, double nMach )
 {
 	// find firm entry on supplier client list
 	object *cli = SHOOKS( HOOKS( firm, SUPPL ) );
@@ -279,7 +282,7 @@ void send_order( object *firm, double nMach )
 
 // perform investment according to available funding in equations '_EI', '_SI'
 
-double invest( object *firm, double desired )
+double EQ::invest( object *firm, double desired )
 {
 	double invest, invCost, loan, loanDes;
 
@@ -345,7 +348,7 @@ double invest( object *firm, double desired )
 
 // add new vintage to the capital stock of a firm in equation 'K' and 'initCountry'
 
-void add_vintage( variable *var, object *firm, double nMach, bool newInd )
+void EQ::add_vintage( c_varT *_v_, object *firm, double nMach, bool newInd )
 {
 	double __Avint, __pVint;
 	int __ageVint, __nMach, __nVint;
@@ -414,7 +417,7 @@ void add_vintage( variable *var, object *firm, double nMach, bool newInd )
 // scrap (remove) vintage from capital stock in equation 'K'
 // return -1 if last vintage (not removed but shrank to 1 machine)
 
-double scrap_vintage( variable *var, object *vint )
+double EQ::scrap_vintage( c_varT *_v_, object *vint )
 {
 	double RS;
 	object *wrk;
@@ -447,7 +450,7 @@ double scrap_vintage( variable *var, object *vint )
 // update a worker after firing in equations 'fires1', '_fires2', 'entry2exit',
 // 'quits1', 'retires1', '_quits2', '_retires2'
 
-void fire_worker( variable *var, object *worker )
+void EQ::fire_worker( c_varT *_v_, object *worker )
 {
 	WRITES( worker, "_employed", 0 );			// register fire
 	WRITES( worker, "_Te", 0 );
@@ -471,8 +474,8 @@ void fire_worker( variable *var, object *worker )
 
 // update a worker after hiring in equations 'hire1', 'hire2'
 
-void hire_worker( variable *var, object *worker, int sec, object *firm,
-				  double wage )
+void EQ::hire_worker( c_varT *_v_, object *worker, int sec, object *firm,
+					  double wage )
 {
 	int flagWorkerLBU;
 	object *wrk;
@@ -490,7 +493,7 @@ void hire_worker( variable *var, object *worker, int sec, object *firm,
 		else										// no: assume sector 2
 			INCRS( PARENTS( HOOKS( worker, FWRK ) ), "_quits2", Lscale );
 
-		fire_worker( var, worker );					// register fire
+		fire_worker( _v_, worker );				// register fire
 	}
 
 	WRITES( worker, "_employed", sec );
@@ -531,7 +534,7 @@ void hire_worker( variable *var, object *worker, int sec, object *firm,
 
 // move worker to a different vintage in equation 'alloc2'
 
-void move_worker( object *worker, object *vint, bool vint_learn )
+void EQ::move_worker( object *worker, object *vint, bool vint_learn )
 {
 	double sV;
 	int IDv;
@@ -688,7 +691,7 @@ void order_applications( int order, appLisT *appl )
 const char *wrkName[ ] = { "Wrk1", "Wrk2" },
 		   *keyName[ ] = { "_key1", "__key2" };
 
-void order_workers( int order, int obj, object *caller )
+void EQ::order_workers( int order, int obj, object *caller )
 {
 	char keyN[ 4 ], dir[ 5 ];
 	double keyV;
@@ -705,11 +708,11 @@ void order_workers( int order, int obj, object *caller )
 			strcpy( dir, "DOWN" );
 			break;
 		case 1:									// higher wage first order
-			strcpy( keyN, "_wR" );
+			strcpy( keyN, "_w" );
 			strcpy( dir, "DOWN" );
 			break;
 		case 2:									// lower wage first order
-			strcpy( keyN, "_wR" );
+			strcpy( keyN, "_w" );
 			strcpy( dir, "UP" );
 			break;
 		case 3:									// higher skills first order
@@ -735,9 +738,9 @@ void order_workers( int order, int obj, object *caller )
 			keyV = RND;
 		else
 			if ( order == 5 || order == 6 )
-				keyV = VS( SHOOKS( wrk ), "_wR" ) / VS( SHOOKS( wrk ), "_s" );
+				keyV = VLS( SHOOKS( wrk ), "_w", 1 ) / VLS( SHOOKS( wrk ), "_s", 1 );
 			else
-				keyV = VS( SHOOKS( wrk ), keyN );
+				keyV = VLS( SHOOKS( wrk ), keyN, 1 );
 
 		WRITES( wrk, keyName[ obj ], keyV );	// copy key to bridge obj
 	}
@@ -754,8 +757,8 @@ void order_workers( int order, int obj, object *caller )
 #define MODE_IPROT 4							// fire non protected workers
 #define MODE_EXIT 5								// fire all when firm exiting
 
-double fire_workers( variable *var, object *firm, int mode, double xsCap,
-					 double *redCap )
+double EQ::fire_workers( c_varT *_v_, object *firm, int mode, double xsCap,
+						 double *redCap )
 {
 	bool fire;
 	int Te, i;
@@ -802,16 +805,14 @@ double fire_workers( variable *var, object *firm, int mode, double xsCap,
 			case MODE_IPROT:					// fire only unprotected
 				// vintage-unallocated worker or not enough fires?
 				if ( HOOKS( worker, VWRK ) == NULL || *redCap < xsCap )
-				{
 					if ( Te <= Tp )				// is worker yet unprotected
 						fire = true;
-				}
 
 				break;
 
 			case MODE_PBACK:					// fire negative paybacks
 				// insufficient payback
-				if ( VS( worker, "_wR" ) / w2avg / VS( worker, "_s" ) > 1 )
+				if ( VLS( worker, "_w", 1 ) / w2avg / VLS( worker, "_s", 1 ) > 1 )
 					fire = true;
 				// no 'break' here, even if payback is ok, fire if excess
 
@@ -830,7 +831,7 @@ double fire_workers( variable *var, object *firm, int mode, double xsCap,
 
 		if ( fire )								// if marked, process firing
 		{
-			fire_worker( var, worker );				// register fire
+			fire_worker( _v_, worker );			// register fire
 			*redCap += VLS( worker, "_Q", 1 ) * Lscale;// pot. fired capacity
 			++i;								// scaled equivalent fires
 		}
@@ -845,7 +846,7 @@ double fire_workers( variable *var, object *firm, int mode, double xsCap,
 // add and configure entrant capital-good firm object(s) and required hooks
 // in equations 'entry1exit' and 'initCountry'
 
-double entry_firm1( variable *var, object *sector, int n, bool newInd )
+double EQ::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 {
 	double _Atau, _Btau, _D10, _Deb1, _Eq1, _L1rd, _NW1, _NW10, _RD0, _c1, _f1,
 		   _p1, _sV, AtauMax, BtauMax, Deb1, Eq1, NW1, w1avg, mult;
@@ -996,7 +997,7 @@ double entry_firm1( variable *var, object *sector, int n, bool newInd )
 // add and configure entrant consumer-good firm object(s) and required hooks
 // in equations 'entry2exit' and 'initCountry'
 
-double entry_firm2( variable *var, object *sector, int n, bool newInd )
+double EQ::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 {
 	bool _postChg;
 	double _A2, _D20, _D2e, _Deb2, _E, _Eq2, _K, _N, _NW2, _NW2f, _NW20, _Q2u,
@@ -1155,7 +1156,7 @@ double entry_firm2( variable *var, object *sector, int n, bool newInd )
 			WRITELLS( firm, "_N", _N, _t2ent, 1 );
 			WRITELLS( firm, "_NW2", _NW2, _t2ent, 1 );
 
-			add_vintage( var, firm, _K / m2, newInd );// first machine vintages
+			add_vintage( _v_, firm, _K / m2, newInd );// first machine vintages
 		}
 		else
 		{
@@ -1209,7 +1210,7 @@ const char *_BadDebVar[ ] = { "_BadDeb1", "_BadDeb2" },
 		   *cExitVar[ ] = { "cExit1", "cExit2" },
 		   *CliBrochObj[ ] = { "Cli", "Broch" };
 
-double exit_firm( variable *var, object *firm, double *firesAcc )
+double EQ::exit_firm( c_varT *_v_, object *firm, double *firesAcc )
 {
 	double fires, liqEq, liqVal;
 	object *bank, *cli;
@@ -1244,7 +1245,7 @@ double exit_firm( variable *var, object *firm, double *firesAcc )
 		WRITES( firm, "_life2cycle", 4 );		// mark as exiting firm
 
 		// fire all workers
-		*firesAcc += fires = fire_workers( var, firm, MODE_EXIT, 0, &fires );
+		*firesAcc += fires = fire_workers( _v_, firm, MODE_EXIT, 0, &fires );
 		INCRS( firm, "_fires2", fires );
 
 		// update firm map before removing LSD object in consumption sector

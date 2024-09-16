@@ -26,7 +26,6 @@
 
 /*======================== ADDITIONAL CODE TO INCLUDE ========================*/
 
-// LSD and K+S macros and objects definition and support code
 #include "fun_KS_class.h"						// K+S class/macro definitions
 #include <fun_head_fast.h>						// LSD definitions
 #include "fun_KS_support.h"						// K+S support C++ functions
@@ -63,6 +62,7 @@ PARAMETER;										// execute only once
 
 USE_ZERO_INSTANCE;								// allow zero-instance objects
 NO_SEARCH;										// don't perform variable search
+NO_SEARCH_UP;
 
 if ( RUN == 1 )									// first run only
 {
@@ -181,6 +181,5 @@ object *cur;
 
 CYCLES( ROOT, cur, "Country" )					// scan all country objects
 	DELETE_EXTS( cur, countryE );				// reclaim allocated memory
-		
-CLOSEEND
 
+CLOSEEND

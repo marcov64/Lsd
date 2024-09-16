@@ -6,7 +6,7 @@ The original Dystopian K+S (DSK) code was developed by Francesco Lamperti and ot
 
 This is a full rewrite based on the original "Dystopian Schumpeter meeting Keynes" (DSK) model, plus a more detailed climate model, a variable number of firms in both industrial sectors, and some other minor improvements. The climate part is based on the carbon-cycle of C-ROADS model (Sterman et al. 2013). Differently from original DSK version, the entire the model was recoded into regular LSD equations. There is no guarantee this version matches the results of original version, due to the additions and the intrinsic differences between programming approaches. As in the original DSK, the climate model was adapted to operate in discrete time, reducing its accuracy.
 
-LSD version 8.0 or higher is required. Download at: https://github.com/SantAnnaKS/LSD
+LSD version 9.0 or higher is required. Download at: https://github.com/SantAnnaKS/LSD
 
 
 Change log

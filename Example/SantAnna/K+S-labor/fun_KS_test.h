@@ -748,8 +748,7 @@ CYCLES( LABSUPL1, cur, "Worker" )
 	if ( VS( cur, "_searchProb" ) <= 0 )
 		srchErr.push_back( cur );
 
-	if ( VS( cur, "_w" ) <= 0 || VS( cur, "_wR" ) <= 0 ||
-		 VS( cur, "_wReal" ) <= 0 || VS( cur, "_wRes" ) <= 0 ||
+	if ( VS( cur, "_w" ) <= 0 || VS( cur, "_wR" ) <= 0 || VS( cur, "_wReal" ) <= 0 ||
 		 VS( cur, "_wS" ) <= 0 || VS( cur, "_w" ) <= VS( cur, "_TaxW" ) )
 		wzErr.push_back( cur );
 

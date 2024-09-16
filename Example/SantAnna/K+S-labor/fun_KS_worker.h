@@ -283,7 +283,14 @@ Adjust employed workers wages according to indexation rules
 */
 
 h = V( "_employed" );							// employment situation
+
+if ( h == 0 )									// unemployed?
+	END_EQUATION( VS( PARENT, "wU" ) );			// use benefit
+
 v[14] = VS( GRANDPARENT, "flagHeterWage" );		// heterogeneous wage mode
+
+if ( v[14] == 0 )								// homogeneous wages
+	END_EQUATION( VS( PARENT, "wCent" ) );		// single wage centrally defined
 
 // select the correct parameter values for post-change type of firms
 i = 1;											// assume pre-change firm
@@ -305,72 +312,58 @@ if ( i )										// use pre-change values
 	v[16] = VS( GRANDPARENT, "flagFireRule" );	// firm firing rule
 }
 
-if ( h == 0 )									// unemployed?
-{	// unemployment wage available if flagGovExp == 2, 3
-	if ( ( int ) VS( GRANDPARENT, "flagGovExp" ) > 1 )
-		v[0] = VS( PARENT, "wU" );				// use benefit
-	else
-		v[0] = VS( PARENT, "w0min" );			// minimum subsistence
-
-	END_EQUATION( v[0] );
-}
-else
+if ( v[15] == 0 )								// no wage adjustment?
 {
-	if ( v[15] == 0 )							// no wage adjustment?
-	{
-		v[0] = CURRENT;
-		goto end_wage;							// still check for minimum wage
-	}
+	v[0] = CURRENT;
+	goto end_wage;								// still check for minimum wage
+}
 
-	if ( v[14] == 0 )							// homogeneous wages
-		END_EQUATION( VS( PARENT, "wCent" ) );	// single wage centrally defined
+if ( v[15] == 2 && h == 2 )						// homogeneous wages?
+	END_EQUATION( VS( cur, "_w2o" ) );			// use current offered wage
 
-	if ( v[15] == 2 && h == 2 )					// homogeneous wages?
-		END_EQUATION( VS( cur, "_w2o" ) );		// use current offered wage
+v[1] = VS( PARENT, "psi1" );					// inflation adjust. parameter
+v[2] = VS( PARENT, "psi2" );					// general prod. adjust. param.
+v[3] = VS( PARENT, "psi3" );					// unemploym. adjust. parameter
+v[4] = VS( PARENT, "psi4" );					// firm prod. adjust. parameter
+v[17] = VS( FINSECL2, "piT" );					// expected inflation
+v[5] = VLS( CONSECL2, "dCPIb", 1 );				// current inflation
+v[6] = VLS( GRANDPARENT, "dAb", 1 );			// general productivity variat.
+v[7] = VLS( PARENT, "dUeB", 1 );				// unemployment variation
 
-	v[1] = VS( PARENT, "psi1" );				// inflation adjust. parameter
-	v[2] = VS( PARENT, "psi2" );				// general prod. adjust. param.
-	v[3] = VS( PARENT, "psi3" );				// unemploym. adjust. parameter
-	v[4] = VS( PARENT, "psi4" );				// firm prod. adjust. parameter
-	v[17] = VS( FINSECL2, "piT" );				// expected inflation
-	v[5] = VLS( CONSECL2, "dCPIb", 1 );			// current inflation
-	v[6] = VLS( GRANDPARENT, "dAb", 1 );		// general productivity variat.
-	v[7] = VLS( PARENT, "dUeB", 1 );			// unemployment variation
-
-	if ( h == 1 )								// worker in sector 1?
-	{
-		k = 4;									// just to silent comp. warning
-		v[8] = VLS( CAPSECL2, "dA1b", 1 );		// sector 1 productivity variat.
-	}
-	else										// sector 2 workers
-	{
-		k = VS( cur, "_life2cycle" );			// employer status
-		if ( k == 0 )							// handle entrants
-			v[8] = 0;
+if ( h == 1 )									// worker in sector 1?
+{
+	k = 4;										// just to silent comp. warning
+	v[8] = VLS( CAPSECL2, "dA1b", 1 );			// sector 1 productivity variat.
+}
+else											// sector 2 workers
+{
+	k = VS( cur, "_life2cycle" );				// employer status
+	if ( k == 0 )								// handle entrants
+		v[8] = 0;
+	else
+		if ( v[14] == 1 )						// how consider productivity?
+			v[8] = VLS( cur, "_dA2b", 1 );		// product. variation (firm)
 		else
-			if ( v[14] == 1 )					// how consider productivity?
-				v[8] = VLS( cur, "_dA2b", 1 );	// product. variation (firm)
-			else
-				v[8] = max( VL( "_dQb", 1 ), 0);// delta pot. prod. (worker)
-	}
+			v[8] = max( VL( "_dQb", 1 ), 0);	// delta pot. prod. (worker)
+}
 
-	// make sure total productivity effect is bounded to 1
-	if ( ( v[2] + v[4] ) > 1 )
-		v[2] = max( 1 - v[4], 0 );				// adjust general prod. effect
+// make sure total productivity effect is bounded to 1
+if ( ( v[2] + v[4] ) > 1 )
+	v[2] = max( 1 - v[4], 0 );					// adjust general prod. effect
 
-	// adjust wage by composite index
-	v[9] = 1 + v[17] + v[1] * ( v[5] - v[17] ) + v[2] * v[6] + v[3] * v[7] + v[4] * v[8];
-	v[0] = CURRENT * v[9];
+// adjust wage by composite index
+v[9] = 1 + v[17] + v[1] * ( v[5] - v[17] ) + v[2] * v[6] + v[3] * v[7] + v[4] * v[8];
+v[0] = CURRENT * v[9];
 
-	// labor sharing mode? (applicable only in sector 2, for non-entrants)
-	if ( h == 2 && v[16] == 1 && k > 0 )
-	{
-		v[10] = V( "_wfull" ) * v[9];			// pre sharing wage ceiling
-		WRITE( "_wfull", v[10] );				// keep wage ceiling updated
-		// adjust wage as utilization changes but not over ceiling
-		v[0] *= 1 + VS( PARENT, "rho" ) * VS( cur, "_dQ2d" ) / VLS( cur, "_Q2e", 1 );
-		v[0] = max( v[0], v[10] );
-	}
+// labor sharing mode? (applicable only in sector 2, for non-entrants)
+if ( h == 2 && v[16] == 1 && k > 0 )
+{
+	v[10] = V( "_wfull" ) * v[9];				// pre sharing wage ceiling
+	WRITE( "_wfull", v[10] );					// keep wage ceiling updated
+
+	// adjust wage as utilization changes but not over ceiling
+	v[0] *= 1 + VS( PARENT, "rho" ) * VS( cur, "_dQ2d" ) / VLS( cur, "_Q2e", 1 );
+	v[0] = max( v[0], v[10] );
 }
 
 // check for abnormal change
@@ -404,7 +397,7 @@ if ( VS( GRANDPARENT, "flagHeterWage" ) == 0 )	// centralized wage setting?
 h = V( "_employed" );							// employment situation
 
 if ( ! h )										// unemployed?
-	v[0] = max( V( "_wRes" ), V( "_wS" ) );		// yes: base on satisfacing wage
+	v[0] = V( "_wS" );							// yes: base on satisfacing wage
 else
 	v[0] = V( "_w" ) * ( 1 + VS( PARENT, "epsilon" ) );	// no: base on last wage
 
@@ -426,30 +419,31 @@ if ( CURRENT > 0 && v[1] > 0 )
 RESULT( v[0] )
 
 
-EQUATION( "_wRes" )
-/*
-Reservation wage
-*/
-RESULT( VS( PARENT, "wU" ) )					// unemployed wage (benefit)
-
-
 EQUATION( "_wS" )
 /*
 Satisfacing wage
 */
 
 j = VS( PARENT, "Ts" );							// wage memory
+v[1] = VS( PARENT, "wU" );						// unemployment subsidy
 
 if ( j == 0 )									// no memory?
-	END_EQUATION( V( "_wRes" ) )
+	END_EQUATION( v[1] );
 
 for ( v[0] = 0, i = 1; i <= j; ++i )
 	if ( T - i >= 0 )							// just go to t=0
-		v[0] += VL( "_w", i );					// sum past wages
+	{
+		v[2] = VL( "_w", i );					// past wage
+
+		if ( v[2] > 0 )
+			v[0] += v[2];						// sum past wages
+		else
+			v[0] += VLS( PARENT, "wU", i );		// or unemployment benefit
+	}
 	else
 		break;
 
-RESULT( v[0] / i )
+RESULT( max( v[1], v[0] / ( i - 1 ) ) )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/

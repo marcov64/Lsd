@@ -146,7 +146,6 @@ Label Root
 				Var: _w
 				Var: _wR
 				Var: _wReal
-				Var: _wRes
 				Var: _wS
 
 			}
@@ -1037,7 +1036,7 @@ Var: searchProb 0 n + n n
 Var: wAvg 1 s + n n	0
 Var: wCent 1 s + n n	0
 Var: wMinPol 1 s + n n	0
-Var: wU 0 s + n n
+Var: wU 8 s + n n	0	0	0	0	0	0	0	0
 
 Object: Worker C	1
 Param: _ID 0 n + n n	0
@@ -1054,14 +1053,13 @@ Var: _appl 0 n + n n
 Var: _dQb 0 n + n n
 Var: _discouraged 0 n + n n
 Var: _employed 0 n + n n
-Var: _s 0 s + n N
+Var: _s 1 s + n N	0
 Var: _sT 1 n + n n	0
 Var: _sV 1 n + n n	0
 Var: _searchProb 0 n + n n
 Var: _w 8 n + n N	0	0	0	0	0	0	0	0
 Var: _wR 1 n + n n	0
 Var: _wReal 0 s + n n
-Var: _wRes 0 n + n n
 Var: _wS 0 n + n n
 
 Object: Capital C	1
@@ -2999,6 +2997,8 @@ END_DESCRIPTION
 
 Variable_wU
 Unemployment benefit paid by government
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Object_Worker
@@ -3085,6 +3085,8 @@ END_DESCRIPTION
 Variable__s
 Compound skills of worker
 Normalized to [0,1] range
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable__sT
@@ -3117,10 +3119,6 @@ END_DESCRIPTION
 
 Variable__wReal
 Real income of worker
-END_DESCRIPTION
-
-Variable__wRes
-Reservation wage of worker
 END_DESCRIPTION
 
 Variable__wS
@@ -5440,7 +5438,12 @@ EQ_FILE
 	MAIN K+S LSD MODEL (including labor and finance extensions)
 	------------------
 
-	VERSION: 5.1.3 - Full LSD version
+	Written by Marcelo C. Pereira, University of Campinas
+
+	Copyright Marcelo C. Pereira
+	Distributed under the GNU General Public License
+
+	VERSION: 5.1.4 - Full LSD version
 
 	This is the topmost code file for the K+S coded in LSD.
 	It contains only the scheduling equations 'runCountry' and 'timeStep',
@@ -5452,7 +5455,7 @@ EQ_FILE
 // disable/enable full logging (FASTMODE=0/1/2)
 #define FASTMODE 0
 
-// do not initialize and check LSD pointers
+// do not initialize and check LSD pointers (comment for debugging!)
 //#define NO_POINTER_INIT
 
 
@@ -5536,6 +5539,11 @@ EQUATION( "runCountry" )
 /*
 Execute the current time-step for all existing countries
 */
+
+V( "init" );									// ensure initialization done
+
+CYCLE( cur, "Country" )
+	VS( cur, "regChg" );						// do regulatory regime change
 
 CYCLE( cur, "Country" )
 	VS( cur, "timeStep" );
