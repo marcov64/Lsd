@@ -21,7 +21,7 @@
 TARGET_LMM=LMM
 TARGET_LSD=LSD
 
-SWITCH_CC=-O3 -Wall -Wextra -Wno-unused-parameter -Wno-implicit-fallthrough
+SWITCH_CC=-O3 -march=x86-64 -Wall -Wextra -Wno-unused-parameter -Wno-implicit-fallthrough
 SWITCH_CC_LMM=-D_LMM_ -D_NP_
 SWITCH_CC_LSD=
 
