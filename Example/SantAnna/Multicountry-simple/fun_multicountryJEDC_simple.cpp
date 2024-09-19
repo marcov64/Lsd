@@ -4,12 +4,11 @@
 
 MODELBEGIN
 
-
 EQUATION( "LINKS" )  
 // this equation creates linkages across objects (via pointers)
 // it is executed only at t=1
 
-if ( t == 1 )
+if ( T == 1 )
 {
 	CYCLE( cur, "sector" )
 	{
@@ -584,57 +583,50 @@ CYCLE( cur, "sector" )
 			v[3] = V( "x_ent" ) + ( V( "xhat_ent" ) - V( "x_ent" ) ) * v[2];
 			
 			// entrants take the countryXsector average productivty plus a shock
-			WRITELS( cur1, "a", VS( cur, "AvgProd_s" ) * ( 1 + v[3] ), t );
+			WRITELS( cur1, "a", VS( cur, "AvgProd_s" ) * ( 1 + v[3] ), T );
 			
 			// entrants take the countryXsector minimum mark up
-			WRITELS( cur1, "m", VS( cur, "m_min_int" ), t );   
-			WRITELLS( cur1, "f", V( "f_min" ), t, 0 );
-			WRITELLS( cur1, "f", V( "f_min" ), t, 1 );
+			WRITELS( cur1, "m", VS( cur, "m_min_int" ), T );   
+			WRITELLS( cur1, "f", V( "f_min" ), T, 0 );
+			WRITELLS( cur1, "f", V( "f_min" ), T, 1 );
 			
 			// production of entrants set to zero. Notice that total production 
 			// is computed before entry and exit (in order to reflect the actual 
 			// value of production)
-			WRITELS( cur1, "y", 0, t );  
+			WRITELS( cur1, "y", 0, T );  
 			WRITELS( cur1, "p", ( 1 + VS( cur, "m_min_int" ) ) * V( "W" ) / 
-								VS( cur1, "a" ), t );
+								VS( cur1, "a" ), T );
 			
 			//initial level of demand is computed using the minimum market share
 			WRITELS( cur1, "D", V( "dshare" ) * V( "Cw" ) * V( "f_min" ) / 
-								( VS( cur1, "p" ) * V( "e" ) ), t );
+								( VS( cur1, "p" ) * V( "e" ) ), T );
 			/*// use in the case of pure autarky (replace previous line)
 			WRITELS( cur1, "D", V( "dshare" ) * V( "expenditure" ) * 
-								V( "f_min" ) / ( VS( cur1, "p" ) ), t );*/
+								V( "f_min" ) / ( VS( cur1, "p" ) ), T );*/
 			
 			// employment of entrants is set to zero and is computed in the next 
 			// step. Notice that total employment in each time step is computed 
 			// before such adjustment (in order to reflect the actual level of 
 			// employment)
-			WRITELS( cur1, "l", 0, t );  
-			WRITELS( cur1, "sales", VS( cur1, "p" ) * VS( cur1, "D" ), t );
+			WRITELS( cur1, "l", 0, T );  
+			WRITELS( cur1, "sales", VS( cur1, "p" ) * VS( cur1, "D" ), T );
 			INCRS( cur1, "Id", 1 );
 			
 			CYCLES( cur1, cur2, "comp" )
 			{
-				WRITELS( cur2, "ff", V( "f_min" ), t );
+				WRITELS( cur2, "ff", V( "f_min" ), T );
 				/*// activate in case of pure autarky
 				if ( VS( cur2, "Id_comp" ) != V( "Id_country" ) )	
 				WRITELS( cur2, "ff", 0, t );
 					else
-				WRITELS( cur2, "ff", V( "f_min" ), t );*/
+				WRITELS( cur2, "ff", V( "f_min" ), T );*/
 			}
 		}
 
 RESULT( 1 )
 
-
 MODELEND
 
 
-
-
-void close_sim( void )
-{
-
-}
-
-
+CLOSEBEGIN
+CLOSEEND

@@ -121,6 +121,7 @@
 #define UPD_PER 0.2						// update period during simulation run in s
 #define USER_D_VARS 1000				// number of user double variables
 #define T_CLEVS 10						// number of t distribution confidence levels
+#define U_FN lsd::equation				// namespace for user functions
 #define Z_CLEVS 7						// number of normal distr. confidence levels
 
 // directory/file separator

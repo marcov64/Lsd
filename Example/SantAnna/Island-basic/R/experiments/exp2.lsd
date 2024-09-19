@@ -198,7 +198,6 @@ END_DESCRIPTION
 Parameter_pi
 The probability that a point in the se is an island 
 (0 < pi < 1)
-If pi = 0, the number of knowable islands is fixed and equal to l0 (bounded economy)
 _INIT_
 All 1 instances equal to 0.4.
 END_DESCRIPTION

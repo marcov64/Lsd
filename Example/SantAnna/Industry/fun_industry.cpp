@@ -448,10 +448,7 @@ EQUATION( "_growth" )
 
 v[0] = log( V( "_s" ) ) - log( VL( "_s", 1 ) );
 
-if ( isinf( v[0] ) )						// just entered market
-	v[0] = NAN;								// growth is not a number
-
-RESULT( v[0] )
+RESULT( std::isfinite( v[0] ) ? v[0] : NAN )
 
 
 //////////////////////////////////////////
@@ -478,10 +475,7 @@ EQUATION( "_aGrowth" )
 
 v[0] = V( "_aEnd" ) / VL( "_aEnd", 1 ) - 1;
 
-if ( isinf( v[0] ) )						// just entered market
-	v[0] = NAN;								// growth is not a number
-
-RESULT( v[0] )
+RESULT( std::isfinite( v[0] ) ? v[0] : NAN )
 
 
 // ###################### MARKET AGGREGATES CALCULATION ####################
@@ -602,7 +596,7 @@ CYCLE( cur, "Firm" )						// all firms in the market
 	v[1] = VS( cur, "_s" );					// market share in t
 	v[2] = VLS( cur, "_s", 1 );				// market share in t-1
 
-	if ( ! isnan( v[1] ) && ! isnan( v[2] ) )// do not consider NaNs
+	if ( std::isfinite( v[1] ) && std::isfinite( v[2] ) )// do not consider NaNs
 		v[0] += abs( v[1] - v[2] );			// compute sum
 }
 
@@ -612,7 +606,5 @@ RESULT( max( 0, min( v[0], 2 ) ) )			// handle abnormal cases
 MODELEND
 
 
-void close_sim(void)
-{
-
-}
+CLOSEBEGIN
+CLOSEEND

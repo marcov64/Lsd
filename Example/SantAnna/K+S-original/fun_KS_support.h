@@ -13,15 +13,12 @@
 
  ******************************************************************************/
 
-#define EQ equation								// shortcut for the class to use
-
-
 /*======================== GENERAL SUPPORT C FUNCTIONS =======================*/
 
 // calculate the bounded, moving-average growth rate of variable
 // if lim is zero, there is no bounding
 
-double EQ::mov_avg_bound( object *obj, const char *var, double lim, double per )
+double U_FN::mov_avg_bound( object *obj, const char *var, double lim, double per )
 {
 	double prev, g, sum_g;
 	int i;
@@ -46,7 +43,7 @@ double EQ::mov_avg_bound( object *obj, const char *var, double lim, double per )
 
 // append error messages and increment error counter
 
-void EQ::check_error( bool cond, const char* errMsg, int errCount, int *errCounter )
+void U_FN::check_error( bool cond, const char* errMsg, int errCount, int *errCounter )
 {
 	if ( ! cond )
 		return;
@@ -70,7 +67,7 @@ const char *_CDvar[ ] = { "_CD1", "_CD2" },
 		   *_DebVar[ ] = { "_Deb1", "_Deb2" },
 		   *_NWvar[ ] = { "_NW1", "_NW2" };
 
-double EQ::update_debt( object *firm, double desired, double loan )
+double U_FN::update_debt( object *firm, double desired, double loan )
 {
 	double Deb, TCfree;
 	object *bank;
@@ -95,7 +92,7 @@ double EQ::update_debt( object *firm, double desired, double loan )
 
 // update firm deposits in equations '_Q1', '_Tax1', '_Q2', '_EI', '_SI', '_Tax2'
 
-double EQ::update_depo( object *firm, double depo, bool incr )
+double U_FN::update_depo( object *firm, double depo, bool incr )
 {
 	double NW;
 	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 : 1;
@@ -122,7 +119,7 @@ const char *_CIvar[ ] = { "", "_CI" },
 		   *_DivVar[ ] = { "_Div1", "_Div2" },
 		   *_NWpVar[ ] = { "_NW1p", "_NW2p" };
 
-double EQ::cash_flow( object *firm, double profit, double tax )
+double U_FN::cash_flow( object *firm, double profit, double tax )
 {
 	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
 			  strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
@@ -180,7 +177,7 @@ double EQ::cash_flow( object *firm, double profit, double tax )
 // send machine brochure to consumption-good client firm in equations '_NC',
 // '_supplier'
 
-object *EQ::send_brochure( object *suppl, object *client )
+object *U_FN::send_brochure( object *suppl, object *client )
 {
 	object *broch, *cli;
 
@@ -199,7 +196,7 @@ object *EQ::send_brochure( object *suppl, object *client )
 
 // set initial supplier for entrant in equations 'entry2exit'
 
-object *EQ::set_supplier( object *firm )
+object *U_FN::set_supplier( object *firm )
 {
 	object *broch, *suppl,
 		   *cap = V_EXTS( GRANDPARENTS( firm ), countryE, capSec );
@@ -215,7 +212,7 @@ object *EQ::set_supplier( object *firm )
 
 // send new machine order in equations '_EI', '_SI'
 
-void EQ::send_order( object *firm, double nMach )
+void U_FN::send_order( object *firm, double nMach )
 {
 	// find firm entry on supplier client list
 	object *cli = SHOOKS( HOOKS( firm, SUPPL ) );
@@ -233,7 +230,7 @@ void EQ::send_order( object *firm, double nMach )
 
 // perform investment according to available funding in equations '_EI', '_SI'
 
-double EQ::invest( object *firm, double desired )
+double U_FN::invest( object *firm, double desired )
 {
 	double invest, invCost, loan, loanDes;
 
@@ -299,7 +296,7 @@ double EQ::invest( object *firm, double desired )
 
 // add new vintage to the capital stock of a firm in equation 'K' and 'initCountry'
 
-void EQ::add_vintage( object *firm, double nMach, bool newInd )
+void U_FN::add_vintage( object *firm, double nMach, bool newInd )
 {
 	double __Avint, __pVint;
 	int __ageVint, __nMach, __nVint;
@@ -364,7 +361,7 @@ void EQ::add_vintage( object *firm, double nMach, bool newInd )
 // scrap (remove) vintage from capital stock in equation 'K'
 // return -1 if last vintage (not removed but shrank to 1 machine)
 
-double EQ::scrap_vintage( c_varT *_v_, object *vint )
+double U_FN::scrap_vintage( c_varT *_v_, object *vint )
 {
 	double RS;
 
@@ -392,7 +389,7 @@ double EQ::scrap_vintage( c_varT *_v_, object *vint )
 // add and configure entrant capital-good firm object(s) and required hooks
 // in equations 'entry1exit' and 'initCountry'
 
-double EQ::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
+double U_FN::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 {
 	double _Atau, _Btau, _D10, _Deb1, _Eq1, _L1rd, _NW1, _NW10, _RD0, _c1, _f1,
 		   _p1, AtauMax, BtauMax, Deb1, Eq1, NW1, mult;
@@ -533,7 +530,7 @@ double EQ::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 // add and configure entrant consumer-good firm object(s) and required hooks
 // in equations 'entry2exit' and 'initCountry'
 
-double EQ::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
+double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 {
 	double _A2, _D20, _D2e, _Deb2, _E, _Eq2, _K, _N, _NW2, _NW2f, _NW20, _Q2u,
 		   _c2, _f2, _life2cycle, _p2, Deb2, Eq2, K, N, NW2, mult;
@@ -700,7 +697,7 @@ const char *BadDebVar[ ] = { "BadDeb1", "BadDeb2" },
 		   *cExitVar[ ] = { "cExit1", "cExit2" },
 		   *CliBrochObj[ ] = { "Cli", "Broch" };
 
-double EQ::exit_firm( c_varT *_v_, object *firm )
+double U_FN::exit_firm( c_varT *_v_, object *firm )
 {
 	double liqEq, liqVal;
 	object *cli, *fin = SEARCHS( GRANDPARENTS( firm ), "Financial" );

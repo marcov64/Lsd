@@ -14,8 +14,6 @@
 
 #define NO_POINTER_INIT							// disable pointer checking
 
-#include "fun_head_fast.h"
-
 // colors of lattice markers
 #define UNKNOWN 3								// unknown island - yellow
 #define KNOWN 2									// known island - green
@@ -29,8 +27,10 @@
 #define ISLAND_ID( X, Y ) ( ( X + LAST_T ) * 1e6 + ( Y + LAST_T ) )
 
 // support C++ functions (code at the end of the file)
-void add_island( object *sea, int x, int y, double & count );// add new island
-void set_marker( object *sea, int x, int y, int color );// set lattice marker color
+#define USER_FUNCS void add_island( lsd::object *sea, int x, int y, double & count ); \
+				   void set_marker( lsd::object *sea, int x, int y, int color );
+
+#include "fun_head_fast.h"
 
 MODELBEGIN
 
@@ -583,7 +583,7 @@ MODELEND
 // support C++ functions
 
 //// add one (unknown) island to the model
-void add_island( object *sea, int x, int y, double & count )
+void U_FN::add_island( lsd::object *sea, int x, int y, double & count )
 {
 	object *island;
 
@@ -603,7 +603,7 @@ void add_island( object *sea, int x, int y, double & count )
 }
 
 //// function to set a marker in the lattice
-void set_marker( object *sea, int x, int y, int color )
+void U_FN::set_marker( lsd::object *sea, int x, int y, int color )
 {
 	int size = VS( sea, "sizeLattice" );
 
@@ -618,4 +618,5 @@ void set_marker( object *sea, int x, int y, int color )
 }
 
 //// close simulation special commands
-void close_sim( void ) { }
+CLOSEBEGIN
+CLOSEEND
