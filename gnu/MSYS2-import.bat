@@ -1,7 +1,7 @@
 @echo off
 rem *************************************************************
 rem
-rem	 LSD 8.0 - December 2020
+rem	 LSD 9.0 - January 2024
 rem	 written by Marco Valente, Universita' dell'Aquila
 rem	 and by Marcelo Pereira, University of Campinas
 rem
@@ -25,7 +25,7 @@ rem  - diff compare tool
 rem *************************************************************
 
 rem component versions
-set GCC_VER=13.2.0
+set GCC_VER=14.2.0
 set PYTHON_VER=3.11
 
 rem XCOPY options for files and directories
@@ -42,6 +42,11 @@ if "%1"=="" (
 	if exist C:\msys64\mingw64\bin\x86_64-w64-mingw32-g++.exe (
 		set MSYS_DIR=C:\msys64
 		goto lsd_path
+	) else (
+		if exist D:\msys64\mingw64\bin\x86_64-w64-mingw32-g++.exe (
+			set MSYS_DIR=D:\msys64
+			goto lsd_path
+		)
 	)
 	echo No MSYS2 FOLDER provided or found, aborting
 	pause
@@ -130,7 +135,7 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libintl-8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libsigsegv-2.dll %LSD_DIR%\gnu\bin\
 
 echo subbotools required libraries...
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgsl-27.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgsl-28.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgslcblas-0.dll %LSD_DIR%\gnu\bin\
 
 echo done copying files

@@ -1,4 +1,4 @@
-set(WebP_VERSION 1.3.2)
+set(WebP_VERSION 1.4.0)
 set(WEBP_VERSION ${WebP_VERSION})
 
 
@@ -35,7 +35,8 @@ endif()
 include("${CMAKE_CURRENT_LIST_DIR}/WebPTargets.cmake")
 
 set_and_check(WebP_INCLUDE_DIR "${PACKAGE_PREFIX_DIR}/include")
-set(WEBP_INCLUDE_DIRS ${WebP_INCLUDE_DIRS})
+set(WebP_INCLUDE_DIRS ${WebP_INCLUDE_DIR})
+set(WEBP_INCLUDE_DIRS ${WebP_INCLUDE_DIR})
 set(WebP_LIBRARIES "webpdecoder;webp;webpdemux;webpmux")
 set(WEBP_LIBRARIES "${WebP_LIBRARIES}")
 

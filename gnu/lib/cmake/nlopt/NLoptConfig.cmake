@@ -1,7 +1,7 @@
 
 # Tell the user project where to find our headers and libraries
 
-set (NLOPT_VERSION "2.7.1")
+set (NLOPT_VERSION "2.8.0")
 
 set (NLOPT_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/../../../include")
 set (NLOPT_LIBRARY_DIRS "${CMAKE_CURRENT_LIST_DIR}/../../")

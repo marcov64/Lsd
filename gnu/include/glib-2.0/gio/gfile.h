@@ -36,16 +36,6 @@ G_BEGIN_DECLS
 #define G_IS_FILE(obj)	       (G_TYPE_CHECK_INSTANCE_TYPE ((obj), G_TYPE_FILE))
 #define G_FILE_GET_IFACE(obj)  (G_TYPE_INSTANCE_GET_INTERFACE ((obj), G_TYPE_FILE, GFileIface))
 
-#if 0
-/**
- * GFile:
- *
- * A handle to an object implementing the #GFileIface interface.
- * Generally stores a location within the file system. Handles do not
- * necessarily represent files or directories that currently exist.
- **/
-typedef struct _GFile         		GFile; /* Dummy typedef */
-#endif
 typedef struct _GFileIface    		GFileIface;
 
 
@@ -954,6 +944,14 @@ void                    g_file_copy_async                 (GFile                
 							   gpointer                    progress_callback_data,
 							   GAsyncReadyCallback         callback,
 							   gpointer                    user_data);
+GIO_AVAILABLE_IN_2_82
+void g_file_copy_async_with_closures (GFile *source,
+                                      GFile *destination,
+                                      GFileCopyFlags flags,
+                                      int io_priority,
+                                      GCancellable *cancellable,
+                                      GClosure *progress_callback_closure,
+                                      GClosure *ready_callback_closure);
 GIO_AVAILABLE_IN_ALL
 gboolean                g_file_copy_finish                (GFile                      *file,
 							   GAsyncResult               *res,
@@ -976,6 +974,14 @@ void                    g_file_move_async                 (GFile                
 							                                             gpointer                    progress_callback_data,
 							                                             GAsyncReadyCallback         callback,
 							                                             gpointer                    user_data);
+GIO_AVAILABLE_IN_2_82
+void g_file_move_async_with_closures (GFile *source,
+                                      GFile *destination,
+                                      GFileCopyFlags flags,
+                                      int io_priority,
+                                      GCancellable *cancellable,
+                                      GClosure *progress_callback_closure,
+                                      GClosure *ready_callback_closure);
 GIO_AVAILABLE_IN_2_72
 gboolean                g_file_move_finish                (GFile                      *file,
 							                                             GAsyncResult               *result,

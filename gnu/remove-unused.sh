@@ -1,13 +1,13 @@
 #!/bin/bash
 #**************************************************************
 #
-#	LSD 8.0 - December 2020
+#	LSD 9.0 - January 2024
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
 #	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
-#	
+#
 #	See Readme.txt for copyright information of
 #	third parties' code used in LSD
 #

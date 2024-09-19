@@ -1,13 +1,13 @@
 @echo off
 rem *************************************************************
 rem
-rem	 LSD 8.0 - December 2020
+rem	 LSD 9.0 - January 2024
 rem	 written by Marco Valente, Universita' dell'Aquila
 rem	 and by Marcelo Pereira, University of Campinas
 rem
 rem	 Copyright Marco Valente and Marcelo Pereira
 rem	 LSD is distributed under the GNU General Public License
-rem	
+rem
 rem	See Readme.txt for copyright information of
 rem	third parties' code used in LSD
 rem
@@ -34,6 +34,11 @@ if "%1"=="" (
 	if exist C:\cygwin64\bin\multitail.exe (
 		set CYG_DIR=C:\cygwin64
 		goto lsd_path
+	) else (
+		if exist D:\cygwin64\bin\multitail.exe (
+			set CYG_DIR=D:\cygwin64
+			goto lsd_path
+		)
 	)
 	echo No CYGWIN FOLDER provided or found, aborting
 	pause
@@ -60,6 +65,7 @@ if "%2"=="" (
 
 echo Cygwin libraries...
 XCOPY %OPT% %CYG_DIR%\bin\cygwin1.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %CYG_DIR%\bin\cygpcreposix-0.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %CYG_DIR%\bin\cygiconv-2.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %CYG_DIR%\bin\cygintl-8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %CYG_DIR%\bin\cygncursesw-10.dll %LSD_DIR%\gnu\bin\

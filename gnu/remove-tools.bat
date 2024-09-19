@@ -1,13 +1,13 @@
 @echo off
 rem *************************************************************
 rem
-rem	 LSD 8.0 - December 2020
+rem	 LSD 9.0 - January 2024
 rem	 written by Marco Valente, Universita' dell'Aquila
 rem	 and by Marcelo Pereira, University of Campinas
 rem
 rem	 Copyright Marco Valente and Marcelo Pereira
 rem	 LSD is distributed under the GNU General Public License
-rem	
+rem
 rem	See Readme.txt for copyright information of
 rem	third parties' code used in LSD
 rem
@@ -70,9 +70,9 @@ ERASE %OPT% %GNU_DIR%\lib\gcc
 ERASE %OPT% %GNU_DIR%\lib\python*.*
 
 rem other files (gcc, gdb, multitail)
-ERASE %OPT% %GNU_DIR%\share 
-ERASE %OPT% %GNU_DIR%\x86_64-w64-mingw32 
-ERASE %OPT% %GNU_DIR%\etc 
+ERASE %OPT% %GNU_DIR%\share
+ERASE %OPT% %GNU_DIR%\x86_64-w64-mingw32
+ERASE %OPT% %GNU_DIR%\etc
 ERASE %OPT% %GNU_DIR%\usr
 
 :end

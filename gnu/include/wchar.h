@@ -55,19 +55,7 @@ extern "C" {
 
 _CRTIMP FILE *__cdecl __acrt_iob_func(unsigned index);
 #ifndef _STDIO_DEFINED
-#ifdef _WIN64
   _CRTIMP FILE *__cdecl __iob_func(void);
-#define _iob  __iob_func()
-#else
-#ifdef _MSVCRT_
-extern FILE _iob[];	/* A pointer to an array of FILE */
-#define __iob_func()	(_iob)
-#else
-extern FILE (* __MINGW_IMP_SYMBOL(_iob))[];	/* A pointer to an array of FILE */
-#define __iob_func()	(* __MINGW_IMP_SYMBOL(_iob))
-#endif
-#endif
-
 #define _iob __iob_func()
 #endif
 
@@ -166,28 +154,11 @@ extern FILE (* __MINGW_IMP_SYMBOL(_iob))[];	/* A pointer to an array of FILE */
 
 #ifndef __PCTYPE_FUNC
 #define __PCTYPE_FUNC __pctype_func()
-#ifdef _MSVCRT_
-#define __pctype_func() (_pctype)
-#else
-#ifdef _UCRT
-  _CRTIMP unsigned short* __pctype_func(void);
-#else
-#define __pctype_func() (* __MINGW_IMP_SYMBOL(_pctype))
-#endif
-#endif
+  _CRTIMP const unsigned short* __pctype_func(void);
 #endif
 
 #ifndef _pctype
-#ifdef _MSVCRT_
-  extern unsigned short *_pctype;
-#else
-#ifdef _UCRT
 #define _pctype (__pctype_func())
-#else
-  extern unsigned short ** __MINGW_IMP_SYMBOL(_pctype);
-#define _pctype (* __MINGW_IMP_SYMBOL(_pctype))
-#endif
-#endif
 #endif
 #endif
 #endif
@@ -196,27 +167,13 @@ extern FILE (* __MINGW_IMP_SYMBOL(_iob))[];	/* A pointer to an array of FILE */
 #define _CRT_WCTYPEDATA_DEFINED
 #ifndef _CTYPE_DISABLE_MACROS
 #if !defined(_wctype) && defined(_CRT_USE_WINAPI_FAMILY_DESKTOP_APP)
-#ifdef _MSVCRT_
-  extern unsigned short *_wctype;
-#else
-  extern unsigned short ** __MINGW_IMP_SYMBOL(_wctype);
+  extern const unsigned short ** __MINGW_IMP_SYMBOL(_wctype);
 #define _wctype (* __MINGW_IMP_SYMBOL(_wctype))
 #endif
-#endif
 
-#ifdef _MSVCRT_
-#define __pwctype_func() (_pwctype)
-#else
-#define __pwctype_func() (* __MINGW_IMP_SYMBOL(_pwctype))
-#endif
-
+  _CRTIMP const wctype_t * __cdecl __pwctype_func(void);
 #ifndef _pwctype
-#ifdef _MSVCRT_
-  extern unsigned short *_pwctype;
-#else
-  extern unsigned short ** __MINGW_IMP_SYMBOL(_pwctype);
-#define _pwctype (* __MINGW_IMP_SYMBOL(_pwctype))
-#endif
+#define _pwctype (__pwctype_func())
 #endif
 
 #endif
@@ -520,19 +477,6 @@ extern FILE (* __MINGW_IMP_SYMBOL(_iob))[];	/* A pointer to an array of FILE */
   int __cdecl __stdio_common_vfwscanf(unsigned __int64 options, FILE *file, const wchar_t *format, _locale_t locale, va_list valist);
 #endif
 
-#undef __mingw_ovr
-#if defined (__GNUC__)
-#define __mingw_ovr static __attribute__ ((__unused__)) __inline__ __cdecl
-#ifdef __mingw_static_ovr
-#undef __mingw_static_ovr
-#define __mingw_static_ovr __mingw_ovr
-#endif
-#elif defined(__cplusplus)
-#define __mingw_ovr inline __cdecl
-#else
-#define __mingw_ovr static __cdecl
-#endif
-
 #if __USE_MINGW_ANSI_STDIO
 
 /*
@@ -704,16 +648,7 @@ int vsnwprintf (wchar_t *__stream, size_t __n, const wchar_t *__format, __builti
     return __stdio_common_vfwscanf(_CRT_INTERNAL_LOCAL_SCANF_OPTIONS, stdin, __format, NULL, __local_argv);
   }
 
-  __mingw_static_ovr
-  int __cdecl fwprintf(FILE * __restrict__ _File,const wchar_t * __restrict__ _Format,...)
-  {
-    __builtin_va_list __ap;
-    int __ret;
-    __builtin_va_start(__ap, _Format);
-    __ret = __stdio_common_vfwprintf(_CRT_INTERNAL_LOCAL_PRINTF_OPTIONS, _File, _Format, NULL, __ap);
-    __builtin_va_end(__ap);
-    return __ret;
-  }
+  int __cdecl fwprintf(FILE * __restrict__ _File,const wchar_t * __restrict__ _Format,...);
   __mingw_ovr
   int __cdecl wprintf(const wchar_t * __restrict__ _Format,...)
   {
@@ -809,16 +744,7 @@ int vsnwprintf (wchar_t *__stream, size_t __n, const wchar_t *__format, __builti
     __builtin_va_end(__ap);
     return __ret;
   }
-  __mingw_static_ovr __MINGW_ATTRIB_DEPRECATED_SEC_WARN
-  int __cdecl _snwprintf(wchar_t * __restrict__ _Dest,size_t _Count,const wchar_t * __restrict__ _Format,...)
-  {
-    __builtin_va_list __ap;
-    int __ret;
-    __builtin_va_start(__ap, _Format);
-    __ret = __stdio_common_vswprintf(_CRT_INTERNAL_LOCAL_PRINTF_OPTIONS | _CRT_INTERNAL_PRINTF_LEGACY_VSPRINTF_NULL_TERMINATION, _Dest, _Count, _Format, NULL, __ap);
-    __builtin_va_end(__ap);
-    return __ret;
-  }
+  int __cdecl _snwprintf(wchar_t * __restrict__ _Dest,size_t _Count,const wchar_t * __restrict__ _Format,...) __MINGW_ATTRIB_DEPRECATED_SEC_WARN;
   __mingw_ovr __MINGW_ATTRIB_DEPRECATED_SEC_WARN
   int __cdecl _vsnwprintf(wchar_t * __restrict__ _Dest,size_t _Count,const wchar_t * __restrict__ _Format,va_list _Args)
   {
@@ -1470,7 +1396,7 @@ int vsnwprintf (wchar_t *__stream, size_t __n, const wchar_t *__format, __builti
   int __cdecl fwide(FILE *stream,int mode);
 #if defined(_UCRT) || defined(__LARGE_MBSTATE_T)
   /* With UCRT, mbsinit is only available as inline. */
-  __mingw_static_ovr int __cdecl mbsinit(const mbstate_t *_P) { return (!_P || _P->_Wchar == 0); }
+  __mingw_ovr int __cdecl mbsinit(const mbstate_t *_P) { return (!_P || _P->_Wchar == 0); }
 #else
   int __cdecl mbsinit(const mbstate_t *ps);
 #endif

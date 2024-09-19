@@ -36,13 +36,6 @@ G_BEGIN_DECLS
 #define G_IS_CONVERTER(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), G_TYPE_CONVERTER))
 #define G_CONVERTER_GET_IFACE(obj)  (G_TYPE_INSTANCE_GET_INTERFACE ((obj), G_TYPE_CONVERTER, GConverterIface))
 
-/**
- * GConverter:
- *
- * Seek object for streaming operations.
- *
- * Since: 2.24
- **/
 typedef struct _GConverterIface   GConverterIface;
 
 /**
@@ -90,6 +83,11 @@ GConverterResult g_converter_convert (GConverter       *converter,
 				      GError          **error);
 GIO_AVAILABLE_IN_ALL
 void             g_converter_reset   (GConverter       *converter);
+
+GIO_AVAILABLE_IN_2_82
+GBytes *         g_converter_convert_bytes (GConverter  *converter,
+                                            GBytes      *bytes,
+                                            GError     **error);
 
 
 G_END_DECLS

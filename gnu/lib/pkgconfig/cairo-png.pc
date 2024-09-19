@@ -3,6 +3,6 @@ includedir=${prefix}/include
 
 Name: cairo-png
 Description: PNG functions for cairo graphics library
-Version: 1.18.0
-Requires: cairo, libpng
+Version: 1.18.2
+Requires: cairo, libpng >=  1.4.0
 Cflags: -I${includedir}
