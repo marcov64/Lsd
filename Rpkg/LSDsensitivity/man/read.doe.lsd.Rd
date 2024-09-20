@@ -122,7 +122,7 @@ folder/baseName_XX_YY_WWW.csv    : DoE response for the selected variable (1 fil
 folder/baseName_YY+1_ZZ_WWW.csv  : validation response for variable (optional - 1 file)
 }
 
-When \code{posit} is supplied together with \code{col.names} or \code{instance}, the variable selection process is done in two steps. Firstly, the column names set by \code{saveVars} and \code{instance} are selected. Secondly, the instances defined by \code{posit} are selected from the first selection set. See \code{\link{select.colnames.lsd}} and \code{\link{select.colattrs.lsd}} for examples on how to apply advanced selection options.
+When \code{posit} is supplied together with \code{col.names} or \code{instance}, the variable selection process is done in two steps. Firstly, the column names set by \code{saveVars} and \code{instance} are selected. Secondly, the instances defined by \code{posit} are selected from the first selection set. See \code{\link[LSDinterface]{select.colnames.lsd}} and \code{\link[LSDinterface]{select.colattrs.lsd}} for examples on how to apply advanced selection options.
 }
 \value{
 The function returns an object/list of class \code{lsd-doe} containing all the experimental data and the corresponding results regarding the selected reference variable \code{outVar}, including the data for the out-of-sample (external) validation of the produced meta-models, if available, as well the DoE(s) details required by the package meta-modelling tools (\code{\link{elementary.effects.lsd}}, \code{\link{kriging.model.lsd}}, and \code{\link{polynomial.model.lsd}}).
