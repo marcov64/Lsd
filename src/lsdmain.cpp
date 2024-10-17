@@ -141,7 +141,7 @@ int prof_obs_only = false;	// profile only observed variables
 int quit = 0;				// simulation interruption mode (0=none)
 int series_saved = 0;		// number of series saved
 int sim_num = 1;			// simulation number running
-int stack;					// LSD stack call level
+int stack_level;			// LSD stack call level
 int stack_info = 0;			// LSD stack control
 int stop;					// activity interruption flag (Tcl boolean)
 int t;						// current time step
@@ -765,7 +765,7 @@ int lsdmain( int argn, const char **argv )
 	stacklog->ns = 0;
 	stacklog->vs = NULL;
 	strcpy( stacklog->label, "LSD Simulation Manager" );
-	stack = 0;
+	stack_level = 0;
 
 #ifndef _NW_
 
@@ -1341,7 +1341,7 @@ void empty_stack( void )
 		stacklog->next = NULL;
 		stacklog->ns = 0;
 		stacklog->vs = NULL;
-		stack = 0;
+		stack_level = 0;
 	}
 	else
 	{

@@ -507,7 +507,7 @@ extern int prof_min_msecs;		// profile only variables taking more than X msecs.
 extern int prof_obs_only;		// profile only observed variables
 extern int saveConf;			// save configuration on results saving (bool)
 extern int series_saved;		// number of series saved
-extern int stack;				// LSD stack call level
+extern int stack_level;			// LSD stack call level
 extern int stack_info;			// LSD stack control
 extern int strWindowOn;			// control the presentation of the model structure window (bool)
 extern int watch;				// allow for graph generation interruption (bool)
