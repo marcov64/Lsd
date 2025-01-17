@@ -25,7 +25,7 @@
 
 /*
 cases used up to 97
-cases free 35, 40, 45, 51
+cases free 35, 40, 45, 48, 51
 */
 
 #include "LSD.h"
@@ -3167,37 +3167,6 @@ lsd::object *gui::operate( lsd::object *r )
 			sscanf( lab1, "%99s", lab );
 
 			scan_used_lab( lab, "." );
-
-		break;
-
-
-		// Set the Html browser for Unix systems
-		case 48:
-
-			cmd( "set temp_var $html_browser" );
-
-			cmd( "newtop .a \"Set Browser\" { set choice 2 }" );
-
-			cmd( "ttk::label .a.l2 -text \"HTML browser for help pages\"" );
-			cmd( "ttk::entry .a.v_num2 -width 20 -textvariable temp_var -justify center" );
-			cmd( "bind .a.v_num2 <Return> { set choice 1 }" );
-			cmd( "pack .a.l2 .a.v_num2 -padx $_5" );
-
-			cmd( "okXhelpcancel .a b Default { set temp_var mozilla } { set choice 1 } { LsdHelp LSD_macros.html#V } { set choice 2 }" );
-
-			cmd( "showtop .a" );
-			cmd( "mousewarpto .a.b.ok 0" );
-			cmd( ".a.v_num2 selection range 0 end" );
-			cmd( "focus .a.v_num2" );
-
-			choice = 0;
-			while ( choice == 0 )
-				Tcl_DoOneEvent( 0 );
-
-			if ( choice == 1 )
-				cmd( "set html_browser $temp_var" );
-
-			cmd( "destroytop .a" );
 
 		break;
 
