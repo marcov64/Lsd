@@ -281,9 +281,9 @@ set dbgLinux			"gdb"		;
 set dbgWindows			"gdb"		;
 
 # OS specific default browser (open=system default)
-set browserMac			"open"			; # "open", "firefox", "safari"
+set browserMac			"Safari"		; # "Safari", "Firefox", "Chrome"
 set browserLinux		"x-www-browser"	; # "x-www-browser", "firefox", "chrome"
-set browserWindows		"start"			; # "start", "firefox", "chrome"
+set browserWindows		"iexplore"		; # "iexplore", "firefox", "chrome"
 
 # OS specific default wish utility
 set wishMac				"wish"

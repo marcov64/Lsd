@@ -821,8 +821,16 @@ proc open_gnuplot { { script "" } { errmsg "" } { persist false } { par ".da" } 
 #************************************************
 # OPEN_BROWSER
 #************************************************
-proc open_browser { dir fn } {
+proc open_browser { dir fnb } {
 	global HtmlBrowser CurPlatform termResult
+
+	set sp [ split $fnb # ]
+	set fn [ lindex $sp 0 ]
+	set bk [ lindex $sp 1 ]
+
+	if { $fn eq "" } {
+		return 0
+	}
 
 	if { $dir eq "" } {
 		set fqn "$fn"
@@ -830,22 +838,32 @@ proc open_browser { dir fn } {
 		set fqn "$dir/$fn"
 	}
 
-	if { ! [ catch { set fqn [ file normalize "$fqn" ] } ] && [ file exists "$fqn" ] } {
-		if { $CurPlatform in [ list linux mac ] } {
-			set error [ open_terminal $fqn $HtmlBrowser ]
-		} else {
-			set error [ open_terminal "$HtmlBrowser $fqn" ]
-		}
-
-		if { $error } {
-			ttk::messageBox -parent . -type ok -icon error -title Error -message "Browser failed to launch" -detail "Please check if the web browser is set up properly.\n\nDetail:\n$termResult"
-			return 0
-		}
-
-		return 1
+	if { $bk eq "" } {
+		set fqnb "$fqn"
+	} else {
+		set fqnb "$fqn#$bk"
 	}
 
-	return 0
+	if { ! [ catch { set fqn [ file normalize "$fqn" ] } ] && [ file exists "$fqn" ] } {
+		set fqnb "file://$fqnb"
+	}
+
+	switch -- $CurPlatform {
+		linux { set error [ open_terminal $fqnb $HtmlBrowser ] }
+		windows { set error [ open_terminal "start $HtmlBrowser $fqnb" ] }
+		mac {
+			set cmdline "osascript -e \"tell application \\\"$HtmlBrowser\\\" to open location \\\"$fqnb\\\"\""
+			set cmdline [ concat $cmdline "-e \"tell application \\\"$HtmlBrowser\\\" to activate\"" ]
+			set error [ catch { exec -- {*}$cmdline & } shit ]
+		}
+	}
+
+	if { $error } {
+		ttk::messageBox -parent . -type ok -icon error -title Error -message "Browser failed to launch" -detail "Please check if the web browser is set up properly.\n\nDetail:\n$termResult"
+		return 0
+	}
+
+	return 1
 }
 
 
