@@ -3,7 +3,6 @@
 <head>
 <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
 <meta name=Generator content="Microsoft Word 15 (filtered)">
-<title>Menu Model</title>
 <style>
 <!--
  /* Font Definitions */
@@ -74,12 +73,13 @@ span.TitleChar
 	font-family:"Cambria",serif;
 	letter-spacing:-.5pt;}
 span.Cdigo
-	{mso-style-name:C\00F3digo;
+	{mso-style-name:Código;
 	font-family:"Courier New";
 	color:gray;}
 .MsoChpDefault
 	{font-size:10.0pt;}
-@page WordSection1
+ /* Page Definitions */
+ @page WordSection1
 	{size:595.3pt 841.9pt;
 	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
 div.WordSection1
@@ -139,11 +139,11 @@ div.WordSection1
 
 </div>
 
-<p class=MsoNormal><span lang=EN-US style='color:white'>This menu provides
-command</span><span lang=EN-US>s to create, modify, explore and document the <a
-href="LSD_faqs.html#modelstructure">LSD model structure</a>. The tools are
-organized in five groups: adding, changing and finding model elements, document
-the model, and setting model-related options.</span></p>
+<p class=MsoNormal><span lang=EN-US>This menu provides commands to create,
+modify, explore and document the <a href="LSD_faqs.html#modelstructure">LSD
+model structure</a>. The tools are organized in five groups: adding, changing
+and finding model elements, document the model, and setting model-related
+options.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Please check also this tutorial with hints
 on <a href="model_writing.html#hints">how to design your model structure</a>.</span></p>
@@ -153,8 +153,8 @@ on <a href="model_writing.html#hints">how to design your model structure</a>.</s
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
-  none'>&#9650;Top</span></a></span></p>
+  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
+  text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -346,8 +346,8 @@ name="_Add_Parent_Object"></a></span></p>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
-  none'>&#9650;Top</span></a></span></p>
+  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
+  text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -373,12 +373,12 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US><a href="#_Find_Element">Find Element</a></span></p>
+</span></span><span lang=EN-US><a href="#_Find_Element">Find</a></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US><a href="#_Sort_Elements">Sort Elements</a></span></p>
+</span></span><span lang=EN-US><a href="#_Sort_Elements">Sort</a></span></p>
 
 <h2><a name="_Change_Element"></a><span lang=EN-US>Change Element</span></h2>
 
@@ -390,9 +390,9 @@ desired Element.</span></p>
 flags, and description of <a href="LSD_faqs.html#variable">Variable</a>, <a
 href="LSD_faqs.html#parameter">Parameter</a> and <a
 href="LSD_faqs.html#function">Function</a> elements, as well access additional
-information on those and modify their initial and sensitivity analysis
-numerical values. Also allow deleting the element. See the Change Element
-window details <a href="browser.html#changeelement">here</a>.</span></p>
+information on those and modify their initial, sensitivity analysis numerical
+values, and data assimilation data source. Also allow deleting the element. See
+the Change Element window details <a href="browser.html#changeelement">here</a>.</span></p>
 
 <h2><a name=ChangeObjName></a><a name="_Change_Object"></a><span lang=EN-US>Change
 Object </span></h2>
@@ -406,24 +406,23 @@ description of <a href="LSD_faqs.html#object">Objects</a>, as well modify their
 number of instances. Also allow moving or deleting the Object. Check the
 details in the Change Object window <a href="browser.html#changeobject">here</a>.</span></p>
 
-<h2><a name="_Find_Element"></a><span lang=EN-US>Find Element</span></h2>
+<h2><a name="_Find_Element"></a><span lang=EN-US>Find</span></h2>
 
 <p class=MsoNormal><i><span lang=EN-US>Shortcuts</span></i><span lang=EN-US>: </span><span
 class=Cdigo><span lang=EN-US>Ctrl+F</span></span><span lang=EN-US> or click the
 magnifying glass icon on the tool bar.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>Search for a <a
-href="LSD_faqs.html#variable">Variable</a>, <a href="LSD_faqs.html#parameter">Parameter</a>
+<p class=MsoNormal><span lang=EN-US>Search for an <a href="LSD_faqs.html#object">Object</a>,
+<a href="LSD_faqs.html#variable">Variable</a>, <a href="LSD_faqs.html#parameter">Parameter</a>
 or <a href="LSD_faqs.html#function">Function</a> in the model. After a
 successful search, the Browser will move the current Object the one containing
-the found element, and this element will be selected.</span></p>
+the found name, and this will be selected.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>Note that the Find Element window is
-endowed with auto-completion: while you type, the entry box proposes the first
-element with the typed initial letters, if any.</span></p>
+<p class=MsoNormal><span lang=EN-US>Note that the Find window is endowed with
+auto-completion: while you type, the entry box proposes the first name with the
+typed initial letters, if any.</span></p>
 
-<h2><a name="_Sort_Elements"></a><a name=sort></a><span lang=EN-US>Sort
-Elements</span></h2>
+<h2><a name="_Sort_Elements"></a><a name=sort></a><span lang=EN-US>Sort</span></h2>
 
 <p class=MsoNormal><span lang=EN-US>Sort the elements in the current active
 list box, either the <a href="LSD_faqs.html#object">Descending Objects</a> or
@@ -496,8 +495,8 @@ details).</span></p>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
-  none'>&#9650;Top</span></a></span></p>
+  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
+  text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -590,8 +589,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 lang=EN-US> This part of the Report Generation window is enabled if the </span><span
 class=Cdigo><span lang=EN-US>User section</span></span><span lang=EN-US>
 checkbox is selected (see above). It allows the user to add a user-defined
-section to the report, composed by the chosen title and the contents from a text
-file provided by the user.</span></p>
+section to the report, composed by the chosen title and the contents from a
+text file provided by the user.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Optionally, the user can reload a
 previously generated HTML model report, using the </span><span class=Cdigo><span
@@ -661,8 +660,8 @@ effort by mainly reusing the descriptions already included in the code.</span></
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
-  none'>&#9650;Top</span></a></span></p>
+  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
+  text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -724,8 +723,8 @@ that of the LSD model configurations.</span></p>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
-  none'>&#9650;Top</span></a></span></p>
+  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
+  text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>

@@ -24,16 +24,16 @@ w\:* {behavior:url(#default#VML);}
  <o:DocumentProperties>
   <o:Author>Marcelo Pereira</o:Author>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>20</o:Revision>
-  <o:TotalTime>2876</o:TotalTime>
+  <o:Revision>21</o:Revision>
+  <o:TotalTime>2878</o:TotalTime>
   <o:Created>2018-07-17T14:59:00Z</o:Created>
-  <o:LastSaved>2024-07-31T22:16:00Z</o:LastSaved>
+  <o:LastSaved>2025-01-16T21:08:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>7658</o:Words>
-  <o:Characters>41358</o:Characters>
+  <o:Words>7657</o:Words>
+  <o:Characters>41351</o:Characters>
   <o:Lines>344</o:Lines>
   <o:Paragraphs>97</o:Paragraphs>
-  <o:CharactersWithSpaces>48919</o:CharactersWithSpaces>
+  <o:CharactersWithSpaces>48911</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -41,9 +41,6 @@ w\:* {behavior:url(#default#VML);}
 <link rel=colorSchemeMapping href="LSD_web_arquivos/colorschememapping.xml">
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
-  <w:Zoom>120</w:Zoom>
-  <w:SpellingState>Clean</w:SpellingState>
-  <w:GrammarState>Clean</w:GrammarState>
   <w:TrackMoves>false</w:TrackMoves>
   <w:TrackFormatting/>
   <w:HyphenationZone>21</w:HyphenationZone>
@@ -1158,12 +1155,6 @@ span.Cdigo
 	mso-hansi-font-family:"Courier New";
 	mso-bidi-font-family:"Courier New";
 	color:gray;}
-span.SpellE
-	{mso-style-name:"";
-	mso-spl-e:yes;}
-span.GramE
-	{mso-style-name:"";
-	mso-gram-e:yes;}
 .MsoChpDefault
 	{mso-style-type:export-only;
 	mso-default-props:yes;
@@ -1409,10 +1400,10 @@ break-word'>
 Interface<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>The manual explains the
-configuration and the usage of the LSD web interface (LWI). LWI allows LSD models
-to be operated using a standard HTML web browser interface and to be available
-to users <span class=GramE>in</span> the open internet, without the need to
-install LSD in the users’ computers.<o:p></o:p></span></p>
+configuration and the usage of the LSD web interface (LWI). LWI allows LSD
+models to be operated using a standard HTML web browser interface and to be
+available to users in the open internet, without the need to install LSD in the
+users’ computers.<o:p></o:p></span></p>
 
 <h1><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
 mso-ansi-language:EN-US'>Table of contents <o:p></o:p></span></h1>
@@ -1482,24 +1473,22 @@ available in closed (intranet) or open (internet) networks. <o:p></o:p></span></
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>As a web interface to
 existing LSD models, LWI does not add new functionalities to them. However, it
-allows <span class=GramE>a simplified</span> access to LSD models to users
-which lack the technical knowledge to operate the full LSD interface, or use a
-platform (smartphone, tablet etc.) in which LSD is not available for
-installation. LWI can be integrated to any HTML-based <a
-href="#_Server_requirements">web server</a> platform. LWI, per se, does not
-provide accounts or persistent storage to users, which can be provided by the
-host web platform. <o:p></o:p></span></p>
+allows a simplified access to LSD models to users which lack the technical
+knowledge to operate the full LSD interface, or use a platform (smartphone, tablet
+etc.) in which LSD is not available for installation. LWI can be integrated to
+any HTML-based <a href="#_Server_requirements">web server</a> platform. LWI,
+per se, does not provide accounts or persistent storage to users, which can be
+provided by the host web platform. <o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>LWI is NOT installed by the
 LSD installer. So, after installing LSD, please download the source code at <a
 href="https://github.com/marcov64/LSD">https://github.com/marcov64/LSD</a> and
-copy the folder named </span><span class=SpellE><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> in the downloaded archive (.zip) to
-the same folder where you installed LSD, making sure the entire subfolder
-structure below </span><span class=SpellE><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>lwi</span></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> is copied.<o:p></o:p></span></p>
+copy the folder named </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>lwi</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> in the downloaded archive (.zip) to the same
+folder where you installed LSD, making sure the entire subfolder structure
+below </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> is copied.<o:p></o:p></span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
@@ -1526,18 +1515,17 @@ PHP server scripting. In principle any relatively recent Linux or Windows
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>This section of the manual
 is not intended to be a guide to unexperienced server operators, as a minimum
-knowledge of server administration is required. Some experience <span
-class=GramE>on</span> operating in the command line is also a pre-requisite.<o:p></o:p></span></p>
+knowledge of server administration is required. Some experience on operating in
+the command line is also a pre-requisite.<o:p></o:p></span></p>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>This section is organized <span
-class=GramE>in</span> three subsections. Initially, we describe the minimum
-hardware and software <a href="#_Server_requirements">requirements for the
-server</a> environment. The second subsection presents the detailed
-instructions to <a href="#_Server_setup">install and configure the server</a>.
-Next, the <a href="#_Apache_and_PHP">web software configuration</a> is
-explored. The fourth subsections <span class=GramE>details</span> the <a
-href="#_LWI_installation_and">LWI software installation</a>. Finally, the last section
-discusses some maintenance issues associated with the <a
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>This section is organized
+in three subsections. Initially, we describe the minimum hardware and software <a
+href="#_Server_requirements">requirements for the server</a> environment. The
+second subsection presents the detailed instructions to <a href="#_Server_setup">install
+and configure the server</a>. Next, the <a href="#_Apache_and_PHP">web software
+configuration</a> is explored. The fourth subsections details the <a
+href="#_LWI_installation_and">LWI software installation</a>. Finally, the last
+section discusses some maintenance issues associated with the <a
 href="#_Server_maintenance">operation of the LWI server</a>.<o:p></o:p></span></p>
 
 <h2><a name="_Server_requirements"></a><span lang=EN-US style='mso-fareast-font-family:
@@ -1546,14 +1534,13 @@ href="#_Server_maintenance">operation of the LWI server</a>.<o:p></o:p></span></
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>The LWI server must be able
 to efficiently execute a complex, computed intensive simulation process for
 each LWI user session actively running a simulation (an “executing session”).
-Each LWI <span class=GramE>executing</span> session must get sufficient server
-resources to produce an adequate experience to the end user. Such <span
-class=GramE>requirement</span> defines the specification of the hardware
-recommended for the server. On the software side, there are no strong
-requirements on the server configuration, being both Linux and (modern) Windows
-servers supported. Mac servers can be used only as a test platform but are not
-supported. No additional special/proprietary software is strictly required by
-LWI.<o:p></o:p></span></p>
+Each LWI executing session must get sufficient server resources to produce an
+adequate experience to the end user. Such requirement defines the specification
+of the hardware recommended for the server. On the software side, there are no
+strong requirements on the server configuration, being both Linux and (modern)
+Windows servers supported. Mac servers can be used only as a test platform but
+are not supported. No additional special/proprietary software is strictly
+required by LWI.<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>LWI can be operated on any
 modern server platform. The instructions below assume a 64-bit Intel/AMD server
@@ -1571,10 +1558,10 @@ Apache, please visit <a href="https://httpd.apache.org">https://httpd.apache.org
 <o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Additionally, the LWI
-requires support <span class=GramE>to</span> PHP version 7.4 (or newer), which
-is natively supported by both Apache and Microsoft IIS on Linux and Windows
-servers. For downloading the appropriate version of PHP, please visit <a
-href="http://php.net">http://php.net</a>. <o:p></o:p></span></p>
+requires support to PHP version 7.4 (or newer), which is natively supported by
+both Apache and Microsoft IIS on Linux and Windows servers. For downloading the
+appropriate version of PHP, please visit <a href="http://php.net">http://php.net</a>.
+<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>The LWI server typically
 operates on non-critical and non-sensitive data. On top of that, there is no
@@ -1591,9 +1578,9 @@ operating system is installed using the default installation options. The
 instructions require a server supporting a bash-like shell, typically any Linux
 distribution or a recent Microsoft Windows 10+ version with the Windows
 Subsystem for Linux (WSL) installed. In the instructions below Ubuntu 20.04 LTS
-and (now deprecated) CentOS 7.4 Linux servers are used as <span class=GramE>examples</span>
-but the installation steps can be adapted for installation on any server
-platform and distribution.<o:p></o:p></span></p>
+and (now deprecated) CentOS 7.4 Linux servers are used as examples but the
+installation steps can be adapted for installation on any server platform and
+distribution.<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>If a Linux server is
 selected, please install the server software following the appropriate
@@ -1608,9 +1595,8 @@ steps to setup using native mode are quite similar and easily adaptable and
 should be the preferred approach in most cases. A regular Windows 10 desktop
 (build 1709 or newer) may be used to deploy a test server (small capacity)
 following the same instructions. Please enable WSL <i>before</i> proceeding. To
-use <span class=GramE>WSL</span> you <span class=GramE>must yet</span> choose a
-Linux distribution. The examples assume using the Ubuntu 20.04 WSL
-distribution.<o:p></o:p></span></p>
+use WSL you must yet choose a Linux distribution. The examples assume using the
+Ubuntu 20.04 WSL distribution.<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Some macOS computers
 (version 10.13 to 11) may come bundled with pre-configured versions of Apache
@@ -1632,18 +1618,16 @@ configuration<o:p></o:p></span></h2>
 Windows Ubuntu WSL servers, install the required packages individually using
 the bash terminal:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> apt install apache2 <span class=SpellE>php</span>
-zip</span></span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo apt
+install apache2 php zip</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>On Linux CentOS, the
 installation command is:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> yum install httpd <span class=SpellE>php</span>
-zip</span></span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo yum
+install httpd php zip</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>macOS servers already come
 with the packages installed.<o:p></o:p></span></p>
@@ -1651,102 +1635,86 @@ with the packages installed.<o:p></o:p></span></p>
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Next (re)start the web
 server. On Linux Ubuntu and Windows Ubuntu WSL:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> service apache2 restart</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo
+service apache2 restart</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>On Linux CentOS:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> <span class=SpellE>systemctl</span> start <span
-class=SpellE><span class=GramE>httpd.service</span></span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo
+systemctl start httpd.service</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'><o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> <span class=SpellE>systemctl</span> enable <span
-class=SpellE><span class=GramE>httpd.service</span></span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo
+systemctl enable httpd.service</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'><o:p></o:p></span></p>
 
 <p><a name="_LWI_installation_and"></a><span lang=EN-US style='mso-ansi-language:
 EN-US'>On macOS (up to version 11 Big Sur):<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> <span class=SpellE>systemctl</span> start <span
-class=SpellE><span class=GramE>httpd.service</span></span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo
+systemctl start httpd.service</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'><o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> <span class=SpellE>systemctl</span> enable <span
-class=SpellE><span class=GramE>httpd.service</span></span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo
+systemctl enable httpd.service</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>On macOS (from version 12
 Monterey, UNSUPPORTED):<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> <span class=SpellE>launchctl</span> unload -w
-/System/Library/<span class=SpellE>LaunchDaemons</span>/<span class=SpellE>org.apache.httpd.plist</span><o:p></o:p></span></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo
+launchctl unload -w /System/Library/LaunchDaemons/org.apache.httpd.plist<o:p></o:p></span></span></p>
 
 <p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>brew
-install httpd <span class=SpellE>php</span><o:p></o:p></span></span></p>
+install httpd php<o:p></o:p></span></span></p>
 
 <p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>brew
 services start httpd<o:p></o:p></span></span></p>
 
 <h2><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-US'>LWI installation and configuration<o:p></o:p></span></h2>
+mso-ansi-language:EN-US'>LWI installation and configuration</span><span
+style='mso-fareast-font-family:"Times New Roman"'><o:p></o:p></span></h2>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>Now we must install LWI files
-<span class=GramE>in</span> the web server. LWI files are stored in a single
-subdirectory tree, inside the directory used by the HTTP server to host the
-website files. In the case of an Apache on Ubuntu distributions (Linux and
-Windows WSL) or CentOS configuration, the HTTP server directory for the website
-is </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/var/www</span></span><span
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>Now we must install LWI
+files in the web server. LWI files are stored in a single subdirectory tree,
+inside the directory used by the HTTP server to host the website files. In the
+case of an Apache on Ubuntu distributions (Linux and Windows WSL) or CentOS
+configuration, the HTTP server directory for the website is </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/var/www</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>. This location may be different
 according to the adopted combination of HTTP server and operating
 system/distribution.<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Each LWI installation
-supports a single <a href="LSD_faqs_arquivos#model">LSD model</a> under a
-unique baseline <a href="LSD_faqs_arquivos#simsetting">configuration</a> (see <a
+supports a single <a href="LSD_faqs.html#model">LSD model</a> under a unique
+baseline <a href="LSD_faqs.html#simsetting">configuration</a> (see <a
 href="#_Customizing_the_LWI">below</a>). If different models or configurations
 must be supported, it is necessary to configure multiple virtual web servers
 (in a single physical server), installing one independent LWI instance
-(different directory) for each virtual server. Please <span class=GramE>refer</span>
-Apache documentation on how to set up virtual web servers.<o:p></o:p></span></p>
+(different directory) for each virtual server. Please refer Apache
+documentation on how to set up virtual web servers.<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>To start, please copy the
 provided LWI subdirectory inside your LSD installation directory (normally at </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>~/LSD/<span
-class=SpellE>lwi</span></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'>) to the appropriate web server directory. On Ubuntu distributions
-(including Windows WSL) and CentOS use the following terminal command:<o:p></o:p></span></p>
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>~/LSD/lwi</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>) to the appropriate web server
+directory. On Ubuntu distributions (including Windows WSL) and CentOS use the
+following terminal command:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>cp</span> -R ~/LSD/<span class=SpellE>lwi</span> /var/<span
-class=SpellE>www</span>/</span></p>
+<p><span class=Cdigo>sudo cp -R ~/LSD/lwi /var/www/</span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>In macOS (up to version 11
 Big Sur):<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> cp -R ~/LSD/<span class=SpellE>lwi</span>
-/Library/<span class=SpellE>WebServer</span>/Documents/</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo cp
+-R ~/LSD/lwi /Library/WebServer/Documents/</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>In macOS (from version 12
 Monterey, UNSUPPORTED):<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo>cp</span></span><span class=Cdigo> -R
-~/LSD/<span class=SpellE>lwi</span> /<span class=SpellE>usr</span>/local/var/<span
-class=SpellE>www</span>/</span></p>
+<p><span class=Cdigo>cp -R ~/LSD/lwi /usr/local/var/www/</span></p>
 
 <p><span lang=EN-GB style='mso-ansi-language:EN-GB'>The structure of LWI
 subdirectory tree is the following:</span><span lang=EN-US style='mso-ansi-language:
@@ -1758,36 +1726,29 @@ src="image/lwi_files.png"></span><span lang=EN-US style='mso-ansi-language:
 EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>In </span><span
-class=SpellE><span class=GramE><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>lwi</span></span></span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> subdirectory are kept all PHP-only
 files (the ones not directly accessed by the user browser), including
-executable and configuration files. The </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/<span
-class=SpellE>tmp</span></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'> subdirectory holds session-related PHP server temporary files, deleted
-periodically (check the Maintenance section). The </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/<span
-class=SpellE>public_html</span></span></span><span lang=EN-US style='mso-ansi-language:
+executable and configuration files. The </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>lwi/tmp</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> subdirectory holds session-related
+PHP server temporary files, deleted periodically (check the Maintenance
+section). The </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>lwi/public_html</span></span><span lang=EN-US style='mso-ansi-language:
 EN-US'> subdirectory holds the files visible to the user browser. The </span><span
-class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/<span
-class=SpellE>public_html</span>/<span class=SpellE>tmp</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> subdirectory holds the session-related,
-temporary user files (downloaded/uploaded simulation configurations and
-simulation results), also deleted periodically. The user/group associated to
-the HTTP and the PHP server (</span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>www-data</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> in Ubuntu distributions, </span><span
-class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>apache</span></span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi/public_html/tmp</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> subdirectory holds the
+session-related, temporary user files (downloaded/uploaded simulation
+configurations and simulation results), also deleted periodically. The
+user/group associated to the HTTP and the PHP server (</span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>www-data</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> in Ubuntu distributions, </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>apache</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> in CentOS, etc.) must have
-read-access to the entire </span><span class=SpellE><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> subdirectory tree plus read-write
-access to <i>both</i> </span><span class=SpellE><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>tmp</span></span></span><span
+read-access to the entire </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>lwi</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> subdirectory tree plus read-write access to <i>both</i>
+</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>tmp</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> subdirectories (the default
 configuration).<o:p></o:p></span></p>
 
@@ -1796,58 +1757,31 @@ be set with all required file permissions/ownership for a typical setup.
 Usually, it is enough to adjust the ownership. For Ubuntu (including Windows
 WSL) use:</span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> <span class=SpellE>chown</span> -R <span
-class=SpellE>www-<span class=GramE>data:www</span>-data</span> /var/www/<span
-class=SpellE>lwi</span></span></span><span lang=EN-US style='font-family:"Courier New";
-color:gray;mso-ansi-language:EN-US'><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>chmod</span> <span class=SpellE>g+w</span> /var/www/<span
-class=SpellE>lwi</span>/<span class=SpellE>tmp</span></span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>chmod</span> <span class=SpellE>g+w</span> /var/www/<span
-class=SpellE>lwi</span>/<span class=SpellE>public_html</span>/<span
-class=SpellE>tmp</span><o:p></o:p></span></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo
+chown -R www-data:www-data /var/www/lwi</span></span><span lang=EN-US
+style='font-family:"Courier New";color:gray;mso-ansi-language:EN-US'><br>
+<span class=Cdigo>sudo chmod g+w /var/www/lwi/tmp</span><br>
+<span class=Cdigo>sudo chmod g+w /var/www/lwi/public_html/tmp<o:p></o:p></span></span></p>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>For CentOS, because of <span
-class=SpellE>SELinux</span>, a longer setup is required: <o:p></o:p></span></p>
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>For CentOS, because of
+SELinux, a longer setup is required: <o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> <span class=SpellE>chown</span> -R <span
-class=SpellE>apache:apache</span> /var/www/<span class=SpellE>lwi</span></span></span><span
-lang=EN-US style='font-family:"Courier New";color:gray;mso-ansi-language:EN-US'><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>chmod</span> <span class=SpellE>g+w</span> /var/www/<span
-class=SpellE>lwi</span>/<span class=SpellE>tmp</span></span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>chmod</span> <span class=SpellE>g+w</span> /var/www/<span
-class=SpellE>lwi</span>/<span class=SpellE>public_html</span>/<span
-class=SpellE>tmp</span></span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>semanage</span> <span class=SpellE>fcontext</span> -a -t <span
-class=SpellE>httpd_sys_content_t</span> &quot;/var/www/<span class=SpellE>lwi</span>(/.*)?&quot;</span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>semanage</span> <span class=SpellE>fcontext</span> -a -t <span
-class=SpellE>httpd_sys_rw_content_t</span> &quot;/var/www/<span class=SpellE>lwi</span>/<span
-class=SpellE>tmp</span>(/.*)?&quot;</span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>semanage</span> <span class=SpellE>fcontext</span> -a -t <span
-class=SpellE>httpd_sys_rw_content_t</span> &quot;/var/www/<span class=SpellE>lwi</span>/<span
-class=SpellE>public_html</span>/<span class=SpellE>tmp</span>(/.*)?&quot;</span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>restorecon</span> -F -R -v /var/www/<span class=SpellE>lwi</span></span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>setsebool</span> -P <span class=SpellE>httpd_builtin_scripting</span>
-on</span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>setsebool</span> -P <span class=SpellE>httpd_can_sendmail</span>
-on</span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>setsebool</span> -P <span class=SpellE>httpd_execmem</span> on</span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>setsebool</span> -P <span class=SpellE>httpd_ssi_exec</span> on</span></span><span
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo
+chown -R apache:apache /var/www/lwi</span></span><span lang=EN-US
+style='font-family:"Courier New";color:gray;mso-ansi-language:EN-US'><br>
+<span class=Cdigo>sudo chmod g+w /var/www/lwi/tmp</span><br>
+<span class=Cdigo>sudo chmod g+w /var/www/lwi/public_html/tmp</span><br>
+<span class=Cdigo>sudo semanage fcontext -a -t httpd_sys_content_t
+&quot;/var/www/lwi(/.*)?&quot;</span><br>
+<span class=Cdigo>sudo semanage fcontext -a -t httpd_sys_rw_content_t
+&quot;/var/www/lwi/tmp(/.*)?&quot;</span><br>
+<span class=Cdigo>sudo semanage fcontext -a -t httpd_sys_rw_content_t
+&quot;/var/www/lwi/public_html/tmp(/.*)?&quot;</span><br>
+<span class=Cdigo>sudo restorecon -F -R -v /var/www/lwi</span><br>
+<span class=Cdigo>sudo setsebool -P httpd_builtin_scripting on</span><br>
+<span class=Cdigo>sudo setsebool -P httpd_can_sendmail on</span><br>
+<span class=Cdigo>sudo setsebool -P httpd_execmem on</span><br>
+<span class=Cdigo>sudo setsebool -P httpd_ssi_exec on</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-GB style='mso-ansi-language:EN-GB'>For macOS</span><span
@@ -1855,27 +1789,15 @@ lang=EN-US style='mso-ansi-language:EN-US'> (up to version 11 Big Sur)</span><sp
 lang=EN-GB style='mso-ansi-language:EN-GB'>:</span><span lang=EN-US
 style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-GB style='mso-ansi-language:
-EN-GB'>sudo</span></span></span><span class=Cdigo><span lang=EN-GB
-style='mso-ansi-language:EN-GB'> <span class=SpellE>chown</span> -R _<span
-class=SpellE><span class=GramE>www:_</span>www</span> /Library/<span
-class=SpellE>WebServer</span>/Documents/<span class=SpellE>lwi</span></span></span><span
+<p><span class=Cdigo><span lang=EN-GB style='mso-ansi-language:EN-GB'>sudo
+chown -R _www:_www /Library/WebServer/Documents/lwi</span></span><span
 lang=EN-GB style='font-family:"Courier New";color:gray;mso-ansi-language:EN-GB'><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>chmod</span> <span class=SpellE>g+w</span> /Library/<span
-class=SpellE>WebServer</span>/Documents/<span class=SpellE>lwi</span>/<span
-class=SpellE>tmp</span></span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>chmod</span> <span class=SpellE>g+w</span> /Library/<span
-class=SpellE>WebServer</span>/Documents/<span class=SpellE>lwi</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/<span
-class=SpellE>public_html</span></span></span><span class=Cdigo><span
-lang=EN-GB style='mso-ansi-language:EN-GB'>/<span class=SpellE>tmp</span></span></span><span
+<span class=Cdigo>sudo chmod g+w /Library/WebServer/Documents/lwi/tmp</span><br>
+<span class=Cdigo>sudo chmod g+w /Library/WebServer/Documents/lwi</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/public_html</span></span><span
+class=Cdigo><span lang=EN-GB style='mso-ansi-language:EN-GB'>/tmp</span></span><span
 lang=EN-GB style='font-family:"Courier New";color:gray;mso-ansi-language:EN-GB'><br>
-<span class=SpellE>sudo</span> <span class=SpellE>xattr</span> -<span
-class=SpellE>rd</span> <span class=SpellE>com.apple.quarantine</span> <span
-class=Cdigo>/Library/<span class=SpellE>WebServer</span>/Documents</span>/<span
-class=SpellE>lwi</span>/*OSX<o:p></o:p></span></p>
+sudo xattr -rd com.apple.quarantine <span class=Cdigo>/Library/WebServer/Documents</span>/lwi/*OSX<o:p></o:p></span></p>
 
 <p><span lang=EN-GB style='mso-ansi-language:EN-GB'>For macOS</span><span
 lang=EN-US style='mso-ansi-language:EN-US'> (from version 12 Monterey,
@@ -1885,74 +1807,55 @@ style='mso-ansi-language:EN-US'> by your short user ID</span><span lang=EN-GB
 style='mso-ansi-language:EN-GB'>:</span><span lang=EN-US style='mso-ansi-language:
 EN-US'><o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-GB style='mso-ansi-language:
-EN-GB'>chown</span></span></span><span class=Cdigo><span lang=EN-GB
-style='mso-ansi-language:EN-GB'> -R [YOURID<span class=GramE>]:admin</span> </span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/<span
-class=SpellE>usr</span>/local/var/www/</span></span><span class=SpellE><span
-class=Cdigo><span lang=EN-GB style='mso-ansi-language:EN-GB'>lwi</span></span></span><span
+<p><span class=Cdigo><span lang=EN-GB style='mso-ansi-language:EN-GB'>chown -R
+[YOURID]:admin </span></span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>/usr/local/var/www/</span></span><span
+class=Cdigo><span lang=EN-GB style='mso-ansi-language:EN-GB'>lwi</span></span><span
 lang=EN-GB style='font-family:"Courier New";color:gray;mso-ansi-language:EN-GB'><br>
-<span class=SpellE><span class=Cdigo>chmod</span></span><span class=Cdigo> <span
-class=SpellE>g+w</span> </span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>/<span class=SpellE>usr</span>/local/var/www/</span></span><span
-class=SpellE><span class=Cdigo><span lang=EN-GB style='mso-ansi-language:EN-GB'>lwi</span></span></span><span
-class=Cdigo><span lang=EN-GB style='mso-ansi-language:EN-GB'>/<span
-class=SpellE>tmp</span></span></span><span lang=EN-GB style='font-family:"Courier New";
-color:gray;mso-ansi-language:EN-GB'><br>
-<span class=SpellE><span class=Cdigo>chmod</span></span><span class=Cdigo> <span
-class=SpellE>g+w</span> </span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>/<span class=SpellE>usr</span>/local/var/www/</span></span><span
-class=SpellE><span class=Cdigo><span lang=EN-GB style='mso-ansi-language:EN-GB'>lwi</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/<span
-class=SpellE>public_html</span></span></span><span class=Cdigo><span
-lang=EN-GB style='mso-ansi-language:EN-GB'>/<span class=SpellE>tmp</span></span></span><span
+<span class=Cdigo>chmod g+w </span></span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>/usr/local/var/www/</span></span><span
+class=Cdigo><span lang=EN-GB style='mso-ansi-language:EN-GB'>lwi/tmp</span></span><span
 lang=EN-GB style='font-family:"Courier New";color:gray;mso-ansi-language:EN-GB'><br>
-<span class=SpellE>xattr</span> -<span class=SpellE>rd</span> <span
-class=SpellE>com.apple.quarantine</span> </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>/<span class=SpellE>usr</span>/local/var/www/</span></span><span
-class=SpellE><span lang=EN-GB style='font-family:"Courier New";color:gray;
-mso-ansi-language:EN-GB'>lwi</span></span><span lang=EN-GB style='font-family:
-"Courier New";color:gray;mso-ansi-language:EN-GB'>/*OSX<o:p></o:p></span></p>
+<span class=Cdigo>chmod g+w </span></span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>/usr/local/var/www/</span></span><span
+class=Cdigo><span lang=EN-GB style='mso-ansi-language:EN-GB'>lwi</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/public_html</span></span><span
+class=Cdigo><span lang=EN-GB style='mso-ansi-language:EN-GB'>/tmp</span></span><span
+lang=EN-GB style='font-family:"Courier New";color:gray;mso-ansi-language:EN-GB'><br>
+xattr -rd com.apple.quarantine </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>/usr/local/var/www/</span></span><span
+lang=EN-GB style='font-family:"Courier New";color:gray;mso-ansi-language:EN-GB'>lwi/*OSX<o:p></o:p></span></p>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>It is now necessary to configure
-the Apache web server to use LWI as the web entry point (virtual web server).
-Use the following commands to adjust the entry point in Ubuntu Linux and
-Windows WSL servers (replace </span><span class=Cdigo><span lang=EN-US
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>It is now necessary to
+configure the Apache web server to use LWI as the web entry point (virtual web
+server). Use the following commands to adjust the entry point in Ubuntu Linux
+and Windows WSL servers (replace </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>000-default</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> by the name of your configuration, if changed
 from the installation default): <o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> cp /var/www/<span class=SpellE>lwi</span>/<span
-class=SpellE>lwi.conf</span> /<span class=SpellE>etc</span>/apache2/sites-available</span></span><span
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo cp
+/var/www/lwi/lwi.conf /etc/apache2/sites-available</span></span><span
 lang=EN-US style='font-family:"Courier New";color:gray;mso-ansi-language:EN-US'><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo>
-a2dissite 000-default</span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo>
-a2ensite <span class=SpellE>lwi</span></span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo>
-service apache2 reload</span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'><o:p></o:p></span></p>
+<span class=Cdigo>sudo a2dissite 000-default</span><br>
+<span class=Cdigo>sudo a2ensite lwi</span><br>
+<span class=Cdigo>sudo service apache2 reload</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>For CentOS, the command is:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> bash -c 'cat /var/www/<span class=SpellE>lwi</span>/<span
-class=SpellE>vhost.conf</span> &gt;&gt; /<span class=SpellE>etc</span>/httpd/<span
-class=SpellE>conf.d</span>/<span class=SpellE>vhost.conf</span>'</span></span><span
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo bash
+-c 'cat /var/www/lwi/vhost.conf &gt;&gt; /etc/httpd/conf.d/vhost.conf'</span></span><span
 lang=EN-US style='font-family:"Courier New";color:gray;mso-ansi-language:EN-US'><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> <span
-class=SpellE>systemctl</span> restart <span class=SpellE><span class=GramE>httpd.service</span></span></span></span><span
+<span class=Cdigo>sudo systemctl restart httpd.service</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>If you have a more complex
 server setup (more than one virtual web server in a single domain, for
-instance), you may need to adjust the files </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi.conf</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> or </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>vhost.conf</span></span></span><span
+instance), you may need to adjust the files </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>lwi.conf</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> or </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>vhost.conf</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> to your needs.<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>In macOS the setup is more
@@ -1967,9 +1870,9 @@ lang=EN-US style='mso-ansi-language:EN-US'> up to version 11 (Big Sur)</span><sp
 lang=EN-GB style='mso-ansi-language:EN-GB'>:</span><span lang=EN-US
 style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
-<p><span class=Cdigo><span lang=IT style='mso-ansi-language:IT'>sudo nano /<span
-class=SpellE>etc</span>/apache2/<span class=SpellE>httpd.conf</span></span></span><span
-lang=IT style='mso-ansi-language:IT'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=IT style='mso-ansi-language:IT'>sudo nano
+/etc/apache2/httpd.conf</span></span><span lang=IT style='mso-ansi-language:
+IT'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>In </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>nano</span></span><span
@@ -1987,26 +1890,22 @@ class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>nano</span></span><
 lang=EN-US style='mso-ansi-language:EN-US'>, search (</span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>CTRL+W</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) for the line containing </span><span
-class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>DocumentRoot</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'> &quot;/Library/<span
-class=SpellE>WebServer</span>/Documents&quot;</span></span><span lang=EN-US
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>DocumentRoot
+&quot;/Library/WebServer/Documents&quot;</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> (or another path) and replace it with:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>DocumentRoot</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> &quot;/Library/<span class=SpellE>WebServer</span>/Documents/<span
-class=SpellE>lwi</span>/<span class=SpellE>public_html</span>&quot;</span></span><span
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>DocumentRoot
+&quot;/Library/WebServer/Documents/lwi/public_html&quot;</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Now find the line
 containing </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>&lt;Directory &quot;/Library/<span class=SpellE>WebServer</span>/Documents&quot;&gt;</span></span><span
+EN-US'>&lt;Directory &quot;/Library/WebServer/Documents&quot;&gt;</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> (or another path, should be below
 the previous one) and replace it by:<o:p></o:p></span></p>
 
 <p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>&lt;Directory
-&quot;/Library/<span class=SpellE>WebServer</span>/Documents/<span
-class=SpellE>lwi</span>/<span class=SpellE>public_html</span>&quot;&gt;</span></span><span
+&quot;/Library/WebServer/Documents/lwi/public_html&quot;&gt;</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Close </span><span
@@ -2020,20 +1919,17 @@ style='mso-ansi-language:EN-US'>ENTER</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>). Finally, restart the webserver so the new
 configuration is used:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> <span class=SpellE>apachectl</span> restart</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo
+apachectl restart</span></span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-GB style='mso-ansi-language:EN-GB'>In macOS</span><span
 lang=EN-US style='mso-ansi-language:EN-US'> from version 12 (Monterey,
 UNSUPPORTED)</span><span lang=EN-GB style='mso-ansi-language:EN-GB'>:</span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
-<p><span class=Cdigo><span lang=IT style='mso-ansi-language:IT'>nano /<span
-class=SpellE>usr</span>/<span class=SpellE>local</span>/<span class=SpellE>etc</span>/<span
-class=SpellE>httpd</span>/<span class=SpellE>httpd.conf</span></span></span><span
-lang=IT style='mso-ansi-language:IT'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=IT style='mso-ansi-language:IT'>nano
+/usr/local/etc/httpd/httpd.conf</span></span><span lang=IT style='mso-ansi-language:
+IT'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>In </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>nano</span></span><span
@@ -2050,15 +1946,12 @@ class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>nano</span></span><
 lang=EN-US style='mso-ansi-language:EN-US'>, search (</span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>CTRL+W</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) for the line starting with </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'># <span
-class=SpellE>LoadModule</span> <span class=SpellE>foo_module</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>. Below it, add the following new
-line:<o:p></o:p></span></p>
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'># LoadModule
+foo_module</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>.
+Below it, add the following new line:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>LoadModule</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> <span class=SpellE>php_module</span>
-/usr/local/opt/php/lib/httpd/modules/libphp.so<o:p></o:p></span></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>LoadModule
+php_module /usr/local/opt/php/lib/httpd/modules/libphp.so<o:p></o:p></span></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Next, in </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>nano</span></span><span
@@ -2076,46 +1969,39 @@ color:gray;mso-ansi-language:EN-US'><br>
 <span class=Cdigo>Group admin<o:p></o:p></span></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Now, search for the line
-containing </span><span class=SpellE><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>DocumentRoot</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'> &quot;</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>/<span class=SpellE>usr</span>/local/var/www&quot;</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> (or another path) and replace it
-with:<o:p></o:p></span></p>
+containing </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>DocumentRoot &quot;</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'> </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>/usr/local/var/www&quot;</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'> (or another path) and replace it with:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>DocumentRoot</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> &quot;</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>/<span class=SpellE>usr</span>/local/var/www/<span
-class=SpellE>lwi</span>/<span class=SpellE>public_html</span>&quot;</span></span><span
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>DocumentRoot
+&quot;</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/usr/local/var/www/lwi/public_html&quot;</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Next, find the line
 containing </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>&lt;Directory &quot;/<span class=SpellE>usr</span>/local/var/www&quot;&gt;</span></span><span
+EN-US'>&lt;Directory &quot;/usr/local/var/www&quot;&gt;</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> (or another path, should be below
 the previous one) and replace it by:<o:p></o:p></span></p>
 
 <p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>&lt;Directory
 &quot;</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/<span
-class=SpellE>usr</span>/local/var/www/<span class=SpellE>lwi</span>/<span
-class=SpellE>public_html</span>&quot;&gt;</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/usr/local/var/www/lwi/public_html&quot;&gt;</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Finally, at the end of the </span><span
-class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>httpd.conf</span></span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>httpd.conf</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> file add the lines:<o:p></o:p></span></p>
 
-<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>&lt;<span
-class=SpellE>FilesMatch</span> .<span class=SpellE>php</span>&gt;</span></span><span
-lang=EN-US style='font-family:"Courier New";color:gray;mso-ansi-language:EN-US'><br>
-<span class=Cdigo><span style='mso-spacerun:yes'>    </span><span class=SpellE>SetHandler</span>
-application/x-httpd-<span class=SpellE>php</span></span><br>
-<span class=Cdigo>&lt;/<span class=SpellE>FilesMatch</span>&gt;</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>&lt;FilesMatch
+.php&gt;</span></span><span lang=EN-US style='font-family:"Courier New";
+color:gray;mso-ansi-language:EN-US'><br>
+<span class=Cdigo><span style='mso-spacerun:yes'>    </span>SetHandler
+application/x-httpd-php</span><br>
+<span class=Cdigo>&lt;/FilesMatch&gt;</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Close </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>nano</span></span><span
@@ -2137,19 +2023,17 @@ LWI server should be up and running now. You can test it using a browser in the
 same machine using the address </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>http://localhost</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>. You can also access the server from other
-machines connected <span class=GramE>in</span> the same local network by using
-the server IP address (or the DNS name, if you have one assigned). To get the
-server IP address(es), type the command:<o:p></o:p></span></p>
+machines connected in the same local network by using the server IP address (or
+the DNS name, if you have one assigned). To get the server IP address(es), type
+the command:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>ifconfig</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> | grep &quot;<span class=SpellE>inet</span> <span
-class=SpellE>addr</span>&quot;</span></span><span lang=EN-US style='mso-ansi-language:
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>ifconfig
+| grep &quot;inet addr&quot;</span></span><span lang=EN-US style='mso-ansi-language:
 EN-US'><o:p></o:p></span></p>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>You can then access the <span
-class=GramE>server</span> typing (one of) the IP addresses in your browser (as
-in </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>http://192.168.1.152</span></span><span
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>You can then access the
+server typing (one of) the IP addresses in your browser (as in </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>http://192.168.1.152</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, for example) in any machine
 connected in the same local network.<o:p></o:p></span></p>
 
@@ -2161,12 +2045,11 @@ be used.<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>LWI offers a link for the
 users to post messages to the site administrator. To enable this functionality
-in a Linux environment, the </span><span class=SpellE><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>sendmail</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> package (or a more recent
-equivalent, like </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>postfix</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>)
-must be configured in the server.<o:p></o:p></span></p>
+in a Linux environment, the </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>sendmail</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> package (or a more recent equivalent, like </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>postfix</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>) must be configured in the server.<o:p></o:p></span></p>
 
 <h2><a name="_Server_maintenance"></a><span lang=EN-US style='mso-fareast-font-family:
 "Times New Roman";mso-ansi-language:EN-US'>Server maintenance<o:p></o:p></span></h2>
@@ -2177,19 +2060,17 @@ discussed below, for all maintenance tasks on the LWI server, like backups,
 software updating, security audits, storage clean-up etc., please follow the
 usual (basic) standard web server guidelines.<o:p></o:p></span></p>
 
-<p><span lang=EN-US style='mso-ansi-language:EN-US'>The only special maintenance
-task in a LWI server is to manage temporary storage utilization. This is
-important as, per the default LWI installation, over time the server may
-accumulate temporary files from the user sessions. If nothing is done, the
+<p><span lang=EN-US style='mso-ansi-language:EN-US'>The only special
+maintenance task in a LWI server is to manage temporary storage utilization.
+This is important as, per the default LWI installation, over time the server
+may accumulate temporary files from the user sessions. If nothing is done, the
 server may eventually run out of storage space, even if at a slow pace. The LWI
 server accumulates temporary files in just two subdirectories:<o:p></o:p></span></p>
 
-<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/var/www/<span
-class=SpellE>lwi</span>/<span class=SpellE>tmp</span></span></span><span
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/var/www/lwi/tmp</span></span><span
 lang=EN-US style='font-family:"Courier New";color:gray;mso-ansi-language:EN-US'><br>
-<span class=Cdigo>/var/www/<span class=SpellE>lwi</span>/<span class=SpellE>public_html</span>/<span
-class=SpellE>tmp</span></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'><o:p></o:p></span></p>
+<span class=Cdigo>/var/www/lwi/public_html/tmp</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Those are paths on an
 Apache on Ubuntu or CentOS setup. For other configurations please replace </span><span
@@ -2202,20 +2083,17 @@ retrieved by the users after that. As PHP sessions are usually configured to
 last less than 24 hours (the default is 24 minutes), it is recommended that
 files older than 2 days to be permanently deleted. In most Linux
 configurations, the temporary file clean up can be performed automatically
-using a </span><span class=SpellE><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>cron</span></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> job. Of course, other similar tools can be
-used, <span class=GramE>in</span> any platform. To configure a </span><span
-class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>cron</span></span></span><span
+using a </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>cron</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> job.
+Of course, other similar tools can be used, in any platform. To configure a </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>cron</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> job, please first create the
-following script file in the server and name it </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>-cleanup</span></span><span
+following script file in the server and name it </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>lwi-cleanup</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>:<o:p></o:p></span></p>
 
-<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>nano <span
-class=SpellE>lwi</span>-cleanup</span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>nano
+lwi-cleanup</span></span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Enter the following lines
 and save the file in </span><span class=Cdigo><span lang=EN-US
@@ -2228,38 +2106,28 @@ style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>ENTER</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>):<o:p></o:p></span></p>
 
-<p><span class=GramE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>#!/</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>bin/sh</span></span><span lang=EN-US
-style='font-family:"Courier New";color:gray;mso-ansi-language:EN-US'><br>
-<span class=Cdigo>find /var/www/<span class=SpellE>lwi</span>/<span
-class=SpellE>tmp</span> /var/www/<span class=SpellE>lwi</span>/<span
-class=SpellE>public_html</span>/<span class=SpellE>tmp</span> -type f -<span
-class=SpellE>mtime</span> +2 -delete</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>#!/bin/sh</span></span><span
+lang=EN-US style='font-family:"Courier New";color:gray;mso-ansi-language:EN-US'><br>
+<span class=Cdigo>find /var/www/lwi/tmp /var/www/lwi/public_html/tmp -type f
+-mtime +2 -delete</span></span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Please adjust the directory
-paths to your <span class=GramE>particular configuration</span>, if needed.<o:p></o:p></span></p>
+paths to your particular configuration, if needed.<o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Then, make the script file
 executable using:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>chmod</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> <span class=SpellE>a+x</span> <span
-class=SpellE>lwi</span>-cleanup</span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>chmod a+x
+lwi-cleanup</span></span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>Finally, copy the script
-file to the </span><span class=SpellE><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>cron</span></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> daily directory:<o:p></o:p></span></p>
+file to the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>cron</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+daily directory:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> cp <span class=SpellE>lwi</span>-cleanup /<span
-class=SpellE>etc</span>/<span class=SpellE>cron.daily</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo cp
+lwi-cleanup /etc/cron.daily</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'><o:p></o:p></span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
@@ -2313,14 +2181,14 @@ model executable<o:p></o:p></span></h2>
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The first
 step is to produce a terminal version of the <a
 href="LSD_faqs.html#modelprogram">LSD model program</a>. This is an executable
-file named </span><span class=SpellE><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>lsd_term</span></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> (plus a </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>.exe</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> extension in Windows, or an </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>x</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> attribute in Linux/macOS) which
-will be invoked by the <a href="#install">LWI server</a> every time a LWI user <a
+file named </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>lsd_term</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+(plus a </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>.exe</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+extension in Windows, or an </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>x</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> attribute in Linux/macOS) which will be
+invoked by the <a href="#install">LWI server</a> every time a LWI user <a
 href="#_Execution_section">starts a simulation</a>. The terminal model program
 can be generated in <a href="LMM.html">LMM</a>, by using the menu command </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
@@ -2328,11 +2196,11 @@ href="LMM.html#nowindow">Model&gt;Create Terminal Executable</a></span></span><s
 lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Please note
-that the model program must be generated <span class=GramE>in</span> a computer
-using the same operating system version as the LWI server (or in the server
-itself). If this is not possible (e.g., it is a headless server), it is
-possible to compile the terminal model program using a terminal session in the
-server, see the instructions <a href="LMM.html#nowindow">here</a>.<o:p></o:p></span></p>
+that the model program must be generated in a computer using the same operating
+system version as the LWI server (or in the server itself). If this is not
+possible (e.g., it is a headless server), it is possible to compile the
+terminal model program using a terminal session in the server, see the
+instructions <a href="LMM.html#nowindow">here</a>.<o:p></o:p></span></p>
 
 <h2><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
 mso-ansi-language:EN-US'>Selecting the Parameters and Variables to configure<o:p></o:p></span></h2>
@@ -2341,15 +2209,15 @@ mso-ansi-language:EN-US'>Selecting the Parameters and Variables to configure<o:p
 step of making a <a href="LSD_faqs.html#model">LSD simulation model</a>
 available for use with LWI is to create a baseline <a
 href="LSD_faqs.html#modelsetting">configuration file</a> (</span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.<span
-class=SpellE>lsd</span></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'> extension) and a limits-selection <a href="LSD_faqs.html#sa">sensitivity
-analysis</a> file (</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>.<span class=SpellE>sa</span></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> extension) using the <a href="browser.html">LSD
-Browser</a>. The baseline configuration and the selection files are
-automatically loaded whenever a LWI user <a href="#_Why_LSD?">starts a session</a>
-or <a href="#_Configuration_page">reset it to the defaults</a>. <o:p></o:p></span></p>
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.lsd</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> extension) and a limits-selection <a
+href="LSD_faqs.html#sa">sensitivity analysis</a> file (</span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.sa</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> extension) using the <a
+href="browser.html">LSD Browser</a>. The baseline configuration and the
+selection files are automatically loaded whenever a LWI user <a
+href="#_Why_LSD?">starts a session</a> or <a href="#_Configuration_page">reset
+it to the defaults</a>. <o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The <a
 href="LSD_faqs.html#parameter">Parameters</a> and <a
@@ -2360,13 +2228,12 @@ lang=EN-US style='mso-ansi-language:EN-US'>lwi.sa</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) using the <a href="browser.html">LSD
 Browser</a>. Parameters and lagged Variables not included in this file are not
 presented to the user and always assume the values defined in the baseline
-configuration (</span><span class=SpellE><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>lwi.lsd</span></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>).<o:p></o:p></span></p>
+configuration (</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>lwi.lsd</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>).<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>To create
 the sensitivity analysis file, first make sure the baseline configuration (</span><span
-class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi.lsd</span></span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi.lsd</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) is loaded in the LSD Browser using
 the menu command </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'><a href="menufile.html#load">File&gt;Load</a></span></span><span
@@ -2404,8 +2271,8 @@ style='mso-ansi-language:EN-US'>Please ensure that the chosen configuration is
 robust to multiple simulation runs, using different <a
 href="menurun.html#simsetting">random number generator seeds</a>, to avoid the <a
 href="#_LSD_web_interface">LWI user sessions</a> to crash. Save your
-configuration file in the LSD Browser with the name </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi.lsd</span></span></span><span
+configuration file in the LSD Browser with the name </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>lwi.lsd</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>. using the menu command </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
 href="menufile.html#save">File&gt;Save As</a></span></span><span lang=EN-US
@@ -2415,25 +2282,24 @@ lang=EN-US style='mso-ansi-language:EN-US'> with menu </span><span class=Cdigo><
 href="menufile.html#sa"><span lang=EN-US style='mso-ansi-language:EN-US'>File&gt;Save
 Sensitivity</span></a></span><span lang=EN-US style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Other than the
-regular model parameters, it may be useful to set specific limits and
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Other than
+the regular model parameters, it may be useful to set specific limits and
 description to the <a href="LSD_faqs.html#modelsetting">simulation settings</a>.
-This may be accomplished by adding to </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi.lsd</span></span></span><span
+This may be accomplished by adding to </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>lwi.lsd</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> and </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>lwi.sa</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> up to three (integer)
 meta-parameters. They are: </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>_<span class=SpellE>timeSteps</span>_</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>, the number of simulation time
-steps, </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>_<span
-class=SpellE>numRuns</span>_</span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'>, the number of <span class=GramE>simulation</span> runs, and </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>_<span
-class=SpellE>rndSeed</span>_</span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'>, the (initial) seed to the pseudorandom number generator. If defined,
-the values for these meta-parameters replace the configured and default ones,
-including the lower-upper limits and descriptions.<o:p></o:p></span></p>
+style='mso-ansi-language:EN-US'>_timeSteps_</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>, the number of simulation time steps, </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>_numRuns_</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>, the number of simulation runs, and
+</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>_rndSeed_</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>, the (initial) seed to the
+pseudorandom number generator. If defined, the values for these meta-parameters
+replace the configured and default ones, including the lower-upper limits and
+descriptions.<o:p></o:p></span></p>
 
 <h2><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
 mso-ansi-language:EN-US'>Defining the Variables to present as results<o:p></o:p></span></h2>
@@ -2441,13 +2307,13 @@ mso-ansi-language:EN-US'>Defining the Variables to present as results<o:p></o:p>
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The <a
 href="LSD_faqs.html#variable">Variables</a>’ time series which will be
 presented to the LWI users must be set to be saved in the </span><span
-class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi.lsd</span></span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi.lsd</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> <a href="LSD_faqs.html#modelsetting">configuration
-file</a>. <span class=SpellE>All time</span> series regularly marked to be
-saved in the <a href="browser.html">LSD Browser</a> are made available to the
-users. Select the desired Variable in the <a href="browser.html#variables">LSD
-Browser list box</a> and use the menu command </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'><a href="browser.html#changeelement">Model&gt;Change
+file</a>. All time series regularly marked to be saved in the <a
+href="browser.html">LSD Browser</a> are made available to the users. Select the
+desired Variable in the <a href="browser.html#variables">LSD Browser list box</a>
+and use the menu command </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'><a href="browser.html#changeelement">Model&gt;Change
 Element</a></span></span><span lang=EN-US style='mso-ansi-language:EN-US'> to
 select the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
 EN-US'>Save</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
@@ -2455,8 +2321,8 @@ checkbox in the Change Element window.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>After
 selecting all Variables to be saved and presented to the LWI users, save the
-baseline configuration under the name </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi.lsd</span></span></span><span
+baseline configuration under the name </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>lwi.lsd</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> using the LSD Browser command </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'><a
 href="menufile.html#save">File&gt;Save As</a></span></span><span lang=EN-US
@@ -2466,13 +2332,12 @@ style='mso-ansi-language:EN-US'>.<o:p></o:p></span></p>
 EN-US'>Installing the new LWI configuration<o:p></o:p></span></h2>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>When all
-the required configuration files are ready (</span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi.lsd</span></span></span><span
+the required configuration files are ready (</span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>lwi.lsd</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>lwi.sa</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> and </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lsd_term</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>[.exe]</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> and </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>lsd_term[.exe]</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) in the <a
 href="LSD_faqs.html#modelhome">model home directory</a>, copy them to the base
 subdirectory of LWI in the server. For Ubuntu, Windows/WSL and CentOS, use the
@@ -2480,56 +2345,43 @@ following terminal commands (see <a href="#_LWI_installation_and">above</a> for
 details on the server directory structure):<o:p></o:p></span></p>
 
 <p class=MsoNormal><a name="_Selecting_the_Parameters"></a><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>cd ~/<span class=SpellE>Lsd</span>/Work/[YOUR_MODEL_PATH]</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>cd ~/Lsd/Work/[YOUR_MODEL_PATH]</span></span><span
 lang=EN-US style='font-family:"Courier New";color:gray;mso-ansi-language:EN-US'><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> cp <span
-class=SpellE>lwi.lsd</span> /var/www/<span class=SpellE>lwi</span>/</span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> cp
-lwi.sa /var/www/<span class=SpellE>lwi</span>/</span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> cp <span
-class=SpellE>lsd_term</span> /var/www/<span class=SpellE>lwi</span>/<o:p></o:p></span></span></p>
+<span class=Cdigo>sudo cp lwi.lsd /var/www/lwi/</span><br>
+<span class=Cdigo>sudo cp lwi.sa /var/www/lwi/</span><br>
+<span class=Cdigo>sudo cp lsd_term /var/www/lwi/<o:p></o:p></span></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>In macOS,
-the generated executable file (</span><span class=SpellE><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>lsd_term</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>) must also be renamed to </span><span
-class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lsd_termOSX</span></span></span><span
+the generated executable file (</span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>lsd_term</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>) must also be renamed to </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lsd_termOSX</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> during the installation:<o:p></o:p></span></p>
 
 <p class=MsoNormal><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>cd ~/<span class=SpellE>Lsd</span>/Work/[YOUR_MODEL_PATH]</span></span><span
-lang=EN-US style='font-family:"Courier New";color:gray;mso-ansi-language:EN-US'><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> cp <span
-class=SpellE>lwi.lsd</span> /Library/<span class=SpellE>WebServer</span>/Documents/<span
-class=SpellE>lwi</span>/</span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> cp
-lwi.sa /Library/<span class=SpellE>WebServer</span>/Documents/<span
-class=SpellE>lwi</span>/</span><br>
-<span class=SpellE><span class=Cdigo>sudo</span></span><span class=Cdigo> cp <span
-class=SpellE>lsd_term</span> /Library/<span class=SpellE>WebServer</span>/Documents/<span
-class=SpellE>lwi</span>/<span class=SpellE>lsd_termOSX</span><o:p></o:p></span></span></p>
+EN-US'>cd ~/Lsd/Work/[YOUR_MODEL_PATH]</span></span><span lang=EN-US
+style='font-family:"Courier New";color:gray;mso-ansi-language:EN-US'><br>
+<span class=Cdigo>sudo cp lwi.lsd /Library/WebServer/Documents/lwi/</span><br>
+<span class=Cdigo>sudo cp lwi.sa /Library/WebServer/Documents/lwi/</span><br>
+<span class=Cdigo>sudo cp lsd_term /Library/WebServer/Documents/lwi/lsd_termOSX<o:p></o:p></span></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>These three
 files will replace the previous model and configuration used by LWI. Finally,
 reload the web server so it can start using the new files. On Ubuntu and
 Windows/WSL use:<o:p></o:p></span></p>
 
-<p class=MsoNormal><span class=SpellE><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>sudo</span></span></span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'> service apache2 reload<o:p></o:p></span></span></p>
+<p class=MsoNormal><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>sudo service apache2 reload<o:p></o:p></span></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>For CentOS:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> <span class=SpellE>systemctl</span> restart <span
-class=SpellE><span class=GramE>httpd.service</span></span><o:p></o:p></span></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo
+systemctl restart httpd.service<o:p></o:p></span></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>For macOS:<o:p></o:p></span></p>
 
-<p><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>sudo</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> <span class=SpellE>apachectl</span> restart<o:p></o:p></span></span></p>
+<p><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>sudo
+apachectl restart<o:p></o:p></span></span></p>
 
 <p class=MsoNormal><a name="_Customizing_the_LWI"></a><span lang=EN-US
 style='mso-ansi-language:EN-US'>Launch the browser in the appropriate address
@@ -2541,22 +2393,18 @@ for your model.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Almost
 everything in the LWI server can be customized. However, other than basic
-personalization, changing the HTML/PHP code <span class=GramE>require</span>
-reasonable web programming skills, and should be unnecessary for most
-applications.<o:p></o:p></span></p>
+personalization, changing the HTML/PHP code require reasonable web programming
+skills, and should be unnecessary for most applications.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The main
-file to be customized in LWI is </span><span class=SpellE><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/<span
-class=SpellE>public_htnl</span>/<span class=SpellE>index.php</span></span></span><span
+file to be customized in LWI is </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>lwi/public_htnl/index.php</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>. Basic customization can be
 performed by changing <i style='mso-bidi-font-style:normal'>only</i> the text
 marked between the special comment marks (starting with </span><span
-class=GramE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>&lt;!--</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'> ### LWI ###</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>). The pre-set change points include
-adding:<o:p></o:p></span></p>
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>&lt;!-- ### LWI
+###</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>). The
+pre-set change points include adding:<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt;mso-list:l0 level1 lfo4'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
@@ -2585,10 +2433,9 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Welcome
 message. Several lines of (HTML formatted) text can be added following the mark
 (the existing message can be removed):<br>
-</span><span class=GramE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>&lt;!--</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> ### LWI ### ADD YOUR WELCOME MESSAGE HERE
---&gt;</span></span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>&lt;!--
+### LWI ### ADD YOUR WELCOME MESSAGE HERE --&gt;</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt;mso-list:l0 level1 lfo4'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
@@ -2596,10 +2443,9 @@ Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Copyright
 link. Add a website and a name for the holder of the copyright after the mark:<br>
-</span><span class=GramE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>&lt;!--</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> ### LWI ### ADD YOUR COPYRIGHT LINK HERE
---&gt;</span></span><span lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
+</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>&lt;!--
+### LWI ### ADD YOUR COPYRIGHT LINK HERE --&gt;</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt;mso-list:l0 level1 lfo4'><![if !supportLists]><span
 class=Cdigo><span style='font-family:Symbol;mso-fareast-font-family:Symbol;
@@ -2608,25 +2454,20 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:
 EN-US'>Copyright and no-warranties messages. Define your copyright conditions
 and limit responsibilities following the mark:<br>
-</span><span class=GramE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>&lt;!--</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> ### LWI ### ADD YOUR COPYRIGHT AND WARRANTY
-MESSAGES HERE --&gt;</span></span><span class=Cdigo><span style='font-family:
-"Arial",sans-serif;color:windowtext'><o:p></o:p></span></span></p>
+</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>&lt;!--
+### LWI ### ADD YOUR COPYRIGHT AND WARRANTY MESSAGES HERE --&gt;</span></span><span
+class=Cdigo><span style='font-family:"Arial",sans-serif;color:windowtext'><o:p></o:p></span></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Be <span
-class=GramE>careful on</span> not changing the contents outside the
-comment-mark regions. <o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Be careful
+on not changing the contents outside the comment-mark regions. <o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Another
-relevant file is </span><span class=SpellE><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>lwi</span></span></span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>/<span class=SpellE>defaults.php</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>. It contains several server
-parameters which may require changes for specific applications. The default
-values are adequate only for small, dedicated servers. E-mail addresses for the
-Contact panel are also adjusted in this file. See more details <a
-href="#_Technical_configuration_of">below</a>.<o:p></o:p></span></p>
+relevant file is </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>lwi/defaults.php</span></span><span lang=EN-US style='mso-ansi-language:
+EN-US'>. It contains several server parameters which may require changes for
+specific applications. The default values are adequate only for small,
+dedicated servers. E-mail addresses for the Contact panel are also adjusted in
+this file. See more details <a href="#_Technical_configuration_of">below</a>.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Please
 reload the web server after any change (follow the instructions <a
@@ -2652,9 +2493,8 @@ EN-US'>LSD Web Interface usage</span></span><span lang=EN-US style='mso-fareast-
 <p><span lang=EN-US style='mso-ansi-language:EN-US'>LSD Web Interface (LWI)
 requires that users are at least familiar with the model being used. The user
 is supposed to have at least some basic knowledge of the model structure and
-its main parameters and variables to fully <span class=GramE>profit</span> from
-LWI. All names used in LSD for the model’s parameters and variables are
-preserved in LWI.<o:p></o:p></span></p>
+its main parameters and variables to fully profit from LWI. All names used in
+LSD for the model’s parameters and variables are preserved in LWI.<o:p></o:p></span></p>
 
 <p><span lang=EN-GB style='mso-ansi-language:EN-GB'>This section is organized
 in five subsections, mirroring LWI software organization. Initially, we
@@ -2679,10 +2519,10 @@ panel<o:p></o:p></span></h2>
 organized in several interaction areas or “cards”, which can be scrolled or
 directly reached using the Navigation panel. When initiating a new LWI session,
 the Navigation Panel is presented together with the Welcome area. In devices
-with a narrow screen, like smartphones, the user <span class=GramE>has to</span>
-click in the “</span><span style='font-family:"MS Gothic";mso-ansi-language:
-EN-US'>&#9776;</span><span lang=EN-US style='mso-ansi-language:EN-US'>” symbol
-to open the Navigation panel.<o:p></o:p></span></p>
+with a narrow screen, like smartphones, the user has to click in the “</span><span
+style='font-family:"MS Gothic";mso-ansi-language:EN-US'>&#9776;</span><span
+lang=EN-US style='mso-ansi-language:EN-US'>” symbol to open the Navigation
+panel.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The options
 in the Navigation panel correspond to the four main LWI areas, presented below,
@@ -2693,9 +2533,9 @@ lang=EN-US style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>Help</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> and </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>Contact</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> areas. <span class=GramE>User</span> can
-switch sections by simply clicking in the name of the desired section in the
-navigation panel or by scrolling the interface.<o:p></o:p></span></p>
+style='mso-ansi-language:EN-US'> areas. User can switch sections by simply
+clicking in the name of the desired section in the navigation panel or by
+scrolling the interface.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Reset</span></span><span
@@ -2740,13 +2580,12 @@ the default configuration (by pressing the Reset button besides any changed
 value) and execute the simulation again.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The
-Configuration area is divided <span class=GramE>in</span> two areas: the
-configurable item list, divided in two groups, and the command buttons. Model
-parameters are predefined and fixed values that are used to compute the model
-equations and define initial conditions to some variables. For instance, the
-user can change parameters to modify simulated agent’s behavioral rules or the
-applicable market rules. Simulation settings are values defining the execution
-of the simulation model. <o:p></o:p></span></p>
+Configuration area is divided in two areas: the configurable item list, divided
+in two groups, and the command buttons. Model parameters are predefined and
+fixed values that are used to compute the model equations and define initial
+conditions to some variables. For instance, the user can change parameters to
+modify simulated agent’s behavioral rules or the applicable market rules.
+Simulation settings are values defining the execution of the simulation model. <o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>At any
 moment, the user has the option to download the current model configuration.
@@ -2774,25 +2613,24 @@ dialog window will ask for the file containing the saved configuration, with
 the “.csv” extension.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Clicking on
-</span><span class=GramE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>Reset</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'> All</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> button replaces the current configuration
-values with the default ones. Be careful to use it if you have configuration
-changes to be saved, as the existing values are lost. If required, click on </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Download</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> before using this option.<o:p></o:p></span></p>
+</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Reset
+All</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> button
+replaces the current configuration values with the default ones. Be careful to
+use it if you have configuration changes to be saved, as the existing values
+are lost. If required, click on </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>Download</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> before using this option.<o:p></o:p></span></p>
 
 <h2><a name="_Execution_section"></a><a name="_Execution_area"></a><span
 lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
 EN-US'>Execution area<o:p></o:p></span></h2>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The Execution
-area controls the execution of the simulation model in the LWI server. Model
-execution can take from a few seconds to several minutes, according to the
-selected configuration, <span class=GramE>in particular</span> the chosen
-number of simulation time steps. The Execution area is divided <span
-class=GramE>in</span> two subareas: the Status box and the command buttons.<o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The
+Execution area controls the execution of the simulation model in the LWI
+server. Model execution can take from a few seconds to several minutes,
+according to the selected configuration, in particular the chosen number of
+simulation time steps. The Execution area is divided in two subareas: the
+Status box and the command buttons.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The command
 buttons control the simulation model execution at the remote server. As soon as
@@ -2811,17 +2649,15 @@ EN-US'> aborts the simulation and no data is saved for analysis. <o:p></o:p></sp
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>While the
 execution is going on, </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>Simulation running</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> is <span class=GramE>show</span> in
-the Status box, together with the elapsed time. <span class=GramE>User</span>
-can execute only one simulation instance at a time. If there is any error
-preventing the simulation execution <span class=GramE>to complete</span>, the
+lang=EN-US style='mso-ansi-language:EN-US'> is show in the Status box, together
+with the elapsed time. User can execute only one simulation instance at a time.
+If there is any error preventing the simulation execution to complete, the
 status box will show </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>Simulation error</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>, the execution will be aborted, and no data is
-saved for analysis. <span class=GramE>User</span> can click on the </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Log</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> button to check the causes of the
-failure.<o:p></o:p></span></p>
+saved for analysis. User can click on the </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>Log</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> button to check the causes of the failure.<o:p></o:p></span></p>
 
 <h2><a name="_Analysis_area"></a><span lang=EN-US style='mso-fareast-font-family:
 "Times New Roman";mso-ansi-language:EN-US'>Analysis area<o:p></o:p></span></h2>
@@ -2831,15 +2667,15 @@ execution of the simulation model, the Status box in the <a
 href="#_Execution_area">Execution area</a> will show </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>Simulation run complete</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, and the produced time series will
-be available for analysis in the Analysis area. The area is composed <span
-class=GramE>by</span> the time series list, the option selectors, and the
-command buttons. Please make sure your browser is configured to allow the LWI
-website to open new browser windows/tabs when using the commands in this area.<o:p></o:p></span></p>
+be available for analysis in the Analysis area. The area is composed by the
+time series list, the option selectors, and the command buttons. Please make
+sure your browser is configured to allow the LWI website to open new browser
+windows/tabs when using the commands in this area.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The user
-can select one or more items in the time series list to be used when the
-command buttons are clicked. Clicking once selects the time <span class=GramE>series</span>
-and an additional click unselects it. <o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The user can
+select one or more items in the time series list to be used when the command
+buttons are clicked. Clicking once selects the time series and an additional
+click unselects it. <o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>By default,
 the commands in the Analysis page operate over all simulation time steps, from </span><span
@@ -2850,12 +2686,11 @@ option to restrict the range of time steps to use in the analysis, by changing
 the default values in the Selected Time Steps box.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The Scale
-box <span class=GramE>provide</span> configuration to the scaling of the
-vertical axis of time series plots. The </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>Auto</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> option uses auto scaling to plot the entire
-data range present in the series. The </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>Manual</span></span><span
+box provide configuration to the scaling of the vertical axis of time series
+plots. The </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>Auto</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+option uses auto scaling to plot the entire data range present in the series.
+The </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Manual</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> option allows the user to select
 the minimum and maximum values for the vertical axis plot. The </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Log</span></span><span
@@ -2867,14 +2702,13 @@ style='mso-ansi-language:EN-US'> option).<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The MC-band
 options provide extra information for multi-run simulation plots. MC-bands are
-only available when </span><span class=SpellE><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>numRuns</span></span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>, in Configuration section, <span
-class=GramE>is</span> set to more than one run (at least 10 runs are
+only available when </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>numRuns</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>,
+in Configuration section, is set to more than one run (at least 10 runs are
 recommended for sensible results). The </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>Confidence</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> option <span class=GramE>add</span>
-a standard 95% confidence interval band to each series selected to plot. The </span><span
+lang=EN-US style='mso-ansi-language:EN-US'> option add a standard 95%
+confidence interval band to each series selected to plot. The </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Max-min</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> option a band from the minimum to
 the maximum values obtained in the set of simulation runs.<o:p></o:p></span></p>
@@ -2891,22 +2725,22 @@ style='mso-ansi-language:EN-US'> is selected, log values (natural base) are
 used in computations. <o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Clicking on
-</span><span class=GramE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>Data</span></span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
-button creates a new browser window containing a table with the selected time
-series in the columns and the time step values in the rows. If </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Log</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> is selected, log values (natural
-base) are presented. At least one and up to 15 series can be selected at a
-time. However, multiple data windows may be open at any time.<o:p></o:p></span></p>
+</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Data</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> button creates a new browser window
+containing a table with the selected time series in the columns and the time
+step values in the rows. If </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>Log</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> is selected, log values (natural base) are
+presented. At least one and up to 15 series can be selected at a time. However,
+multiple data windows may be open at any time.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Clicking on
-</span><span class=GramE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>Plot</span></span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
-button creates a new browser window with the selected time series plots. The
-horizontal axis represents the simulation time steps and the vertical axis, the
-selected series values. At least one and up to 15 series can be selected at a
-time. Multiple plot windows may be open at a time.<o:p></o:p></span></p>
+</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Plot</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> button creates a new browser window
+with the selected time series plots. The horizontal axis represents the
+simulation time steps and the vertical axis, the selected series values. At
+least one and up to 15 series can be selected at a time. Multiple plot windows
+may be open at a time.<o:p></o:p></span></p>
 
 <h2><a name="_Export_page"></a><span lang=EN-US style='mso-fareast-font-family:
 "Times New Roman";mso-ansi-language:EN-US'>Export area<o:p></o:p></span></h2>
@@ -2914,11 +2748,10 @@ time. Multiple plot windows may be open at a time.<o:p></o:p></span></p>
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>After an
 LSD simulation is successfully executed, the user can download the entire
 results data as (compressed) text file(s) in CSV (comma-separated values)
-format. This file can be directly imported <span class=GramE>in</span> any
-numerical analysis software, like spreadsheets or statistical packages. The
-Export area is composed <span class=GramE>by</span> the Information boxes and
-the command buttons. The information boxes summarize the details about the
-available data which can be downloaded.<o:p></o:p></span></p>
+format. This file can be directly imported in any numerical analysis software,
+like spreadsheets or statistical packages. The Export area is composed by the
+Information boxes and the command buttons. The information boxes summarize the
+details about the available data which can be downloaded.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>As soon as
 the simulation execution is finished, the results data file can be downloaded
@@ -2942,9 +2775,9 @@ style='mso-ansi-language:EN-US'> extension.<o:p></o:p></span></p>
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>LWI results
 data files are comma-separated values text files (CSV format). Columns contain
 single variables while lines represent variables values at each time step.
-However, the first line has a special meaning, being the <span class=GramE>first
-time</span> step values located in the second line and so on. The first line
-contains the columns headers with the names of the variables in each column.<o:p></o:p></span></p>
+However, the first line has a special meaning, being the first time step values
+located in the second line and so on. The first line contains the columns
+headers with the names of the variables in each column.<o:p></o:p></span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse;mso-yfti-tbllook:
@@ -2976,26 +2809,24 @@ program. LWI operation workflow can be described as a set of ordered actions:<o:
 lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
 style='mso-list:Ignore'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>LWI
-loads from a configuration file (default: </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/<span
-class=SpellE>lwi.lsd</span></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'>) the names of the parameters and initial conditions the modeler wants
-to offer for configuration at the LWI web page, and the names of output
-variables should be available to the user after the simulation is run. The same
-file includes the default/initial values of the parameters and initial
-conditions, and the textual description for parameters, initial conditions and
-output variables. This file has an LSD specific format and must be generated by
-the <a href="browser.html">LSD Browser</a>, as described in LSD documentation.<o:p></o:p></span></p>
+loads from a configuration file (default: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>lwi/lwi.lsd</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>) the names of the parameters and
+initial conditions the modeler wants to offer for configuration at the LWI web
+page, and the names of output variables should be available to the user after
+the simulation is run. The same file includes the default/initial values of the
+parameters and initial conditions, and the textual description for parameters,
+initial conditions and output variables. This file has an LSD specific format
+and must be generated by the <a href="browser.html">LSD Browser</a>, as
+described in LSD documentation.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 12.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l2 level1 lfo6'><![if !supportLists]><span
 lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
 style='mso-list:Ignore'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>LWI
-loads from a sensitivity analysis file (default: </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/lwi.sa</span></span><span
+loads from a sensitivity analysis file (default: </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>lwi/lwi.sa</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) the numerical limits (range) for
 each of the parameters and initial conditions contained in the configuration
 file. This file has an LSD specific format and must be also generated by the
@@ -3009,74 +2840,62 @@ conditions which accept only integer values (default is to allow real numbers).<
 lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
 style='mso-list:Ignore'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>Using
-the file </span><span class=SpellE><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>lwi</span></span></span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>/<span class=SpellE>public_html</span>/index.html</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>, LWI builds the model web page,
-offering an interface to the user modify the default values for parameters and
-initial conditions, under the defined range and integer/real restrictions for
-each one. This file can be customized to show the appropriate titles and text
-for each model as described <a href="#_Customizing_the_LWI_1">above</a>. Be
-careful when changing this file and make changes only to the marked regions.<o:p></o:p></span></p>
+the file </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>lwi/public_html/index.html</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>, LWI builds the model web page, offering an
+interface to the user modify the default values for parameters and initial
+conditions, under the defined range and integer/real restrictions for each one.
+This file can be customized to show the appropriate titles and text for each
+model as described <a href="#_Customizing_the_LWI_1">above</a>. Be careful when
+changing this file and make changes only to the marked regions.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 12.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l2 level1 lfo6'><![if !supportLists]><span
 lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
 style='mso-list:Ignore'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>After
-the user <span class=GramE>select</span> the desired parameters and initial
-conditions, and ask the simulation to be started, LWI generates a
-comma-separated file (CSV, </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>.csv</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> extension) containing the values chosen by the
-users. This is a text file with two columns, separated by a comma, and a
-first-line header (spaces must be ignored). <span class=GramE>First</span>
-column has the parameter/initial condition name, and the second, the value set
-by the user. In the preconfigured Nelson &amp; Winter model (N&amp;W) example,
-if the user makes no change to the default values, the CSV configuration file
-content is (spaces added for clarity):<o:p></o:p></span></p>
+the user select the desired parameters and initial conditions, and ask the
+simulation to be started, LWI generates a comma-separated file (CSV, </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>.csv</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> extension) containing the values
+chosen by the users. This is a text file with two columns, separated by a
+comma, and a first-line header (spaces must be ignored). First column has the
+parameter/initial condition name, and the second, the value set by the user. In
+the preconfigured Nelson &amp; Winter model (N&amp;W) example, if the user
+makes no change to the default values, the CSV configuration file content is
+(spaces added for clarity):<o:p></o:p></span></p>
 
-<p class=MsoNormal style='margin-left:35.45pt'><span class=GramE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Name,<span
-style='mso-spacerun:yes'>   </span></span></span></span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'><span
-style='mso-spacerun:yes'>            </span>Value</span></span><span
+<p class=MsoNormal style='margin-left:35.45pt'><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>Name,<span
+style='mso-spacerun:yes'>               </span>Value</span></span><span
 lang=EN-US style='font-family:"Courier New";color:gray;mso-ansi-language:EN-US'><br>
-<span class=SpellE><span class=Cdigo>Regime_imi</span></span><span class=Cdigo>,<span
-style='mso-spacerun:yes'>         </span>1</span><br>
-<span class=SpellE><span class=Cdigo>Regime_inno</span></span><span
-class=Cdigo>,<span style='mso-spacerun:yes'>        </span>1</span><br>
-<span class=SpellE><span class=Cdigo>Regime_restraint</span></span><span
-class=Cdigo>,<span style='mso-spacerun:yes'>   </span>0</span><br>
-<span class=SpellE><span class=Cdigo>Regime_fission</span></span><span
-class=Cdigo>,<span style='mso-spacerun:yes'>     </span>0</span><br>
+<span class=Cdigo>Regime_imi,<span style='mso-spacerun:yes'>         </span>1</span><br>
+<span class=Cdigo>Regime_inno,<span style='mso-spacerun:yes'>        </span>1</span><br>
+<span class=Cdigo>Regime_restraint,<span style='mso-spacerun:yes'>   </span>0</span><br>
+<span class=Cdigo>Regime_fission,<span style='mso-spacerun:yes'>     </span>0</span><br>
 <span class=Cdigo>Bank,<span style='mso-spacerun:yes'>               </span>0</span><br>
-<span class=SpellE><span class=Cdigo>Dem_Coeff</span></span><span class=Cdigo>,<span
-style='mso-spacerun:yes'>          </span>67</span><br>
-<span class=SpellE><span class=Cdigo>Dem_elast</span></span><span class=Cdigo>,<span
-style='mso-spacerun:yes'>          </span>1</span><br>
-<span class=SpellE><span class=Cdigo>Inn_stddev</span></span><span class=Cdigo>,<span
-style='mso-spacerun:yes'>         </span>0.01</span><br>
-<span class=SpellE><span class=Cdigo>Dep_rate</span></span><span class=Cdigo>,<span
-style='mso-spacerun:yes'>           </span>0.03</span><br>
+<span class=Cdigo>Dem_Coeff,<span style='mso-spacerun:yes'>          </span>67</span><br>
+<span class=Cdigo>Dem_elast,<span style='mso-spacerun:yes'>          </span>1</span><br>
+<span class=Cdigo>Inn_stddev,<span style='mso-spacerun:yes'>        
+</span>0.01</span><br>
+<span class=Cdigo>Dep_rate,<span style='mso-spacerun:yes'>          
+</span>0.03</span><br>
 <span class=Cdigo>Fiss,<span style='mso-spacerun:yes'>              
 </span>0.01</span><br>
-<span class=Cdigo>_<span class=SpellE>timeSteps</span>_,<span
-style='mso-spacerun:yes'>        </span>1000</span><br>
-<span class=Cdigo>_<span class=SpellE>numRuns</span>_,<span
-style='mso-spacerun:yes'>          </span>100</span><br>
-<span class=Cdigo>_<span class=SpellE>rndSeed</span>_,<span
-style='mso-spacerun:yes'>          </span>1<o:p></o:p></span></span></p>
+<span class=Cdigo>_timeSteps_,<span style='mso-spacerun:yes'>       
+</span>1000</span><br>
+<span class=Cdigo>_numRuns_,<span style='mso-spacerun:yes'>          </span>100</span><br>
+<span class=Cdigo>_rndSeed_,<span style='mso-spacerun:yes'>          </span>1<o:p></o:p></span></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 12.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l2 level1 lfo6'><![if !supportLists]><span
 lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
 style='mso-list:Ignore'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>LWI
-converts the CSV configuration file to the native LSD format, and launches the model
-executable, passing the appropriate configuration file to it. The final LSD
-configuration file name has the format </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>run-<span class=SpellE>XXXXXX.lsd</span></span></span><span
+converts the CSV configuration file to the native LSD format, and launches the
+model executable, passing the appropriate configuration file to it. The final
+LSD configuration file name has the format </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>run-XXXXXX.lsd</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, where </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>XXXXXX</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> is a random suffix associated with
@@ -3087,8 +2906,8 @@ the current user session at the web server.<o:p></o:p></span></p>
 lang=EN-US style='mso-fareast-font-family:Arial;mso-ansi-language:EN-US'><span
 style='mso-list:Ignore'>6.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>During
-model execution, LWI redirects any output (</span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>stdout</span></span></span><span
+model execution, LWI redirects any output (</span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>stdout</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>/</span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>stderr</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) from the model executable to a
@@ -3109,16 +2928,16 @@ or more CSV results files (</span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>.csv</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> extension), one file per Monte Carlo (MC) run
 (as per the </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>_<span class=SpellE>numRuns</span>_</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> meta-parameter). These files are saved to the
-default output path. The results files are named as the configuration file plus
-a </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>_Y</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> suffix, where </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Y</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> is the number of the MC run (</span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Y = 1, ..., _<span
-class=SpellE>numRuns</span>_</span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'>). So, the results file names have the format </span><span class=Cdigo><span
+EN-US'>_numRuns_</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>
+meta-parameter). These files are saved to the default output path. The results
+files are named as the configuration file plus a </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>_Y</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> suffix, where </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>Y</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> is the number of the MC run (</span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Y = 1, ...,
+_numRuns_</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>). So,
+the results file names have the format </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>run-XXXXXX_Y.csv</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, where </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>XXXXXX</span></span><span
@@ -3129,11 +2948,10 @@ with the variable names, is also required. In the N&amp;W example, one of the
 (100) output files look like (just first columns/rows shown, spaces added for
 clarity):<o:p></o:p></span></p>
 
-<p class=MsoNormal style='margin-left:35.45pt'><span class=SpellE><span
-class=Cdigo>InvHerf</span></span><span class=Cdigo>,<span
-style='mso-spacerun:yes'>        </span><span class=SpellE>HP_index</span>,<span
-style='mso-spacerun:yes'>       </span><span class=SpellE>A_Mean</span>,<span
-style='mso-spacerun:yes'>         </span><span class=SpellE>A_Var</span>,<span
+<p class=MsoNormal style='margin-left:35.45pt'><span class=Cdigo>InvHerf,<span
+style='mso-spacerun:yes'>        </span>HP_index,<span
+style='mso-spacerun:yes'>       </span>A_Mean,<span
+style='mso-spacerun:yes'>         </span>A_Var,<span
 style='mso-spacerun:yes'>          </span>...</span><span style='font-family:
 "Courier New";color:gray'><br>
 <span class=Cdigo>16,<span style='mso-spacerun:yes'>            
@@ -3188,11 +3006,9 @@ style='mso-list:Ignore'>8.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>After
 the model executable finishes, LWI reads all the produced results files,
 looking for the output variables marked for saving in the original LSD
-configuration file (default: </span><span class=SpellE><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/<span
-class=SpellE>lwi.lsd</span></span></span><span lang=EN-US style='mso-ansi-language:
-EN-US'>).<o:p></o:p></span></p>
+configuration file (default: </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>lwi/lwi.lsd</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>).<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 12.0pt;margin-left:35.7pt;text-indent:-17.85pt;mso-list:l2 level1 lfo6'><![if !supportLists]><span
@@ -3217,52 +3033,47 @@ produced output files, if more than one exists.<o:p></o:p></span></p>
 style='mso-ansi-language:EN-US'>Technical configuration of LWI<o:p></o:p></span></h2>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The file </span><span
-class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/<span
-class=SpellE>defaults.php</span></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> (at LWI base folder) contains all the default
-values that may be adjusted to <span class=GramE>particular web</span> server
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi/defaults.php</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> (at LWI base folder) contains all
+the default values that may be adjusted to particular web server
 configurations. Instead of changing this file directly, it is recommended to
-create a text file named </span><span class=SpellE><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/<span
-class=SpellE>my_defaults.php</span></span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> (at the same base folder) and redefine the
-required variables there. This way changes are not overwritten in case of LWI
-updates.<o:p></o:p></span></p>
+create a text file named </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>lwi/my_defaults.php</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> (at the same base folder) and
+redefine the required variables there. This way changes are not overwritten in
+case of LWI updates.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>As this is
-an embedded PHP file, please note that the </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>my_defaults.php</span></span></span><span
+an embedded PHP file, please note that the </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>my_defaults.php</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> file <i>must</i> begin with the
 line:<o:p></o:p></span></p>
 
 <p class=MsoNormal><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>&lt;?<span class=SpellE>php</span><o:p></o:p></span></span></p>
+EN-US'>&lt;?php</span><o:p></o:p></span></p>
 
 <h2><span lang=EN-US style='mso-ansi-language:EN-US'>Configuring non-LSD
-executables<o:p></o:p></span></h2>
+executables</span></h2>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>By default,
-LWI assumes a terminal LSD executable as the model program. Despite not <span
-class=GramE>supported</span>, it is possible to use any command-line model
-executable with LWI. However, the model executable must be able to receive its
-configuration as a CSV file like the one shown in item 4 to produce its output
-as a (set of) properly named CSV file(s), as described in item 7 <a
-href="#_LWI_workflow">above</a>.<o:p></o:p></span></p>
+LWI assumes a terminal LSD executable as the model program. Despite not
+supported, it is possible to use any command-line model executable with LWI.
+However, the model executable must be able to receive its configuration as a
+CSV file like the one shown in item 4 to produce its output as a (set of)
+properly named CSV file(s), as described in item 7 <a href="#_LWI_workflow">above</a>.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>If a
 non-LSD executable is to be used, some of the default settings of LWI <i>must</i>
-be changed. To do so, create a text file named </span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>my_defaults.php</span></span></span><span
+be changed. To do so, create a text file named </span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>my_defaults.php</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> at the base LWI folder (the one set
 at the web server!) and add the following lines to it:<o:p></o:p></span></p>
 
 <p class=MsoNormal><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>&lt;?<span class=SpellE>php</span></span></span><span lang=EN-US
-style='font-family:"Courier New";color:gray;mso-ansi-language:EN-US'><br>
-<span class=Cdigo>$<span class=SpellE>lsd_exec</span> = <span class=GramE>&quot;..</span>/NAME_OF_YOUR_EXECUTABLE&quot;;</span><br>
-<span class=Cdigo>$<span class=SpellE>csv_exec_config</span> = true;<o:p></o:p></span></span></p>
+EN-US'>&lt;?php</span></span><span lang=EN-US style='font-family:"Courier New";
+color:gray;mso-ansi-language:EN-US'><br>
+<span class=Cdigo>$lsd_exec = &quot;../NAME_OF_YOUR_EXECUTABLE&quot;;</span><br>
+<span class=Cdigo>$csv_exec_config = true;<o:p></o:p></span></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The second
 line defines the name of your model executable file, <i>without</i>
@@ -3286,12 +3097,9 @@ style='mso-ansi-language:EN-US'>) permissions in macOS and Linux.<o:p></o:p></sp
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Even if the
 model was not coded in LSD, LSD must be used to produce the model configuration
-(</span><span class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>lwi</span></span></span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>/<span class=SpellE>lwi.lsd</span></span></span><span
+(</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi/lwi.lsd</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) and sensitivity (</span><span
-class=SpellE><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi</span></span></span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>/lwi.sa</span></span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>lwi/lwi.sa</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>) files. In this case, a dummy
 (empty) equation file can be used to open the LSD Browser to create the
 required files, no coding in LSD is required. Please check LSD documentation on
@@ -3317,8 +3125,8 @@ limits.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>If the
 model outputs a valid formatted progress bar (see the N&amp;W example for the
-correct format) to the standard output (</span><span class=SpellE><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>stdout</span></span></span><span
+correct format) to the standard output (</span><span class=Cdigo><span
+lang=EN-US style='mso-ansi-language:EN-US'>stdout</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>), LWI uses this information (which
 is also saved to the log file) to update the </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>Status</span></span><span
