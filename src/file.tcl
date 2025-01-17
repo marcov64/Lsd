@@ -846,6 +846,8 @@ proc open_browser { dir fnb } {
 
 	if { ! [ catch { set fqn [ file normalize "$fqn" ] } ] && [ file exists "$fqn" ] } {
 		set fqnb "file://$fqnb"
+	} else {
+		return 0
 	}
 
 	switch -- $CurPlatform {
