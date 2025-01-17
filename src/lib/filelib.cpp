@@ -141,6 +141,7 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 		deb_t = simNode.attribute( "debug_start", hint ).as_uint( );
 		no_ptr_chk = ! simNode.attribute( "ptr_check", hint ).as_bool( true );
 		parallel_disable = ! simNode.attribute( "parallel", hint ).as_bool( true );
+		assim_disable = ! simNode.attribute( "data_assimilation", hint ).as_bool( true );
 		stack_info = setNode.child( "profiling" ).attribute( "level", hint ).as_uint( );
 		prof_min_msecs = setNode.child( "profiling" ).attribute( "time", hint ).as_uint( );
 		prof_obs_only = setNode.child( "profiling" ).attribute( "observed", hint ).as_bool( );
@@ -760,6 +761,9 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	if ( parallel_disable )
 		simNode.append_attribute( "parallel" ) = false;
 
+	if ( assim_disable && assim != NULL )
+		simNode.append_attribute( "data_assimilation" ) = false;
+
 	// add profile settings, if any
 	if ( stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time )
 	{
@@ -1108,10 +1112,10 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 
 		// add data assimilation settings
 		ca = sim->search_assimilation( cv->label );
-		if ( ca != NULL && ca->csv != NULL )
+		if ( ca != NULL && ca->csv_file != NULL )
 		{
 			x_nodeT cna = cn.append_child( "assimilation" );
-			cna.append_attribute( "csv_file" ) = ca->csv;
+			cna.append_attribute( "csv_file" ) = ca->csv_file;
 
 			if ( ca->data_col_name != NULL )
 				cna.append_attribute( "data_column_name" ) = ca->data_col_name;
@@ -1186,7 +1190,7 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 
 	last_t = MAX_STEPS;
 	deb_t = stack_info = prof_min_msecs = 0;
-	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = 0;
+	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = assim_disable = 0;
 	fscanf( f, "%999s", msg );					// should be MAX_STEP
 	if ( strcmp( msg, "MAX_STEP" ) )
 	{

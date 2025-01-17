@@ -39,8 +39,8 @@ lsd::assimilation::assimilation( const char *lab, simulation *_sim, const char *
 
 	if ( _csv != NULL && strlen( _csv ) > 0 )
 	{
-		csv = new char [ strlen( _csv ) + 1 ];
-		strcpy( csv, _csv );
+		csv_file = new char [ strlen( _csv ) + 1 ];
+		strcpy( csv_file, _csv );
 
 		if ( _data_col_name != NULL && strlen( _data_col_name ) > 0 )
 		{
@@ -77,7 +77,7 @@ lsd::assimilation::~assimilation( void )
 {
 	assimilation *ca, *pa;
 
-	delete [ ] csv;
+	delete [ ] csv_file;
 	delete [ ] data_col_name;
 	delete [ ] label;
 	delete [ ] t_col_name;

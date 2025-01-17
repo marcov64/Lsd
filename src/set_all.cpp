@@ -640,23 +640,15 @@ const char *lsd::variable::print_constr( char *buf, int buf_sz )
  *************************************************************/
 int lsd::assimilation::dataentry( const char *parWnd )
 {
-	int res;
+	bool cexist, fexist;
+	int namrow, res;
 	variable *cv;
+	rapidcsv::Document csv( "" );
+	std::vector< std::string > cnames;
 
 	cv = sim->root->search_var( NULL, label );
 	if ( cv == NULL )
 		return 2;
-
-	cmd( "set path \"%s\"", sim->conf_path );
-	if ( strlen( sim->conf_path ) > 0 )
-		cmd( "cd $path" );
-
-	cmd( "set csv \"%s\"", csv == NULL ? "" : csv );
-	cmd( "if { [ string first / $csv ] != -1 } { \
-			set csv [ file nativename $csv ] \
-		}" );
-
-	cmd( "if { ! [ info exists modCSV ] } { set modCSV [ list ] }" );
 
 	// define the correct parent window
 	if ( parWnd != NULL && strlen( parWnd ) > 0 )
@@ -670,10 +662,22 @@ int lsd::assimilation::dataentry( const char *parWnd )
 			set _w $parWnd.as \
 		}" );
 
-	cmd( "set data_col_name %s", label );
-	cmd( "set data_col_num 0" );
-	cmd( "set t_col_name \"\"" );
-	cmd( "set t_col_num 0" );
+	cmd( "if { ! [ info exists modCSV ] } { \
+			set modCSV [ list ] \
+		}" );
+
+	cmd( "set path \"%s\"", sim->conf_path );
+	if ( strlen( sim->conf_path ) > 0 )
+		cmd( "cd $path" );
+
+	cmd( "set csv_file \"%s\"", csv_file != NULL ? csv_file : "" );
+	cmd( "if { [ string first / $csv_file ] != -1 } { \
+			set csv_file [ file nativename $csv_file ] \
+		}" );
+	cmd( "set data_col_name %s", data_col_name != NULL ? data_col_name : data_col_num < 1 ? label : "" );
+	cmd( "set data_col_num %d", data_col_num );
+	cmd( "set t_col_name \"%s\"", t_col_name != NULL ? t_col_name : "" );
+	cmd( "set t_col_num %d", t_col_num );
 
 	cmd( "newtop $_w \"Data Assimilation Settings\" { set choice 2 } $parWnd" );
 
@@ -700,16 +704,16 @@ int lsd::assimilation::dataentry( const char *parWnd )
 	cmd( "pack $_w.csv.l.l $_w.csv.l.pad -side left -padx $_5" );
 
 	cmd( "ttk::frame $_w.csv.file" );
-	cmd( "ttk::combobox $_w.csv.file.e -width 40 -textvariable csv -justify center -values $modCSV" );
+	cmd( "ttk::combobox $_w.csv.file.e -width 40 -textvariable csv_file -justify center -values $modCSV" );
 	cmd( "ttk::button $_w.csv.file.brw -text Browse -command { \
 			set fn [ tk_getOpenFile -parent $_w -title \"Select Data File\" -defaultextension \".csv\" -initialdir $path -filetypes { { {Comma-separated file} {.csv} } } ]; \
 			if { [ string length $fn ] > 0 && ! [ fn_spaces $fn ] } { \
-				set csv [ file normalize $fn ]; \
-				if { [ string first [ file normalize $model_dir ] $csv ] == 0 } { \
-					set csv [ string map [ list \"[ file normalize $model_dir ]/\" \"\" ] $csv ] \
+				set csv_file [ file normalize $fn ]; \
+				if { [ string first [ file normalize $model_dir ] $csv_file ] == 0 } { \
+					set csv_file [ string map [ list \"[ file normalize $model_dir ]/\" \"\" ] $csv_file ] \
 				}; \
-				if { [ string first / $csv ] != -1 } { \
-					set csv [ file nativename $csv ] \
+				if { [ string first / $csv_file ] != -1 } { \
+					set csv_file [ file nativename $csv_file ] \
 				} \
 			} \
 		}" );
@@ -750,7 +754,7 @@ int lsd::assimilation::dataentry( const char *parWnd )
 			} \
 		} -invalidcommand { bell }", label );
 	cmd( "$_w.dcol.d.n2 insert 0 $data_col_num" );
-	cmd( "ttk::label $_w.dcol.d.l3 -text \"(0 : none)\"" );
+	cmd( "ttk::label $_w.dcol.d.l3 -text \"(0 : name)\"" );
 
 	cmd( "pack $_w.dcol.d.l1 $_w.dcol.d.n1 $_w.dcol.d.l2 $_w.dcol.d.n2 $_w.dcol.d.l3 -side left" );
 	cmd( "pack $_w.dcol.l $_w.dcol.d" );
@@ -783,14 +787,14 @@ int lsd::assimilation::dataentry( const char *parWnd )
 			} \
 		} -invalidcommand { bell }" );
 	cmd( "$_w.tcol.d.n2 insert 0 $t_col_num" );
-	cmd( "ttk::label $_w.tcol.d.l3 -text \"(0 : none)\"" );
+	cmd( "ttk::label $_w.tcol.d.l3 -text \"(0 : name)\"" );
 
 	cmd( "pack $_w.tcol.d.l1 $_w.tcol.d.n1 $_w.tcol.d.l2 $_w.tcol.d.n2 $_w.tcol.d.l3 -side left" );
 	cmd( "pack $_w.tcol.l $_w.tcol.d" );
 
 	cmd( "pack $_w.csv $_w.dcol $_w.tcol -padx $_5 -pady $_10" );
 
-	cmd( "okXhelpcancel $_w b Remove { set choice 3 } { set choice 1 } { LsdHelp menudata_init.html#assimilation } { set choice 2 }" );
+	cmd( "okXhelpcancel $_w b Remove { set choice 3 } { set choice 1 } { LsdHelp browser.html#assimilation } { set choice 2 }" );
 
 	cmd( "showtop $_w centerW" );
 	cmd( "mousewarpto $_w.b.ok 0" );
@@ -801,47 +805,120 @@ int lsd::assimilation::dataentry( const char *parWnd )
 
 	res = gui::choice - 1;
 
-	if ( strlen( gui::get_str( "csv" ) ) == 0 )
+	if ( strlen( gui::get_str( "csv_file" ) ) == 0 )
 		res = 2;
-
-	if ( res > 0 )
-		goto end;
-
-	cmd( "lappend modCSV $csv" );
-	cmd( "set modCSV [ lsort -dictionary -unique $modCSV ] " );
-
-	cmd( "set csv [ string map {\\\\ /} $csv ]" );
-	delete [ ] csv;
-	csv = new char [ strlen( gui::get_str( "csv" ) ) + 1 ];
-	strcpy( csv, gui::get_str( "csv" ) );
-
-	data_col_num = 0;
-	delete [ ] data_col_name;
-	if ( strlen( gui::get_str( "data_col_name" ) ) > 0 )
-	{
-		data_col_name = new char [ strlen( gui::get_str( "data_col_name" ) ) + 1 ];
-		strcpy( data_col_name, gui::get_str( "data_col_name" ) );
-	}
 	else
 	{
-		data_col_name = NULL;
-		data_col_num = gui::get_int( "data_col_num" );
+		cmd( "set csv_file [ string map {\\\\ /} $csv_file ]" );
+		cmd( "lappend modCSV $csv_file" );
+		cmd( "set modCSV [ lsort -dictionary -unique $modCSV ] " );
 	}
 
-	t_col_num = 0;
-	delete [ ] t_col_name;
-	if ( strlen( gui::get_str( "t_col_name" ) ) > 0 )
+	if ( strlen( gui::get_str( "data_col_name" ) ) == 0 )
 	{
-		t_col_name = new char [ strlen( gui::get_str( "t_col_name" ) ) + 1 ];
-		strcpy( t_col_name, gui::get_str( "t_col_name" ) );
+		if ( gui::get_int( "data_col_num" ) < 1 )
+			res = 2;
+		else
+		{
+			delete [ ] data_col_name;
+			data_col_name = NULL;
+		}
 	}
 	else
+		data_col_num = 0;
+
+	if ( strlen( gui::get_str( "t_col_name" ) ) == 0 )
 	{
+		if ( gui::get_int( "t_col_num" ) < 1 )
+			t_col_num = 0;
+
+		delete [ ] t_col_name;
 		t_col_name = NULL;
-		t_col_num = gui::get_int( "t_col_num" );
 	}
+	else
+		t_col_num = 0;
 
-	end:
+	if ( res == 0 )
+	{
+		delete [ ] csv_file;
+		csv_file = new char [ strlen( gui::get_str( "csv_file" ) ) + 1 ];
+		strcpy( csv_file, gui::get_str( "csv_file" ) );
+
+		if ( strlen( gui::get_str( "data_col_name" ) ) > 0 )
+		{
+			delete [ ] data_col_name;
+			data_col_name = new char [ strlen( gui::get_str( "data_col_name" ) ) + 1 ];
+			strcpy( data_col_name, gui::get_str( "data_col_name" ) );
+		}
+		else
+			data_col_num = gui::get_int( "data_col_num" );
+
+		if ( strlen( gui::get_str( "t_col_name" ) ) > 0 )
+		{
+			delete [ ] t_col_name;
+			t_col_name = new char [ strlen( gui::get_str( "t_col_name" ) ) + 1 ];
+			strcpy( t_col_name, gui::get_str( "t_col_name" ) );
+		}
+		else
+			if ( gui::get_int( "t_col_num" ) > 0 )
+				t_col_num = gui::get_int( "t_col_num" );
+
+		try
+		{
+			if ( ( data_col_name != NULL && strlen( data_col_name ) > 0 ) ||
+				 ( t_col_name != NULL && strlen( t_col_name ) > 0 ) )
+				namrow = 0;
+			else
+				namrow = -1;
+
+			csv.Load( csv_file, rapidcsv::LabelParams( namrow, -1 ), rapidcsv::SeparatorParams( ',', true ), rapidcsv::ConverterParams( true, std::numeric_limits< long double >::quiet_NaN( ), -1 ), rapidcsv::LineReaderParams( true, '#' ) );
+			fexist = true;
+		}
+		catch ( ... )
+		{
+			cmd( "switch -- [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Data file does not exist\" -detail \"If you want to add the data file later, press 'OK', or press 'Cancel' to abort defining assimilation data.\" ] { ok { set answer 1 } cancel { set answer 0 } }" );
+
+			if ( ! gui::get_bool( "answer" ) )
+				res = 2;
+
+			fexist = false;
+		}
+
+		if ( fexist )
+		{
+			if ( data_col_name != NULL && strlen( data_col_name ) > 0 )
+			{
+				cnames = csv.GetColumnNames( );
+				cexist = std::find( cnames.begin( ), cnames.end( ), data_col_name ) != cnames.end( );
+			}
+			else
+				cexist = data_col_num <= ( int ) csv.GetColumnCount( );
+
+			if ( ! cexist )
+			{
+				cmd( "switch -- [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Data column does not exist\" -detail \"If you want to add the data column later, press 'OK', or press 'Cancel' to abort defining assimilation data.\" ] { ok { set answer 1 } cancel { set answer 0 } }" );
+
+				if ( ! gui::get_bool( "answer" ) )
+					res = 2;
+			}
+
+			if ( t_col_name != NULL && strlen( t_col_name ) > 0 )
+			{
+				cnames = csv.GetColumnNames( );
+				cexist = std::find( cnames.begin( ), cnames.end( ), t_col_name ) != cnames.end( );
+			}
+			else
+				cexist = t_col_num <= ( int ) csv.GetColumnCount( );
+
+			if ( res != 2 && ! cexist )
+			{
+				cmd( "switch -- [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Time reference column does not exist\" -detail \"If you want to add the time reference column later, press 'OK', or press 'Cancel' to abort defining assimilation data.\" ] { ok { set answer 1 } cancel { set answer 0 } }" );
+
+				if ( ! gui::get_bool( "answer" ) )
+					res = 2;
+			}
+		}
+	}
 
 	cmd( "destroytop $_w" );
 

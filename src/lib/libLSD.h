@@ -465,6 +465,7 @@ class lsd::simulation : public equation	// simulation container class
 		dlliblinkage *liblnk = NULL;	// call-back references for DLL
 		hand_vecT run_pids;				// parallel running instances process id's
 		int add_to_tot = false;			// type of totals file generated (bool)
+		int assim_disable = false;		// disable data assimilation
 		int deb_set = false;			// debug enable control (bool)
 		int deb_t;						// next debug stop time step (0 for none)
 		int dobar = false;				// enable progress bar in log/standard output
@@ -1029,7 +1030,7 @@ class lsd::assimilation					// data assimilation container class
 	friend class simulation;
 
 	public:
-		char *csv = NULL;				// name of source data CSV file
+		char *csv_file = NULL;			// name of source data CSV file
 		char *data_col_name = NULL;		// name of data value column
 		char *label = NULL;				// variable name
 		char *t_col_name = NULL;		// name of time value column

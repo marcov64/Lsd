@@ -336,7 +336,7 @@ void lsd::object::load_elem_lists( )
 
 		ca = sim->search_assimilation( cv->label );
 		if ( ca != NULL )
-			cmd( "lappend modCSV \"%s\"", ca->csv );
+			cmd( "lappend modCSV \"%s\"", ca->csv_file );
 	}
 
 	// register son objects
