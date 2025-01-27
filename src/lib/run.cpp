@@ -218,10 +218,42 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
  *************************************************************/
 int lsd::simulation::init_new_seq( char *bar_done, int & perc_done, int & last_done )
 {
+	bool first;
 	int i;
+	assimilation *ca;
 
 	run = 1;					// first run in the sequence
 	quit = 0;					// not marked for abortion
+
+	// load assimilation data, if amy
+	if ( assim != NULL )
+	{
+		if ( ( i = load_assim_data( ) ) < count_assimilation( ) )
+		{
+			if ( i == 0 )
+			{
+				empty_assimilation( );
+				plog( "\nNo data for assimilation found, configuration ignored\n" );
+			}
+			else
+			{
+				plog( "\nData for assimilation missing for:" );
+				for ( ca = assim, first = true; ca != NULL; ca = ca->next )
+					if ( ca->missing )
+					{
+						plog( "%s %s", first ? "" : ",", ca->label );
+						first = false;
+					}
+			}
+
+#ifndef _TERM_
+			cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Cannot load data assimilation data\" -detail \"Part or all data for assimilation could not be retrieved from data files.\nPlease check your assimilation configuration.\"" );
+#endif
+		}
+
+		if ( assim != NULL )
+			plog( "\nAssimilation data loaded for %d variables", i );
+	}
 
 	// check if there are parallel computing variables
 	if ( parallel_disable || max_threads < 2 )

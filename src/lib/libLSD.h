@@ -162,6 +162,7 @@ typedef std::condition_variable cond_vT;
 typedef std::list < int > i_listT;
 typedef std::lock_guard < std::mutex > l_guardT;
 typedef std::lock_guard < std::recursive_mutex > rec_lguardT;
+typedef std::map < int, double > dbl_mapT;
 typedef std::mutex mtxT;
 typedef std::recursive_mutex rec_mtxT;
 typedef std::set < int > i_setT;
@@ -173,15 +174,16 @@ typedef std::vector < double > d_vecT;
 typedef std::vector < int > i_vecT;
 typedef std::vector < handleT > hand_vecT;
 typedef std::vector < long > l_vecT;
-typedef std::vector < std::string > str_vecT;
+typedef std::vector < strT > str_vecT;
 typedef std::vector < std::thread > thr_vecT;
 typedef std::vector < std::vector < int > > i2_vecT;
-typedef std::vector < std::vector < std::string > > str2_vecT;
+typedef std::vector < std::vector < strT > > str2_vecT;
 typedef std::vector < std::list < int > > i_list_vecT;
 typedef std::unique_lock < std::mutex > uniq_lT;
 typedef std::unique_lock < std::recursive_mutex > rec_uniqlT;
-typedef std::unordered_map < std::string, int > i_mapT;
-typedef std::unordered_map < std::string, std::string > p_mapT;
+typedef std::unordered_map < strT, dbl_mapT > dm_mapT;
+typedef std::unordered_map < strT, int > i_mapT;
+typedef std::unordered_map < strT, strT > p_mapT;
 
 // global namespace functions (legacy)
 void close_sim( void );						// legacy user equation closure
@@ -537,6 +539,7 @@ class lsd::simulation : public equation	// simulation container class
 		clock_t start_profile[ MAX_PROF_SIZE ];// profile-level start times
 		clock_t end_profile[ MAX_PROF_SIZE ];// profile-level end times
 		cond_vT upd_workers;			// worker schedule update signal
+		dm_mapT assim_data;				// assimilation data map of maps
 		int nsim;						// library simulation object index
 		int ran_gen_id = 2;				// ID of initial generator (DO NOT CHANGE)
 		int stack_level;				// LSD stack call level
@@ -590,11 +593,11 @@ class lsd::simulation : public equation	// simulation container class
 		void empty_sensitivity( sensitivity *cs = NULL );
 		void empty_stack( void );
 		void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const char *logFmt, ... );
-		void init_random( unsigned seed );// reset the random number generator seed
+		void init_random( unsigned seed );
 		void move_obj( const char *lab, const char *dest );
-		void plog( const char *msg, ... );// write on log window or terminal
+		void plog( const char *msg, ... );
 		void reset_blueprint( object *r );
-		void set_fast( int level );		// enable fast mode
+		void set_fast( int level );
 		void unload_configuration( bool full );
 
 		simulation( void );				// constructor
@@ -604,9 +607,11 @@ class lsd::simulation : public equation	// simulation container class
 		bool load_txt_description( const char *msg, FILE *f );
 		bool next_batch( void );
 		double betacf( double a, double b, double x );
-		double build_obj_list( bool set_list );// build object list for pointer checking
+		double build_obj_list( bool set_list );
+		int count_assimilation( void );
 		int init_new_run( clock_t & start, clock_t & last_update );
 		int init_new_seq( char *bar_done, int & perc_done, int & last_done );
+		int load_assim_data( void );
 		int load_txt_configuration( bool reload, int quick );
 		int monitor_logs( void );
 		template < class distr > double draw_gen( distr &d );
@@ -617,7 +622,7 @@ class lsd::simulation : public equation	// simulation container class
 		template < class distr > double draw_mt32( distr &d );
 		template < class distr > double draw_mt64( distr &d );
 		template < class distr > double draw_rd( distr &d );
-		void *set_random( int gen );	// set random generator engine
+		void *set_random( int gen );
 		void empty_blueprint( void );
 		void empty_cemetery( void );
 		void empty_description( void );
@@ -1030,6 +1035,7 @@ class lsd::assimilation					// data assimilation container class
 	friend class simulation;
 
 	public:
+		bool missing = false;			// data could not be retrieved
 		char *csv_file = NULL;			// name of source data CSV file
 		char *data_col_name = NULL;		// name of data value column
 		char *label = NULL;				// variable name

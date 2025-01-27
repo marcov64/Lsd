@@ -2185,9 +2185,9 @@ double gui::eval_double( const char *tcl_exp )
  *************************************************************/
 const char *gui::get_make_var( const char *var, const char *buf, char *dest, int sz )
 {
+	strT buffer, pattern;
 	std::regex regex;
 	std::smatch match;
-	std::string buffer, pattern;
 
 	buffer = buf;
 	pattern = "(^|\n)[ \t]*";

@@ -642,9 +642,9 @@ int lsd::assimilation::dataentry( const char *parWnd )
 {
 	bool cexist, fexist;
 	int namrow, res;
+	str_vecT cnames;
 	variable *cv;
 	rapidcsv::Document csv( "" );
-	std::vector< std::string > cnames;
 
 	cv = sim->root->search_var( NULL, label );
 	if ( cv == NULL )
@@ -871,7 +871,7 @@ int lsd::assimilation::dataentry( const char *parWnd )
 			else
 				namrow = -1;
 
-			csv.Load( csv_file, rapidcsv::LabelParams( namrow, -1 ), rapidcsv::SeparatorParams( ',', true ), rapidcsv::ConverterParams( true, std::numeric_limits< long double >::quiet_NaN( ), -1 ), rapidcsv::LineReaderParams( true, '#' ) );
+			csv.Load( csv_file, rapidcsv::LabelParams( namrow, -1 ), rapidcsv::SeparatorParams( ',', true ), rapidcsv::ConverterParams( true, std::numeric_limits< long double >::quiet_NaN( ) ), rapidcsv::LineReaderParams( true, '#' ) );
 			fexist = true;
 		}
 		catch ( ... )
