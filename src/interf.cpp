@@ -49,7 +49,7 @@ lsd::object *gui::operate( lsd::object *r )
 	const char *lab1, *lab2, *lab3, *lab4;
 	design *doe;
 	double fracMC, fake = 0;
-	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, temp[ 13 ], done = 0;
+	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, temp[ 12 ], done = 0;
 	long nlinks, ptsSa, maxMC;
 	lsd::assimilation *ca;
 	lsd::bridge *cb;
@@ -2418,8 +2418,7 @@ lsd::object *gui::operate( lsd::object *r )
 			temp[ 8 ] = sim.prof_aggr_time;
 			temp[ 9 ] = sim.no_ptr_chk;
 			temp[ 10 ] = sim.parallel_disable;
-			temp[ 11 ] = sim.assim_disable;
-			temp[ 12 ] = sim.assim_realiz;
+			temp[ 11 ] = sim.assim_realiz;
 
 			Tcl_LinkVar( interp, "last_run", ( char * ) & sim.last_run, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "seed", ( char * ) & sim.seed, TCL_LINK_INT );
@@ -2430,7 +2429,6 @@ lsd::object *gui::operate( lsd::object *r )
 			Tcl_LinkVar( interp, "prof_aggr_time", ( char * ) & sim.prof_aggr_time, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "no_ptr_chk", ( char * ) & sim.no_ptr_chk, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "parallel_disable", ( char * ) & sim.parallel_disable, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "assim_disable", ( char * ) & sim.assim_disable, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "assim_realiz", ( char * ) & sim.assim_realiz, TCL_LINK_INT );
 
 			cmd( "set tw 30" );					// text label width
@@ -2493,8 +2491,8 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::checkbutton $T.c.npar -text \"Disable parallel computation\" -variable parallel_disable" );
 			if ( ! sim.root->search_parallel( ) || sim.max_threads < 2 )
 				cmd( "$T.c.npar configure -state disabled" );
-			cmd( "ttk::checkbutton $T.c.nda -text \"Disable data assimilation\" -variable assim_disable -state %s", sim.assim == NULL ? "disabled" : "normal" );
-			cmd( "pack $T.c.obs $T.c.aggr $T.c.nchk $T.c.npar $T.c.nda -anchor w" );
+
+			cmd( "pack $T.c.obs $T.c.aggr $T.c.nchk $T.c.npar -anchor w" );
 
 			cmd( "pack $T.f $T.c -padx $_5 -pady $_5" );
 
@@ -2536,12 +2534,11 @@ lsd::object *gui::operate( lsd::object *r )
 				sim.prof_aggr_time = temp[ 8 ];
 				sim.no_ptr_chk = temp[ 9 ];
 				sim.parallel_disable = temp[ 10 ];
-				sim.assim_disable = temp[ 11 ];
-				sim.assim_realiz = temp[ 12 ];
+				sim.assim_realiz = temp[ 11 ];
 			}
 			else
 				// signal unsaved change if anything to be saved
-				if ( temp[ 1 ] != sim.last_run || ( unsigned ) temp[ 2 ] != sim.seed || temp[ 3 ] != sim.last_t || temp[ 4 ] != sim.deb_t || temp[ 5 ] != sim.stack_info || temp[ 6 ] != sim.prof_min_msecs || temp[ 7 ] != sim.prof_obs_only || temp[ 8 ] != sim.prof_aggr_time || temp[ 9 ] != sim.no_ptr_chk || temp[ 10 ] != sim.parallel_disable || temp[ 11 ] != sim.assim_disable || temp[ 12 ] != sim.assim_realiz )
+				if ( temp[ 1 ] != sim.last_run || ( unsigned ) temp[ 2 ] != sim.seed || temp[ 3 ] != sim.last_t || temp[ 4 ] != sim.deb_t || temp[ 5 ] != sim.stack_info || temp[ 6 ] != sim.prof_min_msecs || temp[ 7 ] != sim.prof_obs_only || temp[ 8 ] != sim.prof_aggr_time || temp[ 9 ] != sim.no_ptr_chk || temp[ 10 ] != sim.parallel_disable || temp[ 11 ] != sim.assim_realiz )
 					unsaved_change( true );
 
 			Tcl_UnlinkVar( interp, "last_run" );
@@ -2553,7 +2550,6 @@ lsd::object *gui::operate( lsd::object *r )
 			Tcl_UnlinkVar( interp, "prof_aggr_time" );
 			Tcl_UnlinkVar( interp, "no_ptr_chk" );
 			Tcl_UnlinkVar( interp, "parallel_disable" );
-			Tcl_UnlinkVar( interp, "assim_disable" );
 			Tcl_UnlinkVar( interp, "assim_realiz" );
 
 		break;
@@ -4570,6 +4566,13 @@ lsd::object *gui::operate( lsd::object *r )
 		// Create batch for multi-runs jobs and optionally run it
 		case 68:
 
+			// check for data assimilation
+			if ( sim.assim != NULL && sim.assim_realiz > 1 )
+			{
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Data assimilation configured\" -detail \"The current configuration is set to perform data assimilation, which already uses parallel processing. Please use the non-parallel run option.\"" );
+				break;
+			}
+
 			// check a model is already loaded
 			if ( ! sim.conf_ok )
 				findexSens = 0;						// no sensitivity created
@@ -5012,6 +5015,13 @@ lsd::object *gui::operate( lsd::object *r )
 			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 || strlen( sim.conf_file ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create and save one before trying to start a parallel run.\"" );
+				break;
+			}
+
+			// check for data assimilation
+			if ( sim.assim != NULL && sim.assim_realiz > 1 )
+			{
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Data assimilation configured\" -detail \"The current configuration is set to perform data assimilation, which already uses parallel processing. Please use the non-parallel run option.\"" );
 				break;
 			}
 

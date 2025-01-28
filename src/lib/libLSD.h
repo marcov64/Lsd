@@ -467,7 +467,6 @@ class lsd::simulation : public equation	// simulation container class
 		dlliblinkage *liblnk = NULL;	// call-back references for DLL
 		hand_vecT run_pids;				// parallel running instances process id's
 		int add_to_tot = false;			// type of totals file generated (bool)
-		int assim_disable = false;		// disable data assimilation
 		int assim_realiz = 0;			// data assimilation realizations (0=no DA)
 		int deb_set = false;			// debug enable control (bool)
 		int deb_t;						// next debug stop time step (0 for none)

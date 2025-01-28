@@ -955,7 +955,7 @@ wrench icon on the tool bar.</span></p>
 below.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=207 height=290 src="image/simsetting.png"></span></p>
+width=212 height=276 src="image/simsetting.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The option fields in the Simulation
 Settings window are:</span></p>
@@ -999,9 +999,11 @@ unit-increased seed value, starting from the one set here.</span></p>
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Number of realizations</span></b></span><span
 lang=EN-US>: the number of Monte Carlo realizations used for <a
-href="browser.html#assimilation">data assimilation</a> data assimilation (DA).
-If set to 1 (one), data assimilation is not performed, even if there are <a
-href="LSD_faqs.html#variable">Variables</a> configured for DA.</span></p>
+href="browser.html#assimilation">data assimilation</a> (DA). If set to 1 (one),
+data assimilation is not performed, even if there are <a
+href="LSD_faqs.html#variable">Variables</a> configured for DA. This option (1)
+is useful to accelerate simulation computation when data assimilation is not
+required, including allowing for parallel run.</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
@@ -1121,17 +1123,6 @@ Variables marked to be computed in parallel, if any (see <a
 href="browser.html#changeelement">here</a>). This option may be useful to
 disable parallel processing to allow for more details in simulation error
 messages or to permit the use of the profiler.</span></p>
-
-<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Disable data assimilation</span></b></span><span
-lang=EN-US>: if checked, disables the data assimilation process during
-simulation, even if there are Variables marked to have data assimilated (see <a
-href="browser.html#assimilation">here</a>). This option is useful to accelerate
-simulation computation when data assimilation is not required. If there are no
-Variables set for assimilations, or the number of realizations is set to one,
-this option is disabled.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Only the first three option fields in the
 Simulation Settings window are saved in the </span><span class=Cdigo><span
