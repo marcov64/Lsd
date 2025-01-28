@@ -49,7 +49,7 @@ lsd::object *gui::operate( lsd::object *r )
 	const char *lab1, *lab2, *lab3, *lab4;
 	design *doe;
 	double fracMC, fake = 0;
-	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, temp[ 12 ], done = 0;
+	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, temp[ 13 ], done = 0;
 	long nlinks, ptsSa, maxMC;
 	lsd::assimilation *ca;
 	lsd::bridge *cb;
@@ -2419,6 +2419,7 @@ lsd::object *gui::operate( lsd::object *r )
 			temp[ 9 ] = sim.no_ptr_chk;
 			temp[ 10 ] = sim.parallel_disable;
 			temp[ 11 ] = sim.assim_disable;
+			temp[ 12 ] = sim.assim_realiz;
 
 			Tcl_LinkVar( interp, "last_run", ( char * ) & sim.last_run, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "seed", ( char * ) & sim.seed, TCL_LINK_INT );
@@ -2427,11 +2428,12 @@ lsd::object *gui::operate( lsd::object *r )
 			Tcl_LinkVar( interp, "prof_min_msecs", ( char * ) & sim.prof_min_msecs, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "prof_obs_only", ( char * ) & sim.prof_obs_only, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "prof_aggr_time", ( char * ) & sim.prof_aggr_time, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "assim_disable", ( char * ) & sim.assim_disable, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "no_ptr_chk", ( char * ) & sim.no_ptr_chk, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "parallel_disable", ( char * ) & sim.parallel_disable, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "assim_disable", ( char * ) & sim.assim_disable, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "assim_realiz", ( char * ) & sim.assim_realiz, TCL_LINK_INT );
 
-			cmd( "set tw 28" );					// text label width
+			cmd( "set tw 30" );					// text label width
 
 			cmd( "set T .simset" );
 			cmd( "newtop $T \"Simulation Settings\" { set choice 2 }" );
@@ -2456,6 +2458,12 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "$T.f.b.e1 insert 0 $seed" );
 			cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx $_2 -pady $_2" );
 
+			cmd( "ttk::frame $T.f.g" );
+			cmd( "ttk::label $T.f.g.l -width $tw -anchor e -text \"Number of realizations (1:no DA)\"" );
+			cmd( "ttk::spinbox $T.f.g.e -width 7 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set assim_realiz %%P; return 1 } { %%W delete 0 end; %%W insert 0 $assim_realiz; return 0 } } -invalidcommand { bell } -justify center" );
+			cmd( "$T.f.g.e insert 0 $assim_realiz" );
+			cmd( "pack $T.f.g.l $T.f.g.e -side left -anchor w -padx $_2 -pady $_2" );
+
 			cmd( "ttk::frame $T.f.d" );
 			cmd( "ttk::label $T.f.d.l2 -width $tw -anchor e -text \"Start debugger at step (0:none)\"" );
 			cmd( "ttk::spinbox $T.f.d.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set deb_t %%P; return 1 } { %%W delete 0 end; %%W insert 0 $deb_t; return 0 } } -invalidcommand { bell } -justify center" );
@@ -2474,7 +2482,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "$T.f.f.e2 insert 0 $prof_min_msecs" );
 			cmd( "pack $T.f.f.l2 $T.f.f.e2 -side left -anchor w -padx $_2 -pady $_2" );
 
-			cmd( "pack $T.f.c $T.f.a $T.f.b $T.f.d $T.f.e $T.f.f -anchor w" );
+			cmd( "pack $T.f.c $T.f.a $T.f.b $T.f.g $T.f.d $T.f.e $T.f.f -anchor w" );
 
 			cmd( "ttk::frame $T.c" );
 
@@ -2529,10 +2537,11 @@ lsd::object *gui::operate( lsd::object *r )
 				sim.no_ptr_chk = temp[ 9 ];
 				sim.parallel_disable = temp[ 10 ];
 				sim.assim_disable = temp[ 11 ];
+				sim.assim_realiz = temp[ 12 ];
 			}
 			else
 				// signal unsaved change if anything to be saved
-				if ( temp[ 1 ] != sim.last_run || ( unsigned ) temp[ 2 ] != sim.seed || temp[ 3 ] != sim.last_t || temp[ 4 ] != sim.deb_t || temp[ 5 ] != sim.stack_info || temp[ 6 ] != sim.prof_min_msecs || temp[ 7 ] != sim.prof_obs_only || temp[ 8 ] != sim.prof_aggr_time || temp[ 9 ] != sim.no_ptr_chk || temp[ 10 ] != sim.parallel_disable || temp[ 11 ] != sim.assim_disable )
+				if ( temp[ 1 ] != sim.last_run || ( unsigned ) temp[ 2 ] != sim.seed || temp[ 3 ] != sim.last_t || temp[ 4 ] != sim.deb_t || temp[ 5 ] != sim.stack_info || temp[ 6 ] != sim.prof_min_msecs || temp[ 7 ] != sim.prof_obs_only || temp[ 8 ] != sim.prof_aggr_time || temp[ 9 ] != sim.no_ptr_chk || temp[ 10 ] != sim.parallel_disable || temp[ 11 ] != sim.assim_disable || temp[ 12 ] != sim.assim_realiz )
 					unsaved_change( true );
 
 			Tcl_UnlinkVar( interp, "last_run" );
@@ -2545,6 +2554,7 @@ lsd::object *gui::operate( lsd::object *r )
 			Tcl_UnlinkVar( interp, "no_ptr_chk" );
 			Tcl_UnlinkVar( interp, "parallel_disable" );
 			Tcl_UnlinkVar( interp, "assim_disable" );
+			Tcl_UnlinkVar( interp, "assim_realiz" );
 
 		break;
 

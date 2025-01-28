@@ -729,8 +729,8 @@ model configuration does not use parallel object computation (see details <a
 href="menumodel.html">here</a>), this option has no effect.</span></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Skip generating results
 files</span></b></span><span lang=EN-US>: if enabled, LSD will not produce the
 time-series detailed </span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
@@ -955,7 +955,7 @@ wrench icon on the tool bar.</span></p>
 below.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=202 height=272 src="image/simsetting.png"></span></p>
+width=207 height=290 src="image/simsetting.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The option fields in the Simulation
 Settings window are:</span></p>
@@ -993,6 +993,15 @@ lang=EN-US>: the seed to use for the pseudo-random number generator.
 Controlling this value the user can exactly replicate the pseudo-random events.
 If more than one simulation run has been requested, each of them will use a
 unit-increased seed value, starting from the one set here.</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Number of realizations</span></b></span><span
+lang=EN-US>: the number of Monte Carlo realizations used for <a
+href="browser.html#assimilation">data assimilation</a> data assimilation (DA).
+If set to 1 (one), data assimilation is not performed, even if there are <a
+href="LSD_faqs.html#variable">Variables</a> configured for DA.</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
@@ -1121,7 +1130,8 @@ lang=EN-US>: if checked, disables the data assimilation process during
 simulation, even if there are Variables marked to have data assimilated (see <a
 href="browser.html#assimilation">here</a>). This option is useful to accelerate
 simulation computation when data assimilation is not required. If there are no
-Variables set for assimilations, this option is disabled.</span></p>
+Variables set for assimilations, or the number of realizations is set to one,
+this option is disabled.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Only the first three option fields in the
 Simulation Settings window are saved in the </span><span class=Cdigo><span
