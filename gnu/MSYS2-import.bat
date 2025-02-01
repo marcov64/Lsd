@@ -126,7 +126,6 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libreadline8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libtermcap-0.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libxxhash.dll %LSD_DIR%\gnu\bin\
 XCOPY %XOPT% %MSYS_DIR%\mingw64\share\gdb %LSD_DIR%\gnu\share\gdb\
-XCOPY %OPT% %MSYS_DIR%\mingw64\etc\gdbinit %LSD_DIR%\gnu\etc\
 
 echo diff compare tool...
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\diff.exe %LSD_DIR%\gnu\bin\
@@ -167,6 +166,12 @@ if not exist %LSD_DIR%\gnu\bin\subboshow.exe echo missing Subbotools subboshow.e
 if not exist %LSD_DIR%\gnu\bin\LMM.assembly.manifest echo missing LMM.assembly.manifest
 if not exist %LSD_DIR%\gnu\bin\Shortcut.exe echo missing Shortcut.exe
 if not exist %LSD_DIR%\gnu\bin\TailWin.exe echo missing TailWin.exe
+
+echo add pretty printers to GDB
+mkdir %LSD_DIR%\gnu\etc
+FINDSTR /V end %OPT% %MSYS_DIR%\mingw64\etc\gdbinit > %LSD_DIR%\gnu\etc\gdbinit-gcc
+copy /B /Y %LSD_DIR%\gnu\etc\gdbinit-gcc + %LSD_DIR%\gnu\gdbinit-eigen gdbinit
+del %LSD_DIR%\gnu\etc\gdbinit-gcc
 
 echo done
 
