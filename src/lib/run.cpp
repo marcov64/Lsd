@@ -219,7 +219,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 int lsd::simulation::init_new_seq( char *bar_done, int & perc_done, int & last_done )
 {
 	bool first;
-	int i;
+	int i, j;
 	assimilation *ca;
 
 	run = 1;					// first run in the sequence
@@ -231,10 +231,7 @@ int lsd::simulation::init_new_seq( char *bar_done, int & perc_done, int & last_d
 		if ( ( i = load_assim_data( ) ) < count_assimilation( ) )
 		{
 			if ( i == 0 )
-			{
 				empty_assimilation( );
-				plog( "\nNo data for assimilation found, configuration ignored\n" );
-			}
 			else
 			{
 				plog( "\nData for assimilation missing for:" );
@@ -247,12 +244,56 @@ int lsd::simulation::init_new_seq( char *bar_done, int & perc_done, int & last_d
 			}
 
 #ifndef _TERM_
-			cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Cannot load data assimilation data\" -detail \"Part or all data for assimilation could not be retrieved from data files.\nPlease check your assimilation configuration.\"" );
+			cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Cannot load assimilation data\" -detail \"Part or all data for assimilation could not be retrieved from data files.\nPlease check your assimilation configuration.\"" );
 #endif
 		}
 
 		if ( assim != NULL )
-			plog( "\nAssimilation data loaded for %d variables", i );
+		{
+			if ( ( j = load_assim_cov( ) ) <= 0 )
+			{
+				if ( j == -1 )
+					plog( "\nUnused data in covariance matrix ignored" );
+
+				plog( "\nAssimilation data loaded for %d variables\n", i );
+			}
+			else
+			{
+				empty_assimilation( );
+				switch ( j )
+				{
+					case 1:
+						plog( "\nInvalid covariance matrix file name" );
+						break;
+
+					case 2:
+						plog( "\nInvalid covariance matrix file CSV format" );
+						break;
+
+					case 3:
+						plog( "\nNon-symmetric covariance matrix (rows != columns)" );
+						break;
+
+					case 4:
+						plog( "\nEmpty covariance matrix" );
+						break;
+
+					case 5:
+						plog( "\nMissing variable(s) in covariance matrix" );
+						break;
+
+					case 6:
+						plog( "\nMissing elements in covariance matrix" );
+				}
+
+#ifndef _TERM_
+			cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Cannot load assimilation covariance matrix\" -detail \"There was a problem loading the covariance matrix for data assimilation from file '%s'.\nCheck the Log window for details.\"", cov_file != NULL ? cov_file : "(none)" );
+#endif
+			}
+		}
+
+		if ( assim == NULL )
+			plog( "\nData assimilation configuration is invalid, ignoring\n" );
 	}
 
 	// check if there are parallel computing variables

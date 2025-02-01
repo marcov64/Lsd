@@ -25,7 +25,7 @@
 
 /*
 cases used up to 97
-cases free 35, 40, 45, 48, 51
+cases free 40, 45, 48, 51
 */
 
 #include "LSD.h"
@@ -49,7 +49,7 @@ lsd::object *gui::operate( lsd::object *r )
 	const char *lab1, *lab2, *lab3, *lab4;
 	design *doe;
 	double fracMC, fake = 0;
-	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, temp[ 12 ], done = 0;
+	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, temp[ 11 ], done = 0;
 	long nlinks, ptsSa, maxMC;
 	lsd::assimilation *ca;
 	lsd::bridge *cb;
@@ -2404,7 +2404,7 @@ lsd::object *gui::operate( lsd::object *r )
 		break;
 
 
-		// Simulation manager: sets seeds, number of steps, number of simulations
+		// Simulation settings: sets seeds, number of steps, number of simulations
 		case 22:
 
 			// save previous values to allow canceling operation
@@ -2418,7 +2418,6 @@ lsd::object *gui::operate( lsd::object *r )
 			temp[ 8 ] = sim.prof_aggr_time;
 			temp[ 9 ] = sim.no_ptr_chk;
 			temp[ 10 ] = sim.parallel_disable;
-			temp[ 11 ] = sim.assim_realiz;
 
 			Tcl_LinkVar( interp, "last_run", ( char * ) & sim.last_run, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "seed", ( char * ) & sim.seed, TCL_LINK_INT );
@@ -2429,10 +2428,8 @@ lsd::object *gui::operate( lsd::object *r )
 			Tcl_LinkVar( interp, "prof_aggr_time", ( char * ) & sim.prof_aggr_time, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "no_ptr_chk", ( char * ) & sim.no_ptr_chk, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "parallel_disable", ( char * ) & sim.parallel_disable, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "assim_realiz", ( char * ) & sim.assim_realiz, TCL_LINK_INT );
 
 			cmd( "set tw 30" );					// text label width
-
 			cmd( "set T .simset" );
 			cmd( "newtop $T \"Simulation Settings\" { set choice 2 }" );
 
@@ -2456,12 +2453,6 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "$T.f.b.e1 insert 0 $seed" );
 			cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx $_2 -pady $_2" );
 
-			cmd( "ttk::frame $T.f.g" );
-			cmd( "ttk::label $T.f.g.l -width $tw -anchor e -text \"Number of realizations (1:no DA)\"" );
-			cmd( "ttk::spinbox $T.f.g.e -width 7 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set assim_realiz %%P; return 1 } { %%W delete 0 end; %%W insert 0 $assim_realiz; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( "$T.f.g.e insert 0 $assim_realiz" );
-			cmd( "pack $T.f.g.l $T.f.g.e -side left -anchor w -padx $_2 -pady $_2" );
-
 			cmd( "ttk::frame $T.f.d" );
 			cmd( "ttk::label $T.f.d.l2 -width $tw -anchor e -text \"Start debugger at step (0:none)\"" );
 			cmd( "ttk::spinbox $T.f.d.e2 -width 7 -from 0 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 } { set deb_t %%P; return 1 } { %%W delete 0 end; %%W insert 0 $deb_t; return 0 } } -invalidcommand { bell } -justify center" );
@@ -2480,7 +2471,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "$T.f.f.e2 insert 0 $prof_min_msecs" );
 			cmd( "pack $T.f.f.l2 $T.f.f.e2 -side left -anchor w -padx $_2 -pady $_2" );
 
-			cmd( "pack $T.f.c $T.f.a $T.f.b $T.f.g $T.f.d $T.f.e $T.f.f -anchor w" );
+			cmd( "pack $T.f.c $T.f.a $T.f.b $T.f.d $T.f.e $T.f.f -anchor w" );
 
 			cmd( "ttk::frame $T.c" );
 
@@ -2534,11 +2525,10 @@ lsd::object *gui::operate( lsd::object *r )
 				sim.prof_aggr_time = temp[ 8 ];
 				sim.no_ptr_chk = temp[ 9 ];
 				sim.parallel_disable = temp[ 10 ];
-				sim.assim_realiz = temp[ 11 ];
 			}
 			else
 				// signal unsaved change if anything to be saved
-				if ( temp[ 1 ] != sim.last_run || ( unsigned ) temp[ 2 ] != sim.seed || temp[ 3 ] != sim.last_t || temp[ 4 ] != sim.deb_t || temp[ 5 ] != sim.stack_info || temp[ 6 ] != sim.prof_min_msecs || temp[ 7 ] != sim.prof_obs_only || temp[ 8 ] != sim.prof_aggr_time || temp[ 9 ] != sim.no_ptr_chk || temp[ 10 ] != sim.parallel_disable || temp[ 11 ] != sim.assim_realiz )
+				if ( temp[ 1 ] != sim.last_run || ( unsigned ) temp[ 2 ] != sim.seed || temp[ 3 ] != sim.last_t || temp[ 4 ] != sim.deb_t || temp[ 5 ] != sim.stack_info || temp[ 6 ] != sim.prof_min_msecs || temp[ 7 ] != sim.prof_obs_only || temp[ 8 ] != sim.prof_aggr_time || temp[ 9 ] != sim.no_ptr_chk || temp[ 10 ] != sim.parallel_disable )
 					unsaved_change( true );
 
 			Tcl_UnlinkVar( interp, "last_run" );
@@ -2550,7 +2540,131 @@ lsd::object *gui::operate( lsd::object *r )
 			Tcl_UnlinkVar( interp, "prof_aggr_time" );
 			Tcl_UnlinkVar( interp, "no_ptr_chk" );
 			Tcl_UnlinkVar( interp, "parallel_disable" );
+
+		break;
+
+
+		// assimilation settings: sets data assimilation realizations and covariance
+		case 35:
+
+			// save previous values to allow canceling operation
+			temp[ 1 ] = sim.assim_realiz;
+			Tcl_LinkVar( interp, "assim_realiz", ( char * ) & sim.assim_realiz, TCL_LINK_INT );
+
+			cmd( "set path \"%s\"", sim.conf_path );
+			if ( strlen( sim.conf_path ) > 0 )
+				cmd( "cd $path" );
+
+			cmd( "set cov_file \"%s\"", sim.cov_file != NULL ? sim.cov_file : "" );
+			cmd( "if { [ string first / $cov_file ] != -1 } { \
+					set cov_file [ file nativename $cov_file ] \
+				}" );
+
+			cmd( "set tw 30" );					// text label width
+			cmd( "set T .assset" );
+			cmd( "newtop $T \"Data Assimilation Settings\" { set choice 2 }" );
+
+			cmd( "ttk::frame $T.f" );
+
+			cmd( "ttk::frame $T.f.a" );
+			cmd( "ttk::label $T.f.a.l -width $tw -anchor e -text \"Number of realizations (1:no DA)\"" );
+			cmd( "ttk::spinbox $T.f.a.e -width 7 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set assim_realiz %%P; return 1 } { %%W delete 0 end; %%W insert 0 $assim_realiz; return 0 } } -invalidcommand { bell } -justify center" );
+			cmd( "$T.f.a.e insert 0 $assim_realiz" );
+			cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx $_2 -pady $_2" );
+
+			cmd( "pack $T.f.a -anchor w" );
+
+			cmd( "ttk::frame $T.csv" );
+			cmd( "ttk::frame $T.csv.l" );
+			cmd( "ttk::label $T.csv.l.l -text \"Covariance file (CSV only)\"" );
+			cmd( "ttk::label $T.csv.l.pad -width 6" );
+			cmd( "pack $T.csv.l.l $T.csv.l.pad -side left -padx $_5" );
+
+			cmd( "ttk::frame $T.csv.file" );
+			cmd( "ttk::entry $T.csv.file.e -width 40 -textvariable cov_file -justify center" );
+			cmd( "ttk::button $T.csv.file.brw -text Browse -command { \
+					set fn [ tk_getOpenFile -parent $T -title \"Select Data File\" -defaultextension \".csv\" -initialdir $path -filetypes { { {Comma-separated file} {.csv} } } ]; \
+					if { [ string length $fn ] > 0 && ! [ fn_spaces $fn ] } { \
+						set cov_file [ file normalize $fn ]; \
+						if { [ string first [ file normalize $model_dir ] $cov_file ] == 0 } { \
+							set cov_file [ string map [ list \"[ file normalize $model_dir ]/\" \"\" ] $cov_file ] \
+						}; \
+						if { [ string first / $cov_file ] != -1 } { \
+							set cov_file [ file nativename $cov_file ] \
+						} \
+					} \
+				}" );
+			cmd( "pack $T.csv.file.e $T.csv.file.brw -side left -padx $_5" );
+
+			cmd( "pack $T.csv.l $T.csv.file" );
+
+
+			cmd( "pack $T.f $T.csv -padx $_5 -pady $_10" );
+
+			cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#assimilation } { set choice 2 }" );
+
+			cmd( "showtop $T centerW" );
+
+			// check for data assimilation variables
+			if ( sim.assim == NULL )
+				cmd( "ttk::messageBox -parent $T -type ok -icon warning -title Warning -message \"Data assimilation not configured\" -detail \"No variable is configured for data assimilation, changes here are only used if at least one variable is configured with data to be assimilated.\"" );
+
+
+			cmd( "mousewarpto $T.b.ok 0" );
+			cmd( "$T.f.a.e selection range 0 end" );
+			cmd( "focus $T.f.a.e" );
+
+			choice = 0;
+			while ( choice == 0 )
+				Tcl_DoOneEvent( 0 );
+
+			cmd( "set assim_realiz [ $T.f.a.e get ]" );
 			Tcl_UnlinkVar( interp, "assim_realiz" );
+			cmd( "destroytop $T" );
+
+			if ( choice == 2 )
+				sim.assim_realiz = temp[ 1 ];
+			else
+			{
+				bool fchange;
+
+				if ( strlen( get_str( "cov_file" ) ) > 0 )
+				{
+					cmd( "set cov_file [ string map {\\\\ /} $cov_file ]" );
+					lab1 = get_str( "cov_file" );
+					fchange = sim.cov_file == NULL || strcmp( sim.cov_file, lab1 ) != 0;
+				}
+				else
+					fchange = false;
+
+				if ( temp[ 1 ] != sim.assim_realiz || fchange )
+				{
+					if ( fchange )
+					{
+						try
+						{
+							rapidcsv::Document csv;
+							csv.Load( lab1, rapidcsv::LabelParams( 0, 0 ), rapidcsv::SeparatorParams( ',', true ), rapidcsv::ConverterParams( true, std::numeric_limits< long double >::quiet_NaN( ) ), rapidcsv::LineReaderParams( true, '#' ) );
+						}
+						catch ( ... )
+						{
+							cmd( "switch -- [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Covariance file does not exist\" -detail \"If you want to add the covariance file later, press 'OK', or press 'Cancel' to abort changing assimilation settings.\" ] { ok { } cancel { set choice 2 } }" );
+						}
+
+						if ( choice != 2 )
+						{
+							delete [ ] sim.cov_file;
+							sim.cov_file = new char [ strlen( lab1 ) + 1 ];
+							strcpy( sim.cov_file, lab1 );
+						}
+					}
+
+					if ( choice == 2 )
+						sim.assim_realiz = temp[ 1 ];
+					else
+						unsaved_change( true );
+				}
+			}
 
 		break;
 

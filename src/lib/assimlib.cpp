@@ -160,7 +160,7 @@ int lsd::simulation::load_assim_data( void )
 
 	bool fexist;
 	int i, vars_loaded = 0;
-	rapidcsv::Document csv( "" );
+	rapidcsv::Document csv;
 	std::unordered_map < strT, assim_vars > fv;
 
 	for ( auto ca = assim; ca != NULL; ca = ca->next )
@@ -199,7 +199,7 @@ int lsd::simulation::load_assim_data( void )
 						if ( ( *cv )->data_col_num > 0 )
 							data = csv.GetColumn < double >( ( *cv )->data_col_num - 1 );
 						else
-							throw;
+							throw 1;
 
 					( *cv )->missing = false;
 				}
@@ -219,7 +219,7 @@ int lsd::simulation::load_assim_data( void )
 								time = csv.GetColumn < int >( ( *cv )->t_col_num - 1 );
 
 						if ( data.size( ) != time.size( ) )
-							throw;
+							throw 1;
 					}
 					catch( ... )
 					{
@@ -248,4 +248,82 @@ int lsd::simulation::load_assim_data( void )
 	}
 
 	return vars_loaded;
+}
+
+
+/*************************************************************
+ LOAD_ASSIM_COV
+ Load covariance matrix for data assimilation from external file
+ *************************************************************/
+int lsd::simulation::load_assim_cov( void )
+{
+	char fname[ MAX_PATH_LENGTH ];
+	int i, j, res = 0;
+	assimilation *ca;
+	rapidcsv::Document csv;
+	std::unordered_set < strT > covnames;
+	std::unordered_set < strT >::iterator it;
+	str_vecT csvnames;
+
+	if ( cov_file == NULL || strlen( cov_file ) == 0 )
+		return 1;
+
+	snprintf( fname, MAX_PATH_LENGTH, "%s%s%s", conf_path, strlen( conf_path ) > 0 ? "/" : "", cov_file );
+
+	// load matrix from file
+	try
+	{
+		csv.Load( fname, rapidcsv::LabelParams( 0, 0 ), rapidcsv::SeparatorParams( ',', true ), rapidcsv::ConverterParams( true, std::numeric_limits< long double >::quiet_NaN( ) ), rapidcsv::LineReaderParams( true, '#' ) );
+	}
+	catch ( ... )
+	{
+		return 2;
+	}
+
+	// check if matrix is (can be) symmetric
+	auto cnames = csv.GetColumnNames( );
+	auto rnames = csv.GetRowNames( );
+	std::sort( cnames.begin( ), cnames.end( ) );
+	std::sort( rnames.begin( ), rnames.end( ) );
+
+	if ( cnames != rnames )
+		return 3;
+
+	// ignore empty matrix
+	covnames.insert( cnames.begin( ), cnames.end( ) );
+	if ( covnames.size( ) == 0 )
+		return 4;
+
+	// check if all information is available
+	for ( ca = assim, i = 0; ca != NULL; ca = ca->next, ++i )
+	{
+		if ( ( it = covnames.find( ca->label ) ) != covnames.end( ) || ( ca->data_col_name != NULL && ( it = covnames.find( ca->data_col_name ) ) != covnames.end( ) ) )
+		{
+			csvnames.emplace_back( *it );
+			ca->cov_idx = i;
+		}
+		else
+			return 5;
+	}
+
+	// signal unused data
+	if ( covnames.size( ) > csvnames.size( ) )
+		res = -1;
+
+	// build proper matrix, discarding unused data
+	assim_cov.resize( i, i );
+
+	for ( i = 0; i < ( int ) csvnames.size( ); ++i )
+		for ( j = 0; j < ( int ) csvnames.size( ); ++j )
+			try
+			{
+				assim_cov( i, j ) = csv.GetCell < double > ( csvnames[ i ], csvnames[ j ] );
+			}
+			catch ( ... )
+			{
+				assim_cov.resize( 0, 0 );
+				return 6;
+			}
+
+	return res;
 }

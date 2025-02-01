@@ -644,7 +644,7 @@ int lsd::assimilation::dataentry( const char *parWnd )
 	int namrow, res;
 	str_vecT cnames;
 	variable *cv;
-	rapidcsv::Document csv( "" );
+	rapidcsv::Document csv;
 
 	cv = sim->root->search_var( NULL, label );
 	if ( cv == NULL )
@@ -674,7 +674,7 @@ int lsd::assimilation::dataentry( const char *parWnd )
 	cmd( "if { [ string first / $csv_file ] != -1 } { \
 			set csv_file [ file nativename $csv_file ] \
 		}" );
-	cmd( "set data_col_name %s", data_col_name != NULL ? data_col_name : data_col_num < 1 ? label : "" );
+	cmd( "set data_col_name \"%s\"", data_col_name != NULL ? data_col_name : data_col_num < 1 ? label : "" );
 	cmd( "set data_col_num %d", data_col_num );
 	cmd( "set t_col_name \"%s\"", t_col_name != NULL ? t_col_name : "" );
 	cmd( "set t_col_num %d", t_col_num );
@@ -876,7 +876,7 @@ int lsd::assimilation::dataentry( const char *parWnd )
 		}
 		catch ( ... )
 		{
-			cmd( "switch -- [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Data file does not exist\" -detail \"If you want to add the data file later, press 'OK', or press 'Cancel' to abort defining assimilation data.\" ] { ok { set answer 1 } cancel { set answer 0 } }" );
+			cmd( "switch -- [ ttk::messageBox -parent $_w -type okcancel -default cancel -icon warning -title Warning -message \"Data file does not exist\" -detail \"If you want to add the data file later, press 'OK', or press 'Cancel' to abort defining assimilation data.\" ] { ok { set answer 1 } cancel { set answer 0 } }" );
 
 			if ( ! gui::get_bool( "answer" ) )
 				res = 2;
@@ -896,7 +896,7 @@ int lsd::assimilation::dataentry( const char *parWnd )
 
 			if ( ! cexist )
 			{
-				cmd( "switch -- [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Data column does not exist\" -detail \"If you want to add the data column later, press 'OK', or press 'Cancel' to abort defining assimilation data.\" ] { ok { set answer 1 } cancel { set answer 0 } }" );
+				cmd( "switch -- [ ttk::messageBox -parent $_w -type okcancel -default cancel -icon warning -title Warning -message \"Data column does not exist\" -detail \"If you want to add the data column later, press 'OK', or press 'Cancel' to abort defining assimilation data.\" ] { ok { set answer 1 } cancel { set answer 0 } }" );
 
 				if ( ! gui::get_bool( "answer" ) )
 					res = 2;
@@ -912,7 +912,7 @@ int lsd::assimilation::dataentry( const char *parWnd )
 
 			if ( res != 2 && ! cexist )
 			{
-				cmd( "switch -- [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Time reference column does not exist\" -detail \"If you want to add the time reference column later, press 'OK', or press 'Cancel' to abort defining assimilation data.\" ] { ok { set answer 1 } cancel { set answer 0 } }" );
+				cmd( "switch -- [ ttk::messageBox -parent $_w -type okcancel -default cancel -icon warning -title Warning -message \"Time reference column does not exist\" -detail \"If you want to add the time reference column later, press 'OK', or press 'Cancel' to abort defining assimilation data.\" ] { ok { set answer 1 } cancel { set answer 0 } }" );
 
 				if ( ! gui::get_bool( "answer" ) )
 					res = 2;

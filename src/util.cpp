@@ -286,7 +286,7 @@ void gui::error_hard_helper( const char *boxTitle, const char *boxText, const ch
 	{
 		// do run( ) cleanup
 		sim.empty_stack( );
-		sim.running = false;
+		sim.running = sim.running_seq = false;
 		unsavedData = true;				// flag unsaved simulation results
 
 		// run user closing function, reporting error appropriately

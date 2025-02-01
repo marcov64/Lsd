@@ -253,16 +253,12 @@ div.WordSection1
   <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
   margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt'>2.<span
   style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
-  href="#_Simulation_run-time_settings">Simulation run-time settings</a></p>
+  href="#_Simulation_run-time_settings">Run-time settings</a></p>
   <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
   margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span
   lang=EN-US>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><a
   href="#_Show_elements_run-time"><span lang=EN-US>Show/change elements
   run-time properties</span></a> </p>
-  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
-  margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt'>4.<span
-  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
-  href="#_Close_Run-time_Plots">Close Run-time Plots</a></p>
   </td>
  </tr>
 </table>
@@ -635,9 +631,9 @@ lang=EN-US>YYYY/XXXX.sh</span></span><span lang=EN-US>, where </span><span
 class=Cdigo><span lang=EN-US>YYYY</span></span><span lang=EN-US> is the
 configurations subdirectory and </span><span class=Cdigo><span lang=EN-US>XXXX</span></span><span
 lang=EN-US> is the script name (use </span><span class=Cdigo><span lang=EN-US>./XXXX.sh</span></span><span
-lang=EN-US> if already in the configurations subdirectory). If required, the
-user may have to change the script file attributes to allow its execution using
-the command </span><span class=Cdigo><span lang=EN-US>chmod +x</span></span><span
+lang=EN-US> if already in the configurations subdirectory). If required, the user
+may have to change the script file attributes to allow its execution using the
+command </span><span class=Cdigo><span lang=EN-US>chmod +x</span></span><span
 lang=EN-US> </span><span class=Cdigo><span lang=EN-US>YYYY/XXXX.sh</span></span><span
 lang=EN-US> before usage.</span></p>
 
@@ -932,8 +928,8 @@ first create the LSD terminal executable in <a href="LMM.html">LMM</a>!</span></
  </tr>
 </table>
 
-<h1><a name="_Simulation_run-time_settings"></a><span lang=EN-US>Simulation
-run-time settings</span></h1>
+<h1><a name="_Simulation_run-time_settings"></a><span lang=EN-US>Run-time
+settings</span></h1>
 
 <p class=MsoNormal><span lang=EN-US>Options for controlling run-time specific
 simulation settings:</span></p>
@@ -943,6 +939,12 @@ simulation settings:</span></p>
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span lang=EN-US><a href="#_Simulation_Settings">Simulation
 Settings</a></span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US><a href="#_Data_assimilation_settings">Data
+Assimilation Settings</a></span></p>
 
 <h2><a name="_Simulation_Settings"></a><a name=simsetting></a><span lang=EN-US>Simulation
 Settings</span></h2>
@@ -993,17 +995,6 @@ lang=EN-US>: the seed to use for the pseudo-random number generator.
 Controlling this value the user can exactly replicate the pseudo-random events.
 If more than one simulation run has been requested, each of them will use a
 unit-increased seed value, starting from the one set here.</span></p>
-
-<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Number of realizations</span></b></span><span
-lang=EN-US>: the number of Monte Carlo realizations used for <a
-href="browser.html#assimilation">data assimilation</a> (DA). If set to 1 (one),
-data assimilation is not performed, even if there are <a
-href="LSD_faqs.html#variable">Variables</a> configured for DA. This option (1)
-is useful to accelerate simulation computation when data assimilation is not
-required, including allowing for parallel run.</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
@@ -1103,16 +1094,16 @@ class=Cdigo><span lang=EN-US>cur1</span></span><span lang=EN-US>, …) used in
 Macros for validity, equivalently to using Macro </span><span class=Cdigo><span
 lang=EN-US><a href="LSD_macros.html#POINTER_CHECK">NO_POINTER_CHECK</a></span></span><span
 lang=EN-US> at the beginning of the simulation code. However, </span><span
-class=Cdigo><span lang=EN-US>NULL</span></span><span lang=EN-US>-pointer
-detection is enabled even when this option is set. Pointer checking may have
-significant performance impact for some models, particularly when parallel
-computation is used (see <a href="browser.html#changeelement">here</a>).
-Despite speeding up the simulation, it is recommended that this option be only
-used after the model code is fully debugged. If statement </span><span
-class=Cdigo><span lang=EN-US>#define NO_POINTER_CHECK</span></span><span
-lang=EN-US> is used at the beginning of the equation file, this option becomes
-unavailable (and pointer checking is fully disabled, including for </span><span
-class=Cdigo><span lang=EN-US>NULL</span></span><span lang=EN-US> pointers).</span></p>
+class=Cdigo><span lang=EN-US>NULL</span></span><span lang=EN-US>-pointer detection
+is enabled even when this option is set. Pointer checking may have significant
+performance impact for some models, particularly when parallel computation is
+used (see <a href="browser.html#changeelement">here</a>). Despite speeding up
+the simulation, it is recommended that this option be only used after the model
+code is fully debugged. If statement </span><span class=Cdigo><span lang=EN-US>#define
+NO_POINTER_CHECK</span></span><span lang=EN-US> is used at the beginning of the
+equation file, this option becomes unavailable (and pointer checking is fully
+disabled, including for </span><span class=Cdigo><span lang=EN-US>NULL</span></span><span
+lang=EN-US> pointers).</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><a name="_Frequent_Lattice_Updating"></a><span
@@ -1130,6 +1121,50 @@ lang=EN-US>.lsd</span></span><span lang=EN-US> <a
 href="LSD_faqs.html#modelsetting">model configuration</a> file and so are saved
 and retrieved from it. The remaining options remain active during the current <a
 href="browser.html">LSD Browser</a> session only.</span></p>
+
+<h2><a name="_Data_assimilation_settings"></a><a name=assimilation></a><span
+lang=EN-US>Data Assimilation Settings</span></h2>
+
+<p><span lang=EN-US>Set the <a href="browser.html#assimilation">data
+assimilation</a> (DA) options to be applied during run time, using the
+interface below.</span></p>
+
+<p align=center style='text-align:center'><span lang=EN-US><img border=0
+width=283 height=144 src="image/da_settings.png"></span></p>
+
+<p class=MsoNormal><span lang=EN-US>The available options in the Data
+Assimilation Settings window are:</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Number of realizations</span></b></span><span
+lang=EN-US>: the number of Monte Carlo realizations used for DA. If set to 1
+(one), the default, data assimilation is not performed, even if there are <a
+href="LSD_faqs.html#variable">Variables</a> configured for DA. This option (1)
+is useful to accelerate simulation computation when data assimilation is not
+required, including allowing for parallel run.</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Covariance file</span></b></span><span
+lang=EN-US>: the name of the CSV-formatted file containing the covariance
+matrix for the data to be used in DA. <a name="_Hlk189075893">The </a></span><span
+class=Cdigo>Browse</span><span lang=EN-US> button can be used to select files
+with extension </span><span class=Cdigo>.csv</span><span lang=EN-US> on the
+disk. </span><span lang=EN-US>If no file name is provided (blank), the default,
+data assimilation is not performed, even if there are Variables configured for
+DA. The CSV file must have Variable names on both the first line and the first
+column. The covariance matrix must be symmetrical and semi-positive defined.
+All Variables set for DA must be present in the table. If an exact match for
+the name of the Variable is not present, the same name used for the <a
+href="browser.html#assimilation">data column selection</a>, if any, is used.</span></p>
+
+<p><span lang=EN-US>These options are only saved to the </span><span
+class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> <a
+href="LSD_faqs.html#modelsetting">configuration file</a> if there is at least
+one Variable configured for DA, if not they are reset to the defaults.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -1407,23 +1442,6 @@ class=Cdigo><span lang=EN-US>Assimilation</span></span><span lang=EN-US> <a
 href="browser.html#variables">option</a> set on, if any. After using this
 command, no Variable will <a href="LSD_faqs.html#da">assimilate data</a> during
 the <a href="LSD_faqs.html#simulationrun">simulation run</a>. </span></p>
-
-<table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
- <tr>
-  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
-  text-decoration:none'>&#9650;Top</span></a></span></p>
-  </td>
- </tr>
-</table>
-
-<h1><a name="_Close_Run-time_Plots"></a><span lang=EN-US>Close Run-time Plots</span></h1>
-
-<p class=MsoNormal><span lang=EN-US>Close all the <a
-href="LSD_windows.html#runtime">LSD Run-time Plot</a> windows created during
-previous simulation runs, if any.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

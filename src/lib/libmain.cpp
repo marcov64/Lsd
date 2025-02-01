@@ -167,4 +167,5 @@ lsd::simulation::~simulation( void )
 	delete [ ] conf_name;
 	delete [ ] conf_path;
 	delete [ ] log_file;
+	delete [ ] cov_file;
 }

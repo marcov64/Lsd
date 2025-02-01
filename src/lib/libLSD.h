@@ -459,6 +459,7 @@ class lsd::simulation : public equation	// simulation container class
 		char *conf_file = NULL;			// name of current configuration file
 		char *conf_name = NULL;			// name of current simulation configuration
 		char *conf_path = NULL;			// folder where the current configuration is
+		char *cov_file = NULL;			// data assimilation covariance CSV file
 		char *log_file = NULL;			// name of log file, if any
 		char conf_eq_txt[ MAX_FILE_SIZE ] = "";// equations saved in configuration file
 		char rep_file[ MAX_PATH_LENGTH ] = "";// documentation report file name
@@ -516,6 +517,7 @@ class lsd::simulation : public equation	// simulation container class
 		unsigned seed = 1;				// random number generator initial seed
 		variable *cemetery = NULL;		// LSD saved data from deleted objects
 		worker *workers = NULL;			// multi-thread parallel worker data
+		Eigen::MatrixXd assim_cov;		// data assimilation covariance matrix
 		FILE *log_file_ptr;				// log file pointer, if any
 #ifndef _TERM_
 		p_mapT par_map;					// variable to parent name map for AoR
@@ -611,6 +613,7 @@ class lsd::simulation : public equation	// simulation container class
 		int count_assimilation( void );
 		int init_new_run( clock_t & start, clock_t & last_update );
 		int init_new_seq( char *bar_done, int & perc_done, int & last_done );
+		int load_assim_cov( void );
 		int load_assim_data( void );
 		int load_txt_configuration( bool reload, int quick );
 		int monitor_logs( void );
@@ -1041,6 +1044,7 @@ class lsd::assimilation					// data assimilation container class
 		char *label = NULL;				// variable name
 		char *t_col_name = NULL;		// name of time value column
 		double *val = NULL;				// assimilation values
+		int cov_idx = -1;				// index (row+col) in covariance matrix
 		int data_col_num = 0;			// number of data value column
 		int t_col_num = 0;				// number of time value column
 		assimilation *next = NULL;		// data assimilation chain of elements

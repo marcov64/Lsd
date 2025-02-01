@@ -138,10 +138,18 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 		last_t = simNode.attribute( "steps", hint ).as_uint( MAX_STEPS );
 		last_run = simNode.attribute( "runs", hint ).as_uint( 1 );
 		seed = simNode.attribute( "seed", hint ).as_uint( 1 );
-		assim_realiz = simNode.attribute( "realizations", hint ).as_uint( 1 );
 		deb_t = simNode.attribute( "debug_start", hint ).as_uint( );
 		no_ptr_chk = ! simNode.attribute( "ptr_check", hint ).as_bool( true );
 		parallel_disable = ! simNode.attribute( "parallel", hint ).as_bool( true );
+
+		assim_realiz = simNode.attribute( "realizations", hint ).as_uint( 1 );
+		if ( ( i = strlen( simNode.attribute( "covariance_file", hint ).as_string( ) ) ) > 0 )
+		{
+			delete [ ] cov_file;
+			cov_file = new char [ i + 1 ];
+			strcpy( cov_file, simNode.attribute( "covariance_file", hint ).as_string( ) );
+		}
+
 		stack_info = setNode.child( "profiling" ).attribute( "level", hint ).as_uint( );
 		prof_min_msecs = setNode.child( "profiling" ).attribute( "time", hint ).as_uint( );
 		prof_obs_only = setNode.child( "profiling" ).attribute( "observed", hint ).as_bool( );
@@ -202,7 +210,6 @@ endLoad:
  UNLOAD_CONFIGURATION
  Unload the current configuration
  If full is false, just the model data is unloaded
- Returns: pointer to root object
  *************************************************************/
 void lsd::simulation::unload_configuration( bool full )
 {
@@ -213,6 +220,10 @@ void lsd::simulation::unload_configuration( bool full )
 	add_description( "Root" );
 	reset_blueprint( NULL );
 	empty_cemetery( );							// garbage collection
+	empty_assimilation( );						// discard assimilation data
+
+	delete [ ] cov_file;
+	cov_file = NULL;
 
 	save_ok = true;								// valid structure to save
 	sens = NULL;								// no sensitivity data
@@ -752,9 +763,6 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	simNode.append_attribute( "seed" ) = seed + delta;
 
 	// optional settings (include only if non-default)
-	if ( assim_realiz > 1 && assim != NULL )
-		simNode.append_attribute( "realizations" ) = assim_realiz;
-
 	if ( deb_t > 0 )
 		simNode.append_attribute( "debug_start" ) = deb_t;
 
@@ -763,6 +771,16 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 
 	if ( parallel_disable )
 		simNode.append_attribute( "parallel" ) = false;
+
+	// add data assimilation global settings, if enabled
+	if ( assim != NULL )
+	{
+		if ( assim_realiz > 1 )
+			simNode.append_attribute( "realizations" ) = assim_realiz;
+
+		if ( cov_file != NULL && strlen( cov_file ) > 0 )
+			simNode.append_attribute( "covariance_file" ) = cov_file;
+	}
 
 	// add profile settings, if any
 	if ( stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time )
@@ -1188,10 +1206,13 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 		goto endLoad;
 	}
 
+	delete [ ] cov_file;
+	cov_file = NULL;
 	last_t = MAX_STEPS;
 	assim_realiz = 1;
 	deb_t = stack_info = prof_min_msecs = 0;
 	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = 0;
+
 	fscanf( f, "%999s", msg );					// should be MAX_STEP
 	if ( strcmp( msg, "MAX_STEP" ) )
 	{
