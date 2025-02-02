@@ -155,8 +155,7 @@ lsd::assimilation *lsd::simulation::search_assimilation( const char *lab )
  *************************************************************/
 int lsd::simulation::load_assim_data( void )
 {
-	typedef std::list < assimilation * > av_listT;
-	struct assim_vars { av_listT avl; int namrow = -1; };
+	struct assim_vars { ass_listT avl; int namrow = -1; };
 
 	bool fexist;
 	int i, vars_loaded = 0;

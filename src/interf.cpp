@@ -2547,9 +2547,16 @@ lsd::object *gui::operate( lsd::object *r )
 		// assimilation settings: sets data assimilation realizations and covariance
 		case 35:
 
+			// check for data assimilation variables
+			if ( sim.assim == NULL )
+			{
+				cmd( "ttk::messageBox -parent $T -type ok -icon error -title Error -message \"Data assimilation not configured\" -detail \"No variable is configured for data assimilation, changes here are only used if at least one variable is configured with data to be assimilated.\"" );
+				break;
+			}
+
 			// save previous values to allow canceling operation
-			temp[ 1 ] = sim.assim_realiz;
-			Tcl_LinkVar( interp, "assim_realiz", ( char * ) & sim.assim_realiz, TCL_LINK_INT );
+			temp[ 1 ] = sim.assim_disable;
+			Tcl_LinkVar( interp, "assim_disable", ( char * ) & sim.assim_disable, TCL_LINK_INT );
 
 			cmd( "set path \"%s\"", sim.conf_path );
 			if ( strlen( sim.conf_path ) > 0 )
@@ -2560,19 +2567,8 @@ lsd::object *gui::operate( lsd::object *r )
 					set cov_file [ file nativename $cov_file ] \
 				}" );
 
-			cmd( "set tw 30" );					// text label width
 			cmd( "set T .assset" );
 			cmd( "newtop $T \"Data Assimilation Settings\" { set choice 2 }" );
-
-			cmd( "ttk::frame $T.f" );
-
-			cmd( "ttk::frame $T.f.a" );
-			cmd( "ttk::label $T.f.a.l -width $tw -anchor e -text \"Number of realizations (1:no DA)\"" );
-			cmd( "ttk::spinbox $T.f.a.e -width 7 -from 1 -to 9999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set assim_realiz %%P; return 1 } { %%W delete 0 end; %%W insert 0 $assim_realiz; return 0 } } -invalidcommand { bell } -justify center" );
-			cmd( "$T.f.a.e insert 0 $assim_realiz" );
-			cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx $_2 -pady $_2" );
-
-			cmd( "pack $T.f.a -anchor w" );
 
 			cmd( "ttk::frame $T.csv" );
 			cmd( "ttk::frame $T.csv.l" );
@@ -2598,48 +2594,35 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "pack $T.csv.l $T.csv.file" );
 
+			cmd( "ttk::frame $T.c" );
+			cmd( "ttk::checkbutton $T.c.dis -text \"Disable data assimilation\" -variable assim_disable" );
+			cmd( "pack $T.c.dis -anchor w" );
 
-			cmd( "pack $T.f $T.csv -padx $_5 -pady $_10" );
+			cmd( "pack $T.csv $T.c -padx $_5 -pady $_10" );
 
 			cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#assimilation } { set choice 2 }" );
 
 			cmd( "showtop $T centerW" );
 
-			// check for data assimilation variables
-			if ( sim.assim == NULL )
-				cmd( "ttk::messageBox -parent $T -type ok -icon warning -title Warning -message \"Data assimilation not configured\" -detail \"No variable is configured for data assimilation, changes here are only used if at least one variable is configured with data to be assimilated.\"" );
-
-
 			cmd( "mousewarpto $T.b.ok 0" );
-			cmd( "$T.f.a.e selection range 0 end" );
-			cmd( "focus $T.f.a.e" );
+			cmd( "$T.csv.file.e selection range 0 end" );
+			cmd( "focus $T.csv.file.e" );
 
 			choice = 0;
 			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
-			cmd( "set assim_realiz [ $T.f.a.e get ]" );
-			Tcl_UnlinkVar( interp, "assim_realiz" );
+			Tcl_UnlinkVar( interp, "assim_disable" );
 			cmd( "destroytop $T" );
 
-			if ( choice == 2 )
-				sim.assim_realiz = temp[ 1 ];
-			else
+			if ( choice == 1 )
 			{
-				bool fchange;
-
 				if ( strlen( get_str( "cov_file" ) ) > 0 )
 				{
 					cmd( "set cov_file [ string map {\\\\ /} $cov_file ]" );
 					lab1 = get_str( "cov_file" );
-					fchange = sim.cov_file == NULL || strcmp( sim.cov_file, lab1 ) != 0;
-				}
-				else
-					fchange = false;
 
-				if ( temp[ 1 ] != sim.assim_realiz || fchange )
-				{
-					if ( fchange )
+					if ( sim.cov_file == NULL || strcmp( sim.cov_file, lab1 ) != 0 )
 					{
 						try
 						{
@@ -2656,15 +2639,16 @@ lsd::object *gui::operate( lsd::object *r )
 							delete [ ] sim.cov_file;
 							sim.cov_file = new char [ strlen( lab1 ) + 1 ];
 							strcpy( sim.cov_file, lab1 );
+							unsaved_change( true );
 						}
 					}
-
-					if ( choice == 2 )
-						sim.assim_realiz = temp[ 1 ];
-					else
-						unsaved_change( true );
 				}
+
+				if ( sim.assim_disable != temp[ 1 ] )
+					unsaved_change( true );
 			}
+			else
+				sim.assim_disable = temp[ 1 ];
 
 		break;
 
@@ -4681,7 +4665,7 @@ lsd::object *gui::operate( lsd::object *r )
 		case 68:
 
 			// check for data assimilation
-			if ( sim.assim != NULL && sim.assim_realiz > 1 )
+			if ( sim.assim != NULL && ! sim.assim_disable )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Data assimilation configured\" -detail \"The current configuration is set to perform data assimilation, which already uses parallel processing. Please use the non-parallel run option.\"" );
 				break;
@@ -5133,7 +5117,7 @@ lsd::object *gui::operate( lsd::object *r )
 			}
 
 			// check for data assimilation
-			if ( sim.assim != NULL && sim.assim_realiz > 1 )
+			if ( sim.assim != NULL && ! sim.assim_disable )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Data assimilation configured\" -detail \"The current configuration is set to perform data assimilation, which already uses parallel processing. Please use the non-parallel run option.\"" );
 				break;

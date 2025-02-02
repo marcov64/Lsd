@@ -142,7 +142,7 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 		no_ptr_chk = ! simNode.attribute( "ptr_check", hint ).as_bool( true );
 		parallel_disable = ! simNode.attribute( "parallel", hint ).as_bool( true );
 
-		assim_realiz = simNode.attribute( "realizations", hint ).as_uint( 1 );
+		assim_disable = ! simNode.attribute( "assimilation", hint ).as_bool( true );
 		if ( ( i = strlen( simNode.attribute( "covariance_file", hint ).as_string( ) ) ) > 0 )
 		{
 			delete [ ] cov_file;
@@ -775,9 +775,9 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	// add data assimilation global settings, if enabled
 	if ( assim != NULL )
 	{
-		if ( assim_realiz > 1 )
-			simNode.append_attribute( "realizations" ) = assim_realiz;
-
+		if ( assim_disable )
+			simNode.append_attribute( "assimilation" ) = false;
+		
 		if ( cov_file != NULL && strlen( cov_file ) > 0 )
 			simNode.append_attribute( "covariance_file" ) = cov_file;
 	}
@@ -1209,9 +1209,8 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 	delete [ ] cov_file;
 	cov_file = NULL;
 	last_t = MAX_STEPS;
-	assim_realiz = 1;
 	deb_t = stack_info = prof_min_msecs = 0;
-	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = 0;
+	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = assim_disable = 0;
 
 	fscanf( f, "%999s", msg );					// should be MAX_STEP
 	if ( strcmp( msg, "MAX_STEP" ) )

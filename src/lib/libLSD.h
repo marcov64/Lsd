@@ -216,6 +216,7 @@ namespace lsd
  TYPE TEMPLATES
  *************************************************************/
 	typedef std::function < double( const variable *, object * ) > eq_funcT;
+	typedef std::list < assimilation * > ass_listT;
 	typedef std::map < strT, profile > prof_mapT;
 	typedef std::map < thr_idT, worker * > wrk_mapT;
 	typedef std::pair < strT, bridge * > b_pairT;
@@ -225,6 +226,7 @@ namespace lsd
 	typedef std::vector < object * > o_vecT;
 	typedef std::vector < simulation * > sim_vecT;
 	typedef std::unordered_map < double, object * > o_mapT;
+	typedef std::unordered_map < int, ass_listT > ia_mapT;
 	typedef std::unordered_map < long, object * > n_mapT;
 	typedef std::unordered_map < strT, eq_funcT > eq_mapT;
 	typedef std::unordered_map < strT, bridge * > b_mapT;
@@ -468,7 +470,7 @@ class lsd::simulation : public equation	// simulation container class
 		dlliblinkage *liblnk = NULL;	// call-back references for DLL
 		hand_vecT run_pids;				// parallel running instances process id's
 		int add_to_tot = false;			// type of totals file generated (bool)
-		int assim_realiz = 0;			// data assimilation realizations (0=no DA)
+		int assim_disable = false;		// disable data assimilation
 		int deb_set = false;			// debug enable control (bool)
 		int deb_t;						// next debug stop time step (0 for none)
 		int dobar = false;				// enable progress bar in log/standard output
@@ -542,6 +544,7 @@ class lsd::simulation : public equation	// simulation container class
 		clock_t end_profile[ MAX_PROF_SIZE ];// profile-level end times
 		cond_vT upd_workers;			// worker schedule update signal
 		dm_mapT assim_data;				// assimilation data map of maps
+		ia_mapT assim_time;				// list of times and variables for assimilation
 		int nsim;						// library simulation object index
 		int ran_gen_id = 2;				// ID of initial generator (DO NOT CHANGE)
 		int stack_level;				// LSD stack call level
