@@ -83,7 +83,7 @@ class EigenMatrixPrinter:
 			type = type.target()
 		self.type = type.unqualified().strip_typedefs()
 		tag = self.type.tag
-		regex = re.compile('\<.*\>')
+		regex = re.compile('\\<.*\\>')
 		m = regex.findall(tag)[0][1:-1]
 		template_params = m.split(',')
 		template_params = [x.replace(" ", "") for x in template_params]
@@ -150,7 +150,7 @@ class EigenSparseMatrixPrinter:
 			type = type.target()
 		self.type = type.unqualified().strip_typedefs()
 		tag = self.type.tag
-		regex = re.compile('\<.*\>')
+		regex = re.compile('\\<.*\\>')
 		m = regex.findall(tag)[0][1:-1]
 		template_params = m.split(',')
 		template_params = [x.replace(" ", "") for x in template_params]
@@ -287,9 +287,9 @@ def register_eigen_printers(obj):
 
 	if obj == None:
 		obj = gdb
-	obj.pretty_printers.append(lookup_function)
+	obj.pretty_printers.append(eigen_lookup_function)
 
-def lookup_function(val):
+def eigen_lookup_function(val):
 	"Look-up and return a pretty-printer that can print va."
 	
 	type = val.type

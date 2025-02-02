@@ -15,13 +15,17 @@
 # In a command prompt (terminal) in LSD root directory, use
 #  cd src
 #  make
+#
+# Assumes a Sandy Bridge (Intel Core 2nd generation) or
+# Bulldozer (AMD FX/Opteron). If a older processor is used
+# change the "-march=corei7-avx" option to "-march=x86-64"
 #**************************************************************
 
 # general settings
 TARGET_LMM=LMM
 TARGET_LSD=LSD
 
-SWITCH_CC=-O3 -march=x86-64 -Wall -Wextra -Wno-unused-parameter -Wno-implicit-fallthrough
+SWITCH_CC=-O3 -march=corei7-avx -Wall -Wextra -Wno-unused-parameter -Wno-implicit-fallthrough
 SWITCH_CC_LMM=-D_LMM_ -D_NP_
 SWITCH_CC_LSD=
 
@@ -298,7 +302,7 @@ $(MANIF_LSD): $(SRC_DIR)LSD.exe.manifest.rc $(SRC_DIR)LSD.exe.manifest
 clean: cleanLMM cleanLSD
 
 cleanLMM:
-	$(RM) $(OBJ_DIR_LMM)* $(LSDROOT)/$(TARGET_LMM)$(EXE_EXT)
+	$(RM) '$(OBJ_DIR_LMM)*' $(LSDROOT)/$(TARGET_LMM)$(EXE_EXT)
 
 cleanLSD:
-	$(RM) $(OBJ_DIR_LSD)* $(LIB_BASE) $(LIB_GUI) $(LSDROOT)/$(TARGET_LSD)$(EXE_EXT)
+	$(RM) '$(OBJ_DIR_LSD)*' $(LIB_BASE) $(LIB_GUI) $(LSDROOT)/$(TARGET_LSD)$(EXE_EXT)
