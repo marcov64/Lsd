@@ -236,11 +236,21 @@ int lsd::simulation::load_assim_data( void )
 							time.resize( data.size( ) );
 					}
 
+					ass_listT empty;
 					auto h = dtmap.end( );
+					auto g = assim_time.end( );
 					for ( i = 0; i < ( int ) data.size( ); ++i )
+					{
 						h = dtmap.emplace_hint( h, time[ i ], data[ i ] );
 
+						if ( assim_time.find( time[ i ] ) == assim_time.end( ) )
+							g = assim_time.emplace_hint( g, time[ i ], empty );
+
+						assim_time[ time[ i ] ].emplace_back( *cv );
+					}
+
 					assim_data.emplace( ( *cv )->label, dtmap );
+
 					++vars_loaded;
 				}
 			}
