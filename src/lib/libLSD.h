@@ -577,6 +577,7 @@ class lsd::simulation : public equation	// simulation container class
 		variable *last_cemetery = NULL;	// LSD last saved cemetery entry
 
 	public:
+		bool load_assim_files( void );
 		bool results_alt_path( const char *altPath );
 		bool save_txt_configuration( const char *path, const char *rname, const char *ext, const char eq_file[ ], const char eq_txt[ ] = "" );
 		bool save_xml_configuration( int findex = 0, const char *dest_path = NULL, bool quick = false, const char mod_nam[ ] = "", const char mod_ver[ ] = "", const char mod_dat[ ] = "", const char eq_file[ ] = "", const char eq_txt[ ] = "" );

@@ -150,6 +150,94 @@ lsd::assimilation *lsd::simulation::search_assimilation( const char *lab )
 
 
 /*************************************************************
+ LOAD_ASSIM_FILES
+ Load all files containing data required for data assimilation
+ *************************************************************/
+bool lsd::simulation::load_assim_files( void )
+{
+	bool first;
+	int i, j;
+	assimilation *ca;
+
+	// load assimilation data, if amy/proper
+	if ( assim == NULL || assim_disable )
+		return false;
+
+	if ( ( i = load_assim_data( ) ) < count_assimilation( ) )
+	{
+		if ( i == 0 )
+			empty_assimilation( );
+		else
+		{
+			plog( "\nData for assimilation missing for:" );
+			for ( ca = assim, first = true; ca != NULL; ca = ca->next )
+				if ( ca->missing )
+				{
+					plog( "%s %s", first ? "" : ",", ca->label );
+					first = false;
+				}
+		}
+
+#ifndef _TERM_
+		cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Cannot load assimilation data\" -detail \"Part or all data for assimilation could not be retrieved from data files.\nPlease check your assimilation configuration.\"" );
+#endif
+	}
+
+	if ( assim != NULL )
+	{
+		if ( ( j = load_assim_cov( ) ) <= 0 )
+		{
+			if ( j == -1 )
+				plog( "\nUnused data in covariance matrix ignored" );
+
+			plog( "\nAssimilation data loaded for %d variables\n", i );
+		}
+		else
+		{
+			empty_assimilation( );
+			switch ( j )
+			{
+				case 1:
+					plog( "\nInvalid covariance matrix file name" );
+					break;
+
+				case 2:
+					plog( "\nInvalid covariance matrix file CSV format" );
+					break;
+
+				case 3:
+					plog( "\nNon-symmetric covariance matrix (rows != columns)" );
+					break;
+
+				case 4:
+					plog( "\nEmpty covariance matrix" );
+					break;
+
+				case 5:
+					plog( "\nMissing variable(s) in covariance matrix" );
+					break;
+
+				case 6:
+					plog( "\nMissing elements in covariance matrix" );
+			}
+
+#ifndef _TERM_
+		cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Cannot load assimilation covariance matrix\" -detail \"There was a problem loading the covariance matrix for data assimilation from file '%s'.\nCheck the Log window for details.\"", cov_file != NULL ? cov_file : "(none)" );
+#endif
+		}
+	}
+
+	if ( assim == NULL )
+	{
+		plog( "\nData assimilation configuration is invalid, ignoring\n" );
+		return false;
+	}
+	else
+		return true;
+}
+
+
+/*************************************************************
  LOAD_ASSIM_DATA
  Load assimilation data from external data files
  *************************************************************/
@@ -161,6 +249,9 @@ int lsd::simulation::load_assim_data( void )
 	int i, vars_loaded = 0;
 	rapidcsv::Document csv;
 	std::unordered_map < strT, assim_vars > fv;
+
+	assim_data.clear( );
+	assim_time.clear( );
 
 	for ( auto ca = assim; ca != NULL; ca = ca->next )
 	{
