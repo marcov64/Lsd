@@ -119,7 +119,7 @@
 	public: \
 	int dataentry( void );
 
-#define ASSIMILATION_EXT \
+#define ASSIM_EXT \
 	public: \
 	int dataentry( const char *parWnd = NULL );
 

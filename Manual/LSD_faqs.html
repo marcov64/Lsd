@@ -2010,21 +2010,39 @@ assimilation?</span></h1>
 
 <p class=MsoNormal><span lang=EN-US>Data assimilation (DA) is a methodology to
 integrate theory- and data-driven models. The main idea behind DA is to
-implement a statistically-robust way to use data to “correct” the internal
-state <a href="#_What_is_a_3">Variables</a> and <a href="#_What_is_a_4">Parameters</a>
-of theoretical models. DA proposes methods to incorporate (noisy) observational
-data into a dynamical system model to produce more accurate estimates of
-current and future (noisy) state Variables of the model. DA is formed by three
-components: a system theoretical model (a set of <a href="#_What_is_an">Equations</a>),
-an empirical dataset correlated with the system state Variables, and an
-Ensemble Kalman filter (EnKF) to connect them.</span></p>
+implement a statistically-robust way to use observational data to “correct” the
+internal state <a href="#_What_is_a_3">Variables</a> and <a href="#_What_is_a_4">Parameters</a>
+forecasted by theoretical models. DA proposes methods to incorporate (noisy)
+observational data into a dynamical system model to produce more accurate
+estimates of current and future (noisy) state Variables of the model, and/or
+dynamically estimate the model Parameters. DA is formed by three components: a
+system theoretical model (a set of <a href="#_What_is_an">Equations</a>), an
+empirical dataset correlated with the system state Variables, and an ensemble
+filter (EF), like the Ensemble Kalman Filter (EnKF), to connect them.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>The EnKF is a sequential DA “melding”
-scheme which is optimal when state Variables have normal, or at least
+<p class=MsoNormal><span lang=EN-US>Ensemble filters are Monte Carlo (MC)
+approaches appropriate to non-linear ABM data, even when state Variables are
+not linear or have unknown distributions.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>The EnKF, in particular, is a sequential DA
+“melding” scheme which is optimal when state Variables have normal, or at least
 efficient, if distributions are unimodal and non-skewed, providing excellent
-statistical properties at reasonable computation cost. EnKF is a Monte Carlo
-approach appropriate to non-linear ABM data, even when state Variables deviate
-from unimodality or as moderately skewed, as has been shown in the literature.</span></p>
+statistical properties at reasonable computation cost.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>For details about dynamic data assimilation
+using ensemble filters, please refer to the large literature on the subject,
+e.g.:</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US>Reich, S. and Cotter, C. (2015) Probabilistic
+Forecasting and Bayesian Data Assimilation, Cambridge University Press.</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US>Lewis, J. M., Lakshmivarahan, Dhall, S. (2006)
+Dynamic Data Assimilation: A Least Squares Approach, Cambridge University
+Press.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

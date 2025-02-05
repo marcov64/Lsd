@@ -514,7 +514,6 @@ int gui::browse( lsd::object *r )
 							.l.v.c.var_name.v entryconfig 9 -state disabled; \
 							.l.v.c.var_name.v entryconfig 17 -state disabled; \
 							.l.v.c.var_name.v entryconfig 18 -state disabled; \
-							.l.v.c.var_name.v entryconfig 23 -state disabled \
 						} elseif [ string equal $color $colorsTheme(lfun) ] { \
 							.l.v.c.var_name.v entryconfig 2 -state disabled; \
 							.l.v.c.var_name.v entryconfig 7 -state disabled; \
@@ -1251,7 +1250,7 @@ int gui::browse( lsd::object *r )
 	cmd( "if [ info exists modVar ] { set modVar [ lsort -dictionary -unique $modVar ] }" );
 	cmd( "if [ info exists modPar ] { set modPar [ lsort -dictionary -unique $modPar ] }" );
 	cmd( "if [ info exists modFun ] { set modFun [ lsort -dictionary -unique $modFun ] }" );
-	cmd( "if [ info exists modCSV ] { set modCSV [ lsort -dictionary -unique $modCSV ] }" );
+	cmd( "if [ info exists modDAf ] { set modDAf [ lsort -dictionary -unique $modDAf ] }" );
 
 	// restore correct selection on list boxes
 	cmd( "if { $listfocus == 1 } { \

@@ -142,12 +142,12 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 		no_ptr_chk = ! simNode.attribute( "ptr_check", hint ).as_bool( true );
 		parallel_disable = ! simNode.attribute( "parallel", hint ).as_bool( true );
 
-		da.disable = ! simNode.attribute( "assimilation", hint ).as_bool( true );
-		if ( ( i = strlen( simNode.attribute( "covariance_file", hint ).as_string( ) ) ) > 0 )
+		da.disable = setNode.child( "data_assimilation" ).attribute( "disable", hint ).as_bool( false );
+		if ( ( i = strlen( setNode.child( "data_assimilation" ).attribute( "covariance_file", hint ).as_string( ) ) ) > 0 )
 		{
 			delete [ ] da.cov_file;
 			da.cov_file = new char [ i + 1 ];
-			strcpy( da.cov_file, simNode.attribute( "covariance_file", hint ).as_string( ) );
+			strcpy( da.cov_file, setNode.child( "data_assimilation" ).attribute( "covariance_file", hint ).as_string( ) );
 		}
 
 		stack_info = setNode.child( "profiling" ).attribute( "level", hint ).as_uint( );
@@ -196,6 +196,10 @@ endLoad:
 	if ( warnings != NULL )
 	{
 		warnings->clear( );
+
+		if ( res.status != pugi::status_ok )
+			*warnings = res.description( );
+
 		for ( auto i : warning )
 			*warnings += " " + std::to_string( i );
 	}
@@ -373,16 +377,27 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 					{
 						x_nodeT cna = cn.child( "assimilation" );
 
-						const char *csv = cna.attribute( "csv_file" ).value( );
-						if ( strlen( csv ) != 0 )
-						{
-							const char *data_col_name = cna.attribute( "data_column_name" ).value( );
-							const char *t_col_name = cna.attribute( "t_column_name" ).value( );
-							int data_col_num = cna.attribute( "data_column_number" ).as_uint( );
-							int t_col_num = cna.attribute( "t_column_number" ).as_uint( );
+						bool disable = cna.attribute( "disable" ).as_bool( );
+						bool update = cna.attribute( "update" ).as_bool( true );
+						bool data_obs = cna.attribute( "data_observations" ).as_bool( );
 
-							new assim( str, sim, csv, data_col_name, t_col_name, data_col_num, t_col_num );
-						}
+						const char *data_file = cna.attribute( "data_file" ).value( );
+						const char *data_col_name = cna.attribute( "data_column_name" ).value( );
+						const char *t_col_name = cna.attribute( "time_column_name" ).value( );
+						int data_col_num = cna.attribute( "data_column_number" ).as_uint( );
+						int t_col_num = cna.attribute( "time_column_number" ).as_uint( );
+
+						bool param = ! cna.child( "parameter" ).empty( );
+						int par_distr = cna.child( "parameter" ).attribute( "distribution" ).as_uint( );
+						double par_n_var = cna.child( "parameter" ).attribute( "normal_variance" ).as_double( );
+						double par_u_upp = cna.child( "parameter" ).attribute( "uniform_upper" ).as_double( );
+						double par_u_low = cna.child( "parameter" ).attribute( "uniform_lower" ).as_double( );
+
+						bool par_ens_infl = ! cna.child( "parameter" ).child( "ensemble_inflation" ).empty( );
+						double par_infl_fac = cna.child( "parameter" ).child( "ensemble_inflation" ).attribute( "inflation_factor" ).as_double( 1 );
+						int par_infl_time = cna.child( "parameter" ).child( "ensemble_inflation" ).attribute( "inflation_time" ).as_uint( 2 );
+
+						new assim( str, param, disable, update, data_obs, data_file, data_col_name, t_col_name, data_col_num, t_col_num, par_distr, par_n_var, par_u_upp, par_u_low, par_ens_infl, par_infl_fac, par_infl_time );
 					}
 				}
 			}
@@ -736,8 +751,9 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	xf.append_child( pugi::node_doctype ).set_value( "LSD [\n \
 	<!ELEMENT LSD (configuration)>\n \
 	<!ELEMENT configuration (settings, structure, equation_file)>\n \
-	<!ELEMENT settings (simulation, profiling?)>\n \
+	<!ELEMENT settings (simulation, data_assimilation?, profiling?)>\n \
 	<!ELEMENT simulation EMPTY>\n \
+	<!ELEMENT data_assimilation EMPTY>\n \
 	<!ELEMENT profiling EMPTY>\n \
 	<!ELEMENT structure (object)>\n \
 	<!ELEMENT equation_file (#PCDATA)>\n \
@@ -747,7 +763,9 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	<!ELEMENT element (description?, documentation?, sensitivity?, assimilation?)>\n \
 	<!ELEMENT documentation EMPTY>\n \
 	<!ELEMENT sensitivity (#PCDATA)>\n \
-	<!ELEMENT assimilation EMPTY>\n]" );
+	<!ELEMENT assimilation (parameter?)>\n \
+	<!ELEMENT parameter (ensemble_inflation?)>\n \
+	<!ELEMENT ensemble_inflation EMPTY>\n]" );
 	x_nodeT lsdNode = xf.append_child( "LSD" );
 	x_nodeT cfgNode = lsdNode.append_child( "configuration" );
 	cfgNode.append_attribute( "version" ) = "1.0";
@@ -772,14 +790,16 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	if ( parallel_disable )
 		simNode.append_attribute( "parallel" ) = false;
 
-	// add data assimilation global settings, if enabled
-	if ( da.count( ) > 0 )
+	// add data assimilation global settings, if any
+	if ( da.count( 0 ) > 0 || da.disable || ( da.cov_file != NULL && strlen( da.cov_file ) > 0 ) )
 	{
+		x_nodeT assimNode = setNode.append_child( "data_assimilation" );
+
 		if ( da.disable )
-			simNode.append_attribute( "assimilation" ) = false;
+			assimNode.append_attribute( "disable" ) = true;
 
 		if ( da.cov_file != NULL && strlen( da.cov_file ) > 0 )
-			simNode.append_attribute( "covariance_file" ) = da.cov_file;
+			assimNode.append_attribute( "covariance_file" ) = da.cov_file;
 	}
 
 	// add profile settings, if any
@@ -1130,22 +1150,60 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 
 		// add data assimilation settings
 		ca = da.search( cv->label );
-		if ( ca != NULL && ca->csv_file != NULL )
+		if ( ca != NULL )
 		{
 			x_nodeT cna = cn.append_child( "assimilation" );
-			cna.append_attribute( "csv_file" ) = ca->csv_file;
 
-			if ( ca->data_col_name != NULL )
+			if ( ca->disable )
+				cna.append_attribute( "disable" ) = ca->disable;
+
+			if ( ! ca->update )
+				cna.append_attribute( "update" ) = ca->update;
+
+			if ( ca->data_obs )
+				cna.append_attribute( "data_observations" ) = ca->data_obs;
+
+			if ( ca->data_file != NULL && strlen( ca->data_file ) > 0 )
+				cna.append_attribute( "data_file" ) = ca->data_file;
+
+			if ( ca->data_col_name != NULL && strlen( ca->data_col_name ) > 0 )
 				cna.append_attribute( "data_column_name" ) = ca->data_col_name;
 			else
-				if ( ca->data_col_num != 0 )
+				if ( ca->data_col_num > 0 )
 					cna.append_attribute( "data_column_number" ) = ca->data_col_num;
 
-			if ( ca->t_col_name != NULL )
-				cna.append_attribute( "t_column_name" ) = ca->t_col_name;
+			if ( ca->t_col_name != NULL && strlen( ca->t_col_name ) > 0 )
+				cna.append_attribute( "time_column_name" ) = ca->t_col_name;
 			else
-				if ( ca->t_col_num != 0 )
-					cna.append_attribute( "t_column_number" ) = ca->t_col_num;
+				if ( ca->t_col_num > 0 )
+					cna.append_attribute( "time_column_number" ) = ca->t_col_num;
+
+			if ( ca->param )
+			{
+				x_nodeT cnap = cna.append_child( "parameter" );
+
+				cnap.append_attribute( "distribution" ) = ca->par_distr;
+
+				if ( ca->par_distr == 0 && ca->par_n_var > 0 )
+					cnap.append_attribute( "normal_variance" ) = ca->par_n_var;
+
+				if ( ca->par_distr == 1 && ( ca->par_u_upp > 0 || ca->par_u_low > 0 ) )
+				{
+					cnap.append_attribute( "uniform_upper" ) = ca->par_u_upp;
+					cnap.append_attribute( "uniform_lower" ) = ca->par_u_low;
+				}
+
+				if ( ca->par_ens_infl && ( ca->par_infl_fac > 1 || ca->par_infl_time > 2 ) )
+				{
+					x_nodeT cnapi = cnap.append_child( "ensemble_inflation" );
+
+					if ( ca->par_infl_fac > 1 )
+						cnapi.append_attribute( "inflation_factor" ) = ca->par_infl_fac;
+
+					if ( ca->par_infl_time > 2 )
+						cnapi.append_attribute( "inflation_time" ) = ca->par_infl_time;
+				}
+			}
 		}
 	}
 }

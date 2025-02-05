@@ -313,7 +313,7 @@ void lsd::object::load_elem_lists( )
 	variable *cv;
 
 	if ( up == NULL )							// reset lists if root
-		cmd( "unset -nocomplain modObj modElem modVar modPar modFun modCSV" );
+		cmd( "unset -nocomplain modObj modElem modVar modPar modFun modDAf" );
 	else
 		cmd( "lappend modObj %s", label );		// register object if not root
 
@@ -335,8 +335,8 @@ void lsd::object::load_elem_lists( )
 		cmd( "lappend modElem %s", cv->label );
 
 		ca = da.search( cv->label );
-		if ( ca != NULL && ca->csv_file != NULL && strlen( ca->csv_file ) > 0 )
-			cmd( "lappend modCSV \"%s\"", ca->csv_file );
+		if ( ca != NULL && ca->data_file != NULL && strlen( ca->data_file ) > 0 )
+			cmd( "lappend modDAf \"%s\"", ca->data_file );
 	}
 
 	// register son objects

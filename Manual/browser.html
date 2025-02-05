@@ -600,9 +600,9 @@ name=chobjname></a><a name="_Changing_Objects"></a><span lang=EN-US>Changing
 Objects</span></h1>
 
 <p class=MsoNormal><span lang=EN-US>Click on any Object name in the </span><span
-class=Cdigo><span lang=EN-US>Descending Objects</span></span><span lang=EN-US> list
-box or the <a href="graphrep.html">LSD Model Structure</a> window and select
-the menu option </span><span class=Cdigo><span lang=EN-US>Model&gt;Change
+class=Cdigo><span lang=EN-US>Descending Objects</span></span><span lang=EN-US>
+list box or the <a href="graphrep.html">LSD Model Structure</a> window and
+select the menu option </span><span class=Cdigo><span lang=EN-US>Model&gt;Change
 Object</span></span><span class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;
 color:windowtext'>, or</span></span><span lang=EN-US> </span><span class=Cdigo><span
 lang=EN-US>Change</span></span><span lang=EN-US> in the (right-click) context
@@ -1205,41 +1205,158 @@ lang=EN-US>Data assimilation settings</span></h3>
 Assimilation</a> (DA) requires data to “correct” the internal state <a
 href="LSD_faqs.html#variable">Variables</a> and <a
 href="LSD_faqs.html#parameter">Parameters</a>. However, only Variables can have
-data associated with. Data is imported from a CSV-formatted file, with or
-without variable-name headers, and commas as separators. Data for different
-Variables can be provided from the same or different CSV files. When a CSV file
-is being reused by more than one Variable, the combo box button can be used to
-quickly re-use previously browsed files. The </span><span class=Cdigo><span
-lang=EN-US>Browse</span></span><span lang=EN-US> button can be used to select
-files with extension </span><span class=Cdigo><span lang=EN-US>.csv</span></span><span
-lang=EN-US> on the disk.</span></p>
+data associated with. Parameters, differently, must have the distribution shape
+defined. Variables without associated data, and Parameters, can be updated by
+the data assimilation algorithm.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>Considering the differences in data
+assimilation for Variables and Parameters, different configuration windows are
+offered, as shown below.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=296 height=250 src="image/da.png"></span></p>
+border=0 width=296 height=317 src="image/da-var.png"></span><span lang=EN-US>     
+</span><span lang=EN-US><img border=0 width=255 height=370
+src="image/da-par.png"></span></p>
 
-<p class=MsoNormal><span lang=EN-US>If variable-name headers are present, the
-name(s) of the corresponding column(s) must be provided. Names are case
-sensitive. Otherwise, the CSV column number(s) (starting from 1) for the
-variable data, and for the time reference, if present, must be indicated
-instead. Column names and numbers cannot be used at the same time. If a name is
-provided, the column number is set to zero (no column number selected), and
-conversely. </span></p>
+<p class=MsoNormal><span lang=EN-US>The common options are:</span></p>
 
-<p class=MsoNormal><span lang=EN-US>The timing of the provided data is not
-required to match the simulation times (<i>t</i> = 1, 2, …, <i>T</i>). If this
-is the case, one CSV column must contain the corresponding simulation time
-references, and this column must have the name or column number explicitly
-indicated. Otherwise, if data already matches simulated time (first data row
-corresponds to <i>t </i>= 1, second, to <i>t</i> = 2, and so on), the time
-reference column name can be left blank, and the column number set to zero.</span></p>
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Disable assimilation</span></b></span><span
+lang=EN-US>: when checked, it ignores the element (Variable or Parameter)
+during data assimilation. In this case, the element values, form simulation or
+data file, are not considered, nor are updated, by the DA algorithm. This is
+like removing the element from the assimilation list (pressing button </span><span
+class=Cdigo><span lang=EN-US>Remove</span></span><span lang=EN-US>), but
+without losing its current settings. If unchecked (the default), DA is
+performed on the element according to the remaining options in this window.</span></p>
 
-<p class=MsoNormal><span lang=EN-US>Any non-numerical or non-finite data will
-be treated as </span><span class=Cdigo><span lang=EN-US>NA</span></span><span
-lang=EN-US> (not available), and not used for DA.</span></p>
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Update during assimilation</span></b></span><span
+lang=EN-US>: if marked (the default), it considers the element (Variable or
+Parameter) to be updated during the simulation by the DA algorithm. If
+unchecked, the element is considered for the DA but is not updated by it.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>For Variables, the available options are:</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span class=Cdigo><span
+style='font-family:Symbol;color:windowtext'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><span class=Cdigo><b>Read assimilation data from file</b></span><span
+class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;color:windowtext'>:
+if checked, the Variable is assumed to have observational data available in an
+external file, as defined by the following fields. If not marked (the default),
+no observational data for the Variable is used, even if present in the data
+file(s), and the following fields are disabled.</span></span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Data file</span></b></span><span
+lang=EN-US>: the pat to the file containing the data to be assimilated for the
+Variable. Data must be imported from a CSV-formatted file, with or without
+variable-name headers, and commas as separators. Data for different Variables
+can be provided from the same or different CSV files. When a CSV file is being
+reused by more than one Variable, the combo box button can be used to quickly
+re-use previously browsed files. The </span><span class=Cdigo><span lang=EN-US>Browse</span></span><span
+lang=EN-US> button can be used to select files with extension </span><span
+class=Cdigo><span lang=EN-US>.csv</span></span><span lang=EN-US> on the disk.</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Data column name</span></b></span><span
+lang=EN-US> or </span><span class=Cdigo><b><span lang=EN-US>number</span></b></span><span
+lang=EN-US>: if variable-name headers are present in the first row of the CSV
+file, the name of the data column for the Variable must be provided. Names are
+case sensitive and cannot contain spaces. Otherwise, the column number
+(starting from 1) for the variable data must be indicated instead. Column names
+and numbers cannot be used at the same time. If a name is provided, the column
+number is set to zero (no column number selected), and conversely. Any
+non-numerical or non-finite data will be treated as </span><span class=Cdigo><span
+lang=EN-US>NA</span></span><span lang=EN-US> (not available), and not used for
+DA.</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Time reference column name</span></b></span><span
+lang=EN-US> or </span><span class=Cdigo><b><span lang=EN-US>number</span></b></span><span
+lang=EN-US> (optional): if variable-name headers are present in the first row
+of the CSV file, the name of the time reference column for the Variable may be
+provided, if present. Names are case sensitive and cannot contain spaces.
+Alternatively, the column number (starting from 1) for the time reference may
+be indicated instead. Column names and numbers cannot be used at the same time.
+If a name is provided, the column number is set to zero (no column number
+selected), and conversely. The time references are not required to match the
+simulation times (<i>t</i> = 1, 2, …, <i>T</i>). If this is the case, one of
+the CSV columns must contain the corresponding simulation time reference. If a
+time reference column is not provided, it is assumed that data perfectly
+matches simulated time (first data row corresponds to <i>t </i>= 1, second, to <i>t</i>
+= 2, and so on). In this case (the default), the time reference column name
+should be left blank, and the column number set to zero.</span></p>
+
+<p class=MsoNormal><span lang=EN-US>In the case of Parameters, the following
+options are present:</span></p>
+
+<p class=MsoListParagraph style='margin-left:39.0pt;text-indent:-18.0pt'><span
+lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Parameter distribution</span></b></span><span
+lang=EN-US>: the type of distribution that more closely represents the
+uncertainty about the Parameter forecast value. </span><span class=Cdigo><span
+lang=EN-US>Normal</span></span><span lang=EN-US> distribution (the default) is
+more convenient when the expected values for the values are relatively close to
+the initial value. </span><span class=Cdigo>Uniform</span><span lang=EN-US>
+distribution assumes no knowledge about the parameter distribution other than
+its support. According to the selected button, only the corresponding
+distribution parameter fields are enabled.</span></p>
+
+<p class=MsoListParagraph style='margin-left:39.0pt;text-indent:-18.0pt'><span
+lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Variance</span></b></span><span
+lang=EN-US> (Normal distribution only): the variance for the parameter
+distribution. The variance is the square of the standard deviation. This value
+must be strictly positive, zero (the default) or negative values are invalid.
+The distribution mean is always assumed to be equal to the initial value of the
+Parameter. This option is only enabled if </span><span class=Cdigo><span
+lang=EN-US>Normal</span></span><span lang=EN-US> is selected as the Parameter
+distribution.</span></p>
+
+<p class=MsoListParagraph style='margin-left:39.0pt;text-indent:-18.0pt'><span
+lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Upper/Lower bound</span></b></span><span
+lang=EN-US> (Uniform distribution only): the upper and lower bounds for the
+distribution, measured from the initial value of the Parameter. The upper bound
+value is added to the initial values, while the lower bound is subtracted from
+it. Both values must be positive, but they cannot be simultaneously equal to
+zero (the default).</span></p>
+
+<p class=MsoListParagraph style='margin-left:39.0pt;text-indent:-18.0pt'><span
+lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Ensemble inflation enable</span></b></span><span
+lang=EN-US>: if checked applies the ensemble inflation technique to perform the
+Parameter estimation, instead of using its distribution, to make the ensemble
+filter algorithm more robust against the effects of a small Monte Carlo sample.
+If enabled, the following fields must be specified. If disabled (the default)
+the next fields are disabled.</span></p>
+
+<p class=MsoListParagraph style='margin-left:39.0pt;text-indent:-18.0pt'><span
+lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Inflation factor</span></b></span><span
+lang=EN-US>: the key parameter to the ensemble inflation algorithm, defining
+how far from the forecast Parameter mean the virtual observations are expected
+to be located. It must be a (real) number larger than one (the default).</span></p>
+
+<p class=MsoListParagraph style='margin-left:39.0pt;text-indent:-18.0pt'><span
+lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Initial time</span></b></span><span
+lang=EN-US>: the simulation time from which the ensemble inflation algorithm is
+to be used instead of the provided Parameter distribution. Considering that at <i>t
+</i>= 1 the Parameter value is equal to its initial condition along the entire
+MC ensemble, the inflation algorithm can be applied only from <i>t</i> = 2 (the
+default) or later.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
 lang=EN-US>Remove</span></span><span lang=EN-US> button allows for the removal
-of the Variable from the DA computation.</span></p>
+of the Variable or Parameter from the DA computation, and all its settings are
+lost.</span></p>
 
 <table class=Tabelanormal border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

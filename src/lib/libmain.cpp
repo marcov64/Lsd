@@ -168,21 +168,3 @@ lsd::simulation::~simulation( void )
 	delete [ ] conf_path;
 	delete [ ] log_file;
 }
-
-
-/*************************************************************
- ASSIMILATION CONSTRUCTOR
- *************************************************************/
-lsd::assimilation::assimilation( void )
-{
-}
-
-
-/*************************************************************
- ASSIMILATION DESTRUCTOR
- *************************************************************/
-lsd::assimilation::~assimilation( void )
-{
-	empty( );
-	delete [ ] cov_file;
-}

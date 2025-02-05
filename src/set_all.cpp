@@ -640,13 +640,13 @@ const char *lsd::variable::print_constr( char *buf, int buf_sz )
  *************************************************************/
 int lsd::assim::dataentry( const char *parWnd )
 {
-	bool cexist, fexist;
+	bool cexist;
 	int namrow, res;
 	str_vecT cnames;
 	variable *cv;
 	rapidcsv::Document csv;
 
-	cv = sim->root->search_var( NULL, label );
+	cv = sims[ 0 ]->root->search_var( NULL, label );
 	if ( cv == NULL )
 		return 2;
 
@@ -662,22 +662,37 @@ int lsd::assim::dataentry( const char *parWnd )
 			set _w $parWnd.as \
 		}" );
 
-	cmd( "if { ! [ info exists modCSV ] } { \
-			set modCSV [ list ] \
+	cmd( "if { ! [ info exists modDAf ] } { \
+			set modDAf [ list ] \
 		}" );
 
-	cmd( "set path \"%s\"", sim->conf_path );
-	if ( strlen( sim->conf_path ) > 0 )
+	cmd( "set path \"%s\"", sims[ 0 ]->conf_path );
+	if ( strlen( sims[ 0 ]->conf_path ) > 0 )
 		cmd( "cd $path" );
 
-	cmd( "set csv_file \"%s\"", csv_file != NULL ? csv_file : "" );
-	cmd( "if { [ string first / $csv_file ] != -1 } { \
-			set csv_file [ file nativename $csv_file ] \
+	if ( cv->param == 1 )
+		param = true;
+
+	cmd( "set disable %d", disable );
+	cmd( "set update %d", update );
+	cmd( "set data_obs %d", data_obs );
+
+	cmd( "set data_file \"%s\"", data_file != NULL ? data_file : "" );
+	cmd( "if { [ string first / $data_file ] != -1 } { \
+			set data_file [ file nativename $data_file ] \
 		}" );
 	cmd( "set data_col_name \"%s\"", data_col_name != NULL ? data_col_name : data_col_num < 1 ? label : "" );
 	cmd( "set data_col_num %d", data_col_num );
 	cmd( "set t_col_name \"%s\"", t_col_name != NULL ? t_col_name : "" );
 	cmd( "set t_col_num %d", t_col_num );
+
+	cmd( "set par_distr %d", par_distr );
+	cmd( "set par_n_var %.2f", par_n_var );
+	cmd( "set par_u_upp %.2f", par_u_upp );
+	cmd( "set par_u_low %.2f", par_u_low );
+	cmd( "set par_ens_infl %d", par_ens_infl );
+	cmd( "set par_infl_fac %.3f", par_infl_fac );
+	cmd( "set par_infl_time %d", par_infl_time );
 
 	cmd( "newtop $_w \"Data Assimilation Settings\" { set choice 2 } $parWnd" );
 
@@ -685,7 +700,7 @@ int lsd::assim::dataentry( const char *parWnd )
 	cmd( "ttk::label $_w.head.lg -text \"Set data assimilation settings for\"" );
 
 	cmd( "ttk::frame $_w.head.l" );
-	cmd( "ttk::label $_w.head.l.c -text \"Variable: \"" );
+	cmd( "ttk::label $_w.head.l.c -text \"%s: \"", param ? "Parameter" : "Variable" );
 	cmd( "ttk::label $_w.head.l.n -text \"%s  \" -style hl.TLabel", label );
 	cmd( "pack $_w.head.l.c $_w.head.l.n -side left" );
 
@@ -697,102 +712,213 @@ int lsd::assim::dataentry( const char *parWnd )
 	cmd( "pack $_w.head.lg $_w.head.l $_w.head.lo" );
 	cmd( "pack $_w.head" );
 
-	cmd( "ttk::frame $_w.csv" );
-	cmd( "ttk::frame $_w.csv.l" );
-	cmd( "ttk::label $_w.csv.l.l -text \"Data file (CSV only)\"" );
-	cmd( "ttk::label $_w.csv.l.pad -width 6" );
-	cmd( "pack $_w.csv.l.l $_w.csv.l.pad -side left -padx $_5" );
+	cmd( "ttk::frame $_w.c" );
+	cmd( "ttk::checkbutton $_w.c.dis -text \"Disable assimilation\" -variable disable" );
+	cmd( "ttk::checkbutton $_w.c.upd -text \"Update during assimilation\" -variable update" );
+	cmd( "pack $_w.c.dis $_w.c.upd" );
 
-	cmd( "ttk::frame $_w.csv.file" );
-	cmd( "ttk::combobox $_w.csv.file.e -width 40 -textvariable csv_file -justify center -values $modCSV" );
-	cmd( "ttk::button $_w.csv.file.brw -text Browse -command { \
-			set fn [ tk_getOpenFile -parent $_w -title \"Select Data File\" -defaultextension \".csv\" -initialdir $path -filetypes { { {Comma-separated file} {.csv} } } ]; \
-			if { [ string length $fn ] > 0 && ! [ fn_spaces $fn ] } { \
-				set csv_file [ file normalize $fn ]; \
-				if { [ string first [ file normalize $model_dir ] $csv_file ] == 0 } { \
-					set csv_file [ string map [ list \"[ file normalize $model_dir ]/\" \"\" ] $csv_file ] \
-				}; \
-				if { [ string first / $csv_file ] != -1 } { \
-					set csv_file [ file nativename $csv_file ] \
+	if ( ! param )
+	{
+		cmd( "ttk::checkbutton $_w.c.obs -text \"Read data from file\" -variable data_obs -command { \
+				if { $data_obs } { \
+					$_w.csv.file.e configure -state normal; \
+					$_w.csv.file.brw configure -state normal; \
+					$_w.dcol.d.n1 configure -state normal; \
+					$_w.dcol.d.n2 configure -state normal; \
+					$_w.tcol.d.n1 configure -state normal; \
+					$_w.tcol.d.n2 configure -state normal \
+				} else { \
+					$_w.csv.file.e configure -state disabled; \
+					$_w.csv.file.brw configure -state disabled; \
+					$_w.dcol.d.n1 configure -state disabled; \
+					$_w.dcol.d.n2 configure -state disabled; \
+					$_w.tcol.d.n1 configure -state disabled; \
+					$_w.tcol.d.n2 configure -state disabled \
 				} \
-			} \
-		}" );
-	cmd( "pack $_w.csv.file.e $_w.csv.file.brw -side left -padx $_5" );
+			}" );
+		cmd( "pack $_w.c.dis $_w.c.upd $_w.c.obs -anchor w" );
 
-	cmd( "pack $_w.csv.l $_w.csv.file" );
+		cmd( "ttk::frame $_w.csv" );
 
-	cmd( "ttk::frame $_w.dcol" );
-	cmd( "ttk::label $_w.dcol.l -text \"Data column\"" );
+		cmd( "ttk::frame $_w.csv.l" );
+		cmd( "ttk::label $_w.csv.l.l -text \"Data file (CSV only)\"" );
+		cmd( "ttk::label $_w.csv.l.pad -width 6" );
+		cmd( "pack $_w.csv.l.l $_w.csv.l.pad -side left -padx $_5" );
 
-	cmd( "ttk::frame $_w.dcol.d" );
-	cmd( "ttk::label $_w.dcol.d.l1 -text Name" );
-	cmd( "ttk::entry $_w.dcol.d.n1 -width 15 -justify center -textvariable data_col_name -validate focusout -validatecommand { \
-			if { [ string length $data_col_name ] > 0 } { \
-				set data_col_num 0; \
-				$_w.dcol.d.n2 delete 0 end; \
-				$_w.dcol.d.n2 insert 0 0 \
-			}; \
-			return 1 \
-		}" );
-	cmd( "ttk::label $_w.dcol.d.l2 -text \"or number\"" );
-	cmd( "ttk::spinbox $_w.dcol.d.n2 -width 4 -justify center -from 0 -to 999 -validate focusout -validatecommand { \
-			set n %%P; \
-			if { [ string is integer -strict $n ] && $n >= 0 } { \
-				set data_col_num %%P; \
-				if { $n == 0 } { \
-					set data_col_name %s \
-				} { \
-					set data_col_name \"\" \
+		cmd( "ttk::frame $_w.csv.file" );
+		cmd( "ttk::combobox $_w.csv.file.e -width 40 -textvariable data_file -justify center -values $modDAf -state %s", data_obs ? "normal" : "disabled" );
+		cmd( "ttk::button $_w.csv.file.brw -text Browse -state %s -command { \
+				set fn [ tk_getOpenFile -parent $_w -title \"Select Data File\" -defaultextension \".csv\" -initialdir $path -filetypes { { {Comma-separated file} {.csv} } } ]; \
+				if { [ string length $fn ] > 0 && ! [ fn_spaces $fn ] } { \
+					set data_file [ file normalize $fn ]; \
+					if { [ string first [ file normalize $model_dir ] $data_file ] == 0 } { \
+						set data_file [ string map [ list \"[ file normalize $model_dir ]/\" \"\" ] $data_file ] \
+					}; \
+					if { [ string first / $data_file ] != -1 } { \
+						set data_file [ file nativename $data_file ] \
+					} \
+				} \
+			}", data_obs ? "normal" : "disabled" );
+		cmd( "pack $_w.csv.file.e $_w.csv.file.brw -side left -padx $_5" );
+
+		cmd( "pack $_w.csv.l $_w.csv.file" );
+
+		cmd( "ttk::frame $_w.dcol" );
+		cmd( "ttk::label $_w.dcol.l -text \"Data column\"" );
+
+		cmd( "ttk::frame $_w.dcol.d" );
+		cmd( "ttk::label $_w.dcol.d.l1 -text Name" );
+		cmd( "ttk::entry $_w.dcol.d.n1 -width 15 -justify center -textvariable data_col_name -state %s -validate focusout -validatecommand { \
+				if { [ string length $data_col_name ] > 0 } { \
+					set data_col_num 0; \
+					$_w.dcol.d.n2 delete 0 end; \
+					$_w.dcol.d.n2 insert 0 0 \
 				}; \
-				$_w.dcol.d.n1 delete 0 end; \
-				$_w.dcol.d.n1 insert 0 $data_col_name; \
 				return 1 \
-			} { \
-				%%W delete 0 end; \
-				%%W insert 0 $data_col_num; \
-				return 0 \
-			} \
-		} -invalidcommand { bell }", label );
-	cmd( "$_w.dcol.d.n2 insert 0 $data_col_num" );
-	cmd( "ttk::label $_w.dcol.d.l3 -text \"(0 : name)\"" );
+			}", data_obs ? "normal" : "disabled" );
+		cmd( "ttk::label $_w.dcol.d.l2 -text \"or number\"" );
+		cmd( "ttk::spinbox $_w.dcol.d.n2 -width 4 -justify center -from 1 -to 999 -validate focusout -validatecommand { \
+				set n %%P; \
+				if { [ string is integer -strict $n ] && $n >= 0 } { \
+					set data_col_num %%P; \
+					if { $n == 0 } { \
+						set data_col_name %s \
+					} { \
+						set data_col_name \"\" \
+					}; \
+					$_w.dcol.d.n1 delete 0 end; \
+					$_w.dcol.d.n1 insert 0 $data_col_name; \
+					return 1 \
+				} { \
+					%%W delete 0 end; \
+					%%W insert 0 $data_col_num; \
+					return 0 \
+				} \
+			} -invalidcommand { bell }", label );
+		cmd( "$_w.dcol.d.n2 insert 0 $data_col_num" );
+		cmd( "$_w.dcol.d.n2 configure -state %s", data_obs ? "normal" : "disabled" );
+		cmd( "ttk::label $_w.dcol.d.l3 -text \"(0 : name)\"" );
 
-	cmd( "pack $_w.dcol.d.l1 $_w.dcol.d.n1 $_w.dcol.d.l2 $_w.dcol.d.n2 $_w.dcol.d.l3 -side left" );
-	cmd( "pack $_w.dcol.l $_w.dcol.d" );
+		cmd( "pack $_w.dcol.d.l1 $_w.dcol.d.n1 $_w.dcol.d.l2 $_w.dcol.d.n2 $_w.dcol.d.l3 -side left" );
+		cmd( "pack $_w.dcol.l $_w.dcol.d" );
 
-	cmd( "ttk::frame $_w.tcol" );
-	cmd( "ttk::label $_w.tcol.l -text \"Time reference column\"" );
+		cmd( "ttk::frame $_w.tcol" );
+		cmd( "ttk::label $_w.tcol.l -text \"Time reference column\"" );
 
-	cmd( "ttk::frame $_w.tcol.d" );
-	cmd( "ttk::label $_w.tcol.d.l1 -text Name" );
-	cmd( "ttk::entry $_w.tcol.d.n1 -width 15 -justify center -textvariable t_col_name -validate focusout -validatecommand { \
-			if { [ string length $t_col_name ] > 0 } { \
-				set t_col_num 0; \
-				$_w.tcol.d.n2 delete 0 end; \
-				$_w.tcol.d.n2 insert 0 0 \
-			}; \
-			return 1 \
-		}" );
-	cmd( "ttk::label $_w.tcol.d.l2 -text \"or number\"" );
-	cmd( "ttk::spinbox $_w.tcol.d.n2 -width 4 -justify center -from 0 -to 999 -validate focusout -validatecommand { \
-			set n %%P; \
-			if { [ string is integer -strict $n ] && $n >= 0 } { \
-				set t_col_num %%P; \
-				set t_col_name \"\"; \
-				$_w.tcol.d.n1 delete 0 end; \
+		cmd( "ttk::frame $_w.tcol.d" );
+		cmd( "ttk::label $_w.tcol.d.l1 -text Name" );
+		cmd( "ttk::entry $_w.tcol.d.n1 -width 15 -justify center -textvariable t_col_name -state %s -validate focusout -validatecommand { \
+				if { [ string length $t_col_name ] > 0 } { \
+					set t_col_num 0; \
+					$_w.tcol.d.n2 delete 0 end; \
+					$_w.tcol.d.n2 insert 0 0 \
+				}; \
 				return 1 \
-			} { \
-				%%W delete 0 end; \
-				%%W insert 0 $t_col_num; \
-				return 0 \
-			} \
-		} -invalidcommand { bell }" );
-	cmd( "$_w.tcol.d.n2 insert 0 $t_col_num" );
-	cmd( "ttk::label $_w.tcol.d.l3 -text \"(0 : name)\"" );
+			}", data_obs ? "normal" : "disabled" );
+		cmd( "ttk::label $_w.tcol.d.l2 -text \"or number\"" );
+		cmd( "ttk::spinbox $_w.tcol.d.n2 -width 4 -justify center -from 1 -to 999 -state %s -validate focusout -validatecommand { \
+				set n %%P; \
+				if { [ string is integer -strict $n ] && $n >= 0 } { \
+					set t_col_num %%P; \
+					set t_col_name \"\"; \
+					$_w.tcol.d.n1 delete 0 end; \
+					return 1 \
+				} { \
+					%%W delete 0 end; \
+					%%W insert 0 $t_col_num; \
+					return 0 \
+				} \
+			} -invalidcommand { bell }", data_obs ? "normal" : "disabled" );
+		cmd( "$_w.tcol.d.n2 insert 0 $t_col_num" );
+		cmd( "$_w.tcol.d.n2 configure -state %s", data_obs ? "normal" : "disabled" );
+		cmd( "ttk::label $_w.tcol.d.l3 -text \"(0 : name)\"" );
 
-	cmd( "pack $_w.tcol.d.l1 $_w.tcol.d.n1 $_w.tcol.d.l2 $_w.tcol.d.n2 $_w.tcol.d.l3 -side left" );
-	cmd( "pack $_w.tcol.l $_w.tcol.d" );
+		cmd( "pack $_w.tcol.d.l1 $_w.tcol.d.n1 $_w.tcol.d.l2 $_w.tcol.d.n2 $_w.tcol.d.l3 -side left" );
+		cmd( "pack $_w.tcol.l $_w.tcol.d" );
 
-	cmd( "pack $_w.csv $_w.dcol $_w.tcol -padx $_5 -pady $_10" );
+		cmd( "pack $_w.c $_w.csv $_w.dcol $_w.tcol -padx $_5 -pady $_10" );
+	}
+	else
+	{
+		cmd( "pack $_w.c.dis $_w.c.upd -anchor w" );
+
+		cmd( "ttk::frame $_w.dist" );
+
+		cmd( "ttk::frame $_w.dist.d" );
+
+		cmd( "ttk::label $_w.dist.d.l -text \"Parameter distribution\"" );
+
+		cmd( "ttk::frame $_w.dist.d.o -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+		cmd( "ttk::radiobutton $_w.dist.d.o.n -text Normal -variable par_distr -value 0 -underline 0 -command { \
+				$_w.dist.p.var.e configure -state normal; \
+				$_w.dist.p.min.e configure -state disabled; \
+				$_w.dist.p.max.e configure -state disabled; \
+			}" );
+		cmd( "ttk::radiobutton $_w.dist.d.o.u -text Uniform -variable par_distr -value 1 -underline 0 -command { \
+				$_w.dist.p.var.e configure -state disabled; \
+				$_w.dist.p.min.e configure -state normal; \
+				$_w.dist.p.max.e configure -state normal; \
+			}" );
+		cmd( "pack	$_w.dist.d.o.n $_w.dist.d.o.u -anchor w" );
+
+		cmd( "pack $_w.dist.d.l $_w.dist.d.o" );
+
+		cmd( "ttk::frame $_w.dist.p" );
+
+		cmd( "ttk::frame $_w.dist.p.var" );
+		cmd( "ttk::label $_w.dist.p.var.l -width 15 -anchor e -text \"Variance\"" );
+		cmd( "ttk::entry $_w.dist.p.var.e -width 15 -textvariable par_n_var -justify center -state %s", par_distr == 0 ? "normal" : "disabled" );
+		cmd( "pack $_w.dist.p.var.l $_w.dist.p.var.e -side left -anchor w -padx $_2 -pady $_2" );
+
+		cmd( "ttk::frame $_w.dist.p.max" );
+		cmd( "ttk::label $_w.dist.p.max.l -width 15 -anchor e -text \"Upper bound (+)\"" );
+		cmd( "ttk::entry $_w.dist.p.max.e -width 15 -textvariable par_u_upp -justify center -state %s", par_distr == 1 ? "normal" : "disabled" );
+		cmd( "pack $_w.dist.p.max.l $_w.dist.p.max.e -side left -anchor w -padx $_2 -pady $_2" );
+
+		cmd( "ttk::frame $_w.dist.p.min" );
+		cmd( "ttk::label $_w.dist.p.min.l -width 15 -anchor e -text \"Lower bound (-)\"" );
+		cmd( "ttk::entry $_w.dist.p.min.e -width 15 -textvariable par_u_low -justify center -state %s", par_distr == 1 ? "normal" : "disabled" );
+		cmd( "pack $_w.dist.p.min.l $_w.dist.p.min.e -side left -anchor w -padx $_2 -pady $_2" );
+
+		cmd( "pack $_w.dist.p.var $_w.dist.p.max $_w.dist.p.min -anchor w" );
+
+		cmd( "pack $_w.dist.d $_w.dist.p" );
+
+		cmd( "ttk::frame $_w.infl" );
+
+		cmd( "ttk::frame $_w.infl.en" );
+		cmd( "ttk::label $_w.infl.en.l -text \"Ensemble inflation\"" );
+		cmd( "ttk::checkbutton $_w.infl.en.c -text Enable -variable par_ens_infl -command { \
+				if { $par_ens_infl } { \
+					$_w.infl.opt.f.e configure -state normal; \
+					$_w.infl.opt.t.e configure -state normal \
+				} else { \
+					$_w.infl.opt.f.e configure -state disabled; \
+					$_w.infl.opt.t.e configure -state disabled \
+				} \
+			}" );
+		cmd( "pack $_w.infl.en.l $_w.infl.en.c" );
+
+		cmd( "ttk::frame $_w.infl.opt" );
+
+		cmd( "ttk::frame $_w.infl.opt.f" );
+		cmd( "ttk::label $_w.infl.opt.f.l -width 15 -anchor e -text \"Inflation factor\"" );
+		cmd( "ttk::entry $_w.infl.opt.f.e -width 15 -textvariable par_infl_fac -justify center -state %s", par_ens_infl ? "normal" : "disabled" );
+		cmd( "pack $_w.infl.opt.f.l $_w.infl.opt.f.e -side left -anchor w -padx $_2 -pady $_2" );
+
+		cmd( "ttk::frame $_w.infl.opt.t" );
+		cmd( "ttk::label $_w.infl.opt.t.l -width 15 -anchor e -text \"Initial time\"" );
+		cmd( "ttk::spinbox $_w.infl.opt.t.e -width 12 -from 2 -to 99999 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 2 } { set par_infl_time %%P; return 1 } { %%W delete 0 end; %%W insert 2 $par_infl_time; return 0 } } -invalidcommand { bell }" );
+		cmd( "$_w.infl.opt.t.e insert 0 $par_infl_time" );
+		cmd( "$_w.infl.opt.t.e configure -state %s", par_ens_infl ? "normal" : "disabled" );
+		cmd( "pack $_w.infl.opt.t.l $_w.infl.opt.t.e -side left -anchor w -padx $_2 -pady $_2" );
+
+		cmd( "pack $_w.infl.opt.f $_w.infl.opt.t -anchor w" );
+
+		cmd( "pack $_w.infl.en $_w.infl.opt" );
+
+		cmd( "pack $_w.c $_w.dist $_w.infl -padx $_5 -pady $_10" );
+	}
 
 	cmd( "okXhelpcancel $_w b Remove { set choice 3 } { set choice 1 } { LsdHelp browser.html#assimilation } { set choice 2 }" );
 
@@ -805,120 +931,175 @@ int lsd::assim::dataentry( const char *parWnd )
 
 	res = gui::choice - 1;
 
-	if ( strlen( gui::get_str( "csv_file" ) ) == 0 )
-		res = 2;
-	else
+	if ( res > 0 )
+		goto end;
+
+	disable = gui::get_bool( "disable" );
+	update = gui::get_bool( "update" );
+
+	if ( ! param )
 	{
-		cmd( "set csv_file [ string map {\\\\ /} $csv_file ]" );
-		cmd( "lappend modCSV $csv_file" );
-		cmd( "set modCSV [ lsort -dictionary -unique $modCSV ] " );
-	}
+		data_obs = gui::get_bool( "data_obs" );
 
-	if ( strlen( gui::get_str( "data_col_name" ) ) == 0 )
-	{
-		if ( gui::get_int( "data_col_num" ) < 1 )
-			res = 2;
-		else
+		if ( data_obs )
 		{
-			delete [ ] data_col_name;
-			data_col_name = NULL;
-		}
-	}
-	else
-		data_col_num = 0;
-
-	if ( strlen( gui::get_str( "t_col_name" ) ) == 0 )
-	{
-		if ( gui::get_int( "t_col_num" ) < 1 )
-			t_col_num = 0;
-
-		delete [ ] t_col_name;
-		t_col_name = NULL;
-	}
-	else
-		t_col_num = 0;
-
-	if ( res == 0 )
-	{
-		delete [ ] csv_file;
-		csv_file = new char [ strlen( gui::get_str( "csv_file" ) ) + 1 ];
-		strcpy( csv_file, gui::get_str( "csv_file" ) );
-
-		if ( strlen( gui::get_str( "data_col_name" ) ) > 0 )
-		{
-			delete [ ] data_col_name;
-			data_col_name = new char [ strlen( gui::get_str( "data_col_name" ) ) + 1 ];
-			strcpy( data_col_name, gui::get_str( "data_col_name" ) );
-		}
-		else
-			data_col_num = gui::get_int( "data_col_num" );
-
-		if ( strlen( gui::get_str( "t_col_name" ) ) > 0 )
-		{
-			delete [ ] t_col_name;
-			t_col_name = new char [ strlen( gui::get_str( "t_col_name" ) ) + 1 ];
-			strcpy( t_col_name, gui::get_str( "t_col_name" ) );
-		}
-		else
-			if ( gui::get_int( "t_col_num" ) > 0 )
-				t_col_num = gui::get_int( "t_col_num" );
-
-		try
-		{
-			if ( ( data_col_name != NULL && strlen( data_col_name ) > 0 ) ||
-				 ( t_col_name != NULL && strlen( t_col_name ) > 0 ) )
-				namrow = 0;
+			if ( strlen( gui::get_str( "data_file" ) ) == 0 )
+			{
+				delete [ ] data_file;
+				data_file = NULL;
+				res = 1;
+			}
 			else
-				namrow = -1;
+			{
+				cmd( "set data_file [ string map {\\\\ /} $data_file ]" );
+				cmd( "lappend modDAf $data_file" );
+				cmd( "set modDAf [ lsort -dictionary -unique $modDAf ] " );
+			}
 
-			csv.Load( csv_file, rapidcsv::LabelParams( namrow, -1 ), rapidcsv::SeparatorParams( ',', true ), rapidcsv::ConverterParams( true, std::numeric_limits< long double >::quiet_NaN( ) ), rapidcsv::LineReaderParams( true, '#' ) );
-			fexist = true;
+			if ( strlen( gui::get_str( "data_col_name" ) ) == 0 )
+			{
+				delete [ ] data_col_name;
+				data_col_name = NULL;
+			}
+			else
+				data_col_num = 0;
+
+			if ( strlen( gui::get_str( "t_col_name" ) ) == 0 )
+			{
+				delete [ ] t_col_name;
+				t_col_name = NULL;
+			}
+			else
+				t_col_num = 0;
+
+			if ( res == 0 )
+			{
+				delete [ ] data_file;
+				data_file = new char [ strlen( gui::get_str( "data_file" ) ) + 1 ];
+				strcpy( data_file, gui::get_str( "data_file" ) );
+
+				if ( strlen( gui::get_str( "data_col_name" ) ) > 0 )
+				{
+					delete [ ] data_col_name;
+					data_col_name = new char [ strlen( gui::get_str( "data_col_name" ) ) + 1 ];
+					strcpy( data_col_name, gui::get_str( "data_col_name" ) );
+				}
+				else
+					data_col_num = std::max( gui::get_int( "data_col_num" ), 0 );
+
+				if ( strlen( gui::get_str( "t_col_name" ) ) > 0 )
+				{
+					delete [ ] t_col_name;
+					t_col_name = new char [ strlen( gui::get_str( "t_col_name" ) ) + 1 ];
+					strcpy( t_col_name, gui::get_str( "t_col_name" ) );
+				}
+				else
+					if ( gui::get_int( "t_col_num" ) > 0 )
+						t_col_num = std::max( gui::get_int( "t_col_num" ), 0 );
+
+				try
+				{
+					if ( ( data_col_name != NULL && strlen( data_col_name ) > 0 ) ||
+						 ( t_col_name != NULL && strlen( t_col_name ) > 0 ) )
+						namrow = 0;
+					else
+						namrow = -1;
+
+					csv.Load( data_file, rapidcsv::LabelParams( namrow, -1 ), rapidcsv::SeparatorParams( ',', true ), rapidcsv::ConverterParams( true, std::numeric_limits< long double >::quiet_NaN( ) ), rapidcsv::LineReaderParams( true, '#' ) );
+				}
+				catch ( ... )
+				{
+					cmd( "ttk::messageBox -parent $_w -type ok -icon warning -title Warning -message \"Data file does not exist\" -detail \"You can still add the missing data file later.\"" );
+					res = 1;
+				}
+
+				if ( res == 0 )
+				{
+					if ( data_col_name != NULL && strlen( data_col_name ) > 0 )
+					{
+						cnames = csv.GetColumnNames( );
+						cexist = std::find( cnames.begin( ), cnames.end( ), data_col_name ) != cnames.end( );
+					}
+					else
+						cexist = data_col_num <= ( int ) csv.GetColumnCount( );
+
+					if ( ! cexist )
+					{
+						cmd( "ttk::messageBox -parent $_w -type ok warning -title Warning -message \"Data column does not exist\" -detail \"You can still add the missing data column later.\"" );
+						res = 1;
+					}
+
+					if ( res == 0 )
+					{
+						if ( t_col_name != NULL && strlen( t_col_name ) > 0 )
+						{
+							cnames = csv.GetColumnNames( );
+							cexist = std::find( cnames.begin( ), cnames.end( ), t_col_name ) != cnames.end( );
+						}
+						else
+							cexist = t_col_num <= ( int ) csv.GetColumnCount( );
+
+						if ( ! cexist )
+						{
+							cmd( "ttk::messageBox -parent $_w -type ok -icon warning -title Warning -message \"Time reference column does not exist\" -detail \"You can still add the time reference column later.\"" );
+							res = 1;
+						}
+					}
+				}
+			}
 		}
-		catch ( ... )
+	}
+	else
+	{
+		switch ( par_distr = gui::get_int( "par_distr" ) )
 		{
-			cmd( "switch -- [ ttk::messageBox -parent $_w -type okcancel -default cancel -icon warning -title Warning -message \"Data file does not exist\" -detail \"If you want to add the data file later, press 'OK', or press 'Cancel' to abort defining assimilation data.\" ] { ok { set answer 1 } cancel { set answer 0 } }" );
+			case 0:
+				if ( std::isfinite( gui::get_double( "par_n_var" ) ) && gui::get_double( "par_n_var" ) > 0 )
+					par_n_var = gui::get_double( "par_n_var" );
+				else
+				{
+					cmd( "ttk::messageBox -parent $_w -type ok -icon error -title Error -message \"Invalid variance\" -detail \"Parameter variance must be greater than zero.\"" );
+					res = 2;
+				}
 
-			if ( ! gui::get_bool( "answer" ) )
+				break;
+
+			case 1:
+				if ( std::isfinite( gui::get_double( "par_u_upp" ) ) && std::isfinite( gui::get_double( "par_u_low" ) ) && gui::get_double( "par_u_upp" ) >= 0 && gui::get_double( "par_u_low" ) >= 0 && gui::get_double( "par_u_upp" ) + gui::get_double( "par_u_low" ) > 0 )
+				{
+					par_u_upp = gui::get_double( "par_u_upp" );
+					par_u_low = gui::get_double( "par_u_low" );
+				}
+				else
+				{
+					cmd( "ttk::messageBox -parent $_w -type ok -icon error -title Error -message \"Invalid bound values\" -detail \"Parameter distribution bound limits must be finite, non-negative, and add-up to more than zero.\"" );
+					res = 2;
+				}
+
+				break;
+		}
+
+		if ( ( par_ens_infl = gui::get_bool( "par_ens_infl" ) ) )
+		{
+			if ( std::isfinite( gui::get_double( "par_infl_fac" ) ) && gui::get_double( "par_infl_fac" ) > 1 )
+				par_infl_fac = gui::get_double( "par_infl_fac" );
+			else
+			{
+				cmd( "ttk::messageBox -parent $_w -type ok -icon error -title Error -message \"Invalid inflation factor\" -detail \"Parameter ensemble inflation factor must be grater than 1.\"" );
 				res = 2;
-
-			fexist = false;
-		}
-
-		if ( fexist )
-		{
-			if ( data_col_name != NULL && strlen( data_col_name ) > 0 )
-			{
-				cnames = csv.GetColumnNames( );
-				cexist = std::find( cnames.begin( ), cnames.end( ), data_col_name ) != cnames.end( );
 			}
+
+			if ( gui::get_int( "par_infl_time" ) > 1 )
+				par_infl_time = gui::get_int( "par_infl_time" );
 			else
-				cexist = data_col_num <= ( int ) csv.GetColumnCount( );
-
-			if ( ! cexist )
 			{
-				cmd( "switch -- [ ttk::messageBox -parent $_w -type okcancel -default cancel -icon warning -title Warning -message \"Data column does not exist\" -detail \"If you want to add the data column later, press 'OK', or press 'Cancel' to abort defining assimilation data.\" ] { ok { set answer 1 } cancel { set answer 0 } }" );
-
-				if ( ! gui::get_bool( "answer" ) )
-					res = 2;
-			}
-
-			if ( t_col_name != NULL && strlen( t_col_name ) > 0 )
-			{
-				cnames = csv.GetColumnNames( );
-				cexist = std::find( cnames.begin( ), cnames.end( ), t_col_name ) != cnames.end( );
-			}
-			else
-				cexist = t_col_num <= ( int ) csv.GetColumnCount( );
-
-			if ( res != 2 && ! cexist )
-			{
-				cmd( "switch -- [ ttk::messageBox -parent $_w -type okcancel -default cancel -icon warning -title Warning -message \"Time reference column does not exist\" -detail \"If you want to add the time reference column later, press 'OK', or press 'Cancel' to abort defining assimilation data.\" ] { ok { set answer 1 } cancel { set answer 0 } }" );
-
-				if ( ! gui::get_bool( "answer" ) )
-					res = 2;
+				cmd( "ttk::messageBox -parent $_w -type ok -icon error -title Error -message \"Invalid inflation initial time\" -detail \"Parameter ensemble inflation start time must be grater than 1.\"" );
+				res = 2;
 			}
 		}
 	}
+
+	end:
 
 	cmd( "destroytop $_w" );
 

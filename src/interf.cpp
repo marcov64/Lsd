@@ -97,6 +97,13 @@ lsd::object *gui::operate( lsd::object *r )
 				break;
 			}
 
+			// invalid data assimilation settings
+			if ( lsd::da.count( 4 ) > 0 && ! lsd::da.disable && sim.last_run < 2 )
+			{
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid settings for data assimilation\" -detail \"The number of simulation runs is too small to perform data assimilation.\"" );
+				break;
+			}
+
 			// warn about no variable/parameter being saved
 			for ( n = r; n->up != NULL; n = n->up );
 			sim.series_saved = 0;
@@ -125,7 +132,7 @@ lsd::object *gui::operate( lsd::object *r )
 			overwConf = unsaved_change( ) ? true : false;
 
 			// avoid showing dialog if configuration already saved and nothing to save to disk
-			if ( ! overwConf && sim.last_run == 1 && ( lsd::da.count( ) == 0 || lsd::da.disable ) )
+			if ( ! overwConf && sim.last_run == 1 && ( lsd::da.count( 4 ) == 0 || lsd::da.disable ) )
 				goto run;
 
 			// remove any custom save path (save to current by default)
@@ -162,7 +169,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::label $T.f2.t.w -text \"%d\" -style hl.TLabel", sim.last_t );
 			cmd( "pack $T.f2.t.l $T.f2.t.w -side left -padx $_2" );
 
-			if ( lsd::da.count( ) == 0 || lsd::da.disable )	// regular run?
+			if ( lsd::da.count( 4 ) == 0 || lsd::da.disable )// regular run?
 			{
 				if ( sim.last_run == 1 )					// single run
 				{
@@ -1481,7 +1488,7 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "ttk::button $Td.b2.setall -width [ expr { $butWid + 2 } ] -text \"Initial Values\" -command { set done 11 } -underline 1" );
 				cmd( "ttk::button $Td.b2.sens -width [ expr { $butWid + 2 } ] -text \"Sensitivity\" -command { set done 12 } -underline 5" );
 
-				if ( cv->param == 0 )
+				if ( cv->param <= 1 )
 				{
 					cmd( "ttk::button $Td.b2.da -width [ expr { $butWid + 2 } ] -text \"Assimilation\" -command { set done 15 }" );
 					cmd( "tooltip::tooltip $Td.b2.da \"Set data assimilation values for this element\"" );
@@ -2108,7 +2115,7 @@ lsd::object *gui::operate( lsd::object *r )
 				break;
 
 			if ( ( ca = lsd::da.search( cv->label ) ) == NULL )
-				ca = new lsd::assim( cv->label, & sim );
+				ca = new lsd::assim( cv->label );
 
 			i = ca->dataentry( );
 
@@ -2563,11 +2570,8 @@ lsd::object *gui::operate( lsd::object *r )
 		case 35:
 
 			// check for data assimilation variables
-			if ( lsd::da.count( ) == 0 )
-			{
-				cmd( "ttk::messageBox -parent $T -type ok -icon error -title Error -message \"Data assimilation not configured\" -detail \"No variable is configured for data assimilation, changes here are only used if at least one variable is configured with data to be assimilated.\"" );
-				break;
-			}
+			if ( lsd::da.count( 4 ) == 0 )
+				cmd( "ttk::messageBox -parent $T -type ok -icon warning -title Warning -message \"Data assimilation not configured\" -detail \"No element is configured for data assimilation, changes here are only used if at least one variable is configured with data to be assimilated.\"" );
 
 			// save previous values to allow canceling operation
 			temp[ 1 ] = lsd::da.disable;
@@ -4620,7 +4624,7 @@ lsd::object *gui::operate( lsd::object *r )
 			choice = 0;
 
 			// check for existing assimilation settings loaded
-			if ( lsd::da.count( ) == 0 )
+			if ( lsd::da.count( 0 ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"There is no data assimilation settings to show\"" );
 				break;
@@ -4638,7 +4642,7 @@ lsd::object *gui::operate( lsd::object *r )
 			choice = 0;
 
 			// check for existing assimilation settings loaded
-			if ( lsd::da.count( ) == 0 )
+			if ( lsd::da.count( 0 ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No data assimilation settings to remove\"" );
 				break;
@@ -4659,7 +4663,7 @@ lsd::object *gui::operate( lsd::object *r )
 		case 68:
 
 			// check for data assimilation
-			if ( lsd::da.count( ) > 0 && ! lsd::da.disable )
+			if ( lsd::da.count( 4 ) > 0 && ! lsd::da.disable )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Data assimilation configured\" -detail \"The current configuration is set to perform data assimilation, which already uses parallel processing. Please use the non-parallel run option.\"" );
 				break;
@@ -5111,7 +5115,7 @@ lsd::object *gui::operate( lsd::object *r )
 			}
 
 			// check for data assimilation
-			if ( lsd::da.count( ) > 0 && ! lsd::da.disable )
+			if ( lsd::da.count( 4 ) > 0 && ! lsd::da.disable )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Data assimilation configured\" -detail \"The current configuration is set to perform data assimilation, which already uses parallel processing. Please use the non-parallel run option.\"" );
 				break;

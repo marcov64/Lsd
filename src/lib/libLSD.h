@@ -338,11 +338,10 @@ class lsd::assimilation					// assimilation container class
 
 	public:
 		assim *search( const char *lab );
-		int count( void );
+		int count( int what );
 		void empty( assim *ca = NULL );
 		void show( void );
 
-		assimilation( void );			// constructor
 		~assimilation( void );			// destructor
 
 	private:
@@ -360,27 +359,37 @@ class lsd::assim						// data assimilation container class
 	friend class object;
 	friend class assimilation;
 
-	public:
-		bool missing = false;			// data could not be retrieved
-		char *csv_file = NULL;			// name of source data CSV file
+	protected:							// variables used by descending classes
+		bool data_obs = false;			// element has data obs. to assimilate
+		bool disable = false;			// element disabled for assimilation
+		bool param = false;				// element is a parameter (not variable)
+		bool par_ens_infl = false;		// use ensemble inflation for parameters
+		bool update = true;				// element to be updated by assimilation
+		char *data_file = NULL;			// name of source data CSV file
 		char *data_col_name = NULL;		// name of data value column
-		char *label = NULL;				// variable name
 		char *t_col_name = NULL;		// name of time value column
-		double *val = NULL;				// assimilation values
-		int cov_idx = -1;				// index (row+col) in covariance matrix
+		double par_infl_fac = 1;		// parameter ensemble inflation factor
+		double par_n_var = 0;			// parameter normal variance
+		double par_u_upp = 0;			// parameter uniform distribution maximum
+		double par_u_low = 0;			// parameter uniform distribution minimum
 		int data_col_num = 0;			// number of data value column
+		int par_distr = 0;				// parameter distribution (0:N/1:U)
+		int par_infl_time = 2;			// parameter ensemble inflation start time
 		int t_col_num = 0;				// number of time value column
-		assim *next = NULL;				// data assimilation chain of elements
-
-		assim( const char *lab, simulation *_sim, const char *_csv = NULL, const char *_data_col_name = NULL, const char *_t_col_name = NULL, int _data_col_num = 0, int _t_col_num = 0 );
-										// constructor
-		~assim( void );			// destructor
 
 	private:
-		simulation *sim;				// simulation where object is contained
+		bool no_data;					// data could not be retrieved
+		char *label = NULL;				// element name
+		int cov_idx = -1;				// index (row+col) in covariance matrix
+		assim *next = NULL;				// data assimilation chain of elements
 
-#ifdef ASSIMILATION_EXT
-		ASSIMILATION_EXT
+	public:
+		assim( const char *_label, bool param = false, bool _disable = false, bool _update = true, bool _data_obs = false, const char *_csv = NULL, const char *_data_col_name = NULL, const char *_t_col_name = NULL, int _data_col_num = 0, int _t_col_num = 0, int _par_distr = 0, double _par_n_var = 0, double _par_u_upp = 0, double _par_u_low = 0, bool par_ens_infl = false, double _par_infl_fac = 1, int _par_infl_time = 2 );
+										// constructor
+		~assim( void );					// destructor
+
+#ifdef ASSIM_EXT
+		ASSIM_EXT
 #endif
 };
 
