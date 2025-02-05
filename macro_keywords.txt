@@ -2,4 +2,4 @@ MODELBEGIN MODELEND CLOSEBEGIN CLOSEEND EQUATION EQUATION_DUMMY END_EQUATION ABO
 
 pi abs exp fact log log10 min max pow ipow round round_digits sin cos tan asin acos atan sqrt cbrt tgamma lgamma t_star z_star is_finite is_inf is_nan alapl bernoulli beta binomial bpareto cauchy chi_squared exponential fisher gamma geometric lnorm norm pareto poisson student uniform uniform_int weibull alaplcdf betacdf bparetocdf lnormcdf normcdf paretocdf poissoncdf unifcdf 
 
-lsd gui simulation equation object variable mnode bridge store netlink netnode lattice lsdstack store description sensitivity design nolh assimilation result profile worker dlliblinkage
+lsd gui simulation equation object variable mnode bridge store netlink netnode lattice lsdstack store description sensitivity design nolh assim assimilation result profile worker dlliblinkage

@@ -194,6 +194,7 @@ namespace lsd
 /*************************************************************
  CLASSES
  *************************************************************/
+	class assim;
 	class assimilation;
 	class bridge;
 	class description;
@@ -216,7 +217,7 @@ namespace lsd
  TYPE TEMPLATES
  *************************************************************/
 	typedef std::function < double( const variable *, object * ) > eq_funcT;
-	typedef std::list < assimilation * > ass_listT;
+	typedef std::list < assim * > ass_listT;
 	typedef std::map < strT, profile > prof_mapT;
 	typedef std::map < thr_idT, worker * > wrk_mapT;
 	typedef std::pair < strT, bridge * > b_pairT;
@@ -242,6 +243,7 @@ namespace lsd
 	extern const bool no_pointer_init;		// user pointer init. static disable
 
 #ifndef _FUN_
+	extern assimilation da;					// data assimilation object
 	extern char *exec_file;					// name of executable file
 	extern char *exec_path;					// path of executable file
 	extern char *lib_file;					// name of shared library, if any
@@ -314,6 +316,73 @@ namespace lsd
 	void signal_handler( int signum );
 #endif
 }
+
+
+/*************************************************************
+ ASSIMILATION
+ *************************************************************/
+class lsd::assimilation					// assimilation container class
+{
+	friend class assim;
+	friend class simulation;
+
+	public:
+		char *cov_file = NULL;			// data assimilation covariance CSV file
+		int disable = false;			// disable data assimilation
+
+	private:
+		assim *elem = NULL;				// assimilation elements linked-list head
+		dm_mapT data;					// assimilation data map of maps
+		ia_mapT time;					// list of times and variables for assimilation
+		Eigen::MatrixXd cov_mat;		// data assimilation covariance matrix
+
+	public:
+		assim *search( const char *lab );
+		int count( void );
+		void empty( assim *ca = NULL );
+		void show( void );
+
+		assimilation( void );			// constructor
+		~assimilation( void );			// destructor
+
+	private:
+		bool load_files( void );
+		int load_cov( void );
+		int load_data( void );
+};
+
+
+/*************************************************************
+ ASSIM
+ *************************************************************/
+class lsd::assim						// data assimilation container class
+{
+	friend class object;
+	friend class assimilation;
+
+	public:
+		bool missing = false;			// data could not be retrieved
+		char *csv_file = NULL;			// name of source data CSV file
+		char *data_col_name = NULL;		// name of data value column
+		char *label = NULL;				// variable name
+		char *t_col_name = NULL;		// name of time value column
+		double *val = NULL;				// assimilation values
+		int cov_idx = -1;				// index (row+col) in covariance matrix
+		int data_col_num = 0;			// number of data value column
+		int t_col_num = 0;				// number of time value column
+		assim *next = NULL;				// data assimilation chain of elements
+
+		assim( const char *lab, simulation *_sim, const char *_csv = NULL, const char *_data_col_name = NULL, const char *_t_col_name = NULL, int _data_col_num = 0, int _t_col_num = 0 );
+										// constructor
+		~assim( void );			// destructor
+
+	private:
+		simulation *sim;				// simulation where object is contained
+
+#ifdef ASSIMILATION_EXT
+		ASSIMILATION_EXT
+#endif
+};
 
 
 /*************************************************************
@@ -432,6 +501,7 @@ class lsd::equation						// simulation model equation class
  *************************************************************/
 class lsd::simulation : public equation	// simulation container class
 {
+	friend class assimilation;
 	friend class equation;
 	friend class netnode;
 	friend class object;
@@ -439,7 +509,6 @@ class lsd::simulation : public equation	// simulation container class
 	friend class worker;
 
 	public:
-		assimilation *assim = NULL;		// data assimilation linked-list head
 		bool batch_sequential = false;	// terminal multi configuration job running
 		bool conf_ok = false;			// a valid configuration file is loaded
 		bool fast;						// safe copy of fast_mode flag
@@ -461,7 +530,6 @@ class lsd::simulation : public equation	// simulation container class
 		char *conf_file = NULL;			// name of current configuration file
 		char *conf_name = NULL;			// name of current simulation configuration
 		char *conf_path = NULL;			// folder where the current configuration is
-		char *cov_file = NULL;			// data assimilation covariance CSV file
 		char *log_file = NULL;			// name of log file, if any
 		char conf_eq_txt[ MAX_FILE_SIZE ] = "";// equations saved in configuration file
 		char rep_file[ MAX_PATH_LENGTH ] = "";// documentation report file name
@@ -470,7 +538,6 @@ class lsd::simulation : public equation	// simulation container class
 		dlliblinkage *liblnk = NULL;	// call-back references for DLL
 		hand_vecT run_pids;				// parallel running instances process id's
 		int add_to_tot = false;			// type of totals file generated (bool)
-		int assim_disable = false;		// disable data assimilation
 		int deb_set = false;			// debug enable control (bool)
 		int deb_t;						// next debug stop time step (0 for none)
 		int dobar = false;				// enable progress bar in log/standard output
@@ -519,7 +586,6 @@ class lsd::simulation : public equation	// simulation container class
 		unsigned seed = 1;				// random number generator initial seed
 		variable *cemetery = NULL;		// LSD saved data from deleted objects
 		worker *workers = NULL;			// multi-thread parallel worker data
-		Eigen::MatrixXd assim_cov;		// data assimilation covariance matrix
 		FILE *log_file_ptr;				// log file pointer, if any
 #ifndef _TERM_
 		p_mapT par_map;					// variable to parent name map for AoR
@@ -543,8 +609,6 @@ class lsd::simulation : public equation	// simulation container class
 		clock_t start_profile[ MAX_PROF_SIZE ];// profile-level start times
 		clock_t end_profile[ MAX_PROF_SIZE ];// profile-level end times
 		cond_vT upd_workers;			// worker schedule update signal
-		dm_mapT assim_data;				// assimilation data map of maps
-		ia_mapT assim_time;				// list of times and variables for assimilation
 		int nsim;						// library simulation object index
 		int ran_gen_id = 2;				// ID of initial generator (DO NOT CHANGE)
 		int stack_level;				// LSD stack call level
@@ -577,12 +641,10 @@ class lsd::simulation : public equation	// simulation container class
 		variable *last_cemetery = NULL;	// LSD last saved cemetery entry
 
 	public:
-		bool load_assim_files( void );
 		bool results_alt_path( const char *altPath );
 		bool save_txt_configuration( const char *path, const char *rname, const char *ext, const char eq_file[ ], const char eq_txt[ ] = "" );
 		bool save_xml_configuration( int findex = 0, const char *dest_path = NULL, bool quick = false, const char mod_nam[ ] = "", const char mod_ver[ ] = "", const char mod_dat[ ] = "", const char eq_file[ ] = "", const char eq_txt[ ] = "" );
 		bool stop_parallel( void );
-		assimilation *search_assimilation( const char *lab );
 		description *add_description( const char *lab, int type = 4, const char *text = NULL, const char *init = NULL, bool initial = false, bool observe = false );
 		description *change_description( const char *lab_old, const char *lab = NULL, int type = -1, const char *text = NULL, const char *init = NULL, int initial = -1, int observe = -1 );
 		description *search_description( const char *lab, bool add_missing = true );
@@ -595,7 +657,6 @@ class lsd::simulation : public equation	// simulation container class
 		int run_simulation( int until_t = 0, int until_run = 0 );
 		int worker_errors( void );
 		void detach_parallel( void );
-		void empty_assimilation( assimilation *ca = NULL );
 		void empty_sensitivity( sensitivity *cs = NULL );
 		void empty_stack( void );
 		void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const char *logFmt, ... );
@@ -614,11 +675,8 @@ class lsd::simulation : public equation	// simulation container class
 		bool next_batch( void );
 		double betacf( double a, double b, double x );
 		double build_obj_list( bool set_list );
-		int count_assimilation( void );
 		int init_new_run( clock_t & start, clock_t & last_update );
 		int init_new_seq( char *bar_done, int & perc_done, int & last_done );
-		int load_assim_cov( void );
-		int load_assim_data( void );
 		int load_txt_configuration( bool reload, int quick );
 		int monitor_logs( void );
 		template < class distr > double draw_gen( distr &d );
@@ -1029,39 +1087,6 @@ class lsd::sensitivity					// sensitivity analysis container class
 
 #ifdef SENSITIVITY_EXT
 		SENSITIVITY_EXT
-#endif
-};
-
-
-/*************************************************************
- ASSIMILATION
- *************************************************************/
-class lsd::assimilation					// data assimilation container class
-{
-	friend class object;
-	friend class simulation;
-
-	public:
-		bool missing = false;			// data could not be retrieved
-		char *csv_file = NULL;			// name of source data CSV file
-		char *data_col_name = NULL;		// name of data value column
-		char *label = NULL;				// variable name
-		char *t_col_name = NULL;		// name of time value column
-		double *val = NULL;				// assimilation values
-		int cov_idx = -1;				// index (row+col) in covariance matrix
-		int data_col_num = 0;			// number of data value column
-		int t_col_num = 0;				// number of time value column
-		assimilation *next = NULL;		// data assimilation chain of elements
-
-		assimilation( const char *lab, simulation *_sim, const char *_csv = NULL, const char *_data_col_name = NULL, const char *_t_col_name = NULL, int _data_col_num = 0, int _t_col_num = 0 );
-										// constructor
-		~assimilation( void );			// destructor
-
-	private:
-		simulation *sim;				// simulation where object is contained
-
-#ifdef ASSIMILATION_EXT
-		ASSIMILATION_EXT
 #endif
 };
 

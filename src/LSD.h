@@ -315,7 +315,7 @@ namespace gui
 	extern int watch;					// allow for graph generation interruption (bool)
 	extern lsd::object *curr_obj;		// pointer to current object in browser
 	extern lsd::object *last_obj;		// pointer to last selected object in structure
-	extern lsd::simulation sim;			// the single GUI simulation object
+	extern lsd::simulation sim;			// the master GUI simulation object
 	extern nolh NOLH[ ];				// characteristics of NOLH tables
 	extern Tcl_Interp *interp;			// Tcl standard interpreter pointer
 

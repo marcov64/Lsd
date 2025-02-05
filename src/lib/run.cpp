@@ -224,7 +224,7 @@ int lsd::simulation::init_new_seq( char *bar_done, int & perc_done, int & last_d
 	quit = 0;					// not marked for abortion
 
 	// read data assimilation data from files
-	load_assim_files( );
+	da.load_files( );
 
 	// check if there are parallel computing variables
 	if ( parallel_disable || max_threads < 2 )

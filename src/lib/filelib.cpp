@@ -142,12 +142,12 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 		no_ptr_chk = ! simNode.attribute( "ptr_check", hint ).as_bool( true );
 		parallel_disable = ! simNode.attribute( "parallel", hint ).as_bool( true );
 
-		assim_disable = ! simNode.attribute( "assimilation", hint ).as_bool( true );
+		da.disable = ! simNode.attribute( "assimilation", hint ).as_bool( true );
 		if ( ( i = strlen( simNode.attribute( "covariance_file", hint ).as_string( ) ) ) > 0 )
 		{
-			delete [ ] cov_file;
-			cov_file = new char [ i + 1 ];
-			strcpy( cov_file, simNode.attribute( "covariance_file", hint ).as_string( ) );
+			delete [ ] da.cov_file;
+			da.cov_file = new char [ i + 1 ];
+			strcpy( da.cov_file, simNode.attribute( "covariance_file", hint ).as_string( ) );
 		}
 
 		stack_info = setNode.child( "profiling" ).attribute( "level", hint ).as_uint( );
@@ -220,10 +220,10 @@ void lsd::simulation::unload_configuration( bool full )
 	add_description( "Root" );
 	reset_blueprint( NULL );
 	empty_cemetery( );							// garbage collection
-	empty_assimilation( );						// discard assimilation data
+	da.empty( );								// discard assimilation data
 
-	delete [ ] cov_file;
-	cov_file = NULL;
+	delete [ ] da.cov_file;
+	da.cov_file = NULL;
 
 	save_ok = true;								// valid structure to save
 	sens = NULL;								// no sensitivity data
@@ -381,7 +381,7 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 							int data_col_num = cna.attribute( "data_column_number" ).as_uint( );
 							int t_col_num = cna.attribute( "t_column_number" ).as_uint( );
 
-							new assimilation( str, sim, csv, data_col_name, t_col_name, data_col_num, t_col_num );
+							new assim( str, sim, csv, data_col_name, t_col_name, data_col_num, t_col_num );
 						}
 					}
 				}
@@ -773,13 +773,13 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 		simNode.append_attribute( "parallel" ) = false;
 
 	// add data assimilation global settings, if enabled
-	if ( assim != NULL )
+	if ( da.count( ) > 0 )
 	{
-		if ( assim_disable )
+		if ( da.disable )
 			simNode.append_attribute( "assimilation" ) = false;
-		
-		if ( cov_file != NULL && strlen( cov_file ) > 0 )
-			simNode.append_attribute( "covariance_file" ) = cov_file;
+
+		if ( da.cov_file != NULL && strlen( da.cov_file ) > 0 )
+			simNode.append_attribute( "covariance_file" ) = da.cov_file;
 	}
 
 	// add profile settings, if any
@@ -850,7 +850,7 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 	int i, count;
 	long l, k;
 	strT data, text, nser, nid, nnam, lnkto, lnkwht;
-	assimilation *ca;
+	assim *ca;
 	bridge *cb;
 	description *cd;
 	netlink *curl;
@@ -1129,7 +1129,7 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 			}
 
 		// add data assimilation settings
-		ca = sim->search_assimilation( cv->label );
+		ca = da.search( cv->label );
 		if ( ca != NULL && ca->csv_file != NULL )
 		{
 			x_nodeT cna = cn.append_child( "assimilation" );
@@ -1206,11 +1206,11 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 		goto endLoad;
 	}
 
-	delete [ ] cov_file;
-	cov_file = NULL;
+	delete [ ] da.cov_file;
+	da.cov_file = NULL;
 	last_t = MAX_STEPS;
 	deb_t = stack_info = prof_min_msecs = 0;
-	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = assim_disable = 0;
+	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = da.disable = 0;
 
 	fscanf( f, "%999s", msg );					// should be MAX_STEP
 	if ( strcmp( msg, "MAX_STEP" ) )

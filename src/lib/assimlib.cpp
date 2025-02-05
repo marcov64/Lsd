@@ -22,12 +22,12 @@
 
 
 /*************************************************************
- ASSIMILATION CONSTRUCTOR
+ ASSIM CONSTRUCTOR
  Add or update data assimilation settings for a model element
  *************************************************************/
-lsd::assimilation::assimilation( const char *lab, simulation *_sim, const char *_csv, const char *_data_col_name, const char *_t_col_name, int _data_col_num, int _t_col_num )
+lsd::assim::assim( const char *lab, simulation *_sim, const char *_csv, const char *_data_col_name, const char *_t_col_name, int _data_col_num, int _t_col_num )
 {
-	assimilation *ca;
+	assim *ca;
 
 	sim = _sim;
 
@@ -59,23 +59,23 @@ lsd::assimilation::assimilation( const char *lab, simulation *_sim, const char *
 			t_col_num = _t_col_num;
 	}
 
-	if ( sim->assim == NULL )
-		sim->assim = this;
+	if ( da.elem == NULL )
+		da.elem = this;
 	else
 	{
-		for ( ca = sim->assim; ca->next != NULL; ca = ca->next );
+		for ( ca = da.elem; ca->next != NULL; ca = ca->next );
 		ca->next = this;
 	}
 }
 
 
 /*************************************************************
- ASSIMILATION DESTRUCTOR
+ ASSIM DESTRUCTOR
  Remove data assimilation settings for a model element
  *************************************************************/
-lsd::assimilation::~assimilation( void )
+lsd::assim::~assim( void )
 {
-	assimilation *ca, *pa;
+	assim *ca, *pa;
 
 	delete [ ] csv_file;
 	delete [ ] data_col_name;
@@ -83,12 +83,12 @@ lsd::assimilation::~assimilation( void )
 	delete [ ] t_col_name;
 	delete [ ] val;
 
-	if ( sim->assim != NULL )
+	if ( da.elem != NULL )
 	{
-		for ( ca = sim->assim, pa = NULL; ca != this && ca != NULL; pa = ca, ca = ca->next );
+		for ( ca = da.elem, pa = NULL; ca != this && ca != NULL; pa = ca, ca = ca->next );
 
-		if ( ca == sim->assim )
-			sim->assim = next;
+		if ( ca == da.elem )
+			da.elem = next;
 		else
 			if ( ca == this && pa != NULL )
 				pa->next = next;
@@ -97,51 +97,51 @@ lsd::assimilation::~assimilation( void )
 
 
 /*************************************************************
- COUNT_ASSIMILATION
+ COUNT
  Count elements in data assimilation linked list
  *************************************************************/
-int lsd::simulation::count_assimilation( void )
+int lsd::assimilation::count( void )
 {
-	assimilation *ca;
+	assim *ca;
 	int n;
 
-	for ( ca = assim, n = 0; ca != NULL; ca = ca->next, ++n );
+	for ( ca = elem, n = 0; ca != NULL; ca = ca->next, ++n );
 
 	return n;
 }
 
 
 /*************************************************************
- EMPTY_ASSIMILATION
+ EMPTY
  Deallocate data assimilation settings memory
  *************************************************************/
-void lsd::simulation::empty_assimilation( assimilation *ca )
+void lsd::assimilation::empty( assim *ca )
 {
 	if ( ca == NULL )
 	{
-		if ( assim == NULL )
+		if ( elem == NULL )
 			return;
 
-		ca = assim;
-		assim = NULL;
+		ca = elem;
+		elem = NULL;
 	}
 
 	if ( ca->next != NULL )
-		empty_assimilation( ca->next );
+		empty( ca->next );
 
 	delete ca;				// suicide
 }
 
 
 /*************************************************************
- SEARCH_ASSIMILATION
+ SEARCH
  Find element in data assimilation linked list
  *************************************************************/
-lsd::assimilation *lsd::simulation::search_assimilation( const char *lab )
+lsd::assim *lsd::assimilation::search( const char *lab )
 {
-	assimilation *ca;
+	assim *ca;
 
-	for ( ca = assim; ca != NULL; ca = ca->next )
+	for ( ca = elem; ca != NULL; ca = ca->next )
 		if ( ! strcmp( ca->label, lab ) )
 			 break;
 
@@ -150,30 +150,63 @@ lsd::assimilation *lsd::simulation::search_assimilation( const char *lab )
 
 
 /*************************************************************
- LOAD_ASSIM_FILES
+ SHOW
+ Print elements in data assimilation linked list to log window
+ *************************************************************/
+void lsd::assimilation::show( void )
+{
+	assim *ca;
+
+	sims[ 0 ]->plog( "\n\nVariables set for data assimilation:\n" );
+	for ( ca = elem; ca != NULL; ca = ca->next )
+	{
+		sims[ 0 ]->plog( "Var: %s \t%s\t(col=", ca->label, ca->csv_file );
+
+		if ( ca->data_col_name != NULL && strlen( ca->data_col_name ) != 0 )
+			sims[ 0 ]->plog_tag( "'%s'", "highlight", ca->data_col_name );
+		else
+			sims[ 0 ]->plog_tag( "%d", "highlight", ca->data_col_num );
+
+		if ( ( ca->t_col_name != NULL && strlen( ca->t_col_name ) != 0 ) || ca->t_col_num > 0 )
+		{
+			sims[ 0 ]->plog( " t_col=" );
+
+			if ( ca->t_col_name != NULL && strlen( ca->t_col_name ) != 0 )
+				sims[ 0 ]->plog_tag( "'%s'", "highlight", ca->t_col_name );
+			else
+				sims[ 0 ]->plog_tag( "%d", "highlight", ca->t_col_num );
+		}
+
+		sims[ 0 ]->plog( ")\n" );
+	}
+}
+
+
+/*************************************************************
+ LOAD_FILES
  Load all files containing data required for data assimilation
  *************************************************************/
-bool lsd::simulation::load_assim_files( void )
+bool lsd::assimilation::load_files( void )
 {
 	bool first;
 	int i, j;
-	assimilation *ca;
+	assim *ca;
 
 	// load assimilation data, if amy/proper
-	if ( assim == NULL || assim_disable )
+	if ( elem == NULL || disable )
 		return false;
 
-	if ( ( i = load_assim_data( ) ) < count_assimilation( ) )
+	if ( ( i = load_data( ) ) < count( ) )
 	{
 		if ( i == 0 )
-			empty_assimilation( );
+			empty( );
 		else
 		{
-			plog( "\nData for assimilation missing for:" );
-			for ( ca = assim, first = true; ca != NULL; ca = ca->next )
+			sims[ 0 ]->plog( "\nData for assimilation missing for:" );
+			for ( ca = elem, first = true; ca != NULL; ca = ca->next )
 				if ( ca->missing )
 				{
-					plog( "%s %s", first ? "" : ",", ca->label );
+					sims[ 0 ]->plog( "%s %s", first ? "" : ",", ca->label );
 					first = false;
 				}
 		}
@@ -183,42 +216,42 @@ bool lsd::simulation::load_assim_files( void )
 #endif
 	}
 
-	if ( assim != NULL )
+	if ( elem != NULL )
 	{
-		if ( ( j = load_assim_cov( ) ) <= 0 )
+		if ( ( j = load_cov( ) ) <= 0 )
 		{
 			if ( j == -1 )
-				plog( "\nUnused data in covariance matrix ignored" );
+				sims[ 0 ]->plog( "\nUnused data in covariance matrix ignored" );
 
-			plog( "\nAssimilation data loaded for %d variables\n", i );
+			sims[ 0 ]->plog( "\nAssimilation data loaded for %d variables\n", i );
 		}
 		else
 		{
-			empty_assimilation( );
+			empty( );
 			switch ( j )
 			{
 				case 1:
-					plog( "\nInvalid covariance matrix file name" );
+					sims[ 0 ]->plog( "\nInvalid covariance matrix file name" );
 					break;
 
 				case 2:
-					plog( "\nInvalid covariance matrix file CSV format" );
+					sims[ 0 ]->plog( "\nInvalid covariance matrix file CSV format" );
 					break;
 
 				case 3:
-					plog( "\nNon-symmetric covariance matrix (rows != columns)" );
+					sims[ 0 ]->plog( "\nNon-symmetric covariance matrix (rows != columns)" );
 					break;
 
 				case 4:
-					plog( "\nEmpty covariance matrix" );
+					sims[ 0 ]->plog( "\nEmpty covariance matrix" );
 					break;
 
 				case 5:
-					plog( "\nMissing variable(s) in covariance matrix" );
+					sims[ 0 ]->plog( "\nMissing variable(s) in covariance matrix" );
 					break;
 
 				case 6:
-					plog( "\nMissing elements in covariance matrix" );
+					sims[ 0 ]->plog( "\nMissing elements in covariance matrix" );
 			}
 
 #ifndef _TERM_
@@ -227,9 +260,9 @@ bool lsd::simulation::load_assim_files( void )
 		}
 	}
 
-	if ( assim == NULL )
+	if ( elem == NULL )
 	{
-		plog( "\nData assimilation configuration is invalid, ignoring\n" );
+		sims[ 0 ]->plog( "\nData assimilation configuration is invalid, ignoring\n" );
 		return false;
 	}
 	else
@@ -238,10 +271,10 @@ bool lsd::simulation::load_assim_files( void )
 
 
 /*************************************************************
- LOAD_ASSIM_DATA
+ LOAD_DATA
  Load assimilation data from external data files
  *************************************************************/
-int lsd::simulation::load_assim_data( void )
+int lsd::assimilation::load_data( void )
 {
 	struct assim_vars { ass_listT avl; int namrow = -1; };
 
@@ -250,10 +283,10 @@ int lsd::simulation::load_assim_data( void )
 	rapidcsv::Document csv;
 	std::unordered_map < strT, assim_vars > fv;
 
-	assim_data.clear( );
-	assim_time.clear( );
+	data.clear( );
+	time.clear( );
 
-	for ( auto ca = assim; ca != NULL; ca = ca->next )
+	for ( auto ca = elem; ca != NULL; ca = ca->next )
 	{
 		fv[ ca->csv_file ].avl.emplace_back( ca );
 
@@ -277,17 +310,17 @@ int lsd::simulation::load_assim_data( void )
 		if ( fexist )
 			for ( auto cv = cf->second.avl.begin( ); cv != cf->second.avl.end( ); ++cv )
 			{
-				d_vecT data;
-				i_vecT time;
+				d_vecT vdata;
+				i_vecT vtime;
 				dbl_mapT dtmap;
 
 				try
 				{
 					if ( cf->second.namrow == 0 && ( *cv )->data_col_name != NULL )
-						data = csv.GetColumn < double >( ( *cv )->data_col_name );
+						vdata = csv.GetColumn < double >( ( *cv )->data_col_name );
 					else
 						if ( ( *cv )->data_col_num > 0 )
-							data = csv.GetColumn < double >( ( *cv )->data_col_num - 1 );
+							vdata = csv.GetColumn < double >( ( *cv )->data_col_num - 1 );
 						else
 							throw 1;
 
@@ -298,49 +331,49 @@ int lsd::simulation::load_assim_data( void )
 					( *cv )->missing = true;
 				}
 
-				if ( ! ( *cv )->missing && data.size( ) > 0 )
+				if ( ! ( *cv )->missing && vdata.size( ) > 0 )
 				{
 					try
 					{
 						if ( cf->second.namrow == 0 && ( *cv )->t_col_name != NULL )
-							time = csv.GetColumn < int >( ( *cv )->t_col_name );
+							vtime = csv.GetColumn < int >( ( *cv )->t_col_name );
 						else
 							if ( ( *cv )->t_col_num > 0 )
-								time = csv.GetColumn < int >( ( *cv )->t_col_num - 1 );
+								vtime = csv.GetColumn < int >( ( *cv )->t_col_num - 1 );
 
-						if ( data.size( ) != time.size( ) )
+						if ( vdata.size( ) != vtime.size( ) )
 							throw 1;
 					}
 					catch( ... )
 					{
-						if ( data.size( ) > time.size( ) )
+						if ( vdata.size( ) > vtime.size( ) )
 						{
-							int tini = 1, tsz = time.size( );
+							int tini = 1, tsz = vtime.size( );
 
 							if ( tsz > 0 )
-								tini = time[ tsz - 1 ] + 1;
+								tini = vtime[ tsz - 1 ] + 1;
 
-							time.resize( data.size( ) );
-							std::iota( time.begin( ) + tsz, time.end( ), tini );
+							vtime.resize( vdata.size( ) );
+							std::iota( vtime.begin( ) + tsz, vtime.end( ), tini );
 						}
 						else
-							time.resize( data.size( ) );
+							vtime.resize( vdata.size( ) );
 					}
 
 					ass_listT empty;
 					auto h = dtmap.end( );
-					auto g = assim_time.end( );
-					for ( i = 0; i < ( int ) data.size( ); ++i )
+					auto g = time.end( );
+					for ( i = 0; i < ( int ) vdata.size( ); ++i )
 					{
-						h = dtmap.emplace_hint( h, time[ i ], data[ i ] );
+						h = dtmap.emplace_hint( h, vtime[ i ], vdata[ i ] );
 
-						if ( assim_time.find( time[ i ] ) == assim_time.end( ) )
-							g = assim_time.emplace_hint( g, time[ i ], empty );
+						if ( time.find( vtime[ i ] ) == time.end( ) )
+							g = time.emplace_hint( g, vtime[ i ], empty );
 
-						assim_time[ time[ i ] ].emplace_back( *cv );
+						time[ vtime[ i ] ].emplace_back( *cv );
 					}
 
-					assim_data.emplace( ( *cv )->label, dtmap );
+					data.emplace( ( *cv )->label, dtmap );
 
 					++vars_loaded;
 				}
@@ -352,14 +385,14 @@ int lsd::simulation::load_assim_data( void )
 
 
 /*************************************************************
- LOAD_ASSIM_COV
+ LOAD_COV
  Load covariance matrix for data assimilation from external file
  *************************************************************/
-int lsd::simulation::load_assim_cov( void )
+int lsd::assimilation::load_cov( void )
 {
-	char fname[ MAX_PATH_LENGTH ];
+	char *cpath, fname[ MAX_PATH_LENGTH ];
 	int i, j, res = 0;
-	assimilation *ca;
+	assim *ca;
 	rapidcsv::Document csv;
 	std::unordered_set < strT > covnames;
 	std::unordered_set < strT >::iterator it;
@@ -368,7 +401,11 @@ int lsd::simulation::load_assim_cov( void )
 	if ( cov_file == NULL || strlen( cov_file ) == 0 )
 		return 1;
 
-	snprintf( fname, MAX_PATH_LENGTH, "%s%s%s", conf_path, strlen( conf_path ) > 0 ? "/" : "", cov_file );
+	cpath = sims[ 0 ]->conf_path;
+	if ( cpath != NULL && strlen( cpath ) > 0 )
+		snprintf( fname, MAX_PATH_LENGTH, "%s/%s", cpath, cov_file );
+	else
+		strcpyn( fname, cov_file, MAX_PATH_LENGTH );
 
 	// load matrix from file
 	try
@@ -395,7 +432,7 @@ int lsd::simulation::load_assim_cov( void )
 		return 4;
 
 	// check if all information is available
-	for ( ca = assim, i = 0; ca != NULL; ca = ca->next, ++i )
+	for ( ca = elem, i = 0; ca != NULL; ca = ca->next, ++i )
 	{
 		if ( ( it = covnames.find( ca->label ) ) != covnames.end( ) || ( ca->data_col_name != NULL && ( it = covnames.find( ca->data_col_name ) ) != covnames.end( ) ) )
 		{
@@ -411,17 +448,17 @@ int lsd::simulation::load_assim_cov( void )
 		res = -1;
 
 	// build proper matrix, discarding unused data
-	assim_cov.resize( i, i );
+	cov_mat.resize( i, i );
 
 	for ( i = 0; i < ( int ) csvnames.size( ); ++i )
 		for ( j = 0; j < ( int ) csvnames.size( ); ++j )
 			try
 			{
-				assim_cov( i, j ) = csv.GetCell < double > ( csvnames[ i ], csvnames[ j ] );
+				cov_mat( i, j ) = csv.GetCell < double > ( csvnames[ i ], csvnames[ j ] );
 			}
 			catch ( ... )
 			{
-				assim_cov.resize( 0, 0 );
+				cov_mat.resize( 0, 0 );
 				return 6;
 			}
 

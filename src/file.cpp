@@ -209,7 +209,7 @@ void gui::reset_configuration_gui( void )
 	unsavedSense = false;						// no sensitivity data to save
 	findexSens = 0;								// reset sensitivity serial number
 	NOLH_clear( );								// deallocate DoE
-	sim.empty_assimilation( );					// discard assimilation data
+	lsd::da.empty( );							// discard assimilation data
 	sim.empty_sensitivity( );					// discard sensitivity analysis data
 
 	cmd( "destroytop .lat" );					// remove lattice window
@@ -308,7 +308,7 @@ void gui::unload_configuration_gui( bool full )
  *************************************************************/
 void lsd::object::load_elem_lists( )
 {
-	assimilation *ca;
+	assim *ca;
 	bridge *cb;
 	variable *cv;
 
@@ -334,8 +334,8 @@ void lsd::object::load_elem_lists( )
 
 		cmd( "lappend modElem %s", cv->label );
 
-		ca = sim->search_assimilation( cv->label );
-		if ( ca != NULL )
+		ca = da.search( cv->label );
+		if ( ca != NULL && ca->csv_file != NULL && strlen( ca->csv_file ) > 0 )
 			cmd( "lappend modCSV \"%s\"", ca->csv_file );
 	}
 

@@ -34,6 +34,7 @@ namespace lsd
  *************************************************************/
 
 	// regular library global variables
+	assimilation da;				// data assimilation object
 	char *exec_file = NULL;			// name of executable file
 	char *exec_path = NULL;			// path of executable file
 	char *lib_file = NULL;			// name of shared library, if any
@@ -149,7 +150,6 @@ lsd::simulation::~simulation( void )
 {
 	sims.erase( find( sims.begin( ), sims.end( ), this ) );
 
-	empty_assimilation( );
 	empty_sensitivity( );
 	empty_stack( );
 	empty_cemetery( );
@@ -167,5 +167,22 @@ lsd::simulation::~simulation( void )
 	delete [ ] conf_name;
 	delete [ ] conf_path;
 	delete [ ] log_file;
+}
+
+
+/*************************************************************
+ ASSIMILATION CONSTRUCTOR
+ *************************************************************/
+lsd::assimilation::assimilation( void )
+{
+}
+
+
+/*************************************************************
+ ASSIMILATION DESTRUCTOR
+ *************************************************************/
+lsd::assimilation::~assimilation( void )
+{
+	empty( );
 	delete [ ] cov_file;
 }

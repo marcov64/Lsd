@@ -51,7 +51,7 @@ lsd::object *gui::operate( lsd::object *r )
 	double fracMC, fake = 0;
 	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, temp[ 11 ], done = 0;
 	long nlinks, ptsSa, maxMC;
-	lsd::assimilation *ca;
+	lsd::assim *ca;
 	lsd::bridge *cb;
 	lsd::description *cd;
 	lsd::object *n, *cur, *cur1, *cur2;
@@ -125,7 +125,7 @@ lsd::object *gui::operate( lsd::object *r )
 			overwConf = unsaved_change( ) ? true : false;
 
 			// avoid showing dialog if configuration already saved and nothing to save to disk
-			if ( ! overwConf && sim.last_run == 1 && ( sim.assim == NULL || sim.assim_disable ) )
+			if ( ! overwConf && sim.last_run == 1 && ( lsd::da.count( ) == 0 || lsd::da.disable ) )
 				goto run;
 
 			// remove any custom save path (save to current by default)
@@ -162,7 +162,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::label $T.f2.t.w -text \"%d\" -style hl.TLabel", sim.last_t );
 			cmd( "pack $T.f2.t.l $T.f2.t.w -side left -padx $_2" );
 
-			if ( sim.assim == NULL || sim.assim_disable )	// regular run?
+			if ( lsd::da.count( ) == 0 || lsd::da.disable )	// regular run?
 			{
 				if ( sim.last_run == 1 )					// single run
 				{
@@ -2107,8 +2107,8 @@ lsd::object *gui::operate( lsd::object *r )
 			if ( cv == NULL )
 				break;
 
-			if ( ( ca = sim.search_assimilation( cv->label ) ) == NULL )
-				ca = new lsd::assimilation( cv->label, & sim );
+			if ( ( ca = lsd::da.search( cv->label ) ) == NULL )
+				ca = new lsd::assim( cv->label, & sim );
 
 			i = ca->dataentry( );
 
@@ -2563,21 +2563,21 @@ lsd::object *gui::operate( lsd::object *r )
 		case 35:
 
 			// check for data assimilation variables
-			if ( sim.assim == NULL )
+			if ( lsd::da.count( ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent $T -type ok -icon error -title Error -message \"Data assimilation not configured\" -detail \"No variable is configured for data assimilation, changes here are only used if at least one variable is configured with data to be assimilated.\"" );
 				break;
 			}
 
 			// save previous values to allow canceling operation
-			temp[ 1 ] = sim.assim_disable;
-			Tcl_LinkVar( interp, "assim_disable", ( char * ) & sim.assim_disable, TCL_LINK_INT );
+			temp[ 1 ] = lsd::da.disable;
+			Tcl_LinkVar( interp, "da_disable", ( char * ) & lsd::da.disable, TCL_LINK_INT );
 
 			cmd( "set path \"%s\"", sim.conf_path );
 			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd $path" );
 
-			cmd( "set cov_file \"%s\"", sim.cov_file != NULL ? sim.cov_file : "" );
+			cmd( "set cov_file \"%s\"", lsd::da.cov_file != NULL ? lsd::da.cov_file : "" );
 			cmd( "if { [ string first / $cov_file ] != -1 } { \
 					set cov_file [ file nativename $cov_file ] \
 				}" );
@@ -2610,7 +2610,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "pack $T.csv.l $T.csv.file" );
 
 			cmd( "ttk::frame $T.c" );
-			cmd( "ttk::checkbutton $T.c.dis -text \"Disable data assimilation\" -variable assim_disable" );
+			cmd( "ttk::checkbutton $T.c.dis -text \"Disable data assimilation\" -variable da_disable" );
 			cmd( "pack $T.c.dis -anchor w" );
 
 			cmd( "pack $T.csv $T.c -padx $_5 -pady $_10" );
@@ -2627,7 +2627,7 @@ lsd::object *gui::operate( lsd::object *r )
 			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
-			Tcl_UnlinkVar( interp, "assim_disable" );
+			Tcl_UnlinkVar( interp, "da_disable" );
 			cmd( "destroytop $T" );
 
 			if ( choice == 1 )
@@ -2637,7 +2637,7 @@ lsd::object *gui::operate( lsd::object *r )
 					cmd( "set cov_file [ string map {\\\\ /} $cov_file ]" );
 					lab1 = get_str( "cov_file" );
 
-					if ( sim.cov_file == NULL || strcmp( sim.cov_file, lab1 ) != 0 )
+					if ( lsd::da.cov_file == NULL || strcmp( lsd::da.cov_file, lab1 ) != 0 )
 					{
 						try
 						{
@@ -2651,19 +2651,19 @@ lsd::object *gui::operate( lsd::object *r )
 
 						if ( choice != 2 )
 						{
-							delete [ ] sim.cov_file;
-							sim.cov_file = new char [ strlen( lab1 ) + 1 ];
-							strcpy( sim.cov_file, lab1 );
+							delete [ ] lsd::da.cov_file;
+							lsd::da.cov_file = new char [ strlen( lab1 ) + 1 ];
+							strcpy( lsd::da.cov_file, lab1 );
 							unsaved_change( true );
 						}
 					}
 				}
 
-				if ( sim.assim_disable != temp[ 1 ] )
+				if ( lsd::da.disable != temp[ 1 ] )
 					unsaved_change( true );
 			}
 			else
-				sim.assim_disable = temp[ 1 ];
+				lsd::da.disable = temp[ 1 ];
 
 		break;
 
@@ -4620,35 +4620,14 @@ lsd::object *gui::operate( lsd::object *r )
 			choice = 0;
 
 			// check for existing assimilation settings loaded
-			if ( sim.assim == NULL )
+			if ( lsd::da.count( ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"There is no data assimilation settings to show\"" );
 				break;
 			}
 
 			// print data to log window
-			plog( "\n\nVariables set for data assimilation:\n" );
-			for ( ca = sim.assim; ca != NULL; ca = ca->next )
-			{
-				plog( "Var: %s \t%s\t(col=", ca->label, ca->csv_file );
-
-				if ( ca->data_col_name != NULL && strlen( ca->data_col_name ) != 0 )
-					plog_tag( "'%s'", "highlight", ca->data_col_name );
-				else
-					plog_tag( "%d", "highlight", ca->data_col_num );
-
-				if ( ( ca->t_col_name != NULL && strlen( ca->t_col_name ) != 0 ) || ca->t_col_num > 0 )
-				{
-					plog( " t_col=" );
-
-					if ( ca->t_col_name != NULL && strlen( ca->t_col_name ) != 0 )
-						plog_tag( "'%s'", "highlight", ca->t_col_name );
-					else
-						plog_tag( "%d", "highlight", ca->t_col_num );
-				}
-
-				plog( ")\n" );
-			}
+			lsd::da.show( );
 
 		break;
 
@@ -4659,7 +4638,7 @@ lsd::object *gui::operate( lsd::object *r )
 			choice = 0;
 
 			// check for existing assimilation settings loaded
-			if ( sim.assim == NULL )
+			if ( lsd::da.count( ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No data assimilation settings to remove\"" );
 				break;
@@ -4669,7 +4648,7 @@ lsd::object *gui::operate( lsd::object *r )
 				break;
 
 			// empty data assimilation
-			sim.empty_assimilation( );
+			lsd::da.empty( );
 			plog( "\nData assimilation settings removed.\n" );
 			unsavedChange = true;
 
@@ -4680,7 +4659,7 @@ lsd::object *gui::operate( lsd::object *r )
 		case 68:
 
 			// check for data assimilation
-			if ( sim.assim != NULL && ! sim.assim_disable )
+			if ( lsd::da.count( ) > 0 && ! lsd::da.disable )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Data assimilation configured\" -detail \"The current configuration is set to perform data assimilation, which already uses parallel processing. Please use the non-parallel run option.\"" );
 				break;
@@ -5132,7 +5111,7 @@ lsd::object *gui::operate( lsd::object *r )
 			}
 
 			// check for data assimilation
-			if ( sim.assim != NULL && ! sim.assim_disable )
+			if ( lsd::da.count( ) > 0 && ! lsd::da.disable )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Data assimilation configured\" -detail \"The current configuration is set to perform data assimilation, which already uses parallel processing. Please use the non-parallel run option.\"" );
 				break;

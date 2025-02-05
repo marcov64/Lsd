@@ -315,7 +315,7 @@ proc ttk::text { w args } {
 	} else {
 		$w configure -highlightthickness 0 -cursor "" -insertofftime 1 -insertontime 0
 		if { $dark } {
-			setcolor $w -background bg -foreground fg
+			setcolor $w -background dbg -foreground fg
 		} else {
 			setcolor $w -background bg -foreground efg
 		}

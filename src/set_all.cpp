@@ -638,7 +638,7 @@ const char *lsd::variable::print_constr( char *buf, int buf_sz )
  DATAENTRY
  Configure element for data assimilation
  *************************************************************/
-int lsd::assimilation::dataentry( const char *parWnd )
+int lsd::assim::dataentry( const char *parWnd )
 {
 	bool cexist, fexist;
 	int namrow, res;

@@ -68,7 +68,7 @@ namespace gui
 	int watch;						// allow for graph generation interruption (bool)
 	lsd::object *curr_obj = NULL;	// pointer to current object in browser
 	lsd::object *last_obj = NULL;	// pointer to last selected object in structure
-	lsd::simulation sim;			// the single GUI simulation object
+	lsd::simulation sim;			// the master GUI simulation object
 	Tcl_Interp *interp = NULL;		// global Tcl interpreter in LSD
 
 	// constant arrays

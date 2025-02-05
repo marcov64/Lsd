@@ -257,7 +257,6 @@ int lsdmain( int argn, const char **argv )
 					 sep, sep, sep, sep, seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
 	}
 
-	empty_assimilation( );
 	empty_sensitivity( );
 	empty_blueprint( );
 	empty_description( );
