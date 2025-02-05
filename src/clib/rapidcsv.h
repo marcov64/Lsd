@@ -2,9 +2,9 @@
  * rapidcsv.h
  *
  * URL:      https://github.com/d99kris/rapidcsv
- * Version:  8.80
+ * Version:  8.84
  *
- * Copyright (C) 2017-2023 Kristofer Berggren
+ * Copyright (C) 2017-2024 Kristofer Berggren
  * All rights reserved.
  *
  * rapidcsv is distributed under the BSD 3-Clause license, see LICENSE for details.
@@ -1351,7 +1351,7 @@ namespace rapidcsv
 
       SetCell<T>(static_cast<size_t>(columnIdx), pRowIdx, pCell);
     }
-    
+
     /**
      * @brief   Get column name
      * @param   pColumnIdx            zero-based column index.
@@ -1588,6 +1588,15 @@ namespace rapidcsv
             {
               quoted = !quoted;
             }
+            else if (mSeparatorParams.mTrim)
+            {
+              // allow whitespace before first mQuoteChar
+              const auto firstQuote = std::find(cell.begin(), cell.end(), mSeparatorParams.mQuoteChar);
+              if (std::all_of(cell.begin(), firstQuote, [](int ch) { return isspace(ch); }))
+              {
+                quoted = !quoted;
+              }
+            }
             cell += buffer[i];
           }
           else if (buffer[i] == mSeparatorParams.mSeparator)
@@ -1654,13 +1663,28 @@ namespace rapidcsv
         p_FileLength -= readLength;
       }
 
-      // Handle last line without linebreak
-      if (!cell.empty() || !row.empty())
+      // Handle last row / cell without linebreak
+      if (row.empty() && cell.empty())
+      {
+        // skip empty trailing line
+      }
+      else
       {
         row.push_back(Unquote(Trim(cell)));
+
+        if (mLineReaderParams.mSkipCommentLines && !row.at(0).empty() &&
+            (row.at(0)[0] == mLineReaderParams.mCommentPrefix))
+        {
+          // skip comment line
+        }
+        else
+        {
+          mData.push_back(row);
+        }
+
         cell.clear();
-        mData.push_back(row);
         row.clear();
+        quoted = false;
       }
 
       // Assume CR/LF if at least half the linebreaks have CR
@@ -1725,7 +1749,8 @@ namespace rapidcsv
         {
           if (mSeparatorParams.mAutoQuote &&
               ((itc->find(mSeparatorParams.mSeparator) != std::string::npos) ||
-               (itc->find(' ') != std::string::npos)))
+               (itc->find(' ') != std::string::npos) ||
+               (itc->find('\n') != std::string::npos)))
           {
             // escape quotes in string
             std::string str = *itc;

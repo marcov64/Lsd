@@ -28,8 +28,8 @@ Cygwin 3.4.10 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
 Makeself 2.4.5 is copyrighted by Stephane Peter under GPL2, https://makeself.io
 Gnuplot 5.4.8 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
 Eigen 3.4.0 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
-pugixml 1.14 is copyrighted by Arseny Kapoulkine under MIT license, https://pugixml.org
-rapidcsv 8.80 is copyrighted by Kristofer Berggren under BSD-3-Clause license, https://github.com/d99kris/rapidcsv
+pugixml 1.15 is copyrighted by Arseny Kapoulkine under MIT license, https://pugixml.org
+rapidcsv 8.84 is copyrighted by Kristofer Berggren under BSD-3-Clause license, https://github.com/d99kris/rapidcsv
 subbotools 1.3 is copyrighted by Giulio Bottazzi under GPL2, http://cafim.sssup.it/~giulio/software/subbotools
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
 NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under GPL 2.1, http://harvest.nps.edu
