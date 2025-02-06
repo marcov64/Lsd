@@ -105,8 +105,12 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 		if ( rootNode.empty( ) )
 			return 22;							// missing root
 
-		if ( ! reload || quick != 0 )
+		if ( ! ( ( reload && quick == 2 ) || quick == 1 ) )
+		{
+			da.empty( );						// remove assimilation info
+			empty_sensitivity( );				// discard sensitivity analysis data
 			empty_description( );				// remove existing descriptions
+		}
 
 		// load non-instanced model structure
 		load = root->load_xml_struct( rootNode, ( reload && quick == 2 ) || quick == 1 );
@@ -142,7 +146,11 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 		no_ptr_chk = ! simNode.attribute( "ptr_check", hint ).as_bool( true );
 		parallel_disable = ! simNode.attribute( "parallel", hint ).as_bool( true );
 
-		da.disable = setNode.child( "data_assimilation" ).attribute( "disable", hint ).as_bool( false );
+		da.disable = setNode.child( "data_assimilation" ).attribute( "disable", hint ).as_bool( );
+		da.cov_ignore = setNode.child( "data_assimilation" ).attribute( "ignore_covariance", hint ).as_bool( );
+		da.med_stats = setNode.child( "data_assimilation" ).attribute( "median_statistics", hint ).as_bool( );
+		da.sav_fcts = setNode.child( "data_assimilation" ).attribute( "save_forecasts", hint ).as_bool( );
+		da.algorithm = setNode.child( "data_assimilation" ).attribute( "algorithm", hint ).as_uint( );
 		if ( ( i = strlen( setNode.child( "data_assimilation" ).attribute( "covariance_file", hint ).as_string( ) ) ) > 0 )
 		{
 			delete [ ] da.cov_file;
@@ -224,7 +232,6 @@ void lsd::simulation::unload_configuration( bool full )
 	add_description( "Root" );
 	reset_blueprint( NULL );
 	empty_cemetery( );							// garbage collection
-	da.empty( );								// discard assimilation data
 
 	delete [ ] da.cov_file;
 	da.cov_file = NULL;
@@ -237,6 +244,7 @@ void lsd::simulation::unload_configuration( bool full )
 
 	if ( full )									// full unload? (no new config?)
 	{
+		da.empty( );							// discard assimilation info
 		empty_description( );					// remove element descriptions
 
 		delete [ ] conf_path;					// reset current path
@@ -791,12 +799,24 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 		simNode.append_attribute( "parallel" ) = false;
 
 	// add data assimilation global settings, if any
-	if ( da.count( 0 ) > 0 || da.disable || ( da.cov_file != NULL && strlen( da.cov_file ) > 0 ) )
+	if ( da.count( 0 ) > 0 )
 	{
 		x_nodeT assimNode = setNode.append_child( "data_assimilation" );
 
 		if ( da.disable )
 			assimNode.append_attribute( "disable" ) = true;
+
+		if ( da.cov_ignore )
+			assimNode.append_attribute( "ignore_covariance" ) = true;
+
+		if ( da.med_stats )
+			assimNode.append_attribute( "median_statistics" ) = true;
+
+		if ( da.sav_fcts )
+			assimNode.append_attribute( "save_forecasts" ) = true;
+
+		if ( da.algorithm != 0 )
+			assimNode.append_attribute( "algorithm" ) = da.algorithm;
 
 		if ( da.cov_file != NULL && strlen( da.cov_file ) > 0 )
 			assimNode.append_attribute( "covariance_file" ) = da.cov_file;

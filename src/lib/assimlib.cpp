@@ -343,7 +343,7 @@ int lsd::assimilation::load_cov( void )
 	for ( ca = elem; ca != NULL; ca = ca->next )
 		ca->cov_idx = -1;
 
-	if ( cov_file == NULL || strlen( cov_file ) == 0 )
+	if ( ! cov_ignore && ( cov_file == NULL || strlen( cov_file ) == 0 ) )
 		return 1;
 
 	cpath = sims[ 0 ]->conf_path;
@@ -353,28 +353,31 @@ int lsd::assimilation::load_cov( void )
 		strcpyn( fname, cov_file, MAX_PATH_LENGTH );
 
 	// try to load matrix from file
-	try
+	if ( ! cov_ignore )
 	{
-		csv.Load( fname, rapidcsv::LabelParams( 0, 0 ), rapidcsv::SeparatorParams( ',', true ), rapidcsv::ConverterParams( true, std::numeric_limits< long double >::quiet_NaN( ) ), rapidcsv::LineReaderParams( true, '#' ) );
+		try
+		{
+			csv.Load( fname, rapidcsv::LabelParams( 0, 0 ), rapidcsv::SeparatorParams( ',', true ), rapidcsv::ConverterParams( true, std::numeric_limits< long double >::quiet_NaN( ) ), rapidcsv::LineReaderParams( true, '#' ) );
+		}
+		catch ( ... )
+		{
+			return 2;
+		}
+
+		// check if matrix is (can be made) symmetric
+		auto cnames = csv.GetColumnNames( );
+		auto rnames = csv.GetRowNames( );
+		std::sort( cnames.begin( ), cnames.end( ) );
+		std::sort( rnames.begin( ), rnames.end( ) );
+
+		if ( cnames != rnames )
+			return 3;
+
+		// ignore empty matrix
+		covnames.insert( cnames.begin( ), cnames.end( ) );
+		if ( covnames.size( ) == 0 )
+			return 4;
 	}
-	catch ( ... )
-	{
-		return 2;
-	}
-
-	// check if matrix is (can be made) symmetric
-	auto cnames = csv.GetColumnNames( );
-	auto rnames = csv.GetRowNames( );
-	std::sort( cnames.begin( ), cnames.end( ) );
-	std::sort( rnames.begin( ), rnames.end( ) );
-
-	if ( cnames != rnames )
-		return 3;
-
-	// ignore empty matrix
-	covnames.insert( cnames.begin( ), cnames.end( ) );
-	if ( covnames.size( ) == 0 )
-		return 4;
 
 	// check if all information is available
 	for ( ca = elem, k = 0; ca != NULL; ca = ca->next )
@@ -382,13 +385,19 @@ int lsd::assimilation::load_cov( void )
 		if ( ca->no_data )
 			continue;
 
-		if ( ( it = covnames.find( ca->label ) ) != covnames.end( ) || ( ca->data_col_name != NULL && strlen( ca->data_col_name ) > 0 && ( it = covnames.find( ca->data_col_name ) ) != covnames.end( ) ) )
+		if ( ! cov_ignore )
+			if ( ( it = covnames.find( ca->label ) ) != covnames.end( ) || ( ca->data_col_name != NULL && strlen( ca->data_col_name ) > 0 && ( it = covnames.find( ca->data_col_name ) ) != covnames.end( ) ) )
+			{
+				csvnames.emplace_back( *it );
+				ca->cov_idx = k++;
+			}
+			else
+				return 5;
+		else
 		{
-			csvnames.emplace_back( *it );
+			csvnames.emplace_back( ca->label );
 			ca->cov_idx = k++;
 		}
-		else
-			return 5;
 	}
 
 	// signal unused data (warning only)
@@ -401,7 +410,7 @@ int lsd::assimilation::load_cov( void )
 		for ( j = 0; j < k; ++j )
 			try
 			{
-				cov_mat( i, j ) = csv.GetCell < double > ( csvnames[ i ], csvnames[ j ] );
+				cov_mat( i, j ) = cov_ignore ? 0 : csv.GetCell < double > ( csvnames[ i ], csvnames[ j ] );
 			}
 			catch ( ... )
 			{

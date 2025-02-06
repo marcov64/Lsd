@@ -128,6 +128,8 @@
 #define foldersep( dir ) ( dir[ 0 ] == '\0' ? "" : "/" )
 
 // constant string arrays
+#define DA_ALGO_NUM 2
+#define DA_ALGO_NAME { "Ensemble Kalman Filter (EnKF)", "Ensemble Transform Particle (ETPF)" }
 #define DESC_KEY_NUM 2
 #define DESC_KEY_WORD { "_INIT_", "END_DESCRIPTION" }
 #define DESC_TYPE_NUM 5
@@ -328,11 +330,17 @@ class lsd::assimilation					// assimilation container class
 
 	public:
 		char *cov_file = NULL;			// data assimilation covariance CSV file
+		int algorithm = 0;				// algorithm to use in DA (0=EnKF,1=ETPF)
+		int cov_ignore = false;			// ignore data covariance/virtual obs.
 		int disable = false;			// disable data assimilation
+		int med_stats = false;			// use median/MAD statistics (vs mean/SD)
+		int sav_fcts = false;			// save forecast (intermediary) results
+
+		const char *algo_names[ DA_ALGO_NUM ] = DA_ALGO_NAME;
 
 	private:
 		assim *elem = NULL;				// assimilation elements linked-list head
-		dm_mapT data;					// assimilation data map of maps
+		dm_mapT data;					// assimilation data map
 		ia_mapT time;					// list of times and variables for assimilation
 		Eigen::MatrixXd cov_mat;		// data assimilation covariance matrix
 
@@ -378,7 +386,7 @@ class lsd::assim						// data assimilation container class
 		int t_col_num = 0;				// number of time value column
 
 	private:
-		bool no_data;					// data could not be retrieved
+		bool no_data = true;			// no data retrieved?
 		char *label = NULL;				// element name
 		int cov_idx = -1;				// index (row+col) in covariance matrix
 		assim *next = NULL;				// data assimilation chain of elements

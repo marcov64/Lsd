@@ -49,7 +49,7 @@ lsd::object *gui::operate( lsd::object *r )
 	const char *lab1, *lab2, *lab3, *lab4;
 	design *doe;
 	double fracMC, fake = 0;
-	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, temp[ 11 ], done = 0;
+	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, itmp[ 100 ], done = 0;
 	long nlinks, ptsSa, maxMC;
 	lsd::assim *ca;
 	lsd::bridge *cb;
@@ -2140,10 +2140,10 @@ lsd::object *gui::operate( lsd::object *r )
 				break;
 
 			// save previous values to allow canceling operation
-			temp[ 1 ] = cv->delay;
-			temp[ 2 ] = cv->delay_range;
-			temp[ 3 ] = cv->period;
-			temp[ 4 ] = cv->period_range;
+			itmp[ 1 ] = cv->delay;
+			itmp[ 2 ] = cv->delay_range;
+			itmp[ 3 ] = cv->period;
+			itmp[ 4 ] = cv->period_range;
 
 			Tcl_LinkVar( interp, "delay", ( char * ) & cv->delay, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "delay_range", ( char * ) & cv->delay_range, TCL_LINK_INT );
@@ -2218,14 +2218,14 @@ lsd::object *gui::operate( lsd::object *r )
 
 			if ( choice == 2 )	// Escape - revert previous values
 			{
-				cv->delay = temp[ 1 ];
-				cv->delay_range = temp[ 2 ];
-				cv->period = temp[ 3 ];
-				cv->period_range = temp[ 4 ];
+				cv->delay = itmp[ 1 ];
+				cv->delay_range = itmp[ 2 ];
+				cv->period = itmp[ 3 ];
+				cv->period_range = itmp[ 4 ];
 			}
 			else
 			// signal unsaved change if anything to be saved
-				if ( temp[ 1 ] != cv->delay || temp[ 2 ] != cv->delay_range || temp[ 3 ] != cv->period || temp[ 4 ] != cv->period_range )
+				if ( itmp[ 1 ] != cv->delay || itmp[ 2 ] != cv->delay_range || itmp[ 3 ] != cv->period || itmp[ 4 ] != cv->period_range )
 				{
 					for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 					{
@@ -2430,16 +2430,16 @@ lsd::object *gui::operate( lsd::object *r )
 		case 22:
 
 			// save previous values to allow canceling operation
-			temp[ 1 ] = sim.last_run;
-			temp[ 2 ] = sim.seed;
-			temp[ 3 ] = sim.last_t;
-			temp[ 4 ] = sim.deb_t;
-			temp[ 5 ] = sim.stack_info;
-			temp[ 6 ] = sim.prof_min_msecs;
-			temp[ 7 ] = sim.prof_obs_only;
-			temp[ 8 ] = sim.prof_aggr_time;
-			temp[ 9 ] = sim.no_ptr_chk;
-			temp[ 10 ] = sim.parallel_disable;
+			itmp[ 1 ] = sim.last_run;
+			itmp[ 2 ] = sim.seed;
+			itmp[ 3 ] = sim.last_t;
+			itmp[ 4 ] = sim.deb_t;
+			itmp[ 5 ] = sim.stack_info;
+			itmp[ 6 ] = sim.prof_min_msecs;
+			itmp[ 7 ] = sim.prof_obs_only;
+			itmp[ 8 ] = sim.prof_aggr_time;
+			itmp[ 9 ] = sim.no_ptr_chk;
+			itmp[ 10 ] = sim.parallel_disable;
 
 			Tcl_LinkVar( interp, "last_run", ( char * ) & sim.last_run, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "seed", ( char * ) & sim.seed, TCL_LINK_INT );
@@ -2535,22 +2535,22 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "destroytop $T" );
 
-			if ( choice == 2 )	// Escape - revert previous values
+			if ( choice == 2 )	// escape - revert previous values
 			{
-				sim.last_run = temp[ 1 ];
-				sim.seed = ( unsigned ) temp[ 2 ];
-				sim.last_t = temp[ 3 ];
-				sim.deb_t = temp[ 4 ];
-				sim.stack_info = temp[ 5 ];
-				sim.prof_min_msecs = temp[ 6 ];
-				sim.prof_obs_only = temp[ 7 ];
-				sim.prof_aggr_time = temp[ 8 ];
-				sim.no_ptr_chk = temp[ 9 ];
-				sim.parallel_disable = temp[ 10 ];
+				sim.last_run = itmp[ 1 ];
+				sim.seed = ( unsigned ) itmp[ 2 ];
+				sim.last_t = itmp[ 3 ];
+				sim.deb_t = itmp[ 4 ];
+				sim.stack_info = itmp[ 5 ];
+				sim.prof_min_msecs = itmp[ 6 ];
+				sim.prof_obs_only = itmp[ 7 ];
+				sim.prof_aggr_time = itmp[ 8 ];
+				sim.no_ptr_chk = itmp[ 9 ];
+				sim.parallel_disable = itmp[ 10 ];
 			}
 			else
 				// signal unsaved change if anything to be saved
-				if ( temp[ 1 ] != sim.last_run || ( unsigned ) temp[ 2 ] != sim.seed || temp[ 3 ] != sim.last_t || temp[ 4 ] != sim.deb_t || temp[ 5 ] != sim.stack_info || temp[ 6 ] != sim.prof_min_msecs || temp[ 7 ] != sim.prof_obs_only || temp[ 8 ] != sim.prof_aggr_time || temp[ 9 ] != sim.no_ptr_chk || temp[ 10 ] != sim.parallel_disable )
+				if ( itmp[ 1 ] != sim.last_run || ( unsigned ) itmp[ 2 ] != sim.seed || itmp[ 3 ] != sim.last_t || itmp[ 4 ] != sim.deb_t || itmp[ 5 ] != sim.stack_info || itmp[ 6 ] != sim.prof_min_msecs || itmp[ 7 ] != sim.prof_obs_only || itmp[ 8 ] != sim.prof_aggr_time || itmp[ 9 ] != sim.no_ptr_chk || itmp[ 10 ] != sim.parallel_disable )
 					unsaved_change( true );
 
 			Tcl_UnlinkVar( interp, "last_run" );
@@ -2566,21 +2566,29 @@ lsd::object *gui::operate( lsd::object *r )
 		break;
 
 
-		// assimilation settings: sets data assimilation realizations and covariance
+		// assimilation settings
 		case 35:
 
 			// check for data assimilation variables
 			if ( lsd::da.count( 4 ) == 0 )
-				cmd( "ttk::messageBox -parent $T -type ok -icon warning -title Warning -message \"Data assimilation not configured\" -detail \"No element is configured for data assimilation, changes here are only used if at least one variable is configured with data to be assimilated.\"" );
-
-			// save previous values to allow canceling operation
-			temp[ 1 ] = lsd::da.disable;
-			Tcl_LinkVar( interp, "da_disable", ( char * ) & lsd::da.disable, TCL_LINK_INT );
+				cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Data assimilation not configured\" -detail \"No element is configured for data assimilation, changes here are only used if at least one variable is configured with data to be assimilated.\"" );
 
 			cmd( "set path \"%s\"", sim.conf_path );
 			if ( strlen( sim.conf_path ) > 0 )
 				cmd( "cd $path" );
 
+			// save previous values to allow canceling operation
+			itmp[ 1 ] = lsd::da.disable;
+			itmp[ 2 ] = lsd::da.cov_ignore;
+			itmp[ 3 ] = lsd::da.med_stats;
+			itmp[ 4 ] = lsd::da.sav_fcts;
+
+			Tcl_LinkVar( interp, "disable", ( char * ) & lsd::da.disable, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "cov_ignore", ( char * ) & lsd::da.cov_ignore, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "med_stats", ( char * ) & lsd::da.med_stats, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "sav_fcts", ( char * ) & lsd::da.sav_fcts, TCL_LINK_INT );
+
+			cmd( "set algorithm \"%s\"", lsd::da.algo_names[ lsd::da.algorithm ] );
 			cmd( "set cov_file \"%s\"", lsd::da.cov_file != NULL ? lsd::da.cov_file : "" );
 			cmd( "if { [ string first / $cov_file ] != -1 } { \
 					set cov_file [ file nativename $cov_file ] \
@@ -2589,6 +2597,26 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "set T .assset" );
 			cmd( "newtop $T \"Data Assimilation Settings\" { set choice 2 }" );
 
+			cmd( "ttk::frame $T.a" );
+			cmd( "ttk::label $T.a.l -text \"Data assimilation algorithm\"" );
+			cmd( "ttk::combobox $T.a.e -width 35 -textvariable algorithm -justify center -values { \"%s\" \"%s\" } -state readonly", lsd::da.algo_names[ 0 ], lsd::da.algo_names[ 1 ] );
+			cmd( "pack $T.a.l $T.a.e" );
+
+			cmd( "ttk::frame $T.c" );
+			cmd( "ttk::checkbutton $T.c.dis -text \"Disable data assimilation\" -variable disable" );
+			cmd( "ttk::checkbutton $T.c.med -text \"Use medians over means\" -variable med_stats" );
+			cmd( "ttk::checkbutton $T.c.fct -text \"Save intermediary forecasts\" -variable sav_fcts" );
+			cmd( "ttk::checkbutton $T.c.ncov -text \"Ignore data covariance\" -variable cov_ignore -command { \
+					if { $cov_ignore } { \
+						$T.csv.file.e configure -state disabled; \
+						$T.csv.file.brw configure -state disabled \
+					} else { \
+						$T.csv.file.e configure -state normal; \
+						$T.csv.file.brw configure -state normal \
+					} \
+				}" );
+			cmd( "pack $T.c.dis $T.c.med $T.c.fct $T.c.ncov -anchor w" );
+
 			cmd( "ttk::frame $T.csv" );
 			cmd( "ttk::frame $T.csv.l" );
 			cmd( "ttk::label $T.csv.l.l -text \"Covariance file (CSV only)\"" );
@@ -2596,7 +2624,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "pack $T.csv.l.l $T.csv.l.pad -side left -padx $_5" );
 
 			cmd( "ttk::frame $T.csv.file" );
-			cmd( "ttk::entry $T.csv.file.e -width 40 -textvariable cov_file -justify center" );
+			cmd( "ttk::entry $T.csv.file.e -width 40 -textvariable cov_file -justify center -state %s", lsd::da.cov_ignore ? "disabled" : "normal" );
 			cmd( "ttk::button $T.csv.file.brw -text Browse -command { \
 					set fn [ tk_getOpenFile -parent $T -title \"Select Data File\" -defaultextension \".csv\" -initialdir $path -filetypes { { {Comma-separated file} {.csv} } } ]; \
 					if { [ string length $fn ] > 0 && ! [ fn_spaces $fn ] } { \
@@ -2608,35 +2636,62 @@ lsd::object *gui::operate( lsd::object *r )
 							set cov_file [ file nativename $cov_file ] \
 						} \
 					} \
-				}" );
+				} -state %s", lsd::da.cov_ignore ? "disabled" : "normal" );
 			cmd( "pack $T.csv.file.e $T.csv.file.brw -side left -padx $_5" );
 
 			cmd( "pack $T.csv.l $T.csv.file" );
 
-			cmd( "ttk::frame $T.c" );
-			cmd( "ttk::checkbutton $T.c.dis -text \"Disable data assimilation\" -variable da_disable" );
-			cmd( "pack $T.c.dis -anchor w" );
-
-			cmd( "pack $T.csv $T.c -padx $_5 -pady $_10" );
+			cmd( "pack $T.a $T.c $T.csv -padx $_5 -pady $_10" );
 
 			cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#assimilation } { set choice 2 }" );
 
 			cmd( "showtop $T centerW" );
 
 			cmd( "mousewarpto $T.b.ok 0" );
-			cmd( "$T.csv.file.e selection range 0 end" );
-			cmd( "focus $T.csv.file.e" );
 
 			choice = 0;
 			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
-			Tcl_UnlinkVar( interp, "da_disable" );
-			cmd( "destroytop $T" );
+			Tcl_UnlinkVar( interp, "disable" );
+			Tcl_UnlinkVar( interp, "cov_ignore" );
+			Tcl_UnlinkVar( interp, "med_stats" );
+			Tcl_UnlinkVar( interp, "sav_fcts" );
 
-			if ( choice == 1 )
+			if ( choice == 2 )	// escape - revert previous values
 			{
-				if ( strlen( get_str( "cov_file" ) ) > 0 )
+				lsd::da.disable = itmp[ 1 ];
+				lsd::da.cov_ignore = itmp[ 2 ];
+				lsd::da.med_stats = itmp[ 3 ];
+				lsd::da.sav_fcts = itmp[ 4 ];
+			}
+			else
+			{
+				// signal unsaved change if anything to be saved
+				if ( itmp[ 1 ] != lsd::da.disable || itmp[ 2 ] != lsd::da.cov_ignore || itmp[ 3 ] != lsd::da.med_stats || itmp[ 4 ] != lsd::da.sav_fcts )
+					unsaved_change( true );
+
+				// identify selected algorithm
+				for ( i = 0; i < DA_ALGO_NUM; ++i )
+					if ( strcmp( lsd::da.algo_names[ i ], get_str( "algorithm" ) ) == 0 )
+					{
+						if ( i > 0 )
+						{
+							cmd( "ttk::messageBox -parent $T -type ok -icon warning -title Warning -message \"Algorithm not yet implemented\" -detail \"The selected algorithm is not yet implemented in LSD, resetting to the default one.\"" );
+							i = 0;
+						}
+
+						if ( lsd::da.algorithm != i )
+						{
+							lsd::da.algorithm = i;
+							unsaved_change( true );
+						}
+
+						break;
+					}
+
+				// check covariance file
+				if ( ! lsd::da.cov_ignore && strlen( get_str( "cov_file" ) ) > 0 )
 				{
 					cmd( "set cov_file [ string map {\\\\ /} $cov_file ]" );
 					lab1 = get_str( "cov_file" );
@@ -2650,7 +2705,7 @@ lsd::object *gui::operate( lsd::object *r )
 						}
 						catch ( ... )
 						{
-							cmd( "switch -- [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Covariance file does not exist\" -detail \"If you want to add the covariance file later, press 'OK', or press 'Cancel' to abort changing assimilation settings.\" ] { ok { } cancel { set choice 2 } }" );
+							cmd( "switch -- [ ttk::messageBox -parent $T -type okcancel -default cancel -icon warning -title Warning -message \"Covariance file does not exist\" -detail \"If you want to add the covariance file later, press 'OK', or press 'Cancel' to abort changing assimilation settings.\" ] { ok { } cancel { set choice 2 } }" );
 						}
 
 						if ( choice != 2 )
@@ -2662,12 +2717,14 @@ lsd::object *gui::operate( lsd::object *r )
 						}
 					}
 				}
-
-				if ( lsd::da.disable != temp[ 1 ] )
-					unsaved_change( true );
+				else
+				{
+					delete [ ] lsd::da.cov_file;
+					lsd::da.cov_file = NULL;
+				}
 			}
-			else
-				lsd::da.disable = temp[ 1 ];
+
+			cmd( "destroytop $T" );
 
 		break;
 
