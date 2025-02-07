@@ -98,7 +98,7 @@ lsd::object *gui::operate( lsd::object *r )
 			}
 
 			// invalid data assimilation settings
-			if ( lsd::da.count( 4 ) > 0 && ! lsd::da.disable && sim.last_run < 2 )
+			if ( da.count( 4 ) > 0 && ! da.disable && sim.last_run < 2 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid settings for data assimilation\" -detail \"The number of simulation runs is too small to perform data assimilation.\"" );
 				break;
@@ -132,7 +132,7 @@ lsd::object *gui::operate( lsd::object *r )
 			overwConf = unsaved_change( ) ? true : false;
 
 			// avoid showing dialog if configuration already saved and nothing to save to disk
-			if ( ! overwConf && sim.last_run == 1 && ( lsd::da.count( 4 ) == 0 || lsd::da.disable ) )
+			if ( ! overwConf && sim.last_run == 1 && ( da.count( 4 ) == 0 || da.disable ) )
 				goto run;
 
 			// remove any custom save path (save to current by default)
@@ -169,7 +169,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::label $T.f2.t.w -text \"%d\" -style hl.TLabel", sim.last_t );
 			cmd( "pack $T.f2.t.l $T.f2.t.w -side left -padx $_2" );
 
-			if ( lsd::da.count( 4 ) == 0 || lsd::da.disable )// regular run?
+			if ( da.count( 4 ) == 0 || da.disable )			// regular run?
 			{
 				if ( sim.last_run == 1 )					// single run
 				{
@@ -2114,7 +2114,7 @@ lsd::object *gui::operate( lsd::object *r )
 			if ( cv == NULL )
 				break;
 
-			if ( ( ca = lsd::da.search( cv->label ) ) == NULL )
+			if ( ( ca = da.search( cv->label ) ) == NULL )
 				ca = new lsd::assim( cv->label );
 
 			i = ca->dataentry( );
@@ -2570,7 +2570,7 @@ lsd::object *gui::operate( lsd::object *r )
 		case 35:
 
 			// check for data assimilation variables
-			if ( lsd::da.count( 4 ) == 0 )
+			if ( da.count( 4 ) == 0 )
 				cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Data assimilation not configured\" -detail \"No element is configured for data assimilation, changes here are only used if at least one variable is configured with data to be assimilated.\"" );
 
 			cmd( "set path \"%s\"", sim.conf_path );
@@ -2578,18 +2578,18 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "cd $path" );
 
 			// save previous values to allow canceling operation
-			itmp[ 1 ] = lsd::da.disable;
-			itmp[ 2 ] = lsd::da.cov_ignore;
-			itmp[ 3 ] = lsd::da.med_stats;
-			itmp[ 4 ] = lsd::da.sav_fcts;
+			itmp[ 1 ] = da.disable;
+			itmp[ 2 ] = da.cov_ignore;
+			itmp[ 3 ] = da.med_stats;
+			itmp[ 4 ] = da.sav_fcts;
 
-			Tcl_LinkVar( interp, "disable", ( char * ) & lsd::da.disable, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "cov_ignore", ( char * ) & lsd::da.cov_ignore, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "med_stats", ( char * ) & lsd::da.med_stats, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "sav_fcts", ( char * ) & lsd::da.sav_fcts, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "disable", ( char * ) & da.disable, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "cov_ignore", ( char * ) & da.cov_ignore, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "med_stats", ( char * ) & da.med_stats, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "sav_fcts", ( char * ) & da.sav_fcts, TCL_LINK_INT );
 
-			cmd( "set algorithm \"%s\"", lsd::da.algo_names[ lsd::da.algorithm ] );
-			cmd( "set cov_file \"%s\"", lsd::da.cov_file != NULL ? lsd::da.cov_file : "" );
+			cmd( "set algorithm \"%s\"", da.algo_names[ da.algorithm ] );
+			cmd( "set cov_file \"%s\"", da.cov_file != NULL ? da.cov_file : "" );
 			cmd( "if { [ string first / $cov_file ] != -1 } { \
 					set cov_file [ file nativename $cov_file ] \
 				}" );
@@ -2599,7 +2599,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "ttk::frame $T.a" );
 			cmd( "ttk::label $T.a.l -text \"Data assimilation algorithm\"" );
-			cmd( "ttk::combobox $T.a.e -width 35 -textvariable algorithm -justify center -values { \"%s\" \"%s\" } -state readonly", lsd::da.algo_names[ 0 ], lsd::da.algo_names[ 1 ] );
+			cmd( "ttk::combobox $T.a.e -width 35 -textvariable algorithm -justify center -values { \"%s\" \"%s\" } -state readonly", da.algo_names[ 0 ], da.algo_names[ 1 ] );
 			cmd( "pack $T.a.l $T.a.e" );
 
 			cmd( "ttk::frame $T.c" );
@@ -2624,7 +2624,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "pack $T.csv.l.l $T.csv.l.pad -side left -padx $_5" );
 
 			cmd( "ttk::frame $T.csv.file" );
-			cmd( "ttk::entry $T.csv.file.e -width 40 -textvariable cov_file -justify center -state %s", lsd::da.cov_ignore ? "disabled" : "normal" );
+			cmd( "ttk::entry $T.csv.file.e -width 40 -textvariable cov_file -justify center -state %s", da.cov_ignore ? "disabled" : "normal" );
 			cmd( "ttk::button $T.csv.file.brw -text Browse -command { \
 					set fn [ tk_getOpenFile -parent $T -title \"Select Data File\" -defaultextension \".csv\" -initialdir $path -filetypes { { {Comma-separated file} {.csv} } } ]; \
 					if { [ string length $fn ] > 0 && ! [ fn_spaces $fn ] } { \
@@ -2636,7 +2636,7 @@ lsd::object *gui::operate( lsd::object *r )
 							set cov_file [ file nativename $cov_file ] \
 						} \
 					} \
-				} -state %s", lsd::da.cov_ignore ? "disabled" : "normal" );
+				} -state %s", da.cov_ignore ? "disabled" : "normal" );
 			cmd( "pack $T.csv.file.e $T.csv.file.brw -side left -padx $_5" );
 
 			cmd( "pack $T.csv.l $T.csv.file" );
@@ -2660,20 +2660,20 @@ lsd::object *gui::operate( lsd::object *r )
 
 			if ( choice == 2 )	// escape - revert previous values
 			{
-				lsd::da.disable = itmp[ 1 ];
-				lsd::da.cov_ignore = itmp[ 2 ];
-				lsd::da.med_stats = itmp[ 3 ];
-				lsd::da.sav_fcts = itmp[ 4 ];
+				da.disable = itmp[ 1 ];
+				da.cov_ignore = itmp[ 2 ];
+				da.med_stats = itmp[ 3 ];
+				da.sav_fcts = itmp[ 4 ];
 			}
 			else
 			{
 				// signal unsaved change if anything to be saved
-				if ( itmp[ 1 ] != lsd::da.disable || itmp[ 2 ] != lsd::da.cov_ignore || itmp[ 3 ] != lsd::da.med_stats || itmp[ 4 ] != lsd::da.sav_fcts )
+				if ( itmp[ 1 ] != da.disable || itmp[ 2 ] != da.cov_ignore || itmp[ 3 ] != da.med_stats || itmp[ 4 ] != da.sav_fcts )
 					unsaved_change( true );
 
 				// identify selected algorithm
 				for ( i = 0; i < DA_ALGO_NUM; ++i )
-					if ( strcmp( lsd::da.algo_names[ i ], get_str( "algorithm" ) ) == 0 )
+					if ( strcmp( da.algo_names[ i ], get_str( "algorithm" ) ) == 0 )
 					{
 						if ( i > 0 )
 						{
@@ -2681,9 +2681,9 @@ lsd::object *gui::operate( lsd::object *r )
 							i = 0;
 						}
 
-						if ( lsd::da.algorithm != i )
+						if ( da.algorithm != i )
 						{
-							lsd::da.algorithm = i;
+							da.algorithm = i;
 							unsaved_change( true );
 						}
 
@@ -2691,12 +2691,12 @@ lsd::object *gui::operate( lsd::object *r )
 					}
 
 				// check covariance file
-				if ( ! lsd::da.cov_ignore && strlen( get_str( "cov_file" ) ) > 0 )
+				if ( ! da.cov_ignore && strlen( get_str( "cov_file" ) ) > 0 )
 				{
 					cmd( "set cov_file [ string map {\\\\ /} $cov_file ]" );
 					lab1 = get_str( "cov_file" );
 
-					if ( lsd::da.cov_file == NULL || strcmp( lsd::da.cov_file, lab1 ) != 0 )
+					if ( da.cov_file == NULL || strcmp( da.cov_file, lab1 ) != 0 )
 					{
 						try
 						{
@@ -2710,17 +2710,17 @@ lsd::object *gui::operate( lsd::object *r )
 
 						if ( choice != 2 )
 						{
-							delete [ ] lsd::da.cov_file;
-							lsd::da.cov_file = new char [ strlen( lab1 ) + 1 ];
-							strcpy( lsd::da.cov_file, lab1 );
+							delete [ ] da.cov_file;
+							da.cov_file = new char [ strlen( lab1 ) + 1 ];
+							strcpy( da.cov_file, lab1 );
 							unsaved_change( true );
 						}
 					}
 				}
 				else
 				{
-					delete [ ] lsd::da.cov_file;
-					lsd::da.cov_file = NULL;
+					delete [ ] da.cov_file;
+					da.cov_file = NULL;
 				}
 			}
 
@@ -4681,14 +4681,14 @@ lsd::object *gui::operate( lsd::object *r )
 			choice = 0;
 
 			// check for existing assimilation settings loaded
-			if ( lsd::da.count( 0 ) == 0 )
+			if ( da.count( 0 ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"There is no data assimilation settings to show\"" );
 				break;
 			}
 
 			// print data to log window
-			lsd::da.show( );
+			da.show( );
 
 		break;
 
@@ -4699,7 +4699,7 @@ lsd::object *gui::operate( lsd::object *r )
 			choice = 0;
 
 			// check for existing assimilation settings loaded
-			if ( lsd::da.count( 0 ) == 0 )
+			if ( da.count( 0 ) == 0 )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No data assimilation settings to remove\"" );
 				break;
@@ -4709,7 +4709,7 @@ lsd::object *gui::operate( lsd::object *r )
 				break;
 
 			// empty data assimilation
-			lsd::da.empty( );
+			da.empty( );
 			plog( "\nData assimilation settings removed.\n" );
 			unsavedChange = true;
 
@@ -4720,7 +4720,7 @@ lsd::object *gui::operate( lsd::object *r )
 		case 68:
 
 			// check for data assimilation
-			if ( lsd::da.count( 4 ) > 0 && ! lsd::da.disable )
+			if ( da.count( 4 ) > 0 && ! da.disable )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Data assimilation configured\" -detail \"The current configuration is set to perform data assimilation, which already uses parallel processing. Please use the non-parallel run option.\"" );
 				break;
@@ -5172,7 +5172,7 @@ lsd::object *gui::operate( lsd::object *r )
 			}
 
 			// check for data assimilation
-			if ( lsd::da.count( 4 ) > 0 && ! lsd::da.disable )
+			if ( da.count( 4 ) > 0 && ! da.disable )
 			{
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Data assimilation configured\" -detail \"The current configuration is set to perform data assimilation, which already uses parallel processing. Please use the non-parallel run option.\"" );
 				break;

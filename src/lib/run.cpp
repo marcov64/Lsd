@@ -84,7 +84,19 @@ int dispatch_runs( int until_t, int until_run )
 
 
 /*************************************************************
- RUN_SIMULATION
+ RUN_SIMULATION (data assimilation)
+ *************************************************************/
+int lsd::assimilation::run_simulation( int until_t )
+{
+	// read data assimilation data from files
+	load_files( );
+
+	return sims[ 0 ]->run_simulation( until_t );
+}
+
+
+/*************************************************************
+ RUN_SIMULATION (regular)
  *************************************************************/
 int lsd::simulation::run_simulation( int until_t, int until_run )
 {
@@ -222,9 +234,6 @@ int lsd::simulation::init_new_seq( char *bar_done, int & perc_done, int & last_d
 
 	run = 1;					// first run in the sequence
 	quit = 0;					// not marked for abortion
-
-	// read data assimilation data from files
-	da.load_files( );
 
 	// check if there are parallel computing variables
 	if ( parallel_disable || max_threads < 2 )

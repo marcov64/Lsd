@@ -596,7 +596,7 @@ char *lsd::clean_path( const char *filepath )
 
 
 /*************************************************************
- CMD_GUI
+ CMD (library)
  *************************************************************/
 void lsd::cmd( const char *cm, ... )
 {
@@ -920,10 +920,7 @@ double lsd::strtod( const char *in, char** endptr, double inv )
 			else
 				if ( d == - HUGE_VAL )
 					d = - DBL_MAX;
-#ifndef _LMM_
-	if ( sims.size( ) == 1 && sims[ 0 ] != NULL )
-		sims[ 0 ]->plog( "\nWarning: invalid double float (%s), adjusted to %g", in, d );
-#endif
+		plog_master( "\nWarning: invalid double float (%s), adjusted to %g", in, d );
 	}
 
 	return d;
@@ -970,10 +967,8 @@ long lsd::strtol( const char *in, char** endptr, int base, long inv )
 	{
 		if ( l == 0 )
 			l = inv;
-#ifndef _LMM_
-		if ( sims.size( ) == 1 && sims[ 0 ] != NULL )
-			sims[ 0 ]->plog( "\nWarning: invalid long integer (%s), adjusted to %d", in, l );
-#endif
+
+		plog_master( "\nWarning: invalid long integer (%s), adjusted to %d", in, l );
 	}
 
 	return l;

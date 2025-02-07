@@ -107,9 +107,11 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 
 		if ( ! ( ( reload && quick == 2 ) || quick == 1 ) )
 		{
-			da.empty( );						// remove assimilation info
 			empty_sensitivity( );				// discard sensitivity analysis data
 			empty_description( );				// remove existing descriptions
+
+			if ( da != NULL )
+				da->empty( );					// remove assimilation info
 		}
 
 		// load non-instanced model structure
@@ -146,16 +148,19 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 		no_ptr_chk = ! simNode.attribute( "ptr_check", hint ).as_bool( true );
 		parallel_disable = ! simNode.attribute( "parallel", hint ).as_bool( true );
 
-		da.disable = setNode.child( "data_assimilation" ).attribute( "disable", hint ).as_bool( );
-		da.cov_ignore = setNode.child( "data_assimilation" ).attribute( "ignore_covariance", hint ).as_bool( );
-		da.med_stats = setNode.child( "data_assimilation" ).attribute( "median_statistics", hint ).as_bool( );
-		da.sav_fcts = setNode.child( "data_assimilation" ).attribute( "save_forecasts", hint ).as_bool( );
-		da.algorithm = setNode.child( "data_assimilation" ).attribute( "algorithm", hint ).as_uint( );
-		if ( ( i = strlen( setNode.child( "data_assimilation" ).attribute( "covariance_file", hint ).as_string( ) ) ) > 0 )
+		if ( da != NULL )
 		{
-			delete [ ] da.cov_file;
-			da.cov_file = new char [ i + 1 ];
-			strcpy( da.cov_file, setNode.child( "data_assimilation" ).attribute( "covariance_file", hint ).as_string( ) );
+			da->disable = setNode.child( "data_assimilation" ).attribute( "disable", hint ).as_bool( );
+			da->cov_ignore = setNode.child( "data_assimilation" ).attribute( "ignore_covariance", hint ).as_bool( );
+			da->med_stats = setNode.child( "data_assimilation" ).attribute( "median_statistics", hint ).as_bool( );
+			da->sav_fcts = setNode.child( "data_assimilation" ).attribute( "save_forecasts", hint ).as_bool( );
+			da->algorithm = setNode.child( "data_assimilation" ).attribute( "algorithm", hint ).as_uint( );
+			if ( ( i = strlen( setNode.child( "data_assimilation" ).attribute( "covariance_file", hint ).as_string( ) ) ) > 0 )
+			{
+				delete [ ] da->cov_file;
+				da->cov_file = new char [ i + 1 ];
+				strcpy( da->cov_file, setNode.child( "data_assimilation" ).attribute( "covariance_file", hint ).as_string( ) );
+			}
 		}
 
 		stack_info = setNode.child( "profiling" ).attribute( "level", hint ).as_uint( );
@@ -233,9 +238,6 @@ void lsd::simulation::unload_configuration( bool full )
 	reset_blueprint( NULL );
 	empty_cemetery( );							// garbage collection
 
-	delete [ ] da.cov_file;
-	da.cov_file = NULL;
-
 	save_ok = true;								// valid structure to save
 	sens = NULL;								// no sensitivity data
 
@@ -244,8 +246,10 @@ void lsd::simulation::unload_configuration( bool full )
 
 	if ( full )									// full unload? (no new config?)
 	{
-		da.empty( );							// discard assimilation info
 		empty_description( );					// remove element descriptions
+
+		if ( da != NULL )
+			da->empty( );						// discard assimilation info
 
 		delete [ ] conf_path;					// reset current path
 		conf_path = new char[ strlen( model_path ) + 1 ];
@@ -799,27 +803,27 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 		simNode.append_attribute( "parallel" ) = false;
 
 	// add data assimilation global settings, if any
-	if ( da.count( 0 ) > 0 )
+	if ( da != NULL && da->count( 0 ) > 0 )
 	{
 		x_nodeT assimNode = setNode.append_child( "data_assimilation" );
 
-		if ( da.disable )
+		if ( da->disable )
 			assimNode.append_attribute( "disable" ) = true;
 
-		if ( da.cov_ignore )
+		if ( da->cov_ignore )
 			assimNode.append_attribute( "ignore_covariance" ) = true;
 
-		if ( da.med_stats )
+		if ( da->med_stats )
 			assimNode.append_attribute( "median_statistics" ) = true;
 
-		if ( da.sav_fcts )
+		if ( da->sav_fcts )
 			assimNode.append_attribute( "save_forecasts" ) = true;
 
-		if ( da.algorithm != 0 )
-			assimNode.append_attribute( "algorithm" ) = da.algorithm;
+		if ( da->algorithm != 0 )
+			assimNode.append_attribute( "algorithm" ) = da->algorithm;
 
-		if ( da.cov_file != NULL && strlen( da.cov_file ) > 0 )
-			assimNode.append_attribute( "covariance_file" ) = da.cov_file;
+		if ( da->cov_file != NULL && strlen( da->cov_file ) > 0 )
+			assimNode.append_attribute( "covariance_file" ) = da->cov_file;
 	}
 
 	// add profile settings, if any
@@ -1169,8 +1173,7 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 			}
 
 		// add data assimilation settings
-		ca = da.search( cv->label );
-		if ( ca != NULL )
+		if ( da != NULL && ( ca = da->search( cv->label ) ) != NULL )
 		{
 			x_nodeT cna = cn.append_child( "assimilation" );
 
@@ -1284,11 +1287,16 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 		goto endLoad;
 	}
 
-	delete [ ] da.cov_file;
-	da.cov_file = NULL;
+	if ( da != NULL )
+	{
+		delete [ ] da->cov_file;
+		da->cov_file = NULL;
+		da->disable = 0;
+	}
+
 	last_t = MAX_STEPS;
 	deb_t = stack_info = prof_min_msecs = 0;
-	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = da.disable = 0;
+	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = 0;
 
 	fscanf( f, "%999s", msg );					// should be MAX_STEP
 	if ( strcmp( msg, "MAX_STEP" ) )

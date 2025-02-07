@@ -183,8 +183,11 @@ int gui::load_gui( const char **argv )
 			cmd( "cd $path" );
 		}
 	}
+	
+	// set DLL call-back for data assimilation container 
+	lsd::da = & da;
 
-	// set dynamic link library (DLL) call-back references
+	// set DLL call-back references for master simulation
 	sim.inter = interp;
 	sim.liblnk = new lsd::dlliblinkage;
 
@@ -209,7 +212,7 @@ int gui::load_gui( const char **argv )
 	sim.liblnk->runtime_step = & runtime_step;
 	sim.liblnk->save_lattice_helper = & save_lattice_helper;
 	sim.liblnk->update_lattice_helper = & update_lattice_helper;
-
+	
 	// try to load model configuration file
 	if ( strlen( sim.conf_name ) > 0 )
 	{
@@ -251,7 +254,12 @@ int gui::load_gui( const char **argv )
 
 		try
 		{
-			if ( ( i = sim.run_simulation( ) ) != 0 )
+			if ( da.count( 4 ) > 0 && ! da.disable )
+				i = da.run_simulation( );
+			else
+				i = sim.run_simulation( );
+
+			if ( i != 0 )
 				break;
 			else
 				unsavedData = true;	// flag unsaved simulation results

@@ -34,7 +34,7 @@ namespace lsd
  *************************************************************/
 
 	// regular library global variables
-	assimilation da;				// data assimilation object
+	assimilation *da = NULL;		// data assimilation object pointer
 	char *exec_file = NULL;			// name of executable file
 	char *exec_path = NULL;			// path of executable file
 	char *lib_file = NULL;			// name of shared library, if any

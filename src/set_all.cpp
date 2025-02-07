@@ -643,12 +643,20 @@ int lsd::assim::dataentry( const char *parWnd )
 	bool cexist;
 	int namrow, res;
 	str_vecT cnames;
+	simulation *sim;
 	variable *cv;
 	rapidcsv::Document csv;
 
-	cv = sims[ 0 ]->root->search_var( NULL, label );
+	if ( sims.size( ) > 0 && sims[ 0 ] != NULL )
+		sim = sims[ 0 ];
+	else
+		return 2;
+
+	cv = sim->root->search_var( NULL, label );
+
 	if ( cv == NULL )
 		return 2;
+
 
 	// define the correct parent window
 	if ( parWnd != NULL && strlen( parWnd ) > 0 )
@@ -666,8 +674,8 @@ int lsd::assim::dataentry( const char *parWnd )
 			set modDAf [ list ] \
 		}" );
 
-	cmd( "set path \"%s\"", sims[ 0 ]->conf_path );
-	if ( strlen( sims[ 0 ]->conf_path ) > 0 )
+	cmd( "set path \"%s\"", sim->conf_path );
+	if ( strlen( sim->conf_path ) > 0 )
 		cmd( "cd $path" );
 
 	if ( cv->param == 1 )

@@ -245,7 +245,7 @@ namespace lsd
 	extern const bool no_pointer_init;		// user pointer init. static disable
 
 #ifndef _FUN_
-	extern assimilation da;					// data assimilation object
+	extern assimilation *da;				// data assimilation object pointer
 	extern char *exec_file;					// name of executable file
 	extern char *exec_path;					// path of executable file
 	extern char *lib_file;					// name of shared library, if any
@@ -313,93 +313,13 @@ namespace lsd
 	void inhibit_system_sleep( void );
 	void lsd_exit( int v );
 	void msleep( unsigned msec = 1000 );
+	void plog_master( const char *cm, ... );
+	void plog_tag_master( const char *cm, const char *tag, ... );
 	void restore_system_sleep( void );
 	void set_exec( const char *path, const char *file );
 	void signal_handler( int signum );
 #endif
 }
-
-
-/*************************************************************
- ASSIMILATION
- *************************************************************/
-class lsd::assimilation					// assimilation container class
-{
-	friend class assim;
-	friend class simulation;
-
-	public:
-		char *cov_file = NULL;			// data assimilation covariance CSV file
-		int algorithm = 0;				// algorithm to use in DA (0=EnKF,1=ETPF)
-		int cov_ignore = false;			// ignore data covariance/virtual obs.
-		int disable = false;			// disable data assimilation
-		int med_stats = false;			// use median/MAD statistics (vs mean/SD)
-		int sav_fcts = false;			// save forecast (intermediary) results
-
-		const char *algo_names[ DA_ALGO_NUM ] = DA_ALGO_NAME;
-
-	private:
-		assim *elem = NULL;				// assimilation elements linked-list head
-		dm_mapT data;					// assimilation data map
-		ia_mapT time;					// list of times and variables for assimilation
-		Eigen::MatrixXd cov_mat;		// data assimilation covariance matrix
-
-	public:
-		assim *search( const char *lab );
-		int count( int what );
-		void empty( assim *ca = NULL );
-		void show( void );
-
-		~assimilation( void );			// destructor
-
-	private:
-		bool load_files( void );
-		int load_cov( void );
-		int load_data( void );
-};
-
-
-/*************************************************************
- ASSIM
- *************************************************************/
-class lsd::assim						// data assimilation container class
-{
-	friend class object;
-	friend class assimilation;
-
-	protected:							// variables used by descending classes
-		bool data_obs = false;			// element has data obs. to assimilate
-		bool disable = false;			// element disabled for assimilation
-		bool param = false;				// element is a parameter (not variable)
-		bool par_ens_infl = false;		// use ensemble inflation for parameters
-		bool update = true;				// element to be updated by assimilation
-		char *data_file = NULL;			// name of source data CSV file
-		char *data_col_name = NULL;		// name of data value column
-		char *t_col_name = NULL;		// name of time value column
-		double par_infl_fac = 1;		// parameter ensemble inflation factor
-		double par_n_var = 0;			// parameter normal variance
-		double par_u_upp = 0;			// parameter uniform distribution maximum
-		double par_u_low = 0;			// parameter uniform distribution minimum
-		int data_col_num = 0;			// number of data value column
-		int par_distr = 0;				// parameter distribution (0:N/1:U)
-		int par_infl_time = 2;			// parameter ensemble inflation start time
-		int t_col_num = 0;				// number of time value column
-
-	private:
-		bool no_data = true;			// no data retrieved?
-		char *label = NULL;				// element name
-		int cov_idx = -1;				// index (row+col) in covariance matrix
-		assim *next = NULL;				// data assimilation chain of elements
-
-	public:
-		assim( const char *_label, bool param = false, bool _disable = false, bool _update = true, bool _data_obs = false, const char *_csv = NULL, const char *_data_col_name = NULL, const char *_t_col_name = NULL, int _data_col_num = 0, int _t_col_num = 0, int _par_distr = 0, double _par_n_var = 0, double _par_u_upp = 0, double _par_u_low = 0, bool par_ens_infl = false, double _par_infl_fac = 1, int _par_infl_time = 2 );
-										// constructor
-		~assim( void );					// destructor
-
-#ifdef ASSIM_EXT
-		ASSIM_EXT
-#endif
-};
 
 
 /*************************************************************
@@ -680,6 +600,8 @@ class lsd::simulation : public equation	// simulation container class
 		void init_random( unsigned seed );
 		void move_obj( const char *lab, const char *dest );
 		void plog( const char *msg, ... );
+		void plog_tag( const char *cm, const char *tag, ... );
+		void plog_terminal( const char *cm, va_list arg );
 		void reset_blueprint( object *r );
 		void set_fast( int level );
 		void unload_configuration( bool full );
@@ -713,8 +635,6 @@ class lsd::simulation : public equation	// simulation container class
 		void log_parallel( bool term );
 		void monitor_parallel( bool term );
 		void parallel_update( variable *v, object* p, object *caller = NULL );
-		void plog_tag( const char *cm, const char *tag, ... );
-		void plog_terminal( const char *cm, va_list arg );
 		void run_parallel_exec( bool term, int id, strT cmd );
 		void save_results( void );
 		void update_bar( char *bar, int done, int & last_done, int bar_sz );
@@ -1249,4 +1169,87 @@ class lsd::profile						// profiled variable class
 	public:
 		unsigned int comp = 0;
 		unsigned long long ticks = 0;
+};
+
+
+/*************************************************************
+ ASSIMILATION
+ *************************************************************/
+class lsd::assimilation					// assimilation container class
+{
+	friend class assim;
+	friend class simulation;
+
+	public:
+		char *cov_file = NULL;			// data assimilation covariance CSV file
+		int algorithm = 0;				// algorithm to use in DA (0=EnKF,1=ETPF)
+		int cov_ignore = false;			// ignore data covariance/virtual obs.
+		int disable = false;			// disable data assimilation
+		int med_stats = false;			// use median/MAD statistics (vs mean/SD)
+		int sav_fcts = false;			// save forecast (intermediary) results
+
+		const char *algo_names[ DA_ALGO_NUM ] = DA_ALGO_NAME;
+
+	private:
+		assim *elem = NULL;				// assimilation elements linked-list head
+		dm_mapT data;					// assimilation data map
+		ia_mapT time;					// list of times and variables for assimilation
+		Eigen::MatrixXd cov_mat;		// data assimilation covariance matrix
+
+	public:
+		assim *search( const char *lab );
+		int count( int what );
+		int run_simulation( int until_t = 0 );
+		void empty( assim *ca = NULL );
+		void show( void );
+
+		~assimilation( void );			// destructor
+
+	private:
+		bool load_files( void );
+		int load_cov( void );
+		int load_data( void );
+};
+
+
+/*************************************************************
+ ASSIM
+ *************************************************************/
+class lsd::assim						// data assimilation container class
+{
+	friend class object;
+	friend class assimilation;
+
+	protected:							// variables used by descending classes
+		bool data_obs = false;			// element has data obs. to assimilate
+		bool disable = false;			// element disabled for assimilation
+		bool param = false;				// element is a parameter (not variable)
+		bool par_ens_infl = false;		// use ensemble inflation for parameters
+		bool update = true;				// element to be updated by assimilation
+		char *data_file = NULL;			// name of source data CSV file
+		char *data_col_name = NULL;		// name of data value column
+		char *t_col_name = NULL;		// name of time value column
+		double par_infl_fac = 1;		// parameter ensemble inflation factor
+		double par_n_var = 0;			// parameter normal variance
+		double par_u_upp = 0;			// parameter uniform distribution maximum
+		double par_u_low = 0;			// parameter uniform distribution minimum
+		int data_col_num = 0;			// number of data value column
+		int par_distr = 0;				// parameter distribution (0:N/1:U)
+		int par_infl_time = 2;			// parameter ensemble inflation start time
+		int t_col_num = 0;				// number of time value column
+
+	private:
+		bool no_data = true;			// no data retrieved?
+		char *label = NULL;				// element name
+		int cov_idx = -1;				// index (row+col) in covariance matrix
+		assim *next = NULL;				// data assimilation chain of elements
+
+	public:
+		assim( const char *_label, bool param = false, bool _disable = false, bool _update = true, bool _data_obs = false, const char *_csv = NULL, const char *_data_col_name = NULL, const char *_t_col_name = NULL, int _data_col_num = 0, int _t_col_num = 0, int _par_distr = 0, double _par_n_var = 0, double _par_u_upp = 0, double _par_u_low = 0, bool par_ens_infl = false, double _par_infl_fac = 1, int _par_infl_time = 2 );
+										// constructor
+		~assim( void );					// destructor
+
+#ifdef ASSIM_EXT
+		ASSIM_EXT
+#endif
 };

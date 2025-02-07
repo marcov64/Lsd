@@ -66,6 +66,7 @@ namespace gui
 	int platform = 0;				// OS platform (1=Linux, 2=Mac, 3=Windows)
 	int stop;						// activity interruption flag (Tcl boolean)
 	int watch;						// allow for graph generation interruption (bool)
+	lsd::assimilation da;			// data assimilation object
 	lsd::object *curr_obj = NULL;	// pointer to current object in browser
 	lsd::object *last_obj = NULL;	// pointer to last selected object in structure
 	lsd::simulation sim;			// the master GUI simulation object

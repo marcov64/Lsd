@@ -54,6 +54,27 @@ void lsd::simulation::plog( const char *cm, ... )
 
 
 /*************************************************************
+ PLOG_MASTER
+ *************************************************************/
+void lsd::plog_master( const char *cm, ... )
+{
+	static va_list argptr;
+
+	va_start( argptr, cm );
+
+	if ( sims.size( ) > 0 && sims[ 0 ] != NULL )
+	{
+		if ( sims[ 0 ]->liblnk != NULL )
+			sims[ 0 ]->liblnk->plog_backend( cm, "", argptr );
+		else
+			sims[ 0 ]->plog_terminal( cm, argptr );
+	}
+
+	va_end( argptr );
+}
+
+
+/*************************************************************
  _PLOG_
  Print message in equations according
  to simulation flags
@@ -97,6 +118,27 @@ void lsd::simulation::plog_tag( const char *cm, const char *tag, ... )
 		liblnk->plog_backend( cm, tag, argptr );
 	else
 		plog_terminal( cm, argptr );
+
+	va_end( argptr );
+}
+
+
+/*************************************************************
+ PLOG_TAG_MASTER
+ *************************************************************/
+void lsd::plog_tag_master( const char *cm, const char *tag, ... )
+{
+	static va_list argptr;
+
+	va_start( argptr, cm );
+
+	if ( sims.size( ) > 0 && sims[ 0 ] != NULL )
+	{
+		if ( sims[ 0 ]->liblnk != NULL )
+			sims[ 0 ]->liblnk->plog_backend( cm, tag, argptr );
+		else
+			sims[ 0 ]->plog_terminal( cm, argptr );
+	}
 
 	va_end( argptr );
 }
@@ -161,7 +203,7 @@ void lsd::simulation::plog_terminal( const char *cm, va_list arg )
 	fprintf( stdout_ptr, "%s", message );
 	fflush( stdout_ptr );
 
-	if ( sims.size( ) > 0 )
+	if ( sims.size( ) > 0 && sims[ 0 ] != NULL )
 		sims[ 0 ]->message_logged = true;
 
 	if ( bufdyn )

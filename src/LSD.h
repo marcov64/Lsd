@@ -313,6 +313,7 @@ namespace gui
 	extern int stop;					// activity interruption flag (Tcl boolean)
 	extern int str_wnd;					// presentation of the model structure window (bool)
 	extern int watch;					// allow for graph generation interruption (bool)
+	extern lsd::assimilation da;		// data assimilation object
 	extern lsd::object *curr_obj;		// pointer to current object in browser
 	extern lsd::object *last_obj;		// pointer to last selected object in structure
 	extern lsd::simulation sim;			// the master GUI simulation object

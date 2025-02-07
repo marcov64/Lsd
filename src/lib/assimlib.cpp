@@ -29,6 +29,9 @@ lsd::assim::assim( const char *_label, bool _param, bool _disable, bool _update,
 {
 	assim *ca;
 
+	if ( da == NULL )
+		throw std::domain_error( "assimilation object not registered" );
+
 	if ( _label != NULL )
 	{
 		label = new char [ strlen( _label ) + 1 ];
@@ -72,11 +75,11 @@ lsd::assim::assim( const char *_label, bool _param, bool _disable, bool _update,
 
 	no_data = param || disable || ! _data_obs || data_file == NULL || ( data_col_name ==NULL && data_col_num < 1 );
 
-	if ( da.elem == NULL )
-		da.elem = this;
+	if ( da->elem == NULL )
+		da->elem = this;
 	else
 	{
-		for ( ca = da.elem; ca->next != NULL; ca = ca->next );
+		for ( ca = da->elem; ca->next != NULL; ca = ca->next );
 		ca->next = this;
 	}
 }
@@ -95,12 +98,12 @@ lsd::assim::~assim( void )
 	delete [ ] label;
 	delete [ ] t_col_name;
 
-	if ( da.elem != NULL )
+	if ( da != NULL && da->elem != NULL )
 	{
-		for ( ca = da.elem, pa = NULL; ca != this && ca != NULL; pa = ca, ca = ca->next );
+		for ( ca = da->elem, pa = NULL; ca != this && ca != NULL; pa = ca, ca = ca->next );
 
-		if ( ca == da.elem )
-			da.elem = next;
+		if ( ca == da->elem )
+			da->elem = next;
 		else
 			if ( ca == this && pa != NULL )
 				pa->next = next;
@@ -346,7 +349,11 @@ int lsd::assimilation::load_cov( void )
 	if ( ! cov_ignore && ( cov_file == NULL || strlen( cov_file ) == 0 ) )
 		return 1;
 
-	cpath = sims[ 0 ]->conf_path;
+	if ( sims.size( ) > 0 && sims[ 0 ] != NULL )
+		cpath = sims[ 0 ]->conf_path;
+	else
+		cpath = NULL;
+
 	if ( cpath != NULL && strlen( cpath ) > 0 )
 		snprintf( fname, MAX_PATH_LENGTH, "%s/%s", cpath, cov_file );
 	else
@@ -442,18 +449,16 @@ bool lsd::assimilation::load_files( void )
 			empty( );
 		else
 		{
-			sims[ 0 ]->plog( "\nData for assimilation missing for:" );
+			plog_master( "\nData for assimilation missing for:" );
 			for ( ca = elem, first = true; ca != NULL; ca = ca->next )
 				if ( ! ca->param && ! ca->disable && ca->data_obs && ca->no_data )
 				{
-					sims[ 0 ]->plog( "%s %s", first ? "" : ",", ca->label );
+					plog_master( "%s %s", first ? "" : ",", ca->label );
 					first = false;
 				}
 		}
 
-#ifndef _TERM_
 		cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Cannot load assimilation data\" -detail \"Part or all data for assimilation could not be retrieved from data files.\nPlease check your assimilation configuration.\"" );
-#endif
 	}
 
 	if ( elem != NULL )
@@ -461,9 +466,9 @@ bool lsd::assimilation::load_files( void )
 		if ( ( j = load_cov( ) ) <= 0 )
 		{
 			if ( j == -1 )
-				sims[ 0 ]->plog( "\nUnused data in covariance matrix ignored" );
+				plog_master( "\nUnused data in covariance matrix ignored" );
 
-			sims[ 0 ]->plog( "\nAssimilation data loaded for %d variables\n", i );
+			plog_master( "\nAssimilation data loaded for %d variables\n", i );
 		}
 		else
 		{
@@ -471,38 +476,36 @@ bool lsd::assimilation::load_files( void )
 			switch ( j )
 			{
 				case 1:
-					sims[ 0 ]->plog( "\nInvalid covariance matrix file name" );
+					plog_master( "\nInvalid covariance matrix file name" );
 					break;
 
 				case 2:
-					sims[ 0 ]->plog( "\nInvalid covariance matrix file CSV format" );
+					plog_master( "\nInvalid covariance matrix file CSV format" );
 					break;
 
 				case 3:
-					sims[ 0 ]->plog( "\nNon-symmetric covariance matrix (rows != columns)" );
+					plog_master( "\nNon-symmetric covariance matrix (rows != columns)" );
 					break;
 
 				case 4:
-					sims[ 0 ]->plog( "\nEmpty covariance matrix" );
+					plog_master( "\nEmpty covariance matrix" );
 					break;
 
 				case 5:
-					sims[ 0 ]->plog( "\nMissing variable(s) in covariance matrix" );
+					plog_master( "\nMissing variable(s) in covariance matrix" );
 					break;
 
 				case 6:
-					sims[ 0 ]->plog( "\nMissing elements in covariance matrix" );
+					plog_master( "\nMissing elements in covariance matrix" );
 			}
 
-#ifndef _TERM_
 		cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Cannot load assimilation covariance matrix\" -detail \"There was a problem loading the covariance matrix for data assimilation from file '%s'.\nCheck the Log window for details.\"", cov_file != NULL ? cov_file : "(none)" );
-#endif
 		}
 	}
 
 	if ( elem == NULL )
 	{
-		sims[ 0 ]->plog( "\nData assimilation configuration is invalid, ignoring\n" );
+		plog_master( "\nData assimilation configuration is invalid, ignoring\n" );
 		return false;
 	}
 	else
@@ -518,63 +521,63 @@ void lsd::assimilation::show( void )
 {
 	assim *ca;
 
-	sims[ 0 ]->plog( "\n\nVariables set for data assimilation (#=not updated / *=disabled):\n" );
+	plog_master( "\n\nVariables set for data assimilation (#=not updated / *=disabled):\n" );
 	for ( ca = elem; ca != NULL; ca = ca->next )
 	{
-		sims[ 0 ]->plog( "%s: %s", ca->param ? "Par" : "Var", ca->label );
-		sims[ 0 ]->plog_tag( "%s%s", "highlight", ! ca->update ? "#" : "", ca->disable ? "*" : "" );
+		plog_master( "%s: %s", ca->param ? "Par" : "Var", ca->label );
+		plog_tag_master( "%s%s", "highlight", ! ca->update ? "#" : "", ca->disable ? "*" : "" );
 
 		if ( ! ca->param )
 		{
 			if ( ca->data_obs )
 			{
-				sims[ 0 ]->plog( " \t%s\t(col=", ca->data_file != NULL ? ca->data_file : "" );
+				plog_master( " \t%s\t(col=", ca->data_file != NULL ? ca->data_file : "" );
 
 				if ( ca->data_col_name != NULL && strlen( ca->data_col_name ) != 0 )
-					sims[ 0 ]->plog_tag( "'%s'", "highlight", ca->data_col_name );
+					plog_tag_master( "'%s'", "highlight", ca->data_col_name );
 				else
-					sims[ 0 ]->plog_tag( "%d", "highlight", ca->data_col_num );
+					plog_tag_master( "%d", "highlight", ca->data_col_num );
 
 				if ( ( ca->t_col_name != NULL && strlen( ca->t_col_name ) != 0 ) || ca->t_col_num > 0 )
 				{
-					sims[ 0 ]->plog( " t_col=" );
+					plog_master( " t_col=" );
 
 					if ( ca->t_col_name != NULL && strlen( ca->t_col_name ) != 0 )
-						sims[ 0 ]->plog_tag( "'%s'", "highlight", ca->t_col_name );
+						plog_tag_master( "'%s'", "highlight", ca->t_col_name );
 					else
-						sims[ 0 ]->plog_tag( "%d", "highlight", ca->t_col_num );
+						plog_tag_master( "%d", "highlight", ca->t_col_num );
 				}
 
-				sims[ 0 ]->plog( ")" );
+				plog_master( ")" );
 			}
 		}
 		else
 		{
 			if ( ca->par_distr == 0 )
 			{
-				sims[ 0 ]->plog( " \tNorm(var=" );
-				sims[ 0 ]->plog_tag( "%.4g", "highlight", ca->par_n_var );
+				plog_master( " \tNorm(var=" );
+				plog_tag_master( "%.4g", "highlight", ca->par_n_var );
 			}
 			else
 			{
-				sims[ 0 ]->plog( " \tUnif(up=" );
-				sims[ 0 ]->plog_tag( "%.3g", "highlight", ca->par_u_upp );
-				sims[ 0 ]->plog( " lo=" );
-				sims[ 0 ]->plog_tag( "%.3g", "highlight", ca->par_u_low );
+				plog_master( " \tUnif(up=" );
+				plog_tag_master( "%.3g", "highlight", ca->par_u_upp );
+				plog_master( " lo=" );
+				plog_tag_master( "%.3g", "highlight", ca->par_u_low );
 			}
 
-			sims[ 0 ]->plog( ")" );
+			plog_master( ")" );
 
 			if ( ca-> par_ens_infl )
 			{
-				sims[ 0 ]->plog( " \tInflat(alpha=" );
-				sims[ 0 ]->plog_tag( "%.4g", "highlight", ca->par_infl_fac );
-				sims[ 0 ]->plog( " t=" );
-				sims[ 0 ]->plog_tag( "%d", "highlight", ca->par_infl_time );
-				sims[ 0 ]->plog( ")" );
+				plog_master( " \tInflat(alpha=" );
+				plog_tag_master( "%.4g", "highlight", ca->par_infl_fac );
+				plog_master( " t=" );
+				plog_tag_master( "%d", "highlight", ca->par_infl_time );
+				plog_master( ")" );
 			}
 		}
 
-		sims[ 0 ]->plog( "\n" );
+		plog_master( "\n" );
 	}
 }
