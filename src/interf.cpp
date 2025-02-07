@@ -2604,7 +2604,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "ttk::frame $T.c" );
 			cmd( "ttk::checkbutton $T.c.dis -text \"Disable data assimilation\" -variable disable" );
-			cmd( "ttk::checkbutton $T.c.med -text \"Use medians over means\" -variable med_stats" );
+			cmd( "ttk::checkbutton $T.c.med -text \"Use median and comedian\" -variable med_stats" );
 			cmd( "ttk::checkbutton $T.c.fct -text \"Save intermediary forecasts\" -variable sav_fcts" );
 			cmd( "ttk::checkbutton $T.c.ncov -text \"Ignore data covariance\" -variable cov_ignore -command { \
 					if { $cov_ignore } { \
@@ -2619,7 +2619,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "ttk::frame $T.csv" );
 			cmd( "ttk::frame $T.csv.l" );
-			cmd( "ttk::label $T.csv.l.l -text \"Covariance file (CSV only)\"" );
+			cmd( "ttk::label $T.csv.l.l -text \"Covariance/comedian file (CSV only)\"" );
 			cmd( "ttk::label $T.csv.l.pad -width 6" );
 			cmd( "pack $T.csv.l.l $T.csv.l.pad -side left -padx $_5" );
 

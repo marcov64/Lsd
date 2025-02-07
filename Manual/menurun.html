@@ -545,10 +545,10 @@ configuration plus an integer number equal to the seed used for the
 pseudo-random number generator, separated by an underscore character. LSD
 creates one results file (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
 lang=EN-US> extension) per run. A multi-run, single totals file (</span><span
-class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span lang=EN-US>
-extension) may be also produced, including as many lines as the number of runs.
-Each line of this file contains the values of the saved elements at the very
-last time step of each simulation.</span></p>
+class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span lang=EN-US> extension)
+may be also produced, including as many lines as the number of runs. Each line
+of this file contains the values of the saved elements at the very last time
+step of each simulation.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Log text files (</span><span class=Cdigo><span
 lang=EN-US>.log</span></span><span lang=EN-US> extension) are also temporarily
@@ -730,8 +730,8 @@ model configuration does not use parallel object computation (see details <a
 href="menumodel.html">here</a>), this option has no effect.</span></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Skip generating results
 files</span></b></span><span lang=EN-US>: if enabled, LSD will not produce the
 time-series detailed </span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
@@ -1146,16 +1146,17 @@ Assimilation Settings window are:</span></p>
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span class=Cdigo><span style='font-family:Symbol;
 color:windowtext'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><span class=Cdigo><b>Data assimilation algorithm</b></span><span
-class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;color:windowtext'>:
-choose the algorithm employed for data assimilation. The </span></span><span
-class=Cdigo><span lang=EN-US>Ensemble Kalman Filter (EnKF)</span></span><span
-class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;color:windowtext'>,
-the default, is a fast method that assumes variables’ distributions are
-unimodal and not skewed and is efficient under these conditions. The </span>Ensemble
-Transform Particle Filter (ETPF)</span><span class=Cdigo><span lang=EN-US
-style='font-family:"Arial",sans-serif;color:windowtext'> does not make
-assumptions about data distribution but is much slower than EnKF.</span></span></p>
+</span></span></span><span class=Cdigo><b><span lang=EN-US>Data assimilation
+algorithm</span></b></span><span class=Cdigo><span lang=EN-US style='font-family:
+"Arial",sans-serif;color:windowtext'>: choose the algorithm employed for data
+assimilation. The </span></span><span class=Cdigo><span lang=EN-US>Ensemble
+Kalman Filter (EnKF)</span></span><span class=Cdigo><span lang=EN-US
+style='font-family:"Arial",sans-serif;color:windowtext'>, the default, is a
+fast method that assumes variables’ distributions are unimodal and not skewed
+and is efficient under these conditions. The </span></span><span class=Cdigo><span
+lang=EN-US>Ensemble Transform Particle Filter (ETPF)</span></span><span
+class=Cdigo><span lang=EN-US style='font-family:"Arial",sans-serif;color:windowtext'>
+does not make assumptions about data distribution but is much slower than EnKF.</span></span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -1170,10 +1171,10 @@ required, including allowing for parallel run.</span></p>
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Use medians over means</span></b></span><span
+</span></span><span class=Cdigo><b><span lang=EN-US>Use median and comedian</span></b></span><span
 lang=EN-US>: if checked, replaces the default mean and variance statistics used
-for ensemble summarization by the median and MAD. This can be useful to handle
-significantly skewed variable distributions.</span></p>
+for ensemble summarization by the median and the comedian (or coMAD). This can
+be useful to handle significantly skewed variable distributions.</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
@@ -1197,7 +1198,7 @@ case.</span></p>
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Covariance file</span></b></span><span
+</span></span><span class=Cdigo><b><span lang=EN-US>Covariance/comedian file</span></b></span><span
 lang=EN-US>: the name of the CSV-formatted file containing the covariance
 matrix for the data to be used in DA. <a name="_Hlk189075893">The </a></span><span
 class=Cdigo><span lang=EN-US>Browse</span></span><span lang=EN-US> button can
@@ -1206,10 +1207,12 @@ lang=EN-US>.csv</span></span><span lang=EN-US> on the disk. </span><span
 lang=EN-US>If no file name is provided (blank), the default, data assimilation
 is not performed, even if there are Variables configured for DA. The CSV file
 must have Variable names on both the first line and the first column. The
-covariance matrix must be symmetrical and semi-positive defined. All Variables
-set for DA must be present in the table. If an exact match for the name of the
-Variable is not present, the same name used for the <a
-href="browser.html#assimilation">data column selection</a>, if any, is used.</span></p>
+covariance matrix must be symmetrical and semi-positive defined. If the </span><span
+class=Cdigo>Use median and comedian</span><span lang=EN-US> option is checked,
+a comedian (or coMAD) matrix may be provided. All Variables set for DA must be
+present in the table. If an exact match for the name of the Variable is not
+present, the same name used for the <a href="browser.html#assimilation">data
+column selection</a>, if any, is used.</span></p>
 
 <p><span lang=EN-US>These options are only saved to the </span><span
 class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> <a
@@ -1367,8 +1370,8 @@ Log</a> the list of the <a href="LSD_faqs.html#variable">Variables</a> and <a
 href="LSD_faqs.html#parameter">Parameters</a> marked to be used in <a
 href="LSD_faqs.html#sa">sensitivity analysis</a> options. These are the
 elements with the <a href="browser.html#variables">option</a> </span><span
-class=Cdigo><span lang=EN-US>Sensitivity</span></span><span lang=EN-US>
-configured to define a set or a range of values for the sensitivity analysis.</span></p>
+class=Cdigo><span lang=EN-US>Sensitivity</span></span><span lang=EN-US> configured
+to define a set or a range of values for the sensitivity analysis.</span></p>
 
 <h2><a name="_Show_Elements_to_7"></a><span lang=EN-US>Show Elements to Data
 Assimilation</span></h2>
