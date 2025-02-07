@@ -2581,12 +2581,14 @@ lsd::object *gui::operate( lsd::object *r )
 			itmp[ 1 ] = da.disable;
 			itmp[ 2 ] = da.cov_ignore;
 			itmp[ 3 ] = da.med_stats;
-			itmp[ 4 ] = da.sav_fcts;
+			itmp[ 4 ] = da.sav_anl;
+			itmp[ 5 ] = da.sav_fct;
 
 			Tcl_LinkVar( interp, "disable", ( char * ) & da.disable, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "cov_ignore", ( char * ) & da.cov_ignore, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "med_stats", ( char * ) & da.med_stats, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "sav_fcts", ( char * ) & da.sav_fcts, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "sav_anl", ( char * ) & da.sav_anl, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "sav_fct", ( char * ) & da.sav_fct, TCL_LINK_INT );
 
 			cmd( "set algorithm \"%s\"", da.algo_names[ da.algorithm ] );
 			cmd( "set cov_file \"%s\"", da.cov_file != NULL ? da.cov_file : "" );
@@ -2605,7 +2607,8 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $T.c" );
 			cmd( "ttk::checkbutton $T.c.dis -text \"Disable data assimilation\" -variable disable" );
 			cmd( "ttk::checkbutton $T.c.med -text \"Use median and comedian\" -variable med_stats" );
-			cmd( "ttk::checkbutton $T.c.fct -text \"Save intermediary forecasts\" -variable sav_fcts" );
+			cmd( "ttk::checkbutton $T.c.anl -text \"Save ensemble analysis\" -variable sav_anl" );
+			cmd( "ttk::checkbutton $T.c.fct -text \"Save intermediary forecast\" -variable sav_fct" );
 			cmd( "ttk::checkbutton $T.c.ncov -text \"Ignore data covariance\" -variable cov_ignore -command { \
 					if { $cov_ignore } { \
 						$T.csv.file.e configure -state disabled; \
@@ -2615,7 +2618,7 @@ lsd::object *gui::operate( lsd::object *r )
 						$T.csv.file.brw configure -state normal \
 					} \
 				}" );
-			cmd( "pack $T.c.dis $T.c.med $T.c.fct $T.c.ncov -anchor w" );
+			cmd( "pack $T.c.dis $T.c.med $T.c.anl $T.c.fct $T.c.ncov -anchor w" );
 
 			cmd( "ttk::frame $T.csv" );
 			cmd( "ttk::frame $T.csv.l" );
@@ -2656,19 +2659,21 @@ lsd::object *gui::operate( lsd::object *r )
 			Tcl_UnlinkVar( interp, "disable" );
 			Tcl_UnlinkVar( interp, "cov_ignore" );
 			Tcl_UnlinkVar( interp, "med_stats" );
-			Tcl_UnlinkVar( interp, "sav_fcts" );
+			Tcl_UnlinkVar( interp, "sav_anl" );
+			Tcl_UnlinkVar( interp, "sav_fct" );
 
 			if ( choice == 2 )	// escape - revert previous values
 			{
 				da.disable = itmp[ 1 ];
 				da.cov_ignore = itmp[ 2 ];
 				da.med_stats = itmp[ 3 ];
-				da.sav_fcts = itmp[ 4 ];
+				da.sav_anl = itmp[ 4 ];
+				da.sav_fct = itmp[ 5 ];
 			}
 			else
 			{
 				// signal unsaved change if anything to be saved
-				if ( itmp[ 1 ] != da.disable || itmp[ 2 ] != da.cov_ignore || itmp[ 3 ] != da.med_stats || itmp[ 4 ] != da.sav_fcts )
+				if ( itmp[ 1 ] != da.disable || itmp[ 2 ] != da.cov_ignore || itmp[ 3 ] != da.med_stats || itmp[ 4 ] != da.sav_anl || itmp[ 5 ] != da.sav_fct )
 					unsaved_change( true );
 
 				// identify selected algorithm

@@ -153,7 +153,8 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 			da->disable = setNode.child( "data_assimilation" ).attribute( "disable", hint ).as_bool( );
 			da->cov_ignore = setNode.child( "data_assimilation" ).attribute( "ignore_covariance", hint ).as_bool( );
 			da->med_stats = setNode.child( "data_assimilation" ).attribute( "median_statistics", hint ).as_bool( );
-			da->sav_fcts = setNode.child( "data_assimilation" ).attribute( "save_forecasts", hint ).as_bool( );
+			da->sav_anl = setNode.child( "data_assimilation" ).attribute( "save_analysis", hint ).as_bool( );
+			da->sav_fct = setNode.child( "data_assimilation" ).attribute( "save_forecast", hint ).as_bool( );
 			da->algorithm = setNode.child( "data_assimilation" ).attribute( "algorithm", hint ).as_uint( );
 			if ( ( i = strlen( setNode.child( "data_assimilation" ).attribute( "covariance_file", hint ).as_string( ) ) ) > 0 )
 			{
@@ -816,8 +817,11 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 		if ( da->med_stats )
 			assimNode.append_attribute( "median_statistics" ) = true;
 
-		if ( da->sav_fcts )
-			assimNode.append_attribute( "save_forecasts" ) = true;
+		if ( da->sav_anl )
+			assimNode.append_attribute( "save_analysis" ) = true;
+
+		if ( da->sav_fct )
+			assimNode.append_attribute( "save_forecast" ) = true;
 
 		if ( da->algorithm != 0 )
 			assimNode.append_attribute( "algorithm" ) = da->algorithm;

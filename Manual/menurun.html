@@ -545,10 +545,10 @@ configuration plus an integer number equal to the seed used for the
 pseudo-random number generator, separated by an underscore character. LSD
 creates one results file (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
 lang=EN-US> extension) per run. A multi-run, single totals file (</span><span
-class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span lang=EN-US> extension)
-may be also produced, including as many lines as the number of runs. Each line
-of this file contains the values of the saved elements at the very last time
-step of each simulation.</span></p>
+class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span lang=EN-US>
+extension) may be also produced, including as many lines as the number of runs.
+Each line of this file contains the values of the saved elements at the very
+last time step of each simulation.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Log text files (</span><span class=Cdigo><span
 lang=EN-US>.log</span></span><span lang=EN-US> extension) are also temporarily
@@ -730,8 +730,8 @@ model configuration does not use parallel object computation (see details <a
 href="menumodel.html">here</a>), this option has no effect.</span></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Skip generating results
 files</span></b></span><span lang=EN-US>: if enabled, LSD will not produce the
 time-series detailed </span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
@@ -910,10 +910,10 @@ lang=EN-US>make</span></span><span lang=EN-US>), adjust the script properties (<
 class=Cdigo><span lang=EN-US>chmod +x SCRIPT.sh</span></span><span lang=EN-US>,
 replacing </span><span class=Cdigo><span lang=EN-US>SCRIPT</span></span><span
 lang=EN-US> with the name chosen before) and execute it (</span><span
-class=Cdigo><span lang=EN-US>./SCRIPT.sh</span></span><span lang=EN-US>). If
-the paths in the server are not exactly the same as in the computer you
-generated the script, you may have to edit the lines 4 and 5 of the script file
-(be careful to not remove the </span><span class=Cdigo><span lang=EN-US>nice</span></span><span
+class=Cdigo><span lang=EN-US>./SCRIPT.sh</span></span><span lang=EN-US>). If the
+paths in the server are not exactly the same as in the computer you generated
+the script, you may have to edit the lines 4 and 5 of the script file (be
+careful to not remove the </span><span class=Cdigo><span lang=EN-US>nice</span></span><span
 lang=EN-US> prefix to the LSD terminal executable path) or pass the correct
 paths as parameters to the script </span><span class=Cdigo><span lang=EN-US>(./SCRIPT.sh
 'nice /FULL-PATH-TO-EXEC/lsd_term' /FULL-PATH-TO-CONFIGS</span></span><span
@@ -1138,7 +1138,7 @@ assimilation</a> (DA) options to be applied during run time, using the
 interface below.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=284 height=238 src="image/da_settings.png"></span></p>
+width=284 height=257 src="image/da_settings.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available options in the Data
 Assimilation Settings window are:</span></p>
@@ -1179,10 +1179,20 @@ be useful to handle significantly skewed variable distributions.</span></p>
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Save intermediary forecasts</span></b></span><span
-lang=EN-US>: by default, LSD saves only the final estimation of Variables and
-Parameters, after DA analysis. If checked, the intermediary model forecast
-values used by the DA algorithm are also saved.</span></p>
+</span></span><span class=Cdigo><b><span lang=EN-US>Save ensemble analysis</span></b></span><span
+lang=EN-US>: by default, LSD saves only the final individual estimations, after
+DA analysis, of Variables and Parameters for each Monte Carlo (MC) run of the
+ensemble. If checked, the estimated model analysis values for the ensemble, are
+also saved.</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Save intermediary forecast</span></b></span><span
+lang=EN-US>: by default, LSD saves only the final individual estimations, after
+DA analysis, of Variables and Parameters for each Monte Carlo (MC) run of the
+ensemble. If checked, the intermediary model forecast values for the ensemble,
+which are used as an intermediary step by the DA algorithm, are also saved.</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
@@ -1208,11 +1218,11 @@ lang=EN-US>If no file name is provided (blank), the default, data assimilation
 is not performed, even if there are Variables configured for DA. The CSV file
 must have Variable names on both the first line and the first column. The
 covariance matrix must be symmetrical and semi-positive defined. If the </span><span
-class=Cdigo>Use median and comedian</span><span lang=EN-US> option is checked,
-a comedian (or coMAD) matrix may be provided. All Variables set for DA must be
-present in the table. If an exact match for the name of the Variable is not
-present, the same name used for the <a href="browser.html#assimilation">data
-column selection</a>, if any, is used.</span></p>
+class=Cdigo><span lang=EN-US>Use median and comedian</span></span><span
+lang=EN-US> option is checked, a comedian (or coMAD) matrix may be provided.
+All Variables set for DA must be present in the table. If an exact match for
+the name of the Variable is not present, the same name used for the <a
+href="browser.html#assimilation">data column selection</a>, if any, is used.</span></p>
 
 <p><span lang=EN-US>These options are only saved to the </span><span
 class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> <a
@@ -1370,8 +1380,8 @@ Log</a> the list of the <a href="LSD_faqs.html#variable">Variables</a> and <a
 href="LSD_faqs.html#parameter">Parameters</a> marked to be used in <a
 href="LSD_faqs.html#sa">sensitivity analysis</a> options. These are the
 elements with the <a href="browser.html#variables">option</a> </span><span
-class=Cdigo><span lang=EN-US>Sensitivity</span></span><span lang=EN-US> configured
-to define a set or a range of values for the sensitivity analysis.</span></p>
+class=Cdigo><span lang=EN-US>Sensitivity</span></span><span lang=EN-US>
+configured to define a set or a range of values for the sensitivity analysis.</span></p>
 
 <h2><a name="_Show_Elements_to_7"></a><span lang=EN-US>Show Elements to Data
 Assimilation</span></h2>
