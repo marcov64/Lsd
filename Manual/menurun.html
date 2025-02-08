@@ -322,29 +322,66 @@ Variable set for run-time plotting. </span></p>
 class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> <a
 href="LSD_faqs.html#modelsetting">configuration file</a>), LSD will request the
 user to confirm the updating of the </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
-lang=EN-US> configuration file before proceeding. If not explicitly unmarked by
-the user, LSD will overwrite the current configuration file with the pending
-changes. See below for details on this option.</span></p>
+lang=EN-US> configuration file before proceeding if a single run is configured.
+If not explicitly unmarked by the user, LSD will overwrite the current
+configuration file with the pending changes. If more than one run is
+configured, the configuration will be saved except if the button </span><span
+class=Cdigo><span lang=EN-US>Cancel</span></span><span lang=EN-US> is pressed.
+See below for details on this option.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>If a single simulation run is configured
-(the default) the simulation run results are stored in memory only. After the
-simulation run is finished, the user has the option of saving results to a file
-using the command </span><span class=Cdigo><span lang=EN-US><a
+(the default) the simulation run results are stored in memory only. The same
+apply to <a href="browser.html#assimilation">data assimilation</a> (DA)
+ensemble results (for data, forecast, and analysis series). After the
+simulation run is finished, the user has the option of saving these results to
+a file using the command </span><span class=Cdigo><span lang=EN-US><a
 href="menufile.html#saveresults">File&gt;Save Results</a></span></span><span
 lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>If there are multiple simulation runs
 configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
-Settings</span></span><span lang=EN-US> menu entry, but <a
-href="browser.html#assimilation">data assimilation</a> is not configured, LSD
-issues a confirmation message (see example below), telling how the results data
-will be stored and providing some options to the user. </span></p>
+Settings</span></span><span lang=EN-US> menu entry, LSD presents information and
+options on how data is saved to disk. The examples below show the slightly
+different cases of regular multi-run simulations (left) and data assimilation
+ones (right). The presented information describes the name of the </span><span
+class=Cdigo><span lang=EN-US>Model configuration</span></span><span lang=EN-US>
+being used for the simulation, the number of </span><span class=Cdigo><span
+lang=EN-US>Cases</span></span><span lang=EN-US> (time steps) being executed,
+the </span><span class=Cdigo><span lang=EN-US>Number of simulations</span></span><span
+lang=EN-US> or the (DA) </span><span class=Cdigo><span lang=EN-US>Ensemble size</span></span><span
+lang=EN-US> to be processed, the </span><span class=Cdigo><span lang=EN-US>Output
+path</span></span><span lang=EN-US> where all the produced files will be
+stored, the sequential names of the first and the last </span><span
+class=Cdigo><span lang=EN-US>Result files</span></span><span lang=EN-US> being
+created, if selected, and the name of the </span><span class=Cdigo><span
+lang=EN-US>Totals file</span></span><span lang=EN-US> summarizing the results,
+if enabled.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=196 height=407 src="image/summary_run.png"></span></p>
+width=196 height=407 src="image/summary_run.png"></span><span lang=EN-US>            
+</span><span lang=EN-US><img border=0 width=196 height=440
+src="image/summary_run_da.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available checkbox options are (some
 may not be available according to the circumstance):</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Save assimilation data</span></b></span><span
+lang=EN-US> (data assimilation only): by default, LSD saves to memory only the
+estimated model analysis Monte Carlo (MC) values for the ensemble of Variables
+and Parameters. If checked, the observational data used for the DA analysis is
+also saved.</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Save assimilation forecasts</span></b></span><span
+lang=EN-US> (data assimilation only): by default, LSD saves to memory only the
+estimated model analysis MC. If checked, the intermediary model forecast values
+for the ensemble, which are used as an intermediary step by the DA algorithm,
+are also saved.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -363,13 +400,15 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><span class=Cdigo><b><span lang=EN-US>Skip generating results
 files</span></b></span><span lang=EN-US>: if enabled, LSD will not produce the
 time-series detailed </span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
-lang=EN-US> results files.</span></p>
+lang=EN-US> results files. For regular runs, this means only the results of the
+last simulation run are saved to memory. For DA runs, only the DA analysis
+results are saved to memory.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Skip generating totals file</span></b></span><span
-lang=EN-US>: if enabled, LSD will not produce the summarized </span><span
+lang=EN-US>: if enabled, the default, LSD will not produce the summarizing </span><span
 class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span lang=EN-US> totals
 file.</span></p>
 
@@ -390,14 +429,14 @@ uncompressing them before use.</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Comma-separated text format
 (.csv)</span></b></span><span lang=EN-US>: if checked, all produced files will
-be saved in comma-separated text format (extension </span><span class=Cdigo><span
-lang=EN-US>.csv</span></span><span lang=EN-US>), which can be imported by
-almost any data application. Please note that </span><span class=Cdigo><span
-lang=EN-US>.csv</span></span><span lang=EN-US> files do not contain the same
-level of detail as native LSD </span><span class=Cdigo><span lang=EN-US>.res</span></span><span
-lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>.tot</span></span><span
-lang=EN-US> formats and so cannot be used by the <a href="menudata_res.html">Analysis
-of Results</a> module. </span></p>
+be saved in CSV comma-separated text format (extension </span><span
+class=Cdigo><span lang=EN-US>.csv</span></span><span lang=EN-US>), which can be
+imported by almost any data application. Please note that </span><span
+class=Cdigo><span lang=EN-US>.csv</span></span><span lang=EN-US> files do not
+contain the same level of detail as native LSD </span><span class=Cdigo><span
+lang=EN-US>.res</span></span><span lang=EN-US> or </span><span class=Cdigo><span
+lang=EN-US>.tot</span></span><span lang=EN-US> formats and so cannot be used by
+the <a href="menudata_res.html">Analysis of Results</a> module. </span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -414,15 +453,19 @@ to existing totals file</span></span><span lang=EN-US> option.</span></p>
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Update configuration file</span></b></span><span
-lang=EN-US>: if selected (default), the unsaved changes will be saved to the
-current </span><span class=Cdigo><span lang=EN-US>.lsd</span></span><span
-lang=EN-US> <a href="LSD_faqs.html#modelsetting">configuration file</a> before
-simulation is executed. Please note that changes will be lost if this checkbox
-is unmarked and the user press </span><span class=Cdigo><span lang=EN-US>OK</span></span><span
-lang=EN-US>. </span></p>
+lang=EN-US> (read-only): this option cannot be changed because the
+configuration must be saved to disk when running multi-run simulations.
+However, it indicates if the current configuration file is going to be
+overwritten. If marked, the unsaved changes will be saved to the current </span><span
+class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> <a
+href="LSD_faqs.html#modelsetting">configuration file</a> before simulation is
+executed. Please press </span><span class=Cdigo><span lang=EN-US>Cancel</span></span><span
+lang=EN-US> to avoid the current configuration being overwritten or press </span><span
+class=Cdigo><span lang=EN-US>OK</span></span><span lang=EN-US> to proceed and
+update the configuration and run the simulation. </span></p>
 
 <p class=MsoNormal><span lang=EN-US>When multiple simulation runs are
-configured, at the end of each simulation run the results are saved to LSD
+configured, at the end of each simulation run the results may be saved to LSD
 results and totals files (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
 lang=EN-US>, </span><span class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span
 lang=EN-US> or </span><span class=Cdigo><span lang=EN-US>.csv</span></span><span
@@ -441,20 +484,9 @@ seed used for the pseudo-random number generator, separated by an underscore.</s
 results file (</span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
 lang=EN-US> extension) per run. A multi-run, single totals file (</span><span
 class=Cdigo><span lang=EN-US>.tot[.gz]</span></span><span lang=EN-US>
-extension) is also produced, including as many lines as the number of runs.
-Each line of this file contains the values of the saved elements at the very
-last time step of each simulation. This file can be used, for instance, to
-perform robustness tests over the whole set of simulation runs.</span></p>
-
-<p class=MsoNormal><span lang=EN-US>Please note that if there are <a
-href="LSD_faqs.html#variable">Variables</a> set for the <a href="runtime.html">LSD
-Run-time Plot</a> during multiple runs, there will be as many plots as
-simulation runs, possibly crowding the computer desktop with dozens of windows.
-Please <a href="#_Remove_Plot_Flags">remove the run-time plot flags</a> from
-all variables, before running the simulation, if this is not desired or use the
-command </span><span class=Cdigo><span lang=EN-US><a
-href="#_Close_Run-time_Plots">Run&gt;Close Run-time Plots</a></span></span><span
-lang=EN-US>, after the simulation is run, to close all the opened windows.</span></p>
+extension) may be also produced, including as many lines of text data as the
+number of runs. Each line of this file contains the values of the saved
+elements at the very last time step of each simulation.</span></p>
 
 <h2><a name="_Start_‘No_Window’"></a><a name=batch></a><span lang=EN-US>Parallel
 Run</span></h2>
@@ -466,7 +498,8 @@ lang=EN-US> command above, the simulation is directly executed directly by the
 operating system. This option also allows the execution of multi-run
 simulations in parallel, producing faster results by using the full
 capabilities of your computer. This option is not valid when <a
-href="browser.html#assimilation">data assimilation</a> is configured to run.</span></p>
+href="browser.html#assimilation">data assimilation</a> is configured to run, as
+it always processes ensemble runs in parallel.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>Because the background simulation run is
 performed independently from LSD, the execution progress is not shown in the <a
@@ -730,8 +763,8 @@ model configuration does not use parallel object computation (see details <a
 href="menumodel.html">here</a>), this option has no effect.</span></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Skip generating results
 files</span></b></span><span lang=EN-US>: if enabled, LSD will not produce the
 time-series detailed </span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
@@ -910,10 +943,10 @@ lang=EN-US>make</span></span><span lang=EN-US>), adjust the script properties (<
 class=Cdigo><span lang=EN-US>chmod +x SCRIPT.sh</span></span><span lang=EN-US>,
 replacing </span><span class=Cdigo><span lang=EN-US>SCRIPT</span></span><span
 lang=EN-US> with the name chosen before) and execute it (</span><span
-class=Cdigo><span lang=EN-US>./SCRIPT.sh</span></span><span lang=EN-US>). If the
-paths in the server are not exactly the same as in the computer you generated
-the script, you may have to edit the lines 4 and 5 of the script file (be
-careful to not remove the </span><span class=Cdigo><span lang=EN-US>nice</span></span><span
+class=Cdigo><span lang=EN-US>./SCRIPT.sh</span></span><span lang=EN-US>). If
+the paths in the server are not exactly the same as in the computer you
+generated the script, you may have to edit the lines 4 and 5 of the script file
+(be careful to not remove the </span><span class=Cdigo><span lang=EN-US>nice</span></span><span
 lang=EN-US> prefix to the LSD terminal executable path) or pass the correct
 paths as parameters to the script </span><span class=Cdigo><span lang=EN-US>(./SCRIPT.sh
 'nice /FULL-PATH-TO-EXEC/lsd_term' /FULL-PATH-TO-CONFIGS</span></span><span
@@ -1102,16 +1135,16 @@ class=Cdigo><span lang=EN-US>cur1</span></span><span lang=EN-US>, …) used in
 Macros for validity, equivalently to using Macro </span><span class=Cdigo><span
 lang=EN-US><a href="LSD_macros.html#POINTER_CHECK">NO_POINTER_CHECK</a></span></span><span
 lang=EN-US> at the beginning of the simulation code. However, </span><span
-class=Cdigo><span lang=EN-US>NULL</span></span><span lang=EN-US>-pointer
-detection is enabled even when this option is set. Pointer checking may have
-significant performance impact for some models, particularly when parallel
-computation is used (see <a href="browser.html#changeelement">here</a>).
-Despite speeding up the simulation, it is recommended that this option be only
-used after the model code is fully debugged. If statement </span><span
-class=Cdigo><span lang=EN-US>#define NO_POINTER_CHECK</span></span><span
-lang=EN-US> is used at the beginning of the equation file, this option becomes
-unavailable (and pointer checking is fully disabled, including for </span><span
-class=Cdigo><span lang=EN-US>NULL</span></span><span lang=EN-US> pointers).</span></p>
+class=Cdigo><span lang=EN-US>NULL</span></span><span lang=EN-US>-pointer detection
+is enabled even when this option is set. Pointer checking may have significant
+performance impact for some models, particularly when parallel computation is
+used (see <a href="browser.html#changeelement">here</a>). Despite speeding up
+the simulation, it is recommended that this option be only used after the model
+code is fully debugged. If statement </span><span class=Cdigo><span lang=EN-US>#define
+NO_POINTER_CHECK</span></span><span lang=EN-US> is used at the beginning of the
+equation file, this option becomes unavailable (and pointer checking is fully
+disabled, including for </span><span class=Cdigo><span lang=EN-US>NULL</span></span><span
+lang=EN-US> pointers).</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><a name="_Frequent_Lattice_Updating"></a><span
@@ -1138,7 +1171,7 @@ assimilation</a> (DA) options to be applied during run time, using the
 interface below.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=284 height=257 src="image/da_settings.png"></span></p>
+width=284 height=223 src="image/da_settings.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available options in the Data
 Assimilation Settings window are:</span></p>
@@ -1175,24 +1208,6 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 lang=EN-US>: if checked, replaces the default mean and variance statistics used
 for ensemble summarization by the median and the comedian (or coMAD). This can
 be useful to handle significantly skewed variable distributions.</span></p>
-
-<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Save ensemble analysis</span></b></span><span
-lang=EN-US>: by default, LSD saves only the final individual estimations, after
-DA analysis, of Variables and Parameters for each Monte Carlo (MC) run of the
-ensemble. If checked, the estimated model analysis values for the ensemble, are
-also saved.</span></p>
-
-<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Save intermediary forecast</span></b></span><span
-lang=EN-US>: by default, LSD saves only the final individual estimations, after
-DA analysis, of Variables and Parameters for each Monte Carlo (MC) run of the
-ensemble. If checked, the intermediary model forecast values for the ensemble,
-which are used as an intermediary step by the DA algorithm, are also saved.</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span

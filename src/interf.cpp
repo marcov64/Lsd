@@ -44,7 +44,7 @@ namespace gui
  *************************************************************/
 lsd::object *gui::operate( lsd::object *r )
 {
-	bool observe, initial, saveAs, delVar, renVar, table, subDir, overwDir;
+	bool observe, initial, da_run, saveAs, delVar, renVar, table, subDir, overwDir;
 	char deb_mode, *lab0, lab[ MAX_BUFF_SIZE ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_LINE_SIZE ], ch1[ MAX_ELEM_LENGTH ], NOLHfile[ MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], term_exe[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ], buf_descr[ MAX_BUFF_SIZE ];
 	const char *lab1, *lab2, *lab3, *lab4;
 	design *doe;
@@ -97,11 +97,16 @@ lsd::object *gui::operate( lsd::object *r )
 				break;
 			}
 
-			// invalid data assimilation settings
-			if ( da.count( 4 ) > 0 && ! da.disable && sim.last_run < 2 )
+			// check invalid data assimilation settings
+			da_run = da.count( 4 ) > 0 && ! da.disable;
+			if ( da_run && sim.last_run < 2 )
 			{
-				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid settings for data assimilation\" -detail \"The number of simulation runs is too small to perform data assimilation.\"" );
-				break;
+				cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Invalid settings for data assimilation\" -detail \"The number of simulation runs is too small to perform data assimilation.\n\nPress 'OK' to proceed and disable data assimilation or 'Cancel' to return to LSD Browser.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } }" );
+				if ( choice == 2 )
+					break;
+
+				da_run = false;
+				da.disable = true;
 			}
 
 			// warn about no variable/parameter being saved
@@ -110,7 +115,7 @@ lsd::object *gui::operate( lsd::object *r )
 			n->count_save( & sim.series_saved );
 			if ( sim.series_saved == 0 )
 			{
-				cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"If you proceed, there will be no data to be analyzed after the simulation is run. If this is not the intended behavior, please mark the variables and parameters to be saved before running the simulation.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } " );
+				cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"If you proceed, there will be no data to be analyzed after the simulation is run. If this is not the intended behavior, please mark the variables and parameters to be saved before running the simulation.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } }" );
 				if ( choice == 2 )
 					break;
 			}
@@ -132,12 +137,14 @@ lsd::object *gui::operate( lsd::object *r )
 			overwConf = unsaved_change( ) ? true : false;
 
 			// avoid showing dialog if configuration already saved and nothing to save to disk
-			if ( ! overwConf && sim.last_run == 1 && ( da.count( 4 ) == 0 || da.disable ) )
+			if ( ! overwConf && ! da_run && sim.last_run == 1 )
 				goto run;
 
 			// remove any custom save path (save to current by default)
 			sim.results_alt_path( "" );
 
+			Tcl_LinkVar( interp, "sav_dat", ( char * ) & da.sav_dat, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "sav_fct", ( char * ) & da.sav_fct, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "no_res", ( char * ) & sim.no_res, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "no_tot", ( char * ) & sim.no_tot, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "add_to_tot", ( char * ) & sim.add_to_tot, TCL_LINK_BOOLEAN );
@@ -169,147 +176,142 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::label $T.f2.t.w -text \"%d\" -style hl.TLabel", sim.last_t );
 			cmd( "pack $T.f2.t.l $T.f2.t.w -side left -padx $_2" );
 
-			if ( da.count( 4 ) == 0 || da.disable )			// regular run?
+			if ( sim.last_run == 1 )					// single run
 			{
-				if ( sim.last_run == 1 )					// single run
-				{
-					subDir = overwDir = false;
-
-					cmd( "pack $T.f2.t" );
-
-					cmd( "ttk::label $T.f4 -text \"(results will be saved to memory only)\"" );
-
-					cmd( "ttk::checkbutton $T.f6 -text \"Update configuration file\" -variable overwConf -state %s", overwConf ? "normal" : "disabled" );
-
-					cmd( "pack $T.f1 $T.f2 $T.f4 $T.f6 -padx $_5 -pady $_5" );
-				}
-				else										// MC multi-run
-				{
-					// detect the need of a new save path and if it has results files
-					subDir = need_res_dir( sim.conf_path, sim.conf_name, out_dir, MAX_PATH_LENGTH );
-					overwDir = check_res_dir( out_dir );
-
-					cmd( "ttk::frame $T.f2.n" );
-					cmd( "ttk::label $T.f2.n.l -text \"Number of simulations:\"" );
-					cmd( "ttk::label $T.f2.n.w -text \"%d\" -style hl.TLabel", sim.last_run );
-					cmd( "pack $T.f2.n.l $T.f2.n.w -side left -padx $_2" );
-
-					cmd( "pack $T.f2.t $T.f2.n" );
-
-					cmd( "ttk::frame $T.f3" );
-					cmd( "ttk::label $T.f3.l -text \"Output path\"" );
-					cmd( "ttk::label $T.f3.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", out_dir );
-					cmd( "pack $T.f3.l $T.f3.w" );
-
-					cmd( "ttk::frame $T.f4" );
-					cmd( "ttk::label $T.f4.l -text \"Results files\"" );
-
-					cmd( "ttk::frame $T.f4.w" );
-
-					cmd( "ttk::frame $T.f4.w.l1" );
-					cmd( "ttk::label $T.f4.w.l1.l -text \"from:\"" );
-					cmd( "ttk::label $T.f4.w.l1.w -style hl.TLabel -text \"$firstFile.$resExt$zipExt\"" );
-					cmd( "pack $T.f4.w.l1.l $T.f4.w.l1.w -side left -padx $_2" );
-
-					cmd( "ttk::frame $T.f4.w.l2" );
-					cmd( "ttk::label $T.f4.w.l2.l -text \"to:\"" );
-					cmd( "ttk::label $T.f4.w.l2.w -style hl.TLabel -text \"$lastFile.$resExt$zipExt\"" );
-					cmd( "pack $T.f4.w.l2.l $T.f4.w.l2.w -side left -padx $_2" );
-
-					cmd( "pack $T.f4.w.l1 $T.f4.w.l2" );
-
-					cmd( "pack $T.f4.l $T.f4.w" );
-
-					cmd( "set choice [ expr { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } ]", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
-
-					cmd( "ttk::frame $T.f5" );
-					cmd( "ttk::label $T.f5.l1 -text \"Totals file (last steps)\"" );
-					cmd( "ttk::label $T.f5.l2 -style %s -text \"$totFile.$totExt$zipExt\"", choice ? "hl.TLabel" : "dhl.TLabel" );
-
-					if ( choice )
-						cmd( "ttk::label $T.f5.l3 -text $tot_msg_warn" );
-					else
-						cmd( "ttk::label $T.f5.l3 -text \"\"" );
-
-					cmd( "pack $T.f5.l1 $T.f5.l2 $T.f5.l3" );
-
-					sim.add_to_tot = ( choice ) ? sim.add_to_tot : false;
-
-					cmd( "ttk::frame $T.f6" );
-					cmd( "ttk::checkbutton $T.f6.a -text \"Append to existing totals file\" -variable add_to_tot -state %s -command { \
-							if { $add_to_tot && $doover } { \
-								set doover 0 \
-							} \
-						}", ( choice && ! sim.no_tot ) ? "normal" : "disabled" );
-					cmd( "ttk::checkbutton $T.f6.b -text \"Skip generating results files\" -variable no_res" );
-					cmd( "ttk::checkbutton $T.f6.b1 -text \"Skip generating totals file\" -variable no_tot -command { \
-							if { ! $no_tot } { \
-								$T.f5.l2 configure -style hl.TLabel; \
-								if { [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
-									$T.f5.l3 configure -text $tot_msg_warn; \
-									$T.f6.a configure -state normal \
-								} else { \
-									$T.f5.l3 configure -text \"\"; \
-								} \
-							} else { \
-								$T.f5.l2 configure -style dhl.TLabel; \
-								$T.f5.l3 configure -text \"\"; \
-								$T.f6.a configure -state disabled \
-							} \
-						}", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
-					cmd( "ttk::checkbutton $T.f6.c -text \"Generate zipped files\" -variable dozip -command { \
-						if $dozip { set zipExt \".gz\" } { \
-							set zipExt \"\" }; \
-							$T.f4.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
-							$T.f4.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
-							$T.f5.l2 configure -text \"$totFile.$totExt$zipExt\"; \
-							if { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
-								$T.f5.l3 configure -text $tot_msg_warn; \
-								$T.f6.a configure -state normal \
-							} else { \
-								$T.f5.l3 configure -text \"\"; \
-								$T.f6.a configure -state disabled \
-							} \
-						}", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
-					cmd( "ttk::checkbutton $T.f6.d -text \"Comma-separated text format (.csv)\" -variable docsv -command { \
-						if $docsv { \
-							set resExt csv; set totExt csv \
-						} else { \
-							set resExt res; \
-							set totExt tot }; \
-							$T.f4.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
-							$T.f4.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
-							$T.f5.l2 configure -text \"$totFile.$totExt$zipExt\"; \
-							if { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
-								$T.f5.l3 configure -text $tot_msg_warn; \
-								$T.f6.a configure -state normal \
-							} else { \
-								$T.f5.l3 configure -text \"\"; \
-								$T.f6.a configure -state disabled \
-							} \
-						}", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
-					cmd( "ttk::checkbutton $T.f6.o -text \"Clear output path before run\" -variable doover -state %s -command { \
-							if { $add_to_tot && $doover } { \
-								set add_to_tot 0 \
-							} \
-						}", overwDir ? "normal" : "disabled" );
-					cmd( "ttk::checkbutton $T.f6.e -text \"Update configuration file\" -variable overwConf -state %s", overwConf ? "normal" : "disabled" );
-					cmd( "pack $T.f6.a $T.f6.b $T.f6.b1 $T.f6.c $T.f6.d $T.f6.o $T.f6.e -anchor w" );
-
-					cmd( "pack $T.f1 $T.f2 $T.f3 $T.f4 $T.f5 $T.f6 -padx $_5 -pady $_5" );
-				}
-			}
-			else											// data assimilation
-			{
-				subDir = false;
+				subDir = overwDir = false;
 
 				cmd( "pack $T.f2.t" );
 
-				cmd( "ttk::label $T.f4 -text \"(results will be saved to memory only)\n Data Assimilation\"" );
+				cmd( "ttk::label $T.f4 -text \"(results will be saved to memory only)\"" );
 
 				cmd( "ttk::checkbutton $T.f6 -text \"Update configuration file\" -variable overwConf -state %s", overwConf ? "normal" : "disabled" );
 
 				cmd( "pack $T.f1 $T.f2 $T.f4 $T.f6 -padx $_5 -pady $_5" );
+			}
+			else										// MC multi-run
+			{
+				// detect the need of a new save path and if it has results files
+				subDir = need_res_dir( sim.conf_path, sim.conf_name, out_dir, MAX_PATH_LENGTH );
+				overwDir = check_res_dir( out_dir );
+
+				cmd( "ttk::frame $T.f2.n" );
+				cmd( "ttk::label $T.f2.n.l -text \"%s:\"", da_run ? "Ensemble size" : "Number of simulations" );
+				cmd( "ttk::label $T.f2.n.w -text \"%d\" -style hl.TLabel", sim.last_run );
+				cmd( "pack $T.f2.n.l $T.f2.n.w -side left -padx $_2" );
+
+				cmd( "pack $T.f2.t $T.f2.n" );
+
+				cmd( "ttk::frame $T.f3" );
+				cmd( "ttk::label $T.f3.l -text \"Output path\"" );
+				cmd( "ttk::label $T.f3.w -text [ fn_break [ file nativename \"%s\" ] 40 ] -justify center -style hl.TLabel", out_dir );
+				cmd( "pack $T.f3.l $T.f3.w" );
+
+				cmd( "ttk::frame $T.f4" );
+				cmd( "ttk::label $T.f4.l -text \"Results files\"" );
+
+				cmd( "ttk::frame $T.f4.w" );
+
+				cmd( "ttk::frame $T.f4.w.l1" );
+				cmd( "ttk::label $T.f4.w.l1.l -text \"from:\"" );
+				cmd( "ttk::label $T.f4.w.l1.w -style %s -text \"$firstFile.$resExt$zipExt\"", sim.no_res ? "dhl.TLabel" : "hl.TLabel" );
+				cmd( "pack $T.f4.w.l1.l $T.f4.w.l1.w -side left -padx $_2" );
+
+				cmd( "ttk::frame $T.f4.w.l2" );
+				cmd( "ttk::label $T.f4.w.l2.l -text \"to:\"" );
+				cmd( "ttk::label $T.f4.w.l2.w -style %s -text \"$lastFile.$resExt$zipExt\"", sim.no_res ? "dhl.TLabel" : "hl.TLabel" );
+				cmd( "pack $T.f4.w.l2.l $T.f4.w.l2.w -side left -padx $_2" );
+
+				cmd( "pack $T.f4.w.l1 $T.f4.w.l2" );
+
+				cmd( "pack $T.f4.l $T.f4.w" );
+
+				cmd( "set choice [ expr { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } ]", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
+
+				cmd( "ttk::frame $T.f5" );
+				cmd( "ttk::label $T.f5.l1 -text \"Totals file (last steps)\"" );
+				cmd( "ttk::label $T.f5.l2 -style %s -text \"$totFile.$totExt$zipExt\"", choice ? "hl.TLabel" : "dhl.TLabel" );
+
+				if ( choice )
+					cmd( "ttk::label $T.f5.l3 -text $tot_msg_warn" );
+				else
+					cmd( "ttk::label $T.f5.l3 -text \"\"" );
+
+				cmd( "pack $T.f5.l1 $T.f5.l2 $T.f5.l3" );
+
+				sim.add_to_tot = ( choice ) ? sim.add_to_tot : false;
+
+				cmd( "ttk::frame $T.f6" );
+				cmd( "ttk::checkbutton $T.f6.dat -text \"Keep assimilation data\" -variable sav_dat" );
+				cmd( "ttk::checkbutton $T.f6.fct -text \"Keep assimilation forecasts\" -variable sav_fct" );
+				cmd( "ttk::checkbutton $T.f6.a -text \"Append to existing totals file\" -variable add_to_tot -state %s -command { \
+						if { $add_to_tot && $doover } { \
+							set doover 0 \
+						} \
+					}", ( choice && ! sim.no_tot ) ? "normal" : "disabled" );
+				cmd( "ttk::checkbutton $T.f6.b -text \"Skip generating results files\" -variable no_res -command { \
+						if { ! $no_res } { \
+							$T.f4.w.l1.w configure -style hl.TLabel; \
+							$T.f4.w.l2.w configure -style hl.TLabel \
+						} else { \
+							$T.f4.w.l1.w configure -style dhl.TLabel; \
+							$T.f4.w.l2.w configure -style dhl.TLabel \
+						} \
+					}" );
+				cmd( "ttk::checkbutton $T.f6.b1 -text \"Skip generating totals file\" -variable no_tot -command { \
+						if { ! $no_tot } { \
+							$T.f5.l2 configure -style hl.TLabel; \
+							if { [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+								$T.f5.l3 configure -text $tot_msg_warn; \
+								$T.f6.a configure -state normal \
+							} else { \
+								$T.f5.l3 configure -text \"\"; \
+							} \
+						} else { \
+							$T.f5.l2 configure -style dhl.TLabel; \
+							$T.f5.l3 configure -text \"\"; \
+							$T.f6.a configure -state disabled \
+						} \
+					}", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
+				cmd( "ttk::checkbutton $T.f6.c -text \"Generate zipped files\" -variable dozip -command { \
+					if $dozip { set zipExt \".gz\" } { \
+						set zipExt \"\" }; \
+						$T.f4.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
+						$T.f4.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
+						$T.f5.l2 configure -text \"$totFile.$totExt$zipExt\"; \
+						if { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+							$T.f5.l3 configure -text $tot_msg_warn; \
+							$T.f6.a configure -state normal \
+						} else { \
+							$T.f5.l3 configure -text \"\"; \
+							$T.f6.a configure -state disabled \
+						} \
+					}", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
+				cmd( "ttk::checkbutton $T.f6.d -text \"Comma-separated text format (.csv)\" -variable docsv -command { \
+					if $docsv { \
+						set resExt csv; set totExt csv \
+					} else { \
+						set resExt res; \
+						set totExt tot }; \
+						$T.f4.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
+						$T.f4.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
+						$T.f5.l2 configure -text \"$totFile.$totExt$zipExt\"; \
+						if { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+							$T.f5.l3 configure -text $tot_msg_warn; \
+							$T.f6.a configure -state normal \
+						} else { \
+							$T.f5.l3 configure -text \"\"; \
+							$T.f6.a configure -state disabled \
+						} \
+					}", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
+				cmd( "ttk::checkbutton $T.f6.o -text \"Clear output path before run\" -variable doover -state %s -command { \
+						if { $add_to_tot && $doover } { \
+							set add_to_tot 0 \
+						} \
+					}", overwDir ? "normal" : "disabled" );
+				cmd( "ttk::checkbutton $T.f6.e -text \"Update configuration file\" -variable overwConf -state disabled" );
+				cmd( "pack %s $T.f6.a $T.f6.b $T.f6.b1 $T.f6.c $T.f6.d $T.f6.o $T.f6.e -anchor w", da_run ? "$T.f6.dat $T.f6.fct" : "" );
+
+				cmd( "pack $T.f1 $T.f2 $T.f3 $T.f4 $T.f5 $T.f6 -padx $_5 -pady $_5" );
 			}
 
 			cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#run } { set choice 2 }" );
@@ -323,6 +325,8 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "destroytop .run" );
 
+			Tcl_UnlinkVar( interp, "sav_dat" );
+			Tcl_UnlinkVar( interp, "sav_fct" );
 			Tcl_UnlinkVar( interp, "no_res" );
 			Tcl_UnlinkVar( interp, "no_tot" );
 			Tcl_UnlinkVar( interp, "add_to_tot" );
@@ -2581,14 +2585,10 @@ lsd::object *gui::operate( lsd::object *r )
 			itmp[ 1 ] = da.disable;
 			itmp[ 2 ] = da.cov_ignore;
 			itmp[ 3 ] = da.med_stats;
-			itmp[ 4 ] = da.sav_anl;
-			itmp[ 5 ] = da.sav_fct;
 
 			Tcl_LinkVar( interp, "disable", ( char * ) & da.disable, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "cov_ignore", ( char * ) & da.cov_ignore, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "med_stats", ( char * ) & da.med_stats, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "sav_anl", ( char * ) & da.sav_anl, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "sav_fct", ( char * ) & da.sav_fct, TCL_LINK_INT );
 
 			cmd( "set algorithm \"%s\"", da.algo_names[ da.algorithm ] );
 			cmd( "set cov_file \"%s\"", da.cov_file != NULL ? da.cov_file : "" );
@@ -2607,8 +2607,6 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $T.c" );
 			cmd( "ttk::checkbutton $T.c.dis -text \"Disable data assimilation\" -variable disable" );
 			cmd( "ttk::checkbutton $T.c.med -text \"Use median and comedian\" -variable med_stats" );
-			cmd( "ttk::checkbutton $T.c.anl -text \"Save ensemble analysis\" -variable sav_anl" );
-			cmd( "ttk::checkbutton $T.c.fct -text \"Save intermediary forecast\" -variable sav_fct" );
 			cmd( "ttk::checkbutton $T.c.ncov -text \"Ignore data covariance\" -variable cov_ignore -command { \
 					if { $cov_ignore } { \
 						$T.csv.file.e configure -state disabled; \
@@ -2618,7 +2616,7 @@ lsd::object *gui::operate( lsd::object *r )
 						$T.csv.file.brw configure -state normal \
 					} \
 				}" );
-			cmd( "pack $T.c.dis $T.c.med $T.c.anl $T.c.fct $T.c.ncov -anchor w" );
+			cmd( "pack $T.c.dis $T.c.med $T.c.ncov -anchor w" );
 
 			cmd( "ttk::frame $T.csv" );
 			cmd( "ttk::frame $T.csv.l" );
@@ -2659,21 +2657,17 @@ lsd::object *gui::operate( lsd::object *r )
 			Tcl_UnlinkVar( interp, "disable" );
 			Tcl_UnlinkVar( interp, "cov_ignore" );
 			Tcl_UnlinkVar( interp, "med_stats" );
-			Tcl_UnlinkVar( interp, "sav_anl" );
-			Tcl_UnlinkVar( interp, "sav_fct" );
 
 			if ( choice == 2 )	// escape - revert previous values
 			{
 				da.disable = itmp[ 1 ];
 				da.cov_ignore = itmp[ 2 ];
 				da.med_stats = itmp[ 3 ];
-				da.sav_anl = itmp[ 4 ];
-				da.sav_fct = itmp[ 5 ];
 			}
 			else
 			{
 				// signal unsaved change if anything to be saved
-				if ( itmp[ 1 ] != da.disable || itmp[ 2 ] != da.cov_ignore || itmp[ 3 ] != da.med_stats || itmp[ 4 ] != da.sav_anl || itmp[ 5 ] != da.sav_fct )
+				if ( itmp[ 1 ] != da.disable || itmp[ 2 ] != da.cov_ignore || itmp[ 3 ] != da.med_stats )
 					unsaved_change( true );
 
 				// identify selected algorithm

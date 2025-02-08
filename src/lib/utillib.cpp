@@ -130,7 +130,7 @@ void lsd::plog_tag_master( const char *cm, const char *tag, ... )
 {
 	static va_list argptr;
 
-	va_start( argptr, cm );
+	va_start( argptr, tag );
 
 	if ( sims.size( ) > 0 && sims[ 0 ] != NULL )
 	{

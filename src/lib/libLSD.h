@@ -1186,7 +1186,7 @@ class lsd::assimilation					// assimilation container class
 		int cov_ignore = false;			// ignore data covariance/virtual obs.
 		int disable = false;			// disable data assimilation
 		int med_stats = false;			// use median/MAD statistics (vs mean/SD)
-		int sav_anl = false;			// save analysis (ensemble) results
+		int sav_dat = false;			// save observational data
 		int sav_fct = false;			// save forecast (intermediary) results
 
 		const char *algo_names[ DA_ALGO_NUM ] = DA_ALGO_NAME;
