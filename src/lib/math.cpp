@@ -86,9 +86,30 @@ double lsd::equation::fact( double x )
 
 
 /*************************************************************
+ MEAN
+ *************************************************************/
+double lsd::equation::mean( d_vecT & v )
+{
+	if ( v.empty( ) )
+		return NAN;
+
+	return std::accumulate( v.begin( ), v.end( ), 0. ) / v.size( );
+}
+
+
+/*************************************************************
+ MED
+ *************************************************************/
+double lsd::equation::med( d_vecT & v )
+{
+	return median( v.begin( ), v.end( ) );
+}
+
+
+/*************************************************************
  MEDIAN
  *************************************************************/
-double lsd::simulation::median( d_vecT & v )
+double lsd::median( d_vecT & v )
 {
 	int mid;
 	double midVal;
@@ -106,6 +127,78 @@ double lsd::simulation::median( d_vecT & v )
 		return midVal;
 	else
 		return ( * max_element( v.begin( ), midPos ) + midVal ) / 2;
+}
+
+double lsd::median( d_vecT::iterator b, d_vecT::iterator e )
+{
+	d_vecT v( b, e );
+	return median( v );
+}
+
+
+/*************************************************************
+ SD
+ *************************************************************/
+double lsd::equation::sd( d_vecT & v )
+{
+	if ( v.empty( ) )
+		return NAN;
+
+	d_vecT d( v.size( ) );
+	double m = mean( v );
+	std::transform( v.begin( ), v.end( ), d.begin( ), [ m ]( double x ) { return x - m; } );
+
+	return std::sqrt( std::inner_product( d.begin( ), d.end( ), d.begin( ), 0. ) / v.size( ) );
+}
+
+
+/*************************************************************
+ MAD
+ *************************************************************/
+double lsd::equation::mad( d_vecT & v )
+{
+	if ( v.empty( ) )
+		return NAN;
+
+	d_vecT d( v.size( ) );
+	double m = med( v );
+	std::transform( v.begin( ), v.end( ), d.begin( ), [ m ]( double x ) { return fabs( x - m ); } );
+
+	return med( d );
+}
+
+
+/*************************************************************
+ COV
+ *************************************************************/
+double lsd::equation::cov( d_vecT & u, d_vecT & v )
+{
+	if ( u.empty( ) || u.size( ) != v.size( ) )
+		return NAN;
+
+	d_vecT d( u.size( ) );
+	double mu = mean( u );
+	double mv = mean( v );
+	std::transform( u.begin( ), u.end( ), v.begin( ), d.begin( ), [ mu, mv ]( double x, double y ) { return ( x - mu ) * ( y - mv ); } );
+
+	return mean( d );
+}
+
+
+/*************************************************************
+ COM
+ *************************************************************/
+double lsd::equation::com( d_vecT & u, d_vecT & v )
+{
+	if ( u.empty( ) || u.size( ) != v.size( ) )
+		return NAN;
+
+	d_vecT d( u.size( ) );
+	double mu = med( u );
+	double mv = med( v );
+	std::transform( u.begin( ), u.end( ), v.begin( ), d.begin( ), [ mu, mv ]( double x, double y ) { return ( x - mu ) * ( y - mv ); } );
+
+	return med( d );
 }
 
 

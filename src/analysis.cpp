@@ -5068,7 +5068,7 @@ void gui::statistics( void )
 
 		if ( num > 0 )
 		{
-			med = sim.median( v );
+			med = lsd::median( v );
 
 			snprintf( str1, MAX_LINE_SIZE, "%s %s (%.*g)", str[ i ], tag[ i ], pdigits, num );
 			snprintf( longmsg, 2 * MAX_LINE_SIZE, "%-20s\t", str1 );
@@ -5214,7 +5214,7 @@ void gui::statistics_cross( void )
 
 		if ( num > 0 )
 		{
-			med = sim.median( v );
+			med = lsd::median( v );
 
 			snprintf( str1, MAX_LINE_SIZE, "Case %d (%.*g)\t", h, pdigits, num );
 			cmd( ".log.text.text.internal insert end \"%s\" table", str1 );
@@ -7815,7 +7815,7 @@ bool gui::create_series( bool mc, str_vecT var_names )
 				else
 				{
 					nmean = sum / nn;
-					nmed = sim.median( v );
+					nmed = lsd::median( v );
 
 					// handle sample (MC) x population variance calculation
 					if ( mc && nn >= 2 )
@@ -7931,7 +7931,7 @@ bool gui::create_series( bool mc, str_vecT var_names )
 				else
 				{
 					nmean = sum / nn;
-					nmed = sim.median( v );
+					nmed = lsd::median( v );
 					nvar /= nn;
 					nvar -= nmean * nmean;
 				}

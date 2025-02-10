@@ -85,7 +85,7 @@ void lsd::object::count_plot_vars( int *count )
 	object *cur;
 	variable *cv;
 
-	for ( cv = v; cv != NULL; cv = cv->next)
+	for ( cv = v; cv != NULL; cv = cv->next )
 		if ( cv->plot == 1 )
 			++( *count );
 

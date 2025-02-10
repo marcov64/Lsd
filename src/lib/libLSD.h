@@ -292,6 +292,8 @@ namespace lsd
 	char *strencdata( char *out, const char *in, int outSz = 0 );
 	char *strupr( char *s );
 	const char *signal_name( int signum );
+	double median( d_vecT & v );
+	double median( d_vecT::iterator b, d_vecT::iterator e );
 	double strtod( const char *in, char** endptr, double inv );
 	d_vecT strtodsplit( const char *in, char sep, double inv = 0. );
 	int dispatch_runs( int until_t = 0, int until_run = 0 );
@@ -363,6 +365,8 @@ class lsd::equation						// simulation model equation class
 		double bparetocdf( double alpha, double low, double high, double x );
 		double cauchy( double a, double b );
 		double chi_squared( double n );
+		double com( d_vecT & u, d_vecT & v );
+		double cov( d_vecT & u, d_vecT & v );
 		double exponential( double lambda );
 		double fact( double x );
 		double fisher( double m, double n );
@@ -371,11 +375,15 @@ class lsd::equation						// simulation model equation class
 		double ipow( double base, double exp );
 		double lnorm( double mu, double sigma );
 		double lnormcdf( double mu, double sigma, double x );
+		double mad( d_vecT & v );
+		double mean( d_vecT & v );
+		double med( d_vecT & v );
 		double normcdf( double mu, double sigma, double x );
 		double pareto( double mu, double alpha );
 		double paretocdf( double mu, double alpha, double x );
 		double poisson( double m );
 		double poissoncdf( double lambda, double k );
+		double sd( d_vecT & v );
 		double student( double n );
 		double uniform_int( double min, double max );
 		double unifcdf( double a, double b, double x );
@@ -585,7 +593,6 @@ class lsd::simulation : public equation	// simulation container class
 		description *add_description( const char *lab, int type = 4, const char *text = NULL, const char *init = NULL, bool initial = false, bool observe = false );
 		description *change_description( const char *lab_old, const char *lab = NULL, int type = -1, const char *text = NULL, const char *init = NULL, int initial = -1, int observe = -1 );
 		description *search_description( const char *lab, bool add_missing = true );
-		double median( d_vecT & v );
 		int hyper_count( const char *lab );
 		int hyper_count_var( const char *lab );
 		int load_configuration( bool reload, strT *warnings, int quick );
