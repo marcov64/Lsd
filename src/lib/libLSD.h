@@ -294,7 +294,6 @@ namespace lsd
 	char *strupr( char *s );
 	const char *signal_name( int signum );
 	double median( d_vecT & v );
-	double median( d_vecT::iterator b, d_vecT::iterator e );
 	double strtod( const char *in, char** endptr, double inv );
 	d_vecT strtodsplit( const char *in, char sep, double inv = 0. );
 	int dispatch_runs( int until_t = 0, int until_run = 0 );
@@ -378,7 +377,7 @@ class lsd::equation						// simulation model equation class
 		double lnormcdf( double mu, double sigma, double x );
 		double mad( d_vecT & v );
 		double mean( d_vecT & v );
-		double med( d_vecT & v );
+		double med( d_vecT v );
 		double normcdf( double mu, double sigma, double x );
 		double pareto( double mu, double alpha );
 		double paretocdf( double mu, double alpha, double x );

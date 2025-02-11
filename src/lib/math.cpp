@@ -99,40 +99,32 @@ double lsd::equation::mean( d_vecT & v )
 
 /*************************************************************
  MED
+ Preserves the vector order
  *************************************************************/
-double lsd::equation::med( d_vecT & v )
+double lsd::equation::med( d_vecT v )
 {
-	return median( v.begin( ), v.end( ) );
+	return median( v );
 }
 
 
 /*************************************************************
  MEDIAN
+ It changes the original vector order!
  *************************************************************/
 double lsd::median( d_vecT & v )
 {
-	int mid;
-	double midVal;
-
 	if ( v.empty( ) )
 		return NAN;
 
-	mid = v.size( ) / 2;
+	int s = v.size( );
+	int n = s / 2;
+	auto p = v.begin( ) + n;
+	std::nth_element( v.begin( ), p, v.end( ) );
 
-	auto midPos = v.begin( ) + mid;
-	nth_element( v.begin( ), midPos, v.end( ) );
-	midVal = v[ mid ];
-
-	if ( v.size( ) % 2 != 0 )
-		return midVal;
+	if ( s % 2 != 0 )
+		return v[ n ];
 	else
-		return ( * max_element( v.begin( ), midPos ) + midVal ) / 2;
-}
-
-double lsd::median( d_vecT::iterator b, d_vecT::iterator e )
-{
-	d_vecT v( b, e );
-	return median( v );
+		return ( * std::max_element( v.begin( ), p ) + v[ n ] ) / 2.;
 }
 
 
@@ -161,10 +153,10 @@ double lsd::equation::mad( d_vecT & v )
 		return NAN;
 
 	d_vecT d( v.size( ) );
-	double m = med( v );
+	double m = median( v );
 	std::transform( v.begin( ), v.end( ), d.begin( ), [ m ]( double x ) { return fabs( x - m ); } );
 
-	return med( d );
+	return median( d );
 }
 
 
@@ -194,11 +186,11 @@ double lsd::equation::com( d_vecT & u, d_vecT & v )
 		return NAN;
 
 	d_vecT d( u.size( ) );
-	double mu = med( u );
-	double mv = med( v );
+	double mu = median( u );
+	double mv = median( v );
 	std::transform( u.begin( ), u.end( ), v.begin( ), d.begin( ), [ mu, mv ]( double x, double y ) { return ( x - mu ) * ( y - mv ); } );
 
-	return med( d );
+	return median( d );
 }
 
 
