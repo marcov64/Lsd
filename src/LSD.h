@@ -271,7 +271,6 @@ namespace gui
 	extern bool tk_ok;					// control for tk_ready to operate
 	extern bool unsavedChange;			// control unsaved changes in configuration
 	extern bool unsavedData; 			// flag unsaved simulation configurations
-	extern bool unsavedSense;			// control for unsaved sensitivity data
 	extern char *eq_txt;				// equation file content
 	extern char *model_make;			// model makefile options
 	extern char *sens_file;				// current sensitivity analysis file

@@ -722,7 +722,9 @@ int lsd::assim::dataentry( const char *parWnd )
 
 	cmd( "ttk::frame $_w.c" );
 	cmd( "ttk::checkbutton $_w.c.dis -text \"Disable assimilation\" -variable disable" );
+	cmd( "tooltip::tooltip $_w.c.dis \"Exclude %s from data assimilation\"", param ? "parameter" : "variable" );
 	cmd( "ttk::checkbutton $_w.c.upd -text \"Update during assimilation\" -variable update" );
+	cmd( "tooltip::tooltip $_w.c.upd \"Update the value of %s\nwith DA analysis estimate\"", param ? "parameter" : "variable" );
 	cmd( "pack $_w.c.dis $_w.c.upd" );
 
 	if ( ! param )
@@ -744,6 +746,7 @@ int lsd::assim::dataentry( const char *parWnd )
 					$_w.tcol.d.n2 configure -state disabled \
 				} \
 			}" );
+		cmd( "tooltip::tooltip $_w.c.obs \"Get observational data for this variable from external file\"" );
 		cmd( "pack $_w.c.dis $_w.c.upd $_w.c.obs -anchor w" );
 
 		cmd( "ttk::frame $_w.csv" );
@@ -755,6 +758,7 @@ int lsd::assim::dataentry( const char *parWnd )
 
 		cmd( "ttk::frame $_w.csv.file" );
 		cmd( "ttk::combobox $_w.csv.file.e -width 40 -textvariable data_file -justify center -values $modDAf -state %s", data_obs ? "normal" : "disabled" );
+		cmd( "tooltip::tooltip $_w.csv.file.e \"Name of file containing the\nobservational data for variable\nin CSV format, located in the\nconfiguration directory\"" );
 		cmd( "ttk::button $_w.csv.file.brw -text Browse -state %s -command { \
 				set fn [ tk_getOpenFile -parent $_w -title \"Select Data File\" -defaultextension \".csv\" -initialdir $path -filetypes { { {Comma-separated file} {.csv} } } ]; \
 				if { [ string length $fn ] > 0 && ! [ fn_spaces $fn ] } { \
@@ -784,6 +788,7 @@ int lsd::assim::dataentry( const char *parWnd )
 				}; \
 				return 1 \
 			}", data_obs ? "normal" : "disabled" );
+		cmd( "tooltip::tooltip $_w.dcol.d.n1 \"Name of column in CSV file containing\nvariable observational data\"" );
 		cmd( "ttk::label $_w.dcol.d.l2 -text \"or number\"" );
 		cmd( "ttk::spinbox $_w.dcol.d.n2 -width 4 -justify center -from 1 -to 999 -validate focusout -validatecommand { \
 				set n %%P; \
@@ -805,6 +810,7 @@ int lsd::assim::dataentry( const char *parWnd )
 			} -invalidcommand { bell }", label );
 		cmd( "$_w.dcol.d.n2 insert 0 $data_col_num" );
 		cmd( "$_w.dcol.d.n2 configure -state %s", data_obs ? "normal" : "disabled" );
+		cmd( "tooltip::tooltip $_w.dcol.d.n2 \"Number of column in CSV file containing\nvariable observational data\"" );
 		cmd( "ttk::label $_w.dcol.d.l3 -text \"(0 : name)\"" );
 
 		cmd( "pack $_w.dcol.d.l1 $_w.dcol.d.n1 $_w.dcol.d.l2 $_w.dcol.d.n2 $_w.dcol.d.l3 -side left" );
@@ -823,6 +829,7 @@ int lsd::assim::dataentry( const char *parWnd )
 				}; \
 				return 1 \
 			}", data_obs ? "normal" : "disabled" );
+		cmd( "tooltip::tooltip $_w.tcol.d.n1 \"Name of column in CSV file containing\nvariable time reference data, if any\"" );
 		cmd( "ttk::label $_w.tcol.d.l2 -text \"or number\"" );
 		cmd( "ttk::spinbox $_w.tcol.d.n2 -width 4 -justify center -from 1 -to 999 -state %s -validate focusout -validatecommand { \
 				set n %%P; \
@@ -839,6 +846,7 @@ int lsd::assim::dataentry( const char *parWnd )
 			} -invalidcommand { bell }", data_obs ? "normal" : "disabled" );
 		cmd( "$_w.tcol.d.n2 insert 0 $t_col_num" );
 		cmd( "$_w.tcol.d.n2 configure -state %s", data_obs ? "normal" : "disabled" );
+		cmd( "tooltip::tooltip $_w.tcol.d.n2 \"Number of column in CSV file containing\nvariable time reference data, if any\"" );
 		cmd( "ttk::label $_w.tcol.d.l3 -text \"(0 : name)\"" );
 
 		cmd( "pack $_w.tcol.d.l1 $_w.tcol.d.n1 $_w.tcol.d.l2 $_w.tcol.d.n2 $_w.tcol.d.l3 -side left" );
@@ -868,8 +876,9 @@ int lsd::assim::dataentry( const char *parWnd )
 				$_w.dist.p.max.e configure -state normal; \
 			}" );
 		cmd( "pack	$_w.dist.d.o.n $_w.dist.d.o.u -anchor w" );
+		cmd( "tooltip::tooltip $_w.dist.d.o \"Shape of distribution that more\nclosely represents parameter\"" );
 
-		cmd( "pack $_w.dist.d.l $_w.dist.d.o" );
+		cmd( "pack $_w.dist.d.l $_w.dist.d.o -pady $_3" );
 
 		cmd( "ttk::frame $_w.dist.p" );
 
@@ -877,16 +886,19 @@ int lsd::assim::dataentry( const char *parWnd )
 		cmd( "ttk::label $_w.dist.p.var.l -width 15 -anchor e -text \"Variance\"" );
 		cmd( "ttk::entry $_w.dist.p.var.e -width 15 -textvariable par_n_var -justify center -state %s", par_distr == 0 ? "normal" : "disabled" );
 		cmd( "pack $_w.dist.p.var.l $_w.dist.p.var.e -side left -anchor w -padx $_2 -pady $_2" );
+		cmd( "tooltip::tooltip $_w.dist.p.var \"Variance of parameter\nnormal distribution\"" );
 
 		cmd( "ttk::frame $_w.dist.p.max" );
 		cmd( "ttk::label $_w.dist.p.max.l -width 15 -anchor e -text \"Upper bound (+)\"" );
 		cmd( "ttk::entry $_w.dist.p.max.e -width 15 -textvariable par_u_upp -justify center -state %s", par_distr == 1 ? "normal" : "disabled" );
 		cmd( "pack $_w.dist.p.max.l $_w.dist.p.max.e -side left -anchor w -padx $_2 -pady $_2" );
+		cmd( "tooltip::tooltip $_w.dist.p.max \"Maximum value of parameter\nuniform distribution\"" );
 
 		cmd( "ttk::frame $_w.dist.p.min" );
 		cmd( "ttk::label $_w.dist.p.min.l -width 15 -anchor e -text \"Lower bound (-)\"" );
 		cmd( "ttk::entry $_w.dist.p.min.e -width 15 -textvariable par_u_low -justify center -state %s", par_distr == 1 ? "normal" : "disabled" );
 		cmd( "pack $_w.dist.p.min.l $_w.dist.p.min.e -side left -anchor w -padx $_2 -pady $_2" );
+		cmd( "tooltip::tooltip $_w.dist.p.min \"Minimum value of parameter\nuniform distribution\"" );
 
 		cmd( "pack $_w.dist.p.var $_w.dist.p.max $_w.dist.p.min -anchor w" );
 
@@ -905,6 +917,7 @@ int lsd::assim::dataentry( const char *parWnd )
 					$_w.infl.opt.t.e configure -state disabled \
 				} \
 			}" );
+		cmd( "tooltip::tooltip $_w.infl.en.c \"Enable ensemble inflation in DA\nalgorithm for parameter estimation\"" );
 		cmd( "pack $_w.infl.en.l $_w.infl.en.c" );
 
 		cmd( "ttk::frame $_w.infl.opt" );
@@ -913,6 +926,7 @@ int lsd::assim::dataentry( const char *parWnd )
 		cmd( "ttk::label $_w.infl.opt.f.l -width 15 -anchor e -text \"Inflation factor\"" );
 		cmd( "ttk::entry $_w.infl.opt.f.e -width 15 -textvariable par_infl_fac -justify center -state %s", par_ens_infl ? "normal" : "disabled" );
 		cmd( "pack $_w.infl.opt.f.l $_w.infl.opt.f.e -side left -anchor w -padx $_2 -pady $_2" );
+		cmd( "tooltip::tooltip $_w.infl.opt.f \"Dispersion of the inflated\nvirtual observations\"" );
 
 		cmd( "ttk::frame $_w.infl.opt.t" );
 		cmd( "ttk::label $_w.infl.opt.t.l -width 15 -anchor e -text \"Initial time\"" );
@@ -920,6 +934,7 @@ int lsd::assim::dataentry( const char *parWnd )
 		cmd( "$_w.infl.opt.t.e insert 0 $par_infl_time" );
 		cmd( "$_w.infl.opt.t.e configure -state %s", par_ens_infl ? "normal" : "disabled" );
 		cmd( "pack $_w.infl.opt.t.l $_w.infl.opt.t.e -side left -anchor w -padx $_2 -pady $_2" );
+		cmd( "tooltip::tooltip $_w.infl.opt.t \"Simulation time to start applying\nensemble inflation algorithm\"" );
 
 		cmd( "pack $_w.infl.opt.f $_w.infl.opt.t -anchor w" );
 

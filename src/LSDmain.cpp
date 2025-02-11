@@ -47,7 +47,6 @@ namespace gui
 	bool tk_ok = false;				// control for tk ready to operate
 	bool unsavedChange = false;		// control unsaved changes in configuration
 	bool unsavedData = false;		// flag unsaved simulation configurations
-	bool unsavedSense = false;		// control for unsaved sensitivity data
 	char *eq_txt = NULL;			// equation file content
 	char *model_make = NULL;		// model makefile options
 	char *sens_file = NULL;			// current sensitivity analysis file

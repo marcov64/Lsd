@@ -186,6 +186,7 @@ typedef std::unique_lock < std::recursive_mutex > rec_uniqlT;
 typedef std::unordered_map < strT, dbl_mapT > dm_mapT;
 typedef std::unordered_map < strT, int > i_mapT;
 typedef std::unordered_map < strT, strT > p_mapT;
+typedef Eigen::MatrixXd e_matT;
 
 // global namespace functions (legacy)
 void close_sim( void );						// legacy user equation closure
@@ -877,7 +878,7 @@ class lsd::variable						// model numeric element (variable,
 		int period = 1;
 		int period_range = 0;
 		object *up = NULL;
-		variable *next = NULL;
+		variable *next = NULL;			// sibling variable under same object
 
 	private:
 		bool dummy = false;
@@ -1188,12 +1189,14 @@ class lsd::assimilation					// assimilation container class
 	friend class simulation;
 
 	public:
-		char *cov_file = NULL;			// data assimilation covariance CSV file
+		char *dsp_file = NULL;			// data assimilation dispersion CSV file
+		double dsp_fac = 1;				// factor to multiply computed dispersion
 		int algorithm = 0;				// algorithm to use in DA (0=EnKF,1=ETPF)
-		int cov_ignore = false;			// ignore data covariance/virtual obs.
+		int use_dsp_file = false;		// use data dispersion/virtual obs.
 		int disable = false;			// disable data assimilation
 		int med_stats = false;			// use median/MAD statistics (vs mean/SD)
 		int sav_dat = false;			// save observational data
+		int sav_dsp = false;			// save data dispersion matrix
 		int sav_fct = false;			// save forecast (intermediary) results
 
 		const char *algo_names[ DA_ALGO_NUM ] = DA_ALGO_NAME;
@@ -1202,7 +1205,7 @@ class lsd::assimilation					// assimilation container class
 		assim *elem = NULL;				// assimilation elements linked-list head
 		dm_mapT data;					// assimilation data map
 		ia_mapT time;					// list of times and variables for assimilation
-		Eigen::MatrixXd cov_mat;		// data assimilation covariance matrix
+		e_matT disp_mat;				// data assimilation dispersion matrix
 
 	public:
 		assim *search( const char *lab );
@@ -1215,7 +1218,7 @@ class lsd::assimilation					// assimilation container class
 
 	private:
 		bool load_files( void );
-		int load_cov( void );
+		int load_dsp( void );
 		int load_data( void );
 };
 
@@ -1225,15 +1228,15 @@ class lsd::assimilation					// assimilation container class
  *************************************************************/
 class lsd::assim						// data assimilation container class
 {
-	friend class object;
 	friend class assimilation;
+	friend class object;
 
 	protected:							// variables used by descending classes
 		bool data_obs = false;			// element has data obs. to assimilate
 		bool disable = false;			// element disabled for assimilation
 		bool param = false;				// element is a parameter (not variable)
 		bool par_ens_infl = false;		// use ensemble inflation for parameters
-		bool update = true;				// element to be updated by assimilation
+		bool update = false;			// element to be updated by assimilation
 		char *data_file = NULL;			// name of source data CSV file
 		char *data_col_name = NULL;		// name of data value column
 		char *t_col_name = NULL;		// name of time value column

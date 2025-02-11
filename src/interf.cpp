@@ -44,7 +44,7 @@ namespace gui
  *************************************************************/
 lsd::object *gui::operate( lsd::object *r )
 {
-	bool observe, initial, da_run, saveAs, delVar, renVar, table, subDir, overwDir;
+	bool exist, observe, initial, saveAs, delVar, renVar, table, subDir, overwDir;
 	char deb_mode, *lab0, lab[ MAX_BUFF_SIZE ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_LINE_SIZE ], ch1[ MAX_ELEM_LENGTH ], NOLHfile[ MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], term_exe[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ], buf_descr[ MAX_BUFF_SIZE ];
 	const char *lab1, *lab2, *lab3, *lab4;
 	design *doe;
@@ -98,16 +98,20 @@ lsd::object *gui::operate( lsd::object *r )
 			}
 
 			// check invalid data assimilation settings
-			da_run = da.count( 4 ) > 0 && ! da.disable;
-			if ( da_run && sim.last_run < 2 )
+			if ( da.count( 4 ) == 0 )
+				da.disable = true;
+
+			if ( ! da.disable && sim.last_run < 2 )
 			{
 				cmd( "set answer [ ttk::messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Invalid settings for data assimilation\" -detail \"The number of simulation runs is too small to perform data assimilation.\n\nPress 'OK' to proceed and disable data assimilation or 'Cancel' to return to LSD Browser.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } }" );
 				if ( choice == 2 )
 					break;
-
-				da_run = false;
-				da.disable = true;
+				else
+					da.disable = true;
 			}
+			else
+				if ( da.use_dsp_file )
+					da.sav_dsp = false;
 
 			// warn about no variable/parameter being saved
 			for ( n = r; n->up != NULL; n = n->up );
@@ -137,7 +141,7 @@ lsd::object *gui::operate( lsd::object *r )
 			overwConf = unsaved_change( ) ? true : false;
 
 			// avoid showing dialog if configuration already saved and nothing to save to disk
-			if ( ! overwConf && ! da_run && sim.last_run == 1 )
+			if ( ! overwConf && da.disable && sim.last_run == 1 )
 				goto run;
 
 			// remove any custom save path (save to current by default)
@@ -145,6 +149,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			Tcl_LinkVar( interp, "sav_dat", ( char * ) & da.sav_dat, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "sav_fct", ( char * ) & da.sav_fct, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "sav_dsp", ( char * ) & da.sav_dsp, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "no_res", ( char * ) & sim.no_res, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "no_tot", ( char * ) & sim.no_tot, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "add_to_tot", ( char * ) & sim.add_to_tot, TCL_LINK_BOOLEAN );
@@ -195,7 +200,7 @@ lsd::object *gui::operate( lsd::object *r )
 				overwDir = check_res_dir( out_dir );
 
 				cmd( "ttk::frame $T.f2.n" );
-				cmd( "ttk::label $T.f2.n.l -text \"%s:\"", da_run ? "Ensemble size" : "Number of simulations" );
+				cmd( "ttk::label $T.f2.n.l -text \"%s:\"", da.disable ? "Number of simulations" : "Ensemble size" );
 				cmd( "ttk::label $T.f2.n.w -text \"%d\" -style hl.TLabel", sim.last_run );
 				cmd( "pack $T.f2.n.l $T.f2.n.w -side left -padx $_2" );
 
@@ -242,12 +247,17 @@ lsd::object *gui::operate( lsd::object *r )
 
 				cmd( "ttk::frame $T.f6" );
 				cmd( "ttk::checkbutton $T.f6.dat -text \"Keep assimilation data\" -variable sav_dat" );
+				cmd( "tooltip::tooltip $T.f6.dat \"DA data observation values\nare saved to memory\"" );
 				cmd( "ttk::checkbutton $T.f6.fct -text \"Keep assimilation forecasts\" -variable sav_fct" );
+				cmd( "tooltip::tooltip $T.f6.fct \"Intermediary DA forecast\nvalues are saved to memory\"" );
+				cmd( "ttk::checkbutton $T.f6.dsp -text \"Save %s matrix\" -variable sav_fct -state %s", da.med_stats ? "comedian" : "covariance", da.use_dsp_file ? "disabled" : "normal" );
+				cmd( "tooltip::tooltip $T.f6.dsp \"Save generated %s\nmatrix to a CSV file\"", da.med_stats ? "comedian" : "covariance" );
 				cmd( "ttk::checkbutton $T.f6.a -text \"Append to existing totals file\" -variable add_to_tot -state %s -command { \
 						if { $add_to_tot && $doover } { \
 							set doover 0 \
 						} \
 					}", ( choice && ! sim.no_tot ) ? "normal" : "disabled" );
+				cmd( "tooltip::tooltip $T.f6.a \"Append new data to the existing\ntotals file, if available\"" );
 				cmd( "ttk::checkbutton $T.f6.b -text \"Skip generating results files\" -variable no_res -command { \
 						if { ! $no_res } { \
 							$T.f4.w.l1.w configure -style hl.TLabel; \
@@ -257,6 +267,7 @@ lsd::object *gui::operate( lsd::object *r )
 							$T.f4.w.l2.w configure -style dhl.TLabel \
 						} \
 					}" );
+				cmd( "tooltip::tooltip $T.f6.b \"Results files will not be produced,\nonly in memory results will be available\"" );
 				cmd( "ttk::checkbutton $T.f6.b1 -text \"Skip generating totals file\" -variable no_tot -command { \
 						if { ! $no_tot } { \
 							$T.f5.l2 configure -style hl.TLabel; \
@@ -272,6 +283,7 @@ lsd::object *gui::operate( lsd::object *r )
 							$T.f6.a configure -state disabled \
 						} \
 					}", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
+				cmd( "tooltip::tooltip $T.f6.b1 \"Totals file will not be produced\"" );
 				cmd( "ttk::checkbutton $T.f6.c -text \"Generate zipped files\" -variable dozip -command { \
 					if $dozip { set zipExt \".gz\" } { \
 						set zipExt \"\" }; \
@@ -286,6 +298,7 @@ lsd::object *gui::operate( lsd::object *r )
 							$T.f6.a configure -state disabled \
 						} \
 					}", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
+				cmd( "tooltip::tooltip $T.f6.c \"Files will be saved in\ncompressed gzip format\"" );
 				cmd( "ttk::checkbutton $T.f6.d -text \"Comma-separated text format (.csv)\" -variable docsv -command { \
 					if $docsv { \
 						set resExt csv; set totExt csv \
@@ -303,13 +316,16 @@ lsd::object *gui::operate( lsd::object *r )
 							$T.f6.a configure -state disabled \
 						} \
 					}", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
+				cmd( "tooltip::tooltip $T.f6.d \"All files will be saved\nin CSV text format\"" );
 				cmd( "ttk::checkbutton $T.f6.o -text \"Clear output path before run\" -variable doover -state %s -command { \
 						if { $add_to_tot && $doover } { \
 							set add_to_tot 0 \
 						} \
 					}", overwDir ? "normal" : "disabled" );
+				cmd( "tooltip::tooltip $T.f6.o \"Delete all LSD file\nin the output directory\"" );
 				cmd( "ttk::checkbutton $T.f6.e -text \"Update configuration file\" -variable overwConf -state disabled" );
-				cmd( "pack %s $T.f6.a $T.f6.b $T.f6.b1 $T.f6.c $T.f6.d $T.f6.o $T.f6.e -anchor w", da_run ? "$T.f6.dat $T.f6.fct" : "" );
+				cmd( "tooltip::tooltip $T.f6.e \"Shows if configuration file\nwill be updated (read-only)\"" );
+				cmd( "pack %s $T.f6.a $T.f6.b $T.f6.b1 $T.f6.c $T.f6.d $T.f6.o $T.f6.e -anchor w", da.disable ? "" : "$T.f6.dat $T.f6.fct $T.f6.dsp" );
 
 				cmd( "pack $T.f1 $T.f2 $T.f3 $T.f4 $T.f5 $T.f6 -padx $_5 -pady $_5" );
 			}
@@ -327,6 +343,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			Tcl_UnlinkVar( interp, "sav_dat" );
 			Tcl_UnlinkVar( interp, "sav_fct" );
+			Tcl_UnlinkVar( interp, "sav_dsp" );
 			Tcl_UnlinkVar( interp, "no_res" );
 			Tcl_UnlinkVar( interp, "no_tot" );
 			Tcl_UnlinkVar( interp, "add_to_tot" );
@@ -2092,16 +2109,17 @@ lsd::object *gui::operate( lsd::object *r )
 			}
 			else								// edit sensitivity analysis data
 			{
+				exist = false;
 				if ( ( cs = sim.search_sensitivity( cv->label, lag ) ) == NULL )
 					cs = new lsd::sensitivity( cv->label, & sim, cv->param, lag, cv->integer );
-
-				i = cs->dataentry( );
-
-				if ( i == 2 )					// data entry failed, no data?
-					delete cs;
 				else
-					if ( i == 0 )
-						unsavedSense = true;	// signal unsaved change
+					exist = true;
+
+				if ( ( i = cs->dataentry( ) ) == 2 )
+					delete cs;					// data entry failed, no data
+
+				if ( i == 0 || ( i == 2 && exist ) )
+					unsavedChange = true;		// signal unsaved change
 			}
 
 		break;
@@ -2118,16 +2136,17 @@ lsd::object *gui::operate( lsd::object *r )
 			if ( cv == NULL )
 				break;
 
+			exist = false;
 			if ( ( ca = da.search( cv->label ) ) == NULL )
-				ca = new lsd::assim( cv->label );
-
-			i = ca->dataentry( );
-
-			if ( i == 2 )
-				delete ca;						// configuration failed, no data
+				ca = new lsd::assim( cv->label, cv->param, false, cv->param );
 			else
-				if ( i == 0 )
-					unsavedChange = true;		// signal unsaved change
+				exist = true;
+
+			if ( ( i = ca->dataentry( ) ) == 2 )
+				delete ca;						// configuration failed, no data
+
+			if ( i == 0 || ( i == 2 && exist ) )
+				unsavedChange = true;			// signal unsaved change
 
 		break;
 
@@ -2583,17 +2602,20 @@ lsd::object *gui::operate( lsd::object *r )
 
 			// save previous values to allow canceling operation
 			itmp[ 1 ] = da.disable;
-			itmp[ 2 ] = da.cov_ignore;
-			itmp[ 3 ] = da.med_stats;
+			itmp[ 2 ] = da.med_stats;
+			itmp[ 3 ] = da.use_dsp_file;
+			itmp[ 4 ] = da.dsp_fac;
 
-			Tcl_LinkVar( interp, "disable", ( char * ) & da.disable, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "cov_ignore", ( char * ) & da.cov_ignore, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "med_stats", ( char * ) & da.med_stats, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "disable", ( char * ) & da.disable, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "use_dsp_file", ( char * ) & da.use_dsp_file, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "med_stats", ( char * ) & da.med_stats, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "use_dsp_file", ( char * ) & da.use_dsp_file, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "dsp_fac", ( char * ) & da.dsp_fac, TCL_LINK_DOUBLE );
 
 			cmd( "set algorithm \"%s\"", da.algo_names[ da.algorithm ] );
-			cmd( "set cov_file \"%s\"", da.cov_file != NULL ? da.cov_file : "" );
-			cmd( "if { [ string first / $cov_file ] != -1 } { \
-					set cov_file [ file nativename $cov_file ] \
+			cmd( "set dsp_file \"%s\"", da.dsp_file != NULL ? da.dsp_file : "" );
+			cmd( "if { [ string first / $dsp_file ] != -1 } { \
+					set dsp_file [ file nativename $dsp_file ] \
 				}" );
 
 			cmd( "set T .assset" );
@@ -2606,17 +2628,23 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "ttk::frame $T.c" );
 			cmd( "ttk::checkbutton $T.c.dis -text \"Disable data assimilation\" -variable disable" );
-			cmd( "ttk::checkbutton $T.c.med -text \"Use median and comedian\" -variable med_stats" );
-			cmd( "ttk::checkbutton $T.c.ncov -text \"Ignore data covariance\" -variable cov_ignore -command { \
-					if { $cov_ignore } { \
-						$T.csv.file.e configure -state disabled; \
-						$T.csv.file.brw configure -state disabled \
-					} else { \
+			cmd( "tooltip::tooltip $T.c.dis \"Do not run data assimilation\nduring simulation run\"" );
+			cmd( "ttk::checkbutton $T.c.med -text \"Median/comedian statistics\" -variable med_stats" );
+			cmd( "tooltip::tooltip $T.c.med \"Use median/comedian as location and dispersion\nmeasures instead of mean/covariance\"" );
+			cmd( "ttk::checkbutton $T.c.dsp -text \"External covariance/comedian file\" -variable use_dsp_file -command { \
+					if { $use_dsp_file } { \
 						$T.csv.file.e configure -state normal; \
-						$T.csv.file.brw configure -state normal \
+						$T.csv.file.brw configure -state normal; \
+						set dsp_fac 1.0; \
+						$T.df.e configure -state disabled \
+					} else { \
+						$T.csv.file.e configure -state disabled; \
+						$T.csv.file.brw configure -state disabled; \
+						$T.df.e configure -state normal \
 					} \
 				}" );
-			cmd( "pack $T.c.dis $T.c.med $T.c.ncov -anchor w" );
+			cmd( "tooltip::tooltip $T.c.dsp \"Use an external covariance/comedian matrix\ninstead of computing it from data\"" );
+			cmd( "pack $T.c.dis $T.c.med $T.c.dsp -anchor w" );
 
 			cmd( "ttk::frame $T.csv" );
 			cmd( "ttk::frame $T.csv.l" );
@@ -2625,24 +2653,31 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "pack $T.csv.l.l $T.csv.l.pad -side left -padx $_5" );
 
 			cmd( "ttk::frame $T.csv.file" );
-			cmd( "ttk::entry $T.csv.file.e -width 40 -textvariable cov_file -justify center -state %s", da.cov_ignore ? "disabled" : "normal" );
+			cmd( "ttk::entry $T.csv.file.e -width 40 -textvariable dsp_file -justify center -state %s", da.use_dsp_file ? "normal" : "disabled" );
+			cmd( "tooltip::tooltip $T.csv.file.e \"Name of file containing the\ncovariance/comedian matrix in CSV format,\nlocated in the configuration directory\"" );
 			cmd( "ttk::button $T.csv.file.brw -text Browse -command { \
 					set fn [ tk_getOpenFile -parent $T -title \"Select Data File\" -defaultextension \".csv\" -initialdir $path -filetypes { { {Comma-separated file} {.csv} } } ]; \
 					if { [ string length $fn ] > 0 && ! [ fn_spaces $fn ] } { \
-						set cov_file [ file normalize $fn ]; \
-						if { [ string first [ file normalize $model_dir ] $cov_file ] == 0 } { \
-							set cov_file [ string map [ list \"[ file normalize $model_dir ]/\" \"\" ] $cov_file ] \
+						set dsp_file [ file normalize $fn ]; \
+						if { [ string first [ file normalize $model_dir ] $dsp_file ] == 0 } { \
+							set dsp_file [ string map [ list \"[ file normalize $model_dir ]/\" \"\" ] $dsp_file ] \
 						}; \
-						if { [ string first / $cov_file ] != -1 } { \
-							set cov_file [ file nativename $cov_file ] \
+						if { [ string first / $dsp_file ] != -1 } { \
+							set dsp_file [ file nativename $dsp_file ] \
 						} \
 					} \
-				} -state %s", da.cov_ignore ? "disabled" : "normal" );
+				} -state %s", da.use_dsp_file ? "normal" : "disabled" );
 			cmd( "pack $T.csv.file.e $T.csv.file.brw -side left -padx $_5" );
 
 			cmd( "pack $T.csv.l $T.csv.file" );
 
-			cmd( "pack $T.a $T.c $T.csv -padx $_5 -pady $_10" );
+			cmd( "ttk::frame $T.df" );
+			cmd( "ttk::label $T.df.l -width 26 -anchor e -text \"Covariance/comedian factor\"" );
+			cmd( "ttk::entry $T.df.e -width 15 -textvariable dsp_fac -justify center -state %s", da.use_dsp_file ? "disabled" : "normal" );
+			cmd( "pack $T.df.l $T.df.e -side left -anchor w -padx $_2 -pady $_2" );
+			cmd( "tooltip::tooltip $T.df \"Multiplicative factor to be applied to the\ncovariance/comedian matrix computed from data\"" );
+
+			cmd( "pack $T.a $T.c $T.csv $T.df -padx $_5 -pady $_10" );
 
 			cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#assimilation } { set choice 2 }" );
 
@@ -2655,19 +2690,21 @@ lsd::object *gui::operate( lsd::object *r )
 				Tcl_DoOneEvent( 0 );
 
 			Tcl_UnlinkVar( interp, "disable" );
-			Tcl_UnlinkVar( interp, "cov_ignore" );
 			Tcl_UnlinkVar( interp, "med_stats" );
+			Tcl_UnlinkVar( interp, "use_dsp_file" );
+			Tcl_UnlinkVar( interp, "dsp_fac" );
 
 			if ( choice == 2 )	// escape - revert previous values
 			{
 				da.disable = itmp[ 1 ];
-				da.cov_ignore = itmp[ 2 ];
-				da.med_stats = itmp[ 3 ];
+				da.med_stats = itmp[ 2 ];
+				da.use_dsp_file = itmp[ 3 ];
+				da.dsp_fac = itmp[ 4 ];
 			}
 			else
 			{
 				// signal unsaved change if anything to be saved
-				if ( itmp[ 1 ] != da.disable || itmp[ 2 ] != da.cov_ignore || itmp[ 3 ] != da.med_stats )
+				if ( itmp[ 1 ] != da.disable || itmp[ 2 ] != da.med_stats || itmp[ 3 ] != da.use_dsp_file || itmp[ 4 ] != da.dsp_fac )
 					unsaved_change( true );
 
 				// identify selected algorithm
@@ -2690,12 +2727,12 @@ lsd::object *gui::operate( lsd::object *r )
 					}
 
 				// check covariance file
-				if ( ! da.cov_ignore && strlen( get_str( "cov_file" ) ) > 0 )
+				if ( da.use_dsp_file && strlen( get_str( "dsp_file" ) ) > 0 )
 				{
-					cmd( "set cov_file [ string map {\\\\ /} $cov_file ]" );
-					lab1 = get_str( "cov_file" );
+					cmd( "set dsp_file [ string map {\\\\ /} $dsp_file ]" );
+					lab1 = get_str( "dsp_file" );
 
-					if ( da.cov_file == NULL || strcmp( da.cov_file, lab1 ) != 0 )
+					if ( da.dsp_file == NULL || strcmp( da.dsp_file, lab1 ) != 0 )
 					{
 						try
 						{
@@ -2709,17 +2746,17 @@ lsd::object *gui::operate( lsd::object *r )
 
 						if ( choice != 2 )
 						{
-							delete [ ] da.cov_file;
-							da.cov_file = new char [ strlen( lab1 ) + 1 ];
-							strcpy( da.cov_file, lab1 );
+							delete [ ] da.dsp_file;
+							da.dsp_file = new char [ strlen( lab1 ) + 1 ];
+							strcpy( da.dsp_file, lab1 );
 							unsaved_change( true );
 						}
 					}
 				}
 				else
 				{
-					delete [ ] da.cov_file;
-					da.cov_file = NULL;
+					delete [ ] da.dsp_file;
+					da.dsp_file = NULL;
 				}
 			}
 
@@ -4379,7 +4416,6 @@ lsd::object *gui::operate( lsd::object *r )
 				// empty sensitivity data
 				sim.empty_sensitivity( );				// discard read data
 				NOLH_clear( );							// deallocate DoE
-				unsavedSense = false;					// nothing to save
 				findexSens = 0;
 			}
 
@@ -4413,6 +4449,8 @@ lsd::object *gui::operate( lsd::object *r )
 
 			if ( load_sensitivity( f ) != 0 )
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Invalid sensitivity analysis file\" -detail \"Please check if you select a valid file or recreate your sensitivity analysis configuration.\"" );
+			else
+				unsavedChange = true;					// signal unsaved change
 
 			fclose( f );
 
@@ -4469,7 +4507,6 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis file cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY.\"" );
 
 			fclose( f );
-			unsavedSense = false;			// nothing to save
 
 		break;
 
@@ -4668,7 +4705,6 @@ lsd::object *gui::operate( lsd::object *r )
 			NOLH_clear( );							// deallocate DoE
 			plog( "\nSensitivity data removed.\n" );
 			unsavedChange = true;
-			unsavedSense = false;
 			findexSens = 0;
 
 		break;

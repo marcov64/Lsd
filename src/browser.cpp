@@ -183,8 +183,8 @@ int gui::load_gui( const char **argv )
 			cmd( "cd $path" );
 		}
 	}
-	
-	// set DLL call-back for data assimilation container 
+
+	// set DLL call-back for data assimilation container
 	lsd::da = & da;
 
 	// set DLL call-back references for master simulation
@@ -212,7 +212,7 @@ int gui::load_gui( const char **argv )
 	sim.liblnk->runtime_step = & runtime_step;
 	sim.liblnk->save_lattice_helper = & save_lattice_helper;
 	sim.liblnk->update_lattice_helper = & update_lattice_helper;
-	
+
 	// try to load model configuration file
 	if ( strlen( sim.conf_name ) > 0 )
 	{
@@ -254,10 +254,10 @@ int gui::load_gui( const char **argv )
 
 		try
 		{
-			if ( da.count( 4 ) > 0 && ! da.disable )
-				i = da.run_simulation( );
-			else
+			if ( da.disable )
 				i = sim.run_simulation( );
+			else
+				i = da.run_simulation( );
 
 			if ( i != 0 )
 				break;
@@ -2021,7 +2021,7 @@ bool gui::discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 	}
 
 	// nothing to save?
-	if ( ! unsavedData && ! unsavedChange && ! unsavedSense )
+	if ( ! unsavedData && ! unsavedChange )
 		goto end_true;				// yes: simply discard configuration
 
 	// no: ask for confirmation

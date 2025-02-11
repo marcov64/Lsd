@@ -206,7 +206,6 @@ void gui::reset_configuration_gui( void )
 	curr_obj = NULL;							// no current object pointer
 	unsaved_change( false );					// signal no unsaved change
 	unsavedData = false;						// no unsaved simulation results
-	unsavedSense = false;						// no sensitivity data to save
 	findexSens = 0;								// reset sensitivity serial number
 	NOLH_clear( );								// deallocate DoE
 	sim.empty_sensitivity( );					// discard sensitivity analysis data

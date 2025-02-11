@@ -340,8 +340,8 @@ lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>If there are multiple simulation runs
 configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
-Settings</span></span><span lang=EN-US> menu entry, LSD presents information and
-options on how data is saved to disk. The examples below show the slightly
+Settings</span></span><span lang=EN-US> menu entry, LSD presents information
+and options on how data is saved to disk. The examples below show the slightly
 different cases of regular multi-run simulations (left) and data assimilation
 ones (right). The presented information describes the name of the </span><span
 class=Cdigo><span lang=EN-US>Model configuration</span></span><span lang=EN-US>
@@ -359,7 +359,7 @@ if enabled.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=196 height=407 src="image/summary_run.png"></span><span lang=EN-US>            
-</span><span lang=EN-US><img border=0 width=196 height=440
+</span><span lang=EN-US><img border=0 width=196 height=469
 src="image/summary_run_da.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available checkbox options are (some
@@ -368,7 +368,7 @@ may not be available according to the circumstance):</span></p>
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Save assimilation data</span></b></span><span
+</span></span><span class=Cdigo><b><span lang=EN-US>Keep assimilation data</span></b></span><span
 lang=EN-US> (data assimilation only): by default, LSD saves to memory only the
 estimated model analysis Monte Carlo (MC) values for the ensemble of Variables
 and Parameters. If checked, the observational data used for the DA analysis is
@@ -377,11 +377,27 @@ also saved.</span></p>
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Save assimilation forecasts</span></b></span><span
+</span></span><span class=Cdigo><b><span lang=EN-US>Keep assimilation forecasts</span></b></span><span
 lang=EN-US> (data assimilation only): by default, LSD saves to memory only the
 estimated model analysis MC. If checked, the intermediary model forecast values
 for the ensemble, which are used as an intermediary step by the DA algorithm,
 are also saved.</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Save covariance/comedian
+matrix</span></b></span><span lang=EN-US> (data assimilation only): if checked,
+after computing the covariance or comedian matrix from observational data, LSD
+saves the matrix as a comma-separated text (CSV) file in the output path. The
+file is named after the configuration name plus the </span><span class=Cdigo>_data_coX.csv</span><span
+lang=EN-US> ending (</span><span class=Cdigo>X</span><span lang=EN-US> = </span><span
+class=Cdigo>v</span><span lang=EN-US> for a covariance matrix or </span><span
+class=Cdigo>X</span><span lang=EN-US> = </span><span class=Cdigo>m</span><span
+lang=EN-US> for a comedian matrix). If unchecked, the default, the matrix is
+not saved. This option is unavailable when an <a
+href="#_Data_assimilation_settings">external file</a> is used to provide the
+covariance/comedian matrix.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -763,8 +779,8 @@ model configuration does not use parallel object computation (see details <a
 href="menumodel.html">here</a>), this option has no effect.</span></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Skip generating results
 files</span></b></span><span lang=EN-US>: if enabled, LSD will not produce the
 time-series detailed </span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
@@ -1171,7 +1187,7 @@ assimilation</a> (DA) options to be applied during run time, using the
 interface below.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=284 height=223 src="image/da_settings.png"></span></p>
+width=284 height=259 src="image/da_settings.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available options in the Data
 Assimilation Settings window are:</span></p>
@@ -1204,21 +1220,21 @@ required, including allowing for parallel run.</span></p>
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Use median and comedian</span></b></span><span
-lang=EN-US>: if checked, replaces the default mean and variance statistics used
-for ensemble summarization by the median and the comedian (or coMAD). This can
-be useful to handle significantly skewed variable distributions.</span></p>
+</span></span><span class=Cdigo><b><span lang=EN-US>Median/comedian statistics</span></b></span><span
+lang=EN-US>: if checked, it replaces the default mean and variance statistics
+used for ensemble summarization (location and dispersion statistical measures)
+by the median and the comedian (or coMAD). This can be useful to handle
+significantly skewed variable distributions.</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Ignore data covariance</span></b></span><span
-lang=EN-US>: the DA algorithms, by default, use the observation data covariance
-matrix, contained in the file described below, to produce virtual observations
-used to increase the performance of the assimilation process. If checked, the
-observation data is assumed to be exact and independent (a covariance matrix
-filled with zeros), reducing the algorithmic efficiency if this is not the
-case.</span></p>
+</span></span><span class=Cdigo><b><span lang=EN-US>External
+covariance/comedian file</span></b></span><span lang=EN-US>: if unchecked
+(default) the DA algorithm computes the covariance or the comedian matrix from
+observational data. The matrix is used to produce virtual observations to
+increase the performance of the assimilation process. If checked, the
+covariance or the comedian matrix must be provided using the next option.</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
@@ -1234,10 +1250,23 @@ is not performed, even if there are Variables configured for DA. The CSV file
 must have Variable names on both the first line and the first column. The
 covariance matrix must be symmetrical and semi-positive defined. If the </span><span
 class=Cdigo><span lang=EN-US>Use median and comedian</span></span><span
-lang=EN-US> option is checked, a comedian (or coMAD) matrix may be provided.
-All Variables set for DA must be present in the table. If an exact match for
-the name of the Variable is not present, the same name used for the <a
+lang=EN-US> option is checked, a (symmetrical) comedian (or coMAD) matrix may
+be provided. All Variables set for DA must be present in the table. If an exact
+match for the name of the Variable is not present, the same name used for the <a
 href="browser.html#assimilation">data column selection</a>, if any, is used.</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Covariance/comedian factor</span></b></span><span
+lang=EN-US>: a non-negative real number that multiplies (“scales”) the
+covariance or the comedian matrix computed from observational data. Values
+smaller (larger) than one reduces (increases) the spread of virtual
+observations used by DA, reducing (increasing) the speed the algorithm converge
+or diverge. Smaller numbers may be used to prevent divergence. If set to zero,
+producing a null matrix, the factor effectively disables the virtual
+observation generation, reducing the DA effectiveness. This option is not available
+when an external covariance or comedian matrix file is used.</span></p>
 
 <p><span lang=EN-US>These options are only saved to the </span><span
 class=Cdigo><span lang=EN-US>.lsd</span></span><span lang=EN-US> <a

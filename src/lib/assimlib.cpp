@@ -329,10 +329,11 @@ int lsd::assimilation::load_data( void )
 
 
 /*************************************************************
- LOAD_COV
- Load covariance matrix for data assimilation from external file
+ LOAD_DISP
+ Load dispersion (covariance or comedian) matrix for data
+ assimilation from external file
  *************************************************************/
-int lsd::assimilation::load_cov( void )
+int lsd::assimilation::load_dsp( void )
 {
 	char *cpath, fname[ MAX_PATH_LENGTH ];
 	int i, j, k, res = 0;
@@ -342,11 +343,11 @@ int lsd::assimilation::load_cov( void )
 	std::unordered_set < strT >::iterator it;
 	str_vecT csvnames;
 
-	cov_mat.resize( 0, 0 );
+	disp_mat.resize( 0, 0 );
 	for ( ca = elem; ca != NULL; ca = ca->next )
 		ca->cov_idx = -1;
 
-	if ( ! cov_ignore && ( cov_file == NULL || strlen( cov_file ) == 0 ) )
+	if ( use_dsp_file && ( dsp_file == NULL || strlen( dsp_file ) == 0 ) )
 		return 1;
 
 	if ( sims.size( ) > 0 && sims[ 0 ] != NULL )
@@ -355,12 +356,12 @@ int lsd::assimilation::load_cov( void )
 		cpath = NULL;
 
 	if ( cpath != NULL && strlen( cpath ) > 0 )
-		snprintf( fname, MAX_PATH_LENGTH, "%s/%s", cpath, cov_file );
+		snprintf( fname, MAX_PATH_LENGTH, "%s/%s", cpath, dsp_file );
 	else
-		strcpyn( fname, cov_file, MAX_PATH_LENGTH );
+		strcpyn( fname, dsp_file, MAX_PATH_LENGTH );
 
 	// try to load matrix from file
-	if ( ! cov_ignore )
+	if ( use_dsp_file )
 	{
 		try
 		{
@@ -392,7 +393,7 @@ int lsd::assimilation::load_cov( void )
 		if ( ca->no_data )
 			continue;
 
-		if ( ! cov_ignore )
+		if ( use_dsp_file )
 			if ( ( it = covnames.find( ca->label ) ) != covnames.end( ) || ( ca->data_col_name != NULL && strlen( ca->data_col_name ) > 0 && ( it = covnames.find( ca->data_col_name ) ) != covnames.end( ) ) )
 			{
 				csvnames.emplace_back( *it );
@@ -412,16 +413,16 @@ int lsd::assimilation::load_cov( void )
 		res = -1;
 
 	// build proper matrix, discarding unused data
-	cov_mat.resize( k, k );
+	disp_mat.resize( k, k );
 	for ( i = 0; i < k; ++i )
 		for ( j = 0; j < k; ++j )
 			try
 			{
-				cov_mat( i, j ) = cov_ignore ? 0 : csv.GetCell < double > ( csvnames[ i ], csvnames[ j ] );
+				disp_mat( i, j ) = use_dsp_file ? csv.GetCell < double > ( csvnames[ i ], csvnames[ j ] ) : 0;
 			}
 			catch ( ... )
 			{
-				cov_mat.resize( 0, 0 );
+				disp_mat.resize( 0, 0 );
 				return 6;
 			}
 
@@ -463,7 +464,7 @@ bool lsd::assimilation::load_files( void )
 
 	if ( elem != NULL )
 	{
-		if ( ( j = load_cov( ) ) <= 0 )
+		if ( ( j = load_dsp( ) ) <= 0 )
 		{
 			if ( j == -1 )
 				plog_master( "\nUnused data in covariance matrix ignored" );
@@ -499,7 +500,7 @@ bool lsd::assimilation::load_files( void )
 					plog_master( "\nMissing elements in covariance matrix" );
 			}
 
-		cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Cannot load assimilation covariance matrix\" -detail \"There was a problem loading the covariance matrix for data assimilation from file '%s'.\nCheck the Log window for details.\"", cov_file != NULL ? cov_file : "(none)" );
+		cmd( "ttk::messageBox -parent . -type ok -icon warning -title Warning -message \"Cannot load assimilation covariance matrix\" -detail \"There was a problem loading the covariance matrix for data assimilation from file '%s'.\nCheck the Log window for details.\"", dsp_file != NULL ? dsp_file : "(none)" );
 		}
 	}
 

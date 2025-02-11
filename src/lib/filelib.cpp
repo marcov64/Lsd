@@ -151,14 +151,15 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 		if ( da != NULL )
 		{
 			da->disable = setNode.child( "data_assimilation" ).attribute( "disable", hint ).as_bool( );
-			da->cov_ignore = setNode.child( "data_assimilation" ).attribute( "ignore_covariance", hint ).as_bool( );
-			da->med_stats = setNode.child( "data_assimilation" ).attribute( "median_statistics", hint ).as_bool( );
 			da->algorithm = setNode.child( "data_assimilation" ).attribute( "algorithm", hint ).as_uint( );
-			if ( ( i = strlen( setNode.child( "data_assimilation" ).attribute( "covariance_file", hint ).as_string( ) ) ) > 0 )
+			da->med_stats = setNode.child( "data_assimilation" ).attribute( "median_statistics", hint ).as_bool( );
+			da->use_dsp_file = setNode.child( "data_assimilation" ).attribute( "use_dispersion_file", hint ).as_bool( );
+			da->dsp_fac = setNode.child( "data_assimilation" ).attribute( "dispersion_factor", hint ).as_double( 1 );
+			if ( ( i = strlen( setNode.child( "data_assimilation" ).attribute( "dispersion_file", hint ).as_string( ) ) ) > 0 )
 			{
-				delete [ ] da->cov_file;
-				da->cov_file = new char [ i + 1 ];
-				strcpy( da->cov_file, setNode.child( "data_assimilation" ).attribute( "covariance_file", hint ).as_string( ) );
+				delete [ ] da->dsp_file;
+				da->dsp_file = new char [ i + 1 ];
+				strcpy( da->dsp_file, setNode.child( "data_assimilation" ).attribute( "dispersion_file", hint ).as_string( ) );
 			}
 		}
 
@@ -809,17 +810,20 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 		if ( da->disable )
 			assimNode.append_attribute( "disable" ) = true;
 
-		if ( da->cov_ignore )
-			assimNode.append_attribute( "ignore_covariance" ) = true;
+		if ( da->algorithm != 0 )
+			assimNode.append_attribute( "algorithm" ) = da->algorithm;
 
 		if ( da->med_stats )
 			assimNode.append_attribute( "median_statistics" ) = true;
 
-		if ( da->algorithm != 0 )
-			assimNode.append_attribute( "algorithm" ) = da->algorithm;
+		if ( da->use_dsp_file )
+			assimNode.append_attribute( "use_dispersion_file" ) = true;
 
-		if ( da->cov_file != NULL && strlen( da->cov_file ) > 0 )
-			assimNode.append_attribute( "covariance_file" ) = da->cov_file;
+		if ( da->dsp_fac != 0 )
+			assimNode.append_attribute( "dispersion_factor" ) = da->dsp_fac;
+
+		if ( da->dsp_file != NULL && strlen( da->dsp_file ) > 0 )
+			assimNode.append_attribute( "dispersion_file" ) = da->dsp_file;
 	}
 
 	// add profile settings, if any
@@ -1285,8 +1289,8 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 
 	if ( da != NULL )
 	{
-		delete [ ] da->cov_file;
-		da->cov_file = NULL;
+		delete [ ] da->dsp_file;
+		da->dsp_file = NULL;
 		da->disable = 0;
 	}
 
