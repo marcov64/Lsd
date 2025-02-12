@@ -233,6 +233,21 @@ void lsd::variable::empty( bool no_lock )
 
 
 /*************************************************************
+ HYPER_NEXT
+ Find the next instance of variable anywhere in the structure
+  *************************************************************/
+lsd::variable *lsd::variable::hyper_next( void )
+{
+	object *cur;
+
+	if ( ( cur = up->hyper_next( ) ) != NULL )
+		return cur->search_var( NULL, label, true );
+
+	return NULL;
+}
+
+
+/*************************************************************
  CHK_VAL
  Adjust value for considering
  variable constraints

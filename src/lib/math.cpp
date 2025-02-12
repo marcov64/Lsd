@@ -636,7 +636,7 @@ int lsd::simulation::rnd_int( int min, int max )
 
 
 /*************************************************************
- RAN1
+ _RAN1_
  Call the preset pseudo-random number generator
  Just generates numbers > 0 and < 1
  *************************************************************/
