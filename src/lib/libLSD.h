@@ -546,6 +546,7 @@ class lsd::simulation : public equation	// simulation container class
 		bool watch_write_mode;			// flag for write-only watch condition
 		bool worker_crashed;			// parallel worker crash flag
 		bool worker_ready;				// parallel worker ready flag
+		b_atomT parallel_ready;			// indicate variable worker is ready
 		char conf_eq_file[ MAX_PATH_LENGTH ] = "";// equation file name in config. file
 		char error_hard_msg1[ MAX_BUFF_SIZE ];// buffer for parallel worker title msg
 		char error_hard_msg2[ MAX_BUFF_SIZE ];// buffer for parallel worker log msg
@@ -557,12 +558,11 @@ class lsd::simulation : public equation	// simulation container class
 		int nsim;						// library simulation object index
 		int ran_gen_id = 2;				// ID of initial generator (DO NOT CHANGE)
 		int stack_level;				// LSD stack call level
+		i_atomT alaplErrCnt, bernoErrCnt, betaErrCnt, binomErrCnt, cauchErrCnt, chisqErrCnt, expErrCnt, fishErrCnt, gammaErrCnt, geomErrCnt, lnormErrCnt, normErrCnt, paretErrCnt, poissErrCnt, studErrCnt, weibErrCnt;
 		i_vecT run_status;				// parallel running instances status
 		long idum = 0;					// Park-Miller default seed (legacy code)
 		long nodesSerial = 1;			// network node serial number counter
 		object *wait_delete = NULL;		// LSD object waiting for deletion
-		b_atomT parallel_ready;// indicate variable worker is ready
-		i_atomT alaplErrCnt, bernoErrCnt, betaErrCnt, binomErrCnt, cauchErrCnt, chisqErrCnt, expErrCnt, fishErrCnt, gammaErrCnt, geomErrCnt, lnormErrCnt, normErrCnt, paretErrCnt, poissErrCnt, studErrCnt, weibErrCnt;
 		mtxT draw_lc1_lck;				// locks for random generator operations
 		mtxT draw_lc2_lck;
 		mtxT draw_lf24_lck;
@@ -868,6 +868,7 @@ class lsd::variable						// model numeric element (variable,
 		char *label = NULL;
 		char deb_mode = 'n';
 		double *val = NULL;
+		double ini_val = NAN;			// initial for DA parameter estimation
 		double max_val = NAN;			// maximum limit for variable
 		double min_val = NAN;			// minimum limit (NAN = no limit)
 		int delay = 0;
@@ -907,9 +908,9 @@ class lsd::variable						// model numeric element (variable,
 		inline double chk_dummy( const char *lab );
 		inline double chk_res( double res );
 		void add_cemetery( void );
+		void copy_state( const variable *ex );
 		void empty( bool no_lock = false );
-		void init( object *_up, simulation *_sim, const char *_label, int _param = -1,
-				   int _num_lag = -1, double *_val = NULL );
+		void init( object *_up, simulation *_sim, const char *_label, variable *ex = NULL );
 		void save_single( void );
 		void set_lab_tit( void );
 

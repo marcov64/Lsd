@@ -1247,23 +1247,8 @@ lsd::variable *lsd::object::add_var_from_example( variable *example )
 		cv = cv->next;
 	}
 
-	cv->init( this, sim, example->label, example->param, example->num_lag, example->val );
-	cv->save = example->save;
-	cv->savei = example->savei;
-	cv->plot = ( ! sim->running ) ? example->plot : false;
-	cv->parallel = example->parallel;
-	cv->deb_mode = example->deb_mode;
-	cv->initialized = example->initialized;
-	cv->delay = example->delay;
-	cv->delay_range = example->delay_range;
-	cv->period = example->period;
-	cv->period_range = example->period_range;
-	cv->observe = example->observe;
-	cv->last_update = example->last_update;
-	cv->deb_cond = example->deb_cond;
-	cv->deb_cnd_val = example->deb_cnd_val;
-
-	v_map.insert( v_pairT ( example->label, cv ) );
+	cv->init( this, sim, NULL, example );
+	v_map.insert( v_pairT ( cv->label, cv ) );
 
 	return cv;
 }
@@ -1308,6 +1293,9 @@ lsd::object *lsd::object::add_obj( const char *lab, int num, bool propagate )
 		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Invalid characters in object name\" -detail \"Object '%s' has an invalid name. Please rename it to prevent problems.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
 	}
 #endif
+
+	if ( num < 1 )
+		return NULL;
 
 	for ( cur = this; cur != NULL; propagate ? cur = cur->hyper_next( label ) : cur = NULL )
 	{

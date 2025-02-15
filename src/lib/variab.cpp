@@ -131,40 +131,66 @@
 
 
 /*************************************************************
- VARIABLE
- copy constructor
+ VARIABLE  copy constructor
+ ATTENTION: allocation for internal arrays is not duplicated!
+ copied variable will share the same allocated arrays
+ Useful only to move variable among different data structures
  *************************************************************/
-lsd::variable::variable( const variable &v )
+lsd::variable::variable( const variable & v )
 {
+	copy_state( & v );
+
+	label = v.label;
+	val = v.val;
+	up = v.up;
+	next = v.next;
 	dummy = v.dummy;
-	observe = v.observe;
-	parallel = v.parallel;
-	plot = v.plot;
-	save = v.save;
-	savei = v.savei;
 	under_computation = v.under_computation;
 	lab_tit = v.lab_tit;
-	label = v.label;
-	initialized = v.initialized;
-	deb_mode = v.deb_mode;
 	data = v.data;
-	val = v.val;
-	deb_cnd_val = v.deb_cnd_val;
-	deb_cond = v.deb_cond;
 	end = v.end;
-	last_update = v.last_update;
-	next_update = v.next_update;
-	num_lag = v.num_lag;
-	param = v.param;
 	start = v.start;
-	delay = v.delay;
-	delay_range = v.delay_range;
-	period = v.period;
-	period_range = v.period_range;
-	up = v.up;
 	sim = v.sim;
-	next = v.next;
-	eq_func = v.eq_func;
+}
+
+
+/*************************************************************
+ COPY_STATE
+ Copy another variable static state, except for allocated
+ arrays and simulation/structure position
+ *************************************************************/
+void lsd::variable::copy_state( const variable *ex )
+{
+	if ( ex == NULL )
+		return;
+
+	initialized = ex->initialized;
+	integer = ex->integer;
+	observe = ex->observe;
+	parallel = ex->parallel;
+	plot = ( ! ex->sim->running ) ? ex->plot : false;
+	save = ex->save;
+	savei = ex->savei;
+
+	deb_mode = ex->deb_mode;
+	ini_val = ex->ini_val;
+	max_val = ex->max_val;
+	min_val = ex->min_val;
+
+	delay = ex->delay;
+	delay_range = ex->delay_range;
+	num_lag = ex->num_lag;
+	param = ex->param;
+	period = ex->period;
+	period_range = ex->period_range;
+
+	deb_cnd_val = ex->deb_cnd_val;
+
+	eq_func = ex->eq_func;
+
+	deb_cond = ex->deb_cond;
+	last_update = ex->last_update;
+	next_update = ex->next_update;
 }
 
 
@@ -183,26 +209,30 @@ lsd::variable::~variable( void )
 /*************************************************************
  INIT
  *************************************************************/
-void lsd::variable::init( object *_up, simulation *_sim, const char *_label,
-					 int _param, int _num_lag, double *_val )
+void lsd::variable::init( object *_up, simulation *_sim, const char *_label, variable *ex )
 {
-	int i;
-
 	// prevent concurrent use by more than one thread
 	rec_lguardT lock( var_comp_lck );
 
+	copy_state( ex );
+
 	up = _up;
 	sim = _sim;
-	param = _param;
-	num_lag = _num_lag;
-	label = new char[ strlen( _label ) + 1 ];
-	strcpy( label, _label );
 
-	if ( _val != NULL )
+	if ( _label == NULL && ex != NULL && ex->label != NULL )
+		_label = ex->label;
+
+	if ( _label != NULL )
+	{
+		label = new char[ strlen( _label ) + 1 ];
+		strcpy( label, _label );
+	}
+
+	if ( ex != NULL && ex->val != NULL )
 	{
 		val = new double[ num_lag + 1 ];
-		for ( i = 0; i <= num_lag; ++i )
-			val[ i ] = _val[ i ];
+		for ( int i = 0; i <= num_lag; ++i )
+			val[ i ] = ex->val[ i ];
 	}
 }
 
