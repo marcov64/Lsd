@@ -149,6 +149,7 @@ lsd::variable::variable( const variable & v )
 	lab_tit = v.lab_tit;
 	data = v.data;
 	end = v.end;
+	next_update = v.next_update;
 	start = v.start;
 	sim = v.sim;
 }
@@ -190,7 +191,6 @@ void lsd::variable::copy_state( const variable *ex )
 
 	deb_cond = ex->deb_cond;
 	last_update = ex->last_update;
-	next_update = ex->next_update;
 }
 
 
