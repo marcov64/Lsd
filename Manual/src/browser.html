@@ -24,16 +24,16 @@ w\:* {behavior:url(#default#VML);}
  <o:DocumentProperties>
   <o:Author>Marcelo Pereira</o:Author>
   <o:LastAuthor>Marcelo Pereira</o:LastAuthor>
-  <o:Revision>59</o:Revision>
-  <o:TotalTime>3570</o:TotalTime>
+  <o:Revision>61</o:Revision>
+  <o:TotalTime>3577</o:TotalTime>
   <o:Created>2018-03-15T23:17:00Z</o:Created>
-  <o:LastSaved>2025-02-12T22:03:00Z</o:LastSaved>
+  <o:LastSaved>2025-02-14T18:25:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>5514</o:Words>
-  <o:Characters>29779</o:Characters>
+  <o:Words>5525</o:Words>
+  <o:Characters>29836</o:Characters>
   <o:Lines>248</o:Lines>
   <o:Paragraphs>70</o:Paragraphs>
-  <o:CharactersWithSpaces>35223</o:CharactersWithSpaces>
+  <o:CharactersWithSpaces>35291</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -766,8 +766,7 @@ p.MsoTitle, li.MsoTitle, div.MsoTitle
 	color:#254061;
 	font-weight:bold;}
 a:link, span.MsoHyperlink
-	{mso-style-noshow:yes;
-	mso-style-priority:99;
+	{mso-style-priority:99;
 	color:blue;
 	text-decoration:underline;
 	text-underline:single;}
@@ -2354,13 +2353,34 @@ Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>“</span><span
 class=Cdigo><b style='mso-bidi-font-weight:normal'><span lang=EN-US
-style='mso-ansi-language:EN-US'>+</span></b></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>” (plus) (<i style='mso-bidi-font-style:normal'>toggle
-shortcuts</i>: </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>F5</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> or </span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>+</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>): element configured to have its
-time series <a href="LSD_quickhelp.html#save">saved for analysis</a>. <o:p></o:p></span></p>
+style='mso-ansi-language:EN-US'>@</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>” (at): element configured for <a
+href="LSD_faqs.html#da">Data Assimilation</a>, see details <a
+href="#assimilation">below</a>.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt;mso-list:l0 level1 lfo8'><![if !supportLists]><span
+lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>“</span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>§</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>” (section): Variable with a
+special/non-default <a href="#_Variable_updating">updating scheme</a> set.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt;mso-list:l0 level1 lfo8'><![if !supportLists]><span
+lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>“</span><span
+class=Cdigo><b style='mso-bidi-font-weight:normal'><span lang=EN-US
+style='mso-ansi-language:EN-US'>&amp;</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>” (ampersand) (<i style='mso-bidi-font-style:
+normal'>toggle shortcuts</i>: </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>F11</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'> or </span><span class=Cdigo><span lang=EN-US
+style='mso-ansi-language:EN-US'>&amp;</span></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>): Variable configured to have <span
+class=GramE>all of</span> its instances computed in parallel.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt;mso-list:l0 level1 lfo8'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
@@ -2377,6 +2397,20 @@ style='mso-ansi-language:EN-US'>*</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>): element set to be presented during the <a
 href="LSD_faqs.html#simulationrun">simulation run</a> on the <a
 href="runtime.html">Run-time Plot</a> window.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt;mso-list:l0 level1 lfo8'><![if !supportLists]><span
+lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>“</span><span
+class=Cdigo><b style='mso-bidi-font-weight:normal'><span lang=EN-US
+style='mso-ansi-language:EN-US'>+</span></b></span><span lang=EN-US
+style='mso-ansi-language:EN-US'>” (plus) (<i style='mso-bidi-font-style:normal'>toggle
+shortcuts</i>: </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
+EN-US'>F5</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> or </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>+</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'>): element configured to have its
+time series <a href="LSD_quickhelp.html#save">saved for analysis</a>. <o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt;mso-list:l0 level1 lfo8'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
@@ -2435,30 +2469,6 @@ step selected in menu </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'><a href="menurun.html#simsetting">Run&gt;Simulation
 Settings</a></span></span><span lang=EN-US style='mso-ansi-language:EN-US'>.
 This option is not available for Functions.<o:p></o:p></span></p>
-
-<p class=MsoListParagraph style='text-indent:-18.0pt;mso-list:l0 level1 lfo8'><![if !supportLists]><span
-lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
-Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>“</span><span
-class=Cdigo><b style='mso-bidi-font-weight:normal'><span lang=EN-US
-style='mso-ansi-language:EN-US'>&amp;</span></b></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>” (ampersand) (<i style='mso-bidi-font-style:
-normal'>toggle shortcuts</i>: </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>F11</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'> or </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>&amp;</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>): Variable configured to have <span
-class=GramE>all of</span> its instances computed in parallel.<o:p></o:p></span></p>
-
-<p class=MsoListParagraph style='text-indent:-18.0pt;mso-list:l0 level1 lfo8'><![if !supportLists]><span
-lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
-Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US'>“</span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>§</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>” (section): Variable with a
-special/non-default <a href="#_Variable_updating">updating scheme</a> set.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The state
 of the option flags for the selected element can be directly toggled using the
@@ -3519,12 +3529,12 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 style='mso-ansi-language:EN-US'>Variance</span></b></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> (Normal distribution only): the variance for
 the parameter distribution. The variance is the square of the standard
-deviation. This value must be strictly positive, zero (the default) or negative
-values are invalid. The distribution <span class=GramE>mean</span> is always
-assumed to be equal to the initial value of the Parameter. This option is only
-enabled if </span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>Normal</span></span><span lang=EN-US style='mso-ansi-language:EN-US'> is
-selected as the Parameter distribution.<o:p></o:p></span></p>
+deviation. This value must be positive, negative values are invalid. The
+distribution <span class=GramE>mean</span> is always assumed to be equal to the
+initial value of the Parameter. This option is only enabled if </span><span
+class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Normal</span></span><span
+lang=EN-US style='mso-ansi-language:EN-US'> is selected as the Parameter
+distribution.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-left:39.0pt;text-indent:-18.0pt;
 mso-list:l6 level1 lfo22'><![if !supportLists]><span lang=EN-US
@@ -3536,8 +3546,7 @@ style='mso-ansi-language:EN-US'>Upper/Lower bound</span></b></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> (Uniform distribution only): the
 upper and lower bounds for the distribution, measured from the initial value of
 the Parameter. The upper bound value is added to the initial values, while the
-lower bound is subtracted from it. Both values must be positive, but they
-cannot be simultaneously equal to zero (the default).<o:p></o:p></span></p>
+lower bound is subtracted from it. Both values must be positive.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The </span><span
 class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>Remove</span></span><span

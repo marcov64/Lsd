@@ -340,8 +340,8 @@ lang=EN-US>.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>If there are multiple simulation runs
 configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
-Settings</span></span><span lang=EN-US> menu entry, LSD presents information and
-options on how data is saved to disk. The examples below show the slightly
+Settings</span></span><span lang=EN-US> menu entry, LSD presents information
+and options on how data is saved to disk. The examples below show the slightly
 different cases of regular multi-run simulations (left) and data assimilation
 ones (right). The presented information describes the name of the </span><span
 class=Cdigo><span lang=EN-US>Model configuration</span></span><span lang=EN-US>
@@ -781,8 +781,8 @@ model configuration does not use parallel object computation (see details <a
 href="menumodel.html">here</a>), this option has no effect.</span></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Skip generating results
 files</span></b></span><span lang=EN-US>: if enabled, LSD will not produce the
 time-series detailed </span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
@@ -1189,7 +1189,7 @@ assimilation</a> (DA) options to be applied during run time, using the
 interface below.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=284 height=309 src="image/da_settings.png"></span></p>
+width=285 height=325 src="image/da_settings.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available options in the Data
 Assimilation Settings window are:</span></p>
@@ -1218,6 +1218,20 @@ href="LSD_faqs.html#variable">Variables</a> and <a
 href="LSD_faqs.html#parameter">Parameters</a> configured for DA. This option is
 useful to accelerate simulation computation when data assimilation is not
 required, including allowing for parallel run.</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Force instance alignment</span></b></span><span
+lang=EN-US>: if selected, it constrains the data used for assimilation to
+Variable and Parameter instances which are present in all runs of the ensemble,
+not considering unmatched instances. The data saved is not affected. This
+option reduces the precision of analysis but accelerates the simulation. The
+default is to use all instances, matched in all runs or not. This is done by
+creating “virtual instances” of value equal to the ensemble mean or median,
+according to the next setting, effectively increasing the processing time and
+precision. If the number of variable/parameter instances is equal along the
+ensemble, this option has no effect.</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span

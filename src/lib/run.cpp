@@ -34,13 +34,13 @@
 /*************************************************************
  DISPATCH_RUNS
  *************************************************************/
-int dispatch_runs( int until_t, int until_run )
+int lsd::dispatch_runs( sim_vecT run_sims, int until_t, int until_run )
 {
 	int nstale, nrun = 0;
 	mtxT mtx;
 	uniq_lT lock( mtx );
 
-	for ( auto sim : lsd::sims )
+	for ( auto sim : run_sims )
 		if ( ! sim->sim_thread.joinable( ) && sim->conf_ok )
 		{
 			sim->sim_thread = thrT( & lsd::simulation::run_simulation, sim, until_t, until_run );
@@ -54,7 +54,7 @@ int dispatch_runs( int until_t, int until_run )
 		lsd::seq_end.wait_until( lock, start + std::chrono::seconds( MAX_SIM_SLEEP ) );
 
 		nstale = 0;
-		for ( auto sim : lsd::sims )
+		for ( auto sim : run_sims )
 		{
 			if ( sim->sim_thread.joinable( ) && ! sim->running_seq && sim->eff_t > 0 )
 			{
@@ -88,10 +88,69 @@ int dispatch_runs( int until_t, int until_run )
  *************************************************************/
 int lsd::assimilation::run_simulation( int until_t )
 {
-	// read data assimilation data from files
-	load_files( );
+	clock_t last_update;
+	int nstale, res = 0;
 
-	return sims[ 0 ]->run_simulation( until_t );
+	// initialize data assimilation data structures
+	if ( sims.size( ) == 0 || ! init( sims[ 0 ] ) )
+		return 1;
+
+	// cover browser
+#ifndef _TERM_
+	if ( ref_sim->liblnk->runtime_start != NULL )
+		ref_sim->liblnk->runtime_start( true );
+#else
+	plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
+#endif
+
+	// do the data assimilation forecast-analysis cycle
+	for ( auto dtime : time_var )
+	{
+		// stop if data time span is longer than simulation
+		if ( ( next_t = dtime.first ) > ref_sim->last_t )
+			break;
+
+		// DA forecast step
+		if ( ( nstale = dispatch_runs( run_sims, next_t ) ) > 0 )
+		{
+			res = 3;
+			break;
+		}
+
+		// DA analysis step
+		if ( ( res = analysis( dtime.second, next_t ) ) != 0 )
+			break;
+
+#ifndef _TERM_
+		// handle runtime button pressings after progress bar update
+		if ( ref_sim->liblnk->progress_bar != NULL )
+			ref_sim->liblnk->progress_bar( next_t, last_update );
+
+		if ( ref_sim->liblnk->runtime_buttons != NULL && ( res = ref_sim->liblnk->runtime_buttons( ) ) != 0 )
+			break;
+#endif
+	}
+
+	// run remaining pure forecast periods, if any
+	if ( res == 0 && next_t < ref_sim->last_t )
+	{
+		if ( ( nstale = dispatch_runs( run_sims ) ) > 0 )
+			res = 3;
+		else
+			next_t = ref_sim->last_t;
+	}
+
+	// close data assimilation run-time data structures
+	finish( );
+
+	ref_sim->eff_t = next_t;		// to trigger AoR
+
+#ifndef _TERM_
+	if ( ref_sim->liblnk->runtime_end != NULL )
+		ref_sim->liblnk->runtime_end( );
+#endif
+
+	return res;
 }
 
 
@@ -127,7 +186,10 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 		{
 			// update the percentage done bar, if needed
 			if ( dobar && liblnk != NULL )
+			{
 				update_bar( bar_done, perc_done, last_done, 2 * BAR_DONE_SIZE );
+				perc_done = std::min( ( int ) ( 100 * ( ( run - 1 ) + ( double ) t / last_t ) / last_run ), 100 );
+			}
 
 #ifndef _TERM_
 			// only update if simulation not paused
@@ -138,12 +200,17 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 				root->update( true, false );// simulation step execution
 			}
 
-			perc_done = std::min( ( int ) ( 100 * ( ( run - 1 ) + ( double ) t / last_t ) / last_run ), 100 );
+			// collect state variables if in data assimilation
+			if ( ! da->disable && t == da->next_t )
+				da_svars->save_state_vars( root );
 
 #ifndef _TERM_
-			// handle runtime button pressings
-			if ( liblnk != NULL && liblnk->runtime_buttons != NULL )
-				liblnk->runtime_buttons( last_update );
+			// handle runtime button pressings after progress bar update
+			if ( liblnk != NULL && liblnk->progress_bar != NULL && liblnk->runtime_buttons != NULL )
+			{
+				liblnk->progress_bar( t, last_update );
+				liblnk->runtime_buttons( );
+			}
 #endif
 			// check if time to pause run (don't pause at last step)
 			if ( until_t > 0 && t >= until_t && t + 1 <= last_t )
@@ -166,10 +233,10 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 		if ( liblnk != NULL && liblnk->deb_log != NULL )
 			liblnk->deb_log( false, 0 );// close debug log file, if any
 
-		if ( dobar && on_bar )
+		if ( dobar && on_bar && liblnk != NULL )
 			update_bar( bar_done, perc_done, last_done, 2 * BAR_DONE_SIZE );
 
-		if ( fast_mode < 2 )
+		if ( da->disable && fast_mode < 2 )
 			plog( "\nSimulation %d of %d %s at case %d (%.2f sec.)\n", run, last_run, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
 
 		if ( quit == 1 )			// multiple simulation runs need to reset quit
@@ -257,7 +324,7 @@ int lsd::simulation::init_new_seq( char *bar_done, int & perc_done, int & last_d
 
 #ifndef _TERM_
 	if ( liblnk != NULL && liblnk->runtime_start != NULL )
-		liblnk->runtime_start( );
+		liblnk->runtime_start( false );
 #else
 	plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
 #endif

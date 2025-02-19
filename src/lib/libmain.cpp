@@ -46,6 +46,7 @@ namespace lsd
 	mtxT plog_term_lck;				// lock plog_terminal for parallel updating
 	mtxT wrk_thr_ptr_lck;			// lock worker_thread_ptr for parallel updating
 	sim_vecT sims;					// vector holding existing simulations
+	std::mt19937 lib_prng;			// internal pseudo-random number generator
 	thr_idT main_thread;			// LSD main thread ID
 	wrk_mapT worker_thread_ptr;		// worker thread pointers
 	FILE *stderr_ptr;				// main thread standard error file pointer
@@ -115,20 +116,16 @@ lsd::equation::equation( void )
 /*************************************************************
  SIMULATION CONSTRUCTOR
  *************************************************************/
-lsd::simulation::simulation( void )
+lsd::simulation::simulation( const char fname[ ], const char path[ ], int quick )
 {
 	root = new object;
 	root->init( NULL, this, "Root" );
 	add_description( "Root" );
 	latt = new lattice;
+	da_svars = new state_variables;
 	reset_blueprint( NULL );
 
 	max_threads = ( MAX_CORES <= 0 ) ? thrT::hardware_concurrency( ) : MAX_CORES;
-
-	conf_name = new char[ strlen( "" ) + 1 ];
-	conf_path = new char[ strlen( "" ) + 1 ];
-	strcpy( conf_name, "" );
-	strcpy( conf_path, "" );
 
 	stack_level = 0;
 	stack_log = new lsdstack;
@@ -140,6 +137,16 @@ lsd::simulation::simulation( void )
 	_sim_ = this;				// register pointer to base equation class
 	nsim = sims.size( );		// index por this sim
 	sims.push_back( this );		// add to list of existing simulations
+
+	conf_name = new char[ strlen( fname ) + 1 ];
+	strcpy( conf_name, fname );
+
+	conf_path = new char[ strlen( path ) + 1 ];
+	strcpy( conf_path, path );
+
+	if ( strlen( conf_name ) > 0 )
+		if ( load_configuration( false, NULL, quick ) != 0 )
+			throw std::invalid_argument( "cannot load simulation configuration" );
 }
 
 
@@ -162,6 +169,7 @@ lsd::simulation::~simulation( void )
 		fclose( log_file_ptr );
 
 	delete latt;
+	delete da_svars;
 	delete stack_log;
 	delete [ ] conf_file;
 	delete [ ] conf_name;

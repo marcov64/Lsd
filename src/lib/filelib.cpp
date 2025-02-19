@@ -44,6 +44,7 @@
  *************************************************************/
 int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick )
 {
+	bool legacy = false;
 	char *buf = NULL, buf1[ MAX_FILE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ];
 	int i, j, load = 0;
 	n_mapT node_map;
@@ -152,15 +153,20 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 		{
 			da->disable = setNode.child( "data_assimilation" ).attribute( "disable", hint ).as_bool( );
 			da->algorithm = setNode.child( "data_assimilation" ).attribute( "algorithm", hint ).as_uint( );
+			da->align_trim = setNode.child( "data_assimilation" ).attribute( "trim_instances", hint ).as_bool( );
 			da->med_stats = setNode.child( "data_assimilation" ).attribute( "median_statistics", hint ).as_bool( );
 			da->use_dsp_file = setNode.child( "data_assimilation" ).attribute( "use_dispersion_file", hint ).as_bool( );
-			da->dsp_fac = setNode.child( "data_assimilation" ).attribute( "dispersion_factor", hint ).as_double( 1 );
 			if ( ( i = strlen( setNode.child( "data_assimilation" ).attribute( "dispersion_file", hint ).as_string( ) ) ) > 0 )
 			{
 				delete [ ] da->dsp_file;
 				da->dsp_file = new char [ i + 1 ];
 				strcpy( da->dsp_file, setNode.child( "data_assimilation" ).attribute( "dispersion_file", hint ).as_string( ) );
 			}
+
+			da->ens_infl = ! setNode.child( "data_assimilation" ).child( "ensemble_inflation" ).empty( );
+			da->infl_fac = setNode.child( "data_assimilation" ).child( "ensemble_inflation" ).attribute( "inflation_factor" ).as_double( 1 );
+			da->infl_time = setNode.child( "data_assimilation" ).child( "ensemble_inflation" ).attribute( "inflation_time" ).as_uint( 2 );
+
 		}
 
 		stack_info = setNode.child( "profiling" ).attribute( "level", hint ).as_uint( );
@@ -193,9 +199,12 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 			strcpy( conf_eq_txt, "" );
 	}
 	else
+	{
 		// try to read legacy configuration
+		legacy = true;
 		if ( ( load = load_txt_configuration( reload, quick ) ) == 1 )
 			return load;
+	}
 
 endLoad:
 
@@ -206,7 +215,7 @@ endLoad:
 	if ( f != NULL )
 		fclose( f );
 
-	if ( warnings != NULL )
+	if ( ! legacy && warnings != NULL )
 	{
 		warnings->clear( );
 
@@ -400,16 +409,12 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 						int t_col_num = cna.attribute( "time_column_number" ).as_uint( );
 
 						bool param = ! cna.child( "parameter" ).empty( );
-						int par_distr = cna.child( "parameter" ).attribute( "distribution" ).as_uint( );
-						double par_n_var = cna.child( "parameter" ).attribute( "normal_variance" ).as_double( );
+						int par_dist = cna.child( "parameter" ).attribute( "distribution" ).as_uint( );
+						double par_n_sd = cna.child( "parameter" ).attribute( "normal_sd" ).as_double( );
 						double par_u_upp = cna.child( "parameter" ).attribute( "uniform_upper" ).as_double( );
 						double par_u_low = cna.child( "parameter" ).attribute( "uniform_lower" ).as_double( );
 
-						bool par_ens_infl = ! cna.child( "parameter" ).child( "ensemble_inflation" ).empty( );
-						double par_infl_fac = cna.child( "parameter" ).child( "ensemble_inflation" ).attribute( "inflation_factor" ).as_double( 1 );
-						int par_infl_time = cna.child( "parameter" ).child( "ensemble_inflation" ).attribute( "inflation_time" ).as_uint( 2 );
-
-						new assim( str, param, disable, update, data_obs, data_file, data_col_name, t_col_name, data_col_num, t_col_num, par_distr, par_n_var, par_u_upp, par_u_low, par_ens_infl, par_infl_fac, par_infl_time );
+						new assim( str, param, disable, update, data_obs, data_file, data_col_name, t_col_name, data_col_num, t_col_num, par_dist, par_n_sd, par_u_upp, par_u_low );
 					}
 				}
 			}
@@ -765,10 +770,10 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	<!ELEMENT configuration (settings, structure, equation_file)>\n \
 	<!ELEMENT settings (simulation, data_assimilation?, profiling?)>\n \
 	<!ELEMENT simulation EMPTY>\n \
-	<!ELEMENT data_assimilation EMPTY>\n \
+	<!ELEMENT data_assimilation (ensemble_inflation?)>\n \
+	<!ELEMENT ensemble_inflation EMPTY>\n \
 	<!ELEMENT profiling EMPTY>\n \
 	<!ELEMENT structure (object)>\n \
-	<!ELEMENT equation_file (#PCDATA)>\n \
 	<!ELEMENT object (description?, nodes?, object*, element*)>\n \
 	<!ELEMENT description (#PCDATA)>\n \
 	<!ELEMENT nodes (#PCDATA)>\n \
@@ -776,8 +781,8 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	<!ELEMENT documentation EMPTY>\n \
 	<!ELEMENT sensitivity (#PCDATA)>\n \
 	<!ELEMENT assimilation (parameter?)>\n \
-	<!ELEMENT parameter (ensemble_inflation?)>\n \
-	<!ELEMENT ensemble_inflation EMPTY>\n]" );
+	<!ELEMENT parameter EMPTY>\n \
+	<!ELEMENT equation_file (#PCDATA)>\n]" );
 	x_nodeT lsdNode = xf.append_child( "LSD" );
 	x_nodeT cfgNode = lsdNode.append_child( "configuration" );
 	cfgNode.append_attribute( "version" ) = "1.0";
@@ -813,18 +818,28 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 		if ( da->algorithm != 0 )
 			assimNode.append_attribute( "algorithm" ) = da->algorithm;
 
+		if ( da->align_trim )
+			assimNode.append_attribute( "trim_instances" ) = true;
+
 		if ( da->med_stats )
 			assimNode.append_attribute( "median_statistics" ) = true;
 
 		if ( da->use_dsp_file )
 			assimNode.append_attribute( "use_dispersion_file" ) = true;
 
-		if ( da->dsp_fac != 0 )
-			assimNode.append_attribute( "dispersion_factor" ) = da->dsp_fac;
-
 		if ( da->dsp_file != NULL && strlen( da->dsp_file ) > 0 )
 			assimNode.append_attribute( "dispersion_file" ) = da->dsp_file;
-	}
+
+		if ( da->ens_infl && da->infl_fac != 1 )
+		{
+			x_nodeT inflNode = assimNode.append_child( "ensemble_inflation" );
+
+			inflNode.append_attribute( "inflation_factor" ) = da->infl_fac;
+
+			if ( da->infl_time > 2 )
+				inflNode.append_attribute( "inflation_time" ) = da->infl_time;
+		}
+}
 
 	// add profile settings, if any
 	if ( stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time )
@@ -1205,26 +1220,15 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 			{
 				x_nodeT cnap = cna.append_child( "parameter" );
 
-				cnap.append_attribute( "distribution" ) = ca->par_distr;
+				cnap.append_attribute( "distribution" ) = ca->par_dist;
 
-				if ( ca->par_distr == 0 && ca->par_n_var > 0 )
-					cnap.append_attribute( "normal_variance" ) = ca->par_n_var;
+				if ( ca->par_dist == 0 && ca->par_n_sd > 0 )
+					cnap.append_attribute( "normal_sd" ) = ca->par_n_sd;
 
-				if ( ca->par_distr == 1 && ( ca->par_u_upp > 0 || ca->par_u_low > 0 ) )
+				if ( ca->par_dist == 1 && ( ca->par_u_upp > 0 || ca->par_u_low > 0 ) )
 				{
 					cnap.append_attribute( "uniform_upper" ) = ca->par_u_upp;
 					cnap.append_attribute( "uniform_lower" ) = ca->par_u_low;
-				}
-
-				if ( ca->par_ens_infl && ( ca->par_infl_fac > 1 || ca->par_infl_time > 2 ) )
-				{
-					x_nodeT cnapi = cnap.append_child( "ensemble_inflation" );
-
-					if ( ca->par_infl_fac > 1 )
-						cnapi.append_attribute( "inflation_factor" ) = ca->par_infl_fac;
-
-					if ( ca->par_infl_time > 2 )
-						cnapi.append_attribute( "inflation_time" ) = ca->par_infl_time;
 				}
 			}
 		}

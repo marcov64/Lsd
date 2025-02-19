@@ -48,8 +48,8 @@ lsd::object *gui::operate( lsd::object *r )
 	char deb_mode, *lab0, lab[ MAX_BUFF_SIZE ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_LINE_SIZE ], ch1[ MAX_ELEM_LENGTH ], NOLHfile[ MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], term_exe[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ], buf_descr[ MAX_BUFF_SIZE ];
 	const char *lab1, *lab2, *lab3, *lab4;
 	design *doe;
-	double fracMC, fake = 0;
-	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, itmp[ 100 ], done = 0;
+	double fracMC, d_tmp[ 100 ], fake = 0;
+	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, i_tmp[ 100 ], done = 0;
 	long nlinks, ptsSa, maxMC;
 	lsd::assim *ca;
 	lsd::bridge *cb;
@@ -167,7 +167,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "set tot_msg_warn \"(totals file already exists)\"" );
 
 			cmd( "set T .run" );
-			cmd( "newtop $T \"Run Simulation\" { set choice 2 }" );
+			cmd( "newtop $T \"%s\" { set choice 2 }", da.disable ? "Run Simulation" : "Run Assimilation Ensemble" );
 
 			cmd( "ttk::frame $T.f1" );
 			cmd( "ttk::label $T.f1.l -text \"Model configuration\"" );
@@ -250,7 +250,7 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "tooltip::tooltip $T.f6.dat \"DA data observation values\nare saved to memory\"" );
 				cmd( "ttk::checkbutton $T.f6.fct -text \"Keep assimilation forecasts\" -variable sav_fct" );
 				cmd( "tooltip::tooltip $T.f6.fct \"Intermediary DA forecast\nvalues are saved to memory\"" );
-				cmd( "ttk::checkbutton $T.f6.dsp -text \"Save %s matrix\" -variable sav_fct -state %s", da.med_stats ? "comedian" : "covariance", da.use_dsp_file ? "disabled" : "normal" );
+				cmd( "ttk::checkbutton $T.f6.dsp -text \"Save %s matrix\" -variable sav_dsp -state %s", da.med_stats ? "comedian" : "covariance", da.use_dsp_file ? "disabled" : "normal" );
 				cmd( "tooltip::tooltip $T.f6.dsp \"Save generated %s\nmatrix to a CSV file\"", da.med_stats ? "comedian" : "covariance" );
 				cmd( "ttk::checkbutton $T.f6.a -text \"Append to existing totals file\" -variable add_to_tot -state %s -command { \
 						if { $add_to_tot && $doover } { \
@@ -2125,7 +2125,7 @@ lsd::object *gui::operate( lsd::object *r )
 		break;
 
 
-		// add data assimilation settings to variable
+		// add/edit data assimilation settings to variable
 		case 15:
 
 			lab1 = get_str( "vname" );
@@ -2146,7 +2146,10 @@ lsd::object *gui::operate( lsd::object *r )
 				delete ca;						// configuration failed, no data
 
 			if ( i == 0 || ( i == 2 && exist ) )
+			{
 				unsavedChange = true;			// signal unsaved change
+				redrawRoot = true;
+			}
 
 		break;
 
@@ -2163,10 +2166,10 @@ lsd::object *gui::operate( lsd::object *r )
 				break;
 
 			// save previous values to allow canceling operation
-			itmp[ 1 ] = cv->delay;
-			itmp[ 2 ] = cv->delay_range;
-			itmp[ 3 ] = cv->period;
-			itmp[ 4 ] = cv->period_range;
+			i_tmp[ 1 ] = cv->delay;
+			i_tmp[ 2 ] = cv->delay_range;
+			i_tmp[ 3 ] = cv->period;
+			i_tmp[ 4 ] = cv->period_range;
 
 			Tcl_LinkVar( interp, "delay", ( char * ) & cv->delay, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "delay_range", ( char * ) & cv->delay_range, TCL_LINK_INT );
@@ -2241,14 +2244,14 @@ lsd::object *gui::operate( lsd::object *r )
 
 			if ( choice == 2 )	// Escape - revert previous values
 			{
-				cv->delay = itmp[ 1 ];
-				cv->delay_range = itmp[ 2 ];
-				cv->period = itmp[ 3 ];
-				cv->period_range = itmp[ 4 ];
+				cv->delay = i_tmp[ 1 ];
+				cv->delay_range = i_tmp[ 2 ];
+				cv->period = i_tmp[ 3 ];
+				cv->period_range = i_tmp[ 4 ];
 			}
 			else
 			// signal unsaved change if anything to be saved
-				if ( itmp[ 1 ] != cv->delay || itmp[ 2 ] != cv->delay_range || itmp[ 3 ] != cv->period || itmp[ 4 ] != cv->period_range )
+				if ( i_tmp[ 1 ] != cv->delay || i_tmp[ 2 ] != cv->delay_range || i_tmp[ 3 ] != cv->period || i_tmp[ 4 ] != cv->period_range )
 				{
 					for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 					{
@@ -2453,16 +2456,16 @@ lsd::object *gui::operate( lsd::object *r )
 		case 22:
 
 			// save previous values to allow canceling operation
-			itmp[ 1 ] = sim.last_run;
-			itmp[ 2 ] = sim.seed;
-			itmp[ 3 ] = sim.last_t;
-			itmp[ 4 ] = sim.deb_t;
-			itmp[ 5 ] = sim.stack_info;
-			itmp[ 6 ] = sim.prof_min_msecs;
-			itmp[ 7 ] = sim.prof_obs_only;
-			itmp[ 8 ] = sim.prof_aggr_time;
-			itmp[ 9 ] = sim.no_ptr_chk;
-			itmp[ 10 ] = sim.parallel_disable;
+			i_tmp[ 1 ] = sim.last_run;
+			i_tmp[ 2 ] = sim.seed;
+			i_tmp[ 3 ] = sim.last_t;
+			i_tmp[ 4 ] = sim.deb_t;
+			i_tmp[ 5 ] = sim.stack_info;
+			i_tmp[ 6 ] = sim.prof_min_msecs;
+			i_tmp[ 7 ] = sim.prof_obs_only;
+			i_tmp[ 8 ] = sim.prof_aggr_time;
+			i_tmp[ 9 ] = sim.no_ptr_chk;
+			i_tmp[ 10 ] = sim.parallel_disable;
 
 			Tcl_LinkVar( interp, "last_run", ( char * ) & sim.last_run, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "seed", ( char * ) & sim.seed, TCL_LINK_INT );
@@ -2560,20 +2563,20 @@ lsd::object *gui::operate( lsd::object *r )
 
 			if ( choice == 2 )	// escape - revert previous values
 			{
-				sim.last_run = itmp[ 1 ];
-				sim.seed = ( unsigned ) itmp[ 2 ];
-				sim.last_t = itmp[ 3 ];
-				sim.deb_t = itmp[ 4 ];
-				sim.stack_info = itmp[ 5 ];
-				sim.prof_min_msecs = itmp[ 6 ];
-				sim.prof_obs_only = itmp[ 7 ];
-				sim.prof_aggr_time = itmp[ 8 ];
-				sim.no_ptr_chk = itmp[ 9 ];
-				sim.parallel_disable = itmp[ 10 ];
+				sim.last_run = i_tmp[ 1 ];
+				sim.seed = ( unsigned ) i_tmp[ 2 ];
+				sim.last_t = i_tmp[ 3 ];
+				sim.deb_t = i_tmp[ 4 ];
+				sim.stack_info = i_tmp[ 5 ];
+				sim.prof_min_msecs = i_tmp[ 6 ];
+				sim.prof_obs_only = i_tmp[ 7 ];
+				sim.prof_aggr_time = i_tmp[ 8 ];
+				sim.no_ptr_chk = i_tmp[ 9 ];
+				sim.parallel_disable = i_tmp[ 10 ];
 			}
 			else
 				// signal unsaved change if anything to be saved
-				if ( itmp[ 1 ] != sim.last_run || ( unsigned ) itmp[ 2 ] != sim.seed || itmp[ 3 ] != sim.last_t || itmp[ 4 ] != sim.deb_t || itmp[ 5 ] != sim.stack_info || itmp[ 6 ] != sim.prof_min_msecs || itmp[ 7 ] != sim.prof_obs_only || itmp[ 8 ] != sim.prof_aggr_time || itmp[ 9 ] != sim.no_ptr_chk || itmp[ 10 ] != sim.parallel_disable )
+				if ( i_tmp[ 1 ] != sim.last_run || ( unsigned ) i_tmp[ 2 ] != sim.seed || i_tmp[ 3 ] != sim.last_t || i_tmp[ 4 ] != sim.deb_t || i_tmp[ 5 ] != sim.stack_info || i_tmp[ 6 ] != sim.prof_min_msecs || i_tmp[ 7 ] != sim.prof_obs_only || i_tmp[ 8 ] != sim.prof_aggr_time || i_tmp[ 9 ] != sim.no_ptr_chk || i_tmp[ 10 ] != sim.parallel_disable )
 					unsaved_change( true );
 
 			Tcl_UnlinkVar( interp, "last_run" );
@@ -2601,16 +2604,22 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "cd $path" );
 
 			// save previous values to allow canceling operation
-			itmp[ 1 ] = da.disable;
-			itmp[ 2 ] = da.med_stats;
-			itmp[ 3 ] = da.use_dsp_file;
-			itmp[ 4 ] = da.dsp_fac;
+			i_tmp[ 1 ] = da.disable;
+			i_tmp[ 2 ] = da.med_stats;
+			i_tmp[ 3 ] = da.use_dsp_file;
+			i_tmp[ 4 ] = da.ens_infl;
+			d_tmp[ 5 ] = da.infl_fac;
+			i_tmp[ 6 ] = da.infl_time;
+			i_tmp[ 7 ] = da.align_trim;
 
 			Tcl_LinkVar( interp, "disable", ( char * ) & da.disable, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "use_dsp_file", ( char * ) & da.use_dsp_file, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "med_stats", ( char * ) & da.med_stats, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "use_dsp_file", ( char * ) & da.use_dsp_file, TCL_LINK_BOOLEAN );
-			Tcl_LinkVar( interp, "dsp_fac", ( char * ) & da.dsp_fac, TCL_LINK_DOUBLE );
+			Tcl_LinkVar( interp, "ens_infl", ( char * ) & da.ens_infl, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "infl_fac", ( char * ) & da.infl_fac, TCL_LINK_DOUBLE );
+			Tcl_LinkVar( interp, "infl_time", ( char * ) & da.infl_time, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "align_trim", ( char * ) & da.align_trim, TCL_LINK_INT );
 
 			cmd( "set algorithm \"%s\"", da.algo_names[ da.algorithm ] );
 			cmd( "set dsp_file \"%s\"", da.dsp_file != NULL ? da.dsp_file : "" );
@@ -2629,22 +2638,22 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $T.c" );
 			cmd( "ttk::checkbutton $T.c.dis -text \"Disable data assimilation\" -variable disable" );
 			cmd( "tooltip::tooltip $T.c.dis \"Do not run data assimilation\nduring simulation run\"" );
+			cmd( "ttk::checkbutton $T.c.trm -text \"Force instance alignment\" -variable align_trim" );
+			cmd( "tooltip::tooltip $T.c.trm \"Ignore for assimilation element\ninstances not present in all runs (faster)\"" );
 			cmd( "ttk::checkbutton $T.c.med -text \"Median/comedian statistics\" -variable med_stats" );
 			cmd( "tooltip::tooltip $T.c.med \"Use median/comedian as location and dispersion\nmeasures instead of mean/covariance\"" );
 			cmd( "ttk::checkbutton $T.c.dsp -text \"External covariance/comedian file\" -variable use_dsp_file -command { \
 					if { $use_dsp_file } { \
 						$T.csv.file.e configure -state normal; \
-						$T.csv.file.brw configure -state normal; \
-						set dsp_fac 1.0; \
-						$T.df.e configure -state disabled \
+						$T.csv.file.brw configure -state normal \
 					} else { \
 						$T.csv.file.e configure -state disabled; \
 						$T.csv.file.brw configure -state disabled; \
-						$T.df.e configure -state normal \
+						set dsp_file \"\" \
 					} \
 				}" );
 			cmd( "tooltip::tooltip $T.c.dsp \"Use an external covariance/comedian matrix\ninstead of computing it from data\"" );
-			cmd( "pack $T.c.dis $T.c.med $T.c.dsp -anchor w" );
+			cmd( "pack $T.c.dis $T.c.trm $T.c.med $T.c.dsp -anchor w" );
 
 			cmd( "ttk::frame $T.csv" );
 			cmd( "ttk::frame $T.csv.l" );
@@ -2671,13 +2680,45 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "pack $T.csv.l $T.csv.file" );
 
-			cmd( "ttk::frame $T.df" );
-			cmd( "ttk::label $T.df.l -width 26 -anchor e -text \"Covariance/comedian factor\"" );
-			cmd( "ttk::entry $T.df.e -width 15 -textvariable dsp_fac -justify center -state %s", da.use_dsp_file ? "disabled" : "normal" );
-			cmd( "pack $T.df.l $T.df.e -side left -anchor w -padx $_2 -pady $_2" );
-			cmd( "tooltip::tooltip $T.df \"Multiplicative factor to be applied to the\ncovariance/comedian matrix computed from data\"" );
+			cmd( "ttk::frame $T.infl" );
 
-			cmd( "pack $T.a $T.c $T.csv $T.df -padx $_5 -pady $_10" );
+			cmd( "ttk::frame $T.infl.en" );
+			cmd( "ttk::label $T.infl.en.l -text \"Ensemble inflation\"" );
+			cmd( "ttk::checkbutton $T.infl.en.c -text Enable -variable ens_infl -command { \
+					if { $ens_infl } { \
+						$T.infl.opt.f.e configure -state normal; \
+						$T.infl.opt.t.e configure -state normal \
+					} else { \
+						$T.infl.opt.f.e configure -state disabled; \
+						$T.infl.opt.t.e configure -state disabled; \
+						set infl_fac 1.0; \
+						set infl_time 2 \
+					} \
+				}" );
+			cmd( "tooltip::tooltip $T.infl.en.c \"Enable ensemble inflation in DA\nalgorithm for parameter estimation\"" );
+			cmd( "pack $T.infl.en.l $T.infl.en.c" );
+
+			cmd( "ttk::frame $T.infl.opt" );
+
+			cmd( "ttk::frame $T.infl.opt.f" );
+			cmd( "ttk::label $T.infl.opt.f.l -width 15 -anchor e -text \"Inflation factor\"" );
+			cmd( "ttk::entry $T.infl.opt.f.e -width 15 -textvariable infl_fac -justify center -state %s", da.ens_infl ? "normal" : "disabled" );
+			cmd( "pack $T.infl.opt.f.l $T.infl.opt.f.e -side left -anchor w -padx $_2 -pady $_2" );
+			cmd( "tooltip::tooltip $T.infl.opt.f \"Dispersion of the inflated\nvirtual observations\"" );
+
+			cmd( "ttk::frame $T.infl.opt.t" );
+			cmd( "ttk::label $T.infl.opt.t.l -width 15 -anchor e -text \"Initial time\"" );
+			cmd( "ttk::spinbox $T.infl.opt.t.e -width 12 -from 2 -to 99999 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 2 } { set infl_time %%P; return 1 } { %%W delete 0 end; %%W insert 2 $infl_time; return 0 } } -invalidcommand { bell }" );
+			cmd( "$T.infl.opt.t.e insert 0 $infl_time" );
+			cmd( "$T.infl.opt.t.e configure -state %s", da.ens_infl ? "normal" : "disabled" );
+			cmd( "pack $T.infl.opt.t.l $T.infl.opt.t.e -side left -anchor w -padx $_2 -pady $_2" );
+			cmd( "tooltip::tooltip $T.infl.opt.t \"Simulation time to start applying\nensemble inflation algorithm\"" );
+
+			cmd( "pack $T.infl.opt.f $T.infl.opt.t -anchor w" );
+
+			cmd( "pack $T.infl.en $T.infl.opt" );
+
+			cmd( "pack $T.a $T.c $T.csv $T.infl -padx $_5 -pady $_10" );
 
 			cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#assimilation } { set choice 2 }" );
 
@@ -2692,19 +2733,54 @@ lsd::object *gui::operate( lsd::object *r )
 			Tcl_UnlinkVar( interp, "disable" );
 			Tcl_UnlinkVar( interp, "med_stats" );
 			Tcl_UnlinkVar( interp, "use_dsp_file" );
-			Tcl_UnlinkVar( interp, "dsp_fac" );
+			Tcl_UnlinkVar( interp, "ens_infl" );
+			Tcl_UnlinkVar( interp, "infl_fac" );
+			Tcl_UnlinkVar( interp, "infl_time" );
+			Tcl_UnlinkVar( interp, "align_trim" );
 
 			if ( choice == 2 )	// escape - revert previous values
 			{
-				da.disable = itmp[ 1 ];
-				da.med_stats = itmp[ 2 ];
-				da.use_dsp_file = itmp[ 3 ];
-				da.dsp_fac = itmp[ 4 ];
+				da.disable = i_tmp[ 1 ];
+				da.med_stats = i_tmp[ 2 ];
+				da.use_dsp_file = i_tmp[ 3 ];
+				da.ens_infl = i_tmp[ 4 ];
+				da.infl_fac = d_tmp[ 5 ];
+				da.infl_time = i_tmp[ 6 ];
+				da.align_trim = i_tmp[ 7 ];
 			}
 			else
 			{
+				// check invalid inflation values
+				if ( da.ens_infl )
+				{
+					if ( da.infl_fac == 1 )
+					{
+						da.ens_infl = false;
+						da.infl_time = 2;
+					}
+
+					if ( ! std::isfinite( da.infl_fac ) || da.infl_fac < 0 )
+					{
+						cmd( "ttk::messageBox -parent $T -type ok -icon error -title Error -message \"Invalid inflation factor\" -detail \"Parameter ensemble inflation factor must be positive.\"" );
+						da.ens_infl = false;
+						da.infl_fac = 1;
+					}
+
+					if ( da.infl_time < 2 )
+					{
+						cmd( "ttk::messageBox -parent $T -type ok -icon error -title Error -message \"Invalid inflation initial time\" -detail \"Parameter ensemble inflation start time must be grater than 1.\"" );
+						da.ens_infl = false;
+						da.infl_time = 2;
+					}
+				}
+				else
+				{
+					da.infl_fac = 1;
+					da.infl_time = 2;
+				}
+
 				// signal unsaved change if anything to be saved
-				if ( itmp[ 1 ] != da.disable || itmp[ 2 ] != da.med_stats || itmp[ 3 ] != da.use_dsp_file || itmp[ 4 ] != da.dsp_fac )
+				if ( i_tmp[ 1 ] != da.disable || i_tmp[ 2 ] != da.med_stats || i_tmp[ 3 ] != da.use_dsp_file || i_tmp[ 4 ] != da.ens_infl || d_tmp[ 5 ] != da.infl_fac || i_tmp[ 6 ] != da.infl_time || i_tmp[ 7 ] != da.align_trim )
 					unsaved_change( true );
 
 				// identify selected algorithm
@@ -2755,8 +2831,15 @@ lsd::object *gui::operate( lsd::object *r )
 				}
 				else
 				{
-					delete [ ] da.dsp_file;
-					da.dsp_file = NULL;
+					if ( da.use_dsp_file )
+						da.use_dsp_file = false;
+					else
+					{
+						delete [ ] da.dsp_file;
+						da.dsp_file = NULL;
+					}
+
+					unsaved_change( true );
 				}
 			}
 

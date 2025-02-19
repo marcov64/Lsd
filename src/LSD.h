@@ -191,6 +191,8 @@
 #define TCL_FIND_EXE	"@where wish86.exe > nul 2>&1"
 
 // constant string arrays
+#define AOR_TAG_NUM 8
+#define AOR_TAG_NAME { "", "U_", "A_", "T_", "D_", "F_", "C_", "MC_" }
 #define GROUP_OPTIONS_NUM 2
 #define GROUP_OPTIONS_NAME { "name", "description" }
 #define GROUP_OPTIONS_DEFAULT { "(no name)", "(no description)" }
@@ -287,6 +289,7 @@ namespace gui
 	extern const char *model_defaults[ ];
 	extern const char *model_options[ ];
 	extern const char *res_g;			// structure window result variable
+	extern const char *tag_pref[ ];
 	extern const char *tk_wnd_names[ ];	// Tk names of main windows
 	extern const char *wnd_names[ ];	// LSD main windows' names
 	extern const char group_types[ ];	// types of group options
@@ -399,6 +402,7 @@ namespace gui
 	int load_gui( const char **argv );
 	int load_sensitivity( FILE *f );
 	int min_hborder( int pdigits, double miny, double maxy );
+	int runtime_buttons( void );
 	int set_platform( void );
 	int shrink_gnufile( void );
 	int store_gnufile( struct node *c, int x4 );
@@ -441,7 +445,7 @@ namespace gui
 	void clean_spaces( char *s );
 	void cmd( const char *cm, ... );
 	void cmd_backend( const char *cm, va_list arg );
-	void cover_browser( const char *text1, const char *text2, bool run );
+	void cover_browser( const char *text1, const char *text2, bool run, bool da = false );
 	void create( void );
 	void create_logwindow( void );
 	void deb_log( bool on, int time );
@@ -478,17 +482,17 @@ namespace gui
 	void plot_phase_diagram( void );
 	void plot_tseries( void );
 	void print_stack( void );
+	void progress_bar( int cur_t, clock_t & last_update );
 	void put_line( int x1, int y1, int x2 );
 	void put_node( int x, int y, const char *str, bool sel );
 	void put_text( const char *str, const char *num, int x, int y, const char *str2 );
 	void reset_configuration_gui( void );
 	void reset_plot( void );
 	void return_where_used( char *lab, char *s, int sz );
-	void runtime_buttons( clock_t &last_update );
 	void runtime_end( void );
 	void runtime_run_start( void );
 	void runtime_run_end( void );
-	void runtime_start( void );
+	void runtime_start( bool da );
 	void save_data1( void );
 	void save_datazip( void );
 	void scan_used_lab( const char *lab, const char *parWnd = NULL );

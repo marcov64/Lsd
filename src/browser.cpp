@@ -204,6 +204,7 @@ int gui::load_gui( const char **argv )
 	sim.liblnk->plog_backend = & plog_backend;
 	sim.liblnk->plot_runtime = & lsd::variable::plot_runtime;
 	sim.liblnk->print_stack = & print_stack;
+	sim.liblnk->progress_bar = & progress_bar;
 	sim.liblnk->runtime_buttons = & runtime_buttons;
 	sim.liblnk->runtime_end = & runtime_end;
 	sim.liblnk->runtime_run_start = & runtime_run_start;
@@ -359,8 +360,9 @@ void gui::create( void )
  *************************************************************/
 int gui::browse( lsd::object *r )
 {
-	bool done, sp_upd;
+	bool done, sp_upd, da_en;
 	int i, num;
+	lsd::assim *ca;
 	lsd::bridge *cb;
 	lsd::variable *cv;
 
@@ -393,8 +395,14 @@ int gui::browse( lsd::object *r )
 				else
 					sp_upd = false;
 
+				// data assimilation set?
+				if ( ( ca = da.search( cv->label ) ) != NULL && ! ca->disable )
+					da_en = true;
+				else
+					da_en = false;
+
 				// set flags string
-				cmd( "set varFlags \"%s%s%s%s%s%s\"", ( cv->save || cv->savei ) ? "+" : "", cv->plot ? "*" : "", ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? "!" : "", ( cv->deb_mode == 'w' || cv->deb_mode == 'W' ) ? "?" : "", ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? "\u00BF" : "", cv->parallel ? "&" : "", sp_upd ? "\u00A7" : "" );
+				cmd( "set varFlags \"%s%s%s%s%s%s%s\"", da_en ? "@" : "", sp_upd ? "\u00A7" : "", cv->parallel ? "&" : "", cv->plot ? "*" : "", ( cv->save || cv->savei ) ? "+" : "", ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? "!" : "", ( cv->deb_mode == 'w' || cv->deb_mode == 'W' ) ? "?" : "", ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? "\u00BF" : "" );
 
 				// add elements to the listbox
 				if ( cv->param == 0 )
@@ -1368,11 +1376,14 @@ int gui::browse( lsd::object *r )
  RUNTIME_START
  Updates GUI at the start of a set of simulation runs
  *************************************************************/
-void gui::runtime_start( void )
+void gui::runtime_start( bool da )
 {
 	sim.prof_times.clear( );		// reset profiling times
 
-	cover_browser( "Running...", "Use the buttons to control the simulation:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :	accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables", true );
+	if ( da )
+		cover_browser( "Running data assimilation...", "Use the buttons to control the simulations:\n\n'Stop' :  aborts the assimilation", true, true );
+	else
+		cover_browser( "Running...", "Use the buttons to control the simulation:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :	accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables", true, false );
 }
 
 
@@ -1449,9 +1460,16 @@ bool gui::runtime_step( void )
  Handle active buttons during simulation execution
  at the end of each time step
  *************************************************************/
-void gui::runtime_buttons( clock_t &last_update )
+int gui::runtime_buttons( void )
 {
-	switch ( done_in )
+	int button = done_in;
+
+	done_in = 0;
+
+	if ( ! da.disable )
+		return button;
+
+	switch ( button )
 	{
 		case 1:			// Stop button / s/S key
 			if ( pause_run )
@@ -1512,21 +1530,30 @@ void gui::runtime_buttons( clock_t &last_update )
 			}
 	}
 
-	done_in = 0;
-
+	// manage run-time plot window
 	if ( sim.run == 1 && sim.t == 1 )
 		enable_plot( );	// show run time plot if still enabled
 
 	scroll_plot( );		// perform scrolling if enabled
 
-	if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER && exists_window( ".p" ) )
+	return button;
+}
+
+
+/*************************************************************
+ PROGRESS_BAR
+ Update simulation run progress bar
+ *************************************************************/
+ void gui::progress_bar( int cur_t, clock_t & last_update )
+ {
+	 if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER && exists_window( ".p" ) )
 	{
-		cmd( ".p.b2.b configure -value %d", sim.t );
-		cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", std::min( sim.t + 1, sim.last_t ), sim.last_t, sim.t, sim.last_t );
+		cmd( ".p.b2.b configure -value %d", cur_t );
+		cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", std::min( cur_t + 1, sim.last_t ), sim.last_t, cur_t, sim.last_t );
 		cmd( "update" );
 		last_update = clock( );
 	}
-}
+ }
 
 
 /*************************************************************

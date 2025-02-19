@@ -156,6 +156,7 @@ namespace gui
 }
 
 
+
 /*************************************************************
  ANALYSIS
  *************************************************************/
@@ -2447,7 +2448,7 @@ void gui::analysis( bool mc )
 				cmd( "set choice [ search_series ]" );
 
 				if ( choice == 0 )
-					cmd( "ttk::messageBox -parent .da -type ok -title \"Warning\" -icon warning -default ok -message \"Series not found\" -detail \"No additional instance of series found.\"" );
+					cmd( "ttk::messageBox -parent .da -type ok -title Warning -icon warning -default ok -message \"Series not found\" -detail \"No additional instance of series found.\"" );
 
 				break;
 
@@ -4542,6 +4543,7 @@ void lsd::object::insert_data_mem( int *num_v, const char *lab )
 	if ( i > PROG_SERIES )
 		cmd( "progressbox .da.ser \"Load Series\" \"Loading saved series\" \"Series\" %d { set stop true } .da", i );
 
+	da->reset_insts( );				// release used instances of all DA elements
 	insert_labels_mem( num_v, lab );
 	cmd( "update_parent" );
 
@@ -4563,6 +4565,7 @@ void lsd::object::insert_data_mem( int *num_v, const char *lab )
 	delete [ ] gui::vs;
 	gui::vs = vs_new;
 
+	da->reset_insts( );
 	insert_store_mem( *num_v, & ini_v, lab );
 
 	cmd( "destroytop .da.ser" );
@@ -4632,34 +4635,75 @@ void lsd::object::count_labels_mem( int *count, const char *lab )
 void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 {
 	bool found;
-	char tag_pref[ 3 ];
+	int tag;
+	static bool warn_once = false;
 	object *cur;
 	variable *cv;
 	bridge *cb;
 
 	for ( found = false, cv = v; cv != NULL && ! gui::stop; cv = cv->next )
-		if ( ( lab == NULL && cv->save ) || ( lab != NULL && ! strcmp( cv->label, lab ) ) )
+		if ( ( lab == NULL && cv->save ) || ( lab != NULL && da->disable && strcmp( cv->label, lab ) == 0 ) )
 		{
-			if ( cv->save )
-				strcpy( tag_pref, "" );
+			cv->set_lab_tit( );
+
+			if ( da->disable )
+			{
+				if ( cv->save )
+					tag = 0;
+				else
+				{
+					found = true;
+					tag = 1;
+					cv->start = cv->last_update - cv->num_lag;
+					cv->end = cv->last_update;
+				}
+
+				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, gui::tag_pref[ tag ], cv->lab_tit, cv->start, cv->end, *num_v, cv->up->label );
+
+				++( *num_v );
+
+				if ( cv->end > gui::num_c )
+					gui::num_c = cv->end;
+
+				if ( cv->start < gui::first_c )
+					gui::first_c = cv->start;
+			}
 			else
 			{
-				found = true;
-				strcpy( tag_pref, "U_" );
-				cv->start = cv->last_update - cv->num_lag;
-				cv->end = cv->last_update;
+				// check if there are still instances to be presented
+				// because of DA data analysis, dynamic instances may have to entered
+				// the DA process, but were still used in the model forecasts
+				auto ca = da->elem_map.find( cv->label );
+				if ( ca != da->elem_map.end( ) )
+				{
+					if ( ca->second->inst_idx < ca->second->da_data.size( ) )
+					{
+						element_data *ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+
+						for ( auto i = 2; i <= 4; ++i )
+							if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
+							{
+								cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, gui::tag_pref[ i ], cv->lab_tit, ce->start, ce->end, *num_v, cv->up->label );
+								++( *num_v );
+							}
+
+						if ( ce->end > gui::num_c )
+							gui::num_c = ce->end;
+
+						if ( ce->start < gui::first_c )
+							gui::first_c = ce->start;
+					}
+					else
+					{
+						if ( ! warn_once )
+							cmd( "ttk::messageBox -parent .da -type ok -title Warning -icon warning -default ok -message \"Series do not match\" -detail \"The effective model element instances do not match the ones effectively used for data assimilation. This may lead to missing or incorrectly positioned instance series. However, it does not affect the simulation data saved to disk, or the assimilation process.\n\nTo avoid the problem, please do not select for data assimilation variables or parameters with different number of instances among simulation runs.\"" );
+
+						warn_once = true;
+					}
+				}
 			}
 
-			cv->set_lab_tit( );
-			cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref, cv->lab_tit, cv->start, cv->end, *num_v, cv->up->label );
-
-			if ( cv->end > gui::num_c )
-				gui::num_c = cv->end;
-
-			if ( cv->start < gui::first_c )
-				gui::first_c = cv->start;
-
-			if ( ++( *num_v ) % PROG_SERIES == 0 )
+			if ( *num_v % PROG_SERIES == 0 )
 				cmd( "prgboxupdate .da.ser %d", *num_v - 1 );
 		}
 
@@ -4671,7 +4715,7 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 	if ( up == NULL && lab == NULL )
 		for ( cv = sim->cemetery; cv != NULL && ! gui::stop; cv = cv->next )
 		{
-			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", cv->label, cv->lab_tit, cv->start, cv->end, *num_v, sim->par_map[ cv->label ].c_str( ) );
+			cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, gui::tag_pref[ 0 ], cv->lab_tit, cv->start, cv->end, *num_v, sim->par_map[ cv->label ].c_str( ) );
 
 			if ( cv->end > gui::num_c )
 				gui::num_c = cv->end;
@@ -4691,38 +4735,66 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 void lsd::object::insert_store_mem( int max_v, int *num_v, const char *lab )
 {
 	bool found;
-	char tag_pref[ 3 ];
-	int i;
+	int tag;
 	object *cur;
 	variable *cv;
 	bridge *cb;
 
 	for ( found = false, cv = v; cv != NULL && *num_v < max_v; cv = cv->next )
-		if ( ( lab == NULL && cv->save ) || ( lab != NULL && ! strcmp( cv->label, lab ) ) )
+		if ( ( lab == NULL && cv->save ) || ( lab != NULL && da->disable && ! strcmp( cv->label, lab ) ) )
 		{
-			if ( cv->save )
-				strcpy( tag_pref, "" );
+			cv->set_lab_tit( );
+
+			if ( da->disable )
+			{
+				if ( cv->save )
+					tag = 0;
+				else
+				{
+					found = true;
+					tag = 1;
+
+					// use C stdlib to be able to deallocate memory for deleted objects
+					if ( cv->data == NULL )
+						cv->data = ( double * ) malloc( ( cv->num_lag + 1 ) * sizeof( double ) );
+
+					for ( auto i = 0; i <= cv->num_lag; ++i )
+						cv->data[ i ] = cv->val[ cv->num_lag - i ];
+				}
+
+				gui::vs[ *num_v ].data = cv->data;
+
+				strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
+				snprintf( gui::vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", gui::tag_pref[ tag ], cv->lab_tit );
+				gui::vs[ *num_v ].start = cv->start;
+				gui::vs[ *num_v ].end = cv->end;
+				gui::vs[ *num_v ].rank = *num_v;
+				++( *num_v );
+			}
 			else
 			{
-				found = true;
-				strcpy( tag_pref, "U_" );
+				auto ca = da->elem_map.find( cv->label );
+				if ( ca != da->elem_map.end( ) && ca->second->inst_idx < ca->second->da_data.size( ) )
+				{
+					element_data *ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 
-				// use C stdlib to be able to deallocate memory for deleted objects
-				if ( cv->data == NULL )
-					cv->data = ( double * ) malloc( ( cv->num_lag + 1 ) * sizeof( double ) );
+					for ( auto i = 2; i <= 4; ++i )
+					{
+						if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
+							continue;
 
-				for ( i = 0; i <= cv->num_lag; ++i )
-					cv->data[ i ] = cv->val[ cv->num_lag - i ];
+						gui::vs[ *num_v ].data = ( i == 4 ? ce->dat : ( i == 3 ? ce->fct : ce->anl ) );
+
+						strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
+						snprintf( gui::vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", gui::tag_pref[ i ], cv->lab_tit );
+
+						gui::vs[ *num_v ].start = ce->start;
+						gui::vs[ *num_v ].end = ce->end;
+						gui::vs[ *num_v ].rank = *num_v;
+						++( *num_v );
+					}
+				}
 			}
-
-			cv->set_lab_tit( );
-			strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
-			snprintf( gui::vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", tag_pref, cv->lab_tit );
-			gui::vs[ *num_v ].start = cv->start;
-			gui::vs[ *num_v ].end = cv->end;
-			gui::vs[ *num_v ].rank = *num_v;
-			gui::vs[ *num_v ].data = cv->data;
-			++( *num_v );
 		}
 
 	for ( cb = b; cb != NULL && ! found; cb = cb->next )
@@ -4769,7 +4841,7 @@ void gui::insert_data_file( bool gz, int *num_v, str_vecT *var_names, bool keep_
 	}
 
 	new_v = 0;
-	plog( "\nResults data from file %s (F_%d) ", filename, file_counter );
+	plog( "\nResults data from file %s (%s%d) ", filename, gui::tag_pref[ 5 ], file_counter );
 
 	if ( ! gz )
 		ch = ( char ) fgetc( f );
@@ -4851,7 +4923,7 @@ void gui::insert_data_file( bool gz, int *num_v, str_vecT *var_names, bool keep_
 		vs[ i ].rank = i;
 
 		tag = new char [ strlen( vs[ i ].tag ) + 10 ];
-		sprintf( tag, "F_%d_%s", file_counter, vs[ i ].tag );
+		sprintf( tag, "%s%d_%s", gui::tag_pref[ 5 ], file_counter, vs[ i ].tag );
 		lsd::strcpyn( vs[ i ].tag, tag, MAX_ELEM_LENGTH );
 		delete [ ] tag;
 
@@ -7766,7 +7838,7 @@ bool gui::create_series( bool mc, str_vecT var_names )
 	for ( k = 0; k < new_series; ++k, ++num_var, ++var_num )
 	{
 		get_str( "vname", vs[ num_var ].label, MAX_ELEM_LENGTH );
-		snprintf( vs[ num_var ].tag, MAX_ELEM_LENGTH, "%s_%s", mc ? "MC" : "C", get_str( "ftag" ) );
+		snprintf( vs[ num_var ].tag, MAX_ELEM_LENGTH, "%s%s", mc ? gui::tag_pref[ 7 ] : gui::tag_pref[ 6 ], get_str( "ftag" ) );
 		vs[ num_var ].rank = var_num;
 
 		if ( cs_long == 1 )									// compute over series?
@@ -8175,7 +8247,7 @@ bool gui::create_maverag( void )
 		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 
 		snprintf( vs[ num_var + i ].label, MAX_ELEM_LENGTH, "%s_%cma%d", str[ i ], ma_type == 0 ? 's' : 'c', flt );
-		snprintf( vs[ num_var + i ].tag, MAX_ELEM_LENGTH, "C_%s", tag[ i ] );
+		snprintf( vs[ num_var + i ].tag, MAX_ELEM_LENGTH, "%s%s", gui::tag_pref[ 6 ], tag[ i ] );
 		vs[ num_var + i ].start = ( ma_type == 0 ) ? start[ i ] + flt - 1 : start[ i ];
 		vs[ num_var + i ].end = end[ i ];
 		vs[ num_var + i ].rank = num_var + i;

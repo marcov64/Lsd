@@ -534,7 +534,7 @@ double lsd::variable::cal( object *caller, int lag )
 				sim->plog_tag( "%d\t", "highlight", time );
 				sim->plog( "stack=" );
 				sim->plog_tag( "%d\t", "highlight", sim->stack_level );
-				sim->plog( "caller=%s%s%s", caller == NULL ? "SYSTEM" : caller->label, caller == NULL ? "" : "\ttrigger=", caller == NULL || sim->stack_log == NULL || sim->stack_log->prev == NULL ? "" : sim->stack_log->prev->label );
+				sim->plog( "caller=%s%s%s", caller == NULL ? "LSD" : caller->label, caller == NULL ? "" : "\ttrigger=", caller == NULL || sim->stack_log == NULL || sim->stack_log->prev == NULL ? "" : sim->stack_log->prev->label );
 			}
 		}
 
@@ -544,7 +544,7 @@ double lsd::variable::cal( object *caller, int lag )
 			if ( ! tit_updated )
 				set_lab_tit( );
 
-			fprintf( sim->log_file_ptr, "%s (%s)\t= %.4g\t(t=%d sim=%d caller=%s)\n", label, lab_tit, val[ 0 ], sim->t, sim->nsim, caller == NULL ? "SYSTEM" : caller->label );
+			fprintf( sim->log_file_ptr, "%s (%s)\t= %.4g\t(t=%d sim=%d caller=%s)\n", label, lab_tit, val[ 0 ], sim->t, sim->nsim, caller == NULL ? "LSD" : caller->label );
 		}
 
 		// open the debugger if required

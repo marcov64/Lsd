@@ -163,7 +163,7 @@ void gui::set_buttons_run( bool enable )
 /*************************************************************
  COVER_BROWSER
  *************************************************************/
-void gui::cover_browser( const char *text1, const char *text2, bool run )
+void gui::cover_browser( const char *text1, const char *text2, bool run, bool da )
 {
 	if ( brCovered )		// ignore if already covered
 		return;
@@ -179,7 +179,7 @@ void gui::cover_browser( const char *text1, const char *text2, bool run )
 	if ( run )
 	{
 		cmd( "ttk::frame .p" );
-		cmd( "ttk::label .p.l -text \"Simulation progress\" -anchor center" );
+		cmd( "ttk::label .p.l -text \"%s progress\" -anchor center", da ? "Data assimilation" : "Simulation" );
 
 		cmd( "ttk::frame .p.b1" );
 		cmd( "ttk::progressbar .p.b1.b -maximum %d -value 0", sim.last_run );
@@ -191,7 +191,7 @@ void gui::cover_browser( const char *text1, const char *text2, bool run )
 		cmd( "ttk::label .p.b2.i -text \"Case: 1 of %d (0%% done)\" -anchor center", sim.last_t );
 		cmd( "pack .p.b2.b .p.b2.i -pady $_5 -expand yes -fill x" );
 
-		if ( sim.last_run > 1 )
+		if ( ! da && sim.last_run > 1 )
 			cmd( "pack .p.l .p.b1 .p.b2 -pady $_10 -expand yes -fill x" );
 		else
 			cmd( "pack .p.l .p.b2 -pady $_10 -expand yes -fill x" );
@@ -229,13 +229,25 @@ void gui::cover_browser( const char *text1, const char *text2, bool run )
 		set_shortcuts_run( "." );
 		set_shortcuts_run( ".log" );
 		set_shortcuts_run( ".str" );
-
-		// disable debug button when running in parallel mode
-		if ( ! sim.parallel_disable && sim.root->search_parallel( ) )
+		
+		if ( da )
 		{
+			cmd( ".b.r2.pause configure -state disabled" );
+			cmd( ".b.r2.speed configure -state disabled" );
+			cmd( ".b.r2.obs configure -state disabled" );
 			cmd( ".b.r2.deb configure -state disabled" );
-			cmd( "tooltip::tooltip .b.r2.deb \"Disable parallel processing\nto enable debugging\"" );
+			cmd( "tooltip::tooltip .b.r2.pause \"Unavailable during\ndata assimilation\"" );
+			cmd( "tooltip::tooltip .b.r2.speed \"Unavailable during\ndata assimilation\"" );
+			cmd( "tooltip::tooltip .b.r2.obs \"Unavailable during\ndata assimilation\"" );
+			cmd( "tooltip::tooltip .b.r2.deb \"Unavailable during\ndata assimilation\"" );
 		}
+		else
+			// disable debug button when running in parallel mode
+			if ( ! sim.parallel_disable && sim.root->search_parallel( ) )
+			{
+				cmd( ".b.r2.deb configure -state disabled" );
+				cmd( "tooltip::tooltip .b.r2.deb \"Disable parallel processing\nto enable debugging\"" );
+			}
 	}
 	else
 	{

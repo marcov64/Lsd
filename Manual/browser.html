@@ -487,11 +487,23 @@ details <a href="#_Changing_properties">below</a>):</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>“</span><span class=Cdigo><b><span lang=EN-US>+</span></b></span><span
-lang=EN-US>” (plus) (<i>toggle shortcuts</i>: </span><span class=Cdigo><span
-lang=EN-US>F5</span></span><span lang=EN-US> or </span><span class=Cdigo><span
-lang=EN-US>+</span></span><span lang=EN-US>): element configured to have its
-time series <a href="LSD_quickhelp.html#save">saved for analysis</a>. </span></p>
+</span></span><span lang=EN-US>“</span><span class=Cdigo><b><span lang=EN-US>@</span></b></span><span
+lang=EN-US>” (at): element configured for <a href="LSD_faqs.html#da">Data
+Assimilation</a>, see details <a href="#assimilation">below</a>.</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US>“</span><span class=Cdigo><span lang=EN-US>§</span></span><span
+lang=EN-US>” (section): Variable with a special/non-default <a
+href="#_Variable_updating">updating scheme</a> set.</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US>“</span><span class=Cdigo><b><span lang=EN-US>&amp;</span></b></span><span
+lang=EN-US>” (ampersand) (<i>toggle shortcuts</i>: </span><span class=Cdigo><span
+lang=EN-US>F11</span></span><span lang=EN-US> or </span><span class=Cdigo><span
+lang=EN-US>&amp;</span></span><span lang=EN-US>): Variable configured to have
+all of its instances computed in parallel.</span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -501,6 +513,14 @@ lang=EN-US>F6</span></span><span lang=EN-US> or </span><span class=Cdigo><span
 lang=EN-US>*</span></span><span lang=EN-US>): element set to be presented
 during the <a href="LSD_faqs.html#simulationrun">simulation run</a> on the <a
 href="runtime.html">Run-time Plot</a> window.</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US>“</span><span class=Cdigo><b><span lang=EN-US>+</span></b></span><span
+lang=EN-US>” (plus) (<i>toggle shortcuts</i>: </span><span class=Cdigo><span
+lang=EN-US>F5</span></span><span lang=EN-US> or </span><span class=Cdigo><span
+lang=EN-US>+</span></span><span lang=EN-US>): element configured to have its
+time series <a href="LSD_quickhelp.html#save">saved for analysis</a>. </span></p>
 
 <p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -536,20 +556,6 @@ whenever it is explicitly written (not regular Variable update) by an Equation
 at the time step selected in menu </span><span class=Cdigo><span lang=EN-US><a
 href="menurun.html#simsetting">Run&gt;Simulation Settings</a></span></span><span
 lang=EN-US>. This option is not available for Functions.</span></p>
-
-<p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>“</span><span class=Cdigo><b><span lang=EN-US>&amp;</span></b></span><span
-lang=EN-US>” (ampersand) (<i>toggle shortcuts</i>: </span><span class=Cdigo><span
-lang=EN-US>F11</span></span><span lang=EN-US> or </span><span class=Cdigo><span
-lang=EN-US>&amp;</span></span><span lang=EN-US>): Variable configured to have
-all of its instances computed in parallel.</span></p>
-
-<p class=MsoListParagraph style='text-indent:-18.0pt'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span lang=EN-US>“</span><span class=Cdigo><span lang=EN-US>§</span></span><span
-lang=EN-US>” (section): Variable with a special/non-default <a
-href="#_Variable_updating">updating scheme</a> set.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The state of the option flags for the
 selected element can be directly toggled using the indicated shortcuts when
@@ -1314,11 +1320,10 @@ lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"
 </span></span><span class=Cdigo><b><span lang=EN-US>Variance</span></b></span><span
 lang=EN-US> (Normal distribution only): the variance for the parameter
 distribution. The variance is the square of the standard deviation. This value
-must be strictly positive, zero (the default) or negative values are invalid.
-The distribution mean is always assumed to be equal to the initial value of the
-Parameter. This option is only enabled if </span><span class=Cdigo><span
-lang=EN-US>Normal</span></span><span lang=EN-US> is selected as the Parameter
-distribution.</span></p>
+must be positive, negative values are invalid. The distribution mean is always
+assumed to be equal to the initial value of the Parameter. This option is only
+enabled if </span><span class=Cdigo><span lang=EN-US>Normal</span></span><span
+lang=EN-US> is selected as the Parameter distribution.</span></p>
 
 <p class=MsoListParagraph style='margin-left:39.0pt;text-indent:-18.0pt'><span
 lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -1326,8 +1331,7 @@ lang=EN-US style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"
 lang=EN-US> (Uniform distribution only): the upper and lower bounds for the
 distribution, measured from the initial value of the Parameter. The upper bound
 value is added to the initial values, while the lower bound is subtracted from
-it. Both values must be positive, but they cannot be simultaneously equal to
-zero (the default).</span></p>
+it. Both values must be positive.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
 lang=EN-US>Remove</span></span><span lang=EN-US> button allows for the removal

@@ -920,7 +920,9 @@ double lsd::strtod( const char *in, char** endptr, double inv )
 			else
 				if ( d == - HUGE_VAL )
 					d = - DBL_MAX;
+#ifndef _LMM_
 		plog_master( "\nWarning: invalid double float (%s), adjusted to %g", in, d );
+#endif
 	}
 
 	return d;
@@ -967,8 +969,9 @@ long lsd::strtol( const char *in, char** endptr, int base, long inv )
 	{
 		if ( l == 0 )
 			l = inv;
-
+#ifndef _LMM_
 		plog_master( "\nWarning: invalid long integer (%s), adjusted to %d", in, l );
+#endif
 	}
 
 	return l;

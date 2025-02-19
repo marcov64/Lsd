@@ -694,13 +694,10 @@ int lsd::assim::dataentry( const char *parWnd )
 	cmd( "set t_col_name \"%s\"", t_col_name != NULL ? t_col_name : "" );
 	cmd( "set t_col_num %d", t_col_num );
 
-	cmd( "set par_distr %d", par_distr );
-	cmd( "set par_n_var %.2f", par_n_var );
+	cmd( "set par_dist %d", par_dist );
+	cmd( "set par_n_sd %.2f", par_n_sd );
 	cmd( "set par_u_upp %.2f", par_u_upp );
 	cmd( "set par_u_low %.2f", par_u_low );
-	cmd( "set par_ens_infl %d", par_ens_infl );
-	cmd( "set par_infl_fac %.3f", par_infl_fac );
-	cmd( "set par_infl_time %d", par_infl_time );
 
 	cmd( "newtop $_w \"Data Assimilation Settings\" { set choice 2 } $parWnd" );
 
@@ -865,12 +862,12 @@ int lsd::assim::dataentry( const char *parWnd )
 		cmd( "ttk::label $_w.dist.d.l -text \"Parameter distribution\"" );
 
 		cmd( "ttk::frame $_w.dist.d.o -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-		cmd( "ttk::radiobutton $_w.dist.d.o.n -text Normal -variable par_distr -value 0 -underline 0 -command { \
+		cmd( "ttk::radiobutton $_w.dist.d.o.n -text Normal -variable par_dist -value 0 -underline 0 -command { \
 				$_w.dist.p.var.e configure -state normal; \
 				$_w.dist.p.min.e configure -state disabled; \
 				$_w.dist.p.max.e configure -state disabled; \
 			}" );
-		cmd( "ttk::radiobutton $_w.dist.d.o.u -text Uniform -variable par_distr -value 1 -underline 0 -command { \
+		cmd( "ttk::radiobutton $_w.dist.d.o.u -text Uniform -variable par_dist -value 1 -underline 0 -command { \
 				$_w.dist.p.var.e configure -state disabled; \
 				$_w.dist.p.min.e configure -state normal; \
 				$_w.dist.p.max.e configure -state normal; \
@@ -883,20 +880,20 @@ int lsd::assim::dataentry( const char *parWnd )
 		cmd( "ttk::frame $_w.dist.p" );
 
 		cmd( "ttk::frame $_w.dist.p.var" );
-		cmd( "ttk::label $_w.dist.p.var.l -width 15 -anchor e -text \"Variance\"" );
-		cmd( "ttk::entry $_w.dist.p.var.e -width 15 -textvariable par_n_var -justify center -state %s", par_distr == 0 ? "normal" : "disabled" );
+		cmd( "ttk::label $_w.dist.p.var.l -width 15 -anchor e -text \"Std. deviation\"" );
+		cmd( "ttk::entry $_w.dist.p.var.e -width 15 -textvariable par_n_sd -justify center -state %s", par_dist == 0 ? "normal" : "disabled" );
 		cmd( "pack $_w.dist.p.var.l $_w.dist.p.var.e -side left -anchor w -padx $_2 -pady $_2" );
 		cmd( "tooltip::tooltip $_w.dist.p.var \"Variance of parameter\nnormal distribution\"" );
 
 		cmd( "ttk::frame $_w.dist.p.max" );
 		cmd( "ttk::label $_w.dist.p.max.l -width 15 -anchor e -text \"Upper bound (+)\"" );
-		cmd( "ttk::entry $_w.dist.p.max.e -width 15 -textvariable par_u_upp -justify center -state %s", par_distr == 1 ? "normal" : "disabled" );
+		cmd( "ttk::entry $_w.dist.p.max.e -width 15 -textvariable par_u_upp -justify center -state %s", par_dist == 1 ? "normal" : "disabled" );
 		cmd( "pack $_w.dist.p.max.l $_w.dist.p.max.e -side left -anchor w -padx $_2 -pady $_2" );
 		cmd( "tooltip::tooltip $_w.dist.p.max \"Maximum value of parameter\nuniform distribution\"" );
 
 		cmd( "ttk::frame $_w.dist.p.min" );
 		cmd( "ttk::label $_w.dist.p.min.l -width 15 -anchor e -text \"Lower bound (-)\"" );
-		cmd( "ttk::entry $_w.dist.p.min.e -width 15 -textvariable par_u_low -justify center -state %s", par_distr == 1 ? "normal" : "disabled" );
+		cmd( "ttk::entry $_w.dist.p.min.e -width 15 -textvariable par_u_low -justify center -state %s", par_dist == 1 ? "normal" : "disabled" );
 		cmd( "pack $_w.dist.p.min.l $_w.dist.p.min.e -side left -anchor w -padx $_2 -pady $_2" );
 		cmd( "tooltip::tooltip $_w.dist.p.min \"Minimum value of parameter\nuniform distribution\"" );
 
@@ -904,43 +901,7 @@ int lsd::assim::dataentry( const char *parWnd )
 
 		cmd( "pack $_w.dist.d $_w.dist.p" );
 
-		cmd( "ttk::frame $_w.infl" );
-
-		cmd( "ttk::frame $_w.infl.en" );
-		cmd( "ttk::label $_w.infl.en.l -text \"Ensemble inflation\"" );
-		cmd( "ttk::checkbutton $_w.infl.en.c -text Enable -variable par_ens_infl -command { \
-				if { $par_ens_infl } { \
-					$_w.infl.opt.f.e configure -state normal; \
-					$_w.infl.opt.t.e configure -state normal \
-				} else { \
-					$_w.infl.opt.f.e configure -state disabled; \
-					$_w.infl.opt.t.e configure -state disabled \
-				} \
-			}" );
-		cmd( "tooltip::tooltip $_w.infl.en.c \"Enable ensemble inflation in DA\nalgorithm for parameter estimation\"" );
-		cmd( "pack $_w.infl.en.l $_w.infl.en.c" );
-
-		cmd( "ttk::frame $_w.infl.opt" );
-
-		cmd( "ttk::frame $_w.infl.opt.f" );
-		cmd( "ttk::label $_w.infl.opt.f.l -width 15 -anchor e -text \"Inflation factor\"" );
-		cmd( "ttk::entry $_w.infl.opt.f.e -width 15 -textvariable par_infl_fac -justify center -state %s", par_ens_infl ? "normal" : "disabled" );
-		cmd( "pack $_w.infl.opt.f.l $_w.infl.opt.f.e -side left -anchor w -padx $_2 -pady $_2" );
-		cmd( "tooltip::tooltip $_w.infl.opt.f \"Dispersion of the inflated\nvirtual observations\"" );
-
-		cmd( "ttk::frame $_w.infl.opt.t" );
-		cmd( "ttk::label $_w.infl.opt.t.l -width 15 -anchor e -text \"Initial time\"" );
-		cmd( "ttk::spinbox $_w.infl.opt.t.e -width 12 -from 2 -to 99999 -justify center -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 2 } { set par_infl_time %%P; return 1 } { %%W delete 0 end; %%W insert 2 $par_infl_time; return 0 } } -invalidcommand { bell }" );
-		cmd( "$_w.infl.opt.t.e insert 0 $par_infl_time" );
-		cmd( "$_w.infl.opt.t.e configure -state %s", par_ens_infl ? "normal" : "disabled" );
-		cmd( "pack $_w.infl.opt.t.l $_w.infl.opt.t.e -side left -anchor w -padx $_2 -pady $_2" );
-		cmd( "tooltip::tooltip $_w.infl.opt.t \"Simulation time to start applying\nensemble inflation algorithm\"" );
-
-		cmd( "pack $_w.infl.opt.f $_w.infl.opt.t -anchor w" );
-
-		cmd( "pack $_w.infl.en $_w.infl.opt" );
-
-		cmd( "pack $_w.c $_w.dist $_w.infl -padx $_5 -pady $_10" );
+		cmd( "pack $_w.c $_w.dist -padx $_5 -pady $_10" );
 	}
 
 	cmd( "okXhelpcancel $_w b Remove { set choice 3 } { set choice 1 } { LsdHelp browser.html#assimilation } { set choice 2 }" );
@@ -1073,54 +1034,33 @@ int lsd::assim::dataentry( const char *parWnd )
 		}
 	}
 	else
-	{
-		switch ( par_distr = gui::get_int( "par_distr" ) )
+		switch ( par_dist = gui::get_int( "par_dist" ) )
 		{
 			case 0:
-				if ( std::isfinite( gui::get_double( "par_n_var" ) ) && gui::get_double( "par_n_var" ) > 0 )
-					par_n_var = gui::get_double( "par_n_var" );
+				if ( std::isfinite( gui::get_double( "par_n_sd" ) ) && gui::get_double( "par_n_sd" ) >= 0 )
+					par_n_sd = gui::get_double( "par_n_sd" );
 				else
 				{
-					cmd( "ttk::messageBox -parent $_w -type ok -icon error -title Error -message \"Invalid variance\" -detail \"Parameter variance must be greater than zero.\"" );
+					cmd( "ttk::messageBox -parent $_w -type ok -icon error -title Error -message \"Invalid standard deviation\" -detail \"Parameter standard deviation must be greater than or equal to zero.\"" );
 					res = 2;
 				}
 
 				break;
 
 			case 1:
-				if ( std::isfinite( gui::get_double( "par_u_upp" ) ) && std::isfinite( gui::get_double( "par_u_low" ) ) && gui::get_double( "par_u_upp" ) >= 0 && gui::get_double( "par_u_low" ) >= 0 && gui::get_double( "par_u_upp" ) + gui::get_double( "par_u_low" ) > 0 )
+				if ( std::isfinite( gui::get_double( "par_u_upp" ) ) && std::isfinite( gui::get_double( "par_u_low" ) ) && gui::get_double( "par_u_upp" ) >= 0 && gui::get_double( "par_u_low" ) >= 0 )
 				{
 					par_u_upp = gui::get_double( "par_u_upp" );
 					par_u_low = gui::get_double( "par_u_low" );
 				}
 				else
 				{
-					cmd( "ttk::messageBox -parent $_w -type ok -icon error -title Error -message \"Invalid bound values\" -detail \"Parameter distribution bound limits must be finite, non-negative, and add-up to more than zero.\"" );
+					cmd( "ttk::messageBox -parent $_w -type ok -icon error -title Error -message \"Invalid bound values\" -detail \"Parameter distribution bound limits must be finite.\"" );
 					res = 2;
 				}
 
 				break;
 		}
-
-		if ( ( par_ens_infl = gui::get_bool( "par_ens_infl" ) ) )
-		{
-			if ( std::isfinite( gui::get_double( "par_infl_fac" ) ) && gui::get_double( "par_infl_fac" ) > 1 )
-				par_infl_fac = gui::get_double( "par_infl_fac" );
-			else
-			{
-				cmd( "ttk::messageBox -parent $_w -type ok -icon error -title Error -message \"Invalid inflation factor\" -detail \"Parameter ensemble inflation factor must be grater than 1.\"" );
-				res = 2;
-			}
-
-			if ( gui::get_int( "par_infl_time" ) > 1 )
-				par_infl_time = gui::get_int( "par_infl_time" );
-			else
-			{
-				cmd( "ttk::messageBox -parent $_w -type ok -icon error -title Error -message \"Invalid inflation initial time\" -detail \"Parameter ensemble inflation start time must be grater than 1.\"" );
-				res = 2;
-			}
-		}
-	}
 
 	end:
 
