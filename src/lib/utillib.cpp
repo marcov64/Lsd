@@ -304,9 +304,7 @@ void lsd::variable::set_lab_tit( void )
 		strcpyn( app, app1, MAX_LINE_SIZE );
 	}
 
-	if ( lab_tit != NULL )
-		delete [ ] lab_tit;
-
+	delete [ ] lab_tit;
 	lab_tit = new char[ strlen( app ) + 1 ];
 	strcpy( lab_tit, app );
 }

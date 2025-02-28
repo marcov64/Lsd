@@ -4671,12 +4671,12 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 			else
 			{
 				// check if there are still instances to be presented
-				// because of DA data analysis, dynamic instances may have to entered
+				// because of DA data analysis, dynamic instances may have to enter
 				// the DA process, but were still used in the model forecasts
 				auto ca = da->elem_map.find( cv->label );
 				if ( ca != da->elem_map.end( ) )
 				{
-					if ( ca->second->inst_idx < ca->second->da_data.size( ) )
+					if ( ca->second->inst_idx < ( int ) ca->second->da_data.size( ) )
 					{
 						element_data *ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 
@@ -4774,7 +4774,7 @@ void lsd::object::insert_store_mem( int max_v, int *num_v, const char *lab )
 			else
 			{
 				auto ca = da->elem_map.find( cv->label );
-				if ( ca != da->elem_map.end( ) && ca->second->inst_idx < ca->second->da_data.size( ) )
+				if ( ca != da->elem_map.end( ) && ca->second->inst_idx < ( int ) ca->second->da_data.size( ) )
 				{
 					element_data *ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 

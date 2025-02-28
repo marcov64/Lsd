@@ -1261,11 +1261,11 @@ class lsd::assim						// data assimilation container class
 		double par_u_low = 0;			// parameter uniform distribution delta -
 		double par_u_upp = 0;			// parameter uniform distribution delta +
 		ed_vecT da_data;				// data produced during assimilation
+		int cov_idx = -1;				// index (row+col) in covariance matrix
 		int data_col_num = 0;			// number of data value column
+		int inst_idx = -1;				// index to last used element instance
 		int par_dist = 0;				// parameter distribution (0:N/1:U)
 		int t_col_num = 0;				// number of time value column
-		size_t cov_idx = -1;			// index (row+col) in covariance matrix
-		size_t inst_idx = -1;			// index to last used element instance
 
 	public:
 		assim( const char *_label, bool _param = false, bool _disable = false, bool _update = false, bool _data_obs = false, const char *_csv = NULL, const char *_data_col_name = NULL, const char *_t_col_name = NULL, int _data_col_num = 0, int _t_col_num = 0, int _par_dist = 0, double _par_n_sd = 0, double _par_u_upp = 0, double _par_u_low = 0 );

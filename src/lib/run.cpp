@@ -140,10 +140,10 @@ int lsd::assimilation::run_simulation( int until_t )
 			next_t = ref_sim->last_t;
 	}
 
+	ref_sim->eff_t = next_t;		// to trigger AoR
+
 	// close data assimilation run-time data structures
 	finish( );
-
-	ref_sim->eff_t = next_t;		// to trigger AoR
 
 #ifndef _TERM_
 	if ( ref_sim->liblnk->runtime_end != NULL )

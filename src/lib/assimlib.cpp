@@ -300,15 +300,10 @@ lsd::assimilation::~assimilation( void )
 void lsd::assimilation::reset_insts( assim *el )
 {
 	if ( el == NULL )
-	{
-		if ( elem == NULL )
-			return;
-
 		el = elem;
-	}
 
-	for ( auto ca = el; el != NULL; el = el->next )
-		ca->inst_idx = -1;
+	for ( ; el != NULL; el = el->next )
+		el->inst_idx = -1;
 }
 
 
@@ -595,6 +590,9 @@ void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_
 
 		if ( da->sav_dat )
 			ca->da_data[ i ]->dat[ t - ca->da_data[ i ]->start ] = z[ j ];
+		
+		ca->da_data[ i ]->cur_t = ca->da_data[ i ]->end = t;
+		
 	}
 }
 
