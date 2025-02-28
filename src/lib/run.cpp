@@ -732,8 +732,12 @@ error:
  *************************************************************/
 bool lsd::variable::alloc_save_var( void )
 {
-	if ( ! sim->running )
+	if ( ! sim->running || ( ! da->disable && sim == sims[ 0 ] ) )
+	{
+		data = NULL;
+		start = end = 0;
 		return true;
+	}
 
 	if ( num_lag > 0 || param == 1 )
 		start = sim->t - 1;
@@ -853,7 +857,7 @@ bool lsd::simulation::results_alt_path( const char *altPath )
 		alt_path = NULL;
 	}
 
-	if ( strlen( altPath ) == 0 )
+	if ( altPath == NULL || strlen( altPath ) == 0 )
 	{
 		save_alt = false;
 		return false;

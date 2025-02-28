@@ -554,7 +554,7 @@ void lsd::assimilation::update_state_vars( const e_matT & x_a_e )
 				cv->val[ 0 ] = cv->chk_val( x_a_e( i, j ) );
 
 				if ( cv->save || cv->savei )
-					cv->data[ run_sims[ i ]->t - cv->start ] = cv->val[ 0 ];
+					cv->data[ run_sims[ i ]->eff_t - cv->start ] = cv->val[ 0 ];
 			}
 }
 

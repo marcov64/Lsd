@@ -1870,8 +1870,7 @@ void lsd::object::empty( void )
 
 /*************************************************************
  COLLECT_CEMETERY
- Processes variables from an object required to
- go to cemetery
+ Processes variables from an object required to go to cemetery
  Also destroy variables not requiring saving
  *************************************************************/
 void lsd::object::collect_cemetery( const variable *caller )
