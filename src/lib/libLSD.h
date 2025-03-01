@@ -144,6 +144,8 @@
 #define REG_SIG_NAME { "Interrupt signal", "Terminate signal", "Abort signal", \
 					   "Floating-point exception", "Illegal instruction", \
 					   "Segmentation violation" }
+#define VAR_TAG_NUM 8
+#define VAR_TAG_NAME { "", "U_", "A_", "T_", "D_", "F_", "C_", "MC_" }
 
 // macro functions
 #define BROTHER( O ) ( O == NULL ? NULL : O->next )
@@ -266,6 +268,7 @@ namespace lsd
 	extern const char *elem_type_names[ ];
 	extern const char *meta_par_names[ ];
 	extern const char *signal_names[ ];
+	extern const char *tag_pref[ ];
 	extern const double t_dist_cl[ T_CLEVS ];// t-distribution table confidence
 	extern const double t_dist_st[ T_CLEVS ][ 36 ];// t-distribution table statistics
 	extern const double z_dist_cl[ Z_CLEVS ];// normal distribution table confidence
@@ -1128,15 +1131,18 @@ class lsd::result						// results file container class
 		~result( void );				// destructor
 
 	private:
+		bool da_res = false;			// data assimilation results
 		bool docsv;						// comma separated .csv text format
 		bool dozip;						// compressed file flag
-		bool firstCol;					// flag for first column in line
+		bool first_col;					// flag for first column in line
 		gzFile fz = NULL;				// compressed file pointer
 		simulation *sim;				// simulation where object is contained
 		FILE *f = NULL;					// uncompressed file pointer
 
-		void data_recursive( object *r, int i );// save a single time step (recursively)
-		void title_recursive( object *r, int i );// write file header (recursively)
+		void data_recursive( object *r, int t );
+		void title_recursive( object *r, bool header );
+		void write_data( double val, int t, int start, int end );
+		void write_title( variable *v, int tag, bool header = false, int start = -1, int end = -1 );
 };
 
 
@@ -1200,8 +1206,10 @@ class lsd::element_data					// DA element data collection class
 	friend class assim;
 	friend class assimilation;
 	friend class object;
+	friend class result;
 
 	private:
+		bool saved = false;				// data saved in current run
 		double *anl = NULL;				// analysis data produced by DA
 		double *fct = NULL;				// forecast data produced by DA
 		double *dat = NULL;				// observational data used during DA
@@ -1240,6 +1248,7 @@ class lsd::assim						// data assimilation container class
 {
 	friend class assimilation;
 	friend class object;
+	friend class result;
 	friend class state_variables;
 
 	public:
@@ -1290,6 +1299,7 @@ class lsd::assimilation					// assimilation container class
 {
 	friend class assim;
 	friend class object;
+	friend class result;
 	friend class simulation;
 	friend class state_variables;
 
@@ -1324,6 +1334,7 @@ class lsd::assimilation					// assimilation container class
 		str_vecT fctd_labs;				// forecasted variable labels
 
 	public:
+		assim *find( const char *lab );
 		assim *search( const char *lab );
 		int count( int what );
 		int run_simulation( int until_t = 0 );

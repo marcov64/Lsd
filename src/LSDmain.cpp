@@ -79,7 +79,6 @@ namespace gui
 	const char *lsd_term_src[ LSD_TERM_NUM ] = LSD_TERM_SRC;
 	const char *model_defaults[ MODEL_OPTIONS_NUM ] = MODEL_OPTIONS_DEFAULT;
 	const char *model_options[ MODEL_OPTIONS_NUM ] = MODEL_OPTIONS_NAME;
-	const char *tag_pref[ AOR_TAG_NUM ] = AOR_TAG_NAME;
 	const char *tk_wnd_names[ TK_WIN_NUM ] = TK_WIN_NAME;
 	const char *wnd_names[ LSD_WIN_NUM ] = LSD_WIN_NAME;
 	const char group_types[ GROUP_OPTIONS_NUM ] = GROUP_OPTIONS_TYPE;

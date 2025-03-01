@@ -2165,6 +2165,9 @@ lsd::result::result( const char *fname, const char *fmode, simulation *_sim, boo
 	docsv = _docsv;
 	dozip = _dozip;
 
+	if ( da != NULL && ! da->disable && da->ref_sim == sim )
+		da_res = true;
+
 	if ( dozip )
 		fz = gzopen( fname, fmode );
 	else
@@ -2191,7 +2194,10 @@ lsd::result::~result( void )
  *************************************************************/
 void lsd::result::title( object *root, int flag )
 {
-	firstCol = true;
+	if ( da != NULL )
+		da->reset_insts( );				// used instances of all DA elements
+
+	first_col = true;
 
 	title_recursive( root, flag );		// output header
 
@@ -2206,59 +2212,40 @@ void lsd::result::title( object *root, int flag )
  RESULT::TITLE_RECURSIVE
  Recursively add elements to header of results file
  *************************************************************/
-void lsd::result::title_recursive( object *r, int header )
+void lsd::result::title_recursive( object *r, bool header )
 {
-	bool single = false;
+	assim *ca;
 	bridge *cb;
+	element_data *ce;
 	object *cur;
 	variable *cv;
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
-	{
-		if ( cv->save == 1 )
+		if ( cv->save )
 		{
 			cv->set_lab_tit( );
-			if ( ( ! strcmp( cv->lab_tit, "1" ) || ! strcmp( cv->lab_tit, "1_1" ) || ! strcmp( cv->lab_tit, "1_1_1" ) || ! strcmp( cv->lab_tit, "1_1_1_1" ) ) && cv->up->hyper_next( ) == NULL )
-				single = true;					// prevent adding suffix to single objects
 
-			if ( header )
+			if ( da_res )
 			{
-				if ( dozip )
+				// check if there are still instances to be presented
+				// because of DA data analysis, dynamic instances may have to enter
+				// the DA process, but were still used in the model forecasts
+				if ( ( ca = da->find( cv->label ) ) != NULL && ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
 				{
-					if ( docsv )
-						gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-					else
-						gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-					else
-						fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
+					ce = ca->da_data[ ++( ca->inst_idx ) ];
+					if ( ! ce->saved )
+					{
+						for ( auto i = 2; i <= 4; ++i )
+							if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
+								write_title( cv, i, header, ce->start, ce->end );
+
+						ce->saved = true;
+					}
 				}
 			}
 			else
-			{
-				if ( dozip )
-				{
-					if ( docsv )
-						gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-					else
-						gzprintf( fz, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-					else
-						fprintf( f, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
-				}
-			}
-
-			firstCol = false;
+				write_title( cv, 0, header, cv->start, cv->end );
 		}
-	}
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
@@ -2274,27 +2261,65 @@ void lsd::result::title_recursive( object *r, int header )
 	}
 
 	if ( r->up == NULL )
-	{
 		for ( cv = sim->cemetery; cv != NULL; cv = cv->next )
 		{
-			if ( dozip )
+			if ( da_res )
 			{
-				if ( docsv )
-					gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-				else
-					gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
+				if ( ( ca = da->find( cv->label ) ) != NULL && ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
+				{
+					ce = ca->da_data[ ++( ca->inst_idx ) ];
+					if ( ! ce->saved )
+					{
+						for ( auto i = 2; i <= 4; ++i )
+							if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
+								write_title( cv, i );
+
+						ce->saved = true;
+					}
+				}
 			}
 			else
-			{
-				if ( docsv )
-					fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
-				else
-					fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-			}
-
-			firstCol = false;
+				write_title( cv, 0 );
 		}
-	}
+}
+
+
+/*************************************************************
+ RESULT::WRITE_TITLE
+ Write a single element to header of results file
+ *************************************************************/
+void lsd::result::write_title( variable *v, int tag, bool header, int start, int end )
+{
+	bool just_name = false;
+
+	// prevent adding suffix to single objects
+	if ( tag == 0 && ( ! strcmp( v->lab_tit, "1" ) || ! strcmp( v->lab_tit, "1_1" ) || ! strcmp( v->lab_tit, "1_1_1" ) || ! strcmp( v->lab_tit, "1_1_1_1" ) || ! strcmp( v->lab_tit, "1_1_1_1_1" ) || ! strcmp( v->lab_tit, "1_1_1_1_1_1" ) || ! strcmp( v->lab_tit, "1_1_1_1_1_1_1" ) || ! strcmp( v->lab_tit, "1_1_1_1_1_1_1_1" ) || ! strcmp( v->lab_tit, "1_1_1_1_1_1_1_1_1" ) || ! strcmp( v->lab_tit, "1_1_1_1_1_1_1_1_1_1" ) ) && v->up->hyper_next( ) == NULL )
+		just_name = true;
+
+	if ( header )
+		if ( dozip )
+			if ( docsv )
+				gzprintf( fz, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
+			else
+				gzprintf( fz, "%s %s%s (%d %d)\t", v->label, tag_pref[ tag ], v->lab_tit, start, end );
+		else
+			if ( docsv )
+				fprintf( f, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
+			else
+				fprintf( f, "%s %s%s (%d %d)\t", v->label, tag_pref[ tag ], v->lab_tit, start, end );
+	else
+		if ( dozip )
+			if ( docsv )
+				gzprintf( fz, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
+			else
+				gzprintf( fz, "%s %s%s (-1 -1)\t", v->label, tag_pref[ tag ], v->lab_tit );
+		else
+			if ( docsv )
+				fprintf( f, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
+			else
+				fprintf( f, "%s %s%s (-1 -1)\t", v->label, tag_pref[ tag ], v->lab_tit );
+
+	first_col = false;
 }
 
 
@@ -2306,14 +2331,18 @@ void lsd::result::data( object *root, int initstep, int endtstep )
 {
 	// don't include initialization (t=0) in .csv format
 	initstep = ( docsv && initstep < 1 ) ? 1 : initstep;
+
 	// adjust for 1 time step if needed
 	endtstep = ( endtstep == 0 ) ? initstep : endtstep;
 
-	for ( int i = initstep; i <= endtstep; i++ )
+	for ( int t = initstep; t <= endtstep; t++ )
 	{
-		firstCol = true;
+		if ( da != NULL )
+			da->reset_insts( );			// used instances of all DA elements
 
-		data_recursive( root, i );		// output one data line
+		first_col = true;
+
+		data_recursive( root, t );		// output one data line
 
 		if ( dozip )					// and change line
 			gzprintf( fz, "\n" );
@@ -2327,54 +2356,41 @@ void lsd::result::data( object *root, int initstep, int endtstep )
  RESULT::DATA_RECURSIVE
  Recursively add data to results file
  *************************************************************/
-void lsd::result::data_recursive( object *r, int i )
+void lsd::result::data_recursive( object *r, int t )
 {
+	double *data;
+	assim *ca;
 	bridge *cb;
+	element_data *ce;
 	object *cur;
 	variable *cv;
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
-	{
-		if ( cv->save == 1 )
+		if ( cv->save )
 		{
-			if ( cv->start <= i && cv->end >= i && ! std::isnan( cv->data[ i - cv->start ] ) )
+			if ( da_res )
 			{
-				if ( dozip )
+				if ( ( ca = da->find( cv->label ) ) != NULL && ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
 				{
-					if ( docsv )
-						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
-					else
-						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
-					else
-						fprintf( f, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
+					ce = ca->da_data[ ++( ca->inst_idx ) ];
+					if ( ! ce->saved )
+					{
+						for ( auto i = 2; i <= 4; ++i )
+						{
+							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
+								continue;
+
+							data = ( i == 4 ? ce->dat : ( i == 3 ? ce->fct : ce->anl ) );
+							write_data( data[ t - ce->start ], t, ce->start, ce->end );
+						}
+
+						ce->saved = true;
+					}
 				}
 			}
 			else
-			{
-				if ( dozip )		// save NaN as n/a
-				{
-					if ( docsv )
-						gzprintf( fz, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
-					else
-						gzprintf( fz, "%s\t", nonavail );
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
-					else
-						fprintf( f, "%s\t", nonavail );
-				}
-			}
-
-			firstCol = false;
+				write_data( cv->data[ t - cv->start ], t, cv->start, cv->end );
 		}
-	}
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
@@ -2384,49 +2400,66 @@ void lsd::result::data_recursive( object *r, int i )
 		cur = cb->head;
 		if ( cur->to_compute )
 			for ( ; cur != NULL; cur = cur->next )
-				data_recursive( cur, i );
+				data_recursive( cur, t );
 	}
 
 	if ( r->up == NULL )
-	{
 		for ( cv = sim->cemetery; cv != NULL; cv = cv->next )
 		{
-			if ( cv->start <= i && cv->end >= i && ! std::isnan( cv->data[ i - cv->start ] ) )
+			if ( da_res )
 			{
-				if ( dozip )
+				if ( ( ca = da->find( cv->label ) ) != NULL && ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
 				{
-					if ( docsv )
-						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
-					else
-						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i - cv->start ] );
-					else
-						fprintf( f, "%.*G\t", SIG_DIG, cv->data[ i - cv->start ] );
-				}
-			}
-			else					// save NaN as n/a
-			{
-				if ( dozip )
-				{
-					if ( docsv )
-						gzprintf( fz, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
-					else
-						gzprintf( fz, "%s\t", nonavail );
-				}
-				else
-				{
-					if ( docsv )
-						fprintf( f, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
-					else
-						fprintf(f, "%s\t", nonavail );
-				}
-			}
+					ce = ca->da_data[ ++( ca->inst_idx ) ];
+					if ( ! ce->saved )
+					{
+						for ( auto i = 2; i <= 4; ++i )
+						{
+							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
+								continue;
 
-			firstCol = false;
+							data = ( i == 4 ? ce->dat : ( i == 3 ? ce->fct : ce->anl ) );
+							write_data( data[ t - ce->start ], t, ce->start, ce->end );
+						}
+
+						ce->saved = true;
+					}
+				}
+			}
+			else
+				write_data( cv->data[ t - cv->start ], t, cv->start, cv->end );
 		}
-	}
+}
+
+
+/*************************************************************
+ RESULT::WRITE_DATA
+ Write a single element data to results file
+ *************************************************************/
+void lsd::result::write_data( double val, int t, int start, int end )
+{
+	if ( start <= t && end >= t && ! std::isnan( val ) )
+		if ( dozip )
+			if ( docsv )
+				gzprintf( fz, "%s%.*G", first_col ? "" : CSV_SEP, SIG_DIG, val );
+			else
+				gzprintf( fz, "%.*G\t", SIG_DIG, val );
+		else
+			if ( docsv )
+				fprintf( f, "%s%.*G", first_col ? "" : CSV_SEP, SIG_DIG, val );
+			else
+				fprintf( f, "%.*G\t", SIG_DIG, val );
+	else
+		if ( dozip )		// save NaN as n/a
+			if ( docsv )
+				gzprintf( fz, "%s%s", first_col ? "" : CSV_SEP, nonavail );
+			else
+				gzprintf( fz, "%s\t", nonavail );
+		else
+			if ( docsv )
+				fprintf( f, "%s%s", first_col ? "" : CSV_SEP, nonavail );
+			else
+				fprintf( f, "%s\t", nonavail );
+
+	first_col = false;
 }

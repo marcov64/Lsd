@@ -295,7 +295,7 @@ lsd::assimilation::~assimilation( void )
 
 /*************************************************************
  RESET_INSTS
- Reset all the element instances' counters for AoR
+ Reset all the element instances' counters for AoR/saving
  *************************************************************/
 void lsd::assimilation::reset_insts( assim *el )
 {
@@ -303,7 +303,12 @@ void lsd::assimilation::reset_insts( assim *el )
 		el = elem;
 
 	for ( ; el != NULL; el = el->next )
+	{
 		el->inst_idx = -1;
+
+		for ( auto d : el->da_data )
+			d->saved = false;
+	}
 }
 
 
@@ -376,8 +381,23 @@ int lsd::assimilation::count( int what )
 
 
 /*************************************************************
+ FIND
+ Find data assimilation element using runtime (after init) map
+ *************************************************************/
+lsd::assim *lsd::assimilation::find( const char *lab )
+{
+	auto ca = da->elem_map.find( lab );
+
+	if ( ca != da->elem_map.end( ) )
+		return ca->second;
+
+	return NULL;
+}
+
+
+/*************************************************************
  SEARCH
- Find element in data assimilation linked list
+ Search element in data assimilation linked list
  *************************************************************/
 lsd::assim *lsd::assimilation::search( const char *lab )
 {
@@ -590,9 +610,9 @@ void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_
 
 		if ( da->sav_dat )
 			ca->da_data[ i ]->dat[ t - ca->da_data[ i ]->start ] = z[ j ];
-		
+
 		ca->da_data[ i ]->cur_t = ca->da_data[ i ]->end = t;
-		
+
 	}
 }
 

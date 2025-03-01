@@ -191,8 +191,6 @@
 #define TCL_FIND_EXE	"@where wish86.exe > nul 2>&1"
 
 // constant string arrays
-#define AOR_TAG_NUM 8
-#define AOR_TAG_NAME { "", "U_", "A_", "T_", "D_", "F_", "C_", "MC_" }
 #define GROUP_OPTIONS_NUM 2
 #define GROUP_OPTIONS_NAME { "name", "description" }
 #define GROUP_OPTIONS_DEFAULT { "(no name)", "(no description)" }
@@ -289,7 +287,6 @@ namespace gui
 	extern const char *model_defaults[ ];
 	extern const char *model_options[ ];
 	extern const char *res_g;			// structure window result variable
-	extern const char *tag_pref[ ];
 	extern const char *tk_wnd_names[ ];	// Tk names of main windows
 	extern const char *wnd_names[ ];	// LSD main windows' names
 	extern const char group_types[ ];	// types of group options

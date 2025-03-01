@@ -63,6 +63,7 @@ namespace lsd
 	const char *elem_type_names[ ELEM_TYPE_NUM ] = ELEM_TYPE_NAME;
 	const char *meta_par_names[ META_PAR_NUM ] = META_PAR_NAME;
 	const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
+	const char *tag_pref[ VAR_TAG_NUM ] = VAR_TAG_NAME;
 	const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
 	const i_mapT logic_ops_map = LOG_OPS_PAIR;
 }

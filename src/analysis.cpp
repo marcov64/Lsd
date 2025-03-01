@@ -4637,9 +4637,11 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 	bool found;
 	int tag;
 	static bool warn_once = false;
+	assim *ca;
+	bridge *cb;
+	element_data *ce;
 	object *cur;
 	variable *cv;
-	bridge *cb;
 
 	for ( found = false, cv = v; cv != NULL && ! gui::stop; cv = cv->next )
 		if ( ( lab == NULL && cv->save ) || ( lab != NULL && da->disable && strcmp( cv->label, lab ) == 0 ) )
@@ -4658,8 +4660,7 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 					cv->end = cv->last_update;
 				}
 
-				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, gui::tag_pref[ tag ], cv->lab_tit, cv->start, cv->end, *num_v, cv->up->label );
-
+				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref[ tag ], cv->lab_tit, cv->start, cv->end, *num_v, cv->up->label );
 				++( *num_v );
 
 				if ( cv->end > gui::num_c )
@@ -4669,29 +4670,31 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 					gui::first_c = cv->start;
 			}
 			else
-			{
 				// check if there are still instances to be presented
 				// because of DA data analysis, dynamic instances may have to enter
 				// the DA process, but were still used in the model forecasts
-				auto ca = da->elem_map.find( cv->label );
-				if ( ca != da->elem_map.end( ) )
+				if ( ( ca = da->find( cv->label ) ) != NULL )
 				{
-					if ( ca->second->inst_idx < ( int ) ca->second->da_data.size( ) )
+					if ( ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
 					{
-						element_data *ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+						ce = ca->da_data[ ++( ca->inst_idx ) ];
+						if ( ! ce->saved )
+						{
+							for ( auto i = 2; i <= 4; ++i )
+								if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
+								{
+									cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref[ i ], cv->lab_tit, ce->start, ce->end, *num_v, cv->up->label );
+									++( *num_v );
+								}
 
-						for ( auto i = 2; i <= 4; ++i )
-							if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
-							{
-								cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, gui::tag_pref[ i ], cv->lab_tit, ce->start, ce->end, *num_v, cv->up->label );
-								++( *num_v );
-							}
+							if ( ce->end > gui::num_c )
+								gui::num_c = ce->end;
 
-						if ( ce->end > gui::num_c )
-							gui::num_c = ce->end;
+							if ( ce->start < gui::first_c )
+								gui::first_c = ce->start;
 
-						if ( ce->start < gui::first_c )
-							gui::first_c = ce->start;
+							ce->saved = true;
+						}
 					}
 					else
 					{
@@ -4701,7 +4704,6 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 						warn_once = true;
 					}
 				}
-			}
 
 			if ( *num_v % PROG_SERIES == 0 )
 				cmd( "prgboxupdate .da.ser %d", *num_v - 1 );
@@ -4715,15 +4717,41 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 	if ( up == NULL && lab == NULL )
 		for ( cv = sim->cemetery; cv != NULL && ! gui::stop; cv = cv->next )
 		{
-			cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, gui::tag_pref[ 0 ], cv->lab_tit, cv->start, cv->end, *num_v, sim->par_map[ cv->label ].c_str( ) );
+			if ( da->disable )
+			{
+				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref[ 0 ], cv->lab_tit, cv->start, cv->end, *num_v, sim->par_map[ cv->label ].c_str( ) );
+				++( *num_v );
 
-			if ( cv->end > gui::num_c )
-				gui::num_c = cv->end;
+				if ( cv->end > gui::num_c )
+					gui::num_c = cv->end;
 
-			if ( cv->start < gui::first_c )
-				gui::first_c = cv->start;
+				if ( cv->start < gui::first_c )
+					gui::first_c = cv->start;
+			}
+			else
+				if ( ( ca = da->find( cv->label ) ) != NULL && ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
+				{
+					ce = ca->da_data[ ++( ca->inst_idx ) ];
+					if ( ! ce->saved )
+					{
+						for ( auto i = 2; i <= 4; ++i )
+							if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
+							{
+								cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref[ i ], cv->lab_tit, ce->start, ce->end, *num_v, cv->up->label );
+								++( *num_v );
+							}
 
-			if ( ++( *num_v ) % PROG_SERIES == 0 )
+						if ( ce->end > gui::num_c )
+							gui::num_c = ce->end;
+
+						if ( ce->start < gui::first_c )
+							gui::first_c = ce->start;
+
+						ce->saved = true;
+					}
+				}
+
+			if ( *num_v % PROG_SERIES == 0 )
 				cmd( "prgboxupdate .da.ser %d", *num_v - 1 );
 		}
 }
@@ -4736,9 +4764,11 @@ void lsd::object::insert_store_mem( int max_v, int *num_v, const char *lab )
 {
 	bool found;
 	int tag;
+	assim *ca;
+	bridge *cb;
+	element_data *ce;
 	object *cur;
 	variable *cv;
-	bridge *cb;
 
 	for ( found = false, cv = v; cv != NULL && *num_v < max_v; cv = cv->next )
 		if ( ( lab == NULL && cv->save ) || ( lab != NULL && da->disable && ! strcmp( cv->label, lab ) ) )
@@ -4762,39 +4792,33 @@ void lsd::object::insert_store_mem( int max_v, int *num_v, const char *lab )
 						cv->data[ i ] = cv->val[ cv->num_lag - i ];
 				}
 
-				gui::vs[ *num_v ].data = cv->data;
-
 				strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
-				snprintf( gui::vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", gui::tag_pref[ tag ], cv->lab_tit );
+				snprintf( gui::vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", tag_pref[ tag ], cv->lab_tit );
 				gui::vs[ *num_v ].start = cv->start;
 				gui::vs[ *num_v ].end = cv->end;
 				gui::vs[ *num_v ].rank = *num_v;
+				gui::vs[ *num_v ].data = cv->data;
 				++( *num_v );
 			}
 			else
-			{
-				auto ca = da->elem_map.find( cv->label );
-				if ( ca != da->elem_map.end( ) && ca->second->inst_idx < ( int ) ca->second->da_data.size( ) )
+				if ( ( ca = da->find( cv->label ) ) != NULL && ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
 				{
-					element_data *ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+					ce = ca->da_data[ ++( ca->inst_idx ) ];
+					if ( ! ce->saved )
+						for ( auto i = 2; i <= 4; ++i )
+						{
+							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
+								continue;
 
-					for ( auto i = 2; i <= 4; ++i )
-					{
-						if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
-							continue;
-
-						gui::vs[ *num_v ].data = ( i == 4 ? ce->dat : ( i == 3 ? ce->fct : ce->anl ) );
-
-						strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
-						snprintf( gui::vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", gui::tag_pref[ i ], cv->lab_tit );
-
-						gui::vs[ *num_v ].start = ce->start;
-						gui::vs[ *num_v ].end = ce->end;
-						gui::vs[ *num_v ].rank = *num_v;
-						++( *num_v );
-					}
+							strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
+							snprintf( gui::vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", tag_pref[ i ], cv->lab_tit );
+							gui::vs[ *num_v ].start = ce->start;
+							gui::vs[ *num_v ].end = ce->end;
+							gui::vs[ *num_v ].rank = *num_v;
+							gui::vs[ *num_v ].data = ( i == 4 ? ce->dat : ( i == 3 ? ce->fct : ce->anl ) );
+							++( *num_v );
+						}
 				}
-			}
 		}
 
 	for ( cb = b; cb != NULL && ! found; cb = cb->next )
@@ -4803,16 +4827,38 @@ void lsd::object::insert_store_mem( int max_v, int *num_v, const char *lab )
 				cur->insert_store_mem( max_v, num_v, lab );
 
 	if ( up == NULL && lab == NULL )
+	{
 		for ( cv = sim->cemetery; cv != NULL && *num_v < max_v; cv = cv->next )
-		{
-			strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
-			strcpyn( gui::vs[ *num_v ].tag, cv->lab_tit, MAX_ELEM_LENGTH );
-			gui::vs[ *num_v ].start = cv->start;
-			gui::vs[ *num_v ].end = cv->end;
-			gui::vs[ *num_v ].rank = *num_v;
-			gui::vs[ *num_v ].data = cv->data;
-			++( *num_v );
-		}
+			if ( da->disable )
+			{
+				strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
+				strcpyn( gui::vs[ *num_v ].tag, cv->lab_tit, MAX_ELEM_LENGTH );
+				gui::vs[ *num_v ].start = cv->start;
+				gui::vs[ *num_v ].end = cv->end;
+				gui::vs[ *num_v ].rank = *num_v;
+				gui::vs[ *num_v ].data = cv->data;
+				++( *num_v );
+			}
+			else
+				if ( ( ca = da->find( cv->label ) ) != NULL && ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
+				{
+					ce = ca->da_data[ ++( ca->inst_idx ) ];
+					if ( ! ce->saved )
+						for ( auto i = 2; i <= 4; ++i )
+						{
+							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
+								continue;
+
+							strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
+							snprintf( gui::vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", tag_pref[ i ], cv->lab_tit );
+							gui::vs[ *num_v ].start = ce->start;
+							gui::vs[ *num_v ].end = ce->end;
+							gui::vs[ *num_v ].rank = *num_v;
+							gui::vs[ *num_v ].data = ( i == 4 ? ce->dat : ( i == 3 ? ce->fct : ce->anl ) );
+							++( *num_v );
+						}
+				}
+	}
 }
 
 
@@ -4841,7 +4887,7 @@ void gui::insert_data_file( bool gz, int *num_v, str_vecT *var_names, bool keep_
 	}
 
 	new_v = 0;
-	plog( "\nResults data from file %s (%s%d) ", filename, gui::tag_pref[ 5 ], file_counter );
+	plog( "\nResults data from file %s (%s%d) ", filename, lsd::tag_pref[ 5 ], file_counter );
 
 	if ( ! gz )
 		ch = ( char ) fgetc( f );
@@ -4923,7 +4969,7 @@ void gui::insert_data_file( bool gz, int *num_v, str_vecT *var_names, bool keep_
 		vs[ i ].rank = i;
 
 		tag = new char [ strlen( vs[ i ].tag ) + 10 ];
-		sprintf( tag, "%s%d_%s", gui::tag_pref[ 5 ], file_counter, vs[ i ].tag );
+		sprintf( tag, "%s%d_%s", lsd::tag_pref[ 5 ], file_counter, vs[ i ].tag );
 		lsd::strcpyn( vs[ i ].tag, tag, MAX_ELEM_LENGTH );
 		delete [ ] tag;
 
@@ -7838,7 +7884,7 @@ bool gui::create_series( bool mc, str_vecT var_names )
 	for ( k = 0; k < new_series; ++k, ++num_var, ++var_num )
 	{
 		get_str( "vname", vs[ num_var ].label, MAX_ELEM_LENGTH );
-		snprintf( vs[ num_var ].tag, MAX_ELEM_LENGTH, "%s%s", mc ? gui::tag_pref[ 7 ] : gui::tag_pref[ 6 ], get_str( "ftag" ) );
+		snprintf( vs[ num_var ].tag, MAX_ELEM_LENGTH, "%s%s", mc ? lsd::tag_pref[ 7 ] : lsd::tag_pref[ 6 ], get_str( "ftag" ) );
 		vs[ num_var ].rank = var_num;
 
 		if ( cs_long == 1 )									// compute over series?
@@ -8247,7 +8293,7 @@ bool gui::create_maverag( void )
 		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 
 		snprintf( vs[ num_var + i ].label, MAX_ELEM_LENGTH, "%s_%cma%d", str[ i ], ma_type == 0 ? 's' : 'c', flt );
-		snprintf( vs[ num_var + i ].tag, MAX_ELEM_LENGTH, "%s%s", gui::tag_pref[ 6 ], tag[ i ] );
+		snprintf( vs[ num_var + i ].tag, MAX_ELEM_LENGTH, "%s%s", lsd::tag_pref[ 6 ], tag[ i ] );
 		vs[ num_var + i ].start = ( ma_type == 0 ) ? start[ i ] + flt - 1 : start[ i ];
 		vs[ num_var + i ].end = end[ i ];
 		vs[ num_var + i ].rank = num_var + i;

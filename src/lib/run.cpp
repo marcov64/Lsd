@@ -99,9 +99,10 @@ int lsd::assimilation::run_simulation( int until_t )
 #ifndef _TERM_
 	if ( ref_sim->liblnk->runtime_start != NULL )
 		ref_sim->liblnk->runtime_start( true );
-#else
-	ref_sim->plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
 #endif
+
+	ref_sim->plog( "\nData assimilation running (threads=%d)...", ref_sim->last_run );
+	
 	// control execution time
 	start = clock( );
 
@@ -142,12 +143,13 @@ int lsd::assimilation::run_simulation( int until_t )
 			next_t = ref_sim->last_t;
 	}
 
-	ref_sim->eff_t = next_t;		// to trigger AoR
+	ref_sim->eff_t = std::min( next_t, ref_sim->last_t );	// to trigger AoR
+	ref_sim->t = std::min( next_t, ref_sim->last_t + 1 );
 
 	// close data assimilation run-time data structures
 	finish( );
 
-	ref_sim->plog( "\nFinished processing configuration file (%.2f sec.)\n", ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
+	ref_sim->plog( "\nData assimilation %s at case %d (%.2f sec.)\n", ref_sim->quit == 2 ? "stopped" : "finished", ref_sim->t - 1, ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
 
 #ifndef _TERM_
 	if ( ref_sim->liblnk->runtime_end != NULL )
