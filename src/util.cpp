@@ -204,7 +204,7 @@ void gui::error_hard_helper( const char *boxTitle, const char *boxText, const ch
 		reset_plot( );		// show & disable run-time plot
 		set_buttons_run( false );
 
-		plog_tag( "\n\nError detected at case (time step): %d", "highlight", sim.t );
+		plog_tag( "\n\nError detected at time step: %d", "highlight", sim.t );
 		plog( "\n\nError: %s\nDetails: %s", boxTitle, logText );
 		if ( ! sim.parallel_mode && sim.stack_log != NULL && sim.stack_log->v != NULL )
 			plog( "\nOffending code contained in the equation for variable: '%s'", sim.stack_log->v->label );

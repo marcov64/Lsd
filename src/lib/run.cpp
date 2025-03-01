@@ -102,7 +102,7 @@ int lsd::assimilation::run_simulation( int until_t )
 #endif
 
 	ref_sim->plog( "\nData assimilation running (threads=%d)...", ref_sim->last_run );
-	
+
 	// control execution time
 	start = clock( );
 
@@ -149,7 +149,7 @@ int lsd::assimilation::run_simulation( int until_t )
 	// close data assimilation run-time data structures
 	finish( );
 
-	ref_sim->plog( "\nData assimilation %s at case %d (%.2f sec.)\n", ref_sim->quit == 2 ? "stopped" : "finished", ref_sim->t - 1, ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
+	ref_sim->plog( "\nData assimilation %s at time step %d (%.2f sec.)\n", ref_sim->quit == 2 ? "stopped" : "finished", ref_sim->t - 1, ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
 
 #ifndef _TERM_
 	if ( ref_sim->liblnk->runtime_end != NULL )
@@ -243,7 +243,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 			update_bar( bar_done, perc_done, last_done, 2 * BAR_DONE_SIZE );
 
 		if ( da->disable && fast_mode < 2 )
-			plog( "\nSimulation %d of %d %s at case %d (%.2f sec.)\n", run, last_run, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( clock( ) - start_run ) / CLOCKS_PER_SEC );
+			plog( "\nSimulation %d of %d %s at time step %d (%.2f sec.)\n", run, last_run, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( clock( ) - start_run ) / CLOCKS_PER_SEC );
 
 		if ( quit == 1 )			// multiple simulation runs need to reset quit
 			quit = 0;

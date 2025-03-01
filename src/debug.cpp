@@ -297,7 +297,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 						ttk::frame .deb.v.v1; \
 						ttk::label .deb.v.v1.name1 -text \"Variable:\"; \
 						ttk::label .deb.v.v1.name2 -width 20 -anchor w -style hl.TLabel; \
-						ttk::label .deb.v.v1.time1 -text \"Case:\"; \
+						ttk::label .deb.v.v1.time1 -text \"Time:\"; \
 						ttk::label .deb.v.v1.time2 -width 5 -anchor w -style hl.TLabel; \
 						if { %d } { \
 							set interacting 1; \
@@ -656,7 +656,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				cmd( "pack $e.n.l $e.n.v -side left -padx $_2" );
 
 				cmd( "ttk::frame $e.t" );
-				cmd( "ttk::label $e.t.l -text \"Current case:\"" );
+				cmd( "ttk::label $e.t.l -text \"Current time:\"" );
 				cmd( "ttk::label $e.t.v -style hl.TLabel -text %d", sim->t );
 				cmd( "pack $e.t.l $e.t.v -side left -padx $_2" );
 
@@ -1166,7 +1166,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				cmd( "newtop $t \"Run Until\" { set choice 2 } .deb" );
 
 				cmd( "ttk::frame $t.t" );
-				cmd( "ttk::label $t.t.l -text \"Run until case\"" );
+				cmd( "ttk::label $t.t.l -text \"Run until time step\"" );
 				cmd( "ttk::entry $t.t.val -width 5 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set tdebug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tdebug; return 0 } } -invalidcommand { bell } -justify center" );
 				cmd( "$t.t.val insert 0 $tdebug" );
 				cmd( "pack $t.t.l $t.t.val" );

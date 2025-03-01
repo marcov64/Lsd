@@ -177,7 +177,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $T.f2" );
 
 			cmd( "ttk::frame $T.f2.t" );
-			cmd( "ttk::label $T.f2.t.l -text \"Cases:\"" );
+			cmd( "ttk::label $T.f2.t.l -text \"Time steps:\"" );
 			cmd( "ttk::label $T.f2.t.w -text \"%d\" -style hl.TLabel", sim.last_t );
 			cmd( "pack $T.f2.t.l $T.f2.t.w -side left -padx $_2" );
 
@@ -233,7 +233,7 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "set choice [ expr { ! $no_tot && [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } ]", out_dir, strlen( out_dir ) > 0 ? "/" : "" );
 
 				cmd( "ttk::frame $T.f5" );
-				cmd( "ttk::label $T.f5.l1 -text \"Totals file (last steps)\"" );
+				cmd( "ttk::label $T.f5.l1 -text \"Totals file (last time steps)\"" );
 				cmd( "ttk::label $T.f5.l2 -style %s -text \"$totFile.$totExt$zipExt\"", choice ? "hl.TLabel" : "dhl.TLabel" );
 
 				if ( choice )
@@ -2214,8 +2214,8 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "pack $T.h $T.f -padx $_5 -pady $_5" );
 
-			cmd( "tooltip::tooltip $T.f.c \"First case (time step) to compute the variable\"" );
-			cmd( "tooltip::tooltip $T.f.a \"Maximum case (time step) for uniform random first computation\"" );
+			cmd( "tooltip::tooltip $T.f.c \"First time step to compute the variable\"" );
+			cmd( "tooltip::tooltip $T.f.a \"Maximum time step for uniform random first computation\"" );
 			cmd( "tooltip::tooltip $T.f.b \"Period between computations of variable\"" );
 			cmd( "tooltip::tooltip $T.f.d \"Maximum period for uniform random periodic computation\"" );
 
@@ -2484,7 +2484,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $T.f" );
 
 			cmd( "ttk::frame $T.f.c" );
-			cmd( "ttk::label $T.f.c.l2 -width $tw -anchor e -text \"Simulation steps\"" );
+			cmd( "ttk::label $T.f.c.l2 -width $tw -anchor e -text \"Simulation time steps\"" );
 			cmd( "ttk::spinbox $T.f.c.e2 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set last_t %%P; return 1 } { %%W delete 0 end; %%W insert 0 $last_t; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( "$T.f.c.e2 insert 0 $last_t" );
 			cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx $_2 -pady $_2" );
@@ -5372,7 +5372,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $b.f2" );
 
 			cmd( "ttk::frame $b.f2.t" );
-			cmd( "ttk::label $b.f2.t.l -text \"Cases:\"" );
+			cmd( "ttk::label $b.f2.t.l -text \"Time steps:\"" );
 			cmd( "ttk::label $b.f2.t.w -text \"%d\" -style hl.TLabel", sim.last_t );
 			cmd( "pack $b.f2.t.l $b.f2.t.w -side left -padx $_2" );
 

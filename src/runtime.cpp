@@ -383,7 +383,7 @@ void gui::init_plot( int num )
 	{
 		cmd( "$activeplot.fond.go conf -state normal" );
 		cmd( "$activeplot.fond.shift conf -state normal" );
-		cmd( "tooltip::tooltip $activeplot.fond.go \"Center plot in current case (time step)\"" );
+		cmd( "tooltip::tooltip $activeplot.fond.go \"Center plot in current time step\"" );
 		cmd( "tooltip::tooltip $activeplot.fond.shift \"Automatic scrolling\"" );
 	}
 

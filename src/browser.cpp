@@ -1519,13 +1519,13 @@ int gui::runtime_buttons( void )
 			if ( pause_run )
 			{
 				cmd( "set origLogTit [ wm title .log ]; wm title .log \"$origLogTit (PAUSED)\"" );
-				plog( "\nSimulation %d of %d paused at case %d", sim.run, sim.last_run, sim.t );
+				plog( "\nSimulation %d of %d paused at time %d", sim.run, sim.last_run, sim.t );
 				cmd( ".b.r2.pause conf -text Resume" );
 			}
 			else
 			{
 				cmd( "wm title .log \"$origLogTit\"" );
-				plog( "\nSimulation %d of %d resumed at case %d", sim.run, sim.last_run, sim.t );
+				plog( "\nSimulation %d of %d resumed at time %d", sim.run, sim.last_run, sim.t );
 				cmd( ".b.r2.pause conf -text Pause" );
 			}
 	}
@@ -1549,7 +1549,7 @@ int gui::runtime_buttons( void )
 	 if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER && exists_window( ".p" ) )
 	{
 		cmd( ".p.b2.b configure -value %d", cur_t );
-		cmd( ".p.b2.i configure -text \"Case: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", std::min( cur_t + 1, sim.last_t ), sim.last_t, cur_t, sim.last_t );
+		cmd( ".p.b2.i configure -text \"Time: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", std::min( cur_t + 1, sim.last_t ), sim.last_t, cur_t, sim.last_t );
 		cmd( "update" );
 		last_update = clock( );
 	}

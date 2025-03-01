@@ -1611,7 +1611,7 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 						sim->error_hard( "cannot add object",
 										 "check your equation code to prevent this situation",
 										 true,
-										 "invalid update case (%d) to set object '%s'\nvariable '%s' was updated later (%d)",
+										 "invalid update time step (%d) to set object '%s'\nvariable '%s' was updated later (%d)",
 										 t_update, lab, cv->label, cv->last_update );
 						return NULL;
 					}
@@ -3368,7 +3368,7 @@ double lsd::object::write( const char *lab, double value, int time, int lag )
 					sim->error_hard( "invalid write operation",
 									 "check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
 									 true,
-									 "invalid update case (%d) and lag (%d) for variable '%s'",
+									 "invalid update time step (%d) and lag (%d) for variable '%s'",
 									 time, lag, lab );
 					return NAN;
 				}

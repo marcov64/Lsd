@@ -188,7 +188,7 @@ void gui::cover_browser( const char *text1, const char *text2, bool run, bool da
 
 		cmd( "ttk::frame .p.b2" );
 		cmd( "ttk::progressbar .p.b2.b -maximum %d -value 0", sim.last_t );
-		cmd( "ttk::label .p.b2.i -text \"Case: 1 of %d (0%% done)\" -anchor center", sim.last_t );
+		cmd( "ttk::label .p.b2.i -text \"Time: 1 of %d (0%% done)\" -anchor center", sim.last_t );
 		cmd( "pack .p.b2.b .p.b2.i -pady $_5 -expand yes -fill x" );
 
 		if ( ! da && sim.last_run > 1 )
@@ -229,7 +229,7 @@ void gui::cover_browser( const char *text1, const char *text2, bool run, bool da
 		set_shortcuts_run( "." );
 		set_shortcuts_run( ".log" );
 		set_shortcuts_run( ".str" );
-		
+
 		if ( da )
 		{
 			cmd( ".b.r2.pause configure -state disabled" );
