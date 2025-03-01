@@ -3285,7 +3285,7 @@ lsd::object *gui::operate( lsd::object *r )
 		break;
 
 
-		// Save result
+		// Save results
 		case 37:
 
 			choice = 0;
@@ -3302,7 +3302,7 @@ lsd::object *gui::operate( lsd::object *r )
 			time_t rawtime;
 			time( &rawtime );
 			struct tm *timeinfo;
-			char ftime[80];
+			char ftime[ 80 ];
 			timeinfo = localtime( &rawtime );
 			strftime ( ftime, 80, "%Y%m%d-%H%M%S", timeinfo );
 

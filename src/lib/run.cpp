@@ -88,7 +88,7 @@ int lsd::dispatch_runs( sim_vecT run_sims, int until_t, int until_run )
  *************************************************************/
 int lsd::assimilation::run_simulation( int until_t )
 {
-	clock_t last_update;
+	clock_t start, last_update;
 	int nstale, res = 0;
 
 	// initialize data assimilation data structures
@@ -100,8 +100,10 @@ int lsd::assimilation::run_simulation( int until_t )
 	if ( ref_sim->liblnk->runtime_start != NULL )
 		ref_sim->liblnk->runtime_start( true );
 #else
-	plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
+	ref_sim->plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
 #endif
+	// control execution time
+	start = clock( );
 
 	// do the data assimilation forecast-analysis cycle
 	for ( auto dtime : time_var )
@@ -145,6 +147,8 @@ int lsd::assimilation::run_simulation( int until_t )
 	// close data assimilation run-time data structures
 	finish( );
 
+	ref_sim->plog( "\nFinished processing configuration file (%.2f sec.)\n", ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
+
 #ifndef _TERM_
 	if ( ref_sim->liblnk->runtime_end != NULL )
 		ref_sim->liblnk->runtime_end( );
@@ -161,7 +165,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 {
 	int res = 0;
 	static char bar_done[ 2 * BAR_DONE_SIZE ];
-	static clock_t start, last_update;
+	static clock_t start_mc, start_run, last_update;
 	static int perc_done, last_done;
 
 	lsd::inhibit_system_sleep( );	// prevent system sleep during run
@@ -171,14 +175,14 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 		goto end_run;				// already there, nothing to do
 
 	if ( ! running_seq )			// if not already running sequential run set
-		if ( ( res = init_new_seq( bar_done, perc_done, last_done ) ) != 0 )
+		if ( ( res = init_new_seq( start_mc, bar_done, perc_done, last_done ) ) != 0 )
 			goto end_run;
 
 	// start loop controlling set of sequential simulation runs
 	for ( ; quit != 2 && run <= last_run; ++run )
 	{
 		if ( ! running )			// if not already running single run
-			if ( ( res = init_new_run( start, last_update ) ) != 0 )
+			if ( ( res = init_new_run( start_run, last_update ) ) != 0 )
 				goto end_run;
 
 		// start loop controlling a single simulation run
@@ -237,7 +241,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 			update_bar( bar_done, perc_done, last_done, 2 * BAR_DONE_SIZE );
 
 		if ( da->disable && fast_mode < 2 )
-			plog( "\nSimulation %d of %d %s at case %d (%.2f sec.)\n", run, last_run, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
+			plog( "\nSimulation %d of %d %s at case %d (%.2f sec.)\n", run, last_run, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( clock( ) - start_run ) / CLOCKS_PER_SEC );
 
 		if ( quit == 1 )			// multiple simulation runs need to reset quit
 			quit = 0;
@@ -265,7 +269,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 	}	// end of run
 
 	if ( fast_mode == 2 )
-		plog( "\nFinished processing configuration file(s)\n" );
+		plog( "\nFinished processing configuration file(s) (%.2f sec.)\n", ( float ) ( clock( ) - start_mc ) / CLOCKS_PER_SEC );
 
 #ifndef _TERM_
 	if ( liblnk != NULL && liblnk->runtime_end != NULL )
@@ -295,7 +299,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 /*************************************************************
  INIT_NEW_SEQ
  *************************************************************/
-int lsd::simulation::init_new_seq( char *bar_done, int & perc_done, int & last_done )
+int lsd::simulation::init_new_seq( clock_t & start, char *bar_done, int & perc_done, int & last_done )
 {
 	int i;
 
@@ -339,6 +343,9 @@ int lsd::simulation::init_new_seq( char *bar_done, int & perc_done, int & last_d
 	strcpy( bar_done, "" );
 
 	running_seq = true;
+
+	// control execution time
+	start = clock( );
 
 	return 0;
 }

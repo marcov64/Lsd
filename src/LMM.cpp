@@ -4751,19 +4751,19 @@ int modman( int argn, const char **argv )
 				.l.t.text delete 1.0 end; \
 				.l.t.text insert end \"$default\" \
 			}" );
-		cmd( "ttk::button .l.d.opt.cle -width $butWid -text \"Clean Obj.\" -command { \
-				set objs [ glob -nocomplain -directory \"$model_dir\" *.o *.a src break.gdb makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.dll *.so *.app *.bak *.err ]; \
-				foreach i $objs { \
+		cmd( "ttk::button .l.d.opt.cle -width $butWid -text \"File Clean\" -command { \
+				set files [ glob -nocomplain -directory \"$model_dir\" *.o *.a src break.gdb makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.dll *.so *.app *.bak *.err ]; \
+				foreach f $files { \
 					catch { \
-						file delete -force \"$i\" \
+						file delete -force \"$f\" \
 					} \
 				}; \
 				set tmpDir [ temp_dir ]; \
 				if { $tmpDir ne \"\" } { \
-					set objs [ glob -nocomplain -directory $tmpDir LMM %s [ file rootname %s ] ]; \
-					foreach i $objs { \
+					set files [ glob -nocomplain -directory $tmpDir LMM %s [ file rootname %s ] ]; \
+					foreach f $files { \
 						catch { \
-							file delete -force \"$i\" \
+							file delete -force \"$f\" \
 						} \
 					} \
 				} \

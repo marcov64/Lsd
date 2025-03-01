@@ -631,7 +631,7 @@ class lsd::simulation : public equation	// simulation container class
 		double betacf( double a, double b, double x );
 		double build_obj_list( bool set_list );
 		int init_new_run( clock_t & start, clock_t & last_update );
-		int init_new_seq( char *bar_done, int & perc_done, int & last_done );
+		int init_new_seq( clock_t & start, char *bar_done, int & perc_done, int & last_done );
 		int load_txt_configuration( bool reload, int quick );
 		int monitor_logs( void );
 		template < class distr > double draw_gen( distr &d );
