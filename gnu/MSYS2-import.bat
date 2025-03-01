@@ -26,7 +26,7 @@ rem *************************************************************
 
 rem component versions
 set GCC_VER=14.2.0
-set PYTHON_VER=3.11
+set PYTHON_VER=3.12
 
 rem XCOPY options for files and directories
 set OPT=/D/Q/Y
@@ -169,8 +169,8 @@ if not exist %LSD_DIR%\gnu\bin\TailWin.exe echo missing TailWin.exe
 
 echo add pretty printers to GDB
 mkdir %LSD_DIR%\gnu\etc
-FINDSTR /V end %OPT% %MSYS_DIR%\mingw64\etc\gdbinit > %LSD_DIR%\gnu\etc\gdbinit-gcc
-copy /B /Y %LSD_DIR%\gnu\etc\gdbinit-gcc + %LSD_DIR%\gnu\gdbinit-eigen gdbinit
+FINDSTR /V end %MSYS_DIR%\mingw64\etc\gdbinit > %LSD_DIR%\gnu\etc\gdbinit-gcc
+copy /B /Y %LSD_DIR%\gnu\etc\gdbinit-gcc + %LSD_DIR%\gnu\gdbinit-eigen %LSD_DIR%\gnu\etc\gdbinit
 del %LSD_DIR%\gnu\etc\gdbinit-gcc
 
 echo done

@@ -4,7 +4,7 @@ libdir=${prefix}/lib
 
 Name: Pixman
 Description: The pixman library (version 1)
-Version: 0.43.4
+Version: 0.44.2
 Libs: -L${libdir} -lpixman-1
 Libs.private: -lm -pthread
 Cflags: -I${includedir}/pixman-1

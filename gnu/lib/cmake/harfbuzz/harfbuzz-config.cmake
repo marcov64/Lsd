@@ -21,6 +21,8 @@ endmacro()
 
 set_and_check(HARFBUZZ_INCLUDE_DIR "${PACKAGE_PREFIX_DIR}/include/harfbuzz")
 
+set(HARFBUZZ_VERSION "10.3.0")
+
 # Add the libraries.
 add_library(harfbuzz::harfbuzz SHARED IMPORTED)
 set_target_properties(harfbuzz::harfbuzz PROPERTIES

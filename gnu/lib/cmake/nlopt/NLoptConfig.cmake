@@ -1,10 +1,10 @@
 
 # Tell the user project where to find our headers and libraries
 
-set (NLOPT_VERSION "2.8.0")
+set (NLOPT_VERSION "2.10.0")
 
-set (NLOPT_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/../../../include")
-set (NLOPT_LIBRARY_DIRS "${CMAKE_CURRENT_LIST_DIR}/../../")
+set (NLOPT_INCLUDE_DIRS "/mingw64/include")
+set (NLOPT_LIBRARY_DIRS "/mingw64/lib")
 
 # Allows loading NLOPT settings from another project
 set (NLOPT_CONFIG_FILE "${CMAKE_CURRENT_LIST_FILE}")

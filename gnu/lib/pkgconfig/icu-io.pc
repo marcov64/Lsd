@@ -19,19 +19,19 @@ baselibs = -lpthread -lm
 #sbindir = ${exec_prefix}/sbin
 #mandir = ${datarootdir}/man
 #sysconfdir = ${prefix}/etc
-UNICODE_VERSION=15.1
+UNICODE_VERSION=16.0
 ICUPREFIX=icu
 ICULIBSUFFIX=
 LIBICU=lib${ICUPREFIX}
 #SHAREDLIBCFLAGS=-fPIC
-pkglibdir=${libdir}/icu${ICULIBSUFFIX}/75.1
-#pkgdatadir=${datadir}/icu${ICULIBSUFFIX}/75.1
-ICUDATA_NAME = icudt75l
+pkglibdir=${libdir}/icu${ICULIBSUFFIX}/76.1
+#pkgdatadir=${datadir}/icu${ICULIBSUFFIX}/76.1
+ICUDATA_NAME = icudt76l
 #ICUPKGDATA_DIR=${exec_prefix}/lib
 #ICUDATA_DIR=${pkgdatadir}
 ICUDESC=International Components for Unicode
 
-Version: 75.1
+Version: 76.1
 Cflags: -I${includedir}
 # end of icu.pc.in
 Description: International Components for Unicode: Stream and I/O Library

@@ -29,7 +29,7 @@ includedir=${prefix}/include
 Name: libnghttp3
 Description: nghttp3 library
 URL: https://github.com/ngtcp2/nghttp3
-Version: 1.5.0
+Version: 1.8.0
 Libs: -L${libdir} -lnghttp3
 Cflags: -I${includedir}
 Cflags.private: -DNGHTTP3_STATICLIB
