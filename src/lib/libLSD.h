@@ -307,7 +307,7 @@ namespace lsd
 	double median( d_vecT & v );
 	double strtod( const char *in, char** endptr, double inv );
 	d_vecT strtodsplit( const char *in, char sep, double inv = 0. );
-	int dispatch_runs( sim_vecT run_sims, int until_t = 0, int until_run = 0 );
+	int dispatch_runs( sim_vecT run_sims, int until_t = 0, int until_run = 0, bool da = false );
 	int kill_system( simulation *sim, int id );
 	int run_system( const char *cmd, simulation *sim = NULL, int id = -1 );
 	int strcln( char *out, const char *str, int outSz );
@@ -610,7 +610,7 @@ class lsd::simulation : public equation	// simulation container class
 		int load_configuration( bool reload, strT *warnings, int quick );
 		int rnd_int( int min, int max );
 		int run_parallel( bool term, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns );
-		int run_simulation( int until_t = 0, int until_run = 0 );
+		int run_simulation( int until_t = 0, int until_run = 0, bool da = false );
 		int worker_errors( void );
 		void detach_parallel( void );
 		void empty_sensitivity( sensitivity *cs = NULL );
@@ -633,8 +633,8 @@ class lsd::simulation : public equation	// simulation container class
 		bool next_batch( void );
 		double betacf( double a, double b, double x );
 		double build_obj_list( bool set_list );
-		int init_new_run( clock_t & start, clock_t & last_update );
-		int init_new_seq( clock_t & start, char *bar_done, int & perc_done, int & last_done );
+		int init_new_run( clock_t & start, clock_t & last_update, bool da_en = false );
+		int init_new_seq( clock_t & start, char *bar_done, int & perc_done, int & last_done, bool da_en = false );
 		int load_txt_configuration( bool reload, int quick );
 		int monitor_logs( void );
 		template < class distr > double draw_gen( distr &d );
@@ -1002,7 +1002,7 @@ class lsd::dlliblinkage					// callback references for dynamic link library
 		int ( object::*debugger ) ( object *c, const char *lab, double *res, bool interact, const char *hl_var ) = NULL;
 		int ( *runtime_buttons ) ( void ) = NULL;
 		void ( *cmd_backend ) ( const char *cm, va_list arg ) = NULL;
-		void ( *cover_browser ) ( const char *text1, const char *text2, bool run, bool da ) = NULL;
+		void ( *cover_browser ) ( const char *text1, const char *text2, bool run, bool da_en ) = NULL;
 		void ( *deb_log ) ( bool on, int time ) = NULL;
 		void ( *disable_plot ) ( void ) = NULL;
 		void ( *enable_plot ) ( void ) = NULL;
@@ -1345,7 +1345,7 @@ class lsd::assimilation					// assimilation container class
 
 	private:
 		bool init( simulation *ref );
-		bool load_files( simulation *sim );
+		bool load_files( simulation *sim, int last_t );
 		const e_matT & dsp_stat( const e_matT & x, const e_vecT & x_bar );
 		const e_matT & ensemble_forecast( void );
 		const e_matT & ensemble_inflation( const e_matT & x, const e_vecT & x_bar );
@@ -1356,7 +1356,7 @@ class lsd::assimilation					// assimilation container class
 		int analysis( const ass_vecT & dvars, int cur_t );
 		int calc_dsp_mat( void );
 		int load_dsp_mat( simulation *sim );
-		int load_obs_data( void );
+		int load_obs_data( int last_t );
 		template < class T > double median( T begin, T end );
 		void align_state_vars( void );
 		void finish( void );

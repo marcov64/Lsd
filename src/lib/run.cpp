@@ -32,9 +32,93 @@
 
 
 /*************************************************************
+ RUN_SIMULATION (data assimilation)
+ *************************************************************/
+int lsd::assimilation::run_simulation( int until_t )
+{
+	clock_t start, last_update;
+	int nstale, res = 0;
+
+	// initialize data assimilation data structures
+	if ( sims.size( ) == 0 || ! init( sims[ 0 ] ) )
+		return 1;
+
+	// cover browser & open run time plot window
+#ifndef _TERM_
+	if ( ref_sim->liblnk->runtime_start != NULL )
+		ref_sim->liblnk->runtime_start( true );
+
+	if ( ref_sim->liblnk->runtime_run_start != NULL )
+		ref_sim->liblnk->runtime_run_start( );
+#endif
+
+	ref_sim->plog( "\nData assimilation running (threads=%d)...", ref_sim->last_run );
+
+	// control execution time
+	start = clock( );
+
+	// do the data assimilation forecast-analysis cycle
+	for ( auto dtime : time_var )
+	{
+		// stop if data time span is longer than simulation
+		if ( ( next_t = dtime.first ) > ref_sim->last_t )
+			break;
+
+		// DA forecast step
+		if ( ( nstale = dispatch_runs( run_sims, next_t, 1, true ) ) > 0 )
+		{
+			res = 3;
+			break;
+		}
+
+		// DA analysis step
+		if ( ( res = analysis( dtime.second, next_t ) ) != 0 )
+			break;
+
+#ifndef _TERM_
+		// handle runtime button pressings after progress bar update
+		if ( ref_sim->liblnk->progress_bar != NULL )
+			ref_sim->liblnk->progress_bar( next_t, last_update );
+
+		if ( ref_sim->liblnk->runtime_buttons != NULL && ( res = ref_sim->liblnk->runtime_buttons( ) ) != 0 )
+			break;
+#endif
+	}
+
+	// run remaining pure forecast periods, if any
+	if ( res == 0 && next_t < ref_sim->last_t )
+		if ( ( nstale = dispatch_runs( run_sims ) ) > 0 )
+			res = 3;
+
+	if ( res == 0 )
+	{
+		for ( auto sim : run_sims )
+			if ( sim->eff_t != ref_sim->last_t )
+				res = 4;
+
+		ref_sim->eff_t = ref_sim->last_t;
+		ref_sim->t = ref_sim->last_t + 1;
+	}
+	else
+		ref_sim->eff_t = ref_sim->t = next_t;
+	// close data assimilation run-time data structures
+	finish( );
+
+	ref_sim->plog( "\nData assimilation %s at time step %d (%.2f sec.)\n", ref_sim->quit == 2 ? "stopped" : "finished", ref_sim->t - 1, ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
+
+#ifndef _TERM_
+	if ( ref_sim->liblnk->runtime_end != NULL )
+		ref_sim->liblnk->runtime_end( );
+#endif
+
+	return res;
+}
+
+
+/*************************************************************
  DISPATCH_RUNS
  *************************************************************/
-int lsd::dispatch_runs( sim_vecT run_sims, int until_t, int until_run )
+int lsd::dispatch_runs( sim_vecT run_sims, int until_t, int until_run, bool da_en )
 {
 	int nstale, nrun = 0;
 	mtxT mtx;
@@ -43,7 +127,7 @@ int lsd::dispatch_runs( sim_vecT run_sims, int until_t, int until_run )
 	for ( auto sim : run_sims )
 		if ( ! sim->sim_thread.joinable( ) && sim->conf_ok )
 		{
-			sim->sim_thread = thrT( & lsd::simulation::run_simulation, sim, until_t, until_run );
+			sim->sim_thread = thrT( & lsd::simulation::run_simulation, sim, until_t, until_run, da_en );
 			sim->last_dispatch_time = sim->stale_time = 0;
 			++nrun;
 		}
@@ -84,107 +168,28 @@ int lsd::dispatch_runs( sim_vecT run_sims, int until_t, int until_run )
 
 
 /*************************************************************
- RUN_SIMULATION (data assimilation)
- *************************************************************/
-int lsd::assimilation::run_simulation( int until_t )
-{
-	clock_t start, last_update;
-	int nstale, res = 0;
-
-	// initialize data assimilation data structures
-	if ( sims.size( ) == 0 || ! init( sims[ 0 ] ) )
-		return 1;
-
-	// cover browser
-#ifndef _TERM_
-	if ( ref_sim->liblnk->runtime_start != NULL )
-		ref_sim->liblnk->runtime_start( true );
-#endif
-
-	ref_sim->plog( "\nData assimilation running (threads=%d)...", ref_sim->last_run );
-
-	// control execution time
-	start = clock( );
-
-	// do the data assimilation forecast-analysis cycle
-	for ( auto dtime : time_var )
-	{
-		// stop if data time span is longer than simulation
-		if ( ( next_t = dtime.first ) > ref_sim->last_t )
-			break;
-
-		// DA forecast step
-		if ( ( nstale = dispatch_runs( run_sims, next_t ) ) > 0 )
-		{
-			res = 3;
-			break;
-		}
-
-		// DA analysis step
-		if ( ( res = analysis( dtime.second, next_t ) ) != 0 )
-			break;
-
-#ifndef _TERM_
-		// handle runtime button pressings after progress bar update
-		if ( ref_sim->liblnk->progress_bar != NULL )
-			ref_sim->liblnk->progress_bar( next_t, last_update );
-
-		if ( ref_sim->liblnk->runtime_buttons != NULL && ( res = ref_sim->liblnk->runtime_buttons( ) ) != 0 )
-			break;
-#endif
-	}
-
-	// run remaining pure forecast periods, if any
-	if ( res == 0 && next_t < ref_sim->last_t )
-	{
-		if ( ( nstale = dispatch_runs( run_sims ) ) > 0 )
-			res = 3;
-		else
-			next_t = ref_sim->last_t;
-	}
-
-	ref_sim->eff_t = std::min( next_t, ref_sim->last_t );	// to trigger AoR
-	ref_sim->t = std::min( next_t, ref_sim->last_t + 1 );
-
-	// close data assimilation run-time data structures
-	finish( );
-
-	ref_sim->plog( "\nData assimilation %s at time step %d (%.2f sec.)\n", ref_sim->quit == 2 ? "stopped" : "finished", ref_sim->t - 1, ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
-
-#ifndef _TERM_
-	if ( ref_sim->liblnk->runtime_end != NULL )
-		ref_sim->liblnk->runtime_end( );
-#endif
-
-	return res;
-}
-
-
-/*************************************************************
  RUN_SIMULATION (regular)
  *************************************************************/
-int lsd::simulation::run_simulation( int until_t, int until_run )
+int lsd::simulation::run_simulation( int until_t, int until_run, bool da_en )
 {
 	int res = 0;
 	static char bar_done[ 2 * BAR_DONE_SIZE ];
 	static clock_t start_mc, start_run, last_update;
 	static int perc_done, last_done;
 
-	lsd::inhibit_system_sleep( );	// prevent system sleep during run
-
-	if ( ( until_run > 0 && until_run <= run ) || ( until_t > 0 && until_t <= t &&
-		 ( until_run <= 0 || ( until_run > 0 && until_run <= run ) ) ) )
+	if ( ( until_run > 0 && until_run < run ) || ( until_t > 0 && until_t <= t &&
+		 ( until_run <= 0 || ( until_run > 0 && until_run < run ) ) ) )
 		goto end_run;				// already there, nothing to do
 
 	if ( ! running_seq )			// if not already running sequential run set
-		if ( ( res = init_new_seq( start_mc, bar_done, perc_done, last_done ) ) != 0 )
+		if ( ( res = init_new_seq( start_mc, bar_done, perc_done, last_done, da_en ) ) != 0 )
 			goto end_run;
 
 	// start loop controlling set of sequential simulation runs
 	for ( ; quit != 2 && run <= last_run; ++run )
 	{
 		if ( ! running )			// if not already running single run
-			if ( ( res = init_new_run( start_run, last_update ) ) != 0 )
+			if ( ( res = init_new_run( start_run, last_update, da_en ) ) != 0 )
 				goto end_run;
 
 		// start loop controlling a single simulation run
@@ -207,7 +212,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 			}
 
 			// collect state variables if in data assimilation
-			if ( ! da->disable && t == da->next_t )
+			if ( da_en && t == da->next_t )
 				da_svars->save_state_vars( root );
 
 #ifndef _TERM_
@@ -236,14 +241,17 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 		// adjust simulation data to early stops and save variables to file
 		root->reset_end( );
 
+		if ( ! da_en )
+		{
 		if ( liblnk != NULL && liblnk->deb_log != NULL )
 			liblnk->deb_log( false, 0 );// close debug log file, if any
 
 		if ( dobar && on_bar && liblnk != NULL )
 			update_bar( bar_done, perc_done, last_done, 2 * BAR_DONE_SIZE );
 
-		if ( da->disable && fast_mode < 2 )
+			if ( fast_mode < 2 )
 			plog( "\nSimulation %d of %d %s at time step %d (%.2f sec.)\n", run, last_run, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( clock( ) - start_run ) / CLOCKS_PER_SEC );
+		}
 
 		if ( quit == 1 )			// multiple simulation runs need to reset quit
 			quit = 0;
@@ -270,7 +278,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 		}
 	}	// end of run
 
-	if ( fast_mode == 2 )
+	if ( ! da_en && fast_mode == 2 )
 		plog( "\nFinished processing configuration file(s) (%.2f sec.)\n", ( float ) ( clock( ) - start_mc ) / CLOCKS_PER_SEC );
 
 #ifndef _TERM_
@@ -279,8 +287,6 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 #endif
 
 	end_run:
-
-	lsd::restore_system_sleep( );	// allow sleep again
 
 	// set of sequential runs is finished
 	quit = 0;						// ensure no error to handle
@@ -301,7 +307,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run )
 /*************************************************************
  INIT_NEW_SEQ
  *************************************************************/
-int lsd::simulation::init_new_seq( clock_t & start, char *bar_done, int & perc_done, int & last_done )
+int lsd::simulation::init_new_seq( clock_t & start, char *bar_done, int & perc_done, int & last_done, bool da_en )
 {
 	int i;
 
@@ -328,6 +334,8 @@ int lsd::simulation::init_new_seq( clock_t & start, char *bar_done, int & perc_d
 		}
 	}
 
+	if ( ! da_en )
+	{
 #ifndef _TERM_
 	if ( liblnk != NULL && liblnk->runtime_start != NULL )
 		liblnk->runtime_start( false );
@@ -335,6 +343,10 @@ int lsd::simulation::init_new_seq( clock_t & start, char *bar_done, int & perc_d
 	plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
 #endif
 	set_fast( 0 );				// should start on OBSERVE and switch to FAST later
+	}
+	else
+		set_fast( 2 );
+
 	res_list.clear( );			// empty list of saved results files
 	strcpy( res_path, "" );		// and clear last saved path to results files
 
@@ -356,7 +368,7 @@ int lsd::simulation::init_new_seq( clock_t & start, char *bar_done, int & perc_d
 /*************************************************************
  INIT_NEW_RUN
  *************************************************************/
-int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update )
+int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update, bool da_en )
 {
 	int i;
 
@@ -367,7 +379,7 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update )
 	if ( liblnk != NULL && liblnk->runtime_run_start != NULL )
 		liblnk->runtime_run_start( );
 #endif
-	if ( fast_mode < 2 )
+	if ( ! da_en && fast_mode < 2 )
 	{
 		if ( parallel_mode )
 			plog( "\nSimulation %d of %d running (seed=%d threads=%d)...", run, last_run, seed, max_threads );
@@ -392,10 +404,13 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update )
 	if ( i != 0 )
 	{
 #ifndef _TERM_
+		if ( ! da_en )
+		{
 		if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
 			liblnk->log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
 
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", conf_file );
+		}
 #else
 		fprintf( stderr, "\nFile '%s' not found or corrupted.\n", conf_file );
 #endif
@@ -408,10 +423,13 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update )
 	if ( ! root->alloc_save_mem( ) )
 	{
 #ifndef _TERM_
+		if ( ! da_en )
+		{
 		if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
 			liblnk->log_tcl_error( true, "Memory allocation", "Not enough memory, too many series saved for the memory available" );
 
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, last_t );
+		}
 #else
 		fprintf( stderr, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, last_t );
 #endif
@@ -741,7 +759,7 @@ error:
  *************************************************************/
 bool lsd::variable::alloc_save_var( void )
 {
-	if ( ! sim->running || ( ! da->disable && sim == sims[ 0 ] ) )
+	if ( ! sim->running )
 	{
 		data = NULL;
 		start = end = 0;

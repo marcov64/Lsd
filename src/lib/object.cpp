@@ -1882,18 +1882,21 @@ void lsd::object::collect_cemetery( const variable *caller )
 		cv1 = cv->next;						// pointer to next variable
 
 		// need to save?
-		if ( ( cv->save == true || cv->savei == true ) && sim->running && sim->eff_t > 0 && sim->quit != 2 )
+		if ( ( cv->save == true || cv->savei == true ) && sim->running && sim->eff_t > 0 && sim->eff_t <= cv->end && sim->quit != 2 )
 		{
+			cv->set_lab_tit( );				// update last lab_tit
+			cv->data[ sim->eff_t - cv->start ] = cv->val[ 0 ];// define last value
+
 			if ( cv->savei )
 				cv->save_single( );			// update file
 
-			cv->set_lab_tit( );				// update last lab_tit
+			if ( cv->end > sim->eff_t )		// remove unused store positions
+			{
+				cv->end = sim->eff_t;
 
-			cv->end = sim->t;				// define last period,
-			cv->data[ sim->t - cv->start ] = cv->val[ 0 ];// and last value
-
-			// use C stdlib to be able to deallocate memory for deleted objects
-			cv->data = ( double * ) realloc( cv->data, ( sim->t - cv->start + 1 ) * sizeof( double ) );
+				// use C stdlib to be able to deallocate memory for deleted objects
+				cv->data = ( double * ) realloc( cv->data, ( cv->end - cv->start + 1 ) * sizeof( double ) );
+			}
 
 			cv->add_cemetery( );			// transfer to cemetery
 		}

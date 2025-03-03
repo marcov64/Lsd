@@ -253,6 +253,8 @@ int gui::load_gui( const char **argv )
 	{
 		create( );					// open LSD browser
 
+		lsd::inhibit_system_sleep( );// prevent system sleep during run
+
 		try
 		{
 			if ( da.disable )
@@ -275,6 +277,8 @@ int gui::load_gui( const char **argv )
 		{
 			throw;
 		}
+
+		lsd::restore_system_sleep( );// allow sleep again
 	}
 
 	delete sim.liblnk;
@@ -1549,7 +1553,7 @@ int gui::runtime_buttons( void )
 	 if ( ( ( float ) clock( ) - last_update ) / CLOCKS_PER_SEC > UPD_PER && exists_window( ".p" ) )
 	{
 		cmd( ".p.b2.b configure -value %d", cur_t );
-		cmd( ".p.b2.i configure -text \"Time: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", std::min( cur_t + 1, sim.last_t ), sim.last_t, cur_t, sim.last_t );
+		cmd( ".p.b2.i configure -text \"Time step: %d of %d ([ expr { int( 100 * %d / %d ) } ]%% done)\"", std::min( cur_t + 1, sim.last_t ), sim.last_t, cur_t, sim.last_t );
 		cmd( "update" );
 		last_update = clock( );
 	}

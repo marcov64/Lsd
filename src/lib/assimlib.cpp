@@ -239,7 +239,7 @@ bool lsd::assimilation::init( simulation *ref )
 			return false;
 
 	// read data assimilation data from files
-	if ( ! load_files( ref ) )
+	if ( ! load_files( ref, ref_sim->last_t ) )
 		return false;
 
 	// set assimilation random number generator
@@ -254,8 +254,12 @@ bool lsd::assimilation::init( simulation *ref )
 		// adjust instances' settings (random seed, single threaded)
 		sim->seed = seed;
 		sim->last_run = 1;
+		sim->deb_t = 0;
+		sim->stack_info = 0;
 		sim->max_threads = 1;
-		sim->parallel_ready = false;
+		sim->parallel_disable = true;
+		sim->prof_aggr_time = false;
+		sim->no_ptr_chk = true;
 		sim->results_alt_path( ref->alt_path );
 		save_param( sim->root );
 	}
@@ -974,7 +978,7 @@ const e_matT & lsd::assimilation::virtual_obs( const e_vecT & z, int nobs )
  LOAD_OBS_DATA
  Load assimilation data from external data files
  *************************************************************/
-int lsd::assimilation::load_obs_data( void )
+int lsd::assimilation::load_obs_data( int last_t )
 {
 	struct assim_vars { ass_listT avl; int namrow = -1; };
 
@@ -1075,7 +1079,7 @@ int lsd::assimilation::load_obs_data( void )
 				// create var to data and time to var maps
 				auto h = dtmap.end( );
 				auto g = time_var.end( );
-				for ( i = 0; i < vdata.size( ); ++i )
+				for ( i = 0; i < vdata.size( ) && vtime[ i ] <= last_t; ++i )
 				{
 					h = dtmap.emplace_hint( h, vtime[ i ], vdata[ i ] );
 
@@ -1296,7 +1300,7 @@ int lsd::assimilation::load_dsp_mat( simulation *sim )
  LOAD_FILES
  Load all files containing data required for data assimilation
  *************************************************************/
-bool lsd::assimilation::load_files( simulation *sim )
+bool lsd::assimilation::load_files( simulation *sim, int last_t )
 {
 	bool first;
 	int i, j;
@@ -1306,7 +1310,7 @@ bool lsd::assimilation::load_files( simulation *sim )
 	if ( elem == NULL || disable )
 		return false;
 
-	if ( ( i = load_obs_data( ) ) < count( 4 ) )
+	if ( ( i = load_obs_data( last_t ) ) < count( 4 ) )
 	{
 		if ( i == 0 )
 			plog_master( "\nNo data for assimilation found" );
