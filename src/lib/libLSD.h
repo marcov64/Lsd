@@ -202,10 +202,11 @@ namespace lsd
  *************************************************************/
 	class assim;
 	class assimilation;
+	class assinstance;
+	class asstatevars;
 	class bridge;
 	class description;
 	class dlliblinkage;
-	class element_data;
 	class equation;
 	class lattice;
 	class lsdstack;
@@ -216,7 +217,6 @@ namespace lsd
 	class result;
 	class sensitivity;
 	class simulation;
-	class state_variables;
 	class variable;
 	class worker;
 
@@ -234,7 +234,7 @@ namespace lsd
 	typedef std::pair < double, object * > o_pairT;
 	typedef std::pair < long, object * > n_pairT;
 	typedef std::pair < strT, variable * > v_pairT;
-	typedef std::vector < element_data * > ed_vecT;
+	typedef std::vector < assinstance * > ae_vecT;
 	typedef std::vector < object * > o_vecT;
 	typedef std::vector < simulation * > sim_vecT;
 	typedef std::vector < variable * > v_vecT;
@@ -548,6 +548,7 @@ class lsd::simulation : public equation	// simulation container class
 		Tcl_Interp *inter;				// Tcl interpreter (for legacy LSD code)
 #endif
 	private:
+		asstatevars *da_svars;			// state variable vector for DA
 		bool batch_loop = false;		// batch multi-config batch loop in process
 		bool error_hard_thread;			// error_hard called in worker thread
 		bool no_saved = true;			// disable usage of saved values as lagged ones
@@ -586,7 +587,6 @@ class lsd::simulation : public equation	// simulation container class
 		mtxT seq_end_lck;				// lock seq_end for parallel updating
 		mtxT var_update_lck;			// control worker variable update
 		mtxT wrk_crash_lck;				// control worker crash handling
-		state_variables *da_svars;		// state variable vector for DA
 		std::minstd_rand lc1;			// linear congruential generator (internal)
 		std::minstd_rand lc2;			// linear congruential generator (user)
 		std::mt19937_64 mt64;			// Mersenne-Twister 64 bits generator
@@ -1199,9 +1199,9 @@ class lsd::profile						// profiled variable class
 
 
 /*************************************************************
- STATE_VARIABLES
+ STATEVARS
  *************************************************************/
-class lsd::state_variables				// data assimilation state variables class
+class lsd::asstatevars					// data assimilation state variables class
 {
 	friend class assimilation;
 	friend class simulation;
@@ -1216,9 +1216,9 @@ class lsd::state_variables				// data assimilation state variables class
 
 
 /*************************************************************
- ELEMENT_DATA
+ ASSINSTANCE
  *************************************************************/
-class lsd::element_data					// DA element data collection class
+class lsd::assinstance					// DA element data collection class
 {
 	friend class assim;
 	friend class assimilation;
@@ -1236,8 +1236,8 @@ class lsd::element_data					// DA element data collection class
 		int start;						// first valid data period
 
 	public:
-		element_data( int _start, int _end, bool fct, bool dat );// constructor
-		~element_data( void );			// destructor
+		assinstance( int _start, int _end, bool fct, bool dat );// constructor
+		~assinstance( void );			// destructor
 };
 
 
@@ -1249,12 +1249,13 @@ class lsd::assim						// data assimilation container class
 	friend class assimilation;
 	friend class object;
 	friend class result;
-	friend class state_variables;
+	friend class asstatevars;
 
 	public:
 		bool disable = false;			// element disabled for assimilation
 
 	private:
+		ae_vecT da_data;				// data produced during assimilation
 		assim *next = NULL;				// data assimilation chain of elements
 		bool data_obs = false;			// element has data obs. to assimilate
 		bool no_data = true;			// no data retrieved?
@@ -1270,7 +1271,6 @@ class lsd::assim						// data assimilation container class
 		double par_n_sd = 0;			// parameter normal standard deviation
 		double par_u_low = 0;			// parameter uniform distribution delta -
 		double par_u_upp = 0;			// parameter uniform distribution delta +
-		ed_vecT da_data;				// data produced during assimilation
 		int cov_idx = -1;				// index (row+col) in covariance matrix
 		int data_col_num = 0;			// number of data value column
 		int inst_idx = -1;				// index to last used element instance
@@ -1300,10 +1300,10 @@ class lsd::assim						// data assimilation container class
 class lsd::assimilation					// assimilation container class
 {
 	friend class assim;
+	friend class asstatevars;
 	friend class object;
 	friend class result;
 	friend class simulation;
-	friend class state_variables;
 
 	public:
 		char *dsp_file = NULL;			// data assimilation dispersion CSV file

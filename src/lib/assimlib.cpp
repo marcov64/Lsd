@@ -22,10 +22,10 @@
 
 
 /*************************************************************
- ELEMENT_DATA constructor
+ ASSINSTANCE constructor
  Prepare container for element data produced by assimilation
  *************************************************************/
-lsd::element_data::element_data( int _start, int _end, bool sav_fct, bool sav_dat )
+lsd::assinstance::assinstance( int _start, int _end, bool sav_fct, bool sav_dat )
 {
 	size = _end - _start + 1;
 
@@ -60,10 +60,10 @@ lsd::element_data::element_data( int _start, int _end, bool sav_fct, bool sav_da
 
 
 /*************************************************************
- ~ELEMENT_DATA destructor
+ ~ASSINSTANCE destructor
  Prepare container for element data produced by assimilation
  *************************************************************/
-lsd::element_data::~element_data( void )
+lsd::assinstance::~assinstance( void )
 {
 	free( anl );
 	free( fct );
@@ -425,7 +425,7 @@ lsd::assim *lsd::assimilation::search( const char *lab )
  Collect and save the current-step state variable/parameter
  instances for the simulation run
  *************************************************************/
-void lsd::state_variables::save_state_vars( object *r )
+void lsd::asstatevars::save_state_vars( object *r )
 {
 	object *cur;
 	st_vec.clear( );
@@ -608,7 +608,7 @@ void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_
 
 		if ( i == ca->da_data.size( ) )					// all used, create new
 		{
-			auto *slot = new element_data ( t, ref_sim->last_t, da->sav_fct, da->sav_dat );
+			auto *slot = new assinstance ( t, ref_sim->last_t, da->sav_fct, da->sav_dat );
 			ca->da_data.emplace_back( slot );
 		}
 

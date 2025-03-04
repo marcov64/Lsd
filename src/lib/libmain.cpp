@@ -123,7 +123,7 @@ lsd::simulation::simulation( const char fname[ ], const char path[ ], int quick 
 	root->init( NULL, this, "Root" );
 	add_description( "Root" );
 	latt = new lattice;
-	da_svars = new state_variables;
+	da_svars = new asstatevars;
 	reset_blueprint( NULL );
 
 	max_threads = ( MAX_CORES <= 0 ) ? thrT::hardware_concurrency( ) : MAX_CORES;

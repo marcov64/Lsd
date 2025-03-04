@@ -4639,7 +4639,7 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 	static bool warn_once = false;
 	assim *ca;
 	bridge *cb;
-	element_data *ce;
+	assinstance *ce;
 	object *cur;
 	variable *cv;
 
@@ -4766,7 +4766,7 @@ void lsd::object::insert_store_mem( int max_v, int *num_v, const char *lab )
 	int tag;
 	assim *ca;
 	bridge *cb;
-	element_data *ce;
+	assinstance *ce;
 	object *cur;
 	variable *cv;
 

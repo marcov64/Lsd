@@ -2216,7 +2216,7 @@ void lsd::result::title_recursive( object *r, bool header )
 {
 	assim *ca;
 	bridge *cb;
-	element_data *ce;
+	assinstance *ce;
 	object *cur;
 	variable *cv;
 
@@ -2361,7 +2361,7 @@ void lsd::result::data_recursive( object *r, int t )
 	double *data;
 	assim *ca;
 	bridge *cb;
-	element_data *ce;
+	assinstance *ce;
 	object *cur;
 	variable *cv;
 
