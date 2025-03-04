@@ -64,6 +64,8 @@ void gui::init_tcl_tk( const char *exec, const char *tcl_app_name )
 		log_tcl_error( false, "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall LSD" );
 		lsd_exit_gui( 3 );
 	}
+	else
+		tcl_ok = true;
 
 	// initialize & test the tk application
 	num = Tk_Init( interp );
@@ -75,11 +77,12 @@ void gui::init_tcl_tk( const char *exec, const char *tcl_app_name )
 		log_tcl_error( false, "Start Tk", "Tk failed, check the Tcl/Tk installation (version 8.6+) and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( interp ) );
 		lsd_exit_gui( 3 );
 	}
+	else
+		tk_ok = true;
 
 	cmd( "wm withdraw ." );
 	cmd( "update idletasks" );
 	cmd( "tk appname %s", tcl_app_name );
-	tk_ok = true;
 
 	// do not open/close terminal in mac
 	if ( expr_eq( "$tcl_platform(os)", "Darwin" ) )
@@ -1703,7 +1706,7 @@ void gui::cmd_backend( const char *cm, va_list arg )
 #endif
 
 	// abort if Tcl interpreter not initialized
-	if ( interp == NULL )
+	if ( interp == NULL || ! tcl_ok )
 	{
 #ifndef _LMM_
 		FILE *stderr_ptr = lsd::stderr_ptr;
@@ -1884,7 +1887,9 @@ void gui::lsd_exit_gui( int v )
 					catch { destroy . } \
 				}" );
 
+		tk_ok = false;
 		Tcl_Finalize( );
+		tcl_ok = false;
 	}
 
 	lsd::lsd_exit( v );

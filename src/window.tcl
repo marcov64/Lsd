@@ -285,13 +285,44 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 
 
 #************************************************
+# WITHDRAWTOP
+# Withdraw window from screen, if it exists
+#************************************************
+proc withdrawtop w {
+	global restore_geom wndLst logWndFn
+
+	if { $w == "" || ! [ winfo exists $w ] } {
+		return
+	}
+
+	# save main windows sizes/positions
+	if { [ winfo viewable $w ] && [ info exists restore_geom ] && $restore_geom && [ lsearch $wndLst $w ] >= 0 } {
+		set curGeom [ geomtosave $w ]
+
+		if { $curGeom != "" } {
+			set wName [ string range $w 1 3 ]
+			set ::${wName}_geom $curGeom
+		}
+	}
+
+	wm withdraw $w
+	update
+
+	if { $logWndFn && [ info procs plog ] != "" } {
+		plog "\nwithdrawtop (w:$w)"
+	}
+}
+
+
+#************************************************
 # DESTROYTOP
 # Destroy window, if it exists
 #************************************************
 proc destroytop w {
 	global restore_geom wndLst defaultFocus parWndLst grabLst noParLst logWndFn
 
-	if { $w == "" || ! [ winfo exists $w ] } {
+	# avoid crash if tk unloaded
+	if { $w == "" || [ catch { winfo exists $w } w_exist ] || ! $w_exist } {
 		return
 	}
 

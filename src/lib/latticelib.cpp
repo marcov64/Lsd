@@ -86,7 +86,9 @@ double lsd::equation::_init_lattice_( int init_color, double nrow, double ncol, 
  *************************************************************/
 void lsd::equation::_close_lattice_( void )
 {
+#ifndef _TERM_
 	cmd( "destroytop .lat" );
+#endif
 
 	if ( _sim_->latt->array != NULL && _sim_->latt->rows > 0 )
 	{

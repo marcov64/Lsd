@@ -264,6 +264,7 @@ namespace gui
 	extern bool redrawRoot;				// control for redrawing root window (.)
 	extern bool redrawStruc;			// control for redrawing model structure window
 	extern bool scrollB;				// scroll box state in current runtime plot
+	extern bool tcl_ok;					// control for tcl ready to operate
 	extern bool tk_ok;					// control for tk_ready to operate
 	extern bool unsavedChange;			// control unsaved changes in configuration
 	extern bool unsavedData; 			// flag unsaved simulation configurations

@@ -156,12 +156,12 @@ lsd::simulation::simulation( const char fname[ ], const char path[ ], int quick 
  *************************************************************/
 lsd::simulation::~simulation( void )
 {
+	_close_lattice_( );
 	empty_sensitivity( );
 	empty_stack( );
 	empty_cemetery( );
 	empty_blueprint( );
 	empty_description( );
-	_close_lattice_( );
 	root->delete_obj( );
 
 	sims.erase( find( sims.begin( ), sims.end( ), this ) );

@@ -9940,7 +9940,7 @@ void gui::add_da_plot_tab( const char *w, int id_plot )
 	cmd( "set w %s", w );
 	cmd( "set daptab $w.pad" );
 	cmd( "if { ! [ winfo exists $daptab ] } { \
-			newtop $w \"%s%s - LSD Plots\" \"wm withdraw $w\" \"\"; \
+			newtop $w \"%s%s - LSD Plots\" \"withdrawtop $w\" \"\"; \
 			wm transient $w .da; \
 			ttk::notebook $daptab; \
 			pack $daptab -expand yes -fill both; \
