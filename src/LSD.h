@@ -33,6 +33,7 @@
 	int debugger( object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" ); \
 	object *restore_pos( void ); \
 	object *sensitivity_parallel( sensitivity *s ); \
+	void assign_plot_vars( int *idx, const char *lab, bool da_en ); \
 	void clean_debug( void ); \
 	void clean_parallel( void ); \
 	void clean_plot( void ); \
@@ -47,7 +48,6 @@
 	void insert_data_mem( int *num_v, const char *lab = NULL ); \
 	void insert_object( const char *w, bool netOnly = false, object *above = NULL ); \
 	void load_elem_lists( void ); \
-	void prepare_plot( int id_sim ); \
 	void report( void ); \
 	void save_pos( void ); \
 	void set_all( const char *lab, int lag, const char *parWnd = NULL ); \
@@ -72,10 +72,8 @@
 	private:\
 	int entry_new_objnum( const char *tag ); \
 	void ancestors( FILE *f, bool html = true ); \
-	void assign_plot_vars( int *idx, const char *lab ); \
 	void attach_instance_number( char *outh, char *outv, int outSz ); \
 	void count_labels_mem( int *count, const char *lab = NULL ); \
-	void count_plot_vars( int *count ); \
 	void create_float_list( void ); \
 	void create_form( int num, const char *title, const char *prefix, FILE *frep ); \
 	void create_initial_values( FILE *frep ); \
@@ -109,8 +107,6 @@
 	FILE *create_frames( const char *path, const char *fname );
 
 #define VARIABLE_EXT \
-	public: \
-	void plot_runtime( void ); \
 	private: \
 	void write_var( FILE *frep ); \
 	const char *print_constr( char *buf, int buf_sz );
@@ -300,7 +296,7 @@ namespace gui
 	extern const int NOLH_6[ ][ 100 ];
 	extern int choice;					// Tcl menu control (main window)
 	extern int choice_g;				// Tcl menu control variable ( structure window)
-	extern int cur_plt;					// current graph plot number
+	extern int cur_plt_var;				// current graph plot number
 	extern int done_in;					// Tcl menu control variable (log window)
 	extern int doover;					// overwrite results folder (bool)
 	extern int elem_count;				// recursive element counter for show elements menu
@@ -347,7 +343,7 @@ namespace gui
 	bool make_terminal( void );
 	bool need_res_dir( const char *path, const char *sim_name, char *buf, int buf_sz );
 	bool open_configuration( lsd::object *&r, bool reload );
-	bool runtime_step( void );
+	bool runtime_step( bool da_en = false );
 	bool save_sensitivity( FILE *f );
 	bool save_xml_configuration_gui( int findex = 0, const char *dest_path = NULL, bool quick = false );
 	bool sensitivity_clean_dir( const char *path );
@@ -456,7 +452,7 @@ namespace gui
 	void histograms( void );
 	void histograms_cs( void );
 	void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, int init_color );
-	void init_plot( int i );
+	void init_plot( void );
 	void init_tcl_tk( const char *exec, const char *tcl_app_name );
 	void insert_data_file( bool gz, int *num_v, str_vecT *var_names, bool keep_vars );
 	void load_lsd_options( void );
@@ -477,7 +473,9 @@ namespace gui
 	void plot_gnu( void );
 	void plot_lattice( void );
 	void plot_phase_diagram( void );
+	void plot_runtime( int t, double cur_val, double last_val );
 	void plot_tseries( void );
+	void prepare_plot( int id_sim, bool da_en = false );
 	void print_stack( void );
 	void progress_bar( int cur_t, clock_t & last_update );
 	void put_line( int x1, int y1, int x2 );
@@ -487,7 +485,7 @@ namespace gui
 	void reset_plot( void );
 	void return_where_used( char *lab, char *s, int sz );
 	void runtime_end( void );
-	void runtime_run_start( void );
+	void runtime_run_start( bool da_en = false );
 	void runtime_run_end( void );
 	void runtime_start( bool da );
 	void save_data1( void );

@@ -57,7 +57,7 @@ namespace gui
 	const char *res_g = NULL;		// structure window result variable
 	int choice;						// Tcl menu control variable (main window)
 	int choice_g;					// Tcl menu control variable (structure window)
-	int cur_plt;					// current graph plot number
+	int cur_plt_var;				// current graph plot number
 	int done_in;					// Tcl menu control variable (log window)
 	int elem_count;					// recursive element counter for show elements menu
 	int findexSens = 0;				// sequential sensitivity index to filenames

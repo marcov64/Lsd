@@ -202,7 +202,7 @@ int gui::load_gui( const char **argv )
 	sim.liblnk->init_lattice_helper = & init_lattice_helper;
 	sim.liblnk->log_tcl_error = & log_tcl_error;
 	sim.liblnk->plog_backend = & plog_backend;
-	sim.liblnk->plot_runtime = & lsd::variable::plot_runtime;
+	sim.liblnk->plot_runtime = & plot_runtime;
 	sim.liblnk->print_stack = & print_stack;
 	sim.liblnk->progress_bar = & progress_bar;
 	sim.liblnk->runtime_buttons = & runtime_buttons;
@@ -1380,11 +1380,11 @@ int gui::browse( lsd::object *r )
  RUNTIME_START
  Updates GUI at the start of a set of simulation runs
  *************************************************************/
-void gui::runtime_start( bool da )
+void gui::runtime_start( bool da_en )
 {
 	sim.prof_times.clear( );		// reset profiling times
 
-	if ( da )
+	if ( da_en )
 		cover_browser( "Running data assimilation...", "Use the buttons to control the simulations:\n\n'Stop' :  aborts the assimilation", true, true );
 	else
 		cover_browser( "Running...", "Use the buttons to control the simulation:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :	accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables", true, false );
@@ -1409,9 +1409,9 @@ void gui::runtime_end( void )
  Updates GUI at the start of each simulation run
  Prepare run-time plots and clear AoR maps
  *************************************************************/
-void gui::runtime_run_start( void )
+void gui::runtime_run_start( bool da_en )
 {
-	sim.root->prepare_plot( sim.run );
+	prepare_plot( sim.run, da_en );
 	sim.par_map.clear( );			// restart variable to parent name map for AoR
 }
 
@@ -1440,9 +1440,12 @@ void gui::runtime_run_end( void )
  Checks if debug must be invoked and if simulation
  is paused (return FALSE) or not (TRUE)
  *************************************************************/
-bool gui::runtime_step( void )
+bool gui::runtime_step( bool da_en )
 {
-	cur_plt = 0;			// restart runtime variable color cycle
+	cur_plt_var = 0;		// restart runtime variable color cycle
+
+	if ( da_en )
+		return true;
 
 	if ( pause_run )		// adjust "clock" backwards if simulation is paused
 		--sim.t;

@@ -43,13 +43,18 @@ int lsd::assimilation::run_simulation( int until_t )
 	if ( sims.size( ) == 0 || ! init( sims[ 0 ] ) )
 		return 1;
 
+	ref_sim->run = 1;
+
 	// cover browser & open run time plot window
 #ifndef _TERM_
 	if ( ref_sim->liblnk->runtime_start != NULL )
 		ref_sim->liblnk->runtime_start( true );
 
 	if ( ref_sim->liblnk->runtime_run_start != NULL )
-		ref_sim->liblnk->runtime_run_start( );
+		ref_sim->liblnk->runtime_run_start( true );
+
+	if ( ref_sim->liblnk->enable_plot != NULL )
+		ref_sim->liblnk->enable_plot( );
 #endif
 
 	ref_sim->plog( "\nData assimilation running (threads=%d)...", ref_sim->last_run );
@@ -76,6 +81,10 @@ int lsd::assimilation::run_simulation( int until_t )
 			break;
 
 #ifndef _TERM_
+		// update run-time plot
+		if ( ref_sim->liblnk->runtime_step != NULL )
+			ref_sim->liblnk->runtime_step( true );
+
 		// handle runtime button pressings after progress bar update
 		if ( ref_sim->liblnk->progress_bar != NULL )
 			ref_sim->liblnk->progress_bar( next_t, last_update );
@@ -107,6 +116,9 @@ int lsd::assimilation::run_simulation( int until_t )
 	ref_sim->plog( "\nData assimilation %s at time step %d (%.2f sec.)\n", ref_sim->quit == 2 ? "stopped" : "finished", ref_sim->t - 1, ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
 
 #ifndef _TERM_
+	if ( ref_sim->liblnk->runtime_run_end != NULL )
+		ref_sim->liblnk->runtime_run_end( );
+
 	if ( ref_sim->liblnk->runtime_end != NULL )
 		ref_sim->liblnk->runtime_end( );
 #endif
@@ -204,7 +216,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run, bool da_en )
 
 #ifndef _TERM_
 			// only update if simulation not paused
-			if ( liblnk == NULL || liblnk->runtime_step == NULL || liblnk->runtime_step( ) )
+			if ( liblnk == NULL || liblnk->runtime_step == NULL || liblnk->runtime_step( false ) )
 #endif
 			{
 				eff_t = t;
@@ -243,14 +255,14 @@ int lsd::simulation::run_simulation( int until_t, int until_run, bool da_en )
 
 		if ( ! da_en )
 		{
-		if ( liblnk != NULL && liblnk->deb_log != NULL )
-			liblnk->deb_log( false, 0 );// close debug log file, if any
+			if ( liblnk != NULL && liblnk->deb_log != NULL )
+				liblnk->deb_log( false, 0 );// close debug log file, if any
 
-		if ( dobar && on_bar && liblnk != NULL )
-			update_bar( bar_done, perc_done, last_done, 2 * BAR_DONE_SIZE );
+			if ( dobar && on_bar && liblnk != NULL )
+				update_bar( bar_done, perc_done, last_done, 2 * BAR_DONE_SIZE );
 
 			if ( fast_mode < 2 )
-			plog( "\nSimulation %d of %d %s at time step %d (%.2f sec.)\n", run, last_run, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( clock( ) - start_run ) / CLOCKS_PER_SEC );
+				plog( "\nSimulation %d of %d %s at time step %d (%.2f sec.)\n", run, last_run, quit == 2 ? "stopped" : "finished", t - 1, ( float ) ( clock( ) - start_run ) / CLOCKS_PER_SEC );
 		}
 
 		if ( quit == 1 )			// multiple simulation runs need to reset quit
@@ -337,12 +349,12 @@ int lsd::simulation::init_new_seq( clock_t & start, char *bar_done, int & perc_d
 	if ( ! da_en )
 	{
 #ifndef _TERM_
-	if ( liblnk != NULL && liblnk->runtime_start != NULL )
-		liblnk->runtime_start( false );
+		if ( liblnk != NULL && liblnk->runtime_start != NULL )
+			liblnk->runtime_start( false );
 #else
-	plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
+		plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
 #endif
-	set_fast( 0 );				// should start on OBSERVE and switch to FAST later
+		set_fast( 0 );				// should start on OBSERVE and switch to FAST later
 	}
 	else
 		set_fast( 2 );
@@ -377,7 +389,7 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update, bool 
 	save_ok = true;			// valid structure to save
 #ifndef _TERM_
 	if ( liblnk != NULL && liblnk->runtime_run_start != NULL )
-		liblnk->runtime_run_start( );
+		liblnk->runtime_run_start( false );
 #endif
 	if ( ! da_en && fast_mode < 2 )
 	{
@@ -406,10 +418,10 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update, bool 
 #ifndef _TERM_
 		if ( ! da_en )
 		{
-		if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
-			liblnk->log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
+			if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
+				liblnk->log_tcl_error( true, "Load configuration", "Configuration file not found or corrupted" );
 
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", conf_file );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the configuration file '%s'.\nLSD will close now.\"", conf_file );
 		}
 #else
 		fprintf( stderr, "\nFile '%s' not found or corrupted.\n", conf_file );
@@ -425,10 +437,10 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update, bool 
 #ifndef _TERM_
 		if ( ! da_en )
 		{
-		if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
-			liblnk->log_tcl_error( true, "Memory allocation", "Not enough memory, too many series saved for the memory available" );
+			if ( liblnk != NULL && liblnk->log_tcl_error != NULL )
+				liblnk->log_tcl_error( true, "Memory allocation", "Not enough memory, too many series saved for the memory available" );
 
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, last_t );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, last_t );
 		}
 #else
 		fprintf( stderr, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, last_t );
@@ -748,8 +760,10 @@ bool lsd::object::alloc_save_mem( void )
 
 	return true;
 
-error:
+	error:
+
 	sim->quit = 2;
+
 	return false;
 }
 

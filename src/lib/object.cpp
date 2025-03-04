@@ -410,8 +410,13 @@ void lsd::object::update( bool recurse, bool user )
 			if ( cv->save || cv->savei )
 				cv->data[ sim->t - cv->start ] = cv->val[ 0 ];
 #ifndef _TERM_
-			if ( ! user && cv->plot == 1 && sim->liblnk != NULL && sim->liblnk->plot_runtime != NULL )
-				( cv->*sim->liblnk->plot_runtime )( );
+			if ( ! user && cv->plot && sim->liblnk != NULL && sim->liblnk->plot_runtime != NULL )
+			{
+				if ( cv->param == 1 || cv->num_lag == 0 )
+					sim->liblnk->plot_runtime( sim->t, cv->val[ 0 ], NAN );
+				else
+					sim->liblnk->plot_runtime( sim->t, cv->val[ 0 ], cv->val[ 1 ] );
+			}
 #endif
 		}
 	}

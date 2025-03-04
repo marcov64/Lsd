@@ -157,7 +157,7 @@ bool lsd::assim::init( void )
 
 	da_data.clear( );
 
-	// set the save flag
+	// set the variable flags to current ones
 	if ( parent != NULL && strlen( parent ) > 0 )
 		cur = da->ref_sim->root->search( parent );
 	else
@@ -169,7 +169,12 @@ bool lsd::assim::init( void )
 	if ( ( cv = cur->search_var( NULL, label, true ) ) == NULL )
 		return false;
 
+	param = cv->param;
+	plot = cv->plot;
 	save = cv->save || cv->savei;
+
+	// count initial instances
+	for ( inst_ini = 0; cv != NULL; ++inst_ini, cv = cv->hyper_next( ) );
 
 	// add to map of assimilation elements
 	da->elem_map[ label ] = this;
@@ -669,6 +674,31 @@ void lsd::assim::update_param( variable *v )
 
 
 /*************************************************************
+ UPDATE_RUNTIME_PLOT
+ Update the DA run-time plot window
+ *************************************************************/
+void lsd::assimilation::update_runtime_plot( int cur_t )
+{
+	if ( ref_sim->liblnk->plot_runtime == NULL )
+		return;
+
+	for ( auto ca = elem; ca != NULL; ca = ca->next )
+		if ( ca->plot )
+			// plot up to just the initial instances
+			for ( auto i = 0; i <= ca->inst_ini; ++i )
+			{
+				if ( i >= ( int ) ca->da_data.size( ) )
+					ref_sim->liblnk->plot_runtime( cur_t, NAN, NAN );
+				else
+					if ( ca->param == 1 || cur_t == ca->da_data[ i ]->start )
+						ref_sim->liblnk->plot_runtime( cur_t, ca->da_data[ i ]->anl[ cur_t - ca->da_data[ i ]->start ], NAN );
+					else
+						ref_sim->liblnk->plot_runtime( cur_t, ca->da_data[ i ]->anl[ cur_t - ca->da_data[ i ]->start ], ca->da_data[ i ]->anl[ cur_t - ca->da_data[ i ]->start - 1 ] );
+			}
+}
+
+
+/*************************************************************
  ANALYSIS
  Perform data assimilation analysis step
  *************************************************************/
@@ -733,9 +763,10 @@ void lsd::assim::update_param( variable *v )
 	// update the state variables in simulation runs
 	update_state_vars( x_a_e );
 
-	// compute the MC analysis ensemble estimates
+	// compute the MC analysis ensemble estimates & refresh run-time window
 	const e_vecT & x_a = loc_stat( x_a_e );
 	update_assim_vars( x_a, x_f, z, cur_t );
+	update_runtime_plot( cur_t );
 
 	return 0;
 }

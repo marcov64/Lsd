@@ -996,7 +996,7 @@ class lsd::dlliblinkage					// callback references for dynamic link library
 	public:
 		int *choice;
 
-		bool ( *runtime_step ) ( void ) = NULL;
+		bool ( *runtime_step ) ( bool da_en ) = NULL;
 		double ( *save_lattice_helper ) ( const char *fname ) = NULL;
 		double ( *update_lattice_helper ) ( double line, double col, double val, int line_int, int col_int, int val_int ) = NULL;
 		int ( object::*debugger ) ( object *c, const char *lab, double *res, bool interact, const char *hl_var ) = NULL;
@@ -1010,13 +1010,13 @@ class lsd::dlliblinkage					// callback references for dynamic link library
 		void ( *init_lattice_helper ) ( double pixW, double pixH, double nrow, double ncol, int init_color ) = NULL;
 		void ( *log_tcl_error ) ( bool show, const char *cm, const char *message, ... ) = NULL;
 		void ( *plog_backend ) ( const char *cm, const char *tag, va_list arg ) = NULL;
+		void ( *plot_runtime ) ( int t, double cur_val, double last_val ) = NULL;
 		void ( *print_stack ) ( void ) = NULL;
 		void ( *progress_bar ) ( int cur_t, clock_t & last_update ) = NULL;
 		void ( *runtime_end ) ( void ) = NULL;
 		void ( *runtime_run_end ) ( void ) = NULL;
-		void ( *runtime_run_start ) ( void ) = NULL;
-		void ( *runtime_start ) ( bool da ) = NULL;
-		void ( variable::*plot_runtime ) ( void ) = NULL;
+		void ( *runtime_run_start ) ( bool da_en ) = NULL;
+		void ( *runtime_start ) ( bool da_en ) = NULL;
 };
 
 
@@ -1199,6 +1199,23 @@ class lsd::profile						// profiled variable class
 
 
 /*************************************************************
+ STATE_VARIABLES
+ *************************************************************/
+class lsd::state_variables				// data assimilation state variables class
+{
+	friend class assimilation;
+	friend class simulation;
+
+	private:
+		size_t idx;						// current position during analysis
+		v_vecT st_vec;					// current state variable vector for DA
+
+	private:
+		void save_state_vars( object *r );
+};
+
+
+/*************************************************************
  ELEMENT_DATA
  *************************************************************/
 class lsd::element_data					// DA element data collection class
@@ -1225,23 +1242,6 @@ class lsd::element_data					// DA element data collection class
 
 
 /*************************************************************
- STATE_VARIABLES
- *************************************************************/
-class lsd::state_variables				// data assimilation state variables class
-{
-	friend class assimilation;
-	friend class simulation;
-
-	private:
-		size_t idx;						// current position during analysis
-		v_vecT st_vec;					// current state variable vector for DA
-
-	private:
-		void save_state_vars( object *r );
-};
-
-
-/*************************************************************
  ASSIM
  *************************************************************/
 class lsd::assim						// data assimilation container class
@@ -1259,6 +1259,7 @@ class lsd::assim						// data assimilation container class
 		bool data_obs = false;			// element has data obs. to assimilate
 		bool no_data = true;			// no data retrieved?
 		bool param = false;				// element is a parameter (not variable)
+		bool plot = false;				// element marked for run-time plot
 		bool save = false;				// element market to be saved
 		bool update = false;			// element to be updated by assimilation
 		char *data_file = NULL;			// name of source data CSV file
@@ -1273,6 +1274,7 @@ class lsd::assim						// data assimilation container class
 		int cov_idx = -1;				// index (row+col) in covariance matrix
 		int data_col_num = 0;			// number of data value column
 		int inst_idx = -1;				// index to last used element instance
+		int inst_ini = 0;				// number of instances at t=0
 		int par_dist = 0;				// parameter distribution (0:N/1:U)
 		int t_col_num = 0;				// number of time value column
 
@@ -1363,5 +1365,6 @@ class lsd::assimilation					// assimilation container class
 		void reset_insts( assim *el = NULL );
 		void save_param( object *r );
 		void update_assim_vars( const e_vecT & x_a, const e_vecT & x_f, const e_vecT & z, int t );
+		void update_runtime_plot( int cur_t );
 		void update_state_vars( const e_matT & x_a_e );
 };
