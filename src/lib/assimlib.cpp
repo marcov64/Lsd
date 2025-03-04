@@ -690,7 +690,7 @@ void lsd::assimilation::update_runtime_plot( int cur_t )
 				if ( i >= ( int ) ca->da_data.size( ) )
 					ref_sim->liblnk->plot_runtime( cur_t, NAN, NAN );
 				else
-					if ( ca->param == 1 || cur_t == ca->da_data[ i ]->start )
+					if ( ca->param == 1 || cur_t <= ca->da_data[ i ]->start )
 						ref_sim->liblnk->plot_runtime( cur_t, ca->da_data[ i ]->anl[ cur_t - ca->da_data[ i ]->start ], NAN );
 					else
 						ref_sim->liblnk->plot_runtime( cur_t, ca->da_data[ i ]->anl[ cur_t - ca->da_data[ i ]->start ], ca->da_data[ i ]->anl[ cur_t - ca->da_data[ i ]->start - 1 ] );

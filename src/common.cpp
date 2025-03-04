@@ -50,6 +50,8 @@ void gui::init_tcl_tk( const char *exec, const char *tcl_app_name )
 		log_tcl_error( false, "Create Tcl interpreter", "Tcl initialization directories not found, check the Tcl/Tk installation  and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( interp ) );
 		lsd_exit_gui( 3 );
 	}
+	else
+		tcl_ok = true;
 
 	// set variables and links in TCL interpreter
 	Tcl_SetVar( interp, "_LSD_VERSION_", _LSD_VERSION_, 0 );
@@ -62,10 +64,9 @@ void gui::init_tcl_tk( const char *exec, const char *tcl_app_name )
 	if ( res != 1234567890 )
 	{
 		log_tcl_error( false, "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall LSD" );
+		tcl_ok = false;
 		lsd_exit_gui( 3 );
 	}
-	else
-		tcl_ok = true;
 
 	// initialize & test the tk application
 	num = Tk_Init( interp );
@@ -1888,7 +1889,10 @@ void gui::lsd_exit_gui( int v )
 				}" );
 
 		tk_ok = false;
-		Tcl_Finalize( );
+
+		if ( tcl_ok )
+			Tcl_Finalize( );
+
 		tcl_ok = false;
 	}
 
