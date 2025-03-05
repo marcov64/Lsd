@@ -621,7 +621,6 @@ void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_
 			ca->da_data[ i ]->dat[ t - ca->da_data[ i ]->start ] = z[ j ];
 
 		ca->da_data[ i ]->cur_t = ca->da_data[ i ]->end = t;
-
 	}
 }
 

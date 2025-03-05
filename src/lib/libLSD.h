@@ -1199,9 +1199,9 @@ class lsd::profile						// profiled variable class
 
 
 /*************************************************************
- STATEVARS
+ ASSTATEVARS
  *************************************************************/
-class lsd::asstatevars					// data assimilation state variables class
+class lsd::asstatevars					// DA state variables class
 {
 	friend class assimilation;
 	friend class simulation;
@@ -1218,7 +1218,7 @@ class lsd::asstatevars					// data assimilation state variables class
 /*************************************************************
  ASSINSTANCE
  *************************************************************/
-class lsd::assinstance					// DA element data collection class
+class lsd::assinstance					// DA element instance collection class
 {
 	friend class assim;
 	friend class assimilation;

@@ -45,7 +45,7 @@
 	void find_using( variable *v, FILE *frep, bool *found ); \
 	void get_saved( FILE *out, const char *sep, bool all_var = false ); \
 	void get_sa_limits( FILE *out, const char *sep ); \
-	void insert_data_mem( int *num_v, const char *lab = NULL ); \
+	void insert_data_mem( const char *lab = NULL ); \
 	void insert_object( const char *w, bool netOnly = false, object *above = NULL ); \
 	void load_elem_lists( void ); \
 	void report( void ); \
@@ -86,7 +86,7 @@
 	void fill_list_var( bool show_all, bool lag_only ); \
 	void insert_labels_mem( int *num_v, const char *lab = NULL ); \
 	void insert_obj_num( const char *tag, const char *ind, int *idx, int *count ); \
-	void insert_store_mem( int max_v, int *num_v, const char *lab = NULL ); \
+	void insert_store_mem( int *num_v, const char *lab = NULL ); \
 	void link_cells( const char *lab ); \
 	void put_line( int x1, int y1, int x2 ); \
 	void put_node( int x, int y, const char *str, bool sel ); \
@@ -246,8 +246,17 @@ namespace gui
 /*************************************************************
  CLASSES
  *************************************************************/
-	struct design;
-	struct nolh;
+	class design;
+	class nolh;
+	class store;
+
+
+/*************************************************************
+ TYPE TEMPLATES
+ *************************************************************/
+	typedef std::vector < store > sto_vecT;
+	typedef std::vector < store * > stp_vecT;
+	typedef std::vector < stp_vecT > stp2_vecT;
 
 
 /*************************************************************
@@ -429,6 +438,7 @@ namespace gui
 	lsd::object *operate( lsd::object *r ); \
 	strT win_path( strT filepath );
 	void add_da_plot_tab( const char *w, int id_plot );
+	void align_file_vars( str2_vecT & var_names, stp2_vecT & file_stores );
 	void analysis( bool mc = false );
 	void auto_document( const char *lab, const char *which, bool append = false );
 	void canvas_binds( int n );
@@ -455,7 +465,7 @@ namespace gui
 	void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, int init_color );
 	void init_plot( void );
 	void init_tcl_tk( const char *exec, const char *tcl_app_name );
-	void insert_data_file( bool gz, int *num_v, str_vecT *var_names, bool keep_vars );
+	void insert_data_file( bool gz, str_vecT & var_names, stp_vecT & file_stores, bool keep_vars );
 	void load_lsd_options( void );
 	void log_tcl_error( bool show, const char *cm, const char *message, ... );
 	void lsd_exit_gui( int v );
@@ -531,33 +541,61 @@ namespace gui
 /*************************************************************
  DESIGN
  *************************************************************/
-struct gui::design						// design of experiment container class
+class gui::design						// design of experiment container class
 {
-	int typ, tab, n, k, *par, *lag, *inst;// experiment parameters
-	double **hi, **lo, ***doe;
-	char **lab;
-	bool *intg;
+	public:
+		char **lab = NULL;
+		double ***doe = NULL;
+		int k;							// experiment parameters
+		int n;
+		int *lag = NULL;
+		int *par = NULL;
 
-	design( lsd::sensitivity *rsens, int typ, const char *fname, const char *dest_path,
-			int findex, int samples, int factors = 0, int jump = 2, int trajs = 4 );
-										// constructor
-	~design( void );					// destructor
+	private:
+		bool *intg = NULL;
+		double **hi = NULL;
+		double **lo = NULL;
+		int tab;
+		int typ;
+		int *inst = NULL;
 
-	void clear_design( void );
-	void load_design_data( lsd::sensitivity *rsens, int n );
+	private:
+		void clear_design( void );
+		void load_design_data( lsd::sensitivity *rsens, int n );
+
+	public:
+		design( lsd::sensitivity *rsens, int typ, const char *fname, const char *dest_path,
+				int findex, int samples, int factors = 0, int jump = 2, int trajs = 4 );	// constructor
+		~design( void );				// destructor
 };
 
 
 /*************************************************************
  NOLH
  *************************************************************/
-struct gui::nolh						// near-orthogonal Latin hypercube class
+class gui::nolh							// near-orthogonal Latin hypercube class
 {
-	int kMin;
-	int kMax;
-	int n1;
-	int n2;
-	int loLevel;
-	int hiLevel;
-	const int *table;
+	public:
+		int kMin;						// DoE design - DO NOT CHANGE VARS ORDER!
+		int kMax;
+		int n1;
+		int n2;
+		int loLevel;
+		int hiLevel;
+		const int *table;
+};
+
+
+/*************************************************************
+ STORE
+ *************************************************************/
+class gui::store						// analysis element values container class
+{
+	public:
+		char label[ MAX_ELEM_LENGTH ];
+		char tag[ MAX_ELEM_LENGTH ];
+		double *data = NULL;
+		int end;
+		int rank;
+		int start;
 };
