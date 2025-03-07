@@ -254,6 +254,8 @@ namespace gui
 /*************************************************************
  TYPE TEMPLATES
  *************************************************************/
+	typedef std::map < strT, store > sv_mapT;
+	typedef std::set < store * > stp_setT;
 	typedef std::vector < store > sto_vecT;
 	typedef std::vector < store * > stp_vecT;
 	typedef std::vector < stp_vecT > stp2_vecT;
@@ -374,6 +376,7 @@ namespace gui
 	const char *get_make_var( const char *var, const char *buf, char *dest, int sz );
 	const char *get_str( const char *tcl_var );
 	const char *get_target_name( char *str, int str_sz, bool term = false );
+	const str2_vecT & align_file_vars( stp2_vecT & file_stores );
 	double eval_double( const char *tcl_exp );
 	double get_double( const char *tcl_var, double *var = NULL, bool no_error = false );
 	double lower_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
@@ -438,7 +441,6 @@ namespace gui
 	lsd::object *operate( lsd::object *r ); \
 	strT win_path( strT filepath );
 	void add_da_plot_tab( const char *w, int id_plot );
-	void align_file_vars( str2_vecT & var_names, stp2_vecT & file_stores );
 	void analysis( bool mc = false );
 	void auto_document( const char *lab, const char *which, bool append = false );
 	void canvas_binds( int n );
@@ -465,7 +467,7 @@ namespace gui
 	void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, int init_color );
 	void init_plot( void );
 	void init_tcl_tk( const char *exec, const char *tcl_app_name );
-	void insert_data_file( bool gz, str_vecT & var_names, stp_vecT & file_stores, bool keep_vars );
+	void insert_data_file( bool gz, stp_vecT & file_stores, bool keep_vars );
 	void load_lsd_options( void );
 	void log_tcl_error( bool show, const char *cm, const char *message, ... );
 	void lsd_exit_gui( int v );
@@ -592,10 +594,15 @@ class gui::nolh							// near-orthogonal Latin hypercube class
 class gui::store						// analysis element values container class
 {
 	public:
-		char label[ MAX_ELEM_LENGTH ];
-		char tag[ MAX_ELEM_LENGTH ];
+		bool data_alias = true;			// data in memory, data pointer is alias
 		double *data = NULL;
 		int end;
 		int rank;
 		int start;
+		strT label;
+		strT parent;
+		strT tag;
+
+	public:
+		~store( void ) { if ( ! data_alias ) delete [ ] data; }// destructor
 };

@@ -486,7 +486,7 @@ void lsd::assimilation::align_state_vars( void )
 
 		if ( align_trim )
 		{
-			// check for instance mismatches
+			// look for instance mismatches
 			for ( auto missing = false; ! missing; )
 			{
 				// check if all runs have this instance
@@ -502,7 +502,7 @@ void lsd::assimilation::align_state_vars( void )
 					if ( missing )
 					{
 						// one run missing the instance, remove all excess instances
-						while ( true )			// remove all extra instances from var
+						while ( true )			// remove all extra instances of var
 							if ( DA_IDX < DA_SV.size( ) && strcmp( DA_SV[ DA_IDX ]->label, ca->label ) == 0 )
 								DA_SV.erase( DA_SV.begin( ) + DA_IDX );
 							else

@@ -170,6 +170,7 @@ typedef std::map < int, double > d_mapT;
 typedef std::mutex mtxT;
 typedef std::recursive_mutex rec_mtxT;
 typedef std::set < int > i_setT;
+typedef std::set < std::string > str_setT;
 typedef std::string strT;
 typedef std::thread thrT;
 typedef std::thread::id thr_idT;
@@ -318,7 +319,7 @@ namespace lsd
 	int strwrds( const char *s );
 	long strtol( const char *in, char** endptr, int base, long inv );
 	l_vecT strtolsplit( const char *in, char sep, long inv = 0 );
-	strT to_string( const char *fmt, double val );
+	strT to_string( const char *fmt, ... );
 	str_vecT strtostrsplit( const char *in, char sep, bool remQuotes = false );
 	void cmd( const char *cm, ... );
 	void exception_handler( int signum, const char *what );

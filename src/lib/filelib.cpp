@@ -226,8 +226,6 @@ endLoad:
 			*warnings += " " + std::to_string( i );
 	}
 
-	t = 0;
-
 	return load;
 }
 

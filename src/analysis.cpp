@@ -138,12 +138,11 @@ namespace gui
 	int var_num;
 	int xy;
 	node gplot_tree;
-	sto_vecT vs;
+	sto_vecT vs;						// data store for analysis
 
 	// MC series parent names
 	const char *mc_par[ ] = { "meanMC", "medianMC", "maxMC", "minMC", "varMC", "sumMC", "medianMC", "countMC", "sdMC", "prodMC", "invMC", "ci+MC", "ci-MC", "maxMC", "ci+MC", "medianMC", "medianMC" };
 }
-
 
 
 /*************************************************************
@@ -153,10 +152,9 @@ void gui::analysis( bool mc )
 {
 	bool gz;
 	char dirname[ MAX_PATH_LENGTH ], str1[ MAX_ELEM_LENGTH ], str2[ MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ];
-	double *datum, compvalue;
+	double compvalue;
 	int h, i, j, k, l, m, p, r;
 	str_vecT cur_var;
-	str2_vecT var_names;
 	stp2_vecT file_stores;
 	FILE *f;
 
@@ -1680,34 +1678,33 @@ void gui::analysis( bool mc )
 
 						if ( h >= l && h <= m && ! strcmp( str1, str3 ) )
 						{
-							datum = vs[ k ].data;
-							if ( std::isfinite( datum[ h - l ] ) )		// ignore NaNs
+							if ( std::isfinite( vs[ k ].data[ h - l ] ) )// ignore NaNs
 							{
 								r = 0;
 								switch ( p )
 								{
 									case 0:
-										if ( datum[ h - l ] != compvalue )
+										if ( vs[ k ].data[ h - l ] != compvalue )
 											r = 1;
 										break;
 									case 1:
-										if ( datum[ h - l ] == compvalue )
+										if ( vs[ k ].data[ h - l ] == compvalue )
 											r = 1;
 										break;
 									case 2:
-										if ( datum[ h - l ] >= compvalue )
+										if ( vs[ k ].data[ h - l ] >= compvalue )
 											r = 1;
 										break;
 									case 3:
-										if ( datum[ h - l ] > compvalue )
+										if ( vs[ k ].data[ h - l ] > compvalue )
 											r = 1;
 										break;
 									case 4:
-										if ( datum[ h - l ] <= compvalue )
+										if ( vs[ k ].data[ h - l ] <= compvalue )
 											r = 1;
 										break;
 									case 5:
-										if ( datum[ h - l ] < compvalue )
+										if ( vs[ k ].data[ h - l ] < compvalue )
 											r = 1;
 										break;
 								}
@@ -2225,37 +2222,37 @@ void gui::analysis( bool mc )
 
 						if ( h >= l && h <= m && ! strcmp( str1, str3 ) )
 						{
-							datum = vs[ k ].data;
-							if ( std::isfinite( datum[ h - l ] ) )		// ignore NaNs
+							if ( std::isfinite( vs[ k ].data[ h - l ] ) )// ignore NaNs
 							{
 								r = 0;
 								switch ( p )
 								{
 									case 0:
-										if ( datum[ h - l ] != compvalue )
+										if ( vs[ k ].data[ h - l ] != compvalue )
 											r = 1;
 										break;
 									case 1:
-										if ( datum[ h - l ] == compvalue )
+										if ( vs[ k ].data[ h - l ] == compvalue )
 											r = 1;
 										break;
 									case 2:
-										if ( datum[ h - l ] >= compvalue )
+										if ( vs[ k ].data[ h - l ] >= compvalue )
 											r = 1;
 										break;
 									case 3:
-										if ( datum[ h - l ] > compvalue )
+										if ( vs[ k ].data[ h - l ] > compvalue )
 											r = 1;
 										break;
 									case 4:
-										if ( datum[ h - l ] <= compvalue )
+										if ( vs[ k ].data[ h - l ] <= compvalue )
 											r = 1;
 										break;
 									case 5:
-										if ( datum[ h - l ] < compvalue )
+										if ( vs[ k ].data[ h - l ] < compvalue )
 											r = 1;
 										break;
 								}
+
 								if ( r == 1 )
 									cmd( ".da.vars.ch.f.v selection set %d", i );
 							}
@@ -2489,25 +2486,28 @@ void gui::analysis( bool mc )
 			case 24:
 				if ( choice == 24 )
 				{
+					cmd( "newtop .da.s \"Choose Data Source\" { set choice 2 } .da" );
+					cmd( "ttk::label .da.s.l -text \"Source of additional series\"" );
+
+					cmd( "ttk::frame .da.s.i -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
+					cmd( "ttk::radiobutton .da.s.i.c -text \"Create new series from selected\" -underline 0 -variable bidi -value 4" );
+					cmd( "ttk::radiobutton .da.s.i.a -text \"Moving average series from selected\" -underline 0 -variable bidi -value 5" );
+					cmd( "ttk::radiobutton .da.s.i.e -text \"Existing unsaved element\" -underline 0 -variable bidi -value 0" );
+					cmd( "ttk::radiobutton .da.s.i.f -text \"File(s) of saved results\" -underline 0 -variable bidi -value 1" );
+					cmd( "ttk::radiobutton .da.s.i.m -text \"Files from Monte Carlo experiment\" -variable bidi -value 3" );
+
+					cmd( "bind .da.s <KeyPress-f> { set bidi 1 }; bind .da.s <KeyPress-F> { set bidi 1 }" );
+					cmd( "bind .da.s <KeyPress-m> { set bidi 3 }; bind .da.s <KeyPress-M> { set bidi 3 }" );
+
 					if ( vs.size( ) > 0 )
 					{
-						cmd( "newtop .da.s \"Choose Data Source\" { set choice 2 } .da" );
-						cmd( "ttk::label .da.s.l -text \"Source of additional series\"" );
-
-						cmd( "set bidi 4" );
-						cmd( "ttk::frame .da.s.i -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-						cmd( "ttk::radiobutton .da.s.i.c -text \"Create new series from selected\" -underline 0 -variable bidi -value 4" );
-						cmd( "ttk::radiobutton .da.s.i.a -text \"Moving average series from selected\" -underline 0 -variable bidi -value 5" );
-						cmd( "ttk::radiobutton .da.s.i.e -text \"Existing unsaved element\" -underline 0 -variable bidi -value 0" );
-						cmd( "ttk::radiobutton .da.s.i.f -text \"File(s) of saved results\" -underline 0 -variable bidi -value 1" );
-						cmd( "pack .da.s.i.c .da.s.i.a .da.s.i.e .da.s.i.f -anchor w" );
-
 						cmd( "bind .da.s <KeyPress-c> { set bidi 4 }; bind .da.s <KeyPress-C> { set bidi 4 }" );
 						cmd( "bind .da.s <KeyPress-m> { set bidi 5 }; bind .da.s <KeyPress-M> { set bidi 5 }" );
 						cmd( "bind .da.s <KeyPress-e> { set bidi 0 }; bind .da.s <KeyPress-E> { set bidi 0 }" );
-						cmd( "bind .da.s <KeyPress-f> { set bidi 1 }; bind .da.s <KeyPress-F> { set bidi 1 }" );
 
-						cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady $_5 -padx $_5" );
+						cmd( "pack .da.s.i.c .da.s.i.a .da.s.i.e .da.s.i.f .da.s.i.m -anchor w" );
+
+						cmd( "set bidi 4" );
 
 						if ( nv == 0 )
 						{
@@ -2518,20 +2518,12 @@ void gui::analysis( bool mc )
 					}
 					else
 					{
-						cmd( "newtop .da.s \"Choose Data Source\" { set choice 2 } .da" );
-						cmd( "ttk::label .da.s.l -text \"Source of additional series\"" );
-
 						cmd( "set bidi 1" );
-						cmd( "ttk::frame .da.s.i -relief solid -borderwidth 1 -padding [ list $frPadX $frPadY ]" );
-						cmd( "ttk::radiobutton .da.s.i.f -text \"File(s) of saved results\" -variable bidi -value 1" );
-						cmd( "ttk::radiobutton .da.s.i.m -text \"Files from Monte Carlo experiment\" -variable bidi -value 3" );
+
 						cmd( "pack .da.s.i.f .da.s.i.m -anchor w" );
-
-						cmd( "bind .da.s <KeyPress-f> { set bidi 1 }; bind .da.s <KeyPress-F> { set bidi 1 }" );
-						cmd( "bind .da.s <KeyPress-m> { set bidi 3 }; bind .da.s <KeyPress-M> { set bidi 3 }" );
-
-						cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady $_5 -padx $_5" );
 					}
+
+					cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady $_5 -padx $_5" );
 
 					cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#add_series } { set choice 2 }" );
 					cmd( "showtop .da.s" );
@@ -2679,7 +2671,6 @@ void gui::analysis( bool mc )
 							goto add_end;
 
 					case 1:
-
 						// check if MC results were not just created
 						if ( ! mc || sim.res_list.size( ) <= 1 )
 						{
@@ -2696,7 +2687,7 @@ void gui::analysis( bool mc )
 
 							cmd( "set lab [ tk_getOpenFile -parent .da -title \"Load Results File%s\" -multiple yes -initialdir \"$res_path\" -defaultextension .res.gz -filetypes { %s { {All files} {*} } } -typevariable defaultFileType ]", mc ? "s" : "(s)", platform == _MAC_ ? "" : "{ {LSD result files} {.res.gz .res} } { {LSD total files} {.tot .tot.gz} }" );
 							cmd( "if { ! [ fn_spaces \"$lab\" .da 1 ] } { set choice [ llength $lab ] } { set choice 0 }" );
-							h = choice;		// number of files
+							h = choice;			// number of files
 
 							if ( h == 0 )
 								goto add_end;	// no file selected
@@ -2709,10 +2700,10 @@ void gui::analysis( bool mc )
 							}
 						}
 						else
-							h = sim.res_list.size( );
+							h = sim.res_list.size( );// number of files
 
+						p = vs.size( );			// number of existing series
 						file_stores.resize( h );
-						var_names.resize( h );
 
 						if ( mc )
 							k = get_int( "keepSeries" );
@@ -2743,7 +2734,7 @@ void gui::analysis( bool mc )
 							{
 								fclose( f );
 								++file_counter;
-								insert_data_file( gz, var_names[ i ], file_stores[ i ], k );
+								insert_data_file( gz, file_stores[ i ], k );
 
 								if ( h > 1 )
 									cmd( "prgboxupdate .da.pas %d", i + 1 );
@@ -2754,96 +2745,63 @@ void gui::analysis( bool mc )
 
 						cmd( "destroytop .da.pas" );
 
-						if ( ! mc )
-							goto add_clear;
-
 						if ( stop )
 						{
 							vs.clear( );
 							max_c = file_counter = 0;
-							goto add_clear;
 						}
 
-						plog( "\nCreating MC series... " );
-
-						m = vs.size( );
-						l = var_names[ 0 ].size( );	// number of series
-
-						align_file_vars( var_names, file_stores );
-
-						for ( i = 1; i < h; ++i )
+						if ( mc && ! stop )
 						{
-							if ( var_names[ i ].size( ) != ( unsigned ) l )
-							{
-								cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid results files\" -detail \"The number of series in the files are not the same. Variables from objects created during the simulation may not be handled properly. Results files should come from the same set of simulation runs.\"" );
-								plog( "Aborted\n" );
+							plog( "\nCreating MC series... " );
 
-								if ( ! k )
-								{
-									vs.clear( );
-									max_c = file_counter = 0;
-								}
-
-								goto add_clear;
-							}
-
-							for ( j = 0; j < l; ++j )
-							{
-								if ( ! var_names[ i ][ j ].compare( var_names[ 0 ][ j ] ) )
-								{
-									cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid results files\" -detail \"The series in the files are not the same or have different number of time steps or instances. Variables from objects created during the simulation may not be handled properly. Results files should come from the same set of simulation runs.\"" );
-									plog( "Aborted\n" );
-
-									if ( ! k )
-									{
-										vs.clear( );
-										max_c = file_counter = 0;
-									}
-
-									goto add_clear;
-								}
-							}
-						}
-
-						if ( k )
-							var_num = vs.size( );
-						else
-							var_num = 0;
-
-						cmd( "progressbox .da.pas \"Add Series\" \"Creating MC Series\" \"Series\" %d { set stop true } .da", l );
-
-						for ( j = 0, stop = false; j < l && ! stop; ++j )
-						{
+							m = vs.size( );			// total series after file load
+							const str2_vecT & var_names = align_file_vars( file_stores );
+							l = var_names[ 0 ].size( );	// number of series really loaded
+							var_num = k ? vs.size( ) : p;
 							cur_var.resize( h );
 
-							for ( i = 0; i < h; ++i )
-								cur_var[ i ] = var_names[ i ][ j ];
+							cmd( "progressbox .da.pas \"Add Series\" \"Creating MC Series\" \"Series\" %d { set stop true } .da", l );
 
-							cmd( "set vname [ lindex [ split \"%s\" ] 0 ]", var_names[ 0 ][ j ].c_str( ) );
-							cmd( "set ftag [ string replace [ lindex [ split \"%s\" ] 1 ] 0 3 ]", var_names[ 0 ][ j ].c_str( ) );
+							for ( j = 0, stop = false; j < l && ! stop; ++j )
+							{
+								for ( i = 0; i < h; ++i )
+									cur_var[ i ] = var_names[ i ][ j ];
 
-							create_series( true, cur_var );
+								cmd( "set vname [ lindex [ split \"%s\" ] 0 ]", var_names[ 0 ][ j ].c_str( ) );
+								cmd( "set ftag [ string replace [ lindex [ split \"%s\" ] 1 ] 0 3 ]", var_names[ 0 ][ j ].c_str( ) );
 
-							cmd( "prgboxupdate .da.pas %d", j + 1 );
+								create_series( true, cur_var );
+
+								if ( j % PROG_SERIES == 0 )
+									cmd( "prgboxupdate .da.pas %d", j + 1 );
+							}
+
+							cur_var.clear( );
+
+							cmd( "destroytop .da.pas" );
+
+							if ( ! k && ( int ) vs.size( ) >= m )
+							{
+								vs.erase( vs.begin( ) + p, vs.begin( ) + m );
+								file_counter = 0;
+							}
+
+							// reset serial ranks/ids
+							cmd( "$serLbox delete 0 end" );
+							cmd( "tooltip::tooltip clear ${serLbox}*" );
+
+							for ( i = 0; i < ( int ) vs.size( ); ++i )
+							{
+								vs[ i ].rank = i;
+								cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ i ].label.c_str( ), vs[ i ].tag.c_str( ), vs[ i ].start, vs[ i ].end, vs[ i ].rank, vs[ i ].parent.c_str( ) );
+							}
+
+							if ( stop )
+								plog( "Interrupted\n" );
+							else
+								plog( "Done\n" );
 						}
-
-						cmd( "destroytop .da.pas" );
-
-						if ( ! k && ( int ) vs.size( ) > m )
-						{
-							vs.resize( vs.size( ) - m );
-							file_counter = 0;
-						}
-
-						if ( stop )
-							plog( "Interrupted\n" );
-						else
-							plog( "Done\n" );
-
-						add_clear:
-
-						var_names.clear( );
-						cur_var.clear( );
 
 						cmd( "selectinlist .da.vars.lb.f.v 0" );
 				}
@@ -4750,12 +4708,14 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 						cv->data[ i ] = cv->val[ cv->num_lag - i ];
 				}
 
-				strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
-				snprintf( gui::vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", tag_pref[ tag ], cv->lab_tit );
+				gui::vs[ *num_v ].label = cv->label;
+				gui::vs[ *num_v ].parent = cv->up->label;
+				gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ tag ], cv->lab_tit );
 				gui::vs[ *num_v ].start = cv->start;
 				gui::vs[ *num_v ].end = cv->end;
 				gui::vs[ *num_v ].rank = *num_v;
 				gui::vs[ *num_v ].data = cv->data;
+				gui::vs[ *num_v ].data_alias = true;
 				++( *num_v );
 			}
 			else
@@ -4768,12 +4728,14 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
 								continue;
 
-							strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
-							snprintf( gui::vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", tag_pref[ i ], cv->lab_tit );
+							gui::vs[ *num_v ].label = cv->label;
+							gui::vs[ *num_v ].parent = cv->up->label;
+							gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ i ], cv->lab_tit );
 							gui::vs[ *num_v ].start = ce->start;
 							gui::vs[ *num_v ].end = ce->end;
 							gui::vs[ *num_v ].rank = *num_v;
 							gui::vs[ *num_v ].data = ( i == 4 ? ce->dat : ( i == 3 ? ce->fct : ce->anl ) );
+							gui::vs[ *num_v ].data_alias = true;
 							++( *num_v );
 						}
 				}
@@ -4789,12 +4751,14 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 		for ( auto cv = sim->cemetery; cv != NULL && *num_v < ( int ) gui::vs.size( ); cv = cv->next )
 			if ( da->disable )
 			{
-				strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
-				strcpyn( gui::vs[ *num_v ].tag, cv->lab_tit, MAX_ELEM_LENGTH );
+				gui::vs[ *num_v ].label = cv->label;
+				gui::vs[ *num_v ].parent = cv->up->label;
+				gui::vs[ *num_v ].tag = cv->lab_tit;
 				gui::vs[ *num_v ].start = cv->start;
 				gui::vs[ *num_v ].end = cv->end;
 				gui::vs[ *num_v ].rank = *num_v;
 				gui::vs[ *num_v ].data = cv->data;
+				gui::vs[ *num_v ].data_alias = true;
 				++( *num_v );
 			}
 			else
@@ -4807,12 +4771,14 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
 								continue;
 
-							strcpyn( gui::vs[ *num_v ].label, cv->label, MAX_ELEM_LENGTH );
-							snprintf( gui::vs[ *num_v ].tag, MAX_ELEM_LENGTH, "%s%s", tag_pref[ i ], cv->lab_tit );
+							gui::vs[ *num_v ].label = cv->label;
+							gui::vs[ *num_v ].parent = cv->up->label;
+							gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ i ], cv->lab_tit );
 							gui::vs[ *num_v ].start = ce->start;
 							gui::vs[ *num_v ].end = ce->end;
 							gui::vs[ *num_v ].rank = *num_v;
 							gui::vs[ *num_v ].data = ( i == 4 ? ce->dat : ( i == 3 ? ce->fct : ce->anl ) );
+							gui::vs[ *num_v ].data_alias = true;
 							++( *num_v );
 						}
 				}
@@ -4823,11 +4789,11 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 /*************************************************************
  INSERT_DATA_FILE
  *************************************************************/
-void gui::insert_data_file( bool gz, str_vecT & var_names, stp_vecT & file_stores, bool keep_vars )
+void gui::insert_data_file( bool gz, stp_vecT & file_stores, bool keep_vars )
 {
 	FILE *f = NULL;
 	gzFile fz = Z_NULL;
-	char ch, *tok, *linbuf, *tag;
+	char ch, *tok, *linbuf, label[ MAX_ELEM_LENGTH ], tag[ MAX_ELEM_LENGTH ];
 	int i, j, new_v, new_c, num_v;
 	bool header = false;
 	long linsiz = 1;
@@ -4909,39 +4875,38 @@ void gui::insert_data_file( bool gz, str_vecT & var_names, stp_vecT & file_store
 			goto end;
 		}
 
-		sscanf( tok, "%s %s (%d %d)", vs[ i ].label, vs[ i ].tag, &( vs[ i ].start ), &( vs[ i ].end ) );
+		sscanf( tok, "%s %s (%d %d)", label, tag, &( vs[ i ].start ), &( vs[ i ].end ) );
+		vs[ i ].label = label;
+		vs[ i ].tag = lsd::to_string( "%s%d_%s", lsd::tag_pref[ 5 ], file_counter, tag );
 		vs[ i ].rank = i;
+		vs[ i ].data = new double[ vs[ i ].end - vs[ i ].start + 1 ];
+		vs[ i ].data_alias = false;		// dealocate on store destruction
 
-		tag = new char [ strlen( vs[ i ].tag ) + 10 ];
-		sprintf( tag, "%s%d_%s", lsd::tag_pref[ 5 ], file_counter, vs[ i ].tag );
-		lsd::strcpyn( vs[ i ].tag, tag, MAX_ELEM_LENGTH );
-		delete [ ] tag;
+		if ( sim.par_map.find( vs[ i ].label ) == sim.par_map.end( ) )
+			vs[ i ].parent = filename;
+		else
+			vs[ i ].parent = sim.par_map[ vs[ i ].label ];
 
 		if ( vs[ i ].start != -1 )
-			snprintf( da_tmp, MAX_BUFF_SIZE, "%s %s (%d-%d) #%d", vs[ i ].label, vs[ i ].tag, vs[ i ].start, vs[ i ].end, i );
+			snprintf( da_tmp, MAX_BUFF_SIZE, "%s %s (%d-%d) #%d", vs[ i ].label.c_str( ), vs[ i ].tag.c_str( ), vs[ i ].start, vs[ i ].end, i );
 		else
 		{
-			snprintf( da_tmp, MAX_BUFF_SIZE, "%s %s (0-%d) #%d", vs[ i ].label, vs[ i ].tag, new_c - 1, i );
+			snprintf( da_tmp, MAX_BUFF_SIZE, "%s %s (0-%d) #%d", vs[ i ].label.c_str( ), vs[ i ].tag.c_str( ), new_c - 1, i );
 			vs[ i ].start = 0;
 			vs[ i ].end = new_c - 1;
 			first_c = 0;
 		}
 
-		var_names.push_back( da_tmp );
-		file_stores.push_back( & vs[ i ] );
-		vs[ i ].data = new double[ vs[ i ].end - vs[ i ].start + 1 ];
-
 		if ( keep_vars )
 		{
 			cmd( "if { ! [ dict exists serDescrDict %s ] } { \
 					dict set serDescrDict %s \"Loaded from file\n[ file nativename %s ]\" \
-				}", vs[ i ].label, vs[ i ].label, filename );
+				}", vs[ i ].label.c_str( ), vs[ i ].label.c_str( ), filename );
 
-			if ( sim.par_map.find( vs[ i ].label ) == sim.par_map.end( ) )
-				cmd( "add_series \"%s\" %s", da_tmp, filename );
-			else
-				cmd( "add_series \"%s\" %s", da_tmp, sim.par_map[ vs[ i ].label ].c_str( ) );
+			cmd( "add_series \"%s\" %s", da_tmp, vs[ i ].parent.c_str( ) );
 		}
+
+		file_stores.push_back( & vs[ i ] );
 
 		tok = strtok( NULL, "\t" );			// get next token, if any
 
@@ -4960,7 +4925,7 @@ void gui::insert_data_file( bool gz, str_vecT & var_names, stp_vecT & file_store
 
 	cmd( "update_parent" );
 
-	cmd( ".da.pas.main.p2.info.elem configure -text Time" );
+	cmd( ".da.pas.main.p2.info.elem configure -text \"Time step:\"" );
 	cmd( ".da.pas.main.p2.scale configure -maximum %d", new_c - 1 );
 	cmd( "prgboxupdate .da.pas \"\" 0" );
 
@@ -5031,12 +4996,77 @@ void gui::insert_data_file( bool gz, str_vecT & var_names, stp_vecT & file_store
 /*************************************************************
  ALIGN_FILE_VARS
  Ensure only the variables present on all MC data files
- are used for analysis, removing the ones with missing
- instances
+ are used for analysis, trimming the ones with missing
+ equivalent instances (exactly same name, position, time span)
  *************************************************************/
-void gui::align_file_vars( str2_vecT & var_names, stp2_vecT & file_stores )
+const str2_vecT & gui::align_file_vars( stp2_vecT & file_stores )
 {
+	i_vecT v_idx( file_stores.size( ), 0 );
+	static str2_vecT var_names( file_stores.size( ) );
+	str_setT sigs_set;
+	stp_setT to_trim;
+	str_vecT unique_sigs;
+	str2_vecT var_sigs( file_stores.size( ) );
 
+	// get set of unique variable signatures (name-position-start-end), preserving order
+	for ( auto i = 0; i < ( int ) file_stores.size( ); ++i )
+		for ( auto var : file_stores[ i ] )
+		{
+			strT sig = lsd::to_string( "%s-%s-%d-%d", var->label.c_str( ), var->tag.c_str( ), var->start, var->end );
+			var_sigs[ i ].emplace_back( sig );
+
+			// add a single instance of each signature
+			if ( sigs_set.emplace( sig ).second )
+				unique_sigs.emplace_back( sig );
+		}
+
+	// run over all variables found to identify instances to trim
+	for ( auto sig : unique_sigs )
+	{
+		// look for instance mismatches
+		for ( auto missing = false; ! missing; )
+		{
+			// check if all files have this instance
+			for ( auto i = 0; i < ( int ) file_stores.size( ); ++i )
+				if ( v_idx[ i ] >= ( int ) file_stores[ i ].size( ) || var_sigs[ i ][ v_idx[ i ] ] != sig )
+				{
+					missing = true;			// this file doesn't have instance
+					break;
+				}
+
+			// update file indexes, removing excess instances from all files
+			for ( auto i = 0; i < ( int ) file_stores.size( ); ++i )
+			{
+				auto cs = file_stores[ i ][ v_idx[ i ] ];// current variable store
+
+				if ( missing )
+				{
+					if ( v_idx[ i ] < ( int ) file_stores[ i ].size( ) && var_sigs[ i ][ v_idx[ i ] ] == sig )
+						to_trim.emplace( cs );
+				}
+				else						// all runs have this instance
+				{
+					var_names[ i ].emplace_back( lsd::to_string( "%s %s (%d-%d) #%d", cs->label.c_str( ), cs->tag.c_str( ), cs->start, cs->end, cs->rank ) );
+					++v_idx[ i ];			// all aligned so far, check next var
+				}
+			}
+		}
+	}
+
+	// trim excess instances from data store if needed
+	if ( to_trim.size( ) > 0 )
+	{
+		plog( "(discarding %d unmatched instances)... ");
+
+		sto_vecT vs_trim( vs.size( ) - to_trim.size( ) );
+		for ( auto v : vs )
+			if ( to_trim.find( & v ) == to_trim.end( ) )
+				vs_trim.emplace_back( v );
+
+		vs = vs_trim;
+	}
+
+	return var_names;
 }
 
 
@@ -7828,15 +7858,21 @@ bool gui::create_series( bool mc, str_vecT var_names )
 	// handle creation of multiple series
 	for ( k = 0, l = vs.size( ); k < new_series; ++k, ++l, ++var_num )
 	{
-		get_str( "vname", vs[ l ].label, MAX_ELEM_LENGTH );
-		snprintf( vs[ l ].tag, MAX_ELEM_LENGTH, "%s%s", mc ? lsd::tag_pref[ 7 ] : lsd::tag_pref[ 6 ], get_str( "ftag" ) );
+		vs[ l ].label = get_str( "vname" );
+		vs[ l ].tag = lsd::to_string( "%s%s", mc ? lsd::tag_pref[ 7 ] : lsd::tag_pref[ 6 ], get_str( "ftag" ) );
 		vs[ l ].rank = var_num;
+
+		if ( mc && new_series == 1 && sim.par_map.find( vs[ l ].label ) != sim.par_map.end( ) )
+			vs[ l ].parent = sim.par_map[ vs[ l ].label ];
+		else
+			vs[ l ].parent = mc ? mc_par[ type_series < 100 ? type_series : 0 ] : "(added)";
 
 		if ( cs_long == 1 )									// compute over series?
 		{
-			vs[ l ].data = new double[ max_c - min_c + 1 ];
-			vs[ l ].end = max_c;
 			vs[ l ].start = min_c;
+			vs[ l ].end = max_c;
+			vs[ l ].data = new double[ max_c - min_c + 1 ];
+			vs[ l ].data_alias = false;
 
 			for ( i = min_c; i <= max_c; ++i )
 			{
@@ -7950,9 +7986,10 @@ bool gui::create_series( bool mc, str_vecT var_names )
 		}
 		else										// compute over times
 		{
-			vs[ l ].data = new double[ sel_series ];
-			vs[ l ].end = sel_series - 1;
 			vs[ l ].start = 0;
+			vs[ l ].end = sel_series - 1;
+			vs[ l ].data = new double[ sel_series ];
+			vs[ l ].data_alias = false;
 
 			for ( j = 0; j < sel_series; ++j )
 			{
@@ -8044,12 +8081,9 @@ bool gui::create_series( bool mc, str_vecT var_names )
 
 		cmd( "if { ! [ dict exists serDescrDict %s ] } { \
 				dict set serDescrDict %s \"%s\" \
-			}", vs[ l ].label, vs[ l ].label, mc ? "Monte Carlo series" : "Created from other series" );
+			}", vs[ l ].label.c_str( ), vs[ l ].label.c_str( ), mc ? "Monte Carlo series" : "Created from other series" );
 
-		if ( mc && new_series == 1 && sim.par_map.find( vs[ l ].label ) != sim.par_map.end( ) )
-			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ l ].label, vs[ l ].tag, vs[ l ].start, vs[ l ].end, vs[ l ].rank, sim.par_map[ vs[ l ].label ].c_str( ) );
-		else
-			cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ l ].label, vs[ l ].tag, vs[ l ].start, vs[ l ].end, vs[ l ].rank, mc ? mc_par[ type_series < 100 ? type_series : 0 ] : "(added)" );
+		cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ l ].label.c_str( ), vs[ l ].tag.c_str( ), vs[ l ].start, vs[ l ].end, vs[ l ].rank, vs[ l ].parent.c_str( ) );
 
 		// define next series options for multiple series
 		switch ( type_series )
@@ -8229,12 +8263,14 @@ bool gui::create_maverag( void )
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 
-		snprintf( vs[ l ].label, MAX_ELEM_LENGTH, "%s_%cma%d", str[ i ], ma_type == 0 ? 's' : 'c', flt );
-		snprintf( vs[ l ].tag, MAX_ELEM_LENGTH, "%s%s", lsd::tag_pref[ 6 ], tag[ i ] );
+		vs[ l ].label = lsd::to_string( "%s_%cma%d", str[ i ], ma_type == 0 ? 's' : 'c', flt );
+		vs[ l ].parent = "(added)";
+		vs[ l ].tag = lsd::to_string( "%s%s", lsd::tag_pref[ 6 ], tag[ i ] );
 		vs[ l ].start = ( ma_type == 0 ) ? start[ i ] + flt - 1 : start[ i ];
 		vs[ l ].end = end[ i ];
 		vs[ l ].rank = l;
 		vs[ l ].data = new double[ vs[ l ].end - vs[ l ].start + 1 ];
+		vs[ l ].data_alias = false;
 
 		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
@@ -8302,9 +8338,9 @@ bool gui::create_maverag( void )
 
 		cmd( "if { ! [ dict exists serDescrDict %s ] } { \
 				dict set serDescrDict %s \"Moving average (%d) from '%s'\" \
-			}", vs[ l ].label, vs[ l ].label, flt, str[ i ] );
+			}", vs[ l ].label.c_str( ), vs[ l ].label.c_str( ), flt, str[ i ] );
 
-		cmd( "add_series \"%s %s (%d-%d) #%d\" \"(added)\"", vs[ l ].label, vs[ l ].tag, vs[ l ].start, vs[ l ].end, vs[ l ].rank );
+		cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ l ].label.c_str( ), vs[ l ].tag.c_str( ), vs[ l ].start, vs[ l ].end, vs[ l ].rank, vs[ l ].parent.c_str( ) );
 	}
 
 	cmd( "update_parent" );

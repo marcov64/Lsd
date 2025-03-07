@@ -1023,18 +1023,22 @@ str_vecT lsd::strtostrsplit( const char *in, char sep, bool remQuotes )
 
 /*************************************************************
  TO_STRING
- convert double to string, allowing for sprintf
- pattern format
+ convert arguments to string, allowing for sprintf-like
+ pattern formatting
  *************************************************************/
-strT lsd::to_string( const char *fmt, double val )
+strT lsd::to_string( const char *fmt, ... )
 {
-	char buf[ 100 + 1 ];
-	strT res;
+	va_list argptr;
 
-	if ( snprintf( buf, 100, fmt, val ) < 0 )
-		strcpy( buf, "" );
+	va_start( argptr, fmt );
 
-	return res = buf;
+    auto sz = vsnprintf( nullptr, 0, fmt, argptr );
+    strT out( sz, '\0');
+    vsprintf( & out[ 0 ], fmt, argptr );
+
+	va_end( argptr );
+
+    return out;
 }
 
 
