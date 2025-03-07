@@ -596,13 +596,18 @@ class gui::store						// analysis element values container class
 	public:
 		bool data_alias = true;			// data in memory, data pointer is alias
 		double *data = NULL;
-		int end;
-		int rank;
-		int start;
+		int end = -1;
+		int rank = -1;
+		int start = -1;
 		strT label;
 		strT parent;
 		strT tag;
 
 	public:
-		~store( void ) { if ( ! data_alias ) delete [ ] data; }// destructor
+		store( void ) { }				// constructor
+		store( const store & src );		// copy constructor
+		store( store && src ) noexcept;	// move constructor
+		~store( void );					// destructor
+		store & operator=( store rhs );	// assignment operator
+		void swap( store & st ) noexcept;// content swap
 };

@@ -146,6 +146,82 @@ namespace gui
 
 
 /*************************************************************
+ STORE copy constructor
+ *************************************************************/
+gui::store::store( const store & src )
+{
+	start = src.start;
+	end = src.end;
+	rank = src.rank;
+	label = src.label;
+	parent = src.parent;
+	tag = src.tag;
+	data_alias = src.data_alias;
+
+	if ( data_alias )
+		data = src.data;
+	else
+	{
+		int sz = end - start + 1;
+		if ( sz > 0 )
+		{
+			data = new double[ sz ];
+			std::copy( src.data, src.data + sz, data );
+		}
+		else
+			data = NULL;
+	}
+}
+ 
+ 
+/*************************************************************
+ STORE move constructor
+ *************************************************************/
+gui::store::store( store && src ) noexcept : store( )
+{
+	src.swap( *this );
+}
+ 
+ 
+/*************************************************************
+ STORE destructor
+ *************************************************************/
+gui::store::~store( void )
+{
+	if ( ! data_alias ) 
+		delete [ ] data;
+}
+ 
+ 
+/*************************************************************
+ STORE assignment operator
+ *************************************************************/
+gui::store & gui::store::operator=( store rhs )
+{
+	rhs.swap( *this );
+	return *this;
+}
+ 
+ 
+/*************************************************************
+ STORE swap function
+ *************************************************************/
+void gui::store::swap( store & st ) noexcept
+{
+	using std::swap;
+
+	swap( st.start, this->start );
+	swap( st.end, this->end );
+	swap( st.rank, this->rank );
+	swap( st.label, this->label );
+	swap( st.parent, this->parent );
+	swap( st.tag, this->tag );
+	swap( st.data_alias, this->data_alias );
+	swap( st.data, this->data );
+}
+ 
+ 
+/*************************************************************
  ANALYSIS
  *************************************************************/
 void gui::analysis( bool mc )
@@ -7871,7 +7947,7 @@ bool gui::create_series( bool mc, str_vecT var_names )
 		{
 			vs[ l ].start = min_c;
 			vs[ l ].end = max_c;
-			vs[ l ].data = new double[ max_c - min_c + 1 ];
+			vs[ l ].data = new double[ vs[ l ].end - vs[ l ].start + 1 ];
 			vs[ l ].data_alias = false;
 
 			for ( i = min_c; i <= max_c; ++i )
@@ -7988,7 +8064,7 @@ bool gui::create_series( bool mc, str_vecT var_names )
 		{
 			vs[ l ].start = 0;
 			vs[ l ].end = sel_series - 1;
-			vs[ l ].data = new double[ sel_series ];
+			vs[ l ].data = new double[ vs[ l ].end - vs[ l ].start + 1 ];
 			vs[ l ].data_alias = false;
 
 			for ( j = 0; j < sel_series; ++j )
