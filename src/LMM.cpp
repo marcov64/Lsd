@@ -80,6 +80,7 @@ namespace lsd
 // GUI global variable dummies
 namespace gui
 {
+	bool tcl_ok = false;				// tcl ready state
 	bool tk_ok = false;					// control for tk_ready to operate
 	char *model_make = NULL;			// model makefile options
 	char *system_make = NULL;			// system makefile options
