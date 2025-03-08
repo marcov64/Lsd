@@ -2760,7 +2760,7 @@ void gui::show_comp_result( bool term )
 	cmd( "bind .mm.b.ferr <KeyPress-Return> { .mm.b.ferr invoke }" );
 	cmd( "bind .mm.b.close <KeyPress-Return> { .mm.b.close invoke }" );
 
-	cmd( "showtop .mm lefttoW no no no" );
+	cmd( "showtop .mm lefttoW yes yes no" );
 	cmd( "mousewarpto .mm.b.gerr 0" );
 
 	cmd( "if [ file exists \"$model_dir/makemessage.txt\" ] { set file [ open \"$model_dir/makemessage.txt\" ]; .mm.t.t insert end [ read -nonewline $file ]; close $file } { .mm.t.t insert end \"(no compilation errors)\" }" );
