@@ -63,7 +63,7 @@ int lsd::assimilation::run_simulation( int until_t )
 	start = clock( );
 
 	// do the data assimilation forecast-analysis cycle
-	for ( auto dtime : time_var )
+	for ( auto & dtime : time_var )
 	{
 		// stop if data time span is longer than simulation
 		if ( ( next_t = dtime.first ) > ref_sim->last_t )
@@ -101,8 +101,8 @@ int lsd::assimilation::run_simulation( int until_t )
 
 	if ( res == 0 )
 	{
-		for ( auto sim : run_sims )
-			if ( sim->eff_t != ref_sim->last_t )
+		for ( auto & sim : run_sims )
+			if ( sim.eff_t != ref_sim->last_t )
 				res = 4;
 
 		ref_sim->eff_t = ref_sim->last_t;
@@ -130,17 +130,17 @@ int lsd::assimilation::run_simulation( int until_t )
 /*************************************************************
  DISPATCH_RUNS
  *************************************************************/
-int lsd::dispatch_runs( sim_vecT run_sims, int until_t, int until_run, bool da_en )
+int lsd::dispatch_runs( sim_vecT & run_sims, int until_t, int until_run, bool da_en )
 {
 	int nstale, nrun = 0;
 	mtxT mtx;
 	uniq_lT lock( mtx );
 
-	for ( auto sim : run_sims )
-		if ( ! sim->sim_thread.joinable( ) && sim->conf_ok )
+	for ( auto & sim : run_sims )
+		if ( ! sim.sim_thread.joinable( ) && sim.conf_ok )
 		{
-			sim->sim_thread = thrT( & lsd::simulation::run_simulation, sim, until_t, until_run, da_en );
-			sim->last_dispatch_time = sim->stale_time = 0;
+			sim.sim_thread = thrT ( & lsd::simulation::run_simulation, & sim, until_t, until_run, da_en );
+			sim.last_dispatch_time = sim.stale_time = 0;
 			++nrun;
 		}
 
@@ -150,26 +150,26 @@ int lsd::dispatch_runs( sim_vecT run_sims, int until_t, int until_run, bool da_e
 		lsd::seq_end.wait_until( lock, start + std::chrono::seconds( MAX_SIM_SLEEP ) );
 
 		nstale = 0;
-		for ( auto sim : run_sims )
+		for ( auto & sim : run_sims )
 		{
-			if ( sim->sim_thread.joinable( ) && ! sim->running_seq && sim->eff_t > 0 )
+			if ( sim.sim_thread.joinable( ) && ! sim.running_seq && sim.eff_t > 0 )
 			{
-				sim->sim_thread.join( );
+				sim.sim_thread.join( );
 				--nrun;
 			}
 			else
-				if ( sim->eff_t > sim->last_dispatch_time )
+				if ( sim.eff_t > sim.last_dispatch_time )
 				{
-					sim->last_dispatch_time = sim->eff_t;
-					sim->stale_time = 0;
+					sim.last_dispatch_time = sim.eff_t;
+					sim.stale_time = 0;
 				}
 				else
 				{
 					auto elapsed = std::chrono::duration_cast < std::chrono::seconds > ( std::chrono::system_clock::now( ) - start );
-					sim->stale_time += elapsed.count( );
+					sim.stale_time += elapsed.count( );
 				}
 
-			if ( sim->stale_time > MAX_STEP_TIMEOUT )
+			if ( sim.stale_time > MAX_STEP_TIMEOUT )
 				++nstale;
 		}
 	}
@@ -225,7 +225,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run, bool da_en )
 
 			// collect state variables if in data assimilation
 			if ( da_en && t == da->next_t )
-				da_svars->save_state_vars( root );
+				da_svars.save_state_vars( root );
 
 #ifndef _TERM_
 			// handle runtime button pressings after progress bar update

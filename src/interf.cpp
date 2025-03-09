@@ -51,7 +51,7 @@ lsd::object *gui::operate( lsd::object *r )
 	double fracMC, d_tmp[ 100 ], fake = 0;
 	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, i_tmp[ 100 ], done = 0;
 	long nlinks, ptsSa, maxMC;
-	lsd::assim *ca;
+	lsd::ass_list_itT ca;
 	lsd::bridge *cb;
 	lsd::description *cd;
 	lsd::object *n, *cur, *cur1, *cur2;
@@ -2137,14 +2137,16 @@ lsd::object *gui::operate( lsd::object *r )
 				break;
 
 			exist = false;
-			if ( ( ca = da.search( cv->label ) ) == NULL )
-				ca = new lsd::assim( cv->label, cv->param, false, cv->param );
-			else
-				exist = true;
+			ca = da.search( cv->label );
+			if ( ca == da.ass_elem.end( ) )
+			{
+				da.ass_elem.emplace_back( cv->label, cv->param, false, cv->param );
+				ca = -- da.ass_elem.end( );
+			}
 
 			if ( ( i = ca->dataentry( ) ) == 2 )
-				delete ca;						// configuration failed, no data
-
+				da.ass_elem.erase( ca );
+			
 			if ( i == 0 || ( i == 2 && exist ) )
 			{
 				unsavedChange = true;			// signal unsaved change
@@ -2622,7 +2624,7 @@ lsd::object *gui::operate( lsd::object *r )
 			Tcl_LinkVar( interp, "align_trim", ( char * ) & da.align_trim, TCL_LINK_INT );
 
 			cmd( "set algorithm \"%s\"", da.algo_names[ da.algorithm ] );
-			cmd( "set dsp_file \"%s\"", da.dsp_file != NULL ? da.dsp_file : "" );
+			cmd( "set dsp_file \"%s\"", da.dsp_file.c_str( ) );
 			cmd( "if { [ string first / $dsp_file ] != -1 } { \
 					set dsp_file [ file nativename $dsp_file ] \
 				}" );
@@ -2808,7 +2810,7 @@ lsd::object *gui::operate( lsd::object *r )
 					cmd( "set dsp_file [ string map {\\\\ /} $dsp_file ]" );
 					lab1 = get_str( "dsp_file" );
 
-					if ( da.dsp_file == NULL || strcmp( da.dsp_file, lab1 ) != 0 )
+					if ( da.dsp_file != lab1 )
 					{
 						try
 						{
@@ -2822,9 +2824,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 						if ( choice != 2 )
 						{
-							delete [ ] da.dsp_file;
-							da.dsp_file = new char [ strlen( lab1 ) + 1 ];
-							strcpy( da.dsp_file, lab1 );
+							da.dsp_file = lab1;
 							unsaved_change( true );
 						}
 					}
@@ -2834,10 +2834,7 @@ lsd::object *gui::operate( lsd::object *r )
 					if ( da.use_dsp_file )
 						da.use_dsp_file = false;
 					else
-					{
-						delete [ ] da.dsp_file;
-						da.dsp_file = NULL;
-					}
+						da.dsp_file.clear( );
 
 					unsaved_change( true );
 				}
@@ -4827,7 +4824,7 @@ lsd::object *gui::operate( lsd::object *r )
 				break;
 
 			// empty data assimilation
-			da.empty( );
+			lsd::empty_assimilation( );
 			plog( "\nData assimilation settings removed.\n" );
 			unsavedChange = true;
 

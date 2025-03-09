@@ -366,7 +366,7 @@ int gui::browse( lsd::object *r )
 {
 	bool done, sp_upd, da_en;
 	int i, num;
-	lsd::assim *ca;
+	lsd::ass_list_itT ca;
 	lsd::bridge *cb;
 	lsd::variable *cv;
 
@@ -400,7 +400,7 @@ int gui::browse( lsd::object *r )
 					sp_upd = false;
 
 				// data assimilation set?
-				if ( ( ca = da.search( cv->label ) ) != NULL && ! ca->disable )
+				if ( ( ca = da.search( cv->label ) ) != da.ass_elem.end( ) && ! ca->disable )
 					da_en = true;
 				else
 					da_en = false;

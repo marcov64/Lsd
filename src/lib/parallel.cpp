@@ -202,7 +202,7 @@ int lsd::simulation::monitor_logs( void )
 			++finished;
 
 	thr = 0;
-	for ( strT logn : run_logs )
+	for ( strT & logn : run_logs )
 	{
 		// consider just running threads except if all threads are stopped
 		if ( run_status[ thr++ ] != INISTAT && finished < threads )

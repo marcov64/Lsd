@@ -110,9 +110,7 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 		{
 			empty_sensitivity( );				// discard sensitivity analysis data
 			empty_description( );				// remove existing descriptions
-
-			if ( da != NULL )
-				da->empty( );					// remove assimilation info
+			empty_assimilation( );				// remove assimilation info
 		}
 
 		// load non-instanced model structure
@@ -157,11 +155,7 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 			da->med_stats = setNode.child( "data_assimilation" ).attribute( "median_statistics", hint ).as_bool( );
 			da->use_dsp_file = setNode.child( "data_assimilation" ).attribute( "use_dispersion_file", hint ).as_bool( );
 			if ( ( i = strlen( setNode.child( "data_assimilation" ).attribute( "dispersion_file", hint ).as_string( ) ) ) > 0 )
-			{
-				delete [ ] da->dsp_file;
-				da->dsp_file = new char [ i + 1 ];
-				strcpy( da->dsp_file, setNode.child( "data_assimilation" ).attribute( "dispersion_file", hint ).as_string( ) );
-			}
+				da->dsp_file = setNode.child( "data_assimilation" ).attribute( "dispersion_file", hint ).as_string( );
 
 			da->ens_infl = ! setNode.child( "data_assimilation" ).child( "ensemble_inflation" ).empty( );
 			da->infl_fac = setNode.child( "data_assimilation" ).child( "ensemble_inflation" ).attribute( "inflation_factor" ).as_double( 1 );
@@ -222,7 +216,7 @@ endLoad:
 		if ( res.status != pugi::status_ok )
 			*warnings = res.description( );
 
-		for ( auto i : warning )
+		for ( auto & i : warning )
 			*warnings += " " + std::to_string( i );
 	}
 
@@ -254,9 +248,7 @@ void lsd::simulation::unload_configuration( bool full )
 	if ( full )									// full unload? (no new config?)
 	{
 		empty_description( );					// remove element descriptions
-
-		if ( da != NULL )
-			da->empty( );						// discard assimilation info
+		empty_assimilation( );					// remove assimilation info
 
 		delete [ ] conf_path;					// reset current path
 		conf_path = new char[ strlen( model_path ) + 1 ];
@@ -301,7 +293,7 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 	to_compute = n.attribute( "compute" ).as_bool( true );
 
 	// scan contained child objects and elements
-	for ( x_nodeT cn : n.children( ) )
+	for ( x_nodeT & cn : n.children( ) )
 	{
 		if ( ! strcmp( cn.name( ), "object" ) )			// add object?
 		{
@@ -374,7 +366,7 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 						else
 							if ( type == 0 )
 							{
-								for ( x_nodeT sn : cns.children( ) )
+								for ( x_nodeT & sn : cns.children( ) )
 								{
 									data = strtostrsplit( sn.name( ), '-' );
 
@@ -392,7 +384,7 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 							}
 					}
 
-					if ( ! cn.child( "assimilation" ).empty( ) )
+					if ( da != NULL && ! cn.child( "assimilation" ).empty( ) )
 					{
 						x_nodeT cna = cn.child( "assimilation" );
 
@@ -400,9 +392,9 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 						bool update = cna.attribute( "update" ).as_bool( true );
 						bool data_obs = cna.attribute( "data_observations" ).as_bool( );
 
-						const char *data_file = cna.attribute( "data_file" ).value( );
-						const char *data_col_name = cna.attribute( "data_column_name" ).value( );
-						const char *t_col_name = cna.attribute( "time_column_name" ).value( );
+						strT data_file = cna.attribute( "data_file" ).value( );
+						strT data_col_name = cna.attribute( "data_column_name" ).value( );
+						strT t_col_name = cna.attribute( "time_column_name" ).value( );
 						int data_col_num = cna.attribute( "data_column_number" ).as_uint( );
 						int t_col_num = cna.attribute( "time_column_number" ).as_uint( );
 
@@ -412,7 +404,7 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 						double par_u_upp = cna.child( "parameter" ).attribute( "uniform_upper" ).as_double( );
 						double par_u_low = cna.child( "parameter" ).attribute( "uniform_lower" ).as_double( );
 
-						new assim( str, param, disable, update, data_obs, data_file, data_col_name, t_col_name, data_col_num, t_col_num, par_dist, par_n_sd, par_u_upp, par_u_low );
+						da->ass_elem.emplace_back( str, param, disable, update, data_obs, data_file, data_col_name, t_col_name, data_col_num, t_col_num, par_dist, par_n_sd, par_u_upp, par_u_low );
 					}
 				}
 			}
@@ -825,8 +817,8 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 		if ( da->use_dsp_file )
 			assimNode.append_attribute( "use_dispersion_file" ) = true;
 
-		if ( da->dsp_file != NULL && strlen( da->dsp_file ) > 0 )
-			assimNode.append_attribute( "dispersion_file" ) = da->dsp_file;
+		if ( da->dsp_file.size( ) > 0 )
+			assimNode.append_attribute( "dispersion_file" ) = da->dsp_file.c_str( );
 
 		if ( da->ens_infl && da->infl_fac != 1 )
 		{
@@ -907,7 +899,6 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 	int i, count;
 	long l, k;
 	strT data, text, nser, nid, nnam, lnkto, lnkwht;
-	assim *ca;
 	bridge *cb;
 	description *cd;
 	netlink *curl;
@@ -1186,47 +1177,51 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 			}
 
 		// add data assimilation settings
-		if ( da != NULL && ( ca = da->search( cv->label ) ) != NULL )
+		if ( da != NULL )
 		{
-			x_nodeT cna = cn.append_child( "assimilation" );
-
-			if ( ca->disable )
-				cna.append_attribute( "disable" ) = ca->disable;
-
-			if ( ! ca->update )
-				cna.append_attribute( "update" ) = ca->update;
-
-			if ( ca->data_obs )
-				cna.append_attribute( "data_observations" ) = ca->data_obs;
-
-			if ( ca->data_file != NULL && strlen( ca->data_file ) > 0 )
-				cna.append_attribute( "data_file" ) = ca->data_file;
-
-			if ( ca->data_col_name != NULL && strlen( ca->data_col_name ) > 0 )
-				cna.append_attribute( "data_column_name" ) = ca->data_col_name;
-			else
-				if ( ca->data_col_num > 0 )
-					cna.append_attribute( "data_column_number" ) = ca->data_col_num;
-
-			if ( ca->t_col_name != NULL && strlen( ca->t_col_name ) > 0 )
-				cna.append_attribute( "time_column_name" ) = ca->t_col_name;
-			else
-				if ( ca->t_col_num > 0 )
-					cna.append_attribute( "time_column_number" ) = ca->t_col_num;
-
-			if ( ca->param )
+			auto ca = da->search( cv->label );
+			if ( ca != da->ass_elem.end( ) )
 			{
-				x_nodeT cnap = cna.append_child( "parameter" );
+				x_nodeT cna = cn.append_child( "assimilation" );
 
-				cnap.append_attribute( "distribution" ) = ca->par_dist;
+				if ( ca->disable )
+					cna.append_attribute( "disable" ) = ca->disable;
 
-				if ( ca->par_dist == 0 && ca->par_n_sd > 0 )
-					cnap.append_attribute( "normal_sd" ) = ca->par_n_sd;
+				if ( ! ca->update )
+					cna.append_attribute( "update" ) = ca->update;
 
-				if ( ca->par_dist == 1 && ( ca->par_u_upp > 0 || ca->par_u_low > 0 ) )
+				if ( ca->data_obs )
+					cna.append_attribute( "data_observations" ) = ca->data_obs;
+
+				if ( ca->data_file.size( ) > 0 )
+					cna.append_attribute( "data_file" ) = ca->data_file;
+
+				if ( ca->data_col_name.size( ) > 0 )
+					cna.append_attribute( "data_column_name" ) = ca->data_col_name;
+				else
+					if ( ca->data_col_num > 0 )
+						cna.append_attribute( "data_column_number" ) = ca->data_col_num;
+
+				if ( ca->t_col_name.size( ) > 0 )
+					cna.append_attribute( "time_column_name" ) = ca->t_col_name;
+				else
+					if ( ca->t_col_num > 0 )
+						cna.append_attribute( "time_column_number" ) = ca->t_col_num;
+
+				if ( ca->param )
 				{
-					cnap.append_attribute( "uniform_upper" ) = ca->par_u_upp;
-					cnap.append_attribute( "uniform_lower" ) = ca->par_u_low;
+					x_nodeT cnap = cna.append_child( "parameter" );
+
+					cnap.append_attribute( "distribution" ) = ca->par_dist;
+
+					if ( ca->par_dist == 0 && ca->par_n_sd > 0 )
+						cnap.append_attribute( "normal_sd" ) = ca->par_n_sd;
+
+					if ( ca->par_dist == 1 && ( ca->par_u_upp > 0 || ca->par_u_low > 0 ) )
+					{
+						cnap.append_attribute( "uniform_upper" ) = ca->par_u_upp;
+						cnap.append_attribute( "uniform_lower" ) = ca->par_u_low;
+					}
 				}
 			}
 		}
@@ -1291,8 +1286,7 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 
 	if ( da != NULL )
 	{
-		delete [ ] da->dsp_file;
-		da->dsp_file = NULL;
+		da->dsp_file.clear( );
 		da->disable = 0;
 	}
 
@@ -2212,13 +2206,10 @@ void lsd::result::title( object *root, int flag )
  *************************************************************/
 void lsd::result::title_recursive( object *r, bool header )
 {
-	assim *ca;
-	bridge *cb;
-	assinstance *ce;
+	ass_map_itT ca;
 	object *cur;
-	variable *cv;
 
-	for ( cv = r->v; cv != NULL; cv = cv->next )
+	for ( auto cv = r->v; cv != NULL; cv = cv->next )
 		if ( cv->save )
 		{
 			cv->set_lab_tit( );
@@ -2228,16 +2219,16 @@ void lsd::result::title_recursive( object *r, bool header )
 				// check if there are still instances to be presented
 				// because of DA data analysis, dynamic instances may have to enter
 				// the DA process, but were still used in the model forecasts
-				if ( ( ca = da->find( cv->label ) ) != NULL && ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 				{
-					ce = ca->da_data[ ++( ca->inst_idx ) ];
-					if ( ! ce->saved )
+					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+					if ( ! ce.saved )
 					{
 						for ( auto i = 2; i <= 4; ++i )
 							if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
-								write_title( cv, i, header, ce->start, ce->end );
+								write_title( cv, i, header, ce.start, ce.end );
 
-						ce->saved = true;
+						ce.saved = true;
 					}
 				}
 			}
@@ -2245,7 +2236,7 @@ void lsd::result::title_recursive( object *r, bool header )
 				write_title( cv, 0, header, cv->start, cv->end );
 		}
 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( auto cb = r->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			continue;
@@ -2259,20 +2250,20 @@ void lsd::result::title_recursive( object *r, bool header )
 	}
 
 	if ( r->up == NULL )
-		for ( cv = sim->cemetery; cv != NULL; cv = cv->next )
+		for ( auto cv = sim->cemetery; cv != NULL; cv = cv->next )
 		{
 			if ( da_res )
 			{
-				if ( ( ca = da->find( cv->label ) ) != NULL && ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 				{
-					ce = ca->da_data[ ++( ca->inst_idx ) ];
-					if ( ! ce->saved )
+					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+					if ( ! ce.saved )
 					{
 						for ( auto i = 2; i <= 4; ++i )
 							if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
 								write_title( cv, i );
 
-						ce->saved = true;
+						ce.saved = true;
 					}
 				}
 			}
@@ -2357,32 +2348,29 @@ void lsd::result::data( object *root, int initstep, int endtstep )
 void lsd::result::data_recursive( object *r, int t )
 {
 	double *data;
-	assim *ca;
-	bridge *cb;
-	assinstance *ce;
+	ass_map_itT ca;
 	object *cur;
-	variable *cv;
 
-	for ( cv = r->v; cv != NULL; cv = cv->next )
+	for ( auto cv = r->v; cv != NULL; cv = cv->next )
 		if ( cv->save )
 		{
 			if ( da_res )
 			{
-				if ( ( ca = da->find( cv->label ) ) != NULL && ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 				{
-					ce = ca->da_data[ ++( ca->inst_idx ) ];
-					if ( ! ce->saved )
+					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+					if ( ! ce.saved )
 					{
 						for ( auto i = 2; i <= 4; ++i )
 						{
 							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
 								continue;
 
-							data = ( i == 4 ? ce->dat : ( i == 3 ? ce->fct : ce->anl ) );
-							write_data( data[ t - ce->start ], t, ce->start, ce->end );
+							data = ( i == 4 ? ce.dat.data( ) : ( i == 3 ? ce.fct.data( ) : ce.anl.data( ) ) );
+							write_data( data[ t - ce.start ], t, ce.start, ce.end );
 						}
 
-						ce->saved = true;
+						ce.saved = true;
 					}
 				}
 			}
@@ -2390,7 +2378,7 @@ void lsd::result::data_recursive( object *r, int t )
 				write_data( cv->data[ t - cv->start ], t, cv->start, cv->end );
 		}
 
-	for ( cb = r->b; cb != NULL; cb = cb->next )
+	for ( auto cb = r->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			continue;
@@ -2402,25 +2390,25 @@ void lsd::result::data_recursive( object *r, int t )
 	}
 
 	if ( r->up == NULL )
-		for ( cv = sim->cemetery; cv != NULL; cv = cv->next )
+		for ( auto cv = sim->cemetery; cv != NULL; cv = cv->next )
 		{
 			if ( da_res )
 			{
-				if ( ( ca = da->find( cv->label ) ) != NULL && ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 				{
-					ce = ca->da_data[ ++( ca->inst_idx ) ];
-					if ( ! ce->saved )
+					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+					if ( ! ce.saved )
 					{
 						for ( auto i = 2; i <= 4; ++i )
 						{
 							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
 								continue;
 
-							data = ( i == 4 ? ce->dat : ( i == 3 ? ce->fct : ce->anl ) );
-							write_data( data[ t - ce->start ], t, ce->start, ce->end );
+							data = ( i == 4 ? ce.dat.data( ) : ( i == 3 ? ce.fct.data( ) : ce.anl.data( ) ) );
+							write_data( data[ t - ce.start ], t, ce.start, ce.end );
 						}
 
-						ce->saved = true;
+						ce.saved = true;
 					}
 				}
 			}

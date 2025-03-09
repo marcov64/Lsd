@@ -172,8 +172,8 @@ gui::store::store( const store & src )
 			data = NULL;
 	}
 }
- 
- 
+
+
 /*************************************************************
  STORE move constructor
  *************************************************************/
@@ -181,18 +181,18 @@ gui::store::store( store && src ) noexcept : store( )
 {
 	src.swap( *this );
 }
- 
- 
+
+
 /*************************************************************
  STORE destructor
  *************************************************************/
 gui::store::~store( void )
 {
-	if ( ! data_alias ) 
+	if ( ! data_alias )
 		delete [ ] data;
 }
- 
- 
+
+
 /*************************************************************
  STORE assignment operator
  *************************************************************/
@@ -201,8 +201,8 @@ gui::store & gui::store::operator=( store rhs )
 	rhs.swap( *this );
 	return *this;
 }
- 
- 
+
+
 /*************************************************************
  STORE swap function
  *************************************************************/
@@ -219,8 +219,8 @@ void gui::store::swap( store & st ) noexcept
 	swap( st.data_alias, this->data_alias );
 	swap( st.data, this->data );
 }
- 
- 
+
+
 /*************************************************************
  ANALYSIS
  *************************************************************/
@@ -4635,8 +4635,7 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 	bool found = false;
 	int tag;
 	static bool warn_once = false;
-	assim *ca;
-	assinstance *ce;
+	ass_map_itT ca;
 
 	for ( auto cv = v; cv != NULL && ! gui::stop; cv = cv->next )
 		if ( ( lab == NULL && cv->save ) || ( lab != NULL && da->disable && strcmp( cv->label, lab ) == 0 ) )
@@ -4668,27 +4667,27 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 				// check if there are still instances to be presented
 				// because of DA data analysis, dynamic instances may have to enter
 				// the DA process, but were still used in the model forecasts
-				if ( ( ca = da->find( cv->label ) ) != NULL )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) )
 				{
-					if ( ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
+					if ( ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 					{
-						ce = ca->da_data[ ++( ca->inst_idx ) ];
-						if ( ! ce->saved )
+						auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+						if ( ! ce.saved )
 						{
 							for ( auto i = 2; i <= 4; ++i )
 								if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
 								{
-									cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref[ i ], cv->lab_tit, ce->start, ce->end, *num_v, cv->up->label );
+									cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref[ i ], cv->lab_tit, ce.start, ce.end, *num_v, cv->up->label );
 									++( *num_v );
 								}
 
-							if ( ce->end > gui::num_c )
-								gui::num_c = ce->end;
+							if ( ce.end > gui::num_c )
+								gui::num_c = ce.end;
 
-							if ( ce->start < gui::first_c )
-								gui::first_c = ce->start;
+							if ( ce.start < gui::first_c )
+								gui::first_c = ce.start;
 
-							ce->saved = true;
+							ce.saved = true;
 						}
 					}
 					else
@@ -4724,25 +4723,25 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 					gui::first_c = cv->start;
 			}
 			else
-				if ( ( ca = da->find( cv->label ) ) != NULL && ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 				{
-					ce = ca->da_data[ ++( ca->inst_idx ) ];
-					if ( ! ce->saved )
+					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+					if ( ! ce.saved )
 					{
 						for ( auto i = 2; i <= 4; ++i )
 							if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
 							{
-								cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref[ i ], cv->lab_tit, ce->start, ce->end, *num_v, cv->up->label );
+								cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref[ i ], cv->lab_tit, ce.start, ce.end, *num_v, cv->up->label );
 								++( *num_v );
 							}
 
-						if ( ce->end > gui::num_c )
-							gui::num_c = ce->end;
+						if ( ce.end > gui::num_c )
+							gui::num_c = ce.end;
 
-						if ( ce->start < gui::first_c )
-							gui::first_c = ce->start;
+						if ( ce.start < gui::first_c )
+							gui::first_c = ce.start;
 
-						ce->saved = true;
+						ce.saved = true;
 					}
 				}
 
@@ -4759,8 +4758,7 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 {
 	bool found = false;
 	int tag;
-	assim *ca;
-	assinstance *ce;
+	ass_map_itT ca;
 
 	for ( auto cv = v; cv != NULL && *num_v < ( int ) gui::vs.size( ); cv = cv->next )
 		if ( ( lab == NULL && cv->save ) || ( lab != NULL && da->disable && ! strcmp( cv->label, lab ) ) )
@@ -4795,10 +4793,10 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 				++( *num_v );
 			}
 			else
-				if ( ( ca = da->find( cv->label ) ) != NULL && ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 				{
-					ce = ca->da_data[ ++( ca->inst_idx ) ];
-					if ( ! ce->saved )
+					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+					if ( ! ce.saved )
 						for ( auto i = 2; i <= 4; ++i )
 						{
 							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
@@ -4807,10 +4805,10 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 							gui::vs[ *num_v ].label = cv->label;
 							gui::vs[ *num_v ].parent = cv->up->label;
 							gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ i ], cv->lab_tit );
-							gui::vs[ *num_v ].start = ce->start;
-							gui::vs[ *num_v ].end = ce->end;
+							gui::vs[ *num_v ].start = ce.start;
+							gui::vs[ *num_v ].end = ce.end;
 							gui::vs[ *num_v ].rank = *num_v;
-							gui::vs[ *num_v ].data = ( i == 4 ? ce->dat : ( i == 3 ? ce->fct : ce->anl ) );
+							gui::vs[ *num_v ].data = ( i == 4 ? ce.dat.data( ) : ( i == 3 ? ce.fct.data( ) : ce.anl.data( ) ) );
 							gui::vs[ *num_v ].data_alias = true;
 							++( *num_v );
 						}
@@ -4838,10 +4836,10 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 				++( *num_v );
 			}
 			else
-				if ( ( ca = da->find( cv->label ) ) != NULL && ca->inst_idx + 1 < ( int ) ca->da_data.size( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 				{
-					ce = ca->da_data[ ++( ca->inst_idx ) ];
-					if ( ! ce->saved )
+					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+					if ( ! ce.saved )
 						for ( auto i = 2; i <= 4; ++i )
 						{
 							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
@@ -4850,10 +4848,10 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 							gui::vs[ *num_v ].label = cv->label;
 							gui::vs[ *num_v ].parent = cv->up->label;
 							gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ i ], cv->lab_tit );
-							gui::vs[ *num_v ].start = ce->start;
-							gui::vs[ *num_v ].end = ce->end;
+							gui::vs[ *num_v ].start = ce.start;
+							gui::vs[ *num_v ].end = ce.end;
 							gui::vs[ *num_v ].rank = *num_v;
-							gui::vs[ *num_v ].data = ( i == 4 ? ce->dat : ( i == 3 ? ce->fct : ce->anl ) );
+							gui::vs[ *num_v ].data = ( i == 4 ? ce.dat.data( ) : ( i == 3 ? ce.fct.data( ) : ce.anl.data( ) ) );
 							gui::vs[ *num_v ].data_alias = true;
 							++( *num_v );
 						}
@@ -5086,7 +5084,7 @@ const str2_vecT & gui::align_file_vars( stp2_vecT & file_stores )
 
 	// get set of unique variable signatures (name-position-start-end), preserving order
 	for ( auto i = 0; i < ( int ) file_stores.size( ); ++i )
-		for ( auto var : file_stores[ i ] )
+		for ( auto & var : file_stores[ i ] )
 		{
 			strT sig = lsd::to_string( "%s-%s-%d-%d", var->label.c_str( ), var->tag.c_str( ), var->start, var->end );
 			var_sigs[ i ].emplace_back( sig );
@@ -5097,7 +5095,7 @@ const str2_vecT & gui::align_file_vars( stp2_vecT & file_stores )
 		}
 
 	// run over all variables found to identify instances to trim
-	for ( auto sig : unique_sigs )
+	for ( auto & sig : unique_sigs )
 	{
 		// look for instance mismatches
 		for ( auto missing = false; ! missing; )
@@ -5135,7 +5133,7 @@ const str2_vecT & gui::align_file_vars( stp2_vecT & file_stores )
 		plog( "(discarding %d unmatched instances)... ");
 
 		sto_vecT vs_trim( vs.size( ) - to_trim.size( ) );
-		for ( auto v : vs )
+		for ( auto & v : vs )
 			if ( to_trim.find( & v ) == to_trim.end( ) )
 				vs_trim.emplace_back( v );
 

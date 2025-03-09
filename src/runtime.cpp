@@ -106,19 +106,19 @@ void lsd::object::assign_plot_vars( int *count, const char *lab, bool da_en )
 		}
 	}
 	else
-		for ( auto ca = gui::da.elem; ca != NULL; ca = ca->next )
-			if ( ca->plot )
+		for ( auto & ca : gui::da.ass_elem )
+			if ( ca.plot )
 			{
-				if ( ca->inst_ini == 1 )
-					cmd( "lappend tp \"%s%s\"", ca->label, lab );
+				if ( ca.inst_ini == 1 )
+					cmd( "lappend tp \"%s%s\"", ca.label.c_str( ), lab );
 				else
-					for ( j = 1; j <= ca->inst_ini; ++j )
+					for ( j = 1; j <= ca.inst_ini; ++j )
 					{
-						snprintf( cur_lab, MAX_ELEM_LENGTH, "%s#%d", ca->label, j );
+						snprintf( cur_lab, MAX_ELEM_LENGTH, "%s#%d", ca.label.c_str( ), j );
 						cmd( "lappend tp \"%s%s\"", cur_lab, lab );
 					}
 
-				*count += ca->inst_ini;
+				*count += ca.inst_ini;
 			}
 }
 

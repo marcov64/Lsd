@@ -226,7 +226,8 @@ namespace lsd
  TYPE TEMPLATES
  *************************************************************/
 	typedef std::function < double( const variable *, object * ) > eq_funcT;
-	typedef std::list < assim * > ass_listT;
+	typedef std::list < assim > ass_listT;
+	typedef std::list < assim * > asp_listT;
 	typedef std::vector < assim * > ass_vecT;
 	typedef std::map < int, ass_vecT > ia_mapT;
 	typedef std::map < strT, profile > prof_mapT;
@@ -235,17 +236,20 @@ namespace lsd
 	typedef std::pair < double, object * > o_pairT;
 	typedef std::pair < long, object * > n_pairT;
 	typedef std::pair < strT, variable * > v_pairT;
-	typedef std::vector < assinstance * > ae_vecT;
+	typedef std::vector < assinstance > ae_vecT;
 	typedef std::vector < object * > o_vecT;
-	typedef std::vector < simulation * > sim_vecT;
+	typedef std::vector < simulation > sim_vecT;
+	typedef std::vector < simulation * > simp_vecT;
 	typedef std::vector < variable * > v_vecT;
 	typedef std::unordered_map < double, object * > o_mapT;
 	typedef std::unordered_map < long, object * > n_mapT;
-	typedef std::unordered_map < strT, assim * > ass_mapT;
+	typedef std::unordered_map < strT, ass_listT::iterator > ass_mapT;
 	typedef std::unordered_map < strT, eq_funcT > eq_mapT;
 	typedef std::unordered_map < strT, bridge * > b_mapT;
 	typedef std::unordered_map < strT, variable * > v_mapT;
 	typedef std::unordered_set < object * > o_setT;
+	typedef ass_listT::iterator ass_list_itT;
+	typedef ass_mapT::iterator ass_map_itT;
 	typedef const variable c_varT;
 
 
@@ -279,7 +283,7 @@ namespace lsd
 	extern cond_vT seq_end;					// signal simulation sequence end
 	extern mtxT plog_term_lck;				// lock plog_terminal for parallel upd.
 	extern mtxT wrk_thr_ptr_lck;			// lock worker_thread_ptr for par. upd.
-	extern sim_vecT sims;					// vector holding existing simulations
+	extern simp_vecT sims;					// vector holding existing simulations
 	extern std::mt19937 lib_prng;			// internal pseudo-random number generator
 	extern thr_idT main_thread;				// LSD main thread ID
 	extern wrk_mapT worker_thread_ptr;		// worker thread pointer map
@@ -308,7 +312,7 @@ namespace lsd
 	double median( d_vecT & v );
 	double strtod( const char *in, char** endptr, double inv );
 	d_vecT strtodsplit( const char *in, char sep, double inv = 0. );
-	int dispatch_runs( sim_vecT run_sims, int until_t = 0, int until_run = 0, bool da = false );
+	int dispatch_runs( sim_vecT & run_sims, int until_t = 0, int until_run = 0, bool da = false );
 	int kill_system( simulation *sim, int id );
 	int run_system( const char *cmd, simulation *sim = NULL, int id = -1 );
 	int strcln( char *out, const char *str, int outSz );
@@ -322,6 +326,7 @@ namespace lsd
 	strT to_string( const char *fmt, ... );
 	str_vecT strtostrsplit( const char *in, char sep, bool remQuotes = false );
 	void cmd( const char *cm, ... );
+	void empty_assimilation( void );
 	void exception_handler( int signum, const char *what );
 	void handle_signals( void ( * handler ) ( int signum ) );
 	void inhibit_system_sleep( void );
@@ -334,6 +339,23 @@ namespace lsd
 	void signal_handler( int signum );
 #endif
 }
+
+
+/*************************************************************
+ ASSTATEVARS
+ *************************************************************/
+class lsd::asstatevars					// DA state variables class
+{
+	friend class assimilation;
+	friend class simulation;
+
+	private:
+		size_t idx;						// current position during analysis
+		v_vecT st_vec;					// current state variable vector for DA
+
+	private:
+		void save_state_vars( object *r );
+};
 
 
 /*************************************************************
@@ -549,7 +571,7 @@ class lsd::simulation : public equation	// simulation container class
 		Tcl_Interp *inter;				// Tcl interpreter (for legacy LSD code)
 #endif
 	private:
-		asstatevars *da_svars;			// state variable vector for DA
+		asstatevars da_svars;			// state variable vector for DA
 		bool batch_loop = false;		// batch multi-config batch loop in process
 		bool error_hard_thread;			// error_hard called in worker thread
 		bool no_saved = true;			// disable usage of saved values as lagged ones
@@ -913,7 +935,7 @@ class lsd::variable						// model numeric element (variable,
 		double chk_val( double val );
 		variable *hyper_next( void );
 
-		variable( void ) { };			// constructor (empty)
+		variable( void ) { }			// constructor (empty)
 		variable( const variable &v );	// copy constructor
 		~variable( void );				// destructor
 
@@ -1200,23 +1222,6 @@ class lsd::profile						// profiled variable class
 
 
 /*************************************************************
- ASSTATEVARS
- *************************************************************/
-class lsd::asstatevars					// DA state variables class
-{
-	friend class assimilation;
-	friend class simulation;
-
-	private:
-		size_t idx;						// current position during analysis
-		v_vecT st_vec;					// current state variable vector for DA
-
-	private:
-		void save_state_vars( object *r );
-};
-
-
-/*************************************************************
  ASSINSTANCE
  *************************************************************/
 class lsd::assinstance					// DA element instance collection class
@@ -1228,17 +1233,15 @@ class lsd::assinstance					// DA element instance collection class
 
 	private:
 		bool saved = false;				// data saved in current run
-		double *anl = NULL;				// analysis data produced by DA
-		double *fct = NULL;				// forecast data produced by DA
-		double *dat = NULL;				// observational data used during DA
+		d_vecT anl;						// analysis data produced by DA
+		d_vecT fct;						// forecast data produced by DA
+		d_vecT dat;						// observational data used during DA
 		int	cur_t;						// last update time of data
 		int	end;						// last valid data period
-		int size;						// data size in periods
 		int start;						// first valid data period
 
 	public:
 		assinstance( int _start, int _end, bool fct, bool dat );// constructor
-		~assinstance( void );			// destructor
 };
 
 
@@ -1254,21 +1257,16 @@ class lsd::assim						// data assimilation container class
 
 	public:
 		bool disable = false;			// element disabled for assimilation
+		strT label;						// element name
 
 	private:
 		ae_vecT da_data;				// data produced during assimilation
-		assim *next = NULL;				// data assimilation chain of elements
 		bool data_obs = false;			// element has data obs. to assimilate
 		bool no_data = true;			// no data retrieved?
 		bool param = false;				// element is a parameter (not variable)
 		bool plot = false;				// element marked for run-time plot
 		bool save = false;				// element market to be saved
 		bool update = false;			// element to be updated by assimilation
-		char *data_file = NULL;			// name of source data CSV file
-		char *data_col_name = NULL;		// name of data value column
-		char *label = NULL;				// element name
-		char *parent = NULL;			// element parent name
-		char *t_col_name = NULL;		// name of time value column
 		double par_n_sd = 0;			// parameter normal standard deviation
 		double par_u_low = 0;			// parameter uniform distribution delta -
 		double par_u_upp = 0;			// parameter uniform distribution delta +
@@ -1278,11 +1276,14 @@ class lsd::assim						// data assimilation container class
 		int inst_ini = 0;				// number of instances at t=0
 		int par_dist = 0;				// parameter distribution (0:N/1:U)
 		int t_col_num = 0;				// number of time value column
+		strT data_file;					// name of source data CSV file
+		strT data_col_name;				// name of data value column
+		strT parent;					// element parent name
+		strT t_col_name;				// name of time value column
 
 	public:
-		assim( const char *_label, bool _param = false, bool _disable = false, bool _update = false, bool _data_obs = false, const char *_csv = NULL, const char *_data_col_name = NULL, const char *_t_col_name = NULL, int _data_col_num = 0, int _t_col_num = 0, int _par_dist = 0, double _par_n_sd = 0, double _par_u_upp = 0, double _par_u_low = 0 );
+		assim( const strT & _label, bool _param = false, bool _disable = false, bool _update = false, bool _data_obs = false, const strT & _data_file = "", const strT & _data_col_name = "", const strT & _t_col_name = "", int _data_col_num = 0, int _t_col_num = 0, int _par_dist = 0, double _par_n_sd = 0, double _par_u_upp = 0, double _par_u_low = 0 );
 										// constructor
-		~assim( void );					// destructor
 
 	private:
 		bool init( void );
@@ -1307,7 +1308,8 @@ class lsd::assimilation					// assimilation container class
 	friend class simulation;
 
 	public:
-		char *dsp_file = NULL;			// data assimilation dispersion CSV file
+		ass_listT ass_elem;				// assimilation elements linked-list head
+		ass_mapT elem_map;				// map names to assimilation elements
 		double infl_fac = 1.;			// ensemble inflation factor
 		int algorithm = 0;				// algorithm to use in DA (0=EnKF,1=ETPF)
 		int align_trim = false;			// trim extra instances for forecast alignment
@@ -1319,12 +1321,11 @@ class lsd::assimilation					// assimilation container class
 		int sav_dat = false;			// save observational data
 		int sav_dsp = false;			// save data dispersion matrix
 		int sav_fct = false;			// save forecast (intermediary) results
+		strT dsp_file;					// data assimilation dispersion CSV file
 
 		const char *algo_names[ DA_ALGO_NUM ] = DA_ALGO_NAME;
 
 	private:
-		assim *elem = NULL;				// assimilation elements linked-list head
-		ass_mapT elem_map;				// map names to assimilation elements
 		i_vecT miss_inst;				// # of missing instances per mat. column
 		dm_mapT var_data;				// assimilation observational data map
 		e_matT dsp_mat;					// data assimilation dispersion matrix
@@ -1337,16 +1338,13 @@ class lsd::assimilation					// assimilation container class
 		str_vecT fctd_labs;				// forecasted variable labels
 
 	public:
-		assim *find( const char *lab );
-		assim *search( const char *lab );
+		ass_list_itT search( const char *lab );
 		int count( int what );
 		int run_simulation( int until_t = 0 );
-		void empty( assim *el = NULL );
 		void show( void );
 
-		~assimilation( void );			// destructor
-
 	private:
+		ass_list_itT search( const strT & lab );
 		bool init( simulation *ref );
 		bool load_files( simulation *sim, int last_t );
 		const e_matT & dsp_stat( const e_matT & x, const e_vecT & x_bar );
@@ -1363,7 +1361,7 @@ class lsd::assimilation					// assimilation container class
 		template < class T > double median( T begin, T end );
 		void align_state_vars( void );
 		void finish( void );
-		void reset_insts( assim *el = NULL );
+		void reset_insts( void );
 		void save_param( object *r );
 		void update_assim_vars( const e_vecT & x_a, const e_vecT & x_f, const e_vecT & z, int t );
 		void update_runtime_plot( int cur_t );

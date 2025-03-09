@@ -45,7 +45,7 @@ namespace lsd
 	mtxT init_sim_lck;				// lock simulation constructor
 	mtxT plog_term_lck;				// lock plog_terminal for parallel updating
 	mtxT wrk_thr_ptr_lck;			// lock worker_thread_ptr for parallel updating
-	sim_vecT sims;					// vector holding existing simulations
+	simp_vecT sims;					// vector holding existing simulations
 	std::mt19937 lib_prng;			// internal pseudo-random number generator
 	thr_idT main_thread;			// LSD main thread ID
 	wrk_mapT worker_thread_ptr;		// worker thread pointers
@@ -123,7 +123,6 @@ lsd::simulation::simulation( const char fname[ ], const char path[ ], int quick 
 	root->init( NULL, this, "Root" );
 	add_description( "Root" );
 	latt = new lattice;
-	da_svars = new asstatevars;
 	reset_blueprint( NULL );
 
 	max_threads = ( MAX_CORES <= 0 ) ? thrT::hardware_concurrency( ) : MAX_CORES;
@@ -170,7 +169,6 @@ lsd::simulation::~simulation( void )
 		fclose( log_file_ptr );
 
 	delete latt;
-	delete da_svars;
 	delete stack_log;
 	delete [ ] conf_file;
 	delete [ ] conf_name;

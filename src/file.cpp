@@ -306,9 +306,7 @@ void gui::unload_configuration_gui( bool full )
  *************************************************************/
 void lsd::object::load_elem_lists( )
 {
-	assim *ca;
-	bridge *cb;
-	variable *cv;
+	ass_list_itT ca;
 
 	if ( up == NULL )							// reset lists if root
 		cmd( "unset -nocomplain modObj modElem modVar modPar modFun modDAf" );
@@ -316,7 +314,7 @@ void lsd::object::load_elem_lists( )
 		cmd( "lappend modObj %s", label );		// register object if not root
 
 	// register elements in object
-	for ( cv = v; cv != NULL; cv = cv->next )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
 		switch( cv->param )
 		{
@@ -332,16 +330,12 @@ void lsd::object::load_elem_lists( )
 
 		cmd( "lappend modElem %s", cv->label );
 
-		if ( da != NULL )
-		{
-			ca = da->search( cv->label );
-			if ( ca != NULL && ca->data_file != NULL && strlen( ca->data_file ) > 0 )
-				cmd( "lappend modDAf \"%s\"", ca->data_file );
-		}
+		if ( da != NULL && ( ca = da->search( cv->label ) ) != da->ass_elem.end( ) && ca->data_file.size( ) > 0 )
+			cmd( "lappend modDAf \"%s\"", ca->data_file.c_str( ) );
 	}
 
 	// register son objects
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
 		cb->head->load_elem_lists( );
 }
 

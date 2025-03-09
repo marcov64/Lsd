@@ -27,47 +27,17 @@
  *************************************************************/
 lsd::assinstance::assinstance( int _start, int _end, bool sav_fct, bool sav_dat )
 {
-	size = _end - _start + 1;
-
-	// use C stdlib to be able to deallocate partial memory
-	if ( ( anl = ( double * ) malloc( size * sizeof( double ) ) ) == NULL )
-		raise( SIGMEM );
-
-	for ( auto i = 0; i < size; ++i )
-		anl[ i ] = NAN;
-
-	if ( sav_fct )
-	{
-		if ( ( fct = ( double * ) malloc( size * sizeof( double ) ) ) == NULL )
-			raise( SIGMEM );
-
-		for ( auto i = 0; i < size; ++i )
-			fct[ i ] = NAN;
-	}
-
-	if ( sav_dat )
-	{
-		if ( ( dat = ( double * ) malloc( size * sizeof( double ) ) ) == NULL )
-			raise( SIGMEM );
-
-		for ( auto i = 0; i < size; ++i )
-			dat[ i ] = NAN;
-	}
-
 	cur_t = start = _start;
 	end = _end;
-}
 
+	int sz = end - start + 1;
+	anl.assign( sz, NAN );
 
-/*************************************************************
- ~ASSINSTANCE destructor
- Prepare container for element data produced by assimilation
- *************************************************************/
-lsd::assinstance::~assinstance( void )
-{
-	free( anl );
-	free( fct );
-	free( dat );
+	if ( sav_fct )
+		fct.assign( sz, NAN );
+
+	if ( sav_dat )
+		dat.assign( sz, NAN );
 }
 
 
@@ -75,25 +45,20 @@ lsd::assinstance::~assinstance( void )
  ASSIM constructor
  Add or update data assimilation settings for a model element
  *************************************************************/
-lsd::assim::assim( const char *_label, bool _param, bool _disable, bool _update, bool _data_obs, const char *_data_file, const char *_data_col_name, const char *_t_col_name, int _data_col_num, int _t_col_num, int _par_dist, double _par_n_sd, double _par_u_upp, double _par_u_low )
+lsd::assim::assim( const strT & _label, bool _param, bool _disable, bool _update, bool _data_obs, const strT & _data_file, const strT & _data_col_name, const strT & _t_col_name, int _data_col_num, int _t_col_num, int _par_dist, double _par_n_sd, double _par_u_upp, double _par_u_low )
 {
-	assim *ca;
 	variable *cv;
 
 	if ( da == NULL )
 		throw std::domain_error( "assimilation object not registered" );
 
-	if ( _label != NULL )
+	if ( _label.size( ) > 0 )
 	{
-		label = new char [ strlen( _label ) + 1 ];
-		strcpy( label, _label );
+		label = _label;
 
 		if ( sims.size( ) > 0 && sims[ 0 ] != NULL )
-			if ( ( cv = sims[ 0 ]->root->search_var( NULL, label, true ) ) != NULL )
-			{
-				parent = new char [ strlen( cv->up->label ) + 1 ];
-				strcpy( parent, cv->up->label );
-			}
+			if ( ( cv = sims[ 0 ]->root->search_var( NULL, label.c_str( ), true ) ) != NULL )
+				parent = cv->up->label;
 	}
 
 	param = _param;
@@ -101,24 +66,17 @@ lsd::assim::assim( const char *_label, bool _param, bool _disable, bool _update,
 	update = _update;
 	data_obs = _data_obs;
 
-	if ( _data_file != NULL && strlen( _data_file ) > 0 )
+	if ( _data_file.size( ) > 0 )
 	{
-		data_file = new char [ strlen( _data_file ) + 1 ];
-		strcpy( data_file, _data_file );
+		data_file = _data_file;
 
-		if ( _data_col_name != NULL && strlen( _data_col_name ) > 0 )
-		{
-			data_col_name = new char [ strlen( _data_col_name ) + 1 ];
-			strcpy( data_col_name, _data_col_name );
-		}
+		if ( _data_col_name.size( ) > 0 )
+			data_col_name = _data_col_name;
 		else
 			data_col_num = _data_col_num;
 
-		if ( _t_col_name != NULL && strlen( _t_col_name ) > 0 )
-		{
-			t_col_name = new char [ strlen( _t_col_name ) + 1 ];
-			strcpy( t_col_name, _t_col_name );
-		}
+		if ( _t_col_name.size( ) > 0 )
+			t_col_name = _t_col_name;
 		else
 			t_col_num = _t_col_num;
 	}
@@ -128,15 +86,7 @@ lsd::assim::assim( const char *_label, bool _param, bool _disable, bool _update,
 	par_u_upp = _par_u_upp;
 	par_u_low = _par_u_low;
 
-	no_data = param || disable || ! _data_obs || data_file == NULL || ( data_col_name == NULL && data_col_num < 1 );
-
-	if ( da->elem == NULL )
-		da->elem = this;
-	else
-	{
-		for ( ca = da->elem; ca->next != NULL; ca = ca->next );
-		ca->next = this;
-	}
+	no_data = param || disable || ! _data_obs || data_file.size( ) == 0 || ( data_col_name.size( ) == 0 && data_col_num < 1 );
 }
 
 
@@ -158,15 +108,15 @@ bool lsd::assim::init( void )
 	da_data.clear( );
 
 	// set the variable flags to current ones
-	if ( parent != NULL && strlen( parent ) > 0 )
-		cur = da->ref_sim->root->search( parent );
+	if ( parent.size( ) > 0 )
+		cur = da->ref_sim->root->search( parent.c_str( ) );
 	else
 		cur = NULL;
 
 	if ( cur == NULL )
 		cur = da->ref_sim->root;	// no parent hint, start from root
 
-	if ( ( cv = cur->search_var( NULL, label, true ) ) == NULL )
+	if ( ( cv = cur->search_var( NULL, label.c_str( ), true ) ) == NULL )
 		return false;
 
 	param = cv->param;
@@ -175,9 +125,6 @@ bool lsd::assim::init( void )
 
 	// count initial instances
 	for ( inst_ini = 0; cv != NULL; ++inst_ini, cv = cv->hyper_next( ) );
-
-	// add to map of assimilation elements
-	da->elem_map[ label ] = this;
 
 	return true;
 }
@@ -189,38 +136,19 @@ bool lsd::assim::init( void )
  *************************************************************/
 void lsd::assim::finish( void )
 {
-	for ( auto inst : da_data )
-		inst->end = inst->cur_t;
-}
+	for ( auto & i : da_data )
+		if ( i.end > i.cur_t )
+		{
+			i.end = i.cur_t;
+			int sz = i.end - i.start + 1;
+			i.anl.resize( sz );
 
+			if ( da != NULL && da->sav_fct )
+				i.fct.resize( sz );
 
-/*************************************************************
- ASSIM DESTRUCTOR
- Remove data assimilation settings for a model element
- *************************************************************/
-lsd::assim::~assim( void )
-{
-	assim *ca, *pa;
-
-	delete [ ] data_file;
-	delete [ ] data_col_name;
-	delete [ ] label;
-	delete [ ] parent;
-	delete [ ] t_col_name;
-
-	for ( auto inst : da_data )
-		delete inst;
-
-	if ( da != NULL && da->elem != NULL )
-	{
-		for ( ca = da->elem, pa = NULL; ca != this && ca != NULL; pa = ca, ca = ca->next );
-
-		if ( ca == da->elem )
-			da->elem = next;
-		else
-			if ( ca == this && pa != NULL )
-				pa->next = next;
-	}
+			if ( da != NULL && da->sav_dat )
+				i.dat.resize( sz );
+		}
 }
 
 
@@ -230,7 +158,7 @@ lsd::assim::~assim( void )
  *************************************************************/
 bool lsd::assimilation::init( simulation *ref )
 {
-	int nrun, first;
+	int nrun;
 
 	if ( ref == NULL || ( nrun = ref->last_run ) < 2 )
 		return false;
@@ -239,9 +167,14 @@ bool lsd::assimilation::init( simulation *ref )
 
 	// initialize assimilation elements
 	elem_map.clear( );
-	for ( auto ca = elem; ca != NULL; ca = ca->next )
+	for ( auto ca = ass_elem.begin( ); ca != ass_elem.end( ); ++ca )
+	{
 		if ( ! ca->init( ) )
 			return false;
+
+		// add to map of assimilation elements
+		da->elem_map[ ca->label ] = ca;
+	}
 
 	// read data assimilation data from files
 	if ( ! load_files( ref, ref_sim->last_t ) )
@@ -251,26 +184,25 @@ bool lsd::assimilation::init( simulation *ref )
 	lib_prng.seed( ref->seed );
 
 	// create simulation instances to produce realization forecasts
-	first = sims.size( );
+	run_sims.clear( );
+	run_sims.reserve( nrun );
 	for ( int i = 0, seed = ref->seed; i < nrun; ++i, ++seed )
 	{
-		auto sim = new simulation( ref->conf_name, ref->conf_path, 1 );
+		// construct loading configuration file
+		run_sims.emplace_back( ref->conf_name, ref->conf_path, 1 );
 
 		// adjust instances' settings (random seed, single threaded)
-		sim->seed = seed;
-		sim->last_run = 1;
-		sim->deb_t = 0;
-		sim->stack_info = 0;
-		sim->max_threads = 1;
-		sim->parallel_disable = true;
-		sim->prof_aggr_time = false;
-		sim->no_ptr_chk = true;
-		sim->results_alt_path( ref->alt_path );
-		save_param( sim->root );
+		run_sims[ i ].seed = seed;
+		run_sims[ i ].last_run = 1;
+		run_sims[ i ].deb_t = 0;
+		run_sims[ i ].stack_info = 0;
+		run_sims[ i ].max_threads = 1;
+		run_sims[ i ].parallel_disable = true;
+		run_sims[ i ].prof_aggr_time = false;
+		run_sims[ i ].no_ptr_chk = true;
+		run_sims[ i ].results_alt_path( ref->alt_path );
+		save_param( run_sims[ i ].root );
 	}
-
-	// vector of pointers to the ensemble realizations to run
-	run_sims = sim_vecT( sims.begin( ) + first, sims.end( ) );
 
 	return true;
 }
@@ -282,23 +214,24 @@ bool lsd::assimilation::init( simulation *ref )
  *************************************************************/
 void lsd::assimilation::finish( void )
 {
-	for ( auto ca = elem; ca != NULL; ca = ca->next )
-		ca->finish( );
+	for ( auto & ca : ass_elem )
+		ca.finish( );
 
-	for ( auto sim : run_sims )
-		delete sim;
-
+	run_sims.clear( );
 	next_t = 0;
 }
 
 
 /*************************************************************
- ASSIMILATION DESTRUCTOR
+ EMPTY_ASSIMILATION
  *************************************************************/
-lsd::assimilation::~assimilation( void )
+void lsd::empty_assimilation( void )
 {
-	empty( );
-	delete [ ] dsp_file;
+	if ( da == NULL )
+		return;
+
+	da->ass_elem.clear( );
+	da->elem_map.clear( );
 }
 
 
@@ -306,40 +239,15 @@ lsd::assimilation::~assimilation( void )
  RESET_INSTS
  Reset all the element instances' counters for AoR/saving
  *************************************************************/
-void lsd::assimilation::reset_insts( assim *el )
+void lsd::assimilation::reset_insts( void )
 {
-	if ( el == NULL )
-		el = elem;
-
-	for ( ; el != NULL; el = el->next )
+	for ( auto & ca : ass_elem )
 	{
-		el->inst_idx = -1;
+		ca.inst_idx = -1;
 
-		for ( auto d : el->da_data )
-			d->saved = false;
+		for ( auto & i : ca.da_data )
+			i.saved = false;
 	}
-}
-
-
-/*************************************************************
- EMPTY
- Deallocate data assimilation elements settings memory
- *************************************************************/
-void lsd::assimilation::empty( assim *el )
-{
-	if ( el == NULL )
-	{
-		if ( elem == NULL )
-			return;
-
-		el = elem;
-		elem = NULL;
-	}
-
-	if ( el->next != NULL )
-		empty( el->next );
-
-	delete el;				// suicide
 }
 
 
@@ -354,10 +262,8 @@ void lsd::assimilation::empty( assim *el )
  *************************************************************/
 int lsd::assimilation::count( int what )
 {
-	assim *ca;
-	int n;
-
-	for ( ca = elem, n = 0; ca != NULL; ca = ca->next )
+	int n = 0;
+	for ( auto & ca : ass_elem )
 		switch ( what )
 		{
 			default:
@@ -366,22 +272,22 @@ int lsd::assimilation::count( int what )
 				break;
 
 			case 1:
-				if ( ! ca->disable )
+				if ( ! ca.disable )
 					++n;
 				break;
 
 			case 2:
-				if ( ! ca->disable && ca->param )
+				if ( ! ca.disable && ca.param )
 					++n;
 				break;
 
 			case 3:
-				if ( ! ca->disable && ! ca->param )
+				if ( ! ca.disable && ! ca.param )
 					++n;
 				break;
 
 			case 4:
-				if ( ! ca->disable && ! ca->param && ca->data_obs )
+				if ( ! ca.disable && ! ca.param && ca.data_obs )
 					++n;
 		}
 
@@ -390,35 +296,27 @@ int lsd::assimilation::count( int what )
 
 
 /*************************************************************
- FIND
- Find data assimilation element using runtime (after init) map
- *************************************************************/
-lsd::assim *lsd::assimilation::find( const char *lab )
-{
-	auto ca = da->elem_map.find( lab );
-
-	if ( ca != da->elem_map.end( ) )
-		return ca->second;
-
-	return NULL;
-}
-
-
-/*************************************************************
  SEARCH
  Search element in data assimilation linked list
  *************************************************************/
-lsd::assim *lsd::assimilation::search( const char *lab )
+lsd::ass_list_itT lsd::assimilation::search( const strT & lab )
 {
-	assim *ca;
+	ass_list_itT ca;
 
-	for ( ca = elem; ca != NULL; ca = ca->next )
-		if ( ! strcmp( ca->label, lab ) )
+	if ( da == NULL )
+		return ass_elem.end( );
+
+	for ( ca = ass_elem.begin( ); ca != ass_elem.end( ); ++ca )
+		if ( ca->label == lab )
 			 break;
 
 	return ca;
 }
 
+lsd::ass_list_itT lsd::assimilation::search( const char *lab )
+{
+	return search( strT ( lab ) );
+}
 
 /*************************************************************
  SAVE_STATE_VARS
@@ -430,22 +328,25 @@ void lsd::asstatevars::save_state_vars( object *r )
 	object *cur;
 	st_vec.clear( );
 
+	if ( da == NULL )
+		return;
+
 	// find all instances of variables set and enabled for DA
-	for ( auto ca = da->elem; ca != NULL; ca = ca->next )
-		if ( ! ca->disable )
+	for ( auto & ca : da->ass_elem )
+		if ( ! ca.disable )
 		{
-			if ( ca->parent != NULL )		// try to start from parent
-				cur = r->search( ca->parent );
+			if ( ca.parent.size( ) > 0 )	// try to start from parent
+				cur = r->search( ca.parent.c_str( ) );
 			else
 				cur = NULL;
 
 			if ( cur == NULL )
 				cur = r;					// no parent hint, start from root
 
-			for ( auto cv = cur->search_var( NULL, ca->label, true ); cv != NULL; cv = cv->hyper_next( ) )
+			for ( auto cv = cur->search_var( NULL, ca.label.c_str( ), true ); cv != NULL; cv = cv->hyper_next( ) )
 			{
 				st_vec.emplace_back( cv );	// add to state vector of run
-				ca->update_param( cv );		// handle parameter estimation
+				ca.update_param( cv );		// handle parameter estimation
 			}
 		}
 }
@@ -466,8 +367,8 @@ void lsd::asstatevars::save_state_vars( object *r )
  as the rest of the ensemble, which may create artifacts in
  the covariance/comedian matrix, and so in the assimilation.
  *************************************************************/
-#define DA_IDX ( sim->da_svars->idx )
-#define DA_SV ( sim->da_svars->st_vec )
+#define DA_IDX ( sim.da_svars.idx )
+#define DA_SV ( sim.da_svars.st_vec )
 
 void lsd::assimilation::align_state_vars( void )
 {
@@ -475,13 +376,13 @@ void lsd::assimilation::align_state_vars( void )
 
 	// reset vector indexes to first variable
 	miss_inst.clear( );
-	for ( auto sim : run_sims )
+	for ( auto & sim : run_sims )
 		DA_IDX = 0;
 
 	// run over all base state variables
-	for ( auto ca = elem; ca != NULL; ca = ca->next )
+	for ( auto & ca : ass_elem )
 	{
-		if ( ca->disable )
+		if ( ca.disable )
 			continue;
 
 		if ( align_trim )
@@ -490,20 +391,20 @@ void lsd::assimilation::align_state_vars( void )
 			for ( auto missing = false; ! missing; )
 			{
 				// check if all runs have this instance
-				for ( auto sim : run_sims )
-					if ( DA_IDX >= DA_SV.size( ) || strcmp( DA_SV[ DA_IDX ]->label, ca->label ) != 0 )
+				for ( auto & sim : run_sims )
+					if ( DA_IDX >= DA_SV.size( ) || ca.label != DA_SV[ DA_IDX ]->label )
 					{
 						missing = true;			// this run doesn't have instance
 						break;
 					}
 
 				// update vector indexes, removing excess instances from all runs
-				for ( auto sim : run_sims )
+				for ( auto & sim : run_sims )
 					if ( missing )
 					{
 						// one run missing the instance, remove all excess instances
 						while ( true )			// remove all extra instances of var
-							if ( DA_IDX < DA_SV.size( ) && strcmp( DA_SV[ DA_IDX ]->label, ca->label ) == 0 )
+							if ( DA_IDX < DA_SV.size( ) && ca.label == DA_SV[ DA_IDX ]->label )
 								DA_SV.erase( DA_SV.begin( ) + DA_IDX );
 							else
 								break;			// stop on first var after or last var
@@ -518,9 +419,9 @@ void lsd::assimilation::align_state_vars( void )
 			for ( auto done = false; ! done; )
 			{
 				// check if all runs have this instance
-				for ( auto sim : run_sims )
+				for ( auto & sim : run_sims )
 				{	// if not, add virtual instance
-					if ( DA_IDX >= DA_SV.size( ) || strcmp( DA_SV[ DA_IDX ]->label, ca->label ) != 0 )
+					if ( DA_IDX >= DA_SV.size( ) || ca.label != DA_SV[ DA_IDX ]->label )
 					{
 						if ( DA_IDX >= miss_inst.size( ) )
 							miss_inst.resize( DA_IDX + 1, 0 );
@@ -534,8 +435,8 @@ void lsd::assimilation::align_state_vars( void )
 
 				// check if any run still has instances
 				done = true;					// assume all instances done
-				for ( auto sim : run_sims )
-					if ( DA_IDX < DA_SV.size( ) && strcmp( DA_SV[ DA_IDX ]->label, ca->label ) == 0 )
+				for ( auto & sim : run_sims )
+					if ( DA_IDX < DA_SV.size( ) && ca.label == DA_SV[ DA_IDX ]->label )
 					{
 						done = false;			// except if a run still has inst.
 						break;
@@ -546,7 +447,7 @@ void lsd::assimilation::align_state_vars( void )
 
 	// save aligned forecasted variable names
 	fctd_labs.clear( );
-	for ( auto cv : run_sims[ 0 ]->da_svars->st_vec )
+	for ( auto & cv : run_sims[ 0 ].da_svars.st_vec )
 	{
 		if ( cv != NULL )						// handle virtual instances
 			lab = cv->label;
@@ -574,11 +475,11 @@ void lsd::assimilation::update_state_vars( const e_matT & x_a_e )
 		if ( elem_map[ fctd_labs[ j ] ]->update )
 			for ( int i = 0; i < nobs; ++i )
 			{
-				cv = run_sims[ i ]->da_svars->st_vec[ j ];
+				cv = run_sims[ i ].da_svars.st_vec[ j ];
 				cv->val[ 0 ] = cv->chk_val( x_a_e( i, j ) );
 
 				if ( cv->save || cv->savei )
-					cv->data[ run_sims[ i ]->eff_t - cv->start ] = cv->val[ 0 ];
+					cv->data[ run_sims[ i ].eff_t - cv->start ] = cv->val[ 0 ];
 			}
 }
 
@@ -589,38 +490,34 @@ void lsd::assimilation::update_state_vars( const e_matT & x_a_e )
  *************************************************************/
 void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_f, const e_vecT & z, int t )
 {
-	assim *ca;
 	size_t i;
 	int nvar = x_a.size( );
 
 	// saves each variable instance to the corresponding DA element storage
 	for ( int j = 0; j < nvar; ++j )
 	{
-		ca = elem_map[ fctd_labs[ j ] ];
+		auto & ca = *elem_map[ fctd_labs[ j ] ];
 
-		if ( ! ca->save )
+		if ( ! ca.save )
 			continue;
 
 		// find the proper instance to update
-		for ( i = 0; i < ca->da_data.size( ); ++i )
-			if ( ca->da_data[ i ]->cur_t < t )			// check existing slots
+		for ( i = 0; i < ca.da_data.size( ); ++i )
+			if ( ca.da_data[ i ].cur_t < t )			// check existing slots
 				break;
 
-		if ( i == ca->da_data.size( ) )					// all used, create new
-		{
-			auto *slot = new assinstance ( t, ref_sim->last_t, da->sav_fct, da->sav_dat );
-			ca->da_data.emplace_back( slot );
-		}
+		if ( i == ca.da_data.size( ) )					// all used, create new
+			ca.da_data.emplace_back( t, ref_sim->last_t, da->sav_fct, da->sav_dat );
 
-		ca->da_data[ i ]->anl[ t - ca->da_data[ i ]->start ] = x_a[ j ];
+		ca.da_data[ i ].anl[ t - ca.da_data[ i ].start ] = x_a[ j ];
 
 		if ( da->sav_fct )
-			ca->da_data[ i ]->fct[ t - ca->da_data[ i ]->start ] = x_f[ j ];
+			ca.da_data[ i ].fct[ t - ca.da_data[ i ].start ] = x_f[ j ];
 
 		if ( da->sav_dat )
-			ca->da_data[ i ]->dat[ t - ca->da_data[ i ]->start ] = z[ j ];
+			ca.da_data[ i ].dat[ t - ca.da_data[ i ].start ] = z[ j ];
 
-		ca->da_data[ i ]->cur_t = ca->da_data[ i ]->end = t;
+		ca.da_data[ i ].cur_t = ca.da_data[ i ].end = t;
 	}
 }
 
@@ -632,9 +529,9 @@ void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_
 void lsd::assimilation::save_param( object *r )
 {
 	// find all instances of parameters requiring saving initial values
-	for ( auto ca = elem; ca != NULL; ca = ca->next )
-		if ( ! ca->disable && ca->param && ca->update && ca->par_dist == 1 )
-			for ( auto cv = r->search_var( NULL, ca->label, true ); cv != NULL; cv = cv->hyper_next( ) )
+	for ( auto & ca : ass_elem )
+		if ( ! ca.disable && ca.param && ca.update && ca.par_dist == 1 )
+			for ( auto cv = r->search_var( NULL, ca.label.c_str( ), true ); cv != NULL; cv = cv->hyper_next( ) )
 				cv->ini_val = cv->val[ 0 ];
 }
 
@@ -681,18 +578,18 @@ void lsd::assimilation::update_runtime_plot( int cur_t )
 	if ( ref_sim->liblnk->plot_runtime == NULL )
 		return;
 
-	for ( auto ca = elem; ca != NULL; ca = ca->next )
-		if ( ca->plot )
+	for ( auto & ca : ass_elem )
+		if ( ca.plot )
 			// plot up to just the initial instances
-			for ( auto i = 0; i <= ca->inst_ini; ++i )
+			for ( auto i = 0; i <= ca.inst_ini; ++i )
 			{
-				if ( i >= ( int ) ca->da_data.size( ) )
+				if ( i >= ( int ) ca.da_data.size( ) )
 					ref_sim->liblnk->plot_runtime( cur_t, NAN, NAN );
 				else
-					if ( ca->param == 1 || cur_t <= ca->da_data[ i ]->start )
-						ref_sim->liblnk->plot_runtime( cur_t, ca->da_data[ i ]->anl[ cur_t - ca->da_data[ i ]->start ], NAN );
+					if ( ca.param == 1 || cur_t <= ca.da_data[ i ].start )
+						ref_sim->liblnk->plot_runtime( cur_t, ca.da_data[ i ].anl[ cur_t - ca.da_data[ i ].start ], NAN );
 					else
-						ref_sim->liblnk->plot_runtime( cur_t, ca->da_data[ i ]->anl[ cur_t - ca->da_data[ i ]->start ], ca->da_data[ i ]->anl[ cur_t - ca->da_data[ i ]->start - 1 ] );
+						ref_sim->liblnk->plot_runtime( cur_t, ca.da_data[ i ].anl[ cur_t - ca.da_data[ i ].start ], ca.da_data[ i ].anl[ cur_t - ca.da_data[ i ].start - 1 ] );
 			}
 }
 
@@ -838,7 +735,7 @@ const e_matT & lsd::assimilation::dsp_stat( const e_matT & x, const e_vecT & x_b
 	}
 	else
 	{
-		for ( auto row : x.rowwise( ) )
+		for ( auto & row : x.rowwise( ) )
 		{
 			d = row.transpose( ) - x_bar;
 			dsp += d * d.transpose( );
@@ -873,7 +770,7 @@ const e_matT & lsd::assimilation::ensemble_forecast( void )
 
 				// get all existing instance values
 				for ( auto i = 0; i < nobs; ++i )
-					if ( ( sv = run_sims[ i ]->da_svars->st_vec[ j ] ) != NULL && std::isfinite( sv->val[ 0 ] ) )
+					if ( ( sv = run_sims[ i ].da_svars.st_vec[ j ] ) != NULL && std::isfinite( sv->val[ 0 ] ) )
 						v.emplace_back( sv->val[ 0 ] );
 
 				// compute location statistic to be used in virtual instances
@@ -886,7 +783,7 @@ const e_matT & lsd::assimilation::ensemble_forecast( void )
 	// fill matrix by rows/runs
 	for ( auto i = 0; i < nobs; ++i )
 		for ( auto j = 0; j < nvar; ++j )
-			if ( ( sv = run_sims[ i ]->da_svars->st_vec[ j ] ) != NULL && std::isfinite( sv->val[ 0 ] ) )
+			if ( ( sv = run_sims[ i ].da_svars.st_vec[ j ] ) != NULL && std::isfinite( sv->val[ 0 ] ) )
 				x_f_ens( i, j ) = sv->val[ 0 ];
 			else
 				if ( ! align_trim && loc.find( j ) != loc.end( ) )
@@ -1010,7 +907,7 @@ const e_matT & lsd::assimilation::virtual_obs( const e_vecT & z, int nobs )
  *************************************************************/
 int lsd::assimilation::load_obs_data( int last_t )
 {
-	struct assim_vars { ass_listT avl; int namrow = -1; };
+	struct assim_vars { asp_listT avl; int namrow = -1; };
 
 	bool fexist;
 	int vars_loaded = 0;
@@ -1023,18 +920,17 @@ int lsd::assimilation::load_obs_data( int last_t )
 	data_lab.clear( );
 
 	// identify variables to be read and group them by data file
-	for ( auto ca = elem; ca != NULL; ca = ca->next )
+	for ( auto & ca : ass_elem )
 	{
-		ca->no_data = true;
+		ca.no_data = true;
 
-		if ( ca->param || ca->disable || ! ca->data_obs || ca->data_file == NULL || strlen( ca->data_file ) == 0 || ( ( ca->data_col_name == NULL || strlen( ca->data_col_name ) == 0 ) && ca->data_col_num < 1 ) )
+		if ( ca.param || ca.disable || ! ca.data_obs || ca.data_file.size( ) == 0 || ( ca.data_col_name.size( ) == 0 && ca.data_col_num < 1 ) )
 			continue;
 
-		fv[ ca->data_file ].avl.emplace_back( ca );
+		fv[ ca.data_file ].avl.emplace_back( & ca );
 
-		if ( ( ca->data_col_name != NULL && strlen( ca->data_col_name ) > 0 ) ||
-			 ( ca->t_col_name != NULL && strlen( ca->t_col_name ) > 0 ) )
-			fv[ ca->data_file ].namrow = 0;
+		if ( ca.data_col_name.size( ) > 0 || ca.t_col_name.size( ) > 0 )
+			fv[ ca.data_file ].namrow = 0;
 	}
 
 	for ( auto cf = fv.begin( ); cf != fv.end( ); ++cf )
@@ -1062,7 +958,7 @@ int lsd::assimilation::load_obs_data( int last_t )
 
 			try
 			{
-				if ( cf->second.namrow == 0 && ( *ca )->data_col_name != NULL )
+				if ( cf->second.namrow == 0 && ( *ca )->data_col_name.size( ) > 0 )
 					vdata = csv.GetColumn < double >( ( *ca )->data_col_name );
 				else
 					if ( ( *ca )->data_col_num > 0 )
@@ -1080,7 +976,7 @@ int lsd::assimilation::load_obs_data( int last_t )
 			{
 				try
 				{
-					if ( cf->second.namrow == 0 && ( *ca )->t_col_name != NULL )
+					if ( cf->second.namrow == 0 && ( *ca )->t_col_name.size( ) > 0 )
 						vtime = csv.GetColumn < int >( ( *ca )->t_col_name );
 					else
 						if ( ( *ca )->t_col_num > 0 )
@@ -1157,7 +1053,7 @@ int lsd::assimilation::calc_dsp_mat( void )
 			e_vecT yv( y.size( ) );
 
 			int n = 0;
-			for ( auto xt : x )
+			for ( auto & xt : x )
 			{
 				// look for times both values are defined
 				auto yt = y.find( xt.first );
@@ -1237,25 +1133,24 @@ int lsd::assimilation::calc_dsp_mat( void )
 int lsd::assimilation::load_dsp_mat( simulation *sim )
 {
 	char *cpath, fname[ MAX_PATH_LENGTH ];
-	int i, j, k, res = 0;
-	assim *ca;
+	int i, j, k = 0, res = 0;
 	rapidcsv::Document csv;
 	std::unordered_set < strT > covnames;
 	std::unordered_set < strT >::iterator it;
 	str_vecT csvnames;
 
 	dsp_mat.resize( 0, 0 );
-	for ( ca = elem; ca != NULL; ca = ca->next )
-		ca->cov_idx = -1;
+	for ( auto & ca : ass_elem )
+		ca.cov_idx = -1;
 
-	if ( dsp_file == NULL || strlen( dsp_file ) == 0 )
+	if ( dsp_file.size( ) == 0 )
 		return 1;
 
 	cpath = sim == NULL ? NULL : sim->conf_path;
 	if ( cpath != NULL && strlen( cpath ) > 0 )
-		snprintf( fname, MAX_PATH_LENGTH, "%s/%s", cpath, dsp_file );
+		snprintf( fname, MAX_PATH_LENGTH, "%s/%s", cpath, dsp_file.c_str( ) );
 	else
-		strcpyn( fname, dsp_file, MAX_PATH_LENGTH );
+		strcpyn( fname, dsp_file.c_str( ), MAX_PATH_LENGTH );
 
 	// try to load matrix from file
 	try
@@ -1282,15 +1177,15 @@ int lsd::assimilation::load_dsp_mat( simulation *sim )
 		return 4;
 
 	// check if all information is available
-	for ( ca = elem, k = 0; ca != NULL; ca = ca->next )
+	for ( auto & ca : ass_elem )
 	{
-		if ( ca->no_data )
+		if ( ca.no_data )
 			continue;
 
-		if ( ( it = covnames.find( ca->label ) ) != covnames.end( ) || ( ca->data_col_name != NULL && strlen( ca->data_col_name ) > 0 && ( it = covnames.find( ca->data_col_name ) ) != covnames.end( ) ) )
+		if ( ( it = covnames.find( ca.label ) ) != covnames.end( ) || ( ca.data_col_name.size( ) > 0 && ( it = covnames.find( ca.data_col_name ) ) != covnames.end( ) ) )
 		{
 			csvnames.emplace_back( *it );
-			ca->cov_idx = k++;
+			ca.cov_idx = k++;
 		}
 		else
 			return 5;
@@ -1332,12 +1227,11 @@ int lsd::assimilation::load_dsp_mat( simulation *sim )
  *************************************************************/
 bool lsd::assimilation::load_files( simulation *sim, int last_t )
 {
-	bool first;
+	bool first = true;
 	int i, j;
-	assim *ca;
 
 	// load assimilation data, if amy/proper
-	if ( elem == NULL || disable )
+	if ( ass_elem.size( ) == 0 || disable )
 		return false;
 
 	if ( ( i = load_obs_data( last_t ) ) < count( 4 ) )
@@ -1347,10 +1241,10 @@ bool lsd::assimilation::load_files( simulation *sim, int last_t )
 		else
 		{
 			plog_master( "\nData for assimilation missing for:" );
-			for ( ca = elem, first = true; ca != NULL; ca = ca->next )
-				if ( ! ca->param && ! ca->disable && ca->data_obs && ca->no_data )
+			for ( auto & ca : ass_elem )
+				if ( ! ca.param && ! ca.disable && ca.data_obs && ca.no_data )
 				{
-					plog_master( "%s %s", first ? "" : ",", ca->label );
+					plog_master( "%s %s", first ? "" : ",", ca.label.c_str( ) );
 					first = false;
 				}
 		}
@@ -1370,7 +1264,7 @@ bool lsd::assimilation::load_files( simulation *sim, int last_t )
 			}
 			else
 			{
-				empty( );
+				empty_assimilation( );
 				switch ( j )
 				{
 					case 1:
@@ -1401,7 +1295,7 @@ bool lsd::assimilation::load_files( simulation *sim, int last_t )
 						plog_master( "\nNon positive-definite $c matrix" );
 				}
 
-				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Cannot load assimilation $c matrix\" -detail \"There was a problem loading the $c matrix for data assimilation from file '%s'.\nCheck the Log window for details.\"", dsp_file != NULL ? dsp_file : "(none)" );
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Cannot load assimilation $c matrix\" -detail \"There was a problem loading the $c matrix for data assimilation from file '%s'.\nCheck the Log window for details.\"", dsp_file != "" ? dsp_file.c_str( ) : "(none)" );
 				return false;
 			}
 		else
@@ -1474,33 +1368,31 @@ bool lsd::assimilation::load_files( simulation *sim, int last_t )
  *************************************************************/
 void lsd::assimilation::show( void )
 {
-	assim *ca;
-
 	plog_master( "\n\nVariables set for data assimilation (#=not updated / *=disabled):\n" );
-	for ( ca = elem; ca != NULL; ca = ca->next )
+	for ( auto & ca : ass_elem )
 	{
-		plog_master( "%s: %s", ca->param ? "Par" : "Var", ca->label );
-		plog_tag_master( "%s%s", "highlight", ! ca->update ? "#" : "", ca->disable ? "*" : "" );
+		plog_master( "%s: %s", ca.param ? "Par" : "Var", ca.label.c_str( ) );
+		plog_tag_master( "%s%s", "highlight", ! ca.update ? "#" : "", ca.disable ? "*" : "" );
 
-		if ( ! ca->param )
+		if ( ! ca.param )
 		{
-			if ( ca->data_obs )
+			if ( ca.data_obs )
 			{
-				plog_master( " \t%s\t(col=", ca->data_file != NULL ? ca->data_file : "" );
+				plog_master( " \t%s\t(col=", ca.data_file.c_str( ) );
 
-				if ( ca->data_col_name != NULL && strlen( ca->data_col_name ) != 0 )
-					plog_tag_master( "'%s'", "highlight", ca->data_col_name );
+				if ( ca.data_col_name.size( ) > 0 )
+					plog_tag_master( "'%s'", "highlight", ca.data_col_name.c_str( ) );
 				else
-					plog_tag_master( "%d", "highlight", ca->data_col_num );
+					plog_tag_master( "%d", "highlight", ca.data_col_num );
 
-				if ( ( ca->t_col_name != NULL && strlen( ca->t_col_name ) != 0 ) || ca->t_col_num > 0 )
+				if ( ca.t_col_name.size( ) > 0 || ca.t_col_num > 0 )
 				{
 					plog_master( " t_col=" );
 
-					if ( ca->t_col_name != NULL && strlen( ca->t_col_name ) != 0 )
-						plog_tag_master( "'%s'", "highlight", ca->t_col_name );
+					if ( ca.t_col_name.size( ) > 0 )
+						plog_tag_master( "'%s'", "highlight", ca.t_col_name.c_str( ) );
 					else
-						plog_tag_master( "%d", "highlight", ca->t_col_num );
+						plog_tag_master( "%d", "highlight", ca.t_col_num );
 				}
 
 				plog_master( ")" );
@@ -1508,17 +1400,17 @@ void lsd::assimilation::show( void )
 		}
 		else
 		{
-			if ( ca->par_dist == 0 )
+			if ( ca.par_dist == 0 )
 			{
 				plog_master( " \tNorm(sd=" );
-				plog_tag_master( "%.4g", "highlight", ca->par_n_sd );
+				plog_tag_master( "%.4g", "highlight", ca.par_n_sd );
 			}
 			else
 			{
 				plog_master( " \tUnif(up=" );
-				plog_tag_master( "%.3g", "highlight", ca->par_u_upp );
+				plog_tag_master( "%.3g", "highlight", ca.par_u_upp );
 				plog_master( " lo=" );
-				plog_tag_master( "%.3g", "highlight", ca->par_u_low );
+				plog_tag_master( "%.3g", "highlight", ca.par_u_low );
 			}
 
 			plog_master( ")" );

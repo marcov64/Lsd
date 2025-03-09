@@ -652,11 +652,10 @@ int lsd::assim::dataentry( const char *parWnd )
 	else
 		return 2;
 
-	cv = sim->root->search_var( NULL, label );
+	cv = sim->root->search_var( NULL, label.c_str( ) );
 
 	if ( cv == NULL )
 		return 2;
-
 
 	// define the correct parent window
 	if ( parWnd != NULL && strlen( parWnd ) > 0 )
@@ -685,13 +684,13 @@ int lsd::assim::dataentry( const char *parWnd )
 	cmd( "set update %d", update );
 	cmd( "set data_obs %d", data_obs );
 
-	cmd( "set data_file \"%s\"", data_file != NULL ? data_file : "" );
+	cmd( "set data_file \"%s\"", data_file.c_str( ) );
 	cmd( "if { [ string first / $data_file ] != -1 } { \
 			set data_file [ file nativename $data_file ] \
 		}" );
-	cmd( "set data_col_name \"%s\"", data_col_name != NULL ? data_col_name : data_col_num < 1 ? label : "" );
+	cmd( "set data_col_name \"%s\"", data_col_name.size( ) > 0 ? data_col_name.c_str( ) : data_col_num < 1 ? label.c_str( ) : "" );
 	cmd( "set data_col_num %d", data_col_num );
-	cmd( "set t_col_name \"%s\"", t_col_name != NULL ? t_col_name : "" );
+	cmd( "set t_col_name \"%s\"", t_col_name.c_str( ) );
 	cmd( "set t_col_num %d", t_col_num );
 
 	cmd( "set par_dist %d", par_dist );
@@ -706,7 +705,7 @@ int lsd::assim::dataentry( const char *parWnd )
 
 	cmd( "ttk::frame $_w.head.l" );
 	cmd( "ttk::label $_w.head.l.c -text \"%s: \"", param ? "Parameter" : "Variable" );
-	cmd( "ttk::label $_w.head.l.n -text \"%s  \" -style hl.TLabel", label );
+	cmd( "ttk::label $_w.head.l.n -text \"%s  \" -style hl.TLabel", label.c_str( ) );
 	cmd( "pack $_w.head.l.c $_w.head.l.n -side left" );
 
 	cmd( "ttk::frame $_w.head.lo" );
@@ -804,7 +803,7 @@ int lsd::assim::dataentry( const char *parWnd )
 					%%W insert 0 $data_col_num; \
 					return 0 \
 				} \
-			} -invalidcommand { bell }", label );
+			} -invalidcommand { bell }", label.c_str( ) );
 		cmd( "$_w.dcol.d.n2 insert 0 $data_col_num" );
 		cmd( "$_w.dcol.d.n2 configure -state %s", data_obs ? "normal" : "disabled" );
 		cmd( "tooltip::tooltip $_w.dcol.d.n2 \"Number of column in CSV file containing\nvariable observational data\"" );
@@ -929,8 +928,7 @@ int lsd::assim::dataentry( const char *parWnd )
 		{
 			if ( strlen( gui::get_str( "data_file" ) ) == 0 )
 			{
-				delete [ ] data_file;
-				data_file = NULL;
+				data_file.clear( );
 				res = 1;
 			}
 			else
@@ -941,50 +939,33 @@ int lsd::assim::dataentry( const char *parWnd )
 			}
 
 			if ( strlen( gui::get_str( "data_col_name" ) ) == 0 )
-			{
-				delete [ ] data_col_name;
-				data_col_name = NULL;
-			}
+				data_col_name.clear( );
 			else
 				data_col_num = 0;
 
 			if ( strlen( gui::get_str( "t_col_name" ) ) == 0 )
-			{
-				delete [ ] t_col_name;
-				t_col_name = NULL;
-			}
+				t_col_name.clear( );
 			else
 				t_col_num = 0;
 
 			if ( res == 0 )
 			{
-				delete [ ] data_file;
-				data_file = new char [ strlen( gui::get_str( "data_file" ) ) + 1 ];
-				strcpy( data_file, gui::get_str( "data_file" ) );
+				data_file = gui::get_str( "data_file" );
 
 				if ( strlen( gui::get_str( "data_col_name" ) ) > 0 )
-				{
-					delete [ ] data_col_name;
-					data_col_name = new char [ strlen( gui::get_str( "data_col_name" ) ) + 1 ];
-					strcpy( data_col_name, gui::get_str( "data_col_name" ) );
-				}
+					data_col_name = gui::get_str( "data_col_name" );
 				else
 					data_col_num = std::max( gui::get_int( "data_col_num" ), 0 );
 
 				if ( strlen( gui::get_str( "t_col_name" ) ) > 0 )
-				{
-					delete [ ] t_col_name;
-					t_col_name = new char [ strlen( gui::get_str( "t_col_name" ) ) + 1 ];
-					strcpy( t_col_name, gui::get_str( "t_col_name" ) );
-				}
+					t_col_name = gui::get_str( "t_col_name" );
 				else
 					if ( gui::get_int( "t_col_num" ) > 0 )
 						t_col_num = std::max( gui::get_int( "t_col_num" ), 0 );
 
 				try
 				{
-					if ( ( data_col_name != NULL && strlen( data_col_name ) > 0 ) ||
-						 ( t_col_name != NULL && strlen( t_col_name ) > 0 ) )
+					if ( data_col_name.size( ) > 0 || t_col_name.size( ) > 0 )
 						namrow = 0;
 					else
 						namrow = -1;
@@ -999,7 +980,7 @@ int lsd::assim::dataentry( const char *parWnd )
 
 				if ( res == 0 )
 				{
-					if ( data_col_name != NULL && strlen( data_col_name ) > 0 )
+					if ( data_col_name.size( ) > 0 )
 					{
 						cnames = csv.GetColumnNames( );
 						cexist = std::find( cnames.begin( ), cnames.end( ), data_col_name ) != cnames.end( );
@@ -1015,7 +996,7 @@ int lsd::assim::dataentry( const char *parWnd )
 
 					if ( res == 0 )
 					{
-						if ( t_col_name != NULL && strlen( t_col_name ) > 0 )
+						if ( t_col_name.size( ) > 0 )
 						{
 							cnames = csv.GetColumnNames( );
 							cexist = std::find( cnames.begin( ), cnames.end( ), t_col_name ) != cnames.end( );
