@@ -1862,11 +1862,8 @@ void lsd::object::empty( void )
 	b = NULL;
 	b_map.clear( );
 
-	if ( node != NULL )			// network data to delete?
-	{
-		delete node;
-		node = NULL;
-	}
+	delete node;
+	node = NULL;
 
 	delete [ ] label;
 	label = NULL;

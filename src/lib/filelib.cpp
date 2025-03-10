@@ -58,7 +58,7 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 	if ( strlen( conf_name ) == 0 )
 		return 1;
 
-	if ( ! reload || strlen( conf_file ) == 0 )
+	if ( ! reload || conf_file == NULL || strlen( conf_file ) == 0 )
 	{
 		delete [ ] conf_file;
 		conf_file = new char[ strlen( conf_path ) + strlen( conf_name ) + 6 ];
@@ -383,29 +383,29 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 								}
 							}
 					}
+				}
 
-					if ( da != NULL && ! cn.child( "assimilation" ).empty( ) )
-					{
-						x_nodeT cna = cn.child( "assimilation" );
+				if ( sim == sims[ 0 ] && da != NULL && ! cn.child( "assimilation" ).empty( ) )
+				{
+					x_nodeT cna = cn.child( "assimilation" );
 
-						bool disable = cna.attribute( "disable" ).as_bool( );
-						bool update = cna.attribute( "update" ).as_bool( true );
-						bool data_obs = cna.attribute( "data_observations" ).as_bool( );
+					bool disable = cna.attribute( "disable" ).as_bool( );
+					bool update = cna.attribute( "update" ).as_bool( true );
+					bool data_obs = cna.attribute( "data_observations" ).as_bool( );
 
-						strT data_file = cna.attribute( "data_file" ).value( );
-						strT data_col_name = cna.attribute( "data_column_name" ).value( );
-						strT t_col_name = cna.attribute( "time_column_name" ).value( );
-						int data_col_num = cna.attribute( "data_column_number" ).as_uint( );
-						int t_col_num = cna.attribute( "time_column_number" ).as_uint( );
+					strT data_file = cna.attribute( "data_file" ).value( );
+					strT data_col_name = cna.attribute( "data_column_name" ).value( );
+					strT t_col_name = cna.attribute( "time_column_name" ).value( );
+					int data_col_num = cna.attribute( "data_column_number" ).as_uint( );
+					int t_col_num = cna.attribute( "time_column_number" ).as_uint( );
 
-						bool param = ! cna.child( "parameter" ).empty( );
-						int par_dist = cna.child( "parameter" ).attribute( "distribution" ).as_uint( );
-						double par_n_sd = cna.child( "parameter" ).attribute( "normal_sd" ).as_double( );
-						double par_u_upp = cna.child( "parameter" ).attribute( "uniform_upper" ).as_double( );
-						double par_u_low = cna.child( "parameter" ).attribute( "uniform_lower" ).as_double( );
+					bool param = ! cna.child( "parameter" ).empty( );
+					int par_dist = cna.child( "parameter" ).attribute( "distribution" ).as_uint( );
+					double par_n_sd = cna.child( "parameter" ).attribute( "normal_sd" ).as_double( );
+					double par_u_upp = cna.child( "parameter" ).attribute( "uniform_upper" ).as_double( );
+					double par_u_low = cna.child( "parameter" ).attribute( "uniform_lower" ).as_double( );
 
-						da->ass_elem.emplace_back( str, param, disable, update, data_obs, data_file, data_col_name, t_col_name, data_col_num, t_col_num, par_dist, par_n_sd, par_u_upp, par_u_low );
-					}
+					da->ass_elem.emplace_back( str, param, disable, update, data_obs, data_file, data_col_name, t_col_name, data_col_num, t_col_num, par_dist, par_n_sd, par_u_upp, par_u_low );
 				}
 			}
 	}
@@ -2367,7 +2367,7 @@ void lsd::result::data_recursive( object *r, int t )
 								continue;
 
 							data = ( i == 4 ? ce.dat.data( ) : ( i == 3 ? ce.fct.data( ) : ce.anl.data( ) ) );
-							write_data( data[ t - ce.start ], t, ce.start, ce.end );
+							write_data( data, t, ce.start, ce.end );
 						}
 
 						ce.saved = true;
@@ -2375,7 +2375,7 @@ void lsd::result::data_recursive( object *r, int t )
 				}
 			}
 			else
-				write_data( cv->data[ t - cv->start ], t, cv->start, cv->end );
+				write_data( cv->data, t, cv->start, cv->end );
 		}
 
 	for ( auto cb = r->b; cb != NULL; cb = cb->next )
@@ -2405,7 +2405,7 @@ void lsd::result::data_recursive( object *r, int t )
 								continue;
 
 							data = ( i == 4 ? ce.dat.data( ) : ( i == 3 ? ce.fct.data( ) : ce.anl.data( ) ) );
-							write_data( data[ t - ce.start ], t, ce.start, ce.end );
+							write_data( data, t, ce.start, ce.end );
 						}
 
 						ce.saved = true;
@@ -2413,7 +2413,7 @@ void lsd::result::data_recursive( object *r, int t )
 				}
 			}
 			else
-				write_data( cv->data[ t - cv->start ], t, cv->start, cv->end );
+				write_data( cv->data, t, cv->start, cv->end );
 		}
 }
 
@@ -2422,9 +2422,16 @@ void lsd::result::data_recursive( object *r, int t )
  RESULT::WRITE_DATA
  Write a single element data to results file
  *************************************************************/
-void lsd::result::write_data( double val, int t, int start, int end )
+void lsd::result::write_data( double *data, int t, int start, int end )
 {
-	if ( start <= t && end >= t && ! std::isnan( val ) )
+	double val;
+
+	if ( start <= t && t <= end )
+		val = data[ t - start ];
+	else
+		val = NAN;
+
+	if ( std::isfinite( val ) )
 		if ( dozip )
 			if ( docsv )
 				gzprintf( fz, "%s%.*G", first_col ? "" : CSV_SEP, SIG_DIG, val );

@@ -34,10 +34,10 @@
 #define LSD_TERM "lsd_term"			// LSD terminal executable name
 
 int load_config( lsd::simulation & sim );
-int parse_cmdline( int argn, const char **argv, lsd::simulation & sim );
+int parse_cmdline( int argn, const char **argv, lsd::simulation & sim, lsd::assimilation & da );
 
 const char lsdCmdMsg[ ] = "This is the terminal version of LSD.";
-const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd [-s SEED] [-e RUNS] to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-l FILENAME' to save all output to a (log) file\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-p' for skipping the generation of totals file\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-b' for showing a progress bar\n'-c MAX_THREADS[:MAX_RUNS]' to set maximum parallel threads/runs to use\n";
+const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd [-s SEED] [-e RUNS] to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-l FILENAME' to save all output to a (log) file\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-p' for skipping the generation of totals file\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-b' for showing a progress bar\n'-c MAX_THREADS[:MAX_RUNS]' to set maximum parallel threads/runs to use\n'-af' to save data assimilation forecasts\n'-ad' to save data assimilation observational data\n'-ac' to save data assimilation covariance/comedian matrix\n";
 
 
 /*************************************************************
@@ -48,6 +48,7 @@ int main( int argn, const char **argv )
 	char cwd[ PATH_MAX ];
 	int res = -1;
 	lsd::simulation sim;			// single LSD simulation terminal instance
+	lsd::assimilation da;			// data assimilation object
 
 #ifndef _NT_
 	// register all signal handlers
@@ -56,7 +57,6 @@ int main( int argn, const char **argv )
 	try
 	{
 #endif
-
 		// set executable name and path
 		getcwd( cwd, PATH_MAX );
 		lsd::set_exec( cwd, argv[ 0 ] );
@@ -67,8 +67,10 @@ int main( int argn, const char **argv )
 			lsd::lsd_exit( 5 );
 		}
 
+		lsd::da = & da;				// library call-back
+
 		// parse command line options
-		res = parse_cmdline( argn, argv, sim );
+		res = parse_cmdline( argn, argv, sim, da );
 		if ( res != 0 )
 			lsd::lsd_exit( res );
 
@@ -77,21 +79,25 @@ int main( int argn, const char **argv )
 		if ( res != 0 )
 			lsd::lsd_exit( res );
 
-		// if parallel execution is required, just run new instances & wait to finish
-		if ( ! sim.batch_sequential && sim.last_run > 1 && sim.max_runs > 1 )
-		{
-			if ( sim.grand_total || ! sim.no_tot )
-			{
-				printf( "\n(Grand) total file(s) request ignored, running in parallel mode.\n" );
-				sim.no_tot = true;
-				sim.grand_total = false;
-			}
-
-			res = sim.run_parallel( true, argv[ 0 ], sim.conf_name, sim.seed, sim.last_run, sim.max_threads, sim.max_runs );
-		}
+		// check for data assimilation configuration and run it
+		if ( ! da.disable && sim.last_run > 1 && da.count( 4 ) > 0 )
+			res = da.run_simulation( 0 );
 		else
-			// execute single simulation
-			res = sim.run_simulation( );
+			// if parallel execution is required, just run new instances & wait to finish
+			if ( ! sim.batch_sequential && sim.last_run > 1 && sim.max_runs > 1 )
+			{
+				if ( sim.grand_total || ! sim.no_tot )
+				{
+					printf( "\n(Grand) total file(s) request ignored, running in parallel mode.\n" );
+					sim.no_tot = true;
+					sim.grand_total = false;
+				}
+
+				res = sim.run_parallel( true, argv[ 0 ], sim.conf_name, sim.seed, sim.last_run, sim.max_threads, sim.max_runs );
+			}
+			else
+				// execute single simulation
+				res = sim.run_simulation( 0, 0, false );
 
 #ifndef _NT_
 	}
@@ -109,7 +115,7 @@ int main( int argn, const char **argv )
 	}
 #endif
 
-	lsd::lsd_exit( res );
+	lsd::lsd_exit( res, true );
 
 	return res;
 }
@@ -118,7 +124,7 @@ int main( int argn, const char **argv )
 /*************************************************************
  PARSE_CMDLINE
  *************************************************************/
-int parse_cmdline( int argn, const char **argv, lsd::simulation & sim )
+int parse_cmdline( int argn, const char **argv, lsd::simulation & sim, lsd::assimilation & da )
 {
 	int i, j = 0, k = 0;
 
@@ -219,6 +225,27 @@ int parse_cmdline( int argn, const char **argv, lsd::simulation & sim )
 			sim.dobar = true;
 			continue;
 		}
+		// read -af parameter : save assimilation forecast
+		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'a' && argv[ i ][ 2 ] == 'f' )
+		{
+			i--;					// no parameter for this option
+			da.sav_fct = true;
+			continue;
+		}
+		// read -ad parameter : save assimilation data
+		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'a' && argv[ i ][ 2 ] == 'd' )
+		{
+			i--;					// no parameter for this option
+			da.sav_dat = true;
+			continue;
+		}
+		// read -ac parameter : save assimilation covariance/comedian matrix
+		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'a' && argv[ i ][ 2 ] == 'c' )
+		{
+			i--;					// no parameter for this option
+			da.sav_dsp = true;
+			continue;
+		}
 
 		fprintf( stderr, "\nOption '%c%c' not recognized.\n%s\n%s\n", argv[ i ][ 0 ], argv[ i ][ 1 ], lsdCmdMsg, lsdCmdHlp );
 		return 6;
@@ -251,7 +278,7 @@ int load_config( lsd::simulation & sim )
 
 	str = new char[ strlen( sim.conf_name ) + 1 ];
 	strcpy( str, sim.conf_name );
-	strupr( str );
+	lsd::strupr( str );
 
 	if ( strlen( str ) == 0 )
 	{

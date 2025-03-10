@@ -312,7 +312,7 @@ namespace lsd
 	double median( d_vecT & v );
 	double strtod( const char *in, char** endptr, double inv );
 	d_vecT strtodsplit( const char *in, char sep, double inv = 0. );
-	int dispatch_runs( sim_vecT & run_sims, int until_t = 0, int until_run = 0, bool da = false );
+	int dispatch_runs( sim_vecT & run_sims, int until_t, int until_run, bool da );
 	int kill_system( simulation *sim, int id );
 	int run_system( const char *cmd, simulation *sim = NULL, int id = -1 );
 	int strcln( char *out, const char *str, int outSz );
@@ -326,11 +326,12 @@ namespace lsd
 	strT to_string( const char *fmt, ... );
 	str_vecT strtostrsplit( const char *in, char sep, bool remQuotes = false );
 	void cmd( const char *cm, ... );
+	void debug_break( void );
 	void empty_assimilation( void );
 	void exception_handler( int signum, const char *what );
 	void handle_signals( void ( * handler ) ( int signum ) );
 	void inhibit_system_sleep( void );
-	void lsd_exit( int v );
+	void lsd_exit( int v, bool clean = false );
 	void msleep( unsigned msec = 1000 );
 	void plog_master( const char *cm, ... );
 	void plog_tag_master( const char *cm, const char *tag, ... );
@@ -522,7 +523,7 @@ class lsd::simulation : public equation	// simulation container class
 		int dobar = false;				// enable progress bar in log/standard output
 		int docsv = false;				// produce .csv text results files (bool)
 		int dozip = true;				// compressed results file flag (bool)
-		int fast_mode;					// level of LOG messages & runtime plot
+		int fast_mode = 2;				// level of LOG messages & runtime plot
 		int fend;						// last multi configuration job to run
 		int findex;						// current multi configuration job
 		int last_dispatch_time;			// last time step controlled by dispatcher
@@ -540,11 +541,11 @@ class lsd::simulation : public equation	// simulation container class
 		int prof_min_msecs = 0;			// profile variables taking more than X msecs.
 		int prof_obs_only = false;		// profile only observed variables
 		int quit = 0;					// simulation interruption mode (0=none)
-		int run;						// current serial simulation run
+		int run = 0;					// current serial simulation run
 		int series_saved = 0;			// number of series saved
 		int stack_info = 0;				// LSD stack control
 		int stale_time;					// time passed from last step computation
-		int t;							// current time step
+		int t = 0;						// current time step
 		i_atomT eff_t = 0;				// number of executed time steps
 		lattice *latt = NULL;			// model lattice
 		lsdstack *stack_log = NULL;		// LSD stack
@@ -565,7 +566,7 @@ class lsd::simulation : public equation	// simulation container class
 		unsigned seed = 1;				// random number generator initial seed
 		variable *cemetery = NULL;		// LSD saved data from deleted objects
 		worker *workers = NULL;			// multi-thread parallel worker data
-		FILE *log_file_ptr;				// log file pointer, if any
+		FILE *log_file_ptr = NULL;		// log file pointer, if any
 #ifndef _TERM_
 		p_mapT par_map;					// variable to parent name map for AoR
 		Tcl_Interp *inter;				// Tcl interpreter (for legacy LSD code)
@@ -633,7 +634,7 @@ class lsd::simulation : public equation	// simulation container class
 		int load_configuration( bool reload, strT *warnings, int quick );
 		int rnd_int( int min, int max );
 		int run_parallel( bool term, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns );
-		int run_simulation( int until_t = 0, int until_run = 0, bool da = false );
+		int run_simulation( int until_t, int until_run, bool da );
 		int worker_errors( void );
 		void detach_parallel( void );
 		void empty_sensitivity( sensitivity *cs = NULL );
@@ -649,6 +650,7 @@ class lsd::simulation : public equation	// simulation container class
 		void unload_configuration( bool full );
 
 		simulation( const char fname[ ] = "", const char path[ ] = "", int quick = 0 );// constructor
+		simulation( simulation && src ) { }// move constructor
 		~simulation( void );			// destructor
 
 	private:
@@ -678,7 +680,7 @@ class lsd::simulation : public equation	// simulation container class
 		void monitor_parallel( bool term );
 		void parallel_update( variable *v, object* p, object *caller = NULL );
 		void run_parallel_exec( bool term, int id, strT cmd );
-		void save_results( void );
+		void save_results( bool da_en = false );
 		void update_bar( char *bar, int done, int & last_done, int bar_sz );
 		void warn_distr( i_atomT & errCnt, bool & stopErr, const char *distr, const char *msg );
 
@@ -834,6 +836,7 @@ class lsd::object						// simulation model object class
 		void delete_link_net( netlink *ptr );
 		void delete_node_net( void );
 		void empty( void );
+		void get_line( char *lBuffer, FILE *fPtr );
 		void init( object *_up, simulation *_sim, const char *_label, bool _to_compute = true );
 		void name_node_net( const char *nodeName );
 		void recreate_maps( void );
@@ -1164,7 +1167,7 @@ class lsd::result						// results file container class
 
 		void data_recursive( object *r, int t );
 		void title_recursive( object *r, bool header );
-		void write_data( double val, int t, int start, int end );
+		void write_data( double *data, int t, int start, int end );
 		void write_title( variable *v, int tag, bool header = false, int start = -1, int end = -1 );
 };
 
@@ -1340,7 +1343,7 @@ class lsd::assimilation					// assimilation container class
 	public:
 		ass_list_itT search( const char *lab );
 		int count( int what );
-		int run_simulation( int until_t = 0 );
+		int run_simulation( int until_t );
 		void show( void );
 
 	private:

@@ -7,8 +7,17 @@ INCLUDE=-I$(SRC) -I$(PATH_HEADER)
 # terminal specific variables
 LIB_TERM=$(LIB) -lpthread
 CC_TERM=$(CC_CROSS)g++
-SWITCH_CC_TERM=$(GLOBAL_CC) $(SWITCH_CC) -D_TERM_ -O3 -g0
+SWITCH_CC_TERM=$(GLOBAL_CC) $(SWITCH_CC) -D_TERM_
 TARGET_TERM=lsd_term
+
+# check if debug compilation
+DBG=$(findstring $(strip $(DEBUG_TERM)),true True TRUE yes Yes YES 1)
+
+ifeq ($(DBG),)
+  SWITCH_CC_TERM+= -O3 -g0
+else
+  SWITCH_CC_TERM+= -O0 -ggdb3
+endif
 
 # handle platform-specific stuff
 ifeq ($(OS),Windows_NT)
@@ -21,7 +30,7 @@ else
     EXE_EXT=
     DLL_EXT=.dylib
   else
-    OBJ_DIR=$(TMPDIR)/$(TARGET_TERM)/
+    OBJ_DIR=/tmp/$(TARGET_TERM)/
     EXE_EXT=
     DLL_EXT=.so
   endif

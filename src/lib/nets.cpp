@@ -1405,11 +1405,10 @@ long lsd::object::init_lattice_net( int nRow, int nCol, const char *lab, int eig
 
 
 /*************************************************************
- READ_FILE_NET (*)
- Read directed or undirected network text file in
- Pajek format.
+ GET_LINE
+ Read line from network text file
  *************************************************************/
-void get_line( char *lBuffer, FILE *fPtr )
+void lsd::object::get_line( char *lBuffer, FILE *fPtr )
 {
 	char firstChar;
 
@@ -1426,9 +1425,15 @@ void get_line( char *lBuffer, FILE *fPtr )
 	if ( firstChar == '*' )							// check new section start
 		strupr( lBuffer );							// to uppercase
 
-	lsd::strtrimin( lBuffer, lBuffer, MAX_LINE_SIZE );// remove extra spaces
+	strtrimin( lBuffer, lBuffer, MAX_LINE_SIZE );	// remove extra spaces
 }
 
+
+/*************************************************************
+ READ_FILE_NET (*)
+ Read directed or undirected network text file in
+ Pajek format.
+ *************************************************************/
 double lsd::object::read_file_net( const char *lab, const char dir[ ], const char base_name[ ], int serial, const char ext[ ] )
 {
 	int i;

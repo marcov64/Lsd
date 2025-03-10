@@ -258,9 +258,9 @@ int gui::load_gui( const char **argv )
 		try
 		{
 			if ( da.disable )
-				i = sim.run_simulation( );
+				i = sim.run_simulation( 0, 0, false );
 			else
-				i = da.run_simulation( );
+				i = da.run_simulation( 0 );
 
 			if ( i != 0 )
 				break;

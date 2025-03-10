@@ -103,7 +103,7 @@ int lsd::simulation::run_parallel( bool term, const char *exec, const char *simn
 
 			run_pids.resize( run_pids.size( ) + 1 );
 			run_status.push_back( INISTAT );
-			run_threads.push_back( thrT( run_parallel_exec, this, term, run_status.size( ) - 1, strT( cmd ) ) );
+			run_threads.push_back( thrT ( & lsd::simulation::run_parallel_exec, this, term, run_status.size( ) - 1, strT( cmd ) ) );
 
 			j <= sl ? i += num + 1 : i += num;
 		}
@@ -130,7 +130,7 @@ int lsd::simulation::run_parallel( bool term, const char *exec, const char *simn
 
 			run_pids.resize( run_pids.size( ) + 1 );
 			run_status.push_back( INISTAT );
-			run_threads.push_back( thrT( run_parallel_exec, this, term, run_status.size( ) - 1, strT( cmd ) ) );
+			run_threads.push_back( thrT( & lsd::simulation::run_parallel_exec, this, term, run_status.size( ) - 1, strT( cmd ) ) );
 		}
 	}
 
@@ -180,7 +180,7 @@ int lsd::simulation::run_parallel( bool term, const char *exec, const char *simn
 		return i;
 	}
 	else
-		run_monitor = thrT( monitor_parallel, this, term );
+		run_monitor = thrT( & lsd::simulation::monitor_parallel, this, term );
 
 	return 0;
 }

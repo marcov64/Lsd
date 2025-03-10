@@ -121,7 +121,9 @@ bool lsd::assim::init( void )
 
 	param = cv->param;
 	plot = cv->plot;
-	save = cv->save || cv->savei;
+
+	if ( ( save = cv->save ) )
+		++( da->ref_sim->series_saved );
 
 	// count initial instances
 	for ( inst_ini = 0; cv != NULL; ++inst_ini, cv = cv->hyper_next( ) );
@@ -166,6 +168,7 @@ bool lsd::assimilation::init( simulation *ref )
 		ref_sim = ref;
 
 	// initialize assimilation elements
+	ref->series_saved = 0;
 	elem_map.clear( );
 	for ( auto ca = ass_elem.begin( ); ca != ass_elem.end( ); ++ca )
 	{
@@ -575,7 +578,7 @@ void lsd::assim::update_param( variable *v )
  *************************************************************/
 void lsd::assimilation::update_runtime_plot( int cur_t )
 {
-	if ( ref_sim->liblnk->plot_runtime == NULL )
+	if ( ref_sim->liblnk == NULL || ref_sim->liblnk->plot_runtime == NULL )
 		return;
 
 	for ( auto & ca : ass_elem )
@@ -662,7 +665,10 @@ void lsd::assimilation::update_runtime_plot( int cur_t )
 	// compute the MC analysis ensemble estimates & refresh run-time window
 	const e_vecT & x_a = loc_stat( x_a_e );
 	update_assim_vars( x_a, x_f, z, cur_t );
+
+#ifndef _TERM_
 	update_runtime_plot( cur_t );
+#endif
 
 	return 0;
 }
@@ -1356,7 +1362,7 @@ bool lsd::assimilation::load_files( simulation *sim, int last_t )
 		return false;
 	}
 
-	plog_master( "\nAssimilation data loaded for %d variables\n", i );
+	plog_master( "\nAssimilation data loaded for %d variables", i );
 
 	return true;
 }

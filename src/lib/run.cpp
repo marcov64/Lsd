@@ -44,6 +44,7 @@ int lsd::assimilation::run_simulation( int until_t )
 		return 1;
 
 	ref_sim->run = 1;
+	until_t = until_t > 0 && until_t < ref_sim->last_t ? until_t : ref_sim->last_t;
 
 	// cover browser & open run time plot window
 #ifndef _TERM_
@@ -66,7 +67,7 @@ int lsd::assimilation::run_simulation( int until_t )
 	for ( auto & dtime : time_var )
 	{
 		// stop if data time span is longer than simulation
-		if ( ( next_t = dtime.first ) > ref_sim->last_t )
+		if ( ( next_t = dtime.first ) > until_t )
 			break;
 
 		// DA forecast step
@@ -95,18 +96,18 @@ int lsd::assimilation::run_simulation( int until_t )
 	}
 
 	// run remaining pure forecast periods, if any
-	if ( res == 0 && next_t < ref_sim->last_t )
-		if ( ( nstale = dispatch_runs( run_sims ) ) > 0 )
+	if ( res == 0 && next_t < until_t )
+		if ( ( nstale = dispatch_runs( run_sims, until_t, 1, false ) ) > 0 )
 			res = 3;
 
 	if ( res == 0 )
 	{
 		for ( auto & sim : run_sims )
-			if ( sim.eff_t != ref_sim->last_t )
+			if ( sim.eff_t != until_t )
 				res = 4;
 
-		ref_sim->eff_t = ref_sim->last_t;
-		ref_sim->t = ref_sim->last_t + 1;
+		ref_sim->eff_t = until_t;
+		ref_sim->t = until_t + 1;
 	}
 	else
 		ref_sim->eff_t = ref_sim->t = next_t;
@@ -121,6 +122,8 @@ int lsd::assimilation::run_simulation( int until_t )
 
 	if ( ref_sim->liblnk->runtime_end != NULL )
 		ref_sim->liblnk->runtime_end( );
+#else
+	ref_sim->save_results( true );
 #endif
 
 	return res;
@@ -342,7 +345,7 @@ int lsd::simulation::init_new_seq( clock_t & start, char *bar_done, int & perc_d
 		for ( i = 0; i < max_threads; ++i )
 		{
 			workers[ i ].sim = this;
-			workers[ i ].worker_thread = thrT( & worker::cal_worker, & workers[ i ] );
+			workers[ i ].worker_thread = thrT( & lsd::worker::cal_worker, & workers[ i ] );
 		}
 	}
 
@@ -481,7 +484,7 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update, bool 
 /*************************************************************
  SAVE_RESULTS
  *************************************************************/
-void lsd::simulation::save_results( void )
+void lsd::simulation::save_results( bool da_en )
 {
 	char *path_out, *name_out, sep_out[ 2 ], fname[ MAX_PATH_LENGTH ];
 	result *rf;				// pointer for results files (may be zipped or not)
@@ -515,6 +518,9 @@ void lsd::simulation::save_results( void )
 
 	if ( ! no_res )
 	{
+		if ( da_en )
+			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_da_%d_%d.%s", path_out, sep_out, name_out, seed, seed + last_run - 1, docsv ? "csv" : "res" );
+		else
 		if ( ! batch_sequential )
 			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d.%s", path_out, sep_out, name_out, seed - 1, docsv ? "csv" : "res" );
 		else
@@ -537,7 +543,7 @@ void lsd::simulation::save_results( void )
 			plog( "Done\n" );
 	}
 
-	if ( ! no_tot && ( ( liblnk != NULL && liblnk->runtime_run_end != NULL ) || max_runs == 1 ) )
+	if ( ! da_en && ! no_tot && ( ( liblnk != NULL && liblnk->runtime_run_end != NULL ) || max_runs == 1 ) )
 	{
 		if ( ! grand_total || batch_sequential )	// generate partial total files?
 		{
@@ -574,6 +580,8 @@ void lsd::simulation::save_results( void )
 
 	if ( run == last_run )							// last run?
 		strcpyn( res_path, path_out, MAX_PATH_LENGTH );
+		
+	delete [ ] alt_name;
 }
 
 
@@ -658,7 +666,7 @@ void lsd::simulation::set_fast( int level )
 			liblnk->deb_log( false, 0 );
 	}
 
-	if ( fast_mode < 2 && level == 2 )
+	if ( this == sims[ 0 ] && fast_mode < 2 && level == 2 )
 		plog( "\n" );
 
 	fast_mode = level;

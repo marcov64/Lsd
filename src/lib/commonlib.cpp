@@ -110,7 +110,10 @@ int lsd::kill_system( simulation *sim, int id )
 #endif
 	return 1;
 }
+
 #else
+
+#include <csignal>
 
 extern char ** environ;
 
@@ -118,7 +121,7 @@ extern char ** environ;
  INHIBIT_SYSTEM_SLEEP (Unix)
  disables system from entering sleep if left unattended
  *************************************************************/
-int lsd::inhibit_system_sleep( void )
+void lsd::inhibit_system_sleep( void )
 {
 #ifdef __APPLE__
 	CFStringRef name = CFSTR( "Metashape processing" );
@@ -135,7 +138,7 @@ int lsd::inhibit_system_sleep( void )
  RESTORE_SYSTEM_SLEEP (Unix)
  disables system from entering sleep if left unattended
  *************************************************************/
-int lsd::restore_system_sleep( void )
+void lsd::restore_system_sleep( void )
 {
 #ifdef __APPLE__
 	if ( mac_pwr_assert != kIOPMNullAssertionID )
@@ -294,7 +297,7 @@ void lsd::set_exec( const char *path, const char *file )
  LSD_EXIT
  exit LSD
  *************************************************************/
-void lsd::lsd_exit( int v )
+void lsd::lsd_exit( int v, bool clean )
 {
 	fflush( stderr );
 
@@ -305,7 +308,8 @@ void lsd::lsd_exit( int v )
 			delete [ ] sim->workers;
 #endif
 
-	exit( v );
+	if ( ! clean )
+		exit( v );
 }
 
 
@@ -490,6 +494,20 @@ const char *lsd::signal_name( int signum )
 
 
 /*************************************************************
+ DEBUG_BREAK
+ interrupt execution into debugger
+ *************************************************************/
+void lsd::debug_break( void )
+{
+#ifdef _WIN32
+	DebugBreak( );
+#else
+	std::raise( SIGTRAP );
+#endif
+}
+
+
+/*************************************************************
  MSLEEP
  stop execution for a given period
  *************************************************************/
@@ -523,7 +541,8 @@ void lsd::equation::_msleep_( unsigned msec )
  *************************************************************/
 char *lsd::clean_file( const char *filename )
 {
-	char *name, *newname;
+	char *newname;
+	const char *name;
 
 	if ( filename == NULL )
 		return NULL;
