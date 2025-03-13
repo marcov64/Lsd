@@ -30,12 +30,14 @@ else
     OBJ_DIR=$(TMPDIR)/$(TARGET_TERM)/
     EXE_EXT=
     DLL_EXT=.dylib
-    SWITCH_CC_DLL+=-dynamiclib -flat_namespace -Wl,-rpath=$$ORIGIN
+    SWITCH_CC_DLL+=-dynamiclib -flat_namespace
+    SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
   else
     OBJ_DIR=/tmp/$(TARGET_TERM)/
     EXE_EXT=
     DLL_EXT=.so
-    SWITCH_CC_DLL+=-shared -fPIC -Wl,-rpath=$$ORIGIN
+    SWITCH_CC_DLL+=-shared -fPIC
+    SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
   endif
 endif
 

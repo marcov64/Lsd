@@ -27,6 +27,7 @@ TARGET_LSD=LSD
 
 SWITCH_CC=-O3 -march=corei7-avx -Wall -Wextra -Wno-unused-parameter -Wno-implicit-fallthrough
 SWITCH_CC_DLL=
+SWITCH_CC_LNK=
 SWITCH_CC_LMM=-D_LMM_ -D_NP_
 SWITCH_CC_LSD=
 
@@ -67,7 +68,8 @@ else
     PATH_TCLTK_LIB=$(SRC_DIR)LSD.app/Contents/Frameworks
     TCLTK_LIB=-framework Tcl -framework Tk
     SWITCH_CC+=-Wno-unused-result -std=c++14 -mmacosx-version-min=10.10
-    SWITCH_CC_DLL+=-dynamiclib -flat_namespace -Wl,-rpath=$$ORIGIN
+    SWITCH_CC_DLL+=-dynamiclib -flat_namespace
+    SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
   else
     PLAT=linux
     TMP_DIR=/tmp
@@ -77,7 +79,8 @@ else
     PATH_TCLTK_LIB=/usr/lib/tcl$(TCL_VERSION)
     TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
     SWITCH_CC+=-Wno-unused-result
-    SWITCH_CC_DLL+=-shared -fPIC -Wl,-rpath=$$ORIGIN
+    SWITCH_CC_DLL+=-shared -fPIC
+    SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
   endif
 endif
 
@@ -137,7 +140,7 @@ $(MANIF_LMM): $(SRC_DIR)LMM.exe.manifest.rc $(SRC_DIR)LMM.exe.manifest
 
 # LSD dynamic library (removed after executable is built)
 $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT): $(OBJ_DIR_LSD)fun_base.o $(LIB_BASE)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(SWITCH_CC_DLL) $(OBJ_DIR_LSD)fun_base.o -Wl,--whole-archive $(LIB_BASE) -Wl,--no-whole-archive -L$(PATH_LIB) $(LIB) -o $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(OBJ_DIR_LSD)fun_base.o -Wl,--whole-archive $(LIB_BASE) -Wl,--no-whole-archive -L$(PATH_LIB) $(LIB) -o $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
 	$(TOUCH_LSD)
 
 $(OBJ_DIR_LSD)fun_base.o: $(SRC_DIR)fun_base.cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h
@@ -211,7 +214,7 @@ $(OBJ_DIR_LSD)pugixml.o: $(CLIB_DIR)pugixml.cpp $(CLIB_DIR)pugixml.hpp $(CLIB_DI
 
 # LSD executable
 $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT): $(MANIF_LSD) $(LIB_GUI) $(LSDROOT)/lib$(TARGET_LSD)$(DLL_EXT)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(MANIF_LSD) $(LIB_GUI) -L$(LSDROOT) -l$(TARGET_LSD) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT)
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(SWITCH_CC_LNK) $(MANIF_LSD) $(LIB_GUI) -L$(LSDROOT) -l$(TARGET_LSD) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT)
 	$(RM) $(LSDROOT)/lib$(TARGET_LSD)$(DLL_EXT)
 	$(TOUCH_LSD)
 

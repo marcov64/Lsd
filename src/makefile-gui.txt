@@ -25,12 +25,14 @@ else
     PLAT=mac
     TMP_DIR=$(TMPDIR)
     DLL_EXT=.dylib
-    SWITCH_CC_DLL+=-dynamiclib -flat_namespace -Wl,-rpath=$$ORIGIN
+    SWITCH_CC_DLL+=-dynamiclib -flat_namespace
+    SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
   else
     PLAT=linux
     TMP_DIR=/tmp
     DLL_EXT=.so
-    SWITCH_CC_DLL+=-shared -fPIC -Wl,-rpath=$$ORIGIN
+    SWITCH_CC_DLL+=-shared -fPIC
+    SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
   endif
 endif
 
