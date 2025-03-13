@@ -329,8 +329,10 @@ namespace lsd
 	void debug_break( void );
 	void empty_assimilation( void );
 	void exception_handler( int signum, const char *what );
+	void finish_lib( void );
 	void handle_signals( void ( * handler ) ( int signum ) );
 	void inhibit_system_sleep( void );
+	void init_lib( void );
 	void lsd_exit( int v, bool clean = false );
 	void msleep( unsigned msec = 1000 );
 	void plog_master( const char *cm, ... );

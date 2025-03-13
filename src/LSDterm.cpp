@@ -45,6 +45,9 @@ const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd [-s SEED] [-e
  *************************************************************/
 int main( int argn, const char **argv )
 {
+	// initialize LSD library
+	lsd::init_lib( );
+
 	char cwd[ PATH_MAX ];
 	int res = -1;
 	lsd::simulation sim;			// single LSD simulation terminal instance

@@ -34,6 +34,9 @@
  *************************************************************/
 int main( int argn, const char **argv )
 {
+	// initialize LSD library
+	lsd::init_lib( );
+
 	int res = -1;
 
 #ifndef _NT_
@@ -45,7 +48,6 @@ int main( int argn, const char **argv )
 	{
 
 #endif
-
 		// start of GUI load
 		res = gui::load_gui( argv );
 

@@ -1,10 +1,7 @@
-# specify where are the sources of LSD and destination of temporary files
+# LSD file locations
 SRC_DIR=$(LSDROOT)/$(SRC)/
 LIB_DIR=$(SRC_DIR)lib/
 CLIB_DIR=$(SRC_DIR)clib/
-OBJ_DIR=$(TMP)/$(TARGET)/
-INCLUDE=-I$(LSDROOT)/$(SRC) -I$(PATH_TCLTK_HEADER) -I$(PATH_HEADER)
-CUR_DIR:=$(notdir $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST))))))/
 
 # check if LSD source must be recompiled
 ifeq ($(findstring $(strip $(TARGET)),LSD lSD LsD LSd Lsd lSd lsD lsd),)
@@ -14,23 +11,48 @@ else
   PRECOMP=$(findstring $(strip $(PRECOMPILED)),false False FALSE no No NO 0)
 endif
 
+# handle platform-specific stuff
+ifeq ($(OS),Windows_NT)
+  PLAT=windows
+  TMP_DIR=$(TMP)
+  EXE_EXT=.exe
+  DLL_EXT=.dll
+  AR_DIR=$(LSDROOT)/gnu/x86_64-w64-mingw32/bin/
+  MANIF=$(TMP_DIR)/$(TARGET)/LSD.exe.manifest.o
+  SWITCH_CC_DLL+=-shared
+else
+  ifeq ($(shell uname -s),Darwin)
+    PLAT=mac
+    TMP_DIR=$(TMPDIR)
+    DLL_EXT=.dylib
+    SWITCH_CC_DLL+=-dynamiclib -flat_namespace -Wl,-rpath=$$ORIGIN
+  else
+    PLAT=linux
+    TMP_DIR=/tmp
+    DLL_EXT=.so
+    SWITCH_CC_DLL+=-shared -fPIC -Wl,-rpath=$$ORIGIN
+  endif
+endif
+
+# additional OS-specific locations
+INCLUDE=-I$(LSDROOT)/$(SRC) -I$(PATH_TCLTK_HEADER) -I$(PATH_HEADER)
+OBJ_DIR=$(TMP_DIR)/$(TARGET)/
+CUR_DIR:=$(notdir $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST))))))/
+
 # select static libraries to link
 ifeq ($(PRECOMP),)
-  LIB_GUI=$(SRC_DIR)LSDgui-windows.a
-  LIB_BASE=$(SRC_DIR)LSDbase-windows.a
+  LIB_GUI=$(SRC_DIR)LSDgui-$(PLAT).a
+  LIB_BASE=$(SRC_DIR)LSDbase-$(PLAT).a
 else
-  LIB_GUI=$(OBJ_DIR)LSDgui-windows.a
-  LIB_BASE=$(OBJ_DIR)LSDbase-windows.a
+  LIB_GUI=$(OBJ_DIR)LSDgui-$(PLAT).a
+  LIB_BASE=$(OBJ_DIR)LSDbase-$(PLAT).a
 endif
 
 # set general dependencies
-DEP_GUI=$(SRC_DIR)LSD.h
-DEP_LIB=$(LIB_DIR)libLSD.h
+DEP_LIB=$(LIB_DIR)libLSD.h $(SRC_DIR)makefile-gui.txt
+DEP_GUI=$(DEP_LIB) $(SRC_DIR)LSD.h
 
-# OS commands and definitions
-EXE_EXT=.exe
-DLL_EXT=.dll
-AR_DIR=$(LSDROOT)/gnu/x86_64-w64-mingw32/bin/
+# OS commands
 AR=$(AR_DIR)ar$(EXE_EXT) -rcs
 RM=@rm$(EXE_EXT) -rf
 MKDIR=@mkdir$(EXE_EXT) -p
@@ -46,11 +68,11 @@ endif
 
 # dynamic library
 lib$(TARGET)$(DLL_EXT): $(OBJ_DIR)$(CUR_DIR)$(FUN).o $(LIB_BASE)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(OBJ_DIR)$(CUR_DIR)$(FUN).o -Wl,--whole-archive $(LIB_BASE) -Wl,--no-whole-archive -L$(PATH_LIB) $(LIB) -shared -o lib$(TARGET)$(DLL_EXT)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(OBJ_DIR)$(CUR_DIR)$(FUN).o -Wl,--whole-archive $(LIB_BASE) -Wl,--no-whole-archive -L$(PATH_LIB) $(LIB) -o lib$(TARGET)$(DLL_EXT)
 
 $(OBJ_DIR)$(CUR_DIR)$(FUN).o: $(FUN).cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(INCLUDE) -c $(FUN).cpp -o $(OBJ_DIR)$(CUR_DIR)$(FUN).o
+	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(FUN).cpp -o $(OBJ_DIR)$(CUR_DIR)$(FUN).o
 
 ifneq ($(PRECOMP),)
 # base static library for dynamic library
@@ -60,67 +82,67 @@ $(LIB_BASE): $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OB
 # base static library modules
 $(OBJ_DIR)libmain.o: $(LIB_DIR)libmain.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)libmain.cpp -o $(OBJ_DIR)libmain.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(LIB_DIR)libmain.cpp -o $(OBJ_DIR)libmain.o
 
 $(OBJ_DIR)assimlib.o: $(LIB_DIR)assimlib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)assimlib.cpp -o $(OBJ_DIR)assimlib.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(LIB_DIR)assimlib.cpp -o $(OBJ_DIR)assimlib.o
 
 $(OBJ_DIR)commonlib.o: $(LIB_DIR)commonlib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)commonlib.cpp -o $(OBJ_DIR)commonlib.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(LIB_DIR)commonlib.cpp -o $(OBJ_DIR)commonlib.o
 
 $(OBJ_DIR)description.o: $(LIB_DIR)description.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)description.cpp -o $(OBJ_DIR)description.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(LIB_DIR)description.cpp -o $(OBJ_DIR)description.o
 
 $(OBJ_DIR)filelib.o: $(LIB_DIR)filelib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)filelib.cpp -o $(OBJ_DIR)filelib.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(LIB_DIR)filelib.cpp -o $(OBJ_DIR)filelib.o
 
 $(OBJ_DIR)latticelib.o: $(LIB_DIR)latticelib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)latticelib.cpp -o $(OBJ_DIR)latticelib.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(LIB_DIR)latticelib.cpp -o $(OBJ_DIR)latticelib.o
 
 $(OBJ_DIR)math.o: $(LIB_DIR)math.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)math.cpp -o $(OBJ_DIR)math.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(LIB_DIR)math.cpp -o $(OBJ_DIR)math.o
 
 $(OBJ_DIR)nets.o: $(LIB_DIR)nets.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)nets.cpp -o $(OBJ_DIR)nets.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(LIB_DIR)nets.cpp -o $(OBJ_DIR)nets.o
 
 $(OBJ_DIR)object.o: $(LIB_DIR)object.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)object.cpp -o $(OBJ_DIR)object.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(LIB_DIR)object.cpp -o $(OBJ_DIR)object.o
 
 $(OBJ_DIR)parallel.o: $(LIB_DIR)parallel.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)parallel.cpp -o $(OBJ_DIR)parallel.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(LIB_DIR)parallel.cpp -o $(OBJ_DIR)parallel.o
 
 $(OBJ_DIR)run.o: $(LIB_DIR)run.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)run.cpp -o $(OBJ_DIR)run.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(LIB_DIR)run.cpp -o $(OBJ_DIR)run.o
 
 $(OBJ_DIR)stattables.o: $(LIB_DIR)stattables.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)stattables.cpp -o $(OBJ_DIR)stattables.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(LIB_DIR)stattables.cpp -o $(OBJ_DIR)stattables.o
 
 $(OBJ_DIR)utillib.o: $(LIB_DIR)utillib.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)utillib.cpp -o $(OBJ_DIR)utillib.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(LIB_DIR)utillib.cpp -o $(OBJ_DIR)utillib.o
 
 $(OBJ_DIR)variab.o: $(LIB_DIR)variab.cpp $(DEP_LIB)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(LIB_DIR)variab.cpp -o $(OBJ_DIR)variab.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(LIB_DIR)variab.cpp -o $(OBJ_DIR)variab.o
 
 $(OBJ_DIR)pugixml.o: $(CLIB_DIR)pugixml.cpp $(CLIB_DIR)pugixml.hpp $(CLIB_DIR)pugiconfig.hpp
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(CLIB_DIR)pugixml.cpp -o $(OBJ_DIR)pugixml.o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(CLIB_DIR)pugixml.cpp -o $(OBJ_DIR)pugixml.o
 
 # executable
-$(TARGET)$(EXE_EXT): $(OBJ_DIR)LSD.exe.manifest.o $(LIB_GUI) lib$(TARGET)$(DLL_EXT)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(OBJ_DIR)LSD.exe.manifest.o $(LIB_GUI) -L. -l$(TARGET) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(TARGET)$(EXE_EXT)
+$(TARGET)$(EXE_EXT): $(MANIF) $(LIB_GUI) lib$(TARGET)$(DLL_EXT)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(MANIF) $(LIB_GUI) -L. -l$(TARGET) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(TARGET)$(EXE_EXT)
 
 # executable static library
 $(LIB_GUI): $(OBJ_DIR)LSD.o $(OBJ_DIR)LSDmain.o $(OBJ_DIR)analysis.o $(OBJ_DIR)browser.o $(OBJ_DIR)common.o $(OBJ_DIR)debug.o $(OBJ_DIR)draw.o $(OBJ_DIR)edit.o $(OBJ_DIR)edit_dat.o $(OBJ_DIR)file.o $(OBJ_DIR)interf.o $(OBJ_DIR)lattice.o $(OBJ_DIR)log.o $(OBJ_DIR)report.o $(OBJ_DIR)runtime.o $(OBJ_DIR)sensitivity.o $(OBJ_DIR)set_all.o $(OBJ_DIR)show_eq.o $(OBJ_DIR)util.o
@@ -203,9 +225,9 @@ $(OBJ_DIR)util.o: $(SRC_DIR)util.cpp $(DEP_GUI)
 	$(MKDIR) $(@D)
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(INCLUDE) -c $(SRC_DIR)util.cpp -o $(OBJ_DIR)util.o
 
-$(OBJ_DIR)LSD.exe.manifest.o: $(SRC_DIR)LSD.exe.manifest.rc $(SRC_DIR)LSD.exe.manifest
+$(MANIF): $(SRC_DIR)LSD.exe.manifest.rc $(SRC_DIR)LSD.exe.manifest
 	$(MKDIR) $(@D)
-	$(WRC) -i $(SRC_DIR)LSD.exe.manifest.rc -o $(OBJ_DIR)LSD.exe.manifest.o $(INCLUDE)
+	$(WRC) -i $(SRC_DIR)LSD.exe.manifest.rc -o $(MANIF) $(INCLUDE)
 endif
 
 # remove compiled files

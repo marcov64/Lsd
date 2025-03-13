@@ -70,11 +70,12 @@ namespace lsd
 
 
 /*************************************************************
- LIB CONSTRUCTOR
+ INIT_LIB
  *************************************************************/
-void __attribute__( ( constructor ) ) lib_constructor( )
+void lsd::init_lib( void )
 {
 	lsd::main_thread = std::this_thread::get_id( );
+
 	lsd::exec_file = new char[ strlen( "" ) + 1 ];
 	lsd::exec_path = new char[ strlen( "" ) + 1 ];
 	lsd::lib_file = new char[ strlen( "" ) + 1 ];
@@ -92,9 +93,9 @@ void __attribute__( ( constructor ) ) lib_constructor( )
 
 
 /*************************************************************
- LIB DESTRUCTOR
+ FINISH_LIB
  *************************************************************/
-void __attribute__( ( destructor ) ) lib_destructor( )
+void lsd::finish_lib( void )
 {
 	delete [ ] lsd::exec_file;
 	delete [ ] lsd::exec_path;

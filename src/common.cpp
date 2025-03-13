@@ -435,7 +435,7 @@ char *gui::search_lsdroot( char *path, int pathSz )
 {
 	bool miss;
 	const char *files[ ] = LSD_MIN_FILES;
-	char *file, cur_dir[ PATH_MAX ], last_dir[ PATH_MAX ], orig_dir[ PATH_MAX ], src_dir[ PATH_MAX ], *found = NULL;
+	char *file, cur_dir[ PATH_MAX ], last_dir[ PATH_MAX ], orig_dir[ PATH_MAX ], src_dir[ 2 * PATH_MAX ], *found = NULL;
 	int i, st;
 	struct stat info;
 
@@ -452,7 +452,7 @@ char *gui::search_lsdroot( char *path, int pathSz )
 		if ( getcwd( cur_dir, PATH_MAX ) == NULL || ! strcmp( lsd::clean_path( cur_dir ), last_dir ) )
 			goto end;
 
-		snprintf( src_dir, PATH_MAX, "%s/%s", cur_dir, DEFAULT_SRC_DIR );
+		snprintf( src_dir, 2 * PATH_MAX, "%s/%s", cur_dir, DEFAULT_SRC_DIR );
 		for ( i = 0, miss = false; i < LSD_MIN_NUM; ++i )
 		{
 			file = new char[ strlen( src_dir ) + strlen( files[ i ] ) + 2 ];
@@ -2266,7 +2266,7 @@ const char *gui::get_target_name( char *str, int str_sz, bool term )
 	sscanf( str + 7, "%994s", buf );
 	lsd::strcpyn( buf1, buf, MAX_PATH_LENGTH );
 
-	if ( strcmp( strupr( buf1 ), "LSD" ) == 0 )
+	if ( strcmp( lsd::strupr( buf1 ), "LSD" ) == 0 )
 		strcpy( buf, "LSD" );			// LSD default target is case insensitive
 
 	snprintf( str, str_sz, "%s%s", buf, platform == _WIN_ ? ".exe" : "" );
@@ -2296,7 +2296,7 @@ bool gui::get_precompiled_flag( const char *exec, bool term )
 		lsd::strcpyn( buf, exec, MAX_PATH_LENGTH );
 
 		if ( platform == _WIN_ )
-			strupr( buf );
+			lsd::strupr( buf );
 
 		if ( strcmp( buf, platform == _WIN_ ? "LSD.EXE" : "LSD" ) != 0 )
 			deftarg = false;
@@ -2317,7 +2317,7 @@ bool gui::get_precompiled_flag( const char *exec, bool term )
 		return precomp;
 
 	sscanf( buf + 12, "%989s", buf1 );
-	strupr( buf1 );
+	lsd::strupr( buf1 );
 
 	if ( strncmp( buf1, "FALSE", MAX_PATH_LENGTH ) == 0 ||
 		 strncmp( buf1, "NO", MAX_PATH_LENGTH ) == 0 ||
@@ -2397,14 +2397,14 @@ void gui::make_makefile( bool term )
 		load_model_options( get_str( "fapp" ) );
 	}
 
-	cmd( "set f [ open \"$lsd_root/$lsd_src/makefile-%s.txt\" r ]", term ? "term" : get_str( "CurPlatform" ) );
+	cmd( "set f [ open \"$lsd_root/$lsd_src/makefile-%s.txt\" r ]", term ? "term" : "gui" );
 	cmd( "set b [ string trim [ read $f ] ]" );
 	cmd( "close $f" );
 
 	cmd( "set f [ open \"$model_dir/makefile%s\" w ]", term ? "" : ".gui" );
 	cmd( "puts $f \"# Model compilation options\n\n%s\n\"", model_make );
 	cmd( "puts $f {# System compilation options\n\n%s\n}", system_make );
-	cmd( "puts $f \"# Body of makefile%s (from makefile_%s.txt)\n\n$b\"", term ? "" : ".gui", term ? "term" : get_str( "CurPlatform" ) );
+	cmd( "puts $f \"# Body of makefile%s (from makefile-%s.txt)\n\n$b\"", term ? "" : ".gui", term ? "term" : "gui" );
 	cmd( "close $f" );
 }
 
@@ -2569,7 +2569,7 @@ bool gui::compile_run( int run_mode, bool term )
 					switch ( platform )
 					{
 						case _LIN_:
-							cmd( "while { [ catch { exec -- %s/%s & } result ] && $n > 0 } { incr n -1; after 50 }", precompiled ? lsd::root_lsd : ".", str );
+							cmd( "while { [ catch { exec -- sh -c \"LD_LIBRARY_PATH=[ pwd ] %s/%s\" & } result ] && $n > 0 } { incr n -1; after 50 }", precompiled ? lsd::root_lsd : ".", str );
 							break;
 
 						case _MAC_:

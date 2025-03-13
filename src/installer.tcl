@@ -49,7 +49,7 @@ set linuxPmCmd(urp) "urpmi"
 set linuxPmCmd(apk) "apk add"
 set linuxDefPm "apt"
 
-set linuxMkFile "makefile-linux.txt"
+set guiMkFile "makefile-gui.txt"
 set linuxOptFile "system_options-linux.txt"
 set notInstall [ list .git/* installer/* lwi/* Rpkg/* Manual/src/* ]
 
@@ -806,12 +806,12 @@ if { [ string equal $CurPlatform linux ] && [ llength $linuxPkgMiss ] > 0 } {
 if [ string equal $CurPlatform linux ] {
 
 	if { [ llength $pathInclude ] > 1 || [ llength $pathLib ] > 1 } {
-		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Complex include/lib paths" -detail "Your computer has a complex setup of multiple include and lib file paths which cannot be configured automatically.\n\nYou may have to manually adjust the correct paths to the include/lib files in LSD System Options menu and in '$linuxMkFile' before compiling LMM."
-		lappend issues "include/lib paths not configured (nano $linuxMkFile)"
+		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Complex include/lib paths" -detail "Your computer has a complex setup of multiple include and lib file paths which cannot be configured automatically.\n\nYou may have to manually adjust the correct paths to the include/lib files in LSD System Options menu and in '$guiMkFile' before compiling LMM."
+		lappend issues "include/lib paths not configured (nano $guiMkFile)"
 	}
 
-	# update include/libs paths in makefile-linux and system_options-linux.txt
-	set mkFile [ open "$LsdRoot/$LsdSrc/$linuxMkFile" r ]
+	# update include/libs paths in makefile-gui and system_options-linux.txt
+	set mkFile [ open "$LsdRoot/$LsdSrc/$guiMkFile" r ]
 	set soFile [ open "$LsdRoot/$LsdSrc/$linuxOptFile" r ]
 	set mk [ read $mkFile ]
 	set so [ read $soFile ]
@@ -828,7 +828,7 @@ if [ string equal $CurPlatform linux ] {
 		set so [ sed "s|[ lindex $linuxLib 0 ]|[ lindex $pathLib 0 ]" $so ]
 	}
 
-	set mkFile [ open "$LsdRoot/$LsdSrc/$linuxMkFile" w ]
+	set mkFile [ open "$LsdRoot/$LsdSrc/$guiMkFile" w ]
 	set soFile [ open "$LsdRoot/$LsdSrc/$linuxOptFile" w ]
 	puts -nonewline $mkFile $mk
 	puts -nonewline $soFile $so
@@ -853,8 +853,8 @@ if [ string equal $CurPlatform linux ] {
 	}
 
 	if { ! $found } {
-		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Cannot recompile LMM" -detail "The detection of Linux distribution failed and LSD Model Manager (LMM) was not recompiled for your computer.\n\nYou may try to use the installed precompiled LMM or do a manual compilation following the steps described in 'Readme.txt'.\nYou may have to adjust the paths to the include/lib files in '$linuxMkFile'."
-		lappend issues "Cannot recompile LMM (make -f $linuxMkFile)"
+		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Cannot recompile LMM" -detail "The detection of Linux distribution failed and LSD Model Manager (LMM) was not recompiled for your computer.\n\nYou may try to use the installed precompiled LMM or do a manual compilation following the steps described in 'Readme.txt'.\nYou may have to adjust the paths to the include/lib files in '$guiMkFile'."
+		lappend issues "Cannot recompile LMM (make -f $guiMkFile)"
 
 	} elseif { ! [ string equal $pm $linuxDefPm ] } {
 
@@ -870,7 +870,7 @@ if [ string equal $CurPlatform linux ] {
 
 		if { $res } {
 			ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error compiling LMM" -detail "The compilation of LSD Model Manager (LMM) failed ($result).\n\nYou may try to do a manual compilation following the steps described in 'Readme.txt' and also may have to."
-			lappend issues "Cannot recompile LMM (make -f $linuxMkFile)"
+			lappend issues "Cannot recompile LMM (make -f $guiMkFile)"
 			file copy -force "/tmp/LMM" "/$LsdRoot/"
 		} else {
 			file delete -force "/tmp/LMM"

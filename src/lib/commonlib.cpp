@@ -306,6 +306,9 @@ void lsd::lsd_exit( int v, bool clean )
 	for ( auto sim : sims )
 		if ( sim->worker_errors( ) == 0 )
 			delete [ ] sim->workers;
+
+	// library destructor
+	finish_lib( );
 #endif
 
 	if ( ! clean )

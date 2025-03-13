@@ -90,7 +90,7 @@ int gui::load_gui( const char **argv )
 			str = new char[ strlen( argv[ i + 1 ] ) + 1 ];
 			strcpy( sim.conf_name, argv[ i + 1 ] );
 			strcpy( str, argv[ i + 1 ] );
-			strupr( str );
+			lsd::strupr( str );
 
 			if ( strlen( str ) > 0 && strstr( str, ".LSD" ) != NULL )
 				sim.conf_name[ strstr( str, ".LSD" ) - str ] = '\0';
