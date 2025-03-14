@@ -44,6 +44,7 @@ namespace gui
 	bool redrawStruc;				// control for redrawing model structure window
 	bool redrawReq = false;			// flag for asynchronous window redraw request
 	bool scrollB = true;			// scroll box state in current runtime plot
+	bool tcl_exit = false;			// control for tcl being destroyed
 	bool tcl_ok = false;			// control for tcl ready to operate
 	bool tk_ok = false;				// control for tk ready to operate
 	bool unsavedChange = false;		// control unsaved changes in configuration

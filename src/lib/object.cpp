@@ -413,9 +413,9 @@ void lsd::object::update( bool recurse, bool user )
 			if ( ! user && cv->plot && sim->liblnk != NULL && sim->liblnk->plot_runtime != NULL )
 			{
 				if ( cv->param == 1 || cv->num_lag == 0 )
-					sim->liblnk->plot_runtime( sim->t, cv->val[ 0 ], NAN );
+					sim->liblnk->plot_runtime( NULL, sim->t, cv->val[ 0 ], NAN );
 				else
-					sim->liblnk->plot_runtime( sim->t, cv->val[ 0 ], cv->val[ 1 ] );
+					sim->liblnk->plot_runtime( NULL, sim->t, cv->val[ 0 ], cv->val[ 1 ] );
 			}
 #endif
 		}

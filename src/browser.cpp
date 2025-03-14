@@ -113,6 +113,7 @@ int gui::load_gui( const char **argv )
 		sim.max_threads = j;
 
 	// create Tcl commands that call a C++ function
+	Tcl_CreateCommand( interp, "lsd_exit_gui", Tcl_lsd_exit_gui, NULL, NULL );
 	Tcl_CreateCommand( interp, "abort_run_threads", Tcl_abort_run_threads, NULL, NULL );
 	Tcl_CreateCommand( interp, "discard_change", Tcl_discard_change, NULL, NULL );
 	Tcl_CreateCommand( interp, "get_obj_conf", Tcl_get_obj_conf, NULL, NULL );
@@ -1254,7 +1255,7 @@ int gui::browse( lsd::object *r )
 		cmd( "pack .l -fill both -expand yes" );
 	}
 
-	cmd( "settop . no { if { [ discard_change ] eq \"ok\" && [ abort_run_threads ] eq \"ok\" } { exit } } no yes" );
+	cmd( "settop . no { if { [ discard_change ] eq \"ok\" && [ abort_run_threads ] eq \"ok\" } { lsd_exit_gui 0 } } no yes" );
 
 	if ( redrawStruc )
 	{

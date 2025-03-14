@@ -75,7 +75,10 @@ lsd::object *gui::operate( lsd::object *r )
 		case 11:
 
 			if ( discard_change( ) && abort_run_threads( ) )
+			{
 				lsd_exit_gui( 0 );
+				lsd::lsd_exit( 0 );
+			}
 
 		break;
 
@@ -2146,7 +2149,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			if ( ( i = ca->dataentry( ) ) == 2 )
 				da.ass_elem.erase( ca );
-			
+
 			if ( i == 0 || ( i == 2 && exist ) )
 			{
 				unsavedChange = true;			// signal unsaved change

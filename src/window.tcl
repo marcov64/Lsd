@@ -1178,7 +1178,7 @@ proc setglobkeys { w { chkChg 1 } } {
 	if { $chkChg } {
 		bind $w <Control-Alt-x> {
 			if { [ discard_change ] eq \"ok\" && [ abort_run_threads ] eq \"ok\" } {
-				exit
+				lsd_exit_gui 0
 			}
 			break
 		}
@@ -1187,6 +1187,7 @@ proc setglobkeys { w { chkChg 1 } } {
 		bind $w <Control-Alt-x> { exit }
 		bind $w <Control-Alt-X> { event generate . <Control-Alt-x> }
 	}
+
 	# open Tcl/Tk console
 	if { $conWnd } {
 		bind $w <Control-Alt-j> {

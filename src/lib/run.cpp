@@ -36,7 +36,7 @@
  *************************************************************/
 int lsd::assimilation::run_simulation( int until_t )
 {
-	clock_t start, last_update;
+	clock_t start, last_update = clock( );
 	int nstale, res = 0;
 
 	// initialize data assimilation data structures
@@ -189,7 +189,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run, bool da_en )
 {
 	int res = 0;
 	static char bar_done[ 2 * BAR_DONE_SIZE ];
-	static clock_t start_mc, start_run, last_update;
+	static clock_t start_mc, start_run, last_update = clock( );
 	static int perc_done, last_done;
 
 	if ( ( until_run > 0 && until_run < run ) || ( until_t > 0 && until_t <= t &&

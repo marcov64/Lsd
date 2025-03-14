@@ -1700,6 +1700,10 @@ void gui::cmd_backend( const char *cm, va_list arg )
 	static int reqsz, sz;
 	static va_list argcpy;
 
+	// LSD is exiting, do nothing
+	if ( tcl_exit )
+		return;
+
 #ifndef _LMM_
 	// abort if not running in main LSD thread
 	if ( std::this_thread::get_id( ) != lsd::main_thread )
@@ -1879,7 +1883,7 @@ int gui::Tcl_discard_change( ClientData cdata, Tcl_Interp *interp, int argc, con
  LSD_EXIT_GUI (DLL WRAPPER)
  exit LSD after the GUI is launched
  *************************************************************/
-void gui::lsd_exit_gui( int v )
+void gui::lsd_exit_gui( int v, bool clean )
 {
 	if ( interp != NULL )
 	{
@@ -1893,10 +1897,36 @@ void gui::lsd_exit_gui( int v )
 		if ( tcl_ok )
 			Tcl_Finalize( );
 
+		tcl_exit = true;
 		tcl_ok = false;
 	}
 
-	lsd::lsd_exit( v );
+	if ( ! clean )
+		lsd::lsd_exit( v );
+}
+
+
+/*************************************************************
+ TCL_LSD_EXIT_GUI
+ Entry point function for access from the Tcl interpreter
+ *************************************************************/
+int gui::Tcl_lsd_exit_gui( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] )
+{
+	int v, clean;
+
+	if ( argc != 2 && argc != 3 )	// require 1/2 parameters: exit_value, and clean flag
+		return TCL_ERROR;
+
+	if ( argv[ 1 ] == NULL || sscanf( argv[ 1 ], "%d", & v ) != 1 )
+		return TCL_ERROR;
+
+	if ( argc == 3 && argv[ 2 ] != NULL && sscanf( argv[ 2 ], "%d", & clean ) == 1 )
+		lsd_exit_gui( v, clean );
+	else
+		lsd_exit_gui( v );
+
+	Tcl_SetResult( interp, ( char * ) "ok", TCL_VOLATILE );
+	return TCL_OK;
 }
 
 

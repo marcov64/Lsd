@@ -32,8 +32,9 @@
  - void init_plot( int i );
  create the canvas for the plot, the lines, button, labels, etc.
 
- - void plot_runtime( double cur_val )
- the function used run time to plot the value of this variable
+ - void plot_runtime( int *idx, int t, double cur_val,
+ double last_val )
+ the function used run time to plot the value of variable
  *************************************************************/
 
 #include "LSD.h"
@@ -386,13 +387,16 @@ void gui::init_plot( void )
 /*************************************************************
  PLOT_RUNTIME
  *************************************************************/
-void gui::plot_runtime( int t, double cur_val, double last_val )
+void gui::plot_runtime( int *idx, int t, double cur_val, double last_val )
 {
 	bool relabel = false;
 	int height, p_digits;
 	double value, scale, zero_lim, ymed;
 
-	if ( ! exists_var( "activeplot" ) || ! exists_window( "$activeplot.c.c.cn" ) || n_plot_var == 0 || cur_plt_var > n_plot_var || cur_plt_var > 1000 )
+	if ( idx == NULL )
+		idx = & cur_plt_var;
+
+	if ( ! exists_var( "activeplot" ) || ! exists_window( "$activeplot.c.c.cn" ) || n_plot_var == 0 || *idx >= n_plot_var || *idx > 1000 )
 		return;
 
 	if ( ! std::isfinite( cur_val ) )
@@ -457,23 +461,23 @@ void gui::plot_runtime( int t, double cur_val, double last_val )
 
 	if ( std::isfinite( last_val ) )
 	{
-		prev_t[ cur_plt_var ] = t - 1;
-		prev_val[ cur_plt_var ] = last_val;
+		prev_t[ *idx ] = t - 1;
+		prev_val[ *idx ] = last_val;
 	}
 
-	if ( std::isfinite( cur_val ) && prev_t[ cur_plt_var ] == t - 1 && std::isfinite( prev_val[ cur_plt_var ] ) )
+	if ( std::isfinite( cur_val ) && prev_t[ *idx ] == t - 1 && std::isfinite( prev_val[ *idx ] ) )
 	{
 		cmd( "set x1 [ expr { floor( $cvhmarginR + %d * $plot_step ) } ]", t );
 		cmd( "set x2 [ expr { floor( $cvhmarginR + %d * $plot_step ) } ]", t - 1 );
 		cmd( "set y1 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", cur_val, ymin, ymax, ymin );
-		cmd( "set y2 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", prev_val[ cur_plt_var ], ymin, ymax, ymin );
+		cmd( "set y2 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", prev_val[ *idx ], ymin, ymax, ymin );
 
-		cmd( "$activeplot.c.c.cn create line $x2 $y2 $x1 $y1 -tag punto -fill $c%d", cur_plt_var );
+		cmd( "$activeplot.c.c.cn create line $x2 $y2 $x1 $y1 -tag punto -fill $c%d", *idx );
 	}
 
-	prev_t[ cur_plt_var ] = t;
-	prev_val[ cur_plt_var ] = cur_val;
-	++cur_plt_var;
+	prev_t[ *idx ] = t;
+	prev_val[ *idx ] = cur_val;
+	++( *idx );
 }
 
 

@@ -581,18 +581,21 @@ void lsd::assimilation::update_runtime_plot( int cur_t )
 	if ( ref_sim->liblnk == NULL || ref_sim->liblnk->plot_runtime == NULL )
 		return;
 
+	int i = 0;
 	for ( auto & ca : ass_elem )
 		if ( ca.plot )
 			// plot up to just the initial instances
-			for ( auto i = 0; i <= ca.inst_ini; ++i )
+			for ( auto j = 0; j <= ca.inst_ini; ++j, ++i )
 			{
-				if ( i >= ( int ) ca.da_data.size( ) )
-					ref_sim->liblnk->plot_runtime( cur_t, NAN, NAN );
+				int idx = i;		// multiple values of same variable
+
+				if ( j >= ( int ) ca.da_data.size( ) )
+					ref_sim->liblnk->plot_runtime( & idx, cur_t, NAN, NAN );
 				else
-					if ( ca.param == 1 || cur_t <= ca.da_data[ i ].start )
-						ref_sim->liblnk->plot_runtime( cur_t, ca.da_data[ i ].anl[ cur_t - ca.da_data[ i ].start ], NAN );
+					if ( ca.param == 1 || cur_t <= ca.da_data[ j ].start )
+						ref_sim->liblnk->plot_runtime( & idx, cur_t, ca.da_data[ j ].anl[ cur_t - ca.da_data[ j ].start ], NAN );
 					else
-						ref_sim->liblnk->plot_runtime( cur_t, ca.da_data[ i ].anl[ cur_t - ca.da_data[ i ].start ], ca.da_data[ i ].anl[ cur_t - ca.da_data[ i ].start - 1 ] );
+						ref_sim->liblnk->plot_runtime( & idx, cur_t, ca.da_data[ j ].anl[ cur_t - ca.da_data[ j ].start ], ca.da_data[ j ].anl[ cur_t - ca.da_data[ j ].start - 1 ] );
 			}
 }
 

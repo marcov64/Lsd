@@ -69,7 +69,7 @@ int main( int argn, const char **argv )
 
 #endif
 
-	lsd::lsd_exit( res );
+	lsd::lsd_exit( res, true );
 
 	return res;
 }

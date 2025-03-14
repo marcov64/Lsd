@@ -275,6 +275,7 @@ namespace gui
 	extern bool redrawRoot;				// control for redrawing root window (.)
 	extern bool redrawStruc;			// control for redrawing model structure window
 	extern bool scrollB;				// scroll box state in current runtime plot
+	extern bool tcl_exit;				// control for tcl being destroyed
 	extern bool tcl_ok;					// control for tcl ready to operate
 	extern bool tk_ok;					// control for tk_ready to operate
 	extern bool unsavedChange;			// control unsaved changes in configuration
@@ -425,6 +426,7 @@ namespace gui
 	int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_get_var_descr( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_log_tcl_error( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
+	int Tcl_lsd_exit_gui( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_set_c_var( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_set_group_setting( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
 	int Tcl_set_model_setting( ClientData cdata, Tcl_Interp *interp, int argc, const char *argv[ ] );
@@ -470,7 +472,7 @@ namespace gui
 	void insert_data_file( bool gz, stp_vecT & file_stores, bool keep_vars );
 	void load_lsd_options( void );
 	void log_tcl_error( bool show, const char *cm, const char *message, ... );
-	void lsd_exit_gui( int v );
+	void lsd_exit_gui( int v, bool clean = false );
 	void make_makefile( bool term = false );
 	void mat_del( double **a, int m );
 	void plog( const char *msg, ... );
@@ -486,7 +488,7 @@ namespace gui
 	void plot_gnu( void );
 	void plot_lattice( void );
 	void plot_phase_diagram( void );
-	void plot_runtime( int t, double cur_val, double last_val );
+	void plot_runtime( int *idx, int t, double cur_val, double last_val );
 	void plot_tseries( void );
 	void prepare_plot( int id_sim, bool da_en = false );
 	void print_stack( void );

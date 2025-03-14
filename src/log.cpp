@@ -50,7 +50,7 @@ void gui::create_logwindow( void )
 	if ( ! tk_ok )
 		lsd_exit_gui( 7 );
 
-	cmd( "newtop .log \"LSD Log\" { if { [ discard_change ] eq \"ok\" && [ abort_run_threads ] eq \"ok\" } { exit } } \"\"" );
+	cmd( "newtop .log \"LSD Log\" { if { [ discard_change ] eq \"ok\" && [ abort_run_threads ] eq \"ok\" } { lsd_exit_gui 0 } } \"\"" );
 
 	cmd( "set w .log.text" );
 	cmd( "ttk::frame $w" );

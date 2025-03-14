@@ -1038,7 +1038,7 @@ class lsd::dlliblinkage					// callback references for dynamic link library
 		void ( *init_lattice_helper ) ( double pixW, double pixH, double nrow, double ncol, int init_color ) = NULL;
 		void ( *log_tcl_error ) ( bool show, const char *cm, const char *message, ... ) = NULL;
 		void ( *plog_backend ) ( const char *cm, const char *tag, va_list arg ) = NULL;
-		void ( *plot_runtime ) ( int t, double cur_val, double last_val ) = NULL;
+		void ( *plot_runtime ) ( int *idx, int t, double cur_val, double last_val ) = NULL;
 		void ( *print_stack ) ( void ) = NULL;
 		void ( *progress_bar ) ( int cur_t, clock_t & last_update ) = NULL;
 		void ( *runtime_end ) ( void ) = NULL;

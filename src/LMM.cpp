@@ -80,6 +80,7 @@ namespace lsd
 // GUI global variable dummies
 namespace gui
 {
+	bool tcl_exit = false;				// control for tcl being destroyed
 	bool tcl_ok = false;				// tcl ready state
 	bool tk_ok = false;					// control for tk_ready to operate
 	char *model_make = NULL;			// model makefile options
@@ -146,7 +147,7 @@ int main( int argn, const char **argv )
 
 #endif
 
-	lsd::lsd_exit( res );
+	lsd::lsd_exit( res, true );
 
 	return res;
 }
@@ -190,6 +191,7 @@ int modman( int argn, const char **argv )
 	}
 
 	// create Tcl commands that call a C++ function
+	Tcl_CreateCommand( gui::interp, "lsd_exit_gui", gui::Tcl_lsd_exit_gui, NULL, NULL );
 	Tcl_CreateCommand( gui::interp, "discard_change", gui::Tcl_discard_change, NULL, NULL );
 	Tcl_CreateCommand( gui::interp, "get_group_setting", gui::Tcl_get_group_setting, NULL, NULL );
 	Tcl_CreateCommand( gui::interp, "get_model_setting", gui::Tcl_get_model_setting, NULL, NULL );
@@ -854,6 +856,8 @@ int modman( int argn, const char **argv )
 
 		if ( choice == 19 )
 			cmd( "catch { exec -- %s/%s & }", lsd::exec_path, lsd::exec_file );
+
+		gui::lsd_exit_gui( 0, true );
 
 		return 0;
 	}
