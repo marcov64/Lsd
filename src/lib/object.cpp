@@ -1937,11 +1937,10 @@ void lsd::simulation::empty_cemetery( void )
 {
 	variable *cv, *cv1;
 
-	for ( cv = cemetery; cv !=NULL ; )
+	for ( cv = cemetery; cv !=NULL; cv = cv1 )
 	{
 		cv1 = cv->next;
 		cv->empty( );
-		cv = cv1;
 	}
 
 	cemetery = last_cemetery = NULL;

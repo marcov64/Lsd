@@ -1053,10 +1053,10 @@ strT lsd::to_string( const char *fmt, ... )
 	va_list argptr;
 
 	va_start( argptr, fmt );
-
-    auto sz = vsnprintf( nullptr, 0, fmt, argptr );
+    auto sz = vsnprintf( NULL, 0, fmt, argptr ) + 1;
     strT out( sz, '\0');
-    vsprintf( & out[ 0 ], fmt, argptr );
+	va_start( argptr, fmt );
+    vsnprintf( & out[ 0 ], sz, fmt, argptr );
 
 	va_end( argptr );
 

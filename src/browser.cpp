@@ -64,8 +64,11 @@ namespace gui
 int gui::load_gui( const char **argv )
 {
 	char *str;
-	int i, j = 0, k = 0;
+	int i, j = 0, k = 0, res = 0;;
 	lsd::object *r;
+
+	// initialize LSD library
+	lsd::init_lib( );
 
 	// initialize tcl/tk
 	init_tcl_tk( argv[ 0 ], "lsd" );
@@ -252,7 +255,13 @@ int gui::load_gui( const char **argv )
 
 	while ( true )					// main GUI loop: create/edit configuration - run
 	{
-		create( );					// open LSD browser
+		if ( ( i = create( ) ) != 1 )// open LSD browser and wait for running (=1)
+		{
+			if ( i != 11 )			// not normal end
+				res = 100 + i;
+
+			break;
+		}
 
 		lsd::inhibit_system_sleep( );// prevent system sleep during run
 
@@ -264,7 +273,10 @@ int gui::load_gui( const char **argv )
 				i = da.run_simulation( 0 );
 
 			if ( i != 0 )
+			{
+				res = 200 + i;
 				break;
+			}
 			else
 				unsavedData = true;	// flag unsaved simulation results
 		}
@@ -282,8 +294,6 @@ int gui::load_gui( const char **argv )
 		lsd::restore_system_sleep( );// allow sleep again
 	}
 
-	delete sim.liblnk;
-
 	Tcl_UnlinkVar( interp, "choice" );
 	Tcl_UnlinkVar( interp, "choice_g" );
 	Tcl_UnlinkVar( interp, "str_wnd" );
@@ -292,16 +302,16 @@ int gui::load_gui( const char **argv )
 	Tcl_UnlinkVar( interp, "deb_set" );
 	Tcl_UnlinkVar( interp, "deb_t" );
 
-	set_env( false );
+	lsd_exit_gui( 0, true );
 
-	return 100 + i;
+	return res;
 }
 
 
 /*************************************************************
  CREATE
  *************************************************************/
-void gui::create( void )
+int gui::create( void )
 {
 	lsd::object *r;
 
@@ -322,7 +332,7 @@ void gui::create( void )
 	choice_g = choice = 0;
 
 	// main cycle
-	while ( choice != 1 )
+	while ( choice != 1 && choice != 11 )
 	{
 		cmd( "wm title . \"%s%s - LSD Browser\"", unsaved_change( ) ? "*" : " ", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
 		cmd( "wm title .log \"%s%s - LSD Log\"", unsaved_change( ) ? "*" : " ", strlen( sim.conf_name ) > 0 ? sim.conf_name : NO_CONF_NAME );
@@ -357,6 +367,8 @@ void gui::create( void )
 
 		r = operate( r );
 	}
+
+	return choice;
 }
 
 

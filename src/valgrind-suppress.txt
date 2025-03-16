@@ -1,0 +1,50 @@
+# valgrind suppress file
+# command: valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --suppressions=../../src/valgrind-suppress.txt --log-file=valgrind-out.txt ./LSD
+{
+   ignore_tcl_leaks
+   Memcheck:Leak
+   ...
+   obj:*/libtcl8.6.so
+}
+{
+   ignore_tk_leaks
+   Memcheck:Leak
+   ...
+   obj:*/libtk8.6.so
+}
+{
+   ignore_expat_leaks
+   Memcheck:Leak
+   ...
+   obj:*/libexpat.so.*
+}
+{
+   ignore_fontconfig_leaks
+   Memcheck:Leak
+   ...
+   obj:*/libfontconfig.so.*
+}
+{
+   ignore_freetype_leaks
+   Memcheck:Leak
+   ...
+   obj:*/libfreetype.so.*
+}
+{
+   ignore_Xft_leaks
+   Memcheck:Leak
+   ...
+   obj:*/libXft.so.*
+}
+{
+   ignore_X11_leaks
+   Memcheck:Leak
+   ...
+   obj:*/libX11.so.*
+}
+{
+   ignore_dl_leaks
+   Memcheck:Leak
+   ...
+   fun:_dl_*
+}

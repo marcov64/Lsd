@@ -387,7 +387,7 @@ class lsd::equation						// simulation model equation class
 
 	protected:							// methods used also by class simulation
 		double _fun_( variable *v, object *caller );
-		void _close_lattice_( void );
+		void _close_lattice_( bool destroy_window = false );
 
 		equation( void );				// constructor
 

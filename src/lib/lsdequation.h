@@ -462,7 +462,7 @@
 
 #define INIT_LAT( ... ) _init_lattice_( __VA_ARGS__ )
 #define SAVE_LAT( ... ) _save_lattice_( __VA_ARGS__ )
-#define DELETE_LAT _close_lattice_( )
+#define DELETE_LAT _close_lattice_( true )
 
 #define V_LAT( X, Y ) _read_lattice_( X, Y )
 #define WRITE_LAT( X, ... ) _update_lattice_( X, __VA_ARGS__ )

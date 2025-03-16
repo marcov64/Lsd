@@ -54,7 +54,7 @@ double lsd::equation::_init_lattice_( double pixW, double pixH, double nrow, dou
 	init_color = std::min( init_color, 1099 );	// limit to valid palette
 
 	// reset the LSD lattice, if any
-	_close_lattice_( );
+	_close_lattice_( true );
 	_sim_->latt->rows = std::max( 0, ( int ) floor( nrow ) );
 	_sim_->latt->columns = std::max( 0, ( int ) floor( ncol ) );
 	_sim_->latt->errors = 0;
@@ -84,10 +84,11 @@ double lsd::equation::_init_lattice_( int init_color, double nrow, double ncol, 
 /*************************************************************
  _CLOSE_LATTICE_ (*)
  *************************************************************/
-void lsd::equation::_close_lattice_( void )
+void lsd::equation::_close_lattice_( bool destroy_window )
 {
 #ifndef _TERM_
-	cmd( "destroytop .lat" );
+	if ( destroy_window )
+		cmd( "destroytop .lat" );
 #endif
 
 	if ( _sim_->latt->array != NULL && _sim_->latt->rows > 0 )

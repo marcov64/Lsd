@@ -269,9 +269,7 @@ int gui::init_lsd_env( const char **argv )
 	app = get_str( "lsd_root" );
 	if ( app != NULL && strlen( app ) > 0 )
 	{
-		lsd::root_lsd = new char[ strlen( app ) + 1 ];
-		strcpy( lsd::root_lsd, app );
-		lsd::root_lsd = lsd::clean_path( lsd::root_lsd );
+		lsd::root_lsd = lsd::clean_path( app );
 		cmd( "set lsd_root [ file normalize \"%s\" ]", lsd::root_lsd );
 	}
 	else
@@ -415,6 +413,7 @@ bool gui::set_env( bool set )
 #else
 		res = true;					// do not stop on linux/mac
 #endif
+		delete [ ] lsdroot;
 	}
 	else
 	{
@@ -433,9 +432,9 @@ bool gui::set_env( bool set )
  *************************************************************/
 char *gui::search_lsdroot( char *path, int pathSz )
 {
-	bool miss;
+	bool miss, eq;
 	const char *files[ ] = LSD_MIN_FILES;
-	char *file, cur_dir[ PATH_MAX ], last_dir[ PATH_MAX ], orig_dir[ PATH_MAX ], src_dir[ 2 * PATH_MAX ], *found = NULL;
+	char *file, *dir, cur_dir[ PATH_MAX ], last_dir[ PATH_MAX ], orig_dir[ PATH_MAX ], src_dir[ 2 * PATH_MAX ], *found = NULL;
 	int i, st;
 	struct stat info;
 
@@ -449,7 +448,14 @@ char *gui::search_lsdroot( char *path, int pathSz )
 
 	do
 	{
-		if ( getcwd( cur_dir, PATH_MAX ) == NULL || ! strcmp( lsd::clean_path( cur_dir ), last_dir ) )
+		if ( getcwd( cur_dir, PATH_MAX ) == NULL )
+			goto end;
+
+		dir = lsd::clean_path( cur_dir );
+		eq = strcmp( dir, last_dir ) == 0;
+		delete [ ] dir;
+
+		if ( eq )
 			goto end;
 
 		snprintf( src_dir, 2 * PATH_MAX, "%s/%s", cur_dir, DEFAULT_SRC_DIR );
@@ -1885,6 +1891,16 @@ int gui::Tcl_discard_change( ClientData cdata, Tcl_Interp *interp, int argc, con
  *************************************************************/
 void gui::lsd_exit_gui( int v, bool clean )
 {
+#ifndef _LMM_
+	choice = 11;
+
+	delete sim.liblnk;
+	delete [ ] eq_txt;
+#endif
+
+	delete [ ] model_make;
+	delete [ ] system_make;
+
 	if ( interp != NULL )
 	{
 		if ( tk_ok )
@@ -1901,8 +1917,9 @@ void gui::lsd_exit_gui( int v, bool clean )
 		tcl_ok = false;
 	}
 
-	if ( ! clean )
-		lsd::lsd_exit( v );
+	set_env( false );
+
+	lsd::lsd_exit( v, clean );
 }
 
 

@@ -400,6 +400,7 @@ namespace gui
 	double **mat_new( int m, int n );
 	double **opt_trajectories( int k, double **pool, int M, int r, double **X );
 	int browse( lsd::object *r );
+	int create( void );
 	int count_lines( const char *fname, bool dozip = false );
 	int eval_int( const char *tcl_exp );
 	int get_int( const char *tcl_var, int *var = NULL );
@@ -454,7 +455,6 @@ namespace gui
 	void cmd( const char *cm, ... );
 	void cmd_backend( const char *cm, va_list arg );
 	void cover_browser( const char *text1, const char *text2, bool run, bool da = false );
-	void create( void );
 	void create_logwindow( void );
 	void deb_log( bool on, int time );
 	void disable_plot( void );

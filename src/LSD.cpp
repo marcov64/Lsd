@@ -34,9 +34,6 @@
  *************************************************************/
 int main( int argn, const char **argv )
 {
-	// initialize LSD library
-	lsd::init_lib( );
-
 	int res = -1;
 
 #ifndef _NT_
@@ -68,8 +65,6 @@ int main( int argn, const char **argv )
 	}
 
 #endif
-
-	lsd::lsd_exit( res, true );
 
 	return res;
 }

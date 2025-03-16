@@ -74,21 +74,21 @@ namespace lsd
  *************************************************************/
 void lsd::init_lib( void )
 {
-	lsd::main_thread = std::this_thread::get_id( );
+	main_thread = std::this_thread::get_id( );
 
-	lsd::exec_file = new char[ strlen( "" ) + 1 ];
-	lsd::exec_path = new char[ strlen( "" ) + 1 ];
-	lsd::lib_file = new char[ strlen( "" ) + 1 ];
-	lsd::lib_path = new char[ strlen( "" ) + 1 ];
-	lsd::model_path = new char[ strlen( "" ) + 1 ];
-	strcpy( lsd::exec_file, "" );
-	strcpy( lsd::exec_path, "" );
-	strcpy( lsd::lib_file, "" );
-	strcpy( lsd::lib_path, "" );
-	strcpy( lsd::model_path, "" );
+	exec_file = new char[ strlen( "" ) + 1 ];
+	exec_path = new char[ strlen( "" ) + 1 ];
+	lib_file = new char[ strlen( "" ) + 1 ];
+	lib_path = new char[ strlen( "" ) + 1 ];
+	model_path = new char[ strlen( "" ) + 1 ];
+	strcpy( exec_file, "" );
+	strcpy( exec_path, "" );
+	strcpy( lib_file, "" );
+	strcpy( lib_path, "" );
+	strcpy( model_path, "" );
 
-	lsd::stderr_ptr = stderr;		// capture main thread standard streams
-	lsd::stdout_ptr = stdout;
+	stderr_ptr = stderr;		// capture main thread standard streams
+	stdout_ptr = stdout;
 }
 
 
@@ -97,12 +97,12 @@ void lsd::init_lib( void )
  *************************************************************/
 void lsd::finish_lib( void )
 {
-	delete [ ] lsd::exec_file;
-	delete [ ] lsd::exec_path;
-	delete [ ] lsd::lib_file;
-	delete [ ] lsd::lib_path;
-	delete [ ] lsd::model_path;
-	delete [ ] lsd::root_lsd;
+	delete [ ] exec_file;
+	delete [ ] exec_path;
+	delete [ ] lib_file;
+	delete [ ] lib_path;
+	delete [ ] model_path;
+	delete [ ] root_lsd;
 }
 
 
@@ -157,11 +157,11 @@ lsd::simulation::simulation( const char fname[ ], const char path[ ], int quick 
 lsd::simulation::~simulation( void )
 {
 	_close_lattice_( );
-	empty_sensitivity( );
 	empty_stack( );
+	empty_sensitivity( );
+	empty_description( );
 	empty_cemetery( );
 	empty_blueprint( );
-	empty_description( );
 	root->delete_obj( );
 
 	sims.erase( find( sims.begin( ), sims.end( ), this ) );
