@@ -171,6 +171,7 @@ lsd::simulation::~simulation( void )
 
 	delete latt;
 	delete stack_log;
+	delete [ ] alt_path;
 	delete [ ] conf_file;
 	delete [ ] conf_name;
 	delete [ ] conf_path;

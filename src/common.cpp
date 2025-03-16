@@ -330,7 +330,7 @@ int gui::init_lsd_env( const char **argv )
 bool gui::set_env( bool set )
 {
 	bool res = true;
-	char *lsdroot, cur_path[ PATH_MAX ];
+	char *lsdroot, *path, cur_path[ PATH_MAX ];
 	static char *lsdroot_env = NULL, *tcl_lib_env = NULL, *path_env = NULL;
 
 	if ( set )
@@ -340,7 +340,12 @@ bool gui::set_env( bool set )
 		if ( lsdroot == NULL )
 		{
 			if ( getcwd( cur_path, PATH_MAX ) != NULL )
-				lsdroot = search_lsdroot( lsd::clean_path( cur_path ), PATH_MAX );
+			{
+				path = lsd::clean_path( cur_path );
+				lsd::strcpyn( cur_path, path, PATH_MAX );
+				delete [ ] path;
+				lsdroot = search_lsdroot( cur_path, PATH_MAX );
+			}
 
 			if ( lsdroot != NULL )
 			{
@@ -413,7 +418,6 @@ bool gui::set_env( bool set )
 #else
 		res = true;					// do not stop on linux/mac
 #endif
-		delete [ ] lsdroot;
 	}
 	else
 	{
@@ -441,7 +445,7 @@ char *gui::search_lsdroot( char *path, int pathSz )
 	if ( getcwd( orig_dir, PATH_MAX ) == NULL )
 		return NULL;
 
-	if ( chdir( path ) == -1 )
+	if ( pathSz <= 0 || path == NULL || chdir( path ) == -1 )
 		goto end;
 
 	strcpy( last_dir, "" );
