@@ -22,13 +22,14 @@
 
 
 /*************************************************************
- DESCRIPTION (CONSTRUCTOR)
+ DESCR constructor
  *************************************************************/
-lsd::description::description( const char *_label, int _type, const char *_text,
-						   const char *_init, bool _initial, bool _observe )
+lsd::descr::descr( description *_container, const char *_label, int _type, const char *_text, const char *_init, bool _initial, bool _observe )
 {
 	char *str;
 	int i, j;
+
+	container = _container;
 
 	label = new char [ strlen( _label ) + 1 ];
 	strcln( label, _label, strlen( _label ) + 1 );
@@ -79,10 +80,17 @@ lsd::description::description( const char *_label, int _type, const char *_text,
 
 
 /*************************************************************
- ~DESCRIPTION (DESTRUCTOR)
+ ~DESCR destructor
  *************************************************************/
-lsd::description::~description( void )
+lsd::descr::~descr( void )
 {
+	if ( container != NULL )
+	{
+		auto d = container->elem_map.find( label );
+		if ( d != container->elem_map.end( ) )
+			container->elem_map.erase( d );
+	}
+
 	delete [ ] label;
 	delete [ ] type;
 	delete [ ] text;
@@ -91,221 +99,204 @@ lsd::description::~description( void )
 
 
 /*************************************************************
- ADD_DESCRIPTION
+ HAS_DESCR_TEXT
  *************************************************************/
-lsd::description *lsd::simulation::add_description( const char *lab, int type, const char *text, const char *init, bool initial, bool observe )
+bool lsd::descr::has_descr_text( void )
 {
-	description *cd;
-
-	if ( search_description( lab, false ) != NULL )	// already exists?
-		return change_description( lab, NULL, type, text, init, initial, observe );
-
-	if ( descr == NULL )
-		cd = descr = new description( lab, type, text, init, initial, observe );
+	if ( text != NULL && strlen( text ) > 0 && strstr( text, LEGACY_NO_DESCR ) == NULL && ( strlen( NO_DESCR ) == 0 || strstr( text, NO_DESCR ) == NULL ) )
+		return true;
 	else
-	{
-		for ( cd = descr; cd->next != NULL; cd = cd->next );
-		cd->next = new description( lab, type, text, init, initial, observe );
-		cd = cd->next;
-	}
-
-	return cd;
+		return false;
 }
 
 
 /*************************************************************
- CHANGE_DESCRIPTION
+ DESCRIPTION constructor
  *************************************************************/
-lsd::description *lsd::simulation::change_description( const char *lab_old, const char *lab, int type, const char *text, const char *init, int initial, int observe )
+lsd::description::description( void )
 {
-	bool obj = false;
-	char *str, ltype[ MAX_ELEM_LENGTH ];
-	int i, j;
-	description *cd, *cd1;
+	add_descr( "Root" );
+}
 
-	for ( cd = descr; cd != NULL; cd = cd->next )
-	{
-		if ( ! strcmp( cd->label, lab_old ) )
-		{
 
-			if ( lab == NULL && type < 0 && text == NULL && init == NULL && initial == -1 && observe == -1 )
-			{
-				delete [ ] cd->label;
-				delete [ ] cd->type;
-				delete [ ] cd->text;
-				delete [ ] cd->init;
-
-				if ( cd == descr )
-					descr = cd->next;
-				else
-				{
-					for ( cd1 = descr; cd1->next != cd; cd1 = cd1->next );
-					cd1->next = cd->next;
-				}
-
-				delete cd;
-
-				return NULL;
-			}
-
-			if ( lab != NULL )
-			{
-				delete [ ] cd->label;
-				cd->label = new char [ strlen( lab ) + 1 ];
-				strcln( cd->label, lab, strlen( lab ) + 1 );
-			}
-
-			if ( type >= 0 )
-			{
-				delete [ ] cd->type;
-
-				switch ( type )
-				{
-					case 0:
-						strcpy( ltype, "Variable" );
-						break;
-					case 1:
-						strcpy( ltype, "Parameter" );
-						break;
-					case 2:
-						strcpy( ltype, "Function" );
-						break;
-					case 4:
-					default:
-						strcpy( ltype, "Object" );
-						obj = true;
-				}
-
-				cd->type = new char [ strlen( ltype ) + 1 ];
-				strcpy( cd->type, ltype );
-			}
-
-			if ( text != NULL )
-			{
-				delete [ ] cd->text;
-
-				if ( ! strwsp( text ) && strstr( text, LEGACY_NO_DESCR ) == NULL && ( strlen( NO_DESCR ) == 0 || strstr( text, NO_DESCR ) == NULL ) )
-				{
-					for ( i = 0; i < DESC_KEY_NUM; ++i )
-					{
-						str = ( char * ) strstr( text, desc_key_words[ i ] );
-						if ( str != NULL )
-							for( j = 0; j < ( int ) strlen( desc_key_words[ i ] ); ++j, ++str )
-								*str = tolower( *str );
-					}
-
-					cd->text = new char [ strlen( text ) + 1 ];
-					strcln( cd->text, text, strlen( text ) + 1 );
-				}
-				else
-				{
-					cd->text = new char[ strlen( NO_DESCR ) + 1 ];
-					strcln( cd->text, NO_DESCR, strlen( NO_DESCR ) + 1 );
-				}
-			}
-
-			if ( init != NULL )
-			{
-				delete [ ] cd->init;
-
-				if ( ! strwsp( init ) )
-				{
-					str = ( char * ) strstr( init, desc_key_words[ 1 ] );
-					if ( str != NULL )
-						for( j = 0; j < ( int ) strlen( desc_key_words[ 1 ] ); ++j, ++str )
-							*str = tolower( *str );
-
-					cd->init = new char [ strlen( init ) + 1 ];
-					strcln( cd->init, init, strlen( init ) + 1 );
-				}
-				else
-					cd->init = NULL;
-			}
-
-			if ( ! obj && initial != -1 )
-				cd->initial = initial;
-
-			if ( ! obj && observe != -1 )
-				cd->observe = observe;
-
-			return cd;
-		}
-	}
-
-	return NULL;
+/*************************************************************
+ DESCRIPTION destructor
+ *************************************************************/
+lsd::description::~description( void )
+{
+	empty_description( this );
 }
 
 
 /*************************************************************
  EMPTY_DESCRIPTION
  *************************************************************/
-void lsd::simulation::empty_description( void )
+void lsd::empty_description( description *d )
 {
-	description *cd, *cd1;
+	if ( d == NULL )
+		d = desc;
 
-	for ( cd = descr; cd != NULL; cd = cd1 )
-	{
-		cd1 = cd->next;
-		delete cd;
-	}
+	if ( d == NULL )
+		return;
 
-	descr = NULL;
+	d->elem.clear( );
+	d->elem_map.clear( );
 }
 
 
 /*************************************************************
- RESET_DESCRIPTION
+ RESET_DESCR
 	regenerate recur. the descriptions of the model as it is
  *************************************************************/
-void lsd::object::reset_description( void )
+void lsd::description::reset_descr( object *r )
 {
-	bridge *cb;
-	variable *cv;
+	search_descr( r->label, true );
 
-	sim->search_description( label );
+	for ( auto cv = r->v; cv != NULL; cv = cv->next )
+		search_descr( cv->label, true );
 
-	for ( cv = v; cv != NULL; cv = cv->next )
-		sim->search_description( cv->label, true );
-
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( auto cb = r->b; cb != NULL; cb = cb->next )
 		if ( cb->head != NULL )
-			cb->head->reset_description( );
+			reset_descr( cb->head );
 }
 
 
 /*************************************************************
- SEARCH_DESCRIPTION
+ SEARCH_DESCR
  *************************************************************/
-lsd::description *lsd::simulation::search_description( const char *lab, bool add_missing )
+lsd::descr *lsd::description::search_descr( const char *lab, bool add_missing )
 {
-	description *cd;
-	variable *cv;
+	auto d = elem_map.find( lab );
+	if ( d != elem_map.end( ) )
+		return & ( *( d->second ) );
 
-	for ( cd = descr; cd != NULL; cd = cd->next )
-		if ( ! strcmp( cd->label, lab ) )
-			return cd;
-
-	if ( ! add_missing )
+	if ( ! add_missing || sims[ 0 ] == NULL )
 		return NULL;
 
-	if ( root->search( lab ) != NULL )
-		return add_description( lab );
+	if ( sims[ 0 ]->root->search( lab ) != NULL )
+		return add_descr( lab );
 
-	cv = root->search_var( NULL, lab );
+	auto cv = sims[ 0 ]->root->search_var( NULL, lab );
 	if ( cv != NULL )
-		return add_description( lab, cv->param );
+		return add_descr( lab, cv->param );
 
 	return NULL;
 }
 
 
 /*************************************************************
- HAS_DESCR_TEXT
+ ADD_DESCR
  *************************************************************/
-bool lsd::description::has_descr_text( void )
+lsd::descr *lsd::description::add_descr( const char *lab, int type, const char *text, const char *init, bool initial, bool observe )
 {
-	if ( text != NULL && strlen( text ) > 0 && strstr( text, LEGACY_NO_DESCR ) == NULL && ( strlen( NO_DESCR ) == 0 || strstr( text, NO_DESCR ) == NULL ) )
-		return true;
-	else
-		return false;
+	if ( search_descr( lab ) != NULL )	// already exists?
+		return change_descr( lab, NULL, type, text, init, initial, observe );
+
+	elem.emplace_back( this, lab, type, text, init, initial, observe );
+	elem_map.emplace( lab, --elem.end( ) );
+
+	return & elem.back( );
+}
+
+
+/*************************************************************
+ CHANGE_DESCR
+ *************************************************************/
+lsd::descr *lsd::description::change_descr( const char *lab_old, const char *lab, int type, const char *text, const char *init, int initial, int observe )
+{
+	bool obj = false;
+	char *str, ltype[ MAX_ELEM_LENGTH ];
+	int i, j;
+
+	auto cd = search_descr( lab_old );
+	if ( cd == NULL )
+		return NULL;
+
+	if ( lab == NULL && type < 0 && text == NULL && init == NULL && initial == -1 && observe == -1 )
+	{
+		elem.erase( elem_map[ lab_old ] );
+		return NULL;
+	}
+
+	if ( lab != NULL )
+	{
+		delete [ ] cd->label;
+		cd->label = new char [ strlen( lab ) + 1 ];
+		strcln( cd->label, lab, strlen( lab ) + 1 );
+	}
+
+	if ( type >= 0 )
+	{
+		delete [ ] cd->type;
+
+		switch ( type )
+		{
+			case 0:
+				strcpy( ltype, "Variable" );
+				break;
+			case 1:
+				strcpy( ltype, "Parameter" );
+				break;
+			case 2:
+				strcpy( ltype, "Function" );
+				break;
+			case 4:
+			default:
+				strcpy( ltype, "Object" );
+				obj = true;
+		}
+
+		cd->type = new char [ strlen( ltype ) + 1 ];
+		strcpy( cd->type, ltype );
+	}
+
+	if ( text != NULL )
+	{
+		delete [ ] cd->text;
+
+		if ( ! strwsp( text ) && strstr( text, LEGACY_NO_DESCR ) == NULL && ( strlen( NO_DESCR ) == 0 || strstr( text, NO_DESCR ) == NULL ) )
+		{
+			for ( i = 0; i < DESC_KEY_NUM; ++i )
+			{
+				str = ( char * ) strstr( text, desc_key_words[ i ] );
+				if ( str != NULL )
+					for( j = 0; j < ( int ) strlen( desc_key_words[ i ] ); ++j, ++str )
+						*str = tolower( *str );
+			}
+
+			cd->text = new char [ strlen( text ) + 1 ];
+			strcln( cd->text, text, strlen( text ) + 1 );
+		}
+		else
+		{
+			cd->text = new char[ strlen( NO_DESCR ) + 1 ];
+			strcln( cd->text, NO_DESCR, strlen( NO_DESCR ) + 1 );
+		}
+	}
+
+	if ( init != NULL )
+	{
+		delete [ ] cd->init;
+
+		if ( ! strwsp( init ) )
+		{
+			str = ( char * ) strstr( init, desc_key_words[ 1 ] );
+			if ( str != NULL )
+				for( j = 0; j < ( int ) strlen( desc_key_words[ 1 ] ); ++j, ++str )
+					*str = tolower( *str );
+
+			cd->init = new char [ strlen( init ) + 1 ];
+			strcln( cd->init, init, strlen( init ) + 1 );
+		}
+		else
+			cd->init = NULL;
+	}
+
+	if ( ! obj && initial != -1 )
+		cd->initial = initial;
+
+	if ( ! obj && observe != -1 )
+		cd->observe = observe;
+
+	return cd;
 }

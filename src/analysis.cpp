@@ -4535,11 +4535,10 @@ double *gui::log_data( double *data, int start, int end, int ser, const char *er
  *************************************************************/
 void gui::update_descr_dict( void )
 {
-	char desc[ MAX_LINE_SIZE + 1 ];
-	lsd::description *cd;
+	char dsc[ MAX_LINE_SIZE + 1 ];
 
-	for ( cd = sim.descr; cd != NULL; cd = cd->next )
-		cmd( "dict set serDescrDict %s \"%s\"", cd->label, fmt_ttip_descr( desc, cd, MAX_LINE_SIZE + 1, false ) );
+	for ( auto & cd : desc.elem )
+		cmd( "dict set serDescrDict %s \"%s\"", cd.label, fmt_ttip_descr( dsc, cd, MAX_LINE_SIZE + 1, false ) );
 }
 
 

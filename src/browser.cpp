@@ -188,8 +188,9 @@ int gui::load_gui( const char **argv )
 		}
 	}
 
-	// set DLL call-back for data assimilation container
+	// set DLL call-back for GUI containers
 	lsd::da = & da;
+	lsd::desc = & desc;
 
 	// set DLL call-back references for master simulation
 	sim.inter = interp;
@@ -1690,7 +1691,8 @@ void lsd::object::wipe_out( void )
 
 	cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", label );
 
-	sim->change_description( label );
+	if ( desc != NULL )
+		desc->change_descr( label );
 
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
@@ -1700,7 +1702,8 @@ void lsd::object::wipe_out( void )
 		cmd( "if [ info exists modPar ] { set pos [ lsearch -exact $modPar %s ]; if { $pos >= 0 } { set modPar [ lreplace $modPar $pos $pos ] } }", cv->label );
 		cmd( "if [ info exists modFun ] { set pos [ lsearch -exact $modFun %s ]; if { $pos >= 0 } { set modFun [ lreplace $modFun $pos $pos ] } }", cv->label );
 
-		sim->change_description( cv->label );
+		if ( desc != NULL )
+			desc->change_descr( cv->label );
 	}
 
 	cur = hyper_next( label );

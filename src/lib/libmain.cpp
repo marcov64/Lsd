@@ -42,6 +42,7 @@ namespace lsd
 	char *model_path = NULL;		// folder where the model files are
 	char *root_lsd = NULL;			// path of LSD root directory
 	cond_vT seq_end;				// variable to signal simulation sequence end
+	description *desc = NULL;		// element description object pointer
 	mtxT init_sim_lck;				// lock simulation constructor
 	mtxT plog_term_lck;				// lock plog_terminal for parallel updating
 	mtxT wrk_thr_ptr_lck;			// lock worker_thread_ptr for parallel updating
@@ -107,7 +108,7 @@ void lsd::finish_lib( void )
 
 
 /*************************************************************
- EQUATION CONSTRUCTOR
+ EQUATION constructor
  *************************************************************/
 lsd::equation::equation( void )
 {
@@ -116,13 +117,12 @@ lsd::equation::equation( void )
 
 
 /*************************************************************
- SIMULATION CONSTRUCTOR
+ SIMULATION constructor
  *************************************************************/
 lsd::simulation::simulation( const char fname[ ], const char path[ ], int quick )
 {
 	root = new object;
 	root->init( NULL, this, "Root" );
-	add_description( "Root" );
 	latt = new lattice;
 	reset_blueprint( NULL );
 
@@ -152,14 +152,13 @@ lsd::simulation::simulation( const char fname[ ], const char path[ ], int quick 
 
 
 /*************************************************************
- SIMULATION DESTRUCTOR
+ SIMULATION destructor
  *************************************************************/
 lsd::simulation::~simulation( void )
 {
 	_close_lattice_( );
 	empty_stack( );
 	empty_sensitivity( );
-	empty_description( );
 	empty_cemetery( );
 	empty_blueprint( );
 	root->delete_obj( );

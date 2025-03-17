@@ -235,9 +235,11 @@ void lsd::simulation::unload_configuration( bool full )
 	root->delete_obj( );
 	root = new object;
 	root->init( NULL, this, "Root" );
-	add_description( "Root" );
 	reset_blueprint( NULL );
 	empty_cemetery( );							// garbage collection
+
+	if ( desc != NULL )
+		desc->add_descr( "Root" );				// ensure root has description
 
 	save_ok = true;								// valid structure to save
 	sens = NULL;								// no sensitivity data
@@ -280,7 +282,7 @@ void lsd::simulation::unload_configuration( bool full )
 int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 {
 	bool obs, integer;
-	const char *str, *desc, *init;
+	const char *str, *dsc, *init;
 	int i, type, lags;
 	d_vecT val;
 	str_vecT data;
@@ -308,11 +310,11 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 			if ( i != 0 )
 				return i;
 
-			if ( ! quick && ! cn.child( "description" ).empty( ) )
+			if ( ! quick && sim == sims[ 0 ] && desc != NULL && ! cn.child( "description" ).empty( ) )
 			{
-				desc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
-				sim->add_description( str, 4, desc );
-				delete [ ] desc;
+				dsc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
+				desc->add_descr( str, 4, dsc );
+				delete [ ] dsc;
 			}
 		}
 		else
@@ -335,18 +337,16 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 
 				if ( ! quick )
 				{
-					if ( ! cn.child( "description" ).empty( ) )
+					if ( sim == sims[ 0 ] && desc != NULL && ! cn.child( "description" ).empty( ) )
 					{
-						desc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
+						dsc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
 						init = strdecdata( NULL, cn.child( "description" ).child( "initialization" ).text( ).get( ) );
 						obs = cn.child( "documentation" ).attribute( "observe" ).as_bool( );
 
-						sim->add_description( str, type, desc, init,
-										 cn.child( "documentation" ).attribute( "initialization" ).as_bool( ),
-										 obs );
+						desc->add_descr( str, type, dsc, init, cn.child( "documentation" ).attribute( "initialization" ).as_bool( ), obs );
 						cv->observe = obs;
 
-						delete [ ] desc;
+						delete [ ] dsc;
 						delete [ ] init;
 					}
 
@@ -900,10 +900,8 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 	long l, k;
 	strT data, text, nser, nid, nnam, lnkto, lnkwht;
 	bridge *cb;
-	description *cd;
 	netlink *curl;
 	object *cur;
-	sensitivity *cs;
 	variable *cv, *cv1;
 
 	x_nodeT n = pn.append_child( "object" );
@@ -928,10 +926,9 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 
 	n.append_child( "counts" ).text( ) = data.c_str( );
 
-	if ( ! quick )
+	if ( ! quick && desc != NULL )
 	{
-		cd = sim->search_description( label );
-
+		auto cd = desc->search_descr( label, true );
 		if ( ! strwsp( cd->text ) )
 		{
 			x_nodeT nd = n.append_child( "description" );
@@ -1113,41 +1110,43 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 			continue;
 
 		// add description text
-		cd = sim->search_description( cv->label );
-
-		if ( ! strwsp( cd->text ) || ! strwsp( cd->init ) )
+		if ( desc != NULL )
 		{
-			x_nodeT cnd = cn.append_child( "description" );
-
-			if ( ! strwsp( cd->text ) )
+			auto cd = desc->search_descr( cv->label, true );
+			if ( ! strwsp( cd->text ) || ! strwsp( cd->init ) )
 			{
-				str = strencdata( NULL, cd->text );
-				cnd.append_child( "text" ).append_child( pugi::node_cdata ).set_value( str );
-				delete [ ] str;
+				x_nodeT cnd = cn.append_child( "description" );
+
+				if ( ! strwsp( cd->text ) )
+				{
+					str = strencdata( NULL, cd->text );
+					cnd.append_child( "text" ).append_child( pugi::node_cdata ).set_value( str );
+					delete [ ] str;
+				}
+
+				if ( ! strwsp( cd->init ) )
+				{
+					str = strencdata( NULL, cd->init );
+					cnd.append_child( "initialization" ).append_child( pugi::node_cdata ).set_value( str );
+					delete [ ] str;
+				}
 			}
 
-			if ( ! strwsp( cd->init ) )
+			// add documentation marks
+			if ( cd->observe || cd->initial )
 			{
-				str = strencdata( NULL, cd->init );
-				cnd.append_child( "initialization" ).append_child( pugi::node_cdata ).set_value( str );
-				delete [ ] str;
+				x_nodeT cnd = cn.append_child( "documentation" );
+
+				if ( cd->observe )
+					cnd.append_attribute( "observe" ) = true;
+
+				if ( cd->initial )
+					cnd.append_attribute( "initialization" ) = true;
 			}
-		}
-
-		// add documentation marks
-		if ( cd->observe || cd->initial )
-		{
-			x_nodeT cnd = cn.append_child( "documentation" );
-
-			if ( cd->observe )
-				cnd.append_attribute( "observe" ) = true;
-
-			if ( cd->initial )
-				cnd.append_attribute( "initialization" ) = true;
 		}
 
 		// add sensitivity analysis data
-		for ( cs = sim->sens; cs != NULL; cs = cs->next )
+		for ( auto cs = sim->sens; cs != NULL; cs = cs->next )
 			if ( strcmp( cs->label, cv->label ) == 0 )
 			{
 				if ( cs->integer )
@@ -1242,7 +1241,6 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 {
 	char msg[ MAX_LINE_SIZE ], name[ MAX_PATH_LENGTH ], full_name[ 2 * MAX_PATH_LENGTH ];
 	int i, j, load = 0;
-	description *cd;
 	object *cur;
 	variable *cv, *cv1;
 	FILE *g, *f;
@@ -1284,6 +1282,7 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 		goto endLoad;
 	}
 
+	empty_assimilation( );
 	if ( da != NULL )
 	{
 		da->dsp_file.clear( );
@@ -1365,7 +1364,7 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 	i = fscanf( f, "%999s", msg );				// should be the first description
 	for ( j = 0; strcmp( msg, "DOCUOBSERVE" ) && i == 1 && j < MAX_FILE_TRY; ++j )
 	{
-		i = load_txt_description( msg, f );
+		i = load_txt_descr( msg, f );
 		if ( ! fscanf( f, "%999s", msg ) )
 			i = 0;
 	}
@@ -1379,7 +1378,7 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 	fscanf( f, "%999s", msg );
 	for ( j = 0; strcmp( msg, "END_DOCUOBSERVE" ) && j < MAX_FILE_TRY; ++j )
 	{
-		cd = search_description( msg );
+		auto cd = desc != NULL ? desc->search_descr( msg, true ) : NULL;
 		if ( cd != NULL )
 		{
 			cv = root->search_var( NULL, msg );
@@ -1415,7 +1414,7 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 	fscanf( f, "%999s", msg );
 	for ( j = 0; strcmp( msg, "END_DOCUINITIAL" ) && j < MAX_FILE_TRY; ++j )
 	{
-		cd = search_description( msg );
+		auto cd = desc != NULL ? desc->search_descr( msg, true ) : NULL;
 		cv = root->search_var( NULL, msg );
 		if ( cd != NULL && cv != NULL )
 			cd->initial = true;
@@ -1661,11 +1660,14 @@ bool lsd::object::load_txt_insts( const char *file_name, FILE *f )
  Load the descriptions of elements of tree under
  this object from a LEGACY text file
  *************************************************************/
-bool lsd::simulation::load_txt_description( const char *d, FILE *f )
+bool lsd::simulation::load_txt_descr( const char *d, FILE *f )
 {
 	int j, type, ctype;
 	char label[ MAX_ELEM_LENGTH ], text[ 10 * MAX_LINE_SIZE + 1 ], init[ 10 * MAX_LINE_SIZE + 1 ], str[ 10 * MAX_LINE_SIZE + 1 ];
 	variable *cv;
+
+	if ( desc == NULL )
+		return true;
 
 	strcpy( text, "" );
 	strcpy( init, "" );
@@ -1727,7 +1729,7 @@ bool lsd::simulation::load_txt_description( const char *d, FILE *f )
 			return false;
 	}
 
-	add_description( label, type, text, init );
+	desc->add_descr( label, type, text, init );
 
 	return true;
 }
@@ -1776,7 +1778,6 @@ bool lsd::simulation::save_txt_configuration( const char *dest_path, const char 
 {
 	bool saved = false;
 	char *save_file, *bak_file;
-	description *cd;
 	FILE *f;
 
 	save_file = new char[ strlen( dest_path ) + strlen( rname ) + strlen( ext ) + 2 ];
@@ -1822,18 +1823,20 @@ bool lsd::simulation::save_txt_configuration( const char *dest_path, const char 
 		fprintf( f, "\nEQUATION %s\nMODELREPORT %s\n", eq_file, rep_file );
 
 		fprintf( f, "\nDESCRIPTION\n\n" );
-		root->save_txt_description( f );
+		root->save_txt_descr( f );
 
 		fprintf( f, "\nDOCUOBSERVE\n" );
-		for ( cd = descr; cd != NULL; cd = cd->next )
-			if ( cd->observe )
-				fprintf( f, "%s\n", cd->label );
+		if ( desc != NULL )
+			for ( auto & cd : desc->elem )
+				if ( cd.observe )
+					fprintf( f, "%s\n", cd.label );
 		fprintf( f, "\nEND_DOCUOBSERVE\n\n" );
 
 		fprintf( f, "\nDOCUINITIAL\n" );
-		for ( cd = descr; cd != NULL; cd = cd->next )
-			if ( cd->initial )
-				fprintf( f, "%s\n", cd->label );
+		if ( desc != NULL )
+			for ( auto & cd : desc->elem )
+				if ( cd.initial )
+					fprintf( f, "%s\n", cd.label );
 		fprintf( f, "\nEND_DOCUINITIAL\n\n" );
 
 		if ( eq_txt != NULL && ( strlen( conf_eq_txt ) == 0 || strcmp( conf_eq_txt, eq_txt ) != 0 ) )
@@ -2003,32 +2006,33 @@ void lsd::object::save_txt_insts( FILE *f )
  save the descriptions of elements of tree under
  this object to a LEGACY text file
  *************************************************************/
-void lsd::object::save_txt_description( FILE *f )
+void lsd::object::save_txt_descr( FILE *f )
 {
-	bridge *cb;
-	variable *cv;
-	description *cd;
-
-	cd = sim->search_description( label );
-
-	if ( strwsp( cd->init ) )
-		fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ] );
-	else
-		fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 0 ], cd->init, desc_key_words[ 1 ] );
-
-	for ( cv = v; cv != NULL; cv = cv->next )
-	{
-		cd = sim->search_description( cv->label );
-
-		if ( ( cv->param != 1 && cv->num_lag == 0 ) || strwsp( cd->init ) )
+	auto cd = desc != NULL ? desc->search_descr( label, true ) : NULL;
+	if ( cd != NULL )
+		if ( strwsp( cd->init ) )
 			fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ] );
 		else
 			fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 0 ], cd->init, desc_key_words[ 1 ] );
+	else
+		fprintf( f, "Object_%s\n%s\n\n", label, desc_key_words[ 1 ] );
+
+
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+	{
+		auto cd = desc != NULL ? desc->search_descr( cv->label, true ) : NULL;
+		if ( cd != NULL )
+			if ( ( cv->param != 1 && cv->num_lag == 0 ) || strwsp( cd->init ) )
+				fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ] );
+			else
+				fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 0 ], cd->init, desc_key_words[ 1 ] );
+		else
+			fprintf( f, "%s_%s\n%s\n\n", cv->param == 1 ? "Parameter" : "Variable", cv->label, desc_key_words[ 1 ] );
 	}
 
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
 		if ( cb->head != NULL )
-			cb->head->save_txt_description( f );
+			cb->head->save_txt_descr( f );
 }
 
 

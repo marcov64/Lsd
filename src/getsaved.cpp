@@ -69,7 +69,7 @@ int stack_level;			// LSD stack call level
 int stack_info = 0;			// LSD stack control
 long nodesSerial = 1;		// network node's serial number global counter
 unsigned seed = 1;			// random number generator initial seed
-lsd::description *descr = NULL;	// model description structure
+lsd::descr *descr = NULL;	// model description structure
 lsdstack *stack_log = NULL;	// LSD stack
 lsd::object *blueprint = NULL;	// LSD blueprint (effective model in use)
 lsd::object *root = NULL;		// LSD root object
@@ -164,7 +164,7 @@ int lsdmain( int argn, const char **argv )
 
 	root = new lsd::object;
 	root->init( NULL, "Root" );
-	add_description( "Root" );
+	add_descr( "Root" );
 	reset_blueprint( NULL );
 
 	if ( load_configuration( true, NULL, 0 ) != 0 )

@@ -353,24 +353,24 @@ int gui::Tcl_set_c_var( ClientData cdata, Tcl_Interp *interp, int argc, const ch
 /*************************************************************
  FMT_TTIP_DESCR
  *************************************************************/
-char *gui::fmt_ttip_descr( char *out, lsd::description *d, int outSz, bool init )
+char *gui::fmt_ttip_descr( char *out, lsd::descr & d, int outSz, bool init )
 {
 	char out1[ outSz ];
 
 	if ( out == NULL || outSz <= 0 )
 		return NULL;
 
-	if ( d->has_descr_text ( ) )
-		lsd::strcln( out, d->text, outSz );
+	if ( d.has_descr_text ( ) )
+		lsd::strcln( out, d.text, outSz );
 	else
 		out[ 0 ] = '\0';
 
-	if ( init && d != NULL && d->init != NULL && strlen( d->init ) > 0 )
+	if ( init && d.init != NULL && strlen( d.init ) > 0 )
 	{
 		if ( strlen( out ) > 0 )
 			lsd::strcatn( out, "\n\u2500\u2500\u2500\n", outSz );
 
-		lsd::strcln( out1, d->init, outSz );
+		lsd::strcln( out1, d.init, outSz );
 		lsd::strcatn( out, out1, outSz );
 	}
 
@@ -389,17 +389,16 @@ char *gui::fmt_ttip_descr( char *out, lsd::description *d, int outSz, bool init 
  *************************************************************/
 void gui::set_ttip_descr( const char *w, const char *lab, int it, bool init )
 {
-	char desc[ MAX_LINE_SIZE + 1 ];
-	lsd::description *cd;
+	char dsc[ MAX_LINE_SIZE + 1 ];
 
 	// add tooltip only if element has description
-	cd = sim.search_description( lab, false );
-	if ( cd != NULL && strlen( fmt_ttip_descr( desc, cd, MAX_LINE_SIZE + 1, init ) ) > 0 )
+	auto cd = desc.search_descr( lab );
+	if ( cd != NULL && strlen( fmt_ttip_descr( dsc, *cd, MAX_LINE_SIZE + 1, init ) ) > 0 )
 	{
 		if ( it >= 0 )			// listbox/canvas?
-			cmd( "tooltip::tooltip %s -item %d \"%s\"", w, it, desc );
+			cmd( "tooltip::tooltip %s -item %d \"%s\"", w, it, dsc );
 		else
-			cmd( "tooltip::tooltip %s \"%s\"", w, desc );
+			cmd( "tooltip::tooltip %s \"%s\"", w, dsc );
 	}
 }
 
@@ -437,33 +436,32 @@ void gui::auto_document( const char *lab, const char *which, bool append )
 {
 	bool var;
 	char str1[ MAX_LINE_SIZE ], app[ 10 * MAX_LINE_SIZE ], text[ 2 * MAX_BUFF_SIZE ];
-	lsd::description *cd;
 
-	for ( cd = sim.descr; cd != NULL; cd = cd->next )
+	for ( auto & cd : desc.elem )
 	{
 		app[ 0 ] = '\0';
-		if ( ( lab == NULL && ( ! strcmp( which, "ALL" ) || ! strcmp( cd->type, "Variable" ) || ! strcmp( cd->type, "Function" ) ) ) || ( lab != NULL && ! strcmp( lab, cd->label ) ) )
+		if ( ( lab == NULL && ( ! strcmp( which, "ALL" ) || ! strcmp( cd.type, "Variable" ) || ! strcmp( cd.type, "Function" ) ) ) || ( lab != NULL && ! strcmp( lab, cd.label ) ) )
 		{	// for each description
-			if ( ( ! strcmp( cd->type, "Variable") ) == 1 || ( ! strcmp( cd->type, "Function" ) ) == 1 )
+			if ( ( ! strcmp( cd.type, "Variable") ) == 1 || ( ! strcmp( cd.type, "Function" ) ) == 1 )
 			{ 	// if it is a Variable
 				var = true;
-				get_var_descr( cd->label, app, 10 * MAX_LINE_SIZE );
+				get_var_descr( cd.label, app, 10 * MAX_LINE_SIZE );
 			}
 			else
 				var = false;
 
-			return_where_used( cd->label, str1, MAX_LINE_SIZE );
-			if ( ( append || ! var ) && cd->has_descr_text ( ) )
-				if ( lsd::strwsp( cd->text ) )
-					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+			return_where_used( cd.label, str1, MAX_LINE_SIZE );
+			if ( ( append || ! var ) && cd.has_descr_text ( ) )
+				if ( lsd::strwsp( cd.text ) )
+					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd.label, str1 );
 				else
-					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
+					snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n%s\n'%s' appears in the equation for: %s", cd.text, app, cd.label, str1 );
 			else
-				snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+				snprintf( text, 2 * MAX_BUFF_SIZE, "%s\n'%s' appears in the equation for: %s", app, cd.label, str1 );
 
-			delete [ ] cd->text;
-			cd->text = new char[ strlen( text ) + 1 ];
-			strcpy( cd->text, text );
+			delete [ ] cd.text;
+			cd.text = new char[ strlen( text ) + 1 ];
+			strcpy( cd.text, text );
 		} 					// end of the label to document
 	}						// end of the for (desc)
 }
@@ -1261,15 +1259,12 @@ void lsd::object::clean_parallel( void )
  *************************************************************/
 void lsd::object::show_observe( void )
 {
-	bridge *cb;
-	description *cd;
 	object *cur;
-	variable *cv;
 
-	for ( cv = v; cv != NULL; cv = cv->next )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
-		cd = sim->search_description( cv->label );
-		if ( cd->observe )
+		auto cd = desc != NULL ? desc->search_descr( cv->label ) : NULL;
+		if ( cd != NULL && cd->observe )
 		{
 			if ( cv->param == 1 )
 				gui::plog( "Object: %s \tParameter:\t", label );
@@ -1281,7 +1276,7 @@ void lsd::object::show_observe( void )
 		}
 	}
 
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			cur = sim->blueprint->search( cb->label );
@@ -1298,15 +1293,11 @@ void lsd::object::show_observe( void )
 void lsd::object::show_initial( void )
 {
 	char buf_descr[ MAX_BUFF_SIZE ];
-	bridge *cb;
-	object *cur;
-	description *cd;
-	variable *cv, *cv1;
 
-	for ( cv = v; cv != NULL; cv = cv->next )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
-		cd = sim->search_description( cv->label );
-		if ( cd->initial )
+		auto cd = desc != NULL ? desc->search_descr( cv->label ) : NULL;
+		if ( cd != NULL && cd->initial )
 		{
 			if ( cv->param == 1 )
 				gui::plog( "Object: %s \tParameter:\t", label );
@@ -1320,9 +1311,9 @@ void lsd::object::show_initial( void )
 
 			if ( cd->init == NULL || strlen( cd->init ) == 0 )
 			{
-				for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
+				for ( auto cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				{
-					cv1 = cur->search_var( NULL, cv->label );
+					auto cv1 = cur->search_var( NULL, cv->label );
 					gui::plog( " %g", cv1->val[ 0 ] );
 				}
 			}
@@ -1333,14 +1324,9 @@ void lsd::object::show_initial( void )
 		}
 	}
 
-	for ( cb = b; cb != NULL; cb = cb->next )
-	{
+	for ( auto cb = b; cb != NULL; cb = cb->next )
 		if ( cb->head != NULL )
-		{
-			cur = cb->head;
-			cur->show_initial( );
-		}
-	}
+			cb->head->show_initial( );
 }
 
 

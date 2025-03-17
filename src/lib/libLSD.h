@@ -206,6 +206,7 @@ namespace lsd
 	class assinstance;
 	class asstatevars;
 	class bridge;
+	class descr;
 	class description;
 	class dlliblinkage;
 	class equation;
@@ -227,6 +228,7 @@ namespace lsd
  *************************************************************/
 	typedef std::function < double( const variable *, object * ) > eq_funcT;
 	typedef std::list < assim > ass_listT;
+	typedef std::list < descr > desc_listT;
 	typedef std::list < assim * > asp_listT;
 	typedef std::vector < assim * > ass_vecT;
 	typedef std::map < int, ass_vecT > ia_mapT;
@@ -244,6 +246,7 @@ namespace lsd
 	typedef std::unordered_map < double, object * > o_mapT;
 	typedef std::unordered_map < long, object * > n_mapT;
 	typedef std::unordered_map < strT, ass_listT::iterator > ass_mapT;
+	typedef std::unordered_map < strT, desc_listT::iterator > desc_mapT;
 	typedef std::unordered_map < strT, eq_funcT > eq_mapT;
 	typedef std::unordered_map < strT, bridge * > b_mapT;
 	typedef std::unordered_map < strT, variable * > v_mapT;
@@ -281,6 +284,7 @@ namespace lsd
 	extern const int signals[ ];			// handled system signal numbers
 	extern const i_mapT logic_ops_map;		// conditional operators
 	extern cond_vT seq_end;					// signal simulation sequence end
+	extern description *desc;				// element description object pointer
 	extern mtxT plog_term_lck;				// lock plog_terminal for parallel upd.
 	extern mtxT wrk_thr_ptr_lck;			// lock worker_thread_ptr for par. upd.
 	extern simp_vecT sims;					// vector holding existing simulations
@@ -328,6 +332,7 @@ namespace lsd
 	void cmd( const char *cm, ... );
 	void debug_break( void );
 	void empty_assimilation( void );
+	void empty_description( description *d = NULL );
 	void exception_handler( int signum, const char *what );
 	void finish_lib( void );
 	void handle_signals( void ( * handler ) ( int signum ) );
@@ -516,7 +521,6 @@ class lsd::simulation : public equation	// simulation container class
 		char conf_eq_txt[ MAX_FILE_SIZE ] = "";// equations saved in configuration file
 		char rep_file[ MAX_PATH_LENGTH ] = "";// documentation report file name
 		char res_path[ MAX_PATH_LENGTH ] = "";// path of last used results directory
-		description *descr = NULL;		// model description structure
 		dlliblinkage *liblnk = NULL;	// call-back references for DLL
 		hand_vecT run_pids;				// parallel running instances process id's
 		int add_to_tot = false;			// type of totals file generated (bool)
@@ -628,9 +632,6 @@ class lsd::simulation : public equation	// simulation container class
 		bool save_txt_configuration( const char *path, const char *rname, const char *ext, const char eq_file[ ], const char eq_txt[ ] = "" );
 		bool save_xml_configuration( int findex = 0, const char *dest_path = NULL, bool quick = false, const char mod_nam[ ] = "", const char mod_ver[ ] = "", const char mod_dat[ ] = "", const char eq_file[ ] = "", const char eq_txt[ ] = "" );
 		bool stop_parallel( void );
-		description *add_description( const char *lab, int type = 4, const char *text = NULL, const char *init = NULL, bool initial = false, bool observe = false );
-		description *change_description( const char *lab_old, const char *lab = NULL, int type = -1, const char *text = NULL, const char *init = NULL, int initial = -1, int observe = -1 );
-		description *search_description( const char *lab, bool add_missing = true );
 		int hyper_count( const char *lab );
 		int hyper_count_var( const char *lab );
 		int load_configuration( bool reload, strT *warnings, int quick );
@@ -656,7 +657,7 @@ class lsd::simulation : public equation	// simulation container class
 		~simulation( void );			// destructor
 
 	private:
-		bool load_txt_description( const char *msg, FILE *f );
+		bool load_txt_descr( const char *msg, FILE *f );
 		bool next_batch( void );
 		double betacf( double a, double b, double x );
 		double build_obj_list( bool set_list );
@@ -675,7 +676,6 @@ class lsd::simulation : public equation	// simulation container class
 		void *set_random( int gen );
 		void empty_blueprint( void );
 		void empty_cemetery( void );
-		void empty_description( void );
 		void empty_lattice( void );
 		void init_math_error( void );
 		void log_parallel( bool term );
@@ -748,7 +748,6 @@ class lsd::object						// simulation model object class
 		void delete_net( const char *lab );
 		void delete_obj( const variable *caller = NULL );
 		void delete_var( const char *lab );
-		void reset_description( void );
 		void reset_end( void );
 
 	private:
@@ -843,7 +842,7 @@ class lsd::object						// simulation model object class
 		void name_node_net( const char *nodeName );
 		void recreate_maps( void );
 		void replicate( int num, bool propagate = false );
-		void save_txt_description( FILE *f );
+		void save_txt_descr( FILE *f );
 		void save_txt_insts( FILE *f );
 		void save_txt_struct( FILE *f, const char *tab );
 		void save_xml_struct( x_nodeT &pn, long &node_serial, bool quick );
@@ -1116,9 +1115,9 @@ class lsd::worker						// multi-thread variable worker data
 
 
 /*************************************************************
- DESCRIPTION
+ DESCR
  *************************************************************/
-class lsd::description					// model-element description class
+class lsd::descr						// model-element description class
 {
 	friend class object;
 	friend class result;
@@ -1131,14 +1130,34 @@ class lsd::description					// model-element description class
 		char *label;
 		char *text;
 		char *type;
-		description *next = NULL;
-
-		bool has_descr_text( void );
 
 	private:
-		description( const char *_label, int _type, const char *_text,
-					 const char *_init, bool _initial, bool _observe );
-										// constructor
+		description *container = NULL;
+
+	public:
+		bool has_descr_text( void );
+
+		descr( description *_container, const char *_label, int _type, const char *_text, const char *_init, bool _initial, bool _observe );	// constructor
+		~descr( void );					// destructor
+};
+
+
+/*************************************************************
+ DESCRIPTION
+ *************************************************************/
+class lsd::description					// description container class
+{
+	public:
+		desc_listT elem;				// assimilation elements linked-list
+		desc_mapT elem_map;				// map names to assimilation elements
+
+	public:
+		descr *add_descr( const char *lab, int type = 4, const char *text = NULL, const char *init = NULL, bool initial = false, bool observe = false );
+		descr *change_descr( const char *lab_old, const char *lab = NULL, int type = -1, const char *text = NULL, const char *init = NULL, int initial = -1, int observe = -1 );
+		descr *search_descr( const char *lab, bool add_missing = false );
+		void reset_descr( object *r );
+
+		description( void );			// constructor
 		~description( void );			// destructor
 };
 

@@ -322,6 +322,7 @@ namespace gui
 	extern int str_wnd;					// presentation of the model structure window (bool)
 	extern int watch;					// allow for graph generation interruption (bool)
 	extern lsd::assimilation da;		// data assimilation object
+	extern lsd::description desc;		// element description object
 	extern lsd::object *curr_obj;		// pointer to current object in browser
 	extern lsd::object *last_obj;		// pointer to last selected object in structure
 	extern lsd::simulation sim;			// the master GUI simulation object
@@ -366,7 +367,7 @@ namespace gui
 	bool unsaved_change( void );
 	bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false );
 	char *eval_str( const char *tcl_exp, char *var, int var_size );
-	char *fmt_ttip_descr( char *out, lsd::description *d, int outSz, bool init = true );
+	char *fmt_ttip_descr( char *out, lsd::descr & d, int outSz, bool init = true );
 	char *get_str( const char *tcl_var, char *var, int var_size );
 	char *load_eqfile( void );
 	char *search_lsdroot( char *buf, int bufSz );

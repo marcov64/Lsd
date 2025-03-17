@@ -532,8 +532,6 @@ void gui::scan_using_lab( const char *lab, const char *parWnd )
 void gui::show_descr( const char *lab, const char *parWnd )
 {
 	char buf_descr[ MAX_BUFF_SIZE ];
-	lsd::description *cd;
-	lsd::variable *cv;
 
 	// define the correct parent window
 	if ( parWnd != NULL && strlen( parWnd ) > 0 )
@@ -541,11 +539,11 @@ void gui::show_descr( const char *lab, const char *parWnd )
 	else
 		cmd( "set parWnd ." );
 
-	cv = sim.root->search_var( NULL, lab );
-	if ( cv == NULL )
-		return;
+	auto cv = sim.root->search_var( NULL, lab );
+	auto cd = desc.search_descr( lab, true );
 
-	cd = sim.search_description( lab );
+	if ( cv == NULL || cd == NULL )
+		return;
 
 	cmd( "if { [ string equal $parWnd . ] } { \
 			set w .desc_%s \

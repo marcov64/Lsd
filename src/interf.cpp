@@ -53,7 +53,7 @@ lsd::object *gui::operate( lsd::object *r )
 	long nlinks, ptsSa, maxMC;
 	lsd::ass_list_itT ca;
 	lsd::bridge *cb;
-	lsd::description *cd;
+	lsd::descr *cd;
 	lsd::object *n, *cur, *cur1, *cur2;
 	lsd::result *rf;			// pointer for results files (may be zipped or not)
 	lsd::sensitivity *cs;
@@ -596,7 +596,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 					if ( done == 0 )
 					{
-						sim.add_description( lab, param, eval_str( "[ .addelem.d.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
+						desc.add_descr( lab, param, eval_str( "[ .addelem.d.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
 						if ( param == 0 )
 							cmd( "lappend modVar %s", lab );
@@ -766,7 +766,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 				r->add_obj( lab, 1, true );
 
-				sim.add_description( lab, 4, eval_str( "[ .addobj.d.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
+				desc.add_descr( lab, 4, eval_str( "[ .addobj.d.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 				cmd( "lappend modObj %s", lab );
 
 				// update focus memory
@@ -953,7 +953,7 @@ lsd::object *gui::operate( lsd::object *r )
 				break;
 			}
 
-			cd = sim.search_description( lab_old );
+			cd = desc.search_descr( lab_old, true );
 			r->next_count( r, & num );
 
 			cmd( "set to_compute %d", r->to_compute ? 1 : 0 );
@@ -1030,7 +1030,7 @@ lsd::object *gui::operate( lsd::object *r )
 				unsaved_change( true );		// signal unsaved change
 
 				// save description changes
-				sim.change_description( lab_old, NULL, -1, eval_str( "[ .objprop.desc.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
+				desc.change_descr( lab_old, NULL, -1, eval_str( "[ .objprop.desc.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
 				cmd( "set choice $to_compute" );
 
@@ -1159,7 +1159,7 @@ lsd::object *gui::operate( lsd::object *r )
 						cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", cur->label	);
 						cmd( "lappend modObj %s", lab );
 
-						sim.change_description( cur->label, lab );
+						desc.change_descr( cur->label, lab );
 						cur->chg_lab( lab );
 					}
 					else
@@ -1200,7 +1200,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			sscanf( lab1, "%99s", lab_old );
 			cv = r->search_var( NULL, lab_old );
-			cd = sim.search_description( lab_old );
+			cd = desc.search_descr( lab_old, true );
 
 			Tcl_LinkVar( interp, "done", ( char * ) &done, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "save", ( char * ) &save, TCL_LINK_BOOLEAN );
@@ -1582,7 +1582,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			if ( done == 9 )
 			{
-				sim.change_description( lab_old, NULL, -1, eval_str( "[ .chgelem.desc.f.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
+				desc.change_descr( lab_old, NULL, -1, eval_str( "[ .chgelem.desc.f.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
 				auto_document( lab_old, "ALL", true );
 				cmd( ".chgelem.desc.f.desc.text delete 1.0 end" );
@@ -1656,10 +1656,10 @@ lsd::object *gui::operate( lsd::object *r )
 						cv->val[ i ] = cv->chk_val( cv->val[ i ] );
 				}
 
-				sim.change_description( lab_old, NULL, -1, eval_str( "[ .chgelem.desc.f.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
+				desc.change_descr( lab_old, NULL, -1, eval_str( "[ .chgelem.desc.f.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
 				if ( cv->param == 1 || cv->num_lag > 0 )
-					sim.change_description( lab_old, NULL, -1, NULL, eval_str( "[ .chgelem.desc.i.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
+					desc.change_descr( lab_old, NULL, -1, NULL, eval_str( "[ .chgelem.desc.i.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
 				unsaved_change( true );		// signal unsaved change
 
@@ -1821,9 +1821,9 @@ lsd::object *gui::operate( lsd::object *r )
 			if ( ! delVar && ( nature != cv->param || numlag != cv->num_lag ) )
 			{
 				if ( nature != 1 && numlag == 0 )
-					sim.change_description( lab_old, NULL, nature, NULL, "" );
+					desc.change_descr( lab_old, NULL, nature, NULL, "" );
 				else
-					sim.change_description( lab_old, NULL, nature );
+					desc.change_descr( lab_old, NULL, nature );
 
 				for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				{
@@ -1912,7 +1912,7 @@ lsd::object *gui::operate( lsd::object *r )
 					if ( cv->param == 2 )
 						cmd( "lappend modFun %s", lab );
 
-					sim.change_description( lab_old, lab );
+					desc.change_descr( lab_old, lab );
 				}
 
 				for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )

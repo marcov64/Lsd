@@ -51,7 +51,6 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 	const char *app;
 	double value, value1, value2, step, counter;
 	int res, i, j, kappa = 0, to_all, update_d, cases_from, cases_to, fill, use_seed, rnd_seed, step_in;
-	description *cd;
 	object *cur;
 	variable *cv = NULL;
 	FILE *f;
@@ -563,7 +562,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 
 	if ( update_d )
 	{
-		cd = sim->search_description( lab );
+		auto cd = desc != NULL ? desc->search_descr( lab, true ) : NULL;
 
 		if ( step_in > 1 )
 			snprintf( ch, MAX_ELEM_LENGTH, " (every %d instances)", step_in );
@@ -572,19 +571,20 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 
 		if ( to_all )
 			if ( step_in > 1 )
-				if ( cd->init != NULL )
+				if ( cd != NULL && cd->init != NULL )
 					snprintf( msg, MAX_LINE_SIZE, "%s\n%d instances %s%s", cd->init, j, action, ch );
 				else
 					snprintf( msg, MAX_LINE_SIZE, "%d instances %s%s", j, action, ch );
 			else
 				snprintf( msg, MAX_LINE_SIZE, "All %d instances %s%s", j, action, ch );
 		else
-			if ( cd->init != NULL )
+			if ( cd != NULL && cd->init != NULL )
 				snprintf( msg, MAX_LINE_SIZE, "%s\nInstances from %d to %d %s%s", cd->init, cases_from, cases_to, action, ch );
 			else
 				snprintf( msg, MAX_LINE_SIZE, "Instances from %d to %d %s%s", cases_from, cases_to, action, ch );
 
-		sim->change_description( lab, NULL, -1, NULL, msg );
+		if ( desc != NULL )
+			desc->change_descr( lab, NULL, -1, NULL, msg );
 	}
 
 	gui::unsaved_change( true );			// signal unsaved change

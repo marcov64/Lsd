@@ -144,7 +144,7 @@ bool gui::open_configuration( lsd::object *&r, bool reload )
 		case 23:								// missing XML settings node
 		case 24:								// missing XML equation node
 			cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Partially damaged file (%d :%.24s)\" -detail \"Element descriptions were lost but the configuration can still be used.\n\nPlease check if the desired LSD configuration file was selected or re-enter the description information if needed.\n\nIf this is a sensitivity analysis configuration file, this message is expected, and configuration file is ok.\"", i, warnings.c_str( ) );
-			sim.root->reset_description( );
+			desc.reset_descr( sim.root );
 			loaded = true;
 			break;
 
@@ -753,16 +753,13 @@ void lsd::object::get_saved( FILE *out, const char *sep, bool all_var )
 {
 	int i, sl;
 	char *lab;
-	bridge *cb;
-	description *cd;
 	object *cur;
-	variable *cv;
 
-	for ( cv = v; cv != NULL; cv = cv->next )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
 		if ( cv->save || all_var )
 		{
 			// get element description
-			cd = sim->search_description( cv->label, false );
+			auto cd = desc != NULL ? desc->search_descr( cv->label ) : NULL;
 			if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
 			{
 				// select just the first description line
@@ -781,7 +778,7 @@ void lsd::object::get_saved( FILE *out, const char *sep, bool all_var )
 			fprintf( out, "%s%s%s%s%s%s%s\n", cv->label, sep, cv->param ? "parameter" : "variable", sep, label, sep, lab != NULL ? lab : "" );
 		}
 
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			cur = sim->blueprint->search( cb->label );
@@ -802,20 +799,17 @@ void lsd::object::get_sa_limits( FILE *out, const char *sep )
 {
 	int i, sl;
 	char *lab, type[ 10 ];
-	variable *cv;
-	description *cd;
-	sensitivity *cs;
 
 	for ( i = 0; i < META_PAR_NUM; ++i )
 		gui::meta_par_in[ i ] = false;
 
-	for ( cs = sim->sens; cs != NULL; cs = cs->next )
+	for ( auto cs = sim->sens; cs != NULL; cs = cs->next )
 	{
 		// get current value (first object)
-		cv = search_var( NULL, cs->label );
+		auto cv = search_var( NULL, cs->label );
 
 		// get element description
-		cd = sim->search_description( cs->label, false );
+		auto cd = desc != NULL ? desc->search_descr( cs->label ) : NULL;
 		if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
 		{
 			// select just the first description line
