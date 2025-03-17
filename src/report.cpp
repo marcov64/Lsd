@@ -604,7 +604,7 @@ void lsd::variable::write_var( FILE *frep )
 		fprintf( frep,"<I>Using: &nbsp;</I>" );
 
 		found = false;
-		sim->root->find_using( this, frep, & found );
+		up->sim->root->find_using( this, frep, & found );
 
 		if ( ! found )
 			fprintf( frep, "(none)" );

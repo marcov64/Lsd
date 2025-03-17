@@ -1218,7 +1218,7 @@ lsd::variable *lsd::object::add_empty_var( const char *lab )
 		cv = cv->next;
 	}
 
-	cv->init( this, sim, lab );
+	cv->init( this, lab );
 	v_map.insert( v_pairT ( lab, cv ) );
 
 	return cv;
@@ -1252,7 +1252,7 @@ lsd::variable *lsd::object::add_var_from_example( variable *example )
 		cv = cv->next;
 	}
 
-	cv->init( this, sim, NULL, example );
+	cv->init( this, NULL, example );
 	v_map.insert( v_pairT ( cv->label, cv ) );
 
 	return cv;
@@ -1918,15 +1918,15 @@ void lsd::object::collect_cemetery( const variable *caller )
  *************************************************************/
 void lsd::variable::add_cemetery( void )
 {
-	if ( sim->cemetery == NULL )
-		sim->cemetery = sim->last_cemetery = this;
+	if ( up->sim->cemetery == NULL )
+		up->sim->cemetery = up->sim->last_cemetery = this;
 	else
 	{
-		sim->last_cemetery->next = this;
-		sim->last_cemetery = this;
+		up->sim->last_cemetery->next = this;
+		up->sim->last_cemetery = this;
 	}
 
-	sim->last_cemetery->next = NULL;
+	up->sim->last_cemetery->next = NULL;
 }
 
 

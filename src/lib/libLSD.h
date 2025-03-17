@@ -703,6 +703,7 @@ class lsd::object						// simulation model object class
 	friend class netnode;
 	friend class simulation;
 	friend class variable;
+	friend class worker;
 
 	public:
 		bool to_compute;
@@ -897,7 +898,7 @@ class lsd::variable						// model numeric element (variable,
 	friend class simulation;
 	friend class worker;
 
-	public:
+	public:								// static public attributes
 		bool initialized = false;
 		bool integer = false;			// variable must be rounded to integer
 		bool observe = false;
@@ -907,32 +908,35 @@ class lsd::variable						// model numeric element (variable,
 		bool savei = false;
 		char *label = NULL;
 		char deb_mode = 'n';
-		double *val = NULL;
-		double ini_val = NAN;			// initial for DA parameter estimation
 		double max_val = NAN;			// maximum limit for variable
 		double min_val = NAN;			// minimum limit (NAN = no limit)
 		int delay = 0;
 		int delay_range = 0;
 		int num_lag = 0;
-		int param = 0;
 		int period = 1;
 		int period_range = 0;
+
+	private:							// static private attributes
+		bool dummy = false;
+		eq_funcT eq_func = NULL;		// pointer to equation function
+
+	public:								// dynamic public attributes
+		double *val = NULL;
+		double ini_val = NAN;			// initial for DA parameter estimation
+		int param = 0;
 		object *up = NULL;
 		variable *next = NULL;			// sibling variable under same object
 
-	private:
-		bool dummy = false;
+	private:							// dynamic private attributes
 		bool under_computation = false;
 		char *lab_tit = NULL;
 		double deb_cnd_val = 0;
 		double *data = NULL;
-		eq_funcT eq_func = NULL;		// pointer to equation function
 		int deb_cond = 0;
 		int end = 0;
 		int last_update = 0;
 		int next_update = 0;
 		int start = 0;
-		simulation *sim = NULL;			// simulation where object is contained
 		rec_mtxT var_comp_lck;			// mutex lock for parallel computation
 
 	public:
@@ -951,7 +955,7 @@ class lsd::variable						// model numeric element (variable,
 		void add_cemetery( void );
 		void copy_state( const variable *ex );
 		void empty( bool no_lock = false );
-		void init( object *_up, simulation *_sim, const char *_label, variable *ex = NULL );
+		void init( object *_up, const char *_label, variable *ex = NULL );
 		void save_single( void );
 		void set_lab_tit( void );
 
@@ -1100,7 +1104,6 @@ class lsd::worker						// multi-thread variable worker data
 		int signum = -1;
 		jmp_buf env;
 		mtxT worker_lck;
-		simulation *sim = NULL;			// simulation where object is contained
 		std::exception_ptr pexcpt = nullptr;
 		thrT worker_thread;
 		thr_idT thread_id;

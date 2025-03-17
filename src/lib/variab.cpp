@@ -151,7 +151,6 @@ lsd::variable::variable( const variable & v )
 	end = v.end;
 	next_update = v.next_update;
 	start = v.start;
-	sim = v.sim;
 }
 
 
@@ -169,7 +168,7 @@ void lsd::variable::copy_state( const variable *ex )
 	integer = ex->integer;
 	observe = ex->observe;
 	parallel = ex->parallel;
-	plot = ( ! ex->sim->running ) ? ex->plot : false;
+	plot = ( ! ex->up->sim->running ) ? ex->plot : false;
 	save = ex->save;
 	savei = ex->savei;
 
@@ -209,7 +208,7 @@ lsd::variable::~variable( void )
 /*************************************************************
  INIT
  *************************************************************/
-void lsd::variable::init( object *_up, simulation *_sim, const char *_label, variable *ex )
+void lsd::variable::init( object *_up, const char *_label, variable *ex )
 {
 	// prevent concurrent use by more than one thread
 	rec_lguardT lock( var_comp_lck );
@@ -217,7 +216,6 @@ void lsd::variable::init( object *_up, simulation *_sim, const char *_label, var
 	copy_state( ex );
 
 	up = _up;
-	sim = _sim;
 
 	if ( _label == NULL && ex != NULL && ex->label != NULL )
 		_label = ex->label;
@@ -243,18 +241,18 @@ void lsd::variable::init( object *_up, simulation *_sim, const char *_label, var
 void lsd::variable::empty( bool no_lock )
 {
 
-	if ( sim->running && ! no_lock )
+	if ( up->sim->running && ! no_lock )
 	{
 		// prevent concurrent use by more than one thread
 		rec_lguardT lock( var_comp_lck );
 	}
 
-	if ( sim->running && ( label == NULL || val == NULL ) )
+	if ( up->sim->running && ( label == NULL || val == NULL ) )
 	{
-		sim->error_hard( "internal problem in LSD",
-						 "if error persists, please contact developers",
-						 true,
-						 "failure while deallocating variable %s", label );
+		up->sim->error_hard( "internal problem in LSD",
+							 "if error persists, please contact developers",
+							 true,
+							 "failure while deallocating variable %s", label );
 		return;
 	}
 
@@ -310,6 +308,7 @@ double lsd::variable::cal( object *caller, int lag )
 {
 	int i, eff_lag;
 	double app;
+	simulation *sim = up->sim;
 
 #ifndef _TERM_
 	bool tit_updated;
@@ -382,7 +381,7 @@ double lsd::variable::cal( object *caller, int lag )
 			if ( sim->parallel_mode && ! dummy )
 				guard.lock( );
 
-			if ( last_update >= sim->t )		// recheck if not computed during lock
+			if ( last_update >= sim->t )// recheck if not computed during lock
 				return( val[ 0 ] );
 		}
 	}
@@ -642,6 +641,7 @@ void lsd::worker::cal_worker( void )
 {
 	int i;
 	double app;
+	simulation *sim = v->up->sim;
 
 	// create try-catch block to capture exceptions in thread and reroute to main thread
 	try
@@ -848,9 +848,9 @@ void lsd::worker::signal( int sig )
 	}
 
 	if ( v != NULL && v->label != NULL	)
-		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'\n(simulation %d). Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, v->label, v->up->label != NULL ? v->up->label : "(none)", sim->nsim );
+		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'\n(simulation %d). Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, v->label, v->up->label != NULL ? v->up->label : "(none)", v->up->sim->nsim );
 	else
-		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received by a parallel worker thread\n(simulation %d).\nDisable parallel computation to prevent this situation.", signame, sim->nsim );
+		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received by a parallel worker thread\n(simulation %d).\nDisable parallel computation to prevent this situation.", signame, v->up->sim->nsim );
 
 	// signal & kill thread
 	signum = sig;
@@ -895,6 +895,8 @@ bool lsd::worker::check( void )
 {
 	if ( running && ! errored )				// nothing to do?
 		return true;
+
+	simulation *sim = v->up->sim;
 
 	// only process first worker crash
 	l_guardT lock_crash( sim->wrk_crash_lck );

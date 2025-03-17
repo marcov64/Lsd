@@ -343,11 +343,8 @@ int lsd::simulation::init_new_seq( clock_t & start, char *bar_done, int & perc_d
 	{
 		workers = new worker[ max_threads ];
 		for ( i = 0; i < max_threads; ++i )
-		{
-			workers[ i ].sim = this;
 			workers[ i ].worker_thread = thrT( & lsd::worker::cal_worker, & workers[ i ] );
 		}
-	}
 
 	if ( ! da_en )
 	{
@@ -781,7 +778,7 @@ bool lsd::object::alloc_save_mem( void )
  *************************************************************/
 bool lsd::variable::alloc_save_var( void )
 {
-	if ( ! sim->running )
+	if ( ! up->sim->running )
 	{
 		data = NULL;
 		start = end = 0;
@@ -789,11 +786,11 @@ bool lsd::variable::alloc_save_var( void )
 	}
 
 	if ( num_lag > 0 || param == 1 )
-		start = sim->t - 1;
+		start = up->sim->t - 1;
 	else
-		start = sim->t;
+		start = up->sim->t;
 
-	end = sim->last_t;
+	end = up->sim->last_t;
 
 	// use C stdlib to be able to deallocate memory for deleted objects
 	free( data );
@@ -809,7 +806,7 @@ bool lsd::variable::alloc_save_var( void )
 		if ( num_lag > 0 || param == 1 )
 			data[ 0 ] = val[ 0 ];
 
-		++( sim->series_saved );
+		++( up->sim->series_saved );
 		return true;
 	}
 }

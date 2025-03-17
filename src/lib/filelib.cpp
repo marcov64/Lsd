@@ -2052,12 +2052,12 @@ void lsd::variable::save_single( void )
 
 	set_lab_tit( );
 	snprintf( fn, MAX_PATH_LENGTH, "%s_%s-%d_%d_seed-%d.res",
-			  label, lab_tit, start, end, sim->seed - 1 );
+			  label, lab_tit, start, end, up->sim->seed - 1 );
 	f = fopen( fn, "wt" );			// use text mode for Windows better compatibility
 
 	fprintf( f, "%s %s (%d %d)\t\n", label, lab_tit, start, end );
 
-	for ( i = 0; i <= sim->t - 1; ++i )
+	for ( i = 0; i <= up->sim->t - 1; ++i )
 		if ( i >= start && i <= end && ! std::isnan( data[ i - start ] ) )// save NaN as n/a
 			fprintf( f,"%lf\t\n", data[ i - start ] );
 		else
