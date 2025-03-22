@@ -720,41 +720,41 @@ bool lsd::object::alloc_save_mem( void )
 	// for each variable set the data saving support
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		if ( cv->num_lag > 0 || cv->param == 1 )
+		if ( cv->attr->num_lag > 0 || cv->param == 1 )
 		{
-			if ( ! cv->initialized )
+			if ( ! cv->attr->initialized )
 			{
 				sim->error_hard( "required initialization values missing",
 								 "select the object and choose menu 'Data'/'Initial Values'",
 								 false,
 								 "%s '%s' in object '%s' has not been initialized",
-								 cv->param == 1 ? "parameter" : "variable", cv->label, label );
+								 cv->param == 1 ? "parameter" : "variable", cv->attr->label, label );
 				goto error;
 			}
 
 			// ensure variable constraints are respected
-			for ( i = 0; i < ( cv->param == 1 ? 1 : cv->num_lag ); ++i )
+			for ( i = 0; i < ( cv->param == 1 ? 1 : cv->attr->num_lag ); ++i )
 				cv->val[ i ] = cv->chk_val( cv->val[ i ] );
 		}
 
 		cv->last_update = 0;
 
 		// choose next update step for special updating variables
-		if ( cv->delay > 0 || cv->delay_range > 0 )
+		if ( cv->attr->delay > 0 || cv->attr->delay_range > 0 )
 		{
-			cv->next_update = cv->delay;
-			if ( cv->delay_range > 0 )
-				cv->next_update += sim->rnd_int( 0, cv->delay_range );
+			cv->next_update = cv->attr->delay;
+			if ( cv->attr->delay_range > 0 )
+				cv->next_update += sim->rnd_int( 0, cv->attr->delay_range );
 		}
 
-		if ( cv->save || cv->savei )
+		if ( cv->attr->save || cv->attr->savei )
 			if ( ! cv->alloc_save_var( ) )
 				goto error;
 
 #ifndef _TERM_
 		// variable to parent name map for AoR (only in GUI mode)
 		if ( sim->liblnk != NULL )
-			sim->par_map.insert( std::make_pair < strT, strT > ( cv->label, label ) );
+			sim->par_map.insert( std::make_pair < strT, strT > ( cv->attr->label, label ) );
 #endif
 	}
 
@@ -785,7 +785,7 @@ bool lsd::variable::alloc_save_var( void )
 		return true;
 	}
 
-	if ( num_lag > 0 || param == 1 )
+	if ( attr->num_lag > 0 || param == 1 )
 		start = up->sim->t - 1;
 	else
 		start = up->sim->t;
@@ -803,7 +803,7 @@ bool lsd::variable::alloc_save_var( void )
 	}
 	else
 	{
-		if ( num_lag > 0 || param == 1 )
+		if ( attr->num_lag > 0 || param == 1 )
 			data[ 0 ] = val[ 0 ];
 
 		++( up->sim->series_saved );
@@ -823,10 +823,10 @@ void lsd::object::reset_end( void )
 
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		if ( cv->save )
+		if ( cv->attr->save )
 			cv->end = sim->eff_t;
 
-		if ( cv->savei == 1 )
+		if ( cv->attr->savei == 1 )
 			cv->save_single( );
 	}
 

@@ -564,7 +564,7 @@ void gui::show_descr( const char *lab, const char *parWnd )
 	cmd( "pack $w.f.l $w.f.d" );
 	cmd( "pack $w.f -expand yes -fill both -pady $_5" );
 
-	if ( ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL )
+	if ( ( cv->param == 1 || cv->attr->num_lag > 0 ) && cd->init != NULL )
 	{
 		cmd( "ttk::frame $w.i" );
 		cmd( "ttk::label $w.i.l -text \"Initial values\"" );
@@ -586,7 +586,7 @@ void gui::show_descr( const char *lab, const char *parWnd )
 	cmd( "$w.f.d.text insert end \"%s\"", strtcl( buf_descr, cd->text, MAX_BUFF_SIZE ) );
 	cmd( "$w.f.d.text conf -state disabled" );
 
-	if ( ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL )
+	if ( ( cv->param == 1 || cv->attr->num_lag > 0 ) && cd->init != NULL )
 	{
 		cmd( "$w.i.d.text insert end \"%s\"", strtcl( buf_descr, cd->init, MAX_BUFF_SIZE ) );
 		cmd( "$w.i.d.text conf -state disabled" );

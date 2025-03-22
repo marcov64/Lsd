@@ -87,7 +87,7 @@ void lsd::object::assign_plot_vars( int *count, const char *lab, bool da_en )
 		for ( auto cv = v; cv != NULL; cv = cv->next )
 			if ( cv->plot )
 			{
-				cmd( "lappend tp \"%s%s\"", cv->label, lab );
+				cmd( "lappend tp \"%s%s\"", cv->attr->label, lab );
 				++( *count );
 			}
 

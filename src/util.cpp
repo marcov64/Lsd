@@ -207,7 +207,7 @@ void gui::error_hard_helper( const char *boxTitle, const char *boxText, const ch
 		plog_tag( "\n\nError detected at time step: %d", "highlight", sim.t );
 		plog( "\n\nError: %s\nDetails: %s", boxTitle, logText );
 		if ( ! sim.parallel_mode && sim.stack_log != NULL && sim.stack_log->v != NULL )
-			plog( "\nOffending code contained in the equation for variable: '%s'", sim.stack_log->v->label );
+			plog( "\nOffending code contained in the equation for variable: '%s'", sim.stack_log->v->attr->label );
 		plog( "\nSuggestion: %s", boxText );
 		print_stack( );
 		cmd( "focustop .log" );
@@ -271,11 +271,11 @@ void gui::error_hard_helper( const char *boxTitle, const char *boxText, const ch
 	if ( err == 3 )
 	{
 		if ( ! sim.parallel_mode && sim.fast_mode == 0 && sim.stack_log != NULL &&
-			 sim.stack_log->v != NULL && sim.stack_log->v->label != NULL )
+			 sim.stack_log->v != NULL && sim.stack_log->v->attr != NULL && sim.stack_log->v->attr->label != NULL )
 		{
 			char err_msg[ MAX_LINE_SIZE ];
 			double useless = -1;
-			snprintf( err_msg, MAX_LINE_SIZE, "%s (ERROR)", sim.stack_log->v->label );
+			snprintf( err_msg, MAX_LINE_SIZE, "%s (ERROR)", sim.stack_log->v->attr->label );
 			sim.stack_log->v->up->debugger( NULL, err_msg, & useless );
 		}
 
@@ -668,22 +668,22 @@ int gui::Tcl_get_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const
 	// get the appropriate value for variable
 	res[ 1 ] = '\0';					// default is 1 char string array
 	if ( ! strcmp( argv[ 2 ], "save" ) )
-		res[ 0 ] = cv->save ? '1' : '0';
+		res[ 0 ] = cv->attr->save ? '1' : '0';
 	else
-		if ( ! strcmp( argv[ 2 ], "plot" ) )
-			res[ 0 ] = cv->plot ? '1' : '0';
+		if ( ! strcmp( argv[ 2 ], "parallel" ) )
+			res[ 0 ] = cv->attr->parallel ? '1' : '0';
 		else
-			if ( ! strcmp( argv[ 2 ], "debug" ) )
-				res[ 0 ] = ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? '1' : '0';
+			if ( ! strcmp( argv[ 2 ], "plot" ) )
+				res[ 0 ] = cv->plot ? '1' : '0';
 			else
-				if ( ! strcmp( argv[ 2 ], "watch" ) )
-					res[ 0 ] = ( cv->deb_mode == 'w' || cv->deb_mode == 'W' ) ? '1' : '0';
+				if ( ! strcmp( argv[ 2 ], "debug" ) )
+					res[ 0 ] = ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? '1' : '0';
 				else
-					if ( ! strcmp( argv[ 2 ], "watch_write" ) )
-						res[ 0 ] = ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? '1' : '0';
+					if ( ! strcmp( argv[ 2 ], "watch" ) )
+						res[ 0 ] = ( cv->deb_mode == 'w' || cv->deb_mode == 'W' ) ? '1' : '0';
 					else
-						if ( ! strcmp( argv[ 2 ], "parallel" ) )
-							res[ 0 ] = cv->parallel ? '1' : '0';
+						if ( ! strcmp( argv[ 2 ], "watch_write" ) )
+							res[ 0 ] = ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? '1' : '0';
 						else
 							return TCL_ERROR;
 
@@ -715,96 +715,92 @@ int gui::Tcl_set_var_conf( ClientData cdata, Tcl_Interp *interp, int argc, const
 	if ( cv == NULL )					// variable not found
 		return TCL_ERROR;
 
-	// set the appropriate value for variable (all instances)
-	for ( cur = curr_obj; cur != NULL; cur = cur->hyper_next( cur->label ) )
-	{
-		cv = cur->search_var( NULL, vname );
-		if ( ! strcmp( argv[ 2 ], "save" ) )
-			cv->save = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+	// set the appropriate value for variable (static attributes)
+	if ( ! strcmp( argv[ 2 ], "save" ) )
+		cv->attr->save = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+	else
+		if ( ! strcmp( argv[ 2 ], "savei" ) )
+			cv->attr->savei = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
 		else
-			if ( ! strcmp( argv[ 2 ], "savei" ) )
-				cv->savei = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+			if ( ! strcmp( argv[ 2 ], "parallel" ) )
+				cv->attr->parallel  = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
 			else
-				if ( ! strcmp( argv[ 2 ], "plot" ) )
-					cv->plot = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
-				else
-					if ( ! strcmp( argv[ 2 ], "debug" ) )
-					{
-						if ( ! strcmp( argv[ 3 ], "1" ) )
-						{
-							if ( cv->deb_mode == 'n' )
-								cv->deb_mode = 'd';
-							else
-								if ( cv->deb_mode == 'w' )
-									cv->deb_mode = 'W';
-								else
-									if ( cv->deb_mode == 'r' )
-										cv->deb_mode = 'R';
-						}
-						else
-						{
-							if ( cv->deb_mode == 'd' )
-								cv->deb_mode = 'n';
-							else
-								if ( cv->deb_mode == 'W' )
-									cv->deb_mode = 'w';
-								else
-									if ( cv->deb_mode == 'R' )
-										cv->deb_mode = 'r';
-						}
-					}
+				// set the appropriate value for variable (all instances)
+				for ( cur = curr_obj; cur != NULL; cur = cur->hyper_next( cur->label ) )
+				{
+					cv = cur->search_var( NULL, vname );
+
+					if ( ! strcmp( argv[ 2 ], "plot" ) )
+						cv->plot = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
 					else
-						if ( ! strcmp( argv[ 2 ], "watch" ) )
-						{
+						if ( ! strcmp( argv[ 2 ], "debug" ) )
 							if ( ! strcmp( argv[ 3 ], "1" ) )
 							{
-								if ( cv->deb_mode == 'n' || cv->deb_mode == 'r' )
-									cv->deb_mode = 'w';
+								if ( cv->deb_mode == 'n' )
+									cv->deb_mode = 'd';
 								else
-									if ( cv->deb_mode == 'd' || cv->deb_mode == 'R' )
+									if ( cv->deb_mode == 'w' )
 										cv->deb_mode = 'W';
+									else
+										if ( cv->deb_mode == 'r' )
+											cv->deb_mode = 'R';
 							}
 							else
 							{
-								if ( cv->deb_mode == 'w' || cv->deb_mode == 'r' )
+								if ( cv->deb_mode == 'd' )
 									cv->deb_mode = 'n';
 								else
-									if ( cv->deb_mode == 'W' || cv->deb_mode == 'R' )
-										cv->deb_mode = 'd';
-							}
-						}
-						else
-							if ( ! strcmp( argv[ 2 ], "watch_write" ) )
-							{
-								if ( ! strcmp( argv[ 3 ], "1" ) )
-								{
-									if ( cv->deb_mode == 'n' || cv->deb_mode == 'w' )
-										cv->deb_mode = 'r';
-									else
-										if ( cv->deb_mode == 'd' || cv->deb_mode == 'W' )
-											cv->deb_mode = 'R';
-								}
-								else
-								{
-									if ( cv->deb_mode == 'r' )
-										cv->deb_mode = 'n';
+									if ( cv->deb_mode == 'W' )
+										cv->deb_mode = 'w';
 									else
 										if ( cv->deb_mode == 'R' )
+											cv->deb_mode = 'r';
+							}
+						else
+							if ( ! strcmp( argv[ 2 ], "watch" ) )
+								if ( ! strcmp( argv[ 3 ], "1" ) )
+								{
+									if ( cv->deb_mode == 'n' || cv->deb_mode == 'r' )
+										cv->deb_mode = 'w';
+									else
+										if ( cv->deb_mode == 'd' || cv->deb_mode == 'R' )
+											cv->deb_mode = 'W';
+								}
+								else
+								{
+									if ( cv->deb_mode == 'w' || cv->deb_mode == 'r' )
+										cv->deb_mode = 'n';
+									else
+										if ( cv->deb_mode == 'W' || cv->deb_mode == 'R' )
 											cv->deb_mode = 'd';
 								}
-							}
 							else
-								if ( ! strcmp( argv[ 2 ], "parallel" ) )
-									cv->parallel  = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+								if ( ! strcmp( argv[ 2 ], "watch_write" ) )
+									if ( ! strcmp( argv[ 3 ], "1" ) )
+									{
+										if ( cv->deb_mode == 'n' || cv->deb_mode == 'w' )
+											cv->deb_mode = 'r';
+										else
+											if ( cv->deb_mode == 'd' || cv->deb_mode == 'W' )
+												cv->deb_mode = 'R';
+									}
+									else
+									{
+										if ( cv->deb_mode == 'r' )
+											cv->deb_mode = 'n';
+										else
+											if ( cv->deb_mode == 'R' )
+												cv->deb_mode = 'd';
+									}
 								else
 									return TCL_ERROR;
-	}
+					}
 
 	unsaved_change( true );				// signal unsaved change
 	redrawReq = true;
 
-	if ( ( ! strcmp( argv[ 2 ], "save" ) && cv->save ) ||
-		 ( ! strcmp( argv[ 2 ], "savei" ) && cv->savei ) )
+	if ( ( ! strcmp( argv[ 2 ], "save" ) && cv->attr->save ) ||
+		 ( ! strcmp( argv[ 2 ], "savei" ) && cv->attr->savei ) )
 	{
 		for ( cur = curr_obj; cur != NULL; cur = cur->up )
 			if ( ! cur->to_compute )
@@ -934,9 +930,7 @@ bool gui::check_term_exec( const char *term_exe )
  *************************************************************/
 int lsd::object::check_label( const char *lab )
 {
-	bridge *cb;
 	object *cur;
-	variable *cv;
 
 	if ( ! valid_label( lab ) )
 		return 2;				// invalid characters (incl. spaces)
@@ -944,11 +938,11 @@ int lsd::object::check_label( const char *lab )
 	if ( ! strcmp( lab, label ) )
 		return 1;
 
-	for ( cv = v; cv != NULL; cv = cv->next )
-		if ( ! strcmp( lab, cv->label ) )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+		if ( ! strcmp( lab, cv->attr->label ) )
 			return 1;
 
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			cur = sim->blueprint->search( cb->label );
@@ -968,18 +962,16 @@ int lsd::object::check_label( const char *lab )
  *************************************************************/
 void lsd::object::control_to_compute( void )
 {
-	bridge *cb;
 	object *cur;
-	variable *cv;
 
-	for ( cv = v; cv != NULL; cv = cv->next )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
 		if ( ! gui::check_save )
 			return;
 
-		if ( cv->save == 1 )
+		if ( cv->attr->save == 1 )
 		{
-			cmd( "set res [ ttk::messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->label, label );
+			cmd( "set res [ ttk::messageBox -parent . -type okcancel -default ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\n\nPress 'OK' to check for more disabled elements or 'Cancel' to proceed without further checking.\" ]", cv->attr->label, label );
 			cmd( "if [ string equal $res cancel ] { set res 1 } { set res 0 }" );
 
 			if ( gui::get_bool( "res" ) )
@@ -987,7 +979,7 @@ void lsd::object::control_to_compute( void )
 		}
 	}
 
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			cur = sim->blueprint->search( cb->label );
@@ -1004,15 +996,13 @@ void lsd::object::control_to_compute( void )
  *************************************************************/
 void lsd::object::count_save( int *count )
 {
-	bridge *cb;
 	object *cur;
-	variable *cv;
 
-	for ( cv = v; cv != NULL; cv = cv->next )
-		if ( cv->save == 1 || cv->savei == 1 )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+		if ( cv->attr->save == 1 || cv->attr->savei == 1 )
 			( *count )++;
 
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			cur = sim->blueprint->search( cb->label );
@@ -1029,32 +1019,30 @@ void lsd::object::count_save( int *count )
 void lsd::object::show_save( void )
 {
 	char out[ 3 * MAX_ELEM_LENGTH ];
-	bridge *cb;
 	object *cur;
-	variable *cv;
 
-	for ( cv = v; cv != NULL; cv = cv->next )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
-		if ( cv->save == 1 || cv->savei == 1 )
+		if ( cv->attr->save == 1 || cv->attr->savei == 1 )
 		{
 			if ( cv->param == 1 )
 				snprintf( out, 3 * MAX_ELEM_LENGTH, "Object: %s \tParameter:\t", label );
 			else
 				snprintf( out, 3 * MAX_ELEM_LENGTH, "Object: %s \tVariable :\t", label );
-			if ( cv->savei == 1 )
+			if ( cv->attr->savei == 1 )
 			{
-				if ( cv->save == 1 )
+				if ( cv->attr->save == 1 )
 				   strcatn( out, " (memory and disk)", 3 * MAX_ELEM_LENGTH );
 				else
 				   strcatn( out, " (disk only)", 3 * MAX_ELEM_LENGTH );
 			}
 			gui::plog( out );
-			gui::plog_tag( "%s\n", "highlight", cv->label );
+			gui::plog_tag( "%s\n", "highlight", cv->attr->label );
 			++gui::elem_count;
 		}
 	}
 
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			cur = sim->blueprint->search( cb->label );
@@ -1070,17 +1058,11 @@ void lsd::object::show_save( void )
  *************************************************************/
 void lsd::object::clean_save( void )
 {
-	bridge *cb;
-	object *cur;
-	variable *cv;
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+		cv->attr->save = cv->attr->savei = false;
 
-	for ( cv = v; cv != NULL; cv = cv->next )
-	{
-		cv->save = 0;
-		cv->savei = 0;
-	}
-	for ( cb = b; cb != NULL; cb = cb->next )
-		for ( cur = cb->head; cur != NULL; cur = cur->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
+		for ( auto cur = cb->head; cur != NULL; cur = cur->next )
 			cur->clean_save( );
 }
 
@@ -1090,11 +1072,9 @@ void lsd::object::clean_save( void )
  *************************************************************/
 void lsd::object::show_plot( void )
 {
-	bridge *cb;
 	object *cur;
-	variable *cv;
 
-	for ( cv = v; cv != NULL; cv = cv->next )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
 		if ( cv->plot )
 		{
 			if ( cv->param == 1 )
@@ -1103,16 +1083,18 @@ void lsd::object::show_plot( void )
 				gui::plog( "Object: %s \tVariable :\t", label );
 			if ( cv->param == 2 )
 				gui::plog( "Object: %s \tFunction :\t", label );
-			gui::plog_tag( "%s\n", "highlight", cv->label );
+
+			gui::plog_tag( "%s\n", "highlight", cv->attr->label );
 			++gui::elem_count;
 		}
 
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			cur = sim->blueprint->search( cb->label );
 		else
 			cur = cb->head;
+
 		cur->show_plot( );
 	}
 }
@@ -1123,15 +1105,11 @@ void lsd::object::show_plot( void )
  *************************************************************/
 void lsd::object::clean_plot( void )
 {
-	bridge *cb;
-	object *cur;
-	variable *cv;
-
-	for ( cv = v; cv != NULL; cv = cv->next )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
 		cv->plot = false;
 
-	for ( cb = b; cb != NULL; cb = cb->next )
-		for ( cur = cb->head; cur != NULL; cur = cur->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
+		for ( auto cur = cb->head; cur != NULL; cur = cur->next )
 			cur->clean_plot( );
 }
 
@@ -1141,11 +1119,9 @@ void lsd::object::clean_plot( void )
  *************************************************************/
 void lsd::object::show_debug( void )
 {
-	bridge *cb;
 	object *cur;
-	variable *cv;
 
-	for ( cv = v; cv != NULL; cv = cv->next )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
 		if ( cv->deb_mode != 'n' )
 		{
 			if ( cv->param == 0 )
@@ -1155,7 +1131,7 @@ void lsd::object::show_debug( void )
 			if ( cv->param == 2 )
 				gui::plog( "Object: %s \tFunction:\t", label );
 
-			gui::plog_tag( "%s\t", "highlight", cv->label );
+			gui::plog_tag( "%s\t", "highlight", cv->attr->label );
 
 			switch ( cv->deb_mode )
 			{
@@ -1179,7 +1155,7 @@ void lsd::object::show_debug( void )
 			++gui::elem_count;
 		}
 
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			cur = sim->blueprint->search( cb->label );
@@ -1195,15 +1171,11 @@ void lsd::object::show_debug( void )
  *************************************************************/
 void lsd::object::clean_debug( void )
 {
-	bridge *cb;
-	object *cur;
-	variable *cv;
-
-	for ( cv = v; cv != NULL; cv = cv->next )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
 		cv->deb_mode = 'n';
 
-	for ( cb = b; cb != NULL; cb = cb->next )
-		for ( cur = cb->head; cur != NULL; cur = cur->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
+		for ( auto cur = cb->head; cur != NULL; cur = cur->next )
 			cur->clean_debug( );
 }
 
@@ -1213,19 +1185,17 @@ void lsd::object::clean_debug( void )
  *************************************************************/
 void lsd::object::show_parallel( void )
 {
-	bridge *cb;
 	object *cur;
-	variable *cv;
 
-	for ( cv = v; cv != NULL; cv = cv->next )
-		if ( cv->parallel )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+		if ( cv->attr->parallel )
 		{
 			gui::plog( "Object: %s \tVariable:\t", label );
-			gui::plog_tag( "%s\n", "highlight", cv->label );
+			gui::plog_tag( "%s\n", "highlight", cv->attr->label );
 			++gui::elem_count;
 		}
 
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			cur = sim->blueprint->search( cb->label );
@@ -1241,15 +1211,11 @@ void lsd::object::show_parallel( void )
  *************************************************************/
 void lsd::object::clean_parallel( void )
 {
-	bridge *cb;
-	object *cur;
-	variable *cv;
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+		cv->attr->parallel = false;
 
-	for ( cv = v; cv != NULL; cv = cv->next )
-		cv->parallel = false;
-
-	for ( cb = b; cb != NULL; cb = cb->next )
-		for ( cur = cb->head; cur != NULL; cur = cur->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
+		for ( auto cur = cb->head; cur != NULL; cur = cur->next )
 			cur->clean_parallel( );
 }
 
@@ -1263,7 +1229,7 @@ void lsd::object::show_observe( void )
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
-		auto cd = desc != NULL ? desc->search_descr( cv->label ) : NULL;
+		auto cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
 		if ( cd != NULL && cd->observe )
 		{
 			if ( cv->param == 1 )
@@ -1271,7 +1237,7 @@ void lsd::object::show_observe( void )
 			else
 				gui::plog( "Object: %s \tVariable :\t", label );
 
-			gui::plog_tag( "%s (%lf)\n", "highlight", cv->label, cv->val[ 0 ] );
+			gui::plog_tag( "%s (%lf)\n", "highlight", cv->attr->label, cv->val[ 0 ] );
 			++gui::elem_count;
 		}
 	}
@@ -1296,7 +1262,7 @@ void lsd::object::show_initial( void )
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
-		auto cd = desc != NULL ? desc->search_descr( cv->label ) : NULL;
+		auto cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
 		if ( cd != NULL && cd->initial )
 		{
 			if ( cv->param == 1 )
@@ -1307,13 +1273,13 @@ void lsd::object::show_initial( void )
 				gui::plog( "Object: %s \tFunction :\t", label );
 
 			++gui::elem_count;
-			gui::plog_tag( "%s \t", "highlight", cv->label );
+			gui::plog_tag( "%s \t", "highlight", cv->attr->label );
 
 			if ( cd->init == NULL || strlen( cd->init ) == 0 )
 			{
 				for ( auto cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				{
-					auto cv1 = cur->search_var( NULL, cv->label );
+					auto cv1 = cur->search_var( NULL, cv->attr->label );
 					gui::plog( " %g", cv1->val[ 0 ] );
 				}
 			}
@@ -1335,19 +1301,17 @@ void lsd::object::show_initial( void )
  *************************************************************/
 void lsd::object::show_special_updat( void )
 {
-	bridge *cb;
 	object *cur;
-	variable *cv;
 
-	for ( cv = v; cv != NULL; cv = cv->next )
-		if ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+		if ( cv->attr->delay > 0 || cv->attr->delay_range > 0 || cv->attr->period > 1 || cv->attr->period_range > 0 )
 		{
 			gui::plog( "Object: %s \tVariable:\t", label );
-			gui::plog_tag( "%s\n", "highlight", cv->label );
+			gui::plog_tag( "%s\n", "highlight", cv->attr->label );
 			++gui::elem_count;
 		}
 
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
 			cur = sim->blueprint->search( cb->label );

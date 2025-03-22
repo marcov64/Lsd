@@ -351,10 +351,9 @@ void lsd::object::set_blueprint( object *container )
 {
 	bridge *cb, *cb1;
 	object *cur, *cur1;
-	variable *cv;
 
-	for ( cv = v; cv != NULL; cv = cv->next )
-		container->add_var_from_example( cv );
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+		container->add_var( cv );
 
 	delete [ ] container->label;
 
@@ -412,16 +411,13 @@ void lsd::simulation::reset_blueprint( object *r )
  *************************************************************/
 bool lsd::object::search_parallel( void )
 {
-	bridge *cb;
-	variable *cv;
-
 	// search among the variables
-	for ( cv = v; cv != NULL; cv=cv->next )
-		if ( cv->parallel )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+		if ( cv->attr->parallel )
 			return true;
 
 	// search among descendants
-	for ( cb = b; cb != NULL; cb = cb->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
 		if ( cb->head != NULL )
 			if ( cb->head->search_parallel( ) )
 				return true;

@@ -408,56 +408,56 @@ int gui::browse( lsd::object *r )
 			for ( cv = r->v, i = 0; cv != NULL; cv = cv->next, ++i )
 			{
 				// special updating scheme?
-				if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 ) )
+				if ( cv->param == 0 && ( cv->attr->delay > 0 || cv->attr->delay_range > 0 || cv->attr->period > 1 || cv->attr->period_range > 0 ) )
 					sp_upd = true;
 				else
 					sp_upd = false;
 
 				// data assimilation set?
-				if ( ( ca = da.search( cv->label ) ) != da.ass_elem.end( ) && ! ca->disable )
+				if ( ( ca = da.search( cv->attr->label ) ) != da.ass_elem.end( ) && ! ca->disable )
 					da_en = true;
 				else
 					da_en = false;
 
 				// set flags string
-				cmd( "set varFlags \"%s%s%s%s%s%s%s\"", da_en ? "@" : "", sp_upd ? "\u00A7" : "", cv->parallel ? "&" : "", cv->plot ? "*" : "", ( cv->save || cv->savei ) ? "+" : "", ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? "!" : "", ( cv->deb_mode == 'w' || cv->deb_mode == 'W' ) ? "?" : "", ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? "\u00BF" : "" );
+				cmd( "set varFlags \"%s%s%s%s%s%s%s\"", da_en ? "@" : "", sp_upd ? "\u00A7" : "", cv->attr->parallel ? "&" : "", cv->plot ? "*" : "", ( cv->attr->save || cv->attr->savei ) ? "+" : "", ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? "!" : "", ( cv->deb_mode == 'w' || cv->deb_mode == 'W' ) ? "?" : "", ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? "\u00BF" : "" );
 
 				// add elements to the listbox
 				if ( cv->param == 0 )
 				{
-					if ( cv->num_lag == 0 )
+					if ( cv->attr->num_lag == 0 )
 					{
-						cmd( ".l.v.c.var_name insert end \"%s (V$varFlags)\"", cv->label );
+						cmd( ".l.v.c.var_name insert end \"%s (V$varFlags)\"", cv->attr->label );
 						cmd( ".l.v.c.var_name itemconf %d -fg $colorsTheme(var)", i );
 					}
 					else
 					{
-						cmd( ".l.v.c.var_name insert end \"%s (V_%d$varFlags)\"", cv->label, cv->num_lag );
+						cmd( ".l.v.c.var_name insert end \"%s (V_%d$varFlags)\"", cv->attr->label, cv->attr->num_lag );
 						cmd( ".l.v.c.var_name itemconf %d -fg $colorsTheme(lvar)", i );
 					}
 				}
 
 				if ( cv->param == 1 )
 				{
-					cmd( ".l.v.c.var_name insert end \"%s (P$varFlags)\"", cv->label );
+					cmd( ".l.v.c.var_name insert end \"%s (P$varFlags)\"", cv->attr->label );
 					cmd( ".l.v.c.var_name itemconf %d -fg $colorsTheme(par)", i );
 				}
 
 				if ( cv->param == 2 )
 				{
-					if ( cv->num_lag == 0 )
+					if ( cv->attr->num_lag == 0 )
 					{
-						cmd( " .l.v.c.var_name insert end \"%s (F$varFlags)\"", cv->label );
+						cmd( " .l.v.c.var_name insert end \"%s (F$varFlags)\"", cv->attr->label );
 						cmd( ".l.v.c.var_name itemconf %d -fg $colorsTheme(fun)", i );
 					}
 					else
 					{
-						cmd( ".l.v.c.var_name insert end \"%s (F_%d$varFlags)\"", cv->label, cv->num_lag );
+						cmd( ".l.v.c.var_name insert end \"%s (F_%d$varFlags)\"", cv->attr->label, cv->attr->num_lag );
 						cmd( ".l.v.c.var_name itemconf %d -fg $colorsTheme(lfun)", i );
 					}
 				}
 
-				set_ttip_descr( ".l.v.c.var_name", cv->label, i );
+				set_ttip_descr( ".l.v.c.var_name", cv->attr->label, i );
 			}
 
 			cmd( "set nVar [ .l.v.c.var_name size ]" );
@@ -1697,13 +1697,13 @@ void lsd::object::wipe_out( void )
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		// remove from element lists
-		cmd( "if [ info exists modElem ] { set pos [ lsearch -exact $modElem %s ]; if { $pos >= 0 } { set modElem [ lreplace $modElem $pos $pos ] } }", cv->label );
-		cmd( "if [ info exists modVar ] { set pos [ lsearch -exact $modVar %s ]; if { $pos >= 0 } { set modVar [ lreplace $modVar $pos $pos ] } }", cv->label );
-		cmd( "if [ info exists modPar ] { set pos [ lsearch -exact $modPar %s ]; if { $pos >= 0 } { set modPar [ lreplace $modPar $pos $pos ] } }", cv->label );
-		cmd( "if [ info exists modFun ] { set pos [ lsearch -exact $modFun %s ]; if { $pos >= 0 } { set modFun [ lreplace $modFun $pos $pos ] } }", cv->label );
+		cmd( "if [ info exists modElem ] { set pos [ lsearch -exact $modElem %s ]; if { $pos >= 0 } { set modElem [ lreplace $modElem $pos $pos ] } }", cv->attr->label );
+		cmd( "if [ info exists modVar ] { set pos [ lsearch -exact $modVar %s ]; if { $pos >= 0 } { set modVar [ lreplace $modVar $pos $pos ] } }", cv->attr->label );
+		cmd( "if [ info exists modPar ] { set pos [ lsearch -exact $modPar %s ]; if { $pos >= 0 } { set modPar [ lreplace $modPar $pos $pos ] } }", cv->attr->label );
+		cmd( "if [ info exists modFun ] { set pos [ lsearch -exact $modFun %s ]; if { $pos >= 0 } { set modFun [ lreplace $modFun $pos $pos ] } }", cv->attr->label );
 
 		if ( desc != NULL )
-			desc->change_descr( cv->label );
+			desc->change_descr( cv->attr->label );
 	}
 
 	cur = hyper_next( label );
@@ -1724,10 +1724,10 @@ void lsd::object::wipe_out( void )
 
 	if ( direction == -1 )
 	{	// shift up
-		if ( ! strcmp( vlab, v->label ) )
+		if ( ! strcmp( vlab, v->attr->label ) )
 			return;		// variable already at the top
 
-		if ( ! strcmp( vlab, v->next->label ) )
+		if ( ! strcmp( vlab, v->next->attr->label ) )
 		{	// second var, must become the head of the chain
 			cv = v->next->next;		// third
 			cv1 = v;				// first
@@ -1739,7 +1739,7 @@ void lsd::object::wipe_out( void )
 
 		for ( cv = v; cv != NULL; cv = cv->next )
 		{
-			if ( ! strcmp( vlab, cv->label ) )
+			if ( ! strcmp( vlab, cv->attr->label ) )
 			{
 				cv2->next = cv;
 				cv1->next = cv->next;
@@ -1754,7 +1754,7 @@ void lsd::object::wipe_out( void )
 
 	if ( direction == 1 )
 	{	// move down
-		if ( ! strcmp( vlab, v->label ) )
+		if ( ! strcmp( vlab, v->attr->label ) )
 		{	// it's the first
 			if ( v->next == NULL )
 				return;				// it is unique
@@ -1769,7 +1769,7 @@ void lsd::object::wipe_out( void )
 
 		for ( cv = v; cv != NULL; cv = cv->next )
 		{
-			if ( ! strcmp( vlab,cv->label ) )
+			if ( ! strcmp( vlab,cv->attr->label ) )
 			{
 				if ( cv->next == NULL )
 					return;			// already at the end
@@ -1863,10 +1863,10 @@ void lsd::object::shift_desc( int direction, const char *dlab )
  *************************************************************/
 namespace lsd
 {
-	bool ascending_objects( const bridge &a, const bridge &b ) { return ( strcmp( a.label, b.label ) < 0 ); }
-	bool descending_objects( const bridge &a, const bridge &b ) { return ( strcmp( a.label, b.label ) > 0 ); }
-	bool ascending_variables( const variable &a, const variable &b ) { return ( strcmp( a.label, b.label ) < 0 ); }
-	bool descending_variables( const variable &a, const variable &b ) { return ( strcmp( a.label, b.label ) > 0 ); }
+	bool ascending_objects( const bridge & a, const bridge & b  ) { return ( strcmp( a.label, b.label ) < 0 ); }
+	bool descending_objects( const bridge & a, const bridge & b ) { return ( strcmp( a.label, b.label ) > 0 ); }
+	bool ascending_variables( const variable & a, const variable & b ) { return ( strcmp( a.attr->label, b.attr->label ) < 0 ); }
+	bool descending_variables( const variable & a, const variable & b ) { return ( strcmp( a.attr->label, b.attr->label ) > 0 ); }
 }
 
 

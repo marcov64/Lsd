@@ -41,7 +41,7 @@ int lsd::sensitivity::dataentry( void )
 	int i, j, res, nPar, samples;
 	variable *cv = sim->root->search_var( NULL, label, true );
 
-	if ( cv != NULL && cv->integer )
+	if ( cv != NULL && cv->attr->integer )
 		int_var = true;
 
 	cmd( "set integer %d", int_var ? 1 : integer );

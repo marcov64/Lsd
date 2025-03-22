@@ -537,23 +537,23 @@ void lsd::variable::write_var( FILE *frep )
 	fprintf( frep, "<HR WIDTH=\"100%%\">\n" );
 
 	if ( param == 0 )
-		fprintf( frep, "<A NAME=\"_d_%s\"><H4>Variable: &nbsp;<TT><U>%s</U></TT></H4></A>", label, label );
+		fprintf( frep, "<A NAME=\"_d_%s\"><H4>Variable: &nbsp;<TT><U>%s</U></TT></H4></A>", attr->label, attr->label );
 	if ( param == 1 )
-		fprintf( frep, "<A NAME=\"_d_%s\"><H4>Parameter: &nbsp;<TT><U>%s</U></TT></H4></A>", label, label );
+		fprintf( frep, "<A NAME=\"_d_%s\"><H4>Parameter: &nbsp;<TT><U>%s</U></TT></H4></A>", attr->label, attr->label );
 	if ( param == 2 )
-		fprintf( frep, "<A NAME=\"_d_%s\"><H4>Function: &nbsp;<TT><U>%s</U></TT></H4></A>", label, label );
+		fprintf( frep, "<A NAME=\"_d_%s\"><H4>Function: &nbsp;<TT><U>%s</U></TT></H4></A>", attr->label, attr->label );
 
-	if ( num_lag > 0 )
-		fprintf( frep, "<I>Lags: &nbsp;</I>%d<BR>", num_lag );
+	if ( attr->num_lag > 0 )
+		fprintf( frep, "<I>Lags: &nbsp;</I>%d<BR>", attr->num_lag );
 
-	if ( integer )
+	if ( attr->integer )
 		fprintf( frep, "<I>Integer: &nbsp;</I>yes<BR>" );
 
-	if ( ! std::isnan( min_val ) )
-		fprintf( frep, "<I>Minimum: &nbsp;</I>%g<BR>", min_val );
+	if ( ! std::isnan( attr->min_val ) )
+		fprintf( frep, "<I>Minimum: &nbsp;</I>%g<BR>", attr->min_val );
 
-	if ( ! std::isnan( max_val ) )
-		fprintf( frep, "<I>Maximum: &nbsp;</I>%g<BR>", max_val );
+	if ( ! std::isnan( attr->max_val ) )
+		fprintf( frep, "<I>Maximum: &nbsp;</I>%g<BR>", attr->max_val );
 
 	fprintf( frep, "<I>Contained in: &nbsp;</I><A HREF=\"#%s\"><TT>%s</TT></A><BR>", up->label, up->label );
 
@@ -581,7 +581,7 @@ void lsd::variable::write_var( FILE *frep )
 		{
 			if ( gui::eq_header( c1_lab, c2_lab, updt_in ) )
 			{
-				done = gui::eq_contains( ffun, label, strlen( label ) );
+				done = gui::eq_contains( ffun, attr->label, strlen( attr->label ) );
 
 				if ( done )
 				{
@@ -615,17 +615,17 @@ void lsd::variable::write_var( FILE *frep )
 	fprintf( frep, "<BR>\n" );
 
 	// print initial values
-	if ( param == 1 || ( param == 0 && num_lag > 0 ) )
+	if ( param == 1 || ( param == 0 && attr->num_lag > 0 ) )
 	{
 		fprintf( frep,"<I>Initial values (by instance): &nbsp;</I>" );
 
-		if ( param == 1 || num_lag == 1 )
+		if ( param == 1 || attr->num_lag == 1 )
 		{
 			fprintf( frep, "%g", val[ 0 ] );
 
 			for ( j = 1, cur = up->hyper_next( up->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
 			{
-				cv = cur->search_var( cur, label );
+				cv = cur->search_var( cur, attr->label );
 				fprintf( frep, ", %g", cv->val[ 0 ] );
 			}
 
@@ -636,13 +636,13 @@ void lsd::variable::write_var( FILE *frep )
 		}
 		else
 		{
-			for ( i = 0; i < num_lag; ++i )
+			for ( i = 0; i < attr->num_lag; ++i )
 			{
 				fprintf( frep, "<P style=\"margin-left:10px;\"><I>Lag %d:</I> %g", i + 1, val[ i ] );
 
 				for ( j = 1, cur = up->hyper_next( up->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
 				{
-					cv = cur->search_var( cur, label );
+					cv = cur->search_var( cur, attr->label );
 					fprintf( frep, ", %g", cv->val[ i ] );
 				}
 
@@ -683,7 +683,7 @@ void lsd::variable::write_var( FILE *frep )
 				else
 					done = 1;		// will never stop with {} only
 
-				if ( ! strcmp( c2_lab, label ) )
+				if ( ! strcmp( c2_lab, attr->label ) )
 				{
 					found = false;
 					one = true;
@@ -706,9 +706,9 @@ void lsd::variable::write_var( FILE *frep )
 						if ( gui::eq_dum && ( ! strncmp( c1_lab, "EQUATION(", 9 ) || ! strncmp( c1_lab, "EQUATION_DUMMY(", 15 ) || ! strncmp( c1_lab, "FUNCTION(", 9 ) || ! strncmp( c1_lab, "MODELEND", 8 ) ) )
 						{
 							if ( strlen( updt_in ) > 0 )
-								snprintf( c1_lab, 2 * MAX_LINE_SIZE, "(DUMMY EQUATION: variable '%s' updated in '%s')", label, updt_in );
+								snprintf( c1_lab, 2 * MAX_LINE_SIZE, "(DUMMY EQUATION: variable '%s' updated in '%s')", attr->label, updt_in );
 							else
-								snprintf( c1_lab, 2 * MAX_LINE_SIZE, "(DUMMY EQUATION: variable '%s' not updated here)", label );
+								snprintf( c1_lab, 2 * MAX_LINE_SIZE, "(DUMMY EQUATION: variable '%s' not updated here)", attr->label );
 
 							done = 0;
 						}
@@ -858,7 +858,7 @@ void lsd::object::find_using( variable *v, FILE *frep, bool *found )
 
 		while ( fgets( c1_lab, 2 * MAX_LINE_SIZE, ffun ) != NULL )
 			if ( gui::eq_header( c1_lab, c2_lab, updt_in ) )
-				if ( gui::eq_dum && ! strcmp( c2_lab, v->label ) )
+				if ( gui::eq_dum && ! strcmp( c2_lab, v->attr->label ) )
 				{
 					fclose( ffun );
 					return;
@@ -892,24 +892,24 @@ void lsd::object::find_using( variable *v, FILE *frep, bool *found )
 					if ( gui::eq_header( c1_lab, c2_lab, updt_in ) )
 					{
 						done = false;
-						if ( ! strcmp( c2_lab, v->label ) )
-							done = gui::eq_contains( ffun, cv->label, strlen( cv->label ) );
+						if ( ! strcmp( c2_lab, v->attr->label ) )
+							done = gui::eq_contains( ffun, cv->attr->label, strlen( cv->attr->label ) );
 						if ( done )
 						{
 							// avoid duplicated variable equations
-							cmd( "if { [ lsearch -exact $usingList %s ] >= 0 } { set res 1 } { set res 0 }", cv->label );
+							cmd( "if { [ lsearch -exact $usingList %s ] >= 0 } { set res 1 } { set res 0 }", cv->attr->label );
 							if ( gui::get_int( "res", & done ) )
 								continue;
 							else
-								cmd( "lappend usingList %s", cv->label );
+								cmd( "lappend usingList %s", cv->attr->label );
 
 							if ( frep != NULL )
 							{
-								fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one ? ", " : "", cv->label, cv->label );
+								fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one ? ", " : "", cv->attr->label, cv->attr->label );
 								one = true;
 							}
 							else
-								cmd( "$list.l.l insert end %s", cv->label );
+								cmd( "$list.l.l insert end %s", cv->attr->label );
 
 							*found = true;
 						}
@@ -1169,8 +1169,8 @@ void lsd::object::fill_list_var( bool show_all, bool lag_only )
 
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		if ( ( cv->param == 0 || cv->param == 2 ) && ( ! lag_only || cv->num_lag > 0 ) )
-		cmd( "lappend rawlist \"%s (%d)\"", cv->label, cv->num_lag );
+		if ( ( cv->param == 0 || cv->param == 2 ) && ( ! lag_only || cv->attr->num_lag > 0 ) )
+		cmd( "lappend rawlist \"%s (%d)\"", cv->attr->label, cv->attr->num_lag );
 	}
 
 	if ( ! show_all )
@@ -1192,7 +1192,7 @@ void lsd::object::fill_list_par( bool show_all )
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		if ( cv->param == 1 )
-			cmd( "lappend rawlist \"%s\"", cv->label );
+			cmd( "lappend rawlist \"%s\"", cv->attr->label );
 	}
 
 	if ( ! show_all )
@@ -1279,29 +1279,29 @@ void lsd::object::create_table_init( FILE *frep )
 		for ( auto cv = v; cv != NULL; cv = cv->next )
 		{
 			fprintf( frep, "<tr VALIGN=TOP>" );
-			fprintf( frep, "<td><a NAME=\"%s\"><A HREF=\"#_d_%s\"><TT>%s</TT></A></a></td>\n", cv->label, cv->label, cv->label );
+			fprintf( frep, "<td><a NAME=\"%s\"><A HREF=\"#_d_%s\"><TT>%s</TT></A></a></td>\n", cv->attr->label, cv->attr->label, cv->attr->label );
 
 			if ( cv->param == 1 )
-				fprintf( frep, "<td><A HREF=\"#_i_%s\">Par.</A></td>\n", cv->label );
+				fprintf( frep, "<td><A HREF=\"#_i_%s\">Par.</A></td>\n", cv->attr->label );
 			else
-				if ( cv->num_lag > 0 )
-					fprintf( frep, "<td><A HREF=\"#_i_%s\">%d</A></td>\n", cv->label, cv->num_lag );
+				if ( cv->attr->num_lag > 0 )
+					fprintf( frep, "<td><A HREF=\"#_i_%s\">%d</A></td>\n", cv->attr->label, cv->attr->num_lag );
 				else
 					fprintf( frep, "<td></td>\n" );
 
-			if ( std::isnan( cv->min_val ) )
+			if ( std::isnan( cv->attr->min_val ) )
 				strcpy( min_val, "" );
 			else
-				snprintf( min_val, 32, "%g", cv->min_val );
+				snprintf( min_val, 32, "%g", cv->attr->min_val );
 
-			if ( std::isnan( cv->max_val ) )
+			if ( std::isnan( cv->attr->max_val ) )
 				strcpy( max_val, "" );
 			else
-				snprintf( max_val, 32, "%g", cv->max_val );
+				snprintf( max_val, 32, "%g", cv->attr->max_val );
 
-			fprintf( frep, "<td>%s</td><td>%s</td><td>%s</td>\n", cv->integer ? "yes" : "", min_val, max_val );
+			fprintf( frep, "<td>%s</td><td>%s</td><td>%s</td>\n", cv->attr->integer ? "yes" : "", min_val, max_val );
 
-			cd = desc != NULL ? desc->search_descr( cv->label ) : NULL;
+			cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
 
 			fprintf( frep, "<td> " );
 			bool desc_text = false;
@@ -1327,7 +1327,7 @@ void lsd::object::create_table_init( FILE *frep )
 					}
 				}
 
-			if ( cv->param == 1 || cv->num_lag > 0 )
+			if ( cv->param == 1 || cv->attr->num_lag > 0 )
 				if ( cd->init != NULL && strlen( cd->init ) > 0 )
 				{
 					if ( desc_text )
@@ -1375,7 +1375,7 @@ void lsd::object::create_initial_values( FILE *frep )
 	variable *cv, *cv1;
 
 	for ( cv = v; cv != NULL; cv = cv->next )
-		if ( cv->param == 1 || cv->num_lag > 0 )
+		if ( cv->param == 1 || cv->attr->num_lag > 0 )
 			count = 1;
 
 	if ( count == 0 )
@@ -1426,13 +1426,13 @@ void lsd::object::create_initial_values( FILE *frep )
 		if ( cv->param == 1 )
 		{
 			fprintf( frep, "<tr VALIGN=TOP>" );
-			fprintf( frep, "<td><a NAME=\"_i_%s\"><A HREF=\"#%s\"><TT>%s</TT></A></a></td>\n", cv->label, cv->label, cv->label );
+			fprintf( frep, "<td><a NAME=\"_i_%s\"><A HREF=\"#%s\"><TT>%s</TT></A></a></td>\n", cv->attr->label, cv->attr->label, cv->attr->label );
 			fprintf( frep, "<td>Par.</td>\n" );
 			fprintf( frep, "<td>%g", cv->val[ 0 ] );
 
 			for ( j = 1, cur = hyper_next( label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
 			{
-				cv1 = cur->search_var( cur, cv->label );
+				cv1 = cur->search_var( cur, cv->attr->label );
 				fprintf( frep, ", %g", cv1->val[ 0 ] );
 			}
 
@@ -1443,16 +1443,16 @@ void lsd::object::create_initial_values( FILE *frep )
 		}
 		else
 		{
-			for ( i = 0; i < cv->num_lag; ++i )
+			for ( i = 0; i < cv->attr->num_lag; ++i )
 			{
 				fprintf( frep, "<tr VALIGN=TOP>" );
-				fprintf( frep, "<td><a NAME=\"_i_%s\"><A HREF=\"#%s\"><TT>%s</TT></A></a></td>\n", cv->label, cv->label, cv->label );
+				fprintf( frep, "<td><a NAME=\"_i_%s\"><A HREF=\"#%s\"><TT>%s</TT></A></a></td>\n", cv->attr->label, cv->attr->label, cv->attr->label );
 				fprintf( frep, "<td>%d</td>\n", i + 1 );
 				fprintf( frep, "<td>%g", cv->val[ i ] );
 
 				for ( j = 1, cur = hyper_next( label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
 				{
-					cv1 = cur->search_var( cur, cv->label );
+					cv1 = cur->search_var( cur, cv->attr->label );
 					fprintf( frep, ", %g", cv1->val[ i ] );
 				}
 
@@ -1612,7 +1612,7 @@ void lsd::object::show_rep_observe( FILE *f, int *begin, FILE *frep )
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
-		auto cd = desc != NULL ? desc->search_descr( cv->label ) : NULL;
+		auto cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
 		if ( cd != NULL && cd->observe )
 		{
 			if ( *begin == 1 )
@@ -1632,7 +1632,7 @@ void lsd::object::show_rep_observe( FILE *f, int *begin, FILE *frep )
 
 			fprintf( f, "<tr VALIGN=TOP>" );
 
-			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->label, cv->label );
+			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->attr->label, cv->attr->label );
 			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", label, label );
 
 			if ( cv->param == 1 )
@@ -1685,7 +1685,7 @@ void lsd::object::show_rep_initial( FILE *f, int *begin, FILE *frep )
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
-		auto cd = desc != NULL ? desc->search_descr( cv->label ) : NULL;
+		auto cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
 		if ( cd != NULL && cd->initial )
 		{
 			if ( *begin == 1 )
@@ -1704,7 +1704,7 @@ void lsd::object::show_rep_initial( FILE *f, int *begin, FILE *frep )
 			}
 
 			fprintf( f, "<tr VALIGN=TOP>" );
-			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->label, cv->label );
+			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->attr->label, cv->attr->label );
 			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", label, label );
 
 			if ( cv->param == 1 )
@@ -1739,7 +1739,7 @@ void lsd::object::show_rep_initial( FILE *f, int *begin, FILE *frep )
 					}
 				}
 
-			if ( ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
+			if ( ( cv->param == 1 || cv->attr->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
 			{
 				if ( desc_text )
 					fprintf( frep, "<br>\n" );
@@ -1764,7 +1764,7 @@ void lsd::object::show_rep_initial( FILE *f, int *begin, FILE *frep )
 				}
 			}
 
-			fprintf( f, " <A HREF=\"#_i_%s\">(Show initial values)</A>",  cv->label );
+			fprintf( f, " <A HREF=\"#_i_%s\">(Show initial values)</A>",  cv->attr->label );
 			fprintf( f, "</td></tr>\n" );
 		}
 	}
@@ -1977,12 +1977,12 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
-		vl = new char[ 2 * strlen( cv->label ) + 1 ];
-		tex_strcpy( vl, cv->label );
+		vl = new char[ 2 * strlen( cv->attr->label ) + 1 ];
+		tex_strcpy( vl, cv->attr->label );
 
 		if ( ! table )
 		{
-			fprintf( f, "  %s \\label{%s}", cv->label, vl );
+			fprintf( f, "  %s \\label{%s}", cv->attr->label, vl );
 
 			if ( cv->param == 0 )
 				fprintf( f, " (variable" );
@@ -1990,14 +1990,14 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
 				fprintf( f, " (parameter" );
 			if ( cv->param == 2 )
 				fprintf( f, " (function" );
-			if ( cv->param == 1 || cv->num_lag == 0 )
+			if ( cv->param == 1 || cv->attr->num_lag == 0 )
 				fprintf( f, ")" );
 			else
-				fprintf( f, ", %d lag%s)", cv->num_lag, cv->num_lag == 1 ? "" : "s" );
+				fprintf( f, ", %d lag%s)", cv->attr->num_lag, cv->attr->num_lag == 1 ? "" : "s" );
 		}
 		else
 		{
-			fprintf( f, "  \\hrf{%s_init}{%s} \\label{%s}", vl, cv->label, vl );
+			fprintf( f, "  \\hrf{%s_init}{%s} \\label{%s}", vl, cv->attr->label, vl );
 
 			if ( cv->param == 0 )
 				fprintf( f, " & Variable & " );
@@ -2006,27 +2006,27 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
 			if ( cv->param == 2 )
 				fprintf( f, " & Function & " );
 
-			if ( cv->param == 1 || cv->num_lag == 0 )
+			if ( cv->param == 1 || cv->attr->num_lag == 0 )
 				fprintf( f, "& " );
 			else
-				fprintf( f, "%d & ", cv->num_lag );
+				fprintf( f, "%d & ", cv->attr->num_lag );
 
-			if ( std::isnan( cv->min_val ) )
+			if ( std::isnan( cv->attr->min_val ) )
 				strcpy( min_val, "" );
 			else
-				snprintf( min_val, 32, "%g", cv->min_val );
+				snprintf( min_val, 32, "%g", cv->attr->min_val );
 
-			if ( std::isnan( cv->max_val ) )
+			if ( std::isnan( cv->attr->max_val ) )
 				strcpy( max_val, "" );
 			else
-				snprintf( max_val, 32, "%g", cv->max_val );
+				snprintf( max_val, 32, "%g", cv->attr->max_val );
 
-			fprintf( f, "%s & %s & %s & ", cv->integer ? "yes" : "", min_val, max_val );
+			fprintf( f, "%s & %s & %s & ", cv->attr->integer ? "yes" : "", min_val, max_val );
 		}
 
 		delete [ ] vl;
 		bool desc_text = false;
-		cd = desc != NULL ? desc->search_descr( cv->label ) : NULL;
+		cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
 		if ( cd != NULL && cd->has_descr_text ( ) )
 		{
 			if ( ! table )
@@ -2035,7 +2035,7 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
 			tex_fprintf( f, cd->text );
 		}
 
-		if ( table && ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
+		if ( table && ( cv->param == 1 || cv->attr->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
 		{
 			if ( desc_text )
 				fprintf( f, "\\newline " );
@@ -2081,17 +2081,17 @@ void lsd::object::tex_report_observe( FILE *f, bool table )
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
-		auto cd = desc != NULL ? desc->search_descr( cv->label ) : NULL;
+		auto cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
 		if ( cd != NULL && cd->observe )
 		{
-			vl = new char[ 2 * strlen( cv->label ) + 1 ];
-			tex_strcpy( vl, cv->label );
+			vl = new char[ 2 * strlen( cv->attr->label ) + 1 ];
+			tex_strcpy( vl, cv->attr->label );
 
 			if ( ! table )
-				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", vl, cv->label, ol, label );
+				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", vl, cv->attr->label, ol, label );
 			else
 			{
-				fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} & ", vl, cv->label, ol, label );
+				fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} & ", vl, cv->attr->label, ol, label );
 				if ( cv->param == 0 )
 					fprintf( f, "Variable & " );
 				if ( cv->param == 1 )
@@ -2151,17 +2151,17 @@ void lsd::object::tex_report_init( FILE *f, bool table )
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
-		auto cd = desc != NULL ? desc->search_descr( cv->label ) : NULL;
+		auto cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
 		if ( cd != NULL && cd->initial )
 		{
-			vl = new char[ 2 * strlen( cv->label ) + 1 ];
-			tex_strcpy( vl, cv->label );
+			vl = new char[ 2 * strlen( cv->attr->label ) + 1 ];
+			tex_strcpy( vl, cv->attr->label );
 
 			if ( ! table )
-				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", vl, cv->label, ol, label );
+				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", vl, cv->attr->label, ol, label );
 			else
 			{
-				fprintf( f, "  \\hrf{%s_init}{%s} & \\hrf{%s}{%s} & ", vl, cv->label, ol, label );
+				fprintf( f, "  \\hrf{%s_init}{%s} & \\hrf{%s}{%s} & ", vl, cv->attr->label, ol, label );
 				if ( cv->param == 0 )
 					fprintf( f, "Variable & " );
 				if ( cv->param == 1 )
@@ -2176,7 +2176,7 @@ void lsd::object::tex_report_init( FILE *f, bool table )
 					tex_fprintf( f, cd->text );
 				}
 
-				if ( ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
+				if ( ( cv->param == 1 || cv->attr->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
 				{
 					if ( desc_text )
 						fprintf( f, "\\newline " );
@@ -2238,15 +2238,15 @@ void lsd::object::tex_report_initall( FILE *f, bool table )
 
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		vl = new char[ 2 * strlen( cv->label ) + 1 ];
-		tex_strcpy( vl, cv->label );
+		vl = new char[ 2 * strlen( cv->attr->label ) + 1 ];
+		tex_strcpy( vl, cv->attr->label );
 
 		if ( cv->param == 1 )
 		{
-			fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} \\label{%s_init} & & %g", ol, label, vl, cv->label, vl, cv->val[ 0 ] );
+			fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} \\label{%s_init} & & %g", ol, label, vl, cv->attr->label, vl, cv->val[ 0 ] );
 			for ( j = 1, cur = hyper_next( label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
 			{
-				cv1 = cur->search_var( cur, cv->label );
+				cv1 = cur->search_var( cur, cv->attr->label );
 				fprintf( f, ", %g", cv1->val[ 0 ] );
 			}
 			if ( j == MAX_INIT && cur != NULL )
@@ -2256,12 +2256,12 @@ void lsd::object::tex_report_initall( FILE *f, bool table )
 		}
 		else
 		{
-			for ( i = 0; i < cv->num_lag; ++i )
+			for ( i = 0; i < cv->attr->num_lag; ++i )
 			{
-				fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} \\label{%s_init} & %d & %g", ol, label, vl, cv->label, vl, i + 1, cv->val[ i ] );
+				fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} \\label{%s_init} & %d & %g", ol, label, vl, cv->attr->label, vl, i + 1, cv->val[ i ] );
 				for ( j = 1, cur = hyper_next( label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
 				{
-					cv1 = cur->search_var( cur, cv->label );
+					cv1 = cur->search_var( cur, cv->attr->label );
 					fprintf( f, ", %g", cv1->val[ i ] );
 				}
 				if ( j == MAX_INIT && cur != NULL )

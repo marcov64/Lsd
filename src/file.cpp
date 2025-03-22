@@ -319,18 +319,18 @@ void lsd::object::load_elem_lists( )
 		switch( cv->param )
 		{
 			case 0:
-				cmd( "lappend modVar %s", cv->label );
+				cmd( "lappend modVar %s", cv->attr->label );
 				break;
 			case 1:
-				cmd( "lappend modPar %s", cv->label );
+				cmd( "lappend modPar %s", cv->attr->label );
 				break;
 			case 2:
-				cmd( "lappend modFun %s", cv->label );
+				cmd( "lappend modFun %s", cv->attr->label );
 		}
 
-		cmd( "lappend modElem %s", cv->label );
+		cmd( "lappend modElem %s", cv->attr->label );
 
-		if ( da != NULL && ( ca = da->search( cv->label ) ) != da->ass_elem.end( ) && ca->data_file.size( ) > 0 )
+		if ( da != NULL && ( ca = da->search( cv->attr->label ) ) != da->ass_elem.end( ) && ca->data_file.size( ) > 0 )
 			cmd( "lappend modDAf \"%s\"", ca->data_file.c_str( ) );
 	}
 
@@ -596,7 +596,7 @@ int gui::load_sensitivity( FILE *f )
 			break;
 
 		cv = sim.root->search_var( sim.root, lab );
-		if ( cv == NULL || ( cv->param != 1 && cv->num_lag == 0 ) )
+		if ( cv == NULL || ( cv->param != 1 && cv->attr->num_lag == 0 ) )
 			goto error1;					// and not parameter or lagged variable
 
 		// get lags and # of values to test
@@ -756,10 +756,10 @@ void lsd::object::get_saved( FILE *out, const char *sep, bool all_var )
 	object *cur;
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
-		if ( cv->save || all_var )
+		if ( cv->attr->save || all_var )
 		{
 			// get element description
-			auto cd = desc != NULL ? desc->search_descr( cv->label ) : NULL;
+			auto cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
 			if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
 			{
 				// select just the first description line
@@ -775,7 +775,7 @@ void lsd::object::get_saved( FILE *out, const char *sep, bool all_var )
 			else
 				lab = NULL;
 
-			fprintf( out, "%s%s%s%s%s%s%s\n", cv->label, sep, cv->param ? "parameter" : "variable", sep, label, sep, lab != NULL ? lab : "" );
+			fprintf( out, "%s%s%s%s%s%s%s\n", cv->attr->label, sep, cv->param ? "parameter" : "variable", sep, label, sep, lab != NULL ? lab : "" );
 		}
 
 	for ( auto cb = b; cb != NULL; cb = cb->next )

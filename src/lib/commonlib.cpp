@@ -416,10 +416,10 @@ void lsd::exception_handler( int signum, const char *what )
 			{
 				if ( ! sim->parallel_mode && sim->fast_mode == 0 &&
 					 sim->stack_log != NULL && sim->stack_log->v != NULL &&
-					 sim->stack_log->v->label != NULL )
+					 sim->stack_log->v->attr->label != NULL )
 				{
 					strcatn( msg3, "\n\nAttempting to open the LSD Debugger.\n\nLSD will close immediately after exiting the Debugger.", MAX_LINE_SIZE );
-					sim->plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", sim->stack_log->v->label );
+					sim->plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", sim->stack_log->v->attr->label );
 					if ( liblnk->print_stack != NULL )
 						liblnk->print_stack( );
 				}
@@ -443,10 +443,10 @@ void lsd::exception_handler( int signum, const char *what )
 		{
 			if ( ! sim->parallel_mode && sim->fast_mode == 0 &&
 				 sim->stack_log != NULL && sim->stack_log->v != NULL &&
-				 sim->stack_log->v->label != NULL )
+				 sim->stack_log->v->attr->label != NULL )
 			{
 				double useless = -1;
-				snprintf( msg3, MAX_LINE_SIZE, "%s (ERROR)", sim->stack_log->v->label );
+				snprintf( msg3, MAX_LINE_SIZE, "%s (ERROR)", sim->stack_log->v->attr->label );
 				if ( liblnk->debugger != NULL )
 					( sim->stack_log->v->up->*liblnk->debugger )( NULL, msg3, & useless, false, "" );
 			}

@@ -122,7 +122,7 @@ bool lsd::assim::init( void )
 	param = cv->param;
 	plot = cv->plot;
 
-	if ( ( save = cv->save ) )
+	if ( ( save = cv->attr->save ) )
 		++( da->ref_sim->series_saved );
 
 	// count initial instances
@@ -395,7 +395,7 @@ void lsd::assimilation::align_state_vars( void )
 			{
 				// check if all runs have this instance
 				for ( auto & sim : run_sims )
-					if ( DA_IDX >= DA_SV.size( ) || ca.label != DA_SV[ DA_IDX ]->label )
+					if ( DA_IDX >= DA_SV.size( ) || ca.label != DA_SV[ DA_IDX ]->attr->label )
 					{
 						missing = true;			// this run doesn't have instance
 						break;
@@ -407,7 +407,7 @@ void lsd::assimilation::align_state_vars( void )
 					{
 						// one run missing the instance, remove all excess instances
 						while ( true )			// remove all extra instances of var
-							if ( DA_IDX < DA_SV.size( ) && ca.label == DA_SV[ DA_IDX ]->label )
+							if ( DA_IDX < DA_SV.size( ) && ca.label == DA_SV[ DA_IDX ]->attr->label )
 								DA_SV.erase( DA_SV.begin( ) + DA_IDX );
 							else
 								break;			// stop on first var after or last var
@@ -424,7 +424,7 @@ void lsd::assimilation::align_state_vars( void )
 				// check if all runs have this instance
 				for ( auto & sim : run_sims )
 				{	// if not, add virtual instance
-					if ( DA_IDX >= DA_SV.size( ) || ca.label != DA_SV[ DA_IDX ]->label )
+					if ( DA_IDX >= DA_SV.size( ) || ca.label != DA_SV[ DA_IDX ]->attr->label )
 					{
 						if ( DA_IDX >= miss_inst.size( ) )
 							miss_inst.resize( DA_IDX + 1, 0 );
@@ -439,7 +439,7 @@ void lsd::assimilation::align_state_vars( void )
 				// check if any run still has instances
 				done = true;					// assume all instances done
 				for ( auto & sim : run_sims )
-					if ( DA_IDX < DA_SV.size( ) && ca.label == DA_SV[ DA_IDX ]->label )
+					if ( DA_IDX < DA_SV.size( ) && ca.label == DA_SV[ DA_IDX ]->attr->label )
 					{
 						done = false;			// except if a run still has inst.
 						break;
@@ -453,7 +453,7 @@ void lsd::assimilation::align_state_vars( void )
 	for ( auto & cv : run_sims[ 0 ].da_svars.st_vec )
 	{
 		if ( cv != NULL )						// handle virtual instances
-			lab = cv->label;
+			lab = cv->attr->label;
 
 		fctd_labs.emplace_back( lab );
 	}
@@ -481,7 +481,7 @@ void lsd::assimilation::update_state_vars( const e_matT & x_a_e )
 				cv = run_sims[ i ].da_svars.st_vec[ j ];
 				cv->val[ 0 ] = cv->chk_val( x_a_e( i, j ) );
 
-				if ( cv->save || cv->savei )
+				if ( cv->attr->save || cv->attr->savei )
 					cv->data[ run_sims[ i ].eff_t - cv->start ] = cv->val[ 0 ];
 			}
 }

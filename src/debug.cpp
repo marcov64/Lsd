@@ -627,7 +627,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				cv = search_var( NULL, gui::get_str( "res" ) );
 				i = cv->last_update;
 				debug = ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? 1 : 0;
-				eff_lags = ( cv->last_update >= cv->num_lag ) ? cv->num_lag : cv->num_lag - 1;
+				eff_lags = ( cv->last_update >= cv->attr->num_lag ) ? cv->attr->num_lag : cv->attr->num_lag - 1;
 				app_values = new double[ eff_lags + 1 ];
 				cmd( "set debugall 0" );
 				cmd( "set undebugall 0" );
@@ -742,7 +742,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				while ( gui::choice == 0 )
 					Tcl_DoOneEvent( 0 );
 
-				cv->initialized = true;
+				cv->attr->initialized = true;
 
 				for ( i = 0; i <= eff_lags; ++i )
 				{
@@ -751,7 +751,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					cv->val[ i ] = app_values[ i ];
 					snprintf( ch, MAX_ELEM_LENGTH, "val%d", i );
 
-					if ( i == 0 && strcmp( cv->label, lab ) == 0 )
+					if ( i == 0 && strcmp( cv->attr->label, lab ) == 0 )
 					{
 						app_res = cv->val[ 0 ];
 						cmd( ".deb.v.v1.val2 configure -text [ format %%g $value ]" );
@@ -796,7 +796,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				if ( gui::choice == 1 )
 					for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
 					{
-						cv1 = cur->search_var( cur, cv->label );
+						cv1 = cur->search_var( cur, cv->attr->label );
 						cv1->deb_mode = cv->deb_mode;
 					}
 
@@ -812,7 +812,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 
 					cmd( "ttk::frame $cb.l" );
 					cmd( "ttk::label $cb.l.l -text \"Variable:\"" );
-					cmd( "ttk::label $cb.l.n -style hl.TLabel -text %s", cv->label );
+					cmd( "ttk::label $cb.l.n -style hl.TLabel -text %s", cv->attr->label );
 					cmd( "pack $cb.l.l $cb.l.n -side left -padx $_2" );
 
 					cmd( "ttk::frame $cb.t" );
@@ -861,14 +861,14 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 
 				if ( gui::choice == 8 )
 				{
-					gui::show_eq( cv->label, ".deb" );
+					gui::show_eq( cv->attr->label, ".deb" );
 					gui::choice = 8;
 				}
 
 				if ( gui::choice == 9 )
 				{
 					cur = cv->up;
-					cur->cal( cv->label, 0 );
+					cur->cal( cv->attr->label, 0 );
 				}
 
 				if ( gui::choice == 10 )
@@ -1613,7 +1613,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 void lsd::object::debugger_update( const char *hl_var, int mode )
 {
 	char ch[ MAX_LINE_SIZE ], ch1[ MAX_LINE_SIZE ];
-	variable *ap_v;
+	variable *cv;
 	int i, j;
 
 	// fix the top frame before proceeding
@@ -1756,31 +1756,31 @@ void lsd::object::debugger_update( const char *hl_var, int mode )
 		cmd( "ttk::frame $w" );
 		cmd( "$g.can create window 0 0 -window $w -anchor nw" );
 
-		for ( i = 1, ap_v = v; ap_v != NULL; ap_v = ap_v->next, ++i )
+		for ( i = 1, cv = v; cv != NULL; cv = cv->next, ++i )
 		{
-			cmd( "set debElem(%s) [ list $i $w.e$i ]", ap_v->label );
+			cmd( "set debElem(%s) [ list $i $w.e$i ]", cv->attr->label );
 
-			cmd( "set last %d", ap_v->last_update );
-			cmd( "set val %g", ap_v->val[ 0 ] );
+			cmd( "set last %d", cv->last_update );
+			cmd( "set val %g", cv->val[ 0 ] );
 			cmd( "ttk::frame $w.e$i" );
-			cmd( "ttk::label $w.e$i.name -width $hnamszD -anchor w -text %s", ap_v->label );
+			cmd( "ttk::label $w.e$i.name -width $hnamszD -anchor w -text %s", cv->attr->label );
 
-			if ( std::isnan( ap_v->val[ 0 ] ) )
+			if ( std::isnan( cv->val[ 0 ] ) )
 				cmd( "ttk::label $w.e$i.val -width $hvalszD -style hl.TLabel -text NAN" );
 			else
-				if ( std::isinf( ap_v->val[ 0 ] ) )
-					cmd( "ttk::label $w.e$i.val -width $hvalszD -style hl.TLabel -text %sINFINITY", ap_v->val[ 0 ] < 0 ? "-" : "" );
+				if ( std::isinf( cv->val[ 0 ] ) )
+					cmd( "ttk::label $w.e$i.val -width $hvalszD -style hl.TLabel -text %sINFINITY", cv->val[ 0 ] < 0 ? "-" : "" );
 				else
-					if ( ap_v->val[ 0 ] != 0 && fabs( ap_v->val[ 0 ] ) < SIG_MIN )	// insignificant value?
+					if ( cv->val[ 0 ] != 0 && fabs( cv->val[ 0 ] ) < SIG_MIN )	// insignificant value?
 						cmd( "ttk::label $w.e$i.val -width $hvalszD -style hl.TLabel -text ~0" );
 					else
 						cmd( "ttk::label $w.e$i.val -width $hvalszD -style hl.TLabel -text $val" );
 
-			if ( ap_v->param == 0 )
+			if ( cv->param == 0 )
 				cmd( "ttk::label $w.e$i.last -width $hupdszD -text $last" );
-			if ( ap_v->param == 1 )
+			if ( cv->param == 1 )
 				cmd( "ttk::label $w.e$i.last -width $hupdszD -text (P)" );
-			if ( ap_v->param == 2 )
+			if ( cv->param == 2 )
 				cmd( "ttk::label $w.e$i.last -width $hupdszD -text (F)" );
 
 			if ( i % 2 == 0 )
@@ -1801,23 +1801,23 @@ void lsd::object::debugger_update( const char *hl_var, int mode )
 			cmd( "mouse_wheel $w.e$i.val" );
 			cmd( "mouse_wheel $w.e$i.last" );
 
-			gui::set_ttip_descr( "$w.e$i.name", ap_v->label, -1, false );
+			gui::set_ttip_descr( "$w.e$i.name", cv->attr->label, -1, false );
 
-			if ( mode != 2 && ap_v->num_lag > 0 )
+			if ( mode != 2 && cv->attr->num_lag > 0 )
 			{
 				cmd( "set lvals \"\"" );
-				for ( j = 1; j <= ap_v->num_lag; ++j )
+				for ( j = 1; j <= cv->attr->num_lag; ++j )
 				{
-					if ( std::isnan( ap_v->val[ j ] ) )
+					if ( std::isnan( cv->val[ j ] ) )
 						cmd( "set val NAN" );
 					else
-						if ( std::isinf( ap_v->val[ j ] ) )
-							cmd( "set val %sINFINITY", ap_v->val[ j ] < 0 ? "-" : "" );
+						if ( std::isinf( cv->val[ j ] ) )
+							cmd( "set val %sINFINITY", cv->val[ j ] < 0 ? "-" : "" );
 						else
-							if ( ap_v->val[ j ] != 0 && fabs( ap_v->val[ j ] ) < SIG_MIN )
+							if ( cv->val[ j ] != 0 && fabs( cv->val[ j ] ) < SIG_MIN )
 								cmd( "set val  ~0" );
 							else
-								cmd( "set val %g", ap_v->val[ j ] );
+								cmd( "set val %g", cv->val[ j ] );
 
 					cmd( "append lvals \"%d:  $val\n\"", j );
 				}
@@ -1825,18 +1825,18 @@ void lsd::object::debugger_update( const char *hl_var, int mode )
 				cmd( "tooltip::tooltip $w.e$i.val [ string range $lvals 0 end-1 ]" );
 			}
 
-			if ( ap_v->num_lag > 0 )
-				cmd( "tooltip::tooltip $w.e$i.last \"%d lag%s\"", ap_v->num_lag, ap_v->num_lag > 1 ? "s" : "" );
+			if ( cv->attr->num_lag > 0 )
+				cmd( "tooltip::tooltip $w.e$i.last \"%d lag%s\"", cv->attr->num_lag, cv->attr->num_lag > 1 ? "s" : "" );
 			else
-				if ( ap_v->param != 1 )
+				if ( cv->param != 1 )
 					cmd( "tooltip::tooltip $w.e$i.last \"No lag\"" );
 
-			cmd( "bind $w.e$i.name <Button-1> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 8 }", ap_v->label );
-			cmd( "bind $w.e$i.val <Button-1> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 8 }", ap_v->label );
-			cmd( "bind $w.e$i.last <Button-1> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 8 }", ap_v->label );
-			cmd( "bind $w.e$i.name <Button-2> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 25 }", ap_v->label );
-			cmd( "bind $w.e$i.val <Button-2> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 25 }", ap_v->label );
-			cmd( "bind $w.e$i.last <Button-2> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 25 }", ap_v->label );
+			cmd( "bind $w.e$i.name <Button-1> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 8 }", cv->attr->label );
+			cmd( "bind $w.e$i.val <Button-1> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 8 }", cv->attr->label );
+			cmd( "bind $w.e$i.last <Button-1> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 8 }", cv->attr->label );
+			cmd( "bind $w.e$i.name <Button-2> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 25 }", cv->attr->label );
+			cmd( "bind $w.e$i.val <Button-2> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 25 }", cv->attr->label );
+			cmd( "bind $w.e$i.last <Button-2> { set res %s; set lstDebPos [ .deb.cc.grid.can yview ]; set choice 25 }", cv->attr->label );
 			cmd( "bind $w.e$i.name <Button-3> { event generate .deb.cc.grid.can.f.e$i.name <Button-2> -x %%x -y %%y }" );
 			cmd( "bind $w.e$i.val <Button-3> { event generate .deb.cc.grid.can.f.e$i.val <Button-2> -x %%x -y %%y }" );
 			cmd( "bind $w.e$i.last <Button-3> { event generate .deb.cc.grid.can.f.e$i.last <Button-2> -x %%x -y %%y }" );

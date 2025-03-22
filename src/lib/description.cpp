@@ -153,7 +153,7 @@ void lsd::description::reset_descr( object *r )
 	search_descr( r->label, true );
 
 	for ( auto cv = r->v; cv != NULL; cv = cv->next )
-		search_descr( cv->label, true );
+		search_descr( cv->attr->label, true );
 
 	for ( auto cb = r->b; cb != NULL; cb = cb->next )
 		if ( cb->head != NULL )

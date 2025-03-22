@@ -234,9 +234,6 @@
  chase objects of lab type even when they are scattered in
  different groups.
 
- - void add_empty_var( char *label );
- Add a variable to the object
-
  - object *add_obj( char *label, int num, bool propagate );
  Add a new object type in the model as descendant of current one
  and initialize its name. It makes num copiesof it, and can
@@ -258,12 +255,12 @@
  Only to this object, changes the label of the variable whose
  label is old, and it si changed in n
 
- - variable *add_empty_var( char *str );
+ - variable *add_var( char *str );
  Add a variable before knowing its contents, setting to a
  default initialization values all the fields in the variable.
  It operates only on object this
 
- - variable *add_var_from_example( variable *example );
+ - variable *add_var( variable *example );
  Add a variable instance copying all the fields by the variable
  example. It operates only on object this
 
@@ -367,7 +364,7 @@ void lsd::object::recreate_maps( void )
 	b_map.clear( );
 
 	for ( cv = v; cv != NULL; cv = cv->next )
-		v_map.insert( v_pairT( cv->label, cv ) );
+		v_map.insert( v_pairT( cv->attr->label, cv ) );
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 		b_map.insert( b_pairT ( cb->label, cb ) );
@@ -399,7 +396,7 @@ void lsd::object::update( bool recurse, bool user )
 
 		if ( cv->param == 0 && cv->last_update < sim->t )
 		{
-			if ( sim->parallel_ready && cv->parallel && ! cv->dummy )
+			if ( sim->parallel_ready && cv->attr->parallel && ! cv->attr->dummy )
 				sim->parallel_update( cv, this );
 			else
 				cv->cal( NULL, 0 );
@@ -407,12 +404,12 @@ void lsd::object::update( bool recurse, bool user )
 
 		if ( ! deleted	)
 		{
-			if ( cv->save || cv->savei )
+			if ( cv->attr->save || cv->attr->savei )
 				cv->data[ sim->t - cv->start ] = cv->val[ 0 ];
 #ifndef _TERM_
 			if ( ! user && cv->plot && sim->liblnk != NULL && sim->liblnk->plot_runtime != NULL )
 			{
-				if ( cv->param == 1 || cv->num_lag == 0 )
+				if ( cv->param == 1 || cv->attr->num_lag == 0 )
 					sim->liblnk->plot_runtime( NULL, sim->t, cv->val[ 0 ], NAN );
 				else
 					sim->liblnk->plot_runtime( NULL, sim->t, cv->val[ 0 ], cv->val[ 1 ] );
@@ -1173,11 +1170,11 @@ lsd::object *lsd::object::turbosearch_cond( const char *lab, double value )
 
 
 /*************************************************************
- ADD_EMPTY_VAR
+ ADD_VAR
  Add a new (empty) element, used in the creation
  of the model structure
  *************************************************************/
-lsd::variable *lsd::object::add_empty_var( const char *lab )
+lsd::variable *lsd::object::add_var( const char *lab, int par, int lags, bool plot, char deb )
 {
 	variable *cv;
 
@@ -1209,16 +1206,25 @@ lsd::variable *lsd::object::add_empty_var( const char *lab )
 	}
 #endif
 
+	if ( par < 0 || par > 2 )
+	{
+		sim->error_hard( "internal problem in LSD",
+						 "if error persists, please contact developers",
+						 true,
+						 "invalid element type %d",
+						 par );
+		return NULL;
+	}
+
 	if ( v == NULL )
-		cv = v = new variable;
+		cv = v = new variable ( this, lab, par, lags, plot, deb );
 	else
 	{
 		for ( cv = v; cv->next != NULL; cv = cv->next );
-		cv->next = new variable;
+		cv->next = new variable ( this, lab, par, lags, plot, deb );
 		cv = cv->next;
 	}
 
-	cv->init( this, lab );
 	v_map.insert( v_pairT ( lab, cv ) );
 
 	return cv;
@@ -1226,34 +1232,34 @@ lsd::variable *lsd::object::add_empty_var( const char *lab )
 
 
 /*************************************************************
- ADD_VAR_FROM_EXAMPLE
+ ADD_VAR
  Add a new element instance identical to the example
  *************************************************************/
-lsd::variable *lsd::object::add_var_from_example( variable *example )
+lsd::variable *lsd::object::add_var( variable *example )
 {
 	variable *cv;
 
-	if ( search_var( this, example->label, true, true ) != NULL )
+	if ( search_var( this, example->attr->label, true, true ) != NULL )
 	{
 		sim->error_hard( "variable or parameter not added",
 						 "choose an unique name for the element",
 						 true,
 						 "element '%s' already exists in object '%s'",
-						 example->label, label );
+						 example->attr->label, label );
 		return NULL;
 	}
 
 	if ( v == NULL )
-		cv = v = new variable;
+		cv = v = new variable ( *example );
 	else
 	{
 		for ( cv = v; cv->next != NULL; cv = cv->next );
-		cv->next = new variable;
+		cv->next = new variable ( *example );
 		cv = cv->next;
 	}
 
-	cv->init( this, NULL, example );
-	v_map.insert( v_pairT ( cv->label, cv ) );
+	cv->up = this;
+	v_map.insert( v_pairT ( cv->attr->label, cv ) );
 
 	return cv;
 }
@@ -1398,7 +1404,7 @@ void lsd::simulation::move_obj( const char *lab, const char *dest )
 				cur1->init( d, d->sim, lab, cur->to_compute );
 
 				for ( cv = cur->v; cv != NULL; cv = cv->next )
-					cur1->add_var_from_example( cv );
+					cur1->add_var( cv );
 
 				cur->copy_descendant( cur1 );
 			}
@@ -1461,7 +1467,7 @@ void lsd::object::replicate( int num, bool propagate )
 
 		cur1 = cur->next;
 		for ( cv = v; cv != NULL; cv = cv->next )
-			cur1->add_var_from_example( cv );
+			cur1->add_var( cv );
 
 		copy_descendant( cur1 );
 	}
@@ -1500,7 +1506,7 @@ void lsd::object::copy_descendant( object *to )
 
 	// copy variables of head object
 	for ( cv = cur->v; cv != NULL; cv = cv->next )
-		to->b->head->add_var_from_example( cv );
+		to->b->head->add_var( cv );
 
 	// copy head descendants
 	cur->copy_descendant( to->b->head );
@@ -1521,7 +1527,7 @@ void lsd::object::copy_descendant( object *to )
 		cb->head->init( to, to->sim, cur->label, cur->to_compute );
 
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
-			cb->head->add_var_from_example( cv );
+			cb->head->add_var( cv );
 
 		cur->copy_descendant( cb->head );
 	}
@@ -1598,7 +1604,7 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 
 		// create its variables and initialize them
 		for ( cv = ex->v; cv != NULL; cv = cv->next )
-		  cur->add_var_from_example( cv );
+		  cur->add_var( cv );
 
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 		{
@@ -1617,7 +1623,7 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 										 "check your equation code to prevent this situation",
 										 true,
 										 "invalid update time step (%d) to set object '%s'\nvariable '%s' was updated later (%d)",
-										 t_update, lab, cv->label, cv->last_update );
+										 t_update, lab, cv->attr->label, cv->last_update );
 						return NULL;
 					}
 
@@ -1626,15 +1632,15 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 				}
 
 				// choose next update step for special updating variables
-				if ( cv->delay > 0 || cv->delay_range > 0 )
+				if ( cv->attr->delay > 0 || cv->attr->delay_range > 0 )
 				{
-					cv->next_update = cv->last_update + cv->delay;
-					if ( cv->delay_range > 0 )
-						cv->next_update += sim->rnd_int( 0, cv->delay_range );
+					cv->next_update = cv->last_update + cv->attr->delay;
+					if ( cv->attr->delay_range > 0 )
+						cv->next_update += sim->rnd_int( 0, cv->attr->delay_range );
 				}
 			}
 
-			if ( cv->save || cv->savei )
+			if ( cv->attr->save || cv->attr->savei )
 				cv->alloc_save_var( );
 		}
 
@@ -1847,7 +1853,7 @@ void lsd::object::empty( void )
 	for ( cv = v; cv != NULL; cv = cv1 )
 	{
 		cv1 = cv->next;
-		cv->empty( );
+		cv->destroy( );
 	}
 
 	v = NULL;
@@ -1884,12 +1890,12 @@ void lsd::object::collect_cemetery( const variable *caller )
 		cv1 = cv->next;						// pointer to next variable
 
 		// need to save?
-		if ( ( cv->save == true || cv->savei == true ) && sim->running && sim->eff_t > 0 && sim->eff_t <= cv->end && sim->quit != 2 )
+		if ( ( cv->attr->save == true || cv->attr->savei == true ) && sim->running && sim->eff_t > 0 && sim->eff_t <= cv->end && sim->quit != 2 )
 		{
 			cv->set_lab_tit( );				// update last lab_tit
 			cv->data[ sim->eff_t - cv->start ] = cv->val[ 0 ];// define last value
 
-			if ( cv->savei )
+			if ( cv->attr->savei )
 				cv->save_single( );			// update file
 
 			if ( cv->end > sim->eff_t )		// remove unused store positions
@@ -1903,7 +1909,7 @@ void lsd::object::collect_cemetery( const variable *caller )
 			cv->add_cemetery( );			// transfer to cemetery
 		}
 		else
-			cv->empty( caller == NULL || cv == caller );// disable lock if emptying caller
+			cv->destroy( caller == NULL || cv == caller );// disable lock if emptying caller
 	}
 
 	v = NULL;
@@ -1940,7 +1946,7 @@ void lsd::simulation::empty_cemetery( void )
 	for ( cv = cemetery; cv !=NULL; cv = cv1 )
 	{
 		cv1 = cv->next;
-		cv->empty( );
+		cv->destroy( );
 	}
 
 	cemetery = last_cemetery = NULL;
@@ -1967,20 +1973,20 @@ void lsd::object::delete_var( const char *lab )
 {
 	variable *cv, *cv1;
 
-	if ( ! strcmp( v->label, lab ) )
+	if ( ! strcmp( v->attr->label, lab ) )
 	{	// first variable in the chain
 		v_map.erase( lab );
 		cv = v->next;
-		v->empty( );
+		v->destroy( );
 		v = cv;
 	}
 	else		// not first variable, search
 		for ( cv = v; cv->next != NULL; cv = cv->next)
-			if ( ! strcmp( cv->next->label, lab ) )
+			if ( ! strcmp( cv->next->attr->label, lab ) )
 			{
 				v_map.erase( lab );
 				cv1 = cv->next->next;
-				cv->next->empty( );
+				cv->next->destroy( );
 				cv->next = cv1;
 				break;
 			}
@@ -2030,15 +2036,11 @@ void lsd::object::chg_lab( const char *lab )
  *************************************************************/
 void lsd::object::chg_var_lab( const char *old, const char *newname )
 {
-	variable *cv;
-
-	for ( cv = v; cv != NULL; cv = cv->next)
-		if ( ! strcmp( cv->label, old ) )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+		if ( strcmp( cv->attr->label, old ) == 0 )
 		{
+			sim->va.rename( old, newname );
 			v_map.erase( old );
-			delete [ ] cv->label;
-			cv->label = new char[ strlen( newname ) + 1 ];
-			strcpy( cv->label, newname );
 			v_map.insert( v_pairT ( newname, cv ) );
 			break;
 		}
@@ -2052,19 +2054,15 @@ void lsd::object::chg_var_lab( const char *old, const char *newname )
  *************************************************************/
 bool lsd::object::under_computation( void )
 {
-	bridge *cb;
-	object *cur;
-	variable *cv;
-
 	// check variables in descendants
-	for ( cb = b; cb != NULL; cb = cb->next )
-		for ( cur = cb->head; cur != NULL; cur = cur->next )
+	for ( auto cb = b; cb != NULL; cb = cb->next )
+		for ( auto cur = cb->head; cur != NULL; cur = cur->next )
 			if ( cur->under_computation( ) )
 				return true;
 
 	// check variables directly contained in object
-	for ( cv = v; cv != NULL; cv = cv->next )
-		if ( cv->under_computation && ! cv->dummy )
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+		if ( cv->under_computation && ! cv->attr->dummy )
 			return true;
 
 	return false;
@@ -2107,7 +2105,7 @@ double lsd::object::cal( object *caller, const char *lab, int lag, bool force_se
 	if ( cv == NULL )
 		return NAN;
 
-	if ( lag == 0 && sim->parallel_ready && cv->parallel && cv->last_update < sim->t && ! cv->dummy )
+	if ( lag == 0 && sim->parallel_ready && cv->attr->parallel && cv->last_update < sim->t && ! cv->attr->dummy )
 		sim->parallel_update( cv, this, caller );
 
 	return cv->cal( caller, lag );
@@ -2124,7 +2122,7 @@ double lsd::object::cal( object *caller, const char *lab, int lag )
 	if ( cv == NULL )
 		return NAN;
 
-	if ( lag == 0 && sim->parallel_ready && cv->parallel && cv->last_update < sim->t && ! cv->dummy )
+	if ( lag == 0 && sim->parallel_ready && cv->attr->parallel && cv->last_update < sim->t && ! cv->attr->dummy )
 		sim->parallel_update( cv, this, caller );
 
 	return cv->cal( caller, lag );
@@ -2173,10 +2171,10 @@ double lsd::object::recal( const char *lab )
 
 	app = cv->val[ 0 ];
 
-	for ( i = 0; i < cv->num_lag; ++i )		// scale up the past values
+	for ( i = 0; i < cv->attr->num_lag; ++i )		// scale up the past values
 		cv->val[ i ] = cv->val[ i + 1 ];
 
-	if ( ( cv->save || cv->savei ) && i + 1 <= sim->t - cv->start )
+	if ( ( cv->attr->save || cv->attr->savei ) && i + 1 <= sim->t - cv->start )
 		cv->val[ i ] = cv->data[ sim->t - i - 1 - cv->start ];
 	else
 		cv->val[ i ] = NAN;
@@ -2364,7 +2362,7 @@ double lsd::object::mav( object *caller, const char *lab, double per, const doub
 	if ( per < 0 )
 	{
 		per = - per;
-		maxlag = cv->num_lag;
+		maxlag = cv->attr->num_lag;
 	}
 	else
 		maxlag = 0;
@@ -3251,7 +3249,7 @@ double lsd::object::write( const char *lab, double value, int time, int lag )
 
 	if ( cv->under_computation )
 	{
-		if ( ! cv->dummy )
+		if ( ! cv->attr->dummy )
 		{
 			sim->error_hard( "invalid write operation",
 							 "check your equation code to prevent this situation",
@@ -3292,7 +3290,7 @@ double lsd::object::write( const char *lab, double value, int time, int lag )
 	// allow for change of initial lagged values when starting simulation (t=1)
 	if ( cv->param != 1 && time < 0 && sim->t == 1 )
 	{
-		if ( - time > cv->num_lag )		// check for invalid lag
+		if ( - time > cv->attr->num_lag )		// check for invalid lag
 		{
 			sim->error_hard( "invalid write operation",
 							 "check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
@@ -3305,20 +3303,20 @@ double lsd::object::write( const char *lab, double value, int time, int lag )
 		cv->val[ - time - 1 ] = value;
 		cv->last_update = 0;	// force new updating
 
-		if ( time == -1 && ( cv->save || cv->savei ) )
+		if ( time == -1 && ( cv->attr->save || cv->attr->savei ) )
 			cv->data[ 0 ] = value;
 
 		// choose next update step for special updating variables
-		if ( cv->delay > 0 || cv->delay_range > 0 )
+		if ( cv->attr->delay > 0 || cv->attr->delay_range > 0 )
 		{
-			cv->next_update = cv->delay;
-			if ( cv->delay_range > 0 )
-				cv->next_update += sim->rnd_int( 0, cv->delay_range );
+			cv->next_update = cv->attr->delay;
+			if ( cv->attr->delay_range > 0 )
+				cv->next_update += sim->rnd_int( 0, cv->attr->delay_range );
 		}
 	}
 	else
 	{
-		if ( lag < 0 || ( cv->param != 1 && lag > cv->num_lag ) || ( cv->param == 1 && lag > 1 ) )
+		if ( lag < 0 || ( cv->param != 1 && lag > cv->attr->num_lag ) || ( cv->param == 1 && lag > 1 ) )
 		{
 			sim->error_hard( "invalid write operation",
 							 "check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
@@ -3337,8 +3335,8 @@ double lsd::object::write( const char *lab, double value, int time, int lag )
 		{
 			// if not yet calculated this time step, adjust lagged values
 			if ( time >= sim->t && lag == 0 && cv->last_update < sim->t )
-				for ( i = 0; i < cv->num_lag; ++i )
-					cv->val[ cv->num_lag - i ] = cv->val[ cv->num_lag - i - 1 ];
+				for ( i = 0; i < cv->attr->num_lag; ++i )
+					cv->val[ cv->attr->num_lag - i ] = cv->val[ cv->attr->num_lag - i - 1 ];
 
 			if ( lag == 0 )
 			{
@@ -3346,11 +3344,11 @@ double lsd::object::write( const char *lab, double value, int time, int lag )
 				eff_time = time;
 
 				// choose next update step for special updating variables
-				if ( cv->period > 1 || cv->period_range > 0 )
+				if ( cv->attr->period > 1 || cv->attr->period_range > 0 )
 				{
-					cv->next_update = sim->t + cv->period;
-					if ( cv->period_range > 0 )
-						cv->next_update += sim->rnd_int( 0, cv->period_range );
+					cv->next_update = sim->t + cv->attr->period;
+					if ( cv->attr->period_range > 0 )
+						cv->next_update += sim->rnd_int( 0, cv->attr->period_range );
 				}
 			}
 			else
@@ -3367,7 +3365,7 @@ double lsd::object::write( const char *lab, double value, int time, int lag )
 					eff_time = sim->t - lag;
 				}
 
-				if ( eff_lag < 0 || eff_lag > cv->num_lag )
+				if ( eff_lag < 0 || eff_lag > cv->attr->num_lag )
 				{
 					sim->error_hard( "invalid write operation",
 									 "check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
@@ -3382,7 +3380,7 @@ double lsd::object::write( const char *lab, double value, int time, int lag )
 		cv->val[ eff_lag ] = value;
 		cv->last_update = time;
 
-		if ( cv->save || cv->savei )
+		if ( cv->attr->save || cv->attr->savei )
 		{
 			if ( eff_time >= cv->start && eff_time <= cv->end )
 				cv->data[ eff_time - cv->start ] = value;
@@ -3397,7 +3395,7 @@ double lsd::object::write( const char *lab, double value, int time, int lag )
 	{
 		sim->watch_trigger = true;
 		sim->watch_write_mode = true;
-		strncpy( sim->watch_elem, cv->label, MAX_ELEM_LENGTH );
+		strncpy( sim->watch_elem, cv->attr->label, MAX_ELEM_LENGTH );
 	}
 
 	return value;

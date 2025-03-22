@@ -397,10 +397,10 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 				{
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = cv->chk_val( value1 );
-					cv->initialized = true;
 					++j;
 				}
 
+			sim->va.search( lab )->initialized = true;
 			snprintf( action, MAX_ELEM_LENGTH, "equal to %g%s", value1, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
@@ -418,7 +418,6 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 				{
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = cv->chk_val( value1 + value * step );
-					cv->initialized = true;
 					++j;
 				}
 
@@ -426,6 +425,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 					++step;
 			}
 
+			sim->va.search( lab )->initialized = true;
 			snprintf( action, MAX_ELEM_LENGTH, "ranging from %g to %g (increments of %g)%s", value1, value2, value, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
@@ -438,7 +438,6 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 				{
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = cv->chk_val( value1 + step * value2 );
-					cv->initialized = true;
 					++j;
 				}
 
@@ -446,6 +445,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 					++step;
 			}
 
+			sim->va.search( lab )->initialized = true;
 			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g%s", value1, value2, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
@@ -457,7 +457,6 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 				{
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = cv->chk_val( value1 + step * value2 );
-					cv->initialized = true;
 					++j;
 					++step;
 
@@ -465,6 +464,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 						step = 0;
 				}
 
+			sim->va.search( lab )->initialized = true;
 			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g for each group of objects%s", value1, value2, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
@@ -476,10 +476,10 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 				{
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = cv->chk_val( sim->uniform( value1, value2 ) );
-					cv->initialized = true;
 					++j;
 				}
 
+			sim->va.search( lab )->initialized = true;
 			snprintf( action, MAX_ELEM_LENGTH, "drawn from uniform distribution between %g and %g%s", value1, value2, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
@@ -491,10 +491,10 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 				{
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = cv->chk_val( sim->rnd_int( round( value1 ), round( value2 ) ) );
-					cv->initialized = true;
 					++j;
 				}
 
+			sim->va.search( lab )->initialized = true;
 			snprintf( action, MAX_ELEM_LENGTH, "drawn from integer uniform distribution between %g and %g%s", round( value1 ), round( value2 ), cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
@@ -506,10 +506,10 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 				{
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = cv->chk_val( sim->norm( value1, value2 ) );
-					cv->initialized = true;
 					++j;
 				}
 
+			sim->va.search( lab )->initialized = true;
 			snprintf( action, MAX_ELEM_LENGTH, "drawn from normal distribution of mean %g and s.d. %g%s", value1, value2, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
@@ -541,10 +541,10 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 
 					cv = cur->search_var( NULL, lab );
 					cv->val[ lag ] = cv->chk_val( value );
-					cv->initialized = true;
 					++j;
 				}
 
+			sim->va.search( lab )->initialized = true;
 			if ( cur != NULL || kappa == EOF )
 				cmd( "ttk::messageBox -parent $_w -title Error -icon error -type ok -message \"Incomplete data\" -detail \"Problem loading data from file '%s', the file contains fewer values compared to the number of instances to set.\"", app );
 
@@ -598,32 +598,32 @@ const char *lsd::variable::print_constr( char *buf, int buf_sz )
 {
 	strT text;
 
-	if ( ! integer && std::isnan( max_val ) && std::isnan( min_val ) )
+	if ( ! attr->integer && std::isnan( attr->max_val ) && std::isnan( attr->min_val ) )
 		strcpy( buf, "" );
 	else
 	{
-		if ( integer )
+		if ( attr->integer )
 			text = ",\nrounded to integer";
 
-		if ( ! std::isnan( min_val ) )
+		if ( ! std::isnan( attr->min_val ) )
 		{
 			if ( text.size( ) > 0 )
 				text += ", ";
 			else
 				text += ",\n";
 
-			snprintf( buf, buf_sz, "greater or equal to %.6g", min_val );
+			snprintf( buf, buf_sz, "greater or equal to %.6g", attr->min_val );
 			text += buf;
 		}
 
-		if ( ! std::isnan( max_val ) )
+		if ( ! std::isnan( attr->max_val ) )
 		{
 			if ( text.size( ) > 0 )
 				text += ", ";
 			else
 				text += ",\n";
 
-			snprintf( buf, buf_sz, "less or equal to %.6g", max_val );
+			snprintf( buf, buf_sz, "less or equal to %.6g", attr->max_val );
 			text += buf;
 		}
 

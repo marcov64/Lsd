@@ -57,6 +57,7 @@ lsd::object *gui::operate( lsd::object *r )
 	lsd::object *n, *cur, *cur1, *cur2;
 	lsd::result *rf;			// pointer for results files (may be zipped or not)
 	lsd::sensitivity *cs;
+	lsd::varattr *attr;
 	lsd::variable *cv, *cv1;
 	str_vecT logs;
 	FILE *f;
@@ -610,23 +611,7 @@ lsd::object *gui::operate( lsd::object *r )
 						cmd( "lappend modElem %s", lab );
 
 						for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
-						{
-							cv = cur->add_empty_var( lab );
-							if ( param != 0 )
-								num = 0;
-							cv->val = new double[ num + 1 ];
-							cv->save = 0;
-							cv->param = param;
-							cv->num_lag = num;
-							cv->deb_mode = 'n';
-							if ( ( param == 0 && num == 0 ) || param == 2 )
-								cv->initialized = true;
-							else
-								cv->initialized = false;
-
-							for ( i = 0; i < num + 1; ++i )
-								cv->val[ i ] = 0;
-						}
+							cv = cur->add_var( lab, param, num );
 
 						initParent = r;
 
@@ -1212,28 +1197,28 @@ lsd::object *gui::operate( lsd::object *r )
 			Tcl_LinkVar( interp, "parallel", ( char * ) &parallel, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "nature", ( char * ) &nature, TCL_LINK_BOOLEAN );
 
-			save = cv->save;
-			savei = cv->savei;
+			save = cv->attr->save;
+			savei = cv->attr->savei;
 			plot = cv->plot;
-			nature = cv->integer;
+			nature = cv->attr->integer;
 			debug = ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? 1 : 0;
 			watch = ( cv->deb_mode == 'w' || cv->deb_mode == 'W' || cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? 1 : 0;
 			watch_write = ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? 1 : 0;
-			parallel = cv->parallel;
+			parallel = cv->attr->parallel;
 
 			cmd( "set observe %d", cd->observe ? 1 : 0 );
 			cmd( "set initial %d", cd->initial ? 1 : 0 );
 			cmd( "set vname %s", lab_old );
 
-			if ( std::isnan( cv->max_val ) )
+			if ( std::isnan( cv->attr->max_val ) )
 				cmd( "set vmax \"%s\"", NON_AVAILABLE );
 			else
-				cmd( "set vmax %g", cv->max_val );
+				cmd( "set vmax %g", cv->attr->max_val );
 
-			if ( std::isnan( cv->min_val ) )
+			if ( std::isnan( cv->attr->min_val ) )
 				cmd( "set vmin \"%s\"", NON_AVAILABLE );
 			else
-				cmd( "set vmin %g", cv->min_val );
+				cmd( "set vmin %g", cv->attr->min_val );
 
 			cmd( "set T .chgelem" );
 			cmd( "newtop $T \"Change Element\" { set done 2 }" );
@@ -1262,16 +1247,16 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "pack $T.h.o.l $T.h.o.o -side left -padx $_5" );
 			cmd( "pack $T.h.o" );
 
-			if ( cv->num_lag > 0 || cv->param == 1 )
+			if ( cv->attr->num_lag > 0 || cv->param == 1 )
 			{
 				cmd( "ttk::frame $T.h.i" );
-				cmd( "ttk::label $T.h.i.l -text \"Initial value%s%s:\"", cv->num_lag > 1 ? "s" : "", cv->up->next == NULL ? "" : " (first instance)" );
+				cmd( "ttk::label $T.h.i.l -text \"Initial value%s%s:\"", cv->attr->num_lag > 1 ? "s" : "", cv->up->next == NULL ? "" : " (first instance)" );
 
-				if ( cv->initialized )
+				if ( cv->attr->initialized )
 				{
 					strcpy ( buf_descr, "" );
 
-					j = ( cv->param == 1 ) ? 1 : std::min( cv->num_lag, 4 );
+					j = ( cv->param == 1 ) ? 1 : std::min( cv->attr->num_lag, 4 );
 					for ( i = 0; i < j; ++i )
 					{
 						cmd( "ttk::frame $T.h.i.v%d", i );
@@ -1300,42 +1285,42 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "pack $T.h.i" );
 			}
 
-			if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 1 ) )
+			if ( cv->param == 0 && ( cv->attr->delay > 0 || cv->attr->delay_range > 0 || cv->attr->period > 1 || cv->attr->period_range > 1 ) )
 			{
 				cmd( "ttk::frame $T.h.u" );
 
-				if ( cv->delay > 0 )
+				if ( cv->attr->delay > 0 )
 				{
 					cmd( "ttk::frame $T.h.u.d" );
 					cmd( "ttk::label $T.h.u.d.l -text \"Initial updating delay:\"" );
-					cmd( "ttk::label $T.h.u.d.v -style hl.TLabel -text \"%d\"", cv->delay );
+					cmd( "ttk::label $T.h.u.d.v -style hl.TLabel -text \"%d\"", cv->attr->delay );
 					cmd( "pack $T.h.u.d.l $T.h.u.d.v -side left -padx $_2" );
 					cmd( "pack $T.h.u.d" );
 				}
 
-				if ( cv->delay_range > 0 )
+				if ( cv->attr->delay_range > 0 )
 				{
 					cmd( "ttk::frame $T.h.u.dr" );
 					cmd( "ttk::label $T.h.u.dr.l -text \"Random updating delay range:\"" );
-					cmd( "ttk::label $T.h.u.dr.v -style hl.TLabel -text \"%d\"", cv->delay_range );
+					cmd( "ttk::label $T.h.u.dr.v -style hl.TLabel -text \"%d\"", cv->attr->delay_range );
 					cmd( "pack $T.h.u.dr.l $T.h.u.dr.v -side left -padx $_2" );
 					cmd( "pack $T.h.u.dr" );
 				}
 
-				if ( cv->period > 1 )
+				if ( cv->attr->period > 1 )
 				{
 					cmd( "ttk::frame $T.h.u.p" );
 					cmd( "ttk::label $T.h.u.p.l -text \"Updating period:\"" );
-					cmd( "ttk::label $T.h.u.p.v -style hl.TLabel -text \"%d\"", cv->period );
+					cmd( "ttk::label $T.h.u.p.v -style hl.TLabel -text \"%d\"", cv->attr->period );
 					cmd( "pack $T.h.u.p.l $T.h.u.p.v -side left -padx $_2" );
 					cmd( "pack $T.h.u.p" );
 				}
 
-				if ( cv->period_range > 1 )
+				if ( cv->attr->period_range > 1 )
 				{
 					cmd( "ttk::frame $T.h.u.pr" );
 					cmd( "ttk::label $T.h.u.pr.l -text \"Random updating period range:\"" );
-					cmd( "ttk::label $T.h.u.pr.v -style hl.TLabel -text \"%d\"", cv->period_range );
+					cmd( "ttk::label $T.h.u.pr.v -style hl.TLabel -text \"%d\"", cv->attr->period_range );
 					cmd( "pack $T.h.u.pr.l $T.h.u.pr.v -side left -padx $_2" );
 					cmd( "pack $T.h.u.pr" );
 				}
@@ -1431,7 +1416,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::label $T.b2.l -text \"Include in documentation to be\"" );
 			cmd( "ttk::checkbutton $T.b2.ini -text \"Initialized\" -variable initial -underline 0" );
 
-			if ( cv->param != 1 && cv->num_lag == 0 )
+			if ( cv->param != 1 && cv->attr->num_lag == 0 )
 				cmd( "$T.b2.ini configure -state disabled" );
 
 			cmd( "ttk::checkbutton $T.b2.obs -text \"Observed\" -variable observe -underline 0" );
@@ -1491,7 +1476,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "tooltip::tooltip $Td.b.us \"List all variables using this element\"" );
 			cmd( "tooltip::tooltip $Td.b.using \"List all variables and parameters used\"" );
 
-			if ( cv->param == 1 || cv->num_lag > 0 )
+			if ( cv->param == 1 || cv->attr->num_lag > 0 )
 			{
 				cmd( "ttk::frame $Td.i" );
 				cmd( "ttk::label $Td.i.int -text \"Initial values description\"" );
@@ -1560,7 +1545,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "$Td.f.desc.text insert end \"%s\"", strtcl( buf_descr, cd->text, MAX_BUFF_SIZE ) );
 
-			if ( cv->param == 1 || cv->num_lag > 0 )
+			if ( cv->param == 1 || cv->attr->num_lag > 0 )
 				cmd( "$Td.i.desc.text insert end \"%s\"", strtcl( buf_descr, cd->init, MAX_BUFF_SIZE ) );
 
 			cycle_var:
@@ -1638,27 +1623,29 @@ lsd::object *gui::operate( lsd::object *r )
 					vmax = NAN;
 				}
 
+				attr = sim.va.search( lab_old );
+				attr->save = save;
+				attr->savei = savei;
+				attr->parallel = parallel;
+				attr->observe = observe;
+				attr->integer = nature;
+				attr->max_val = vmax;
+				attr->min_val = vmin;
+
 				for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				{
 					cv = cur->search_var( NULL, lab_old );
-					cv->save = save;
-					cv->savei = savei;
 					cv->deb_mode = deb_mode;
 					cv->plot = plot;
-					cv->parallel = parallel;
-					cv->observe = observe;
-					cv->integer = nature;
-					cv->max_val = vmax;
-					cv->min_val = vmin;
 
 					// ensure variable constraints are respected
-					for ( i = 0; i < ( cv->param == 1 ? 1 : cv->num_lag ); ++i )
+					for ( i = 0; i < ( cv->param == 1 ? 1 : cv->attr->num_lag ); ++i )
 						cv->val[ i ] = cv->chk_val( cv->val[ i ] );
 				}
 
 				desc.change_descr( lab_old, NULL, -1, eval_str( "[ .chgelem.desc.f.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
-				if ( cv->param == 1 || cv->num_lag > 0 )
+				if ( cv->param == 1 || cv->attr->num_lag > 0 )
 					desc.change_descr( lab_old, NULL, -1, NULL, eval_str( "[ .chgelem.desc.i.desc.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
 				unsaved_change( true );		// signal unsaved change
@@ -1753,14 +1740,14 @@ lsd::object *gui::operate( lsd::object *r )
 				delVar = renVar = false;
 
 				cmd( "set nature %d", cv->param );
-				cmd( "if { $nature == 0 } { set numlag %d } { set numlag 0 }", cv->num_lag );
+				cmd( "if { $nature == 0 } { set numlag %d } { set numlag 0 }", cv->attr->num_lag );
 
 				cmd( "set T .prop" );
 				cmd( "newtop $T \"Properties\" { set choice 2 }" );
 
 				cmd( "ttk::frame $T.h" );
 				cmd( "ttk::label $T.h.l1 -text \"Element:\"" );
-				cmd( "ttk::label $T.h.l2 -text \"%s\" -style hl.TLabel", cv->label );
+				cmd( "ttk::label $T.h.l2 -text \"%s\" -style hl.TLabel", cv->attr->label );
 				cmd( "pack $T.h.l1 $T.h.l2 -side left -padx $_2" );
 
 				cmd( "ttk::frame $T.n" );
@@ -1818,7 +1805,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "set choice $numlag" );
 			numlag = choice;
 
-			if ( ! delVar && ( nature != cv->param || numlag != cv->num_lag ) )
+			if ( ! delVar && ( nature != cv->param || numlag != cv->attr->num_lag ) )
 			{
 				if ( nature != 1 && numlag == 0 )
 					desc.change_descr( lab_old, NULL, nature, NULL, "" );
@@ -1839,26 +1826,28 @@ lsd::object *gui::operate( lsd::object *r )
 						cv->val[ i ] = 0;
 
 					// avoid reseting initial values if not required
-					if ( ( cv->param == 1 && numlag > 0 ) || ( nature == 1 && cv->num_lag > 0 ) )
+					if ( ( cv->param == 1 && numlag > 0 ) || ( nature == 1 && cv->attr->num_lag > 0 ) )
 						cv->val[ 0 ] = old_val[ 0 ];		// parameter <-> lagged variable
 					else
-						if ( cv->num_lag > 0 && numlag > 0 )// x-lags variable to y-lags variable?
-							for ( i = 0; i < std::min( cv->num_lag, numlag ); ++i )
+						if ( cv->attr->num_lag > 0 && numlag > 0 )// x-lags variable to y-lags variable?
+							for ( i = 0; i < std::min( cv->attr->num_lag, numlag ); ++i )
 								cv->val[ i ] = old_val[ i ];
 
 					delete [ ] old_val;
-					cv->num_lag = numlag;
 					cv->param = nature;
+				}
 
-					if ( cv->param == 1 || cv->num_lag > 0 )
-						cv->initialized = false;
+				attr = sim.va.search( lab_old );
+				attr->num_lag = numlag;
 
-					if ( cv->param != 0 )
-					{
-						cv->parallel = false;
-						cv->period = 1;
-						cv->delay = cv->delay_range = cv->period_range = 0;
-					}
+				if ( nature == 1 || numlag > 0 )
+					attr->initialized = false;
+
+				if ( nature != 0 )
+				{
+					attr->parallel = false;
+					attr->period = 1;
+					attr->delay = attr->delay_range = attr->period_range = 0;
 				}
 			}
 
@@ -1993,7 +1982,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cv = r->search_var( NULL, lab_old );
 
 			for ( cur = sim.root->search( lab1 ); cur != NULL; cur = cur->hyper_next( cur->label ) )
-				cur->add_var_from_example( cv );
+				cur->add_var( cv );
 
 			for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				cur->delete_var( lab_old );
@@ -2026,7 +2015,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			// do lag selection, if necessary, for initialization/sensitivity data entry
 			lag = 0;								// lag option for the next cases (first lag)
-			if ( ! initVal && ( cv->param == 0 || cv->param == 2 ) && cv->num_lag > 1 )
+			if ( ! initVal && ( cv->param == 0 || cv->param == 2 ) && cv->attr->num_lag > 1 )
 			{										// more than one lag to choose?
 				cmd( "set lag \"1\"" );
 
@@ -2036,7 +2025,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 				cmd( "ttk::frame $T.i" );
 				cmd( "ttk::label $T.i.l -text \"Use lag\"" );
-				cmd( "ttk::spinbox $T.i.e -justify center -width 3 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= %d } { set lag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lag; return 0 } } -invalidcommand { bell }", cv->num_lag, cv->num_lag );
+				cmd( "ttk::spinbox $T.i.e -justify center -width 3 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 0 && $n <= %d } { set lag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lag; return 0 } } -invalidcommand { bell }", cv->attr->num_lag, cv->attr->num_lag );
 				cmd( "$T.i.e insert 0 $lag" );
 				cmd( "pack $T.i.l $T.i.e -side left -padx $_2" );
 
@@ -2044,7 +2033,7 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "ttk::label $T.o.l1 -text \"( valid values:\"" );
 				cmd( "ttk::label $T.o.w1 -text 1 -style hl.TLabel" );
 				cmd( "ttk::label $T.o.l2 -text to" );
-				cmd( "ttk::label $T.o.w2 -text %d -style hl.TLabel", cv->num_lag );
+				cmd( "ttk::label $T.o.w2 -text %d -style hl.TLabel", cv->attr->num_lag );
 				cmd( "ttk::label $T.o.l3 -text \")\"" );
 				cmd( "pack $T.o.l1 $T.o.w1 $T.o.l2 $T.o.w2 $T.o.l3 -side left -padx $_2" );
 
@@ -2070,7 +2059,7 @@ lsd::object *gui::operate( lsd::object *r )
 				lag = abs( choice ) - 1;		// try to extract chosed lag
 
 				// abort if necessary
-				if ( lag < 0 || lag > ( cv->num_lag - 1 ) )
+				if ( lag < 0 || lag > ( cv->attr->num_lag - 1 ) )
 				{
 					cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid lag selected\" -detail \"Select a valid lag value for the variable or change the number of lagged values for this variable.\"" );
 					break;
@@ -2088,12 +2077,12 @@ lsd::object *gui::operate( lsd::object *r )
 				else
 					cur = r;
 
-				cur->set_all( cv->label, lag );
+				cur->set_all( cv->attr->label, lag );
 				redrawRoot = true;				// redraw is needed to show new value tip
 
 				if ( initVal )
 				{
-					if ( next_lag < ( cv->num_lag - 1 ) )
+					if ( next_lag < ( cv->attr->num_lag - 1 ) )
 					{
 						++next_lag;
 						choice = 77;			// execute command again
@@ -2110,8 +2099,8 @@ lsd::object *gui::operate( lsd::object *r )
 			else								// edit sensitivity analysis data
 			{
 				exist = false;
-				if ( ( cs = sim.search_sensitivity( cv->label, lag ) ) == NULL )
-					cs = new lsd::sensitivity( cv->label, & sim, cv->param, lag, cv->integer );
+				if ( ( cs = sim.search_sensitivity( cv->attr->label, lag ) ) == NULL )
+					cs = new lsd::sensitivity( cv->attr->label, & sim, cv->param, lag, cv->attr->integer );
 				else
 					exist = true;
 
@@ -2137,10 +2126,10 @@ lsd::object *gui::operate( lsd::object *r )
 				break;
 
 			exist = false;
-			ca = da.search( cv->label );
+			ca = da.search( cv->attr->label );
 			if ( ca == da.ass_elem.end( ) )
 			{
-				da.ass_elem.emplace_back( cv->label, cv->param, false, cv->param );
+				da.ass_elem.emplace_back( cv->attr->label, cv->param, false, cv->param );
 				ca = -- da.ass_elem.end( );
 			}
 
@@ -2168,22 +2157,22 @@ lsd::object *gui::operate( lsd::object *r )
 				break;
 
 			// save previous values to allow canceling operation
-			i_tmp[ 1 ] = cv->delay;
-			i_tmp[ 2 ] = cv->delay_range;
-			i_tmp[ 3 ] = cv->period;
-			i_tmp[ 4 ] = cv->period_range;
+			i_tmp[ 1 ] = cv->attr->delay;
+			i_tmp[ 2 ] = cv->attr->delay_range;
+			i_tmp[ 3 ] = cv->attr->period;
+			i_tmp[ 4 ] = cv->attr->period_range;
 
-			Tcl_LinkVar( interp, "delay", ( char * ) & cv->delay, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "delay_range", ( char * ) & cv->delay_range, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "period", ( char * ) & cv->period, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "period_range", ( char * ) & cv->period_range, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "delay", ( char * ) & cv->attr->delay, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "delay_range", ( char * ) & cv->attr->delay_range, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "period", ( char * ) & cv->attr->period, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "period_range", ( char * ) & cv->attr->period_range, TCL_LINK_INT );
 
 			cmd( "set T .updating" );
 			cmd( "newtop $T \"Variable Updating\" { set choice 2 }" );
 
 			cmd( "ttk::frame $T.h" );
 			cmd( "ttk::label $T.h.l1 -text \"Variable:\"" );
-			cmd( "ttk::label $T.h.l2 -text \"%s\" -style hl.TLabel", cv->label );
+			cmd( "ttk::label $T.h.l2 -text \"%s\" -style hl.TLabel", cv->attr->label );
 			cmd( "pack $T.h.l1 $T.h.l2 -side left -padx $_2" );
 
 			cmd( "ttk::frame $T.f" );
@@ -2246,24 +2235,15 @@ lsd::object *gui::operate( lsd::object *r )
 
 			if ( choice == 2 )	// Escape - revert previous values
 			{
-				cv->delay = i_tmp[ 1 ];
-				cv->delay_range = i_tmp[ 2 ];
-				cv->period = i_tmp[ 3 ];
-				cv->period_range = i_tmp[ 4 ];
+				cv->attr->delay = i_tmp[ 1 ];
+				cv->attr->delay_range = i_tmp[ 2 ];
+				cv->attr->period = i_tmp[ 3 ];
+				cv->attr->period_range = i_tmp[ 4 ];
 			}
 			else
 			// signal unsaved change if anything to be saved
-				if ( i_tmp[ 1 ] != cv->delay || i_tmp[ 2 ] != cv->delay_range || i_tmp[ 3 ] != cv->period || i_tmp[ 4 ] != cv->period_range )
+				if ( i_tmp[ 1 ] != cv->attr->delay || i_tmp[ 2 ] != cv->attr->delay_range || i_tmp[ 3 ] != cv->attr->period || i_tmp[ 4 ] != cv->attr->period_range )
 				{
-					for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
-					{
-						cv1 = cur->search_var( NULL, lab_old );
-						cv1->delay = cv->delay;
-						cv1->delay_range = cv->delay_range;
-						cv1->period = cv->period;
-						cv1->period_range = cv->period_range;
-					}
-
 					unsaved_change( true );
 					redrawRoot = true;
 				}

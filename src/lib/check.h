@@ -131,14 +131,14 @@ namespace lsd
 	{
 		if ( std::isfinite( res ) )
 		{
-			if ( integer )
+			if ( attr->integer )
 				res = round( res );
 
-			if ( ! std::isnan( max_val ) && res > max_val )
-				res = max_val;
+			if ( ! std::isnan( attr->max_val ) && res > attr->max_val )
+				res = attr->max_val;
 			else
-				if ( ! std::isnan( min_val ) && res < min_val )
-					res = min_val;
+				if ( ! std::isnan( attr->min_val ) && res < attr->min_val )
+					res = attr->min_val;
 		}
 		else
 			if ( up->sim->quit == 0 && ( ( ! up->sim->use_nan && std::isnan( res ) ) || std::isinf( res ) ) )
@@ -146,7 +146,7 @@ namespace lsd
 									 "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation",
 									 true,
 									 "equation for '%s' produces the invalid value '%lf' at time step %d",
-									 label, res, up->sim->t );
+									 attr->label, res, up->sim->t );
 
 		return res;
 	}
@@ -167,7 +167,7 @@ namespace lsd
 
 			if ( cv != NULL )
 			{
-				dummy = true;
+				attr->dummy = true;
 
 				if ( ! cv->up->under_comput_var( lab ) )
 					cv->up->cal( up, lab, 0, true );

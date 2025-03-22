@@ -281,7 +281,8 @@ void lsd::simulation::unload_configuration( bool full )
  *************************************************************/
 int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 {
-	bool obs, integer;
+	bool integer, obs, plot;
+	char debug;
 	const char *str, *dsc, *init;
 	int i, type, lags;
 	d_vecT val;
@@ -332,8 +333,27 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 				if ( strlen( str ) == 0 || ! valid_label( str ) )
 					return 34;
 
-				cv = add_empty_var( str );
-				cv->param = type;
+				lags = cn.attribute( "lags" ).as_uint( );
+				plot = cn.attribute( "plot" ).as_bool( );
+				debug = cn.attribute( "debug" ).as_string( "n" )[ 0 ];
+
+				cv = add_var( str, type, lags, plot, debug );
+
+				cv->attr->save = cn.attribute( "save" ).as_bool( );
+				cv->attr->savei = cn.attribute( "save_file" ).as_bool( );
+				cv->attr->integer = cn.attribute( "integer" ).as_bool( );
+				cv->attr->parallel = cn.attribute( "parallel" ).as_bool( );
+				cv->attr->max_val = cn.attribute( "maximum" ).as_double( NAN );
+				cv->attr->min_val = cn.attribute( "minimum" ).as_double( NAN );
+				cv->attr->initialized = cn.attribute( "initialized" ).as_bool( true );
+
+				if ( type == 0 )
+				{
+					cv->attr->delay = cn.attribute( "delay" ).as_uint( );
+					cv->attr->delay_range = cn.attribute( "delay_range" ).as_uint( );
+					cv->attr->period = cn.attribute( "period" ).as_uint( 1 );
+					cv->attr->period_range = cn.attribute( "period_range" ).as_uint( );
+				}
 
 				if ( ! quick )
 				{
@@ -344,7 +364,7 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 						obs = cn.child( "documentation" ).attribute( "observe" ).as_bool( );
 
 						desc->add_descr( str, type, dsc, init, cn.child( "documentation" ).attribute( "initialization" ).as_bool( ), obs );
-						cv->observe = obs;
+						cv->attr->observe = obs;
 
 						delete [ ] dsc;
 						delete [ ] init;
@@ -354,7 +374,6 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 					{
 						x_nodeT cns = cn.child( "sensitivity" );
 						integer = cn.attribute( "integer" ).as_bool( );
-						lags = cn.attribute( "lags" ).as_uint( );
 
 						if ( type == 1 )
 						{
@@ -571,30 +590,11 @@ int lsd::object::load_xml_insts( x_nodeT &n, n_mapT &node_map, i_setT &warning )
 	// load elements (parameters, variables and functions)
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		x_nodeT cn = n.find_child_by_attribute( "element", "name", cv->label );
+		x_nodeT cn = n.find_child_by_attribute( "element", "name", cv->attr->label );
 		if ( cn.empty( ) )
 			warning.insert( 52 );				// missing element data
 
-		cv->num_lag = ( cv->param == 1 ) ? 0 : cn.attribute( "lags" ).as_uint( );
-		cv->save = cn.attribute( "save" ).as_bool( );
-		cv->savei = cn.attribute( "save_file" ).as_bool( );
-		cv->plot = cn.attribute( "plot" ).as_bool( );
-		cv->integer = cn.attribute( "integer" ).as_bool( );
-		cv->parallel = cn.attribute( "parallel" ).as_bool( );
-		cv->max_val = cn.attribute( "maximum" ).as_double( NAN );
-		cv->min_val = cn.attribute( "minimum" ).as_double( NAN );
-		cv->deb_mode = cn.attribute( "debug" ).as_string( "n" )[ 0 ];
-		cv->initialized = cn.attribute( "initialized" ).as_bool( true );
-
-		if ( cv->param == 0 )
-		{
-			cv->delay = cn.attribute( "delay" ).as_uint( );
-			cv->delay_range = cn.attribute( "delay_range" ).as_uint( );
-			cv->period = cn.attribute( "period" ).as_uint( 1 );
-			cv->period_range = cn.attribute( "period_range" ).as_uint( );
-		}
-
-		if ( cv->param == 1 || cv->num_lag > 0 )
+		if ( cv->param == 1 || cv->attr->num_lag > 0 )
 		{	// split the values of instances string into a string vector
 			val = strtostrsplit( cn.child( "values" ).text( ).get( ), ';' );
 			if ( ( long ) val.size( ) != nd )
@@ -604,25 +604,10 @@ int lsd::object::load_xml_insts( x_nodeT &n, n_mapT &node_map, i_setT &warning )
 		// set values of instances for each variable instance
 		for ( l = 0, cur = this; cur != NULL; cur = cur->hyper_next( label ), ++l )
 		{
-			cv1 = cur->search_var( NULL, cv->label );
-			cv1->param = cv->param;
-			cv1->num_lag = cv->num_lag;
-			cv1->save = cv->save;
-			cv1->savei = cv->savei;
-			cv1->plot = cv->plot;
-			cv1->parallel = cv->parallel;
-			cv1->deb_mode = cv->deb_mode;
-			cv1->initialized = cv->initialized;
-			cv1->delay = cv->delay;
-			cv1->delay_range = cv->delay_range;
-			cv1->period = cv->period;
-			cv1->period_range = cv->period_range;
-			cv1->observe = cv->observe;
+			cv1 = cur->search_var( NULL, cv->attr->label );
 
 			// set parameters and initial conditions
-			cv1->val = new double[ cv1->num_lag + 1 ];
-
-			if ( cv1->param == 1 || cv1->num_lag > 0 )
+			if ( cv1->param == 1 || cv1->attr->num_lag > 0 )
 			{
 				if ( l >= ( long ) val.size( ) || strlen( val[ l ].c_str( ) ) == 0 )
 				{
@@ -632,7 +617,7 @@ int lsd::object::load_xml_insts( x_nodeT &n, n_mapT &node_map, i_setT &warning )
 				else
 					val1 = strtodsplit( val[ l ].c_str( ), ',' );
 
-				for ( i = 0; i < ( cv1->param == 1 ? 1 : cv1->num_lag ); ++i )
+				for ( i = 0; i < ( cv1->param == 1 ? 1 : cv1->attr->num_lag ); ++i )
 				{
 					if ( i >= ( long ) val1.size( ) || ! std::isfinite( val1[ i ] ) )
 					{
@@ -647,7 +632,7 @@ int lsd::object::load_xml_insts( x_nodeT &n, n_mapT &node_map, i_setT &warning )
 			}
 
 			if ( cv1->param != 1 )				// remove trash from last position
-				cv1->val[ cv1->num_lag ] = 0;
+				cv1->val[ cv1->attr->num_lag ] = 0;
 		}
 
 		if ( l < nd )
@@ -1021,19 +1006,19 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		x_nodeT cn = n.append_child( "element" );
-		cn.append_attribute( "name" ) = cv->label;
+		cn.append_attribute( "name" ) = cv->attr->label;
 		cn.append_attribute( "type" ) = elem_type_names[ cv->param ];
 
 		if ( cv->param != 1 )
-			cn.append_attribute( "lags" ) = cv->num_lag;
+			cn.append_attribute( "lags" ) = cv->attr->num_lag;
 
 		// search for uninitialized data
-		if ( cv->param == 1 || cv->num_lag > 0 )
+		if ( cv->param == 1 || cv->attr->num_lag > 0 )
 		{
 			for ( init = true, cur = this; cur != NULL; cur = cur->hyper_next( label ) )
 			{
-				cv1 = cur->search_var( NULL, cv->label );
-				if ( ! cv1->initialized )
+				cv1 = cur->search_var( NULL, cv->attr->label );
+				if ( ! cv1->attr->initialized )
 				{
 					init = false;
 					break;
@@ -1045,26 +1030,26 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 		}
 
 		// save only non-default values
-		if ( cv->save )
+		if ( cv->attr->save )
 			cn.append_attribute( "save" ) = true;
 
-		if ( cv->savei )
+		if ( cv->attr->savei )
 			cn.append_attribute( "save_file" ) = true;
+
+		if ( cv->attr->integer )
+			cn.append_attribute( "integer" ) = true;
+
+		if ( cv->attr->parallel )
+			cn.append_attribute( "parallel" ) = true;
+
+		if ( ! std::isnan( cv->attr->max_val ) )
+			cn.append_attribute( "maximum" ) = cv->attr->max_val;
+
+		if ( ! std::isnan( cv->attr->min_val ) )
+			cn.append_attribute( "minimum" ) = cv->attr->min_val;
 
 		if ( cv->plot )
 			cn.append_attribute( "plot" ) = true;
-
-		if ( cv->integer )
-			cn.append_attribute( "integer" ) = true;
-
-		if ( cv->parallel )
-			cn.append_attribute( "parallel" ) = true;
-
-		if ( ! std::isnan( cv->max_val ) )
-			cn.append_attribute( "maximum" ) = cv->max_val;
-
-		if ( ! std::isnan( cv->min_val ) )
-			cn.append_attribute( "minimum" ) = cv->min_val;
 
 		if ( cv->deb_mode != 'n' )
 		{
@@ -1072,20 +1057,20 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 			cn.append_attribute( "debug" ) = data.c_str( );
 		}
 
-		if ( cv->delay > 0 )
-			cn.append_attribute( "delay" ) = cv->delay;
+		if ( cv->attr->delay > 0 )
+			cn.append_attribute( "delay" ) = cv->attr->delay;
 
-		if ( cv->delay_range > 0 )
-			cn.append_attribute( "delay_range" ) = cv->delay_range;
+		if ( cv->attr->delay_range > 0 )
+			cn.append_attribute( "delay_range" ) = cv->attr->delay_range;
 
-		if ( cv->period > 1 )
-			cn.append_attribute( "period" ) = cv->period;
+		if ( cv->attr->period > 1 )
+			cn.append_attribute( "period" ) = cv->attr->period;
 
-		if ( cv->period_range > 0 )
-			cn.append_attribute( "period_range" ) = cv->period_range;
+		if ( cv->attr->period_range > 0 )
+			cn.append_attribute( "period_range" ) = cv->attr->period_range;
 
 		// add initial values
-		if ( cv->param == 1 || cv->num_lag > 0 )
+		if ( cv->param == 1 || cv->attr->num_lag > 0 )
 		{
 			for ( data = "", cur = this; cur != NULL;
 				  cur = cur->hyper_next( label ) )
@@ -1093,13 +1078,13 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 				if ( cur != this )
 					data += ";";
 
-				cv1 = cur->search_var( NULL, cv->label );
-				for ( i = 0; i < ( cv1->param == 1 ? 1 : cv1->num_lag ); ++i )
+				cv1 = cur->search_var( NULL, cv->attr->label );
+				for ( i = 0; i < ( cv1->param == 1 ? 1 : cv1->attr->num_lag ); ++i )
 				{
 					if ( i != 0 )
 						data += ",";
 
-					data += to_string( "%.15g", cv1->initialized ? cv1->chk_val( cv1->val[ i ] ) : 0 );
+					data += to_string( "%.15g", cv1->attr->initialized ? cv1->chk_val( cv1->val[ i ] ) : 0 );
 				}
 			}
 
@@ -1112,7 +1097,7 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 		// add description text
 		if ( desc != NULL )
 		{
-			auto cd = desc->search_descr( cv->label, true );
+			auto cd = desc->search_descr( cv->attr->label, true );
 			if ( ! strwsp( cd->text ) || ! strwsp( cd->init ) )
 			{
 				x_nodeT cnd = cn.append_child( "description" );
@@ -1147,7 +1132,7 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 
 		// add sensitivity analysis data
 		for ( auto cs = sim->sens; cs != NULL; cs = cs->next )
-			if ( strcmp( cs->label, cv->label ) == 0 )
+			if ( strcmp( cs->label, cv->attr->label ) == 0 )
 			{
 				if ( cs->integer )
 					cn.append_attribute( "integer" ) = true;
@@ -1178,7 +1163,7 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 		// add data assimilation settings
 		if ( da != NULL )
 		{
-			auto ca = da->search( cv->label );
+			auto ca = da->search( cv->attr->label );
 			if ( ca != da->ass_elem.end( ) )
 			{
 				x_nodeT cna = cn.append_child( "assimilation" );
@@ -1388,9 +1373,9 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 
 				for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( cv->up->label ) )
 				{
-					cv1 = cur->search_var( NULL, cv->label );
+					cv1 = cur->search_var( NULL, cv->attr->label );
 					if ( cv1 != NULL )
-						cv1->observe = true;
+						cv1->attr->observe = true;
 				}
 			}
 		}
@@ -1453,10 +1438,9 @@ endLoad:
  *************************************************************/
 bool lsd::object::load_txt_struct( FILE *f )
 {
-	int i = 0;
+	int type, i = 0;
 	char ch[ MAX_ELEM_LENGTH ];
 	bridge *cb;
-	variable *cv;
 
 	fscanf( f, "%99s", ch );
 	while ( strcmp( ch, "Label" ) && ++i < MAX_FILE_TRY )
@@ -1488,27 +1472,16 @@ bool lsd::object::load_txt_struct( FILE *f )
 				return false;
 		}
 
-		if ( ! strcmp( ch, "Var:" ) )
-		{
-			fscanf( f, "%*[ ]%99s", ch );
-			cv = add_empty_var( ch );
-			cv->param = 0;
-		}
-
+		type = 0;
 		if ( ! strcmp( ch, "Param:" ) )
-		{
-			fscanf( f, "%*[ ]%99s", ch );
-			cv = add_empty_var( ch );
-			cv->param = 1;
-		}
+			type = 1;
+		else
+			if ( ! strcmp( ch, "Func:" ) )
+				type = 2;
 
-		if ( ! strcmp( ch, "Func:" ) )
-		{
-			fscanf( f, "%*[ ]%99s", ch );
-			cv = add_empty_var( ch );
-			cv->param = 2;
-		}
-
+		fscanf( f, "%*[ ]%99s", ch );
+		add_var( ch, type );
+		
 		fscanf( f, "%*[{\r\t\n]%99s", ch );
 	}
 
@@ -1572,31 +1545,27 @@ bool lsd::object::load_txt_insts( const char *file_name, FILE *f )
 		if ( f == NULL )
 			return false;
 
-		if ( fscanf( f, "%d %c %c %c %c", &( cv->num_lag ), &ch1, &ch2, &ch3, &ch4 ) != 5 )
+		if ( fscanf( f, "%d %c %c %c %c", &( cv->attr->num_lag ), &ch1, &ch2, &ch3, &ch4 ) != 5 )
 			return false;
 
-		if ( cv->param == 1 )
-			cv->num_lag = 0;
+		if ( cv->param != 0 )
+			cv->attr->num_lag = 0;
 
-		cv->save = ( tolower( ch1 ) == 's' ) ? true : false;
-		cv->savei = ( ch1 == 'S' || ch1 == 'N' ) ? true : false;
-		cv->initialized = ( ch2 == '+' ) ? true : false;
+		cv->attr->save = ( tolower( ch1 ) == 's' ) ? true : false;
+		cv->attr->savei = ( ch1 == 'S' || ch1 == 'N' ) ? true : false;
+		cv->attr->initialized = ( ch2 == '+' ) ? true : false;
 		cv->deb_mode = ch3;
 		cv->plot = ( tolower( ch4 ) == 'p' ) ? true : false;
-		cv->parallel = ( ch4 == 'P' || ch4 == 'N' ) ? true : false;
+		cv->attr->parallel = ( ch4 == 'P' || ch4 == 'N' ) ? true : false;
 
 		for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
 		{
-			cv1 = cur->search_var( NULL, cv->label );
-			cv1->val = new double[ cv->num_lag + 1 ];
-			cv1->param = cv->param;
-			cv1->num_lag = cv->num_lag;
-			cv1->save = cv->save;
-			cv1->savei = cv->savei;
+			cv1 = cur->search_var( NULL, cv->attr->label );
 			cv1->plot = cv->plot;
-			cv1->initialized = cv->initialized;
 			cv1->deb_mode = cv->deb_mode;
-			cv1->parallel = cv->parallel;
+
+			delete [ ] cv1->val;
+			cv1->val = new double [ cv->attr->num_lag + 1 ];
 
 			if ( cv1->param == 1 )
 			{
@@ -1607,14 +1576,14 @@ bool lsd::object::load_txt_insts( const char *file_name, FILE *f )
 			}
 			else
 			{
-				for ( i = 0; i < cv->num_lag; ++i )
+				for ( i = 0; i < cv->attr->num_lag; ++i )
 					if ( fscanf( f, "\t%lf", &app ) != 1 )
 						return false;
 					else
 						// place values shifted one position, since they are "time 0" values
 						cv1->val[ i ] = app;
 
-				cv1->val[ cv->num_lag ] = 0;
+				cv1->val[ cv->attr->num_lag ] = 0;
 			}
 		}
 
@@ -1622,21 +1591,12 @@ bool lsd::object::load_txt_insts( const char *file_name, FILE *f )
 		if ( cv->param == 0 )
 		{
 			fgetpos( f, & pos );
-			num = fscanf( f, "\t<upd: %d %d %d %d>", & cv->delay, & cv->delay_range, & cv->period, & cv->period_range );
+			num = fscanf( f, "\t<upd: %d %d %d %d>", & cv->attr->delay, & cv->attr->delay_range, & cv->attr->period, & cv->attr->period_range );
 
 			if ( num > 0 && num < 4 )
 				return false;
 
-			if ( num > 0 )
-				for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
-				{
-					cv1 = cur->search_var( NULL, cv->label );
-					cv1->delay = cv->delay;
-					cv1->delay_range = cv->delay_range;
-					cv1->period = cv->period;
-					cv1->period_range = cv->period_range;
-				}
-			else
+			if ( num == 0 )
 				fsetpos( f, & pos );
 		}
 	}
@@ -1885,13 +1845,13 @@ void lsd::object::save_txt_struct( FILE *f, const char *tab )
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		if ( cv->param == 0 )
-			fprintf( f, "%sVar: %s\n", tab1, cv->label );
+			fprintf( f, "%sVar: %s\n", tab1, cv->attr->label );
 
 		if ( cv->param == 1 )
-			fprintf( f, "%sParam: %s\n", tab1, cv->label );
+			fprintf( f, "%sParam: %s\n", tab1, cv->attr->label );
 
 		if ( cv->param == 2)
-			fprintf( f, "%sFunc: %s\n", tab1, cv->label );
+			fprintf( f, "%sFunc: %s\n", tab1, cv->attr->label );
 	}
 
 	fprintf( f, "\n" );
@@ -1931,11 +1891,11 @@ void lsd::object::save_txt_insts( FILE *f )
 	{
 		// search for unloaded data
 		ch2 = '+';
-		if ( cv->param == 1 || cv->num_lag > 0 )
+		if ( cv->param == 1 || cv->attr->num_lag > 0 )
 			for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
 			{
-				cv1 = cur->search_var( NULL, cv->label );
-				if ( ! cv1->initialized )
+				cv1 = cur->search_var( NULL, cv->attr->label );
+				if ( ! cv1->attr->initialized )
 				{
 					ch2 = '-';
 					break;
@@ -1959,38 +1919,38 @@ void lsd::object::save_txt_insts( FILE *f )
 		//		p = runtime plot only
 		//		P = runtime plot and parallel update
 
-		ch1 = cv->save ? 's' : 'n';
-		ch1 = cv->savei ? toupper( ch1 ) : ch1;
+		ch1 = cv->attr->save ? 's' : 'n';
+		ch1 = cv->attr->savei ? toupper( ch1 ) : ch1;
 		ch3 = cv->deb_mode;
 		ch4 = cv->plot ? 'p' : 'n';
-		ch4 = cv->parallel ? toupper( ch4 ) : ch4;
+		ch4 = cv->attr->parallel ? toupper( ch4 ) : ch4;
 
 		if ( cv->param == 0 )
-			fprintf( f, "Var: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch2, ch3, ch4 );
+			fprintf( f, "Var: %s %d %c %c %c %c", cv->attr->label, cv->attr->num_lag, ch1, ch2, ch3, ch4 );
 		if ( cv->param == 1 )
-			fprintf( f, "Param: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch2, ch3, ch4 );
+			fprintf( f, "Param: %s %d %c %c %c %c", cv->attr->label, cv->attr->num_lag, ch1, ch2, ch3, ch4 );
 		if ( cv->param == 2 )
-			fprintf( f, "Func: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch2, ch3, ch4 );
+			fprintf( f, "Func: %s %d %c %c %c %c", cv->attr->label, cv->attr->num_lag, ch1, ch2, ch3, ch4 );
 
 		for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
 		{
-			cv1 = cur->search_var( NULL, cv->label );
+			cv1 = cur->search_var( NULL, cv->attr->label );
 			if ( cv1->param == 1 )
-				if ( cv1->initialized )
+				if ( cv1->attr->initialized )
 					fprintf( f, "\t%.15g", cv1->chk_val( cv1->val[ 0 ] ) );
 				else
 					fprintf( f, "\t%c", '0' );
 			else
-				for ( i = 0; i < cv->num_lag; ++i )
-					if ( cv1->initialized )
+				for ( i = 0; i < cv->attr->num_lag; ++i )
+					if ( cv1->attr->initialized )
 						fprintf( f, "\t%.15g", cv1->chk_val( cv1->val[ i ] ) );
 					else
 						fprintf( f, "\t%c", '0' );
 		}
 
 		// add optional special updating data
-		if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 ) )
-			fprintf( f, "\t<upd: %d %d %d %d>", cv->delay, cv->delay_range, cv->period, cv->period_range );
+		if ( cv->param == 0 && ( cv->attr->delay > 0 || cv->attr->delay_range > 0 || cv->attr->period > 1 || cv->attr->period_range > 0 ) )
+			fprintf( f, "\t<upd: %d %d %d %d>", cv->attr->delay, cv->attr->delay_range, cv->attr->period, cv->attr->period_range );
 
 		fprintf( f, "\n" );
 	}
@@ -2020,14 +1980,14 @@ void lsd::object::save_txt_descr( FILE *f )
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
-		auto cd = desc != NULL ? desc->search_descr( cv->label, true ) : NULL;
+		auto cd = desc != NULL ? desc->search_descr( cv->attr->label, true ) : NULL;
 		if ( cd != NULL )
-			if ( ( cv->param != 1 && cv->num_lag == 0 ) || strwsp( cd->init ) )
+			if ( ( cv->param != 1 && cv->attr->num_lag == 0 ) || strwsp( cd->init ) )
 				fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ] );
 			else
 				fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 0 ], cd->init, desc_key_words[ 1 ] );
 		else
-			fprintf( f, "%s_%s\n%s\n\n", cv->param == 1 ? "Parameter" : "Variable", cv->label, desc_key_words[ 1 ] );
+			fprintf( f, "%s_%s\n%s\n\n", cv->param == 1 ? "Parameter" : "Variable", cv->attr->label, desc_key_words[ 1 ] );
 	}
 
 	for ( auto cb = b; cb != NULL; cb = cb->next )
@@ -2052,10 +2012,10 @@ void lsd::variable::save_single( void )
 
 	set_lab_tit( );
 	snprintf( fn, MAX_PATH_LENGTH, "%s_%s-%d_%d_seed-%d.res",
-			  label, lab_tit, start, end, up->sim->seed - 1 );
+			  attr->label, lab_tit, start, end, up->sim->seed - 1 );
 	f = fopen( fn, "wt" );			// use text mode for Windows better compatibility
 
-	fprintf( f, "%s %s (%d %d)\t\n", label, lab_tit, start, end );
+	fprintf( f, "%s %s (%d %d)\t\n", attr->label, lab_tit, start, end );
 
 	for ( i = 0; i <= up->sim->t - 1; ++i )
 		if ( i >= start && i <= end && ! std::isnan( data[ i - start ] ) )// save NaN as n/a
@@ -2214,7 +2174,7 @@ void lsd::result::title_recursive( object *r, bool header )
 	object *cur;
 
 	for ( auto cv = r->v; cv != NULL; cv = cv->next )
-		if ( cv->save )
+		if ( cv->attr->save )
 		{
 			cv->set_lab_tit( );
 
@@ -2223,7 +2183,7 @@ void lsd::result::title_recursive( object *r, bool header )
 				// check if there are still instances to be presented
 				// because of DA data analysis, dynamic instances may have to enter
 				// the DA process, but were still used in the model forecasts
-				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->attr->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 				{
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )
@@ -2258,7 +2218,7 @@ void lsd::result::title_recursive( object *r, bool header )
 		{
 			if ( da_res )
 			{
-				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->attr->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 				{
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )
@@ -2292,25 +2252,25 @@ void lsd::result::write_title( variable *v, int tag, bool header, int start, int
 	if ( header )
 		if ( dozip )
 			if ( docsv )
-				gzprintf( fz, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
+				gzprintf( fz, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->attr->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
 			else
-				gzprintf( fz, "%s %s%s (%d %d)\t", v->label, tag_pref[ tag ], v->lab_tit, start, end );
+				gzprintf( fz, "%s %s%s (%d %d)\t", v->attr->label, tag_pref[ tag ], v->lab_tit, start, end );
 		else
 			if ( docsv )
-				fprintf( f, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
+				fprintf( f, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->attr->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
 			else
-				fprintf( f, "%s %s%s (%d %d)\t", v->label, tag_pref[ tag ], v->lab_tit, start, end );
+				fprintf( f, "%s %s%s (%d %d)\t", v->attr->label, tag_pref[ tag ], v->lab_tit, start, end );
 	else
 		if ( dozip )
 			if ( docsv )
-				gzprintf( fz, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
+				gzprintf( fz, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->attr->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
 			else
-				gzprintf( fz, "%s %s%s (-1 -1)\t", v->label, tag_pref[ tag ], v->lab_tit );
+				gzprintf( fz, "%s %s%s (-1 -1)\t", v->attr->label, tag_pref[ tag ], v->lab_tit );
 		else
 			if ( docsv )
-				fprintf( f, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
+				fprintf( f, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->attr->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
 			else
-				fprintf( f, "%s %s%s (-1 -1)\t", v->label, tag_pref[ tag ], v->lab_tit );
+				fprintf( f, "%s %s%s (-1 -1)\t", v->attr->label, tag_pref[ tag ], v->lab_tit );
 
 	first_col = false;
 }
@@ -2356,11 +2316,11 @@ void lsd::result::data_recursive( object *r, int t )
 	object *cur;
 
 	for ( auto cv = r->v; cv != NULL; cv = cv->next )
-		if ( cv->save )
+		if ( cv->attr->save )
 		{
 			if ( da_res )
 			{
-				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->attr->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 				{
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )
@@ -2398,7 +2358,7 @@ void lsd::result::data_recursive( object *r, int t )
 		{
 			if ( da_res )
 			{
-				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->attr->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 				{
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )

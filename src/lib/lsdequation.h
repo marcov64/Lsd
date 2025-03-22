@@ -125,9 +125,9 @@
 	{ \
 		if ( _sim_->quit == 2 ) \
 			return v->val[ 0 ]; \
-		if ( v->eq_func == NULL ) \
-			v->eq_func = _chk_eq_( v->label ); \
-		return v->chk_res( ( v->eq_func )( v, caller ) ); \
+		if ( v->attr->eq_func == NULL ) \
+			v->attr->eq_func = _chk_eq_( v->attr->label ); \
+		return v->chk_res( ( v->attr->eq_func )( v, caller ) ); \
 	} \
 	void lsd::equation::_init_map_( ) \
 	{ \

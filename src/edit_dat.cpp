@@ -74,10 +74,10 @@ void lsd::object::edit_data( const char *lab )
 	if ( first != NULL )
 		for ( cv = first->v, rows = i = 0; cv != NULL; )
 		{
-			if ( cv->param == 1 || cv->num_lag > 0 )
+			if ( cv->param == 1 || cv->attr->num_lag > 0 )
 				++rows;
 
-			if ( cv->param == 0 && i + 1 < cv->num_lag )
+			if ( cv->param == 0 && i + 1 < cv->attr->num_lag )
 				++i;
 			else
 			{
@@ -329,130 +329,130 @@ void lsd::object::link_cells( const char *lab )
 	{
 		if ( cv1->param == 1 )
 		{
-			strcpyn( ch1, cv1->label, MAX_ELEM_LENGTH );
+			strcpyn( ch1, cv1->attr->label, MAX_ELEM_LENGTH );
 
-			cmd( "ttk::label $w.tit_t%s -text %s", cv1->label, ch1 );
-			cmd( "grid $w.tit_t%s -row %d -sticky w -padx [ list $_2 $_5 ]", cv1->label, k );
-			cmd( "mouse_wheel $w.tit_t%s", cv1->label );
-			cmd( "ttk::label $w.typ_t%s -text (P) -style hl.TLabel", cv1->label );
-			cmd( "grid $w.typ_t%s -row %d -column 1 -padx $_1", cv1->label, k );
-			cmd( "mouse_wheel $w.typ_t%s", cv1->label );
-			cmd( "ttk::button $w.t%s -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set var_name %s; set lag %d; set lastFocus $w.c1_v%sp; set choice 2 }", cv1->label, cv1->label, j, cv1->label );
-			cmd( "grid $w.t%s -row %d -column 2", cv1->label, k );
-			cmd( "mouse_wheel $w.t%s", cv1->label );
+			cmd( "ttk::label $w.tit_t%s -text %s", cv1->attr->label, ch1 );
+			cmd( "grid $w.tit_t%s -row %d -sticky w -padx [ list $_2 $_5 ]", cv1->attr->label, k );
+			cmd( "mouse_wheel $w.tit_t%s", cv1->attr->label );
+			cmd( "ttk::label $w.typ_t%s -text (P) -style hl.TLabel", cv1->attr->label );
+			cmd( "grid $w.typ_t%s -row %d -column 1 -padx $_1", cv1->attr->label, k );
+			cmd( "mouse_wheel $w.typ_t%s", cv1->attr->label );
+			cmd( "ttk::button $w.t%s -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set var_name %s; set lag %d; set lastFocus $w.c1_v%sp; set choice 2 }", cv1->attr->label, cv1->attr->label, j, cv1->attr->label );
+			cmd( "grid $w.t%s -row %d -column 2", cv1->attr->label, k );
+			cmd( "mouse_wheel $w.t%s", cv1->attr->label );
 
-			cmd( "set tit $w.tit_t%s", cv1->label );
-			gui::set_ttip_descr( gui::get_str( "tit" ), cv1->label, -1, false );
-			cmd( "tooltip::tooltip $w.typ_t%s \"Parameter '%s'\nin object '%s'\"", cv1->label, cv1->label, cur1->label );
-			cmd( "tooltip::tooltip $w.t%s \"Set all or a subset of\n'%s' instances\"", cv1->label, cv1->label );
+			cmd( "set tit $w.tit_t%s", cv1->attr->label );
+			gui::set_ttip_descr( gui::get_str( "tit" ), cv1->attr->label, -1, false );
+			cmd( "tooltip::tooltip $w.typ_t%s \"Parameter '%s'\nin object '%s'\"", cv1->attr->label, cv1->attr->label, cur1->label );
+			cmd( "tooltip::tooltip $w.t%s \"Set all or a subset of\n'%s' instances\"", cv1->attr->label, cv1->attr->label );
 		}
 		else
 		{
-			if ( j < cv1->num_lag )
+			if ( j < cv1->attr->num_lag )
 			{
-				strcpyn( ch1, cv1->label, MAX_ELEM_LENGTH );
+				strcpyn( ch1, cv1->attr->label, MAX_ELEM_LENGTH );
 
-				cmd( "ttk::label $w.tit_t%s_%d -text %s", cv1->label, j, ch1 );
-				cmd( "grid $w.tit_t%s_%d -row %d -sticky w -padx [ list $_2 $_5 ]", cv1->label, j, k );
-				cmd( "mouse_wheel $w.tit_t%s_%d", cv1->label, j );
-				cmd( "ttk::label $w.typ_t%s_%d -text (V_%d) -style hl.TLabel", cv1->label, j, j + 1 );
-				cmd( "grid $w.typ_t%s_%d -row %d -column 1 -padx $_1", cv1->label, j, k );
-				cmd( "mouse_wheel $w.typ_t%s_%d", cv1->label, j );
-				cmd( "ttk::button $w.t%s_%d -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set var_name %s; set lag %d; set lastFocus $w.c1_v%s_%d; set choice 2 }", cv1->label, j, cv1->label, j, cv1->label, j );
-				cmd( "grid $w.t%s_%d -row %d -column 2", cv1->label, j, k );
-				cmd( "mouse_wheel $w.t%s_%d", cv1->label, j );
+				cmd( "ttk::label $w.tit_t%s_%d -text %s", cv1->attr->label, j, ch1 );
+				cmd( "grid $w.tit_t%s_%d -row %d -sticky w -padx [ list $_2 $_5 ]", cv1->attr->label, j, k );
+				cmd( "mouse_wheel $w.tit_t%s_%d", cv1->attr->label, j );
+				cmd( "ttk::label $w.typ_t%s_%d -text (V_%d) -style hl.TLabel", cv1->attr->label, j, j + 1 );
+				cmd( "grid $w.typ_t%s_%d -row %d -column 1 -padx $_1", cv1->attr->label, j, k );
+				cmd( "mouse_wheel $w.typ_t%s_%d", cv1->attr->label, j );
+				cmd( "ttk::button $w.t%s_%d -text \"Set All\" -width -1 -takefocus 0 -style small.TButton -command { set var_name %s; set lag %d; set lastFocus $w.c1_v%s_%d; set choice 2 }", cv1->attr->label, j, cv1->attr->label, j, cv1->attr->label, j );
+				cmd( "grid $w.t%s_%d -row %d -column 2", cv1->attr->label, j, k );
+				cmd( "mouse_wheel $w.t%s_%d", cv1->attr->label, j );
 
-				cmd( "set tit $w.tit_t%s_%d", cv1->label, j );
-				gui::set_ttip_descr( gui::get_str( "tit" ), cv1->label, -1, false );
-				cmd( "tooltip::tooltip $w.typ_t%s_%d \"Variable '%s' (lag %d)\nin object '%s'\"", cv1->label, j, cv1->label, j + 1, cur1->label );
-				cmd( "tooltip::tooltip $w.t%s_%d \"Set all or a subset of\n'%s' instances\"", cv1->label, j, cv1->label );
+				cmd( "set tit $w.tit_t%s_%d", cv1->attr->label, j );
+				gui::set_ttip_descr( gui::get_str( "tit" ), cv1->attr->label, -1, false );
+				cmd( "tooltip::tooltip $w.typ_t%s_%d \"Variable '%s' (lag %d)\nin object '%s'\"", cv1->attr->label, j, cv1->attr->label, j + 1, cur1->label );
+				cmd( "tooltip::tooltip $w.t%s_%d \"Set all or a subset of\n'%s' instances\"", cv1->attr->label, j, cv1->attr->label );
 			}
 		}
 
 		for ( cur = cur1, i = 1; i <= maxCols && cur != NULL; cur = cur->hyper_next( lab ) , ++i )
 		{
-			cv = cur->search_var( cur, cv1->label );
-			cv->initialized = true;
+			cv = cur->search_var( cur, cv1->attr->label );
+			cv->attr->initialized = true;
 
 			if ( cv->param == 1 )
 			{
-				snprintf( ch1, MAX_ELEM_LENGTH, "p%s_%d", cv->label, i );
+				snprintf( ch1, MAX_ELEM_LENGTH, "p%s_%d", cv->attr->label, i );
 				Tcl_LinkVar( gui::interp, ch1, ( char * ) &( cv->val[ 0 ] ), TCL_LINK_DOUBLE );
 
-				cmd( "ttk::entry $w.c%d_v%sp -width $cwidth -justify center -validate focusout -validatecommand { set n %%P; if [ string is double -strict $n ] { set p%s_%d $n; return 1 } { %%W delete 0 end; %%W insert 0 ${p%s_%d}; return 0 } } -invalidcommand { bell }", i, cv->label, cv->label, i, cv->label, i, cv->label, i );
-				cmd( "$w.c%d_v%sp insert 0 [ formatfloat ${p%s_%d} ]", i, cv->label, cv->label, i );
-				cmd( "grid $w.c%d_v%sp -row %d -column [ expr { 2 + %d } ] -padx $_1", i, cv->label, k, i );
-				cmd( "mouse_wheel $w.c%d_v%sp", i, cv->label );
+				cmd( "ttk::entry $w.c%d_v%sp -width $cwidth -justify center -validate focusout -validatecommand { set n %%P; if [ string is double -strict $n ] { set p%s_%d $n; return 1 } { %%W delete 0 end; %%W insert 0 ${p%s_%d}; return 0 } } -invalidcommand { bell }", i, cv->attr->label, cv->attr->label, i, cv->attr->label, i, cv->attr->label, i );
+				cmd( "$w.c%d_v%sp insert 0 [ formatfloat ${p%s_%d} ]", i, cv->attr->label, cv->attr->label, i );
+				cmd( "grid $w.c%d_v%sp -row %d -column [ expr { 2 + %d } ] -padx $_1", i, cv->attr->label, k, i );
+				cmd( "mouse_wheel $w.c%d_v%sp", i, cv->attr->label );
 
 				cmd( "if { [ info exists tag_%d ] && $tag_%d ne \"\" } { \
 						tooltip::tooltip $w.c%d_v%sp \"Parameter '%s'\ninstance $tag_%d\" \
 					} else { \
 						tooltip::tooltip $w.c%d_v%sp \"Parameter '%s'\" \
-					}", i, i, i, cv->label, cv->label, i, i, cv->label, cv->label );
+					}", i, i, i, cv->attr->label, cv->attr->label, i, i, cv->attr->label, cv->attr->label );
 
 				if ( strlen( previous ) != 0 )
 				{
-					cmd( "bind %s <Return> { selectcell $g.can $w.c%d_v%sp }", previous, i, cv->label );
-					cmd( "bind $w.c%d_v%sp <Shift-Return> { selectcell $g.can %s }", i, cv->label, previous );
-					cmd( "bind %s <Tab> { selectcell $g.can $w.c%d_v%sp }", previous, i, cv->label );
-					cmd( "bind $w.c%d_v%sp <Shift-Tab> { selectcell $g.can %s }", i, cv->label, previous );
-					cmd( "bind %s <Down> { selectcell $g.can $w.c%d_v%sp }", previous, i, cv->label );
-					cmd( "bind $w.c%d_v%sp <Up> { selectcell $g.can %s }", i, cv->label, previous );
+					cmd( "bind %s <Return> { selectcell $g.can $w.c%d_v%sp }", previous, i, cv->attr->label );
+					cmd( "bind $w.c%d_v%sp <Shift-Return> { selectcell $g.can %s }", i, cv->attr->label, previous );
+					cmd( "bind %s <Tab> { selectcell $g.can $w.c%d_v%sp }", previous, i, cv->attr->label );
+					cmd( "bind $w.c%d_v%sp <Shift-Tab> { selectcell $g.can %s }", i, cv->attr->label, previous );
+					cmd( "bind %s <Down> { selectcell $g.can $w.c%d_v%sp }", previous, i, cv->attr->label );
+					cmd( "bind $w.c%d_v%sp <Up> { selectcell $g.can %s }", i, cv->attr->label, previous );
 				}
 				else
 				{
-					cmd( "bind $w.c%d_v%sp <Shift-Return> { break }", i, cv->label );
+					cmd( "bind $w.c%d_v%sp <Shift-Return> { break }", i, cv->attr->label );
 					cmd( "bind %s <Tab> { break }", previous );
-					cmd( "bind $w.c%d_v%sp <Shift-Tab> { break }", i, cv->label );
+					cmd( "bind $w.c%d_v%sp <Shift-Tab> { break }", i, cv->attr->label );
 				}
 
-				snprintf( previous, 2 * MAX_ELEM_LENGTH, "$w.c%d_v%sp", i, cv->label );
+				snprintf( previous, 2 * MAX_ELEM_LENGTH, "$w.c%d_v%sp", i, cv->attr->label );
 
 				if ( ! lastFocus )
 				{
-					cmd( "set lastFocus $w.c%d_v%sp", i, cv->label );
+					cmd( "set lastFocus $w.c%d_v%sp", i, cv->attr->label );
 					lastFocus = true;
 				}
 			}
 			else
 			{
-				if ( j < cv->num_lag )
+				if ( j < cv->attr->num_lag )
 				{
-					snprintf( ch1, MAX_ELEM_LENGTH, "v%s_%d_%d", cv->label, i, j );
+					snprintf( ch1, MAX_ELEM_LENGTH, "v%s_%d_%d", cv->attr->label, i, j );
 					Tcl_LinkVar( gui::interp, ch1, ( char * ) &( cv->val[ j ] ), TCL_LINK_DOUBLE );
 
-					cmd( "ttk::entry $w.c%d_v%s_%d -width $cwidth -justify center -validate focusout -validatecommand { set n %%P; if [ string is double -strict $n ] { set v%s_%d_%d $n; return 1 } { %%W delete 0 end; %%W insert 0 ${v%s_%d_%d}; return 0 } } -invalidcommand { bell }", i, cv->label, j, cv->label, i, j, cv->label, i, j, cv->label, i, j );
-					cmd( "$w.c%d_v%s_%d insert 0 [ formatfloat ${v%s_%d_%d} ]", i, cv->label, j, cv->label, i, j );
-					cmd( "grid $w.c%d_v%s_%d -row %d -column [ expr { 2 + %d } ] -padx $_1", i, cv->label, j, k, i );
-					cmd( "mouse_wheel $w.c%d_v%s_%d", i, cv->label, j );
+					cmd( "ttk::entry $w.c%d_v%s_%d -width $cwidth -justify center -validate focusout -validatecommand { set n %%P; if [ string is double -strict $n ] { set v%s_%d_%d $n; return 1 } { %%W delete 0 end; %%W insert 0 ${v%s_%d_%d}; return 0 } } -invalidcommand { bell }", i, cv->attr->label, j, cv->attr->label, i, j, cv->attr->label, i, j, cv->attr->label, i, j );
+					cmd( "$w.c%d_v%s_%d insert 0 [ formatfloat ${v%s_%d_%d} ]", i, cv->attr->label, j, cv->attr->label, i, j );
+					cmd( "grid $w.c%d_v%s_%d -row %d -column [ expr { 2 + %d } ] -padx $_1", i, cv->attr->label, j, k, i );
+					cmd( "mouse_wheel $w.c%d_v%s_%d", i, cv->attr->label, j );
 
 					cmd( "if { [ info exists tag_%d ] && $tag_%d ne \"\" } { \
 							tooltip::tooltip $w.c%d_v%s_%d \"Variable '%s' (lag %d)\ninstance $tag_%d\" \
 						} else { \
 							tooltip::tooltip $w.c%d_v%s_%d \"Variable '%s' (lag %d)\" \
-						}", i, i, i, cv->label, j, cv->label, j + 1, i, i, cv->label, j, cv->label, j + 1 );
+						}", i, i, i, cv->attr->label, j, cv->attr->label, j + 1, i, i, cv->attr->label, j, cv->attr->label, j + 1 );
 
 					if ( strlen( previous ) != 0 )
 					{
-						cmd( "bind %s <Return> { selectcell $g.can $w.c%d_v%s_%d }", previous, i, cv->label, j );
-						cmd( "bind	$w.c%d_v%s_%d <Shift-Return> { selectcell $g.can %s }", i, cv->label, j, previous );
-						cmd( "bind %s <Tab> { selectcell $g.can $w.c%d_v%s_%d }", previous, i, cv->label, j );
-						cmd( "bind	$w.c%d_v%s_%d <Shift-Tab> { selectcell $g.can %s }", i, cv->label, j, previous );
-						cmd( "bind %s <Down> { selectcell $g.can $w.c%d_v%s_%d }", previous, i, cv->label, j );
-						cmd( "bind	$w.c%d_v%s_%d <Up> { selectcell $g.can %s }", i, cv->label, j, previous );
+						cmd( "bind %s <Return> { selectcell $g.can $w.c%d_v%s_%d }", previous, i, cv->attr->label, j );
+						cmd( "bind	$w.c%d_v%s_%d <Shift-Return> { selectcell $g.can %s }", i, cv->attr->label, j, previous );
+						cmd( "bind %s <Tab> { selectcell $g.can $w.c%d_v%s_%d }", previous, i, cv->attr->label, j );
+						cmd( "bind	$w.c%d_v%s_%d <Shift-Tab> { selectcell $g.can %s }", i, cv->attr->label, j, previous );
+						cmd( "bind %s <Down> { selectcell $g.can $w.c%d_v%s_%d }", previous, i, cv->attr->label, j );
+						cmd( "bind	$w.c%d_v%s_%d <Up> { selectcell $g.can %s }", i, cv->attr->label, j, previous );
 					}
 					else
 					{
-						cmd( "bind	$w.c%d_v%s_%d <Shift-Return> { break }", i, cv->label, j );
+						cmd( "bind	$w.c%d_v%s_%d <Shift-Return> { break }", i, cv->attr->label, j );
 						cmd( "bind %s <Tab> { break }", previous );
-						cmd( "bind	$w.c%d_v%s_%d <Shift-Tab> { break }", i, cv->label, j );
+						cmd( "bind	$w.c%d_v%s_%d <Shift-Tab> { break }", i, cv->attr->label, j );
 					}
 
-					snprintf( previous, 2 * MAX_ELEM_LENGTH, "$w.c%d_v%s_%d", i, cv->label, j );
+					snprintf( previous, 2 * MAX_ELEM_LENGTH, "$w.c%d_v%s_%d", i, cv->attr->label, j );
 
 					if ( ! lastFocus )
 					{
-						cmd( "set lastFocus $w.c%d_v%s_%d", i, cv->label, j );
+						cmd( "set lastFocus $w.c%d_v%s_%d", i, cv->attr->label, j );
 						lastFocus = true;
 					}
 				}
@@ -474,14 +474,14 @@ void lsd::object::link_cells( const char *lab )
 		// set flag of data loaded also to not shown pars.
 		for ( ; cur != NULL; cur = cur->hyper_next( lab ) )
 		{
-			cv = cur->search_var( cur, cv1->label );
-			cv->initialized = true;
+			cv = cur->search_var( cur, cv1->attr->label );
+			cv->attr->initialized = true;
 		}
 
-		if ( cv1->param == 1 || cv1->num_lag > 0 )
+		if ( cv1->param == 1 || cv1->attr->num_lag > 0 )
 			++k;
 
-		if ( cv1->param == 0 && j + 1 < cv1->num_lag )
+		if ( cv1->param == 0 && j + 1 < cv1->attr->num_lag )
 			++j;
 		else
 		{
@@ -507,14 +507,14 @@ void lsd::object::show_cells( const char *lab )
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 			if ( cv->param == 1 )
 			{
-				cmd( "$w.c%d_v%sp delete 0 end", i, cv->label );
-				cmd( "$w.c%d_v%sp insert 0 [ formatfloat ${p%s_%d} ]", i, cv->label, cv->label, i );
+				cmd( "$w.c%d_v%sp delete 0 end", i, cv->attr->label );
+				cmd( "$w.c%d_v%sp insert 0 [ formatfloat ${p%s_%d} ]", i, cv->attr->label, cv->attr->label, i );
 			}
 			else
-				for ( j = 0; j < cv->num_lag; ++j )
+				for ( j = 0; j < cv->attr->num_lag; ++j )
 				{
-					cmd( "$w.c%d_v%s_%d delete 0 end", i, cv->label, j );
-					cmd( "$w.c%d_v%s_%d insert 0 [ formatfloat ${v%s_%d_%d} ]", i, cv->label, j, cv->label, i, j );
+					cmd( "$w.c%d_v%s_%d delete 0 end", i, cv->attr->label, j );
+					cmd( "$w.c%d_v%s_%d insert 0 [ formatfloat ${v%s_%d_%d} ]", i, cv->attr->label, j, cv->attr->label, i, j );
 				}
 }
 
@@ -533,10 +533,10 @@ void lsd::object::save_cells( const char *lab )
 	for ( i = 1; i <= maxCols && cur != NULL; cur = cur->hyper_next( lab ), ++i )
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 			if ( cv->param == 1 )
-				cmd( "catch \"set p%s_%d [ $w.c%d_v%sp get ]\"", cv->label, i, i, cv->label );
+				cmd( "catch \"set p%s_%d [ $w.c%d_v%sp get ]\"", cv->attr->label, i, i, cv->attr->label );
 			else
-				for ( j = 0; j < cv->num_lag; ++j )
-					cmd( "catch \"set v%s_%d_%d [ $w.c%d_v%s_%d get ]\"", cv->label, i, j, i, cv->label, j );
+				for ( j = 0; j < cv->attr->num_lag; ++j )
+					cmd( "catch \"set v%s_%d_%d [ $w.c%d_v%s_%d get ]\"", cv->attr->label, i, j, i, cv->attr->label, j );
 }
 
 
@@ -556,14 +556,14 @@ void lsd::object::unlink_cells( const char *lab )
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 			if ( cv->param == 1 )
 			{
-				snprintf( ch1, 2 * MAX_ELEM_LENGTH,"p%s_%d", cv->label, i );
+				snprintf( ch1, 2 * MAX_ELEM_LENGTH,"p%s_%d", cv->attr->label, i );
 				Tcl_UnlinkVar( gui::interp, ch1 );
 				cv->val[ 0 ] = cv->chk_val( cv->val[ 0 ] );
 			}
 			else
-				for ( j = 0; j < cv->num_lag; ++j )
+				for ( j = 0; j < cv->attr->num_lag; ++j )
 				{
-					snprintf( ch1, 2 * MAX_ELEM_LENGTH,"v%s_%d_%d", cv->label, i, j );
+					snprintf( ch1, 2 * MAX_ELEM_LENGTH,"v%s_%d_%d", cv->attr->label, i, j );
 					Tcl_UnlinkVar( gui::interp, ch1 );
 					cv->val[ j ] = cv->chk_val( cv->val[ j ] );
 				}

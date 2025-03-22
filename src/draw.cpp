@@ -233,44 +233,44 @@ void lsd::object::create_float_list( void )
 		for ( cv = v; cv != NULL; cv = cv->next )
 		{
 			// special updating scheme?
-			if ( cv->param == 0 && ( cv->delay > 0 || cv->delay_range > 0 || cv->period > 1 || cv->period_range > 0 ) )
+			if ( cv->param == 0 && ( cv->attr->delay > 0 || cv->attr->delay_range > 0 || cv->attr->period > 1 || cv->attr->period_range > 0 ) )
 				sp_upd = true;
 			else
 				sp_upd = false;
 
 			// set flags string
-			cmd( "set varFlags \"%s%s%s%s%s%s\"", ( cv->save || cv->savei ) ? "+" : "", cv->plot ? "*" : "", ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? "!" : "", ( cv->deb_mode == 'w' || cv->deb_mode == 'W' ) ? "?" : "", ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? "\u00BF" : "", cv->parallel ? "&" : "", sp_upd ? "\u00A7" : "" );
+			cmd( "set varFlags \"%s%s%s%s%s%s\"", ( cv->attr->save || cv->attr->savei ) ? "+" : "", cv->plot ? "*" : "", ( cv->deb_mode == 'd' || cv->deb_mode == 'W' || cv->deb_mode == 'R' ) ? "!" : "", ( cv->deb_mode == 'w' || cv->deb_mode == 'W' ) ? "?" : "", ( cv->deb_mode == 'r' || cv->deb_mode == 'R' ) ? "\u00BF" : "", cv->attr->parallel ? "&" : "", sp_upd ? "\u00A7" : "" );
 
 			if ( cv->param == 0 )
 			{
-				if ( cv->num_lag == 0 )
+				if ( cv->attr->num_lag == 0 )
 				{
-					cmd( "lappend tlist_%s \"%s (V$varFlags)\"", label, cv->label );
+					cmd( "lappend tlist_%s \"%s (V$varFlags)\"", label, cv->attr->label );
 					cmd( "lappend slist_%s var", label );
 				}
 				else
 				{
-					cmd( "lappend tlist_%s \"%s (V_%d$varFlags)\"", label, cv->label, cv->num_lag );
+					cmd( "lappend tlist_%s \"%s (V_%d$varFlags)\"", label, cv->attr->label, cv->attr->num_lag );
 					cmd( "lappend slist_%s lvar", label );
 				}
 			}
 
 			if ( cv->param == 1 )
 			{
-				cmd( "lappend tlist_%s \"%s (P$varFlags)\"", label, cv->label );
+				cmd( "lappend tlist_%s \"%s (P$varFlags)\"", label, cv->attr->label );
 				cmd( "lappend slist_%s par", label );
 			}
 
 			if ( cv->param == 2 )
 			{
-				if ( cv->num_lag == 0 )
+				if ( cv->attr->num_lag == 0 )
 				{
-					cmd( "lappend tlist_%s \"%s (F$varFlags)\"", label, cv->label );
+					cmd( "lappend tlist_%s \"%s (F$varFlags)\"", label, cv->attr->label );
 					cmd( "lappend slist_%s fun", label );
 				}
 				else
 				{
-					cmd( "lappend tlist_%s \"%s (F_%d$varFlags)\"", label, cv->label, cv->num_lag );
+					cmd( "lappend tlist_%s \"%s (F_%d$varFlags)\"", label, cv->attr->label, cv->attr->num_lag );
 					cmd( "lappend slist_%s lfun", label );
 				}
 			}

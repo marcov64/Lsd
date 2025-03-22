@@ -4591,7 +4591,7 @@ void lsd::object::insert_data_mem( const char *lab )
 void lsd::object::create_par_map( void )
 {
 	for ( auto cv = v; cv != NULL; cv = cv->next )
-		sim->par_map.insert( std::make_pair < strT, strT > ( cv->label, label ) );
+		sim->par_map.insert( std::make_pair < strT, strT > ( cv->attr->label, label ) );
 
 	for ( auto cb = b; cb != NULL; cb = cb->next )
 		for ( auto cur = cb->head; cur != NULL; cur = BROTHER( cur ) )
@@ -4607,9 +4607,9 @@ void lsd::object::count_labels_mem( int *count, const char *lab )
 	bool found = false;
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
-		if ( ( lab == NULL && cv->save ) || ( lab != NULL && ! strcmp( cv->label, lab ) ) )
+		if ( ( lab == NULL && cv->attr->save ) || ( lab != NULL && ! strcmp( cv->attr->label, lab ) ) )
 		{
-			if ( ! cv->save )
+			if ( ! cv->attr->save )
 				found = true;
 
 			++( *count );
@@ -4637,23 +4637,23 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 	ass_map_itT ca;
 
 	for ( auto cv = v; cv != NULL && ! gui::stop; cv = cv->next )
-		if ( ( lab == NULL && cv->save ) || ( lab != NULL && da->disable && strcmp( cv->label, lab ) == 0 ) )
+		if ( ( lab == NULL && cv->attr->save ) || ( lab != NULL && da->disable && strcmp( cv->attr->label, lab ) == 0 ) )
 		{
 			cv->set_lab_tit( );
 
 			if ( da->disable )
 			{
-				if ( cv->save )
+				if ( cv->attr->save )
 					tag = 0;
 				else
 				{
 					found = true;
 					tag = 1;
-					cv->start = cv->last_update - cv->num_lag;
+					cv->start = cv->last_update - cv->attr->num_lag;
 					cv->end = cv->last_update;
 				}
 
-				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref[ tag ], cv->lab_tit, cv->start, cv->end, *num_v, cv->up->label );
+				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->attr->label, tag_pref[ tag ], cv->lab_tit, cv->start, cv->end, *num_v, cv->up->label );
 				++( *num_v );
 
 				if ( cv->end > gui::num_c )
@@ -4666,7 +4666,7 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 				// check if there are still instances to be presented
 				// because of DA data analysis, dynamic instances may have to enter
 				// the DA process, but were still used in the model forecasts
-				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->attr->label ) ) != da->elem_map.end( ) )
 				{
 					if ( ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 					{
@@ -4676,7 +4676,7 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 							for ( auto i = 2; i <= 4; ++i )
 								if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
 								{
-									cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref[ i ], cv->lab_tit, ce.start, ce.end, *num_v, cv->up->label );
+									cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->attr->label, tag_pref[ i ], cv->lab_tit, ce.start, ce.end, *num_v, cv->up->label );
 									++( *num_v );
 								}
 
@@ -4712,7 +4712,7 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 		{
 			if ( da->disable )
 			{
-				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref[ 0 ], cv->lab_tit, cv->start, cv->end, *num_v, sim->par_map[ cv->label ].c_str( ) );
+				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->attr->label, tag_pref[ 0 ], cv->lab_tit, cv->start, cv->end, *num_v, sim->par_map[ cv->attr->label ].c_str( ) );
 				++( *num_v );
 
 				if ( cv->end > gui::num_c )
@@ -4722,7 +4722,7 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 					gui::first_c = cv->start;
 			}
 			else
-				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->attr->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 				{
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )
@@ -4730,7 +4730,7 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 						for ( auto i = 2; i <= 4; ++i )
 							if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
 							{
-								cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->label, tag_pref[ i ], cv->lab_tit, ce.start, ce.end, *num_v, cv->up->label );
+								cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->attr->label, tag_pref[ i ], cv->lab_tit, ce.start, ce.end, *num_v, cv->up->label );
 								++( *num_v );
 							}
 
@@ -4760,13 +4760,13 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 	ass_map_itT ca;
 
 	for ( auto cv = v; cv != NULL && *num_v < ( int ) gui::vs.size( ); cv = cv->next )
-		if ( ( lab == NULL && cv->save ) || ( lab != NULL && da->disable && ! strcmp( cv->label, lab ) ) )
+		if ( ( lab == NULL && cv->attr->save ) || ( lab != NULL && da->disable && ! strcmp( cv->attr->label, lab ) ) )
 		{
 			cv->set_lab_tit( );
 
 			if ( da->disable )
 			{
-				if ( cv->save )
+				if ( cv->attr->save )
 					tag = 0;
 				else
 				{
@@ -4775,13 +4775,13 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 
 					// use C stdlib to be able to deallocate memory for deleted objects
 					if ( cv->data == NULL )
-						cv->data = ( double * ) malloc( ( cv->num_lag + 1 ) * sizeof( double ) );
+						cv->data = ( double * ) malloc( ( cv->attr->num_lag + 1 ) * sizeof( double ) );
 
-					for ( auto i = 0; i <= cv->num_lag; ++i )
-						cv->data[ i ] = cv->val[ cv->num_lag - i ];
+					for ( auto i = 0; i <= cv->attr->num_lag; ++i )
+						cv->data[ i ] = cv->val[ cv->attr->num_lag - i ];
 				}
 
-				gui::vs[ *num_v ].label = cv->label;
+				gui::vs[ *num_v ].label = cv->attr->label;
 				gui::vs[ *num_v ].parent = cv->up->label;
 				gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ tag ], cv->lab_tit );
 				gui::vs[ *num_v ].start = cv->start;
@@ -4792,7 +4792,7 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 				++( *num_v );
 			}
 			else
-				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->attr->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 				{
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )
@@ -4801,7 +4801,7 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
 								continue;
 
-							gui::vs[ *num_v ].label = cv->label;
+							gui::vs[ *num_v ].label = cv->attr->label;
 							gui::vs[ *num_v ].parent = cv->up->label;
 							gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ i ], cv->lab_tit );
 							gui::vs[ *num_v ].start = ce.start;
@@ -4824,7 +4824,7 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 		for ( auto cv = sim->cemetery; cv != NULL && *num_v < ( int ) gui::vs.size( ); cv = cv->next )
 			if ( da->disable )
 			{
-				gui::vs[ *num_v ].label = cv->label;
+				gui::vs[ *num_v ].label = cv->attr->label;
 				gui::vs[ *num_v ].parent = cv->up->label;
 				gui::vs[ *num_v ].tag = cv->lab_tit;
 				gui::vs[ *num_v ].start = cv->start;
@@ -4835,7 +4835,7 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 				++( *num_v );
 			}
 			else
-				if ( da != NULL && ( ca = da->elem_map.find( cv->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
+				if ( da != NULL && ( ca = da->elem_map.find( cv->attr->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
 				{
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )
@@ -4844,7 +4844,7 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
 								continue;
 
-							gui::vs[ *num_v ].label = cv->label;
+							gui::vs[ *num_v ].label = cv->attr->label;
 							gui::vs[ *num_v ].parent = cv->up->label;
 							gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ i ], cv->lab_tit );
 							gui::vs[ *num_v ].start = ce.start;

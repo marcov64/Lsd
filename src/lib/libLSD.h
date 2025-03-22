@@ -219,6 +219,8 @@ namespace lsd
 	class result;
 	class sensitivity;
 	class simulation;
+	class varattr;
+	class varattributes;
 	class variable;
 	class worker;
 
@@ -228,8 +230,9 @@ namespace lsd
  *************************************************************/
 	typedef std::function < double( const variable *, object * ) > eq_funcT;
 	typedef std::list < assim > ass_listT;
-	typedef std::list < descr > desc_listT;
 	typedef std::list < assim * > asp_listT;
+	typedef std::list < descr > desc_listT;
+	typedef std::list < varattr > vatt_listT;
 	typedef std::vector < assim * > ass_vecT;
 	typedef std::map < int, ass_vecT > ia_mapT;
 	typedef std::map < strT, profile > prof_mapT;
@@ -247,6 +250,7 @@ namespace lsd
 	typedef std::unordered_map < long, object * > n_mapT;
 	typedef std::unordered_map < strT, ass_listT::iterator > ass_mapT;
 	typedef std::unordered_map < strT, desc_listT::iterator > desc_mapT;
+	typedef std::unordered_map < strT, vatt_listT::iterator > vatt_mapT;
 	typedef std::unordered_map < strT, eq_funcT > eq_mapT;
 	typedef std::unordered_map < strT, bridge * > b_mapT;
 	typedef std::unordered_map < strT, variable * > v_mapT;
@@ -422,8 +426,8 @@ namespace lsd
 			object *next_count( object *obj, int *count );
 			object *search( const char *lab, bool no_search = false, bool no_search_up = true );
 			object *search_err( const char *lab, bool no_search, bool no_search_up, const char *errmsg );
-			variable *add_empty_var( const char *str );
-			variable *add_var_from_example( variable *example );
+			variable *add_var( const char *str, int par, int lags = -1, bool plot = false, char deb = 'n' );
+			variable *add_var( variable *example );
 			variable *search_var( object *caller, const char *label, bool no_error = false, bool no_search = false, bool no_search_up = false, bool search_sons = false );
 			void chg_lab( const char *lab );
 			void chg_var_lab( const char *old, const char *n );
@@ -568,27 +572,22 @@ namespace lsd
 
 
 /*************************************************************
- VARIABLE
+ VARATTR
  *************************************************************/
-	class variable							// model numeric element (variable,
-	{										// parameter, or function) class
-		friend class assimilation;
-		friend class equation;
+	class varattr							// element (variable, parameter,
+	{										// or function) static/homogeneous
+		friend class equation;				// attributes class
 		friend class object;
-		friend class result;
-		friend class simulation;
-		friend class worker;
+		friend class variable;
 
 		public:								// static public attributes
 			bool initialized = false;
 			bool integer = false;			// variable must be rounded to integer
 			bool observe = false;
 			bool parallel = false;
-			bool plot = false;
 			bool save = false;
 			bool savei = false;
-			char *label = NULL;
-			char deb_mode = 'n';
+			char *label;
 			double max_val = NAN;			// maximum limit for variable
 			double min_val = NAN;			// minimum limit (NAN = no limit)
 			int delay = 0;
@@ -600,12 +599,55 @@ namespace lsd
 		private:							// static private attributes
 			bool dummy = false;
 			eq_funcT eq_func = NULL;		// pointer to equation function
+			varattributes *container = NULL;// attributes container
+
+		public:
+			varattr( const char *_label, int _num_lag = -1 );// constructor
+			varattr( const varattr & a );	// copy constructor
+			~varattr( void );				// destructor
+			varattr & operator=( const varattr & a );// assignment constructor
+	};
+
+
+/*************************************************************
+ VARATTRIBUTES
+ *************************************************************/
+	class varattributes						// container for element (variable,
+	{										// parameter, or function) attributes
+		public:
+			vatt_listT attr;				// element attributes linked-list
+			vatt_mapT attr_map;				// map names to element attributes
+
+		private:
+			rec_mtxT vattr_lck;				// mutex lock for parallel computation
+
+		public:
+			varattr *add( const char *label, int lags = -1 );
+			varattr *rename( const char *old_lab, const char *new_lab );
+			varattr *search( const char *lab );
+	};
+
+
+/*************************************************************
+ VARIABLE
+ *************************************************************/
+	class variable							// model numeric element (variable,
+	{										// parameter, or function) class
+		friend class assimilation;
+		friend class equation;
+		friend class object;
+		friend class result;
+		friend class simulation;
+		friend class worker;
 
 		public:								// dynamic public attributes
-			double *val = NULL;
+			bool plot = false;
+			char deb_mode = 'n';
+			double *val;
 			double ini_val = NAN;			// initial for DA parameter estimation
 			int param = 0;
-			object *up = NULL;
+			object *up;
+			varattr *attr;					// static/homogeneous attributes object
 			variable *next = NULL;			// sibling variable under same object
 
 		private:							// dynamic private attributes
@@ -624,9 +666,10 @@ namespace lsd
 			double chk_val( double val );
 			variable *hyper_next( void );
 
-		variable( void ) { }			// constructor (empty)
-			variable( const variable &v );	// copy constructor
+			variable( object *_up, const char *_label, int _param, int _num_lag, bool plot, char _deb_mode );	// constructor
+			variable( const variable & v );	// copy constructor
 			~variable( void );				// destructor
+			variable & operator=( const variable & v );// assignment constructor
 
 		private:
 			bool alloc_save_var( void );
@@ -634,9 +677,7 @@ namespace lsd
 			inline double chk_dummy( const char *lab );
 			inline double chk_res( double res );
 			void add_cemetery( void );
-			void copy_state( const variable *ex );
-			void empty( bool no_lock = false );
-			void init( object *_up, const char *_label, variable *ex = NULL );
+			void destroy( bool no_lock = false );
 			void save_single( void );
 			void set_lab_tit( void );
 
