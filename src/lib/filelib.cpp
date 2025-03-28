@@ -231,12 +231,14 @@ endLoad:
  *************************************************************/
 void lsd::simulation::unload_configuration( bool full )
 {
+	empty_cemetery( );							// garbage collection
 	empty_blueprint( );							// remove current model structure
 	root->delete_obj( );
-	root = new object;
-	root->init( NULL, this, "Root" );
+	empty_varattributes( this );
+	empty_objattributes( this );
+
+	root = new object ( NULL, this, "Root" );
 	reset_blueprint( NULL );
-	empty_cemetery( );							// garbage collection
 
 	if ( desc != NULL )
 		desc->add_descr( "Root" );				// ensure root has description
@@ -290,7 +292,7 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 	bridge *cb;
 	variable *cv;
 
-	if ( strcmp( n.attribute( "name" ).value( ), label ) != 0 )
+	if ( strcmp( n.attribute( "name" ).value( ), attr->label ) != 0 )
 		return 31;
 
 	to_compute = n.attribute( "compute" ).as_bool( true );
@@ -451,15 +453,14 @@ int lsd::object::load_xml_insts( x_nodeT &n, n_mapT &node_map, i_setT &warning )
 	object *cur;
 	variable *cv, *cv1;
 
-	if ( strcmp( n.attribute( "name" ).value( ), label ) != 0 )
+	if ( strcmp( n.attribute( "name" ).value( ), attr->label ) != 0 )
 		return 41;
 
 	// split the number of instances string into an integer vector
 	num = strtolsplit( n.child( "counts" ).text( ).get( ), ',' );
 
 	// set # of instances for each object group
-	for ( nd = l = 0, cur = this; cur != NULL;
-		  nd += num[ l ], ++l, cur = cur->hyper_next( label ) )
+	for ( nd = l = 0, cur = this; cur != NULL; nd += num[ l ], ++l, cur = cur->hyper_next( ) )
 	{
 		if ( l >= ( long ) num.size( ) || num[ l ] <= 0 )
 		{
@@ -494,7 +495,7 @@ int lsd::object::load_xml_insts( x_nodeT &n, n_mapT &node_map, i_setT &warning )
 				warning.insert( 45 );			// inconsistent # of node names
 		}
 
-		for ( l = 0, cur = this; cur != NULL; ++l, cur = cur->hyper_next( label ) )
+		for ( l = 0, cur = this; cur != NULL; ++l, cur = cur->hyper_next( ) )
 		{
 			if ( l >= ( long ) nser.size( ) || nser[ l ] < 1 )
 			{
@@ -534,7 +535,7 @@ int lsd::object::load_xml_insts( x_nodeT &n, n_mapT &node_map, i_setT &warning )
 				lnkwht = strtostrsplit( nn.child( "linksweigth" ).text( ).get( ), ';' );
 
 			// add links to node objects
-			for ( l = k = 0, cur = this; cur != NULL; ++l, cur = cur->hyper_next( label ) )
+			for ( l = k = 0, cur = this; cur != NULL; ++l, cur = cur->hyper_next( ) )
 				if ( cur->node != NULL )		// node on instance?
 				{
 					if ( l >= ( long ) lnkto.size( ) )
@@ -602,9 +603,9 @@ int lsd::object::load_xml_insts( x_nodeT &n, n_mapT &node_map, i_setT &warning )
 		}
 
 		// set values of instances for each variable instance
-		for ( l = 0, cur = this; cur != NULL; cur = cur->hyper_next( label ), ++l )
+		for ( l = 0, cur = this; cur != NULL; cur = cur->hyper_next( ), ++l )
 		{
-			cv1 = cur->search_var( NULL, cv->attr->label );
+			cv1 = cur->search_var( NULL, cv->attr );
 
 			// set parameters and initial conditions
 			if ( cv1->param == 1 || cv1->attr->num_lag > 0 )
@@ -641,7 +642,7 @@ int lsd::object::load_xml_insts( x_nodeT &n, n_mapT &node_map, i_setT &warning )
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
-		x_nodeT cn = n.find_child_by_attribute( "object", "name", cb->label );
+		x_nodeT cn = n.find_child_by_attribute( "object", "name", cb->attr->label );
 		i = cb->head->load_xml_insts( cn, node_map, warning );
 		if ( i != 0 )
 			return i;
@@ -890,13 +891,12 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 	variable *cv, *cv1;
 
 	x_nodeT n = pn.append_child( "object" );
-	n.append_attribute( "name" ) = label;
+	n.append_attribute( "name" ) = attr->label;
 
 	if ( ! to_compute )
 		n.append_attribute( "compute" ) = false;
 
-	for ( data = "", nodes = false, cur = this; cur != NULL;
-		  cur = cur->hyper_next( cur->label ) )
+	for ( data = "", nodes = false, cur = this; cur != NULL; cur = cur->hyper_next( ) )
 	{
 		if ( cur != this )
 			data += ",";
@@ -913,7 +913,7 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 
 	if ( ! quick && desc != NULL )
 	{
-		auto cd = desc->search_descr( label, true );
+		auto cd = desc->search_descr( attr->label, true );
 		if ( ! strwsp( cd->text ) )
 		{
 			x_nodeT nd = n.append_child( "description" );
@@ -928,7 +928,7 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 	noWht = true;
 	if ( nodes )
 	{	// first save nodes and attribute serials
-		for ( cur = this; cur != NULL; ++l, cur = cur->hyper_next( cur->label ) )
+		for ( cur = this; cur != NULL; ++l, cur = cur->hyper_next( ) )
 		{
 			if ( cur != this )
 			{
@@ -951,7 +951,7 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 		}
 
 		// second save links using serials for destination
-		for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
+		for ( cur = this; cur != NULL; cur = cur->hyper_next( ) )
 		{
 			if ( cur != this )
 			{
@@ -998,7 +998,7 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 	// save son objects recursively
 	for ( cb = b; cb != NULL; cb = cb->next )
 		if ( cb->head == NULL )
-			sim->blueprint->search( cb->label )->save_xml_struct( n, node_serial, quick );
+			sim->blueprint->search( cb->attr )->save_xml_struct( n, node_serial, quick );
 		else
 			cb->head->save_xml_struct( n, node_serial, quick );
 
@@ -1015,9 +1015,9 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 		// search for uninitialized data
 		if ( cv->param == 1 || cv->attr->num_lag > 0 )
 		{
-			for ( init = true, cur = this; cur != NULL; cur = cur->hyper_next( label ) )
+			for ( init = true, cur = this; cur != NULL; cur = cur->hyper_next( ) )
 			{
-				cv1 = cur->search_var( NULL, cv->attr->label );
+				cv1 = cur->search_var( NULL, cv->attr );
 				if ( ! cv1->attr->initialized )
 				{
 					init = false;
@@ -1072,13 +1072,12 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 		// add initial values
 		if ( cv->param == 1 || cv->attr->num_lag > 0 )
 		{
-			for ( data = "", cur = this; cur != NULL;
-				  cur = cur->hyper_next( label ) )
+			for ( data = "", cur = this; cur != NULL; cur = cur->hyper_next( ) )
 			{
 				if ( cur != this )
 					data += ";";
 
-				cv1 = cur->search_var( NULL, cv->attr->label );
+				cv1 = cur->search_var( NULL, cv->attr );
 				for ( i = 0; i < ( cv1->param == 1 ? 1 : cv1->attr->num_lag ); ++i )
 				{
 					if ( i != 0 )
@@ -1371,9 +1370,9 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 			{
 				cd->observe = true;
 
-				for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( cv->up->label ) )
+				for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( ) )
 				{
-					cv1 = cur->search_var( NULL, cv->attr->label );
+					cv1 = cur->search_var( NULL, cv->attr );
 					if ( cv1 != NULL )
 						cv1->attr->observe = true;
 				}
@@ -1450,11 +1449,8 @@ bool lsd::object::load_txt_struct( FILE *f )
 		return false;
 
 	fscanf( f, "%99s", ch );
-	if ( label == NULL )
-	{
-		label = new char[ strlen( ch ) + 1 ];
-		strcpy( label, ch );
-	}
+	if ( strcmp( attr->label, ch ) != 0 )
+		return false;
 
 	i = 0;
 	fscanf( f, "%*[{\r\t\n]%99s", ch );
@@ -1481,7 +1477,7 @@ bool lsd::object::load_txt_struct( FILE *f )
 
 		fscanf( f, "%*[ ]%99s", ch );
 		add_var( ch, type );
-		
+
 		fscanf( f, "%*[{\r\t\n]%99s", ch );
 	}
 
@@ -1508,7 +1504,7 @@ bool lsd::object::load_txt_insts( const char *file_name, FILE *f )
 	variable *cv, *cv1;
 
 	if ( f == NULL )
-		f = search_txt_data( file_name, "DATA", label );
+		f = search_txt_data( file_name, "DATA", attr->label );
 	else
 	{
 		fscanf( f, "%99s", str );		// skip the 'Object: '
@@ -1526,7 +1522,7 @@ bool lsd::object::load_txt_insts( const char *file_name, FILE *f )
 	else
 		to_compute = false;
 
-	for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
+	for ( cur = this; cur != NULL; cur = cur->hyper_next( ) )
 	{
 		if ( fscanf( f, "\t%d", &num ) != 1 )
 			return false;
@@ -1558,9 +1554,9 @@ bool lsd::object::load_txt_insts( const char *file_name, FILE *f )
 		cv->plot = ( tolower( ch4 ) == 'p' ) ? true : false;
 		cv->attr->parallel = ( ch4 == 'P' || ch4 == 'N' ) ? true : false;
 
-		for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
+		for ( cur = this; cur != NULL; cur = cur->hyper_next( ) )
 		{
-			cv1 = cur->search_var( NULL, cv->attr->label );
+			cv1 = cur->search_var( NULL, cv->attr );
 			cv1->plot = cv->plot;
 			cv1->deb_mode = cv->deb_mode;
 
@@ -1829,15 +1825,15 @@ void lsd::object::save_txt_struct( FILE *f, const char *tab )
 		fprintf( f, "\t\n" );
 
 	strcpyn( tab1, tab, MAX_ELEM_LENGTH );
-	fprintf( f, "%sLabel %s\n%s{\n", tab1, label, tab1 );
+	fprintf( f, "%sLabel %s\n%s{\n", tab1, attr->label, tab1 );
 	strcatn( tab1, "\t", MAX_ELEM_LENGTH );
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
-		fprintf( f, "%sSon: %s\n", tab1, cb->label );
+		fprintf( f, "%sSon: %s\n", tab1, cb->attr->label );
 
 		if ( cb->head == NULL )
-			sim->blueprint->search( cb->label )->save_txt_struct( f, tab1 );
+			sim->blueprint->search( cb->attr )->save_txt_struct( f, tab1 );
 		else
 			cb->head->save_txt_struct( f, tab1 );
 	}
@@ -1872,14 +1868,14 @@ void lsd::object::save_txt_insts( FILE *f )
 	object *cur;
 	variable *cv, *cv1;
 
-	fprintf( f, "\nObject: %s", label );
+	fprintf( f, "\nObject: %s", attr->label );
 
 	if ( to_compute )
 		fprintf( f, " C" );
 	else
 		fprintf( f, " N" );
 
-	for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
+	for ( cur = this; cur != NULL; cur = cur->hyper_next( ) )
 	{
 		next_count( cur, &count );
 		fprintf( f, "\t%d", count );
@@ -1892,9 +1888,9 @@ void lsd::object::save_txt_insts( FILE *f )
 		// search for unloaded data
 		ch2 = '+';
 		if ( cv->param == 1 || cv->attr->num_lag > 0 )
-			for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
+			for ( cur = this; cur != NULL; cur = cur->hyper_next( ) )
 			{
-				cv1 = cur->search_var( NULL, cv->attr->label );
+				cv1 = cur->search_var( NULL, cv->attr );
 				if ( ! cv1->attr->initialized )
 				{
 					ch2 = '-';
@@ -1932,9 +1928,9 @@ void lsd::object::save_txt_insts( FILE *f )
 		if ( cv->param == 2 )
 			fprintf( f, "Func: %s %d %c %c %c %c", cv->attr->label, cv->attr->num_lag, ch1, ch2, ch3, ch4 );
 
-		for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
+		for ( cur = this; cur != NULL; cur = cur->hyper_next( ) )
 		{
-			cv1 = cur->search_var( NULL, cv->attr->label );
+			cv1 = cur->search_var( NULL, cv->attr );
 			if ( cv1->param == 1 )
 				if ( cv1->attr->initialized )
 					fprintf( f, "\t%.15g", cv1->chk_val( cv1->val[ 0 ] ) );
@@ -1968,14 +1964,14 @@ void lsd::object::save_txt_insts( FILE *f )
  *************************************************************/
 void lsd::object::save_txt_descr( FILE *f )
 {
-	auto cd = desc != NULL ? desc->search_descr( label, true ) : NULL;
+	auto cd = desc != NULL ? desc->search_descr( attr->label, true ) : NULL;
 	if ( cd != NULL )
 		if ( strwsp( cd->init ) )
 			fprintf( f, "%s_%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 1 ] );
 		else
 			fprintf( f, "%s_%s\n%s\n%s\n%s\n%s\n\n", cd->type, cd->label, cd->text, desc_key_words[ 0 ], cd->init, desc_key_words[ 1 ] );
 	else
-		fprintf( f, "Object_%s\n%s\n\n", label, desc_key_words[ 1 ] );
+		fprintf( f, "Object_%s\n%s\n\n", attr->label, desc_key_words[ 1 ] );
 
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )

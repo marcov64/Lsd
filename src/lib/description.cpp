@@ -150,7 +150,7 @@ void lsd::empty_description( description *d )
  *************************************************************/
 void lsd::description::reset_descr( object *r )
 {
-	search_descr( r->label, true );
+	search_descr( r->attr->label, true );
 
 	for ( auto cv = r->v; cv != NULL; cv = cv->next )
 		search_descr( cv->attr->label, true );

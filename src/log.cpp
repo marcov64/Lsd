@@ -312,7 +312,7 @@ void gui::show_prof_aggr( void )
 	{
 		elem.var = it->first.c_str( );
 		cv = sim.root->search_var( NULL, elem.var );
-		elem.obj = ( cv == NULL ) ? NULL : cv->up->label;
+		elem.obj = ( cv == NULL ) ? NULL : cv->up->attr->label;
 		elem.time = 1000 * it->second.ticks / CLOCKS_PER_SEC;
 		elem.count = it->second.comp;
 		vars.push_back( elem );

@@ -431,7 +431,7 @@ lsd::object *gui::operate( lsd::object *r )
 				case 0:								// variable
 					cmd( "ttk::frame $T.l" );
 					cmd( "ttk::label $T.l.l1 -text \"New variable in object:\"" );
-					cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
+					cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->attr->label );
 					cmd( "pack $T.l.l1 $T.l.l2 -side left -padx $_2" );
 
 					cmd( "ttk::frame $T.f" );
@@ -471,7 +471,7 @@ lsd::object *gui::operate( lsd::object *r )
 				case 2:								// function
 					cmd( "ttk::frame $T.l" );
 					cmd( "ttk::label $T.l.l1 -text \"New function in object:\"" );
-					cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
+					cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->attr->label );
 					cmd( "pack $T.l.l1 $T.l.l2 -side left -padx $_2" );
 
 					cmd( "ttk::frame $T.f" );
@@ -504,7 +504,7 @@ lsd::object *gui::operate( lsd::object *r )
 				case 1:								// parameter
 					cmd( "ttk::frame $T.l" );
 					cmd( "ttk::label $T.l.l1 -text \"New parameter in object:\"" );
-					cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
+					cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->attr->label );
 					cmd( "pack $T.l.l1 $T.l.l2 -side left -padx $_2" );
 
 					cmd( "ttk::frame $T.f" );
@@ -610,7 +610,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 						cmd( "lappend modElem %s", lab );
 
-						for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
+						for ( cur = r; cur != NULL; cur = cur->hyper_next( ) )
 							cv = cur->add_var( lab, param, num );
 
 						initParent = r;
@@ -693,7 +693,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "ttk::frame $T.l" );
 			cmd( "ttk::label $T.l.l1 -text \"New object descending from:\"" );
-			cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
+			cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->attr->label );
 			cmd( "pack $T.l.l1 $T.l.l2 -side left -padx $_2" );
 
 			cmd( "ttk::frame $T.f" );
@@ -849,20 +849,20 @@ lsd::object *gui::operate( lsd::object *r )
 			if ( lab1 == NULL || strlen( lab1 ) == 0 )
 				goto endmove;
 
-			i = sim.hyper_count( r->up->label );
+			i = sim.hyper_count( r->up->attr->label );
 			j = sim.hyper_count( lab1 );
 
 			if ( i != j )
 			{
 				cmd( "if { %d < %d } { set msg \"the last instance of '$vname' being replicated %d times\" } { set msg \"the last %d unmatched instances of '$vname' being deleted\" }", i, j, j - i, i - j );
-				cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -title Warning -icon warning -message \"Different number of parents' instances\" -detail \"The original parent object '%s' has a different number of instances (%d) than the desired new parent '%s' (%d). Copying object '$vname' to parent '%s' will result in $msg.\" ]", r->up->label, i, lab1, j, lab1 );
+				cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -title Warning -icon warning -message \"Different number of parents' instances\" -detail \"The original parent object '%s' has a different number of instances (%d) than the desired new parent '%s' (%d). Copying object '$vname' to parent '%s' will result in $msg.\" ]", r->up->attr->label, i, lab1, j, lab1 );
 				cmd( "switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 
 				if( choice == 2 )
 					goto endmove;
 			}
 
-			sim.move_obj( lab_old, lab1 );
+			r->move( lab1 );
 
 			unsaved_change( true );		// signal unsaved change
 			redrawRoot = redrawStruc = true;	// force browser/structure redraw
@@ -913,7 +913,7 @@ lsd::object *gui::operate( lsd::object *r )
 		// Edit current Object and give the option to disable the computation (defined in tcl $vname)
 		case 6:
 
-			cmd( "if $useCurrObj { set lab %s } { if [ info exists vname ] { set lab $vname } { set lab \"\" } }; set useCurrObj yes ", r->label  );
+			cmd( "if $useCurrObj { set lab %s } { if [ info exists vname ] { set lab $vname } { set lab \"\" } }; set useCurrObj yes ", r->attr->label  );
 			lab1 = get_str( "lab" );
 
 			if ( lab1 == NULL || ! strcmp( lab1, "" ) )
@@ -921,7 +921,7 @@ lsd::object *gui::operate( lsd::object *r )
 			sscanf( lab1, "%99s", lab_old );
 
 			// check if current or pointed object and save current if needed
-			if ( strcmp( r->label, lab_old ) )	// check if not current variable
+			if ( strcmp( r->attr->label, lab_old ) != 0 )	// check if not current variable
 			{
 				n = sim.root->search( lab_old );// set pointer to $vname
 				if ( n == NULL )
@@ -932,7 +932,7 @@ lsd::object *gui::operate( lsd::object *r )
 			else
 				cur2 = NULL;
 
-			if ( ! strcmp( r->label, "Root" ) )	// cannot change Root
+			if ( ! strcmp( r->attr->label, "Root" ) )	// cannot change Root
 			{
 				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Cannot change Root\" -detail \"Please select an existing object or insert a new one before using this option.\"" );
 				break;
@@ -1021,10 +1021,10 @@ lsd::object *gui::operate( lsd::object *r )
 
 				if ( choice != r->to_compute )
 				{
-					cur = sim.blueprint->search( r->label );
+					cur = sim.blueprint->search( r->attr );
 					if ( cur != NULL )
 						cur->to_compute = choice;
-					for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
+					for ( cur = r; cur != NULL; cur = cur->hyper_next( ) )
 						cur->to_compute = choice;
 				}
 
@@ -1121,7 +1121,7 @@ lsd::object *gui::operate( lsd::object *r )
 						break;
 					sscanf( lab1, "%99s", lab );
 
-					if ( strcmp( lab, r->label ) )
+					if ( strcmp( lab, r->attr->label ) )
 					{
 						for ( cur1 = r; cur1->up != NULL; cur1 = cur1->up );
 
@@ -1141,10 +1141,10 @@ lsd::object *gui::operate( lsd::object *r )
 						}
 
 						// update element list
-						cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", cur->label	);
+						cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", cur->attr->label	);
 						cmd( "lappend modObj %s", lab );
 
-						desc.change_descr( cur->label, lab );
+						desc.change_descr( cur->attr->label, lab );
 						cur->chg_lab( lab );
 					}
 					else
@@ -1241,7 +1241,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "ttk::frame $T.h.o.o" );
 			cmd( "ttk::label $T.h.o.o.l -text \"In object:\"" );
-			cmd( "ttk::label $T.h.o.o.obj -style hl.TLabel -text \"%s\"", cv->up->label );
+			cmd( "ttk::label $T.h.o.o.obj -style hl.TLabel -text \"%s\"", cv->up->attr->label );
 			cmd( "pack $T.h.o.o.l $T.h.o.o.obj -side left -padx $_2" );
 
 			cmd( "pack $T.h.o.l $T.h.o.o -side left -padx $_5" );
@@ -1632,7 +1632,7 @@ lsd::object *gui::operate( lsd::object *r )
 				attr->max_val = vmax;
 				attr->min_val = vmin;
 
-				for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
+				for ( cur = r; cur != NULL; cur = cur->hyper_next( ) )
 				{
 					cv = cur->search_var( NULL, lab_old );
 					cv->deb_mode = deb_mode;
@@ -1653,7 +1653,7 @@ lsd::object *gui::operate( lsd::object *r )
 				if ( save == 1 || savei == 1 )
 					for ( cur = r; cur != NULL; cur = cur->up )
 						if ( ! cur->to_compute )
-							cmd( "ttk::messageBox -parent .chgelem -type ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\"", lab_old, cur->label );
+							cmd( "ttk::messageBox -parent .chgelem -type ok -title Warning -icon warning -message \"Cannot save element\" -detail \"Element '%s' set to be saved but it will not be computed for the Analysis of Results, since object '%s' is not set to be computed.\"", lab_old, cur->attr->label );
 			}
 
 			if ( done != 8 )
@@ -1812,7 +1812,7 @@ lsd::object *gui::operate( lsd::object *r )
 				else
 					desc.change_descr( lab_old, NULL, nature );
 
-				for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
+				for ( cur = r; cur != NULL; cur = cur->hyper_next( ) )
 				{
 					cv = cur->search_var( NULL, lab_old );
 
@@ -1904,7 +1904,7 @@ lsd::object *gui::operate( lsd::object *r )
 					desc.change_descr( lab_old, lab );
 				}
 
-				for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
+				for ( cur = r; cur != NULL; cur = cur->hyper_next( ) )
 					if ( ! delVar )
 						cur->chg_var_lab( lab_old, lab );
 					else
@@ -1976,15 +1976,15 @@ lsd::object *gui::operate( lsd::object *r )
 				break;
 
 			lab1 = get_str( "movelabel" );
-			if ( lab1 == NULL || ! strcmp( lab1, r->label ) )		// same object?
+			if ( lab1 == NULL || ! strcmp( lab1, r->attr->label ) )		// same object?
 				break;
 
 			cv = r->search_var( NULL, lab_old );
 
-			for ( cur = sim.root->search( lab1 ); cur != NULL; cur = cur->hyper_next( cur->label ) )
+			for ( cur = sim.root->search( lab1 ); cur != NULL; cur = cur->hyper_next( ) )
 				cur->add_var( cv );
 
-			for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
+			for ( cur = r; cur != NULL; cur = cur->hyper_next( ) )
 				cur->delete_var( lab_old );
 
 			unsaved_change( true );		// signal unsaved change
@@ -2390,7 +2390,7 @@ lsd::object *gui::operate( lsd::object *r )
 		// Edit Objects' numbers
 		case 19:
 
-			lsd::strcpyn( lab, r->label, MAX_BUFF_SIZE );
+			lsd::strcpyn( lab, r->attr->label, MAX_BUFF_SIZE );
 
 			choice = 0;
 			sim.root->set_obj_number( );
@@ -2423,7 +2423,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			for ( n = r; n->up != NULL; n = n->up );
 
-			n->edit_data( r->label );
+			n->edit_data( r->attr->label );
 
 			redrawRoot = true;
 			unsaved_change( true );			// signal unsaved change
@@ -3138,7 +3138,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "ttk::frame $T.l" );
 
 			cmd( "ttk::label $T.l.l1 -text \"Object:\"" );
-			cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->label );
+			cmd( "ttk::label $T.l.l2 -text \"%s\" -style hl.TLabel", r->attr->label );
 			cmd( "pack $T.l.l1 $T.l.l2 -side left" );
 
 			cmd( "ttk::frame $T.e" );
@@ -3845,7 +3845,7 @@ lsd::object *gui::operate( lsd::object *r )
 				for ( i = 1, cs = sim.sens; cs!=NULL; cs = cs->next )
 					i *= cs->num_val;
 				cur = sim.root->b->head;
-				sim.root->add_n_objects2( cur->label, i - 1, cur );
+				sim.root->add_n_objects2( cur->attr->label, i - 1, cur );
 
 				plog( "\nUpdating configuration... " );
 				cmd( "focustop .log" );
@@ -5650,7 +5650,7 @@ lsd::object *gui::operate( lsd::object *r )
 			if ( ! strcmp( lab_old, "(none)" ) )
 			{
 				if ( r != NULL )
-					lsd::strcpyn( lab_old, r->label, MAX_ELEM_LENGTH );
+					lsd::strcpyn( lab_old, r->attr->label, MAX_ELEM_LENGTH );
 				else
 					strcpy( lab_old, "" );
 			}

@@ -223,14 +223,13 @@ void lsd::object::draw_buttons( void )
 void lsd::object::create_float_list( void )
 {
 	bool sp_upd;
-	variable *cv;
 
 	// element lists used to build floating elements window
-	cmd( "set tlist_%s [ list ]", label );
-	cmd( "set slist_%s [ list ]", label );
+	cmd( "set tlist_%s [ list ]", attr->label );
+	cmd( "set slist_%s [ list ]", attr->label );
 
 	if ( v != NULL )
-		for ( cv = v; cv != NULL; cv = cv->next )
+		for ( auto cv = v; cv != NULL; cv = cv->next )
 		{
 			// special updating scheme?
 			if ( cv->param == 0 && ( cv->attr->delay > 0 || cv->attr->delay_range > 0 || cv->attr->period > 1 || cv->attr->period_range > 0 ) )
@@ -245,33 +244,33 @@ void lsd::object::create_float_list( void )
 			{
 				if ( cv->attr->num_lag == 0 )
 				{
-					cmd( "lappend tlist_%s \"%s (V$varFlags)\"", label, cv->attr->label );
-					cmd( "lappend slist_%s var", label );
+					cmd( "lappend tlist_%s \"%s (V$varFlags)\"", attr->label, cv->attr->label );
+					cmd( "lappend slist_%s var", attr->label );
 				}
 				else
 				{
-					cmd( "lappend tlist_%s \"%s (V_%d$varFlags)\"", label, cv->attr->label, cv->attr->num_lag );
-					cmd( "lappend slist_%s lvar", label );
+					cmd( "lappend tlist_%s \"%s (V_%d$varFlags)\"", attr->label, cv->attr->label, cv->attr->num_lag );
+					cmd( "lappend slist_%s lvar", attr->label );
 				}
 			}
 
 			if ( cv->param == 1 )
 			{
-				cmd( "lappend tlist_%s \"%s (P$varFlags)\"", label, cv->attr->label );
-				cmd( "lappend slist_%s par", label );
+				cmd( "lappend tlist_%s \"%s (P$varFlags)\"", attr->label, cv->attr->label );
+				cmd( "lappend slist_%s par", attr->label );
 			}
 
 			if ( cv->param == 2 )
 			{
 				if ( cv->attr->num_lag == 0 )
 				{
-					cmd( "lappend tlist_%s \"%s (F$varFlags)\"", label, cv->attr->label );
-					cmd( "lappend slist_%s fun", label );
+					cmd( "lappend tlist_%s \"%s (F$varFlags)\"", attr->label, cv->attr->label );
+					cmd( "lappend slist_%s fun", attr->label );
 				}
 				else
 				{
-					cmd( "lappend tlist_%s \"%s (F_%d$varFlags)\"", label, cv->attr->label, cv->attr->num_lag );
-					cmd( "lappend slist_%s lfun", label );
+					cmd( "lappend tlist_%s \"%s (F_%d$varFlags)\"", attr->label, cv->attr->label, cv->attr->num_lag );
+					cmd( "lappend slist_%s lfun", attr->label );
 				}
 			}
 		}
@@ -305,7 +304,7 @@ void lsd::object::draw_obj( object *sel, int level, int center, int from, bool z
 	// draw node only if it is not the root
 	if ( up != NULL )
 	{
-		strcpyn( ch, label, MAX_ELEM_LENGTH );
+		strcpyn( ch, attr->label, MAX_ELEM_LENGTH );
 		strcpy( ch1, "" );
 
 		// count number of brothers and define maximum width for number string
@@ -340,10 +339,10 @@ void lsd::object::draw_obj( object *sel, int level, int center, int from, bool z
 			{
 				// must search out of the blueprint, where we are now
 				// may get the wrong parent if the parent is replicated somewhere
-				cur = sim->root->search( up->up->label );
+				cur = sim->root->search( up->up->attr );
 				if ( cur != NULL )
 				{
-					cb = cur->search_bridge( up->label );
+					cb = cur->search_bridge( up->attr );
 					for ( k = 0, cur = cb->head; cur != NULL; ++k, cur = cur->next );
 
 					if ( k > 1 )				// handle multi-instanced parents
@@ -375,7 +374,7 @@ void lsd::object::draw_obj( object *sel, int level, int center, int from, bool z
 			// count number of instances of parent and check for zero instances
 			if ( fit_wid && up->up != NULL )	// first level cannot have multiple zero instances
 			{
-				cb = up->up->search_bridge( up->label );
+				cb = up->up->search_bridge( up->attr );
 				for ( k = 0, cur = cb->head; cur != NULL; ++k, cur = cur->next );
 
 				if ( h < k )					// found zero instanced object?
@@ -389,8 +388,8 @@ void lsd::object::draw_obj( object *sel, int level, int center, int from, bool z
 		if ( up->up != NULL )
 			put_line( from, level, center );
 
-		put_node( center, level, label, this == sel ? true : false );
-		put_text( ch, ch1, center, level, label );
+		put_node( center, level, attr->label, this == sel ? true : false );
+		put_text( ch, ch1, center, level, attr->label );
 	}
 	else
 	{
@@ -481,7 +480,7 @@ void lsd::object::draw_obj( object *sel, int level, int center, int from, bool z
 			cb->head->draw_obj( sel, level + step_level, i, center, zeroinst );
 		else
 		{	// try to draw zero instance objects
-			cur = sim->blueprint->search( cb->label );
+			cur = sim->blueprint->search( cb->attr );
 			if ( cur != NULL )
 				cur->draw_obj( sel, level + step_level, i, center, true );
 		}

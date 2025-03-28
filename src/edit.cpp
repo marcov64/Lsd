@@ -241,7 +241,7 @@ void lsd::object::insert_obj_num( const char *tag, const char *ind, int *idx, in
 			cmd( "ttk::label $t.ind$idx -text \"   %s   \"", newInd );
 			cmd( "pack $t.ind$idx" );
 
-			cmd( "ttk::label $t.lab$idx -style boldSmall.TLabel -text \"%s  \"", cb->head->label );
+			cmd( "ttk::label $t.lab$idx -style boldSmall.TLabel -text \"%s  \"", cb->head->attr->label );
 			cmd( "pack $t.lab$idx" );
 
 			cmd( "set count$idx $val" );
@@ -249,7 +249,7 @@ void lsd::object::insert_obj_num( const char *tag, const char *ind, int *idx, in
 			cmd( "pack $t.val$idx" );
 
 			if ( cb->head->up != NULL && strlen( tag ) != 0 )
-				cmd( "ttk::label $t.tag$idx -text \"  in   %s %s \"", cb->head->up->label, tag );
+				cmd( "ttk::label $t.tag$idx -text \"  in   %s %s \"", cb->head->up->attr->label, tag );
 			else
 				cmd( "ttk::label $t.tag$idx" );
 
@@ -274,11 +274,11 @@ void lsd::object::insert_obj_num( const char *tag, const char *ind, int *idx, in
 			if ( level >= max_depth && cb->head->b != NULL )
 				hid_level = true;
 
-			cmd( "tooltip::tooltip $t.but$idx \"Set the number of instances\nof object '%s'\"", cb->head->label );
-			cmd( "tooltip::tooltip $t.ind$idx \"Object '%s'\nat level %d\"", cb->head->label, level );
-			cmd( "tooltip::tooltip $t.lab$idx \"Click to change initial values\nof object '%s'\"", cb->head->label );
+			cmd( "tooltip::tooltip $t.but$idx \"Set the number of instances\nof object '%s'\"", cb->head->attr->label );
+			cmd( "tooltip::tooltip $t.ind$idx \"Object '%s'\nat level %d\"", cb->head->attr->label, level );
+			cmd( "tooltip::tooltip $t.lab$idx \"Click to change initial values\nof object '%s'\"", cb->head->attr->label );
 
-			cmd( "bind $t.lab$idx <Button-1> { set obj_name %s; set choice 3 }", cb->head->label );
+			cmd( "bind $t.lab$idx <Button-1> { set obj_name %s; set choice 3 }", cb->head->attr->label );
 		}
 
 		if ( max_depth < 1 || level < max_depth )
@@ -289,7 +289,7 @@ void lsd::object::insert_obj_num( const char *tag, const char *ind, int *idx, in
 				lowest_level = level > lowest_level ? level : lowest_level;
 
 				if ( strlen( tag ) != 0 && cb->head->up != NULL )
-					snprintf( newTag, tagLen, "#%d - %s %s", i, cb->head->up->label, tag );
+					snprintf( newTag, tagLen, "#%d - %s %s", i, cb->head->up->attr->label, tag );
 				else
 					snprintf( newTag, tagLen, "#%d", i );
 
@@ -353,7 +353,7 @@ int lsd::object::entry_new_objnum( const char *tag )
 	if ( up == NULL )
 		return 2;
 
-	next_count( up->search( label ), & num );
+	next_count( up->search( attr ), & num );
 	cmd( "set num %d", num );
 	cmd( "set conf 0" );
 	cmd( "set cfrom 1" );
@@ -366,12 +366,12 @@ int lsd::object::entry_new_objnum( const char *tag )
 
 	cmd( "ttk::frame $T.l.n1" );
 	cmd( "ttk::label $T.l.n1.l1 -text \"Object:\"" );
-	cmd( "ttk::label $T.l.n1.l2 -text \"%s\" -style hl.TLabel", label );
+	cmd( "ttk::label $T.l.n1.l2 -text \"%s\" -style hl.TLabel", attr->label );
 	cmd( "pack $T.l.n1.l1 $T.l.n1.l2 -side left" );
 
 	cmd( "ttk::frame $T.l.n2" );
 	cmd( "ttk::label $T.l.n2.l1 -text \"Contained in:\"" );
-	cmd( "ttk::label $T.l.n2.l2 -style hl.TLabel -text \"%s %s\"", up->label, tag );
+	cmd( "ttk::label $T.l.n2.l2 -style hl.TLabel -text \"%s %s\"", up->attr->label, tag );
 	cmd( "pack $T.l.n2.l1 $T.l.n2.l2 -side left" );
 
 	cmd( "pack $T.l.n1 $T.l.n2" );
@@ -399,21 +399,21 @@ int lsd::object::entry_new_objnum( const char *tag )
 	{
 		if ( j == 1 )
 		{
-			first = cur->up->search( cur->label );
+			first = cur->up->search( cur->attr );
 			for ( k = 1; first != cur; first = BROTHER( first ), ++k );
 			cmd( "set affect 1.%d", k );
-			cmd( "ttk::radiobutton $T.ef.g.r1 -text \"This group of '%s' contained in '%s' #%d\" -variable affect -value 1.%d", label, cur->label, k, k );
+			cmd( "ttk::radiobutton $T.ef.g.r1 -text \"This group of '%s' contained in '%s' #%d\" -variable affect -value 1.%d", attr->label, cur->attr->label, k, k );
 		}
 		else
 		{
-			first = cur->up->search( cur->label );
+			first = cur->up->search( cur->attr );
 			for ( k = 1; first != cur; first = BROTHER( first ), ++k );
-			cmd( "ttk::radiobutton $T.ef.g.r%d -text \"All groups of '%s' contained in '%s' #%d\" -variable affect -value %d.%d", j, label, cur->label, k, j, k );
+			cmd( "ttk::radiobutton $T.ef.g.r%d -text \"All groups of '%s' contained in '%s' #%d\" -variable affect -value %d.%d", j, attr->label, cur->attr->label, k, j, k );
 		}
 		cmd( "pack $T.ef.g.r%d -anchor w", j );
 	}
 
-	cmd( "ttk::radiobutton $T.ef.g.r%d -text \"All groups of '%s' in the model\" -variable affect -value %d.1", j, label, j );
+	cmd( "ttk::radiobutton $T.ef.g.r%d -text \"All groups of '%s' in the model\" -variable affect -value %d.1", j, attr->label, j );
 	cmd( "pack $T.ef.g.r%d -anchor w", j );
 
 	max_level = j;
@@ -514,7 +514,7 @@ int lsd::object::compute_copyfrom( const char *parWnd )
 	cmd( "newtop $cc \"Instance Number\" { set cconf 1; set choice 1 } %s", parWnd );
 
 	cmd( "ttk::frame $cc.l" );
-	cmd( "ttk::label $cc.l.l -justify center -text \"Determine the effective instance number of '%s'\nby computing the instance numbers of the containing objects.\nPress 'Done' to use the number and continue.\"", label );
+	cmd( "ttk::label $cc.l.l -justify center -text \"Determine the effective instance number of '%s'\nby computing the instance numbers of the containing objects.\nPress 'Done' to use the number and continue.\"", attr->label );
 	cmd( "pack $cc.l.l" );
 
 	cmd( "ttk::frame $cc.f" );
@@ -522,11 +522,11 @@ int lsd::object::compute_copyfrom( const char *parWnd )
 	for ( i = 1, j = 1, cur = this; cur->up != NULL; cur = cur->up, ++j )
 	{
 		cmd( "ttk::frame $cc.f.f%d", j );
-		cmd( "ttk::label $cc.f.f%d.l -text \"Instance # of '%s'\"", j, cur->label );
+		cmd( "ttk::label $cc.f.f%d.l -text \"Instance # of '%s'\"", j, cur->attr->label );
 		cmd( "ttk::entry $cc.f.f%d.e -width 5 -textvariable num%d -justify center", j, j );
 		cmd( "pack $cc.f.f%d.l $cc.f.f%d.e -side left -padx $_2", j, j );
 
-		for ( i = 1, cur1 = cur->up->search( cur->label ); cur1 != cur; cur1 = cur1->next, ++i );
+		for ( i = 1, cur1 = cur->up->search( cur->attr ); cur1 != cur; cur1 = cur1->next, ++i );
 
 		cmd( "set num%d %d", j, i );
 	}
@@ -560,9 +560,9 @@ int lsd::object::compute_copyfrom( const char *parWnd )
 	ccompute:
 
 	for ( cur = up; cur->up != NULL; cur = cur->up ); 	// find root
-	cur = cur->search( label );							// find the first
+	cur = cur->search( attr );							// find the first
 
-	for ( i = 0, k = 0, cur3 = NULL; k == 0 && cur != NULL ; cur3 = cur, cur = cur->hyper_next( label ), ++i )
+	for ( i = 0, k = 0, cur3 = NULL; k == 0 && cur != NULL ; cur3 = cur, cur = cur->hyper_next( attr->label ), ++i )
 	{
 		k = 1;
 		for ( j = 1, cur1 = cur; cur1->up != NULL; cur1 = cur1->up, ++j )
@@ -572,7 +572,7 @@ int lsd::object::compute_copyfrom( const char *parWnd )
 			if ( n < 0 )
 				break;
 
-			for ( h = 1, cur2 = cur1->up->search( cur1->label ); cur2 != cur1; cur2 = cur2->next, ++h );
+			for ( h = 1, cur2 = cur1->up->search( cur1->attr ); cur2 != cur1; cur2 = cur2->next, ++h );
 			if ( cur2->next == NULL && n > h )
 				n = h;
 
@@ -589,7 +589,7 @@ int lsd::object::compute_copyfrom( const char *parWnd )
 	// reset possibly erroneous values
 	for ( j = 1, cur2 = cur3; cur2 != NULL && cur2->up != NULL; cur2 = cur2->up, ++j )
 	{
-		for ( i = 1, cur1 = cur2->up->search( cur2->label ); cur1 != cur2; cur1 = cur1->next, ++i );
+		for ( i = 1, cur1 = cur2->up->search( cur2->attr ); cur1 != cur2; cur1 = cur1->next, ++i );
 
 		cmd( "set num%d %d", j, i );
 	}
@@ -631,11 +631,11 @@ void gui::change_obj_number( lsd::object *&c, int value, int level, int affected
 	for ( cur = c; cur->up != NULL; cur = cur->up );		// go to root
 
 	// select the object example
-	for ( first = cur->search( c->label ), i = 1; i < cfrom && first != NULL; first = first->hyper_next( first->label ), ++i );
+	for ( first = cur->search( c->attr ), i = 1; i < cfrom && first != NULL; first = first->hyper_next( ), ++i );
 
 	if ( first == NULL )
 	{
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Object instance not found\" -detail \"Instance %d of object '%s' not found.\"", cfrom, c->label );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Object instance not found\" -detail \"Instance %d of object '%s' not found.\"", cfrom, c->attr->label );
 		return;
 	}
 
@@ -644,7 +644,7 @@ void gui::change_obj_number( lsd::object *&c, int value, int level, int affected
 		pivot = pivot->up;
 
 	// select the first object of the type to change under pivot
-	cur = pivot->search( c->label );
+	cur = pivot->search( c->attr );
 
 	while ( cur != NULL )
 	{	// as long as necessary
@@ -654,7 +654,7 @@ void gui::change_obj_number( lsd::object *&c, int value, int level, int affected
 
 			if ( num <= value )
 				// add objects
-				cur->up->add_n_objects2( first->label, value - num, first ); //add the necessary num of objects
+				cur->up->add_n_objects2( first->attr->label, value - num, first ); //add the necessary num of objects
 			else
 			{ 	// remove objects
 				if ( level == 1 ) 		// you have the option to choose the items to be removed, only if you operate on one group
@@ -682,7 +682,7 @@ void gui::change_obj_number( lsd::object *&c, int value, int level, int affected
 			cur = NULL;
 		else
 		{
-			cur = last->hyper_next( cur->label );	// first copy of the object to change after the just adjusted bunch
+			cur = last->hyper_next( cur->attr->label );	// first copy of the object to change after the just adjusted bunch
 
 			if ( level > 0 && cur != NULL )
 			{	//search the next pivot
@@ -714,7 +714,7 @@ void gui::eliminate_obj( lsd::object *&c, int actual, int desired )
 
 	cmd( "ttk::frame $d.l" );
 	cmd( "ttk::label $d.l.l1 -text \"Object:\"" );
-	cmd( "ttk::label $d.l.l2 -style hl.TLabel -text \"%s\"", c->label );
+	cmd( "ttk::label $d.l.l2 -style hl.TLabel -text \"%s\"", c->attr->label );
 	cmd( "pack $d.l.l1 $d.l.l2 -side left" );
 
 	cmd( "ttk::frame $d.t" );
@@ -762,11 +762,11 @@ void gui::eliminate_obj( lsd::object *&c, int actual, int desired )
 
 		cmd( "ttk::frame $d.l" );
 		cmd( "ttk::label $d.l.l1 -text \"Object:\"" );
-		cmd( "ttk::label $d.l.l2 -style hl.TLabel -text \"%s\"", c->label );
+		cmd( "ttk::label $d.l.l2 -style hl.TLabel -text \"%s\"", c->attr->label );
 		cmd( "pack $d.l.l1 $d.l.l2 -side left" );
 
 		cmd( "ttk::frame $d.t" );
-		cmd( "ttk::label $d.t.tit -text \"Instance to delete\"", c->label );
+		cmd( "ttk::label $d.t.tit -text \"Instance to delete\"", c->attr->label );
 		cmd( "ttk::spinbox $d.t.e -width 6 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set val2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $val2; return 0 } } -invalidcommand { bell } -justify center", actual, actual );
 		cmd( "ttk::label $d.t.tit1 -text \"\"" );
 		cmd( "pack $d.t.tit $d.t.e $d.t.tit1" );
@@ -843,7 +843,7 @@ int lsd::object::check_affected( int level, int affected[ ] )
 		// don't check if it is in Root or if there is no constraint
 		if ( affected[ i ] != -1 && cur->up != NULL )
 		{
-			cur1 = cur->up->search( cur->label );
+			cur1 = cur->up->search( cur->attr );
 			for ( j = 1; cur1 != cur; cur1 = cur1->next, ++j );	// find the id of cur
 			if ( j != affected[ i ] )
 				res = 0;

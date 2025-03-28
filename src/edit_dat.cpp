@@ -286,9 +286,9 @@ void lsd::object::set_title( const char *lab, const char *tag, int *cols )
 {
 	char ch1[ MAX_ELEM_LENGTH ], ch2[ MAX_ELEM_LENGTH ];
 
-	if ( ! strcmp( label, lab ) )
+	if ( ! strcmp( attr->label, lab ) )
 	{
-		strcpyn( ch1, label, MAX_ELEM_LENGTH );
+		strcpyn( ch1, attr->label, MAX_ELEM_LENGTH );
 
 		if ( strlen( tag ) != 0 )
 			strcpyn( ch2, tag, MAX_ELEM_LENGTH );
@@ -343,7 +343,7 @@ void lsd::object::link_cells( const char *lab )
 
 			cmd( "set tit $w.tit_t%s", cv1->attr->label );
 			gui::set_ttip_descr( gui::get_str( "tit" ), cv1->attr->label, -1, false );
-			cmd( "tooltip::tooltip $w.typ_t%s \"Parameter '%s'\nin object '%s'\"", cv1->attr->label, cv1->attr->label, cur1->label );
+			cmd( "tooltip::tooltip $w.typ_t%s \"Parameter '%s'\nin object '%s'\"", cv1->attr->label, cv1->attr->label, cur1->attr->label );
 			cmd( "tooltip::tooltip $w.t%s \"Set all or a subset of\n'%s' instances\"", cv1->attr->label, cv1->attr->label );
 		}
 		else
@@ -364,14 +364,14 @@ void lsd::object::link_cells( const char *lab )
 
 				cmd( "set tit $w.tit_t%s_%d", cv1->attr->label, j );
 				gui::set_ttip_descr( gui::get_str( "tit" ), cv1->attr->label, -1, false );
-				cmd( "tooltip::tooltip $w.typ_t%s_%d \"Variable '%s' (lag %d)\nin object '%s'\"", cv1->attr->label, j, cv1->attr->label, j + 1, cur1->label );
+				cmd( "tooltip::tooltip $w.typ_t%s_%d \"Variable '%s' (lag %d)\nin object '%s'\"", cv1->attr->label, j, cv1->attr->label, j + 1, cur1->attr->label );
 				cmd( "tooltip::tooltip $w.t%s_%d \"Set all or a subset of\n'%s' instances\"", cv1->attr->label, j, cv1->attr->label );
 			}
 		}
 
 		for ( cur = cur1, i = 1; i <= maxCols && cur != NULL; cur = cur->hyper_next( lab ) , ++i )
 		{
-			cv = cur->search_var( cur, cv1->attr->label );
+			cv = cur->search_var( cur, cv1->attr );
 			cv->attr->initialized = true;
 
 			if ( cv->param == 1 )
@@ -474,7 +474,7 @@ void lsd::object::link_cells( const char *lab )
 		// set flag of data loaded also to not shown pars.
 		for ( ; cur != NULL; cur = cur->hyper_next( lab ) )
 		{
-			cv = cur->search_var( cur, cv1->attr->label );
+			cv = cur->search_var( cur, cv1->attr );
 			cv->attr->initialized = true;
 		}
 

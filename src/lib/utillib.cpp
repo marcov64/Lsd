@@ -325,7 +325,7 @@ void lsd::object::set_tit_counter( void )
 	up->set_tit_counter( );
 
 	// find the bridge which contains the object
-	cb = up->search_bridge( label );
+	cb = up->search_bridge( attr );
 
 	if ( cb->counter_updated )
 		return;
@@ -352,13 +352,13 @@ void lsd::object::set_blueprint( object *container )
 	bridge *cb, *cb1;
 	object *cur, *cur1;
 
+	if ( container == NULL )
+		return;
+
+	container->attr = attr;
+
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 		container->add_var( cv );
-
-	delete [ ] container->label;
-
-	container->label = new char[ strlen( label ) + 1 ];
-	strcpy( container->label, label );
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
@@ -366,9 +366,9 @@ void lsd::object::set_blueprint( object *container )
 			continue;
 
 		cur1 = cb->head;
-		container->add_obj( cur1->label );
+		container->add_obj( cur1->attr->label );
 
-		for ( cb1 = container->b; strcmp( cb1->label, cb->label ); cb1 = cb1->next );
+		for ( cb1 = container->b; cb1->attr != cb->attr; cb1 = cb1->next );
 
 		cur = cb1->head;
 		cur1->set_blueprint( cur );
@@ -385,7 +385,6 @@ void lsd::simulation::empty_blueprint( void )
 	if ( blueprint == NULL )
 		return;
 
-	blueprint->empty( );
 	blueprint->delete_obj( );
 	blueprint = NULL;
 }
@@ -398,8 +397,7 @@ void lsd::simulation::empty_blueprint( void )
 void lsd::simulation::reset_blueprint( object *r )
 {
 	empty_blueprint( );
-	blueprint = new object;
-	blueprint->init( NULL, this, "Root" );
+	blueprint = new object ( NULL, this, "Root" );
 
 	if ( r != NULL )
 		r->set_blueprint( blueprint );

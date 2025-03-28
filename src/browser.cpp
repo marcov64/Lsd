@@ -777,7 +777,7 @@ int gui::browse( lsd::object *r )
 		if ( r->up != NULL )
 		{
 			cmd( ".l.s.c.son_name insert end \"$upSymbol\"" );
-			cmd( "tooltip::tooltip .l.s.c.son_name -item 0 \"%s\"", r->up->label );
+			cmd( "tooltip::tooltip .l.s.c.son_name -item 0 \"%s\"", r->up->attr->label );
 			i = 1;
 		}
 		else
@@ -803,10 +803,10 @@ int gui::browse( lsd::object *r )
 					done = true;
 				}
 
-				cmd( ".l.s.c.son_name insert end \"%s (#%d%s)\"", cb->label, num, done ? "" : "-" );
+				cmd( ".l.s.c.son_name insert end \"%s (#%d%s)\"", cb->attr->label, num, done ? "" : "-" );
 				cmd( ".l.s.c.son_name itemconf %d -fg $colorsTheme(obj)", i );
 
-				set_ttip_descr( ".l.s.c.son_name", cb->label, i );
+				set_ttip_descr( ".l.s.c.son_name", cb->attr->label, i );
 			}
 		}
 
@@ -1018,7 +1018,7 @@ int gui::browse( lsd::object *r )
 		cmd( "ttk::label .l.p.up_name.d -text \"Parent object:\" -width 15 -anchor w" );
 		if ( r->up != NULL )
 		{
-			cmd( "ttk::label .l.p.up_name.n -text \" %s \" -anchor w -style hl.TLabel", r->up->label );
+			cmd( "ttk::label .l.p.up_name.n -text \" %s \" -anchor w -style hl.TLabel", r->up->attr->label );
 			cmd( "bind . <KeyPress-u> { set itemfocus 0; set choice 5 }; bind . <KeyPress-U> { set itemfocus 0; set choice 5 }" );
 		}
 		else
@@ -1029,7 +1029,7 @@ int gui::browse( lsd::object *r )
 
 		cmd( "ttk::frame .l.p.tit" );
 		cmd( "ttk::label .l.p.tit.lab -text \"Current object:\" -width 15 -anchor w" );
-		cmd( "ttk::button .l.p.tit.but -width -1 -text \" %s \" -style hlBold.Toolbutton %s", r->label, r->up == NULL ? "" : "-command { set choice 6 }" );
+		cmd( "ttk::button .l.p.tit.but -width -1 -text \" %s \" -style hlBold.Toolbutton %s", r->attr->label, r->up == NULL ? "" : "-command { set choice 6 }" );
 
 		if ( r->up != NULL )
 			cmd( "tooltip::tooltip .l.p.tit.but \"Change...\"" );
@@ -1587,7 +1587,7 @@ void lsd::object::save_pos( void )
 		return;				// browser not drawn yet
 
 	// save the current object & cursor position for quick reload
-	cmd( "set last_obj %s", label );
+	cmd( "set last_obj %s", attr->label );
 
 	cmd( "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { \
 				set last_list 2 \
@@ -1664,15 +1664,14 @@ void lsd::object::insert_object( const char *w, bool netOnly, object *above )
 	bridge *cb;
 	object *cur;
 
-	if ( ( above == NULL || above->up == NULL || ( strcmp( label, above->label ) != 0 && strcmp( label, above->up->label ) != 0 ) ) &&
-		 ( ! netOnly || node != NULL ) )
-		cmd( "%s insert end %s", w, label );
+	if ( ( above == NULL || above->up == NULL || ( attr != above->attr && attr != above->up->attr ) ) && ( ! netOnly || node != NULL ) )
+		cmd( "%s insert end %s", w, attr->label );
 
 	for ( cb = b; cb != NULL; cb = cb->next )
-		if ( above == NULL || strcmp( cb->label, above->label ) != 0 )
+		if ( above == NULL || cb->attr != above->attr )
 		{
 			if ( cb->head == NULL )
-				cur = sim->blueprint->search( cb->label );
+				cur = sim->blueprint->search( cb->attr );
 			else
 				cur = cb->head;
 
@@ -1689,10 +1688,10 @@ void lsd::object::wipe_out( void )
 	object *cur;
 	variable *cv;
 
-	cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", label );
+	cmd( "if [ info exists modObj ] { set pos [ lsearch -exact $modObj %s ]; if { $pos >= 0 } { set modObj [ lreplace $modObj $pos $pos ] } }", attr->label );
 
 	if ( desc != NULL )
-		desc->change_descr( label );
+		desc->change_descr( attr->label );
 
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
@@ -1706,12 +1705,10 @@ void lsd::object::wipe_out( void )
 			desc->change_descr( cv->attr->label );
 	}
 
-	cur = hyper_next( label );
-	if ( cur != NULL )
+	if ( ( cur = hyper_next( ) ) != NULL )
 		cur->wipe_out( );
 
-	delete_bridge( );
-	delete this;
+	delete_obj( );
 }
 
 
@@ -1795,10 +1792,10 @@ void lsd::object::shift_desc( int direction, const char *dlab )
 
 	if ( direction == -1 )
 	{	// shift up
-		if ( ! strcmp( dlab, b->label ) )
+		if ( ! strcmp( dlab, b->attr->label ) )
 			return;		// object already at the top
 
-		if ( ! strcmp( dlab, b->next->label ) )
+		if ( ! strcmp( dlab, b->next->attr->label ) )
 		{	// second var, must become the head of the chain
 			cb = b->next->next;		// third
 			cb1 = b;				// first
@@ -1810,7 +1807,7 @@ void lsd::object::shift_desc( int direction, const char *dlab )
 
 		for ( cb = b; cb != NULL; cb = cb->next )
 		{
-			if ( ! strcmp( dlab, cb->label ) )
+			if ( ! strcmp( dlab, cb->attr->label ) )
 			{
 				cb2->next = cb;
 				cb1->next = cb->next;
@@ -1825,7 +1822,7 @@ void lsd::object::shift_desc( int direction, const char *dlab )
 
 	if ( direction == 1 )
 	{	//move down
-		if ( ! strcmp( dlab, b->label ) )
+		if ( ! strcmp( dlab, b->attr->label ) )
 		{	// it's the first
 			if ( b->next == NULL)
 				return;				// it is unique
@@ -1840,7 +1837,7 @@ void lsd::object::shift_desc( int direction, const char *dlab )
 
 		for ( cb = b; cb != NULL; cb = cb->next )
 		{
-			if ( ! strcmp( dlab, cb->label ) )
+			if ( ! strcmp( dlab, cb->attr->label ) )
 			{
 				if ( cb->next == NULL )
 					return;			// already at the end
@@ -1863,8 +1860,8 @@ void lsd::object::shift_desc( int direction, const char *dlab )
  *************************************************************/
 namespace lsd
 {
-	bool ascending_objects( const bridge & a, const bridge & b  ) { return ( strcmp( a.label, b.label ) < 0 ); }
-	bool descending_objects( const bridge & a, const bridge & b ) { return ( strcmp( a.label, b.label ) > 0 ); }
+	bool ascending_objects( const bridge & a, const bridge & b  ) { return ( strcmp( a.attr->label, b.attr->label ) < 0 ); }
+	bool descending_objects( const bridge & a, const bridge & b ) { return ( strcmp( a.attr->label, b.attr->label ) > 0 ); }
 	bool ascending_variables( const variable & a, const variable & b ) { return ( strcmp( a.attr->label, b.attr->label ) < 0 ); }
 	bool descending_variables( const variable & a, const variable & b ) { return ( strcmp( a.attr->label, b.attr->label ) > 0 ); }
 }
@@ -1991,8 +1988,7 @@ bool lsd::object::sort_listbox( int box, int order )
 		for ( cb = b; cb != NULL; cb = cb1 )
 		{
 			cb1 = cb->next;
-			newb.push_back( *cb );
-			cb->copy = true;		// prevent garbage collection
+			newb.push_back( std::move( *cb ) );
 			delete cb;
 		}
 
@@ -2004,7 +2000,7 @@ bool lsd::object::sort_listbox( int box, int order )
 		// rebuild LSD linked list from C++ list
 		for ( first = true, it = newb.begin( ); it != newb.end( ); ++it )
 		{
-			cb = new bridge( *it );
+			cb = new bridge( std::move( *it ) );
 			if ( first )
 			{
 				b = cb;
@@ -2012,6 +2008,7 @@ bool lsd::object::sort_listbox( int box, int order )
 			}
 			else
 				cb1->next = cb;
+
 			cb1 = cb;
 		}
 

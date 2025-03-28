@@ -324,7 +324,7 @@ lsd::object *lsd::object::sensitivity_parallel( sensitivity *s )
 				cv->val[ 0 ] = cs->val[ cs->cur_val ];
 		}
 
-		cur = cur->hyper_next( cur->label );
+		cur = cur->hyper_next( );
 	}
 
 	return cur;
@@ -382,7 +382,7 @@ void gui::sensitivity_sequential( int *findex, lsd::sensitivity *s, double probS
 			nv *= cs->num_val;
 			cv = sim.root->search_var( sim.root, cs->label );
 
-			for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( cur->label ) )
+			for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( ) )
 			{
 				cv = cur->search_var( cur, cs->label );
 				if ( cs->param == 1 )				// handle lags > 0
@@ -1465,7 +1465,7 @@ void gui::sensitivity_doe( int *findex, design *doe, const char *dest_path )
 		for ( j = 0; j < doe->k; j++ )			// run through all factors
 		{
 			cv = sim.root->search_var( sim.root, doe->lab[ j ] );// find variable to set
-			for ( h = 0, cur = cv->up; cur != NULL; ++h, cur = cur->hyper_next( cur->label ) )
+			for ( h = 0, cur = cv->up; cur != NULL; ++h, cur = cur->hyper_next( ) )
 			{									// run through all objects containing var
 				cv = cur->search_var( cur, doe->lab[ j ] );
 				if ( doe->par[ j ] == 1 )		// handle lags > 0

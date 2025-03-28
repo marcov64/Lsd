@@ -133,11 +133,13 @@
 /*************************************************************
  VARATTR constructor
  *************************************************************/
-lsd::varattr::varattr( const char *_label, int _num_lag )
+lsd::varattr::varattr( simulation *sim, const char *_label, int _num_lag )
 {
+	container = & ( sim->va );
 	num_lag = _num_lag;
+	label_size = strlen( _label );
 
-	label = new char[ strlen( _label ) + 1 ];
+	label = new char [ label_size + 1 ];
 	strcpy( label, _label );
 }
 
@@ -145,7 +147,7 @@ lsd::varattr::varattr( const char *_label, int _num_lag )
 /*************************************************************
  VARATTR copy constructor
  *************************************************************/
-lsd::varattr::varattr( const lsd::varattr & a )
+lsd::varattr::varattr( const varattr & a )
 {
 	initialized = a.initialized;
 	integer = a.integer;
@@ -165,19 +167,11 @@ lsd::varattr::varattr( const lsd::varattr & a )
 	dummy = a.dummy;
 	eq_func = a.eq_func;
 
-	label = new char[ strlen( a.label ) + 1 ];
+	container = a.container;
+	label_size = a.label_size;
+
+	label = new char [ a.label_size + 1 ];
 	strcpy( label, a.label );
-}
-
-
-/*************************************************************
- VARATTR assignment constructor
- supposed not to be used, just crash program if used
- *************************************************************/
-lsd::varattr & lsd::varattr::operator=( const varattr & a )
-{
-	throw 0;
-	return *this;
 }
 
 
@@ -218,9 +212,12 @@ void lsd::empty_varattributes( simulation *sim )
  *************************************************************/
 lsd::varattr *lsd::varattributes::search( const char *lab )
 {
-	auto d = attr_map.find( lab );
-	if ( d != attr_map.end( ) )
-		return & ( *( d->second ) );
+	if ( lab != NULL && strlen( lab ) > 0 )
+	{
+		auto d = attr_map.find( lab );
+		if ( d != attr_map.end( ) )
+			return & ( *( d->second ) );
+	}
 
 	return NULL;
 }
@@ -229,17 +226,20 @@ lsd::varattr *lsd::varattributes::search( const char *lab )
 /*************************************************************
  ADD
  *************************************************************/
-lsd::varattr *lsd::varattributes::add( const char *label, int lags )
+lsd::varattr *lsd::varattributes::add( simulation *sim, const char *lab, int lags )
 {
-	auto d = attr_map.find( label );
+	if ( sim == NULL || lab == NULL || strlen( lab ) == 0 )
+		throw 0;
+
+	auto d = attr_map.find( lab );
 	if ( d != attr_map.end( ) )
 		return & ( *( d->second ) );
 
 	// prevent concurrent use by more than one thread
 	rec_lguardT lock( vattr_lck );
 
-	attr.emplace_back( label, lags );
-	attr_map.emplace( label, --attr.end( ) );
+	attr.emplace_back( sim, lab, lags );
+	attr_map.emplace( lab, --attr.end( ) );
 
 	return & attr.back( );
 }
@@ -251,15 +251,17 @@ lsd::varattr *lsd::varattributes::add( const char *label, int lags )
 lsd::varattr *lsd::varattributes::rename( const char *old_lab, const char *new_lab )
 {
 	auto d = attr_map.find( old_lab );
-	if ( d == attr_map.end( ) || strlen( new_lab ) == 0 )	// doesn't exist or empty?
+	if ( d == attr_map.end( ) || strlen( new_lab ) == 0 )// doesn't exist or empty?
 		return NULL;
 
 	// prevent concurrent use by more than one thread
 	rec_lguardT lock( vattr_lck );
 
 	auto attr = d->second;
+	attr->label_size = strlen( new_lab );
+
 	delete [ ] attr->label;
-	attr->label = new char[ strlen( new_lab ) + 1 ];
+	attr->label = new char [ attr->label_size + 1 ];
 	strcpy( attr->label, new_lab );
 
 	attr_map.erase( d );
@@ -293,7 +295,7 @@ lsd::variable::variable( object *_up, const char *_label, int _param, int _num_l
 
 	if ( ( attr = _up->sim->va.search( _label ) ) == NULL )
 	{
-		attr = up->sim->va.add( _label, _num_lag );
+		attr = up->sim->va.add( _up->sim, _label, _num_lag );
 
 		if ( ( _param == 0 && _num_lag == 0 ) || _param == 2 )
 			attr->initialized = true;
@@ -326,17 +328,6 @@ lsd::variable::variable( const variable & v )
 
 
 /*************************************************************
- VARIABLE assignment constructor
- supposed not to be used, just crash program if used
- *************************************************************/
-lsd::variable & lsd::variable::operator=( const variable & v )
-{
-	throw 0;
-	return *this;
-}
-
-
-/*************************************************************
  ~VARIABLE destructor
  *************************************************************/
 lsd::variable::~variable( void )
@@ -348,9 +339,9 @@ lsd::variable::~variable( void )
 
 
 /*************************************************************
- DESTROY
+ DELETE_VAR
  *************************************************************/
-void lsd::variable::destroy( bool no_lock )
+void lsd::variable::delete_var( bool no_lock )
 {
 
 	if ( up->sim->running && ! no_lock )
@@ -359,7 +350,7 @@ void lsd::variable::destroy( bool no_lock )
 		rec_lguardT lock( var_comp_lck );
 	}
 
-	if ( up->sim->running && ( attr == NULL || attr->label == NULL || val == NULL ) )
+	if ( up->sim->running && val == NULL )
 	{
 		up->sim->error_hard( "internal problem in LSD",
 							 "if error persists, please contact developers",
@@ -375,13 +366,13 @@ void lsd::variable::destroy( bool no_lock )
 /*************************************************************
  HYPER_NEXT
  Find the next instance of variable anywhere in the structure
-  *************************************************************/
+ *************************************************************/
 lsd::variable *lsd::variable::hyper_next( void )
 {
 	object *cur;
 
 	if ( ( cur = up->hyper_next( ) ) != NULL )
-		return cur->search_var( NULL, attr->label, true );
+		return cur->search_var( NULL, attr, true );
 
 	return NULL;
 }
@@ -520,7 +511,7 @@ double lsd::variable::cal( object *caller, int lag )
 		sim->error_hard( "deadlock",
 						 "check your equation code to prevent this situation\nprobably using the variable lagged value instead",
 						 true,
-						 "equation for '%s' (object '%s') requested \nits own value while computing its current value", attr->label, up->label );
+						 "equation for '%s' (object '%s') requested \nits own value while computing its current value", attr->label, up->attr->label );
 		return 0;
 	}
 
@@ -545,7 +536,7 @@ double lsd::variable::cal( object *caller, int lag )
 							 "if error persists, please contact developers",
 							 true,
 							 "failure while pushing '%s' (object '%s')",
-							 attr->label, up->label );
+							 attr->label, up->attr->label );
 			return 0;
 		}
 
@@ -571,7 +562,7 @@ double lsd::variable::cal( object *caller, int lag )
 	}
 	catch ( std::exception& exc )
 	{
-		sim->plog( "\n\nAn exception was detected while computing the equation \nfor '%s' requested by object '%s'", attr->label, caller == NULL ? "(none)" : caller->label );
+		sim->plog( "\n\nAn exception was detected while computing the equation \nfor '%s' requested by object '%s'", attr->label, caller == NULL ? "(none)" : caller->attr->label );
 		sim->quit = 2;
 		throw;
 	}
@@ -583,7 +574,7 @@ double lsd::variable::cal( object *caller, int lag )
 	{
 		if ( sim->quit != 2 )		// error message not already presented?
 		{
-			sim->plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s' requested by object '%s'", attr->label, caller == NULL ? "(none)" : caller->label );
+			sim->plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s' requested by object '%s'", attr->label, caller == NULL ? "(none)" : caller->attr->label );
 			sim->quit = 2;
 			throw;
 		}
@@ -645,7 +636,7 @@ double lsd::variable::cal( object *caller, int lag )
 				sim->plog_tag( "%d\t", "highlight", time );
 				sim->plog( "stack=" );
 				sim->plog_tag( "%d\t", "highlight", sim->stack_level );
-				sim->plog( "caller=%s%s%s", caller == NULL ? "LSD" : caller->label, caller == NULL ? "" : "\ttrigger=", caller == NULL || sim->stack_log == NULL || sim->stack_log->prev == NULL ? "" : sim->stack_log->prev->label );
+				sim->plog( "caller=%s%s%s", caller == NULL ? "LSD" : caller->attr->label, caller == NULL ? "" : "\ttrigger=", caller == NULL || sim->stack_log == NULL || sim->stack_log->prev == NULL ? "" : sim->stack_log->prev->label );
 			}
 		}
 
@@ -655,7 +646,7 @@ double lsd::variable::cal( object *caller, int lag )
 			if ( ! tit_updated )
 				set_lab_tit( );
 
-			fprintf( sim->log_file_ptr, "%s (%s)\t= %.4g\t(t=%d sim=%d caller=%s)\n", attr->label, lab_tit, val[ 0 ], sim->t, sim->nsim, caller == NULL ? "LSD" : caller->label );
+			fprintf( sim->log_file_ptr, "%s (%s)\t= %.4g\t(t=%d sim=%d caller=%s)\n", attr->label, lab_tit, val[ 0 ], sim->t, sim->nsim, caller == NULL ? "LSD" : caller->attr->label );
 		}
 
 		// open the debugger if required
@@ -706,7 +697,7 @@ double lsd::variable::cal( object *caller, int lag )
 							 "if error persists, please contact developers",
 							 true,
 							 "failure while poping '%s' (in object '%s')",
-							 attr->label, up->label );
+							 attr->label, up->attr->label );
 			return 0;
 		}
 	}
@@ -733,12 +724,12 @@ double lsd::variable::cal( object *caller, int lag )
 						 "check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation",
 						 false,
 						 "variable or function '%s' (object '%s') requested \nwith lag=%d but declared with lag=%d\nPossible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the offender equation to request the value of '%s' with lag=%d maximum, or\n- enable USE_SAVED and mark '%s' to be saved (variables only)",
-						 attr->label, up->label, eff_lag, attr->num_lag, attr->label, eff_lag, attr->label, attr->num_lag, attr->label );
+						 attr->label, up->attr->label, eff_lag, attr->num_lag, attr->label, eff_lag, attr->label, attr->num_lag, attr->label );
 	else
 		sim->error_hard( "invalid lag used",
 						 "check your code (used lags in equation) to prevent negative lag",
 						 false,
-						 "variable or function '%s' (object '%s') requested \nwith lag=%d but negative lags are not allowed here\nPossible fix: use positive lag instead", attr->label, up->label, eff_lag );
+						 "variable or function '%s' (object '%s') requested \nwith lag=%d but negative lags are not allowed here\nPossible fix: use positive lag instead", attr->label, up->attr->label, eff_lag );
 
 	return 0;
 }
@@ -787,7 +778,7 @@ void lsd::worker::cal_worker( void )
 				if ( v->under_computation )
 				{
 					snprintf( err_msg1, MAX_BUFF_SIZE, "deadlock during parallel computation" );
-					snprintf( err_msg2, MAX_BUFF_SIZE, "the equation for '%s' in object '%s' requested its own value\nwhile parallel-computing its current value", v->attr->label, v->up->label );
+					snprintf( err_msg2, MAX_BUFF_SIZE, "the equation for '%s' in object '%s' requested its own value\nwhile parallel-computing its current value", v->attr->label, v->up->attr->label );
 					snprintf( err_msg3, MAX_BUFF_SIZE, "check your code to prevent this situation" );
 					user_excpt = true;
 
@@ -824,7 +815,7 @@ void lsd::worker::cal_worker( void )
 					{
 						pexcpt = std::current_exception( );
 						snprintf( err_msg1, MAX_BUFF_SIZE, "equation error" );
-						snprintf( err_msg2, MAX_BUFF_SIZE, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", v->attr->label, v->up->label );
+						snprintf( err_msg2, MAX_BUFF_SIZE, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", v->attr->label, v->up->attr->label );
 						snprintf( err_msg3, MAX_BUFF_SIZE, "check your code to prevent this situation" );
 					}
 
@@ -890,7 +881,7 @@ void lsd::worker::cal_worker( void )
 		{
 			pexcpt = std::current_exception( );
 			snprintf( err_msg1, MAX_BUFF_SIZE, "parallel computation problem" );
-			snprintf( err_msg2, MAX_BUFF_SIZE, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", v->attr->label, v->up->label );
+			snprintf( err_msg2, MAX_BUFF_SIZE, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", v->attr->label, v->up->attr->label );
 			snprintf( err_msg3, MAX_BUFF_SIZE, "disable parallel computation for this variable\nor check your code to prevent this situation" );
 		}
 	}
@@ -899,6 +890,12 @@ void lsd::worker::cal_worker( void )
 
 	running = free = false;
 }
+
+
+/*************************************************************
+ WORKER constructor
+ *************************************************************/
+lsd::worker::worker( void ) { }
 
 
 /*************************************************************
@@ -959,7 +956,7 @@ void lsd::worker::signal( int sig )
 	}
 
 	if ( v != NULL && v->attr != NULL && v->attr->label != NULL )
-		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'\n(simulation %d). Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, v->attr->label, v->up->label != NULL ? v->up->label : "(none)", v->up->sim->nsim );
+		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'\n(simulation %d). Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, v->attr->label, v->up->attr->label, v->up->sim->nsim );
 	else
 		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received by a parallel worker thread\n(simulation %d).\nDisable parallel computation to prevent this situation.", signame, v->up->sim->nsim );
 
@@ -1040,7 +1037,7 @@ bool lsd::worker::check( void )
 										 "disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
 										 true,
 										 "while computing variable '%s' (object '%s') a multi-threading worker crashed",
-										 v->attr->label, v->up->label != NULL ? v->up->label : "(none)" );
+										 v->attr->label, v->up->attr->label );
 					else
 						sim->error_hard( "parallel computation problem",
 										 "disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
@@ -1078,7 +1075,7 @@ void lsd::simulation::parallel_update( variable *v, object* p, object *caller )
 	}
 
 	// find the beginning of the linked list chain for current object
-	cb = p->up->search_bridge( p->label );
+	cb = p->up->search_bridge( p->attr );
 
 	// if single instanced object, update as usual
 	if ( cb->head == NULL || cb->head->next == NULL )
@@ -1100,14 +1097,14 @@ void lsd::simulation::parallel_update( variable *v, object* p, object *caller )
 		error_hard( "parallel computation problem",
 					"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
 					true,
-					"variable '%s' (object '%s') %d parallel worker(s) crashed", v->attr->label, v->up->label, i );
+					"variable '%s' (object '%s') %d parallel worker(s) crashed", v->attr->label, v->up->attr->label, i );
 		return;
 	}
 
 	// scan all instances of current object under current parent
 	for ( co = cb->head; co != NULL; co = co->next )
 	{
-		cv = co->search_var( co, v->attr->label );
+		cv = co->search_var( co, v->attr );
 
 		// compute only if not updated
 		if ( cv != NULL && cv->last_update < t && t >= cv->next_update )
@@ -1129,7 +1126,7 @@ void lsd::simulation::parallel_update( variable *v, object* p, object *caller )
 						error_hard( "deadlock during parallel computation",
 									"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
 									true,
-									"variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time step %d", cv->attr->label, cv->up->label, MAX_WAIT_TIME, t );
+									"variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time step %d", cv->attr->label, cv->up->attr->label, MAX_WAIT_TIME, t );
 						return;
 					}
 				}
@@ -1173,7 +1170,7 @@ void lsd::simulation::parallel_update( variable *v, object* p, object *caller )
 				error_hard( "parallel computation problem",
 							"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
 							true,
-							"variable '%s' (object '%s') had a multi-threading inconsistency,\nmaybe a deadlock state", cv->attr->label, cv->up->label );
+							"variable '%s' (object '%s') had a multi-threading inconsistency,\nmaybe a deadlock state", cv->attr->label, cv->up->attr->label );
 				return;
 			}
 			else
@@ -1201,7 +1198,7 @@ void lsd::simulation::parallel_update( variable *v, object* p, object *caller )
 				error_hard( "deadlock during parallel computation",
 							"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box",
 							true,
-							"variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time step %d", cv != NULL ? cv->up->label : "", cv != NULL && cv->attr != NULL && cv->attr->label != NULL ? cv->attr->label : "(none)", MAX_WAIT_TIME, t );
+							"variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time step %d", cv != NULL ? cv->up->attr->label : "", cv != NULL ? cv->attr->label : "(none)", MAX_WAIT_TIME, t );
 				return;
 			}
 		}

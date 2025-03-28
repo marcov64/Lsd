@@ -214,6 +214,8 @@ namespace lsd
 	class lsdstack;
 	class netlink;
 	class netnode;
+	class objattr;
+	class objattributes;
 	class object;
 	class profile;
 	class result;
@@ -232,15 +234,16 @@ namespace lsd
 	typedef std::list < assim > ass_listT;
 	typedef std::list < assim * > asp_listT;
 	typedef std::list < descr > desc_listT;
+	typedef std::list < objattr > oatt_listT;
 	typedef std::list < varattr > vatt_listT;
 	typedef std::vector < assim * > ass_vecT;
 	typedef std::map < int, ass_vecT > ia_mapT;
 	typedef std::map < strT, profile > prof_mapT;
 	typedef std::map < thr_idT, worker * > wrk_mapT;
-	typedef std::pair < strT, bridge * > b_pairT;
 	typedef std::pair < double, object * > o_pairT;
 	typedef std::pair < long, object * > n_pairT;
-	typedef std::pair < strT, variable * > v_pairT;
+	typedef std::pair < objattr *, bridge * > b_pairT;
+	typedef std::pair < varattr *, variable * > v_pairT;
 	typedef std::vector < assinstance > ae_vecT;
 	typedef std::vector < object * > o_vecT;
 	typedef std::vector < simulation > sim_vecT;
@@ -248,12 +251,13 @@ namespace lsd
 	typedef std::vector < variable * > v_vecT;
 	typedef std::unordered_map < double, object * > o_mapT;
 	typedef std::unordered_map < long, object * > n_mapT;
+	typedef std::unordered_map < objattr *, bridge * > b_mapT;
 	typedef std::unordered_map < strT, ass_listT::iterator > ass_mapT;
 	typedef std::unordered_map < strT, desc_listT::iterator > desc_mapT;
+	typedef std::unordered_map < strT, oatt_listT::iterator > oatt_mapT;
 	typedef std::unordered_map < strT, vatt_listT::iterator > vatt_mapT;
 	typedef std::unordered_map < strT, eq_funcT > eq_mapT;
-	typedef std::unordered_map < strT, bridge * > b_mapT;
-	typedef std::unordered_map < strT, variable * > v_mapT;
+	typedef std::unordered_map < varattr *, variable * > v_mapT;
 	typedef std::unordered_set < object * > o_setT;
 	typedef ass_listT::iterator ass_list_itT;
 	typedef ass_mapT::iterator ass_map_itT;
@@ -378,6 +382,45 @@ namespace lsd
 
 
 /*************************************************************
+ OBJATTR
+ *************************************************************/
+	class objattr							// object static/homogeneous
+	{										// attributes class
+		public:								// static public attributes
+			char *label;
+			int label_size;
+
+		private:							// static private attributes
+			objattributes *container;		// attributes container
+
+		public:
+			objattr( simulation *sim, const char *_label );// constructor
+			objattr( const objattr & a );	// copy constructor
+			~objattr( void );				// destructor
+			objattr & operator=( const varattr & a ) = delete;// assignment constructor
+	};
+
+
+/*************************************************************
+ OBJATTRIBUTES
+ *************************************************************/
+	class objattributes						// container for object attributes
+	{
+		public:
+			oatt_listT attr;				// element attributes linked-list
+			oatt_mapT attr_map;				// map names to element attributes
+
+		private:
+			rec_mtxT oattr_lck;				// mutex lock for parallel computation
+
+		public:
+			objattr *add( simulation *sim, const char *lab );
+			objattr *rename( const char *old_lab, const char *new_lab );
+			objattr *search( const char *lab );
+	};
+
+
+/*************************************************************
  OBJECT
  *************************************************************/
 	class object							// simulation model object class
@@ -393,8 +436,8 @@ namespace lsd
 		public:
 			bool to_compute;
 			bridge *b = NULL;
-			char *label;
 			netnode *node = NULL;			// pointer to network node data structure
+			objattr *attr;					// static/homogeneous attributes object
 			object *next = NULL;
 			object *up;						// parent object
 			variable *v = NULL;
@@ -421,20 +464,29 @@ namespace lsd
 			object *add_n_objects2( const char *lab, int n, int t_update = -1 );
 			object *add_n_objects2( const char *lab, int n, object *ex, int t_update = -1 );
 			object *add_obj( const char *label, int num = 1, bool propagate = false );
-			object *hyper_next( void );
 			object *hyper_next( const char *lab );
+			object *hyper_next( objattr *at );
+			object *hyper_next( void );
 			object *next_count( object *obj, int *count );
 			object *search( const char *lab, bool no_search = false, bool no_search_up = true );
+			object *search( objattr *at, bool no_search = false, bool no_search_up = true );
 			object *search_err( const char *lab, bool no_search, bool no_search_up, const char *errmsg );
 			variable *add_var( const char *str, int par, int lags = -1, bool plot = false, char deb = 'n' );
 			variable *add_var( variable *example );
 			variable *search_var( object *caller, const char *label, bool no_error = false, bool no_search = false, bool no_search_up = false, bool search_sons = false );
+			variable *search_var( object *caller, varattr *at, bool no_error = false, bool no_search = false, bool no_search_up = false, bool search_sons = false );
 			void chg_lab( const char *lab );
 			void chg_var_lab( const char *old, const char *n );
 			void delete_net( const char *lab );
 			void delete_obj( const variable *caller = NULL );
 			void delete_var( const char *lab );
+			void move( const char *dest );
 			void reset_end( void );
+
+			object( object *_up, simulation *_sim, const char *_label, bool _to_compute = true );	// constructor
+			~object( void );					// destructor
+			object( object & o ) = delete;		// copy constructor
+			object & operator=( const object & o ) = delete;// assignment constructor
 
 		private:
 			bool alloc_save_mem( void );
@@ -447,6 +499,7 @@ namespace lsd
 			bool sort_up_2( object *a, object *b, const char *var1, const char *var2, int lag );
 			bool under_computation( void );
 			bridge *search_bridge( const char *lab, bool no_error = false );
+			bridge *search_bridge( objattr *at, bool no_error = false );
 			double av( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 			double cal( const char *l, int lag = 0 );
 			double cal( object *caller, const char *l, int lag = 0 );
@@ -519,12 +572,9 @@ namespace lsd
 			void collect_cemetery( const variable *caller = NULL );
 			void collect_inst( o_setT &list );
 			void copy_descendant( object *to );
-			void delete_bridge( void );
 			void delete_link_net( netlink *ptr );
 			void delete_node_net( void );
-			void empty( void );
 			void get_line( char *lBuffer, FILE *fPtr );
-			void init( object *_up, simulation *_sim, const char *_label, bool _to_compute = true );
 			void name_node_net( const char *nodeName );
 			void recreate_maps( void );
 			void replicate( int num, bool propagate = false );
@@ -555,19 +605,21 @@ namespace lsd
 
 		public:
 			bridge *next = NULL;
-			char *label;					// bridge label (same as parent)
+			objattr *attr;					// static/homogeneous attributes object
 			object *head = NULL;
 
-			bridge( const char *lab );		// constructor
-			bridge( const bridge &b );		// copy constructor
-			~bridge( void );				// destructor
-
 		private:
-			bool copy = false;				// just a temporary copy
 			bool counter_updated = false;
 			char *search_var = NULL;		// current initialized search variable
 			n_mapT t_map;					// turbosearch map
 			o_mapT o_map;					// fast lookup map to object values
+
+		public:
+			bridge( objattr *_attr );		// constructor
+			bridge( bridge && b );			// move constructor
+			~bridge( void );				// destructor
+			bridge( const bridge & b ) = delete;// copy constructor
+			bridge & operator=( const bridge & b ) = delete;// assignment constructor
 	};
 
 
@@ -592,20 +644,21 @@ namespace lsd
 			double min_val = NAN;			// minimum limit (NAN = no limit)
 			int delay = 0;
 			int delay_range = 0;
-			int num_lag = 0;
+			int label_size;
+			int num_lag;
 			int period = 1;
 			int period_range = 0;
 
 		private:							// static private attributes
 			bool dummy = false;
 			eq_funcT eq_func = NULL;		// pointer to equation function
-			varattributes *container = NULL;// attributes container
+			varattributes *container;		// attributes container
 
 		public:
-			varattr( const char *_label, int _num_lag = -1 );// constructor
+			varattr( simulation *sim, const char *_label, int _num_lag = -1 );// constructor
 			varattr( const varattr & a );	// copy constructor
 			~varattr( void );				// destructor
-			varattr & operator=( const varattr & a );// assignment constructor
+			varattr & operator=( const varattr & a ) = delete;// assignment constructor
 	};
 
 
@@ -622,7 +675,7 @@ namespace lsd
 			rec_mtxT vattr_lck;				// mutex lock for parallel computation
 
 		public:
-			varattr *add( const char *label, int lags = -1 );
+			varattr *add( simulation *sim, const char *lab, int lags = -1 );
 			varattr *rename( const char *old_lab, const char *new_lab );
 			varattr *search( const char *lab );
 	};
@@ -669,7 +722,7 @@ namespace lsd
 			variable( object *_up, const char *_label, int _param, int _num_lag, bool plot, char _deb_mode );	// constructor
 			variable( const variable & v );	// copy constructor
 			~variable( void );				// destructor
-			variable & operator=( const variable & v );// assignment constructor
+			variable & operator=( const variable & v ) = delete;// assignment constructor
 
 		private:
 			bool alloc_save_var( void );
@@ -677,7 +730,7 @@ namespace lsd
 			inline double chk_dummy( const char *lab );
 			inline double chk_res( double res );
 			void add_cemetery( void );
-			void destroy( bool no_lock = false );
+			void delete_var( bool no_lock = false );
 			void save_single( void );
 			void set_lab_tit( void );
 
@@ -710,6 +763,8 @@ namespace lsd
 			netnode( object *_up, long nodeId = -1, const char nodeName[ ] = "",
 					 double nodeProb = 1 );	// constructor
 			~netnode( void );				// destructor
+			netnode( const netnode & n ) = delete;	// copy constructor
+			netnode & operator=( const netnode & n ) = delete;// assignment constructor
 	};
 
 
@@ -734,6 +789,8 @@ namespace lsd
 			netlink( object *origNode, object *destNode, double linkWeight = 0, double destProb = 1 );
 											// constructor
 			~netlink( void );				// destructor
+			netlink( const netlink & n ) = delete;	// copy constructor
+			netlink & operator=( const netlink & n ) = delete;// assignment constructor
 	};
 
 
@@ -791,9 +848,10 @@ namespace lsd
 			int param;						// element type
 			sensitivity *next = NULL;		// sensitivity analysis chain of elements
 
-			sensitivity( const char *lab, simulation *_sim, int _param, int _lag, bool _integer, int _num_val = 0, d_vecT *_val = NULL );
-											// constructor
+			sensitivity( const char *lab, simulation *_sim, int _param, int _lag, bool _integer, int _num_val = 0, d_vecT *_val = NULL );	// constructor
 			~sensitivity( void );			// destructor
+			sensitivity( const sensitivity & s ) = delete;	// copy constructor
+			sensitivity & operator=( const sensitivity & s ) = delete;// assignment constructor
 
 		private:
 			simulation *sim;				// simulation where object is contained
@@ -812,7 +870,10 @@ namespace lsd
 		friend class simulation;
 
 		public:
+			worker( void );					// constructor
 			~worker( void );				// destructor
+			worker( const worker & w ) = delete;	// copy constructor
+			worker & operator=( const worker & w ) = delete;// assignment constructor
 
 		private:
 			bool errored;
@@ -864,6 +925,8 @@ namespace lsd
 
 			descr( description *_container, const char *_label, int _type, const char *_text, const char *_init, bool _initial, bool _observe );	// constructor
 			~descr( void );					// destructor
+			descr( const descr & d ) = delete;	// copy constructor
+			descr & operator=( const descr & d ) = delete;// assignment constructor
 	};
 
 
@@ -884,6 +947,8 @@ namespace lsd
 
 			description( void );			// constructor
 			~description( void );			// destructor
+			description( const description & d ) = delete;	// copy constructor
+			description & operator=( const description & d ) = delete;// assignment constructor
 	};
 
 
@@ -901,6 +966,8 @@ namespace lsd
 			result( const char *fname, const char *fmode, simulation *_sim,
 					bool _dozip = false, bool _docsv = false );// constructor
 			~result( void );				// destructor
+			result( const result & r ) = delete;	// copy constructor
+			result & operator=( const result & r ) = delete;// assignment
 
 		private:
 			bool da_res = false;			// data assimilation results
@@ -1210,6 +1277,7 @@ namespace lsd
 			mtxT obj_list_lck;				// lock object list for parallel manip.
 			mtxT run_logs_lck;				// lock run_logs for parallel updating
 			mtxT run_pids_lck;				// lock run_pids for parallel updating
+			objattributes oa;				// static object attributes container
 			object *blueprint = NULL;		// LSD blueprint (effective model in use)
 			object *root = NULL;			// LSD root object
 			o_setT obj_list;				// set with all existing LSD objects
@@ -1297,7 +1365,6 @@ namespace lsd
 			void empty_stack( void );
 			void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const char *logFmt, ... );
 			void init_random( unsigned seed );
-			void move_obj( const char *lab, const char *dest );
 			void plog( const char *msg, ... );
 			void plog_tag( const char *cm, const char *tag, ... );
 			void plog_terminal( const char *cm, va_list arg );
@@ -1308,6 +1375,8 @@ namespace lsd
 			simulation( const char fname[ ] = "", const char path[ ] = "", int quick = 0 );// constructor
 			simulation( simulation && src ) { }// move constructor
 			~simulation( void );			// destructor
+			simulation( const simulation & s ) = delete;	// copy constructor
+			simulation & operator=( const simulation & s ) = delete;// assignment
 
 		private:
 			bool load_txt_descr( const char *msg, FILE *f );
@@ -1422,6 +1491,7 @@ namespace lsd
 	void debug_break( void );
 	void empty_assimilation( void );
 	void empty_description( description *d = NULL );
+	void empty_objattributes( simulation *sim = NULL );
 	void empty_varattributes( simulation *sim = NULL );
 	void exception_handler( int signum, const char *what );
 	void finish_lib( void );

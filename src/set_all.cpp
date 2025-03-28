@@ -56,9 +56,9 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 	FILE *f;
 
 	// do on first instance
-	if ( up != NULL && up->search( label ) != this )
+	if ( up != NULL && ( cur = up->search( attr ) ) != this )
 	{
-		up->search( label )->set_all( lab, lag, parWnd );
+		cur->set_all( lab, lag, parWnd );
 		return;
 	}
 
@@ -127,7 +127,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 
 	cmd( "ttk::frame $_w.head.lo" );
 	cmd( "ttk::label $_w.head.lo.l -text \"Contained in object: \"" );
-	cmd( "ttk::label $_w.head.lo.o -text \"%s\" -style hl.TLabel", cv->up->label  );
+	cmd( "ttk::label $_w.head.lo.o -text \"%s\" -style hl.TLabel", cv->up->attr->label  );
 	cmd( "pack $_w.head.lo.l $_w.head.lo.o -side left" );
 
 	cmd( "pack $_w.head.lg $_w.head.l $_w.head.lo" );
@@ -392,7 +392,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 	{
 		// equal to
 		case 1:
-			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( label ), ++i )
+			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -406,13 +406,13 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 
 		// range
 		case 9:
-			for ( i = 1, cur = this, counter = -1; cur != NULL; cur = cur->hyper_next( label ), ++i )
+			for ( i = 1, cur = this, counter = -1; cur != NULL; cur = cur->hyper_next( ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( ( ( i - cases_from ) % step_in == 0 ) ) )
 					counter++;
 
 			value = ( value2 - value1 ) / counter;
 
-			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( label ), ++i )
+			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( ), ++i )
 			{
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
@@ -432,7 +432,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 
 		// increasing
 		case 2:
-			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( label ), ++i )
+			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( ), ++i )
 			{
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
@@ -452,7 +452,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 
 		// increasing (groups)
 		case 4:
-			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( label ), ++i )
+			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( ), ++i )
 				if ( to_all == 1 || ( cases_from <= i && cases_to >= i ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -460,7 +460,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 					++j;
 					++step;
 
-					if ( cur->next != cur->hyper_next( label ) )
+					if ( cur->next != cur->hyper_next( ) )
 						step = 0;
 				}
 
@@ -471,7 +471,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 
 		// random (uniform)
 		case 3:
-			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( label ), ++i )
+			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -486,7 +486,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 
 		// random integer (uniform)
 		case 8:
-			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( label ), ++i )
+			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -501,7 +501,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 
 		// random (normal)
 		case 5:
-			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( label ), ++i )
+			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
@@ -532,7 +532,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 			if ( fscanf( f, "%99s", ch ) == EOF )				// the label
 				return;
 
-			for ( i = 1, cur = this; cur != NULL; cur = cur->hyper_next( label ), ++i )
+			for ( i = 1, cur = this; cur != NULL; cur = cur->hyper_next( ), ++i )
 				if ( to_all == 1 || ( cases_from <= i && cases_to >= i ) )
 				{
 					kappa = fscanf( f, "%lf", &value );
@@ -710,7 +710,7 @@ int lsd::assim::dataentry( const char *parWnd )
 
 	cmd( "ttk::frame $_w.head.lo" );
 	cmd( "ttk::label $_w.head.lo.l -text \"Contained in object: \"" );
-	cmd( "ttk::label $_w.head.lo.o -text \"%s\" -style hl.TLabel", cv->up->label  );
+	cmd( "ttk::label $_w.head.lo.o -text \"%s\" -style hl.TLabel", cv->up->attr->label  );
 	cmd( "pack $_w.head.lo.l $_w.head.lo.o -side left" );
 
 	cmd( "pack $_w.head.lg $_w.head.l $_w.head.lo" );

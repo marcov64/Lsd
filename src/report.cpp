@@ -486,7 +486,7 @@ void lsd::object::write_obj( FILE *frep, int *elemDone )
 	{
 		fprintf( frep, "<HR WIDTH=\"100%%\">\n" );
 
-		fprintf( frep, "<H3><A NAME=\"_d_%s\">Object: &nbsp;<TT><U>%s</U></TT></A></H3>\n", cur->label, cur->label );
+		fprintf( frep, "<H3><A NAME=\"_d_%s\">Object: &nbsp;<TT><U>%s</U></TT></A></H3>\n", cur->attr->label, cur->attr->label );
 
 		if ( cur->up != NULL )
 		{
@@ -498,9 +498,9 @@ void lsd::object::write_obj( FILE *frep, int *elemDone )
 		if ( cur->b != NULL )
 		{
 			fprintf( frep,"<i>Containing: &nbsp;</i>" );
-			fprintf( frep, "<TT><A HREF=\"#%s\">%s</A></TT>", cur->b->label, cur->b->label );
+			fprintf( frep, "<TT><A HREF=\"#%s\">%s</A></TT>", cur->b->attr->label, cur->b->attr->label );
 			for ( cb = cur->b->next; cb != NULL; cb = cb->next )
-				fprintf( frep, "<TT>,  <A HREF=\"#%s\">%s</A></TT>", cb->label, cb->label );
+				fprintf( frep, "<TT>,  <A HREF=\"#%s\">%s</A></TT>", cb->attr->label, cb->attr->label );
 			fprintf( frep, "<BR>\n" );
 		}
 
@@ -555,7 +555,7 @@ void lsd::variable::write_var( FILE *frep )
 	if ( ! std::isnan( attr->max_val ) )
 		fprintf( frep, "<I>Maximum: &nbsp;</I>%g<BR>", attr->max_val );
 
-	fprintf( frep, "<I>Contained in: &nbsp;</I><A HREF=\"#%s\"><TT>%s</TT></A><BR>", up->label, up->label );
+	fprintf( frep, "<I>Contained in: &nbsp;</I><A HREF=\"#%s\"><TT>%s</TT></A><BR>", up->attr->label, up->attr->label );
 
 	fprintf( frep, "<I>Used in: &nbsp;</I>" );
 
@@ -581,7 +581,7 @@ void lsd::variable::write_var( FILE *frep )
 		{
 			if ( gui::eq_header( c1_lab, c2_lab, updt_in ) )
 			{
-				done = gui::eq_contains( ffun, attr->label, strlen( attr->label ) );
+				done = gui::eq_contains( ffun, attr->label, attr->label_size );
 
 				if ( done )
 				{
@@ -623,9 +623,9 @@ void lsd::variable::write_var( FILE *frep )
 		{
 			fprintf( frep, "%g", val[ 0 ] );
 
-			for ( j = 1, cur = up->hyper_next( up->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
+			for ( j = 1, cur = up->hyper_next( ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( ), ++j )
 			{
-				cv = cur->search_var( cur, attr->label );
+				cv = cur->search_var( cur, attr );
 				fprintf( frep, ", %g", cv->val[ 0 ] );
 			}
 
@@ -640,9 +640,9 @@ void lsd::variable::write_var( FILE *frep )
 			{
 				fprintf( frep, "<P style=\"margin-left:10px;\"><I>Lag %d:</I> %g", i + 1, val[ i ] );
 
-				for ( j = 1, cur = up->hyper_next( up->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
+				for ( j = 1, cur = up->hyper_next( ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( ), ++j )
 				{
-					cv = cur->search_var( cur, attr->label );
+					cv = cur->search_var( cur, attr );
 					fprintf( frep, ", %g", cv->val[ i ] );
 				}
 
@@ -893,7 +893,7 @@ void lsd::object::find_using( variable *v, FILE *frep, bool *found )
 					{
 						done = false;
 						if ( ! strcmp( c2_lab, v->attr->label ) )
-							done = gui::eq_contains( ffun, cv->attr->label, strlen( cv->attr->label ) );
+							done = gui::eq_contains( ffun, cv->attr->label, cv->attr->label_size );
 						if ( done )
 						{
 							// avoid duplicated variable equations
@@ -1018,7 +1018,7 @@ bool gui::eq_contains( FILE *f, const char *lab, int len )
  *************************************************************/
 void lsd::object::write_str( FILE *frep, int dep, const char *prefix )
 {
-	int len, i, j, count = 0;
+	int i, j, count = 0;
 	bridge *cb;
 
 	if ( up != NULL )
@@ -1043,11 +1043,12 @@ void lsd::object::write_str( FILE *frep, int dep, const char *prefix )
 		count = 1;
 	}
 
-	fprintf( frep, "<TT><A HREF=\"#%s%s\">%s</A></TT>", prefix, label, label );
-	len = strlen( label );
-	for ( i = 0; i < len; ++i )
+	fprintf( frep, "<TT><A HREF=\"#%s%s\">%s</A></TT>", prefix, attr->label, attr->label );
+
+	for ( i = 0; i < attr->label_size; ++i )
 		tmp_rep[ dep + i + count ] = ' ';
-	dep = dep + len + count;
+
+	dep = dep + attr->label_size + count;
 	j = dep;
 
 	for ( cb = b; cb != NULL; cb = cb->next )
@@ -1094,9 +1095,9 @@ void lsd::object::write_list( FILE *frep, bool show_all, const char *prefix )
 
 	// distinguish the case you are compiling the initial list of element (all) or for a single Object)
 	if ( ! show_all )
-		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_v_%s_%s", label, prefix );
+		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_v_%s_%s", attr->label, prefix );
 	else
-		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_v_all_%s_%s", label, prefix );
+		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_v_all_%s_%s", attr->label, prefix );
 
 	if ( lmenu )
 		create_form( num, s1, prefix, frep );
@@ -1132,9 +1133,9 @@ void lsd::object::write_list( FILE *frep, bool show_all, const char *prefix )
 
 	// distinguish the case you are compiling the initial list of element (all) or for a single Object)
 	if ( ! show_all )
-		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_p_%s_%s", label, prefix );
+		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_p_%s_%s", attr->label, prefix );
 	else
-		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_p_all_%s_%s", label, prefix );
+		snprintf( s1, 2 * MAX_ELEM_LENGTH, "form_p_all_%s_%s", attr->label, prefix );
 
 	if ( lmenu )
 		create_form( num, s1, prefix, frep );
@@ -1214,7 +1215,7 @@ void lsd::object::create_table_init( FILE *frep )
 
 	fprintf( frep, "<HR WIDTH=\"100%%\">\n" );
 
-	fprintf( frep, "<H3><A NAME=\"%s\">Object: &nbsp;<TT><U>%s</U></TT></A></H3>", label, label );
+	fprintf( frep, "<H3><A NAME=\"%s\">Object: &nbsp;<TT><U>%s</U></TT></A></H3>", attr->label, attr->label );
 
 	if ( up != NULL )
 	{
@@ -1226,16 +1227,16 @@ void lsd::object::create_table_init( FILE *frep )
 	if ( b != NULL )
 	{
 		fprintf( frep, "<i>Containing: &nbsp;</i>" );
-		fprintf( frep, "<TT><a HREF=\"#%s\">%s</a></TT>", b->label, b->label );
+		fprintf( frep, "<TT><a HREF=\"#%s\">%s</a></TT>", b->attr->label, b->attr->label );
 		for ( auto cb = b->next ; cb != NULL; cb = cb->next )
-			fprintf( frep, "<TT>,  <a HREF=\"#%s\">%s</a></TT>", cb->label, cb->label );
+			fprintf( frep, "<TT>,  <a HREF=\"#%s\">%s</a></TT>", cb->attr->label, cb->attr->label );
 		fprintf( frep, "<BR>\n" );
 	}
 
 	fprintf( frep, "<BR>\n" );
 	write_list( frep, false, "" );
 
-	auto cd = desc != NULL ? desc->search_descr( label ) : NULL;
+	auto cd = desc != NULL ? desc->search_descr( attr->label ) : NULL;
 	if ( cd != NULL && cd->has_descr_text ( ) )
 	{
 		fprintf( frep, "<i>Description:</i><BR>\n" );
@@ -1385,25 +1386,25 @@ void lsd::object::create_initial_values( FILE *frep )
 		return;
 	}
 
-	for ( count = 0, cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
+	for ( count = 0, cur = this; cur != NULL; cur = cur->hyper_next( ) )
 		count++;
 
 	fprintf( frep, "<HR WIDTH=\"100%%\">\n" );
-	fprintf( frep, "<H3><A NAME=\"%s\">Object: &nbsp;<TT><U>%s</U></TT></A></H3>", label, label );
+	fprintf( frep, "<H3><A NAME=\"%s\">Object: &nbsp;<TT><U>%s</U></TT></A></H3>", attr->label, attr->label );
 	fprintf( frep, "<i>Instance number: &nbsp</i>%d<BR>", count );
 	fprintf( frep, "<i>Instance group(s): &nbsp;</i>" );
 
 	for ( i = 0, cur = this; cur != NULL; )
 	{
 		count = 1;
-		while ( cur->next != NULL && ! strcmp( cur->label, ( cur->next )->label ) )
+		while ( cur->next != NULL && cur->attr == cur->next->attr )
 		{
 			++count;
 			cur = cur->next;
 		}
 
 		fprintf( frep, "%d ", count );
-		cur = cur->hyper_next( cur->label );
+		cur = cur->hyper_next( );
 		++i;
 
 		if ( i > MAX_INIT )
@@ -1430,9 +1431,9 @@ void lsd::object::create_initial_values( FILE *frep )
 			fprintf( frep, "<td>Par.</td>\n" );
 			fprintf( frep, "<td>%g", cv->val[ 0 ] );
 
-			for ( j = 1, cur = hyper_next( label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
+			for ( j = 1, cur = hyper_next( ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( ), ++j )
 			{
-				cv1 = cur->search_var( cur, cv->attr->label );
+				cv1 = cur->search_var( cur, cv->attr );
 				fprintf( frep, ", %g", cv1->val[ 0 ] );
 			}
 
@@ -1450,9 +1451,9 @@ void lsd::object::create_initial_values( FILE *frep )
 				fprintf( frep, "<td>%d</td>\n", i + 1 );
 				fprintf( frep, "<td>%g", cv->val[ i ] );
 
-				for ( j = 1, cur = hyper_next( label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
+				for ( j = 1, cur = hyper_next( ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( ), ++j )
 				{
-					cv1 = cur->search_var( cur, cv->attr->label );
+					cv1 = cur->search_var( cur, cv->attr );
 					fprintf( frep, ", %g", cv1->val[ i ] );
 				}
 
@@ -1633,7 +1634,7 @@ void lsd::object::show_rep_observe( FILE *f, int *begin, FILE *frep )
 			fprintf( f, "<tr VALIGN=TOP>" );
 
 			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->attr->label, cv->attr->label );
-			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", label, label );
+			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", attr->label, attr->label );
 
 			if ( cv->param == 1 )
 				fprintf( f, "<td>Parameter</td>" );
@@ -1705,7 +1706,7 @@ void lsd::object::show_rep_initial( FILE *f, int *begin, FILE *frep )
 
 			fprintf( f, "<tr VALIGN=TOP>" );
 			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->attr->label, cv->attr->label );
-			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", label, label );
+			fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", attr->label, attr->label );
 
 			if ( cv->param == 1 )
 				fprintf( f, "<td>Parameter</td>" );
@@ -1879,19 +1880,19 @@ void lsd::object::ancestors( FILE *f, bool html )
 	if ( up != NULL )
 	{
 		up->ancestors( f, html );
-		ol = new char[ 2 * strlen( up->label ) + 1 ];
-		tex_strcpy( ol, up->label );
+		ol = new char [ 2 * up->attr->label_size + 1 ];
+		tex_strcpy( ol, up->attr->label );
 
 		if ( up->up == NULL )
 			if ( html )
-				fprintf( f, "<TT><A HREF=\"#%s\">%s</A></TT>", up->label, up->label );
+				fprintf( f, "<TT><A HREF=\"#%s\">%s</A></TT>", up->attr->label, up->attr->label );
 			else
-				fprintf( f, "\\hrf{%s}{%s}", ol, up->label );
+				fprintf( f, "\\hrf{%s}{%s}", ol, up->attr->label );
 		else
 			if ( html )
-				fprintf( f, "<TT>&mdash;&gt;<A HREF=\"#%s\">%s</A></TT>", up->label, up->label );
+				fprintf( f, "<TT>&mdash;&gt;<A HREF=\"#%s\">%s</A></TT>", up->attr->label, up->attr->label );
 			else
-				fprintf( f, "$\\rightarrow$\\hrf{%s}{%s}", ol, up->label );
+				fprintf( f, "$\\rightarrow$\\hrf{%s}{%s}", ol, up->attr->label );
 
 		delete [ ] ol;
 	}
@@ -1933,9 +1934,9 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
 	if ( up == NULL )
 		fprintf( f, "\\section{Model Structure}\n\n" );
 
-	ol = new char[ 2 * strlen( label ) + 1 ];
-	tex_strcpy( ol, label );
-	fprintf( f, "\\subsection{Object: %s} \\label{%s}\n\n", label, ol );
+	ol = new char [ 2 * attr->label_size + 1 ];
+	tex_strcpy( ol, attr->label );
+	fprintf( f, "\\subsection{Object: %s} \\label{%s}\n\n", attr->label, ol );
 	delete [ ] ol;
 
 	if ( up != NULL )
@@ -1947,23 +1948,23 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
 
 	if ( b != NULL )
 	{
-		ol = new char[ 2 * strlen( b->label ) + 1 ];
-		tex_strcpy( ol, b->label );
-		fprintf( f,"\\emph{Containing:} \\hrf{%s}{%s}", ol, b->label );
+		ol = new char [ 2 * b->attr->label_size + 1 ];
+		tex_strcpy( ol, b->attr->label );
+		fprintf( f,"\\emph{Containing:} \\hrf{%s}{%s}", ol, b->attr->label );
 		delete [ ] ol;
 
 		for ( auto cb = b->next; cb != NULL; cb = cb->next )
 		{
-			ol = new char[ 2 * strlen( cb->label ) + 1 ];
-			tex_strcpy( ol, cb->label );
-			fprintf( f, ",	\\hrf{%s}{%s}", ol, cb->label );
+			ol = new char [ 2 * cb->attr->label_size + 1 ];
+			tex_strcpy( ol, cb->attr->label );
+			fprintf( f, ",	\\hrf{%s}{%s}", ol, cb->attr->label );
 			delete [ ] ol;
 		}
 
 		fprintf( f, "\n\n" );
 	}
 
-	auto cd = desc != NULL ? desc->search_descr( label ) : NULL;
+	auto cd = desc != NULL ? desc->search_descr( attr->label ) : NULL;
 	if ( cd != NULL && cd->has_descr_text ( ) )
 		fprintf( f, "\\emph{Description:}\n\\detokenize{%s}\n\n", cd->text );
 
@@ -1977,7 +1978,7 @@ void lsd::object::tex_report_struct( FILE *f, bool table )
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
-		vl = new char[ 2 * strlen( cv->attr->label ) + 1 ];
+		vl = new char [ 2 * cv->attr->label_size + 1 ];
 		tex_strcpy( vl, cv->attr->label );
 
 		if ( ! table )
@@ -2076,22 +2077,22 @@ void lsd::object::tex_report_observe( FILE *f, bool table )
 			fprintf( f, "\\begin{longtable}{*{3}{|l}|p{9cm}|}\n	 \\hline\n	\\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
 	}
 
-	ol = new char[ 2 * strlen( label ) + 1 ];
-	tex_strcpy( ol, label );
+	ol = new char [ 2 * attr->label_size + 1 ];
+	tex_strcpy( ol, attr->label );
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
 		auto cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
 		if ( cd != NULL && cd->observe )
 		{
-			vl = new char[ 2 * strlen( cv->attr->label ) + 1 ];
+			vl = new char [ 2 * cv->attr->label_size + 1 ];
 			tex_strcpy( vl, cv->attr->label );
 
 			if ( ! table )
-				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", vl, cv->attr->label, ol, label );
+				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", vl, cv->attr->label, ol, attr->label );
 			else
 			{
-				fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} & ", vl, cv->attr->label, ol, label );
+				fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} & ", vl, cv->attr->label, ol, attr->label );
 				if ( cv->param == 0 )
 					fprintf( f, "Variable & " );
 				if ( cv->param == 1 )
@@ -2146,22 +2147,22 @@ void lsd::object::tex_report_init( FILE *f, bool table )
 			fprintf( f, "\\begin{longtable}{*{3}{|l}|p{9cm}|}\n	 \\hline\n	\\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description and initial values comments} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
 	}
 
-	ol = new char[ 2 * strlen( label ) + 1 ];
-	tex_strcpy( ol, label );
+	ol = new char [ 2 * attr->label_size + 1 ];
+	tex_strcpy( ol, attr->label );
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 	{
 		auto cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
 		if ( cd != NULL && cd->initial )
 		{
-			vl = new char[ 2 * strlen( cv->attr->label ) + 1 ];
+			vl = new char [ 2 * cv->attr->label_size + 1 ];
 			tex_strcpy( vl, cv->attr->label );
 
 			if ( ! table )
-				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", vl, cv->attr->label, ol, label );
+				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", vl, cv->attr->label, ol, attr->label );
 			else
 			{
-				fprintf( f, "  \\hrf{%s_init}{%s} & \\hrf{%s}{%s} & ", vl, cv->attr->label, ol, label );
+				fprintf( f, "  \\hrf{%s_init}{%s} & \\hrf{%s}{%s} & ", vl, cv->attr->label, ol, attr->label );
 				if ( cv->param == 0 )
 					fprintf( f, "Variable & " );
 				if ( cv->param == 1 )
@@ -2233,20 +2234,20 @@ void lsd::object::tex_report_initall( FILE *f, bool table )
 		fprintf( f, "\\begin{longtable}{*{3}{|l}|p{9cm}|}\n	 \\hline\n	\\textbf{Object} & \\textbf{Element} & \\textbf{Lag} & \\textbf{Initial values (by instance)} \\\\ \n  \\hline \\endhead\n	\\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
 	}
 
-	ol = new char[ 2 * strlen( label ) + 1 ];
-	tex_strcpy( ol, label );
+	ol = new char [ 2 * attr->label_size + 1 ];
+	tex_strcpy( ol, attr->label );
 
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
-		vl = new char[ 2 * strlen( cv->attr->label ) + 1 ];
+		vl = new char [ 2 * cv->attr->label_size + 1 ];
 		tex_strcpy( vl, cv->attr->label );
 
 		if ( cv->param == 1 )
 		{
-			fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} \\label{%s_init} & & %g", ol, label, vl, cv->attr->label, vl, cv->val[ 0 ] );
-			for ( j = 1, cur = hyper_next( label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
+			fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} \\label{%s_init} & & %g", ol, attr->label, vl, cv->attr->label, vl, cv->val[ 0 ] );
+			for ( j = 1, cur = hyper_next( attr->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( ), ++j )
 			{
-				cv1 = cur->search_var( cur, cv->attr->label );
+				cv1 = cur->search_var( cur, cv->attr );
 				fprintf( f, ", %g", cv1->val[ 0 ] );
 			}
 			if ( j == MAX_INIT && cur != NULL )
@@ -2258,10 +2259,10 @@ void lsd::object::tex_report_initall( FILE *f, bool table )
 		{
 			for ( i = 0; i < cv->attr->num_lag; ++i )
 			{
-				fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} \\label{%s_init} & %d & %g", ol, label, vl, cv->attr->label, vl, i + 1, cv->val[ i ] );
-				for ( j = 1, cur = hyper_next( label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
+				fprintf( f, "  \\hrf{%s}{%s} & \\hrf{%s}{%s} \\label{%s_init} & %d & %g", ol, attr->label, vl, cv->attr->label, vl, i + 1, cv->val[ i ] );
+				for ( j = 1, cur = hyper_next( ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( ), ++j )
 				{
-					cv1 = cur->search_var( cur, cv->attr->label );
+					cv1 = cur->search_var( cur, cv->attr );
 					fprintf( f, ", %g", cv1->val[ i ] );
 				}
 				if ( j == MAX_INIT && cur != NULL )

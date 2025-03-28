@@ -551,7 +551,7 @@ void gui::show_descr( const char *lab, const char *parWnd )
 			set w $parWnd.desc_%s \
 		}", lab, lab );
 
-	cmd( "newtop $w \"Element '%s' in Object '%s'\" \"destroytop $w; focus $parWnd\" $parWnd", lab, cv->up->label );
+	cmd( "newtop $w \"Element '%s' in Object '%s'\" \"destroytop $w; focus $parWnd\" $parWnd", lab, cv->up->attr->label );
 
 	cmd( "ttk::frame $w.f" );
 	cmd( "ttk::label $w.f.l -text Description" );

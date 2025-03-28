@@ -239,7 +239,7 @@
  and initialize its name. It makes num copiesof it, and can
  propagate to other instances of the same parent object.
 
- - void move_obj( char *lab );
+ - void move( char *dest );
  Move the current object as descendant to a new parent
 
  - object *search( char *lab );
@@ -281,73 +281,201 @@
 
 
 /*************************************************************
- BRIDGE
- Constructor
+ OBJATTR constructor
  *************************************************************/
-lsd::bridge::bridge( const char *lab )
+lsd::objattr::objattr( simulation *sim, const char *_label )
 {
-	label = new char[ strlen( lab ) + 1 ];
-	strcpy( label, lab );
+
+	container = & ( sim->oa );
+	label_size = strlen( _label );
+
+	label = new char [ label_size + 1 ];
+	strcpy( label, _label );
 }
 
 
 /*************************************************************
- BRIDGE
- Copy (MOVE!) constructor
- This is not really a copy constructor, once it does
- not reallocate space for the pointed contents.
- It can be used ONLY for moving content from one
- instance to another using iterators
+ OBJATTR copy constructor
  *************************************************************/
-lsd::bridge::bridge( const bridge &b )
+lsd::objattr::objattr( const objattr & a )
 {
-	copy = true;
-	counter_updated = b.counter_updated;
-	label = b.label;
-	search_var = b.search_var;
-	next = b.next;
-	head = b.head;
-	t_map = b.t_map;
-	o_map = b.o_map;
+	container = a.container;
+	label_size = a.label_size;
+
+	label = new char [ a.label_size + 1 ];
+	strcpy( label, a.label );
 }
 
 
 /*************************************************************
- BRIDGE
- Destructor
+ OBJATTR destructor
  *************************************************************/
-lsd::bridge::~bridge( void )
+lsd::objattr::~objattr( void )
 {
-	object *cur, *cnext;
-
-	if ( copy )
-		return;					// don't empty copy bridges
-
-	for ( cur = head; cur != NULL; cur = cnext )
+	if ( container != NULL )
 	{
-		cnext = cur->next;
-		cur->collect_cemetery( );
-		cur->empty( );
-		delete cur;
+		auto v = container->attr_map.find( label );
+		if ( v != container->attr_map.end( ) )
+			container->attr_map.erase( v );
 	}
-
-	delete [ ] search_var;
 
 	delete [ ] label;
 }
 
 
 /*************************************************************
- INIT
- Set the basics for a newly created object
+ EMPTY_OBJATTRIBUTES
  *************************************************************/
-void lsd::object::init( object *_up, simulation *_sim, const char *lab, bool _to_compute )
+void lsd::empty_objattributes( simulation *sim )
+{
+	if ( sim == NULL && sims.size( ) > 0 )
+		sim = sims[ 0 ];
+
+	if ( sim == NULL )
+		return;
+
+	sim->oa.attr.clear( );
+	sim->oa.attr_map.clear( );
+}
+
+
+/*************************************************************
+ SEARCH
+ *************************************************************/
+lsd::objattr *lsd::objattributes::search( const char *lab )
+{
+	if ( lab != NULL && strlen( lab ) > 0 )
+	{
+		auto d = attr_map.find( lab );
+		if ( d != attr_map.end( ) )
+			return & ( *( d->second ) );
+	}
+
+	return NULL;
+}
+
+
+/*************************************************************
+ ADD
+ *************************************************************/
+lsd::objattr *lsd::objattributes::add( simulation *sim, const char *lab )
+{
+	if ( sim == NULL || lab == NULL || strlen( lab ) == 0 )
+		throw 0;
+
+	auto d = attr_map.find( lab );
+	if ( d != attr_map.end( ) )
+		return & ( *( d->second ) );
+
+	// prevent concurrent use by more than one thread
+	rec_lguardT lock( oattr_lck );
+
+	attr.emplace_back( sim, lab );
+	attr_map.emplace( lab, --attr.end( ) );
+
+	return & attr.back( );
+}
+
+
+/*************************************************************
+ RENAME
+ *************************************************************/
+lsd::objattr *lsd::objattributes::rename( const char *old_lab, const char *new_lab )
+{
+	auto d = attr_map.find( old_lab );
+	if ( d == attr_map.end( ) || strlen( new_lab ) == 0 )// doesn't exist or empty?
+		return NULL;
+
+	// prevent concurrent use by more than one thread
+	rec_lguardT lock( oattr_lck );
+
+	auto attr = d->second;
+	attr->label_size = strlen( new_lab );
+
+	delete [ ] attr->label;
+	attr->label = new char [ attr->label_size + 1 ];
+	strcpy( attr->label, new_lab );
+
+	attr_map.erase( d );
+	attr_map.emplace( new_lab, attr );
+
+	return & ( *attr );
+}
+
+
+/*************************************************************
+ OBJECT constructor
+ *************************************************************/
+lsd::object::object( object *_up, simulation *_sim, const char *_label, bool _to_compute )
 {
 	up = _up;
 	sim = _sim;
 	to_compute = _to_compute;
-	label = new char[ strlen( lab ) + 1 ];
-	strcpy( label, lab );
+
+	if ( ( attr = _sim->oa.search( _label ) ) == NULL )
+		attr = _sim->oa.add( sim, _label );
+}
+
+
+/*************************************************************
+ OBJECT destructor
+ *************************************************************/
+lsd::object::~object( void )
+{
+	bridge *cb, *cb1;
+	variable *cv, *cv1;
+
+	// remove variables if cemetery collection was not called before
+	for ( cv = v; cv != NULL; cv = cv1 )
+	{
+		cv1 = cv->next;
+		cv->delete_var( );
+	}
+
+	for ( cb = b; cb != NULL; cb = cb1 )	// delete son bridges
+	{
+		cb1 = cb->next;
+		delete cb;				// bridge destructor delete the rest
+	}
+
+	delete node;
+}
+
+
+/*************************************************************
+ BRIDGE constructor
+ *************************************************************/
+lsd::bridge::bridge( objattr *_attr )
+{
+	attr = _attr;
+}
+
+
+/*************************************************************
+ BRIDGE move constructor
+ *************************************************************/
+lsd::bridge::bridge( bridge && b )
+{
+	b.search_var = NULL;
+	b.head = NULL;
+}
+
+
+/*************************************************************
+ BRIDGE destructor
+ *************************************************************/
+lsd::bridge::~bridge( void )
+{
+	object *cnext;
+
+	for ( auto cur = head; cur != NULL; cur = cnext )
+	{
+		cnext = cur->next;
+		cur->collect_cemetery( );
+		delete cur;
+	}
+
+	delete [ ] search_var;
 }
 
 
@@ -364,10 +492,10 @@ void lsd::object::recreate_maps( void )
 	b_map.clear( );
 
 	for ( cv = v; cv != NULL; cv = cv->next )
-		v_map.insert( v_pairT( cv->attr->label, cv ) );
+		v_map.insert( v_pairT( cv->attr, cv ) );
 
 	for ( cb = b; cb != NULL; cb = cb->next )
-		b_map.insert( b_pairT ( cb->label, cb ) );
+		b_map.insert( b_pairT ( cb->attr, cb ) );
 }
 
 
@@ -447,7 +575,7 @@ lsd::object *lsd::object::next_obj( object *obj )
 	if ( obj == NULL || obj->up == NULL )
 		return NULL;
 
-	cb = obj->up->search_bridge( obj->label );
+	cb = obj->up->search_bridge( obj->attr );
 
 	if ( cb == NULL || cb->next == NULL )
 		return NULL;
@@ -475,31 +603,40 @@ lsd::object *lsd::object::next_count( object *obj, int *count )
 
 /*************************************************************
  HYPER_NEXT
- Return the next Object in the model with the label
- lab. The Object is searched in the whole model,
+ Return the next Object in the model with the attribute at
+ or label lab. The Object is searched in the whole model,
  including different branches
  *************************************************************/
-lsd::object *lsd::object::hyper_next( const char *lab )
+lsd::object *lsd::object::hyper_next( objattr *at )
 {
 	object *cur, *cur1;
 
 	for ( cur1 = NULL, cur = next; cur != NULL; cur = next_obj( cur ) )
 	{
-		cur1 = cur->search( lab );
+		cur1 = cur->search( at );
 		if ( cur1 != NULL )
 			return cur1;
 	}
 
 	if ( up != NULL )
-		cur = up->hyper_next( lab );
+		cur = up->hyper_next( at );
 
 	return cur;
+}
+
+lsd::object *lsd::object::hyper_next( const char *lab )
+{
+	objattr *at = sim->oa.search( lab );
+	if ( at != NULL )
+		return hyper_next( at );
+
+	return NULL;
 }
 
 // search object with same name as the current object
 lsd::object *lsd::object::hyper_next( void )
 {
-	return hyper_next( label );
+	return hyper_next( attr );
 }
 
 
@@ -550,18 +687,21 @@ int lsd::simulation::hyper_count_var( const char *lab )
  in this.
  Uses the fast bridge look-up map.
  *************************************************************/
-lsd::bridge *lsd::object::search_bridge( const char *lab, bool no_error )
+lsd::bridge *lsd::object::search_bridge( objattr *at, bool no_error )
 {
-	// find the bridge which contains the object
-	auto bit = b_map.find( lab );
+	auto bit = b_map.find( at );
 	if ( bit != b_map.end( ) )
 		return bit->second;
 
-	if ( ! no_error )
-		sim->error_hard( "internal problem in LSD",
-						 "if error persists, please contact developers",
-						 true,
-						 "invalid data structure (bridge not found)" );
+	return NULL;
+}
+
+lsd::bridge *lsd::object::search_bridge( const char *lab, bool no_error )
+{
+	objattr *at = sim->oa.search( lab );
+	if ( at != NULL )
+		return search_bridge( at, no_error );
+
 	return NULL;
 }
 
@@ -572,17 +712,17 @@ lsd::bridge *lsd::object::search_bridge( const char *lab, bool no_error )
  model below this.
  Uses the fast bridge look-up map.
  *************************************************************/
-lsd::object *lsd::object::search( const char *lab, bool no_search, bool no_search_up )
+lsd::object *lsd::object::search( objattr *at, bool no_search, bool no_search_up )
 {
 	bridge *cb;
 	object *cur;
 
 	// the current object?
-	if ( label != NULL && ! strcmp( label, lab ) )
+	if ( attr == at )
 		return this;
 
 	// Search among the descendants of current object
-	auto bit = b_map.find( lab );
+	auto bit = b_map.find( at );
 	if ( bit != b_map.end( ) )
 		return bit->second->head;
 
@@ -594,7 +734,7 @@ lsd::object *lsd::object::search( const char *lab, bool no_search, bool no_searc
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head != NULL )
-			cur = cb->head->search( lab );
+			cur = cb->head->search( at, false, true );
 		else
 			cur = NULL;
 
@@ -605,9 +745,18 @@ lsd::object *lsd::object::search( const char *lab, bool no_search, bool no_searc
 	// search in the entire tree if enabled
 	if ( ! no_search_up && up != NULL )
 	{
-		cur = up->search( lab, false, false );
+		cur = up->search( at, false, false );
 		return cur;
 	}
+
+	return NULL;
+}
+
+lsd::object *lsd::object::search( const char *lab, bool no_search, bool no_search_up )
+{
+	objattr *at = sim->oa.search( lab );
+	if ( at != NULL )
+		return search( at, no_search, no_search_up );
 
 	return NULL;
 }
@@ -647,7 +796,7 @@ lsd::object *lsd::object::search_err( const char *lab, bool no_search, bool no_s
 							 "move object in model structure, or specify a parent object",
 							 false,
 							 "object '%s' not%s under '%s' for %s%s",
-							 lab, no_search ? " directly" : "", label == NULL ? "" : label,
+							 lab, no_search ? " directly" : "", attr->label,
 							 errmsg, no_search ? "\n(NO_SEARCH enabled!)" : "" );
 	}
 
@@ -699,7 +848,7 @@ double lsd::object::initturbo( const char *lab )
 	cb->t_map.clear( );
 
 	// fill the map with the object positions
-	for ( l = 1, cur = search( lab ); cur != NULL; ++l, cur = BROTHER( cur ) )
+	for ( l = 1, cur = search( cb->attr ); cur != NULL; ++l, cur = BROTHER( cur ) )
 		cb->t_map.insert( n_pairT( l, cur ) );
 
 	return ( double ) cb->t_map.size( );
@@ -810,7 +959,7 @@ void lsd::object::search_inst( object *obj, long *pos, long *checked )
 		// search among descendants only if object yet not found (speed-up)
 		if ( ! found )
 		{
-			if ( sim->no_ptr_chk || strcmp( cur->label, obj->label ) )
+			if ( sim->no_ptr_chk || strcmp( cur->attr->label, obj->attr->label ) )
 			{
 				for ( cb = cur->b; cb != NULL && *pos == 0; cb = cb->next )
 					if ( cb->head != NULL )
@@ -843,7 +992,7 @@ double lsd::object::search_inst( object *obj, bool fun )
 
 	if ( cur->up != NULL )				// not root?
 		// get first instance of found/current object brotherhood
-		cur = cur->up->search_bridge( cur->label )->head;
+		cur = cur->up->search_bridge( cur->attr )->head;
 
 	pos = 0;
 	checked = fun ? -1 : 0;
@@ -858,8 +1007,8 @@ double lsd::object::search_inst( object *obj, bool fun )
  SEARCH_VAR
  Explore the model starting from this and
  gradually extending till considering the whole model.
- It searches for an object having a variable whose label is l
- and returns the first found.
+ It searches for an object having a variable whose attribute
+ is at or label is lab and returns the first found.
  The research strategy used by this method is simple:
  1) search among the variables of this. If not found:
  2) search among the variables of the descending objects.
@@ -878,13 +1027,13 @@ double lsd::object::search_inst( object *obj, bool fun )
  descendants the search goes up again, or from the parent down.
  Uses the fast variable look-up map of the searched variables.
  *************************************************************/
-lsd::variable *lsd::object::search_var( object *caller, const char *lab, bool no_error, bool no_search, bool no_search_up, bool search_sons )
+lsd::variable *lsd::object::search_var( object *caller, varattr *at, bool no_error, bool no_search, bool no_search_up, bool search_sons )
 {
 	bridge *cb;
 	variable *cv;
 
 	// Search among the variables of current object
-	auto vit = v_map.find( lab );
+	auto vit = v_map.find( at );
 	if ( vit != v_map.end( ) )
 		return vit->second;
 
@@ -896,9 +1045,9 @@ lsd::variable *lsd::object::search_var( object *caller, const char *lab, bool no
 	for ( cb = b, cv = NULL; cb != NULL; cb = cb->next )
 	{
 		// search down only if one instance exists and the label is different from caller
-		if ( cb->head != NULL && ( caller == NULL || strcmp( cb->head->label, caller->label ) ) )
+		if ( cb->head != NULL && ( caller == NULL || cb->head->attr != caller->attr ) )
 		{
-			cv = cb->head->search_var( this, lab, no_error, no_search, true );
+			cv = cb->head->search_var( this, at, no_error, no_search, true, false );
 			if ( cv != NULL )
 				return cv;
 		}
@@ -919,14 +1068,23 @@ lsd::variable *lsd::object::search_var( object *caller, const char *lab, bool no
 				sim->error_hard( "variable or parameter not found",
 								 "create variable or parameter in model structure",
 								 false,
-								 "element '%s' is missing", lab );
+								 "element '%s' is missing", at->label );
 			return NULL;
 		}
 
-		cv = up->search_var( this, lab, no_error );
+		cv = up->search_var( this, at, no_error, false, false, false );
 	}
 
 	return cv;
+}
+
+lsd::variable *lsd::object::search_var( object *caller, const char *lab, bool no_error, bool no_search, bool no_search_up, bool search_sons )
+{
+	varattr *at = sim->va.search( lab );
+	if ( at != NULL )
+		return search_var( caller, at, no_error, no_search, no_search_up, search_sons );
+
+	return NULL;
 }
 
 
@@ -939,9 +1097,9 @@ lsd::variable *lsd::object::search_var_err( object *caller, const char *lab, boo
 	variable *cv, *cv1;
 
 	cv = search_var( caller, lab, true, no_search, no_search_up, search_sons );
-	if ( cv == NULL && label != NULL )
+	if ( cv == NULL )
 	{	// check if it is a zero-instance object
-		cur = sim->blueprint->search( label );
+		cur = sim->blueprint->search( attr );
 		if ( cur != NULL )
 			cv = cur->search_var( NULL, lab, true, no_search, no_search_up, search_sons );
 
@@ -968,8 +1126,8 @@ lsd::variable *lsd::object::search_var_err( object *caller, const char *lab, boo
 							 "move object in model structure, or specify a parent object",
 							 false,
 							 "'%s' in '%s' not%s under '%s' for %s%s",
-							 lab, cv1->up != NULL && cv1->up->label != NULL ? cv1->up->label : "?",
-							 no_search ? " directly" : "", label, errmsg,
+							 lab, cv1->up != NULL ? cv1->up->attr->label : "?",
+							 no_search ? " directly" : "", attr->label, errmsg,
 							 no_search ? "\n(NO_SEARCH enabled!)" : "" );
 	}
 
@@ -1036,7 +1194,7 @@ double lsd::object::initturbo_cond( const char *lab )
 	}
 
 	// find the bridge which contains the object containing the variable
-	auto bit = cv->up->up->b_map.find( cv->up->label );
+	auto bit = cv->up->up->b_map.find( cv->up->attr );
 	if ( bit == cv->up->up->b_map.end( ) )
 	{
 		sim->error_hard( "internal problem in LSD",
@@ -1095,7 +1253,7 @@ double lsd::object::turboset_cond( const char *lab )
 	}
 
 	// find the bridge which contains the object containing the variable
-	auto bit = cv->up->up->b_map.find( cv->up->label );
+	auto bit = cv->up->up->b_map.find( cv->up->attr );
 	if ( bit == cv->up->up->b_map.end( ) )
 	{
 		sim->error_hard( "internal problem in LSD",
@@ -1138,7 +1296,7 @@ lsd::object *lsd::object::turbosearch_cond( const char *lab, double value )
 	}
 
 	// find the bridge which contains the object containing the variable
-	auto bit = cv->up->up->b_map.find( cv->up->label );
+	auto bit = cv->up->up->b_map.find( cv->up->attr );
 	if ( bit == cv->up->up->b_map.end( ) )
 	{
 		sim->error_hard( "internal problem in LSD",
@@ -1225,7 +1383,7 @@ lsd::variable *lsd::object::add_var( const char *lab, int par, int lags, bool pl
 		cv = cv->next;
 	}
 
-	v_map.insert( v_pairT ( lab, cv ) );
+	v_map.insert( v_pairT ( cv->attr, cv ) );
 
 	return cv;
 }
@@ -1239,13 +1397,13 @@ lsd::variable *lsd::object::add_var( variable *example )
 {
 	variable *cv;
 
-	if ( search_var( this, example->attr->label, true, true ) != NULL )
+	if ( search_var( this, example->attr, true, true ) != NULL )
 	{
 		sim->error_hard( "variable or parameter not added",
 						 "choose an unique name for the element",
 						 true,
 						 "element '%s' already exists in object '%s'",
-						 example->attr->label, label );
+						 example->attr->label, attr->label );
 		return NULL;
 	}
 
@@ -1259,7 +1417,7 @@ lsd::variable *lsd::object::add_var( variable *example )
 	}
 
 	cv->up = this;
-	v_map.insert( v_pairT ( cv->attr->label, cv ) );
+	v_map.insert( v_pairT ( cv->attr, cv ) );
 
 	return cv;
 }
@@ -1308,30 +1466,27 @@ lsd::object *lsd::object::add_obj( const char *lab, int num, bool propagate )
 	if ( num < 1 )
 		return NULL;
 
-	for ( cur = this; cur != NULL; propagate ? cur = cur->hyper_next( label ) : cur = NULL )
+	for ( cur = this; cur != NULL; propagate ? cur = cur->hyper_next( ) : cur = NULL )
 	{
 		// create bridge
 		if ( cur->b == NULL )
-			cb = cur->b = new bridge( lab );
+			cb = cur->b = new bridge ( NULL );
 		else
 		{
 			for ( cb = cur->b; cb->next != NULL; cb = cb->next );
-			cb->next = new bridge( lab );
+			cb->next = new bridge ( NULL );
 			cb = cb->next;
 		}
 
 		// create object instances
 		for ( i = 0; i < num; ++i )
-		{
 			if ( i == 0 )
-				cur1 = cur2 = cb->head = new object;
+				cur1 = cur2 = cb->head = new object ( cur, sim, lab );
 			else
-				cur1 = cur1->next = new object;
+				cur1 = cur1->next = new object ( cur, sim, lab );
 
-			cur1->init( cur, sim, lab );
-		}
-
-		cur->b_map.insert( b_pairT ( lab, cb ) );
+		cb->attr = cur1->attr;
+		cur->b_map.insert( b_pairT ( cb->attr, cb ) );
 	}
 
 	return cur2;
@@ -1340,24 +1495,24 @@ lsd::object *lsd::object::add_obj( const char *lab, int num, bool propagate )
 
 /*************************************************************
  MOVE_OBJ
- Move object in the model structure. The lab object
+ Move object in the model structure. The object
  is placed below the provided dest object
  *************************************************************/
-void lsd::simulation::move_obj( const char *lab, const char *dest )
+void lsd::object::move( const char *dest )
 {
 	bridge *cb, *cb1, *mb = NULL, *nb;
-	object *cur, *cur1, *d, *no, *o, *s;
+	object *cur, *cur1, *d, *o, *s;
 	variable *cv;
 
-	o = root->search( lab );		// pick first model instances
-	d = root->search( dest );
+	o = sim->root->search( attr );	// pick first model instances
+	d = sim->root->search( dest );
 
 	if ( o == NULL || d == NULL || o->search( dest ) != NULL )
 	{
-		error_hard( "missing/invalid source or destination object",
-					"choose valid object names\nand non-nested destination",
-					true,
-					"cannot move object '%s'", lab );
+		sim->error_hard( "missing/invalid source or destination object",
+						 "choose valid object names\nand non-nested destination",
+						 true,
+						 "cannot move object '%s'", attr->label );
 		return;
 	}
 
@@ -1368,7 +1523,7 @@ void lsd::simulation::move_obj( const char *lab, const char *dest )
 		if ( s != NULL )
 		{
 			// find bridge to object being copied in source parent
-			for ( cb1 = NULL, cb = s->b; cb != NULL && strcmp( cb->label, lab ) != 0; cb1 = cb, cb = cb->next );
+			for ( cb1 = NULL, cb = s->b; cb != NULL && cb->attr != attr; cb1 = cb, cb = cb->next );
 
 			// remove from the source parent's bridge linked list
 			if ( cb1 == NULL )	// head of list?
@@ -1379,29 +1534,22 @@ void lsd::simulation::move_obj( const char *lab, const char *dest )
 			mb = cb;
 			mb->next = NULL;	// moved object bridge enters at the end of the new parent list
 
-			s->b_map.erase( lab );	// update speedup maps
-			s = s->hyper_next( );	// next source parent
+			s->b_map.erase( attr );			// update speedup maps
+			s = s->hyper_next( );			// next source parent
 		}
 		else	// handle the case last object instance has to be cloned to fill
 		{		// additional instances of destination parent
 			// clone last object bridge to insert it on unmatched destination parents
-			nb = new bridge( lab );
+			nb = new bridge ( attr );
 
 			// clone object instances and add them to the cloned bridge
 			for ( cur = mb->head, cur1 = NULL; cur != NULL; cur = cur->next )
 			{
-				no = new object;
-
 				// update linked list of object instances in bridge
 				if ( cur1 == NULL )
-					nb->head = no;
+					cur1 = nb->head = new object ( d, d->sim, attr->label, cur->to_compute );
 				else
-					cur1->next = no;
-
-				cur1 = no;
-
-				// clone object instance, variables and descending objects
-				cur1->init( d, d->sim, lab, cur->to_compute );
+					cur1 = cur1->next = new object ( d, d->sim, attr->label, cur->to_compute );
 
 				for ( cv = cur->v; cv != NULL; cv = cv->next )
 					cur1->add_var( cv );
@@ -1427,8 +1575,8 @@ void lsd::simulation::move_obj( const char *lab, const char *dest )
 			for ( cur = mb->head; cur != NULL; cur = cur->next )
 				cur->up = d;
 
-			d->b_map.insert( b_pairT ( lab, mb ) );	// update speedup maps
-			d = d->hyper_next( );					// next destination parent
+			d->b_map.insert( b_pairT ( attr, mb ) );	// update speedup maps
+			d = d->hyper_next( );						// next destination parent
 		}
 		else	// handle the case last object instances in source parent must be
 				// deleted because there are no more instances in destination
@@ -1447,7 +1595,7 @@ void lsd::object::replicate( int num, bool propagate )
 	int i, usl;
 
 	if ( propagate )
-		cur = hyper_next( label );
+		cur = hyper_next( attr->label );
 	else
 		cur = NULL;
 
@@ -1460,8 +1608,7 @@ void lsd::object::replicate( int num, bool propagate )
 	for ( i = usl; i < num; ++i )
 	{
 		cur1 = cur->next;
-		cur->next = new object;
-		cur->next->init( up, up->sim, label, to_compute );
+		cur->next = new object ( up, up->sim, attr->label, to_compute );
 		cur->next->next = cur1;
 		cur->to_compute = to_compute;
 
@@ -1490,19 +1637,18 @@ void lsd::object::copy_descendant( object *to )
 	}
 
 	// create the first bridge
-	to->b = new bridge( b->label );
+	to->b = new bridge ( b->attr );
 
 	// add bridge to new object lookup map
-	to->b_map.insert( b_pairT ( to->b->label, to->b ) );
+	to->b_map.insert( b_pairT ( to->b->attr, to->b ) );
 
 	// create the first (head) object
 	if ( b->head == NULL )
-		cur = sim->blueprint->search( b->label );
+		cur = sim->blueprint->search( b->attr );
 	else
 		cur = b->head;
 
-	to->b->head = new object;
-	to->b->head->init( to, to->sim, cur->label, cur->to_compute );
+	to->b->head = new object ( to, to->sim, cur->attr->label, cur->to_compute );
 
 	// copy variables of head object
 	for ( cv = cur->v; cv != NULL; cv = cv->next )
@@ -1514,17 +1660,16 @@ void lsd::object::copy_descendant( object *to )
 	// create following bridges
 	for ( cb = to->b, cb1 = b->next; cb1 != NULL; cb1 = cb1->next )
 	{
-		cb->next = new bridge( cb1->label );
+		cb->next = new bridge ( cb1->attr );
 		cb = cb->next;
-		to->b_map.insert( b_pairT ( cb1->label, cb ) );
+		to->b_map.insert( b_pairT ( cb1->attr, cb ) );
 
 		if ( cb1->head == NULL )
-			cur = sim->blueprint->search( cb1->label );
+			cur = sim->blueprint->search( cb1->attr );
 		else
 			cur = cb1->head;
 
-		cb->head = new object;
-		cb->head->init( to, to->sim, cur->label, cur->to_compute );
+		cb->head = new object ( to, to->sim, cur->attr->label, cur->to_compute );
 
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 			cb->head->add_var( cv );
@@ -1558,7 +1703,7 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 	variable *cv;
 
 	// check the labels and prepare the bridge to attach to
-	for ( cb2 = b; cb2 != NULL && strcmp( cb2->label, lab ); cb2 = cb2->next );
+	for ( cb2 = b; cb2 != NULL && strcmp( cb2->attr->label, lab ); cb2 = cb2->next );
 
 	if ( cb2 == NULL )
 	{
@@ -1566,11 +1711,11 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 						 "create son object in model structure",
 						 false,
 						 "object '%s' contains no son object '%s' for adding instance(s)",
-						 label, lab );
+						 attr->label, lab );
 		return NULL;
 	}
 
-	if ( ex == NULL || strcmp( ex->label, lab ) )
+	if ( ex == NULL || strcmp( ex->attr->label, lab ) )
 	{
 		sim->error_hard( "invalid example object",
 						 "check your equation code to prevent this situation",
@@ -1596,8 +1741,7 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 	for ( i = 0; i < n; ++i )
 	{
 		// create a new copy of the object
-		cur = new object;
-		cur->init( this, sim, lab );
+		cur = new object ( this, sim, lab );
 
 		if ( net )						// if objects are nodes in a network
 			cur->node = new netnode( this );// insert new nodes in network (as isolated nodes)
@@ -1648,15 +1792,15 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 		for ( cb1 = NULL, cb = ex->b; cb != NULL; cb = cb->next )
 		{
 			if ( cb1 == NULL )
-				cb1 = cur->b = new bridge( cb->label );
+				cb1 = cur->b = new bridge ( cb->attr );
 			else
-				cb1 = cb1->next = new bridge( cb->label );
+				cb1 = cb1->next = new bridge ( cb->attr );
 
 			// add bridge to new object lookup map
-			cur->b_map.insert( b_pairT ( cb->label, cb1 ) );
+			cur->b_map.insert( b_pairT ( cb->attr, cb1 ) );
 
 			for ( cur1 = cb->head; cur1 != NULL; cur1 = cur1->next )
-				cur->add_n_objects2( cur1->label, 1, cur1, t_update );
+				cur->add_n_objects2( cur1->attr->label, 1, cur1, t_update );
 		}
 
 		// destroy invalidated turbosearch trees
@@ -1697,40 +1841,6 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 
 
 /*************************************************************
- DELETE_BRIDGE
- Remove a bridge, used when an
- object is removed from the
- model in browser.
- *************************************************************/
-void lsd::object::delete_bridge( void )
-{
-	bridge *cb, *cb1;
-
-	if ( up->b == NULL )
-		return;
-
-	if ( up->b->head == this )
-	{	// first bridge in the bridge chain
-		cb = up->b;
-		up->b = up->b->next;
-		up->b_map.erase( cb->label );
-		delete cb;
-	}
-	else
-	{	// find position in bridge chain (not first)
-		for ( cb = up->b, cb1 = NULL; cb != NULL; cb1 = cb, cb = cb->next )
-			if ( cb->head == this && cb1 != NULL )
-			{
-				cb1->next = cb->next;			// previous bridge points to next
-				up->b_map.erase( cb->label );
-				delete cb;
-				break;
-			}
-	}
-}
-
-
-/*************************************************************
  DELETE_OBJ (*)
  Remove the object from the model
  Before killing the Variables data to be saved are stored
@@ -1738,8 +1848,8 @@ void lsd::object::delete_bridge( void )
  *************************************************************/
 void lsd::object::delete_obj( const variable *caller )
 {
-	object *cur = this;
 	bridge *cb;
+	object *cur = this;
 
 	if ( cur == NULL )
 		return;					// ignore deleting null object
@@ -1759,7 +1869,7 @@ void lsd::object::delete_obj( const variable *caller )
 								 "check your equation code to prevent deleting objects recursively",
 								 true,
 								 "cannot schedule the deletion of object '%s'",
-								 label );
+								 attr->label );
 				return;
 			}
 			else
@@ -1789,7 +1899,7 @@ void lsd::object::delete_obj( const variable *caller )
 
 	// find the bridge
 	if ( up != NULL )
-		cb = up->search_bridge( label );
+		cb = up->search_bridge( attr );
 	else
 		cb = NULL;
 
@@ -1807,7 +1917,7 @@ void lsd::object::delete_obj( const variable *caller )
 									 "check your equation code to ensure at least one instance\nof any object is kept",
 									 true,
 									 "cannot delete all instances of '%s'",
-									 label );
+									 attr->label );
 					return;
 				}
 
@@ -1833,46 +1943,7 @@ void lsd::object::delete_obj( const variable *caller )
 	if ( del_flag != NULL )
 		*del_flag = true;		// flag deletion to caller, if requested
 
-	empty( );					// empty object but don't delete it
-
 	delete this;				// delete (suicide) now
-}
-
-
-/*************************************************************
- EMPTY
- Garbage collection for objects
- Delete the entire son tree below
- *************************************************************/
-void lsd::object::empty( void )
-{
-	bridge *cb, *cb1;
-	variable *cv, *cv1;
-
-	// remove variables if cemetery collection was not called before
-	for ( cv = v; cv != NULL; cv = cv1 )
-	{
-		cv1 = cv->next;
-		cv->destroy( );
-	}
-
-	v = NULL;
-	v_map.clear( );
-
-	for ( cb = b; cb != NULL; cb = cb1 )	// delete son bridges
-	{
-		cb1 = cb->next;
-		delete cb;				// bridge destructor delete the rest
-	}
-
-	b = NULL;
-	b_map.clear( );
-
-	delete node;
-	node = NULL;
-
-	delete [ ] label;
-	label = NULL;
 }
 
 
@@ -1909,7 +1980,7 @@ void lsd::object::collect_cemetery( const variable *caller )
 			cv->add_cemetery( );			// transfer to cemetery
 		}
 		else
-			cv->destroy( caller == NULL || cv == caller );// disable lock if emptying caller
+			cv->delete_var( caller == NULL || cv == caller );// disable lock if emptying caller
 	}
 
 	v = NULL;
@@ -1946,7 +2017,7 @@ void lsd::simulation::empty_cemetery( void )
 	for ( cv = cemetery; cv !=NULL; cv = cv1 )
 	{
 		cv1 = cv->next;
-		cv->destroy( );
+		cv->delete_var( );
 	}
 
 	cemetery = last_cemetery = NULL;
@@ -1973,20 +2044,20 @@ void lsd::object::delete_var( const char *lab )
 {
 	variable *cv, *cv1;
 
-	if ( ! strcmp( v->attr->label, lab ) )
+	if ( strcmp( v->attr->label, lab ) == 0 )
 	{	// first variable in the chain
-		v_map.erase( lab );
 		cv = v->next;
-		v->destroy( );
+		v_map.erase( v->attr );
+		v->delete_var( );
 		v = cv;
 	}
 	else		// not first variable, search
 		for ( cv = v; cv->next != NULL; cv = cv->next)
 			if ( ! strcmp( cv->next->attr->label, lab ) )
 			{
-				v_map.erase( lab );
 				cv1 = cv->next->next;
-				cv->next->destroy( );
+				v_map.erase( cv->next->attr );
+				cv->next->delete_var( );
 				cv->next = cv1;
 				break;
 			}
@@ -2000,33 +2071,7 @@ void lsd::object::delete_var( const char *lab )
  *************************************************************/
 void lsd::object::chg_lab( const char *lab )
 {
-	object *cur;
-	bridge *cb;
-
-	// change all groups of this objects
-	cur = up->hyper_next( up->label );
-	if ( cur != NULL )
-	{
-		cb = cur->search_bridge( label );
-
-		if ( cb->head != NULL )
-			cb->head->chg_lab( lab );
-	}
-
-	cb = up->search_bridge( label );
-
-	up->b_map.erase( cb->label );
-	delete [ ] cb->label;
-	cb->label = new char[ strlen( lab ) + 1 ];
-	strcpy( cb->label, lab );
-	up->b_map.insert( b_pairT ( lab, cb ) );
-
-	for ( cur = this; cur != NULL; cur = cur->next )
-	{
-		delete [ ] cur->label;
-		cur->label = new char[ strlen( lab ) + 1 ];
-		strcpy( cur->label, lab );
-	}
+	sim->oa.rename( attr->label, lab );
 }
 
 
@@ -2040,8 +2085,6 @@ void lsd::object::chg_var_lab( const char *old, const char *newname )
 		if ( strcmp( cv->attr->label, old ) == 0 )
 		{
 			sim->va.rename( old, newname );
-			v_map.erase( old );
-			v_map.insert( v_pairT ( newname, cv ) );
 			break;
 		}
 }
@@ -2217,7 +2260,7 @@ double lsd::object::sum( const char *lab1, int lag, bool cond, const char *lab2,
 
 	cur = cv->up;
 	if ( cur->up != NULL )
-		cur = ( cur->up )->search( cur->label );
+		cur = cur->up->search( cur->attr );
 
 	for ( tot = n = 0; cur != NULL; cur = cnext )
 	{
@@ -2263,7 +2306,7 @@ double lsd::object::overall_max( const char *lab1, int lag, bool cond, const cha
 
 	cur = cv->up;
 	if ( cur->up != NULL )
-		cur = ( cur->up )->search( cur->label );
+		cur = cur->up->search( cur->attr );
 
 	for ( tot = -DBL_MAX, n = 0; cur != NULL; cur = cnext )
 	{
@@ -2313,7 +2356,7 @@ double lsd::object::overall_min( const char *lab1, int lag, bool cond, const cha
 
 	cur = cv->up;
 	if ( cur->up != NULL )
-		cur = ( cur->up )->search( cur->label );
+		cur = cur->up->search( cur->attr );
 
 	for ( tot = DBL_MAX, n = 0; cur != NULL; cur = cnext )
 	{
@@ -2418,7 +2461,7 @@ double lsd::object::av( const char *lab1, int lag, bool cond, const char *lab2, 
 
 	cur = cv->up;
 	if ( cur->up != NULL )
-		cur = ( cur->up )->search( cur->label );
+		cur = cur->up->search( cur->attr );
 
 	for ( tot = n = 0; cur != NULL; cur = cnext )
 	{
@@ -2470,7 +2513,7 @@ double lsd::object::whg_av( const char *lab1, const char *lab2, int lag, bool co
 
 	cur = cv->up;
 	if ( cur->up != NULL )
-		cur = ( cur->up )->search( cur->label );
+		cur = cur->up->search( cur->attr );
 
 	for ( tot = n = 0; cur != NULL; cur = cnext )
 	{
@@ -2538,7 +2581,7 @@ double lsd::object::perc( const char *lab1, double p, int lag, bool cond, const 
 
 	cur = cv->up;
 	if ( cur->up != NULL )
-		cur = ( cur->up )->search( cur->label );
+		cur = cur->up->search( cur->attr );
 
 	// copy selected data series to vector
 	for ( n = 0; cur != NULL; cur = cnext )
@@ -2597,7 +2640,7 @@ double lsd::object::sd( const char *lab1, int lag, bool cond, const char *lab2, 
 
 	cur = cv->up;
 	if ( cur->up != NULL )
-		cur = ( cur->up )->search( cur->label );
+		cur = cur->up->search( cur->attr );
 
 	for ( tot = tot2 = n = 0; cur != NULL; cur = cnext )
 	{
@@ -2865,7 +2908,7 @@ lsd::object *lsd::object::lsdqsort( const char *obj, const char *var, const char
 			return NULL;
 
 		cur = cv->up;
-		if ( cur == NULL || strcmp( obj, cur->label ) )
+		if ( cur == NULL || strcmp( obj, cur->attr->label ) )
 		{
 			sim->error_hard( "variable or parameter not found",
 							 "create variable or parameter in model structure",
@@ -2891,7 +2934,7 @@ lsd::object *lsd::object::lsdqsort( const char *obj, const char *var, const char
 		cur = search( obj );
 		if ( cur != NULL )
 			if ( cur->node != NULL )		// valid network node?
-				cb = cur->up->search_bridge( obj, true );
+				cb = cur->up->search_bridge( cur->attr, true );
 			else
 			{
 				sim->error_hard( "invalid network object",
@@ -3004,7 +3047,7 @@ lsd::object *lsd::object::lsdqsort( const char *obj, const char *var1, const cha
 		return NULL;
 
 	cur = cv->up;
-	if ( cur == NULL || strcmp( obj, cur->label ) )
+	if ( cur == NULL || cb->attr != cur->attr )
 	{
 		sim->error_hard( "variable or parameter not found",
 						 "create variable or parameter in model structure",
@@ -3502,13 +3545,13 @@ lsd::object *lsd::object::lat_down( void )
 	int i, j;
 	object *cur;
 
-	for ( i = 1, cur = up->search( label ); cur != this; cur = BROTHER( cur ), ++i );
+	for ( i = 1, cur = up->search( attr ); cur != this; cur = BROTHER( cur ), ++i );
 
 	cur = BROTHER( up );
 	if ( cur == NULL )
-		cur = up->up->search( up->label );
+		cur = up->up->search( up->attr );
 
-	for ( j = 1, cur = cur->search( label ); j < i; cur = BROTHER( cur ), ++j );
+	for ( j = 1, cur = cur->search( attr ); j < i; cur = BROTHER( cur ), ++j );
 
 	return cur;
 }
@@ -3524,15 +3567,15 @@ lsd::object *lsd::object::lat_up( void )
 	int i, k;
 	object *cur, *cur1, *cur2;
 
-	for ( i = 1, cur = up->search( label ); cur != this; cur = BROTHER( cur ), ++i );
+	for ( i = 1, cur = up->search( attr ); cur != this; cur = BROTHER( cur ), ++i );
 
-	cur = up->up->search( up->label );
+	cur = up->up->search( up->attr );
 	if ( cur == up )
 		for ( cur1 = up; BROTHER( cur1 ) != NULL; cur1 = BROTHER( cur1 ) );
 	else
 		for ( cur1 = cur; BROTHER( cur1 ) != up; cur1 = BROTHER( cur1 ) );
 
-	for ( cur2 = cur1->search( label ), k = 1; k < i; cur2 = BROTHER( cur2 ), ++k );
+	for ( cur2 = cur1->search( attr ), k = 1; k < i; cur2 = BROTHER( cur2 ), ++k );
 
 	return cur2;
 }
@@ -3546,7 +3589,7 @@ lsd::object *lsd::object::lat_up( void )
 lsd::object *lsd::object::lat_right( void )
 {
 	if ( next == NULL )
-		return up->search( label );
+		return up->search( attr );
 	else
 		return next;
 }
@@ -3561,10 +3604,10 @@ lsd::object *lsd::object::lat_left( void )
 {
 	object *cur;
 
-	if ( up->search( label ) == this )
+	if ( up->search( attr ) == this )
 		for ( cur = this; BROTHER( cur ) != NULL; cur = BROTHER( cur ) );
 	else
-		for ( cur = up->search( label ); BROTHER( cur ) != this; cur = BROTHER( cur ) );
+		for ( cur = up->search( attr ); BROTHER( cur ) != this; cur = BROTHER( cur ) );
 
 	return cur;
 }
@@ -3617,7 +3660,7 @@ void lsd::object::collect_inst( o_setT &list )
 						 "disable pointer checking by defining 'NO_POINTER_CHECK'",
 						 false,
 						 "object '%s' cannot be collected for pointer checking",
-						 label );
+						 attr->label );
 		return;
 	}
 

@@ -58,7 +58,7 @@ lsd::assim::assim( const strT & _label, bool _param, bool _disable, bool _update
 
 		if ( sims.size( ) > 0 && sims[ 0 ] != NULL )
 			if ( ( cv = sims[ 0 ]->root->search_var( NULL, label.c_str( ), true ) ) != NULL )
-				parent = cv->up->label;
+				parent = cv->up->attr->label;
 	}
 
 	param = _param;

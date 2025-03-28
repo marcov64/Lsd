@@ -728,7 +728,7 @@ bool lsd::object::alloc_save_mem( void )
 								 "select the object and choose menu 'Data'/'Initial Values'",
 								 false,
 								 "%s '%s' in object '%s' has not been initialized",
-								 cv->param == 1 ? "parameter" : "variable", cv->attr->label, label );
+								 cv->param == 1 ? "parameter" : "variable", cv->attr->label, attr->label );
 				goto error;
 			}
 
@@ -754,7 +754,7 @@ bool lsd::object::alloc_save_mem( void )
 #ifndef _TERM_
 		// variable to parent name map for AoR (only in GUI mode)
 		if ( sim->liblnk != NULL )
-			sim->par_map.insert( std::make_pair < strT, strT > ( cv->attr->label, label ) );
+			sim->par_map.insert( std::make_pair < strT, strT > ( cv->attr->label, attr->label ) );
 #endif
 	}
 

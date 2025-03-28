@@ -199,7 +199,7 @@ lsd::netlink::~netlink( void )
 lsd::netlink *lsd::object::add_link_net( object *destPtr, double weight, double probTo )
 {
 	netlink *cur;
-	if ( up != destPtr->up || strcmp( label, destPtr->label ) )
+	if ( up != destPtr->up || attr != destPtr->attr )
 		return NULL;								// different parent or object type?
 	cur = new netlink( this, destPtr, weight, probTo );
 
@@ -1690,11 +1690,10 @@ double lsd::object::write_file_net( const char *lab, const char dir[ ], const ch
 
 	if ( serial >= 0 && l > numNodes )
 		sim->plog( "\nWarning: instances of object '%s' have no data structure,\n \
-					they must be at the end of the chain of siblings", cur1->label );
+					they must be at the end of the chain of siblings", cur1->attr->label );
 
-	if ( serial >= 0 && cur1->hyper_next( cur1->label ) != NULL )
-		sim->plog( "\nWarning: multiple parents of object '%s', considering just first",
-				   cur1->label );
+	if ( serial >= 0 && cur1->hyper_next( ) != NULL )
+		sim->plog( "\nWarning: multiple parents of object '%s', considering just first", cur1->attr->label );
 
 	fprintf( pajekFile, "*Vertices %lu\n", numNodes);// start vertices section
 
@@ -1809,14 +1808,14 @@ lsd::object *lsd::object::check_net_struct( const char *nodeLab, bool noErr )
 		return NULL;
 	}
 
-	if ( strcmp( cur->up->label, label ) )
+	if ( cur->up->attr != attr )
 	{
 		if ( ! noErr )								// interactive mode - handle in interf.cpp
 			sim->error_hard( "invalid network data structure",
 							 "check your model structure to prevent this situation",
 							 false,
 							 "no descending object '%s' in container object '%s'",
-							 nodeLab, label );
+							 nodeLab, attr->label );
 		return NULL;
 	}
 

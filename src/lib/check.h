@@ -195,14 +195,12 @@ namespace lsd
 		{
 			object *cur1 = _sim_->root->search( label );
 
-			if ( _sim_->no_search && cur1 != NULL && parent->label != NULL &&
-				 cur1->up != NULL && cur1->up->label != NULL &&
-				 strcmp( parent->label, cur1->up->label ) )
+			if ( _sim_->no_search && cur1 != NULL && cur1->up != NULL && parent->attr != cur1->up->attr )
 				_sim_->error_hard( "object is not a descending object",
 								   "move object in model structure, or specify a parent object",
 								   false,
 								   "object '%s' not directly under '%s' for cycling\n(NO_SEARCH enabled!)",
-								   label, parent->label );
+								   label, parent->attr->label );
 		}
 
 		return cur;

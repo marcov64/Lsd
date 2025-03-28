@@ -794,9 +794,9 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 
 				cmd( "if { $debugall || $undebugall } { set choice 1 } { set choice 0 }" );
 				if ( gui::choice == 1 )
-					for ( cur = this; cur != NULL; cur = cur->hyper_next( cur->label ) )
+					for ( cur = this; cur != NULL; cur = cur->hyper_next( ) )
 					{
-						cv1 = cur->search_var( cur, cv->attr->label );
+						cv1 = cur->search_var( cur, cv->attr );
 						cv1->deb_mode = cv->deb_mode;
 					}
 
@@ -1012,7 +1012,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 
 							cur = cv->up;
 
-							for ( ; cur != NULL && i == 0; cur = cur->hyper_next( cur->label ) )
+							for ( ; cur != NULL && i == 0; cur = cur->hyper_next( ) )
 							{
 								app_res = cur->search_var( cur, ch, true )->val[ 0 ];
 								if ( app_res == value_search )
@@ -1030,7 +1030,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 						if ( cv != NULL )
 							cur = cv->up;
 						while ( cur != NULL && cur->cal( ch, 0 ) < value_search )
-							cur = cur->hyper_next( cur->label );
+							cur = cur->hyper_next( );
 						break;
 
 					case 3:
@@ -1038,7 +1038,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 						if ( cv != NULL )
 							cur = cv->up;
 						while ( cur != NULL && cur->cal( ch, 0 ) > value_search )
-							cur = cur->hyper_next( cur->label );
+							cur = cur->hyper_next( );
 						break;
 
 					case 4:
@@ -1046,7 +1046,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 						if ( cv != NULL )
 							cur = cv->up;
 						while ( cur != NULL && cur->cal( ch, 0 ) <= value_search )
-							cur = cur->hyper_next( cur->label );
+							cur = cur->hyper_next( );
 						break;
 
 					case 5:
@@ -1054,7 +1054,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 						if ( cv != NULL )
 							cur = cv->up;
 						while ( cur != NULL && cur->cal( ch, 0 ) >= value_search )
-							cur = cur->hyper_next( cur->label );
+							cur = cur->hyper_next( );
 						break;
 
 					case 6:
@@ -1062,7 +1062,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 						if ( cv != NULL )
 							cur = cv->up;
 						while ( cur != NULL && cur->cal( ch, 0 ) == value_search )
-							cur = cur->hyper_next( cur->label );
+							cur = cur->hyper_next( );
 						break;
 
 					default:
@@ -1106,7 +1106,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					break;
 				}
 
-				for ( cb1 = NULL, cb = up->b; strcmp( label, cb->label ); cb1 = cb, cb = cb->next );
+				for ( cb1 = NULL, cb = up->b; attr != cb->attr; cb1 = cb, cb = cb->next );
 
 				if ( cb->head != NULL )
 				{
@@ -1313,7 +1313,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 
 					cmd( "ttk::frame $hk.l" );
 					cmd( "ttk::label $hk.l.l -text \"Object:\"" );
-					cmd( "ttk::label $hk.l.n -style hl.TLabel -text %s", label );
+					cmd( "ttk::label $hk.l.n -style hl.TLabel -text %s", attr->label );
 					cmd( "pack $hk.l.l $hk.l.n -side left -padx $_2" );
 
 					cmd( "ttk::frame $hk.t" );
@@ -1332,7 +1332,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 							{
 								if ( k > 0 )
 								{
-									cmd( "ttk::radiobutton $hk.t.t.h%d -text \"Hook %d to %s (%d)\" -variable hook -value %d", i, i, hooks[ i ]->label, k, i );
+									cmd( "ttk::radiobutton $hk.t.t.h%d -text \"Hook %d to %s (%d)\" -variable hook -value %d", i, i, hooks[ i ]->attr->label, k, i );
 									checked[ i ] = true;
 								}
 								else
@@ -1351,7 +1351,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 						{
 							if ( k > 0 )
 							{
-								cmd( "ttk::radiobutton $hk.t.t.h%d -text \"Static Hook to %s (%d)\" -variable hook -value %d", i, hook->label, k, i );
+								cmd( "ttk::radiobutton $hk.t.t.h%d -text \"Static Hook to %s (%d)\" -variable hook -value %d", i, hook->attr->label, k, i );
 									checked[ i ] = true;
 							}
 							else
@@ -1930,7 +1930,7 @@ void lsd::object::show_tmp_vars( bool update )
 		}
 
 	m = sim->root->search_inst( this, true );
-	cmd( "$in.l1.n.name configure -text \"%s\"", label == NULL ? "" : label );
+	cmd( "$in.l1.n.name configure -text \"%s\"", attr->label );
 	cmd( "$in.l1.n.id configure -text \"%d\"", m );
 
 	Tcl_LinkVar( gui::interp, "i", ( char * ) & i, TCL_LINK_INT );
@@ -2004,8 +2004,8 @@ void lsd::object::show_tmp_vars( bool update )
 			// search an object pointed by the pointer
 			n = ( int ) sim->root->search_inst( sim->_o_values_[ j ], false );
 
-			if ( n > 0 && sim->_o_values_[ j ]->label != NULL )
-				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%d)\"", sim->_o_values_[ j ]->label, n );
+			if ( n > 0 && sim->_o_values_[ j ] != NULL )
+				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%d)\"", sim->_o_values_[ j ]->attr->label, n );
 			else
 				if ( n < 0 )
 					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"(unchecked)\"" );
@@ -2021,8 +2021,8 @@ void lsd::object::show_tmp_vars( bool update )
 
 		if ( n > 0 )
 		{
-			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", sim->_o_values_[ j ]->label, n );
-			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", sim->_o_values_[ j ]->label, n );
+			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", sim->_o_values_[ j ]->attr->label, n );
+			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", sim->_o_values_[ j ]->attr->label, n );
 		}
 
 		cmd( "$in.n.t window create end -window $in.n.t.n$i" );
@@ -2052,10 +2052,7 @@ void lsd::object::show_tmp_vars( bool update )
 				for ( curLnk = node->first; curLnk != NULL; curLnk = curLnk->next )
 					if ( curLnk == sim->_n_values_[ j ] && curLnk->to != NULL && curLnk->to->node != NULL )
 					{
-						if ( curLnk->to->label != NULL )
-							cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%ld)\"", curLnk->to->label, curLnk->to->node->id );
-						else
-							cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"(%ld)\"", curLnk->to->node->id );
+						cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%ld)\"", curLnk->to->attr->label, curLnk->to->node->id );
 
 						n = 1;
 						break;
@@ -2074,8 +2071,8 @@ void lsd::object::show_tmp_vars( bool update )
 
 		if ( n > 0 && curLnk != NULL )
 		{
-			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->to->node->id, curLnk->to->label );
-			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->to->node->id, curLnk->to->label );
+			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->to->node->id, curLnk->to->attr->label );
+			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->to->node->id, curLnk->to->attr->label );
 		}
 
 		cmd( "$in.n.t window create end -window $in.n.t.n$i" );
@@ -2108,13 +2105,10 @@ void lsd::object::show_tmp_vars( bool update )
 			// search an object pointed by the hook
 			n = ( int ) sim->root->search_inst( cur, false );
 
-			if ( n > 0 && cur->label != NULL )
-				cmd( "ttk::label $in.n.t.n$i.val -width 12 -style hl.TLabel -text \"%s(%d)\"", cur->label, n );
+			if ( n > 0 )
+				cmd( "ttk::label $in.n.t.n$i.val -width 12 -style hl.TLabel -text \"%s(%d)\"", cur->attr->label, n );
 			else
-				if ( n < 0 )
-					cmd( "ttk::label $in.n.t.n$i.val -width 12 -style hl.TLabel -text \"(unchecked)\"" );
-				else
-					cmd( "ttk::label $in.n.t.n$i.val -width 12 -style hl.TLabel -text \"(invalid)\"" );
+				cmd( "ttk::label $in.n.t.n$i.val -width 12 -style hl.TLabel -text \"(unchecked)\"" );
 		}
 
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
@@ -2125,8 +2119,8 @@ void lsd::object::show_tmp_vars( bool update )
 
 		if ( n > 0 )
 		{
-			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", cur->label, n );
-			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", cur->label, n );
+			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", cur->attr->label, n );
+			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", cur->attr->label, n );
 		}
 
 		cmd( "$in.n.t window create end -window $in.n.t.n$i" );
@@ -2261,10 +2255,10 @@ void lsd::object::show_neighbors( bool update )
 		cmd( "mouse_wheel $N.n.t.n$i.pad" );
 		cmd( "mouse_wheel $N.n.t.n$i.weight" );
 
-		cmd( "bind $N.n.t.n$i.nodeto <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->to->node->id, label );
+		cmd( "bind $N.n.t.n$i.nodeto <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->to->node->id, attr->label );
 
 		if ( curLnk->weight != 0 )
-			cmd( "bind $N.n.t.n$i.weight <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->to->node->id, label );
+			cmd( "bind $N.n.t.n$i.weight <Double-Button-1> { set nodeId %ld; set nodeLab %s; set choice 23 }", curLnk->to->node->id, attr->label );
 
 		cmd( "$N.n.t window create end -window $N.n.t.n$i" );
 		cmd( "$N.n.t insert end \\n" );
@@ -2287,7 +2281,7 @@ void lsd::object::attach_instance_number( char *outh, char *outv, int outSz )
 	{
 		up->attach_instance_number( outh, outv, outSz );
 
-		for ( cur = up->search( label ); cur != NULL; cur = BROTHER( cur ) )
+		for ( cur = up->search( attr ); cur != NULL; cur = BROTHER( cur ) )
 		{
 			if ( cur == this )
 				j = i;
@@ -2295,13 +2289,13 @@ void lsd::object::attach_instance_number( char *outh, char *outv, int outSz )
 			++i;
 		}
 
-		snprintf( inst_msg, MAX_BUFF_SIZE, "| %d:%s (%d/%d) ", ++inst_dpth, label, j, i - 1 );
+		snprintf( inst_msg, MAX_BUFF_SIZE, "| %d:%s (%d/%d) ", ++inst_dpth, attr->label, j, i - 1 );
 	}
 	else
-		snprintf( inst_msg, MAX_BUFF_SIZE, "%d:%s (1/1) ", inst_dpth = 1, label );
+		snprintf( inst_msg, MAX_BUFF_SIZE, "%d:%s (1/1) ", inst_dpth = 1, attr->label );
 
 	strcatn( outh, inst_msg, outSz );
 
-	snprintf( inst_msg, MAX_BUFF_SIZE, "%d:%s (%d/%d)\n", inst_dpth, label, j, up == NULL ? 1 : i - 1 );
+	snprintf( inst_msg, MAX_BUFF_SIZE, "%d:%s (%d/%d)\n", inst_dpth, attr->label, j, up == NULL ? 1 : i - 1 );
 	strcatn( outv, inst_msg, outSz );
 }

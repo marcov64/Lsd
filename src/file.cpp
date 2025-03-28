@@ -311,7 +311,7 @@ void lsd::object::load_elem_lists( )
 	if ( up == NULL )							// reset lists if root
 		cmd( "unset -nocomplain modObj modElem modVar modPar modFun modDAf" );
 	else
-		cmd( "lappend modObj %s", label );		// register object if not root
+		cmd( "lappend modObj %s", attr->label );// register object if not root
 
 	// register elements in object
 	for ( auto cv = v; cv != NULL; cv = cv->next )
@@ -775,13 +775,13 @@ void lsd::object::get_saved( FILE *out, const char *sep, bool all_var )
 			else
 				lab = NULL;
 
-			fprintf( out, "%s%s%s%s%s%s%s\n", cv->attr->label, sep, cv->param ? "parameter" : "variable", sep, label, sep, lab != NULL ? lab : "" );
+			fprintf( out, "%s%s%s%s%s%s%s\n", cv->attr->label, sep, cv->param ? "parameter" : "variable", sep, attr->label, sep, lab != NULL ? lab : "" );
 		}
 
 	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->label );
+			cur = sim->blueprint->search( cb->attr );
 		else
 			cur = cb->head;
 
