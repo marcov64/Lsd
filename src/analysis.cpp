@@ -98,7 +98,7 @@ namespace gui
 	bool first_run = true;
 	char da_tmp[ MAX_BUFF_SIZE ];
 	double histo_mean;
-	double histo_var;
+	double histo_v;
 	double maxy;
 	double maxy2;
 	double miny;
