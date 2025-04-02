@@ -404,14 +404,12 @@ void lsd::assimilation::align_state_vars( void )
 				// update vector indexes, removing excess instances from all runs
 				for ( auto & sim : run_sims )
 					if ( missing )
-					{
 						// one run missing the instance, remove all excess instances
 						while ( true )			// remove all extra instances of var
 							if ( DA_IDX < DA_SV.size( ) && ca.label == DA_SV[ DA_IDX ]->attr->label )
 								DA_SV.erase( DA_SV.begin( ) + DA_IDX );
 							else
 								break;			// stop on first var after or last var
-					}
 					else						// all runs have this instance
 						++DA_IDX;				// all aligned so far, check next var
 			}
@@ -617,7 +615,7 @@ void lsd::assimilation::update_runtime_plot( int cur_t )
 	const e_matT & x_f_ens = ensemble_forecast( );
 
 	// produce the forecast ensemble location statistics (L x 1)
-	const e_vecT & x_f = loc_stat( x_f_ens );
+	e_vecT x_f = loc_stat( x_f_ens );
 
 	// apply ensemble inflation if enabled
 	const e_matT & x_f_e = ensemble_inflation( x_f_ens, x_f );
@@ -666,7 +664,7 @@ void lsd::assimilation::update_runtime_plot( int cur_t )
 	update_state_vars( x_a_e );
 
 	// compute the MC analysis ensemble estimates & refresh run-time window
-	const e_vecT & x_a = loc_stat( x_a_e );
+	e_vecT x_a = loc_stat( x_a_e );
 	update_assim_vars( x_a, x_f, z, cur_t );
 
 #ifndef _TERM_
@@ -702,10 +700,10 @@ double lsd::assimilation::median( T begin, T end )
  LOC_STAT
  Compute the location statistic vector (mean or median)
  *************************************************************/
-const e_vecT & lsd::assimilation::loc_stat( const e_matT & x )
+e_vecT lsd::assimilation::loc_stat( const e_matT & x )
 {
 	int nvar = x.cols( );
-	static e_vecT x_bar( nvar );
+	e_vecT x_bar( nvar );
 
 	if ( med_stats )
 		for ( int i = 0; i < nvar; ++i )
@@ -721,15 +719,16 @@ const e_vecT & lsd::assimilation::loc_stat( const e_matT & x )
 
 
 /*************************************************************
- DISP_STAT
+ DSP_STAT
  Compute the dispersion statistic matrix (covariance or comedian)
  *************************************************************/
 const e_matT & lsd::assimilation::dsp_stat( const e_matT & x, const e_vecT & x_bar )
 {
 	int nvar = x.cols( );
 	e_vecT d( nvar );
+	static e_matT dsp;
 
-	static e_matT dsp = e_matT::Zero( nvar, nvar );
+	dsp = e_matT::Zero( nvar, nvar );
 
 	if ( med_stats )
 	{
@@ -766,8 +765,10 @@ const e_matT & lsd::assimilation::ensemble_forecast( void )
 	d_mapT loc;
 	int nobs = run_sims.size( );
 	int nvar = fctd_labs.size( );
-	static e_matT x_f_ens( nobs, nvar );
+	static e_matT x_f_ens;
 	variable *sv;
+
+	x_f_ens.resize( nobs, nvar );
 
 	// compute average/median for columns missing instances
 	if ( ! align_trim )
@@ -815,7 +816,9 @@ const e_matT & lsd::assimilation::ensemble_inflation( const e_matT & x, const e_
 
 	int nobs = x.rows( );
 	int nvar = x.cols( );
-	static e_matT x_f_e( nobs, nvar );
+	static e_matT x_f_e;
+
+	x_f_e.resize( nobs, nvar );
 
 	for ( int i = 0; i < nobs; ++i )
 	{
@@ -835,8 +838,10 @@ const e_matT & lsd::assimilation::forward_matrix( const ass_vecT & dvars )
 {
 	int ndvar = dvars.size( );
 	int nfvar = fctd_labs.size( );
-	static e_matT H = e_matT::Zero( ndvar, nfvar );
+	static e_matT H;
 	b_vecT used_fvars( nfvar, false );
+
+	H = e_matT::Zero( ndvar, nfvar );
 
 	// match data variables (no duplicates) to each forecast variable (incl. duplicates)
 	for ( auto i = 0; i < ndvar; ++i )
@@ -875,7 +880,9 @@ const e_matT & lsd::assimilation::forward_matrix( const ass_vecT & dvars )
 const e_vecT & lsd::assimilation::data_obs( const ass_vecT & dvars, int cur_t )
 {
 	int nvar = dvars.size( );
-	static e_vecT z( nvar );
+	static e_vecT z;
+
+	z.resize( nvar );
 
 	// collect observations available at current time
 	for ( auto j = 0; j < nvar; ++j )
@@ -891,9 +898,10 @@ const e_vecT & lsd::assimilation::data_obs( const ass_vecT & dvars, int cur_t )
 const e_matT & lsd::assimilation::virtual_obs( const e_vecT & z, int nobs )
 {
 	int nvar = z.size( );
-	static e_matT z_e( nobs, nvar );
+	static e_matT z_e;
 	e_vecT y( nvar );
 
+	z_e.resize( nobs, nvar );
 	std::normal_distribution < double > N( 0, 1 );
 
 	// generate virtual observations
@@ -1139,7 +1147,7 @@ int lsd::assimilation::calc_dsp_mat( void )
  assimilation from external file, and try to perform
  Cholesky decomposition
  *************************************************************/
-int lsd::assimilation::load_dsp_mat( simulation *sim )
+int lsd::assimilation::load_dsp_mat( simulation *sim, strT & missing )
 {
 	char *cpath, fname[ MAX_PATH_LENGTH ];
 	int i, j, k = 0, res = 0;
@@ -1147,6 +1155,8 @@ int lsd::assimilation::load_dsp_mat( simulation *sim )
 	std::unordered_set < strT > covnames;
 	std::unordered_set < strT >::iterator it;
 	str_vecT csvnames;
+
+	missing = "";
 
 	dsp_mat.resize( 0, 0 );
 	for ( auto & ca : ass_elem )
@@ -1197,7 +1207,10 @@ int lsd::assimilation::load_dsp_mat( simulation *sim )
 			ca.cov_idx = k++;
 		}
 		else
+		{
+			missing = ca.label;
 			return 5;
+		}
 	}
 
 	// signal unused data (warning only)
@@ -1215,6 +1228,7 @@ int lsd::assimilation::load_dsp_mat( simulation *sim )
 			catch ( ... )
 			{
 				dsp_mat.resize( 0, 0 );
+				missing = csvnames[ i ];
 				return 6;
 			}
 
@@ -1238,6 +1252,7 @@ bool lsd::assimilation::load_files( simulation *sim, int last_t )
 {
 	bool first = true;
 	int i, j;
+	strT missing;
 
 	// load assimilation data, if amy/proper
 	if ( ass_elem.size( ) == 0 || disable )
@@ -1266,10 +1281,10 @@ bool lsd::assimilation::load_files( simulation *sim, int last_t )
 		cmd( "set c %s", med_stats ? "comedian" : "covariance" );
 
 		if ( use_dsp_file )
-			if ( ( j = load_dsp_mat( sim ) ) <= 0 )
+			if ( ( j = load_dsp_mat( sim, missing ) ) <= 0 )
 			{
 				if ( j == -1 )
-					plog_master( "\nUnused data in $c matrix ignored" );
+					plog_master( "\nUnused data in $$c matrix ignored" );
 			}
 			else
 			{
@@ -1277,31 +1292,31 @@ bool lsd::assimilation::load_files( simulation *sim, int last_t )
 				switch ( j )
 				{
 					case 1:
-						plog_master( "\nInvalid $c matrix file name" );
+						plog_master( "\nInvalid $$c matrix file name\n" );
 						break;
 
 					case 2:
-						plog_master( "\nInvalid $c matrix file CSV format" );
+						plog_master( "\nInvalid $$c matrix file CSV format\n" );
 						break;
 
 					case 3:
-						plog_master( "\nNon-symmetric $c matrix (rows != columns)" );
+						plog_master( "\nNon-symmetric $$c matrix (rows != columns)\n" );
 						break;
 
 					case 4:
-						plog_master( "\nEmpty $c matrix" );
+						plog_master( "\nEmpty $$c matrix\n" );
 						break;
 
 					case 5:
-						plog_master( "\nMissing variable(s) in $c matrix" );
+						plog_master( "\nMissing element in $$c matrix: %s\n", missing.c_str( ) );
 						break;
 
 					case 6:
-						plog_master( "\nMissing elements in $c matrix" );
+						plog_master( "\nMissing row/column in $$c matrix: %s\n", missing.c_str( ) );
 						break;
 
 					case 7:
-						plog_master( "\nNon positive-definite $c matrix" );
+						plog_master( "\nNon positive-definite $$c matrix\n" );
 				}
 
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Cannot load assimilation $c matrix\" -detail \"There was a problem loading the $c matrix for data assimilation from file '%s'.\nCheck the Log window for details.\"", dsp_file != "" ? dsp_file.c_str( ) : "(none)" );
@@ -1312,7 +1327,7 @@ bool lsd::assimilation::load_files( simulation *sim, int last_t )
 			switch ( j = calc_dsp_mat( ) )
 			{
 				case 1:
-					plog_master( "\nNull $c matrix, virtual observations disabled" );
+					plog_master( "\nNull $$c matrix, virtual observations disabled" );
 					break;
 
 				case 2:
@@ -1320,7 +1335,7 @@ bool lsd::assimilation::load_files( simulation *sim, int last_t )
 					break;
 
 				case 3:
-					plog_master( "\nNon definite-positive $c matrix, virtual observations disable" );
+					plog_master( "\nNon definite-positive $$c matrix, virtual observations disable" );
 			}
 
 			if ( sav_dsp && dsp_mat.cols( ) > 0 && sim != NULL )

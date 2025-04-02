@@ -413,7 +413,9 @@ lsd::object::object( object *_up, simulation *_sim, const char *_label, bool _to
 	to_compute = _to_compute;
 
 	if ( ( attr = _sim->oa.search( _label ) ) == NULL )
-		attr = _sim->oa.add( sim, _label );
+		attr = _sim->oa.add( _sim, _label );
+	else
+		attr->container = & ( _sim->oa );
 }
 
 

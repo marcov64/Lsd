@@ -39,9 +39,15 @@ int lsd::assimilation::run_simulation( int until_t )
 	clock_t start, last_update = clock( );
 	int nstale, res = 0;
 
+	if ( sims.size( ) == 0 )
+		return 9;
+
 	// initialize data assimilation data structures
-	if ( sims.size( ) == 0 || ! init( sims[ 0 ] ) )
-		return 1;
+	if ( ! init( sims[ 0 ] ) )
+	{
+		sims[ 0 ]->eff_t = 1;		// signal failed startup
+		return res;
+	}
 
 	ref_sim->run = 1;
 	until_t = until_t > 0 && until_t < ref_sim->last_t ? until_t : ref_sim->last_t;
@@ -73,7 +79,7 @@ int lsd::assimilation::run_simulation( int until_t )
 		// DA forecast step
 		if ( ( nstale = dispatch_runs( run_sims, next_t, 1, true ) ) > 0 )
 		{
-			res = 3;
+			res = 1;
 			break;
 		}
 
@@ -90,7 +96,7 @@ int lsd::assimilation::run_simulation( int until_t )
 		if ( ref_sim->liblnk->progress_bar != NULL )
 			ref_sim->liblnk->progress_bar( next_t, last_update );
 
-		if ( ref_sim->liblnk->runtime_buttons != NULL && ( res = ref_sim->liblnk->runtime_buttons( ) ) != 0 )
+		if ( ref_sim->liblnk->runtime_buttons != NULL && ( res = - ref_sim->liblnk->runtime_buttons( ) ) != 0 )
 			break;
 #endif
 	}
@@ -98,23 +104,43 @@ int lsd::assimilation::run_simulation( int until_t )
 	// run remaining pure forecast periods, if any
 	if ( res == 0 && next_t < until_t )
 		if ( ( nstale = dispatch_runs( run_sims, until_t, 1, false ) ) > 0 )
-			res = 3;
+			res = 1;
 
 	if ( res == 0 )
 	{
+		nstale = 0;
 		for ( auto & sim : run_sims )
 			if ( sim.eff_t != until_t )
-				res = 4;
+			{
+				res = 2;
+				++ nstale;
+			}
 
 		ref_sim->eff_t = until_t;
-		ref_sim->t = until_t + 1;
 	}
 	else
-		ref_sim->eff_t = ref_sim->t = next_t;
+		ref_sim->eff_t = next_t;
+
+	ref_sim->t = ref_sim->eff_t + 1;
+
 	// close data assimilation run-time data structures
 	finish( );
 
-	ref_sim->plog( "\nData assimilation %s at time step %d (%.2f sec.)\n", ref_sim->quit == 2 ? "stopped" : "finished", ref_sim->t - 1, ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
+	ref_sim->plog( "\nData assimilation %s at time step %d (%.2f sec.)\n", res != 0 ? "stopped" : "finished", ref_sim->t - 1, ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
+
+	switch ( res )
+	{
+		case 1:
+			ref_sim->plog( "\n%d run(s) stop responding, aborted ...", nstale );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Data assimilation aborted\" -detail \"One or more simulation runs stopped responding.\n\nPlease check your code to prevent crashes before running data assimilation.\"" );
+			empty_assimilation( );
+			break;
+
+		case 2:
+			ref_sim->plog( "\n%d run(s) did not complete ...", nstale );
+			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Data assimilation incomplete\" -detail \"One or more simulation runs did not run until last period.\n\nPlease check your code to prevent this behavior before running data assimilation.\"" );
+			break;
+	}
 
 #ifndef _TERM_
 	if ( ref_sim->liblnk->runtime_run_end != NULL )
@@ -126,7 +152,7 @@ int lsd::assimilation::run_simulation( int until_t )
 	ref_sim->save_results( true );
 #endif
 
-	return res;
+	return res < 2 ? 0 : res;				// don't signal recoverable errors
 }
 
 
@@ -341,10 +367,10 @@ int lsd::simulation::init_new_seq( clock_t & start, char *bar_done, int & perc_d
 	// start multi-thread workers
 	if ( parallel_mode )
 	{
-		workers = new worker[ max_threads ];
+		workers = new worker [ max_threads ];
 		for ( i = 0; i < max_threads; ++i )
 			workers[ i ].worker_thread = thrT( & lsd::worker::cal_worker, & workers[ i ] );
-		}
+	}
 
 	if ( ! da_en )
 	{
@@ -354,7 +380,7 @@ int lsd::simulation::init_new_seq( clock_t & start, char *bar_done, int & perc_d
 #else
 		plog( "\nProcessing configuration file %s...\n", clean_file( conf_file ) );
 #endif
-		set_fast( 0 );				// should start on OBSERVE and switch to FAST later
+		set_fast( 0 );			// should start on OBSERVE and switch to FAST later
 	}
 	else
 		set_fast( 2 );
@@ -518,10 +544,10 @@ void lsd::simulation::save_results( bool da_en )
 		if ( da_en )
 			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_da_%d_%d.%s", path_out, sep_out, name_out, seed, seed + last_run - 1, docsv ? "csv" : "res" );
 		else
-		if ( ! batch_sequential )
-			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d.%s", path_out, sep_out, name_out, seed - 1, docsv ? "csv" : "res" );
-		else
-			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, findex, seed - 1, docsv ? "csv" : "res" );
+			if ( ! batch_sequential )
+				snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d.%s", path_out, sep_out, name_out, seed - 1, docsv ? "csv" : "res" );
+			else
+				snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, findex, seed - 1, docsv ? "csv" : "res" );
 
 		if ( dozip )
 			strcatn( fname, ".gz", MAX_PATH_LENGTH );
@@ -577,7 +603,7 @@ void lsd::simulation::save_results( bool da_en )
 
 	if ( run == last_run )							// last run?
 		strcpyn( res_path, path_out, MAX_PATH_LENGTH );
-		
+
 	delete [ ] alt_name;
 }
 
@@ -917,7 +943,7 @@ bool lsd::simulation::results_alt_path( const char *altPath )
 			alt_path[ lstChr ] = '\0';
 
 		struct stat sb;
-		if ( stat( alt_path, &sb ) == 0 && S_ISDIR( sb.st_mode ) )
+		if ( stat( alt_path, & sb ) == 0 && S_ISDIR( sb.st_mode ) )
 		{
 			save_alt = true;
 			return true;

@@ -294,14 +294,17 @@ lsd::variable::variable( object *_up, const char *_label, int _param, int _num_l
 		val = NULL;
 
 	if ( ( attr = _up->sim->va.search( _label ) ) == NULL )
-	{
 		attr = up->sim->va.add( _up->sim, _label, _num_lag );
-
-		if ( ( _param == 0 && _num_lag == 0 ) || _param == 2 )
-			attr->initialized = true;
-		else
-			attr->initialized = false;
+	else
+	{
+		attr->container = & ( _up->sim->va );
+		attr->num_lag = _num_lag;
 	}
+
+	if ( ( _param == 0 && _num_lag == 0 ) || _param == 2 )
+		attr->initialized = true;
+	else
+		attr->initialized = false;
 }
 
 

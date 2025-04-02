@@ -254,11 +254,81 @@ namespace gui
 /*************************************************************
  TYPE TEMPLATES
  *************************************************************/
-	typedef std::map < strT, store > sv_mapT;
-	typedef std::set < store * > stp_setT;
 	typedef std::vector < store > sto_vecT;
-	typedef std::vector < store * > stp_vecT;
-	typedef std::vector < stp_vecT > stp2_vecT;
+
+
+/*************************************************************
+ DESIGN
+ *************************************************************/
+	class design						// design of experiment container class
+	{
+		public:
+			char **lab = NULL;
+			double ***doe = NULL;
+			int k;						// experiment parameters
+			int n;
+			int *lag = NULL;
+			int *par = NULL;
+
+		private:
+			bool *intg = NULL;
+			double **hi = NULL;
+			double **lo = NULL;
+			int tab;
+			int typ;
+			int *inst = NULL;
+
+		private:
+			void clear_design( void );
+			void load_design_data( lsd::sensitivity *rsens, int n );
+
+		public:
+			design( lsd::sensitivity *rsens, int typ, const char *fname, const char *dest_path,
+					int findex, int samples, int factors = 0, int jump = 2, int trajs = 4 );	// constructor
+			~design( void );			// destructor
+	};
+
+
+/*************************************************************
+ NOLH
+ *************************************************************/
+	class nolh							// near-orthogonal Latin hypercube class
+	{
+		public:
+			int kMin;					// DoE design - DO NOT CHANGE VARS ORDER!
+			int kMax;
+			int n1;
+			int n2;
+			int loLevel;
+			int hiLevel;
+			const int *table;
+	};
+
+
+/*************************************************************
+ STORE
+ *************************************************************/
+	class store							// analysis element values container class
+	{
+		public:
+			bool data_alias = true;		// data in memory, data pointer is alias
+			bool mc = false;			// temporary flag to MC analysis
+			double *data = NULL;
+			int end = -1;
+			int rank = -1;
+			int start = -1;
+			strT label;
+			strT parent;
+			strT tag;
+
+		public:
+			store( void ) { }			// constructor
+			store( const store & src );	// copy constructor
+			store( store && src ) noexcept;	// move constructor
+			~store( void );				// destructor
+			store & operator=( store rhs );	// assignment operator
+			void swap( store & st ) noexcept;// content swap
+	};
 
 
 /*************************************************************
@@ -378,7 +448,6 @@ namespace gui
 	const char *get_make_var( const char *var, const char *buf, char *dest, int sz );
 	const char *get_str( const char *tcl_var );
 	const char *get_target_name( char *str, int str_sz, bool term = false );
-	const str2_vecT & align_file_vars( stp2_vecT & file_stores );
 	double eval_double( const char *tcl_exp );
 	double get_double( const char *tcl_var, double *var = NULL, bool no_error = false );
 	double lower_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
@@ -439,11 +508,13 @@ namespace gui
 	i_listT get_max_sum_ind( i_list_vecT indices_list, d_vecT row_maxima_i );
 	i_listT top_idx( double *a, int n, int i );
 	i_list_vecT add_indices( i_listT m_max_ind, int M );
+	i_vecT insert_data_file( const char *file_name, bool gz, bool keep_vars );
 	i2_vecT combinations( i_listT indices, int r );
 	long eval_long( const char *tcl_exp );
 	long get_long( const char *tcl_var, long *var = NULL );
 	lsd::object *operate( lsd::object *r ); \
 	strT win_path( strT filepath );
+	str2_vecT align_file_vars( i2_vecT & f_stores );
 	void add_da_plot_tab( const char *w, int id_plot );
 	void analysis( bool mc = false );
 	void auto_document( const char *lab, const char *which, bool append = false );
@@ -470,7 +541,6 @@ namespace gui
 	void init_lattice_helper( double pixW, double pixH, double nrow, double ncol, int init_color );
 	void init_plot( void );
 	void init_tcl_tk( const char *exec, const char *tcl_app_name );
-	void insert_data_file( bool gz, stp_vecT & file_stores, bool keep_vars );
 	void load_lsd_options( void );
 	void log_tcl_error( bool show, const char *cm, const char *message, ... );
 	void lsd_exit_gui( int v, bool clean = false );
@@ -541,76 +611,3 @@ namespace gui
 	void NOLH_clear( void );
 	FILE *search_all_sources( char *str );
 }
-
-
-/*************************************************************
- DESIGN
- *************************************************************/
-class gui::design						// design of experiment container class
-{
-	public:
-		char **lab = NULL;
-		double ***doe = NULL;
-		int k;							// experiment parameters
-		int n;
-		int *lag = NULL;
-		int *par = NULL;
-
-	private:
-		bool *intg = NULL;
-		double **hi = NULL;
-		double **lo = NULL;
-		int tab;
-		int typ;
-		int *inst = NULL;
-
-	private:
-		void clear_design( void );
-		void load_design_data( lsd::sensitivity *rsens, int n );
-
-	public:
-		design( lsd::sensitivity *rsens, int typ, const char *fname, const char *dest_path,
-				int findex, int samples, int factors = 0, int jump = 2, int trajs = 4 );	// constructor
-		~design( void );				// destructor
-};
-
-
-/*************************************************************
- NOLH
- *************************************************************/
-class gui::nolh							// near-orthogonal Latin hypercube class
-{
-	public:
-		int kMin;						// DoE design - DO NOT CHANGE VARS ORDER!
-		int kMax;
-		int n1;
-		int n2;
-		int loLevel;
-		int hiLevel;
-		const int *table;
-};
-
-
-/*************************************************************
- STORE
- *************************************************************/
-class gui::store						// analysis element values container class
-{
-	public:
-		bool data_alias = true;			// data in memory, data pointer is alias
-		double *data = NULL;
-		int end = -1;
-		int rank = -1;
-		int start = -1;
-		strT label;
-		strT parent;
-		strT tag;
-
-	public:
-		store( void ) { }				// constructor
-		store( const store & src );		// copy constructor
-		store( store && src ) noexcept;	// move constructor
-		~store( void );					// destructor
-		store & operator=( store rhs );	// assignment operator
-		void swap( store & st ) noexcept;// content swap
-};

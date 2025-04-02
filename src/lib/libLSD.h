@@ -386,6 +386,8 @@ namespace lsd
  *************************************************************/
 	class objattr							// object static/homogeneous
 	{										// attributes class
+		friend class object;
+
 		public:								// static public attributes
 			char *label;
 			int label_size;
@@ -1186,10 +1188,10 @@ namespace lsd
 			const e_matT & virtual_obs( const e_vecT & z, int nobs );
 			const e_matT & forward_matrix( const ass_vecT & dvars );
 			const e_vecT & data_obs( const ass_vecT & dvars, int cur_t );
-			const e_vecT & loc_stat( const e_matT & x );
+			e_vecT loc_stat( const e_matT & x );
 			int analysis( const ass_vecT & dvars, int cur_t );
 			int calc_dsp_mat( void );
-			int load_dsp_mat( simulation *sim );
+			int load_dsp_mat( simulation *sim, strT & missing );
 			int load_obs_data( int last_t );
 			template < class T > double median( T begin, T end );
 			void align_state_vars( void );

@@ -97,7 +97,6 @@ namespace gui
 	bool avgSmplMsg;
 	bool first_run = true;
 	char da_tmp[ MAX_BUFF_SIZE ];
-	char filename[ MAX_PATH_LENGTH ];
 	double histo_mean;
 	double histo_var;
 	double maxy;
@@ -112,7 +111,6 @@ namespace gui
 	int *cdata;
 	int cur_plot;
 	int dir;
-	int file_counter;
 	int first_c;
 	int grid;
 	int gnu;
@@ -139,6 +137,7 @@ namespace gui
 	int xy;
 	node gplot_tree;
 	sto_vecT vs;						// data store for analysis
+	str_vecT data_files;				// unique data files loaded
 
 	// MC series parent names
 	const char *mc_par[ ] = { "meanMC", "medianMC", "maxMC", "minMC", "varMC", "sumMC", "medianMC", "countMC", "sdMC", "prodMC", "invMC", "ci+MC", "ci-MC", "maxMC", "ci+MC", "medianMC", "medianMC" };
@@ -157,6 +156,7 @@ gui::store::store( const store & src )
 	parent = src.parent;
 	tag = src.tag;
 	data_alias = src.data_alias;
+	mc = src.mc;
 
 	if ( data_alias )
 		data = src.data;
@@ -217,6 +217,7 @@ void gui::store::swap( store & st ) noexcept
 	swap( st.parent, this->parent );
 	swap( st.tag, this->tag );
 	swap( st.data_alias, this->data_alias );
+	swap( st.mc, this->mc );
 	swap( st.data, this->data );
 }
 
@@ -227,11 +228,12 @@ void gui::store::swap( store & st ) noexcept
 void gui::analysis( bool mc )
 {
 	bool gz;
-	char dirname[ MAX_PATH_LENGTH ], str1[ MAX_ELEM_LENGTH ], str2[ MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ];
+	char dirname[ MAX_PATH_LENGTH ], fname[ MAX_PATH_LENGTH ], str1[ MAX_ELEM_LENGTH ], str2[ MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ];
 	double compvalue;
 	int h, i, j, k, l, m, p, r;
+	i2_vecT f_stores;
 	str_vecT cur_var;
-	stp2_vecT file_stores;
+	str2_vecT v_names;
 	FILE *f;
 
 	cover_browser( "Analysis of Results...", "Please exit Analysis of Results\nbefore using the LSD Browser.", false );
@@ -265,7 +267,6 @@ void gui::analysis( bool mc )
 	avgSmplMsg = false;
 	logs = false;
 	cur_plot = 0;
-	file_counter = 0;
 	autom_x = true;
 	max_c = min_c = num_c = first_c = 1;
 	autom = true;
@@ -273,6 +274,7 @@ void gui::analysis( bool mc )
 	time_cross = xy = false;
 	gnu = false;
 	watch = true;
+	data_files.clear( );
 
 	cmd( "set y2 0" );
 	cmd( "set allblack $grayscaleP" );
@@ -2778,13 +2780,14 @@ void gui::analysis( bool mc )
 						else
 							h = sim.res_list.size( );// number of files
 
-						p = vs.size( );			// number of existing series
-						file_stores.resize( h );
-
 						if ( mc )
 							k = get_int( "keepSeries" );
 						else
 							k = true;
+
+						p = vs.size( );				// number of existing series
+						r = data_files.size( );		// number of loaded files
+						f_stores.clear( );
 
 						if ( h > 1 )
 							cmd( "progressbox .da.pas \"Add Series\" \"Loading results files\" \"File\" %d { set stop true } .da \"Series\"", h );
@@ -2796,44 +2799,55 @@ void gui::analysis( bool mc )
 							if ( ! mc || sim.res_list.size( ) <= 1 )
 							{
 								cmd( "set datafile [ lindex $lab %d ]", i );
-								get_str( "datafile", filename, MAX_PATH_LENGTH );
+								get_str( "datafile", fname, MAX_PATH_LENGTH );
 							}
 							else
-								lsd::strcpyn( filename, sim.res_list[ i ].c_str( ), MAX_PATH_LENGTH );
+								lsd::strcpyn( fname, sim.res_list[ i ].c_str( ), MAX_PATH_LENGTH );
 
-							if ( strlen( filename ) > 3 && ! strcmp( & filename[ strlen( filename ) - 3 ], ".gz" ) )
+							if ( strlen( fname ) > 3 && ! strcmp( & fname[ strlen( fname ) - 3 ], ".gz" ) )
 								gz = true;
 
-							f = fopen( filename, "r" );
+							f = fopen( fname, "r" );
 
 							if ( f != NULL )
 							{
 								fclose( f );
-								++file_counter;
-								insert_data_file( gz, file_stores[ i ], k );
+								f_stores.push_back( insert_data_file( fname, gz, k ) );
 
 								if ( h > 1 )
 									cmd( "prgboxupdate .da.pas %d", i + 1 );
 							}
 							else
-								plog( "\nError: could not open file: %s\n", filename );
+								plog( "\nError: could not open file: %s\n", fname );
 						}
 
 						cmd( "destroytop .da.pas" );
 
 						if ( stop )
 						{
-							vs.clear( );
-							max_c = file_counter = 0;
+							vs.resize( p );
+							data_files.resize( r );
+
+							if ( p == 0 )
+								min_c = max_c = 0;
 						}
 
 						if ( mc && ! stop )
 						{
 							plog( "\nCreating MC series... " );
 
-							m = vs.size( );			// total series after file load
-							const str2_vecT & var_names = align_file_vars( file_stores );
-							l = var_names[ 0 ].size( );	// number of series really loaded
+							m = vs.size( );				// total series after file load
+							v_names = align_file_vars( f_stores );
+							l = v_names[ 0 ].size( );	// number of series really loaded
+
+							if ( l == 0 )
+							{
+								cmd( "ttk::messageBox -parent .da -type ok -icon error -title Error -message \"Invalid results files\" -detail \"Monte Carlo experiment requires files from the same simulation model and configuration. Please check and regenerate the files.\"" );
+								plog( "\nError: invalid files\n" );
+								vs.resize( p );
+								goto add_end;
+							}
+
 							var_num = k ? vs.size( ) : p;
 							cur_var.resize( h );
 
@@ -2842,10 +2856,10 @@ void gui::analysis( bool mc )
 							for ( j = 0, stop = false; j < l && ! stop; ++j )
 							{
 								for ( i = 0; i < h; ++i )
-									cur_var[ i ] = var_names[ i ][ j ];
+									cur_var[ i ] = v_names[ i ][ j ];
 
-								cmd( "set vname [ lindex [ split \"%s\" ] 0 ]", var_names[ 0 ][ j ].c_str( ) );
-								cmd( "set ftag [ string replace [ lindex [ split \"%s\" ] 1 ] 0 3 ]", var_names[ 0 ][ j ].c_str( ) );
+								cmd( "set vname [ lindex [ split \"%s\" ] 0 ]", v_names[ 0 ][ j ].c_str( ) );
+								cmd( "set ftag [ string replace [ lindex [ split \"%s\" ] 1 ] 0 3 ]", v_names[ 0 ][ j ].c_str( ) );
 
 								create_series( true, cur_var );
 
@@ -2857,21 +2871,27 @@ void gui::analysis( bool mc )
 
 							cmd( "destroytop .da.pas" );
 
-							if ( ! k && ( int ) vs.size( ) >= m )
+							// remove MC series and reset ranks
+							if ( ! k )
 							{
-								vs.erase( vs.begin( ) + p, vs.begin( ) + m );
-								file_counter = 0;
+								sto_vecT vs_tmp = std::move( vs );
+								vs.clear( );
+
+								i = 0;
+								for ( auto & cs : vs_tmp )
+									if ( ! cs.mc )
+									{
+										cs.rank = i++;
+										vs.push_back( std::move( cs ) );
+									}
 							}
 
-							// reset serial ranks/ids
+							// redo the series available list box
 							cmd( "$serLbox delete 0 end" );
 							cmd( "tooltip::tooltip clear ${serLbox}*" );
 
-							for ( i = 0; i < ( int ) vs.size( ); ++i )
-							{
-								vs[ i ].rank = i;
-								cmd( "add_series \"%s %s (%d-%d) #%d\" %s", vs[ i ].label.c_str( ), vs[ i ].tag.c_str( ), vs[ i ].start, vs[ i ].end, vs[ i ].rank, vs[ i ].parent.c_str( ) );
-							}
+							for ( auto & cs : vs )
+								cmd( "add_series \"%s %s (%d-%d) #%d\" %s", cs.label.c_str( ), cs.tag.c_str( ), cs.start, cs.end, cs.rank, cs.parent.c_str( ) );
 
 							if ( stop )
 								plog( "Interrupted\n" );
@@ -3963,7 +3983,6 @@ void gui::plot_tseries( void )
 
 	// handle time selection
 	if ( autom_x || min_c >= max_c )
-	{
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
@@ -3975,7 +3994,6 @@ void gui::plot_tseries( void )
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
 		}
-	}
 
 	// handle 2nd y-axis scale
 	cmd( "set choice $y2" );
@@ -4862,19 +4880,20 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 /*************************************************************
  INSERT_DATA_FILE
  *************************************************************/
-void gui::insert_data_file( bool gz, stp_vecT & file_stores, bool keep_vars )
+i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 {
 	FILE *f = NULL;
 	gzFile fz = Z_NULL;
 	char ch, *tok, *linbuf, label[ MAX_ELEM_LENGTH ], tag[ MAX_ELEM_LENGTH ];
-	int i, j, new_v, new_c, num_v;
+	int i, j, fidx, new_v, new_c, num_v;
 	bool header = false;
 	long linsiz = 1;
+	i_vecT file_store;
 
 	if ( ! gz )
-		f = fopen( filename, "rt" );
+		f = fopen( file_name, "rt" );
 	else
-		fz = gzopen( filename, "rt" );
+		fz = gzopen( file_name, "rt" );
 
 	if ( f == NULL && fz == Z_NULL )
 	{
@@ -4882,7 +4901,14 @@ void gui::insert_data_file( bool gz, stp_vecT & file_stores, bool keep_vars )
 		goto end;
 	}
 
-	plog( "\nResults data from file %s (%s%d) ", filename, lsd::tag_pref[ 5 ], file_counter );
+	for ( fidx = 0; fidx < ( int ) data_files.size( ); ++fidx )
+		if ( data_files[ fidx ] == file_name )
+			break;
+
+	if ( fidx == ( int ) data_files.size( ) )
+		data_files.push_back( file_name );
+
+	plog( "\nResults data from file %s (%s%d) ", file_name, lsd::tag_pref[ 5 ], ++fidx );
 
 	num_v = vs.size( );
 	new_v = 0;
@@ -4923,12 +4949,12 @@ void gui::insert_data_file( bool gz, stp_vecT & file_stores, bool keep_vars )
 	cmd( ".da.pas.main.p2.scale configure -maximum %d", new_v );
 
 	vs.resize( num_v + new_v );
-	new_c = count_lines( filename, gz ) - 1;
+	new_c = count_lines( file_name, gz ) - 1;
 
 	if ( ! gz )
-		f = fopen( filename, "rt" );
+		f = fopen( file_name, "rt" );
 	else
-		fz = gzopen( filename, "rt" );
+		fz = gzopen( file_name, "rt" );
 
 	linsiz = ( long ) std::max( linsiz, ( long ) new_v * ( DBL_DIG + 4 ) ) + 1;
 	linbuf = new char[ linsiz ];
@@ -4950,13 +4976,13 @@ void gui::insert_data_file( bool gz, stp_vecT & file_stores, bool keep_vars )
 
 		sscanf( tok, "%s %s (%d %d)", label, tag, &( vs[ i ].start ), &( vs[ i ].end ) );
 		vs[ i ].label = label;
-		vs[ i ].tag = lsd::to_string( "%s%d_%s", lsd::tag_pref[ 5 ], file_counter, tag );
+		vs[ i ].tag = lsd::to_string( "%s%d_%s", lsd::tag_pref[ 5 ], fidx, tag );
 		vs[ i ].rank = i;
 		vs[ i ].data = new double[ vs[ i ].end - vs[ i ].start + 1 ];
 		vs[ i ].data_alias = false;		// dealocate on store destruction
 
 		if ( sim.par_map.find( vs[ i ].label ) == sim.par_map.end( ) )
-			vs[ i ].parent = filename;
+			vs[ i ].parent = file_name;
 		else
 			vs[ i ].parent = sim.par_map[ vs[ i ].label ];
 
@@ -4974,12 +5000,12 @@ void gui::insert_data_file( bool gz, stp_vecT & file_stores, bool keep_vars )
 		{
 			cmd( "if { ! [ dict exists serDescrDict %s ] } { \
 					dict set serDescrDict %s \"Loaded from file\n[ file nativename %s ]\" \
-				}", vs[ i ].label.c_str( ), vs[ i ].label.c_str( ), filename );
+				}", vs[ i ].label.c_str( ), vs[ i ].label.c_str( ), file_name );
 
 			cmd( "add_series \"%s\" %s", da_tmp, vs[ i ].parent.c_str( ) );
 		}
 
-		file_stores.push_back( & vs[ i ] );
+		file_store.push_back( i );
 
 		tok = strtok( NULL, "\t" );			// get next token, if any
 
@@ -5063,6 +5089,8 @@ void gui::insert_data_file( bool gz, stp_vecT & file_stores, bool keep_vars )
 		fclose( f );
 	else
 		gzclose( fz );
+
+	return file_store;
 }
 
 
@@ -5072,74 +5100,95 @@ void gui::insert_data_file( bool gz, stp_vecT & file_stores, bool keep_vars )
  are used for analysis, trimming the ones with missing
  equivalent instances (exactly same name, position, time span)
  *************************************************************/
-const str2_vecT & gui::align_file_vars( stp2_vecT & file_stores )
+str2_vecT gui::align_file_vars( i2_vecT & f_stores )
 {
-	i_vecT v_idx( file_stores.size( ), 0 );
-	static str2_vecT var_names( file_stores.size( ) );
-	str_setT sigs_set;
-	stp_setT to_trim;
-	str_vecT unique_sigs;
-	str2_vecT var_sigs( file_stores.size( ) );
+	int n, rank = 0, trim = 0;
+	i_vecT v_idx( f_stores.size( ), 0 );
+	std::smatch f_num;
+	store *cs;
+	str_setT to_trim, sigs_set;
+	str_vecT uniq_sigs;
+	str2_vecT v_names( f_stores.size( ) ), v_sigs( f_stores.size( ) );
+
+	std::regex f_pref( std::string( std::string( "^" ) + lsd::tag_pref[ 5 ] ) + "([0-9]+)_" );
 
 	// get set of unique variable signatures (name-position-start-end), preserving order
-	for ( auto i = 0; i < ( int ) file_stores.size( ); ++i )
-		for ( auto & var : file_stores[ i ] )
+	for ( auto i = 0; i < ( int ) f_stores.size( ); ++i )
+		for ( auto j = 0; j < ( int ) f_stores[ i ].size( ); ++j )
 		{
-			strT sig = lsd::to_string( "%s-%s-%d-%d", var->label.c_str( ), var->tag.c_str( ), var->start, var->end );
-			var_sigs[ i ].emplace_back( sig );
+			cs = & vs[ f_stores[ i ][ j ] ];// current variable store
+			cs->mc = true;
+
+			// remove file prefix and number from tag before creating signature
+			strT sig = lsd::to_string( "%s-%s-%d-%d", cs->label.c_str( ), std::regex_replace( cs->tag, f_pref, "" ).c_str( ), cs->start, cs->end );
+			v_sigs[ i ].push_back( sig );
 
 			// add a single instance of each signature
 			if ( sigs_set.emplace( sig ).second )
-				unique_sigs.emplace_back( sig );
+				uniq_sigs.push_back( sig );
 		}
 
 	// run over all variables found to identify instances to trim
-	for ( auto & sig : unique_sigs )
+	for ( auto & sig : uniq_sigs )
 	{
 		// look for instance mismatches
 		for ( auto missing = false; ! missing; )
 		{
 			// check if all files have this instance
-			for ( auto i = 0; i < ( int ) file_stores.size( ); ++i )
-				if ( v_idx[ i ] >= ( int ) file_stores[ i ].size( ) || var_sigs[ i ][ v_idx[ i ] ] != sig )
+			for ( auto i = 0; i < ( int ) v_sigs.size( ); ++i )
+				if ( v_idx[ i ] >= ( int ) v_sigs[ i ].size( ) || sig != v_sigs[ i ][ v_idx[ i ] ] )
 				{
 					missing = true;			// this file doesn't have instance
 					break;
 				}
 
 			// update file indexes, removing excess instances from all files
-			for ( auto i = 0; i < ( int ) file_stores.size( ); ++i )
-			{
-				auto cs = file_stores[ i ][ v_idx[ i ] ];// current variable store
-
+			for ( auto i = 0; i < ( int ) v_sigs.size( ); ++i )
 				if ( missing )
-				{
-					if ( v_idx[ i ] < ( int ) file_stores[ i ].size( ) && var_sigs[ i ][ v_idx[ i ] ] == sig )
-						to_trim.emplace( cs );
-				}
+					// one run missing the instance, remove all excess instances
+					while ( true )			// remove all extra instances of var
+						if ( v_idx[ i ] < ( int ) v_sigs[ i ].size( ) && sig == v_sigs[ i ][ v_idx[ i ] ] )
+						{
+							v_sigs[ i ].erase( v_sigs[ i ].begin( ) + v_idx[ i ] );
+							to_trim.emplace( sig );
+							++trim;
+						}
+						else
+							break;			// stop on first var after or last var
 				else						// all runs have this instance
-				{
-					var_names[ i ].emplace_back( lsd::to_string( "%s %s (%d-%d) #%d", cs->label.c_str( ), cs->tag.c_str( ), cs->start, cs->end, cs->rank ) );
 					++v_idx[ i ];			// all aligned so far, check next var
-				}
-			}
 		}
 	}
 
 	// trim excess instances from data store if needed
-	if ( to_trim.size( ) > 0 )
+	if ( trim > 0 )
+		plog( "(discarding %d unmatched instances)... ", trim );
+
+	// just move undesirable stores out of vs vector (no copy)
+	sto_vecT vs_tmp = std::move( vs );
+	vs.clear( );
+
+	for ( auto & cs : vs_tmp )
+		if ( to_trim.find( lsd::to_string( "%s-%s-%d-%d", cs.label.c_str( ), std::regex_replace( cs.tag, f_pref, "" ).c_str( ), cs.start, cs.end ) ) == to_trim.end( ) )
+		{
+			cs.rank = rank++;
+
+			// collect the final variable list for each data file
+			if ( cs.mc && std::regex_search( cs.tag, f_num, f_pref ) && ( n = std::stoi( f_num[ 1 ] ) ) <= ( int ) v_names.size( ) )
+				v_names[ n - 1 ].push_back( lsd::to_string( "%s %s (%d-%d) #%d", cs.label.c_str( ), cs.tag.c_str( ), cs.start, cs.end, cs.rank ) );
+
+			vs.push_back( std::move( cs ) );
+		}
+		else
+			--trim;
+
+	if ( trim != 0 )
 	{
-		plog( "(discarding %d unmatched instances)... ");
-
-		sto_vecT vs_trim( vs.size( ) - to_trim.size( ) );
-		for ( auto & v : vs )
-			if ( to_trim.find( & v ) == to_trim.end( ) )
-				vs_trim.emplace_back( v );
-
-		vs = vs_trim;
+		plog( "[error (%d)] ", trim );
+		stop = true;
 	}
 
-	return var_names;
+	return v_names;
 }
 
 
@@ -5547,7 +5596,6 @@ void gui::plot_gnu( void )
 
 	// handle time selection
 	if ( autom_x || min_c >= max_c )
-	{
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
@@ -5559,7 +5607,6 @@ void gui::plot_gnu( void )
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
 		}
-	}
 
 	// auto-find minimums and maximums
 	if ( miny >= maxy )
@@ -6003,7 +6050,6 @@ void gui::plot_cs_xy( void )
 
 	// handle time selection
 	if ( autom_x || min_c >= max_c )
-	{
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
@@ -6015,7 +6061,6 @@ void gui::plot_cs_xy( void )
 			if ( end[ i ] > max_c )
 				max_c = end[ i ] > num_c ? num_c : end[ i ];
 		}
-	}
 
 	// auto-find minimums and maximums
 	if ( miny >= maxy )
@@ -7650,7 +7695,7 @@ void gui::histograms_cs( void )
 /*************************************************************
  CREATE_SERIES
  *************************************************************/
-bool gui::create_series( bool mc, str_vecT var_names )
+bool gui::create_series( bool mc, str_vecT v_names )
 {
 	bool first, medCI = false, done = true;
 	char **str, **tag;
@@ -7808,7 +7853,7 @@ bool gui::create_series( bool mc, str_vecT var_names )
 		flt = 0;
 		thflt = 0;
 		cs_long = 1;
-		sel_series = var_names.size( );
+		sel_series = v_names.size( );
 		cmd( "set basename $vname" );
 
 		// set option specific parameters
@@ -7882,16 +7927,16 @@ bool gui::create_series( bool mc, str_vecT var_names )
 		data[ i ] = NULL;
 
 		if ( mc )
-			lsd::strcpyn( da_tmp, var_names[ i ].c_str( ), MAX_BUFF_SIZE );
+			lsd::strcpyn( da_tmp, v_names[ i ].c_str( ), MAX_BUFF_SIZE );
 		else
 		{
 			cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 			get_str( "res", da_tmp, MAX_BUFF_SIZE );
 		}
 
-		sscanf( da_tmp, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( da_tmp, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
-		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
+		if ( mc || autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
@@ -7906,10 +7951,10 @@ bool gui::create_series( bool mc, str_vecT var_names )
 		}
 	}
 
-	if ( autom_x || min_c >= max_c )
+	if ( mc || autom_x || min_c >= max_c )
 	{
 		// differently from normal, pick just time steps covering all series
-		min_c = std::max( start[ 0 ], showInit ? 0 : 1 );
+		min_c = std::max( start[ 0 ], showInit || mc ? 0 : 1 );
 		max_c = end[ 0 ];
 		for ( i = 1; i < sel_series; ++i )
 		{
@@ -7929,7 +7974,7 @@ bool gui::create_series( bool mc, str_vecT var_names )
 	}
 
 	// handle creation of multiple series
-	for ( k = 0, l = vs.size( ); k < new_series; ++k, ++l, ++var_num )
+	for ( k = 0, l = vs.size( ) - new_series; k < new_series; ++k, ++l, ++var_num )
 	{
 		vs[ l ].label = get_str( "vname" );
 		vs[ l ].tag = lsd::to_string( "%s%s", mc ? lsd::tag_pref[ 7 ] : lsd::tag_pref[ 6 ], get_str( "ftag" ) );
@@ -8548,29 +8593,41 @@ void gui::save_datazip( void )
 	str = new char *[ nv ];
 	tag = new char *[ nv ];
 
-	max_c = min_c = 0;
-
 	for ( i = 0; i < nv; ++i )
 	{
 		str[ i ] = new char[ MAX_ELEM_LENGTH ];
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
+		data[ i ] = NULL;
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
 		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
 
-		data[ i ] = vs[ id[ i ] ].data;
-		if ( data[ i ] == NULL )
+		if ( start[ i ] <= max_c && end[ i ] >= min_c )
 		{
-			sim.error_hard( "internal problem in LSD",
-							"if error persists, please contact developers",
-							true,
-							"invalid series data" );
-			lsd_exit_gui( 18 );
+			data[ i ] = vs[ id[ i ] ].data;
+			if ( data[ i ] == NULL )
+			{
+				sim.error_hard( "internal problem in LSD",
+								"if error persists, please contact developers",
+								true,
+								"invalid series data" );
+				lsd_exit_gui( 18 );
+			}
 		}
-
-		if ( max_c < end[ i ] )
-			max_c = end[ i ];
 	}
+
+	if ( min_c >= max_c )
+		for ( i = 0; i < nv; ++i )
+		{
+			if ( i == 0 )
+				min_c = max_c = start[ i ];
+
+			if ( start[ i ] < min_c )
+				min_c = start[ i ];
+
+			if ( end[ i ] > max_c )
+			max_c = end[ i ] > num_c ? num_c : end[ i ];
+		}
 
 	Tcl_LinkVar( interp, "fr", ( char * ) &fr, TCL_LINK_BOOLEAN);
 	Tcl_LinkVar( interp, "dozip", ( char * ) &sim.dozip, TCL_LINK_BOOLEAN);
@@ -8759,6 +8816,9 @@ void gui::save_datazip( void )
 		if ( strlen( labprefix ) == 0 )
 			strcpy( labprefix, "V" );
 	}
+
+	if ( del == 3 && num_col > 80 )
+		cmd( "ttk::messageBox -parent .da -type ok -title Warning -icon warning -default ok -message \"Too many data columns to save\" -detail \"No more than 80 columns are supported if fixed column width is chosen.\nOnly the first 80 columns will be saved.\"" );
 
 	num_col = ( int ) std::max( 10, std::min( num_col, 80 ) );
 
@@ -9027,7 +9087,6 @@ void gui::plog_series( void )
 	}
 
 	if ( autom_x || min_c >= max_c )
-	{
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
@@ -9039,7 +9098,6 @@ void gui::plog_series( void )
 			if ( end[ i ] > max_c )
 			max_c = end[ i ] > num_c ? num_c : end[ i ];
 		}
-	}
 
 	plog( "\n\nTime series data\n" );
 	plog_tag( "t\t%s_%s", "series", str[ 0 ], tag[ 0 ] );
