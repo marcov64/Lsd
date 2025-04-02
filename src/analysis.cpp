@@ -111,17 +111,17 @@ namespace gui
 	int *cdata;
 	int cur_plot;
 	int dir;
-	int first_c;
+	int first_t;
 	int grid;
 	int gnu;
-	int histo_cases;
+	int histo_t;
 	int histo_cs;
 	int line_point;
 	int logs;
-	int max_c;
-	int min_c;
+	int max_t;
+	int min_t;
 	int num_bins;
-	int num_c;
+	int num_t;
 	int num_col = 16;
 	int num_y2;
 	int nv;
@@ -133,7 +133,7 @@ namespace gui
 	int showInit;
 	int time_cross;
 	int type_plot[ MAX_PLOTS ];
-	int var_num;
+	int v_num;
 	int xy;
 	node gplot_tree;
 	sto_vecT vs;						// data store for analysis
@@ -229,10 +229,10 @@ void gui::analysis( bool mc )
 {
 	bool gz;
 	char dirname[ MAX_PATH_LENGTH ], fname[ MAX_PATH_LENGTH ], str1[ MAX_ELEM_LENGTH ], str2[ MAX_ELEM_LENGTH ], str3[ MAX_ELEM_LENGTH ];
-	double compvalue;
+	double comp_val;
 	int h, i, j, k, l, m, p, r;
 	i2_vecT f_stores;
-	str_vecT cur_var;
+	str_vecT cur_v;
 	str2_vecT v_names;
 	FILE *f;
 
@@ -240,35 +240,35 @@ void gui::analysis( bool mc )
 
 	cmd( "destroytop .dap" );
 
-	Tcl_LinkVar( interp, "cur_plot", ( char * ) &cur_plot, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "nv", ( char * ) &nv, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "avgSmpl", ( char * ) &avgSmpl, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "showInit", ( char * ) &showInit, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "auto", ( char * ) &autom, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "auto_x", ( char * ) &autom_x, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "firstc", ( char * ) &first_c, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "numc", ( char * ) &num_c, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "minc", ( char * ) &min_c, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "maxc", ( char * ) &max_c, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "miny", ( char * ) &miny, TCL_LINK_DOUBLE );
-	Tcl_LinkVar( interp, "maxy", ( char * ) &maxy, TCL_LINK_DOUBLE );
-	Tcl_LinkVar( interp, "logs", ( char * ) &logs, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "allblack", ( char * ) &allblack, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "grid", ( char * ) &grid, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "point_size", ( char * ) &point_size, TCL_LINK_DOUBLE );
-	Tcl_LinkVar( interp, "tc", ( char * ) &time_cross, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "line_point", ( char * ) &line_point, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "xy", ( char * ) &xy, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "pdigits", ( char * ) &pdigits, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "watch", ( char * ) &watch, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "gnu", ( char * ) &gnu, TCL_LINK_BOOLEAN );
-	Tcl_LinkVar( interp, "num_y2", ( char * ) &num_y2, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "cur_plot", ( char * ) & cur_plot, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "nv", ( char * ) & nv, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "avgSmpl", ( char * ) & avgSmpl, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "showInit", ( char * ) & showInit, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "auto", ( char * ) & autom, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "auto_x", ( char * ) & autom_x, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "firstc", ( char * ) & first_t, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "numc", ( char * ) & num_t, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "minc", ( char * ) & min_t, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "maxc", ( char * ) & max_t, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "miny", ( char * ) & miny, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( interp, "maxy", ( char * ) & maxy, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( interp, "logs", ( char * ) & logs, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "allblack", ( char * ) & allblack, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "grid", ( char * ) & grid, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "point_size", ( char * ) & point_size, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( interp, "tc", ( char * ) & time_cross, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "line_point", ( char * ) & line_point, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "xy", ( char * ) & xy, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "pdigits", ( char * ) & pdigits, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "watch", ( char * ) & watch, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "gnu", ( char * ) & gnu, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( interp, "num_y2", ( char * ) & num_y2, TCL_LINK_INT );
 
 	avgSmplMsg = false;
 	logs = false;
 	cur_plot = 0;
 	autom_x = true;
-	max_c = min_c = num_c = first_c = 1;
+	max_t = min_t = num_t = first_t = 1;
 	autom = true;
 	miny = maxy = 0;
 	time_cross = xy = false;
@@ -749,8 +749,8 @@ void gui::analysis( bool mc )
 	if ( sim.eff_t > 0 )
 	{
 		sim.root->insert_data_mem( );
-		min_c = std::max( first_c, showInit ? 0 : 1 );
-		max_c = num_c;
+		min_t = std::max( first_t, showInit ? 0 : 1 );
+		max_t = num_t;
 	}
 	else
 	{	// create parent map from loaded but not run configuration
@@ -1278,8 +1278,8 @@ void gui::analysis( bool mc )
 
 			// Use right button of the mouse to select all series with a given label
 			case 30:
-				compvalue = 0;
-				Tcl_LinkVar( interp, "compvalue", ( char * ) &compvalue, TCL_LINK_DOUBLE );
+				comp_val = 0;
+				Tcl_LinkVar( interp, "comp_val", ( char * ) & comp_val, TCL_LINK_DOUBLE );
 				cmd( "set a [ split $res ]" );
 				cmd( "set b [ lindex $a 0 ]" );
 				cmd( "set ntag [ llength [ split [ lindex $a 1 ] {_} ] ]" );
@@ -1521,8 +1521,8 @@ void gui::analysis( bool mc )
 				cmd( "ttk::frame .da.a.c.v" );
 				cmd( "ttk::frame .da.a.c.v.c" );
 				cmd( "ttk::label .da.a.c.v.c.l -text \"Comparison value\"" );
-				cmd( "ttk::entry .da.a.c.v.c.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set compvalue %%P; return 1 } { %%W delete 0 end; %%W insert 0 $compvalue; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-				cmd( "write_any .da.a.c.v.c.e $compvalue" );
+				cmd( "ttk::entry .da.a.c.v.c.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set comp_val %%P; return 1 } { %%W delete 0 end; %%W insert 0 $comp_val; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
+				cmd( "write_any .da.a.c.v.c.e $comp_val" );
 				cmd( "bind .da.a.c.v.c.e <Return> {focus .da.a.c.v.t.e2; .da.a.c.v.t.e2 selection range 0 end }" );
 				cmd( "pack .da.a.c.v.c.l .da.a.c.v.c.e" );
 				cmd( "ttk::frame .da.a.c.v.t" );
@@ -1547,8 +1547,8 @@ void gui::analysis( bool mc )
 					Tcl_DoOneEvent( 0 );
 
 				cmd( "set tvar [ .da.a.c.v.t.e2 get ]" );
-				cmd( "set compvalue [ .da.a.c.v.c.e get ]" );
-				Tcl_UnlinkVar( interp, "compvalue" );
+				cmd( "set comp_val [ .da.a.c.v.c.e get ]" );
+				Tcl_UnlinkVar( interp, "comp_val" );
 
 				if ( choice == 2 )
 				{
@@ -1752,7 +1752,7 @@ void gui::analysis( bool mc )
 					for ( i = 0; i < j; ++i )
 					{
 						cmd( "set res [ lindex $tot %d ]", i );
-						sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str1, str2, &l, &m, &k );
+						sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str1, str2, & l, & m, & k );
 
 						if ( h >= l && h <= m && ! strcmp( str1, str3 ) )
 						{
@@ -1762,27 +1762,27 @@ void gui::analysis( bool mc )
 								switch ( p )
 								{
 									case 0:
-										if ( vs[ k ].data[ h - l ] != compvalue )
+										if ( vs[ k ].data[ h - l ] != comp_val )
 											r = 1;
 										break;
 									case 1:
-										if ( vs[ k ].data[ h - l ] == compvalue )
+										if ( vs[ k ].data[ h - l ] == comp_val )
 											r = 1;
 										break;
 									case 2:
-										if ( vs[ k ].data[ h - l ] >= compvalue )
+										if ( vs[ k ].data[ h - l ] >= comp_val )
 											r = 1;
 										break;
 									case 3:
-										if ( vs[ k ].data[ h - l ] > compvalue )
+										if ( vs[ k ].data[ h - l ] > comp_val )
 											r = 1;
 										break;
 									case 4:
-										if ( vs[ k ].data[ h - l ] <= compvalue )
+										if ( vs[ k ].data[ h - l ] <= comp_val )
 											r = 1;
 										break;
 									case 5:
-										if ( vs[ k ].data[ h - l ] < compvalue )
+										if ( vs[ k ].data[ h - l ] < comp_val )
 											r = 1;
 										break;
 								}
@@ -1805,8 +1805,8 @@ void gui::analysis( bool mc )
 
 			// Use right button of the mouse to remove series selected with different criteria
 			case 33:
-				compvalue = 0;
-				Tcl_LinkVar( interp, "compvalue", ( char * ) &compvalue, TCL_LINK_DOUBLE );
+				comp_val = 0;
+				Tcl_LinkVar( interp, "comp_val", ( char * ) & comp_val, TCL_LINK_DOUBLE );
 				cmd( "set a [ split $res ]" );
 				cmd( "set b [ lindex $a 0 ]" );
 				cmd( "set c [ lindex $a 1 ]" ); //get the tag value
@@ -2048,8 +2048,8 @@ void gui::analysis( bool mc )
 				cmd( "ttk::frame .da.a.c.v" );
 				cmd( "ttk::frame .da.a.c.v.c" );
 				cmd( "ttk::label .da.a.c.v.c.l -text \"Comparison value\"" );
-				cmd( "ttk::entry .da.a.c.v.c.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set compvalue %%P; return 1 } { %%W delete 0 end; %%W insert 0 $compvalue; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
-				cmd( "write_any .da.a.c.v.c.e $compvalue" );
+				cmd( "ttk::entry .da.a.c.v.c.e -width 10 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set comp_val %%P; return 1 } { %%W delete 0 end; %%W insert 0 $comp_val; return 0 } } -invalidcommand { bell } -justify center -state disabled" );
+				cmd( "write_any .da.a.c.v.c.e $comp_val" );
 				cmd( "bind .da.a.c.v.c.e <Return> {focus .da.a.c.v.t.e2; .da.a.c.v.t.e2 selection range 0 end }" );
 				cmd( "pack .da.a.c.v.c.l .da.a.c.v.c.e" );
 				cmd( "ttk::frame .da.a.c.v.t" );
@@ -2077,8 +2077,8 @@ void gui::analysis( bool mc )
 					Tcl_DoOneEvent( 0 );
 
 				cmd( "set tvar [ .da.a.c.v.t.e2 get ]" );
-				cmd( "set compvalue [ .da.a.c.v.c.e get ]" );
-				Tcl_UnlinkVar( interp, "compvalue" );
+				cmd( "set comp_val [ .da.a.c.v.c.e get ]" );
+				Tcl_UnlinkVar( interp, "comp_val" );
 
 				if ( choice == 2 )
 				{
@@ -2296,7 +2296,7 @@ void gui::analysis( bool mc )
 					for ( i = 0; i < j; ++i )
 					{
 						cmd( "set res [ lindex $tot %d ]", i );
-						sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str1, str2, &l, &m, &k );
+						sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str1, str2, & l, & m, & k );
 
 						if ( h >= l && h <= m && ! strcmp( str1, str3 ) )
 						{
@@ -2306,27 +2306,27 @@ void gui::analysis( bool mc )
 								switch ( p )
 								{
 									case 0:
-										if ( vs[ k ].data[ h - l ] != compvalue )
+										if ( vs[ k ].data[ h - l ] != comp_val )
 											r = 1;
 										break;
 									case 1:
-										if ( vs[ k ].data[ h - l ] == compvalue )
+										if ( vs[ k ].data[ h - l ] == comp_val )
 											r = 1;
 										break;
 									case 2:
-										if ( vs[ k ].data[ h - l ] >= compvalue )
+										if ( vs[ k ].data[ h - l ] >= comp_val )
 											r = 1;
 										break;
 									case 3:
-										if ( vs[ k ].data[ h - l ] > compvalue )
+										if ( vs[ k ].data[ h - l ] > comp_val )
 											r = 1;
 										break;
 									case 4:
-										if ( vs[ k ].data[ h - l ] <= compvalue )
+										if ( vs[ k ].data[ h - l ] <= comp_val )
 											r = 1;
 										break;
 									case 5:
-										if ( vs[ k ].data[ h - l ] < compvalue )
+										if ( vs[ k ].data[ h - l ] < comp_val )
 											r = 1;
 										break;
 								}
@@ -2624,7 +2624,7 @@ void gui::analysis( bool mc )
 				switch ( choice )
 				{
 					case 4:
-						if ( create_series( false, cur_var ) )
+						if ( create_series( false, cur_v ) )
 							cmd( "selectinlist .da.vars.lb.f.v end" );
 
 						break;
@@ -2829,7 +2829,7 @@ void gui::analysis( bool mc )
 							data_files.resize( r );
 
 							if ( p == 0 )
-								min_c = max_c = 0;
+								min_t = max_t = 0;
 						}
 
 						if ( mc && ! stop )
@@ -2848,26 +2848,26 @@ void gui::analysis( bool mc )
 								goto add_end;
 							}
 
-							var_num = k ? vs.size( ) : p;
-							cur_var.resize( h );
+							v_num = k ? vs.size( ) : p;
+							cur_v.resize( h );
 
 							cmd( "progressbox .da.pas \"Add Series\" \"Creating MC Series\" \"Series\" %d { set stop true } .da", l );
 
 							for ( j = 0, stop = false; j < l && ! stop; ++j )
 							{
 								for ( i = 0; i < h; ++i )
-									cur_var[ i ] = v_names[ i ][ j ];
+									cur_v[ i ] = v_names[ i ][ j ];
 
 								cmd( "set vname [ lindex [ split \"%s\" ] 0 ]", v_names[ 0 ][ j ].c_str( ) );
 								cmd( "set ftag [ string replace [ lindex [ split \"%s\" ] 1 ] 0 3 ]", v_names[ 0 ][ j ].c_str( ) );
 
-								create_series( true, cur_var );
+								create_series( true, cur_v );
 
 								if ( j % PROG_SERIES == 0 )
 									cmd( "prgboxupdate .da.pas %d", j + 1 );
 							}
 
-							cur_var.clear( );
+							cur_v.clear( );
 
 							cmd( "destroytop .da.pas" );
 
@@ -3824,17 +3824,17 @@ void gui::update_bounds( void )
 		maxy2 = 1;
 	}
 
-	if ( min_c < first_c )
-		min_c = std::max( first_c, showInit ? 0 : 1 );
+	if ( min_t < first_t )
+		min_t = std::max( first_t, showInit ? 0 : 1 );
 
-	if ( max_c <= min_c )
+	if ( max_t <= min_t )
 	{
-		max_c = min_c + 1;
+		max_t = min_t + 1;
 
-		if ( max_c > num_c && num_c > 0 )
+		if ( max_t > num_t && num_t > 0 )
 		{
-			max_c = num_c;
-			min_c = num_c - 1;
+			max_t = num_t;
+			min_t = num_t - 1;
 		}
 	}
 
@@ -3949,8 +3949,8 @@ void gui::plot_tseries( void )
 
 	if ( autom_x )
 	{
-		min_c = std::max( first_c, showInit ? 0 : 1 );
-		max_c = num_c;
+		min_t = std::max( first_t, showInit ? 0 : 1 );
+		max_t = num_t;
 	}
 
 	// prepare data from selected series
@@ -3961,10 +3961,10 @@ void gui::plot_tseries( void )
 		data[ i ] = NULL;
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
 		// get series data and take logs if necessary
-		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
+		if ( autom_x || ( start[ i ] <= max_t && end[ i ] >= min_t ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
@@ -3982,17 +3982,17 @@ void gui::plot_tseries( void )
 	}
 
 	// handle time selection
-	if ( autom_x || min_c >= max_c )
+	if ( autom_x || min_t >= max_t )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = std::max( start[ i ], showInit ? 0 : 1 );
+				min_t = max_t = std::max( start[ i ], showInit ? 0 : 1 );
 
-			if ( start[ i ] < min_c )
-				min_c = std::max( start[ i ], showInit ? 0 : 1 );
+			if ( start[ i ] < min_t )
+				min_t = std::max( start[ i ], showInit ? 0 : 1 );
 
-			if ( end[ i ] > max_c )
-				max_c = end[ i ] > num_c ? num_c : end[ i ];
+			if ( end[ i ] > max_t )
+				max_t = end[ i ] > num_t ? num_t : end[ i ];
 		}
 
 	// handle 2nd y-axis scale
@@ -4017,7 +4017,7 @@ void gui::plot_tseries( void )
 	if ( autom )
 	{
 		for ( done = false, i = 0; i < num_y2 - 1 && i < nv; ++i )
-			for ( j = min_c; j <= max_c; ++j )
+			for ( j = min_t; j <= max_t; ++j )
 			{
 				if ( ! done && start[ i ] <= j && end[ i ] >= j && std::isfinite( data[ i ][ j - start[ i ] ] ) )		// ignore NaNs
 				{
@@ -4047,7 +4047,7 @@ void gui::plot_tseries( void )
 
 	// 2nd y axis is always automatic scaled
 	for ( miny2 = maxy2 = 0, done = false, i = num_y2 - 1; i < nv; ++i )
-		for ( j = min_c; j <= max_c; ++j )
+		for ( j = min_t; j <= max_t; ++j )
 		{
 			if ( ! done && start[ i ] <= j && end[ i ] >= j && std::isfinite( data[ i ][ j - start[ i ] ] ) )		// ignore NaNs
 			{
@@ -4139,8 +4139,8 @@ void gui::plot_cross( void )
 
 	if ( autom_x )
 	{
-		min_c = std::max( first_c, showInit ? 0 : 1 );
-		max_c = num_c;
+		min_t = std::max( first_t, showInit ? 0 : 1 );
+		max_t = num_t;
 	}
 
 	// prepare data from selected series
@@ -4151,7 +4151,7 @@ void gui::plot_cross( void )
 		data[ i ] = NULL;
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
 		// check if series has data for all CS selected time steps
 		for ( k = 0, erase[ i ] = 0; k < nt; ++k )
@@ -4252,7 +4252,7 @@ void gui::plot_cross( void )
 	}
 
 	// plot all series
-	plot( CRSSECT, new_nv, val, list_times, &nt, id, str, tag );
+	plot( CRSSECT, new_nv, val, list_times, & nt, id, str, tag );
 
 	for ( i = 0; i < nv; ++i )
 	{
@@ -4293,8 +4293,8 @@ void gui::set_cs_data( void )
 		return;
 	}
 
-	Tcl_LinkVar( interp, "res", ( char * ) &res, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "dir", ( char * ) &dir, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "res", ( char * ) & res, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "dir", ( char * ) & dir, TCL_LINK_INT );
 
 	cmd( "set bidi $maxc" );
 	cmd( "set res $maxc" );
@@ -4674,11 +4674,11 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->attr->label, tag_pref[ tag ], cv->lab_tit, cv->start, cv->end, *num_v, cv->up->attr->label );
 				++( *num_v );
 
-				if ( cv->end > gui::num_c )
-					gui::num_c = cv->end;
+				if ( cv->end > gui::num_t )
+					gui::num_t = cv->end;
 
-				if ( cv->start < gui::first_c )
-					gui::first_c = cv->start;
+				if ( cv->start < gui::first_t )
+					gui::first_t = cv->start;
 			}
 			else
 				// check if there are still instances to be presented
@@ -4698,11 +4698,11 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 									++( *num_v );
 								}
 
-							if ( ce.end > gui::num_c )
-								gui::num_c = ce.end;
+							if ( ce.end > gui::num_t )
+								gui::num_t = ce.end;
 
-							if ( ce.start < gui::first_c )
-								gui::first_c = ce.start;
+							if ( ce.start < gui::first_t )
+								gui::first_t = ce.start;
 
 							ce.saved = true;
 						}
@@ -4733,11 +4733,11 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->attr->label, tag_pref[ 0 ], cv->lab_tit, cv->start, cv->end, *num_v, sim->par_map[ cv->attr->label ].c_str( ) );
 				++( *num_v );
 
-				if ( cv->end > gui::num_c )
-					gui::num_c = cv->end;
+				if ( cv->end > gui::num_t )
+					gui::num_t = cv->end;
 
-				if ( cv->start < gui::first_c )
-					gui::first_c = cv->start;
+				if ( cv->start < gui::first_t )
+					gui::first_t = cv->start;
 			}
 			else
 				if ( da != NULL && ( ca = da->elem_map.find( cv->attr->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
@@ -4752,11 +4752,11 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 								++( *num_v );
 							}
 
-						if ( ce.end > gui::num_c )
-							gui::num_c = ce.end;
+						if ( ce.end > gui::num_t )
+							gui::num_t = ce.end;
 
-						if ( ce.start < gui::first_c )
-							gui::first_c = ce.start;
+						if ( ce.start < gui::first_t )
+							gui::first_t = ce.start;
 
 						ce.saved = true;
 					}
@@ -4885,7 +4885,7 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 	FILE *f = NULL;
 	gzFile fz = Z_NULL;
 	char ch, *tok, *linbuf, label[ MAX_ELEM_LENGTH ], tag[ MAX_ELEM_LENGTH ];
-	int i, j, fidx, new_v, new_c, num_v;
+	int i, j, fidx, new_v, new_t, num_v;
 	bool header = false;
 	long linsiz = 1;
 	i_vecT file_store;
@@ -4949,7 +4949,7 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 	cmd( ".da.pas.main.p2.scale configure -maximum %d", new_v );
 
 	vs.resize( num_v + new_v );
-	new_c = count_lines( file_name, gz ) - 1;
+	new_t = count_lines( file_name, gz ) - 1;
 
 	if ( ! gz )
 		f = fopen( file_name, "rt" );
@@ -4990,10 +4990,10 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 			snprintf( da_tmp, MAX_BUFF_SIZE, "%s %s (%d-%d) #%d", vs[ i ].label.c_str( ), vs[ i ].tag.c_str( ), vs[ i ].start, vs[ i ].end, i );
 		else
 		{
-			snprintf( da_tmp, MAX_BUFF_SIZE, "%s %s (0-%d) #%d", vs[ i ].label.c_str( ), vs[ i ].tag.c_str( ), new_c - 1, i );
+			snprintf( da_tmp, MAX_BUFF_SIZE, "%s %s (0-%d) #%d", vs[ i ].label.c_str( ), vs[ i ].tag.c_str( ), new_t - 1, i );
 			vs[ i ].start = 0;
-			vs[ i ].end = new_c - 1;
-			first_c = 0;
+			vs[ i ].end = new_t - 1;
+			first_t = 0;
 		}
 
 		if ( keep_vars )
@@ -5018,18 +5018,18 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 	if ( stop )
 	{
 		new_v = i - num_v;
-		new_c = 2;
+		new_t = 2;
 		stop = false;
 	}
 
 	cmd( "update_parent" );
 
 	cmd( ".da.pas.main.p2.info.elem configure -text \"Time step:\"" );
-	cmd( ".da.pas.main.p2.scale configure -maximum %d", new_c - 1 );
+	cmd( ".da.pas.main.p2.scale configure -maximum %d", new_t - 1 );
 	cmd( "prgboxupdate .da.pas \"\" 0" );
 
 	// read data lines
-	for ( first_c = 1, j = 0; j < new_c && ! stop; ++j )
+	for ( first_t = 1, j = 0; j < new_t && ! stop; ++j )
 	{
 		if ( ! gz )
 			fgets( linbuf, linsiz, f );		// buffers one entire line
@@ -5043,7 +5043,7 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 			if ( tok == NULL )
 			{
 				plog( "\nError: invalid data, aborting file load\n" );
-				num_c += ( j > 0 ? j - 1 : 0 ) > num_c ? ( j > 0 ? j - 1 : 0 ) : 0;
+				num_t += ( j > 0 ? j - 1 : 0 ) > num_t ? ( j > 0 ? j - 1 : 0 ) : 0;
 				goto end;
 			}
 
@@ -5057,7 +5057,7 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 					sscanf( tok, "%lf", &( vs[ i ].data[ j - vs[ i ].start ] ) );
 
 					if ( j == 0 )			// at least one lagged variable?
-						first_c = 0;
+						first_t = 0;
 				}
 			}
 
@@ -5071,17 +5071,17 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 	cmd( "prgboxupdate .da.pas \"\" %d", j + 1 );
 
 	if ( stop )
-		new_c = j - 1;
+		new_t = j - 1;
 
-	--new_c;
+	--new_t;
 
-	if ( new_c > num_c )
-		num_c = new_c;
+	if ( new_t > num_t )
+		num_t = new_t;
 
-	if ( new_c > max_c )
-		max_c = new_c;
+	if ( new_t > max_t )
+		max_t = new_t;
 
-	min_c = std::max( first_c, showInit ? 0 : 1 );
+	min_t = std::max( first_t, showInit ? 0 : 1 );
 
 	end:
 
@@ -5217,8 +5217,8 @@ void gui::statistics( void )
 
 	if ( autom_x )
 	{
-		min_c = std::max( first_c, showInit ? 0 : 1 );
-		max_c = num_c;
+		min_t = std::max( first_t, showInit ? 0 : 1 );
+		max_t = num_t;
 	}
 
 	// prepare data from selected series
@@ -5229,10 +5229,10 @@ void gui::statistics( void )
 		data[ i ] = NULL;
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
 		// get series data and take logs if necessary
-		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
+		if ( autom_x || ( start[ i ] <= max_t && end[ i ] >= min_t ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
@@ -5254,7 +5254,7 @@ void gui::statistics( void )
 	else
 		cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics:\n\n\" table" );
 
-	snprintf( str1, MAX_LINE_SIZE, "%d time steps", max_c - min_c + 1 );
+	snprintf( str1, MAX_LINE_SIZE, "%d time steps", max_t - min_t + 1 );
 	snprintf( longmsg, 2 * MAX_LINE_SIZE, "%-20s\tAverage\tMedian\tStd.Dev.\tMin.\tMax.\n", str1 );
 	cmd( ".log.text.text.internal insert end \"%s\" table", longmsg );
 
@@ -5263,9 +5263,9 @@ void gui::statistics( void )
 		ymin = DBL_MAX;
 		ymax = - DBL_MAX;
 		v.clear( );
-		v.reserve( max_c - min_c + 1 );
+		v.reserve( max_t - min_t + 1 );
 
-		for ( av = var = num = 0, j = min_c; j <= max_c; ++j )
+		for ( av = var = num = 0, j = min_t; j <= max_t; ++j )
 		{
 			if ( j >= start[ i ] && j <= end[ i ] && std::isfinite( data[ i ][ j - start[ i ] ] ) )	// ignore NaNs
 			{
@@ -5334,7 +5334,7 @@ void gui::statistics_cross( void )
 	int i, j, h, k, nt, *start, *end, *id, *list_times;
 	d_vecT v;
 
-	Tcl_LinkVar( interp, "nt", ( char * ) &nt, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "nt", ( char * ) & nt, TCL_LINK_INT );
 	cmd( "if [ info exists num_t ] { set nt $num_t } { set nt \"-1\" }" );
 	Tcl_UnlinkVar( interp, "nt" );
 
@@ -5348,7 +5348,7 @@ void gui::statistics_cross( void )
 	// sets the list of time steps to plot
 	list_times = new int [ nt ];
 	cmd( "set k 0" );
-	Tcl_LinkVar( interp, "k", ( char * ) &k, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "k", ( char * ) & k, TCL_LINK_INT );
 
 	for ( i = 0; i < nt; ++i )
 	{
@@ -5367,8 +5367,8 @@ void gui::statistics_cross( void )
 
 	if ( autom_x )
 	{
-		min_c = std::max( first_c, showInit ? 0 : 1 );
-		max_c = num_c;
+		min_t = std::max( first_t, showInit ? 0 : 1 );
+		max_t = num_t;
 	}
 
 	// prepare data from selected series
@@ -5378,7 +5378,7 @@ void gui::statistics_cross( void )
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
@@ -5560,8 +5560,8 @@ void gui::plot_gnu( void )
 
 	if ( autom_x )
 	{
-		min_c = std::max( first_c, showInit ? 0 : 1 );
-		max_c = num_c;
+		min_t = std::max( first_t, showInit ? 0 : 1 );
+		max_t = num_t;
 	}
 
 	// prepare data from selected series
@@ -5572,10 +5572,10 @@ void gui::plot_gnu( void )
 		data[ i ] = NULL;
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
 		// get series data and take logs if necessary
-		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
+		if ( autom_x || ( start[ i ] <= max_t && end[ i ] >= min_t ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
@@ -5595,17 +5595,17 @@ void gui::plot_gnu( void )
 	}
 
 	// handle time selection
-	if ( autom_x || min_c >= max_c )
+	if ( autom_x || min_t >= max_t )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = std::max( start[ i ], showInit ? 0 : 1 );
+				min_t = max_t = std::max( start[ i ], showInit ? 0 : 1 );
 
-			if ( start[ i ] < min_c )
-				min_c = std::max( start[ i ], showInit ? 0 : 1 );
+			if ( start[ i ] < min_t )
+				min_t = std::max( start[ i ], showInit ? 0 : 1 );
 
-			if ( end[ i ] > max_c )
-				max_c = end[ i ] > num_c ? num_c : end[ i ];
+			if ( end[ i ] > max_t )
+				max_t = end[ i ] > num_t ? num_t : end[ i ];
 		}
 
 	// auto-find minimums and maximums
@@ -5615,7 +5615,7 @@ void gui::plot_gnu( void )
 	if ( autom )
 	{
 		for ( done = false, i = 1; i < nv; ++i )
-			for ( j = min_c; j <= max_c; ++j )
+			for ( j = min_t; j <= max_t; ++j )
 			{
 				if ( ! done && start[ i ] <= j && end[ i ] >= j && std::isfinite( data[ i ][ j - start[ i ] ] ) )	// ignore NaNs
 				{
@@ -5637,7 +5637,7 @@ void gui::plot_gnu( void )
 	}
 
 	// check x series max/mins to allow splines
-	for ( minx = maxx = 0, done = false, j = min_c; j <= max_c; ++j )
+	for ( minx = maxx = 0, done = false, j = min_t; j <= max_t; ++j )
 	{
 		if ( ! done && start[ 0 ] <= j && end[ 0 ] >= j && std::isfinite( data[ 0 ][ j - start[ 0 ] ] ) )	// ignore NaNs
 		{
@@ -5673,7 +5673,7 @@ void gui::plot_gnu( void )
 	if ( box == 0 )
 	{
 		for ( i = 0; i < nv; ++i )
-			if ( start[ i ] <= max_c && end[ i ] >= min_c )
+			if ( start[ i ] <= max_t && end[ i ] >= min_t )
 				fprintf( f, "%s_%s\t", str[ i ], tag[ i ] );
 	}
 	else
@@ -5684,13 +5684,13 @@ void gui::plot_gnu( void )
 			if ( box == 1 )
 			{
 				for ( i = 0; i < nv; ++i )
-					if ( start[ i ] <= max_c && end[ i ] >= min_c )
+					if ( start[ i ] <= max_t && end[ i ] >= min_t )
 						fprintf( f, "Var%d\t%s_%s\t", i, str[ i ], tag[ i ] );
 			}
 			else
 			{
 				for ( i = 0; i < nv; ++i )
-					if ( start[ i ] <= max_c && end[ i ] >= min_c )
+					if ( start[ i ] <= max_t && end[ i ] >= min_t )
 						fprintf( f, "%s_%s\t", str[ i ], tag[ i ] );
 			}
 		}
@@ -5702,10 +5702,10 @@ void gui::plot_gnu( void )
 
 	if ( box == 0 )
 	{
-		for ( j = min_c; j <= max_c; ++j )
+		for ( j = min_t; j <= max_t; ++j )
 		{
 			for ( i = 0; i < nv; ++i )
-				if ( start[ i ] <= max_c && end[ i ] >= min_c )
+				if ( start[ i ] <= max_t && end[ i ] >= min_t )
 				{
 					if ( j >= start[ i ] && i <= end[ i ] )
 						fprintf( f, "%.*g\t", pdigits, data[ i ][ j - start[ i ] ] );
@@ -5721,11 +5721,11 @@ void gui::plot_gnu( void )
 		{	//not gridded
 			if ( box == 1 )			// 3D with time and rank
 			{
-				for ( j = min_c; j <= max_c; ++j )
+				for ( j = min_t; j <= max_t; ++j )
 				{
 					fprintf( f, "%d\t", j );
 					for ( i = 0; i < nv; ++i )
-						if ( start[ i ] <= max_c && end[ i ] >= min_c )
+						if ( start[ i ] <= max_t && end[ i ] >= min_t )
 						{
 							if ( j >= start[ i ] && i <= end[ i ] )
 								fprintf( f, "%d\t%.*g\t", i + 1, pdigits, data[ i ][ j - start[ i ] ] );
@@ -5738,11 +5738,11 @@ void gui::plot_gnu( void )
 			}
 			else					// 3D with time and 1st series
 			{
-				for ( j = min_c; j <= max_c; ++j )
+				for ( j = min_t; j <= max_t; ++j )
 				{
 					fprintf( f, "%d\t", j );
 					for ( i = 0; i < nv; ++i )
-						if ( start[ i ] <= max_c && end[ i ] >= min_c )
+						if ( start[ i ] <= max_t && end[ i ] >= min_t )
 						{
 							if ( j >= start[ i ] && i <= end[ i ] )
 								fprintf( f, "%.*g\t", pdigits, data[ i ][ j - start[ i ] ] );
@@ -5760,8 +5760,8 @@ void gui::plot_gnu( void )
 			{
 				for ( i = 0; i < nv; ++i )
 				{
-					for ( j = min_c; j <= max_c; ++j )
-						if ( start[ i ] <= max_c && end[ i ] >= min_c )
+					for ( j = min_t; j <= max_t; ++j )
+						if ( start[ i ] <= max_t && end[ i ] >= min_t )
 						{
 							if ( j >= start[ i ] && i <= end[ i ] )
 								fprintf( f, "%d\t%d\t%.*g\n", j, i + 1, pdigits, data[ i ][ j - start[ i ] ] );
@@ -5774,8 +5774,8 @@ void gui::plot_gnu( void )
 			{
 				for ( i = 0; i < nv; ++i )
 				{
-					for ( j = min_c; j <= max_c; ++j )
-						if ( start[ i ] <= max_c && end[ i ] >= min_c )
+					for ( j = min_t; j <= max_t; ++j )
+						if ( start[ i ] <= max_t && end[ i ] >= min_t )
 						{
 							if ( j >= start[ i ] && i <= end[ i ] )
 								fprintf( f, "%d\t%.*g\n", j, pdigits, data[ i ][ j - start[ i ] ] );
@@ -5924,7 +5924,7 @@ void gui::plot_gnu( void )
 	fprintf( f2, "%s", da_tmp );
 
 	for ( ; i < nv; ++i )
-		if ( start[ i ] <= max_c && end[ i ] >= min_c )
+		if ( start[ i ] <= max_t && end[ i ] >= min_t )
 		{
 			if ( ndim == 2 )
 				snprintf( str2, 2 * MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d %s t \"%s_%s\"", i + 1, str1, str[ i ], tag[ i ] );
@@ -6016,8 +6016,8 @@ void gui::plot_cs_xy( void )
 
 	if ( autom_x )
 	{
-		min_c = std::max( first_c, showInit ? 0 : 1 );
-		max_c = num_c;
+		min_t = std::max( first_t, showInit ? 0 : 1 );
+		max_t = num_t;
 	}
 
 	// prepare data from selected series
@@ -6028,10 +6028,10 @@ void gui::plot_cs_xy( void )
 		data[ i ] = NULL;
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
 		// get series data and take logs if necessary
-		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
+		if ( autom_x || ( start[ i ] <= max_t && end[ i ] >= min_t ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
@@ -6049,17 +6049,17 @@ void gui::plot_cs_xy( void )
 	}
 
 	// handle time selection
-	if ( autom_x || min_c >= max_c )
+	if ( autom_x || min_t >= max_t )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = std::max( start[ i ], showInit ? 0 : 1 );
+				min_t = max_t = std::max( start[ i ], showInit ? 0 : 1 );
 
-			if ( start[ i ] < min_c )
-				min_c = std::max( start[ i ], showInit ? 0 : 1 );
+			if ( start[ i ] < min_t )
+				min_t = std::max( start[ i ], showInit ? 0 : 1 );
 
-			if ( end[ i ] > max_c )
-				max_c = end[ i ] > num_c ? num_c : end[ i ];
+			if ( end[ i ] > max_t )
+				max_t = end[ i ] > num_t ? num_t : end[ i ];
 		}
 
 	// auto-find minimums and maximums
@@ -6069,7 +6069,7 @@ void gui::plot_cs_xy( void )
 	if ( autom )
 	{
 		for ( done = false, i = 1; i < nv; ++i )
-			for ( j = min_c; j <= max_c; ++j )
+			for ( j = min_t; j <= max_t; ++j )
 			{
 				if ( ! done && start[ i ] <= j && end[ i ] >= j && std::isfinite( data[ i ][ j - start[ i ] ] ) )	// ignore NaNs
 				{
@@ -6091,7 +6091,7 @@ void gui::plot_cs_xy( void )
 	}
 
 	// check x series max/mins to allow splines
-	for ( minx = maxx = 0, done = false, j = min_c; j <= max_c; ++j )
+	for ( minx = maxx = 0, done = false, j = min_t; j <= max_t; ++j )
 	{
 		if ( ! done && start[ 0 ] <= j && end[ 0 ] >= j && std::isfinite( data[ 0 ][ j - start[ 0 ] ] ) )	// ignore NaNs
 		{
@@ -6243,7 +6243,7 @@ void gui::plot_cs_xy( void )
 			if ( start[ i + j ] == end[ i + j ] )
 				fprintf( f, "%.*g\t", pdigits, data[ i + j ][ end[ i + j ] - start[ i + j ] ] );
 			else
-				if ( start[ i + j ] <= max_c && end[ i + j ] >= min_c && start[ i + j ] <= time_sel && end[ i + j ] >= time_sel )
+				if ( start[ i + j ] <= max_t && end[ i + j ] >= min_t && start[ i + j ] <= time_sel && end[ i + j ] >= time_sel )
 					fprintf( f, "%.*g\t", pdigits, data[ i + j ][ time_sel - start[ i + j ] ] );
 
 		fprintf( f, "\n" );
@@ -6355,7 +6355,7 @@ void gui::plot_cs_xy( void )
 	{
 		j = i * block_length;
 
-		if ( start[ j ] <= max_c && end[ j ] >= min_c )
+		if ( start[ j ] <= max_t && end[ j ] >= min_t )
 		{
 			if ( ndim == 2 )
 			{
@@ -6436,8 +6436,8 @@ void gui::plot_phase_diagram( void )
 
 	if ( autom_x )
 	{
-		min_c = std::max( first_c, showInit ? 0 : 1 );
-		max_c = num_c;
+		min_t = std::max( first_t, showInit ? 0 : 1 );
+		max_t = num_t;
 	}
 
 	// prepare data from selected series
@@ -6448,10 +6448,10 @@ void gui::plot_phase_diagram( void )
 		data[ i ] = NULL;
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
 		// get series data and take logs if necessary
-		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
+		if ( autom_x || ( start[ i ] <= max_t && end[ i ] >= min_t ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
@@ -6469,17 +6469,17 @@ void gui::plot_phase_diagram( void )
 	}
 
 	// handle time selection
-	if ( autom_x || min_c >= max_c )
+	if ( autom_x || min_t >= max_t )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = std::max( start[ i ], showInit ? 0 : 1 );
+				min_t = max_t = std::max( start[ i ], showInit ? 0 : 1 );
 
-			if ( start[ i ] < min_c )
-				min_c = std::max( start[ i ], showInit ? 0 : 1 );
+			if ( start[ i ] < min_t )
+				min_t = std::max( start[ i ], showInit ? 0 : 1 );
 
-			if ( end[ i ] > max_c )
-				max_c = end[ i ] > num_c ? num_c : end[ i ];
+			if ( end[ i ] > max_t )
+				max_t = end[ i ] > num_t ? num_t : end[ i ];
 		}
 
 	// auto-find minimums and maximums
@@ -6489,7 +6489,7 @@ void gui::plot_phase_diagram( void )
 	if ( autom )
 	{
 		for ( done = false, i = 0; i < nv; ++i )
-			for ( j = min_c; j <= max_c; ++j )
+			for ( j = min_t; j <= max_t; ++j )
 			{
 				if ( ! done && start[ i ] <= j && end[ i ] >= j && std::isfinite( data[ i ][ j - start[ i ] ] ) )		// ignore NaNs
 				{
@@ -6558,15 +6558,15 @@ void gui::plot_phase_diagram( void )
 	fprintf( f, "#" );
 
 	for ( i = 0; i <= nlags; ++i )
-		if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
+		if ( start[ 0 ] <= max_t && end[ 0 ] >= min_t )
 			fprintf( f, "%s_%s(%d)\t", str[ 0 ], tag[ 0 ], i );
 
 	fprintf( f, "\n" );
 
-	for ( maxdelta = 0, j = min_c; j <= max_c - nlags; ++j )
+	for ( maxdelta = 0, j = min_t; j <= max_t - nlags; ++j )
 	{
 		for ( i = 0; i <= nlags; ++i )
-			if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
+			if ( start[ 0 ] <= max_t && end[ 0 ] >= min_t )
 			{
 				fprintf( f, "%lf\t", data[ 0 ][ j + i - start[ 0 ] ] );
 
@@ -6637,7 +6637,7 @@ void gui::plot_phase_diagram( void )
 		lsd::strcatn( da_tmp, str3, MAX_BUFF_SIZE );
 
 	for ( i = 2; i <= nlags; ++i )
-		if ( start[ 0 ] <= max_c && end[ 0 ] >= min_c )
+		if ( start[ 0 ] <= max_t && end[ 0 ] >= min_t )
 		{
 			snprintf( str2, 2 * MAX_ELEM_LENGTH, ", 'data.gp' using 1:%d %s t \"t+%d\"", i + 1, str1, i );
 			lsd::strcatn( da_tmp, str2, MAX_BUFF_SIZE );
@@ -6943,7 +6943,7 @@ void gui::plot_lattice( void )
 	cscale = get_double( "cscaleLat" );		// 1.0
 
 	// find column number suggestion
-	tot = time_cross == 1 ? nv : max_c - min_c + 1;
+	tot = time_cross == 1 ? nv : max_t - min_t + 1;
 	ncol = ( int ) std::max( sqrt( tot ), 1. );
 	while ( tot % ncol != 0 && ncol > 0 )
 		ncol--;
@@ -6955,7 +6955,7 @@ void gui::plot_lattice( void )
 	str = new char *[ nv ];
 	tag = new char *[ nv ];
 
-	cmd( "set time %d", num_c );
+	cmd( "set time %d", num_t );
 	cmd( "set bidi %d", ncol );
 	cmd( "set cscale [ format %%.2f %lf ]", cscale );
 
@@ -6969,7 +6969,7 @@ void gui::plot_lattice( void )
 
 	cmd( "ttk::frame .da.s.i" );
 	cmd( "ttk::label .da.s.i.l -width 22 -anchor e -text \"Data columns\"" );
-	cmd( "ttk::spinbox .da.s.i.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center", num_c, num_c );
+	cmd( "ttk::spinbox .da.s.i.e -width 5 -from 1 -to %d -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 && $n <= %d } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invalidcommand { bell } -justify center", num_t, num_t );
 	cmd( ".da.s.i.e insert 0 $bidi" );
 	cmd( "pack .da.s.i.l .da.s.i.e -side left -anchor w -padx $_2 -pady $_2" );
 
@@ -7023,7 +7023,7 @@ void gui::plot_lattice( void )
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
 		// check if series has data for all selected times (cross-section only )
 		if ( time_cross == 1 && ( time < start[ i ] || time > end[ i ] ) )
@@ -7058,20 +7058,20 @@ void gui::plot_lattice( void )
 
 	if ( time_cross == 0 )
 	{
-		if ( autom_x || min_c >= max_c )
+		if ( autom_x || min_t >= max_t )
 		{
 			first = std::max( start[ 0 ], 1 );
 			last = end[ 0 ];
 		}
 		else
 		{
-			if ( min_c > std::max( start[ 0 ], showInit ? 0 : 1 ) )
-				first = min_c;
+			if ( min_t > std::max( start[ 0 ], showInit ? 0 : 1 ) )
+				first = min_t;
 			else
 				first = std::max( start[ 0 ], showInit ? 0 : 1 );
 
-			if ( max_c < end[ 0 ] )
-				last = max_c;
+			if ( max_t < end[ 0 ] )
+				last = max_t;
 			else
 				last = end[ 0 ];
 		}
@@ -7208,7 +7208,7 @@ void gui::histograms( void )
 	tag[ 0 ] = new char[ MAX_ELEM_LENGTH ];
 
 	cmd( "set res [ .da.vars.ch.f.v get 0 ]" );
-	sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ 0 ], tag[ 0 ], &start, &end, &id );
+	sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ 0 ], tag[ 0 ], & start, & end, & id );
 
 	data = vs[ id ].data;
 	if ( data == NULL )
@@ -7223,20 +7223,20 @@ void gui::histograms( void )
 	if ( logs )			// apply log to the values to show "log scale" in the y-axis
 		data = log_data( data, start, end, -1, "histogram" );
 
-	if ( autom_x || min_c >= max_c )
+	if ( autom_x || min_t >= max_t )
 	{
 		first = std::max( start, showInit ? 0 : 1 );
 		last = end;
 	}
 	else
 	{
-		if ( min_c > std::max( start, showInit ? 0 : 1 ) )
-			first = min_c;
+		if ( min_t > std::max( start, showInit ? 0 : 1 ) )
+			first = min_t;
 		else
 			first = std::max( start, showInit ? 0 : 1 );
 
-		if ( max_c < end )
-			last = max_c;
+		if ( max_t < end )
+			last = max_t;
 		else
 			last = end;
 	}
@@ -7286,7 +7286,7 @@ void gui::histograms( void )
 	cmd( "set choice $bidi" );
 	num_bins = choice;
 
-	histo_mean = histo_var = histo_cases = 0;
+	histo_mean = histo_v = histo_t = 0;
 	for ( i = first; i <= last; ++i )
 	{
 		if ( std::isnan( data[ i - start ] ) || ! std::isfinite( data[ i - start ] ) )	// ignore NaNs
@@ -7304,12 +7304,12 @@ void gui::histograms( void )
 		}
 
 		histo_mean += data[ i - start ];
-		histo_var += data[ i - start ] * data[ i - start ];
+		histo_v += data[ i - start ] * data[ i - start ];
 
-		++histo_cases;
+		++histo_t;
 	}
 
-	if ( histo_cases == 0 )
+	if ( histo_t == 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series has no valid data for the chosen time steps.\"" );
 		choice = 2;
@@ -7323,8 +7323,8 @@ void gui::histograms( void )
 		goto end;
 	}
 
-	histo_mean = histo_mean / histo_cases;
-	histo_var = histo_var / histo_cases - histo_mean * histo_mean;
+	histo_mean = histo_mean / histo_t;
+	histo_v = histo_v / histo_t - histo_mean * histo_mean;
 
 	histo_bins = new bin[ num_bins ];
 	for ( i = 0; i < num_bins; ++i )
@@ -7375,7 +7375,7 @@ void gui::histograms( void )
 		plog( "\nTime series histogram statistics\n #	Boundaries(center)\t\tMin.\tAverage\tMax.\tNum.\tFreq." );
 
 	step = ( mx + a / 2 - ( mn - a / 2 ) ) / num_bins;
-	lminy = histo_cases;
+	lminy = histo_t;
 	lmaxy = 0;
 
 	for ( i = 0; i < num_bins; ++i )
@@ -7388,7 +7388,7 @@ void gui::histograms( void )
 		histo_bins[ i ].center = histo_bins[ i ].highb / 2 + histo_bins[ i ].lowb / 2;
 
 		if ( stat == 1 )
-			plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", i + 1, pdigits, mn - a / 2 + ( double ) i * step, pdigits, mn - a / 2 + ( double ) ( i + 1 ) * step, pdigits, mn - a / 2 + ( double ) i * step + step / 2, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].max, pdigits, histo_bins[ i ].num, pdigits, histo_bins[ i ].num / histo_cases );
+			plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", i + 1, pdigits, mn - a / 2 + ( double ) i * step, pdigits, mn - a / 2 + ( double ) ( i + 1 ) * step, pdigits, mn - a / 2 + ( double ) i * step + step / 2, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].max, pdigits, histo_bins[ i ].num, pdigits, histo_bins[ i ].num / histo_t );
 
 		if ( histo_bins[ i ].num < lminy )
 			lminy = histo_bins[ i ].num;
@@ -7405,8 +7405,8 @@ void gui::histograms( void )
 
 	if ( autom || miny >= maxy )
 	{
-		maxy = lmaxy / histo_cases;
-		miny = lminy > 0 ? ( lminy - 1 ) / histo_cases : 0;
+		maxy = lmaxy / histo_t;
+		miny = lminy > 0 ? ( lminy - 1 ) / histo_t : 0;
 		update_bounds( );
 	}
 
@@ -7414,7 +7414,7 @@ void gui::histograms( void )
 	norm = choice ? true : false;
 
 	// plot histogram
-	plot( HISTOGR, &start, &end, str, tag, norm );
+	plot( HISTOGR, & start, & end, str, tag, norm );
 
 	choice = 0;
 
@@ -7462,8 +7462,8 @@ void gui::histograms_cs( void )
 
 	if ( autom_x )
 	{
-		min_c = std::max( first_c, showInit ? 0 : 1 );
-		max_c = num_c;
+		min_t = std::max( first_t, showInit ? 0 : 1 );
+		max_t = num_t;
 	}
 
 	// prepare data from selected series
@@ -7473,7 +7473,7 @@ void gui::histograms_cs( void )
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
 		data[ i ] = vs[ id[ i ] ].data;
 		if ( data[ i ] == NULL )
@@ -7541,7 +7541,7 @@ void gui::histograms_cs( void )
 	cmd( "set choice $time" );
 	histo_cs = choice;
 
-	histo_mean = histo_var = histo_cases = 0;
+	histo_mean = histo_v = histo_t = 0;
 	active_v = 0;
 	for ( i = 0; i < nv; ++i )
 		if ( start[ i ] <= histo_cs && end[ i ] >= histo_cs && std::isfinite( data[ i ][ histo_cs - start[ i ] ] ) )		// ignore NaNs
@@ -7558,13 +7558,13 @@ void gui::histograms_cs( void )
 			}
 
 			histo_mean += data[ i ][ histo_cs - start[ i ] ];
-			histo_var += data[ i ][ histo_cs - start[ i ] ] * data[ i ][ histo_cs - start[ i ] ];
+			histo_v += data[ i ][ histo_cs - start[ i ] ] * data[ i ][ histo_cs - start[ i ] ];
 
-			++histo_cases;
+			++histo_t;
 			++active_v;
 		}
 
-	if ( histo_cases == 0 )
+	if ( histo_t == 0 )
 	{
 		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series have no valid data in the chosen time steps.\"" );
 		choice = 2;
@@ -7578,8 +7578,8 @@ void gui::histograms_cs( void )
 		goto end;
 	}
 
-	histo_mean = histo_mean / histo_cases;
-	histo_var = histo_var / histo_cases - histo_mean * histo_mean;
+	histo_mean = histo_mean / histo_t;
+	histo_v = histo_v / histo_t - histo_mean * histo_mean;
 
 	histo_bins = new bin[ num_bins ];
 	for ( i = 0; i < num_bins; ++i )
@@ -7641,7 +7641,7 @@ void gui::histograms_cs( void )
 		histo_bins[ i ].center = histo_bins[ i ].highb / 2 + histo_bins[ i ].lowb / 2;
 
 		if ( stat == 1 )
-			plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", i + 1, pdigits, mn - a / 2 + ( double ) i * step, pdigits, mn - a / 2 + ( double ) ( i + 1 ) * step, pdigits, mn - a / 2 + ( double ) i * step + step / 2, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].max, pdigits, histo_bins[ i ].num, pdigits, histo_bins[ i ].num / histo_cases );
+			plog( "\n%3d: \\[%.*g, %.*g\\] (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", i + 1, pdigits, mn - a / 2 + ( double ) i * step, pdigits, mn - a / 2 + ( double ) ( i + 1 ) * step, pdigits, mn - a / 2 + ( double ) i * step + step / 2, pdigits, histo_bins[ i ].min, pdigits, histo_bins[ i ].av, pdigits, histo_bins[ i ].max, pdigits, histo_bins[ i ].num, pdigits, histo_bins[ i ].num / histo_t );
 
 		if ( histo_bins[ i ].num < lminy )
 			lminy = histo_bins[ i ].num;
@@ -7657,8 +7657,8 @@ void gui::histograms_cs( void )
 
 	if ( autom || miny >= maxy )
 	{
-		maxy = lmaxy / histo_cases;
-		miny = lminy > 0 ? ( lminy - 1 ) / histo_cases : 0;
+		maxy = lmaxy / histo_t;
+		miny = lminy > 0 ? ( lminy - 1 ) / histo_t : 0;
 		update_bounds( );
 	}
 
@@ -7846,7 +7846,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 		cs_long = get_int( "bido" );
 		new_series = get_int( "newSeries" );
 		sel_series = nv;
-		var_num = vs.size( );
+		v_num = vs.size( );
 	}
 	else
 	{
@@ -7916,8 +7916,8 @@ bool gui::create_series( bool mc, str_vecT v_names )
 
 	if ( autom_x )
 	{
-		min_c = std::max( first_c, showInit ? 0 : 1 );
-		max_c = num_c;
+		min_t = std::max( first_t, showInit ? 0 : 1 );
+		max_t = num_t;
 	}
 
 	for ( i = 0; i < sel_series; ++i )
@@ -7936,7 +7936,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 
 		sscanf( da_tmp, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
-		if ( mc || autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
+		if ( mc || autom_x || ( start[ i ] <= max_t && end[ i ] >= min_t ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
@@ -7951,20 +7951,20 @@ bool gui::create_series( bool mc, str_vecT v_names )
 		}
 	}
 
-	if ( mc || autom_x || min_c >= max_c )
+	if ( mc || autom_x || min_t >= max_t )
 	{
 		// differently from normal, pick just time steps covering all series
-		min_c = std::max( start[ 0 ], showInit || mc ? 0 : 1 );
-		max_c = end[ 0 ];
+		min_t = std::max( start[ 0 ], showInit || mc ? 0 : 1 );
+		max_t = end[ 0 ];
 		for ( i = 1; i < sel_series; ++i )
 		{
-			if ( start[ i ] > min_c )
-				min_c = start[ i ];
-			if ( end[ i ] < max_c )
-				max_c = end[ i ];
+			if ( start[ i ] > min_t )
+				min_t = start[ i ];
+			if ( end[ i ] < max_t )
+				max_t = end[ i ];
 		}
 
-		if ( ! mc && min_c >= max_c )
+		if ( ! mc && min_t >= max_t )
 		{
 			cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Series time steps do not overlap\" -detail \"Two or more series in the Series Selected listbox have no common time steps. Please use manual time step selection if this is the desired behavior.\"" );
 
@@ -7974,11 +7974,11 @@ bool gui::create_series( bool mc, str_vecT v_names )
 	}
 
 	// handle creation of multiple series
-	for ( k = 0, l = vs.size( ) - new_series; k < new_series; ++k, ++l, ++var_num )
+	for ( k = 0, l = vs.size( ) - new_series; k < new_series; ++k, ++l, ++v_num )
 	{
 		vs[ l ].label = get_str( "vname" );
 		vs[ l ].tag = lsd::to_string( "%s%s", mc ? lsd::tag_pref[ 7 ] : lsd::tag_pref[ 6 ], get_str( "ftag" ) );
-		vs[ l ].rank = var_num;
+		vs[ l ].rank = v_num;
 
 		if ( mc && new_series == 1 && sim.par_map.find( vs[ l ].label ) != sim.par_map.end( ) )
 			vs[ l ].parent = sim.par_map[ vs[ l ].label ];
@@ -7987,12 +7987,12 @@ bool gui::create_series( bool mc, str_vecT v_names )
 
 		if ( cs_long == 1 )									// compute over series?
 		{
-			vs[ l ].start = min_c;
-			vs[ l ].end = max_c;
+			vs[ l ].start = min_t;
+			vs[ l ].end = max_t;
 			vs[ l ].data = new double[ vs[ l ].end - vs[ l ].start + 1 ];
 			vs[ l ].data_alias = false;
 
-			for ( i = min_c; i <= max_c; ++i )
+			for ( i = min_t; i <= max_t; ++i )
 			{
 				nn = nvar = sum = prod = 0;
 				inv = neg = lag = NAN;
@@ -8049,29 +8049,29 @@ bool gui::create_series( bool mc, str_vecT v_names )
 				}
 
 				if ( type_series >= 100 )
-					vs[ l ].data[ i - min_c ] = nmean;
+					vs[ l ].data[ i - min_t ] = nmean;
 				if ( type_series == 1 || type_series == 6 || type_series == 15 || type_series == 16 )
-					vs[ l ].data[ i - min_c ] = nmed;
+					vs[ l ].data[ i - min_t ] = nmed;
 				if ( type_series == 2 || type_series == 13 )
-					vs[ l ].data[ i - min_c ] = nmax;
+					vs[ l ].data[ i - min_t ] = nmax;
 				if ( type_series == 3 )
-					vs[ l ].data[ i - min_c ] = nmin;
+					vs[ l ].data[ i - min_t ] = nmin;
 				if ( type_series == 4 )
-					vs[ l ].data[ i - min_c ] = nvar;
+					vs[ l ].data[ i - min_t ] = nvar;
 				if ( type_series == 5 )
-					vs[ l ].data[ i - min_c ] = sum;
+					vs[ l ].data[ i - min_t ] = sum;
 				if ( type_series == 7 )
-					vs[ l ].data[ i - min_c ] = nn;
+					vs[ l ].data[ i - min_t ] = nn;
 				if ( type_series == 8 )
-					vs[ l ].data[ i - min_c ] = sqrt( nvar );
+					vs[ l ].data[ i - min_t ] = sqrt( nvar );
 				if ( type_series == 9 )
-					vs[ l ].data[ i - min_c ] = prod;
+					vs[ l ].data[ i - min_t ] = prod;
 				if ( type_series == 10 )
-					vs[ l ].data[ i - min_c ] = inv;
+					vs[ l ].data[ i - min_t ] = inv;
 				if ( type_series == 20 )
-					vs[ l ].data[ i - min_c ] = lag;
+					vs[ l ].data[ i - min_t ] = lag;
 				if ( type_series == 21 )
-					vs[ l ].data[ i - min_c ] = neg;
+					vs[ l ].data[ i - min_t ] = neg;
 
 				// compute proper variance for confidence intervals
 				if ( medCI )
@@ -8089,16 +8089,16 @@ bool gui::create_series( bool mc, str_vecT v_names )
 				if ( mc && nn >= 2 )
 				{
 					if ( type_series == 11 || type_series == 14 )
-						vs[ l ].data[ i - min_c ] = cenCI + sim.t_star( nn - 1, confi ) * sqrt( varCI ) / sqrt( nn );
+						vs[ l ].data[ i - min_t ] = cenCI + sim.t_star( nn - 1, confi ) * sqrt( varCI ) / sqrt( nn );
 					if ( type_series == 12 )
-						vs[ l ].data[ i - min_c ] = cenCI - sim.t_star( nn - 1, confi ) * sqrt( varCI ) / sqrt( nn );
+						vs[ l ].data[ i - min_t ] = cenCI - sim.t_star( nn - 1, confi ) * sqrt( varCI ) / sqrt( nn );
 				}
 				else
 				{
 					if ( type_series == 11 || type_series == 14 )
-						vs[ l ].data[ i - min_c ] = cenCI + z_crit * sqrt( varCI ) / sqrt( nn );
+						vs[ l ].data[ i - min_t ] = cenCI + z_crit * sqrt( varCI ) / sqrt( nn );
 					if ( type_series == 12 )
-						vs[ l ].data[ i - min_c ] = cenCI - z_crit * sqrt( varCI ) / sqrt( nn );
+						vs[ l ].data[ i - min_t ] = cenCI - z_crit * sqrt( varCI ) / sqrt( nn );
 				}
 			}
 		}
@@ -8114,9 +8114,9 @@ bool gui::create_series( bool mc, str_vecT v_names )
 				nn = nvar = sum = prod = 0;
 				inv = neg = lag = NAN;
 				v.clear( );
-				v.reserve( max_c - min_c + 1 );
+				v.reserve( max_t - min_t + 1 );
 
-				for ( first = true, i = min_c; i <= max_c; ++i )
+				for ( first = true, i = min_t; i <= max_t; ++i )
 				{
 					if ( i >= start[ j ] && i <= end[ j ] && std::isfinite( data[ j ][ i - start[ j ] ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i - start[ j ] ] > thflt ) || ( flt == 2 && data[ j ][ i - start[ j ] ] < thflt ) ) )
 					{
@@ -8354,7 +8354,7 @@ bool gui::create_maverag( void )
 		tag[ i ] = new char[ MAX_ELEM_LENGTH ];
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
 		if ( end[ i ] - start[ i ] + 1 < flt )
 		{
@@ -8370,8 +8370,8 @@ bool gui::create_maverag( void )
 
 	if ( autom_x )
 	{
-		min_c = std::max( first_c, showInit ? 0 : 1 );
-		max_c = num_c;
+		min_t = std::max( first_t, showInit ? 0 : 1 );
+		max_t = num_t;
 	}
 
 	for ( i = 0, l = ov; i < nv; ++i, ++l )
@@ -8379,7 +8379,7 @@ bool gui::create_maverag( void )
 		data[ i ] = NULL;
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
 		vs[ l ].label = lsd::to_string( "%s_%cma%d", str[ i ], ma_type == 0 ? 's' : 'c', flt );
 		vs[ l ].parent = "(added)";
@@ -8390,7 +8390,7 @@ bool gui::create_maverag( void )
 		vs[ l ].data = new double[ vs[ l ].end - vs[ l ].start + 1 ];
 		vs[ l ].data_alias = false;
 
-		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
+		if ( autom_x || ( start[ i ] <= max_t && end[ i ] >= min_t ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
@@ -8600,9 +8600,9 @@ void gui::save_datazip( void )
 		data[ i ] = NULL;
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
-		if ( start[ i ] <= max_c && end[ i ] >= min_c )
+		if ( start[ i ] <= max_t && end[ i ] >= min_t )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
@@ -8616,24 +8616,24 @@ void gui::save_datazip( void )
 		}
 	}
 
-	if ( min_c >= max_c )
+	if ( min_t >= max_t )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = start[ i ];
+				min_t = max_t = start[ i ];
 
-			if ( start[ i ] < min_c )
-				min_c = start[ i ];
+			if ( start[ i ] < min_t )
+				min_t = start[ i ];
 
-			if ( end[ i ] > max_c )
-			max_c = end[ i ] > num_c ? num_c : end[ i ];
+			if ( end[ i ] > max_t )
+			max_t = end[ i ] > num_t ? num_t : end[ i ];
 		}
 
-	Tcl_LinkVar( interp, "fr", ( char * ) &fr, TCL_LINK_BOOLEAN);
-	Tcl_LinkVar( interp, "dozip", ( char * ) &sim.dozip, TCL_LINK_BOOLEAN);
-	Tcl_LinkVar( interp, "typelab", ( char * ) &typelab, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "deli", ( char * ) &del, TCL_LINK_INT );
-	Tcl_LinkVar( interp, "num_col", ( char * ) &num_col, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "fr", ( char * ) & fr, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( interp, "dozip", ( char * ) & sim.dozip, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( interp, "typelab", ( char * ) & typelab, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "deli", ( char * ) & del, TCL_LINK_INT );
+	Tcl_LinkVar( interp, "num_col", ( char * ) & num_col, TCL_LINK_INT );
 
 	lsd::strcpyn( misval, lsd::nonavail, 10 );
 	typelab = 3;
@@ -8940,7 +8940,7 @@ void gui::save_datazip( void )
 	{
 		if ( sim.dozip == 1 )
 		{
-			for ( j = min_c; j <= max_c; ++j )
+			for ( j = min_t; j <= max_t; ++j )
 			{
 				for ( i = 0; i < nv; ++i )
 				{
@@ -8958,7 +8958,7 @@ void gui::save_datazip( void )
 		}
 		else
 		{
-			for ( j = min_c; j <= max_c; ++j )
+			for ( j = min_t; j <= max_t; ++j )
 			{
 				for ( i = 0; i < nv; ++i )
 				{
@@ -8977,7 +8977,7 @@ void gui::save_datazip( void )
 	}
 	else								//fixed column data writing
 	{
-		for ( j = min_c; j <= max_c; ++j )
+		for ( j = min_t; j <= max_t; ++j )
 		{
 			for ( i = 0; i < nv; ++i )
 			{
@@ -9070,9 +9070,9 @@ void gui::plog_series( void )
 		data[ i ] = NULL;
 
 		cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], &start[ i ], &end[ i ], &id[ i ] );
+		sscanf( get_str( "res" ), "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
 
-		if ( autom_x || ( start[ i ] <= max_c && end[ i ] >= min_c ) )
+		if ( autom_x || ( start[ i ] <= max_t && end[ i ] >= min_t ) )
 		{
 			data[ i ] = vs[ id[ i ] ].data;
 			if ( data[ i ] == NULL )
@@ -9086,17 +9086,17 @@ void gui::plog_series( void )
 		}
 	}
 
-	if ( autom_x || min_c >= max_c )
+	if ( autom_x || min_t >= max_t )
 		for ( i = 0; i < nv; ++i )
 		{
 			if ( i == 0 )
-				min_c = max_c = start[ i ];
+				min_t = max_t = start[ i ];
 
-			if ( start[ i ] < min_c )
-				min_c = start[ i ];
+			if ( start[ i ] < min_t )
+				min_t = start[ i ];
 
-			if ( end[ i ] > max_c )
-			max_c = end[ i ] > num_c ? num_c : end[ i ];
+			if ( end[ i ] > max_t )
+			max_t = end[ i ] > num_t ? num_t : end[ i ];
 		}
 
 	plog( "\n\nTime series data\n" );
@@ -9107,7 +9107,7 @@ void gui::plog_series( void )
 
 	plog( "\n" );
 
-	for ( i = min_c; i <= max_c; ++i )
+	for ( i = min_t; i <= max_t; ++i )
 	{
 		if ( start[ 0 ] <= i && end[ 0 ] >= i && ! std::isnan( data[ 0 ][ i - start[ 0 ] ] ) )
 			plog_tag( "%d\t%.*g", "series", i, pdigits, data[ 0 ][ i - start[ 0 ] ] );
@@ -9156,8 +9156,8 @@ void gui::plot( int type, int nv, double **data, const int *start, const int *en
 	{
 		case TSERIES:
 			nLine = nv;
-			iniCase = min_c;
-			endCase = max_c;
+			iniCase = min_t;
+			endCase = max_t;
 			break;
 
 		case CRSSECT:
@@ -9493,7 +9493,7 @@ void gui::plot( int type, const int *start, const int *end, char **str, char **t
 		{
 			x1 = hbordsize + ( int ) floor( hsize * ( histo_bins[ i ].lowb - histo_bins[ 0 ].lowb ) / ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) );
 			x2 = hbordsize + ( int ) floor( hsize * ( histo_bins[ i ].highb - histo_bins[ 0 ].lowb ) / ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) );
-			y1 = std::min( std::max( tbordsize + vsize - ( int ) floor( vsize * ( histo_bins[ i ].num / histo_cases - miny ) / ( maxy - miny ) ), tbordsize ), tbordsize + vsize );
+			y1 = std::min( std::max( tbordsize + vsize - ( int ) floor( vsize * ( histo_bins[ i ].num / histo_t - miny ) / ( maxy - miny ) ), tbordsize ), tbordsize + vsize );
 			y2 = tbordsize + vsize;
 
 			cmd( "plot_bars $p %d %d %d %d p%d $c%d %lf", x1, y1, x2, y2, i, color + 1, point_size );
@@ -9501,7 +9501,7 @@ void gui::plot( int type, const int *start, const int *end, char **str, char **t
 		else
 		{
 			x1 = hbordsize + ( int ) floor( hsize * ( histo_bins[ i ].center - histo_bins[ 0 ].lowb ) / ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) );
-			y1 = tbordsize + vsize - ( int ) floor( vsize * ( histo_bins[ i ].num / histo_cases - miny ) / ( maxy - miny ) );
+			y1 = tbordsize + vsize - ( int ) floor( vsize * ( histo_bins[ i ].num / histo_t - miny ) / ( maxy - miny ) );
 			if ( y1 <= tbordsize + vsize && y1 >= tbordsize )
 				cmd( "plot_points $p %d %d p%d $c%d %lf", x1, y1, i, color, point_size );
 		}
@@ -9522,23 +9522,23 @@ void gui::plot( int type, const int *start, const int *end, char **str, char **t
 		return;
 	}
 
-	if ( norm && histo_var > 0 )
+	if ( norm && histo_v > 0 )
 	{
 		double a, b, s, tot_norm = 0;
 
 		for ( i = 0; i < num_bins; ++i )
 		{
 			a = histo_bins[ i ].lowb;
-			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) / ( sqrt( 2 * M_PI * histo_var ) );
+			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_v ) ) / ( sqrt( 2 * M_PI * histo_v ) );
 			a = histo_bins[ i ].highb;
-			s = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) / ( sqrt( 2 * M_PI * histo_var ) );
+			s = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_v ) ) / ( sqrt( 2 * M_PI * histo_v ) );
 			tot_norm += ( b + s ) / 2;
 		}
 
 		for ( i = 0; i < num_bins; ++i )
 		{
 			a = histo_bins[ i ].center;
-			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_var ) ) / ( sqrt( 2 * M_PI * histo_var ) );
+			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_v ) ) / ( sqrt( 2 * M_PI * histo_v ) );
 			b /= tot_norm;
 			y2 = std::min( std::max( tbordsize + vsize - ( int ) round( vsize * ( b - miny ) / ( maxy - miny ) ), tbordsize ), tbordsize + vsize );
 
@@ -9581,7 +9581,7 @@ void gui::plot( int type, const int *start, const int *end, char **str, char **t
 				$w.b.c.y.v1 configure -text [ format \"%%%%.${pdigits}g\" [ expr { ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf } ] ]; \
 				$w.b.c.y.v2 configure -text \"( n=[ expr { int( ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ) } ] )\" \
 			} \
-		}", cur_plot, cur_plot, hbordsize, hbordsize + hsize, tbordsize, tbordsize + vsize, num_bins, num_bins, maxy, miny, miny, maxy * histo_cases, miny * histo_cases, miny * histo_cases );
+		}", cur_plot, cur_plot, hbordsize, hbordsize + hsize, tbordsize, tbordsize + vsize, num_bins, num_bins, maxy, miny, miny, maxy * histo_t, miny * histo_t, miny * histo_t );
 
 	for ( i = 0; i < num_bins; ++i )
 	{
@@ -9667,8 +9667,8 @@ void gui::plot_canvas( int type, int nv, const int *start, const int *end, char 
 			nLine = 0;
 			bbordsize = 2 * lheight;
 			y2on = true;
-			cminy2 = miny * histo_cases;
-			cmaxy2 = maxy * histo_cases;
+			cminy2 = miny * histo_t;
+			cmaxy2 = maxy * histo_t;
 			break;
 
 		case HISTOCS:
@@ -9678,8 +9678,8 @@ void gui::plot_canvas( int type, int nv, const int *start, const int *end, char 
 			nLine = 1;
 			bbordsize = 4 * lheight;
 			y2on = true;
-			cminy2 = miny * histo_cases;
-			cmaxy2 = maxy * histo_cases;
+			cminy2 = miny * histo_t;
+			cmaxy2 = maxy * histo_t;
 			break;
 
 		default:
@@ -9697,7 +9697,7 @@ void gui::plot_canvas( int type, int nv, const int *start, const int *end, char 
 
 	// initial canvas size
 	hcanvas = hsize + hbordsize * ( y2on ? 2 : 1 ) +
-				( y2on ? 0 : ( max_c < 1000 ? 10 : 20 ) );
+				( y2on ? 0 : ( max_t < 1000 ? 10 : 20 ) );
 	vcanvas = vsize + tbordsize + bbordsize;
 	cmd( "set hcanvasP %d; set vcanvasP %d", hcanvas, vcanvas );
 
@@ -9810,9 +9810,9 @@ void gui::plot_canvas( int type, int nv, const int *start, const int *end, char 
 		cmd( "lappend series%d \"%s_%s\"", cur_plot, str[ i ], tag[ i ] );
 
 	// axis lines, ticks & grid (adjust ticks for few horizontal times)
-	if ( type == TSERIES && ( max_c - min_c ) / ( hticks + 1 ) < 10 )
+	if ( type == TSERIES && ( max_t - min_t ) / ( hticks + 1 ) < 10 )
 		for ( ; hticks > 0; --hticks )
-			if ( ( max_c - min_c ) % ( hticks + 1 ) == 0 )
+			if ( ( max_t - min_t ) % ( hticks + 1 ) == 0 )
 				break;
 
 	cmd( "canvas_axis $p %d %d %d %d", type, grid, hticks, y2on );
@@ -9822,7 +9822,7 @@ void gui::plot_canvas( int type, int nv, const int *start, const int *end, char 
 	{
 		case TSERIES:
 			for ( i = 0; i < hticks + 2; ++i )
-				cmd( "$p create text %d [ expr { %d + $pad3 } ] -fill $colorsTheme(dfg) -font $fontP -anchor n -text %d -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, min_c + ( int ) floor( i * ( double ) ( max_c - min_c ) / ( hticks + 1 ) ) );
+				cmd( "$p create text %d [ expr { %d + $pad3 } ] -fill $colorsTheme(dfg) -font $fontP -anchor n -text %d -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, min_t + ( int ) floor( i * ( double ) ( max_t - min_t ) / ( hticks + 1 ) ) );
 			break;
 
 		case CRSSECT:
@@ -9864,7 +9864,7 @@ void gui::plot_canvas( int type, int nv, const int *start, const int *end, char 
 		switch ( type )
 		{
 			case TSERIES:
-				if ( start[ i ] <= max_c && end[ i ] >= min_c )
+				if ( start[ i ] <= max_t && end[ i ] >= min_t )
 					tOk = true;
 				else
 					tOk = false;
@@ -10206,7 +10206,7 @@ int gui::Tcl_upload_series( ClientData cd, Tcl_Interp *interp, int oc, Tcl_Obj *
 		return TCL_ERROR;
 	}
 
-	if ( Tcl_GetIntFromObj( interp, ov[ 1 ], &size ) != TCL_OK )
+	if ( Tcl_GetIntFromObj( interp, ov[ 1 ], & size ) != TCL_OK )
 		return TCL_ERROR;
 
 	data = ( int * ) Tcl_GetByteArrayFromObj( ov[ 2 ], NULL );
@@ -10437,7 +10437,7 @@ int gui::shrink_gnufile( void )
 			j = strcspn( str, "]" );
 			strncpy( str1, str + i, j - i + 1 );
 			str1[ j - i + 1 ] = '\0';
-			sscanf( str1, "[ expr { $cmx * %d / 1000 } ]", &x1 );
+			sscanf( str1, "[ expr { $cmx * %d / 1000 } ]", & x1 );
 
 			i = strcspn( str + j + 1, "[" );
 			i += j + 1;
@@ -10445,7 +10445,7 @@ int gui::shrink_gnufile( void )
 			j += i + 1;
 			strncpy( str2, str + i, j - i + 1 );
 			str2[ j - i + 1 ]='\0';
-			sscanf( str2, "[ expr { $cmy * %d / 1000 } ]", &x2 );
+			sscanf( str2, "[ expr { $cmy * %d / 1000 } ]", & x2 );
 
 			i = strcspn( str + j + 1, "[" );
 			i += j + 1;
@@ -10453,7 +10453,7 @@ int gui::shrink_gnufile( void )
 			j += i + 1;
 			strncpy( str3, str + i, j - i + 1 );
 			str3[ j - i + 1 ] = '\0';
-			sscanf( str3, "[ expr { $cmx * %d / 1000 } ]", &x3 );
+			sscanf( str3, "[ expr { $cmx * %d / 1000 } ]", & x3 );
 
 			i = strcspn( str + j + 1, "[" );
 			i += j + 1;
@@ -10461,7 +10461,7 @@ int gui::shrink_gnufile( void )
 			j += i + 1;
 			strncpy( str4, str + i, j - i + 1 );
 			str4[ j - i + 1 ] = '\0';
-			sscanf( str4, "[ expr { $cmy * %d / 1000 } ]", &x4 );
+			sscanf( str4, "[ expr { $cmy * %d / 1000 } ]", & x4 );
 
 			// if new data are stored, then add it to the cleaned file
 			if ( store_gnufile( x1, x2, x3, x4 ) == 1 )
