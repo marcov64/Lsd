@@ -359,11 +359,20 @@ if enabled.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
 width=196 height=407 src="image/summary_run.png"></span><span lang=EN-US>            
-</span><span lang=EN-US><img border=0 width=196 height=469
+</span><span lang=EN-US><img border=0 width=196 height=528
 src="image/summary_run_da.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available checkbox options are (some
 may not be available according to the circumstance):</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Assimilation confidence
+intervals</span></b></span><span lang=EN-US> (data assimilation only): by
+default, LSD saves to memory only the MC means or medians. If checked, the mean
+or median confidence intervals for the ensemble are also saved. It is
+applicable to all saved DA series (analysis, forecast and observational data).</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
@@ -1153,16 +1162,16 @@ class=Cdigo><span lang=EN-US>cur1</span></span><span lang=EN-US>, …) used in
 Macros for validity, equivalently to using Macro </span><span class=Cdigo><span
 lang=EN-US><a href="LSD_macros.html#POINTER_CHECK">NO_POINTER_CHECK</a></span></span><span
 lang=EN-US> at the beginning of the simulation code. However, </span><span
-class=Cdigo><span lang=EN-US>NULL</span></span><span lang=EN-US>-pointer detection
-is enabled even when this option is set. Pointer checking may have significant
-performance impact for some models, particularly when parallel computation is
-used (see <a href="browser.html#changeelement">here</a>). Despite speeding up
-the simulation, it is recommended that this option be only used after the model
-code is fully debugged. If statement </span><span class=Cdigo><span lang=EN-US>#define
-NO_POINTER_CHECK</span></span><span lang=EN-US> is used at the beginning of the
-equation file, this option becomes unavailable (and pointer checking is fully
-disabled, including for </span><span class=Cdigo><span lang=EN-US>NULL</span></span><span
-lang=EN-US> pointers).</span></p>
+class=Cdigo><span lang=EN-US>NULL</span></span><span lang=EN-US>-pointer
+detection is enabled even when this option is set. Pointer checking may have
+significant performance impact for some models, particularly when parallel
+computation is used (see <a href="browser.html#changeelement">here</a>).
+Despite speeding up the simulation, it is recommended that this option be only
+used after the model code is fully debugged. If statement </span><span
+class=Cdigo><span lang=EN-US>#define NO_POINTER_CHECK</span></span><span
+lang=EN-US> is used at the beginning of the equation file, this option becomes
+unavailable (and pointer checking is fully disabled, including for </span><span
+class=Cdigo><span lang=EN-US>NULL</span></span><span lang=EN-US> pointers).</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><a name="_Frequent_Lattice_Updating"></a><span

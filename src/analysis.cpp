@@ -2652,7 +2652,7 @@ void gui::analysis( bool mc )
 						cmd( "set minMax 0" );
 						cmd( "set cnfInt 0" );
 						cmd( "set keepSeries 0" );
-						cmd( "set confi 95" );
+						cmd( "set conf_lev 95" );
 						cmd( "set medCI 0" );
 						cmd( "set clList [ list ]" );
 						for ( i = 0; i < T_CLEVS; ++i )
@@ -2715,7 +2715,8 @@ void gui::analysis( bool mc )
 						cmd( "ttk::frame .da.s.ci" );
 						cmd( "ttk::label .da.s.ci.l -text \"Confidence level (%%)\"" );
 						cmd( "ttk::combobox .da.s.ci.p -values $clList -width 4 -justify center -state disabled" );
-						cmd( "write_disabled .da.s.ci.p $confi" );
+						cmd( "write_disabled .da.s.ci.p $conf_lev" );
+						cmd( "tooltip::tooltip .da.s.ci.p \"Confidence level to be used\nin MC confidence intervals\"" );
 						cmd( "pack .da.s.ci.l .da.s.ci.p" );
 
 						cmd( "ttk::frame .da.s.s" );
@@ -2740,7 +2741,7 @@ void gui::analysis( bool mc )
 						while ( choice == 0 )
 							Tcl_DoOneEvent( 0 );
 
-						cmd( "if [ string is double -strict [ .da.s.ci.p get ] ] { set confi [ .da.s.ci.p get ] }" );
+						cmd( "if [ string is double -strict [ .da.s.ci.p get ] ] { set conf_lev [ .da.s.ci.p get ] }" );
 						cmd( "destroytop .da.s" );
 
 						cmd( "if { ! $mean && ! $median && ! $minMax && ! $cnfInt } { set choice 2 }" );
@@ -4577,7 +4578,7 @@ void lsd::object::insert_data_mem( const char *lab )
 		cmd( "progressbox .da.ser \"Load Series\" \"Loading saved series\" \"Series\" %d { set stop true } .da", mem_v );
 
 	da->reset_insts( );				// release used instances of all DA elements
-	insert_labels_mem( & num_v, lab );
+	insert_label_mem( & num_v, lab );
 	cmd( "update_parent" );
 
 	if ( num_v > PROG_SERIES )
@@ -4645,14 +4646,12 @@ void lsd::object::count_labels_mem( int *count, const char *lab )
 
 
 /*************************************************************
- INSERT_LABELS_MEM
+ INSERT_LABEL_MEM
  *************************************************************/
-void lsd::object::insert_labels_mem( int *num_v, const char *lab )
+void lsd::object::insert_label_mem( int *num_v, const char *lab )
 {
 	bool found = false;
 	int tag;
-	static bool warn_once = false;
-	ass_map_itT ca;
 
 	for ( auto cv = v; cv != NULL && ! gui::stop; cv = cv->next )
 		if ( ( lab == NULL && cv->attr->save ) || ( lab != NULL && da->disable && strcmp( cv->attr->label, lab ) == 0 ) )
@@ -4662,11 +4661,11 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 			if ( da->disable )
 			{
 				if ( cv->attr->save )
-					tag = 0;
+					tag = TAG_NONE;
 				else
 				{
 					found = true;
-					tag = 1;
+					tag = TAG_UPDT;
 					cv->start = cv->last_update - cv->attr->num_lag;
 					cv->end = cv->last_update;
 				}
@@ -4681,40 +4680,7 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 					gui::first_t = cv->start;
 			}
 			else
-				// check if there are still instances to be presented
-				// because of DA data analysis, dynamic instances may have to enter
-				// the DA process, but were still used in the model forecasts
-				if ( da != NULL && ( ca = da->elem_map.find( cv->attr->label ) ) != da->elem_map.end( ) )
-				{
-					if ( ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
-					{
-						auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
-						if ( ! ce.saved )
-						{
-							for ( auto i = 2; i <= 4; ++i )
-								if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
-								{
-									cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->attr->label, tag_pref[ i ], cv->lab_tit, ce.start, ce.end, *num_v, cv->up->attr->label );
-									++( *num_v );
-								}
-
-							if ( ce.end > gui::num_t )
-								gui::num_t = ce.end;
-
-							if ( ce.start < gui::first_t )
-								gui::first_t = ce.start;
-
-							ce.saved = true;
-						}
-					}
-					else
-					{
-						if ( ! warn_once )
-							cmd( "ttk::messageBox -parent .da -type ok -title Warning -icon warning -default ok -message \"Series do not match\" -detail \"The effective model element instances do not match the ones effectively used for data assimilation. This may lead to missing or incorrectly positioned instance series. However, it does not affect the simulation data saved to disk, or the assimilation process.\n\nTo avoid the problem, please do not select for data assimilation variables or parameters with different number of instances among simulation runs.\"" );
-
-						warn_once = true;
-					}
-				}
+				da->insert_label_mem( num_v, cv );
 
 			if ( *num_v % PROG_SERIES == 0 )
 				cmd( "prgboxupdate .da.ser %d", *num_v - 1 );
@@ -4723,14 +4689,14 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 	for ( auto cb = b; cb != NULL && ! found; cb = cb->next )
 		if ( cb->head != NULL && cb->head->to_compute )
 			for ( auto cur = cb->head; cur != NULL; cur = cur->next )
-				cur->insert_labels_mem( num_v, lab );
+				cur->insert_label_mem( num_v, lab );
 
 	if ( up == NULL && lab == NULL )
 		for ( auto cv = sim->cemetery; cv != NULL && ! gui::stop; cv = cv->next )
 		{
 			if ( da->disable )
 			{
-				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->attr->label, tag_pref[ 0 ], cv->lab_tit, cv->start, cv->end, *num_v, sim->par_map[ cv->attr->label ].c_str( ) );
+				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->attr->label, tag_pref[ TAG_NONE ], cv->lab_tit, cv->start, cv->end, *num_v, sim->par_map[ cv->attr->label ].c_str( ) );
 				++( *num_v );
 
 				if ( cv->end > gui::num_t )
@@ -4740,31 +4706,60 @@ void lsd::object::insert_labels_mem( int *num_v, const char *lab )
 					gui::first_t = cv->start;
 			}
 			else
-				if ( da != NULL && ( ca = da->elem_map.find( cv->attr->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
-				{
-					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
-					if ( ! ce.saved )
-					{
-						for ( auto i = 2; i <= 4; ++i )
-							if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
-							{
-								cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->attr->label, tag_pref[ i ], cv->lab_tit, ce.start, ce.end, *num_v, cv->up->attr->label );
-								++( *num_v );
-							}
-
-						if ( ce.end > gui::num_t )
-							gui::num_t = ce.end;
-
-						if ( ce.start < gui::first_t )
-							gui::first_t = ce.start;
-
-						ce.saved = true;
-					}
-				}
+				da->insert_label_mem( num_v, cv );
 
 			if ( *num_v % PROG_SERIES == 0 )
 				cmd( "prgboxupdate .da.ser %d", *num_v - 1 );
 		}
+}
+
+
+/*************************************************************
+ INSERT_LABEL_MEM
+ *************************************************************/
+void lsd::assimilation::insert_label_mem( int *num_v, variable *v )
+{
+	ass_map_itT ca;
+	static bool warn_once = false;
+
+	// check if there are still instances to be presented
+	// because of DA data analysis, dynamic instances may have to enter
+	// the DA process, but were still used in the model forecasts
+	if ( ( ca = elem_map.find( v->attr->label ) ) == elem_map.end( ) || ca->second->inst_idx + 1 >= ( int ) ca->second->da_data.size( ) )
+	{
+		if ( ! warn_once )
+			cmd( "ttk::messageBox -parent .da -type ok -title Warning -icon warning -default ok -message \"Series do not match\" -detail \"The effective model element instances do not match the ones effectively used for data assimilation. This may lead to missing or incorrectly positioned instance series. However, it does not affect the simulation data saved to disk, or the assimilation process.\n\nTo avoid the problem, please do not select for data assimilation variables or parameters with different number of instances among simulation runs.\"" );
+
+		warn_once = true;
+		return;
+	}
+
+	auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+	if ( ce.saved )
+		return;
+
+	for ( auto tag = TAG_ANL; tag <= TAG_DAT; ++tag )
+		if ( ! ( tag == TAG_FCT && ! sav_fct ) && ! ( tag == TAG_DAT && ! sav_dat ) )
+		{
+			cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v, v->up->attr->label );
+
+			if ( ! sav_ci )
+				++( *num_v );
+			else
+			{
+				cmd( "add_series \"%s_ci+ %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 1, v->up->attr->label );
+				cmd( "add_series \"%s_ci- %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 2, v->up->attr->label );
+				*num_v += 3;
+			}
+		}
+
+	if ( ce.end > gui::num_t )
+		gui::num_t = ce.end;
+
+	if ( ce.start < gui::first_t )
+		gui::first_t = ce.start;
+
+	ce.saved = true;
 }
 
 
@@ -4775,7 +4770,6 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 {
 	bool found = false;
 	int tag;
-	ass_map_itT ca;
 
 	for ( auto cv = v; cv != NULL && *num_v < ( int ) gui::vs.size( ); cv = cv->next )
 		if ( ( lab == NULL && cv->attr->save ) || ( lab != NULL && da->disable && ! strcmp( cv->attr->label, lab ) ) )
@@ -4785,11 +4779,11 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 			if ( da->disable )
 			{
 				if ( cv->attr->save )
-					tag = 0;
+					tag = TAG_NONE;
 				else
 				{
 					found = true;
-					tag = 1;
+					tag = TAG_UPDT;
 
 					// use C stdlib to be able to deallocate memory for deleted objects
 					if ( cv->data == NULL )
@@ -4810,26 +4804,7 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 				++( *num_v );
 			}
 			else
-				if ( da != NULL && ( ca = da->elem_map.find( cv->attr->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
-				{
-					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
-					if ( ! ce.saved )
-						for ( auto i = 2; i <= 4; ++i )
-						{
-							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
-								continue;
-
-							gui::vs[ *num_v ].label = cv->attr->label;
-							gui::vs[ *num_v ].parent = cv->up->attr->label;
-							gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ i ], cv->lab_tit );
-							gui::vs[ *num_v ].start = ce.start;
-							gui::vs[ *num_v ].end = ce.end;
-							gui::vs[ *num_v ].rank = *num_v;
-							gui::vs[ *num_v ].data = ( i == 4 ? ce.dat.data( ) : ( i == 3 ? ce.fct.data( ) : ce.anl.data( ) ) );
-							gui::vs[ *num_v ].data_alias = true;
-							++( *num_v );
-						}
-				}
+				da->insert_store_mem( num_v, cv );
 		}
 
 	for ( auto cb = b; cb != NULL && ! found; cb = cb->next )
@@ -4853,26 +4828,63 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 				++( *num_v );
 			}
 			else
-				if ( da != NULL && ( ca = da->elem_map.find( cv->attr->label ) ) != da->elem_map.end( ) && ca->second->inst_idx + 1 < ( int ) ca->second->da_data.size( ) )
-				{
-					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
-					if ( ! ce.saved )
-						for ( auto i = 2; i <= 4; ++i )
-						{
-							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
-								continue;
+				da->insert_store_mem( num_v, cv );
+	}
+}
 
-							gui::vs[ *num_v ].label = cv->attr->label;
-							gui::vs[ *num_v ].parent = cv->up->attr->label;
-							gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ i ], cv->lab_tit );
-							gui::vs[ *num_v ].start = ce.start;
-							gui::vs[ *num_v ].end = ce.end;
-							gui::vs[ *num_v ].rank = *num_v;
-							gui::vs[ *num_v ].data = ( i == 4 ? ce.dat.data( ) : ( i == 3 ? ce.fct.data( ) : ce.anl.data( ) ) );
-							gui::vs[ *num_v ].data_alias = true;
-							++( *num_v );
-						}
-				}
+
+/*************************************************************
+ INSERT_STORE_MEM
+ *************************************************************/
+void lsd::assimilation::insert_store_mem( int *num_v, variable *v )
+{
+	ass_map_itT ca;
+
+	if ( ( ca = elem_map.find( v->attr->label ) ) == elem_map.end( ) || ca->second->inst_idx + 1 >= ( int ) ca->second->da_data.size( ) )
+		return;
+
+	auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+	if ( ce.saved )
+		return;
+
+	for ( auto tag = TAG_ANL; tag <= TAG_DAT; ++tag )
+	{
+		if ( ( tag == TAG_FCT && ! sav_fct ) || ( tag == TAG_DAT && ! sav_dat ) )
+			continue;
+
+		gui::vs[ *num_v ].label = v->attr->label;
+		gui::vs[ *num_v ].parent = v->up->attr->label;
+		gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
+		gui::vs[ *num_v ].start = ce.start;
+		gui::vs[ *num_v ].end = ce.end;
+		gui::vs[ *num_v ].rank = *num_v;
+		gui::vs[ *num_v ].data = ( tag == TAG_DAT ? ce.dat.data( ) : ( tag == TAG_FCT ? ce.fct.data( ) : ce.anl.data( ) ) );
+		gui::vs[ *num_v ].data_alias = true;
+
+		if ( ! sav_ci )
+			++( *num_v );
+		else
+		{
+			gui::vs[ *num_v + 1 ].label = to_string( "%s_ci+", v->attr->label );
+			gui::vs[ *num_v + 1 ].parent = v->up->attr->label;
+			gui::vs[ *num_v + 1 ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
+			gui::vs[ *num_v + 1 ].start = ce.start;
+			gui::vs[ *num_v + 1 ].end = ce.end;
+			gui::vs[ *num_v + 1 ].rank = *num_v + 1;
+			gui::vs[ *num_v + 1 ].data = ( tag == TAG_DAT ? ce.dat_hi.data( ) : ( tag == TAG_FCT ? ce.fct_hi.data( ) : ce.anl_hi.data( ) ) );
+			gui::vs[ *num_v + 1 ].data_alias = true;
+
+			gui::vs[ *num_v + 2 ].label = to_string( "%s_ci-", v->attr->label );
+			gui::vs[ *num_v + 2 ].parent = v->up->attr->label;
+			gui::vs[ *num_v + 2 ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
+			gui::vs[ *num_v + 2 ].start = ce.start;
+			gui::vs[ *num_v + 2 ].end = ce.end;
+			gui::vs[ *num_v + 2 ].rank = *num_v + 2;
+			gui::vs[ *num_v + 2 ].data = ( tag == TAG_DAT ? ce.dat_lo.data( ) : ( tag == TAG_FCT ? ce.fct_lo.data( ) : ce.anl_lo.data( ) ) );
+			gui::vs[ *num_v + 2 ].data_alias = true;
+
+			*num_v += 3;
+		}
 	}
 }
 
@@ -4908,7 +4920,7 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 	if ( fidx == ( int ) data_files.size( ) )
 		data_files.push_back( file_name );
 
-	plog( "\nResults data from file %s (%s%d) ", file_name, lsd::tag_pref[ 5 ], ++fidx );
+	plog( "\nResults data from file %s (%s%d) ", file_name, lsd::tag_pref[ TAG_FILE ], ++fidx );
 
 	num_v = vs.size( );
 	new_v = 0;
@@ -4976,7 +4988,7 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 
 		sscanf( tok, "%s %s (%d %d)", label, tag, &( vs[ i ].start ), &( vs[ i ].end ) );
 		vs[ i ].label = label;
-		vs[ i ].tag = lsd::to_string( "%s%d_%s", lsd::tag_pref[ 5 ], fidx, tag );
+		vs[ i ].tag = lsd::to_string( "%s%d_%s", lsd::tag_pref[ TAG_FILE ], fidx, tag );
 		vs[ i ].rank = i;
 		vs[ i ].data = new double[ vs[ i ].end - vs[ i ].start + 1 ];
 		vs[ i ].data_alias = false;		// dealocate on store destruction
@@ -5110,7 +5122,7 @@ str2_vecT gui::align_file_vars( i2_vecT & f_stores )
 	str_vecT uniq_sigs;
 	str2_vecT v_names( f_stores.size( ) ), v_sigs( f_stores.size( ) );
 
-	std::regex f_pref( std::string( std::string( "^" ) + lsd::tag_pref[ 5 ] ) + "([0-9]+)_" );
+	std::regex f_pref( std::string( std::string( "^" ) + lsd::tag_pref[ TAG_FILE ] ) + "([0-9]+)_" );
 
 	// get set of unique variable signatures (name-position-start-end), preserving order
 	for ( auto i = 0; i < ( int ) f_stores.size( ); ++i )
@@ -7699,7 +7711,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 {
 	bool first, medCI = false, done = true;
 	char **str, **tag;
-	double nmax = 0, nmin = 0, nmean, nmed, nvar, nn, sum, prod, inv, lag, neg, thflt, confi, cenCI, varCI, z_crit, **data;
+	double nmax = 0, nmin = 0, nmean, nmed, nvar, nn, sum, prod, inv, lag, neg, thflt, conf_lev, cenCI, varCI, z_crit, **data;
 	int i, j, k, l, flt, cs_long, type_series, new_series, sel_series, *start, *end, *id;
 	d_vecT v;
 
@@ -7723,7 +7735,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 		cmd( "set bido 1" );
 		cmd( "set bidi 100" );
 		cmd( "set ftag 1" );
-		cmd( "set confi 95" );
+		cmd( "set conf_lev 95" );
 		cmd( "set medCI 0" );
 		cmd( "set clList [ list ]" );
 
@@ -7796,7 +7808,8 @@ bool gui::create_series( bool mc, str_vecT v_names )
 		cmd( "ttk::frame .da.s.ci" );
 		cmd( "ttk::label .da.s.ci.l -text \"Confidence level (%%)\"" );
 		cmd( "ttk::combobox .da.s.ci.p -values $clList -width 4 -justify center -state disabled" );
-		cmd( "write_disabled .da.s.ci.p $confi" );
+		cmd( "write_disabled .da.s.ci.p $conf_lev" );
+		cmd( "tooltip::tooltip .da.s.ci.p \"Confidence level to be used\nin confidence intervals\"" );
 		cmd( "pack .da.s.ci.l .da.s.ci.p" );
 
 		cmd( "ttk::frame .da.s.n" );
@@ -7829,7 +7842,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 		cmd( "if { $bidi == 6 } { set basename $vname; set vname \"${basename}_med\" }" );
 		cmd( "if { $bidi == 111 } { set basename $vname; set vname \"${basename}_avg\"; set nextVname \"${basename}_ci+\" }" );
 		cmd( "if [ string is double -strict [ .da.s.f.t.th get ] ] { set thflt [ .da.s.f.t.th get ] }" );
-		cmd( "if [ string is double -strict [ .da.s.ci.p get ] ] { set confi [ .da.s.ci.p get ] }" );
+		cmd( "if [ string is double -strict [ .da.s.ci.p get ] ] { set conf_lev [ .da.s.ci.p get ] }" );
 		cmd( "destroytop .da.s" );
 
 		if ( choice != 2 && nv > 1 && ( get_int( "bidi" ) == 20 || ( get_int( "bido" ) == 1 && ( get_int( "bidi" ) == 10 || get_int( "bidi" ) == 21 ) ) ) )
@@ -7901,8 +7914,8 @@ bool gui::create_series( bool mc, str_vecT v_names )
 	type_series = get_int( "bidi" );
 	new_series = get_int( "newSeries" );
 	medCI = get_bool( "medCI" );		// asymptotic median confidence interval?
-	confi = get_double( "confi" );
-	z_crit = sim.z_star( confi );
+	conf_lev = get_double( "conf_lev" );
+	z_crit = sim.z_star( conf_lev );
 
 	data = new double *[ sel_series ];
 	start = new int [ sel_series ];
@@ -7977,7 +7990,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 	for ( k = 0, l = vs.size( ) - new_series; k < new_series; ++k, ++l, ++v_num )
 	{
 		vs[ l ].label = get_str( "vname" );
-		vs[ l ].tag = lsd::to_string( "%s%s", mc ? lsd::tag_pref[ 7 ] : lsd::tag_pref[ 6 ], get_str( "ftag" ) );
+		vs[ l ].tag = lsd::to_string( "%s%s", mc ? lsd::tag_pref[ TAG_MC ] : lsd::tag_pref[ TAG_CALC ], get_str( "ftag" ) );
 		vs[ l ].rank = v_num;
 
 		if ( mc && new_series == 1 && sim.par_map.find( vs[ l ].label ) != sim.par_map.end( ) )
@@ -8089,9 +8102,9 @@ bool gui::create_series( bool mc, str_vecT v_names )
 				if ( mc && nn >= 2 )
 				{
 					if ( type_series == 11 || type_series == 14 )
-						vs[ l ].data[ i - min_t ] = cenCI + sim.t_star( nn - 1, confi ) * sqrt( varCI ) / sqrt( nn );
+						vs[ l ].data[ i - min_t ] = cenCI + sim.t_star( nn - 1, conf_lev ) * sqrt( varCI ) / sqrt( nn );
 					if ( type_series == 12 )
-						vs[ l ].data[ i - min_t ] = cenCI - sim.t_star( nn - 1, confi ) * sqrt( varCI ) / sqrt( nn );
+						vs[ l ].data[ i - min_t ] = cenCI - sim.t_star( nn - 1, conf_lev ) * sqrt( varCI ) / sqrt( nn );
 				}
 				else
 				{
@@ -8383,7 +8396,7 @@ bool gui::create_maverag( void )
 
 		vs[ l ].label = lsd::to_string( "%s_%cma%d", str[ i ], ma_type == 0 ? 's' : 'c', flt );
 		vs[ l ].parent = "(added)";
-		vs[ l ].tag = lsd::to_string( "%s%s", lsd::tag_pref[ 6 ], tag[ i ] );
+		vs[ l ].tag = lsd::to_string( "%s%s", lsd::tag_pref[ TAG_CALC ], tag[ i ] );
 		vs[ l ].start = ( ma_type == 0 ) ? start[ i ] + flt - 1 : start[ i ];
 		vs[ l ].end = end[ i ];
 		vs[ l ].rank = l;

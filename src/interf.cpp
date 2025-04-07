@@ -150,6 +150,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			Tcl_LinkVar( interp, "sav_dat", ( char * ) & da.sav_dat, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "sav_fct", ( char * ) & da.sav_fct, TCL_LINK_BOOLEAN );
+			Tcl_LinkVar( interp, "sav_ci", ( char * ) & da.sav_ci, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "sav_dsp", ( char * ) & da.sav_dsp, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "no_res", ( char * ) & sim.no_res, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "no_tot", ( char * ) & sim.no_tot, TCL_LINK_BOOLEAN );
@@ -166,6 +167,11 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "set totExt %s", sim.docsv ? "csv" : "tot" );
 			cmd( "set zipExt \"%s\"", sim.dozip ? ".gz" : "" );
 			cmd( "set tot_msg_warn \"(totals file already exists)\"" );
+
+			cmd( "set conf_lev %g", da.conf_lev );
+			cmd( "set clList [ list ]" );
+			for ( i = 0; i < Z_CLEVS; ++i )
+				cmd( "lappend clList %g", 100 * lsd::z_dist_cl[ i ] );
 
 			cmd( "set T .run" );
 			cmd( "newtop $T \"%s\" { set choice 2 }", da.disable ? "Run Simulation" : "Run Assimilation Ensemble" );
@@ -246,13 +252,29 @@ lsd::object *gui::operate( lsd::object *r )
 
 				sim.add_to_tot = ( choice ) ? sim.add_to_tot : false;
 
+				cmd( "ttk::frame $T.f7" );
+				cmd( "ttk::label $T.f7.l -text \"Confidence level (%%)\"" );
+				cmd( "ttk::combobox $T.f7.p -values $clList -width 4 -justify center -state %s", da.sav_ci ? "normal" : "disabled" );
+				cmd( "write_any $T.f7.p $conf_lev" );
+				cmd( "tooltip::tooltip $T.f7.p \"Confidence level to be used\nin DA confidence intervals\"" );
+				cmd( "pack $T.f7.l $T.f7.p" );
+
 				cmd( "ttk::frame $T.f6" );
+				cmd( "ttk::checkbutton $T.f6.ci -text \"Assimilation confidence intervals\" -variable sav_ci -command { \
+						if { $sav_ci } { \
+							$T.f7.p configure -state normal \
+						} { \
+							$T.f7.p configure -state disabled \
+						} \
+					}" );
+				cmd( "tooltip::tooltip $T.f6.ci \"DA %s confidence intervals\nare saved to memory\"", da.med_stats ? "median" : "mean" );
 				cmd( "ttk::checkbutton $T.f6.dat -text \"Keep assimilation data\" -variable sav_dat" );
 				cmd( "tooltip::tooltip $T.f6.dat \"DA data observation values\nare saved to memory\"" );
 				cmd( "ttk::checkbutton $T.f6.fct -text \"Keep assimilation forecasts\" -variable sav_fct" );
-				cmd( "tooltip::tooltip $T.f6.fct \"Intermediary DA forecast\nvalues are saved to memory\"" );
-				cmd( "ttk::checkbutton $T.f6.dsp -text \"Save %s matrix\" -variable sav_dsp -state %s", da.med_stats ? "comedian" : "covariance", da.use_dsp_file ? "disabled" : "normal" );
-				cmd( "tooltip::tooltip $T.f6.dsp \"Save generated %s\nmatrix to a CSV file\"", da.med_stats ? "comedian" : "covariance" );
+				cmd( "tooltip::tooltip $T.f6.fct \"DA intermediary forecast\nvalues are saved to memory\"" );
+				cmd( "ttk::checkbutton $T.f6.dsp -text \"Assimilation %s matrix\" -variable sav_dsp -state %s", da.med_stats ? "comedian" : "covariance", da.use_dsp_file ? "disabled" : "normal" );
+				cmd( "tooltip::tooltip $T.f6.dsp \"Save generated DA %s\nmatrix to a CSV file\"", da.med_stats ? "comedian" : "covariance" );
+
 				cmd( "ttk::checkbutton $T.f6.a -text \"Append to existing totals file\" -variable add_to_tot -state %s -command { \
 						if { $add_to_tot && $doover } { \
 							set doover 0 \
@@ -326,9 +348,10 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "tooltip::tooltip $T.f6.o \"Delete all LSD file\nin the output directory\"" );
 				cmd( "ttk::checkbutton $T.f6.e -text \"Update configuration file\" -variable overwConf -state disabled" );
 				cmd( "tooltip::tooltip $T.f6.e \"Shows if configuration file\nwill be updated (read-only)\"" );
-				cmd( "pack %s $T.f6.a $T.f6.b $T.f6.b1 $T.f6.c $T.f6.d $T.f6.o $T.f6.e -anchor w", da.disable ? "" : "$T.f6.dat $T.f6.fct $T.f6.dsp" );
 
-				cmd( "pack $T.f1 $T.f2 $T.f3 $T.f4 $T.f5 $T.f6 -padx $_5 -pady $_5" );
+				cmd( "pack %s $T.f6.a $T.f6.b $T.f6.b1 $T.f6.c $T.f6.d $T.f6.o $T.f6.e -anchor w", da.disable ? "" : "$T.f6.ci $T.f6.dat $T.f6.fct $T.f6.dsp" );
+
+				cmd( "pack $T.f1 $T.f2 $T.f3 $T.f4 $T.f5 %s $T.f6 -padx $_5 -pady $_5", da.disable ? "" : "$T.f7" );
 			}
 
 			cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#run } { set choice 2 }" );
@@ -340,10 +363,13 @@ lsd::object *gui::operate( lsd::object *r )
 			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
 
+			cmd( "if [ string is double -strict [ $T.f7.p get ] ] { set conf_lev [ $T.f7.p get ] }" );
+
 			cmd( "destroytop .run" );
 
 			Tcl_UnlinkVar( interp, "sav_dat" );
 			Tcl_UnlinkVar( interp, "sav_fct" );
+			Tcl_UnlinkVar( interp, "sav_ci" );
 			Tcl_UnlinkVar( interp, "sav_dsp" );
 			Tcl_UnlinkVar( interp, "no_res" );
 			Tcl_UnlinkVar( interp, "no_tot" );
@@ -355,6 +381,8 @@ lsd::object *gui::operate( lsd::object *r )
 
 			if ( choice == 2 )
 				break;
+
+			da.conf_lev = get_double( "conf_lev" );
 
 			if ( ( ! sim.no_res || ! sim.no_tot ) && subDir )
 				if ( ! create_res_dir( out_dir ) || ! sim.results_alt_path( out_dir ) )

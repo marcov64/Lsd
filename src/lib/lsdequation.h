@@ -64,8 +64,8 @@
 	#define CHK_LNK_DBL( O ) O == NULL ? _nul_lnk_dbl_( __FILE__, __LINE__ ) :
 	#define CHK_LNK_OBJ( O ) O == NULL ? _nul_lnk_obj_( __FILE__, __LINE__ ) :
 	#define CHK_LNK_VOID( O ) O == NULL ? _nul_lnk_void_( __FILE__, __LINE__ ) :
-	#define CHK_NODE_CHR( O ) O->node == NULL ? _no_node_chr_( O->label, __FILE__, __LINE__ ) :
-	#define CHK_NODE_DBL( O ) O->node == NULL ? _no_node_dbl_( O->label, __FILE__, __LINE__ ) :
+	#define CHK_NODE_CHR( O ) O->node == NULL ? _no_node_chr_( O->attr->label, __FILE__, __LINE__ ) :
+	#define CHK_NODE_DBL( O ) O->node == NULL ? _no_node_dbl_( O->attr->label, __FILE__, __LINE__ ) :
 #else
 	const bool lsd::no_pointer_init = true;
 
@@ -225,8 +225,8 @@
 #define LOG( ... ) _plog_( false, __VA_ARGS__ )
 #define PLOG( ... ) _plog_( true, __VA_ARGS__ )
 
-#define NAME ( ( const char * ) p->label )
-#define NAMES( O ) ( _chk_ptr_( O ) ? NULL : ( const char * ) O->label )
+#define NAME ( ( const char * ) p->attr->label )
+#define NAMES( O ) ( _chk_ptr_( O ) ? NULL : ( const char * ) O->attr->label )
 #define CONFIG _conf_name_( )
 #define PATH _conf_path_( )
 
@@ -602,14 +602,14 @@
 	#define CYCLE_LINKS( C, O ) for ( O = C->node->first; O != NULL; O = O->next )
 #else
 	#define CYCLE_LINK( X ) if ( p->node == NULL ) \
-								_no_node_dbl_( p->label, __FILE__, __LINE__ ); \
+								_no_node_dbl_( p->attr->label, __FILE__, __LINE__ ); \
 							else \
 								for ( X = p->node->first; X != NULL; X = X->next )
 	#define CYCLE_LINKS( O, X ) if ( O == NULL ) \
 									_bad_ptr_dbl_( O, __FILE__, __LINE__ ); \
 								else \
 									if ( O->node == NULL ) \
-										_no_node_dbl_( O->label, __FILE__, __LINE__ ); \
+										_no_node_dbl_( O->attr->label, __FILE__, __LINE__ ); \
 									else \
 										for ( X = O->node->first; X != NULL; X = X->next )
 #endif
@@ -699,7 +699,7 @@
 	#define EXECS_EXT( O, CLASS, OBJ, METHOD, ... ) EXEC_EXTS( O, CLASS, OBJ, METHOD, __VA_ARGS__ )
 	#define DEBUG \
 		f = fopen( "log.txt", "a" ); \
-		fprintf( f, "t=%g\t%s\t(cur=%g)\n", T, _v_->label, _v_->val[0] ); \
+		fprintf( f, "t=%g\t%s\t(cur=%g)\n", T, _v_->attr->label, _v_->val[0] ); \
 		fclose( f );
 	#define DEBUG_AT( X ) \
 		if ( T >= X ) \

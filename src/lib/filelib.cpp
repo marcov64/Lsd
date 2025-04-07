@@ -2184,16 +2184,24 @@ void lsd::result::title_recursive( object *r, bool header )
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )
 					{
-						for ( auto i = 2; i <= 4; ++i )
-							if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
-								write_title( cv, i, header, ce.start, ce.end );
+						for ( auto tag = TAG_ANL; tag <= TAG_DAT; ++tag )
+							if ( ! ( tag == TAG_FCT && ! da->sav_fct ) && ! ( tag == TAG_DAT && ! da->sav_dat ) )
+							{
+								write_title( cv->attr->label, cv->lab_tit, cv->up, tag, header, ce.start, ce.end );
+
+								if ( da->sav_ci )
+								{
+									write_title( to_string( "%s_ci+", cv->attr->label ).c_str( ), cv->lab_tit, cv->up, tag, header, ce.start, ce.end );
+									write_title( to_string( "%s_ci-", cv->attr->label ).c_str( ), cv->lab_tit, cv->up, tag, header, ce.start, ce.end );
+								}
+							}
 
 						ce.saved = true;
 					}
 				}
 			}
 			else
-				write_title( cv, 0, header, cv->start, cv->end );
+				write_title( cv->attr->label, cv->lab_tit, cv->up, TAG_NONE, header, cv->start, cv->end );
 		}
 
 	for ( auto cb = r->b; cb != NULL; cb = cb->next )
@@ -2219,16 +2227,24 @@ void lsd::result::title_recursive( object *r, bool header )
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )
 					{
-						for ( auto i = 2; i <= 4; ++i )
-							if ( ! ( i == 3 && ! da->sav_fct ) && ! ( i == 4 && ! da->sav_dat ) )
-								write_title( cv, i );
+						for ( auto i = TAG_ANL; i <= TAG_DAT; ++i )
+							if ( ! ( i == TAG_FCT && ! da->sav_fct ) && ! ( i == TAG_DAT && ! da->sav_dat ) )
+							{
+								write_title( cv->attr->label, cv->lab_tit, cv->up, i );
+
+								if ( da->sav_ci )
+								{
+									write_title( to_string( "%s_ci+", cv->attr->label ).c_str( ), cv->lab_tit, cv->up, i );
+									write_title( to_string( "%s_ci-", cv->attr->label ).c_str( ), cv->lab_tit, cv->up, i );
+								}
+							}
 
 						ce.saved = true;
 					}
 				}
 			}
 			else
-				write_title( cv, 0 );
+				write_title( cv->attr->label, cv->lab_tit, cv->up, TAG_NONE );
 		}
 }
 
@@ -2237,36 +2253,36 @@ void lsd::result::title_recursive( object *r, bool header )
  RESULT::WRITE_TITLE
  Write a single element to header of results file
  *************************************************************/
-void lsd::result::write_title( variable *v, int tag, bool header, int start, int end )
+void lsd::result::write_title( const char *lab, const char *lab_tit, object *par, int tag, bool header, int start, int end )
 {
 	bool just_name = false;
 
 	// prevent adding suffix to single objects
-	if ( tag == 0 && ( ! strcmp( v->lab_tit, "1" ) || ! strcmp( v->lab_tit, "1_1" ) || ! strcmp( v->lab_tit, "1_1_1" ) || ! strcmp( v->lab_tit, "1_1_1_1" ) || ! strcmp( v->lab_tit, "1_1_1_1_1" ) || ! strcmp( v->lab_tit, "1_1_1_1_1_1" ) || ! strcmp( v->lab_tit, "1_1_1_1_1_1_1" ) || ! strcmp( v->lab_tit, "1_1_1_1_1_1_1_1" ) || ! strcmp( v->lab_tit, "1_1_1_1_1_1_1_1_1" ) || ! strcmp( v->lab_tit, "1_1_1_1_1_1_1_1_1_1" ) ) && v->up->hyper_next( ) == NULL )
+	if ( tag == 0 && ( ! strcmp( lab_tit, "1" ) || ! strcmp( lab_tit, "1_1" ) || ! strcmp( lab_tit, "1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1_1_1_1" ) ) && par->hyper_next( ) == NULL )
 		just_name = true;
 
 	if ( header )
 		if ( dozip )
 			if ( docsv )
-				gzprintf( fz, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->attr->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
+				gzprintf( fz, "%s%s%s%s%s", first_col ? "" : CSV_SEP, lab, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : lab_tit );
 			else
-				gzprintf( fz, "%s %s%s (%d %d)\t", v->attr->label, tag_pref[ tag ], v->lab_tit, start, end );
+				gzprintf( fz, "%s %s%s (%d %d)\t", lab, tag_pref[ tag ], lab_tit, start, end );
 		else
 			if ( docsv )
-				fprintf( f, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->attr->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
+				fprintf( f, "%s%s%s%s%s", first_col ? "" : CSV_SEP, lab, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : lab_tit );
 			else
-				fprintf( f, "%s %s%s (%d %d)\t", v->attr->label, tag_pref[ tag ], v->lab_tit, start, end );
+				fprintf( f, "%s %s%s (%d %d)\t", lab, tag_pref[ tag ], lab_tit, start, end );
 	else
 		if ( dozip )
 			if ( docsv )
-				gzprintf( fz, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->attr->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
+				gzprintf( fz, "%s%s%s%s%s", first_col ? "" : CSV_SEP, lab, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : lab_tit );
 			else
-				gzprintf( fz, "%s %s%s (-1 -1)\t", v->attr->label, tag_pref[ tag ], v->lab_tit );
+				gzprintf( fz, "%s %s%s (-1 -1)\t", lab, tag_pref[ tag ], lab_tit );
 		else
 			if ( docsv )
-				fprintf( f, "%s%s%s%s%s", first_col ? "" : CSV_SEP, v->attr->label, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : v->lab_tit );
+				fprintf( f, "%s%s%s%s%s", first_col ? "" : CSV_SEP, lab, just_name ? "" : "_", just_name ? "" : tag_pref[ tag ], just_name ? "" : lab_tit );
 			else
-				fprintf( f, "%s %s%s (-1 -1)\t", v->attr->label, tag_pref[ tag ], v->lab_tit );
+				fprintf( f, "%s %s%s (-1 -1)\t", lab, tag_pref[ tag ], lab_tit );
 
 	first_col = false;
 }
@@ -2321,13 +2337,21 @@ void lsd::result::data_recursive( object *r, int t )
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )
 					{
-						for ( auto i = 2; i <= 4; ++i )
+						for ( auto i = TAG_ANL; i <= TAG_DAT; ++i )
 						{
-							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
+							if ( ( i == TAG_FCT && ! da->sav_fct ) || ( i == TAG_DAT && ! da->sav_dat ) )
 								continue;
 
-							data = ( i == 4 ? ce.dat.data( ) : ( i == 3 ? ce.fct.data( ) : ce.anl.data( ) ) );
+							data = ( i == TAG_DAT ? ce.dat.data( ) : ( i == TAG_FCT ? ce.fct.data( ) : ce.anl.data( ) ) );
 							write_data( data, t, ce.start, ce.end );
+
+							if ( da->sav_ci )
+							{
+								data = ( i == TAG_DAT ? ce.dat_hi.data( ) : ( i == TAG_FCT ? ce.fct_hi.data( ) : ce.anl_hi.data( ) ) );
+								write_data( data, t, ce.start, ce.end );
+								data = ( i == TAG_DAT ? ce.dat_lo.data( ) : ( i == TAG_FCT ? ce.fct_lo.data( ) : ce.anl_lo.data( ) ) );
+								write_data( data, t, ce.start, ce.end );
+							}
 						}
 
 						ce.saved = true;
@@ -2359,13 +2383,21 @@ void lsd::result::data_recursive( object *r, int t )
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )
 					{
-						for ( auto i = 2; i <= 4; ++i )
+						for ( auto tag = TAG_ANL; tag <= TAG_DAT; ++tag )
 						{
-							if ( ( i == 3 && ! da->sav_fct ) || ( i == 4 && ! da->sav_dat ) )
+							if ( ( tag == TAG_FCT && ! da->sav_fct ) || ( tag == TAG_DAT && ! da->sav_dat ) )
 								continue;
 
-							data = ( i == 4 ? ce.dat.data( ) : ( i == 3 ? ce.fct.data( ) : ce.anl.data( ) ) );
+							data = ( tag == TAG_DAT ? ce.dat.data( ) : ( tag == TAG_FCT ? ce.fct.data( ) : ce.anl.data( ) ) );
 							write_data( data, t, ce.start, ce.end );
+
+							if ( da->sav_ci )
+							{
+								data = ( tag == TAG_DAT ? ce.dat_hi.data( ) : ( tag == TAG_FCT ? ce.fct_hi.data( ) : ce.anl_hi.data( ) ) );
+								write_data( data, t, ce.start, ce.end );
+								data = ( tag == TAG_DAT ? ce.dat_lo.data( ) : ( tag == TAG_FCT ? ce.fct_lo.data( ) : ce.anl_lo.data( ) ) );
+								write_data( data, t, ce.start, ce.end );
+							}
 						}
 
 						ce.saved = true;

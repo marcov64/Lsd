@@ -38,6 +38,24 @@ lsd::assinstance::assinstance( int _start, int _end, bool sav_fct, bool sav_dat 
 
 	if ( sav_dat )
 		dat.assign( sz, NAN );
+
+	if ( da->sav_ci )
+	{
+		anl_hi.assign( sz, NAN );
+		anl_lo.assign( sz, NAN );
+
+		if ( sav_fct )
+		{
+			fct_hi.assign( sz, NAN );
+			fct_lo.assign( sz, NAN );
+		}
+
+		if ( sav_dat )
+		{
+			dat_hi.assign( sz, NAN );
+			dat_lo.assign( sz, NAN );
+		}
+	}
 }
 
 
@@ -489,7 +507,7 @@ void lsd::assimilation::update_state_vars( const e_matT & x_a_e )
  UPDATE_ASSIM_VARS
  Update the DA analysis variables in LSD
  *************************************************************/
-void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_f, const e_vecT & z, int t )
+void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_f, const e_vecT & z, const e_matT & x_a_ci, const e_matT & x_f_ci, const e_matT & z_ci, int t )
 {
 	size_t i;
 	int nvar = x_a.size( );
@@ -517,6 +535,24 @@ void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_
 
 		if ( da->sav_dat )
 			ca.da_data[ i ].dat[ t - ca.da_data[ i ].start ] = z[ j ];
+
+		if ( da->sav_ci )
+		{
+			ca.da_data[ i ].anl_hi[ t - ca.da_data[ i ].start ] = x_a_ci( 0, j );
+			ca.da_data[ i ].anl_lo[ t - ca.da_data[ i ].start ] = x_a_ci( 1, j );
+
+			if ( da->sav_fct )
+			{
+				ca.da_data[ i ].fct_hi[ t - ca.da_data[ i ].start ] = x_f_ci( 0, j );
+				ca.da_data[ i ].fct_lo[ t - ca.da_data[ i ].start ] = x_f_ci( 1, j );
+			}
+
+			if ( da->sav_dat )
+			{
+				ca.da_data[ i ].dat_hi[ t - ca.da_data[ i ].start ] = z_ci( 0, j );
+				ca.da_data[ i ].dat_lo[ t - ca.da_data[ i ].start ] = z_ci( 1, j );
+			}
+		}
 
 		ca.da_data[ i ].cur_t = ca.da_data[ i ].end = t;
 	}
@@ -665,7 +701,7 @@ void lsd::assimilation::update_runtime_plot( int cur_t )
 
 	// compute the MC analysis ensemble estimates & refresh run-time window
 	e_vecT x_a = loc_stat( x_a_e );
-	update_assim_vars( x_a, x_f, z, cur_t );
+	update_assim_vars( x_a, x_f, z, ci_stat( x_a_e, x_a ), ci_stat( x_f_e, x_f ), ci_stat( z_e, z ), cur_t );
 
 #ifndef _TERM_
 	update_runtime_plot( cur_t );
@@ -715,6 +751,44 @@ e_vecT lsd::assimilation::loc_stat( const e_matT & x )
 		x_bar = x.colwise( ).mean( );
 
 	return x_bar;
+}
+
+
+/*************************************************************
+ CI_STAT
+ Compute the confidence interval matrix (for mean or median)
+ *************************************************************/
+e_matT lsd::assimilation::ci_stat( const e_matT & x, const e_vecT & x_bar )
+{
+	int nobs = x.rows( ), nvar = x.cols( );
+	e_matT x_ci( 2, nvar );
+
+	if ( sav_ci )
+	{
+		double l, t_crit = ref_sim->t_star( nobs - 1, conf_lev );
+		e_vecT d( nobs );
+
+		for ( auto i = 0; i < nvar; ++i )
+		{
+			if ( med_stats )
+			{
+				d = ( x.col( i ).array( ) - x_bar[ i ] ).abs( );
+				double mad = median( d.begin( ), d.end( ) );
+				l = t_crit * 1.4826 * mad / std::sqrt( nobs );
+			}
+			else
+			{
+				d = x.col( i ).array( ) - x_bar[ i ];
+				double sd = std::sqrt( d.dot( d.transpose( ) ) / ( x.rows( ) - 1. ) );
+				l = t_crit * sd / std::sqrt( nobs );
+			}
+
+			x_ci( 0, i ) = x_bar[ i ] + l;
+			x_ci( 1, i ) = x_bar[ i ] - l;
+		}
+	}
+
+	return x_ci;
 }
 
 

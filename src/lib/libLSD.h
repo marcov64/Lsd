@@ -124,6 +124,15 @@
 #define U_FN lsd::equation				// namespace for user functions
 #define Z_CLEVS 7						// number of normal distr. confidence levels
 
+#define TAG_NONE 0						// series tags - no tag
+#define TAG_UPDT 1						// series from update buffer
+#define TAG_ANL 2						// series from DA - analysis
+#define TAG_FCT 3						// series from DA - forecast
+#define TAG_DAT 4						// series from DA - observation data
+#define TAG_FILE 5						// series from files
+#define TAG_CALC 6						// series from calculations
+#define TAG_MC 7						// series from Monte Carlo experiment
+
 // directory/file separator
 #define foldersep( dir ) ( dir[ 0 ] == '\0' ? "" : "/" )
 
@@ -983,7 +992,7 @@ namespace lsd
 			void data_recursive( object *r, int t );
 			void title_recursive( object *r, bool header );
 			void write_data( double *data, int t, int start, int end );
-			void write_title( variable *v, int tag, bool header = false, int start = -1, int end = -1 );
+			void write_title( const char *lab, const char *lab_tit, object *par, int tag, bool header = false, int start = -1, int end = -1 );
 	};
 
 
@@ -1069,8 +1078,14 @@ namespace lsd
 		private:
 			bool saved = false;				// data saved in current run
 			d_vecT anl;						// analysis data produced by DA
+			d_vecT anl_hi;					// analysis data upper bound
+			d_vecT anl_lo;					// analysis data lower bound
 			d_vecT fct;						// forecast data produced by DA
+			d_vecT fct_hi;					// forecast data upper bound
+			d_vecT fct_lo;					// forecast data lower bound
 			d_vecT dat;						// observational data used during DA
+			d_vecT dat_hi;					// observational data upper bound
+			d_vecT dat_lo;					// observational data lower bound
 			int	cur_t;						// last update time of data
 			int	end;						// last valid data period
 			int start;						// first valid data period
@@ -1145,6 +1160,7 @@ namespace lsd
 		public:
 			ass_listT ass_elem;				// assimilation elements linked-list head
 			ass_mapT elem_map;				// map names to assimilation elements
+			double conf_lev = 95.;			// confidence interval confidence level (%)
 			double infl_fac = 1.;			// ensemble inflation factor
 			int algorithm = 0;				// algorithm to use in DA (0=EnKF,1=ETPF)
 			int align_trim = false;			// trim extra instances for forecast alignment
@@ -1153,6 +1169,7 @@ namespace lsd
 			int use_dsp_file = false;		// use data dispersion/virtual obs.
 			int disable = false;			// disable data assimilation
 			int med_stats = false;			// use median/MAD statistics (vs mean/SD)
+			int sav_ci = false;				// save confidence interval for DA series
 			int sav_dat = false;			// save observational data
 			int sav_dsp = false;			// save data dispersion matrix
 			int sav_fct = false;			// save forecast (intermediary) results
@@ -1188,6 +1205,7 @@ namespace lsd
 			const e_matT & virtual_obs( const e_vecT & z, int nobs );
 			const e_matT & forward_matrix( const ass_vecT & dvars );
 			const e_vecT & data_obs( const ass_vecT & dvars, int cur_t );
+			e_matT ci_stat( const e_matT & x_e, const e_vecT & x_bar );
 			e_vecT loc_stat( const e_matT & x );
 			int analysis( const ass_vecT & dvars, int cur_t );
 			int calc_dsp_mat( void );
@@ -1198,9 +1216,13 @@ namespace lsd
 			void finish( void );
 			void reset_insts( void );
 			void save_param( object *r );
-			void update_assim_vars( const e_vecT & x_a, const e_vecT & x_f, const e_vecT & z, int t );
+			void update_assim_vars( const e_vecT & x_a, const e_vecT & x_f, const e_vecT & z, const e_matT & x_a_ci, const e_matT & x_f_ci, const e_matT & z_ci, int t );
 			void update_runtime_plot( int cur_t );
 			void update_state_vars( const e_matT & x_a_e );
+
+#ifdef ASSIMILATION_EXT
+			ASSIMILATION_EXT
+#endif
 	};
 
 

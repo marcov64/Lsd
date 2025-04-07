@@ -197,7 +197,7 @@ double lsd::equation::com( d_vecT & u, d_vecT & v )
 /*************************************************************
  T_STAR
  Student t distribution  statistic for given
- degrees of freedom and confidence level (in %)
+ degrees of freedom and confidence level (alpha/2) (in %)
  *************************************************************/
 double lsd::equation::t_star( int df, double cl )
 {
