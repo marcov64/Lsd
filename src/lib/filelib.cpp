@@ -339,70 +339,71 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 				plot = cn.attribute( "plot" ).as_bool( );
 				debug = cn.attribute( "debug" ).as_string( "n" )[ 0 ];
 
-				cv = add_var( str, type, lags, plot, debug );
-
-				cv->attr->save = cn.attribute( "save" ).as_bool( );
-				cv->attr->savei = cn.attribute( "save_file" ).as_bool( );
-				cv->attr->integer = cn.attribute( "integer" ).as_bool( );
-				cv->attr->parallel = cn.attribute( "parallel" ).as_bool( );
-				cv->attr->max_val = cn.attribute( "maximum" ).as_double( NAN );
-				cv->attr->min_val = cn.attribute( "minimum" ).as_double( NAN );
-				cv->attr->initialized = cn.attribute( "initialized" ).as_bool( true );
-
-				if ( type == 0 )
+				if ( ( cv = add_var( str, type, lags, plot, debug ) ) != NULL )
 				{
-					cv->attr->delay = cn.attribute( "delay" ).as_uint( );
-					cv->attr->delay_range = cn.attribute( "delay_range" ).as_uint( );
-					cv->attr->period = cn.attribute( "period" ).as_uint( 1 );
-					cv->attr->period_range = cn.attribute( "period_range" ).as_uint( );
-				}
+					cv->attr->save = cn.attribute( "save" ).as_bool( );
+					cv->attr->savei = cn.attribute( "save_file" ).as_bool( );
+					cv->attr->integer = cn.attribute( "integer" ).as_bool( );
+					cv->attr->parallel = cn.attribute( "parallel" ).as_bool( );
+					cv->attr->max_val = cn.attribute( "maximum" ).as_double( NAN );
+					cv->attr->min_val = cn.attribute( "minimum" ).as_double( NAN );
+					cv->attr->initialized = cn.attribute( "initialized" ).as_bool( true );
 
-				if ( ! quick )
-				{
-					if ( sim == sims[ 0 ] && desc != NULL && ! cn.child( "description" ).empty( ) )
+					if ( type == 0 )
 					{
-						dsc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
-						init = strdecdata( NULL, cn.child( "description" ).child( "initialization" ).text( ).get( ) );
-						obs = cn.child( "documentation" ).attribute( "observe" ).as_bool( );
-
-						desc->add_descr( str, type, dsc, init, cn.child( "documentation" ).attribute( "initialization" ).as_bool( ), obs );
-						cv->attr->observe = obs;
-
-						delete [ ] dsc;
-						delete [ ] init;
+						cv->attr->delay = cn.attribute( "delay" ).as_uint( );
+						cv->attr->delay_range = cn.attribute( "delay_range" ).as_uint( );
+						cv->attr->period = cn.attribute( "period" ).as_uint( 1 );
+						cv->attr->period_range = cn.attribute( "period_range" ).as_uint( );
 					}
 
-					if ( ! cn.child( "sensitivity" ).empty( ) )
+					if ( ! quick )
 					{
-						x_nodeT cns = cn.child( "sensitivity" );
-						integer = cn.attribute( "integer" ).as_bool( );
-
-						if ( type == 1 )
+						if ( sim == sims[ 0 ] && desc != NULL && ! cn.child( "description" ).empty( ) )
 						{
-							val = strtodsplit( cns.child( "values" ).text( ).get( ), ',' );
+							dsc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
+							init = strdecdata( NULL, cn.child( "description" ).child( "initialization" ).text( ).get( ) );
+							obs = cn.child( "documentation" ).attribute( "observe" ).as_bool( );
 
-							if ( val.size( ) > 1 )
-								new sensitivity( str, sim, type, 0, integer, val.size( ), &val );
+							desc->add_descr( str, type, dsc, init, cn.child( "documentation" ).attribute( "initialization" ).as_bool( ), obs );
+							cv->attr->observe = obs;
+
+							delete [ ] dsc;
+							delete [ ] init;
 						}
-						else
-							if ( type == 0 )
+
+						if ( ! cn.child( "sensitivity" ).empty( ) )
+						{
+							x_nodeT cns = cn.child( "sensitivity" );
+							integer = cn.attribute( "integer" ).as_bool( );
+
+							if ( type == 1 )
 							{
-								for ( x_nodeT & sn : cns.children( ) )
-								{
-									data = strtostrsplit( sn.name( ), '-' );
+								val = strtodsplit( cns.child( "values" ).text( ).get( ), ',' );
 
-									if ( data.size( ) < 2 || data[ 0 ] != "values" )
-										continue;
-
-									if ( ( i = strtol( data[ 1 ].c_str( ), NULL, 10, -1 ) ) < 1 || i > lags )
-										continue;
-
-									val = strtodsplit( sn.text( ).get( ), ',' );
-
-									if ( val.size( ) > 1 )
-										new sensitivity( str, sim, type, i - 1, integer, val.size( ), &val );
-								}
+								if ( val.size( ) > 1 )
+									new sensitivity( str, sim, type, 0, integer, val.size( ), &val );
 							}
+							else
+								if ( type == 0 )
+								{
+									for ( x_nodeT & sn : cns.children( ) )
+									{
+										data = strtostrsplit( sn.name( ), '-' );
+
+										if ( data.size( ) < 2 || data[ 0 ] != "values" )
+											continue;
+
+										if ( ( i = strtol( data[ 1 ].c_str( ), NULL, 10, -1 ) ) < 1 || i > lags )
+											continue;
+
+										val = strtodsplit( sn.text( ).get( ), ',' );
+
+										if ( val.size( ) > 1 )
+											new sensitivity( str, sim, type, i - 1, integer, val.size( ), &val );
+									}
+								}
+						}
 					}
 				}
 
@@ -1467,16 +1468,19 @@ bool lsd::object::load_txt_struct( FILE *f )
 			if ( cb->head == NULL || ! cb->head->load_txt_struct( f ) )
 				return false;
 		}
-
-		type = 0;
-		if ( ! strcmp( ch, "Param:" ) )
-			type = 1;
 		else
-			if ( ! strcmp( ch, "Func:" ) )
-				type = 2;
+		{
+			if ( ! strcmp( ch, "Param:" ) )
+				type = 1;
+			else
+				if ( ! strcmp( ch, "Func:" ) )
+					type = 2;
+				else
+					type = 0;
 
-		fscanf( f, "%*[ ]%99s", ch );
-		add_var( ch, type );
+			fscanf( f, "%*[ ]%99s", ch );
+			add_var( ch, type );
+		}
 
 		fscanf( f, "%*[{\r\t\n]%99s", ch );
 	}

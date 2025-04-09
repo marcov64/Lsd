@@ -639,7 +639,7 @@ lsd::object *gui::operate( lsd::object *r )
 						cmd( "lappend modElem %s", lab );
 
 						for ( cur = r; cur != NULL; cur = cur->hyper_next( ) )
-							cv = cur->add_var( lab, param, num );
+							cur->add_var( lab, param, num );
 
 						initParent = r;
 

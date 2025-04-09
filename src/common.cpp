@@ -224,12 +224,12 @@ int gui::init_lsd_env( const char **argv )
 
 	// check if LSDROOT environment variable exists and use it if so
 	cmd( "if { [ info exists env(LSDROOT) ] } { \
-			set lsd_root [ file normalize $env(LSDROOT) ]; \
-			if [ file exists \"$lsd_root/$lsd_src/LSD.h\" ] { \
-				set res 0 \
-			} { \
-				set res 1 \
-			} \
+			set lsd_root [ file normalize $env(LSDROOT) ] \
+		} { \
+			set lsd_root [ file normalize %s ] \
+		}", lsd::exec_path );
+	cmd( "if [ file exists \"$lsd_root/$lsd_src/LSD.h\" ] { \
+			set res 0 \
 		} { \
 			set res 1 \
 		}" );

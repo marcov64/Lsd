@@ -1338,31 +1338,19 @@ lsd::variable *lsd::object::add_var( const char *lab, int par, int lags, bool pl
 {
 	variable *cv;
 
-	if ( search_var( this, lab, true, true ) != NULL )
+	if ( search_var( this, lab, true, true ) != NULL || search( lab ) != NULL )
 	{
-		sim->error_hard( "variable or parameter not added",
-						 "choose an unique name for the element",
-						 true,
-						 "an element named '%s' already exists in the model",
-						 lab );
-		return NULL;
-	}
-
-	if ( search( lab ) != NULL )
-	{
-		sim->error_hard( "variable or parameter not added",
-						 "choose an unique name for the element",
-						 true,
-						 "an object named '%s' already exists in the model",
-						 lab );
+		sim->plog( "\nWarning: duplicated element name '%s', please rename", lab );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Duplicated element name\" -detail \"Element '%s' name is already used in the model. Please rename it.\n\nThe names of objects, variables, parameters, and functions must be unique.\"", lab );
 		return NULL;
 	}
 
 #ifndef _TERM_
 	if ( ! valid_label( lab ) )
 	{
-		sim->plog( "\nWarning: invalid variable name '%s', please rename", lab );
-		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Invalid characters in variable name\" -detail \"Variable '%s' has an invalid name. Please rename it to prevent problems.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
+		sim->plog( "\nWarning: invalid element name '%s', please rename", lab );
+		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid characters in element name\" -detail \"Element '%s' has an invalid name. Please rename it.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
+		return NULL;
 	}
 #endif
 
