@@ -657,7 +657,7 @@ char *lsd::get_path( const char *filename )
 	if ( last_slash == strT::npos || last_slash == 0 )
 		return NULL;
 
-	return( clean_path( fn.substr( 0, last_slash - 1 ).c_str( ) ) );
+	return( clean_path( fn.substr( 0, last_slash ).c_str( ) ) );
 }
 
 
