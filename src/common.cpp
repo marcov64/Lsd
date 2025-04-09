@@ -120,7 +120,7 @@ void gui::init_tcl_tk( const char *exec, const char *tcl_app_name )
  *************************************************************/
 int gui::init_lsd_env( const char **argv )
 {
-	char *str, cwd[ PATH_MAX ];
+	char *str;
 	const char *app, *app1;
 	int i;
 	FILE *f;
@@ -137,11 +137,10 @@ int gui::init_lsd_env( const char **argv )
 	cmd( "set DESCRIPTION \"%s\"", DESCRIPTION );
 	cmd( "set DATE_FMT \"%s\"", DATE_FMT );
 
-	// assume exec path is current path
-	getcwd( cwd, PATH_MAX );
-	lsd::set_exec( cwd, argv[ 0 ] );
+	// assume exec path is included in file name, use CWD if not
+	lsd::set_exec( NULL, argv[ 0 ] );
 
-	if ( lsd::exec_file == NULL || lsd::exec_path == NULL )
+	if ( lsd::exec_file == NULL || strlen( lsd::exec_file ) == 0 || lsd::exec_path == NULL || strlen( lsd::exec_path ) == 0 )
 	{
 		log_tcl_error( true, "Invalid LSD executable name or path", "Make sure the LSD directory is not too deep into the disk directory tree" );
 		return 1;

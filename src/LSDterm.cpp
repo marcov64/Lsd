@@ -60,11 +60,10 @@ int main( int argn, const char **argv )
 	try
 	{
 #endif
-		// set executable name and path
-		getcwd( cwd, PATH_MAX );
-		lsd::set_exec( cwd, argv[ 0 ] );
+		// assume exec path is included in file name, use CWD if not
+		lsd::set_exec( NULL, argv[ 0 ] );
 
-		if ( lsd::exec_file == NULL || lsd::exec_path == NULL )
+		if ( lsd::exec_file == NULL || strlen( lsd::exec_file ) == 0 || lsd::exec_path == NULL || strlen( lsd::exec_path ) == 0 )
 		{
 			fprintf( stderr, "\nInvalid LSD executable name or path.\n%s\nMake sure the LSD directory is not too deep into the disk directory tree (over %d chars).\n\n", lsdCmdMsg, PATH_MAX );
 			lsd::lsd_exit( 5 );

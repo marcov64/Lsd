@@ -242,8 +242,36 @@ void lsd::set_exec( const char *path, const char *file )
 {
 	strT exefile, exepath, libfile, libpath, fname;
 
-	exepath = path;
-	exefile = file;
+	if ( file != NULL && strlen( file ) > 0 )
+	{
+		exefile = file;
+
+		if ( path == NULL || access( to_string( "%s/%s", path, file ).c_str( ), F_OK ) != 0 )
+		{
+			// invalid path and/or file, try to extract path from file name
+			if ( access( file, F_OK ) == 0 )
+			{
+				char *dir = get_path( file );
+
+				// if no path prefix, use working directory
+				if ( dir == NULL )
+				{
+					char cwd[ PATH_MAX ];
+					getcwd( cwd, PATH_MAX );
+
+					if ( access( to_string( "%s/%s", cwd, file ).c_str( ), F_OK ) == 0 )
+						dir = cwd;
+				}
+
+				if ( dir != NULL )
+					exepath = dir;
+
+				delete [ ] dir;
+			}
+		}
+		else
+			exepath = path;
+	}
 
 	delete [ ] exec_path;
 	delete [ ] exec_file;
@@ -614,6 +642,22 @@ char *lsd::clean_path( const char *filepath )
 	strcpyn( newpath, oldpath, strlen( oldpath ) + 1 );
 
 	return newpath;
+}
+
+
+/*************************************************************
+ GET_PATH
+ extract directory from a fully qualified file neme path
+ *************************************************************/
+char *lsd::get_path( const char *filename )
+{
+	strT fn = filename;
+	size_t last_slash = fn.find_last_of( "/\\" );
+
+	if ( last_slash == strT::npos || last_slash == 0 )
+		return NULL;
+
+	return( clean_path( fn.substr( 0, last_slash - 1 ).c_str( ) ) );
 }
 
 

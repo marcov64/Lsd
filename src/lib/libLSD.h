@@ -1489,6 +1489,7 @@ namespace lsd
 	bool valid_xml_string( const char *lab );
 	char *clean_file( const char *file );
 	char *clean_path( const char *path );
+	char *get_path( const char *file );
 	char *strcatn( char *d, const char *s, size_t dSz );
 	char *strcpyn( char *d, const char *s, size_t dSz );
 	char *strdecdata( char *out, const char *in, int outSz = 0 );
