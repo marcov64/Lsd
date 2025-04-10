@@ -128,7 +128,7 @@
 #define TAG_UPDT 1						// series from update buffer
 #define TAG_ANL 2						// series from DA - analysis
 #define TAG_FCT 3						// series from DA - forecast
-#define TAG_DAT 4						// series from DA - observation data
+#define TAG_OBS 4						// series from DA - observation data
 #define TAG_FILE 5						// series from files
 #define TAG_CALC 6						// series from calculations
 #define TAG_MC 7						// series from Monte Carlo experiment
@@ -1083,15 +1083,15 @@ namespace lsd
 			d_vecT fct;						// forecast data produced by DA
 			d_vecT fct_hi;					// forecast data upper bound
 			d_vecT fct_lo;					// forecast data lower bound
-			d_vecT dat;						// observational data used during DA
-			d_vecT dat_hi;					// observational data upper bound
-			d_vecT dat_lo;					// observational data lower bound
+			d_vecT obs;						// observational data used during DA
+			d_vecT obs_hi;					// observational data upper bound
+			d_vecT obs_lo;					// observational data lower bound
 			int	cur_t;						// last update time of data
 			int	end;						// last valid data period
 			int start;						// first valid data period
 
 		public:
-			assinstance( int _start, int _end, bool fct, bool dat );// constructor
+			assinstance( int _start, int _end, bool fct, bool obs );// constructor
 	};
 
 
@@ -1170,7 +1170,7 @@ namespace lsd
 			int disable = false;			// disable data assimilation
 			int med_stats = false;			// use median/MAD statistics (vs mean/SD)
 			int sav_ci = false;				// save confidence interval for DA series
-			int sav_dat = false;			// save observational data
+			int sav_obs = false;			// save observational data
 			int sav_dsp = false;			// save data dispersion matrix
 			int sav_fct = false;			// save forecast (intermediary) results
 			strT dsp_file;					// data assimilation dispersion CSV file

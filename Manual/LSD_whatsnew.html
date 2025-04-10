@@ -94,7 +94,7 @@ div.WordSection1
 
 <p class=MsoTitle><span lang=EN-US>What’s new in LSD</span></p>
 
-<h1><span lang=EN-US>Version 9.0 (January 2024)</span></h1>
+<h1><span lang=EN-US>Version 9.0 (April 2024)</span></h1>
 
 <p class=MsoNormal><span lang=EN-US>The version introduces support for
 data-assimilation ABMs, a new organization and interface of model executables,
@@ -105,7 +105,24 @@ and other improvements:</span></p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b><span lang=EN-US>Data-assimilation agent-based models</span></b><span
 lang=EN-US>. It is now possible to perform data-assimilation during model
-execution.</span></p>
+execution and analysis. Multiple simulation runs are run as multiple threads
+directly managed by LSD, fully taking advantage of multi-core modern computers
+and servers.</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Dynamic calibration of parameters using data
+assimilation</span></b><span lang=EN-US>. Model parameters may be continuously
+re-estimated to fit available time-series data set.</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>Reduced model memory footprint</span></b><span
+lang=EN-US>. The memory (RAM) used by LSD models was reduced, allowing more
+model instances running simultaneously. This also increases the simulation
+speed slightly.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -131,6 +148,15 @@ safe manipulation by other applications, including text editors. Legacy
 configuration files can still be read and exported (basic model structure
 only). Reading from uncompressed XML format is also supported. This allows
 other applications to easily create/modify LSD configuration files.</span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=EN-US>More robust Monte Carlo analysis.</span></b><span
+lang=EN-US> LSD now automatically trim “excess” instances of Objects, to align
+data for Monte Carlo experiment statistics generation. There is no more the
+need to remove Variables from Objects with different number of instances
+between simulation runs when using LSD to analyze results.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -548,8 +574,9 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span><b><span lang=EN-US>Automatic description for new
 Variable/Function</span></b><span lang=EN-US>. When <a
 href="menumodel.html#AddAVar">adding new Variables and Functions</a> using the
-name list, <a name="_Hlk11434818">any existing description text (comments) existing
-in the equation file(s) is used to fill the Description field automatically</a>.</span></p>
+name list, <a name="_Hlk11434818">any existing description text (comments)
+existing in the equation file(s) is used to fill the Description field
+automatically</a>.</span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US

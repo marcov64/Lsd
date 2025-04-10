@@ -25,7 +25,7 @@
  ASSINSTANCE constructor
  Prepare container for element data produced by assimilation
  *************************************************************/
-lsd::assinstance::assinstance( int _start, int _end, bool sav_fct, bool sav_dat )
+lsd::assinstance::assinstance( int _start, int _end, bool sav_fct, bool sav_obs )
 {
 	cur_t = start = _start;
 	end = _end;
@@ -36,8 +36,8 @@ lsd::assinstance::assinstance( int _start, int _end, bool sav_fct, bool sav_dat 
 	if ( sav_fct )
 		fct.assign( sz, NAN );
 
-	if ( sav_dat )
-		dat.assign( sz, NAN );
+	if ( sav_obs )
+		obs.assign( sz, NAN );
 
 	if ( da->sav_ci )
 	{
@@ -50,10 +50,10 @@ lsd::assinstance::assinstance( int _start, int _end, bool sav_fct, bool sav_dat 
 			fct_lo.assign( sz, NAN );
 		}
 
-		if ( sav_dat )
+		if ( sav_obs )
 		{
-			dat_hi.assign( sz, NAN );
-			dat_lo.assign( sz, NAN );
+			obs_hi.assign( sz, NAN );
+			obs_lo.assign( sz, NAN );
 		}
 	}
 }
@@ -166,8 +166,8 @@ void lsd::assim::finish( void )
 			if ( da != NULL && da->sav_fct )
 				i.fct.resize( sz );
 
-			if ( da != NULL && da->sav_dat )
-				i.dat.resize( sz );
+			if ( da != NULL && da->sav_obs )
+				i.obs.resize( sz );
 		}
 }
 
@@ -526,15 +526,15 @@ void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_
 				break;
 
 		if ( i == ca.da_data.size( ) )					// all used, create new
-			ca.da_data.emplace_back( t, ref_sim->last_t, da->sav_fct, da->sav_dat );
+			ca.da_data.emplace_back( t, ref_sim->last_t, da->sav_fct, da->sav_obs );
 
 		ca.da_data[ i ].anl[ t - ca.da_data[ i ].start ] = x_a[ j ];
 
 		if ( da->sav_fct )
 			ca.da_data[ i ].fct[ t - ca.da_data[ i ].start ] = x_f[ j ];
 
-		if ( da->sav_dat )
-			ca.da_data[ i ].dat[ t - ca.da_data[ i ].start ] = z[ j ];
+		if ( da->sav_obs )
+			ca.da_data[ i ].obs[ t - ca.da_data[ i ].start ] = z[ j ];
 
 		if ( da->sav_ci )
 		{
@@ -547,10 +547,10 @@ void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_
 				ca.da_data[ i ].fct_lo[ t - ca.da_data[ i ].start ] = x_f_ci( 1, j );
 			}
 
-			if ( da->sav_dat )
+			if ( da->sav_obs )
 			{
-				ca.da_data[ i ].dat_hi[ t - ca.da_data[ i ].start ] = z_ci( 0, j );
-				ca.da_data[ i ].dat_lo[ t - ca.da_data[ i ].start ] = z_ci( 1, j );
+				ca.da_data[ i ].obs_hi[ t - ca.da_data[ i ].start ] = z_ci( 0, j );
+				ca.da_data[ i ].obs_lo[ t - ca.da_data[ i ].start ] = z_ci( 1, j );
 			}
 		}
 

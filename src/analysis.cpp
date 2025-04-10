@@ -4738,8 +4738,8 @@ void lsd::assimilation::insert_label_mem( int *num_v, variable *v )
 	if ( ce.saved )
 		return;
 
-	for ( auto tag = TAG_ANL; tag <= TAG_DAT; ++tag )
-		if ( ! ( tag == TAG_FCT && ! sav_fct ) && ! ( tag == TAG_DAT && ! sav_dat ) )
+	for ( auto tag = TAG_ANL; tag <= TAG_OBS; ++tag )
+		if ( ! ( tag == TAG_FCT && ! sav_fct ) && ! ( tag == TAG_OBS && ! sav_obs ) )
 		{
 			cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v, v->up->attr->label );
 
@@ -4847,9 +4847,9 @@ void lsd::assimilation::insert_store_mem( int *num_v, variable *v )
 	if ( ce.saved )
 		return;
 
-	for ( auto tag = TAG_ANL; tag <= TAG_DAT; ++tag )
+	for ( auto tag = TAG_ANL; tag <= TAG_OBS; ++tag )
 	{
-		if ( ( tag == TAG_FCT && ! sav_fct ) || ( tag == TAG_DAT && ! sav_dat ) )
+		if ( ( tag == TAG_FCT && ! sav_fct ) || ( tag == TAG_OBS && ! sav_obs ) )
 			continue;
 
 		gui::vs[ *num_v ].label = v->attr->label;
@@ -4858,7 +4858,7 @@ void lsd::assimilation::insert_store_mem( int *num_v, variable *v )
 		gui::vs[ *num_v ].start = ce.start;
 		gui::vs[ *num_v ].end = ce.end;
 		gui::vs[ *num_v ].rank = *num_v;
-		gui::vs[ *num_v ].data = ( tag == TAG_DAT ? ce.dat.data( ) : ( tag == TAG_FCT ? ce.fct.data( ) : ce.anl.data( ) ) );
+		gui::vs[ *num_v ].data = ( tag == TAG_OBS ? ce.obs.data( ) : ( tag == TAG_FCT ? ce.fct.data( ) : ce.anl.data( ) ) );
 		gui::vs[ *num_v ].data_alias = true;
 
 		if ( ! sav_ci )
@@ -4871,7 +4871,7 @@ void lsd::assimilation::insert_store_mem( int *num_v, variable *v )
 			gui::vs[ *num_v + 1 ].start = ce.start;
 			gui::vs[ *num_v + 1 ].end = ce.end;
 			gui::vs[ *num_v + 1 ].rank = *num_v + 1;
-			gui::vs[ *num_v + 1 ].data = ( tag == TAG_DAT ? ce.dat_hi.data( ) : ( tag == TAG_FCT ? ce.fct_hi.data( ) : ce.anl_hi.data( ) ) );
+			gui::vs[ *num_v + 1 ].data = ( tag == TAG_OBS ? ce.obs_hi.data( ) : ( tag == TAG_FCT ? ce.fct_hi.data( ) : ce.anl_hi.data( ) ) );
 			gui::vs[ *num_v + 1 ].data_alias = true;
 
 			gui::vs[ *num_v + 2 ].label = to_string( "%s_ci-", v->attr->label );
@@ -4880,7 +4880,7 @@ void lsd::assimilation::insert_store_mem( int *num_v, variable *v )
 			gui::vs[ *num_v + 2 ].start = ce.start;
 			gui::vs[ *num_v + 2 ].end = ce.end;
 			gui::vs[ *num_v + 2 ].rank = *num_v + 2;
-			gui::vs[ *num_v + 2 ].data = ( tag == TAG_DAT ? ce.dat_lo.data( ) : ( tag == TAG_FCT ? ce.fct_lo.data( ) : ce.anl_lo.data( ) ) );
+			gui::vs[ *num_v + 2 ].data = ( tag == TAG_OBS ? ce.obs_lo.data( ) : ( tag == TAG_FCT ? ce.fct_lo.data( ) : ce.anl_lo.data( ) ) );
 			gui::vs[ *num_v + 2 ].data_alias = true;
 
 			*num_v += 3;

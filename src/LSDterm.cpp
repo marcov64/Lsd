@@ -244,7 +244,7 @@ int parse_cmdline( int argn, const char **argv, lsd::simulation & sim, lsd::assi
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'a' && argv[ i ][ 2 ] == 'd' )
 		{
 			i--;					// no parameter for this option
-			da.sav_dat = true;
+			da.sav_obs = true;
 			continue;
 		}
 		// read -ac parameter : save assimilation covariance/comedian matrix

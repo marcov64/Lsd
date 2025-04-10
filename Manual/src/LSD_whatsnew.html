@@ -15,7 +15,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <link rel=colorSchemeMapping href="LSD_whatsnew_arquivos/colorschememapping.xml">
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
-  <w:Zoom>180</w:Zoom>
+  <w:Zoom>110</w:Zoom>
   <w:TrackMoves>false</w:TrackMoves>
   <w:TrackFormatting/>
   <w:HyphenationZone>21</w:HyphenationZone>
@@ -1352,7 +1352,7 @@ break-word'>
 in LSD<o:p></o:p></span></p>
 
 <h1><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-US'>Version 9.0 (January 2024)<o:p></o:p></span></h1>
+mso-ansi-language:EN-US'>Version 9.0 (April 2024)<o:p></o:p></span></h1>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The version
 introduces support for data-assimilation ABMs, a new organization and interface
@@ -1366,7 +1366,30 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
 EN-US'>Data-assimilation agent-based models</span></b><span lang=EN-US
 style='mso-ansi-language:EN-US'>. It is now possible to perform
-data-assimilation during model execution.<o:p></o:p></span></p>
+data-assimilation during model execution and analysis. Multiple simulation runs
+are run as multiple threads directly managed by LSD, fully taking advantage of multi-core
+modern computers and servers.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
+lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
+EN-US'>Dynamic calibration of parameters using data assimilation</span></b><span
+lang=EN-US style='mso-ansi-language:EN-US'>. Model parameters may be
+continuously re-estimated to fit available time-series data set.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
+lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
+EN-US'>Reduced model memory footprint</span></b><span lang=EN-US
+style='mso-ansi-language:EN-US'>. The memory (RAM) used by LSD models was
+reduced, allowing more model instances running simultaneously. This also
+increases the simulation speed slightly.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1400,6 +1423,18 @@ including text editors. Legacy configuration files can still be read and
 exported (basic model structure only). Reading from uncompressed XML format is
 also supported. This allows other applications to easily create/modify LSD
 configuration files.<o:p></o:p></span></p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
+lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><b><span lang=EN-US style='mso-ansi-language:
+EN-US'>More robust Monte Carlo analysis.</span></b><span lang=EN-US
+style='mso-ansi-language:EN-US'> LSD now automatically trim “excess” instances
+of Objects, to align data for Monte Carlo experiment statistics generation.
+There is no more the need to remove Variables from Objects with different
+number of instances between simulation runs when using LSD to analyze results.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l0 level1 lfo2'><![if !supportLists]><span
@@ -1774,8 +1809,8 @@ href="LSD_macros.html#T">RUN</a></span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'> informs the current run number in a multi-run
 simulation execution. </span><span class=Cdigo><a href="LSD_macros.html#T"><span
 lang=EN-US style='mso-ansi-language:EN-US'>LAST_RUN</span></a></span><span
-lang=EN-US style='mso-ansi-language:EN-US'> provides the total number of runs
-configured for the current simulation. </span><span class=Cdigo><a
+style='mso-ansi-language:EN-US'> <span lang=EN-US>provides the total number of
+runs configured for the current simulation. </span></span><span class=Cdigo><a
 href="LSD_macros.html#THIS"><span lang=EN-US style='mso-ansi-language:EN-US'>THIS</span></a></span><span
 lang=EN-US style='mso-ansi-language:EN-US'> points to the current Object under
 computation. </span><span class=Cdigo><a href="LSD_macros.html#THIS"><span
@@ -2094,8 +2129,8 @@ Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span lang=EN-US style='mso-ansi-language:EN-US;
 mso-bidi-font-weight:bold'>New embedded Tcl/Tk 8.6.10, bug fixes</span><span
-lang=EN-US style='mso-ansi-language:EN-US'>, mainly for macOS users (required for
-Mojave/Catalina), lattices are working again.<o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'>, mainly for macOS users (required
+for Mojave/Catalina), lattices are working again.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-left:35.85pt'><span lang=EN-US
 style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
@@ -2342,9 +2377,9 @@ other small improvements and bug fixes.<o:p></o:p></span></p>
 <h1><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
 mso-ansi-language:EN-US'>Version 7.0 (Apr 2018)<o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The new version
-maintains the compatibility with all the models built with previous versions of
-LSD (some optimizations require C++11 and </span><span class=Cdigo><span
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The new
+version maintains the compatibility with all the models built with previous
+versions of LSD (some optimizations require C++11 and </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>fun_head_fast.h</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>). Main changes:<o:p></o:p></span></p>
 
@@ -2564,8 +2599,8 @@ lang=EN-US style='mso-ansi-language:EN-US'>), support for not-a-number handling
 (</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>USE_NAN</span></span><span
 lang=EN-US style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span
 lang=EN-US style='mso-ansi-language:EN-US'>NO_NAN</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>), better control of initialization
-of Variables in new Objects (</span><span class=Cdigo><span lang=EN-US
+lang=EN-US style='mso-ansi-language:EN-US'>), better control of initialization of
+Variables in new Objects (</span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>WRITELL</span></span><span lang=EN-US
 style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
 style='mso-ansi-language:EN-US'>ADDxOBJL</span></span><span lang=EN-US
@@ -2773,9 +2808,9 @@ minor bug fixes and documentation improvements.<o:p></o:p></span></p>
 <h1><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
 mso-ansi-language:EN-US'>Version 5.2<o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The new
-version maintains the compatibility with all the models built with previous
-versions of LSD. There are several improvements:<o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The new version
+maintains the compatibility with all the models built with previous versions of
+LSD. There are several improvements:<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt;mso-list:l1 level1 lfo4'><![if !supportLists]><span

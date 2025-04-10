@@ -341,13 +341,11 @@ lang=EN-US>.</span></p>
 <p class=MsoNormal><span lang=EN-US>If there are multiple simulation runs
 configured in the </span><span class=Cdigo><span lang=EN-US>Run&gt;Simulation
 Settings</span></span><span lang=EN-US> menu entry, LSD presents information
-and options on how data is saved to disk. The examples below show the slightly
-different cases of regular multi-run simulations (left) and data assimilation
-ones (right). The presented information describes the name of the </span><span
-class=Cdigo><span lang=EN-US>Model configuration</span></span><span lang=EN-US>
-being used for the simulation, the number of </span><span class=Cdigo><span
-lang=EN-US>Cases</span></span><span lang=EN-US> (time steps) being executed,
-the </span><span class=Cdigo><span lang=EN-US>Number of simulations</span></span><span
+and options on how data is saved to disk. The presented information describes
+the name of the </span><span class=Cdigo><span lang=EN-US>Model configuration</span></span><span
+lang=EN-US> being used for the simulation, the number of </span><span
+class=Cdigo><span lang=EN-US>Time steps</span></span><span lang=EN-US> being
+executed, the </span><span class=Cdigo><span lang=EN-US>Number of simulations</span></span><span
 lang=EN-US> or the (DA) </span><span class=Cdigo><span lang=EN-US>Ensemble size</span></span><span
 lang=EN-US> to be processed, the </span><span class=Cdigo><span lang=EN-US>Output
 path</span></span><span lang=EN-US> where all the produced files will be
@@ -358,57 +356,10 @@ lang=EN-US>Totals file</span></span><span lang=EN-US> summarizing the results,
 if enabled.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=196 height=407 src="image/summary_run.png"></span><span lang=EN-US>            
-</span><span lang=EN-US><img border=0 width=196 height=528
-src="image/summary_run_da.png"></span></p>
+width=196 height=407 src="image/summary_run.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available checkbox options are (some
 may not be available according to the circumstance):</span></p>
-
-<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Assimilation confidence
-intervals</span></b></span><span lang=EN-US> (data assimilation only): by
-default, LSD saves to memory only the MC means or medians. If checked, the mean
-or median confidence intervals for the ensemble are also saved. It is
-applicable to all saved DA series (analysis, forecast and observational data).</span></p>
-
-<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Keep assimilation data</span></b></span><span
-lang=EN-US> (data assimilation only): by default, LSD saves to memory only the
-estimated model analysis Monte Carlo (MC) values for the ensemble of Variables
-and Parameters. If checked, the observational data used for the DA analysis is
-also saved.</span></p>
-
-<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Keep assimilation forecasts</span></b></span><span
-lang=EN-US> (data assimilation only): by default, LSD saves to memory only the
-estimated model analysis MC. If checked, the intermediary model forecast values
-for the ensemble, which are used as an intermediary step by the DA algorithm,
-are also saved.</span></p>
-
-<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b><span lang=EN-US>Save covariance/comedian
-matrix</span></b></span><span lang=EN-US> (data assimilation only): if checked,
-after computing the covariance or comedian matrix from observational data, LSD
-saves the matrix as a comma-separated text (CSV) file in the output path. The
-file is named after the configuration name plus the </span><span class=Cdigo><span
-lang=EN-US>_data_coX.csv</span></span><span lang=EN-US> ending (</span><span
-class=Cdigo><span lang=EN-US>X</span></span><span lang=EN-US> = </span><span
-class=Cdigo><span lang=EN-US>v</span></span><span lang=EN-US> for a covariance
-matrix or </span><span class=Cdigo><span lang=EN-US>X</span></span><span
-lang=EN-US> = </span><span class=Cdigo><span lang=EN-US>m</span></span><span
-lang=EN-US> for a comedian matrix). If unchecked, the default, the matrix is
-not saved. This option is unavailable when an <a
-href="#_Data_assimilation_settings">external file</a> is used to provide the
-covariance/comedian matrix.</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -790,8 +741,8 @@ model configuration does not use parallel object computation (see details <a
 href="menumodel.html">here</a>), this option has no effect.</span></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b><span lang=EN-US>Skip generating results
 files</span></b></span><span lang=EN-US>: if enabled, LSD will not produce the
 time-series detailed </span><span class=Cdigo><span lang=EN-US>.res[.gz]</span></span><span
@@ -1198,7 +1149,7 @@ assimilation</a> (DA) options to be applied during run time, using the
 interface below.</span></p>
 
 <p align=center style='text-align:center'><span lang=EN-US><img border=0
-width=285 height=325 src="image/da_settings.png"></span></p>
+width=285 height=413 src="image/da_settings.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>The available options in the Data
 Assimilation Settings window are:</span></p>
@@ -1250,6 +1201,60 @@ lang=EN-US>: if checked, it replaces the default mean and variance statistics
 used for ensemble summarization (location and dispersion statistical measures)
 by the median and the comedian (or coMAD). This can be useful to handle
 significantly skewed variable distributions.</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Save observational data</span></b></span><span
+lang=EN-US>: by default, LSD saves to memory only the estimated model analysis
+Monte Carlo (MC) mean or median statistics for the ensemble of Variables and
+Parameters. If checked, the observational data used for the DA analysis is also
+saved.</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Save forecasts</span></b></span><span
+lang=EN-US>: by default, LSD saves to memory only the estimated model analysis
+MC mean or median statistics. If checked, the intermediary model forecast mean
+or median values for the ensemble, which are used as an intermediary step by
+the DA algorithm, are also saved.</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Save confidence intervals</span></b></span><span
+lang=EN-US>: by default, LSD saves to memory only the MC means or medians. If
+checked, the confidence intervals for the mean/median of the ensemble are also
+saved. It is applicable to all saved DA series (analysis, forecast and
+observational data). Confidence intervals are only calculated if this option is
+marked, slightly increasing the simulation time.</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Confidence level (%)</span></b></span><span
+lang=EN-US>: when saving confidence intervals, it is possible to select the
+confidence level of an equivalent Gaussian distribution. Only the values
+offered in the drop dawn list can be used. If confidence intervals are not
+saved (see previous option), this option is disabled.</span></p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b><span lang=EN-US>Save covariance/comedian
+matrix</span></b></span><span lang=EN-US>: if checked, after computing the
+covariance or comedian matrix from observational data, LSD saves the matrix as
+a comma-separated text (CSV) file in the output path. The file is named after
+the configuration name plus the </span><span class=Cdigo><span lang=EN-US>_data_coX.csv</span></span><span
+lang=EN-US> ending (</span><span class=Cdigo><span lang=EN-US>X</span></span><span
+lang=EN-US> = </span><span class=Cdigo><span lang=EN-US>v</span></span><span
+lang=EN-US> for a covariance matrix or </span><span class=Cdigo><span
+lang=EN-US>X</span></span><span lang=EN-US> = </span><span class=Cdigo><span
+lang=EN-US>m</span></span><span lang=EN-US> for a comedian matrix). If
+unchecked, the default, the matrix is not saved. This option is unavailable
+when an <a href="#_Data_assimilation_settings">external file</a> is used to
+provide the covariance/comedian matrix (see next option).</span></p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span lang=EN-US style='font-family:Symbol'>·<span

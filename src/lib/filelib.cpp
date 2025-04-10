@@ -153,6 +153,12 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 			da->algorithm = setNode.child( "data_assimilation" ).attribute( "algorithm", hint ).as_uint( );
 			da->align_trim = setNode.child( "data_assimilation" ).attribute( "trim_instances", hint ).as_bool( );
 			da->med_stats = setNode.child( "data_assimilation" ).attribute( "median_statistics", hint ).as_bool( );
+			da->sav_obs = setNode.child( "data_assimilation" ).attribute( "save_observations", hint ).as_bool( );
+			da->sav_fct = setNode.child( "data_assimilation" ).attribute( "save_forecasts", hint ).as_bool( );
+			da->sav_dsp = setNode.child( "data_assimilation" ).attribute( "save_disp_matrix", hint ).as_bool( );
+			da->sav_ci = setNode.child( "data_assimilation" ).attribute( "save_intervals", hint ).as_bool( );
+			da->conf_lev = setNode.child( "data_assimilation" ).attribute( "confidence", hint ).as_double( 95 );
+
 			da->use_dsp_file = setNode.child( "data_assimilation" ).attribute( "use_dispersion_file", hint ).as_bool( );
 			if ( ( i = strlen( setNode.child( "data_assimilation" ).attribute( "dispersion_file", hint ).as_string( ) ) ) > 0 )
 				da->dsp_file = setNode.child( "data_assimilation" ).attribute( "dispersion_file", hint ).as_string( );
@@ -800,6 +806,21 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 
 		if ( da->med_stats )
 			assimNode.append_attribute( "median_statistics" ) = true;
+
+		if ( da->sav_obs )
+			assimNode.append_attribute( "save_observations" ) = true;
+
+		if ( da->sav_fct )
+			assimNode.append_attribute( "save_forecasts" ) = true;
+
+		if ( da->sav_dsp )
+			assimNode.append_attribute( "save_disp_matrix" ) = true;
+
+		if ( da->sav_ci )
+			assimNode.append_attribute( "save_intervals" ) = true;
+
+		if ( da->conf_lev != 95 )
+			assimNode.append_attribute( "confidence" ) = da->conf_lev;
 
 		if ( da->use_dsp_file )
 			assimNode.append_attribute( "use_dispersion_file" ) = true;
@@ -2188,8 +2209,8 @@ void lsd::result::title_recursive( object *r, bool header )
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )
 					{
-						for ( auto tag = TAG_ANL; tag <= TAG_DAT; ++tag )
-							if ( ! ( tag == TAG_FCT && ! da->sav_fct ) && ! ( tag == TAG_DAT && ! da->sav_dat ) )
+						for ( auto tag = TAG_ANL; tag <= TAG_OBS; ++tag )
+							if ( ! ( tag == TAG_FCT && ! da->sav_fct ) && ! ( tag == TAG_OBS && ! da->sav_obs ) )
 							{
 								write_title( cv->attr->label, cv->lab_tit, cv->up, tag, header, ce.start, ce.end );
 
@@ -2231,8 +2252,8 @@ void lsd::result::title_recursive( object *r, bool header )
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )
 					{
-						for ( auto i = TAG_ANL; i <= TAG_DAT; ++i )
-							if ( ! ( i == TAG_FCT && ! da->sav_fct ) && ! ( i == TAG_DAT && ! da->sav_dat ) )
+						for ( auto i = TAG_ANL; i <= TAG_OBS; ++i )
+							if ( ! ( i == TAG_FCT && ! da->sav_fct ) && ! ( i == TAG_OBS && ! da->sav_obs ) )
 							{
 								write_title( cv->attr->label, cv->lab_tit, cv->up, i );
 
@@ -2341,19 +2362,19 @@ void lsd::result::data_recursive( object *r, int t )
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )
 					{
-						for ( auto i = TAG_ANL; i <= TAG_DAT; ++i )
+						for ( auto i = TAG_ANL; i <= TAG_OBS; ++i )
 						{
-							if ( ( i == TAG_FCT && ! da->sav_fct ) || ( i == TAG_DAT && ! da->sav_dat ) )
+							if ( ( i == TAG_FCT && ! da->sav_fct ) || ( i == TAG_OBS && ! da->sav_obs ) )
 								continue;
 
-							data = ( i == TAG_DAT ? ce.dat.data( ) : ( i == TAG_FCT ? ce.fct.data( ) : ce.anl.data( ) ) );
+							data = ( i == TAG_OBS ? ce.obs.data( ) : ( i == TAG_FCT ? ce.fct.data( ) : ce.anl.data( ) ) );
 							write_data( data, t, ce.start, ce.end );
 
 							if ( da->sav_ci )
 							{
-								data = ( i == TAG_DAT ? ce.dat_hi.data( ) : ( i == TAG_FCT ? ce.fct_hi.data( ) : ce.anl_hi.data( ) ) );
+								data = ( i == TAG_OBS ? ce.obs_hi.data( ) : ( i == TAG_FCT ? ce.fct_hi.data( ) : ce.anl_hi.data( ) ) );
 								write_data( data, t, ce.start, ce.end );
-								data = ( i == TAG_DAT ? ce.dat_lo.data( ) : ( i == TAG_FCT ? ce.fct_lo.data( ) : ce.anl_lo.data( ) ) );
+								data = ( i == TAG_OBS ? ce.obs_lo.data( ) : ( i == TAG_FCT ? ce.fct_lo.data( ) : ce.anl_lo.data( ) ) );
 								write_data( data, t, ce.start, ce.end );
 							}
 						}
@@ -2387,19 +2408,19 @@ void lsd::result::data_recursive( object *r, int t )
 					auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
 					if ( ! ce.saved )
 					{
-						for ( auto tag = TAG_ANL; tag <= TAG_DAT; ++tag )
+						for ( auto tag = TAG_ANL; tag <= TAG_OBS; ++tag )
 						{
-							if ( ( tag == TAG_FCT && ! da->sav_fct ) || ( tag == TAG_DAT && ! da->sav_dat ) )
+							if ( ( tag == TAG_FCT && ! da->sav_fct ) || ( tag == TAG_OBS && ! da->sav_obs ) )
 								continue;
 
-							data = ( tag == TAG_DAT ? ce.dat.data( ) : ( tag == TAG_FCT ? ce.fct.data( ) : ce.anl.data( ) ) );
+							data = ( tag == TAG_OBS ? ce.obs.data( ) : ( tag == TAG_FCT ? ce.fct.data( ) : ce.anl.data( ) ) );
 							write_data( data, t, ce.start, ce.end );
 
 							if ( da->sav_ci )
 							{
-								data = ( tag == TAG_DAT ? ce.dat_hi.data( ) : ( tag == TAG_FCT ? ce.fct_hi.data( ) : ce.anl_hi.data( ) ) );
+								data = ( tag == TAG_OBS ? ce.obs_hi.data( ) : ( tag == TAG_FCT ? ce.fct_hi.data( ) : ce.anl_hi.data( ) ) );
 								write_data( data, t, ce.start, ce.end );
-								data = ( tag == TAG_DAT ? ce.dat_lo.data( ) : ( tag == TAG_FCT ? ce.fct_lo.data( ) : ce.anl_lo.data( ) ) );
+								data = ( tag == TAG_OBS ? ce.obs_lo.data( ) : ( tag == TAG_FCT ? ce.fct_lo.data( ) : ce.anl_lo.data( ) ) );
 								write_data( data, t, ce.start, ce.end );
 							}
 						}
