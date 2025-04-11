@@ -837,7 +837,7 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 			if ( da->infl_time > 2 )
 				inflNode.append_attribute( "inflation_time" ) = da->infl_time;
 		}
-}
+	}
 
 	// add profile settings, if any
 	if ( stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time )

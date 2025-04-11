@@ -1097,14 +1097,17 @@ strT lsd::to_string( const char *fmt, ... )
 	va_list argptr;
 
 	va_start( argptr, fmt );
-    auto sz = vsnprintf( NULL, 0, fmt, argptr ) + 1;
-    strT out( sz, '\0');
+	auto sz = vsnprintf( NULL, 0, fmt, argptr );
+	strT out( sz + 1, '\0');
+	va_end( argptr );
+
 	va_start( argptr, fmt );
-    vsnprintf( & out[ 0 ], sz, fmt, argptr );
+	vsnprintf( & out[ 0 ], sz + 1, fmt, argptr );
+	out.resize( sz );
 
 	va_end( argptr );
 
-    return out;
+	return out;
 }
 
 
