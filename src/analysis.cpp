@@ -4747,8 +4747,8 @@ void lsd::assimilation::insert_label_mem( int *num_v, variable *v )
 				++( *num_v );
 			else
 			{
-				cmd( "add_series \"%s_ci+ %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 1, v->up->attr->label );
-				cmd( "add_series \"%s_ci- %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 2, v->up->attr->label );
+				cmd( "add_series \"%s+ %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 1, v->up->attr->label );
+				cmd( "add_series \"%s- %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 2, v->up->attr->label );
 				*num_v += 3;
 			}
 		}
@@ -4865,7 +4865,7 @@ void lsd::assimilation::insert_store_mem( int *num_v, variable *v )
 			++( *num_v );
 		else
 		{
-			gui::vs[ *num_v + 1 ].label = to_string( "%s_ci+", v->attr->label );
+			gui::vs[ *num_v + 1 ].label = to_string( "%s+", v->attr->label );
 			gui::vs[ *num_v + 1 ].parent = v->up->attr->label;
 			gui::vs[ *num_v + 1 ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
 			gui::vs[ *num_v + 1 ].start = ce.start;
@@ -4874,7 +4874,7 @@ void lsd::assimilation::insert_store_mem( int *num_v, variable *v )
 			gui::vs[ *num_v + 1 ].data = ( tag == TAG_OBS ? ce.obs_hi.data( ) : ( tag == TAG_FCT ? ce.fct_hi.data( ) : ce.anl_hi.data( ) ) );
 			gui::vs[ *num_v + 1 ].data_alias = true;
 
-			gui::vs[ *num_v + 2 ].label = to_string( "%s_ci-", v->attr->label );
+			gui::vs[ *num_v + 2 ].label = to_string( "%s-", v->attr->label );
 			gui::vs[ *num_v + 2 ].parent = v->up->attr->label;
 			gui::vs[ *num_v + 2 ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
 			gui::vs[ *num_v + 2 ].start = ce.start;

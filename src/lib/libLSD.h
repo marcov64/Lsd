@@ -154,7 +154,7 @@
 					   "Floating-point exception", "Illegal instruction", \
 					   "Segmentation violation" }
 #define VAR_TAG_NUM 8
-#define VAR_TAG_NAME { "", "U_", "A_", "T_", "D_", "F_", "C_", "MC_" }
+#define VAR_TAG_NAME { "", "U_", "A_", "T_", "O_", "F_", "C_", "MC_" }
 
 // macro functions
 #define BROTHER( O ) ( O == NULL ? NULL : O->next )

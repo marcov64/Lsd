@@ -2216,8 +2216,8 @@ void lsd::result::title_recursive( object *r, bool header )
 
 								if ( da->sav_ci )
 								{
-									write_title( to_string( "%s_ci+", cv->attr->label ).c_str( ), cv->lab_tit, cv->up, tag, header, ce.start, ce.end );
-									write_title( to_string( "%s_ci-", cv->attr->label ).c_str( ), cv->lab_tit, cv->up, tag, header, ce.start, ce.end );
+									write_title( to_string( "%s+", cv->attr->label ).c_str( ), cv->lab_tit, cv->up, tag, header, ce.start, ce.end );
+									write_title( to_string( "%s-", cv->attr->label ).c_str( ), cv->lab_tit, cv->up, tag, header, ce.start, ce.end );
 								}
 							}
 
