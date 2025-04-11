@@ -833,7 +833,7 @@ namespace lsd
 			void ( *plog_backend ) ( const char *cm, const char *tag, va_list arg ) = NULL;
 			void ( *plot_runtime ) ( int *idx, int t, double cur_val, double last_val ) = NULL;
 			void ( *print_stack ) ( void ) = NULL;
-			void ( *progress_bar ) ( int cur_t, clock_t & last_update ) = NULL;
+			void ( *progress_bar ) ( int t, clock_t & last_update ) = NULL;
 			void ( *runtime_end ) ( void ) = NULL;
 			void ( *runtime_run_end ) ( void ) = NULL;
 			void ( *runtime_run_start ) ( bool da_en ) = NULL;
@@ -1204,10 +1204,10 @@ namespace lsd
 			const e_matT & ensemble_inflation( const e_matT & x, const e_vecT & x_bar );
 			const e_matT & virtual_obs( const e_vecT & z, int nobs );
 			const e_matT & forward_matrix( const ass_vecT & dvars );
-			const e_vecT & data_obs( const ass_vecT & dvars, int cur_t );
+			const e_vecT & data_obs( const ass_vecT & dvars, int t );
 			e_matT ci_stat( const e_matT & x_e, const e_vecT & x_bar );
 			e_vecT loc_stat( const e_matT & x );
-			int analysis( const ass_vecT & dvars, int cur_t );
+			int analysis( const ass_vecT & dvars, int t );
 			int calc_dsp_mat( void );
 			int load_dsp_mat( simulation *sim, strT & missing );
 			int load_obs_data( int last_t );
@@ -1217,7 +1217,7 @@ namespace lsd
 			void reset_insts( void );
 			void save_param( object *r );
 			void update_assim_vars( const e_vecT & x_a, const e_vecT & x_f, const e_vecT & z, const e_matT & x_a_ci, const e_matT & x_f_ci, const e_matT & z_ci, int t );
-			void update_runtime_plot( int cur_t );
+			void update_runtime_plot( int t );
 			void update_state_vars( const e_matT & x_a_e );
 
 #ifdef ASSIMILATION_EXT

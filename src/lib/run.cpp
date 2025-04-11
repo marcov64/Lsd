@@ -83,6 +83,8 @@ int lsd::assimilation::run_simulation( int until_t )
 			break;
 		}
 
+		ref_sim->t = ref_sim->eff_t = next_t;
+
 		// DA analysis step
 		if ( ( res = analysis( dtime.second, next_t ) ) != 0 )
 			break;
@@ -90,7 +92,10 @@ int lsd::assimilation::run_simulation( int until_t )
 #ifndef _TERM_
 		// update run-time plot
 		if ( ref_sim->liblnk->runtime_step != NULL )
+		{
 			ref_sim->liblnk->runtime_step( true );
+			update_runtime_plot( next_t );
+		}
 
 		// handle runtime button pressings after progress bar update
 		if ( ref_sim->liblnk->progress_bar != NULL )

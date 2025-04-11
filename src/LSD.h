@@ -134,7 +134,7 @@
 #define _LSD_MAJOR_ 9
 #define _LSD_MINOR_ 0
 #define _LSD_VERSION_ "9.0"
-#define _LSD_DATE_ "February 6 2024"	 // __DATE__
+#define _LSD_DATE_ "April 10 2024"	 // __DATE__
 
 // platform codes
 #define _LIN_	1
@@ -536,6 +536,7 @@ namespace gui
 	void deb_log( bool on, int time );
 	void disable_plot( void );
 	void draw_buttons( void );
+	void draw_plot( int *idx, int t, double cur_val, bool point = false );
 	void eliminate_obj( lsd::object *&c, int actual, int desired );
 	void enable_plot( void );
 	void error_hard_helper( const char *boxTitle, const char *boxText, const char *logText, bool defQuit );

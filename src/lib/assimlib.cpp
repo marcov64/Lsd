@@ -610,26 +610,51 @@ void lsd::assim::update_param( variable *v )
  UPDATE_RUNTIME_PLOT
  Update the DA run-time plot window
  *************************************************************/
-void lsd::assimilation::update_runtime_plot( int cur_t )
+void lsd::assimilation::update_runtime_plot( int t )
 {
+	double cur_val_anl, cur_val_fct, cur_val_obs, last_val_anl, last_val_fct, last_val_obs;
+
 	if ( ref_sim->liblnk == NULL || ref_sim->liblnk->plot_runtime == NULL )
 		return;
 
-	int i = 0;
 	for ( auto & ca : ass_elem )
 		if ( ca.plot )
 			// plot up to just the initial instances
-			for ( auto j = 0; j <= ca.inst_ini; ++j, ++i )
+			for ( auto i = 0; i < ca.inst_ini; ++i )
 			{
-				int idx = i;		// multiple values of same variable
-
-				if ( j >= ( int ) ca.da_data.size( ) )
-					ref_sim->liblnk->plot_runtime( & idx, cur_t, NAN, NAN );
+				if ( i >= ( int ) ca.da_data.size( ) )
+					cur_val_anl = cur_val_fct = cur_val_obs = last_val_anl = last_val_fct = last_val_obs = NAN;
 				else
-					if ( ca.param == 1 || cur_t <= ca.da_data[ j ].start )
-						ref_sim->liblnk->plot_runtime( & idx, cur_t, ca.da_data[ j ].anl[ cur_t - ca.da_data[ j ].start ], NAN );
+				{
+					cur_val_anl = ca.da_data[ i ].anl[ t - ca.da_data[ i ].start ];
+
+					if ( sav_fct )
+						cur_val_fct = ca.da_data[ i ].fct[ t - ca.da_data[ i ].start ];
+
+					if ( sav_obs )
+						cur_val_obs = ca.da_data[ i ].obs[ t - ca.da_data[ i ].start ];
+
+					if ( ca.param == 1 || t <= ca.da_data[ i ].start )
+						last_val_anl = last_val_fct = last_val_obs = NAN;
 					else
-						ref_sim->liblnk->plot_runtime( & idx, cur_t, ca.da_data[ j ].anl[ cur_t - ca.da_data[ j ].start ], ca.da_data[ j ].anl[ cur_t - ca.da_data[ j ].start - 1 ] );
+					{
+						last_val_anl = ca.da_data[ i ].anl[ t - ca.da_data[ i ].start - 1 ];
+
+						if ( sav_fct )
+							last_val_fct = ca.da_data[ i ].fct[ t - ca.da_data[ i ].start - 1 ];
+
+						if ( sav_obs )
+							last_val_obs = ca.da_data[ i ].obs[ t - ca.da_data[ i ].start - 1 ];
+					}
+				}
+
+				ref_sim->liblnk->plot_runtime( NULL, t, cur_val_anl, last_val_anl );
+
+				if ( sav_fct )
+					ref_sim->liblnk->plot_runtime( NULL, t, cur_val_fct, last_val_fct );
+
+				if ( sav_obs )
+					ref_sim->liblnk->plot_runtime( NULL, t, cur_val_obs, last_val_obs );
 			}
 }
 
@@ -638,7 +663,7 @@ void lsd::assimilation::update_runtime_plot( int cur_t )
  ANALYSIS
  Perform data assimilation analysis step
  *************************************************************/
- int lsd::assimilation::analysis( const ass_vecT & dvars, int cur_t )
+ int lsd::assimilation::analysis( const ass_vecT & dvars, int t )
 {
 	// reconcile/align the state vectors along all simulation runs
 	align_state_vars( );
@@ -663,7 +688,7 @@ void lsd::assimilation::update_runtime_plot( int cur_t )
 	const e_matT & H = forward_matrix( dvars );
 
 	// create virtual observations (P x N)
-	const e_vecT & z = data_obs( dvars, cur_t );
+	const e_vecT & z = data_obs( dvars, t );
 	const e_matT & z_e = virtual_obs( z, nobs );
 
 	// apply the data assimilation algorithm
@@ -701,11 +726,7 @@ void lsd::assimilation::update_runtime_plot( int cur_t )
 
 	// compute the MC analysis ensemble estimates & refresh run-time window
 	e_vecT x_a = loc_stat( x_a_e );
-	update_assim_vars( x_a, x_f, z, ci_stat( x_a_e, x_a ), ci_stat( x_f_e, x_f ), ci_stat( z_e, z ), cur_t );
-
-#ifndef _TERM_
-	update_runtime_plot( cur_t );
-#endif
+	update_assim_vars( x_a, x_f, z, ci_stat( x_a_e, x_a ), ci_stat( x_f_e, x_f ), ci_stat( z_e, z ), t );
 
 	return 0;
 }
@@ -951,7 +972,7 @@ const e_matT & lsd::assimilation::forward_matrix( const ass_vecT & dvars )
  DATA_OBS
  Get current data observations
  *************************************************************/
-const e_vecT & lsd::assimilation::data_obs( const ass_vecT & dvars, int cur_t )
+const e_vecT & lsd::assimilation::data_obs( const ass_vecT & dvars, int t )
 {
 	int nvar = dvars.size( );
 	static e_vecT z;
@@ -960,7 +981,7 @@ const e_vecT & lsd::assimilation::data_obs( const ass_vecT & dvars, int cur_t )
 
 	// collect observations available at current time
 	for ( auto j = 0; j < nvar; ++j )
-		z[ j ] = var_data[ dvars[ j ]->label ][ cur_t ];
+		z[ j ] = var_data[ dvars[ j ]->label ][ t ];
 
 	return z;
 }

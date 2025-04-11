@@ -1487,68 +1487,68 @@ int gui::runtime_buttons( void )
 
 	done_in = 0;
 
-	if ( ! da.disable )
-		return button;
-
-	switch ( button )
+	if ( da.disable )
 	{
-		case 1:			// Stop button / s/S key
-			if ( pause_run )
-			{
-				cmd( "wm title .log \"$origLogTit\"" );
-				cmd( ".b.r2.pause conf -text Pause" );
-			}
+		switch ( button )
+		{
+			case 1:			// Stop button / s/S key
+				if ( pause_run )
+				{
+					cmd( "wm title .log \"$origLogTit\"" );
+					cmd( ".b.r2.pause conf -text Pause" );
+				}
 
-			sim.quit = 2;
-			break;
+				sim.quit = 2;
+				break;
 
-		case 2:			// Fast button / f/F key
-			sim.set_fast( 1 );
-			sim.deb_set = false;
-			break;
+			case 2:			// Fast button / f/F key
+				sim.set_fast( 1 );
+				sim.deb_set = false;
+				break;
 
-		case 3:			// Debug button / d/D key
-			if ( ! pause_run )
-			{
-				sim.deb_t = sim.t + 1;
-				sim.deb_set = true;
-				cmd( "focustop .deb" );
-			}
-			else		// if paused, just call the data browser
-			{
-				double useless = 0;
-				sim.root->debugger( NULL, "Paused by User", &useless, false, "" );
-			}
+			case 3:			// Debug button / d/D key
+				if ( ! pause_run )
+				{
+					sim.deb_t = sim.t + 1;
+					sim.deb_set = true;
+					cmd( "focustop .deb" );
+				}
+				else		// if paused, just call the data browser
+				{
+					double useless = 0;
+					sim.root->debugger( NULL, "Paused by User", &useless, false, "" );
+				}
 
-			break;
+				break;
 
-		case 4:			// Observe button / o/O key
-			sim.set_fast( 0 );
-			break;
+			case 4:			// Observe button / o/O key
+				sim.set_fast( 0 );
+				break;
 
-		// runtime plot events
-		case 7:			// center button
-			center_plot( );
-			break;
+			// runtime plot events
+			case 7:			// center button
+				center_plot( );
+				break;
 
-		case 8:			// scroll checkbox
-			scrollB = ! scrollB;
-			break;
+			case 8:			// scroll checkbox
+				scrollB = ! scrollB;
+				break;
 
-		case 9:			// pause simulation
-			pause_run = ! pause_run;
-			if ( pause_run )
-			{
-				cmd( "set origLogTit [ wm title .log ]; wm title .log \"$origLogTit (PAUSED)\"" );
-				plog( "\nSimulation %d of %d paused at time %d", sim.run, sim.last_run, sim.t );
-				cmd( ".b.r2.pause conf -text Resume" );
-			}
-			else
-			{
-				cmd( "wm title .log \"$origLogTit\"" );
-				plog( "\nSimulation %d of %d resumed at time %d", sim.run, sim.last_run, sim.t );
-				cmd( ".b.r2.pause conf -text Pause" );
-			}
+			case 9:			// pause simulation
+				pause_run = ! pause_run;
+				if ( pause_run )
+				{
+					cmd( "set origLogTit [ wm title .log ]; wm title .log \"$origLogTit (PAUSED)\"" );
+					plog( "\nSimulation %d of %d paused at time %d", sim.run, sim.last_run, sim.t );
+					cmd( ".b.r2.pause conf -text Resume" );
+				}
+				else
+				{
+					cmd( "wm title .log \"$origLogTit\"" );
+					plog( "\nSimulation %d of %d resumed at time %d", sim.run, sim.last_run, sim.t );
+					cmd( ".b.r2.pause conf -text Pause" );
+				}
+		}
 	}
 
 	// manage run-time plot window
