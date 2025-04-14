@@ -1374,7 +1374,7 @@ lang=EN-US> is chosen, the user has several choices on how to generate the new
 series:</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US><img
-border=0 width=212 height=497 src="image/create_series.png"></span></p>
+border=0 width=226 height=479 src="image/create_series.png"></span></p>
 
 <p class=MsoNormal><span lang=EN-US>It is possible to filter away data during
 the new series calculations by ignoring values below or above a specified
@@ -1413,12 +1413,16 @@ all the time steps chosen, according to the order in the <a
 href="#_Series_selected">Series selected</a> list box.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The new series can be computed as the
-average, median, sum, product, inverse (1/x), negative (-x), lag (x(t-1)),
-count, maximum, minimum, variance, standard deviation, and mean and median
-confidence intervals (at the specified confidence level) of the series. Select
-the desired operation accordingly. Some operations (inverse, negative, lag),
-when calculating over series, use only the first selected series to create the
-new series. The lag operation can only be applied to computations over series.</span></p>
+average, median, sum, subtraction, product, division, inverse (1/x), negative
+(-x), lag (x(t-1)), count, maximum, minimum, variance, standard deviation,
+median absolute deviation (MAD), and mean and median confidence intervals (at
+the specified confidence level) of the series. Select the desired operation
+accordingly. Some operations (inverse, negative, lag), when calculating over
+series, use only the first selected series to create the new series. The lag
+operation can only be applied to computations over series. In subtraction, the
+first series/time is the minuend, and all others are summed up to compound the
+subtrahend. In division, the first series/time is the dividend, and all the
+rest is multiplied to form the divisor.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>The </span><span class=Cdigo><span
 lang=EN-US>Count</span></span><span lang=EN-US> option produces a maximum value
@@ -2566,10 +2570,10 @@ lang=EN-US>), LSD requests the disk directory and the file name to be used. </sp
 quality, vector-based formats which are accepted by most text and image
 software packages, like LaTex, OpenOffice, Microsoft Office (SVG only), Chrome,
 Firefox, etc. Format conversion to raster-based formats, like JPEG or PNG,
-should be avoided. When format conversion is needed, the use of an external
-utility is necessary. For basic needs, there are many websites offering
-conversion from SVG and EPS to any format. For advanced conversion controls,
-there are free tools like Inkscape.</span></p>
+should be avoided. When format conversion is needed, the use of an external utility
+is necessary. For basic needs, there are many websites offering conversion from
+SVG and EPS to any format. For advanced conversion controls, there are free
+tools like Inkscape.</span></p>
 
 <h2><a name=save></a><a name="_Save_Data"></a><span lang=EN-US>Save Data </span></h2>
 

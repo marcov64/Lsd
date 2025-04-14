@@ -7711,9 +7711,9 @@ bool gui::create_series( bool mc, str_vecT v_names )
 {
 	bool first, medCI = false, done = true;
 	char **str, **tag;
-	double nmax = 0, nmin = 0, nmean, nmed, nvar, nn, sum, prod, inv, lag, neg, thflt, conf_lev, cenCI, varCI, z_crit, **data;
+	double nmax = 0, nmin = 0, nmean, nmed, nvar, nmad, nn, sum, sub, prod, div, inv, lag, neg, thflt, conf_lev, cenCI, varCI, z_crit, **data;
 	int i, j, k, l, flt, cs_long, type_series, new_series, sel_series, *start, *end, *id;
-	d_vecT v;
+	d_vecT v, dv;
 
 	if ( ! mc )
 	{
@@ -7780,23 +7780,29 @@ bool gui::create_series( bool mc, str_vecT v_names )
 
 		cmd( "ttk::frame .da.s.i.r.c.l" );
 		cmd( "ttk::radiobutton .da.s.i.r.c.l.m -text \"Average\" -variable bidi -value 100 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_avg\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.l.z -text \"Sum\" -variable bidi -value 5 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_sum\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.l.s -text \"Subtract\" -variable bidi -value 17 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_sub\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
 		cmd( "ttk::radiobutton .da.s.i.r.c.l.i -text \"Invert\" -variable bidi -value 10 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_inv\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.l.l -text \"Lag\" -variable bidi -value 20 -command { set bido 1; .da.s.o.r.m configure -state disabled; .da.s.o.r.f configure -state disabled; .da.s.ci.p configure -state disabled; set vname \"${basename}_lag\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.l.f -text \"Maximum\" -variable bidi -value 2 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_max\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.l.n -text \"Count\" -variable bidi -value 7 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_num\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
 		cmd( "ttk::radiobutton .da.s.i.r.c.l.c -text \"Variance\" -variable bidi -value 4 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_var\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
-		cmd( "pack .da.s.i.r.c.l.m .da.s.i.r.c.l.z .da.s.i.r.c.l.i .da.s.i.r.c.l.l .da.s.i.r.c.l.f .da.s.i.r.c.l.c -anchor w" );
+		cmd( "pack .da.s.i.r.c.l.m .da.s.i.r.c.l.s .da.s.i.r.c.l.i .da.s.i.r.c.l.n .da.s.i.r.c.l.c -anchor w" );
+
+		cmd( "ttk::frame .da.s.i.r.c.c" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.c.d -text \"Median\" -variable bidi -value 1 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_med\"; set newSeries 1; .da.s.n.nv selection range 0 end	 }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.c.x -text \"Product\" -variable bidi -value 9 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_prd\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.c.g -text \"Negative\" -variable bidi -value 21 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_neg\"; set newSeries 1; .da.s.n.nv selection range 0 end	}" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.c.f -text \"Maximum\" -variable bidi -value 2 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_max\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.c.s -text \"Std. dev.\" -variable bidi -value 8 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_sd\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "pack .da.s.i.r.c.c.d .da.s.i.r.c.c.x .da.s.i.r.c.c.g .da.s.i.r.c.c.f .da.s.i.r.c.c.s -anchor w" );
 
 		cmd( "ttk::frame .da.s.i.r.c.r" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.r.d -text \"Median\" -variable bidi -value 1 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_med\"; set newSeries 1; .da.s.n.nv selection range 0 end	 }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.r.x -text \"Product\" -variable bidi -value 9 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_prd\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.r.g -text \"Negative\" -variable bidi -value 21 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_neg\"; set newSeries 1; .da.s.n.nv selection range 0 end	}" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.r.n -text \"Count\" -variable bidi -value 7 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_num\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.z -text \"Sum\" -variable bidi -value 5 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_sum\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.v -text \"Divide\" -variable bidi -value 18 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_div\"; set newSeries 1; .da.s.n.nv selection range 0 end  }" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.l -text \"Lag\" -variable bidi -value 20 -command { set bido 1; .da.s.o.r.m configure -state disabled; .da.s.o.r.f configure -state disabled; .da.s.ci.p configure -state disabled; set vname \"${basename}_lag\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
 		cmd( "ttk::radiobutton .da.s.i.r.c.r.t -text \"Minimum\" -variable bidi -value 3 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_min\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
-		cmd( "ttk::radiobutton .da.s.i.r.c.r.s -text \"Standard deviation\" -variable bidi -value 8 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_sd\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
-		cmd( "pack .da.s.i.r.c.r.d .da.s.i.r.c.r.x .da.s.i.r.c.r.g .da.s.i.r.c.r.n .da.s.i.r.c.r.t .da.s.i.r.c.r.s -anchor w" );
+		cmd( "ttk::radiobutton .da.s.i.r.c.r.m -text \"MAD\" -variable bidi -value 19 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state disabled; set vname \"${basename}_mad\"; set newSeries 1; .da.s.n.nv selection range 0 end }" );
+		cmd( "pack .da.s.i.r.c.r.z .da.s.i.r.c.r.v .da.s.i.r.c.r.l .da.s.i.r.c.r.t .da.s.i.r.c.r.m -anchor w" );
 
-		cmd( "pack .da.s.i.r.c.l .da.s.i.r.c.r -side left -ipadx $_7" );
+		cmd( "pack .da.s.i.r.c.l .da.s.i.r.c.c .da.s.i.r.c.r -side left -ipadx $_7" );
 
 		cmd( "ttk::radiobutton .da.s.i.r.cia -text \"Average confidence interval (3 series)\" -variable bidi -value 111 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state readonly; set vname \"${basename}\"; set newSeries 3; set medCI 0; .da.s.n.nv selection range 0 end }" );
 		cmd( "ttk::radiobutton .da.s.i.r.cim -text \"Median confidence interval (3 series)\" -variable bidi -value 6 -command { .da.s.o.r.m configure -state normal; .da.s.o.r.f configure -state normal; .da.s.ci.p configure -state readonly; set vname \"${basename}\"; set newSeries 3; set medCI 1; .da.s.n.nv selection range 0 end }" );
@@ -8007,7 +8013,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 
 			for ( i = min_t; i <= max_t; ++i )
 			{
-				nn = nvar = sum = prod = 0;
+				nn = nvar = nmad = sum = sub = prod = div = 0;
 				inv = neg = lag = NAN;
 				v.clear( );
 				v.reserve( sel_series );
@@ -8018,7 +8024,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 					{
 						if ( first )
 						{
-							nmin = nmax = prod = data[ j ][ i - start[ j ] ];
+							nmin = nmax = sub = prod = div = data[ j ][ i - start[ j ] ];
 							inv = ( data[ j ][ i - start[ j ] ] != 0 ) ? 1 / data[ j ][ i - start[ j ] ] : NAN;
 							neg = - data[ j ][ i - start[ j ] ];
 							lag = ( i > start[ j ] ) ? data[ j ][ i - start[ j ] - 1 ] : NAN;
@@ -8028,9 +8034,17 @@ bool gui::create_series( bool mc, str_vecT v_names )
 						{
 							if ( nmin > data[ j ][ i - start[ j ] ] )
 								nmin = data[ j ][ i - start[ j ] ];
+
 							if ( nmax < data[ j ][ i - start[ j ] ] )
 								nmax = data[ j ][ i - start[ j ] ];
+
+							sub -= data[ j ][ i - start[ j ] ];
 							prod *= data[ j ][ i - start[ j ] ];
+
+							if ( data[ j ][ i - start[ j ] ] == 0 )
+								div = NAN;
+							else
+								div /= data[ j ][ i - start[ j ] ];
 						}
 
 						sum += data[ j ][ i - start[ j ] ];
@@ -8041,7 +8055,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 				}
 
 				if ( nn == 0 )	// not a single valid value?
-					nn = nmean = nmed = nvar = nmin = nmax = sum = prod = NAN;
+					nn = nmean = nmed = nvar = nmad = nmin = nmax = sum = sub = prod = div = NAN;
 				else
 				{
 					nmean = sum / nn;
@@ -8059,6 +8073,13 @@ bool gui::create_series( bool mc, str_vecT v_names )
 						nvar /= nn;
 						nvar -= nmean * nmean;
 					}
+
+					dv.clear( );
+					dv.reserve( sel_series );
+					for ( auto x : v )
+						dv.push_back( std::abs( x - nmed ) );
+
+					nmad = lsd::median( dv );
 				}
 
 				if ( type_series >= 100 )
@@ -8071,14 +8092,20 @@ bool gui::create_series( bool mc, str_vecT v_names )
 					vs[ l ].data[ i - min_t ] = nmin;
 				if ( type_series == 4 )
 					vs[ l ].data[ i - min_t ] = nvar;
+				if ( type_series == 19 )
+					vs[ l ].data[ i - min_t ] = nmad;
 				if ( type_series == 5 )
 					vs[ l ].data[ i - min_t ] = sum;
+				if ( type_series == 17 )
+					vs[ l ].data[ i - min_t ] = sub;
 				if ( type_series == 7 )
 					vs[ l ].data[ i - min_t ] = nn;
 				if ( type_series == 8 )
-					vs[ l ].data[ i - min_t ] = sqrt( nvar );
+					vs[ l ].data[ i - min_t ] = std::sqrt( nvar );
 				if ( type_series == 9 )
 					vs[ l ].data[ i - min_t ] = prod;
+				if ( type_series == 18 )
+					vs[ l ].data[ i - min_t ] = div;
 				if ( type_series == 10 )
 					vs[ l ].data[ i - min_t ] = inv;
 				if ( type_series == 20 )
@@ -8124,7 +8151,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 
 			for ( j = 0; j < sel_series; ++j )
 			{
-				nn = nvar = sum = prod = 0;
+				nn = nvar = nmad = sum = sub = prod = div = 0;
 				inv = neg = lag = NAN;
 				v.clear( );
 				v.reserve( max_t - min_t + 1 );
@@ -8135,7 +8162,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 					{
 						if ( first )
 						{
-							nmin = nmax = prod = data[ j ][ i - start[ j ] ];
+							nmin = nmax = sub = prod = div = data[ j ][ i - start[ j ] ];
 							inv = ( data[ j ][ i - start[ j ] ] != 0 ) ? 1 / data[ j ][ i - start[ j ] ] : NAN;
 							neg = - data[ j ][ i - start[ j ] ];
 							lag = ( i > start[ j ] ) ? data[ j ][ i - start[ j ] - 1 ] : NAN;
@@ -8145,9 +8172,17 @@ bool gui::create_series( bool mc, str_vecT v_names )
 						{
 							if ( nmin > data[ j ][ i - start[ j ] ] )
 								nmin = data[ j ][ i - start[ j ] ];
+
 							if ( nmax < data[ j ][ i - start[ j ] ] )
 								nmax = data[ j ][ i - start[ j ] ];
+
+							sub -= data[ j ][ i - start[ j ] ];
 							prod *= data[ j ][ i - start[ j ] ];
+
+							if ( data[ j ][ i - start[ j ] ] == 0 )
+								div = NAN;
+							else
+								div /= data[ j ][ i - start[ j ] ];
 						}
 
 						sum += data[ j ][ i - start[ j ] ];
@@ -8158,13 +8193,20 @@ bool gui::create_series( bool mc, str_vecT v_names )
 				}
 
 				if ( nn == 0 )	// not a single valid value?
-					nn = nmean = nmed = nvar = nmin = nmax = sum = prod = NAN;
+					nn = nmean = nmed = nvar = nmad = nmin = nmax = sum = sub = prod = div = NAN;
 				else
 				{
 					nmean = sum / nn;
 					nmed = lsd::median( v );
 					nvar /= nn;
 					nvar -= nmean * nmean;
+
+					dv.clear( );
+					dv.reserve( sel_series );
+					for ( auto x : v )
+						dv.push_back( std::abs( x - nmed ) );
+
+					nmad = lsd::median( dv );
 				}
 
 				if ( type_series >= 100 )
@@ -8177,14 +8219,20 @@ bool gui::create_series( bool mc, str_vecT v_names )
 					vs[ l ].data[ j ] = nmin;
 				if ( type_series == 4 )
 					vs[ l ].data[ j ] = nvar;
+				if ( type_series == 19 )
+					vs[ l ].data[ j ] = nmad;
 				if ( type_series == 5 )
 					vs[ l ].data[ j ] = sum;
+				if ( type_series == 17 )
+					vs[ l ].data[ j ] = sub;
 				if ( type_series == 7 )
 					vs[ l ].data[ j ] = nn;
 				if ( type_series == 8 )
-					vs[ l ].data[ j ] = sqrt( nvar );
+					vs[ l ].data[ j ] = std::sqrt( nvar );
 				if ( type_series == 9 )
 					vs[ l ].data[ j ] = prod;
+				if ( type_series == 18 )
+					vs[ l ].data[ j ] = div;
 				if ( type_series == 10 )
 					vs[ l ].data[ j ] = inv;
 				if ( type_series == 20 )
