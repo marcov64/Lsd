@@ -124,6 +124,9 @@ bool lsd::assim::init( void )
 		return false;
 
 	da_data.clear( );
+	sum_erra_anl = sum_erra_fct = sum_erra_obs = 0;
+	sum_err2_anl = sum_err2_fct = sum_err2_obs = 0;
+	sum_n = sum_n_obs = 0;
 
 	// set the variable flags to current ones
 	if ( parent.size( ) > 0 )
@@ -507,15 +510,37 @@ void lsd::assimilation::update_state_vars( const e_matT & x_a_e )
  UPDATE_ASSIM_VARS
  Update the DA analysis variables in LSD
  *************************************************************/
-void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_f, const e_vecT & z, const e_matT & x_a_ci, const e_matT & x_f_ci, const e_matT & z_ci, int t )
+void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_f, const e_vecT & z, const e_matT & x_a_e, const e_matT & x_f_e, const e_matT & z_e, int t )
 {
-	size_t i;
-	int nvar = x_a.size( );
+	e_matT x_a_ci, x_f_ci, z_ci;
+	size_t i, nvar = fctd_labs.size( );
+
+	// compute confidence intervals for DA elements
+	if ( da->sav_ci )
+	{
+		x_a_ci = ci_stat( x_a_e, x_a );
+		x_f_ci = ci_stat( x_f_e, x_f );
+		z_ci = ci_stat( z_e, z );
+	}
 
 	// saves each variable instance to the corresponding DA element storage
-	for ( int j = 0; j < nvar; ++j )
+	for ( size_t j = 0; j < nvar; ++j )
 	{
 		auto & ca = *elem_map[ fctd_labs[ j ] ];
+
+		// update error accumulators
+		ca.sum_erra_anl += std::abs( x_a[ j ] - z[ j ] );
+		ca.sum_erra_fct += std::abs( x_f[ j ] - z[ j ] );
+		ca.sum_err2_anl += std::pow( x_a[ j ] - z[ j ], 2 );
+		ca.sum_err2_fct += std::pow( x_f[ j ] - z[ j ], 2 );
+		++ ca.sum_n;
+
+		for ( auto k = 0; k < z_e.rows( ); ++k )
+		{
+			ca.sum_erra_obs += std::abs( z_e( k, j ) - z[ j ] );
+			ca.sum_err2_obs += std::pow( z_e( k, j ) - z[ j ], 2 );
+			++ ca.sum_n_obs;
+		}
 
 		if ( ! ca.save )
 			continue;
@@ -627,24 +652,16 @@ void lsd::assimilation::update_runtime_plot( int t )
 				else
 				{
 					cur_val_anl = ca.da_data[ i ].anl[ t - ca.da_data[ i ].start ];
-
-					if ( sav_fct )
-						cur_val_fct = ca.da_data[ i ].fct[ t - ca.da_data[ i ].start ];
-
-					if ( sav_obs )
-						cur_val_obs = ca.da_data[ i ].obs[ t - ca.da_data[ i ].start ];
+					cur_val_fct = sav_fct ? ca.da_data[ i ].fct[ t - ca.da_data[ i ].start ] : NAN;
+					cur_val_obs = sav_obs ? ca.da_data[ i ].obs[ t - ca.da_data[ i ].start ] : NAN;
 
 					if ( ca.param == 1 || t <= ca.da_data[ i ].start )
 						last_val_anl = last_val_fct = last_val_obs = NAN;
 					else
 					{
 						last_val_anl = ca.da_data[ i ].anl[ t - ca.da_data[ i ].start - 1 ];
-
-						if ( sav_fct )
-							last_val_fct = ca.da_data[ i ].fct[ t - ca.da_data[ i ].start - 1 ];
-
-						if ( sav_obs )
-							last_val_obs = ca.da_data[ i ].obs[ t - ca.da_data[ i ].start - 1 ];
+						last_val_fct = sav_fct ? ca.da_data[ i ].fct[ t - ca.da_data[ i ].start - 1 ] : NAN;
+						last_val_obs = sav_obs ? ca.da_data[ i ].obs[ t - ca.da_data[ i ].start - 1 ] : NAN;
 					}
 				}
 
@@ -687,7 +704,7 @@ void lsd::assimilation::update_runtime_plot( int t )
 	// create the forward model matrix (P x L)
 	const e_matT & H = forward_matrix( dvars );
 
-	// create virtual observations (P x N)
+	// create virtual observations (N x P)
 	const e_vecT & z = data_obs( dvars, t );
 	const e_matT & z_e = virtual_obs( z, nobs );
 
@@ -726,7 +743,7 @@ void lsd::assimilation::update_runtime_plot( int t )
 
 	// compute the MC analysis ensemble estimates & refresh run-time window
 	e_vecT x_a = loc_stat( x_a_e );
-	update_assim_vars( x_a, x_f, z, ci_stat( x_a_e, x_a ), ci_stat( x_f_e, x_f ), ci_stat( z_e, z ), t );
+	update_assim_vars( x_a, x_f, z, x_a_e, x_f_e, z_e, t );
 
 	return 0;
 }
@@ -810,6 +827,40 @@ e_matT lsd::assimilation::ci_stat( const e_matT & x, const e_vecT & x_bar )
 	}
 
 	return x_ci;
+}
+
+
+/*************************************************************
+ PLOG_STATS
+ Present final DA statistics in the log window
+ *************************************************************/
+void lsd::assimilation::plog_stats( void )
+{
+	if ( ref_sim == NULL )
+		return;
+
+	ref_sim->plog( "\nData assimilation statistics (runs=%d observations=%d)\n", ref_sim->last_run, time_var.size( ) );
+	ref_sim->plog( "\n               \tAnalysis\t\tForecast\t\tVirtual observations" );
+	ref_sim->plog( "\nElement        \tRMSE\tMAE\tRMSE\tMAE\tRMSE\tMAE\tSamples" );
+
+	for ( auto & lab : fctd_labs )
+	{
+		auto & ca = *elem_map[ lab ];
+
+		if ( ca.sum_n == 0 || ca.sum_n_obs == 0 )
+			continue;
+
+		double rmse_anl = std::sqrt( ca.sum_err2_anl / ca.sum_n  );
+		double rmse_fct = std::sqrt( ca.sum_err2_fct / ca.sum_n  );
+		double rmse_obs = std::sqrt( ca.sum_err2_obs / ca.sum_n_obs );
+		double mae_anl = ca.sum_erra_anl / ca.sum_n;
+		double mae_fct = ca.sum_erra_fct / ca.sum_n;
+		double mae_obs = ca.sum_erra_obs / ca.sum_n_obs;
+
+		ref_sim->plog( "\n%-15s\t%.4g\t%.4g\t%.4g\t%.4g\t%.4g\t%.4g\t%d/%d", lab.c_str( ), rmse_anl, mae_anl, rmse_fct, mae_fct, rmse_obs, mae_obs, ca.sum_n, ca.sum_n_obs );
+	}
+
+	ref_sim->plog( "\n" );
 }
 
 

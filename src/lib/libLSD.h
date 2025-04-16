@@ -1120,11 +1120,19 @@ namespace lsd
 			double par_n_sd = 0;			// parameter normal standard deviation
 			double par_u_low = 0;			// parameter uniform distribution delta -
 			double par_u_upp = 0;			// parameter uniform distribution delta +
+			double sum_erra_anl;			// sum of absolute analysis errors
+			double sum_erra_fct;			// sum of absolute forecast errors
+			double sum_erra_obs;			// sum of absolute virtual obs. errors
+			double sum_err2_anl;			// sum of quadratic analysis errors
+			double sum_err2_fct;			// sum of quadratic forecast errors
+			double sum_err2_obs;			// sum of quadratic virtual obs. errors
 			int cov_idx = -1;				// index (row+col) in covariance matrix
 			int data_col_num = 0;			// number of data value column
 			int inst_idx = -1;				// index to last used element instance
 			int inst_ini = 0;				// number of instances at t=0
 			int par_dist = 0;				// parameter distribution (0:N/1:U)
+			int sum_n;						// number of sum of errors
+			int sum_n_obs;					// number of sum of observation errors
 			int t_col_num = 0;				// number of time value column
 			strT data_file;					// name of source data CSV file
 			strT data_col_name;				// name of data value column
@@ -1214,9 +1222,10 @@ namespace lsd
 			template < class T > double median( T begin, T end );
 			void align_state_vars( void );
 			void finish( void );
+			void plog_stats( void );
 			void reset_insts( void );
 			void save_param( object *r );
-			void update_assim_vars( const e_vecT & x_a, const e_vecT & x_f, const e_vecT & z, const e_matT & x_a_ci, const e_matT & x_f_ci, const e_matT & z_ci, int t );
+			void update_assim_vars( const e_vecT & x_a, const e_vecT & x_f, const e_vecT & z, const e_matT & x_a_e, const e_matT & x_f_e, const e_matT & z_e, int t );
 			void update_runtime_plot( int t );
 			void update_state_vars( const e_matT & x_a_e );
 

@@ -132,6 +132,7 @@ int lsd::assimilation::run_simulation( int until_t )
 	finish( );
 
 	ref_sim->plog( "\nData assimilation %s at time step %d (%.2f sec.)\n", res != 0 ? "stopped" : "finished", ref_sim->t - 1, ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
+	plog_stats( );
 
 	switch ( res )
 	{
