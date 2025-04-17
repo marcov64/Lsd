@@ -4670,7 +4670,7 @@ void lsd::object::insert_label_mem( int *num_v, const char *lab )
 				}
 			else
 				tag = TAG_NONE;
-			
+
 			insert_label_mem( num_v, cv, tag );
 
 			if ( *num_v % PROG_SERIES == 0 )
@@ -4714,7 +4714,7 @@ void lsd::object::insert_label_mem( int *num_v, variable *v, int tag )
 	else
 	{
 		ass_map_itT ca;
-		
+
 		// check if there are still instances to be presented
 		// because of DA data analysis, dynamic instances may have to enter
 		// the DA process, but were still used in the model forecasts
@@ -4732,7 +4732,7 @@ void lsd::object::insert_label_mem( int *num_v, variable *v, int tag )
 			return;
 
 		for ( auto tag = TAG_ANL; tag <= TAG_OBS; ++tag )
-			if ( ! ( tag == TAG_FCT && ! da->sav_fct ) && ! ( tag == TAG_OBS && ! da->sav_obs ) )
+			if ( ! ( tag == TAG_FCT && ! da->sav_fct ) && ! ( tag == TAG_OBS && ! da->sav_obs ) && ! ( tag == TAG_OBS && da->obs_labs_map.find( v->attr->label ) == da->obs_labs_map.end( ) ) )
 			{
 				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v, v->up->attr->label );
 
@@ -4787,7 +4787,7 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 				}
 			else
 				tag = TAG_NONE;
-			
+
 			insert_store_mem( num_v, cv, tag );
 		}
 
@@ -4832,7 +4832,7 @@ void lsd::object::insert_store_mem( int *num_v, variable *v, int tag )
 
 		for ( auto tag = TAG_ANL; tag <= TAG_OBS; ++tag )
 		{
-			if ( ( tag == TAG_FCT && ! da->sav_fct ) || ( tag == TAG_OBS && ! da->sav_obs ) )
+			if ( ( tag == TAG_FCT && ! da->sav_fct ) || ( tag == TAG_OBS && ! da->sav_obs ) || ( tag == TAG_OBS && da->obs_labs_map.find( v->attr->label ) == da->obs_labs_map.end( ) ) )
 				continue;
 
 			gui::vs[ *num_v ].label = v->attr->label;

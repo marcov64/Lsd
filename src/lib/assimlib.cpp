@@ -468,17 +468,17 @@ void lsd::assimilation::align_state_vars( void )
 	}
 
 	// save aligned forecasted variable names
-	fctd_labs.clear( );
+	fct_labs.clear( );
 	for ( auto & cv : run_sims[ 0 ].da_svars.st_vec )
 	{
 		if ( cv != NULL )						// handle virtual instances
 			lab = cv->attr->label;
 
-		fctd_labs.emplace_back( lab );
+		fct_labs.emplace_back( lab );
 	}
 
 	// ensure missing instance vector is consistent
-	miss_inst.resize( fctd_labs.size( ), false );
+	miss_inst.resize( fct_labs.size( ), false );
 }
 
 
@@ -490,11 +490,11 @@ void lsd::assimilation::align_state_vars( void )
 void lsd::assimilation::update_state_vars( const e_matT & x_a_e )
 {
 	int nobs = run_sims.size( );
-	int nvar = fctd_labs.size( );
+	int nvar = fct_labs.size( );
 	variable *cv;
 
 	for ( int j = 0; j < nvar; ++j )
-		if ( elem_map[ fctd_labs[ j ] ]->update )
+		if ( elem_map[ fct_labs[ j ] ]->update )
 			for ( int i = 0; i < nobs; ++i )
 			{
 				cv = run_sims[ i ].da_svars.st_vec[ j ];
@@ -513,7 +513,8 @@ void lsd::assimilation::update_state_vars( const e_matT & x_a_e )
 void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_f, const e_vecT & z, const e_matT & x_a_e, const e_matT & x_f_e, const e_matT & z_e, int t )
 {
 	e_matT x_a_ci, x_f_ci, z_ci;
-	size_t i, nvar = fctd_labs.size( );
+	int obs_idx;
+	size_t i, nvar = fct_labs.size( );
 
 	// compute confidence intervals for DA elements
 	if ( da->sav_ci )
@@ -524,22 +525,31 @@ void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_
 	}
 
 	// saves each variable instance to the corresponding DA element storage
-	for ( size_t j = 0; j < nvar; ++j )
+	for ( auto j = 0; j < nvar; ++j )
 	{
-		auto & ca = *elem_map[ fctd_labs[ j ] ];
+		auto & ca = *elem_map[ fct_labs[ j ] ];
+		auto co = obs_labs_map.find( fct_labs[ j ] );
 
-		// update error accumulators
-		ca.sum_erra_anl += std::abs( x_a[ j ] - z[ j ] );
-		ca.sum_erra_fct += std::abs( x_f[ j ] - z[ j ] );
-		ca.sum_err2_anl += std::pow( x_a[ j ] - z[ j ], 2 );
-		ca.sum_err2_fct += std::pow( x_f[ j ] - z[ j ], 2 );
-		++ ca.sum_n;
+		if ( co != obs_labs_map.end( ) )
+			obs_idx = co->second;
+		else
+			obs_idx = -1;
 
-		for ( auto k = 0; k < z_e.rows( ); ++k )
+		if ( obs_idx >= 0 )
 		{
-			ca.sum_erra_obs += std::abs( z_e( k, j ) - z[ j ] );
-			ca.sum_err2_obs += std::pow( z_e( k, j ) - z[ j ], 2 );
-			++ ca.sum_n_obs;
+			// update error accumulators
+			ca.sum_erra_anl += std::abs( x_a[ j ] - z[ obs_idx ] );
+			ca.sum_erra_fct += std::abs( x_f[ j ] - z[ obs_idx ] );
+			ca.sum_err2_anl += std::pow( x_a[ j ] - z[ obs_idx ], 2 );
+			ca.sum_err2_fct += std::pow( x_f[ j ] - z[ obs_idx ], 2 );
+			++ ca.sum_n;
+
+			for ( auto k = 0; k < z_e.rows( ); ++k )
+			{
+				ca.sum_erra_obs += std::abs( z_e( k, obs_idx ) - z[ obs_idx ] );
+				ca.sum_err2_obs += std::pow( z_e( k, obs_idx ) - z[ obs_idx ], 2 );
+				++ ca.sum_n_obs;
+			}
 		}
 
 		if ( ! ca.save )
@@ -551,15 +561,15 @@ void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_
 				break;
 
 		if ( i == ca.da_data.size( ) )					// all used, create new
-			ca.da_data.emplace_back( t, ref_sim->last_t, da->sav_fct, da->sav_obs );
+			ca.da_data.emplace_back( t, ref_sim->last_t, da->sav_fct, da->sav_obs && obs_idx >= 0 );
 
 		ca.da_data[ i ].anl[ t - ca.da_data[ i ].start ] = x_a[ j ];
 
 		if ( da->sav_fct )
 			ca.da_data[ i ].fct[ t - ca.da_data[ i ].start ] = x_f[ j ];
 
-		if ( da->sav_obs )
-			ca.da_data[ i ].obs[ t - ca.da_data[ i ].start ] = z[ j ];
+		if ( da->sav_obs && obs_idx >= 0 )
+			ca.da_data[ i ].obs[ t - ca.da_data[ i ].start ] = z[ obs_idx ];
 
 		if ( da->sav_ci )
 		{
@@ -572,10 +582,10 @@ void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_
 				ca.da_data[ i ].fct_lo[ t - ca.da_data[ i ].start ] = x_f_ci( 1, j );
 			}
 
-			if ( da->sav_obs )
+			if ( da->sav_obs && obs_idx >= 0 )
 			{
-				ca.da_data[ i ].obs_hi[ t - ca.da_data[ i ].start ] = z_ci( 0, j );
-				ca.da_data[ i ].obs_lo[ t - ca.da_data[ i ].start ] = z_ci( 1, j );
+				ca.da_data[ i ].obs_hi[ t - ca.da_data[ i ].start ] = z_ci( 0, obs_idx );
+				ca.da_data[ i ].obs_lo[ t - ca.da_data[ i ].start ] = z_ci( 1, obs_idx );
 			}
 		}
 
@@ -686,7 +696,7 @@ void lsd::assimilation::update_runtime_plot( int t )
 	align_state_vars( );
 
 	int nobs = run_sims.size( );
-	int nvar = fctd_labs.size( );
+	int nvar = fct_labs.size( );
 	e_matT K, x_a_e( nobs, nvar );
 
 	// create the forecast ensemble matrix (N x L)
@@ -843,11 +853,11 @@ void lsd::assimilation::plog_stats( void )
 	ref_sim->plog( "\n               \tAnalysis\t\tForecast\t\tVirtual observations" );
 	ref_sim->plog( "\nElement        \tRMSE\tMAE\tRMSE\tMAE\tRMSE\tMAE\tSamples" );
 
-	for ( auto & lab : fctd_labs )
+	for ( auto & lab : fct_labs )
 	{
 		auto & ca = *elem_map[ lab ];
 
-		if ( ca.sum_n == 0 || ca.sum_n_obs == 0 )
+		if ( ca.sum_n == 0 )
 			continue;
 
 		double rmse_anl = std::sqrt( ca.sum_err2_anl / ca.sum_n  );
@@ -857,7 +867,10 @@ void lsd::assimilation::plog_stats( void )
 		double mae_fct = ca.sum_erra_fct / ca.sum_n;
 		double mae_obs = ca.sum_erra_obs / ca.sum_n_obs;
 
-		ref_sim->plog( "\n%-15s\t%.4g\t%.4g\t%.4g\t%.4g\t%.4g\t%.4g\t%d/%d", lab.c_str( ), rmse_anl, mae_anl, rmse_fct, mae_fct, rmse_obs, mae_obs, ca.sum_n, ca.sum_n_obs );
+		if ( ca.sum_n_obs > 0 )
+			ref_sim->plog( "\n%-15s\t%.4g\t%.4g\t%.4g\t%.4g\t%.4g\t%.4g\t%d/%d", lab.c_str( ), rmse_anl, mae_anl, rmse_fct, mae_fct, rmse_obs, mae_obs, ca.sum_n, ca.sum_n_obs );
+		else
+			ref_sim->plog( "\n%-15s\t%.4g\t%.4g\t%.4g\t%.4g\t     \t     \t%d", lab.c_str( ), rmse_anl, mae_anl, rmse_fct, mae_fct, ca.sum_n );
 	}
 
 	ref_sim->plog( "\n" );
@@ -910,7 +923,7 @@ const e_matT & lsd::assimilation::ensemble_forecast( void )
 {
 	d_mapT loc;
 	int nobs = run_sims.size( );
-	int nvar = fctd_labs.size( );
+	int nvar = fct_labs.size( );
 	static e_matT x_f_ens;
 	variable *sv;
 
@@ -983,7 +996,7 @@ const e_matT & lsd::assimilation::ensemble_inflation( const e_matT & x, const e_
 const e_matT & lsd::assimilation::forward_matrix( const ass_vecT & dvars )
 {
 	int ndvar = dvars.size( );
-	int nfvar = fctd_labs.size( );
+	int nfvar = fct_labs.size( );
 	static e_matT H;
 	b_vecT used_fvars( nfvar, false );
 
@@ -999,7 +1012,7 @@ const e_matT & lsd::assimilation::forward_matrix( const ass_vecT & dvars )
 			if ( used_fvars[ j ] )	// avoid comparing already matched variables
 				continue;
 
-			if ( dvars[ i ]->label == fctd_labs[ j ] )
+			if ( dvars[ i ]->label == fct_labs[ j ] )
 			{
 				idx_fvars.emplace_back( j );
 				used_fvars[ j ] = true;
@@ -1080,7 +1093,8 @@ int lsd::assimilation::load_obs_data( int last_t )
 
 	var_data.clear( );
 	time_var.clear( );
-	data_lab.clear( );
+	obs_labs.clear( );
+	obs_labs_map.clear( );
 
 	// identify variables to be read and group them by data file
 	for ( auto & ca : ass_elem )
@@ -1179,7 +1193,8 @@ int lsd::assimilation::load_obs_data( int last_t )
 				}
 
 				var_data.emplace( ( *ca )->label, dtmap );
-				data_lab.emplace_back( ( *ca )->label );
+				obs_labs.emplace_back( ( *ca )->label );
+				obs_labs_map.emplace( ( *ca )->label, vars_loaded );
 
 				++vars_loaded;
 			}
@@ -1199,18 +1214,18 @@ int lsd::assimilation::load_obs_data( int last_t )
 int lsd::assimilation::calc_dsp_mat( void )
 {
 	int res = 0;
-	int nvar = data_lab.size( );
+	int nvar = obs_labs.size( );
 	e_matT cov_mat( nvar, nvar );				// contingency covariance matrix
 	dsp_mat.resize( nvar, nvar );
 
 	// handle each pair of variables independently to allow for different timings
 	for ( auto i = 0; i < nvar; ++i )
 	{
-		auto x = var_data[ data_lab[ i ] ];
+		auto x = var_data[ obs_labs[ i ] ];
 
 		for ( auto j = i; j < nvar; ++j )		// symmetrical matrix
 		{
-			auto y = var_data[ data_lab[ j ] ];
+			auto y = var_data[ obs_labs[ j ] ];
 
 			e_vecT xv( x.size( ) );
 			e_vecT yv( y.size( ) );
@@ -1498,8 +1513,8 @@ bool lsd::assimilation::load_files( simulation *sim, int last_t )
 					// create empty CSV
 					for ( auto i = 0; i < n; ++i )
 					{
-						csv.InsertColumn< double >( i, d_vecT ( ), data_lab[ i ] );
-						csv.InsertRow< double >( i, d_vecT ( ), data_lab[ i ] );
+						csv.InsertColumn< double >( i, d_vecT ( ), obs_labs[ i ] );
+						csv.InsertRow< double >( i, d_vecT ( ), obs_labs[ i ] );
 					}
 
 					// populate csv

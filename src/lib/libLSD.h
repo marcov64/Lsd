@@ -1193,9 +1193,10 @@ namespace lsd
 			ia_mapT time_var;				// list of times and variables for assimilation
 			int next_t = 0;					// next da assimilation time
 			simulation *ref_sim = NULL;		// reference simulation for data assimilation
+			i_mapT obs_labs_map;			// map of obs. data variable label indexes
 			sim_vecT run_sims;				// vector of running assimilation simulations
-			str_vecT data_lab;				// observational data variable labels
-			str_vecT fctd_labs;				// forecasted variable labels
+			str_vecT obs_labs;				// observational data variable labels
+			str_vecT fct_labs;				// forecasted variable labels
 
 		public:
 			ass_list_itT search( const char *lab );
