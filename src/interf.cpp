@@ -1864,7 +1864,7 @@ lsd::object *gui::operate( lsd::object *r )
 						cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
 						goto here_endprop;
 					}
-					
+
 					if ( choice == 2 )
 					{
 						cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
@@ -1885,10 +1885,10 @@ lsd::object *gui::operate( lsd::object *r )
 
 					if ( cv->param == 0 )
 						cmd( "lappend modVar %s", lab );
-					
+
 					if ( cv->param == 1 )
 						cmd( "lappend modPar %s", lab );
-					
+
 					if ( cv->param == 2 )
 						cmd( "lappend modFun %s", lab );
 
@@ -2123,6 +2123,8 @@ lsd::object *gui::operate( lsd::object *r )
 				da.ass_elem.emplace_back( cv->attr->label, cv->param, false, cv->param );
 				ca = -- da.ass_elem.end( );
 			}
+			else
+				exist = true;
 
 			if ( ( i = ca->dataentry( ) ) == 2 )
 				da.ass_elem.erase( ca );
