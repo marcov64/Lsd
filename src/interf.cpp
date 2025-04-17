@@ -1841,10 +1841,10 @@ lsd::object *gui::operate( lsd::object *r )
 			}
 
 			lab1 = get_str( "vname" );
-			if ( lab1 != NULL && strcmp( lab1, "" ) )
+			if ( lab1 != NULL && strcmp( lab1, "" ) != 0 )
 			{
 				sscanf( lab1, "%99s", lab );			// new name in lab (empty if delete)
-				if ( strcmp( lab, lab_old ) )			// check new name if different
+				if ( strcmp( lab, lab_old ) != 0 )		// check new name if different
 					renVar = true;
 			}
 			else
@@ -1857,14 +1857,14 @@ lsd::object *gui::operate( lsd::object *r )
 			{
 				if ( ! delVar )
 				{
-					for ( cur = r; cur->up != NULL; cur = cur->up );
-					choice = cur->check_label( lab );
+					choice = sim.root->check_label( lab );
 
 					if ( choice == 1 )
 					{
 						cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
 						goto here_endprop;
 					}
+					
 					if ( choice == 2 )
 					{
 						cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
@@ -1885,8 +1885,10 @@ lsd::object *gui::operate( lsd::object *r )
 
 					if ( cv->param == 0 )
 						cmd( "lappend modVar %s", lab );
+					
 					if ( cv->param == 1 )
 						cmd( "lappend modPar %s", lab );
+					
 					if ( cv->param == 2 )
 						cmd( "lappend modFun %s", lab );
 

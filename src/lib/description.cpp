@@ -223,6 +223,14 @@ lsd::descr *lsd::description::change_descr( const char *lab_old, const char *lab
 		delete [ ] cd->label;
 		cd->label = new char [ strlen( lab ) + 1 ];
 		strcln( cd->label, lab, strlen( lab ) + 1 );
+
+		auto d = elem_map.find( lab_old );
+		if ( d != elem_map.end( ) )
+		{
+			auto it = d->second;
+			elem_map.erase( d );
+			elem_map.emplace( lab, it );
+		}
 	}
 
 	if ( type >= 0 )
