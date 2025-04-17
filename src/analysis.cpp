@@ -4659,7 +4659,6 @@ void lsd::object::insert_label_mem( int *num_v, const char *lab )
 			cv->set_lab_tit( );
 
 			if ( da->disable )
-			{
 				if ( cv->attr->save )
 					tag = TAG_NONE;
 				else
@@ -4669,18 +4668,10 @@ void lsd::object::insert_label_mem( int *num_v, const char *lab )
 					cv->start = cv->last_update - cv->attr->num_lag;
 					cv->end = cv->last_update;
 				}
-
-				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->attr->label, tag_pref[ tag ], cv->lab_tit, cv->start, cv->end, *num_v, cv->up->attr->label );
-				++( *num_v );
-
-				if ( cv->end > gui::num_t )
-					gui::num_t = cv->end;
-
-				if ( cv->start < gui::first_t )
-					gui::first_t = cv->start;
-			}
 			else
-				da->insert_label_mem( num_v, cv );
+				tag = TAG_NONE;
+			
+			insert_label_mem( num_v, cv, tag );
 
 			if ( *num_v % PROG_SERIES == 0 )
 				cmd( "prgboxupdate .da.ser %d", *num_v - 1 );
@@ -4694,19 +4685,7 @@ void lsd::object::insert_label_mem( int *num_v, const char *lab )
 	if ( up == NULL && lab == NULL )
 		for ( auto cv = sim->cemetery; cv != NULL && ! gui::stop; cv = cv->next )
 		{
-			if ( da->disable )
-			{
-				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", cv->attr->label, tag_pref[ TAG_NONE ], cv->lab_tit, cv->start, cv->end, *num_v, sim->par_map[ cv->attr->label ].c_str( ) );
-				++( *num_v );
-
-				if ( cv->end > gui::num_t )
-					gui::num_t = cv->end;
-
-				if ( cv->start < gui::first_t )
-					gui::first_t = cv->start;
-			}
-			else
-				da->insert_label_mem( num_v, cv );
+			insert_label_mem( num_v, cv, TAG_NONE );
 
 			if ( *num_v % PROG_SERIES == 0 )
 				cmd( "prgboxupdate .da.ser %d", *num_v - 1 );
@@ -4717,49 +4696,64 @@ void lsd::object::insert_label_mem( int *num_v, const char *lab )
 /*************************************************************
  INSERT_LABEL_MEM
  *************************************************************/
-void lsd::assimilation::insert_label_mem( int *num_v, variable *v )
+void lsd::object::insert_label_mem( int *num_v, variable *v, int tag )
 {
-	ass_map_itT ca;
 	static bool warn_once = false;
 
-	// check if there are still instances to be presented
-	// because of DA data analysis, dynamic instances may have to enter
-	// the DA process, but were still used in the model forecasts
-	if ( ( ca = elem_map.find( v->attr->label ) ) == elem_map.end( ) || ca->second->inst_idx + 1 >= ( int ) ca->second->da_data.size( ) )
+	if ( da->disable )
 	{
-		if ( ! warn_once )
-			cmd( "ttk::messageBox -parent .da -type ok -title Warning -icon warning -default ok -message \"Series do not match\" -detail \"The effective model element instances do not match the ones effectively used for data assimilation. This may lead to missing or incorrectly positioned instance series. However, it does not affect the simulation data saved to disk, or the assimilation process.\n\nTo avoid the problem, please do not select for data assimilation variables or parameters with different number of instances among simulation runs.\"" );
+		cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, v->start, v->end, *num_v, sim->par_map[ v->attr->label ].c_str( ) );
+		++( *num_v );
 
-		warn_once = true;
-		return;
+		if ( v->end > gui::num_t )
+			gui::num_t = v->end;
+
+		if ( v->start < gui::first_t )
+			gui::first_t = v->start;
 	}
-
-	auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
-	if ( ce.saved )
-		return;
-
-	for ( auto tag = TAG_ANL; tag <= TAG_OBS; ++tag )
-		if ( ! ( tag == TAG_FCT && ! sav_fct ) && ! ( tag == TAG_OBS && ! sav_obs ) )
+	else
+	{
+		ass_map_itT ca;
+		
+		// check if there are still instances to be presented
+		// because of DA data analysis, dynamic instances may have to enter
+		// the DA process, but were still used in the model forecasts
+		if ( ( ca = da->elem_map.find( v->attr->label ) ) == da->elem_map.end( ) || ca->second->inst_idx + 1 >= ( int ) ca->second->da_data.size( ) )
 		{
-			cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v, v->up->attr->label );
+			if ( ! warn_once )
+				cmd( "ttk::messageBox -parent .da -type ok -title Warning -icon warning -default ok -message \"Series do not match\" -detail \"The effective model element instances do not match the ones effectively used for data assimilation. This may lead to missing or incorrectly positioned instance series. However, it does not affect the simulation data saved to disk, or the assimilation process.\n\nTo avoid the problem, please do not select for data assimilation variables or parameters with different number of instances among simulation runs.\"" );
 
-			if ( ! sav_ci )
-				++( *num_v );
-			else
-			{
-				cmd( "add_series \"%s+ %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 1, v->up->attr->label );
-				cmd( "add_series \"%s- %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 2, v->up->attr->label );
-				*num_v += 3;
-			}
+			warn_once = true;
+			return;
 		}
 
-	if ( ce.end > gui::num_t )
-		gui::num_t = ce.end;
+		auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+		if ( ce.saved )
+			return;
 
-	if ( ce.start < gui::first_t )
-		gui::first_t = ce.start;
+		for ( auto tag = TAG_ANL; tag <= TAG_OBS; ++tag )
+			if ( ! ( tag == TAG_FCT && ! da->sav_fct ) && ! ( tag == TAG_OBS && ! da->sav_obs ) )
+			{
+				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v, v->up->attr->label );
 
-	ce.saved = true;
+				if ( ! da->sav_ci )
+					++( *num_v );
+				else
+				{
+					cmd( "add_series \"%s+ %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 1, v->up->attr->label );
+					cmd( "add_series \"%s- %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 2, v->up->attr->label );
+					*num_v += 3;
+				}
+			}
+
+		if ( ce.end > gui::num_t )
+			gui::num_t = ce.end;
+
+		if ( ce.start < gui::first_t )
+			gui::first_t = ce.start;
+
+		ce.saved = true;
+	}
 }
 
 
@@ -4777,7 +4771,6 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 			cv->set_lab_tit( );
 
 			if ( da->disable )
-			{
 				if ( cv->attr->save )
 					tag = TAG_NONE;
 				else
@@ -4792,19 +4785,10 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 					for ( auto i = 0; i <= cv->attr->num_lag; ++i )
 						cv->data[ i ] = cv->val[ cv->attr->num_lag - i ];
 				}
-
-				gui::vs[ *num_v ].label = cv->attr->label;
-				gui::vs[ *num_v ].parent = cv->up->attr->label;
-				gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ tag ], cv->lab_tit );
-				gui::vs[ *num_v ].start = cv->start;
-				gui::vs[ *num_v ].end = cv->end;
-				gui::vs[ *num_v ].rank = *num_v;
-				gui::vs[ *num_v ].data = cv->data;
-				gui::vs[ *num_v ].data_alias = true;
-				++( *num_v );
-			}
 			else
-				da->insert_store_mem( num_v, cv );
+				tag = TAG_NONE;
+			
+			insert_store_mem( num_v, cv, tag );
 		}
 
 	for ( auto cb = b; cb != NULL && ! found; cb = cb->next )
@@ -4813,77 +4797,77 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 				cur->insert_store_mem( num_v, lab );
 
 	if ( up == NULL && lab == NULL )
-	{
 		for ( auto cv = sim->cemetery; cv != NULL && *num_v < ( int ) gui::vs.size( ); cv = cv->next )
-			if ( da->disable )
-			{
-				gui::vs[ *num_v ].label = cv->attr->label;
-				gui::vs[ *num_v ].parent = cv->up->attr->label;
-				gui::vs[ *num_v ].tag = cv->lab_tit;
-				gui::vs[ *num_v ].start = cv->start;
-				gui::vs[ *num_v ].end = cv->end;
-				gui::vs[ *num_v ].rank = *num_v;
-				gui::vs[ *num_v ].data = cv->data;
-				gui::vs[ *num_v ].data_alias = true;
-				++( *num_v );
-			}
-			else
-				da->insert_store_mem( num_v, cv );
-	}
+			insert_store_mem( num_v, cv, TAG_NONE );
 }
 
 
 /*************************************************************
  INSERT_STORE_MEM
  *************************************************************/
-void lsd::assimilation::insert_store_mem( int *num_v, variable *v )
+void lsd::object::insert_store_mem( int *num_v, variable *v, int tag )
 {
-	ass_map_itT ca;
-
-	if ( ( ca = elem_map.find( v->attr->label ) ) == elem_map.end( ) || ca->second->inst_idx + 1 >= ( int ) ca->second->da_data.size( ) )
-		return;
-
-	auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
-	if ( ce.saved )
-		return;
-
-	for ( auto tag = TAG_ANL; tag <= TAG_OBS; ++tag )
+	if ( da->disable )
 	{
-		if ( ( tag == TAG_FCT && ! sav_fct ) || ( tag == TAG_OBS && ! sav_obs ) )
-			continue;
-
 		gui::vs[ *num_v ].label = v->attr->label;
-		gui::vs[ *num_v ].parent = v->up->attr->label;
+		gui::vs[ *num_v ].parent = sim->par_map[ v->attr->label ].c_str( );
 		gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
-		gui::vs[ *num_v ].start = ce.start;
-		gui::vs[ *num_v ].end = ce.end;
+		gui::vs[ *num_v ].start = v->start;
+		gui::vs[ *num_v ].end = v->end;
 		gui::vs[ *num_v ].rank = *num_v;
-		gui::vs[ *num_v ].data = ( tag == TAG_OBS ? ce.obs.data( ) : ( tag == TAG_FCT ? ce.fct.data( ) : ce.anl.data( ) ) );
+		gui::vs[ *num_v ].data = v->data;
 		gui::vs[ *num_v ].data_alias = true;
+		++( *num_v );
+	}
+	else
+	{
+		ass_map_itT ca;
 
-		if ( ! sav_ci )
-			++( *num_v );
-		else
+		if ( ( ca = da->elem_map.find( v->attr->label ) ) == da->elem_map.end( ) || ca->second->inst_idx + 1 >= ( int ) ca->second->da_data.size( ) )
+			return;
+
+		auto & ce = ca->second->da_data[ ++( ca->second->inst_idx ) ];
+		if ( ce.saved )
+			return;
+
+		for ( auto tag = TAG_ANL; tag <= TAG_OBS; ++tag )
 		{
-			gui::vs[ *num_v + 1 ].label = to_string( "%s+", v->attr->label );
-			gui::vs[ *num_v + 1 ].parent = v->up->attr->label;
-			gui::vs[ *num_v + 1 ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
-			gui::vs[ *num_v + 1 ].start = ce.start;
-			gui::vs[ *num_v + 1 ].end = ce.end;
-			gui::vs[ *num_v + 1 ].rank = *num_v + 1;
-			gui::vs[ *num_v + 1 ].data = ( tag == TAG_OBS ? ce.obs_hi.data( ) : ( tag == TAG_FCT ? ce.fct_hi.data( ) : ce.anl_hi.data( ) ) );
-			gui::vs[ *num_v + 1 ].data_alias = true;
+			if ( ( tag == TAG_FCT && ! da->sav_fct ) || ( tag == TAG_OBS && ! da->sav_obs ) )
+				continue;
 
-			gui::vs[ *num_v + 2 ].label = to_string( "%s-", v->attr->label );
-			gui::vs[ *num_v + 2 ].parent = v->up->attr->label;
-			gui::vs[ *num_v + 2 ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
-			gui::vs[ *num_v + 2 ].start = ce.start;
-			gui::vs[ *num_v + 2 ].end = ce.end;
-			gui::vs[ *num_v + 2 ].rank = *num_v + 2;
-			gui::vs[ *num_v + 2 ].data = ( tag == TAG_OBS ? ce.obs_lo.data( ) : ( tag == TAG_FCT ? ce.fct_lo.data( ) : ce.anl_lo.data( ) ) );
-			gui::vs[ *num_v + 2 ].data_alias = true;
+			gui::vs[ *num_v ].label = v->attr->label;
+			gui::vs[ *num_v ].parent = sim->par_map[ v->attr->label ].c_str( );
+			gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
+			gui::vs[ *num_v ].start = ce.start;
+			gui::vs[ *num_v ].end = ce.end;
+			gui::vs[ *num_v ].rank = *num_v;
+			gui::vs[ *num_v ].data = ( tag == TAG_OBS ? ce.obs.data( ) : ( tag == TAG_FCT ? ce.fct.data( ) : ce.anl.data( ) ) );
+			gui::vs[ *num_v ].data_alias = true;
 
-			*num_v += 3;
+			if ( ! da->sav_ci )
+				++( *num_v );
+			else
+			{
+				gui::vs[ *num_v + 1 ].label = to_string( "%s+", v->attr->label );
+				gui::vs[ *num_v + 1 ].parent = sim->par_map[ v->attr->label ].c_str( );
+				gui::vs[ *num_v + 1 ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
+				gui::vs[ *num_v + 1 ].start = ce.start;
+				gui::vs[ *num_v + 1 ].end = ce.end;
+				gui::vs[ *num_v + 1 ].rank = *num_v + 1;
+				gui::vs[ *num_v + 1 ].data = ( tag == TAG_OBS ? ce.obs_hi.data( ) : ( tag == TAG_FCT ? ce.fct_hi.data( ) : ce.anl_hi.data( ) ) );
+				gui::vs[ *num_v + 1 ].data_alias = true;
+
+				gui::vs[ *num_v + 2 ].label = to_string( "%s-", v->attr->label );
+				gui::vs[ *num_v + 2 ].parent = sim->par_map[ v->attr->label ].c_str( );
+				gui::vs[ *num_v + 2 ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
+				gui::vs[ *num_v + 2 ].start = ce.start;
+				gui::vs[ *num_v + 2 ].end = ce.end;
+				gui::vs[ *num_v + 2 ].rank = *num_v + 2;
+				gui::vs[ *num_v + 2 ].data = ( tag == TAG_OBS ? ce.obs_lo.data( ) : ( tag == TAG_FCT ? ce.fct_lo.data( ) : ce.anl_lo.data( ) ) );
+				gui::vs[ *num_v + 2 ].data_alias = true;
+
+				*num_v += 3;
+			}
 		}
 	}
 }

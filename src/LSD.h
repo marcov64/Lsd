@@ -85,8 +85,10 @@
 	void fill_list_par( bool show_all ); \
 	void fill_list_var( bool show_all, bool lag_only ); \
 	void insert_label_mem( int *num_v, const char *lab = NULL ); \
+	void insert_label_mem( int *num_v, variable *v, int tag ); \
 	void insert_obj_num( const char *tag, const char *ind, int *idx, int *count ); \
 	void insert_store_mem( int *num_v, const char *lab = NULL ); \
+	void insert_store_mem( int *num_v, variable *v, int tag ); \
 	void link_cells( const char *lab ); \
 	void put_line( int x1, int y1, int x2 ); \
 	void put_node( int x, int y, const char *str, bool sel ); \
@@ -120,9 +122,7 @@
 	int dataentry( const char *parWnd = NULL );
 
 #define ASSIMILATION_EXT \
-	public: \
-	void insert_label_mem( int *num_v, variable *v ); \
-	void insert_store_mem( int *num_v, variable *v );
+	public:
 
 // definitions from LSD library
 #include "lib/libLSD.h"
