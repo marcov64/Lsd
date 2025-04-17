@@ -69,9 +69,9 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 	if ( cv->param == 1 )
 		lag = 0;
 
-	Tcl_LinkVar( gui::interp, "res", ( char * ) &res, TCL_LINK_INT );
-	Tcl_LinkVar( gui::interp, "value1", ( char * ) &value1, TCL_LINK_DOUBLE );
-	Tcl_LinkVar( gui::interp, "value2", ( char * ) &value2, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( gui::interp, "res", ( char * ) & res, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "value1", ( char * ) & value1, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( gui::interp, "value2", ( char * ) & value2, TCL_LINK_DOUBLE );
 
 	// default values
 	res = 1;
@@ -680,6 +680,11 @@ int lsd::assim::dataentry( const char *parWnd )
 	if ( cv->param == 1 )
 		param = true;
 
+	Tcl_LinkVar( gui::interp, "par_dist", ( char * ) & par_dist, TCL_LINK_INT );
+	Tcl_LinkVar( gui::interp, "par_n_sd", ( char * ) & par_n_sd, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( gui::interp, "par_u_upp", ( char * ) & par_u_upp, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( gui::interp, "par_u_low", ( char * ) & par_u_low, TCL_LINK_DOUBLE );
+
 	cmd( "set disable %d", disable );
 	cmd( "set update %d", update );
 	cmd( "set data_obs %d", data_obs );
@@ -692,11 +697,6 @@ int lsd::assim::dataentry( const char *parWnd )
 	cmd( "set data_col_num %d", data_col_num );
 	cmd( "set t_col_name \"%s\"", t_col_name.c_str( ) );
 	cmd( "set t_col_num %d", t_col_num );
-
-	cmd( "set par_dist %d", par_dist );
-	cmd( "set par_n_sd %.2f", par_n_sd );
-	cmd( "set par_u_upp %.2f", par_u_upp );
-	cmd( "set par_u_low %.2f", par_u_low );
 
 	cmd( "newtop $_w \"Data Assimilation Settings\" { set choice 2 } $parWnd" );
 
@@ -880,19 +880,22 @@ int lsd::assim::dataentry( const char *parWnd )
 
 		cmd( "ttk::frame $_w.dist.p.var" );
 		cmd( "ttk::label $_w.dist.p.var.l -width 15 -anchor e -text \"Std. deviation\"" );
-		cmd( "ttk::entry $_w.dist.p.var.e -width 15 -textvariable par_n_sd -justify center -state %s", par_dist == 0 ? "normal" : "disabled" );
+		cmd( "ttk::entry $_w.dist.p.var.e -width 15 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set par_n_sd %%P; return 1 } { %%W delete 0 end; %%W insert 0 $par_n_sd; return 0 } } -invalidcommand { bell } -justify center -state %s", par_dist == 0 ? "normal" : "disabled" );
+		cmd( "write_any $_w.dist.p.var.e $par_n_sd" );
 		cmd( "pack $_w.dist.p.var.l $_w.dist.p.var.e -side left -anchor w -padx $_2 -pady $_2" );
-		cmd( "tooltip::tooltip $_w.dist.p.var \"Variance of parameter\nnormal distribution\"" );
+		cmd( "tooltip::tooltip $_w.dist.p.var \"Standard deviation of\nparameter normal distribution\"" );
 
 		cmd( "ttk::frame $_w.dist.p.max" );
 		cmd( "ttk::label $_w.dist.p.max.l -width 15 -anchor e -text \"Upper bound (+)\"" );
-		cmd( "ttk::entry $_w.dist.p.max.e -width 15 -textvariable par_u_upp -justify center -state %s", par_dist == 1 ? "normal" : "disabled" );
+		cmd( "ttk::entry $_w.dist.p.max.e -width 15 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set par_u_upp %%P; return 1 } { %%W delete 0 end; %%W insert 0 $par_u_upp; return 0 } } -invalidcommand { bell } -justify center -state %s", par_dist == 1 ? "normal" : "disabled" );
+		cmd( "write_any $_w.dist.p.max.e $par_u_upp" );
 		cmd( "pack $_w.dist.p.max.l $_w.dist.p.max.e -side left -anchor w -padx $_2 -pady $_2" );
 		cmd( "tooltip::tooltip $_w.dist.p.max \"Maximum value of parameter\nuniform distribution\"" );
 
 		cmd( "ttk::frame $_w.dist.p.min" );
 		cmd( "ttk::label $_w.dist.p.min.l -width 15 -anchor e -text \"Lower bound (-)\"" );
-		cmd( "ttk::entry $_w.dist.p.min.e -width 15 -textvariable par_u_low -justify center -state %s", par_dist == 1 ? "normal" : "disabled" );
+		cmd( "ttk::entry $_w.dist.p.min.e -width 15 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set par_u_low %%P; return 1 } { %%W delete 0 end; %%W insert 0 $par_u_low; return 0 } } -invalidcommand { bell } -justify center -state %s", par_dist == 1 ? "normal" : "disabled" );
+		cmd( "write_any $_w.dist.p.min.e $par_u_low" );
 		cmd( "pack $_w.dist.p.min.l $_w.dist.p.min.e -side left -anchor w -padx $_2 -pady $_2" );
 		cmd( "tooltip::tooltip $_w.dist.p.min \"Minimum value of parameter\nuniform distribution\"" );
 
@@ -911,6 +914,19 @@ int lsd::assim::dataentry( const char *parWnd )
 	gui::choice = 0;
 	while ( gui::choice == 0 )
 		Tcl_DoOneEvent( 0 );
+
+	// save current linked variables values before closing
+	if ( param )
+	{
+		cmd( "if [ string is double -strict [ $_w.dist.p.var.e get ] ] { set par_n_sd [ $_w.dist.p.var.e get ] }" );
+		cmd( "if [ string is double -strict [ $_w.dist.p.max.e get ] ] { set par_u_upp [ $_w.dist.p.max.e get ] }" );
+		cmd( "if [ string is double -strict [ $_w.dist.p.min.e get ] ] { set par_u_low [ $_w.dist.p.min.e get ] }" );
+	}
+
+	Tcl_UnlinkVar( gui::interp, "par_dist" );
+	Tcl_UnlinkVar( gui::interp, "par_n_sd" );
+	Tcl_UnlinkVar( gui::interp, "par_u_upp" );
+	Tcl_UnlinkVar( gui::interp, "par_u_low" );
 
 	res = gui::choice - 1;
 
@@ -1015,28 +1031,23 @@ int lsd::assim::dataentry( const char *parWnd )
 		}
 	}
 	else
-		switch ( par_dist = gui::get_int( "par_dist" ) )
+		switch ( par_dist )
 		{
 			case 0:
-				if ( std::isfinite( gui::get_double( "par_n_sd" ) ) && gui::get_double( "par_n_sd" ) >= 0 )
-					par_n_sd = gui::get_double( "par_n_sd" );
-				else
+				if ( ! std::isfinite( par_n_sd ) || par_n_sd < 0 )
 				{
-					cmd( "ttk::messageBox -parent $_w -type ok -icon error -title Error -message \"Invalid standard deviation\" -detail \"Parameter standard deviation must be greater than or equal to zero.\"" );
+					cmd( "ttk::messageBox -parent $_w -type ok -icon error -title Error -message \"Invalid standard deviation\" -detail \"Parameter standard deviation must be finite and greater than or equal to zero.\"" );
+					par_n_sd = 0;
 					res = 2;
 				}
 
 				break;
 
 			case 1:
-				if ( std::isfinite( gui::get_double( "par_u_upp" ) ) && std::isfinite( gui::get_double( "par_u_low" ) ) && gui::get_double( "par_u_upp" ) >= 0 && gui::get_double( "par_u_low" ) >= 0 )
+				if ( ! std::isfinite( par_u_upp ) || ! std::isfinite( par_u_low ) || par_u_upp < 0 || par_u_low < 0 )
 				{
-					par_u_upp = gui::get_double( "par_u_upp" );
-					par_u_low = gui::get_double( "par_u_low" );
-				}
-				else
-				{
-					cmd( "ttk::messageBox -parent $_w -type ok -icon error -title Error -message \"Invalid bound values\" -detail \"Parameter distribution bound limits must be finite.\"" );
+					cmd( "ttk::messageBox -parent $_w -type ok -icon error -title Error -message \"Invalid bound values\" -detail \"Parameter distribution bound limits must be finite and greater than or equal to zero.\"" );
+					par_u_upp = par_u_low = 0;
 					res = 2;
 				}
 
