@@ -228,6 +228,9 @@ bool lsd::assimilation::init( simulation *ref )
 		save_param( run_sims[ i ].root );
 	}
 
+	// clear list of produced results files
+	ref_sim->res_list.clear( );
+
 	return true;
 }
 
@@ -240,6 +243,11 @@ void lsd::assimilation::finish( void )
 {
 	for ( auto & ca : ass_elem )
 		ca.finish( );
+
+	// collect produced results files
+	for ( auto & sim : run_sims )
+		for ( auto & fname : sim.res_list )
+			ref_sim->res_list.push_back( fname );
 
 	run_sims.clear( );
 	next_t = 0;
