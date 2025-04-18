@@ -744,6 +744,13 @@ void gui::analysis( bool mc )
 	cmd( "set running %d", sim.running ? 1 : 0 );
 	cmd( "if $running { showtop .da overM } { showtop .da overM 1 1 0 }" );
 
+	// create parent map from loaded but not (really) run configuration
+	if ( ! da.disable || sim.eff_t == 0 )
+	{
+		sim.par_map.clear( );
+		sim.root->create_par_map( );
+	}
+
 	// add time series in memory to listbox
 	update_descr_dict( );
 	if ( sim.eff_t > 0 )
@@ -751,11 +758,6 @@ void gui::analysis( bool mc )
 		sim.root->insert_data_mem( );
 		min_t = std::max( first_t, showInit ? 0 : 1 );
 		max_t = num_t;
-	}
-	else
-	{	// create parent map from loaded but not run configuration
-		sim.par_map.clear( );
-		sim.root->create_par_map( );
 	}
 
 	if ( ! mc && vs.size( ) == 0 )
@@ -4699,10 +4701,11 @@ void lsd::object::insert_label_mem( int *num_v, const char *lab )
 void lsd::object::insert_label_mem( int *num_v, variable *v, int tag )
 {
 	static bool warn_once = false;
+	strT par_lab = v->up != NULL ? v->up->attr->label : sim->par_map[ v->attr->label ];
 
 	if ( da->disable )
 	{
-		cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, v->start, v->end, *num_v, sim->par_map[ v->attr->label ].c_str( ) );
+		cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, v->start, v->end, *num_v, par_lab.c_str( ) );
 		++( *num_v );
 
 		if ( v->end > gui::num_t )
@@ -4734,14 +4737,14 @@ void lsd::object::insert_label_mem( int *num_v, variable *v, int tag )
 		for ( auto tag = TAG_ANL; tag <= TAG_OBS; ++tag )
 			if ( ! ( tag == TAG_FCT && ! da->sav_fct ) && ! ( tag == TAG_OBS && ! da->sav_obs ) && ! ( tag == TAG_OBS && da->obs_labs_map.find( v->attr->label ) == da->obs_labs_map.end( ) ) )
 			{
-				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v, v->up->attr->label );
+				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v, par_lab.c_str( ) );
 
 				if ( ! da->sav_ci )
 					++( *num_v );
 				else
 				{
-					cmd( "add_series \"%s+ %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 1, v->up->attr->label );
-					cmd( "add_series \"%s- %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 2, v->up->attr->label );
+					cmd( "add_series \"%s+ %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 1, par_lab.c_str( ) );
+					cmd( "add_series \"%s- %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 2, par_lab.c_str( ) );
 					*num_v += 3;
 				}
 			}
@@ -4807,10 +4810,12 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
  *************************************************************/
 void lsd::object::insert_store_mem( int *num_v, variable *v, int tag )
 {
+	strT par_lab = v->up != NULL ? v->up->attr->label : sim->par_map[ v->attr->label ];
+
 	if ( da->disable )
 	{
 		gui::vs[ *num_v ].label = v->attr->label;
-		gui::vs[ *num_v ].parent = sim->par_map[ v->attr->label ].c_str( );
+		gui::vs[ *num_v ].parent = par_lab;
 		gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
 		gui::vs[ *num_v ].start = v->start;
 		gui::vs[ *num_v ].end = v->end;
@@ -4836,7 +4841,7 @@ void lsd::object::insert_store_mem( int *num_v, variable *v, int tag )
 				continue;
 
 			gui::vs[ *num_v ].label = v->attr->label;
-			gui::vs[ *num_v ].parent = sim->par_map[ v->attr->label ].c_str( );
+			gui::vs[ *num_v ].parent = par_lab;
 			gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
 			gui::vs[ *num_v ].start = ce.start;
 			gui::vs[ *num_v ].end = ce.end;
@@ -4849,7 +4854,7 @@ void lsd::object::insert_store_mem( int *num_v, variable *v, int tag )
 			else
 			{
 				gui::vs[ *num_v + 1 ].label = to_string( "%s+", v->attr->label );
-				gui::vs[ *num_v + 1 ].parent = sim->par_map[ v->attr->label ].c_str( );
+				gui::vs[ *num_v + 1 ].parent = par_lab;
 				gui::vs[ *num_v + 1 ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
 				gui::vs[ *num_v + 1 ].start = ce.start;
 				gui::vs[ *num_v + 1 ].end = ce.end;
@@ -4858,7 +4863,7 @@ void lsd::object::insert_store_mem( int *num_v, variable *v, int tag )
 				gui::vs[ *num_v + 1 ].data_alias = true;
 
 				gui::vs[ *num_v + 2 ].label = to_string( "%s-", v->attr->label );
-				gui::vs[ *num_v + 2 ].parent = sim->par_map[ v->attr->label ].c_str( );
+				gui::vs[ *num_v + 2 ].parent = par_lab;
 				gui::vs[ *num_v + 2 ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
 				gui::vs[ *num_v + 2 ].start = ce.start;
 				gui::vs[ *num_v + 2 ].end = ce.end;

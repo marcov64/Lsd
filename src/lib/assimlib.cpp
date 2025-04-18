@@ -522,7 +522,7 @@ void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_
 {
 	e_matT x_a_ci, x_f_ci, z_ci;
 	int obs_idx;
-	size_t i, nvar = fct_labs.size( );
+	size_t i, j, nvar = fct_labs.size( );
 
 	// compute confidence intervals for DA elements
 	if ( da->sav_ci )
@@ -533,7 +533,7 @@ void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_
 	}
 
 	// saves each variable instance to the corresponding DA element storage
-	for ( auto j = 0; j < nvar; ++j )
+	for ( j = 0; j < nvar; ++j )
 	{
 		auto & ca = *elem_map[ fct_labs[ j ] ];
 		auto co = obs_labs_map.find( fct_labs[ j ] );
