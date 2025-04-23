@@ -6,7 +6,9 @@
 # Copyright (c) 1991-1993 The Regents of the University of California.
 # Copyright (c) 1994-1996 Sun Microsystems, Inc.
 # Copyright (c) 1998-1999 Scriptics Corporation.
-# Copyright (c) 2004 by Kevin B. Kenny.  All rights reserved.
+# Copyright (c) 2004 Kevin B. Kenny.
+#
+# All rights reserved.
 #
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -16,7 +18,7 @@
 if {[info commands package] == ""} {
     error "version mismatch: library\nscripts expect Tcl version 7.5b1 or later but the loaded version is\nonly [info patchlevel]"
 }
-package require -exact Tcl 8.6.10
+package require -exact Tcl 8.6.16
 
 # Compute the auto path to use in this interpreter.
 # The values on the path come from several locations:
@@ -37,41 +39,47 @@ package require -exact Tcl 8.6.10
 # tcl_pkgPath, which is set by the platform-specific initialization routines
 #	On UNIX it is compiled in
 #       On Windows, it is not used
+#
+# (Ticket 41c9857bdd) In a safe interpreter, this file does not set
+# ::auto_path (other than to {} if it is undefined). The caller, typically
+# a Safe Base command, is responsible for setting ::auto_path.
 
 if {![info exists auto_path]} {
-    if {[info exists env(TCLLIBPATH)]} {
+    if {[info exists env(TCLLIBPATH)] && (![interp issafe])} {
 	set auto_path $env(TCLLIBPATH)
     } else {
 	set auto_path ""
     }
 }
+
 namespace eval tcl {
-    variable Dir
-    foreach Dir [list $::tcl_library [file dirname $::tcl_library]] {
-	if {$Dir ni $::auto_path} {
-	    lappend ::auto_path $Dir
-	}
-    }
-    set Dir [file join [file dirname [file dirname \
-	    [info nameofexecutable]]] lib]
-    if {$Dir ni $::auto_path} {
-	lappend ::auto_path $Dir
-    }
-    catch {
-	foreach Dir $::tcl_pkgPath {
+    if {![interp issafe]} {
+	variable Dir
+	foreach Dir [list $::tcl_library [file dirname $::tcl_library]] {
 	    if {$Dir ni $::auto_path} {
 		lappend ::auto_path $Dir
 	    }
 	}
-    }
+	set Dir [file join [file dirname [file dirname \
+		[info nameofexecutable]]] lib]
+	if {$Dir ni $::auto_path} {
+	    lappend ::auto_path $Dir
+	}
+	if {[info exists ::tcl_pkgPath]} { catch {
+	    foreach Dir $::tcl_pkgPath {
+		if {$Dir ni $::auto_path} {
+		    lappend ::auto_path $Dir
+		}
+	    }
+	}}
 
-    if {![interp issafe]} {
-        variable Path [encoding dirs]
-        set Dir [file join $::tcl_library encoding]
-        if {$Dir ni $Path} {
+	variable Path [encoding dirs]
+	set Dir [file join $::tcl_library encoding]
+	if {$Dir ni $Path} {
 	    lappend Path $Dir
 	    encoding dirs $Path
-        }
+	}
+	unset Dir Path
     }
 
     # TIP #255 min and max functions
@@ -79,7 +87,7 @@ namespace eval tcl {
 	proc min {args} {
 	    if {![llength $args]} {
 		return -code error \
-		    "too few arguments to math function \"min\""
+		    "not enough arguments to math function \"min\""
 	    }
 	    set val Inf
 	    foreach arg $args {
@@ -95,7 +103,7 @@ namespace eval tcl {
 	proc max {args} {
 	    if {![llength $args]} {
 		return -code error \
-		    "too few arguments to math function \"max\""
+		    "not enough arguments to math function \"max\""
 	    }
 	    set val -Inf
 	    foreach arg $args {
@@ -195,7 +203,7 @@ if {[namespace which -command exec] eq ""} {
     set auto_noexec 1
 }
 
-# Define a log command (which can be overwitten to log errors
+# Define a log command (which can be overwritten to log errors
 # differently, specially when stderr is not available)
 
 if {[namespace which -command tclLog] eq ""} {
@@ -308,7 +316,7 @@ proc unknown args {
 		set errInfo [string range $errInfo 0 $last-1]
 		set tail "\"$cinfo\""
 		set last [string last $tail $errInfo]
-		if {$last + [string length $tail] != [string length $errInfo]} {
+		if {$last < 0 || $last + [string length $tail] != [string length $errInfo]} {
 		    return -code error -errorcode $errCode \
 			    -errorinfo $errInfo $msg
 		}
@@ -366,14 +374,14 @@ proc unknown args {
 	    return -options $::tcl::UnknownOptions $::tcl::UnknownResult
 	}
 
-	set ret [catch {set candidates [info commands $name*]} msg]
+	set ret [catch [list uplevel 1 [list info commands $name*]] candidates]
 	if {$name eq "::"} {
 	    set name ""
 	}
 	if {$ret != 0} {
 	    dict append opts -errorinfo \
 		    "\n    (expanding command prefix \"$name\" in unknown)"
-	    return -options $opts $msg
+	    return -options $opts $candidates
 	}
 	# Filter out bogus matches when $name contained
 	# a glob-special char [Bug 946952]
@@ -418,16 +426,20 @@ proc unknown args {
 proc auto_load {cmd {namespace {}}} {
     global auto_index auto_path
 
+    # qualify names:
     if {$namespace eq ""} {
 	set namespace [uplevel 1 [list ::namespace current]]
     }
     set nameList [auto_qualify $cmd $namespace]
     # workaround non canonical auto_index entries that might be around
     # from older auto_mkindex versions
-    lappend nameList $cmd
-    foreach name $nameList {
+    if {$cmd ni $nameList} {lappend nameList $cmd}
+
+    # try to load (and create sub-cmd handler "_sub_load_cmd" for further usage):
+    foreach name $nameList [set _sub_load_cmd {
+	# via auto_index:
 	if {[info exists auto_index($name)]} {
-	    namespace eval :: $auto_index($name)
+	    namespace inscope :: $auto_index($name)
 	    # There's a couple of ways to look for a command of a given
 	    # name.  One is to use
 	    #    info commands $name
@@ -439,22 +451,19 @@ proc auto_load {cmd {namespace {}}} {
 		return 1
 	    }
 	}
-    }
+    }]
+
+    # load auto_index if possible:
     if {![info exists auto_path]} {
 	return 0
     }
-
     if {![auto_load_index]} {
 	return 0
     }
-    foreach name $nameList {
-	if {[info exists auto_index($name)]} {
-	    namespace eval :: $auto_index($name)
-	    if {[namespace which -command $name] ne ""} {
-		return 1
-	    }
-	}
-    }
+
+    # try again (something new could be loaded):
+    foreach name $nameList $_sub_load_cmd
+
     return 0
 }
 
@@ -484,11 +493,12 @@ proc auto_load_index {} {
 	set dir [lindex $auto_path $i]
 	set f ""
 	if {$issafe} {
-	    catch {source [file join $dir tclIndex]}
+	    catch {source -encoding utf-8 [file join $dir tclIndex]}
 	} elseif {[catch {set f [open [file join $dir tclIndex]]}]} {
 	    continue
 	} else {
 	    set error [catch {
+		fconfigure $f -eofchar "\x1A {}" -encoding utf-8
 		set id [gets $f]
 		if {$id eq "# Tcl autoload index file, version 2.0"} {
 		    eval [read $f]
@@ -500,7 +510,7 @@ proc auto_load_index {} {
 			}
 			set name [lindex $line 0]
 			set auto_index($name) \
-				"source [file join $dir [lindex $line 1]]"
+				"source -encoding utf-8 [file join $dir [lindex $line 1]]"
 		    }
 		} else {
 		    error "[file join $dir tclIndex] isn't a proper Tcl index file"
@@ -601,12 +611,12 @@ proc auto_import {pattern} {
     auto_load_index
 
     foreach pattern $patternList {
-        foreach name [array names auto_index $pattern] {
-            if {([namespace which -command $name] eq "")
+	foreach name [array names auto_index $pattern] {
+	    if {([namespace which -command $name] eq "")
 		    && ([namespace qualifiers $pattern] eq [namespace qualifiers $name])} {
-                namespace eval :: $auto_index($name)
-            }
-        }
+		namespace inscope :: $auto_index($name)
+	    }
+	}
     }
 }
 
@@ -637,7 +647,7 @@ proc auto_execok name {
     }
     set auto_execs($name) ""
 
-    set shellBuiltins [list assoc cls copy date del dir echo erase ftype \
+    set shellBuiltins [list assoc cls copy date del dir echo erase exit ftype \
 	    md mkdir mklink move rd ren rename rmdir start time type ver vol]
     if {[info exists env(PATHEXT)]} {
 	# Add an initial ; to have the {} extension check first.
@@ -667,17 +677,14 @@ proc auto_execok name {
 	return ""
     }
 
-    set path "[file dirname [info nameof]];.;"
+    set path "[file dirname [info nameofexecutable]];.;"
     if {[info exists env(SystemRoot)]} {
 	set windir $env(SystemRoot)
     } elseif {[info exists env(WINDIR)]} {
 	set windir $env(WINDIR)
     }
     if {[info exists windir]} {
-	if {$tcl_platform(os) eq "Windows NT"} {
-	    append path "$windir/system32;"
-	}
-	append path "$windir/system;$windir;"
+	append path "$windir/system32;$windir/system;$windir;"
     }
 
     foreach var {PATH Path path} {
@@ -792,7 +799,7 @@ proc tcl::CopyDirectory {action src dest} {
 	    }
 	}
     } else {
-	if {[string first $nsrc $ndest] != -1} {
+	if {[string first $nsrc $ndest] >= 0} {
 	    set srclen [expr {[llength [file split $nsrc]] - 1}]
 	    set ndest [lindex [file split $ndest] $srclen]
 	    if {$ndest eq [file tail $nsrc]} {

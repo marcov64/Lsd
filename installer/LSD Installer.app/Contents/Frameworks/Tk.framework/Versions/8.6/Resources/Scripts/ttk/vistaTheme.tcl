@@ -3,7 +3,7 @@
 #
 
 # The Vista theme can only be defined on Windows Vista and above. The theme
-# is created in C due to the need to assign a theme-enabled function for 
+# is created in C due to the need to assign a theme-enabled function for
 # detecting when themeing is disabled. On systems that cannot support the
 # Vista theme, there will be no such theme created and we must not
 # evaluate this script.
@@ -22,12 +22,10 @@ namespace eval ttk::theme::vista {
 	    -selectforeground SystemHighlightText \
 	    -selectbackground SystemHighlight \
 	    -insertcolor SystemWindowText \
-	    -font TkDefaultFont \
-	    ;
+	    -font TkDefaultFont
 
 	ttk::style map "." \
-	    -foreground [list disabled SystemGrayText] \
-	    ;
+	    -foreground [list disabled SystemGrayText]
 
 	ttk::style configure TButton -anchor center -padding {1 1} -width -11
 	ttk::style configure TRadiobutton -padding 2
@@ -69,9 +67,9 @@ namespace eval ttk::theme::vista {
         ttk::style layout TCombobox {
             Combobox.border -sticky nswe -border 0 -children {
                 Combobox.rightdownarrow -side right -sticky ns
-                Combobox.padding -expand 1 -sticky nswe -children {
+                Combobox.padding -sticky nswe -children {
                     Combobox.background -sticky nswe -children {
-                        Combobox.focus -expand 1 -sticky nswe -children {
+                        Combobox.focus -sticky nswe -children {
                             Combobox.textarea -sticky nswe
                         }
                     }
@@ -93,8 +91,7 @@ namespace eval ttk::theme::vista {
 		disabled		SystemGrayText \
 	    	{readonly focus}	SystemHighlightText \
 	    ] \
-	    -focusfill	[list {readonly focus} SystemHighlight] \
-	    ;
+	    -focusfill	[list {readonly focus} SystemHighlight]
 
         # Entry
         ttk::style configure TEntry -padding {1 1 1 1} ;# Needs lookup
@@ -113,8 +110,7 @@ namespace eval ttk::theme::vista {
         }
 	ttk::style map TEntry \
 	    -selectbackground [list !focus SystemWindow] \
-	    -selectforeground [list !focus SystemWindowText] \
-	    ;
+	    -selectforeground [list !focus SystemWindowText]
 
         # Spinbox
         ttk::style configure TSpinbox -padding 0
@@ -138,7 +134,7 @@ namespace eval ttk::theme::vista {
                 Spinbox.background -sticky news -children {
                     Spinbox.padding -sticky news -children {
                         Spinbox.innerbg -sticky news -children {
-                            Spinbox.textarea -expand 1
+                            Spinbox.textarea
                         }
                     }
                     Spinbox.uparrow -side top -sticky ens
@@ -148,10 +144,9 @@ namespace eval ttk::theme::vista {
         }
 	ttk::style map TSpinbox \
 	    -selectbackground [list !focus SystemWindow] \
-	    -selectforeground [list !focus SystemWindowText] \
-	    ;
+	    -selectforeground [list !focus SystemWindowText]
 
-        
+
         # SCROLLBAR elements (Vista includes a state for 'hover')
         ttk::style element create Vertical.Scrollbar.uparrow vsapi \
             SCROLLBAR 1 {disabled 4 pressed 3 active 2 hover 17 {} 1} \
@@ -196,14 +191,14 @@ namespace eval ttk::theme::vista {
                 Vertical.Progressbar.pbar -side bottom -sticky we
             }
         }
-        
+
         # Scale
         ttk::style element create Horizontal.Scale.slider vsapi \
             TRACKBAR 3 {disabled 5 focus 4 pressed 3 active 2 {} 1} \
             -width 6 -height 12
         ttk::style layout Horizontal.TScale {
-            Scale.focus -expand 1 -sticky nswe -children {
-                Horizontal.Scale.trough -expand 1 -sticky nswe -children {
+            Scale.focus -sticky nswe -children {
+                Horizontal.Scale.trough -sticky nswe -children {
                     Horizontal.Scale.track -sticky we
                     Horizontal.Scale.slider -side left -sticky {}
                 }
@@ -213,17 +208,48 @@ namespace eval ttk::theme::vista {
             TRACKBAR 6 {disabled 5 focus 4 pressed 3 active 2 {} 1} \
             -width 12 -height 6
         ttk::style layout Vertical.TScale {
-            Scale.focus -expand 1 -sticky nswe -children {
-                Vertical.Scale.trough -expand 1 -sticky nswe -children {
+            Scale.focus -sticky nswe -children {
+                Vertical.Scale.trough -sticky nswe -children {
                     Vertical.Scale.track -sticky ns
                     Vertical.Scale.slider -side top -sticky {}
                 }
             }
         }
-        
+
         # Treeview
         ttk::style configure Item -padding {4 0 0 0}
-        
+
         package provide ttk::theme::vista 1.0
+    }
+}
+
+# ttk::theme::vista::configureNotebookStyle --
+#
+# Sets theme-specific option values for the ttk::notebook style $style and the
+# style $style.Tab.  Invoked by ::ttk::configureNotebookStyle.
+
+proc ttk::theme::vista::configureNotebookStyle {style} {
+    set tabPos [ttk::style lookup $style -tabposition {} nw]
+    switch -- [string index $tabPos 0] {
+	n {
+	    ttk::style configure $style -tabmargins     {2 2 2 0}
+	    ttk::style map $style.Tab -expand {selected {2 2 2 2}}
+	}
+	s {
+	    ttk::style configure $style -tabmargins     {2 0 2 2}
+	    ttk::style map $style.Tab -expand {selected {2 2 2 2}}
+	}
+	w {
+	    ttk::style configure $style -tabmargins     {2 2 0 2}
+	    ttk::style map $style.Tab -expand {selected {2 2 2 2}}
+	}
+	e {
+	    ttk::style configure $style -tabmargins     {0 2 2 2}
+	    ttk::style map $style.Tab -expand {selected {2 2 2 2}}
+	}
+	default {
+	    ttk::style configure $style -tabmargins     {2 2 2 0}
+	    ttk::style map $style.Tab -expand {selected {2 2 2 2}}
+	}
     }
 }

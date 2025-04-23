@@ -31,16 +31,16 @@ proc tcl::Pkg::CompareExtension {fileName {ext {}}} {
     global tcl_platform
     if {$ext eq ""} {set ext [info sharedlibextension]}
     if {$tcl_platform(platform) eq "windows"} {
-        return [string equal -nocase [file extension $fileName] $ext]
+	return [string equal -nocase [file extension $fileName] $ext]
     } else {
-        # Some unices add trailing numbers after the .so, so
-        # we could have something like '.so.1.2'.
-        set root $fileName
-        while {1} {
-            set currExt [file extension $root]
-            if {$currExt eq $ext} {
-                return 1
-            }
+	# Some unices add trailing numbers after the .so, so
+	# we could have something like '.so.1.2'.
+	set root $fileName
+	while {1} {
+	    set currExt [file extension $root]
+	    if {$currExt eq $ext} {
+		return 1
+	    }
 
 	    # The current extension does not match; if it is not a numeric
 	    # value, quit, as we are only looking to ignore version number
@@ -51,7 +51,7 @@ proc tcl::Pkg::CompareExtension {fileName {ext {}}} {
 	    if {![string is integer -strict [string range $currExt 1 end]]} {
 		return 0
 	    }
-            set root [file rootname $root]
+	    set root [file rootname $root]
 	}
     }
 }
@@ -69,7 +69,7 @@ proc tcl::Pkg::CompareExtension {fileName {ext {}}} {
 #			than lazily when the first reference to an exported
 #			procedure in the package is made.
 # -verbose		(optional) Verbose output; the name of each file that
-#			was successfully rocessed is printed out. Additionally,
+#			was successfully processed is printed out. Additionally,
 #			if processing of a file failed a message is printed.
 # -load pat		(optional) Preload any packages whose names match
 #			the pattern.  Used to handle DLLs that depend on
@@ -206,7 +206,7 @@ proc pkg_mkIndex {args} {
 	    package unknown tclPkgUnknown
 
 	    # Stub out the unknown command so package can call into each other
-	    # during their initialilzation.
+	    # during their initialization.
 
 	    proc unknown {args} {}
 
@@ -237,7 +237,7 @@ proc pkg_mkIndex {args} {
 	$c eval [list set ::tcl::file $file]
 	$c eval [list set ::tcl::direct $direct]
 
-	# Download needed procedures into the slave because we've just deleted
+	# Download needed procedures into the child because we've just deleted
 	# the unknown procedure.  This doesn't handle procedures with default
 	# arguments.
 
@@ -291,7 +291,7 @@ proc pkg_mkIndex {args} {
 		    set ::tcl::type load
 		} else {
 		    set ::tcl::debug sourcing
-		    source [file join $::tcl::dir $::tcl::file]
+		    source -encoding utf-8 [file join $::tcl::dir $::tcl::file]
 		    set ::tcl::type source
 		}
 
@@ -441,7 +441,7 @@ proc tclPkgSetup {dir pkg version files} {
 	    if {$type eq "load"} {
 		set auto_index($cmd) [list load [file join $dir $f] $pkg]
 	    } else {
-		set auto_index($cmd) [list source [file join $dir $f]]
+		set auto_index($cmd) [list source -encoding utf-8 [file join $dir $f]]
 	    }
 	}
     }
@@ -479,16 +479,19 @@ proc tclPkgUnknown {name args} {
 	}
 	set tclSeenPath($dir) 1
 
-	# we can't use glob in safe interps, so enclose the following in a
-	# catch statement, where we get the pkgIndex files out of the
-	# subdirectories
+	# Get the pkgIndex.tcl files in subdirectories of auto_path directories.
+	# - Safe Base interpreters have a restricted "glob" command that
+	#   works in this case.
+	# - The "catch" was essential when there was no safe glob and every
+	#   call in a safe interp failed; it is retained only for corner
+	#   cases in which the eventual call to glob returns an error.
 	catch {
 	    foreach file [glob -directory $dir -join -nocomplain \
 		    * pkgIndex.tcl] {
 		set dir [file dirname $file]
 		if {![info exists procdDirs($dir)]} {
 		    try {
-			source $file
+			source -encoding utf-8 $file
 		    } trap {POSIX EACCES} {} {
 			# $file was not readable; silently ignore
 			continue
@@ -506,7 +509,7 @@ proc tclPkgUnknown {name args} {
 	    # safe interps usually don't have "file exists",
 	    if {([interp issafe] || [file exists $file])} {
 		try {
-		    source $file
+		    source -encoding utf-8 $file
 		} trap {POSIX EACCES} {} {
 		    # $file was not readable; silently ignore
 		    continue
@@ -585,6 +588,7 @@ proc tcl::MacOSXPkgUnknown {original name args} {
 	set tclSeenPath($dir) 1
 
 	# get the pkgIndex files out of the subdirectories
+	# Safe interpreters do not use tcl::MacOSXPkgUnknown - see init.tcl.
 	foreach file [glob -directory $dir -join -nocomplain \
 		* Resources Scripts pkgIndex.tcl] {
 	    set dir [file dirname $file]
@@ -716,7 +720,7 @@ proc ::tcl::Pkg::Create {args} {
 	error $err(noLoadOrSource)
     }
 
-    # OK, now everything is good.  Generate the package ifneeded statment.
+    # OK, now everything is good.  Generate the package ifneeded statement.
     set cmdline "package ifneeded $opts(-name) $opts(-version) "
 
     set cmdList {}
