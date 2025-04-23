@@ -54,6 +54,7 @@ ifeq ($(OS),Windows_NT)
   SWITCH_CC+=-mthreads -mwindows
   SWITCH_CC_DLL+=-shared
   SWITCH_CC_LMM+=-static-libstdc++
+  INCLUDE=-I$(SRC). -I$(PATH_TCLTK_HEADER)
 else
   ifeq ($(shell uname -s),Darwin)
     PLAT=mac
@@ -67,9 +68,11 @@ else
     PATH_TK_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tk.framework/Headers
     PATH_TCLTK_LIB=$(SRC_DIR)LSD.app/Contents/Frameworks
     TCLTK_LIB=-framework Tcl -framework Tk
-    SWITCH_CC+=-Wno-unused-result -std=c++14 -mmacosx-version-min=10.10
+    MAC_LIB=-framework IOKit -framework CoreFoundation
+    SWITCH_CC+=-Wno-unused-result -std=c++17
     SWITCH_CC_DLL+=-dynamiclib -flat_namespace
     SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
+    INCLUDE=-I$(SRC). -I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER)
   else
     PLAT=linux
     TMP_DIR=/tmp
@@ -81,11 +84,11 @@ else
     SWITCH_CC+=-Wno-unused-result
     SWITCH_CC_DLL+=-shared -fPIC
     SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
+    INCLUDE=-I$(SRC). -I$(PATH_TCLTK_HEADER)
   endif
 endif
 
 # additional OS-specific locations
-INCLUDE=-I$(SRC). -I$(PATH_TCLTK_HEADER)
 LIB_GUI=$(SRC_DIR)LSDgui-$(PLAT).a
 LIB_BASE=$(SRC_DIR)LSDbase-$(PLAT).a
 OBJ_DIR_LMM=$(TMP_DIR)/$(TARGET_LMM)/
@@ -106,15 +109,15 @@ MKDIR=@mkdir$(EXE_EXT) -p
 # targets
 .PHONY: all LMM LSD libdll libgui libbase clean cleanLMM cleanLSD
 all: LMM LSD
-LMM: $(LSDROOT)/$(TARGET_LMM)$(EXE_EXT)
-LSD: $(LSDROOT)/$(TARGET_LSD)$(EXE_EXT)
+LMM: $(LSDROOT)/$(PKG_LMM)$(TARGET_LMM)$(EXE_EXT)
+LSD: $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT)
 libdll: $(LSDROOT)/lib$(TARGET_LSD)$(DLL_EXT)
 libgui: $(LIB_GUI)
 libbase: $(LIB_BASE)
 
 # LMM executable
 $(LSDROOT)/$(PKG_LMM)$(TARGET_LMM)$(EXE_EXT): $(OBJ_DIR_LMM)LMM.o $(OBJ_DIR_LMM)common.o $(OBJ_DIR_LMM)commonlib.o $(OBJ_DIR_LMM)pugixml.o $(MANIF_LMM)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LMM) $(OBJ_DIR_LMM)LMM.o $(OBJ_DIR_LMM)common.o $(OBJ_DIR_LMM)commonlib.o $(OBJ_DIR_LMM)pugixml.o $(MANIF_LMM) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(LSDROOT)/$(PKG_LMM)$(TARGET_LMM)$(EXE_EXT)
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LMM) $(OBJ_DIR_LMM)LMM.o $(OBJ_DIR_LMM)common.o $(OBJ_DIR_LMM)commonlib.o $(OBJ_DIR_LMM)pugixml.o $(MANIF_LMM) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) $(MAC_LIB) -o $(LSDROOT)/$(PKG_LMM)$(TARGET_LMM)$(EXE_EXT)
 	$(TOUCH_LMM)
 
 # LMM executable modules
@@ -213,8 +216,8 @@ $(OBJ_DIR_LSD)pugixml.o: $(CLIB_DIR)pugixml.cpp $(CLIB_DIR)pugixml.hpp $(CLIB_DI
 	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(SWITCH_CC_DLL) $(INCLUDE) -c $(CLIB_DIR)pugixml.cpp -o $(OBJ_DIR_LSD)pugixml.o
 
 # LSD executable
-$(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT): $(MANIF_LSD) $(LIB_GUI) $(LSDROOT)/lib$(TARGET_LSD)$(DLL_EXT)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(SWITCH_CC_LNK) $(MANIF_LSD) $(LIB_GUI) -L$(LSDROOT) -l$(TARGET_LSD) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT)
+$(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT): $(MANIF_LSD) $(LIB_GUI) $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(SWITCH_CC_LNK) $(MANIF_LSD) $(LIB_GUI) -L$(LSDROOT) -l$(TARGET_LSD) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) $(MAC_LIB) -o $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT)
 	$(RM) $(LSDROOT)/lib$(TARGET_LSD)$(DLL_EXT)
 	$(TOUCH_LSD)
 
@@ -307,7 +310,7 @@ $(MANIF_LSD): $(SRC_DIR)LSD.exe.manifest.rc $(SRC_DIR)LSD.exe.manifest
 clean: cleanLMM cleanLSD
 
 cleanLMM:
-	$(RM) $(OBJ_DIR_LMM)* $(LSDROOT)/$(TARGET_LMM)$(EXE_EXT)
+	$(RM) $(OBJ_DIR_LMM)* $(LSDROOT)/$(PKG_LMM)$(TARGET_LMM)$(EXE_EXT)
 
 cleanLSD:
 	$(RM) $(OBJ_DIR_LSD)* $(LIB_BASE) $(LIB_GUI) $(LSDROOT)/$(TARGET_LSD)$(EXE_EXT)

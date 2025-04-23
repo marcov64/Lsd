@@ -117,6 +117,11 @@ int lsd::kill_system( simulation *sim, int id )
 
 extern char ** environ;
 
+#ifdef __APPLE__
+#include <IOKit/pwr_mgt/IOPMLib.h>
+IOPMAssertionID lsd::mac_pwr_assert;
+#endif
+
 /*************************************************************
  INHIBIT_SYSTEM_SLEEP (Unix)
  disables system from entering sleep if left unattended
@@ -126,7 +131,7 @@ void lsd::inhibit_system_sleep( void )
 #ifdef __APPLE__
 	CFStringRef name = CFSTR( "Metashape processing" );
 
-	if ( IOPMAssertionCreateWithName( kIOPMAssertionTypePreventUserIdleSystemSleep, kIOPMAssertionLevelOn, name, &mac_pwr_assert ) != kIOReturnSuccess )
+	if ( IOPMAssertionCreateWithName( kIOPMAssertionTypePreventUserIdleSystemSleep, kIOPMAssertionLevelOn, name, & mac_pwr_assert ) != kIOReturnSuccess )
 		mac_pwr_assert = kIOPMNullAssertionID;
 #else
 	// a simple general method was not found

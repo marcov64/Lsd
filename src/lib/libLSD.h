@@ -46,6 +46,7 @@
 #include <set>
 #include <sys/stat.h>
 #include <thread>
+#include <unordered_map>
 #include <unordered_set>
 #include <zlib.h>
 

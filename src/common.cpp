@@ -2384,7 +2384,7 @@ bool gui::get_precompiled_flag( const char *exec, bool term )
 
 error:
 	cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Makefile not found or corrupted\" -detail \"Please check 'Model Options' and 'System Options' in LMM menu 'Model'.\"" );
-	return NULL;
+	return false;
 }
 
 
