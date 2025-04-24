@@ -139,7 +139,7 @@ IMPORTANT: from version 8.0 and higher, LSD supports only Windows 64-bit. If you
 
 ANTIVIRUS BAD BEHAVIOR: many third-party anti-virus software consider LSD operation suspicious because it creates executable files and deals with tools, like compilers, which do not belong to the regular user universe. This wrong assumption can break LSD operation in many aspects and usually cannot be fixed reliably, so using LSD together with these tools is NOT SUPPORTED. LSD is tested and fully works with the embedded Windows Security anti-virus, which is unfortunately disabled when a third-party anti-virus is installed by the user. According to specialized media tests, Windows anti-virus is considered an excellent option, in particular when compared to the free alternatives, so using it instead should not create any problem. However, if you cannot remove your current third-party anti-virus (and enable Windows Security), you still have the option to run LSD inside a virtual machine like VirtualBox or VMware (but with reduced performance).
 
-To install LSD, the simplest alternative is to use the installer package (e.g. LSD-installer-windows-8-0-stable-2.zip). Download it, extract the content, double-click on the executable installer file (e.g. LSD-installer-windows-8-0-stable-2.exe), and follow the instructions. According to your configuration, express authorization must be provided in both the browser and Explorer before downloading and running the LSD installer. This is normal and safe if you downloaded LSD from the official site. The package and the executable files can be deleted after the installation.
+To install LSD, the simplest alternative is to use the installer package (e.g. LSD-installer-windows-9-0-stable-1.zip). Download it, extract the content, double-click on the executable installer file (e.g. LSD-installer-windows-9-0-stable-1.exe), and follow the instructions. According to your configuration, express authorization must be provided in both the browser and Explorer before downloading and running the LSD installer. This is normal and safe if you downloaded LSD from the official site. The package and the executable files can be deleted after the installation.
 
 If Gnuplot software is not present, the LSD installer will install it automatically during the set-up. In this case, the User Account Control (UAC) window will ask permission to Gnuplot installer to do the required system-level changes to your computer. If you reject the permission, LSD will still install, but some plot options will not work. Gnuplot is also open-source free software, and the version included in LSD is directly provided by Gnuplot official site (http://www.gnuplot.info). Gnuplot can also be installed later.
 
@@ -149,9 +149,9 @@ Alternatively, or in the case of problems using the installer, it is also possib
 
 1. In an internet browser, open the site https://github.com/marcov64/Lsd/releases , choose the desired release, and click on the respective "Source code (zip)" link to download the LSD distribution file.
 
-2. Open Windows Explorer and double-click on the downloaded LSD distribution file to open it (e.g., LSD-8.0-master.zip).
+2. Open Windows Explorer and double-click on the downloaded LSD distribution file to open it (e.g., LSD-9.0-master.zip).
 
-3. Drag the single folder inside the distribution file (e.g., LSD-8.0-master) to the desired location. The recommended is "C:\", normally labeled as "Local Disk (C:)" in Windows Explorer.
+3. Drag the single folder inside the distribution file (e.g., LSD-9.0-master) to the desired location. The recommended is "C:\", normally labeled as "Local Disk (C:)" in Windows Explorer.
 
 This will create the whole LSD folder structure. The distribution file may be deleted after installation.
 
@@ -187,22 +187,22 @@ and choose the "Run as administrator" option. This will force LSD libraries to b
 
 USING DIFFERENT COMPILERS (optional):
 
-It is possible to use LSD with a C++ compiler already installed in your computer. However, in this case the user must install and configure the compiler to ensure it has all the required optional libraries. LSD supports any version of GNU 64-bit C++ compiler (GCC) supporting C++14 (or more recent) standard. Cygwin and MSYS2 mingw-w64-x86_64 versions are both fine, but they require Tcl/Tk 8.6 and zlib 1.2 libraries to be installed. Cygwin compiler is somewhat easier to install as it does not require the user to deal with a command prompt. MSYS2 compiler usually releases new versions earlier. Instructions for installing both are available at the end of this document. Even if they are already installed, the instructions can be also followed to make sure the installation is complete and LSD is configured to use it.
+It is possible to use LSD with a C++ compiler already installed in your computer. However, in this case the user must install and configure the compiler to ensure it has all the required optional libraries. LSD supports any version of GNU 64-bit C++ compiler (GCC) supporting C++17 (or more recent) standard. Cygwin and MSYS2 mingw-w64-x86_64 versions are both fine, but they require Tcl/Tk 8.6 and zlib 1.2 libraries to be installed. Cygwin compiler is somewhat easier to install as it does not require the user to deal with a command prompt. MSYS2 compiler usually releases new versions earlier. Instructions for installing both are available at the end of this document. Even if they are already installed, the instructions can be also followed to make sure the installation is complete and LSD is configured to use it.
 
 
 ************************************
-4.2 macOS installation (10.10+ ONLY)
+4.2 macOS installation (11.0+ ONLY)
 ************************************
 
-To install LSD, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-8-0-stable-2.dmg). Download it, double-click on the package file to mount it, double-click on the LSD Installer application, and follow the instructions. The installer package can be unmounted and deleted after the installation.
+To install LSD, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-9-0-stable-1.dmg). Download it, double-click on the package file to mount it, double-click on the LSD Installer application, and follow the instructions. The installer package can be unmounted and deleted after the installation.
 
 IMPORTANT: please pay attention to the Terminal windows opened by the installer. They may require your interaction, according to the instructions of the installer. Do not close any Terminal window which is not inactive. If the Terminal window is closed or interrupted by accident, please cancel the installation and restart.
 
-To manually install LSD, simply unzip a LSD distribution file (e.g., LSD-8.0-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
+To manually install LSD, simply unzip a LSD distribution file (e.g., LSD-9.0-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
 
 Next, open the Terminal application (located inside the Utilities app folder), and type the following commands (each line must be completed by pressing "Enter"):
 
- cd ~/Lsd-8.0-master
+ cd ~/Lsd-9.0-master
  ./add-shortcut-mac.sh
 
 After a successful installation, a desktop shortcut (icon) will be available for using LMM/LSD. A shortcut is also created in the computer Applications folder.
@@ -246,17 +246,17 @@ Authorized programs can be checked at System Preferences > Security & Privacy > 
 4.3 Linux installation
 **********************
 
-To install LSD, the simplest alternative is to use the installer script package (e.g. LSD-installer-linux-8-0-stable-2.zip). Download, extract and execute it. If your file manager does not support extracting compressed files or executing scripts directly, open a terminal, and type (replacing the X's with the actual values):
+To install LSD, the simplest alternative is to use the installer script package (e.g. LSD-installer-linux-9-0-stable-1.zip). Download, extract and execute it. If your file manager does not support extracting compressed files or executing scripts directly, open a terminal, and type (replacing the X's with the actual values):
 
  cd ~/Downloads
- unzip LSD-installer-linux-8-X-xxxx-X.sh
- ./LSD-installer-linux-8-X-xxxx-X.sh
+ unzip LSD-installer-linux-9-X-xxxx-X.sh
+ ./LSD-installer-linux-9-X-xxxx-X.sh
 
 You may have to adjust the download directory according to your computer. When the LSD installer program opens, follow the instructions to install LSD and the required packages. The installer requires Tcl/Tk to be installed. This is the default in most distributions. The installer script will ask you to install Tcl/Tk if this is not the case. The installer package and script can be deleted after the installation.
 
-Alternatively, or in the case of problems using the installer script, it is also possible to simply unpack the LSD distribution file (e.g., Lsd-8.0-master.tar.gz) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using your file manager or command line. This will create the whole directory structure. In terminal, you may use the command (".tar.gz" extension files only):
+Alternatively, or in the case of problems using the installer script, it is also possible to simply unpack the LSD distribution file (e.g., Lsd-9.0-master.tar.gz) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using your file manager or command line. This will create the whole directory structure. In terminal, you may use the command (".tar.gz" extension files only):
 
- tar -xzf Lsd-8.0-master.tar.gz
+ tar -xzf Lsd-9.0-master.tar.gz
 
 The distribution file may be deleted after installation.
 
@@ -264,7 +264,7 @@ If you want to create a desktop link (icon) to run LSD/LMM, you can use the scri
 
  ./add-shortcut-linux.sh
 
-To use the LSD in Linux it is necessary to have the GNU gcc/g++ compiler (version 6.4+) with the standard packages, including zlib, Tcl/Tk 8.6, and GDB. Likely, you already have those installed on your computer but you may need to install the development version of these packages. Usually, you can use your distribution package manager to get the appropriate 'dev' package versions to your installation. Though not strictly necessary, it is also suggested to have the Gnuplot graphical package (for advanced graphics), preferably using Qt.
+To use the LSD in Linux it is necessary to have the GNU gcc/g++ compiler (version 7+) with the standard packages, including zlib, Tcl/Tk 8.6, and GDB. Likely, you already have those installed on your computer but you may need to install the development version of these packages. Usually, you can use your distribution package manager to get the appropriate 'dev' package versions to your installation. Though not strictly necessary, it is also suggested to have the Gnuplot graphical package (for advanced graphics), preferably using Qt.
 
 In Debian or Ubuntu, to make sure you have the correct libraries you can use:
 

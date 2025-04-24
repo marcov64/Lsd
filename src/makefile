@@ -69,7 +69,7 @@ else
     PATH_TCLTK_LIB=$(SRC_DIR)LSD.app/Contents/Frameworks
     TCLTK_LIB=-framework Tcl -framework Tk
     MAC_LIB=-framework IOKit -framework CoreFoundation
-    SWITCH_CC+=-Wno-unused-result -std=c++17
+    SWITCH_CC+=-Wno-unused-result -std=c++17 -mmacosx-version-min=11.0
     SWITCH_CC_DLL+=-dynamiclib -flat_namespace
     SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
     INCLUDE=-I$(SRC). -I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER)

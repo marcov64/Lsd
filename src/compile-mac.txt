@@ -9,9 +9,9 @@ To build, use the scripts in both tclX.X.X/macosx and tkX.X.X/macosx, in this or
 
 cd TclTk
 
-ver="X.X.X"
+ver="8.6.X"
 
-CFLAGS="-arch x86_64 -mmacosx-version-min=10.10"
+CFLAGS="-arch x86_64 -mmacosx-version-min=11.0"
 export CFLAGS
 
 make -C tcl${ver}/macosx deploy
