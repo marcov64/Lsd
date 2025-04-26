@@ -910,7 +910,7 @@ const e_matT & lsd::assimilation::dsp_stat( const e_matT & x, const e_vecT & x_b
 	}
 	else
 	{
-		for ( auto & row : x.rowwise( ) )
+		for ( auto row : x.rowwise( ) )
 		{
 			d = row.transpose( ) - x_bar;
 			dsp += d * d.transpose( );

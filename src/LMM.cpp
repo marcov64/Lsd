@@ -4757,7 +4757,7 @@ int modman( int argn, const char **argv )
 				.l.t.text insert end \"$default\" \
 			}" );
 		cmd( "ttk::button .l.d.opt.cle -width $butWid -text \"File Clean\" -command { \
-				set files [ glob -nocomplain -directory \"$model_dir\" *.o *.a src break.gdb makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.dll *.so *.app *.bak *.err ]; \
+				set files [ glob -nocomplain -directory \"$model_dir\" *.o *.a src break.* makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.dll *.so *.app *.bak *.err ]; \
 				foreach f $files { \
 					catch { \
 						file delete -force \"$f\" \

@@ -238,16 +238,28 @@ int gui::init_lsd_env( const char **argv )
 	if ( get_bool( "res" ) )
 	{
 		cmd( "set here [ pwd ]" );
+
+		// search down from current path and then from exec directory
 		cmd( "while { ! [ file exists \"$lsd_src/LSD.h\" ] && ! [ string equal [ pwd ] \"/\" ] && [ string length [ pwd ] ] > 3 } { \
 				cd .. \
 			}" );
-		cmd( "if [ file exists \"$lsd_src/LSD.h\" ] { \
+		cmd( "if { [ file exists \"$lsd_src/LSD.h\" ] } { \
 				set lsd_root [ pwd ]; \
-				cd $here; \
 				set res 0 \
 			} { \
-				set res 1 \
-			}" );
+				cd \"%s\"; \
+				while { ! [ file exists \"$lsd_src/LSD.h\" ] && ! [ string equal [ pwd ] \"/\" ] && [ string length [ pwd ] ] > 3 } { \
+					cd .. \
+				}; \
+				if { [ file exists \"$lsd_src/LSD.h\" ] } { \
+					set lsd_root [ pwd ]; \
+					set res 0 \
+				} { \
+					set res 1 \
+				} \
+			}", lsd::exec_path );
+
+		cmd( "cd $here" );
 		cmd( "unset here" );
 
 		if ( get_bool( "res" ) )
