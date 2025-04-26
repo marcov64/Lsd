@@ -25,7 +25,8 @@ ifeq ($(OS),Windows_NT)
   AR_DIR=$(LSDROOT)/gnu/x86_64-w64-mingw32/bin/
   MANIF=$(TMP_DIR)/$(TARGET)/LSD.exe.manifest.o
   SWITCH_CC_DLL+=-shared
-  SWITCH_CC_LNK+=-Wl,--whole-archive
+  LIB_INI=-Wl,--whole-archive
+  LIB_END=-Wl,--no-whole-archive
   INCLUDE+=-I$(PATH_TCLTK_HEADER)
 else
   ifeq ($(shell uname -s),Darwin)
@@ -36,19 +37,22 @@ else
     MAC_FRMWRK=-framework IOKit -framework CoreFoundation
     GLOBAL_CC+=-std=c++17 -mmacosx-version-min=11.0
     SWITCH_CC_LNK+=-L$(TARGET).app/Contents/MacOS
-    SWITCH_CC_LNK_DLL+=-dynamiclib -flat_namespace -Wl,-all_load
+    SWITCH_CC_LNK_DLL+=-dylib -flat_namespace -install_name @executable_path/lib$(TARGET)$(DLL_EXT)
+    LIB_INI=-Wl,-force_load
     INCLUDE+=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER)
     DEP_LIB+=$(TARGET).app/Contents/Info.plist
     FIX_LSD=touch -c $(TARGET).app && \
       install_name_tool -change `otool -L $(PKG)$(TARGET) | sed -n 's/\(^[^/]*\(\/[^(]*Tcl\) .*$$\)/\2/p'` @executable_path/../Frameworks/Tcl.framework/Tcl $(PKG)$(TARGET) && \
       install_name_tool -change `otool -L $(PKG)$(TARGET) | sed -n 's/\(^[^/]*\(\/[^(]*Tk\) .*$$\)/\2/p'` @executable_path/../Frameworks/Tk.framework/Tk $(PKG)$(TARGET)
-    FIX_DLL=install_name_tool -id @executable_path/lib$(TARGET)$(DLL_EXT) $(PKG)lib$(TARGET)$(DLL_EXT)
+#    FIX_DLL=install_name_tool -id @executable_path/lib$(TARGET)$(DLL_EXT) $(PKG)lib$(TARGET)$(DLL_EXT)
   else
     PLAT=linux
     TMP_DIR=/tmp
     DLL_EXT=.so
     SWITCH_CC_DLL+=-shared -fPIC
-    SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN' -Wl,--whole-archive
+    SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
+    LIB_INI=-Wl,--whole-archive
+    LIB_END=-Wl,--no-whole-archive
     INCLUDE+=-I$(PATH_TCLTK_HEADER)
   endif
 endif
@@ -89,7 +93,7 @@ $(TARGET).app/Contents/Info.plist: $(LSDROOT)/LSD.app/Contents/MacOS/LSD $(LSDRO
 
 # dynamic library
 $(PKG)lib$(TARGET)$(DLL_EXT): $(OBJ_DIR)$(CUR_DIR)$(FUN).o $(LIB_BASE)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(OBJ_DIR)$(CUR_DIR)$(FUN).o $(SWITCH_CC_LNK) $(SWITCH_CC_LNK_DLL) $(LIB_BASE) -L$(PATH_LIB) $(LIB) $(MAC_FRMWRK) -o $(PKG)lib$(TARGET)$(DLL_EXT)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(SWITCH_CC_LNK_DLL) $(OBJ_DIR)$(CUR_DIR)$(FUN).o $(LIB_INI) $(LIB_BASE) $(LIB_END) -L$(PATH_LIB) $(LIB) $(MAC_FRMWRK) -o $(PKG)lib$(TARGET)$(DLL_EXT)
 	$(FIX_DLL)
 
 $(OBJ_DIR)$(CUR_DIR)$(FUN).o: $(FUN).cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA)

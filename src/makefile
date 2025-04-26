@@ -60,7 +60,8 @@ ifeq ($(OS),Windows_NT)
   SWITCH_CC+=-mthreads -mwindows
   SWITCH_CC_DLL+=-shared
   SWITCH_CC_LMM+=-static-libstdc++
-  SWITCH_CC_LNK_DLL+=-Wl,--whole-archive
+  LIB_INI=-Wl,--whole-archive
+  LIB_END=-Wl,--no-whole-archive
   INCLUDE+=-I$(PATH_TCLTK_HEADER)
 else
   ifeq ($(shell uname -s),Darwin)
@@ -76,7 +77,8 @@ else
     MAC_FRMWRK=-framework IOKit -framework CoreFoundation
     SWITCH_CC+=-Wno-unused-result -std=c++17 -mmacosx-version-min=11.0
     SWITCH_CC_LNK+=-L$(LSDROOT)/$(TARGET_LSD).app/Contents/MacOS
-    SWITCH_CC_LNK_DLL+=-dynamiclib -flat_namespace -Wl,-all_load
+    SWITCH_CC_LNK_DLL+=-dynamiclib -flat_namespace -install_name @executable_path/lib$(TARGET_LSD)$(DLL_EXT)
+    LIB_INI=-Wl,-force_load
     INCLUDE+=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER)
     FIX_LMM=touch -c $(LSDROOT)/$(TARGET_LMM).app && \
       install_name_tool -change `otool -L $(LSDROOT)/$(PKG_LMM)$(TARGET_LMM) | sed -n 's/\(^[^/]*\(\/[^(]*Tcl\) .*$$\)/\2/p'` @executable_path/../Frameworks/Tcl.framework/Tcl $(LSDROOT)/$(PKG_LMM)$(TARGET_LMM) && \
@@ -84,7 +86,7 @@ else
     FIX_LSD=touch -c $(LSDROOT)/$(TARGET_LSD).app && \
       install_name_tool -change `otool -L $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD) | sed -n 's/\(^[^/]*\(\/[^(]*Tcl\) .*$$\)/\2/p'` @executable_path/../Frameworks/Tcl.framework/Tcl $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD) && \
       install_name_tool -change `otool -L $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD) | sed -n 's/\(^[^/]*\(\/[^(]*Tk\) .*$$\)/\2/p'` @executable_path/../Frameworks/Tk.framework/Tk $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)
-    FIX_DLL=install_name_tool -id @executable_path/lib$(TARGET_LSD)$(DLL_EXT) $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
+#    FIX_DLL=install_name_tool -id @executable_path/lib$(TARGET_LSD)$(DLL_EXT) $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
   else
     PLAT=linux
     TMP_DIR=/tmp
@@ -95,7 +97,9 @@ else
     TCLTK_LIB=-ltcl$(TCL_VERSION) -ltk$(TCL_VERSION)
     SWITCH_CC+=-Wno-unused-result
     SWITCH_CC_DLL+=-shared -fPIC
-    SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN' -Wl,--whole-archive
+    SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
+    LIB_INI=-Wl,--whole-archive
+    LIB_END=-Wl,--no-whole-archive
     INCLUDE+=-I$(PATH_TCLTK_HEADER)
   endif
 endif
@@ -151,7 +155,7 @@ $(MANIF_LMM): $(SRC_DIR)LMM.exe.manifest.rc $(SRC_DIR)LMM.exe.manifest
 
 # LSD dynamic library (removed after executable is built)
 $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT): $(OBJ_DIR_LSD)fun_base.o $(LIB_BASE)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(SWITCH_CC_DLL) $(OBJ_DIR_LSD)fun_base.o $(SWITCH_CC_LNK) $(SWITCH_CC_LNK_DLL) $(LIB_BASE) -L$(PATH_LIB) $(LIB) $(MAC_FRMWRK) -o $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(SWITCH_CC_LNK_DLL) $(OBJ_DIR_LSD)fun_base.o $(LIB_INI) $(LIB_BASE) $(LIB_END) -L$(PATH_LIB) $(LIB) $(MAC_FRMWRK) -o $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
 	$(FIX_DLL)
 
 $(OBJ_DIR_LSD)fun_base.o: $(SRC_DIR)fun_base.cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h
