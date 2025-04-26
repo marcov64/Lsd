@@ -30,8 +30,10 @@ else
     OBJ_DIR=$(TMPDIR)/$(TARGET_TERM)/
     EXE_EXT=
     DLL_EXT=.dylib
-    SWITCH_CC_DLL+=-dynamiclib -flat_namespace
-    SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
+    MAC_FRMWRK=-framework IOKit -framework CoreFoundation
+    GLOBAL_CC+=-std=c++17 -mmacosx-version-min=11.0
+    SWITCH_CC_LNK_DLL+=-dynamiclib -flat_namespace
+    FIX_DLL=install_name_tool -id @executable_path/lib$(TARGET_TERM)$(DLL_EXT) lib$(TARGET_TERM)$(DLL_EXT)
   else
     OBJ_DIR=/tmp/$(TARGET_TERM)/
     EXE_EXT=
@@ -55,15 +57,16 @@ all: $(TARGET_TERM)$(EXE_EXT)
 ifeq ($(DLL),)
 # dynamic library
 lib$(TARGET_TERM)$(DLL_EXT): $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o -L$(PATH_LIB) $(LIB_TERM) -shared -o lib$(TARGET_TERM)$(DLL_EXT)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(SWITCH_CC_LNK_DLL) $(MAC_FRMWRK) $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o -L$(PATH_LIB) $(LIB_TERM) -o lib$(TARGET_TERM)$(DLL_EXT)
+	$(FIX_DLL)
 
 # terminal executable (small file)
 $(TARGET_TERM)$(EXE_EXT): $(OBJ_DIR)LSDterm.o lib$(TARGET_TERM)$(DLL_EXT)
-	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)LSDterm.o -L. -l$(TARGET_TERM) -L$(PATH_LIB) $(LIB_TERM) -o $(TARGET_TERM)$(EXE_EXT)
+	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)LSDterm.o -L. -l$(TARGET_TERM) -L$(PATH_LIB) $(LIB_TERM) $(MAC_FRMWRK) -o $(TARGET_TERM)$(EXE_EXT)
 else
 # terminal executable (single file)
 $(TARGET_TERM)$(EXE_EXT): $(OBJ_DIR)LSDterm.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o
-	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)LSDterm.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o -L$(PATH_LIB) $(LIB_TERM) -o $(TARGET_TERM)$(EXE_EXT)
+	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)LSDterm.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o -L$(PATH_LIB) $(LIB_TERM) $(MAC_FRMWRK) -o $(TARGET_TERM)$(EXE_EXT)
 endif
 
 # executable/DLL modules
