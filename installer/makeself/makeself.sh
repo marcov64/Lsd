@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Makeself version 2.4.x
+# Makeself version 2.5.x
 #  by Stephane Peter <megastep@megastep.org>
 #
 # Utility to create self-extracting tar.gz archives.
@@ -8,79 +8,16 @@
 # a small Shell script stub that uncompresses the archive to a temporary
 # directory and then executes a given script from withing that directory.
 #
-# Makeself home page: https://makeself.io/
+# Makeself home page: https://makeself.io/ - Version history available on GitHub
 #
-# Version 2.0 is a rewrite of version 1.0 to make the code easier to read and maintain.
-#
-# Version history :
-# - 1.0 : Initial public release
-# - 1.1 : The archive can be passed parameters that will be passed on to
-#         the embedded script, thanks to John C. Quillan
-# - 1.2 : Package distribution, bzip2 compression, more command line options,
-#         support for non-temporary archives. Ideas thanks to Francois Petitjean
-# - 1.3 : More patches from Bjarni R. Einarsson and Francois Petitjean:
-#         Support for no compression (--nocomp), script is no longer mandatory,
-#         automatic launch in an xterm, optional verbose output, and -target 
-#         archive option to indicate where to extract the files.
-# - 1.4 : Improved UNIX compatibility (Francois Petitjean)
-#         Automatic integrity checking, support of LSM files (Francois Petitjean)
-# - 1.5 : Many bugfixes. Optionally disable xterm spawning.
-# - 1.5.1 : More bugfixes, added archive options -list and -check.
-# - 1.5.2 : Cosmetic changes to inform the user of what's going on with big 
-#           archives (Quake III demo)
-# - 1.5.3 : Check for validity of the DISPLAY variable before launching an xterm.
-#           More verbosity in xterms and check for embedded command's return value.
-#           Bugfix for Debian 2.0 systems that have a different "print" command.
-# - 1.5.4 : Many bugfixes. Print out a message if the extraction failed.
-# - 1.5.5 : More bugfixes. Added support for SETUP_NOCHECK environment variable to
-#           bypass checksum verification of archives.
-# - 1.6.0 : Compute MD5 checksums with the md5sum command (patch from Ryan Gordon)
-# - 2.0   : Brand new rewrite, cleaner architecture, separated header and UNIX ports.
-# - 2.0.1 : Added --copy
-# - 2.1.0 : Allow multiple tarballs to be stored in one archive, and incremental updates.
-#           Added --nochown for archives
-#           Stopped doing redundant checksums when not necesary
-# - 2.1.1 : Work around insane behavior from certain Linux distros with no 'uncompress' command
-#           Cleaned up the code to handle error codes from compress. Simplified the extraction code.
-# - 2.1.2 : Some bug fixes. Use head -n to avoid problems.
-# - 2.1.3 : Bug fixes with command line when spawning terminals.
-#           Added --tar for archives, allowing to give arbitrary arguments to tar on the contents of the archive.
-#           Added --noexec to prevent execution of embedded scripts.
-#           Added --nomd5 and --nocrc to avoid creating checksums in archives.
-#           Added command used to create the archive in --info output.
-#           Run the embedded script through eval.
-# - 2.1.4 : Fixed --info output.
-#           Generate random directory name when extracting files to . to avoid problems. (Jason Trent)
-#           Better handling of errors with wrong permissions for the directory containing the files. (Jason Trent)
-#           Avoid some race conditions (Ludwig Nussel)
-#           Unset the $CDPATH variable to avoid problems if it is set. (Debian)
-#           Better handling of dot files in the archive directory.
-# - 2.1.5 : Made the md5sum detection consistent with the header code.
-#           Check for the presence of the archive directory
-#           Added --encrypt for symmetric encryption through gpg (Eric Windisch)
-#           Added support for the digest command on Solaris 10 for MD5 checksums
-#           Check for available disk space before extracting to the target directory (Andreas Schweitzer)
-#           Allow extraction to run asynchronously (patch by Peter Hatch)
-#           Use file descriptors internally to avoid error messages (patch by Kay Tiong Khoo)
-# - 2.1.6 : Replaced one dot per file progress with a realtime progress percentage and a spining cursor (Guy Baconniere)
-#           Added --noprogress to prevent showing the progress during the decompression (Guy Baconniere)
-#           Added --target dir to allow extracting directly to a target directory (Guy Baconniere)
-# - 2.2.0 : Many bugfixes, updates and contributions from users. Check out the project page on Github for the details.
-# - 2.3.0 : Option to specify packaging date to enable byte-for-byte reproducibility. (Marc Pawlowsky)
-# - 2.4.0 : Optional support for SHA256 checksums in archives.
-# - 2.4.2 : Add support for threads for several compressors. (M. Limber)
-#           Added zstd support.
-# - 2.4.3 : Make explicit POSIX tar archives for increased compatibility.
-# - 2.4.5 : Added --tar-format to override ustar tar archive format
-#
-# (C) 1998-2021 by Stephane Peter <megastep@megastep.org>
+# (C) 1998-2023 by Stephane Peter <megastep@megastep.org>
 #
 # This software is released under the terms of the GNU GPL version 2 and above
 # Please read the license at http://www.gnu.org/copyleft/gpl.html
 # Self-extracting archives created with this script are explictly NOT released under the term of the GPL
 #
 
-MS_VERSION=2.4.5
+MS_VERSION=2.5.0
 MS_COMMAND="$0"
 unset CDPATH
 
@@ -110,11 +47,12 @@ MS_Usage()
     echo "    --zstd             : Compress with zstd"
     echo "    --bzip2            : Compress using bzip2 instead of gzip"
     echo "    --pbzip2           : Compress using pbzip2 instead of gzip"
+    echo "    --bzip3            : Compress using bzip3 instead of gzip"
     echo "    --xz               : Compress using xz instead of gzip"
     echo "    --lzo              : Compress using lzop instead of gzip"
     echo "    --lz4              : Compress using lz4 instead of gzip"
     echo "    --compress         : Compress using the UNIX 'compress' command"
-    echo "    --complevel lvl    : Compression level for gzip pigz zstd xz lzo lz4 bzip2 and pbzip2 (default 9)"
+    echo "    --complevel lvl    : Compression level for gzip pigz zstd xz lzo lz4 bzip2 pbzip2 and bzip3 (default 9)"
     echo "    --threads thds     : Number of threads to be used by compressors that support parallelization."
     echo "                         Omit to use compressor's default. Most useful (and required) for opting"
     echo "                         into xz's threading, usually with '--threads=0' for all available cores."
@@ -135,8 +73,9 @@ MS_Usage()
     echo "    --nochown          : Do not give the target folder to the current user (default)"
     echo "    --chown            : Give the target folder to the current user recursively"
     echo "    --nocomp           : Do not compress the data"
-    echo "    --notemp           : The archive will create archive_dir in the"
-    echo "                         current directory and uncompress in ./archive_dir"
+    echo "    --notemp           : The archive will create archive_dir in the current directory"
+    echo "                         and uncompress in ./archive_dir"
+    echo "                         Note: persistent archives do not strictly require a startup_script"
     echo "    --needroot         : Check that the root user is extracting the archive before proceeding"
     echo "    --copy             : Upon extraction, the archive will first copy itself to"
     echo "                         a temporary directory"
@@ -144,9 +83,9 @@ MS_Usage()
     echo "                         The label and startup scripts will then be ignored"
     echo "    --target dir       : Extract directly to a target directory"
     echo "                         directory path can be either absolute or relative"
-    echo "    --nooverwrite      : Do not extract the archive if the specified target directory exists"
     echo "    --current          : Files will be extracted to the current directory"
-    echo "                         Both --current and --target imply --notemp"
+    echo "                         Both --current and --target imply --notemp, and do not require a startup_script"
+    echo "    --nooverwrite      : Do not extract the archive if the specified target directory exists"
     echo "    --tar-format opt   : Specify a tar archive format (default is ustar)"
     echo "    --tar-extra opt    : Append more options to the tar command line"
     echo "    --untar-extra opt  : Append more options to the during the extraction of the tar archive"
@@ -231,6 +170,10 @@ do
 	;;
     --pbzip2)
 	COMPRESS=pbzip2
+	shift
+	;;
+    --bzip3)
+	COMPRESS=bzip3
 	shift
 	;;
     --bzip2)
@@ -407,7 +350,7 @@ do
 	shift
 	;;
     --lsm)
-	LSM_CMD="cat \"$2\" >> \"\$archname\""
+	LSM_CMD="awk 1 \"$2\" >> \"\$archname\""
     shift 2 || { MS_Usage; exit 1; }
 	;;
     --packaging-date)
@@ -540,6 +483,16 @@ pbzip2)
     fi
     GUNZIP_CMD="bzip2 -d"
     ;;
+bzip3)
+    # Map the compression level to a block size in MiB as 2^(level-1).
+    BZ3_COMPRESS_LEVEL=`echo "2^($COMPRESS_LEVEL-1)" | bc`
+    GZIP_CMD="bzip3 -b$BZ3_COMPRESS_LEVEL"
+    if test $THREADS -ne $DEFAULT_THREADS; then # Leave as the default if threads not indicated
+        GZIP_CMD="$GZIP_CMD -j$THREADS"
+    fi
+    JOBS=`echo "10-$COMPRESS_LEVEL" | bc`
+    GUNZIP_CMD="bzip3 -dj$JOBS"
+    ;;
 bzip2)
     GZIP_CMD="bzip2 -$COMPRESS_LEVEL"
     GUNZIP_CMD="bzip2 -d"
@@ -651,6 +604,7 @@ fi
 
 # See if we have GNU tar
 TAR=`exec <&- 2>&-; which gtar || command -v gtar || type gtar`
+test -x "$TAR" || TAR=`exec <&- 2>&-; which bsdtar || command -v bsdtar || type bsdtar`
 test -x "$TAR" || TAR=tar
 
 tmparch="${TMPDIR:-/tmp}/mkself$$.tar"
@@ -765,7 +719,7 @@ fi
 if test "$SIGN" = y; then
     GPG_PATH=`exec <&- 2>&-; which gpg || command -v gpg || type gpg`
     if test -x "$GPG_PATH"; then
-        SIGNATURE=`$GPG_PATH --pinentry-mode=loopback --batch --yes --passphrase "$GPG_PASSPHRASE" --output - --detach-sig $tmpfile | base64 | tr -d \\\\n`
+        SIGNATURE=`$GPG_PATH --pinentry-mode=loopback --batch --yes $GPG_EXTRA --passphrase "$GPG_PASSPHRASE" --output - --detach-sig $tmpfile | base64 | tr -d \\\\n`
         if test "$QUIET" = "n"; then
             echo "Signature: $SIGNATURE"
         fi

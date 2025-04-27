@@ -23,7 +23,7 @@ script="$SCRIPT"
 scriptargs="$SCRIPTARGS"
 cleanup_script="${CLEANUP_SCRIPT}"
 licensetxt="$LICENSE"
-helpheader='$HELPHEADER'
+helpheader="${HELPHEADER}"
 targetdir="$archdirname"
 filesizes="$filesizes"
 totalsize="$totalsize"
@@ -92,7 +92,7 @@ MS_PrintLicense()
 MS_diskspace()
 {
 	(
-	df -kP "\$1" | tail -1 | awk '{ if (\$4 ~ /%/) {print \$3} else {print \$4} }'
+	df -k "\$1" | tail -1 | awk '{ if (\$4 ~ /%/) {print \$3} else {print \$4} }'
 	)
 }
 
@@ -127,7 +127,7 @@ MS_dd_Progress()
     blocks=\`expr \$length / \$bsize\`
     bytes=\`expr \$length % \$bsize\`
     (
-        dd ibs=\$offset skip=1 count=0 2>/dev/null
+        dd ibs=\$offset skip=1 count=1 2>/dev/null
         pos=\`expr \$pos \+ \$bsize\`
         MS_Printf "     0%% " 1>&2
         if test \$blocks -gt 0; then
@@ -157,7 +157,7 @@ MS_dd_Progress()
 MS_Help()
 {
     cat << EOH >&2
-\${helpheader}Makeself version $MS_VERSION
+Makeself version $MS_VERSION
  1) Getting help or info about \$0 :
   \$0 --help   Print this message
   \$0 --info   Print embedded info : title, default target directory, embedded script ...
@@ -190,7 +190,7 @@ MS_Help()
                         on the current terminal.
   --cleanup-args args   Arguments to the cleanup script. Wrap in quotes to provide
                         multiple arguments.
-  --                    Following arguments will be passed to the embedded script
+  --                    Following arguments will be passed to the embedded script\${helpheader}
 EOH
 }
 
@@ -200,7 +200,7 @@ MS_Verify_Sig()
     MKTEMP_PATH=\`exec <&- 2>&-; which mktemp || command -v mktemp || type mktemp\`
     test -x "\$GPG_PATH" || GPG_PATH=\`exec <&- 2>&-; which gpg || command -v gpg || type gpg\`
     test -x "\$MKTEMP_PATH" || MKTEMP_PATH=\`exec <&- 2>&-; which mktemp || command -v mktemp || type mktemp\`
-	offset=\`head -n "\$skip" "\$1" | wc -c | tr -d " "\`
+	offset=\`head -n "\$skip" "\$1" | wc -c | sed "s/ //g"\`
     temp_sig=\`mktemp -t XXXXX\`
     echo \$SIGNATURE | base64 --decode > "\$temp_sig"
     gpg_output=\`MS_dd "\$1" \$offset \$totalsize | LC_ALL=C "\$GPG_PATH" --verify "\$temp_sig" - 2>&1\`
@@ -235,8 +235,8 @@ MS_Check()
     if test x"\$quiet" = xn; then
 		MS_Printf "Verifying archive integrity..."
     fi
-    offset=\`head -n "\$skip" "\$1" | wc -c | tr -d " "\`
-    fsize=\`cat "\$1" | wc -c | tr -d " "\`
+    offset=\`head -n "\$skip" "\$1" | wc -c | sed "s/ //g"\`
+    fsize=\`cat "\$1" | wc -c | sed "s/ //g"\`
     if test \$totalsize -ne \`expr \$fsize - \$offset\`; then
         echo " Unexpected archive size." >&2
         exit 2
@@ -424,7 +424,7 @@ EOLSM
 	;;
     --list)
 	echo Target directory: \$targetdir
-	offset=\`head -n "\$skip" "\$0" | wc -c | tr -d " "\`
+	offset=\`head -n "\$skip" "\$0" | wc -c | sed "s/ //g"\`
 	for s in \$filesizes
 	do
 	    MS_dd "\$0" \$offset \$s | MS_Decompress | UnTAR t
@@ -433,7 +433,7 @@ EOLSM
 	exit 0
 	;;
 	--tar)
-	offset=\`head -n "\$skip" "\$0" | wc -c | tr -d " "\`
+	offset=\`head -n "\$skip" "\$0" | wc -c | sed "s/ //g"\`
 	arg1="\$2"
     shift 2 || { MS_Help; exit 1; }
 	for s in \$filesizes
@@ -556,6 +556,7 @@ copy)
     cp "\$0" "\$SCRIPT_COPY"
     chmod +x "\$SCRIPT_COPY"
     cd "\$TMPROOT"
+    export USER_PWD="\$tmpdir"
     exec "\$SCRIPT_COPY" --phase2 -- \$initargs
     ;;
 phase2)
@@ -564,7 +565,7 @@ phase2)
 esac
 
 if test x"\$nox11" = xn; then
-    if tty -s; then                 # Do we have a terminal?
+    if test -t 1; then  # Do we have a terminal on stdout?
 	:
     else
         if test x"\$DISPLAY" != x -a x"\$xterm_loop" = x; then  # No, but do we have X?
@@ -576,7 +577,7 @@ if test x"\$nox11" = xn; then
                         break
                     fi
                 done
-                chmod a+x \$0 || echo Please add execution rights on \$0
+                chmod a+x \$0 || echo Please add execution rights on \$0 >&2
                 if test \`echo "\$0" | cut -c1\` = "/"; then # Spawn a terminal!
                     exec \$XTERM -e "\$0 --xwin \$initargs"
                 else
@@ -616,7 +617,7 @@ location="\`pwd\`"
 if test x"\$SETUP_NOCHECK" != x1; then
     MS_Check "\$0"
 fi
-offset=\`head -n "\$skip" "\$0" | wc -c | tr -d " "\`
+offset=\`head -n "\$skip" "\$0" | wc -c | sed "s/ //g"\`
 
 if test x"\$verbose" = xy; then
 	MS_Printf "About to extract $USIZE KB in \$tmpdir ... Proceed ? [Y/n] "

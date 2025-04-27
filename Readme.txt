@@ -20,13 +20,13 @@ LSD is copyrighted by Marco Valente and Marcelo C. Pereira and is distributed ac
 
 LSD includes third party software under the original licenses of the copyright owners:
 
-GCC 13.2 and associated utilities are copyrighted by the Free Software Foundation, Inc. under GPL 3, https://gcc.gnu.org
-Tcl/Tk 8.6.13 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
-MSYS2 3.4.10, https://www.msys2.org
-Cygwin 3.4.10 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
-7-Zip LZMA SDK 23.01 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
-Makeself 2.4.5 is copyrighted by Stephane Peter under GPL2, https://makeself.io
-Gnuplot 5.4.8 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
+GCC 14.2 and associated utilities are copyrighted by the Free Software Foundation, Inc. under GPL 3, https://gcc.gnu.org
+Tcl/Tk 8.6.16 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
+MSYS2 3.5.7, https://www.msys2.org
+Cygwin 3.5.7 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
+7-Zip LZMA SDK 24.09 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
+Makeself 2.5.0 is copyrighted by Stephane Peter under GPL2, https://makeself.io
+Gnuplot 6.0.2 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
 Eigen 3.4.0 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
 pugixml 1.15 is copyrighted by Arseny Kapoulkine under MIT license, https://pugixml.org
 rapidcsv 8.84 is copyrighted by Kristofer Berggren under BSD-3-Clause license, https://github.com/d99kris/rapidcsv

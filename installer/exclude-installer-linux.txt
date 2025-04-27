@@ -6,11 +6,15 @@
 ./Manual/src
 ./LMM.app
 ./LMM.exe.config
+./LSD.app
 ./Work
 ./trashbin
-./src/LSD.app
 ./src/compile-mac*
 ./src/compile-windows*
+./src/LSDbase-mac.a
+./src/LSDbase-windows.a
+./src/LSDgui-mac.a
+./src/LSDgui-windows.a
 ./src/makefile-mac*
 ./src/makefile-windows*
 ./src/system_options-mac.txt
@@ -31,6 +35,8 @@
 *.manifest
 *.exe
 *.dll
+*.dylib
+*.so
 *.bat
 *.vbs
 *.gitignore
