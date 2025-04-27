@@ -418,17 +418,25 @@ namespace lsd
  *************************************************************/
 	class objattributes						// container for object attributes
 	{
+		friend class objattr;
+
 		public:
 			oatt_listT attr;				// element attributes linked-list
 			oatt_mapT attr_map;				// map names to element attributes
 
 		private:
 			rec_mtxT oattr_lck;				// mutex lock for parallel computation
+			simulation *sim = NULL;			// containing simulation
 
 		public:
 			objattr *add( simulation *sim, const char *lab );
 			objattr *rename( const char *old_lab, const char *new_lab );
 			objattr *search( const char *lab );
+			
+			objattributes( void ) { };		// constructor
+			objattributes( const objattributes & a ) = delete;// copy constructor
+			~objattributes( void );			// destructor
+			objattributes & operator=( const objattributes & a ) = delete;// assignment constructor
 	};
 
 
@@ -679,17 +687,25 @@ namespace lsd
  *************************************************************/
 	class varattributes						// container for element (variable,
 	{										// parameter, or function) attributes
+		friend class varattr;
+
 		public:
 			vatt_listT attr;				// element attributes linked-list
 			vatt_mapT attr_map;				// map names to element attributes
 
 		private:
 			rec_mtxT vattr_lck;				// mutex lock for parallel computation
+			simulation *sim = NULL;			// containing simulation
 
 		public:
 			varattr *add( simulation *sim, const char *lab, int lags = -1 );
 			varattr *rename( const char *old_lab, const char *new_lab );
 			varattr *search( const char *lab );
+			
+			varattributes( void ) { };		// constructor
+			varattributes( const varattributes & a ) = delete;// copy constructor
+			~varattributes( void );			// destructor
+			varattributes & operator=( const varattributes & a ) = delete;// assignment constructor
 	};
 
 
@@ -1408,7 +1424,7 @@ namespace lsd
 			void unload_configuration( bool full );
 
 			simulation( const char fname[ ] = "", const char path[ ] = "", int quick = 0 );// constructor
-			simulation( simulation && src ) { }// move constructor
+			simulation( simulation && src ) { };// move constructor
 			~simulation( void );			// destructor
 			simulation( const simulation & s ) = delete;	// copy constructor
 			simulation & operator=( const simulation & s ) = delete;// assignment

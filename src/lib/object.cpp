@@ -285,12 +285,14 @@
  *************************************************************/
 lsd::objattr::objattr( simulation *sim, const char *_label )
 {
-
 	container = & ( sim->oa );
 	label_size = strlen( _label );
 
 	label = new char [ label_size + 1 ];
 	strcpy( label, _label );
+
+	if ( container->sim == NULL )
+		container->sim = sim;
 }
 
 
@@ -313,13 +315,18 @@ lsd::objattr::objattr( const objattr & a )
 lsd::objattr::~objattr( void )
 {
 	if ( container != NULL )
-	{
-		auto v = container->attr_map.find( label );
-		if ( v != container->attr_map.end( ) )
-			container->attr_map.erase( v );
-	}
+		container->attr_map.erase( label );
 
 	delete [ ] label;
+}
+
+
+/*************************************************************
+ OBJATTRIBUTES destructor
+ *************************************************************/
+lsd::objattributes::~objattributes( void )
+{
+	empty_objattributes( sim );
 }
 
 

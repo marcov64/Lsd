@@ -141,6 +141,9 @@ lsd::varattr::varattr( simulation *sim, const char *_label, int _num_lag )
 
 	label = new char [ label_size + 1 ];
 	strcpy( label, _label );
+
+	if ( container->sim == NULL )
+		container->sim = sim;
 }
 
 
@@ -181,13 +184,18 @@ lsd::varattr::varattr( const varattr & a )
 lsd::varattr::~varattr( void )
 {
 	if ( container != NULL )
-	{
-		auto v = container->attr_map.find( label );
-		if ( v != container->attr_map.end( ) )
-			container->attr_map.erase( v );
-	}
+		container->attr_map.erase( label );
 
 	delete [ ] label;
+}
+
+
+/*************************************************************
+ VARATTRIBUTES destructor
+ *************************************************************/
+lsd::varattributes::~varattributes( void )
+{
+	empty_varattributes( sim );
 }
 
 

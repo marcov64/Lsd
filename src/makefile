@@ -74,10 +74,9 @@ else
     PATH_TK_HEADER=$(LSDROOT)/$(TARGET_LSD).app/Contents/Frameworks/Tk.framework/Headers
     PATH_TCLTK_LIB=$(LSDROOT)/$(TARGET_LSD).app/Contents/Frameworks
     TCLTK_LIB=-framework Tcl -framework Tk
-    MAC_FRMWRK=-framework IOKit -framework CoreFoundation
     SWITCH_CC+=-Wno-unused-result -std=c++17 -mmacosx-version-min=11.0
     SWITCH_CC_LNK+=-L$(LSDROOT)/$(TARGET_LSD).app/Contents/MacOS
-    SWITCH_CC_LNK_DLL+=-dynamiclib -flat_namespace -install_name @executable_path/lib$(TARGET_LSD)$(DLL_EXT)
+    SWITCH_CC_LNK_DLL+=-dynamiclib -flat_namespace -install_name @executable_path/lib$(TARGET_LSD)$(DLL_EXT) -framework IOKit -framework CoreFoundation
     LIB_INI=-Wl,-force_load
     INCLUDE+=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER)
     FIX_LMM=touch -c $(LSDROOT)/$(TARGET_LMM).app && \
@@ -86,7 +85,6 @@ else
     FIX_LSD=touch -c $(LSDROOT)/$(TARGET_LSD).app && \
       install_name_tool -change `otool -L $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD) | sed -n 's/\(^[^/]*\(\/[^(]*Tcl\) .*$$\)/\2/p'` @executable_path/../Frameworks/Tcl.framework/Tcl $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD) && \
       install_name_tool -change `otool -L $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD) | sed -n 's/\(^[^/]*\(\/[^(]*Tk\) .*$$\)/\2/p'` @executable_path/../Frameworks/Tk.framework/Tk $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)
-#    FIX_DLL=install_name_tool -id @executable_path/lib$(TARGET_LSD)$(DLL_EXT) $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
   else
     PLAT=linux
     TMP_DIR=/tmp
@@ -129,7 +127,7 @@ libbase: $(LIB_BASE)
 
 # LMM executable
 $(LSDROOT)/$(PKG_LMM)$(TARGET_LMM)$(EXE_EXT): $(OBJ_DIR_LMM)LMM.o $(OBJ_DIR_LMM)common.o $(OBJ_DIR_LMM)commonlib.o $(OBJ_DIR_LMM)pugixml.o $(MANIF_LMM)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LMM) $(OBJ_DIR_LMM)LMM.o $(OBJ_DIR_LMM)common.o $(OBJ_DIR_LMM)commonlib.o $(OBJ_DIR_LMM)pugixml.o $(MANIF_LMM) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) $(MAC_FRMWRK) -o $(LSDROOT)/$(PKG_LMM)$(TARGET_LMM)$(EXE_EXT)
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LMM) $(OBJ_DIR_LMM)LMM.o $(OBJ_DIR_LMM)common.o $(OBJ_DIR_LMM)commonlib.o $(OBJ_DIR_LMM)pugixml.o $(MANIF_LMM) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(LSDROOT)/$(PKG_LMM)$(TARGET_LMM)$(EXE_EXT)
 	$(FIX_LMM)
 
 # LMM executable modules
@@ -155,8 +153,7 @@ $(MANIF_LMM): $(SRC_DIR)LMM.exe.manifest.rc $(SRC_DIR)LMM.exe.manifest
 
 # LSD dynamic library (removed after executable is built)
 $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT): $(OBJ_DIR_LSD)fun_base.o $(LIB_BASE)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(SWITCH_CC_LNK_DLL) $(OBJ_DIR_LSD)fun_base.o $(LIB_INI) $(LIB_BASE) $(LIB_END) -L$(PATH_LIB) $(LIB) $(MAC_FRMWRK) -o $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
-	$(FIX_DLL)
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(SWITCH_CC_LNK_DLL) $(OBJ_DIR_LSD)fun_base.o $(LIB_INI) $(LIB_BASE) $(LIB_END) -L$(PATH_LIB) $(LIB) -o $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
 
 $(OBJ_DIR_LSD)fun_base.o: $(SRC_DIR)fun_base.cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h
 	$(MKDIR) $(@D)
@@ -229,7 +226,7 @@ $(OBJ_DIR_LSD)pugixml.o: $(CLIB_DIR)pugixml.cpp $(CLIB_DIR)pugixml.hpp $(CLIB_DI
 
 # LSD executable
 $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT): $(MANIF_LSD) $(LIB_GUI) $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
-	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(SWITCH_CC_LNK) $(MANIF_LSD) $(LIB_GUI) -L$(LSDROOT) -l$(TARGET_LSD) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) $(MAC_FRMWRK) -o $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT)
+	$(CC) $(SWITCH_CC) $(SWITCH_CC_LSD) $(SWITCH_CC_LNK) $(MANIF_LSD) $(LIB_GUI) -L$(LSDROOT) -l$(TARGET_LSD) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT)
 	$(FIX_LSD)
 	$(RM) $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
 

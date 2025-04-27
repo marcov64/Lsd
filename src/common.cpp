@@ -1912,7 +1912,7 @@ void gui::lsd_exit_gui( int v, bool clean )
 	delete sim.liblnk;
 	delete [ ] eq_txt;
 #endif
-
+	
 	delete [ ] model_make;
 	delete [ ] system_make;
 
@@ -2635,7 +2635,7 @@ bool gui::compile_run( int run_mode, bool term )
 							break;
 
 						case _MAC_:
-							cmd( "while { [ catch { exec -- open -F -n %s/%s.app & } result ] && $n > 0 } { incr n -1; after 50 }", precompiled ? lsd::root_lsd : ".", str );
+							cmd( "while { [ catch { exec -- open -F -n %s.app & } result ] && $n > 0 } { incr n -1; after 50 }", str );
 							break;
 
 						case _WIN_:

@@ -85,11 +85,7 @@ lsd::descr::descr( description *_container, const char *_label, int _type, const
 lsd::descr::~descr( void )
 {
 	if ( container != NULL )
-	{
-		auto d = container->elem_map.find( label );
-		if ( d != container->elem_map.end( ) )
-			container->elem_map.erase( d );
-	}
+		container->elem_map.erase( label );
 
 	delete [ ] label;
 	delete [ ] type;

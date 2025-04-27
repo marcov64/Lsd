@@ -4578,7 +4578,7 @@ int modman( int argn, const char **argv )
 				.l.t.text insert end $a; \
 				.l.d.msg configure -text \"\"; \
 				if { ! [ string equal -nocase \"$model_dir\" \"$lsd_root\" ] } { \
-					set objs [ glob -nocomplain -directory \"$model_dir\" *.o *.a src makefile* makemessage.txt lsd* *.exe *.dll *.so *.app ]; \
+					set objs [ glob -nocomplain -directory \"$model_dir\" *.o *.a src makefile* makemessage.txt lsd* *.exe *.dll *.so *.dylib *.app ]; \
 					foreach i $objs { \
 						catch { \
 							file delete -force \"$i\" \
@@ -4757,7 +4757,7 @@ int modman( int argn, const char **argv )
 				.l.t.text insert end \"$default\" \
 			}" );
 		cmd( "ttk::button .l.d.opt.cle -width $butWid -text \"File Clean\" -command { \
-				set files [ glob -nocomplain -directory \"$model_dir\" *.o *.a src break.* makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.dll *.so *.app *.bak *.err ]; \
+				set files [ glob -nocomplain -directory \"$model_dir\" *.o *.a src break.* makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.dll *.so *.dylib *.app *.bak *.err ]; \
 				foreach f $files { \
 					catch { \
 						file delete -force \"$f\" \

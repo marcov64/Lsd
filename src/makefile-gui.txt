@@ -34,17 +34,15 @@ else
     TMP_DIR=$(TMPDIR)
     PKG=$(TARGET).app/Contents/MacOS/
     DLL_EXT=.dylib
-    MAC_FRMWRK=-framework IOKit -framework CoreFoundation
     GLOBAL_CC+=-std=c++17 -mmacosx-version-min=11.0
     SWITCH_CC_LNK+=-L$(TARGET).app/Contents/MacOS
-    SWITCH_CC_LNK_DLL+=-dylib -flat_namespace -install_name @executable_path/lib$(TARGET)$(DLL_EXT)
+    SWITCH_CC_LNK_DLL+=-dynamiclib -flat_namespace -install_name @executable_path/lib$(TARGET)$(DLL_EXT) -framework IOKit -framework CoreFoundation
     LIB_INI=-Wl,-force_load
     INCLUDE+=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER)
     DEP_LIB+=$(TARGET).app/Contents/Info.plist
     FIX_LSD=touch -c $(TARGET).app && \
       install_name_tool -change `otool -L $(PKG)$(TARGET) | sed -n 's/\(^[^/]*\(\/[^(]*Tcl\) .*$$\)/\2/p'` @executable_path/../Frameworks/Tcl.framework/Tcl $(PKG)$(TARGET) && \
       install_name_tool -change `otool -L $(PKG)$(TARGET) | sed -n 's/\(^[^/]*\(\/[^(]*Tk\) .*$$\)/\2/p'` @executable_path/../Frameworks/Tk.framework/Tk $(PKG)$(TARGET)
-#    FIX_DLL=install_name_tool -id @executable_path/lib$(TARGET)$(DLL_EXT) $(PKG)lib$(TARGET)$(DLL_EXT)
   else
     PLAT=linux
     TMP_DIR=/tmp
@@ -93,8 +91,7 @@ $(TARGET).app/Contents/Info.plist: $(LSDROOT)/LSD.app/Contents/MacOS/LSD $(LSDRO
 
 # dynamic library
 $(PKG)lib$(TARGET)$(DLL_EXT): $(OBJ_DIR)$(CUR_DIR)$(FUN).o $(LIB_BASE)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(SWITCH_CC_LNK_DLL) $(OBJ_DIR)$(CUR_DIR)$(FUN).o $(LIB_INI) $(LIB_BASE) $(LIB_END) -L$(PATH_LIB) $(LIB) $(MAC_FRMWRK) -o $(PKG)lib$(TARGET)$(DLL_EXT)
-	$(FIX_DLL)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(SWITCH_CC_LNK_DLL) $(OBJ_DIR)$(CUR_DIR)$(FUN).o $(LIB_INI) $(LIB_BASE) $(LIB_END) -L$(PATH_LIB) $(LIB) -o $(PKG)lib$(TARGET)$(DLL_EXT)
 
 $(OBJ_DIR)$(CUR_DIR)$(FUN).o: $(FUN).cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA)
 	$(MKDIR) $(@D)
@@ -169,7 +166,7 @@ $(OBJ_DIR)pugixml.o: $(CLIB_DIR)pugixml.cpp $(CLIB_DIR)pugixml.hpp $(CLIB_DIR)pu
 # executable
 $(PKG)$(TARGET)$(EXE_EXT): $(MANIF) $(LIB_GUI) $(PKG)lib$(TARGET)$(DLL_EXT)
 	$(RM) $(PKG)LSD
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(MANIF) $(LIB_GUI) -L. -l$(TARGET) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) $(MAC_FRMWRK) -o $(PKG)$(TARGET)$(EXE_EXT)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_LNK) $(MANIF) $(LIB_GUI) -L. -l$(TARGET) -L$(PATH_TCLTK_LIB) $(TCLTK_LIB) -L$(PATH_LIB) $(LIB) -o $(PKG)$(TARGET)$(EXE_EXT)
 	$(FIX_LSD)
 
 # executable static library
