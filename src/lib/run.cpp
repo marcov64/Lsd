@@ -627,7 +627,7 @@ bool lsd::simulation::next_batch( void )
 		// try reading next file
 		snprintf( fname, MAX_PATH_LENGTH, "%s_%d.lsd", conf_name, ++findex );
 		delete [ ] conf_file;
-		conf_file = new char[ strlen( fname ) + 1 ];
+		conf_file = new char [ strlen( fname ) + 1 ];
 		strcpy( conf_file, fname );
 		f = fopen( conf_file, "r" );
 
@@ -929,6 +929,8 @@ void lsd::simulation::update_bar( char *bar, int done, int & last_done, int bar_
  *************************************************************/
 bool lsd::simulation::results_alt_path( const char *altPath )
 {
+	int sz;
+	
 	if ( save_alt )
 	{
 		delete [ ] alt_path;
@@ -941,8 +943,9 @@ bool lsd::simulation::results_alt_path( const char *altPath )
 		return false;
 	}
 
-	alt_path = new char[ strlen( altPath ) + 1 ];
-	if ( sprintf( alt_path, "%s", altPath ) > 0 )
+	sz = strlen( altPath ) + 1;
+	alt_path = new char [ sz ];
+	if ( snprintf( alt_path, sz, "%s", altPath ) > 0 )
 	{
 		int lstChr = strlen( alt_path ) - 1;
 		if ( alt_path[ lstChr ] == '\\' || alt_path[ lstChr ] == '/' )

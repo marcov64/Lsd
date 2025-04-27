@@ -64,7 +64,7 @@ namespace gui
 int gui::load_gui( const char **argv )
 {
 	char *str;
-	int i, j = 0, k = 0, res = 0;;
+	int i, sz, j = 0, k = 0, res = 0;
 	lsd::object *r;
 
 	// initialize LSD library
@@ -222,8 +222,9 @@ int gui::load_gui( const char **argv )
 	// try to load model configuration file
 	if ( strlen( sim.conf_name ) > 0 )
 	{
-		sim.conf_file = new char[ strlen( sim.conf_path ) + strlen( sim.conf_name ) + 6 ];
-		sprintf( sim.conf_file, "%s%s%s.lsd", sim.conf_path, strlen( sim.conf_path ) > 0 ? "/" : "", sim.conf_name );
+		sz = strlen( sim.conf_path ) + strlen( sim.conf_name ) + 6;
+		sim.conf_file = new char [ sz ];
+		snprintf( sim.conf_file, sz, "%s%s%s.lsd", sim.conf_path, strlen( sim.conf_path ) > 0 ? "/" : "", sim.conf_name );
 		snprintf( sim.rep_file, MAX_PATH_LENGTH, "report_%s.html", sim.conf_name );
 
 		i = open_configuration( r = NULL, true );

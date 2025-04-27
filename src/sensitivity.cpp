@@ -91,8 +91,8 @@ int lsd::sensitivity::dataentry( void )
 	cmd( "showtop .sens topleftW" );
 	cmd( "mousewarpto .sens.fb2.ok 0" );
 
-	sss = new char[ MAX_ELEM_LENGTH * num_val + 1 ];// allocate space for string
-	tok = new char[ MAX_ELEM_LENGTH ];
+	sss = new char [ MAX_ELEM_LENGTH * num_val + 1 ];// allocate space for string
+	tok = new char [ MAX_ELEM_LENGTH ];
 	strcpy( sss, "" );
 	for ( i = 0; i < num_val; i++ )			// pass existing data as a string
 	{
@@ -358,7 +358,7 @@ lsd::object *lsd::object::sensitivity_parallel( sensitivity *s )
  *************************************************************/
 void gui::sensitivity_sequential( int *findex, lsd::sensitivity *s, double probSampl, const char *dest_path )
 {
-	int i, nv;
+	int i;
 	lsd::object *cur;
 	lsd::sensitivity *cs;
 	lsd::variable *cv;
@@ -376,10 +376,8 @@ void gui::sensitivity_sequential( int *findex, lsd::sensitivity *s, double probS
 
 	for ( i = 0; i < s->num_val && ! stop; ++i )
 	{
-		s->cur_val = i;
-		for ( nv = 1, cs = sim.sens; cs != NULL; cs = cs->next )
+		for ( s->cur_val = i, cs = sim.sens; cs != NULL; cs = cs->next )
 		{
-			nv *= cs->num_val;
 			cv = sim.root->search_var( sim.root, cs->label );
 
 			for ( cur = cv->up; cur != NULL; cur = cur->hyper_next( ) )
@@ -390,7 +388,6 @@ void gui::sensitivity_sequential( int *findex, lsd::sensitivity *s, double probS
 				else
 					cv->val[ cs->lag ] = cs->val[ cs->cur_val ];
 			}
-
 		}
 
 		if ( probSampl == 1.0 || sim._ran1_( ) <= probSampl )	// if required draw if point will be sampled
@@ -484,7 +481,7 @@ void gui::NOLH_clear( void )
  *************************************************************/
 bool gui::NOLH_load( const char baseName[ ], bool force )
 {
-	int i, j, n = 1, loLevel = INT_MAX, hiLevel = 1, kFile = 0;
+	int i, j, sz, n = 1, loLevel = INT_MAX, hiLevel = 1, kFile = 0;
 	char *fileName, *lBuffer, *str, *num;
 	bool ok = false;
 	FILE *NOLHfile;
@@ -494,13 +491,15 @@ bool gui::NOLH_load( const char baseName[ ], bool force )
 
 	if ( strlen( sim.conf_path ) > 0 )
 	{
-		fileName = new char[ strlen( sim.conf_path ) + strlen( baseName ) + 2 ];
-		sprintf( fileName, "%s/%s", sim.conf_path, baseName );
+		sz = strlen( sim.conf_path ) + strlen( baseName ) + 2;
+		fileName = new char [ sz ];
+		snprintf( fileName, sz, "%s/%s", sim.conf_path, baseName );
 	}
 	else
 	{
-		fileName = new char[ strlen( baseName ) + 1 ];
-		sprintf( fileName, "%s", baseName );
+		sz = strlen( baseName ) + 1;
+		fileName = new char [ sz ];
+		snprintf( fileName, sz, "%s", baseName );
 	}
 	NOLHfile = fopen( fileName, "r" );
 	if ( NOLHfile == NULL )
@@ -512,7 +511,7 @@ bool gui::NOLH_load( const char baseName[ ], bool force )
 		return false;
 	}
 
-	lBuffer = str = new char[ MAX_FILE_SIZE ];
+	lBuffer = str = new char [ MAX_FILE_SIZE ];
 
 	// get first text line
 	fgets( str, MAX_FILE_SIZE, NOLHfile );
@@ -1238,7 +1237,7 @@ void gui::design::load_design_data( lsd::sensitivity *rsens, int n )
  *************************************************************/
 gui::design::design( lsd::sensitivity *rsens, int typ, const char *fname, const char *dest_path, int findex, int samples, int factors, int jump, int trajs )
 {
-	int h, i, j, kTab, doeRange, poolSz;
+	int h, i, j, sz, kTab, doeRange, poolSz;
 	double **pool, **traj;
 	char *doefname, doeName[ MAX_ELEM_LENGTH ];
 	FILE *f;
@@ -1395,13 +1394,15 @@ gui::design::design( lsd::sensitivity *rsens, int typ, const char *fname, const 
 
 	if ( strlen( dest_path ) > 0 )				// non-default folder?
 	{
-		doefname = new char [ strlen( dest_path ) + strlen( sim.conf_name ) + strlen( doeName ) + 10 ];
-		sprintf( doefname, "%s/%s_%s.csv", dest_path, strlen( sim.conf_name ) > 0 ? sim.conf_name : "doe", doeName );
+		sz = strlen( dest_path ) + strlen( sim.conf_name ) + strlen( doeName ) + 10;
+		doefname = new char [ sz ];
+		snprintf( doefname, sz, "%s/%s_%s.csv", dest_path, strlen( sim.conf_name ) > 0 ? sim.conf_name : "doe", doeName );
 	}
 	else
 	{
-		doefname = new char [ strlen( sim.conf_name ) + strlen( doeName ) + 9 ];
-		sprintf( doefname, "%s_%s.csv", strlen( sim.conf_name ) > 0 ? sim.conf_name : "doe", doeName );
+		sz = strlen( sim.conf_name ) + strlen( doeName ) + 9;
+		doefname = new char [ sz ];
+		snprintf( doefname, sz, "%s_%s.csv", strlen( sim.conf_name ) > 0 ? sim.conf_name : "doe", doeName );
 	}
 
 	if ( ( f = fopen( doefname, "w" ) ) == NULL )

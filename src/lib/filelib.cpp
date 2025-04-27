@@ -46,7 +46,7 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 {
 	bool legacy = false;
 	char *buf = NULL, buf1[ MAX_FILE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ];
-	int i, j, load = 0;
+	int i, j, sz, load = 0;
 	n_mapT node_map;
 	i_setT warning;
 	FILE *f = NULL;
@@ -61,8 +61,9 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 	if ( ! reload || conf_file == NULL || strlen( conf_file ) == 0 )
 	{
 		delete [ ] conf_file;
-		conf_file = new char[ strlen( conf_path ) + strlen( conf_name ) + 6 ];
-		sprintf( conf_file, "%s%s%s.lsd", conf_path, strlen( conf_path ) > 0 ? "/" : "", conf_name );
+		sz = strlen( conf_path ) + strlen( conf_name ) + 6;
+		conf_file = new char [ sz ];
+		snprintf( conf_file, sz, "%s%s%s.lsd", conf_path, strlen( conf_path ) > 0 ? "/" : "", conf_name );
 	}
 
 	// try to open maybe compressed xml configuration
@@ -187,8 +188,7 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 		}
 
 		// use the current equation name only if the file exists
-		snprintf( full_name, 2 * MAX_PATH_LENGTH, "%s/%s", model_path,
-				  eqfNode.child( "filename" ).text( ).as_string( "NONE" ) );
+		snprintf( full_name, 2 * MAX_PATH_LENGTH, "%s/%s", model_path, eqfNode.child( "filename" ).text( ).as_string( "NONE" ) );
 		if ( ( f = fopen( full_name, "r" ) ) != NULL )
 			strcpyn( conf_eq_file, eqfNode.child( "filename" ).text( ).get( ), MAX_PATH_LENGTH );
 
@@ -700,14 +700,14 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	if ( strlen( conf_path ) > 0 )
 	{
 		save_len = strlen( save_path ) + strlen( conf_name ) + 6 + indexDig;
-		save_file = new char[ save_len ];
-		sprintf( save_file, "%s/%s", save_path, conf_name );
+		save_file = new char [ save_len ];
+		snprintf( save_file, save_len, "%s/%s", save_path, conf_name );
 	}
 	else
 	{
 		save_len = strlen( conf_name ) + 6 + indexDig;
-		save_file = new char[ save_len ];
-		sprintf( save_file, "%s", conf_name );
+		save_file = new char [ save_len ];
+		snprintf( save_file, save_len, "%s", conf_name );
 	}
 
 	if ( findex > 0 )
@@ -718,8 +718,9 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	else
 	{
 		// create backup file when not indexed saving
-		bak_file = new char[ strlen( save_file ) + 5 ];
-		sprintf( bak_file, "%s.bak", save_file );
+		save_len = strlen( save_file ) + 5;
+		bak_file = new char [ save_len ];
+		snprintf( bak_file, save_len, "%s.bak", save_file );
 
 		strcatn( save_file, ".lsd", save_len );
 
@@ -1759,10 +1760,12 @@ bool lsd::simulation::save_txt_configuration( const char *dest_path, const char 
 {
 	bool saved = false;
 	char *save_file, *bak_file;
+	int save_len;
 	FILE *f;
 
-	save_file = new char[ strlen( dest_path ) + strlen( rname ) + strlen( ext ) + 2 ];
-	sprintf( save_file, "%s%s%s%s", dest_path, strlen( dest_path ) > 0 ? "/" : "", rname, ext );
+	save_len = strlen( dest_path ) + strlen( rname ) + strlen( ext ) + 2;
+	save_file = new char [ save_len ];
+	snprintf( save_file, save_len, "%s%s%s%s", dest_path, strlen( dest_path ) > 0 ? "/" : "", rname, ext );
 
 	f = fopen( save_file, "r" );
 	if ( f != NULL )
@@ -1770,8 +1773,9 @@ bool lsd::simulation::save_txt_configuration( const char *dest_path, const char 
 		fclose( f );
 
 		// create backup file
-		bak_file = new char[ strlen( save_file ) - strlen( ext ) + 5 ];
-		sprintf( bak_file, "%s%s%s.bak", dest_path, strlen( dest_path ) > 0 ? "/" : "", rname );
+		save_len = strlen( save_file ) - strlen( ext ) + 5;
+		bak_file = new char [ save_len ];
+		snprintf( bak_file, save_len, "%s%s%s.bak", dest_path, strlen( dest_path ) > 0 ? "/" : "", rname );
 
 		f = fopen( bak_file, "r" );
 		if ( f != NULL )

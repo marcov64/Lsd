@@ -122,7 +122,7 @@ int gui::init_lsd_env( const char **argv )
 {
 	char *str;
 	const char *app, *app1;
-	int i;
+	int sz;
 	FILE *f;
 
 	// set system defaults in tcl
@@ -147,9 +147,9 @@ int gui::init_lsd_env( const char **argv )
 	}
 
 	// check if exec file is in current path
-	i = strlen( lsd::exec_path ) + strlen( lsd::exec_file ) + 2;
-	str = new char[ i ];
-	snprintf( str, i, "%s%s%s", lsd::exec_path, strlen( lsd::exec_path ) > 0 ? "/" : "", lsd::exec_file );
+	sz = strlen( lsd::exec_path ) + strlen( lsd::exec_file ) + 2;
+	str = new char [ sz ];
+	snprintf( str, sz, "%s%s%s", lsd::exec_path, strlen( lsd::exec_path ) > 0 ? "/" : "", lsd::exec_file );
 	f = fopen( str, "r" );
 	delete [ ] str;
 	if ( f != NULL )
@@ -342,6 +342,7 @@ bool gui::set_env( bool set )
 {
 	bool res = true;
 	char *lsdroot, *path, cur_path[ PATH_MAX ];
+	int sz;
 	static char *lsdroot_env = NULL, *tcl_lib_env = NULL, *path_env = NULL;
 
 	if ( set )
@@ -361,9 +362,9 @@ bool gui::set_env( bool set )
 			if ( lsdroot != NULL )
 			{
 				delete [ ] lsdroot_env;
-				lsdroot_env = new char[ strlen( "LSDROOT" ) + strlen( lsdroot ) + 2 ];
-				sprintf( lsdroot_env, "LSDROOT=%s", lsdroot );
-
+				sz = strlen( "LSDROOT" ) + strlen( lsdroot ) + 2;
+				lsdroot_env = new char [ sz ];
+				snprintf( lsdroot_env, sz, "LSDROOT=%s", lsdroot );
 				res = ! ( bool ) putenv( lsdroot_env );
 			}
 			else
@@ -381,18 +382,18 @@ bool gui::set_env( bool set )
 		if ( lsdroot != NULL && getenv( TCL_LIB_VAR ) == NULL )
 		{
 			lsdroot = lsd::clean_path( lsdroot );
-
-			file = new char[ strlen( lsdroot ) + strlen( TCL_LIB_PATH ) + strlen( TCL_LIB_INIT ) + 3 ];
-			sprintf( file, "%s/%s/%s", lsdroot, TCL_LIB_PATH, TCL_LIB_INIT );
+			sz = strlen( lsdroot ) + strlen( TCL_LIB_PATH ) + strlen( TCL_LIB_INIT ) + 3;
+			file = new char [ sz ];
+			snprintf( file, sz, "%s/%s/%s", lsdroot, TCL_LIB_PATH, TCL_LIB_INIT );
 			st = stat( file, &info );
 			delete [ ] file;
 
 			if ( st == 0 )
 			{
 				delete [ ] tcl_lib_env;
-				tcl_lib_env = new char[ strlen( TCL_LIB_VAR ) + strlen( lsdroot ) + strlen( TCL_LIB_PATH ) + 3 ];
-				sprintf( tcl_lib_env, "%s=%s/%s", TCL_LIB_VAR, lsdroot, TCL_LIB_PATH );
-
+				sz = strlen( TCL_LIB_VAR ) + strlen( lsdroot ) + strlen( TCL_LIB_PATH ) + 3;
+				tcl_lib_env = new char [ sz ];
+				snprintf( tcl_lib_env, sz, "%s=%s/%s", TCL_LIB_VAR, lsdroot, TCL_LIB_PATH );
 				res = ! ( bool ) putenv( tcl_lib_env );
 			}
 			else
@@ -403,8 +404,9 @@ bool gui::set_env( bool set )
 		if ( lsdroot != NULL && path != NULL )
 		{
 			// check if not already in path and add it in the adequate order
-			lsd_bin = new char[ win_path( lsdroot ).size( ) + strlen( TCL_EXEC_PATH ) + 2 ];
-			sprintf( lsd_bin, "%s\\%s", win_path( lsdroot ).c_str( ), TCL_EXEC_PATH );
+			sz = win_path( lsdroot ).size( ) + strlen( TCL_EXEC_PATH ) + 2;
+			lsd_bin = new char [ sz ];
+			snprintf( lsd_bin, sz, "%s\\%s", win_path( lsdroot ).c_str( ), TCL_EXEC_PATH );
 
 			if ( strstr( path, lsd_bin ) == NULL )
 			{
@@ -414,12 +416,13 @@ bool gui::set_env( bool set )
 						st = 0;
 
 				delete [ ] path_env;
-				path_env = new char[ strlen( path ) + strlen( lsd_bin ) + 7 ];
+				sz = strlen( path ) + strlen( lsd_bin ) + 7;
+				path_env = new char [ sz ];
 
 				if ( st == 0 )
-					sprintf( path_env, "PATH=%s;%s", path, lsd_bin );
+					snprintf( path_env, sz, "PATH=%s;%s", path, lsd_bin );
 				else
-					sprintf( path_env, "PATH=%s;%s", lsd_bin, path );
+					snprintf( path_env, sz, "PATH=%s;%s", lsd_bin, path );
 
 				putenv( path_env );
 			}
@@ -450,7 +453,7 @@ char *gui::search_lsdroot( char *path, int pathSz )
 	bool miss, eq;
 	const char *files[ ] = LSD_MIN_FILES;
 	char *file, *dir, cur_dir[ PATH_MAX ], last_dir[ PATH_MAX ], orig_dir[ PATH_MAX ], src_dir[ 2 * PATH_MAX ], *found = NULL;
-	int i, st;
+	int i, st, sz;
 	struct stat info;
 
 	if ( getcwd( orig_dir, PATH_MAX ) == NULL )
@@ -476,8 +479,9 @@ char *gui::search_lsdroot( char *path, int pathSz )
 		snprintf( src_dir, 2 * PATH_MAX, "%s/%s", cur_dir, DEFAULT_SRC_DIR );
 		for ( i = 0, miss = false; i < LSD_MIN_NUM; ++i )
 		{
-			file = new char[ strlen( src_dir ) + strlen( files[ i ] ) + 2 ];
-			sprintf( file, "%s/%s", src_dir, files[ i ] );
+			sz = strlen( src_dir ) + strlen( files[ i ] ) + 2;
+			file = new char [ sz ];
+			snprintf( file, sz, "%s/%s", src_dir, files[ i ] );
 			st = stat( file, &info );
 			delete [ ] file;
 

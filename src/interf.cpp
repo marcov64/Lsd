@@ -49,7 +49,7 @@ lsd::object *gui::operate( lsd::object *r )
 	const char *lab1, *lab2, *lab3, *lab4;
 	design *doe;
 	double fracMC, d_tmp[ 100 ], fake = 0;
-	int i, j, k, sl, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, i_tmp[ 100 ], done = 0;
+	int i, j, k, sl, sz, num, param, save, plot, nature, numlag, lag, fSeq, ffirst, fnext, sizMC, varSA, savei, debug, watch, watch_write, parallel, i_tmp[ 100 ], done = 0;
 	long nlinks, ptsSa, maxMC;
 	lsd::ass_list_itT ca;
 	lsd::bridge *cb;
@@ -2335,17 +2335,18 @@ lsd::object *gui::operate( lsd::object *r )
 					break;
 
 				delete [ ] sim.conf_name;
-				sim.conf_name = new char[ strlen( lab1 ) + 1 ];
+				sim.conf_name = new char [ strlen( lab1 ) + 1 ];
 				strcpy( sim.conf_name, lab1 );
 
 				lab1 = get_str( "path" );
 				delete [ ] sim.conf_path;
-				sim.conf_path = new char[ strlen( lab1 ) + 1 ];
+				sim.conf_path = new char [ strlen( lab1 ) + 1 ];
 				strcpy( sim.conf_path, lab1 );
 
 				delete [ ] sim.conf_file;
-				sim.conf_file = new char[ strlen( sim.conf_path ) + strlen( sim.conf_name ) + 6 ];
-				sprintf( sim.conf_file, "%s%s%s.lsd", sim.conf_path, strlen( sim.conf_path ) > 0 ? "/" : "", sim.conf_name );
+				sz = strlen( sim.conf_path ) + strlen( sim.conf_name ) + 6;
+				sim.conf_file = new char [ sz ];
+				snprintf( sim.conf_file, sz, "%s%s%s.lsd", sim.conf_path, strlen( sim.conf_path ) > 0 ? "/" : "", sim.conf_name );
 
 				if ( strlen( lab1 ) > 0 )
 					cmd( "cd $path" );
@@ -4539,10 +4540,13 @@ lsd::object *gui::operate( lsd::object *r )
 			// form full name
 			lab1 = get_str( "res" );
 			lab2 = get_str( "path" );
+			
 			if ( sens_file != NULL )
 				delete sens_file;
-			sens_file = new char[ strlen( lab1 ) + strlen( lab2 ) + 5 ];
-			sprintf( sens_file,"%s%s%s.sa", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
+
+			sz = strlen( lab1 ) + strlen( lab2 ) + 5;
+			sens_file = new char [ sz ];
+			snprintf( sens_file, sz, "%s%s%s.sa", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
 
 			// read sensitivity file (text mode)
 			f = fopen( sens_file, "rt" );
@@ -4595,10 +4599,13 @@ lsd::object *gui::operate( lsd::object *r )
 			// form full name
 			lab1 = get_str( "res" );
 			lab2 = get_str( "path" );
+			
 			if ( sens_file != NULL )
 				delete sens_file;
-			sens_file = new char[ strlen( lab1 ) + strlen( lab2 ) + 5 ];
-			sprintf( sens_file,"%s%s%s.sa", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
+			
+			sz = strlen( lab1 ) + strlen( lab2 ) + 5;
+			sens_file = new char [ sz ];
+			snprintf( sens_file, sz, "%s%s%s.sa", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
 
 			// write sensitivity file (text mode)
 			f = fopen( sens_file, "wt" );  // use text mode for Windows better compatibility
