@@ -355,19 +355,10 @@ lsd::variable::~variable( void )
 void lsd::variable::delete_var( bool no_lock )
 {
 
-	if ( up->sim->running && ! no_lock )
+	if ( up != NULL && up->sim->running && ! no_lock )
 	{
 		// prevent concurrent use by more than one thread
 		rec_lguardT lock( var_comp_lck );
-	}
-
-	if ( up->sim->running && val == NULL )
-	{
-		up->sim->error_hard( "internal problem in LSD",
-							 "if error persists, please contact developers",
-							 true,
-							 "failure while deallocating variable %s", attr != NULL && attr->label != NULL ? attr->label : "(none)" );
-		return;
 	}
 
 	delete this;

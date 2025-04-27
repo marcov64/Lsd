@@ -1962,7 +1962,6 @@ void lsd::object::collect_cemetery( const variable *caller )
 		{
 			cv->set_lab_tit( );				// update last lab_tit
 			cv->data[ sim->eff_t - cv->start ] = cv->val[ 0 ];// define last value
-			cv->up = NULL;					// remove parent
 
 			if ( cv->attr->savei )
 				cv->save_single( );			// update file
@@ -2002,6 +2001,7 @@ void lsd::variable::add_cemetery( void )
 	}
 
 	up->sim->last_cemetery->next = NULL;
+	up = NULL;								// remove parent
 }
 
 
