@@ -35,12 +35,14 @@ set lsd_src src
 set lsd_ico $lsd_src/icons
 set winRoot "C:/"
 
-set linuxPmPkg(apt)	[ list	build-essential 	make	gdb		gnuplot		xterm	multitail	zlib1g-dev		tcl-dev			tk-dev			]
-set linuxPmPkg(yum)	[ list	gcc-c++ 			make	gdb		gnuplot		xterm	multitail	zlib-devel		tcl-devel		tk-devel		]
-set linuxPmPkg(dnf)	[ list	gcc-c++ 			make	gdb		gnuplot		xterm	multitail	zlib-devel		tcl-devel		tk-devel		]
-set linuxPmPkg(zyp)	[ list	gcc-c++ 			make	gdb		gnuplot		xterm	multitail	zlib-devel		tcl-devel		tk-devel		]
-set linuxPmPkg(urp)	[ list	gcc-c++ 			make	gdb		gnuplot		xterm	multitail	lib64z-devel	lib64tcl-devel	lib64tk-devel	]
-set linuxPmPkg(apk)	[ list	g++					make	gdb		gnuplot		xterm	multitail	zlib-dev		tcl-dev			tk-dev			]
+set macPmPkg [ list install multitail gnuplot cython ]
+set macPmCmd "brew install"
+set linuxPmPkg(apt)	[ list	build-essential 	make	gdb		gnuplot		xterm	multitail	zlib1g-dev		tcl-dev			tk-dev			python3-dev			cython3	]
+set linuxPmPkg(yum)	[ list	gcc-c++ 			make	gdb		gnuplot		xterm	multitail	zlib-devel		tcl-devel		tk-devel		python3-devel		python3-cython	]
+set linuxPmPkg(dnf)	[ list	gcc-c++ 			make	gdb		gnuplot		xterm	multitail	zlib-devel		tcl-devel		tk-devel		python3-devel		python3-cython	]
+set linuxPmPkg(zyp)	[ list	gcc-c++ 			make	gdb		gnuplot		xterm	multitail	zlib-devel		tcl-devel		tk-devel		python3-devel		python3-Cython	]
+set linuxPmPkg(urp)	[ list	gcc-c++ 			make	gdb		gnuplot		xterm	multitail	lib64z-devel	lib64tcl-devel	lib64tk-devel	lib64python3-devel	python3-cython	]
+set linuxPmPkg(apk)	[ list	g++					make	gdb		gnuplot		xterm	multitail	zlib-dev		tcl-dev			tk-dev			cython	]
 set linuxPmCmd(apt) "apt-get install"
 set linuxPmCmd(yum) "yum install"
 set linuxPmCmd(dnf) "dnf install"
@@ -657,16 +659,10 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 			set brewMsg2 ""
 		}
 
-		if { [ info exists gnuplot ] && [ info exists multitail ] } {
-			set pkgInsta "brew install multitail gnuplot; "
-		} elseif { [ info exists gnuplot ] } {
-			set pkgInsta "brew install gnuplot; "
-		} else {
-			set pkgInsta "brew install multitail; "
-		}
+		set pkgInsta "$macPmCmd $macPmPkg; "
 
-		ttk::messageBox -parent "" -type ok -title "Tools Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to confirm installation of ${brewInstr}Gnuplot graphical terminal and/or MultiTail tool.\n\nA Terminal window will open and the interaction must be performed there."
-		set wait [ waitbox .wait "Installing..." "Installing ${brewInstr} Gnuplot graphical terminal\nand/or MultiTail tool.\nAn internet connection is required.\n\nIt may take a while, please wait..." "1. if required, allow the Terminal access\n2. ${brewSteps}Terminal window will close/disable when done\n" 1 "" ]
+		ttk::messageBox -parent "" -type ok -title "Tools Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to confirm installation of ${brewInstr}Gnuplot graphical terminal, MultiTail tool and/or Cython compiler.\n\nA Terminal window will open and the interaction must be performed there."
+		set wait [ waitbox .wait "Installing..." "Installing ${brewInstr} Gnuplot graphical terminal\nMultiTail and/or Cython.\nAn internet connection is required.\n\nIt may take a while, please wait..." "1. if required, allow the Terminal access\n2. ${brewSteps}Terminal window will close/disable when done\n" 1 "" ]
 
 		set scpt [ open "$env(TMPDIR)/install_homebrew.as" w ]
 		puts $scpt "tell application \"Terminal\""

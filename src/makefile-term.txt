@@ -2,29 +2,29 @@
 SRC_DIR=$(SRC)/
 LIB_DIR=$(SRC_DIR)lib/
 CLIB_DIR=$(SRC_DIR)clib/
-INCLUDE=-I$(SRC) -I$(PATH_HEADER)
+INCLUDE=-I$(SRC) -I$(SRC)/lib -I$(PATH_HEADER)
 
 # terminal specific variables
+TARGET_LOW=$(shell echo $(TARGET) | tr$(EXE_EXT) A-z a-z)
+TARGET_TERM=$(TARGET_LOW)_term
 LIB_TERM=$(LIB) -lpthread
 CC_TERM=$(CC_CROSS)g++
 SWITCH_CC_TERM=$(GLOBAL_CC) $(SWITCH_CC) -D_TERM_
-TARGET_TERM=lsd_term
-
-# check if debug compilation
-DBG=$(findstring $(strip $(DEBUG_TERM)),true True TRUE yes Yes YES 1)
-
-ifeq ($(DBG),)
-  SWITCH_CC_TERM+= -O3 -g0
-else
-  SWITCH_CC_TERM+= -O0 -ggdb3
-endif
+SWITCH_CP=-+ -3 -Wextra
 
 # handle platform-specific stuff
 ifeq ($(OS),Windows_NT)
+  GNU_DIR=$(LSDROOT)/gnu/
+  GNU_BIN=$(GNU_DIR)bin/
   OBJ_DIR=$(TMP)/$(TARGET_TERM)/
   EXE_EXT=.exe
   DLL_EXT=.dll
   SWITCH_CC_DLL+=-shared
+  CP_TERM=cython$(EXE_EXT)
+  PYT_VER=$(shell $(GNU_BIN)python-version)
+  PYT_INCLUDE+=-I$(GNU_DIR)include/python$(PYT_VER)
+  PYT_LIB_PATH=-L$(GNU_BIN)
+  PYT_CFG=$(GNU_BIN)python-config $(PYT_VER)
 else
   ifeq ($(shell uname -s),Darwin)
     OBJ_DIR=$(TMPDIR)/$(TARGET_TERM)/
@@ -33,25 +33,56 @@ else
     MAC_FRMWRK=-framework IOKit -framework CoreFoundation
     GLOBAL_CC+=-std=c++17 -mmacosx-version-min=11.0
     SWITCH_CC_LNK_DLL+=-dynamiclib -flat_namespace -install_name @executable_path/lib$(TARGET_TERM)$(DLL_EXT)
+    CP_TERM=/usr/local/opt/cython/bin/cython
+    PYT_VER=$(shell python3 -c "import sys; print('.'.join( map( str, sys.version_info[ : 2 ] ) ) )")
+    PYT_LIB_PATH=$(shell python3 -c "from distutils import sysconfig; print( sysconfig.get_config_var( 'LIBDIR' ) )")
+    PYT_CFG=python$(PYT_VER)-config
   else
     OBJ_DIR=/tmp/$(TARGET_TERM)/
     EXE_EXT=
     DLL_EXT=.so
     SWITCH_CC_DLL+=-shared -fPIC
     SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
+    CP_TERM=cython
+    PYT_VER=$(shell python3 -c "import sys; print('.'.join( map( str, sys.version_info[ : 2 ] ) ) )")
+    PYT_LIB_PATH=$(shell python3 -c "from distutils import sysconfig; print( sysconfig.get_config_var( 'LIBDIR' ) )")
+    PYT_CFG=python$(PYT_VER)-config
   endif
 endif
-
-# check if DLL is to be created
-DLL=$(findstring $(strip $(DLL_TERM)),false False FALSE no No NO 0)
 
 # OS commands
 RM=@rm$(EXE_EXT) -f
 MKDIR=@mkdir$(EXE_EXT) -p
 
+# check if debug compilation
+DBG=$(findstring $(strip $(DEBUG_TERM)),true True TRUE yes Yes YES 1)
+
+ifeq ($(DBG),)
+  SWITCH_CC_TERM+= -O3 -g0
+else
+  SWITCH_CC_TERM+= -O0 -ggdb3
+  SWITCH_CP+=--gdb --gdb-outdir .
+endif
+
+# check if DLL is to be created
+DLL=$(findstring $(strip $(DLL_TERM)),false False FALSE no No NO 0)
+
+# check if Python API dll is to be created
+PYT=$(findstring $(strip $(PYTHON_API)),true True TRUE yes Yes YES 1)
+
+ifneq ($(PYT),)
+  DLL=
+  PYT_TARGET=$(TARGET_LOW)_api
+  PYT_INCLUDE+=$(shell $(PYT_CFG) --includes)
+  PYT_EXT=$(shell $(PYT_CFG) --extension-suffix)
+  PYT_LIB=$(PYT_TARGET)$(PYT_EXT)
+endif
+
 # targets
 .PHONY: all
-all: $(TARGET_TERM)$(EXE_EXT)
+all: $(TARGET_TERM)$(EXE_EXT) $(PYT_LIB)
+lib: lib$(TARGET_TERM)$(DLL_EXT)
+python: $(PYT_LIB)
 
 ifeq ($(DLL),)
 # dynamic library
@@ -136,6 +167,18 @@ $(OBJ_DIR)pugixml.o: $(CLIB_DIR)pugixml.cpp $(CLIB_DIR)pugixml.hpp $(CLIB_DIR)pu
 	$(MKDIR) $(@D)
 	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_DLL) $(INCLUDE) -c $(CLIB_DIR)pugixml.cpp -o $(OBJ_DIR)pugixml.o
 
+# Python API dynamic library
+$(PYT_LIB): $(OBJ_DIR)$(PYT_TARGET).o lib$(TARGET_TERM)$(DLL_EXT)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(SWITCH_CC_LNK_DLL) $(OBJ_DIR)$(PYT_TARGET).o -L. -l$(TARGET_TERM) -L$(PATH_LIB) $(LIB_TERM) $(PYT_LIB_PATH) -lpython$(PYT_VER) -o $(PYT_LIB)
+
+$(OBJ_DIR)$(PYT_TARGET).o: $(OBJ_DIR)$(PYT_TARGET).cpp
+	$(MKDIR) $(@D)
+	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_DLL) $(INCLUDE) $(PYT_INCLUDE) -c $(OBJ_DIR)$(PYT_TARGET).cpp -o $(OBJ_DIR)$(PYT_TARGET).o
+
+$(OBJ_DIR)$(PYT_TARGET).cpp: $(LIB_DIR)pythonAPI.pyx $(LIB_DIR)pythonAPI.pxd $(LIB_DIR)libLSD.h
+	$(MKDIR) $(@D)
+	$(CP_TERM) $(SWITCH_CP) $(LIB_DIR)pythonAPI.pyx --module-name $(PYT_TARGET) -o $(OBJ_DIR)$(PYT_TARGET).cpp
+
 # remove compiled files
 clean:
-	$(RM) $(OBJ_DIR)* lib$(TARGET_TERM)$(DLL_EXT) $(TARGET_TERM)$(EXE_EXT)
+	$(RM) $(OBJ_DIR)* lib$(TARGET_TERM)$(DLL_EXT) $(TARGET_TERM)$(EXE_EXT) $(PYT_LIB)

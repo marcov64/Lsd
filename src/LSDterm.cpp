@@ -48,10 +48,10 @@ int main( int argn, const char **argv )
 	// initialize LSD library
 	lsd::init_lib( );
 
-	char cwd[ PATH_MAX ];
 	int res = -1;
 	lsd::simulation sim;			// single LSD simulation terminal instance
 	lsd::assimilation da;			// data assimilation object
+	lsd::da = & da;					// library call-back
 
 #ifndef _NT_
 	// register all signal handlers
@@ -68,8 +68,6 @@ int main( int argn, const char **argv )
 			fprintf( stderr, "\nInvalid LSD executable name or path.\n%s\nMake sure the LSD directory is not too deep into the disk directory tree (over %d chars).\n\n", lsdCmdMsg, PATH_MAX );
 			lsd::lsd_exit( 5 );
 		}
-
-		lsd::da = & da;				// library call-back
 
 		// parse command line options
 		res = parse_cmdline( argn, argv, sim, da );
@@ -148,7 +146,7 @@ int parse_cmdline( int argn, const char **argv, lsd::simulation & sim, lsd::assi
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 		{
 			delete [ ] sim.conf_name;
-			sim.conf_name = new char[ strlen( argv[ 1 + i ] ) + 1 ];
+			sim.conf_name = new char [ strlen( argv[ 1 + i ] ) + 1 ];
 			strcpy( sim.conf_name, argv[ 1 + i ] );
 			continue;
 		}
@@ -162,7 +160,7 @@ int parse_cmdline( int argn, const char **argv, lsd::simulation & sim, lsd::assi
 		if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'l' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 		{
 			delete [ ] sim.log_file;
-			sim.log_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
+			sim.log_file = new char [ strlen( argv[ 1 + i ] ) + 1 ];
 			strcpy( sim.log_file, argv[ 1 + i ] );
 			continue;
 		}
@@ -284,7 +282,7 @@ int load_config( lsd::simulation & sim )
 	char *str;
 	FILE *f;
 
-	str = new char[ strlen( sim.conf_name ) + 1 ];
+	str = new char [ strlen( sim.conf_name ) + 1 ];
 	strcpy( str, sim.conf_name );
 	lsd::strupr( str );
 
@@ -304,13 +302,13 @@ int load_config( lsd::simulation & sim )
 			return 6;
 		}
 
-		sim.conf_file = new char[ strlen( sim.conf_name ) + ( int ) log10( sim.findex ) + 7 ];
+		sim.conf_file = new char [ strlen( sim.conf_name ) + ( int ) log10( sim.findex ) + 7 ];
 		sprintf( sim.conf_file, "%s_%d.lsd", sim.conf_name, sim.findex );
 	}
 	else
 	{
 		sim.batch_sequential = false;
-		sim.conf_file = new char[ strlen( sim.conf_name ) + 1 ];
+		sim.conf_file = new char [ strlen( sim.conf_name ) + 1 ];
 		strcpy( sim.conf_file, sim.conf_name );
 		sim.conf_name[ strstr( str, ".LSD" ) - str ] = '\0';
 	}
@@ -345,7 +343,7 @@ int load_config( lsd::simulation & sim )
 		if ( sim.save_alt && strncmp( sim.log_file, sim.alt_path, strlen( sim.alt_path ) ) != 0 )
 		{
 			str = sim.log_file;
-			sim.log_file = new char[ strlen( sim.alt_path ) + strlen( str ) + 2 ];
+			sim.log_file = new char [ strlen( sim.alt_path ) + strlen( str ) + 2 ];
 			sprintf( sim.log_file, "%s/%s", sim.alt_path, str );
 			delete [ ] str;
 		}

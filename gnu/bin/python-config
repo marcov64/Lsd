@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo $( bash.exe -c "source python$1-config $2" )

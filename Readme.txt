@@ -30,6 +30,7 @@ Gnuplot 6.0.2 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnu
 Eigen 3.4.0 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
 pugixml 1.15 is copyrighted by Arseny Kapoulkine under MIT license, https://pugixml.org
 rapidcsv 8.84 is copyrighted by Kristofer Berggren under BSD-3-Clause license, https://github.com/d99kris/rapidcsv
+Cython 3.0 is copyrighted by Stefan Behnel and others under Apache 2.0, https://cython.org
 subbotools 1.3 is copyrighted by Giulio Bottazzi under GPL2, http://cafim.sssup.it/~giulio/software/subbotools
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
 NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under GPL 2.1, http://harvest.nps.edu
@@ -60,6 +61,7 @@ This Readme.txt file contains five sections:
 4. Installing LSD (Windows, macOS and Linux)
 5. Installation of optional compilers in Windows (MSYS2 and Cygwin)
 6. Removing LSD
+7. Controlling LSD from Python
 
 
 ***************
@@ -219,7 +221,7 @@ It is recommended, but not required, to install multitail and Gnuplot applicatio
 
 After Homebrew installation finishes (details at http://brew.sh), you can install multitail and Gnuplot using the following command in Terminal (Qt framework will be automatically installed too):
 
- brew install multitail gnuplot
+ brew install multitail gnuplot cython
 
 INACTIVE TERMINAL WINDOWS:
 
@@ -268,15 +270,15 @@ To use the LSD in Linux it is necessary to have the GNU gcc/g++ compiler (versio
 
 In Debian or Ubuntu, to make sure you have the correct libraries you can use:
 
- sudo apt-get install build-essential gdb gnuplot-qt multitail zlib1g-dev tcl-dev tk-dev xterm
+ sudo apt-get install build-essential gdb gnuplot-qt multitail zlib1g-dev tcl-dev tk-dev xterm python3-dev cython3
 
 In Fedora, CentOS or Red Hat, the equivalent command is:
 
- sudo yum install gcc-c++ make gdb gnuplot multitail zlib-devel tcl tk tcl-devel tk-devel xterm
+ sudo yum install gcc-c++ make gdb gnuplot multitail zlib-devel tcl tk tcl-devel tk-devel xterm python3-devel python3-cython
 
 In Mandriva or Mageia:
 
- sudo urpmi gcc-c++ make gdb gnuplot multitail lib64z-devel lib64tcl-devel lib64tk-devel xterm
+ sudo urpmi gcc-c++ make gdb gnuplot multitail lib64z-devel lib64tcl-devel lib64tk-devel xterm lib64python3-devel python3-cython
 
 If installing to a server (no desktop), please remove gnuplot/gnuplot-qt from the above commands to prevent the full desktop stack to be installed, which is not usually adequate for a server.
 
@@ -403,12 +405,28 @@ In macOS, fully uninstalling Homebrew, including all utilities, can be done in T
 
 In Linux, all utilities LSD require can be removed using the distribution package manager. For Debian or Ubuntu the shell command is:
 
- sudo apt-get remove build-essential gdb gnuplot-qt multitail zlib1g-dev tcl-dev tk-dev xterm
+ sudo apt-get remove build-essential gdb gnuplot-qt multitail zlib1g-dev tcl-dev tk-dev xterm python3-dev cython3
 
 For Fedora, CentOS or Red Hat, the equivalent command is:
 
- sudo yum remove gcc-c++ make gdb gnuplot multitail zlib-devel tcl tk tcl-devel tk-devel xterm
+ sudo yum remove gcc-c++ make gdb gnuplot multitail zlib-devel tcl tk tcl-devel tk-devel xterm python3-devel python3-cython
 
 For Mandriva or Mageia:
 
- sudo urpme gcc-c++ make gdb gnuplot multitail lib64z-devel lib64tcl-devel lib64tk-devel xterm
+ sudo urpme gcc-c++ make gdb gnuplot multitail lib64z-devel lib64tcl-devel lib64tk-devel xterm lib64python3-devel python3-cython
+
+
+******************************
+7. Controlling LSD from Python
+******************************
+
+LSD simulation configuration and execution can be controlled from Python code, by means of the interface described in src/lib/pythonAPI.pyx. The provided API (application programming interface) just includes basic commands to load (existing) LSD configurations of a given model, execute the simulation (possibly in steps), and read data from the saved time series.
+
+The API can be modified and expanded as required to control any part of LSD, allowing for its operation without resorting to the GUI or the terminal interface. This is done by accessing the native LSD C++ available objects, methods, functions, and variables and encapsulating them into native Python objects and functions. All required API code must reside in the src/lib/pythonAPI.pyx file, located in the LSD installation directory. Changes to the API require a good knowledge of both C++ and Python. Please note that changes to this file are lost when LSD is reinstalled or updated, so saving a copy of your modifications is strongly recommended.
+
+The API is implemented as a Python-native dynamic-link library named as TARGET_api.cpXXX-YYY.ZZZ, where XXX, YYY and ZZZ are software- and hardware-specific identifiers, and TARGET is the name defined in model options (defaults to lsd). The API library is generated in a per-model basis whenever the string PYTHON_API=true is included in the model configuration or the (terminal) makefile. This library needs the associated libTARGET_term.ZZZ C++ dynamic link library (defaults to liblsd_term.ZZZ. Both are produced in the LSD model directory when a terminal executable is produced by LSD. The two libraries can be moved together to other directories, if needed. Please note that both libraries depend on other dynamic-link libraries, according to the specific computer configuration.
+
+To create the API library, Python 3.6+ (development version, including headers) must be installed, plus the Cython 3.0+ package. All the required software is usually installed by LSD installer automatically. The instructions above for manual installation also include the required software.
+
+WARNING: please note that the produced TARGET_api.cpXXX-YYY.ZZZ dynamic-link library is specific to the existing environment at the time of creation of the terminal executable by LSD. If Python or the computer set-up is changed, the API library must be regenerated, or Python will fail when importing it. In Windows, this means that the produced library must be used with the MSYS2 version of Python (libpythonX.XX.dll) supplied with LSD in the gnu/bin directory inside the LSD installation. Producing the API for use with the native Microsoft Visual Studio version of Python is not supported.
+
