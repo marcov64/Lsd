@@ -399,8 +399,8 @@ namespace lsd
 		friend class object;
 
 		public:								// static public attributes
-			char *label;
-			int label_size;
+			char *label;					// object name
+			int label_size;					// object name string length
 
 		private:							// static private attributes
 			objattributes *container;		// attributes container
@@ -432,7 +432,7 @@ namespace lsd
 			objattr *add( simulation *sim, const char *lab );
 			objattr *rename( const char *old_lab, const char *new_lab );
 			objattr *search( const char *lab );
-			
+
 			objattributes( void ) { };		// constructor
 			objattributes( const objattributes & a ) = delete;// copy constructor
 			~objattributes( void );			// destructor
@@ -454,13 +454,13 @@ namespace lsd
 		friend class worker;
 
 		public:
-			bool to_compute;
-			bridge *b = NULL;
+			bool to_compute;				// object contents to be updated?
+			bridge *b = NULL;				// head of list of son-object instances
 			netnode *node = NULL;			// pointer to network node data structure
 			objattr *attr;					// static/homogeneous attributes object
-			object *next = NULL;
+			object *next = NULL;			// next sibling object
 			object *up;						// parent object
-			variable *v = NULL;
+			variable *v = NULL;				// head of list of contained variables
 
 		private:
 			bool *del_flag = NULL;			// address of flag to signal deletion
@@ -469,8 +469,8 @@ namespace lsd
 			int acounter = 0;				// "fail safe" when creating labels
 			int lst_cnt_upd = 0;			// period of last counter update
 			mtxT obj_comp_lck;				// mutex lock for parallel computations
-			object *hook = NULL;
-			o_vecT hooks;
+			object *hook = NULL;			// static connection to other objects
+			o_vecT hooks;					// vector of connections to other objects
 			simulation *sim;				// simulation where object is contained
 			void *cext = NULL;				// pointer to C++ object extension
 			v_mapT v_map;					// fast lookup map to variables
@@ -478,7 +478,7 @@ namespace lsd
 		public:
 			bool search_parallel( void );
 			bool under_comput_var( const char *lab );
-			double cal( object *caller, const char *l, int lag, bool force_search );
+			double cal( object *caller, const char *lab, int lag, bool force_search );
 			double read_file_net( const char *lab, const char *dir = "", const char *base_name = "net", int serial = 1, const char *ext = "net" );
 			double write_file_net( const char *lab, const char *dir = "", const char *base_name = "net", int serial = 1, bool append = false );
 			object *add_n_objects2( const char *lab, int n, int t_update = -1 );
@@ -624,9 +624,9 @@ namespace lsd
 		friend class simulation;
 
 		public:
-			bridge *next = NULL;
+			bridge *next = NULL;			// next son-object type
 			objattr *attr;					// static/homogeneous attributes object
-			object *head = NULL;
+			object *head = NULL;			// first instance of this object type
 
 		private:
 			bool counter_updated = false;
@@ -653,21 +653,21 @@ namespace lsd
 		friend class variable;
 
 		public:								// static public attributes
-			bool initialized = false;
+			bool initialized = false;		// variable initial value set?
 			bool integer = false;			// variable must be rounded to integer
-			bool observe = false;
-			bool parallel = false;
-			bool save = false;
-			bool savei = false;
-			char *label;
+			bool observe = false;			// include details on report
+			bool parallel = false;			// may be executed in parallel
+			bool save = false;				// time series to be saved
+			bool savei = false;				// time series to sade individually
+			char *label;					// variable name
 			double max_val = NAN;			// maximum limit for variable
 			double min_val = NAN;			// minimum limit (NAN = no limit)
-			int delay = 0;
-			int delay_range = 0;
-			int label_size;
-			int num_lag;
-			int period = 1;
-			int period_range = 0;
+			int delay = 0;					// time from t=0 to start computation
+			int delay_range = 0;			// maximum range for random delay
+			int label_size;					// length of label string
+			int num_lag;					// number of lags kept in value array
+			int period = 1;					// period between updates
+			int period_range = 0;			// maximum range for random updates
 
 		private:							// static private attributes
 			bool dummy = false;
@@ -701,7 +701,7 @@ namespace lsd
 			varattr *add( simulation *sim, const char *lab, int lags = -1 );
 			varattr *rename( const char *old_lab, const char *new_lab );
 			varattr *search( const char *lab );
-			
+
 			varattributes( void ) { };		// constructor
 			varattributes( const varattributes & a ) = delete;// copy constructor
 			~varattributes( void );			// destructor
@@ -722,28 +722,29 @@ namespace lsd
 		friend class worker;
 
 		public:								// dynamic public attributes
-			bool plot = false;
-			char deb_mode = 'n';
-			double *val;
+			bool plot = false;				// run-time plot enabled?
+			char deb_mode = 'n';			// debugger state for variable
+			double *data = NULL;			// variable long-term value array
+			double *val;					// variable short-term value array
 			double ini_val = NAN;			// initial for DA parameter estimation
-			int param = 0;
-			object *up;
+			int end = 0;					// last time allocated in value array
+			int last_update = 0;			// last period variable was updated
+			int next_update = 0;			// next period variable will be updated
+			int param = 0;					// variable type (0=var/1=var/2=func)
+			int start = 0;					// first time allocated in value array
+			object *up;						// parent object
 			varattr *attr;					// static/homogeneous attributes object
 			variable *next = NULL;			// sibling variable under same object
 
 		private:							// dynamic private attributes
-			bool under_computation = false;
-			char *lab_tit = NULL;
-			double deb_cnd_val = 0;
-			double *data = NULL;
-			int deb_cond = 0;
-			int end = 0;
-			int last_update = 0;
-			int next_update = 0;
-			int start = 0;
+			bool under_computation = false;	// value being computed now
+			char *lab_tit = NULL;			// positional label string
+			double deb_cnd_val = 0;			// debugger triggering value
+			int deb_cond = 0;				// debugger condition to check
 			rec_mtxT var_comp_lck;			// mutex lock for parallel computation
 
 		public:
+			double cal( object *caller, int lag );
 			double chk_val( double val );
 			variable *hyper_next( void );
 
@@ -754,7 +755,6 @@ namespace lsd
 
 		private:
 			bool alloc_save_var( void );
-			double cal( object *caller, int lag );
 			inline double chk_dummy( const char *lab );
 			inline double chk_res( double res );
 			void add_cemetery( void );
@@ -1423,7 +1423,8 @@ namespace lsd
 			void set_fast( int level );
 			void unload_configuration( bool full );
 
-			simulation( const char fname[ ] = "", const char path[ ] = "", int quick = 0 );// constructor
+			simulation( const char *fname, const char path[ ] = "", int quick = 0 );// constructor
+			simulation( void ) : simulation( "", "", 0 ) { };// constructor
 			simulation( simulation && src ) { };// move constructor
 			~simulation( void );			// destructor
 			simulation( const simulation & s ) = delete;	// copy constructor

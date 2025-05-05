@@ -174,7 +174,7 @@ int lsd::dispatch_runs( sim_vecT & run_sims, int until_t, int until_run, bool da
 	for ( auto & sim : run_sims )
 		if ( ! sim.sim_thread.joinable( ) && sim.conf_ok )
 		{
-			sim.sim_thread = thrT ( & lsd::simulation::run_simulation, & sim, until_t, until_run, da_en );
+			sim.sim_thread = thrT ( & simulation::run_simulation, & sim, until_t, until_run, da_en );
 			sim.last_dispatch_time = sim.stale_time = 0;
 			++nrun;
 		}
