@@ -497,6 +497,7 @@ namespace lsd
 			variable *search_var( object *caller, varattr *at, bool no_error = false, bool no_search = false, bool no_search_up = false, bool search_sons = false );
 			void chg_lab( const char *lab );
 			void chg_var_lab( const char *old, const char *n );
+			void create_par_map( void );
 			void delete_net( const char *lab );
 			void delete_obj( const variable *caller = NULL );
 			void delete_var( const char *lab );
@@ -1332,6 +1333,7 @@ namespace lsd
 			object *blueprint = NULL;		// LSD blueprint (effective model in use)
 			object *root = NULL;			// LSD root object
 			o_setT obj_list;				// set with all existing LSD objects
+			p_mapT par_map;					// variable to parent name map for AoR/Python
 			prof_mapT prof_times;			// set of saved profiling times
 			sensitivity *sens = NULL;		// sensitivity analysis linked-list head
 			std::mt19937 mt32;				// Mersenne-Twister 32 bits generator
@@ -1346,7 +1348,6 @@ namespace lsd
 			worker *workers = NULL;			// multi-thread parallel worker data
 			FILE *log_file_ptr = NULL;		// log file pointer, if any
 #ifndef _TERM_
-			p_mapT par_map;					// variable to parent name map for AoR
 			Tcl_Interp *inter;				// Tcl interpreter (for legacy LSD code)
 #endif
 		private:

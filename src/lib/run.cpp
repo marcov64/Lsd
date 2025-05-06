@@ -274,7 +274,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run, bool da_en )
 			if ( until_t > 0 && t >= until_t && t + 1 <= last_t )
 			{
 				res = -2;			// interrupt
-				goto end_run;
+				goto pause_run;
 			}
 		}	// end of time step
 
@@ -321,7 +321,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run, bool da_en )
 		if ( until_run > 0 && run >= until_run && run + 1 <= last_run )
 		{
 			res = -1;				// interrupt
-			goto end_run;
+			goto pause_run;
 		}
 	}	// end of run
 
@@ -342,6 +342,8 @@ int lsd::simulation::run_simulation( int until_t, int until_run, bool da_en )
 	// stop multi-thread workers
 	delete [ ] workers;
 	workers = NULL;
+
+	pause_run:
 
 	// wake dispatcher lock
 	l_guardT lock( seq_end_lck );
@@ -464,6 +466,7 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update, bool 
 	// pre-allocate memory to save all existing elements for the entire simulation
 	running = true;
 	series_saved = 0;
+	par_map.clear( );					// restart variable to parent name map for AoR/Python
 	if ( ! root->alloc_save_mem( ) )
 	{
 #ifndef _TERM_
@@ -783,11 +786,7 @@ bool lsd::object::alloc_save_mem( void )
 			if ( ! cv->alloc_save_var( ) )
 				goto error;
 
-#ifndef _TERM_
-		// variable to parent name map for AoR (only in GUI mode)
-		if ( sim->liblnk != NULL )
-			sim->par_map.insert( std::make_pair < strT, strT > ( cv->attr->label, attr->label ) );
-#endif
+		sim->par_map.insert( std::make_pair < strT, strT > ( cv->attr->label, attr->label ) );
 	}
 
 	for ( cb = b; cb != NULL; cb = cb->next )
@@ -930,7 +929,7 @@ void lsd::simulation::update_bar( char *bar, int done, int & last_done, int bar_
 bool lsd::simulation::results_alt_path( const char *altPath )
 {
 	int sz;
-	
+
 	if ( save_alt )
 	{
 		delete [ ] alt_path;

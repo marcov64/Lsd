@@ -61,7 +61,7 @@ This Readme.txt file contains five sections:
 4. Installing LSD (Windows, macOS and Linux)
 5. Installation of optional compilers in Windows (MSYS2 and Cygwin)
 6. Removing LSD
-7. Controlling LSD from Python
+7. LSD interface to Python
 
 
 ***************
@@ -416,11 +416,11 @@ For Mandriva or Mageia:
  sudo urpme gcc-c++ make gdb gnuplot multitail lib64z-devel lib64tcl-devel lib64tk-devel xterm lib64python3-devel python3-cython
 
 
-******************************
-7. Controlling LSD from Python
-******************************
+**************************
+7. LSD interface to Python
+**************************
 
-LSD simulation configuration and execution can be controlled from Python code, by means of the interface described in src/lib/pythonAPI.pyx. The provided API (application programming interface) just includes basic commands to load (existing) LSD configurations of a given model, execute the simulation (possibly in steps), and read data from the saved time series.
+LSD simulation configuration and execution can be controlled from Python code, by means of the interface described in src/lib/pythonAPI.pyx. The provided API (application programming interface) includes commands to create, load (existing), modify, and save LSD configurations of a given model, to execute the simulation (possibly in steps), and to read data from the saved time series.
 
 The API can be modified and expanded as required to control any part of LSD, allowing for its operation without resorting to the GUI or the terminal interface. This is done by accessing the native LSD C++ available objects, methods, functions, and variables and encapsulating them into native Python objects and functions. All required API code must reside in the src/lib/pythonAPI.pyx file, located in the LSD installation directory. Changes to the API require a good knowledge of both C++ and Python. Please note that changes to this file are lost when LSD is reinstalled or updated, so saving a copy of your modifications is strongly recommended.
 

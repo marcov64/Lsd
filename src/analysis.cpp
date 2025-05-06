@@ -4607,20 +4607,6 @@ void lsd::object::insert_data_mem( const char *lab )
 
 
 /*************************************************************
- CREATE_PAR_MAP
- *************************************************************/
-void lsd::object::create_par_map( void )
-{
-	for ( auto cv = v; cv != NULL; cv = cv->next )
-		sim->par_map.insert( std::make_pair < strT, strT > ( cv->attr->label, attr->label ) );
-
-	for ( auto cb = b; cb != NULL; cb = cb->next )
-		for ( auto cur = cb->head; cur != NULL; cur = BROTHER( cur ) )
-			cur->create_par_map( );
-}
-
-
-/*************************************************************
  COUNT_LABELS_MEM
  *************************************************************/
 void lsd::object::count_labels_mem( int *count, const char *lab )

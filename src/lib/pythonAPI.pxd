@@ -56,9 +56,7 @@ cdef extern from "libLSD.h" namespace "lsd" :
 		cobject *up				# parent object
 		variable *v				# head of list of contained variables
 
-		double cal( cobject *caller, const char *lab, int lag, bool force_search )
 		cobject *add_n_objects2( const char *lab, int n, int t_update ) except +
-		cobject *hyper_next( )
 		cobject *search( const char *lab, bool no_search, bool no_search_up )
 		variable *search_var( cobject *caller, const char *label, bool no_error, bool no_search, bool no_search_up, bool search_sons )
 		void delete_obj( const variable *caller = NULL )
@@ -81,9 +79,6 @@ cdef extern from "libLSD.h" namespace "lsd" :
 		cobject *up				# parent object
 		varattr *attr			# static/homogeneous attributes object
 		variable *next			# sibling variable under same object
-
-		double cal( cobject *caller, int lag )
-		variable *hyper_next( )
 
 	cdef cppclass varattr :		# variable/parameter static/shared attributes
 		bool integer			# variable must be rounded to integer

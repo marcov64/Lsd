@@ -509,6 +509,20 @@ void lsd::object::recreate_maps( void )
 
 
 /*************************************************************
+ CREATE_PAR_MAP
+ *************************************************************/
+void lsd::object::create_par_map( void )
+{
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+		sim->par_map.insert( std::make_pair < strT, strT > ( cv->attr->label, attr->label ) );
+
+	for ( auto cb = b; cb != NULL; cb = cb->next )
+		for ( auto cur = cb->head; cur != NULL; cur = BROTHER( cur ) )
+			cur->create_par_map( );
+}
+
+
+/*************************************************************
  UPDATE (*)
  Compute the value of all the Variables in the Object, saving
  the values and updating the runtime plot.

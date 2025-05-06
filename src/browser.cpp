@@ -1427,7 +1427,6 @@ void gui::runtime_end( void )
 void gui::runtime_run_start( bool da_en )
 {
 	prepare_plot( sim.run, da_en );
-	sim.par_map.clear( );			// restart variable to parent name map for AoR
 }
 
 

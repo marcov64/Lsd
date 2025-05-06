@@ -2285,9 +2285,12 @@ void lsd::result::title_recursive( object *r, bool header )
 void lsd::result::write_title( const char *lab, const char *lab_tit, object *par, int tag, bool header, int start, int end )
 {
 	bool just_name = false;
+	
+	if ( par == NULL && sim->par_map.find( "lab" ) != sim->par_map.end( ) )
+		par = sim->root->search( sim->par_map[ lab ].c_str( ) );
 
 	// prevent adding suffix to single objects
-	if ( tag == 0 && ( ! strcmp( lab_tit, "1" ) || ! strcmp( lab_tit, "1_1" ) || ! strcmp( lab_tit, "1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1_1_1_1" ) ) && par->hyper_next( ) == NULL )
+	if ( tag == 0 && ( ! strcmp( lab_tit, "1" ) || ! strcmp( lab_tit, "1_1" ) || ! strcmp( lab_tit, "1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1_1_1_1" ) ) && ( par == NULL || par->hyper_next( ) == NULL ) )
 		just_name = true;
 
 	if ( header )

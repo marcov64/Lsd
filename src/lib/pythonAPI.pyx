@@ -219,7 +219,12 @@ cdef class Element :
 	@property
 	def type( self ) :
 		if self.varPtr is not NULL :
-			return self.varPtr.param
+			if self.varPtr.param == 0 :
+				return "variable"
+			elif self.varPtr.param == 1 :
+				return "parameter"
+			else :
+				return "function"
 		else :
 			return None
 
@@ -231,26 +236,22 @@ cdef class Element :
 		else :
 			return None
 
-	# values: get a list with short-term values stored in element
+	# values: get a dictionary with short-term values stored in element
 	@property
 	def values( self ) :
-		val = [ ]
-
+		val = { }
 		if self.varPtr is not NULL :
 			for i in range( self.varPtr.attr.num_lag + 1 ) :
-				val.append( self.varPtr.val[ i ] )
-
+				val[ i ] = self.varPtr.val[ i ]
 		return val
 
 	# data: get a dictionary with long-term values stored in element with times
 	@property
 	def data( self ) :
 		data = { }
-
 		if self.varPtr is not NULL and self.varPtr.data is not NULL :
 			for i in range( self.varPtr.end - self.varPtr.start + 1 ) :
 				data[ self.varPtr.start + i ] = self.varPtr.data[ i ]
-
 		return data
 
 	# next: get the next element in the chain of siblings

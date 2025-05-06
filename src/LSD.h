@@ -40,7 +40,6 @@
 	void clean_save( void ); \
 	void control_to_compute( void ); \
 	void count_save( int *count ); \
-	void create_par_map( void ); \
 	void edit_data( const char *lab ); \
 	void find_using( variable *v, FILE *frep, bool *found ); \
 	void get_saved( FILE *out, const char *sep, bool all_var = false ); \
