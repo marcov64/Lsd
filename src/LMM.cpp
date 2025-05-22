@@ -229,6 +229,7 @@ int modman( int argn, const char **argv )
 		return j;
 
 	// Tcl global variables
+	cmd( "set rootname %s", ROOT_NAME );
 	cmd( "set choice 0" );
 	cmd( "set recolor \"\"" );
 	cmd( "set docase 1" );

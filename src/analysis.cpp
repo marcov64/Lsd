@@ -744,13 +744,6 @@ void gui::analysis( bool mc )
 	cmd( "set running %d", sim.running ? 1 : 0 );
 	cmd( "if $running { showtop .da overM } { showtop .da overM 1 1 0 }" );
 
-	// create parent map from loaded but not (really) run configuration
-	if ( ! da.disable || sim.eff_t == 0 )
-	{
-		sim.par_map.clear( );
-		sim.root->create_par_map( );
-	}
-
 	// add time series in memory to listbox
 	update_descr_dict( );
 	if ( sim.eff_t > 0 )
@@ -776,7 +769,6 @@ void gui::analysis( bool mc )
 	}
 
 	// main loop
-
 	while ( true )
 	{
 		// sort the list of available variables
@@ -4597,10 +4589,10 @@ void lsd::object::insert_data_mem( const char *lab )
 
 	if ( num_v != ini_v )
 	{
-		sim->error_hard( "internal problem in LSD",
-						 "if error persists, please contact developers",
-						 true,
-						 "invalid number of series" );
+		gui::sim.error_hard( "internal problem in LSD",
+							 "if error persists, please contact developers",
+							 true,
+							 "invalid number of series" );
 		gui::lsd_exit_gui( 18 );
 	}
 }
@@ -4628,7 +4620,7 @@ void lsd::object::count_labels_mem( int *count, const char *lab )
 				cur->count_labels_mem( count, lab );
 
 	if ( up == NULL && lab == NULL )
-		for ( auto cv = sim->cemetery; cv != NULL; cv = cv->next )
+		for ( auto cv = gui::sim.cemetery; cv != NULL; cv = cv->next )
 			++( *count );
 }
 
@@ -4671,7 +4663,7 @@ void lsd::object::insert_label_mem( int *num_v, const char *lab )
 				cur->insert_label_mem( num_v, lab );
 
 	if ( up == NULL && lab == NULL )
-		for ( auto cv = sim->cemetery; cv != NULL && ! gui::stop; cv = cv->next )
+		for ( auto cv = gui::sim.cemetery; cv != NULL && ! gui::stop; cv = cv->next )
 		{
 			insert_label_mem( num_v, cv, TAG_NONE );
 
@@ -4687,11 +4679,10 @@ void lsd::object::insert_label_mem( int *num_v, const char *lab )
 void lsd::object::insert_label_mem( int *num_v, variable *v, int tag )
 {
 	static bool warn_once = false;
-	strT par_lab = v->up != NULL ? v->up->attr->label : sim->par_map[ v->attr->label ];
 
 	if ( da->disable )
 	{
-		cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, v->start, v->end, *num_v, par_lab.c_str( ) );
+		cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, v->start, v->end, *num_v, v->attr->par_attr->label );
 		++( *num_v );
 
 		if ( v->end > gui::num_t )
@@ -4723,14 +4714,14 @@ void lsd::object::insert_label_mem( int *num_v, variable *v, int tag )
 		for ( auto tag = TAG_ANL; tag <= TAG_OBS; ++tag )
 			if ( ! ( tag == TAG_FCT && ! da->sav_fct ) && ! ( tag == TAG_OBS && ! da->sav_obs ) && ! ( tag == TAG_OBS && da->obs_labs_map.find( v->attr->label ) == da->obs_labs_map.end( ) ) )
 			{
-				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v, par_lab.c_str( ) );
+				cmd( "add_series \"%s %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v, v->attr->par_attr->label );
 
 				if ( ! da->sav_ci )
 					++( *num_v );
 				else
 				{
-					cmd( "add_series \"%s+ %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 1, par_lab.c_str( ) );
-					cmd( "add_series \"%s- %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 2, par_lab.c_str( ) );
+					cmd( "add_series \"%s+ %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 1, v->attr->par_attr->label );
+					cmd( "add_series \"%s- %s%s (%d-%d) #%d\" %s", v->attr->label, tag_pref[ tag ], v->lab_tit, ce.start, ce.end, *num_v + 2, v->attr->par_attr->label );
 					*num_v += 3;
 				}
 			}
@@ -4786,7 +4777,7 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
 				cur->insert_store_mem( num_v, lab );
 
 	if ( up == NULL && lab == NULL )
-		for ( auto cv = sim->cemetery; cv != NULL && *num_v < ( int ) gui::vs.size( ); cv = cv->next )
+		for ( auto cv = gui::sim.cemetery; cv != NULL && *num_v < ( int ) gui::vs.size( ); cv = cv->next )
 			insert_store_mem( num_v, cv, TAG_NONE );
 }
 
@@ -4796,12 +4787,10 @@ void lsd::object::insert_store_mem( int *num_v, const char *lab )
  *************************************************************/
 void lsd::object::insert_store_mem( int *num_v, variable *v, int tag )
 {
-	strT par_lab = v->up != NULL ? v->up->attr->label : sim->par_map[ v->attr->label ];
-
 	if ( da->disable )
 	{
 		gui::vs[ *num_v ].label = v->attr->label;
-		gui::vs[ *num_v ].parent = par_lab;
+		gui::vs[ *num_v ].parent = v->attr->par_attr->label;
 		gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
 		gui::vs[ *num_v ].start = v->start;
 		gui::vs[ *num_v ].end = v->end;
@@ -4827,7 +4816,7 @@ void lsd::object::insert_store_mem( int *num_v, variable *v, int tag )
 				continue;
 
 			gui::vs[ *num_v ].label = v->attr->label;
-			gui::vs[ *num_v ].parent = par_lab;
+			gui::vs[ *num_v ].parent = v->attr->par_attr->label;
 			gui::vs[ *num_v ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
 			gui::vs[ *num_v ].start = ce.start;
 			gui::vs[ *num_v ].end = ce.end;
@@ -4840,7 +4829,7 @@ void lsd::object::insert_store_mem( int *num_v, variable *v, int tag )
 			else
 			{
 				gui::vs[ *num_v + 1 ].label = to_string( "%s+", v->attr->label );
-				gui::vs[ *num_v + 1 ].parent = par_lab;
+				gui::vs[ *num_v + 1 ].parent = v->attr->par_attr->label;
 				gui::vs[ *num_v + 1 ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
 				gui::vs[ *num_v + 1 ].start = ce.start;
 				gui::vs[ *num_v + 1 ].end = ce.end;
@@ -4849,7 +4838,7 @@ void lsd::object::insert_store_mem( int *num_v, variable *v, int tag )
 				gui::vs[ *num_v + 1 ].data_alias = true;
 
 				gui::vs[ *num_v + 2 ].label = to_string( "%s-", v->attr->label );
-				gui::vs[ *num_v + 2 ].parent = par_lab;
+				gui::vs[ *num_v + 2 ].parent = v->attr->par_attr->label;
 				gui::vs[ *num_v + 2 ].tag = to_string( "%s%s", tag_pref[ tag ], v->lab_tit );
 				gui::vs[ *num_v + 2 ].start = ce.start;
 				gui::vs[ *num_v + 2 ].end = ce.end;
@@ -4876,6 +4865,7 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 	bool header = false;
 	long linsiz = 1;
 	i_vecT file_store;
+	lsd::varattr *va;
 
 	if ( ! gz )
 		f = fopen( file_name, "rt" );
@@ -4968,10 +4958,10 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 		vs[ i ].data = new double[ vs[ i ].end - vs[ i ].start + 1 ];
 		vs[ i ].data_alias = false;		// dealocate on store destruction
 
-		if ( sim.par_map.find( vs[ i ].label ) == sim.par_map.end( ) )
+		if ( ( va = sim.va.search( label ) ) == NULL )
 			vs[ i ].parent = file_name;
 		else
-			vs[ i ].parent = sim.par_map[ vs[ i ].label ];
+			vs[ i ].parent = va->par_attr->label;
 
 		if ( vs[ i ].start != -1 )
 			snprintf( da_tmp, MAX_BUFF_SIZE, "%s %s (%d-%d) #%d", vs[ i ].label.c_str( ), vs[ i ].tag.c_str( ), vs[ i ].start, vs[ i ].end, i );
@@ -7689,6 +7679,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 	double nmax = 0, nmin = 0, nmean, nmed, nvar, nmad, nn, sum, sub, prod, div, inv, lag, neg, thflt, conf_lev, cenCI, varCI, z_crit, **data;
 	int i, j, k, l, flt, cs_long, type_series, new_series, sel_series, *start, *end, *id;
 	d_vecT v, dv;
+	lsd::varattr *va;
 
 	if ( ! mc )
 	{
@@ -7974,8 +7965,8 @@ bool gui::create_series( bool mc, str_vecT v_names )
 		vs[ l ].tag = lsd::to_string( "%s%s", mc ? lsd::tag_pref[ TAG_MC ] : lsd::tag_pref[ TAG_CALC ], get_str( "ftag" ) );
 		vs[ l ].rank = v_num;
 
-		if ( mc && new_series == 1 && sim.par_map.find( vs[ l ].label ) != sim.par_map.end( ) )
-			vs[ l ].parent = sim.par_map[ vs[ l ].label ];
+		if ( mc && new_series == 1 && ( va = sim.va.search( get_str( "vname" ) ) ) != NULL )
+			vs[ l ].parent = va->par_attr->label;
 		else
 			vs[ l ].parent = mc ? mc_par[ type_series < 100 ? type_series : 0 ] : "(added)";
 

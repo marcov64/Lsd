@@ -92,7 +92,7 @@ int t;						// current time step
 int series_saved = 0;		// number of series saved
 int stack_level;			// LSD stack call level
 int stack_info = 0;			// LSD stack control
-long nodesSerial = 1;		// network node's serial number global counter
+long node_serial = 1;		// network node's serial number global counter
 unsigned seed = 1;			// random number generator initial seed
 lsd::descr *descr = NULL;	// model description structure
 lsdstack *stack_log = NULL;	// LSD stack

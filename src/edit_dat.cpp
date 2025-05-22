@@ -102,7 +102,7 @@ void lsd::object::edit_data( const char *lab )
 
 	cmd( "set cwidth 11" );
 
-	cmd( "newtop .inid \"%s%s - LSD Initial Values Editor\" { set choice 1 }", gui::unsaved_change( ) ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
+	cmd( "newtop .inid \"%s%s - LSD Initial Values Editor\" { set choice 1 }", gui::unsaved_change( ) ? "*" : " ", strlen( gui::sim.conf_name ) > 0 ? gui::sim.conf_name : NO_CONF_NAME );
 
 	cmd( "ttk::frame .inid.t" );		// top frame to pack
 

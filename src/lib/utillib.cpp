@@ -278,7 +278,7 @@ void lsd::variable::set_lab_tit( void )
 
 	if ( up->up == NULL )
 	{
-		// this is the Root of the model
+		// this is the root of the model
 		if ( lab_tit != NULL )
 			return;						// already done in the past
 
@@ -315,7 +315,7 @@ void lsd::variable::set_lab_tit( void )
  *************************************************************/
 void lsd::object::set_tit_counter( void )
 {
-	int i;
+	int i, t;
 	bridge *cb;
 	object *cur;
 
@@ -330,11 +330,12 @@ void lsd::object::set_tit_counter( void )
 	if ( cb->counter_updated )
 		return;
 
+	t = attr->cont->sim->t;
 	for ( cur = cb->head, i = 1; cur != NULL; cur = cur->next, ++i )
-		if ( cur->lst_cnt_upd < sim->t )// don't update more than once per period
+		if ( cur->lst_cnt_upd < t )		// don't update more than once per period
 		{								// to avoid deletions to change counters
 			cur->acounter = i;
-			cur->lst_cnt_upd = sim->t;
+			cur->lst_cnt_upd = t;
 		}
 
 	cb->counter_updated = true;
@@ -397,7 +398,7 @@ void lsd::simulation::empty_blueprint( void )
 void lsd::simulation::reset_blueprint( object *r )
 {
 	empty_blueprint( );
-	blueprint = new object ( NULL, this, "Root" );
+	blueprint = new object ( NULL, ROOT_NAME, true, this );
 
 	if ( r != NULL )
 		r->set_blueprint( blueprint );

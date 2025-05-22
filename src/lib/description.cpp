@@ -111,7 +111,7 @@ bool lsd::descr::has_descr_text( void )
  *************************************************************/
 lsd::description::description( void )
 {
-	add_descr( "Root" );
+	add_descr( ROOT_NAME );
 }
 
 

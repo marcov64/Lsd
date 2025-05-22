@@ -39,7 +39,7 @@ int lsd::sensitivity::dataentry( void )
 	const char *app;
 	double temp, start, end;
 	int i, j, res, nPar, samples;
-	variable *cv = sim->root->search_var( NULL, label, true );
+	variable *cv = gui::sim.root->search_var( NULL, label, true );
 
 	if ( cv != NULL && cv->attr->integer )
 		int_var = true;
@@ -108,7 +108,7 @@ int lsd::sensitivity::dataentry( void )
 	cmd( "focus .sens.t.t" );
 
 	// reset random number generator to make random numbers reproducible
-	sim->init_random( sim->seed );
+	gui::sim.init_random( gui::sim.seed );
 
 	gui::choice = 0;
 
@@ -199,7 +199,7 @@ int lsd::sensitivity::dataentry( void )
 				if ( toupper( type ) == 'R' && samples > 0 )// random sampling
 					for ( int j = 0; j < samples; ++j, ++i )
 					{
-						val[ i ] = fmin( start, end ) + sim->_ran1_( ) * ( fmax( start, end ) - fmin( start, end ) );
+						val[ i ] = fmin( start, end ) + gui::sim._ran1_( ) * ( fmax( start, end ) - fmin( start, end ) );
 						val[ i ] = integer ? round( val[ i ] ) : val[ i ];
 					}
 			}
@@ -277,7 +277,7 @@ int lsd::simulation::num_sensitivity_variables( void )
  SENSITIVITY_PARALLEL
  This function fills the initial values according to the sensitivity analysis
  system performed by parallel simulations: 1 single run over many independent
- configurations descending in parallel from Root.
+ configurations descending in parallel from root.
 
  Users can set one or more elements to be part of the sensitivity analysis. For
  each element the user has to provide the number of values to be explored and
@@ -315,7 +315,7 @@ lsd::object *lsd::object::sensitivity_parallel( sensitivity *s )
 	for ( cur = this, i = 0; i < s->num_val; ++i )
 	{
 		s->cur_val = i;
-		for ( cs = sim->sens; cs != NULL; cs = cs->next )
+		for ( cs = gui::sim.sens; cs != NULL; cs = cs->next )
 		{
 			cv = cur->search_var( cur, cs->label );
 			if ( cs->param == 0 )				// handle lags > 0

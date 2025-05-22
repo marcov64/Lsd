@@ -56,7 +56,7 @@ void lsd::object::show_graph( void )
 {
 	object *top;
 
-	if ( ! sim->conf_ok || ! gui::str_wnd )// model structure window is deactivated?
+	if ( ! gui::sim.conf_ok || ! gui::str_wnd )// model structure window is deactivated?
 	{
 		cmd( "destroytop .str" );
 		return;
@@ -75,7 +75,7 @@ void lsd::object::show_graph( void )
 	else
 		cmd( "destroy .str.f" );			// or just recreate canvas
 
-	cmd( "wm title .str \"%s%s - LSD Model Structure\"", gui::unsaved_change( ) ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
+	cmd( "wm title .str \"%s%s - LSD Model Structure\"", gui::unsaved_change( ) ? "*" : " ", strlen( gui::sim.conf_name ) > 0 ? gui::sim.conf_name : NO_CONF_NAME );
 
 	cmd( "ttk::frame .str.f" );
 	cmd( "ttk::canvas .str.f.c -xscrollincrement 1 -entry 0 -dark $darkTheme" );
@@ -101,10 +101,10 @@ void lsd::object::show_graph( void )
 			if { [ info exists res_g ] } { \
 				set choice_g 24 \
 			} elseif { %%y <= $rootyM } { \
-				set res_g Root; \
+				set res_g %s; \
 				set choice_g 24 \
 			} \
-		}" );
+		}", ROOT_NAME );
 	cmd( "bind .str.f.c <Double-Button-1> { \
 			if { [ info exists res_g ] && [ winfo exists .m ] } { \
 				destroy .list; \
@@ -339,7 +339,7 @@ void lsd::object::draw_obj( object *sel, int level, int center, int from, bool z
 			{
 				// must search out of the blueprint, where we are now
 				// may get the wrong parent if the parent is replicated somewhere
-				cur = sim->root->search( up->up->attr );
+				cur = gui::sim.root->search( up->up->attr );
 				if ( cur != NULL )
 				{
 					cb = cur->search_bridge( up->attr );
@@ -480,7 +480,7 @@ void lsd::object::draw_obj( object *sel, int level, int center, int from, bool z
 			cb->head->draw_obj( sel, level + step_level, i, center, zeroinst );
 		else
 		{	// try to draw zero instance objects
-			cur = sim->blueprint->search( cb->attr );
+			cur = gui::sim.blueprint->search( cb->attr );
 			if ( cur != NULL )
 				cur->draw_obj( sel, level + step_level, i, center, true );
 		}

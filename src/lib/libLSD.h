@@ -118,6 +118,7 @@
 #define NON_AVAILABLE "NA"				// unavailable values text (R default)
 #define NO_CONF_NAME "(no name)"		// no configuration file name yet
 #define NO_DESCR ""						// no description available text
+#define ROOT_NAME "Root"				// name of root element
 #define SIG_DIG 10						// number of significant digits in data files
 #define UPD_PER 0.2						// update period during simulation run in s
 #define USER_D_VARS 1000				// number of user double variables
@@ -172,6 +173,7 @@ typedef pugi::xml_node x_nodeT;
 typedef pugi::xml_attribute x_attrT;
 typedef std::atomic < bool > b_atomT;
 typedef std::atomic < int > i_atomT;
+typedef std::atomic < long > l_atomT;
 typedef std::condition_variable cond_vT;
 typedef std::list < int > i_listT;
 typedef std::lock_guard < std::mutex > l_guardT;
@@ -396,17 +398,22 @@ namespace lsd
  *************************************************************/
 	class objattr							// object static/homogeneous
 	{										// attributes class
+		friend class netlink;
+		friend class netnode;
 		friend class object;
+		friend class varattr;
+		friend class variable;
 
 		public:								// static public attributes
 			char *label;					// object name
 			int label_size;					// object name string length
+			objattr *par_attr;				// parent object attribute
 
 		private:							// static private attributes
-			objattributes *container;		// attributes container
+			objattributes *cont;			// attributes container
 
 		public:
-			objattr( simulation *sim, const char *_label );// constructor
+			objattr( objattributes *_cont, objattr *_par_attr, const char *_label );// constructor
 			objattr( const objattr & a );	// copy constructor
 			~objattr( void );				// destructor
 			objattr & operator=( const varattr & a ) = delete;// assignment constructor
@@ -418,7 +425,13 @@ namespace lsd
  *************************************************************/
 	class objattributes						// container for object attributes
 	{
+		friend class netlink;
+		friend class netnode;
 		friend class objattr;
+		friend class object;
+		friend class simulation;
+		friend class varattr;
+		friend class variable;
 
 		public:
 			oatt_listT attr;				// element attributes linked-list
@@ -426,14 +439,14 @@ namespace lsd
 
 		private:
 			rec_mtxT oattr_lck;				// mutex lock for parallel computation
-			simulation *sim = NULL;			// containing simulation
+			simulation *sim;				// containing simulation
 
 		public:
-			objattr *add( simulation *sim, const char *lab );
+			objattr *add( objattr *par_attr, const char *lab );
 			objattr *rename( const char *old_lab, const char *new_lab );
 			objattr *search( const char *lab );
 
-			objattributes( void ) { };		// constructor
+			objattributes( simulation *_sim );// constructor
 			objattributes( const objattributes & a ) = delete;// copy constructor
 			~objattributes( void );			// destructor
 			objattributes & operator=( const objattributes & a ) = delete;// assignment constructor
@@ -471,7 +484,6 @@ namespace lsd
 			mtxT obj_comp_lck;				// mutex lock for parallel computations
 			object *hook = NULL;			// static connection to other objects
 			o_vecT hooks;					// vector of connections to other objects
-			simulation *sim;				// simulation where object is contained
 			void *cext = NULL;				// pointer to C++ object extension
 			v_mapT v_map;					// fast lookup map to variables
 
@@ -481,6 +493,7 @@ namespace lsd
 			double cal( object *caller, const char *lab, int lag, bool force_search );
 			double read_file_net( const char *lab, const char *dir = "", const char *base_name = "net", int serial = 1, const char *ext = "net" );
 			double write_file_net( const char *lab, const char *dir = "", const char *base_name = "net", int serial = 1, bool append = false );
+			int check_label( const char *lab );
 			object *add_n_objects2( const char *lab, int n, int t_update = -1 );
 			object *add_n_objects2( const char *lab, int n, object *ex, int t_update = -1 );
 			object *add_obj( const char *label, int num = 1, bool propagate = false );
@@ -497,14 +510,13 @@ namespace lsd
 			variable *search_var( object *caller, varattr *at, bool no_error = false, bool no_search = false, bool no_search_up = false, bool search_sons = false );
 			void chg_lab( const char *lab );
 			void chg_var_lab( const char *old, const char *n );
-			void create_par_map( void );
 			void delete_net( const char *lab );
 			void delete_obj( const variable *caller = NULL );
 			void delete_var( const char *lab );
 			void move( const char *dest );
 			void reset_end( void );
 
-			object( object *_up, simulation *_sim, const char *_label, bool _to_compute = true );	// constructor
+			object( object *_up, const char *_label, bool _to_compute = true, simulation *sim = NULL );	// constructor
 			~object( void );					// destructor
 			object( object & o ) = delete;		// copy constructor
 			object & operator=( const object & o ) = delete;// assignment constructor
@@ -652,6 +664,7 @@ namespace lsd
 		friend class equation;				// attributes class
 		friend class object;
 		friend class variable;
+		friend class worker;
 
 		public:								// static public attributes
 			bool initialized = false;		// variable initial value set?
@@ -669,14 +682,15 @@ namespace lsd
 			int num_lag;					// number of lags kept in value array
 			int period = 1;					// period between updates
 			int period_range = 0;			// maximum range for random updates
+			objattr *par_attr;				// parent object attribute
 
 		private:							// static private attributes
 			bool dummy = false;
 			eq_funcT eq_func = NULL;		// pointer to equation function
-			varattributes *container;		// attributes container
+			varattributes *cont;			// attributes container
 
 		public:
-			varattr( simulation *sim, const char *_label, int _num_lag = -1 );// constructor
+			varattr( varattributes *_cont, objattr *_par_attr, const char *_label, int _num_lag = -1 );// constructor
 			varattr( const varattr & a );	// copy constructor
 			~varattr( void );				// destructor
 			varattr & operator=( const varattr & a ) = delete;// assignment constructor
@@ -688,7 +702,10 @@ namespace lsd
  *************************************************************/
 	class varattributes						// container for element (variable,
 	{										// parameter, or function) attributes
+		friend class simulation;
 		friend class varattr;
+		friend class variable;
+		friend class worker;
 
 		public:
 			vatt_listT attr;				// element attributes linked-list
@@ -696,14 +713,14 @@ namespace lsd
 
 		private:
 			rec_mtxT vattr_lck;				// mutex lock for parallel computation
-			simulation *sim = NULL;			// containing simulation
+			simulation *sim;				// containing simulation
 
 		public:
-			varattr *add( simulation *sim, const char *lab, int lags = -1 );
+			varattr *add( objattr *par_attr, const char *lab, int lags = -1 );
 			varattr *rename( const char *old_lab, const char *new_lab );
 			varattr *search( const char *lab );
 
-			varattributes( void ) { };		// constructor
+			varattributes( simulation *sim );// constructor
 			varattributes( const varattributes & a ) = delete;// copy constructor
 			~varattributes( void );			// destructor
 			varattributes & operator=( const varattributes & a ) = delete;// assignment constructor
@@ -1329,11 +1346,10 @@ namespace lsd
 			mtxT obj_list_lck;				// lock object list for parallel manip.
 			mtxT run_logs_lck;				// lock run_logs for parallel updating
 			mtxT run_pids_lck;				// lock run_pids for parallel updating
-			objattributes oa;				// static object attributes container
+			objattributes oa { NULL };		// static object attributes container
 			object *blueprint = NULL;		// LSD blueprint (effective model in use)
 			object *root = NULL;			// LSD root object
 			o_setT obj_list;				// set with all existing LSD objects
-			p_mapT par_map;					// variable to parent name map for AoR/Python
 			prof_mapT prof_times;			// set of saved profiling times
 			sensitivity *sens = NULL;		// sensitivity analysis linked-list head
 			std::mt19937 mt32;				// Mersenne-Twister 32 bits generator
@@ -1343,7 +1359,7 @@ namespace lsd
 			thrT run_monitor;				// thread monitoring parallel instances
 			thrT sim_thread;				// thread object where simulation is run
 			unsigned seed = 1;				// random number generator initial seed
-			varattributes va;				// static variable attributes container
+			varattributes va { NULL };		// static variable attributes container
 			variable *cemetery = NULL;		// LSD saved data from deleted objects
 			worker *workers = NULL;			// multi-thread parallel worker data
 			FILE *log_file_ptr = NULL;		// log file pointer, if any
@@ -1376,7 +1392,7 @@ namespace lsd
 			i_atomT alaplErrCnt, bernoErrCnt, betaErrCnt, binomErrCnt, cauchErrCnt, chisqErrCnt, expErrCnt, fishErrCnt, gammaErrCnt, geomErrCnt, lnormErrCnt, normErrCnt, paretErrCnt, poissErrCnt, studErrCnt, weibErrCnt;
 			i_vecT run_status;				// parallel running instances status
 			long idum = 0;					// Park-Miller default seed (legacy code)
-			long nodesSerial = 1;			// network node serial number counter
+			l_atomT node_serial = 1;		// network node serial number counter
 			object *wait_delete = NULL;		// LSD object waiting for deletion
 			mtxT draw_lc1_lck;				// locks for random generator operations
 			mtxT draw_lc2_lck;
@@ -1468,7 +1484,7 @@ namespace lsd
 
 
 /*************************************************************
- GLOBAL VARIABLES
+ LIBRARY GLOBAL VARIABLES
  *************************************************************/
 	extern const bool no_pointer_check;		// user pointer check static disable
 	extern const bool no_pointer_init;		// user pointer init. static disable
@@ -1511,7 +1527,7 @@ namespace lsd
 
 
 /*************************************************************
- GLOBAL FUNCTIONS
+ LIBRARY GLOBAL FUNCTIONS
  *************************************************************/
 	bool strwsp( const char *str );
 	bool valid_label( const char *lab );
@@ -1551,7 +1567,7 @@ namespace lsd
 	void finish_lib( void );
 	void handle_signals( void ( * handler ) ( int signum ) );
 	void inhibit_system_sleep( void );
-	void init_lib( void );
+	void init_lib( assimilation *_da );
 	void lsd_exit( int v, bool clean = false );
 	void msleep( unsigned msec = 1000 );
 	void plog_master( const char *cm, ... );

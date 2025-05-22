@@ -105,7 +105,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 			}; \
 			newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\"; \
 			set newDeb true \
-		}", gui::unsaved_change( ) ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
+		}", gui::unsaved_change( ) ? "*" : " ", strlen( gui::sim.conf_name ) > 0 ? gui::sim.conf_name : NO_CONF_NAME );
 
 	// avoid redrawing the menu if it already exists and is configured
 	if ( ! gui::exists_window( ".deb.m" ) || ! gui::expr_eq( "[ .deb cget -menu ]", ".deb.m" ) )
@@ -203,7 +203,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 		// second row of buttons (if applicable)
 		if ( mode == 1 || mode == 3 )
 		{
-			cmd( "set stack_flag %d", sim->stack_info );
+			cmd( "set stack_flag %d", gui::sim.stack_info );
 
 			cmd( "ttk::frame .deb.b.act" );
 
@@ -265,14 +265,14 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 	Tcl_LinkVar( gui::interp, "value", ( char * ) & app_res, TCL_LINK_DOUBLE );
 	cmd( "set value_change 0" );
 
-	if ( sim->watch_trigger )
+	if ( gui::sim.watch_trigger )
 	{
-		if ( sim->watch_write_mode )
+		if ( gui::sim.watch_write_mode )
 			cmd( "set watch_msg \"      Write watch:\"" );
 		else
 			cmd( "set watch_msg \"      Read watch:\"" );
 
-		cmd( "set watch_name %s", sim->watch_elem );
+		cmd( "set watch_name %s", gui::sim.watch_elem );
 	}
 	else
 	{
@@ -280,7 +280,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 		cmd( "set watch_name \"\"" );
 	}
 
-	sim->watch_trigger = false;		// clears any watch condition already signaled
+	gui::sim.watch_trigger = false;		// clears any watch condition already signaled
 
 	redraw = true;
 	gui::choice = 0;
@@ -352,7 +352,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					}", interact ? 1 : 0, mode );
 
 				cmd( ".deb.v.v1.name2 configure -text \"%s\"", lab == NULL ? "" : lab );
-				cmd( ".deb.v.v1.time2 configure -text \"%d	   \"", sim->t );
+				cmd( ".deb.v.v1.time2 configure -text \"%d	   \"", gui::sim.t );
 			}
 
 			// create the element list
@@ -496,7 +496,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 		{
 			cmd( "bind .deb <KeyPress-g> { }; bind .deb <KeyPress-G> { }" );
 			cmd( "set stack_flag [ .deb.b.act.stack.e get ]" );
-			sim->stack_info = gui::get_int( "stack_flag" );
+			gui::sim.stack_info = gui::get_int( "stack_flag" );
 
 			cmd( "if { $value_change } { \
 					if [ string is double -strict [ .deb.v.v1.val2 get ] ] { \
@@ -513,11 +513,11 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 		{
 			// Step
 			case 1:
-				if ( sim->t >= sim->last_t )
+				if ( gui::sim.t >= gui::sim.last_t )
 				{
 					cmd( "destroytop .deb" );
 					gui::set_buttons_run( true );
-					sim->deb_set = false;
+					gui::sim.deb_set = false;
 				}
 				break;
 
@@ -526,7 +526,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				cmd( "destroytop .deb" );
 				gui::set_buttons_run( true );
 				if ( ! interact )
-					sim->deb_set = false;
+					gui::sim.deb_set = false;
 
 				break;
 
@@ -599,8 +599,8 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				switch ( mode )
 				{
 					case 1:		// prevent changing run parameters when only data browse was called
-						sim->quit = 1;
-						sim->deb_set = false;
+						gui::sim.quit = 1;
+						gui::sim.deb_set = false;
 						break;
 
 					case 2:
@@ -657,7 +657,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 
 				cmd( "ttk::frame $e.t" );
 				cmd( "ttk::label $e.t.l -text \"Current time:\"" );
-				cmd( "ttk::label $e.t.v -style hl.TLabel -text %d", sim->t );
+				cmd( "ttk::label $e.t.v -style hl.TLabel -text %d", gui::sim.t );
 				cmd( "pack $e.t.l $e.t.v -side left -padx $_2" );
 
 				cmd( "ttk::frame $e.u" );
@@ -667,7 +667,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 
 				cmd( "ttk::frame $e.x" );
 				cmd( "ttk::label $e.x.l -text \"Next update:\"" );
-				cmd( "ttk::label $e.x.v -style hl.TLabel -text %d", cv->next_update > 0 ? cv->next_update : cv->last_update < sim->t ? sim->t : sim->t + 1 );
+				cmd( "ttk::label $e.x.v -style hl.TLabel -text %d", cv->next_update > 0 ? cv->next_update : cv->last_update < gui::sim.t ? gui::sim.t : gui::sim.t + 1 );
 				cmd( "pack $e.x.l $e.x.v -side left -padx $_2" );
 
 				cmd( "ttk::frame $e.v" );
@@ -986,8 +986,8 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					break;
 				}
 
-				pre_running = sim->running;
-				sim->running = false;
+				pre_running = gui::sim.running;
+				gui::sim.running = false;
 
 				cmd( "set value_search [ .deb.so.v.e get ]" );
 				gui::get_str( "bidi", ch, MAX_ELEM_LENGTH );
@@ -1069,7 +1069,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 						cur = NULL;
 				}
 
-				sim->quit = 0;	// if name is mispelled don't stop the simulation!
+				gui::sim.quit = 0;	// if name is mispelled don't stop the simulation!
 				cmd( "destroytop .deb.so" );
 				Tcl_UnlinkVar( gui::interp, "value_search" );
 				Tcl_UnlinkVar( gui::interp, "condition" );
@@ -1085,12 +1085,12 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					break;
 				}
 
-				sim->running = pre_running;
+				gui::sim.running = pre_running;
 				break;
 
 			// Analysis
 			case 11:
-				sim->root->reset_end( );
+				gui::sim.root->reset_end( );
 				gui::analysis( );
 				cmd( "focustop .deb" );
 
@@ -1160,7 +1160,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 
 			// Until
 			case 16:
-				cmd( "set tdebug %d", sim->t + 1 );
+				cmd( "set tdebug %d", gui::sim.t + 1 );
 
 				cmd( "set t .deb.tdeb" );
 				cmd( "newtop $t \"Run Until\" { set choice 2 } .deb" );
@@ -1193,8 +1193,8 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				{
 					// restart execution
 					gui::choice = 2;
-					sim->deb_set = false;
-					cmd( "if { $tdebug > %d } { set deb_t $tdebug } { set deb_t %d }", sim->t, sim->t + 1 );
+					gui::sim.deb_set = false;
+					cmd( "if { $tdebug > %d } { set deb_t $tdebug } { set deb_t %d }", gui::sim.t, gui::sim.t + 1 );
 					cmd( "destroytop .deb" );
 					gui::set_buttons_run( true );
 				}
@@ -1276,12 +1276,12 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					break;
 				}
 
-				pre_running = sim->running;
-				sim->running = false;
+				pre_running = gui::sim.running;
+				gui::sim.running = false;
 
 				gui::choice = debugger( c, lab, res, interact, gui::get_str( "bidi" ) );
 
-				sim->running = pre_running;
+				gui::sim.running = pre_running;
 				break;
 
 			// clear find selection
@@ -1326,7 +1326,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					for ( i = 0; i < j; ++i )
 						if ( hooks[ i ] != NULL )
 						{
-							k = sim->root->search_inst( hooks[ i ], false );
+							k = gui::sim.root->search_inst( hooks[ i ], false );
 
 							if ( k != 0 )
 							{
@@ -1345,7 +1345,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 
 					if ( hook != NULL )
 					{
-						k = sim->root->search_inst( hook, false );
+						k = gui::sim.root->search_inst( hook, false );
 
 						if ( k != 0 )
 						{
@@ -1410,7 +1410,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				else
 					if ( hook != NULL )
 					{
-						k = sim->root->search_inst( hook, false );
+						k = gui::sim.root->search_inst( hook, false );
 
 						if ( k == 0 )
 						{
@@ -1453,7 +1453,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 
 			// double-click (change to) network node
 			case 23:
-				cur = sim->root->search_node_net( gui::get_str( "nodeLab" ), gui::get_long( "nodeId" ) );
+				cur = gui::sim.root->search_node_net( gui::get_str( "nodeLab" ), gui::get_long( "nodeId" ) );
 				if ( cur != NULL )
 					gui::choice = cur->debugger( c, lab, res, interact );
 				else
@@ -1467,7 +1467,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 			// double-click (change to) object pointer
 			case 24:
 				i = gui::get_int( "objNum" );
-				cur = sim->root->search( gui::get_str( "objLab" ) );
+				cur = gui::sim.root->search( gui::get_str( "objLab" ) );
 				for ( j = 1; j != i && cur != NULL; ++j, cur = cur->hyper_next( ) );
 				if ( cur != NULL )
 					gui::choice = cur->debugger( c, lab, res, interact );
@@ -1503,9 +1503,9 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					break;
 				}
 
-				if ( asl == NULL && sim->stack_log != NULL )
+				if ( asl == NULL && gui::sim.stack_log != NULL )
 				{
-					asl = sim->stack_log;
+					asl = gui::sim.stack_log;
 					gui::plog( "\nVariable: %s", asl->label );
 					if ( asl->v != NULL && asl->v->up != NULL )
 						gui::choice = asl->v->up->debugger( c, lab, res, interact );
@@ -1556,7 +1556,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					// redraw model structure graph
 					case 23:
 
-						( gui::last_obj == NULL ? sim->root : gui::last_obj )->show_graph( );
+						( gui::last_obj == NULL ? gui::sim.root : gui::last_obj )->show_graph( );
 						cmd( "focustop .deb" );
 
 						gui::choice = 0;
@@ -1571,7 +1571,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 						cmd( "focustop .deb" );
 
 						if ( gui::exists_var( "res_g" ) )
-							cur = sim->root->search( gui::get_str( "res_g" ) );
+							cur = gui::sim.root->search( gui::get_str( "res_g" ) );
 						else
 							cur = NULL;
 
@@ -1929,7 +1929,7 @@ void lsd::object::show_tmp_vars( bool update )
 			return;
 		}
 
-	m = sim->root->search_inst( this, true );
+	m = gui::sim.root->search_inst( this, true );
 	cmd( "$in.l1.n.name configure -text \"%s\"", attr->label );
 	cmd( "$in.l1.n.id configure -text \"%d\"", m );
 
@@ -1943,16 +1943,16 @@ void lsd::object::show_tmp_vars( bool update )
 		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"v\\\[%d\\]\"", j );
 		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 
-		if ( std::isnan( sim->_d_values_[ j ] ) )
+		if ( std::isnan( gui::sim._d_values_[ j ] ) )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NAN" );
 		else
-			if ( std::isinf( sim->_d_values_[ j ] ) )
-				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", sim->_d_values_[ j ] < 0 ? "-" : "" );
+			if ( std::isinf( gui::sim._d_values_[ j ] ) )
+				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", gui::sim._d_values_[ j ] < 0 ? "-" : "" );
 			else
-				if ( sim->_d_values_[ j ] != 0 && fabs( sim->_d_values_[ j ] ) < SIG_MIN )// insignificant value?
+				if ( gui::sim._d_values_[ j ] != 0 && fabs( gui::sim._d_values_[ j ] ) < SIG_MIN )// insignificant value?
 					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text ~0" );
 				else
-					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %g", sim->_d_values_[ j ] );
+					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %g", gui::sim._d_values_[ j ] );
 
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 
@@ -1972,7 +1972,7 @@ void lsd::object::show_tmp_vars( bool update )
 		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"%c\"", i_names[ j ] );
 		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 
-		cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %d", sim->_i_values_[ j ] );
+		cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %d", gui::sim._i_values_[ j ] );
 
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 
@@ -1997,15 +1997,15 @@ void lsd::object::show_tmp_vars( bool update )
 			cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"cur%d\"", j );
 
 		n = 0;
-		if ( sim->_o_values_[ j ] == NULL )
+		if ( gui::sim._o_values_[ j ] == NULL )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NULL" );
 		else
 		{
 			// search an object pointed by the pointer
-			n = ( int ) sim->root->search_inst( sim->_o_values_[ j ], false );
+			n = ( int ) gui::sim.root->search_inst( gui::sim._o_values_[ j ], false );
 
-			if ( n > 0 && sim->_o_values_[ j ] != NULL )
-				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%d)\"", sim->_o_values_[ j ]->attr->label, n );
+			if ( n > 0 && gui::sim._o_values_[ j ] != NULL )
+				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%d)\"", gui::sim._o_values_[ j ]->attr->label, n );
 			else
 				if ( n < 0 )
 					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"(unchecked)\"" );
@@ -2021,8 +2021,8 @@ void lsd::object::show_tmp_vars( bool update )
 
 		if ( n > 0 )
 		{
-			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", sim->_o_values_[ j ]->attr->label, n );
-			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", sim->_o_values_[ j ]->attr->label, n );
+			cmd( "bind $in.n.t.n$i.var <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", gui::sim._o_values_[ j ]->attr->label, n );
+			cmd( "bind $in.n.t.n$i.val <Double-Button-1> { set objLab %s; set objNum %d; set choice 24 }", gui::sim._o_values_[ j ]->attr->label, n );
 		}
 
 		cmd( "$in.n.t window create end -window $in.n.t.n$i" );
@@ -2041,7 +2041,7 @@ void lsd::object::show_tmp_vars( bool update )
 		else
 			cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"curl%d\"", j );
 
-		if ( sim->_n_values_[ j ] == NULL )
+		if ( gui::sim._n_values_[ j ] == NULL )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NULL" );
 		else
 		{
@@ -2050,7 +2050,7 @@ void lsd::object::show_tmp_vars( bool update )
 			if ( node != NULL )
 			{
 				for ( curLnk = node->first; curLnk != NULL; curLnk = curLnk->next )
-					if ( curLnk == sim->_n_values_[ j ] && curLnk->to != NULL && curLnk->to->node != NULL )
+					if ( curLnk == gui::sim._n_values_[ j ] && curLnk->to != NULL && curLnk->to->node != NULL )
 					{
 						cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text \"%s(%ld)\"", curLnk->to->attr->label, curLnk->to->node->id );
 
@@ -2103,7 +2103,7 @@ void lsd::object::show_tmp_vars( bool update )
 		else
 		{
 			// search an object pointed by the hook
-			n = ( int ) sim->root->search_inst( cur, false );
+			n = ( int ) gui::sim.root->search_inst( cur, false );
 
 			if ( n > 0 )
 				cmd( "ttk::label $in.n.t.n$i.val -width 12 -style hl.TLabel -text \"%s(%d)\"", cur->attr->label, n );
@@ -2135,16 +2135,16 @@ void lsd::object::show_tmp_vars( bool update )
 		cmd( "ttk::label $in.n.t.n$i.var -width 6 -text \"v\\\[%d\\]\"", j );
 		cmd( "ttk::label $in.n.t.n$i.pad -width 1" );
 
-		if ( std::isnan( sim->_d_values_[ j ] ) )
+		if ( std::isnan( gui::sim._d_values_[ j ] ) )
 			cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text NAN" );
 		else
-			if ( std::isinf( sim->_d_values_[ j ] ) )
-				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", sim->_d_values_[ j ] < 0 ? "-" : "" );
+			if ( std::isinf( gui::sim._d_values_[ j ] ) )
+				cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %sINFINITY", gui::sim._d_values_[ j ] < 0 ? "-" : "" );
 			else
-				if ( sim->_d_values_[ j ] != 0 && fabs( sim->_d_values_[ j ] ) < SIG_MIN )	// insignificant value?
+				if ( gui::sim._d_values_[ j ] != 0 && fabs( gui::sim._d_values_[ j ] ) < SIG_MIN )	// insignificant value?
 					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text ~0" );
 				else
-					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %g", sim->_d_values_[ j ] );
+					cmd( "ttk::label $in.n.t.n$i.val -width 13 -style hl.TLabel -text %g", gui::sim._d_values_[ j ] );
 
 		cmd( "pack $in.n.t.n$i.var $in.n.t.n$i.pad $in.n.t.n$i.val -side left" );
 

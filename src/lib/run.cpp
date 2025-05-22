@@ -466,7 +466,6 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update, bool 
 	// pre-allocate memory to save all existing elements for the entire simulation
 	running = true;
 	series_saved = 0;
-	par_map.clear( );					// restart variable to parent name map for AoR/Python
 	if ( ! root->alloc_save_mem( ) )
 	{
 #ifndef _TERM_
@@ -750,6 +749,7 @@ bool lsd::object::alloc_save_mem( void )
 	int i;
 	bridge *cb;
 	object *cur;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	// for each variable set the data saving support
@@ -785,8 +785,6 @@ bool lsd::object::alloc_save_mem( void )
 		if ( cv->attr->save || cv->attr->savei )
 			if ( ! cv->alloc_save_var( ) )
 				goto error;
-
-		sim->par_map.insert( std::make_pair < strT, strT > ( cv->attr->label, attr->label ) );
 	}
 
 	for ( cb = b; cb != NULL; cb = cb->next )
@@ -809,7 +807,9 @@ bool lsd::object::alloc_save_mem( void )
  *************************************************************/
 bool lsd::variable::alloc_save_var( void )
 {
-	if ( ! up->sim->running )
+	simulation *sim = attr->cont->sim;
+	
+	if ( ! sim->running )
 	{
 		data = NULL;
 		start = end = 0;
@@ -817,11 +817,11 @@ bool lsd::variable::alloc_save_var( void )
 	}
 
 	if ( attr->num_lag > 0 || param == 1 )
-		start = up->sim->t - 1;
+		start = sim->t - 1;
 	else
-		start = up->sim->t;
+		start = sim->t;
 
-	end = up->sim->last_t;
+	end = sim->last_t;
 
 	// use C stdlib to be able to deallocate memory for deleted objects
 	free( data );
@@ -837,7 +837,7 @@ bool lsd::variable::alloc_save_var( void )
 		if ( attr->num_lag > 0 || param == 1 )
 			data[ 0 ] = val[ 0 ];
 
-		++( up->sim->series_saved );
+		++( sim->series_saved );
 		return true;
 	}
 }
@@ -855,7 +855,7 @@ void lsd::object::reset_end( void )
 	for ( cv = v; cv != NULL; cv = cv->next )
 	{
 		if ( cv->attr->save )
-			cv->end = sim->eff_t;
+			cv->end = attr->cont->sim->eff_t;
 
 		if ( cv->attr->savei == 1 )
 			cv->save_single( );

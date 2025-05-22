@@ -73,8 +73,9 @@ namespace lsd
 /*************************************************************
  INIT_LIB
  *************************************************************/
-void lsd::init_lib( void )
+void lsd::init_lib( assimilation *_da )
 {
+	da = _da;
 	main_thread = std::this_thread::get_id( );
 
 	exec_file = new char[ strlen( "" ) + 1 ];
@@ -121,7 +122,8 @@ lsd::equation::equation( void )
  *************************************************************/
 lsd::simulation::simulation( const char fname[ ], const char path[ ], int quick )
 {
-	root = new object ( NULL, this, "Root" );
+	oa.sim = va.sim = this;
+	root = new object ( NULL, ROOT_NAME, true, this );
 	latt = new lattice;
 	reset_blueprint( NULL );
 

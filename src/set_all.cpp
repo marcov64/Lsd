@@ -120,7 +120,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 		cmd( "ttk::label $_w.head.l.c -text \"Variable: \"" );
 		cmd( "ttk::label $_w.head.l.n1 -text \"%s  \" -style hl.TLabel", lab );
 		cmd( "ttk::label $_w.head.l.n2 -text \"\\[	lag \"" );
-		cmd( "ttk::label $_w.head.l.n3 -text \"%d\" -style hl.TLabel", sim->t - cv->last_update + lag + 1  );
+		cmd( "ttk::label $_w.head.l.n3 -text \"%d\" -style hl.TLabel", gui::sim.t - cv->last_update + lag + 1  );
 		cmd( "ttk::label $_w.head.l.n4 -text \"\\]\"" );
 		cmd( "pack $_w.head.l.c $_w.head.l.n1 $_w.head.l.n2 $_w.head.l.n3 $_w.head.l.n4 -side left" );
 	}
@@ -384,7 +384,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 	update_d = gui::get_int( "update_d" );
 
 	if ( use_seed )
-		sim->init_random( ( unsigned ) rnd_seed );
+		gui::sim.init_random( ( unsigned ) rnd_seed );
 
 	j = 0;
 
@@ -400,7 +400,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 					++j;
 				}
 
-			sim->va.search( lab )->initialized = true;
+			gui::sim.va.search( lab )->initialized = true;
 			snprintf( action, MAX_ELEM_LENGTH, "equal to %g%s", value1, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
@@ -425,7 +425,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 					++step;
 			}
 
-			sim->va.search( lab )->initialized = true;
+			gui::sim.va.search( lab )->initialized = true;
 			snprintf( action, MAX_ELEM_LENGTH, "ranging from %g to %g (increments of %g)%s", value1, value2, value, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
@@ -445,7 +445,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 					++step;
 			}
 
-			sim->va.search( lab )->initialized = true;
+			gui::sim.va.search( lab )->initialized = true;
 			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g%s", value1, value2, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
@@ -464,7 +464,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 						step = 0;
 				}
 
-			sim->va.search( lab )->initialized = true;
+			gui::sim.va.search( lab )->initialized = true;
 			snprintf( action, MAX_ELEM_LENGTH, "increasing from %g with step %g for each group of objects%s", value1, value2, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
@@ -475,11 +475,11 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = cv->chk_val( sim->uniform( value1, value2 ) );
+					cv->val[ lag ] = cv->chk_val( gui::sim.uniform( value1, value2 ) );
 					++j;
 				}
 
-			sim->va.search( lab )->initialized = true;
+			gui::sim.va.search( lab )->initialized = true;
 			snprintf( action, MAX_ELEM_LENGTH, "drawn from uniform distribution between %g and %g%s", value1, value2, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
@@ -490,11 +490,11 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = cv->chk_val( sim->rnd_int( round( value1 ), round( value2 ) ) );
+					cv->val[ lag ] = cv->chk_val( gui::sim.rnd_int( round( value1 ), round( value2 ) ) );
 					++j;
 				}
 
-			sim->va.search( lab )->initialized = true;
+			gui::sim.va.search( lab )->initialized = true;
 			snprintf( action, MAX_ELEM_LENGTH, "drawn from integer uniform distribution between %g and %g%s", round( value1 ), round( value2 ), cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
@@ -505,11 +505,11 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = cv->chk_val( sim->norm( value1, value2 ) );
+					cv->val[ lag ] = cv->chk_val( gui::sim.norm( value1, value2 ) );
 					++j;
 				}
 
-			sim->va.search( lab )->initialized = true;
+			gui::sim.va.search( lab )->initialized = true;
 			snprintf( action, MAX_ELEM_LENGTH, "drawn from normal distribution of mean %g and s.d. %g%s", value1, value2, cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
@@ -544,7 +544,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 					++j;
 				}
 
-			sim->va.search( lab )->initialized = true;
+			gui::sim.va.search( lab )->initialized = true;
 			if ( cur != NULL || kappa == EOF )
 				cmd( "ttk::messageBox -parent $_w -title Error -icon error -type ok -message \"Incomplete data\" -detail \"Problem loading data from file '%s', the file contains fewer values compared to the number of instances to set.\"", app );
 
@@ -553,10 +553,10 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 
 
 		default:
-			sim->error_hard( "internal problem in LSD",
-							 "if error persists, please contact developers",
-							 true,
-							 "invalid option for setting values" );
+			gui::sim.error_hard( "internal problem in LSD",
+								 "if error persists, please contact developers",
+								 true,
+								 "invalid option for setting values" );
 			gui::lsd_exit_gui( 22 );
 	}
 
@@ -643,16 +643,10 @@ int lsd::assim::dataentry( const char *parWnd )
 	bool cexist;
 	int namrow, res;
 	str_vecT cnames;
-	simulation *sim;
 	variable *cv;
 	rapidcsv::Document csv;
 
-	if ( sims.size( ) > 0 && sims[ 0 ] != NULL )
-		sim = sims[ 0 ];
-	else
-		return 2;
-
-	cv = sim->root->search_var( NULL, label.c_str( ) );
+	cv = gui::sim.root->search_var( NULL, label.c_str( ) );
 
 	if ( cv == NULL )
 		return 2;
@@ -673,8 +667,8 @@ int lsd::assim::dataentry( const char *parWnd )
 			set modDAf [ list ] \
 		}" );
 
-	cmd( "set path \"%s\"", sim->conf_path );
-	if ( strlen( sim->conf_path ) > 0 )
+	cmd( "set path \"%s\"", gui::sim.conf_path );
+	if ( strlen( gui::sim.conf_path ) > 0 )
 		cmd( "cd $path" );
 
 	if ( cv->param == 1 )

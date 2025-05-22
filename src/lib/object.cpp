@@ -244,7 +244,7 @@
 
  - object *search( char *lab );
  Explores one branch of the model to find for an object whose
- label is lab. It searches only down and next. Only for Root,
+ label is lab. It searches only down and next. Only for root,
  the search is extensive on the whole model.
 
  - void chg_lab( char *lab );
@@ -283,16 +283,14 @@
 /*************************************************************
  OBJATTR constructor
  *************************************************************/
-lsd::objattr::objattr( simulation *sim, const char *_label )
+lsd::objattr::objattr( objattributes *_cont, objattr *_par_attr, const char *_label )
 {
-	container = & ( sim->oa );
+	cont = _cont;
+	par_attr = _par_attr;
 	label_size = strlen( _label );
 
 	label = new char [ label_size + 1 ];
 	strcpy( label, _label );
-
-	if ( container->sim == NULL )
-		container->sim = sim;
 }
 
 
@@ -301,7 +299,8 @@ lsd::objattr::objattr( simulation *sim, const char *_label )
  *************************************************************/
 lsd::objattr::objattr( const objattr & a )
 {
-	container = a.container;
+	cont = a.cont;
+	par_attr = a.par_attr;
 	label_size = a.label_size;
 
 	label = new char [ a.label_size + 1 ];
@@ -314,10 +313,19 @@ lsd::objattr::objattr( const objattr & a )
  *************************************************************/
 lsd::objattr::~objattr( void )
 {
-	if ( container != NULL )
-		container->attr_map.erase( label );
+	if ( cont != NULL )
+		cont->attr_map.erase( label );
 
 	delete [ ] label;
+}
+
+
+/*************************************************************
+ OBJATTRIBUTES constructor
+ *************************************************************/
+lsd::objattributes::objattributes( simulation *_sim )
+{
+	sim = _sim;
 }
 
 
@@ -365,19 +373,20 @@ lsd::objattr *lsd::objattributes::search( const char *lab )
 /*************************************************************
  ADD
  *************************************************************/
-lsd::objattr *lsd::objattributes::add( simulation *sim, const char *lab )
+lsd::objattr *lsd::objattributes::add( objattr *par_attr, const char *lab )
 {
-	if ( sim == NULL || lab == NULL || strlen( lab ) == 0 )
-		throw 0;
-
 	auto d = attr_map.find( lab );
-	if ( d != attr_map.end( ) )
-		return & ( *( d->second ) );
 
 	// prevent concurrent use by more than one thread
 	rec_lguardT lock( oattr_lck );
 
-	attr.emplace_back( sim, lab );
+	if ( d != attr_map.end( ) )
+	{
+		d->second->par_attr = par_attr;
+		return & ( *( d->second ) );
+	}
+
+	attr.emplace_back( this, par_attr, lab );
 	attr_map.emplace( lab, --attr.end( ) );
 
 	return & attr.back( );
@@ -413,16 +422,28 @@ lsd::objattr *lsd::objattributes::rename( const char *old_lab, const char *new_l
 /*************************************************************
  OBJECT constructor
  *************************************************************/
-lsd::object::object( object *_up, simulation *_sim, const char *_label, bool _to_compute )
+lsd::object::object( object *_up, const char *_label, bool _to_compute, simulation *sim )
 {
+	objattr *par_attr;
+
 	up = _up;
-	sim = _sim;
 	to_compute = _to_compute;
 
-	if ( ( attr = _sim->oa.search( _label ) ) == NULL )
-		attr = _sim->oa.add( _sim, _label );
+	if ( up != NULL )
+	{
+		sim = up->attr->cont->sim;
+		par_attr = up->attr;
+	}
+	else						// handle case o root, no parent
+		par_attr = NULL;
+
+	if ( ( attr = sim->oa.search( _label ) ) == NULL )
+		attr = sim->oa.add( par_attr, _label );
 	else
-		attr->container = & ( _sim->oa );
+	{
+		attr->par_attr = par_attr;
+		attr->cont = & sim->oa;
+	}
 }
 
 
@@ -509,20 +530,6 @@ void lsd::object::recreate_maps( void )
 
 
 /*************************************************************
- CREATE_PAR_MAP
- *************************************************************/
-void lsd::object::create_par_map( void )
-{
-	for ( auto cv = v; cv != NULL; cv = cv->next )
-		sim->par_map.insert( std::make_pair < strT, strT > ( cv->attr->label, attr->label ) );
-
-	for ( auto cb = b; cb != NULL; cb = cb->next )
-		for ( auto cur = cb->head; cur != NULL; cur = BROTHER( cur ) )
-			cur->create_par_map( );
-}
-
-
-/*************************************************************
  UPDATE (*)
  Compute the value of all the Variables in the Object, saving
  the values and updating the runtime plot.
@@ -535,9 +542,11 @@ void lsd::object::update( bool recurse, bool user )
 	static bool deleted;
 	bridge *cb, *cb1;
 	object *cur, *cnext;
+	simulation *sim;
 	variable *cv;
 
 	deleted = false;
+	sim = attr->cont->sim;
 	del_flag = & deleted;			// register feedback channel
 
 	for ( cv = v; ! deleted && cv != NULL && sim->quit != 2; cv = cv->next )
@@ -649,7 +658,7 @@ lsd::object *lsd::object::hyper_next( objattr *at )
 
 lsd::object *lsd::object::hyper_next( const char *lab )
 {
-	objattr *at = sim->oa.search( lab );
+	objattr *at = attr->cont->sim->oa.search( lab );
 	if ( at != NULL )
 		return hyper_next( at );
 
@@ -721,7 +730,7 @@ lsd::bridge *lsd::object::search_bridge( objattr *at, bool no_error )
 
 lsd::bridge *lsd::object::search_bridge( const char *lab, bool no_error )
 {
-	objattr *at = sim->oa.search( lab );
+	objattr *at = attr->cont->sim->oa.search( lab );
 	if ( at != NULL )
 		return search_bridge( at, no_error );
 
@@ -777,7 +786,7 @@ lsd::object *lsd::object::search( objattr *at, bool no_search, bool no_search_up
 
 lsd::object *lsd::object::search( const char *lab, bool no_search, bool no_search_up )
 {
-	objattr *at = sim->oa.search( lab );
+	objattr *at = attr->cont->sim->oa.search( lab );
 	if ( at != NULL )
 		return search( at, no_search, no_search_up );
 
@@ -795,6 +804,7 @@ lsd::object *lsd::object::search_err( const char *lab, bool no_search, bool no_s
 	cur = search( lab, no_search, no_search_up );
 	if ( cur == NULL )
 	{	// check if it is a zero-instance object
+		simulation *sim = attr->cont->sim;
 		cur = sim->blueprint->search( lab );
 
 		if ( ! sim->no_zero_instance && cur != NULL )// zero instance allowed?
@@ -848,20 +858,21 @@ double lsd::object::initturbo( const char *lab )
 	cb = search_bridge( lab, true );
 	if ( cb == NULL )
 	{
-		sim->error_hard( "object not found",
-						 "create object in model structure",
-						 false,
-						 "object '%s' is missing for turbo search", lab );
+		attr->cont->sim->error_hard( "object not found",
+									 "create object in model structure",
+									 false,
+									 "object '%s' is missing for turbo search",
+									 lab );
 		return 0;
 	}
 
 	if ( cb->head == NULL )
 	{
-		sim->error_hard( "object has no instance",
-						 "check your equation code to prevent this situation",
-						 true,
-						 "failure when initializing object '%s' for turbo search",
-						 lab );
+		attr->cont->sim->error_hard( "object has no instance",
+									 "check your equation code to prevent this situation",
+									 true,
+									 "failure when initializing object '%s' for turbo search",
+									 lab );
 		return 0;
 	}
 
@@ -892,10 +903,11 @@ double lsd::object::turboset( const char *lab )
 	cb = search_bridge( lab, true );
 	if ( cb == NULL )
 	{
-		sim->error_hard( "object not found",
-						 "check your equation code to prevent this situation",
-						 true,
-						 "cannot find turbo search object '%s'", lab );
+		attr->cont->sim->error_hard( "object not found",
+									 "check your equation code to prevent this situation",
+									 true,
+									 "cannot find turbo search object '%s'",
+									 lab );
 		return 0;
 	}
 
@@ -921,19 +933,21 @@ lsd::object *lsd::object::turbosearch( const char *lab, double num )
 	cb = search_bridge( lab, true );
 	if ( cb == NULL )
 	{
-		sim->error_hard( "object not found",
-						 "check your equation code to prevent this situation",
-						 true,
-						 "failure when turbo searching object '%s'", lab );
+		attr->cont->sim->error_hard( "object not found",
+									 "check your equation code to prevent this situation",
+									 true,
+									 "failure when turbo searching object '%s'",
+									 lab );
 		return NULL;
 	}
 
 	if ( cb->t_map.size( ) == 0 )
 	{
-		sim->error_hard( "invalid search operation",
-						 "check your equation code to prevent this situation",
-						 true,
-						 "object '%s' is not initialized for turbo search", lab );
+		attr->cont->sim->error_hard( "invalid search operation",
+									 "check your equation code to prevent this situation",
+									 true,
+									 "object '%s' is not initialized for turbo search",
+									 lab );
 		return NULL;
 	}
 
@@ -982,7 +996,7 @@ void lsd::object::search_inst( object *obj, long *pos, long *checked )
 		// search among descendants only if object yet not found (speed-up)
 		if ( ! found )
 		{
-			if ( sim->no_ptr_chk || strcmp( cur->attr->label, obj->attr->label ) )
+			if ( attr->cont->sim->no_ptr_chk || strcmp( cur->attr->label, obj->attr->label ) )
 			{
 				for ( cb = cur->b; cb != NULL && *pos == 0; cb = cb->next )
 					if ( cb->head != NULL )
@@ -998,6 +1012,7 @@ double lsd::object::search_inst( object *obj, bool fun )
 {
 	long pos, checked;
 	object *cur;
+	simulation *sim = attr->cont->sim;
 
 	if ( obj == NULL )					// default is self
 		obj = this;
@@ -1088,10 +1103,11 @@ lsd::variable *lsd::object::search_var( object *caller, varattr *at, bool no_err
 		if ( up == NULL )
 		{
 			if ( ! no_error )
-				sim->error_hard( "variable or parameter not found",
-								 "create variable or parameter in model structure",
-								 false,
-								 "element '%s' is missing", at->label );
+				attr->cont->sim->error_hard( "variable or parameter not found",
+											 "create variable or parameter in model structure",
+											 false,
+											 "element '%s' is missing",
+											 at->label );
 			return NULL;
 		}
 
@@ -1103,7 +1119,7 @@ lsd::variable *lsd::object::search_var( object *caller, varattr *at, bool no_err
 
 lsd::variable *lsd::object::search_var( object *caller, const char *lab, bool no_error, bool no_search, bool no_search_up, bool search_sons )
 {
-	varattr *at = sim->va.search( lab );
+	varattr *at = attr->cont->sim->va.search( lab );
 	if ( at != NULL )
 		return search_var( caller, at, no_error, no_search, no_search_up, search_sons );
 
@@ -1122,6 +1138,7 @@ lsd::variable *lsd::object::search_var_err( object *caller, const char *lab, boo
 	cv = search_var( caller, lab, true, no_search, no_search_up, search_sons );
 	if ( cv == NULL )
 	{	// check if it is a zero-instance object
+		simulation *sim = attr->cont->sim;
 		cur = sim->blueprint->search( attr );
 		if ( cur != NULL )
 			cv = cur->search_var( NULL, lab, true, no_search, no_search_up, search_sons );
@@ -1137,7 +1154,8 @@ lsd::variable *lsd::object::search_var_err( object *caller, const char *lab, boo
 				sim->error_hard( "variable or parameter not found",
 								 "create variable or parameter in model structure",
 								 false,
-								 "element '%s' is missing for %s", lab, errmsg );
+								 "element '%s' is missing for %s",
+								 lab, errmsg );
 			else 				// exists only in blueprint
 				sim->error_hard( "last object instance deleted",
 								 "check your equation code to ensure at least one instance\nof any object is kept or use command USE_ZERO_INSTANCE",
@@ -1172,6 +1190,7 @@ lsd::object *lsd::object::search_var_cond( const char *lab, double value, int la
 {
 	double res;
 	object *cur, *cnext;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	cv = search_var_err( this, lab, sim->no_search, sim->no_search_up, true, "conditional searching" );
@@ -1202,17 +1221,17 @@ double lsd::object::initturbo_cond( const char *lab )
 	object *cur, *cnext;
 	variable *cv;
 
-	cv = search_var_err( this, lab, sim->no_search, sim->no_search_up, true, "turbo conditional searching" );
+	cv = search_var_err( this, lab, attr->cont->sim->no_search, attr->cont->sim->no_search_up, true, "turbo conditional searching" );
 	if ( cv == NULL )
 		return 0;
 
 	if ( cv->up->up == NULL )				// variable at root level?
 	{
-		sim->error_hard( "invalid variable or parameter for turbo search",
-						 "check your model structure to prevent this situation",
-						 false,
-						 "element '%s' is at root level (always single-instanced)",
-						 lab );
+		attr->cont->sim->error_hard( "invalid variable or parameter for turbo search",
+									 "check your model structure to prevent this situation",
+									 false,
+									 "element '%s' is at root level (always single-instanced)",
+									 lab );
 		return 0;
 	}
 
@@ -1220,10 +1239,10 @@ double lsd::object::initturbo_cond( const char *lab )
 	auto bit = cv->up->up->b_map.find( cv->up->attr );
 	if ( bit == cv->up->up->b_map.end( ) )
 	{
-		sim->error_hard( "internal problem in LSD",
-						 "if error persists, please contact developers",
-						 true,
-						 "invalid data structure (bridge not found)" );
+		attr->cont->sim->error_hard( "internal problem in LSD",
+									 "if error persists, please contact developers",
+									 true,
+									 "invalid data structure (bridge not found)" );
 		return 0;
 	}
 
@@ -1261,17 +1280,17 @@ double lsd::object::turboset_cond( const char *lab )
 {
 	variable *cv;
 
-	cv = search_var_err( this, lab, sim->no_search, sim->no_search_up, true, "turbo conditional searching" );
+	cv = search_var_err( this, lab, attr->cont->sim->no_search, attr->cont->sim->no_search_up, true, "turbo conditional searching" );
 	if ( cv == NULL )
 		return 0;
 
 	if ( cv->up->up == NULL )				// variable at root level?
 	{
-		sim->error_hard( "invalid variable or parameter for turbo search",
-						 "check your model structure to prevent this situation",
-						 false,
-						 "element '%s' is at root level (always single-instanced)",
-						 lab );
+		attr->cont->sim->error_hard( "invalid variable or parameter for turbo search",
+									 "check your model structure to prevent this situation",
+									 false,
+									 "element '%s' is at root level (always single-instanced)",
+									 lab );
 		return 0;
 	}
 
@@ -1279,10 +1298,10 @@ double lsd::object::turboset_cond( const char *lab )
 	auto bit = cv->up->up->b_map.find( cv->up->attr );
 	if ( bit == cv->up->up->b_map.end( ) )
 	{
-		sim->error_hard( "internal problem in LSD",
-						 "if error persists, please contact developers",
-						 true,
-						 "invalid data structure (bridge not found)" );
+		attr->cont->sim->error_hard( "internal problem in LSD",
+									 "if error persists, please contact developers",
+									 true,
+									 "invalid data structure (bridge not found)" );
 		return 0;
 	}
 
@@ -1304,17 +1323,17 @@ lsd::object *lsd::object::turbosearch_cond( const char *lab, double value )
 	bridge *cb;
 	variable *cv;
 
-	cv = search_var_err( this, lab, sim->no_search, sim->no_search_up, true, "turbo conditional searching" );
+	cv = search_var_err( this, lab, attr->cont->sim->no_search, attr->cont->sim->no_search_up, true, "turbo conditional searching" );
 	if ( cv == NULL )
 		return NULL;
 
 	if ( cv->up->up == NULL )				// variable at root level?
 	{
-		sim->error_hard( "invalid variable or parameter for turbo search",
-						 "check your model structure to prevent this situation",
-						 false,
-						 "element '%s' is at root level (always single-instanced)",
-						 lab );
+		attr->cont->sim->error_hard( "invalid variable or parameter for turbo search",
+									 "check your model structure to prevent this situation",
+									 false,
+									 "element '%s' is at root level (always single-instanced)",
+									 lab );
 		return NULL;
 	}
 
@@ -1322,10 +1341,10 @@ lsd::object *lsd::object::turbosearch_cond( const char *lab, double value )
 	auto bit = cv->up->up->b_map.find( cv->up->attr );
 	if ( bit == cv->up->up->b_map.end( ) )
 	{
-		sim->error_hard( "internal problem in LSD",
-						 "if error persists, please contact developers",
-						 true,
-						 "invalid data structure (bridge not found)" );
+		attr->cont->sim->error_hard( "internal problem in LSD",
+									 "if error persists, please contact developers",
+									 true,
+									 "invalid data structure (bridge not found)" );
 		return NULL;
 	}
 
@@ -1333,11 +1352,11 @@ lsd::object *lsd::object::turbosearch_cond( const char *lab, double value )
 
 	if ( cb->o_map.size( ) == 0 || cb->search_var == NULL || strcmp( cb->search_var, lab ) )
 	{
-		sim->error_hard( "invalid search operation",
-						 "check your equation code to prevent this situation",
-						 true,
-						 "element '%s' is not initialized for turbo conditional search",
-						 lab );
+		attr->cont->sim->error_hard( "invalid search operation",
+									 "check your equation code to prevent this situation",
+									 true,
+									 "element '%s' is not initialized for turbo conditional search",
+									 lab );
 		return NULL;
 	}
 
@@ -1361,7 +1380,7 @@ lsd::variable *lsd::object::add_var( const char *lab, int par, int lags, bool pl
 
 	if ( search_var( this, lab, true, true ) != NULL || search( lab ) != NULL )
 	{
-		sim->plog( "\nWarning: duplicated element name '%s', please rename", lab );
+		attr->cont->sim->plog( "\nWarning: duplicated element name '%s', please rename", lab );
 		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Duplicated element name\" -detail \"Element '%s' name is already used in the model. Please rename it.\n\nThe names of objects, variables, parameters, and functions must be unique.\"", lab );
 		return NULL;
 	}
@@ -1369,7 +1388,7 @@ lsd::variable *lsd::object::add_var( const char *lab, int par, int lags, bool pl
 #ifndef _TERM_
 	if ( ! valid_label( lab ) )
 	{
-		sim->plog( "\nWarning: invalid element name '%s', please rename", lab );
+		attr->cont->sim->plog( "\nWarning: invalid element name '%s', please rename", lab );
 		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid characters in element name\" -detail \"Element '%s' has an invalid name. Please rename it.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
 		return NULL;
 	}
@@ -1377,11 +1396,11 @@ lsd::variable *lsd::object::add_var( const char *lab, int par, int lags, bool pl
 
 	if ( par < 0 || par > 2 )
 	{
-		sim->error_hard( "internal problem in LSD",
-						 "if error persists, please contact developers",
-						 true,
-						 "invalid element type %d",
-						 par );
+		attr->cont->sim->error_hard( "internal problem in LSD",
+									 "if error persists, please contact developers",
+									 true,
+									 "invalid element type %d",
+									 par );
 		return NULL;
 	}
 
@@ -1401,6 +1420,41 @@ lsd::variable *lsd::object::add_var( const char *lab, int par, int lags, bool pl
 
 
 /*************************************************************
+ CHECK_LABEL
+ Control that the label lab does not already exist
+ in the model. Also prevents invalid characters in
+ the names.
+ *************************************************************/
+int lsd::object::check_label( const char *lab )
+{
+	object *cur;
+
+	if ( ! valid_label( lab ) )
+		return 2;				// invalid characters (incl. spaces)
+
+	if ( ! strcmp( lab, attr->label ) )
+		return 1;
+
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+		if ( ! strcmp( lab, cv->attr->label ) )
+			return 1;
+
+	for ( auto cb = b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			cur = attr->cont->sim->blueprint->search( cb->attr );
+		else
+			cur = cb->head;
+
+		if ( cur->check_label( lab ) )
+			return 1;
+	}
+
+	return 0;
+}
+
+
+/*************************************************************
  ADD_VAR
  Add a new element instance identical to the example
  *************************************************************/
@@ -1410,11 +1464,11 @@ lsd::variable *lsd::object::add_var( variable *example )
 
 	if ( search_var( this, example->attr, true, true ) != NULL )
 	{
-		sim->error_hard( "variable or parameter not added",
-						 "choose an unique name for the element",
-						 true,
-						 "element '%s' already exists in object '%s'",
-						 example->attr->label, attr->label );
+		attr->cont->sim->error_hard( "variable or parameter not added",
+									 "choose an unique name for the element",
+									 true,
+									 "element '%s' already exists in object '%s'",
+									 example->attr->label, attr->label );
 		return NULL;
 	}
 
@@ -1448,28 +1502,28 @@ lsd::object *lsd::object::add_obj( const char *lab, int num, bool propagate )
 
 	if ( search( lab ) != NULL )
 	{
-		sim->error_hard( "object not added",
-						 "choose an unique name for the object",
-						 true,
-						 "an object named '%s' already exists in the model",
-						 lab );
+		attr->cont->sim->error_hard( "object not added",
+									 "choose an unique name for the object",
+									 true,
+									 "an object named '%s' already exists in the model",
+									 lab );
 		return NULL;
 	}
 
 	if ( search_var( NULL, lab, true ) != NULL )
 	{
-		sim->error_hard( "object not added",
-						 "choose an unique name for the object",
-						 true,
-						 "an element named '%s' already exists in the model",
-						 lab );
+		attr->cont->sim->error_hard( "object not added",
+									 "choose an unique name for the object",
+									 true,
+									 "an element named '%s' already exists in the model",
+									 lab );
 		return NULL;
 	}
 
 #ifndef _TERM_
 	if ( ! valid_label( lab ) )
 	{
-		sim->plog( "\nWarning: invalid object name '%s', please rename", lab );
+		attr->cont->sim->plog( "\nWarning: invalid object name '%s', please rename", lab );
 		cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Invalid characters in object name\" -detail \"Object '%s' has an invalid name. Please rename it to prevent problems.\n\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces or other characters.\"", lab );
 	}
 #endif
@@ -1492,9 +1546,9 @@ lsd::object *lsd::object::add_obj( const char *lab, int num, bool propagate )
 		// create object instances
 		for ( i = 0; i < num; ++i )
 			if ( i == 0 )
-				cur1 = cur2 = cb->head = new object ( cur, sim, lab );
+				cur1 = cur2 = cb->head = new object ( cur, lab );
 			else
-				cur1 = cur1->next = new object ( cur, sim, lab );
+				cur1 = cur1->next = new object ( cur, lab );
 
 		cb->attr = cur1->attr;
 		cur->b_map.insert( b_pairT ( cb->attr, cb ) );
@@ -1505,7 +1559,7 @@ lsd::object *lsd::object::add_obj( const char *lab, int num, bool propagate )
 
 
 /*************************************************************
- MOVE_OBJ
+ MOVE
  Move object in the model structure. The object
  is placed below the provided dest object
  *************************************************************/
@@ -1515,15 +1569,16 @@ void lsd::object::move( const char *dest )
 	object *cur, *cur1, *d, *o, *s;
 	variable *cv;
 
-	o = sim->root->search( attr );	// pick first model instances
-	d = sim->root->search( dest );
+	o = attr->cont->sim->root->search( attr );	// pick first model instances
+	d = attr->cont->sim->root->search( dest );
 
 	if ( o == NULL || d == NULL || o->search( dest ) != NULL )
 	{
-		sim->error_hard( "missing/invalid source or destination object",
-						 "choose valid object names\nand non-nested destination",
-						 true,
-						 "cannot move object '%s'", attr->label );
+		attr->cont->sim->error_hard( "missing/invalid source or destination object",
+									 "choose valid object names\nand non-nested destination",
+									 true,
+									 "cannot move object '%s'", 
+									 attr->label );
 		return;
 	}
 
@@ -1558,9 +1613,9 @@ void lsd::object::move( const char *dest )
 			{
 				// update linked list of object instances in bridge
 				if ( cur1 == NULL )
-					cur1 = nb->head = new object ( d, d->sim, attr->label, cur->to_compute );
+					cur1 = nb->head = new object ( d, attr->label, cur->to_compute );
 				else
-					cur1 = cur1->next = new object ( d, d->sim, attr->label, cur->to_compute );
+					cur1 = cur1->next = new object ( d, attr->label, cur->to_compute );
 
 				for ( cv = cur->v; cv != NULL; cv = cv->next )
 					cur1->add_var( cv );
@@ -1619,7 +1674,7 @@ void lsd::object::replicate( int num, bool propagate )
 	for ( i = usl; i < num; ++i )
 	{
 		cur1 = cur->next;
-		cur->next = new object ( up, up->sim, attr->label, to_compute );
+		cur->next = new object ( up, attr->label, to_compute );
 		cur->next->next = cur1;
 		cur->to_compute = to_compute;
 
@@ -1639,6 +1694,7 @@ void lsd::object::copy_descendant( object *to )
 {
 	bridge *cb, *cb1;
 	object *cur;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	if ( b == NULL )
@@ -1659,7 +1715,7 @@ void lsd::object::copy_descendant( object *to )
 	else
 		cur = b->head;
 
-	to->b->head = new object ( to, to->sim, cur->attr->label, cur->to_compute );
+	to->b->head = new object ( to, cur->attr->label, cur->to_compute );
 
 	// copy variables of head object
 	for ( cv = cur->v; cv != NULL; cv = cv->next )
@@ -1680,7 +1736,7 @@ void lsd::object::copy_descendant( object *to )
 		else
 			cur = cb1->head;
 
-		cb->head = new object ( to, to->sim, cur->attr->label, cur->to_compute );
+		cb->head = new object ( to, cur->attr->label, cur->to_compute );
 
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 			cb->head->add_var( cv );
@@ -1702,7 +1758,7 @@ void lsd::object::copy_descendant( object *to )
  *************************************************************/
 lsd::object *lsd::object::add_n_objects2( const char *lab, int n, int t_update )
 {
-	return add_n_objects2( lab, n, sim->blueprint->search( lab ), t_update );
+	return add_n_objects2( lab, n, attr->cont->sim->blueprint->search( lab ), t_update );
 }
 
 lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, int t_update )
@@ -1711,6 +1767,7 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 	int i;
 	bridge *cb, *cb1, *cb2;
 	object *cur, *cur1, *last, *first = NULL;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	// check the labels and prepare the bridge to attach to
@@ -1752,7 +1809,7 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 	for ( i = 0; i < n; ++i )
 	{
 		// create a new copy of the object
-		cur = new object ( this, sim, lab );
+		cur = new object ( this, lab );
 
 		if ( net )						// if objects are nodes in a network
 			cur->node = new netnode( this );// insert new nodes in network (as isolated nodes)
@@ -1861,6 +1918,7 @@ void lsd::object::delete_obj( const variable *caller )
 {
 	bridge *cb;
 	object *cur = this;
+	simulation *sim = attr->cont->sim;
 
 	if ( cur == NULL )
 		return;					// ignore deleting null object
@@ -1965,6 +2023,7 @@ void lsd::object::delete_obj( const variable *caller )
  *************************************************************/
 void lsd::object::collect_cemetery( const variable *caller )
 {
+	simulation *sim = attr->cont->sim;
 	variable *cv, *cv1;
 
 	for ( cv = v; cv != NULL; cv = cv1 )	// scan all variables
@@ -2006,15 +2065,15 @@ void lsd::object::collect_cemetery( const variable *caller )
  *************************************************************/
 void lsd::variable::add_cemetery( void )
 {
-	if ( up->sim->cemetery == NULL )
-		up->sim->cemetery = up->sim->last_cemetery = this;
+	if ( attr->cont->sim->cemetery == NULL )
+		attr->cont->sim->cemetery = attr->cont->sim->last_cemetery = this;
 	else
 	{
-		up->sim->last_cemetery->next = this;
-		up->sim->last_cemetery = this;
+		attr->cont->sim->last_cemetery->next = this;
+		attr->cont->sim->last_cemetery = this;
 	}
 
-	up->sim->last_cemetery->next = NULL;
+	attr->cont->sim->last_cemetery->next = NULL;
 	up = NULL;								// remove parent
 }
 
@@ -2044,7 +2103,7 @@ void lsd::simulation::empty_cemetery( void )
  *************************************************************/
 double lsd::object::to_delete( void )
 {
-	return sim->wait_delete == this;
+	return attr->cont->sim->wait_delete == this;
 }
 
 
@@ -2083,7 +2142,7 @@ void lsd::object::delete_var( const char *lab )
  *************************************************************/
 void lsd::object::chg_lab( const char *lab )
 {
-	sim->oa.rename( attr->label, lab );
+	attr->cont->sim->oa.rename( attr->label, lab );
 }
 
 
@@ -2096,7 +2155,7 @@ void lsd::object::chg_var_lab( const char *old, const char *newname )
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 		if ( strcmp( cv->attr->label, old ) == 0 )
 		{
-			sim->va.rename( old, newname );
+			attr->cont->sim->va.rename( old, newname );
 			break;
 		}
 }
@@ -2151,6 +2210,7 @@ bool lsd::object::under_comput_var( const char *lab )
  *************************************************************/
 double lsd::object::cal( object *caller, const char *lab, int lag, bool force_search )
 {
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	if ( sim->quit == 2 )
@@ -2168,6 +2228,7 @@ double lsd::object::cal( object *caller, const char *lab, int lag, bool force_se
 
 double lsd::object::cal( object *caller, const char *lab, int lag )
 {
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	if ( sim->quit == 2 )
@@ -2197,7 +2258,7 @@ double lsd::object::last_cal( const char *lab )
 {
 	variable *cv;
 
-	cv = search_var_err( this, lab, sim->no_search, false, false, "last updating" );
+	cv = search_var_err( this, lab, attr->cont->sim->no_search, false, false, "last updating" );
 	if ( cv == NULL )
 		return NAN;
 
@@ -2214,6 +2275,7 @@ double lsd::object::recal( const char *lab )
 {
 	int i;
 	double app;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	cv = search_var_err( this, lab, sim->no_search, false, false, "recalculating" );
@@ -2255,6 +2317,7 @@ double lsd::object::sum( const char *lab1, int lag, bool cond, const char *lab2,
 	int n, lopc;
 	double tot;
 	object *cur, *cnext;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	cv = search_var_err( this, lab1, sim->no_search, sim->no_search_up, true, "summing" );
@@ -2301,6 +2364,7 @@ double lsd::object::overall_max( const char *lab1, int lag, bool cond, const cha
 	int n, lopc;
 	double tot, temp;
 	object *cur, *cnext;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	cv = search_var_err( this, lab1, sim->no_search, sim->no_search_up, true, "maximizing" );
@@ -2351,6 +2415,7 @@ double lsd::object::overall_min( const char *lab1, int lag, bool cond, const cha
 	int n, lopc;
 	double tot, temp;
 	object *cur, *cnext;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	cv = search_var_err( this, lab1, sim->no_search, sim->no_search_up, true, "minimizing" );
@@ -2398,6 +2463,7 @@ double lsd::object::mav( object *caller, const char *lab, double per, const doub
 {
 	int i, maxlag;
 	double sumv, sumw;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	if ( ( ! sim->use_nan && std::isnan( per ) ) || std::isinf( per ) || abs( per ) < 1 )
@@ -2456,6 +2522,7 @@ double lsd::object::av( const char *lab1, int lag, bool cond, const char *lab2, 
 	int n, lopc;
 	double tot;
 	object *cur, *cnext;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	cv = search_var_err( this, lab1, sim->no_search, sim->no_search_up, true, "averaging" );
@@ -2504,6 +2571,7 @@ double lsd::object::whg_av( const char *lab1, const char *lab2, int lag, bool co
 	int n, lopc;
 	double tot;
 	object *cur, *cnext;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	cv = search_var_err( this, lab1, sim->no_search, sim->no_search_up, true, "weighted averaging" );
@@ -2565,6 +2633,7 @@ double lsd::object::perc( const char *lab1, double p, int lag, bool cond, const 
 	int n, lopc, floor_x;
 	double x, vx, vx1, tmp;
 	object *cur, *cnext;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 	d_vecT vals;
 
@@ -2635,6 +2704,7 @@ double lsd::object::sd( const char *lab1, int lag, bool cond, const char *lab2, 
 	int n, lopc;
 	double x, tot, tot2;
 	object *cur, *cnext;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	cv = search_var_err( this, lab1, sim->no_search, sim->no_search_up, true, "calculating s.d." );
@@ -2683,6 +2753,7 @@ double lsd::object::count( const char *lab1, int lag, bool cond, const char *lab
 {
 	int n, lopc;
 	object *cur, *cnext;
+	simulation *sim = attr->cont->sim;
 
 	cur = search_err( lab1, sim->no_search, sim->no_search_up, "counting" );
 
@@ -2721,6 +2792,7 @@ double lsd::object::count_all( const char *lab1, int lag, bool cond, const char 
 {
 	int n, lopc;
 	object *cur, *cnext;
+	simulation *sim = attr->cont->sim;
 
 	if ( up->b->head != NULL )
 		cur = up->b->head->search_err( lab1, sim->no_search, sim->no_search_up, "counting all" );// pick always first instance
@@ -2774,6 +2846,7 @@ double lsd::object::stat( const char *lab1, double *r, int lag, bool cond, const
 	int n, lopc;
 	double val, r_temp[ 7 ];
 	object *cur, *cnext;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 	d_vecT vals;
 
@@ -2910,6 +2983,7 @@ lsd::object *lsd::object::lsdqsort( const char *obj, const char *var, const char
 	int num, i;
 	bridge *cb;
 	object *cur;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 	bool useNodeId = ( var == NULL ) ? true : false;		// sort on node id and not on variable
 
@@ -3032,6 +3106,7 @@ lsd::object *lsd::object::lsdqsort( const char *obj, const char *var1, const cha
 	int num, i;
 	bridge *cb;
 	object *cur;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	cb = search_bridge( obj, true );			// try to find the bridge
@@ -3131,6 +3206,7 @@ lsd::object *lsd::object::draw_rnd( const char *lo, const char *lv, int lag )
 {
 	double a, b;
 	object *cur, *cur1, *cnext;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	cv = search_var_err( this, lv, sim->no_search, sim->no_search_up, true, "random drawing" );
@@ -3192,6 +3268,7 @@ lsd::object *lsd::object::draw_rnd( const char *lab )
 {
 	double a, b;
 	object *cur, *cur1;
+	simulation *sim = attr->cont->sim;
 
 	cur1 = cur = search_err( lab, sim->no_search, sim->no_search_up, "random drawing" );
 
@@ -3235,6 +3312,7 @@ lsd::object *lsd::object::draw_rnd( const char *lo, const char *lv, int lag, dou
 {
 	double a, b;
 	object *cur, *cur1, *cnext;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	if ( tot <= 0 )
@@ -3286,6 +3364,7 @@ lsd::object *lsd::object::draw_rnd( const char *lo, const char *lv, int lag, dou
 double lsd::object::write( const char *lab, double value, int time, int lag )
 {
 	int i, eff_lag, eff_time;
+	simulation *sim = attr->cont->sim;
 	variable *cv;
 
 	if ( ( ! sim->use_nan && std::isnan( value ) ) || std::isinf( value ) )
@@ -3465,8 +3544,9 @@ double lsd::object::write( const char *lab, double value, int time, int lag )
  *************************************************************/
 double lsd::object::increment( const char *lab, double value )
 {
-	variable *cv;
 	double new_value;
+	simulation *sim = attr->cont->sim;
+	variable *cv;
 
 	if ( ( ! sim->use_nan && std::isnan( value ) ) || std::isinf( value ) )
 	{
@@ -3510,8 +3590,9 @@ double lsd::object::increment( const char *lab, double value )
  *************************************************************/
 double lsd::object::multiply( const char *lab, double value )
 {
-	variable *cv;
 	double new_value;
+	simulation *sim = attr->cont->sim;
+	variable *cv;
 
 	if ( ( ! sim->use_nan && std::isnan( value ) ) || std::isinf( value ) )
 	{
@@ -3668,11 +3749,11 @@ void lsd::object::collect_inst( o_setT &list )
 	auto res = list.emplace( this );
 	if ( ! res.second )
 	{
-		sim->error_hard( "LSD internal error",
-						 "disable pointer checking by defining 'NO_POINTER_CHECK'",
-						 false,
-						 "object '%s' cannot be collected for pointer checking",
-						 attr->label );
+		attr->cont->sim->error_hard( "LSD internal error",
+									 "disable pointer checking by defining 'NO_POINTER_CHECK'",
+									 false,
+									 "object '%s' cannot be collected for pointer checking",
+									 attr->label );
 		return;
 	}
 
@@ -3695,6 +3776,7 @@ double lsd::object::interact( const char *text, double v, double *tv, int i, int
 #ifndef _TERM_
 	int n;
 	double app = v;
+	simulation *sim = attr->cont->sim;
 
 	if ( sim->quit == 0 )
 	{
@@ -3750,10 +3832,10 @@ int lsd::object::logic_op_code( const char *lop, const char *errmsg )
 	if ( lopp != logic_ops_map.end( ) )
 		return lopp->second;
 
-	sim->error_hard( "invalid logical relational operator",
-					 "use a valid operator (== != > >= < <=)",
-					 false,
-					 "cannot compare with '%s' for %s", lop, errmsg );
+	attr->cont->sim->error_hard( "invalid logical relational operator",
+								 "use a valid operator (== != > >= < <=)",
+								 false,
+								 "cannot compare with '%s' for %s", lop, errmsg );
 	return -1;
 }
 

@@ -79,15 +79,15 @@ void lsd::object::report( void )
 
 	file_error = 0;
 
-	if ( ! sim->conf_ok )
+	if ( ! gui::sim.conf_ok )
 	{
 		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to create a report.\"" );
 		return;
 	}
 
-	snprintf( sim->rep_file, MAX_PATH_LENGTH, "report_%s.html", strlen( sim->conf_name ) > 0 ? sim->conf_name : "model" );
+	snprintf( gui::sim.rep_file, MAX_PATH_LENGTH, "report_%s.html", strlen( gui::sim.conf_name ) > 0 ? gui::sim.conf_name : "model" );
 
-	cmd( "set mrep %s", sim->rep_file );
+	cmd( "set mrep %s", gui::sim.rep_file );
 	cmd( "set res [ file exists $mrep ]" );
 	if ( gui::get_bool( "res" ) )
 	{
@@ -99,7 +99,7 @@ void lsd::object::report( void )
 		gui::eval_str( "[ pwd ]", path_rep, MAX_PATH_LENGTH );
 	}
 	else
-		strcpyn( path_rep, sim->conf_path, MAX_PATH_LENGTH );
+		strcpyn( path_rep, gui::sim.conf_path, MAX_PATH_LENGTH );
 
 	Tcl_LinkVar( gui::interp, "detail", ( char * ) &detail, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( gui::interp, "ini", ( char * ) &ini, TCL_LINK_BOOLEAN );
@@ -112,7 +112,7 @@ void lsd::object::report( void )
 	ini = true;
 	detail = true;
 	extra = false;
-	cmd( "set reptit \"%s\"", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
+	cmd( "set reptit \"%s\"", strlen( gui::sim.conf_name ) > 0 ? gui::sim.conf_name : NO_CONF_NAME );
 	cmd( "set lmenu 1" );
 	cmd( "set html2 1" );
 	cmd( "set tit2 \"Comments\"" );
@@ -194,7 +194,7 @@ void lsd::object::report( void )
 		if ( app == NULL || strlen( app ) == 0 )
 			goto here_create_report;
 
-		strcpyn( sim->rep_file, app, MAX_PATH_LENGTH );
+		strcpyn( gui::sim.rep_file, app, MAX_PATH_LENGTH );
 		gui::eval_str( "[ file dirname  \"$res\" ]", path_rep, MAX_PATH_LENGTH );
 	}
 
@@ -229,7 +229,7 @@ void lsd::object::report( void )
 	cmd( "set l $lmenu" );
 	lmenu = gui::get_int( "l" );
 
-	frep = create_frames( path_rep, sim->rep_file );
+	frep = create_frames( path_rep, gui::sim.rep_file );
 
 	if ( frep == NULL )
 	{
@@ -417,21 +417,21 @@ void lsd::object::report( void )
 
 	if ( gui::stop )
 	{
-		cmd( "set fullFileName [ file join \"%s\" \"%s\" ]", path_rep, sim->rep_file );
+		cmd( "set fullFileName [ file join \"%s\" \"%s\" ]", path_rep, gui::sim.rep_file );
 		remove( gui::get_str( "fullFileName" ) );
-		cmd( "set fullFileName [ file join \"%s\" \"head_%s\" ]", path_rep, sim->rep_file );
+		cmd( "set fullFileName [ file join \"%s\" \"head_%s\" ]", path_rep, gui::sim.rep_file );
 		remove( gui::get_str( "fullFileName" ) );
-		cmd( "set fullFileName [ file join \"%s\" \"body_%s\" ]", path_rep, sim->rep_file );
+		cmd( "set fullFileName [ file join \"%s\" \"body_%s\" ]", path_rep, gui::sim.rep_file );
 		remove( gui::get_str( "fullFileName" ) );
 	}
 	else
 	{
 		if ( strlen( path_rep ) > 0 )
-			gui::plog( "\nReport saved in file: %s/%s\n", path_rep, sim->rep_file );
+			gui::plog( "\nReport saved in file: %s/%s\n", path_rep, gui::sim.rep_file );
 		else
-			gui::plog( "\nReport saved in file: %s\n", sim->rep_file );
+			gui::plog( "\nReport saved in file: %s\n", gui::sim.rep_file );
 
-		cmd( "open_browser \"%s\" \"%s\"", path_rep, sim->rep_file );
+		cmd( "open_browser \"%s\" \"%s\"", path_rep, gui::sim.rep_file );
 	}
 
 	end:
@@ -604,7 +604,7 @@ void lsd::variable::write_var( FILE *frep )
 		fprintf( frep,"<I>Using: &nbsp;</I>" );
 
 		found = false;
-		up->sim->root->find_using( this, frep, & found );
+		gui::sim.root->find_using( this, frep, & found );
 
 		if ( ! found )
 			fprintf( frep, "(none)" );
@@ -1915,7 +1915,7 @@ void lsd::object::tex_report_head( FILE *f, bool table )
 	fprintf( f, "\\newcommand{\\hrf}[2] {\\hyperref[#1]{\\texttt{\\color{blue}{\\detokenize{#2}}}}}\n" );
 	fprintf( f, "\\setlength{\\parindent}{0cm}\n\n" );
 
-	fprintf( f, "\\title{Model: %s}\n", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
+	fprintf( f, "\\title{Model: %s}\n", strlen( gui::sim.conf_name ) > 0 ? gui::sim.conf_name : NO_CONF_NAME );
 	fprintf( f, "\\author{Automatically generated LSD report}\n" );
 	fprintf( f, "\\date{}\n\n" );
 

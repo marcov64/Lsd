@@ -243,17 +243,17 @@ void lsd::simulation::unload_configuration( bool full )
 	empty_varattributes( this );
 	empty_objattributes( this );
 
-	root = new object ( NULL, this, "Root" );
+	root = new object ( NULL, ROOT_NAME, true, this );
 	reset_blueprint( NULL );
 
 	if ( desc != NULL )
-		desc->add_descr( "Root" );				// ensure root has description
+		desc->add_descr( ROOT_NAME );			// ensure root has description
 
 	save_ok = true;								// valid structure to save
 	sens = NULL;								// no sensitivity data
 
 	eff_t = 0;									// reset steps counter
-	nodesSerial = 0;							// reset network node serial number
+	node_serial = 0;							// reset network node serial number
 
 	if ( full )									// full unload? (no new config?)
 	{
@@ -319,7 +319,7 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 			if ( i != 0 )
 				return i;
 
-			if ( ! quick && sim == sims[ 0 ] && desc != NULL && ! cn.child( "description" ).empty( ) )
+			if ( ! quick && attr->cont->sim == sims[ 0 ] && desc != NULL && ! cn.child( "description" ).empty( ) )
 			{
 				dsc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
 				desc->add_descr( str, 4, dsc );
@@ -365,7 +365,7 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 
 					if ( ! quick )
 					{
-						if ( sim == sims[ 0 ] && desc != NULL && ! cn.child( "description" ).empty( ) )
+						if ( attr->cont->sim == sims[ 0 ] && desc != NULL && ! cn.child( "description" ).empty( ) )
 						{
 							dsc = strdecdata( NULL, cn.child( "description" ).child( "text" ).text( ).get( ) );
 							init = strdecdata( NULL, cn.child( "description" ).child( "initialization" ).text( ).get( ) );
@@ -388,7 +388,7 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 								val = strtodsplit( cns.child( "values" ).text( ).get( ), ',' );
 
 								if ( val.size( ) > 1 )
-									new sensitivity( str, sim, type, 0, integer, val.size( ), &val );
+									new sensitivity( str, attr->cont->sim, type, 0, integer, val.size( ), &val );
 							}
 							else
 								if ( type == 0 )
@@ -406,14 +406,14 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 										val = strtodsplit( sn.text( ).get( ), ',' );
 
 										if ( val.size( ) > 1 )
-											new sensitivity( str, sim, type, i - 1, integer, val.size( ), &val );
+											new sensitivity( str, attr->cont->sim, type, i - 1, integer, val.size( ), &val );
 									}
 								}
 						}
 					}
 				}
 
-				if ( sim == sims[ 0 ] && da != NULL && ! cn.child( "assimilation" ).empty( ) )
+				if ( attr->cont->sim == sims[ 0 ] && da != NULL && ! cn.child( "assimilation" ).empty( ) )
 				{
 					x_nodeT cna = cn.child( "assimilation" );
 
@@ -1021,7 +1021,7 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 	// save son objects recursively
 	for ( cb = b; cb != NULL; cb = cb->next )
 		if ( cb->head == NULL )
-			sim->blueprint->search( cb->attr )->save_xml_struct( n, node_serial, quick );
+			attr->cont->sim->blueprint->search( cb->attr )->save_xml_struct( n, node_serial, quick );
 		else
 			cb->head->save_xml_struct( n, node_serial, quick );
 
@@ -1153,7 +1153,7 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 		}
 
 		// add sensitivity analysis data
-		for ( auto cs = sim->sens; cs != NULL; cs = cs->next )
+		for ( auto cs = attr->cont->sim->sens; cs != NULL; cs = cs->next )
 			if ( strcmp( cs->label, cv->attr->label ) == 0 )
 			{
 				if ( cs->integer )
@@ -1631,7 +1631,7 @@ bool lsd::object::load_txt_insts( const char *file_name, FILE *f )
 	}
 
 	if ( up == NULL )	// this is the root, and therefore the end of the loading
-		set_blueprint( sim->blueprint );
+		set_blueprint( attr->cont->sim->blueprint );
 
 	return true;
 }
@@ -1862,7 +1862,7 @@ void lsd::object::save_txt_struct( FILE *f, const char *tab )
 		fprintf( f, "%sSon: %s\n", tab1, cb->attr->label );
 
 		if ( cb->head == NULL )
-			sim->blueprint->search( cb->attr )->save_txt_struct( f, tab1 );
+			attr->cont->sim->blueprint->search( cb->attr )->save_txt_struct( f, tab1 );
 		else
 			cb->head->save_txt_struct( f, tab1 );
 	}
@@ -2037,12 +2037,12 @@ void lsd::variable::save_single( void )
 
 	set_lab_tit( );
 	snprintf( fn, MAX_PATH_LENGTH, "%s_%s-%d_%d_seed-%d.res",
-			  attr->label, lab_tit, start, end, up->sim->seed - 1 );
+			  attr->label, lab_tit, start, end, attr->cont->sim->seed - 1 );
 	f = fopen( fn, "wt" );			// use text mode for Windows better compatibility
 
 	fprintf( f, "%s %s (%d %d)\t\n", attr->label, lab_tit, start, end );
 
-	for ( i = 0; i <= up->sim->t - 1; ++i )
+	for ( i = 0; i <= attr->cont->sim->t - 1; ++i )
 		if ( i >= start && i <= end && ! std::isnan( data[ i - start ] ) )// save NaN as n/a
 			fprintf( f,"%lf\t\n", data[ i - start ] );
 		else
@@ -2285,9 +2285,10 @@ void lsd::result::title_recursive( object *r, bool header )
 void lsd::result::write_title( const char *lab, const char *lab_tit, object *par, int tag, bool header, int start, int end )
 {
 	bool just_name = false;
-	
-	if ( par == NULL && sim->par_map.find( "lab" ) != sim->par_map.end( ) )
-		par = sim->root->search( sim->par_map[ lab ].c_str( ) );
+	varattr *va;
+
+	if ( par == NULL && ( va = sim->va.search( lab ) ) != NULL )
+		par = sim->root->search( va->par_attr->label );
 
 	// prevent adding suffix to single objects
 	if ( tag == 0 && ( ! strcmp( lab_tit, "1" ) || ! strcmp( lab_tit, "1_1" ) || ! strcmp( lab_tit, "1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1_1_1" ) || ! strcmp( lab_tit, "1_1_1_1_1_1_1_1_1_1" ) ) && ( par == NULL || par->hyper_next( ) == NULL ) )

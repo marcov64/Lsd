@@ -133,17 +133,15 @@
 /*************************************************************
  VARATTR constructor
  *************************************************************/
-lsd::varattr::varattr( simulation *sim, const char *_label, int _num_lag )
+lsd::varattr::varattr( varattributes *_cont, objattr *_par_attr, const char *_label, int _num_lag )
 {
-	container = & ( sim->va );
+	cont = _cont;
+	par_attr = _par_attr;
 	num_lag = _num_lag;
 	label_size = strlen( _label );
 
 	label = new char [ label_size + 1 ];
 	strcpy( label, _label );
-
-	if ( container->sim == NULL )
-		container->sim = sim;
 }
 
 
@@ -170,7 +168,8 @@ lsd::varattr::varattr( const varattr & a )
 	dummy = a.dummy;
 	eq_func = a.eq_func;
 
-	container = a.container;
+	cont = a.cont;
+	par_attr = a.par_attr;
 	label_size = a.label_size;
 
 	label = new char [ a.label_size + 1 ];
@@ -183,10 +182,19 @@ lsd::varattr::varattr( const varattr & a )
  *************************************************************/
 lsd::varattr::~varattr( void )
 {
-	if ( container != NULL )
-		container->attr_map.erase( label );
+	if ( cont != NULL )
+		cont->attr_map.erase( label );
 
 	delete [ ] label;
+}
+
+
+/*************************************************************
+ VARATTRIBUTES constructor
+ *************************************************************/
+lsd::varattributes::varattributes( simulation *_sim )
+{
+	sim = _sim;
 }
 
 
@@ -234,19 +242,21 @@ lsd::varattr *lsd::varattributes::search( const char *lab )
 /*************************************************************
  ADD
  *************************************************************/
-lsd::varattr *lsd::varattributes::add( simulation *sim, const char *lab, int lags )
+lsd::varattr *lsd::varattributes::add( objattr *par_attr, const char *lab, int lags )
 {
-	if ( sim == NULL || lab == NULL || strlen( lab ) == 0 )
-		throw 0;
-
 	auto d = attr_map.find( lab );
-	if ( d != attr_map.end( ) )
-		return & ( *( d->second ) );
 
 	// prevent concurrent use by more than one thread
 	rec_lguardT lock( vattr_lck );
 
-	attr.emplace_back( sim, lab, lags );
+	if ( d != attr_map.end( ) )
+	{
+		d->second->par_attr = par_attr;
+		d->second->num_lag = lags;
+		return & ( *( d->second ) );
+	}
+
+	attr.emplace_back( this, par_attr, lab, lags );
 	attr_map.emplace( lab, --attr.end( ) );
 
 	return & attr.back( );
@@ -284,6 +294,8 @@ lsd::varattr *lsd::varattributes::rename( const char *old_lab, const char *new_l
  *************************************************************/
 lsd::variable::variable( object *_up, const char *_label, int _param, int _num_lag, bool _plot, char _deb_mode )
 {
+	varattributes *va = & _up->attr->cont->sim->va;
+
 	if ( _param != 0 )
 		_num_lag = 0;
 
@@ -301,11 +313,12 @@ lsd::variable::variable( object *_up, const char *_label, int _param, int _num_l
 	else
 		val = NULL;
 
-	if ( ( attr = _up->sim->va.search( _label ) ) == NULL )
-		attr = up->sim->va.add( _up->sim, _label, _num_lag );
+	if ( ( attr = va->search( _label ) ) == NULL )
+		attr = va->add( _up->attr, _label, _num_lag );
 	else
 	{
-		attr->container = & ( _up->sim->va );
+		attr->par_attr = _up->attr;
+		attr->cont = va;
 		attr->num_lag = _num_lag;
 	}
 
@@ -321,7 +334,7 @@ lsd::variable::variable( object *_up, const char *_label, int _param, int _num_l
  *************************************************************/
 lsd::variable::variable( const variable & v )
 {
-	plot = ( ! v.up->sim->running ) ? v.plot : false;
+	plot = ( ! v.attr->cont->sim->running ) ? v.plot : false;
 	ini_val = v.ini_val;
 	param = v.param;
 	attr = v.attr;
@@ -355,7 +368,7 @@ lsd::variable::~variable( void )
 void lsd::variable::delete_var( bool no_lock )
 {
 
-	if ( up != NULL && up->sim->running && ! no_lock )
+	if ( attr->cont->sim->running && ! no_lock )
 	{
 		// prevent concurrent use by more than one thread
 		rec_lguardT lock( var_comp_lck );
@@ -413,7 +426,7 @@ double lsd::variable::cal( object *caller, int lag )
 {
 	int i, eff_lag;
 	double app;
-	simulation *sim = up->sim;
+	simulation *sim = attr->cont->sim;
 
 #ifndef _TERM_
 	bool tit_updated;
@@ -745,7 +758,7 @@ void lsd::worker::cal_worker( void )
 {
 	int i;
 	double app;
-	simulation *sim = v->up->sim;
+	simulation *sim = v->attr->cont->sim;
 
 	// create try-catch block to capture exceptions in thread and reroute to main thread
 	try
@@ -958,9 +971,9 @@ void lsd::worker::signal( int sig )
 	}
 
 	if ( v != NULL && v->attr != NULL && v->attr->label != NULL )
-		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'\n(simulation %d). Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, v->attr->label, v->up->attr->label, v->up->sim->nsim );
+		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received while parallel-computing the equation\nfor '%s' in object '%s'\n(simulation %d). Disable parallel computation for this variable\nor check your code to prevent this situation.", signame, v->attr->label, v->up->attr->label, v->attr->cont->sim->nsim );
 	else
-		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received by a parallel worker thread\n(simulation %d).\nDisable parallel computation to prevent this situation.", signame, v->up->sim->nsim );
+		snprintf( err_msg1, MAX_BUFF_SIZE, "\n\n%s: signal received by a parallel worker thread\n(simulation %d).\nDisable parallel computation to prevent this situation.", signame, v->attr->cont->sim->nsim );
 
 	// signal & kill thread
 	signum = sig;
@@ -1006,7 +1019,7 @@ bool lsd::worker::check( void )
 	if ( running && ! errored )				// nothing to do?
 		return true;
 
-	simulation *sim = v->up->sim;
+	simulation *sim = v->attr->cont->sim;
 
 	// only process first worker crash
 	l_guardT lock_crash( sim->wrk_crash_lck );

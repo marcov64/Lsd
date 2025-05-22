@@ -28,7 +28,6 @@
 	public: \
 	bool sort_listbox( int box, int order ); \
 	int check_affected( int level, int affected[ ] ); \
-	int check_label( const char *lab ); \
 	int compute_copyfrom( const char *parWnd ); \
 	int debugger( object *c, const char *lab, double *res, bool interact = false, const char *hl_var = "" ); \
 	object *restore_pos( void ); \
@@ -228,7 +227,7 @@
 								"#", "#", "#", \
 								"#", "#", "#", \
 								"#", "#", "#", \
-								"Root", "1", "0", \
+								ROOT_NAME, "1", "0", \
 								"0", "1" }
 #define MODEL_OPTIONS_TYPE { 's', 's', 's', \
 							 'g', 'g', 'g', \

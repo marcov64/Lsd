@@ -141,12 +141,12 @@ namespace lsd
 					res = attr->min_val;
 		}
 		else
-			if ( up->sim->quit == 0 && ( ( ! up->sim->use_nan && std::isnan( res ) ) || std::isinf( res ) ) )
-				up->sim->error_hard( "invalid equation result",
-									 "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation",
-									 true,
-									 "equation for '%s' produces the invalid value '%lf' at time step %d",
-									 attr->label, res, up->sim->t );
+			if ( attr->cont->sim->quit == 0 && ( ( ! attr->cont->sim->use_nan && std::isnan( res ) ) || std::isinf( res ) ) )
+				attr->cont->sim->error_hard( "invalid equation result",
+											 "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation",
+													   true,
+											 "equation for '%s' produces the invalid value '%lf' at time step %d",
+											  attr->label, res, attr->cont->sim->t );
 
 		return res;
 	}
@@ -173,10 +173,10 @@ namespace lsd
 					cv->up->cal( up, lab, 0, true );
 			}
 			else
-				up->sim->error_hard( "updater variable not found",
-									 "check updater variable name or create it in model structure",
-									 false,
-									 "variable '%s' is missing", lab );
+				attr->cont->sim->error_hard( "updater variable not found",
+													   "check updater variable name or create it in model structure",
+													   false,
+													   "variable '%s' is missing", lab );
 		}
 
 		return val[ 0 ];

@@ -786,7 +786,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			if ( r->up == NULL )
 			{
-				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Cannot move 'Root' object\" -detail \"Consider, if appropriate, moving its descendants, one at a time.\"" );
+				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Cannot move '%s' object\" -detail \"Consider, if appropriate, moving its descendants, one at a time.\"", ROOT_NAME );
 				goto endmove;
 			}
 
@@ -823,7 +823,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			choice = 0;
 
-			cmd( "if { [ $TT.v.t.lb size ] == 0 } { ttk::messageBox -parent . -type ok -title Error -icon error -message \"Cannot move single 'Root' descendant\" -detail \"Consider, if appropriate, creating additional objects under 'Root' before moving this one.\"; set choice 2 }" );
+			cmd( "if { [ $TT.v.t.lb size ] == 0 } { ttk::messageBox -parent . -type ok -title Error -icon error -message \"Cannot move single '%s' descendant\" -detail \"Consider, if appropriate, creating additional objects under '%s' before moving this one.\"; set choice 2 }", ROOT_NAME, ROOT_NAME );
 
 			while ( choice == 0 )
 				Tcl_DoOneEvent( 0 );
@@ -921,9 +921,9 @@ lsd::object *gui::operate( lsd::object *r )
 			else
 				cur2 = NULL;
 
-			if ( ! strcmp( r->attr->label, "Root" ) )	// cannot change Root
+			if ( ! strcmp( r->attr->label, ROOT_NAME ) )	// cannot change root
 			{
-				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Cannot change Root\" -detail \"Please select an existing object or insert a new one before using this option.\"" );
+				cmd( "ttk::messageBox -parent . -type ok -title Error -icon error -message \"Cannot change '%s'\" -detail \"Please select an existing object or insert a new one before using this option.\"", ROOT_NAME );
 				break;
 			}
 
@@ -1978,7 +1978,7 @@ lsd::object *gui::operate( lsd::object *r )
 			for ( cur = r; cur != NULL; cur = cur->hyper_next( ) )
 				cur->delete_var( lab_old );
 
-			unsaved_change( true );		// signal unsaved change
+			unsaved_change( true );				// signal unsaved change
 			redrawRoot = redrawStruc = true;	// force browser/structure redraw
 
 		break;
@@ -3170,7 +3170,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			if ( r->up == NULL )
 			{
-				cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Cannot create instances of 'Root' object\" -detail \"Consider, if necessary, to add a new object here and moving all descendants of 'Root' to it. this new object can, then, be multiplied in many instances.\"" );
+				cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Cannot create instances of '%s' object\" -detail \"Consider, if necessary, to add a new object here and moving all descendants of '%s' to it. this new object can, then, be multiplied in many instances.\"", ROOT_NAME, ROOT_NAME );
 				goto endinst;
 			}
 
@@ -3508,7 +3508,7 @@ lsd::object *gui::operate( lsd::object *r )
 			}
 
 			cmd( "set bidi \"\"" );
-			cmd( "set a [ lsort -dictionary [ concat Root $modObj $modElem ] ]" );
+			cmd( "set a [ lsort -dictionary [ concat %s $modObj $modElem ] ]", ROOT_NAME );
 
 			cmd( "newtop .srch \"Find\" { set choice 2 }" );
 
@@ -3557,7 +3557,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cur = NULL;
 			cv = NULL;
-			if ( eval_bool( "\"$bidi\" eq \"Root\"" ) )
+			if ( eval_bool( "\"$bidi\" eq \"$rootname\"" ) )
 				cur = sim.root;
 			else
 				if ( eval_bool( "\"$bidi\" in $modObj" ) )
@@ -4540,7 +4540,7 @@ lsd::object *gui::operate( lsd::object *r )
 			// form full name
 			lab1 = get_str( "res" );
 			lab2 = get_str( "path" );
-			
+
 			if ( sens_file != NULL )
 				delete sens_file;
 
@@ -4599,10 +4599,10 @@ lsd::object *gui::operate( lsd::object *r )
 			// form full name
 			lab1 = get_str( "res" );
 			lab2 = get_str( "path" );
-			
+
 			if ( sens_file != NULL )
 				delete sens_file;
-			
+
 			sz = strlen( lab1 ) + strlen( lab2 ) + 5;
 			sens_file = new char [ sz ];
 			snprintf( sens_file, sz, "%s%s%s.sa", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );

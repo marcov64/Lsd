@@ -91,7 +91,7 @@ void lsd::object::set_obj_number( void )
 	level = lowest_level = 1;
 	max_depth = 0;							// start with all levels open
 
-	cmd( "newtop .inin \"%s%s - LSD Object Number Editor\" { set choice 1; set result -1 }", gui::unsaved_change( ) ? "*" : " ", strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
+	cmd( "newtop .inin \"%s%s - LSD Object Number Editor\" { set choice 1; set result -1 }", gui::unsaved_change( ) ? "*" : " ", strlen( gui::sim.conf_name ) > 0 ? gui::sim.conf_name : NO_CONF_NAME );
 
 	cmd( "ttk::frame .inin.obj" );
 	cmd( "set f .inin.obj" );
@@ -504,7 +504,7 @@ int lsd::object::compute_copyfrom( const char *parWnd )
 
 	if ( up == NULL )
 	{
-		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Element in Root object\" -detail \"The Root object is always single-instanced, so any element contained in it has only one instance.\"" );
+		cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Element in '%s' object\" -detail \"The '%s' object is always single-instanced, so any element contained in it has only one instance.\"", ROOT_NAME, ROOT_NAME );
 		return 1;
 	}
 
@@ -840,7 +840,7 @@ int lsd::object::check_affected( int level, int affected[ ] )
 
 	for ( i = 1, res = 1, cur = up; i <= level && res == 1; ++i, cur = cur->up )
 	{
-		// don't check if it is in Root or if there is no constraint
+		// don't check if it is in root or if there is no constraint
 		if ( affected[ i ] != -1 && cur->up != NULL )
 		{
 			cur1 = cur->up->search( cur->attr );

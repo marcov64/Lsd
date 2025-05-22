@@ -136,7 +136,7 @@
  *************************************************************/
 lsd::netlink::netlink( object *origNode, object *destNode, double linkWeight, double destProb )
 {
-	time = origNode->sim->t;						// save creation time
+	time = origNode->attr->cont->sim->t;			// save creation time
 
 	if ( origNode->node == NULL )					// origin is not yet a node?
 		origNode->node = new netnode( origNode );	// create one
@@ -228,15 +228,13 @@ lsd::netlink *lsd::object::add_link_net( const char *nodeName, long startNode, l
 	cur = turbosearch( nodeName, ( double ) startNode );// searches first node object
 
 	if ( cur->node == NULL || cur->node->id != startNode )
-		sim->plog( "\nWarning: invalid %s origin (%ld to %ld), ignored",
-				   edge ? "edge" : "arc", startNode, endNode );
+		attr->cont->sim->plog( "\nWarning: invalid %s origin (%ld to %ld), ignored", edge ? "edge" : "arc", startNode, endNode );
 	else
 	{
 		cur1 = turbosearch( nodeName, ( double ) endNode );// searches second node object
 
 		if ( cur1->node == NULL || cur1->node->id != endNode )
-			sim->plog( "\nWarning: invalid %s destination (%ld to %ld), ignored",
-					   edge ? "edge" : "arc", startNode, endNode );
+			attr->cont->sim->plog( "\nWarning: invalid %s destination (%ld to %ld), ignored", edge ? "edge" : "arc", startNode, endNode );
 		else
 		{
 			curl = cur->add_link_net( cur1, weight, probTo );// add link(s) to network
@@ -308,15 +306,15 @@ lsd::netlink *lsd::object::draw_link_net( void )
 
 	if ( ! std::isfinite( sum ) || sum <= 0 )		// check valid probabilities
 	{
-		sim->error_hard( "invalid network operation",
-						 "check your configuration (parameter value) or\ncode (equation constant) to prevent this situation",
-						 false,
-						 "probabilities are invalid for link drawing" );
+		attr->cont->sim->error_hard( "invalid network operation",
+									 "check your configuration (parameter value) or\ncode (equation constant) to prevent this situation",
+									 false,
+									 "probabilities are invalid for link drawing" );
 		return node->first;
 	}
 
 	do
-		drawPoint = sim->_ran1_( ) * sum;
+		drawPoint = attr->cont->sim->_ran1_( ) * sum;
 	while ( drawPoint == sum );						// avoid ran1 == 1
 
 	for ( accProb = 0, cur = cur1 = node->first;	// accumulate probabilities
@@ -339,8 +337,8 @@ lsd::netnode::netnode( object *_up, long nodeId, const char *nodeName, double no
 {
 	up = _up;
 	id = nodeId;
-	time = up->sim->t;								// save creation time
-	serial = up->sim->nodesSerial++;
+	time = up->attr->cont->sim->t;					// save creation time
+	serial = up->attr->cont->sim->node_serial++;
 	prob = nodeProb;
 
 	if ( id < 0 )									// ID assigned?
@@ -353,7 +351,7 @@ lsd::netnode::netnode( object *_up, long nodeId, const char *nodeName, double no
 	}
 	else
 		if ( strcmp( nodeName, "" ) )
-			up->sim->plog( "\nWarning: network node name '%s' is invalid, ignored.", nodeName );
+			up->attr->cont->sim->plog( "\nWarning: network node name '%s' is invalid, ignored.", nodeName );
 }
 
 
@@ -383,7 +381,7 @@ lsd::object *lsd::object::add_node_net( long id, const char nodeName[ ],
 	if ( node != NULL )
 	{
 		if ( ! silent )
-			sim->plog( "\nWarning: existing network data discarded from object." );
+			attr->cont->sim->plog( "\nWarning: existing network data discarded from object." );
 
 		serialOld = node->serial;					// save serial number
 		delete node;
@@ -395,7 +393,7 @@ lsd::object *lsd::object::add_node_net( long id, const char nodeName[ ],
 	if ( serialOld > 0 )
 	{
 		node->serial = serialOld;
-		sim->nodesSerial--;
+		attr->cont->sim->node_serial--;
 	}
 
 	return this;
@@ -446,8 +444,7 @@ lsd::object *lsd::object::search_node_net( const char *lab, long destId )
 {
 	object *cur;
 
-	for ( cur = search_err( lab, sim->no_search, sim->no_search_up,
-							"searching net node" );
+	for ( cur = search_err( lab, attr->cont->sim->no_search, attr->cont->sim->no_search_up, "searching net node" );
 		  cur != NULL && cur->node != NULL && cur->node->id != destId;
 		  cur = BROTHER( cur ) );
 	if ( cur == NULL || cur->node == NULL )			// no network structure?
@@ -472,8 +469,7 @@ double lsd::object::stats_net( const char *lab, double *r )
 {
 	r[ 0 ] = r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = r[ 5 ] = 0;
 
-	object *cur = search_err( lab, sim->no_search, sim->no_search_up,
-							  "stating net" );
+	object *cur = search_err( lab, attr->cont->sim->no_search, attr->cont->sim->no_search_up, "stating net" );
 
 	if ( cur == NULL || cur->node == NULL )			// invalid network node?
 		return NAN;
@@ -512,7 +508,7 @@ lsd::object *lsd::object::draw_node_net( const char *lab )
 	object *cur, *cur1, *cur2;
 
 	// make sure this is being called from the parent (container) object
-	cur1 = cur = search_err( lab, sim->no_search, sim->no_search_up, "drawing net node" );
+	cur1 = cur = search_err( lab, attr->cont->sim->no_search, attr->cont->sim->no_search_up, "drawing net node" );
 	if ( cur == NULL )
 		return NULL;
 
@@ -522,15 +518,15 @@ lsd::object *lsd::object::draw_node_net( const char *lab )
 
 	if ( ! std::isfinite( sum ) || sum <= 0 )		// check valid probabilities
 	{
-		sim->error_hard( "invalid network operation",
-						 "check your configuration (parameter value) or\ncode (equation constant) to prevent this situation",
-						 false,
-						 "probabilities are invalid for node drawing" );
+		attr->cont->sim->error_hard( "invalid network operation",
+									 "check your configuration (parameter value) or\ncode (equation constant) to prevent this situation",
+									 false,
+									 "probabilities are invalid for node drawing" );
 		return cur1;
 	}
 
 	do
-		drawPoint = sim->_ran1_( ) * sum;
+		drawPoint = attr->cont->sim->_ran1_( ) * sum;
 	while ( drawPoint == sum );						// avoid ran1 == 1
 
 	for ( accProb = 0, cur = cur2 = cur1;			// accumulate probabilities
@@ -564,16 +560,16 @@ lsd::object *lsd::object::shuffle_nodes_net( const char *lab )
 
 	for ( i = numNodes; i > 1; i-- )				// run the shuffling
 	{
-		j = ( long ) sim->rnd_int( 1, i );
+		j = ( long ) attr->cont->sim->rnd_int( 1, i );
 		cur = turbosearch( lab, ( double ) i );
 		cur1 = turbosearch( lab, ( double ) j );
 
 		if ( cur->node == NULL || cur1->node == NULL )
 		{
-			sim->error_hard( "invalid network object",
-							 "check your equation code to add\nthe network structure before using this macro",
-							 true,
-							 "object '%s' has no network data structure", lab  );
+			attr->cont->sim->error_hard( "invalid network object",
+										 "check your equation code to add\nthe network structure before using this macro",
+										 true,
+										 "object '%s' has no network data structure", lab  );
 			return NULL;
 		}
 
@@ -600,14 +596,13 @@ long lsd::object::nodes2create( const char *lab, long numNodes )
 	long count;
 	object *cur;
 
-	for ( count = 0, cur = search_err( lab, sim->no_search, sim->no_search_up,
-									   "adding net node" );
+	for ( count = 0, cur = search_err( lab, attr->cont->sim->no_search, attr->cont->sim->no_search_up, "adding net node" );
 		  cur != NULL; count++, cur = BROTHER( cur ) );
 
 	if ( numNodes >= count )
 		return numNodes - count;
 
-	sim->plog( "\nWarning: number of existing nodes is more than the required." );
+	attr->cont->sim->plog( "\nWarning: number of existing nodes is more than the required." );
 
 	return 0;
 }
@@ -633,11 +628,11 @@ double lsd::object::init_stub_net( const char *lab, const char gen[ ], long numN
 	// must have a label, and two nodes except is a disconnected network (1 node minimum)
 	if ( ( numNodes < 2 && strcmp( option, "DISCONNECTED" ) ) || lab == NULL )
 	{
-		sim->error_hard( "cannot create network",
-						 "check your equation code to prevent this situation",
-						 true,
-						 "invalid parameter values for a %s network in object '%s'",
-						 option, lab );
+		attr->cont->sim->error_hard( "cannot create network",
+									 "check your equation code to prevent this situation",
+									 true,
+									 "invalid parameter values for a %s network in object '%s'",
+									 option, lab );
 		return 0;
 	}
 
@@ -686,11 +681,11 @@ double lsd::object::init_stub_net( const char *lab, const char gen[ ], long numN
 		if ( numNodes % par1 == 0 && par1 > 0 )
 			return init_lattice_net( numNodes / par1, par1, lab, ( bool ) par2 );
 
-	sim->error_hard( "cannot create network",
-					 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
-					 true,
-					 "invalid parameter values for a %s network in object '%s'",
-					 option, lab );
+	attr->cont->sim->error_hard( "cannot create network",
+								 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
+								 true,
+								 "invalid parameter values for a %s network in object '%s'",
+								 option, lab );
 	return 0;
 }
 
@@ -708,11 +703,11 @@ long lsd::object::init_discon_net( const char *lab, long numNodes )
 
 	if ( numNodes < 1 || lab == NULL )
 	{
-		sim->error_hard( "cannot create network",
-						 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
-						 true,
-						 "invalid parameter values for disconnected network in object '%s'",
-						 lab );
+		attr->cont->sim->error_hard( "cannot create network",
+									 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
+									 true,
+									 "invalid parameter values for disconnected network in object '%s'",
+									 lab );
 		return -1;
 	}
 
@@ -743,11 +738,11 @@ long lsd::object::init_connect_net( const char *lab, long numNodes )
 
 	if ( numNodes < 2 || lab == NULL )
 	{
-		sim->error_hard( "cannot create network",
-						 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
-						 true,
-						 "invalid parameter values for fully connected network in object '%s'",
-						 lab );
+		attr->cont->sim->error_hard( "cannot create network",
+									 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
+									 true,
+									 "invalid parameter values for fully connected network in object '%s'",
+									 lab );
 		return 0;
 	}
 
@@ -791,7 +786,7 @@ long lsd::object::init_star_net( const char *lab, long numNodes )
 	if ( init_discon_net( lab, numNodes ) != 0 )
 		return 0;
 
-	cur1 = search_err( lab, sim->no_search, sim->no_search_up, "initing net" );
+	cur1 = search_err( lab, attr->cont->sim->no_search, attr->cont->sim->no_search_up, "initing net" );
 	if ( cur1 == NULL )
 		return 0;
 
@@ -821,21 +816,21 @@ long lsd::object::init_random_dir_net( const char *lab, long numNodes, long numL
 
 	if ( numNodes < 2 || numLinks < 0 || lab == NULL )
 	{
-		sim->error_hard( "cannot create network",
-						 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
-						 true,
-						 "invalid parameter values for random directed network in object '%s'",
-						 lab );
+		attr->cont->sim->error_hard( "cannot create network",
+									 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
+									 true,
+									 "invalid parameter values for random directed network in object '%s'",
+									 lab );
 		return 0;
 	}
 
 	if ( numLinks > ( numNodes * ( numNodes - 1 ) ) )// test if net is achievable
 	{
-		sim->error_hard( "cannot create network",
-						 "check your configuration (parameter value) or\ncode (equation constant) to prevent this situation",
-						 false,
-						 "object '%s' has numLinks > ( numNodes * ( numNodes - 1 ) )",
-						 lab );
+		attr->cont->sim->error_hard( "cannot create network",
+									 "check your configuration (parameter value) or\ncode (equation constant) to prevent this situation",
+									 false,
+									 "object '%s' has numLinks > ( numNodes * ( numNodes - 1 ) )",
+									 lab );
 		return 0;
 	}
 
@@ -880,21 +875,21 @@ long lsd::object::init_random_undir_net( const char *lab, long numNodes, long nu
 
 	if ( numNodes < 2 || numLinks < 0 || lab == NULL )
 	{
-		sim->error_hard( "cannot create network",
-						 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
-						 true,
-						 "invalid parameter values for random undirected network in object '%s'",
-						 lab );
+		attr->cont->sim->error_hard( "cannot create network",
+									 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
+									 true,
+									 "invalid parameter values for random undirected network in object '%s'",
+									 lab );
 		return 0;
 	}
 
 	if ( numLinks > ( numNodes * ( numNodes - 1 ) ) / 2 )// test if net is achievable
 	{
-		sim->error_hard( "cannot create network",
-						 "check your configuration (parameter value) or\ncode (equation constant) to prevent this situation",
-						 false,
-						 "object '%s' has numLinks > ( numNodes * ( numNodes - 1 ) ) / 2",
-						 lab );
+		attr->cont->sim->error_hard( "cannot create network",
+									 "check your configuration (parameter value) or\ncode (equation constant) to prevent this situation",
+									 false,
+									 "object '%s' has numLinks > ( numNodes * ( numNodes - 1 ) ) / 2",
+									 lab );
 		return 0;
 	}
 
@@ -941,11 +936,11 @@ long lsd::object::init_uniform_net( const char *lab, long numNodes, long outDeg 
 
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || lab == NULL )
 	{
-		sim->error_hard( "cannot create network",
-						 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
-						 true,
-						 "invalid parameter values for uniform random network in object '%s'",
-						 lab );
+		attr->cont->sim->error_hard( "cannot create network",
+									 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
+									 true,
+									 "invalid parameter values for uniform random network in object '%s'",
+									 lab );
 		return 0;
 	}
 
@@ -972,7 +967,7 @@ long lsd::object::init_uniform_net( const char *lab, long numNodes, long outDeg 
 			tryNode = idNode;
 			while ( ! newNode || tryNode == idNode )// while no new link found
 			{
-				tryNode = ( long ) sim->rnd_int( 1, numNodes );// draw link (other node ID)
+				tryNode = ( long ) attr->cont->sim->rnd_int( 1, numNodes );// draw link (other node ID)
 				if ( cur->search_link_net( tryNode ) )// link already exists?
 					newNode = false;				// yes
 				else
@@ -1002,11 +997,11 @@ long lsd::object::init_renyi_erdos_net( const char *lab, long numNodes, double l
 
 	if ( numNodes < 2 || linkProb < 0 || linkProb > 1 || lab == NULL )
 	{
-		sim->error_hard( "cannot create network",
-						 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
-						 true,
-						 "invalid parameter values for Renyi-Erdos network in object '%s'",
-						 lab );
+		attr->cont->sim->error_hard( "cannot create network",
+									 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
+									 true,
+									 "invalid parameter values for Renyi-Erdos network in object '%s'",
+									 lab );
 		return 0;
 	}
 
@@ -1028,7 +1023,7 @@ long lsd::object::init_renyi_erdos_net( const char *lab, long numNodes, double l
 	{												// for all nodes except last
 		for ( endNode = startNode + 1; endNode <= numNodes; endNode++ )
 		{											// and for all higher numbered nodes
-			if ( sim->_ran1_( ) < linkProb )		// draws the existence of a link between both
+			if ( attr->cont->sim->_ran1_( ) < linkProb )// draws the existence of a link between both
 			{
 				cur = turbosearch( lab, ( double ) startNode );// searches first node object
 				cur1 = turbosearch( lab, ( double ) endNode );// searches second node object
@@ -1057,11 +1052,11 @@ long lsd::object::init_circle_net( const char *lab, long numNodes, long outDeg )
 
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || lab == NULL )
 	{
-		sim->error_hard( "cannot create network",
-						 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
-						 true,
-						 "invalid parameter values for circle network in object '%s'",
-						 lab );
+		attr->cont->sim->error_hard( "cannot create network",
+									 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
+									 true,
+									 "invalid parameter values for circle network in object '%s'",
+									 lab );
 		return 0;
 	}
 
@@ -1125,11 +1120,11 @@ long lsd::object::init_small_world_net( const char *lab, long numNodes, long out
 
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || rho < 0 || rho > 1 || lab == NULL )
 	{
-		sim->error_hard( "cannot create network",
-						 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
-						 true,
-						 "invalid parameter values for Small-World network in object '%s'",
-						 lab );
+		attr->cont->sim->error_hard( "cannot create network",
+									 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
+									 true,
+									 "invalid parameter values for Small-World network in object '%s'",
+									 lab );
 		return 0;
 	}
 
@@ -1145,7 +1140,7 @@ long lsd::object::init_small_world_net( const char *lab, long numNodes, long out
 	for ( ; cur != NULL; cur = BROTHER( cur ) )
 													// scan all nodes
 		for ( link = 1; link <= numNeigh; link++ )	// all possible neighbors' node IDs
-			if ( sim->_ran1_( ) < rho ) 			// draw rewiring probability
+			if ( attr->cont->sim->_ran1_( ) < rho )	// draw rewiring probability
 			{										// if rewiring
 				idNode = cur->node->id;				// get current node ID
 				tryNode = idNode + link;			// next node to try
@@ -1165,7 +1160,7 @@ long lsd::object::init_small_world_net( const char *lab, long numNodes, long out
 													// and the link from this object
 				newNode = idNode;					// look for a new node to create a link
 				while ( newNode == idNode )
-					newNode = ( long ) sim->rnd_int( 1, numNodes );// draw a random int different from this agent
+					newNode = ( long ) attr->cont->sim->rnd_int( 1, numNodes );// draw a random int different from this agent
 				cur1 = turbosearch( lab, newNode );	// and get new linking node object
 
 				cur->add_link_net( cur1 );			// create a new link to the new neighbor
@@ -1203,11 +1198,11 @@ long lsd::object::init_scale_free_net( const char *lab, long numNodes, long outD
 
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || expLink <= 0 || lab == NULL )
 	{
-		sim->error_hard( "cannot create network",
-						 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
-						 true,
-						 "invalid parameter values for scale-free network in object '%s'",
-						 lab );
+		attr->cont->sim->error_hard( "cannot create network",
+									 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
+									 true,
+									 "invalid parameter values for scale-free network in object '%s'",
+									 lab );
 		return 0;
 	}
 
@@ -1313,11 +1308,11 @@ long lsd::object::init_lattice_net( int nRow, int nCol, const char *lab, int eig
 
 	if ( nRow <= 0 || nCol <= 0 || lab == NULL || ( eightNeigbr != 0 && eightNeigbr != 1 ) )
 	{
-		sim->error_hard( "cannot create network",
-						 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
-						 true,
-						 "invalid parameter values for lattice network in object '%s'",
-						 lab );
+		attr->cont->sim->error_hard( "cannot create network",
+									 "check your code (equation constants) or\nconfiguration (parameter values) to prevent this situation",
+									 true,
+									 "invalid parameter values for lattice network in object '%s'",
+									 lab );
 		return 0;
 	}
 
@@ -1460,10 +1455,11 @@ double lsd::object::read_file_net( const char *lab, const char dir[ ], const cha
 	if ( ! ( pajekFile = fopen( fileName, "r" ) ) )	// open file for reading
 	{
 		if ( serial >= 0 )							// interactive mode - handle in interf.cpp
-			sim->error_hard( "network file error",
-							 "check if the file requested in equation code exists",
-							 true,
-							 "cannot open network file '%s'", fileName );
+			attr->cont->sim->error_hard( "network file error",
+										 "check if the file requested in equation code exists",
+										 true,
+										 "cannot open network file '%s'",
+										 fileName );
 		return -2;
 	}
 
@@ -1480,10 +1476,11 @@ double lsd::object::read_file_net( const char *lab, const char dir[ ], const cha
 	{
 		fclose( pajekFile );
 		if ( serial >= 0 )							// interactive mode - handle in interf.cpp
-			sim->error_hard( "network file error",
-							 "check the requested file content",
-							 false,
-							 "empty or invalid network file '%s'", fileName );
+			attr->cont->sim->error_hard( "network file error",
+										 "check the requested file content",
+										 false,
+										 "empty or invalid network file '%s'",
+										 fileName );
 		return -3;
 	}
 
@@ -1508,7 +1505,7 @@ double lsd::object::read_file_net( const char *lab, const char dir[ ], const cha
 		if ( idNode > 0 && idNode != countNode )
 		{
 			if ( serial >= 0 )
-				sim->plog( "\nWarning: network node # %d is invalid, changing to %d", idNode, countNode );
+				attr->cont->sim->plog( "\nWarning: network node # %d is invalid, changing to %d", idNode, countNode );
 			idNode = countNode;
 		}
 
@@ -1546,7 +1543,7 @@ double lsd::object::read_file_net( const char *lab, const char dir[ ], const cha
 					}
 					else
 						if ( serial >= 0 && strlen( textLine ) > 0 )
-							sim->plog( "\nWarning: invalid arc (%s), ignored", textLine );
+							attr->cont->sim->plog( "\nWarning: invalid arc (%s), ignored", textLine );
 
 				if ( feof( pajekFile ) )			// check file end
 					break;
@@ -1575,7 +1572,7 @@ double lsd::object::read_file_net( const char *lab, const char dir[ ], const cha
 						}
 						else
 							if ( serial >= 0 && strlen( textLine ) > 0 )
-								sim->plog( "\nWarning: invalid edge list (%s), ignored", textLine );
+								attr->cont->sim->plog( "\nWarning: invalid edge list (%s), ignored", textLine );
 					}
 
 					if ( feof( pajekFile ) )
@@ -1598,7 +1595,7 @@ double lsd::object::read_file_net( const char *lab, const char dir[ ], const cha
 							}
 							else
 								if ( serial >= 0 && strlen( textLine ) > 0 )
-									sim->plog( "\nWarning: invalid edge (%s), ignored", textLine );
+									attr->cont->sim->plog( "\nWarning: invalid edge (%s), ignored", textLine );
 
 						if ( feof( pajekFile ) )
 							break;
@@ -1621,7 +1618,7 @@ double lsd::object::write_file_net( const char *lab, const char dir[ ], const ch
 							 int serial, bool append )
 {
 	bool iniSec, noName, noTime, noWeight;
-	int tCur = ( sim->t > sim->last_t ) ? sim->last_t : sim->t;// effective current time
+	int tCur = ( attr->cont->sim->t > attr->cont->sim->last_t ) ? attr->cont->sim->last_t : attr->cont->sim->t;// effective current time
 	long l, numNodes, numLinks = 0;
 	char *c, mode[ 2 ], fileName[ MAX_PATH_LENGTH ], name[ MAX_PATH_LENGTH ];
 	object *firstNode, *cur, *cur1;
@@ -1648,10 +1645,11 @@ double lsd::object::write_file_net( const char *lab, const char dir[ ], const ch
 	if ( ! ( pajekFile = fopen( fileName, mode ) ) )// create new file
 	{
 		if ( serial >= 0 )							// interactive mode - handle in interf.cpp
-			sim->error_hard( "network file error",
-							 "check disk space and permissions",
-							 false,
-							 "cannot create network file '%s'", fileName );
+			attr->cont->sim->error_hard( "network file error",
+										 "check disk space and permissions",
+										 false,
+										 "cannot create network file '%s'",
+										 fileName );
 		return -2;
 	}
 
@@ -1665,7 +1663,7 @@ double lsd::object::write_file_net( const char *lab, const char dir[ ], const ch
 	}
 	else
 		fprintf( pajekFile, "%% %s objects from LSD '%s' configuration\n\n",
-				 lab, strlen( sim->conf_name ) > 0 ? sim->conf_name : NO_CONF_NAME );
+				 lab, strlen( attr->cont->sim->conf_name ) > 0 ? attr->cont->sim->conf_name : NO_CONF_NAME );
 
 	// get network information
 	for ( numNodes = l = 0, noName = noTime = noWeight = true, cur1 = NULL,
@@ -1689,11 +1687,10 @@ double lsd::object::write_file_net( const char *lab, const char dir[ ], const ch
 		}
 
 	if ( serial >= 0 && l > numNodes )
-		sim->plog( "\nWarning: instances of object '%s' have no data structure,\n \
-					they must be at the end of the chain of siblings", cur1->attr->label );
+		attr->cont->sim->plog( "\nWarning: instances of object '%s' have no data structure,\nthey must be at the end of the chain of siblings", cur1->attr->label );
 
 	if ( serial >= 0 && cur1->hyper_next( ) != NULL )
-		sim->plog( "\nWarning: multiple parents of object '%s', considering just first", cur1->attr->label );
+		attr->cont->sim->plog( "\nWarning: multiple parents of object '%s', considering just first", cur1->attr->label );
 
 	fprintf( pajekFile, "*Vertices %lu\n", numNodes);// start vertices section
 
@@ -1703,11 +1700,11 @@ double lsd::object::write_file_net( const char *lab, const char dir[ ], const ch
 		{
 			fclose( pajekFile );
 			if ( serial >= 0 )						// interactive mode - handle in interf.cpp
-				sim->error_hard( "invalid network object",
-								 "check your equation code to add\nthe network structure before using this macro",
-								 true,
-								 "object '%s' has incorrect network structure, file '%s' not saved",
-								 lab, fileName );
+				attr->cont->sim->error_hard( "invalid network object",
+											 "check your equation code to add\nthe network structure before using this macro",
+											 true,
+											 "object '%s' has incorrect network structure, file '%s' not saved",
+											 lab, fileName );
 			return -3;
 		}
 
@@ -1770,7 +1767,7 @@ void lsd::object::delete_net( const char *lab )
 {
 	object *cur;
 
-	for ( cur = search_err( lab, sim->no_search, sim->no_search_up, "deleting net" );
+	for ( cur = search_err( lab, attr->cont->sim->no_search, attr->cont->sim->no_search_up, "deleting net" );
 		  cur != NULL; cur = BROTHER( cur ) )
 		cur->delete_node_net( );					// scan all nodes
 }
@@ -1786,36 +1783,37 @@ void lsd::object::delete_net( const char *lab )
  *************************************************************/
 lsd::object *lsd::object::check_net_struct( const char *nodeLab, bool noErr )
 {
-	object *cur = search( nodeLab, sim->no_search, sim->no_search_up );
+	object *cur = search( nodeLab, attr->cont->sim->no_search, attr->cont->sim->no_search_up );
 
 	if ( cur == NULL )
 	{
 		if ( ! noErr )								// interactive mode - handle in interf.cpp
-			sim->error_hard( "object not found",
-							 "create object in model structure",
-							 false,
-							 "object '%s' is missing", nodeLab );
+			attr->cont->sim->error_hard( "object not found",
+										 "create object in model structure",
+										 false,
+										 "object '%s' is missing",
+										 nodeLab );
 		return NULL;
 	}
 
 	if ( cur->up == NULL )
 	{
 		if ( ! noErr )								// interactive mode - handle in interf.cpp
-			sim->error_hard( "invalid network data structure",
-							 "check your model structure to prevent this situation",
-							 false,
-							 "cannot create network at the Root level" );
+			attr->cont->sim->error_hard( "invalid network data structure",
+										 "check your model structure to prevent this situation",
+										 false,
+										 "cannot create network at the root level" );
 		return NULL;
 	}
 
 	if ( cur->up->attr != attr )
 	{
 		if ( ! noErr )								// interactive mode - handle in interf.cpp
-			sim->error_hard( "invalid network data structure",
-							 "check your model structure to prevent this situation",
-							 false,
-							 "no descending object '%s' in container object '%s'",
-							 nodeLab, attr->label );
+			attr->cont->sim->error_hard( "invalid network data structure",
+										 "check your model structure to prevent this situation",
+										 false,
+										 "no descending object '%s' in container object '%s'",
+										 nodeLab, attr->label );
 		return NULL;
 	}
 

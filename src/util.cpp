@@ -922,41 +922,6 @@ bool gui::check_term_exec( const char *term_exe )
 
 
 /*************************************************************
- CHECK_LABEL
- Control that the label lab does not already exist
- in the model. Also prevents invalid characters in
- the names.
- *************************************************************/
-int lsd::object::check_label( const char *lab )
-{
-	object *cur;
-
-	if ( ! valid_label( lab ) )
-		return 2;				// invalid characters (incl. spaces)
-
-	if ( ! strcmp( lab, attr->label ) )
-		return 1;
-
-	for ( auto cv = v; cv != NULL; cv = cv->next )
-		if ( ! strcmp( lab, cv->attr->label ) )
-			return 1;
-
-	for ( auto cb = b; cb != NULL; cb = cb->next )
-	{
-		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->attr );
-		else
-			cur = cb->head;
-
-		if ( cur->check_label( lab ) )
-			return 1;
-	}
-
-	return 0;
-}
-
-
-/*************************************************************
  CONTROL_TO_COMPUTE
  *************************************************************/
 void lsd::object::control_to_compute( void )
@@ -981,7 +946,7 @@ void lsd::object::control_to_compute( void )
 	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->attr );
+			cur = gui::sim.blueprint->search( cb->attr );
 		else
 			cur = cb->head;
 
@@ -1004,7 +969,7 @@ void lsd::object::count_save( int *count )
 	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->attr );
+			cur = gui::sim.blueprint->search( cb->attr );
 		else
 			cur = cb->head;
 
@@ -1047,7 +1012,7 @@ void lsd::object::show_save( void )
 	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->attr );
+			cur = gui::sim.blueprint->search( cb->attr );
 		else
 			cur = cb->head;
 
@@ -1094,7 +1059,7 @@ void lsd::object::show_plot( void )
 	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->attr );
+			cur = gui::sim.blueprint->search( cb->attr );
 		else
 			cur = cb->head;
 
@@ -1161,7 +1126,7 @@ void lsd::object::show_debug( void )
 	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->attr );
+			cur = gui::sim.blueprint->search( cb->attr );
 		else
 			cur = cb->head;
 
@@ -1202,7 +1167,7 @@ void lsd::object::show_parallel( void )
 	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->attr );
+			cur = gui::sim.blueprint->search( cb->attr );
 		else
 			cur = cb->head;
 
@@ -1250,7 +1215,7 @@ void lsd::object::show_observe( void )
 	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->attr );
+			cur = gui::sim.blueprint->search( cb->attr );
 		else
 			cur = cb->head;
 
@@ -1320,7 +1285,7 @@ void lsd::object::show_special_updat( void )
 	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->attr );
+			cur = gui::sim.blueprint->search( cb->attr );
 		else
 			cur = cb->head;
 

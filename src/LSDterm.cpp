@@ -45,13 +45,12 @@ const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd [-s SEED] [-e
  *************************************************************/
 int main( int argn, const char **argv )
 {
-	// initialize LSD library
-	lsd::init_lib( );
-
 	int res = -1;
-	lsd::simulation sim;			// single LSD simulation terminal instance
 	lsd::assimilation da;			// data assimilation object
-	lsd::da = & da;					// library call-back
+	lsd::simulation sim;			// single LSD simulation terminal instance
+	
+	// initialize LSD library
+	lsd::init_lib( & da );
 
 #ifndef _NT_
 	// register all signal handlers

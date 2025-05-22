@@ -68,7 +68,7 @@ int gui::load_gui( const char **argv )
 	lsd::object *r;
 
 	// initialize LSD library
-	lsd::init_lib( );
+	lsd::init_lib( & da );
 
 	// initialize tcl/tk
 	init_tcl_tk( argv[ 0 ], "lsd" );
@@ -159,6 +159,7 @@ int gui::load_gui( const char **argv )
 		return j;
 
 	// Tcl global variables
+	cmd( "set rootname %s", ROOT_NAME );
 	cmd( "set small_character [ expr { $dim_character - $deltaSize } ]" );
 	cmd( "set gpterm \"\"" );
 
@@ -1615,7 +1616,7 @@ lsd::object *lsd::object::restore_pos( void )
 {
 	object *cur;
 
-	if ( gui::eval_bool( "$last_obj ne \"\"" ) && ( cur = sim->root->search( gui::get_str( "last_obj" ) ) ) != NULL )
+	if ( gui::eval_bool( "$last_obj ne \"\"" ) && ( cur = gui::sim.root->search( gui::get_str( "last_obj" ) ) ) != NULL )
 	{
 		cmd( "if [ info exists last_list ] { set listfocus $last_list }" );
 		cmd( "if [ info exists last_item ] { set itemfocus $last_item }" );
@@ -1671,7 +1672,7 @@ void lsd::object::insert_object( const char *w, bool netOnly, object *above )
 		if ( above == NULL || cb->attr != above->attr )
 		{
 			if ( cb->head == NULL )
-				cur = sim->blueprint->search( cb->attr );
+				cur = gui::sim.blueprint->search( cb->attr );
 			else
 				cur = cb->head;
 

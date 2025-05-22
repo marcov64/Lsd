@@ -781,7 +781,7 @@ void lsd::object::get_saved( FILE *out, const char *sep, bool all_var )
 	for ( auto cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur = sim->blueprint->search( cb->attr );
+			cur = gui::sim.blueprint->search( cb->attr );
 		else
 			cur = cb->head;
 
@@ -803,7 +803,7 @@ void lsd::object::get_sa_limits( FILE *out, const char *sep )
 	for ( i = 0; i < META_PAR_NUM; ++i )
 		gui::meta_par_in[ i ] = false;
 
-	for ( auto cs = sim->sens; cs != NULL; cs = cs->next )
+	for ( auto cs = gui::sim.sens; cs != NULL; cs = cs->next )
 	{
 		// get current value (first object)
 		auto cv = search_var( NULL, cs->label );

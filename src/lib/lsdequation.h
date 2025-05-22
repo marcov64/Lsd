@@ -624,7 +624,7 @@
 		extern Tcl_Interp *inter;
 	#endif
 
-		extern sim_vecT sims;				// vector holding existing simulations
+		extern simp_vecT sims;				// vector holding existing simulations
 		char msg[ MAX_BUFF_SIZE ];			// legacy auxiliary buffer
 		void equation::_close_sim_( void ) { }
 	}
