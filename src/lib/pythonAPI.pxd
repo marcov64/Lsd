@@ -101,6 +101,7 @@ cdef extern from "libLSD.h" namespace "lsd" :
 		bint disable			# disable data assimilation
 		double conf_lev			# confidence interval confidence level (%)
 
+		assimilation( )			# constructor
 		int count( int what )
 		int run_simulation( int until_t ) except +
 
@@ -111,5 +112,5 @@ cdef extern from "libLSD.h" namespace "lsd" :
 
 	# LSD library global variables
 	int dispatch_runs( vector[ simulation ] & run_sims, int until_t, int until_run, bool da )
-	void init_lib( )
+	void init_lib( assimilation *da )
 	void set_exec( const char *path, const char *file )

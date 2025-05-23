@@ -279,7 +279,7 @@ cdef class Element :
 
 # Assimilation: class containing the data assimilation configuration and data
 cdef class Assimilation :
-	cdef lsd.assimilation da
+	cdef lsd.assimilation *daPtr
 
 	# options: set data assimilation options
 	#  confLevel: confidence interval level (percentage)
@@ -287,26 +287,30 @@ cdef class Assimilation :
 	#  saveObservations: if True, DA observation data is saved
 	#  saveCovMatrix: if True, DA covariance/comedian matrix is saved
 	def options( self, confLevel = 95, saveForecasts = False, saveObservations = False, saveCovMatrix = False ) :
-		self.da.conf_lev = confLevel
-		self.da.sav_fct = saveForecasts
-		self.da.sav_obs = saveObservations
-		self.da.sav_dsp = saveCovMatrix
+		self.daPtr.conf_lev = confLevel
+		self.daPtr.sav_fct = saveForecasts
+		self.daPtr.sav_obs = saveObservations
+		self.daPtr.sav_dsp = saveCovMatrix
 
 	# enabled: check if data assimilation is enabled (True)
 	def enabled( self ) :
-		return not self.da.disable and self.da.count( 4 ) > 0
+		return not self.daPtr.disable and self.daPtr.count( 4 ) > 0
 
 	# run: execute the loaded data assimilation configuration
 	#  until: time step to stop the simulation (0=end)
 	def run( self, until = 0 ) :
 		if self.sim.conf_ok :
-			return self.da.run_simulation( until )
+			return self.daPtr.run_simulation( until )
 		else :
 			return -1
 
-	# constructor: register at library
+	# constructor: allocate in heap
 	def __cinit__( self ) :
-		lsd.da = & self.da
+		self.daPtr = new lsd.assimilation( )
+
+	# destructor: deallocate from heap
+	def __dealloc__( self ) :
+		del self.daPtr
 
 
 # wrapped C++ functions
@@ -314,5 +318,6 @@ cdef class Assimilation :
 # init.LSD: initialize LSD
 #  fileScript: name of script, including the full path if pathScript is None
 def initLSD( fileScript : str ) :
-	lsd.init_lib( )								# initialize LSD library
-	lsd.set_exec( NULL, fileScript.encode( ) )	# assume script path is included in file name
+	da_ptr = new lsd.assimilation( )				# allocate DA on heap
+	lsd.init_lib( < lsd.assimilation * > da_ptr )	# initialize LSD library
+	lsd.set_exec( NULL, fileScript.encode( ) )		# assume script path is included in file name
