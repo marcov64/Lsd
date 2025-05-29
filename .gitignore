@@ -27,3 +27,4 @@ makefileNW
 lsd.exe
 lsdNW.exe
 Example/SantAnna/K+S-finance/libLSD.dll
+makefile.gui

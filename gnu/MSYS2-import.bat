@@ -25,7 +25,7 @@ rem  - diff compare tool
 rem *************************************************************
 
 rem component versions
-set GCC_VER=14.2.0
+set GCC_VER=15.1.0
 set PYTHON_VER=3.12
 
 rem XCOPY options for files and directories
@@ -82,7 +82,12 @@ if not exist %MSYS_DIR%\mingw64\lib\python%PYTHON_VER% (
 )
 
 echo MSYS2 libraries and utilities...
+XCOPY %OPT% %MSYS_DIR%\usr\bin\sh.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\bash.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\usr\bin\sed.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\usr\bin\dirname.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\usr\bin\readlink.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\usr\bin\which.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\rm.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\tr.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\mkdir.exe %LSD_DIR%\gnu\bin\
@@ -172,6 +177,11 @@ if not exist %LSD_DIR%\gnu\bin\subboshow.exe echo missing Subbotools subboshow.e
 if not exist %LSD_DIR%\gnu\bin\LMM.assembly.manifest echo missing LMM.assembly.manifest
 if not exist %LSD_DIR%\gnu\bin\Shortcut.exe echo missing Shortcut.exe
 if not exist %LSD_DIR%\gnu\bin\TailWin.exe echo missing TailWin.exe
+
+if not exist %LSD_DIR%\gnu\bin\kill-lsd-term.bat echo missing kill-lsd-term.bat
+if not exist %LSD_DIR%\gnu\bin\log-monitor.bat echo missing log-monitor.bat
+if not exist %LSD_DIR%\gnu\bin\python-config echo missing python-config
+if not exist %LSD_DIR%\gnu\bin\python-version echo missing python-version
 
 echo add pretty printers to GDB
 mkdir %LSD_DIR%\gnu\etc
