@@ -127,9 +127,6 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tk*.dll %LSD_DIR%\gnu\bin\
 echo gdb debugger...
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\gdb.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libncursesw6.dll %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\python3.exe %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\python%PYTHON_VER%-config %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libpython%PYTHON_VER%.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libreadline8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libtermcap-0.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libxxhash.dll %LSD_DIR%\gnu\bin\
@@ -137,6 +134,10 @@ XCOPY %XOPT% %MSYS_DIR%\mingw64\share\gdb %LSD_DIR%\gnu\share\gdb\
 
 echo cython compiler...
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\cython.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\python.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\python3.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\python%PYTHON_VER%-config %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libpython%PYTHON_VER%.dll %LSD_DIR%\gnu\bin\
 
 echo diff compare tool...
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\diff.exe %LSD_DIR%\gnu\bin\
