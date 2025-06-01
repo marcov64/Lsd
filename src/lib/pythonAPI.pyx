@@ -119,6 +119,16 @@ cdef class Simulation :
 	def lastRun( self ) :
 		return self.sim.last_run
 
+	# seed: the pseudo random number generator seed
+	@property
+	def seed( self ) :
+		return self.sim.seed
+
+	@seed.setter
+	def seed( self, value : int ) :
+		if value > 0 :
+			self.sim.seed = value
+
 	# destructor: garbage collection
 	def __dealloc__( self ) :
 		PyMem_Free( self.sim.conf_name )

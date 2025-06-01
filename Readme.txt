@@ -428,5 +428,7 @@ The API is implemented as a Python-native dynamic-link library named as TARGET_a
 
 To create the API library, Python 3.6+ (development version, including headers) must be installed, plus the Cython 3.0+ package. All the required software is usually installed by LSD installer automatically. The instructions above for manual installation also include the required software.
 
+There are two small examples of the library usage for the Industry and the Island models in the Sant'Anna group of example models.
+
 WARNING: please note that the produced TARGET_api.cpXXX-YYY.ZZZ dynamic-link library is specific to the existing environment at the time of creation of the terminal executable by LSD. If Python or the computer set-up is changed, the API library must be regenerated, or Python will fail when importing it. In Windows, this means that the produced library must be used with the MSYS2 version of Python (libpythonX.XX.dll) supplied with LSD in the gnu/bin directory inside the LSD installation. Producing the API for use with the native Microsoft Visual Studio version of Python is not supported.
 

@@ -40,6 +40,7 @@ cdef extern from "libLSD.h" namespace "lsd" :
 		int max_threads			# maximum parallel threads per run
 		int run					# current serial simulation run
 		int eff_t				# number of executed time steps
+		unsigned int seed		# random number generator initial seed
 		cobject *root			# LSD root object of structure-tree
 
 		simulation( ) except +
