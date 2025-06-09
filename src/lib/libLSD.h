@@ -941,7 +941,7 @@ namespace lsd
 			bool check( void );				// handle worker problems
 			static void signal_wrapper( int signun );// wrapper for signal_handler
 			void cal( variable *_v );		// start worker calculation
-			void cal_worker( void );		// worker thread code
+			void cal_worker( simulation *sim );// worker thread code
 			void signal( int signum );		// signal handler
 	};
 

@@ -377,7 +377,7 @@ int lsd::simulation::init_new_seq( clock_t & start, char *bar_done, int & perc_d
 	{
 		workers = new worker [ max_threads ];
 		for ( i = 0; i < max_threads; ++i )
-			workers[ i ].worker_thread = thrT( & lsd::worker::cal_worker, & workers[ i ] );
+			workers[ i ].worker_thread = thrT( & lsd::worker::cal_worker, & workers[ i ], this );
 	}
 
 	if ( ! da_en )
@@ -808,7 +808,7 @@ bool lsd::object::alloc_save_mem( void )
 bool lsd::variable::alloc_save_var( void )
 {
 	simulation *sim = attr->cont->sim;
-	
+
 	if ( ! sim->running )
 	{
 		data = NULL;

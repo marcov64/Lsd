@@ -754,11 +754,10 @@ double lsd::variable::cal( object *caller, int lag )
  CAL_WORKER
  Multi-thread worker for variable computation
  *************************************************************/
-void lsd::worker::cal_worker( void )
+void lsd::worker::cal_worker( simulation *sim )
 {
 	int i;
 	double app;
-	simulation *sim = v->attr->cont->sim;
 
 	// create try-catch block to capture exceptions in thread and reroute to main thread
 	try
