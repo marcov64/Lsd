@@ -129,16 +129,24 @@ int lsd::assimilation::run_simulation( int until_t )
 	ref_sim->t = ref_sim->eff_t + 1;
 
 	// close data assimilation run-time data structures
-	finish( );
+	if ( res != 1 )
+		finish( );
 
 	ref_sim->plog( "\nData assimilation %s at time step %d (%.2f sec.)\n", res != 0 ? "stopped" : "finished", ref_sim->t - 1, ( float ) ( clock( ) - start ) / CLOCKS_PER_SEC );
-	plog_stats( );
 
 	switch ( res )
 	{
+		case 0:
+			plog_stats( );
+			break;
+
 		case 1:
 			ref_sim->plog( "\n%d run(s) stop responding, aborted ...", nstale );
-			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Data assimilation aborted\" -detail \"One or more simulation runs stopped responding.\n\nPlease check your code to prevent crashes before running data assimilation.\"" );
+			ref_sim->error_hard( "deadlock during computation",
+								 "check your code to prevent crashes before running data assimilation",
+								 true,
+								 "%d simulation run(s) stopped responding",
+								 nstale );
 			empty_assimilation( );
 			break;
 
@@ -187,7 +195,7 @@ int lsd::dispatch_runs( sim_vecT & run_sims, int until_t, int until_run, bool da
 		nstale = 0;
 		for ( auto & sim : run_sims )
 		{
-			if ( sim.sim_thread.joinable( ) && ! sim.running_seq && sim.eff_t > 0 )
+			if ( sim.sim_thread.joinable( ) && ! sim.running_steps && sim.eff_t > 0 )
 			{
 				sim.sim_thread.join( );
 				--nrun;
@@ -233,7 +241,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run, bool da_en )
 			goto end_run;
 
 	// start loop controlling set of sequential simulation runs
-	for ( ; quit != 2 && run <= last_run; ++run )
+	for ( running_steps = true; quit != 2 && run <= last_run; ++run )
 	{
 		if ( ! running )			// if not already running single run
 			if ( ( res = init_new_run( start_run, last_update, da_en ) ) != 0 )
@@ -346,6 +354,7 @@ int lsd::simulation::run_simulation( int until_t, int until_run, bool da_en )
 	pause_run:
 
 	// wake dispatcher lock
+	running_steps = false;
 	l_guardT lock( seq_end_lck );
 	seq_end.notify_one( );
 

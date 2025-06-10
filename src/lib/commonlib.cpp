@@ -375,7 +375,7 @@ void lsd::exception_handler( int signum, const char *what )
 	{
 		case SIGINT:
 		case SIGTERM:
-			if ( liblnk->cmd_backend == NULL )
+			if ( liblnk == NULL || liblnk->cmd_backend == NULL )
 			{
 				snprintf( msg1, MAX_LINE_SIZE, "SIGINT/SIGTERM (%s)", signal_name( signum ) );
 				break;
@@ -425,7 +425,7 @@ void lsd::exception_handler( int signum, const char *what )
 			strcpy( msg2, "" );
 	}
 
-	if ( liblnk->cmd_backend != NULL )			// Tcl GUI available?
+	if ( liblnk != NULL && liblnk->cmd_backend != NULL )// Tcl GUI available?
 	{
 #ifndef _LMM_
 		bool usrExcpt = false;
