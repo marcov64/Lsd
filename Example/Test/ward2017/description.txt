@@ -1,0 +1,33 @@
+Model Population transit (ver. 1.0)
+
+Adapted from Ward, J. A., Evans, A. J., Malleson, N. S. (2016) Dynamic calibration of agent-based models using data assimilation
+
+People enter and exit a certain region randomly over (discrete) time t = 0, 1, 2, ..., producing a changing population x at any time t.
+
+At any period, there is a random entry of people into the region in t:
+
+E ~ Poisson( alpha )
+
+For the people already in the region, there are also exits in t:
+
+X ~ Poisson( beta * x_1 )
+
+Population evolves freely based on initial population X_0:
+
+x = x_1 + E - X
+
+alpha and beta are parameters.
+
+The results are only approximately comparable to the original continuous-time model because of the discrete time simplification adopted in the equations above.
+
+
+Configurations:
+
+illustration.lsd - paper illustration in figure 1 (alpha = 50, beta = 0.25, N = 200)
+illustration_histogram.lsd - paper illustration in figure 1c (alpha = 50, beta = 0.25, N = 5000)
+EnKF_ground_truth.lsd - single run to produce the ground truth (real) values to use (alpha = 50.52, beta = 0.2580, N = 1, T = 10000)
+EnKF_state_estim.lsd - paper ensemble KF analysis (alpha = 50.52, beta = 0.2580, N = 100, x0_mean = 200, x0_var = 200, T = 10000)
+EnKF_param_estim.lsd - paper sequential parameter estimation (alpha0 = 50, alpha_var = 25, beta0 = 0.35, beta_var = 0.0001, N = 100, x0_mean = 200, x0_var = 200, T = 10000)
+
+To make the comparison with the continuous-time results more reasonable, in the last 3 configurations, each original time unit is being represented by 100 substeps, producing 10000 (100 x 100) discrete time steps, with observational data available every 100 discrete periods.
+
