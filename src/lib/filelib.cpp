@@ -1293,7 +1293,7 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 	if ( da != NULL )
 	{
 		da->dsp_file.clear( );
-		da->disable = 0;
+		da->disable = true;
 	}
 
 	last_t = MAX_STEPS;
