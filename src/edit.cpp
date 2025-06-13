@@ -178,7 +178,7 @@ void lsd::object::set_obj_number( void )
 
 		if ( gui::choice == 3 )
 		{
-			if ( gui::get_str( "obj_name", lab, MAX_ELEM_LENGTH ) != NULL )
+			if ( gui::copy_str( "obj_name", lab, MAX_ELEM_LENGTH ) != NULL )
 				edit_data( lab );
 
 			goto noredraw;

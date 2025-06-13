@@ -220,7 +220,7 @@ void lsd::object::edit_data( const char *lab )
 
 	if ( gui::choice == 2 )
 	{
-		if ( gui::get_str( "var_name", ch, 2 * MAX_ELEM_LENGTH ) != NULL )
+		if ( gui::copy_str( "var_name", ch, 2 * MAX_ELEM_LENGTH ) != NULL )
 		{
 			first->set_all( ch, lag, ".inid" );
 			show_cells( lab );

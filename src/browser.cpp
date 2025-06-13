@@ -205,6 +205,7 @@ int gui::load_gui( const char **argv )
 	sim.liblnk->disable_plot = & disable_plot;
 	sim.liblnk->enable_plot = & enable_plot;
 	sim.liblnk->error_hard_helper = & error_hard_helper;
+	sim.liblnk->get_str = & get_str;
 	sim.liblnk->init_lattice_helper = & init_lattice_helper;
 	sim.liblnk->log_tcl_error = & log_tcl_error;
 	sim.liblnk->plog_backend = & plog_backend;

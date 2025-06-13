@@ -436,9 +436,9 @@ namespace gui
 	bool unsaved_change( bool );
 	bool unsaved_change( void );
 	bool NOLH_load( const char baseName[ ] = NOLH_DEF_FILE, bool force = false );
+	char *copy_str( const char *tcl_var, char *var, int var_size );
 	char *eval_str( const char *tcl_exp, char *var, int var_size );
 	char *fmt_ttip_descr( char *out, lsd::descr & d, int outSz, bool init = true );
-	char *get_str( const char *tcl_var, char *var, int var_size );
 	char *load_eqfile( void );
 	char *search_lsdroot( char *buf, int bufSz );
 	char *strtcl( char *out, const char *text, int outSz );

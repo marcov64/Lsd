@@ -1669,7 +1669,7 @@ int modman( int argn, const char **argv )
 				} { \
 					set curdir ___ \
 				}", i, i );
-			gui::get_str( "curdir", str, MAX_PATH_LENGTH );
+			gui::copy_str( "curdir", str, MAX_PATH_LENGTH );
 
 			// check for invalid directories (LSD managed)
 			for ( found = false, j = 0; j < LSD_DIR_NUM; ++j )
@@ -4330,7 +4330,7 @@ int modman( int argn, const char **argv )
 		for ( i = 0; i < num && choice != 3; ++i )
 		{
 			cmd( "if [ file isdirectory [ lindex $dir %d ] ] { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
-			gui::get_str( "curdir", str, MAX_PATH_LENGTH );
+			gui::copy_str( "curdir", str, MAX_PATH_LENGTH );
 
 			// check for invalid directories (LSD managed)
 			for ( found = false, j = 0; j < LSD_DIR_NUM; ++j )

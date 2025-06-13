@@ -474,7 +474,7 @@ bool gui::need_res_dir( const char *dest_path, const char *sim_name, char *buf, 
 	else
 		cmd( "set d \"\"" );
 
-	get_str( "d", buf, buf_sz );
+	copy_str( "d", buf, buf_sz );
 
 	return newDir;
 }

@@ -561,7 +561,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			if ( done == 1 || done == 3 )
 			{
-				get_str( "lab", lab, MAX_ELEM_LENGTH );
+				copy_str( "lab", lab, MAX_ELEM_LENGTH );
 				sl = strlen( lab );
 				if ( sl != 0 )
 				{
@@ -715,7 +715,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			if ( done == 1 )
 			{
-				get_str( "lab", lab, MAX_ELEM_LENGTH );
+				copy_str( "lab", lab, MAX_ELEM_LENGTH );
 				if ( strlen( lab ) == 0 )
 					goto here_endobject;
 
@@ -3371,7 +3371,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			cmd( "focustop .log" );
 
-			get_str( "lab", ch1, MAX_ELEM_LENGTH );
+			copy_str( "lab", ch1, MAX_ELEM_LENGTH );
 
 			if ( saveConf && strlen( sim.conf_name ) > 0 )
 			{
@@ -3614,7 +3614,7 @@ lsd::object *gui::operate( lsd::object *r )
 			if ( choice == 0 )
 			  break;
 
-			get_str( "res1", lab, MAX_PATH_LENGTH );
+			copy_str( "res1", lab, MAX_PATH_LENGTH );
 			if ( strlen( lab ) == 0 )
 				break;
 
@@ -4188,7 +4188,7 @@ lsd::object *gui::operate( lsd::object *r )
 				if ( ! get_bool( "extdoe" ) )
 					strcpy( NOLHfile, "" );
 				else
-					get_str( "NOLHfile", NOLHfile, MAX_PATH_LENGTH );
+					copy_str( "NOLHfile", NOLHfile, MAX_PATH_LENGTH );
 
 				num = ( sscanf( get_str( "doesize" ), "%d\u00D7", & j ) > 0 ) ? j : 0;
 
@@ -4977,8 +4977,8 @@ lsd::object *gui::operate( lsd::object *r )
 						break;
 
 					ffirst = choice;
-					get_str( "res", out_file, MAX_PATH_LENGTH );
-					get_str( "path", out_dir, MAX_PATH_LENGTH );
+					copy_str( "res", out_file, MAX_PATH_LENGTH );
+					copy_str( "path", out_dir, MAX_PATH_LENGTH );
 					f = NULL;
 					do									// search for all sequential files
 					{
@@ -5015,7 +5015,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 					ffirst = 1;
 					fnext = choice + 1;
-					get_str( "path", out_dir, MAX_PATH_LENGTH );
+					copy_str( "path", out_dir, MAX_PATH_LENGTH );
 				}
 			}
 
@@ -5110,7 +5110,7 @@ lsd::object *gui::operate( lsd::object *r )
 			if ( nature < 1 || nature > SRV_MAX_CORES )
 				nature = std::min( sim.max_threads, SRV_MAX_CORES );
 
-			get_str( "res2", out_bat, MAX_PATH_LENGTH );
+			copy_str( "res2", out_bat, MAX_PATH_LENGTH );
 
 			// select batch format & create batch file
 			cmd( "if [ string equal $CurPlatform windows ] { if { $natBat == 1 } { set choice 1 } { set choice 2 } } { if { $natBat == 1 } { set choice 3 } { set choice 4 } }" );
@@ -5230,7 +5230,7 @@ lsd::object *gui::operate( lsd::object *r )
 					else
 					{	// get the selected file names, one by one
 						cmd( "set res3 [ lindex $bah %d ]; set res3 [ file tail $res3 ]; set last [ expr { [ string last .lsd $res3 ] - 1 } ]; set res3 [ string range $res3 0 $last ]", j - 1	);
-						get_str( "res3", out_file, MAX_PATH_LENGTH - 4 );
+						copy_str( "res3", out_file, MAX_PATH_LENGTH - 4 );
 						snprintf( lab_old, 2 * MAX_PATH_LENGTH, "%s.log", out_file );
 
 						if ( choice == 1 || choice == 4 )	// Windows

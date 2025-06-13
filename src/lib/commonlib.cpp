@@ -687,6 +687,20 @@ void lsd::cmd( const char *cm, ... )
 
 
 /*************************************************************
+ GET_STR (library)
+ *************************************************************/
+const char *lsd::get_str( const char *tcl_var )
+{
+#ifndef _LMM_
+	if ( sims.size( ) > 0 && sims[ 0 ] != NULL && sims[ 0 ]->liblnk != NULL )
+		return sims[ 0 ]->liblnk->get_str( tcl_var );
+#endif
+
+	return NULL;
+}
+
+
+/*************************************************************
  VALID_LABEL
  *************************************************************/
 bool lsd::valid_label( const char *lab )

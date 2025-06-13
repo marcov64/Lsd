@@ -1734,9 +1734,9 @@ void gui::analysis( bool mc )
 					j = choice;
 
 					if ( l == 3 )
-						get_str( "b", str3, MAX_ELEM_LENGTH );
+						copy_str( "b", str3, MAX_ELEM_LENGTH );
 					else
-						get_str( "svar", str3, MAX_ELEM_LENGTH );
+						copy_str( "svar", str3, MAX_ELEM_LENGTH );
 
 					cmd( "set choice $tvar" );
 					h = choice;
@@ -2280,9 +2280,9 @@ void gui::analysis( bool mc )
 					j = choice;
 
 					if ( l == 3 )
-						get_str( "b", str3, MAX_ELEM_LENGTH );
+						copy_str( "b", str3, MAX_ELEM_LENGTH );
 					else
-						get_str( "svar", str3, MAX_ELEM_LENGTH );
+						copy_str( "svar", str3, MAX_ELEM_LENGTH );
 
 					cmd( "set choice $tvar" );
 					h = choice;
@@ -2794,7 +2794,7 @@ void gui::analysis( bool mc )
 							if ( ! mc || sim.res_list.size( ) <= 1 )
 							{
 								cmd( "set datafile [ lindex $lab %d ]", i );
-								get_str( "datafile", fname, MAX_PATH_LENGTH );
+								copy_str( "datafile", fname, MAX_PATH_LENGTH );
 							}
 							else
 								lsd::strcpyn( fname, sim.res_list[ i ].c_str( ), MAX_PATH_LENGTH );
@@ -7916,7 +7916,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 		else
 		{
 			cmd( "set res [ .da.vars.ch.f.v get %d ]", i );
-			get_str( "res", da_tmp, MAX_BUFF_SIZE );
+			copy_str( "res", da_tmp, MAX_BUFF_SIZE );
 		}
 
 		sscanf( da_tmp, "%s %s (%d-%d) #%d", str[ i ], tag[ i ], & start[ i ], & end[ i ], & id[ i ] );
@@ -8775,7 +8775,7 @@ void gui::save_datazip( void )
 		cmd( "set choice $headprefix" );
 
 		headprefix = choice;
-		get_str( "misval", misval, 10 );
+		copy_str( "misval", misval, 10 );
 
 		choice = 0;
 	}
@@ -8813,7 +8813,7 @@ void gui::save_datazip( void )
 				set res \"$res.%s.gz\" \
 			}", ext );
 
-	get_str( "res", da_tmp, MAX_BUFF_SIZE );
+	copy_str( "res", da_tmp, MAX_BUFF_SIZE );
 
 	if ( strlen( da_tmp ) == 0 )
 		goto end;
@@ -8827,7 +8827,7 @@ void gui::save_datazip( void )
 	{
 		if ( del == 2 )
 		{
-			get_str( "delimiter", delimiter, 10 );
+			copy_str( "delimiter", delimiter, 10 );
 
 			if ( strlen( delimiter ) == 0 )
 				strcpy( delimiter, "\t" );
@@ -8838,7 +8838,7 @@ void gui::save_datazip( void )
 
 	if ( typelab == 2 )
 	{
-		get_str( "labprefix", labprefix, MAX_ELEM_LENGTH );
+		copy_str( "labprefix", labprefix, MAX_ELEM_LENGTH );
 
 		if ( strlen( labprefix ) == 0 )
 			strcpy( labprefix, "V" );

@@ -1916,7 +1916,7 @@ void gui::lsd_exit_gui( int v, bool clean )
 	delete sim.liblnk;
 	delete [ ] eq_txt;
 #endif
-	
+
 	delete [ ] model_make;
 	delete [ ] system_make;
 
@@ -2113,10 +2113,11 @@ double gui::get_double( const char *tcl_var, double *var, bool no_error )
 
 
 /*************************************************************
- GET_STR
+ COPY_STR
+ Copy Tcl string to C array
  Set var to NULL to just get the Tcl pointer
  *************************************************************/
-char *gui::get_str( const char *tcl_var, char *var, int var_size )
+char *gui::copy_str( const char *tcl_var, char *var, int var_size )
 {
 	const char *strvar = Tcl_GetVar( interp, tcl_var, 0 );
 
@@ -2135,9 +2136,14 @@ char *gui::get_str( const char *tcl_var, char *var, int var_size )
 		return ( char * ) strvar;
 }
 
+
+/*************************************************************
+ GET_STR
+ Get the pointer to Tcl string
+ *************************************************************/
 const char *gui::get_str( const char *tcl_var )
 {
-	return ( const char * ) get_str( tcl_var, NULL, 0 );
+	return ( const char * ) copy_str( tcl_var, NULL, 0 );
 }
 
 

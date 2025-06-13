@@ -158,6 +158,7 @@
 	},
 
 #define END_EQUATION( X ) \
+	; \
 	{ \
 		DEBUG_CODE \
 		return X; \
@@ -619,13 +620,9 @@
 #ifdef LEGACY_CODE
 	namespace lsd
 	{
-	#ifndef _TERM_
-		#include <tk.h>
-		extern Tcl_Interp *inter;
-	#endif
-
 		extern simp_vecT sims;				// vector holding existing simulations
 		char msg[ MAX_BUFF_SIZE ];			// legacy auxiliary buffer
+		const char *get_str( const char *tcl_var );
 		void equation::_close_sim_( void ) { }
 	}
 
@@ -633,7 +630,14 @@
 	inline void cmd( const char *cm, ... ) { if ( lsd::sims[ 0 ]->liblnk != NULL ) { va_list argptr; va_start( argptr, cm ); lsd::sims[ 0 ]->liblnk->cmd_backend( cm, argptr ); va_end( argptr ); } }
 	inline void plog( const char *cm, ... ) { if ( lsd::sims[ 0 ]->liblnk != NULL ) { va_list argptr; va_start( argptr, cm ); lsd::sims[ 0 ]->liblnk->plog_backend( cm, "", argptr ); va_end( argptr ); } }
 
-	#define SIM ( sims[ 0 ] )				// pointer to first simulation
+	#ifdef Tcl_GetVar
+		#undef Tcl_GetVar
+	#endif
+
+	#define Tcl_GetVar( X, Y, Z ) lsd::get_str( Y )
+	#define inter NULL
+
+	#define SIM ( lsd::sims[ 0 ] )			// pointer to first simulation
 	#define var _v_
 	#define caller c
 	#define t T
@@ -644,6 +648,8 @@
 	#define FUNCTION( X ) EQUATION( X )
 	#define UNIFORM( X, Y ) uniform( X, Y )
 	#define rnd_integer( X, Y ) uniform_int( X, Y )
+	#define init_lattice( ... ) INIT_LAT( __VA_ARGS__ )
+	#define update_lattice( X, Y, Z ) WRITE_LAT( X, Y, Z )
 	#define VL_CHEAT( X, Y, C ) V_CHEATL( X, Y, C )
 	#define VS_CHEAT( X, Y, C ) V_CHEATS( X, Y, C )
 	#define VLS_CHEAT( X, Y, Z, C ) V_CHEATLS( X, Y, Z, C )

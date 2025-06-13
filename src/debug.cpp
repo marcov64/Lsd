@@ -873,7 +873,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 
 				if ( gui::choice == 10 )
 				{
-					gui::get_str( "res", ch, MAX_ELEM_LENGTH );
+					gui::copy_str( "res", ch, MAX_ELEM_LENGTH );
 
 					cmd( "set choice $sa" );
 					i = gui::choice;
@@ -990,7 +990,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				gui::sim.running = false;
 
 				cmd( "set value_search [ .deb.so.v.e get ]" );
-				gui::get_str( "bidi", ch, MAX_ELEM_LENGTH );
+				gui::copy_str( "bidi", ch, MAX_ELEM_LENGTH );
 
 				cur = NULL;
 				switch ( cond )

@@ -853,6 +853,7 @@ namespace lsd
 			int *choice;
 
 			bool ( *runtime_step ) ( bool da_en ) = NULL;
+			const char *( *get_str ) ( const char *tcl_var ) = NULL;
 			double ( *save_lattice_helper ) ( const char *fname ) = NULL;
 			double ( *update_lattice_helper ) ( double line, double col, double val, int line_int, int col_int, int val_int ) = NULL;
 			int ( object::*debugger ) ( object *c, const char *lab, double *res, bool interact, const char *hl_var ) = NULL;
@@ -1541,6 +1542,7 @@ namespace lsd
 	char *strdecdata( char *out, const char *in, int outSz = 0 );
 	char *strencdata( char *out, const char *in, int outSz = 0 );
 	char *strupr( char *s );
+	const char *get_str( const char *tcl_var );
 	const char *signal_name( int signum );
 	double median( d_vecT & v );
 	double strtod( const char *in, char** endptr, double inv );
