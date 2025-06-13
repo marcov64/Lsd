@@ -1,6 +1,6 @@
-#include "fun_head.h"
+#define USER_FUNCS object *find_nei(lsd::object *o,int r, int c, double nrow, double ncol, lsd::object *lattice);
 
-object *find_nei(object *o,int r, int c, double nrow, double ncol, object *lattice);
+#include "fun_head.h"
 
 MODELBEGIN
 
@@ -86,8 +86,7 @@ CYCLE_SAFE(cur, "Job")
  }
 if(v[4]==0)
  {
-  
-  quit=2;
+  ABORT;
  } 
 RESULT(v[4] )
 
@@ -468,7 +467,7 @@ FUNCTION("IssueIdProd")
 Deliver the IdProd for entrants
 */
 
-RESULT(val[0]+1 )
+RESULT(CURRENT+1 )
 
 
 
@@ -483,11 +482,11 @@ void close_sim(void)
 }
 
 
-object *find_nei(object *o,int r, int c, double nrow, double ncol, object *lattice)
+lsd::object *U_FN::find_nei(lsd::object *o,int r, int c, double nrow, double ncol, lsd::object *lattice)
 {
 
 double IndR, IndC;
-object *ores;
+lsd::object *ores;
 
 IndR=VS_CHEAT(o,"IdRow",o)+r;
 if(IndR<1)

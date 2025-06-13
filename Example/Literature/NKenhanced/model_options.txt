@@ -1,4 +1,0 @@
-TARGET=LSD
-FUN=fun_nkun
-SWITCH_CC=-g
-

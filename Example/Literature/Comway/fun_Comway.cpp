@@ -2,12 +2,8 @@
 
 MODELBEGIN
 
-const char *chstr;
-
-
 EQUATION("State")
 /*
-
 Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
 Any live cell with two or three live neighbours lives on to the next generation.
 Any live cell with more than three live neighbours dies, as if by overpopulation.
@@ -75,11 +71,9 @@ CYCLE(cur, "node")
 if(v[3]<0)
  {
   cmd("set fname [tk_getOpenFile -title \"Select file with initial active cells\"]");
-  chstr=(char *)Tcl_GetVar(inter, "fname",0);
-  
-  f=fopen(chstr, "r");
+  f=fopen(get_str("fname"), "r");
   if(f==NULL)
-   {quit=2;
+   {ABORT;
     plog("\nWrong file name\n\n");
     END_EQUATION(0);
    } 
@@ -94,7 +88,7 @@ if(v[3]<0)
   fclose(f);
  }
 cmd("update");
-PARAMETER 
+PARAMETER; 
 END_EQUATION(0);
 /***
 CYCLE(cur, "node")

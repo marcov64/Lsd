@@ -10,7 +10,7 @@ v[0]=V("IsBroken"); //breaks ?
 if(v[0]==1)
   v[1]=V("Purchase"); //yes, buy a new produc
 else 
-  v[1]=val[0]; //no, keep on using the previous one
+  v[1]=CURRENT; //no, keep on using the previous one
 
 RESULT(v[1])
 

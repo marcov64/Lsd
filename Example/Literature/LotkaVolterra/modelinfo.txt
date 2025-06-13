@@ -1,3 +1,0 @@
-Lotka - Volterra
-0.1
-1 March, 2001

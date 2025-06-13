@@ -1,4 +1,0 @@
-TARGET=LSD
-FUN=fun_nw04
-SWITCH_CC=-g
-

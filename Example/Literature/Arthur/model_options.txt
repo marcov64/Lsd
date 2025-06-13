@@ -1,4 +1,0 @@
-TARGET=LSD
-FUN=fun_ba
-SWITCH_CC=-g
-

@@ -158,7 +158,6 @@
 	},
 
 #define END_EQUATION( X ) \
-	; \
 	{ \
 		DEBUG_CODE \
 		return X; \
