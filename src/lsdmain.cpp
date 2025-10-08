@@ -1002,7 +1002,17 @@ void run( void )
 			switch ( done_in )
 			{
 				case 1:			// Stop button / s/S key
-					if ( pause_run )
+				cmd("toplevel .q");
+				cmd( "set answer [ ttk::messageBox -parent .q -type yesno -title Confirmation -message \"Stop the simulation?\" -detail \"Press 'Yes' to interrupt the simulation run and return to the LSD Browser\" -icon question -default yes ]" );
+				cmd( "if { [ string compare $answer yes ] == 0 } { set choice 1 } { set choice 0 }" );
+				cmd("destroy .q");
+				if(choice==0)
+                    { cmd( "focus -force .b" );
+					  break;
+					}
+
+                    
+                    if ( pause_run )
 					{
 						cmd( "wm title .log \"$origLogTit\"" );
 						cmd( ".b.r2.pause conf -text Pause" );
@@ -2325,3 +2335,4 @@ void deb_log( bool on, int time )
 
 #endif
 }
+
