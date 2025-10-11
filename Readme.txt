@@ -266,6 +266,10 @@ If you want to create a desktop link (icon) to run LSD/LMM, you can use the scri
 
  ./add-shortcut-linux.sh
 
+A shortcut to run LSD/LMM is also added to the Linux program menu as a user item (added to "~/.local/share/applications" directory). If running in Windows WSLg, it is necessary to run the alternative command to add LSD/LMM to Windows Start Menu (link added to "/usr/share/applications" as a system item):
+
+ sudo ./add-shortcut-linux.sh
+
 To use the LSD in Linux it is necessary to have the GNU gcc/g++ compiler (version 7+) with the standard packages, including zlib, Tcl/Tk 8.6, and GDB. Likely, you already have those installed on your computer but you may need to install the development version of these packages. Usually, you can use your distribution package manager to get the appropriate 'dev' package versions to your installation. Though not strictly necessary, it is also suggested to have the Gnuplot graphical package (for advanced graphics), preferably using Qt.
 
 In Debian or Ubuntu, to make sure you have the correct libraries you can use:

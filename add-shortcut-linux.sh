@@ -27,17 +27,27 @@ fi
 LMMLNK="LMM.desktop"
 LMMEXE=LMM
 LSDROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
-APPMENU="$HOME/.local/share/applications"
-if [ -x "$( command -v xdg-user-dir )" ]; then
+
+if [[ $( id -u ) -ne 0 ]];
+then
+	APPMENU="$HOME/.local/share/applications"
+	mkdir -p "$APPMENU"
+else
+	APPMENU="/usr/share/applications"
+fi
+
+if [[ -x "$( command -v xdg-user-dir )" ]]; then
 	DESKTOP="$( xdg-user-dir DESKTOP )"
 else
-	if [ -z "$1" ]; then
+	if [[ -z "$1" ]]; then
 		echo "Warning: cannot find desktop folder, assuming '$HOME/Desktop'"
 		DESKTOP="$HOME/Desktop"
 	else
 		DESKTOP="$1"
 	fi
 fi
+
+mkdir -p "$DESKTOP"
 
 # remove existing shortcuts
 rm -f "$DESKTOP/$LMMLNK" "$DESKTOP/lsd.desktop" "$DESKTOP/LSD.desktop"
@@ -52,11 +62,7 @@ if command -v gio &> /dev/null; then
 	dbus-launch gio set "$DESKTOP/$LMMLNK" "metadata::trusted" true > /dev/null 2>&1
 fi
 
-# also add icon to user window manager configuration
-if [ ! -d "$APPMENU" ]; then
-	mkdir -p "$APPMENU"
-fi
-
+# also add icon to window manager configuration
 cp -f "$DESKTOP/$LMMLNK" "$APPMENU/"
 
 exit 0

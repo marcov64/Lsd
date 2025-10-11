@@ -6,5 +6,6 @@ Categories=Development;Simulation;IDE;
 Terminal=false
 Name=LSD Model Manager
 Comment=Laboratory for Simulation Development
+Path=$LSDROOT
 Exec=$LSDROOT/LMM
 Icon=$LSDROOT/src/icons/lmm.png
