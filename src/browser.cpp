@@ -1494,6 +1494,11 @@ int gui::runtime_buttons( void )
 		switch ( button )
 		{
 			case 1:			// Stop button / s/S key
+				cmd( "set answer [ ttk::messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Stop the simulation?\" -detail \"Press 'Yes' to interrupt the simulation and return to the LSD Browser, or 'No' to continue.\" ]" );
+
+				if ( ! get_bool( "answer" ) )
+					break;
+
 				if ( pause_run )
 				{
 					cmd( "wm title .log \"$origLogTit\"" );
