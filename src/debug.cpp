@@ -1910,7 +1910,7 @@ void lsd::object::show_tmp_vars( bool update )
 
 		cmd( "showtop $in topleftW 0 1 0" );
 		cmd( "wm minsize $in [ winfo reqwidth $in ] [ expr { $vsizeDmin + $vmenusize } ]" );
-		cmd( "wm geometry $in [ winfo reqwidth $in ]x[ expr { [ winfo height .deb ] + $vmenusize } ]" );
+		cmd( "wmgeom $in [ winfo reqwidth $in ]x[ expr { [ winfo height .deb ] + $vmenusize } ]" );
 
 		cmd( "$in.n.t tag configure bold -font [ ttk::style lookup boldSmallProp.TText -font ]" );
 
@@ -2217,7 +2217,7 @@ void lsd::object::show_neighbors( bool update )
 
 		cmd( "showtop $N topleftW 0 1 0" );
 		cmd( "wm minsize $N [ winfo reqwidth $N ] [ expr { $vsizeDmin + $vmenusize } ]" );
-		cmd( "wm geometry $N [ winfo reqwidth $N ]x[ expr { [ winfo height .deb ] + $vmenusize } ]" );
+		cmd( "wmgeom $N [ winfo reqwidth $N ]x[ expr { [ winfo height .deb ] + $vmenusize } ]" );
 
 		cmd( "if { ! [ winfo exists .deb.val ] } { align $N .deb } { align $N .deb.val }" );
 	}

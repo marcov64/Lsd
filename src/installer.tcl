@@ -285,7 +285,7 @@ pack .dir -padx $_10 -pady $_10
 
 okcancel . b { set done 1 } { set done 2 }
 
-wm geometry . +[ getx . centerS ]+[ gety . centerS ]
+wmgeom . +[ getx . centerS ]+[ gety . centerS ]
 settop . "LSD Installer" { set done 2 } "" yes
 
 tooltip::tooltip .dir.choice.but.browse "Choose a different\ninstallation directory"

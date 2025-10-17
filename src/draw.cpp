@@ -552,7 +552,7 @@ void lsd::object::put_text( const char *str, const char *n, int x, int y, const 
 					set __focus__ [ focus ] \
 				}; \
 				catch { \
-					wm geometry .list +[ expr { %%X + 5 } ]+[ expr { %%Y + 5 } ]; \
+					wmgeom .list +[ expr { %%X + 5 } ]+[ expr { %%Y + 5 } ]; \
 					wm deiconify .list; \
 					raise .list; \
 					if { $CurPlatform eq \"mac\" } { \

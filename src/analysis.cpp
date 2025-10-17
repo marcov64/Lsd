@@ -3332,7 +3332,7 @@ void gui::analysis( bool mc )
 
 				cmd( "set wid $ccanvas.a" );
 				cmd( "newtop $wid \"Edit Text\" { set choice 2 } $ccanvas" );
-				cmd( "wm geometry $wid +$LX+$LY" );
+				cmd( "wmgeom $wid +$LX+$LY" );
 
 				cmd( "ttk::frame $wid.l" );
 				cmd( "ttk::label $wid.l.t -text \"New text\"" );
@@ -3418,7 +3418,7 @@ void gui::analysis( bool mc )
 
 				cmd( "set wid $ccanvas.a" );
 				cmd( "newtop $wid \"New Text\" { set choice 2 } $ccanvas" );
-				cmd( "wm geometry $wid +$LX+$LY" );
+				cmd( "wmgeom $wid +$LX+$LY" );
 
 				cmd( "ttk::frame $wid.l" );
 				cmd( "ttk::label $wid.l.t -text \"New text\"" );
@@ -3465,7 +3465,7 @@ void gui::analysis( bool mc )
 
 				cmd( "set wid $ccanvas.a" );
 				cmd( "newtop $wid \"Edit Line\" { set choice 2 } $ccanvas" );
-				cmd( "wm geometry $wid +$LX+$LY" );
+				cmd( "wmgeom $wid +$LX+$LY" );
 
 				cmd( "ttk::frame $wid.l" );
 				cmd( "ttk::label $wid.l.t -text \"Width\"" );
@@ -3663,7 +3663,7 @@ void gui::analysis( bool mc )
 
 				cmd( "set wid $ccanvas.a" );
 				cmd( "newtop $wid \"Edit Bar\" { set choice 2 } $ccanvas" );
-				cmd( "wm geometry $wid +$LX+$LY" );
+				cmd( "wmgeom $wid +$LX+$LY" );
 
 				cmd( "ttk::frame $wid.c" );
 				cmd( "ttk::label $wid.c.l -text \"Fill color\"" );
