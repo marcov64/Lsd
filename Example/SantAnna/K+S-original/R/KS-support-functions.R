@@ -1189,7 +1189,7 @@ plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
       }
 
       # treat zeros as NAs
-      if( na0 && plt[[ k ]][[ j ]] <= 0 ) {
+      if( na0 && any( plt[[ k ]][[ j ]] ) <= 0 ) {
         plt[[ k ]][[ j ]] <- min[[ k ]][[ j ]] <- max[[ k ]][[ j ]] <-
           CIlo[[ k ]][[ j ]] <- CIhi[[ k ]][[ j ]] <- NA
       }
