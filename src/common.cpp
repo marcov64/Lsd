@@ -23,6 +23,29 @@
 
 namespace gui
 {
+	// color types (0-n) to Tk tags mapping
+	const char *color_types[ ] = { "comment1", "comment2", "cprep", "str", "lsdvar", "lsdmacro", "lsdfunc", "lsdtype", "ctype", "ckword" };
+
+	// color names (0-n) in Tk colorTheme array
+	const char *color_names[ ] = { "comm", "comm", "prep", "str", "vlsd", "mlsd", "fun", "type", "type", "kwrd" };
+
+	// regular expressions identifying colored text types
+	const char *color_regex[ ] = {
+		"/\[*].*\[*]/",		// each item define one different color
+		"//.*",
+		"^(\\s)*#\[^/]*",
+		"\\\"\[^\\\"]*\\\"",
+		"v\\[\[0-9]{1,3}]|curl?\[1-9]?|i|j|h|k|root|up|next|hook",
+		LSD_MACROS, LSD_FUNCTIONS, LSD_TYPES,
+		C_TYPES, C_KEYWORDS
+	};
+
+	struct color_hit
+	{
+		unsigned type, count;
+		unsigned long first_line, first_col;
+	};
+
 	mtxT lock_log_tcl_err;			// lock log_tcl_error for parallel access
 }
 
@@ -2891,6 +2914,7 @@ void gui::clean_spaces( char *s )
 		{
 			case ' ':
 			case '\t':
+			case '\n':
 				break;
 
 			default:
@@ -2957,4 +2981,178 @@ char *gui::strtcl( char *out, const char *text, int outSz )
 	out[ j ] = '\0';
 
 	return out;
+}
+
+
+/*************************************************************
+ COLOR_MAP
+ map syntax highlight level to the
+ number of color types to use
+ *************************************************************/
+#define ITEM_COUNT( ptrArray )	( sizeof( ptrArray ) / sizeof( ptrArray[0] ) )
+#define TOT_COLOR ITEM_COUNT( color_types )
+int gui::color_map( bool source_file, int ht_level )
+{
+	if ( ! source_file || ht_level == 0 )
+		return 0;
+
+	if ( ht_level == 1 )
+		return 4;
+
+	if ( ITEM_COUNT( color_types ) > ITEM_COUNT( color_regex ) )
+		return ITEM_COUNT( color_regex );
+
+	return TOT_COLOR;
+}
+
+
+/*************************************************************
+ COLOR_COMP_HIT
+ compare function for qsort to
+ compare different color hits
+ *************************************************************/
+int gui::color_comp_hit( const void *p1, const void *p2 )
+{
+	if ( ( ( color_hit * ) p1 )->first_line < ( ( color_hit * ) p2 )->first_line )
+		return -1;
+
+	if ( ( ( color_hit * ) p1 )->first_line > ( ( color_hit * ) p2 )->first_line )
+		return 1;
+
+	if ( ( ( color_hit * ) p1 )->first_col < ( ( color_hit * ) p2 )->first_col )
+		return -1;
+
+	if ( ( ( color_hit * ) p1 )->first_col > ( ( color_hit * ) p2 )->first_col )
+		return 1;
+
+	if ( ( ( color_hit * ) p1 )->type < ( ( color_hit * ) p2 )->type )
+		return -1;
+
+	if ( ( ( color_hit * ) p1 )->type > ( ( color_hit * ) p2 )->type )
+		return 1;
+
+	if ( ( ( color_hit * ) p1 )->count < ( ( color_hit * ) p2 )->count )
+		return -1;
+
+	if ( ( ( color_hit * ) p1 )->count > ( ( color_hit * ) p2 )->count )
+		return 1;
+
+	return 0;
+}
+
+
+/*************************************************************
+ COLOR_INIT
+ initialize color tags for window
+ *************************************************************/
+void gui::color_init( const char *window )
+{
+	for ( auto i = 0; ( unsigned ) i < TOT_COLOR; ++i )
+		cmd( "%s tag configure %s -foreground $colorsTheme(%s)", window, color_types[ i ], color_names[ i ] );
+}
+
+
+/*************************************************************
+ COLOR_TEXT
+ Colors equation text syntax
+ *************************************************************/
+void gui::color_text( const char *window, bool source_file, int ht_level, long first_line, long last_line )
+{
+	char *ccount, *cpos, *count[ TOT_COLOR ], *pos[ TOT_COLOR ], end_str[ 16 ], *s;
+	const char *pcount, *ppos;
+	unsigned i, maxColor;
+	unsigned long j, k, tsize = 0, curLin = 0, curCol = 0, size[ TOT_COLOR ];
+	struct color_hit *hits;
+
+	// prepare parameters
+	maxColor = color_map( source_file, ht_level );// convert option to # of color types
+	if ( first_line <= 0 )
+		first_line = 1;
+
+	if ( last_line <= 0 )			// convert code 0 for end of text
+		strcpy( end_str, "end" );
+	else
+		snprintf( end_str, 16, "%ld.end", last_line );
+
+	// remove color tags
+	for ( i = 0; i < TOT_COLOR; ++i )
+		cmd( "%s tag remove %s %ld.0 %s", window, color_types[ i ], first_line, end_str );
+
+	// find & copy all occurrence types to arrays of C strings
+	for ( i = 0; i < maxColor; ++i )
+	{
+		// locate all occurrences of each color group
+		cmd( "set ccount \"\"" );
+		if ( strcmp( color_types[ i ], "comment1" ) == 0 )// multi line search element?
+			cmd( "set pos [ %s search -regexp -all -nolinestop -count ccount -- {%s} %ld.0 %s ]", window, color_regex[ i ], first_line, end_str );
+		else
+			cmd( "set pos [ %s search -regexp -all -count ccount -- {%s} %ld.0 %s ]", window, color_regex[ i ], first_line, end_str );
+
+		// check number of ocurrences
+		pcount = gui::get_str( "ccount" );
+		size[ i ] = lsd::strwrds( pcount );
+		if ( size[ i ] == 0 )			// nothing to do?
+			continue;
+
+		tsize += size[ i ];
+
+		// do intermediate store in C memory
+		count[ i ] = new char[ strlen( pcount ) + 1 ];
+		strcpy( count[ i ], pcount );
+		ppos = gui::get_str( "pos" );
+		pos[ i ] = new char[ strlen( ppos ) + 1 ];
+		strcpy( pos[ i ], ppos );
+	}
+	if ( tsize == 0 )
+		return;							// nothing to do
+
+	// organize all occurrences in a single array of C numbers (struct color_hit)
+	hits = new color_hit [ tsize ];
+	for ( i = 0, k = 0; i < maxColor; ++i )
+	{
+		if ( size[ i ] == 0 )			// nothing to do?
+			continue;
+
+		ccount = count[ i ] - 1;
+		cpos = pos[ i ] - 1;
+		for ( j = 0; j < size[ i ] && k < tsize; j++, ++k )
+		{
+			hits[ k ].type = i;
+			s = strtok( ccount + 1, " \t" );
+			hits[ k ].count = atoi( s );
+			ccount = s + strlen( s );
+			s = strtok( cpos + 1, " \t" );
+			sscanf( strtok( s, " \t" ), "%ld.%ld", & hits[ k ].first_line, & hits[ k ].first_col );
+			cpos = s + strlen( s );
+		}
+
+		delete [ ] count[ i ];
+		delete [ ] pos[ i ];
+	}
+
+	// sort the single list for processing
+	qsort( ( void * ) hits, tsize, sizeof( color_hit ), color_comp_hit );
+
+	// process each occurrence, if applicable
+	for ( k = 0; k < tsize; ++k )
+		// skip occurrences inside other occurrence
+		if ( hits[ k ].first_line > curLin || ( hits[ k ].first_line == curLin && hits[ k ].first_col >= curCol ) )
+		{
+			cmd( "set pos %ld.%ld", hits[ k ].first_line, hits[ k ].first_col );
+			cmd( "set end [ %s index \"$pos + %d char\" ]", window, hits[ k ].count );
+
+			// treats each type of color case properly
+			if ( hits[ k ].type < 4 )		// non token?
+				cmd( "%s tag add %s $pos $end", window, color_types[ hits[ k ].type ] );
+			else							// token - should not be inside another word
+				cmd( "if { ( [ regexp {\\w} [ %s get \"$pos - 1 any chars\" ] ] == 0 || [ string equal $pos 1.0 ] ) && [ regexp {\\w} [ %s get $end ] ] == 0 } { \
+						%s tag add %s $pos $end \
+					}", window, window, window, color_types[ hits[ k ].type ] );
+
+			// next search position
+			ppos = gui::get_str( "end" );
+			sscanf( ppos, "%ld.%ld", & curLin, & curCol );
+		}
+
+	delete [ ] hits;
 }

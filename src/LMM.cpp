@@ -58,7 +58,6 @@ options used up to 88
 #include "LSD.h"
 
 // LMM global variables
-bool sourcefile = false;		// current file type
 int tosave = false;				// modified file flag
 lsd::dlliblinkage lmm_liblnk;	// call-back references for DLL
 
@@ -106,11 +105,8 @@ namespace gui
 bool discard_change( void );
 bool model_loaded( bool no_error = false );
 bool source_file( const char *fname );
-int comphit( const void *p1, const void *p2 );
-int map_color( int hiLev );
 int modman( int argn, const char **argv );
 void cmd( const char *cm, ... );
-void color( int hiLev, long iniLin, long finLin );
 
 
 /*************************************************************
@@ -158,7 +154,7 @@ int main( int argn, const char **argv )
  *************************************************************/
 int modman( int argn, const char **argv )
 {
-	bool found, recolor = false;
+	bool found, recolor = false, sourcefile = false;
 	int i, j, num, choice, synt_high, recolor_all = 0, v_counter = 0;
 	const char *s;
 	char str[ 2 * MAX_PATH_LENGTH ], tmp[ MAX_BUFF_SIZE ];
@@ -519,15 +515,8 @@ int modman( int argn, const char **argv )
 	cmd( "settab .f.t.t $tab_size fixed.TText" );	// adjust tabs size to font type/size
 	cmd( "setwrap .f.t.t $wrap" );		// adjust text wrap
 
-	// set colors
-	cmd( ".f.t.t tag configure comment1 -foreground $colorsTheme(comm)" );
-	cmd( ".f.t.t tag configure comment2 -foreground $colorsTheme(comm)" );
-	cmd( ".f.t.t tag configure str -foreground $colorsTheme(str)" );
-	cmd( ".f.t.t tag configure cprep -foreground $colorsTheme(prep)" );
-	cmd( ".f.t.t tag configure ctype -foreground $colorsTheme(type)" );
-	cmd( ".f.t.t tag configure ckword -foreground $colorsTheme(kwrd)" );
-	cmd( ".f.t.t tag configure lsdvar -foreground $colorsTheme(vlsd)" );
-	cmd( ".f.t.t tag configure lsdmacro -foreground $colorsTheme(mlsd)" );
+	// set syntax colors
+	gui::color_init( ".f.t.t" );
 
 	cmd( "ttk::frame .f.hea" );
 
@@ -807,7 +796,7 @@ int modman( int argn, const char **argv )
 	if ( recolor_all )				// all text?
 	{
 		cmd( "sav_cur_ini; sav_cur_end" );	// save data for recolor
-		color( synt_high, 0, 0 );		// set color types (all text)
+		gui::color_text( ".f.t.t", sourcefile, synt_high );// set color types (all text)
 	}
 	else
 		if ( recolor )				// just around cursor?
@@ -5347,7 +5336,7 @@ int modman( int argn, const char **argv )
 					nextLin = ( long ) floor( curPos[ i ] ) + 1;
 			}
 
-			color( synt_high, prevLin, nextLin );
+			gui::color_text( ".f.t.t", sourcefile, synt_high, prevLin, nextLin );
 		}
 
 		choice = 0;
@@ -5423,191 +5412,6 @@ bool source_file( const char *fname )
 		   ! strcmp( ext, ".CPP" ) || ! strcmp( ext, ".Cpp" ) || ! strcmp( ext, ".c++" ) || \
 		   ! strcmp( ext, ".C++" ) || ! strcmp( ext, ".h" )	  || ! strcmp( ext, ".H" )	 || \
 		   ! strcmp( ext, ".hpp" ) || ! strcmp( ext, ".HPP" ) || ! strcmp( ext, ".Hpp" );
-}
-
-
-/*************************************************************
- COLOR data
- data structures for color syntax
- *************************************************************/
-struct hit
-{
-	int type, count;
-	long iniLin, iniCol;
-	char previous, next;
-};
-
-// color types (0-n) to Tk tags mapping
-const char *cTypes[ ] = { "comment1", "comment2", "cprep", "str", "lsdvar", "lsdmacro", "ctype", "ckword" };
-
-// regular expressions identifying colored text types
-const char *cRegex[ ] = {
-	"/\[*].*\[*]/",		// each item define one different color
-	"//.*",
-	"^(\\s)*#\[^/]*",
-	"\\\"\[^\\\"]*\\\"",
-	"v\\[\[0-9]{1,3}]|curl?\[1-9]?|root|up|next|hook",
-	"(MODEL|CLOSE)(BEGIN|END)|(END_)?EQUATION(_DUMMY)?|RESULT|ABORT|DEBUG_(START|STOP)(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM(_CND)?L?S?|COUNT(_ALL|_CNDL?|_ALL_CNDL?|_HOOK)?S?|STAT(_CND)?L?S?|STAT_(NETS?|NODES?)|(M|WHT|WHTM)?AVE(_CND)?L?S?|MED(_CND)?L?S?|PERC(_CND)?L?S?|SD(_CND)?L?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAX(_CND)?L?S?|MIN(_CND)?L?S?|HOOKS?|SHOOKS?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|ARG_EXTS?|LAT|HOOKS?|SHOOKS?)|SEARCH(_CNDL?|_INST|_NODE|_LINK)?S?|SEARCHS?|TSEARCH(_CND)?(_SET)?S?|SORT2?L?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?|EXT_INITS?|HOOKS?)|DELETE|DELETE_(EXTS?|LAT|NETS?|NODES?|LINKS?)|DELETINGS?|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCH(_CND)?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(DOWN|UP|LEFT|RIGHT)_LATS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|(USE|NO)_POINTER_CHECK|(USE|NO)_SAVED|(USE|NO)_SEARCH(_UP)?|(USE|NO)_ZERO_INSTANCE|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|LAST_CALCS?|RECALCS?|UPDATE(S|_RECS?)?|DEFAULT_RESULT|THIS|CALLER|NAMES?|NEXTS?|(GRAND)?PARENTS?|ROOT|UP|DOWN|RUN|LAST_RUN|(CSV|EIGEN|XML)LIB|pi|abs|exp|fact|log(10)?|min|max|i?pow|round(_digits)?|a?sin|a?cos|a?tan|(sq|cb)rt|(t|l)?gamma|(t|z)_star|is_(finite|inf|nan)|alapl(cdf)?|bernoulli|beta(cdf)?|binomial|b?pareto(cdf)?|cauchy|chi_squared|exponential|fisher|gamma|geometric|l?norm(cdf)?|poisson(cdf)?|student|uniform(_int)?|unifcdf|weibull",
-	"auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
-	"break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
-};
-
-
-/*************************************************************
- MAP_COLOR
- map syntax highlight level to the
- number of color types to use
- *************************************************************/
-#define ITEM_COUNT( ptrArray )	( sizeof( ptrArray ) / sizeof( ptrArray[0] ) )
-int map_color( int hiLev )
-{
-	if ( ! sourcefile || hiLev == 0 )
-		return 0;
-
-	if ( hiLev == 1 )
-		return 4;
-
-	if ( ITEM_COUNT( cTypes ) > ITEM_COUNT( cRegex ) )
-		return ITEM_COUNT( cRegex );
-
-	return ITEM_COUNT( cTypes );
-}
-
-
-/*************************************************************
- COMPHIT
- compare function for qsort to
- compare different color hits
- *************************************************************/
-int comphit( const void *p1, const void *p2 )
-{
-	if ( ( ( hit * ) p1 )->iniLin < ( ( hit * ) p2 )->iniLin )
-		return -1;
-
-	if ( ( ( hit * ) p1 )->iniLin > ( ( hit * ) p2 )->iniLin )
-		return 1;
-
-	if ( ( ( hit * ) p1 )->iniCol < ( ( hit * ) p2 )->iniCol )
-		return -1;
-
-	if ( ( ( hit * ) p1 )->iniCol > ( ( hit * ) p2 )->iniCol )
-		return 1;
-
-	if ( ( ( hit * ) p1 )->type < ( ( hit * ) p2 )->type )
-		return -1;
-
-	if ( ( ( hit * ) p1 )->type > ( ( hit * ) p2 )->type )
-		return 1;
-
-	return 0;
-}
-
-
-/*************************************************************
- COLOR
- Colors equation text syntax
- *************************************************************/
-#define TOT_COLOR ITEM_COUNT( cTypes )
-void color( int hiLev, long iniLin, long finLin )
-{
-	char *ccount, *cpos, *count[ TOT_COLOR ], *pos[ TOT_COLOR ], finStr[ 16 ], *s;
-	const char *pcount, *ppos;
-	int i, maxColor, newCnt;
-	long j, k, tsize = 0, curLin = 0, curCol = 0, newLin, newCol, size[ TOT_COLOR ];
-	struct hit *hits;
-
-	// prepare parameters
-	maxColor = map_color( hiLev );	// convert option to # of color types
-	if ( finLin == 0 )			// convert code 0 for end of text
-		strcpy( finStr, "end" );
-	else
-		snprintf( finStr, 16, "%ld.end", finLin );
-
-	// remove color tags
-	for ( i = 0; ( unsigned ) i < TOT_COLOR; ++i )
-		cmd( ".f.t.t tag remove %s %ld.0 %s", cTypes[ i ], iniLin == 0 ? 1 : iniLin, finStr );
-
-	// find & copy all occurrence types to arrays of C strings
-	for ( i = 0; i < maxColor; ++i )
-	{
-		// locate all occurrences of each color group
-		cmd( "set ccount \"\"" );
-		if ( strcmp( cTypes[ i ], "comment1" ) == 0 )// multi line search element?
-			cmd( "set pos [ .f.t.t search -regexp -all -nolinestop -count ccount -- {%s} %ld.0 %s ]", cRegex[ i ], iniLin == 0 ? 1 : iniLin, finStr );
-		else
-			cmd( "set pos [ .f.t.t search -regexp -all -count ccount -- {%s} %ld.0 %s ]", cRegex[ i ], iniLin == 0 ? 1 : iniLin, finStr );
-
-		// check number of ocurrences
-		pcount = gui::get_str( "ccount" );
-		size[ i ] = lsd::strwrds( pcount );
-		if ( size[ i ] == 0 )			// nothing to do?
-			continue;
-
-		tsize += size[ i ];
-
-		// do intermediate store in C memory
-		count[ i ] = new char[ strlen( pcount ) + 1 ];
-		strcpy( count[ i ], pcount );
-		ppos = gui::get_str( "pos" );
-		pos[ i ] = new char[ strlen( ppos ) + 1 ];
-		strcpy( pos[ i ], ppos );
-	}
-	if ( tsize == 0 )
-		return;							// nothing to do
-
-	// organize all occurrences in a single array of C numbers (struct hit)
-	hits = new hit[ tsize ];
-	for ( i = 0, k = 0; i < maxColor; ++i )
-	{
-		if ( size[ i ] == 0 )			// nothing to do?
-			continue;
-		ccount = count[ i ] - 1;
-		cpos = pos[ i ] - 1;
-		for ( j = 0; j < size[ i ] && k < tsize; j++, ++k )
-		{
-			hits[ k ].type = i;
-			s = strtok( ccount + 1, " \t" );
-			hits[ k ].count = atoi( s );
-			ccount = s + strlen( s );
-			s = strtok( cpos + 1, " \t" );
-			sscanf( strtok( s, " \t" ), "%ld.%ld", &hits[ k ].iniLin, &hits[ k ].iniCol );
-			cpos = s + strlen( s );
-		}
-
-		delete [ ] count[ i ];
-		delete [ ] pos[ i ];
-	}
-
-	// Sort the single list for processing
-	qsort( ( void * ) hits, tsize, sizeof( hit ), comphit );
-
-	// process each occurrence, if applicable
-	Tcl_LinkVar( gui::interp, "lin", ( char * ) &newLin, TCL_LINK_LONG | TCL_LINK_READ_ONLY );
-	Tcl_LinkVar( gui::interp, "col", ( char * ) &newCol, TCL_LINK_LONG | TCL_LINK_READ_ONLY );
-	Tcl_LinkVar( gui::interp, "cnt", ( char * ) &newCnt, TCL_LINK_INT | TCL_LINK_READ_ONLY );
-
-	for ( k = 0; k < tsize; ++k )
-		// skip occurrences inside other occurrence
-		if ( hits[ k ].iniLin > curLin || ( hits[ k ].iniLin == curLin && hits[ k ].iniCol >= curCol ) )
-		{
-			newLin = hits[ k ].iniLin;
-			newCol = hits[ k ].iniCol;
-			newCnt = hits[ k ].count;
-			cmd( "set end [.f.t.t index \"$lin.$col + $cnt char\"]" );
-			// treats each type of color case properly
-			if ( hits[ k ].type < 4 )		// non token?
-				cmd( ".f.t.t tag add %s $lin.$col $end", cTypes[ hits[ k ].type ] );
-			else							// token - should not be inside another word
-				cmd( "if { [ regexp {\\w} [ .f.t.t get \"$lin.$col - 1 any chars\" ] ] == 0 && [ regexp {\\w} [ .f.t.t get $end ] ] == 0 } { .f.t.t tag add %s $lin.$col $end }", cTypes[ hits[ k ].type ] );
-			// next search position
-			ppos = gui::get_str( "end" );
-			sscanf( ppos, "%ld.%ld", &curLin, &curCol );
-		}
-
-	Tcl_UnlinkVar( gui::interp, "lin");
-	Tcl_UnlinkVar( gui::interp, "col");
-	Tcl_UnlinkVar( gui::interp, "cnt");
-	delete [ ] hits;
 }
 
 

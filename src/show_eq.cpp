@@ -50,10 +50,10 @@
  ****************************************************/
 void gui::show_eq( const char *lab, const char *parWnd )
 {
-	bool done;
+	bool done, end, res;
 	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ], c3_lab[ MAX_LINE_SIZE ], full_name[ MAX_PATH_LENGTH ], updt_in[ MAX_ELEM_LENGTH ];
 	const char *fname, *app;
-	int i, k, bra, start, printing_var = 0, comment_line = 0, temp_var = 0;
+	int i, k, close_par, open_par;
 	FILE *f1, *f2;
 
 	cmd( "if [ string compare [ info command .eq_%s ] .eq_%s ] { set res 1 } { set res 0 }", lab, lab );
@@ -200,24 +200,9 @@ void gui::show_eq( const char *lab, const char *parWnd )
 
 	cmd( "tooltip::tooltip $w.b.search \"Search for text\"" );
 
-	cmd( "$w.f.text tag conf vars -foreground $colorsTheme(str)" );
-	cmd( "$w.f.text tag conf comment_line -foreground $colorsTheme(comm)" );
-	cmd( "$w.f.text tag conf temp_var -foreground $colorsTheme(vlsd)" );
-
-	cmd( "set mytag \"\"" );
-
-	if ( ! macro )
-	{	// standard type of equations
-		start = 1;
-		bra = 1;
-	}
-	else
-	{
-		start = 0;
-		bra = 2;
-	}
-
 	lsd::strcpyn( c3_lab, c1_lab, MAX_LINE_SIZE );			// save original first line
+	open_par = close_par = 0;
+	res = end = false;
 
 	do
 	{
@@ -236,107 +221,32 @@ void gui::show_eq( const char *lab, const char *parWnd )
 		}
 
 		if ( ! strncmp( c2_lab,"RESULT(", 7 ) )
-			bra--;
+			res = true;
 
-		for ( i = 0; c1_lab[ i ] != 0; ++i )
+		if ( res )
 		{
-			if ( c1_lab[ i ] == '\r' )
-			i++;
-			if ( c1_lab[ i ] == '{' )
-			{
-				if ( bra != 1 )
-					cmd( "$w.f.text insert end \"{\" $mytag" );
-				else
-					start = 0;
-				bra++;
-			}
-			else
-				if ( c1_lab[ i ] == '}' )
-				{
-					bra--;
-					if ( bra > 1 )
-						cmd( "$w.f.text insert end \"}\" $mytag " );
-				}
-				else
-					if ( c1_lab[ i ] == '\\' )
-						cmd( "$w.f.text insert end \\\\ $mytag" );
-					else
-						if ( c1_lab[ i ] == '[' )
-							cmd( "$w.f.text insert end \\[ $mytag " );
-						else
-							if ( c1_lab[ i ] == ']' )
-							{
-								cmd( "$w.f.text insert end \\]	$mytag" );
-								if ( temp_var == 1 )
-								{
-									temp_var = 0;
-									cmd( "set mytag \"\"" );
-								}
-							}
-							else
-								if ( c1_lab[ i ] == '"' )
-								{
-									if ( printing_var == 1 && comment_line == 0 )
-										cmd( "set mytag \"\"" );
+			for ( i = 0; c2_lab[ i ] != '\0'; ++i )
+				if ( c2_lab[ i ] == '(' )
+					++open_par;
 
-									cmd( "$w.f.text insert end {\"} $mytag" );
-									if ( printing_var == 0 && comment_line == 0 )
-									{
-										cmd( "set mytag \"vars\"" );
-										printing_var = 1;
-									}
-									else
-										printing_var = 0;
-								}
-								else
-									if ( c1_lab[ i ] == '/' && c1_lab[ i + 1 ] == '/' && comment_line == 0 )
-									{
-										cmd( "set mytag comment_line" );
-										comment_line = 1;
-										cmd( "$w.f.text insert end \"//\" $mytag" );
-										i++;
-									}
-									else
-										if ( c1_lab[ i ] == '/' && c1_lab[ i + 1 ] == '*' && comment_line == 0 )
-										{
-											cmd( "set mytag comment_line" );
-											comment_line = 2;
-											cmd( "$w.f.text insert end \"/*\" $mytag" );
-											i++;
-										}
-										else
-											if ( c1_lab[ i ] == '*' && c1_lab[ i + 1 ] == '/' && comment_line == 2 )
-											{
-												comment_line = 0;
-												cmd( "$w.f.text insert end \"*/\" $mytag" );
-												i++;
-												cmd( "set mytag \"\"" );
-											}
-											else
-												if ( c1_lab[ i ] == 'v' && c1_lab[ i + 1 ] == '[' && comment_line == 0 )
-												{
-													temp_var = 1;
-													cmd( "set mytag temp_var" );
-													cmd( "$w.f.text insert end \"v\" $mytag" );
-												}
-												else
-													if ( c1_lab[ i ] != '\n' )
-														cmd( "$w.f.text insert end \"%c\"  $mytag", c1_lab[ i ] );
-													else
-													{
-														cmd( "$w.f.text insert end \\n	$mytag" );
-														if ( comment_line == 1 )
-														{
-															cmd( "set mytag \"\"" );
-															comment_line = 0;
-														}
-													}
+			for ( i = 0; c2_lab[ i ] != '\0'; ++i )
+				if ( c2_lab[ i ] == ')' )
+					++close_par;
+
+			if ( open_par <= close_par )
+				end = true;
 		}
+
+		// copy line including special chars
+		Tcl_SetVar( interp, "a", c1_lab, 0 );
+		cmd( "$w.f.text insert end \"$a\"" );
 	}
-	while ( ( bra > 1 || start == 1 ) && fgets( c1_lab, MAX_LINE_SIZE, f2 ) != NULL	 );
+	while ( ! end && fgets( c1_lab, MAX_LINE_SIZE, f2 ) != NULL	 );
 
 	fclose( f2 );
 
+	color_init( "$w.f.text" );
+	color_text( "$w.f.text" );
 	cmd( "$w.f.text mark set insert 1.0" );
 	cmd( "$w.f.text conf -state disabled" );
 }
@@ -422,11 +332,6 @@ void gui::scan_used_lab( const char *lab, const char *parWnd )
 
 				if ( ! strcmp( c2_lab, "if(!strcmp(label," ) || ! strcmp( c2_lab, "EQUATION(" ) || ! strcmp( c2_lab, "EQUATION_DUMMY(" ) || ! strcmp( c2_lab, "FUNCTION(" ) )
 				{
-					if ( ! strcmp( c2_lab, "if(!strcmp(label," ) )
-						macro = false;
-					else
-						macro = true;
-
 					for ( j = 0; c1_lab[ i + 1 + j ] != '"'; ++j )
 						c2_lab[ j ] = c1_lab[ i + 1 + j ];	// prepare the c2_lab to store the var's label
 					c2_lab[ j ] = '\0';

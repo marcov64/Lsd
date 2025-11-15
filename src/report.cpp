@@ -678,10 +678,7 @@ void lsd::variable::write_var( FILE *frep )
 		{
 			if ( gui::eq_header( c1_lab, c2_lab, updt_in ) )
 			{
-				if ( ! gui::macro )
-					done = 0;
-				else
-					done = 1;		// will never stop with {} only
+				done = 1;
 
 				if ( ! strcmp( c2_lab, attr->label ) )
 				{
@@ -806,7 +803,7 @@ void lsd::variable::write_var( FILE *frep )
 
 						fprintf( frep, "</TT>\n" );
 
-						if ( ! strncmp( c3_lab, "RESULT(", 7 ) && gui::macro )
+						if ( ! strncmp( c3_lab, "RESULT(", 7 ) )
 							done = 0;		// force it to stop
 					}
 
@@ -937,19 +934,8 @@ void lsd::object::find_using( variable *v, FILE *frep, bool *found )
 bool gui::eq_contains( FILE *f, const char *lab, int len )
 {
 	bool found = false;
-	int bra, start, i, j, got, comm = 0;
+	int i, j, got, bra = 2, comm = 0, start = 0;
 	char c1_lab[ MAX_LINE_SIZE ], pot[ MAX_LINE_SIZE ];
-
-	if ( ! macro )
-	{
-		start = 1;
-		bra = 1;
-	}
-	else
-	{
-		start = 0;
-		bra = 2;
-	}
 
 	// for each line of the equation ...
 	while ( ( bra > 1 || start == 1 ) && fgets( c1_lab, MAX_LINE_SIZE, f ) != NULL )
@@ -1492,11 +1478,6 @@ bool gui::eq_header( const char *raw_line, char *var, char *updt_in )
 	if ( ! strncmp( line, "if(!strcmp(label,", 17 ) || ! strncmp( line, "EQUATION(", 9 ) || ! strncmp( line, "EQUATION_DUMMY(", 9 ) || ! strncmp( line, "FUNCTION(", 9 ) )
 	{
 		header = true;
-
-		if ( ! strncmp( line, "if(!strcmp(label,", 17 ) )
-			macro = false;
-		else
-			macro = true;
 
 		if ( ! strncmp( line, "EQUATION_DUMMY(", 15 ) )
 			eq_dum = true;

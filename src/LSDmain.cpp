@@ -63,7 +63,6 @@ namespace gui
 	int done_in;					// Tcl menu control variable (log window)
 	int elem_count;					// recursive element counter for show elements menu
 	int findexSens = 0;				// sequential sensitivity index to filenames
-	int macro;						// equations style (macros or C++) (bool)
 	int platform = 0;				// OS platform (1=Linux, 2=Mac, 3=Windows)
 	int stop;						// activity interruption flag (Tcl boolean)
 	int watch;						// allow for graph generation interruption (bool)

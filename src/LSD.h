@@ -239,6 +239,11 @@
 #define TK_WIN_NAME { ".", ".log", ".str", ".inid", ".inin", ".da", ".deb", ".lat", ".plt", ".dap" }
 #define WIN_COMP_NUM 2
 #define WIN_COMP_PATH { "mingw64\\bin", "cygwin64\\bin" }// must use (double) backslashes
+#define LSD_MACROS "(MODEL|CLOSE)(BEGIN|END)|(END_)?EQUATION(_DUMMY)?|RESULT|ABORT|DEBUG_(START|STOP)(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM(_CND)?L?S?|COUNT(_ALL|_CNDL?|_ALL_CNDL?|_HOOK)?S?|STAT(_CND)?L?S?|STAT_(NETS?|NODES?)|(M|WHT|WHTM)?AVE(_CND)?L?S?|MED(_CND)?L?S?|PERC(_CND)?L?S?|SD(_CND)?L?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAX(_CND)?L?S?|MIN(_CND)?L?S?|HOOKS?|SHOOKS?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|ARG_EXTS?|LAT|HOOKS?|SHOOKS?)|SEARCH(_CNDL?|_INST|_NODE|_LINK)?S?|SEARCHS?|TSEARCH(_CND)?(_SET)?S?|SORT2?L?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?|EXT_INITS?|HOOKS?)|DELETE|DELETE_(EXTS?|LAT|NETS?|NODES?|LINKS?)|DELETINGS?|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCH(_CND)?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(DOWN|UP|LEFT|RIGHT)_LATS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|(USE|NO)_POINTER_CHECK|(USE|NO)_SAVED|(USE|NO)_SEARCH(_UP)?|(USE|NO)_ZERO_INSTANCE|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|LAST_CALCS?|RECALCS?|UPDATE(S|_RECS?)?|DEFAULT_RESULT|THIS|CALLER|VAR|NAMES?|NEXTS?|(GRAND)?PARENTS?|ROOT|UP|DOWN|RUN|LAST_RUN|CFUNS?(_DBL|_INT|_OBJ|_VOID)?|(CSV|EIGEN|XML)LIB"
+#define LSD_FUNCTIONS "pi|abs|exp|fact|log(10)?|min|max|i?pow|round(_digits)?|a?sin|a?cos|a?tan|(sq|cb)rt|(t|l)?gamma|(t|z)_star|is_(finite|inf|nan)|alapl(cdf)?|bernoulli|beta(cdf)?|binomial|b?pareto(cdf)?|cauchy|chi_squared|exponential|fisher|gamma|geometric|l?norm(cdf)?|poisson(cdf)?|student|uniform(_int)?|unifcdf|weibull"
+#define LSD_TYPES "lsd|gui|simulation|equation|object|variable|mnode|bridge|store|netlink|netnode|lattice|lsdstack|store|description|sensitivity|design|nolh|assim|assimilation|result|profile|worker|dlliblinkage"
+#define C_TYPES "auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t"
+#define C_KEYWORDS "break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
 
 // LSD GUI name space
 namespace gui
@@ -470,6 +475,8 @@ namespace gui
 	double **mat_new( int m, int n );
 	double **opt_trajectories( int k, double **pool, int M, int r, double **X );
 	int browse( lsd::object *r );
+	int color_comp_hit( const void *p1, const void *p2 );
+	int color_map( bool source_file, int ht_level );
 	int create( void );
 	int count_lines( const char *fname, bool dozip = false );
 	int eval_int( const char *tcl_exp );
@@ -521,6 +528,8 @@ namespace gui
 	void canvas_binds( int n );
 	void center_plot( void );
 	void change_obj_number( lsd::object *&c, int value, int all, int pippo[ ], int cfrom );
+	void color_init( const char *window );
+	void color_text( const char *window, bool source_file = true, int ht_level = 2, long first_line = 0, long last_line = 0 );
 	void reset_make_options( int which = 0 );
 	void clean_res_dir( const char *path, const char *sim_name = NULL );
 	void clean_spaces( char *s );
