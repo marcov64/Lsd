@@ -1801,6 +1801,14 @@ int modman( int argn, const char **argv )
 		else
 			cmd( ".f.t.t mark set insert 1.0" );
 
+		cmd( "if { [ info exists file_cur ] } { \
+				.f.t.t mark set insert $file_cur; \
+				unset file_cur \
+			}" );
+		cmd( "if { [ info exists file_pos ] } { \
+				.f.t.t yview moveto $file_pos; \
+				unset file_pos \
+			}" );
 		cmd( "upd_cursor" );
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
 

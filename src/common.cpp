@@ -738,7 +738,7 @@ void gui::load_lsd_options( void )
 		cmd( "set_group_setting [ file normalize $group_new ] description \"Models under development.\"" );
 	}
 
-	// load previous model
+	// load previous model file
 	x_nodeT modNode = lmmNode.child( "model" );		// LMM current model
 	cmd( "set m {%s}", modNode.child( "path" ).text( ).as_string( ) );
 	if ( eval_bool( "[ file exists \"$m/$MODEL_XML_CONFIG\" ]" ) )
@@ -756,6 +756,8 @@ void gui::load_lsd_options( void )
 	{
 		cmd( "set file_dir [ file normalize [ file dirname $f ] ]" );
 		cmd( "set file_name [ file tail $f ]" );
+		cmd( "set file_cur {%s}", modNode.attribute( "cursor" ).as_string( "1.0" ) );
+		cmd( "set file_pos {%f}", modNode.attribute( "position" ).as_float( ) );
 	}
 #endif
 }
@@ -923,6 +925,30 @@ void gui::update_lsd_options( bool save_settings )
 				child = modNode.append_child( "file" );
 
 			child.text( ) = eval_str( "[ file normalize \"$file_dir/$file_name\" ]" );
+
+			cmd( "if { [ catch { .f.t.t index insert } cur ] } { \
+					set cur \"\" \
+				}" );
+
+			if ( strlen( get_str( "cur" ) ) > 0 )
+			{
+				if ( ( attr = modNode.attribute( "cursor" ) ) == NULL )
+					attr = modNode.append_attribute( "cursor" );
+
+				attr = get_str( "cur" );
+			}
+
+			cmd( "if { [ catch { lindex [ .f.t.t yview ] 0 } pos ] } { \
+					set pos \"\" \
+				}" );
+
+			if ( strlen( get_str( "pos" ) ) > 0 )
+			{
+				if ( ( attr = modNode.attribute( "position" ) ) == NULL )
+					attr = modNode.append_attribute( "position" );
+
+				attr = get_str( "pos" );
+			}
 		}
 	}
 	else
