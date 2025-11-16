@@ -18,8 +18,17 @@ Header file to enable just current LSD syntax. Use fun_head.h
 to keep compatibility with legacy LSD code.
 *************************************************************/
 
+#ifdef EQ_USER_CFUNS
+	#ifndef LSDFUNINIT
+		#error User C functions defined but 'fun_init.h' not included
+		#include <stop>
+	#endif
+#endif
+
 #ifdef LEGACY_CODE
 	#undef LEGACY_CODE
 #endif
 
-#include "lib/lsdequation.h"
+#ifndef LSDEQUATION
+	#include "lib/lsdequation.h"
+#endif

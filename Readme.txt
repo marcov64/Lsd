@@ -189,11 +189,11 @@ and choose the "Run as administrator" option. This will force LSD libraries to b
 
 USING DIFFERENT COMPILERS (optional):
 
-It is possible to use LSD with a C++ compiler already installed in your computer. However, in this case the user must install and configure the compiler to ensure it has all the required optional libraries. LSD supports any version of GNU 64-bit C++ compiler (GCC) supporting C++17 (or more recent) standard. Cygwin and MSYS2 mingw-w64-x86_64 versions are both fine, but they require Tcl/Tk 8.6 and zlib 1.2 libraries to be installed. Cygwin compiler is somewhat easier to install as it does not require the user to deal with a command prompt. MSYS2 compiler usually releases new versions earlier. Instructions for installing both are available at the end of this document. Even if they are already installed, the instructions can be also followed to make sure the installation is complete and LSD is configured to use it.
+It is possible to use LSD with a C++ compiler already installed in your computer. However, in this case the user must install and configure the compiler to ensure it has all the required optional libraries. LSD supports any version of GNU 64-bit C++ compiler (GCC 8+) supporting C++20 (or more recent) standard. Cygwin and MSYS2 mingw-w64-x86_64 versions are both fine, but they require Tcl/Tk 8.6 and zlib 1.2 libraries to be installed. Cygwin compiler is somewhat easier to install as it does not require the user to deal with a command prompt. MSYS2 compiler usually releases new versions earlier. Instructions for installing both are available at the end of this document. Even if they are already installed, the instructions can be also followed to make sure the installation is complete and LSD is configured to use it.
 
 
 ************************************
-4.2 macOS installation (11.0+ ONLY)
+4.2 macOS installation (14.5+ ONLY)
 ************************************
 
 To install LSD, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-9-0-stable-1.dmg). Download it, double-click on the package file to mount it, double-click on the LSD Installer application, and follow the instructions. The installer package can be unmounted and deleted after the installation.
@@ -209,7 +209,7 @@ Next, open the Terminal application (located inside the Utilities app folder), a
 
 After a successful installation, a desktop shortcut (icon) will be available for using LMM/LSD. A shortcut is also created in the computer Applications folder.
 
-Users of macOS Sierra (10.12) or newer MUST yet manually install the Apple Command Line Tools package (the full Xcode package is NOT required) to make the compiler and other required command line tools available in macOS. To install it, open the Terminal  and enter the following command:
+Users MUST yet manually install the Apple Command Line Tools package (the full Xcode package is NOT required) to make the compiler and other required command line tools available in macOS. To install it, open the Terminal  and enter the following command:
 
  xcode-select --install
 
@@ -231,7 +231,7 @@ IN CASE OF PROBLEMS:
 
 LSD is only supported in mac computers as a native macOS (Aqua) application. There is no longer support for X11.
 
-If using macOS 10.12 (Sierra) or newer, you MUST use the "add-shortcut-mac.sh" command above to remove LMM and LSD from the system quarantine. Failing to do so will prevent from using LSD as a native macOS application.
+You MUST use the "add-shortcut-mac.sh" command above to remove LMM and LSD from the system quarantine. Failing to do so will prevent from using LSD as a native macOS application.
 
 If you delete or cannot create the LSD shortcuts, you can still run the app named LMM located inside the LSD installation directory (double click it in Finder) to open LMM/LSD, or try to rerun the "add-shortcut-mac.sh" script to recreate the shortcut.
 
@@ -270,17 +270,17 @@ A shortcut to run LSD/LMM is also added to the Linux program menu as a user item
 
  sudo ./add-shortcut-linux.sh
 
-To use the LSD in Linux it is necessary to have the GNU gcc/g++ compiler (version 7+) with the standard packages, including zlib, Tcl/Tk 8.6, and GDB. Likely, you already have those installed on your computer but you may need to install the development version of these packages. Usually, you can use your distribution package manager to get the appropriate 'dev' package versions to your installation. Though not strictly necessary, it is also suggested to have the Gnuplot graphical package (for advanced graphics), preferably using Qt.
+To use the LSD in Linux it is necessary to have the GNU gcc/g++ compiler (version 8+) supporting C++20 with the standard packages, including zlib, Tcl/Tk 8.6, and GDB. Likely, you already have those installed on your computer but you may need to install the development version of these packages. Usually, you can use your distribution package manager to get the appropriate 'dev' package versions to your installation. Though not strictly necessary, it is also suggested to have the Gnuplot graphical package (for advanced graphics), preferably using Qt.
 
-In Debian or Ubuntu, to make sure you have the correct libraries you can use:
+In Debian (10+) or Ubuntu (20.04+), to make sure you have the correct libraries you can use:
 
  sudo apt-get install build-essential gdb gnuplot-qt multitail zlib1g-dev tcl-dev tk-dev xterm python3-dev cython3
 
-In Fedora, CentOS or Red Hat, the equivalent command is:
+In Fedora (28+), CentOS/Red Hat (8+), the equivalent command is:
 
  sudo yum install gcc-c++ make gdb gnuplot multitail zlib-devel tcl tk tcl-devel tk-devel xterm python3-devel python3-cython
 
-In Mandriva or Mageia:
+In Mandriva (4.1+) or Mageia (7+):
 
  sudo urpmi gcc-c++ make gdb gnuplot multitail lib64z-devel lib64tcl-devel lib64tk-devel xterm lib64python3-devel python3-cython
 

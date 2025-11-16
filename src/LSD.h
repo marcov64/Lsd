@@ -207,8 +207,8 @@
 						   'a', 'a', 'a', 'a', \
 						   'a', 'a', 'p', 'p', \
 						   'a', 'g', 'p' }
-#define LSD_TERM_NUM 3
-#define LSD_TERM_SRC { "LSDterm.cpp", "fun_head.h", "fun_head_fast.h" }
+#define LSD_TERM_NUM 4
+#define LSD_TERM_SRC { "LSDterm.cpp", "fun_init.h", "fun_head.h", "fun_head_fast.h" }
 #define LSD_DIR_NUM 8
 #define LSD_DIR_NAME { DEFAULT_SRC_DIR, "gnu", "installer", "Manual", \
 					   "LMM.app", "Rpkg", "lwi", "___" }

@@ -23,4 +23,6 @@ LSD code is used.
 	#define LEGACY_CODE
 #endif
 
-#include "lib/lsdequation.h"
+#ifndef LSDEQUATION
+	#include "lib/lsdequation.h"
+#endif

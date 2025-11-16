@@ -18,6 +18,8 @@
  model's equation file.
  *************************************************************/
 
+#define LSDEQUATION
+
 #define _FUN_				// comment this line to access internal LSD functions
 #include "lib/check.h"		// macro check support code
 
@@ -139,9 +141,9 @@
 	}
 
 #define EQUATION( X ) \
-	{ strT( X ), [ this ]( const variable *_v_, object *c ) -> double \
+	{ strT( X ), [ this ]( const variable *_v_, object *_c_ ) -> double \
 		{ \
-			object *p = _v_->up; \
+			object *_p_ = _v_->up; \
 			int h, i, j, k; \
 			double v[ USER_D_VARS ]; \
 			object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cyccur, *cyccur2, *cyccur3; \
@@ -164,7 +166,7 @@
 	}
 
 #define EQUATION_DUMMY( X, Y ) \
-	{ strT( X ), [ ]( const variable *_v_, object *c ) -> double \
+	{ strT( X ), [ ]( const variable *_v_, object *_c_ ) -> double \
 		{ \
 			return ( ( variable * ) _v_ )->chk_dummy( Y ); \
 		} \
@@ -181,6 +183,20 @@
 	void close_sim( void ) { }
 #endif
 
+// macros to handle user-defined C functions to be used in equations
+#ifdef LSDFUNINIT
+	#undef CFUN_DBL
+	#undef CFUN_INT
+	#undef CFUN_OBJ
+	#undef CFUN_VOID
+	#define CFUN_DBL( N, ... ) double lsd::equation::N( object *_p_, const variable *_v_, object *_c_ __VA_OPT__( , ) __VA_ARGS__ )
+	#define CFUN_INT( N, ... ) int lsd::equation::N( object *_p_, const variable *_v_, object *_c_ __VA_OPT__( , ) __VA_ARGS__ )
+	#define CFUN_OBJ( N, ... ) object *lsd::equation::N( object *_p_, const variable *_v_, object *_c_ __VA_OPT__( , ) __VA_ARGS__ )
+	#define CFUN_VOID( N, ... ) void lsd::equation::N( object *_p_, const variable *_v_, object *_c_ __VA_OPT__( , ) __VA_ARGS__ )
+	#define CFUN( N, ... ) lsd::equation::N( _p_, _v_, _c_ __VA_OPT__( , ) __VA_ARGS__ )
+	#define CFUNS( N, O, ... ) lsd::equation::N( O, _v_, _c_ __VA_OPT__( , ) __VA_ARGS__ )
+#endif
+
 // LSD macros
 #define pi M_PI
 #define is_finite( x ) std::isfinite( x )
@@ -192,7 +208,7 @@
 #define UP "UP"
 #define DOWN "DOWN"
 
-#define ABORT _quit_( 1 );
+#define ABORT _quit_( 1 )
 #define FAST _fast_( 1 )
 #define FAST_FULL _fast_( 2 )
 #define OBSERVE _fast_( 0 )
@@ -225,7 +241,7 @@
 #define LOG( ... ) _plog_( false, __VA_ARGS__ )
 #define PLOG( ... ) _plog_( true, __VA_ARGS__ )
 
-#define NAME ( ( const char * ) p->attr->label )
+#define NAME ( ( const char * ) _p_->attr->label )
 #define NAMES( O ) ( _chk_ptr_( O ) ? NULL : ( const char * ) O->attr->label )
 #define CONFIG _conf_name_( )
 #define PATH _conf_path_( )
@@ -235,229 +251,229 @@
 #define LAST_T _last_t_( )
 #define RUN _run_( )
 #define LAST_RUN _last_run_( )
-#define LAST_CALC( X ) ( p->last_cal( X ) )
+#define LAST_CALC( X ) ( _p_->last_cal( X ) )
 #define LAST_CALCS( O, X ) ( CHK_PTR_DBL( O ) O->last_cal( X ) )
 
 #define ROOT _root_( )
-#define THIS p
-#define CALLER c
-#define NEXT ( p->next )
+#define THIS _p_
+#define CALLER _c_
+#define NEXT ( _p_->next )
 #define NEXTS( O ) ( CHK_PTR_OBJ( O ) O->next )
-#define PARENT ( p->up )
+#define PARENT ( _p_->up )
 #define PARENTS( O ) ( CHK_PTR_OBJ( O ) O->up )
-#define GRANDPARENT ( CHK_PTR_POBJ( p ) p->up->up )
+#define GRANDPARENT ( CHK_PTR_POBJ( _p_ ) _p_->up->up )
 #define GRANDPARENTS( O ) ( CHK_PTR_POBJ( O ) O->up->up )
 
-#define RECALC( X ) ( p->recal( X ) )
+#define RECALC( X ) ( _p_->recal( X ) )
 #define RECALCS( O, X ) ( CHK_PTR_DBL( O ) O->recal( X ) )
-#define UPDATE ( p->update( false, true ) )
+#define UPDATE ( _p_->update( false, true ) )
 #define UPDATES( O ) ( CHK_PTR_VOID( O ) O->update( false, true ) )
-#define UPDATE_REC ( p->update( true, true ) )
+#define UPDATE_REC ( _p_->update( true, true ) )
 #define UPDATE_RECS( O ) ( CHK_PTR_VOID( O ) O->update( true, true ) )
 
-#define V( X ) ( p->cal( p, X, 0 ) )
-#define VL( X, L ) ( p->cal( p, X, L ) )
+#define V( X ) ( _p_->cal( _p_, X, 0 ) )
+#define VL( X, L ) ( _p_->cal( _p_, X, L ) )
 #define VS( O, X ) ( CHK_PTR_DBL( O ) O->cal( O, X, 0 ) )
 #define VLS( O, X, L ) ( CHK_PTR_DBL( O ) O->cal( O, X, L ) )
 
-#define MAVE( X, P ) ( p->mav( p, X, P, 0 ) )
-#define MAVEL( X, P, L ) ( p->mav( p, X, P, L ) )
+#define MAVE( X, P ) ( _p_->mav( _p_, X, P, 0 ) )
+#define MAVEL( X, P, L ) ( _p_->mav( _p_, X, P, L ) )
 #define MAVES( O, X, P ) ( CHK_PTR_DBL( O ) O->mav( O, X, P, 0 ) )
 #define MAVELS( O, X, P, L ) ( CHK_PTR_DBL( O ) O->mav( O, X, P, L ) )
 
-#define WHTMAVE( X, P, W ) ( p->mav( p, X, P, W, 0 ) )
-#define WHTMAVEL( X, P, W, L ) ( p->mav( p, X, P, W, L ) )
+#define WHTMAVE( X, P, W ) ( _p_->mav( _p_, X, P, W, 0 ) )
+#define WHTMAVEL( X, P, W, L ) ( _p_->mav( _p_, X, P, W, L ) )
 #define WHTMAVES( O, X, P, W ) ( CHK_PTR_DBL( O ) O->mav( O, X, P, W, 0 ) )
 #define WHTMAVELS( O, X, P, W, L ) ( CHK_PTR_DBL( O ) O->mav( O, X, P, W, L ) )
 
-#define SUM( X ) ( p->sum( X, 0, false, "", "", 0. ) )
-#define SUML( X, L ) ( p->sum( X, L, false, "", "", 0. ) )
+#define SUM( X ) ( _p_->sum( X, 0, false, "", "", 0. ) )
+#define SUML( X, L ) ( _p_->sum( X, L, false, "", "", 0. ) )
 #define SUMS( O, X ) ( CHK_PTR_DBL( O ) O->sum( X, 0, false, "", "", 0. ) )
 #define SUMLS( O, X, L ) ( CHK_PTR_DBL( O ) O->sum( X, L, false, "", "", 0. ) )
-#define SUM_CND( X, T, R, V ) ( p->sum( X, 0, true, T, R, V ) )
-#define SUM_CNDL( X, T, R, V, L ) ( p->sum( X, L, true, T, R, V ) )
+#define SUM_CND( X, T, R, V ) ( _p_->sum( X, 0, true, T, R, V ) )
+#define SUM_CNDL( X, T, R, V, L ) ( _p_->sum( X, L, true, T, R, V ) )
 #define SUM_CNDS( O, X, T, R, V ) ( CHK_PTR_DBL( O ) O->sum( X, 0, true, T, R, V ) )
 #define SUM_CNDLS( O, X, T, R, V, L ) ( CHK_PTR_DBL( O ) O->sum( X, L, true, T, R, V ) )
 
-#define MAX( X ) ( p->overall_max( X, 0, false, "", "", 0. ) )
-#define MAXL( X, L ) ( p->overall_max( X, L, false, "", "", 0. ) )
+#define MAX( X ) ( _p_->overall_max( X, 0, false, "", "", 0. ) )
+#define MAXL( X, L ) ( _p_->overall_max( X, L, false, "", "", 0. ) )
 #define MAXS( O, X ) ( CHK_PTR_DBL( O ) O->overall_max( X, 0, false, "", "", 0. ) )
 #define MAXLS( O, X, L ) ( CHK_PTR_DBL( O ) O->overall_max( X, L, false, "", "", 0. ) )
-#define MAX_CND( X, T, R, V ) ( p->overall_max( X, 0, true, T, R, V ) )
-#define MAX_CNDL( X, T, R, V, L ) ( p->overall_max( X, L, true, T, R, V ) )
+#define MAX_CND( X, T, R, V ) ( _p_->overall_max( X, 0, true, T, R, V ) )
+#define MAX_CNDL( X, T, R, V, L ) ( _p_->overall_max( X, L, true, T, R, V ) )
 #define MAX_CNDS( O, X, T, R, V ) ( CHK_PTR_DBL( O ) O->overall_max( X, 0, true, T, R, V ) )
 #define MAX_CNDLS( O, X, T, R, V, L ) ( CHK_PTR_DBL( O ) O->overall_max( X, L, true, T, R, V ) )
 
-#define MIN( X ) ( p->overall_min( X, 0, false, "", "", 0. ) )
-#define MINL( X, L ) ( p->overall_min( X, L, false, "", "", 0. ) )
+#define MIN( X ) ( _p_->overall_min( X, 0, false, "", "", 0. ) )
+#define MINL( X, L ) ( _p_->overall_min( X, L, false, "", "", 0. ) )
 #define MINS( O, X ) ( CHK_PTR_DBL( O ) O->overall_min( X, 0, false, "", "", 0. ) )
 #define MINLS( O, X, L ) ( CHK_PTR_DBL( O ) O->overall_min( X, L, false, "", "", 0. ) )
-#define MIN_CND( X, T, R, V ) ( p->overall_min( X, 0, true, T, R, V ) )
-#define MIN_CNDL( X, T, R, V, L ) ( p->overall_min( X, L, true, T, R, V ) )
+#define MIN_CND( X, T, R, V ) ( _p_->overall_min( X, 0, true, T, R, V ) )
+#define MIN_CNDL( X, T, R, V, L ) ( _p_->overall_min( X, L, true, T, R, V ) )
 #define MIN_CNDS( O, X, T, R, V ) ( CHK_PTR_DBL( O ) O->overall_min( X, 0, true, T, R, V ) )
 #define MIN_CNDLS( O, X, T, R, V, L ) ( CHK_PTR_DBL( O ) O->overall_min( X, L, true, T, R, V ) )
 
-#define AVE( X ) ( p->av( X, 0, false, "", "", 0. ) )
-#define AVEL( X, L ) ( p->av( X, L, false, "", "", 0. ) )
+#define AVE( X ) ( _p_->av( X, 0, false, "", "", 0. ) )
+#define AVEL( X, L ) ( _p_->av( X, L, false, "", "", 0. ) )
 #define AVES( O, X ) ( CHK_PTR_DBL( O ) O->av( X, 0, false, "", "", 0. ) )
 #define AVELS( O, X, L ) ( CHK_PTR_DBL( O ) O->av( X, L, false, "", "", 0. ) )
-#define AVE_CND( X, T, R, V ) ( p->av( X, 0, true, T, R, V ) )
-#define AVE_CNDL( X, T, R, V, L ) ( p->av( X, L, true, T, R, V ) )
+#define AVE_CND( X, T, R, V ) ( _p_->av( X, 0, true, T, R, V ) )
+#define AVE_CNDL( X, T, R, V, L ) ( _p_->av( X, L, true, T, R, V ) )
 #define AVE_CNDS( O, X, T, R, V ) ( CHK_PTR_DBL( O ) O->av( X, 0, true, T, R, V ) )
 #define AVE_CNDLS( O, X, T, R, V, L ) ( CHK_PTR_DBL( O ) O->av( X, L, true, T, R, V ) )
 
-#define WHTAVE( X, Y ) ( p->whg_av( X, Y, 0, false, "", "", 0. ) )
-#define WHTAVEL( X, Y, L ) ( p->whg_av( X, Y, L, false, "", "", 0. ) )
+#define WHTAVE( X, Y ) ( _p_->whg_av( X, Y, 0, false, "", "", 0. ) )
+#define WHTAVEL( X, Y, L ) ( _p_->whg_av( X, Y, L, false, "", "", 0. ) )
 #define WHTAVES( O, X, Y ) ( CHK_PTR_DBL( O ) O->whg_av( X, Y, 0, false, "", "", 0. ) )
 #define WHTAVELS( O, X, Y, L ) ( CHK_PTR_DBL( O ) O->whg_av( X, Y, L, false, "", "", 0. ) )
-#define WHTAVE_CND( X, Y, T, R, V ) ( p->whg_av( X, Y, 0, true, T, R, V ) )
-#define WHTAVE_CNDL( X, Y, T, R, V, L ) ( p->whg_av( X, Y, L, true, T, R, V ) )
+#define WHTAVE_CND( X, Y, T, R, V ) ( _p_->whg_av( X, Y, 0, true, T, R, V ) )
+#define WHTAVE_CNDL( X, Y, T, R, V, L ) ( _p_->whg_av( X, Y, L, true, T, R, V ) )
 #define WHTAVE_CNDS( O, X, Y, T, R, V ) ( CHK_PTR_DBL( O ) O->whg_av( X, Y, 0, true, T, R, V ) )
 #define WHTAVE_CNDLS( O, X, Y, T, R, V, L ) ( CHK_PTR_DBL( O ) O->whg_av( X, Y, L, true, T, R, V ) )
 
-#define MED( X ) ( p->med( X, 0, false, "", "", 0. ) )
-#define MEDL( X, L ) ( p->med( X, L, false, "", "", 0. ) )
+#define MED( X ) ( _p_->med( X, 0, false, "", "", 0. ) )
+#define MEDL( X, L ) ( _p_->med( X, L, false, "", "", 0. ) )
 #define MEDS( O, X ) ( CHK_PTR_DBL( O ) O->med( X, 0, false, "", "", 0. ) )
 #define MEDLS( O, X, L ) ( CHK_PTR_DBL( O ) O->med( X, L, false, "", "", 0. ) )
-#define MED_CND( X, T, R, V ) ( p->med( X, 0, true, T, R, V ) )
-#define MED_CNDL( X, T, R, V, L ) ( p->med( X, L, true, T, R, V ) )
+#define MED_CND( X, T, R, V ) ( _p_->med( X, 0, true, T, R, V ) )
+#define MED_CNDL( X, T, R, V, L ) ( _p_->med( X, L, true, T, R, V ) )
 #define MED_CNDS( O, X, T, R, V ) ( CHK_PTR_DBL( O ) O->med( X, 0, true, T, R, V ) )
 #define MED_CNDLS( O, X, T, R, V, L ) ( CHK_PTR_DBL( O ) O->med( X, L, true, T, R, V ) )
 
-#define PERC( X, P ) ( p->perc( X, P, 0, false, "", "", 0. ) )
-#define PERCL( X, P, L ) ( p->perc( X, P, L, false, "", "", 0. ) )
+#define PERC( X, P ) ( _p_->perc( X, P, 0, false, "", "", 0. ) )
+#define PERCL( X, P, L ) ( _p_->perc( X, P, L, false, "", "", 0. ) )
 #define PERCS( O, X, P ) ( CHK_PTR_DBL( O ) O->perc( X, P, 0, false, "", "", 0. ) )
 #define PERCLS( O, X, P, L ) ( CHK_PTR_DBL( O ) O->perc( X, P, L, false, "", "", 0. ) )
-#define PERC_CND( X, P, T, R, V ) ( p->perc( X, P, 0, true, T, R, V ) )
-#define PERC_CNDL( X, P, T, R, V, L ) ( p->perc( X, P, L, true, T, R, V ) )
+#define PERC_CND( X, P, T, R, V ) ( _p_->perc( X, P, 0, true, T, R, V ) )
+#define PERC_CNDL( X, P, T, R, V, L ) ( _p_->perc( X, P, L, true, T, R, V ) )
 #define PERC_CNDS( O, X, P, T, R, V ) ( CHK_PTR_DBL( O ) O->perc( X, P, 0, true, T, R, V ) )
 #define PERC_CNDLS( O, X, P, T, R, V, L ) ( CHK_PTR_DBL( O ) O->perc( X, P, L, true, T, R, V ) )
 
-#define SD( X ) ( p->sd( X, 0, false, "", "", 0. ) )
-#define SDL( X, L ) ( p->sd( X, L, false, "", "", 0. ) )
+#define SD( X ) ( _p_->sd( X, 0, false, "", "", 0. ) )
+#define SDL( X, L ) ( _p_->sd( X, L, false, "", "", 0. ) )
 #define SDS( O, X ) ( CHK_PTR_DBL( O ) O->sd( X, 0, false, "", "", 0. ) )
 #define SDLS( O, X, L ) ( CHK_PTR_DBL( O ) O->sd( X, L, false, "", "", 0. ) )
-#define SD_CND( X, T, R, V ) ( p->sd( X, 0, true, T, R, V ) )
-#define SD_CNDL( X, T, R, V, L ) ( p->sd( X, L, true, T, R, V ) )
+#define SD_CND( X, T, R, V ) ( _p_->sd( X, 0, true, T, R, V ) )
+#define SD_CNDL( X, T, R, V, L ) ( _p_->sd( X, L, true, T, R, V ) )
 #define SD_CNDS( O, X, T, R, V ) ( CHK_PTR_DBL( O ) O->sd( X, 0, true, T, R, V ) )
 #define SD_CNDLS( O, X, T, R, V, L ) ( CHK_PTR_DBL( O ) O->sd( X, L, true, T, R, V ) )
 
-#define COUNT( X ) ( p->count( X, 0, false, "", "", 0. ) )
+#define COUNT( X ) ( _p_->count( X, 0, false, "", "", 0. ) )
 #define COUNTS( O, X ) ( CHK_PTR_DBL( O ) O->count( X, 0, false, "", "", 0. ) )
-#define COUNT_CND( X, T, R, V ) ( p->count( X, 0, true, T, R, V ) )
-#define COUNT_CNDL( X, T, R, V, L ) ( p->count( X, L, true, T, R, V ) )
+#define COUNT_CND( X, T, R, V ) ( _p_->count( X, 0, true, T, R, V ) )
+#define COUNT_CNDL( X, T, R, V, L ) ( _p_->count( X, L, true, T, R, V ) )
 #define COUNT_CNDS( O, X, T, R, V ) ( CHK_PTR_DBL( O ) O->count( X, 0, true, T, R, V ) )
 #define COUNT_CNDLS( O, X, T, R, V, L ) ( CHK_PTR_DBL( O ) O->count( X, L, true, T, R, V ) )
 
-#define COUNT_ALL( X ) ( p->count_all( X, 0, false, "", "", 0. ) )
+#define COUNT_ALL( X ) ( _p_->count_all( X, 0, false, "", "", 0. ) )
 #define COUNT_ALLS( O, X ) ( CHK_PTR_DBL( O ) O->count_all( X, 0, false, "", "", 0. ) )
-#define COUNT_ALL_CND( X, T, R, V ) ( p->count_all( X, 0, true, T, R, V ) )
-#define COUNT_ALL_CNDL( X, T, R, V, L ) ( p->count_all( X, L, true, T, R, V ) )
+#define COUNT_ALL_CND( X, T, R, V ) ( _p_->count_all( X, 0, true, T, R, V ) )
+#define COUNT_ALL_CNDL( X, T, R, V, L ) ( _p_->count_all( X, L, true, T, R, V ) )
 #define COUNT_ALL_CNDS( O, X, T, R, V ) ( CHK_PTR_DBL( O ) O->count_all( X, 0, true, T, R, V ) )
 #define COUNT_ALL_CNDLS( O, X, T, R, V, L ) ( CHK_PTR_DBL( O ) O->count_all( X, L, true, T, R, V ) )
 
-#define STAT( X ) ( p->stat( X, v, 0, false, "", "", 0. ) )
-#define STATL( X, L ) ( p->stat( X, v, L, false, "", "", 0. ) )
+#define STAT( X ) ( _p_->stat( X, v, 0, false, "", "", 0. ) )
+#define STATL( X, L ) ( _p_->stat( X, v, L, false, "", "", 0. ) )
 #define STATS( O, X ) ( CHK_PTR_DBL( O ) O->stat( X, v, 0, false, "", "", 0. ) )
 #define STATLS( O, X, L ) ( CHK_PTR_DBL( O ) O->stat( X, v, L, false, "", "", 0. ) )
-#define STAT_CND( X, T, R, V ) ( p->stat( X, v, 0, true, T, R, V ) )
-#define STAT_CNDL( X, T, R, V, L ) ( p->stat( X, v, L, true, T, R, V ) )
+#define STAT_CND( X, T, R, V ) ( _p_->stat( X, v, 0, true, T, R, V ) )
+#define STAT_CNDL( X, T, R, V, L ) ( _p_->stat( X, v, L, true, T, R, V ) )
 #define STAT_CNDS( O, X, T, R, V ) ( CHK_PTR_DBL( O ) O->stat( X, v, 0, true, T, R, V ) )
 #define STAT_CNDLS( O, X, T, R, V, L ) ( CHK_PTR_DBL( O ) O->stat( X, v, L, true, T, R, V ) )
 
-#define INTERACT( X, Y ) ( p->interact( X, Y, v, i, j, h, k, cur, cur1, cur2, cur3, cur4, cur5, cur6, cur7, cur8, cur9, curl, curl1, curl2, curl3, curl4, curl5, curl6, curl7, curl8, curl9, f ) )
+#define INTERACT( X, Y ) ( _p_->interact( X, Y, v, i, j, h, k, cur, cur1, cur2, cur3, cur4, cur5, cur6, cur7, cur8, cur9, curl, curl1, curl2, curl3, curl4, curl5, curl6, curl7, curl8, curl9, f ) )
 #define INTERACTS( O, X, Y ) ( CHK_PTR_DBL( O ) O->interact( X, Y, v, i, j, h, k, cur, cur1, cur2, cur3, cur4, cur5, cur6, cur7, cur8, cur9, curl, curl1, curl2, curl3, curl4, curl5, curl6, curl7, curl8, curl9, f ) )
 
-#define SEARCH( X ) ( p->search( X, false ) )
+#define SEARCH( X ) ( _p_->search( X, false ) )
 #define SEARCHS( O, X ) ( CHK_PTR_OBJ( O ) O->search( X, false ) )
-#define SEARCH_CND( X, Y ) ( p->search_var_cond( X, Y, 0 ) )
-#define SEARCH_CNDL( X, Y, L ) ( p->search_var_cond( X, Y, L ) )
+#define SEARCH_CND( X, Y ) ( _p_->search_var_cond( X, Y, 0 ) )
+#define SEARCH_CNDL( X, Y, L ) ( _p_->search_var_cond( X, Y, L ) )
 #define SEARCH_CNDS( O, X, Y ) ( CHK_PTR_OBJ( O ) O->search_var_cond( X, Y, 0 ) )
 #define SEARCH_CNDLS( O, X, Y, L ) ( CHK_PTR_OBJ( O ) O->search_var_cond( X, Y, L ) )
 
-#define SEARCH_INST( X ) ( p->search_inst( X, true ) )
+#define SEARCH_INST( X ) ( _p_->search_inst( X, true ) )
 #define SEARCH_INSTS( O, X ) ( CHK_PTR_DBL( O ) O->search_inst( X, true ) )
 
-#define RNDDRAW( X, Y ) ( p->draw_rnd( X, Y, 0 ) )
-#define RNDDRAWL( X, Y, L ) ( p->draw_rnd( X, Y, L ) )
+#define RNDDRAW( X, Y ) ( _p_->draw_rnd( X, Y, 0 ) )
+#define RNDDRAWL( X, Y, L ) ( _p_->draw_rnd( X, Y, L ) )
 #define RNDDRAWS( O, X, Y ) ( CHK_PTR_OBJ( O ) O->draw_rnd( X, Y, 0 ) )
 #define RNDDRAWLS( O, X, Y, L ) ( CHK_PTR_OBJ( O ) O->draw_rnd( X, Y, L ) )
 
-#define RNDDRAW_FAIR( X ) ( p->draw_rnd( X ) )
+#define RNDDRAW_FAIR( X ) ( _p_->draw_rnd( X ) )
 #define RNDDRAW_FAIRS( O, X ) ( CHK_PTR_OBJ( O ) O->draw_rnd( X ) )
-#define RNDDRAW_TOT( X, Y, Z ) ( p->draw_rnd( X, Y, 0, Z ) )
-#define RNDDRAW_TOTL( X, Y, L, Z ) ( p->draw_rnd( X, Y, L, Z ) )
+#define RNDDRAW_TOT( X, Y, Z ) ( _p_->draw_rnd( X, Y, 0, Z ) )
+#define RNDDRAW_TOTL( X, Y, L, Z ) ( _p_->draw_rnd( X, Y, L, Z ) )
 #define RNDDRAW_TOTS( O, X, Y, Z ) ( CHK_PTR_OBJ( O ) O->draw_rnd( X, Y, 0, Z ) )
 #define RNDDRAW_TOTLS( O, X, Y, L, Z ) ( CHK_PTR_OBJ( O ) O->draw_rnd( X, Y, L, Z ) )
 
-#define WRITE( X, Y ) ( p->write( X, Y, T, 0 ) )
-#define WRITEL( X, Y, L ) ( p->write( X, Y, L, 0 ) )
-#define WRITELL( X, Y, Z, L ) ( p->write( X, Y, Z, L ) )
+#define WRITE( X, Y ) ( _p_->write( X, Y, T, 0 ) )
+#define WRITEL( X, Y, L ) ( _p_->write( X, Y, L, 0 ) )
+#define WRITELL( X, Y, Z, L ) ( _p_->write( X, Y, Z, L ) )
 #define WRITES( O, X, Y ) ( CHK_PTR_DBL( O ) O->write( X, Y, T, 0 ) )
 #define WRITELS( O, X, Y, L ) ( CHK_PTR_DBL( O ) O->write( X, Y, L, 0 ) )
 #define WRITELLS( O, X, Y, Z, L ) ( CHK_PTR_DBL( O ) O->write( X, Y, Z, L ) )
 
-#define INCR( X, Y ) ( p->increment( X, Y ) )
+#define INCR( X, Y ) ( _p_->increment( X, Y ) )
 #define INCRS( O, X, Y ) ( CHK_PTR_DBL( O ) O->increment( X, Y ) )
 
-#define MULT( X, Y ) ( p->multiply( X, Y ) )
+#define MULT( X, Y ) ( _p_->multiply( X, Y ) )
 #define MULTS( O, X, Y ) ( CHK_PTR_DBL( O ) O->multiply( X, Y ) )
 
-#define ADDOBJ( X ) ( p->add_n_objects2( X, 1, -1 ) )
-#define ADDOBJL( X, L ) ( p->add_n_objects2( X, 1, L ) )
+#define ADDOBJ( X ) ( _p_->add_n_objects2( X, 1, -1 ) )
+#define ADDOBJL( X, L ) ( _p_->add_n_objects2( X, 1, L ) )
 #define ADDOBJS( O, X ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( X, 1, -1 ) )
 #define ADDOBJLS( O, X, L ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( X, 1, L ) )
-#define ADDNOBJ( X, N ) ( p->add_n_objects2( X, N, -1 ) )
-#define ADDNOBJL( X, N, L ) ( p->add_n_objects2( X, N, L ) )
+#define ADDNOBJ( X, N ) ( _p_->add_n_objects2( X, N, -1 ) )
+#define ADDNOBJL( X, N, L ) ( _p_->add_n_objects2( X, N, L ) )
 #define ADDNOBJS( O, X, N ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( X, N, -1 ) )
 #define ADDNOBJLS( O, X, N, L ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( X, N, L ) )
 
-#define ADDOBJ_EX( X, E ) ( p->add_n_objects2( X, 1, E, -1 ) )
-#define ADDOBJ_EXL( X, E, L ) ( p->add_n_objects2( X, 1, E, L ) )
+#define ADDOBJ_EX( X, E ) ( _p_->add_n_objects2( X, 1, E, -1 ) )
+#define ADDOBJ_EXL( X, E, L ) ( _p_->add_n_objects2( X, 1, E, L ) )
 #define ADDOBJ_EXS( O, X, E ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( X, 1, E, -1 ) )
 #define ADDOBJ_EXLS( O, X, E, L ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( X, 1, E, L ) )
-#define ADDNOBJ_EX( X, N, E ) ( p->add_n_objects2( X, N, E, -1 ) )
-#define ADDNOBJ_EXL( X, N, E, L ) ( p->add_n_objects2( X, N, E, L ) )
+#define ADDNOBJ_EX( X, N, E ) ( _p_->add_n_objects2( X, N, E, -1 ) )
+#define ADDNOBJ_EXL( X, N, E, L ) ( _p_->add_n_objects2( X, N, E, L ) )
 #define ADDNOBJ_EXS( O, X, N, E ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( X, N, E, -1 ) )
 #define ADDNOBJ_EXLS( O, X, N, E, L ) ( CHK_PTR_OBJ( O ) O->add_n_objects2( X, N, E, L ) )
 
 #define DELETE( O ) ( CHK_PTR_VOID( O ) O->delete_obj( _v_ ) )
-#define DELETING ( p->to_delete( ) )
+#define DELETING ( _p_->to_delete( ) )
 #define DELETINGS( O ) ( CHK_PTR_DBL( O ) O->to_delete( ) )
 
-#define SORT( X, Y, D ) ( p->lsdqsort( X, Y, D, 0 ) )
-#define SORTL( X, Y, D, L ) ( p->lsdqsort( X, Y, D, L ) )
+#define SORT( X, Y, D ) ( _p_->lsdqsort( X, Y, D, 0 ) )
+#define SORTL( X, Y, D, L ) ( _p_->lsdqsort( X, Y, D, L ) )
 #define SORTS( O, X, Y, D ) ( CHK_PTR_OBJ( O ) O->lsdqsort( X, Y, D, 0 ) )
 #define SORTLS( O, X, Y, D, L ) ( CHK_PTR_OBJ( O ) O->lsdqsort( X, Y, D, L ) )
 
-#define SORT2( X, Y, Z, D ) ( p->lsdqsort( X, Y, Z, D , 0 ) )
-#define SORT2L( X, Y, Z, D, L ) ( p->lsdqsort( X, Y, Z, D, L ) )
+#define SORT2( X, Y, Z, D ) ( _p_->lsdqsort( X, Y, Z, D , 0 ) )
+#define SORT2L( X, Y, Z, D, L ) ( _p_->lsdqsort( X, Y, Z, D, L ) )
 #define SORT2S( O, X, Y, Z, D ) ( CHK_PTR_OBJ( O ) O->lsdqsort( X, Y, Z, D, 0 ) )
 #define SORT2LS( O, X, Y, Z, D, L ) ( CHK_PTR_OBJ( O ) O->lsdqsort( X, Y, Z, D, L ) )
 
-#define HOOK( N ) ( CHK_HK_OBJ( p, N ) p->hooks[ N ] )
+#define HOOK( N ) ( CHK_HK_OBJ( _p_, N ) _p_->hooks[ N ] )
 #define HOOKS( O, N ) ( CHK_PTR_OBJ( O ) CHK_HK_OBJ( O, N ) O->hooks[ N ] )
-#define SHOOK ( p->hook )
+#define SHOOK ( _p_->hook )
 #define SHOOKS( O ) ( CHK_PTR_OBJ( O ) O->hook )
 
-#define WRITE_HOOK( N, X ) ( CHK_HK_OBJ( p, N ) CHK_OBJ_OBJ( X ) p->hooks[ N ] = X )
+#define WRITE_HOOK( N, X ) ( CHK_HK_OBJ( _p_, N ) CHK_OBJ_OBJ( X ) _p_->hooks[ N ] = X )
 #define WRITE_HOOKS( O, N, X ) ( CHK_PTR_OBJ( O ) CHK_HK_OBJ( O, N ) CHK_OBJ_OBJ( X ) O->hooks[ N ] = X )
-#define WRITE_SHOOK( X ) ( CHK_OBJ_OBJ( X ) p->hook = X )
+#define WRITE_SHOOK( X ) ( CHK_OBJ_OBJ( X ) _p_->hook = X )
 #define WRITE_SHOOKS( O, X ) ( CHK_PTR_OBJ( O ) CHK_OBJ_OBJ( X ) O->hook = X )
 
-#define ADDHOOK( N ) ( p->hooks.resize( ( unsigned ) N ) )
+#define ADDHOOK( N ) ( _p_->hooks.resize( ( unsigned ) N ) )
 #define ADDHOOKS( O, N ) ( CHK_PTR_VOID( O ) O->hooks.resize( ( unsigned ) N ) )
 
-#define COUNT_HOOK ( p->hooks.size( ) )
+#define COUNT_HOOK ( _p_->hooks.size( ) )
 #define COUNT_HOOKS( O ) ( CHK_PTR_DBL( O ) O->hooks.size( ) )
 
-#define DOWN_LAT ( p->lat_down( ) )
+#define DOWN_LAT ( _p_->lat_down( ) )
 #define DOWN_LATS( O ) ( CHK_PTR_OBJ( O ) O->lat_down( ) )
-#define LEFT_LAT ( p->lat_left( ) )
+#define LEFT_LAT ( _p_->lat_left( ) )
 #define LEFT_LATS( O ) ( CHK_PTR_OBJ( O ) O->lat_left( ) )
-#define RIGHT_LAT ( p->lat_right( ) )
+#define RIGHT_LAT ( _p_->lat_right( ) )
 #define RIGHT_LATS( O ) ( CHK_PTR_OBJ( O ) O->lat_right( ) )
-#define UP_LAT ( p->lat_up( ) )
+#define UP_LAT ( _p_->lat_up( ) )
 #define UP_LATS( O ) ( CHK_PTR_OBJ( O ) O->lat_up( ) )
 
 #define INIT_LAT( ... ) _init_lattice_( __VA_ARGS__ )
@@ -467,92 +483,92 @@
 #define V_LAT( X, Y ) _read_lattice_( X, Y )
 #define WRITE_LAT( X, ... ) _update_lattice_( X, __VA_ARGS__ )
 
-#define V_NODEID ( CHK_NODE_DBL( p ) p->node->id )
+#define V_NODEID ( CHK_NODE_DBL( _p_ ) _p_->node->id )
 #define V_NODEIDS( O ) ( CHK_PTR_DBL( O ) CHK_NODE_DBL( O ) O->node->id )
-#define V_NODENAME ( CHK_NODE_CHR( p ) p->node->name )
+#define V_NODENAME ( CHK_NODE_CHR( _p_ ) _p_->node->name )
 #define V_NODENAMES( O ) ( CHK_PTR_CHR( O ) CHK_NODE_CHR( O ) O->node->name )
 #define V_LINK( L ) ( CHK_LNK_DBL( L ) L->weight )
 
-#define STAT_NET( X ) ( p->stats_net( X, v ) )
+#define STAT_NET( X ) ( _p_->stats_net( X, v ) )
 #define STAT_NETS( O, X ) ( CHK_PTR_DBL( O ) O->stats_net( X, v ) )
-#define STAT_NODE ( CHK_NODE_DBL( p ) p->node->nlinks )
+#define STAT_NODE ( CHK_NODE_DBL( _p_ ) _p_->node->nlinks )
 #define STAT_NODES( O ) ( CHK_PTR_DBL( O ) CHK_NODE_DBL( O ) O->node->nlinks )
 
-#define SEARCH_NODE( X, Y ) ( p->search_node_net( X, Y ) )
+#define SEARCH_NODE( X, Y ) ( _p_->search_node_net( X, Y ) )
 #define SEARCH_NODES( O, X, Y ) ( CHK_PTR_OBJ( O ) O->search_node_net( X, Y ) )
-#define SEARCH_LINK( X ) ( p->search_link_net( X ) )
+#define SEARCH_LINK( X ) ( _p_->search_link_net( X ) )
 #define SEARCH_LINKS( O, X ) ( CHK_PTR_LNK( O ) O->search_link_net( X ) )
 
-#define RNDDRAW_NODE( X ) ( p->draw_node_net( X ) )
+#define RNDDRAW_NODE( X ) ( _p_->draw_node_net( X ) )
 #define RNDDRAW_NODES( O, X ) ( CHK_PTR_OBJ( O ) O->draw_node_net( X ) )
-#define RNDDRAW_LINK ( p->draw_link_net( ) )
+#define RNDDRAW_LINK ( _p_->draw_link_net( ) )
 #define RNDDRAW_LINKS( O ) ( CHK_PTR_LNK( O ) O->draw_link_net( ) )
 
-#define DRAWPROB_NODE( X ) ( CHK_NODE_DBL( p ) p->node->prob = X )
+#define DRAWPROB_NODE( X ) ( CHK_NODE_DBL( _p_ ) _p_->node->prob = X )
 #define DRAWPROB_NODES( O, X ) ( CHK_PTR_DBL( O ) CHK_NODE_DBL( O ) O->node->prob = X )
 #define DRAWPROB_LINK( L, X ) ( CHK_LNK_DBL( L ) L->probTo = X )
 
 #define LINKTO( L ) ( CHK_LNK_OBJ( L ) L->to )
 #define LINKFROM( L ) ( CHK_LNK_OBJ( L ) L->from )
 
-#define WRITE_NODEID( X ) ( CHK_NODE_DBL( p ) p->node->id = X )
+#define WRITE_NODEID( X ) ( CHK_NODE_DBL( _p_ ) _p_->node->id = X )
 #define WRITE_NODEIDS( O, X ) ( CHK_PTR_DBL( O ) CHK_NODE_DBL( O ) O->node->id = X )
-#define WRITE_NODENAME( X ) ( p->name_node_net( X ) )
+#define WRITE_NODENAME( X ) ( _p_->name_node_net( X ) )
 #define WRITE_NODENAMES( O, X ) ( CHK_PTR_VOID( O ) O->name_node_net( X ) )
 #define WRITE_LINK( L, X ) ( CHK_LNK_DBL( L ) L->weight = X )
 
-#define INIT_NET( ... ) ( p->init_stub_net( __VA_ARGS__ ) )
+#define INIT_NET( ... ) ( _p_->init_stub_net( __VA_ARGS__ ) )
 #define INIT_NETS( O, ... ) ( CHK_PTR_DBL( O ) O->init_stub_net( __VA_ARGS__ ) )
 
-#define LOAD_NET( X, Y ) ( p->read_file_net( X, "", Y, RND_SEED, "net" ) )
+#define LOAD_NET( X, Y ) ( _p_->read_file_net( X, "", Y, RND_SEED, "net" ) )
 #define LOAD_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->read_file_net( X, "", Y, RND_SEED, "net" ) )
-#define SAVE_NET( X, Y ) ( p->write_file_net( X, "", Y, RND_SEED, false ) )
+#define SAVE_NET( X, Y ) ( _p_->write_file_net( X, "", Y, RND_SEED, false ) )
 #define SAVE_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->write_file_net( X, "", Y , RND_SEED, false ) )
-#define SNAP_NET( X, Y ) ( p->write_file_net( X, "", Y, RND_SEED, true ) )
+#define SNAP_NET( X, Y ) ( _p_->write_file_net( X, "", Y, RND_SEED, true ) )
 #define SNAP_NETS( O, X, Y ) ( CHK_PTR_DBL( O ) O->write_file_net( X, "", Y, RND_SEED, true ) )
 
-#define ADDNODE( X, Y ) ( p->add_node_net( X, Y, false ) )
+#define ADDNODE( X, Y ) ( _p_->add_node_net( X, Y, false ) )
 #define ADDNODES( O, X, Y ) ( CHK_PTR_OBJ( O ) O->add_node_net( X, Y, false ) )
 
-#define ADDLINK( X ) ( p->add_link_net( X, 0 , 1 ) )
+#define ADDLINK( X ) ( _p_->add_link_net( X, 0 , 1 ) )
 #define ADDLINKS( O, X ) ( CHK_PTR_LNK( O ) O->add_link_net( X, 0 , 1 ) )
-#define ADDLINKW( X, Y ) ( p->add_link_net( X, Y, 1 ) )
+#define ADDLINKW( X, Y ) ( _p_->add_link_net( X, Y, 1 ) )
 #define ADDLINKWS( O, X, Y ) ( CHK_PTR_LNK( O ) O->add_link_net( X, Y, 1 ) )
 
-#define DELETE_NET( X ) ( p->delete_net( X ) )
+#define DELETE_NET( X ) ( _p_->delete_net( X ) )
 #define DELETE_NETS( O, X ) ( CHK_PTR_VOID( O ) O->delete_net( X ) )
-#define DELETE_NODE ( p->delete_node_net( ) )
+#define DELETE_NODE ( _p_->delete_node_net( ) )
 #define DELETE_NODES( O ) ( CHK_PTR_VOID( O ) O->delete_node_net( ) )
 #define DELETE_LINK( L ) ( CHK_LNK_VOID( L ) L->from->delete_link_net( L ) )
 
-#define SHUFFLE_NET( X ) ( p->shuffle_nodes_net( X ) )
+#define SHUFFLE_NET( X ) ( _p_->shuffle_nodes_net( X ) )
 #define SHUFFLE_NETS( O, X ) ( CHK_PTR_OBJ( O ) O->shuffle_nodes_net( X ) )
 
-#define INIT_TSEARCH( X ) ( p->initturbo( X ) )
+#define INIT_TSEARCH( X ) ( _p_->initturbo( X ) )
 #define INIT_TSEARCHS( O, X ) ( CHK_PTR_DBL( O ) O->initturbo( X ) )
-#define TSEARCH_SET( X ) ( p->turboset( X ) )
+#define TSEARCH_SET( X ) ( _p_->turboset( X ) )
 #define TSEARCH_SETS( O, X ) ( CHK_PTR_DBL( O ) O->turboset( X ) )
-#define TSEARCH( X, Y ) ( p->turbosearch( X, Y ) )
+#define TSEARCH( X, Y ) ( _p_->turbosearch( X, Y ) )
 #define TSEARCHS( O, X, Y ) ( CHK_PTR_OBJ( O ) O->turbosearch( X, Y ) )
 
-#define INIT_TSEARCH_CND( X ) ( p->initturbo_cond( X ) )
+#define INIT_TSEARCH_CND( X ) ( _p_->initturbo_cond( X ) )
 #define INIT_TSEARCH_CNDS( O, X ) ( CHK_PTR_DBL( O ) O->initturbo_cond( X ) )
-#define TSEARCH_CND_SET( X ) ( p->turboset_cond( X ) )
+#define TSEARCH_CND_SET( X ) ( _p_->turboset_cond( X ) )
 #define TSEARCH_CND_SETS( O, X ) ( CHK_PTR_DBL( O ) O->turboset_cond( X ) )
-#define TSEARCH_CND( X, Y ) ( p->turbosearch_cond( X, Y ) )
+#define TSEARCH_CND( X, Y ) ( _p_->turbosearch_cond( X, Y ) )
 #define TSEARCH_CNDS( O, X, Y ) ( CHK_PTR_OBJ( O ) O->turbosearch_cond( X, Y ) )
 
-#define V_CHEAT( X, Y ) ( p->cal( Y, X, 0 ) )
-#define V_CHEATL( X, L, Y ) ( p->cal( Y, X, L ) )
+#define V_CHEAT( X, Y ) ( _p_->cal( Y, X, 0 ) )
+#define V_CHEATL( X, L, Y ) ( _p_->cal( Y, X, L ) )
 #define V_CHEATS( O, X, Y ) ( CHK_PTR_DBL( O ) O->cal( Y, X, 0 ) )
 #define V_CHEATLS( O, X, L, Y ) ( CHK_PTR_DBL( O ) O->cal( Y, X, L ) )
 
-#define ADDEXT( C ) { if ( p->cext != NULL ) DELETE_EXT( C ); p->cext = reinterpret_cast < void * > ( new C ); }
+#define ADDEXT( C ) { if ( _p_->cext != NULL ) DELETE_EXT( C ); _p_->cext = reinterpret_cast < void * > ( new C ); }
 #define ADDEXTS( O, C ) { CHK_PTR_NOP( O ); if ( O->cext != NULL ) DELETE_EXTS( O, C ); O->cext = reinterpret_cast < void * > ( new C ); }
-#define ADDEXT_INIT( C, ... ) { if ( p->cext != NULL ) DELETE_EXT( C ); p->cext = reinterpret_cast < void * > ( new C( __VA_ARGS__ ) ); }
+#define ADDEXT_INIT( C, ... ) { if ( _p_->cext != NULL ) DELETE_EXT( C ); _p_->cext = reinterpret_cast < void * > ( new C( __VA_ARGS__ ) ); }
 #define ADDEXT_INITS( O, C, ... ) { CHK_PTR_NOP( O ); if ( O->cext != NULL ) DELETE_EXTS( O, C ); O->cext = reinterpret_cast < void * > ( new C( __VA_ARGS__ ) ); }
 
-#define DELETE_EXT( C ) { delete P_EXT( C ); p->cext = NULL; }
+#define DELETE_EXT( C ) { delete P_EXT( C ); _p_->cext = NULL; }
 #define DELETE_EXTS( O, C ) { CHK_PTR_NOP( O ); delete P_EXTS( O, C ); O->cext = NULL; }
 
 #define V_EXT( C, X ) ( P_EXT( C ) -> X )
@@ -564,7 +580,7 @@
 
 #define EXT( C ) ( * P_EXT( C ) )
 #define EXTS( O, C ) ( * P_EXTS( O, C ) )
-#define P_EXT( C ) ( reinterpret_cast < C * > ( p->cext ) )
+#define P_EXT( C ) ( reinterpret_cast < C * > ( _p_->cext ) )
 #define P_EXTS( O, C ) ( reinterpret_cast < C * > ( O->cext ) )
 
 #define WRITE_EXT( C, X, Y ) ( P_EXT( C ) -> X = Y )
@@ -572,14 +588,14 @@
 #define WRITE_ARG_EXT( C, X, Y, ... ) ( P_EXT( C ) -> X( __VA_ARGS__ ) = Y )
 #define WRITE_ARG_EXTS( O, C, X, Y, ... ) ( P_EXTS( O, C ) -> X( __VA_ARGS__ ) = Y )
 
-#define CYCLE( X, Y ) for ( X = _cycle_obj_( p, Y, "CYCLE" ); X != NULL; X = BROTHER( X ) )
-#define CYCLE_SAFE( X, Y ) for ( X = _cycle_obj_( p, Y, "CYCLE_SAFE" ), \
+#define CYCLE( X, Y ) for ( X = _cycle_obj_( _p_, Y, "CYCLE" ); X != NULL; X = BROTHER( X ) )
+#define CYCLE_SAFE( X, Y ) for ( X = _cycle_obj_( _p_, Y, "CYCLE_SAFE" ), \
 								 cyccur = BROTHER( X ); X != NULL; X = cyccur, \
 								 cyccur != NULL ? cyccur = BROTHER( cyccur ) : cyccur = cyccur )
-#define CYCLE2_SAFE( X, Y ) for ( X = _cycle_obj_( p, Y, "CYCLE_SAFE" ), \
+#define CYCLE2_SAFE( X, Y ) for ( X = _cycle_obj_( _p_, Y, "CYCLE_SAFE" ), \
 								  cyccur2 = BROTHER( X ); X != NULL; X = cyccur2, \
 								  cyccur2 != NULL ? cyccur2 = BROTHER( cyccur2 ) : cyccur2 = cyccur2 )
-#define CYCLE3_SAFE( X, Y ) for ( X = _cycle_obj_( p, Y, "CYCLE_SAFE" ), \
+#define CYCLE3_SAFE( X, Y ) for ( X = _cycle_obj_( _p_, Y, "CYCLE_SAFE" ), \
 								  cyccur3 = BROTHER( X ); X != NULL; X = cyccur3, \
 								  cyccur3 != NULL ? cyccur3 = BROTHER( cyccur3 ) : cyccur3 = cyccur3 )
 
@@ -598,13 +614,13 @@
 #define CYCLE_EXTS( O, X, Y, Z ) for ( X = EXEC_EXTS( O, Y, Z, begin ); X != EXEC_EXTS( O, Y, Z, end ); ++X )
 
 #ifdef NO_POINTER_INIT
-	#define CYCLE_LINK( O ) for ( O = p->node->first; O != NULL; O = O->next )
+	#define CYCLE_LINK( O ) for ( O = _p_->node->first; O != NULL; O = O->next )
 	#define CYCLE_LINKS( C, O ) for ( O = C->node->first; O != NULL; O = O->next )
 #else
-	#define CYCLE_LINK( X ) if ( p->node == NULL ) \
-								_no_node_dbl_( p->attr->label, __FILE__, __LINE__ ); \
+	#define CYCLE_LINK( X ) if ( _p_->node == NULL ) \
+								_no_node_dbl_( _p_->attr->label, __FILE__, __LINE__ ); \
 							else \
-								for ( X = p->node->first; X != NULL; X = X->next )
+								for ( X = _p_->node->first; X != NULL; X = X->next )
 	#define CYCLE_LINKS( O, X ) if ( O == NULL ) \
 									_bad_ptr_dbl_( O, __FILE__, __LINE__ ); \
 								else \
@@ -638,7 +654,7 @@
 
 	#define SIM ( lsd::sims[ 0 ] )			// pointer to first simulation
 	#define var _v_
-	#define caller c
+	#define caller _c_
 	#define t T
 	#define root ROOT
 	#define path ( SIM->conf_path )
@@ -675,9 +691,9 @@
 	#define RNDDRAWTOTLS( O, X, Y, Z, T ) RNDDRAW_TOTLS( O, X, Y, Z, T )
 	#define NETWORK_INI( X, Y, Z, ... ) INIT_NET( X, Y, Z, __VA_ARGS__ )
 	#define NETWORKS_INI( O, X, Y, Z, ... ) INIT_NETS( O, X, Y, Z, __VA_ARGS__ )
-	#define NETWORK_LOAD( X, Y, Z ) ( p->read_file_net( X, Y, Z, RND_SEED, "net" ) )
+	#define NETWORK_LOAD( X, Y, Z ) ( _p_->read_file_net( X, Y, Z, RND_SEED, "net" ) )
 	#define NETWORKS_LOAD( O, X, Y, Z ) ( O == NULL ? 0. : O->read_file_net( X, Y, Z, RND_SEED, "net" ) )
-	#define NETWORK_SAVE( X, Y, Z ) ( p->write_file_net( X, Y, Z, RND_SEED, false ) )
+	#define NETWORK_SAVE( X, Y, Z ) ( _p_->write_file_net( X, Y, Z, RND_SEED, false ) )
 	#define NETWORKS_SAVE( O, X, Y, Z ) ( O == NULL ? 0. : O->write_file_net( X, Y, Z , RND_SEED, false ) )
 	#define STATS_NET( O, X ) STAT_NETS( O, X )
 	#define SHUFFLE( X ) SHUFFLE_NET( X )

@@ -123,7 +123,6 @@
 #define UPD_PER 0.2						// update period during simulation run in s
 #define USER_D_VARS 1000				// number of user double variables
 #define T_CLEVS 10						// number of t distribution confidence levels
-#define U_FN lsd::equation				// namespace for user functions
 #define Z_CLEVS 7						// number of normal distr. confidence levels
 
 #define TAG_NONE 0						// series tags - no tag
@@ -273,7 +272,6 @@ namespace lsd
 	typedef std::unordered_set < object * > o_setT;
 	typedef ass_listT::iterator ass_list_itT;
 	typedef ass_mapT::iterator ass_map_itT;
-	typedef const variable c_varT;
 
 
 /*************************************************************
@@ -387,8 +385,8 @@ namespace lsd
 			void _init_map_( void );
 			void _msleep_( unsigned msec );
 
-#ifdef USER_FUNCS
-			USER_FUNCS						// user defined equation functions
+#ifdef EQ_USER_CFUNS
+			EQ_USER_CFUNS					// user defined C functions
 #endif
 	};
 
