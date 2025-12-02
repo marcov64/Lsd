@@ -658,11 +658,11 @@ if { ! [ string equal $CurPlatform linux ] && ( [ info exists gnuplot ] || [ inf
 		}
 
 		if { [ info exists gnuplot ] && [ info exists multitail ] } {
-			set pkgInsta "brew install multitail gnuplot; "
+			set pkgInsta "brew install tcl-tk@8 multitail gnuplot; "
 		} elseif { [ info exists gnuplot ] } {
-			set pkgInsta "brew install gnuplot; "
+			set pkgInsta "brew install tcl-tk@8 gnuplot; "
 		} else {
-			set pkgInsta "brew install multitail; "
+			set pkgInsta "brew install tcl-tk@8 multitail; "
 		}
 
 		ttk::messageBox -parent "" -type ok -title "Tools Installation" -icon info -message "User interaction required" -detail "The next step of installation will require the user to confirm installation of ${brewInstr}Gnuplot graphical terminal and/or MultiTail tool.\n\nA Terminal window will open and the interaction must be performed there."

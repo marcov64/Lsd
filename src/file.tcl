@@ -873,7 +873,7 @@ proc open_browser { dir fnb } {
 # OPEN_TERMINAL
 #************************************************
 proc open_terminal { cmd { term "" } } {
-	global sysTerm CurPlatform termResult
+	global sys_term CurPlatform termResult
 
 	if { $term eq "" } {
 		set term $sysTerm
@@ -891,6 +891,13 @@ proc open_terminal { cmd { term "" } } {
 	if { $CurPlatform eq "mac" && [ string equal -nocase $term Terminal ] } {
 		set cmdline "osascript -e \"tell application \\\"$term\\\" to do script \\\"cd [ pwd ]; clear; $cmd; exit\\\"\""
 		set cmdline [ concat $cmdline "-e \"tell application \\\"$term\\\" to activate\"" ]
+	} elseif { $CurPlatform eq "mac" && [ string equal -nocase $term wish ] } {
+		set tclPath ""
+		if { ! [ catch { exec brew --prefix tcl-tk@8 } tclPath ] && $tclPath ne "" } {
+			set tclPath "$tclPath/bin/"
+		}
+
+		set cmdline [ concat "$tclPath$term" $opt $cmd ]
 	} else {
 		set cmdline [ concat $term $opt $cmd ]
 	}

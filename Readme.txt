@@ -213,7 +213,7 @@ It is recommended, but not required, to install multitail and Gnuplot applicatio
 
 After Homebrew installation finishes (details at http://brew.sh), you can install multitail and Gnuplot using the following command in Terminal (Qt framework will be automatically installed too):
 
- brew install multitail gnuplot
+ brew install tcl-tk@8 multitail gnuplot cython
 
 INACTIVE TERMINAL WINDOWS:
 
