@@ -899,9 +899,9 @@ proc open_terminal { cmd { term "" } } {
 	if { $CurPlatform eq "mac" && [ string equal -nocase $term Terminal ] } {
 		set cmdline "osascript -e \"tell application \\\"$term\\\" to do script \\\"cd [ pwd ]; clear; $cmd; exit\\\"\""
 		set cmdline [ concat $cmdline "-e \"tell application \\\"$term\\\" to activate\"" ]
-	} elseif { $CurPlatform eq "mac" && $term eq $wish_exe ] } {
+	} elseif { $CurPlatform eq "mac" && $term eq $wish_exe } {
 		set tclPath ""
-		if { ! [ catch { exec echo $( brew --prefix tcl-tk@8 ) } tclPath ] && $tclPath ne "" } {
+		if { ! [ catch { exec brew --prefix tcl-tk@8 } tclPath ] && $tclPath ne "" } {
 			set tclPath "$tclPath/bin/"
 		}
 
