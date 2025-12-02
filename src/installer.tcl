@@ -35,7 +35,7 @@ set lsd_src src
 set lsd_ico $lsd_src/icons
 set winRoot "C:/"
 
-set macPmPkg [ list install multitail gnuplot cython ]
+set macPmPkg [ list install tcl-tk@8 multitail gnuplot cython ]
 set macPmCmd "brew install"
 set linuxPmPkg(apt)	[ list	build-essential 	make	gdb		gnuplot		xterm	multitail	zlib1g-dev		tcl-dev			tk-dev			python3-dev			cython3	]
 set linuxPmPkg(yum)	[ list	gcc-c++ 			make	gdb		gnuplot		xterm	multitail	zlib-devel		tcl-devel		tk-devel		python3-devel		python3-cython	]
