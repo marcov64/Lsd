@@ -613,14 +613,8 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 
 				break;
 
-			// element change (click on parameter/variable)
+			// element change/inspect (click on parameter/variable)
 			case 8:
-				if ( mode != 1 && mode != 3 )		// do only if debugger is active
-				{
-					gui::choice = 0;
-					break;
-				}
-
 				Tcl_LinkVar( gui::interp, "debug", ( char * ) & debug, TCL_LINK_INT );
 				Tcl_LinkVar( gui::interp, "i", ( char * ) & i, TCL_LINK_INT );
 
@@ -689,14 +683,23 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					cmd( "ttk::entry $e.v.l%d.e -width 15 -validate focusout -validatecommand { set n %%P; if { [ string is double -strict $n ] } { set val%d %%P; return 1 } { %%W delete 0 end; %%W insert 0 $val%d; return 0 } } -invalidcommand { bell } -justify center", i, i, i );
 					cmd( "$e.v.l%d.e insert 0 $val%d", i, i );
 
-					cmd( "ttk::button $e.v.l$i.sa -width -1 -text \"Set All\" -command { set sa %i; set choice 10 }", i );
-					cmd( "pack $e.v.l$i.l $e.v.l$i.e $e.v.l$i.sa -side left -padx $_2" );
-					cmd( "pack $e.v.l$i" );
+					if ( mode % 2 != 0 )				// mode 1 or 3 ?
+					{
+						cmd( "ttk::button $e.v.l$i.sa -width -1 -text \"Set All\" -command { set sa %i; set choice 10 }", i );
+						cmd( "pack $e.v.l$i.l $e.v.l$i.e $e.v.l$i.sa -side left -padx $_2" );
 
-					if ( i == 0 )
-						cmd( "tooltip::tooltip $e.v.l$i.sa \"Set all or a subset of\n'$res' instances\"" );
+						if ( i == 0 )
+							cmd( "tooltip::tooltip $e.v.l$i.sa \"Set all or a subset of\n'$res' instances\"" );
+						else
+							cmd( "tooltip::tooltip $e.v.l$i.sa \"Set all or a subset of\n'$res' instances (lag %d)\"", i );
+					}
 					else
-						cmd( "tooltip::tooltip $e.v.l$i.sa \"Set all or a subset of\n'$res' instances (lag %d)\"", i );
+					{
+						cmd( "$e.v.l%d.e configure -state disabled", i );
+						cmd( "pack $e.v.l$i.l $e.v.l$i.e -side left -padx $_2" );
+					}
+
+					cmd( "pack $e.v.l$i" );
 				}
 
 				if ( cv->param == 1 )
@@ -707,7 +710,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 				else
 				{
 					if ( cv->param == 0 )
-						cmd( "pack $e.n $e.t $e.u $e.x" );
+						cmd( "pack $e.n $e.t $e.u %s", mode % 2 != 0 ? "$e.x" : "" );
 					else
 						cmd( "pack $e.n $e.t $e.u" );
 
@@ -716,13 +719,13 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					cmd( "ttk::checkbutton $e.d.deball -text \"Debug all instances\" -variable debugall -command { if { $debugall == 1 } { set debug 1; set undebugall 0; .deb.stat.d.deb configure -state disabled } { set debug 0; set undebugall 1; .deb.stat.d.deb configure -state normal } }" );
 					cmd( "pack $e.d.deb $e.d.deball" );
 
-					cmd( "pack $e.v $e.d -pady $_5 -padx $_5" );
+					cmd( "pack $e.v %s -pady $_5 -padx $_5", mode % 2 != 0 ? "$e.d" : "" );
 
 					cmd( "ttk::frame $e.b1" );
 					cmd( "ttk::button $e.b1.eq -width $butWid -text Equation -command { set choice 8 }" );
 					cmd( "ttk::button $e.b1.cond -width $butWid -text \"Set Break\" -command { set choice 7 }" );
 					cmd( "ttk::button $e.b1.exec -width $butWid -text Update -command { set choice 9 }" );
-					cmd( "pack $e.b1.eq $e.b1.cond $e.b1.exec -padx $butSpc -side left" );
+					cmd( "pack $e.b1.eq %s -padx $butSpc -side left", mode % 2 != 0 ? "$e.b1.cond $e.b1.exec" : "" );
 					cmd( "pack $e.b1 -padx $butPad" );
 
 					cmd( "tooltip::tooltip $e.b1.eq \"Show equation code\"" );
@@ -735,8 +738,14 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 
 				cmd( "showtop $e" );
 				cmd( "mousewarpto $e.b.ok 0" );
-				cmd( "$e.v.l0.e selection range 0 end" );
-				cmd( "focus $e.v.l0.e" );
+
+				if ( mode % 2 != 0 )				// mode 1 or 3 ?
+				{
+					cmd( "$e.v.l0.e selection range 0 end" );
+					cmd( "focus $e.v.l0.e" );
+				}
+				else
+					cmd( "$e.v.l0.e configure -state disabled" );
 
 				gui::choice = 0;
 				while ( gui::choice == 0 )
@@ -751,7 +760,7 @@ int lsd::object::debugger( object *c, const char *lab, double *res, bool interac
 					cv->val[ i ] = app_values[ i ];
 					snprintf( ch, MAX_ELEM_LENGTH, "val%d", i );
 
-					if ( i == 0 && strcmp( cv->attr->label, lab ) == 0 )
+					if ( i == 0 && lab != NULL && strcmp( cv->attr->label, lab ) == 0 )
 					{
 						app_res = cv->val[ 0 ];
 						cmd( ".deb.v.v1.val2 configure -text [ format %%g $value ]" );
