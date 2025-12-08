@@ -194,7 +194,7 @@
 	#define CFUN_OBJ( N, ... ) object *lsd::equation::N( object *_p_, const variable *_v_, object *_c_ __VA_OPT__( , ) __VA_ARGS__ )
 	#define CFUN_VOID( N, ... ) void lsd::equation::N( object *_p_, const variable *_v_, object *_c_ __VA_OPT__( , ) __VA_ARGS__ )
 	#define CFUN( N, ... ) lsd::equation::N( _p_, _v_, _c_ __VA_OPT__( , ) __VA_ARGS__ )
-	#define CFUNS( N, O, ... ) lsd::equation::N( O, _v_, _c_ __VA_OPT__( , ) __VA_ARGS__ )
+	#define CFUNS( O, N, ... ) lsd::equation::N( O, _v_, _c_ __VA_OPT__( , ) __VA_ARGS__ )
 #endif
 
 // LSD macros
