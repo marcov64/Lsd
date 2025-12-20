@@ -13,9 +13,22 @@
  *************************************************************/
 
 /*************************************************************
-FUN_HEAD_FAST.H
-Placeholder header file for legacy code compatibility,
-it simply includes current lsd_head.h.
+LSD_HEAD.H
+Header file to enable current LSD syntax. Use fun_head.h
+to keep compatibility with legacy LSD code.
 *************************************************************/
 
-#include "lsd_head.h"
+#ifdef EQ_USER_CFUNS
+	#ifndef LSDFUNINIT
+		#error User C functions defined but 'lsd_init.h' not included
+		#include <stop>
+	#endif
+#endif
+
+#ifdef LEGACY_CODE
+	#undef LEGACY_CODE
+#endif
+
+#ifndef LSDEQUATION
+	#include "lib/lsdequation.h"
+#endif

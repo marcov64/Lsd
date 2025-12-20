@@ -20,7 +20,7 @@
 
 #define LSDEQUATION
 
-#define _FUN_				// comment this line to access internal LSD functions
+#define _EQ_				// comment this line to access internal LSD functions
 #include "lib/check.h"		// macro check support code
 
 // enable pointer checking to protect users (medium overhead) if not disabled
@@ -631,7 +631,7 @@
 #endif
 
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
-// enabled only when directly including fun_head.h (and not fun_head_fast.h)
+// enabled only when directly including fun_head.h (and not lsd_head.h/fun_head_fast.h)
 #ifdef LEGACY_CODE
 	namespace lsd
 	{

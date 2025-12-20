@@ -19,7 +19,7 @@
 
  Relevant macros for conditional compilation (when defined):
 
- - _FUN_: user model equation file
+ - _EQ_: user model equation file
  - _TERM_: terminal executable
  - _NT_: no signal trapping (better when debugging in GDB)
  *************************************************************/
@@ -1489,7 +1489,7 @@ namespace lsd
 	extern const bool no_pointer_check;		// user pointer check static disable
 	extern const bool no_pointer_init;		// user pointer init. static disable
 
-#ifndef _FUN_
+#ifndef _EQ_
 	extern assimilation *da;				// data assimilation object container
 	extern char *exec_file;					// name of executable file
 	extern char *exec_path;					// path of executable file

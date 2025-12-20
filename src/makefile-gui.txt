@@ -8,6 +8,14 @@ INCLUDE=-I$(LSDROOT)/$(SRC) -I$(PATH_HEADER)
 DEP_LIB=$(LIB_DIR)libLSD.h $(SRC_DIR)makefile-gui.txt
 DEP_GUI=$(DEP_LIB) $(SRC_DIR)LSD.h
 
+# legacy compatibility for LSD equation file(s)
+ifeq ($(EQUATION),)
+  EQUATION=$(FUN)
+endif
+ifeq ($(EXTRA),)
+  EXTRA=$(FUN_EXTRA)
+endif
+
 # check if LSD source must be recompiled
 ifeq ($(findstring $(strip $(TARGET)),LSD lSD LsD LSd Lsd lSd lsD lsd),)
   PRECOMP=false
@@ -90,12 +98,12 @@ $(TARGET).app/Contents/Info.plist: $(LSDROOT)/LSD.app/Contents/MacOS/LSD $(LSDRO
 	sed -e 's/LSD/$(TARGET)/g' -i '' $(TARGET).app/Contents/Info.plist
 
 # dynamic library
-$(PKG)lib$(TARGET)$(DLL_EXT): $(OBJ_DIR)$(CUR_DIR)$(FUN).o $(LIB_BASE)
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(SWITCH_CC_LNK_DLL) $(OBJ_DIR)$(CUR_DIR)$(FUN).o $(LIB_INI) $(LIB_BASE) $(LIB_END) -L$(PATH_LIB) $(LIB) -o $(PKG)lib$(TARGET)$(DLL_EXT)
+$(PKG)lib$(TARGET)$(DLL_EXT): $(OBJ_DIR)$(CUR_DIR)$(EQUATION).o $(LIB_BASE)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(SWITCH_CC_LNK_DLL) $(OBJ_DIR)$(CUR_DIR)$(EQUATION).o $(LIB_INI) $(LIB_BASE) $(LIB_END) -L$(PATH_LIB) $(LIB) -o $(PKG)lib$(TARGET)$(DLL_EXT)
 
-$(OBJ_DIR)$(CUR_DIR)$(FUN).o: $(FUN).cpp $(DEP_LIB) $(LIB_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA)
+$(OBJ_DIR)$(CUR_DIR)$(EQUATION).o: $(EQUATION).cpp $(DEP_LIB) $(LIB_DIR)check.h $(LIB_DIR)lsdequation.h $(EXTRA)
 	$(MKDIR) $(@D)
-	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(FUN).cpp -o $(OBJ_DIR)$(CUR_DIR)$(FUN).o
+	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(SWITCH_CC_DLL) $(INCLUDE) -c $(EQUATION).cpp -o $(OBJ_DIR)$(CUR_DIR)$(EQUATION).o
 
 ifneq ($(PRECOMP),)
 # base static library for dynamic library

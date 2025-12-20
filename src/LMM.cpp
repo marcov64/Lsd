@@ -979,7 +979,7 @@ int modman( int argn, const char **argv )
 		if ( gui::eval_bool( "[ file exists $filetoload ]" ) )
 			choice = 71;
 		else
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Equation file not found\" -detail \"If equation file has been renamed, update the 'FUN' field in menu 'Model', 'Model Options'.\"" );
+			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Equation file not found\" -detail \"If equation file has been renamed, update the 'EQUATION' field in menu 'Model', 'Model Options'.\"" );
 
 		goto loop;
 	}
@@ -1715,7 +1715,7 @@ int modman( int argn, const char **argv )
 		cmd( "file mkdir $file_dir" );
 
 		// create the empty equation file
-		cmd( "file copy \"$lsd_root/$lsd_src/fun_base.cpp\" \"$model_dir/fun_$mdir.cpp\"" );
+		cmd( "file copy \"$lsd_root/$lsd_src/lsd_base.cpp\" \"$model_dir/lsd_$mdir.cpp\"" );
 
 		// create the model options and info files
 		gui::reset_make_options( 2 );
@@ -4638,7 +4638,7 @@ int modman( int argn, const char **argv )
 		cmd( "set b \"%s\"", s );
 		cmd( "set model_make {%s}", gui::model_make );
 
-		cmd( "set gcc_conf \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname $b ]\nPRECOMPILED=true\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=\"" );
+		cmd( "set gcc_conf \"# LSD options\nTARGET=$DefaultExe\nEQUATION=[ file rootname $b ]\nPRECOMPILED=true\n\n# Additional model files\nEXTRA=[ get_source_files $model_dir 1 ]\n\n# Compiler options\nSWITCH_CC=\"" );
 		cmd( "set gcc_deb_nopt \"-O0\"" );
 		cmd( "set gcc_deb \"$gcc_conf$gcc_deb_nopt -ggdb3\nSWITCH_CC_LNK=\"" );
 		cmd( "set gcc_opt \"$gcc_conf -O3\nSWITCH_CC_LNK=\"" );
@@ -4714,18 +4714,18 @@ int modman( int argn, const char **argv )
 			}" );
 		cmd( "ttk::button .l.d.opt.ext -width $butWid -text \"Add Extra\" -command { \
 				set a [.l.t.text get 1.0 end]; \
-				set pos [ string first \"FUN_EXTRA=\" $a ]; \
+				set pos [ string first \"EXTRA=\" $a ]; \
 				if { $pos == -1 } { \
 					.l.d.opt.def invoke; \
 					set a [.l.t.text get 1.0 end]; \
-					set pos [ string first \"FUN_EXTRA=\" $a ]; \
+					set pos [ string first \"EXTRA=\" $a ]; \
 				}; \
-				set fun_extra [ tk_getOpenFile -parent .l -title \"Select Additional Source Files\" -multiple yes -initialdir \"$model_dir\" -filetypes { { {C++ header files} {.h .hpp .h++} } { {C++ source files} {.c .cpp .c++} } { {All files} {*} } } ]; \
-				if { $fun_extra eq \"\" } { \
+				set extra [ tk_getOpenFile -parent .l -title \"Select Additional Source Files\" -multiple yes -initialdir \"$model_dir\" -filetypes { { {C++ header files} {.h .hpp .h++} } { {C++ source files} {.c .cpp .c++} } { {All files} {*} } } ]; \
+				if { $extra eq \"\" } { \
 					return \
 				}; \
 				set extra_files [ list ]; \
-				foreach x $fun_extra { \
+				foreach x $extra { \
 					set dirlen [ string length $model_dir ]; \
 					if { [ string equal -length $dirlen $model_dir $x ] } { \
 						if { [ string index $x $dirlen ] eq \"/\" || [ string index $x $dirlen ] eq \"\\\\\" } {  \
@@ -5116,7 +5116,7 @@ int modman( int argn, const char **argv )
 
 		if ( gui::eval_bool( "[ llength $extra_files ] == 0" ) )
 		{
-			cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"No extra files defined\" -detail \"Open 'Model Options' in menu 'Model' and include all extra files names in the line starting with 'FUN_EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'FUN_EXTRA=' line, press 'Default' button first.\"" );
+			cmd( "ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"No extra files defined\" -detail \"Open 'Model Options' in menu 'Model' and include all extra files names in the line starting with 'EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'EXTRA=' line, press 'Default' button first.\"" );
 			goto loop;
 		}
 
@@ -5196,7 +5196,7 @@ int modman( int argn, const char **argv )
 		cmd( "if { $errfil eq \"\" } { \
 					set choice 0 \
 				} { \
-					if [ string equal -nocase [ file tail \"$errfil\" ] \"fun_head.h\" ] { \
+					if [ string equal -nocase [ file tail \"$errfil\" ] \"lsd_head.h\" ] { \
 						ttk::messageBox -parent . -title Warning -icon warning -type ok -message \"Error in LSD macro expansion\" -detail \"Please check the offending file and line in the description following the error message.\"; \
 						set choice 0 \
 					} else { \
@@ -5245,7 +5245,7 @@ int modman( int argn, const char **argv )
 
 				if ( choice == 0 )
 				{
-					cmd( "ttk::messageBox -parent .mm -title Warning -icon warning -type ok -message \"File not tracked\" -detail \"LMM is able to show error only in your main equation file or in extra files explicitly included.\n\nIf you want to track additional extra files, please open 'Model Options' in menu 'Model' and include all (additional) extra files names at the end of the line starting with 'FUN_EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'FUN_EXTRA=' line, press 'Default' button first.\"" );
+					cmd( "ttk::messageBox -parent .mm -title Warning -icon warning -type ok -message \"File not tracked\" -detail \"LMM is able to show error only in your main equation file or in extra files explicitly included.\n\nIf you want to track additional extra files, please open 'Model Options' in menu 'Model' and include all (additional) extra files names at the end of the line starting with 'EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'EXTRA=' line, press 'Default' button first.\"" );
 					goto loop;				// file not available
 				}
 			}

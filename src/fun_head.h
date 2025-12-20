@@ -15,8 +15,7 @@
 /*************************************************************
 FUN_HEAD.H
 Header file to enable deprecated LSD syntax. Use instead
-fun_head_fast.h to ensure just current and faster
-LSD code is used.
+lsd_head.h to ensure just current and faster LSD code is used.
 *************************************************************/
 
 #ifndef LEGACY_CODE

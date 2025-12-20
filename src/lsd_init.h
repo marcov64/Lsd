@@ -13,14 +13,14 @@
  *************************************************************/
 
 /*************************************************************
- FUN_INIT.H
+ LSD_INIT.H
  This file contains the macros required to define
  user-created C functions to be used in equations.
  Must be included at the very beginning of the equation file.
  *************************************************************/
 
 #ifdef EQ_USER_CFUNS
-	#error User C functions defined before 'fun_init.h' is included
+	#error User C functions defined before 'lsd_init.h' is included
 	#include <stop>
 #endif
 

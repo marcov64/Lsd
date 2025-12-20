@@ -3607,7 +3607,7 @@ lsd::object *gui::operate( lsd::object *r )
 				break;
 			}
 
-			cmd( "set res1 fun_%s.cpp", sim.conf_name );
+			cmd( "set res1 lsd_%s.cpp", sim.conf_name );
 			cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ]", lsd::model_path );
 
 			cmd( "if { [ string length $bah ] > 0 } { set choice 1; set res1 [ file tail $bah ] } { set choice 0 }" );

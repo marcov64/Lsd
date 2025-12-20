@@ -12,6 +12,14 @@ CC_TERM=$(CC_CROSS)g++
 SWITCH_CC_TERM=$(GLOBAL_CC) $(SWITCH_CC) -D_TERM_
 SWITCH_CP=-+ -3 -Wextra
 
+# legacy compatibility for LSD equation file(s)
+ifeq ($(EQUATION),)
+  EQUATION=$(FUN)
+endif
+ifeq ($(EXTRA),)
+  EXTRA=$(FUN_EXTRA)
+endif
+
 # handle platform-specific stuff
 ifeq ($(OS),Windows_NT)
   GNU_DIR=$(LSDROOT)/gnu/
@@ -86,22 +94,22 @@ python: $(PYT_LIB)
 
 ifeq ($(DLL),)
 # dynamic library
-lib$(TARGET_TERM)$(DLL_EXT): $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o
-	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(SWITCH_CC_LNK_DLL) $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o -L$(PATH_LIB) $(LIB_TERM) $(MAC_FRMWRK) -o lib$(TARGET_TERM)$(DLL_EXT)
+lib$(TARGET_TERM)$(DLL_EXT): $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(EQUATION).o
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) $(SWITCH_CC_DLL) $(SWITCH_CC_LNK) $(SWITCH_CC_LNK_DLL) $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(EQUATION).o -L$(PATH_LIB) $(LIB_TERM) $(MAC_FRMWRK) -o lib$(TARGET_TERM)$(DLL_EXT)
 
 # terminal executable (small file)
 $(TARGET_TERM)$(EXE_EXT): $(OBJ_DIR)LSDterm.o lib$(TARGET_TERM)$(DLL_EXT)
 	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)LSDterm.o -L. -l$(TARGET_TERM) -L$(PATH_LIB) $(LIB_TERM) -o $(TARGET_TERM)$(EXE_EXT)
 else
 # terminal executable (single file)
-$(TARGET_TERM)$(EXE_EXT): $(OBJ_DIR)LSDterm.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o
-	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)LSDterm.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(FUN).o -L$(PATH_LIB) $(LIB_TERM) $(MAC_FRMWRK) -o $(TARGET_TERM)$(EXE_EXT)
+$(TARGET_TERM)$(EXE_EXT): $(OBJ_DIR)LSDterm.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(EQUATION).o
+	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)LSDterm.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)$(EQUATION).o -L$(PATH_LIB) $(LIB_TERM) $(MAC_FRMWRK) -o $(TARGET_TERM)$(EXE_EXT)
 endif
 
 # executable/DLL modules
-$(OBJ_DIR)$(FUN).o: $(FUN).cpp $(LIB_DIR)libLSD.h $(LIB_DIR)check.h $(SRC_DIR)fun_head.h $(FUN_EXTRA)
+$(OBJ_DIR)$(EQUATION).o: $(EQUATION).cpp $(LIB_DIR)libLSD.h $(LIB_DIR)check.h $(LIB_DIR)lsdequation.h $(EXTRA)
 	$(MKDIR) $(@D)
-	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_DLL) $(INCLUDE) -c $(FUN).cpp -o $(OBJ_DIR)$(FUN).o
+	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_DLL) $(INCLUDE) -c $(EQUATION).cpp -o $(OBJ_DIR)$(EQUATION).o
 
 $(OBJ_DIR)LSDterm.o: $(SRC_DIR)LSDterm.cpp $(LIB_DIR)libLSD.h
 	$(MKDIR) $(@D)

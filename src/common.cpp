@@ -574,13 +574,13 @@ void gui::reset_make_options( int which )
 	// model makefile options
 	if ( which != 1 && eval_bool( "$model_dir ne \"\"" ) && eval_bool( "$model_dir ne $lsd_root" ) )
 	{
-		cmd( "set a [ glob -nocomplain \"$model_dir/fun_*.cpp\" ]" );
+		cmd( "set a [ lsort -decreasing [ glob -nocomplain \"$model_dir/lsd_*.cpp\" \"$model_dir/fun_*.cpp\" ] ]" );
 		cmd( "if { $a ne \"\" } { \
 				set b [ file tail [ lindex $a 0 ] ] \
 			} { \
-				set b \"fun_UNKNOWN.cpp\" \
+				set b \"lsd_UNKNOWN.cpp\" \
 			}" );
-		cmd( "set model_make \"# LSD options\nTARGET=$DefaultExe\nFUN=[ file rootname \"$b\" ]\nPRECOMPILED=true\n\n# Additional model files\nFUN_EXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
+		cmd( "set model_make \"# LSD options\nTARGET=$DefaultExe\nEQUATION=[ file rootname \"$b\" ]\nPRECOMPILED=true\n\n# Additional model files\nEXTRA=\n\n# Compiler options\nSWITCH_CC=-O0 -ggdb3\nSWITCH_CC_LNK=\"" );
 
 		if ( ( s = get_str( "model_make" ) ) != NULL )
 		{
@@ -1192,7 +1192,10 @@ void gui::update_model_options( bool fix )
 
 	// ensure model name is set
 	cmd( "if { ! [ info exists model_name ] || $model_name eq \"\" || $model_name eq \"%s\" } { \
-			set model_name [ string map -nocase { fun_ \"\" .cpp \"\" } \"%s\" ] \
+			set model_name [ string map -nocase { lsd_ \"\" fun_ \"\" .cpp \"\" } \"%s\" ]; \
+			if { $model_name eq \"\" } { \
+				set model_name UNKNOWN \
+			} \
 		}", model_defaults[ 0 ], eq_file );
 #endif
 
@@ -2340,7 +2343,7 @@ const char *gui::get_make_var( const char *var, const char *buf, char *dest, int
  *************************************************************/
 const char *gui::get_eqfile_name( char *s, int sz )
 {
-	if ( get_make_var( "FUN", model_make, s, sz ) == NULL || strlen( s ) == 0 )
+	if ( ( get_make_var( "EQUATION", model_make, s, sz ) == NULL && get_make_var( "FUN", model_make, s, sz ) == NULL ) || strlen( s ) == 0 )
 	{
 		cmd( "ttk::messageBox -parent . -type ok -title -title Error -icon error -message \"Configuration corrupted\" -detail \"Please check 'Model Options' and 'System Options' in LMM menu 'Model'.\"" );
 
@@ -2578,8 +2581,11 @@ bool gui::compile_run( int run_mode, bool term )
 #ifdef _LMM_
 	if ( run_mode == 0 && ! term )// delete existing object file if it's just compiling
 	{							  // to force recompilation
-
-		cmd( "set oldObj \"[ temp_dir ]/[ file rootname $mainExe ]/[ file tail $model_dir ]/[ file rootname [ lindex [ glob -nocomplain fun_*.cpp ] 0 ] ].o\"" );
+		cmd( "set a [ glob -nocomplain lsd_*.cpp ]" );
+		cmd( "if { $a eq \"\" } { \
+				set a [ glob -nocomplain fun_*.cpp ] \
+			}" );
+		cmd( "set oldObj \"[ temp_dir ]/[ file rootname $mainExe ]/[ file tail $model_dir ]/[ file rootname [ lindex $a 0 ] ].o\"" );
 		cmd( "if { [ file exists \"$oldObj\" ] } { file delete \"$oldObj\" }" );
 	}
 

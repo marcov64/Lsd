@@ -1101,7 +1101,7 @@ proc get_source_files { path { onlyExtra 0 } } {
 	set files [ list ]
 
 	if { ! $onlyExtra } {
-		regexp -line {^[ \t]*FUN[ \t]*=[ \t]*(.*)[ \t]*$} $model_make all match
+		regexp -line {^[ \t]*(EQUATION|FUN)[ \t]*=[ \t]*(.*)[ \t]*$} $model_make all disc match
 		if { [ info exists match ] && $match ne "" } {
 			set match "[ string trim $match ].cpp"
 			if { [ file exists $match ] || [ file exists "$path/$match" ] } {
@@ -1110,7 +1110,7 @@ proc get_source_files { path { onlyExtra 0 } } {
 		}
 	}
 
-	regexp -line {^[ \t]*FUN_EXTRA[ \t]*=[ \t]*(.*)[ \t]*$} $model_make all match
+	regexp -line {^[ \t]*(FUN_)?EXTRA[ \t]*=[ \t]*(.*)[ \t]*$} $model_make all disc match
 	if { [ info exists match ] && $match ne "" } {
 		set match [ string trim $match ]
 		regsub -all { +} $match { } match
