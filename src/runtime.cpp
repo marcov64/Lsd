@@ -455,7 +455,7 @@ void gui::draw_plot( int *idx, int t, double cur_val, bool point )
 	yhi = std::max( cur_val, plot_prev_val[ *idx ] );
 	ylo = std::min( cur_val, plot_prev_val[ *idx ] );
 
-	if ( plot_y_max == plot_y_min )			// very initial setting
+	if ( plot_y_max <= plot_y_min || std::fabs( plot_y_max - plot_y_min ) < MARG )	// very initial setting
 	{
 		if ( yhi > 0 )
 			plot_y_max = sim.round_digits( yhi * ( 1 + MARG ), p_digits );
@@ -463,10 +463,6 @@ void gui::draw_plot( int *idx, int t, double cur_val, bool point )
 			plot_y_max = sim.round_digits( yhi * ( 1 - MARG ), p_digits );
 
 		plot_y_min = sim.round_digits( ylo, p_digits );
-
-		if ( plot_y_max == plot_y_min )
-			plot_y_max += MARG;
-
 		relabel = true;
 	}
 
@@ -475,12 +471,16 @@ void gui::draw_plot( int *idx, int t, double cur_val, bool point )
 		value = yhi * ( yhi > 0 ? 1 + MARG_CONST : 1 - MARG_CONST );
 		value = sim.round_digits( value, p_digits );
 
+		if ( value == plot_y_min )
+			plot_y_min -= std::fabs( plot_y_min ) * MARG;
+
+		if ( value == plot_y_min )	// case all are zero?
+			plot_y_min -= MARG;
+
 		scale = ( plot_y_max - plot_y_min ) / ( value - plot_y_min );
 		plot_y_max = value;
-
 		relabel = true;
-
-		cmd( "$activeplot.c.c.cn scale punto 0 $vsizeR 1 %lf", scale  < 0.01 ? 0.01 : scale	 );
+		cmd( "$activeplot.c.c.cn scale punto 0 $vsizeR 1 %lf", scale  < 0.01 ? 0.01 : scale );
 	}
 
 	if ( ylo <= plot_y_min )
@@ -489,13 +489,23 @@ void gui::draw_plot( int *idx, int t, double cur_val, bool point )
 		value = std::min( value, plot_y_min - ( plot_y_max - plot_y_min ) / get_int( "vsizeR" ) );
 		value = sim.round_digits( value, p_digits );
 
+		if ( value == plot_y_max )
+			plot_y_max += std::fabs( plot_y_max ) * MARG;
+
+		if ( value == plot_y_max )	// case all are zero?
+			plot_y_max += MARG;
+
 		scale = ( plot_y_max - plot_y_min ) / ( plot_y_max - value );
 		plot_y_min = value;
-
 		relabel = true;
-
-		cmd( "$activeplot.c.c.cn scale punto 0 0 1 %lf", scale < 0.01 ? 0.01 : scale  );
+		cmd( "$activeplot.c.c.cn scale punto 0 0 1 %lf", scale  < 0.01 ? 0.01 : scale );
 	}
+
+	if ( plot_y_max <= plot_y_min || std::fabs( plot_y_max - plot_y_min ) < MARG )
+		if ( plot_y_max != 0 )
+			plot_y_max += std::fabs( plot_y_max ) * MARG;
+		else
+			plot_y_max += MARG;
 
 	if ( relabel )
 	{
@@ -603,6 +613,6 @@ void gui::scroll_plot( void )
 		cmd( "if { [ info exists activeplot ] && [ winfo exists $activeplot ] && [ winfo ismapped $activeplot ] && %d > [ expr { $hsizeR * 0.8 } ] } { \
 				$activeplot.c.c.cn xview scroll %d units \
 			}", sim.t, sim.t - plot_last_t );
-	
+
 	plot_last_t = sim.t;
 }
