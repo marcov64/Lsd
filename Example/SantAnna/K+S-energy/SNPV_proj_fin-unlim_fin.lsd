@@ -857,6 +857,7 @@ Label Root
 				Var: RSe
 				Var: SNPVgeAvg
 				Var: ageEavg
+				Var: cE
 				Var: dEmE
 				Var: dEn
 				Var: emTauDEavg
@@ -949,6 +950,7 @@ Label Root
 			Var: testCountry
 			Var: testEner
 			Var: testFin
+			Var: testInit
 			Var: testLabor
 			Var: test1sec
 			Var: test2sec
@@ -970,6 +972,7 @@ Label Root
 		Param: flagProjFinGE
 		Param: flagTax
 		Param: Crec
+		Param: dGDP0
 		Param: gG
 		Param: mLim
 		Param: mPer
@@ -1034,6 +1037,7 @@ Param: flagGovExp 0 n + n n	2
 Param: flagProjFinGE 0 n + n n	2
 Param: flagTax 0 n + n n	0
 Param: Crec 0 n + n n	0.2
+Param: dGDP0 0 n + n n	0
 Param: gG 0 n + n n	0.005
 Param: mLim 0 n + n n	1
 Param: mPer 0 n + n n	1
@@ -1746,7 +1750,7 @@ Var: _NW2p 0 n + n n
 Var: _Pi2 0 n + n n
 Var: _Q2 0 n + n n
 Var: _Q2d 0 n + n n
-Var: _Q2e 2 s + n n	0	0
+Var: _Q2e 0 s + n n
 Var: _Q2p 0 n + n N
 Var: _Q2pe 0 n + n N
 Var: _Q2u 0 n + n n
@@ -1824,6 +1828,7 @@ Var: testClim 0 n + n n
 Var: testCountry 0 n + n n
 Var: testEner 0 n + n n
 Var: testFin 0 n + n n
+Var: testInit 0 n + n n
 Var: testLabor 0 n + n n
 Var: test1sec 0 n + n n
 Var: test2sec 0 n + n n
@@ -1874,6 +1879,7 @@ Var: RDe 0 s + n n
 Var: RSe 0 s + n n
 Var: SNPVgeAvg 0 s + n n
 Var: ageEavg 0 s + n n
+Var: cE 0 s + n n
 Var: dEmE 0 s + n n
 Var: dEn 0 s + n n
 Var: emTauDEavg 0 s + n n
@@ -2065,6 +2071,13 @@ Unfilled past consumption recover limit as fraction of current consumption
 (>0)
 _INIT_
 All 1 instances equal to 0.2.
+END_DESCRIPTION
+
+Parameter_dGDP0
+Steady-state initial GDP growth rate
+(>0)
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Parameter_gG
@@ -5820,8 +5833,6 @@ END_DESCRIPTION
 
 Variable__D2e
 Adaptive demand expectation of consumption-good firm
-_INIT_
-All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable__Deb2
@@ -5922,8 +5933,6 @@ END_DESCRIPTION
 
 Variable__Q2e
 Effective output of consumption-good firm
-_INIT_
-All 1 instances equal to 0.
 END_DESCRIPTION
 
 Variable__Q2p
@@ -6338,6 +6347,10 @@ Print detailed statistics of financial sector (!=0 if error is found)
 Set the time range in 'testFtIni' and 'testFtEnd'
 END_DESCRIPTION
 
+Variable_testInit
+Test the selected initial condition values for minimal compatibility with a stationary steady state at t=0
+END_DESCRIPTION
+
 Variable_testLabor
 Print detailed statistics of the labor supply (!=0 if error is found)
 Set the time range in 'testLtIni' and 'testLtEnd'
@@ -6542,6 +6555,10 @@ Variable_ageEavg
 Average age of firms in energy sector
 END_DESCRIPTION
 
+Variable_cE
+Average unit generation cost of energy sector
+END_DESCRIPTION
+
 Variable_dEmE
 CO2 emissions growth rate of energy producer
 END_DESCRIPTION
@@ -6736,7 +6753,6 @@ END_DESCRIPTION
 
 
 DOCUOBSERVE
-Root
 nE
 _A2
 _E
@@ -6754,7 +6770,6 @@ END_DOCUOBSERVE
 
 
 DOCUINITIAL
-Root
 
 END_DOCUINITIAL
 
@@ -6788,9 +6803,9 @@ EQ_FILE
 
 /*======================== ADDITIONAL CODE TO INCLUDE ========================*/
 
-// LSD and K+S macros and objects definition and support code
-#include <fun_head_fast.h>						// LSD definitions
-#include "fun_KS_class.h"						// K+S class/macro definitions
+#include <lsd_init.h>							// LSD base definitions
+#include "fun_KS_class.h"						// K+S definitions
+#include <lsd_head.h>							// LSD main definitions
 #include "fun_KS_support.h"						// K+S support C++ functions
 
 
@@ -6829,10 +6844,13 @@ Also configures LSD main flags.
 
 PARAMETER;										// execute only once
 
-DEFAULT_RESULT( NAN );							// default equation result
 USE_SAVED;										// allow access to saved vars
 USE_ZERO_INSTANCE;								// allow zero-instance objects
 NO_SEARCH;										// don't perform variable search
+NO_SEARCH_UP;
+RND_GENERATOR( 2 );								// LSD source of randomness
+
+random_engine.seed( RND_SEED );					// sync seeds between engines
 
 if ( RUN == 1 )									// first run only
 {
@@ -6853,7 +6871,7 @@ if ( RUN == 1 )									// first run only
 #endif
 }
 
-CYCLES( root, cur, "Country" )					// scan all country objects
+CYCLES( ROOT, cur, "Country" )					// scan all country objects
 	VS( cur, "initCountry" );					// initialize country
 
 RESULT( 1 )
@@ -6954,12 +6972,12 @@ MODELEND
 
 /*=========================== GARBAGE COLLECTION =============================*/
 
-void close_sim( void )
-{
-	object *cur;
+CLOSEBEGIN
 
-	CYCLES( root, cur, "Country" )				// scan all country objects
-		DELETE_EXTS( cur, countryE );			// reclaim allocated memory
-}
+object *cur;
 
+CYCLES( ROOT, cur, "Country" )					// scan all country objects
+	DELETE_EXTS( cur, countryE );				// reclaim allocated memory
+
+CLOSEEND
 END_EQ_FILE

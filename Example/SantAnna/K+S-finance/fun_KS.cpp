@@ -26,8 +26,9 @@
 
 /*======================== ADDITIONAL CODE TO INCLUDE ========================*/
 
-#include "fun_KS_class.h"						// K+S class/macro definitions
-#include <fun_head_fast.h>						// LSD definitions
+#include <lsd_init.h>							// LSD base definitions
+#include "fun_KS_class.h"						// K+S definitions
+#include <lsd_head.h>							// LSD main definitions
 #include "fun_KS_support.h"						// K+S support C++ functions
 
 
@@ -61,9 +62,13 @@ Also configures LSD main flags.
 
 PARAMETER;										// execute only once
 
+USE_SAVED;										// allow access to saved vars
 USE_ZERO_INSTANCE;								// allow zero-instance objects
-NO_SEARCH;										// don't perform variable search
-NO_SEARCH_UP;
+//NO_SEARCH;										// don't perform variable search
+//NO_SEARCH_UP;
+RND_GENERATOR( 2 );								// LSD source of randomness
+
+random_engine.seed( RND_SEED );					// sync seeds between engines
 
 if ( RUN == 1 )									// first run only
 {

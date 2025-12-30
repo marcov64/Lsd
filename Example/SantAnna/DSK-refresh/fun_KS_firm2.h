@@ -134,7 +134,7 @@ Also updates '_NW2', '_Deb2', _CD2', '_CD2c', '_CS2'
 */
 V( "_Q2" );										// make sure production decided
 V( "_supplier" );								// ensure supplier is selected
-RESULT( invest( THIS, V( "_EId" ) ) )
+RESULT( CFUN( invest, V( "_EId" ) ) )
 
 
 EQUATION( "_EId" )
@@ -243,10 +243,10 @@ else
 		}
 	}
 
-	update_debt( THIS, v[9], v[8] );			// update debt (desired/granted)
+	CFUN( update_debt, v[9], v[8] );			// update debt (desired/granted)
 }
 
-update_depo( THIS, v[7], false );				// update the firm net worth
+CFUN( update_depo, v[7], false );				// update the firm net worth
 WRITE( "_NW2p", v[3] - v[7] + v[8] );			// provision for production
 
 RESULT( v[0] )
@@ -273,7 +273,7 @@ Effective substitution investment of firm in consumption-good sector
 Also updates '_NW2', '_Deb2', _CD2', '_CD2c', '_CS2'
 */
 V( "_EI" );										// make sure expansion done
-RESULT( invest( THIS, V( "_SId" ) ) )
+RESULT( CFUN( invest, V( "_SId" ) ) )
 
 
 EQUATION( "_Tax2" )
@@ -289,7 +289,7 @@ if ( v[1] > 0 )									// profits?
 else
 	v[0] = 0;									// no tax on losses
 
-cash_flow( THIS, v[1], v[0] );					// manage the period cash flow
+CFUN( cash_flow, v[1], v[0] );					// manage the period cash flow
 
 v[0] += V( "_Em2" ) * VS( GRANDPARENT, "trCO2" );// tax on emissions already paid
 
@@ -480,7 +480,7 @@ if ( cur2 != NULL && cur3 != NULL )
 }
 else											// no brochure received
 {
-	cur1 = set_supplier( THIS );				// draw new supplier
+	cur1 = CFUN( set_supplier );				// draw new supplier
 	i = VS( cur1, "_ID1" );
 }
 
@@ -526,7 +526,7 @@ if ( k == T && v[1] > 0 )
 	else
 		WRITE( "_SI", ( v[3] - v[1] ) * v[2] );	// shrink substitution investm.
 
-	update_depo( THIS, v[5] * v[1], true );		// recover paid machines value
+	CFUN( update_depo, v[5] * v[1], true );		// recover paid machines value
 
 	v[0] = v[1] * v[2];							// canceled investment
 }
@@ -599,7 +599,7 @@ if ( v[2] + v[3] > 0 )
 	v[4] = floor( ( v[2] + v[3] ) / v[1] );		// total number of new machines
 
 	if ( v[4] > 0 )								// new machines to install?
-		add_vintage( THIS, v[4], false );		// create vintage
+		CFUN( add_vintage, v[4], false );		// create vintage
 }
 
 // apply disaster generating function shock if enabled
@@ -642,7 +642,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 			}
 			else								// scrap entire vintage
 			{
-				if ( scrap_vintage( _v_, cur ) >= 0 )// not last vintage?
+				if ( CFUNS( cur, scrap_vintage ) >= 0 )// not last vintage?
 				{
 					v[6] -= v[8];
 					continue;					// don't consider for old vint.
@@ -667,7 +667,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 		}
 		else									// scrap entire vintage
 		{
-			if ( scrap_vintage( _v_, cur ) >= 0 )// not last vintage?
+			if ( CFUNS( cur, scrap_vintage ) >= 0 )// not last vintage?
 			{
 				v[7] -= v[8];
 				continue;						// don't consider for old vint.
@@ -818,8 +818,8 @@ EQUATION( "_dA2b" )
 Notional productivity (bounded) rate of change of firm in consumption-good sector
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( THIS, "_A2", VS( GRANDPARENT, "mLim" ),
-					   VS( GRANDPARENT, "mPer" ) ) )
+RESULT( CFUN( mov_avg_bound, "_A2", VS( GRANDPARENT, "mLim" ),
+		VS( GRANDPARENT, "mPer" ) ) )
 
 
 EQUATION( "_dNnom" )

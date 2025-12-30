@@ -15,7 +15,7 @@
 
  ******************************************************************************/
 
-#include "fun_head_fast.h"
+#include <lsd_head.h>
 
 #define PROD_INI 1							// initial notional productivity
 #define PROD_SD 0.1							// initial productivity std. dev.

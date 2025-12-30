@@ -178,7 +178,7 @@ CYCLE_SAFE( cur, "FirmE" )
 			if ( VS( cur, "_NWe" ) < 0 )		// count bankruptcies
 				++v[6];
 
-			exit_firm( _v_, cur );				// del obj & collect liq. value
+			CFUNS( cur, exit_firm );			// del obj & collect liq. value
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
@@ -219,7 +219,7 @@ if ( Fe - j + k < FeMin )
 if ( Fe + k > FeMax )
 	k = FeMax - Fe + j;
 
-entry_firmE( _v_, THIS, k, false );				// add entrant-firm objects
+CFUN( entry_firmE, k, false );					// add entrant-firm objects
 
 v[0] = k - j;									// net number of entrants
 INCR( "Fe", v[0] );								// update the number of firms
@@ -250,8 +250,8 @@ Price of fossil fuel
 v[1] = VS( PARENT, "mLim" );					// growth rate limit
 v[2] = V( "Tplan" );							// moving average period
 RESULT( CURRENT * ( 1 + V( "upsilonF" ) *
-					( mov_avg_bound( THIS, "pE", v[1], v[2], 1 ) +
-					  mov_avg_bound( THIS, "Df", v[1], v[2], 1 ) ) ) )
+					( CFUN( mov_avg_bound, "pE", v[1], v[2], 1 ) +
+					  CFUN( mov_avg_bound, "Df", v[1], v[2], 1 ) ) ) )
 
 
 EQUATION( "CeEq" )
@@ -508,7 +508,7 @@ EQUATION( "dDeMavg" )
 /*
 Moving average of growth rate of energy demand
 */
-RESULT( mov_avg_bound( THIS, "De", VS( PARENT, "mLim" ), V( "Tplan" ) ) )
+RESULT( CFUN( mov_avg_bound, "De", VS( PARENT, "mLim" ), V( "Tplan" ) ) )
 
 
 EQUATION( "iDe" )

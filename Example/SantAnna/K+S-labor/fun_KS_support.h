@@ -18,18 +18,18 @@
 // calculate the bounded, moving-average growth rate of variable
 // if lim is zero, there is no bounding
 
-double U_FN::mov_avg_bound( object *obj, const char *var, double lim, double per )
+CFUN_DBL( mov_avg_bound, const char *var, double lim, double per, int lag = 0 )
 {
 	double prev, g, sum_g;
 	int i;
 
 	for ( sum_g = i = 0; i < per; ++i )
 	{
-		if ( T - i <= 0 )						// just go to t=0
+		if ( T - i + lag <= 0 )					// just go to t=1
 			break;
 
-		prev = VLS( obj, var, i + 1 );
-		g = ( prev != 0 ) ? VLS( obj, var, i ) / prev - 1 : 0;
+		prev = VL( var, i + lag + 1 );
+		g = ( prev != 0 ) ? VL( var, i + lag ) / prev - 1 : 0;
 
 		if ( lim > 0 )
 			g = max( min( g, lim ), - lim );	// apply bounds
@@ -43,7 +43,7 @@ double U_FN::mov_avg_bound( object *obj, const char *var, double lim, double per
 
 // append error messages and increment error counter
 
-void U_FN::check_error( bool cond, const char* errMsg, int errCount, int *errCounter )
+CFUN_VOID( check_error, bool cond, const char* errMsg, int errCount, int *errCounter )
 {
 	if ( ! cond )
 		return;
@@ -74,22 +74,22 @@ const char *bankPar[ ] = { "_bank1", "_bank2" },
 		   *_IDpar[ ] = { "_ID1","_ID2" },
 		   *__IDpar[ ] = { "__ID1","__ID2" };
 
-object *U_FN::set_bank( object *firm )
+CFUN_OBJ( set_bank )
 {
-	int _IDb, sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 : 1;
-	object *bank, *cli, *fin = V_EXTS( GRANDPARENTS( firm ), countryE, finSec );
+	int _IDb, sec = strcmp( NAME, "Firm1" ) == 0 ? 0 : 1;
+	object *bank, *cli, *fin = V_EXTS( GRANDPARENT, countryE, finSec );
 
 	_IDb = VS( fin, "pickBank" );				// draw initial preferred bank
-	bank = V_EXTS( GRANDPARENTS( firm ), countryE, bankPtr[ _IDb - 1 ] );
-	WRITES( firm, bankPar[ sec ], _IDb );		// save bank ID
-	WRITE_HOOKS( firm, BANK, bank );
+	bank = V_EXTS( GRANDPARENT, countryE, bankPtr[ _IDb - 1 ] );
+	WRITE( bankPar[ sec ], _IDb );				// save bank ID
+	WRITE_HOOK( BANK, bank );
 
 	cli = ADDOBJS( bank, CliObj[ sec ] );		// add to bank client list
-	WRITES( cli, __IDpar[ sec ], VS( firm, _IDpar[ sec ] ) );// update object
-	WRITE_SHOOKS( cli, firm );					// pointer back to client
-	WRITE_HOOKS( firm, BCLIENT, cli );			// pointer to bank client list
+	WRITES( cli, __IDpar[ sec ], V( _IDpar[ sec ] ) );// update object
+	WRITE_SHOOKS( cli, THIS );					// pointer back to client
+	WRITE_HOOK( BCLIENT, cli );					// pointer to bank client list
 
-	return HOOKS( firm, BCLIENT );				// bank client list obj
+	return HOOK( BCLIENT );						// bank client list obj
 }
 
 
@@ -102,30 +102,30 @@ const char *_CDvar[ ] = { "_CD1", "_CD2" },
 		   *_NWvar[ ] = { "_NW1", "_NW2" },
 		   *_TCfreeVar[ ] = { "_TC1free", "_TC2free" };
 
-double U_FN::update_debt( object *firm, double desired, double loan )
+CFUN_DBL( update_debt, double desired, double loan )
 {
 	double Deb, TCfree;
 	object *bank;
-	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 : 1;
+	int sec = strcmp( NAME, "Firm1" ) == 0 ? 0 : 1;
 
 	if ( desired > 0 )							// ignore loan repayment
 	{
-		INCRS( firm, _CDvar[ sec ], desired );	// desired credit
-		INCRS( firm, _CDcVar[ sec ], desired - loan );// credit constraint
-		INCRS( firm, _CSvar[ sec ], loan );		// supplied credit
+		INCR( _CDvar[ sec ], desired );			// desired credit
+		INCR( _CDcVar[ sec ], desired - loan );	// credit constraint
+		INCR( _CSvar[ sec ], loan );			// supplied credit
 	}
 
-	Deb = VS( firm, _DebVar[ sec ] );
+	Deb = V( _DebVar[ sec ] );
 
 	// take new loan/repay debt from/to bank
 	if ( loan != 0 )
 	{
 		if ( Deb + loan < 0.001 )				// write-off small debt?
-			Deb = WRITES( firm, _DebVar[ sec ], 0 );
+			Deb = WRITE( _DebVar[ sec ], 0 );
 		else
-			Deb = INCRS( firm, _DebVar[ sec ], loan );
+			Deb = INCR( _DebVar[ sec ], loan );
 
-		bank = HOOKS( firm, BANK );				// firm's bank
+		bank = HOOK( BANK );					// firm's bank
 
 		// if credit limit active, adjust bank's available credit
 		TCfree = VS( bank, _TCfreeVar[ sec ] );	// available credit firm's bank
@@ -139,21 +139,21 @@ double U_FN::update_debt( object *firm, double desired, double loan )
 
 // update firm deposits in equations '_Q1', '_Tax1', '_Q2', '_EI', '_SI', '_Tax2'
 
-double U_FN::update_depo( object *firm, double depo, bool incr )
+CFUN_DBL( update_depo, double depo, bool incr )
 {
 	double NW;
-	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 : 1;
+	int sec = strcmp( NAME, "Firm1" ) == 0 ? 0 : 1;
 
 	// update total firm net worth (deposits)
 	if ( incr )
 	{
-		NW = VS( firm, _NWvar[ sec ] );
+		NW = V( _NWvar[ sec ] );
 
 		if ( depo != 0 )
-			NW = INCRS( firm, _NWvar[ sec ], depo );
+			NW = INCR( _NWvar[ sec ], depo );
 	}
 	else
-		NW = WRITES( firm, _NWvar[ sec ], depo );
+		NW = WRITE( _NWvar[ sec ], depo );
 
 	return NW;
 }
@@ -166,55 +166,54 @@ const char *_CIvar[ ] = { "", "_CI" },
 		   *_DivVar[ ] = { "_Div1", "_Div2" },
 		   *_NWpVar[ ] = { "_NW1p", "_NW2p" };
 
-double U_FN::cash_flow( object *firm, double profit, double tax )
+CFUN_DBL( cash_flow, double profit, double tax )
 {
-	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
-			  strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
-	object *fin = V_EXTS( GRANDPARENTS( firm ), countryE, finSec );
+	int sec = strcmp( NAME, "Firm1" ) == 0 ? 0 : 1;
+	object *fin = V_EXTS( GRANDPARENT, countryE, finSec );
 
-	double bonus = ( sec == 1 ) ? VLS( firm, "_Bon2", 1 ) : 0;// worker bonus
-	double dividends = VLS( firm, _DivVar[ sec ], 1 );// shareholder dividends
+	double bonus = ( sec == 1 ) ? VL( "_Bon2", 1 ) : 0;// worker bonus
+	double dividends = VL( _DivVar[ sec ], 1 );// shareholder dividends
 	double cashFree = profit - tax - bonus - dividends;// final free cash flow
 
 	if ( sec > 0 )
-		VS( firm, _CIvar[ sec ] );				// ensure canc. invest. reimbursed
+		V( _CIvar[ sec ] );						// ensure canc. invest. reimbursed
 
-	double provision = ( sec < 2 ) ? VS( firm, _NWpVar[ sec ] ) : 0;// prod. cost
-	double depo = update_depo( firm, provision, true );// current bank deposits
+	double provision = V( _NWpVar[ sec ] );		// prod. cost
+	double depo = CFUN( update_depo, provision, true );// current bank deposits
 
 	if ( cashFree < 0 )							// must finance losses?
 	{
 		if ( depo >= - cashFree )				// deposits cover losses?
-			update_depo( firm, cashFree, true );// draw from deposits
+			CFUN( update_depo, cashFree, true );// draw from deposits
 		else
 		{
-			double credAvb = VS( firm, _CSaVar[ sec ] );// available credit
+			double credAvb = V( _CSaVar[ sec ] );// available credit
 			double credDes = - cashFree - depo;	// desired credit
 
-			update_debt( firm, credDes, credDes );// finance all in any case
+			CFUN( update_debt, credDes, credDes );// finance all in any case
 
 			if ( credAvb >= credDes )			// could finance losses?
-				update_depo( firm, 0, false );	// keep going with zero deposits
+				CFUN( update_depo, 0, false );	// keep going with zero deposits
 			else
-				update_depo( firm, -1e-6, false );// let negative NW (bankruptcy)
+				CFUN( update_depo, -1e-6, false );// let negative NW (bankruptcy)
 		}
 	}
 	else										// pay debt with available cash
 	{
-		double repayDes = VS( firm, _DebVar[ sec ] ) * VS( fin, "deltaB" );
+		double repayDes = V( _DebVar[ sec ] ) * VS( fin, "deltaB" );
 												// desired debt repayment
 		if ( repayDes > 0 )						// something to repay?
 		{
 			if ( cashFree > repayDes )			// can repay desired and more
 			{
-				update_debt( firm, 0, - repayDes );// repay up to desired
-				update_depo( firm, cashFree - repayDes, true );// keep the rest
+				CFUN( update_debt, 0, - repayDes );// repay up to desired
+				CFUN( update_depo, cashFree - repayDes, true );// keep the rest
 			}
 			else
-				update_debt( firm, 0, - cashFree );// repay what is possible
+				CFUN( update_debt, 0, - cashFree );// repay what is possible
 		}
 		else
-			update_depo( firm, cashFree, true );// just keep all
+			CFUN( update_depo, cashFree, true );// just keep all
 	}
 
 	return cashFree;
@@ -226,16 +225,16 @@ double U_FN::cash_flow( object *firm, double profit, double tax )
 // send machine brochure to consumption-good client firm in equations '_NC',
 // '_supplier'
 
-object *U_FN::send_brochure( object *suppl, object *client )
+CFUN_OBJ( send_brochure, object *client )
 {
 	object *broch, *cli;
 
-	cli = ADDOBJS( suppl, "Cli" );				// add object to new client
-	WRITES( cli, "__IDc", VS( client, "_ID2" ) );// update client ID
+	cli = ADDOBJ( "Cli" );						// add object to new client
+	WRITES( cli, "__IDc", VS( client, "_ID2" ) );// client ID
 	WRITES( cli, "__tSel", T );					// update selection time
 
 	broch = ADDOBJS( client, "Broch" );			// add brochure to client
-	WRITES( broch, "__IDs", VS( suppl, "_ID1" ) );// update supplier ID
+	WRITES( broch, "__IDs", V( "_ID1" ) );		// supplier ID
 	WRITE_SHOOKS( broch, cli );					// pointer to supplier client list
 	WRITE_SHOOKS( cli, broch );					// pointer to client brochure list
 
@@ -245,14 +244,14 @@ object *U_FN::send_brochure( object *suppl, object *client )
 
 // set initial supplier for entrant in equations 'entry2exit'
 
-object *U_FN::set_supplier( object *firm )
+CFUN_OBJ( set_supplier )
 {
 	object *broch, *suppl,
-		   *cap = V_EXTS( GRANDPARENTS( firm ), countryE, capSec );
+		   *cap = V_EXTS( GRANDPARENT, countryE, capSec );
 
 	suppl = RNDDRAWS( cap, "Firm1", "_Atau" );	// draw capital supplier
-	broch = send_brochure( suppl, firm );		// get supplier brochure
-	WRITE_HOOKS( firm, SUPPL, broch );			// pointer to current supplier
+	broch = CFUNS( suppl, send_brochure, THIS );// get supplier brochure
+	WRITE_HOOK( SUPPL, broch );					// pointer to current supplier
 	INCRS( suppl, "_NC", 1 );					// update supplier's clients #
 
 	return suppl;
@@ -261,10 +260,10 @@ object *U_FN::set_supplier( object *firm )
 
 // send new machine order in equations '_EI', '_SI'
 
-void U_FN::send_order( object *firm, double nMach )
+CFUN_VOID( send_order, double nMach )
 {
 	// find firm entry on supplier client list
-	object *cli = SHOOKS( HOOKS( firm, SUPPL ) );
+	object *cli = SHOOKS( HOOK( SUPPL ) );
 
 	if ( VS( cli, "__tOrd" ) < T )				// if first order in period
 	{
@@ -279,17 +278,17 @@ void U_FN::send_order( object *firm, double nMach )
 
 // perform investment according to available funding in equations '_EI', '_SI'
 
-double U_FN::invest( object *firm, double desired )
+CFUN_DBL( invest, double desired )
 {
 	double invest, invCost, loan, loanDes;
 
 	if ( desired <= 0 )
 		return 0;
 
-	double m2 = VS( PARENTS( firm ), "m2" );	// machine output per period
-	double _CS2a = VS( firm, "_CS2a" );			// available credit supply
-	double _NW2 = VS( firm, "_NW2" );			// net worth (cash available)
-	double _p1 = VS( PARENTS( SHOOKS( HOOKS( firm, SUPPL ) ) ), "_p1" );
+	double m2 = VS( PARENT, "m2" );				// machine output per period
+	double _CS2a = V( "_CS2a" );				// available credit supply
+	double _NW2 = V( "_NW2" );					// net worth (cash available)
+	double _p1 = VS( PARENTS( SHOOKS( HOOK( SUPPL ) ) ), "_p1" );
 
 	invCost = _p1 * desired / m2;				// desired investment cost
 
@@ -330,13 +329,13 @@ double U_FN::invest( object *firm, double desired )
 			}
 		}
 
-		update_debt( firm, loanDes, loan );		// update debt (desired/granted)
+		CFUN( update_debt, loanDes, loan );		// update debt (desired/granted)
 	}
 
 	if ( invest > 0 )
 	{
-		update_depo( firm, _NW2, false );		// update the firm net worth
-		send_order( firm, round( invest / m2 ) );// order to machine supplier
+		CFUN( update_depo, _NW2, false );		// update the firm net worth
+		CFUN( send_order, round( invest / m2 ) );// order to machine supplier
 	}
 
 	return invest;
@@ -345,20 +344,20 @@ double U_FN::invest( object *firm, double desired )
 
 // add new vintage to the capital stock of a firm in equation 'K' and 'initCountry'
 
-void U_FN::add_vintage( c_varT *_v_, object *firm, double nMach, bool newInd )
+CFUN_VOID( add_vintage, double nMach, bool newInd )
 {
 	double __Avint, __pVint;
 	int __ageVint, __nMach, __nVint;
 	object *cap, *cons, *cur, *suppl, *vint;
 
-	suppl = PARENTS( SHOOKS( HOOKS( firm, SUPPL ) ) );// current supplier
+	suppl = PARENTS( SHOOKS( HOOK( SUPPL ) ) );	// current supplier
 	__nMach = floor( nMach );					// integer number of machines
 
 	// at t=1 firms have a mix of machines: old to new, many suppliers
 	if ( newInd )
 	{
-		cap = V_EXTS( GRANDPARENTS( firm ), countryE, capSec );
-		cons = V_EXTS( GRANDPARENTS( firm ), countryE, conSec );
+		cap = V_EXTS( GRANDPARENT, countryE, capSec );
+		cons = V_EXTS( GRANDPARENT, countryE, conSec );
 
 		__ageVint = VS( cons, "eta" ) + 1;		// age of oldest machine
 		__nVint = ceil( nMach / __ageVint );	// machines per vintage
@@ -381,16 +380,16 @@ void U_FN::add_vintage( c_varT *_v_, object *firm, double nMach, bool newInd )
 			if ( cur == suppl )					// don't use current supplier
 				continue;
 
-			vint = ADDOBJLS( firm, "Vint", T - 1 );// recalculate in t=1
+			vint = ADDOBJL( "Vint", T - 1 );	// recalculate in t=1
 		}
 		else
 		{
 			cur = suppl;						// just use current supplier
-			vint = ADDOBJS( firm, "Vint" );		// just recalculate in next t
+			vint = ADDOBJ( "Vint" );			// just recalculate in next t
 		}
 
-		WRITE_SHOOKS( vint, HOOKS( firm, TOPVINT ) );// save previous vintage
-		WRITE_HOOKS( firm, TOPVINT, vint );		// save pointer to top vintage
+		WRITE_SHOOKS( vint, HOOK( TOPVINT ) );	// save previous vintage
+		WRITE_HOOK( TOPVINT, vint );			// save pointer to top vintage
 
 		WRITES( vint, "__IDvint", VNT( T, VS( cur, "_ID1" ) ) );// vintage ID
 		WRITES( vint, "__Avint", __Avint );		// vintage productivity
@@ -414,28 +413,28 @@ void U_FN::add_vintage( c_varT *_v_, object *firm, double nMach, bool newInd )
 // scrap (remove) vintage from capital stock in equation 'K'
 // return -1 if last vintage (not removed but shrank to 1 machine)
 
-double U_FN::scrap_vintage( c_varT *_v_, object *vint )
+CFUN_DBL( scrap_vintage )
 {
 	double RS;
 	object *wrk;
 
-	if ( NEXTS( vint ) != NULL )				// don't remove last vintage
+	if ( NEXT != NULL )							// don't remove last vintage
 	{
 		// move all workers out from this vintage
-		CYCLES( vint, wrk, "WrkV" )
+		CYCLE( wrk, "WrkV" )
 			WRITE_HOOKS( SHOOKS( wrk ), VWRK, NULL );
 
 		// remove as previous vintage from next vintage
-		if ( SHOOKS( NEXTS( vint ) ) == vint )
-			WRITE_SHOOKS( NEXTS( vint ), NULL );
+		if ( SHOOKS( NEXT ) == THIS )
+			WRITE_SHOOKS( NEXT, NULL );
 
-		RS = abs( VS( vint, "__RSvint" ) );
-		DELETE( vint );							// delete vintage
+		RS = abs( V( "__RSvint" ) );
+		DELETE( THIS );							// delete vintage
 	}
 	else
 	{
 		RS = -1;								// signal last machine
-		WRITES( vint, "__nVint", 1 );			// keep just 1 machine
+		WRITE( "__nVint", 1 );					// keep just 1 machine
 	}
 
 	return RS;
@@ -447,23 +446,23 @@ double U_FN::scrap_vintage( c_varT *_v_, object *vint )
 // update a worker after firing in equations 'fires1', '_fires2', 'entry2exit',
 // 'quits1', 'retires1', '_quits2', '_retires2'
 
-void U_FN::fire_worker( c_varT *_v_, object *worker )
+CFUN_VOID( fire_worker )
 {
-	WRITES( worker, "_employed", 0 );			// register fire
-	WRITES( worker, "_Te", 0 );
-	RECALCS( worker, "_w" );					// recalc. wage if already done
+	WRITE( "_employed", 0 );					// register fire
+	WRITE( "_Te", 0 );
+	RECALC( "_w" );								// recalc. wage if already done
 
 	// if already has a bridge object, destroy it first
-	if ( HOOKS( worker, FWRK ) != NULL )
+	if ( HOOK( FWRK ) != NULL )
 	{
-		DELETE( HOOKS( worker, FWRK ) );
-		WRITE_HOOKS( worker, FWRK, NULL );
+		DELETE( HOOK( FWRK ) );
+		WRITE_HOOK( FWRK, NULL );
 
 		// and also destroy vintage bridge object
-		if ( HOOKS( worker, VWRK ) != NULL )
+		if ( HOOK( VWRK ) != NULL )
 		{
-			DELETE( HOOKS( worker, VWRK ) );
-			WRITE_HOOKS( worker, VWRK, NULL );
+			DELETE( HOOK( VWRK ) );
+			WRITE_HOOK( VWRK, NULL );
 		}
 	}
 }
@@ -471,38 +470,36 @@ void U_FN::fire_worker( c_varT *_v_, object *worker )
 
 // update a worker after hiring in equations 'hire1', 'hire2'
 
-void U_FN::hire_worker( c_varT *_v_, object *worker, int sec, object *firm,
-					  double wage )
+CFUN_VOID( hire_worker, int sec, object *firm, double wage )
 {
 	int flagWorkerLBU;
 	object *wrk;
 
-	int _ID = VS( worker, "_ID" );
-	int _employed = VS( worker, "_employed" );
+	int _ID = V( "_ID" );
+	int _employed = V( "_employed" );
 
 	if ( _employed )								// worker must quit first?
 	{
-		double Lscale = VS( PARENTS( worker ), "Lscale" );// labor scaling
+		double Lscale = VS( PARENT, "Lscale" );		// labor scaling
 
 		if ( _employed == 1 )						// sector 1?
-			INCRS( V_EXTS( GRANDPARENTS( worker ), countryE, capSec ), "quits1",
-				   Lscale );
+			INCRS( V_EXTS( GRANDPARENT, countryE, capSec ), "quits1", Lscale );
 		else										// no: assume sector 2
-			INCRS( PARENTS( HOOKS( worker, FWRK ) ), "_quits2", Lscale );
+			INCRS( PARENTS( HOOK( FWRK ) ), "_quits2", Lscale );
 
-		fire_worker( _v_, worker );				// register fire
+		CFUN( fire_worker );						// register fire
 	}
 
-	WRITES( worker, "_employed", sec );
-	WRITES( worker, "_Te", 0 );
-	WRITES( worker, "_CQ", 0 );					// no cumulated production yet
-	WRITES( worker, "_w", wage );
+	WRITE( "_employed", sec );
+	WRITE( "_Te", 0 );
+	WRITE( "_CQ", 0 );								// no cumulated production yet
+	WRITE( "_w", wage );
 
-	flagWorkerLBU = VS( GRANDPARENTS( worker ), "flagWorkerLBU" );
+	flagWorkerLBU = VS( GRANDPARENT, "flagWorkerLBU" );
 	if ( flagWorkerLBU != 0 && flagWorkerLBU != 2 )
-		WRITES( worker, "_sV", VS( PARENTS( worker ), "sigma" ) );// public skills
+		WRITE( "_sV", VS( PARENT, "sigma" ) );		// public skills
 	else
-		WRITES( worker, "_sV", INISKILL );
+		WRITE( "_sV", INISKILL );
 
 	// then handle the case at hand, setting vintage and bridge objects
 	if ( sec < 2 )								// unemployed or sector 1?
@@ -513,7 +510,7 @@ void U_FN::hire_worker( c_varT *_v_, object *worker, int sec, object *firm,
 		{
 			// add bridge object between 'Wrk1' (in Capital) to 'Worker'
 			wrk = ADDOBJS( firm, "Wrk1" );
-			WRITE_SHOOKS( wrk, worker );		// pointer to worker from firm
+			WRITE_SHOOKS( wrk, THIS );			// pointer to worker from firm
 			WRITES( wrk, "_IDw1", _ID );
 		}
 	}
@@ -521,17 +518,17 @@ void U_FN::hire_worker( c_varT *_v_, object *worker, int sec, object *firm,
 	{
 		// add bridge-object between 'Wrk2' (in Firm2) to 'Worker'
 		wrk = ADDOBJS( firm, "Wrk2" );
-		WRITE_SHOOKS( wrk, worker );			// pointer to worker from firm
+		WRITE_SHOOKS( wrk, THIS );				// pointer to worker from firm
 		WRITES( wrk, "__IDw2", _ID );			// register worker ID ID
 	}
 
-	WRITE_HOOKS( worker, FWRK, wrk );			// pointer to firm from worker
+	WRITE_HOOK( FWRK, wrk );					// pointer to firm from worker
 }
 
 
 // move worker to a different vintage in equation 'alloc2'
 
-void U_FN::move_worker( object *worker, object *vint, bool vint_learn )
+CFUN_VOID( move_worker, object *vint, bool vint_learn )
 {
 	double sV;
 	int IDv;
@@ -546,12 +543,12 @@ void U_FN::move_worker( object *worker, object *vint, bool vint_learn )
 		sV = INISKILL;
 
 	wrkV = ADDOBJS( vint, "WrkV" );				// add worker-bridge object
-	WRITE_SHOOKS( wrkV, worker );				// save pointer to work object
-	WRITE_HOOKS( worker, VWRK, wrkV );			// register vint. in worker
+	WRITE_SHOOKS( wrkV, THIS );					// save pointer to work object
+	WRITE_HOOK( VWRK, wrkV );					// register vint. in worker
 
-	WRITES( wrkV, "___IDwV", VS( worker, "_ID" ) );
-	WRITES( worker, "_sV", sV );				// set vintage skills
-	WRITES( worker, "_CQ", 0 );					// no cumulated production yet
+	WRITES( wrkV, "___IDwV", V( "_ID" ) );
+	WRITE( "_sV", sV );							// set vintage skills
+	WRITE( "_CQ", 0 );							// no cumulated production yet
 }
 
 
@@ -560,7 +557,7 @@ void U_FN::move_worker( object *worker, object *vint, bool vint_learn )
 bool wo_asc_wrk( wageOffer e1, wageOffer e2 ) { return e1.workers < e2.workers; };
 bool wo_desc_off( wageOffer e1, wageOffer e2 ) { return e1.offer > e2.offer; };
 
-void shuffle_offers( woLisT *offers )
+CFUN_VOID( shuffle_offers, woLisT *offers )
 {
 	// make a copy of the workers list into a vector
 	vector < wageOffer > temp( offers->size( ) );
@@ -573,14 +570,14 @@ void shuffle_offers( woLisT *offers )
 	copy( temp.begin( ), temp.end( ), offers->begin( ) );
 }
 
-void order_offers( int order, woLisT *offers )
+CFUN_VOID( order_offers, int order, woLisT *offers )
 {
 	int i;
 	woLisT noWorker;
 	woLisT::iterator it;
 
 	// always shuffle orders to prevent preference when same wages are offered
-	shuffle_offers( offers );
+	CFUN( shuffle_offers, offers );
 
 	if ( order == 2 || order == 3 )				// no worker firms priority?
 	{
@@ -606,8 +603,8 @@ void order_offers( int order, woLisT *offers )
 			break;
 
 		case 2:									// no worker first, all random
-			shuffle_offers( & noWorker );		// shuffle noWorker firm(s)
-			shuffle_offers( offers );			// shuffle the rest of the list
+			CFUN( shuffle_offers, & noWorker );	// shuffle noWorker firm(s)
+			CFUN( shuffle_offers, offers );		// shuffle the rest of the list
 
 			// insert the shuffled list of no worker firm(s) at the beginning
 			offers->splice( offers->begin(), noWorker,
@@ -636,7 +633,7 @@ bool appl_desc_ws( application e1, application e2 ) { return e1.ws > e2.ws; };
 bool appl_asc_Te( application e1, application e2 ) { return e1.Te < e2.Te; };
 bool appl_desc_Te( application e1, application e2 ) { return e1.Te > e2.Te; };
 
-void order_applications( int order, appLisT *appl )
+CFUN_VOID( order_applications, int order, appLisT *appl )
 {
 	if ( appl->size( ) == 0 )					// prevent empty lists
 		return;
@@ -688,7 +685,7 @@ void order_applications( int order, appLisT *appl )
 const char *wrkName[ ] = { "Wrk1", "Wrk2" },
 		   *keyName[ ] = { "_key1", "__key2" };
 
-void U_FN::order_workers( int order, int obj, object *caller )
+CFUN_VOID( order_workers, int order, int obj )
 {
 	char keyN[ 4 ], dir[ 5 ];
 	double keyV;
@@ -729,7 +726,7 @@ void U_FN::order_workers( int order, int obj, object *caller )
 			strcpy( dir, "UP" );
 	}
 
-	CYCLES( caller, wrk, wrkName[ obj ] )		// update all employees
+	CYCLE( wrk, wrkName[ obj ] )				// update all employees
 	{
 		if ( order == 0 )						// random order?
 			keyV = RND;
@@ -742,7 +739,7 @@ void U_FN::order_workers( int order, int obj, object *caller )
 		WRITES( wrk, keyName[ obj ], keyV );	// copy key to bridge obj
 	}
 
-	SORTS( caller, wrkName[ obj ], keyName[ obj ], dir );// sort the bridge objects
+	SORT( wrkName[ obj ], keyName[ obj ], dir );// sort the bridge objects
 }
 
 
@@ -754,18 +751,17 @@ void U_FN::order_workers( int order, int obj, object *caller )
 #define MODE_IPROT 4							// fire non protected workers
 #define MODE_EXIT 5								// fire all when firm exiting
 
-double U_FN::fire_workers( c_varT *_v_, object *firm, int mode, double xsCap,
-						 double *redCap )
+CFUN_DBL( fire_workers, int mode, double xsCap, double *redCap )
 {
 	bool fire;
 	int Te, i;
 	object *cyccur, *wrk, *worker;
 
-	object *country = GRANDPARENTS( firm );		// pointers to objects
+	object *country = GRANDPARENT;				// pointers to objects
 	object *lab = V_EXTS( country, countryE, labSup );
 
 	double Lscale = VS( lab, "Lscale" );		// labor scale
-	double w2avg = VLS( PARENTS( firm ), "w2avg", 1 );// average wage
+	double w2avg = VLS( PARENT, "w2avg", 1 );	// average wage
 	int Tp = VS( lab, "Tp" );					// time for protected workers
 
 	i = 0;										// fired workers counter
@@ -773,16 +769,16 @@ double U_FN::fire_workers( c_varT *_v_, object *firm, int mode, double xsCap,
 	xsCap *= 1 - VS( lab, "theta" );			// create slack (extra workers)
 
 	// order workers to fire according firm preference
-	int fOrder = VS( firm, "_postChg" ) ? VS( country, "flagFireOrder2Chg" ) :
-										  VS( country, "flagFireOrder2" );
+	int fOrder = V( "_postChg" ) ? VS( country, "flagFireOrder2Chg" ) :
+								   VS( country, "flagFireOrder2" );
 	if ( mode == MODE_PBACK )					// explicit payback firing?
 		fOrder = 0;								// ignore order set
 
 	// create sorted list of workers according to the chosen attributes
-	order_workers( fOrder, OBJ_WRK2, firm );	// sort bridge objects
+	CFUN( order_workers, fOrder, OBJ_WRK2 );	// sort bridge objects
 
 	// check firing worker by worker: firm desired adjustments
-	CYCLE_SAFES( firm, wrk, "Wrk2" )
+	CYCLE_SAFE( wrk, "Wrk2" )
 	{
 		fire = false;
 		worker = SHOOKS( wrk );
@@ -828,7 +824,7 @@ double U_FN::fire_workers( c_varT *_v_, object *firm, int mode, double xsCap,
 
 		if ( fire )								// if marked, process firing
 		{
-			fire_worker( _v_, worker );			// register fire
+			CFUNS( worker, fire_worker );		// register fire
 			*redCap += VLS( worker, "_Q", 1 ) * Lscale;// pot. fired capacity
 			++i;								// scaled equivalent fires
 		}
@@ -843,24 +839,24 @@ double U_FN::fire_workers( c_varT *_v_, object *firm, int mode, double xsCap,
 // add and configure entrant capital-good firm object(s) and required hooks
 // in equations 'entry1exit' and 'initCountry'
 
-double U_FN::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
+CFUN_DBL( entry_firm1, int n, bool newInd )
 {
 	double _Atau, _Btau, _D10, _Deb1, _Eq1, _L1rd, _NW1, _NW10, _RD0, _c1, _f1,
 		   _p1, _sV, AtauMax, BtauMax, Deb1, Eq1, NW1, w1avg, mult;
 	int _ID1, _t1ent;
 	object *firm, *bank,
-		   *cons = V_EXTS( PARENTS( sector ), countryE, conSec ),
-		   *lab = V_EXTS( PARENTS( sector ), countryE, labSup );
+		   *cons = V_EXTS( PARENT, countryE, conSec ),
+		   *lab = V_EXTS( PARENT, countryE, labSup );
 
-	double Deb10ratio = VS( sector, "Deb10ratio" );// bank fin. to equity ratio
-	double Phi3 = VS( sector, "Phi3" );			// lower support for wealth share
-	double Phi4 = VS( sector, "Phi4" );			// upper support for wealth share
-	double alpha2 = VS( sector, "alpha2" );		// lower support for imitation
-	double beta2 = VS( sector, "beta2" );		// upper support for imitation
-	double mu1 = VS( sector, "mu1" );			// mark-up in sector 1
-	double m1 = VS( sector, "m1" );				// worker production scale
-	double nu = VS( sector, "nu" );				// share of R&D expenses
-	double x5 = VS( sector, "x5" );				// entrant upper advantage
+	double Deb10ratio = V( "Deb10ratio" );		// bank fin. to equity ratio
+	double Phi3 = V( "Phi3" );					// lower support for wealth share
+	double Phi4 = V( "Phi4" );					// upper support for wealth share
+	double alpha2 = V( "alpha2" );				// lower support for imitation
+	double beta2 = V( "beta2" );				// upper support for imitation
+	double mu1 = V( "mu1" );					// mark-up in sector 1
+	double m1 = V( "m1" );						// worker production scale
+	double nu = V( "nu" );						// share of R&D expenses
+	double x5 = V( "x5" );						// entrant upper advantage
 
 	if ( newInd )
 	{
@@ -870,7 +866,7 @@ double U_FN::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 		_Atau = AtauMax = INIPROD;				// initial productivities to use
 		_Btau = BtauMax = ( 1 + mu1 ) * _Atau / ( m1 * m2 * VS( cons, "b" ) );
 												// and build machines (s. s.)
-		_NW10 = VS( sector, "NW10" );			// initial wealth in sector 1
+		_NW10 = V( "NW10" );					// initial wealth in sector 1
 		_f1 = 1.0 / n;							// fair share
 		_sV = VLS( lab, "sAvg", 1 );			// initial worker vintage skills
 		_t1ent = 0;								// entered before t=1
@@ -885,17 +881,17 @@ double U_FN::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 	}
 	else
 	{
-		_NW10 = max( WHTAVES( sector, "_NW1", "_f1" ), VS( sector, "NW10" ) *
-					 VS( sector, "PPI" ) / VS( sector, "pK0" ) );
+		_NW10 = max( WHTAVE( "_NW1", "_f1" ), V( "NW10" ) *
+					 V( "PPI" ) / V( "pK0" ) );
 		_f1 = 0;								// no market share
 		_sV = INISKILL;							// worker vintage skills
 		_t1ent = T;								// entered now
-		AtauMax = MAXS( sector, "_Atau" );		// best machine productivity
-		BtauMax = MAXS( sector, "_Btau" );		// best productivity in sector 1
-		w1avg = VS( sector, "w1avg" );			// average wage in sector 1
+		AtauMax = MAX( "_Atau" );				// best machine productivity
+		BtauMax = MAX( "_Btau" );				// best productivity in sector 1
+		w1avg = V( "w1avg" );					// average wage in sector 1
 
 		// initial demand equal to 1 machine per client under fair share entry
-		_D10 = VS( cons, "F2" ) / VS( sector, "F1" );
+		_D10 = VS( cons, "F2" ) / V( "F1" );
 	}
 
 	// add entrant firms (end of period, don't try to sell)
@@ -903,18 +899,18 @@ double U_FN::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 	{
 		// create object, only recalculate in t if new industry
 		if ( newInd )
-			firm = ADDOBJLS( sector, "Firm1", T - 1 );
+			firm = ADDOBJL( "Firm1", T - 1 );
 		else
-			firm = ADDOBJS( sector, "Firm1" );
+			firm = ADDOBJ( "Firm1" );
 
-		_ID1 = INCRS( sector, "lastID1", 1 );	// new firm ID
+		_ID1 = INCR( "lastID1", 1 );			// new firm ID
 		WRITES( firm, "_ID1", _ID1 );
 
 		ADDHOOKS( firm, FIRM1HK );				// add object hooks
 		DELETE( SEARCHS( firm, "Cli" ) );		// remove empty instances
 
 		// select associated bank
-		bank = set_bank( firm );
+		bank = CFUNS( firm, set_bank );
 
 		if ( ! newInd )
 		{
@@ -954,8 +950,8 @@ double U_FN::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 			WRITELLS( firm, "_RD", _RD0, _t1ent, 1 );
 
 			// initialize the map of vintage productivity and skills
-			WRITE_EXTS( PARENTS( sector ), countryE, vintProd[ VNT( T - 1, _ID1 ) ].sVp, _sV );
-			WRITE_EXTS( PARENTS( sector ), countryE, vintProd[ VNT( T - 1, _ID1 ) ].sVavg, _sV );
+			WRITE_EXTS( PARENT, countryE, vintProd[ VNT( T - 1, _ID1 ) ].sVp, _sV );
+			WRITE_EXTS( PARENT, countryE, vintProd[ VNT( T - 1, _ID1 ) ].sVavg, _sV );
 		}
 		else
 		{
@@ -977,14 +973,14 @@ double U_FN::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 
 	if ( newInd )								// set t=0 values
 	{
-		WRITELLS( sector, "Deb1", Deb1, _t1ent, 1 );
-		WRITELLS( sector, "Eq1", Eq1, _t1ent, 1 );
-		WRITELLS( sector, "NW1", NW1, _t1ent, 1 );
+		WRITELL( "Deb1", Deb1, _t1ent, 1 );
+		WRITELL( "Eq1", Eq1, _t1ent, 1 );
+		WRITELL( "NW1", NW1, _t1ent, 1 );
 	}
 	else										// just account new equity
 	{
-		INCRS( sector, "Eq1", Eq1 );
-		INCRS( sector, "cEntry1", Eq1 );
+		INCR( "Eq1", Eq1 );
+		INCR( "cEntry1", Eq1 );
 	}
 
 	return Eq1;
@@ -994,7 +990,7 @@ double U_FN::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 // add and configure entrant consumer-good firm object(s) and required hooks
 // in equations 'entry2exit' and 'initCountry'
 
-double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
+CFUN_DBL( entry_firm2, int n, bool newInd )
 {
 	bool _postChg;
 	double _A2, _D20, _D2e, _Deb2, _E, _Eq2, _K, _N, _NW2, _NW2f, _NW20, _Q2u,
@@ -1002,23 +998,23 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 		   w2avg, w2oAvg, w2realAvg, mult;
 	int _ID2, _t2ent;
 	object *firm, *bank, *suppl,
-		   *cap = V_EXTS( PARENTS( sector ), countryE, capSec ),
-		   *lab = V_EXTS( PARENTS( sector ), countryE, labSup );
+		   *cap = V_EXTS( PARENT, countryE, capSec ),
+		   *lab = V_EXTS( PARENT, countryE, labSup );
 
-	bool AllFirmsChg = VS( PARENTS( sector ), "flagAllFirmsChg" );// change at once?
-	bool f2critChg = VS( sector, "f2critChg" );	// critical change thresh. met?
-	double Deb20ratio = VS( sector, "Deb20ratio" );// bank fin. to equity ratio
-	double Phi1 = VS( sector, "Phi1" );			// lower support for K share
-	double Phi2 = VS( sector, "Phi2" );			// upper support for K share
-	double ent2HldShr = VS( sector, "ent2HldShr" );// hold share post-chg firms
-	double f2minPosChg = VS( sector, "f2minPosChg" );// min m.s. post-chg firms
-	double iota = VS( sector, "iota" );			// desired inventories factor
-	double mu20 = VS( sector, "mu20" );			// initial mark-up in sector 2
-	double m2 = VS( sector, "m2" );				// machine output per period
+	bool AllFirmsChg = VS( PARENT, "flagAllFirmsChg" );// change at once?
+	bool f2critChg = V( "f2critChg" );			// critical change thresh. met?
+	double Deb20ratio = V( "Deb20ratio" );		// bank fin. to equity ratio
+	double Phi1 = V( "Phi1" );					// lower support for K share
+	double Phi2 = V( "Phi2" );					// upper support for K share
+	double ent2HldShr = V( "ent2HldShr" );		// hold share post-chg firms
+	double f2minPosChg = V( "f2minPosChg" );	// min m.s. post-chg firms
+	double iota = V( "iota" );					// desired inventories factor
+	double mu20 = V( "mu20" );					// initial mark-up in sector 2
+	double m2 = V( "m2" );						// machine output per period
 	double p10 = VLS( cap, "p1avg", 1 );		// initial machine price
-	double u = VS( sector, "u" );				// desired capital utilization
+	double u = V( "u" );						// desired capital utilization
 	double sAvg = VLS( lab, "sAvg", 1 );		// initial worker compound skills
-	int TregChg = VS( PARENTS( sector ), "TregChg" );// time for regime change
+	int TregChg = VS( PARENT, "TregChg" );		// time for regime change
 
 	if ( newInd )
 	{
@@ -1026,21 +1022,21 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 		double c10 = p10 / ( 1 + VS( cap, "mu1" ) );// initial unit cost sec. 1
 		double c20 = INIWAGE / INIPROD;			// initial unit cost sec. 2
 		double p20 = ( 1 + mu20 ) * c20;		// initial consumer-good price
-		double trW = VS( PARENTS( sector ), "flagTax" ) > 0 ?
-					 VS( PARENTS( sector ), "tr" ) : 0;// tax rate on wages
+		double trW = VS( PARENT, "flagTax" ) > 0 ?
+					 VS( PARENT, "tr" ) : 0;	// tax rate on wages
 		double K0 = ceil( VS( lab, "Ls0" ) * INIWAGE /
 						  p20 / n / m2 ) * m2;	// full employment K required
-		double SIr0 = n * K0 / m2 / VS( sector, "eta" );// substit. real invest.
+		double SIr0 = n * K0 / m2 / V( "eta" );	// substit. real invest.
 		double RD0 = VS( cap, "nu" ) * SIr0 * p10;// initial R&D expense
 
 		// initial steady state demand under fair share
 		_D20 = ( ( SIr0 * c10 + RD0 ) * ( 1 - phi - trW ) +
 				VS( lab, "Ls0" ) * INIWAGE * phi ) /
 			  ( mu20 + phi + trW ) * c20 / n;
-		_E = VLS( sector, "Eavg", 1 );			// initial competitiveness
+		_E = VL( "Eavg", 1 );					// initial competitiveness
 		_K = K0;								// initial capital in sector 2
 		_N = iota * _D20;						// initial inventories
-		_NW20 = VS( sector, "NW20" );			// initial wealth in sector 2
+		_NW20 = V( "NW20" );					// initial wealth in sector 2
 		_Q2u = 1;								// initial capacity utilization
 		_f2 = 1.0 / n;							// fair share
 		_life2cycle = 3;						// start as incumbent
@@ -1052,19 +1048,19 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 	else
 	{
 		_D20 = 0;
-		_E = VS( sector, "Eavg" );				// average competitiveness
-		_K = WHTAVES( sector, "_K", "_f2" );	// w. avg. capital in sector 2
+		_E = V( "Eavg" );						// average competitiveness
+		_K = WHTAVE( "_K", "_f2" );				// w. avg. capital in sector 2
 		_N = 0;									// inventories
-		_NW20 = WHTAVES( sector, "_NW2", "_f2" );// average wealth in sector 2
-		_Q2u = VS( sector, "Q2u" );				// capacity utilization
+		_NW20 = WHTAVE( "_NW2", "_f2" );		// average wealth in sector 2
+		_Q2u = V( "Q2u" );						// capacity utilization
 		_f2 = 0;								// no market share
 		_life2cycle = 0;						// start as pre-operat. entrant
-		_q2 = VS( sector, "q2avg" );			// average quality
+		_q2 = V( "q2avg" );						// average quality
 		_t2ent = T;								// entered now
-		f2posChg = VS( sector, "f2posChg" );	// m.s. of post-change firms
-		w2avg = VS( sector, "w2avg" );			// average wage in sector 2
-		w2oAvg = VS( sector, "w2oAvg" );		// average wage offer in s. 2
-		w2realAvg = VS( sector, "w2realAvg" );	// average real wage in s. 2
+		f2posChg = V( "f2posChg" );				// m.s. of post-change firms
+		w2avg = V( "w2avg" );					// average wage in sector 2
+		w2oAvg = V( "w2oAvg" );					// average wage offer in s. 2
+		w2realAvg = V( "w2realAvg" );			// average real wage in s. 2
 	}
 
 	// add entrant firms (end of period, don't try to sell)
@@ -1072,11 +1068,11 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 	{
 		// create object, only recalculate in t if new industry
 		if ( newInd )
-			firm = ADDOBJLS( sector, "Firm2", T - 1 );
+			firm = ADDOBJL( "Firm2", T - 1 );
 		else
-			firm = ADDOBJS( sector, "Firm2" );
+			firm = ADDOBJ( "Firm2" );
 
-		_ID2 = INCRS( sector, "lastID2", 1 );	// new firm ID
+		_ID2 = INCR( "lastID2", 1 );			// new firm ID
 		WRITES( firm, "_ID2", _ID2 );
 
 		ADDHOOKS( firm, FIRM2HK );				// add object hooks
@@ -1086,10 +1082,10 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 		DELETE( SEARCHS( firm, "Wrk2" ) );
 
 		// select associated bank
-		bank = set_bank( firm );
+		bank = CFUNS( firm, set_bank );
 
 		// select initial machine supplier
-		suppl = set_supplier( firm );
+		suppl = CFUNS( firm, set_supplier );
 
 		// choose firm type (pre/post-change)
 		if ( TregChg <= 0 || T < TregChg )		// before regime change?
@@ -1153,7 +1149,7 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 			WRITELLS( firm, "_N", _N, _t2ent, 1 );
 			WRITELLS( firm, "_NW2", _NW2, _t2ent, 1 );
 
-			add_vintage( _v_, firm, _K / m2, newInd );// first machine vintages
+			CFUNS( firm, add_vintage, _K / m2, newInd );// first machine vintages
 		}
 		else
 		{
@@ -1183,16 +1179,16 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 
 	if ( newInd )								// set t=0 values
 	{
-		WRITELLS( sector, "Deb2", Deb2, _t2ent, 1 );
-		WRITELLS( sector, "Eq2", Eq2, _t2ent, 1 );
-		WRITELLS( sector, "K", K, _t2ent, 1 );
-		WRITELLS( sector, "N", N, _t2ent, 1 );
-		WRITELLS( sector, "NW2", NW2, _t2ent, 1 );
+		WRITELL( "Deb2", Deb2, _t2ent, 1 );
+		WRITELL( "Eq2", Eq2, _t2ent, 1 );
+		WRITELL( "K", K, _t2ent, 1 );
+		WRITELL( "N", N, _t2ent, 1 );
+		WRITELL( "NW2", NW2, _t2ent, 1 );
 	}
 	else										// just account new equity
 	{
-		INCRS( sector, "Eq2", Eq2 );
-		INCRS( sector, "cEntry2", Eq2 );
+		INCR( "Eq2", Eq2 );
+		INCR( "cEntry2", Eq2 );
 	}
 
 	return Eq2;
@@ -1207,51 +1203,51 @@ const char *_BadDebVar[ ] = { "_BadDeb1", "_BadDeb2" },
 		   *cExitVar[ ] = { "cExit1", "cExit2" },
 		   *CliBrochObj[ ] = { "Cli", "Broch" };
 
-double U_FN::exit_firm( c_varT *_v_, object *firm, double *firesAcc )
+CFUN_DBL( exit_firm, double *firesAcc )
 {
 	double fires, liqEq, liqVal;
 	object *bank, *cli;
-	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 : 1;
+	int sec = strcmp( NAME, "Firm1" ) == 0 ? 0 : 1;
 
 	// remove equity from sector total
-	INCRS( PARENTS( firm ), EqVar[ sec ], - VS( firm, _EqVar[ sec ] ) );
+	INCRS( PARENT, EqVar[ sec ], - V( _EqVar[ sec ] ) );
 
 	// account liquidation equity credit of shareholder or bad debt cost of bank
-	liqVal = VS( firm, _NWvar[ sec ] ) - VS( firm, _DebVar[ sec ] );
+	liqVal = V( _NWvar[ sec ] ) - V( _DebVar[ sec ] );
 
 	if ( liqVal < 0 )							// account bank losses, if any
 	{
 		liqEq = 0;								// no liquidation equity
-		bank = HOOKS( firm, BANK );				// exiting firm bank
+		bank = HOOK( BANK );					// exiting firm bank
 		VS( bank, _BadDebVar[ sec ] );			// ensure reset in t
 		INCRS( bank, _BadDebVar[ sec ], - liqVal );// accumulate bank losses
 	}
 	else
 	{
 		liqEq = ROUND( liqVal, 0, 0.01 );		// no liquidation equity credit
-		INCRS( PARENTS( firm ), cExitVar[ sec ], liqEq );
+		INCRS( PARENT, cExitVar[ sec ], liqEq );
 	}
 
-	DELETE( HOOKS( firm, BCLIENT ) );			// leave client list of bank
+	DELETE( HOOK( BCLIENT ) );					// leave client list of bank
 
-	CYCLES( firm, cli, CliBrochObj[ sec ] )		// leave counterpart lists
-		DELETE( SHOOKS( cli ) );				// delete from counterpart list
+	CYCLE( cli, CliBrochObj[ sec ] )			// leave counterpart list
+		DELETE( SHOOKS( cli ) );				// delete from counterpart lists
 
 	if ( sec == 1 )
 	{
-		WRITES( firm, "_life2cycle", 4 );		// mark as exiting firm
+		WRITE( "_life2cycle", 4 );				// mark as exiting firm
 
 		// fire all workers
-		*firesAcc += fires = fire_workers( _v_, firm, MODE_EXIT, 0, &fires );
-		INCRS( firm, "_fires2", fires );
+		*firesAcc += fires = CFUN( fire_workers, MODE_EXIT, 0, & fires );
+		INCR( "_fires2", fires );
 
 		// update firm map before removing LSD object in consumption sector
-		EXEC_EXTS( GRANDPARENTS( firm ), countryE, firm2map, erase,
-				   ( int ) VS( firm, "_ID2" ) );
-		DELETE_EXTS( firm, firm2E );
+		EXEC_EXTS( GRANDPARENT, countryE, firm2map, erase,
+				   ( int ) V( "_ID2" ) );
+		DELETE_EXT( firm2E );
 	}
 
-	DELETE( firm );
+	DELETE( THIS );
 
 	return liqEq;
 }

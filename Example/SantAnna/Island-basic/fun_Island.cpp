@@ -12,7 +12,14 @@
 
  ******************************************************************************/
 
-#define NO_POINTER_INIT							// disable pointer checking
+// support C++ function (code at the end of the file)
+#include <lsd_init.h>
+
+#define EQ_USER_FUNCS CFUN_VOID( add_island, int x, int y, double & count );
+
+#include <lsd_head.h>
+
+//#define NO_POINTER_INIT						// disable pointer checking
 
 // agent-type codes
 #define EXPLORER 3
@@ -21,11 +28,6 @@
 
 // macro to encode island coordinates into a single island ID number
 #define ISLAND_ID( X, Y ) ( ( X + LAST_T ) * 1e6 + ( Y + LAST_T ) )
-
-// support C++ function (code at the end of the file)
-#define USER_FUNCS void add_island( lsd::object *sea, int x, int y, double & count );
-
-#include "fun_head_fast.h"
 
 MODELBEGIN
 
@@ -48,7 +50,7 @@ v[3] = V( "l0" );								// initial number of known islands
 v[4] = V( "l0radius" );							// rsearch radius for initial islands
 
 // make sure there is an island at (0, 0)
-add_island( THIS, 0, 0, v[0] );
+CFUN( add_island, 0, 0, v[0] );
 
 // create random islands to fill the initial radius plus one
 for ( i = - v[4] - 1; i <= v[4] + 1; ++i )
@@ -56,7 +58,7 @@ for ( i = - v[4] - 1; i <= v[4] + 1; ++i )
 		// draw the existence of an island (except in (0, 0))
 		if ( RND < v[2] && ! ( i == 0 && j == 0 ) )
 			// create island and add to the graphical lattice if required
-			add_island( THIS, i, j, v[0] );
+			CFUN( add_island, i, j, v[0] );
 
 // set the KnownIsland object instances to be nodes of a network
 INIT_NET( "KnownIsland", "DISCONNECTED", 1 );
@@ -196,7 +198,7 @@ if ( v[6] <= v[2] )
 	WRITE( "westFrontier", --v[2] );			// update the frontier
 	for ( i = v[2], j = v[4]; j <= v[5]; ++j )	// move south -> north
 		if ( RND < v[1] )						// is it an island?
-			add_island( THIS, i, j, v[0] );
+			CFUN( add_island, i, j, v[0] );
 }
 
 // expand to the east if required
@@ -205,7 +207,7 @@ if ( v[7] >= v[3] )
 	WRITE( "eastFrontier", ++v[3] );			// update the frontier
 	for ( i = v[7], j = v[4]; j <= v[5]; ++j )	// move south -> north
 		if ( RND < v[1] )						// is it an island?
-			add_island( THIS, i, j, v[0] );
+			CFUN( add_island, i, j, v[0] );
 }
 
 // expand to the south if required
@@ -214,7 +216,7 @@ if ( v[8] <= v[4] )
 	WRITE( "southFrontier", --v[4] );			// update the frontier
 	for ( j = v[4], i = v[2]; i <= v[3]; ++i )	// move west -> east
 		if ( RND < v[1] )						// is it an island?
-			add_island( THIS, i, j, v[0] );
+			CFUN( add_island, i, j, v[0] );
 }
 
 // expand to the north if required
@@ -223,7 +225,7 @@ if ( v[9] >= v[5] )
 	WRITE( "northFrontier", ++v[5] );			// update the frontier
 	for ( j = v[5], i = v[2]; i <= v[3]; ++i )	// move west -> east
 		if ( RND < v[1] )						// is it an island?
-			add_island( THIS, i, j, v[0] );
+			CFUN( add_island, i, j, v[0] );
 }
 
 RESULT( v[0] )
@@ -505,14 +507,14 @@ MODELEND
 // support C++ functions
 
 //// add one (unknown) island to the model
-void U_FN::add_island( lsd::object *sea, int x, int y, double & count )
+CFUN_VOID( add_island, int x, int y, double & count )
 {
 	object *island;
 
 	if ( count == 0 )							// first island?
-		island = SEARCHS( sea, "Island" );		// pick existing object
+		island = SEARCH( "Island" );			// pick existing object
 	else
-		island = ADDOBJLS( sea, "Island", 0 );	// add new object instance
+		island = ADDOBJL( "Island", 0 );		// add new object instance
 
 	++count;									// update the islands counter
 	WRITES( island, "_idIsland", ISLAND_ID( x, y ) );// save island id (coords.)

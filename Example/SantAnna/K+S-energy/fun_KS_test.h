@@ -20,6 +20,10 @@
 #define SFCTHRD 1e-4							// threshold for SFC detection
 #define TOL	0.1									// general error tolerance
 
+#define OUTRANGE( R, V, T ) ( abs( V ) < ( 1 - T ) * abs( R ) || \
+							  abs( V ) > ( 1 + T ) * abs( R ) )
+#define V0( V ) CFUNS( PARENT, init_cond, #V )	// shorter access to ini. values
+
 /*========================= COUNTRY-LEVEL TESTS ==============================*/
 
 EQUATION( "testSFC" )
@@ -294,6 +298,320 @@ if ( CALLER != NULL && strcmp( NAMES( CALLER ), "Stats" ) == 0 )
 RESULT( v[5] / 2 )
 
 
+EQUATION( "testInit" )
+/*
+Test the selected initial condition values for minimal compatibility
+with a stationary steady state at t=0
+*/
+
+#ifdef FASTMODE
+if ( FASTMODE != 0 )
+	END_EQUATION( 0 );
+#endif
+
+LOG( "\n !!! TESTING OF INITIAL CONDITIONS" );
+
+int errors = 0;									// error counter
+int flagEnClim = VS( PARENT, "flagEnClim" );	// energy sector active?
+double dY0 = VS( PARENT, "dGDP0" );				// steady-state initial growth
+
+// macro prices
+LOG( "\n  !! w0=%.2lf r0=%.4lf dY0=%.4lf fGE0=%.4lf",
+	 V0( w0 ), V0( r0 ), dY0, VS( ENESECL1, "fGE0" ) );
+
+CFUN( check_error, OUTRANGE( V0( w0 ), VS( LABSUPL1, "w" ), TOL ),
+	  "WAGE-LARGE-CHANGE", 0, & errors );
+
+CFUN( check_error, OUTRANGE( V0( r0 ), VS( FINSECL1, "r" ), TOL ),
+	  "INTEREST-LARGE-CHANGE", 0, & errors );
+
+CFUN( check_error, dY0 > 1 / VS( CONSECL1, "u" ) - 1 ||
+	  dY0 > VS( ENESECL1, "iotaE" ),
+	  "EXCESSIVE-INITIAL_GROWTH", 0, & errors );
+
+if ( flagEnClim )
+	CFUN( check_error, OUTRANGE( VS( ENESECL1, "fGE0" ), VS( ENESTAL1, "fGE" ), TOL ),
+		  "GREEN-SHARE-LARGE-CHANGE", 0, & errors );
+
+LOG( "\n  !! rD0=%.4lf rRes0=%.4lf rBonds0=%.4lf rDeb0=%.4lf",
+	 V0( rD0 ), V0( rRes0 ), V0( rBonds0 ), V0( rDeb0 ) );
+
+CFUN( check_error, V0( rD0 ) > V0( rRes0 ) || V0( rRes0 ) > V0( rBonds0 ) ||
+	  V0( rBonds0 ) > V0( r0 ) || V0( r0 ) > V0( rDeb0 ),
+	  "INCONSISTENT-INTEREST-STRUCTURE", 0, & errors );
+
+// technology and productivities
+LOG( "\n  !! AtauLP0=%.2lf AtauEE0=%.2lf AtauEF0=%.2lf AlpIni=%.2lf, Tk0=%.0lf",
+	 V0( AtauLP0 ), V0( AtauEE0 ), V0( AtauEF0 ), V0( AlpIni ), V0( Tk0 ) );
+
+CFUN( check_error, OUTRANGE( V0( AtauLP0 ), VS( SECSTAL1, "AtauAvg" ), TOL ) ||
+	  OUTRANGE( V0( AtauEE0 ), VS( SECSTAL1, "A2ee" ), TOL ) ||
+	  OUTRANGE( V0( AtauEF0 ), VS( SECSTAL1, "A2ef" ), TOL ),
+	  "PRODUCTIVITY-LARGE-CHANGE-CONSUMPTION", 0, & errors );
+
+LOG( "\n  !! BtauLP0=%.2lf BtauEE0=%.2lf BtauEF0=%.2lf",
+	 V0( BtauLP0 ), V0( BtauEE0 ), V0( BtauEF0 ) );
+
+CFUN( check_error, OUTRANGE( V0( BtauLP0 ), VS( SECSTAL1, "BtauAvg" ), TOL ) ||
+	  OUTRANGE( V0( BtauEE0 ), VS( SECSTAL1, "A1ee" ), TOL ) ||
+	  OUTRANGE( V0( BtauEF0 ), VS( SECSTAL1, "A1ef" ), TOL ),
+	  "PRODUCTIVITY-LARGE-CHANGE-CAPITAL", 0, & errors );
+
+// costs, prices and competitiveness
+LOG( "\n  !! ICge0=%.4lf cE0=%.4lf c10=%.0lf c20=%.2lf",
+	 V0( ICge0 ), V0( cE0 ), V0( c10 ), V0( c20 ) );
+
+CFUN( check_error, OUTRANGE( V0( ICge0 ), VS( ENESTAL1, "ICtauGEavg" ), TOL ) ||
+	  OUTRANGE( V0( cE0 ) * VS( ENESTAL1, "fGE" ) / VS( ENESECL1, "fGE0" ),
+				VS( ENESTAL1, "cE" ), TOL ) ||
+	  OUTRANGE( V0( c10 ), WHTAVES( CAPSECL1, "_c1", "_f1" ), TOL ) ||
+	  OUTRANGE( V0( c20 ), VS( CONSECL1, "c2" ), TOL ),
+	  "UNIT-COST-LARGE-CHANGE", 0, & errors );
+
+LOG( "\n  !! mE0=%.0lf pE0=%.4lf p10=%.0lf p20=%.2lf",
+	 V0( mE0 ), V0( pE0 ), V0( p10 ), V0( p20 ) );
+
+CFUN( check_error, OUTRANGE( V0( mE0 ), VS( CAPSECL1, "p1avg" ) /
+										VS( ENESTAL1, "ICtauGEavg" ), TOL ) ||
+	  OUTRANGE( V0( pE0 ), VS( ENESECL1, "pE" ), TOL ) ||
+	  OUTRANGE( V0( p10 ), VS( CAPSECL1, "p1avg" ), TOL ) ||
+	  OUTRANGE( V0( p20 ), VS( CONSECL1, "p2avg" ), TOL ),
+	  "PRICE-LARGE-CHANGE", 0, & errors );
+
+// steady state capital
+LOG( "\n  !! thetaE0=%3g lambdaE0=%3g psi10=%3g",
+	 V0( thetaE0 ), V0( lambdaE0 ), V0( psi10 ) );
+
+CFUN( check_error, V0( thetaE0 ) < 0 || V0( lambdaE0 ) < 0 || V0( psi10 ) <= 0,
+	  "INCONSISTENT-STEADY-STATE", 0, & errors );
+
+LOG( "\n  !! kappa10=%3g delta20=%.3lf rho20=%3g",
+	 V0( kappa10 ), V0( delta20 ), V0( rho20 ) );
+
+CFUN( check_error, V0( kappa10 ) <= 0 || V0( delta20 ) <= 0 || V0( rho20 ) <= 0,
+	  "INCONSISTENT-STEADY-STATE", 0, & errors );
+
+LOG( "\n  !! Ke0=%.0lf K0=%.0lf",
+	 V0( Ke0 ), V0( K0 ) );
+
+CFUN( check_error, V0( Ke0 ) < 0 || V0( K0 ) <= 0,
+	  "INCONSISTENT-CAPITAL", 0, & errors );
+
+CFUN( check_error, OUTRANGE( V0( Ke0 ), VS( ENESECL1, "Ke" ), TOL ) ||
+	  OUTRANGE( V0( K0 ), VS( CONSECL1, "K" ), TOL ),
+	  "CAPITAL-LARGE-CHANGE", 0, & errors );
+
+// demand and production
+LOG( "\n  !! En0=%.0lf En10=%.0lf En20=%.0lf",
+	 V0( En0 ), V0( En10 ), V0( En20 ) );
+
+CFUN( check_error, OUTRANGE( V0( En0 ) * ( 1 + dY0 ), VS( PARENT, "En" ), TOL ) ||
+	  OUTRANGE( V0( En10 ) * ( 1 + dY0 ), VS( CAPSECL1, "En1" ), TOL ) ||
+	  OUTRANGE( V0( En20 ) * ( 1 + dY0 ), VS( CONSECL1, "En2" ), TOL ),
+	  "ENERGY-LARGE-CHANGE", 0, & errors );
+
+LOG( "\n  !! Df0=%.0lf De0=%.0lf D10=%.0lf D20=%.0lf",
+	 V0( Df0 ), V0( De0 ), V0( D10 ), V0( D20 ) );
+
+CFUN( check_error, OUTRANGE( V0( Df0 ) * ( 1 + dY0 ), VS( ENESECL1, "Df" ), TOL ) ||
+	  OUTRANGE( V0( De0 ) * ( 1 + dY0 ), VS( ENESECL1, "De" ), TOL ) ||
+	  OUTRANGE( V0( D10 ) * ( 1 + dY0 ), VS( CAPSECL1, "D1" ), TOL ) ||
+	  OUTRANGE( V0( D20 ) * ( 1 + dY0 ), VS( CONSECL1, "D2" ), TOL ),
+	  "DEMAND-LARGE-CHANGE", 0, & errors );
+
+LOG( "\n  !! Qe0=%.0lf Q10=%.0lf Q20=%.0lf N0=%.0lf",
+	 V0( Qe0 ), V0( Q10 ), V0( Q20 ), V0( N0 ) );
+
+CFUN( check_error, OUTRANGE( V0( Qe0 ) * ( 1 + dY0 ), VS( ENESECL1, "Qe" ), TOL ) ||
+	  OUTRANGE( V0( Q10 ) * ( 1 + dY0 ), VS( CAPSECL1, "Q1e" ), TOL ) ||
+	  OUTRANGE( V0( Q20 ) * ( 1 + dY0 ), VS( CONSECL1, "Q2e" ), TOL ),
+	  "PRODUCTION-LARGE-CHANGE", 0, & errors );
+
+CFUN( check_error, OUTRANGE( V0( N0 ) * ( 1 + dY0 ), VS( CONSECL1, "N" ), TOL ),
+	  "INVENTORY-LARGE-CHANGE", 0, & errors );
+
+// production distribution
+h = VS( CONSECL1, "F20" );
+v[0] = VS( CONSECL1, "Q2e" ) / h;
+v[1] = v[2] = v[3] = 0;
+CYCLES( CONSECL1, cur, "Firm2" )
+	if ( VS( cur, "_t2ent" ) == 0 )
+	{
+		v[1] += v[4] = VS( cur, "_Q2e" );
+		v[2] += pow( v[4] - v[0], 2 );
+		v[3] = max( abs( v[4] - v[0] ), v[3] );
+	}
+
+v[2] = sqrt( v[2] / h );
+
+LOG( "\n  !! _Q2eAvg=%.2lf _Q2eSD=%.2lf _Q2eMAD=%.2lf",
+	 v[1] / h, v[2], v[3] );
+
+CFUN( check_error, OUTRANGE( v[1], VS( CONSECL1, "Q2e" ), 0.01 ),
+	  "INVALID-AGGREGATION", 0, & errors );
+
+CFUN( check_error, v[2] / v[0] > TOL || v[3] / v[0] > TOL,
+	  "INCONSISTENT-PRODUCTION-DISTRIBUTION", 0, & errors );
+
+// labor employed and real wage
+LOG( "\n  !! L0=%.0lf Le0=%.0lf L10=%.0lf L20=%.0lf",
+	 V0( L0 ), V0( Le0 ), V0( L10 ), V0( L20 ) );
+
+CFUN( check_error, OUTRANGE( V0( L0 ) * ( 1 + dY0 ), VS( LABSUPL1, "L" ), TOL ) ||
+	  OUTRANGE( V0( Le0 ) * ( 1 + dY0 ), VS( ENESECL1, "Le" ), TOL ) ||
+	  OUTRANGE( V0( L10 ) * ( 1 + dY0 ), VS( CAPSECL1, "L1" ), TOL ) ||
+	  OUTRANGE( V0( L20 ) * ( 1 + dY0 ), VS( CONSECL1, "L2" ), TOL ),
+	  "EMPLOYMENT-LARGE-CHANGE", 0, & errors );
+
+CFUN( check_error, V0( L0 ) > VS( LABSUPL1, "Ls0" ),
+	  "LABOR-DEMAND-LARGER-THAN-SUPPLY", 0, & errors );
+
+CFUN( check_error, floor( V0( L0 ) ) != floor( V0( L10 ) + V0( L20 ) + V0( Le0 ) ),
+	  "INCONSISTENT-LABOR-DEMAND", 0, & errors );
+
+LOG( "\n  !! U0=%.2lf wReal0=%.2lf",
+	 V0( U0 ), V0( wReal0 ) );
+
+CFUN( check_error, OUTRANGE( 1 + V0( U0 ), 1 + VS( LABSUPL1, "U" ), TOL ),
+	  "UNEMPLOYMENT-LARGE-CHANGE", 0, & errors );
+
+CFUN( check_error, OUTRANGE( V0( wReal0 ), VS( LABSUPL1, "wReal" ), TOL ),
+	  "REAL-WAGE-LARGE-CHANGE", 0, & errors );
+
+CFUN( check_error, V0( U0 ) > 0.1,
+	  "HIGH-INITIAL-UNEMPLOYMENT", 0, & errors );
+
+// CO2 emissions
+LOG( "\n  !! Em0=%.0lf EmE0=%.0lf Em10=%.0lf Em20=%.0lf",
+	 V0( Em0 ), V0( EmE0 ), V0( Em10 ), V0( Em20 ) );
+
+CFUN( check_error, OUTRANGE( V0( Em0 ) * ( 1 + dY0 ), VS( PARENT, "Em" ), TOL ) ||
+	  OUTRANGE( V0( EmE0 ) * ( 1 + dY0 ), VS( ENESECL1, "EmE" ), TOL ) ||
+	  OUTRANGE( V0( Em10 ) * ( 1 + dY0 ), VS( CAPSECL1, "Em1" ), TOL ) ||
+	  OUTRANGE( V0( Em20 ) * ( 1 + dY0 ), VS( CONSECL1, "Em2" ), TOL ),
+	  "EMMISIONS-LARGE-CHANGE", 0, & errors );
+
+// firm net worth, loan debt and profits
+LOG( "\n  !! NWe0=%.0lf NW10=%.0lf NW20=%.0lf",
+	 V0( NWe0 ), V0( NW10 ), V0( NW20 ) );
+
+LOG( "\n  !! DebE0=%.0lf Deb10=%.0lf Deb20=%.0lf",
+	 V0( DebE0 ), V0( Deb10 ), V0( Deb20 ) );
+
+CFUN( check_error, OUTRANGE( V0( NWe0 ), VS( ENESECL1, "NWe" ) -
+							 VS( ENESECL1, "DebE" ) + VS( ENESECL1, "IeNom" ) -
+							 VS( ENESECL1, "PiE" ) + VS( ENESECL1, "TaxE" ) +
+							 V0( DebE0 ), TOL ) ||
+	  OUTRANGE( V0( NW10 ), VS( CAPSECL1, "NW1" ) - VS( CAPSECL1, "Deb1" ) -
+				VS( CAPSECL1, "Pi1" ) + VS( CAPSECL1, "Tax1" ) +
+				V0( Deb10 ), TOL ) ||
+	  OUTRANGE( V0( NW20 ), VS( CONSECL1, "NW2" ) - VS( CONSECL1, "Deb2" ) +
+				VS( CONSECL1, "Inom" ) - VS( CONSECL1, "Pi2" ) +
+				VS( CONSECL1, "Tax2" ) + V0( Deb20 ), TOL ),
+	  "INCONSISTENT-BALANCE-SHEETS", 0, & errors );
+
+LOG( "\n  !! PiE0=%.0lf Pi10=%.0lf Pi20=%.0lf PiB=%.0lf",
+	 V0( PiE0 ), V0( Pi10 ), V0( Pi20 ), V0( PiB0 ) );
+
+if ( flagEnClim )
+	CFUN( check_error, V0( PiE0 ) < ( 1 - TOL ) * V0( p10 ) *
+		  VS( ENESECL1, "fGE0" ) * V0( Ke0 ) / ( V0( mE0 ) * VS( ENESECL1, "etaE" ) ),
+		  "UNSUSTAINABLE-PROFITS-ENERGY", 0, & errors );
+
+CFUN( check_error, V0( Pi10 ) < - TOL * V0( p10 ) * V0( D10 ),
+	  "UNSUSTAINABLE-PROFITS-CAPITAL", 0, & errors );
+
+CFUN( check_error, V0( Pi20 ) < ( 1 - TOL ) * V0( p10 ) * V0( K0 ) /
+	  ( VS( CONSECL1, "m2" ) * VS( CONSECL1, "eta" ) ),
+	  "UNSUSTAINABLE-PROFITS-CONSUMPTION", 0, & errors );
+
+CFUN( check_error, V0( PiB0 ) < - TOL * V0( rDeb0 ) *
+	  ( V0( DebE0 ) + V0( Deb10 ) + V0( Deb20 ) ),
+	  "UNSUSTAINABLE-PROFITS-FINANCIAL", 0, & errors );
+
+// investment, consumption and GDP
+LOG( "\n  !! InomE0=%.2lf Inom0=%.0lf C0=%.0lf GDPnom0=%.0lf",
+	 V0( InomE0 ), V0( Inom0 ), V0( C0 ), V0( GDPnom0 ) );
+
+CFUN( check_error, OUTRANGE( V0( InomE0 ), VS( ENESTAL1, "ICtauGEavg" ) *
+										   VS( ENESECL1, "Kge" ) /
+										   VS( ENESECL1, "etaE" ), TOL ) ||
+	  OUTRANGE( V0( Inom0 ), VS( CONSECL1, "Inom" ), TOL ) ||
+	  OUTRANGE( V0( C0 ), VS( PARENT, "C" ), TOL ) ||
+	  OUTRANGE( V0( GDPnom0 ), VS( PARENT, "GDPnom" ), TOL ),
+	  "MACRO-LARGE-CHANGE", 0, & errors );
+
+// government expenditure, tax revenue and budget deficit
+LOG( "\n  !! G0=%.0lf Tax0=%.0lf Def0=%.0lf",
+	 V0( G0 ), V0( Tax0 ), V0( Def0 ) );
+
+CFUN( check_error, OUTRANGE( V0( G0 ), VS( PARENT, "G" ), TOL ) ||
+	  OUTRANGE( V0( Tax0 ), VS( PARENT, "Tax" ), TOL ) ||
+	  OUTRANGE( V0( Def0 ), VS( PARENT, "Def" ), 2 * TOL ),
+	  "BUDGET-LARGE-CHANGE", 0, & errors );
+
+CFUN( check_error, V0( Def0 ) / V0( GDPnom0 ) > 0.1,
+	"HIGH-GOVERNMENT-DEFICIT", 0, & errors );
+
+CFUN( check_error, V0( Def0 ) / V0( GDPnom0 ) < -0.02,
+	"HIGH-GOVERNMENT-SURPLUS", 0, & errors );
+
+// productivity and competitiveness
+LOG( "\n  !! A0=%.2lf Ae0=%.0lf E0=%.2lf",
+	 V0( A0 ), V0( Ae0 ), V0( E0 ) );
+
+CFUN( check_error, OUTRANGE( V0( A0 ), VS( PARENT, "A" ), TOL ) ||
+	  OUTRANGE( V0( Ae0 ), VS( ENESECL1, "Ae" ), TOL ) ||
+	  OUTRANGE( V0( E0 ), VS( CONSECL1, "Eavg" ), TOL ),
+	  "PROD-COMPET-LARGE-CHANGE", 0, & errors );
+
+// capital age distribution
+std::vector < int > mach;
+v[0] = v[1] = 0;
+CYCLES( CONSECL1, cur, "Firm2" )
+	CYCLES( cur, cur1, "Vint" )
+		if ( VS( cur1, "__tVint" ) <= 0 )
+		{
+			i = abs( VS( cur1, "__tVint" ) );
+			if ( mach.size( ) < i + 1 )
+				mach.resize( i + 1, 0 );
+			mach[ i ] += VS( cur1, "__nVint" );
+			v[0] += VS( cur1, "__AlpVint" ) * VS( cur1, "__nVint" );
+			v[1] += VS( cur1, "__nVint" );
+		}
+
+v[0] /= v[1];
+v[2] = mach.size( );
+v[3] = v[1] / v[2];
+v[4] = v[5] = 0;
+for ( auto n : mach )
+{
+	v[4] += pow( n - v[3], 2 );
+	v[5] = max( abs( n - v[3] ), v[5] );
+}
+
+v[4] = sqrt( v[4] / v[2] );
+
+LOG( "\n  !! AlpVintAvg=%.2lf tVintMax=-%.0lf nVintAvg=%.0lf nVintSD=%.0lf nVintMAD=%.0lf",
+	 v[0], v[2] - 1, v[3], v[4], v[5] );
+
+CFUN( check_error, OUTRANGE( V0( AlpIni ), v[0], TOL ),
+	  "INVALID-VINTAGE-PRODUCTIVITY", 0, & errors );
+
+CFUN( check_error, v[2] != VS( CONSECL1, "eta" ),
+	  "INVALID-VINTAGE-DISTRIBUTION", 0, & errors );
+
+CFUN( check_error, OUTRANGE( v[1] * ( 1 + 1 / VS( CONSECL1, "eta" ) ),
+				V0( K0 ) / VS( CONSECL1, "m2" ), TOL ) ||
+	  v[4] / v[3] > TOL || v[5] / v[3] > TOL,
+	  "INCONSISTENT-VINTAGES", 0, & errors );
+
+LOG( "\n !!! TESTING OF INITIAL CONDITIONS FINISHED" );
+PARAMETER;										// compute only once
+
+RESULT( errors )
+
+
 EQUATION( "testCountry" )
 /*
 Print detailed statistics of country macro (!=0 if error is found)
@@ -386,42 +704,42 @@ LOG( "\n  @@ (t=%g) dA=%.2g dGDP=%.2g C%%=%.2g I%%=%.2g G%%=%.2g dN%%=%.2g Sav%%
 	  dA, dGDP, C / GDPnom, Inom / GDPnom, G / GDPnom, dNnom / GDPnom, Sav / GDPnom );
 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
-	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
+	CFUN( check_error, nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
 
 for ( i = 0; i < LEN_ARR( posit ); ++i )
-	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
+	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
-check_error( dA < - 2 * TOL, "HIGH-PRODUCTIVITY-DROP", 0, & errors );
+CFUN( check_error, dA < - 2 * TOL, "HIGH-PRODUCTIVITY-DROP", 0, & errors );
 
-check_error( A < min( Q1e * pK0 / L1, Q2e * pC0 / L2 ) ||
-			 A > max( Q1e * pK0 / L1, Q2e * pC0 / L2 ),
-			 "INCONSISTENT-PRODUCTIVITY", 0, & errors );
+CFUN( check_error, A < min( Q1e * pK0 / L1, Q2e * pC0 / L2 ) ||
+	  A > max( Q1e * pK0 / L1, Q2e * pC0 / L2 ),
+	  "INCONSISTENT-PRODUCTIVITY", 0, & errors );
 
-check_error( ceil( Cd ) < floor( C ), "INCONSISTENT-CONSUMPTION", 0, & errors );
+CFUN( check_error, ceil( Cd ) < floor( C ), "INCONSISTENT-CONSUMPTION", 0, & errors );
 
-check_error( GDPnom > ( 1 + 2 * TOL ) * ( Q1e * PPI + Q2e * CPI ) ||
-			 GDPnom < ( 1 - 2 * TOL ) * ( Q1e * PPI + Q2e * CPI ) ||
-			 GDPnom > ( 1 + TOL ) * ( C + Inom + dNnom ) ||
-			 GDPnom < ( 1 - TOL ) * ( C + Inom + dNnom ),
-			 "INCONSISTENT-GDP", 0, & errors );
+CFUN( check_error, GDPnom > ( 1 + 2 * TOL ) * ( Q1e * PPI + Q2e * CPI ) ||
+	  GDPnom < ( 1 - 2 * TOL ) * ( Q1e * PPI + Q2e * CPI ) ||
+	  GDPnom > ( 1 + TOL ) * ( C + Inom + dNnom ) ||
+	  GDPnom < ( 1 - TOL ) * ( C + Inom + dNnom ),
+	  "INCONSISTENT-GDP", 0, & errors );
 
-check_error( GDPnom > ( 1 + 2 * TOL ) * GDI ||
-			 GDPnom < ( 1 - 2 * TOL ) * GDI,
-			 "GDI-GAP", 0, & errors );
+CFUN( check_error, GDPnom > ( 1 + 2 * TOL ) * GDI ||
+	  GDPnom < ( 1 - 2 * TOL ) * GDI,
+	  "GDI-GAP", 0, & errors );
 
-check_error( Sav / GDPnom > 5 * TOL, "HIGH-SAVINGS", 0, & errors );
+CFUN( check_error, Sav / GDPnom > 5 * TOL, "HIGH-SAVINGS", 0, & errors );
 
 // forced savings, public debt, firms equity and dynamics
 LOG( "\n   @ Tax%%=%.2g Def%%=%.2g Deb%%=%.2g cEntry%%=%.2g cExit%%=%.2g entryExit=%g",
 	  Tax / GDPnom, Def / GDPnom, Deb / GDPnom, cEntry / GDPnom, cExit / GDPnom,
 	  entryExit );
 
-check_error( cEntry / GDPnom > 2 * TOL, "HIGH-EQUITY", 0, & errors );
+CFUN( check_error, cEntry / GDPnom > 2 * TOL, "HIGH-EQUITY", 0, & errors );
 
-check_error( Deb / GDPnom > 100 * TOL, "EXPLOSIVE-DEBT", 0, & errors );
+CFUN( check_error, Deb / GDPnom > 100 * TOL, "EXPLOSIVE-DEBT", 0, & errors );
 
 // SFC check
 RECALC( "testSFC" );
@@ -441,14 +759,14 @@ if ( T == v[2] )
 	LOG( "\n   @ GDPgwth=%.3g Agwth=%.3g DebGwth=%.3g SavGwth=%.3g",
 		 v[4], v[5], v[6], v[7] );
 
-	check_error( v[4] < TOL / 20 || v[5] < TOL / 20,
-				 "LOW-GROWTH", 0, & errorsTot );
+	CFUN( check_error, v[4] < TOL / 20 || v[5] < TOL / 20,
+		  "LOW-GROWTH", 0, & errorsTot );
 
-	check_error( v[6] > ( 1 + TOL ) * v[4],
-				 "EXPLOSIVE-DEBT-GROWTH", 0, & errorsTot );
+	CFUN( check_error, v[6] > ( 1 + TOL ) * v[4],
+		  "EXPLOSIVE-DEBT-GROWTH", 0, & errorsTot );
 
-	check_error( v[7] > ( 1 + TOL ) * v[4],
-				 "EXPLOSIVE-SAVINGS-GROWTH", 0, & errorsTot );
+	CFUN( check_error, v[7] > ( 1 + TOL ) * v[4],
+		  "EXPLOSIVE-SAVINGS-GROWTH", 0, & errorsTot );
 
 	LOG( "\n @@@ TESTING OF COUNTRY MACRO FINISHED (%d)", errorsTot );
 }
@@ -623,102 +941,102 @@ LOG( "\n  $$$ (t=%g) rD=%.2g rRes=%.2g rBonds=%.2g r=%.2g rDeb=%.2g",
 	 T, rD, rRes, rBonds, r, rDeb );
 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
-	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
+	CFUN( check_error, nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
 
 for ( i = 0; i < LEN_ARR( posit ); ++i )
-	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
+	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
-check_error( rD > rRes || rD > rBonds || rRes > r || r > rDeb ||
-			 rBonds - r > VS( FINSECL1, "rAdj" ),
-			 "INCONSISTENT-INTEREST-STRUCTURE", 0, & errors );
+CFUN( check_error, rD > rRes || rD > rBonds || rRes > r || r > rDeb ||
+	  rBonds - r > VS( FINSECL1, "rAdj" ),
+	  "INCONSISTENT-INTEREST-STRUCTURE", 0, & errors );
 
 // central bank
 LOG( "\n   $$ Res=%.3g ExRes=%.3g LoansCB=%.3g BondsCB=%.3g DepoG=%.3g Gbail=%.3g",
 	 Res, ExRes, LoansCB, BondsCB, DepoG, Gbail );
 
-check_error( Res > Depo || round( Res ) != round( v[13] ) ||
-			 round( ExRes ) != round( v[14] ),
-			 "INCONSISTENT-RESERVES", 0, & errors );
+CFUN( check_error, Res > Depo || round( Res ) != round( v[13] ) ||
+	  round( ExRes ) != round( v[14] ),
+	  "INCONSISTENT-RESERVES", 0, & errors );
 
-check_error( round( LoansCB ) != round ( v[12] ),
-			 "INCONSISTENT-CB-LOANS", 0, & errors );
+CFUN( check_error, round( LoansCB ) != round ( v[12] ),
+	  "INCONSISTENT-CB-LOANS", 0, & errors );
 
-check_error( round( BondsCB ) < round( BS - BD ),
-			 "INCONSISTENT-CB-BONDS", 0, & errors );
+CFUN( check_error, round( BondsCB ) < round( BS - BD ),
+	  "INCONSISTENT-CB-BONDS", 0, & errors );
 
 // government bonds and debt
 LOG( "\n   $$ BS=%.3g BD=%.3g BSnew=%.3g Def_1=%.3g Deb=%.3g",
 	 BS, BD, BS - BS_1 + BD_1, Def_1, Deb );
 
-check_error( BS - BS_1 > max( Def + ( BondsB + BondsCB ) / thetaBonds, 0 ) ||
-			 floor( BD ) > BS + BondsCB || floor( BD ) > BondsB ||
-			 round( BondsB ) != round( v[8] ) ||
-			 ( BS - BS_1 > TOL && DepoG - DepoG_1 > TOL ),
-			 "INCONSISTENT-BONDS", 0, & errors );
+CFUN( check_error, BS - BS_1 > max( Def + ( BondsB + BondsCB ) / thetaBonds, 0 ) ||
+	  floor( BD ) > BS + BondsCB || floor( BD ) > BondsB ||
+	  round( BondsB ) != round( v[8] ) ||
+	  ( BS - BS_1 > TOL && DepoG - DepoG_1 > TOL ),
+	  "INCONSISTENT-BONDS", 0, & errors );
 
 // bank customers and crisis/bail-outs
 LOG( "\n   $$ #Bank=%d #Client1=%g #Client2=%g Bfail=%g",
 	 k, v[4], v[5], Bfail );
 
-check_error( F1 != v[4], "INCONSISTENT-CLIENT1", 0, & errors );
+CFUN( check_error, F1 != v[4], "INCONSISTENT-CLIENT1", 0, & errors );
 
-check_error( F2 != v[5], "INCONSISTENT-CLIENT2", 0, & errors );
+CFUN( check_error, F2 != v[5], "INCONSISTENT-CLIENT2", 0, & errors );
 
-check_error( F1 * ( 1 - entry1 + exit1 ) + F2 * ( 1 - entry2 + exit2 ) >
-			 ( 1 + TOL ) * Cl ||
-			 F1 * ( 1 - entry1 + exit1 ) + F2 * ( 1 - entry2 + exit2 ) <
-			 ( 1 - TOL ) * Cl ||
-			 v[6] != Cl,
-			 "INCONSISTENT-CLIENT", 0, & errors );
+CFUN( check_error, F1 * ( 1 - entry1 + exit1 ) + F2 * ( 1 - entry2 + exit2 ) >
+	  ( 1 + TOL ) * Cl ||
+	  F1 * ( 1 - entry1 + exit1 ) + F2 * ( 1 - entry2 + exit2 ) <
+	  ( 1 - TOL ) * Cl ||
+	  v[6] != Cl,
+	  "INCONSISTENT-CLIENT", 0, & errors );
 
-check_error( v[7] < 1 - TOL / 10 || v[7] > 1 + TOL / 10,
-			 "INCONSISTENT-SHARES", 0, & errors );
+CFUN( check_error, v[7] < 1 - TOL / 10 || v[7] > 1 + TOL / 10,
+	  "INCONSISTENT-SHARES", 0, & errors );
 
 // bank assets and liabilities, credit dynamic
 LOG( "\n   $$ Depo=%.3g Loans=%.3g LoansGE=%.3g CD=%.3g CS=%.3g CDc=%.3g",
 	 Depo, Loans, LoansGE, CD, CS, CDc );
 
-check_error( round( Depo ) != round( v[9] ) ||
-			 round( Loans ) != round( v[10] ) ||
-			 round( LoansGE ) != round( v[11] ),
-			 "INCONSISTENT-BANK-ACCOUNTS", 0, & errors );
+CFUN( check_error, round( Depo ) != round( v[9] ) ||
+	  round( Loans ) != round( v[10] ) ||
+	  round( LoansGE ) != round( v[11] ),
+	  "INCONSISTENT-BANK-ACCOUNTS", 0, & errors );
 
 // try to account for deposits from loans of entrant firms (very crude)
-check_error( abs( NW1 + NW2 + SavAcc - Depo - Deb1 - Deb2 +
-				  Loans + LoansGE ) / Depo > TOL,
-			 "LARGE-DEPO-LOANS-GAP", 0, & errors );
+CFUN( check_error, abs( NW1 + NW2 + SavAcc - Depo - Deb1 - Deb2 +
+						Loans + LoansGE ) / Depo > TOL,
+	  "LARGE-DEPO-LOANS-GAP", 0, & errors );
 
-check_error( CS > CD || CDc > CD, "INCONSISTENT-FINANCE", 0, & errors );
+CFUN( check_error, CS > CD || CDc > CD, "INCONSISTENT-FINANCE", 0, & errors );
 
-check_error( abs( + Gbail + ( PiB - TaxB ) - DivB_1 + ( Depo - Depo_1 )
-				  - ( Loans - Loans_1 ) - ( LoansGE - LoansGE_1 )
-				  + ( ( Loans - Loans_1 ) + ( LoansGE - LoansGE_1 ) -
-					  ( Depo - Depo_1 ) )
-				  - ( Res - Res_1 ) - ( ExRes - ExRes_1 )
-				  + ( LoansCB - LoansCB_1 ) - ( BondsB - BondsB_1 ) ) > TOL,
-				 "INCONSISTENT-SFC-CAPITAL", 0, & errors );
+CFUN( check_error, abs( + Gbail + ( PiB - TaxB ) - DivB_1 + ( Depo - Depo_1 )
+						- ( Loans - Loans_1 ) - ( LoansGE - LoansGE_1 )
+						+ ( ( Loans - Loans_1 ) + ( LoansGE - LoansGE_1 ) -
+							( Depo - Depo_1 ) )
+						- ( Res - Res_1 ) - ( ExRes - ExRes_1 )
+						+ ( LoansCB - LoansCB_1 ) - ( BondsB - BondsB_1 ) ) > TOL,
+	  "INCONSISTENT-SFC-CAPITAL", 0, & errors );
 
-check_error( sfcKerr.size( ) > 0, "SFC-CAP-ERR-BANK", sfcKerr.size( ), & errors );
+CFUN( check_error, sfcKerr.size( ) > 0, "SFC-CAP-ERR-BANK", sfcKerr.size( ), & errors );
 
 // banks cash-flow
 LOG( "\n   $$ TC+TCge=%.2g BadDeb=%.2g iB=%.2g TaxB=%.2g PiB=%.2g NWb=%.2g",
 	 TC + TCge, BadDeb, iB, TaxB, PiB, NWb );
 
-check_error( TC < -1 || TCge < -1, "NEGATIVE-TOTAL-CREDIT", 0, & errors );
+CFUN( check_error, TC < -1 || TCge < -1, "NEGATIVE-TOTAL-CREDIT", 0, & errors );
 
-check_error( PiB - TaxB > iB + rRes_1 * Res_1 + rBonds_1 * BondsB_1,
-			 "INCONSISTENT-BANK-PROFIT", 0, & errors );
+CFUN( check_error, PiB - TaxB > iB + rRes_1 * Res_1 + rBonds_1 * BondsB_1,
+	  "INCONSISTENT-BANK-PROFIT", 0, & errors );
 
-check_error( TCerr.size( ) > 0, "INCONSISTENT-TC-FREE", TCerr.size( ), & errors );
+CFUN( check_error, TCerr.size( ) > 0, "INCONSISTENT-TC-FREE", TCerr.size( ), & errors );
 
-check_error( abs( - TaxB - ( PiB - TaxB ) - BadDeb_1 - iDb + iB + rRes_1 * Res_1
-				  - r_1 * LoansCB_1 + rBonds_1 * BondsB_1 ) > TOL,
-				 "INCONSISTENT-SFC-FLOW", 0, & errors );
+CFUN( check_error, abs( - TaxB - ( PiB - TaxB ) - BadDeb_1 - iDb + iB + rRes_1 * Res_1
+						- r_1 * LoansCB_1 + rBonds_1 * BondsB_1 ) > TOL,
+	  "INCONSISTENT-SFC-FLOW", 0, & errors );
 
-check_error( sfcCerr.size( ) > 0, "SFC-FLOW-ERR-BANK", sfcCerr.size( ), & errors );
+CFUN( check_error, sfcCerr.size( ) > 0, "SFC-FLOW-ERR-BANK", sfcCerr.size( ), & errors );
 
 errorsTot += errors;
 
@@ -814,29 +1132,29 @@ LOG( "\n   C Cd1=%.4g Cd2=%.4g Cd3=%.5g Cd4=%.5g",
 	 Cd1, Cd2, Cd3, Cd4 );
 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
-	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
+	CFUN( check_error, nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
 
 for ( i = 0; i < LEN_ARR( posit ); ++i )
-	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
+	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
-check_error( T > v[1] && round( v[4] ) != round( Cstock + EmCa ),
-			 "INCONSISTENT-CARBON-STOCKS", 0, & errors );
+CFUN( check_error, T > v[1] && round( v[4] ) != round( Cstock + EmCa ),
+	  "INCONSISTENT-CARBON-STOCKS", 0, & errors );
 
-check_error( T > v[1] && round( v[5] ) != round( EmCa ),
-			 "INCONSISTENT-CARBON-FLOWS", 0, & errors );
+CFUN( check_error, T > v[1] && round( v[5] ) != round( EmCa ),
+	  "INCONSISTENT-CARBON-FLOWS", 0, & errors );
 
 // heat stocks
 LOG( "\n   C Fco2=%.3g FC=%.3g Hm=%.3g Hd1=%.3g Hd2=%.3g Hd3=%.3g Hd4=%.3g",
 	 Fco2, FC, Hm, Hd1, Hd2, Hd3, Hd4 );
 
-check_error( T > v[1] && round( v[6] ) != round( Hstock + Fco2 - FC ),
-			 "INCONSISTENT-HEAT-STOCKS", 0, & errors );
+CFUN( check_error, T > v[1] && round( v[6] ) != round( Hstock + Fco2 - FC ),
+	  "INCONSISTENT-HEAT-STOCKS", 0, & errors );
 
-check_error( ( T > v[1] && round( v[7] ) != round( Fco2 - FC ) ) || Fco2 < FC,
-			 "INCONSISTENT-HEAT-FLOWS", 0, & errors );
+CFUN( check_error, ( T > v[1] && round( v[7] ) != round( Fco2 - FC ) ) || Fco2 < FC,
+	  "INCONSISTENT-HEAT-FLOWS", 0, & errors );
 
 // temperatures
 LOG( "\n   C Tm=%.3g Td1=%.3g Td2=%.3g Td3=%.3g Td4=%.3g",
@@ -1143,79 +1461,79 @@ LOG( "\n  EE (t=%g) Fe=%g Ke=%.3g Kde=%.3g Kge=%.3g",
 	 T, Fe, Ke, Kde, Kge );
 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
-	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
+	CFUN( check_error, nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
 
 for ( i = 0; i < LEN_ARR( posit ); ++i )
-	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
+	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
-check_error( tErr.size( ) > 0, "INCONSISTENT-LIFE-CYCLE", tErr.size( ), & errors );
+CFUN( check_error, tErr.size( ) > 0, "INCONSISTENT-LIFE-CYCLE", tErr.size( ), & errors );
 
-check_error( Kerr.size( ) > 0, "INCONSISTENT-CAPITAL", Kerr.size( ), & errors );
+CFUN( check_error, Kerr.size( ) > 0, "INCONSISTENT-CAPITAL", Kerr.size( ), & errors );
 
 LOG( "\n   E fGE=%.2g fKge=%.2g IeNom=%.3g SIeD=%.3g SIe=%.3g EIe=%.3g",
 	 fGE, fKge, IeNom, SIeD, SIe, EIe );
 
-check_error( Kde < floor( v[5] ) || Kge < floor( v[8] ) ||
-			 round( Ke ) != round( Kde + Kge ) || floor( SIeD ) > ceil( Ke ),
-			 "INCONSISTENT-CAPITAL", 0, & errors );
+CFUN( check_error, Kde < floor( v[5] ) || Kge < floor( v[8] ) ||
+	  round( Ke ) != round( Kde + Kge ) || floor( SIeD ) > ceil( Ke ),
+	  "INCONSISTENT-CAPITAL", 0, & errors );
 
-check_error( SIe > SIeD || floor( SIeD ) > ceil( v[6] + v[9] ),
-			 "INCONSISTENT-SCRAPPING", 0, & errors );
+CFUN( check_error, SIe > SIeD || floor( SIeD ) > ceil( v[6] + v[9] ),
+	  "INCONSISTENT-SCRAPPING", 0, & errors );
 
-check_error( ceil( SIeD ) < SIe || ceil( EIeD ) < EIe,
-			 "INCONSISTENT-INVESTMENT", 0, & errors );
+CFUN( check_error, ceil( SIeD ) < SIe || ceil( EIeD ) < EIe,
+	  "INCONSISTENT-INVESTMENT", 0, & errors );
 
-check_error( floor( CIe ) > EIe + SIe, "INCONSISTENT-CANCELING", 0, & errors );
+CFUN( check_error, floor( CIe ) > EIe + SIe, "INCONSISTENT-CANCELING", 0, & errors );
 
 // innovation, productivity
 LOG( "\n   E RDe=%.3g AtauDEavg=%.3g emTauDEavg=%.3g ICtauGEavg=%.3g",
 	 RDe, AtauDEavg, emTauDEavg, ICtauGEavg );
 
-check_error( cErr.size( ) > 0, "BAD-COST-PLANTS", cErr.size( ), & errors );
+CFUN( check_error, cErr.size( ) > 0, "BAD-COST-PLANTS", cErr.size( ), & errors );
 
 // production
 LOG( "\n   E innDE=%.2g innGE=%.2g RSe=%.3g EmE=%.3g Qe=%.3g QeO=%.3g",
 	 innDE, innGE, RSe, EmE, Qe, QeO );
 
-check_error( Qerr.size( ) > 0, "BAD-GEN-PLANTS", Qerr.size( ), & errors );
+CFUN( check_error, Qerr.size( ) > 0, "BAD-GEN-PLANTS", Qerr.size( ), & errors );
 
-check_error( EmErr.size( ) > 0, "BAD-EMISS-PLANTS", EmErr.size( ), & errors );
+CFUN( check_error, EmErr.size( ) > 0, "BAD-EMISS-PLANTS", EmErr.size( ), & errors );
 
-check_error( ceil( EmE ) < v[4], "INCONSISTENT-EMISSIONS", 0, & errors );
+CFUN( check_error, ceil( EmE ) < v[4], "INCONSISTENT-EMISSIONS", 0, & errors );
 
-check_error( Derr.size( ) > 0, "BAD-GEN-FIRMS", Derr.size( ), & errors );
+CFUN( check_error, Derr.size( ) > 0, "BAD-GEN-FIRMS", Derr.size( ), & errors );
 
-check_error( round( Qe ) != round( De ) || floor( Qge ) > Qe ||
-			 ceil( De ) < v[14] || ceil( Qe ) < v[7] + v[10],
-			 "INCONSISTENT-GENERATION", 0, & errors );
+CFUN( check_error, round( Qe ) != round( De ) || floor( Qge ) > Qe ||
+	  ceil( De ) < v[14] || ceil( Qe ) < v[7] + v[10],
+	  "INCONSISTENT-GENERATION", 0, & errors );
 
 // labor
 LOG( "\n   E JOe=%g LeDrd=%g LeRD=%g LeD=%g Le=%g",
 	 JOe, LeDrd, LeRD, LeD, Le );
 
-check_error( perr.size( ) > 0, "NO-LABOR-FIRMS", perr.size( ), & errors );
+CFUN( check_error, perr.size( ) > 0, "NO-LABOR-FIRMS", perr.size( ), & errors );
 
-check_error( ceil( LeD ) < JOe || floor( Le ) > LeD || floor( LeDrd ) > LeD ||
-			 floor( LeRD ) > Le || floor( Le ) > Ls,
-			 "INCONSISTENT-LABOR", 0, & errors );
+CFUN( check_error, ceil( LeD ) < JOe || floor( Le ) > LeD || floor( LeDrd ) > LeD ||
+	  floor( LeRD ) > Le || floor( Le ) > Ls,
+	  "INCONSISTENT-LABOR", 0, & errors );
 
-check_error( Lerr.size( ) > 0, "NO-LABOR-PRODUCING", Lerr.size( ), & errors );
+CFUN( check_error, Lerr.size( ) > 0, "NO-LABOR-PRODUCING", Lerr.size( ), & errors );
 
 // cash flow
 LOG( "\n   E We=%g Cf=%.3g Ce=%.3g TaxE=%.3g PiE=%.3g DivE=%.3g",
 	 We, Df * pF, Ce, TaxE, PiE, DivE );
 
-check_error( RDe > We || floor( Df * pF + We ) > Ce || We + PiE > Se ||
-			 TaxE > Se || PiE > Se, "INCONSISTENT-COST", 0, & errors );
+CFUN( check_error, RDe > We || floor( Df * pF + We ) > Ce || We + PiE > Se ||
+	  TaxE > Se || PiE > Se, "INCONSISTENT-COST", 0, & errors );
 
-check_error( abs( Se - pF * Df - We - TaxE - ( PiE - TaxE ) +
-				  iDe - iE - iGE ) > TOL,
-			 "INCONSISTENT-SFC-FLOW", 0, & errors );
+CFUN( check_error, abs( Se - pF * Df - We - TaxE - ( PiE - TaxE ) +
+						iDe - iE - iGE ) > TOL,
+	  "INCONSISTENT-SFC-FLOW", 0, & errors );
 
-check_error( sfcCerr.size( ) > 0, "SFC-FLOW-ERR-FIRM", sfcCerr.size( ), & errors );
+CFUN( check_error, sfcCerr.size( ) > 0, "SFC-FLOW-ERR-FIRM", sfcCerr.size( ), & errors );
 
 // finance
 LOG( "\n   E NWe=%.3g DebGE=%.3g CDge=%.3g CDgeC=%.3g CSge=%.3g",
@@ -1223,45 +1541,45 @@ LOG( "\n   E NWe=%.3g DebGE=%.3g CDge=%.3g CDgeC=%.3g CSge=%.3g",
 LOG( "\n   E DebE=%.3g DebEmax=%.3g CDe=%.3g CDeC=%.3g CSe=%.3g",
 	 DebE, DebEmax, CDe, CDeC, CSe );
 
-check_error( FinErr.size( ) > 0,
-			 "INCONSISTENT-FINANCE-TIMING", FinErr.size( ), & errors );
+CFUN( check_error, FinErr.size( ) > 0,
+	  "INCONSISTENT-FINANCE-TIMING", FinErr.size( ), & errors );
 
-check_error( pfinErr.size( ) > 0,
-			 "INCONSISTENT-SNPV", pfinErr.size( ), & errors );
+CFUN( check_error, pfinErr.size( ) > 0,
+	  "INCONSISTENT-SNPV", pfinErr.size( ), & errors );
 
-check_error( CSe > CDe || CDeC > CDe ||
-			 CSge > CDge || CDgeC > CDge, "INCONSISTENT-FINANCE", 0, & errors );
+CFUN( check_error, CSe > CDe || CDeC > CDe ||
+	  CSge > CDge || CDgeC > CDge, "INCONSISTENT-FINANCE", 0, & errors );
 
-check_error( round( DebGE ) != round( v[11] ) || round( iGE ) != round( v[12] ),
-			 "INCONSISTENT-PROJECT-FINANCE", 0, & errors );
+CFUN( check_error, round( DebGE ) != round( v[11] ) || round( iGE ) != round( v[12] ),
+	  "INCONSISTENT-PROJECT-FINANCE", 0, & errors );
 
-check_error( abs( - IeNom + ( PiE - TaxE ) - DivE_1 + cEntryE_1
-				  - cExitE_1 + BadDebE_1 + BadDebGE_1 - ( NWe - NWe_1 )
-				  + ( DebE - DebE_1 ) + ( DebGE - DebGE_1 ) ) > TOL,
-			 "INCONSISTENT-SFC-CAPITAL", 0, & errors );
+CFUN( check_error, abs( - IeNom + ( PiE - TaxE ) - DivE_1 + cEntryE_1
+						- cExitE_1 + BadDebE_1 + BadDebGE_1 - ( NWe - NWe_1 )
+						+ ( DebE - DebE_1 ) + ( DebGE - DebGE_1 ) ) > TOL,
+	  "INCONSISTENT-SFC-CAPITAL", 0, & errors );
 
-check_error( sfcKerr.size( ) > 0, "SFC-CAP-ERR-FIRM", sfcKerr.size( ), & errors );
+CFUN( check_error, sfcKerr.size( ) > 0, "SFC-CAP-ERR-FIRM", sfcKerr.size( ), & errors );
 
 // market
 LOG( "\n   E muEavg=%.2g pE=%.2g De=%.3g Se=%.3g EnGDP=%.3g",
 	 muEavg, pE, De, Se, EnGDP );
 
-check_error( perr.size( ) > 0, "ZERO-PRICE-FIRMS", perr.size( ), & errors );
+CFUN( check_error, perr.size( ) > 0, "ZERO-PRICE-FIRMS", perr.size( ), & errors );
 
-check_error( muerr.size( ) > 0, "HI-LO-MARKUP-FIRMS", muerr.size( ), & errors );
+CFUN( check_error, muerr.size( ) > 0, "HI-LO-MARKUP-FIRMS", muerr.size( ), & errors );
 
 // competition
 LOG( "\n   E ageEavg=%g uE=%.2g MCe=%.2g entryEexit=%g HHe=%.2g HPe=%.2g",
 	 ageEavg, uE, MCe, entryEexit, HHe, HPe );
 
-check_error( Oerr.size( ) > 0, "ZERO-OFFER-FIRMS", Oerr.size( ), & errors );
+CFUN( check_error, Oerr.size( ) > 0, "ZERO-OFFER-FIRMS", Oerr.size( ), & errors );
 
-check_error( v[13] < 1 - TOL / 10 || v[13] > 1 + TOL / 10,
-			 "INCONSISTENT-SHARES", 0, & errors );
+CFUN( check_error, v[13] < 1 - TOL / 10 || v[13] > 1 + TOL / 10,
+	  "INCONSISTENT-SHARES", 0, & errors );
 
-check_error( HHe > 1.001 || HPe > 2.001, "INCONSISTENT-STATS", 0, & errors );
+CFUN( check_error, HHe > 1.001 || HPe > 2.001, "INCONSISTENT-STATS", 0, & errors );
 
-check_error( uEmavg < 0.3, "LO-PLANT-UTILIZATION", 0, & errors );
+CFUN( check_error, uEmavg < 0.3, "LO-PLANT-UTILIZATION", 0, & errors );
 
 errorsTot += errors;
 
@@ -1334,29 +1652,29 @@ LOG( "\n  ++ (t=%g) Ls=%g L=%g V=%.2g U=%.2g w=%.2g",
 	 T, Ls, L, Vac, U, w );
 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
-	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
+	CFUN( check_error, nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
 
 for ( i = 0; i < LEN_ARR( posit ); ++i )
-	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
+	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
-check_error( U > 1 || Vac > 1, "INCONSISTENT-LABOR-STATS", 0, & errors );
+CFUN( check_error, U > 1 || Vac > 1, "INCONSISTENT-LABOR-STATS", 0, & errors );
 
-check_error( L1 + L2 != L || Ls < L, "INCONSISTENT-LABOR", 0, & errors );
+CFUN( check_error, L1 + L2 != L || Ls < L, "INCONSISTENT-LABOR", 0, & errors );
 
-check_error( W1 + W2 < ( 1 - TOL / 10 ) * L * w ||
-			 W1 + W2 > ( 1 + TOL / 10 ) * L * w,
-			 "INCONSISTENT-WAGES", 0, & errors );
+CFUN( check_error, W1 + W2 < ( 1 - TOL / 10 ) * L * w ||
+	  W1 + W2 > ( 1 + TOL / 10 ) * L * w,
+	  "INCONSISTENT-WAGES", 0, & errors );
 
 // finance
 LOG( "\n   + W=%.2g Div=%.2g cEntry=%.2g cExit=%.2g SavAcc=%.2g",
 	 W, Div_1, cEntry_1, cExit_1, SavAcc );
 
-check_error( abs( - C + G + W - TaxW + Div_1 - cEntry_1 + cExit_1
-				  + rD_1 * SavAcc_1 - ( SavAcc - SavAcc_1 ) ) > TOL,
-				 "INCONSISTENT-SFC-FLOW", 0, & errors );
+CFUN( check_error, abs( - C + G + W - TaxW + Div_1 - cEntry_1 + cExit_1
+						+ rD_1 * SavAcc_1 - ( SavAcc - SavAcc_1 ) ) > TOL,
+	  "INCONSISTENT-SFC-FLOW", 0, & errors );
 
 errorsTot += errors;
 
@@ -1494,65 +1812,65 @@ LOG( "\n  ^^ (t=%g) inn=%.3g imi=%.3g A1=%.3g D1=%.3g Q1=%.3g Q1e=%.3g",
 	 T, inn, imi, A1, D1, Q1, Q1e );
 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
-	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
+	CFUN( check_error, nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
 
 for ( i = 0; i < LEN_ARR( posit ); ++i )
-	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
+	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE",
+	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE",
 				 itd - all.begin( ) + 1, & errors );
 
-check_error( Aerr.size( ) > TOL * F1, "ZERO-PROD-FIRMS", Aerr.size( ), & errors );
+CFUN( check_error, Aerr.size( ) > TOL * F1, "ZERO-PROD-FIRMS", Aerr.size( ), & errors );
 
-check_error( RDerr.size( ) > TOL * F1, "ZERO-RD-FIRMS", RDerr.size( ), & errors );
+CFUN( check_error, RDerr.size( ) > TOL * F1, "ZERO-RD-FIRMS", RDerr.size( ), & errors );
 
-check_error( floor( Q1e ) > Q1 || floor( Q1 ) > D1,
+CFUN( check_error, floor( Q1e ) > Q1 || floor( Q1 ) > D1,
 			 "INCONSISTENT-PRODUCTION", 0, & errors );
 
 // labor
 LOG( "\n   ^ JO1=%g L1d=%g L1dRD=%g L1=%g L1rd=%g",
 	 JO1, L1d, L1dRD, L1, L1rd );
 
-check_error( ceil( L1dRD ) < L1rd || floor( L1rd ) > L1 || ceil( L1d ) < JO1 ||
-			 floor( L1 ) > Ls || ceil( L1 ) < v[5] || ceil( L1rd ) < v[6],
-			 "INCONSISTENT-LABOR", 0, & errors );
+CFUN( check_error, ceil( L1dRD ) < L1rd || floor( L1rd ) > L1 || ceil( L1d ) < JO1 ||
+	  floor( L1 ) > Ls || ceil( L1 ) < v[5] || ceil( L1rd ) < v[6],
+	  "INCONSISTENT-LABOR", 0, & errors );
 
 // cash flow
 LOG( "\n   ^ S1=%.3g W1=%.3g Tax1=%.3g Pi1=%.3g NW1=%.3g",
 	 S1, W1, Tax1, Pi1, NW1 );
 
-check_error( S1 + RD < ( 1 - TOL ) * W1, "HIGH-WAGES", 0, & errors );
+CFUN( check_error, S1 + RD < ( 1 - TOL ) * W1, "HIGH-WAGES", 0, & errors );
 
-check_error( c1err.size( ) > 0, "ZERO-COST-FIRM", c1err.size( ), & errors );
+CFUN( check_error, c1err.size( ) > 0, "ZERO-COST-FIRM", c1err.size( ), & errors );
 
-check_error( abs( S1 - pE * En1 - W1 - Tax1 - ( Pi1 - Tax1 ) + iD1 - i1 ) > TOL,
-			 "INCONSISTENT-SFC-FLOW", 0, & errors );
+CFUN( check_error, abs( S1 - pE * En1 - W1 - Tax1 - ( Pi1 - Tax1 ) + iD1 - i1 ) > TOL,
+	  "INCONSISTENT-SFC-FLOW", 0, & errors );
 
-check_error( sfcCerr.size( ) > 0, "SFC-FLOW-ERR-FIRM", sfcCerr.size( ), & errors );
+CFUN( check_error, sfcCerr.size( ) > 0, "SFC-FLOW-ERR-FIRM", sfcCerr.size( ), & errors );
 
 // finance
 LOG( "\n   ^ Deb1=%.3g CD1=%.3g CS1=%.3g CD1c=%.3g PPI=%.2g",
 	 Deb1, CD1, CS1, CD1c, PPI );
 
-check_error( CS1 > CD1 || CD1c > CD1, "INCONSISTENT-FINANCE", 0, & errors );
+CFUN( check_error, CS1 > CD1 || CD1c > CD1, "INCONSISTENT-FINANCE", 0, & errors );
 
-check_error( abs( ( Pi1 - Tax1 ) - Div1_1 + cEntry1_1 - cExit1_1 + BadDeb1_1
-				  - ( NW1 - NW1_1 ) + ( Deb1 - Deb1_1 ) ) > TOL,
-				 "INCONSISTENT-SFC-CAPITAL", 0, & errors );
+CFUN( check_error, abs( ( Pi1 - Tax1 ) - Div1_1 + cEntry1_1 - cExit1_1 + BadDeb1_1
+						- ( NW1 - NW1_1 ) + ( Deb1 - Deb1_1 ) ) > TOL,
+	  "INCONSISTENT-SFC-CAPITAL", 0, & errors );
 
-check_error( sfcKerr.size( ) > 0, "SFC-CAP-ERR-FIRM", sfcKerr.size( ), & errors );
+CFUN( check_error, sfcKerr.size( ) > 0, "SFC-CAP-ERR-FIRM", sfcKerr.size( ), & errors );
 
 // competition
 LOG( "\n   ^ F1=%g age1avg=%.3g MC1=%.2g entry1exit=%g HH1=%.2g HP1=%.2g",
 	 F1, age1avg, MC1, entry1exit, HH1, HP1 );
 
-check_error( v[4] < 1 - TOL / 10 || v[4] >	1 + TOL / 10,
-			 "INCONSISTENT-SHARES", 0, & errors );
+CFUN( check_error, v[4] < 1 - TOL / 10 || v[4] >	1 + TOL / 10,
+	  "INCONSISTENT-SHARES", 0, & errors );
 
-check_error( CliErr.size( ) > 0, "NO-CLIENT-FIRMS", CliErr.size( ), & errors );
+CFUN( check_error, CliErr.size( ) > 0, "NO-CLIENT-FIRMS", CliErr.size( ), & errors );
 
-check_error( HH1 > 1 || HP1 > 2, "INCONSISTENT-STATS", 0, & errors );
+CFUN( check_error, HH1 > 1 || HP1 > 2, "INCONSISTENT-STATS", 0, & errors );
 
 errorsTot += errors;
 
@@ -1715,98 +2033,98 @@ LOG( "\n  && (t=%g) F2=%g Kd=%.3g Kavb=%.3g K=%.3g",
 	 T, F2, Kd, Kavb, K );
 
 for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
-	check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
+	CFUN( check_error, nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
 
 for ( i = 0; i < LEN_ARR( posit ); ++i )
-	check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
+	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
-check_error( Kerr.size( ) > 0, "NO-CAPITAL-FIRMS", Kerr.size( ), & errors );
+CFUN( check_error, Kerr.size( ) > 0, "NO-CAPITAL-FIRMS", Kerr.size( ), & errors );
 
 LOG( "\n   & Inom=%.3g Ireal=%.3g EI=%.3g SI=%.3g CI=%.3g",
 	 Inom, Ireal, EI, SI, CI );
 
-check_error( SI + EI > Id, "INCONSISTENT-INVESTMENT", 0, & errors );
+CFUN( check_error, SI + EI > Id, "INCONSISTENT-INVESTMENT", 0, & errors );
 
-check_error( SI > Kavb || K > Kavb + EI + SI,
-			 "INCONSISTENT-CAPITAL", 0, & errors );
+CFUN( check_error, SI > Kavb || K > Kavb + EI + SI,
+	  "INCONSISTENT-CAPITAL", 0, & errors );
 
 // productivity
 LOG( "\n   & A2=%.3g c2=%.3g c2e=%.3g",
 	 A2, c2, c2e );
 
-check_error( c2e < ( 1 - 3 * TOL * Q2 / Q2e ) * c2,
-			 "LOW-UNIT-COST", 0, & errors );
+CFUN( check_error, c2e < ( 1 - 3 * TOL * Q2 / Q2e ) * c2,
+	  "LOW-UNIT-COST", 0, & errors );
 
 // production
 LOG( "\n   & Q2d=%.3g Q2=%.3g Q2e=%.3g",
 	 Q2d, Q2, Q2e );
 
-check_error( Q2e > Q2 || Q2 > Q2d || Q2e > K,
-			 "INCONSISTENT-PRODUCTION", 0, & errors );
+CFUN( check_error, Q2e > Q2 || Q2 > Q2d || Q2e > K,
+	  "INCONSISTENT-PRODUCTION", 0, & errors );
 
-check_error( c2err.size( ) > 0, "ZERO-COST-FIRMS", c2err.size( ), & errors );
+CFUN( check_error, c2err.size( ) > 0, "ZERO-COST-FIRMS", c2err.size( ), & errors );
 
-check_error( Q2err.size( ) > 0, "NO-PROD-FIRMS", Q2err.size( ), & errors );
+CFUN( check_error, Q2err.size( ) > 0, "NO-PROD-FIRMS", Q2err.size( ), & errors );
 
 // labor
 LOG( "\n   & JO2=%g L2d=%g L2=%g",
 	 JO2, L2d, L2 );
 
-check_error( ceil( L2d ) < JO2 || floor( L2 ) > Ls,
-			 "INCONSISTENT-LABOR", 0, & errors );
+CFUN( check_error, ceil( L2d ) < JO2 || floor( L2 ) > Ls,
+	  "INCONSISTENT-LABOR", 0, & errors );
 
-check_error( L2err.size( ) > 0, "NO-LABOR-PRODUCING", L2err.size( ), & errors );
+CFUN( check_error, L2err.size( ) > 0, "NO-LABOR-PRODUCING", L2err.size( ), & errors );
 
 // cash flow
 LOG( "\n   & W2=%.3g Tax2=%.3g Pi2=%.3g",
 	 W2, Tax2, Pi2 );
 
-check_error( W2err.size( ) > 0, "WAGES-GAP", W2err.size( ), & errors );
+CFUN( check_error, W2err.size( ) > 0, "WAGES-GAP", W2err.size( ), & errors );
 
-check_error( S2 < ( 1 - TOL ) * W2, "HIGH-WAGES", 0, & errors );
+CFUN( check_error, S2 < ( 1 - TOL ) * W2, "HIGH-WAGES", 0, & errors );
 
-check_error( v[5] / F2 > TOL, "MANY-NO-WORKER", 0, & errors );
+CFUN( check_error, v[5] / F2 > TOL, "MANY-NO-WORKER", 0, & errors );
 
-check_error( abs( S2 - pE * En2 - W2 - Tax2 - ( Pi2 - Tax2 ) + iD2 - i2 ) > TOL,
+CFUN( check_error, abs( S2 - pE * En2 - W2 - Tax2 - ( Pi2 - Tax2 ) + iD2 - i2 ) > TOL,
 			 "INCONSISTENT-SFC-FLOW", 0, & errors );
 
-check_error( sfcCerr.size( ) > 0, "SFC-FLOW-ERR-FIRM", sfcCerr.size( ), & errors );
+CFUN( check_error, sfcCerr.size( ) > 0, "SFC-FLOW-ERR-FIRM", sfcCerr.size( ), & errors );
 
 // finance
 LOG( "\n   & NW2=%.3g Deb2=%.3g CD2=%.3g CD2c=%.3g CPI=%.2g",
 	 NW2, Deb2, CD2, CD2c, CPI );
 
-check_error( CS2 > CD2 || CD2c > CD2, "INCONSISTENT-FINANCE", 0, & errors );
+CFUN( check_error, CS2 > CD2 || CD2c > CD2, "INCONSISTENT-FINANCE", 0, & errors );
 
-check_error( abs( - Inom + ( Pi2 - Tax2 ) - Div2_1 + cEntry2_1
-				  - cExit2_1 + BadDeb2_1 - ( NW2 - NW2_1 )
-				  + ( Deb2 - Deb2_1 ) ) > TOL,
-				 "INCONSISTENT-SFC-CAPITAL", 0, & errors );
+CFUN( check_error, abs( - Inom + ( Pi2 - Tax2 ) - Div2_1 + cEntry2_1
+						- cExit2_1 + BadDeb2_1 - ( NW2 - NW2_1 )
+						+ ( Deb2 - Deb2_1 ) ) > TOL,
+	  "INCONSISTENT-SFC-CAPITAL", 0, & errors );
 
-check_error( sfcKerr.size( ) > 0, "SFC-CAP-ERR-FIRM", sfcKerr.size( ), & errors );
+CFUN( check_error, sfcKerr.size( ) > 0, "SFC-CAP-ERR-FIRM", sfcKerr.size( ), & errors );
 
 // market
 LOG( "\n   & mu2avg=%.2g p2avg=%.2g D2=%.3g D2e=%.3g S2=%.3g",
 	 mu2avg, p2avg, D2, D2e, S2 );
 
-check_error( D2 > ( 1 + TOL ) * D2d, "INCONSISTENT-DEMAND", 0, & errors );
+CFUN( check_error, D2 > ( 1 + TOL ) * D2d, "INCONSISTENT-DEMAND", 0, & errors );
 
-check_error( D2err.size( ) > 0, "NO-DEMAND-FIRMS", D2err.size( ), & errors );
+CFUN( check_error, D2err.size( ) > 0, "NO-DEMAND-FIRMS", D2err.size( ), & errors );
 
-check_error( mu2err.size( ) > 0, "BAD-MARKUP-FIRMS", mu2err.size( ), & errors );
+CFUN( check_error, mu2err.size( ) > 0, "BAD-MARKUP-FIRMS", mu2err.size( ), & errors );
 
 // competition
 LOG( "\n   & age2avg=%g MC2=%.2g entry2exit=%g HH2=%.2g HP2=%.2g",
 	 age2avg, MC2, entry2exit, HH2, HP2 );
 LOG( "\n   & l2avg=%.2g", l2avg );
 
-check_error( v[4] < 1 - TOL / 10 || v[4] > 1 + TOL / 10,
-			 "INCONSISTENT-SHARES", 0, & errors );
+CFUN( check_error, v[4] < 1 - TOL / 10 || v[4] > 1 + TOL / 10,
+	  "INCONSISTENT-SHARES", 0, & errors );
 
-check_error( HH2 > 1 || HP2 > 2, "INCONSISTENT-STATS", 0, & errors );
+CFUN( check_error, HH2 > 1 || HP2 > 2, "INCONSISTENT-STATS", 0, & errors );
 
 errorsTot += errors;
 
@@ -1935,7 +2253,7 @@ CYCLES( ENESECL1, cur, "FirmE" )
 			 ( VS( cur1, "__Qde" ) > 0 && VS( cur1, "__cDE" ) == 0 ) )
 			cErr.push_back( cur1 );
 
-		if ( VS( cur1, "__Qde" ) > 0 && VS( cur1, "__LdeD" ) == 0 ||
+		if ( ( VS( cur1, "__Qde" ) > 0 && VS( cur1, "__LdeD" ) == 0 ) ||
 			 ( VS( cur1, "__LdeD" ) > 0 && __lifeDEcycle <= 0 ) )
 			Lerr.push_back( cur1 );
 
@@ -1963,7 +2281,7 @@ CYCLES( ENESECL1, cur, "FirmE" )
 			 ( VS( cur1, "__Qge" ) > 0 && VS( cur1, "__cGE" ) == 0 ) )
 			cErr.push_back( cur1 );
 
-		if ( VS( cur1, "__Qge" ) > 0 && VS( cur1, "__LgeD" ) == 0 ||
+		if ( ( VS( cur1, "__Qge" ) > 0 && VS( cur1, "__LgeD" ) == 0 ) ||
 			 ( VS( cur1, "__LgeD" ) > 0 && __lifeGEcycle <= 0 ) )
 			Lerr.push_back( cur1 );
 
@@ -2090,72 +2408,72 @@ CYCLES( ENESECL1, cur, "FirmE" )
 	fprintf( firmsE, "%g,%d,%d,%g,%g", T, j, h, v[16], v[17] );
 
 	for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
-		check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
+		CFUN( check_error, nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
 
 	for ( i = 0; i < LEN_ARR( posit ); ++i )
-		check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
+		CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 	for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-		check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+		CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
-	check_error( h > T && v[16] + v[17] == 0, "NO-PLANTS", 0, & errors );
+	CFUN( check_error, h > T && v[16] + v[17] == 0, "NO-PLANTS", 0, & errors );
 
 	// innovation, productivity
 	LOG( "\n   e AtauDE=%.3g ICtauGE=%.3g emTauDE=%.3g RDe=%.3g",
 		 _AtauDE, _ICtauGE, _emTauDE, _RDe );
 	fprintf( firmsE, ",%g,%g,%g,%g", _AtauDE, _ICtauGE, _emTauDE, _RDe );
 
-	check_error( h > T && _RDe <= 0, "NO-R&D", 0, & errors );
+	CFUN( check_error, h > T && _RDe <= 0, "NO-R&D", 0, & errors );
 
-	check_error( _AtauDE < TOL, "INCONSISTENT-PRODUCTIVITY", 0, & errors );
+	CFUN( check_error, _AtauDE < TOL, "INCONSISTENT-PRODUCTIVITY", 0, & errors );
 
 	// capital and investment
 	LOG( "\n   e Ke=%.3g Kde=%.3g Kge=%.3g SIeD=%.3g SIe=%.3g EIe=%.3g",
 		 _Ke, _Kde, _Kge, _SIeD, _SIe, _EIe );
 	fprintf( firmsE, ",%g,%g,%g,%g,%g,%g", _Ke, _Kde, _Kge, _SIeD, _SIe, _EIe );
 
-	check_error( tErr.size( ) > 0, "INVALID-T-PLANT", tErr.size( ), & errors );
+	CFUN( check_error, tErr.size( ) > 0, "INVALID-T-PLANT", tErr.size( ), & errors );
 
-	check_error( _Kde < floor( v[8] ) || _Kge < floor( v[11] ) ||
-				 round( _Ke ) != round( _Kde + _Kge ) ||
-				 _Ke + _IeCon < _EIe + _SIe,
-				 "INCONSISTENT-CAPITAL", 0, & errors );
+	CFUN( check_error, _Kde < floor( v[8] ) || _Kge < floor( v[11] ) ||
+		  round( _Ke ) != round( _Kde + _Kge ) ||
+		  _Ke + _IeCon < _EIe + _SIe,
+		  "INCONSISTENT-CAPITAL", 0, & errors );
 
 	LOG( "\n   e De=%g Qe=%g Qde=%g Qge=%g LeD=%g Le=%g LeRD=%g",
 		 round( _De ), round( _Qe ), round( _Qde ), round( _Qge ), round( _LeD ),
 		 round( _Le ), round( _LeRD ) );
 	fprintf( firmsE, ",%g,%g,%g,%g,%g,%g,%g", _De, _Qe, _Qde, _Qge, _LeD, _Le, _LeRD );
 
-	check_error( Qerr.size( ) > 0, "INVALID-GEN-PLANT", Qerr.size( ), & errors );
+	CFUN( check_error, Qerr.size( ) > 0, "INVALID-GEN-PLANT", Qerr.size( ), & errors );
 
-	check_error( EmErr.size( ) > 0, "INVALID-EMISS-PLANT", EmErr.size( ), & errors );
+	CFUN( check_error, EmErr.size( ) > 0, "INVALID-EMISS-PLANT", EmErr.size( ), & errors );
 
-	check_error( Lerr.size( ) > 0, "INVALID-LABOR-PLANT", Lerr.size( ), & errors );
+	CFUN( check_error, Lerr.size( ) > 0, "INVALID-LABOR-PLANT", Lerr.size( ), & errors );
 
-	check_error( _EmE < floor( v[7] ), "INCONSISTENT-EMISSIONS", 0, & errors );
+	CFUN( check_error, _EmE < floor( v[7] ), "INCONSISTENT-EMISSIONS", 0, & errors );
 
-	check_error( _SIe > _SIeD || floor( _SIeD ) > ceil( v[9] + v[12] ),
-				 "INCONSISTENT-SCRAPPING", 0, & errors );
+	CFUN( check_error, _SIe > _SIeD || floor( _SIeD ) > ceil( v[9] + v[12] ),
+		  "INCONSISTENT-SCRAPPING", 0, & errors );
 
-	check_error( ceil( _SIeD ) < _SIe || ceil( _EIeD ) < _EIe ||
-				 floor( _IgeD ) > _SIeD + _EIeD ||
-				 ( Tcon > 1 && ceil( _IeCon ) < _SIe + _EIe ) ||
-				 ( Tcon == 1 && _IeCon != 0 ),
-				 "INCONSISTENT-INVESTMENT", 0, & errors );
+	CFUN( check_error, ceil( _SIeD ) < _SIe || ceil( _EIeD ) < _EIe ||
+		  floor( _IgeD ) > _SIeD + _EIeD ||
+		  ( Tcon > 1 && ceil( _IeCon ) < _SIe + _EIe ) ||
+		  ( Tcon == 1 && _IeCon != 0 ),
+		  "INCONSISTENT-INVESTMENT", 0, & errors );
 
-	check_error( floor( _CIe ) > _EIe + _SIe,
-				 "INCONSISTENT-CANCELING", 0, & errors );
+	CFUN( check_error, floor( _CIe ) > _EIe + _SIe,
+		  "INCONSISTENT-CANCELING", 0, & errors );
 
-	check_error( round( _Qe ) != round( _De ) || _Qde < floor( v[10] ) ||
-				 _Qge < floor( v[13] ) || round( _Qe ) != round( _Qde + _Qge ),
-				 "INCONSISTENT-GENERATION", 0, & errors );
+	CFUN( check_error, round( _Qe ) != round( _De ) || _Qde < floor( v[10] ) ||
+		  _Qge < floor( v[13] ) || round( _Qe ) != round( _Qde + _Qge ),
+		  "INCONSISTENT-GENERATION", 0, & errors );
 
-	check_error( _Qe > ( 1 + TOL ) * _Ke, "OVER-GENERATION", 0, & errors );
+	CFUN( check_error, _Qe > ( 1 + TOL ) * _Ke, "OVER-GENERATION", 0, & errors );
 
-	check_error( _LeD < _JOe || _Le > _LeD || _LeDrd > _LeD || _LeRD > _Le,
-				 "INCONSISTENT-LABOR", 0, & errors );
+	CFUN( check_error, _LeD < _JOe || _Le > _LeD || _LeDrd > _LeD || _LeRD > _Le,
+		  "INCONSISTENT-LABOR", 0, & errors );
 
-	check_error( _LeD > 0 && _Le == 0, "NO-WORKER", 0, & errors );
+	CFUN( check_error, _LeD > 0 && _Le == 0, "NO-WORKER", 0, & errors );
 
 	// finance
 	LOG( "\n   e PiE=%g NWe=%g DebGE=%g CSge=%g CDgeC=%g",
@@ -2166,29 +2484,29 @@ CYCLES( ENESECL1, cur, "FirmE" )
 		 round( _DebE ), round( _DebEmax ), round( _CSe ), round( _CDeC ) );
 	fprintf( firmsE, ",%g,%g,%g,%g", _DebE, _DebEmax, _CSe, _CDeC );
 
-	check_error( cErr.size( ) > 0, "INVALID-COST-PLANT", cErr.size( ), & errors );
+	CFUN( check_error, cErr.size( ) > 0, "INVALID-COST-PLANT", cErr.size( ), & errors );
 
-	check_error( FinErr.size( ) > 0,
-				 "INCONSISTENT-FINANCE-TIMING", FinErr.size( ), & errors );
+	CFUN( check_error, FinErr.size( ) > 0,
+		  "INCONSISTENT-FINANCE-TIMING", FinErr.size( ), & errors );
 
-	check_error( _CSe > _CDe || _CDeC > _CDe ||
-				 _CSge > _CDge || _CDgeC > _CDge,
-				 "INCONSISTENT-FINANCE", 0, & errors );
+	CFUN( check_error, _CSe > _CDe || _CDeC > _CDe ||
+		  _CSge > _CDge || _CDgeC > _CDge,
+		  "INCONSISTENT-FINANCE", 0, & errors );
 
-	check_error( round( _DebGE ) != round( v[14] ) ||
-				 round( _iGE ) != round( v[15] ) ||
-				 _DebGE - _DebGE_1 > 0 && _SNPVge < 0,
-				 "INCONSISTENT-PROJECT-FINANCE", 0, & errors );
+	CFUN( check_error, round( _DebGE ) != round( v[14] ) ||
+		  round( _iGE ) != round( v[15] ) ||
+		  ( _DebGE - _DebGE_1 > 0 && _SNPVge < 0 ),
+		  "INCONSISTENT-PROJECT-FINANCE", 0, & errors );
 
-	check_error( abs( + _Se - pF * _Df - _We - _TaxE
-					  - ( _PiE - _TaxE ) + _iDe - _iE - _iGE ) > TOL,
-				 "INCONSISTENT-SFC-FLOW", 0, & errors );
+	CFUN( check_error, abs( + _Se - pF * _Df - _We - _TaxE
+							- ( _PiE - _TaxE ) + _iDe - _iE - _iGE ) > TOL,
+		  "INCONSISTENT-SFC-FLOW", 0, & errors );
 
-	check_error( abs( - _IeNom + ( _PiE - _TaxE ) - _DivE_1
-					  - ( _NWe - _NWe_1 )
-					  + ( _DebE - _DebE_1 ) + ( _DebGE - _DebGE_1 )
-					  + ( h == T ? + _EqE : 0 ) ) > TOL,
-				 "INCONSISTENT-SFC-CAPITAL", 0, & errors );
+	CFUN( check_error, abs( - _IeNom + ( _PiE - _TaxE ) - _DivE_1
+							- ( _NWe - _NWe_1 )
+							+ ( _DebE - _DebE_1 ) + ( _DebGE - _DebGE_1 )
+							+ ( h == T ? + _EqE : 0 ) ) > TOL,
+		  "INCONSISTENT-SFC-CAPITAL", 0, & errors );
 
 	// market
 	LOG( "\n   e muE=%.2g pE=%.2g Se=%g We=%g Ce=%.3g Cf=%.3g fE=%.2g", _muE, _pE,
@@ -2196,9 +2514,9 @@ CYCLES( ENESECL1, cur, "FirmE" )
 	fprintf( firmsE, ",%g,%g,%g,%g,%g,%g,%g", _muE, _pE, _Se, _We, _Ce,
 			 _Df * pF, _fE );
 
-	check_error( _RDe > _We || floor( _Df * pF + _We ) > _Ce ||
-				 _We + _PiE > _Se || _TaxE > _Se || _PiE > _Se,
-				 "INCONSISTENT-COST", 0, & errors );
+	CFUN( check_error, _RDe > _We || floor( _Df * pF + _We ) > _Ce ||
+		  _We + _PiE > _Se || _TaxE > _Se || _PiE > _Se,
+		  "INCONSISTENT-COST", 0, & errors );
 
 	// last period actions (single-firm analysis only)
 	if ( k == 1 && T == v[2] )
@@ -2378,13 +2696,13 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	fprintf( firms1, "%g,%d,%d,%d", T, i, h, j );
 
 	for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
-		check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
+		CFUN( check_error, nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
 
 	for ( i = 0; i < LEN_ARR( posit ); ++i )
-		check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
+		CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 	for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-		check_error( ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+		CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 	// innovation, productivity
 	LOG( "\n   * AtauLP=%.3g BtauLP=%.3g AtauEE=%.3g BtauEE=%.3g AtauEF=%.3g BtauEF=%.3g",
@@ -2396,11 +2714,11 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	fprintf( firms1, ",%g,%g,%g,%g,%g,%g,%g",
 			 _RD, _c1, _D1, _Q1, _Q1e, _L1d, _L1 );
 
-	check_error( _RD <= 0, "NO-R&D", 0, & errors );
+	CFUN( check_error, _RD <= 0, "NO-R&D", 0, & errors );
 
-	check_error( _AtauEE < TOL || _BtauEE < TOL || _AtauEF < TOL ||
-				 _BtauEF < TOL || _AtauLP < TOL || _BtauLP < TOL / 10,
-				 "INCONSISTENT-PRODUCTIVITY", 0, & errors );
+	CFUN( check_error, _AtauEE < TOL || _BtauEE < TOL || _AtauEF < TOL ||
+		  _BtauEF < TOL || _AtauLP < TOL || _BtauLP < TOL / 10,
+		  "INCONSISTENT-PRODUCTIVITY", 0, & errors );
 
 	// finance
 	LOG( "\n   * Pi1=%g NW1=%g Deb1=%g Deb1max=%g CS1=%g CD1c=%g",
@@ -2409,15 +2727,15 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	fprintf( firms1, ",%g,%g,%g,%g,%g,%g",
 			 _Pi1, _NW1, _Deb1, _Deb1max, _CS1, _CD1c );
 
-	check_error( _CS1 > _CD1 || _CD1c > _CD1, "INCONSISTENT-FINANCE", 0, & errors );
+	CFUN( check_error, _CS1 > _CD1 || _CD1c > _CD1, "INCONSISTENT-FINANCE", 0, & errors );
 
-	check_error( abs(  + _S1 - pE * _En1 - _W1 - _Tax1
-					   - ( _Pi1 - _Tax1 ) + _iD1 - _i1 ) > TOL,
-				 "INCONSISTENT-SFC-FLOW", 0, & errors );
+	CFUN( check_error, abs( + _S1 - pE * _En1 - _W1 - _Tax1
+							- ( _Pi1 - _Tax1 ) + _iD1 - _i1 ) > TOL,
+		  "INCONSISTENT-SFC-FLOW", 0, & errors );
 
-	check_error( abs( ( _Pi1 - _Tax1 ) - _Div1_1 - ( _NW1 - _NW1_1 ) +
-					  ( _Deb1 - _Deb1_1 ) + ( h == T ? + _Eq1 : 0 ) ) > TOL,
-				 "INCONSISTENT-SFC-CAPITAL", 0, & errors );
+	CFUN( check_error, abs( ( _Pi1 - _Tax1 ) - _Div1_1 - ( _NW1 - _NW1_1 ) +
+							( _Deb1 - _Deb1_1 ) + ( h == T ? + _Eq1 : 0 ) ) > TOL,
+		  "INCONSISTENT-SFC-CAPITAL", 0, & errors );
 
 	// market and client dynamics
 	LOG( "\n   * HC=%g NC=%g BC=%g p1=%.2g S1=%g f1=%.2g",
@@ -2425,9 +2743,9 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 	fprintf( firms1, ",%g,%g,%g,%g,%g,%g",
 			 _HC, _NC, _BC, _p1, _S1, _f1 );
 
-	check_error( j > _HC + _NC, "INCONSISTENT-CLIENTS", 0, & errors );
+	CFUN( check_error, j > _HC + _NC, "INCONSISTENT-CLIENTS", 0, & errors );
 
-	check_error( j < _BC, "INCONSISTENT-BUYERS", 0, & errors );
+	CFUN( check_error, j < _BC, "INCONSISTENT-BUYERS", 0, & errors );
 
 	// last period actions (single-firm analysis only)
 	if ( k == 1 && T == v[2] )
@@ -2655,16 +2973,16 @@ CYCLES( CONSECL1, cur, "Firm2" )
 			 v[19], __pVint );
 
 	for ( i = 0; i < LEN_ARR( nonNeg ); ++i )
-		check_error( nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
+		CFUN( check_error, nonNeg[ i ] < 0, "NEGATIVE-VALUE", i + 1, & errors );
 
 	for ( i = 0; i < LEN_ARR( posit ); ++i )
-		check_error( posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
+		CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 	for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-		check_error( ! isfinite( *itd ),
-					 "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+		CFUN( check_error, ! isfinite( *itd ),
+			  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
-	check_error( v[18] == 0, "NO-BROCHURE", 0, & errors );
+	CFUN( check_error, v[18] == 0, "NO-BROCHURE", 0, & errors );
 
 	// capital and investment
 	LOG( "\n   # Kd=%g Kavb=%g EId=%g SId=%g EI=%g SI=%g CI=%g K=%g",
@@ -2672,37 +2990,37 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	fprintf( firms2, ",%g,%g,%g,%g,%g,%g,%g,%g",
 		 _Kd, _Kavb, _EId, _SId, _EI, _SI, _CI, _K );
 
-	check_error( _life2cycle > 0 && v[19] == 0, "NO-VINTAGE", 0, & errors );
+	CFUN( check_error, _life2cycle > 0 && v[19] == 0, "NO-VINTAGE", 0, & errors );
 
-	check_error( IDerr.size( ) > 0, "INVALID-ID-VINT", IDerr.size( ), & errors );
+	CFUN( check_error, IDerr.size( ) > 0, "INVALID-ID-VINT", IDerr.size( ), & errors );
 
-	check_error( tVintErr.size( ) > 0,
-				 "INVALID-T-VINT", tVintErr.size( ), & errors );
+	CFUN( check_error, tVintErr.size( ) > 0,
+		  "INVALID-T-VINT", tVintErr.size( ), & errors );
 
-	check_error( _SId > _Kavb || _K > _Kavb + _EI + _SI || v[7] * m2 > _K ||
-				 ( _life2cycle > 0 && _K == 0 ),
-				 "INCONSISTENT-CAPITAL", 0, & errors );
+	CFUN( check_error, _SId > _Kavb || _K > _Kavb + _EI + _SI || v[7] * m2 > _K ||
+		  ( _life2cycle > 0 && _K == 0 ),
+		  "INCONSISTENT-CAPITAL", 0, & errors );
 
 	LOG( "\n   # D2e=%g Q2d=%g Q2=%g Q2e=%g L2d=%g L2=%g c2=%.2g",
 		 round( _D2e ), _Q2d, _Q2, round( _Q2e ), _L2d, _L2, _c2 );
 	fprintf( firms2, ",%g,%g,%g,%g,%g,%g,%g",
 		 _D2e, _Q2d, _Q2, _Q2e, _L2d, _L2, _c2 );
 
-	check_error( ( _Q2d > 0 &&
-				 floor( _Q2d ) > ceil( ( 1 + iota ) * _D2e - _N_1 ) ) ||
-				 _Q2 > _Q2d || _Q2e > _K || _Q2e > _Q2,
-				 "INCONSISTENT-PRODUCTION", 0, & errors );
+	CFUN( check_error, ( _Q2d > 0 &&
+		  floor( _Q2d ) > ceil( ( 1 + iota ) * _D2e - _N_1 ) ) ||
+		  _Q2 > _Q2d || _Q2e > _K || _Q2e > _Q2,
+		  "INCONSISTENT-PRODUCTION", 0, & errors );
 
-	check_error( QvintErr.size( ) > 0,
-				 "INVALID-PROD-VINT", QvintErr.size( ), & errors );
+	CFUN( check_error, QvintErr.size( ) > 0,
+		  "INVALID-PROD-VINT", QvintErr.size( ), & errors );
 
-	check_error( _L2d > 0 && _L2 == 0, "NO-WORKER", 0, & errors );
+	CFUN( check_error, _L2d > 0 && _L2 == 0, "NO-WORKER", 0, & errors );
 
-	check_error( LvintErr.size( ) > 0,
-				 "INVALID-LABOR-VINT", LvintErr.size( ), & errors );
+	CFUN( check_error, LvintErr.size( ) > 0,
+		  "INVALID-LABOR-VINT", LvintErr.size( ), & errors );
 
-	check_error( _life2cycle > 0 && ( _c2 == 0 || _c2e == 0 ),
-				 "INCONSISTENT-COST", 0, & errors );
+	CFUN( check_error, _life2cycle > 0 && ( _c2 == 0 || _c2e == 0 ),
+		  "INCONSISTENT-COST", 0, & errors );
 
 	// finance
 	LOG( "\n   # Pi2=%g NW2=%g Deb2=%g Deb2max=%g CS2=%g CD2c=%g",
@@ -2711,25 +3029,25 @@ CYCLES( CONSECL1, cur, "Firm2" )
 	fprintf( firms2, ",%g,%g,%g,%g,%g,%g",
 			 _Pi2, _NW2, _Deb2, _Deb2max, _CS2, _CD2c );
 
-	check_error( _CS2 > _CD2 || _CD2c > _CD2, "INCONSISTENT-FINANCE", 0, & errors );
+	CFUN( check_error, _CS2 > _CD2 || _CD2c > _CD2, "INCONSISTENT-FINANCE", 0, & errors );
 
-	check_error( abs( + _S2 - pE * _En2 - _W2 - _Tax2
-					  - ( _Pi2 - _Tax2 ) + _iD2 - _i2 ) > TOL,
-				 "INCONSISTENT-SFC-FLOW", 0, & errors );
+	CFUN( check_error, abs( + _S2 - pE * _En2 - _W2 - _Tax2
+							- ( _Pi2 - _Tax2 ) + _iD2 - _i2 ) > TOL,
+		  "INCONSISTENT-SFC-FLOW", 0, & errors );
 
-	check_error( abs( - _Inom + ( _Pi2 - _Tax2 ) - _Div2_1
-					  - ( _NW2 - _NW2_1 ) + ( _Deb2 - _Deb2_1 )
-					  + ( h == T ? + _Eq2 : 0 ) ) > TOL,
-				 "INCONSISTENT-SFC-CAPITAL", 0, & errors );
+	CFUN( check_error, abs( - _Inom + ( _Pi2 - _Tax2 ) - _Div2_1
+							- ( _NW2 - _NW2_1 ) + ( _Deb2 - _Deb2_1 )
+							+ ( h == T ? + _Eq2 : 0 ) ) > TOL,
+		  "INCONSISTENT-SFC-CAPITAL", 0, & errors );
 
 	// market
 	LOG( "\n   # mu2=%.2g p2=%.2g D2=%g S2=%g W2=%g f2=%.2g N=%g", _mu2, _p2,
 		 round( _D2 ), round( _S2 ), round( _W2 ), _f2, round( _N ) );
 	fprintf( firms2, ",%g,%g,%g,%g,%g,%g,%g", _mu2, _p2, _D2, _S2, _W2, _f2, _N );
 
-	check_error( _mu2 > 5 * mu20, "EXCESSIVE-MARKUP", 0, & errors );
+	CFUN( check_error, _mu2 > 5 * mu20, "EXCESSIVE-MARKUP", 0, & errors );
 
-	check_error( _mu2 < mu20 / 5, "INSUFFICIENT-MARKUP", 0, & errors );
+	CFUN( check_error, _mu2 < mu20 / 5, "INSUFFICIENT-MARKUP", 0, & errors );
 
 	// last period actions (single-firm analysis only)
 	if ( k == 1 && T == v[2] )

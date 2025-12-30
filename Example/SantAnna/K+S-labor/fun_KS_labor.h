@@ -233,7 +233,7 @@ EQUATION( "dUeB" )
 Notional unemployment (bounded) rate of change
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( THIS, "Ue", VS( PARENT, "mLim" ), VS( PARENT, "mPer" ) ) )
+RESULT( CFUN( mov_avg_bound, "Ue", VS( PARENT, "mLim" ), VS( PARENT, "mPer" ) ) )
 
 
 EQUATION( "sAvg" )

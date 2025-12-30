@@ -368,6 +368,15 @@ Average age of firms in energy sector
 RESULT( T - AVES( ENESECL2, "_tEent" ) )
 
 
+EQUATION( "cE" )
+/*
+Average unit generation cost of energy sector
+*/
+v[1] = VS( ENESECL2, "Qe" );
+RESULT( v[1] > 0 ? ( VS( ENESECL2, "Ce" ) - V( "RDe" ) ) /
+				   VS( ENESECL2, "Qe" ) : 0 )
+
+
 EQUATION( "dEmE" )
 /*
 CO2 emissions growth rate of energy sector

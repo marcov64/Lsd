@@ -17,7 +17,10 @@ install.packages( c( "LSDsensitivity",
                      "rmutil",
                      "plotrix",
                      "textplot",
-                     "extrafont" ) )
+                     "extrafont",
+                     "ggplot2",
+                     "gghalves",
+                     "ggthemes" ) )
 
 #
 # ATTENTION: LSD R packages can be also installed from disk,

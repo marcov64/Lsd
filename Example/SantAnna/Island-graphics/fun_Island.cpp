@@ -12,6 +12,15 @@
 
  ******************************************************************************/
 
+// support C++ functions (code at the end of the file)
+#include <lsd_init.h>
+
+#define EQ_USER_FUNCS \
+	CFUN_VOID( add_island, int x, int y, double & count ); \
+	CFUN_VOID( set_marker, int x, int y, int color );
+
+#include <lsd_head.h>
+
 #define NO_POINTER_INIT							// disable pointer checking
 
 // colors of lattice markers
@@ -25,12 +34,6 @@
 
 // macro to encode island coordinates into a single island ID number
 #define ISLAND_ID( X, Y ) ( ( X + LAST_T ) * 1e6 + ( Y + LAST_T ) )
-
-// support C++ functions (code at the end of the file)
-#define USER_FUNCS void add_island( lsd::object *sea, int x, int y, double & count ); \
-				   void set_marker( lsd::object *sea, int x, int y, int color );
-
-#include "fun_head_fast.h"
 
 MODELBEGIN
 
@@ -66,13 +69,13 @@ if ( v[5] > 0 && ! V( "latticeOpen" ) )
 // handle bounded economies (pi=0)
 if ( v[2] == 0 && v[3] == 2 )
 {
-	add_island( THIS, 1, 1, v[0] );				// island at (1, 1)
-	add_island( THIS, 1, v[4], v[0] );			// island at (1, l0radius)
+	CFUN( add_island, 1, 1, v[0] );				// island at (1, 1)
+	CFUN( add_island, 1, v[4], v[0] );			// island at (1, l0radius)
 }
 else
 {
 	// make sure there is an island at (0, 0)
-	add_island( THIS, 0, 0, v[0] );
+	CFUN( add_island, 0, 0, v[0] );
 
 	// create random islands to fill the initial radius plus one
 	for ( i = - v[4] - 1; i <= v[4] + 1; ++i )
@@ -80,7 +83,7 @@ else
 			// draw the existence of an island (except in (0, 0))
 			if ( RND < v[2] && ! ( i == 0 && j == 0 ) )
 				// create island and add to the graphical lattice if required
-				add_island( THIS, i, j, v[0] );
+				CFUN( add_island, i, j, v[0] );
 }
 
 // set the KnownIsland object instances to be nodes of a network
@@ -225,7 +228,7 @@ if ( v[6] <= v[2] )
 	WRITE( "westFrontier", --v[2] );			// update the frontier
 	for ( i = v[2], j = v[4]; j <= v[5]; ++j )	// move south -> north
 		if ( RND < v[1] )						// is it an island?
-			add_island( THIS, i, j, v[0] );
+			CFUN( add_island, i, j, v[0] );
 }
 
 // expand to the east if required
@@ -234,7 +237,7 @@ if ( v[7] >= v[3] )
 	WRITE( "eastFrontier", ++v[3] );			// update the frontier
 	for ( i = v[7], j = v[4]; j <= v[5]; ++j )	// move south -> north
 		if ( RND < v[1] )						// is it an island?
-			add_island( THIS, i, j, v[0] );
+			CFUN( add_island, i, j, v[0] );
 }
 
 // expand to the south if required
@@ -243,7 +246,7 @@ if ( v[8] <= v[4] )
 	WRITE( "southFrontier", --v[4] );			// update the frontier
 	for ( j = v[4], i = v[2]; i <= v[3]; ++i )	// move west -> east
 		if ( RND < v[1] )						// is it an island?
-			add_island( THIS, i, j, v[0] );
+			CFUN( add_island, i, j, v[0] );
 }
 
 // expand to the north if required
@@ -252,7 +255,7 @@ if ( v[9] >= v[5] )
 	WRITE( "northFrontier", ++v[5] );			// update the frontier
 	for ( j = v[5], i = v[2]; i <= v[3]; ++i )	// move west -> east
 		if ( RND < v[1] )						// is it an island?
-			add_island( THIS, i, j, v[0] );
+			CFUN( add_island, i, j, v[0] );
 }
 
 RESULT( v[0] )
@@ -305,11 +308,11 @@ v[0] = COUNT( "Miner" );
 
 // update island marker
 if ( v[0] == 0 )
-	set_marker( GRANDPARENT,  VS( SHOOK, "_xIsland" ),
-				VS( SHOOK, "_yIsland" ), KNOWN );
+	CFUNS( GRANDPARENT, set_marker, VS( SHOOK, "_xIsland" ),
+		   VS( SHOOK, "_yIsland" ), KNOWN );
 else
-	set_marker( GRANDPARENT,  VS( SHOOK, "_xIsland" ),
-				VS( SHOOK, "_yIsland" ), COLONIZED );
+	CFUNS( GRANDPARENT, set_marker, VS( SHOOK, "_xIsland" ),
+		   VS( SHOOK, "_yIsland" ), COLONIZED );
 
 RESULT( v[0] )
 
@@ -351,7 +354,7 @@ j = V( "_yAgent" );
 if ( CURRENT != MINER )
 {
 	// clear current marker from lattice, if required
-	set_marker( GRANDPARENT, i, j, SEA );
+	CFUNS( GRANDPARENT, set_marker, i, j, SEA );
 
 	// if it is an explorer, move randomly across the sea
 	if ( CURRENT == EXPLORER )
@@ -456,9 +459,11 @@ if ( CURRENT != MINER )
 	else										// update the navigation marker
 	{
 		if ( CURRENT == EXPLORER )
-			set_marker( GRANDPARENT, V( "_xAgent" ), V( "_yAgent" ), EXPLORER );
+			CFUNS( GRANDPARENT, set_marker, V( "_xAgent" ), V( "_yAgent" ), 
+				   EXPLORER );
 		else
-			set_marker( GRANDPARENT, V( "_xAgent" ), V( "_yAgent" ), IMITATOR );
+			CFUNS( GRANDPARENT, set_marker, V( "_xAgent" ), V( "_yAgent" ), 
+				   IMITATOR );
 	}
 }
 
@@ -583,37 +588,36 @@ MODELEND
 // support C++ functions
 
 //// add one (unknown) island to the model
-void U_FN::add_island( lsd::object *sea, int x, int y, double & count )
+CFUN_VOID( add_island, int x, int y, double & count )
 {
 	object *island;
 
 	if ( count == 0 )							// first island?
-		island = SEARCHS( sea, "Island" );		// pick existing object
+		island = SEARCH( "Island" );			// pick existing object
 	else
-		island = ADDOBJLS( sea, "Island", 0 );	// add new object instance
+		island = ADDOBJL( "Island", 0 );		// add new object instance
 
 	++count;									// update the islands counter
 	WRITES( island, "_idIsland", ISLAND_ID( x, y ) );// save island id (coords.)
 	WRITES( island, "_xIsland", x );			// save island x coordinate
 	WRITES( island, "_yIsland", y );			// save island y coordinate
 
-	set_marker( sea, x, y, UNKNOWN );			// create marker
+	CFUN( set_marker, x, y, UNKNOWN );			// create marker
 
 	LOG( "\nIsland=%.0lf at x=%d y=%d", count, x, y );
 }
 
 //// function to set a marker in the lattice
-void U_FN::set_marker( lsd::object *sea, int x, int y, int color )
+CFUN_VOID( set_marker, int x, int y, int color )
 {
-	int size = VS( sea, "sizeLattice" );
+	int size = V( "sizeLattice" );
 
 	// transform from (0, 0)-centered to lattice window absolute coordinates
 	int i = x + size / 2 + 1;
 	int j = size - ( y + size / 2 ) + 1;
 
 	// check lattice shown and ignore markers outside canvas area
-	if ( VS( sea, "seaShown" ) && ( i >= 1 && i <= size + 1 && j >= 1 &&
-		 j <= size + 1 ) )
+	if ( V( "seaShown" ) && ( i >= 1 && i <= size + 1 && j >= 1 && j <= size + 1 ) )
 		WRITE_LAT( j, i, color );
 }
 

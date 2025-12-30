@@ -267,7 +267,7 @@ EQUATION( "dAb" )
 Notional overall productivity (bounded) rate of change
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( THIS, "A", V( "mLim" ), V( "mPer" ) ) )
+RESULT( CFUN( mov_avg_bound, "A", V( "mLim" ), V( "mPer" ) ) )
 
 
 EQUATION( "dGDP" )
@@ -461,10 +461,10 @@ VS( cur3, "banksMaps" );						// update the mapping vectors
 DELETE( SEARCHS( cur1, "Firm1" ) );				// remove empty firm instances
 DELETE( SEARCHS( cur2, "Firm2" ) );
 
-v[1] = entry_firm1( _v_, cur1, F10, true );		// add capital-good firms
+v[1] = CFUNS( cur1, entry_firm1, F10, true );	// add capital-good firms
 INIT_TSEARCHS( cur1, "Firm1" );					// prepare turbo search indexing
 
-v[1] += entry_firm2( _v_, cur2, F20, true );	// add consumer-good firms
+v[1] += CFUNS( cur2, entry_firm2, F20, true );	// add consumer-good firms
 VS( cur2, "firm2maps" );						// update the mapping vectors
 
 WRITEL( "Eq", v[1], -1 );						// save existing equity

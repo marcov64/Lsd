@@ -16,7 +16,6 @@
 // K+S additional C++ STL containers and utilities
 #include <list>
 #include <map>
-#include <mutex>
 #include <random>
 #include <set>
 #include <vector>
@@ -38,17 +37,17 @@ mt19937_64 random_engine;
 
 /*============================= GENERAL CLASSES ==============================*/
 
+struct firmRank									// element of pecking order rank
+{
+	double NWtoS;								// net-wealth-to-sales ratio
+	object *firm;								// pointer to firm
+};
+
 struct vintage									// element of map of vintages
 {
 	double sVp;									// public skills for vintage
 	double sVavg, sVavgLag;						// average skills for vintage
 	int workers;								// current workers using
-};
-
-struct firmRank									// element of pecking order rank
-{
-	double NWtoS;								// net-wealth-to-sales ratio
-	object *firm;								// pointer to firm
 };
 
 struct wageOffer								// element of wage offer list
@@ -181,29 +180,30 @@ struct firm2E									// extensions to Firm2 object
 #define LEN_ARR( A ) ( ( int ) ( sizeof A / sizeof A[0] ) )
 #define END_ARR( A ) ( A + LEN_ARR( A ) )
 
+/*=================== FORWARD DECLARATION OF C++ FUNCTIONS ===================*/
 
-/*================== FORWARD DECLARATION OF C++ EXTENSIONS ===================*/
-
-#define USER_FUNCS \
-double cash_flow( object *firm, double profit, double tax ); \
-double entry_firm1( c_varT *_v_, object *sector, int n, bool newInd ); \
-double entry_firm2( c_varT *_v_, object *sector, int n, bool newInd ); \
-double exit_firm( c_varT *_v_, object *firm, double *firesAcc ); \
-double fire_workers( c_varT *_v_, object *firm, int mode, double xsCap, double *redCap ); \
-double hire_workers( c_varT *_v_, object *sector, int cat ); \
-double invest( object *firm, double desired ); \
-double mov_avg_bound( object *obj, const char *var, double lim, double per ); \
-double open_positions( object *firm, int cat ); \
-double scrap_vintage( c_varT *_v_, object *vint ); \
-double update_debt( object *firm, double desired, double loan ); \
-double update_depo( object *firm, double depo, bool incr ); \
-object *send_brochure( object *suppl, object *client ); \
-object *set_bank( object *firm ); \
-object *set_supplier( object *firm ); \
-void add_vintage( c_varT *_v_, object *firm, double nMach, bool newInd ); \
-void check_error( bool cond, const char* errMsg, int errCount, int *errCounter ); \
-void fire_worker( c_varT *_v_, object *worker ); \
-void hire_worker( c_varT *_v_, object *worker, int sec, object *firm, double wage ); \
-void move_worker( object *worker, object *vint, bool vint_learn ); \
-void order_workers( int order, int obj, object *caller ); \
-void send_order( object *firm, double nMach );
+#define EQ_USER_CFUNS \
+	CFUN_DBL( cash_flow, double profit, double tax ); \
+	CFUN_DBL( entry_firm1, int n, bool newInd ); \
+	CFUN_DBL( entry_firm2, int n, bool newInd ); \
+	CFUN_DBL( exit_firm, double *firesAcc ); \
+	CFUN_DBL( fire_workers, int mode, double xsCap, double *redCap ); \
+	CFUN_DBL( invest, double desired ); \
+	CFUN_DBL( mov_avg_bound, const char *var, double lim, double per, int lag ); \
+	CFUN_DBL( scrap_vintage ); \
+	CFUN_DBL( update_debt, double desired, double loan ); \
+	CFUN_DBL( update_depo, double depo, bool incr ); \
+	CFUN_OBJ( send_brochure, object *client ); \
+	CFUN_OBJ( set_bank ); \
+	CFUN_OBJ( set_supplier ); \
+	CFUN_VOID( add_vintage, double nMach, bool newInd ); \
+	CFUN_VOID( check_error, bool cond, const char* errMsg, int errCount, \
+			   int *errCounter ); \
+	CFUN_VOID( fire_worker ); \
+	CFUN_VOID( hire_worker, int sec, object *firm, double wage ); \
+	CFUN_VOID( move_worker, object *vint, bool vint_learn ); \
+	CFUN_VOID( order_applications, int order, appLisT *appl ); \
+	CFUN_VOID( order_offers, int order, woLisT *offers ); \
+	CFUN_VOID( order_workers, int order, int obj ); \
+	CFUN_VOID( send_order, double nMach ); \
+	CFUN_VOID( shuffle_offers, woLisT *offers );

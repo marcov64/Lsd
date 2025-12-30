@@ -18,19 +18,18 @@
 // calculate the bounded, moving-average growth rate of variable
 // if lim is zero, there is no bounding
 
-double U_FN::mov_avg_bound( object *obj, const char *var, double lim, double per,
-					  	  int lag = 0 )
+CFUN_DBL( mov_avg_bound, const char *var, double lim, double per, int lag = 0 )
 {
 	double prev, g, sum_g;
 	int i;
 
 	for ( sum_g = i = 0; i < per; ++i )
 	{
-		if ( T - i + lag <= 0 )						// just go to t=1
+		if ( T - i + lag <= 0 )					// just go to t=1
 			break;
 
-		prev = VLS( obj, var, i + lag + 1 );
-		g = ( prev != 0 ) ? VLS( obj, var, i + lag ) / prev - 1 : 0;
+		prev = VL( var, i + lag + 1 );
+		g = ( prev != 0 ) ? VL( var, i + lag ) / prev - 1 : 0;
 
 		if ( lim > 0 )
 			g = max( min( g, lim ), - lim );	// apply bounds
@@ -44,7 +43,7 @@ double U_FN::mov_avg_bound( object *obj, const char *var, double lim, double per
 
 // append error messages and increment error counter
 
-void U_FN::check_error( bool cond, const char* errMsg, int errCount, int *errCounter )
+CFUN_VOID( check_error, bool cond, const char* errMsg, int errCount, int *errCounter )
 {
 	if ( ! cond )
 		return;
@@ -73,7 +72,7 @@ bool rank_desc_NWtoS( firmRank e1, firmRank e2 )
 
 double npv( double pmt, double r, double n, double def = 0 )
 {
-	double npv = 0 ;
+	double npv = 0;
 
 	for ( double i = 1; i <= n; ++i )
 		npv += pmt / pow( 1 + r, i + def );
@@ -90,23 +89,23 @@ const char *bankPar[ ] = { "_bank1", "_bank2", "_bankE" },
 		   *_IDpar[ ] = { "_ID1","_ID2", "_IDe" },
 		   *__IDpar[ ] = { "__ID1","__ID2", "__IDe" };
 
-object *U_FN::set_bank( object *firm )
+CFUN_OBJ( set_bank )
 {
-	int _IDb, sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
-					strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
-	object *bank, *cli, *fin = V_EXTS( GRANDPARENTS( firm ), countryE, finSec );
+	int _IDb, sec = strcmp( NAME, "Firm1" ) == 0 ? 0 :
+					strcmp( NAME, "Firm2" ) == 0 ? 1 : 2;
+	object *bank, *cli, *fin = V_EXTS( GRANDPARENT, countryE, finSec );
 
 	_IDb = VS( fin, "pickBank" );				// draw initial preferred bank
-	bank = V_EXTS( GRANDPARENTS( firm ), countryE, bankPtr[ _IDb - 1 ] );
-	WRITES( firm, bankPar[ sec ], _IDb );		// save bank ID
-	WRITE_HOOKS( firm, BANK, bank );
+	bank = V_EXTS( GRANDPARENT, countryE, bankPtr[ _IDb - 1 ] );
+	WRITE( bankPar[ sec ], _IDb );				// save bank ID
+	WRITE_HOOK( BANK, bank );
 
 	cli = ADDOBJS( bank, CliObj[ sec ] );		// add to bank client list
-	WRITES( cli, __IDpar[ sec ], VS( firm, _IDpar[ sec ] ) );// update object
-	WRITE_SHOOKS( cli, firm );					// pointer back to client
-	WRITE_HOOKS( firm, BCLIENT, cli );			// pointer to bank client list
+	WRITES( cli, __IDpar[ sec ], V( _IDpar[ sec ] ) );// update object
+	WRITE_SHOOKS( cli, THIS );					// pointer back to client
+	WRITE_HOOK( BCLIENT, cli );					// pointer to bank client list
 
-	return HOOKS( firm, BCLIENT );				// bank client list obj
+	return HOOK( BCLIENT );						// bank client list obj
 }
 
 
@@ -119,20 +118,19 @@ const char *_CDvar[ ] = { "_CD1", "_CD2", "_CDe", "_CDge" },
 		   *_DebVar[ ] = { "_Deb1", "_Deb2", "_DebE", "__DebGE" },
 		   *_TCfreeVar[ ] = { "_TC1free", "_TC2free", "_TCeFree", "_TCgeFree" };
 
-double U_FN::update_debt( object *firm, double desired, double loan,
-						object *plant = NULL )
+CFUN_DBL( update_debt, double desired, double loan, object *plant = NULL )
 {
 	double Deb, TCfree;
-	object *bank, *debObj = plant == NULL ? firm : plant;
-	int TfinGE, dest = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
-					   strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 :
+	object *bank, *debObj = plant == NULL ? THIS : plant;
+	int TfinGE, dest = strcmp( NAME, "Firm1" ) == 0 ? 0 :
+					   strcmp( NAME, "Firm2" ) == 0 ? 1 :
 					   plant == NULL ? 2 : 3;
 
 	if ( desired > 0 )							// ignore loan repayment
 	{
-		INCRS( firm, _CDvar[ dest ], desired );	// desired credit
-		INCRS( firm, _CDcVar[ dest ], desired - loan );// credit constraint
-		INCRS( firm, _CSvar[ dest ], loan );	// supplied credit
+		INCR( _CDvar[ dest ], desired );		// desired credit
+		INCR( _CDcVar[ dest ], desired - loan );// credit constraint
+		INCR( _CSvar[ dest ], loan );			// supplied credit
 	}
 
 	Deb = VS( debObj, _DebVar[ dest ] );
@@ -140,22 +138,22 @@ double U_FN::update_debt( object *firm, double desired, double loan,
 	// take new loan/repay debt from/to bank
 	if ( loan != 0 )
 	{
-		if ( Deb + loan < 0.001 )			// write-off small debt?
+		if ( Deb + loan < 0.001 )				// write-off small debt?
 			Deb = WRITES( debObj, _DebVar[ dest ], 0 );
 		else
 			Deb = INCRS( debObj, _DebVar[ dest ], loan );
 
 		if ( dest == 3 )
 		{
-			TfinGE = min( VS( PARENTS( firm ), "Tfin" ),
-						  VS( PARENTS( firm ), "etaE" ) );// viable period
+			TfinGE = min( VS( PARENT, "Tfin" ),
+						  VS( PARENT, "etaE" ) );// viable period
 
 			WRITES( plant, "__TfinGE", TfinGE );
-			WRITES( plant, "__rGEdeb", VS( firm, "_rEdeb" ) );
+			WRITES( plant, "__rGEdeb", V( "_rEdeb" ) );
 			WRITES( plant, "__pfinGE", 1 );
 		}
 
-		bank = HOOKS( firm, BANK );				// firm's bank
+		bank = HOOK( BANK );					// firm's bank
 
 		// if credit limit active, adjust bank's available credit
 		TCfree = VS( bank, _TCfreeVar[ dest ] );// available credit firm's bank
@@ -172,22 +170,22 @@ double U_FN::update_debt( object *firm, double desired, double loan,
 
 const char *_NWvar[ ] = { "_NW1", "_NW2", "_NWe" };
 
-double U_FN::update_depo( object *firm, double depo, bool incr )
+CFUN_DBL( update_depo, double depo, bool incr )
 {
 	double NW;
-	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
-			  strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
+	int sec = strcmp( NAME, "Firm1" ) == 0 ? 0 :
+			  strcmp( NAME, "Firm2" ) == 0 ? 1 : 2;
 
 	// update total firm net worth (deposits)
 	if ( incr )
 	{
-		NW = VS( firm, _NWvar[ sec ] );
+		NW = V( _NWvar[ sec ] );
 
 		if ( depo != 0 )
-			NW = INCRS( firm, _NWvar[ sec ], depo );
+			NW = INCR( _NWvar[ sec ], depo );
 	}
 	else
-		NW = WRITES( firm, _NWvar[ sec ], depo );
+		NW = WRITE( _NWvar[ sec ], depo );
 
 	return NW;
 }
@@ -200,55 +198,55 @@ const char *_CIvar[ ] = { "", "_CI", "_CIe" },
 		   *_DivVar[ ] = { "_Div1", "_Div2", "_DivE" },
 		   *_NWpVar[ ] = { "_NW1p", "_NW2p", "" };
 
-double U_FN::cash_flow( object *firm, double profit, double tax )
+CFUN_DBL( cash_flow, double profit, double tax )
 {
-	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
-			  strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
-	object *fin = V_EXTS( GRANDPARENTS( firm ), countryE, finSec );
+	int sec = strcmp( NAME, "Firm1" ) == 0 ? 0 :
+			  strcmp( NAME, "Firm2" ) == 0 ? 1 : 2;
+	object *fin = V_EXTS( GRANDPARENT, countryE, finSec );
 
-	double dividends = VLS( firm, _DivVar[ sec ], 1 );// shareholder dividends
-	double amort = sec < 2 ? 0 : VS( firm, "_amtGE" );// proj. fin. amortization
+	double dividends = VL( _DivVar[ sec ], 1 );// shareholder dividends
+	double amort = sec < 2 ? 0 : V( "_amtGE" );// proj. fin. amortization
 	double cashFree = profit - tax - dividends - amort;	// final free cash flow
 
 	if ( sec > 0 )
-		VS( firm, _CIvar[ sec ] );				// ensure canc. invest. reimbursed
+		V( _CIvar[ sec ] );						// ensure canc. invest. reimbursed
 
-	double provision = ( sec < 2 ) ? VS( firm, _NWpVar[ sec ] ) : 0;// prod. cost
-	double depo = update_depo( firm, provision, true );// current bank deposits
+	double provision = ( sec < 2 ) ? V( _NWpVar[ sec ] ) : 0;// prod. cost
+	double depo = CFUN( update_depo, provision, true );// current bank deposits
 
 	if ( cashFree < 0 )							// must finance losses?
 	{
 		if ( depo >= - cashFree )				// deposits cover losses?
-			update_depo( firm, cashFree, true );// draw from deposits
+			CFUN( update_depo, cashFree, true );// draw from deposits
 		else
 		{
-			double credAvb = VS( firm, _CSaVar[ sec ] );// available credit
+			double credAvb = V( _CSaVar[ sec ] );// available credit
 			double credDes = - cashFree - depo;	// desired credit
 
-			update_debt( firm, credDes, credDes );// finance all in any case
+			CFUN( update_debt, credDes, credDes );// finance all in any case
 
 			if ( credAvb >= credDes )			// could finance losses?
-				update_depo( firm, 0, false );	// keep going with zero deposits
+				CFUN( update_depo, 0, false );	// keep going with zero deposits
 			else
-				update_depo( firm, -1e-6, false );// let negative NW (bankruptcy)
+				CFUN( update_depo, -1e-6, false );// let negative NW (bankruptcy)
 		}
 	}
 	else										// pay debt with available cash
 	{
-		double repayDes = VS( firm, _DebVar[ sec ] ) * VS( fin, "deltaB" );
+		double repayDes = V( _DebVar[ sec ] ) * VS( fin, "deltaB" );
 												// desired debt repayment
 		if ( repayDes > 0 )						// something to repay?
 		{
 			if ( cashFree > repayDes )			// can repay desired and more
 			{
-				update_debt( firm, 0, - repayDes );// repay up to desired
-				update_depo( firm, cashFree - repayDes, true );// keep the rest
+				CFUN( update_debt, 0, - repayDes );// repay up to desired
+				CFUN( update_depo, cashFree - repayDes, true );// keep the rest
 			}
 			else
-				update_debt( firm, 0, - cashFree );// repay what is possible
+				CFUN( update_debt, 0, - cashFree );// repay what is possible
 		}
 		else
-			update_depo( firm, cashFree, true );// just keep all
+			CFUN( update_depo, cashFree, true );// just keep all
 	}
 
 	return cashFree;
@@ -266,17 +264,17 @@ const char *Cli1Obj[ ] = { "", "Cli", "CliEn" },
 		   *__IDsPar[ ] = { "", "__IDs", "__IDsE" },
 		   *__tSelPar[ ] = { "", "__tSel", "__tSelE" };
 
-object *U_FN::send_brochure( object *suppl, object *client )
+CFUN_OBJ( send_brochure, object *client )
 {
 	object *broch, *cli;
 	int sec = strcmp( NAMES( client ), "Firm2" ) == 0 ? 1 : 2;
 
-	cli = ADDOBJS( suppl, Cli1Obj[ sec ] );		// add object to new client
-	WRITES( cli, __IDcPar[ sec ], VS( client, _IDpar[ sec ] ) );
+	cli = ADDOBJ( Cli1Obj[ sec ] );				// add object to new client
+	WRITES( cli, __IDcPar[ sec ], VS( client, _IDpar[ sec ] ) );// client ID
 	WRITES( cli, __tSelPar[ sec ], T );			// update selection time
 
 	broch = ADDOBJS( client, CliBrochObj[ sec ] );// add brochure to client
-	WRITES( broch, __IDsPar[ sec ], VS( suppl, _IDpar[ 0 ] ) );// supplier ID
+	WRITES( broch, __IDsPar[ sec ], V( _IDpar[ 0 ] ) );// supplier ID
 	WRITE_SHOOKS( broch, cli );					// pointer to supplier client list
 	WRITE_SHOOKS( cli, broch );					// pointer to client brochure list
 
@@ -286,14 +284,14 @@ object *U_FN::send_brochure( object *suppl, object *client )
 
 // set initial supplier for entrant in equations 'entry2exit', 'entryEexit'
 
-object *U_FN::set_supplier( object *firm )
+CFUN_OBJ( set_supplier )
 {
 	object *broch, *suppl,
-		   *cap = V_EXTS( GRANDPARENTS( firm ), countryE, capSec );
+		   *cap = V_EXTS( GRANDPARENT, countryE, capSec );
 
 	suppl = RNDDRAWS( cap, "Firm1", "_AtauLP" );// draw capital supplier
-	broch = send_brochure( suppl, firm );		// get supplier brochure
-	WRITE_HOOKS( firm, SUPPL, broch );			// pointer to current supplier
+	broch = CFUNS( suppl, send_brochure, THIS );// get supplier brochure
+	WRITE_HOOK( SUPPL, broch );					// pointer to current supplier
 	INCRS( suppl, "_NC", 1 );					// update supplier's clients #
 
 	return suppl;
@@ -306,12 +304,12 @@ const char *__nCanPar[ ] = { "", "__nCan", "__nCanE" },
 		   *__nOrdPar[ ] = { "", "__nOrd", "__nOrdE" },
 		   *__tOrdPar[ ] = { "", "__tOrd", "__tOrdE" };
 
-void U_FN::send_order( object *firm, double nMach )
+CFUN_VOID( send_order, double nMach )
 {
-	int sec = strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
+	int sec = strcmp( NAME, "Firm2" ) == 0 ? 1 : 2;
 
 	// find firm entry on supplier client list
-	object *cli = SHOOKS( HOOKS( firm, SUPPL ) );
+	object *cli = SHOOKS( HOOK( SUPPL ) );
 
 	if ( VS( cli, __tOrdPar[ sec ] ) < T )		// if first order in period
 	{
@@ -326,17 +324,17 @@ void U_FN::send_order( object *firm, double nMach )
 
 // perform investment according to available funding in equations '_EI', '_SI'
 
-double U_FN::invest( object *firm, double desired )
+CFUN_DBL( invest, double desired )
 {
 	double invest, invCost, loan, loanDes;
 
 	if ( desired <= 0 )
 		return 0;
 
-	double m2 = VS( PARENTS( firm ), "m2" );	// machine output per period
-	double _CS2a = VS( firm, "_CS2a" );			// available credit supply
-	double _NW2 = VS( firm, "_NW2" );			// net worth (cash available)
-	double _p1 = VS( PARENTS( SHOOKS( HOOKS( firm, SUPPL ) ) ), "_p1" );
+	double m2 = VS( PARENT, "m2" );				// machine output per period
+	double _CS2a = V( "_CS2a" );				// available credit supply
+	double _NW2 = V( "_NW2" );					// net worth (cash available)
+	double _p1 = VS( PARENTS( SHOOKS( HOOK( SUPPL ) ) ), "_p1" );
 
 	invCost = _p1 * desired / m2;				// desired investment cost
 
@@ -377,13 +375,13 @@ double U_FN::invest( object *firm, double desired )
 			}
 		}
 
-		update_debt( firm, loanDes, loan );		// update debt (desired/granted)
+		CFUN( update_debt, loanDes, loan );		// update debt (desired/granted)
 	}
 
 	if ( invest > 0 )
 	{
-		update_depo( firm, _NW2, false );		// update the firm net worth
-		send_order( firm, round( invest / m2 ) );// order to machine supplier
+		CFUN( update_depo, _NW2, false );		// update the firm net worth
+		CFUN( send_order, round( invest / m2 ) );// order to machine supplier
 	}
 
 	return invest;
@@ -392,70 +390,91 @@ double U_FN::invest( object *firm, double desired )
 
 // add new vintage to the capital stock of a firm in equation 'K' and 'initCountry'
 
-void U_FN::add_vintage( object *firm, double nMach, bool newInd )
+CFUN_VOID( add_vintage, double nMach, bool newInd )
 {
-	double __AeeVint, __AefVint, __AlpVint, __pVint;
-	int __ageVint, __nMach, __nVint;
-	object *cap, *cons, *cur, *suppl, *vint;
+	double __AeeVint, __AefVint, __AlpVint, __pVint, dY0, nInt, nRem;
+	int __nVint, __tVint, eta;
+	object *cap, *cur, *suppl, *vint;
+	intVecT vintUse;
 
-	suppl = PARENTS( SHOOKS( HOOKS( firm, SUPPL ) ) );// current supplier
-	__nMach = floor( nMach );					// integer number of machines
+	suppl = PARENTS( SHOOKS( HOOK( SUPPL ) ) );	// current supplier
+	nMach = floor( nMach );						// integer number of machines
+	dY0 = VS( GRANDPARENT, "dGDP0" );			// growth rate at t=0
 
 	// at t=1 firms have a mix of machines: old to new, many suppliers
 	if ( newInd )
 	{
-		cap = V_EXTS( GRANDPARENTS( firm ), countryE, capSec );
-		cons = V_EXTS( GRANDPARENTS( firm ), countryE, conSec );
+		cap = V_EXTS( GRANDPARENT, countryE, capSec );
+		eta = VS( V_EXTS( GRANDPARENT, countryE, conSec ), "eta" );// tech. life
 
-		__ageVint = VS( cons, "eta" ) + 1;		// age of oldest machine
-		__nVint = ceil( nMach / __ageVint );	// machines per vintage
-		__AeeVint = INIEEFF;					// initial energy efficiency
-		__AefVint = INIEFRI;					// initial envir. friendliness
-		__AlpVint = INIPROD;					// initial labor productivity
-		__pVint = VLS( cap, "p1avg", 1 );		// initial machine price
+		__tVint = - eta;						// time of oldest vintage to try
+		__AeeVint = CFUN( init_cond, "AtauEE0" );// initial energy efficiency
+		__AefVint = CFUN( init_cond, "AtauEF0" );// initial envir. friendliness
+		__AlpVint = CFUN( init_cond, "AtauLP0" ) /
+					pow( 1 + dY0, eta );		// productivity of oldest vintage
+		__pVint = CFUN( init_cond, "p10" );		// initial machine price
+
+		nInt = floor( nMach / ( eta + 1 ) );	// machines per every vintage
+		nRem = nMach - nInt * ( eta + 1 );		// remainder machines
+		vintUse.resize( eta + 1 );				// list of installed vintages
+		iota( vintUse.begin( ), vintUse.end( ), - eta );// assign vint. times
+		shuffle( vintUse.begin( ), vintUse.end( ), random_engine );
+		vintUse.resize( nRem );					// random vintages for remainder
 	}
 	else
 	{
-		__ageVint = 1 - T;
-		__nVint = __nMach;
+		__tVint = T;
 		__AeeVint = VS( suppl, "_AtauEE" );
 		__AefVint = VS( suppl, "_AtauEF" );
 		__AlpVint = VS( suppl, "_AtauLP" );
 		__pVint = VS( suppl, "_p1" );
 	}
 
-	while ( __nMach > 0 )
+	while ( nMach > 0 )
 	{
+		// adjust non-integer differences randomly ove vintages
 		if ( newInd )
 		{
-			cur = RNDDRAW_FAIRS( cap, "Firm1" );// draw another supplier
-			if ( cur == suppl )					// don't use current supplier
-				continue;
-
-			vint = ADDOBJLS( firm, "Vint", T - 1 );// recalculate in t=1
+			__nVint = nInt;						// allocate uniform part
+			if ( std::find( vintUse.begin( ), vintUse.end( ), __tVint ) !=
+				 vintUse.end( ) )
+				__nVint++;						// allocate remainder part
 		}
 		else
+			__nVint = nMach;
+
+		if ( __nVint > 0 )
 		{
-			cur = suppl;						// just use current supplier
-			vint = ADDOBJS( firm, "Vint" );		// just recalculate in next t
+			if ( newInd )
+			{
+				do
+					cur = RNDDRAW_FAIRS( cap, "Firm1" );// draw another supplier
+				while ( cur == suppl );			// don't use current supplier
+
+				vint = ADDOBJL( "Vint", T - 1 );// recalculate in t=1
+			}
+			else
+			{
+				cur = suppl;					// just use current supplier
+				vint = ADDOBJ( "Vint" );		// just recalculate in next t
+			}
+
+			WRITE_SHOOKS( vint, HOOK( TOPVINT ) );// save previous vintage
+			WRITE_HOOK( TOPVINT, vint );	// save pointer to top vintage
+
+			WRITES( vint, "__IDvint", VNT( T, VS( cur, "_ID1" ) ) );// vintage ID
+			WRITES( vint, "__AeeVint", __AeeVint );	// vintage energy efficiency
+			WRITES( vint, "__AefVint", __AefVint );	// vintage envir. friendliness
+			WRITES( vint, "__AlpVint", __AlpVint );	// vintage labor productivity
+			WRITES( vint, "__nVint", __nVint );	// number of machines in vintage
+			WRITES( vint, "__pVint", __pVint );	// price of machines in vintage
+			WRITES( vint, "__tVint", __tVint );	// vintage build time
+
+			nMach -= __nVint;
 		}
 
-		WRITE_SHOOKS( vint, HOOKS( firm, TOPVINT ) );// save previous vintage
-		WRITE_HOOKS( firm, TOPVINT, vint );		// save pointer to top vintage
-
-		WRITES( vint, "__IDvint", VNT( T, VS( cur, "_ID1" ) ) );// vintage ID
-		WRITES( vint, "__AeeVint", __AeeVint );	// vintage energy efficiency
-		WRITES( vint, "__AefVint", __AefVint );	// vintage envir. friendliness
-		WRITES( vint, "__AlpVint", __AlpVint );	// vintage labor productivity
-		WRITES( vint, "__nVint", __nVint );		// number of machines in vintage
-		WRITES( vint, "__pVint", __pVint );		// price of machines in vintage
-		WRITES( vint, "__tVint", 1 - __ageVint );// vintage build time
-
-		__nMach -= __nVint;
-		--__ageVint;
-
-		if ( __ageVint > 0 && __nMach % __ageVint == 0 )// exact ratio missing?
-			__nVint = __nMach / __ageVint;		// adjust machines per vintage
+		__tVint++;
+		__AlpVint *= 1 + dY0;
 	}
 }
 
@@ -463,23 +482,23 @@ void U_FN::add_vintage( object *firm, double nMach, bool newInd )
 // scrap (remove) vintage from capital stock in equation 'K'
 // return -1 if last vintage (not removed but shrank to 1 machine)
 
-double U_FN::scrap_vintage( c_varT *_v_, object *vint )
+CFUN_DBL( scrap_vintage )
 {
 	double RS;
 
-	if ( NEXTS( vint ) != NULL )				// don't remove last vintage
+	if ( NEXT != NULL )							// don't remove last vintage
 	{
 		// remove as previous vintage from next vintage
-		if ( SHOOKS( NEXTS( vint ) ) == vint )
-			WRITE_SHOOKS( NEXTS( vint ), NULL );
+		if ( SHOOKS( NEXT ) == THIS )
+			WRITE_SHOOKS( NEXT, NULL );
 
-		RS = abs( VS( vint, "__RSvint" ) );
-		DELETE( vint );							// delete vintage
+		RS = abs( V( "__RSvint" ) );
+		DELETE( THIS );							// delete vintage
 	}
 	else
 	{
 		RS = -1;								// signal last machine
-		WRITES( vint, "__nVint", 1 );			// keep just 1 machine
+		WRITE( "__nVint", 1 );			// keep just 1 machine
 	}
 
 	return RS;
@@ -488,22 +507,22 @@ double U_FN::scrap_vintage( c_varT *_v_, object *vint )
 
 // add new green power plant to energy firm in equation 'EIe' and 'initCountry'
 
-object *U_FN::add_green_plant( object *firm, double cap, double nMach, bool newInd )
+CFUN_OBJ( add_green_plant, double cap, double nMach, bool newInd )
 {
 	object *plant;
-	double u = 1 / ( 1 + VS( PARENTS( firm ), "iotaE" ) );
-	double p1 = VS( PARENTS( SHOOKS( HOOKS( firm, SUPPL ) ) ), "_p1" );
+	double u = 1 / ( 1 + VS( PARENT, "iotaE" ) );
+	double p1 = VS( PARENTS( SHOOKS( HOOK( SUPPL ) ) ), "_p1" );
 
 	if ( newInd )
 	{
-		plant = ADDOBJLS( firm, "Green", T - 1 );// recalculate in t
+		plant = ADDOBJL( "Green", T - 1 );		// recalculate in t
 		WRITES( plant, "__lifeGEcycle", 2 );	// already operational
 		WRITES( plant, "__tGE", T - 1 );		// installation time
-		WRITELS( plant, "__QgeU", u, 1 );		// planned utilization
+		WRITELLS( plant, "__QgeU", u, T - 1, 1 );// planned utilization
 	}
 	else
 	{
-		plant = ADDOBJS( firm, "Green" );		// recalculate only in t+1
+		plant = ADDOBJ( "Green" );				// recalculate only in t+1
 		RECALCS( plant, "__lifeGEcycle" );		// except for status
 		WRITES( plant, "__tGE", T );
 		WRITES( plant, "__QgeU", u );
@@ -513,7 +532,7 @@ object *U_FN::add_green_plant( object *firm, double cap, double nMach, bool newI
 	WRITES( plant, "__ICge", p1 * nMach );		// plant capital cost
 	WRITES( plant, "__mGE", cap / nMach );		// unit (machine) power capacity
 
-	WRITE_HOOKS( firm, TOPVINT, plant );		// new top green vintage
+	WRITE_HOOK( TOPVINT, plant );				// new top green vintage
 
 	return plant;
 }
@@ -521,29 +540,29 @@ object *U_FN::add_green_plant( object *firm, double cap, double nMach, bool newI
 
 // add new dirty power plant to energy firm in equation 'EIe' and 'initCountry'
 
-void U_FN::add_dirty_plant( object *firm, double cap, bool newInd )
+CFUN_VOID( add_dirty_plant, double cap, bool newInd )
 {
 	object *plant;
-	double u = 1 / ( 1 + VS( PARENTS( firm ), "iotaE" ) );
+	double u = 1 / ( 1 + VS( PARENT, "iotaE" ) );
 
 	if ( newInd )
 	{
-		plant = ADDOBJLS( firm, "Dirty", T - 1 );// recalculate in t
+		plant = ADDOBJL( "Dirty", T - 1 );		// recalculate in t
 		WRITES( plant, "__lifeDEcycle", 2 );	// already operational
 		WRITES( plant, "__tDE", T - 1 );		// installation time
-		WRITELS( plant, "__QdeU", u, 1 );		// planned utilization
+		WRITELLS( plant, "__QdeU", u, T - 1, 1 );// planned utilization
 	}
 	else
 	{
-		plant = ADDOBJS( firm, "Dirty" );		// recalculate only in t+1
+		plant = ADDOBJ( "Dirty" );				// recalculate only in t+1
 		RECALCS( plant, "__lifeDEcycle" );		// except for status
 		WRITES( plant, "__tDE", T );
 		WRITES( plant, "__QdeU", u );
 	}
 
 	WRITES( plant, "__Kde", cap );				// plant generation capacity
-	WRITES( plant, "__Ade", VS( firm, "_AtauDE" ) );// plant thermal efficiency
-	WRITES( plant, "__emDE", VS( firm, "_emTauDE" ) );// plant emissions
+	WRITES( plant, "__Ade", V( "_AtauDE" ) );	// plant thermal efficiency
+	WRITES( plant, "__emDE", V( "_emTauDE" ) );	// plant emissions
 }
 
 
@@ -552,66 +571,58 @@ void U_FN::add_dirty_plant( object *firm, double cap, bool newInd )
 // add and configure entrant capital-good firm object(s) and required hooks
 // in equations 'entry1exit' and 'initCountry'
 
-double U_FN::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
+CFUN_DBL( entry_firm1, int n, bool newInd )
 {
 	double _AtauEE, _AtauEF, _AtauLP, _BtauEE, _BtauEF, _BtauLP, _D10, _Deb1,
 		   _Eq1, _L1rd, _NW1, _NW10, _RD0, _c1, _cTau, _f1, _p1, AtauLPmax,
 		   BtauLPmax, Deb1, Eq1, NW1, mult;
 	int _ID1, _t1ent;
 	object *firm, *bank,
-		   *cons = V_EXTS( PARENTS( sector ), countryE, conSec ),
-		   *ene = V_EXTS( PARENTS( sector ), countryE, eneSec ),
-		   *lab = V_EXTS( PARENTS( sector ), countryE, labSup );
+		   *cons = V_EXTS( PARENT, countryE, conSec ),
+		   *ene = V_EXTS( PARENT, countryE, eneSec ),
+		   *lab = V_EXTS( PARENT, countryE, labSup );
 
-	double Deb10ratio = VS( sector, "Deb10ratio" );// bank fin. to equity ratio
-	double Phi3 = VS( sector, "Phi3" );			// lower support for wealth share
-	double Phi4 = VS( sector, "Phi4" );			// upper support for wealth share
-	double alpha2 = VS( sector, "alpha2" );		// lower support for imitation
-	double beta2 = VS( sector, "beta2" );		// upper support for imitation
-	double mu1 = VS( sector, "mu1" );			// mark-up in sector 1
-	double m1 = VS( sector, "m1" );				// worker production scale
-	double nu = VS( sector, "nu" );				// share of R&D expenses
+	double Deb10ratio = V( "Deb10ratio" );		// bank fin. to equity ratio
+	double Phi3 = V( "Phi3" );					// lower support for wealth share
+	double Phi4 = V( "Phi4" );					// upper support for wealth share
+	double alpha2 = V( "alpha2" );				// lower support for imitation
+	double beta2 = V( "beta2" );				// upper support for imitation
+	double mu1 = V( "mu1" );					// mark-up in sector 1
+	double m1 = V( "m1" );						// worker production scale
+	double nu = V( "nu" );						// share of R&D expenses
 	double pE = VS( ene, "pE" );				// energy price
-	double trCO2 = VS( PARENTS( sector ), "trCO2" );// carbon tax rate
-	double x5 = VS( sector, "x5" );				// entrant upper advantage
+	double trCO2 = VS( PARENT, "trCO2" );		// carbon tax rate
+	double x5 = V( "x5" );						// entrant upper advantage
 	double w = VS( lab, "w" );					// current wage
 
 	if ( newInd )
 	{
-		double F20 = VS( cons, "F20" );
-		double m2 = VS( cons, "m2" );			// machine output per period
-
-		_AtauEE = _BtauEE = INIEEFF;			// initial products.
-		_AtauEF = _BtauEF = INIEFRI;
-		_AtauLP = AtauLPmax = INIPROD;
-		_BtauLP = BtauLPmax = ( 1 + mu1 ) * _AtauLP /
-							  ( m1 * m2 * VS( cons, "b" ) );
-		_NW10 = VS( sector, "NW10" );			// initial wealth in sector 1
+		_AtauEE = CFUN( init_cond, "AtauEE0" );	// initial products.
+		_AtauEF = CFUN( init_cond, "AtauEF0" );
+		_AtauLP = AtauLPmax = CFUN( init_cond, "AtauLP0" );
+		_BtauEE = CFUN( init_cond, "BtauEE0" );
+		_BtauEF = CFUN( init_cond, "BtauEF0" );
+		_BtauLP = BtauLPmax = CFUN( init_cond, "BtauLP0" );
+		_D10 = CFUN( init_cond, "D10" ) / n;	// steady-state equil. demand
+		_NW10 = V( "NW10" );					// initial wealth in sector 1
 		_f1 = 1.0 / n;							// fair share
 		_t1ent = 0;								// entered before t=1
-
-		// initial demand expectation, assuming all sector 2 firms, 1/eta
-		// replacement factor and fair share in sector 1 and full employment
-		double p20 = VLS( cons, "CPI", 1 );
-		double K0 = ceil( VS( lab, "Ls0" ) * INIWAGE / p20 / F20 / m2 ) * m2;
-
-		_D10 = F20 * K0 / m2 / VS( cons, "eta" ) / n;
 	}
 	else
 	{
-		_AtauEE = AVES( sector, "_AtauEE" );	// avg. machine energy efficiency
-		_AtauEF = AVES( sector, "_AtauEF" );	// avg. machine envir. friendl.
-		_BtauEE = AVES( sector, "_BtauEE" );	// avg. energy effic. in sector 1
-		_BtauEF = AVES( sector, "_BtauEF" );	// avg. env. friend. in sector 1
-		_NW10 = max( WHTAVES( sector, "_NW1", "_f1" ), VS( sector, "NW10" ) *
-					 VS( sector, "PPI" ) / VS( sector, "pK0" ) );
+		_AtauEE = AVE( "_AtauEE" );				// avg. machine energy efficiency
+		_AtauEF = AVE( "_AtauEF" );				// avg. machine envir. friendl.
+		_BtauEE = AVE( "_BtauEE" );				// avg. energy effic. in sector 1
+		_BtauEF = AVE( "_BtauEF" );				// avg. env. friend. in sector 1
+		_NW10 = max( WHTAVE( "_NW1", "_f1" ), V( "NW10" ) *
+					 V( "PPI" ) / V( "pK0" ) );
 		_f1 = 0;								// no market share
 		_t1ent = T;								// entered now
-		AtauLPmax = MAXS( sector, "_AtauLP" );	// best machine lab. productivity
-		BtauLPmax = MAXS( sector, "_BtauLP" );	// best productivity in sector 1
+		AtauLPmax = MAX( "_AtauLP" );			// best machine lab. productivity
+		BtauLPmax = MAX( "_BtauLP" );			// best productivity in sector 1
 
 		// initial demand equal to 1 machine per client under fair share entry
-		_D10 = VS( cons, "F2" ) / VS( sector, "F1" );
+		_D10 = VS( cons, "F2" ) / V( "F1" );
 	}
 
 	// add entrant firms (end of period, don't try to sell)
@@ -619,11 +630,11 @@ double U_FN::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 	{
 		// create object, only recalculate in t if new industry
 		if ( newInd )
-			firm = ADDOBJLS( sector, "Firm1", T - 1 );
+			firm = ADDOBJL( "Firm1", T - 1 );
 		else
-			firm = ADDOBJS( sector, "Firm1" );
+			firm = ADDOBJ( "Firm1" );
 
-		_ID1 = INCRS( sector, "lastID1", 1 );	// new firm ID
+		_ID1 = INCR( "lastID1", 1 );			// new firm ID
 		WRITES( firm, "_ID1", _ID1 );
 
 		ADDHOOKS( firm, FIRM1HK );				// add object hooks
@@ -631,7 +642,7 @@ double U_FN::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 		DELETE( SEARCHS( firm, "CliEn" ) );
 
 		// select associated bank
-		bank = set_bank( firm );
+		bank = CFUNS( firm, set_bank );
 
 		if ( ! newInd )
 		{
@@ -701,14 +712,14 @@ double U_FN::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 
 	if ( newInd )								// set t=0 values
 	{
-		WRITELLS( sector, "Deb1", Deb1, _t1ent, 1 );
-		WRITELLS( sector, "Eq1", Eq1, _t1ent, 1 );
-		WRITELLS( sector, "NW1", NW1, _t1ent, 1 );
+		WRITELL( "Deb1", Deb1, _t1ent, 1 );
+		WRITELL( "Eq1", Eq1, _t1ent, 1 );
+		WRITELL( "NW1", NW1, _t1ent, 1 );
 	}
 	else										// just account new equity
 	{
-		INCRS( sector, "Eq1", Eq1 );
-		INCRS( sector, "cEntry1", Eq1 );
+		INCR( "Eq1", Eq1 );
+		INCR( "cEntry1", Eq1 );
 	}
 
 	return Eq1;
@@ -718,51 +729,38 @@ double U_FN::entry_firm1( c_varT *_v_, object *sector, int n, bool newInd )
 // add and configure entrant consumer-good firm object(s) and required hooks
 // in equations 'entry2exit' and 'initCountry'
 
-double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
+CFUN_DBL( entry_firm2, int n, bool newInd )
 {
-	double _A2, _D20, _D2e, _Deb2, _E, _Eq2, _K, _N, _NW2, _NW2f, _NW20, _Q2u,
-		   _c2, _f2, _life2cycle, _p2, Deb2, Eq2, K, N, NW2, mult;
+	double _A2, _D20, _D2e, _Deb2, _E, _Eq2, _K, _L2, _N, _NW2, _NW2f, _NW20,
+		   _Q2u, _c2, _dD20, _f2, _life2cycle, _p2, Deb2, Eq2, K, N, NW2, mult;
 	int _ID2, _t2ent;
 	object *firm, *bank, *suppl,
-		   *cap = V_EXTS( PARENTS( sector ), countryE, capSec ),
-		   *ene = V_EXTS( PARENTS( sector ), countryE, eneSec ),
-		   *lab = V_EXTS( PARENTS( sector ), countryE, labSup );
+		   *cap = V_EXTS( PARENT, countryE, capSec ),
+		   *ene = V_EXTS( PARENT, countryE, eneSec ),
+		   *lab = V_EXTS( PARENT, countryE, labSup );
 
-	double Deb20ratio = VS( sector, "Deb20ratio" );// bank fin. to equity ratio
-	double Phi1 = VS( sector, "Phi1" );			// lower support for K share
-	double Phi2 = VS( sector, "Phi2" );			// upper support for K share
-	double iota = VS( sector, "iota" );			// desired inventories factor
-	double mu20 = VS( sector, "mu20" );			// initial mark-up in sector 2
-	double m2 = VS( sector, "m2" );				// machine output per period
+	double Deb20ratio = V( "Deb20ratio" );		// bank fin. to equity ratio
+	double Phi1 = V( "Phi1" );					// lower support for K share
+	double Phi2 = V( "Phi2" );					// upper support for K share
+	double iota = V( "iota" );					// desired inventories factor
+	double mu20 = V( "mu20" );					// initial mark-up in sector 2
+	double m2 = V( "m2" );						// machine output per period
 	double p10 = VLS( cap, "p1avg", 1 );		// initial machine price
 	double pE = VS( ene, "pE" );				// energy price
-	double trCO2 = VS( PARENTS( sector ), "trCO2" );// carbon tax rate
-	double u = VS( sector, "u" );				// desired capital utilization
+	double trCO2 = VS( PARENT, "trCO2" );		// carbon tax rate
+	double u = V( "u" );						// desired capital utilization
 	double w = VS( lab, "w" );					// current wage
 
 	if ( newInd )
 	{
-		double phi = VS( lab, "phi" );			// unemployment benefit rate
-		double c10 = p10 / ( 1 + VS( cap, "mu1" ) );// initial unit cost sec. 1
-		double c20 = INIWAGE / INIPROD +		// initial unit cost sec. 2
-					 ( pE + trCO2 * INIEFRI ) / INIEEFF;
-		double p20 = ( 1 + mu20 ) * c20;		// initial consumer-good price
-		double trW = VS( PARENTS( sector ), "flagTax" ) > 0 ?
-					 VS( PARENTS( sector ), "tr" ) : 0;// tax rate on wages
-		double K0 = ceil( VS( lab, "Ls0" ) * INIWAGE /
-						  p20 / n / m2 ) * m2;	// full employment K required
-		double SIr0 = n * K0 / m2 / VS( sector, "eta" );// substit. real invest.
-		double RD0 = VS( cap, "nu" ) * SIr0 * p10;// initial R&D expense
-
-		// initial steady state demand under fair share
-		_D20 = ( ( SIr0 * c10 + RD0 ) * ( 1 - phi - trW ) +
-				VS( lab, "Ls0" ) * INIWAGE * phi ) /
-			  ( mu20 + phi + trW ) * c20 / n;
-		_E = VLS( sector, "Eavg", 1 );			// initial competitiveness
-		_K = K0;								// initial capital in sector 2
-		_N = iota * _D20;						// initial inventories
-		_NW20 = VS( sector, "NW20" );			// initial wealth in sector 2
+		_D20 = CFUN( init_cond, "D20" ) / n;	// steady-state equil. demand
+		_E = CFUN( init_cond, "E0" );			// initial competitiveness
+		_K = CFUN( init_cond, "K0" ) / n;		// initial capital in sector 2
+		_L2 = CFUN( init_cond, "L20" ) / n;		// initial labor in sector 2
+		_N = CFUN( init_cond, "N0" ) / n;		// initial inventories
+		_NW20 = V( "NW20" );					// initial wealth in sector 2
 		_Q2u = 1;								// initial capacity utilization
+		_dD20 = VS( PARENT, "dGDP0" );			// pre-initialization growth
 		_f2 = 1.0 / n;							// fair share
 		_life2cycle = 1;						// start as incumbent
 		_t2ent = 0;								// entered before t=1
@@ -770,11 +768,13 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 	else
 	{
 		_D20 = 0;
-		_E = VS( sector, "Eavg" );				// average competitiveness
-		_K = WHTAVES( sector, "_K", "_f2" );	// w. avg. capital in sector 2
+		_E = V( "Eavg" );						// average competitiveness
+		_K = WHTAVE( "_K", "_f2" );				// w. avg. capital in sector 2
+		_L2 = 0;								// labor employed
 		_N = 0;									// inventories
-		_NW20 = WHTAVES( sector, "_NW2", "_f2" );// average wealth in sector 2
-		_Q2u = VS( sector, "Q2u" );				// capacity utilization
+		_NW20 = WHTAVE( "_NW2", "_f2" );		// average wealth in sector 2
+		_Q2u = V( "Q2u" );						// capacity utilization
+		_dD20 = 0;
 		_f2 = 0;								// no market share
 		_life2cycle = 0;						// start as pre-operat. entrant
 		_t2ent = T;								// entered now
@@ -785,11 +785,11 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 	{
 		// create object, only recalculate in t if new industry
 		if ( newInd )
-			firm = ADDOBJLS( sector, "Firm2", T - 1 );
+			firm = ADDOBJL( "Firm2", T - 1 );
 		else
-			firm = ADDOBJS( sector, "Firm2" );
+			firm = ADDOBJ( "Firm2" );
 
-		_ID2 = ID( 2, INCRS( sector, "lastID2", 1 ) );// new firm ID
+		_ID2 = ID( 2, INCR( "lastID2", 1 ) );	// new firm ID
 		WRITES( firm, "_ID2", _ID2 );
 
 		ADDHOOKS( firm, FIRM2HK );				// add object hooks
@@ -797,10 +797,10 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 		DELETE( SEARCHS( firm, "Broch" ) );
 
 		// select associated bank
-		bank = set_bank( firm );
+		bank = CFUNS( firm, set_bank );
 
 		// select initial machine supplier
-		suppl = set_supplier( firm );
+		suppl = CFUNS( firm, set_supplier );
 
 		// initial desired capital/expected demand, rounded to # of machines
 		mult = newInd ? 1 : uniform( Phi1, Phi2 );// capital multiple
@@ -809,9 +809,19 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 		N += _N;
 
 		// define entrant initial free cash (1 period wages or default minimum)
-		mult = newInd ? 1 : uniform( Phi1, Phi2 );// NW multiple
-		_A2 = VS( suppl, "_AtauLP" );			// initial labor productivity
-		_c2 = VS( suppl, "_cTau" );				// initial unit costs
+		if ( newInd )
+		{
+			mult = 1;							// NW multiple
+			_A2 = CFUN( init_cond, "AlpIni" );	// initial labor productivity
+			_c2 = CFUN( init_cond, "c20" );		// initial unit costs
+		}
+		else
+		{
+			mult = uniform( Phi1, Phi2 );
+			_A2 = VS( suppl, "_AtauLP" );
+			_c2 = VS( suppl, "_cTau" );
+		}
+
 		_p2 = ( 1 + mu20 ) * _c2;				// initial price
 		_NW2f = ( 1 + iota ) * _D2e * _c2;		// initial free cash
 		_NW2f = max( _NW2f, mult * _NW20 );
@@ -826,6 +836,7 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 		WRITES( firm, "_t2ent", _t2ent );
 		WRITES( firm, "_life2cycle", _life2cycle );
 		WRITELLS( firm, "_A2", _A2, _t2ent, 1 );
+		WRITELLS( firm, "_L2", _L2, _t2ent, 1 );
 		WRITELLS( firm, "_f2", _f2, _t2ent, 1 );
 		WRITELLS( firm, "_f2", _f2, _t2ent, 2 );
 		WRITELLS( firm, "_mu2", mu20, _t2ent, 1 );
@@ -834,18 +845,19 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 
 		for ( int i = 1; i <= 4; ++i )
 		{
-			WRITELLS( firm, "_D2", _D2e, _t2ent, i );
-			WRITELLS( firm, "_D2d", _D2e, _t2ent, i );
+			WRITELLS( firm, "_D2", _D2e * ( 1 - _dD20 * ( i - 1 ) ), _t2ent, i );
+			WRITELLS( firm, "_D2d", _D2e * ( 1 - _dD20 * ( i - 1 ) ), _t2ent, i );
 		}
 
 		if ( newInd )
 		{
+			WRITELLS( firm, "_D2e", _D2e, _t2ent, 1 );
 			WRITELLS( firm, "_Deb2", _Deb2, _t2ent, 1 );
 			WRITELLS( firm, "_K", _K, _t2ent, 1 );
 			WRITELLS( firm, "_N", _N, _t2ent, 1 );
 			WRITELLS( firm, "_NW2", _NW2, _t2ent, 1 );
 
-			add_vintage( firm, _K / m2, newInd );// first machine vintages
+			CFUNS( firm, add_vintage, _K / m2, newInd );// first machine vintages
 		}
 		else
 		{
@@ -869,16 +881,16 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 
 	if ( newInd )								// set t=0 values
 	{
-		WRITELLS( sector, "Deb2", Deb2, _t2ent, 1 );
-		WRITELLS( sector, "Eq2", Eq2, _t2ent, 1 );
-		WRITELLS( sector, "K", K, _t2ent, 1 );
-		WRITELLS( sector, "N", N, _t2ent, 1 );
-		WRITELLS( sector, "NW2", NW2, _t2ent, 1 );
+		WRITELL( "Deb2", Deb2, _t2ent, 1 );
+		WRITELL( "Eq2", Eq2, _t2ent, 1 );
+		WRITELL( "K", K, _t2ent, 1 );
+		WRITELL( "N", N, _t2ent, 1 );
+		WRITELL( "NW2", NW2, _t2ent, 1 );
 	}
 	else										// just account new equity
 	{
-		INCRS( sector, "Eq2", Eq2 );
-		INCRS( sector, "cEntry2", Eq2 );
+		INCR( "Eq2", Eq2 );
+		INCR( "cEntry2", Eq2 );
 	}
 
 	return Eq2;
@@ -888,68 +900,64 @@ double U_FN::entry_firm2( c_varT *_v_, object *sector, int n, bool newInd )
 // add and configure entrant energy producer firm object(s) and required hooks
 // in equations 'entryEexit' and 'initCountry'
 
-double U_FN::entry_firmE( c_varT *_v_, object *sector, int n, bool newInd )
+CFUN_DBL( entry_firmE, int n, bool newInd )
 {
-	double _AtauDE, _DeE, _DebE, _EqE, _ICtauGE, _Kde, _Kge, _KgeD, _NWe,
-		   _emTauDE, _fE, _fKge, _pE, _p1, _rEdeb, AtauDEmax, AtauDEmin, DebE,
-		   EqE, ICtauGEmax, ICtauGEmin, Kde, Kge, NWe, NWe0, emTauDEavg, mult;
+	double _AtauDE, _DeE, _DebE, _EqE, _ICtauGE, _Kde, _Kge, _KgeD, _NWe, _emTauDE,
+		   _fE, _fKge, _muE, _pE, _p1, _rEdeb, AtauDEmax, AtauDEmin, DebE, EqE,
+		   ICtauGEmax, ICtauGEmin, Kde, Kge, NWe, NWe0, emTauDEavg, mult;
 	int _IDe, _nMach, _tEent;
 	object *firm, *bank, *plant, *suppl,
-		   *cap = V_EXTS( PARENTS( sector ), countryE, capSec ),
-		   *cons = V_EXTS( PARENTS( sector ), countryE, conSec ),
-		   *fin = V_EXTS( PARENTS( sector ), countryE, finSec ),
-		   *lab = V_EXTS( PARENTS( sector ), countryE, labSup );
+		   *cap = V_EXTS( PARENT, countryE, capSec ),
+		   *cons = V_EXTS( PARENT, countryE, conSec ),
+		   *fin = V_EXTS( PARENT, countryE, finSec ),
+		   *lab = V_EXTS( PARENT, countryE, labSup );
 
-	double DebE0ratio = VS( sector, "DebE0ratio" );// bank fin. to equity ratio
-	double Phi5 = VS( sector, "Phi5" );			// lower support for wealth share
-	double Phi6 = VS( sector, "Phi6" );			// upper support for wealth share
-	double alpha3 = VS( sector, "alpha3" );		// lower support for imitation
-	double beta3 = VS( sector, "beta3" );		// upper support for imitation
-	double bE = VS( sector, "bE" );				// required payback period
-	double fGE0 = VS( sector, "fGE0" );			// initial green energy share
-	double iotaE = VS( sector, "iotaE" );		// planned reserve capacity
+	double DebE0ratio = V( "DebE0ratio" );		// bank fin. to equity ratio
+	double Phi5 = V( "Phi5" );					// lower support for wealth share
+	double Phi6 = V( "Phi6" );					// upper support for wealth share
+	double alpha3 = V( "alpha3" );				// lower support for imitation
+	double beta3 = V( "beta3" );				// upper support for imitation
+	double bE = V( "bE" );						// required payback period
+	double fGE0 = V( "fGE0" );					// initial green energy share
+	double iotaE = V( "iotaE" );				// planned reserve capacity
 	double kConst = VS( fin, "kConst" );		// debt interest scale factor
-	double pF = VS( sector, "pF" );				// fossil fuel price
-	double x6 = VS( sector, "x6" );				// entrant upper advantage
-	int flagEnClim = VS( PARENTS( sector ), "flagEnClim" );// energy enable flag
+	double muE0 = V( "muE0" );					// initial markup wage multiple
+	double pF = V( "pF" );						// fossil fuel price
+	double x6 = V( "x6" );						// entrant upper advantage
+	double w0 = VLS( lab, "w", 1 );				// initial wage
+	int flagEnClim = VS( PARENT, "flagEnClim" );// energy enable flag
 
-	double _muE = VS( sector, "muE0" ) * VLS( lab, "wReal", 1 );// mark-up floor
 	int _qc0 = 4;								// start at end of pecking order
 
 	if ( newInd )
 	{
-		double p20 = VLS( cons, "CPI", 1 );
-		double D10 = VS( lab, "Ls0" ) * INIWAGE / p20 / VS( cons, "m2" ) /
-					 VS( cons, "eta" );			// initial demand for sector 1
-		double D20 = SUMLS( cons, "_D2", 1 ) ;	// initial demand for sector 2
-
-		// initial steady state expected demand under fair share
-		_DeE = ( D10 / VS( cap, "m1" ) + D20 ) / INIEEFF / n;
-
-		_AtauDE = VS( sector, "Ade0" );			// ini. efficiency dirty plant
-		_ICtauGE = VS( sector, "ICge0" );		// initial green plant unit cost
-		_emTauDE = VS( sector, "emDE0" );		// initial emissions dirty plant
+		_AtauDE = V( "Ade0" );					// ini. efficiency dirty plant
+		_DeE = CFUN( init_cond, "De0" ) / n;	// steady-state equil. demand
+		_ICtauGE = V( "ICge0" );				// initial green plant unit cost
+		_emTauDE = V( "emDE0" );				// initial emissions dirty plant
 		_fE = 1.0 / n;							// fair share
-		_fKge = VS( sector, "fGE0" );			// initial share of green plants
-		_pE = _muE + ( _fKge == 1 ? 0 : pF / _AtauDE );// initial price
+		_fKge = V( "fGE0" );					// initial share of green plants
+		_muE = muE0 * w0;						// mark-up floor
+		_pE = CFUN( init_cond, "pE0" );			// initial price
 		_rEdeb = VLS( fin, "rDeb", 1 ) * ( 1 + ( _qc0 - 1 ) * kConst );// interest
 		_tEent = 0;								// entered before t=1
-		NWe0 = VS( sector, "NWe0" );			// initial wealth in energy sec.
+		NWe0 = V( "NWe0" );						// initial wealth in energy sec.
 	}
 	else
 	{
-		_DeE = VS( PARENTS( sector ), "En" ) / VS( sector, "Fe" );// fair share
-		_emTauDE = AVES( sector, "_emTauDE" );	// average dirty energy emissions
+		_DeE = VS( PARENT, "En" ) / V( "Fe" );	// fair share
+		_emTauDE = AVE( "_emTauDE" );			// average dirty energy emissions
 		_fE = 0;								// no market share
-		_fKge = WHTAVES( sector, "_fKge", "_fE" );// average share of green plants
-		_pE = WHTAVES( sector, "_pE", "_fE" );	// average power price
+		_fKge = WHTAVE( "_fKge", "_fE" );		// average share of green plants
+		_muE = muE0 * VLS( lab, "wReal", 1 );	// mark-up floor
+		_pE = WHTAVE( "_pE", "_fE" );			// average power price
 		_rEdeb = VS( fin, "rDeb" ) * ( 1 + ( _qc0 - 1 ) * kConst );// interest
 		_tEent = T;								// entered now
-		AtauDEmax = MAXS( sector, "_AtauDE" );	// max dirty energy efficiency
-		AtauDEmin = MINS( sector, "_AtauDE" );	// min dirty energy efficiency
-		ICtauGEmax = MAXS( sector, "_ICtauGE" );// max green plant cost
-		ICtauGEmin = MINS( sector, "_ICtauGE" );// min green plant cost
-		NWe0 = max( WHTAVES( sector, "_NWe", "_fE" ), VS( sector, "NWe0" ) );
+		AtauDEmax = MAX( "_AtauDE" );			// max dirty energy efficiency
+		AtauDEmin = MIN( "_AtauDE" );			// min dirty energy efficiency
+		ICtauGEmax = MAX( "_ICtauGE" );			// max green plant cost
+		ICtauGEmin = MIN( "_ICtauGE" );			// min green plant cost
+		NWe0 = max( WHTAVE( "_NWe", "_fE" ), V( "NWe0" ) );
 	}
 
 	// add entrant firms (end of period, don't try to sell)
@@ -957,11 +965,11 @@ double U_FN::entry_firmE( c_varT *_v_, object *sector, int n, bool newInd )
 	{
 		// create object, only recalculate in t if new industry
 		if ( newInd )
-			firm = ADDOBJLS( sector, "FirmE", T - 1 );
+			firm = ADDOBJL( "FirmE", T - 1 );
 		else
-			firm = ADDOBJS( sector, "FirmE" );
+			firm = ADDOBJ( "FirmE" );
 
-		_IDe = ID( 3, INCRS( sector, "lastIDe", 1 ) );// new firm ID
+		_IDe = ID( 3, INCR( "lastIDe", 1 ) );// new firm ID
 		WRITES( firm, "_IDe", _IDe );
 
 		ADDHOOKS( firm, FIRMEHK );				// add object hooks
@@ -971,10 +979,10 @@ double U_FN::entry_firmE( c_varT *_v_, object *sector, int n, bool newInd )
 		DELETE( SEARCHS( firm, "BrE" ) );
 
 		// select associated bank
-		bank = set_bank( firm );
+		bank = CFUNS( firm, set_bank );
 
 		// select initial machine supplier
-		suppl = set_supplier( firm );
+		suppl = CFUNS( firm, set_supplier );
 
 		if ( ! newInd )
 		{
@@ -1043,10 +1051,10 @@ double U_FN::entry_firmE( c_varT *_v_, object *sector, int n, bool newInd )
 			WRITELLS( firm, "_NWe", _NWe, _tEent, 1 );
 
 			if ( _Kge > 0 )						// first green plant
-				add_green_plant( firm, _Kge, _nMach, true );
+				CFUNS( firm, add_green_plant, _Kge, _nMach, true );
 
 			if ( _Kde > 0 )						// first dirty plant
-				add_dirty_plant( firm, _Kde, true );
+				CFUNS( firm, add_dirty_plant, _Kde, true );
 		}
 		else
 		{
@@ -1071,15 +1079,15 @@ double U_FN::entry_firmE( c_varT *_v_, object *sector, int n, bool newInd )
 
 	if ( newInd )								// set t=0 values
 	{
-		WRITELLS( sector, "DebE", DebE, _tEent, 1 );
-		WRITELLS( sector, "EqE", EqE, _tEent, 1 );
-		WRITELLS( sector, "Ke", Kge + Kde, _tEent, 1 );
-		WRITELLS( sector, "NWe", NWe, _tEent, 1 );
+		WRITELL( "DebE", DebE, _tEent, 1 );
+		WRITELL( "EqE", EqE, _tEent, 1 );
+		WRITELL( "Ke", Kge + Kde, _tEent, 1 );
+		WRITELL( "NWe", NWe, _tEent, 1 );
 	}
 	else										// just account new equity
 	{
-		INCRS( sector, "EqE", EqE );
-		INCRS( sector, "cEntryE", EqE );
+		INCR( "EqE", EqE );
+		INCR( "cEntryE", EqE );
 	}
 
 	return EqE;
@@ -1094,24 +1102,24 @@ const char *_BadDebVar[ ] = { "_BadDeb1", "_BadDeb2", "_BadDebE", "_BadDebGE" },
 		   *EqVar[ ] = { "Eq1", "Eq2", "EqE" },
 		   *cExitVar[ ] = { "cExit1", "cExit2", "cExitE" };
 
-double U_FN::exit_firm( c_varT *_v_, object *firm )
+CFUN_DBL( exit_firm )
 {
 	double liqEq, liqVal, DebGE;
 	object *bank, *cli;
-	int sec = strcmp( NAMES( firm ), "Firm1" ) == 0 ? 0 :
-			  strcmp( NAMES( firm ), "Firm2" ) == 0 ? 1 : 2;
+	int sec = strcmp( NAME, "Firm1" ) == 0 ? 0 :
+			  strcmp( NAME, "Firm2" ) == 0 ? 1 : 2;
 
 	// remove equity from sector total
-	INCRS( PARENTS( firm ), EqVar[ sec ], - VS( firm, _EqVar[ sec ] ) );
+	INCRS( PARENT, EqVar[ sec ], - V( _EqVar[ sec ] ) );
 
 	// account liquidation equity credit of shareholder or bad debt cost of bank
-	liqVal = VS( firm, _NWvar[ sec ] ) - VS( firm, _DebVar[ sec ] );
-	DebGE = sec == 2 ? VS( firm, "_DebGE" ) : 0;// green project finance
+	liqVal = V( _NWvar[ sec ] ) - V( _DebVar[ sec ] );
+	DebGE = sec == 2 ? V( "_DebGE" ) : 0;// green project finance
 
 	if ( liqVal - DebGE < 0 )					// account bank losses, if any
 	{
 		liqEq = 0;								// no liquidation equity
-		bank = HOOKS( firm, BANK );				// exiting firm bank
+		bank = HOOK( BANK );					// exiting firm bank
 		VS( bank, _BadDebVar[ sec ] );			// ensure reset in t
 		INCRS( bank, _BadDebVar[ sec ], - liqVal );// accumulate bank losses
 
@@ -1124,29 +1132,234 @@ double U_FN::exit_firm( c_varT *_v_, object *firm )
 	else
 	{
 		liqEq = ROUND( liqVal - DebGE, 0, 0.01 );// liquidation equity credit
-		INCRS( PARENTS( firm ), cExitVar[ sec ], liqEq );
+		INCRS( PARENT, cExitVar[ sec ], liqEq );
 	}
 
-	DELETE( HOOKS( firm, BCLIENT ) );			// leave client list of bank
+	DELETE( HOOK( BCLIENT ) );					// leave client list of bank
 
-	CYCLES( firm, cli, CliBrochObj[ sec ] )		// leave 1st counterpart list
+	CYCLE( cli, CliBrochObj[ sec ] )			// leave 1st counterpart list
 		DELETE( SHOOKS( cli ) );				// delete from counterpart lists
 
 	if ( sec == 0 )
-		CYCLES( firm, cli, "CliEn" )			// leave 2nd counterpart list
+		CYCLE( cli, "CliEn" )					// leave 2nd counterpart list
 			DELETE( SHOOKS( cli ) );			// delete from counterpart lists
 
 	if ( sec == 1 )
 		// update firm map before removing LSD object in consumption sector
-		EXEC_EXTS( GRANDPARENTS( firm ), countryE, firm2map, erase,
-				   ( int ) VS( firm, _IDpar[ sec ] ) );
+		EXEC_EXTS( GRANDPARENT, countryE, firm2map, erase,
+				   ( int ) V( _IDpar[ sec ] ) );
 
 	if ( sec == 2 )
 		// update firm map before removing LSD object in energy sector
-		EXEC_EXTS( GRANDPARENTS( firm ), countryE, firmEmap, erase,
-				   ( int ) VS( firm, _IDpar[ sec ] ) );
+		EXEC_EXTS( GRANDPARENT, countryE, firmEmap, erase,
+				   ( int ) V( _IDpar[ sec ] ) );
 
-	DELETE( firm );
+	DELETE( THIS );
 
 	return liqEq;
+}
+
+
+// steady-state initial conditions constants
+
+CFUN_DBL( init_cond, const char *var )
+{
+	static bool computed = false;
+	static map < string, double > v;
+
+	if ( var == NULL )							// simulation reset?
+		computed = false;
+
+	if ( ! computed )
+	{
+		computed = true;
+
+		// model parameters
+		bool flagEnClim = V( "flagEnClim" );	// energy sector enabled?
+		double Ade0 = VS( ENESECL0, "Ade0" );	// initial efficiency dirty plant
+		double Deb10ratio = VS( CAPSECL0, "Deb10ratio" );// initial debt-to-equity
+		double Deb20ratio = VS( CONSECL0, "Deb20ratio" );
+		double DebE0ratio = VS( ENESECL0, "DebE0ratio" );
+		double F10 = VS( CAPSECL0, "F10" );		// initial number of firms
+		double F20 = VS( CONSECL0, "F20" );
+		double Fe0 = VS( ENESECL0, "Fe0" );
+		double Ls0 = VS( LABSUPL0, "Ls0" );		// initial labor supply
+		double NW10 = VS( CAPSECL0, "NW10" );	// initial net worth (cash)
+		double NW20 = VS( CONSECL0, "NW20" );
+		double NWe0 = VS( ENESECL0, "NWe0" );
+		double b = VS( CONSECL0, "b" );			// investment payback period
+		double bE = VS( ENESECL0, "bE" );		// energy invest. payback period
+		double dY0 = V( "dGDP0" );				// steady-state initial growth
+		double emDE0 = VS( ENESECL0, "emDE0" );	// initial emissions coefficient
+		double eta = VS( CONSECL0, "eta" );		// technical machine lifetime
+		double etaE = VS( ENESECL0, "etaE" );	// technical power plant lifetime
+		double fGE0 = VS( ENESECL0, "fGE0" );	// initial share of green energy
+		double iota = VS( CONSECL0, "iota" );	// desired inventory factor
+		double iotaE = VS( ENESECL0, "iotaE" );	// reserve plant capacity factor
+		double m1 = VS( CAPSECL0, "m1" );		// output factor in capital sec.
+		double m2 = VS( CONSECL0, "m2" );		// output factor in cons. sec.
+		double mDE = VS( ENESECL0, "mDE" );		// labor intensity dirty energy
+		double mGE = VS( ENESECL0, "mGE" );		// labor intensity green energy
+		double mu1 = VS( CAPSECL0, "mu1" );		// mark-up in capital sector
+		double mu20 = VS( CONSECL0, "mu20" );	// initial mark-up in cons. sec.
+		double muE0 = VS( ENESECL0, "muE0" );	// initial mark-up in energy sec.
+		double muBonds = VS( FINSECL0, "muBonds" );// mark-down interest on bonds
+		double muD = VS( FINSECL0, "muD" );		// mark-down interest on deposits
+		double muDeb = VS( FINSECL0, "muDeb" );	// mark-up interest on loan debt
+		double muRes = VS( FINSECL0, "muRes" );	// mark-down interest on reserves
+		double nu = VS( CAPSECL0, "nu" );		// R&D to sales ratio
+		double nuE = VS( ENESECL0, "nuE" );		// R&D to energy sales ratio
+		double omega1 = VS( CONSECL0, "omega1" );// price weight on competitiv.
+		double omega2 = VS( CONSECL0, "omega2" );// delivery weight on competitiv.
+		double pF0 = VS( ENESECL0, "pF0" );		// initial price of fossil fuel
+		double phi = VS( LABSUPL0, "phi" );		// unemployment benefit rate
+		double rT = VS( FINSECL0, "rT" );		// target prime interest rate
+		double tr = V( "tr" );					// tax rate
+		double trIn = V( "flagTax" ) > 0 ? tr : 0;// tax rate on income (wages)
+		double trCO2 = V( "trCO2" );			// carbon tax rate
+		double trCO2e = VS( ENESECL0, "trCO2e" );// carbon tax rate energy sec.
+		double tA0 = VS( CLIMATL0, "tA0" );		// energy-source competition time
+		double u = VS( CONSECL0, "u" );			// planned capital utilization
+
+		// macro prices
+		v[ "w0" ] = INIWAGE;
+		v[ "r0" ] = rT;
+		v[ "rBonds0" ] = ( 1 - muBonds ) * v[ "r0" ];
+		v[ "rD0" ] = ( 1 - muD ) * v[ "r0" ];
+		v[ "rDeb0" ] = ( 1 + muDeb ) * v[ "r0" ];
+		v[ "rRes0" ] = ( 1 - muRes ) * v[ "r0" ];
+
+		// technology and productivities
+		v[ "AtauLP0" ] = INIPROD;
+		v[ "AtauEE0" ] = INIEEFF * v[ "AtauLP0" ];
+		v[ "AtauEF0" ] = INIEFRI * v[ "AtauLP0" ];
+		v[ "BtauLP0" ] = v[ "AtauLP0" ] * ( 1 + mu1 ) / ( m1 * m2 * b );
+		v[ "BtauEE0" ] = INIEEFF * v[ "AtauLP0" ];
+		v[ "BtauEF0" ] = INIEFRI * v[ "AtauLP0" ];
+		v[ "ICge0" ] = ( 1 + log( tA0 + 1 ) ) * bE * pF0 / Ade0;
+		v[ "Tk0" ] = min( ceil( eta * u * ( 1 + dY0 ) ), eta );
+
+		if ( dY0 == 0 )
+			v[ "AlpIni" ] = v[ "AtauLP0" ];
+		else
+			v[ "AlpIni" ] = v[ "AtauLP0" ] / ( v[ "Tk0" ] + 1 ) *
+							( 1 + ( 1 + dY0 ) *
+							( 1 - pow( 1 + dY0, - v[ "Tk0" ] ) ) / dY0 );
+
+		// costs and prices
+		if ( flagEnClim )
+		{
+			v[ "cE0" ] = fGE0 * mGE * v[ "w0" ] + ( 1 - fGE0 ) *
+												  ( pF0 / Ade0 + mDE * v[ "w0" ] );
+			if ( fGE0 == 1 )
+				v[ "pE0" ] = ( mGE + muE0 ) * v[ "w0" ];
+			else
+				v[ "pE0" ] = pF0 / Ade0 + ( mDE + muE0 ) * v[ "w0" ];
+		}
+		else
+			v[ "cE0" ] = v[ "pE0" ] = 0;
+
+		v[ "c10" ] = ( 1 / m1 ) * ( v[ "w0" ] / v[ "BtauLP0" ] +
+									( v[ "pE0" ] + trCO2 * v[ "BtauEF0" ] ) /
+									v[ "BtauEE0" ] );
+		v[ "c20" ] = v[ "w0" ] / v[ "AlpIni" ] +
+					 ( v[ "pE0" ] + trCO2 * v[ "AtauEF0" ] ) / v[ "AtauEE0" ];
+		v[ "p10" ] = ( 1 + mu1 ) * v[ "c10" ];
+		v[ "p20" ] = ( 1 + mu20 ) * v[ "c20" ];
+		v[ "mE0" ] = v[ "p10" ] / v[ "ICge0" ];
+
+		// steady state capital, demand, production and inventory
+		v[ "delta20" ] = iota * ( 1 - 1 / ( 1 + dY0 ) ) + 1;
+		v[ "rho20" ] = ( 1 + dY0) * u / v[ "AlpIni" ];
+
+		if ( flagEnClim )
+			v[ "thetaE0" ] = etaE * v[ "mE0" ] * ( 1 + iotaE ) *
+							 ( v[ "delta20" ] * v[ "AtauEE0" ] +
+							   ( 1 + dY0 ) * u * eta * m1 * m2 * v[ "BtauEE0" ] ) /
+							 ( eta * m2 * v[ "delta20" ] * v[ "AtauEE0" ] *
+							   ( etaE * m1 * v[ "mE0" ] * v[ "BtauEE0" ] -
+								 ( 1 + iotaE ) * fGE0 ) );
+		else
+			v[ "thetaE0" ] = 0;
+
+		v[ "psi10" ] = 1 / ( eta * m2 ) +
+					   v[ "thetaE0" ] * fGE0 / ( etaE * v[ "mE0" ] );
+		v[ "kappa10" ] = nu * v[ "p10" ] / v[ "w0" ] +
+						 1 / ( m1 * v[ "BtauLP0" ] );
+		v[ "lambdaE0" ] = ( 1 + dY0 ) *
+						  ( nuE * v[ "pE0" ] / ( v[ "w0" ] * ( 1 + iotaE ) ) +
+							mDE * ( 1 - fGE0 ) + mGE * fGE0 );
+		v[ "K0" ] = phi * Ls0 / ( ( 1 + dY0 ) * u * v[ "p20" ] /
+									( v[ "w0" ] * v[ "delta20" ] ) -
+								  ( 1 - phi - trIn ) *
+								  ( v[ "kappa10" ] * v[ "psi10" ] + v[ "rho20" ] +
+									v[ "thetaE0" ] * v[ "lambdaE0" ] ) );
+		v[ "Ke0" ] = v[ "thetaE0" ] * v[ "K0" ];
+		v[ "De0" ] = ( 1 + dY0 ) / ( 1 + iotaE ) * v[ "Ke0" ];
+		v[ "Df0" ] = ( 1 - fGE0 ) / Ade0 * v[ "De0" ];
+		v[ "D10" ] = v[ "Q10" ] = v[ "psi10" ] * v[ "K0" ];
+		v[ "D20" ] = u * ( 1 + dY0 ) / v[ "delta20" ] * v[ "K0" ];
+		v[ "Qe0" ] = ( 1 + iotaE ) * v[ "De0" ];
+		v[ "Q20" ] = v[ "delta20" ] * v[ "D20" ];
+		v[ "N0" ] = iota * v[ "D20" ];
+
+		// labor employed and real wage
+		v[ "L0" ] = ( v[ "kappa10" ] * v[ "psi10" ] + v[ "rho20" ] +
+					  v[ "lambdaE0" ] * v[ "thetaE0" ] ) * v[ "K0" ];
+		v[ "Le0" ] = v[ "lambdaE0" ] * v[ "thetaE0" ] * v[ "K0" ];
+		v[ "L10" ] = v[ "kappa10" ] * v[ "psi10" ] * v[ "K0" ];
+		v[ "L20" ] = v[ "rho20" ] * v[ "K0" ];
+		v[ "U0" ] = 1 - min( v[ "L0" ] / Ls0, 1 );
+		v[ "wReal0" ] = v[ "w0" ] / v[ "p20" ];
+
+		// energy consumption and CO2 emissions
+		v[ "En10" ] = v[ "D10" ] / ( m1 * v[ "BtauEE0" ] );
+		v[ "En20" ] = v[ "D20" ] / v[ "AtauEE0" ];
+		v[ "En0" ] = v[ "En10" ] + v[ "En20" ];
+		v[ "Em10" ] = v[ "En10" ] * v[ "BtauEF0" ];
+		v[ "Em20" ] = v[ "En20" ] * v[ "AtauEF0" ];
+		v[ "EmE0" ] = v[ "Df0" ] * emDE0;
+		v[ "Em0" ] = v[ "Em10" ] + v[ "Em20" ] + v[ "EmE0" ];
+
+		// firm net worth, loan debt and profits
+		v[ "NW10" ] = NW10 * F10;
+		v[ "NW20" ] = NW20 * F20;
+		v[ "NWe0" ] = NWe0 * Fe0;
+		v[ "Deb10" ] = v[ "NW10" ] * Deb10ratio;
+		v[ "Deb20" ] = v[ "NW20" ] * Deb20ratio;
+		v[ "DebE0" ] = v[ "NWe0" ] * DebE0ratio;
+		v[ "Pi10" ] = v[ "p10" ] * v[ "D10" ] - v[ "w0" ] * v[ "L10" ] -
+					  v[ "pE0" ] * v[ "En10" ] - trCO2 * v[ "Em10" ] +
+					  v[ "rD0" ] * v[ "NW10" ] - v[ "rDeb0" ] * v[ "Deb10" ];
+		v[ "Pi20" ] = v[ "p20" ] * v[ "D20" ] - v[ "w0" ] * v[ "L20" ] -
+					  v[ "pE0" ] * v[ "En20" ] - trCO2 * v[ "Em20" ] +
+					  v[ "rD0" ] * v[ "NW20" ] - v[ "rDeb0" ] * v[ "Deb20" ];
+		v[ "PiE0" ] = v[ "pE0" ] * v[ "De0" ] - v[ "w0" ] * v[ "Le0" ] -
+					  pF0 * v[ "Df0" ] - trCO2e * v[ "EmE0" ] +
+					  v[ "rD0" ] * v[ "NWe0" ] - v[ "rDeb0" ] * v[ "DebE0" ];
+		v[ "PiB0" ] = ( v[ "Deb10" ] + v[ "Deb20" ] + v[ "DebE0" ] ) * v[ "rDeb0" ] -
+					 ( v[ "NW10" ] + v[ "NW20" ] + v[ "NWe0" ] ) * v[ "rD0" ];
+
+		// investment, consumption and GDP
+		v[ "InomE0" ] = v[ "ICge0" ] * fGE0 * v[ "Ke0" ] / etaE;
+		v[ "Inom0" ] = v[ "p10" ] * v[ "D10" ];
+		v[ "C0" ] = v[ "p20" ] * v[ "D20" ];
+		v[ "GDPnom0" ] = v[ "C0" ] + v[ "Inom0" ];
+
+		// government expenditure, tax revenue and budget deficit
+		v[ "G0" ] = phi * v[ "w0" ] * Ls0 * v[ "U0" ];
+		v[ "Tax0" ] = ( v[ "Pi10" ] + v[ "Pi20" ] + v[ "PiE0" ] + v[ "PiB0" ] ) * tr;
+		v[ "Def0" ] = v[ "G0" ] - v[ "Tax0" ];
+
+		// productivity and competitiveness
+		v[ "A0" ] = v[ "GDPnom0" ] / ( v[ "L10" ] + v[ "L20" ] );
+		v[ "Ae0" ] = v[ "Le0" ] > 0 ? v[ "De0" ] / v[ "Le0" ] :
+									  fGE0 / mDE + ( 1 - fGE0 ) / mGE;
+		v[ "E0" ] = - omega1 - omega2;
+	}
+
+	if ( var != NULL && v.find( var ) != v.end( ) )
+		return v[ var ];
+	else
+		return NAN;
 }

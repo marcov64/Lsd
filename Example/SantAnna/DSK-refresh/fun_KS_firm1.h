@@ -264,7 +264,7 @@ for ( k = 0; i > 0 && targets.size( ) > 0; --i, ++k )
 	targets.erase( targets.begin( ) + h );		// remove drawn firm from list
 
 	// create the brochure/client interconnected objects
-	send_brochure( THIS, client.second );
+	CFUN( send_brochure, client.second );
 }
 
 RESULT( k )
@@ -343,10 +343,10 @@ else
 				INCRS( cur, "__nCan", floor( VS( cur, "__nOrd" ) * v[11] ) );
 	}
 
-	update_debt( THIS, v[10], v[9] );			// update debt (desired/granted)
+	CFUN( update_debt, v[10], v[9] );			// update debt (desired/granted)
 }
 
-update_depo( THIS, v[8], false );				// update the firm net worth
+CFUN( update_depo, v[8], false );				// update the firm net worth
 WRITE( "_NW1p", v[3] - v[8] + v[9] );			// provision for production
 
 RESULT( v[0] )
@@ -382,7 +382,7 @@ if ( v[1] > 0 )									// profits?
 else
 	v[0] = 0;									// no tax on losses
 
-cash_flow( THIS, v[1], v[0] );					// manage the period cash flow
+CFUN( cash_flow, v[1], v[0] );					// manage the period cash flow
 
 v[0] += V( "_Em1" ) * VS( GRANDPARENT, "trCO2" );// tax on emissions already paid
 

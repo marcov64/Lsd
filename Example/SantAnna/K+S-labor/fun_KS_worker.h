@@ -502,8 +502,8 @@ EQUATION( "_dQb" )
 Notional production (bounded) rate of change of worker
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( THIS, "_Q", VS( GRANDPARENT, "mLim" ),
-					   VS( GRANDPARENT, "mPer" ) ) )
+RESULT( CFUN( mov_avg_bound, "_Q", VS( GRANDPARENT, "mLim" ),
+		VS( GRANDPARENT, "mPer" ) ) )
 
 
 /*============================= DUMMY EQUATIONS ==============================*/

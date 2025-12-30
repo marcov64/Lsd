@@ -191,7 +191,7 @@ if ( _IgeDnom > 0 )								// invest in new green plants?
 				}
 			}
 
-			update_debt( THIS, _CD, _CDc );		// update debt (desired/granted)
+			CFUN( update_debt, _CD, _CDc );		// update debt (desired/granted)
 		}
 	}
 	else
@@ -199,13 +199,13 @@ if ( _IgeDnom > 0 )								// invest in new green plants?
 
 	if ( _IgeD > 0 )							// investment to do?
 	{
-		send_order( THIS, nMach );				// send order to sector 1
-		cur = add_green_plant( THIS, _IgeD, nMach, false );// create object
+		CFUN( send_order, nMach );				// send order to sector 1
+		cur = CFUN( add_green_plant, _IgeD, nMach, false );// create object
 
 		if ( pfinGE )							// update debt (project finance)?
-			update_debt( THIS, _IgeDnom, _IgeDnom, cur );
+			CFUN( update_debt, _IgeDnom, _IgeDnom, cur );
 		else
-			update_depo( THIS, _NWe, false );	// update the firm net worth
+			CFUN( update_depo, _NWe, false );	// update the firm net worth
 	}
 }
 else
@@ -214,7 +214,7 @@ else
 _IdeD = _IeD - _IgeD;							// desired dirty investment
 
 if ( _IdeD >= 1 )								// new dirty plant?
-	add_dirty_plant( THIS, _IdeD, false );		// create dirty plant object
+	CFUN( add_dirty_plant, _IdeD, false );		// create dirty plant object
 else
 	_IdeD = 0;									// don't build if too small
 
@@ -339,9 +339,17 @@ EQUATION( "_RDe" )
 /*
 R&D expenditure of energy producer
 */
-// R&D floor is 1 worker
-RESULT( VS( GRANDPARENT, "flagEnClim" ) > 0 ?
-		max( VS( PARENT, "nuE" ) * VL( "_Se", 1 ), VS( LABSUPL2, "w" ) ) : 0 )
+
+if ( VS( GRANDPARENT, "flagEnClim" ) == 0 )
+	END_EQUATION( 0 );
+
+v[1] = VL( "_Se", 1 );
+
+// use expected sales if no real sales exists
+if ( v[1] == 0 )
+	v[1] = VL( "_pE", 1 ) * VL( "_Ke", 1 ) / ( 1 + VS( PARENT, "iotaE" ) );
+
+RESULT( VS( PARENT, "nuE" ) * v[1] )
 
 
 EQUATION( "_SIe" )
@@ -431,7 +439,7 @@ if ( v[1] > 0 )									// profits?
 else
 	v[0] = 0;									// no tax/dividend on losses
 
-cash_flow( THIS, v[1], v[0] );					// manage the period cash flow
+CFUN( cash_flow, v[1], v[0] );					// manage the period cash flow
 
 v[0] += V( "_EmE" ) * VS( PARENT, "trCO2e" );	// tax on emissions already paid
 
@@ -600,7 +608,7 @@ else											// no brochure received
 	i = VS( cur1, "_ID1" );
 
 	// create the brochure/client interconnected objects
-	cur3 = send_brochure( cur1, THIS );
+	cur3 = CFUNS( cur1, send_brochure, THIS );
 }
 
 WRITE_HOOK( SUPPL, cur3 );						// pointer to current brochure
@@ -657,7 +665,7 @@ if ( k == T && v[1] > 0 )
 	}
 
 	if ( h != 1 )
-		update_depo( THIS, v[3], true );		// recover paid machines value
+		CFUN( update_depo, v[3], true );		// recover paid machines value
 }
 else
 	v[0] = 0;

@@ -16,6 +16,7 @@
 // K+S additional C++ STL containers and utilities
 #include <list>
 #include <map>
+#include <random>
 #include <set>
 #include <vector>
 
@@ -29,6 +30,9 @@ namespace lsd
 // set default name spaces (C++ STL, LSD)
 using namespace std;
 using namespace lsd;
+
+// K+S random engine (!= LSD)
+mt19937_64 random_engine;
 
 
 /*============================= GENERAL CLASSES ==============================*/
@@ -129,21 +133,21 @@ struct countryE
 #define LEN_ARR( A ) ( ( int ) ( sizeof A / sizeof A[0] ) )
 #define END_ARR( A ) ( A + LEN_ARR( A ) )
 
+/*=================== FORWARD DECLARATION OF C++ FUNCTIONS ===================*/
 
-/*================== FORWARD DECLARATION OF C++ EXTENSIONS ===================*/
-
-#define USER_FUNCS \
-double cash_flow( object *firm, double profit, double tax ); \
-double entry_firm1( c_varT *_v_, object *sector, int n, bool newInd ); \
-double entry_firm2( c_varT *_v_, object *sector, int n, bool newInd ); \
-double exit_firm( c_varT *_v_, object *firm ); \
-double invest( object *firm, double desired ); \
-double mov_avg_bound( object *obj, const char *var, double lim, double per ); \
-double scrap_vintage( c_varT *_v_, object *vint ); \
-double update_debt( object *firm, double desired, double loan ); \
-double update_depo( object *firm, double depo, bool incr ); \
-object *send_brochure( object *suppl, object *client ); \
-object *set_supplier( object *firm ); \
-void add_vintage( object *firm, double nMach, bool newInd ); \
-void check_error( bool cond, const char* errMsg, int errCount, int *errCounter ); \
-void send_order( object *firm, double nMach );
+#define EQ_USER_CFUNS \
+	CFUN_DBL( cash_flow, double profit, double tax ); \
+	CFUN_DBL( entry_firm1, int n, bool newInd ); \
+	CFUN_DBL( entry_firm2, int n, bool newInd ); \
+	CFUN_DBL( exit_firm ); \
+	CFUN_DBL( invest, double desired ); \
+	CFUN_DBL( mov_avg_bound, const char *var, double lim, double per, int lag ); \
+	CFUN_DBL( scrap_vintage ); \
+	CFUN_DBL( update_debt, double desired, double loan ); \
+	CFUN_DBL( update_depo, double depo, bool incr ); \
+	CFUN_OBJ( send_brochure, object *client ); \
+	CFUN_OBJ( set_supplier ); \
+	CFUN_VOID( add_vintage, double nMach, bool newInd ); \
+	CFUN_VOID( check_error, bool cond, const char* errMsg, int errCount, \
+			   int *errCounter ); \
+	CFUN_VOID( send_order, double nMach );

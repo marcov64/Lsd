@@ -15,6 +15,10 @@
 # remove warnings for support functions
 # !diagnostics suppress = log0, colSds, na.remove, rec.stats, textplot
 
+suppressPackageStartupMessages( require( ggplot2, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( gghalves, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( ggthemes, warn.conflicts = FALSE ) )
+
 
 box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
                        warmUpStat, nTstat, legends, legendList, sDigits,
@@ -27,6 +31,7 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
   n <- array( dim = c( maxStats, nExp ) )
   conf <- array( dim = c( maxStats, 2, nExp ) )
   data <- out <- array( list( ), dim = c( maxStats, nExp ) )
+  dataMC <- array( dim = c( maxStats, nSize, nExp ) )
   temp <- matrix( nrow = TmaxStat, ncol = nSize )
   names <- units <- list( )
 
@@ -39,6 +44,7 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
     }
 
     data[[ stat, exper ]] <<- x
+    dataMC[ stat, , exper ] <<- x
     names[[ stat ]] <<- tit
     units[[ stat ]] <<- ylab
     statsTb[ stat, , exper ] <<- c( mean( x ), median( x ), sd( x ), min( x ), max( x ) )
@@ -272,6 +278,7 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
 
   # remove unused stats space
   numStats <- stat - 1
+  dataMC <- dataMC[ - ( stat : maxStats ), , , drop = FALSE ]
   statsTb <- statsTb[ - ( stat : maxStats ), , , drop = FALSE ]
   statsBp <- statsBp[ - ( stat : maxStats ), , , drop = FALSE ]
   n <- n[ - ( stat : maxStats ), , drop = FALSE ]
@@ -325,13 +332,26 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
       listBp <- list( stats = matrix( statsBp[ stat, , ] ),
                       n = matrix( n[ stat, ] ), conf = matrix( conf[ stat, , ] ),
                       out = outVal, group = outGrp, names = legends )
-
+    
+    # prepare ggplot-frindly dataframe
+    dfBp <- data.frame( matrix( nrow = nExp * nSize, ncol = 2 ) )
+    i <- 1
+    for( k in 1 : nExp )
+      for( j in 1 : nSize ) {
+        dfBp[ i, 1 ] <- legends[ k ]
+        dfBp[ i, 2 ] <- data.frame( dataMC[ stat, j, k ] )
+        i <- i + 1
+      }
+    
+    names( dfBp ) <- c( "Experiment", units[[ stat ]] )
+    dfBp$Experiment <- as.factor( dfBp$Experiment )
     title <- names[[ stat ]]
     subTitle <- as.expression(bquote(paste(
       "( bar: median / box: 2nd-3rd quartile / whiskers: max-min / points: outliers / MC runs = ",
       .( nSize ), " / period = ", .( warmUpStat + 1 ), " - ", .( nTstat ), " )" ) ) )
-    tryCatch( bxp( listBp, range = bPlotCoef, notch = bPlotNotc, main = title,
-                   sub = subTitle, ylab = units[[ stat ]] ),
+    tryCatch( print( ggplot( dfBp, aes( Experiment, !! sym( units[[ stat ]] ) ) ) + 
+              geom_half_boxplot( center = TRUE, errorbar.draw = ! bPlotNotc, width = 0.5 ) +
+              geom_half_violin( side = "r", nudge = 0.05 ) + theme_base( ) + labs( x = "" ) ),
               error = function( e ) {
                 warning( "In boxplot (bxp): problem while plotting: ", title, "\n\n" )
                 textplot( paste( "Plot for <", title, "> failed." ) )

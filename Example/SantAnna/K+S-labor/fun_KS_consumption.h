@@ -172,7 +172,7 @@ CYCLE_SAFE( cur, "Firm2" )
 			if ( VS( cur, "_NW2" ) < 0 )		// count bankruptcies
 				++v[6];
 
-			exit_firm( _v_, cur, & v[2] );		// del obj & collect liq. val.
+			CFUNS( cur, exit_firm, & v[2] );	// del obj & collect liq. val.
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
@@ -207,7 +207,7 @@ if ( F2 - j + k < F2min )
 if ( F2 + k > F2max )
 	k = F2max - F2 + j;
 
-entry_firm2( _v_, THIS, k, false );				// add entrant-firm objects
+CFUN( entry_firm2, k, false );					// add entrant-firm objects
 
 v[0] = k - j;									// net number of entrants
 INCR( "F2", v[0] );								// update the number of firms
@@ -239,7 +239,7 @@ v[2] = VS( LABSUPL1, "Lscale" );				// labor scaling
 
 // create pointer and sort wage offers list
 woLisT *offers = & V_EXTS( PARENT, countryE, firm2wo );
-order_offers( h, offers );
+CFUN( order_offers, h, offers );
 
 // firms hire employees according to the selected hiring order
 i = 0;
@@ -254,7 +254,7 @@ for ( auto ito = offers->begin( ); ito != offers->end( ); ++ito )
 		// sort firm's candidate list according to the defined strategy
 		k = VS( ito->firm, "_postChg" ) ? VS( PARENT, "flagHireOrder2Chg" ) :
 										  VS( PARENT, "flagHireOrder2" );
-		order_applications( k, appl );
+		CFUN( order_applications, k, appl );
 	}
 
 	// hire the ordered applications until queue is exhausted
@@ -273,7 +273,7 @@ for ( auto ito = offers->begin( ); ito != offers->end( ); ++ito )
 			if ( ROUND( ita->w, ito->offer, 0.01 ) <= ito->offer )
 			{
 				// flag hiring and set wage, employer and vintage to be used by worker
-				hire_worker( _v_, ita->wrk, 2, ito->firm, ito->offer );
+				CFUNS( ita->wrk, hire_worker, 2, ito->firm, ito->offer );
 				++h;							// scaled count hire (firm)
 			}
 			else
@@ -290,7 +290,7 @@ for ( auto ito = offers->begin( ); ito != offers->end( ); ++ito )
 	// try to hire at least one worker, at any wage
 	if ( j - h > 0 && h == 0 && cur != NULL )	// none hired but someone avail?
 	{
-		hire_worker( _v_, cur, 2, ito->firm, v[4] );// pay requested wage
+		CFUNS( cur, hire_worker, 2, ito->firm, v[4] );// pay requested wage
 		++h;
 	}
 
@@ -653,8 +653,7 @@ EQUATION( "dCPIb" )
 /*
 Consumer price index inflation (change) rate
 */
-RESULT( mov_avg_bound( THIS, "CPI", VS( PARENT, "mLim" ), VS( PARENT, "mPer" ) ) )
-
+RESULT( CFUN( mov_avg_bound, "CPI", VS( PARENT, "mLim" ), VS( PARENT, "mPer" ) ) )
 
 EQUATION( "dNnom" )
 /*

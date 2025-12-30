@@ -285,7 +285,7 @@ EQUATION( "dAb" )
 Notional overall productivity (bounded) rate of change
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( THIS, "A", V( "mLim" ), V( "mPer" ) ) )
+RESULT( CFUN( mov_avg_bound, "A", V( "mLim" ), V( "mPer" ) ) )
 
 
 EQUATION( "dGDP" )
@@ -357,6 +357,9 @@ cur4 = LABSUPL0;
 cur5 = ENESECL0;
 cur6 = CLIMATL0;
 
+// reset initial conditions, if restarting
+CFUN( init_cond, NULL );
+
 // check unwanted extra instances (only one of each is required)
 if ( COUNT( "Capital" ) > 1 || COUNT( "Consumption" ) > 1 ||
 	 COUNT( "Financial" ) > 1 || COUNT( "Energy" ) > 1 ||
@@ -398,59 +401,20 @@ WRITES( cur5, "Fe0", min( max( VS( cur5, "Fe0" ), VS( cur5, "FeMin" ) ),
 WRITES( cur2, "m2", max( 1, ceil( VS( cur2, "m2" ) ) ) );
 
 // prepare data required to set initial conditions
-double Ade0 = VS( cur5, "Ade0" );				// initial efficiency dirty plant
 double EqB0 = VS( cur3, "EqB0" );				// initial bank equity multiple
 double NWe0 = VS( cur5, "NWe0" );				// initial net worth in en. sec.
 double NW10 = VS( cur1, "NW10" );				// initial net worth in sector 1
 double NW20 = VS( cur2, "NW20" );				// initial net worth in sector 2
 double alphaB = VS( cur3, "alphaB" );			// bank size distrib. parameter
-double eta = VS( cur2, "eta" );					// technical machine life time
-double fGE0 = VS( cur5, "fGE0" );				// initial share of green energy
-double m1 = VS( cur1, "m1" );					// output factor in sector 1
-double m2 = VS( cur2, "m2" );					// output factor in sector 2
-double mu1 = VS( cur1, "mu1" );					// mark-up in sector 1
-double mu20 = VS( cur2, "mu20" );				// initial mark-up in sector 2
-double pF0 = VS( cur5, "pF0" );					// initial price of fossil fuel
-double phi = VS( cur4, "phi" );					// unemployment benefit rate
-double rT = VS( cur3, "rT" );					// prime rate target
 double tauB = VS( cur3, "tauB" );				// minimum capital adequacy rate
-double trCO2 = V( "trCO2" );					// carbon tax rate
+double p10 = CFUN( init_cond, "p10" );			// initial price sector 1
+double p20 = CFUN( init_cond, "p20" );			// initial price sector 2
 int B = VS( cur3, "B" );						// number of banks
 int Fe0 = VS( cur5, "Fe0" );					// initial energy producers
 int FeMax = VS( cur5, "FeMax" );				// max energy producers
 int F10 = VS( cur1, "F10" );					// initial firms in sector 1
 int F20 = VS( cur2, "F20" );					// initial firms in sector 2
 int F2max = VS( cur2, "F2max" );				// max firms in sector 2
-int Ls0 = VS( cur4, "Ls0" );					// initial labor supply
-
-double Btau0 = ( 1 + mu1 ) * INIPROD /			// initial productivity in sec. 1
-			   ( m1 * m2 * VS( cur2, "b" ) );
-double ICge0 = ( 1 + log( VS( cur6, "tA0" ) + 1 ) ) *
-			   VS( cur5, "bE" ) * pF0 / Ade0;	// initial green plant unit cost
-double pE0 = INIWAGE * VS( cur5, "muE0" ) +
-			 ( fGE0 == 1 ? 0 : pF0 / Ade0 );	// init. energy price
-double c10 = ( INIWAGE / Btau0 + ( pE0 + trCO2 * INIEFRI ) / INIEEFF ) / m1;
-												// initial unit cost in sector 1
-double c20 = INIWAGE / INIPROD + ( pE0 + trCO2 * INIEFRI ) / INIEEFF;
-												// initial unit cost in sector 2
-double p10 = ( 1 + mu1 ) * c10;					// initial price sector 1
-double p20 = ( 1 + mu20 ) * c20;				// initial price sector 2
-double trW = V( "flagTax" ) > 0 ? V( "tr" ) : 0;// tax rate on wages
-double K0 = Ls0 * INIWAGE / p20;				// full employment K required
-double D10 = K0 / ( m2 * eta );					// initial demand for sector 1
-double RD0 = VS( cur1, "nu" ) * D10 * p10;		// initial R&D expense
-double D20 = ( ( D10 * c10 + RD0 ) * ( 1 - phi - trW ) + Ls0 * INIWAGE * phi ) /
-			 ( mu20 + phi + trW ) * c20;		// initial demand for sector 2
-double Ld10 = RD0 / INIWAGE + D10 / ( Btau0 * m1 );// initial labor demand sec. 1
-double Ld20 = D20 / INIPROD;					// initial labor demand sector 2
-double A0 = ( D10 * p10 + D20 * p20 ) / ( Ld10 + Ld20 );// initial prod.
-double Eavg0 = ( VS( cur2, "omega1" ) + VS( cur2, "omega2" ) ) / 2;
-												// initial competitiveness
-double rBonds = rT * ( 1 - VS( cur3, "muBonds" ) );// initial interest on bonds
-double rD = rT * ( 1 - VS( cur3, "muD" ) );		// initial interest on deposits
-double rDeb = rT * ( 1 + VS( cur3, "muDeb" ) );	// initial interest on debt
-double rRes = rT * ( 1 - VS( cur3, "muRes" ) );	// initial interest on reserves
-double G0 = V( "gG" ) * Ls0;					// initial public spending
 
 // reserve space for country-level non-initialized vectors
 EXEC_EXT( countryE, firmEptr, reserve, FeMax );	// energy sector firm objects
@@ -463,33 +427,45 @@ WRITES( cur1, "lastID1", 0 );
 WRITES( cur2, "lastID2", 0 );
 
 // initialize lagged variables depending on parameters
-WRITEL( "A", A0, -1 );
-WRITEL( "G", G0, -1 );
+WRITEL( "A", CFUN( init_cond, "A0" ), -1 );
+WRITEL( "Def", CFUN( init_cond, "Def0" ), -1 );
+WRITEL( "Em", CFUN( init_cond, "Em0" ), -1 );
+WRITEL( "En", CFUN( init_cond, "En0" ), -1 );
+WRITEL( "G", CFUN( init_cond, "G0" ), -1 );
+WRITEL( "GDPnom", CFUN( init_cond, "GDPnom0" ), -1 );
+WRITEL( "GDPreal", CFUN( init_cond, "GDPnom0" ), -1 );
+WRITEL( "Tax", CFUN( init_cond, "Tax0" ), -1 );
 WRITES( cur1, "pK0", p10 );
 WRITES( cur2, "pC0", p20 );
-WRITES( cur5, "ICge0", ICge0 );
-WRITELS( cur1, "A1", Btau0, -1 );
+WRITES( cur5, "ICge0", CFUN( init_cond, "ICge0" ) );
+WRITELS( cur1, "A1", CFUN( init_cond, "BtauLP0" ), -1 );
 WRITELS( cur1, "F1", F10, -1 );
+WRITELS( cur1, "L1", CFUN( init_cond, "L10" ), -1 );
 WRITELS( cur1, "PPI", p10, -1 );
 WRITELS( cur1, "p1avg", p10, -1 );
 WRITELS( cur2, "CPI", p20, -1 );
-WRITELS( cur2, "Eavg", Eavg0, -1 );
+WRITELS( cur2, "Eavg", CFUN( init_cond, "E0" ), -1 );
 WRITELS( cur2, "F2", F20, -1 );
-WRITELS( cur2, "c2", c20, -1 );
-WRITELS( cur3, "r", rT, -1 );
-WRITELS( cur3, "rBonds", rBonds, -1 );
-WRITELS( cur3, "rD", rD, -1 );
-WRITELS( cur3, "rDeb", rDeb, -1 );
-WRITELS( cur3, "rRes", rRes, -1 );
-WRITELS( cur4, "Ls", Ls0, -1 );
-WRITELS( cur4, "w", INIWAGE, -1 );
-WRITELS( cur4, "wReal", INIWAGE, -1 );
-WRITELS( cur5, "AeMavg", A0, -1 );
-WRITELS( cur5, "pE", pE0, -1 );
-WRITELS( cur5, "pF", pF0, -1 );
+WRITELS( cur2, "c2", CFUN( init_cond, "c20" ), -1 );
+WRITELS( cur3, "r", CFUN( init_cond, "r0" ), -1 );
+WRITELS( cur3, "rBonds", CFUN( init_cond, "rBonds0" ), -1 );
+WRITELS( cur3, "rD", CFUN( init_cond, "rD0" ), -1 );
+WRITELS( cur3, "rDeb", CFUN( init_cond, "rDeb0" ), -1 );
+WRITELS( cur3, "rRes", CFUN( init_cond, "rRes0" ), -1 );
+WRITELS( cur4, "Ls", VS( cur4, "Ls0" ), -1 );
+WRITELS( cur4, "U", CFUN( init_cond, "U0" ), -1 );
+WRITELS( cur4, "w", CFUN( init_cond, "w0" ), -1 );
+WRITELS( cur4, "wReal", CFUN( init_cond, "wReal0" ), -1 );
+WRITELS( cur5, "Ae", CFUN( init_cond, "Ae0" ), -1 );
+WRITELS( cur5, "AeMavg", CFUN( init_cond, "Ae0" ), -1 );
+WRITELS( cur5, "De", CFUN( init_cond, "De0" ), -1 );
+WRITELS( cur5, "Df", CFUN( init_cond, "Df0" ), -1 );
+WRITELS( cur5, "EmE", CFUN( init_cond, "EmE0" ), -1 );
+WRITELS( cur5, "pE", CFUN( init_cond, "pE0" ), -1 );
+WRITELS( cur5, "pF", VS( cur5, "pF0" ), -1 );
 
 // variables not to recalculate in t=1
-WRITES( cur5, "pE", pE0 );
+WRITES( cur5, "pE", CFUN( init_cond, "pE0" ) );
 
 // initialize climate
 VS( cur6, "initClimate" );
@@ -523,13 +499,13 @@ DELETE( SEARCHS( cur1, "Firm1" ) );				// remove empty firm instances
 DELETE( SEARCHS( cur2, "Firm2" ) );
 DELETE( SEARCHS( cur5, "FirmE" ) );
 
-v[1] = entry_firm1( _v_, cur1, F10, true );		// add capital-good firms
+v[1] = CFUNS( cur1, entry_firm1, F10, true );	// add capital-good firms
 INIT_TSEARCHS( cur1, "Firm1" );					// prepare turbo search indexing
 
-v[1] += entry_firm2( _v_, cur2, F20, true );	// add consumer-good firms
+v[1] += CFUNS( cur2, entry_firm2, F20, true );	// add consumer-good firms
 VS( cur2, "firm2maps" );						// update the mapping vectors
 
-v[1] += entry_firmE( _v_, cur5, Fe0, true );	// add energy producers
+v[1] += CFUNS( cur5, entry_firmE, Fe0, true );	// add energy producers
 VS( cur5, "firmEmaps" );						// update the mapping vectors
 
 WRITEL( "Eq", v[1], -1 );						// save existing equity

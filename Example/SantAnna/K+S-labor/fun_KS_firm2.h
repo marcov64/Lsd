@@ -158,7 +158,7 @@ Also updates '_NW2', '_Deb2', _CD2', '_CD2c', '_CS2'
 */
 V( "_Q2" );										// make sure production decided
 V( "_supplier" );								// ensure supplier is selected
-RESULT( invest( THIS, V( "_EId" ) ) )
+RESULT( CFUN( invest, V( "_EId" ) ) )
 
 
 EQUATION( "_EId" )
@@ -267,10 +267,10 @@ else
 		}
 	}
 
-	update_debt( THIS, v[9], v[8] );			// update debt (desired/granted)
+	CFUN( update_debt, v[9], v[8] );			// update debt (desired/granted)
 }
 
-update_depo( THIS, v[7], false );				// update the firm net worth
+CFUN( update_depo, v[7], false );				// update the firm net worth
 WRITE( "_NW2p", v[3] - v[7] + v[8] );			// provision for production
 
 RESULT( v[0] )
@@ -297,7 +297,7 @@ Effective substitution investment of firm in consumption-good sector
 Also updates '_NW2', '_Deb2', _CD2', '_CD2c', '_CS2'
 */
 V( "_EI" );										// make sure expansion done
-RESULT( invest( THIS, V( "_SId" ) ) )
+RESULT( CFUN( invest, V( "_SId" ) ) )
 
 
 EQUATION( "_Tax2" )
@@ -313,7 +313,7 @@ if ( v[1] > 0 )									// profits?
 else
 	v[0] = 0;									// no tax on losses
 
-cash_flow( THIS, v[1], v[0] );					// manage the period cash flow
+CFUN( cash_flow, v[1], v[0] );					// manage the period cash flow
 
 RESULT( v[0] )
 
@@ -350,7 +350,7 @@ CYCLE( cur1, "Wrk2" )							// search for unallocated worker
 			k = VS( cur, "__dLdVint" );			// addt'l labor demand of vint.
 		}
 
-		move_worker( SHOOKS( cur1 ), cur, vint_learn );// move worker to vintage
+		CFUNS( SHOOKS( cur1 ), move_worker, cur, vint_learn );// move to vintage
 		++i;
 		--k;									// update vintage worker demand
 	}
@@ -372,7 +372,7 @@ CYCLE( cur1, "Vint" )							// search for unallocated worker
 		}
 
 		cur2 = SEARCHS( cur1, "WrkV" );			// pick old vint. first worker
-		move_worker( SHOOKS( cur2 ), cur, vint_learn );// move worker to vintage
+		CFUNS( SHOOKS( cur2 ), move_worker, cur, vint_learn );// move to vintage
 		DELETE( cur2 );							// remove old bridge-object
 		++i;
 		--k;									// update new vintage demand
@@ -512,7 +512,7 @@ switch ( fRule )
 	case 2:										// only fire if firm downsizing
 		// production being reduced and extra capacity is expected?
 		if ( V( "_dQ2d" ) < 0 && v[1] > 0 )		// workers have to be fired?
-			v[0] = fire_workers( _v_, THIS, MODE_ADJ, v[1], &v[2] );
+			v[0] = CFUN( fire_workers, MODE_ADJ, v[1], & v[2] );
 		else
 			v[0] = 0;
 		break;
@@ -520,24 +520,24 @@ switch ( fRule )
 	case 3:										// only fire if firm at losses
 		// production being reduced and extra capacity is expected?
 		if ( VL( "_Pi2", 1 ) < 0 && v[1] > 0 )	// workers have to be fired?
-			v[0] = fire_workers( _v_, THIS, MODE_ADJ, v[1], &v[2] );
+			v[0] = CFUN( fire_workers, MODE_ADJ, v[1], & v[2] );
 		else
 			v[0] = 0;
 		break;
 
 	case 4:										// fire if payback is achieved
 		// fire insufficient payback workers
-		v[0] = fire_workers( _v_, THIS, MODE_PBACK, v[1], &v[2] );
+		v[0] = CFUN( fire_workers, MODE_PBACK, v[1], & v[2] );
 		break;
 
 	case 5:										// fire when contract ends
 		// fire all workers with finished contracts
-		v[0] = fire_workers( _v_, THIS, MODE_ALL, v[1], &v[2] );
+		v[0] = CFUN( fire_workers, MODE_ALL, v[1], & v[2] );
 		break;
 
 	case 6:										// reg. 5 until t=T, then reg. Y
 		// fire non needed, non stable workers
-		v[0] = fire_workers( _v_, THIS, MODE_IPROT, v[1], &v[2] );
+		v[0] = CFUN( fire_workers, MODE_IPROT, v[1], & v[2] );
 }
 
 RESULT( v[0] )
@@ -617,7 +617,7 @@ if ( cur2 != NULL && cur3 != NULL )
 }
 else											// no brochure received
 {
-	cur1 = set_supplier( THIS );				// draw new supplier
+	cur1 = CFUN( set_supplier );				// draw new supplier
 	i = VS( cur1, "_ID1" );
 }
 
@@ -693,7 +693,7 @@ else
 	// sort firm's candidate list according to the defined strategy
 	int hOrder = V( "_postChg" ) ? VS( GRANDPARENT, "flagHireOrder2Chg" ) :
 								   VS( GRANDPARENT, "flagHireOrder2" );
-	order_applications( hOrder, & V_EXT( firm2E, appl ) );
+	CFUN( order_applications, hOrder, & V_EXT( firm2E, appl ) );
 
 	// search applications set (increasing wage requests) for enough workers
 	i = 0;										// workers counter
@@ -780,7 +780,7 @@ if ( k == T && v[1] > 0 )
 	else
 		WRITE( "_SI", ( v[3] - v[1] ) * v[2] );	// shrink substitution investm.
 
-	update_depo( THIS, v[5] * v[1], true );		// recover paid machines value
+	CFUN( update_depo, v[5] * v[1], true );		// recover paid machines value
 
 	v[0] = v[1] * v[2];							// canceled investment
 }
@@ -845,7 +845,7 @@ if ( v[2] + v[3] > 0 )
 	v[4] = floor( ( v[2] + v[3] ) / v[1] );		// total number of new machines
 
 	if ( v[4] > 0 )								// new machines to install?
-		add_vintage( _v_, THIS, v[4], false );	// create vintage
+		CFUN( add_vintage, v[4], false );		// create vintage
 }
 
 v[5] = max( VL( "_K", 1 ) + v[3] - V( "_Kd" ), 0 );// desired capital shrinkage
@@ -873,7 +873,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 			}
 			else								// scrap entire vintage
 			{
-				if ( scrap_vintage( _v_, cur ) >= 0 )// not last vintage?
+				if ( CFUNS( cur, scrap_vintage ) >= 0 )// not last vintage?
 				{
 					v[6] -= v[8];
 					continue;					// don't consider for old vint.
@@ -898,7 +898,7 @@ CYCLE_SAFE( cur, "Vint" )						// search from older vintages
 		}
 		else									// scrap entire vintage
 		{
-			if ( scrap_vintage( _v_, cur ) >= 0 )// not last vintage?
+			if ( CFUNS( cur, scrap_vintage ) >= 0 )// not last vintage?
 			{
 				v[7] -= v[8];
 				continue;						// don't consider for old vint.
@@ -1085,8 +1085,8 @@ EQUATION( "_dA2b" )
 Notional productivity (bounded) rate of change of firm in consumption-good sector
 Used for wages adjustment only
 */
-RESULT( mov_avg_bound( THIS, "_A2", VS( GRANDPARENT, "mLim" ),
-					   VS( GRANDPARENT, "mPer" ) ) )
+RESULT( CFUN( mov_avg_bound, "_A2", VS( GRANDPARENT, "mLim" ),
+		VS( GRANDPARENT, "mPer" ) ) )
 
 
 EQUATION( "_dNnom" )
@@ -1116,7 +1116,7 @@ EQUATION( "_iD2" )
 /*
 Interest received from deposits by firm in consumption-good sector
 */
-RESULT( VL( "_NW2", 1 ) * VLS( FINSECL2, "rD", 1 ) )
+RESULT( max( VL( "_NW2", 1 ) * VLS( FINSECL2, "rD", 1 ), 0 ) )
 
 
 EQUATION( "_life2cycle" )
@@ -1182,7 +1182,7 @@ h = 0;
 CYCLE_SAFE( cur, "Wrk2" )
 	if ( VS( SHOOKS( cur ), "_w" ) <= v[1] )	// under unemp. benefit?
 	{
-		fire_worker( _v_, SHOOKS( cur ) );
+		CFUNS( SHOOKS( cur ), fire_worker );
 		++h;
 	}
 
@@ -1201,7 +1201,7 @@ h = 0;
 CYCLE_SAFE( cur, "Wrk2" )
 	if ( VS( SHOOKS( cur ), "_age" ) == 1 )		// is a "reborn"?
 	{
-		fire_worker( _v_, SHOOKS( cur ) );
+		CFUNS( SHOOKS( cur ), fire_worker );
 		++h;
 	}
 

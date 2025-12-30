@@ -1,4 +1,4 @@
-Energy-augmented K+S Model (version 0.5.2)
+Energy-augmented K+S Model (version 0.5.3)
 ==========================================
 
 This version copyright by Marcelo C. Pereira.
@@ -23,6 +23,7 @@ v0.5.1 (01/01/2022) - consolidate energy producer cash-flow to government for SF
                       add full dynamic multi-level SFC testing
                       improve tests
 v0.5.2 (25/09/2023) - implement real options analysis of green energy projects
+v0.5.3 (16/11/2025) - improve steady-state initial conditions
 
 
 Relevant references
@@ -187,6 +188,7 @@ The model parameters control both the initial conditions applied to lagged varia
 Country-level parameters (object Country)
 ------------------------
 Crec = unfilled past consumption recover limit as fraction of current consumption (>0)
+dGDP0 = steady-state initial GDP growth rate (>0)
 gG = growth rate of fixed public expenditure (>=0)
 mLim = absolute cap on moving-average growth calculation (>=0, 0=no limit)
 mPer = number of periods on moving-average growth calculation (>=1)

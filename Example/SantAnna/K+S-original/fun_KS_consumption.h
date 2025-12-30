@@ -155,7 +155,7 @@ CYCLE_SAFE( cur, "Firm2" )
 			if ( VS( cur, "_NW2" ) < 0 )		// count bankruptcies
 				++v[6];
 
-			exit_firm( _v_, cur );				// del obj & collect liq. val.
+			CFUNS( cur, exit_firm );			// del obj & collect liq. val.
 		}
 		else
 			if ( h == 0 && i == k )				// best firm must get new equity
@@ -175,7 +175,7 @@ CYCLE_SAFE( cur, "Firm2" )
 V( "f2rescale" );								// redistribute exiting m.s.
 
 // replace exiting firms by entrants
-entry_firm2( _v_, THIS, j, false );				// add entrant-firm objects
+CFUN( entry_firm2, j, false );					// add entrant-firm objects
 
 INCR( "cEntry2", v[1] );						// add cost of additional equity
 WRITES( SECSTAL1, "exit2fail", v[6] / F2 );
@@ -448,8 +448,7 @@ EQUATION( "dCPIb" )
 /*
 Consumer price index inflation (change) rate
 */
-RESULT( mov_avg_bound( THIS, "CPI", VS( PARENT, "mLim" ), VS( PARENT, "mPer" ) ) )
-
+RESULT( CFUN( mov_avg_bound, "CPI", VS( PARENT, "mLim" ), VS( PARENT, "mPer" ) ) )
 
 EQUATION( "dNnom" )
 /*
