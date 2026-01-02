@@ -1,0 +1,113 @@
+# K+S Model v5.3 - Sobol Decomposition SA
+
+# International trade
+chiM 0 2 f: 0 0.02 
+chiX 0 2 f: 0 0.02
+f0 0 2 f: 0 0.4
+fMax 0 2 f: 0.4 0.7
+gammaE 0 2 f: 0 0.2
+trMC 0 2 f: 0 0.1
+trMK 0 2 f: 0 0.1
+trX1 0 2 f: 0 0.1
+trX2 0 2 f: 0 0.1
+
+# Government-owned firms
+LambdaG 0 2 f: 2 4
+bG 0 2 f: 1 12
+gamma1g 0 2 f: 0.2 2
+gamma2g 0 2 f: 0.2 2
+nuG 0 2 f: 0.04 0.1
+phi2g 0 2 f: 0 1
+phi3g 0 2 f: 0 1
+theta2g 0 2 f: 0 0.6
+theta3g 0 2 f: 0 0.4
+x6 0 2 f: 0 0.2
+
+# Policy and credit market
+PhiB 0 2 f: 0.2 1
+tr 0 2 f: 0.05 0.3
+rT 0 2 f: 0.005 0.03
+muBonds 0 2 f: 0.5 1
+muD 0 2 f: 0.5 1
+muDeb 0 2 f: 0.1 0.5
+muRes 0 2 f: 0.5 1
+deltaB 0 2 f: 0.1 1
+Lambda 0 2 f: 1 3
+Lambda0 0 2 f: 100 10000
+
+# Labor market
+epsilon 0 2 f: 0.005 0.1
+tauT 0 2 f: 0.002 0.05
+tauU 0 2 f: 0.002 0.05
+Tr 0 2 i: 80 160
+Ts 0 2 i: 0 4
+omega 0 2 f: 0 10
+omegaU 0 2 f: 1 20
+phi 0 2 f: 0.1 0.9
+psi2 0 2 f: 0.95 1.05
+psi4 0 2 f: 0 1
+psi6 0 2 f: 0 0.5
+
+# Education
+alphaEd 0 2 f: 2 10
+betaEd 0 2 f: 1 8
+epsilonAd 0 2 f: 0.02 0.1
+epsilonEd 0 2 f: 0.01 0.15
+phi2 0 2 f: 0 1
+phi3 0 2 f: 0 1
+tauEd 0 2 f: 0.2 5
+varthetaEd 0 2 f: 0.5 2
+theta2 0 2 f: 0 0.6
+theta3 0 2 f: 0 0.4
+
+# Technology
+eta 0 2 f: 10 30
+nu 0 2 f: 0.01 0.1
+xi 0 2 f: 0.2 0.8
+b 0 2 f: 1 12
+m1 0 2 f: 0.02 0.5
+m2 0 2 f: 10 100
+alpha1 0 2 f: 1 5
+beta1 0 2 f: 1 5
+alpha2 0 2 f: 1 5
+beta2 0 2 f: 1 5
+zeta1 0 2 f: 0.1 0.6
+zeta2 0 2 f: 0.1 0.6
+x1inf 0 2 f: -0.3 -0.1
+x1sup 0 2 f: 0.1 0.3
+
+# Industrial dynamics
+gamma 0 2 f: 0.2 0.8
+iota 0 2 f: 0 0.3
+kappaMax 0 2 f: 0.1 1
+mu1 0 2 f: 0.05 0.15
+omega1 0 2 f: 0.5 2
+omega2 0 2 f: 0.5 2
+omega3 0 2 f: 0.5 2
+chi 0 2 f: 0.2 5
+omicron 0 2 f: 0 1
+upsilon 0 2 f: 0.01 0.1
+f2min 0 2 f: 1e-06 1e-04
+u 0 2 f: 0.5 1
+x5 0 2 f: 0 0.6
+Phi1 0 2 f: 0 0.5
+Phi2 0 2 f: 0.5 1
+Phi3 0 2 f: 0 0.5
+Phi4 0 2 f: 0.5 1
+x2inf 0 2 f: -0.3 -0.1
+x2sup 0 2 f: 0.1 0.3
+F1min 0 2 i: 5 20
+F1max 0 2 i: 20 50
+F2min 0 2 i: 10 100
+F2max 0 2 i: 200 400
+
+# Initial conditions
+EqB0 0 2 f: 0.2 5
+mu20 0 2 f: 0.1 0.5
+w0min 0 2 f: 0.2 0.8
+Ls0 0 2 i: 130000 500000
+B 0 2 i: 5 15
+F10 0 2 i: 5 20
+F20 0 2 i: 100 400
+NW10 0 2 f: 200 5000
+NW20 0 2 f: 200 5000

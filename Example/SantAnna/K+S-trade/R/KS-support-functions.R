@@ -1,0 +1,3510 @@
+#******************************************************************
+#
+# ------------- Plot, fit and support functions -----------------
+#
+#   Written by Marcelo C. Pereira, University of Campinas
+#
+#   Copyright Marcelo C. Pereira
+#   Distributed under the GNU General Public License
+#
+#   Script used by other scripts.
+#   This script should not be executed directly.
+#
+#******************************************************************
+
+# ==== User parameters ====
+
+useSubbotools   <- TRUE       # use Subbotools (T) or normalp package (F)
+subboMaxSample  <- 5000       # maximum sample size in Subbotin fits (speed control)
+subboMinSample  <- 20         # minimum sample size in Subbotin fits (signif. control)
+subboBlimit     <- 5          # maximum limit for b to be considered valid (0=no limit)
+maxSample       <- 10000      # maximum sample size in plots (pdf control)
+topMargin       <- 0.2        # top plot margin scaling factor
+botMargin       <- 0.1        # bottom plot margin scaling factor
+def.digits      <- 4          # default number of digits after comma for printing
+
+
+# ==== Required libraries (order is relevant!) ====
+
+suppressPackageStartupMessages( require( LSDinterface, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( LSDsensitivity, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( abind, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( dplyr, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( robustbase, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( normalp, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( rmutil, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( nortest, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( zoo, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( gplots, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( plotrix, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( parallel, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( textplot, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( corrplot, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( matrixStats, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( tseries, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( np, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( extrafont, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( mFilter, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( tools, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( ggplot2, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( gghalves, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( ggthemes, warn.conflicts = FALSE ) )
+suppressPackageStartupMessages( require( fmsb, warn.conflicts = FALSE ) )
+
+# check minimum required versions
+if( packageVersion( "LSDinterface" ) < "1.2.1" )
+  stop( "Please update LSDinterface package to current version" )
+if( packageVersion( "LSDsensitivity" ) < "1.2.1" )
+  stop( "Please update LSDsensitivity package to current version" )
+
+# remove warnings for support functions
+# !diagnostics suppress = paramp, CI
+
+
+# ==== Basic functions ====
+
+#
+# ====== function [] = all.NA ======
+#
+# Test if all elements in a matrix/dataframe row are NA
+#
+# Output:
+#   TRUE if all elements are NA
+#
+# Input:
+#   x : vector/matrix/data frame to test
+#
+
+all.NA <- function( x ) {
+  apply( x, 1, function( x ) all( is.na( x ) ) )
+}
+
+
+#
+# ====== function [] = is.nan.data.frame ======
+#
+# Expand is.nan to handle data frames
+#
+# Output:
+#   TRUE/FALSE vector/matrix/data frame
+#
+# Input:
+#   x : vector/matrix/data frame to test
+#
+
+is.nan.data.frame <- function( x ) {
+  do.call( cbind, lapply( x, is.nan ) )
+}
+
+
+#
+# ====== function [] = is.finite.data.frame ======
+#
+# Expand is.finite to handle data frames
+#
+# Output:
+#   TRUE/FALSE vector/matrix/data frame
+#
+# Input:
+#   x : vector/matrix/data frame to test
+#
+
+is.finite.data.frame <- function( x ) {
+  do.call( cbind, lapply( x, is.finite ) )
+}
+
+
+#
+# ====== function [] = logNA ======
+#
+# Redefine log with NA instead of -Inf
+#
+# Output:
+#   log vector/matrix/data frame
+#
+# Input:
+#   x : vector/matrix/data frame to take log
+#
+
+logNA <- function( x ) {
+  x[ x <= 0 ] <- NA
+  return( log( x ) )
+}
+
+
+#
+# ====== function [] = log0 ======
+#
+# Redefine log with zero floor
+#
+# Output:
+#   log vector/matrix/data frame
+#
+# Input:
+#   x : vector/matrix/data frame to take log
+#
+
+log0 <- function( x ) {
+  y <- logNA( x )
+  y[ is.na( y ) ] <- 0
+  return( y )
+}
+
+
+#
+# ====== function [] = logX ======
+#
+# Flexible log function
+#
+# Output:
+#   (log) vector/matrix/data frame
+#
+# Input:
+#   x : vector/matrix/data frame to take log if type > 0
+#   type : 0=no log, 1=regular log, 2=log0, 3=logNA
+#
+
+logX <- function( x, type ) {
+  if( type == 1 )
+    logX <- log( x )
+  else
+    if( type == 2 )
+      logX <- log0( x )
+    else
+      if( type == 3 )
+        logX <- logNA( x )
+      else
+        logX <- x
+
+  return( logX )
+}
+
+
+#
+# ====== function [] = t.test0 ======
+#
+# Redefine t-test with to use 0 in case of NaN
+#
+# Output:
+#   t-test p-value
+#
+# Input:
+#   x : vector of data to test
+#   mu: average to test against
+#   conf.level: confidence level
+#
+
+t.test0 <- function( x, mu = 0, conf.level = 0.95 ) {
+  x[ is.nan( x ) ] <- 0
+
+  sdx <- sd( x, na.rm = TRUE )
+  if( is.na( sdx ) || sdx < 1e-12 )
+    return( 0 )
+
+  return( t.test( x, mu = mu, alternative = "greater",
+                  conf.level = conf.level, na.action = "na.omit" )$p.value )
+}
+
+
+#
+# ====== function [] = se ======
+#
+# Standard error for a sample
+#
+# Output:
+#   standard error
+#
+# Input:
+#   x : vector of data to use
+#   na.rm: remove NAs if TRUE
+#
+
+se <- function( x, na.rm = TRUE ) {
+  if( na.rm )
+    n <- length( x[ ! is.na( x ) ] )
+  else
+    n <- length( x )
+
+  return( sd( x, na.rm = na.rm ) / sqrt( n ) )
+}
+
+
+#
+# ====== function [] = mavg ======
+#
+# Moving average of a time series
+#
+# Output:
+#   The corresponding moving-average time series
+#
+# Input:
+#   x : vector of data to use
+#   len: moving average length
+#   sides: 1=mavg to the right of data
+#          2=mavg at the center of data
+#
+
+mavg <- function( x, len, sides = 1 ) {
+  return( as.vector( stats::filter( x, rep( 1 / len, len ), sides = sides ) ) )
+}
+
+
+# ==== Support functions ====
+
+#
+# ====== function [] = notIn ======
+#
+# Test if all strings in a vector are contained in another vector
+#
+# Output:
+#   missing values or an empty string if none
+#
+# Input:
+#   a, b: two vectors of strings
+#
+
+notIn <- function( a, b ) {
+  res <- c( )
+  for( x in a )
+    if( ! x %in% b )
+      res <- append( res, x )
+
+  return( res )
+}
+
+
+#
+# ====== function [] = alignSeries ======
+#
+# Align series in named vectors to a reference, if possible
+#
+# Output:
+#   a list of series containing only the time steps as in the reference series
+#
+# Input:
+#   series: a list containing the series (named vectors) to align
+#   ref: list index to the series to be used as reference
+#
+
+alignSeries <- function( series, ref ) {
+
+  start <- as.numeric( names( series[[ ref ]][ 1 ] ) )
+  end <- as.numeric( names( series[[ ref ]][ length( series[[ ref ]] ) ] ) )
+
+  for( i in 1 : length( series ) ) {
+
+    if( as.numeric( names( series[[ i ]][ 1 ] ) ) > start ||
+        as.numeric( names( series[[ i ]][ length( series[[ i ]] ) ] ) ) < end ) {
+      series[[ i ]] <- NA
+
+    } else {
+
+      while( as.numeric( names( series[[ i ]][ 1 ] ) ) < start )
+        series[[ i ]] <- series[[ i ]][ 2 : length( series[[ i ]] ) ]
+
+      while( as.numeric( names( series[[ i ]][ length( series[[ i ]] ) ] ) ) > end )
+        series[[ i ]] <- series[[ i ]][ 1 : ( length( series[[ i ]] ) - 1) ]
+    }
+  }
+
+  return( series )
+}
+
+
+#
+# ====== function [] = findYlim ======
+#
+# Define plot window y limits
+#
+# Output:
+#   two-value vector mith minimum and maximum values for y axis
+#
+# Input:
+#   yMin: minimum value in data
+#   yMax: maximum value in data
+#   zero: limit bottom margin to zero if TRUE
+#
+# Environment:
+#   botMargin: bottom margin of plot area
+#   topMargin: top margin of plot area
+#
+
+findYlim <- function( yMin, yMax, zero = FALSE ) {
+  ylim <- c( yMin - botMargin * ( yMax - yMin ),
+             yMax + topMargin * ( yMax - yMin ) )
+  if( zero ) {
+    if( ylim[ 1 ] <= 0 )
+      ylim[ 1 ] <- yMin * ( 1 - botMargin )
+    if( ylim[ 2 ] <= ylim[ 1 ] )
+      ylim[ 2 ] <- yMax * ( 1 + topMargin )
+  }
+
+  return( ylim )
+}
+
+
+#
+# ====== function [] = vector.clean ======
+#
+# Clean a set of values and format it as a vector
+#
+# Output:
+#   vector without infinite values and above the given minimum
+#
+# Input:
+#   x : vector of data to clean
+#   min: minimum value for data
+#   na.rm: remove NAs if TRUE
+#
+
+vector.clean <- function( x, min = 0, na.rm = FALSE ) {
+  if( ! is.vector( x ) )
+    x <- as.vector( x )
+  x <- x[ is.finite( x ) ]
+  x <- x[ x >= min ]
+  if ( na.rm )
+    x <- x[ ! is.na( x ) ]
+  return( x )
+}
+
+
+#
+# ====== function [] = mean.clean ======
+#
+# Clean average, with default value
+#
+# Output:
+#   vector data average with a default value if mean doesn't exist
+#
+# Input:
+#   x : vector of data to use
+#   default: default average value
+#   na.rm: remove NAs if TRUE
+#
+
+mean.clean <- function( x, default = 0, na.rm = TRUE ) {
+  mean.x <- mean( x, na.rm = na.rm )
+  if( ! is.finite( mean.x ) ) mean.x <- default
+  return( mean.x )
+}
+
+
+#
+# ====== function [] = fmt ======
+#
+# Rounding and formatting numbers for tables
+#
+# Output:
+#   formatted table
+#
+# Input:
+#   x : vector/matrix/data frame to format
+#   digits: number of decimal digits
+#   signif: number of significant digits
+#   scipen: R scientific notation parameter
+#
+
+fmt <- function( x, digits = def.digits, signif = NULL, scipen = NA ) {
+  if( is.numeric( x ) ) {
+    return( format( round( x, digits = digits ),
+                    nsmall = digits, digits = signif, scientific = scipen ) )
+  }
+  if( is.data.frame( x ) ) {
+    for( i in 1 : ncol( x ) )
+      if( is.numeric( x[ , i ] ) )
+        x[ , i ] <- round( x[ , i ], digits = digits )
+    return( format( x, nsmall = digits, digits = signif, scientific = scipen ) )
+  }
+  stop( "Cannot format non-numeric data" )
+}
+
+
+#
+# ====== function [] = light_color ======
+#
+# Provide a lighter version of color
+#
+# Output:
+#   corresponding lighter color
+#
+# Input:
+#   color: color to use
+#   factor: 0= black / 1=white
+#   name = optional name for saving the color
+#
+
+light_color <- function( color, factor = 0.7, name = NULL ) {
+  if ( factor > 1 || factor < 0 )
+    return( color )
+  c <- col2rgb(color)
+  c <- c + ( 255 - c ) * factor
+  light_color <- rgb( t( c ), maxColorValue = 255, names = name )
+  invisible( light_color )
+}
+
+
+#
+# ====== function [] = transp_color ======
+#
+# Provide a transparent version of color
+#
+# Output:
+#   corresponding transparent color
+#
+# Input:
+#   color: color to use
+#   factor: level of transparency
+#   name = optional name for saving the color
+#
+
+transp_color <- function( color, factor = 0.5, name = NULL ) {
+  rgb <- col2rgb( color )
+  transp_color <- rgb( rgb[ 1 ], rgb[ 2 ], rgb[ 3 ], maxColorValue = 255,
+                       alpha = ( 1  - factor ) * 255, names = name )
+  invisible( transp_color )
+}
+
+
+# ==== Parallel processing functions ====
+
+#
+# ====== function [] = nCores ======
+#
+# Determine the number of cores to use
+# Bounded to the number of cores available
+#
+# Output:
+#   valid number of cores to use
+#
+# Input:
+#   cores: desired number of cores to use
+#   nStats: maximum number of statistics to compute in parallel
+#
+
+nCores <- function( cores = 0, nStats = 0 ) {
+
+  # find the maximum useful number of cores ( <= num. cores )
+  if( cores == 0 )
+    cores <- detectCores( )
+  nc <- min( cores, detectCores( ) )
+
+  if( nStats > 0 ) {
+    i <- 1
+    while( ceiling( nStats / i ) > cores )
+      i <- i + 1
+    nc <- ceiling( nStats / i )
+  }
+
+  if( cores == 1 )
+    nc <- 1
+
+  return( nc )
+}
+
+
+#
+# ====== function [] = startCores ======
+#
+# Start and initialize cores for parallel processing
+#
+# Output:
+#   valid handle to cluster if more than one core is used,
+#   NULL otherwise
+#
+# Input:
+#   cores: desired number of cores to use
+#   nStats: maximum number of statistics to compute in parallel
+#   ...: object names to be exported to the cluster environments
+#
+
+startCores <- function( cores = 0, nStats = 0, ... ) {
+
+  nc <- nCores( cores, nStats )
+
+  if( nc > 1 ) {
+    # start cores and initialize them
+    cl <- makeCluster( nc )
+    invisible( clusterEvalQ( cl, source( "KS-support-functions.R" ) ) )
+
+    if( length( list( ... ) ) > 0 )
+      invisible( clusterExport( cl, c( ... ) ) )
+  } else {
+    cl <- NULL
+  }
+
+  return( cl )
+}
+
+
+#
+# ====== function [] = stopCores ======
+#
+# Start and initialize cores for parallel processing
+#
+# Output:
+#   none but cluster is destroyed
+#
+# Input:
+#   cl: handle to cluster, NULL accepted (do nothing)
+#
+
+stopCores <- function( cl ) {
+  if( ! is.null( cl ) )
+    stopCluster( cl )
+}
+
+
+#
+# ====== function [] = autoLapply ======
+#
+# function to perform parallel or serial lapply
+#
+# Output:
+#   result list of lapply
+#
+# Input:
+#   cl: handle to existing cluster or NULL to process serially
+#
+#
+
+autoLapply <- function( cl, list, fun, ... ) {
+
+  res <- NULL
+
+  if( is.null( cl ) )
+    suppressWarnings( res <- lapply( list, fun, ... ) )
+  else
+    suppressWarnings( res <- parLapplyLB( cl, list, fun, ... ) )
+
+  return( res )
+}
+
+
+# ==== Script general functions ====
+
+#
+# ====== function [] = setCmdLinePars ======
+#
+# Set command line file parameters passed to script
+#
+# Output:
+#   set of changed variables in the caller environment
+#
+# Input:
+#   sa: if TRUE use the alternative sensitivity analysis variable set
+#
+
+setCmdLinePars <- function( sa = FALSE ) {
+
+  args <- commandArgs( trailingOnly = TRUE )
+  cat( "Command line arguments: ", args, "\n" )
+
+  if( length ( args ) > 0 )
+    folder <<- args [ 1 ]
+
+  if( length ( args ) > 1 )
+    baseName <<- args [ 2 ]
+
+  if( length ( args ) > 3 )
+    iniDrop <<- as.integer( args [ 4 ] )
+
+  if( length ( args ) > 4 )
+    nKeep <<- as.integer( args [ 5 ] )
+
+  if( length ( args ) > 5 )
+    coresExp <<- as.integer( args [ 6 ] )
+
+  if( length ( args ) > 7 )
+    savDat <<- as.logical( args [ 8 ] )
+
+  if( length ( args ) > 8 )
+    nCnt <<- as.integer( args [ 9 ] )
+
+  # SA-specific parameters
+  if( sa ) {
+
+    if( length ( args ) > 2 )
+      varName <<- args [ 3 ]
+
+    if( length ( args ) > 6 )
+      remOutl <<- as.logical( args [ 7 ] )
+
+  } else {
+
+    if( length ( args ) > 2 )
+      nExp <<- as.integer( args [ 3 ] )
+
+    if( length ( args ) > 6 )
+      coresMC <<- as.integer( args [ 7 ] )
+
+    if( length ( args ) > 9 )
+      mCnt <<- as.logical( args [ 10 ] )
+
+  }
+
+  cat( " Folder =", folder, "\n" )
+  cat( " Base name =", baseName, "\n" )
+
+  if( sa )
+    cat( " Variable name =", varName, "\n" )
+  else {
+    cat( " Multi-country report =", mCnt, "\n" )
+
+    if( mCnt )
+      cat( " Number of countries =", nExp, "\n" )
+    else
+      cat( " Number of experiments =", nExp, "\n" )
+  }
+
+  cat( " Country to use =", nCnt, "\n" )
+  cat( " Initial time steps to drop =", iniDrop, "\n" )
+  cat( " Time steps to keep =", nKeep, "\n" )
+  cat( " Maximum cores to use (exp.) =", coresExp, "\n" )
+
+  if( sa )
+    cat( " Remove outliers =", remOutl, "\n" )
+  else
+    cat( " Maximum cores to use (MC) =", coresMC, "\n" )
+
+  cat( " Re-use data files =", savDat, "\n\n" )
+}
+
+
+#
+# ====== function [] = showStartMark ======
+#
+# Show the log start mark
+#
+# Output:
+#   a formatted string in the log (terminal)
+#
+# Input:
+#   caption: string with the desired caption text
+#
+
+showStartMark <- function( caption ) {
+  underline = strrep( "=", nchar( caption ) )
+  cat( "\n" )
+  cat( caption, "\n" )
+  cat( underline, "\n\n" )
+  cat( as.character( Sys.time( ) ), "-> Start processing...\n\n" )
+  startTime <<- proc.time( )       # register current time
+}
+
+
+#
+# ====== function [] = showEndMark ======
+#
+# Show the log end mark
+#
+# Output:
+#   a formatted string in the log (terminal)
+#
+# !diagnostics suppress = startTime
+
+showEndMark <- function( ) {
+  dev.off( )            # Close PDF report file
+
+  if( ! exists( "endMsg", envir = sys.frame( -1 ) ) )
+    endMsg <- "Done!"
+
+  cat( paste0( "\n", endMsg, "\n\n" ) )
+
+  if( exists( "endMsg", envir = sys.frame( -1 ) ) )
+    rm( endMsg, envir = sys.frame( -1 ) )
+
+  cat( as.character( Sys.time( ) ), "-> Releasing resources...\n\n" )
+  totalTime <- proc.time( ) - startTime
+  print( totalTime )
+}
+
+
+#
+# ====== function [] = catchError ======
+#
+# Handle interrupts in tryCatch blocks
+#
+# Output:
+#   a formatted string in the log (terminal) and the report
+#
+# Input:
+#   ex: string with the exception description
+#
+
+catchError <- function( ex ) {
+  cat( "\n" )
+  print( ex )
+  textplot( "Incomplete report" )
+  endMsg <<- "Problem detected! (incomplete report)"
+}
+
+
+#
+# ====== function [] = setLabels ======
+#
+# Generate labels & build labels list legend
+#
+# Output:
+#   set of changed variables in the caller environment
+#
+# Input:
+#	  nExp: total number of experiments/countries
+#   mCnt: multi-country report? (TRUE/FALSE)
+#   nCnt: country to use (mCnt = FALSE) (0 = all)
+#
+# !diagnostics suppress = repName, baseName, cntVal, expVal, sector
+
+setLabels <- function( nExp, mCnt, nCnt ) {
+
+  if( repName == "" )
+    repName <<- baseName
+
+  legends <<- vector( )
+  listLeg <<- cntLeg <<- ""
+
+  if( ! mCnt ) {
+    expLeg <<- "Experiment"
+    listLeg <<- "Experiments: "
+    allLeg <<- "( all experiments )"
+    itemList <- "Case"
+
+    if( nCnt > 0 ) {
+      if( is.na( cntVal[ nCnt ] ) || cntVal[ nCnt ] == "" )
+        cntLeg <<- paste( "/ Country", nCnt )
+      else
+        cntLeg <<- paste( "/", cntVal[ nCnt ] )
+    }
+
+  } else {
+
+    for( k in 1 : nExp ) {
+      if( is.na( cntVal[ k ] ) || cntVal[ k ] == "" )
+        expVal[ k ] <<- paste( "Country", k )
+      else
+        expVal[ k ] <<- cntVal[ k ]
+    }
+
+    expLeg <<- "Country"
+    listLeg <<- "Countries: "
+    allLeg <<- "( all countries )"
+    itemList <- "Country"
+  }
+
+  for( k in 1 : nExp ) {
+    if( is.na( expVal[ k ] ) || expVal[ k ] == "" )
+      legends[ k ] <<- paste( itemList, k )
+    else
+      legends[ k ] <<- expVal[ k ]
+
+    if( k != 1 )
+      listLeg <<- paste0( listLeg, ",  " )
+
+    listLeg <<- paste0( listLeg, "[", k, "] ", legends[ k ] )
+  }
+
+  if( cntLeg != "" && exists( "sector") && is.character( sector ) )
+    sector <<- paste( sector, cntLeg )
+}
+
+
+#
+# ====== function [] = repFile ======
+#
+# Create report folder and files and connect output to it
+#
+# Output:
+#   open output device is created
+#   caller 'outDir' variable is updated/created
+#
+# Input:
+#   name: base name of report
+#   folder: relative folder to use
+#   suffix: suffix to apply to base name
+#   width: report page width
+#   height: report page height
+#   rows: number of plotting rows
+#   cols: number of plotting columns
+#   raster: create PNG output if TRUE and PDF if FALSE
+#   res: resolution to use if PNG output is selected
+#
+# !diagnostics suppress = fn
+
+repFile <- function( name, folder = ".", suffix = "",
+                     width = 10, height = 7, rows = 1, cols = 1,
+                     raster = FALSE, res = 300 ) {
+
+  # create a daily output directory
+  outDir <<- format( Sys.time(), "%Y-%m-%d" )
+  if( ! dir.exists( paste0( folder, "/", outDir ) ) )
+    dir.create( paste0( folder, "/", outDir ) )
+
+  if( dev.cur( )[ 1 ] == 1 )
+    cat( paste( "\nSaving results to:", paste0( folder, "/", outDir ), "\n" ) )
+  else
+    dev.off( )                # closes open output device
+
+  errF <- function( ex ) {
+    stop( "Cannot write report to '", fn, "'\nPlease close file if open" )
+  }
+
+  # select type of output
+  if( raster ){
+    # Open PNG (bitmap) files for output
+    fn <- paste0( folder, "/", outDir, "/", name, "_", suffix, "_%d.png" )
+    tryCatch( {
+      png( fn, width = width, height = height, units = "in", res = res )
+    }, error = errF )
+
+  } else {
+    # Open PDF plot file for output
+    fn <- paste0( folder, "/", outDir, "/", name, "_", suffix, "_plots.pdf" )
+    tryCatch( {
+      pdf( fn, width = width, height = height )
+    }, error = errF )
+    par( mfrow = c ( rows, cols ) )             # define plots per page
+  }
+}
+
+
+#
+# ====== function [] = saveCSV ======
+#
+# Save data frame to .csv file (Excel readable)
+#
+# Output:
+#   desired file is created
+#
+# Input:
+#   df: data frame to save
+#   baseName: base name of report
+#   baseFolder: relative base folder to use
+#   subFolder: sub folder inside base folder to use/create
+#   num: experiment/country number, if required
+#   suffix: suffix to apply to base name/experiment/country number
+#   type: additional suffix indicating the type of data
+#
+saveCSV <- function( df, baseName, baseFolder = ".", subFolder = NULL,
+                     num = NULL, suffix = "", type = "" ) {
+  if( ! is.null( subFolder ) ) {
+
+    folder <- paste0( baseFolder, "/", subFolder )
+
+    if( ! dir.exists( folder ) )
+      dir.create( folder )
+
+  } else {
+
+    folder <- baseFolder
+  }
+
+  if( is.null( num ) )
+    fn <- paste0( folder, "/", baseName, "_", suffix, "_", type, ".csv" )
+  else
+    fn <- paste0( folder, "/", baseName, "_", num, "_", suffix, "_", type, ".csv" )
+
+  write.csv( df, quote = FALSE, file = fn )
+}
+
+
+#
+# ====== function [] = readMC ======
+# Function to read one Monte Carlo run data in reports (to be parallelized)
+# Also adds new variables to dataset
+#
+# Output:
+#   Array containing Monte Carlo data
+#
+# Input:
+#   nMC: sequential number of Monte Carlo runs (1, 2, ..., nSize)
+#   exper: sequential number of experiment/country (1, 2, ..., nExp)
+#   posit: country instance prefix (1_*, 2_*, ...)
+#	  nSize: total number of Monte Carlo runs
+#	  nExp: total number of experiments/countries
+#   nVar: total number of variables in dataset (original+added)
+#   nAddVar: number of variables to be added to dataset
+#   addVar: new variables in the dataset
+#   addVarFn: function to create new variables in the dataset
+#   niceVarName: remove starting underscores from variable names (TRUE)
+#   resFiles: vector of Monte Carlo run file names
+#
+# Caller environment:
+#	  folder: data file folder to use (relative to current or absolute)
+#	  baseName: data file base name (same as .lsd file)
+#   iniDrop: initial time steps to drop from analysis (0=none)
+#   nKeep: number of time steps to keep (-1=all)
+#   origVar: original variables in dataset (from LSD)
+#   datFilSfx: data file name suffix
+#
+# !diagnostics suppress = folder, baseName, posit, iniDrop, nKeep
+# !diagnostics suppress = datFilSfx, mcStat, CI, bootCI, bootR, niceVarName
+
+readMC <- function( nMC, exper, posit, nSize, nExp, nVar, nAddVar, origVar,
+                    addVar, addVarFn, niceVarName, resFiles ) {
+
+  cat( "\n Monte Carlo run", nMC, "of", nSize )
+
+  # read as a 4D multi-MC array of a single MC sample, drop 1 dimension, add space
+  mc <- read.4d.lsd( resFiles[ nMC ], col.names = origVar, skip = iniDrop,
+                     nrows = nKeep, posit = posit, posit.match = "regex" )
+
+  mcOrigFile <- dimnames( mc )[[ 4 ]]
+  mc <- adrop( mc[ , , , 1, drop = FALSE ], drop = 4 )
+
+  nTsteps <- dim( mc )[ 1 ]
+  nElemMC <- dim( mc )[ 3 ]
+  newVar <- c( dimnames( mc )[[ 2 ]], name.var.lsd( addVar ) )
+  mc <- abind( mc, array( as.numeric( NA ),
+                          dim = c( nTsteps, nAddVar, nElemMC ) ),
+               along = 2, use.first.dimnames = TRUE )
+
+  if( niceVarName )
+    dimnames( mc )[[ 2 ]] <- name.nice.lsd( newVar )
+  else
+    dimnames( mc )[[ 2 ]] <- newVar
+
+  cat( " (", nElemMC, "instance(s) )" )
+
+  # add new variables to dataset
+  if( ! is.null( addVarFn ) )
+    mc <- addVarFn( mc, nElemMC, nTsteps, nVar )
+
+  # save temporary single MC results to disk to save memory
+  mcFile <- paste0( folder, "/", baseName, "_", exper, "_", datFilSfx, "_mc", "/",
+                    baseName, "_", exper, "_", datFilSfx, "_mc_", nMC, ".Rdata" )
+  save( mc, nMC, exper, nElemMC, file = mcFile )
+
+  return( list( mcFile = mcFile, mcOrigFile = mcOrigFile, nElemMC = nElemMC,
+                newVar = newVar ) )
+}
+
+
+#
+# ====== function [] = readExp ======
+# Function to read one experiment/country data in reports (to be parallelized)
+# Also computes Monte Carlo statistics
+#
+# Output:
+#   Name of file containing pooled data
+#
+# Input:
+#   exper: sequential number of experiment/country (1, 2, ..., nExp)
+#   nExp: total number of experiments/countries
+#   mCnt: multi-country analysis? (TRUE/FALSE)
+#   nCnt: number of country to use (mCnt=TRUE)
+#   origVar: original variables in dataset (from LSD)
+#   addVar: variables to be added to dataset
+#   addVarFn: function to create new variables in the dataset
+#   niceVarName: remove starting underscores from variable names (TRUE)
+#   coresMC: max cores to allocate for Monte Carlo (0=all)
+#
+# Caller environment:
+#	  folder: data file folder to use (relative to current or absolute)
+#	  baseName: data file base name (same as .lsd file)
+#   iniDrop: initial time steps to drop from analysis (0=none)
+#   nKeep: number of time steps to keep (-1=all)
+#   datFilSfx: data file name suffix
+#
+# !diagnostics suppress = mcDist
+
+readExp <- function( exper, nExp, mCnt, nCnt, origVar, addVar,
+                     addVarFn, niceVarName, coresMC ) {
+  if( mCnt ) {
+    lab <- "country"
+    posit <- paste0( "^", exper, "(_.+)?$" )
+  } else {
+    lab <- "experiment"
+
+    if( nCnt > 0 )
+      posit <- paste0( "^", nCnt, "(_.+)?$" )
+    else
+      posit <- NULL
+  }
+
+  if( ! mCnt && nExp > 1 )
+    resFiles <- list.files.lsd( folder, paste0( baseName, exper ) )
+  else
+    resFiles <- list.files.lsd( folder, baseName )
+
+  nSize <- length( resFiles )            # Monte Carlo sample size
+  if( nSize < 1 )
+    stop( "Data files not found. Check 'folder', 'baseName' and 'nExp' parameters." )
+
+  cat( "\nLoading", lab, exper, "of", nExp, "\n\nData files:", resFiles, "\n" )
+
+  # Read data (first MC sample) from text file just to set array dimensions
+  mc <- read.4d.lsd( resFiles[ 1 ], col.names = origVar, skip = iniDrop,
+                     nrows = nKeep, posit = posit, posit.match = "regex" )
+
+  # set basic information
+  nTsteps <- dim( mc )[ 1 ]              # number of time steps
+  origNvar <- dim( mc )[ 2 ]             # number of variables (original)
+  nElem <- dim( mc )[ 3 ]                # number of elements (instances)
+  nAddVar <- length( addVar )            # number of new variables to add
+  nVar <- length( origVar ) + nAddVar    # number of variables (worker-level)
+
+  cat( "\n" )
+  cat( toTitleCase( lab ), "details:\n" )
+  cat( " Number of MC runs =", nSize, "\n" )
+  cat( " Number of original variables =", origNvar, "\n" )
+  cat( " Number of total variables =", nVar, "\n" )
+  cat( " Number of instances (first file) =", nElem, "\n" )
+  cat( " Number of used periods =", nTsteps, "\n\n" )
+
+  rm( mc )
+
+  cat( "Creating new variables and saving Monte Carlo data..." )
+
+  # create the output directory if needed
+  if( ! dir.exists( paste0( folder, "/", baseName, "_", exper, "_", datFilSfx,
+                            "_mc" ) ) )
+    dir.create( paste0( folder, "/", baseName, "_", exper, "_", datFilSfx,
+                        "_mc" ) )
+
+  # ---- configure clusters for parallel loading ----
+
+  # initiate and configure cluster for parallel loading
+  # export required variables from global environment
+  cl <- startCores( coresMC, 0, "folder", "baseName", "iniDrop", "nKeep",
+                    "datFilSfx" )
+
+  # load each experiment/country in parallel, with current function variables
+  mcRes <- autoLapply( cl, 1 : nSize, readMC, exper = exper, posit = posit,
+                       nSize = nSize, nExp = nExp, nVar = nVar,
+                       nAddVar = nAddVar, origVar = origVar, addVar = addVar,
+                       addVarFn = addVarFn, niceVarName = niceVarName,
+                       resFiles = resFiles )
+
+  stopCores( cl )
+
+  # ---- reorganize and save data ----
+
+  cat( "\n\nConsolidating data and computing Monte Carlo statistics...\n" )
+
+  nElem <- 0
+  for( i in 1 : length( mcRes ) )
+    nElem <- nElem + mcRes[[ i ]]$nElemMC
+
+  if( niceVarName )
+    newVar <- name.nice.lsd( mcRes[[ 1 ]]$newVar )
+  else
+    newVar <- mcRes[[ 1 ]]$newVar
+
+  # Create "flatter" 2D/3D arrays, appending data from different MC runs in sequence
+  pool <- array( as.numeric( NA ), dim = c( nTsteps, nVar, nElem ),
+                 dimnames = list( c( ( iniDrop + 1 ) : ( iniDrop + nTsteps ) ),
+                                  newVar, c( 1 : nElem ) ) )
+  mcFiles <- mcOrigFiles <- vector( "character", length = nSize )
+  l <- rep( 1, nVar )                   # absolute variable x element instance counter
+  netElemMC <- 0                        # net elements added (ignoring all NA elements)
+
+  # reorganize multiple MC data tables into the 2D/3D arrays
+  for( h in 1 : nSize ) {               # for all MC samples (files)
+
+    mcFiles[ h ] <- mcRes[[ h ]]$mcFile
+    mcOrigFiles[ h ] <- mcRes[[ h ]]$mcOrigFile
+    load( mcFiles[ h ] )
+
+    if( dim( mc )[ 1 ] != nTsteps || dim( mc )[ 2 ] != nVar )
+      stop( "Inconsistent data files.\nSame number of time steps and variables is required." )
+
+    cat( " Monte Carlo run", h, "of", nSize )
+
+    for( j in 1 : nVar ) {              # for all variables
+
+      for( i in 1 : dim( mc )[ 3 ] ) {  # for all element instances
+
+        pool[ , j, l[ j ] ] <- mc[ , j, i ]
+        l[ j ] <- l[ j ] + 1
+      }
+    }
+
+    lastElemMC <- netElemMC
+    netElemMC <- ncol( Filter( function( x ) ! all( is.na( x ) ),
+                               as.data.frame( pool[ , dim( mc )[ 2 ], ] ) ) )
+    cat( " (", netElemMC - lastElemMC, "+", mcRes[[ h ]]$nElemMC -
+           ( netElemMC - lastElemMC ), "of", nElem, "instance(s) )\n" )
+  }
+
+  rm( mc )
+
+  # Compute Monte Carlo averages and std. deviation and store in 2D arrays
+  stats <- info.stats.lsd( pool, median = ( mcStat == "median" ), ci = mcStat,
+                           ci.conf = CI, ci.boot = bootCI, boot.R = bootR )
+
+  if( mcStat == "median" ) {
+    P <- as.data.frame( stats$med )
+    S <- as.data.frame( stats$mad )
+  } else {
+    P <- as.data.frame( stats$avg )
+    S <- as.data.frame( stats$sd )
+  }
+
+  M <- as.data.frame( stats$max )
+  m <- as.data.frame( stats$min )
+  C <- as.data.frame( stats$ci.hi )
+  c <- as.data.frame( stats$ci.lo )
+  n <- as.data.frame( stats$n )
+
+  if( exists( "mcDist" ) && ! is.null( mcDist ) && mcDist != "" ) { # use typical runs?
+
+    if( nElem != nSize )
+      stop( "More than one variable instance selected in a single MC run" )
+
+    dimnames( pool )[[ 3 ]] <- mcOrigFiles
+
+    d <- info.distance.lsd( pool, P, distance = mcDist, rank = TRUE )
+
+    mcP <- d$close[ 1, ]
+    P <- matrix( nrow = nTsteps, ncol = 0 )
+    for( i in 1 : length( mcP ) )
+      P <- cbind( P, pool[ , names( mcP[ i ] ), mcP[ i ] ] )
+
+    dimnames( P ) <- list( dimnames( pool )[[ 1 ]], names( mcP ) )
+    P <- as.data.frame( P )
+
+    mcX <- names( d$rank )[ 1 ]
+    X <- as.data.frame( pool[ , , mcX ] )
+  } else
+    mcP <- mcX <- X <- NULL
+
+
+  # save Monte Carlo statistics
+  saveCSV( P, baseName = baseName, num = exper, baseFolder = folder,
+           suffix = datFilSfx, type = mcStat )
+  saveCSV( S, baseName = baseName, num = exper, baseFolder = folder,
+           suffix = datFilSfx, type = "sd" )
+  saveCSV( M, baseName = baseName, num = exper, baseFolder = folder,
+           suffix = datFilSfx, type = "max" )
+  saveCSV( m, baseName = baseName, num = exper, baseFolder = folder,
+           suffix = datFilSfx, type = "min" )
+  saveCSV( n, baseName = baseName, num = exper, baseFolder = folder,
+           suffix = datFilSfx, type = "num" )
+
+  # save temporary results to disk to save memory
+  poolFile <- paste0( folder, "/", baseName, "_", exper, "_", datFilSfx,
+                      "_pool.Rdata" )
+  save( pool, mcP, mcX, P, X, S, C, c, M, m, n, exper, nTsteps, nVar, nElem,
+        nSize, file = poolFile )
+
+  return( list( pool = poolFile, mc = mcFiles ) )
+}
+
+
+#
+# ====== function [] = loadData ======
+# Function to load LSD data in reports
+# Output:
+#   Vector of file names containing pooled data
+#
+# Input:
+#   savDat: flag defining if temporary data files should be saved/used
+#	  nExp: total number of experiments/countries
+#   mCnt: multi-country report? (TRUE/FALSE)
+#   nCnt: country to use (mCnt = FALSE) (0 = all)
+#	  folder: data file folder to use (relative to current or absolute)
+#	  baseName: data file base name (same as .lsd file)
+#   iniDrop: initial time steps to drop from analysis (0=none)
+#   nKeep: number of time steps to keep (-1=all)
+#   origVar: original variables in dataset (from LSD)
+#   addVar: variables to be added to dataset
+#   niceVarName: remove starting underscores from variable names (TRUE)
+#   datFilSfx: data file name suffix
+#   coresExp: max cores to allocate for experiments/countries (0=all)
+#   coresMC: max cores to allocate for Monte Carlo (0=all)
+#   addVarFn: function to create new variables in the dataset
+#   mcStat: statistic to use
+#   CI: confidence level
+#   bootR: number of bootstrap samples
+#   bootCI: type of bootstrap confidence interval
+#
+
+loadData <- function( savDat, nExp = 1, mCnt = FALSE, nCnt = 0, folder = ".",
+                      baseName, iniDrop = 0, nKeep = -1, origVar, addVar = "",
+                      niceVarName = TRUE, datFilSfx = "", coresExp = 0,
+                      coresMC = 0, addVarFn = NULL, mcStat = "mean",
+                      mcDist = NULL, CI = 0.95, bootR = 999, bootCI = NULL ) {
+
+  # only reprocess results file if requested/needed
+  if( savDat ) {
+
+    files <- list( )
+    noDat <- FALSE
+
+    # check all .dat files exist and are newer than .res files
+    for( i in 1 : nExp ) {
+      if( ! mCnt && nExp > 1 )
+        resFiles <- list.files.lsd( folder, paste0( baseName, i ) )
+      else
+        resFiles <- list.files.lsd( folder, baseName )
+
+      poolFile <- paste0( folder, "/", baseName, "_", i, "_", datFilSfx,
+                          "_pool.Rdata" )
+      mcFiles <- list.files( path = paste0( folder, "/", baseName, "_", i, "_",
+                                            datFilSfx, "_mc" ),
+                             pattern = paste0( baseName, "_", i, "_", datFilSfx,
+                                               "_mc_[0-9]+.Rdata" ),
+                             full.names = TRUE )
+
+      # if any .Rdata file is missing or .res file is newer, redo everything
+      if( ! file.exists( poolFile ) || length( mcFiles ) != length( resFiles ) ||
+          file.mtime( poolFile ) < max( file.mtime( resFiles ) ) ) {
+
+        if( file.exists( poolFile ) )
+          file.remove( poolFile )
+
+        if( length( mcFiles ) > 0 )
+          file.remove( mcFiles )
+
+        files[[ i ]] <- list( pool = "", mc = c( ) )
+        noDat <- TRUE
+
+        if( ! noDat )
+          cat( "New/missing data files, removing previously saved data...\n\n" )
+      } else {
+        files[[ i ]] <- list( pool = poolFile, mc = mcFiles )
+      }
+    }
+
+    if( ! noDat )
+      cat( "Re-using previously saved data...\n" )
+  }
+
+  if( ! savDat || noDat ) {
+
+    cat( "Reading data from files...\n" )
+
+    # configure clusters for 2 level parallel loading, prioritize MC usage
+    if( coresExp == 0 )
+      coresExp <- min( nExp, detectCores( ) )
+    else
+      coresExp <- min( coresExp, nExp, detectCores( ) )
+
+    if( coresMC == 0 )
+      coresMC <- detectCores( )
+    else
+      coresMC <- min( coresMC, detectCores( ) )
+
+    if( ( coresExp + coresMC ) > detectCores( ) ) {
+      coresExp <- detectCores( ) - coresMC
+      if( coresExp < 1 ) {
+        coresExp <- 1
+        coresMC <- detectCores( ) - 1
+      }
+    }
+
+    # initiate cluster for parallel loading
+    cl <- startCores( coresExp, 0, "folder", "baseName", "iniDrop", "nKeep",
+                      "datFilSfx", "mcStat", "mcDist", "CI", "bootCI", "bootR" )
+
+    # load each experiment/country in parallel
+    files <- autoLapply( cl, 1 : nExp, readExp, nExp = nExp, mCnt = mCnt,
+                         nCnt = nCnt, origVar = origVar, addVar = addVar,
+                         addVarFn = addVarFn, niceVarName = niceVarName,
+                         coresMC = coresMC )
+    stopCores( cl )
+  }
+
+  return( files )
+}
+
+
+#
+# ====== function [] = clearTemp ======
+# Remove temporary files if temporary data files are disabled
+#
+# Input:
+#   savDat: flag defining if temporary data files should be saved/used
+#   files: list of file names containing data
+#	  nExp: total number of experiments/countries
+#	  folder: data file folder to use (relative to current or absolute)
+#	  baseName: data file base name (same as .lsd file)
+#   datFilSfx: data file name suffix
+#
+
+clearTemp <- function( savDat, files, nExp, folder, baseName, datFilSfx ) {
+
+  if( ! savDat ) {                    # delete temporary files, if needed
+    for( k in 1 : nExp ) {            # do for each experiment/country
+      file.remove( files[[ k ]]$pool )        # pooled data files
+      lapply( files[[ k ]]$mc, file.remove )  # MC data files
+    }
+
+    unlink( paste0( folder, "/", baseName, "_", k, "_", datFilSfx, "_mc" ),
+            recursive = TRUE )
+  }
+}
+
+
+# ==== Statistical functions ====
+
+#
+# ====== function [] = rem_dec ======
+#
+# Smooth series and remove decreasing periods
+# in a growth curve (to allow first difference logs)
+#
+# Output:
+#   smoothed vector of data
+#
+# Input:
+#   x : vector of data to smooth
+#
+
+rem_dec <- function( x ) {
+
+  # smooth the series
+  x <- supsmu( 1 : length( x ), x )$y
+
+  # if beginning is decreasing, try to find another peak
+  if( which.max( x ) == 1 ) {
+    i <- 1
+    while( i < length( x ) && x[ i ] > x[ i + 1 ] )
+      i <- i + 1
+    x <- x[ i : length( x ) ]
+  }
+
+  x <- x[ 1 : which.max( x ) ]
+
+  last <- 0
+  for( i in 1 : length( x ) ) {
+    if( x[ i ] < last + .0001 )
+      x[ i ] <- last + .0001
+
+    last <- x[ i ]
+  }
+  return( x )
+}
+
+
+#
+# ====== function [] = compertz_model ======
+#
+# Fit a Compertz (sigmoid) growth model to data
+#
+# Output:
+#  List with Compertz model estimated parameters
+#
+# Input:
+#   x: series
+#
+
+compertz_model <- function( x ) {
+  # prepare dataset for nonlinear regression
+  dlx <- diff( log( x ) )
+  t <- 1 : length( dlx )
+
+  # estimate initial values for nonlinear regression (Jukic et al 2004)
+  last <- length( x )
+  mid <- ceiling( last / 2 )
+  gamma0 <- - ( 2 / ( last - 1 ) ) * log( ( log( x[ last ] ) - log( x[ mid ] ) ) /
+                                            ( log( x[ mid ] ) - log( x[ 1 ] ) ) )
+  beta0 <- - ( ( log( x[ mid ] ) - log( x[ 1 ] ) ) ^ 2 /
+                 ( log( x[ last ] ) - 2 * log( x[ mid ] ) + log( x[ 1 ] ) ) )
+  gamma0 <- max( gamma0, 0.01 )
+  beta0 <- max( beta0, 0.01 )
+
+  # try to fit a Compertz growth curve to data with nonlinear LS (Franses, 1994)
+  model <- NULL
+  try( model <- nls( logNA( dlx ) ~ -gamma * t + logNA( beta * exp( gamma ) - beta ),
+                     start = list( gamma = gamma0, beta = beta0 ),
+                     na.action = na.exclude ), silent = TRUE )
+
+  if( is.null( model ) )
+    return( list( model = NA, beta = NA, gamma = NA, betaSE = NA, betaPr = NA,
+                  gammaSE = NA, gammaPr = NA, corr = NA, R2 = NA ) )
+
+  # some notional (non-precise) measures of the fitting
+  corr <- cor( log( dlx ), predict( model ) )
+
+  R2 <- 1 - sum( residuals( model ) ^ 2 ) /
+    sum( ( log( dlx ) - mean( log( dlx ) ) ) ^ 2 )
+
+  return( list( model = model,
+                beta = coef( model )[ "beta" ],
+                gamma = coef( model )[ "gamma" ],
+                betaSE = summary( model )$parameters[ "beta", "Std. Error" ],
+                betaPr = summary( model )$parameters[ "beta", "Pr(>|t|)" ],
+                gammaSE = summary( model )$parameters[ "gamma", "Std. Error" ],
+                gammaPr = summary( model )$parameters[ "gamma", "Pr(>|t|)" ],
+                corr = corr, R2 = R2 ) )
+}
+
+
+#
+# ====== function [] = fit_subbotin ======
+# Output:
+#  List with symmetric Subbotin distribution estimated parameters
+#
+# Input:
+#   x: series
+#   silent: no warnings if TRUE
+#
+
+exec_subbofit <- function( x, type  = "symmetric" ) {
+  # default return in case of error
+  subboFit <- c( rep( as.numeric( NA ), 7 ) )
+
+  if( type == "asymmetric" )
+    command <- "subboafit"
+  else
+    command <- "subbofit"
+
+  cat( "  ", type, "subbofit, n =", length( x ), "... " )
+
+  outStr <- system2( command, args = "-O 3", input = as.character( x ),
+                     stdout = TRUE, stderr = FALSE )
+  try( subboFit <- sapply( scan( textConnection ( outStr ), what = character( ), quiet = TRUE ),
+                           as.numeric, silent = TRUE ),
+       silent = TRUE )
+
+  if( type == "asymmetric" )
+    se <- paste( subboFit[ 6 ], subboFit[ 7 ] )
+  else
+    se <- subboFit[ 4 ]
+  cat( "b_se =", se, "\n" )
+
+  return( subboFit )
+}
+
+fit_subbotin <- function( x, silent = FALSE ) {
+
+  # default return in case of error
+  subboFit <- c( as.numeric( NA ), as.numeric( NA ), as.numeric( NA ) )
+
+  # prepare valid data for Subbotools (no NA's & limited sample size)
+  x <- x[ !is.na( x ) ]
+  if( length( x ) > subboMaxSample )
+    x <- sample( x, subboMaxSample )
+
+  if( length( x ) < subboMinSample ) {
+    if( ! silent )
+      warning( "Too few observations to fit Subbotin: returning NA")
+    return( list( b = subboFit[ 1 ], a = subboFit[ 2 ], m = subboFit[ 3 ] ) )
+  }
+
+  if( useSubbotools && length( x ) >= 50 )
+    subboFit <- exec_subbofit( x )
+  else{       # Alternative calculation using the normalp package
+    sf <- try( paramp( x ), silent = TRUE )
+
+    if( class( sf ) != "try-error" ) {
+      sf$p <- estimatep( x, mu = sf$mean, p = sf$p, method = "inverse" )
+      # use Subbotools when p < 1, as normalp doesn't work in this condition
+      if( sf$p <= 1.01 )
+        subboFit <- exec_subbofit( x )
+      else
+        subboFit <- c( sf$p, sf$sp, sf$mp )
+    } else {
+      if( useSubbotools )
+        subboFit <- exec_subbofit( x )
+    }
+  }
+
+  # check for degenerated distribution
+  if( subboBlimit != 0 && ! is.na( subboFit[1] ) && subboFit[1] > subboBlimit ){
+    subboFit <- c( as.numeric( NA ), as.numeric( NA ), as.numeric( NA ) )
+    if( ! silent )
+      warning( "Degenerated Subbotin distribution: returning NA")
+  }
+
+  return( list( b = subboFit[1], a = subboFit[2], m = subboFit[3] ) )
+}
+
+
+#
+# ====== function [] = remove_extremes ======
+# Output:
+#  Series containing values outside defined quantiles
+#
+# Input:
+#   x: series to remove outliers
+#	  quant: limit quantile (0-1)
+#	  na.rm: remove missing
+#
+
+remove_extremes <- function( x, quant = 0.25, na.rm = TRUE, ... ) {
+  if( length( x ) == 0 )
+    return( c( ) )
+  if( quant <= 0 || quant > 1 )
+    return( x )
+  qnt <- quantile( x, probs=c( quant, 1 - quant ), na.rm = na.rm, ... )
+  y <- x
+  y[ x < qnt[1] ] <- NA
+  y[ x > qnt[2] ] <- NA
+  if( na.rm )
+    y <- y[ ! is.na( y ) ]
+  return( y )
+}
+
+
+#
+# ====== function [] = outliers ======
+# Output:
+#  outlier positions in vector x
+#
+# Input:
+#   x: series to remove outliers
+#	  quant: limit quantile (0-1)
+#
+
+outliers <- function( x, quant = 0.25, na.rm = TRUE, ... ) {
+  if( length( x ) == 0 )
+    return( c( ) )
+  qnt <- quantile( x, probs=c( quant, 1 - quant ), na.rm = na.rm, ... )
+  H <- 1.5 * ( IQR( x, na.rm = na.rm ) / 0.5 ) * 2 * quant
+  y <- rep( FALSE, length( x ) )
+  y[ x < ( qnt[ 1 ] - H ) ] <- TRUE
+  y[ x > ( qnt[ 2 ] + H ) ] <- TRUE
+  z <- vector( )
+  for( i in 1 : length( y ) )
+    if( y[ i ] )
+      z <- append( z, i )
+  return( z )
+}
+
+
+#
+# ====== function [] = nOutliers ======
+# Output:
+#  non-outlier positions in vector x
+#
+# Input:
+#   x: series to remove outliers
+#	  quant: limit quantile (0-1)
+#
+
+nOutliers <- function( x, quant = 0.25, na.rm = TRUE, ... ) {
+  if( length( x ) == 0 )
+    return( c( ) )
+  qnt <- quantile( x, probs=c( quant, 1 - quant ), na.rm = na.rm, ... )
+  H <- 1.5 * ( IQR( x, na.rm = na.rm ) / 0.5 ) * 2 * quant
+  y <- rep( TRUE, length( x ) )
+  y[ x < ( qnt[ 1 ] - H ) ] <- FALSE
+  y[ x > ( qnt[ 2 ] + H ) ] <- FALSE
+  z <- vector( )
+  for( i in 1 : length( y ) )
+    if( y[ i ] )
+      z <- append( z, i )
+  return( z )
+}
+
+
+#
+# ====== function [] = remove_outliers ======
+# Output:
+#  Series containing non-outlier values
+#
+# Input:
+#   x: series to remove outliers
+#	  quant: limit quantile (0-1)
+#	  na.rm: remove missing
+#
+
+remove_outliers <- function( x, quant = 0.25, na.rm = TRUE, ... ) {
+  if( length( x ) == 0 )
+    return( c( ) )
+  qnt <- quantile( x, probs = c( quant, 1 - quant ), na.rm = na.rm, ... )
+  H <- 1.5 * ( IQR( x, na.rm = na.rm ) / 0.5 ) * 2 * quant
+  y <- x
+  y[ x < ( qnt[ 1 ] - H ) ] <- NA
+  y[ x > ( qnt[ 2 ] + H ) ] <- NA
+  if( na.rm )
+    y <- y[ ! is.na( y ) ]
+  return( y )
+}
+
+
+#
+# ====== function [] = remove_outliers_table ======
+# Output:
+#  Table of series containing non-outlier values
+#  All lines containing NAs are removed
+#
+# Input:
+#   x: table of series (columns) to remove outliers
+#	  quant: limit quantile (0-1)
+#
+
+remove_outliers_table <- function( x, quant = 0.25, ... ) {
+
+  if( nrow( x ) == 0 )
+    return( c( ) )
+
+  iniLen <- nrow( x )        # initial number of observations
+  outList <- vector( "numeric" )
+
+  # remove NAs first
+  for( i in 1 : ncol( x ) )
+    x <- x[ ! is.na( x[ , i ] ), , drop = FALSE ]
+
+  # remove NAs and identify outliers for each series
+  for( i in 1 : ncol( x ) )
+    outList <- append( outList, outliers( x[ , i ], quant, na.rm = TRUE, ... ) )
+
+  # remove duplicates and sort list
+  outList <- sort( unique( outList ) )
+
+  # check abnormal number of outliers
+  outPerc <- length( outList ) / iniLen
+  if( outPerc > 2 * quant && outPerc > 0.05 )
+    warning( "Many outliers:", outPerc * 100, "%" )
+
+  if( outPerc == 0 )
+    return( x )                               # no outlier
+  else
+    return( x[ - outList, , drop = FALSE ] )  # remove outliers' lines from table
+}
+
+
+#
+# ====== function [] = abs_max ======
+# Output:
+#  Series to find absolute maximum (excluding extremes)
+#
+# Input:
+#   x: series to analyze
+#	  quant: limit quantile (0-1)
+#	  na.rm: remove missing
+#
+
+abs_max <- function( x, quant = 0.25 ) {
+  y <- remove_extremes( x, quant = quant, na.rm = TRUE )
+  return( max( max( y ), - min( y ) ) )
+}
+
+
+#
+# ====== function [] = lm_outl( ======
+# Output:
+#  linear regression result, not considering extremes
+#
+# Input:
+#   x, y: series to regress
+#	  quant: limit quantile (0-1) to consider
+#   rm.outl: remove outliers regression
+#
+
+lm_outl <- function( y, x, quant = 0.05, rm.outl = TRUE ){
+
+  if( rm.outl ){
+    x <- remove_extremes( x, quant = quant, na.rm = FALSE )
+    y <- remove_extremes( y, quant = quant, na.rm = FALSE )
+  }
+
+  return( lm( y ~ x ) )
+}
+
+
+#
+# ====== function [] = comp_stats ======
+# Output:
+#  several statistics obtained from x (in this order):
+#   mean, std. deviation, symmetric subbotin fit,
+#   jarque-bera normality test, lilliefors n. test,
+#   anderson-darling n. test
+#
+# Input:
+#   x: vector or matrix of data
+#
+
+comp_stats <- function ( x ){
+  x <- as.vector( x )
+  x <- x[ ! is.na( x ) ]
+
+  # define default (NA) values in case of error
+  jbx <- list( statistic = as.numeric( NA ), parameter = as.numeric( NA ),
+               p.value = as.numeric( NA ), method = "", data.name ="" )
+  llx <- list( statistic = as.numeric( NA ), p.value = as.numeric( NA ),
+               method = "", data.name ="" )
+  adx <- list( statistic = as.numeric( NA ), p.value = as.numeric( NA ),
+               method = "", data.name ="" )
+  acfx <- c( as.numeric( NA ), as.numeric( NA ), as.numeric( NA ) )
+
+  # run calculations
+  mx <- mean( x )
+  if( is.nan( mx ) )
+    mx <- as.numeric( NA )
+  sx <- sd( x )
+  if( is.nan( sx ) )
+    sx <- as.numeric( NA )
+  subbox <- fit_subbotin( x, silent = TRUE )
+  try( jbx <- jarque.bera.test( x ), silent = TRUE )
+  try( llx <- lillie.test( x ), silent = TRUE )
+  try( adx <- ad.test( x ), silent = TRUE )
+  try( acfx <- acf( x, plot = FALSE )$acf, silent = TRUE )    # autocorrelation lags
+
+  # check for infinite/NaN results
+  if( ! is.finite( jbx$statistic ) ) jbx$statistic <- as.numeric( NA )
+  if( ! is.finite( jbx$p.value ) ) jbx$p.value <- as.numeric( NA )
+  if( ! is.finite( llx$statistic ) ) llx$statistic <- as.numeric( NA )
+  if( ! is.finite( jbx$p.value ) ) jbx$p.value <- as.numeric( NA )
+  if( ! is.finite( adx$statistic ) ) adx$statistic <- as.numeric( NA )
+  if( ! is.finite( adx$p.value ) ) adx$p.value <- as.numeric( NA )
+  if( ! is.finite( acfx[2] ) ) acfx[2] <- as.numeric( NA )
+  if( ! is.finite( acfx[3] ) ) acfx[3] <- as.numeric( NA )
+
+  return( list( avg = mx, sd = sx, subbo = subbox,
+                jb = jbx, ll = llx,  ad = adx,
+                ac = list ( t1 = acfx[2], t2 = acfx[3] ) ) )
+}
+
+
+#
+# ====== function [] = comp_MC_stats ======
+# Output:
+#  statistics obtained from a set of Monte
+#   Carlo runs:  mean, std. deviation, maximum,
+#   minimum
+#
+# Input:
+#   x: list of MC data
+#
+
+comp_MC_stats <- function ( x ){
+
+  # build list with Monte Carlo average of runs for selected variables
+  avg.avg <- mean( sapply( x, '[[', "avg" ), na.rm = TRUE )
+  avg.sd <- mean( sapply( x, '[[', "sd" ), na.rm = TRUE )
+  avg.subbo <- list( b = mean( simplify2array( sapply( x, '[[', "subbo" )[ "b", ] ), na.rm = TRUE ),
+                     a = mean( simplify2array( sapply( x, '[[', "subbo" )[ "a", ] ), na.rm = TRUE ),
+                     m = mean( simplify2array( sapply( x, '[[', "subbo" )[ "m", ] ), na.rm = TRUE ) )
+  avg.jb <- list( statistic = mean( simplify2array( sapply( x, '[[', "jb" )[ "statistic", ] ), na.rm = TRUE ),
+                  p.value = mean( simplify2array( sapply( x, '[[', "jb" )[ "p.value", ] ), na.rm = TRUE ) )
+  avg.ll <- list( statistic = mean( simplify2array( sapply( x, '[[', "ll" )[ "statistic", ] ), na.rm = TRUE ),
+                  p.value = mean( simplify2array( sapply( x, '[[', "ll" )[ "p.value", ] ), na.rm = TRUE ) )
+  avg.ad <- list( statistic = mean( simplify2array( sapply( x, '[[', "ad" )[ "statistic", ] ), na.rm = TRUE ),
+                  p.value = mean( simplify2array( sapply( x, '[[', "ad" )[ "p.value", ] ), na.rm = TRUE ) )
+  avg.ac <- list( t1 = mean( simplify2array( sapply( x, '[[', "ac" )[ "t1", ] ), na.rm = TRUE ),
+                  t2 = mean( simplify2array( sapply( x, '[[', "ac" )[ "t2", ] ), na.rm = TRUE ) )
+
+  avg.x <- list( avg = avg.avg, sd = avg.sd, subbo = avg.subbo,
+                 jb = avg.jb, ll = avg.ll, ad = avg.ad, ac = avg.ac  )
+
+  # build list with Monte Carlo std. dev. of runs for selected variables
+  sd.avg <- sd( sapply( x, '[[', "avg" ), na.rm = TRUE )
+  sd.sd <- sd( sapply( x, '[[', "sd" ), na.rm = TRUE )
+  sd.subbo <- list( b = sd( simplify2array( sapply( x, '[[', "subbo" )[ "b", ] ), na.rm = TRUE ),
+                    a = sd( simplify2array( sapply( x, '[[', "subbo" )[ "a", ] ), na.rm = TRUE ),
+                    m = sd( simplify2array( sapply( x, '[[', "subbo" )[ "m", ] ), na.rm = TRUE ) )
+  sd.jb <- list( statistic = sd( simplify2array( sapply( x, '[[', "jb" )[ "statistic", ] ), na.rm = TRUE ),
+                 p.value = sd( simplify2array( sapply( x, '[[', "jb" )[ "p.value", ] ), na.rm = TRUE ) )
+  sd.ll <- list( statistic = sd( simplify2array( sapply( x, '[[', "ll" )[ "statistic", ] ), na.rm = TRUE ),
+                 p.value = sd( simplify2array( sapply( x, '[[', "ll" )[ "p.value", ] ), na.rm = TRUE ) )
+  sd.ad <- list( statistic = sd( simplify2array( sapply( x, '[[', "ad" )[ "statistic", ] ), na.rm = TRUE ),
+                 p.value = sd( simplify2array( sapply( x, '[[', "ad" )[ "p.value", ] ), na.rm = TRUE ) )
+  sd.ac <- list( t1 = sd( simplify2array( sapply( x, '[[', "ac" )[ "t1", ] ), na.rm = TRUE ),
+                 t2 = sd( simplify2array( sapply( x, '[[', "ac" )[ "t2", ] ), na.rm = TRUE ) )
+
+  sd.x <- list( avg = sd.avg, sd = sd.sd, subbo = sd.subbo,
+                jb = sd.jb, ll = sd.ll, ad = sd.ad, ac = sd.ac  )
+
+  # build list with Monte Carlo std. error of runs for selected variables
+  se.avg <- se( sapply( x, '[[', "avg" ) )
+  se.sd <- se( sapply( x, '[[', "sd" ) )
+  se.subbo <- list( b = se( simplify2array( sapply( x, '[[', "subbo" )[ "b", ] ) ),
+                    a = se( simplify2array( sapply( x, '[[', "subbo" )[ "a", ] ) ),
+                    m = se( simplify2array( sapply( x, '[[', "subbo" )[ "m", ] ) ) )
+  se.jb <- list( statistic = se( simplify2array( sapply( x, '[[', "jb" )[ "statistic", ] ) ),
+                 p.value = se( simplify2array( sapply( x, '[[', "jb" )[ "p.value", ] ) ) )
+  se.ll <- list( statistic = se( simplify2array( sapply( x, '[[', "ll" )[ "statistic", ] ) ),
+                 p.value = se( simplify2array( sapply( x, '[[', "ll" )[ "p.value", ] ) ) )
+  se.ad <- list( statistic = se( simplify2array( sapply( x, '[[', "ad" )[ "statistic", ] ) ),
+                 p.value = se( simplify2array( sapply( x, '[[', "ad" )[ "p.value", ] ) ) )
+  se.ac <- list( t1 = se( simplify2array( sapply( x, '[[', "ac" )[ "t1", ] ) ),
+                 t2 = se( simplify2array( sapply( x, '[[', "ac" )[ "t2", ] ) ) )
+
+  se.x <- list( avg = se.avg, sd = se.sd, subbo = se.subbo,
+                jb = se.jb, ll = se.ll, ad = se.ad, ac = se.ac  )
+
+  return( list( avg = avg.x, sd = sd.x, se =  se.x ) )
+}
+
+
+#
+# ====== function [] = plot_lognorm ======
+# Output:
+#  rank-size plot against Lognormal distribution
+#
+# Input:
+#   x: list of vectors of data (not in log!)
+#   xlab, ylab: label of x and y axes
+#   tit, subtit: title/subtitle of the plot
+#   outLim: limit for outliers (0=nolimit)
+#	bins: number of bins to use in histogram
+#	leg: experiments/countries legends
+#	col, lty, pty: colors, line and point types
+#
+
+plot_lognorm <- function( x, xlab = "", ylab = "", tit, subtit = "",
+                          outLim = 0, bins = 15, leg = NULL,
+                          col = NULL, lty = NULL ) {
+
+  if( ! is.list( x ) )
+    x <- list( x )
+
+  if( length( x[[ 1 ]] ) == 0 )
+    return( )
+
+  nExp <- length( x )
+
+  # fill default values
+  if( is.null( leg ) )
+    leg <- 1 : nExp
+  if( is.null( col ) )
+    col <- rep( "black", nExp )
+  if( is.null( lty ) )
+    lty <- rep( "solid", nExp )
+
+  yMax <- xMax <- -Inf
+  yMin <- xMin <- Inf
+  xx <- rank <- fit <- list( )
+
+  # compute statistics and find the right plot scale
+  for( k in 1 : nExp ) {
+
+    # remove NAs and limit number of points to make pdf's lighter
+    xx[[ k ]] <- as.vector( x[[ k ]][ ! is.na( x[[ k ]] ) & x[[ k ]] > 0 ] )
+    if( length( xx[[ k ]] ) > maxSample )
+      xx[[ k ]] <- sample( xx[[ k ]], maxSample )
+
+    # filter in ascending order
+    xx[[ k ]] <- sort( xx[[ k ]] )
+    iniLen <- length( xx[[ k ]] )        # initial number of observations
+    if( outLim > 0 )                     # remove outliers
+      xx[[ k ]] <- xx[[ k ]][ nOutliers( xx[[ k ]], outLim ) ]
+    n <- length( xx[[ k ]] )             # final number of observations
+    if( n == 0 ){
+      warning( paste( "No remaining data to plot:", tit, ", series:", k ) )
+      return( )
+    }
+    outPerc <- ( iniLen - n ) / iniLen
+    if( outPerc > 2 * outLim && outPerc > 0.05 )
+      warning( "Many outliers:", outPerc * 100, "%, series:", k )
+
+    rank[[ k ]] <- n - c( 1 : n ) + 1    # rank support for distribution
+    mxx <- mean( log( xx[[ k ]] ) )      # parameters of observed data
+    sxx <- sd( log( xx[[ k ]] ) )
+
+    # compute fitted theoretical distribution
+    fit[[ k ]] <- n * ( 1 - plnorm( xx[[ k ]], meanlog = mxx, sdlog = sxx ) )
+
+    # find y and x limits
+    yMax = max( yMax, rank[[ k ]] )
+    yMin = min( yMin, rank[[ k ]] )
+    xMax = max( xMax, xx[[ k ]] )
+    xMin = min( xMin, xx[[ k ]] )
+  }
+
+  # adjust margins for legends
+  ylim <- findYlim( yMin, yMax, zero = TRUE )
+
+  # now do the plots in the correct scale
+  for( k in 1 : nExp ) {
+
+    # plot histogram points
+    if( k == 1 )
+      plot( xx[[ k ]], rank[[ k ]], log = "xy", type = "p", pch = ".",
+            col = col[ k ], main = tit, sub = subtit, xlab = xlab, ylab = ylab,
+            xlim = c( xMin, xMax ), ylim = ylim, cex = 2 )
+    else
+      points( xx[[ k ]], rank[[ k ]], type = "p", pch = ".",
+              col = col[ k ], cex = 2 )
+
+    # plot fitted distribution
+    lines( xx[[ k ]], fit[[ k ]], lwd = 1, col = light_color( col[ k ] ), lty = lty[ k ] )
+  }
+
+  if( nExp > 1 )
+    legend( legend = c( leg, "Log-normal fits" ), x = "bottomleft",
+            inset = 0.03, adj = 0.1, cex = 0.8,
+            lty = c( rep( NA, nExp ), lty[ 1 ] ),
+            lwd = c( rep( NA, nExp ), 1 ),
+            pch = c( rep( 20, nExp ), NA ),
+            col = c( col[ 1 : nExp ], light_color( "black" ) ) )
+  else
+    legend( legend = c( "Model", "Log-normal fit" ), x = "bottomleft",
+            inset = 0.03, adj = 0.1, cex = 0.8,
+            lty = c( NA, lty[ 1 ] ), lwd = c( NA, 1 ),
+            pch = c( 20, NA ), col = c( "black", light_color( "black" ) ) )
+}
+
+
+#
+# ====== function [] = plot_loglin ======
+# Output:
+#  binned densities plot against log-linear distribution
+#
+# Input:
+#   x: list of vectors of data
+#   xlab, ylab: label of x and y axes
+#   tit, subtit: title/subtitle of the plot
+#   outLim: limit for outliers (0=nolimit)
+#	bins: number of bins to use in histogram
+#	leg: experiments/countries legends
+#	col, lty, pty: colors, line and point types
+#
+
+plot_loglin <- function( x, xlab = "", ylab = "", tit, subtit = "",
+                       outLim = 0, bins = 15, leg = NULL,
+                       col = NULL, lty = NULL, pty = NULL ) {
+
+  if( ! is.list( x ) )
+    x <- list( x )
+
+  if( length( x[[ 1 ]] ) == 0 )
+    return( )
+
+  nExp <- length( x )
+
+  # fill default values
+  if( is.null( leg ) )
+    leg <- 1 : nExp
+  if( is.null( col ) )
+    col <- rep( "black", nExp )
+  if( is.null( lty ) )
+    lty <- rep( "solid", nExp )
+  if( is.null( pty ) )
+    pty <- rep( 4, nExp )
+
+  yMax <- xMax <- -Inf
+  yMin <- xMin <- Inf
+  xx <- hist <- fit <- list( )
+
+  # compute statistics and find the right plot scale
+  for( k in 1 : nExp ) {
+
+    # remove NAs and limit number of points to make pdf's lighter
+    xx[[ k ]] <- as.vector( x[[ k ]][ ! is.na( x[[ k ]] ) ] )
+    if( length( xx[[ k ]] ) > maxSample )
+      xx[[ k ]] <- sample( xx[[ k ]], maxSample )
+
+    xx[[ k ]] <- sort( xx[[ k ]] )       # filter in ascending order
+    iniLen <- length( xx[[ k ]] )        # initial number of observations
+    if( outLim > 0 )                     # remove outliers
+      xx[[ k ]] <- xx[[ k ]][ nOutliers( xx[[ k ]], outLim ) ]
+    n <- length( xx[[ k ]] )             # final number of observations
+    if( n == 0 ){
+      warning( paste( "No remaining data to plot:", tit, ", series:", k ) )
+      return( )
+    }
+    outPerc <- ( iniLen - n ) / iniLen
+    if( outPerc > 2 * outLim && outPerc > 0.05 )
+      warning( "Many outliers:", outPerc * 100, "%, series:", k )
+
+    hist[[ k ]] <- hist( xx[[ k ]], breaks = bins, plot = FALSE )
+
+    # compute fitted theoretical distribution
+    fit[[ k ]] <- exp( ltsReg( log( hist[[ k ]]$density ) ~ hist[[ k ]]$mids )$
+                         fitted.values )
+
+    # find y and x limits
+    yMax = max( yMax, hist[[ k ]]$density[ hist[[ k ]]$density > 0 ] )
+    yMin = min( yMin, hist[[ k ]]$density[ hist[[ k ]]$density > 0 ] )
+    xMax = max( xMax, xx[[ k ]] )
+    xMin = min( xMin, xx[[ k ]] )
+  }
+
+  # adjust margins for legends
+  ylim <- findYlim( yMin, yMax, zero = TRUE )
+
+  # now do the plots in the correct scale
+  for( k in 1 : nExp ) {
+
+    # plot histogram points, avoiding log(0) warnings
+    if( k == 1 )
+      suppressWarnings( plot( hist[[ k ]]$mids, hist[[ k ]]$density, log = "y",
+                              type = "p", pch = pty[ k ], col = col[ k ],
+                              main = tit, sub = subtit, xlab = xlab, ylab = ylab,
+                              xlim = c( xMin, xMax ), ylim = ylim ) )
+    else
+      suppressWarnings( points( hist[[ k ]]$mids, hist[[ k ]]$density, type = "p",
+                                pch = pty[ k ], col = col[ k ] ) )
+
+    # plot fitted distribution, if available
+    if( ! is.na( fit[[ k ]][ 1 ] ) )
+      suppressWarnings( lines( hist[[ k ]]$mids, fit[[ k ]], lwd = 1,
+                               col = light_color( col[ k ] ), lty = lty[ k ] ) )
+  }
+
+  if( nExp > 1 )
+    legend( x = "topright", inset = 0.03, adj = 0.1, cex = 0.8,
+            legend = c( leg, "LTS fits" ), lty = c( rep( NA, nExp ), lty[ 1 ] ),
+            lwd = c( rep( NA, nExp ), 1 ), pch = c( pty[ 1 : nExp ], NA ),
+            col = c( col[ 1 : nExp ], light_color( "black" ) ) )
+  else
+    legend( x = "topright", legend = c( "Model", "LTS fit" ), inset = 0.03,
+            adj = 0.1, cex = 0.8, lty = c( NA, lty[ 1 ] ), lwd = c( NA, 1 ),
+            pch = c( pty[ 1 ], NA ), col = c( "black", light_color( "black" ) ) )
+}
+
+
+#
+# ====== function [] = plot_norm ======
+# Output:
+#  binned densities plot against normal distribution
+#
+# Input:
+#   x: list of vectors of data
+#   xlab, ylab: label of x and y axes
+#   tit, subtit: title/subtitle of the plot
+#   outLim: limit for outliers (0=nolimit)
+#	bins: number of bins to use in histogram
+#	leg: experiments/countries legends
+#	col, lty, pty: colors, line and point types
+#
+
+plot_norm <- function( x, xlab = "", ylab = "", tit, subtit = "",
+                       outLim = 0, bins = 15, leg = NULL,
+                       col = NULL, lty = NULL, pty = NULL ) {
+
+  if( ! is.list( x ) )
+    x <- list( x )
+
+  if( length( x[[ 1 ]] ) == 0 )
+    return( )
+
+  nExp <- length( x )
+
+  # fill default values
+  if( is.null( leg ) )
+    leg <- 1 : nExp
+  if( is.null( col ) )
+    col <- rep( "black", nExp )
+  if( is.null( lty ) )
+    lty <- rep( "solid", nExp )
+  if( is.null( pty ) )
+    pty <- rep( 4, nExp )
+
+  yMax <- xMax <- -Inf
+  yMin <- xMin <- Inf
+  xx <- hist <- fit <- list( )
+
+  # compute statistics and find the right plot scale
+  for( k in 1 : nExp ) {
+
+    # remove NAs and limit number of points to make pdf's lighter
+    xx[[ k ]] <- as.vector( x[[ k ]][ ! is.na( x[[ k ]] ) ] )
+    if( length( xx[[ k ]] ) > maxSample )
+      xx[[ k ]] <- sample( xx[[ k ]], maxSample )
+
+    xx[[ k ]] <- sort( xx[[ k ]] )       # filter in ascending order
+    iniLen <- length( xx[[ k ]] )        # initial number of observations
+    if( outLim > 0 )                     # remove outliers
+      xx[[ k ]] <- xx[[ k ]][ nOutliers( xx[[ k ]], outLim ) ]
+    n <- length( xx[[ k ]] )             # final number of observations
+    if( n == 0 ){
+      warning( paste( "No remaining data to plot:", tit, ", series:", k ) )
+      return( )
+    }
+    outPerc <- ( iniLen - n ) / iniLen
+    if( outPerc > 2 * outLim && outPerc > 0.05 )
+      warning( "Many outliers:", outPerc * 100, "%, series:", k )
+
+    hist[[ k ]] <- hist( xx[[ k ]], breaks = bins, plot = FALSE )
+    mxx <- mean( xx[[ k ]] )             # parameters of observed data
+    sxx <- sd( xx[[ k ]] )
+
+    # compute fitted theoretical distribution
+    fit[[ k ]] <- dnorm( xx[[ k ]], mean = mxx, sd = sxx )
+
+    # find y and x limits
+    yMax = max( yMax, hist[[ k ]]$density[ hist[[ k ]]$density > 0 ] )
+    yMin = min( yMin, hist[[ k ]]$density[ hist[[ k ]]$density > 0 ] )
+    xMax = max( xMax, xx[[ k ]] )
+    xMin = min( xMin, xx[[ k ]] )
+  }
+
+  # adjust margins for legends
+  ylim <- findYlim( yMin, yMax, zero = TRUE )
+
+  # now do the plots in the correct scale
+  for( k in 1 : nExp ) {
+
+    # plot histogram points, avoiding log(0) warnings
+    if( k == 1 )
+      suppressWarnings( plot( hist[[ k ]]$mids, hist[[ k ]]$density, log = "y",
+                              type = "p", pch = pty[ k ], col = col[ k ],
+                              main = tit, sub = subtit, xlab = xlab, ylab = ylab,
+                              xlim = c( xMin, xMax ), ylim = ylim ) )
+    else
+      suppressWarnings( points( hist[[ k ]]$mids, hist[[ k ]]$density, type = "p",
+                                pch = pty[ k ], col = col[ k ] ) )
+
+    # plot fitted distribution, if available
+    if( ! is.na( fit[[ k ]][ 1 ] ) )
+      suppressWarnings( lines( xx[[ k ]], fit[[ k ]], lwd = 1,
+                               col = light_color( col[ k ] ), lty = lty[ k ] ) )
+  }
+
+  if( nExp > 1 )
+    legend( x = "topleft", inset = 0.03, adj = 0.1, cex = 0.8,
+            legend = c( leg, "Normal fits" ), lty = c( rep( NA, nExp ), lty[ 1 ] ),
+            lwd = c( rep( NA, nExp ), 1 ), pch = c( pty[ 1 : nExp ], NA ),
+            col = c( col[ 1 : nExp ], light_color( "black" ) ) )
+  else
+    legend( x = "topleft", legend = c( "Model", "Normal fit" ), inset = 0.03,
+            adj = 0.1, cex = 0.8, lty = c( NA, lty[ 1 ] ), lwd = c( NA, 1 ),
+            pch = c( pty[ 1 ], NA ), col = c( "black", light_color( "black" ) ) )
+}
+
+
+#
+# ====== function [] = plot_laplace ======
+# Output:
+#  binned densities plot against Laplace distribution
+#
+# Input:
+#   x: list of vectors of data
+#   xlab, ylab: label of x and y axes
+#   tit, subtit: title/subtitle of the plot
+#   outLim: limit for outliers (0=nolimit)
+#	bins: number of bins to use in histogram
+#	leg: experiments/countries legends
+#	col, lty, pty: colors, line and point types
+#
+
+plot_laplace <- function( x, xlab = "", ylab = "", tit, subtit = "",
+                          outLim = 0, bins = 15, leg = NULL,
+                          col = NULL, lty = NULL, pty = NULL ) {
+
+  if( ! is.list( x ) )
+    x <- list( x )
+
+  if( length( x[[ 1 ]] ) == 0 )
+    return( )
+
+  nExp <- length( x )
+
+  # fill default values
+  if( is.null( leg ) )
+    leg <- 1 : nExp
+  if( is.null( col ) )
+    col <- rep( "black", nExp )
+  if( is.null( lty ) )
+    lty <- rep( "solid", nExp )
+  if( is.null( pty ) )
+    pty <- rep( 4, nExp )
+
+  yMax <- xMax <- -Inf
+  yMin <- xMin <- Inf
+  xx <- hist <- fit <- list( )
+
+  # compute statistics and find the right plot scale
+  for( k in 1 : nExp ) {
+
+    # remove NAs and limit number of points to make pdf's lighter
+    xx[[ k ]] <- as.vector( x[[ k ]][ ! is.na( x[[ k ]] ) ] )
+    if( length( xx[[ k ]] ) > maxSample )
+      xx[[ k ]] <- sample( xx[[ k ]], maxSample )
+
+    xx[[ k ]] <- sort( xx[[ k ]] )       # filter in ascending order
+    iniLen <- length( xx[[ k ]] )        # initial number of observations
+    if( outLim > 0 )                     # remove outliers
+      xx[[ k ]] <- xx[[ k ]][ nOutliers( xx[[ k ]], outLim ) ]
+    n <- length( xx[[ k ]] )             # final number of observations
+    if( n == 0 ){
+      warning( paste( "No remaining data to plot:", tit, ", series:", k ) )
+      return( )
+    }
+    outPerc <- ( iniLen - n ) / iniLen
+    if( outPerc > 2 * outLim && outPerc > 0.05 )
+      warning( "Many outliers:", outPerc * 100, "%, series:", k )
+
+    hist[[ k ]] <- hist( xx[[ k ]], breaks = bins, plot = FALSE )
+    mxx <- median( xx[[ k ]] )             # parameters of observed data
+    sxx <- sum( abs( xx[[ k ]] - mxx ) ) / n
+
+    # compute fitted theoretical distribution
+    if( sxx != 0 )
+      fit[[ k ]] <- dlaplace( xx[[ k ]], m = mxx, s = sxx )
+    else
+      fit[[ k ]] <- c( NA )
+
+    # find y and x limits
+    yMax = max( yMax, hist[[ k ]]$density[ hist[[ k ]]$density > 0 ] )
+    yMin = min( yMin, hist[[ k ]]$density[ hist[[ k ]]$density > 0 ] )
+    xMax = max( xMax, xx[[ k ]] )
+    xMin = min( xMin, xx[[ k ]] )
+  }
+
+  # adjust margins for legends
+  ylim <- findYlim( yMin, yMax, zero = TRUE )
+
+  # now do the plots in the correct scale
+  for( k in 1 : nExp ) {
+
+    # plot histogram points, avoiding log(0) warnings
+    if( k == 1 )
+      suppressWarnings( plot( hist[[ k ]]$mids, hist[[ k ]]$density, log = "y",
+                              type = "p", pch = pty[ k ], col = col[ k ],
+                              main = tit, sub = subtit, xlab = xlab, ylab = ylab,
+                              xlim = c( xMin, xMax ), ylim = ylim ) )
+    else
+      suppressWarnings( points( hist[[ k ]]$mids, hist[[ k ]]$density, type = "p",
+                                pch = pty[ k ], col = col[ k ] ) )
+
+    # plot fitted distribution, if available
+    if( ! is.na( fit[[ k ]][ 1 ] ) )
+      suppressWarnings( lines( xx[[ k ]], fit[[ k ]], lwd = 1,
+                               col = light_color( col[ k ] ), lty = lty[ k ] ) )
+  }
+
+  if( nExp > 1 )
+    legend( x = "topleft", inset = 0.03, adj = 0.1, cex = 0.8,
+            legend = c( leg, "Laplace fits" ), lty = c( rep( NA, nExp ), lty[ 1 ] ),
+            lwd = c( rep( NA, nExp ), 1 ), pch = c( pty[ 1 : nExp ], NA ),
+            col = c( col[ 1 : nExp ], light_color( "black" ) ) )
+  else
+    legend( x = "topleft", legend = c( "Model", "Laplace fit" ), inset = 0.03,
+            adj = 0.1, cex = 0.8, lty = c( NA, lty[ 1 ] ), lwd = c( NA, 1 ),
+            pch = c( pty[ 1 ], NA ), col = c( "black", light_color( "black" ) ) )
+}
+
+
+#
+# ====== function [] = plot_quant ======
+# Output:
+#  binned values plot against distribution quantiles
+#
+# Input:
+#   x: vector of data to be distributed
+#   y: vector of data defining quantiles
+#   xlab, ylab: label of x and y axes
+#   tit, subtit: title/subtitle of the plot
+#	  bins: number of quantiles to distribute data
+#	  col, lty, pty: colors, line and point types
+#
+
+plot_quant <- function( x, y, bins = 10, xlab = "", ylab = "",
+                        tit = "", subtit = "" ) {
+
+  if( length( x ) == 0 || length( y ) == 0 )
+    return( )
+
+  dist <- data.frame( y = y, x = x )
+  dist$q <- ntile( dist$x, bins )
+  dist <- dist[ order( dist$q ), ]
+  dist <- dist %>%
+    select( y, x ) %>%
+    group_by( dist$q ) %>%
+    summarise( y = mean( y ), .groups = 'drop' )
+
+  barplot( dist$y, names.arg = rownames( dist ), ylim = c( 0, 1.2 * max( dist$y ) ),
+           ylab = ylab, xlab = xlab )
+  title( main = tit, sub = subtit )
+}
+
+
+#
+# ====== function [] = plot_lists ======
+# Output:
+#  Time series plot of multiple experiments/countries
+#
+# Input:
+#   avg: list of variable names to plot
+#	  Pdata, mdata, Mdata, Sdata, cdata, Cdata: lists of experiments/countries
+#     statistic (mean or median), min, max, std. dev., conf. interval low and up
+#     (all with the same dimensions)
+#   stat: type of plot statistic (mean or median)
+#   nMC: number of Monte Carlo runs
+#   CI: confidence for confidence interval
+#   log, log0: log or zero-bounded log to be applied on series
+#   mrk: plot vertical dotted lin in timestep (only if >0)
+#	  leg: vector of experiment/country names
+#	  col, lty: vectors of experiment/country colors and line types
+#   xlab, ylab: label of x and y axes
+#   tit, subtit: title/subtitle of the plot
+#	  leg2: legends fot type of plots
+#   trend: show trend line ("lin", "loess" )
+#
+
+plot_lists <- function( vars, Pdata, mdata, Mdata, cdata = NULL, Cdata = NULL,
+                        nMC, sdMC = NULL, mCnt = FALSE, statMC = "mean",
+                        mask = NULL, CI = 0.95, log = FALSE, log0 = FALSE,
+                        na0 = FALSE, mrk = -1, xlab = "", ylab = "", tit = "",
+                        subtit = "", leg = NULL, leg2 = NULL, col = NULL,
+                        lty = NULL, trend = "" ) {
+
+  nVar <- length( vars )
+  nExp <- length( Pdata )
+
+  # asymptotic distribution approximation factor when no CI is available
+  if( statMC == "mean" )
+    af <- qt( ( 1 - CI ) / 2, nMC - 1 ) / sqrt( nMC )
+  else
+    af <- sqrt( pi / ( 2 * nMC ) )  # asymptotic distribution factor
+
+  # fill default values
+  if( is.null( mask ) )
+    mask <- 1 : length( Pdata[[ 1 ]][[ 1 ]] )
+  if( is.null( leg ) )
+    leg <- 1 : nExp
+  if( is.null( leg2 ) )
+    leg2 <- rep( "", nExp )
+  if( is.null( col ) )
+    col <- rep( "black", nExp )
+  if( is.null( lty ) )
+    lty <- rep( "solid", nExp )
+
+  # prepare all time series
+  plt <- min <- max <- CIlo <- CIhi <- list( )
+  for( k in 1 : nExp ) {
+
+    plt[[ k ]] <- min[[ k ]] <- max[[ k ]] <- CIlo[[ k ]] <- CIhi[[ k ]] <- list( )
+    for( j in 1 : nVar ) {
+      Pdata[[ k ]][ ! is.finite( Pdata[[ k ]] ) ] <- NA
+      mdata[[ k ]][ ! is.finite( mdata[[ k ]] ) ] <- NA
+      Mdata[[ k ]][ ! is.finite( Mdata[[ k ]] ) ] <- NA
+
+      if( ! is.null( cdata ) )
+        cdata[[ k ]][ ! is.finite( cdata[[ k ]] ) ] <- NA
+
+      if( ! is.null( Cdata ) )
+        Cdata[[ k ]][ ! is.finite( Cdata[[ k ]] ) ] <- NA
+
+      if( ! is.null( sdMC ) )
+        sdMC[[ k ]][ ! is.finite( sdMC[[ k ]] ) ] <- NA
+
+      plt[[ k ]][[ j ]] <- Pdata[[ k ]][ mask, vars[ j ] ]
+      min[[ k ]][[ j ]] <- mdata[[ k ]][ mask, vars[ j ] ]
+      max[[ k ]][[ j ]] <- Mdata[[ k ]][ mask, vars[ j ] ]
+
+      if( ! is.null( cdata ) )
+        CIlo[[ k ]][[ j ]] <- cdata[[ k ]][ mask, vars[ j ] ]
+      else {
+        if( ! is.null( sdMC ) )
+          CIlo[[ k ]][[ j ]] <- plt[[ k ]][[ j ]] - af * sdMC[[ k ]][ mask, vars[ j ] ]
+        else
+          CIlo[[ k ]][[ j ]] <- NA
+      }
+
+      if( ! is.null( Cdata ) )
+        CIhi[[ k ]][[ j ]] <- Cdata[[ k ]][ mask, vars[ j ] ]
+      else {
+        if( ! is.null( sdMC ) )
+          CIhi[[ k ]][[ j ]] <- plt[[ k ]][[ j ]] + af * sdMC[[ k ]][ mask, vars[ j ] ]
+        else
+          CIhi[[ k ]][[ j ]] <- NA
+      }
+
+      # apply logs if required
+      if( log ) {
+        plt[[ k ]][[ j ]] <- logNA( plt[[ k ]][[ j ]] )
+        min[[ k ]][[ j ]] <- logNA( min[[ k ]][[ j ]] )
+        max[[ k ]][[ j ]] <- logNA( max[[ k ]][[ j ]] )
+        CIlo[[ k ]][[ j ]] <- logNA( CIlo[[ k ]][[ j ]] )
+        CIhi[[ k ]][[ j ]] <- logNA( CIhi[[ k ]][[ j ]] )
+      } else if( log0 ) {
+        plt[[ k ]][[ j ]] <- log0( plt[[ k ]][[ j ]] )
+        min[[ k ]][[ j ]] <- log0( min[[ k ]][[ j ]] )
+        max[[ k ]][[ j ]] <- log0( max[[ k ]][[ j ]] )
+        CIlo[[ k ]][[ j ]] <- log0( CIlo[[ k ]][[ j ]] )
+        CIhi[[ k ]][[ j ]] <- log0( CIhi[[ k ]][[ j ]] )
+      }
+
+      # treat zeros as NAs
+      if( na0 && any( plt[[ k ]][[ j ]] ) <= 0 ) {
+        plt[[ k ]][[ j ]] <- min[[ k ]][[ j ]] <- max[[ k ]][[ j ]] <-
+          CIlo[[ k ]][[ j ]] <- CIhi[[ k ]][[ j ]] <- NA
+      }
+    }
+  }
+
+  # find y and x limits
+  yMax <- xMax <- -Inf
+  yMin <- xMin <- Inf
+  xM <- xm <- yM <- ym <- array( dim = c( nExp, nVar ) )
+
+  for( k in 1 : nExp )
+    for( j in 1 : length( plt[[ k ]] ) ) {
+      # find first and last valid times
+      xM[ k, j ] <- xm[ k, j ] <- 1
+      for( i in 1 : length( plt[[ k ]][[ j ]] ) ) {
+        if( is.finite( plt[[ k ]][[ j ]][ i ] ) ) {
+          xM[ k, j ] <- i
+        } else {
+          if( xM[ k, j ] == 1 ) {
+            xm[ k, j ] <- i + 1
+          }
+        }
+      }
+
+      suppressWarnings( yM[ k, j ] <- max( plt[[ k ]][[ j ]], na.rm = TRUE ) )
+      suppressWarnings( ym[ k, j ] <- min( plt[[ k ]][[ j ]], na.rm = TRUE ) )
+      yMax = max( yMax, yM[ k, j ] )
+      yMin = min( yMin, ym[ k, j ] )
+      xMax = max( xMax, xM[ k, j ] )
+      xMin = min( xMin, xm[ k, j ] )
+    }
+
+  # adjust margins for legends
+  ylim <- findYlim( yMin, yMax )
+
+  if( ! is.finite( xMin ) || ! is.finite( xMax ) ||
+      ! is.finite( ylim[ 1 ] ) || ! is.finite( ylim[ 2 ] ) )
+    stop( paste( "Invalid series data (", var, ")" ) )
+
+  # plot base frame
+  if( mCnt )
+    title <- paste( tit, "( all countries )" )
+  else
+    title <- paste( tit, "( all experiments )" )
+
+  if( mrk > 0 )
+    sub <- paste( "vertical dotted line: regime change /", subtit )
+  else
+    sub <- subtit
+
+  plot( x = c( xMin : xMax ), y = plt[[ 1 ]][[ 1 ]][ xMin : xMax ], type = "l",
+        main = title, sub = paste( "(", sub, ")" ), xlab = xlab, ylab = ylab,
+        col = col[ 1 ], lty = lty[ 1 ], ylim = ylim )
+
+  if( nExp > 1 )
+    for( k in 2 : nExp )
+      lines( x = c( xm[ k, 1 ] : xM[ k, 1 ] ),
+             y = plt[[ k ]][[ 1 ]][ xm[ k, 1 ] : xM[ k, 1 ] ],
+             col = col[ k ], lty = lty[ k ] )
+
+  if( nVar > 1 )
+    for( k in 1 : nExp )
+      for( j in 2 : nVar )
+        if( is.finite( xm[ k, j ] ) && is.finite( xM[ k, j ] ) ) {
+          if( lty[ 1 ] == lty[ length( lty ) ] )
+            lines( x = c( xm[ k, j ] : xM[ k, j ] ),
+                   y = plt[[ k ]][[ j ]][ xm[ k, j ] : xM[ k, j ] ],
+                   col = col[ k ], lty = j )
+          else
+            lines( x = c( xm[ k, j ] : xM[ k, j ] ),
+                   y = plt[[ k ]][[ j ]][ xm[ k, j ] : xM[ k, j ] ],
+                   col = col[ k ], lty = lty[ k ], lwd = j )
+        }
+
+  # plot regime transition mark
+  if( mrk > 0 )
+    lines( x = c( mrk, mrk ), y = ylim, lty = 3, col = "black" )
+
+  legend( x = "topleft", legend = leg, inset = 0.03, cex = 0.8,
+          lty = lty, lwd = 2, col = col )
+  if( nVar > 1 )
+    if( lty[ 1 ] == lty[ length( lty ) ] )
+      legend( x = "topright", legend = leg2, inset = 0.03,
+              cex = 0.8, lty = 1 : 6, lwd = 2 )
+    else
+      legend( x = "topright", legend = leg2, inset = 0.03,
+              cex = 0.8, lty = 1, lwd = 1 : nVar )
+
+  if( trend == "" )
+    tl <- ""
+  else
+    tl <- paste( trend, "trend in blue / " )
+
+  # each experiment/country averages with confidence and max/min intervals
+  for( k in 1 : nExp ) {
+
+    # find y limits
+    xMax <- max( xM[ k, ], na.rm = TRUE )
+    xMin <- min( xm[ k, ], na.rm = TRUE )
+    yMax <- max( yM[ k, ], na.rm = TRUE )
+    yMin <- min( ym[ k, ], na.rm = TRUE )
+
+    # adjust margins for legends
+    ylim <- findYlim( yMin, yMax )
+
+    title <- paste( tit, "(", leg[k], ")" )
+    subTitle <- paste0( "( gray: ", CI * 100,
+                        "% confidence / light gray: min/max / ", tl, sub, " )" )
+    plot( x = c( xMin : xMax ), y = plt[[ k ]][[ 1 ]][ xMin : xMax ], type = "l",
+          main = title, sub = subTitle, xlab = xlab, ylab = ylab, ylim = ylim )
+
+    # plot max/min area first for all series in experiment/country
+    if( length( min ) == nExp && length( max ) == nExp )
+      for( j in 1 : length( plt[[k]] ) )
+        if( length( min[[ k ]][[ j ]] ) == length( plt[[ k ]][[ j ]] ) &&
+            length( max[[ k ]][[ j ]] ) == length( plt[[ k ]][[ j ]] ) &&
+            is.finite( xm[ k, j ] ) && is.finite( xM[ k, j ] ) )
+          polygon( c( xm[ k, j ] : xM[ k, j ], xM[ k, j ] : xm[ k, j ] ),
+                   c( pmin( max[[ k ]][[ j ]][ xm[ k, j ] : xM[ k, j ] ],
+                            ylim[ 2 ], na.rm = TRUE ),
+                      rev( pmax( min[[ k ]][[ j ]][ xm[ k, j ] : xM[ k, j ] ],
+                                 ylim[ 1 ], na.rm = TRUE ) ) ),
+                   col = "gray90", border = NA )
+
+    # then plot confidence interval area for all series
+    if( length( CIlo ) == nExp && length( CIhi ) == nExp )
+      for( j in 1 : length( plt[[ k ]] ) )
+        if( length( CIhi[[ k ]][[ j ]] ) == length( plt[[ k ]][[ j ]] ) &&
+            length( CIlo[[ k ]][[ j ]] ) == length( plt[[ k ]][[ j ]] ) &&
+            is.finite( xm[ k, j ] ) && is.finite( xM[ k, j ] ) )
+          polygon( c( xm[ k, j ] : xM[ k, j ], xM[ k, j ] : xm[ k, j ] ),
+                   c( pmin( CIhi[[ k ]][[ j ]][ xm[ k, j ] : xM[ k, j ] ],
+                            ylim[ 2 ], na.rm = TRUE ),
+                      rev( pmax( CIlo[[ k ]][[ j ]][ xm[ k, j ] : xM[ k, j ] ],
+                                 ylim[ 1 ], na.rm = TRUE ) ) ),
+                   col = "gray70", border = NA )
+
+    # and finally plot the series lines/trends, on top of all
+    for( j in 1 : length( plt[[ k ]] ) )
+      if( is.finite( xm[ k, j ] ) && is.finite( xM[ k, j ] ) ) {
+
+        y <- plt[[ k ]][[ j ]][ xm[ k, j ] : xM[ k, j ] ]
+        y[ is.infinite( y ) ] <- NA
+        y[ is.nan( y ) ] <- NA
+
+        if( length( y ) == 0 || all( is.na( y ) ) )
+          next
+
+        lines( x = c( xm[ k, j ] : xM[ k, j ] ), y = y, lty = j )
+
+        # plot trend line, if any
+        if( trend == "linear" || trend == "loess" ) {
+
+          if( trend == "linear" )
+            pred <- predict( lm( y ~ c( xm[ k, j ] : xM[ k, j ] ) ),
+                             na.action = na.exclude )
+          else
+            pred <- predict( loess( y ~ c( xm[ k, j ] : xM[ k, j ] ) ),
+                             na.action = na.exclude )
+
+          lines( pred, col = "turquoise", lty = j )
+        }
+      }
+
+    # plot regime transition mark
+    if( mrk > 0 )
+      lines( x = c( mrk, mrk ), y = ylim, lty = 3, col = "black" )
+
+    if( nVar > 1 )
+      legend( x = "topright", inset = 0.03, cex = 0.8, legend = leg2,
+             lty = c( 1 : 5 ), lwd = 2, col = "black" )
+  }
+}
+
+
+#
+# ====== function [] = plot_radar ======
+# Output:
+#   Radar plot of multiple variables and experiments/countries
+#
+# Input:
+#   x: matrix of variables (columns) and experiments/countries (rows)
+#   zoom: vector indicating zooming factors (1=no zoom)
+#   dig: number of significant digits to use
+#	  col, lty: vectors of experiments/countries colors and line types
+#   tit, subtit: title/subtitle of the plot
+#
+
+plot_radar <- function( x, zoom = 1.1, dig = 2, col = NULL, lty = NULL,
+                        tit = "", subtit = "", ... ) {
+
+  if( ! is.matrix( x ) )
+    x <- as.matrix( x )
+
+  nExp <- nrow( x )
+  nVar <- ncol( x )
+  leg <- rownames( x )
+
+  if( nVar < 3 || nExp < 1 )
+    return( )
+
+  # fill default values
+  if( is.null( leg ) )
+    leg <- 1 : nExp
+  if( is.null( col ) )
+    col <- rep( "black", nExp )
+  if( is.null( lty ) )
+    lty <- rep( "solid", nExp )
+
+  if( length( zoom ) < nVar )
+    zoom <- rep( zoom, nVar )
+
+  # define plot boundaries for each variable
+  hi <- lo <- vector( "numeric", nVar )
+  for( i in 1 : nVar ) {
+    if( abs( max( x[ , i ] ) ) >= abs( min( x[ , i ] ) ) ) {
+      hi[ i ] <- signif( max( x[ , i ] ) * zoom[ i ], digits = dig )
+      lo[ i ] <- signif( min( x[ , i ] ) / zoom[ i ], digits = dig )
+    } else {
+      hi[ i ] <- signif( max( x[ , i ] ) / zoom[ i ], digits = dig )
+      lo[ i ] <- signif( min( x[ , i ] ) * zoom[ i ], digits = dig )
+    }
+  }
+
+  x <- rbind( hi, lo, x )
+
+  radarchart( as.data.frame( x ), axistype = 2, palcex = 0.8, vlcex = 0.9,
+              pcol = col, plty = 1, axislabcol = "black", title = tit,
+              sub = subtit, ... )
+
+  if( nExp > 1 )
+    legend( x = "topleft", inset = 0.03, cex = 0.8, lty = 1, lwd = 2,
+            col = col, legend = leg )
+}
+
+
+#
+# ====== function [] = plot_bpf ======
+# Output:
+#   BK band-pass filtered time series plot of multiple experiments/countries
+#
+# Input:
+#   x: list of experiments/countries containing 1 time series each
+#   resc: vector indicating rescaling factors (NA=no rescale)
+#   pl, pu, nfix: BK band-pass filter parameters
+#   mask: vector with the time mask to plot
+#   mrk: plot vertical dotted lin in timestep (only if >0)
+#	  leg: vector of experiment/country names
+#	  col, lty: vectors of experiments/countries colors and line types
+#   xlab, ylab: label of x and y axes
+#   tit, subtit: title/subtitle of the plot
+#
+
+plot_bpf <- function( x, pl, pu, nfix, mask, resc = NA, mrk = -1,
+                      xlab = "", ylab = "", tit = "", subtit = "",
+                      leg = NULL, col = NULL, lty = NULL ) {
+
+  if( ! is.list( x ) )
+    x <- list( x )
+
+  nExp <- length( x )
+
+  # fill default values
+  if( is.null( leg ) )
+    leg <- 1 : nExp
+  if( is.null( col ) )
+    col <- rep( "black", nExp )
+  if( is.null( lty ) )
+    lty <- rep( "solid", nExp )
+
+  # produce bpf-filtered series & find max plot values
+  x.plot <- list()
+  maxX <- scaleY <- vector( "numeric" )
+  for( k in 1 : nExp ) {
+    bpf <- bkfilter( x[[ k ]], pl = pl, pu = pu, nfix = nfix )
+    x.plot[[ k ]] <- bpf$cycle[ mask ][ ! is.nan( bpf$cycle[ mask ] ) ]
+    maxX[ k ] <- max( abs( x.plot[[ k ]] ), na.rm = TRUE )
+  }
+  maxY <- max( maxX, na.rm = TRUE )
+  for( k in 1 : nExp )
+    if( is.na( resc[ k ] ) || resc[ k ] <= 0 )
+      scaleY[ k ] <- 1                  # no rescaling
+  else
+    scaleY[ k ] <- resc[ k ] * maxY / maxX[ k ]
+
+  # adjust margins for legends
+  ylim <- findYlim( - maxY, maxY )
+
+  # plot frame & first experiment/country
+  plot( x.plot[[ 1 ]] * scaleY[ 1 ], ylim = ylim, type = "l",
+        col = col[ 1 ], lty = lty[ 1 ], main = tit, sub = subtit,
+        xlab = xlab, ylab = ylab )
+
+  # plot the rest
+  if( nExp > 1 )
+    for( k in 2 : nExp )
+      lines( x.plot[[ k ]] * scaleY[ k ], col = col[ k ], lty = lty[ k ] )
+
+  # plot regime transition mark
+  if( mrk > 0 )
+    lines( x = c( mrk, mrk ), y = ylim, lty = 3, col = "black" )
+
+  legend( x = "topleft", inset = 0.03, cex = 0.8,
+          legend = leg, lty = lty, lwd = 2, col = col )
+}
+
+
+#
+# ====== function [] = plot_xy ======
+# Output:
+#   X-Y plot of 2 series, trend line and extremes control
+#
+# Input:
+#   x, y: series to plot
+#   na.rm: remove NAs from plot
+#	  outLim: outliers quantile limit (0=none)
+#   xlab, ylab: label of x and y axes
+#   tit, subtit: title/subtitle of the plot
+#
+
+plot_xy <- function( x, y, quant = 0.25, xlab = "",
+                     ylab = "", tit = "", subtit = "" ){
+
+  # build data analysis matrix, samples in rows
+  xy <- cbind( x, y )
+
+  x <- remove_extremes( x, quant = quant, na.rm = FALSE )
+  y <- remove_extremes( y, quant = quant, na.rm = FALSE )
+
+  mX <- abs_max( x, quant = quant )
+  mY <- abs_max( y, quant = quant )
+
+  # adjust margins for legends
+  ylim <- findYlim( - mY, mY )
+
+  plot( x, y, xlim = c( -mX, mX ), ylim = ylim,
+        main = tit, sub = paste( "(", subtit, ")" ),
+        xlab = xlab, ylab = ylab )
+
+  regLine <- lm( y ~ x )
+  if( ! ( TRUE %in% is.na( regLine$coefficients ) ) )
+    abline( regLine, col = "gray70" )
+
+  legend( x = "topright", inset = 0.03, cex = 0.8, adj = 0.1,
+          legend = c( sprintf( "Adj. R-squared = %.2f",
+                               summary( regLine ) $ adj.r.squared ),
+                      sprintf( "Coeff. b = %.4f",
+                               regLine $ coefficients[2] ) ) )
+}
+
+
+#
+# ====== function [] = plot_recovery ======
+# Output:
+#   Time series plot of marked crises
+#
+# Input:
+#   x: time series to plot (not in logs)
+#	  growth: time series growth rate (log first difference)
+#	  strt: vector of crises starts
+#	  dur: vector of crises durations
+#   per: pre-crisis period to base trend start (>=1)
+#   mask: vector with the time mask to plot
+#   warm: warm-up time (not to plot) (0=none)
+#   mrk: plot vertical dotted lin in timestep (only if >0)
+#   xlab, ylab: label of x and y axes
+#   tit, subtit: title/subtitle of the plot
+#
+
+plot_recovery <- function( x, growth, strt, dur, per, mask, warm = 0, mrk = -1,
+                           xlab = "", ylab = "", tit = "", subtit = "" ) {
+
+  y <- log0( x[ mask ] )    # log series
+
+  yMin <- min( y, na.rm = TRUE )
+  yMax <- max( y, na.rm = TRUE )
+
+  # adjust margins for legends
+  ylim <- findYlim( yMin, yMax )
+
+  # plot base chart
+  plot( x = mask - warm, y = y, ylim = ylim, type = "l",
+        main = tit, sub = subtit, xlab = xlab, ylab = ylab )
+
+  if( is.null( strt ) || is.null( dur ) )
+    return( )
+
+  growthTrend <- hpfilter( growth, smoothing ) $ trend[ , 1 ]
+
+  # mark crisis and plot trend lines
+  preCrisisTrend <- c( rep( NA , length( x ) ) )
+  for( i in 1 : length( strt ) ) {
+
+    start <- strt[ i ]
+    end <- start + dur[ i ]
+
+    if( is.na( end ) )
+      next
+
+    polygon( x = c( start, start, end, end ) - warm,
+             y = c( rev( ylim ), ylim ),
+             col = "gray90", border = NA )
+
+    preCrisisTrend[ start - 1 ] <- log( mean( x[ ( start - per ) : ( start - 1 ) ] ) )
+    gTrend <- mean( growthTrend[ ( start - per ) : ( start - 1 ) ], na.rm = TRUE )
+    for( t in start : end )
+      preCrisisTrend[ t ] <- preCrisisTrend[ t - 1 ] + gTrend
+
+    lines( x = c( start : end ) - warm, y = preCrisisTrend[ start : end ],
+           type = "l", lty = "dotted" )
+  }
+
+  # replot curve
+  lines( x = mask - warm, y = y )
+
+  # plot regime transition mark
+  if( mrk > 0 )
+    lines( x = c( mrk, mrk ), y = ylim, lty = 3, col = "black" )
+}
+
+
+#
+# ====== function [] = plot_lin ======
+# Output:
+#  x-y scatter plot against linear model
+#
+# Input:
+#   x, y: vectors of data
+#   xlab, ylab: label of x and y axes
+#   tit, subtit: title/subtitle of the plot
+#   invleg: invert legends positions
+#   legalign: legends aligned (side-by-side)
+#
+
+plot_lin <- function( x, y, xlab = "", ylab = "", tit, subtit = "",
+                      invleg = FALSE, legalign = FALSE ) {
+
+  if( length( x ) == 0 || length( y ) == 0 ) {
+    warning( "Zero x and/or y observations, cannot plot" )
+    return( )
+  }
+
+  x[ ! is.finite( x ) ] <- NA
+  y[ ! is.finite( y ) ] <- NA
+
+  plot( x, y, type = "p", pch = 1,
+        main = tit, sub = subtit, xlab = xlab, ylab = ylab )
+
+  # fit a line to linear model growth SD = alpha + beta * size
+  y.lm <- lm( y ~ x, as.data.frame( cbind( x, y ) ) )
+  abline( y.lm, col = "gray" )
+
+  if( invleg ) {
+    if ( legalign ) {
+      l1 = "bottomleft"
+      l2 = "bottomright"
+    } else {
+      l1 = "bottomright"
+      l2 = "topleft"
+    }
+  } else {
+    if ( legalign ) {
+      l1 = "topleft"
+      l2 = "topright"
+    } else {
+      l1 = "topright"
+      l2 = "bottomleft"
+    }
+  }
+
+  legend( x = l1, legend = c( "Data", "Linear fit" ),
+          inset = 0.03, cex = 0.8, lty = c( 1, 1 ), lwd = 2.5,
+          col = c( "black", "gray"), adj = 0.1 )
+
+  legend( x = l2, legend = c( sprintf( "beta = %.4f", coef( summary( y.lm ) )[ 2, 1 ] ),
+                              sprintf( "std. err. = %.4f", coef( summary( y.lm ) )[ 2, 2 ] ),
+                              sprintf( "p-val. = %.4f", coef( summary( y.lm ) )[ 2, 4 ] ) ,
+                              sprintf( "adj. R2 = %.4f", summary( y.lm )$adj.r.squared ) ),
+          inset = 0.03, cex = 0.8, adj = 0.1 )
+}
+
+
+#
+# ====== function [] = plot_epanechnikov ======
+# Output:
+#  Epanechnikov non-parametric regression plot against linear regression fit
+#
+# Input:
+#   lFit: linear regression fit object (produced by lm)
+#   xlab, ylab: label of x and y axes
+#   tit, subtit: title/subtitle of the plot
+#
+
+plot_epanechnikov <- function( lFit, ekOrd = 4, CI = 0.95, xlab = "", ylab = "",
+                               tit = "", subtit = "" ) {
+
+  # redo the fitting because of a bug in np package
+  # npreg & npplot must be executed in sequence
+  nlFit <- npreg( as.formula( lFit$call[[ "formula" ]] ), data = lFit$model,
+                  ckerorder = ekOrd, ckertype = "epanechnikov" )
+
+  # get non-parametric results and bootstrap standard errors
+  nlPlot <- plot( nlFit, plot.behavior = "data", plot.errors.method = "bootstrap",
+                  plot.errors.quantiles = c( ( 1 - CI ) / 2, 1 - ( 1 - CI ) / 2 ) )
+  xyVal <- data.frame( cbind( nlPlot$r1$eval[ , 1 ],
+                              nlPlot$r1$mean,
+                              nlPlot$r1$mean + nlPlot$r1$merr[ , 1 ],
+                              nlPlot$r1$mean + nlPlot$r1$merr[ , 2 ]) )
+  colnames( xyVal ) <- c( "x", "y", "ciLo", "ciHi" )
+  xyVal <- subset( xyVal, x > 0.01 & y > 0.01 & ciLo > 0.01 & ciHi > 0.01 )
+
+  # plot base chart
+  plot( xyVal$x, xyVal$y, type = "l", col = "white",
+        xlim = c( max( 0, min( xyVal$x ) ), max( xyVal$x ) ),
+        ylim = c( max( 0, min( xyVal$ciLo ) ), max( xyVal$ciHi ) ),
+        xlab = xlab, ylab = ylab )
+
+  # plot confidence interval area
+  polygon( c( xyVal$x, rev( xyVal$x ) ),
+           c( xyVal$ciLo, rev( xyVal$ciHi ) ),
+           col = "gray80", border = NA )
+
+  # plot data
+  # points( lFit$model, pch="." )
+
+  # plot regression lines
+  lines( xyVal[ , 1 : 2 ], type = "l", lwd = 2 )
+  abline( lFit, lty = 2 )
+
+  # plot regression info boxes and legends
+  legend( x = "topleft", legend = c( paste( "Non-parametric",
+                                            sprintf( "(R2 = %.2f)",
+                                                     nlFit$R2 ) ),
+                                     paste( "Parametric",
+                                            sprintf( "(R2 = %.2f)",
+                                                     summary( lFit )$r.squared ) ) ),
+          inset = 0.03, cex = 0.8, lty = c( 1, 2 ), lwd = c( 2, 1 ), adj = 0.05 )
+
+  legend( x = "bottomright", legend = c( "Parametric fit:",
+                                         sprintf( "beta = %.4f",
+                                                  coef( summary( lFit ) )[ 2, 1 ] ),
+                                         sprintf( "(s.e.) = %.4f",
+                                                  coef( summary( lFit ) )[ 2, 2 ] ),
+                                         sprintf( "(p-value) = %.4f",
+                                                  coef( summary( lFit ) )[ 2, 4 ] ) ),
+          inset = 0.03, cex = 0.8, adj = 0.1 )
+
+  title( main = tit, sub = subtit )
+}
+
+
+#
+# ====== function [] = plot_histo ======
+# Output:
+#   Plot stacked histogram/density at selected times
+#
+# Input:
+#   times: vector of time cross-sections to use
+#	  data: Monte Carlo experiment/country table (time x mc)
+#   bins: number of bins in histogram
+#   log: take log of variable (0=no log, 1=log, 2=log0, 3=logNA)
+#   labVar: text label for variable
+#   bw.adj: smoothing bandwidth adjustment
+#   leg: vector of text legends to each cross-section
+#   tit, subtit: title/subtitle of the plot
+#
+
+plot_histo <- function( times, data, bins = 10, log = 0, labVar = NULL,
+                        bw.adj = 1, leg = NULL, tit = "", subtit = "" ) {
+
+  nCS <- length( times )
+  cs <- logX( data[ times, ], log )
+
+  if( is.null( labVar ) )
+    labVar <- var
+  if( is.null( leg ) || length( leg ) != nCS )
+    leg <- rep( "", nCS )
+
+  # find histogram limits
+  xMin <- min( cs, na.rm = TRUE )
+  xMax <- max( cs, na.rm = TRUE )
+
+  # define bin breaks
+  breaks <- c( )
+  incr <- ( xMax - xMin ) / bins
+  for( i in 0 : bins )
+    breaks <- c( breaks, xMin + i * incr )
+
+  yMax <- 0
+  for( i in 1 : nCS ) {
+    d <- tryCatch( density( cs[ i, ], bw = "SJ", adjust = bw.adj, na.rm = TRUE )$y,
+                   error = function( cond ) return( NA ) )
+    h <- tryCatch( hist( cs[ i, ], breaks = breaks, plot = FALSE )$density,
+                   error = function( cond ) return( NA ) )
+    yMax <- max( yMax, d, h )
+  }
+
+  # change the output format but save existing conf to restore at end
+  oldPar <- par( )
+  par( mfrow = c( nCS, 1 ), oma = c( 2.5, 2, 3.5, 2 ), mar = c( 4, 4, 0, 2 ) )
+
+  # plot all
+  for( i in 1 : nCS ) {
+    if( ! is.na( yMax ) ) {
+      h <- hist( cs[ i, ], prob = TRUE, breaks = breaks, col = NULL,
+                 main = "", xlab = paste0( labVar, " (", leg[ i ], ")" ),
+                 xlim = c( xMin, xMax ), ylim = c( 0, 1.1 * yMax ) )
+      d <- density( cs[ i, ], bw = "SJ", adjust = bw.adj, na.rm = TRUE )
+      polygon( d, col = transp_color( "gray", 0.7 ) )
+      xAvg <- mean( cs[ i, ], na.rm = TRUE )
+      yAvg <- 1.1 * max( h$density, d$y )
+      lines( c( xAvg, xAvg ), c( 0, yAvg ), type = "l", lty = "dotted" )
+    } else {
+      textplot( "Insufficient data to plot", cex = 1.0 )
+    }
+  }
+
+  mtext( tit, outer = TRUE, cex = 1.2, font = 2, padj = -1 )
+  mtext( subtit, side = 1, outer = TRUE, padj = 2 )
+
+  par( mfrow = oldPar$mfrow, oma = oldPar$oma, mar = oldPar$mar )
+}
+
+
+#
+# ====== function [] = plot_bxp_vio ======
+# Output:
+#   Plot MC boxplots and distributions (violins)
+#
+# Input:
+#	  data: Monte Carlo data for variable (mc x experiment)
+#   log: take log of variable (0=no log, 1=log, 2=log0, 3=logNA)
+#   leg: vector of text legends to each experiment
+#   unit: variable's units legend
+#   notch: use boxplot notches
+#   tit, subtit: title/subtitle of the plot
+#
+
+plot_bxp_vio <- function( data, log = 0, leg = NULL, unit = "", notch = FALSE,
+                          tit = "", subtit = "" ) {
+
+  data <- na.omit( data )
+  mcSize <- nrow( data )
+  nExp <- ncol( data )
+
+  if( is.null( leg ) || length( leg ) != nExp )
+    leg <- rep( "", nExp )
+
+  data <- logX( data, log )
+
+  # prepare ggplot-frindly dataframe
+  dfBp <- data.frame( matrix( nrow = nExp * mcSize, ncol = 2 ) )
+  i <- 1
+  for( k in 1 : nExp )
+    for( j in 1 : mcSize ) {
+      dfBp[ i, 1 ] <- leg[ k ]
+      dfBp[ i, 2 ] <- data.frame( data[ j, k ] )
+      i <- i + 1
+    }
+
+  names( dfBp ) <- c( "Experiment", unit )
+  dfBp$Experiment <- as.factor( dfBp$Experiment )
+
+  # identify extreme outliers and remove them from plot window
+  stat <- ggplot_build( ggplot( dfBp, aes( Experiment, !! sym( unit ) ) ) +
+                          geom_boxplot( ) )[[ 1 ]][[ 1 ]]
+  marg <- ( max( stat$ymax ) - min( stat$ymin ) ) / 4
+  ymax <- min( max( stat$ymax_final ), max( stat$ymax ) + marg )
+  ymin <- max( min( stat$ymin_final ), min( stat$ymin ) - marg )
+
+  print( ggplot( dfBp, aes( Experiment, !! sym( unit ) ) ) +
+         geom_half_boxplot( center = TRUE, errorbar.draw = ! notch, width = 0.5 ) +
+         geom_half_violin( side = "r", nudge = 0.05 ) + theme_base( ) +
+         labs( x = "", title = tit, caption = subtit ) +
+         theme( axis.title = element_text( hjust = 0.5, size = 12 ),
+                plot.title = element_text( hjust = 0.5, size = 16 ),
+                plot.caption = element_text( hjust = 0.5, size = 12 ) ) +
+         coord_cartesian( ylim = c( ymin, ymax ) ) )
+}
+
+#
+# ====== function [] = size_bins ======
+# Output:
+#   Statistic bins grouped by firm size s
+#
+# Input:
+#   s: sizes of firms in t (in logs)
+#   s: sizes of firms in t-1 (in logs)
+#	  g: size growth rates from t-1 to t
+#	  bins: number of bins to use
+#	  outLim: absolute outliers limit for growth rate (0=none)
+#
+
+size_bins <- function( s, sLag, g, bins = 30, outLim = 0 ) {
+
+  # build data analysis matrix, samples in rows
+  xx <- na.omit( cbind( s, sLag, g ) )
+
+  # resample, reducing number of samples
+  if( nrow( xx ) > 10 * maxSample )
+    xx <- xx[ sample( nrow( xx ), 10 * maxSample ), ]
+
+  # remove outliers
+  if( outLim > 0 )
+    xx <- remove_outliers_table( xx, quant = outLim )
+
+  # sort by size in t/t-1 (test scaling variance/Gibrat)
+  xx1 <- xx[ order( xx[ , 1 ] ), , drop = FALSE ]
+  xx2 <- xx[ order( xx[ , 2 ] ), , drop = FALSE ]
+
+  if ( nrow( xx ) < bins ) {
+    warning( "Fewer observations than bins, returning NA." )
+    return( NA )
+  }
+
+  # organize data set into bins by size in t/t-1
+  bins1 <- hist( xx[ , 1 ], breaks = bins, plot = F ) # define bins limits
+  bins2 <- hist( xx[ , 2 ], breaks = bins, plot = F )
+
+  s1avg <- s2avg <- sLagAvg <- gAvg <- gSD <- vector( "numeric" )
+
+  # do it first for Gibrat stats (reference is s(t-1))
+  j <- 1                                 # start reading first obs
+  for( i in 1 : length( bins1$mids ) ) { # for all bins
+    # create empty matrix for bins
+    set <- matrix( nrow = 0, ncol = 3 )
+
+    # scan till the end of dataset or for all members of bin
+    while( j <= nrow( xx1 ) && xx1[ j, 1 ] < bins1$breaks[ i + 1 ] ) {
+      # add observation to the bin and move to next obs
+      set <- rbind( set, xx1[ j, ], deparse.level = 0, make.row.names = FALSE )
+      j <- j + 1
+    }
+
+    # calculate average of size (t/t-1), growth rate and SD of growth for each bin
+    s1avg <- append( s1avg, mean( set[ , 1 ] ) )
+    sLagAvg <- append( sLagAvg, mean( set[ , 2 ] ) )
+  }
+
+  # then redo it for scaling variance stats (reference is s(t))
+  j <- 1                                 # start reading first obs
+  for( i in 1 : length( bins2$mids ) ) { # for all bins
+    # create empty matrix for bins
+    set <- matrix( nrow = 0, ncol = 3 )
+
+    # scan till the end of dataset or for all members of bin
+    while( j <= nrow( xx2 ) && xx2[ j, 2 ] < bins2$breaks[ i + 1 ] ) {
+      # add observation to the bin and move to next obs
+      set <- rbind( set, xx2[ j, ], deparse.level = 0, make.row.names = FALSE )
+      j <- j + 1
+    }
+
+    # calculate average of size (t/t-1), growth rate and SD of growth for each bin
+    s2avg <- append( s2avg, mean( set[ , 1 ] ) )
+    gAvg <- append( gAvg, mean( set[ , 3 ] ) )
+    gSD <- append( gSD, logNA( sd( set[ , 3 ] ) ) )
+  }
+
+  return( list( s1avg = s1avg, s2avg = s2avg, sLagAvg = sLagAvg, gAvg = gAvg,
+                gSD = gSD ) )
+}
+
+
+#
+# ====== function [] = growth_stats ======
+# Output:
+#   Growth statistics table
+#
+# Input:
+#   vars: vector of variable names to include in table
+#	  data: Monte Carlo experiment/country dataset (time x vars x mc)
+#   labVars: optional vector of text label for variables
+#	  mask: vector of (continuous) range of time steps to use
+#	  pl, pu: BK-filter lower/upper band-pass period parameter
+#	  nfix: BK-filter order (selectivity)
+#   CI: confidence level
+#
+
+growth_stats <- function( vars, data, labVars = NULL, mask = NULL,
+                          pl = 6, pu = 32, nfix = 12, CI = 0.95 ) {
+  nVar <- length( vars )
+  nTsteps <- nrow( data )
+  nSize <- dim( data )[ 3 ]
+
+  if( is.null( labVars ) || length( labVars ) != nVar )
+    labVars <- vars
+  if( is.null( mask ) || max( mask ) - min( mask ) + 1 > nTsteps )
+    mask <- c( 1 : nTsteps )
+
+  meanPer <- nfix
+  maskBpf <- ( nfix + 1 ) : ( max( mask ) - min( mask ) + 1 - nfix )
+
+  # create the stats table
+  tab <- matrix( nrow = 13, ncol = nVar )
+  colnames( tab ) <- labVars
+  rownames( tab ) <- c( "avg. growth rate", " (s.e.)",
+                        "ADF test (logs)", " (s.e.)", " (p-val.)", " (s.e.)",
+                        "ADF test (bpf)", " (s.e.)", " (p-val.)", " (s.e.)",
+                        " s.d. (bpf)", " (s.e.)",
+                        paste0( " relative s.d. (", vars[ 1 ], ")" ) )
+
+  # fill the table
+  for( i in 1 : nVar ) {
+    gVar <- sVar <- rep( NA, nSize )
+    dVar <- dfVar <- list( )
+    for( j in 1 : nSize ) {
+
+      # MC average growth rates
+      start <- mean( log0( data[ mask[ 1 : meanPer ], vars[ i ], j ] ),
+                     na.rm = TRUE )
+      end <- mean( log0( data[ mask[ ( length( mask ) - meanPer + 1 ) :
+                                       length( mask ) ], vars[ i ], j ] ),
+                     na.rm = TRUE )
+      gVar[ j ] <- ( end - start ) / ( max( mask ) - min( mask ) + 2 - meanPer )
+
+      # Baxter-King filter
+      fVar <- bkfilter( log0( data[ mask, vars[ i ], j ] ),
+                        pl = pl, pu = pu, nfix = nfix )
+
+      # Augmented Dickey-Fuller tests (unit roots) & standard deviations
+      dVar[[ j ]] <- suppressWarnings( adf.test( log0( data[ mask, vars[ i ], j ] ) ) )
+      dfVar[[ j ]] <- suppressWarnings( adf.test( fVar$cycle[ maskBpf, 1 ] ) )
+      sVar[ j ] <- sd( fVar$cycle[ maskBpf, 1 ] )
+    }
+
+
+    if( i == 1 )
+      sRef <- sVar
+
+    tab[ , i ] <- c( mean( gVar ),
+                    sd( gVar ) / sqrt( nSize ),
+                    mean( unname( sapply( dVar, `[[`, "statistic" ) ) ),
+                    sd( unname( sapply( dVar, `[[`, "statistic" ) ) ) / sqrt( nSize ),
+                    mean( unname( sapply( dVar, `[[`, "p.value" ) ) ),
+                    sd( unname( sapply( dVar, `[[`, "p.value" ) ) ) / sqrt( nSize ),
+                    mean( unname( sapply( dfVar, `[[`, "statistic" ) ) ),
+                    sd( unname( sapply( dfVar, `[[`, "statistic" ) ) ) / sqrt( nSize ),
+                    mean( unname( sapply( dfVar, `[[`, "p.value" ) ) ),
+                    sd( unname( sapply( dfVar, `[[`, "p.value" ) ) ) / sqrt( nSize ),
+                    mean( sVar ),
+                    sd( sVar ) / sqrt( nSize ),
+                    mean( sVar ) / mean( sRef ) )
+  }
+
+  return( tab )
+}
+
+
+#
+# ====== function [] = corr_table ======
+# Output:
+#   list with MC correlation, standard errors and p-value tables (vars x vars)
+#
+# Input:
+#   vars: vector of variable names to include in table
+#	  data: Monte Carlo experiment/country dataset (time x vars x mc)
+#   logVars: vector of variables to take log (0=no log, 1=log, 2=log0)
+#   labVars: optional vector of text label for variables
+#	  mask: vector of (continuous) range of time steps to use
+#	  pl, pu: BK-filter lower/upper band-pass period parameter
+#	  nfix: BK-filter order (selectivity)
+#   CI: confidence level
+#   plot: plot a heatmap fo the table
+#   tit, subtit: title/subtitle of the plot
+#
+
+corr_table <- function( vars, data, logVars = NULL, labVars = NULL,
+                        mask = NULL, pl = 6, pu = 32, nfix = 12, CI = 0.95,
+                        plot = FALSE, tit = "", subtit = "" ) {
+
+  nVar <- length( vars )
+  nTsteps <- nrow( data )
+  nSize <- dim( data )[ 3 ]
+
+  if( is.null( labVars ) || length( labVars ) != nVar )
+    labVars <- vars
+  if( is.null( logVars ) || length( logVars ) != nVar )
+    logVars <- rep( 0, nVar )
+  if( is.null( mask ) || max( mask ) - min( mask ) + 1 > nTsteps )
+    mask <- c( 1 : nTsteps )
+
+  maskBpf <- ( nfix + 1 ) : ( max( mask ) - min( mask ) + 1 - nfix )
+  nTstat <- max( maskBpf ) - min( maskBpf ) + 1
+
+  corr <- pval <- array( dim = c( nVar, nVar, nSize ),
+                         dimnames = list( labVars, labVars,
+                                          dimnames( data )[[ 3 ]] ) )
+
+  # BK-filter each MC var and build the filtered series matrices
+  for( j in 1 : nSize ) {
+    mat <- matrix( nrow = nTstat, ncol = nVar )
+    for( i in 1 : nVar ) {
+      mat[ , i ] <- bkfilter( logX( data[ mask, vars[ i ], j ],
+                                    logVars[ i ] ),
+                              pl = pl, pu = pu, nfix = nfix )$cycle[ maskBpf, 1 ]
+
+      for( h in 1 : i )
+        pval[ i, h, j ] <- pval[ h, i, j ] <- tryCatch( suppressWarnings(
+          cor.test( mat[ , i ], mat[ , h ], conf.level = CI )$p.value ),
+          error = function( cond ) return( 1 ) )
+    }
+
+    corr[ , , j ] <- suppressWarnings( cor( mat ) )
+  }
+
+  mean <- apply( corr, 1 : 2, mean, na.rm = TRUE )
+  se <- apply( corr, 1 : 2, se, na.rm = TRUE )
+  p.value <- apply( pval, 1 : 2, mean, na.rm = TRUE )
+  mean[ is.nan( mean ) ] <- 0
+  se[ is.nan( se ) ] <- 0
+  p.value[ is.nan( p.value ) ] <- 0
+
+  if( plot ) {
+    corrplot( round( mean, 2 ), p.mat = p.value, sig.level = 1 - CI,
+              method = "color", type = "lower", title = tit, cl.pos = "n",
+              diag = FALSE, mar = c( 2, 2, 2, 2 ), addCoef.col = "black",
+              tl.col = "black", number.cex = 0.7, tl.srt = 45, insig = "blank" )
+
+    title( sub = subtit )
+
+    invisible( list( mean = mean, se = se, p.value = p.value ) )
+
+  } else
+    return( list( mean = mean, se = se, p.value = p.value ) )
+}
+
+
+#
+# ====== function [] = corr_struct ======
+# Output:
+#   Correlation structure table
+#
+# Input:
+#   ref: reference variable to use
+#   vars: vector of variable names to include in table
+#	  data: Monte Carlo experiment/country dataset (time x vars x mc)
+#   logRef: take log of reference variable (0=no log, 1=log, 2=log0)
+#   logVars: vector of variables to take log (0=no log, 1=log, 2=log0)
+#   labRef: optional text label for reference variable
+#   labVars: optional vector of text label for variables
+#	  mask: vector of (continuous) range of time steps to use
+#   lags: correlation lags to use
+#	  pl, pu: BK-filter lower/upper band-pass period parameter
+#	  nfix: BK-filter order (selectivity)
+#   CI: confidence level
+#
+
+corr_struct <- function( ref, vars, data, logRef = 0, logVars = NULL,
+                         labRef = NULL, labVars = NULL, mask = NULL,
+                         lags = 4, pl = 6, pu = 32, nfix = 12, CI = 0.95 ) {
+  nVar <- length( vars )
+  nTsteps <- nrow( data )
+  nSize <- dim( data )[ 3 ]
+  nCols <- 2 * lags + 1
+
+  if( is.null( labRef ) )
+    labRef <- ref
+  if( is.null( labVars ) || length( labVars ) != nVar )
+    labVars <- vars
+  if( is.null( logVars ) || length( logVars ) != nVar )
+    logVars <- rep( 0, nVar )
+  if( is.null( mask ) || max( mask ) - min( mask ) + 1 > nTsteps )
+    mask <- c( 1 : nTsteps )
+
+  # Calculates the critical correlation limit for significance (under heroic assumptions!)
+  maskBpf <- ( nfix + 1 ) : ( max( mask ) - min( mask ) + 1 - nfix )
+  nTstat <- max( maskBpf ) - min( maskBpf ) + 1
+  critCorr <- qnorm( 1 - ( 1 - CI ) / 2 ) / sqrt( nTstat )
+
+  # compute the correlation structure for each BK-filtered var and MC
+  cRef <- fRef <- list( )
+  for( j in 1 : nSize ) {
+    fRef[[ j ]] <- bkfilter( logX( data[ mask, ref, j ], logRef ),
+                             pl = pl, pu = pu, nfix = nfix )
+    cRef[[ j ]] <- ccf( fRef[[ j ]]$cycle[ maskBpf, 1 ],
+                        fRef[[ j ]]$cycle[ maskBpf, 1 ],
+                        lag.max = lags, plot = FALSE, na.action = na.pass )
+  }
+
+  cVars <- list( )
+  for( i in 1 : nVar ) {
+    cVars[[ i ]] <- list( )
+    for( j in 1 : nSize ) {
+      fVar <- bkfilter( logX( data[ mask, vars[ i ], j ], logVars[ i ] ),
+                        pl = pl, pu = pu, nfix = nfix )
+      cVars[[ i ]][[ j ]] <- ccf( fRef[[ j ]]$cycle[ maskBpf, 1 ],
+                                  fVar$cycle[ maskBpf, 1 ],
+                                  lag.max = lags, plot = FALSE, na.action = na.pass )
+    }
+  }
+
+  # apply t-test to the mean lag results to test significance (H0: lag < critCorr)
+  pRef <- rep( NA, nCols )
+  for( k in 1 : nCols )
+    if( k != lags + 1 )    # no autocorrelation at lag 0
+      pRef[ k ] <- t.test0( abs( unname( sapply( cRef, `[[`, "acf" ) )[ k, ] ),
+                            critCorr, CI )
+
+  pVars <- list( )
+  for( i in 1 : nVar ) {
+    pVars[[ i ]] <- rep( NA, nCols )
+    for( k in 1 : nCols )
+      pVars[[ i ]][ k ] <- t.test0( abs( unname( sapply( cVars[[ i ]],
+                                                         `[[`, "acf" ) )[ k, ] ),
+                                    critCorr, CI )
+  }
+
+  # mount the stats table
+  tab <- matrix( nrow = 3 * ( nVar + 1 ), ncol = nCols )
+  colnames( tab ) <- cRef[[ 1 ]]$lag
+
+  tab[ 1, ] <- colMeans( t( unname( sapply( cRef, `[[`, "acf" ) ) ),
+                            na.rm = TRUE )
+  tab[ 2, ] <- colSds( t ( unname( sapply( cRef, `[[`, "acf" ) ) ),
+                          na.rm = TRUE ) / sqrt( nSize )
+  tab[ 3, ] <- pRef
+  rowNames <- c( labRef, " (s.e.)", " (p-val.)" )
+
+  for( i in 1 : nVar ) {
+    tab[ i * 3 + 1, ] <- colMeans( t( unname( sapply( cVars[[ i ]], `[[`, "acf" ) ) ),
+                           na.rm = TRUE )
+    tab[ i * 3 + 2, ] <- colSds( t ( unname( sapply( cVars[[ i ]], `[[`, "acf" ) ) ),
+                         na.rm = TRUE ) / sqrt( nSize )
+    tab[ i * 3 + 3, ] <- pVars[[ i ]]
+    rowNames <- c( rowNames, labVars[ i ], " (s.e.)", " (p-val.)" )
+  }
+
+  rownames( tab ) <- rowNames
+
+  return( tab )
+}
+
+
+#
+# ====== function [] = autocorr_table ======
+# Output:
+#   Long-term auto-correlation table for variable
+#
+# Input:
+#	  data: Monte Carlo experiment/country data for variable (time x mc)
+#   lagsLT: number of lags to analyze (up to 150)
+#   logVar: take log of variable (0=no log, 1=log, 2=log0, 3=logNA)
+#   CI: confidence level
+#
+
+autocorr_table <- function( data, lagsLT, logVar = 0, CI = 0.95 ) {
+
+  acfx <- matrix( nrow = lagsLT, ncol = 0 )
+
+  for( j in 1 : ncol( data ) )
+    acfx <- cbind( acfx, acf( logX( data, logVar ), lag.max = 150, ci = CI,
+                              plot = FALSE )$acf[ 1 : lagsLT ] )
+
+  table <- cbind( 1 : lagsLT,
+                  rowMeans( acfx ),
+                  rowSds( acfx ) / sqrt( ncol( data ) ),
+                  apply( acfx, 1, t.test0, 0, CI ),
+                  rowMaxs( acfx ),
+                  rowMins( acfx ) )
+
+  colnames( table ) <- c( "Lag", "Mean effect", "Std. err.",
+                          "p-value", "Max.", "Min." )
+
+  return( table )
+}
+
+
+#
+# ====== function [] = spectrum_table ======
+# Output:
+#   Frequency-domain spectrum table for variable
+#
+# Input:
+#	  data: Monte Carlo experiment/country data for variable (time x mc)
+#   lagsLT: number of lags to analyze (up to 150)
+#   logVar: take log of variable (0=no log, 1=log, 2=log0, 3=logNA)
+#   CI: confidence level
+#
+
+spectrum_table <- function( data, lagsLT, logVar = 0, CI = 0.95 ) {
+
+  specx <- matrix( nrow = lagsLT, ncol = 0 )
+
+  for( j in 1 : ncol( data ) ) {
+    spec <- spectrum( logX( data, logVar ), spans = 4, detrend = TRUE, ci = CI,
+                      plot = FALSE )
+    specx <- cbind( specx, spec$spec[ 1 : lagsLT ] )
+  }
+
+  freq <- spec$freq[ 1 : lagsLT ]
+
+  table <- cbind( 1 / freq,
+                  rowMeans( specx ),
+                  rowSds( specx ) / sqrt( ncol( data ) ),
+                  apply( specx, 1, t.test0, 0, CI ),
+                  rowMaxs( specx ),
+                  rowMins( specx ) )
+
+  colnames( table ) <- c( "Period", "Mean density", "Std. err.",
+                          "p-value", "Max.", "Min." )
+
+  return( table )
+}

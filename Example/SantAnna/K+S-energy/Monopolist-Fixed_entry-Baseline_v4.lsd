@@ -1828,7 +1828,7 @@ Var: testClim 0 n + n n
 Var: testCountry 0 n + n n
 Var: testEner 0 n + n n
 Var: testFin 0 n + n n
-Var: testInit 0 n + n n
+Var: testInit 1 n + n n	0
 Var: testLabor 0 n + n n
 Var: test1sec 0 n + n n
 Var: test2sec 0 n + n n
@@ -6349,6 +6349,8 @@ END_DESCRIPTION
 
 Variable_testInit
 Test the selected initial condition values for minimal compatibility with a stationary steady state at t=0
+_INIT_
+All 1 instances equal to 0
 END_DESCRIPTION
 
 Variable_testLabor
@@ -6785,7 +6787,7 @@ EQ_FILE
 	Copyright Marcelo C. Pereira
 	Distributed under the GNU General Public License
 
-	VERSION: 0.5.1 - climate model and energy sector with multi power suppliers
+	VERSION: 0.5.3 - climate model and energy sector with multi power suppliers
 
 	This is the topmost code file for the K+S coded in LSD.
 	It contains only the scheduling equations 'runCountry' and 'timeStep',
@@ -6846,8 +6848,8 @@ PARAMETER;										// execute only once
 
 USE_SAVED;										// allow access to saved vars
 USE_ZERO_INSTANCE;								// allow zero-instance objects
-NO_SEARCH;										// don't perform variable search
-NO_SEARCH_UP;
+//NO_SEARCH;										// don't perform variable search
+//NO_SEARCH_UP;
 RND_GENERATOR( 2 );								// LSD source of randomness
 
 random_engine.seed( RND_SEED );					// sync seeds between engines

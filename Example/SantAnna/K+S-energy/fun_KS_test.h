@@ -304,10 +304,16 @@ Test the selected initial condition values for minimal compatibility
 with a stationary steady state at t=0
 */
 
-#ifdef FASTMODE
-if ( FASTMODE != 0 )
-	END_EQUATION( 0 );
-#endif
+if ( T == 1 )
+{
+	PLOG( "\n Optional statistics being computed in object 'Stats'" );
+	PARAMETER;									// compute for the last time
+}
+
+v[1] = VL( "testInit", 1 );
+
+if ( v[1] == 0 )
+	END_EQUATION( 0 )
 
 LOG( "\n !!! TESTING OF INITIAL CONDITIONS" );
 
@@ -617,9 +623,6 @@ EQUATION( "testCountry" )
 Print detailed statistics of country macro (!=0 if error is found)
 Set the time range in 'testCtIni' and 'testCtEnd'
 */
-
-if ( T == 1 )
-	PLOG( "\n Optional statistics being computed in object 'Stats'" );
 
 v[1] = V( "testCtIni" );
 v[2] = V( "testCtEnd" );

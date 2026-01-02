@@ -1,0 +1,516 @@
+Labor- and finance-augmented K+S Model (version 5.3.1)
+======================================================
+
+This version copyright by Marcelo C. Pereira.
+The original K+S code was developed by Andrea Roventini and other contributors.
+
+This is a full rewrite of the original "Schumpeter meeting Keynes" (K+S) model, plus the labor and finance extensions, to LSD, including worker behavioral consumption and savings, dynamic autonomous government expenditure, public firms and international trade of consumption goods.
+
+LSD version 9.0 or higher is required. Download at: https://github.com/SantAnnaKS/LSD
+
+
+Change log
+==========
+v5.3.0            - initial version based on v5.2.3
+v5.3.1 (26/02/24) - add government-owned firms with differentiated behavior
+
+
+Relevant references
+===================
+
+Dosi, G., G. Fagiolo, A. Roventini (2010). Schumpeter meeting Keynes: A policy-friendly model of endogenous growth and business cycles. Journal of Economic Dynamics and Control 34:1748-1767.
+Dosi, G., G. Fagiolo, M. Napoletano, A. Roventini, and T. Treibich (2015). Fiscal and monetary policies in complex evolving economies. Journal of Economic Dynamics and Control 52:166-189.
+Dosi, G., M. C. Pereira, A. Roventini, and M. E. Virgillito (2017). When more flexibility yields more fragility: the microfoundations of Keynesian aggregate unemployment. Journal of Economic Dynamics and Control 81:162-186.
+Dosi, G., M. C. Pereira, A. Roventini, and M. E. Virgillito (2018). Causes and consequences of hysteresis: aggregate demand, productivity, employment. Industrial and Corporate Change 27:1015-1044.
+Dosi, G., M. C. Pereira, A. Roventini, and M. E. Virgillito (2019). What if supply-side policies are not enough? The perverse interaction of flexibility and austerity. Journal of Economic Behavior & Organization 162:360-388.
+Dosi, G., R. Freeman, M. C. Pereira, A. Roventini, and M. E. Virgillito (2020). The impact of deunionization on the growth and dispersion of productivity and pay. Industrial and Corporate Change dtaa025.
+Amendola, M. et al (2021). Linear and state-dependent fiscal multipliers: results from an agent-based model.
+
+
+Model description
+=================
+
+The K+S model is a general disequilibrium, stock-and-flow consistent, agent-based model, populated by heterogeneous workers, firms, and banks which behave according to bounded-rational rules. The model set-up allows for the simultaneous analysis of the macro and microeconomic dynamics, including the endogenous growth paths of the productivity and the GDP, and provides details on the coupled operation of labor and financial markets. 
+
+The three-sector economy in the K+S model is composed by four populations of heterogeneous agents: workers/consumers, capital-good firms, consumption-good firms, and banks, plus the central bank and the government. More than one country may exist.
+
+Capital-good firms invest in R&D and produce heterogeneous machine-tools whose stochastic productivity evolves endogenously over time. Consumption-good firms combine machines bought from capital-good firms and labor in order to produce a industry-homogeneous, quality-differentiated good for consumers. The banking sector is represented by a fixed number of banks which take deposits and provide interest-paying loans to finance firms' production and investment plans. Workers search for jobs, and firms hire workers according to their individual demand expectation. The central bank manages the monetary policy, imposes regulatory reserves to the banks, and bails out the failing ones. The government levies taxes on firm/bank profits and worker income, pays unemployment benefits, provides education, offers training for the unemployed, consumes goods, imposes a minimum wage, absorbs excess profits and losses from the central bank, and keeps a non-explosive public debt trajectory in the long run.
+
+Countries trade capital and consumption goods. Machine producers send brochures to potential clients worldwide, and consumption-good firms choose suppliers from the brochures received. Countries compete on the consumption-good world market, and the export shares (imperfectly) evolve based on a replicator dynamics: more (price and quality) competitive countries export more, and conversely. Exports and imports incur in (constant) transaction costs. There is no international flow of labor or finance. International prices are affected by (relative) nominal exchange rates which evolve according to countries' trade balances. Currencies are fully convertible and there is no balance of trade constraints.
+
+Firms in both real sectors hold a fixed relationship with a (randomly-chosen) single bank. Banks are heterogeneous under a fixed size distribution. Banks take deposits from firms (net wealth) and workers (savings) and pay interest. On request, banks evaluate the provision of loans to firms bounded by each bank's capital and Basel-type regulatory capital-adequacy constraints. Available (limited) credit is allocated by each bank according to a pecking order whereby demanding clients are ranked by credit score. Firm limits are based on past sales performance, according to a loan-to-value ratio rule, and the score is based on clients' relative solvency index. Total credit supply by the financial sector is elastic and unconstrained by the aggregate supply side, adapting to credit demand and prudential requirements. Credit-rationed firms are not able to fully accomplish their investment plans.
+
+The capital-good sector is the locus of endogenous innovation in the model. Capital-good firms develop new machine-embodied techniques (innovation) or imitate the ones of their (worldwide) technologically-closer competitors in order to produce and sell more productive and cheaper machinery. Innovation is "incremental", gradually increasing existing technologies' productivity both on new machine construction and usage. On demand, capital-good firms supply universal-application machine-tools to consumption-good firms in all countries, producing with labor as the only input. Firms have access to bank loans to cover their possible liquidity requirements (up to a limit). The capital-good market is characterized by imperfect information and Schumpeterian competition driven by technological innovation. Firms signal the price and productivity of machines to their current worldwide customers as well as to a subset of potential new ones, and invest a fraction of past revenues in R&D aimed at searching for better machines or copy existing ones. Prices are set using a fixed mark-up over (labor) costs of production. 
+
+Consumption-good firms produce a single, quality-differentiated good employing capital and labor under constant returns to scale. The physical capital stock is composed by a set of machine-tool "vintages" associated with different labor productivities. Desired production is determined according to adaptive (myopic) demand expectations. Given the actual inventories, if the current capital stock is not sufficient to produce the desired output, firms order new machines to expand their installed capacity, paying in advance — drawing on their retained past profits or, up to some limits, on bank loans. Moreover, they replace old machines according to a payback-period rule. As new capital embed state-of-the-art technologies, the labor productivity of consumption-good firms increases over time according to the mix of (employed) vintages in the capital stock. Firms choose the capital-good suppliers comparing the price and the productivity of the machines they are aware of. Firms fix prices applying a variable mark-up rule on their (labor) production costs, balancing profit margins and market shares, increasing mark-ups and prices whenever market shares are expanding and vice versa. Imperfect information is also the normal state of the consumption-good market, so consumers do not instantaneously switch to the most competitive producer. Market shares evolve according to a (quasi) replicator dynamics: the more competitive firms expand, while the ones with relatively lower competitiveness levels shrink, or exit the market. Competitiveness is derived from individual price, unfilled demand and product quality.
+
+The process of firm entry-exit is endogenous in both industrial sectors. Firms leave whenever market shares get close to zero or net assets turn negative (bankruptcy). Residual positive firm net values are distributed to shareholders, and negative proceedings are supported by the defaulted banks. Conversely, the (stochastic) number of entrants depends on the number of incumbents and on the prevailing financial conditions. When the sectoral liquidity-to-debt ratio is growing, new firm entry gets easier, and vice versa. Entrant firms may finance entry through bank finance, or by issuing stock to be acquired by workers, or by mixing the two modes.
+
+When very productive or large firms exit because of bankruptcy in both sectors, there is the possibility of the government rescuing firms, and taking their property (statization). Government-owned firms behave mostly like other firms except for a few parameters (higher credit limit, higher propensity to R&D, more patience to recover investment, higher slack when expanding capital, and differentiated labor education mix, wage premiums, and hiring/firing strategies). In the case of capital-good firms, they have access to the technology frontier immediately after statization, and then follow the regular innovation rules. Government-owned firms exit the market as private firms, but the government repays any outstanding debt.
+
+The labor market is modeled as a fully decentralized search-and-match process between workers and firms. For simplicity, banks, the central bank and the government occupy no workers. The aggregate supply of labor may be fixed or not, and all workers are available to be hired in any period. Workers present different education levels, affecting firms' productivities. Workers may present learn-by-using (machine operation) vintage skills, learning-by-doing (on-the-job) tenure skills, or both. Unemployed workers may get government-supplied training to preserve/update skills. 
+
+When unemployed, workers submit a certain number of job applications to a random subset of firms. Employed workers may apply or not for better positions, according to the institutional set-up. Larger firms have a proportionally higher probability of receiving job applications, which are collected in separated, firm-specific application queues. The labor market is characterized by imperfect information as firms only observe workers' education, skills and wage requests over their own queues, and workers are aware only of the wage offers they may receive from firms where they applied for a job.
+
+Firms, on the grounds of the received orders (capital-good sector), the expected demand (consumption-good sector), and the current labor productivity levels, decide whether to (i) hire new workers, (ii) fire part of the existing ones, or (iii) keep the current labor force. Each hiring firm defines a unique wage offer for the best applicant workers, based on firm- and economy-wide productivities (in the case of unionized firms) and on the received applications (in non-unionized ones). Workers select the best wage offer they get from firms to which they submitted applications, if any. When already employed, depending on the institutional regime, they may quit the current job if a better  offer is received. There are no further rounds of bargaining between workers and firms in the same period. Thus, firms have no guarantee of fulfilling all the open positions, workers may not find a job even when there are still unfilled positions, and no labor market clearing is ever guaranteed. Moreover, there are no firing or hiring transaction costs.
+
+Workers of firms presenting above-average profits may receive a share of the positive free cash flows as bonus, proportionally (and in addition) to their individual wages. The remaining free cash flows of firms may be paid as dividends to a group of non-worker, firm-owner individuals, when workers are not shareholders, or to workers, otherwise. Unemployed workers may get unemployment benefits from the government. Consumer-workers (tentatively) spend part of the income on consumption goods. Unspent income is saved in interest-paying bank accounts, and it is used to smooth future consumption expenditure. If total supply of consumer goods is insufficient to satisfy the resulting demand, the excess is (force) saved. Workers cannot get credit from banks for consumption.
+
+The central bank fixes the prime interest rate using a single or dual mandate Taylor rule, depending on the policy set-up. A share of banks' deposits are held by the central bank as compulsory reserves. The interest rate structure is such that the prime rate stands between the interest rate on deposits, as the lower bound, the interest rate on bank reserves, and the rate on loans, as the upper bound. The latter are defined according to mark-down and mark-up rules on the prime, respectively. Central bank bails out the banking sector whenever the total net worth turns negative by absorbing the failed bank liabilities and injecting a fixed amount of new capital. When workers are also shareholders, government may be forced to bail-out them if accumulated (forced) savings get negative. As the model is stock-flow consistent: the bail-out costs correspond to an increase of government expenditure and, likely, to an increment of the public debt. As banks and workers do not repay bail-out funds, the associated expenses worsen the conditions of public finance, potentially violating the set fiscal rules, thus triggering government expenditure cuts. However, as bail-outs repeat over time, the accumulated debt must be repaid to ensure a balanced public debt growth path. Hence the target tax rate is adjusted accordingly.
+
+The government charges taxes on profits and income, applies duties on international trade, provides education, pays unemployment benefits and worker training, and do procurement of goods. Education, unemployment benefits, and training are represented as transfers to workers. Goods procurement represent demand to consumption good sector. Public consumption over GDP fluctuates counter-cyclically around a fixed value. The government still enforces a minimum wage indexed (partly or fully) to the aggregate productivity of the economy.
+
+The model is fully stock-and-flow consistent, at the macro (world and country), micro (sector), and individual (firm and worker) levels. Entrant firm's capital can be derived from a mix between bank debt and (shareholder) worker-owned stock, according to the configuration. 
+
+The model supports an institutional change (shock) at a predefined time step. When it occurs, for a period a fraction of new firms are introduced in the market using a different configuration from the existing firms ("post-change" vs. "pre-change" types). When the hold on period is over, the probability of an entrant firm to belong to one of the two groups is given by the joint market share of that group.
+
+
+Example configurations
+======================
+
+The model come with some ready-to-use configuration files (.lsd extension), illustrating some of the possible set-ups:
+
+Cent_wage-Benchmark_v1.lsd = centralized wage, no worker/firm skills, no savings or public consumption, homogeneous consumption-good, minimal financial market (1 bank, fixed interest rate, no bank credit limit, no monetary policy), fixed number of firms, no regulatory shock, close to configuration in 2010 paper (v0.1.1)
+
+Cent_wage-Baseline_v2.lsd = centralized wage, no worker/firm skills, no savings or public consumption, homogeneous consumption-good, regular financial market (10 banks, variable interest rates, bank credit limits, monetary policy), fixed number of firms, no regulatory shock, close to configuration in 2015 paper (v0.2.1)
+
+Educ-Ten_skills-Free_entry-Bas_fin.lsd = two Fordist countries (1=leading, 2=laggard), worker education and tenure skills, no savings or public consumption, quality differentiated consumption-good, basic financial market (10 banks, fixed interest rates, no bank credit limit, no fiscal policy), variable number of firms, international trade (machines only) introduced at t=100
+
+No-skills-Fix_entry-No_fin.lsd = no worker/firm skills, no savings or public consumption, homogeneous consumption-good, minimal financial market (1 bank, fixed interest rate, no bank credit limit, no fiscal policy), fixed number of firms, no regulatory shock, close to configuration in 2017 paper model (Fordist regime)
+
+Savings-Pub_cons-Int_fin.lsd.lsd = worker savings and tenure skills, no worker education, public consumption, quality differentiated consumption-good, intermediate financial market (10 banks, fixed interest rates, bank credit limit, no fiscal policy), variable number of firms, close to configuration in 2021 paper
+
+GOF-2_ctry-Educ-Ten_skills-Free_entry-Bas_fin.lsd = two Fordist countries (1=leading, 2=laggard), worker education and tenure skills, no savings or public consumption, quality differentiated consumption-good, basic financial market (10 banks, fixed interest rates, no bank credit limit, no fiscal policy), variable number of firms, international trade (machines and goods), and a policy shock allowing for government-owned firms (both sectors) introduced at t=100
+
+Ten-skills-Free_entry-No_fin.lsd = worker tenure skills, no savings or public consumption, quality differentiated consumption-good, minimal financial market (1 bank, fixed interest rate, no bank credit limit, no fiscal policy), entrant firm capital provided by workers (stock equity), variable number of firms, regulatory shock at t=200, close to configuration in 2018 paper (Fordist to Competitive regime transition)
+
+Ten-skills-Free_entry-Full_fin.lsd = worker tenure skills, no savings or public consumption, quality differentiated consumption-good, full financial market (10 banks, Taylor rule monetary policy, interest structure, Basel-like bank credit limit, soft fiscal-compact rule, bonds-spread adjustment), variable number of firms, unemployed training, regulatory shock at t=200, close to configuration in 2019 paper (Fordist to Competitive FC regime transition)
+
+Ten-skills-Free_entry-Bas_fin.lsd = worker tenure skills, no savings or public consumption, quality differentiated consumption-good, basic financial market (10 banks, fixed interest rates, no bank credit limit, no fiscal policy), variable number of firms, regulatory shock at t=200 with pre/post-change firms competing, close to configuration in 2020 paper (invasion scenario)
+
+Two_ctry-Sav-Pub_cons-Bas_fin.lsd = two countries (1=small, 2=large), worker savings and tenure skills, no worker education, public consumption, quality differentiated consumption-good, basic financial market (10 banks, fixed interest rates, no bank credit limit, no fiscal policy), variable number of firms, international trade (machines and goods), regulatory shock at t=200 (Fordist to Competitive regime)
+
+Some set-ups include a regulatory shock at t=200 (parameter TregChg). In some cases, new, post-change entrant firms may compete with the existing pre-change incumbents. The parameters affected by the shock are identified by the suffix "Chg" in the names.
+
+Please refer to the original papers (references above) for details. Configurations were set as close as possible to the original models. Given the significant differences in the computer code among versions, it is not possible to have a 1:1 correspondence on parameters and results. For precise results reproduction, please use the original models.
+
+
+R analysis scripts
+==================
+
+There are several R scripts (.R extension inside R subdirectory) ready to analyze the simulation results:
+
+KS-aggregates.R = overall analysis of macroeconomic aggregates, including scenario comparison, time series plots, de-trended series growth stationarity, temporal correlation structure, hysteresis measures, Monte Carlo experiments comparison (distribution and performance)
+
+KS-aggregates-labor.R = analysis of labor-specific macro aggregates, including scenario statistics comparison, Beveridge, Okun, Philips, matching function and wage curves, Shimer metrics (separation, de-trended labor productivity, vacancy-unemployment to productivity and summary statistics), and unemployment recovery hysteresis
+
+KS-sector-1.R = pooled and Monte Carlo firm-level analysis of firms in the capital-good sector, including scenario statistics comparison, size, productivity and growth rate empirical plots and fits to Gaussian, Laplace and Subbotin distributions
+
+KS-sector-2.R = pooled and Monte Carlo firm-level analysis of firms in the consumption-good sector, including scenario statistics comparison, Gibrat-law and scaling-variance tests, productivity dynamics among groups of firms, FHK and DN productivity decompositions, parametric/non-parametric regressions of wages on productivity, and size, productivity and growth rate empirical plots and fits to Gaussian, Laplace and Subbotin distributions
+
+KS-workers.R = pooled and Monte Carlo worker-level analysis of workers/consumers, including scenario statistics comparison, wage, skills and unemployment duration empirical plots and fits to Gaussian, Laplace, log-normal and Subbotin distributions
+
+KS-elementary-effects-SA.R = Morris elementary effects sensitivity analysis of the selected model responses for all model parameters, including sensitivity coefficients estimation and significance, for both linear and nonlinear effects
+
+KS-kriging-sobol-SA.R = global Sobol variance-based sensitivity analysis using a Kriging meta-model, including alternative meta-model kernels selection, meta-model estimation and validation, Sobol variance decomposition for direct and interactive effects, and surface response plotting (2D and 3D) of top-influential factors
+
+KS-polynomial-sobol-SA.R = polynomial meta-model fitting for global Sobol variance-based sensitivity analysis, including alternative meta-model order and interactive terms selection, meta-model estimation and validation, Sobol variance decomposition for direct and interactive effects, and surface response plotting (2D and 3D) of top-influential factors
+
+Other support scripts exist in the R subdirectory and are required by the above scripts. The scripts are configured to use the R subdirectory as the R working directory. Please add all the data required for the analysis (including LSD configuration files) in subdirectories inside the R working directory (the default is 'data'). 
+
+There is a set of preconfigured test configurations (.lsd extension files in the data subdirectory) which can be executed in LSD and analyzed by the R scripts without any change. The sample test configurations are configured for speed but the number of Monte Carlo experiments (runs) is insufficient for reliable inference. See 'Configuring the K+S scripts.txt' in R subdirectory for details and recommendations.
+
+The R scripts require the following R packages (and dependencies) to be installed from the standard repositories: LSDsensitivity, tseries, normalp, nortest, mFilter, np, matrixStats, gplots, corrplot, rmutil, plotrix, textplot, extrafont. 12GB or more of available memory is required to run some of the reports. Use 'install-lsd-examples-packages.R' script in R subdirectory to install the required packages automatically.
+
+
+Model regime control
+====================
+
+The model allows for a single regime change (shock) at the specified time, represented by the change of several control flags and parameters (see below). According to the configuration, incumbent firms at the regime change time can be kept differentiated ("pre-change" firms) in regard to the entrants after the shock ("post-change" firms).
+
+Change time (parameter TregChg)
+-----------
+0 = no regime change during simulation
+t = regime change in time t
+		  
+Global changes (see affected flags and parameters below)
+--------------
+flagFiscalShock		-> flagFiscalShockChg
+flagFireOrder1		-> flagFireOrder1Chg
+flagHireOrder1		-> flagHireOrder1Chg
+flagHireSeq			-> flagHireSeqChg
+flagIndexMinWage	-> flagIndexMinWageChg
+flagSearchMode		-> flagSearchModeChg
+flagTradeC 			-> flagTradeCchg
+flagTradeK 			-> flagTradeKchg
+tr		-> trChg					(tax rate on profit)
+trIn	-> trInChg					(tax rate on income)
+Lambda	-> LambdaChg				(max credit multiple)
+muRes	-> muResChg					(markup for bank reserves interest)
+rT		-> rTchg					(target interest rate)
+tauB	-> tauBchg					(bank max equity to loans ratio)
+Ts		-> TsChg					(wage memory in periods)
+delta	-> deltaChg					(labor force growth rate)
+omega	-> omegaPreChg/omegaPostChg	(number of firms employed workers queue for jobs)
+phi		-> phiChg					(unemployment benefit target as fraction of average wage)
+e0		-> e0Chg					("animal spirits" in [0, 1])
+mu20	-> mu20Chg					(initial consumption-good firm mark-up)
+
+Firm-specific changes (pre-change firms are not updated if flagAllFirmsChg=0)
+---------------------
+flagFirmOwner		-> flagFirmOwnerChg
+flagFireOrder2		-> flagFireOrder2Chg
+flagFireRule		-> flagFireRuleChg
+flagHireOrder2		-> flagHireOrder2Chg
+flagIndexWage		-> flagIndexWageChg
+flagWageOffer		-> flagWageOfferChg
+b					-> bChg					(machine pay-back period)
+
+
+Model control flags
+===================
+
+Model flags allow controlling the specific processing behavior of the code when more than one alternative is available:
+
+Consumption composition (parameter flagCons)
+-----------------------
+0 = all income, C = Q2 + N (ignore unfilled past demand savings)
+1 = all income, C = Q2 + N + Cpast (unfilled past demand savings spent at once)
+2 = all income, C = Q2 + N + min( Cpast, Crec ) (spend past demand up to Crec)
+3 = part of income and behavioral savings (according to alphaC/betaC)
+
+Government expenditure (parameter flagGovExp)
+----------------------
+0 = minimum subsistency income (w0min) plus net interest and bail-outs
+1 = 0 plus public consumption at level g0 of GDP medium-term trend
+2 = 1 plus unemployment benefit instead of minimum subsistency income
+3 = 2 plus consumption of government current surplus if no public debt
+4 = 3 plus consumption of accumulated surpluses to cover GDP gap
+
+Bank total credit supply rule (parameter flagCreditRule)
+-----------------------------
+0 = no bank-level credit limit (firm-level prudential limit still apply)
+1 = deposits multiplier credit limit but no capital adequacy rule or bank bail-out
+2 = Basel-like bank capital adequacy rule and bank bail-out if net worth is negative
+
+Government fiscal rule (parameter flagFiscalRule)
+----------------------
+0 = no fiscal rule (fixed unemployment benefit rate)
+1 = balanced budget rule with maximum deficit on GDP
+2 = soft balanced budget rule with maximum deficit on GDP (only if GDP growing)
+3 = balanced budget rule with maximum debt and deficit on GDP
+4 = soft balanced budget rule with maximum debt and deficit on GDP (only if GDP growing)
+
+Government fiscal policy shock (parameter flagFiscalShock)
+------------------------------
+0 = no fiscal policy shock
+1 = one (random) time public consumption positive shock (length Tsh and strength ySh)
+2 = one (random) time income tax rate negative shock (length Tsh and strength ySh)
+3 = 1 plus 2
+
+Firm ownership (parameter flagFirmOwner)
+--------------
+0 = only private (worker-owned) firms in both sectors
+1 = private and public (government-owned) firms in capital-good sector
+2 = private and public firms in consumption-good sector
+3 = private and public firms in both sectors
+
+Consumption-good international trade (parameter flagTradeC)
+----------------------------------------------
+0 = no international trade of goods
+1 = international trade of goods
+
+Capital-good international trade and imitation (parameter flagTradeK)
+----------------------------------------------
+0 = only domestic trade of machines and tech. imitation
+1 = int'l trade of machines but only domestic tech. imitation
+2 = int'l trade of machines and tech. imitation
+3 = int'l trade of machines (to incumbents only) but only domestic tech. imitation
+4 = int'l trade of machines (to incumbents only) and tech. imitation
+
+Capital-good sector firm-specific regime change (parameter flagAllFirmsChg)
+-----------------------------------------------
+0 = only a fraction of new firms at t=TregChg change
+1 = all firms change at t=TregChg
+
+Capital-good sector technological imitation scope (parameter flagImit)
+-------------------------------------------------
+0 = only domestic firms can be imitated
+1 = firms in any country are (possibly) imitated
+
+Firm expectation in consumption-good sector (parameter flagExpect)
+-------------------------------------------
+0 = myopic expectations with 1-period memory
+1 = myopic expectations with up to 4-period memory
+2 = accelerating GD expectations
+3 = 1st order adaptive expectations
+4 = extrapolative-accelerating expectations
+
+Job search mode (parameter flagSearchMode)
+---------------
+0 = always search
+1 = search only if unemployed
+2 = search if unemployed or wage is below average
+
+Job search discouragement (parameter flagSearchDisc)
+-------------------------
+0 = always search
+1 = global search probability (aggregate unemployment)
+2 = individual search probability (individual unemployment)
+
+Consumption-good sector hiring sequence (parameter flagHireSeq)
+---------------------------------------
+0 = firms hire workers in random order
+1 = firms offering higher wages hire first
+2 = firms without workers hire first then random order
+3 = firms without workers hire first then higher wages order
+
+Hiring order (parameters flagHireOrder1, flagHireOrder2, flagHireOrder2g)
+------------
+0 = random order
+1 = higher wage workers first
+2 = lower wage workers first
+3 = higher skills workers first (requires flagWorkerLBU=1 to be meaningful)
+4 = lower skills workers first (requires flagWorkerLBU=1 to be meaningful)
+5 = higher payback period workers first
+6 = lower payback period workers first
+7 = old hired workers first
+8 = recent hired workers first
+
+Firing order (parameters flagFireOrder1, flagFireOrder2, flagFireOrder2g)
+------------
+0-8 = Same options as the hiring order above
+
+Consumption-good sector firing rule operation (parameter flagFireRule)
+---------------------------------------------
+0 = never fires (always except for retirement) ("Japanese mode")
+1 = never fires with sharing ("German mode")
+2 = only fire if firm downsizing ("French mode")
+3 = only fire if firm is at losses ("Italian mode")
+4 = fire if sufficient payback is achieved ("American mode")
+5 = always fire when contract ends ("Brazilian mode")
+6 = regime 5 until t=T and then regime Y ("increasing protection")
+
+Wage indexation heterogeneity (parameter flagHeterWage)
+-----------------------------
+0 = firm and worker level homogeneous (economy productivity indexes wages)
+1 = firm-level heterogeneity only (firms productivity index wages)
+2 = worker-level heterogeneity (positive workers productivity index wages)
+
+Wage offer mode (parameter flagWageOffer)
+---------------
+0 = propose wage premium (don't consider requested wages)
+1 = propose lowest possible wage based on workers' requested wages
+
+Wage premium mode (parameter flagWagePremium)
+-----------------
+0 = no premium (keep current wage)
+1 = indexation mechanism (WP1)
+2 = endogenous mechanism (WP2)
+
+Wage indexation (parameter flagIndexWage)
+---------------
+0 = no wage adjustment during employment
+1 = periodic wage adjustment (according to flagHeterWages)
+2 = current wage offer replication to existing workers (consumption-good sector only)
+
+Minimum wage indexation (parameter flagIndexMinWage)
+-----------------------
+0 = no minimum wage adjustment
+1 = periodic minimum wage adjustment (value in ]0,1] to weight indexation)
+
+Worker education mode (parameter flagEduc)
+---------------------
+0 = homogeneous education, no goverment expenditure on education
+1 = heterogeneus education, distribution according to gevernment expenditure
+
+Worker-level learning in capital-good sector (parameter flagLearn1)
+--------------------------------------------
+0 = no learning, preserve skills
+1 = no learning, reducing skills (like unemployed)
+2 = learning, increasing skills (like consumption-good sector)
+3 = learning with minimum skills
+
+Worker-level learning cumulativeness (parameter flagWorkerLBU)
+------------------------------------
+0 = no worker-level learning
+1 = worker-level learning-by-using-vintage
+2 = worker-level learning-by-tenure
+3 = worker-level learning-by-using-vintage & learning-by-tenure
+
+Worker skills effect on productivity in consumption-good sector (parameter flagWorkerSkProd)
+---------------------------------------------------------------
+0 = no effect of worker skills on productivity (firm-level skills not affected)
+1 = only worker vintage skills affect productivity
+2 = only worker tenure skills affect productivity
+3 = both worker vintage & tenure skills affect productivity
+
+
+Model parameters
+================
+
+The model parameters control both the initial conditions applied to lagged variables as well the particular values used in the model's equations (some parameters are used only when the appropriate control flags are set):
+
+World-level parameters (object Root)
+----------------------
+chiX = replicator dynamics coefficients for exports (>0)
+delta1, delta2 = competitiveness weight of price/quality in consumption-good exports (>=0)
+f0 = minimum exports/imports share in international trade (]0,1[)
+
+Country-level parameters (object Country)
+------------------------
+Tmt = medium-term GDP horizon in number of periods (>0)
+TregChg = regime change period (0=no change) (>=0)
+Tsh = fiscal policy shock number of periods (>0)
+chiM = replicator dynamics coefficients for imports (>0)
+fMax = maximum imports share in consumption good domestic market (]f0,1[)
+g0 = desired public consumption on GDP (>=0)
+gammaE = sensitivity of exchange rates to trade unbalance (>=0)
+mLim = absolute cap on moving-average growth calculation (>=0, 0=no limit)
+mPer = number of periods on moving-average growth calculation (>=1)
+omicron = sensitivity of entry to market conditions (liquid assets vs. debt ratio) ([0,1])
+stick = stickiness of the number of firms (return to average) (>=0)
+tr/trChg = tax rate on profits (pre/post-change) (>=0)
+trIn = tax rate on income (>=0)
+trMC, trMK = duty rates on import of consumer/capital goods ([0,1[)
+x2inf/x2sup = lower/upper support for entry draw distribution (-1<x2inf<=x2sup<1)
+ySh = fiscal policy shock as share of GDP per period (>0)
+
+Financial sector parameters (object Financial)
+---------------------------
+B = number of heterogeneous banks (>=1)
+DebRule = maximum government debt on GDP ratio for fiscal rule (>0)
+DefPrule = maximum government primary deficit on GDP ratio for fiscal rule (>0)
+EqB0 = initial equity of bank as multiple of firms total net worth (>0)
+Lambda/LambdaChg = multiple of net assets or sales for credit limit (pre/post-change) (>0)
+LambdaG = multiple of net assets or sales for credit limit for government-owned firms (>0)
+Lambda0 = credit limit initial absolute floor (>=0)
+PhiB = fraction of incumbent banks net worth provided to bailed-out bank (]0,1])
+Trule = time to start enforcing fiscal rules (>1)
+Ut = target unemployment rate for central bank's Taylor rule (>0)
+alphaB = Pareto distribution shape parameter defining bank size heterogeneity (>0)
+betaB = bank sensitivity to financial fragility (>0)
+dB = dividend rate on net profits for banks (>=0)
+deltaB = desired share of outstanding firm debt to pay in period (]0,1])
+deltaDeb = share of government debt to pay when debt fiscal rule is binding (]0,1])
+gammaPi = central bank's Taylor rule sensitivity to target inflation (>=0)
+gammaU = central bank's Taylor rule sensitivity to target unemployment (>=0)
+kConst = interest rate ramping parameter for firms debt by credit class (>=0)
+mPerB = number of periods on banks moving-average calculations (>=1)
+muBonds = sovereign bonds spread (mark-down over central bank prime rate) ([0,1])
+muD = bank spread (mark-down) on deposits (from central bank prime rate) ([0,1])
+muDeb = bank spread (mark-up) on debt (over central bank prime rate) (>=0)
+muRes/muResChg = central bank spread (mark-down) on reserves (pre/post-change) ([0,1])
+piT = target inflation rate by central bank's Taylor rule (>0)
+rAdj = prime rate minimum adjustment step (>0)
+rT/rTchg = target prime interest rate set by central bank (pre/post-change) (>0)
+rhoBonds = sovereign bonds risk premium (>=0)
+tauB/tauBchg = minimum bank capital adequacy rate (pre/post-change) (]0,1[)
+thetaBonds = average maturity periods of sovereign bonds (>0)
+
+Capital-good sector parameters (object Capital)
+------------------------------
+Deb10 = debt-to-equity initial ratio in capital-good sector ([0,1], 0=only equity)
+F10 = initial number of firms in capital-good sector (1<=F1min<=F10<=F1max)
+F1max/F1min = maximum/minimum number of firms in capital-good sector (1<=F1min<=F10<=F1max)
+L1rdMax = maximum share of workers in R&D (]0,1[)
+L1shortMax = maximum labor shortage allowed in capital-good sector ([0,1])
+NW10 = average initial net worth in capital-good sector (>=0)
+Phi3/Phi4 = lower/upper support for capital-good entrant net worth share (0<Phi3<Phi4<=1)
+alpha1/beta1 = Beta distribution parameters for innovation drawing (>0)
+alpha2/beta2 = Beta distribution parameters for imitation drawing (>0)
+d1 = dividend rate in capital-good sector ([0,1])
+gamma = new customer share for firm in capital-good sector (]0,1])
+gamma1g = minimum multiple of average to statization of cap. bankrupt firms (>0)
+m1 = worker output in capital-good units per period (>0)
+mu1 = mark-up of firms in the capital-good sector (>0)
+n1 = number of periods for evaluating market share in capital-good sector (1-8)
+nu = share of revenue applied in R&D by private firm in capital-good sector (]0,1[)
+nuG = share of revenue applied in R&D by gov.-owned firm in capital-good sector (]0,1[)
+trX1 = duty rate on export of capital goods ([0,1[)
+x1inf/x1sup = lower/upper support for new machine productivity change (x1inf<x1sup)
+x5 = upper share limit for productivity improvement of capital-good entrant (>=0)
+x6 = gap share from technological frontier of government-owned firms after statization (>=0)
+xi = share of R&D expenses in innovation ([0,1])
+zeta1/zeta2 = expected elasticity of R&D expense in innovation/imitation success (>=0)
+
+Consumption-good sector parameters (object Consumption)
+----------------------------------
+Deb20 = debt-to-equity initial ratio in consumption-good sector ([0,1], 0=only equity)
+F20 = initial number of firms in consumption-good sector (1<=F2min<=F20<=F2max)
+F2max/F2min = maximum/minimum number of firms in consumption-good sector (1<=F1min<=F10<=F1max)
+NW20 = average minimum initial net worth in consumption-good sector (>=0)
+Phi1/Phi2 = lower/upper support for consumption-good entrant net worth share (0<Phi1<Phi2<=1)
+b/bChg = number of pay-back periods before machine scrapping (pre/post-change) (>1)
+bG = number of pay-back periods before machine scrapping for government-owned firms (>1)
+chi = replicator dynamics selectivity coefficient (>0)
+d2 = dividend rate in consumption-good sector ([0,1])
+e0/e0Chg = weight of potential demand on expectations (animal spirits) (pre/post-change) ([0,1])
+e1/e2/e3/e4 = weight of t-1/t-2/t-3/t-4 demand on myopic expectations ([0,1])
+e5 = acceleration rate on expected demand growth ([0,1])
+e6 = first order adaptive expectation factor ([0,1])
+e7/e8 = first/second order extrapolative expectation factors ([0,1])
+ent2HldPer = periods after TregChg to hold fixed proportion of pre/post-change entrants (>=0)
+ent2HldShr = share of post-change entrants during ent2HldPer period ([0,1])
+eta = technical lifetime of machines (>1)
+f2min = minimum market share to stay in consumption-good sector ([0,1[)
+f2minPosChg = minimum probability of new post-change-type firm ([0,1])
+f2trdChg = minimum market share of post-change-type firms ([0,1], 0=all firms equal)
+gamma2g = minimum multiple of average to statization of cons. bankrupt firms (>0)
+iota = share of inventories on planned output of private consumption-good firm (>=0)
+iotaG = share of inventories on planned output of gov.-owned consumption-good firm (>=0)
+kappaMax/kappaMin = capital max/min threshold share growth (0<=kappaMin<kappaMax)
+m2 = machine output in consumption-good units per period (>0)
+mu20/mu20Chg = initial mark-up of firms in the consumption-good sector (pre/post-change) (>0)
+n2 = number of periods for evaluating market share in consumption-good sector (1-5)
+omega1/omega2/omega3 = competitiveness weight of price/unfilled demand/quality (>=0)
+trX2 = duty rate on export of consumption goods ([0,1[)
+u = planned utilization of machinery (]0,1])
+upsilon = sensitivity of mark-up adjustment (>0)
+
+Labor supply parameters (object Labor)
+-----------------------
+Crec = unfilled past consumption recover limit as fraction of current consumption (>0)
+Gamma = share of unemployed workers covered by government-supplied training ([0,1])
+GammaCost = share of average wage cost per worker of government-supplied training (>=0)
+Ls0 = initial number of workers in labor market (>1)
+Lscale = scale of one Worker object in model (number of workers per object) (>=1)
+Tc = work contract term (periods) (>=1)
+Texp = expectation formation time horizon periods (>0)
+Tp = number of periods after firing is not allowed (>=0, 0=no protection)
+Tr = number of periods a worker stay in firm before retiring (>=0, 0=no retirement)
+Ts/TsChg = number of periods to define requested wage (pre/post-change) ([0,4], 0=no memory)
+alphaC/betaC = importance of current income/past consumption on consumption (0<alphaC+betaC<=1)
+alphaEd/betaEd = education level beta distribution parameters (>0)
+delta = labor force growth rate ([-1,1])
+deltaF = labor force additional growth rate on full employment ([-1,1])
+epsilon = minimum wage increment to change jobs (>0)
+epsilonAd = public education expenditure of advanced countries as share of GDP (>=0)
+epsilonEd = public education expenditure as share of GDP (>=0)
+gammaC = consumption reduction floor factor ([0,1])
+kappa = overall intensity for job searching of discouraged workers (>0)
+lambda = individual for job searching intensity of discouraged workers (>0)
+omegaC = past consumption time weight (>0)
+omega = average number of firms employed workers apply for jobs (>0)
+omegaPreChg/omegaPosChg = avg. # job applications per worker in pre/post-change firm (>0)
+omegaU = average number of job applications by unemployed worker (>0)
+phi/phiChg = unemployment benefit as a share of average wage (pre/post-change) (>=0)
+phi2/phi3 = wage relative premium floor due to education category in private firms (>=0)
+phi2g/phi3g = wage relative premium floor due to education category in government firms (>=0)
+psi1 = share of inflation passed to wages (psi2 on 2010 paper) ([0,1])
+psi2/psi4 = elasticity of wages to aggregate/firm-level productivity growth (>=0)
+psi3 = elasticity of wages to the unemployment rate (<=0)
+psi5 = elasticity of wages to firm past vacancy rate (>=0)
+psi6 = share of firm free cash flow paid as bonus in top consumption-good firms ([0,1])
+rho = labor sharing parameter for flagFireRule=1 ([0,1])
+sigma = degree of learning-by-doing on public skill level ([0,1])
+tauEd = education level leverage on productivity (>=0)
+tauG = learning factor for workers under government-supplied training (>=0)
+tauT = tenure learning factor for employed workers (>=0)
+tauU = skills deterioration rate for unemployed workers (>=0)
+theta = share of extra capacity (slack) when hiring (>=0)
+theta2/theta3 = share of demand for category 2/3 workers in private firm (0<=theta2+theta3<=1)
+theta2g/theta3g = share of demand for category 2/3 workers in gov. firms(0<=theta2+theta3<=1)
+varthetaEd = sensitivity of education level distribution to education expenditure (>=0)
+w0min = social benefit absolute floor (subsistence) (>0)
+wCap = wage change multiple cap on offers, requests and adjustments (>=0, 0=no cap)
