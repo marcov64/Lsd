@@ -393,7 +393,7 @@ void gui::sensitivity_sequential( int *findex, lsd::sensitivity *s, double probS
 		if ( probSampl == 1.0 || sim._ran1_( ) <= probSampl )	// if required draw if point will be sampled
 		{
 			// generate a configuration file for the experiment (no descriptions)
-			if ( ! sim.save_xml_configuration( *findex, dest_path, true, get_str( model_options[ 0 ] ), get_str( model_options[ 1 ] ), get_str( model_options[ 2 ] ), eq_file ) )
+			if ( ! sim.save_xml_configuration( dest_path, NULL, NULL, *findex, true, true, get_str( model_options[ 0 ] ), get_str( model_options[ 1 ] ), get_str( model_options[ 2 ] ), eq_file ) )
 			{
 				plog( "Aborted\n" );
 				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
@@ -1477,7 +1477,7 @@ void gui::sensitivity_doe( int *findex, design *doe, const char *dest_path )
 		}
 
 		// generate a configuration file for the experiment (no descriptions)
-		if ( ! sim.save_xml_configuration( *findex, dest_path, true, get_str( model_options[ 0 ] ), get_str( model_options[ 1 ] ), get_str( model_options[ 2 ] ), eq_file ) )
+		if ( ! sim.save_xml_configuration( dest_path, NULL, NULL, *findex, true, true, get_str( model_options[ 0 ] ), get_str( model_options[ 1 ] ), get_str( model_options[ 2 ] ), eq_file ) )
 		{
 			plog( "Aborted\n" );
 			cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );

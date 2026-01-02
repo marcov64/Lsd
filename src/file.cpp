@@ -347,11 +347,11 @@ void lsd::object::load_elem_lists( )
  If quick is true, just the structure and the parameters are saved
  Returns: true: save ok, false: save failure
  *************************************************************/
-bool gui::save_xml_configuration_gui( int findex, const char *dest_path, bool quick )
+bool gui::save_xml_configuration_gui( bool quick )
 {
 	bool saved;
 
-	saved = sim.save_xml_configuration( findex, dest_path, quick, get_str( model_options[ 0 ] ), get_str( model_options[ 1 ] ), get_str( model_options[ 2 ] ), eq_file, eq_txt );
+	saved = sim.save_xml_configuration( NULL, NULL, NULL, 0, true, quick, get_str( model_options[ 0 ] ), get_str( model_options[ 1 ] ), get_str( model_options[ 2 ] ), eq_file, eq_txt );
 
 	if ( saved )
 		cmd( "set last_conf [ string map -nocase { \"%s/\" \"\" } [ file normalize \"%s\" ] ]", lsd::model_path, sim.conf_file );

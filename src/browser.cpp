@@ -1058,6 +1058,7 @@ int gui::browse( lsd::object *r )
 
 			cmd( "$w add command -label Unload -underline 0 -accelerator Ctrl+E -command { set choice 20 }" );
 			cmd( "$w add command -label \"Compare...\" -underline 0 -command { set choice 82 }" );
+			cmd( "$w add command -label \"Export XML...\" -underline 9 -command { set choice 40 }" );
 			cmd( "$w add command -label \"Export Legacy...\" -underline 9 -command { set choice 9 }" );
 			cmd( "$w add command -label \"Export Saved Elements...\" -underline 1 -command { set choice 91 }" );
 

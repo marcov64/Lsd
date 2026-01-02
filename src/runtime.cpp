@@ -502,10 +502,12 @@ void gui::draw_plot( int *idx, int t, double cur_val, bool point )
 	}
 
 	if ( plot_y_max <= plot_y_min || std::fabs( plot_y_max - plot_y_min ) < MARG )
+	{
 		if ( plot_y_max != 0 )
 			plot_y_max += std::fabs( plot_y_max ) * MARG;
 		else
 			plot_y_max += MARG;
+	}
 
 	if ( relabel )
 	{

@@ -1419,7 +1419,7 @@ namespace lsd
 		public:
 			bool results_alt_path( const char *altPath );
 			bool save_txt_configuration( const char *path, const char *rname, const char *ext, const char eq_file[ ], const char eq_txt[ ] = "" );
-			bool save_xml_configuration( int findex = 0, const char *dest_path = NULL, bool quick = false, const char mod_nam[ ] = "", const char mod_ver[ ] = "", const char mod_dat[ ] = "", const char eq_file[ ] = "", const char eq_txt[ ] = "" );
+			bool save_xml_configuration( const char *dest_path = NULL, const char *rname = NULL, const char *ext = NULL, int findex = 0, bool zip = true, bool quick = false, const char mod_nam[ ] = "", const char mod_ver[ ] = "", const char mod_dat[ ] = "", const char eq_file[ ] = "", const char eq_txt[ ] = "" );
 			bool stop_parallel( void );
 			int hyper_count( const char *lab );
 			int hyper_count_var( const char *lab );

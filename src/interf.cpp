@@ -25,7 +25,7 @@
 
 /*
 cases used up to 97
-cases free 40, 45, 48, 51
+cases free 45, 48, 51
 */
 
 #include "LSD.h"
@@ -2272,9 +2272,9 @@ lsd::object *gui::operate( lsd::object *r )
 		break;
 
 
-		// Save a model
+		// save a model
 		case 18:
-		// Save a model as different name
+		// save a model as different name
 		case 73:
 
 			saveAs = ( choice == 73 || strlen( sim.conf_name ) == 0 ) ? true : false;
@@ -2355,11 +2355,9 @@ lsd::object *gui::operate( lsd::object *r )
 			}
 
 			if ( ! save_xml_configuration_gui( ) )
-			{
-				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"The model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", sim.conf_name	);
-			}
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"The model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", sim.conf_name );
 			else
-				unsaved_change( false );					// signal no unsaved change
+				unsaved_change( false );// signal no unsaved change
 
 			save_end:
 			Tcl_UnlinkVar( interp, "done" );
@@ -4625,6 +4623,8 @@ lsd::object *gui::operate( lsd::object *r )
 
 		// export configuration in legacy LSD format
 		case 9:
+		// export configuration as uncompressed XML
+		case 40:
 
 			if ( ! sim.conf_ok || strlen( sim.conf_name ) == 0 )
 			{
@@ -4633,7 +4633,7 @@ lsd::object *gui::operate( lsd::object *r )
 			}
 
 			// default file name
-			cmd( "set res %s-legacy", sim.conf_name );
+			cmd( "set res \"%s-%s\"", sim.conf_name, choice == 9 ? "legacy" : "xml" );
 
 			// make sure there is a path set
 			cmd( "set path \"%s\"", sim.conf_path );
@@ -4641,16 +4641,26 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "cd $path" );
 
 			// open dialog box to get file name & folder
-			choice = 0;
-			cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Configuration in Legacy LSD Format\" -defaultextension \".csv\" -initialfile $res -initialdir $path -filetypes { { {LSD configuration files} {.lsd} } } ]" );
-			cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file rootname [ file tail $bah ] ]; set ext [ file extension $bah ] } { set choice 2 }" );
+			cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Configuration in %s Format\" -defaultextension \".csv\" -initialfile $res -initialdir $path -filetypes { { {LSD configuration files} {.lsd} } } ]", choice == 9 ? "Legacy LSD" : "XML" );
+			cmd( "if { [ string length $bah ] > 0 } { \
+					set path [ file dirname $bah ]; \
+					set res [ file rootname [ file tail $bah ] ]; \
+					set ext [ file extension $bah ] \
+				} else { \
+					set choice 2 \
+				}" );
 
 			if ( choice == 2 )
 				break;
 
 			// write export file
-			if ( ! sim.save_txt_configuration( get_str( "path" ), get_str( "res" ), get_str( "ext" ), eq_file, eq_txt ) )
-				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"Legacy configuration file not saved\" -detail \"Please check if the file name and path are valid, or if the drive or the file is set READ-ONLY, or try to save to a different location.\"" );
+			if ( choice == 9 )
+				save = sim.save_txt_configuration( get_str( "path" ), get_str( "res" ), get_str( "ext" ), eq_file, eq_txt );
+			else
+				save = sim.save_xml_configuration( get_str( "path" ), get_str( "res" ), get_str( "ext" ), 0, false, false, get_str( model_options[ 0 ] ), get_str( model_options[ 1 ] ), get_str( model_options[ 2 ] ), eq_file, eq_txt );
+
+			if ( ! save )
+				cmd( "ttk::messageBox -parent . -type ok -icon error -title Error -message \"%s configuration file not saved\" -detail \"Please check if the file name and path are valid, or if the drive or the file is set READ-ONLY, or try to save to a different location.\"", choice == 9 ? "Legacy LSD" : "XML" );
 
 		break;
 

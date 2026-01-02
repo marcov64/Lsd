@@ -667,12 +667,12 @@ int lsd::object::load_xml_insts( x_nodeT &n, n_mapT &node_map, i_setT &warning )
  saved
  Returns: true: save ok, false: save failure
  *************************************************************/
-bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path, bool quick, const char mod_nam[ ], const char mod_ver[ ], const char mod_dat[ ], const char eq_file[ ], const char eq_txt[ ] )
+bool lsd::simulation::save_xml_configuration( const char *dest_path, const char *rname, const char *ext, int findex, bool zip, bool quick, const char mod_nam[ ], const char mod_ver[ ], const char mod_dat[ ], const char eq_file[ ], const char eq_txt[ ] )
 {
 	bool saved;
-	int delta, indexDig, save_len;
+	int delta, indexDig, save_len, save_len_bkp;
 	char ch[ MAX_PATH_LENGTH ], *save_file, *bak_file;
-	const char *save_path;
+	const char *save_name, *save_ext, *save_path;
 	long node_serial = 1;
 	FILE *f;
 	gzFile fz;
@@ -697,33 +697,33 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 	if ( strlen( rep_file ) == 0 )
 		snprintf( rep_file, MAX_PATH_LENGTH, "report_%s.html", conf_name );
 
-	if ( strlen( conf_path ) > 0 )
-	{
-		save_len = strlen( save_path ) + strlen( conf_name ) + 6 + indexDig;
-		save_file = new char [ save_len ];
-		snprintf( save_file, save_len, "%s/%s", save_path, conf_name );
-	}
+	if ( rname == NULL || strlen( rname ) == 0 )
+		save_name = conf_name;
 	else
-	{
-		save_len = strlen( conf_name ) + 6 + indexDig;
-		save_file = new char [ save_len ];
-		snprintf( save_file, save_len, "%s", conf_name );
-	}
+		save_name = rname;
+
+	if ( ext == NULL || strlen( ext ) == 0 )
+		save_ext = ".lsd";
+	else
+		save_ext = ext;
+
+	save_len = strlen( save_path ) + strlen( save_name ) + strlen( save_ext ) + indexDig + 2;
+	save_file = new char [ save_len ];
+	snprintf( save_file, save_len, "%s%s%s", save_path, strlen( save_path ) > 0 ? "/" : "", save_name );
 
 	if ( findex > 0 )
 	{
-		snprintf( ch, MAX_PATH_LENGTH, "_%d.lsd", findex );
+		snprintf( ch, MAX_PATH_LENGTH, "_%d%s", findex, save_ext );
 		strcatn( save_file, ch, save_len );
 	}
 	else
 	{
 		// create backup file when not indexed saving
-		save_len = strlen( save_file ) + 5;
-		bak_file = new char [ save_len ];
-		snprintf( bak_file, save_len, "%s.bak", save_file );
+		save_len_bkp = strlen( save_file ) + 5;
+		bak_file = new char [ save_len_bkp ];
+		snprintf( bak_file, save_len_bkp, "%s.bak", save_file );
 
-		strcatn( save_file, ".lsd", save_len );
-
+		strcatn( save_file, save_ext, save_len );
 		f = fopen( save_file, "r" );
 		if ( f != NULL )
 		{
@@ -734,7 +734,7 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 			{
 				fclose( f );
 
-				if( ! remove( bak_file ) )
+				if( remove( bak_file ) == 0 )
 					rename( save_file, bak_file );
 			}
 			else
@@ -880,13 +880,21 @@ bool lsd::simulation::save_xml_configuration( int findex, const char *dest_path,
 
 	xf.save( buf );
 
-	if ( ( fz = gzopen( save_file, "wb9" ) ) != Z_NULL )
+	saved = false;
+	if ( zip )
 	{
-		saved = gzputs( fz, buf.str( ).c_str( ) );
-		saved = gzclose( fz ) == Z_OK ? saved : false;
+		if ( ( fz = gzopen( save_file, "wb9" ) ) != Z_NULL )
+		{
+			saved = gzputs( fz, buf.str( ).c_str( ) );
+			saved = gzclose( fz ) == Z_OK ? saved : false;
+		}
 	}
 	else
-		saved = false;
+		if ( ( f = fopen( save_file, "wt" ) ) != NULL )
+		{
+			saved = fputs( buf.str( ).c_str( ), f ) != EOF ? true : false;
+			saved = fclose( f ) != EOF ? saved : false;
+		}
 
 	delete [ ] save_file;
 

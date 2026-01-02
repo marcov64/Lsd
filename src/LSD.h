@@ -434,7 +434,7 @@ namespace gui
 	bool open_configuration( lsd::object *&r, bool reload );
 	bool runtime_step( bool da_en = false );
 	bool save_sensitivity( FILE *f );
-	bool save_xml_configuration_gui( int findex = 0, const char *dest_path = NULL, bool quick = false );
+	bool save_xml_configuration_gui( bool quick = false );
 	bool sensitivity_clean_dir( const char *path );
 	bool sensitivity_too_large( long numSaPts );
 	bool set_env( bool set );
