@@ -26,30 +26,24 @@ def.digits      <- 4          # default number of digits after comma for printin
 
 # ==== Required libraries (order is relevant!) ====
 
-suppressPackageStartupMessages( require( LSDinterface, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( LSDsensitivity, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( abind, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( dplyr, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( robustbase, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( normalp, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( rmutil, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( nortest, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( zoo, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( gplots, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( plotrix, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( parallel, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( textplot, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( corrplot, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( matrixStats, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( tseries, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( np, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( extrafont, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( mFilter, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( tools, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( ggplot2, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( gghalves, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( ggthemes, warn.conflicts = FALSE ) )
-suppressPackageStartupMessages( require( fmsb, warn.conflicts = FALSE ) )
+reqLibs <- c( "LSDinterface", "LSDsensitivity", "parallel", "tools", "abind",
+              "dplyr", "tseries", "normalp", "nortest", "zoo", "mFilter", "np",
+              "matrixStats", "gplots", "corrplot", "rmutil", "robustbase",
+              "plotrix", "textplot", "extrafont", "ggplot2", "gghalves",
+              "ggthemes", "fmsb" )
+
+repos <- c( "https://cloud.r-project.org", "https://erocoar.r-universe.dev" )
+
+for( lib in reqLibs ) {
+  if( ! lib %in% rownames( installed.packages( ) ) )
+    install.packages( lib, verbose = FALSE, repos = repos )
+
+  suppressPackageStartupMessages( require( lib, character.only = TRUE,
+                                           warn.conflicts = FALSE,
+                                           quietly = TRUE  ) )
+  if( ! lib %in% rownames( installed.packages( ) ) )
+    stop( "Cannot install library '", lib,"'" )
+}
 
 # check minimum required versions
 if( packageVersion( "LSDinterface" ) < "1.2.1" )
@@ -72,10 +66,13 @@ if( packageVersion( "LSDsensitivity" ) < "1.2.1" )
 #   TRUE if all elements are NA
 #
 # Input:
-#   x : vector/matrix/data frame to test
+#   x : matrix/data frame to test
 #
 
 all.NA <- function( x ) {
+  if( is.null( dim( x ) ) )
+    return( all( is.na( x ) ) )
+
   apply( x, 1, function( x ) all( is.na( x ) ) )
 }
 
@@ -2850,6 +2847,11 @@ plot_lin <- function( x, y, xlab = "", ylab = "", tit, subtit = "",
   x[ ! is.finite( x ) ] <- NA
   y[ ! is.finite( y ) ] <- NA
 
+  if( all.NA( x ) || all.NA( y ) ) {
+    warning( "Not enough data to plot" )
+    return( )
+  }
+
   plot( x, y, type = "p", pch = 1,
         main = tit, sub = subtit, xlab = xlab, ylab = ylab )
 
@@ -3077,11 +3079,12 @@ plot_bxp_vio <- function( data, log = 0, leg = NULL, unit = "", notch = FALSE,
 
   print( ggplot( dfBp, aes( Experiment, !! sym( unit ) ) ) +
          geom_half_boxplot( center = TRUE, errorbar.draw = ! notch, width = 0.5 ) +
-         geom_half_violin( side = "r", nudge = 0.05 ) + theme_base( ) +
+         geom_half_violin( side = "r", nudge = 0.05 ) + theme_base( base_size = 12 ) +
          labs( x = "", title = tit, caption = subtit ) +
-         theme( axis.title = element_text( hjust = 0.5, size = 12 ),
+         theme( axis.title = element_text( hjust = 0.5 ),
                 plot.title = element_text( hjust = 0.5, size = 16 ),
-                plot.caption = element_text( hjust = 0.5, size = 12 ) ) +
+                plot.caption = element_text( hjust = 0.5 ),
+                panel.background = element_rect( fill = "white" ) ) +
          coord_cartesian( ylim = c( ymin, ymax ) ) )
 }
 

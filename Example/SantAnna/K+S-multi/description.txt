@@ -1,5 +1,5 @@
-Multiproduct K+S Model (version 6.0)
-====================================
+Multi-industry K+S Model (version 6.0)
+======================================
 
 This version copyright by Marcelo C. Pereira.
 The K+S original code was developed by Andrea Roventini and other contributors.

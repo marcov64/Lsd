@@ -24,7 +24,7 @@ botMargin       <- 0.1        # bottom plot margin scaling factor
 def.digits      <- 4          # default number of digits after comma for printing
 
 
-# ==== required libraries (order is relevant!) ====
+# ==== Required libraries (order is relevant!) ====
 
 reqLibs <- c( "LSDinterface", "LSDsensitivity", "parallel", "tools", "abind",
               "dplyr", "tseries", "normalp", "nortest", "zoo", "mFilter", "np",

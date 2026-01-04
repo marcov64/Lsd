@@ -225,7 +225,7 @@ CYCLES( ROOT, cur, "Country" )					// scan all country objects
 		CYCLES( cur1, cur2, "Firm2" )			// free Firm2 extensions
 			DELETE_EXTS( cur2, firm2E );
 
-	DELETE_EXTS( cur, countryE );				// reclaim allocated memory
+	DELETE_EXTS( cur, countryE );				// free Country extensions
 }
 
 CLOSEEND

@@ -235,9 +235,9 @@ bool rank_desc_NWtoS( firmRank e1, firmRank e2 )
 CFUN_DBL( add_generation )
 {
 	double A1top, DeltaG, _A1, _A1g, _B1, _B1g, h, topMix;
-	object *cur, *gen;
+	object *cur, *gen, *lastGen = SHOOK;
 
-	if ( SHOOK == NULL )						// initial generation?
+	if ( lastGen == NULL )						// initial generation?
 	{
 		gen = SEARCH( "T1" );					// get existing object
 		_A1g = _B1g = topMix = INIPROD;			// notional initial productivity
@@ -247,8 +247,8 @@ CFUN_DBL( add_generation )
 		gen = ADDOBJL( "T1", T - 1 );			// add new object (to update in t)
 
 		// use last generation as minimum reference
-		A1top = VS( SHOOK, "_A1g" );
-		topMix = A1top * VS( SHOOK, "_B1g" );
+		A1top = VS( lastGen, "_A1g" );
+		topMix = A1top * VS( lastGen, "_B1g" );
 
 		CYCLE( cur, "Firm1" )					// search best among firms
 		{
@@ -271,7 +271,7 @@ CFUN_DBL( add_generation )
 	}
 
 	// insert technology in the hook chains and map table
-	WRITE_SHOOKS( gen, SHOOK );
+	WRITE_SHOOKS( gen, lastGen );
 	WRITE_SHOOK( gen );
 	EXEC_EXTS( PARENT, countryE, g1ptr, push_back, gen );
 	int _IDg = EXEC_EXTS( PARENT, countryE, g1ptr, size ) - 1;
@@ -283,9 +283,9 @@ CFUN_DBL( add_generation )
 	WRITES( gen, "_B1g", _B1g );
 
 	// update the technology gap from previously explored generations
-	if ( SHOOK != NULL )
+	if ( lastGen != NULL )
 	{
-		DeltaG = log( _A1g * _B1g / ( VS( SHOOK, "_A1g" ) * VS( SHOOK, "_B1g" ) ) );
+		DeltaG = log( _A1g * _B1g / ( VS( lastGen, "_A1g" ) * VS( lastGen, "_B1g" ) ) );
 		INCRS( PARENT, "DeltaG", DeltaG );
 	}
 	else
