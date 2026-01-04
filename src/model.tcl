@@ -34,7 +34,7 @@ set months [ list January February March April May June July August September Oc
 #************************************************
 # SHOWMODEL
 #************************************************
-proc showmodel groupdir {
+proc showmodel { groupdir { modsel "" } } {
 	global lmn lmd ldn lrn lbn result choiceSM lver rootname group group_new group_dir model_group model_dir browser_dir upSymbol groupSymbol lsd_root lsd_example lsd_trash selstate newstate editstate copystate pastestate delstate curpastestate curcopystate memory small_character GROUP_TXT_INFO MODEL_TXT_INFO GROUP_XML_CONFIG MODEL_XML_CONFIG DESCRIPTION colorsTheme darkTheme
 
 	unset -nocomplain lmn lver lmd ldn lrn lbn group
@@ -443,6 +443,8 @@ proc showmodel groupdir {
 		}
 	}
 
+	set selpos 0
+
 	# list models
 	foreach i $dir {
 		if { [ file exists "$i/$MODEL_TXT_INFO" ] || [ file exists "$i/$MODEL_XML_CONFIG" ] } {
@@ -475,6 +477,10 @@ proc showmodel groupdir {
 			.l.l.l insert end "$mn (v. $ver)"
 			.l.l.l itemconf end -fg $colorsTheme(mod)
 
+			if { "$modsel" ne "" && "$modsel" eq $mn } {
+				set selpos [ expr { [ .l.l.l index end ] - 1 } ]
+			}
+
 			tooltip::tooltip .l.l.l -item [ expr { [ .l.l.l index end ] - 1 } ] [ file nativename $groupdir/$i ]
 		}
 	}
@@ -483,7 +489,7 @@ proc showmodel groupdir {
 
 	.l.t.text insert end [ lindex $lmd 0 ]
 	.l.t.text conf -state disable
-	.l.l.l selection set 0
+	selectinlist .l.l.l $selpos
 	focus .l.l.l
 	update
 }
@@ -605,7 +611,7 @@ proc medit i {
 	ttk::frame .l.e.n
 	ttk::label .l.e.n.l -text "Name"
 	ttk::entry .l.e.n.n -width 25 -justify center
-	.l.e.n.n insert 1 "[ file tail [ lindex $lmn $i ] ]"
+	.l.e.n.n insert 1 "[ lindex $lmn $i ]"
 	pack .l.e.n.l  .l.e.n.n
 
 	ttk::frame .l.e.t
@@ -634,11 +640,15 @@ proc medit i {
 			set_group_setting [ lindex $ldn $result ] description [ .l.e.t.t.text get 0.0 end ]
 		}
 
+		if { [ lindex $group $result ] == 0 } {
+			set newname [ .l.e.n.n get ]
+		}
+
 		destroytop .l.e
-		showmodel [ lindex $lrn $result ]
+		showmodel [ lindex $lrn $result ] $newname
 	} {
 		destroytop .l.e
-		showmodel [ lindex $lrn $result ]
+		showmodel [ lindex $lrn $result ] [ lindex $lmn $result ]
 	}
 
 	bind .l.e.n.n <Return> {
@@ -722,6 +732,7 @@ proc mpaste i {
 	.l.p.n.n selection range 0 end
 	focus .l.p.n.n
 
+	set newname ""
 	set choiceSM 0
 	tkwait variable choiceSM
 
@@ -749,11 +760,13 @@ proc mpaste i {
 				set f [ open "$pastedir/$appd/$DESCRIPTION" w ]
 				puts -nonewline $f "$appdsc"
 				close $f
+
+				set newname $appl
 			}
 		}
 	}
 
 	destroytop .l.p
 	set choiceSM 0
-	showmodel [ lindex $lrn $i ]
+	showmodel [ lindex $lrn $i ] $newname
 }
