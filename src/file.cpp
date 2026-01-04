@@ -908,7 +908,8 @@ int gui::count_lines( const char *fname, bool dozip )
 void gui::show_logs( const char *dest_path, str_vecT & logs, bool par_cntl )
 {
 	char exec[ MAX_PATH_LENGTH	];
-	int i, j, n, sz;
+	int i, j, n;
+	std::string logs_str;
 
 	cmd( "switch [ ttk::messageBox -parent . -type yesno -default yes -icon info -title \"Background run monitor\" -message \"Open the background run monitor?\" -detail \"The selected simulation runs were started as parallel background job(s). Each job progress can be monitored in a separated window results by choosing 'Yes'\n\nLog files are being created in the folder:\n\n[ fn_break [ file nativename \"%s\" ] 40 ]\" ] { yes { set res 1 } no { set res 0 } }", dest_path );
 
@@ -921,20 +922,8 @@ void gui::show_logs( const char *dest_path, str_vecT & logs, bool par_cntl )
 	if ( n == 0 )
 		return;
 
-	for ( i = j = 0; i < n; ++i )
-		j += logs[ i ].length( );
-
-	sz = i + j + 1;
-	char logs_str[ sz ];
-	strcpy( logs_str, "" );
-
 	for ( i = 0; i < n; ++i )
-	{
-		lsd::strcatn( logs_str, logs[ i ].c_str( ), sz );
-
-		if ( i < n - 1 )
-			lsd::strcatn( logs_str, " ", sz );
-	}
+		logs_str += " " + logs[ i ];
 
 	if ( n == 1 )
 		strcpy( exec, "tail -n 20 -F" );
@@ -944,12 +933,12 @@ void gui::show_logs( const char *dest_path, str_vecT & logs, bool par_cntl )
 		j = n > 4 ? ( n > 8 ? ( n > 12 ? ( n > 20 ? ( n > 30 ? 6 : 5 ) : 4 ) : 3 ) : 2 ) : 1;
 
 		if ( j == 1 )
-			snprintf( exec, MAX_PATH_LENGTH , "multitail%s --basename -P r -i", platform == _WIN_ ? "" : " --retry-all" );
+			snprintf( exec, MAX_PATH_LENGTH , "multitail %s --basename -P r", platform == _WIN_ ? "" : "--retry-all" );
 		else
-			snprintf( exec, MAX_PATH_LENGTH , "multitail%s --basename -P r -s %d -i", platform == _WIN_ ? "" : " --retry-all", j );
+			snprintf( exec, MAX_PATH_LENGTH , "multitail -s %d %s --basename -P r", j, platform == _WIN_ ? "" : "--retry-all" );
 	}
 
-	cmd( "if { [ open_terminal \"%s %s\" ] != 0 } { \
+	cmd( "if { [ open_terminal \"%s%s\" ] != 0 } { \
 			ttk::messageBox -parent . -type ok -icon error -title Error -message \"%s failed to launch\" -detail \"Please check if %s is installed and set up properly.\n\nDetail:\n$termResult\" \
-		}", exec, logs_str, exec, exec );
+		}", exec, logs_str.c_str( ), exec, exec );
 }
