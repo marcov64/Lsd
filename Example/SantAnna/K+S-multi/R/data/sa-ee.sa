@@ -1,0 +1,106 @@
+# K+S Model v6.0 - Elementary Effects SA
+
+# Policy and credit market
+PhiB 0 2 f: 0.2 1
+phi 0 2 f: 0.1 0.9
+tr 0 2 f: 0.05 0.3
+rT 0 2 f: 0.005 0.03
+rD 0 2 f: 0 0.005
+muDeb 0 2 f: 0.1 0.5
+muRes 0 2 f: -0.8 -0.2
+Lambda 0 2 f: 1 3
+Lambda0 0 2 f: 500 2000
+
+# Labor market
+epsilon 0 2 f: 0.005 0.1
+tauT 0 2 f: 0.002 0.05
+tauU 0 2 f: 0.002 0.05
+Tr 0 2 i: 80 160
+Ts 0 2 i: 0 4
+omega 0 2 f: 0 10
+omegaU 0 2 f: 1 20
+psi2 0 2 f: 0.95 1.05
+psi4 0 2 f: 0 1
+psi6 0 2 f: 0 0.5
+
+# Technology
+eta 0 2 f: 10 30
+nu 0 2 f: 0.01 0.1
+xi 0 2 f: 0.2 0.8
+b 0 2 f: 3 12
+h 0 2 f: 0.05 0.2
+m1 0 2 f: 0.2 5
+m2 0 2 f: 20 500
+alpha1 0 2 f: 1 5
+beta1 0 2 f: 1 5
+alpha2 0 2 f: 1 5
+beta2 0 2 f: 1 5
+alpha3 0 2 f: 1 5
+beta3 0 2 f: 1 5
+gammaBas 0 2 f: 0 0.5
+gammaLux 0 2 f: 0.5 2
+zetaG 0 2 f: 0.01 0.1
+zeta0 0 2 f: 0.01 0.05
+zeta1 0 2 f: 0.05 0.2
+zeta2 0 2 f: 0.05 0.2
+x1inf 0 2 f: -0.3 -0.1
+x1sup 0 2 f: 0.1 0.3
+
+# Industrial dynamics
+delta1 0 2 f: 0.5 2
+delta2 0 2 f: 0.5 2
+delta3 0 2 f: 0.5 2
+delta4 0 2 f: 0.5 2
+gamma 0 2 f: 0.2 0.8
+iota 0 2 f: 0 0.3
+kappaMax 0 2 f: 0.1 1
+mu1 0 2 f: 0.05 0.15
+omega1 0 2 f: 0.5 2
+omega2 0 2 f: 0.5 2
+omega3 0 2 f: 0.5 2
+chi2 0 2 f: 0.2 5
+chiC 0 2 f: 0.1 1
+omicron 0 2 f: 0 1
+upsilon 0 2 f: 0.01 0.1
+f2min 0 2 f: 1e-06 1e-04
+fCmin 0 2 f: 0.001 0.1
+nC 0 2 f: 5 20
+u 0 2 f: 0.5 1
+x5 0 2 f: 0 0.6
+zetaBas 0 2 f: 0.02 0.1
+zetaLux 0 2 f: 0.02 0.1
+Phi1 0 2 f: 0 0.5
+Phi2 0 2 f: 0.5 1
+Phi3 0 2 f: 0 0.5
+Phi4 0 2 f: 0.5 1
+x2inf 0 2 f: -0.3 -0.1
+x2sup 0 2 f: 0.1 0.3
+x3inf 0 2 f: -0.1 0.02
+x3sup 0 2 f: 0.03 0.1
+F1min 0 2 i: 1 20
+F1max 0 2 i: 20 50
+F2min 0 2 i: 1 10
+F2max 0 2 i: 20 400
+FcBasMin 0 2 i: 1 5
+FcBasMax 0 2 i: 5 20
+FcLuxMin 0 2 i: 0 3
+FcLuxMax 0 2 i: 3 10
+
+# Consumption
+phiLux 0 2 f: 0.2 0.7
+Crec 0 2 f: 0.1 0.5
+Tlux 0 2 i: 2 8
+TluxLife 0 2 i: 4 16
+
+# Initial conditions
+mu0bas 0 2 f: 0.2 0.5
+mu0lux 0 2 f: 0.3 0.8
+w0min 0 2 f: 0.2 0.8
+Ls0 0 2 i: 130000 500000
+B 0 2 i: 5 15
+F10 0 2 i: 10 40
+F20 0 2 i: 20 200
+Fc0bas 0 2 i: 1 10
+Fc0lux 0 2 i: 0 5
+NW10 0 2 f: 0 5
+NW20 0 2 f: 0 5
