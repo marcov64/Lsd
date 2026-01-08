@@ -631,7 +631,23 @@
 #endif
 
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
-// enabled only when directly including fun_head.h (and not lsd_head.h/fun_head_fast.h)
+// enabled only when directly including fun_head.h (and not lsd_head.h)
+#ifdef SEMI_LEGACY_CODE
+	namespace lsd
+	{
+		void equation::_close_sim_( void ) { }
+	}
+
+	#define c CALLER
+	#define p THIS
+	#define t T
+	#define root ROOT
+	#define seed RND_SEED
+	#define plog PLOG
+	#define quit _sim_->quit
+	#define object lsd::object
+#endif
+
 #ifdef LEGACY_CODE
 	namespace lsd
 	{
@@ -654,9 +670,15 @@
 
 	#define SIM ( lsd::sims[ 0 ] )			// pointer to first simulation
 	#define var _v_
-	#define caller _c_
+	#define c CALLER
+	#define caller CALLER
+	#define p THIS
 	#define t T
 	#define root ROOT
+	#define seed RND_SEED
+	#define plog PLOG
+	#define quit _sim_->quit
+	#define object lsd::object
 	#define path ( SIM->conf_path )
 	#define poidev( ... ) ( SIM->poisson( __VA_ARGS__ ) )
 	#define go_brother( O ) BROTHER( O )

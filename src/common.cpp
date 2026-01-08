@@ -35,7 +35,7 @@ namespace gui
 		"//.*",
 		"^(\\s)*#\[^/]*",
 		"\\\"\[^\\\"]*\\\"",
-		"v\\[\[0-9]{1,3}]|curl?\[1-9]?|i|j|h|k|root|up|next|hook",
+		"v\\[\[0-9]{1,3}]|curl?\[1-9]?|i|j|h|k",
 		LSD_MACROS, LSD_FUNCTIONS, LSD_TYPES,
 		C_TYPES, C_KEYWORDS
 	};

@@ -1577,7 +1577,7 @@ void lsd::object::move( const char *dest )
 		attr->cont->sim->error_hard( "missing/invalid source or destination object",
 									 "choose valid object names\nand non-nested destination",
 									 true,
-									 "cannot move object '%s'", 
+									 "cannot move object '%s'",
 									 attr->label );
 		return;
 	}
@@ -2282,8 +2282,8 @@ double lsd::object::recal( const char *lab )
 	if ( cv == NULL )
 		return NAN;
 
-	// don't do anything if not yet computed in t
-	if ( cv->last_update < sim->t )
+	// don't do anything if parameter or function or not yet computed in t
+	if ( cv->param != 0 || cv->last_update < sim->t )
 		return( cv->val[ 0 ] );
 
 	app = cv->val[ 0 ];

@@ -18,4 +18,8 @@ Placeholder header file for legacy code compatibility,
 it simply includes current lsd_head.h.
 *************************************************************/
 
+#ifndef SEMI_LEGACY_CODE
+	#define SEMI_LEGACY_CODE
+#endif
+
 #include "lsd_head.h"

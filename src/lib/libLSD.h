@@ -469,6 +469,7 @@ namespace lsd
 			bridge *b = NULL;				// head of list of son-object instances
 			netnode *node = NULL;			// pointer to network node data structure
 			objattr *attr;					// static/homogeneous attributes object
+			object *hook = NULL;			// static connection to other objects
 			object *next = NULL;			// next sibling object
 			object *up;						// parent object
 			variable *v = NULL;				// head of list of contained variables
@@ -480,7 +481,6 @@ namespace lsd
 			int acounter = 0;				// "fail safe" when creating labels
 			int lst_cnt_upd = 0;			// period of last counter update
 			mtxT obj_comp_lck;				// mutex lock for parallel computations
-			object *hook = NULL;			// static connection to other objects
 			o_vecT hooks;					// vector of connections to other objects
 			void *cext = NULL;				// pointer to C++ object extension
 			v_mapT v_map;					// fast lookup map to variables
@@ -532,8 +532,8 @@ namespace lsd
 			bridge *search_bridge( const char *lab, bool no_error = false );
 			bridge *search_bridge( objattr *at, bool no_error = false );
 			double av( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
-			double cal( const char *l, int lag = 0 );
-			double cal( object *caller, const char *l, int lag = 0 );
+			double cal( const char *lab, int lag = 0 );
+			double cal( object *caller, const char *lab, int lag = 0 );
 			double count( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 			double count_all( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 			double increment( const char *lab, double value );
@@ -793,6 +793,9 @@ namespace lsd
 		friend class netlink;
 		friend class object;
 
+		public:
+			netlink *first = NULL;			// first link in the linked list of links
+		
 		private:
 			char *name = NULL;				// node textual name (not required)
 			double prob;					// assigned node draw probability
@@ -800,7 +803,6 @@ namespace lsd
 			long id;						// node unique ID number (reorderable)
 			long nlinks = 0;				// number of arcs FROM node
 			long serial;					// node serial number (for file save/export)
-			netlink *first = NULL;			// first link in the linked list of links
 			netlink *last = NULL;			// last link in the linked list of links
 			object *up;						// object containing node
 
@@ -821,14 +823,16 @@ namespace lsd
 		friend class netnode;
 		friend class object;
 
+		public:
+			netlink *next = NULL;			// pointer to next link (NULL if last )
+			object *from;					// network node containing the link
+			object *to;						// pointer to destination number
+		
 		private:
 			double probTo;					// destination node draw probability
 			double weight;					// link weight
 			int time;						// time of creation/update
-			netlink *next = NULL;			// pointer to next link (NULL if last )
 			netlink *prev;					// pointer to previous link (NULL if first )
-			object *from;					// network node containing the link
-			object *to;						// pointer to destination number
 
 			netlink( object *origNode, object *destNode, double linkWeight = 0, double destProb = 1 );
 											// constructor

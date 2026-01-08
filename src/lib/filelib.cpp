@@ -1578,7 +1578,7 @@ bool lsd::object::load_txt_insts( const char *file_name, FILE *f )
 		if ( fscanf( f, "%d %c %c %c %c", &( cv->attr->num_lag ), &ch1, &ch2, &ch3, &ch4 ) != 5 )
 			return false;
 
-		if ( cv->param != 0 )
+		if ( cv->param == 1 )
 			cv->attr->num_lag = 0;
 
 		cv->attr->save = ( tolower( ch1 ) == 's' ) ? true : false;
