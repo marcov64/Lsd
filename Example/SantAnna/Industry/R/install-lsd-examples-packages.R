@@ -5,6 +5,7 @@
 #******************************************************************
 
 install.packages( c( "LSDsensitivity",
+                     "Rsubbotools",
                      "tseries",
                      "normalp",
                      "nortest",

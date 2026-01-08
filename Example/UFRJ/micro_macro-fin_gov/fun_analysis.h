@@ -148,36 +148,36 @@ RESULT(VS(financial, "Financial_Sector_Demand_Met"))
 
 EQUATION("FS_RES")//Financial sector Rescue
 RESULT(VS(financial, "Financial_Sector_Rescue"))
-   
+
 EQUATION("FS_PR")//Financial sector profits
-RESULT(VS(financial, "Financial_Sector_Profits"))   
+RESULT(VS(financial, "Financial_Sector_Profits"))
 
 EQUATION("PONZI")//Share of Firms in Ponzi position
-RESULT(VS(country, "Country_Ponzi_Share"))    
+RESULT(VS(country, "Country_Ponzi_Share"))
 
 EQUATION("SPEC")//Share of Firms in Speculative position
-RESULT(VS(country, "Country_Speculative_Share"))  
+RESULT(VS(country, "Country_Speculative_Share"))
 
 EQUATION("HEDGE")//Share of Firms in Hedge position
-RESULT(VS(country, "Country_Hedge_Share")) 
+RESULT(VS(country, "Country_Hedge_Share"))
 
 EQUATION("IR")//Basic Interest Rate
-RESULT(VS(financial, "Central_Bank_Basic_Interest_Rate"))     
+RESULT(VS(financial, "Central_Bank_Basic_Interest_Rate"))
 
 EQUATION("IR_DEP")//Interest Rate on Deposits
-RESULT(VS(financial, "Financial_Sector_Interest_Rate_Deposits"))  
+RESULT(VS(financial, "Financial_Sector_Interest_Rate_Deposits"))
 
 EQUATION("IR_ST")//Interest Rate on Short Term Loans
-RESULT(VS(financial, "Financial_Sector_Avg_Interest_Rate_Short_Term"))  
+RESULT(VS(financial, "Financial_Sector_Avg_Interest_Rate_Short_Term"))
 
 EQUATION("IR_LT")//Interest Rate on Long Term Loans
-RESULT(VS(financial, "Financial_Sector_Avg_Interest_Rate_Long_Term"))   
+RESULT(VS(financial, "Financial_Sector_Avg_Interest_Rate_Long_Term"))
 
 EQUATION("BKR")//Number of Bankrupt Events
-RESULT(VS(country, "Exit_Bankruptcy_Events")) 
+RESULT(VS(country, "Exit_Bankruptcy_Events"))
 
 EQUATION("BKR_RT")//Bankrupt Rate
-RESULT(VS(country, "Exit_Bankruptcy_Share")) 
+RESULT(VS(country, "Exit_Bankruptcy_Share"))
 
 /*****CLASS STATS*****/
 EQUATION("YSH_A")
@@ -285,46 +285,46 @@ RESULT(VS(input, "Sector_Avg_Interest_Rate_Long_Term"))
 /*****COUNTRY GROWTH STATS*****/
 
 EQUATION("EMP_G")//Quarterly Employment Growth rate
-RESULT(LAG_GROWTH(p,"EMP",1))
+RESULT(LAG_GROWTH(THIS,"EMP",1))
 
 EQUATION("CON_G")//Quarterly Real Consumption Growth rate
-RESULT(LAG_GROWTH(p,"C_r",1))
+RESULT(LAG_GROWTH(THIS,"C_r",1))
 
 EQUATION("INV_G")//Quarterly Real Investment Growth rate
-RESULT(LAG_GROWTH(p,"I_r",1))
+RESULT(LAG_GROWTH(THIS,"I_r",1))
 
 EQUATION("PROD_G")//Average Productivity Growth
-RESULT(LAG_GROWTH(p,"PROD",1))
+RESULT(LAG_GROWTH(THIS,"PROD",1))
 
 EQUATION("MK_G")//Average Markup Growth
-RESULT(LAG_GROWTH(p,"MK",1))
+RESULT(LAG_GROWTH(THIS,"MK",1))
 
 EQUATION("INVE_G")//Real Aggregate Inventories Growth
-RESULT(LAG_GROWTH(p,"INVE_r",1))
+RESULT(LAG_GROWTH(THIS,"INVE_r",1))
 
 EQUATION("K_G")//Real Stock of Capital Growth
-RESULT(LAG_GROWTH(p,"K_r",1))
+RESULT(LAG_GROWTH(THIS,"K_r",1))
 
 EQUATION("PROFITS_G")//Real Profits Growth rate
-RESULT(LAG_GROWTH(p,"PROFITS",1))
+RESULT(LAG_GROWTH(THIS,"PROFITS",1))
 
 EQUATION("WAGE_G")//Real Wages growth rate
-RESULT(LAG_GROWTH(p,"WAGE",1))
+RESULT(LAG_GROWTH(THIS,"WAGE",1))
 
 EQUATION("GOV_G")//Quarterly Real Government Expenses Growth rate
-RESULT(LAG_GROWTH(p,"G_r",1))
+RESULT(LAG_GROWTH(THIS,"G_r",1))
 
 EQUATION("PDEBT_G")//Public Debt Growth rate
-RESULT(LAG_GROWTH(p,"PDEBT",1))
+RESULT(LAG_GROWTH(THIS,"PDEBT",1))
 
 EQUATION("M_G")//Quarterly Real Imports Growth rate
-RESULT(LAG_GROWTH(p,"M_r",1))
+RESULT(LAG_GROWTH(THIS,"M_r",1))
 
 EQUATION("X_G")//Quarterly Real Exports Growth rate
-RESULT(LAG_GROWTH(p,"X_r",1))
+RESULT(LAG_GROWTH(THIS,"X_r",1))
 
 EQUATION("NX_G")//Quarterly Real Net Exports Growth rate
-RESULT(LAG_GROWTH(p,"NX_r",1))
+RESULT(LAG_GROWTH(THIS,"NX_r",1))
 
 
 /*****MACRO SHARE STATS*****/
@@ -351,22 +351,22 @@ EQUATION("INVGDP")
 RESULT(V("Country_Inventories")/V("Country_GDP_Demand"))
 
 EQUATION("KGDP")
-RESULT(V("Country_Capital_Stock")/V("Country_GDP_Demand")) 
+RESULT(V("Country_Capital_Stock")/V("Country_GDP_Demand"))
 
 
 /*****FINANCIAL GROWTH STATS*****/
 
 EQUATION("DEBT_FS_ST_G")//Stock of short term debt growth in the financial sector
-RESULT(LAG_GROWTH(p,"DEBT_FS_ST",1))
+RESULT(LAG_GROWTH(THIS,"DEBT_FS_ST",1))
 
 EQUATION("DEBT_FS_LT_G")//Stock of long term debt growth in the financial sector
-RESULT(LAG_GROWTH(p,"DEBT_FS_LT",1))
+RESULT(LAG_GROWTH(THIS,"DEBT_FS_LT",1))
 
 EQUATION("DEBT_FS_G")//Stock of total debt growth in the financial sector
-RESULT(LAG_GROWTH(p,"DEBT_FS",1))
+RESULT(LAG_GROWTH(THIS,"DEBT_FS",1))
 
 EQUATION("DEP_FS_G")//Stock of total deposits growth in the financial sector
-RESULT(LAG_GROWTH(p,"DEP_FS",1))
+RESULT(LAG_GROWTH(THIS,"DEP_FS",1))
 
 
 /*****GOVERNMENT STATS*****/

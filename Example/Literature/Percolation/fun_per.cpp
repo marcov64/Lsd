@@ -737,7 +737,7 @@ FUNCTION("IssueIdProd")
 Deliver the IdProd for entrants
 */
 
-RESULT(val[0]+1 )
+RESULT(CURRENT+1 )
 
 
 

@@ -7,14 +7,14 @@ EQUATION("Sector_Profit_Rate")
 /*
 Sector Variable for Analysis
 */
-	v[0]=0;                           		//initializes the CYCLE    
+	v[0]=0;                           		//initializes the CYCLE
 	CYCLE(cur, "FIRMS")               		//CYCLE trought all firms of the sector
 	{
-		v[1]=VS(cur, "Firm_Net_Profits");  
-		v[2]=VLS(cur, "Firm_Capital",1);		
+		v[1]=VS(cur, "Firm_Net_Profits");
+		v[2]=VLS(cur, "Firm_Capital",1);
 		v[5]=VS(cur, "Firm_Deposits_Return");
 		if(v[2]!=0)
-			v[0]=v[0]+(v[1]-v[5])/v[2];          
+			v[0]=v[0]+(v[1]-v[5])/v[2];
 		else
 			v[0]=v[0];
 	}
@@ -27,7 +27,7 @@ EQUATION("Sector_Normalized_HHI")
 /*
 Sector Variable for Analysis
 */
-	v[0]=0;                           		//initializes the CYCLE    
+	v[0]=0;                           		//initializes the CYCLE
 	CYCLE(cur, "FIRMS")               		//CYCLE trought all firms of the sector
 	{
 		v[1]=VS(cur, "Firm_Market_Share");  //firm's market share
@@ -36,7 +36,7 @@ Sector Variable for Analysis
 	v[2]=COUNT("FIRMS");
 	if (v[2]!=1)
 		v[3]=(v[0]-(1/v[2]))/(1- (1/v[2]));
-	else	
+	else
 		v[3]=1;
 RESULT(v[3])
 
@@ -56,11 +56,11 @@ EQUATION("Sector_Turbulence")
 /*
 Sector Variable for Analysis
 */
-	v[0]=0;                                           //initializes the CYCLE 
-	CYCLE(cur, "FIRMS")                               //CYCLE trough all firms 
+	v[0]=0;                                           //initializes the CYCLE
+	CYCLE(cur, "FIRMS")                               //CYCLE trough all firms
 	{
 	v[1]=VS(cur,"firm_date_birth");                   //firm's date of birth
- 	if(v[1]==(double)t)                               //if the time period is the same of the firm's date of birth
+ 	if(v[1]==T)                  		             //if the time period is the same of the firm's date of birth
  		v[4]=0;                                       //use zero
  	else                                              //if the time period is no the same of the firm's date of birth
  		{
@@ -95,21 +95,21 @@ RESULT(v[2])
 
 
 EQUATION("Sector_Hedge_Normalized_Share")
-	v[0]=WHTAVE("firm_hedge", "Firm_Market_Share");		
+	v[0]=WHTAVE("firm_hedge", "Firm_Market_Share");
 	v[1]=COUNT("FIRMS");
 	v[2]= v[1]!=0? v[0]/v[1] : 0;
 RESULT(v[2])
 
 
 EQUATION("Sector_Speculative_Normalized_Share")
-	v[0]=WHTAVE("firm_speculative", "Firm_Market_Share");	
+	v[0]=WHTAVE("firm_speculative", "Firm_Market_Share");
 	v[1]=COUNT("FIRMS");
 	v[2]= v[1]!=0? v[0]/v[1] : 0;
 RESULT(v[2])
 
 
 EQUATION("Sector_Ponzi_Normalized_Share")
-	v[0]=WHTAVE("firm_ponzi", "Firm_Market_Share");	
+	v[0]=WHTAVE("firm_ponzi", "Firm_Market_Share");
 	v[1]=COUNT("FIRMS");
 	v[2]= v[1]!=0? v[0]/v[1] : 0;
 RESULT(v[2])
@@ -139,16 +139,16 @@ RESULT(v[4])
 /*****SECTOR AGGREGATES*****/
 
 
-EQUATION("Sector_Sales")                                                               
+EQUATION("Sector_Sales")
 RESULT(SUM("Firm_Sales"))
 
-EQUATION("Sector_Inventories")                              
+EQUATION("Sector_Inventories")
 RESULT(SUM("Firm_Stock_Inventories"))
 
-EQUATION("Sector_Effective_Production")                       
+EQUATION("Sector_Effective_Production")
 RESULT(SUM("Firm_Effective_Production"))
 
-EQUATION("Sector_Productive_Capacity")                     
+EQUATION("Sector_Productive_Capacity")
 RESULT(SUM("Firm_Productive_Capacity"))
 
 EQUATION("Sector_Taxation")
@@ -196,12 +196,12 @@ RESULT(v[0])
 EQUATION("Sector_Bargain_Power")
 	v[0]=CURRENT;                                                          	 			 //firm wage in the last period
 	v[1]=V("annual_frequency");
-	v[2]= fmod((double) t-1,v[1]);                                                      //divide the time period by the annual period parameter
+	v[2]= fmod(T-1,v[1]);                               //divide the time period by the annual period parameter
 	v[3]=V("sector_passthrough_productivity");
 	v[4]=V("sector_passthrough_inflation");
 	if(v[2]==0)                                                                      	 //if the rest of the above division is zero (beggining of the year, adjust wages)
 		{
-		v[5]=LAG_GROWTH(p, "Sector_Employment", v[1], 1);
+		v[5]=LAG_GROWTH(THIS, "Sector_Employment", v[1], 1);
 		v[6]=V("sector_bargain_power_adjustment");
 		if(v[5]>0)
 			{
@@ -211,17 +211,17 @@ EQUATION("Sector_Bargain_Power")
 		else if(v[5]<0)
 			{
 			v[7]=v[3]*(1+v[5]*v[6]);
-			v[8]=v[4]*(1+v[5]*v[6]);				
+			v[8]=v[4]*(1+v[5]*v[6]);
 			}
 		else
 			{
-			v[7]=v[3];		
+			v[7]=v[3];
 			v[8]=v[4];
 			}
 		}
 	else                                                                             	 //if the rest of the division is not zero, do not adjust wages
 		{
-		v[7]=v[3];		
+		v[7]=v[3];
 		v[8]=v[4];                                                                      //current wages will be the last period's
 		}
 	v[9]=min(1,max(v[7],0));
@@ -250,7 +250,7 @@ Sector average interest rate on long term loans weighted by stock of long term l
 */
 	v[0]=WHTAVE("Firm_Interest_Rate_Long_Term", "Firm_Stock_Loans_Long_Term");
 	v[1]=SUM("Firm_Stock_Loans_Long_Term");
-	v[2]= v[1]!=0? v[0]/v[1] : 0;	
+	v[2]= v[1]!=0? v[0]/v[1] : 0;
 RESULT(v[2])
 
 
@@ -274,7 +274,7 @@ RESULT(WHTAVE("Firm_Price", "Firm_Market_Share"))
 EQUATION("Sector_Avg_Wage")
 RESULT(WHTAVE("Firm_Wage", "Firm_Market_Share"))
 
-EQUATION("Sector_Max_Productivity")        
+EQUATION("Sector_Max_Productivity")
 RESULT(MAX("Firm_Frontier_Productivity"))
 
 EQUATION("Sector_Avg_Markup")

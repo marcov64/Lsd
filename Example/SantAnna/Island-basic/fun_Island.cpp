@@ -15,7 +15,7 @@
 // support C++ function (code at the end of the file)
 #include <lsd_init.h>
 
-#define EQ_USER_FUNCS CFUN_VOID( add_island, int x, int y, double & count );
+#define EQ_USER_CFUNS CFUN_VOID( add_island, int x, int y, double & count );
 
 #include <lsd_head.h>
 
@@ -439,6 +439,7 @@ v[2] = v[3] = v[4] = 0;							// best prod./str. over./listened
 i = j = h = k = 0;								// best island coord. over./list.
 
 if ( v[1] != 0 )								// avoid zero division
+{
 	// check all network connections of current island for signals
 	CYCLE_LINKS( PARENTS( SHOOK ), curl )
 	{
@@ -463,6 +464,7 @@ if ( v[1] != 0 )								// avoid zero division
 			k = VS( SHOOKS( cur ), "_yIsland" );
 		}
 	}
+}
 
 WRITE( "_wBest", v[3] );						// best overall island signal str.
 WRITE( "_xBest", i );							// best overall island coordinates

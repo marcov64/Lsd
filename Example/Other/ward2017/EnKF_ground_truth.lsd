@@ -1,0 +1,144 @@
+	
+Label Root
+{
+	Son: Region
+	Label Region
+	{
+		Var: E
+		Var: X
+		Var: x
+
+	}
+
+	Param: alpha
+	Param: beta
+	Var: t
+
+}
+
+
+DATA
+
+Object: Root C	1
+Param: alpha 0 n + n n	52.52
+Param: beta 0 n + n n	0.258
+Var: t 0 s + n n
+
+Object: Region C	1
+Var: E 0 n + n n
+Var: X 0 n + n n
+Var: x 1 s + n p	200
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 10000
+EQUATION fun_ward2017.cpp
+MODELREPORT report_Baseline.html
+
+DESCRIPTION
+
+Object_Root
+
+END_DESCRIPTION
+
+Parameter_alpha
+The average number of people entering the region in one period
+_INIT_
+All 1 instances equal to 52.52
+END_DESCRIPTION
+
+Parameter_beta
+The average share of people in the region that in average exits in one period
+_INIT_
+All 1 instances equal to 0.258
+END_DESCRIPTION
+
+Variable_t
+Time for data export
+END_DESCRIPTION
+
+Object_Region
+A spatial region where agents enter and exit that can hold an indefinite number of agents
+END_DESCRIPTION
+
+Variable_E
+Number of people entering region in period
+END_DESCRIPTION
+
+Variable_X
+Number of people exiting region in period
+END_DESCRIPTION
+
+Variable_x
+Number of people in region in period
+_INIT_
+All 1 instances equal to 200,
+rounded to integer
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "lsd_head.h"
+
+MODELBEGIN
+
+
+EQUATION( "E" )
+// Number of people entering region in period
+
+RESULT( poisson( V( "alpha" ) ) )
+
+
+EQUATION( "X" )
+// Number of people exiting region in period
+
+RESULT( poisson( V( "beta" ) * VL( "x", 1 ) ) )
+
+
+EQUATION( "x" )
+// Number of people in region in period
+
+RESULT( CURRENT + V( "E" ) - V( "X" ) )
+
+
+EQUATION( "t" )
+// Time for data export
+
+RESULT( T )
+
+
+EQUATION( "init_region" )
+// Set the initial number of people in region
+
+WRITEL( "x", norm( V( "x0" ), sqrt( V( "x0_var" ) ) ), 0 );
+PARAMETER;
+
+RESULT( 1 )
+
+
+EQUATION( "init" )
+// Set the initial parameters
+
+WRITE( "alpha", norm( V( "alpha"), sqrt( V( "alpha_var" ) ) ) );
+WRITE( "beta", norm( V( "beta"), sqrt( V( "beta_var" ) ) ) );
+PARAMETER;
+
+RESULT( 1 )
+
+
+MODELEND
+
+
+CLOSEBEGIN
+CLOSEEND
+END_EQ_FILE

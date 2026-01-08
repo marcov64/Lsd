@@ -1,4 +1,0 @@
-TARGET=LSD
-FUN=fun_Aix
-SWITCH_CC=-g
-

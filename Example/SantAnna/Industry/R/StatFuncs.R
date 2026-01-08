@@ -18,10 +18,11 @@
 
 # ==== User parameters ====
 
+useSubbotools <- TRUE          # use Subbotools (T) or normalp package (F)
+Rsubbotools <- TRUE            # use newer Subbotools R package instead of system's
 subboMaxSample <- 5000         # maximum sample size in Subbotin fits (speed control)
 subboMinSample <- 50           # minimum sample size in Subbotin fits (significance control)
 subboBlimit <- 0               # maximum limit for b to be considered valid (0=no limit)
-useSubbotools <- TRUE          # use Subbotools (T) or normalp package (F)
 useASubbotin <- TRUE           # use symmetric (=F) or asymmetric Subbotin (=T)
 useALaplace <- TRUE            # use symmetric (=F) or asymmetric Laplace (=T)
 nBins  <- 20                   # number of bins to use in histograms
@@ -33,13 +34,21 @@ def.digits <- 4                # default number of digits after comma for printi
 
 # ==== Required libraries (order is relevant!) ====
 
-require( gplots, warn.conflicts = FALSE, quietly = TRUE )
-require( LSDinterface, warn.conflicts = FALSE, quietly = TRUE )
-require( LSDsensitivity, warn.conflicts = FALSE, quietly = TRUE )
-require( LaplacesDemon, warn.conflicts = FALSE, quietly = TRUE )
-require( normalp, warn.conflicts = FALSE, quietly = TRUE )
-require( robustbase, warn.conflicts = FALSE, quietly = TRUE )
-require( minpack.lm, warn.conflicts = FALSE, quietly = TRUE )
+reqLibs <- c( "LSDinterface", "LSDsensitivity", "Rsubbotools", "normalp",
+              "LaplacesDemon", "gplots", "robustbase", "minpack.lm" )
+
+repos <- c( "https://cloud.r-project.org", "https://erocoar.r-universe.dev" )
+
+for( lib in reqLibs ) {
+  if( ! lib %in% rownames( installed.packages( ) ) )
+    install.packages( lib, verbose = FALSE, repos = repos )
+
+  suppressPackageStartupMessages( require( lib, character.only = TRUE,
+                                           warn.conflicts = FALSE,
+                                           quietly = TRUE  ) )
+  if( ! lib %in% rownames( installed.packages( ) ) )
+    stop( "Cannot install library '", lib,"'" )
+}
 
 
 # ==== Evaluation function to compute and add the Subbotin b to data ====
@@ -342,30 +351,61 @@ fit_alaplace <- function( x ){
 
 # ---- Subbotin distribution ----
 
-exec_subbofit <- function( x, type  = "symmetric" ) {
-  if( ! exists( "folder" ) )  # folder where to run Subbotools defined?
-    folder <- "."
+exec_subbofit <- function( x, Rpackage = TRUE, type  = "symmetric" ) {
+
+  # default return in case of error
+  subboFit <- c( rep( as.numeric( NA ), 10 ) )
+
+  cat( "  ", type, "subbofit, n =", length( x ), "... " )
+
+  if( Rpackage ) {
+    if( type == "asymmetric" ) {
+      invisible( capture.output( sf <- subboafit( x ) ) )
+
+      if( ! exists( "sf" ) )
+        return( subboFit )
+
+      subboFit <- c( sf$dt$coef[ 1 ], sf$dt$coef[ 2 ], sf$dt$coef[ 3 ],
+                     sf$dt$coef[ 4 ], sf$dt$coef[ 5 ],
+                     sf$dt$std_error[ 1 ], sf$dt$std_error[ 2 ],
+                     sf$dt$std_error[ 3 ], sf$dt$std_error[ 4 ],
+                     sf$dt$std_error[ 5 ] )
+    } else {
+      invisible( capture.output( sf <- subbofit( x ) ) )
+
+      if( ! exists( "sf" ) )
+        return( subboFit )
+
+      subboFit <- c( sf$dt$coef[ 1 ], sf$dt$coef[ 2 ], sf$dt$coef[ 3 ],
+                     sf$dt$std_error[ 1 ], sf$dt$std_error[ 2 ],
+                     sf$dt$std_error[ 3 ] )
+    }
+  } else {
+
+    if( type == "asymmetric" )
+      command <- "subboafit"
+    else
+      command <- "subbofit"
+
+    outStr <- system2( command, args = "-O 3", input = as.character( x ),
+                       stdout = TRUE, stderr = FALSE )
+    try( subboFit <- sapply( scan( textConnection ( outStr ), what = character( ), quiet = TRUE ),
+                             as.numeric, silent = TRUE ),
+         silent = TRUE )
+  }
+
   if( type == "asymmetric" )
-    command <- "subboafit"
-  else
-    command <- "subbofit"
-
-  cat( "Running external SubboFit on a MC run ... " )
-
-  outStr <- system2( command, args = "-O 3", input = as.character( x ),
-                     stdout = TRUE, stderr = FALSE )
-  try( subboFit <- scan( textConnection ( outStr ), quiet = TRUE ), silent = TRUE )
-
-  if( type == "asymmetric" )
-    se <- paste( subboFit[ 6 ], subboFit[7] )
+    se <- paste( subboFit[ 6 ], subboFit[ 7 ] )
   else
     se <- subboFit[ 4 ]
-  cat( "done\n" )
+
+  cat( "b_se =", se, "\n" )
 
   return( subboFit )
 }
 
-fit_subbotin <- function( x ){
+fit_subbotin <- function( x, silent = FALSE ) {
+
   # default return in case of error
   subboFit <- c( as.numeric( NA ), as.numeric( NA ), as.numeric( NA ) )
 
@@ -373,27 +413,36 @@ fit_subbotin <- function( x ){
   x <- x[ !is.na( x ) ]
   if( length( x ) > subboMaxSample )
     x <- sample( x, subboMaxSample )
-  if( length( x ) < subboMinSample ){
-    warning( "Too few observations to fit Subbotin: returning NA")
+
+  if( length( x ) < subboMinSample ) {
+    if( ! silent )
+      warning( "Too few observations to fit Subbotin: returning NA")
     return( subboFit )
   }
 
   if( useSubbotools && length( x ) >= 50 )
-    subboFit <- exec_subbofit( x )
-  else{       # Alternative calculation using the normalp package
-    sf <- paramp( x )
-    sf$p <- estimatep( x, mu = sf$mean, p = sf$p, method = "inverse" )
-    # use Subbotools when p < 1, as normalp doesn't work in this condition
-    if( sf$p <= 1.01 )
-      subboFit <- exec_subbofit( x )
-    else
-      subboFit <- c( sf$p, sf$sp, sf$mp )
+    subboFit <- exec_subbofit( x, Rpackage = Rsubbotools )
+  else {       # Alternative calculation using the normalp package
+    sf <- try( paramp( x ), silent = TRUE )
+
+    if( class( sf ) != "try-error" ) {
+      sf$p <- estimatep( x, mu = sf$mean, p = sf$p, method = "inverse" )
+      # use Subbotools when p < 1, as normalp doesn't work in this condition
+      if( sf$p <= 1.01 )
+        subboFit <- exec_subbofit( x )
+      else
+        subboFit <- c( sf$p, sf$sp, sf$mp )
+    } else {
+      if( useSubbotools )
+        subboFit <- exec_subbofit( x )
+    }
   }
 
   # check for degenerated distribution
   if( subboBlimit != 0 && ! is.na( subboFit[1] ) && subboFit[1] > subboBlimit ){
     subboFit <- c( as.numeric( NA ), as.numeric( NA ), as.numeric( NA ) )
-    warning( "Degenerated Subbotin distribution: returning NA")
+    if( ! silent )
+      warning( "Degenerated Subbotin distribution: returning NA")
   }
 
   return( subboFit )
@@ -401,25 +450,32 @@ fit_subbotin <- function( x ){
 
 # ---- Asymmetric Subbotin distribution ----
 
-fit_asubbotin <- function( x ){
+fit_asubbotin <- function( x, silent = FALSE ) {
+
   # default return in case of error
-  subboaFit <- c( as.numeric( NA ), as.numeric( NA ), as.numeric( NA ), as.numeric( NA ) )
+  subboaFit <- c( as.numeric( NA ), as.numeric( NA ), as.numeric( NA ),
+                  as.numeric( NA ), as.numeric( NA ), as.numeric( NA ) )
 
   # prepare valid data for Subbotools (no NA's & limited sample size)
   x <- x[ !is.na( x ) ]
   if( length( x ) > subboMaxSample )
     x <- sample( x, subboMaxSample )
-  if( length( x ) < subboMinSample ){
-    warning( "Too few observations to fit Subbotin: returning NA")
+
+  if( length( x ) < subboMinSample ) {
+    if( ! silent )
+      warning( "Too few observations to fit Subbotin: returning NA")
     return( subboaFit )
   }
 
-  subboaFit <- exec_subbofit( x, type = "asymmetric" )
+  subboaFit <- exec_subbofit( x, Rpackage = Rsubbotools, type = "asymmetric" )
 
   # check for degenerated distribution
-  if( subboBlimit != 0 && ! is.na( subboaFit[1] ) && subboaFit[1] > subboBlimit ){
-    subboaFit <- c( as.numeric( NA ), as.numeric( NA ), as.numeric( NA ), as.numeric( NA ) )
-    warning( "Degenerated Subbotin distribution: returning NA")
+  if( subboBlimit != 0 && ( ( ! is.na( subboaFit[1] ) && subboaFit[1] > subboBlimit ) ||
+      ( ! is.na( subboaFit[2] ) && subboaFit[2] > subboBlimit ) ) ){
+    subboaFit <- c( as.numeric( NA ), as.numeric( NA ), as.numeric( NA ),
+                    as.numeric( NA ), as.numeric( NA ), as.numeric( NA ) )
+    if( ! silent )
+      warning( "Degenerated Subbotin distribution: returning NA")
   }
 
   return( subboaFit )
@@ -436,7 +492,7 @@ plot_laplace <- function( x, lapFit, xlab, ylab, tit, subtit ){
         main = tit, sub = subtit, xlab = xlab, ylab = ylab,
         ylim = c( min( bins$density[bins$density!=0] ), 2 * max( bins$density ) ) )
 
-  fit <- dalaplace( x, location = lapFit[2], scale = lapFit[1], kappa = 1 )
+  fit <- LaplacesDemon::dalaplace( x, location = lapFit[2], scale = lapFit[1], kappa = 1 )
 
   lines( x, fit, col = "gray")
 
@@ -663,7 +719,7 @@ plot_all <- function( x, normFit, lapFit, subboFit, xlab, ylab, tit, subtit ){
         main = tit, sub = subtit, xlab = xlab, ylab = ylab,
         ylim = c( min( bins$density[bins$density!=0] ), 2 * max( bins$density ) ) )
 
-  fit1 <- dalaplace( x, location = lapFit[2], scale = lapFit[1], kappa = 1 )
+  fit1 <- LaplacesDemon::dalaplace( x, location = lapFit[2], scale = lapFit[1], kappa = 1 )
   fit2 <- subbotinDist( x, m = subboFit[3], a = subboFit[2], b = subboFit[1] )
   fit3 <- dnorm( x, mean = normFit[2], sd = normFit[1] )
 

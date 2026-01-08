@@ -22,24 +22,24 @@ CYCLE(cur, "BANKS")
 	v[13]=VS(cur, "Bank_Market_Share");
 	v[14]=v[13]*v[12];
 	v[10]=0;
-	CYCLES(root, cur1, "SECTORS")
+	CYCLES(ROOT, cur1, "SECTORS")
 	{
 		v[3]=SUMS(cur1, "Firm_Demand_Loans");			//sector demand of loans
 		if(v[0]!=0)
 			v[4]=v[3]/v[0];								//sector share of demand
 		else
 			v[4]=0;
-		
+
 		v[5]=max(0,(v[1]-v[14])*v[4]);
 		v[11]=V("switch_creditworthness");
-				
+
 			v[9]=0;
 			if(v[11]==1)
-				SORTS(root, "FIRMS", "Firm_Avg_Debt_Rate", "UP");
+				SORTS(ROOT, "FIRMS", "Firm_Avg_Debt_Rate", "UP");
 			if(v[11]==2)
-				SORTS(root, "FIRMS", "firm_date_birth", "UP");
+				SORTS(ROOT, "FIRMS", "firm_date_birth", "UP");
 			if(v[11]==3)
-				SORTS(root, "FIRMS", "firm_date_birth", "DOWN");
+				SORTS(ROOT, "FIRMS", "firm_date_birth", "DOWN");
 			CYCLES(cur1, cur2, "FIRMS")
 			{
 				v[6]=VS(cur2, "firm_bank");
@@ -58,16 +58,16 @@ CYCLE(cur, "BANKS")
 					{
 						v[5]=v[5];
 						v[9]=v[9];
-					}		
+					}
 			}
 
 	v[10]=v[10]+v[9];
 	}
 WRITES(cur, "Bank_Number_Clients", v[10]);
-}	
+}
 RESULT(0)
 
-	
+
 EQUATION("Country_Domestic_Intermediate_Demand")
 /*
 Calculates the domestic demand for inputs.
@@ -103,7 +103,7 @@ Must be called by the sectors.
 */
 	v[1]=0;                                                 			//initializes the CYCLE
 	CYCLE(cur, "SECTORS")                                   			//CYCLE trought the sectors
-	{	
+	{
 		v[10]=SUMLS(cur, "Firm_Demand_Capital_Goods_Expansion",1);
 		v[11]=SUMLS(cur, "Firm_Demand_Capital_Goods_Replacement",1);
 		v[1]=v[1]+v[10]+v[11];                                       	//sums up all firm's capital goods demand
@@ -141,7 +141,7 @@ Average Price of the consumption goods sector
 	{
 		v[5]=VS(cur, "Class_Imports_Share");
 		v[6]=VLS(cur, "Class_Income_Share",1);
-		v[3]=v[3]+v[5]*v[6];		
+		v[3]=v[3]+v[5]*v[6];
 	}
 	v[4]=v[0]*(1-v[3])+v[1]*v[2]*v[3];
 RESULT(v[4])
@@ -152,7 +152,7 @@ EQUATION("Country_Annual_Inflation")
 Annual growth of the overall price index.
 Uses support function
 */
-RESULT(LAG_GROWTH(p, "Country_Price_Index", V("annual_frequency"), 1))
+RESULT(LAG_GROWTH(THIS, "Country_Price_Index", V("annual_frequency"), 1))
 
 
 EQUATION("Country_Annual_CPI_Inflation")
@@ -160,7 +160,7 @@ EQUATION("Country_Annual_CPI_Inflation")
 Annual growth of the consumer price index
 Uses support function
 */
-RESULT(LAG_GROWTH(p, "Country_Consumer_Price_Index", V("annual_frequency"), 1))
+RESULT(LAG_GROWTH(THIS, "Country_Consumer_Price_Index", V("annual_frequency"), 1))
 
 
 EQUATION("Country_Distributed_Profits")
@@ -200,7 +200,7 @@ The total wage is calculated by the sum of the wages paid by the sectors with go
 			v[2]=VS(cur1, "Firm_Wage");                             //firm's wage
 			v[3]=VS(cur1, "Firm_Effective_Production");             //firm's effective production
 			v[4]=VS(cur1, "Firm_Avg_Productivity");            		//firm's productivity in the last period
-			v[5]=VS(cur1, "Firm_RND_Expenses");                     //firm's rnd expeses, returned as salary to researchers		
+			v[5]=VS(cur1, "Firm_RND_Expenses");                     //firm's rnd expeses, returned as salary to researchers
 			if(v[4]!=0)
 				v[1]=v[1]+v[3]*(v[2]/v[4])+v[5];               		//sums up all firms' wage, determined by a unitary wage (sectorial wage divided by firm's productivity) multiplied by firm's effective production plus RND expenses
 			else
@@ -262,7 +262,7 @@ Aggregated average debt rate, wheighted by the sales of each sector
 	v[0]=WHTAVE("Sector_Avg_Debt_Rate", "Sector_Sales");
 	v[1]=SUM("Sector_Sales");
 	v[2]= v[1]!=0? v[0]/v[1]: 0;
-RESULT(v[2])	
+RESULT(v[2])
 
 
 EQUATION("Country_Avg_HHI")
@@ -272,7 +272,7 @@ Aggregated average markup, wheighted by the number of firms
 	v[0]=WHTAVE("Sector_Normalized_HHI", "Sector_Number_Firms");
 	v[1]=SUM("Sector_Number_Firms");
 	v[2]= v[1]!=0? v[0]/v[1]: 0;
-RESULT(v[2])	
+RESULT(v[2])
 
 
 EQUATION("Country_Hedge_Share")
@@ -281,7 +281,7 @@ EQUATION("Country_Hedge_Share")
 		v[0]=v[0]+SUMS(cur, "firm_hedge");
 	v[2]=COUNT_ALL("FIRMS");
 	v[3]= v[2]!=0? v[0]/v[2] : 0;
-RESULT(v[3])	
+RESULT(v[3])
 
 
 EQUATION("Country_Speculative_Share")
@@ -306,7 +306,7 @@ EQUATION("Country_GDP")
 /*
 Nominal quarterly GDP is calculated summing up profits, wages and indirect taxes
 */
-	v[0]=V("Country_Total_Profits");                       
+	v[0]=V("Country_Total_Profits");
 	v[1]=V("Country_Total_Wages");
 	v[2]=V("Government_Indirect_Taxes");
 	v[3]=v[0]+v[1]+v[2];
@@ -315,11 +315,11 @@ RESULT(v[3])
 
 
 EQUATION("Country_Annual_GDP")
-RESULT(LAG_SUM(p, "Country_GDP", V("annual_frequency")))
+RESULT(LAG_SUM(THIS, "Country_GDP", V("annual_frequency")))
 
 
 EQUATION("Country_Annual_Real_GDP")
-RESULT(LAG_SUM(p, "Country_Real_GDP", V("annual_frequency")))
+RESULT(LAG_SUM(THIS, "Country_Real_GDP", V("annual_frequency")))
 
 
 EQUATION("Country_Real_GDP")
@@ -336,8 +336,8 @@ EQUATION("Country_Annual_Growth")
 /*
 Annual Nominal GDP growth rate.
 */
-	v[1]=LAG_SUM(p, "Country_GDP", V("annual_frequency"));
-	v[2]=LAG_SUM(p, "Country_GDP", V("annual_frequency"), V("annual_frequency") );
+	v[1]=LAG_SUM(THIS, "Country_GDP", V("annual_frequency"));
+	v[2]=LAG_SUM(THIS, "Country_GDP", V("annual_frequency"), V("annual_frequency") );
 	v[3]= v[2]!=0? (v[1]-v[2])/v[2] : 0;
 RESULT(v[3])
 
@@ -346,18 +346,18 @@ EQUATION("Country_Annual_Real_Growth")
 /*
 Annual Real GDP Growth rate.
 */
-	v[1]=LAG_SUM(p, "Country_Real_GDP", V("annual_frequency"));
-	v[2]=LAG_SUM(p, "Country_Real_GDP", V("annual_frequency"), V("annual_frequency") );
+	v[1]=LAG_SUM(THIS, "Country_Real_GDP", V("annual_frequency"));
+	v[2]=LAG_SUM(THIS, "Country_Real_GDP", V("annual_frequency"), V("annual_frequency") );
 	v[3]= v[2]!=0? (v[1]-v[2])/v[2] : 0;
 RESULT(v[3])
 
 
 EQUATION("Country_Likelihood_Crisis")
 /*
-Counts the number of crisis ocurrances. 
+Counts the number of crisis ocurrances.
 */
 	v[7]=V("annual_frequency");
-	v[0]= fmod((double) t,v[7]);        		//divides the time period by four
+	v[0]= fmod(T,v[7]);        					//divides the time period by four
 	if(v[0]==0)                        		 	//if the rest of the above division is zero (begenning of the year)
 		{
 		v[1]=V("Country_Annual_Real_Growth");   //real growth rate
@@ -367,10 +367,10 @@ Counts the number of crisis ocurrances.
 			v[3]=0;                         	//do not count a crisis
 		}
 	else                                		//if the rest of the division is not zero
-		v[3]=0;                           		//do not count a crisis   
+		v[3]=0;                           		//do not count a crisis
 	v[4]=CURRENT;     							//crisis counter in the last period
 	v[5]=v[4]+v[3];                     		//acumulates the crisis counters
-	v[6]=(v[5]/t/v[7]);                      	//gives the probability, total crisis counter divided by the number of time periods
+	v[6]=(v[5]/T/v[7]);                      	//gives the probability, total crisis counter divided by the number of time periods
 RESULT(v[3])
 
 
@@ -414,7 +414,7 @@ RESULT(v[0])
 
 EQUATION("Country_Avg_Productivity")
 /*
-Average Productivity of the economy weighted by the employment of each sector 
+Average Productivity of the economy weighted by the employment of each sector
 */
 	v[0]=WHTAVE("Sector_Avg_Productivity", "Sector_Employment");
 	v[1]=SUM("Sector_Employment");

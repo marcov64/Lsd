@@ -69,19 +69,19 @@ v[62]=VS(government, "government_initial_share_capital");
 v[63]=VS(government, "government_initial_share_input");
 //CENTRAL BANK PARAMETERS
 v[70]=VS(centralbank, "cb_target_annual_inflation");
-	
+
 	if(V("switch_monetary_policy")==2)			//smithin rule
-		v[71]=v[70];	
+		v[71]=v[70];
 	else if(V("switch_monetary_policy")==3)		//pasinetti rule
 		v[71]=v[70];
 	else if(V("switch_monetary_policy")==4)		//kansas city rule.
 		v[71]=0;
 	else					//taylor rule or fixed monetary policy
-		v[71]=v[50]+v[70];	
+		v[71]=v[50]+v[70];
 
 	v[100]=(((v[20]*v[22]/v[21])+(v[30]*v[32]/v[31])+(v[10]*v[12]/v[11]))*v[23])/v[1];				//nominal GDP
 	LOG("\nNominal GDP is %f.",v[100]);
-		
+
 	//GOVERNMENT INTERMEDIATE CALCULATION
 	v[101]=v[100]*v[60];								//government debt
 	v[102]=pow((1+v[71]),(1/v[0]))-1;					//quarterly basic interest rate
@@ -96,7 +96,7 @@ v[70]=VS(centralbank, "cb_target_annual_inflation");
 	v[111]=v[108]/v[33];								//government real inputs
 	v[112]=v[104]-v[106]-v[107]-v[108];					//government wages
 	v[113]=v[103]/v[100];								//government surplus rate target
-	
+
 	//WRITTING GOVERNMENT LAGGED VALUES
 	WRITELLS(government, "Government_Desired_Wages", v[112], 0, 1);
 	WRITELLS(government, "Government_Desired_Unemployment_Benefits", 0, 0, 1);
@@ -109,9 +109,9 @@ v[70]=VS(centralbank, "cb_target_annual_inflation");
 	WRITELLS(government, "Government_Max_Expenses_Ceiling", v[104], 0, 1);//olhar depois
 	WRITELLS(government, "Government_Max_Expenses_Surplus", v[104], 0, 1);//olhar depois
 	WRITELLS(government, "Government_Max_Expenses", v[104], 0, 1);//olhar depois
-	for(i=1;i<=v[0]+1;i++) 
+	for(i=1;i<=v[0]+1;i++)
 		WRITELLS(government, "Government_Debt_GDP_Ratio", v[60], 0, i);
-	for(i=1;i<=v[0];i++) 
+	for(i=1;i<=v[0];i++)
 		WRITELLS(government, "Government_Effective_Expenses", v[104], 0, i);
 
 	//EXTERNAL INTERMEDIATE CALCULATION
@@ -137,7 +137,7 @@ v[70]=VS(centralbank, "cb_target_annual_inflation");
 	WRITES(input, "sector_initial_demand", v[143]);
 
 	v[270]=WHTAVE("sector_initial_price", "sector_initial_demand")/SUM("sector_initial_demand");	//average price
-	
+
 	//WRITTING EXTERNAL SECTOR LAGGED VALUES
 	WRITELLS(external, "External_Real_Income", v[120]/v[270], 0, 1);
 	WRITELLS(external, "External_Real_Income", v[120]/v[270], 0, 2);
@@ -149,7 +149,7 @@ v[70]=VS(centralbank, "cb_target_annual_inflation");
 	WRITELLS(external, "Country_Capital_Flows", v[121], 0, 1);
 	WRITELLS(external, "Country_International_Reserves_GDP_Ratio", v[43], 0, 1);
 	WRITELLS(external, "Country_External_Debt", 0, 0, 1);
-	
+
 v[210]=v[211]=v[212]=v[213]=v[214]=v[215]=v[216]=v[217]=v[218]=v[219]=v[226]=0;
 CYCLE(cur, "SECTORS")
 {
@@ -173,7 +173,7 @@ CYCLE(cur, "SECTORS")
 	v[167]=VS(cur, "sector_initial_quality");
 	v[168]=VS(cur, "sector_desired_inventories_proportion");
 	v[169]=VS(cur, "sector_price_frequency");
-	
+
 	v[170]=v[150]*v[153];											//sector revenue
 	v[171]=v[150]*v[153]*v[160];									//sector taxation
 	v[172]=v[150]*v[153]*(1-v[160])*v[161];							//sector rnd expenses
@@ -181,7 +181,7 @@ CYCLE(cur, "SECTORS")
 	v[174]=v[150]*v[154]*v[155]*v[37]*v[44];						//sector imported input expenses
 	v[175]=v[173]+v[174];											//sector total input expenses
 	v[176]=v[150]*v[164];											//sector gross profits
-	
+
 	v[177]=v[150]/v[156];											//sector desired capacity
 	v[178]=v[177]/v[152];											//firm desired capacity
 	v[179]=ROUND(v[178]*v[158], "UP");								//firm number capitals
@@ -222,26 +222,26 @@ CYCLE(cur, "SECTORS")
 	WRITELLS(cur, "Sector_Max_Quality", v[167], 0, 1);
 	WRITELLS(cur, "Sector_Propensity_Import_Inputs", v[155], 0, 1);
 	WRITELLS(cur, "Sector_Exports_Share", (VS(cur,"sector_initial_exports_share")*v[123]/v[153])/v[150], 0, 1);
-	for(i=1;i<=v[0]+1;i++) 
+	for(i=1;i<=v[0]+1;i++)
 		WRITELLS(cur, "Sector_Avg_Price", v[153], 0, i);
-	for(i=1;i<=v[0]+1;i++) 
+	for(i=1;i<=v[0]+1;i++)
 		WRITELLS(cur, "Sector_Avg_Quality", v[167], 0, i);
-	for(i=1;i<=v[0]+1;i++) 
+	for(i=1;i<=v[0]+1;i++)
 		WRITELLS(cur, "Sector_Employment", v[191], 0, i);
-	for(i=1;i<=v[151];i++) 
+	for(i=1;i<=v[151];i++)
 		WRITELLS(cur, "Sector_Demand_Met", 0, 0, i);
-	for(i=1;i<=v[151];i++) 
+	for(i=1;i<=v[151];i++)
 		WRITELLS(cur, "Sector_Demand_Met_By_Imports", 1, 0, i);
-	for(i=1;i<=v[151];i++) 
+	for(i=1;i<=v[151];i++)
 		WRITELLS(cur, "Sector_Effective_Orders", v[150], 0, i);
-	
+
 	LOG("\nSector %f.0",SEARCH_INST(cur));LOG(" Desired Capacity Uilization is %f.",v[198]);
 	LOG("\nSector %f.0",SEARCH_INST(cur));LOG(" Profit Distribution Rate is %f.",v[196]);
 	LOG("\nSector %f.0",SEARCH_INST(cur));LOG(" Wage Rate is %f.",v[188]);
-	
+
 	//WRITTING FIRM LAGGED VALUES
-	cur1=SEARCHS(cur, "FIRMS");																	
-	WRITES(cur1, "firm_date_birth", 0);   
+	cur1=SEARCHS(cur, "FIRMS");
+	WRITES(cur1, "firm_date_birth", 0);
 	WRITELLS(cur1, "Firm_Effective_Market_Share", 1/v[152], 0, 1);
 	WRITELLS(cur1, "Firm_Avg_Productivity", v[159], 0, 1);
 	WRITELLS(cur1, "Firm_Price", v[153], 0, 1);
@@ -258,71 +258,71 @@ CYCLE(cur, "SECTORS")
 	WRITELLS(cur1, "Firm_Liquidity_Preference", v[163], 0, 1);
 	WRITELLS(cur1, "Firm_Capital", v[181]/v[152], 0, 1);
 	WRITELLS(cur1, "Firm_Stock_Loans", v[183]/v[152], 0, 1);
-	for(i=1;i<=v[151];i++) 
+	for(i=1;i<=v[151];i++)
 		WRITELLS(cur1, "Firm_Demand_Capital_Goods_Expansion", 0, 0, i);
-	for(i=1;i<=v[151];i++) 
+	for(i=1;i<=v[151];i++)
 		WRITELLS(cur1, "Firm_Demand_Capital_Goods_Replacement", 0, 0, i);
-	for(i=1;i<=v[151];i++) 
+	for(i=1;i<=v[151];i++)
 		WRITELLS(cur1, "Firm_Frontier_Productivity", v[159], 0, i);
-	for(i=1;i<=v[151];i++) 
+	for(i=1;i<=v[151];i++)
 		WRITELLS(cur1, "Firm_Productive_Capacity", v[197]/v[152], 0, i);
-	for(i=1;i<=v[151];i++) 
+	for(i=1;i<=v[151];i++)
 		WRITELLS(cur1, "Firm_Interest_Payment", v[185]/v[152], 0, i);
-	for(i=1;i<=v[151];i++) 
+	for(i=1;i<=v[151];i++)
 		WRITELLS(cur1, "Firm_Debt_Rate", v[162], 0, i);
-	for(i=1;i<=v[151];i++) 
+	for(i=1;i<=v[151];i++)
 		WRITELLS(cur1, "Firm_Net_Profits", v[176]/v[152], 0, i);
-	for(i=1;i<=v[151]-1;i++) 
+	for(i=1;i<=v[151]-1;i++)
 		WRITELLS(cur1, "Firm_Effective_Orders_Capital_Goods", v[150]/v[152], 0, i);
-	for(i=1;i<=2*v[151]-1;i++) 
+	for(i=1;i<=2*v[151]-1;i++)
 		WRITELLS(cur1, "Firm_Effective_Orders", v[150]/v[152], 0, i);
-	for(i=1;i<=v[169];i++) 
+	for(i=1;i<=v[169];i++)
 		WRITELLS(cur1, "Firm_Market_Share", 1/v[152], 0, i);
-	for(i=1;i<=v[0]+1;i++) 
+	for(i=1;i<=v[0]+1;i++)
 		WRITELLS(cur1, "Firm_Avg_Productivity", v[159], 0, i);
-	
+
 	//WRITTING CAPITAL LAGGED VALUES
-	cur2=SEARCHS(cur1, "CAPITALS");														
-	WRITELLS(cur2, "Capital_Good_Acumulated_Production", 0, 0, 1);      				
-	WRITES(cur2, "capital_good_productive_capacity", 1/v[158]);     					
-	WRITES(cur2, "capital_good_productivity_initial", v[159]);       		  			
+	cur2=SEARCHS(cur1, "CAPITALS");
+	WRITELLS(cur2, "Capital_Good_Acumulated_Production", 0, 0, 1);
+	WRITES(cur2, "capital_good_productive_capacity", 1/v[158]);
+	WRITES(cur2, "capital_good_productivity_initial", v[159]);
 	WRITES(cur2, "capital_good_to_replace", 0);
 	WRITES(cur2, "capital_good_date_birth", 0);
-	WRITES(cur2, "id_capital_good_number", 1);    
-	
+	WRITES(cur2, "id_capital_good_number", 1);
+
 	//CREATING FIRM OBJECTS
-	for(i=1; i<=(v[152]-1); i++)															
+	for(i=1; i<=(v[152]-1); i++)
 	cur4=ADDOBJ_EXLS(cur,"FIRMS", cur1, 0);
-	CYCLES(cur, cur1, "FIRMS")                                                 				
+	CYCLES(cur, cur1, "FIRMS")
 		{
 			v[200]=SEARCH_INSTS(cur, cur1);
-			WRITES(cur1, "firm_id", v[200]);                         	
+			WRITES(cur1, "firm_id", v[200]);
 			v[201]=v[200]/(v[152]/v[57]);
 			//WRITES(cur1, "firm_bank", ROUND(v[201], "UP"));
 			WRITES(cur1, "firm_bank", uniform_int(1,v[57]));
-			
+
 			//WRITTING FIRM_LOANS LAGGED VALUES
 			cur2=SEARCHS(cur1, "FIRM_LOANS");
-			WRITES(cur2, "id_firm_loan_long_term", 1);     					
-			WRITES(cur2, "id_firm_loan_short_term", 0);   
-			WRITES(cur2, "firm_loan_total_amount", v[183]/v[152]);			
+			WRITES(cur2, "id_firm_loan_long_term", 1);
+			WRITES(cur2, "id_firm_loan_short_term", 0);
+			WRITES(cur2, "firm_loan_total_amount", v[183]/v[152]);
 			WRITES(cur2, "firm_loan_interest_rate", v[184]);
 			WRITES(cur2, "firm_loan_fixed_amortization", v[192]/v[152]);
 			WRITES(cur2, "firm_loan_fixed_object", 0);
-			
+
 			//CREATING CAPITAL OBJECTS
-			cur2=SEARCHS(cur1, "CAPITALS");   
-			for(i=1; i<=(v[179]-1); i++)                        								
-			{                                 			
-			cur3=ADDOBJ_EXLS(cur1,"CAPITALS", cur2, 0);			                       		
-			WRITES(cur3, "id_capital_good_number", (i+1));										
+			cur2=SEARCHS(cur1, "CAPITALS");
+			for(i=1; i<=(v[179]-1); i++)
+			{
+			cur3=ADDOBJ_EXLS(cur1,"CAPITALS", cur2, 0);
+			WRITES(cur3, "id_capital_good_number", (i+1));
 			}
-			
-			CYCLES(cur1, cur2, "CAPITALS")                                            			
+
+			CYCLES(cur1, cur2, "CAPITALS")
 				{
 				v[202]=fmod(v[200]+v[151], v[151]);
 				v[203]=VS(cur2, "id_capital_good_number");
-				v[204]=v[202]+(v[203]-1)*v[151];			
+				v[204]=v[202]+(v[203]-1)*v[151];
 				WRITES(cur2, "capital_good_depreciation_period", v[204]);
 				}
 		}
@@ -354,16 +354,16 @@ v[226]+=(v[193]-v[194]);											//total demand loans
 	WRITELLS(financial, "Financial_Sector_Avg_Interest_Rate_Long_Term", v[102]+v[54], 0, 1);
 	WRITELLS(financial, "Financial_Sector_Total_Stock_Loans_Growth", 0, 0, 1);
 	WRITELLS(financial, "Financial_Sector_Total_Stock_Loans", v[214], 0, 1);
-	
+
 	//CREATING BANK OBJECTS
 	cur1=SEARCHS(financial, "BANKS");
-	for(i=1; i<=(v[57]-1); i++)																
+	for(i=1; i<=(v[57]-1); i++)
 	cur2=ADDOBJ_EXLS(financial,"BANKS", cur1, 0);
 
 	//WRITTING BANK LAGGED VALUES
-	CYCLES(financial, cur1, "BANKS")                                                 				
-		{												
-		WRITES(cur1, "bank_id", SEARCH_INSTS(root, cur1)); 
+	CYCLES(financial, cur1, "BANKS")
+		{
+		WRITES(cur1, "bank_id", SEARCH_INSTS(ROOT, cur1));
 		WRITELLS(cur1, "Bank_Market_Share", 1/v[57], 0, 1);
 		WRITELLS(cur1, "Bank_Default_Share", 0, 0, 1);
 		WRITELLS(cur1, "Bank_Accumulated_Defaulted_Loans", 0, 0, 1);
@@ -377,21 +377,21 @@ v[226]+=(v[193]-v[194]);											//total demand loans
 		WRITELLS(cur1, "Bank_Interest_Rate_Long_Term", v[102]+v[54], 0, 1);
 		WRITELLS(cur1, "Bank_Accumulated_Profits", v[222], 0, 1);
 		}
-		
+
 	//AGGREGATE INTERMEDIATE VARIABLES
 	v[230]=v[211]+v[217]+v[112];									//total wages
 	v[231]=v[218]+v[223];											//total distributed profits
-	v[232]=v[230]+v[231];											//total households gross income	
+	v[232]=v[230]+v[231];											//total households gross income
 	v[233]=v[105]-v[210];											//total income taxation
 	v[235]=v[124]-v[212];											//total imported consumption expenses
-	
+
 	if(V("switch_class_tax_structure")==0)							    	//taxation structure = no tax
 		v[280]=0;
 	if(V("switch_class_tax_structure")==1)									//taxation structure = only wages
 		v[280]=WHTAVE("class_direct_tax", "class_wage_share")*v[230];
 	if(V("switch_class_tax_structure")==2)									//taxation structure = only profits
 		v[280]=WHTAVE("class_direct_tax", "class_profit_share")*v[231];
-	if(V("switch_class_tax_structure")==3)									//taxation structure = profits and wages 
+	if(V("switch_class_tax_structure")==3)									//taxation structure = profits and wages
 		v[280]=WHTAVE("class_direct_tax", "class_profit_share")*v[231]
 		      +WHTAVE("class_direct_tax", "class_wage_share")*v[230];
 	if(V("switch_class_tax_structure")==4)									//taxation structure = profits, wages and interest
@@ -401,8 +401,8 @@ v[226]+=(v[193]-v[194]);											//total demand loans
 	LOG("\nPseudo Taxation %f.0",v[280]);
 	LOG("\nTaxation %f.0",v[233]);
 	v[281]=v[233]/v[280];
-		
-	//WRITTING CLASS LAGGED VALUES  
+
+	//WRITTING CLASS LAGGED VALUES
 	v[251]=v[252]=0;
 	CYCLE(cur, "CLASSES")
 	{
@@ -411,9 +411,9 @@ v[226]+=(v[193]-v[194]);											//total demand loans
 		v[242]=VS(cur, "class_wage_share");
 		v[254]=VS(cur, "class_initial_max_debt_rate");
 		v[255]=VS(cur, "class_initial_liquidity_preference");
-	
+
 		v[243]=v[230]*v[242]+v[231]*v[241];
-		
+
 		if(V("switch_class_tax_structure")==0)							    	//taxation structure = no tax
 		{
 			v[234]=0;
@@ -429,7 +429,7 @@ v[226]+=(v[193]-v[194]);											//total demand loans
 			v[234]=VS(cur,"class_direct_tax")*v[281];
 			v[244]=v[234]*(v[231]*v[241]);										//average direct tax rate
 		}
-		if(V("switch_class_tax_structure")==3)									//taxation structure = profits and wages 
+		if(V("switch_class_tax_structure")==3)									//taxation structure = profits and wages
 		{
 			v[234]=VS(cur,"class_direct_tax")*v[281];
 			v[244]=v[234]*(v[230]*v[242]+v[231]*v[241]);						//average direct tax rate
@@ -449,8 +449,8 @@ v[226]+=(v[193]-v[194]);											//total demand loans
 		v[250]=v[245]-v[246];										//class induced savings
 		v[251]+=v[249];												//total induced domestic consumption
 		v[252]+=v[250];												//total induced savings
-		
-		WRITES(cur, "class_direct_tax", v[234]);//same tax rate 
+
+		WRITES(cur, "class_direct_tax", v[234]);//same tax rate
 		WRITES(cur, "class_initial_propensity_import", v[248]);
 		WRITELLS(cur, "Class_Stock_Deposits", v[225]*v[241], 0, 1);
 		WRITELLS(cur, "Class_Liquidity_Preference", v[255], 0, 1);//olhar depois
@@ -464,15 +464,15 @@ v[226]+=(v[193]-v[194]);											//total demand loans
 		for(i=1;i<=v[0]+1;i++)
 			WRITELLS(cur, "Class_Debt_Rate", 0, 0, 1);
 	}
-	
+
 	v[253]=v[140]-v[251];//total autonomous consumption
 	CYCLE(cur, "CLASSES")
 		WRITELLS(cur, "Class_Real_Autonomous_Consumption", v[253]*VS(cur, "class_profit_share")/v[13], 0, 1);
 
 v[271]=WHTAVE("sector_initial_productivity", "sector_initial_demand")/SUM("sector_initial_demand");
 v[272]=WHTAVE("sector_desired_degree_capacity_utilization", "sector_initial_demand")/SUM("sector_initial_demand");
-	
-//WRITTING COUNTRY LAGGED VALUES  
+
+//WRITTING COUNTRY LAGGED VALUES
 WRITELLS(country, "Country_Debt_Rate_Firms", v[220], 0, 1);
 WRITELLS(country, "Country_Idle_Capacity", 1-v[272], 0, 1);
 WRITELLS(country, "Country_Avg_Productivity", v[271], 0, 1);
@@ -488,6 +488,6 @@ for(i=1;i<=2*v[0]+1;i++)
 	WRITELLS(country, "Country_Real_GDP", v[100]/v[270], 0, i);
 for(i=1;i<=v[0];i++)
 	WRITELLS(country, "Country_Capital_Goods_Price", v[23], 0, i);
-	
+
 PARAMETER
 RESULT(0)

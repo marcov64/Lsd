@@ -1,4 +1,0 @@
-TARGET=LSD
-FUN=fun_BusinessPlanning
-SWITCH_CC=-g
-

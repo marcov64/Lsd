@@ -48,8 +48,8 @@ Param: Cmax 0 n + n n	10
 Param: C0 0 n + n n	1
 Param: Q0 0 n + n n	0
 Param: N 0 n + n n	3
-Var: HHI 0 s + n n
-Var: HPI 0 s + n p
+Var: HHI 0 s + n p
+Var: HPI 0 s + n n
 Var: TotProb 0 s + n n
 
 Object: Firm C	1
@@ -68,12 +68,10 @@ MODELREPORT report_Sim1.html
 DESCRIPTION
 
 Object_Root
-(no description available)
+
 END_DESCRIPTION
 
 Object_Market
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
@@ -81,8 +79,6 @@ Variable_Init
 Model initialization
 
 'Init' appears in the equation for: (never used)
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_alpha
@@ -161,8 +157,6 @@ Variable_HHI
 Herfindhal-Hirschman Index
 
 'HHI' appears in the equation for: (never used)
-_INIT_
-
 END_DESCRIPTION
 
 Variable_HPI
@@ -170,21 +164,15 @@ Hymer & Pashigian Instability Index
 Sum of the absolute changes in firm market shares
 
 'HPI' appears in the equation for: (never used)
-_INIT_
-
 END_DESCRIPTION
 
 Variable_TotProb
 Sum of probabilities of all firms
 
 'TotProb' appears in the equation for: ms
-_INIT_
-
 END_DESCRIPTION
 
 Object_Firm
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
@@ -192,8 +180,6 @@ Variable_Prob
 Probability of firm being chosen
 
 'Prob' appears in the equation for: ms, TotProb
-_INIT_
-
 END_DESCRIPTION
 
 Variable_Quality
@@ -421,5 +407,4 @@ MODELEND
 void close_sim( void )
 {
 }
-
 END_EQ_FILE

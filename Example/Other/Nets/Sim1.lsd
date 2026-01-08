@@ -1,0 +1,830 @@
+	
+Label Root
+{
+	Son: Network
+	Label Network
+	{
+		Son: Node
+		Label Node
+		{
+			Var: NodeLinks
+			Var: TopLink
+
+		}
+
+		Param: numNodes
+		Param: numLinks
+		Param: typeNet
+		Param: expLink
+		Param: rho
+		Param: avgOutDeg
+		Param: linkProb
+		Param: nCol
+		Param: eightNeigbr
+		Var: NewLink
+		Var: TotalLinks
+
+	}
+
+	Son: Example
+	Label Example
+	{
+		Son: Pajek
+		Label Pajek
+		{
+			Son: PajNode
+			Label PajNode
+			{
+
+			}
+
+			Var: PajekInit
+
+		}
+
+		Son: Direct
+		Label Direct
+		{
+			Son: DirNode
+			Label DirNode
+			{
+
+			}
+
+			Var: DirectInit
+
+		}
+
+		Son: Undir
+		Label Undir
+		{
+			Son: UndNode
+			Label UndNode
+			{
+
+			}
+
+			Var: UndirInit
+
+		}
+
+		Son: Random
+		Label Random
+		{
+			Son: RandNode
+			Label RandNode
+			{
+
+			}
+
+			Var: RandomInit
+
+		}
+
+		Son: Renyi
+		Label Renyi
+		{
+			Son: RenyiNode
+			Label RenyiNode
+			{
+
+			}
+
+			Var: RenyiInit
+
+		}
+
+		Son: Circle
+		Label Circle
+		{
+			Son: CircNode
+			Label CircNode
+			{
+
+			}
+
+			Var: CircleInit
+
+		}
+
+		Son: SmallW
+		Label SmallW
+		{
+			Son: SWnode
+			Label SWnode
+			{
+
+			}
+
+			Var: SmallWInit
+
+		}
+
+		Son: ScFree
+		Label ScFree
+		{
+			Son: SFnode
+			Label SFnode
+			{
+
+			}
+
+			Var: ScFreeInit
+
+		}
+
+		Son: Star
+		Label Star
+		{
+			Son: StarNode
+			Label StarNode
+			{
+
+			}
+
+			Var: StarInit
+
+		}
+
+		Son: Lattice
+		Label Lattice
+		{
+			Son: LatNode
+			Label LatNode
+			{
+
+			}
+
+			Var: LatticeInit
+
+		}
+
+
+	}
+
+	Var: InitNet
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: InitNet 0 n + d n
+
+Object: Network C	1
+Param: numNodes 0 n + n n	1000
+Param: numLinks 0 n + n n	10000
+Param: typeNet 0 n + n n	1
+Param: expLink 0 n + n n	2
+Param: rho 0 n + n n	0.1
+Param: avgOutDeg 0 n + n n	10
+Param: linkProb 0 n + n n	0.01
+Param: nCol 0 n + n n	40
+Param: eightNeigbr 0 n + n n	1
+Var: NewLink 0 s + n n
+Var: TotalLinks 0 s + n n
+
+Object: Node C	1
+Var: NodeLinks 0 s + n n
+Var: TopLink 0 s + n n
+
+Object: Example C	1
+
+Object: Pajek C	1
+Var: PajekInit 0 n + n n
+
+Object: PajNode C	1
+
+Object: Direct C	1
+Var: DirectInit 0 n + n n
+
+Object: DirNode C	1
+
+Object: Undir C	1
+Var: UndirInit 0 n + n n
+
+Object: UndNode C	1
+
+Object: Random C	1
+Var: RandomInit 0 n + n n
+
+Object: RandNode C	1
+
+Object: Renyi C	1
+Var: RenyiInit 0 n + n n
+
+Object: RenyiNode C	1
+
+Object: Circle C	1
+Var: CircleInit 0 n + n n
+
+Object: CircNode C	1
+
+Object: SmallW C	1
+Var: SmallWInit 0 n + n n
+
+Object: SWnode C	1
+
+Object: ScFree C	1
+Var: ScFreeInit 0 n + n n
+
+Object: SFnode C	1
+
+Object: Star C	1
+Var: StarInit 0 n + n n
+
+Object: StarNode C	1
+
+Object: Lattice C	1
+Var: LatticeInit 0 n + n n
+
+Object: LatNode C	1
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 100
+EQUATION fun_nets.cpp
+MODELREPORT modelreport.html
+
+DESCRIPTION
+
+Object_Root
+
+END_DESCRIPTION
+
+Variable_InitNet
+Initialize the net
+
+'InitNet' appears in the equation for: (Never Used).
+END_DESCRIPTION
+
+Object_Network
+(no description available )
+END_DESCRIPTION
+
+Parameter_numNodes
+Number of nodes (users) in network
+_INIT_
+All 1 instances equal to 1000.
+END_DESCRIPTION
+
+Parameter_numLinks
+Average number of arcs (directed links) per user node (out degree)
+_INIT_
+All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_typeNet
+Type of user network initialization:
+0 - Reads network from file in Pajek format, according to LSD seed value (1, 2 ...)
+1 - Directed random network: numNodes: total nodes, numLinks: number of links in network
+2 - Undirected random network: numNodes: total nodes, numLinks: number of links in network
+3 - Uniform random network: numNodes: total nodes, avgOutDeg: out links per node
+4 - Renyi-Erdos random network: numNodes: total nodes, avgOutDeg: average out links per node
+5 - Circle network: numNodes: total nodes, avgOutDeg: out neighbours per node
+6 - Small-World network: numNodes: total nodes, avgOutDeg: out neighbours per node, rho: rewires out of total number of links
+7 - Power-law network: numNodes: total nodes, avgOutDeg: average out links per node, expLink: power degree
+8 - Star network: numNodes: total nodes
+9 - Lattice network: numNodes: total nodes, nCol: number of columns in lattice, eightNeigbr: flag to use 8 neighbors instead of 4
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_expLink
+Power degree of the scale-free network of users (power-law networks only)
+_INIT_
+All 1 instances equal to 2.
+END_DESCRIPTION
+
+Parameter_rho
+Rewiring link probability parameter for the small-world network of users (small-world networks only)
+_INIT_
+All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_avgOutDeg
+Average out-degree
+_INIT_
+All 1 instances equal to 10.
+END_DESCRIPTION
+
+Parameter_linkProb
+Probability of two links connecting (Renyi-Erdos networks)
+_INIT_
+All 1 instances equal to 0.01.
+END_DESCRIPTION
+
+Parameter_nCol
+Number of columns in a lattice network
+_INIT_
+All 1 instances equal to 40.
+END_DESCRIPTION
+
+Parameter_eightNeigbr
+Flag to use 8 (=1) neighbors instead of 4 (=0)
+_INIT_
+All 1 instances equal to 1.
+END_DESCRIPTION
+
+Variable_NewLink
+Add one new bidirectional link randomly every time step,
+with weight equal to the time
+
+'NewLink' appears in the equation for: (Never Used).
+END_DESCRIPTION
+
+Variable_TotalLinks
+Register the total number of links in network
+
+'TotalLinks' appears in the equation for: (Never Used).
+END_DESCRIPTION
+
+Object_Node
+(no description available )
+END_DESCRIPTION
+
+Variable_NodeLinks
+Register the total number of links in the node
+
+'NodeLinks' appears in the equation for: (Never Used).
+END_DESCRIPTION
+
+Variable_TopLink
+Register the id of the highest weight link destination for the node
+and reduce the weight by one
+
+'TopLink' appears in the equation for: (Never Used).
+END_DESCRIPTION
+
+Object_Example
+Several example networks in each son object
+END_DESCRIPTION
+
+Object_Pajek
+
+END_DESCRIPTION
+
+Variable_PajekInit
+Produce the Pajek imported network (net_2.net) example
+END_DESCRIPTION
+
+Object_PajNode
+
+END_DESCRIPTION
+
+Object_Direct
+
+END_DESCRIPTION
+
+Variable_DirectInit
+Produce the (fully) directed random network example
+END_DESCRIPTION
+
+Object_DirNode
+
+END_DESCRIPTION
+
+Object_Undir
+
+END_DESCRIPTION
+
+Variable_UndirInit
+Produce the (fully) undirected random network example
+END_DESCRIPTION
+
+Object_UndNode
+
+END_DESCRIPTION
+
+Object_Random
+
+END_DESCRIPTION
+
+Variable_RandomInit
+Produce the uniform random network example
+END_DESCRIPTION
+
+Object_RandNode
+
+END_DESCRIPTION
+
+Object_Renyi
+
+END_DESCRIPTION
+
+Variable_RenyiInit
+Produce the Renyi-Erdos random network example
+END_DESCRIPTION
+
+Object_RenyiNode
+
+END_DESCRIPTION
+
+Object_Circle
+
+END_DESCRIPTION
+
+Variable_CircleInit
+Produce the circle (non-random) network example
+END_DESCRIPTION
+
+Object_CircNode
+
+END_DESCRIPTION
+
+Object_SmallW
+
+END_DESCRIPTION
+
+Variable_SmallWInit
+Produce the small-world random network example
+END_DESCRIPTION
+
+Object_SWnode
+
+END_DESCRIPTION
+
+Object_ScFree
+
+END_DESCRIPTION
+
+Variable_ScFreeInit
+Produce the scale-free (power law) random network example
+END_DESCRIPTION
+
+Object_SFnode
+
+END_DESCRIPTION
+
+Object_Star
+
+END_DESCRIPTION
+
+Variable_StarInit
+Produce the star (non-random) network example
+END_DESCRIPTION
+
+Object_StarNode
+
+END_DESCRIPTION
+
+Object_Lattice
+
+END_DESCRIPTION
+
+Variable_LatticeInit
+Produce the lattice network example
+END_DESCRIPTION
+
+Object_LatNode
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "lsd_head.h"
+
+/****************************************************************************
+
+	Network generation algorithms
+	=============================
+
+	Networks are created as sets of two type of objects: nodes and links.
+	Links are special properties of object nodes, so	each undirected link is
+	represented by two objects (two directed links), each one contained inside
+	its own node.
+
+ ****************************************************************************/
+
+using namespace lsd;
+
+object *network;							// global pointer to the network
+											// used to save network after simul.
+
+MODELBEGIN
+
+
+EQUATION( "InitNet" )
+/*
+Initialize the net
+*/
+
+char message[256];
+
+cur = network = SEARCH( "Network" );		// network nodes container (parent object)
+v[0] = V( "typeNet" );						// type of network to build
+v[1] = V( "numNodes" );						// number of nodes in network
+v[2] = V( "numLinks" );						// number of links in network
+v[3] = V( "avgOutDeg" );					// average outgoing degree
+v[4] = V( "linkProb" );						// probability of two nodes linking
+v[5] = V( "rho" );							// small-world rewiring parameter
+v[6] = V( "expLink" );						// power-law exponential parameter
+v[7] = V( "nCol" );							// number of columns in lattice
+v[8] = V( "eightNeigbr" );					// flag to use 8 neighbors instead of 4
+
+switch ( (int) v[0] )						// executes initialization for each type
+{
+	case 0:									// read external network file
+		v[2] = LOAD_NETS( cur, "Node", "net" );
+		sprintf( message, "\n Network read from file: net_%lf.net", RND_SEED - 1);
+	break;
+
+	case 1:									// (fully) Directed random network
+		v[2] = INIT_NETS( cur, "Node", "RANDOM-DIR", v[1], v[2], 0 );
+		strcpy( message, "\n Fully random network (directed) created" );
+	break;
+
+	case 2:									// (fully) Undirected random network
+		v[2] = INIT_NETS( cur, "Node", "RANDOM-UNDIR", v[1], v[2], 0 );
+		strcpy( message, "\n Fully random network (undirected) created" );
+	break;
+
+	case 3:									// Uniform random network
+		v[2] = INIT_NETS( cur, "Node", "UNIFORM", v[1], v[3], 0 );
+		strcpy( message, "\n Uniform random network created" );
+	break;
+
+	case 4:									// Renyi-Erdos random network
+		v[2] = INIT_NETS( cur, "Node", "RENYI-ERDOS", v[1], 0, v[4] );
+		strcpy( message, "\n Renyi-Erdos random network created" );
+	break;
+
+	case 5:									// Circle (non-random) network
+		v[2] = INIT_NETS( cur, "Node", "CIRCLE", v[1], v[3], 0 );
+		strcpy( message, "\n Circle regular network created" );
+	break;
+
+	case 6:									// Small-World random network
+		v[2] = INIT_NETS( cur, "Node", "SMALL-WORLD", v[1], v[3], v[5] );
+		strcpy( message, "\n Small-world random network created" );
+	break;
+
+	case 7:									// Scale-free (power law) random network
+		v[2] = INIT_NETS( cur, "Node", "SCALE-FREE", v[1], v[3], v[6] );
+		strcpy( message, "\n Scale-free random network created" );
+	break;
+
+	case 8:									// Star (non-random) network
+		v[2] = INIT_NETS( cur, "Node", "STAR", v[1], 0, 0 );
+		strcpy( message, "\n Star network created" );
+	break;
+
+	case 9:									// Lattice network
+		v[2] = INIT_NETS( cur, "Node", "LATTICE", v[1], v[7], v[8] );
+		strcpy( message, "\n Lattice network created" );
+	break;
+
+	default:
+		strcpy( message, "\nError: Invalid type of network selected!\n" );
+}
+
+STAT_NETS( cur, "Node" );					// get network statistics
+
+WRITES( cur, "numNodes", v[0] );			// updates parameters
+WRITES( cur, "numLinks", v[1] );
+WRITES( cur, "avgOutDeg", v[2] );
+
+LOG( message );
+LOG( "\n Num. nodes: %.0f, Num. arcs: %.0f, Avg. out-degree: %.4f", v[0], v[1], v[2] );
+LOG( "\n Min. out-degree: %.0f, Max. out-degree: %.0f, Density: %.4f", v[3], v[4], v[5] );
+
+SHUFFLE_NETS( cur, "Node" );				// shuffles node sequence
+											// (IDs and linked list order)
+
+PARAMETER;									// turn variable into parameter
+											// run variable just once
+RESULT( 1 )									// return 1 as ok
+
+
+EQUATION( "NewLink" )
+/*
+Add one new bidirectional link randomly every time step,
+with weight equal to the time
+*/
+
+cur1 = RNDDRAW_NODE( "Node" );				// draw first node
+cur2 = RNDDRAW_NODE( "Node" );				// draw second node
+
+ADDLINKWS( cur1, cur2, T );					// link from 1st to 2nd
+ADDLINKWS( cur2, cur1, T );					// link from 2nd to 1st
+
+SNAP_NET( "Node", CONFIG );	// create a network snapshot
+
+RESULT( 1 )
+
+
+EQUATION( "TotalLinks" )
+/*
+Register the total number of links in network
+*/
+
+STAT_NET( "Node" );							// get network statistics
+
+RESULT( v[1] )
+
+
+EQUATION( "NodeLinks" )
+/*
+Register the total number of links in the node
+*/
+
+STAT_NODE;									// get node statistics
+
+RESULT( v[0] )
+
+
+EQUATION( "TopLink" )
+/*
+Register the id of the highest weight link destination for the node
+and reduce the weight by one
+*/
+
+v[0] = 0;									// max weight
+v[1] = 0;									// max weight link dest. id
+cur = NULL;									// pointer to destination
+curl1 = NULL;
+
+CYCLE_LINK( curl )
+	if ( V_LINK( curl ) > v[0] )			// is this link bigger?
+	{
+		v[0] = V_LINK( curl );				// save the new top weight
+		cur = LINKTO( curl );				// to where it points
+		curl1 = curl;
+		v[1] = V_NODEIDS( cur );			// and its id
+	}
+
+if ( curl1 != NULL )
+	WRITE_LINK( curl1, v[0] - 0.1 ); 		// reduces weight of top link
+
+if ( v[1] != 0 )							// search top pointed node
+{
+	cur2 = SEARCH_NODES( PARENT, "Node", v[1] );
+
+	if ( cur != NULL && cur != cur2 )		// check pointer & id match
+		PLOG( "\nWarning: pointer mismatch" );
+	else
+	{
+		v[2] = V_NODEIDS( cur );
+		v[3] = V( "numNodes" );
+		WRITE_NODEIDS( cur, v[2] + v[3] );	// change top node id
+	}
+}
+
+RESULT( v[1] )
+
+
+// equations to create all example networks under the Example object and save each one to disk
+
+EQUATION( "PajekInit" )
+/*
+Produce the Pajek imported network (net_2.net) example
+*/
+
+LOAD_NET( "PajNode", "net" );
+SAVE_NET( "PajNode", "Pajek" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "DirectInit" )
+/*
+Produce the (fully) directed random network example
+*/
+
+INIT_NET( "DirNode", "RANDOM-DIR", V( "numNodes" ),  V( "numLinks" ), 0 );
+SAVE_NET( "DirNode", "Directed" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "UndirInit" )
+/*
+Produce the (fully) undirected random network example
+*/
+
+INIT_NET( "UndNode", "RANDOM-UNDIR", V( "numNodes" ),  V( "numLinks" ), 0 );
+SAVE_NET( "UndNode", "Undirected" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "RandomInit" )
+/*
+Produce the uniform random network example
+*/
+
+INIT_NET( "RandNode", "UNIFORM", V( "numNodes" ), V( "avgOutDeg" ), 0 );
+SAVE_NET( "RandNode", "UniformRandom" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "RenyiInit" )
+/*
+Produce the Renyi-Erdos random network example
+*/
+
+INIT_NET( "RenyiNode", "RENYI-ERDOS", V( "numNodes" ), 0, V( "linkProb" ) );
+SAVE_NET( "RenyiNode", "RenyiErdos" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "CircleInit" )
+/*
+Produce the circle (non-random) network example
+*/
+
+INIT_NET( "CircNode", "CIRCLE", V( "numNodes" ), V( "avgOutDeg" ), 0 );
+SAVE_NET( "CircNode", "Circle" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "SmallWInit" )
+/*
+Produce the small-world random network example
+*/
+
+INIT_NET( "SWnode", "SMALL-WORLD", V( "numNodes" ), V( "avgOutDeg" ), V( "rho" ) );
+SAVE_NET( "SWnode", "SmallWorld" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "ScFreeInit" )
+/*
+Produce the scale-free (power law) random network example
+*/
+
+INIT_NET( "SFnode", "SCALE-FREE", V( "numNodes" ), V( "avgOutDeg" ), V( "expLink" ) );
+SAVE_NET( "SFnode", "ScaleFree" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "StarInit" )
+/*
+Produce the star (non-random) network example
+*/
+
+INIT_NET( "StarNode", "STAR", V( "numNodes" ), 0, 0 );
+SAVE_NET( "StarNode", "Star" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+EQUATION( "LatticeInit" )
+/*
+Produce the lattice network example
+*/
+
+INIT_NET( "LatNode", "LATTICE", V( "numNodes" ), V( "nCol" ), V( "eightNeigbr" ) );
+SAVE_NET( "LatNode", "Lattice" );
+
+PARAMETER;									// do just once
+
+RESULT( 1 )
+
+
+MODELEND
+
+
+CLOSEBEGIN
+
+// save final network as Pajek file
+LOG( "\n Saving final network: %s%s%s_%d.net",
+	 PATH, strlen( PATH ) == 0 ? "" : "/", CONFIG, RND_SEED - 1 );
+SAVE_NETS( network, "Node", CONFIG );
+
+CLOSEEND
+END_EQ_FILE

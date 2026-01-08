@@ -1,4 +1,0 @@
-TARGET=LSD
-FUN=fun_rwalk
-SWITCH_CC=-g
-

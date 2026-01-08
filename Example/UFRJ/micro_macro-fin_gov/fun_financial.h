@@ -20,36 +20,36 @@ Nominal Interest rate is set by the central bank following a (possible) dual man
 "cb_interest_rate_adjustment": absolute increase
 
 */
-	
+
 	v[0]=V("cb_annual_real_interest_rate");
-	
+
 	v[1]=V("cb_target_annual_inflation");
 	v[2]=V("cb_target_capacity");
 	v[3]=V("cb_target_credit_growth");
 	v[4]=V("cb_target_debt_rate");
 	v[5]=VS(external,"exchange_rate_max");
 	v[6]=VS(external,"exchange_rate_min");
-	
+
 	v[11]=VL("Country_Annual_CPI_Inflation",1);
 	v[12]=VL("Country_Idle_Capacity",1);
 	v[13]=VL("Financial_Sector_Total_Stock_Loans_Growth",1);
 	v[14]=VL("Country_Debt_Rate_Firms",1);
 	v[15]=VL("Country_Exchange_Rate",1);
 	v[16]=LAG_GROWTH(country, "Country_Avg_Productivity", 1,1);
-	
+
 	v[21]=v[11]-v[1];
 	v[22]=v[12]-v[2];
 	v[23]=max(0,v[13]-v[3]);
 	v[24]=max(0,v[14]-v[4]);
 	v[25]=max(0,v[15]-v[5]);
 	v[26]=min(0,v[15]-v[6]);
-	
-	
+
+
 	v[30]=V("switch_monetary_policy");
-	
+
 	if(v[30]==0)//no monetary policy rule, fixed nominal interest rate set by "cb_annual_real_interest_rate" parameter
 		v[40]=v[0]+v[11];
-	
+
 	if(v[30]==1)//taylor rule
 	{
 		v[31]=V("cb_sensitivity_inflation");
@@ -66,10 +66,10 @@ Nominal Interest rate is set by the central bank following a (possible) dual man
 			 +v[35]*v[25]
 			 +v[25]*v[26];
 	}
-	
+
 	if(v[30]==2)//smithin rule
-		v[40]=v[11];	
-	
+		v[40]=v[11];
+
 	if(v[30]==3)//pasinetti rule
 		v[40]=v[11]+v[16];
 
@@ -77,7 +77,7 @@ Nominal Interest rate is set by the central bank following a (possible) dual man
 		v[40]=0;
 
 	//Smoothing
-	
+
 	v[41]=V("cb_interest_rate_adjustment");
 	v[42]=pow(1+CURRENT,V("annual_frequency"))-1;					//annual basic interest
 	if(abs(v[40]-v[42])>v[41]&&v[41]!=-1)
@@ -91,16 +91,16 @@ Nominal Interest rate is set by the central bank following a (possible) dual man
 		}
 	else
 		v[43]=v[40];
-	
+
 	v[44]=V("begin_monetary_policy");
-	if(t>v[44]&&v[44]!=-1)
+	if(T>v[44]&&v[44]!=-1)
 		v[45]=v[43];
 	else
 		v[45]=v[42];
-	
+
 	//Quarterly rate
 	v[46]=pow(1+v[45],1/V("annual_frequency"))-1;
-	
+
 RESULT(max(0,v[46]))
 
 
@@ -253,7 +253,7 @@ EQUATION("Financial_Sector_Normalized_HHI")
 /*
 Financial Sector Variable for Analysis
 */
-	v[0]=0;                           		//initializes the CYCLE    
+	v[0]=0;                           		//initializes the CYCLE
 	CYCLE(cur, "BANKS")               		//CYCLE trought all firms of the sector
 	{
 		v[1]=VS(cur, "Bank_Market_Share");  //firm's market share
@@ -262,7 +262,7 @@ Financial Sector Variable for Analysis
 	v[2]=COUNT("BANKS");
 	if (v[2]!=1)
 		v[3]=(v[0]-(1/v[2]))/(1- (1/v[2]));
-	else	
+	else
 		v[3]=1;
 RESULT(v[3])
 
@@ -271,8 +271,8 @@ EQUATION("Financial_Sector_Turbulence")
 /*
 Financial Sector Variable for Analysis
 */
-	v[0]=0;                                           	 //initializes the CYCLE 
-	CYCLE(cur, "BANKS")                              	 //CYCLE trough all firms 
+	v[0]=0;                                           	 //initializes the CYCLE
+	CYCLE(cur, "BANKS")                              	 //CYCLE trough all firms
 	{
 		v[2]=VS(cur,"Bank_Market_Share");   			 //firm's effective market share in current period
 		v[3]=VLS(cur,"Bank_Market_Share",1);			 //firm's effective market share in the last period

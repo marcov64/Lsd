@@ -4,8 +4,8 @@ EQUATION("Government_Desired_Wages")
 /*
 Priority expenses.
 If there are no maximum expenses, it is adjusted by average productivity growth and inflation.
-*/                                     
-	v[0]= LAG_GROWTH(consumption, "Sector_Avg_Price", 1, 1);		   		
+*/
+	v[0]= LAG_GROWTH(consumption, "Sector_Avg_Price", 1, 1);
 	v[1]=V("government_real_growth");
 	v[2]=CURRENT*(1+v[0]+v[1]);
 RESULT(max(0,v[2]))
@@ -14,7 +14,7 @@ RESULT(max(0,v[2]))
 EQUATION("Government_Desired_Unemployment_Benefits")
 /*
 Counter-cyclical Expenses
-Benefit is a share of average wage. 
+Benefit is a share of average wage.
 The amount depends on current unemployment.
 */
 	v[0]=V("government_benefit_rate");
@@ -31,7 +31,7 @@ The amount depends on current unemployment.
 		v[9]=v[6]*(v[0]*v[8]/v[7]);
 		v[1]=v[1]+v[9];
 	}
-	
+
 	v[1]=0;
 	CYCLES(country, cur, "SECTORS")
 	{
@@ -42,7 +42,7 @@ The amount depends on current unemployment.
 		v[8]=VLS(cur, "Sector_Avg_Wage", 1);
 		v[9]=v[5]*(v[0]*v[8]);
 		v[1]=v[1]+v[9];
-	}	
+	}
 RESULT(max(0,v[1]))
 
 
@@ -51,7 +51,7 @@ EQUATION("Government_Desired_Investment")
 Desired Investment Expenses
 Adjusted by a desired real growth rate and avg capital price growth
 */
-	v[0]=V("government_real_growth");		
+	v[0]=V("government_real_growth");
 	v[1]=LAG_GROWTH(capital, "Sector_Avg_Price", 1, 1);
 	v[2]=CURRENT*(1+v[0]+v[1]);
 RESULT(max(0,v[2]))
@@ -62,7 +62,7 @@ EQUATION("Government_Desired_Consumption")
 Desired Consumption Expenses
 Adjusted by a desired real growth rate and avg consumption price growth
 */
-	v[0]=V("government_real_growth");   
+	v[0]=V("government_real_growth");
 	v[1]= LAG_GROWTH(consumption, "Sector_Avg_Price", 1, 1);
 	v[2]=CURRENT*(1+v[0]+v[1]);
 RESULT(max(0,v[2]))
@@ -73,7 +73,7 @@ EQUATION("Government_Desired_Inputs")
 Desired Intermediate Expenses
 Adjusted by a desired real growth rate and avg input price growth
 */
-	v[0]=V("government_real_growth");      
+	v[0]=V("government_real_growth");
 	v[1]=LAG_GROWTH(input, "Sector_Avg_Price", 1, 1);
 	v[2]=CURRENT*(1+v[0]+v[1]);
 RESULT(max(0,v[2]))
@@ -86,7 +86,7 @@ EQUATION("Government_Surplus_Rate_Target")
 /*
 Adjusts government surplus target based on debt to gdp evolution
 */
-	v[0]=V("government_max_surplus_target");                     
+	v[0]=V("government_max_surplus_target");
 	v[1]=V("government_min_surplus_target");
 	v[2]=CURRENT;                   						   //last period's target
 	v[3]=VL("Government_Debt_GDP_Ratio",1);                    //current debt to gdp ratio
@@ -96,24 +96,24 @@ Adjusts government surplus target based on debt to gdp evolution
 	v[6]=V("government_surplus_target_adjustment");			   //adjustment parameter
 	v[9]=V("begin_flexible_surplus_target");
 	v[10]=V("annual_frequency");
-	v[11]= fmod((double) t-1,v[10]);
-	if(t>=v[9]&&v[9]!=-1&&v[11]==0)
+	v[11]= fmod(T-1,v[10]);
+	if(T>=v[9]&&v[9]!=-1&&v[11]==0)
 	{
-	if(v[3]>v[4])                           		   //if debt to gdp is higher than accepted 
+	if(v[3]>v[4])                           		   //if debt to gdp is higher than accepted
 		v[7]=v[2]+v[6];							       //increase surplus target
-	else if (v[3]<v[5])                     		   //if debt to gdp is lower than accepted 
+	else if (v[3]<v[5])                     		   //if debt to gdp is lower than accepted
 		v[7]=v[2]-v[6];								   //deacrease surplus target
 	else											   //if debt to gdp is between acceptable band
 		{
 		if(v[3]>v[8])
 			v[7]=v[2]+v[6];							   //increase surplus target
 		else
-			v[7]=v[2];		
-		}		
+			v[7]=v[2];
+		}
 	}
 	else                                               //if flexible surplus target rule is not active
-		v[7]=v[2];                                     //do not change surplus taget  
-		
+		v[7]=v[2];                                     //do not change surplus taget
+
 	v[8]=max(min(v[0],v[7]),v[1]);
 RESULT(v[8])
 
@@ -151,18 +151,18 @@ Depend on the policy parameter.
 
 v[1]=V("begin_surplus_target_rule");                           //define when surplus target rule begins
 v[2]=V("begin_expenses_ceiling_rule");                         //define when expenses ceiling begins
-																	
+
 v[3]=V("Government_Max_Expenses_Surplus");
 v[4]=V("Government_Max_Expenses_Ceiling");
 
-	if ((t>=v[1]&&v[1]!=-1)&&(t>=v[2]&&v[2]!=-1))
+	if ((T>=v[1]&&v[1]!=-1)&&(T>=v[2]&&v[2]!=-1))
 		v[5]=min(v[3],v[4]);												//surplus rule and ceiling rule
-	else if ((t>=v[1]&&v[1]!=-1)&&(t<v[2]||v[2]==-1))
+	else if ((T>=v[1]&&v[1]!=-1)&&(T<v[2]||v[2]==-1))
 		v[5]=v[3];															//only surplus rule
-	else if ((t<v[1]||v[1]==-1)&&(t>=v[2]&&v[2]!=-1))
+	else if ((T<v[1]||v[1]==-1)&&(T>=v[2]&&v[2]!=-1))
 		v[5]=v[4];															//only ceiling rule
 	else
-		v[5]=-1;															//no rule															
+		v[5]=-1;															//no rule
 RESULT(v[5])
 
 
@@ -210,7 +210,7 @@ else
 		if(V("switch_extra_gov_expenses")==1)
 			v[15]=v[12]+v[14];
 		else
-			v[15]=v[12];	
+			v[15]=v[12];
 }
 WRITE("Government_Effective_Wages", max(0,v[8]));
 WRITE("Government_Effective_Unemployment_Benefits",  max(0,v[9]));
@@ -264,7 +264,7 @@ EQUATION("Government_Surplus_GDP_Ratio")
 	v[3]= v[2]!=0? v[1]/v[2] : 0;
 RESULT(v[3])
 
-	
+
 
 
 

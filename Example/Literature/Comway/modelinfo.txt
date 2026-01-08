@@ -1,3 +1,0 @@
-Game of Life
-0.1
-06 July, 2017

@@ -15,7 +15,7 @@
 // support C++ functions (code at the end of the file)
 #include <lsd_init.h>
 
-#define EQ_USER_FUNCS \
+#define EQ_USER_CFUNS \
 	CFUN_VOID( add_island, int x, int y, double & count ); \
 	CFUN_VOID( set_marker, int x, int y, int color );
 

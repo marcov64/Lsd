@@ -2,6 +2,7 @@
 
 int **dat;
 int **sta;
+int NCol;
 MODELBEGIN
 
 
@@ -132,7 +133,7 @@ Initialize the lattice:
 
 v[10]=V("PlotLattice");
 v[8]=V("p");
-v[2]=V("NCol");
+NCol=v[2]=V("NCol");
 v[3]=V("NRow");
 v[4]=V("PixWidth");
 v[5]=V("PixHeight");
@@ -181,8 +182,7 @@ MODELEND
 void close_sim(void)
 {
 double v[10];
-v[0]=root->cal("NRow",0);
-v[1]=root->cal("NCol",0);
+v[1]=NCol;
 for(v[2]=0; v[2]<v[1]; v[2]++)
  {
   delete sta[(int)v[2]];

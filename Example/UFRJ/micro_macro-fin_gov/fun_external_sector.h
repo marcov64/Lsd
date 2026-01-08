@@ -10,11 +10,11 @@ Real value of external income.
 	v[4]=V("external_income_sd");							//fixed external income sd
 	v[5]=LAG_GROWTH(country, "Country_Real_GDP", 1, 1);
 	v[7]=V("external_income_adjustmnent");                  //exogenous parameter that amplifies external growth based on domestic growth
-	v[8]=norm((v[3]+v[5]*v[7]), v[4]);						//random draw from a normal distribution with average equals to past growth and standard deviation equals to past growth in absolute value	
+	v[8]=norm((v[3]+v[5]*v[7]), v[4]);						//random draw from a normal distribution with average equals to past growth and standard deviation equals to past growth in absolute value
 	v[9]=V("external_shock_begin");          				//defines when the shock happens
 	v[10]=V("external_shock_duration");       				//defines how long the shock lasts
 	v[11]=V("external_shock_size");           				//defines the size, in percentage, of the shock
-	if(t>=v[9]&&t<v[9]+v[10])
+	if(T>=v[9]&&T<v[9]+v[10])
 		v[12]=v[8]*(1+v[11]);
 	else
 		v[12]=v[8];
@@ -73,7 +73,7 @@ Country net capital flows are a function of the quarterly nominal interest rate 
 RESULT(v[6])
 
 EQUATION("Country_International_Reserves")
-	
+
 	v[1]=V("Country_Trade_Balance");
 	v[2]=V("Country_Capital_Flows");
 	v[3]=VL("Country_International_Reserves",1);
@@ -130,9 +130,9 @@ Nominal exchange rate.
 	//v[3]=v[0]+v[2]*v[1];
 	v[4]=V("exchange_rate_min");
 	v[5]=V("exchange_rate_max");
-	v[6]=max(min(v[3],v[5]),v[4]);	
+	v[6]=max(min(v[3],v[5]),v[4]);
 	v[7]=V("begin_flexible_exchange_rate");
-	if(t>v[7]&&v[7]!=-1)
+	if(T>v[7]&&v[7]!=-1)
 		v[8]=v[6];
 	else
 		v[8]=v[0];

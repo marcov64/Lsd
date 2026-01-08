@@ -126,241 +126,177 @@ MODELREPORT modelreport.html
 DESCRIPTION
 
 Object_Root
-(no description available)
+
 END_DESCRIPTION
 
 Object_Market
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Variable_InitTrade
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Variable_EndTrade
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Variable_Init
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Object_Supply
 (no description available )
-_INIT_
-
 END_DESCRIPTION
 
 Function_Purchase
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Parameter_alpha
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Variable_TotalUsers
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Function_IsBroken
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Variable_TotalSales
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Parameter_IncludeBroken
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Variable_Exit
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Variable_Entry
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Variable_AvBD
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Parameter_ProbEntry
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Function_GenerateId
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Variable_NumFirms
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Parameter_VarBD
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Parameter_StepBD
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Parameter_HighestBD
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Parameter_LowestBD
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Variable_MinBD
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Variable_TotalMarketing
-(no description available)
+
 _INIT_
- All 1 instances equal to 10000.
+All 1 instances equal to 10000.
 END_DESCRIPTION
 
 Parameter_SpeedTrack
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Object_Firm
 (no description available )
-_INIT_
-
 END_DESCRIPTION
 
 Parameter_IdFirm
-(no description available)
+
 _INIT_
- All 100 instances increasing from 1 with steps 1. The value is increased every 1 instances.
+All 100 instances increasing from 1 with steps 1. The value is increased every 1 instances.
 END_DESCRIPTION
 
 Variable_BD
-(no description available)
+
 _INIT_
- All 10 instances equal to 0.15.
+All 10 instances equal to 0.15.
 END_DESCRIPTION
 
 Variable_NumUsers
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Variable_ms_user
-(no description available)
+
 _INIT_
- All 100 instances equal to 0.01.
+All 100 instances equal to 0.01.
 END_DESCRIPTION
 
 Variable_Visibility
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Parameter_Sales
-(no description available)
+
 _INIT_
- All 10 instances equal to 0.
+All 10 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_NumLost
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Variable_ms_sales
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Variable_Marketing
-(no description available)
+
 _INIT_
- All 10 instances equal to 1000.
+All 10 instances equal to 1000.
 END_DESCRIPTION
 
 Variable_MarketingIndex
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Object_Demand
 (no description available )
-_INIT_
-
 END_DESCRIPTION
 
 Object_Consumer
 (no description available )
-_INIT_
-
 END_DESCRIPTION
 
 Variable_ProdUsed
-(no description available)
-_INIT_
 
 END_DESCRIPTION
 
 Parameter_IdCons
-(no description available)
+
 _INIT_
- All 10000 instances increasing from 1 with steps 1. The value is increased every 1 instances.
+All 10000 instances increasing from 1 with steps 1. The value is increased every 1 instances.
 END_DESCRIPTION
 
 
@@ -389,7 +325,7 @@ v[0]=V("IsBroken"); //breaks ?
 if(v[0]==1)
   v[1]=V("Purchase"); //yes, buy a new produc
 else 
-  v[1]=val[0]; //no, keep on using the previous one
+  v[1]=CURRENT; //no, keep on using the previous one
 
 RESULT(v[1])
 
@@ -586,7 +522,8 @@ CYCLE(cur, "Consumer")
  {
  cur1=RNDDRAWFAIR("Firm");  //choose randomly one of the products
  v[1]=VS(cur1,"IdFirm"); //return the ID of the chosen firm
- INCRS(cur1,"NumUsers",1);//increase the number of users for the chosen firm
+ //increase the number of users for the chosen firm
+ WRITELS( cur1, "NumUsers", VLS( cur1, "NumUsers", 1 ) + 1, -1 );
  WRITES(cur,"ProdUsed",v[1]);
  v[0]=v[0]+1; //count the number of consumers
  }
@@ -751,7 +688,4 @@ void close_sim(void)
 {
 
 }
-
-
-
 END_EQ_FILE

@@ -15,6 +15,7 @@
 # ==== User parameters ====
 
 useSubbotools <- TRUE          # use Subbotools (T) or normalp package (F)
+Rsubbotools <- TRUE            # use newer Subbotools R package instead of system's
 subboMaxSample <- 5000         # maximum sample size in Subbotin fits (speed control)
 subboMinSample <- 20           # minimum sample size in Subbotin fits (significance control)
 subboBlimit <- 5               # maximum limit for b to be considered valid (0=no limit)
@@ -26,20 +27,21 @@ def.digits <- 4                # default number of digits after comma for printi
 
 # ==== required libraries (order is relevant!) ====
 
-reqLibs <- c( "LSDsensitivity", "normalp", "nortest", "mFilter", "matrixStats",
-              "tseries", "gplots", "plotrix", "extrafont", "rmutil" )
+reqLibs <- c( "LSDinterface", "LSDsensitivity", "Rsubbotools", "normalp",
+              "nortest", "mFilter", "matrixStats", "tseries", "gplots",
+              "plotrix", "extrafont", "rmutil" )
+
+repos <- c( "https://cloud.r-project.org", "https://erocoar.r-universe.dev" )
 
 for( lib in reqLibs ) {
-  if( ! require( lib, character.only = TRUE, quietly = TRUE ) )
-    install.packages( lib, verbose = FALSE )
-  require( lib, character.only = TRUE, warn.conflicts = FALSE, quietly = TRUE )
-}
+  if( ! lib %in% rownames( installed.packages( ) ) )
+    install.packages( lib, verbose = FALSE, repos = repos )
 
-# subbotools location (leave blank in linux/Mac)
-if( tolower( .Platform$OS.type ) == "windows" ){
-  subbotoolsFolder <- "subbotools-1.2.1-win64\\"
-} else{
-  subbotoolsFolder <- ""
+  suppressPackageStartupMessages( require( lib, character.only = TRUE,
+                                           warn.conflicts = FALSE,
+                                           quietly = TRUE  ) )
+  if( ! lib %in% rownames( installed.packages( ) ) )
+    stop( "Cannot install library '", lib,"'" )
 }
 
 # remove warnings for support functions
@@ -120,32 +122,64 @@ findYlim <- function( yMin, yMax, zero = FALSE ) {
 #
 # Input:
 #   x: series
+#   silent: no warnings if TRUE
 #
 
-exec_subbofit <- function( x, type  = "symmetric" ) {
-  if( ! exists( "folder" ) )  # folder where to run Subbotools defined?
-    folder <- "."
+exec_subbofit <- function( x, Rpackage = TRUE, type  = "symmetric" ) {
+
+  # default return in case of error
+  subboFit <- c( rep( as.numeric( NA ), 10 ) )
+
+  cat( "  ", type, "subbofit, n =", length( x ), "... " )
+
+  if( Rpackage ) {
+    if( type == "asymmetric" ) {
+      invisible( capture.output( sf <- subboafit( x ) ) )
+
+      if( ! exists( "sf" ) )
+        return( subboFit )
+
+      subboFit <- c( sf$dt$coef[ 1 ], sf$dt$coef[ 2 ], sf$dt$coef[ 3 ],
+                     sf$dt$coef[ 4 ], sf$dt$coef[ 5 ],
+                     sf$dt$std_error[ 1 ], sf$dt$std_error[ 2 ],
+                     sf$dt$std_error[ 3 ], sf$dt$std_error[ 4 ],
+                     sf$dt$std_error[ 5 ] )
+    } else {
+      invisible( capture.output( sf <- subbofit( x ) ) )
+
+      if( ! exists( "sf" ) )
+        return( subboFit )
+
+      subboFit <- c( sf$dt$coef[ 1 ], sf$dt$coef[ 2 ], sf$dt$coef[ 3 ],
+                     sf$dt$std_error[ 1 ], sf$dt$std_error[ 2 ],
+                     sf$dt$std_error[ 3 ] )
+    }
+  } else {
+
+    if( type == "asymmetric" )
+      command <- "subboafit"
+    else
+      command <- "subbofit"
+
+    outStr <- system2( command, args = "-O 3", input = as.character( x ),
+                       stdout = TRUE, stderr = FALSE )
+    try( subboFit <- sapply( scan( textConnection ( outStr ), what = character( ), quiet = TRUE ),
+                             as.numeric, silent = TRUE ),
+         silent = TRUE )
+  }
+
   if( type == "asymmetric" )
-    command <- "subboafit"
-  else
-    command <- "subbofit"
-
-  cat( "", as.character( Sys.time( ) ), "->", type, "subbofit, n =", length( x ), "... " )
-
-  outStr <- system2( paste0( subbotoolsFolder, command ), args = "-O 3",
-                     input = as.character( x ), stdout = TRUE, stderr = FALSE )
-  try( subboFit <- scan( textConnection ( outStr ), quiet = TRUE ), silent = TRUE )
-
-  if( type == "asymmetric" )
-    se <- paste( subboFit[ 6 ], subboFit[7] )
+    se <- paste( subboFit[ 6 ], subboFit[ 7 ] )
   else
     se <- subboFit[ 4 ]
-  cat( "done, b_se =", se, "\n" )
+
+  cat( "b_se =", se, "\n" )
 
   return( subboFit )
 }
 
-fit_subbotin <- function( x ){
+fit_subbotin <- function( x, silent = FALSE ) {
+
   # default return in case of error
   subboFit <- c( as.numeric( NA ), as.numeric( NA ), as.numeric( NA ) )
 
@@ -153,27 +187,36 @@ fit_subbotin <- function( x ){
   x <- x[ !is.na( x ) ]
   if( length( x ) > subboMaxSample )
     x <- sample( x, subboMaxSample )
-  if( length( x ) < subboMinSample ){
-    warning( "Too few observations to fit Subbotin: returning NA")
-    return( list( b = subboFit[1], a = subboFit[2], m = subboFit[3] ) )
+
+  if( length( x ) < subboMinSample ) {
+    if( ! silent )
+      warning( "Too few observations to fit Subbotin: returning NA")
+    return( list( b = subboFit[ 1 ], a = subboFit[ 2 ], m = subboFit[ 3 ] ) )
   }
 
   if( useSubbotools && length( x ) >= 50 )
-    subboFit <- exec_subbofit( x )
-  else{       # Alternative calculation using the normalp package
-    sf <- paramp( x )
-    sf$p <- estimatep( x, mu = sf$mean, p = sf$p, method = "inverse" )
-    # use Subbotools when p < 1, as normalp doesn't work in this condition
-    if( sf$p <= 1.01 )
-      subboFit <- exec_subbofit( x )
-    else
-      subboFit <- c( sf$p, sf$sp, sf$mp )
+    subboFit <- exec_subbofit( x, Rsubbotools )
+  else {       # Alternative calculation using the normalp package
+    sf <- try( paramp( x ), silent = TRUE )
+
+    if( class( sf ) != "try-error" ) {
+      sf$p <- estimatep( x, mu = sf$mean, p = sf$p, method = "inverse" )
+      # use Subbotools when p < 1, as normalp doesn't work in this condition
+      if( sf$p <= 1.01 )
+        subboFit <- exec_subbofit( x )
+      else
+        subboFit <- c( sf$p, sf$sp, sf$mp )
+    } else {
+      if( useSubbotools )
+        subboFit <- exec_subbofit( x )
+    }
   }
 
   # check for degenerated distribution
   if( subboBlimit != 0 && ! is.na( subboFit[1] ) && subboFit[1] > subboBlimit ){
     subboFit <- c( as.numeric( NA ), as.numeric( NA ), as.numeric( NA ) )
-    warning( "Degenerated Subbotin distribution: returning NA")
+    if( ! silent )
+      warning( "Degenerated Subbotin distribution: returning NA")
   }
 
   return( list( b = subboFit[1], a = subboFit[2], m = subboFit[3] ) )

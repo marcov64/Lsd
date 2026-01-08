@@ -1,4 +1,3 @@
-//#define EIGENLIB			// uncomment to use Eigen linear algebra library
 //#define NO_POINTER_INIT	// uncomment to disable pointer checking
 #include "fun_head_fast.h"
 
