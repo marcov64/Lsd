@@ -894,11 +894,12 @@ int gui::Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const
 /*************************************************************
  CHECK_TERM_EXEC
  Check if terminal executable/lib files are older than
- running executable file
+ running executable files (exe and dll)
  *************************************************************/
 bool gui::check_term_exec( const char *term_exe )
 {
 	char exe[ MAX_PATH_LENGTH ], lib[ MAX_PATH_LENGTH ];
+	int statLib, statExe, statTerm;
 	struct stat stTermExe, stLib, stExe;
 
 	if ( strlen( lsd::lib_path ) > 0 )
@@ -911,10 +912,14 @@ bool gui::check_term_exec( const char *term_exe )
 	else
 		lsd::strcpyn( exe, lsd::exec_file, MAX_PATH_LENGTH );
 
+	statTerm = stat( term_exe, &stTermExe );
+	statLib = stat( lib, &stLib );
+	statExe = stat( exe, &stExe );
+
 	// get OS info for files
-	if ( stat( term_exe, &stTermExe ) == 0 && ( stat( lib, &stLib ) == 0 || ( stat( lib, &stExe ) == 0 ) ) )
-		if ( ( stat( lib, &stLib ) == 0 && difftime( stTermExe.st_mtime, stLib.st_mtime ) < 0 ) ||
-			 ( stat( lib, &stExe ) == 0 && difftime( stTermExe.st_mtime, stExe.st_mtime ) < 0 ) )
+	if ( statTerm == 0 && ( statLib == 0 || statExe == 0 ) )
+		if ( ( statLib == 0 && difftime( stTermExe.st_mtime, stLib.st_mtime ) < 0 ) ||
+			 ( statExe == 0 && difftime( stTermExe.st_mtime, stExe.st_mtime ) < 0 ) )
 			return true;
 
 	return false;

@@ -29,7 +29,7 @@ ifeq ($(OS),Windows_NT)
   DLL_EXT=.dll
   SWITCH_CC_DLL+=-shared
   CP_TERM=cython$(EXE_EXT)
-  PYT_VER=$(shell $(GNU_BIN)python-version)
+  PYT_VER=$(shell $(GNU_BIN)python-version $(GNU_BIN))
   PYT_INCLUDE+=-I$(GNU_DIR)include/python$(PYT_VER)
   PYT_LIB_PATH=-L$(GNU_BIN)
   PYT_CFG=$(GNU_BIN)python-config $(PYT_VER)
