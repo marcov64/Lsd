@@ -17,8 +17,6 @@
  Macro compilation test file.
  *************************************************************/
 
-//#define NO_POINTER_CHECK
-//#define NO_POINTER_INIT
 #define LEGACY_CODE
 
 #define EQ_USER_VARS int a; double b;
@@ -519,14 +517,20 @@ s = msg;
 a = deb( p, c, "X", & b );
 a = deb( p, c, "X", & b, false );
 a = deb( p, c, "X", & b, false, "" );
-const simulation *z = SIM;
-const variable *w = var;
-cur = caller;
-cur = root;
 cmd( "X" );
 cmd( "%g", 1. );
 plog( "X" );
 plog( "%g", 1. );
+const simulation *z = SIM;
+const variable *w = var;
+cur = c;
+cur = caller;
+cur = p;
+b = t;
+cur = root;
+a = seed;
+quit = 0;
+object *o = NULL;
 s = path;
 b = poidev( 1. );
 cur = go_brother( cur1 );

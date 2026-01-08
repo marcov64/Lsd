@@ -676,7 +676,6 @@
 	#define t T
 	#define root ROOT
 	#define seed RND_SEED
-	#define plog PLOG
 	#define quit _sim_->quit
 	#define object lsd::object
 	#define path ( SIM->conf_path )
