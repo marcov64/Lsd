@@ -1293,8 +1293,13 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 	fscanf( f, "%999s", msg );					// should be SEED
 	if ( ! ( ! strcmp( msg, "SEED" ) && fscanf( f, "%d", & seed ) && seed > 0 ) )
 	{
-		load = 5;
-		goto endLoad;
+		if ( seed <= 0 )
+			seed = 1;
+		else
+		{
+			load = 5;
+			goto endLoad;
+		}
 	}
 
 	empty_assimilation( );
