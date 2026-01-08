@@ -4169,7 +4169,7 @@ int modman( int argn, const char **argv )
 		{
 			Tcl_LinkVar( gui::interp, "choiceSM", ( char * ) & i, TCL_LINK_INT );
 
-			cmd( "showmodel $group_dir $model_name" );
+			cmd( "showmodel $group_dir $model_dir" );
 
 			i = 0;
 			while ( i == 0 )

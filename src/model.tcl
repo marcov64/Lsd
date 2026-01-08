@@ -34,7 +34,7 @@ set months [ list January February March April May June July August September Oc
 #************************************************
 # SHOWMODEL
 #************************************************
-proc showmodel { groupdir { modsel "" } } {
+proc showmodel { groupdir { modeldir "" } } {
 	global lmn lmd ldn lrn lbn result choiceSM lver rootname group group_new group_dir model_group model_dir browser_dir upSymbol groupSymbol lsd_root lsd_example lsd_trash selstate newstate editstate copystate pastestate delstate curpastestate curcopystate memory small_character GROUP_TXT_INFO MODEL_TXT_INFO GROUP_XML_CONFIG MODEL_XML_CONFIG DESCRIPTION colorsTheme darkTheme
 
 	unset -nocomplain lmn lver lmd ldn lrn lbn group
@@ -477,7 +477,7 @@ proc showmodel { groupdir { modsel "" } } {
 			.l.l.l insert end "$mn (v. $ver)"
 			.l.l.l itemconf end -fg $colorsTheme(mod)
 
-			if { "$modsel" ne "" && "$modsel" eq $mn } {
+			if { "$modeldir" ne "" && [ file normalize "$modeldir" ] eq [ file normalize "$groupdir/$i" ] } {
 				set selpos [ expr { [ .l.l.l index end ] - 1 } ]
 			}
 
@@ -645,10 +645,10 @@ proc medit i {
 		}
 
 		destroytop .l.e
-		showmodel [ lindex $lrn $result ] $newname
+		showmodel [ lindex $lrn $result ] [ lindex $ldn $result ]
 	} {
 		destroytop .l.e
-		showmodel [ lindex $lrn $result ] [ lindex $lmn $result ]
+		showmodel [ lindex $lrn $result ] [ lindex $ldn $result ]
 	}
 
 	bind .l.e.n.n <Return> {
@@ -732,7 +732,7 @@ proc mpaste i {
 	.l.p.n.n selection range 0 end
 	focus .l.p.n.n
 
-	set newname ""
+	set newdir ""
 	set choiceSM 0
 	tkwait variable choiceSM
 
@@ -761,12 +761,12 @@ proc mpaste i {
 				puts -nonewline $f "$appdsc"
 				close $f
 
-				set newname $appl
+				set newdir $appd
 			}
 		}
 	}
 
 	destroytop .l.p
 	set choiceSM 0
-	showmodel [ lindex $lrn $i ] $newname
+	showmodel [ lindex $lrn $i ] $newdir
 }
