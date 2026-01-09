@@ -47,6 +47,7 @@ DEP_GUI=$(DEP_LIB) $(SRC_DIR)LSD.h
 ifeq ($(OS),Windows_NT)
   PLAT=windows
   TMP_DIR=$(TMP)
+  ALL_FILES=\*
   EXE_EXT=.exe
   DLL_EXT=.dll
   WRC=windres -D_WIN32
@@ -64,6 +65,7 @@ ifeq ($(OS),Windows_NT)
   LIB_END=-Wl,--no-whole-archive
   INCLUDE+=-I$(PATH_TCLTK_HEADER)
 else
+  ALL_FILES=*
   ifeq ($(shell uname -s),Darwin)
     PLAT=mac
     TMP_DIR=$(TMPDIR)
@@ -319,7 +321,7 @@ $(MANIF_LSD): $(SRC_DIR)LSD.exe.manifest.rc $(SRC_DIR)LSD.exe.manifest
 clean: cleanLMM cleanLSD
 
 cleanLMM:
-	$(RM) $(OBJ_DIR_LMM)\* $(LSDROOT)/$(PKG_LMM)$(TARGET_LMM)$(EXE_EXT)
+	$(RM) $(OBJ_DIR_LMM)$(ALL_FILES) $(LSDROOT)/$(PKG_LMM)$(TARGET_LMM)$(EXE_EXT)
 
 cleanLSD:
-	$(RM) $(OBJ_DIR_LSD)\* $(LIB_BASE) $(LIB_GUI) $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT) $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)
+	$(RM) $(OBJ_DIR_LSD)$(ALL_FILES) $(LIB_BASE) $(LIB_GUI) $(LSDROOT)/$(PKG_LSD)$(TARGET_LSD)$(EXE_EXT) $(LSDROOT)/$(PKG_LSD)lib$(TARGET_LSD)$(DLL_EXT)

@@ -1577,7 +1577,7 @@ namespace lsd
 	void finish_lib( void );
 	void handle_signals( void ( * handler ) ( int signum ) );
 	void inhibit_system_sleep( void );
-	void init_lib( assimilation *_da, description *_desc = NULL );
+	void init_lib( description *_desc = NULL, assimilation *_da = NULL );
 	void lsd_exit( int v, bool clean = false );
 	void msleep( unsigned msec = 1000 );
 	void plog_master( const char *cm, ... );

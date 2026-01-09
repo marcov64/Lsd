@@ -35,9 +35,7 @@
 #define SEP	",;\t"					// column separators to use
 
 // objects which must be allocated in the heap
-lsd::assimilation da;				// data assimilation object (unused)
 lsd::description desc;				// element description object
-lsd::simulation sim;				// single LSD simulation terminal instance
 
 // command line strings
 const char lsdCmdMsg[ ] = "This is the LSD Initial Values Range Reader.";
@@ -55,8 +53,9 @@ int main( int argn, const char **argv )
 	int i;
 	FILE *f;
 
-	// initialize LSD library
-	lsd::init_lib( & da, & desc );
+	// initialize LSD library and create master simulation object
+	lsd::init_lib( & desc );
+	lsd::simulation sim;				// must be defined AFTER init_lib!
 
 	// assume exec path is included in file name, use CWD if not
 	lsd::set_exec( NULL, argv[ 0 ] );
@@ -161,7 +160,8 @@ int main( int argn, const char **argv )
 		lsd::lsd_exit( 10 );
 	}
 
-	fclose( f );
+	if ( f != NULL )
+		fclose( f );
 
 	if ( sim.sens == NULL )
 	{

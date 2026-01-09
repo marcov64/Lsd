@@ -23,10 +23,6 @@
 
 #define SEP	",;\t"					// column separators to use
 
-// objects which must be allocated in the heap
-lsd::assimilation da;				// data assimilation object (unused)
-lsd::simulation sim;				// single LSD simulation terminal instance
-
 // command line strings
 const char lsdCmdMsg[ ] = "This is the LSD Saved Variable Reader.";
 const char lsdCmdDsc[ ] = "It reads a LSD configuration file (.lsd) and shows the variables/parameters\nbeing saved, optionally saving them in a comma separated text file (.csv).\n";
@@ -43,8 +39,9 @@ int main( int argn, const char **argv )
 	int i;
 	FILE *f;
 
-	// initialize LSD library
-	lsd::init_lib( & da );
+	// initialize LSD library and create master simulation object
+	lsd::init_lib( );
+	lsd::simulation sim;				// must be defined AFTER init_lib!
 
 	// assume exec path is included in file name, use CWD if not
 	lsd::set_exec( NULL, argv[ 0 ] );

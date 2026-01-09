@@ -38,7 +38,6 @@ int parse_cmdline( int argn, const char **argv, lsd::simulation & sim, lsd::assi
 
 // objects which must be allocated in the heap
 lsd::assimilation da;				// data assimilation object (unused)
-lsd::simulation sim;				// single LSD simulation terminal instance
 
 // command line strings
 const char lsdCmdMsg[ ] = "This is the terminal version of LSD.";
@@ -52,8 +51,9 @@ int main( int argn, const char **argv )
 {
 	int res = -1;
 
-	// initialize LSD library
-	lsd::init_lib( & da );
+	// initialize LSD library and create master simulation object
+	lsd::init_lib( NULL, & da );
+	lsd::simulation sim;				// must be defined AFTER init_lib!
 
 #ifndef _NT_
 	// register all signal handlers

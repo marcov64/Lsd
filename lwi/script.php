@@ -63,13 +63,13 @@ function check_config( ) {
 		}
     }
 
-    if ( $sa_config != "" && file_exists( $sa_config ) ) {
+    if ( ! empty( $sa_config ) && file_exists( $sa_config ) ) {
         $sa = " -s " . $sa_config;
     } else {
 		$sa = "";
 	}
 
-    if ( ! file_exists( $input_config ) || ( file_exists( $input_config ) && filemtime( $input_config ) < filemtime( $lsd_config ) ) ) ) {
+    if ( ! file_exists( $input_config ) || ( file_exists( $input_config ) && filemtime( $input_config ) < filemtime( $lsd_config ) ) ) {
         if ( file_exists( $limits_exec ) ) {
             exec( $limits_exec . " -f " . $lsd_config . $sa . " -o " . $input_config, $shell_out, $shell_err );
 			if ( $shell_err !== 0 ) {

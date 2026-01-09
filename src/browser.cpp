@@ -68,7 +68,7 @@ int gui::load_gui( const char **argv )
 	lsd::object *r;
 
 	// initialize LSD library
-	lsd::init_lib( & da, & desc );
+	lsd::init_lib( & desc, & da );
 
 	// initialize tcl/tk
 	init_tcl_tk( argv[ 0 ], "lsd" );

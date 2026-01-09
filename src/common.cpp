@@ -3064,7 +3064,7 @@ void gui::color_init( const char *window )
  *************************************************************/
 void gui::color_text( const char *window, bool source_file, int ht_level, long first_line, long last_line )
 {
-	char *ccount, *cpos, *count[ TOT_COLOR ], *pos[ TOT_COLOR ], end_str[ 16 ], *s;
+	char *ccount, *cpos, *count[ TOT_COLOR ], *pos[ TOT_COLOR ], end_str[ 25 ], *s;
 	const char *pcount, *ppos;
 	unsigned i, maxColor;
 	unsigned long j, k, tsize = 0, curLin = 0, curCol = 0, size[ TOT_COLOR ];
@@ -3078,7 +3078,7 @@ void gui::color_text( const char *window, bool source_file, int ht_level, long f
 	if ( last_line <= 0 )			// convert code 0 for end of text
 		strcpy( end_str, "end" );
 	else
-		snprintf( end_str, 16, "%ld.end", last_line );
+		snprintf( end_str, 25, "%ld.end", last_line );
 
 	// remove color tags
 	for ( i = 0; i < TOT_COLOR; ++i )

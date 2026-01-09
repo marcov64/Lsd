@@ -43,7 +43,7 @@ $flag_pref = "../tmp/";         // prefix to execution flag files (server contro
 // file names (relative to index.php path)
 $lsd_exec = "../lsd_term";          // model executable command
 $lsd_config = "../lwi.lsd";         // LSD model configuration file to use
-$sa_config = "";                    // LSD model parameter-range file to use
+$sa_config = "../lwi.sa";           // LSD model parameter-range file to use
 $limits_exec = "../lsd_getlimits";  // LSD getlimits executable (no extension)
 $saved_exec = "../lsd_getsaved";    // LSD getsaved executable (no extension)
 $confgen_exec = "../lsd_confgen";   // LSD confgen executable (no extension)

@@ -73,7 +73,7 @@ namespace lsd
 /*************************************************************
  INIT_LIB
  *************************************************************/
-void lsd::init_lib( assimilation *_da, description *_desc )
+void lsd::init_lib( description *_desc, assimilation *_da )
 {
 	da = _da;
 	desc = _desc;

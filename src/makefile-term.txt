@@ -25,6 +25,7 @@ ifeq ($(OS),Windows_NT)
   GNU_DIR=$(LSDROOT)/gnu/
   GNU_BIN=$(GNU_DIR)bin/
   OBJ_DIR=$(TMP)/$(TARGET_TERM)/
+  ALL_FILES=\*
   EXE_EXT=.exe
   DLL_EXT=.dll
   SWITCH_CC_DLL+=-shared
@@ -34,27 +35,24 @@ ifeq ($(OS),Windows_NT)
   PYT_LIB_PATH=-L$(GNU_BIN)
   PYT_CFG=$(GNU_BIN)python-config $(PYT_VER)
 else
+  ALL_FILES=*
+  EXE_EXT=
+  PYT_VER=$(shell python3 -c "import sys; print('.'.join( map( str, sys.version_info[ : 2 ] ) ) )")
+  PYT_LIB_PATH=$(shell python3 -c "from distutils import sysconfig; print( sysconfig.get_config_var( 'LIBDIR' ) )")
+  PYT_CFG=python$(PYT_VER)-config
   ifeq ($(shell uname -s),Darwin)
     OBJ_DIR=$(TMPDIR)/$(TARGET_TERM)/
-    EXE_EXT=
     DLL_EXT=.dylib
     MAC_FRMWRK=-framework IOKit -framework CoreFoundation
     GLOBAL_CC+=-std=c++17 -mmacosx-version-min=11.0
     SWITCH_CC_LNK_DLL+=-dynamiclib -flat_namespace -install_name @executable_path/lib$(TARGET_TERM)$(DLL_EXT)
     CP_TERM=/usr/local/opt/cython/bin/cython
-    PYT_VER=$(shell python3 -c "import sys; print('.'.join( map( str, sys.version_info[ : 2 ] ) ) )")
-    PYT_LIB_PATH=$(shell python3 -c "from distutils import sysconfig; print( sysconfig.get_config_var( 'LIBDIR' ) )")
-    PYT_CFG=python$(PYT_VER)-config
   else
     OBJ_DIR=/tmp/$(TARGET_TERM)/
-    EXE_EXT=
     DLL_EXT=.so
     SWITCH_CC_DLL+=-shared -fPIC
     SWITCH_CC_LNK+=-Wl,-rpath '-Wl,$$ORIGIN'
     CP_TERM=cython
-    PYT_VER=$(shell python3 -c "import sys; print('.'.join( map( str, sys.version_info[ : 2 ] ) ) )")
-    PYT_LIB_PATH=$(shell python3 -c "from distutils import sysconfig; print( sysconfig.get_config_var( 'LIBDIR' ) )")
-    PYT_CFG=python$(PYT_VER)-config
   endif
 endif
 
@@ -189,4 +187,4 @@ $(OBJ_DIR)$(PYT_TARGET).cpp: $(LIB_DIR)pythonAPI.pyx $(LIB_DIR)pythonAPI.pxd $(L
 
 # remove compiled files
 clean:
-	$(RM) $(OBJ_DIR)\* lib$(TARGET_TERM)$(DLL_EXT) $(TARGET_TERM)$(EXE_EXT) $(PYT_LIB)
+	$(RM) $(OBJ_DIR)$(ALL_FILES) lib$(TARGET_TERM)$(DLL_EXT) $(TARGET_TERM)$(EXE_EXT) $(PYT_LIB)

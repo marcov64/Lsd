@@ -30,13 +30,13 @@ SWITCH_CC= -O3
 SWITCH_CC_LNK=
 
 # Libraries options
-PATH_HEADER=$(LSDROOT)/gnu/include
-PATH_LIB=$(LSDROOT)/gnu/lib/gcc
+PATH_HEADER=.
+PATH_LIB=.
 LIB=-lz
 
 # Compiler options
 CC=g++
-GLOBAL_CC=-march=corei7-avx -Wall -Wextra -Wno-unused-parameter -Wno-implicit-fallthrough
+GLOBAL_CC=-march=corei7-avx -Wall -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-implicit-fallthrough
 
 # specify where are the sources of LSD
 SRC_DIR=$(LSDROOT)/$(SRC)/
@@ -52,8 +52,10 @@ SWITCH_CC_TERM=$(GLOBAL_CC) $(SWITCH_CC) -D_TERM_
 # handle platform-specific stuff
 ifeq ($(OS),Windows_NT)
   OBJ_DIR=$(TMP)/lwi/
+  ALL_FILES=\*
   EXE_EXT=.exe
 else
+  ALL_FILES=*
   ifeq ($(shell uname -s),Darwin)
     OBJ_DIR=$(TMPDIR)/lwi/
     EXE_EXT=-mac
@@ -172,4 +174,4 @@ $(OBJ_DIR)pugixml.o: $(CLIB_DIR)pugixml.cpp $(CLIB_DIR)pugixml.hpp $(CLIB_DIR)pu
 
 # remove compiled files
 clean:
-	$(RM) $(OBJ_DIR)\* $(TARGET_1)$(EXE_EXT) $(TARGET_2)$(EXE_EXT) $(TARGET_3)$(EXE_EXT) $(TARGET_4)$(EXE_EXT)
+	$(RM) $(OBJ_DIR)$(ALL_FILES) $(TARGET_1)$(EXE_EXT) $(TARGET_2)$(EXE_EXT) $(TARGET_3)$(EXE_EXT) $(TARGET_4)$(EXE_EXT)
