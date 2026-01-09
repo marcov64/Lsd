@@ -22,7 +22,6 @@ MODELEND
 
 // do not add Equations in this area
 
-
 CLOSEBEGIN
 // close simulation special commands go here
 CLOSEEND

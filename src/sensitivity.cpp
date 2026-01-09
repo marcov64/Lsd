@@ -224,23 +224,6 @@ int lsd::sensitivity::dataentry( void )
 
 
 /*************************************************************
- SEARCH_SENSITIVITY
- Find element in sensitivity data linked list
- *************************************************************/
-lsd::sensitivity *lsd::simulation::search_sensitivity( const char *lab, int lag )
-{
-	sensitivity *cs;
-
-	for ( cs = sens; cs != NULL; cs = cs->next )
-		if ( ! strcmp( cs->label, lab ) &&
-			 ( cs->param == 1 || cs->lag == lag ) )
-			 break;
-
-	return cs;
-}
-
-
-/*************************************************************
  NUM_SENSITIVITY_POINTS
  Calculate the sensitivity space size
  *************************************************************/

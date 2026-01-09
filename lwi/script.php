@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
+ * Copyright (C) 2026 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,13 +63,15 @@ function check_config( ) {
 		}
     }
 
-    if ( ! file_exists( $sa_config ) ) {
-        die( "LSD sensitivity analysis file missing" );
-    }
+    if ( $sa_config != "" && file_exists( $sa_config ) ) {
+        $sa = " -s " . $sa_config;
+    } else {
+		$sa = "";
+	}
 
-    if ( ! file_exists( $input_config ) || ( file_exists( $input_config ) && filemtime( $input_config ) < max( filemtime( $lsd_config ), filemtime( $sa_config ) ) ) ) {
+    if ( ! file_exists( $input_config ) || ( file_exists( $input_config ) && filemtime( $input_config ) < filemtime( $lsd_config ) ) ) ) {
         if ( file_exists( $limits_exec ) ) {
-            exec( $limits_exec . " -f " . $lsd_config . " -s " . $sa_config . " -o " . $input_config, $shell_out, $shell_err );
+            exec( $limits_exec . " -f " . $lsd_config . $sa . " -o " . $input_config, $shell_out, $shell_err );
 			if ( $shell_err !== 0 ) {
 				die( "'lsd_getlimits' failed: " . implode( " ", $shell_out ) . " (" . $shell_err . ")" );
 			}

@@ -73,9 +73,10 @@ namespace lsd
 /*************************************************************
  INIT_LIB
  *************************************************************/
-void lsd::init_lib( assimilation *_da )
+void lsd::init_lib( assimilation *_da, description *_desc )
 {
 	da = _da;
+	desc = _desc;
 	main_thread = std::this_thread::get_id( );
 
 	exec_file = new char[ strlen( "" ) + 1 ];

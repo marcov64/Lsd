@@ -36,7 +36,6 @@
  *************************************************************/
 int lsd::assimilation::run_simulation( int until_t )
 {
-	clock_t start, last_update = clock( );
 	int nstale, res = 0;
 
 	if ( sims.size( ) == 0 )
@@ -62,12 +61,14 @@ int lsd::assimilation::run_simulation( int until_t )
 
 	if ( ref_sim->liblnk->enable_plot != NULL )
 		ref_sim->liblnk->enable_plot( );
+
+	clock_t last_update = clock( );
 #endif
 
-	ref_sim->plog( "\nData assimilation running (threads=%d)...", ref_sim->last_run );
-
 	// control execution time
-	start = clock( );
+	clock_t start = clock( );
+
+	ref_sim->plog( "\nData assimilation running (threads=%d)...", ref_sim->last_run );
 
 	// do the data assimilation forecast-analysis cycle
 	for ( auto & dtime : time_var )

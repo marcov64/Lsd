@@ -265,4 +265,4 @@ endif
 
 # remove compiled files
 clean:
-	$(RM) $(OBJ_DIR)* $(PKG)lib$(TARGET)$(DLL_EXT) $(PKG)$(TARGET)$(EXE_EXT) $(TARGET).app
+	$(RM) $(OBJ_DIR)\* $(PKG)lib$(TARGET)$(DLL_EXT) $(PKG)$(TARGET)$(EXE_EXT) $(TARGET).app

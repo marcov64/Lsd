@@ -189,4 +189,4 @@ $(OBJ_DIR)$(PYT_TARGET).cpp: $(LIB_DIR)pythonAPI.pyx $(LIB_DIR)pythonAPI.pxd $(L
 
 # remove compiled files
 clean:
-	$(RM) $(OBJ_DIR)* lib$(TARGET_TERM)$(DLL_EXT) $(TARGET_TERM)$(EXE_EXT) $(PYT_LIB)
+	$(RM) $(OBJ_DIR)\* lib$(TARGET_TERM)$(DLL_EXT) $(TARGET_TERM)$(EXE_EXT) $(PYT_LIB)

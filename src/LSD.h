@@ -21,8 +21,7 @@
 #define SIMULATION_EXT \
 	public: \
 	int num_sensitivity_variables( void ); \
-	long num_sensitivity_points( void ); \
-	sensitivity *search_sensitivity( const char *lab, int lag = 0 );
+	long num_sensitivity_points( void );
 
 #define OBJECT_EXT \
 	public: \
@@ -38,11 +37,8 @@
 	void clean_plot( void ); \
 	void clean_save( void ); \
 	void control_to_compute( void ); \
-	void count_save( int *count ); \
 	void edit_data( const char *lab ); \
 	void find_using( variable *v, FILE *frep, bool *found ); \
-	void get_saved( FILE *out, const char *sep, bool all_var = false ); \
-	void get_sa_limits( FILE *out, const char *sep ); \
 	void insert_data_mem( const char *lab = NULL ); \
 	void insert_object( const char *w, bool netOnly = false, object *above = NULL ); \
 	void load_elem_lists( void ); \

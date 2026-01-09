@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (C) 2021 Marcelo C. Pereira <mcper at unicamp.br>
+ * Copyright (C) 2026 Marcelo C. Pereira <mcper at unicamp.br>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ $flag_pref = "../tmp/";         // prefix to execution flag files (server contro
 // file names (relative to index.php path)
 $lsd_exec = "../lsd_term";          // model executable command
 $lsd_config = "../lwi.lsd";         // LSD model configuration file to use
-$sa_config = "../lwi.sa";           // LSD model parameter-range file to use
+$sa_config = "";                    // LSD model parameter-range file to use
 $limits_exec = "../lsd_getlimits";  // LSD getlimits executable (no extension)
 $saved_exec = "../lsd_getsaved";    // LSD getsaved executable (no extension)
 $confgen_exec = "../lsd_confgen";   // LSD confgen executable (no extension)
@@ -61,11 +61,11 @@ if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === "WIN" ) {
     $nice_enable = false;
 } elseif  ( strtolower( substr( PHP_OS, 0, 6 ) ) === "darwin" ) {
     $os = "mac";
-    $lsd_exec .= "OSX";
-    $limits_exec .= "OSX";
-    $saved_exec .= "OSX";
-    $confgen_exec .= "OSX";
-    $mcstats_exec .= "OSX";
+    $lsd_exec .= "-mac";
+    $limits_exec .= "-mac";
+    $saved_exec .= "-mac";
+    $confgen_exec .= "-mac";
+    $mcstats_exec .= "-mac";
 } else {
     $os = "linux";
 }

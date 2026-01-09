@@ -508,9 +508,12 @@ namespace lsd
 			variable *search_var( object *caller, varattr *at, bool no_error = false, bool no_search = false, bool no_search_up = false, bool search_sons = false );
 			void chg_lab( const char *lab );
 			void chg_var_lab( const char *old, const char *n );
+			void count_save( int *count );
 			void delete_net( const char *lab );
 			void delete_obj( const variable *caller = NULL );
 			void delete_var( const char *lab );
+			void get_saved( FILE *out, const char *sep, bool all_var = false );
+			void get_sa_limits( FILE *out, const char *sep, bool meta_par_in[ ] );
 			void move( const char *dest );
 			void reset_end( void );
 
@@ -795,7 +798,7 @@ namespace lsd
 
 		public:
 			netlink *first = NULL;			// first link in the linked list of links
-		
+
 		private:
 			char *name = NULL;				// node textual name (not required)
 			double prob;					// assigned node draw probability
@@ -827,7 +830,7 @@ namespace lsd
 			netlink *next = NULL;			// pointer to next link (NULL if last )
 			object *from;					// network node containing the link
 			object *to;						// pointer to destination number
-		
+
 		private:
 			double probTo;					// destination node draw probability
 			double weight;					// link weight
@@ -1428,10 +1431,12 @@ namespace lsd
 			int hyper_count( const char *lab );
 			int hyper_count_var( const char *lab );
 			int load_configuration( bool reload, strT *warnings, int quick );
+			int load_txt_sensitivity( FILE *f );
 			int rnd_int( int min, int max );
 			int run_parallel( bool term, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns );
 			int run_simulation( int until_t, int until_run, bool da );
 			int worker_errors( void );
+			sensitivity *search_sensitivity( const char *lab, int lag = 0 );
 			void detach_parallel( void );
 			void empty_sensitivity( sensitivity *cs = NULL );
 			void empty_stack( void );
@@ -1572,7 +1577,7 @@ namespace lsd
 	void finish_lib( void );
 	void handle_signals( void ( * handler ) ( int signum ) );
 	void inhibit_system_sleep( void );
-	void init_lib( assimilation *_da );
+	void init_lib( assimilation *_da, description *_desc = NULL );
 	void lsd_exit( int v, bool clean = false );
 	void msleep( unsigned msec = 1000 );
 	void plog_master( const char *cm, ... );

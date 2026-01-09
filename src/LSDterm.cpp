@@ -36,6 +36,11 @@
 int load_config( lsd::simulation & sim );
 int parse_cmdline( int argn, const char **argv, lsd::simulation & sim, lsd::assimilation & da );
 
+// objects which must be allocated in the heap
+lsd::assimilation da;				// data assimilation object (unused)
+lsd::simulation sim;				// single LSD simulation terminal instance
+
+// command line strings
 const char lsdCmdMsg[ ] = "This is the terminal version of LSD.";
 const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd [-s SEED] [-e RUNS] to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-l FILENAME' to save all output to a (log) file\n'-t' to produce comma separated (.csv) text result file(s)\n'-r' for skipping the generation of intermediate result file(s)\n'-p' for skipping the generation of totals file\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-b' for showing a progress bar\n'-c MAX_THREADS[:MAX_RUNS]' to set maximum parallel threads/runs to use\n'-ai CL' to save data assimilation confidence intervals at CL level (%%)\n'-af' to save data assimilation forecasts\n'-ad' to save data assimilation observational data\n'-ac' to save data assimilation covariance/comedian matrix\n";
 
@@ -46,9 +51,7 @@ const char lsdCmdHlp[ ] = "Command line options:\n'-f FILENAME.lsd [-s SEED] [-e
 int main( int argn, const char **argv )
 {
 	int res = -1;
-	lsd::assimilation da;			// data assimilation object
-	lsd::simulation sim;			// single LSD simulation terminal instance
-	
+
 	// initialize LSD library
 	lsd::init_lib( & da );
 
@@ -281,15 +284,15 @@ int load_config( lsd::simulation & sim )
 	char *str;
 	FILE *f;
 
-	str = new char [ strlen( sim.conf_name ) + 1 ];
-	strcpy( str, sim.conf_name );
-	lsd::strupr( str );
-
-	if ( strlen( str ) == 0 )
+	if ( sim.conf_name == NULL || strlen( sim.conf_name ) == 0 )
 	{
 		fprintf( stderr, "\nOption '-f' required, no configuration file(s).\n%s\n%s\n", lsdCmdMsg, lsdCmdHlp );
 		return 6;
 	}
+
+	str = new char [ strlen( sim.conf_name ) + 1 ];
+	strcpy( str, sim.conf_name );
+	lsd::strupr( str );
 
 	if ( strstr( str, ".LSD" ) == NULL )
 	{

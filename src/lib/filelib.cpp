@@ -1384,7 +1384,9 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 	i = fscanf( f, "%999s", msg );				// should be the first description
 	for ( j = 0; strcmp( msg, "DOCUOBSERVE" ) && i == 1 && j < MAX_FILE_TRY; ++j )
 	{
-		i = load_txt_descr( msg, f );
+		if ( desc != NULL )
+			i = load_txt_descr( msg, f );
+
 		if ( ! fscanf( f, "%999s", msg ) )
 			i = 0;
 	}
@@ -1651,7 +1653,7 @@ bool lsd::object::load_txt_insts( const char *file_name, FILE *f )
 
 
 /*************************************************************
- LOAD_TXT_DESCRIPTION (LEGACY)
+ LOAD_TXT_DESCR (LEGACY)
  Load the descriptions of elements of tree under
  this object from a LEGACY text file
  *************************************************************/
@@ -2146,6 +2148,115 @@ void lsd::simulation::empty_sensitivity( sensitivity *cs )
 		empty_sensitivity( cs->next );
 
 	delete cs;				// suicide
+}
+
+
+/*************************************************************
+ LOAD_TXT_SENSITIVITY
+ Load defined sensitivity analysis configuration
+ Returns: 0: load ok, 1,2,3,4,...: load failure
+ *************************************************************/
+int lsd::simulation::load_txt_sensitivity( FILE *f )
+{
+	bool integer;
+	d_vecT val;
+	int i, lag, param, num_val, err = 0;
+	char cc, lab[ MAX_ELEM_LENGTH ];
+	variable *cv;
+	sensitivity *cs;
+
+	// read data from file (1 line per element, '#' indicate comment)
+	while ( ! feof( f ) )
+	{	// read element by element, skipping comments
+		fscanf( f, "%99s", lab );			// read string
+		while ( lab[ 0 ] == '#' )			// start of a comment
+		{
+			do								// jump to next line
+				cc = fgetc( f );
+			while ( ! feof( f ) && cc != '\n' );
+			fscanf( f, "%99s", lab );		// try again
+		}
+
+		if ( feof( f ) )					// ended too early?
+			break;
+
+		cv = root->search_var( root, lab );
+		if ( cv == NULL || ( cv->param != 1 && cv->attr->num_lag == 0 ) )
+		{
+			err = 1;						// and not parameter or lagged variable
+			break;
+		}
+
+		// get lags and # of values to test
+		if ( fscanf( f, "%d %d ", & lag, & num_val ) < 2 )
+		{
+			err = 2;
+			break;
+		}
+
+		// get variable type (newer versions)
+		if ( fscanf( f, "%c ", &cc ) < 1 )
+		{
+			err = 3;
+			break;
+		}
+
+		if ( cc == 'i' || cc == 'd' || cc == 'f' )
+		{
+			integer = ( cc == 'i' ) ? true : false;
+			fscanf( f, ": " );				// remove separator
+		}
+		else
+			if ( cc == ':' )
+				integer = false;
+			else
+			{
+				err = 4;
+				break;
+			}
+
+		if ( lag == 0 )						// adjust type and lag #
+			param = 1;
+		else
+		{
+			param = 0;
+			lag = abs( lag ) - 1;
+		}
+
+		for ( val.resize( num_val ), i = 0; i < num_val; ++i )
+			if ( ! fscanf( f, "%lf", & val[ i ] ) )
+			{
+				err = 5;
+				break;
+			}
+
+		if ( ( cs = search_sensitivity( lab, lag ) ) != NULL )
+			delete cs;
+
+		new sensitivity( lab, this, param, lag, integer, num_val, & val );
+	}
+
+	if ( err != 0 )
+		empty_sensitivity( );				// discard read data
+
+	return err;
+}
+
+
+/*************************************************************
+ SEARCH_SENSITIVITY
+ Find element in sensitivity data linked list
+ *************************************************************/
+lsd::sensitivity *lsd::simulation::search_sensitivity( const char *lab, int lag )
+{
+	sensitivity *cs;
+
+	for ( cs = sens; cs != NULL; cs = cs->next )
+		if ( ! strcmp( cs->label, lab ) &&
+			 ( cs->param == 1 || cs->lag == lag ) )
+			 break;
+
+	return cs;
 }
 
 

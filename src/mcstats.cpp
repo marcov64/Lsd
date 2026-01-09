@@ -19,11 +19,12 @@
  Generate Monte Carlo experiment statistic files.
  *************************************************************/
 
-#include "lib/libLSD.h"		// LSD library classes
+#include "lib/libLSD.h"				// LSD library classes
 
-#define SEP	",;\t"			// column separators to use
+#define SEP	",;\t"					// column separators to use
+#define NONAVAIL "NA"				// string for unavailable values (R default)
 
-// class to handle arrays for MC data
+// classes to handle arrays for MC data
 template < typename T >
 class vector3D
 {
@@ -52,7 +53,7 @@ class vector3D
 
 	private:
 		size_t d1, d2, d3;
-		vector < T > data;
+		std::vector < T > data;
 };
 
 template < typename T >
@@ -82,18 +83,10 @@ class vector2D
 
 	private:
 		size_t d1, d2;
-		vector < T > data;
+		std::vector < T > data;
 };
 
-void gui::save_csv( const char *base, const char *suffix, vector < string > header, vector2D < double > data, int rows, int cols );
-
-// constant string arrays
-const char *signal_names[ REG_SIG_NUM ] = REG_SIG_NAME;
-const int signals[ REG_SIG_NUM ] = REG_SIG_CODE;
-
-char nonavail[ ] = "NA";	// string for unavailable values (use R default)
-char **in_files = NULL;		// input .csv files
-char *out_file = NULL;		// output .csv file, if any
+void save_csv( const char *base, const char *suffix, std::vector < std::string > header, vector2D < double > data, int rows, int cols );
 
 // command line strings
 const char lsdCmdMsg[ ] = "This is the LSD Monte Carlo statistics generator.";
@@ -102,20 +95,20 @@ const char lsdCmdHlp[ ] = "Command line options:\n'-o OUTPUT' base name for the 
 
 
 /*************************************************************
- LSDMAIN
+ MAIN
  *************************************************************/
-int gui::lsdmain( int argn, const char **argv )
+int main( int argn, const char **argv )
 {
-	char ch, *linbuf, *tok;
+	char ch, *linbuf, *tok, **in_files = NULL, *out_file = NULL;
 	double val, sum, sumsq, maxv, minv;
 	int i, j, k, n, sz, linsz = 0, rows = 0, cols = 0, files = 0;
-	vector < string > vars, cur_vars;
 	FILE *f;
+	std::vector < std::string > vars, cur_vars;
 
-	if ( argn < 2 )
+	if ( argn < 3 )
 	{
 		fprintf( stderr, "\n%s\n%s\n%s\n", lsdCmdMsg, lsdCmdDsc, lsdCmdHlp );
-		lsd_exit( 1 );
+		exit( 1 );
 	}
 	else
 	{
@@ -148,14 +141,14 @@ int gui::lsdmain( int argn, const char **argv )
 			}
 
 			fprintf( stderr, "\nOption '%c%c' not recognized.\n%s\n%s\n", argv[ i ][ 0 ], argv[ i ][ 1 ], lsdCmdMsg, lsdCmdHlp );
-			lsd_exit( 2 );
+			exit( 2 );
 		}
 	}
 
 	if ( files < 2 )
 	{
 		fprintf( stderr, "\nInsufficient result files provided.\n%s.\nSpecify '-f FILENAME1.csv FILENAME2.csv ...' to provide at least 2 result files.\n\n", lsdCmdMsg );
-		lsd_exit( 3 );
+		exit( 3 );
 	}
 
 	for ( i = 0; i < files; ++i )
@@ -164,7 +157,7 @@ int gui::lsdmain( int argn, const char **argv )
 		if ( f == NULL )
 		{
 			fprintf( stderr, "\nFile '%s' not found.\n%s\nSpecify existing '-f FILENAME1.csv FILENAME2.csv ...' result files.\n\n", in_files[ i ], lsdCmdMsg );
-			lsd_exit( 4 );
+			exit( 4 );
 		}
 
 		// determine number of rows and columns from results file
@@ -177,7 +170,7 @@ int gui::lsdmain( int argn, const char **argv )
 			if ( k > 0 && ch != EOF )
 				++j;
 
-			linsz = max( linsz, k );
+			linsz = std::max( linsz, k );
 		}
 
 		fclose( f );
@@ -188,14 +181,14 @@ int gui::lsdmain( int argn, const char **argv )
 		if ( j < 2 || j != rows )
 		{
 			fprintf( stderr, "\nInvalid file rows (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
-			lsd_exit( 5 );
+			exit( 5 );
 		}
 	}
 
 	if ( out_file == NULL || strlen( out_file ) == 0 )
 	{
 		fprintf( stderr, "\nNo base name to MC files provided.\n%s.\nSpecify '-o OUTPUT' to provide a base name.\n\n", lsdCmdMsg );
-		lsd_exit( 6 );
+		exit( 6 );
 	}
 
 	linbuf = new char[ linsz + 2 ];
@@ -213,7 +206,7 @@ int gui::lsdmain( int argn, const char **argv )
 		{
 			sz = strlen( tok ) + 1;
 			char out[ sz ];
-			strtrim( out, tok, sz );
+			lsd::strtrim( out, tok, sz );
 			cur_vars.push_back( out );
 			tok = strtok( NULL, SEP );
 		}
@@ -228,7 +221,7 @@ int gui::lsdmain( int argn, const char **argv )
 		if ( j < 1 || j != cols || cur_vars != vars )
 		{
 			fprintf( stderr, "\nInvalid file header (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
-			lsd_exit( 7 );
+			exit( 7 );
 		}
 
 		// read data lines
@@ -240,14 +233,14 @@ int gui::lsdmain( int argn, const char **argv )
 			{
 				sz = strlen( tok ) + 1;
 				char out[ sz ];
-				strtrim( out, tok, sz );
-				if ( ! strcmp( out, nonavail ) )
+				lsd::strtrim( out, tok, sz );
+				if ( ! strcmp( out, NONAVAIL ) )
 					val = NAN;
 				else
 					if ( sscanf( out, "%lf", & val ) == 0 )
 					{
 						fprintf( stderr, "\nInvalid file values (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
-						lsd_exit( 8 );
+						exit( 8 );
 					}
 
 				mcdata( i, j, k ) = val;
@@ -257,14 +250,14 @@ int gui::lsdmain( int argn, const char **argv )
 			if ( k < cols || tok != NULL )
 			{
 				fprintf( stderr, "\nInvalid file columns (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
-				lsd_exit( 9 );
+				exit( 9 );
 			}
 		}
 
 		if ( j < rows - 1 )
 		{
 			fprintf( stderr, "\nInvalid file rows (%s).\n%s.\nFiles must have same number of rows (>1) and columns (>0).\n\n", in_files[ i ], lsdCmdMsg );
-			lsd_exit( 10 );
+			exit( 10 );
 		}
 
 		fclose( f );
@@ -280,12 +273,12 @@ int gui::lsdmain( int argn, const char **argv )
 			maxv = DBL_MIN;
 			minv = DBL_MAX;
 			for ( i = 0; i < files; ++i )
-				if ( isfinite( mcdata( i, j, k ) ) )
+				if ( std::isfinite( mcdata( i, j, k ) ) )
 				{
 					sum += mcdata( i, j, k );
 					sumsq += pow( mcdata( i, j, k ), 2 );
-					maxv = max( maxv, mcdata( i, j, k ) );
-					minv = min( minv, mcdata( i, j, k ) );
+					maxv = std::max( maxv, mcdata( i, j, k ) );
+					minv = std::min( minv, mcdata( i, j, k ) );
 					++n;
 				}
 
@@ -323,7 +316,7 @@ int gui::lsdmain( int argn, const char **argv )
  SAVE_CSV
  save table to CSV file
  *************************************************************/
-void gui::save_csv( const char *base, const char *suffix, vector < string > header, vector2D < double > data, int rows, int cols )
+void save_csv( const char *base, const char *suffix, std::vector < std::string > header, vector2D < double > data, int rows, int cols )
 {
 	char fn[ strlen( base ) + strlen( suffix ) + 6 ];
 	int i, j, k;
@@ -334,7 +327,7 @@ void gui::save_csv( const char *base, const char *suffix, vector < string > head
 	if ( f == NULL )
 	{
 		fprintf( stderr, "\nFile '%s' cannot be created.\n%s\nCheck if base name is correct.\n\n", fn, lsdCmdMsg );
-		lsd_exit( 11 );
+		exit( 11 );
 	}
 
 	for ( i = 0; i < ( int ) header.size( ); ++ i )
@@ -345,14 +338,13 @@ void gui::save_csv( const char *base, const char *suffix, vector < string > head
 	for ( j = 0; j < rows - 1; ++j )
 	{
 		for ( k = 0; k < cols; ++k )
-			if ( isfinite( data( j, k ) ) )
+			if ( std::isfinite( data( j, k ) ) )
 				fprintf( f, "%s%g", k > 0 ? "," : "", data( j, k ) );
 			else
-				fprintf( f, "%s%s", k > 0 ? "," : "", nonavail );
+				fprintf( f, "%s%s", k > 0 ? "," : "", NONAVAIL );
 
 		fprintf( f, "\n" );
 	}
 
 	fclose( f );
 }
-

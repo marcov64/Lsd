@@ -68,7 +68,7 @@ int gui::load_gui( const char **argv )
 	lsd::object *r;
 
 	// initialize LSD library
-	lsd::init_lib( & da );
+	lsd::init_lib( & da, & desc );
 
 	// initialize tcl/tk
 	init_tcl_tk( argv[ 0 ], "lsd" );
@@ -188,10 +188,6 @@ int gui::load_gui( const char **argv )
 			cmd( "cd $path" );
 		}
 	}
-
-	// set DLL call-back for GUI containers
-	lsd::da = & da;
-	lsd::desc = & desc;
 
 	// set DLL call-back references for master simulation
 	sim.inter = interp;

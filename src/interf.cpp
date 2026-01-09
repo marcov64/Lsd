@@ -4770,7 +4770,7 @@ lsd::object *gui::operate( lsd::object *r )
 			fprintf( f, "Name%sType%sLag%sFormat%sValue%sMinimum%sMaximum%sDescription\n", ch, ch, ch, ch, ch, ch, ch );
 
 			// write data
-			r->get_sa_limits( f, ch );
+			r->get_sa_limits( f, ch, meta_par_in );
 
 			fclose( f );
 

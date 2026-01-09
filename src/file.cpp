@@ -573,103 +573,32 @@ void gui::clean_res_dir( const char *dest_path, const char *sim_name )
  *************************************************************/
 int gui::load_sensitivity( FILE *f )
 {
-	bool integer;
-	d_vecT val;
-	int i, lag, param, num_val;
-	char cc, lab[ MAX_ELEM_LENGTH ];
-	lsd::variable *cv;
-	lsd::sensitivity *cs;
+	int err;
 
-	// read data from file (1 line per element, '#' indicate comment)
-	while ( ! feof( f ) )
-	{	// read element by element, skipping comments
-		fscanf( f, "%99s", lab );			// read string
-		while ( lab[ 0 ] == '#' )			// start of a comment
-		{
-			do								// jump to next line
-				cc = fgetc( f );
-			while ( ! feof( f ) && cc != '\n' );
-			fscanf( f, "%99s", lab );		// try again
-		}
-
-		if ( feof( f ) )					// ended too early?
+	switch ( err = sim.load_txt_sensitivity( f ) )
+	{
+		case 1:
+			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid sensitivity file\" -detail \"Variable has no lags set.\"" );
 			break;
 
-		cv = sim.root->search_var( sim.root, lab );
-		if ( cv == NULL || ( cv->param != 1 && cv->attr->num_lag == 0 ) )
-			goto error1;					// and not parameter or lagged variable
+		case 2:
+			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid sensitivity file\" -detail \"Element has less than two values to test.\"" );
+			break;
 
-		// get lags and # of values to test
-		if ( fscanf( f, "%d %d ", & lag, & num_val ) < 2 )
-			goto error2;
+		case 3:
+			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid sensitivity file\" -detail \"Element has an invalid value set.\"" );
+			break;
 
-		// get variable type (newer versions)
-		if ( fscanf( f, "%c ", &cc ) < 1 )
-			goto error3;
+		case 4:
+			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid sensitivity file\" -detail \"Element has no separator character (':').\"" );
+			break;
 
-		if ( cc == 'i' || cc == 'd' || cc == 'f' )
-		{
-			integer = ( cc == 'i' ) ? true : false;
-			fscanf( f, ": " );				// remove separator
-		}
-		else
-			if ( cc == ':' )
-				integer = false;
-			else
-				goto error4;
-
-		if ( lag == 0 )						// adjust type and lag #
-			param = 1;
-		else
-		{
-			param = 0;
-			lag = abs( lag ) - 1;
-		}
-
-		for ( val.resize( num_val ), i = 0; i < num_val; ++i )
-			if ( ! fscanf( f, "%lf", & val[ i ] ) )
-				goto error5;
-
-		if ( ( cs = sim.search_sensitivity( lab, lag ) ) != NULL )
-			delete cs;
-
-		new lsd::sensitivity( lab, & sim, param, lag, integer, num_val, & val );
+		case 5:
+			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid sensitivity file\" -detail \"Element has non-numeric range values.\"" );
+			break;
 	}
 
-	return 0;
-
-	// error handling
-	error1:
-		if ( cv != NULL )
-			cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid lag selected\" -detail \"Variable '%s' has no lags set.\"", lab );
-		i = 1;
-		goto error;
-
-	error2:
-		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid range\" -detail \"Element '%s' has less than two values to test.\"", lab );
-		i = 2;
-		goto error;
-
-	error3:
-		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid element type\" -detail \"Element '%s' has an invalid value set.\"", lab );
-		i = 3;
-		goto error;
-
-	error4:
-		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Missing separator\" -detail \"Element '%s' has no separator character (':').\"", lab );
-		i = 4;
-		goto error;
-
-	error5:
-		cmd( "ttk::messageBox -parent . -title Error -icon error -type ok -message \"Invalid range value\" -detail \"Element '%s' has non-numeric range values.\"", lab );
-		i = 5;
-		goto error;
-
-	error:
-
-	sim.empty_sensitivity( );					// discard read data
-
-	return i;
+	return err;
 }
 
 
@@ -741,119 +670,6 @@ char *gui::load_eqfile( void )
 	delete [ ] buf2;
 
 	return eq;
-}
-
-
-/*************************************************************
- GET_SAVED
- Get the set of elements which values are saved
- during simulation run
- *************************************************************/
-void lsd::object::get_saved( FILE *out, const char *sep, bool all_var )
-{
-	int i, sl;
-	char *lab;
-	object *cur;
-
-	for ( auto cv = v; cv != NULL; cv = cv->next )
-		if ( cv->attr->save || all_var )
-		{
-			// get element description
-			auto cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
-			if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
-			{
-				// select just the first description line
-				lab = new char[ sl + 1 ];
-				strcpy( lab, cd->text );
-				for ( i = 0; i < sl; ++i )
-					if ( lab[ i ] == '\n' || lab[ i ] == '\r' )
-					{
-						lab[ i ] = '\0';
-						break;
-					}
-			}
-			else
-				lab = NULL;
-
-			fprintf( out, "%s%s%s%s%s%s%s\n", cv->attr->label, sep, cv->param ? "parameter" : "variable", sep, attr->label, sep, lab != NULL ? lab : "" );
-		}
-
-	for ( auto cb = b; cb != NULL; cb = cb->next )
-	{
-		if ( cb->head == NULL )
-			cur = gui::sim.blueprint->search( cb->attr );
-		else
-			cur = cb->head;
-
-		cur->get_saved( out, sep, all_var );
-	}
-}
-
-
-/*************************************************************
- GET_SA_LIMITS
- Get the max-min limits used for sensitivity
- analysis of variables
- *************************************************************/
-void lsd::object::get_sa_limits( FILE *out, const char *sep )
-{
-	int i, sl;
-	char *lab, type[ 10 ];
-
-	for ( i = 0; i < META_PAR_NUM; ++i )
-		gui::meta_par_in[ i ] = false;
-
-	for ( auto cs = gui::sim.sens; cs != NULL; cs = cs->next )
-	{
-		// get current value (first object)
-		auto cv = search_var( NULL, cs->label );
-
-		// get element description
-		auto cd = desc != NULL ? desc->search_descr( cs->label ) : NULL;
-		if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
-		{
-			// select just the first description line
-			lab = new char[ sl + 1 ];
-			strcpy( lab, cd->text );
-			for ( i = 0; i < sl; ++i )
-				if ( lab[ i ] == '\n' || lab[ i ] == '\r' )
-				{
-					lab[ i ] = '\0';
-					break;
-				}
-		}
-		else
-			lab = NULL;
-
-		// find max and min values
-		double min = HUGE_VAL, max = - HUGE_VAL;
-		for ( i = 0; cs->val != NULL &&  i < cs->num_val; ++i )
-			if ( cs->val[ i ] < min )
-				min = cs->val[ i ];
-			else
-				if ( cs->val[ i ] > max )
-					max = cs->val[ i ];
-
-		// check meta-parameters
-		if ( cs->param == 1 )
-		{
-			strcpy( type, "parameter" );
-
-			for ( i = 0; i < META_PAR_NUM; ++i )
-				if ( ! strcmp( cs->label, meta_par_names[ i ] ) )
-				{
-					strcpy( type, "setting" );
-					gui::meta_par_in[ i ] = true;
-					break;
-				}
-		}
-		else
-			strcpy( type, "variable" );
-
-		fprintf( out, "%s%s%s%s%d%s%s%s%g%s%g%s%g%s\"%s\"\n", cs->label, sep, type, sep, cs->param == 1 ? 0 : cs->lag + 1, sep, cs->integer ? "integer" : "real", sep, cv != NULL ? cv->val[ cs->lag ] : NAN, sep, min, sep, max, sep, lab != NULL ? lab : "" );
-
-		delete [ ] lab;
-	}
 }
 
 

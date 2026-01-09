@@ -961,29 +961,6 @@ void lsd::object::control_to_compute( void )
 
 
 /*************************************************************
- COUNT_SAVE
- *************************************************************/
-void lsd::object::count_save( int *count )
-{
-	object *cur;
-
-	for ( auto cv = v; cv != NULL; cv = cv->next )
-		if ( cv->attr->save == 1 || cv->attr->savei == 1 )
-			( *count )++;
-
-	for ( auto cb = b; cb != NULL; cb = cb->next )
-	{
-		if ( cb->head == NULL )
-			cur = gui::sim.blueprint->search( cb->attr );
-		else
-			cur = cb->head;
-
-		cur->count_save( count );
-	}
-}
-
-
-/*************************************************************
  SHOW_SAVE
  *************************************************************/
 void lsd::object::show_save( void )

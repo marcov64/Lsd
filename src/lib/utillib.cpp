@@ -263,6 +263,142 @@ void lsd::simulation::error_hard( const char *boxTitle, const char *boxText, boo
 
 
 /*************************************************************
+ COUNT_SAVE
+ *************************************************************/
+void lsd::object::count_save( int *count )
+{
+	object *cur;
+
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+		if ( cv->attr->save == 1 || cv->attr->savei == 1 )
+			( *count )++;
+
+	for ( auto cb = b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			cur = attr->cont->sim->blueprint->search( cb->attr );
+		else
+			cur = cb->head;
+
+		cur->count_save( count );
+	}
+}
+
+
+/*************************************************************
+ GET_SAVED
+ Get the set of elements which values are saved
+ during simulation run
+ *************************************************************/
+void lsd::object::get_saved( FILE *out, const char *sep, bool all_var )
+{
+	int i, sl;
+	char *lab;
+	object *cur;
+
+	for ( auto cv = v; cv != NULL; cv = cv->next )
+		if ( cv->attr->save || all_var )
+		{
+			// get element description
+			auto cd = desc != NULL ? desc->search_descr( cv->attr->label ) : NULL;
+			if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
+			{
+				// select just the first description line
+				lab = new char[ sl + 1 ];
+				strcpy( lab, cd->text );
+				for ( i = 0; i < sl; ++i )
+					if ( lab[ i ] == '\n' || lab[ i ] == '\r' )
+					{
+						lab[ i ] = '\0';
+						break;
+					}
+			}
+			else
+				lab = NULL;
+
+			fprintf( out, "%s%s%s%s%s%s%s\n", cv->attr->label, sep, cv->param ? "parameter" : "variable", sep, attr->label, sep, lab != NULL ? lab : "" );
+		}
+
+	for ( auto cb = b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			cur = attr->cont->sim->blueprint->search( cb->attr );
+		else
+			cur = cb->head;
+
+		cur->get_saved( out, sep, all_var );
+	}
+}
+
+
+/*************************************************************
+ GET_SA_LIMITS
+ Get the max-min limits used for sensitivity
+ analysis of variables
+ *************************************************************/
+void lsd::object::get_sa_limits( FILE *out, const char *sep, bool meta_par_in[ ] )
+{
+	int i, sl;
+	char *lab, type[ 10 ];
+
+	for ( i = 0; i < META_PAR_NUM; ++i )
+		meta_par_in[ i ] = false;
+
+	for ( auto cs = attr->cont->sim->sens; cs != NULL; cs = cs->next )
+	{
+		// get current value (first object)
+		auto cv = search_var( NULL, cs->label );
+
+		// get element description
+		auto cd = desc != NULL ? desc->search_descr( cs->label ) : NULL;
+		if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
+		{
+			// select just the first description line
+			lab = new char[ sl + 1 ];
+			strcpy( lab, cd->text );
+			for ( i = 0; i < sl; ++i )
+				if ( lab[ i ] == '\n' || lab[ i ] == '\r' )
+				{
+					lab[ i ] = '\0';
+					break;
+				}
+		}
+		else
+			lab = NULL;
+
+		// find max and min values
+		double min = HUGE_VAL, max = - HUGE_VAL;
+		for ( i = 0; cs->val != NULL &&  i < cs->num_val; ++i )
+			if ( cs->val[ i ] < min )
+				min = cs->val[ i ];
+			else
+				if ( cs->val[ i ] > max )
+					max = cs->val[ i ];
+
+		// check meta-parameters
+		if ( cs->param == 1 )
+		{
+			strcpy( type, "parameter" );
+
+			for ( i = 0; i < META_PAR_NUM; ++i )
+				if ( ! strcmp( cs->label, meta_par_names[ i ] ) )
+				{
+					strcpy( type, "setting" );
+					meta_par_in[ i ] = true;
+					break;
+				}
+		}
+		else
+			strcpy( type, "variable" );
+
+		fprintf( out, "%s%s%s%s%d%s%s%s%g%s%g%s%g%s\"%s\"\n", cs->label, sep, type, sep, cs->param == 1 ? 0 : cs->lag + 1, sep, cs->integer ? "integer" : "real", sep, cv != NULL ? cv->val[ cs->lag ] : NAN, sep, min, sep, max, sep, lab != NULL ? lab : "" );
+
+		delete [ ] lab;
+	}
+}
+
+
+/*************************************************************
  SET_LAB_TIT
  Ensure that all objects on top of the variables
  have the counter updated, and then writes the
