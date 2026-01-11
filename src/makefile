@@ -25,7 +25,7 @@
 TARGET_LMM=LMM
 TARGET_LSD=LSD
 
-SWITCH_CC=-O3 -march=corei7-avx -Wall -Wextra -Wno-unused-parameter -Wno-implicit-fallthrough
+SWITCH_CC=-O3 -march=corei7-avx -Wall -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-implicit-fallthrough
 SWITCH_CC_LMM=-D_LMM_ -D_NP_
 SWITCH_CC_LSD=
 SWITCH_CC_DLL=
@@ -76,7 +76,7 @@ else
     PATH_TK_HEADER=$(LSDROOT)/$(TARGET_LSD).app/Contents/Frameworks/Tk.framework/Headers
     PATH_TCLTK_LIB=$(LSDROOT)/$(TARGET_LSD).app/Contents/Frameworks
     TCLTK_LIB=-framework Tcl -framework Tk
-    SWITCH_CC+=-Wno-unused-result -std=c++17 -mmacosx-version-min=11.0
+    SWITCH_CC+=-std=gnu++20 -mmacosx-version-min=11.0 -Wno-unused-but-set-variable -Wno-vla-cxx-extension
     SWITCH_CC_LNK+=-L$(LSDROOT)/$(TARGET_LSD).app/Contents/MacOS
     SWITCH_CC_LNK_DLL+=-dynamiclib -flat_namespace -install_name @executable_path/lib$(TARGET_LSD)$(DLL_EXT) -framework IOKit -framework CoreFoundation
     LIB_INI=-Wl,-force_load

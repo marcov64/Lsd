@@ -42,7 +42,7 @@ else
     TMP_DIR=$(TMPDIR)
     PKG=$(TARGET).app/Contents/MacOS/
     DLL_EXT=.dylib
-    GLOBAL_CC+=-std=c++17 -mmacosx-version-min=11.0
+    GLOBAL_CC+=-std=gnu++20 -mmacosx-version-min=11.0 -Wno-unused-but-set-variable -Wno-vla-cxx-extension
     SWITCH_CC_LNK+=-L$(TARGET).app/Contents/MacOS
     SWITCH_CC_LNK_DLL+=-dynamiclib -flat_namespace -install_name @executable_path/lib$(TARGET)$(DLL_EXT) -framework IOKit -framework CoreFoundation
     LIB_INI=-Wl,-force_load

@@ -31,7 +31,6 @@ Eigen 3.4.0 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.t
 pugixml 1.15 is copyrighted by Arseny Kapoulkine under MIT license, https://pugixml.org
 rapidcsv 8.84 is copyrighted by Kristofer Berggren under BSD-3-Clause license, https://github.com/d99kris/rapidcsv
 Cython 3.0 is copyrighted by Stefan Behnel and others under Apache 2.0, https://cython.org
-subbotools 1.3 is copyrighted by Giulio Bottazzi under GPL2, http://cafim.sssup.it/~giulio/software/subbotools
 NOLHDesigns_v6 is copyrighted by Susan M. Sanchez under GPL 2.1, http://harvest.nps.edu
 NOB_Mixed_512DP_v1 is copyrighted by Helcio Vieira under GPL 2.1, http://harvest.nps.edu
 seticon/osxconutils is copyrighted by Sveinbjorn Thordarson, https://sveinbjorn.org/osxiconutils
@@ -58,7 +57,7 @@ This Readme.txt file contains five sections:
 1. Introduction to LSD
 2. LSD distribution content
 3. Hints on the use of LSD
-4. Installing LSD (Windows, macOS and Linux)
+4. Installing LSD (Windows, Linux, and macOS)
 5. Installation of optional compilers in Windows (MSYS2 and Cygwin)
 6. Removing LSD
 7. LSD interface to Python
@@ -192,60 +191,8 @@ USING DIFFERENT COMPILERS (optional):
 It is possible to use LSD with a C++ compiler already installed in your computer. However, in this case the user must install and configure the compiler to ensure it has all the required optional libraries. LSD supports any version of GNU 64-bit C++ compiler (GCC 8+) supporting C++20 (or more recent) standard. Cygwin and MSYS2 mingw-w64-x86_64 versions are both fine, but they require Tcl/Tk 8.6 and zlib 1.2 libraries to be installed. Cygwin compiler is somewhat easier to install as it does not require the user to deal with a command prompt. MSYS2 compiler usually releases new versions earlier. Instructions for installing both are available at the end of this document. Even if they are already installed, the instructions can be also followed to make sure the installation is complete and LSD is configured to use it.
 
 
-************************************
-4.2 macOS installation (14.5+ ONLY)
-************************************
-
-To install LSD, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-9-0-stable-1.dmg). Download it, double-click on the package file to mount it, double-click on the LSD Installer application, and follow the instructions. The installer package can be unmounted and deleted after the installation.
-
-IMPORTANT: please pay attention to the Terminal windows opened by the installer. They may require your interaction, according to the instructions of the installer. Do not close any Terminal window which is not inactive. If the Terminal window is closed or interrupted by accident, please cancel the installation and restart.
-
-To manually install LSD, simply unzip a LSD distribution file (e.g., LSD-9.0-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
-
-Next, open the Terminal application (located inside the Utilities app folder), and type the following commands (each line must be completed by pressing "Enter"):
-
- cd ~/Lsd-9.0-master
- ./add-shortcut-mac.sh
-
-After a successful installation, a desktop shortcut (icon) will be available for using LMM/LSD. A shortcut is also created in the computer Applications folder.
-
-Users MUST yet manually install the Apple Command Line Tools package (the full Xcode package is NOT required) to make the compiler and other required command line tools available in macOS. To install it, open the Terminal  and enter the following command:
-
- xcode-select --install
-
-Then, in the opened window, click on the "Install" button (do NOT click on the "Get Xcode" button), accept the license and wait the installation to complete (you may have to reboot to finish the installation).
-
-It is recommended, but not required, to install multitail and Gnuplot applications. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. The easiest way to install Gnuplot is to use the Homebrew package manager for the installation. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
-
- /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-
-After Homebrew installation finishes (details at http://brew.sh), you can install multitail and Gnuplot using the following command in Terminal (Qt framework will be automatically installed too):
-
- brew install tcl-tk@8 multitail gnuplot cython
-
-INACTIVE TERMINAL WINDOWS:
-
-As LSD accesses external programs, inactive Terminal windows may be left open in the computer desktop. To prevent this default behavior, the user can change the Terminal aplication configuration. In Terminal, open menu "Preferences > Profiles > Shell" and set options "When the shell exists" to "Close if the shell exited cleanly", and "Ask before closing" to "Never".
-
-IN CASE OF PROBLEMS:
-
-LSD is only supported in mac computers as a native macOS (Aqua) application. There is no longer support for X11.
-
-You MUST use the "add-shortcut-mac.sh" command above to remove LMM and LSD from the system quarantine. Failing to do so will prevent from using LSD as a native macOS application.
-
-If you delete or cannot create the LSD shortcuts, you can still run the app named LMM located inside the LSD installation directory (double click it in Finder) to open LMM/LSD, or try to rerun the "add-shortcut-mac.sh" script to recreate the shortcut.
-
-AUTOMATION ACCESS:
-
-LSD needs to control external programs to automate operation. The first time it needs automation access, a macOS (10.14+) pop-up will request the user to allow it, please click on OK. If user denies automation access once, macOS will not ask again for authorization and will silently block all further LSD operations, curtailing LSD capabilities and preventing some operations. To force the system to ask again for authorization (all programs) please use the following command on the Terminal:
-
- tccutil reset AppleEvents
-
-Authorized programs can be checked at System Preferences > Security & Privacy > Privacy > Automation.
-
-
 **********************
-4.3 Linux installation
+4.2 Linux installation
 **********************
 
 To install LSD, the simplest alternative is to use the installer script package (e.g. LSD-installer-linux-9-0-stable-1.zip). Download, extract and execute it. If your file manager does not support extracting compressed files or executing scripts directly, open a terminal, and type (replacing the X's with the actual values):
@@ -314,6 +261,84 @@ If the system lists further libraries, add the appropriate option to the linker 
 Last, LSD comes with pre-compiled code that may need to be recompiled to your specific environment. To recreate the pre-compiled binaries, close all LSD instances and open a terminal instance at the LSD installation directory. Then, use the following commands:
 
 IMPORTANT: if you modified the makefile to compile LMM, the same changes need to be made to the makefiles used to generate the LSD Model programs. You need to make these changes only once using LMM. Use the menu item System Compilation Options in menu Model. You will have to fill the same variables as in the makefile used to compile LMM, which must be set to the same values.
+
+
+************************************
+4.3 macOS installation (UNSUPPORTED)
+************************************
+
+LSD 9.0 does not officially support macOS, despite it may work, depending on the specific macOS version, some required "adjustments" (hacks), and luck. Unfortunately, over the years, macOS became more and more a platform closed to open-source development. To complicate things further, Apple-exclusive processors made development to require Apple hardware (Mx), which is not the standard platform of LSD development (x86_64).
+
+For macOS users, the recommended path to use LSD is (1) installing a virtual machine (VM) hypervisor in macOS (VirtualBox, Fusion, Parallels, etc.), (2) downloading a pre-configured Windows or Linux VM image, and (3) installing LSD in the downloaded VM following the instructions above (section 4.1 or 4.2). There are many tutorials and sources on the internet about how to perform steps 1 and 2. The performance penalty of using LSD in a VM is relatively small, particularly in the case of Linux. However, Windows VMs are usually easier to set-up and use, and performance is still reasonable.
+
+The instructions below frequently worked with macOS up to version 15.7, but that may depend on specific machine configurations and can break at any moment given the constant Apple changes to its operating system. LSD developers are not able to help on fixing the possible problems.
+
+To try to install LSD natively on macOS, the simplest alternative is to use the installer package (e.g. LSD-installer-mac-9-0-stable-1.dmg). Download it, double-click on the package file to mount it, double-click on the LSD Installer application, accept the unsupported message, and follow the instructions. The installer package can be unmounted and deleted after the installation.
+
+IMPORTANT: please pay attention to the Terminal windows opened by the installer, this is critical to a successful installation. The Terminal window do require your interaction, according to the instructions of the installer. Do not close any Terminal window which is not inactive. If the Terminal window is closed or interrupted by accident, please cancel the installation and restart.
+
+To try to manually install LSD, simply unzip a LSD distribution file (e.g., LSD-9.0-master.zip) to the chosen directory (in most cases  "~/", the user home directory, is recommended) using Finder. This will create the whole LSD folder structure. Take note of the name of the main (topmost) folder where LSD is installed. The distribution file may be deleted after the extraction.
+
+Next, open the Terminal application (located inside the Utilities app folder), and type the following commands (each line must be completed by pressing "Enter"):
+
+ cd ~/Lsd-9.0-master
+ ./add-shortcut-mac.sh
+
+After a successful installation, a desktop shortcut (icon) will be available for using LMM/LSD. A shortcut is also created in the computer Applications folder.
+
+Users MUST yet manually install the Apple Command Line Tools package (the full Xcode package is NOT required) to make the compiler and other required command line tools available in macOS. To install it, open the Terminal  and enter the following command:
+
+ xcode-select --install
+
+Then, in the opened window, click on the "Install" button (do NOT click on the "Get Xcode" button), accept the license and wait the installation to complete (you may have to reboot to finish the installation).
+
+It is recommended, but not required, to install multitail and Gnuplot applications. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. The easiest way to install Gnuplot is to use the Homebrew package manager for the installation. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
+
+ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+
+After Homebrew installation finishes (details at http://brew.sh), you can install multitail and Gnuplot using the following command in Terminal (Qt framework will be automatically installed too):
+
+ brew install tcl-tk@8 multitail gnuplot cython
+
+SECURITY MESSAGES WHEN LAUNCHING LMM AND LSD SIMULATIONS:
+
+Because LSD development team cannot afford the time and money to become a "known" developer to Apple, macOS usually refuses to run LSD components, presenting a dialog box suggesting deleting LMM.app and LSD.app application files, and refusing to run them. To try to circumvent this refusal, according to Apple you must:
+
+1. Choose Apple menu > System Settings, then click Privacy & Security in the sidebar (you may need to scroll down).
+2. Go to Security, then click Open.
+3. Locate the corresponding "LMM.app/LSD.app was blocked" item and click Open Anyway (this button is available for about an hour after you try to open the app).
+4. Click on Open Anyway in the dialog that shows up.
+5. Enter your login password, then click OK.
+
+It must be noted that sometimes even proceeding with the instructions above, macOS may keep blocking LSD components.
+
+APP TRANSLOCATION OR GATEKEEPER PATH RANDOMIZATION:
+
+macOS my decide to open a just compiled model executable (LSD.app, by default) in another random folder, "to improve security". LSD tries to disable this behavior, but it may not work every time. In this case you must disable this behavior manually in the Terminal, by issuing the following command:
+
+ xattr -r -d com.apple.quarantine ~/LSD/Work/path/to/LSD.app
+
+Replace ~/LSD/Work/path/to with the actual path to your model folder.
+
+INACTIVE TERMINAL WINDOWS:
+
+As LSD accesses external programs, inactive Terminal windows may be left open in the computer desktop. To prevent this default behavior, the user can change the Terminal aplication configuration. In Terminal, open menu "Preferences > Profiles > Shell" and set options "When the shell exists" to "Close if the shell exited cleanly", and "Ask before closing" to "Never".
+
+IN CASE OF PROBLEMS:
+
+LSD is only supported in mac computers as a native macOS (Aqua) application. There is no longer support for X11.
+
+You MUST use the "add-shortcut-mac.sh" command above to remove LMM and LSD from the system quarantine. Failing to do so will prevent from using LSD as a native macOS application.
+
+If you delete or cannot create the LSD shortcuts, you can still run the app named LMM located inside the LSD installation directory (double click it in Finder) to open LMM/LSD, or try to rerun the "add-shortcut-mac.sh" script to recreate the shortcut.
+
+AUTOMATION ACCESS:
+
+LSD needs to control external programs to automate operation. The first time it needs automation access, a macOS (10.14+) pop-up will request the user to allow it, please click on OK. If user denies automation access once, macOS will not ask again for authorization and will silently block all further LSD operations, curtailing LSD capabilities and preventing some operations. To force the system to ask again for authorization (all programs) please use the following command on the Terminal:
+
+ tccutil reset AppleEvents
+
+Authorized programs can be checked at System Preferences > Security & Privacy > Privacy > Automation.
 
 
 ******************************************

@@ -47,22 +47,24 @@ INCLUDE=-I$(LSDROOT)/$(SRC) -I$(LSDROOT)/$(SRC)/lib -I$(PATH_HEADER)
 # terminal specific variables
 LIB_TERM=$(LIB)
 CC_TERM=$(CC)
-SWITCH_CC_TERM=$(GLOBAL_CC) $(SWITCH_CC) -D_TERM_
+SWITCH_CC_TERM=$(GLOBAL_CC) $(SWITCH_CC) -D_TERM_ -D_LWI_
 
 # handle platform-specific stuff
 ifeq ($(OS),Windows_NT)
   OBJ_DIR=$(TMP)/lwi/
   ALL_FILES=\*
   EXE_EXT=.exe
+  EXE_SUF=
 else
   ALL_FILES=*
+  EXE_EXT=
   ifeq ($(shell uname -s),Darwin)
-    OBJ_DIR=$(TMPDIR)/lwi/
-    EXE_EXT=-mac
-    GLOBAL_CC+=-std=c++17 -mmacosx-version-min=11.0
+    OBJ_DIR=$(TMPDIR)lwi/
+    EXE_SUF=-mac
+    GLOBAL_CC+=-std=gnu++20 -mmacosx-version-min=11.0 -Wno-unused-but-set-variable -Wno-vla-cxx-extension
   else
     OBJ_DIR=/tmp/lwi/
-    EXE_EXT=
+    EXE_SUF=
   endif
 endif
 
@@ -80,16 +82,16 @@ mcstats: $(TARGET_4)$(EXE_EXT)
 
 # terminal executables (single file)
 $(TARGET_1)$(EXE_EXT): $(OBJ_DIR)getsaved.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)lsd_base.o
-	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)getsaved.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)lsd_base.o -L$(PATH_LIB) $(LIB_TERM) -o $(TARGET_1)$(EXE_EXT)
+	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)getsaved.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)lsd_base.o -L$(PATH_LIB) $(LIB_TERM) -o $(TARGET_1)$(EXE_SUF)$(EXE_EXT)
 
 $(TARGET_2)$(EXE_EXT): $(OBJ_DIR)getlimits.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)lsd_base.o
-	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)getlimits.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)lsd_base.o -L$(PATH_LIB) $(LIB_TERM) -o $(TARGET_2)$(EXE_EXT)
+	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)getlimits.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)lsd_base.o -L$(PATH_LIB) $(LIB_TERM) -o $(TARGET_2)$(EXE_SUF)$(EXE_EXT)
 
 $(TARGET_3)$(EXE_EXT): $(OBJ_DIR)confgen.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)lsd_base.o
-	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)confgen.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)lsd_base.o -L$(PATH_LIB) $(LIB_TERM) -o $(TARGET_3)$(EXE_EXT)
+	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)confgen.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)lsd_base.o -L$(PATH_LIB) $(LIB_TERM) -o $(TARGET_3)$(EXE_SUF)$(EXE_EXT)
 
 $(TARGET_4)$(EXE_EXT): $(OBJ_DIR)mcstats.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)lsd_base.o
-	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)mcstats.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)lsd_base.o -L$(PATH_LIB) $(LIB_TERM) -o $(TARGET_4)$(EXE_EXT)
+	$(CC_TERM) $(SWITCH_CC_TERM) $(SWITCH_CC_LNK) $(OBJ_DIR)mcstats.o $(OBJ_DIR)libmain.o $(OBJ_DIR)assimlib.o $(OBJ_DIR)commonlib.o $(OBJ_DIR)description.o $(OBJ_DIR)filelib.o $(OBJ_DIR)latticelib.o $(OBJ_DIR)math.o $(OBJ_DIR)nets.o $(OBJ_DIR)object.o $(OBJ_DIR)parallel.o $(OBJ_DIR)run.o $(OBJ_DIR)stattables.o $(OBJ_DIR)utillib.o $(OBJ_DIR)variab.o $(OBJ_DIR)pugixml.o $(OBJ_DIR)lsd_base.o -L$(PATH_LIB) $(LIB_TERM) -o $(TARGET_4)$(EXE_SUF)$(EXE_EXT)
 
 # executable/DLL modules
 $(OBJ_DIR)getsaved.o: $(SRC_DIR)getsaved.cpp $(LIB_DIR)libLSD.h
@@ -174,4 +176,4 @@ $(OBJ_DIR)pugixml.o: $(CLIB_DIR)pugixml.cpp $(CLIB_DIR)pugixml.hpp $(CLIB_DIR)pu
 
 # remove compiled files
 clean:
-	$(RM) $(OBJ_DIR)$(ALL_FILES) $(TARGET_1)$(EXE_EXT) $(TARGET_2)$(EXE_EXT) $(TARGET_3)$(EXE_EXT) $(TARGET_4)$(EXE_EXT)
+	$(RM) $(OBJ_DIR)$(ALL_FILES) $(TARGET_1)$(EXE_SUF)$(EXE_EXT) $(TARGET_2)$(EXE_SUF)$(EXE_EXT) $(TARGET_3)$(EXE_SUF)$(EXE_EXT) $(TARGET_4)$(EXE_SUF)$(EXE_EXT)

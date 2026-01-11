@@ -45,7 +45,7 @@ rm -f "$APPHOME/$LMMAPP" "$APPHOME/$LMMAPP.app" "$APPHOME/$LMMLNK"
 
 # disable macOS quarantine of LSD executables
 sudo xattr -rd com.apple.quarantine "$LSDROOT/$LMMAPP.app"
-sudo xattr -rd com.apple.quarantine "$LSDROOT/src/$LSDAPP.app"
+sudo xattr -rd com.apple.quarantine "$LSDROOT/$LSDAPP.app"
 
 # create alias on desktop
 osascript >/dev/null <<END_SCRIPT

@@ -100,6 +100,10 @@ if { ! [ check_components ] } {
 }
 
 if { $CurPlatform eq "mac" } {
+	if { [ ttk::messageBox -parent "" -type okcancel -title Warning -icon warning -message "Unsupported platform" -detail "LSD may not work properly in macOS, see Readme.txt file for details.\n\nIf you decide to continue, please be patient and extremely careful on following all the requested activities in the Terminal window as installation proceeds." ] eq "cancel" } {
+		exit 1
+	}
+	
 	set notInstall [ concat $notInstall *.exe *.dll *.bat gnu/* src/installer-loader-linux.sh ]
 
 	# make sure PATH is complete

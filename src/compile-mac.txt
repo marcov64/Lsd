@@ -1,7 +1,12 @@
 To configure for embedded TclTk in macOS 
 (see http://wiki.tcl.tk/12987 and https://wiki.tcl.tk/12945)
 
-TCL/TK (https://www.tcl.tk/software/tcltk/download.html):
+Make sure you have the latest version of CLANG compiler installed:
+
+sudo rm -rf /Library/Developer/CommandLineTools
+sudo xcode-select --install
+
+Download TCL and TK zip files (https://www.tcl.tk/software/tcltk/download.html).
 
 Extract tclX.X.X and tkX.X.X subdirectories under a common directory (i.e., /Users/Marcelo/TclTk). Remove old versions before compilation.
 
@@ -19,6 +24,8 @@ make -C tk${ver}/macosx deploy
 
 make -C tcl${ver}/macosx install-embedded INSTALL_ROOT=/Users/Marcelo/TclTk/
 make -C tk${ver}/macosx install-embedded INSTALL_ROOT=/Users/Marcelo/TclTk/
+
+Please adapt /Users/Marcelo/TclTk/ to the path where you extracted Tcl/Tk sources.
 
 In LMM.app/Contents, LSD.app/Contents, and installer/LSD Installer.app/Contents remove the Frameworks subfolder.
 

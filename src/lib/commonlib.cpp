@@ -124,6 +124,7 @@ extern char ** environ;
 void lsd::inhibit_system_sleep( void )
 {
 #ifndef _LMM_
+#ifndef _LWI_
 #ifdef __APPLE__
 	CFStringRef name = CFSTR( "Metashape processing" );
 
@@ -131,6 +132,7 @@ void lsd::inhibit_system_sleep( void )
 		mac_pwr_assert = kIOPMNullAssertionID;
 #else
 	// a simple general method was not found
+#endif
 #endif
 #endif
 }
@@ -143,6 +145,7 @@ void lsd::inhibit_system_sleep( void )
 void lsd::restore_system_sleep( void )
 {
 #ifndef _LMM_
+#ifndef _LWI_
 #ifdef __APPLE__
 	if ( mac_pwr_assert != kIOPMNullAssertionID )
 	{
@@ -151,6 +154,7 @@ void lsd::restore_system_sleep( void )
 	}
 #else
 	// a simple general method was not found
+#endif
 #endif
 #endif
 }

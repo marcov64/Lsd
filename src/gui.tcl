@@ -107,7 +107,7 @@ if { ! [ info exists wish_exe ] || ( $CurPlatform eq "mac" && $wish_exe eq "wish
 	set wish_exe $DefaultWish
 }
 
-if { ! [ info exists html_browser ] || ( $CurPlatform eq "windows" && $html_browser eq "open" ) } {
+if { ! [ info exists html_browser ] || $html_browser eq "open" } {
 	set html_browser $DefaultHtmlBrowser
 }
 
