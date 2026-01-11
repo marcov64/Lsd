@@ -30,6 +30,7 @@
 '*makemessage.txt'
 '*temp.html'
 '*sync.ffs_db'
+'*.ffs_gui'
 '*.o'
 '*.obj'
 '*.rc'

@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 9.0 - January 2024
+	LSD 9.0 - January 2026
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -125,7 +125,7 @@
 #define _LSD_MAJOR_ 9
 #define _LSD_MINOR_ 0
 #define _LSD_VERSION_ "9.0"
-#define _LSD_DATE_ "April 10 2024"	 // __DATE__
+#define _LSD_DATE_ "January 12 2026"	 // __DATE__
 
 // platform codes
 #define _LIN_	1

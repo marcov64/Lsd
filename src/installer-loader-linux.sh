@@ -1,7 +1,7 @@
 #!/bin/bash
 #**************************************************************
 #
-#	LSD 9.0 - January 2024
+#	LSD 9.0 - January 2026
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #

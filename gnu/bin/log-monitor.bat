@@ -1,7 +1,7 @@
 @ECHO off
 rem *************************************************************
 rem
-rem	 LSD 9.0 - January 2024
+rem	 LSD 9.0 - January 2026
 rem	 written by Marco Valente, Universita' dell'Aquila
 rem	 and by Marcelo Pereira, University of Campinas
 rem
