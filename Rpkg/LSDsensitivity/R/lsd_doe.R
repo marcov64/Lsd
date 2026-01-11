@@ -184,13 +184,13 @@ read.doe.lsd <- function( folder, baseName, outVar = "", does = 1, doeFile = NUL
   if( is.null( confFile ) ) {
     config <- read.config( folder = folder, baseName = baseName )
   } else
-    config <- read.config( fileName = confFile )
+    config <- read.config( folder = folder, fileName = confFile )
 
   # read LSD parameter limits file and join with default configuration
   if( is.null( limFile ) ) {
     limits <- read.sens( folder = folder, baseName = baseName )
   } else
-    limits <- read.sens( fileName = limFile )
+    limits <- read.sens( folder = folder, fileName = limFile )
 
   limits$Def <- NA                          # add new column to param table
   for( i in 1 : nrow( limits ) ) {
@@ -418,6 +418,59 @@ config.file <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
 read.sens <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
+  if( is.null( fileName ) && is.null( baseName ) )
+    stop( "LSD sensitivity file name (or parts) missing" )
+
+  limits <- NULL
+
+  if( ! is.null( fileName ) )
+    limits <- read.sa.sens( folder = folder, fileName = fileName )
+
+  if( is.null( limits ) )
+    limits <- read.xml.sens( folder = folder, baseName = baseName, fileName = fileName )
+
+  if( is.null( limits ) )
+    limits <- read.sa.sens( folder = folder, baseName = baseName )
+
+  if( is.null( limits ) )
+    stop( "LSD sensitivity information missing" )
+
+  tit <- inst <- c( )
+
+  for( i in 1 : ( ( ncol( limits ) - 1 ) / 2 ) )
+    tit <- append( tit, c( paste0( "Min.", i ), paste0( "Max.", i ) ) )
+
+  for( i in 1 : nrow( limits ) ) {
+
+    for( j in seq( 2, ncol( limits ), 2 ) ) {
+      if( is.na( limits[ i, j ] ) || is.na( limits[ i, j + 1 ] ) ) {
+        j <- j - 2
+        break
+      }
+
+      if( limits[ i, j ] > limits[ i, j + 1 ] ) {
+        temp <- limits[ i, j ]
+        limits[ i, j ] <- limits[ i, j + 1 ]
+        limits[ i, j + 1 ] <- temp
+      }
+    }
+
+    inst[ i ] <- j / 2
+  }
+
+  limits <- cbind( limits, inst )
+  colnames( limits ) <- c( "Par", tit, "Inst" )
+
+  return( limits )
+}
+
+
+# ==== Read LSD parameter limits from XML configuration .lsd file ====
+
+read.xml.sens <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
+
+  limits <- NULL
+
   file <- config.file( folder, baseName, fileName )
   if( length( file ) > 0 ) {
 
@@ -456,84 +509,78 @@ read.sens <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
             length( values ) <- wid
             limits[ i, ] <- c( XML::xmlGetAttr( XML::xmlParent( set[[ i ]] ), "name" ),
-                                  as.list( values ) )
+                               as.list( values ) )
           }
         }
       }
     }
   }
-
-  if( ! exists( "limits" ) ) {
-    if( is.null( fileName ) && is.null( baseName ) )
-      stop( "LSD sensitivity file name (or parts) missing" )
-
-    if( is.null( fileName ) )
-      file <- paste0( baseName, ".sa" )
-    else
-      file <- fileName
-
-    if( ! is.null( folder ) && file.exists( folder ) )
-      dir <- normalizePath( folder, winslash = "/", mustWork = TRUE )
-    else
-      dir <- getwd( )
-
-    par <- dirname( dir )
-
-    if( file.exists( paste0( dir, "/", file ) ) ) {
-      file <- paste0( dir, "/", file )
-    } else {
-      if( file.exists( paste0( dir, "/", file, "n" ) ) ) {    # accept .san extension (CRAN bug)
-        file <- paste0( dir, "/", file, "n" )
-      } else {
-        if( file.exists( paste0( par, "/", file ) ) ) {
-          file <- paste0( par, "/", file )
-        } else {
-          if( file.exists( paste0( par, "/", file, "n" ) ) ) {
-            file <- paste0( par, "/", file, "n" )
-          } else {
-            stop( "LSD sensitivity file does not exist" )
-          }
-        }
-      }
-    }
-
-    limits <- utils::read.table( file, stringsAsFactors = FALSE, fill = TRUE )
-    limits <- limits[ -2 : -3 ]
-    if( ! is.numeric( limits[ 1, 2 ] ) )  # handle newer LSD versions bringing extra col
-      limits <- limits[ -2 ]
-
-    if( ( ncol( limits ) - 1 ) %% 2 > 0 ) {
-      warning( "Unused sensitivity values for element(s), discarding last one(s)",
-               call. = FALSE )
-      limits <- limits[ - ncol( limits ) ]
-    }
-  }
-
-  tit <- inst <- c( )
-
-  for( i in 1 : ( ( ncol( limits ) - 1 ) / 2 ) )
-    tit <- append( tit, c( paste0( "Min.", i ), paste0( "Max.", i ) ) )
-
-  for( i in 1 : nrow( limits ) ) {
-
-    for( j in seq( 2, ncol( limits ), 2 ) ) {
-      if( is.na( limits[ i, j ] ) || is.na( limits[ i, j + 1 ] ) ) {
-        j <- j - 2
-        break
-      }
-
-      if( limits[ i, j ] > limits[ i, j + 1 ] ) {
-        temp <- limits[ i, j ]
-        limits[ i, j ] <- limits[ i, j + 1 ]
-        limits[ i, j + 1 ] <- temp
-      }
-    }
-
-    inst[ i ] <- j / 2
-  }
-
-  limits <- cbind( limits, inst )
-  colnames( limits ) <- c( "Par", tit, "Inst" )
 
   return( limits )
+}
+
+
+# ==== Read LSD parameter limits from sensitivity analysis .sa file ====
+
+read.sa.sens <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
+
+  limits <- NULL
+
+  file <- sens.file( folder, baseName, fileName )
+  if( length( file ) == 0 )
+    stop( "LSD sensitivity file missing or non existing" )
+
+  limits <- utils::read.table( file, stringsAsFactors = FALSE, fill = TRUE )
+  limits <- limits[ -2 : -3 ]
+  if( ! is.numeric( limits[ 1, 2 ] ) )  # handle newer LSD versions bringing extra col
+    limits <- limits[ -2 ]
+
+  if( ( ncol( limits ) - 1 ) %% 2 > 0 ) {
+    warning( "Unused sensitivity values for element(s), discarding last one(s)",
+             call. = FALSE )
+    limits <- limits[ - ncol( limits ) ]
+  }
+
+  return( limits )
+}
+
+
+# ==== Get valid LSD sensitivity analysis .sa file name ====
+
+sens.file <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
+
+  if( is.null( fileName ) && is.null( baseName ) )
+    return( "" )
+
+  if( is.null( fileName ) )
+    file <- paste0( baseName, ".sa" )
+  else
+    file <- fileName
+
+  if( ! is.null( folder ) && file.exists( folder ) )
+    dir <- normalizePath( folder, winslash = "/", mustWork = TRUE )
+  else
+    dir <- getwd( )
+
+  par <- dirname( dir )
+
+  if( file.exists( paste0( dir, "/", file ) ) ) {
+    file <- paste0( dir, "/", file )
+  } else {
+    if( file.exists( paste0( dir, "/", file, "n" ) ) ) {    # accept .san extension (CRAN bug)
+      file <- paste0( dir, "/", file, "n" )
+    } else {
+      if( file.exists( paste0( par, "/", file ) ) ) {
+        file <- paste0( par, "/", file )
+      } else {
+        if( file.exists( paste0( par, "/", file, "n" ) ) ) {
+          file <- paste0( par, "/", file, "n" )
+        } else {
+          file <- ""
+        }
+      }
+    }
+  }
+
+  return( file )
 }

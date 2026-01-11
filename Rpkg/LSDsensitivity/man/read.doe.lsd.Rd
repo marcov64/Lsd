@@ -42,10 +42,10 @@ the external validation DoE specification file to be used. For the default (NULL
 the external validation DoE response file to be used/created. For the default (NULL), the \code{baseName} is used to generate the name.
 }
   \item{confFile}{
-the LSD baseline \code{.lsd} configuration file. The default (NULL) is to use \code{baseName.lsd}.
+the LSD baseline \code{.lsd} configuration file. The default (NULL) is to use \code{config/baseName.lsd}.
 }
   \item{limFile}{
-the LSD factor limit ranges \code{.sa} file. The default (NULL) is to use \code{baseName.sa}.
+the LSD factor limit ranges \code{.sa} file. The default (NULL) is to use the data contained in the configuration file (\code{confFile}); if configuration ha no factor limit ranges, tries to load \code{config/baseName.sa}, if it exists.
 }
   \item{iniDrop}{
 integer: the number of initial time steps to drop from analysis (from \code{t = 1} till \code{t = iniDrop}). The default (0) is to remove no time step.
