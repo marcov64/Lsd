@@ -33,7 +33,7 @@ lsd:
 
 # LSD Web Interface executables
 lwi:
-	cd lwi && $(MAKE)
+	if [ -d "lwi" ]; then cd lwi && $(MAKE); fi
 
 # delete all executables, libraries and object files
 clean:

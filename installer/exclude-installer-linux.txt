@@ -21,6 +21,7 @@
 ./src/system_options-windows.txt
 ./src/system_options.txt
 ./lmm_options.txt
+./LSD.cfg
 ./add-shortcut-mac.sh
 ./uninstall-mac.sh
 *elements.txt

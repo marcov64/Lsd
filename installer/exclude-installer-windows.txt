@@ -27,6 +27,7 @@ LMM
 LSD
 LMM.desktop
 lmm_options.txt
+LSD.cfg
 LSD*.zip
 elements.txt
 makefile

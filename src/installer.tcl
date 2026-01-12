@@ -27,7 +27,7 @@ wm withdraw .
 set _LSD_NAME_ "LSD Laboratory for Simulation Development"
 set _LSD_PUBLISHER_ "Marco Valente and Marcelo Pereira"
 set _LSD_VERSION_ "9.0"
-set _LSD_DATE_ "April 10 2025"
+set _LSD_DATE_ "January 12 2026"
 set _LSD_SIZE_KB_ 900120
 
 set lsd_dir LSD
@@ -103,7 +103,7 @@ if { $CurPlatform eq "mac" } {
 	if { [ ttk::messageBox -parent "" -type okcancel -title Warning -icon warning -message "Unsupported platform" -detail "LSD may not work properly in macOS, see Readme.txt file for details.\n\nIf you decide to continue, please be patient and extremely careful on following all the requested activities in the Terminal window as installation proceeds." ] eq "cancel" } {
 		exit 1
 	}
-	
+
 	set notInstall [ concat $notInstall *.exe *.dll *.bat gnu/* src/installer-loader-linux.sh ]
 
 	# make sure PATH is complete
@@ -398,13 +398,21 @@ foreach f $files {
 
 
 #
-# remove temporary files
+# remove temporary files, including from previous LSD installs
 #
 
-if [ string equal $CurPlatform mac ] {
+if { [ string equal $CurPlatform mac ] } {
 	$inst configure -text "Removing temporary files..."
 	catch { file delete -force $filesDir }
+	set tmpDir "$env(TMPDIR)"
+} elseif { [ string equal $CurPlatform windows ] } {
+	set tmpDir "$env(TMP)/"
+} else {
+	set tmpDir "/tmp/"
 }
+
+$inst configure -text "Removing old temporary files..."
+catch { file delete -force ${tmpDir}LMM ${tmpDir}LSD ${tmpDir}lsd_term ${tmpDir}lwi }
 
 destroytop .inst
 

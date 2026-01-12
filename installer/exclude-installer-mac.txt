@@ -21,6 +21,7 @@
 'LMM.desktop'
 'LMM.exe.config'
 'lmm_options.txt'
+'LSD.cfg'
 'LSD'
 'add-shortcut-linux.sh'
 'uninstall-linux.sh'
