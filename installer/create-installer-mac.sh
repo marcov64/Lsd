@@ -65,6 +65,7 @@ cd - > /dev/null
 rm -f "$INST_DIR/Package/LSD-archive-mac.zip" "$INST_DIR/Scripts/src/"*
 mv -f "$DMG_DIR/LSD-archive-mac.zip" "$INST_DIR/Package/"
 cp -f "$SRC_DIR/"*.tcl "$INST_DIR/Scripts/src/"
+cp -rf "$SRC_DIR/tklib" "$INST_DIR/Scripts/src/"
 
 # create .dmg archive
 rm -f -R /tmp/LSD_INSTALLER "$FILENAME-$LSD_FILE_TAG.dmg"

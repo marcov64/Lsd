@@ -7,6 +7,8 @@ LSD.app\
 Work\*\
 trashbin\
 gnu\*\__pycache__\
+Example\*\src\
+Example\*\makefile
 Example\*\*.dll
 Example\*\*.dylib
 Example\*\*.exe
@@ -30,14 +32,11 @@ lmm_options.txt
 LSD.cfg
 LSD*.zip
 elements.txt
-makefile
-makefileNW
+makefile.gui
 makemessage.txt
 temp.html
 sync.ffs_db
 *.ffs_gui
-*src\*.o
-*.obj
 *.sh
 *.gitignore
 *.err

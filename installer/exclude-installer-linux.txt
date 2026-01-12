@@ -9,6 +9,10 @@
 ./LSD.app
 ./Work
 ./trashbin
+./Example/*/*/src
+./Example/*/*/*/src
+./Example/*/*/makefile
+./Example/*/*/*/makefile
 ./src/compile-mac*
 ./src/compile-windows*
 ./src/LSDbase-mac.a
@@ -25,8 +29,7 @@
 ./add-shortcut-mac.sh
 ./uninstall-mac.sh
 *elements.txt
-*makefile
-*makefileNW
+*makefile.gui
 *makemessage.txt
 *temp.html
 *sync.ffs_db

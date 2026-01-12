@@ -318,11 +318,11 @@ int main( int argn, const char **argv )
  *************************************************************/
 void save_csv( const char *base, const char *suffix, std::vector < std::string > header, vector2D < double > data, int rows, int cols )
 {
-	char fn[ strlen( base ) + strlen( suffix ) + 6 ];
-	int i, j, k;
+	int i, j, k, len = strlen( base ) + strlen( suffix ) + 6;
+	char fn[ len ];
 	FILE *f;
 
-	sprintf( fn, "%s_%s.csv", base, suffix );
+	snprintf( fn, len, "%s_%s.csv", base, suffix );
 	f = fopen( fn, "wt" );
 	if ( f == NULL )
 	{

@@ -36,7 +36,7 @@ LMMLNK="LSD Model Manager"
 LMMAPP=LMM
 LMMEXE="$LMMAPP.app/Contents/MacOS/LMM"
 LSDAPP=LSD
-LSDFOLDERS="Example gnu installer LMM.app lwi Manual Rpkg src tmp"
+LSDFOLDERS="Example gnu installer LMM.app LSD.app lwi Manual Rpkg src tmp"
 LSDWORK=Work
 DESKTOP="$( osascript \
              -e 'tell application "System Events"' \

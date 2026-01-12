@@ -32,3 +32,7 @@ In LMM.app/Contents, LSD.app/Contents, and installer/LSD Installer.app/Contents 
 Copy the Frameworks subfolder from TclTk/Applications/Utilities/Wish.app/Contents, into LMM.app/Contents, LSD.app/Contents, and installer/LSD Installer.app/Contents.
 
 Copy only to LSD.app/Contents/Frameworks the MISSING Headers, PrivateHeaders, libtclstub8.6.a andlibtkstub8.6.a items from build/tcl/Tcl.Framework[/Versions/8.6] and build/tk/Tk.Framework[/Versions/8.6], being careful to not overwrite the existing files. Copy files and the respective link files. Copy link files ONLY after copying real files/folders.
+
+Copy only to installer/LSD Installer.app/Contents/MacOS the Wish file.
+
+Copy only to installer/LSD Installer.app/Contents/Resources the Wish.sdef and Credits.html files.
