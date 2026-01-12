@@ -141,7 +141,7 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 
 		// get simulation settings
 		x_attrT hint;							// speed-up pointer
-		last_t = simNode.attribute( "steps", hint ).as_uint( MAX_STEPS );
+		last_t = simNode.attribute( "steps", hint ).as_uint( SIM_STEPS );
 		last_run = simNode.attribute( "runs", hint ).as_uint( 1 );
 		seed = simNode.attribute( "seed", hint ).as_uint( 1 );
 		deb_t = simNode.attribute( "debug_start", hint ).as_uint( );
@@ -1309,7 +1309,7 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 		da->disable = true;
 	}
 
-	last_t = MAX_STEPS;
+	last_t = SIM_STEPS;
 	deb_t = stack_info = prof_min_msecs = 0;
 	prof_obs_only = prof_aggr_time = no_ptr_chk = parallel_disable = 0;
 

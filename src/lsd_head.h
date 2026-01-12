@@ -19,7 +19,7 @@ to keep compatibility with legacy LSD code.
 *************************************************************/
 
 #ifdef EQ_USER_CFUNS
-	#ifndef LSDFUNINIT
+	#ifndef LSDCFUNINIT
 		#error User C functions defined but 'lsd_init.h' not included
 		#include <stop>
 	#endif

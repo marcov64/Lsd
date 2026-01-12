@@ -15,6 +15,14 @@
 /*************************************************************
  LSD.H
  Global definitions shared by all LSD GUI modules.
+
+ Relevant macros for conditional compilation (when defined):
+
+ - _EQ_: user model equation file
+ - _TERM_: terminal executable
+ - _LMM_: LMM executable
+ - _LWI_: LSD Web Interface executables
+ - _NT_: no signal trapping (better when debugging in GDB)
  *************************************************************/
 
 // base class extensions

@@ -26,6 +26,8 @@
 
  - _EQ_: user model equation file
  - _TERM_: terminal executable
+ - _LMM_: LMM executable
+ - _LWI_: LSD Web Interface executables
  - _NT_: no signal trapping (better when debugging in GDB)
  *************************************************************/
 

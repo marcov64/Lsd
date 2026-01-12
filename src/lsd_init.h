@@ -24,7 +24,12 @@
 	#include <stop>
 #endif
 
-#define LSDFUNINIT
+#define LSDCFUNINIT
+
+// LSD classes and type definitions
+#ifndef LSDLIBINIT
+	#include "lib/libinit.h"
+#endif
 
 // macros to define user-defined C functions to be used in equations
 #define CFUN_DBL( N, ... ) double N( object *_p_, const variable *_v_, object *_c_ __VA_OPT__( , ) __VA_ARGS__ )

@@ -2,7 +2,6 @@
 
 #include <lsd_init.h>
 
-namespace lsd { class object; }
 using namespace lsd;
 using namespace std;
 

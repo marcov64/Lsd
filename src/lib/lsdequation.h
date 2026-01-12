@@ -184,7 +184,7 @@
 #endif
 
 // macros to handle user-defined C functions to be used in equations
-#ifdef LSDFUNINIT
+#ifdef LSDCFUNINIT
 	#undef CFUN_DBL
 	#undef CFUN_INT
 	#undef CFUN_OBJ

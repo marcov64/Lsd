@@ -2470,7 +2470,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx $_2 -pady $_2" );
 
 			cmd( "ttk::frame $T.f.b" );
-			cmd( "ttk::label $T.f.b.l1 -width $tw -anchor e -text \"Random numbers initial seed\"" );
+			cmd( "ttk::label $T.f.b.l1 -width $tw -anchor e -text \"Random number initial seed\"" );
 			cmd( "ttk::spinbox $T.f.b.e1 -width 7 -from 1 -to 99999 -validate focusout -validatecommand { set n %%P; if { [ string is integer -strict $n ] && $n >= 1 } { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invalidcommand { bell } -justify center" );
 			cmd( "$T.f.b.e1 insert 0 $seed" );
 			cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx $_2 -pady $_2" );

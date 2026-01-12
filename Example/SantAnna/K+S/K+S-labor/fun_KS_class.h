@@ -13,20 +13,6 @@
 
  ******************************************************************************/
 
-// K+S additional C++ STL containers and utilities
-#include <list>
-#include <map>
-#include <random>
-#include <set>
-#include <vector>
-
-// LSD classes forward declarations
-namespace lsd
-{
-	class object;
-	class variable;
-}
-
 // set default name spaces (C++ STL, LSD)
 using namespace std;
 using namespace lsd;
