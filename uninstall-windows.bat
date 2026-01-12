@@ -29,7 +29,7 @@ IF "%1"=="/?" (
 SET LSDROOT=%~dp0
 SET LSDROOT=%LSDROOT:~0,-1%
 SET GETFOLDER=%LSDROOT%\src\get-dir-windows.vbs
-SET LSDFOLDERS=Example gnu installer LMM.app lwi Manual Rpkg src
+SET LSDFOLDERS=Example gnu installer LMM.app lwi Manual Rpkg src tmp
 SET LSDWORK=Work
 
 IF /I "%1"=="/s" GOTO nocheck

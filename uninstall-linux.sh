@@ -34,7 +34,7 @@ fi
 
 LMMLNK="LMM.desktop"
 LMMEXE="LMM"
-LSDFOLDERS="Example gnu installer LMM.app lwi Manual Rpkg src"
+LSDFOLDERS="Example gnu installer LMM.app lwi Manual Rpkg src tmp"
 LSDWORK="Work"
 APPMENU="$HOME/.local/share/applications"
 if [ -x "$( command -v xdg-user-dir )" ]; then

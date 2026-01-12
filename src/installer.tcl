@@ -28,7 +28,7 @@ set _LSD_NAME_ "LSD Laboratory for Simulation Development"
 set _LSD_PUBLISHER_ "Marco Valente and Marcelo Pereira"
 set _LSD_VERSION_ "9.0"
 set _LSD_DATE_ "January 12 2026"
-set _LSD_SIZE_KB_ 900120
+set _LSD_SIZE_KB_ 735273
 
 set lsd_dir LSD
 set lsd_src src
@@ -947,16 +947,8 @@ bind .b.finish <Return> { .b.finish invoke }
 bind . <Escape> { .b.finish invoke }
 tooltip::tooltip .b.finish "Close LSD installer"
 
-if { [ llength $issues ] == 0 && ( ! [ info exists sysPath ] || ! $sysPath ) } {
-	ttk::button .b.run -width $butWid -text "Run Now" -command { set done 1 }
-	bind .b.run <Return> { .b.run invoke }
-	pack .b.run .b.finish -padx $_10 -pady $_10 -side left
-	focus .b.run
-	tooltip::tooltip .b.run "Close installer and launch LSD"
-} else {
-	pack .b.finish -padx $_10 -pady $_10 -side left
-	focus .b.finish
-}
+pack .b.finish -padx $_10 -pady $_10 -side left
+focus .b.finish
 
 pack .b -side right
 

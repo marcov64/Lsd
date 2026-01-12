@@ -48,6 +48,10 @@ proc showmodel { groupdir { modeldir "" } } {
 	lappend lbn		; # model/group parent name
 	lappend group	; # model = 0 / group = 1 flag
 
+	if { ! [ file exists $groupdir ] || ! [ file isdirectory $groupdir ] } {
+		set groupdir $lsd_root
+	}
+
 	set browser_dir $groupdir
 
 	if { [ string first "$lsd_root/$lsd_example" [ file normalize $groupdir ] ] == 0 } {

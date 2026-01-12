@@ -36,7 +36,7 @@ LMMLNK="LSD Model Manager"
 LMMAPP=LMM
 LMMEXE="$LMMAPP.app/Contents/MacOS/LMM"
 LSDAPP=LSD
-LSDFOLDERS="Example gnu installer LMM.app lwi Manual Rpkg src"
+LSDFOLDERS="Example gnu installer LMM.app lwi Manual Rpkg src tmp"
 LSDWORK=Work
 DESKTOP="$( osascript \
              -e 'tell application "System Events"' \
@@ -46,7 +46,7 @@ APPHOME="$( osascript \
              -e 'tell application "System Events"' \
              -e 'get POSIX path of (path to applications folder from user domain)' \
              -e 'end tell' )"
-			 
+
 # remove desktop and start menu aliases
 rm -f "$DESKTOP/$LMMLNK"
 rm -f "$APPHOME/$LMMLNK"
