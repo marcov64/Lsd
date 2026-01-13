@@ -26,7 +26,7 @@ MSYS2 3.5.7, https://www.msys2.org
 Cygwin 3.5.7 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
 7-Zip LZMA SDK 24.09 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
 Makeself 2.5.0 is copyrighted by Stephane Peter under GPL2, https://makeself.io
-Gnuplot 6.0.2 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
+Gnuplot 6.0.4 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
 Eigen 3.4.0 is copyrighted by Benoit Jacob and others under MPL2, http://eigen.tuxfamily.org
 pugixml 1.15 is copyrighted by Arseny Kapoulkine under MIT license, https://pugixml.org
 rapidcsv 8.84 is copyrighted by Kristofer Berggren under BSD-3-Clause license, https://github.com/d99kris/rapidcsv

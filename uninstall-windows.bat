@@ -45,13 +45,8 @@ NET session >NUL 2>&1
 IF %ERRORLEVEL%==0 SET ADMIN=1
 
 rem remove LSD from system PATH
-FOR /F "skip=2 tokens=3*" %%a in ('REG query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V PATH') DO (
-	IF [%%b]==[] (
-		SET SYSPATH=%%~a
-	) ELSE (
-		SET SYSPATH=%%~a %%~b
-	)
-)
+SET REGLOC="HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+FOR /F "tokens=2*" %%A IN ('REG QUERY %REGLOC% /v PATH 2^>^&1^|find "REG_"') DO SET SYSPATH=%%B
 
 CALL SET NEWPATH=%%SYSPATH:%LSDROOT%\gnu\bin=%%
 IF NOT "%NEWPATH%"=="%SYSPATH%" (
@@ -66,32 +61,29 @@ IF NOT "%NEWPATH%"=="%SYSPATH%" (
 )
 
 rem remove LSD from user PATH
-FOR /F "skip=2 tokens=3*" %%a in ('REG query "HKCU\Environment" /V PATH') DO (
-	IF [%%b]==[] (
-		SET USRPATH=%%~a
-	) ELSE (
-		SET USRPATH=%%~a %%~b
-	)
-)
+SET REGLOC="HKCU\Environment"
+FOR /F "tokens=2*" %%A IN ('REG QUERY %REGLOC% /v PATH 2^>^&1^|find "REG_"') DO SET USRPATH=%%B
 
 CALL SET NEWPATH=%%USRPATH:%LSDROOT%\gnu\bin=%%
 IF NOT "%NEWPATH%"=="%USRPATH%" SETX PATH "%NEWPATH%" > nul
 
 rem remove desktop and start menu links, unregister from Windows
-FOR /F "delims=" %%i in ('cscript %GETFOLDER% //nologo Desktop') DO SET DESKTOP=%%i
-FOR /F "delims=" %%i in ('cscript %GETFOLDER% //nologo Programs') DO SET STRTMENU=%%i
+SET REGLOC="HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
+FOR /F "tokens=2*" %%A IN ('REG QUERY %REGLOC% /v Desktop 2^>^&1^|find "REG_"') DO SET DESKTOP=%%B
+FOR /F "tokens=2*" %%A IN ('REG QUERY %REGLOC% /v Programs 2^>^&1^|find "REG_"') DO SET STRTMENU=%%B
 ERASE /F "%DESKTOP%\LSD Model Manager.lnk" > NUL 2>&1
 ERASE /F "%STRTMENU%\LSD Model Manager.lnk" > NUL 2>&1
 REG DELETE "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\LSD" /f > NUL 2>&1
 
-IF %ADMIN%==1 (
-FOR /F "delims=" %%i in ('cscript %GETFOLDER% //nologo AllUsersDesktop') DO SET DESKTOP=%%i
-FOR /F "delims=" %%i in ('cscript %GETFOLDER% //nologo AllUsersPrograms') DO SET STRTMENU=%%i
-REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\LSD" /f > NUL 2>&1
-)
+SET REGLOC="HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders"
+FOR /F "tokens=2*" %%A IN ('REG QUERY %REGLOC% /v Desktop 2^>^&1^|find "REG_"') DO SET DESKTOP=%%B
+FOR /F "tokens=2*" %%A IN ('REG QUERY %REGLOC% /v Programs 2^>^&1^|find "REG_"') DO SET STRTMENU=%%B
 
-ERASE /F "%DESKTOP%\LSD Model Manager.lnk" > NUL 2>&1
-ERASE /F "%STRTMENU%\LSD Model Manager.lnk" > NUL 2>&1
+IF %ADMIN%==1 (
+	ERASE /F "%DESKTOP%\LSD Model Manager.lnk" > NUL 2>&1
+	ERASE /F "%STRTMENU%\LSD Model Manager.lnk" > NUL 2>&1
+	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\LSD" /f > NUL 2>&1
+)
 
 rem do not proceed if wrong directory
 IF NOT EXIST "%LSDROOT%\LMM.exe" (

@@ -41,7 +41,6 @@
 '*.dylib'
 '*.so'
 '*.bat'
-'*.vbs'
 '*.gitignore'
 '*.err'
 '*.gch'
