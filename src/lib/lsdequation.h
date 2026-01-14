@@ -189,10 +189,10 @@
 	#undef CFUN_INT
 	#undef CFUN_OBJ
 	#undef CFUN_VOID
-	#define CFUN_DBL( N, ... ) double lsd::equation::N( object *_p_, const variable *_v_, object *_c_ __VA_OPT__( , ) __VA_ARGS__ )
-	#define CFUN_INT( N, ... ) int lsd::equation::N( object *_p_, const variable *_v_, object *_c_ __VA_OPT__( , ) __VA_ARGS__ )
-	#define CFUN_OBJ( N, ... ) object *lsd::equation::N( object *_p_, const variable *_v_, object *_c_ __VA_OPT__( , ) __VA_ARGS__ )
-	#define CFUN_VOID( N, ... ) void lsd::equation::N( object *_p_, const variable *_v_, object *_c_ __VA_OPT__( , ) __VA_ARGS__ )
+	#define CFUN_DBL( N, ... ) double lsd::equation::N( lsd::object *_p_, const lsd::variable *_v_, lsd::object *_c_ __VA_OPT__( , ) __VA_ARGS__ )
+	#define CFUN_INT( N, ... ) int lsd::equation::N( lsd::object *_p_, const lsd::variable *_v_, lsd::object *_c_ __VA_OPT__( , ) __VA_ARGS__ )
+	#define CFUN_OBJ( N, ... ) lsd::object *lsd::equation::N( lsd::object *_p_, const lsd::variable *_v_, lsd::object *_c_ __VA_OPT__( , ) __VA_ARGS__ )
+	#define CFUN_VOID( N, ... ) void lsd::equation::N( lsd::object *_p_, const lsd::variable *_v_, lsd::object *_c_ __VA_OPT__( , ) __VA_ARGS__ )
 	#define CFUN( N, ... ) lsd::equation::N( _p_, _v_, _c_ __VA_OPT__( , ) __VA_ARGS__ )
 	#define CFUNS( O, N, ... ) lsd::equation::N( CHK_PTR_OBJ( O ) O, _v_, _c_ __VA_OPT__( , ) __VA_ARGS__ )
 #endif
