@@ -7,7 +7,7 @@ This MACRO returns the rouded value of a value specified by the user.
 The user can specify the direction wih the word UP and "DOWN", in quotes and capital letters, in which case the MACRO will round up or down, respectively.
 If any other word or no word is specified, the MACRO will simply round the value.
 */
-double equation::ROUND( double x , string d )
+double equation::ROUND( double x , std::string d )
 {
 	double r = round(x);
 	double y;

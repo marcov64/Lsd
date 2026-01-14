@@ -788,7 +788,7 @@ EQUATION( "TuAvg" )
 Average number of periods of unemployment for unemployed workers
 */
 v[0] = AVE_CNDS( LABSUPL2, "_Tu", "_employed", "==", 0 );
-RESULT( ! isnan( v[0] ) ? v[0] : 0 )
+RESULT( ! is_nan( v[0] ) ? v[0] : 0 )
 
 
 EQUATION( "V" )
@@ -821,6 +821,7 @@ Category 3 worker vacancy rate
 */
 RESULT( T > 1 ? min( ( VS( CAPSECL2, "JO13" ) + VS( CONSECL2, "JO23" ) ) /
 					 V( "Ls3" ), 1 ) : 0 )
+
 
 EQUATION( "dw" )
 /*
@@ -988,8 +989,8 @@ CYCLES( CONSECL2, cur, "Firm2" )				// consider sector 2 firm owners
 												// Positive net wealth change
 
 // apply the Jasso-Deaton formula
-sort( rank1, rank1 + empN, greater < double > ( ) );// sort in descending order
-sort( rank2, rank2 + agtN, greater < double > ( ) );
+sort( rank1, rank1 + empN, std::greater < double > ( ) );// sort in descending order
+sort( rank2, rank2 + agtN, std::greater < double > ( ) );
 
 for ( rank1wSum = wRank1Sum = k = 0; k < empN; ++k )
 {

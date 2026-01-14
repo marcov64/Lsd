@@ -1387,7 +1387,7 @@ v[7] = sqrt( max( ( v[3] / i ) - pow( v[2] / i, 2 ), 0 ) );// SD of log wages
 v[17] = sqrt( max( ( v[13] / i ) - pow( v[12] / i, 2 ), 0 ) );// SD log sat. wage
 v[27] = sqrt( max( ( v[23] / i ) - pow( v[22] / i, 2 ), 0 ) );// SD log req. wage
 
-sort( rank, rank + j, greater< double > ( ) );	// sort in descending order
+sort( rank, rank + j, std::greater< double > ( ) );	// sort in descending order
 
 for ( v[8] = v[9] = k = 0; k < j; ++k )
 {
@@ -1441,7 +1441,7 @@ CYCLES( LABSUPL2, cur, "Worker" )				// consider all workers
 		rank[ i++ ] = v[0];						// insert wage in rank array
 	}
 
-sort( rank, rank + i, greater< double >( ) );	// sort in descending order
+sort( rank, rank + i, std::greater< double >( ) );// sort in descending order
 
 for ( v[4] = v[5] = 0, k = 0; k < i; ++k )
 {

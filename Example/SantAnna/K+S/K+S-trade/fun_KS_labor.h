@@ -511,7 +511,7 @@ Average wage received by workers (excluding bonus & unemployment benefits)
 */
 VS( CONSECL1, "hires2" );						// ensure hiring done
 v[0] = AVE( "_w" );
-RESULT( ! isnan( v[0] ) ? v[0] : CURRENT )
+RESULT( ! is_nan( v[0] ) ? v[0] : CURRENT )
 
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/

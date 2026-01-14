@@ -3,10 +3,9 @@
 #include <lsd_init.h>
 
 using namespace lsd;
-using namespace std;
 
 #define EQ_USER_CFUNS \
-	double ROUND( double x , string d = "none"); \
+	double ROUND( double x , std::string d = "none"); \
 	double LAG_SUM( object *obj , const char *var , int lag = 0, int lag2 = 0); \
 	double LAG_AVE( object *obj , const char *var , int lag = 0, int lag2 = 0); \
 	double LAG_GROWTH( object *obj , const char *var , int lag = 0, int lag2 = 0);

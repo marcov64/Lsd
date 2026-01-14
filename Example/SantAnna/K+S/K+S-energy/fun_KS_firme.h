@@ -568,7 +568,7 @@ if ( V( "_De" ) <= V( "_Kge" ) + 0.01 )			// just green energy to produce?
 else
 	v[1] = MAX_CND( "__cDE", "__Qde", ">", 0 );	// hi price among used d. plants
 
-RESULT( V( "_muE" ) + ( isfinite( v[1] ) ? v[1] : 0 ) )
+RESULT( V( "_muE" ) + ( is_finite( v[1] ) ? v[1] : 0 ) )
 
 
 EQUATION( "_supplierE" )

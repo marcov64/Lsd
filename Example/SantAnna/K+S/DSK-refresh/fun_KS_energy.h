@@ -300,7 +300,7 @@ if ( VL( "De", 1 ) <= VL( "Kge", 1 ) + 0.01 )	// just green energy produced?
 else
 	v[1] = MAX_CNDL( "__cDE", "__Qde", ">", 0, 1 );// max cost among used plants
 
-RESULT( V( "muE" ) + ( isfinite( v[1] ) ? v[1] : 0 ) )
+RESULT( V( "muE" ) + ( is_finite( v[1] ) ? v[1] : 0 ) )
 
 
 /*============================ SUPPORT EQUATIONS =============================*/

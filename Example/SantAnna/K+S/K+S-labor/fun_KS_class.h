@@ -13,12 +13,8 @@
 
  ******************************************************************************/
 
-// set default name spaces (C++ STL, LSD)
-using namespace std;
-using namespace lsd;
-
 // K+S random engine (!= LSD)
-mt19937_64 random_engine;
+std::mt19937_64 random_engine;
 
 
 /*============================= GENERAL CLASSES ==============================*/
@@ -26,7 +22,7 @@ mt19937_64 random_engine;
 struct firmRank									// element of pecking order rank
 {
 	double NWtoS;								// net-wealth-to-sales ratio
-	object *firm;								// pointer to firm
+	lsd::object *firm;							// pointer to firm
 };
 
 struct vintage									// element of map of vintages
@@ -40,25 +36,33 @@ struct wageOffer								// element of wage offer list
 {
 	double offer;								// wage offer value
 	int workers;								// workers in firm
-	object *firm;								// pointer to firm
+	lsd::object *firm;							// pointer to firm
 };
 
 struct application								// element of application list
 {
 	double w, s, ws;							// ordering attributes
 	int Te;
-	object *wrk;								// pointer to worker
+	lsd::object *wrk;							// pointer to worker
 };
 
-typedef pair < int, object * > firmPairT;		// firm-to-object pair template
-typedef map < int, object * > firmMapT;			// firm-to-object map template
-typedef set < object * > firmSeT;				// firm-set template
-typedef map < int, vintage > vintMapT;			// ID-to-vintage map template
-typedef list < firmRank > firmLisT;				// ranked-firms list template
-typedef list < wageOffer > woLisT;				// ranked-wage-offer list
-typedef list < application > appLisT;			// job-application list
-typedef vector < double > dblVecT;				// vector of doubles template
-typedef vector < object * > objVecT;			// vector of objects template
+typedef std::pair < int, lsd::object * > firmPairT;// firm-to-object pair templ.
+typedef std::map < int, lsd::object * > firmMapT;// firm-to-object map template
+typedef std::map < int, vintage > vintMapT;		// ID-to-vintage map template
+typedef std::map < std::string, double > strMapT;// string-to-double map templ.
+typedef std::set < lsd::object * > firmSeT;		// firm-set template
+typedef std::list < application > appLisT;		// job-application list
+typedef std::list < firmRank > firmLisT;		// ranked-firms list template
+typedef std::list < wageOffer > woLisT;			// ranked-wage-offer list
+typedef std::vector < application > appVecT;	// vector of applications
+typedef std::vector < bool > boolVecT;			// vector of booleans template
+typedef std::vector < double > dblVecT;			// vector of doubles template
+typedef std::vector < firmPairT > firmPairVecT;	// vector of firm pairs
+typedef std::vector < firmRank > firmVecT;		// vector of firm ranks template
+typedef std::vector < int > intVecT;			// vector of integers template
+typedef std::vector < lsd::object * > objVecT;	// vector of objects template
+typedef std::vector < wageOffer > woVecT;		// vector of wage offers
+
 
 
 /*======================== COUNTRY EXTENSION CLASS ===========================*/
@@ -66,7 +70,7 @@ typedef vector < object * > objVecT;			// vector of objects template
 struct countryE
 {
 	// static global pointers to speed-up the access to individual containers
-	object *finSec, *capSec, *conSec, *labSup, *macSta, *secSta, *labSta;
+	lsd::object *finSec, *capSec, *conSec, *labSup, *macSta, *secSta, *labSta;
 
 	// country speed-up vectors & maps
 	dblVecT bankWgtd;							// m. s. cum. weights in banking
@@ -166,6 +170,7 @@ struct firm2E									// extensions to Firm2 object
 #define LEN_ARR( A ) ( ( int ) ( sizeof A / sizeof A[0] ) )
 #define END_ARR( A ) ( A + LEN_ARR( A ) )
 
+
 /*=================== FORWARD DECLARATION OF C++ FUNCTIONS ===================*/
 
 #define EQ_USER_CFUNS \
@@ -179,15 +184,15 @@ struct firm2E									// extensions to Firm2 object
 	CFUN_DBL( scrap_vintage ); \
 	CFUN_DBL( update_debt, double desired, double loan ); \
 	CFUN_DBL( update_depo, double depo, bool incr ); \
-	CFUN_OBJ( send_brochure, object *client ); \
+	CFUN_OBJ( send_brochure, lsd::object *client ); \
 	CFUN_OBJ( set_bank ); \
 	CFUN_OBJ( set_supplier ); \
 	CFUN_VOID( add_vintage, double nMach, bool newInd ); \
 	CFUN_VOID( check_error, bool cond, const char* errMsg, int errCount, \
 			   int *errCounter ); \
 	CFUN_VOID( fire_worker ); \
-	CFUN_VOID( hire_worker, int sec, object *firm, double wage ); \
-	CFUN_VOID( move_worker, object *vint, bool vint_learn ); \
+	CFUN_VOID( hire_worker, int sec, lsd::object *firm, double wage ); \
+	CFUN_VOID( move_worker, lsd::object *vint, bool vint_learn ); \
 	CFUN_VOID( order_applications, int order, appLisT *appl ); \
 	CFUN_VOID( order_offers, int order, woLisT *offers ); \
 	CFUN_VOID( order_workers, int order, int obj ); \

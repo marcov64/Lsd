@@ -171,7 +171,7 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ),
+	CFUN( check_error, ! is_finite( *itd ),
 		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, dA < - TOL, "INVALID-PRODUCTIVITY", 0, & errors );
@@ -380,7 +380,7 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ),
+	CFUN( check_error, ! is_finite( *itd ),
 		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, F1sum != v[4], "INCONSISTENT-CLIENT1", 0, & errors );
@@ -602,7 +602,7 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ),
+	CFUN( check_error, ! is_finite( *itd ),
 		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, U > 1 || Vac > 1, "INCONSISTENT-LABOR-STATS", 0, & errors );
@@ -783,8 +783,8 @@ CYCLES( PARENT, cur, "Capital" )
 		CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 	for ( itd = all.begin( ); itd != all.end( ); ++itd )
-		CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE",
-			  itd - all.begin( ) + 1, & errors );
+		CFUN( check_error, ! is_finite( *itd ),
+			  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 	CFUN( check_error, imi1 + inn1i + inn1r > F1_1,
 		  "INCONSISTENT-INNOVATION", 0, & errors );
@@ -1053,7 +1053,7 @@ CYCLES( PARENT, cur, "Consumption" )
 			  "NON-POSITIVE-VALUE", i + 1, & errors );
 
 	for ( itd = all.begin( ); itd != all.end( ); ++itd )
-		CFUN( check_error, ! isfinite( *itd ),
+		CFUN( check_error, ! is_finite( *itd ),
 			  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 	CFUN( check_error, Kerr.size( ) > 0,
@@ -1299,7 +1299,7 @@ CYCLES( PARENT, cur, "Capital" )
 				  "NON-POSITIVE-VALUE", i + 1, & errors );
 
 		for ( itd = all.begin( ); itd != all.end( ); ++itd )
-			CFUN( check_error, ! isfinite( *itd ),
+			CFUN( check_error, ! is_finite( *itd ),
 				  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 		CFUN( check_error, _L1 > _L1d || _L1 < _L1rd || _L1rd > _L1d,
@@ -1584,7 +1584,7 @@ CYCLES( PARENT, cur, "Consumption" )
 			CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 		for ( itd = all.begin( ); itd != all.end( ); ++itd )
-			CFUN( check_error, ! isfinite( *itd ),
+			CFUN( check_error, ! is_finite( *itd ),
 				  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 		CFUN( check_error, v[18] == 0, "NO-BROCHURE", 0, & errors );

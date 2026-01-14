@@ -271,7 +271,7 @@ v[1] = V( "a0" ) * ( 1 + log( VL( "Tm", 1 ) / V( "Tm0" ) ) );// a parameter
 v[2] = V( "b0" ) * V( "sigma10y0" ) / VL( "sigma10y", 1 );// b parameter
 
 // the beta parameters are for yearly shocks, so adjust draw probability
-if ( v[1] <= 0 || ! isfinite( v[2] ) || RND > 1 / V( "tScale" ) )
+if ( v[1] <= 0 || ! is_finite( v[2] ) || RND > 1 / V( "tScale" ) )
 	v[0] = 0;
 else
 	v[0] = beta( v[1], v[2] );					// draw again the size of shock

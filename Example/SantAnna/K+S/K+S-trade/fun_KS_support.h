@@ -684,7 +684,7 @@ bool wo_desc_off( wageOffer e1, wageOffer e2 ) { return e1.offer > e2.offer; };
 CFUN_VOID( shuffle_offers, woLisT *offers )
 {
 	// make a copy of the workers list into a vector
-	vector < wageOffer > temp( offers->size( ) );
+	woVecT temp( offers->size( ) );
 	copy( offers->begin( ), offers->end( ), temp.begin( ) );
 
 	// shuffle firms to choose hiring order
@@ -762,7 +762,7 @@ CFUN_VOID( order_applications, int order, appLisT *appl )
 	if ( appl->size( ) == 0 )					// prevent empty lists
 		return;
 
-	vector < application > temp( appl->size( ) );
+	appVecT temp( appl->size( ) );
 
 	switch ( order )
 	{
@@ -1023,7 +1023,7 @@ CFUN_DBL( wage_offer, int cat )
 	woData.firm = THIS;
 
 	// block access to firm2woX from other parallel threads
-	lock_guard < mutex > lock( V_EXTS( country, countryE, firm2woMtx ) );
+	mtxLckT lock( V_EXTS( country, countryE, firm2woMtx ) );
 
 	if ( cat == 1 )
 		EXEC_EXTS( country, countryE, firm2wo1, push_back, woData );

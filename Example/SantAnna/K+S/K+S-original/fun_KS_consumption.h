@@ -110,7 +110,7 @@ double f2min = V( "f2min" );					// min market share in sector 2
 double n2 = V( "n2" );							// market participation period
 int F2 = V( "F2" );								// current number of firms
 
-vector < bool > quit( F2, false );				// vector of firms' quit status
+boolVecT quit( F2, false );						// vector of firms' quit status
 
 WRITE( "cEntry2", 0 );							// reset exit/entry accumulators
 WRITE( "cExit2", 0 );

@@ -127,7 +127,7 @@ int F20 = V( "F20" );							// initial number of firms
 int F2max = V( "F2max" );						// max firms in sector 2
 int F2min = V( "F2min" );						// min firms in sector 2
 
-vector < bool > quit( F2, false );				// vector of firms' quit status
+boolVecT quit( F2, false );						// vector of firms' quit status
 
 WRITE( "cEntry2", 0 );							// reset exit/entry accumulators
 WRITE( "cExit2", 0 );
@@ -689,7 +689,7 @@ sector
 */
 V( "CPI" );										// ensure m.s. are updated
 v[0] = SUM_CND( "_f2", "_postChg", "!=", 0 )
-RESULT( ! isnan( v[0] ) ? v[0] : 0 )
+RESULT( ! is_nan( v[0] ) ? v[0] : 0 )
 
 
 EQUATION( "fires2" )

@@ -498,7 +498,7 @@ CFUN_DBL( scrap_vintage )
 	else
 	{
 		RS = -1;								// signal last machine
-		WRITE( "__nVint", 1 );			// keep just 1 machine
+		WRITE( "__nVint", 1 );					// keep just 1 machine
 	}
 
 	return RS;
@@ -1165,7 +1165,7 @@ CFUN_DBL( exit_firm )
 CFUN_DBL( init_cond, const char *var )
 {
 	static bool computed = false;
-	static map < string, double > v;
+	static strMapT v;
 
 	if ( var == NULL )							// simulation reset?
 		computed = false;

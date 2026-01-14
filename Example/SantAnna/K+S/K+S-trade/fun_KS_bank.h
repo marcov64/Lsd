@@ -372,7 +372,7 @@ Define the credit class for bank's clients
 */
 
 firmRank firmData;
-vector < firmRank > rank1, rank2;
+firmVecT rank1, rank2;
 
 CYCLE( cur, "Cli1" )							// rank sector 1 clients
 {

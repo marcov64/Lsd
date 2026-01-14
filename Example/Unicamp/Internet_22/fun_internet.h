@@ -4,10 +4,6 @@
 	------------------------
 
  ******************************************************************************/
-#include <algorithm>
-#include <list>
-#include <map>
-#include <set>
 #include <lsd_head.h>
 
 using namespace std;

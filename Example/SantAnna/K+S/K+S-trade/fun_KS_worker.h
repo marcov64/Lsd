@@ -258,7 +258,7 @@ applData.cat = V( "_cat" );
 applData.wrk = THIS;
 
 // block access to firm2woX from other parallel threads
-lock_guard < mutex > lock( V_EXTS( COUNTRL2, countryE, firmApplMtx ) );
+mtxLckT lock( V_EXTS( COUNTRL2, countryE, firmApplMtx ) );
 
 // apply to sector 1 queue
 EXEC_EXTS( COUNTRL2, countryE, firm1appl, push_back, applData );

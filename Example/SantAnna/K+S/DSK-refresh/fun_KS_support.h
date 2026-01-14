@@ -209,7 +209,7 @@ CFUN_DBL( cash_flow, double profit, double tax )
 				CFUN( update_depo, cashFree - repayDes, true );// keep the rest
 			}
 			else
-				CFUN( update_debt, 0, - cashFree );	// repay what is possible
+				CFUN( update_debt, 0, - cashFree );// repay what is possible
 		}
 		else
 			CFUN( update_depo, cashFree, true );// just keep all
@@ -430,7 +430,7 @@ CFUN_DBL( scrap_vintage )
 	else
 	{
 		RS = -1;								// signal last machine
-		WRITE( "__nVint", 1 );			// keep just 1 machine
+		WRITE( "__nVint", 1 );					// keep just 1 machine
 	}
 
 	return RS;

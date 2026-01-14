@@ -132,7 +132,7 @@ int FeMax = V( "FeMax" );						// max firms in energy sector
 int FeMin = V( "FeMin" );						// min firms in energy sector
 int Tcon = V( "Tcon" );							// plant construction time
 
-vector < bool > quit( Fe, false );				// vector of firms' quit status
+boolVecT quit( Fe, false );						// vector of firms' quit status
 
 WRITE( "cEntryE", 0 );							// reset exit/entry accumulators
 WRITE( "cExitE", 0 );

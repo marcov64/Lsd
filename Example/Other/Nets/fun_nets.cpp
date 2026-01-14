@@ -1,5 +1,3 @@
-#include "lsd_head.h"
-
 /****************************************************************************
 
 	Network generation algorithms
@@ -12,9 +10,9 @@
 
  ****************************************************************************/
 
-using namespace lsd;
+#include <lsd_head.h>
 
-object *network;							// global pointer to the network
+lsd::object *network;						// global pointer to the network
 											// used to save network after simul.
 
 MODELBEGIN

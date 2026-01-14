@@ -555,7 +555,7 @@ industry
 */
 V( "p2" );										// ensure m.s. are updated
 v[0] = SUM_CND( "_f2", "_post2chg", "!=", 0 )
-RESULT( ! isnan( v[0] ) ? v[0] : 0 )
+RESULT( ! is_nan( v[0] ) ? v[0] : 0 )
 
 
 EQUATION( "fires2" )

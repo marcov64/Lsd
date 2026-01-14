@@ -318,7 +318,7 @@ EQUATION( "wAvg" )
 Average wage received by workers (excluding bonus & unemployment benefits)
 */
 v[0] = AVE_CND( "_w", "_employed", ">", 0 );
-RESULT( ! isnan( v[0] ) ? v[0] : CURRENT )
+RESULT( ! is_nan( v[0] ) ? v[0] : CURRENT )
 
 
 /*========================== SUPPORT LSD FUNCTIONS ===========================*/

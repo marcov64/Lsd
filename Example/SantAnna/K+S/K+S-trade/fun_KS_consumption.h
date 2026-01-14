@@ -849,7 +849,7 @@ sector
 */
 V( "CPI" );										// ensure m.s. are updated
 v[0] = SUM_CND( "_f2", "_postChg", "!=", 0 )
-RESULT( ! isnan( v[0] ) ? v[0] : 0 )
+RESULT( ! is_nan( v[0] ) ? v[0] : 0 )
 
 
 EQUATION( "fires2" )

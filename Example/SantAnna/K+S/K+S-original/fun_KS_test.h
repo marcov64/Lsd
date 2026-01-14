@@ -298,7 +298,8 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! is_finite( *itd ),
+		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, dA < - 2 * TOL, "HIGH-PRODUCTIVITY-DROP", 0, & errors );
 
@@ -438,7 +439,8 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! is_finite( *itd ),
+		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 // try to account for deposits from loans of entrant firms (very crude)
 CFUN( check_error, abs( NW1 + NW2 + SavAcc - Depo - Deb1 - Deb2 + Loans ) / Depo > TOL,
@@ -533,7 +535,8 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! is_finite( *itd ),
+		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, U > 1 || Vac > 1, "INCONSISTENT-LABOR-STATS", 0, & errors );
 
@@ -686,8 +689,8 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE",
-		  itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! is_finite( *itd ), 
+		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, Aerr.size( ) > TOL * F1, "ZERO-PROD-FIRMS", Aerr.size( ), & errors );
 
@@ -902,7 +905,8 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! is_finite( *itd ),
+		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, Kerr.size( ) > 0, "NO-CAPITAL-FIRMS", Kerr.size( ), & errors );
 
@@ -1139,7 +1143,8 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 		CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 	for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-		CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+		CFUN( check_error, ! is_finite( *itd ),
+			  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 	// innovation, productivity
 	LOG( "\n   * RD=%g Atau=%.3g Btau=%.3g c1=%.3g D1=%g Q1=%g Q1e=%g L1d=%g L1=%g",
@@ -1401,7 +1406,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 		CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 	for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-		CFUN( check_error, ! isfinite( *itd ),
+		CFUN( check_error, ! is_finite( *itd ),
 			  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 	CFUN( check_error, v[18] == 0, "NO-BROCHURE", 0, & errors );

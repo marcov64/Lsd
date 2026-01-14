@@ -371,7 +371,8 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! is_finite( *itd ),
+		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, dA < - 2 * TOL, "HIGH-PRODUCTIVITY-DROP", 0, & errors );
 
@@ -599,7 +600,8 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! is_finite( *itd ),
+		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, rD > rRes || rD > rBonds || rRes > r || r > rDeb ||
 	  rBonds - r > VS( FINSECL1, "rAdj" ),
@@ -786,7 +788,8 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! is_finite( *itd ),
+		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, T > v[1] && round( v[4] ) != round( Cstock + EmCa ),
 	  "INCONSISTENT-CARBON-STOCKS", 0, & errors );
@@ -928,7 +931,8 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! is_finite( *itd ),
+		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, Qerr.size( ) > 0, "BAD-GENERAT-PLANT", Qerr.size( ), & errors );
 
@@ -1040,7 +1044,8 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! is_finite( *itd ),
+		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, U > 1 || Vac > 1, "INCONSISTENT-LABOR-STATS", 0, & errors );
 
@@ -1200,8 +1205,8 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE",
-		  itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! is_finite( *itd ), 
+		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, Aerr.size( ) > TOL * F1, "ZERO-PROD-FIRMS", Aerr.size( ), & errors );
 
@@ -1421,7 +1426,8 @@ for ( i = 0; i < LEN_ARR( posit ); ++i )
 	CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-	CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+	CFUN( check_error, ! is_finite( *itd ),
+		  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 CFUN( check_error, Kerr.size( ) > 0, "NO-CAPITAL-FIRMS", Kerr.size( ), & errors );
 
@@ -1674,7 +1680,8 @@ CYCLES( CAPSECL1, cur, "Firm1" )
 		CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 	for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-		CFUN( check_error, ! isfinite( *itd ), "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
+		CFUN( check_error, ! is_finite( *itd ),
+			  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 	// innovation, productivity
 	LOG( "\n   * AtauLP=%.3g BtauLP=%.3g AtauEE=%.3g BtauEE=%.3g AtauEF=%.3g BtauEF=%.3g",
@@ -1951,7 +1958,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 		CFUN( check_error, posit[ i ] <= 0, "NON-POSITIVE-VALUE", i + 1, & errors );
 
 	for ( auto itd = all.begin( ); itd != all.end( ); ++itd )
-		CFUN( check_error, ! isfinite( *itd ),
+		CFUN( check_error, ! is_finite( *itd ),
 			  "NON-FINITE-VALUE", itd - all.begin( ) + 1, & errors );
 
 	CFUN( check_error, v[18] == 0, "NO-BROCHURE", 0, & errors );

@@ -62,7 +62,7 @@ CFUN_VOID( check_error, bool cond, const char* errMsg, int errCount, int *errCou
 CFUN_VOID( shuffle_orders, buyLisT *orders )
 {
 	// make a copy of the list into a vector
-	vector < buyOrder > temp( orders->size( ) );
+	buyVecT temp( orders->size( ) );
 	copy( orders->begin( ), orders->end( ), temp.begin( ) );
 
 	// shuffle orders to choose buying order
@@ -590,7 +590,7 @@ bool wo_desc_off( wageOffer e1, wageOffer e2 ) { return e1.offer > e2.offer; };
 CFUN_VOID( shuffle_offers, woLisT *offers )
 {
 	// make a copy of the workers list into a vector
-	vector < wageOffer > temp( offers->size( ) );
+	woVecT temp( offers->size( ) );
 	copy( offers->begin( ), offers->end( ), temp.begin( ) );
 
 	// shuffle firms to choose hiring order
@@ -668,7 +668,7 @@ CFUN_VOID( order_applications, int order, appLisT *appl )
 	if ( appl->size( ) == 0 )					// prevent empty lists
 		return;
 
-	vector < application > temp( appl->size( ) );
+	appVecT temp( appl->size( ) );
 
 	switch ( order )
 	{
@@ -1121,7 +1121,7 @@ CFUN_DBL( entry_firm2, int n, bool newInd )
 		{
 			k2avg = type2 == 0 ? VLS( PARENT, "kCavgBas", 1 ) :
 								 VLS( PARENT, "kCavgLux", 1 );
-			if ( isnan( k2avg ) )
+			if ( is_nan( k2avg ) )
 				k2avg = VLS( PARENT, "kCavg", 1 );
 
 			f2sum = SUM_CNDLS( PARENT, "f2", "type2", "==", type2, 1 );
@@ -1333,7 +1333,7 @@ CFUN_DBL( exit_firm1, double *cEntry, double *cExit, double *nFail, bool all )
 	double n1 = V( "n1" );						// market participation period
 	int F1 = COUNT( "Firm1" );					// current number of firms
 
-	vector < bool > quit( F1 );					// vector of firms' quit status
+	boolVecT quit( F1 );					// vector of firms' quit status
 
 	// mark bankrupt and market-share-irrelevant firms to exit
 	shareBest = best = i = 0;
@@ -1434,7 +1434,7 @@ CFUN_DBL( exit_firm2, double *cEntry, double *cExit, double *nFail, bool all )
 	double n2 = V( "n2" );						// market participation period
 	int F2 = COUNT( "Firm2" );					// current number of firms
 
-	vector < bool > quit( F2 );					// vector of firms' quit status
+	boolVecT quit( F2 );						// vector of firms' quit status
 
 	// mark bankrupt and market-share-irrelevant incumbent firms to exit
 	shareBest = best = i = 0;

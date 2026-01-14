@@ -70,7 +70,7 @@ int F10 = V( "F10" );							// initial number of firms
 int F1max = V( "F1max" );						// max firms in sector 1
 int F1min = V( "F1min" );						// min firms in sector 1
 
-vector < bool > quit( F1, false );				// vector of firms' quit status
+boolVecT quit( F1, false );						// vector of firms' quit status
 
 WRITE( "cEntry1", 0 );							// reset exit/entry accumulators
 WRITE( "cExit1", 0 );

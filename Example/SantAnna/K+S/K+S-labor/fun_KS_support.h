@@ -560,7 +560,7 @@ bool wo_desc_off( wageOffer e1, wageOffer e2 ) { return e1.offer > e2.offer; };
 CFUN_VOID( shuffle_offers, woLisT *offers )
 {
 	// make a copy of the workers list into a vector
-	vector < wageOffer > temp( offers->size( ) );
+	woVecT temp( offers->size( ) );
 	copy( offers->begin( ), offers->end( ), temp.begin( ) );
 
 	// shuffle firms to choose hiring order
@@ -638,7 +638,7 @@ CFUN_VOID( order_applications, int order, appLisT *appl )
 	if ( appl->size( ) == 0 )					// prevent empty lists
 		return;
 
-	vector < application > temp( appl->size( ) );
+	appVecT temp( appl->size( ) );
 
 	switch ( order )
 	{

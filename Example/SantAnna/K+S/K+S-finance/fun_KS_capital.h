@@ -59,7 +59,7 @@ double NW10u = V( "NW10" ) * V( "PPI" ) / V( "pK0" );// minimum wealth in s. 1
 double n1 = V( "n1" );							// market participation period
 int F1 = V( "F1" );								// number of firms
 
-vector < bool > quit( F1, false );				// vector of firms' quit status
+boolVecT quit( F1, false );						// vector of firms' quit status
 
 WRITE( "cEntry1", 0 );							// reset exit/entry accumulators
 WRITE( "cExit1", 0 );

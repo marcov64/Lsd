@@ -254,7 +254,7 @@ if ( h + i < j )								// ensure at least fair share
 	i = j - h;
 
 // build vector of all target firms (not yet clients)
-vector < firmPairT > targets( firms.begin( ), firms.end( ) );
+firmPairVecT targets( firms.begin( ), firms.end( ) );
 
 // draw new clients from target list, updating the list after each draw
 for ( k = 0; i > 0 && targets.size( ) > 0; --i, ++k )

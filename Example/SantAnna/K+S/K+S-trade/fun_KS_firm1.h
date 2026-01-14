@@ -198,7 +198,7 @@ else
 	v[8] = VS( PARENT, "sigma" );
 
 // block access to vintProd from other parallel threads
-lock_guard < mutex > lock( V_EXTS( COUNTRL2, countryE, vintProdMtx ) );
+mtxLckT lock( V_EXTS( COUNTRL2, countryE, vintProdMtx ) );
 
 WRITE_EXTS( COUNTRL2, countryE, vintProd[ j ].sVp, v[8] );
 WRITE_EXTS( COUNTRL2, countryE, vintProd[ j ].sVavg, v[8] );
@@ -271,7 +271,7 @@ if ( h + i < j )								// ensure at least fair share
 	i = j - h;
 
 // build vector of all target firms (not yet clients)
-vector < firmPairT > targets( firms.begin( ), firms.end( ) );
+firmPairVecT targets( firms.begin( ), firms.end( ) );
 
 // draw new clients from target list, updating the list after each draw
 for ( k = 0; i > 0 && targets.size( ) > 0; --i, ++k )
