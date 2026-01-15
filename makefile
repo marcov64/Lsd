@@ -21,7 +21,7 @@
 # build all
 all:
 	cd src && $(MAKE)
-	cd lwi && $(MAKE)
+	if [ -d "lwi" ]; then cd lwi && $(MAKE); fi
 
 # LMM executable
 lmm:
@@ -38,4 +38,4 @@ lwi:
 # delete all executables, libraries and object files
 clean:
 	cd src && $(MAKE) clean
-	cd lwi && $(MAKE) clean
+	if [ -d "lwi" ]; then cd lwi && $(MAKE) clean; fi
