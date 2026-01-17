@@ -16,26 +16,32 @@
 #  make
 #**************************************************************
 
+# LSD file locations
+LSDROOT=.
+SRC_DIR=$(LSDROOT)/src
+LWI_DIR=$(LSDROOT)/lwi
+
+
 .PHONY: all
 
 # build all
 all:
-	cd src && $(MAKE)
-	if [ -d "lwi" ]; then cd lwi && $(MAKE); fi
+	$(MAKE) -C $(SRC_DIR)
+	if [ -d "$(LWI_DIR)" ]; then $(MAKE) -C $(LWI_DIR); fi
 
 # LMM executable
 lmm:
-	cd src && $(MAKE) lmm
+	cd $(SRC_DIR) && $(MAKE) lmm
 
 # LSD executable, static and dynamic libraries
 lsd:
-	cd src && $(MAKE) lsd
+	cd $(SRC_DIR) && $(MAKE) lsd
 
 # LSD Web Interface executables
 lwi:
-	if [ -d "lwi" ]; then cd lwi && $(MAKE); fi
+	if [ -d "$(LWI_DIR)" ]; then $(MAKE) -C $(LWI_DIR); fi
 
 # delete all executables, libraries and object files
 clean:
-	cd src && $(MAKE) clean
-	if [ -d "lwi" ]; then cd lwi && $(MAKE) clean; fi
+	cd $(SRC_DIR) && $(MAKE) clean
+	if [ -d "$(LWI_DIR)" ]; then cd $(LWI_DIR) && $(MAKE) clean; fi

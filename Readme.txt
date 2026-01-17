@@ -241,26 +241,27 @@ Also make sure if Tcl/Tk version 8.6 or newer is present (use the command "echo 
 
 To run LMM from a system shell, please open a terminal in the installation directory (or use your graphical file browser) and execute:
 
- ./run.sh
+ ./LMM &
 
-If you get an error when trying to execute any of the above commands, please make sure the respective files are set as executable (use terminal command "chmod +x FILENAME" in the installation directory, replacing FILENAME by the name of the corresponding file).
+If you get an error when trying to execute the above command, please make sure the file is set as executable (use terminal command "chmod +x LMM" in the installation directory).
 
-Last, LSD comes with pre-compiled code that may need to be recompiled to your specific environment. To recreate the pre-compiled binaries, close all LSD instances and open a terminal instance at the LSD installation directory. Then, use the following commands:
+Last, LSD comes with pre-compiled executables and libraries that may need to be recompiled to your specific environment. To recreate the pre-compiled binaries, close all LSD instances and open a terminal instance at the LSD installation directory. Then, use the following command:
 
- cd src
  make
 
-If the compilation fails, the most likely reason is the mis-specification of the locations of the files required for the compilation. The major problem is that Tcl/Tk may be installed in your systems in several different locations. The makefile contains a list of variables for the directory needed for the Tcl/Tk libraries and include files. For example, on some systems you have the Tcl/Tk library located in /usr/lib, or /usr/local/lib, or usr/share/lib, etc. Similarly, the include files may be located in different directories. The makefile lists the files you need to identify; check the location for those files and edit the makefile as appropriate for your system.
+If the compilation fails, the most likely reason is the mis-specification of the locations of the files required for the compilation. The major problem is that Tcl/Tk may be installed in your systems in several different locations. The makefile contains a list of variables for the directory needed for the Tcl/Tk libraries and include files. For example, on some systems you have the Tcl/Tk library located in /usr/lib, or /usr/local/lib, or usr/share/lib, etc. Similarly, the include files may be located in different directories. The file "src/makefile" lists the files you need to identify; check the location for those files and edit the file "src/makefile" as appropriate for your system.
 
-It is also possible that Tcl/Tk requires further libraries besides those specified in the makefile. If you have errors even after having specified the correct path to the Tcl/Tk libraries, then find out where the file wish is located (using the command "whereis wish"), and then find out which libraries are used with the command:
+It is also possible that Tcl/Tk requires further libraries besides those specified in file "src/makefile". If you have errors even after having specified the correct path to the Tcl/Tk libraries, then find out where the file "wish" is located (using the command "whereis wish"), and then find out which libraries are used with the command:
 
  ldd /usr/bin/wish
 
-If the system lists further libraries, add the appropriate option to the linker (e.g. -lieee to add the library libieee.a) in the makefile to the variable DUMMY.
+If the system lists further libraries, add the appropriate option to the linker (e.g. "-lieee" to add the library named "libieee.a") in the file "src/makefile" to the variable TCLTK_LIB in the linux section. Adjustments may be also necessary to the variables PATH_TCLTK_HEADER and PATH_TCLTK_LIB, which point to the directories containing Tcl/Tk header (.h) and library (.a) files
 
-Last, LSD comes with pre-compiled code that may need to be recompiled to your specific environment. To recreate the pre-compiled binaries, close all LSD instances and open a terminal instance at the LSD installation directory. Then, use the following commands:
+Last, LSD comes with pre-compiled code that may need to be recompiled to your specific environment. To recreate the pre-compiled binaries, close all LSD instances and open a terminal instance at the LSD installation directory. Then, use the following command:
 
-IMPORTANT: if you modified the makefile to compile LMM, the same changes need to be made to the makefiles used to generate the LSD Model programs. You need to make these changes only once using LMM. Use the menu item System Compilation Options in menu Model. You will have to fill the same variables as in the makefile used to compile LMM, which must be set to the same values.
+ make
+
+IMPORTANT: if you modified the file "src/makefile" to recompile LSD binaries, the same changes need to be made to the makefiles used to generate your model executable. You need to make these changes only once using LMM. Use the menu item System Compilation Options in menu Model. You will have to fill the same variables as in the makefile used to compile LMM, which must be set to the same values.
 
 
 ************************************
@@ -269,7 +270,7 @@ IMPORTANT: if you modified the makefile to compile LMM, the same changes need to
 
 LSD 9.0 does not officially support macOS, despite it may work, depending on the specific macOS version, some required "adjustments" (hacks), and luck. Unfortunately, over the years, macOS became more and more a platform closed to open-source development. To complicate things further, Apple-exclusive processors made development to require Apple hardware (Mx), which is not the standard platform of LSD development (x86_64).
 
-For macOS users, the recommended path to use LSD is (1) installing a virtual machine (VM) hypervisor in macOS (VirtualBox, Fusion, Parallels, etc.), (2) downloading a pre-configured Windows or Linux VM image, and (3) installing LSD in the downloaded VM following the instructions above (section 4.1 or 4.2). There are many tutorials and sources on the internet about how to perform steps 1 and 2. The performance penalty of using LSD in a VM is relatively small, particularly in the case of Linux. However, Windows VMs are usually easier to set-up and use, and performance is still reasonable.
+For macOS users, the recommended path to use LSD is (1) installing a virtual machine (VM) hypervisor in macOS (VirtualBox, Fusion, Parallels, etc.), (2) downloading a pre-configured Windows or Linux VM image, and (3) installing LSD into the downloaded VM following the instructions above (section 4.1 or 4.2). There are many tutorials and sources on the internet about how to perform steps 1 and 2. The performance penalty of using LSD in a VM is relatively small, particularly in the case of Linux. However, Windows VMs are usually easier to set-up and use, and performance is still reasonable.
 
 The instructions below frequently worked with macOS up to version 15.7, but that may depend on specific machine configurations and can break at any moment given the constant Apple changes to its operating system. LSD developers are not able to help on fixing the possible problems.
 
@@ -284,7 +285,7 @@ Next, open the Terminal application (located inside the Utilities app folder), a
  cd ~/Lsd-9.0-master
  ./add-shortcut-mac.sh
 
-After a successful installation, a desktop shortcut (icon) will be available for using LMM/LSD. A shortcut is also created in the computer Applications folder.
+Please provide the user password when requested. After a successful installation, a desktop shortcut (icon) will be available for using LMM/LSD. A shortcut is also created in the computer Applications folder. Even if the user does not want the desktop shortcut, the commands above MUST be performed to prevent LSD executables translocation.
 
 Users MUST yet manually install the Apple Command Line Tools package (the full Xcode package is NOT required) to make the compiler and other required command line tools available in macOS. To install it, open the Terminal  and enter the following command:
 
@@ -292,11 +293,11 @@ Users MUST yet manually install the Apple Command Line Tools package (the full X
 
 Then, in the opened window, click on the "Install" button (do NOT click on the "Get Xcode" button), accept the license and wait the installation to complete (you may have to reboot to finish the installation).
 
-It is recommended, but not required, to install multitail and Gnuplot applications. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. The easiest way to install Gnuplot is to use the Homebrew package manager for the installation. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
+It is required to install Tcl/Tk and recommended to also install multitail, Gnuplot and Cython applications. Gnuplot allows LSD to produce X-Y and other more elaborated plots but it is not otherwise needed to run LSD simulations. Cython allows for Python integration. The easiest way to install the applications is to use the Homebrew package manager. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
 
  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
-After Homebrew installation finishes (details at http://brew.sh), you can install multitail and Gnuplot using the following command in Terminal (Qt framework will be automatically installed too):
+After Homebrew installation finishes (details at http://brew.sh), you can install multitail, Gnuplot and Cython using the following command in Terminal (Qt framework will be automatically installed too):
 
  brew install tcl-tk@8 multitail gnuplot cython
 
@@ -339,6 +340,20 @@ LSD needs to control external programs to automate operation. The first time it 
  tccutil reset AppleEvents
 
 Authorized programs can be checked at System Preferences > Security & Privacy > Privacy > Automation.
+
+ARM64, ROSETTA AND COMPILATION ERRORS:
+
+Newer mac hardware is based on ARM64 hardware, which is not the default LSD hardware platform (X86_64). If not already installed, macOS may ask you to install Rosetta, an Apple translation app, to allow running X86_64 code in newer macs. Without Rosetta, LMM will not run. You can also intall Rosetta using the Terminal and the commad:
+
+ softwareupdate –install-rosetta
+
+When your models compile, LSD should automatically produce ARM64 code in newer machines. However, LSD precompiled libraries have X86_64 code, and you may get compilation errors because of this. The simple solution is to avoid using precompiled libraries, by adding (or changing to) the line "PRECOMPILED=false", without the quotes, to the system compilation options (menu Model in LMM).
+
+Alternatively, LSD precompiled libraries can be recompiled. Open Terminal, navigate to LSD folder (e.g., "cd ~/LSD") and use the command:
+
+ make lsd
+
+If there any errors, the line "PRECOMPILED=true" can be reinstated in the LSD system compilation options. This speeds up model compilation, but not the model execution.
 
 
 ******************************************

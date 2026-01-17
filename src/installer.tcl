@@ -51,6 +51,7 @@ set linuxPmCmd(urp) "urpmi"
 set linuxPmCmd(apk) "apk add"
 set linuxDefPm "apt"
 
+set mkFile "makefile"
 set guiMkFile "makefile-gui.txt"
 set linuxOptFile "system_options-linux.txt"
 set notInstall [ list .git/* installer/* lwi/* Rpkg/* Manual/src/* ]
@@ -846,7 +847,7 @@ if [ string equal $CurPlatform linux ] {
 
 
 #
-# recompile LMM in Linux if not default distro
+# recompile LSD in Linux if not default distro
 #
 
 if [ string equal $CurPlatform linux ] {
@@ -861,27 +862,29 @@ if [ string equal $CurPlatform linux ] {
 	}
 
 	if { ! $found } {
-		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Cannot recompile LMM" -detail "The detection of Linux distribution failed and LSD Model Manager (LMM) was not recompiled for your computer.\n\nYou may try to use the installed precompiled LMM or do a manual compilation following the steps described in 'Readme.txt'.\nYou may have to adjust the paths to the include/lib files in '$guiMkFile'."
-		lappend issues "Cannot recompile LMM (make -f $guiMkFile)"
+		ttk::messageBox -parent "" -type ok -title Warning -icon warning -message "Cannot recompile LSD" -detail "The detection of Linux distribution failed and LSD was not recompiled for your computer.\n\nYou may try to use the installed precompiled LMM or do a manual compilation following the steps described in 'Readme.txt'.\nYou may have to adjust the paths to the include/lib files in '$lsd_dir/$lsd_src/$mkFile'."
+		lappend issues "Cannot recompile LMM (make -C $lsd_dir/$lsd_src)"
 
 	} elseif { ! [ string equal $pm $linuxDefPm ] } {
 
-		waitbox .wait "Compiling LMM..." "Compiling LSD Model Manager (LMM)\nfor your Linux distribution.\n\nPlease wait..." "" 0 ""
+		waitbox .wait "Compiling LSD..." "Compiling LSD executables and libraries\nfor your Linux distribution.\n\nPlease wait..." "" 0 ""
 
 		file copy -force "$lsd_root/LMM" "/tmp/"
-		cd "$lsd_root/$lsd_src"
+		file copy -force "$lsd_root/LSD" "/tmp/"
+		file copy -force "$lsd_root/$lsd_src/LSDbase-linux.a" "/tmp/"
+		file copy -force "$lsd_root/$lsd_src/LSDgui-linux.a" "/tmp/"
 
-		set res [ catch { exec make } result ]
+		set res [ catch { exec make -C "$lsd_root/$lsd_src" } result ]
 
-		file delete -force {*}[ glob -nocomplain -directory "$lsd_root/$lsd_src" *.o ]
 		destroytop .wait
 
 		if { $res } {
-			ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error compiling LMM" -detail "The compilation of LSD Model Manager (LMM) failed ($result).\n\nYou may try to do a manual compilation following the steps described in 'Readme.txt' and also may have to."
-			lappend issues "Cannot recompile LMM (make -f $guiMkFile)"
+			ttk::messageBox -parent "" -type ok -title Error -icon error -message "Error compiling LSD" -detail "The compilation of LSD executables and libraries failed ($result).\n\nYou may try to do a manual compilation following the steps described in 'Readme.txt'."
+			lappend issues "Cannot recompile LMM (make -C $lsd_dir/$lsd_src)"
 			file copy -force "/tmp/LMM" "/$lsd_root/"
-		} else {
-			file delete -force "/tmp/LMM"
+			file copy -force "/tmp/LSD" "/$lsd_root/"
+			file copy -force "/tmp/LSDbase-linux.a" "/$lsd_root/$lsd_src/"
+			file copy -force "/tmp/LSDgui-linux.a" "/$lsd_root/$lsd_src/"
 		}
 	}
 }
