@@ -30,15 +30,15 @@ all:
 	if [ -d "$(LWI_DIR)" ]; then $(MAKE) -C $(LWI_DIR); fi
 
 # LMM executable
-lmm:
-	cd $(SRC_DIR) && $(MAKE) lmm
+LMM:
+	cd $(SRC_DIR) && $(MAKE) LMM
 
 # LSD executable, static and dynamic libraries
-lsd:
-	cd $(SRC_DIR) && $(MAKE) lsd
+LSD:
+	cd $(SRC_DIR) && $(MAKE) LSD
 
 # LSD Web Interface executables
-lwi:
+LWI:
 	if [ -d "$(LWI_DIR)" ]; then $(MAKE) -C $(LWI_DIR); fi
 
 # delete all executables, libraries and object files

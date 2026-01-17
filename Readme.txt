@@ -351,7 +351,7 @@ When your models compile, LSD should automatically produce ARM64 code in newer m
 
 Alternatively, LSD precompiled libraries can be recompiled. Open Terminal, navigate to LSD folder (e.g., "cd ~/LSD") and use the command:
 
- make lsd
+ make LSD
 
 If there any errors, the line "PRECOMPILED=true" can be reinstated in the LSD system compilation options. This speeds up model compilation, but not the model execution.
 
