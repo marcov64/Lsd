@@ -98,12 +98,10 @@ addVarFn <- function( mc, nElemMC, nTsteps, nVar ) {
     for( j in 1 : nElemMC ){             # and all element instances
 
       # change zero values to NA to avoid artifacts in statistics
-      if( mc[ i, "wReal", j ] <= 0 )
-        mc[ i, "wReal", j ] <- NA
-      if( mc[ i, "s", j ] <= 0 )
-        mc[ i, "s", j ] <- NA
-      if( mc[ i, "Tu", j ] < 0 )
-        mc[ i, "Tu", j ] <- NA
+      if( is.na( mc[ i, "wReal", j ] ) || mc[ i, "wReal", j ] <= 0 ||
+          is.na( mc[ i, "s", j ] ) || mc[ i, "s", j ] <= 0 ||
+          is.na( mc[ i, "Tu", j ] ) || mc[ i, "Tu", j ] < 0 )
+        mc[ i, , j ] <- NA
 
       # normalization of variables using the period average size
       if( mean.wReal != 0 )

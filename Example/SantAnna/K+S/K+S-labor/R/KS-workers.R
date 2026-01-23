@@ -118,12 +118,10 @@ readExp <- function( exper ) {
       for( j in 1 : nWorkers ){           # and all workers (instances)
 
         # Change zero values to NA to avoid atifacts in statistics
-        if( mc[ i, "wReal", j, m ] <= 0 )
-          mc[ i, "wReal", j, m ] <- NA
-        if( mc[ i, "s", j, m ] <= 0 )
-          mc[ i, "s", j, m ] <- NA
-        if( mc[ i, "Tu", j, m ] < 0 )
-          mc[ i, "Tu", j, m ] <- NA
+        if( is.na( mc[ i, "wReal", j, m ] ) || mc[ i, "wReal", j, m ] <= 0 ||
+            is.na( mc[ i, "s", j, m ] ) || mc[ i, "s", j, m ] <= 0 ||
+            is.na( mc[ i, "Tu", j, m ] ) || mc[ i, "Tu", j, m ] < 0 )
+          mc[ i, , j, m ] <- NA
 
         # Normalization of variables using the period average size
         if( mean.wReal != 0 )

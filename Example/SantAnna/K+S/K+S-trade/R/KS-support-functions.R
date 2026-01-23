@@ -33,7 +33,8 @@ reqLibs <- c( "LSDinterface", "LSDsensitivity", "parallel", "tools", "abind",
               "plotrix", "textplot", "extrafont", "ggplot2", "gghalves",
               "ggthemes", "fmsb", "Rsubbotools" )
 
-repos <- c( "https://cloud.r-project.org", "https://erocoar.r-universe.dev" )
+repos <- c( "https://cloud.r-project.org", "https://ews.santannapisa.it/rpackages",
+            "https://erocoar.r-universe.dev" )
 
 for( lib in reqLibs ) {
   if( ! lib %in% rownames( installed.packages( ) ) )

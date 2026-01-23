@@ -37,7 +37,8 @@ def.digits <- 4                # default number of digits after comma for printi
 reqLibs <- c( "LSDinterface", "LSDsensitivity", "Rsubbotools", "normalp",
               "LaplacesDemon", "gplots", "robustbase", "minpack.lm" )
 
-repos <- c( "https://cloud.r-project.org", "https://erocoar.r-universe.dev" )
+repos <- c( "https://cloud.r-project.org", "https://ews.santannapisa.it/rpackages",
+            "https://erocoar.r-universe.dev" )
 
 for( lib in reqLibs ) {
   if( ! lib %in% rownames( installed.packages( ) ) )

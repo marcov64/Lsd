@@ -105,20 +105,14 @@ addVarFn <- function( mc, nElemMC, nTsteps, nVar ) {
     for( j in 1 : nElemMC ){             # and all element instances
 
       # change zero values to NA to avoid artifacts in statistics
-      if( mc[ i, "In", j ] <= 0 )
-        mc[ i, "In", j ] <- NA
-      if( mc[ i, "wReal", j ] <= 0 )
-        mc[ i, "wReal", j ] <- NA
-      if( mc[ i, "s", j ] <= 0 )
-        mc[ i, "s", j ] <- NA
-      if( mc[ i, "Tu", j ] < 0 )
-        mc[ i, "Tu", j ] <- NA
-      if( mc[ i, "CdBas", j ] < 0 )
-        mc[ i, "CdBas", j ] <- NA
-      if( mc[ i, "CdLux", j ] < 0 )
-        mc[ i, "CdLux", j ] <- NA
-      if( mc[ i, "SavLux", j ] < 0 )
-        mc[ i, "SavLux", j ] <- NA
+      if( is.na( mc[ i, "In", j ] )     || mc[ i, "In", j ] <= 0 ||
+          is.na( mc[ i, "wReal", j ] )  || mc[ i, "wReal", j ] <= 0 ||
+          is.na( mc[ i, "s", j ] )      || mc[ i, "s", j ] <= 0 ||
+          is.na( mc[ i, "Tu", j ] )     || mc[ i, "Tu", j ] < 0 ||
+          is.na( mc[ i, "CdBas", j ] )  || mc[ i, "CdBas", j ] < 0 ||
+          is.na( mc[ i, "CdLux", j ] )  || mc[ i, "CdLux", j ] < 0 ||
+          is.na( mc[ i, "SavLux", j ] ) || mc[ i, "SavLux", j ] < 0 )
+        mc[ i, , j ] <- NA
 
       # normalization of variables using the period average size
       if( mean.In != 0 )

@@ -4,6 +4,10 @@
 #
 #******************************************************************
 
+options( repos = c( CRAN = "https://cloud.r-project.org",
+                    LSD = "https://ews.santannapisa.it/rpackages",
+                    GGHALVES = "https://erocoar.r-universe.dev" ) )
+
 install.packages( c( "LSDsensitivity",
                      "Rsubbotools",
                      "tseries",

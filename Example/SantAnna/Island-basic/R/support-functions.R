@@ -31,7 +31,8 @@ reqLibs <- c( "LSDinterface", "LSDsensitivity", "Rsubbotools", "normalp",
               "nortest", "mFilter", "matrixStats", "tseries", "gplots",
               "plotrix", "extrafont", "rmutil" )
 
-repos <- c( "https://cloud.r-project.org", "https://erocoar.r-universe.dev" )
+repos <- c( "https://cloud.r-project.org", "https://ews.santannapisa.it/rpackages",
+            "https://erocoar.r-universe.dev" )
 
 for( lib in reqLibs ) {
   if( ! lib %in% rownames( installed.packages( ) ) )
