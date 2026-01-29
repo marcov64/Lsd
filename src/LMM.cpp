@@ -1674,6 +1674,9 @@ int modman( int argn, const char **argv )
 					} elseif { $a eq $mname } { \
 						set choice -5 \
 					}" );
+
+				if ( choice == -4 || choice == -5 )
+					break;
 			}
 		}
 

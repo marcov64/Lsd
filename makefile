@@ -22,7 +22,7 @@ SRC_DIR=$(LSDROOT)/src
 LWI_DIR=$(LSDROOT)/lwi
 
 
-.PHONY: all
+.PHONY: all LMM LSD LWI clean
 
 # build all
 all:
