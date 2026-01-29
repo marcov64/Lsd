@@ -2012,6 +2012,8 @@ void lsd::object::delete_obj( const variable *caller )
 	if ( del_flag != NULL )
 		*del_flag = true;		// flag deletion to caller, if requested
 
+	next = NULL;				// try to prevent improper CYCLE to continue
+
 	delete this;				// delete (suicide) now
 }
 
