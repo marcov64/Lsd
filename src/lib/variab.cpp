@@ -403,7 +403,7 @@ double lsd::variable::chk_val( double val )
 	if ( std::isfinite( val ) )
 	{
 		if ( attr->integer )
-			val = round( val );
+			val = std::round( val );
 
 		if ( std::isfinite( attr->max_val ) && val > attr->max_val )
 			val = attr->max_val;

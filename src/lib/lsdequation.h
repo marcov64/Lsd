@@ -199,11 +199,26 @@
 
 // LSD macros
 #define pi M_PI
+#define abs( x ) std::fabs( x )
+#define exp( x ) std::exp( x )
+#define log( x ) std::log( x )
+#define log10( x ) std::log10( x )
+#define max( x, y ) std::fmax( x, y )
+#define min( x, y ) std::fmin( x, y )
+#define pow( x, y ) std::pow( x, y )
+#define round( x ) std::round( x )
+#define sin( x ) std::sin( x )
+#define cos( x ) std::cos( x )
+#define tan( x ) std::tan( x )
+#define asin( x ) std::asin( x )
+#define acos( x ) std::acos( x )
+#define atan( x ) std::atan( x )
+#define sqrt( x ) std::sqrt( x )
+#define tgamma( x ) std::tgamma( x )
+#define lgamma( x ) std::lgamma( x )
 #define is_finite( x ) std::isfinite( x )
 #define is_inf( x ) std::isinf( x )
 #define is_nan( x ) std::isnan( x )
-#define max( x, y ) fmax( x, y )
-#define min( x, y ) fmin( x, y )
 
 #define UP "UP"
 #define DOWN "DOWN"

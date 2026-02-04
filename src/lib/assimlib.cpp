@@ -546,15 +546,15 @@ void lsd::assimilation::update_assim_vars( const e_vecT & x_a, const e_vecT & x_
 		if ( obs_idx >= 0 )
 		{
 			// update error accumulators
-			ca.sum_erra_anl += std::abs( x_a[ j ] - z[ obs_idx ] );
-			ca.sum_erra_fct += std::abs( x_f[ j ] - z[ obs_idx ] );
+			ca.sum_erra_anl += std::fabs( x_a[ j ] - z[ obs_idx ] );
+			ca.sum_erra_fct += std::fabs( x_f[ j ] - z[ obs_idx ] );
 			ca.sum_err2_anl += std::pow( x_a[ j ] - z[ obs_idx ], 2 );
 			ca.sum_err2_fct += std::pow( x_f[ j ] - z[ obs_idx ], 2 );
 			++ ca.sum_n;
 
 			for ( auto k = 0; k < z_e.rows( ); ++k )
 			{
-				ca.sum_erra_obs += std::abs( z_e( k, obs_idx ) - z[ obs_idx ] );
+				ca.sum_erra_obs += std::fabs( z_e( k, obs_idx ) - z[ obs_idx ] );
 				ca.sum_err2_obs += std::pow( z_e( k, obs_idx ) - z[ obs_idx ], 2 );
 				++ ca.sum_n_obs;
 			}

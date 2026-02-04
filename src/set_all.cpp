@@ -490,12 +490,12 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = cv->chk_val( gui::sim.rnd_int( round( value1 ), round( value2 ) ) );
+					cv->val[ lag ] = cv->chk_val( gui::sim.rnd_int( std::round( value1 ), std::round( value2 ) ) );
 					++j;
 				}
 
 			gui::sim.va.search( lab )->initialized = true;
-			snprintf( action, MAX_ELEM_LENGTH, "drawn from integer uniform distribution between %g and %g%s", round( value1 ), round( value2 ), cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
+			snprintf( action, MAX_ELEM_LENGTH, "drawn from integer uniform distribution between %g and %g%s", std::round( value1 ), std::round( value2 ), cv == NULL ? "" : cv->print_constr( msg, MAX_LINE_SIZE ) );
 			break;
 
 

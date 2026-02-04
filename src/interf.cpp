@@ -2047,7 +2047,7 @@ lsd::object *gui::operate( lsd::object *r )
 					break;
 
 				cmd( "set choice $lag" );
-				lag = abs( choice ) - 1;		// try to extract chosed lag
+				lag = std::abs( choice ) - 1;	// try to extract chosed lag
 
 				// abort if necessary
 				if ( lag < 0 || lag > ( cv->attr->num_lag - 1 ) )

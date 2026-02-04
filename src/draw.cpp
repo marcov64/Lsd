@@ -296,7 +296,7 @@ void lsd::object::draw_obj( object *sel, int level, int center, int from, bool z
 	range_fact = gui::get_double( "rfactM" );
 	range_init = gui::get_int( "rinitM" );
 	step_level = gui::get_int( "vstepM" );
-	step_level = round( step_level * v_fact );
+	step_level = std::round( step_level * v_fact );
 
 	// find current tree depth
 	for ( j = 0, cur = this; cur->up != NULL; ++j, cur = cur->up );
@@ -455,12 +455,12 @@ void lsd::object::draw_obj( object *sel, int level, int center, int from, bool z
 				level_factor[ 3 ] = 0.5 + ( i - 5.0 ) / 40;
 		}
 
-		range_type = round( level_factor[ 0 ] * range_init * h_fact );
+		range_type = std::round( level_factor[ 0 ] * range_init * h_fact );
 	}
 	else
 	{
 		// reduce object type width at each level
-		range_type = round( fabs( level_factor[ j ] * range_init / pow( 2, j + range_fact ) - pow( range_init * 2 / 3, 1 / j ) + 1 ) * h_fact );
+		range_type = std::round( fabs( level_factor[ j ] * range_init / pow( 2, j + range_fact ) - pow( range_init * 2 / 3, 1 / j ) + 1 ) * h_fact );
 	}
 
 	if ( i <= 1 )					// single object type son?

@@ -188,26 +188,26 @@ int lsd::sensitivity::dataentry( void )
 			{
 				if ( toupper( type ) == 'L' && samples > 0 )// linear sampling
 				{
-					val[ i++ ] = integer ? round( fmin( start, end ) ) : fmin( start, end );
+					val[ i++ ] = integer ? std::round( std::fmin( start, end ) ) : std::fmin( start, end );
 					for ( int j = 1; j < samples; ++j, ++i )
 					{
-						val[ i ] = val[ i - 1 ] + ( fmax( start, end ) - fmin( start, end ) ) / ( samples - 1 );
-						val[ i ] = integer ? round( val[ i ] ) : val[ i ];
+						val[ i ] = val[ i - 1 ] + ( std::fmax( start, end ) - std::fmin( start, end ) ) / ( samples - 1 );
+						val[ i ] = integer ? std::round( val[ i ] ) : val[ i ];
 					}
 				}
 
 				if ( toupper( type ) == 'R' && samples > 0 )// random sampling
 					for ( int j = 0; j < samples; ++j, ++i )
 					{
-						val[ i ] = fmin( start, end ) + gui::sim._ran1_( ) * ( fmax( start, end ) - fmin( start, end ) );
-						val[ i ] = integer ? round( val[ i ] ) : val[ i ];
+						val[ i ] = std::fmin( start, end ) + gui::sim._ran1_( ) * ( std::fmax( start, end ) - std::fmin( start, end ) );
+						val[ i ] = integer ? std::round( val[ i ] ) : val[ i ];
 					}
 			}
 			else							// no, read as regular double float
 			{
 				j = i;
 				i += sscanf( tok, "%lf", &( val[ i ] ) );// count valid doubles only
-				val[ j ] = integer ? round( val[ j ] ) : val[ j ];
+				val[ j ] = integer ? std::round( val[ j ] ) : val[ j ];
 			}
 		}
 	}
@@ -1416,7 +1416,7 @@ gui::design::design( lsd::sensitivity *rsens, int typ, const char *fname, const 
 			{
 				// round to integer if necessary
 				if ( intg[ j ] )
-					doe[ i ][ j ][ h ] = round( doe[ i ][ j ][ h ] );
+					doe[ i ][ j ][ h ] = std::round( doe[ i ][ j ][ h ] );
 
 				fprintf( f, "%lf%c", doe[ i ][ j ][ h ],
 						 j == k - 1 && h == inst[ j ] - 1 ? '\n' : ',' );

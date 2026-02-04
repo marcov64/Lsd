@@ -7112,7 +7112,7 @@ void gui::plot_lattice( void )
 		{
 			val = time_cross == 1 ? data[ ncol * j + i ][ time - start[ ncol * j + i ] ] :
 									data[ 0 ][ first + ncol * j + i - start[ 0 ] ];
-			color = std::max( 0., std::min( 1099., round( val * cscale ) ) );
+			color = std::max( 0., std::min( 1099., std::round( val * cscale ) ) );
 			if ( std::isnan( color ) || ! std::isfinite( color ) )
 			  color = 0;
 
@@ -8043,7 +8043,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 					dv.clear( );
 					dv.reserve( sel_series );
 					for ( auto x : v )
-						dv.push_back( std::abs( x - nmed ) );
+						dv.push_back( std::fabs( x - nmed ) );
 
 					nmad = lsd::median( dv );
 				}
@@ -8170,7 +8170,7 @@ bool gui::create_series( bool mc, str_vecT v_names )
 					dv.clear( );
 					dv.reserve( sel_series );
 					for ( auto x : v )
-						dv.push_back( std::abs( x - nmed ) );
+						dv.push_back( std::fabs( x - nmed ) );
 
 					nmad = lsd::median( dv );
 				}
@@ -9324,7 +9324,7 @@ void gui::plot( int type, int nv, double **data, const int *start, const int *en
 							// constrain to canvas virtual limits
 							y[ k ] = std::min( std::max( y[ k ], cminy ), cmaxy );
 							// scale to the canvas physical y range and save to visual vertical line buffer
-							pdataY[ k ][ j ] = ( int ) round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
+							pdataY[ k ][ j ] = ( int ) std::round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
 						}
 
 						// restart averaging
@@ -9342,7 +9342,7 @@ void gui::plot( int type, int nv, double **data, const int *start, const int *en
 							if ( line_point == 1 || ( yVal >= cminy && yVal <= cmaxy ) )
 							{
 								y[ k ] = std::min( std::max( yVal, cminy ), cmaxy );
-								pdataY[ k ][ j ] = ( int ) round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
+								pdataY[ k ][ j ] = ( int ) std::round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
 							}
 
 							y[ k ] = 0;
@@ -9567,9 +9567,9 @@ void gui::plot( int type, const int *start, const int *end, char **str, char **t
 			a = histo_bins[ i ].center;
 			b = exp( - ( a - histo_mean ) * ( a - histo_mean ) / ( 2 * histo_v ) ) / ( sqrt( 2 * M_PI * histo_v ) );
 			b /= tot_norm;
-			y2 = std::min( std::max( tbordsize + vsize - ( int ) round( vsize * ( b - miny ) / ( maxy - miny ) ), tbordsize ), tbordsize + vsize );
+			y2 = std::min( std::max( tbordsize + vsize - ( int ) std::round( vsize * ( b - miny ) / ( maxy - miny ) ), tbordsize ), tbordsize + vsize );
 
-			x2 = hbordsize + ( int ) round( hsize * ( histo_bins[ i ].center - histo_bins[ 0 ].lowb ) / ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) );
+			x2 = hbordsize + ( int ) std::round( hsize * ( histo_bins[ i ].center - histo_bins[ 0 ].lowb ) / ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) );
 
 			if ( i > 0 && ( y1 > tbordsize || y2 > tbordsize ) &&
 				 ( y1 < tbordsize + vsize || y2 < tbordsize + vsize ) )
@@ -9849,7 +9849,7 @@ void gui::plot_canvas( int type, int nv, const int *start, const int *end, char 
 	{
 		case TSERIES:
 			for ( i = 0; i < hticks + 2; ++i )
-				cmd( "$p create text %d [ expr { %d + $pad3 } ] -fill $colorsTheme(dfg) -font $fontP -anchor n -text %d -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, min_t + ( int ) floor( i * ( double ) ( max_t - min_t ) / ( hticks + 1 ) ) );
+				cmd( "$p create text %d [ expr { %d + $pad3 } ] -fill $colorsTheme(dfg) -font $fontP -anchor n -text %d -tag { p text }", hbordsize + ( int ) std::round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, min_t + ( int ) floor( i * ( double ) ( max_t - min_t ) / ( hticks + 1 ) ) );
 			break;
 
 		case CRSSECT:
@@ -9859,7 +9859,7 @@ void gui::plot_canvas( int type, int nv, const int *start, const int *end, char 
 		case HISTOGR:
 		case HISTOCS:
 			for ( i = 0; i < hticks + 2; ++i )
-				cmd( "$p create text %d [ expr { %d + $pad3 } ] -fill $colorsTheme(dfg) -font $fontP -anchor n -text %.*g -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, pdigits, histo_bins[ 0 ].lowb + i * ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) / ( hticks + 1 ) );
+				cmd( "$p create text %d [ expr { %d + $pad3 } ] -fill $colorsTheme(dfg) -font $fontP -anchor n -text %.*g -tag { p text }", hbordsize + ( int ) std::round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, pdigits, histo_bins[ 0 ].lowb + i * ( histo_bins[ num_bins - 1 ].highb - histo_bins[ 0 ].lowb ) / ( hticks + 1 ) );
 			break;
 	}
 
@@ -9869,7 +9869,7 @@ void gui::plot_canvas( int type, int nv, const int *start, const int *end, char 
 		yVal = miny + ( vticks + 1 - i ) * ( maxy - miny ) / ( vticks + 1 );
 		yVal = ( fabs( yVal ) < ( maxy - miny ) * MARG ) ? 0 : yVal;
 
-		cmd( "$p create text %d %d -fill $colorsTheme(dfg) -font $fontP -anchor e -text %.*g -tag { p text }", hbordsize - htmargin - 5, tbordsize + ( int ) round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, yVal );
+		cmd( "$p create text %d %d -fill $colorsTheme(dfg) -font $fontP -anchor e -text %.*g -tag { p text }", hbordsize - htmargin - 5, tbordsize + ( int ) std::round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, yVal );
 
 		// second y-axis series values ( if any )
 		if ( y2on )
@@ -9877,7 +9877,7 @@ void gui::plot_canvas( int type, int nv, const int *start, const int *end, char 
 			yVal = cminy2 + ( vticks + 1 - i ) * ( cmaxy2 - cminy2 ) / ( vticks + 1 );
 			yVal = ( fabs( yVal ) < ( cmaxy2 - cminy2 ) * MARG ) ? 0 : yVal;
 
-			cmd( "$p create text %d %d -fill $colorsTheme(dfg) -font $fontP -anchor w -text %.*g -tag { p text }", hbordsize + hsize + htmargin + 5, tbordsize + ( int ) round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, yVal );
+			cmd( "$p create text %d %d -fill $colorsTheme(dfg) -font $fontP -anchor w -text %.*g -tag { p text }", hbordsize + hsize + htmargin + 5, tbordsize + ( int ) std::round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, yVal );
 		}
 	}
 

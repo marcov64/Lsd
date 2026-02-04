@@ -17,12 +17,13 @@
  Macro compilation test file.
  *************************************************************/
 
-#define LEGACY_CODE
+#include <lsd_init.h>
 
 #define EQ_USER_VARS int a; double b;
-#define USER_FUNCS void x( void ) { };
+#define EQ_USER_CFUNS void x( void ) { };
 
-#include "lib/lsdequation.h"
+//#define LEGACY_CODE
+#include <lsd_head.h>
 
 struct e
 {
@@ -41,6 +42,7 @@ EQUATION( "X" )
 
 e g, *l;
 std::string s;
+std::vector < double > u;
 
 pi;
 
@@ -65,6 +67,12 @@ b = sqrt( 0. );
 b = cbrt( 0. );
 b = tgamma( 1. );
 b = lgamma( 1. );
+b = mean( u );
+b = med( u );
+b = sd( u );
+b = mad( u );
+b = cov( u, u );
+b = com( u, u );
 b = t_star( 1., .95 );
 b = z_star( .95 );
 b = is_finite( 0. );
@@ -498,6 +506,10 @@ CYCLE( cur, "Y" ) { }
 CYCLE_SAFE( cur, "Y" ) { }
 CYCLE2_SAFE( cur, "Y" ) { }
 CYCLE3_SAFE( cur, "Y" ) { }
+
+#ifndef LEGACY_CODE
+auto p = _p_;
+#endif
 
 cur = p;
 CYCLES( cur, cur1, "Y" ) { }

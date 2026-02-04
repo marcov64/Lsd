@@ -2092,7 +2092,7 @@ lsd::sensitivity::sensitivity( const char *lab, simulation *_sim, int _param, in
 		num_val = _num_val;
 		val = new double [ _val->size( ) ];
 		for ( i = 0; i < num_val; ++i )
-			val[ i ] = integer ? round( ( *_val )[ i ] ) : ( *_val )[ i ];
+			val[ i ] = integer ? std::round( ( *_val )[ i ] ) : ( *_val )[ i ];
 	}
 
 	if ( sim->sens == NULL )
@@ -2220,7 +2220,7 @@ int lsd::simulation::load_txt_sensitivity( FILE *f )
 		else
 		{
 			param = 0;
-			lag = abs( lag ) - 1;
+			lag = std::abs( lag ) - 1;
 		}
 
 		for ( val.resize( num_val ), i = 0; i < num_val; ++i )

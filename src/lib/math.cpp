@@ -31,7 +31,7 @@ double lsd::equation::round_digits( double value, int digits )
 
 	double factor = pow( 10.0, digits - ceil( log10( fabs( value ) ) ) );
 
-	return round( value * factor ) / factor;
+	return std::round( value * factor ) / factor;
 }
 
 

@@ -2468,7 +2468,7 @@ double lsd::object::mav( object *caller, const char *lab, double per, const doub
 	simulation *sim = attr->cont->sim;
 	variable *cv;
 
-	if ( ( ! sim->use_nan && std::isnan( per ) ) || std::isinf( per ) || abs( per ) < 1 )
+	if ( ( ! sim->use_nan && std::isnan( per ) ) || std::isinf( per ) || std::abs( per ) < 1 )
 	{
 		sim->error_hard( "invalid moving average period",
 						 "check your equation code to prevent this situation",
@@ -2482,6 +2482,7 @@ double lsd::object::mav( object *caller, const char *lab, double per, const doub
 	if ( cv == NULL )
 		return NAN;
 
+	per = std::round( per );
 	if ( per < 0 )
 	{
 		per = - per;

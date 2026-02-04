@@ -974,9 +974,9 @@ proc formatfloat { float { N 6 } } {
 	set fmt "%.${N}g"
 
 	set fmtFlt [ format $fmt $float ]
-	if { abs( $fmtFlt - $float ) < $prec } {
+	if { [ expr { abs( $fmtFlt - $float ) } ] < $prec } {
 		return $fmtFlt
-	} elseif { abs( $float - int( $float ) ) < $prec } {
+	} elseif { [ expr { abs( $float - int( $float ) } ] ) < $prec } {
 		return [ expr { int( $float ) } ]
 	} else {
 		return $float
