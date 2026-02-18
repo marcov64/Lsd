@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+  <MemoryInMB>8192</MemoryInMB>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>D:\LSD</HostFolder>
+      <SandboxFolder>C:\LSD-host</SandboxFolder>
+     <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+    <Command>powershell -Verb RunAs -command "cmd /c C:\LSD-host\installer\init-sandbox.bat"</Command>
+  </LogonCommand>
+</Configuration>

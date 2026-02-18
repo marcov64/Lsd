@@ -54,14 +54,14 @@ FOR /F "tokens=2*" %%A IN ('REG QUERY %REGLOC% /v Desktop 2^>^&1^|find "REG_"') 
 FOR /F "tokens=2*" %%A IN ('REG QUERY %REGLOC% /v Programs 2^>^&1^|find "REG_"') DO SET STRTMENU=%%B
 
 rem remove old shortcuts
-ERASE /F "%DESKTOP%\LSD*.lnk" > NUL 2>&1
-ERASE /F "%DESKTOP%\LMM*.lnk" > NUL 2>&1
-ERASE /F "%STRTMENU%\LSD*.lnk" > NUL 2>&1
-ERASE /F "%STRTMENU%\LMM*.lnk" > NUL 2>&1
+CALL ERASE /F "%DESKTOP%\LSD*.lnk" > NUL 2>&1
+CALL ERASE /F "%DESKTOP%\LMM*.lnk" > NUL 2>&1
+CALL ERASE /F "%STRTMENU%\LSD*.lnk" > NUL 2>&1
+CALL ERASE /F "%STRTMENU%\LMM*.lnk" > NUL 2>&1
 
 rem create shortcuts in desktop and the user menu
-"%CD%\gnu\bin\Shortcut.exe" /f:"%DESKTOP%\LSD Model Manager.lnk" /a:c /t:"%CD%\LMM.exe" /w:%CD% /r:7 /i:%CD%\src\icons\lmm.ico /d:"LSD Model Manager" > NUL
+CALL "%CD%\gnu\bin\Shortcut.exe" /f:"%DESKTOP%\LSD Model Manager.lnk" /a:c /t:"%CD%\LMM.exe" /w:%CD% /r:7 /i:%CD%\src\icons\lmm.ico /d:"LSD Model Manager" > NUL
 
-COPY "%DESKTOP%\LSD Model Manager.lnk" "%STRTMENU%" > NUL
+CALL COPY "%DESKTOP%\LSD Model Manager.lnk" "%STRTMENU%" > NUL
 
 :end

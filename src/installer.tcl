@@ -57,7 +57,6 @@ set linuxOptFile "system_options-linux.txt"
 set notInstall [ list .git/* installer/* lwi/* Rpkg/* Manual/src/* ]
 
 # absolute reference paths
-set homeDir [ file normalize "~/." ]
 set scptDir [ file normalize "[ file dirname [ info script ] ]/.." ]
 set macZip [ file normalize "$scptDir/../Package/LSD-archive-mac.zip" ]
 
@@ -134,8 +133,14 @@ if { $CurPlatform eq "mac" } {
 # check default LSD directory location
 #
 
+if { [ string equal $CurPlatform windows ] } {
+	set homeDir [ file normalize $env(USERPROFILE) ]
+} else {
+	set homeDir [ file normalize "~/." ]
+}
+
 if { [ info exists env(LSDROOT) ] && [ file exists [ file dirname $env(LSDROOT) ] ] } {
-	set homeDir [ file dirname $env(LSDROOT) ]
+	set homeDir [ file normalize [ file dirname $env(LSDROOT) ] ]
 	set lsd_root [ file normalize $env(LSDROOT) ]
 
 } else {
@@ -150,13 +155,13 @@ if { [ info exists env(LSDROOT) ] && [ file exists [ file dirname $env(LSDROOT) 
 
 	} else {
 		if { [ string first " " "$homeDir" ] < 0 } {
-			set lsd_root [ file normalize "~/$lsd_dir" ]
+			set lsd_root [ file normalize "$homeDir/$lsd_dir" ]
 		} elseif [ file exists $winRoot ] {
-			set homeDir "$winRoot"
-			set lsd_root "${winRoot}$lsd_dir"
+			set homeDir [ file normalize "$winRoot" ]
+			set lsd_root [ file normalize "${winRoot}$lsd_dir" ]
 		} else {
-			set homeDir "/"
-			set lsd_root "/$lsd_dir"
+			set homeDir [ file normalize "/" ]
+			set lsd_root [ file normalize "/$lsd_dir" ]
 		}
 	}
 }
@@ -218,7 +223,7 @@ ttk::label .dir.choice.but.lab
 ttk::button .dir.choice.but.browse -text Browse -width -1 -command {
 	set dir [ tk_chooseDirectory -initialdir "$homeDir" -title "Choose a directory" ]
 	if { $dir != "" } {
-		set lsd_root "$dir"
+		set lsd_root [ file normalize "$dir" ]
 	}
 	.dir.choice.blk.where selection range 0 end
 	focus .dir.choice.blk.where
@@ -227,15 +232,15 @@ pack .dir.choice.but.lab .dir.choice.but.browse
 pack .dir.choice.blk .dir.choice.but -padx $_5 -side left
 ttk::label .dir.obs -text "If LSD is already installed in the\nselected directory, it will be updated" -justify center
 
-if [ string equal $CurPlatform windows ] {
+if { [ string equal $CurPlatform windows ] } {
 
 	if { ! [ catch { exec net session >nul 2>&1 } ] } {
 		set wadmin 1
 		set wall 1
 		if [ file exists $winRoot ] {
-			set lsd_root "${winRoot}$lsd_dir"
+			set lsd_root [ file normalize "${winRoot}$lsd_dir" ]
 		} else {
-			set lsd_root "/$lsd_dir"
+			set lsd_root [ file normalize "/$lsd_dir" ]
 		}
 	} else {
 		set wadmin 0
@@ -245,12 +250,12 @@ if [ string equal $CurPlatform windows ] {
 	ttk::checkbutton .dir.wall -variable wall -text "Install for all users" -command {
 		if { $wall } {
 			if [ file exists $winRoot ] {
-				set lsd_root "${winRoot}$lsd_dir"
+				set lsd_root [ file normalize "${winRoot}$lsd_dir" ]
 			} else {
-				set lsd_root "/$lsd_dir"
+				set lsd_root [ file normalize "/$lsd_dir" ]
 			}
 		} elseif { [ string first " " "$homeDir" ] < 0 } {
-			set lsd_root [ file normalize "~/$lsd_dir" ]
+			set lsd_root [ file normalize "$homeDir/$lsd_dir" ]
 		}
 	}
 
@@ -529,7 +534,7 @@ if [ string equal $CurPlatform windows ] {
 		set regPath "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\LSD"
 	}
 
-	set res [ catch { exec $lsd_root/add-shortcut-windows.bat $wopt } result ]
+	set res [ catch { exec $lsd_root\\add-shortcut-windows.bat $wopt } result ]
 
 	catch {
 		registry set $regPath DisplayIcon "[ file nativename $lsd_root/$lsd_ico ]\\lsd.ico" sz
