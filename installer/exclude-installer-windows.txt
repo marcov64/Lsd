@@ -38,6 +38,7 @@ temp.html
 sync.ffs_db
 *.ffs_gui
 *.sh
+*.wsb
 *.gitignore
 *.err
 *.gch

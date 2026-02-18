@@ -27,7 +27,7 @@ wm withdraw .
 set _LSD_NAME_ "LSD Laboratory for Simulation Development"
 set _LSD_PUBLISHER_ "Marco Valente and Marcelo Pereira"
 set _LSD_VERSION_ "9.0"
-set _LSD_DATE_ "January 12 2026"
+set _LSD_DATE_ "February 12 2026"
 set _LSD_SIZE_KB_ 735273
 
 set lsd_dir LSD
