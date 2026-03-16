@@ -1407,6 +1407,11 @@ int modman( int argn, const char **argv )
 	if ( choice == 14 )
 	{
 		cmd( "destroytop .mm" );	// close compilation results, if open
+		
+		// use current group directory if browser was not called yet
+		cmd( "if { ! [ info exists browser_dir ] } { \
+				set browser_dir $group_dir \
+			}" );
 
 		// prevent creating new groups in example groups
 		cmd( "if { [ string first \"$lsd_root/$lsd_example\" [ file normalize $browser_dir ] ] == 0 } { \
