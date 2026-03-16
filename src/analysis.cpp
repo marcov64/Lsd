@@ -4943,7 +4943,7 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 		gzgets( fz, linbuf, linsiz );
 
 	tok = strtok( linbuf , "\t" );		// prepares for parsing and get first one
-	for ( i = num_v; i < new_v + num_v && ! stop; ++i )
+	for ( i = num_v; i < num_v + new_v && ! stop; ++i )
 	{
 		if ( tok == NULL )
 		{
@@ -4955,8 +4955,6 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 		vs[ i ].label = label;
 		vs[ i ].tag = lsd::to_string( "%s%d_%s", lsd::tag_pref[ TAG_FILE ], fidx, tag );
 		vs[ i ].rank = i;
-		vs[ i ].data = new double[ vs[ i ].end - vs[ i ].start + 1 ];
-		vs[ i ].data_alias = false;		// dealocate on store destruction
 
 		if ( ( va = sim.va.search( label ) ) == NULL )
 			vs[ i ].parent = file_name;
@@ -4972,6 +4970,9 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 			vs[ i ].end = new_t - 1;
 			first_t = 0;
 		}
+
+		vs[ i ].data = new double[ vs[ i ].end - vs[ i ].start + 1 ];
+		vs[ i ].data_alias = false;		// dealocate on store destruction
 
 		if ( keep_vars )
 		{
@@ -5015,7 +5016,7 @@ i_vecT gui::insert_data_file( const char *file_name, bool gz, bool keep_vars )
 
 		tok = strtok( linbuf , "\t" );		// prepares for parsing and get first one
 
-		for ( i = num_v; i < new_v + num_v; ++i )
+		for ( i = num_v; i < num_v + new_v; ++i )
 		{
 			if ( tok == NULL )
 			{
