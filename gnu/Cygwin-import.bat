@@ -70,6 +70,7 @@ XCOPY %OPT% %CYG_DIR%\bin\cygiconv-2.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %CYG_DIR%\bin\cygintl-8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %CYG_DIR%\bin\cygncursesw-10.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %CYG_DIR%\bin\cygpanelw-10.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %CYG_DIR%\bin\cygpcre-1.dll %LSD_DIR%\gnu\bin\
 
 echo multitail utility...
 XCOPY %OPT% %CYG_DIR%\bin\tail.exe %LSD_DIR%\gnu\bin\

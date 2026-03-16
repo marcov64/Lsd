@@ -20,10 +20,10 @@ LSD is copyrighted by Marco Valente and Marcelo C. Pereira and is distributed ac
 
 LSD includes third party software under the original licenses of the copyright owners:
 
-GCC 14.2 and associated utilities are copyrighted by the Free Software Foundation, Inc. under GPL 3, https://gcc.gnu.org
-Tcl/Tk 8.6.16 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
-MSYS2 3.5.7, https://www.msys2.org
-Cygwin 3.5.7 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
+GCC 15.2 and associated utilities are copyrighted by the Free Software Foundation, Inc. under GPL 3, https://gcc.gnu.org
+Tcl/Tk 8.6.17 is copyrighted by the Regents of the University of California, and other parties under BSD-style license, https://www.tcl.tk
+MSYS2 3.6.7, https://www.msys2.org
+Cygwin 3.6.7 is copyrighted under GNU GPL and LGPL 3, https://cygwin.com
 7-Zip LZMA SDK 24.09 is copyrighted by Igor Pavlov under GNU LGPL 2.1, https://www.7-zip.org
 Makeself 2.5.0 is copyrighted by Stephane Peter under GPL2, https://makeself.io
 Gnuplot 6.0.4 is copyrighted by Thomas Williams and Colin Kelley, http://www.gnuplot.info
@@ -43,7 +43,7 @@ tksvg 0.7 is copyrighted by Harald Oehlmann, https://github.com/oehhar/tksvg
 dblclick.tcl is copyrighted by Wolf-Dieter Busch under OLL, https://wiki.tcl-lang.org/page/doubleclick
 tooltip.tcl 1.4.6 is copyrighted by Jeffrey Hobbs, https://wiki.tcl-lang.org/page/tklib
 tkcon.tcl 2.5 is copyrighted by Jeffrey Hobbs, https://wiki.tcl-lang.org/page/Tkcon
-tkdiff.tcl 4.2 is copyrighted by John M. Klassa and others GNU GPL 2+, https://sourceforge.net/projects/tkdiff
+tkdiff.tcl 6.0 is copyrighted by John M. Klassa and others GNU GPL 2+, https://sourceforge.net/projects/tkdiff
 
 For legal conditions on third party software included in LSD see the legal licenses on the sites above.
 
@@ -376,7 +376,7 @@ Step-by-step procedure to install the MSYS2 64-bit compiler (an internet connect
 
 4. Still in the shell, install the compiler and required tools:
 
- pacman -S make mingw-w64-x86_64-toolchain mingw-w64-x86_64-diffutils mingw-w64-x86_64-gsl mingw-w64-x86_64-libsigsegv mingw-w64-x86_64-python-pygments mingw-w64-x86_64-cython
+ pacman -S make diffutils mingw-w64-x86_64-toolchain mingw-w64-x86_64-python-pygments mingw-w64-x86_64-cython
 
 5. Press "Windows" and "R" keys together, type the command "sysdm.cpl" in the "Run" dialog box and press "Enter". In the "System Properties" window, go to the "Advanced" tab and click on button "Environment Variables...". In the "System variables" list, select "Path" and press "Edit...". Run across the lines to see if your MSYS2 MinGW64 bin folder, i.e. "C:\msys64\mingw64\bin", is already there. If Yes, just press "Cancel" 3 times. If not, click on "New" and type MSYS2 MinGW64 binary folder, i.e. "C:\msys64\mingw64\bin". Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your MSYS2 MinGW64 bin folder in PATH.
 

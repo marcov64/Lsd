@@ -1,0 +1,8 @@
+prefix=/mingw64
+includedir=${prefix}/include
+
+Name: cairo-ft
+Description: FreeType font backend for cairo graphics library
+Version: 1.18.4
+Requires: cairo, freetype2 >=  23.0.17
+Cflags: -I${includedir}

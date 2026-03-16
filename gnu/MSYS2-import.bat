@@ -25,8 +25,8 @@ rem  - diff compare tool
 rem *************************************************************
 
 rem component versions
-set GCC_VER=15.1.0
-set PYTHON_VER=3.12
+set GCC_VER=15.2.0
+set PYTHON_VER=3.14
 
 rem XCOPY options for files and directories
 set OPT=/D/Q/Y
@@ -85,6 +85,7 @@ echo MSYS2 libraries and utilities...
 XCOPY %OPT% %MSYS_DIR%\usr\bin\sh.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\bash.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\sed.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\usr\bin\diff.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\dirname.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\readlink.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\usr\bin\which.exe %LSD_DIR%\gnu\bin\
@@ -126,6 +127,10 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\bin\tk*.dll %LSD_DIR%\gnu\bin\
 
 echo gdb debugger...
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\gdb.exe %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libexpat-1.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libiconv-2.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libintl-8.dll %LSD_DIR%\gnu\bin\
+XCOPY %OPT% %MSYS_DIR%\mingw64\bin\liblzma-5.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libncursesw6.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libreadline8.dll %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libtermcap-0.dll %LSD_DIR%\gnu\bin\
@@ -138,16 +143,6 @@ XCOPY %OPT% %MSYS_DIR%\mingw64\bin\python.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\python3.exe %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\python%PYTHON_VER%-config %LSD_DIR%\gnu\bin\
 XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libpython%PYTHON_VER%.dll %LSD_DIR%\gnu\bin\
-
-echo diff compare tool...
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\diff.exe %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libiconv-2.dll %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libintl-8.dll %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libsigsegv-2.dll %LSD_DIR%\gnu\bin\
-
-echo subbotools required libraries...
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgsl-28.dll %LSD_DIR%\gnu\bin\
-XCOPY %OPT% %MSYS_DIR%\mingw64\bin\libgslcblas-0.dll %LSD_DIR%\gnu\bin\
 
 echo done copying files
 
@@ -162,18 +157,6 @@ echo checking missing files
 
 if not exist %LSD_DIR%\gnu\bin\tail.exe echo missing Cygwin tail.exe
 if not exist %LSD_DIR%\gnu\bin\multitail.exe echo missing Cygwin multitail.exe
-
-if not exist %LSD_DIR%\gnu\bin\laplafit.exe echo missing Subbotools laplafit.exe
-if not exist %LSD_DIR%\gnu\bin\laplaafit.exe echo missing Subbotools laplaafit.exe
-if not exist %LSD_DIR%\gnu\bin\sepfit.exe echo missing Subbotools sepfit.exe
-if not exist %LSD_DIR%\gnu\bin\subboafish.exe echo missing Subbotools subboafish.exe
-if not exist %LSD_DIR%\gnu\bin\subboafit.exe echo missing Subbotools subboafit.exe
-if not exist %LSD_DIR%\gnu\bin\subboagen.exe echo missing Subbotools subboagen.exe
-if not exist %LSD_DIR%\gnu\bin\subbofish.exe echo missing Subbotools subbofish.exe
-if not exist %LSD_DIR%\gnu\bin\subbofit.exe echo missing Subbotools subbofit.exe
-if not exist %LSD_DIR%\gnu\bin\subbogen.exe echo missing Subbotools subbogen.exe
-if not exist %LSD_DIR%\gnu\bin\subbolafit.exe echo missing Subbotools subbolafit.exe
-if not exist %LSD_DIR%\gnu\bin\subboshow.exe echo missing Subbotools subboshow.exe
 
 if not exist %LSD_DIR%\gnu\bin\LMM.assembly.manifest echo missing LMM.assembly.manifest
 if not exist %LSD_DIR%\gnu\bin\Shortcut.exe echo missing Shortcut.exe
