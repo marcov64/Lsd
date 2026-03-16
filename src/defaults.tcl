@@ -623,8 +623,8 @@ proc scaleScreen { x } {
 	return [ expr { int( $screenScaling * $x ) } ]
 }
 
-set effDPI [ expr 72 * [ tk scaling ] ]
-set screenScaling [ expr $effDPI / $refDPI ]
+set effDPI [ expr { 72 * [ tk scaling ] } ]
+set screenScaling [ expr { $effDPI / $refDPI } ]
 set allScreenMeasures {
 	hsizeLmin vsizeLmin hsizeBmin vsizeBmin hsizeAmin vsizeAmin hsizeDmin
 	vsizeDmin hsizePmin vsizePmin hsizeGmin vsizeGmin corrX corrY butPad
