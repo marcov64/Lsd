@@ -1775,6 +1775,8 @@ int modman( int argn, const char **argv )
 		cmd( "close $file" );
 		cmd( ".f.t.t edit reset" );
 		cmd( ".f.t.t tag remove sel 1.0 end" );
+		cmd( ".f.t.t tag add sel 1.0" );
+		cmd( ".f.t.t mark set insert 1.0" );
 
 		cmd( "set file_dir [ file dirname [ file normalize $filetoload ] ]" );
 		cmd( "set file_name [ file tail $filetoload ]" );
@@ -1795,16 +1797,15 @@ int modman( int argn, const char **argv )
 				cmd( ".f.t.t mark set insert $errlin.0" );
 			}
 		}
-		else
-			cmd( ".f.t.t mark set insert 1.0" );
 
-		cmd( "if { [ info exists file_cur ] } { \
-				.f.t.t mark set insert $file_cur; \
-				unset file_cur \
-			}" );
 		cmd( "if { [ info exists file_pos ] } { \
 				.f.t.t yview moveto $file_pos; \
 				unset file_pos \
+			}" );
+		cmd( "if { [ info exists file_cur ] } { \
+				.f.t.t mark set insert $file_cur; \
+				.f.t.t see [ .f.t.t index insert ]; \
+				unset file_cur \
 			}" );
 		cmd( "upd_cursor" );
 		cmd( "set before [ .f.t.t get 1.0 end ]" );
