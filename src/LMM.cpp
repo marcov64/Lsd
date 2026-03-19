@@ -155,7 +155,7 @@ int main( int argn, const char **argv )
 int modman( int argn, const char **argv )
 {
 	bool found, recolor = false, sourcefile = false;
-	int i, j, num, choice, synt_high, recolor_all = 0, v_counter = 0;
+	int i, j, num, choice, synt_high, recolor_all = 0, v_counter = 0, cur_counter = 0;
 	const char *s;
 	char str[ 2 * MAX_PATH_LENGTH ], tmp[ MAX_BUFF_SIZE ];
 
@@ -1407,7 +1407,7 @@ int modman( int argn, const char **argv )
 	if ( choice == 14 )
 	{
 		cmd( "destroytop .mm" );	// close compilation results, if open
-		
+
 		// use current group directory if browser was not called yet
 		cmd( "if { ! [ info exists browser_dir ] } { \
 				set browser_dir $group_dir \
@@ -2151,15 +2151,15 @@ int modman( int argn, const char **argv )
 			goto loop;
 		}
 
-		cmd( "set a [ .f.t.t index insert ]" );
+		cmd( "set a [ .f.t.t index \"insert linestart\" ]" );
 
 		cmd( ".f.t.t insert insert \"EQUATION(\\\"$v_label\\\")\\n\"" );
 		cmd( ".f.t.t insert insert \"// Comment\\n\\n\"" );
 		cmd( ".f.t.t insert insert \"RESULT( )\\n\"" );
-		cmd( ".f.t.t mark set insert \"$a + 2 line\"" );
-		cmd( ".f.t.t tag add sel insert \"insert + 7 char\"" );
+		cmd( ".f.t.t mark set insert \"$a + 1 line + 3 chars \"" );
+		cmd( ".f.t.t tag add sel insert \"insert + 7 chars\"" );
 
-		v_counter = 0;
+		v_counter = cur_counter = 0;
 
 		cmd( ".f.t.t see insert" );
 
@@ -2179,7 +2179,7 @@ int modman( int argn, const char **argv )
 		cmd( "newtop .a \"Insert 'V' Command\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.v" );
-		cmd( "ttk::label .a.v.l -text \"Number v\\\[x\\] to assign to\"" );
+		cmd( "ttk::label .a.v.l -justify center -justify center -text \"v\\\[x\\] to assign to\n(empty: none)\"" );
 		cmd( "ttk::spinbox .a.v.e -width 3 -from 0 -to 99 -justify center" );
 		cmd( ".a.v.e set $v_num" );
 		cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
@@ -2209,8 +2209,7 @@ int modman( int argn, const char **argv )
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#V } { set choice 2 }" );
 
 		cmd( "showtop .a" );
-		cmd( "focus .a.v.e" );
-		cmd( ".a.v.e selection range 0 end" );
+		cmd( "focus .a.n.e" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -2235,11 +2234,15 @@ int modman( int argn, const char **argv )
 		cmd( "if { $v_lag == 0 && $v_obj ne \"THIS\" } { .f.t.t insert insert \"VS($v_obj, \\\"$v_label\\\")\" }" );
 		cmd( "if { $v_lag != 0 && $v_obj ne \"THIS\" } { .f.t.t insert insert \"VLS($v_obj, \\\"$v_label\\\", $v_lag)\" }" );
 
-		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
-		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
+		cmd( "if { $v_num ne \"\" } { \
+				.f.t.t insert insert \";\"; \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
 
-		if ( num != -1 )
-			v_counter = ++num;
+		if ( num )
+			v_counter++;
 
 		cmd( ".f.t.t see insert" );
 
@@ -2251,22 +2254,22 @@ int modman( int argn, const char **argv )
 	if ( choice == 27 )
 	{
 		cmd( "set v_label \"\"" );
-		cmd( "set v_obj cur" );
+		cmd( "if { %d == 0 } { set v_obj0 cur } { set v_obj0 cur%d }", cur_counter, cur_counter );
 		cmd( "set v_par THIS" );
 
 		cmd( "newtop .a \"Insert 'CYCLE' Command\" { set choice 2 }" );
 
+		cmd( "ttk::frame .a.c" );
+		cmd( "ttk::label .a.c.l -text \"Cycling pointer\"" );
+		cmd( "ttk::entry .a.c.e -width 6 -textvariable v_obj0 -justify center" );
+		cmd( "bind .a.c.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
+		cmd( "pack .a.c.l .a.c.e" );
+
 		cmd( "ttk::frame .a.o" );
 		cmd( "ttk::label .a.o.l -text \"Object to cycle through\"" );
 		cmd( "ttk::entry .a.o.e -width 25 -textvariable v_label -justify center" );
-		cmd( "bind .a.o.e <Return> { focus .a.c.e; .a.c.e selection range 0 end }" );
+		cmd( "bind .a.o.e <Return> { focus .a.p.e; .a.p.e selection range 0 end }" );
 		cmd( "pack .a.o.l .a.o.e" );
-
-		cmd( "ttk::frame .a.c" );
-		cmd( "ttk::label .a.c.l -text \"Cycling pointer\"" );
-		cmd( "ttk::entry .a.c.e -width 6 -textvariable v_obj -justify center" );
-		cmd( "bind .a.c.e <Return> { focus .a.p.e; .a.p.e selection range 0 end }" );
-		cmd( "pack .a.c.l .a.c.e" );
 
 		cmd( "ttk::frame .a.p" );
 		cmd( "ttk::label .a.p.l -text \"Parent object\"" );
@@ -2274,13 +2277,12 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.p.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.p.l .a.p.e" );
 
-		cmd( "pack .a.o .a.c .a.p -padx $_5 -pady $_5" );
+		cmd( "pack .a.c .a.o .a.p -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#CYCLE } { set choice 2 }" );
 
 		cmd( "showtop .a" );
 		cmd( "focus .a.o.e" );
-		cmd( ".a.o.e selection range 0 end" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -2296,7 +2298,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_par eq \"THIS\" } { .f.t.t insert insert \"CYCLE($v_obj, \\\"$v_label\\\")\\n\" } { .f.t.t insert insert \"CYCLES($v_par, $v_obj, \\\"$v_label\\\")\\n\" }" );
+		cmd( "if { $v_par eq \"THIS\" } { .f.t.t insert insert \"CYCLE($v_obj0, \\\"$v_label\\\")\\n\" } { .f.t.t insert insert \"CYCLES($v_par, $v_obj0, \\\"$v_label\\\")\\n\" }" );
 
 		cmd( "set in [ .f.t.t index insert ]" );
 		cmd( "scan $in %%d.%%d line col" );
@@ -2326,6 +2328,17 @@ int modman( int argn, const char **argv )
 		cmd( ".f.t.t insert insert \"}\\n\"" );
 		cmd( ".f.t.t mark set insert \"$b\"" );
 
+		cmd( "if { $v_obj0 ne \"\" } { \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
+
+		if ( num )
+			cur_counter++;
+
+		cmd( ".f.t.t see insert" );
+
 		recolor = true;		// trigger recoloring
 		goto loop;
 	}
@@ -2335,13 +2348,13 @@ int modman( int argn, const char **argv )
 	{
 		cmd( "set v_num %d", v_counter );
 		cmd( "set v_label \"\"" );
-		cmd( "set v_val 1" );
+		cmd( "set v_val 0" );
 		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'INCR' Command\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.v" );
-		cmd( "ttk::label .a.v.l -text \"Number v\\\[x\\] to assign the result after increment\"" );
+		cmd( "ttk::label .a.v.l -justify center -justify center -text \"v\\\[x\\] to assign the result after increment\n(empty: none)\"" );
 		cmd( "ttk::spinbox .a.v.e -width 3 -from 0 -to 99 -justify center" );
 		cmd( ".a.v.e set $v_num" );
 		cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
@@ -2370,8 +2383,7 @@ int modman( int argn, const char **argv )
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#INCR } { set choice 2 }" );
 
 		cmd( "showtop .a" );
-		cmd( "focus .a.v.e" );
-		cmd( ".a.v.e selection range 0 end" );
+		cmd( "focus .a.n.e" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -2391,11 +2403,15 @@ int modman( int argn, const char **argv )
 		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
 		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"INCRS($v_obj, \\\"$v_label\\\", $v_val)\" } { .f.t.t insert insert \"INCR(\\\"$v_label\\\", $v_val)\" }" );
 
-		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
-		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
+		cmd( "if { $v_num ne \"\" } { \
+				.f.t.t insert insert \";\"; \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
 
-		if ( num != -1 )
-			v_counter = ++num;
+		if ( num )
+			v_counter++;
 
 		cmd( ".f.t.t see insert" );
 
@@ -2414,7 +2430,7 @@ int modman( int argn, const char **argv )
 		cmd( "newtop .a \"Insert 'MULT' Command\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.v" );
-		cmd( "ttk::label .a.v.l -text \"Number v\\\[x\\] to assign the result after multiplication\"" );
+		cmd( "ttk::label .a.v.l -justify center -justify center -text \"v\\\[x\\] to assign the result after multiplication\n(empty: none)\"" );
 		cmd( "ttk::spinbox .a.v.e -width 3 -from 0 -to 99 -justify center" );
 		cmd( ".a.v.e set $v_num" );
 		cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
@@ -2443,8 +2459,7 @@ int modman( int argn, const char **argv )
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#MULT } { set choice 2 }" );
 
 		cmd( "showtop .a" );
-		cmd( "focus .a.v.e" );
-		cmd( ".a.v.e selection range 0 end" );
+		cmd( "focus .a.n.e" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -2462,13 +2477,18 @@ int modman( int argn, const char **argv )
 		cmd( "set a [ .f.t.t index insert ]" );
 
 		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+
 		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"MULTS($v_obj, \\\"$v_label\\\", $v_val)\" } { .f.t.t insert insert \"MULT(\\\"$v_label\\\", $v_val)\" }" );
 
-		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
-		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
+		cmd( "if { $v_num ne \"\" } { \
+				.f.t.t insert insert \";\"; \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
 
-		if ( num != -1 )
-			v_counter = ++num;
+		if ( num )
+			v_counter++;
 
 		cmd( ".f.t.t see insert" );
 
@@ -2479,24 +2499,25 @@ int modman( int argn, const char **argv )
 	// insert a WRITE macro
 	if ( choice == 29 )
 	{
-		cmd( "set v_num 0" );
+		cmd( "set v_num %d", std::max( v_counter - 1, 0 ) );
 		cmd( "set v_label \"\"" );
 		cmd( "set v_lag T" );
 		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'WRITE' Command\" { set choice 2 }" );
 
-		cmd( "ttk::frame .a.v" );
-		cmd( "ttk::label .a.v.l -text \"Value to write\"" );
-		cmd( "ttk::entry .a.v.e -width 15 -textvariable v_num -justify center" );
-		cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
-		cmd( "pack .a.v.l .a.v.e" );
-
 		cmd( "ttk::frame .a.n" );
 		cmd( "ttk::label .a.n.l -text \"Variable or parameter to write\"" );
 		cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
-		cmd( "bind .a.n.e <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
+		cmd( "bind .a.n.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 		cmd( "pack .a.n.l .a.n.e" );
+
+		cmd( "ttk::frame .a.v" );
+		cmd( "ttk::label .a.v.l -justify center -justify center -text \"v\\\[x\\] to write from\"" );
+		cmd( "ttk::spinbox .a.v.e -width 3 -from 0 -to 99 -justify center" );
+		cmd( ".a.v.e set $v_num" );
+		cmd( "bind .a.v.e <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
+		cmd( "pack .a.v.l .a.v.e" );
 
 		cmd( "ttk::frame .a.l" );
 		cmd( "ttk::label .a.l.l -text \"Case appearing as latest computation\"" );
@@ -2510,18 +2531,18 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.v .a.n .a.l .a.o -padx $_5 -pady $_5" );
+		cmd( "pack .a.n .a.v .a.l .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#WRITE } { set choice 2 }" );
 
 		cmd( "showtop .a" );
-		cmd( "focus .a.v.e" );
-		cmd( ".a.v.e selection range 0 end" );
+		cmd( "focus .a.n.e" );
 
 		choice = 0;
 		while ( choice == 0 )
 			Tcl_DoOneEvent( 0 );
 
+		cmd( "set v_num [ .a.v.e get ]" );
 		cmd( "destroytop .a" );
 
 		if ( choice == 2 )
@@ -2532,10 +2553,10 @@ int modman( int argn, const char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_obj eq \"THIS\" && ( $v_lag eq \"\" || [ string equal -nocase $v_lag t ] ) } { .f.t.t insert insert \"WRITE(\\\"$v_label\\\", $v_num);\" }" );
-		cmd( "if { $v_obj eq \"THIS\" && $v_lag ne \"\" && ! [ string equal -nocase $v_lag t ] } { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\", $v_num, $v_lag);\" }" );
-		cmd( "if { $v_obj ne \"THIS\" && ( $v_lag eq \"\" || [ string equal -nocase $v_lag t ] ) } { .f.t.t insert insert \"WRITES($v_obj, \\\"$v_label\\\", $v_num);\" }" );
-		cmd( "if { $v_obj ne \"THIS\" && $v_lag ne \"\" && ! [ string equal -nocase $v_lag t ] } { .f.t.t insert insert \"WRITELS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\" }" );
+		cmd( "if { $v_obj eq \"THIS\" && ( $v_lag eq \"\" || [ string equal -nocase $v_lag t ] ) } { .f.t.t insert insert \"WRITE(\\\"$v_label\\\", v\\\[$v_num\\]);\" }" );
+		cmd( "if { $v_obj eq \"THIS\" && $v_lag ne \"\" && ! [ string equal -nocase $v_lag t ] } { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\", v\\\[$v_num\\], $v_lag);\" }" );
+		cmd( "if { $v_obj ne \"THIS\" && ( $v_lag eq \"\" || [ string equal -nocase $v_lag t ] ) } { .f.t.t insert insert \"WRITES($v_obj, \\\"$v_label\\\", v\\\[$v_num\\]);\" }" );
+		cmd( "if { $v_obj ne \"THIS\" && $v_lag ne \"\" && ! [ string equal -nocase $v_lag t ] } { .f.t.t insert insert \"WRITELS($v_obj, \\\"$v_label\\\", v\\\[$v_num\\], $v_lag);\" }" );
 
 		cmd( ".f.t.t see insert" );
 
@@ -2546,31 +2567,31 @@ int modman( int argn, const char **argv )
 	// insert a SEARCH_CND macro
 	if ( choice == 30 )
 	{
-		cmd( "set v_obj0 cur" );
-		cmd( "set v_num 0" );
+		cmd( "if { %d == 0 } { set v_obj0 cur } { set v_obj0 cur%d }", cur_counter, cur_counter );
 		cmd( "set v_label \"\"" );
+		cmd( "set v_num 0" );
 		cmd( "set v_lag 0" );
 		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'SEARCH_CND' Command\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.d" );
-		cmd( "ttk::label .a.d.l -text \"Pointer to return the object found\"" );
+		cmd( "ttk::label .a.d.l -justify center -text \"Pointer to return the object found\n(empty: none)\"" );
 		cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
-		cmd( "bind .a.d.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
+		cmd( "bind .a.d.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "pack .a.d.l .a.d.e" );
-
-		cmd( "ttk::frame .a.v" );
-		cmd( "ttk::label .a.v.l -text \"Value to search for\"" );
-		cmd( "ttk::entry .a.v.e -width 15 -textvariable v_num -justify center" );
-		cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
-		cmd( "pack .a.v.l .a.v.e" );
 
 		cmd( "ttk::frame .a.n" );
 		cmd( "ttk::label .a.n.l -text \"Variable or parameter to search\"" );
 		cmd( "ttk::entry .a.n.e -width 25 -textvariable v_label -justify center" );
-		cmd( "bind .a.n.e <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
+		cmd( "bind .a.n.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 		cmd( "pack .a.n.l .a.n.e" );
+
+		cmd( "ttk::frame .a.v" );
+		cmd( "ttk::label .a.v.l -text \"Value to search for\"" );
+		cmd( "ttk::entry .a.v.e -width 15 -textvariable v_num -justify center" );
+		cmd( "bind .a.v.e <Return> { focus .a.l.e; .a.l.e selection range 0 end }" );
+		cmd( "pack .a.v.l .a.v.e" );
 
 		cmd( "ttk::frame .a.l" );
 		cmd( "ttk::label .a.l.l -text \"Lag to use\"" );
@@ -2585,13 +2606,12 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
 
-		cmd( "pack .a.d .a.v .a.n .a.l .a.o -padx $_5 -pady $_5" );
+		cmd( "pack .a.d .a.n .a.v .a.l .a.o -padx $_5 -pady $_5" );
 
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SEARCH_CND } { set choice 2 }" );
 
 		cmd( "showtop .a" );
-		cmd( "focus .a.d.e" );
-		cmd( ".a.d.e selection range 0 end" );
+		cmd( "focus .a.n.e" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -2608,10 +2628,22 @@ int modman( int argn, const char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_obj eq \"THIS\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CND(\\\"$v_label\\\", $v_num);\" }" );
-		cmd( "if { $v_obj eq \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDL(\\\"$v_label\\\", $v_num, $v_lag);\" }" );
-		cmd( "if { $v_obj ne \"THIS\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDS($v_obj, \\\"$v_label\\\", $v_num);\" }" );
-		cmd( "if { $v_obj ne \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDLS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\" }" );
+		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
+
+		cmd( "if { $v_obj eq \"THIS\" && $v_lag == 0 } { .f.t.t insert insert \"SEARCH_CND(\\\"$v_label\\\", $v_num)\" }" );
+		cmd( "if { $v_obj eq \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"SEARCH_CNDL(\\\"$v_label\\\", $v_num, $v_lag)\" }" );
+		cmd( "if { $v_obj ne \"THIS\" && $v_lag == 0 } { .f.t.t insert insert \"SEARCH_CNDS($v_obj, \\\"$v_label\\\", $v_num)\" }" );
+		cmd( "if { $v_obj ne \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"$SEARCH_CNDLS($v_obj, \\\"$v_label\\\", $v_num, $v_lag)\" }" );
+
+		cmd( "if { $v_obj0 ne \"\" } { \
+				.f.t.t insert insert \";\"; \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
+
+		if ( num )
+			cur_counter++;
 
 		cmd( ".f.t.t see insert" );
 
@@ -2656,7 +2688,6 @@ int modman( int argn, const char **argv )
 		cmd( "bind .a.l.e <Return> { focus .a.o.e; .a.o.e selection range 0 end }" );
 		cmd( "pack .a.l.l .a.l.e" );
 
-
 		cmd( "ttk::frame .a.o" );
 		cmd( "ttk::label .a.o.l -text \"Parent object\"" );
 		cmd( "ttk::entry .a.o.e -width 25 -textvariable v_obj -justify center" );
@@ -2669,7 +2700,6 @@ int modman( int argn, const char **argv )
 
 		cmd( "showtop .a" );
 		cmd( "focus .a.d.e" );
-		cmd( ".a.d.e selection range 0 end" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -2706,7 +2736,7 @@ int modman( int argn, const char **argv )
 	// insert a ADDOBJ macro
 	if ( choice == 52 )
 	{
-		cmd( "set v_obj0 cur" );
+		cmd( "if { %d == 0 } { set v_obj0 cur } { set v_obj0 cur%d }", cur_counter, cur_counter );
 		cmd( "set v_label \"\"" );
 		cmd( "set numobj 1" );
 		cmd( "set v_num \"\"" );
@@ -2715,7 +2745,7 @@ int modman( int argn, const char **argv )
 		cmd( "newtop .a \"Insert 'ADDOBJ' Command\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.d" );
-		cmd( "ttk::label .a.d.l -text \"Pointer to return the object created\"" );
+		cmd( "ttk::label .a.d.l -justify center -text \"Pointer to return the object created\n(empty: none)\"" );
 		cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 		cmd( "bind .a.d.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "pack .a.d.l .a.d.e" );
@@ -2749,8 +2779,7 @@ int modman( int argn, const char **argv )
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#ADDOBJ } { set choice 2 }" );
 
 		cmd( "showtop .a" );
-		cmd( "focus .a.d.e" );
-		cmd( ".a.d.e selection range 0 end" );
+		cmd( "focus .a.n.e" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -2771,18 +2800,28 @@ int modman( int argn, const char **argv )
 
 		if ( choice	 == 1 )
 		{
-		cmd( "if { $v_obj eq \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\" }" );
-		cmd( "if { $v_obj eq \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num);\" }" );
-		cmd( "if { $v_obj ne \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDOBJS($v_obj, \\\"$v_label\\\");\" }" );
-		cmd( "if { $v_obj ne \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDOBJ_EXS($v_obj, \\\"$v_label\\\", $v_num);\" }" );
+			cmd( "if { $v_obj eq \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\")\" }" );
+			cmd( "if { $v_obj eq \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num)\" }" );
+			cmd( "if { $v_obj ne \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDOBJS($v_obj, \\\"$v_label\\\")\" }" );
+			cmd( "if { $v_obj ne \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDOBJ_EXS($v_obj, \\\"$v_label\\\", $v_num)\" }" );
 		}
 		else
 		{
-		cmd( "if { $v_obj eq \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\", $numobj, $v_num);\"; set choice -3 }" );
-		cmd( "if { $v_obj ne \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDNOBJ_EXS($v_obj, \\\"$v_label\\\", $numobj, $v_num);\"; set choice -3 }" );
-		cmd( "if { $v_obj eq \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\", $numobj);\"; set choice -3 }" );
-		cmd( "if { $v_obj ne \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDNOBJS($v_obj, \\\"$v_label\\\", $numobj);\"; set choice -3 }" );
+			cmd( "if { $v_obj eq \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\", $numobj, $v_num)\"; set choice -3 }" );
+			cmd( "if { $v_obj ne \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDNOBJ_EXS($v_obj, \\\"$v_label\\\", $numobj, $v_num)\"; set choice -3 }" );
+			cmd( "if { $v_obj eq \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\", $numobj)\"; set choice -3 }" );
+			cmd( "if { $v_obj ne \"THIS\" && $v_num eq \"\" } { .f.t.t insert insert \"ADDNOBJS($v_obj, \\\"$v_label\\\", $numobj)\"; set choice -3 }" );
 		}
+
+		cmd( "if { $v_obj0 ne \"\" } { \
+				.f.t.t insert insert \";\"; \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
+
+		if ( num )
+			cur_counter++;
 
 		cmd( ".f.t.t see insert" );
 
@@ -2793,12 +2832,12 @@ int modman( int argn, const char **argv )
 	// insert a DELETE macro
 	if ( choice == 53 )
 	{
-		cmd( "set v_obj0 cur" );
+		cmd( "if { %d <= 1 } { set v_obj0 cur } { set v_obj0 cur%d }", cur_counter, cur_counter - 1 );
 
 		cmd( "newtop .a \"Insert 'DELETE' Command\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.d" );
-		cmd( "ttk::label .a.d.l -text \"Object to delete\"" );
+		cmd( "ttk::label .a.d.l -text \"Pointer to object to delete\"" );
 		cmd( "ttk::entry .a.d.e -width 25 -textvariable v_obj0 -justify center" );
 		cmd( "bind .a.d.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.d.l .a.d.e" );
@@ -2836,7 +2875,7 @@ int modman( int argn, const char **argv )
 	// insert a RNDDRAW macro
 	if ( choice == 54 )
 	{
-		cmd( "set v_obj0 cur" );
+		cmd( "if { %d == 0 } { set v_obj0 cur } { set v_obj0 cur%d }", cur_counter, cur_counter );
 		cmd( "set v_num \"\"" );
 		cmd( "set v_label \"\"" );
 		cmd( "set v_lag 0" );
@@ -2846,7 +2885,7 @@ int modman( int argn, const char **argv )
 		cmd( "newtop .a \"Insert 'RNDDRAW' Command\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.d" );
-		cmd( "ttk::label .a.d.l -text \"Pointer to return the object found\"" );
+		cmd( "ttk::label .a.d.l -justify center -text \"Pointer to return the object found\n(empty: none)\"" );
 		cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 		cmd( "bind .a.d.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 		cmd( "pack .a.d.l .a.d.e" );
@@ -2887,8 +2926,7 @@ int modman( int argn, const char **argv )
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#RNDDRAW } { set choice 2 }" );
 
 		cmd( "showtop .a" );
-		cmd( "focus .a.d.e" );
-		cmd( ".a.d.e selection range 0 end" );
+		cmd( "focus .a.v.e" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -2905,24 +2943,36 @@ int modman( int argn, const char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
+		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
+
 		cmd( "if { $v_tot eq \"\" } { set choice 1 } { set choice 2 }" );
 
 		if ( choice == 1 )
 		 {
-		  cmd( "if { $v_obj eq \"THIS\" && $v_lag == 0 && $v_label ne \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW(\\\"$v_num\\\", \\\"$v_label\\\");\" }" );
-		  cmd( "if { $v_obj eq \"THIS\" && $v_lag == 0 && $v_label eq \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIR(\\\"$v_num\\\");\" }" );
-		  cmd( "if { $v_obj eq \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAWL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\" }" );
-		  cmd( "if { $v_obj ne \"THIS\" && $v_lag == 0 && $v_label ne \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAWS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\");\" }" );
-		  cmd( "if { $v_obj ne \"THIS\" && $v_lag == 0 && $v_label eq \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIRS($v_obj, \\\"$v_num\\\");\" }" );
-		  cmd( "if { $v_obj ne \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAWLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\" }" );
+		  cmd( "if { $v_obj eq \"THIS\" && $v_lag == 0 && $v_label ne \"\" } { .f.t.t insert insert \"RNDDRAW(\\\"$v_num\\\", \\\"$v_label\\\")\" }" );
+		  cmd( "if { $v_obj eq \"THIS\" && $v_lag == 0 && $v_label eq \"\" } { .f.t.t insert insert \"RNDDRAW_FAIR(\\\"$v_num\\\")\" }" );
+		  cmd( "if { $v_obj eq \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"$RNDDRAWL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag)\" }" );
+		  cmd( "if { $v_obj ne \"THIS\" && $v_lag == 0 && $v_label ne \"\" } { .f.t.t insert insert \"RNDDRAWS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\")\" }" );
+		  cmd( "if { $v_obj ne \"THIS\" && $v_lag == 0 && $v_label eq \"\" } { .f.t.t insert insert \"RNDDRAW_FAIRS($v_obj, \\\"$v_num\\\")\" }" );
+		  cmd( "if { $v_obj ne \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"RNDDRAWLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag)\" }" );
 		 }
 		else
 		 {
-		  cmd( "if { $v_obj eq \"THIS\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOT(\\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\" }" );
-		  cmd( "if { $v_obj eq \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\" }" );
-		  cmd( "if { $v_obj ne \"THIS\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOTS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\" }" );
-		  cmd( "if { $v_obj ne \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\" }" );
+		  cmd( "if { $v_obj eq \"THIS\" && $v_lag == 0 } { .f.t.t insert insert \"RNDDRAWTOT(\\\"$v_num\\\", \\\"$v_label\\\", $v_tot)\" }" );
+		  cmd( "if { $v_obj eq \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"RNDDRAW_TOTL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot)\" }" );
+		  cmd( "if { $v_obj ne \"THIS\" && $v_lag == 0 } { .f.t.t insert insert \"RNDDRAWTOTS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_tot)\" }" );
+		  cmd( "if { $v_obj ne \"THIS\" && $v_lag != 0 } { .f.t.t insert insert \"RNDDRAW_TOTLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot)\" }" );
 		 }
+
+		cmd( "if { $v_obj0 ne \"\" } { \
+				.f.t.t insert insert \";\"; \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
+
+		if ( num )
+			cur_counter++;
 
 		cmd( ".f.t.t see insert" );
 
@@ -2933,14 +2983,14 @@ int modman( int argn, const char **argv )
 	// insert a SEARCH macro
 	if ( choice == 55 )
 	{
-		cmd( "set v_obj0 cur" );
+		cmd( "if { %d == 0 } { set v_obj0 cur } { set v_obj0 cur%d }", cur_counter, cur_counter );
 		cmd( "set v_label \"\"" );
 		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'SEARCH' Command\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.d" );
-		cmd( "ttk::label .a.d.l -text \"Pointer to return the object found\"" );
+		cmd( "ttk::label .a.d.l -justify center -text \"Pointer to return the object found\n(empty: none)\"" );
 		cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 		cmd( "bind .a.d.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "pack .a.d.l .a.d.e" );
@@ -2962,8 +3012,7 @@ int modman( int argn, const char **argv )
 		cmd( "okhelpcancel .a f { set choice 1 } { LSD_macros.html#SEARCH } { set choice 2 }" );
 
 		cmd( "showtop .a" );
-		cmd( "focus .a.d.e" );
-		cmd( ".a.d.e selection range 0 end" );
+		cmd( "focus .a.n.e" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -2979,7 +3028,19 @@ int modman( int argn, const char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"$v_obj0 = SEARCH(\\\"$v_label\\\");\" } { .f.t.t insert insert \"$v_obj0 = SEARCHS($v_obj, \\\"$v_label\\\");\" }" );
+		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
+
+		cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"SEARCH(\\\"$v_label\\\")\" } { .f.t.t insert insert \"SEARCHS($v_obj, \\\"$v_label\\\")\" }" );
+
+		cmd( "if { $v_obj0 ne \"\" } { \
+				.f.t.t insert insert \";\"; \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
+
+		if ( num )
+			cur_counter++;
 
 		cmd( ".f.t.t see insert" );
 
@@ -2998,7 +3059,7 @@ int modman( int argn, const char **argv )
 		cmd( "newtop .a \"Insert 'SUM' Command\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.v" );
-		cmd( "ttk::label .a.v.l -text \"Number v\\\[x\\] to assign the result\"" );
+		cmd( "ttk::label .a.v.l -justify center -justify center -text \"v\\\[x\\] to assign the result\n(empty: none)\"" );
 		cmd( "ttk::spinbox .a.v.e -width 3 -from 0 -to 99 -justify center" );
 		cmd( ".a.v.e set $v_num" );
 		cmd( "bind .a.v.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
@@ -3028,8 +3089,7 @@ int modman( int argn, const char **argv )
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SUM } { set choice 2 }" );
 
 		cmd( "showtop .a" );
-		cmd( "focus .a.v.e" );
-		cmd( ".a.v.e selection range 0 end" );
+		cmd( "focus .a.n.e" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -3054,11 +3114,15 @@ int modman( int argn, const char **argv )
 		cmd( "if { $v_lag == 0 && $v_obj ne \"THIS\" } { .f.t.t insert insert \"SUMS($v_obj, \\\"$v_label\\\")\" }" );
 		cmd( "if { $v_lag != 0 && $v_obj ne \"THIS\" } { .f.t.t insert insert \"SUMLS($v_obj, \\\"$v_label\\\", $v_lag)\" }" );
 
-		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
-		cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
+		cmd( "if { $v_num ne \"\" } { \
+				.f.t.t insert insert \";\"; \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
 
-		if ( num != -1 )
-			v_counter = ++num;
+		if ( num )
+			v_counter++;
 
 		cmd( ".f.t.t see insert" );
 
@@ -3154,20 +3218,36 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::frame .a.d" );
 		cmd( "ttk::label .a.d.l -text \"Type of network to create\"" );
 		cmd( "ttk::combobox .a.d.e -width 30 -textvariable v_net -justify center -values $netListLong" );
-		cmd( "bind .a.d.e <<ComboboxSelected>> { set a [ lindex [ lindex $netListPar [ .a.d.e current ] ] 0 ]; if { $a eq \"\" } { set a \"(unused)\"; .a.p1.e configure -state disabled } { .a.p1.e configure -state normal }; .a.p1.l configure -text $a; set a [ lindex [ lindex $netListPar [ .a.d.e current ] ] 1 ]; if { $a eq \"\" } { set a \"(unused)\"; .a.p2.e configure -state disabled } { .a.p2.e configure -state normal }; .a.p2.l configure -text $a }" );
+		cmd( "bind .a.d.e <<ComboboxSelected>> { \
+				set a [ lindex [ lindex $netListPar [ .a.d.e current ] ] 0 ]; \
+				if { $a eq \"\" } { \
+					set a \"(unused)\"; \
+					.a.p1.e configure -state disabled \
+				} else { \
+					.a.p1.e configure -state normal }; \
+					.a.p1.l configure -text $a; \
+					set a [ lindex [ lindex $netListPar [ .a.d.e current ] ] 1 ]; \
+					if { $a eq \"\" } { \
+						set a \"(unused)\"; \
+						.a.p2.e configure -state disabled \
+					} else { \
+						.a.p2.e configure -state normal \
+					}; \
+					.a.p2.l configure -text $a \
+				}" );
 		cmd( "bind .a.d.e <Return> { focus .a.x.e; .a.x.e selection range 0 end }" );
 		cmd( "pack .a.d.l .a.d.e" );
 
 		cmd( "ttk::frame .a.x" );
 		cmd( "ttk::label .a.x.l -text \"Number of nodes\"" );
 		cmd( "ttk::entry .a.x.e -width 6 -textvariable v_num -justify center" );
-		cmd( "bind .a.x.e <Return> { focus .a.p1.e; .a.p1.e selection range 0 end }" );
+		cmd( "bind .a.x.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "pack .a.x.l .a.x.e" );
 
 		cmd( "ttk::frame .a.p1" );
 		cmd( "ttk::label .a.p1.l -text \"(unused)\"" );
 		cmd( "ttk::entry .a.p1.e -width 6 -textvariable v_par1 -justify center -state disabled" );
-		cmd( "bind .a.p1.e <Return> { focus .a.p2.e; .a.p2.e selection range 0 end }" );
+		cmd( "bind .a.p1.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "pack .a.p1.l .a.p1.e" );
 
 		cmd( "ttk::frame .a.p2" );
@@ -3221,6 +3301,7 @@ int modman( int argn, const char **argv )
 		cmd( "if { $v_obj ne \"THIS\" && [ llength [ lindex $netListPar $res ] ] == 2 } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\" }" );
 		cmd( "if { $v_obj ne \"THIS\" && [ llength [ lindex $netListPar $res ] ] == 1 } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\" }" );
 		cmd( "if { $v_obj ne \"THIS\" && [ llength [ lindex $netListPar $res ] ] == 0 } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\" }" );
+
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3260,7 +3341,6 @@ int modman( int argn, const char **argv )
 
 		cmd( "showtop .a" );
 		cmd( "focus .a.d.e" );
-		cmd( ".a.d.e selection range 0 end" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -3278,6 +3358,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"LOAD_NET(\\\"$v_label\\\", \\\"$v_net\\\");\" }" );
 		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"LOAD_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\" }" );
+
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3317,7 +3398,6 @@ int modman( int argn, const char **argv )
 
 		cmd( "showtop .a" );
 		cmd( "focus .a.d.e" );
-		cmd( ".a.d.e selection range 0 end" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -3335,6 +3415,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"SAVE_NET(\\\"$v_label\\\", \\\"$v_net\\\");\" }" );
 		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"SAVE_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\" }" );
+
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3374,7 +3455,6 @@ int modman( int argn, const char **argv )
 
 		cmd( "showtop .a" );
 		cmd( "focus .a.d.e" );
-		cmd( ".a.d.e selection range 0 end" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -3392,6 +3472,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"SNAP_NET(\\\"$v_label\\\", \\\"$v_net\\\");\" }" );
 		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"SNAP_NETS($v_obj, \\\"$v_label\\\", \\\"$v_net\\\");\" }" );
+
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3402,7 +3483,7 @@ int modman( int argn, const char **argv )
 	if ( choice == 77 )
 	{
 		cmd( "set v_type 0" );
-		cmd( "set v_obj0 cur" );
+		cmd( "if { %d == 0 } { set v_obj0 cur } { set v_obj0 cur%d }", cur_counter, cur_counter );
 		cmd( "set v_num \"\"" );
 		cmd( "set v_label \"\"" );
 		cmd( "set v_obj THIS" );
@@ -3413,8 +3494,27 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::label .a.c.l -text \"Add to the network a\"" );
 
 		cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
-		cmd( "ttk::radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { write_any .a.d.e cur; .a.i.l configure -text \"Unique ID number\"; .a.n.l configure -text \"Node name (optional)\"; write_any .a.n.e \"\"; .a.o.l configure -text \"Object for new network node\" }" );
-		cmd( "ttk::radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { write_any .a.d.e curl; .a.i.l configure -text \"Link weight\"; .a.n.l configure -text \"Destination node object\"; write_any .a.n.e cur; .a.o.l configure -text \"Origin node object\" }" );
+		cmd( "ttk::radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { \
+				write_any .a.d.e cur; \
+				.a.i.l configure -text \"Unique ID number\"; \
+				.a.n.l configure -text \"Node name (optional)\"; \
+				write_any .a.n.e \"\"; \
+				.a.o.l configure -text \"Object for new network node\"; \
+				set v_num \"\" \
+			}" );
+		cmd( "ttk::radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { \
+				write_any .a.d.e curl; \
+				.a.i.l configure -text \"Link weight\"; \
+				.a.n.l configure -text \"Destination node object\"; \
+				if { %d <= 1 } { \
+					set v_label cur \
+				} else { \
+					set v_label cur%d \
+				}; \
+				write_any .a.n.e $v_label; \
+				.a.o.l configure -text \"Origin node object\"; \
+				set v_num 1 \
+			}", cur_counter, cur_counter - 1 );
 		cmd( "bind .a.c.b.e <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 		cmd( "bind .a.c.b.f <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 		cmd( "pack .a.c.b.e .a.c.b.f -side left" );
@@ -3422,7 +3522,7 @@ int modman( int argn, const char **argv )
 		cmd( "pack .a.c.l .a.c.b" );
 
 		cmd( "ttk::frame .a.d" );
-		cmd( "ttk::label .a.d.l -text \"Pointer to return the object created\"" );
+		cmd( "ttk::label .a.d.l -justify center -text \"Pointer to return the object created\n(empty: none)\"" );
 		cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 		cmd( "bind .a.d.e <Return> { focus .a.i.e; .a.i.e selection range 0 end }" );
 		cmd( "pack .a.d.l .a.d.e" );
@@ -3451,8 +3551,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "showtop .a" );
 		cmd( ".a.c.b.e invoke" );
-		cmd( "focus .a.d.e" );
-		cmd( ".a.d.e selection range 0 end" );
+		cmd( "focus .a.n.e" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -3468,13 +3567,13 @@ int modman( int argn, const char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "set choice $v_type" );
 		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
 
+		cmd( "set choice $v_type" );
 		if ( choice == 0 )
 		{
-			cmd( "if { $v_obj eq \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDNODE($v_num, \\\"$v_label\\\")\" }" );
-			cmd( "if { $v_obj ne \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDNODES($v_obj, $v_num, \\\"$v_label\\\")\" }" );
+			cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"ADDNODE($v_num, \\\"$v_label\\\")\" }" );
+			cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"ADDNODES($v_obj, $v_num, \\\"$v_label\\\")\" }" );
 		}
 		else
 		{
@@ -3484,7 +3583,16 @@ int modman( int argn, const char **argv )
 			cmd( "if { $v_obj ne \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"ADDLINKWS($v_obj, $v_label, $v_num)\" }" );
 		}
 
-		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \";\" }" );
+		cmd( "if { $v_obj0 ne \"\" } { \
+				.f.t.t insert insert \";\"; \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
+
+		if ( num )
+			cur_counter++;
+
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3496,6 +3604,7 @@ int modman( int argn, const char **argv )
 	{
 		cmd( "set v_type 0" );
 		cmd( "set v_num %d", v_counter );
+		cmd( "if { %d <= 1 } { set v_obj0 curl } { set v_obj0 curl%d }", cur_counter, cur_counter - 1 );
 		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'V_NODE/LINK' Command\" { set choice 2 }" );
@@ -3504,9 +3613,35 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::label .a.c.l -text \"Get the value of\"" );
 
 		cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
-		cmd( "ttk::radiobutton .a.c.b.e -text \"Node ID\" -width 8 -variable v_type -value 0 -command { .a.v.l configure -text \"Number v\\\[x\\] to assign to\"; write_any .a.v.e %d; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }", v_counter );
-		cmd( "ttk::radiobutton .a.c.b.f -text \"Node name\" -width 8 -variable v_type -value 1 -command { .a.v.l configure -text \"char	 pointer to assign to\"; write_any .a.v.e \"\"; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }" );
-		cmd( "ttk::radiobutton .a.c.b.g -text \"Link weight\" -width 8 -variable v_type -value 2 -command { .a.v.l configure -text \"Number v\\\[x\\] to assign to\"; write_any .a.v.e %d; .a.o.l configure -text \"Link pointer\"; write_any .a.o.e curl }", v_counter );
+		cmd( "ttk::radiobutton .a.c.b.e -text \"Node ID\" -width 10 -variable v_type -value 0 -command { \
+				.a.v.l configure -justify center -justify center -text \"v\\\[x\\] to assign to\n(empty: none)\"; \
+				write_any .a.v.e %d; \
+				.a.o.l configure -text \"Object node\"; \
+				set v_obj THIS; \
+				write_any .a.o.e $v_obj \
+			}", v_counter );
+		cmd( "ttk::radiobutton .a.c.b.f -text \"Node name\" -width 10 -variable v_type -value 1 -command { \
+				.a.v.l configure -text \"char pointer to assign to\"; \
+				write_any .a.v.e \"\"; \
+				.a.o.l configure -text \"Object node\"; \
+				set v_obj THIS; \
+				write_any .a.o.e $v_obj; \
+				focus .a.o.e; \
+				.a.o.e selection range 0 end \
+			}" );
+		cmd( "ttk::radiobutton .a.c.b.g -text \"Link weight\" -width 10 -variable v_type -value 2 -command { \
+				.a.v.l configure -justify center -text \"v\\\[x\\] to assign to\n(empty: none)\"; \
+				write_any .a.v.e %d; \
+				.a.o.l configure -text \"Link pointer\"; \
+				if { %d <= 1 } { \
+					set v_obj0 curl \
+				} else { \
+					set v_obj0 curl%d \
+				}; \
+				write_any .a.o.e $v_obj0; \
+				focus .a.o.e; \
+				.a.o.e selection range 0 end \
+			}", v_counter, cur_counter, cur_counter - 1 );
 		cmd( "bind .a.c.b.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 		cmd( "bind .a.c.b.f <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 		cmd( "bind .a.c.b.g <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
@@ -3532,8 +3667,6 @@ int modman( int argn, const char **argv )
 
 		cmd( "showtop .a" );
 		cmd( ".a.c.b.e invoke" );
-		cmd( "focus .a.v.e" );
-		cmd( ".a.v.e selection range 0 end" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -3550,41 +3683,38 @@ int modman( int argn, const char **argv )
 		cmd( "set a [ .f.t.t index insert ]" );
 
 		cmd( "set choice $v_type" );
-
 		switch ( choice )
 		{
 			case 0:
-				cmd( "if { $v_num ne \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+				cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+
 				cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"V_NODEID()\" }" );
 				cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"V_NODEIDS($v_obj)\" }" );
-
-				cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
-
-				if ( num != -1 )
-					v_counter = ++num;
 				break;
 
 			case 1:
 				cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \"$v_num = \" }" );
+
 				cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"V_NODENAME()\" }" );
 				cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"V_NODENAMES($v_obj)\" }" );
 				break;
 
 			case 2:
-				cmd( "if { $v_num ne \"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+				cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+
 				cmd( ".f.t.t insert insert \"V_LINK($v_obj)\"" );
-
-				cmd( "if { $v_num eq \"\" } { set num -1 } { set num $v_num }" );
-
-				if ( num != -1 )
-					v_counter = ++num;
-				break;
-
-			default:
-				break;
 		}
 
-		cmd( "if { $v_num ne \"\" } { .f.t.t insert insert \";\" }" );
+		cmd( "if { $v_type ne 1 && $v_num ne \"\" } { \
+				.f.t.t insert insert \";\"; \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
+
+		if ( num )
+			v_counter++;
+
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3595,7 +3725,7 @@ int modman( int argn, const char **argv )
 	if ( choice == 79 )
 	{
 		cmd( "set v_type 0" );
-		cmd( "set v_num \"\"" );
+		cmd( "set v_num 0" );
 		cmd( "set v_obj THIS" );
 
 		cmd( "newtop .a \"Insert 'WRITE_NODE/LINK' Command\" { set choice 2 }" );
@@ -3604,9 +3734,31 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::label .a.c.l -text \"Write a value to\"" );
 
 		cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
-		cmd( "ttk::radiobutton .a.c.b.e -text \"Node ID\" -width 8 -variable v_type -value 0 -command { .a.v.l configure -text \"Node ID to set\"; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }", v_counter );
-		cmd( "ttk::radiobutton .a.c.b.f -text \"Node name\" -width 8 -variable v_type -value 1 -command { .a.v.l configure -text \"Node name to set\"; .a.o.l configure -text \"Object node\"; write_any .a.o.e p }" );
-		cmd( "ttk::radiobutton .a.c.b.g -text \"Link weight\" -width 8 -variable v_type -value 2 -command { .a.v.l configure -text \"Link weight to set\"; .a.o.l configure -text \"Link pointer\"; write_any .a.o.e curl }", v_counter );
+		cmd( "ttk::radiobutton .a.c.b.e -text \"Node ID\" -width 10 -variable v_type -value 0 -command { \
+				.a.v.l configure -text \"Node ID to set\"; \
+				set v_num 1; \
+				.a.o.l configure -text \"Object node\"; \
+				set v_obj THIS; \
+				write_any .a.o.e $v_obj \
+			}" );
+		cmd( "ttk::radiobutton .a.c.b.f -text \"Node name\" -width 10 -variable v_type -value 1 -command { \
+				.a.v.l configure -text \"Node name to set\"; \
+				set v_num \"\"; \
+				.a.o.l configure -text \"Object node\"; \
+				set v_obj THIS; \
+				write_any .a.o.e $v_obj \
+			}" );
+		cmd( "ttk::radiobutton .a.c.b.g -text \"Link weight\" -width 10 -variable v_type -value 2 -command { \
+				.a.v.l configure -text \"Link weight to set\"; \
+				set v_num 1; \
+				.a.o.l configure -text \"Link pointer\"; \
+				if { %d <= 1 } { \
+					set v_obj curl \
+				} else { \
+					set v_obj curl%d \
+				}; \
+				write_any .a.o.e $v_obj; \
+			}", cur_counter, cur_counter - 1 );
 		cmd( "bind .a.c.b.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 		cmd( "bind .a.c.b.f <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 		cmd( "bind .a.c.b.g <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
@@ -3633,7 +3785,6 @@ int modman( int argn, const char **argv )
 		cmd( "showtop .a" );
 		cmd( ".a.c.b.e invoke" );
 		cmd( "focus .a.v.e" );
-		cmd( ".a.v.e selection range 0 end" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -3650,7 +3801,6 @@ int modman( int argn, const char **argv )
 		cmd( "set a [ .f.t.t index insert ]" );
 
 		cmd( "set choice $v_type" );
-
 		switch ( choice )
 		{
 			case 0:
@@ -3670,6 +3820,7 @@ int modman( int argn, const char **argv )
 			default:
 				break;
 		}
+
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3679,14 +3830,14 @@ int modman( int argn, const char **argv )
 	// cycle through links
 	if ( choice == 80 )
 	{
-		cmd( "set v_obj curl" );
-		cmd( "set v_par p" );
+		cmd( "if { %d == 0 } { set v_obj0 curl } { set v_obj0 curl%d }", cur_counter, cur_counter );
+		cmd( "set v_par THIS" );
 
 		cmd( "newtop .a \"Insert 'CYCLE_LINK' Command\" { set choice 2 }" );
 
 		cmd( "ttk::frame .a.c" );
 		cmd( "ttk::label .a.c.l -text \"Cycling link pointer\"" );
-		cmd( "ttk::entry .a.c.e -width 6 -textvariable v_obj -justify center" );
+		cmd( "ttk::entry .a.c.e -width 6 -textvariable v_obj0 -justify center" );
 		cmd( "bind .a.c.e <Return> { focus .a.p.e; .a.p.e selection range 0 end }" );
 		cmd( "pack .a.c.l .a.c.e" );
 
@@ -3701,8 +3852,8 @@ int modman( int argn, const char **argv )
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#CYCLE_LINK } { set choice 2 }" );
 
 		cmd( "showtop .a" );
-		cmd( "focus .a.c.e" );
-		cmd( ".a.c.e selection range 0 end" );
+		cmd( "focus .a.p.e" );
+		cmd( ".a.p.e selection range 0 end" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -3718,8 +3869,8 @@ int modman( int argn, const char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"CYCLE_LINK($v_obj)\\n\" }" );
-		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"CYCLE_LINKS($v_par, $v_obj)\\n\" }" );
+		cmd( "if { $v_par eq \"THIS\" } { .f.t.t insert insert \"CYCLE_LINK($v_obj0)\\n\" }" );
+		cmd( "if { $v_par ne \"THIS\" } { .f.t.t insert insert \"CYCLE_LINKS($v_par, $v_obj0)\\n\" }" );
 
 		cmd( "set in [ .f.t.t index insert ]" );
 		cmd( "scan $in %%d.%%d line col" );
@@ -3747,6 +3898,16 @@ int modman( int argn, const char **argv )
 
 		cmd( ".f.t.t insert insert \"}\\n\"" );
 		cmd( ".f.t.t mark set insert \"$b\"" );
+
+		cmd( "if { $v_obj0 ne \"\" } { \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
+
+		if ( num )
+			cur_counter++;
+
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3756,7 +3917,7 @@ int modman( int argn, const char **argv )
 	// search for a node or link
 	if ( choice == 81 )
 	{
-		cmd( "set v_obj0 cur" );
+		cmd( "if { %d == 0 } { set v_obj0 cur } { set v_obj0 cur%d }", cur_counter, cur_counter );
 		cmd( "set v_num 0" );
 		cmd( "set v_label \"\"" );
 		cmd( "set v_obj THIS" );
@@ -3767,8 +3928,32 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::label .a.c.l -text \"Search for a\"" );
 
 		cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
-		cmd( "ttk::radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { write_any .a.d.e cur; .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\" }" );
-		cmd( "ttk::radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { write_any .a.d.e curl; .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Node object\" }" );
+		cmd( "ttk::radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { \
+				write_any .a.d.e cur; \
+				.a.n.l configure -text \"Network node object name\"; \
+				.a.n.e configure -state normal; \
+				.a.o.l configure -text \"Network nodes parent object\"; \
+				if { %d == 0 } { \
+					set v_obj0 cur \
+				} else { \
+					set v_obj0 cur%d \
+				}; \
+				focus .a.n.e \
+			}", cur_counter, cur_counter );
+		cmd( "ttk::radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { \
+				write_any .a.d.e curl; \
+				.a.n.l configure -text \"(unused)\"; \
+				write_any .a.n.e \"\"; \
+				.a.n.e configure -state disabled; \
+				.a.o.l configure -text \"Node object\"; \
+				if { %d == 0 } { \
+					set v_obj0 curl \
+				} else { \
+					set v_obj0 curl%d \
+				}; \
+				focus .a.o.e; \
+				.a.o.e selection range 0 end \
+			}", cur_counter, cur_counter );
 		cmd( "bind .a.c.b.e <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 		cmd( "bind .a.c.b.f <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 		cmd( "pack .a.c.b.e .a.c.b.f -side left" );
@@ -3776,7 +3961,7 @@ int modman( int argn, const char **argv )
 		cmd( "pack .a.c.l .a.c.b" );
 
 		cmd( "ttk::frame .a.d" );
-		cmd( "ttk::label .a.d.l -text \"Pointer to return the element found\"" );
+		cmd( "ttk::label .a.d.l -justify center -text \"Pointer to return the element found\n(empty: none)\"" );
 		cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 		cmd( "bind .a.d.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 		cmd( "pack .a.d.l .a.d.e" );
@@ -3805,8 +3990,6 @@ int modman( int argn, const char **argv )
 
 		cmd( "showtop .a" );
 		cmd( ".a.c.b.e invoke" );
-		cmd( "focus .a.d.e" );
-		cmd( ".a.d.e selection range 0 end" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -3822,9 +4005,9 @@ int modman( int argn, const char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "set choice $v_type" );
 		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
 
+		cmd( "set choice $v_type" );
 		if ( choice == 0 )
 		{
 			cmd( "if { $v_obj eq \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"SEARCH_NODE(\\\"$v_label\\\", $v_num)\" }" );
@@ -3836,7 +4019,16 @@ int modman( int argn, const char **argv )
 			cmd( "if { $v_obj ne \"THIS\" && $v_num ne \"\" } { .f.t.t insert insert \"SEARCH_LINKS($v_obj, $v_num)\" }" );
 		}
 
-		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \";\" }" );
+		cmd( "if { $v_obj0 ne \"\" } { \
+				.f.t.t insert insert \";\"; \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
+
+		if ( num )
+			cur_counter++;
+
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3847,8 +4039,8 @@ int modman( int argn, const char **argv )
 	if ( choice == 82 )
 	{
 		cmd( "set v_type 0" );
-		cmd( "set v_obj0 cur" );
-		cmd( "set v_obj curl" );
+		cmd( "if { %d <= 1 } { set v_obj curl } { set v_obj curl%d }", cur_counter, cur_counter - 1 );
+		cmd( "if { %d == 0 } { set v_obj0 cur } { set v_obj0 cur%d }", cur_counter, cur_counter );
 
 		cmd( "newtop .a \"Insert 'LINKTO/FROM' Command\" { set choice 2 }" );
 
@@ -3856,8 +4048,8 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::label .a.c.l -text \"Get the node object\"" );
 
 		cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
-		cmd( "ttk::radiobutton .a.c.b.e -text \"Link points to\" -width 12 -variable v_type -value 0" );
-		cmd( "ttk::radiobutton .a.c.b.f -text \"Link points from\" -width 12 -variable v_type -value 1" );
+		cmd( "ttk::radiobutton .a.c.b.e -text \"Link points to\" -width 14 -variable v_type -value 0" );
+		cmd( "ttk::radiobutton .a.c.b.f -text \"Link points from\" -width 14 -variable v_type -value 1" );
 		cmd( "bind .a.c.b.e <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 		cmd( "bind .a.c.b.f <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 		cmd( "pack .a.c.b.e .a.c.b.f -side left" );
@@ -3865,7 +4057,7 @@ int modman( int argn, const char **argv )
 		cmd( "pack .a.c.l .a.c.b" );
 
 		cmd( "ttk::frame .a.d" );
-		cmd( "ttk::label .a.d.l -text \"Pointer to return the node pointed\"" );
+		cmd( "ttk::label .a.d.l -justify center -text \"Pointer to return the node pointed\n(empty: none)\"" );
 		cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 		cmd( "bind .a.d.e <Return> { focus .a.v.e; .a.v.e selection range 0 end }" );
 		cmd( "pack .a.d.l .a.d.e" );
@@ -3881,8 +4073,8 @@ int modman( int argn, const char **argv )
 		cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#LINKTO } { set choice 2 }" );
 
 		cmd( "showtop .a" );
-		cmd( "focus .a.d.e" );
-		cmd( ".a.d.e selection range 0 end" );
+		cmd( "focus .a.v.e" );
+		cmd( ".a.v.e selection range 0 end" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -3898,15 +4090,24 @@ int modman( int argn, const char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "set choice $v_type" );
 		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
 
+		cmd( "set choice $v_type" );
 		if ( choice == 0 )
 			cmd( ".f.t.t insert insert \"LINKTO($v_obj)\" }" );
 		else
 			cmd( ".f.t.t insert insert \"LINKFROM($v_obj)\" }" );
 
-		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \";\" }" );
+		cmd( "if { $v_obj0 ne \"\" } { \
+				.f.t.t insert insert \";\"; \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
+
+		if ( num )
+			cur_counter++;
+
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3928,7 +4129,7 @@ int modman( int argn, const char **argv )
 		cmd( "pack .a.n.l .a.n.e" );
 
 		cmd( "ttk::frame .a.o" );
-		cmd( "ttk::label .a.o.l -text \"Network nodes parent object\"" );
+		cmd( "ttk::label .a.o.l -text \"Network node parent object\"" );
 		cmd( "ttk::entry .a.o.e -width 6 -textvariable v_obj -justify center" );
 		cmd( "bind .a.o.e <Return> { focus .a.f.ok }" );
 		cmd( "pack .a.o.l .a.o.e" );
@@ -3939,7 +4140,6 @@ int modman( int argn, const char **argv )
 
 		cmd( "showtop .a" );
 		cmd( "focus .a.n.e" );
-		cmd( ".a.n.e selection range 0 end" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -3957,6 +4157,7 @@ int modman( int argn, const char **argv )
 
 		cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"SHUFFLE_NET(\\\"$v_label\\\");\" }" );
 		cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"SHUFFLE_NETS($v_obj, \\\"$v_label\\\");\" }" );
+
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -3967,9 +4168,9 @@ int modman( int argn, const char **argv )
 	if ( choice == 84 )
 	{
 		cmd( "set v_type 0" );
+		cmd( "if { %d == 0 } { set v_obj0 cur } { set v_obj0 cur%d }", cur_counter, cur_counter );
 		cmd( "set v_label \"\"" );
 		cmd( "set v_obj THIS" );
-		cmd( "set v_obj0 cur" );
 
 		cmd( "newtop .a \"Insert 'RNDDRAW_NODE/LINK' Command\" { set choice 2 }" );
 
@@ -3977,8 +4178,32 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::label .a.c.l -text \"Randomly draw a\"" );
 
 		cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
-		cmd( "ttk::radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { write_any .a.d.e cur; .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\" }" );
-		cmd( "ttk::radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { write_any .a.d.e curl; .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Network node object\" }" );
+		cmd( "ttk::radiobutton .a.c.b.e -text Node -width 6 -variable v_type -value 0 -command { \
+				write_any .a.d.e cur; \
+				.a.n.l configure -text \"Network node object name\"; \
+				.a.n.e configure -state normal; \
+				.a.o.l configure -text \"Network nodes parent object\"; \
+				if { %d == 0 } { \
+					set v_obj0 cur \
+				} else { \
+					set v_obj0 cur%d \
+				}; \
+				focus .a.n.e \
+			}", cur_counter, cur_counter );
+		cmd( "ttk::radiobutton .a.c.b.f -text Link -width 6 -variable v_type -value 1 -command { \
+				write_any .a.d.e curl; \
+				.a.n.l configure -text \"(unused)\"; \
+				write_any .a.n.e \"\"; \
+				.a.n.e configure -state disabled; \
+				.a.o.l configure -text \"Network node object\"; \
+				if { %d == 0 } { \
+					set v_obj0 cur \
+				} else { \
+					set v_obj0 cur%d \
+				}; \
+				focus .a.o.e; \
+				.a.o.e selection range 0 end \
+			}", cur_counter, cur_counter );
 		cmd( "bind .a.c.b.e <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 		cmd( "bind .a.c.b.f <Return> { focus .a.d.e; .a.d.e selection range 0 end }" );
 		cmd( "pack .a.c.b.e .a.c.b.f -side left" );
@@ -3986,7 +4211,7 @@ int modman( int argn, const char **argv )
 		cmd( "pack .a.c.l .a.c.b" );
 
 		cmd( "ttk::frame .a.d" );
-		cmd( "ttk::label .a.d.l -text \"Pointer to return the element drawn\"" );
+		cmd( "ttk::label .a.d.l -justify center -text \"Pointer to return the element drawn\n(empty: none)\"" );
 		cmd( "ttk::entry .a.d.e -width 6 -textvariable v_obj0 -justify center" );
 		cmd( "bind .a.d.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "pack .a.d.l .a.d.e" );
@@ -4009,8 +4234,6 @@ int modman( int argn, const char **argv )
 
 		cmd( "showtop .a" );
 		cmd( ".a.c.b.e invoke" );
-		cmd( "focus .a.d.e" );
-		cmd( ".a.d.e selection range 0 end" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -4026,9 +4249,9 @@ int modman( int argn, const char **argv )
 
 		cmd( "set a [ .f.t.t index insert ]" );
 
-		cmd( "set choice $v_type" );
 		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \"$v_obj0 = \" }" );
 
+		cmd( "set choice $v_type" );
 		if ( choice == 0 )
 		{
 			cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"RNDDRAW_NODE(\\\"$v_label\\\")\" }" );
@@ -4040,7 +4263,16 @@ int modman( int argn, const char **argv )
 			cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"RNDDRAW_LINKS($v_obj)\" }" );
 		}
 
-		cmd( "if { $v_obj0 ne \"\" } { .f.t.t insert insert \";\" }" );
+		cmd( "if { $v_obj0 ne \"\" } { \
+				.f.t.t insert insert \";\"; \
+				set num 1 \
+			} else { \
+				set num 0 \
+			}" );
+
+		if ( num )
+			cur_counter++;
+
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -4060,9 +4292,42 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::label .a.c.l -text \"Delete a\"" );
 
 		cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
-		cmd( "ttk::radiobutton .a.c.b.e -text Network -width 6 -variable v_type -value 0 -command { .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\"; write_any .a.o.e p }" );
-		cmd( "ttk::radiobutton .a.c.b.f -text Node -width 6 -variable v_type -value 1 -command { .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Node object\"; write_any .a.o.e p }" );
-		cmd( "ttk::radiobutton .a.c.b.g -text Link -width 6 -variable v_type -value 2 -command { .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Link pointer\"; write_any .a.o.e curl }" );
+		cmd( "ttk::radiobutton .a.c.b.e -text Network -width 6 -variable v_type -value 0 -command { \
+				.a.n.l configure -text \"Network node object name\"; \
+				.a.n.e configure -state normal; \
+				.a.o.l configure -text \"Network nodes parent object\"; \
+				set v_obj THIS; \
+				write_any .a.o.e THIS; \
+				focus .a.n.e \
+			}" );
+		cmd( "ttk::radiobutton .a.c.b.f -text Node -width 6 -variable v_type -value 1 -command { \
+				.a.n.l configure -text \"(unused)\"; \
+				write_any .a.n.e \"\"; \
+				.a.n.e configure -state disabled; \
+				.a.o.l configure -text \"Node object\"; \
+				if { %d <= 1 } { \
+					set v_obj cur \
+				} else { \
+					set v_obj cur%d \
+				}; \
+				write_any .a.o.e $v_obj; \
+				focus .a.o.e; \
+				.a.o.e selection range 0 end \
+			}", cur_counter, cur_counter - 1 );
+		cmd( "ttk::radiobutton .a.c.b.g -text Link -width 6 -variable v_type -value 2 -command { \
+				.a.n.l configure -text \"(unused)\"; \
+				write_any .a.n.e \"\"; \
+				.a.n.e configure -state disabled; \
+				.a.o.l configure -text \"Link pointer\"; \
+				if { %d <= 1 } { \
+					set v_obj curl \
+				} else { \
+					set v_obj curl%d \
+				}; \
+				write_any .a.o.e $v_obj; \
+				focus .a.o.e; \
+				.a.o.e selection range 0 end \
+			}", cur_counter, cur_counter - 1 );
 		cmd( "bind .a.c.b.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "bind .a.c.b.f <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "bind .a.c.b.g <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
@@ -4088,8 +4353,6 @@ int modman( int argn, const char **argv )
 
 		cmd( "showtop .a" );
 		cmd( ".a.c.b.e invoke" );
-		cmd( "focus .a.n.e" );
-		cmd( ".a.n.e selection range 0 end" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -4106,7 +4369,6 @@ int modman( int argn, const char **argv )
 		cmd( "set a [ .f.t.t index insert ]" );
 
 		cmd( "set choice $v_type" );
-
 		switch ( choice )
 		{
 			case 0:
@@ -4121,11 +4383,8 @@ int modman( int argn, const char **argv )
 
 			case 2:
 				cmd( ".f.t.t insert insert \"DELETE_LINK($v_obj);\"" );
-				break;
-
-			default:
-				break;
 		}
+
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
@@ -4145,8 +4404,28 @@ int modman( int argn, const char **argv )
 		cmd( "ttk::label .a.c.l -text \"Get statistics from a\"" );
 
 		cmd( "ttk::frame .a.c.b -borderwidth 1 -relief solid" );
-		cmd( "ttk::radiobutton .a.c.b.e -text Network -width 6 -variable v_type -value 0 -command { .a.n.l configure -text \"Network node object name\"; .a.n.e configure -state normal; .a.o.l configure -text \"Network nodes parent object\"; write_any .a.o.e p }" );
-		cmd( "ttk::radiobutton .a.c.b.f -text Node -width 6 -variable v_type -value 1 -command { .a.n.l configure -text \"(unused)\"; write_any .a.n.e \"\"; .a.n.e configure -state disabled; .a.o.l configure -text \"Node object\"; write_any .a.o.e p }" );
+		cmd( "ttk::radiobutton .a.c.b.e -text Network -width 8 -variable v_type -value 0 -command { \
+				.a.n.l configure -text \"Network node object name\"; \
+				.a.n.e configure -state normal; \
+				.a.o.l configure -text \"Network nodes parent object\"; \
+				set v_obj THIS; \
+				write_any .a.o.e $v_obj; \
+				focus .a.n.e \
+			}" );
+		cmd( "ttk::radiobutton .a.c.b.f -text Node -width 8 -variable v_type -value 1 -command { \
+				.a.n.l configure -text \"(unused)\"; \
+				write_any .a.n.e \"\"; \
+				.a.n.e configure -state disabled; \
+				.a.o.l configure -text \"Node object\"; \
+				if { %d <= 1 } { \
+					set v_obj cur \
+				} else { \
+					set v_obj cur%d \
+				}; \
+				write_any .a.o.e $v_obj; \
+				focus .a.o.e; \
+				.a.o.e selection range 0 end \
+			}", cur_counter, cur_counter - 1 );
 		cmd( "bind .a.c.b.e <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "bind .a.c.b.f <Return> { focus .a.n.e; .a.n.e selection range 0 end }" );
 		cmd( "pack .a.c.b.e .a.c.b.f -side left" );
@@ -4172,7 +4451,6 @@ int modman( int argn, const char **argv )
 		cmd( "showtop .a" );
 		cmd( ".a.c.b.e invoke" );
 		cmd( "focus .a.n.e" );
-		cmd( ".a.n.e selection range 0 end" );
 
 		choice = 0;
 		while ( choice == 0 )
@@ -4200,6 +4478,7 @@ int modman( int argn, const char **argv )
 				cmd( "if { $v_obj eq \"THIS\" } { .f.t.t insert insert \"STAT_NODE();\" }" );
 				cmd( "if { $v_obj ne \"THIS\" } { .f.t.t insert insert \"STAT_NODES($v_obj);\" }" );
 		}
+
 		cmd( ".f.t.t see insert" );
 
 		recolor = true;		// trigger recoloring
