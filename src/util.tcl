@@ -970,17 +970,19 @@ proc round_N { float N } {
 # digits without losing precision
 #************************************************
 proc formatfloat { float { N 6 } } {
-	set prec 1e-12
-	set fmt "%.${N}g"
+	set prec 1e-6
+	set fmtFlt [ format "%.${N}g" $float ]
 
-	set fmtFlt [ format $fmt $float ]
-	if { [ expr { abs( $fmtFlt - $float ) } ] < $prec } {
-		return $fmtFlt
-	} elseif { [ expr { abs( $float - int( $float ) } ] ) < $prec } {
-		return [ expr { int( $float ) } ]
-	} else {
-		return $float
+	while { $N < 16 } {
+		if { [ expr { abs( $fmtFlt - $float ) } ] < $prec } {
+			break
+		} else {
+			incr N
+			set fmtFlt [ format "%.${N}g" $float ]
+		}
 	}
+
+	return $fmtFlt
 }
 
 
