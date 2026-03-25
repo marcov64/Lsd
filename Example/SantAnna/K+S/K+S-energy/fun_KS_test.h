@@ -579,7 +579,7 @@ CYCLES( CONSECL1, cur, "Firm2" )
 		if ( VS( cur1, "__tVint" ) <= 0 )
 		{
 			i = abs( VS( cur1, "__tVint" ) );
-			if ( mach.size( ) < i + 1 )
+			if ( ( int ) mach.size( ) < i + 1 )
 				mach.resize( i + 1, 0 );
 			mach[ i ] += VS( cur1, "__nVint" );
 			v[0] += VS( cur1, "__AlpVint" ) * VS( cur1, "__nVint" );

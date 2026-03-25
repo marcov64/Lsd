@@ -56,7 +56,7 @@ EQUATION( "CS" )
 Total credit supplied
 */
 RESULT( VS( SECSTAL2, "CS1" ) + VS( SECSTAL2, "CS2" ) +
-		VS( ENESTAL2, "CSe" ) + VS( ENESTAL2, "CSge" )  )
+		VS( ENESTAL2, "CSe" ) + VS( ENESTAL2, "CSge" ) )
 
 
 EQUATION( "DefGDP" )
@@ -342,6 +342,22 @@ EQUATION( "RDe" )
 R&D expenditure of energy sector
 */
 RESULT( SUMS( ENESECL2, "_RDe" )  )
+
+
+EQUATION( "RSde" )
+/*
+Power plant (planned) scrapping rate of dirty energy plants
+*/
+v[1] = SUMLS( ENESECL2, "_Kde", 1 );
+RESULT( T > 1 && v[1] > 0 ? ( SUMS( ENESECL2, "_SIdeD" ) ) / v[1] : 0 )
+
+
+EQUATION( "RSge" )
+/*
+Power plant (planned) scrapping rate of dirty energy plants
+*/
+v[1] = SUMLS( ENESECL2, "_Kge", 1 );
+RESULT( T > 1 && v[1] > 0 ? ( SUMS( ENESECL2, "_SIgeD" ) ) / v[1] : 0 )
 
 
 EQUATION( "RSe" )

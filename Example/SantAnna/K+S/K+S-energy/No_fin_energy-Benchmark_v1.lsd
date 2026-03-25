@@ -854,6 +854,8 @@ Label Root
 				Var: IgeDEratio
 				Var: NPVgeAvg
 				Var: RDe
+				Var: RSde
+				Var: RSge
 				Var: RSe
 				Var: SNPVgeAvg
 				Var: ageEavg
@@ -1876,6 +1878,8 @@ Var: ICtauGEeff 0 s + n n
 Var: IgeDEratio 0 s + n n
 Var: NPVgeAvg 0 s + n n
 Var: RDe 0 s + n n
+Var: RSde 0 s + n n
+Var: RSge 0 s + n n
 Var: RSe 0 s + n n
 Var: SNPVgeAvg 0 s + n n
 Var: ageEavg 0 s + n n
@@ -4344,9 +4348,10 @@ END_DESCRIPTION
 Variable___lifeDEcycle
 Stage in life cycle of dirty energy plant:
 0 = in construction phase
-1 = available for operation
-2 = in scrapping process (next period)
-3 = scrapped
+1 = available for operation (next period)
+2 = operating
+-1 = scrapped
+-2 = object removed
 _INIT_
 All 1 instances equal to 0
 END_DESCRIPTION
@@ -6543,6 +6548,14 @@ END_DESCRIPTION
 
 Variable_RDe
 R&D expenditure of energy sector
+END_DESCRIPTION
+
+Variable_RSde
+Power plant (planned) scrapping rate of dirty energy plants
+END_DESCRIPTION
+
+Variable_RSge
+Power plant (planned) scrapping rate of dirty energy plants
 END_DESCRIPTION
 
 Variable_RSe

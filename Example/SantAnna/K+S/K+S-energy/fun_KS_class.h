@@ -119,6 +119,10 @@ struct countryE
 
 /*============================== SUPPORT MACROS ==============================*/
 
+// power plant/energy types
+#define DIRTY 0
+#define GREEN 1
+
 // macro for checking if variable was already computed (used in timeStep)
 #define NEW_VS( VAL, OBJ, VAR ) \
 	if ( LAST_CALCS( OBJ, VAR ) == T ) \
@@ -164,11 +168,10 @@ struct countryE
 	CFUN_DBL( scrap_vintage ); \
 	CFUN_DBL( update_debt, double desired, double loan, lsd::object *plant ); \
 	CFUN_DBL( update_depo, double depo, bool incr ); \
-	CFUN_OBJ( add_green_plant, double cap, double nMach, bool newInd ); \
+	CFUN_OBJ( add_plant, int type, double capacity, double nMach, bool newInd ); \
 	CFUN_OBJ( send_brochure, lsd::object *client ); \
 	CFUN_OBJ( set_bank ); \
 	CFUN_OBJ( set_supplier ); \
-	CFUN_VOID( add_dirty_plant, double cap, bool newInd ); \
 	CFUN_VOID( add_vintage, double nMach, bool newInd ); \
 	CFUN_VOID( check_error, bool cond, const char* errMsg, int errCount, \
 			   int *errCounter ); \

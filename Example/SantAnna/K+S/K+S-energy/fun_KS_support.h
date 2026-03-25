@@ -398,7 +398,7 @@ CFUN_VOID( add_vintage, double nMach, bool newInd )
 	intVecT vintUse;
 
 	suppl = PARENTS( SHOOKS( HOOK( SUPPL ) ) );	// current supplier
-	nMach = floor( nMach );						// integer number of machines
+	nMach = floor( max( nMach, 1 ) );			// integer number of machines
 	dY0 = VS( GRANDPARENT, "dGDP0" );			// growth rate at t=0
 
 	// at t=1 firms have a mix of machines: old to new, many suppliers
@@ -416,7 +416,7 @@ CFUN_VOID( add_vintage, double nMach, bool newInd )
 
 		nInt = floor( nMach / ( eta + 1 ) );	// machines per every vintage
 		nRem = nMach - nInt * ( eta + 1 );		// remainder machines
-		vintUse.resize( eta + 1 );				// list of installed vintages
+		vintUse.resize( eta + 1 );				// list of installed vint. times
 		iota( vintUse.begin( ), vintUse.end( ), - eta );// assign vint. times
 		shuffle( vintUse.begin( ), vintUse.end( ), random_engine );
 		vintUse.resize( nRem );					// random vintages for remainder
@@ -432,7 +432,7 @@ CFUN_VOID( add_vintage, double nMach, bool newInd )
 
 	while ( nMach > 0 )
 	{
-		// adjust non-integer differences randomly ove vintages
+		// adjust non-integer differences randomly over vintages
 		if ( newInd )
 		{
 			__nVint = nInt;						// allocate uniform part
@@ -505,64 +505,104 @@ CFUN_DBL( scrap_vintage )
 }
 
 
-// add new green power plant to energy firm in equation 'EIe' and 'initCountry'
+// add new power plant to energy firm in equation 'EIe' and 'initCountry'
 
-CFUN_OBJ( add_green_plant, double cap, double nMach, bool newInd )
+const char *plantObj[ ] = { "Dirty", "Green" };
+const char *__lifeEcycle[ ] = { "__lifeDEcycle", "__lifeGEcycle" };
+const char *__tE[ ] = { "__tDE", "__tGE" };
+const char *__QeU[ ] = { "__QdeU", "__QgeU" };
+const char *__Ke[ ] = { "__Kde", "__Kge" };
+
+CFUN_OBJ( add_plant, int type, double cap, double nMach, bool newInd )
 {
+	double __Ade, __emDE, __pMach, __uPlant, fGE0, nInt, nRem;
+	int __nPlant, __tPlant, etaE, nGE;
 	object *plant;
-	double u = 1 / ( 1 + VS( PARENT, "iotaE" ) );
-	double p1 = VS( PARENTS( SHOOKS( HOOK( SUPPL ) ) ), "_p1" );
+	intVecT plantUse;
 
+	nMach = floor( max( nMach, 1 ) );			// integer number of machines
+	__Ade = V( "_AtauDE" );						// plant thermal efficiency
+	__emDE = V( "_emTauDE" );					// plant emission coefficient
+	__uPlant = 1 / ( 1 + VS( PARENT, "iotaE" ) );// planned utilization
+
+	// at t=1 firms have a mix of newer/older plants with minimum 1 machine each
 	if ( newInd )
 	{
-		plant = ADDOBJL( "Green", T - 1 );		// recalculate in t
-		WRITES( plant, "__lifeGEcycle", 2 );	// already operational
-		WRITES( plant, "__tGE", T - 1 );		// installation time
-		WRITELLS( plant, "__QgeU", u, T - 1, 1 );// planned utilization
+		etaE = VS( PARENT, "etaE" );
+		fGE0 = VS( PARENT, "fGE0" );
+		nGE = COUNT( "Green" );
+
+		__tPlant = - etaE;
+		__pMach = CFUN( init_cond, "p10" );		// initial machine price
+
+		if ( type == DIRTY && nMach == 1 && fGE0 > 0 && nGE > 0 )
+			nMach = floor( nGE / fGE0 );
+
+		cap /= min( nMach, etaE + 1 );			// capacity of each plant
+		nInt = floor( nMach / ( etaE + 1 ) );	// machines per every plant
+		nRem = nMach - nInt * ( etaE + 1 );		// remainder machines
+		plantUse.resize( etaE + 1 );			// list of installed plant times
+		iota( plantUse.begin( ), plantUse.end( ), - etaE );// assign plant times
+		shuffle( plantUse.begin( ), plantUse.end( ), random_engine );
+		plantUse.resize( nRem );				// random plants for remainder
 	}
 	else
 	{
-		plant = ADDOBJ( "Green" );				// recalculate only in t+1
-		RECALCS( plant, "__lifeGEcycle" );		// except for status
-		WRITES( plant, "__tGE", T );
-		WRITES( plant, "__QgeU", u );
+		__tPlant = T;
+		__pMach = VS( PARENTS( SHOOKS( HOOK( SUPPL ) ) ), "_p1" );
 	}
 
-	WRITES( plant, "__Kge", cap );				// plant generation capacity
-	WRITES( plant, "__ICge", p1 * nMach );		// plant capital cost
-	WRITES( plant, "__mGE", cap / nMach );		// unit (machine) power capacity
+	while ( nMach > 0 )
+	{
+		// adjust non-integer differences randomly over plants
+		if ( newInd )
+		{
+			__nPlant = nInt;					// allocate uniform part
+			if ( std::find( plantUse.begin( ), plantUse.end( ), __tPlant ) !=
+				 plantUse.end( ) )
+				__nPlant++;						// allocate remainder part
+		}
+		else
+			__nPlant = nMach;
 
-	WRITE_HOOK( TOPVINT, plant );				// new top green vintage
+		// create plant if there are machines to allocate
+		if ( __nPlant > 0 )
+		{
+			if ( newInd )
+			{
+				plant = ADDOBJL( plantObj[ type ], T - 1 );// recalculate in t=1
+				WRITES( plant, __lifeEcycle[ type ], 2 );// already operational
+				WRITELLS( plant, __QeU[ type ], __uPlant, T - 1, 1 );
+			}
+			else
+			{
+				plant = ADDOBJ( plantObj[ type ] );// just recalculate in next t
+				RECALCS( plant, __lifeEcycle[ type ] );// recalculate status
+				WRITES( plant, __QeU[ type ], __uPlant );
+			}
+
+			WRITES( plant, __tE[ type ], __tPlant );// installation time
+			WRITES( plant, __Ke[ type ], cap );	// plant generation capacity
+
+			if ( type == DIRTY )
+			{
+				WRITES( plant, "__Ade", __Ade );
+				WRITES( plant, "__emDE", __emDE );
+			}
+			else
+			{
+				WRITE_HOOK( TOPVINT, plant );	// new top green vintage
+				WRITES( plant, "__ICge", __pMach * __nPlant );// plant capital cost
+				WRITES( plant, "__mGE", cap / __nPlant );// unit power capacity
+			}
+
+			nMach -= __nPlant;
+		}
+
+		__tPlant++;
+	}
 
 	return plant;
-}
-
-
-// add new dirty power plant to energy firm in equation 'EIe' and 'initCountry'
-
-CFUN_VOID( add_dirty_plant, double cap, bool newInd )
-{
-	object *plant;
-	double u = 1 / ( 1 + VS( PARENT, "iotaE" ) );
-
-	if ( newInd )
-	{
-		plant = ADDOBJL( "Dirty", T - 1 );		// recalculate in t
-		WRITES( plant, "__lifeDEcycle", 2 );	// already operational
-		WRITES( plant, "__tDE", T - 1 );		// installation time
-		WRITELLS( plant, "__QdeU", u, T - 1, 1 );// planned utilization
-	}
-	else
-	{
-		plant = ADDOBJ( "Dirty" );				// recalculate only in t+1
-		RECALCS( plant, "__lifeDEcycle" );		// except for status
-		WRITES( plant, "__tDE", T );
-		WRITES( plant, "__QdeU", u );
-	}
-
-	WRITES( plant, "__Kde", cap );				// plant generation capacity
-	WRITES( plant, "__Ade", V( "_AtauDE" ) );	// plant thermal efficiency
-	WRITES( plant, "__emDE", V( "_emTauDE" ) );	// plant emissions
 }
 
 
@@ -1051,10 +1091,10 @@ CFUN_DBL( entry_firmE, int n, bool newInd )
 			WRITELLS( firm, "_NWe", _NWe, _tEent, 1 );
 
 			if ( _Kge > 0 )						// first green plant
-				CFUNS( firm, add_green_plant, _Kge, _nMach, true );
+				CFUNS( firm, add_plant, GREEN, _Kge, _nMach, true );
 
 			if ( _Kde > 0 )						// first dirty plant
-				CFUNS( firm, add_dirty_plant, _Kde, true );
+				CFUNS( firm, add_plant, DIRTY, _Kde, 0, true );
 		}
 		else
 		{

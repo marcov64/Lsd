@@ -200,7 +200,7 @@ if ( _IgeDnom > 0 )								// invest in new green plants?
 	if ( _IgeD > 0 )							// investment to do?
 	{
 		CFUN( send_order, nMach );				// send order to sector 1
-		cur = CFUN( add_green_plant, _IgeD, nMach, false );// create object
+		cur = CFUN( add_plant, GREEN, _IgeD, nMach, false );// create object
 
 		if ( pfinGE )							// update debt (project finance)?
 			CFUN( update_debt, _IgeDnom, _IgeDnom, cur );
@@ -214,7 +214,7 @@ else
 _IdeD = _IeD - _IgeD;							// desired dirty investment
 
 if ( _IdeD >= 1 )								// new dirty plant?
-	CFUN( add_dirty_plant, _IdeD, false );		// create dirty plant object
+	CFUN( add_plant, DIRTY, _IdeD, 0, false );	// create dirty plant object
 else
 	_IdeD = 0;									// don't build if too small
 
