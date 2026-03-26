@@ -1382,7 +1382,7 @@ int modman( int argn, const char **argv )
 				break;
 
 			case _MAC_:
-				snprintf( tmp, MAX_BUFF_SIZE, "cd $file_dir; export DYLD_LIBRARY_PATH=[ pwd ]; clear; $debug_exe $cmdbreak -f %s%s%s.app/Contents/MacOS/%s", s, i ? lsd::root_lsd : "", i ? "/" : "", s );
+				snprintf( tmp, MAX_BUFF_SIZE, "cd $file_dir; clear; $debug_exe $cmdbreak -f %s.app/Contents/MacOS/%s", s, s );
 				break;
 
 			case _WIN_:
