@@ -64,10 +64,10 @@ if [ string equal $CurPlatform mac ] {
 } elseif [ string equal $CurPlatform linux ] {
 
 	# use xterm as alternative for missing default/alternative terminals
-	if { [ catch { exec which [ lindex $DefaultSysTerm 0 ] } ] } {
-		set DefaultSysTerm "xterm -e"
+	if { [ catch { exec which [ lindex $DefaultSysTerm 0 ] } term_path ] || $term_path eq "" } {
+		set DefaultSysTerm "xterm -fa 'Monospace' -fs 11 -e"
 		foreach term $sysTermLinuxAlt {
-			if { ! [ catch { exec which [ lindex $term 0 ] } ] } {
+			if { ! [ catch { exec which [ lindex $term 0 ] } term_path ] && $term_path ne "" } {
 				set DefaultSysTerm $term
 				break
 			}
@@ -99,7 +99,7 @@ if [ string equal $CurPlatform mac ] {
 }
 
 # check old incompatible options and fix with defaults
-if { ! [ info exists sys_term ] || ( $CurPlatform in [ list linux windows ] && [ llength $sys_term ] < 2 ) } {
+if { ! [ info exists sys_term ] || ( $CurPlatform in [ list linux windows ] && [ llength $sys_term ] < 2 ) || ( $CurPlatform eq "linux" && ( [ catch { exec which [ lindex $sys_term 0 ] } term_path ] || $term_path eq "" ) ) } {
 	set sys_term $DefaultSysTerm
 }
 

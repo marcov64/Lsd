@@ -1377,13 +1377,16 @@ int modman( int argn, const char **argv )
 
 		switch( gui::platform )
 		{
-			case _WIN_:
 			case _LIN_:
-				snprintf( tmp, MAX_BUFF_SIZE, "$debug_exe $cmdbreak %s%s%s", i ? lsd::root_lsd : "", i ? "/" : "", s );
+				snprintf( tmp, MAX_BUFF_SIZE, "sh -c \\\"LD_LIBRARY_PATH=[ pwd ] $debug_exe $cmdbreak %s%s%s\\\"", i ? lsd::root_lsd : "", i ? "/" : "", s );
 				break;
 
 			case _MAC_:
-				snprintf( tmp, MAX_BUFF_SIZE, "cd $file_dir; clear; $debug_exe $cmdbreak -f %s%s%s.app/Contents/MacOS/%s", s, i ? lsd::root_lsd : "", i ? "/" : "", s );
+				snprintf( tmp, MAX_BUFF_SIZE, "cd $file_dir; export DYLD_LIBRARY_PATH=[ pwd ]; clear; $debug_exe $cmdbreak -f %s%s%s.app/Contents/MacOS/%s", s, i ? lsd::root_lsd : "", i ? "/" : "", s );
+				break;
+
+			case _WIN_:
+				snprintf( tmp, MAX_BUFF_SIZE, "$debug_exe $cmdbreak %s%s%s", i ? lsd::root_lsd : "", i ? "/" : "", s );
 				break;
 
 			default:
