@@ -40,6 +40,7 @@
 folder    <- "data"                 # data files folder
 baseName  <- "Sim"                  # data files base name (same as .lsd file)
 nExp      <- 2                      # number of experiments
+dComp     <- FALSE                  # compare experiments to data (baseName0.csv)
 iniDrop   <- 0                      # initial time steps to drop (0=none)
 nKeep     <- -1                     # number of time steps to keep (-1=all)
 mcStat    <- "mean"                 # Monte Carlo statistic ("mean", "median")
@@ -50,6 +51,7 @@ bootCI    <- NULL                   # bootstrap confidence interval method (SLOW
                                     # (NULL (no bootstrap), "basic", or "bca")
 
 expVal <- c( "Baseline", "CO2 tax" )   # case parameter values
+dcVal <- "Empirical data"
 
 # aggregated variables to use
 logVars <- c( "Creal", "GDPreal", "GDPnom", "G", "Gbail", "Tax", "Deb", "Def",
@@ -186,6 +188,36 @@ rm( tmpFiles, mcP, mcX, P, X, S, M, m, C, c, nTsteps.1, nSize.1 )
 invisible( gc( verbose = FALSE ) )
 
 
+# ---- Read data comparison file ----
+
+DCfile <- paste0( folder, "/", baseName, "0.csv" )
+if( dComp && file.exists( DCfile ) ) {
+  DCdata <- read.csv( DCfile )
+  if( ncol( DCdata ) < 2 || nrow( DCdata ) < 1 )
+    stop( "insufficient data for comparison in '", DCfile, "'" )
+  if( ! "t" %in% colnames( DCdata ) )
+    stop( "a time column named 't' is required in '", DCfile, "'" )
+
+  # adjust minimum series time span
+  if( min( DCdata$t ) > 1 ) {
+    filldf <- data.frame( matrix( nrow = min( DCdata$t ) - 1,
+                                  ncol = ncol( DCdata ) ) )
+    colnames( filldf ) <- colnames( DCdata )
+    DCdata <- rbind( filldf, DCdata )
+    DCdata$t[ 1 : ( min( DCdata$t ) - 1 ) ] <- 1 : ( min( DCdata$t ) - 1 )
+  }
+  if( max( DCdata$t ) < nTsteps ) {
+    filldf <- data.frame( matrix( nrow = nTsteps - max( DCdata$t ),
+                                  ncol = ncol( DCdata ) ) )
+    colnames( filldf ) <- colnames( DCdata )
+    DCdata <- rbind( DCdata, filldf )
+    DCdata$t[ ( max( DCdata$t ) + 1 ) : nTsteps ] <- ( max( DCdata$t ) + 1 ) : nTsteps
+  }
+} else {
+  DCdata <- NULL
+}
+
+
 #******************************************************************
 #
 # --------------------- Plot statistics -------------------------
@@ -267,14 +299,20 @@ if( ! is.null( mcDist ) && mcDist != "" ) {   # use typical runs?
 # Generate fancy labels & build labels list legend
 legends <- vector( )
 legendList <- "Experiments: "
+l <- 1
+if( ! is.null( DCdata ) ) {
+  legends[ l ] <- dcVal
+  l <- l + 1
+}
 for( k in 1 : nExp ) {
   if( is.na( expVal[ k ] ) || expVal[ k ] == "" )
-    legends[ k ] <- paste( "Case", k )
+    legends[ l ] <- paste( "Case", k )
   else
-    legends[ k ] <- expVal[ k ]
+    legends[ l ] <- expVal[ k ]
   if( k != 1 )
     legendList <- paste0( legendList, ",  " )
-  legendList <- paste0( legendList, "[", k, "] ", legends[ k ] )
+  legendList <- paste0( legendList, "[", k, "] ", legends[ l ] )
+  l <- l + 1
 }
 
 # Number of periods to show in graphics and use in statistics
@@ -304,9 +342,9 @@ par( mfrow = c ( plotRows, plotCols ) )             # define plots per page
 # ====== Experiment comparison plots & statistics ======
 #
 
-time_plots( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata, mcStat,
-            nExp, nSize, nTsteps, TmaskPlot, CI, Ptag, Xtag, legends, colors,
-            lTypes, smoothing )
+time_plots( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata, DCdata,
+            mcStat, nExp, nSize, nTsteps, TmaskPlot, CI, Ptag, Xtag, legends,
+            colors, lTypes, smoothing )
 
 box_plots( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat, warmUpStat, nTstat,
            legends, legendList, sDigits, bPlotCoef, bPlotNotc, folder, repName )
