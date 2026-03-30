@@ -144,8 +144,9 @@ logNA <- function( x ) {
 #
 
 log0 <- function( x ) {
-  y <- logNA( x )
-  y[ is.na( y ) ] <- 0
+  suppressWarnings( y <- log( x ) )
+  y[ is.nan( y ) ] <- 0
+  y[ is.infinite( y ) ] <- 0
   return( y )
 }
 

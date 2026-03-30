@@ -199,19 +199,20 @@ if( dComp && file.exists( DCfile ) ) {
     stop( "a time column named 't' is required in '", DCfile, "'" )
 
   # adjust minimum series time span
-  if( min( DCdata$t ) > 1 ) {
-    filldf <- data.frame( matrix( nrow = min( DCdata$t ) - 1,
-                                  ncol = ncol( DCdata ) ) )
+  minT <- min( DCdata$t, na.rm = TRUE )
+  if( minT > 1 ) {
+    filldf <- data.frame( matrix( nrow = minT - 1, ncol = ncol( DCdata ) ) )
     colnames( filldf ) <- colnames( DCdata )
     DCdata <- rbind( filldf, DCdata )
-    DCdata$t[ 1 : ( min( DCdata$t ) - 1 ) ] <- 1 : ( min( DCdata$t ) - 1 )
+    DCdata$t[ 1 : ( minT - 1 ) ] <- 1 : ( minT - 1 )
   }
-  if( max( DCdata$t ) < nTsteps ) {
-    filldf <- data.frame( matrix( nrow = nTsteps - max( DCdata$t ),
-                                  ncol = ncol( DCdata ) ) )
+
+  maxT <- max( DCdata$t, na.rm = TRUE )
+  if( maxT < nTsteps ) {
+    filldf <- data.frame( matrix( nrow = nTsteps - maxT, ncol = ncol( DCdata ) ) )
     colnames( filldf ) <- colnames( DCdata )
     DCdata <- rbind( DCdata, filldf )
-    DCdata$t[ ( max( DCdata$t ) + 1 ) : nTsteps ] <- ( max( DCdata$t ) + 1 ) : nTsteps
+    DCdata$t[ ( maxT + 1 ) : nTsteps ] <- ( maxT + 1 ) : nTsteps
   }
 } else {
   DCdata <- NULL
