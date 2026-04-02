@@ -45,6 +45,7 @@ baseName  <- "Sim"                  # data files base name (same as .lsd file)
 nExp      <- 2                      # number of experiments/countries
 mCnt      <- FALSE                  # experiments from multiple countries?
 nCnt      <- 0                      # country to use (mCnt = FALSE) (0=all)
+dComp     <- FALSE                  # compare experiments to data (baseName0.csv)
 iniDrop   <- 0                      # initial time steps to drop (0=none)
 nKeep     <- -1                     # number of time steps to keep (-1=all)
 coresExp  <- 0                      # max cores for experiments (0=all)
@@ -60,6 +61,7 @@ bootCI    <- NULL                   # bootstrap confidence interval method (SLOW
 # caption and file names
 expVal    <- c( "Only unionized firms", "Mixed firms" )   # experiment captions
 cntVal    <- c( "Country 1", "Country 2" )                # country captions
+dcVal     <- "Empirical data"                             # comparison data
 firmTypes <- c( "Pre-change firms", "Post-change firms" ) # firm-type captions
 caption   <- "K+S aggregate analysis"                     # log caption
 datFilSfx <- "aggr"                                       # data file suffix
@@ -100,10 +102,11 @@ options( warn = 0 )         # -1=no warning/0:warnings at end/2:warnings stop
 # !diagnostics suppress = log0, logNA, abind, plot_lin, plot_bpf, plot_histo
 # !diagnostics suppress = textplot, corr_table, corr_struct, autocorr_table
 # !diagnostics suppress = spectrum_table, growth_stats, time_plots, box_plots
-# !diagnostics suppress = crisis_recover, ergod.test.lsd, repFile, saveCSV, zoo
-# !diagnostics suppress = t.test0, rollmedian, clearTemp, setLabels, outDir
-# !diagnostics suppress = mc, mcP, mcX, pool, P, X, S, C, c, M, m, n, nTsteps
-# !diagnostics suppress = nVar, nSize, legends, expLeg, listLeg, cntLeg, allLeg
+# !diagnostics suppress = crisis_recover, ergod.test.lsd, repFile, readCSV
+# !diagnostics suppress = saveCSV, zoo, t.test0, rollmedian, clearTemp
+# !diagnostics suppress = setLabels, outDir, mc, mcP, mcX, pool, P, X, S, C, c
+# !diagnostics suppress = M, m, n, nTsteps, nVar, nTsteps, nSize, legends,
+# !diagnostics suppress = plotLegends, expLeg, listLeg, cntLeg, allLeg
 
 
 # ==== Process LSD result files ====
@@ -143,6 +146,8 @@ lagsLT    <- 20     # lags to analyze (long term)
 bPlotCoef <- 1.5    # boxplot whiskers extension from the box (0=extremes)
 bPlotNotc <- FALSE  # use boxplot notches
 smoothing <- 1e5    # HP filter smoothing factor (lambda)
+radarStat <- 2      # radar plot statistic: 1=mean, 2=median, 3=sd, 4=min, 5=max
+radarZoom <- 1.1    # zoom factor to use in radar plots
 crisisTh  <- -0.03  # crisis growth threshold
 crisisLen <- 3      # crisis minimum duration (periods)
 crisisPre <- 4      # pre-crisis period to base trend start (>=1)
@@ -174,9 +179,6 @@ pTypes <- c( 4, 4, 4, 4, 4, 4 )
 
 
 # ==== Support stuff ====
-
-# generate labels & build labels list legend
-setLabels( nExp, mCnt, nCnt )
 
 # organize data read from temporary files
 mcData <- mcPtag <- mcXtag <- Pdata <- Xdata <- Sdata <- Cdata <- cdata <-
@@ -222,6 +224,17 @@ for( k in 1 : nExp ) {                      # realocate data in separate lists
 }
 
 rm( pool, mc, mcP, mcX, P, X, S, C, c, M, m, n )
+
+# read data comparison file
+if( ! mCnt && dComp ) {
+  DCdata <- readCSV( folder, baseName, "0", iniDrop, nTsteps )
+} else {
+  dComp <- FALSE
+  DCdata <- NULL
+}
+
+# generate labels & build labels list legend
+setLabels( nExp, mCnt, nCnt, dComp )
 
 # create tags for MC-specific plots
 if( ! is.null( mcDist ) && mcDist != "" ) {   # use typical runs?
@@ -292,17 +305,18 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
   # ------ time plots ------
   #
 
-  time_plots( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata, mcStat,
-              nExp, nSize, nTsteps, mCnt, TmaskPlot, CI, Ptag, Xtag, legends,
-              cntLeg, colors, lTypes, smoothing, transMk, firmTypes )
+  time_plots( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata, DCdata,
+              mcStat, nExp, nSize, nTsteps, mCnt, TmaskPlot, CI, Ptag, Xtag,
+              plotLegends, cntLeg, colors, lTypes, smoothing, transMk, firmTypes )
 
   #
   # ------ comparison of experiments ------
   #
 
-  box_plots( mcData, rec.stats, mcStat, nExp, nSize, TmaxStat, TmaskStat,
-             warmUpStat, nTstat, legends, listLeg, cntLeg, allLeg, sDigits,
-             bPlotCoef, bPlotNotc, folder, outDir, repName, datFilSfx )
+  box_plots( mcData, rec.stats, mcStat, nExp, nSize, mCnt, TmaxStat, TmaskStat,
+             warmUpStat, nTstat, radarStat, radarZoom, legends, listLeg, cntLeg,
+             allLeg, colors, lTypes, sDigits, bPlotCoef, bPlotNotc, folder,
+             outDir, repName, datFilSfx )
 
 
   #
@@ -326,49 +340,42 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
 
     # cross-section times selection
     csT <- c( round( ( warmUpPlot + nTplot + 1 ) / 2 ), nTplot )
+    subtit <- paste( "( mean at dotted line / cross sections at (",
+                     paste( csT, collapse = ", " ), ") / MC runs =",
+                     nSize, cntLeg, ")" )
 
     plot_histo( csT, mcData[[ k ]][ , "GDPreal", ], log = 3, bins = nBins,
                 tit = paste( "GDP distribution (",
                              legends[ k ], ")" ),
-                subtit = paste( "( mean at dotted line / cross sections at (",
-                                paste( csT, collapse = ", " ), ") / MC runs =",
-                                nSize, cntLeg, ")" ),
+                subtit = subtit,
                 labVar = "Log real gross domestic product",
                 leg = paste( csT ) )
 
     plot_histo( csT, mcData[[ k ]][ , "A", ], log = 1, bins = nBins,
                 tit = paste( "Productivity distribution (",
                              legends[ k ], ")" ),
-                subtit = paste( "( mean at dotted line / cross sections at (",
-                                paste( csT, collapse = ", " ), ") / MC runs =",
-                                nSize, cntLeg, ")" ),
+                subtit = subtit,
                 labVar = "Relative log labor productivity",
                 leg = paste( csT ) )
 
     plot_histo( csT, mcData[[ k ]][ , "wAvgReal", ], log = 1, bins = nBins,
                 tit = paste( "Real wage distribution (",
                              legends[ k ], ")" ),
-                subtit = paste( "( mean at dotted line / cross sections at (",
-                                paste( csT, collapse = ", " ), ") / MC runs =",
-                                nSize, cntLeg, ")" ),
+                subtit = subtit,
                 labVar = "Log real wage",
                 leg = paste( csT ) )
 
     plot_histo( csT, mcData[[ k ]][ , "wGini", ], bins = nBins,
                 tit = paste( "Worker inequality (",
                              legends[ k ], ")" ),
-                subtit = paste( "( mean at dotted line / cross sections at (",
-                                paste( csT, collapse = ", " ), ") / MC runs =",
-                                nSize, cntLeg, ")" ),
+                subtit = subtit,
                 labVar = "Gini index for worker income",
                 leg = paste( csT ) )
 
     plot_histo( csT, mcData[[ k ]][ , "DebGDP", ], bins = nBins,
                 tit = paste( "Government debt distribution (",
                              legends[ k ], ")" ),
-                subtit = paste( "( mean at dotted line / cross sections at (",
-                                paste( csT, collapse = ", " ), ") / MC runs =",
-                                nSize, cntLeg, ")" ),
+                subtit = subtit,
                 labVar = "Government debt over GDP",
                 leg = paste( csT ) )
 
@@ -378,16 +385,17 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
 
     bpfMsg <- paste0( "Baxter-King bandpass-filtered series, low =", lowP,
                       "Q / high = ", highP, "Q / order = ", bpfK )
+    subtit <- paste0( "( ", bpfMsg, " / period = ", warmUpStat + 1, "-", nTstat,
+                      " / MC runs = ", nSize, " / MC ", Xtag[ k ], cntLeg, ")" )
 
     plot_bpf( list( log0( Xdata[[ k ]]$GDPreal ), log0( Xdata[[ k ]]$Creal ),
                     log0( Xdata[[ k ]]$Ireal ), log0( Xdata[[ k ]]$A ) ),
               pl = lowP, pu = highP, nfix = bpfK, mask = TmaskPlot,
               mrk = transMk, col = colors, lty = lTypes,
-              leg = c("GDP", "Consumption", "Investment", "Productivity" ),
+              leg = c( "GDP", "Consumption", "Investment", "Productivity" ),
               xlab = "Time", ylab = "Filtered series",
               tit = paste( "GDP cycles (", legends[ k ], ")" ),
-              subtit = paste( "(", bpfMsg, "/ MC runs =", nSize,
-                              "/ MC", Xtag[ k ], cntLeg, ")" ) )
+              subtit = subtit )
 
     plot_bpf( list( Xdata[[ k ]]$U, Xdata[[ k ]]$V ),
               pl = lowP, pu = highP, nfix = bpfK, mask = TmaskPlot,
@@ -395,8 +403,7 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
               leg = c( "Productivity", "Unemployment", "Vacancy" ),
               xlab = "Time", ylab = "Filtered series",
               tit = paste( "Shimer puzzle (", legends[ k ], ")" ),
-              subtit = paste( "(", bpfMsg, "/ MC runs =", nSize,
-                              "/ MC", Xtag[ k ], cntLeg, ")" ) )
+              subtit = subtit )
 
     entry1exit <- ( Xdata[[ k ]]$entry1 - Xdata[[ k ]]$exit1 ) * Xdata[[ k ]]$F1
     entryCexit <- ( Xdata[[ k ]]$entryC - Xdata[[ k ]]$exitC ) * Xdata[[ k ]]$Fc
@@ -408,8 +415,7 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                        "Net entry (consumption)" ),
               xlab = "Time", ylab = "Filtered series (rescaled)",
               tit = paste( "Net entry and business cycle (", legends[ k ], ")" ),
-              subtit = paste( "(", bpfMsg, "/ MC runs =", nSize,
-                              "/ MC", Xtag[ k ], cntLeg, ")" ) )
+              subtit = subtit )
 
     #
     # ---- GDP autocorrelation ----
@@ -418,8 +424,9 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
     acf( logNA( Xdata[[ k ]]$GDPreal[ TmaskStat ] ), lag.max = 150, ci = CI,
          xlab = "GDP lag periods", ylab = "Real GDP average autocorrelation",
          main = paste( "GDP autocorrelation (", legends[ k ], ")" ),
-         sub = paste0( "( blue: ", CI * 100, "% confidence level / MC runs = ",
-                       nSize, " / MC ", Xtag[ k ], " ", cntLeg, " )" ) )
+         sub = paste0( "( blue: ", CI * 100, "% confidence level / period = ",
+                       warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize,
+                       " / MC ", Xtag[ k ], " ", cntLeg, " )" ) )
 
     gdp.acf.stats <- autocorr_table( mcData[[ k ]][ TmaskStat, "GDPreal", ],
                                      lagsLT, logVar = 3, CI = CI )
@@ -428,9 +435,9 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
               show.rownames = FALSE )
     title <- paste( "GDP autocorrelation MC results (", legends[ k ], ")" )
     subTitle <- paste( paste0(
-                    "( auto-correlation function estimation means / MC runs = ",
-                    nSize, " / MC ", Xtag[ k ], " / period = ", warmUpStat + 1,
-                    "-", nTstat, " ", cntLeg, " )" ),
+                    "( auto-correlation function estimation means / period = ",
+                    warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize,
+                    " / MC ", mcStat, " ", cntLeg, " )" ),
                     paste0( "( test H0: lag is not significant at ",
                             ( 1 - CI ) * 100, "% level )" ), sep ="\n" )
     title( main = title, sub = subTitle )
@@ -453,9 +460,9 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
     textplot( formatC( gdp.spec.stats, digits = sDigits, format = "g" ), cmar = 2,
               show.rownames = FALSE )
     title <- paste( "GDP spectral analysis MC results (", legends[ k ], ")" )
-    subTitle <- paste( paste0( "( spectral densities estimation means / MC runs = ",
-                               nSize, " / MC ", Xtag[ k ], " / period = ",
-                               warmUpStat + 1, "-", nTstat, " ", cntLeg, " )" ),
+    subTitle <- paste( paste0( "( spectral densities estimation means / period = ",
+                               warmUpStat + 1, "-", nTstat, " / MC runs = ",
+                               nSize, " / MC ", Xtag[ k ], " ", cntLeg, " )" ),
                        paste0( "( test H0: period is not significant at ",
                                ( 1 - CI ) * 100, "% level )" ), sep ="\n" )
     title( main = title, sub = subTitle )
@@ -467,14 +474,16 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
     # ---- A = f( K / L ) ----
     #
 
+    subtit <- paste0( "( period = ", warmUpStat + 1, "-", nTstat, " / MC runs = ",
+                      nSize, " / MC ", Xtag[ k ], " ", cntLeg, " )" )
+
     plot_lin( Xdata[[ k ]]$KcBas[ TmaskStat ] / Xdata[[ k ]]$LcBas[ TmaskStat ],
               Xdata[[ k ]]$AcBas[ TmaskStat ],
               xlab = "Number of machines to workers ratio",
               ylab = "Average labor productivity",
               tit = paste( "Process innovation in basic industries (",
                            legends[ k ], ")" ),
-              subtit = paste( "( MC runs =", nSize, "/ MC", Xtag[ k ], cntLeg,
-                              ")" ), invleg = TRUE )
+              subtit = subtit, invleg = TRUE )
 
     plot_lin( Xdata[[ k ]]$KcLux[ TmaskStat ] / Xdata[[ k ]]$LcLux[ TmaskStat ],
               Xdata[[ k ]]$AcLux[ TmaskStat ],
@@ -482,8 +491,7 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
               ylab = "Average labor productivity",
               tit = paste( "Process innovation in Luxury industries (",
                            legends[ k ], ")" ),
-              subtit = paste( "( MC runs =", nSize, "/ MC", Xtag[ k ], cntLeg,
-                              ")" ), invleg = TRUE )
+              subtit = subtit, invleg = TRUE )
 
     #
     # ---- correlation table ----
@@ -497,8 +505,8 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                 mask = TmaskStat, pl = lowP, pu = highP, nfix = bpfK,
                 tit = paste( "Pearson correlation coefficients (", legends[ k ], ")" ),
                 subtit = paste0( "( insignificant values at ", ( 1 - CI ) * 100,
-                                 "% in white / MC runs = ", nSize, " / period = ",
-                                 warmUpStat + 1, " - ", nTstat, " ", cntLeg, " )" ),
+                                 "% in white / period = ", warmUpStat + 1, "-",
+                                 nTstat, " / MC runs = ", nSize, " ", cntLeg, " )" ),
                 labVars = c( "GDP", "Consumption", "Investment", "Cons. price",
                              "L. productivity", "Unemployment", "Wage", "Mark-up",
                              "Interest", "Gov. debt", "Credit supply", "Loans",
@@ -548,8 +556,8 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
     title <- paste( "Correlation structure for GDP (1) (", legends[ k ], ")" )
     testMsg <- paste0( "( test H0: lag coefficient is not significant at ",
                        ( 1 - CI ) * 100, "% level", " )" )
-    subTitle <- paste( paste0( "( ", bpfMsg, " / MC runs = ", nSize, " / period = ",
-                               warmUpStat + 1, " - ", nTstat, " ", cntLeg, " )" ),
+    subTitle <- paste( paste0( "( ", bpfMsg, " / period = ", warmUpStat + 1, "-",
+                               nTstat, " / MC runs = ", nSize, " ", cntLeg, " )" ),
                        testMsg, sep = "\n" )
     title( main = title, sub = subTitle )
 
@@ -593,8 +601,8 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                     legends[ k ], ")" )
     testMsg <- paste0( "( test H0: there are unit roots / non-stationary at ",
                        ( 1 - CI ) * 100, "% level", " )" )
-    subTitle <- paste( paste0( "( ", bpfMsg," / MC runs = ", nSize, " / period = ",
-                               warmUpStat + 1, " - ", nTstat, " ", cntLeg, " )" ),
+    subTitle <- paste( paste0( "( ", bpfMsg, " / period = ", warmUpStat + 1, "-",
+                               nTstat," / MC runs = ", nSize, " ", cntLeg, " )" ),
                        testMsg, sep = "\n" )
     title( main = title, sub = subTitle )
 
@@ -622,10 +630,10 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
     testMsg <- paste(
       "( ADF/PP H0: non-stationary, KPSS H0: stationary, BDS H0: i.i.d., KS/AD/WW H0: ergodic )" ,
       paste0( "( significance = ", ( 1 - CI ) * 100, "% )" ), sep = "\n" )
-    subTitle <- paste( paste(
-      "( average p-values for testing H0 and rate of rejection of H0 / MC runs =",
-      nSize, "/ period =", warmUpStat + 1, "-", nTstat, cntLeg, ")" ), testMsg,
-      sep = "\n" )
+    subTitle <- paste( paste0(
+      "( average p-values for testing H0 and rate of rejection of H0 / period = ",
+      warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize, " ", cntLeg, " )" ),
+      testMsg, sep = "\n" )
     title( main = title, sub = subTitle )
 
     saveCSV( statErgo, baseName = repName, num = k, baseFolder = folder,
@@ -646,13 +654,15 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
     DeltaFc <- as.vector( diff( Fc.lag, na.pad = TRUE ) / Fc.lag )
     arrivals <- replace ( DeltaFc, which( DeltaFc <= 0 ), NA )
 
+    subtit <- paste0( "( Consider only net positive entry cases / period = ",
+                      warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize,
+                      " / MC ", Xtag[ k ], " ", cntLeg, " )" )
+
     plot_lin( arrivals, U, xlab = "Average rate of basic-good industries arriving",
               ylab = "Median unemployment",
               tit = paste( "Unemployment vs. arrival of new basic industry (",
                            legends[ k ], ")" ),
-              subtit = paste( "( Consider only net positive entry cases / MC runs =",
-                              nSize, "/ MC", Xtag[ k ], cntLeg, ")" ),
-              legalign = TRUE )
+              subtit = subtit, legalign = TRUE )
 
     Fc.lag <- lag( zoo( Xdata[[ k ]]$FcLux[ TmaskStat ] ), k = - lags - 1, na.pad = TRUE )
     DeltaFc <- as.vector( diff( Fc.lag, na.pad = TRUE ) / Fc.lag )
@@ -662,9 +672,7 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
               ylab = "Median unemployment",
               tit = paste( "Unemployment vs. arrival of new luxury industry (",
                            legends[ k ], ")" ),
-              subtit = paste( "( Consider only net positive entry cases / MC runs =",
-                              nSize, "/ MC", Xtag[ k ], cntLeg, ")" ),
-              legalign = TRUE )
+              subtit = subtit, legalign = TRUE )
 
     U.arrivals.bas.b <- U.arrivals.bas.R2 <- U.arrivals.lux.b <-
       U.arrivals.lux.R2 <- A.KL.bas.b <- A.KL.bas.R2 <- A.KL.lux.b <-
@@ -758,9 +766,9 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
     textplot( formatC( U.arrivals.stats, digits = sDigits, format = "g" ), cmar = 2 )
     title <- paste( "Unemployment vs. arrival of new industries MC results (",
                     legends[ k ], ")" )
-    subTitle <- paste( paste0( "( linear regression / MC runs = ", nSize, "/ MC",
-                               Xtag[ k ], " / period = ", warmUpStat + 1, "-",
-                               nTstat, " ", cntLeg, " )" ),
+    subTitle <- paste( paste0( "( linear regression / period = ", warmUpStat + 1,
+                               "-", nTstat, " / MC runs = ", nSize, "/ MC ",
+                               Xtag[ k ], " ", cntLeg, " )" ),
                        paste0( "( test H0: statistic is not significant at ",
                                ( 1 - CI ) * 100, "% level",
                                " )" ), sep ="\n" )

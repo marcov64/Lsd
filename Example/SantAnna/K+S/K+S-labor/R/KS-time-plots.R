@@ -24,14 +24,17 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   else
     XtagAll <- paste( Xtag, collapse = "|" )
 
+  subtitbase <- paste0( "period = ", min( TmaskPlot ), "-", max( TmaskPlot ),
+                        " / MC runs = ", nSize, " / MC" )
+  subtit <- paste( subtitbase, XtagAll )
+
   # ------ GDP, consumption and investment cases comparison charts ------
 
   plot_lists( c( "GDPreal", "Ireal", "Creal" ), Xdata, mdata, Mdata, cdata, Cdata,
               leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI, log0 = TRUE,
               col = colors, mrk = transMk, lty = lTypes,
               xlab = "Time", ylab = "Log real values",
-              tit = "GDP, investment and consumption",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll ),
+              tit = "GDP, investment and consumption", subtit = subtit,
               leg2 = c( "GDP", "Investment", "Consumption" ) )
 
 
@@ -49,7 +52,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               statMC = mcStat, leg = legends, mask = TmaskPlot, nMC = nSize,
               CI = CI, log0 = TRUE, col = colors, mrk = transMk, lty = lTypes,
               xlab = "Time", ylab = "Log real GDP",
-              tit = "GDP", subtit = paste( "MC runs =", nSize, "/ MC", XtagAll ),
+              tit = "GDP", subtit = subtit,
               leg2 = c( "Effective GDP", "GDP @ 100% utilization" ) )
 
 
@@ -83,8 +86,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               Mdata, cdata, Cdata, leg = legends, mask = TmaskPlot, nMC = nSize,
               CI = CI, mrk = transMk, col = colors, lty = lTypes, xlab = "Time",
               ylab = "Government tax income and expenditure over GDP",
-              tit = "Government income and expenditure",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll ),
+              tit = "Government income and expenditure", subtit = subtit,
               leg2 = c( "Tax", "Gov. expenditure", "Bank bail-out", "Training exp." ) )
 
 
@@ -94,8 +96,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
               mrk = transMk, col = colors, lty = lTypes,
               xlab = "Time", ylab = "Government deficit over GDP",
-              tit = "Government deficit",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll ),
+              tit = "Government deficit", subtit = subtit,
               leg2 = c( "Total", "Primary" ) )
 
 
@@ -105,7 +106,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk, col = colors,
               lty = lTypes, xlab = "Time", ylab = "Government debt over GDP",
               tit = "Government debt",
-              subtit = paste( "MC runs =", nSize, "/ MC", Ptag[ "DebGDP" ] ) )
+              subtit = paste( subtitbase, Ptag[ "DebGDP" ] ) )
 
 
   # ------ Total credit supply and loans in GDP terms ------
@@ -128,8 +129,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
               mrk = transMk, col = colors, lty = lTypes, xlab = "Time",
               ylab = "Total bank credit available and firm debt stock over GDP",
-              tit = "Bank credit supply and firm loans",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll ),
+              tit = "Bank credit supply and firm loans", subtit = subtit,
               leg2 = c( "Credit available", "Loans" ) )
 
 
@@ -153,8 +153,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
               mrk = transMk, col = colors, lty = lTypes, xlab = "Time",
               ylab = "Effective total firm credit demand and bank credit supply over GDP",
-              tit = "Credit demand and supply flow on GDP",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll ),
+              tit = "Credit demand and supply flow on GDP", subtit = subtit,
               leg2 = c( "Demand", "Supply" ) )
 
 
@@ -163,8 +162,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   plot_lists( c( "U", "V" ), Xdata, mdata, Mdata, cdata, Cdata, leg = legends,
               mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk, col = colors,
               lty = lTypes, xlab = "Time", ylab = "Unemployment and vacancy rates",
-              tit = "Unemployment and vacancy",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll ),
+              tit = "Unemployment and vacancy", subtit = subtit,
               leg2 = c( "Unemployment", "Vacancy" ) )
 
 
@@ -174,7 +172,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               mask = TmaskPlot, nMC = nSize, CI = CI, log0 = TRUE, mrk = transMk,
               col = colors, lty = lTypes, xlab = "Time",
               ylab = "Log average real wage", tit = "Real wage",
-              subtit = paste( "MC runs =", nSize, "/ MC", Ptag[ "wAvgReal" ] ) )
+              subtit = paste( subtitbase, Ptag[ "wReal" ] ) )
 
 
   # ------ Real wages share in GDP terms ------
@@ -195,8 +193,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               statMC = mcStat, mask = TmaskPlot, nMC = nSize, CI = CI,
               mrk = transMk, col = colors, lty = lTypes, xlab = "Time",
               ylab = "Total real wages on GDP",
-              tit = "Wage share",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll ) )
+              tit = "Wage share", subtit = subtit )
 
 
   # ------ Gini index ------
@@ -205,7 +202,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk,
               col = colors, lty = lTypes, xlab = "Time",
               ylab = "Gini index on workers' income", tit = "Gini index",
-              subtit = paste( "MC runs =", nSize, "/ MC", Ptag[ "wGini" ] ) )
+              subtit = paste( subtitbase, Ptag[ "wGini" ] ) )
 
 
   # ------ Average tenure and vintage skills ------
@@ -213,8 +210,8 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   plot_lists( c( "sTavg", "sVavg" ), Xdata, mdata, Mdata, cdata, Cdata,
               leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
               mrk = transMk, col = colors, lty = lTypes, xlab = "Time",
-              ylab = "Average worker skills level", tit = "Workers' skills",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll ),
+              ylab = "Average worker skills level", 
+              tit = "Workers' skills", subtit = subtit,
               leg2 = c( "Tenure skills", "Vintage skills" ) )
 
 
@@ -225,8 +222,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               mrk = transMk, col = colors, lty = lTypes, xlab = "Time",
               ylab = "Share of innovating and imitating firms",
               tit = "Innovation and imitation",
-              subtit = paste( "Capital-good sector only / MC runs =", nSize,
-                              "/ MC", XtagAll ),
+              subtit = paste( "Capital-good sector only /", subtit ),
               leg2 = c( "Innovation", "Imitation" ) )
 
 
@@ -236,8 +232,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI, log = TRUE,
               mrk = transMk, col = colors, lty = lTypes, xlab = "Time",
               ylab = "Relative average log labor productivity",
-              tit = "Productivity",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll ),
+              tit = "Productivity", subtit = subtit,
               leg2 = c( "Overall", "Capital-good sector", "Consumption-good sector" ) )
 
 
@@ -247,8 +242,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI, log0 = TRUE,
               mrk = transMk, col = colors, lty = lTypes, xlab = "Time",
               ylab = "Relative average log labor productivity by firm type",
-              tit = "Productivity by firm type",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll ),
+              tit = "Productivity by firm type", subtit = subtit,
               leg2 = firmTypes )
 
 
@@ -259,8 +253,8 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               col = colors, lty = lTypes, xlab = "Time",
               ylab = paste( "Market share of", firmTypes[2] ),
               tit = paste( "Market share of", firmTypes[2] ),
-              subtit = paste( "Consumption-good sector only / MC runs =",
-                              nSize, "/ MC", Ptag[ "f2posChg" ] ) )
+              subtit = paste( "Consumption-good sector only /", subtitbase,
+                              Ptag[ "f2posChg" ] ) )
 
 
   # ------ Concentration ------
@@ -269,8 +263,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
               mrk = transMk, col = colors, lty = lTypes, xlab = "Time",
               ylab = "Standardized Herfindahl-Hirschman index",
-              tit = "Market concentration",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll ),
+              tit = "Market concentration", subtit = subtit,
               leg2 = c( "Capital-good sector", "Consumption-good sector" ) )
 
 
@@ -281,8 +274,8 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               col = colors, lty = lTypes, xlab = "Time",
               ylab = "Weighted average mark-up rate",
               tit = "Mark-up",
-              subtit = paste( "Consumption-good sector only / MC runs =", nSize,
-                              "/ MC", Ptag[ "mu2avg" ] ) )
+              subtit = paste( "Consumption-good sector only /", subtitbase,
+                              Ptag[ "mu2avg" ] ) )
 
 
   # ------ Firms net entry trend in the market ------
@@ -312,8 +305,7 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
               leg = legends, statMC = mcStat, mask = TmaskPlot, nMC = nSize,
               CI = CI, mrk = transMk, col = colors, lty = lTypes, xlab = "Time",
               ylab = "Number of net entrant firms (HP-filtered)",
-              tit = "Net entry of firms trend",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll ),
+              tit = "Net entry of firms trend", subtit = subtit,
               leg2 = c( "Consumption-good sector", "Capital-good sector" ) )
 
 }

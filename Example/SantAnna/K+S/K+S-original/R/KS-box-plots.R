@@ -258,8 +258,8 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
 
     title <- names[[ stat ]]
     subTitle <- paste0(
-      "( bar: median / box: 2nd-3rd quartile / whiskers: max-min / points: outliers / MC runs = ",
-      nSize, " / period = ", warmUpStat + 1, "-", nTstat, " )" )
+      "( bar: median / box: 2nd-3rd quartile / whiskers: max-min / points: outliers / period = ",
+      warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize, " )" )
     plot_bxp_vio( dataMC[ stat, , ], leg = legends, unit = units[[ stat ]],
                   notch = bPlotNotc, tit = title, subtit = subTitle )
   }
@@ -328,8 +328,8 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
 
   textplot( formatC( table.stats, digits = sDigits, format = "g" ), cmar = 1 )
   title <- paste( "Monte Carlo descriptive statistics ( all experiments )" )
-  subTitle <- paste( "( numbers in brackets: experiment number / MC runs =",
-                     nSize, "/ period =", warmUpStat + 1, "-", nTstat, ")" )
+  subTitle <- paste0( "( numbers in brackets: experiment number / period = ",
+                      warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize, " )" )
   title( main = title, sub = subTitle )
   mtext( legendList, side = 1, line = -2, outer = TRUE )
 
@@ -342,10 +342,10 @@ box_plots <- function( mcData, mcStat, nExp, nSize, TmaxStat, TmaskStat,
 
     textplot( formatC( perf.comp, digits = sDigits, format = "g" ), cmar = 1 )
     title <- paste( "Performance comparison ( all experiments )" )
-    subTitle <- paste(
-      "( experiment number in brackets /", tlab,
-      "H0: no difference with baseline / MC runs =",
-      nSize, "/ period =", warmUpStat + 1, "-", nTstat, ")" )
+    subTitle <- paste0(
+      "( experiment number in brackets / ", tlab,
+      " H0: no difference with baseline / period = ", warmUpStat + 1, "-",
+      nTstat, " / MC runs = ", nSize, " )" )
     title( main = title, sub = subTitle )
     mtext( legendList, side = 1, line = -2, outer = TRUE )
   }

@@ -16,8 +16,8 @@
 # !diagnostics suppress = log0, plot_lists, hpfilter, colSds, colMins, colMaxs, mavg
 
 time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
-                        mcStat, nExp, nSize, nTsteps, mCnt, TmaskPlot, CI, Ptag,
-                        Xtag, legends, cntLeg, colors, lTypes, smoothing,
+                        DCdata, mcStat, nExp, nSize, nTsteps, mCnt, TmaskPlot, CI,
+                        Ptag, Xtag, legends, cntLeg, colors, lTypes, smoothing,
                         transMk, firmTypes ) {
 
   if( all( Xtag == mcStat ) )
@@ -25,26 +25,29 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   else
     XtagAll <- paste( Xtag, collapse = "|" )
 
+  subtitbase <- paste0( "period = ", min( TmaskPlot ), "-", max( TmaskPlot ),
+                        " / MC runs = ", nSize, " / MC" )
+  subtit <- paste( subtitbase, XtagAll, cntLeg )
+
   # ------ Real GDP, consumption and investment ------
 
   plot_lists( c( "Yreal", "Creal", "Ireal" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI, log0 = TRUE,
-              col = colors, mrk = transMk, lty = lTypes,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, log0 = TRUE, col = colors, mrk = transMk, lty = lTypes,
               xlab = "Time", ylab = "Log real (initial prices) aggregate",
-              tit = "Real GDP, consumption, and investment",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "Real GDP, consumption, and investment", subtit = subtit,
               leg2 = c( "GDP", "Consumption", "Investment" ) )
 
 
-  # ------ Nominal GDP, consumption, investment ------
+  # ------ Nominal GDP, consumption, investment, net exports ------
 
   plot_lists( c( "Y", "C", "Inom", "X" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI, log0 = TRUE,
-              col = colors, mrk = transMk, lty = lTypes,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, log0 = TRUE, col = colors, mrk = transMk, lty = lTypes,
               xlab = "Time", ylab = "Log nominal (current prices) aggregate",
               tit = "Nominal GDP, consumption, investment, and net exports",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
-              leg2 = c( "GDP", "Consumption", "Investment", "Exports" ) )
+              subtit = subtit,
+              leg2 = c( "GDP", "Consumption", "Investment", "Net exports" ) )
 
 
   # ------ GDP gap ------
@@ -64,12 +67,11 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
       log0( Xdata[[ nExp ]][ , var ] ) - log0( Xdata[[ nExp - 1 ]][ , var ] )
     Sdata[[ nExp ]][ varNew ] <- rep( 0, length( Xdata[[ k ]][ , var ] ) )
 
-    plot_lists( varNew, Xdata, mdata, Mdata, sdMC = Sdata,
-                statMC = mcStat, leg = legends, mask = TmaskPlot, nMC = nSize,
+    plot_lists( varNew, Xdata, mdata, Mdata, sdMC = Sdata, statMC = mcStat,
+                DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
                 CI = CI, col = colors, mrk = transMk, lty = lTypes,
                 mCnt = mCnt, xlab = "Time", ylab = "Log gross domestic product gap",
-                tit = "GDP gap",
-                subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ) )
+                tit = "GDP gap", subtit = subtit )
   }
 
 
@@ -82,39 +84,35 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
     Sdata[[ k ]][ "Y100" ] <- sqrt( Sdata[[ k ]]$Yreal ^ 2 + Sdata[[ k ]]$Q2u ^ 2 )
   }
 
-  plot_lists( c( "Yreal", "Y100" ), Xdata, mdata, Mdata, sdMC = Sdata,
-              statMC = mcStat, leg = legends, mask = TmaskPlot, nMC = nSize,
+  plot_lists( c( "Yreal", "Y100" ), Xdata, mdata, Mdata, sdMC = Sdata, statMC = mcStat,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
               CI = CI, log0 = TRUE, col = colors, mrk = transMk, lty = lTypes,
               mCnt = mCnt, xlab = "Time", ylab = "Log real (initial prices) GDP",
-              tit = "Capacity utilization",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "Capacity utilization", subtit = subtit,
               leg2 = c( "Effective GDP", "GDP @ 100% utilization" ) )
 
 
   # ------ International trade ------
 
-  plot_lists( c( "Xk", "Mk" ), Xdata, mdata, Mdata, sdMC = Sdata,
-              statMC = mcStat, leg = legends, mask = TmaskPlot, nMC = nSize,
+  plot_lists( c( "Xk", "Mk" ), Xdata, mdata, Mdata, sdMC = Sdata, statMC = mcStat,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
               CI = CI, log0 = TRUE, col = colors, mrk = transMk, lty = lTypes,
               mCnt = mCnt, xlab = "Time", ylab = "Log monetary values",
-              tit = "International machine trade",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "International machine trade", subtit = subtit,
               leg2 = c( "Exports", "Imports" ) )
 
-  plot_lists( c( "Xc", "Mc" ), Xdata, mdata, Mdata, sdMC = Sdata,
-              statMC = mcStat, leg = legends, mask = TmaskPlot, nMC = nSize,
+  plot_lists( c( "Xc", "Mc" ), Xdata, mdata, Mdata, sdMC = Sdata, statMC = mcStat,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
               CI = CI, log0 = TRUE, col = colors, mrk = transMk, lty = lTypes,
               mCnt = mCnt, xlab = "Time", ylab = "Log monetary values",
-              tit = "International consumption-good trade",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "International consumption-good trade", subtit = subtit,
               leg2 = c( "Exports", "Imports" ) )
 
   plot_lists( "e", Xdata, mdata, Mdata, sdMC = Sdata, statMC = mcStat,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              col = colors, mrk = transMk, lty = lTypes, mCnt = mCnt,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, col = colors, mrk = transMk, lty = lTypes, mCnt = mCnt,
               xlab = "Time", ylab = "Nominal exchange rate",
-              tit = "Exchange rate",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ) )
+              tit = "Exchange rate", subtit = subtit )
 
 
   # ------ Trade balance in GDP terms ------
@@ -128,11 +126,10 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   }
 
   plot_lists( "XnetY", Xdata, mdata, Mdata, sdMC = Sdata, statMC = mcStat,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              col = colors, mrk = transMk, lty = lTypes, mCnt = mCnt,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, col = colors, mrk = transMk, lty = lTypes, mCnt = mCnt,
               xlab = "Time", ylab = "Exports minus imports over GDP",
-              tit = "Balance of trade",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ) )
+              tit = "Balance of trade", subtit = subtit )
 
 
   # ------ Long-term trade balance per sector in GDP terms ------
@@ -176,13 +173,11 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   tXk = round( mean( unlist( tXk ) ) )
   tXc = round( mean( unlist( tXc ) ) )
 
-  plot_lists( c( "XkNetY", "XcNetY" ),
-              Xdata, mdata, Mdata, sdMC = Sdata, statMC = mcStat,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              col = colors, mrk = transMk, lty = lTypes, mCnt = mCnt,
+  plot_lists( c( "XkNetY", "XcNetY" ), Xdata, mdata, Mdata, sdMC = Sdata, statMC = mcStat,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, col = colors, mrk = transMk, lty = lTypes, mCnt = mCnt,
               xlab = "Time", ylab = "Exports minus imports over GDP",
-              tit = "Sectoral balance of trade",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "Sectoral balance of trade", subtit = subtit,
               leg2 = c( paste0( "Net capital exports (tx=", tXk, ")" ),
                         paste0( "Net consumption exports (tx=", tXc, ")" ) ) )
 
@@ -218,11 +213,11 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   }
 
   plot_lists( c( "TaxY", "GY", "GbailY", "GedY", "GtrainY" ), Xdata, mdata,
-              Mdata, cdata, Cdata, leg = legends, mask = TmaskPlot, nMC = nSize,
-              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
-              xlab = "Time", ylab = "Government tax income and expenditure over GDP",
-              tit = "Government income and expenditure",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              Mdata, cdata, Cdata, DCdata = DCdata, leg = legends,
+              mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk,
+              col = colors, lty = lTypes, mCnt = mCnt, xlab = "Time",
+              ylab = "Government tax income and expenditure over GDP",
+              tit = "Government income and expenditure", subtit = subtit,
               leg2 = c( "Tax", "Gov. expenditure", "Bank bail-out",
                         "Education exp.", "Training exp." ) )
 
@@ -230,22 +225,21 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   # ------ Government deficit in GDP terms------
 
   plot_lists( c( "DefY", "DefPy" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
               xlab = "Time", ylab = "Government deficit over GDP",
-              tit = "Government deficit",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "Government deficit", subtit = subtit,
               leg2 = c( "Total", "Primary" ), trend = "loess" )
 
 
   # ------ Government debt in GDP terms ------
 
-  plot_lists( "DebY", Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
-              mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk, col = colors,
-              lty = lTypes, xlab = "Time", ylab = "Government debt over GDP",
+  plot_lists( "DebY", Pdata, mdata, Mdata, cdata, Cdata,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes,
+              xlab = "Time", ylab = "Government debt over GDP",
               tit = "Government debt",
-              subtit = paste( "MC runs =", nSize, "/ MC", Ptag[ "DebY" ],
-                              cntLeg ),
+              subtit = paste( subtitbase, Ptag[ "DebY" ], cntLeg ),
               trend = "linear" )
 
 
@@ -265,11 +259,11 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   }
 
   plot_lists( c( "TCY", "LoansY" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt, xlab = "Time",
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time",
               ylab = "Total bank credit available and firm debt stock over GDP",
-              tit = "Bank credit supply and firm loans",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "Bank credit supply and firm loans", subtit = subtit,
               leg2 = c( "Credit available", "Loans" ) )
 
 
@@ -289,11 +283,11 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   }
 
   plot_lists( c( "CDY", "CSY" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt, xlab = "Time",
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time",
               ylab = "Effective total firm credit demand and bank credit supply over GDP",
-              tit = "Credit demand and supply flow over GDP",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "Credit demand and supply flow over GDP", subtit = subtit,
               leg2 = c( "Demand", "Supply" ) )
 
 
@@ -308,11 +302,11 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   }
 
   plot_lists( c( "LoansY", "BadDebY" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt, xlab = "Time",
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time",
               ylab = "Firm debt stock and bad-debt on period over GDP",
-              tit = "Firm loans and bank bad debt",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "Firm loans and bank bad debt", subtit = subtit,
               leg2 = c( "Loans", "Bad debt" ) )
 
 
@@ -332,22 +326,21 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   }
 
   plot_lists( c( "SavY", "SavAccY" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt, xlab = "Time",
-              ylab = "Savings over GDP",
-              tit = "Worker savings",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time", ylab = "Savings over GDP",
+              tit = "Worker savings", subtit = subtit,
               leg2 = c( "Current savings", "Accumulated savings" ) )
 
 
   # ------ Bank fragility ------
 
-  plot_lists( "Bda", Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
-              mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk, col = colors,
-              lty = lTypes, mCnt = mCnt, xlab = "Time",
-              ylab = "Accumulated banks bad debt over assets",
+  plot_lists( "Bda", Pdata, mdata, Mdata, cdata, Cdata,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time", ylab = "Accumulated banks bad debt over assets",
               tit = "Bank fragility",
-              subtit = paste( "MC runs =", nSize, "/ MC", Ptag[ "Bda" ], cntLeg ),
+              subtit = paste( subtitbase, Ptag[ "Bda" ], cntLeg ),
               trend = "loess" )
 
 
@@ -361,34 +354,33 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
     Cdata[[ k ]][ "Lpart" ] <- Cdata[[ k ]]$L / Xdata[[ k ]]$Ls
   }
 
-  plot_lists( c( "Q2u", "Lpart" ), Xdata, mdata, Mdata, cdata, Cdata, leg = legends,
-              mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk, col = colors,
-              lty = lTypes, mCnt = mCnt, xlab = "Time",
+  plot_lists( c( "Q2u", "Lpart" ), Xdata, mdata, Mdata, cdata, Cdata,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time",
               ylab = "Rates of capital utilization and labor participation",
-              tit = "Capacity utilization and labor participation",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "Capacity utilization and labor participation", subtit = subtit,
               leg2 = c( "Capacity utilization", "Labor participation" ),
               trend = "loess" )
 
 
   # ------ Unemployment and vacancy rates ------
 
-  plot_lists( c( "U", "V" ), Xdata, mdata, Mdata, cdata, Cdata, leg = legends,
-              mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk, col = colors,
-              lty = lTypes, mCnt = mCnt, xlab = "Time",
-              ylab = "Overall unemployment and vacancy rates",
-              tit = "Unemployment and vacancy",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+  plot_lists( c( "U", "V" ), Xdata, mdata, Mdata, cdata, Cdata,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time", ylab = "Overall unemployment and vacancy rates",
+              tit = "Unemployment and vacancy", subtit = subtit,
               leg2 = c( "Unemployment", "Vacancy" ) )
 
 
   # ------ Unemployment rates by category ------
 
-  plot_lists( c( "U1", "U2", "U3" ), Xdata, mdata, Mdata, cdata, Cdata, leg = legends,
-              mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk, col = colors,
-              lty = lTypes, mCnt = mCnt, xlab = "Time", ylab = "Unemployment rates",
-              tit = "Unemployment by education level",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+  plot_lists( c( "U1", "U2", "U3" ), Xdata, mdata, Mdata, cdata, Cdata,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time", ylab = "Unemployment rates",
+              tit = "Unemployment by education level", subtit = subtit,
               leg2 = c( "Primary education", "Secondary education",
                         "Tertiary education" ) )
 
@@ -437,11 +429,10 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
     Sdata[[ nExp ]][ varNew ] <- rep( 0, length( Xdata[[ k ]][ , var ] ) )
 
     plot_lists( c( "U1gap", "U2gap", "U3gap" ), Xdata, mdata, Mdata, sdMC = Sdata,
-                statMC = mcStat, leg = legends, mask = TmaskPlot, nMC = nSize,
-                CI = CI, col = colors, mrk = transMk, lty = lTypes,
+                statMC = mcStat, DCdata = DCdata, leg = legends, mask = TmaskPlot,
+                nMC = nSize, CI = CI, col = colors, mrk = transMk, lty = lTypes,
                 mCnt = mCnt, xlab = "Time", ylab = "Unemployment ratio gap",
-                tit = "Unemployment gap",
-                subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+                tit = "Unemployment gap", subtit = subtit,
                 leg2 = c( "Primary education", "Secondary education",
                           "Tertiary education" ) )
   }
@@ -449,11 +440,11 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
 
   # ------ Vacancy rates by category ------
 
-  plot_lists( c( "V1", "V2", "V3" ), Xdata, mdata, Mdata, cdata, Cdata, leg = legends,
-              mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk, col = colors,
-              lty = lTypes, mCnt = mCnt, xlab = "Time", ylab = "Vacancy rates",
-              tit = "Vacancy by education level",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+  plot_lists( c( "V1", "V2", "V3" ), Xdata, mdata, Mdata, cdata, Cdata,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time", ylab = "Vacancy rates",
+              tit = "Vacancy by education level", subtit = subtit,
               leg2 = c( "Primary education", "Secondary education",
                         "Tertiary education" ) )
 
@@ -502,11 +493,10 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
     Sdata[[ nExp ]][ varNew ] <- rep( 0, length( Xdata[[ k ]][ , var ] ) )
 
     plot_lists( c( "V1gap", "V2gap", "V3gap" ), Xdata, mdata, Mdata, sdMC = Sdata,
-                statMC = mcStat, leg = legends, mask = TmaskPlot, nMC = nSize,
-                CI = CI, col = colors, mrk = transMk, lty = lTypes,
+                statMC = mcStat, DCdata = DCdata, leg = legends, mask = TmaskPlot,
+                nMC = nSize, CI = CI, col = colors, mrk = transMk, lty = lTypes,
                 mCnt = mCnt, xlab = "Time", ylab = "Vacancy ratio gap",
-                tit = "Vacancy gap",
-                subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+                tit = "Vacancy gap", subtit = subtit,
                 leg2 = c( "Primary education", "Secondary education",
                           "Tertiary education" ) )
   }
@@ -514,21 +504,21 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
 
   # ------ Real wages ------
 
-  plot_lists( "wAvgReal", Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
-              mask = TmaskPlot, nMC = nSize, CI = CI, log0 = TRUE, mrk = transMk,
-              col = colors, lty = lTypes, mCnt = mCnt, xlab = "Time",
+  plot_lists( "wAvgReal", Pdata, mdata, Mdata, cdata, Cdata,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, log0 = TRUE, mrk = transMk, col = colors, lty = lTypes,
+              mCnt = mCnt, xlab = "Time",
               ylab = "Log average real wage", tit = "Real wage",
-              subtit = paste( "MC runs =", nSize, "/ MC", Ptag[ "wAvgReal" ],
-                              cntLeg ) )
+              subtit = paste( subtitbase, Ptag[ "wAvgReal" ], cntLeg ) )
 
   # ------ Real wages by category ------
 
   plot_lists( c( "wAvg1real", "wAvg2real", "wAvg3real" ), Xdata, mdata, Mdata,
-              cdata, Cdata, leg = legends, mask = TmaskPlot, nMC = nSize,
-              CI = CI, log0 = TRUE, mrk = transMk, col = colors, lty = lTypes,
-              mCnt = mCnt, xlab = "Time", ylab = "Log average real wage",
-              tit = "Wages by education level",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              cdata, Cdata, DCdata = DCdata, leg = legends, mask = TmaskPlot,
+              nMC = nSize, CI = CI, log0 = TRUE, mrk = transMk, col = colors,
+              lty = lTypes, mCnt = mCnt, xlab = "Time",
+              ylab = "Log average real wage",
+              tit = "Wages by education level", subtit = subtit,
               leg2 = c( "Primary education", "Secondary education",
                         "Tertiary education" ) )
 
@@ -577,11 +567,10 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
     Sdata[[ nExp ]][ varNew ] <- rep( 0, length( Xdata[[ k ]][ , var ] ) )
 
     plot_lists( c( "w1gap", "w2gap", "w3gap" ), Xdata, mdata, Mdata, sdMC = Sdata,
-            statMC = mcStat, leg = legends, mask = TmaskPlot, nMC = nSize,
-            CI = CI, col = colors, mrk = transMk, lty = lTypes,
+            statMC = mcStat, DCdata = DCdata, leg = legends, mask = TmaskPlot,
+            nMC = nSize, CI = CI, col = colors, mrk = transMk, lty = lTypes,
             mCnt = mCnt, xlab = "Time", ylab = "Log average real wage gap",
-            tit = "Wage gap",
-            subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+            tit = "Wage gap", subtit = subtit,
             leg2 = c( "Primary education", "Secondary education",
                       "Tertiary education" ) )
   }
@@ -590,12 +579,12 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   # ------ Real wages by firm type ------
 
   plot_lists( c( "w2realPreChg", "w2realPosChg" ), Xdata, mdata, Mdata,
-              cdata, Cdata, leg = legends, mask = TmaskPlot, nMC = nSize,
-              CI = CI, log0 = TRUE, mrk = transMk, col = colors, lty = lTypes,
-              mCnt = mCnt, xlab = "Time", ylab = "Log average real wage",
+              cdata, Cdata, DCdata = DCdata, leg = legends, mask = TmaskPlot,
+              nMC = nSize, CI = CI, log0 = TRUE, mrk = transMk, col = colors,
+              lty = lTypes, mCnt = mCnt, xlab = "Time",
+              ylab = "Log average real wage",
               tit = "Wages by firm type",
-              subtit = paste( "Consumption-good sector only / MC runs =",
-                              nSize, "/ MC", XtagAll, cntLeg ),
+              subtit = paste( "Consumption-good sector only /", subtit ),
               leg2 = firmTypes )
 
 
@@ -621,67 +610,63 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   }
 
   plot_lists( c( "WY", "Bon2Y", "InY" ), Xdata, mdata, Mdata, sdMC = Sdata,
-              leg = legends, statMC = mcStat, mask = TmaskPlot, nMC = nSize,
-              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
-              xlab = "Time", ylab = "Total wages, bonus, and income over GDP",
-              tit = "Wage share",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              DCdata = DCdata, leg = legends, statMC = mcStat, mask = TmaskPlot,
+              nMC = nSize, CI = CI, mrk = transMk, col = colors, lty = lTypes,
+              mCnt = mCnt, xlab = "Time",
+              ylab = "Total wages, bonus, and income over GDP",
+              tit = "Wage share", subtit = subtit,
               leg2 = c( "Wages", "Bonus", "Income" ), trend = "loess" )
 
 
   # ------ Wages spread ------
 
-  plot_lists( "wLogSD", Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
-              mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk,
-              col = colors, lty = lTypes, mCnt = mCnt, xlab = "Time",
-              ylab = "Standard deviation of log real wage", tit = "Wage spread",
-              subtit = paste( "MC runs =", nSize, "/ MC", Ptag[ "wLogSD" ],
-                              cntLeg ),
+  plot_lists( "wLogSD", Pdata, mdata, Mdata, cdata, Cdata,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time", ylab = "Standard deviation of log real wage",
+              tit = "Wage spread",
+              subtit = paste( subtitbase, Ptag[ "wLogSD" ], cntLeg ),
               trend = "loess" )
 
 
   # ------ Gini index ------
 
   plot_lists( c( "Gini", "wGini" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
               xlab = "Time", ylab = "Gini index", tit = "Gini index",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
-              leg2 = c( "Total income", "Wage income only" ),
+              subtit = subtit, leg2 = c( "Total income", "Wage income only" ),
               trend = "loess" )
 
 
   # ------ Average tenure and vintage skills ------
 
   plot_lists( c( "sTavg", "sVavg" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
               xlab = "Time", ylab = "Average worker skills level",
-              tit = "Workers' skills",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "Workers' skills", subtit = subtit,
               leg2 = c( "Tenure skills", "Vintage skills" ) )
 
 
   # ------ Innovation and imitation ------
 
   plot_lists( c( "inn", "imi" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
               xlab = "Time", ylab = "Share of innovating and imitating firms",
               tit = "Innovation and imitation",
-              subtit = paste( "Capital-good sector only / MC runs =", nSize,
-                              "/ MC", XtagAll, cntLeg ),
+              subtit = paste( "Capital-good sector only /", subtit ),
               leg2 = c( "Innovation", "Imitation" ), trend = "loess" )
 
 
   # ------ Productivity by sector ------
 
   plot_lists( c( "A", "A1", "A2" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI, log = TRUE,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
-              xlab = "Time", ylab = "Average log labor productivity",
-              tit = "Productivity by sector",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, log = TRUE, mrk = transMk, col = colors, lty = lTypes,
+              mCnt = mCnt, xlab = "Time", ylab = "Average log labor productivity",
+              tit = "Productivity by sector", subtit = subtit,
               leg2 = c( "Overall", "Capital-good sector", "Consumption-good sector" ) )
 
 
@@ -702,103 +687,98 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
       log0( Xdata[[ nExp ]][ , var ] ) - log0( Xdata[[ nExp - 1 ]][ , var ] )
     Sdata[[ nExp ]][ varNew ] <- rep( 0, length( Xdata[[ k ]][ , var ] ) )
 
-    plot_lists( varNew, Xdata, mdata, Mdata, sdMC = Sdata,
-                statMC = mcStat, leg = legends, mask = TmaskPlot, nMC = nSize,
+    plot_lists( varNew, Xdata, mdata, Mdata, sdMC = Sdata, statMC = mcStat,
+                DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
                 CI = CI, col = colors, mrk = transMk, lty = lTypes,
-                mCnt = mCnt, xlab = "Time", ylab = "Capital-good log labor productivity gap",
-                tit = "Productivity gap",
-                subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ) )
+                mCnt = mCnt, xlab = "Time",
+                ylab = "Capital-good log labor productivity gap",
+                tit = "Productivity gap", subtit = subtit )
   }
 
 
   # ------ Productivity by firm type ------
 
   plot_lists( c( "A2preChg", "A2posChg" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI, log0 = TRUE,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt, xlab = "Time",
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, log0 = TRUE, mrk = transMk, col = colors, lty = lTypes,
+              mCnt = mCnt, xlab = "Time",
               ylab = "Average log labor productivity",
-              tit = "Productivity by firm type",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "Productivity by firm type", subtit = subtit,
               leg2 = firmTypes )
 
 
   # ------ Productivity spread by firm type ------
 
   plot_lists( c( "A2sdPreChg", "A2sdPosChg" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt, xlab = "Time",
-              ylab = "Standard deviation of firm log productivity",
-              tit = "Productivity spread",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time", ylab = "Standard deviation of firm log productivity",
+              tit = "Productivity spread", subtit = subtit,
               leg2 = firmTypes )
 
 
   # ------ Product quality by firm type ------
 
   plot_lists( c( "q2preChg", "q2posChg" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
               xlab = "Time",
               ylab = "Weighted average consumer-goods reference quality",
-              tit = "Product quality",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "Product quality", subtit = subtit,
               leg2 = firmTypes, trend = "loess" )
 
 
   # ------ Share of public firms in capital -------
 
-  plot_lists( "f1g", Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
-              mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk,
-              col = colors, lty = lTypes, mCnt = mCnt, xlab = "Time",
+  plot_lists( "f1g", Pdata, mdata, Mdata, cdata, Cdata,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time",
               ylab = "Number of government-owned capital-good firms over total",
               tit = "Share of public capital-good firms",
-              subtit = paste( "MC runs =",  nSize, "/ MC", Ptag[ "f2posChg" ],
-                              cntLeg ) )
+              subtit = paste( subtitbase, Ptag[ "f2posChg" ], cntLeg ) )
 
 
   # ------ Share of public firms in consumption -------
 
-  plot_lists( "f2g", Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
-              mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk,
-              col = colors, lty = lTypes, mCnt = mCnt, xlab = "Time",
+  plot_lists( "f2g", Pdata, mdata, Mdata, cdata, Cdata,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time",
               ylab = "Number of government-owned consumption-good firms over total",
               tit = "Share of public consumption-good firms",
-              subtit = paste( "MC runs =",  nSize, "/ MC", Ptag[ "f2posChg" ],
-                              cntLeg ) )
+              subtit = paste( subtitbase, Ptag[ "f2posChg" ], cntLeg ) )
 
 
   # ------ Market share of post-change firms ------
 
-  plot_lists( "f2posChg", Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
-              mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk,
-              col = colors, lty = lTypes, mCnt = mCnt, xlab = "Time",
-              ylab = paste( "Market share of", firmTypes[2] ),
+  plot_lists( "f2posChg", Pdata, mdata, Mdata, cdata, Cdata,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time", ylab = paste( "Market share of", firmTypes[2] ),
               tit = paste( "Market share of", firmTypes[2] ),
-              subtit = paste( "Consumption-good sector only / MC runs =",
-                              nSize, "/ MC", Ptag[ "f2posChg" ], cntLeg ) )
+              subtit = paste( "Consumption-good sector only /", subtitbase,
+                              Ptag[ "f2posChg" ], cntLeg ) )
 
 
   # ------ Firms in the market ------
 
-  plot_lists( c( "F2", "F1" ), Xdata, mdata, Mdata, cdata, Cdata, leg = legends,
-              mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk,
-              col = colors, lty = lTypes, mCnt = mCnt, xlab = "Time",
-              ylab = "Number of firms",
-              tit = "Firms operating in the market",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+  plot_lists( c( "F2", "F1" ), Xdata, mdata, Mdata, cdata, Cdata,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time", ylab = "Number of firms",
+              tit = "Firms operating in the market", subtit = subtit,
               leg2 = c( "Consumption goods", "Capital goods" ) )
 
 
   # ------ Firm entry and exit in the consumer market ------
 
   plot_lists( c( "entry2", "exit2" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
-              xlab = "Time",
-              ylab = "Share of total firms",
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time", ylab = "Share of total firms",
               tit = "Firm entry and exit in the consumption-goods market",
-              subtit = paste( "Consumption-good sector only / MC runs =",
-                              nSize, "/ MC", XtagAll, cntLeg ),
+              subtit = paste( "Consumption-good sector only /", subtit ),
               leg2 = c( "Entry", "Exit" ), trend = "loess" )
 
 
@@ -825,22 +805,21 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   }
 
   plot_lists( c( "nEntT1", "nEntT2" ), Xdata, mdata, Mdata, sdMC = Sdata,
-              leg = legends, statMC = mcStat, mask = TmaskPlot, nMC = nSize,
-              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
-              xlab = "Time", ylab = "Number of net entrant firms (HP-filtered)",
-              tit = "Net entry of firms trend",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              DCdata = DCdata, leg = legends, statMC = mcStat, mask = TmaskPlot,
+              nMC = nSize, CI = CI, mrk = transMk, col = colors, lty = lTypes,
+              mCnt = mCnt, xlab = "Time",
+              ylab = "Number of net entrant firms (HP-filtered)",
+              tit = "Net entry of firms trend", subtit = subtit,
               leg2 = c( "Capital-good sector", "Consumption-good sector" ) )
 
 
   # ------ Market-share turbulence ------
 
   plot_lists( c( "HP1", "HP2" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
               xlab = "Time", ylab = "Hymer-Pashigian index",
-              tit = "Market-share turbulence",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "Market-share turbulence", subtit = subtit,
               leg2 = c( "Capital-good sector", "Consumption-good sector" ),
               trend = "loess" )
 
@@ -848,22 +827,21 @@ time_plots <- function( mcData, Pdata, Xdata, mdata, Mdata, Sdata, cdata, Cdata,
   # ------ Concentration ------
 
   plot_lists( c( "HH1", "HH2" ), Xdata, mdata, Mdata, cdata, Cdata,
-              leg = legends, mask = TmaskPlot, nMC = nSize, CI = CI,
-              mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
               xlab = "Time", ylab = "Standardized Herfindahl-Hirschman index",
-              tit = "Market concentration",
-              subtit = paste( "MC runs =", nSize, "/ MC", XtagAll, cntLeg ),
+              tit = "Market concentration", subtit = subtit,
               leg2 = c( "Capital-good sector", "Consumption-good sector" ),
               trend = "loess" )
 
 
   # ------ Markup ------
 
-  plot_lists( "mu2avg", Pdata, mdata, Mdata, cdata, Cdata, leg = legends,
-              mask = TmaskPlot, nMC = nSize, CI = CI, mrk = transMk,
-              col = colors, lty = lTypes, mCnt = mCnt, xlab = "Time",
-              ylab = "Weighted average mark-up rate",
+  plot_lists( "mu2avg", Pdata, mdata, Mdata, cdata, Cdata,
+              DCdata = DCdata, leg = legends, mask = TmaskPlot, nMC = nSize,
+              CI = CI, mrk = transMk, col = colors, lty = lTypes, mCnt = mCnt,
+              xlab = "Time", ylab = "Weighted average mark-up rate",
               tit = "Mark-up",
-              subtit = paste( "Consumption-good sector only / MC runs =", nSize,
-                              "/ MC", Ptag[ "mu2avg" ], cntLeg ) )
+              subtit = paste( "Consumption-good sector only /", subtitbase,
+                              Ptag[ "mu2avg" ], cntLeg ) )
 }

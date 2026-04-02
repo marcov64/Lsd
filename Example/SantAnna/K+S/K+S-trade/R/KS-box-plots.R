@@ -23,7 +23,7 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, mCnt, TmaxStat,
                        repName, datFilSfx ) {
 
   radarList <- list( )
-  radarList[[ 1 ]] <- list( series = c( 55, 56, 57, 1, 40, 7 ),
+  radarList[[ 1 ]] <- list( series = c( 1, 7, 40, 55, 56, 57 ),
                             title = "Country effects" )
 
   # ======= COMPARISON OF EXPERIMENTS =======
@@ -594,8 +594,8 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, mCnt, TmaxStat,
 
     title <- names[[ stat ]]
     subTitle <- paste0(
-      "( bar: median / box: 2nd-3rd quartile / whiskers: max-min / points: outliers / MC runs = ",
-      nSize, " / period = ", warmUpStat + 1, "-", nTstat, " ", cntLeg, " )" )
+      "( bar: median / box: 2nd-3rd quartile / whiskers: max-min / points: outliers / period = ",
+      warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize, " ", cntLeg, " )" )
     plot_bxp_vio( dataMC[ stat, , ], leg = legends, unit = units[[ stat ]],
                   notch = bPlotNotc, tit = title, subtit = subTitle )
   }
@@ -664,8 +664,9 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, mCnt, TmaxStat,
 
   textplot( formatC( table.stats, digits = sDigits, format = "g" ), cmar = 1 )
   title <- paste( "Monte Carlo descriptive statistics", allLeg )
-  subTitle <- paste( "( numbers in brackets: experiment number / MC runs =",
-                     nSize, "/ period =", warmUpStat + 1, "-", nTstat, cntLeg, ")" )
+  subTitle <- paste0( "( numbers in brackets: experiment number / period = ",
+                      warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize, " ",
+                      cntLeg, " )" )
   title( main = title, sub = subTitle )
   mtext( listLeg, side = 1, line = -2, outer = TRUE )
 
@@ -681,10 +682,10 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, mCnt, TmaxStat,
 
     textplot( formatC( perf.comp, digits = sDigits, format = "g" ), cmar = 1 )
     title <- paste( "Performance comparison", allLeg )
-    subTitle <- paste(
-      "( experiment number in brackets /", tlab,
-      "H0: no difference with baseline / MC runs =",
-      nSize, "/ period =", warmUpStat + 1, "-", nTstat, cntLeg, ")" )
+    subTitle <- paste0(
+      "( experiment number in brackets / ", tlab,
+      " H0: no difference with baseline / period =", warmUpStat + 1, "-",
+      nTstat, " / MC runs = ", nSize, " ", cntLeg, " )" )
     title( main = title, sub = subTitle )
     mtext( listLeg, side = 1, line = -2, outer = TRUE )
 
@@ -695,9 +696,9 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, mCnt, TmaxStat,
   # ---- Radar plots ----
 
   statNames <- c( "mean", "median", "std. dev.", "minimum", "maximum" )
-  subTitle <- paste0( "( ", statNames[ radarStat ], " values / MC runs = ",
-                      nSize, " / period = ", warmUpStat + 1, "-", nTstat, " ",
-                      cntLeg, " )" )
+  subTitle <- paste0( "( ", statNames[ radarStat ], " values / period = ",
+                      warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize,
+                      " ", cntLeg, " )" )
 
   for( r in 1 : length( radarList ) )
     if( length( radarList[[ r ]]$series ) >= 3 )

@@ -81,7 +81,7 @@ options( warn = 0 )         # -1=no warning/0:warnings at end/2:warnings stop
 # !diagnostics suppress = log0, textplot, saveCSV, plot_xy, hpfilter, abs_max
 # !diagnostics suppress = twoord.plot, clearTemp, repFile, setLabels, outDir
 # !diagnostics suppress = mc, pool, nTsteps, nSize, legends, expLeg, listLeg
-# !diagnostics suppress = cntLeg, allLeg
+# !diagnostics suppress = cntLeg, allLeg, setLabels
 
 
 # ==== Process LSD result files ====
@@ -347,57 +347,55 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
     #
 
     if( limOutl > 0 ) {
-      subTitle <- paste0( "Outliers removed, included percentiles = ",
-                          limOutl * 100, "-", ( 1 - limOutl ) * 100,
-                          " / MC case = ", mcCase, " / period = ", warmUpStat + 1,
-                          " - ", nTstat, " ", cntLeg )
+      subtit <- paste0( "Outliers removed, included percentiles = ",
+                        limOutl * 100, "-", ( 1 - limOutl ) * 100,
+                        " / period = ", warmUpStat + 1, "-", nTstat,
+                        " / MC case = ", mcCase, " ", cntLeg )
     } else {
-      subTitle <- paste( "MC case =", mcCase, "/ period =", warmUpStat + 1,
-                         "-", nTstat, cntLeg )
+      subtit <- paste0( "period = ", warmUpStat + 1, "-", nTstat,
+                        " / MC case = ", mcCase, " ", cntLeg )
     }
 
     # ---- Beveridge curve ----
 
     plot_xy( shimer.series[ 1, , k ], shimer.series[ 2, , k ], quant = limOutl,
              tit = paste( "Beveridge curve (", legends[k], ")" ),
-             subtit = subTitle,
+             subtit = subtit,
              xlab = "Unemployment rate", ylab = "Vacancy rate" )
 
     # ---- Matching function ----
 
     plot_xy( shimer.series[ 3, , k ], shimer.series[ 4, , k ], quant = limOutl,
-             tit = paste( "Matching function (", legends[k], ")" ),
-             subtit = subTitle,
+             tit = paste( "Matching function (", legends[k], ")" ), subtit = subtit,
              xlab = "Vacancies/unemployment ratio", ylab = "Job-finding rate" )
 
     # ---- Wage curve ----
 
     plot_xy( shimer.series[ 1, , k ], shimer.series[ 7, , k ], quant = limOutl,
-             tit = paste( "Wage curve (", legends[k], ")" ),
-             subtit = subTitle,
+             tit = paste( "Wage curve (", legends[k], ")" ), subtit = subtit,
              xlab = "Unemployment rate", ylab = "Log real wage" )
 
     # ---- Phillips curve ----
 
     plot_xy( shimer.series[ 1, , k ], shimer.series[ 8, , k ], quant = limOutl,
-             tit = paste( "Phillips curve (", legends[k], ")" ),
-             subtit = subTitle,
+             tit = paste( "Phillips curve (", legends[k], ")" ), subtit = subtit,
              xlab = "Unemployment rate", ylab = "Log nominal wage change" )
 
     # ---- Okun curve ----
 
     plot_xy( shimer.series[ 9, , k ], shimer.series[ 10, , k ], quant = limOutl,
-             tit = paste( "Okun curve (", legends[k], ")" ),
-             subtit = subTitle,
+             tit = paste( "Okun curve (", legends[k], ")" ), subtit = subtit,
              xlab = "Unemployment change", ylab = "GDP growth" )
 
     # ---- Periodic separation ----
 
+    subtit <- paste0( "( HP-filtered trend, smoothing parameter = ", smoothing,
+                      " / period = ", warmUpStat + 1, "-", nTstat,
+                      " / MC case = ", mcCase, " ", cntLeg, " )" )
+
     plot( TmaskStat, shimer.series[ 5, , k ] + shimer.trend.5, type = "l",
           main = paste( "Periodic separation (", legends[k], ")" ),
-          sub = paste( "( HP-filtered trend, smoothing parameter =",
-                       smoothing, "/ MC case =", mcCase, cntLeg, ")" ),
-          xlab = "Time", ylab = "Separation probability",
+          sub = subtit, xlab = "Time", ylab = "Separation probability",
           col = colors[ 1 ], lty = lTypes[ 1 ] )
 
     lines( TmaskStat, shimer.trend.5, type = "l", lwd = 2,
@@ -417,9 +415,7 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
 
     plot( TmaskStat, shimer.series[ 6, , k ] + shimer.trend.6, type = "l",
           main = paste( "Labor productivity (", legends[k], ")" ),
-          sub = paste( "( HP-filtered trend, smoothing parameter =",
-                       smoothing, "/ MC case =", mcCase, cntLeg, ")" ),
-          xlab = "Time", ylab = "Average log labor productivity",
+          sub = subtit, xlab = "Time", ylab = "Average log labor productivity",
           col = colors[ 1 ], lty = lTypes[ 1 ] )
 
     lines( TmaskStat, shimer.trend.6, type = "l", lwd = 2,
@@ -444,7 +440,8 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
                  TmaskStat, shimer.series[ 6, , k ],
                  main = paste( "Vacancy-unemployment & productivity (",
                                legends[k], ")" ),
-                 sub = paste( "( MC case =", mcCase, cntLeg, ")" ),
+                 sub = paste0( "( period = ", warmUpStat + 1, "-", nTstat,
+                               " / MC case = ", mcCase, " ", cntLeg, " )" ),
                  xlab = "Time", ylab = "Vacancy-unemployment rate",
                  rylab = "Average log labor productivity",
                  lcol = colors[ 1 ], rcol = colors[ 2 ],
@@ -509,10 +506,10 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
     plot.results <- formatC( shimer.results, digits = sDigits, format = "g" )
     plot.results[ grep( "NA", plot.results ) ] <- ""
     textplot( plot.results, cmar = 1, cex = 1.0 )
-    title <- paste( "Summary Statistics (", legends[ k ], ")" )
-    subTitle <- paste( "( corr. matrix: unempl., vacancy, vac./unempl., job-finding, separation, product. / MC case =",
-                       mcCase, "/ period =", warmUpStat + 1, "-", nTstat,
-                       cntLeg, ")" )
+    title <- paste( "Summary statistics (", legends[ k ], ")" )
+    subTitle <- paste0(
+      "( corr. matrix: unempl., vacancy, vac./unempl., job-finding, separation, product. / period = ",
+      warmUpStat + 1, "-", nTstat, " / MC case = ", mcCase, " ", cntLeg," )" )
     title( main = title, sub = subTitle )
 
     saveCSV( plot.results, baseName = repName, num = k, baseFolder = folder,
@@ -569,10 +566,10 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
   rownames( curves.param ) <- param.labels
 
   textplot( formatC( curves.param, digits = sDigits, format = "g" ), cmar = 1 )
-  title <- paste( "Curves Fitting", allLeg )
-  subTitle <- paste( "( numbers in brackets: experiment number / MC runs =",
-                     nSize, "/ period =", warmUpStat + 1, "-", nTstat, cntLeg,
-                     ")" )
+  title <- paste( "Curves fitting", allLeg )
+  subTitle <- paste0( "( numbers in brackets: experiment number / period = ",
+                      warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize, " ",
+                      cntLeg, " )" )
   title( main = title, sub = subTitle )
   mtext( listLeg, side = 1, line = -3, outer = TRUE )
 
@@ -608,9 +605,9 @@ tryCatch( {   # enter error handling mode so PDF can be closed in case of error
 
   textplot( formatC( recovery, digits = sDigits, format = "g" ), cmar = 1 )
   title <- paste( "Unemployment time recovery after crisis", allLeg )
-  subTitle <- paste( "( MC standard error in parentheses / MC runs =",
-                     nSize, "/ period =", warmUpStat + 1, "-", nTstat, cntLeg,
-                     ")" )
+  subTitle <- paste0( "( MC standard error in parentheses / period = ",
+                      warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize, " ",
+                      cntLeg, " )" )
   title( main = title, sub = subTitle )
 
   saveCSV( recovery, baseName = repName, baseFolder = folder,

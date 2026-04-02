@@ -420,6 +420,90 @@ nCores <- function( cores = 0, nStats = 0 ) {
 #
 # ==== Script general functions ====
 
+# ====== function [] = readCSV ======
+#
+# Read .csv (Excel readable) file to data frame
+#
+# Output:
+#   data frame conaining data
+#
+# Input:
+#   folder: relative folder to use
+#   baseName: base name of report
+#   num: experiment/country number, if required
+#   iniDrop: last initial period (from 1) to drop
+#   nTsteps: number of time steps in the data frame
+#
+readCSV <- function( folder, baseName, num = "",
+                     iniDrop = NULL, nTsteps = NULL ) {
+
+  fn <- paste0( folder, "/", baseName, num, ".csv" )
+  tn <- c( "t", "time" )
+
+  if( ! file.exists( fn ) )
+    stop( "File '", fn, "' do not exist" )
+
+  DCdata <- NULL
+  try( DCdata <- read.csv( fn ), silent = TRUE )
+
+  if( is.null( DCdata ) )
+    try( DCdata <- read.csv2( fn ), silent = TRUE )
+
+  if( is.null( DCdata ) )
+    stop( "Invalid data format in '", fn, "'" )
+
+  if( ncol( DCdata ) < 1 || nrow( DCdata ) < 1 )
+    stop( "Insufficient data in '", fn, "'" )
+
+  tCol <- match( tolower( tn ), tolower( colnames( DCdata ) ) )
+  if( all( is.na( tCol ) ) ) {
+    tCol <- 1
+    filldf <- data.frame( matrix( 1 : nrow( DCdata ) ) )
+    DCdata <- cbind( data.frame( matrix( 1 : nrow( DCdata ) ) ), DCdata )
+    colnames( DCdata )[ 1 ] <- "t"
+  } else
+    for( i in 1 : length( tCol ) )
+      if( ! is.na( tCol[ i ] ) ) {
+        tCol <- tCol[ i ]
+        break
+      }
+
+  # adjust minimum series time span
+  if( ! is.null( iniDrop ) ) {
+    minT <- min( DCdata[ , tCol ], na.rm = TRUE )
+    if( minT > iniDrop + 1 ) {
+      filldf <- data.frame( matrix( nrow = minT - 1, ncol = ncol( DCdata ) ) )
+      colnames( filldf ) <- colnames( DCdata )
+      DCdata <- rbind( filldf, DCdata )
+      DCdata[ 1 : ( minT - 1 ), tCol ] <- ( iniDrop + 1 ) : ( iniDrop + minT - 1 )
+    } else
+      if( minT < iniDrop + 1 )
+        DCdata <- DCdata[ - ( 1 : ( iniDrop + 1 - minT ) ), ]
+  }
+
+  if( ! is.null( nTsteps ) ) {
+    maxT <- max( DCdata[ , tCol ], na.rm = TRUE )
+    nRow <- nrow( DCdata )
+    if( maxT - iniDrop != nRow )
+      stop( "Inconsistent time sequence in column '",
+            colnames( DCdata )[ tCol ], "'" )
+
+    if( nRow < nTsteps ) {
+      filldf <- data.frame( matrix( nrow = nTsteps - nRow,
+                                    ncol = ncol( DCdata ) ) )
+      colnames( filldf ) <- colnames( DCdata )
+      DCdata <- rbind( DCdata, filldf )
+      DCdata[ ( nRow + 1 ) : nTsteps, tCol ] <- ( maxT + 1 ) : ( maxT + nTsteps - nRow )
+    }
+  }
+
+  rownames( DCdata ) <- DCdata[ , tCol ]
+  colnames( DCdata )[ tCol ] = "t"
+
+  return( DCdata )
+}
+
+
 # ====== function [] = saveCSV ======
 #
 # Save data frame to .csv file (Excel readable)

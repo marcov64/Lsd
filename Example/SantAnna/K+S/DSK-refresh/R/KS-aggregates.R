@@ -354,8 +354,8 @@ for( k in 1 : nExp ) {
 textplot( formatC( table, format ="fg", digits = 3, zero.print = "" ),
           cmar = 2, cex = 1 )
 title <- "Energy transition scenarios ( all experiments )"
-subTitle <- paste( "( MC runs =", nSize, "/ MC", XtagAll, "/ period =",
-				   warmUpStat + 1, "-", nTstat, ")" )
+subTitle <- paste( "( period =", warmUpStat + 1, "-", nTstat, "/ MC runs =",
+                   nSize, "/ MC", XtagAll, ")" )
 title( main = title, sub = subTitle )
 
 
@@ -371,58 +371,49 @@ for( k in 1 : nExp ) { # Experiment k
 
   # cross-section times selection
   csT <- c( round( ( warmUpPlot + nTplot + 1 ) / 2 ), nTplot )
+  subtit <- paste( "( mean at dotted line / cross sections at (",
+                   paste( csT, collapse = ", " ), ") / MC runs =",
+                   nSize, ")" )
 
   plot_histo( csT, mcData[[ k ]][ , "GDPreal", ], log = 3, bins = nBins,
               tit = paste( "GDP distribution (",
                            legends[ k ], ")" ),
-              subtit = paste( "( mean at dotted line / cross sections at (",
-                              paste( csT, collapse = ", " ), ") / MC runs =",
-                              nSize, ")" ),
+              subtit = subtit,
               labVar = "Log real gross domestic product",
               leg = c( "\"2050\"", "\"2100\"" ) )
 
   plot_histo( csT, mcData[[ k ]][ , "A", ], log = 1, bins = nBins,
               tit = paste( "Productivity distribution (",
                            legends[ k ], ")" ),
-              subtit = paste( "( mean at dotted line / cross sections at (",
-                              paste( csT, collapse = ", " ), ") / MC runs =",
-                              nSize, ")" ),
+              subtit = subtit,
               labVar = "Relative log labor productivity",
               leg = c( "\"2050\"", "\"2100\"" ) )
 
   plot_histo( csT, mcData[[ k ]][ , "wReal", ], log = 1, bins = nBins,
               tit = paste( "Real wage distribution (",
                            legends[ k ], ")" ),
-              subtit = paste( "( mean at dotted line / cross sections at (",
-                              paste( csT, collapse = ", " ), ") / MC runs =",
-                              nSize, ")" ),
+              subtit = subtit,
               labVar = "Log real wage",
               leg = c( "\"2050\"", "\"2100\"" ) )
 
   plot_histo( csT, mcData[[ k ]][ , "DebGDP", ], bins = nBins,
               tit = paste( "Government debt distribution (",
                            legends[ k ], ")" ),
-              subtit = paste( "( mean at dotted line / cross sections at (",
-                              paste( csT, collapse = ", " ), ") / MC runs =",
-                              nSize, ")" ),
+              subtit = subtit,
               labVar = "Government debt over GDP",
               leg = c( "\"2050\"", "\"2100\"" ) )
 
   plot_histo( csT, mcData[[ k ]][ , "CO2a", ], bins = nBins,
               tit = paste( "CO2 in atmosphere distribution (",
                            legends[ k ], ")" ),
-              subtit = paste( "( mean at dotted line / cross sections at (",
-                              paste( csT, collapse = ", " ), ") / MC runs =",
-                              nSize, ")" ),
+              subtit = subtit,
               labVar = "CO2 atmospheric concentration in PPM",
               leg = c( "\"2050\"", "\"2100\"" ) )
 
   plot_histo( csT, mcData[[ k ]][ , "Tm", ], bins = nBins,
               tit = paste( "Temperature anomaly distribution (",
                            legends[ k ], ")" ),
-              subtit = paste( "( mean at dotted line / cross sections at (",
-                              paste( csT, collapse = ", " ), ") / MC runs =",
-                              nSize, ")" ),
+              subtit = subtit,
               labVar = "Temperature change in C",
               leg = c( "\"2050\"", "\"2100\"" ) )
 
@@ -433,6 +424,8 @@ for( k in 1 : nExp ) { # Experiment k
 
   bpfMsg <- paste0( "Baxter-King bandpass-filtered series, low =", lowP,
                     "Q / high = ", highP, "Q / order = ", bpfK )
+  subtit <- paste0( "( ", bpfMsg, " / period = ", warmUpStat + 1, "-", nTstat,
+                    " / MC runs = ", nSize, " / MC ", Xtag[ k ], ")" )
 
   plot_bpf( list( log0( Xdata[[ k ]]$GDPreal ), log0( Xdata[[ k ]]$Creal ),
                   log0( Xdata[[ k ]]$Ireal ), log0( Xdata[[ k ]]$A ) ),
@@ -441,8 +434,7 @@ for( k in 1 : nExp ) { # Experiment k
             leg = c("GDP", "Consumption", "Investment", "Productivity" ),
             xlab = "Time", ylab = "Filtered series",
             tit = paste( "GDP cycles (", legends[ k ], ")" ),
-            subtit = paste( "(", bpfMsg, "/ MC runs =", nSize,
-                            "/ MC ", Xtag[ k ], ")" ) )
+            subtit = subtit )
 
   plot_bpf( list( Xdata[[ k ]]$U, Xdata[[ k ]]$V ),
             pl = lowP, pu = highP, nfix = bpfK, mask = TmaskPlot,
@@ -450,8 +442,7 @@ for( k in 1 : nExp ) { # Experiment k
             leg = c( "Productivity", "Unemployment", "Vacancy" ),
             xlab = "Time", ylab = "Filtered series",
             tit = paste( "Shimer puzzle (", legends[ k ], ")" ),
-            subtit = paste( "(", bpfMsg, "/ MC runs =", nSize,
-                            "/ MC ", Xtag[ k ], ")" ) )
+            subtit = subtit )
 
   plot_bpf( list( log0( Xdata[[ k ]]$GDPreal ), Xdata[[ k ]]$entry1exit,
                   Xdata[[ k ]]$entry2exit ),
@@ -461,8 +452,7 @@ for( k in 1 : nExp ) { # Experiment k
             "Net entry (consumption)" ),
             xlab = "Time", ylab = "Filtered series (rescaled)",
             tit = paste( "Net entry and business cycle (", legends[ k ], ")" ),
-            subtit = paste( "(", bpfMsg, "/ MC runs =", nSize,
-                            "/ MC ", Xtag[ k ], ")" ) )
+            subtit = subtit )
 
   #
   # ---- Correlation table ----
@@ -476,8 +466,8 @@ for( k in 1 : nExp ) { # Experiment k
               mask = TmaskStat, pl = lowP, pu = highP, nfix = bpfK,
               tit = paste( "Pearson correlation coefficients (", legends[ k ], ")" ),
               subtit = paste0( "( insignificant values at ", ( 1 - CI ) * 100,
-                               "% in white / MC runs = ", nSize, " / period = ",
-                               warmUpStat + 1, " - ", nTstat, " )" ),
+                               "% in white / period = ", warmUpStat + 1, "-",
+                               nTstat, " / MC runs = ", nSize, " )" ),
               labVars = c( "GDP", "Consumption", "Investment", "Cons. price",
                            "L. productivity", "Unemployment", "Wage", "Mark-up",
                            "Interest", "Gov. debt", "Credit supply", "Loans",
@@ -523,8 +513,8 @@ for( k in 1 : nExp ) { # Experiment k
   title <- paste( "Correlation structure for GDP (1) (", legends[ k ], ")" )
   testMsg <- paste0( "( test H0: lag coefficient is not significant at ",
                      ( 1 - CI ) * 100, "% level", " )" )
-  subTitle <- paste( paste0( "( ", bpfMsg, " / MC runs = ", nSize, " / period = ",
-                             warmUpStat + 1, " - ", nTstat, " )" ),
+  subTitle <- paste( paste0( "( ", bpfMsg, " / period = ", warmUpStat + 1, "-",
+                             nTstat, " / MC runs = ", nSize, " )" ),
                      testMsg, sep = "\n" )
   title( main = title, sub = subTitle )
 
@@ -563,8 +553,9 @@ for( k in 1 : nExp ) { # Experiment k
                   legends[ k ], ")" )
   testMsg <- paste0( "( test H0: there are unit roots / non-stationary at ",
                      ( 1 - CI ) * 100, "% level", " )" )
-  subTitle <- paste( paste0( "( ", bpfMsg," / MC runs = ", nSize, " / period = ",
-                             warmUpStat + 1, " - ", nTstat, " )" ), testMsg, sep = "\n" )
+  subTitle <- paste( paste0( "( ", bpfMsg, " / period = ", warmUpStat + 1, "-",
+                             nTstat," / MC runs = ", nSize, " )" ),
+                     testMsg, sep = "\n" )
   title( main = title, sub = subTitle )
 
   #
@@ -582,9 +573,10 @@ for( k in 1 : nExp ) { # Experiment k
   testMsg <- paste(
     "( ADF/PP H0: non-stationary, KPSS H0: stationary, BDS H0: i.i.d., KS/AD/WW H0: ergodic )" ,
     paste0( "( significance = ", ( 1 - CI ) * 100, "% )" ), sep = "\n" )
-  subTitle <- paste( paste(
-    "( average p-values for testing H0 and rate of rejection of H0 / MC runs =",
-    nSize, "/ period =", warmUpStat + 1, "-", nTstat, ")" ), testMsg, sep = "\n" )
+  subTitle <- paste( paste0(
+    "( average p-values for testing H0 and rate of rejection of H0 / period = ",
+    warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize, " )" ),
+    testMsg, sep = "\n" )
   title( main = title, sub = subTitle )
 
 }

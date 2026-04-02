@@ -14,11 +14,17 @@
 
 # remove warnings for support functions
 # !diagnostics suppress = log0, colSds, na.remove, rec.stats, textplot, saveCSV
+# !diagnostics suppress = colors, radarZoom, plot_bxp_vio, plot_radar
 
-box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, TmaxStat,
-                       TmaskStat, warmUpStat, nTstat, legends, listLeg, cntLeg,
-                       allLeg, sDigits, bPlotCoef, bPlotNotc, folder, outDir,
+box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, mCnt, TmaxStat,
+                       TmaskStat, warmUpStat, nTstat, radarStat, radarZoom,
+                       legends, listLeg, cntLeg, allLeg, colors, lTypes,
+                       sDigits, bPlotCoef, bPlotNotc, folder, outDir,
                        repName, datFilSfx ) {
+
+  radarList <- list( )
+  radarList[[ 1 ]] <- list( series = c( 1, 7, 13, 19, 24, 28 ),
+                            title = "Country effects" )
 
   # ======= COMPARISON OF EXPERIMENTS =======
 
@@ -29,9 +35,15 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, TmaxStat,
   data <- out <- array( list( ), dim = c( maxStats, nExp ) )
   dataMC <- array( dim = c( maxStats, nSize, nExp ) )
   temp <- matrix( nrow = TmaxStat, ncol = nSize )
-  names <- units <- list( )
+  names <- units <- radars <- list( )
 
-  # function to add whiskerplots to the list of comparisons
+  # create radar plot data structure
+  for( r in 1 : length( radarList ) )
+    radars[[ r ]] <- matrix( nrow = nExp, ncol = length( radarList[[ r ]]$series ),
+                             dimnames = list( legends,
+                                              rep( "", length( radarList[[ r ]]$series ) ) ) )
+
+  # function to add data to the comparison data structures
   addStat <- function( stat, exper, x, tit, ylab ) {
 
     if( stat > maxStats ) {
@@ -51,6 +63,16 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, TmaxStat,
     conf[ stat, , exper ] <<- bPlotStats$conf
     out[[ stat, exper ]] <<- bPlotStats$out
 
+    for( r in 1 : length( radarList ) ) {
+      pos <- match( stat, radarList[[ r ]]$series )
+      if( ! is.na( pos ) ) {
+        if( exper == 1 )
+          colnames( radars[[ r ]] )[ pos ] <<- tit
+
+        radars[[ r ]][ exper, pos ] <<- statsTb[ stat, radarStat, exper ]
+      }
+    }
+
     return( stat + 1 )
   }
 
@@ -59,12 +81,13 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, TmaxStat,
   for( k in 1 : nExp ) {
     stat <- 1
 
+    #1
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "dGDPreal", ],
                                         na.rm = TRUE ),
                      tit = "GDP growth",
                      ylab = "Average real GDP growth rate" )
-
-    # Calculates periodic GDP growth rates for each MC series
+    #2
+    # calculates periodic GDP growth rates for each MC series
     for( j in 1 : nSize )
       for( i in TmaskStat )
         if( i == 1 ) {
@@ -74,13 +97,13 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, TmaxStat,
                                            log0( mcData[[ k ]][ i - 1, "GDPreal", j ] ) )
         }
 
-    # Remove +/-infinite values and replace by +/-1
+    # remove +/-infinite values and replace by +/-1
     temp[ is.infinite( temp ) ] <- sign( temp[ is.infinite( temp ) ] )
     stat <- addStat( stat, k, colSds( temp, na.rm = TRUE ),
                      tit = "Volatility of GDP growth",
                      ylab = "Standard deviation of real GDP growth rate" )
-
-    # Mark crises periods (= 1) when GDP growth is less than -3%
+    #3
+    # mark crises periods (= 1) when GDP growth is less than -3%
     for( j in 1 : nSize ) {
       for( i in TmaskStat ) {
         if( i == 1 ){
@@ -99,32 +122,32 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, TmaxStat,
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
                      tit = "Likelihood of GDP crises",
                      ylab = "Probability of GDP reductions over 3%" )
-
+    #4
     stat <- addStat( stat, k, rec.stats[ 2, , k ],
                      tit = "Recovery from GDP crises",
                      ylab = "Average GDP crises recovery period" )
-
+    #5
     stat <- addStat( stat, k, rec.stats[ 5, , k ],
                      tit = "Losses from GDP crises",
                      ylab = "Average GDP losses during crises recovery" )
-
+    #6
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "QcU", ],
                                         na.rm = TRUE ),
                      tit = "Capacity utilization",
                      ylab = "Average capacity utilization rate in consumption-good sector" )
-
+    #7
     temp <- mcData[[ k ]][ TmaskStat, "dCPI", ]
     temp[ ! is.finite( temp ) ] <- NA
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
                      tit = "Inflation",
                      ylab = "Consumer prices index average growth rate" )
-
+    #8
     temp <- mcData[[ k ]][ TmaskStat, "Tax", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
                      tit = "Government income",
                      ylab = "Government tax income over GDP" )
-
+    #9
     temp <- ( mcData[[ k ]][ TmaskStat, "Gcons", ] +
                 mcData[[ k ]][ TmaskStat, "Gtrf", ] +
                 mcData[[ k ]][ TmaskStat, "Gbail", ] ) /
@@ -133,67 +156,67 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, TmaxStat,
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
                      tit = "Government expenditure",
                      ylab = "Total government expenditure over GDP" )
-
+    #10
     temp <- mcData[[ k ]][ TmaskStat, "Gtrain", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
                      tit = "Government training expenditure",
                      ylab = "Government costs to provide training over GDP" )
-
+    #11
     temp <- mcData[[ k ]][ TmaskStat, "Gbail", ] / mcData[[k]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
                      tit = "Government bank bail-out expenditure",
                      ylab = "Government costs to bail-out banks over GDP" )
-
+    #12
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "DefGDP", ],
                                         na.rm = TRUE ),
                      tit = "Government deficit",
                      ylab = "Government deficit over GDP" )
-
+    #13
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "DebGDP", ],
                                         na.rm = TRUE ),
                      tit = "Government debt",
                      ylab = "Government debt over GDP" )
-
+    #14
     temp <- mcData[[ k ]][ TmaskStat, "TC", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
                      tit = "Bank credit supply",
                      ylab = "Total bank credit available over GDP" )
-
+    #15
     temp <- mcData[[ k ]][ TmaskStat, "Loans", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
                      tit = "Firm loans",
                      ylab = "Firm debt stock over GDP" )
-
+    #16
     temp <- mcData[[ k ]][ TmaskStat, "BadDeb", ] / mcData[[ k ]][ TmaskStat, "GDPnom", ]
     temp[ ! is.finite( temp ) ] <- NA
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
                      tit = "Bad debt",
                      ylab = "Total bank bad debt over GDP" )
-
+    #17
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "Bda", ],
                                         na.rm = TRUE ),
                      tit = "Financial fragility",
                      ylab = "Accumulated banks bad debt over assets" )
-
+    #18
     stat <- addStat( stat, k, colMeans( mcData[[k]][ TmaskStat, "Bfail", ],
                                         na.rm = TRUE ),
                      tit = "Bank failures",
                      ylab = "Average bank failures per period" )
-
+    #19
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "U", ],
                                         na.rm = TRUE ),
                      tit = "Unemployment",
                      ylab = "Overal unemployment rate" )
-
+    #20
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "Ue", ],
                                         na.rm = TRUE ),
                      tit = "Unemployment ex-discouraged",
                      ylab = "Average unemployment rate excluding discouraged workers" )
-
+    #21
     # Format full employment MC series (1 = full employment, 0 = otherwise)
     for( j in 1 : nSize )
       for( i in TmaskStat )
@@ -204,78 +227,78 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, TmaxStat,
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
                      tit = "Full employment frequency",
                      ylab = "Probability of zero unemployment rate" )
-
+    #22
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "V", ],
                                         na.rm = TRUE ),
                      tit = "Vacancy",
                      ylab = "Overall Vacancy rate" )
-
+    #23
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "Lent", ],
                                         na.rm = TRUE ),
                      tit = "Entry rate of labor",
                      ylab = "Hires over total labor force" )
-
+    #24
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "wAvgReal", ],
                                         na.rm = TRUE ),
                      tit = "Real wage",
                      ylab = "Average log overall real wage" )
-
+    #25
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "wLogSD", ],
                                         na.rm = TRUE ),
                      tit = "Wage spread",
                      ylab = "Standard deviation of log wage" )
-
+    #26
     temp <- mcData[[ k ]][ TmaskStat, "BonC", ] / mcData[[ k ]][ TmaskStat, "Wc", ]
     temp[ ! is.finite( temp ) ] <- NA
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
                      tit = "Bonus to wage ratio",
                      ylab = "Average bonuses over wages in consumption-good sector" )
-
+    #27
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "wGini", ],
                                         na.rm = TRUE ),
                      tit = "Gini index (wages)",
                      ylab = "Gini index on workers' income" )
-
+    #28
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "Gini", ],
                                         na.rm = TRUE ),
                      tit = "Gini index (all income)",
                      ylab = "Gini index on overall income" )
-
+    #29
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "TeAvg", ],
                                         na.rm = TRUE ),
                      tit = "Worker tenure",
                      ylab = "Average employment time" )
-
+    #30
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "sTavg", ],
                                         na.rm = TRUE ),
                      tit = "Workers tenure skills",
                      ylab = "Average worker tenure skills level" )
-
+    #31
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "sVavg", ],
                                         na.rm = TRUE ),
                      tit = "Workers vintage skills",
                      ylab = "Average worker vintage skills level" )
-
+    #32
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "inn1i", ],
                                         na.rm = TRUE ),
                      tit = "Incremental innovation",
                      ylab = "Share of innovating firms in capital-good sector" )
-
+    #33
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "inn1r", ],
                                         na.rm = TRUE ),
                      tit = "Radical innovation",
                      ylab = "Share of innovating firms in capital-good sector" )
-
+    #34
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "imi1", ],
                                         na.rm = TRUE ),
                      tit = "Imitation",
                      ylab = "Share of imitating firms in capital-good sector" )
-
+    #35
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "dA", ],
                                         na.rm = TRUE ),
                      tit = "Productivity growth",
                      ylab = "Labor productivity growth rate" )
-
+    #36
     temp <- ( 1 - mcData[[ k ]][ TmaskStat, "fCposChg", ] ) *
       mcData[[ k ]][ TmaskStat, "AsdCpreChg", ] +
             mcData[[ k ]][ TmaskStat, "fCposChg", ] *
@@ -284,12 +307,12 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, TmaxStat,
     stat <- addStat( stat, k, colMeans( temp, na.rm = TRUE ),
                      tit = "Productivity spread",
                      ylab = "Standard deviation of log productivity in consumption-good sector" )
-
+    #37
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "qCavg", ],
                                         na.rm = TRUE ),
                      tit = "Quality",
                      ylab = "Weighted average product quality in consumption-good sector" )
-
+    #38
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "entry1", ] -
                                           mcData[[ k ]][ TmaskStat, "exit1", ] +
                                           mcData[[ k ]][ TmaskStat, "entryC", ] -
@@ -297,27 +320,27 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, TmaxStat,
                                         na.rm = TRUE ),
                      tit = "Net entry of firms",
                      ylab = "Number of net entrant firms in all sectors" )
-
+    #39
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "HP1", ],
                                         na.rm = TRUE ),
                      tit = "Market-share turbulence in capital-good sector",
                      ylab = "Hymer-Pashigian index in capital-good sector" )
-
+    #40
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "HPc", ],
                                         na.rm = TRUE ),
                      tit = "Market-share turbulence in consumption-good sector",
                      ylab = "Hymer-Pashigian index in consumption-good sector" )
-
+    #41
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "HH1", ],
                                         na.rm = TRUE ),
                      tit = "Market concentration in capital-good sector",
                      ylab = "Standardized Herfindahl-Hirschman index in capital-good sector" )
-
+    #42
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "HHc", ],
                                         na.rm = TRUE ),
                      tit = "Market concentration in consumption-good sector",
                      ylab = "Standardized Herfindahl-Hirschman index in consumption-good sector" )
-
+    #43
     stat <- addStat( stat, k, colMeans( mcData[[ k ]][ TmaskStat, "muCavg", ],
                                         na.rm = TRUE ),
                      tit = "Mark-up in consumption-good sector",
@@ -383,8 +406,8 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, TmaxStat,
 
     title <- names[[ stat ]]
     subTitle <- paste0(
-      "( bar: median / box: 2nd-3rd quartile / whiskers: max-min / points: outliers / MC runs = ",
-      nSize, " / period = ", warmUpStat + 1, "-", nTstat, " ", cntLeg, " )" )
+      "( bar: median / box: 2nd-3rd quartile / whiskers: max-min / points: outliers / period = ",
+      warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize, " ", cntLeg, " )" )
     plot_bxp_vio( dataMC[ stat, , ], leg = legends, unit = units[[ stat ]],
                   notch = bPlotNotc, tit = title, subtit = subTitle )
   }
@@ -453,8 +476,9 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, TmaxStat,
 
   textplot( formatC( table.stats, digits = sDigits, format = "g" ), cmar = 1 )
   title <- paste( "Monte Carlo descriptive statistics", allLeg )
-  subTitle <- paste( "( numbers in brackets: experiment number / MC runs =",
-                     nSize, "/ period =", warmUpStat + 1, "-", nTstat, cntLeg, ")" )
+  subTitle <- paste0( "( numbers in brackets: experiment number / period = ",
+                      warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize, " ",
+                      cntLeg, " )" )
   title( main = title, sub = subTitle )
   mtext( listLeg, side = 1, line = -2, outer = TRUE )
 
@@ -470,14 +494,26 @@ box_plots <- function( mcData, rec.stats, mcStat, nExp, nSize, TmaxStat,
 
     textplot( formatC( perf.comp, digits = sDigits, format = "g" ), cmar = 1 )
     title <- paste( "Performance comparison", allLeg )
-    subTitle <- paste(
-      "( experiment number in brackets /", tlab,
-      "H0: no difference with baseline / MC runs =",
-      nSize, "/ period =", warmUpStat + 1, "-", nTstat, cntLeg, ")" )
+    subTitle <- paste0(
+      "( experiment number in brackets / ", tlab,
+      " H0: no difference with baseline / period =", warmUpStat + 1, "-",
+      nTstat, " / MC runs = ", nSize, " ", cntLeg, " )" )
     title( main = title, sub = subTitle )
     mtext( listLeg, side = 1, line = -2, outer = TRUE )
 
     saveCSV( perf.comp, baseName = repName, baseFolder = folder,
              subFolder = outDir, suffix = datFilSfx, type = "exp_comp" )
   }
+
+  # ---- Radar plots ----
+
+  statNames <- c( "mean", "median", "std. dev.", "minimum", "maximum" )
+  subTitle <- paste0( "( ", statNames[ radarStat ], " values / period = ",
+                      warmUpStat + 1, "-", nTstat, " / MC runs = ", nSize,
+                      " ", cntLeg, " )" )
+
+  for( r in 1 : length( radarList ) )
+    if( length( radarList[[ r ]]$series ) >= 3 )
+      plot_radar( radars[[ r ]], zoom = radarZoom, dig = 2, col = colors,
+                  lty = lTypes, tit = radarList[[ r ]]$title, subtit = subTitle )
 }
