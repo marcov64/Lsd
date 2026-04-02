@@ -8819,10 +8819,18 @@ void gui::save_datazip( void )
 	if ( strlen( da_tmp ) == 0 )
 		goto end;
 
+	fsavez = NULL;
+	fsave = NULL;
 	if ( sim.dozip == 1 )
 		fsavez = gzopen( da_tmp, "wt" );
 	else
 		fsave = fopen( da_tmp, "wt" );	// use text mode for Windows better compatibility
+
+	if ( fsavez == NULL && fsave == NULL )
+	{
+		cmd( "ttk::messageBox -parent .da -type ok -title Error -icon error -message \"Cannot save data to file\" -detail \"Cannot create plot file\" -detail \"Please check if the drive or the directory\nis not set READ-ONLY or full,n the file is\not open in another application, and try again\"" );
+		goto end;
+	}
 
 	if ( del != 3 ) // delimited files
 	{
@@ -8846,7 +8854,7 @@ void gui::save_datazip( void )
 	}
 
 	if ( del == 3 && num_col > 80 )
-		cmd( "ttk::messageBox -parent .da -type ok -title Warning -icon warning -default ok -message \"Too many data columns to save\" -detail \"No more than 80 columns are supported if fixed column width is chosen.\nOnly the first 80 columns will be saved.\"" );
+		cmd( "ttk::messageBox -parent .da -type ok -title Warning -icon warning -message \"Too many data columns to save\" -detail \"No more than 80 columns are supported if fixed column width is chosen.\nOnly the first 80 columns will be saved\"" );
 
 	num_col = ( int ) std::max( 10, std::min( num_col, 80 ) );
 
