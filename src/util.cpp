@@ -839,7 +839,10 @@ int gui::Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const
 	if ( ! strcmp( argv[ 2 ], "comp" ) )
 		res[ 0 ] = cur->to_compute ? '1' : '0';
 	else
-		return TCL_ERROR;
+		if ( ! strcmp( argv[ 2 ], "i_prng" ) )
+			res[ 0 ] = cur->i_prng ? '1' : '0';
+		else
+			return TCL_ERROR;
 
 	Tcl_SetResult( interp, res, TCL_VOLATILE );
 	return TCL_OK;
@@ -882,7 +885,10 @@ int gui::Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const
 			}
 		}
 		else
-			return TCL_ERROR;
+			if ( ! strcmp( argv[ 2 ], "i_prng" ) )
+				cur1->i_prng = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+			else
+				return TCL_ERROR;
 
 	unsaved_change( true );				// signal unsaved change
 	redrawReq = true;

@@ -233,6 +233,7 @@ namespace lsd
 		friend class worker;
 
 		public:
+			bool i_prng;					// independent pseudo-random gen.?
 			bool to_compute;				// object contents to be updated?
 			bridge *b = NULL;				// head of list of son-object instances
 			netnode *node = NULL;			// pointer to network node data structure
@@ -285,7 +286,7 @@ namespace lsd
 			void move( const char *dest );
 			void reset_end( void );
 
-			object( object *_up, const char *_label, bool _to_compute = true, simulation *sim = NULL );	// constructor
+			object( object *_up, const char *_label, bool _i_prng = false, bool _to_compute = true, simulation *sim = NULL );	// constructor
 			~object( void );					// destructor
 			object( object & o ) = delete;		// copy constructor
 			object & operator=( const object & o ) = delete;// assignment constructor

@@ -534,7 +534,7 @@ void lsd::simulation::empty_blueprint( void )
 void lsd::simulation::reset_blueprint( object *r )
 {
 	empty_blueprint( );
-	blueprint = new object ( NULL, ROOT_NAME, true, this );
+	blueprint = new object ( NULL, ROOT_NAME, false, true, this );
 
 	if ( r != NULL )
 		r->set_blueprint( blueprint );

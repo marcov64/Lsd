@@ -116,6 +116,7 @@ void lsd::object::show_graph( void )
 				destroy .list; \
 				set vname $res_g; \
 				set useCurrObj no; \
+				set i_prng [ expr { ! [ get_obj_conf $vname i_prng ] } ]; \
 				set nocomp [ expr { ! [ get_obj_conf $vname comp ] } ]; \
 				tk_popup .str.f.c.v %%X %%Y \
 			} \
@@ -133,7 +134,8 @@ void lsd::object::show_graph( void )
 	cmd( ".str.f.c.v add separator" );
 	cmd( ".str.f.c.v add cascade -label Add -menu .str.f.c.v.a" );
 	cmd( ".str.f.c.v add separator" );
-	cmd( ".str.f.c.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -command { set ctxMenuCmd \"set_obj_conf $vname comp [ expr { ! $nocomp } ]\"; set choice 95 }" );	// entryconfig 14
+	cmd( ".str.f.c.v add checkbutton -label \"Indep. PRNG ($)\" -variable i_prng -onvalue 0 -offvalue 1 -command { set ctxMenuCmd \"set_obj_conf $vname i_prng [ expr { ! $i_prng } ]\"; set choice 95 }" );
+	cmd( ".str.f.c.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -command { set ctxMenuCmd \"set_obj_conf $vname comp [ expr { ! $nocomp } ]\"; set choice 95 }" );
 	cmd( ".str.f.c.v add separator" );
 	cmd( ".str.f.c.v add command -label \"Initial Values\" -command { set choice 21 }" );
 	cmd( ".str.f.c.v add command -label \"Browse Data\" -command { set choice 34 }" );
@@ -282,7 +284,7 @@ void lsd::object::create_float_list( void )
  *************************************************************/
 void lsd::object::draw_obj( object *sel, int level, int center, int from, bool zeroinst )
 {
-	bool fit_wid, to_compute;
+	bool fit_wid, to_compute, i_prng;
 	double h_fact, v_fact, range_fact;
 	int h, i, j, k, step_level, step_type, begin, count, max_wid, range_init;
 	char str[ MAX_LINE_SIZE ], ch[ MAX_ELEM_LENGTH ], ch1[ MAX_LINE_SIZE ];
@@ -352,6 +354,7 @@ void lsd::object::draw_obj( object *sel, int level, int center, int from, bool z
 		}
 		else									// compute number of groups of this type
 		{
+			i_prng = false;
 			fit_wid = to_compute = true;
 			for ( h = 0, cur = this; cur != NULL ; ++h, cur = cur->hyper_next( ) )
 			{
@@ -366,6 +369,7 @@ void lsd::object::draw_obj( object *sel, int level, int center, int from, bool z
 				snprintf( str, MAX_LINE_SIZE, "%s%d", strlen( ch1 ) > 0 ? " " : "", count );
 				strcatn( ch1, str, MAX_LINE_SIZE );
 
+				i_prng = cur->i_prng;
 				to_compute = cur->to_compute;
 
 				for ( ; cur->next != NULL; cur = cur->next ); // reaches the last object of this group
@@ -380,6 +384,9 @@ void lsd::object::draw_obj( object *sel, int level, int center, int from, bool z
 				if ( h < k )					// found zero instanced object?
 					strcatn( ch1, "\u2026", MAX_LINE_SIZE );
 			}
+
+			if ( i_prng )
+				strcatn( ch1, "$", MAX_LINE_SIZE );
 
 			if ( ! to_compute )
 				strcatn( ch1, "-", MAX_LINE_SIZE );

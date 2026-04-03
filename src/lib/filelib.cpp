@@ -243,7 +243,7 @@ void lsd::simulation::unload_configuration( bool full )
 	empty_varattributes( this );
 	empty_objattributes( this );
 
-	root = new object ( NULL, ROOT_NAME, true, this );
+	root = new object ( NULL, ROOT_NAME, false, true, this );
 	reset_blueprint( NULL );
 
 	if ( desc != NULL )
@@ -301,6 +301,7 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 	if ( strcmp( n.attribute( "name" ).value( ), attr->label ) != 0 )
 		return 31;
 
+	i_prng = n.attribute( "prng" ).as_bool( false );
 	to_compute = n.attribute( "compute" ).as_bool( true );
 
 	// scan contained child objects and elements
@@ -477,6 +478,7 @@ int lsd::object::load_xml_insts( x_nodeT &n, n_mapT &node_map, i_setT &warning )
 		else
 			m = num[ l ];
 
+		cur->i_prng = i_prng;
 		cur->to_compute = to_compute;
 		cur->replicate( m );
 
@@ -923,6 +925,9 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 
 	x_nodeT n = pn.append_child( "object" );
 	n.append_attribute( "name" ) = attr->label;
+
+	if ( i_prng )
+		n.append_attribute( "prng" ) = true;
 
 	if ( ! to_compute )
 		n.append_attribute( "compute" ) = false;

@@ -377,7 +377,7 @@ int gui::create( void )
  *************************************************************/
 int gui::browse( lsd::object *r )
 {
-	bool done, sp_upd, da_en;
+	bool done, sp_upd, da_en, i_prng, to_compute;
 	int i, num;
 	lsd::ass_list_itT ca;
 	lsd::bridge *cb;
@@ -794,15 +794,17 @@ int gui::browse( lsd::object *r )
 				if ( cb->head != NULL )
 				{
 					cb->head->next_count( cb->head, & num );
-					done = cb->head->to_compute;
+					i_prng = cb->head->i_prng;
+					to_compute = cb->head->to_compute;
 				}
 				else
 				{
 					num = 0;
-					done = true;
+					i_prng = false;
+					to_compute = true;
 				}
 
-				cmd( ".l.s.c.son_name insert end \"%s (#%d%s)\"", cb->attr->label, num, done ? "" : "-" );
+				cmd( ".l.s.c.son_name insert end \"%s (#%d%s%s)\"", cb->attr->label, num, i_prng ? "$" : "", to_compute ? "" : "-" );
 				cmd( ".l.s.c.son_name itemconf %d -fg $colorsTheme(obj)", i );
 
 				set_ttip_descr( ".l.s.c.son_name", cb->attr->label, i );
@@ -827,10 +829,11 @@ int gui::browse( lsd::object *r )
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 11
 		cmd( ".l.s.c.son_name.v add cascade -label Add -menu .l.s.c.son_name.v.a" );	// entryconfig 12=14
 		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 13
-		cmd( ".l.s.c.son_name.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -accelerator F5 -command { set ctxMenuCmd \"set_obj_conf $vname comp [ expr { ! $nocomp } ]\"; set choice 95 }" );	// entryconfig 14
-		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 15
-		cmd( ".l.s.c.son_name.v add command -label \"Initial Values\" -accelerator \"Ctrl+I\" -command { set choice 21 }" );	// entryconfig 16
-		cmd( ".l.s.c.son_name.v add command -label \"Browse Data\" -accelerator \"Ctrl+B\" -command { set choice 34 }" );	// entryconfig 17
+		cmd( ".l.s.c.son_name.v add checkbutton -label \"Indep. PRNG ($)\" -variable i_prng -onvalue 0 -offvalue 1 -accelerator F5 -command { set ctxMenuCmd \"set_obj_conf $vname i_prng [ expr { ! $i_prng } ]\"; set choice 95 }" );	// entryconfig 14
+		cmd( ".l.s.c.son_name.v add checkbutton -label \"Not Compute (-)\" -variable nocomp -accelerator F6 -command { set ctxMenuCmd \"set_obj_conf $vname comp [ expr { ! $nocomp } ]\"; set choice 95 }" );	// entryconfig 15
+		cmd( ".l.s.c.son_name.v add separator" );	// entryconfig 16
+		cmd( ".l.s.c.son_name.v add command -label \"Initial Values\" -accelerator \"Ctrl+I\" -command { set choice 21 }" );	// entryconfig 17
+		cmd( ".l.s.c.son_name.v add command -label \"Browse Data\" -accelerator \"Ctrl+B\" -command { set choice 34 }" );	// entryconfig 18
 		cmd( "ttk::menu .l.s.c.son_name.v.a -tearoff 0" );
 		cmd( ".l.s.c.son_name.v.a add command -label Variable -accelerator \"Ctrl+V\" -command { set choice 2; set param 0 }" );
 		cmd( ".l.s.c.son_name.v.a add command -label Parameter -accelerator \"Ctrl+P\" -command { set choice 2; set param 1 }" );
@@ -882,6 +885,7 @@ int gui::browse( lsd::object *r )
 					set itemfirst [ lindex [ .l.s.c.son_name yview ] 0 ]; \
 					if { ! ( $upObjItem && $itemfocus == 0 ) && ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						set useCurrObj no; \
+						set i_prng [ expr { ! [ get_obj_conf $vname i_prng ] } ]; \
 						set nocomp [ expr { ! [ get_obj_conf $vname comp ] } ]; \
 						if { $itemfocus == 0 } { \
 							.l.s.c.son_name.v entryconfig 3 -state disabled \
@@ -953,13 +957,25 @@ int gui::browse( lsd::object *r )
 					set listfocus 2; \
 					set itemfocus [ .l.s.c.son_name curselection ]; \
 					if { ! ( $upObjItem && $itemfocus == 0 ) && ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $eff_t == 0 } { \
+						set i_prng [ expr { ! [ get_obj_conf $vname i_prng ] } ]; \
+						set ctxMenuCmd \"set_obj_conf $vname i_prng $i_prng\"; \
+						set choice 95 \
+					} \
+				}" );
+			cmd( "bind .l.s.c.son_name <dollar> { \
+					event generate .l.s.c.son_name <F5> \
+				}" );
+			cmd( "bind .l.s.c.son_name <F6> { \
+					set listfocus 2; \
+					set itemfocus [ .l.s.c.son_name curselection ]; \
+					if { ! ( $upObjItem && $itemfocus == 0 ) && ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] && $eff_t == 0 } { \
 						set nocomp [ expr { ! [ get_obj_conf $vname comp ] } ]; \
 						set ctxMenuCmd \"set_obj_conf $vname comp $nocomp\"; \
 						set choice 95 \
 					} \
 				}" );
 			cmd( "bind .l.s.c.son_name <minus> { \
-					event generate .l.s.c.son_name <F5> \
+					event generate .l.s.c.son_name <F6> \
 				}" );
 			cmd( "bind .l.s.c.son_name <KeyRelease> { \
 					if { ( %%s & 0x20004 ) != 0 } { \

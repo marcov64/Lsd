@@ -930,6 +930,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cd = desc.search_descr( lab_old, true );
 			r->next_count( r, & num );
 
+			cmd( "set i_prng %d", r->i_prng ? 1 : 0 );
 			cmd( "set to_compute %d", r->to_compute ? 1 : 0 );
 
 			cmd( "set T .objprop" );
@@ -962,8 +963,12 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "tooltip::tooltip $T.b0.del \"Remove object\"" );
 
 			cmd( "ttk::frame $T.b1" );
+			cmd( "ttk::checkbutton $T.b1.prng -text \"Independent PRNG: use dedicated pseudo-random number generator\" -variable i_prng -underline 0" );
 			cmd( "ttk::checkbutton $T.b1.com -text \"Compute: force the computation of the variables in this object\" -variable to_compute -underline 1" );
-			cmd( "pack $T.b1.com" );
+			cmd( "pack $T.b1.prng $T.b1.com -anchor w" );
+
+			cmd( "tooltip::tooltip $T.b1.prng \"Use a per-instance dedicated\npseudo-random number generator\nfor variables an descendants\"" );
+			cmd( "tooltip::tooltip $T.b1.com \"Force the computation of the variables\nin this object even if not requiredfor\nthe computation of other variables\"" );
 
 			cmd( "set w $T.desc" );
 
@@ -984,6 +989,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cmd( "bind $T <Control-n> \"$T.b0.num invoke\"; bind $T <Control-N> \"$T.b0.num invoke\"" );
 			cmd( "bind $T <Control-m> \"$T.b0.mov invoke\"; bind $T <Control-M> \"$T.b0.mov invoke\"" );
 			cmd( "bind $T <Control-d> \"$T.b0.del invoke\"; bind $T <Control-D> \"$T.b0.del invoke\"" );
+			cmd( "bind $T <Control-i> \"$T.b1.prng invoke\"; bind $T <Control-I> \"$T.b1.prng invoke\"" );
 			cmd( "bind $T <Control-o> \"$T.b1.com invoke\"; bind $T <Control-O> \"$T.b1.com invoke\"" );
 
 			cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#ChangeObjName } { set choice 2 }" );
@@ -1006,8 +1012,17 @@ lsd::object *gui::operate( lsd::object *r )
 				// save description changes
 				desc.change_descr( lab_old, NULL, -1, eval_str( "[ .objprop.desc.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
-				cmd( "set choice $to_compute" );
+				cmd( "set choice $i_prng" );
+				if ( choice != r->i_prng )
+				{
+					cur = sim.blueprint->search( r->attr );
+					if ( cur != NULL )
+						cur->i_prng = choice;
+					for ( cur = r; cur != NULL; cur = cur->hyper_next( ) )
+						cur->i_prng = choice;
+				}
 
+				cmd( "set choice $to_compute" );
 				if ( choice != r->to_compute )
 				{
 					cur = sim.blueprint->search( r->attr );

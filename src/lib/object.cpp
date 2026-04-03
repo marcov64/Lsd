@@ -422,11 +422,12 @@ lsd::objattr *lsd::objattributes::rename( const char *old_lab, const char *new_l
 /*************************************************************
  OBJECT constructor
  *************************************************************/
-lsd::object::object( object *_up, const char *_label, bool _to_compute, simulation *sim )
+lsd::object::object( object *_up, const char *_label, bool _i_prng, bool _to_compute, simulation *sim )
 {
 	objattr *par_attr;
 
 	up = _up;
+	i_prng = _i_prng;
 	to_compute = _to_compute;
 
 	if ( up != NULL )
@@ -1613,9 +1614,9 @@ void lsd::object::move( const char *dest )
 			{
 				// update linked list of object instances in bridge
 				if ( cur1 == NULL )
-					cur1 = nb->head = new object ( d, attr->label, cur->to_compute );
+					cur1 = nb->head = new object ( d, attr->label, cur->i_prng, cur->to_compute );
 				else
-					cur1 = cur1->next = new object ( d, attr->label, cur->to_compute );
+					cur1 = cur1->next = new object ( d, attr->label, cur->i_prng, cur->to_compute );
 
 				for ( cv = cur->v; cv != NULL; cv = cv->next )
 					cur1->add_var( cv );
@@ -1674,8 +1675,9 @@ void lsd::object::replicate( int num, bool propagate )
 	for ( i = usl; i < num; ++i )
 	{
 		cur1 = cur->next;
-		cur->next = new object ( up, attr->label, to_compute );
+		cur->next = new object ( up, attr->label, i_prng, to_compute );
 		cur->next->next = cur1;
+		cur->i_prng = i_prng;
 		cur->to_compute = to_compute;
 
 		cur1 = cur->next;
@@ -1715,7 +1717,7 @@ void lsd::object::copy_descendant( object *to )
 	else
 		cur = b->head;
 
-	to->b->head = new object ( to, cur->attr->label, cur->to_compute );
+	to->b->head = new object ( to, cur->attr->label, cur->i_prng, cur->to_compute );
 
 	// copy variables of head object
 	for ( cv = cur->v; cv != NULL; cv = cv->next )
@@ -1736,7 +1738,7 @@ void lsd::object::copy_descendant( object *to )
 		else
 			cur = cb1->head;
 
-		cb->head = new object ( to, cur->attr->label, cur->to_compute );
+		cb->head = new object ( to, cur->attr->label, cur->i_prng, cur->to_compute );
 
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 			cb->head->add_var( cv );
