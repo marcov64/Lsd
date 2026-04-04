@@ -2319,16 +2319,14 @@ double gui::eval_double( const char *tcl_exp )
 const char *gui::get_make_var( const char *var, const char *buf, char *dest, int sz )
 {
 	strT buffer, pattern;
-	std::regex regex;
 	std::smatch match;
 
 	buffer = buf;
 	pattern = "(^|\n)[ \t]*";
 	pattern	+= var;
 	pattern += "[ \t]*=[ \t]*(.*)[ \t]*(?=\n|$)";
-	regex = pattern;
 
-	if ( ! std::regex_search( buffer, match, regex ) )
+	if ( ! std::regex_search( buffer, match, std::regex( pattern ) ) )
 		return NULL;
 
 	snprintf( dest, sz, "%s", match.str( 2 ).c_str( ) );

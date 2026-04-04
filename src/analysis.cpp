@@ -5088,7 +5088,7 @@ str2_vecT gui::align_file_vars( i2_vecT & f_stores )
 	str_vecT uniq_sigs;
 	str2_vecT v_names( f_stores.size( ) ), v_sigs( f_stores.size( ) );
 
-	std::regex f_pref( std::string( std::string( "^" ) + lsd::tag_pref[ TAG_FILE ] ) + "([0-9]+)_" );
+	const std::regex f_pref( std::string( std::string( "^" ) + lsd::tag_pref[ TAG_FILE ] ) + "([0-9]+)_" );
 
 	// get set of unique variable signatures (name-position-start-end), preserving order
 	for ( auto i = 0; i < ( int ) f_stores.size( ); ++i )
