@@ -100,6 +100,7 @@ typedef std::vector < std::thread > thr_vecT;
 typedef std::vector < std::vector < int > > i2_vecT;
 typedef std::vector < std::vector < strT > > str2_vecT;
 typedef std::vector < std::list < int > > i_list_vecT;
+typedef std::uint_least32_t u_long32T;
 typedef std::unique_lock < std::mutex > uniq_lT;
 typedef std::unique_lock < std::recursive_mutex > rec_uniqlT;
 typedef std::unordered_map < strT, d_mapT > dm_mapT;
@@ -107,7 +108,6 @@ typedef std::unordered_map < strT, int > i_mapT;
 typedef std::unordered_map < strT, strT > p_mapT;
 typedef Eigen::MatrixXd e_matT;
 typedef Eigen::VectorXd e_vecT;
-
 
 namespace lsd
 {

@@ -514,38 +514,74 @@ double lsd::equation::_seed_( int new_value )
 }
 
 
-double lsd::object::rnd_seed( long new_seed )
+/*************************************************************
+ SEEDER
+ *************************************************************/
+u_long32T lsd::simulation::seeder( u_long32T seed )
 {
-	if ( new_seed >= 0 )
+	static std::mt19937 rd;
+	static std::vector< u_long32T > seeds;
+	static std::uniform_int_distribution< int > u( 0, 9 );
+
+	if ( seed > 0 || seeds.size( ) == 0 )
 	{
-		prng_seed = ( unsigned long ) new_seed;
+		if ( seed > 0 )
+			rd.seed( seed );
 
-		if ( prng != NULL )
-			switch ( prng_type )
-			{
-				case 1:
-				case 3:
-					( ( std::minstd_rand * ) prng )->seed( prng_seed );
-					break;
-				case 2:
-				case 4:
-					( ( std::mt19937 * ) prng )->seed( prng_seed );
-					break;
-				case 5:
-					( ( std::mt19937_64 * ) prng )->seed( prng_seed );
-					break;
-				case 6:
-					( ( std::ranlux24 * ) prng )->seed( prng_seed );
-					break;
-				case 7:
-					( ( std::ranlux48 * ) prng )->seed( prng_seed );
-					break;
-			}
-
-		return ( double ) prng_seed;
+		seeds.resize( 1000 );
+		std::seed_seq seq { u( rd ), u( rd ), u( rd ), u( rd ) };
+		seq.generate( seeds.begin( ), seeds.end( ) );
 	}
-	else
-		return ( double ) ( prng_seed - 1 );
+
+	if ( seed == 0 )
+	{
+		seed = seeds.back( );
+		seeds.pop_back( );
+
+		return seed;
+	}
+
+	return 0;
+}
+
+
+/*************************************************************
+ GET_RND_SEED (*)
+ *************************************************************/
+double lsd::object::get_rnd_seed( void )
+{
+	return prng_seed;
+}
+
+
+/*************************************************************
+ SET_RND_SEED (*)
+ *************************************************************/
+void lsd::object::set_rnd_seed( u_long32T seed )
+{
+	prng_seed = seed;
+
+	if ( prng != NULL )
+		switch ( prng_type )
+		{
+			case 1:
+			case 3:
+				( ( std::minstd_rand * ) prng )->seed( seed );
+				break;
+			case 2:
+			case 4:
+				( ( std::mt19937 * ) prng )->seed( seed );
+				break;
+			case 5:
+				( ( std::mt19937_64 * ) prng )->seed( seed );
+				break;
+			case 6:
+				( ( std::ranlux24 * ) prng )->seed( seed );
+				break;
+			case 7:
+				( ( std::ranlux48 * ) prng )->seed( seed );
+				break;
+		}
 }
 
 

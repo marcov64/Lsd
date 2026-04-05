@@ -1878,7 +1878,7 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 
 		// set new PRNG new seed
 		if ( cur->prng_type > 0 )
-			cur->rnd_seed( attr->cont->sim->seeder++ );
+			cur->set_rnd_seed( attr->cont->sim->seeder( ) );
 
 		if ( net )						// if objects are nodes in a network
 			cur->node = new netnode( this );// insert new nodes in network (as isolated nodes)

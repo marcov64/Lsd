@@ -252,7 +252,7 @@ namespace lsd
 			int lst_cnt_upd = 0;			// period of last counter update
 			mtxT obj_comp_lck;				// mutex lock for parallel computations
 			o_vecT hooks;					// vector of connections to other objects
-			unsigned long prng_seed = 1;	// random number generator initial seed
+			u_long32T prng_seed = 0;		// random number generator initial seed
 			void *cext = NULL;				// pointer to C++ object extension
 			void *prng = NULL;				// pointer to pseudo-random generator
 			v_mapT v_map;					// fast lookup map to variables
@@ -295,7 +295,7 @@ namespace lsd
 			object & operator=( const object & o ) = delete;// assignment constructor
 
 		private:
-			bool alloc_save_mem( unsigned long & seeder );
+			bool alloc_save_mem( void );
 			bool check_cond( double val1, int lopc, double val2 );
 			bool load_txt_insts( const char *file_name, FILE *f );
 			bool load_txt_struct( FILE *f );
@@ -311,6 +311,7 @@ namespace lsd
 			double cal( object *caller, const char *lab, int lag = 0 );
 			double count( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 			double count_all( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
+			double get_rnd_seed( void );
 			double increment( const char *lab, double value );
 			double initturbo( const char *lab );
 			double initturbo( const char *lab, double tot );
@@ -328,7 +329,6 @@ namespace lsd
 			double recal( const char *l );
 			double sd( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 			double search_inst( object *obj = NULL, bool fun = true );
-			double rnd_seed( long new_seed );
 			double stat( const char *lab1, double *v = NULL, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 			double stats_net( const char *lab, double *r );
 			double sum( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
@@ -391,6 +391,7 @@ namespace lsd
 			void save_xml_struct( x_nodeT &pn, long &node_serial, bool quick );
 			void search_inst( object *obj, long *pos, long *checked );
 			void set_blueprint( object *container );
+			void set_rnd_seed( u_long32T seed );
 			void set_tit_counter( void );
 			void update( bool recurse, bool user );
 			FILE *search_txt_data( const char *name, const char *init, const char *str );
@@ -1139,7 +1140,6 @@ namespace lsd
 			thrT run_monitor;				// thread monitoring parallel instances
 			thrT sim_thread;				// thread object where simulation is run
 			unsigned seed = 1;				// random number generator initial seed
-			unsigned long seeder;			// object PRNG seeder
 			varattributes va { NULL };		// static variable attributes container
 			variable *cemetery = NULL;		// LSD saved data from deleted objects
 			worker *workers = NULL;			// multi-thread parallel worker data
@@ -1247,6 +1247,7 @@ namespace lsd
 			template < class distr > double draw_mt32( distr &d );
 			template < class distr > double draw_mt64( distr &d );
 			template < class distr > double draw_rd( distr &d );
+			u_long32T seeder( u_long32T seed = 0 );
 			void *set_random( int gen );
 			void empty_blueprint( void );
 			void empty_cemetery( void );
