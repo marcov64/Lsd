@@ -24,7 +24,7 @@
  course, it has also to manage the messages from user and from
  the model at run time.
 
- - bool object::alloc_save_mem( );
+ - bool object::alloc_save_mem( unsigned long & seeder );
  Prepare variables to store saved data.
  *************************************************************/
 
@@ -475,8 +475,9 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update, bool 
 
 	// pre-allocate memory to save all existing elements for the entire simulation
 	running = true;
+	seeder = seed;
 	series_saved = 0;
-	if ( ! root->alloc_save_mem( ) )
+	if ( ! root->alloc_save_mem( seeder ) )
 	{
 #ifndef _TERM_
 		if ( ! da_en )
@@ -753,14 +754,18 @@ void lsd::simulation::empty_stack( void )
 
 /*************************************************************
  ALLOC_SAVE_MEM
+ Also initialize pseudo-random number generators in objects
  *************************************************************/
-bool lsd::object::alloc_save_mem( void )
+bool lsd::object::alloc_save_mem( unsigned long & seeder )
 {
 	int i;
 	bridge *cb;
 	object *cur;
 	simulation *sim = attr->cont->sim;
 	variable *cv;
+
+	if ( prng_type > 0 )
+		rnd_seed( seeder++ );						// initialize PRNGs
 
 	// for each variable set the data saving support
 	for ( cv = v; cv != NULL; cv = cv->next )
@@ -799,7 +804,7 @@ bool lsd::object::alloc_save_mem( void )
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 		for ( cur = cb->head; cur != NULL && sim->quit != 2; cur = BROTHER( cur ) )
-			if ( ! cur->alloc_save_mem( ) )
+			if ( ! cur->alloc_save_mem( seeder ) )
 				goto error;
 
 	return true;

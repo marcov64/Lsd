@@ -124,7 +124,7 @@ lsd::equation::equation( void )
 lsd::simulation::simulation( const char fname[ ], const char path[ ], int quick )
 {
 	oa.sim = va.sim = this;
-	root = new object ( NULL, ROOT_NAME, false, true, this );
+	root = new object ( NULL, ROOT_NAME, DEF_PRNG, true, false, this );
 	latt = new lattice;
 	reset_blueprint( NULL );
 

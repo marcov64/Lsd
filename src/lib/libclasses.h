@@ -26,6 +26,7 @@
 
 
 // global constants
+#define DEF_PRNG 2							// default random generator type
 #define MAX_BUFF_SIZE 	10000				// standard Tcl buffer size (>9999)
 #define MAX_ELEM_LENGTH	100					// maximum element name length (>99)
 #define MAX_FILE_SIZE 	1000000				// max bytes to read from file
@@ -233,9 +234,9 @@ namespace lsd
 		friend class worker;
 
 		public:
-			bool i_prng;					// independent pseudo-random gen.?
 			bool to_compute;				// object contents to be updated?
 			bridge *b = NULL;				// head of list of son-object instances
+			int prng_type = -1;				// pseudo-random generator type
 			netnode *node = NULL;			// pointer to network node data structure
 			objattr *attr;					// static/homogeneous attributes object
 			object *hook = NULL;			// static connection to other objects
@@ -251,7 +252,9 @@ namespace lsd
 			int lst_cnt_upd = 0;			// period of last counter update
 			mtxT obj_comp_lck;				// mutex lock for parallel computations
 			o_vecT hooks;					// vector of connections to other objects
+			unsigned long prng_seed = 1;	// random number generator initial seed
 			void *cext = NULL;				// pointer to C++ object extension
+			void *prng = NULL;				// pointer to pseudo-random generator
 			v_mapT v_map;					// fast lookup map to variables
 
 		public:
@@ -263,7 +266,7 @@ namespace lsd
 			int check_label( const char *lab );
 			object *add_n_objects2( const char *lab, int n, int t_update = -1 );
 			object *add_n_objects2( const char *lab, int n, object *ex, int t_update = -1 );
-			object *add_obj( const char *label, int num = 1, bool propagate = false );
+			object *add_obj( const char *label, int num = 1, bool propagate = false, int prng_type = -1, bool to_compute = true, bool blueprint = false );
 			object *hyper_next( const char *lab );
 			object *hyper_next( objattr *at );
 			object *hyper_next( void );
@@ -286,13 +289,13 @@ namespace lsd
 			void move( const char *dest );
 			void reset_end( void );
 
-			object( object *_up, const char *_label, bool _i_prng = false, bool _to_compute = true, simulation *sim = NULL );	// constructor
+			object( object *_up, const char *_label, int _prng_type = -1, bool _to_compute = true, bool blueprint = false, simulation *sim = NULL );	// constructor
 			~object( void );					// destructor
 			object( object & o ) = delete;		// copy constructor
 			object & operator=( const object & o ) = delete;// assignment constructor
 
 		private:
-			bool alloc_save_mem( void );
+			bool alloc_save_mem( unsigned long & seeder );
 			bool check_cond( double val1, int lopc, double val2 );
 			bool load_txt_insts( const char *file_name, FILE *f );
 			bool load_txt_struct( FILE *f );
@@ -325,6 +328,7 @@ namespace lsd
 			double recal( const char *l );
 			double sd( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 			double search_inst( object *obj = NULL, bool fun = true );
+			double rnd_seed( long new_seed );
 			double stat( const char *lab1, double *v = NULL, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 			double stats_net( const char *lab, double *r );
 			double sum( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
@@ -1135,6 +1139,7 @@ namespace lsd
 			thrT run_monitor;				// thread monitoring parallel instances
 			thrT sim_thread;				// thread object where simulation is run
 			unsigned seed = 1;				// random number generator initial seed
+			unsigned long seeder;			// object PRNG seeder
 			varattributes va { NULL };		// static variable attributes container
 			variable *cemetery = NULL;		// LSD saved data from deleted objects
 			worker *workers = NULL;			// multi-thread parallel worker data
@@ -1163,7 +1168,7 @@ namespace lsd
 			clock_t end_profile[ MAX_PROF_SIZE ];// profile-level end times
 			cond_vT upd_workers;			// worker schedule update signal
 			int nsim;						// library simulation object index
-			int ran_gen_id = 2;				// ID of initial generator (DO NOT CHANGE)
+			int sim_prng_type = DEF_PRNG;	// pseudo-random generator type
 			int stack_level;				// LSD stack call level
 			i_atomT alaplErrCnt, bernoErrCnt, betaErrCnt, binomErrCnt, cauchErrCnt, chisqErrCnt, expErrCnt, fishErrCnt, gammaErrCnt, geomErrCnt, lnormErrCnt, normErrCnt, paretErrCnt, poissErrCnt, studErrCnt, weibErrCnt;
 			i_vecT run_status;				// parallel running instances status

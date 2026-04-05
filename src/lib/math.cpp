@@ -477,14 +477,14 @@ double lsd::equation::betacdf( double alpha, double beta, double x )
  INIT_RANDOM
  Set seed to all random generators
  Pseudo-random number generator to extract draws
- ran_gen_id = 0 : system (not pseudo) random device in (0,1)
- ran_gen_id = 1 : Linear congruential in (0,1)
- ran_gen_id = 2 : Mersenne-Twister in (0,1)
- ran_gen_id = 3 : Linear congruential in [0,1)
- ran_gen_id = 4 : Mersenne-Twister in [0,1)
- ran_gen_id = 5 : Mersenne-Twister with 64 bits resolution in [0,1)
- ran_gen_id = 6 : Lagged fibonacci with 24 bits resolution in [0,1)
- ran_gen_id = 7 : Lagged fibonacci with 48 bits resolution in [0,1)
+ prng_type = 0 : system (not pseudo) random device in (0,1)
+ prng_type = 1 : Linear congruential in (0,1)
+ prng_type = 2 : Mersenne-Twister in (0,1)
+ prng_type = 3 : Linear congruential in [0,1)
+ prng_type = 4 : Mersenne-Twister in [0,1)
+ prng_type = 5 : Mersenne-Twister 64 bits resolution in [0,1)
+ prng_type = 6 : Lagged fibonacci 24 bits resolution in [0,1)
+ prng_type = 7 : Lagged fibonacci 48 bits resolution in [0,1)
  *************************************************************/
 void lsd::simulation::init_random( unsigned seed )
 {
@@ -496,6 +496,72 @@ void lsd::simulation::init_random( unsigned seed )
 	lf24.seed( seed );				// lagged fibonacci 24 bits
 	lf48.seed( seed );				// lagged fibonacci 48 bits
 }
+
+
+/*************************************************************
+ _SEED_ (*)
+ *************************************************************/
+double lsd::equation::_seed_( int new_value )
+{
+	if ( new_value >= 0 )
+	{
+		_sim_->seed = ( unsigned ) new_value;
+		_sim_->init_random( _sim_->seed );
+		return _sim_->seed;
+	}
+	else
+		return _sim_->seed - 1;
+}
+
+
+double lsd::object::rnd_seed( long new_seed )
+{
+	if ( new_seed >= 0 )
+	{
+		prng_seed = ( unsigned long ) new_seed;
+
+		if ( prng != NULL )
+			switch ( prng_type )
+			{
+				case 1:
+				case 3:
+					( ( std::minstd_rand * ) prng )->seed( prng_seed );
+					break;
+				case 2:
+				case 4:
+					( ( std::mt19937 * ) prng )->seed( prng_seed );
+					break;
+				case 5:
+					( ( std::mt19937_64 * ) prng )->seed( prng_seed );
+					break;
+				case 6:
+					( ( std::ranlux24 * ) prng )->seed( prng_seed );
+					break;
+				case 7:
+					( ( std::ranlux48 * ) prng )->seed( prng_seed );
+					break;
+			}
+
+		return ( double ) prng_seed;
+	}
+	else
+		return ( double ) ( prng_seed - 1 );
+}
+
+
+/*************************************************************
+ _RANDOM_ (*)
+ *************************************************************/
+double lsd::equation::_random_( int new_value )
+{
+	if ( new_value >= 0 && new_value <= 7 )
+		_sim_->set_random( ( unsigned ) new_value );
+
+	return _sim_->sim_prng_type;
+}
+
+
+
 
 template < class distr > double lsd::simulation::draw_rd( distr &d )
 {
@@ -560,7 +626,7 @@ template < class distr > double lsd::simulation::draw_lf48( distr &d )
  *************************************************************/
 template < class distr > double lsd::simulation::draw_gen( distr &d )
 {
-	switch ( ran_gen_id )
+	switch ( sim_prng_type )
 	{
 		case 0:						// system (not pseudo) random generator
 			return draw_rd( d );
@@ -593,9 +659,9 @@ void *lsd::simulation::set_random( int gen )
 {
 	if ( gen >= 0 && gen <= 7 )
 	{
-		ran_gen_id = gen;
+		sim_prng_type = gen;
 
-		switch ( ran_gen_id )
+		switch ( sim_prng_type )
 		{
 			case 0:						// system (not pseudo) random generator
 				if ( ! HW_RAND_GEN )
@@ -647,7 +713,7 @@ double lsd::equation::_ran1_( long *unused )
 
 	do
 		ran = _sim_->draw_gen( distr );
-	while ( ran == 0.0 && _sim_->ran_gen_id < 3 );
+	while ( ran == 0.0 && _sim_->sim_prng_type < 3 );
 
 	return ran;
 }

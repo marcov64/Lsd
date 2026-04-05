@@ -493,6 +493,8 @@ void lsd::object::set_blueprint( object *container )
 		return;
 
 	container->attr = attr;
+	container->prng_type = prng_type;
+	container->to_compute = to_compute;
 
 	for ( auto cv = v; cv != NULL; cv = cv->next )
 		container->add_var( cv );
@@ -503,7 +505,7 @@ void lsd::object::set_blueprint( object *container )
 			continue;
 
 		cur1 = cb->head;
-		container->add_obj( cur1->attr->label );
+		container->add_obj( cur1->attr->label, 1, false, cur1->prng_type, cur1->to_compute, true );
 
 		for ( cb1 = container->b; cb1->attr != cb->attr; cb1 = cb1->next );
 
@@ -534,7 +536,7 @@ void lsd::simulation::empty_blueprint( void )
 void lsd::simulation::reset_blueprint( object *r )
 {
 	empty_blueprint( );
-	blueprint = new object ( NULL, ROOT_NAME, false, true, this );
+	blueprint = new object ( NULL, ROOT_NAME, DEF_PRNG, true, true, this );
 
 	if ( r != NULL )
 		r->set_blueprint( blueprint );
@@ -666,34 +668,6 @@ double lsd::equation::_no_zero_inst_( int new_value )
 		return ( _sim_->no_zero_instance = new_value == 1 ? true : false );
 	else
 		return _sim_->no_zero_instance;
-}
-
-
-/*************************************************************
- _SEED_ (*)
- *************************************************************/
-double lsd::equation::_seed_( int new_value )
-{
-	if ( new_value >= 0 )
-	{
-		_sim_->seed = ( unsigned ) new_value;
-		_sim_->init_random( _sim_->seed );
-		return _sim_->seed;
-	}
-	else
-		return _sim_->seed - 1;
-}
-
-
-/*************************************************************
- _RANDOM_ (*)
- *************************************************************/
-double lsd::equation::_random_( int new_value )
-{
-	if ( new_value >= 0 && new_value <= 7 )
-		_sim_->set_random( ( unsigned ) new_value );
-
-	return _sim_->ran_gen_id;
 }
 
 

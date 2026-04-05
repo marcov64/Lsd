@@ -71,6 +71,7 @@ namespace gui
 	lsd::object *curr_obj = NULL;	// pointer to current object in browser
 	lsd::object *last_obj = NULL;	// pointer to last selected object in structure
 	lsd::simulation sim;			// the master GUI simulation object
+	std::mt19937 gui_prng;			// internal pseudo-random number generator
 	Tcl_Interp *interp = NULL;		// global Tcl interpreter in LSD
 
 	// constant arrays

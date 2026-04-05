@@ -243,7 +243,7 @@ void lsd::simulation::unload_configuration( bool full )
 	empty_varattributes( this );
 	empty_objattributes( this );
 
-	root = new object ( NULL, ROOT_NAME, false, true, this );
+	root = new object ( NULL, ROOT_NAME, DEF_PRNG, true, false, this );
 	reset_blueprint( NULL );
 
 	if ( desc != NULL )
@@ -301,7 +301,11 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 	if ( strcmp( n.attribute( "name" ).value( ), attr->label ) != 0 )
 		return 31;
 
-	i_prng = n.attribute( "prng" ).as_bool( false );
+	if ( up == NULL )					// root must have PRNG
+		prng_type = DEF_PRNG;
+	else
+		prng_type = n.attribute( "prng" ).as_int( -1 );
+
 	to_compute = n.attribute( "compute" ).as_bool( true );
 
 	// scan contained child objects and elements
@@ -313,7 +317,7 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 			if ( strlen( str ) == 0 || ! valid_label( str ) )
 				return 32;
 
-			add_obj( str );
+			add_obj( str, 1, false, cn.attribute( "prng" ).as_int( -1 ) );
 			cb = search_bridge( str );
 
 			i = cb->head->load_xml_struct( cn, quick );
@@ -478,7 +482,7 @@ int lsd::object::load_xml_insts( x_nodeT &n, n_mapT &node_map, i_setT &warning )
 		else
 			m = num[ l ];
 
-		cur->i_prng = i_prng;
+		cur->prng_type = prng_type;
 		cur->to_compute = to_compute;
 		cur->replicate( m );
 
@@ -926,8 +930,8 @@ void lsd::object::save_xml_struct( x_nodeT &pn, long &node_serial, bool quick )
 	x_nodeT n = pn.append_child( "object" );
 	n.append_attribute( "name" ) = attr->label;
 
-	if ( i_prng )
-		n.append_attribute( "prng" ) = true;
+	if ( prng_type >= 0 )
+		n.append_attribute( "prng" ) = prng_type;
 
 	if ( ! to_compute )
 		n.append_attribute( "compute" ) = false;

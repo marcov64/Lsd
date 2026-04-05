@@ -369,7 +369,7 @@ void lsd::object::draw_obj( object *sel, int level, int center, int from, bool z
 				snprintf( str, MAX_LINE_SIZE, "%s%d", strlen( ch1 ) > 0 ? " " : "", count );
 				strcatn( ch1, str, MAX_LINE_SIZE );
 
-				i_prng = cur->i_prng;
+				i_prng = cur->prng_type < 0 ? false : true;
 				to_compute = cur->to_compute;
 
 				for ( ; cur->next != NULL; cur = cur->next ); // reaches the last object of this group

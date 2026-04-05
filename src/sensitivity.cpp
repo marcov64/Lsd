@@ -108,7 +108,7 @@ int lsd::sensitivity::dataentry( void )
 	cmd( "focus .sens.t.t" );
 
 	// reset random number generator to make random numbers reproducible
-	gui::sim.init_random( gui::sim.seed );
+	gui::gui_prng.seed( gui::sim.seed );
 
 	gui::choice = 0;
 
@@ -199,7 +199,7 @@ int lsd::sensitivity::dataentry( void )
 				if ( toupper( type ) == 'R' && samples > 0 )// random sampling
 					for ( int j = 0; j < samples; ++j, ++i )
 					{
-						val[ i ] = std::fmin( start, end ) + gui::sim._ran1_( ) * ( std::fmax( start, end ) - std::fmin( start, end ) );
+						val[ i ] = std::fmin( start, end ) + gui::ran1( ) * ( std::fmax( start, end ) - std::fmin( start, end ) );
 						val[ i ] = integer ? std::round( val[ i ] ) : val[ i ];
 					}
 			}
@@ -373,7 +373,7 @@ void gui::sensitivity_sequential( int *findex, lsd::sensitivity *s, double probS
 			}
 		}
 
-		if ( probSampl == 1.0 || sim._ran1_( ) <= probSampl )	// if required draw if point will be sampled
+		if ( probSampl == 1.0 || ran1( ) <= probSampl )	// if required draw if point will be sampled
 		{
 			// generate a configuration file for the experiment (no descriptions)
 			if ( ! sim.save_xml_configuration( dest_path, NULL, NULL, *findex, true, true, get_str( model_options[ 0 ] ), get_str( model_options[ 1 ] ), get_str( model_options[ 2 ] ), eq_file ) )
@@ -579,7 +579,7 @@ end:
  *************************************************************/
 
 // Random choice between two numbers
-#define RND_CHOICE( o1, o2 ) ( sim._ran1_( ) < 0.5 ? o1 : o2 )
+#define RND_CHOICE( o1, o2 ) ( ran1( ) < 0.5 ? o1 : o2 )
 
 
 /*************************************************************
@@ -763,7 +763,7 @@ double **gui::morris_oat( int k, int r, int p, int jump, double **X )
 	double delta = ( double ) jump / ( p - 1 );	// grid step delta
 
 	// reset random number generator
-	sim.init_random( sim.seed );
+	gui_prng.seed( sim.seed );
 
 	// allocate all temporary matrices
 	double **B = mat_new( k + 1, k ),
@@ -796,7 +796,7 @@ double **gui::morris_oat( int k, int r, int p, int jump, double **X )
 		for ( i = 0; i < k; ++i )
 			perm [ i ] = i;
 
-		shuffle( & perm[ 0 ], & perm[ k ], sim.mt32 );
+		shuffle( & perm[ 0 ], & perm[ k ], gui_prng );
 
 		P = mat_copy_scal( P, k, k, 0 );
 		for ( i = 0; i < k; ++i )
@@ -1226,7 +1226,7 @@ gui::design::design( lsd::sensitivity *rsens, int typ, const char *fname, const 
 	FILE *f;
 
 	// reset random number generator
-	sim.init_random( sim.seed );
+	gui_prng.seed( sim.seed );
 
 	if ( rsens == NULL )					// valid pointer?
 		typ = 0;							// trigger invalid design
@@ -1313,7 +1313,7 @@ gui::design::design( lsd::sensitivity *rsens, int typ, const char *fname, const 
 				for ( j = 0; j < k; ++j )	// for all factors
 					for ( h = 0; h < inst[ j ]; ++h )	// for all instances
 						doe[ i ][ j ][ h ] = lo[ j ][ h ] +
-											 sim._ran1_( ) * ( hi[ j ][ h ] - lo[ j ][ h ] );
+											 ran1( ) * ( hi[ j ][ h ] - lo[ j ][ h ] );
 
 			break;
 

@@ -406,6 +406,7 @@ namespace gui
 	extern lsd::object *last_obj;		// pointer to last selected object in structure
 	extern lsd::simulation sim;			// the master GUI simulation object
 	extern nolh NOLH[ ];				// characteristics of NOLH tables
+	extern std::mt19937 gui_prng;		// internal pseudo-random number generator
 	extern Tcl_Interp *interp;			// Tcl standard interpreter pointer
 
 
@@ -461,6 +462,7 @@ namespace gui
 	double get_double( const char *tcl_var, double *var = NULL, bool no_error = false );
 	double lower_bound( double a, double b, double marg, double marg_eq, int dig = 16 );
 	double mat_sum_dists( double **a, int m, int n, double **b );
+	double ran1( void );
 	double save_lattice_helper( const char *fname );
 	double sum_distances( i_listT indices, double **DM );
 	double update_lattice_helper( double line, double col, double val, int line_int, int col_int, int val_int );

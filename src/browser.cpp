@@ -377,7 +377,7 @@ int gui::create( void )
  *************************************************************/
 int gui::browse( lsd::object *r )
 {
-	bool done, sp_upd, da_en, i_prng, to_compute;
+	bool sp_upd, da_en, i_prng, to_compute;
 	int i, num;
 	lsd::ass_list_itT ca;
 	lsd::bridge *cb;
@@ -794,7 +794,7 @@ int gui::browse( lsd::object *r )
 				if ( cb->head != NULL )
 				{
 					cb->head->next_count( cb->head, & num );
-					i_prng = cb->head->i_prng;
+					i_prng = cb->head->prng_type < 0 ? false : true;
 					to_compute = cb->head->to_compute;
 				}
 				else

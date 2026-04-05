@@ -217,7 +217,8 @@
  whose name is label and then calls the method cal() for that
  variable (see variable::cal), that returns the desired value.
 
- - void init( object *_up, simulation *_sim, char *_label, bool _to_compute );
+ - void init( object *_up, simulation *_sim, char *_label,
+			  bool _to_compute );
  Initialization for an object. Assigns _up to up, _sim to sim,
  and creates the label
 
@@ -234,7 +235,8 @@
  chase objects of lab type even when they are scattered in
  different groups.
 
- - object *add_obj( char *label, int num, bool propagate );
+ - object *add_obj( char *label, int num, bool propagate,
+					int prng_type, bool to_compute, bool blueprint );
  Add a new object type in the model as descendant of current one
  and initialize its name. It makes num copiesof it, and can
  propagate to other instances of the same parent object.
@@ -422,12 +424,12 @@ lsd::objattr *lsd::objattributes::rename( const char *old_lab, const char *new_l
 /*************************************************************
  OBJECT constructor
  *************************************************************/
-lsd::object::object( object *_up, const char *_label, bool _i_prng, bool _to_compute, simulation *sim )
+lsd::object::object( object *_up, const char *_label, int _prng_type, bool _to_compute, bool blueprint, simulation *sim )
 {
 	objattr *par_attr;
 
 	up = _up;
-	i_prng = _i_prng;
+	prng_type = _prng_type;
 	to_compute = _to_compute;
 
 	if ( up != NULL )
@@ -445,6 +447,42 @@ lsd::object::object( object *_up, const char *_label, bool _i_prng, bool _to_com
 		attr->par_attr = par_attr;
 		attr->cont = & sim->oa;
 	}
+
+	if ( ! blueprint )
+		switch ( prng_type )
+		{
+			case 0:						// system (not pseudo) random device in (0,1)
+				if ( HW_RAND_GEN )
+				{
+					prng = ( void * ) new std::random_device;
+					break;
+				}
+				else
+				{
+					attr->cont->sim->plog( "\nWarning: true random generator not available\n" );
+					prng_type = 1;
+				}
+			case 1:						// Linear congruential in (0,1)
+			case 3:						// linear congruential in [0,1)
+				prng = ( void * ) new std::minstd_rand;
+				break;
+			case 2:						// Mersenne-Twister in (0,1)
+			case 4:						// Mersenne-Twister in [0,1)
+				prng = ( void * ) new std::mt19937;
+				break;
+			case 5:						// Mersenne-Twister 64 bits resolution in [0,1)
+				prng = ( void * ) new std::mt19937_64;
+				break;
+			case 6:						// Lagged fibonacci 24 bits resolution in [0,1)
+				prng = ( void * ) new std::ranlux24;
+				break;
+			case 7:						// Lagged fibonacci 48 bits resolution in [0,1)
+				prng = ( void * ) new std::ranlux48;
+				break;
+			default:					// parent's PRNG
+				if ( up != NULL )
+					prng = up->prng;
+		}
 }
 
 
@@ -455,6 +493,31 @@ lsd::object::~object( void )
 {
 	bridge *cb, *cb1;
 	variable *cv, *cv1;
+
+	if ( prng != NULL )
+		switch ( prng_type )
+		{
+			case 0:
+				delete ( std::random_device * ) prng;
+				break;
+			case 1:
+			case 3:
+				delete ( std::minstd_rand * ) prng;
+				break;
+			case 2:
+			case 4:
+				delete ( std::mt19937 * ) prng;
+				break;
+			case 5:
+				delete ( std::mt19937_64 * ) prng;
+				break;
+			case 6:
+				delete ( std::ranlux24 * ) prng;
+				break;
+			case 7:
+				delete ( std::ranlux48 * ) prng;
+				break;
+		}
 
 	// remove variables if cemetery collection was not called before
 	for ( cv = v; cv != NULL; cv = cv1 )
@@ -1495,7 +1558,7 @@ lsd::variable *lsd::object::add_var( variable *example )
  this one if propagate = true, wherever is on the
  tree
  *************************************************************/
-lsd::object *lsd::object::add_obj( const char *lab, int num, bool propagate )
+lsd::object *lsd::object::add_obj( const char *lab, int num, bool propagate, int prng_type, bool to_compute, bool blueprint )
 {
 	int i;
 	bridge *cb;
@@ -1544,12 +1607,12 @@ lsd::object *lsd::object::add_obj( const char *lab, int num, bool propagate )
 			cb = cb->next;
 		}
 
-		// create object instances
+		// create non-configured object instances
 		for ( i = 0; i < num; ++i )
 			if ( i == 0 )
-				cur1 = cur2 = cb->head = new object ( cur, lab );
+				cur1 = cur2 = cb->head = new object ( cur, lab, prng_type, to_compute, blueprint );
 			else
-				cur1 = cur1->next = new object ( cur, lab );
+				cur1 = cur1->next = new object ( cur, lab, prng_type, to_compute, blueprint );
 
 		cb->attr = cur1->attr;
 		cur->b_map.insert( b_pairT ( cb->attr, cb ) );
@@ -1614,9 +1677,9 @@ void lsd::object::move( const char *dest )
 			{
 				// update linked list of object instances in bridge
 				if ( cur1 == NULL )
-					cur1 = nb->head = new object ( d, attr->label, cur->i_prng, cur->to_compute );
+					cur1 = nb->head = new object ( d, attr->label, cur->prng_type, cur->to_compute );
 				else
-					cur1 = cur1->next = new object ( d, attr->label, cur->i_prng, cur->to_compute );
+					cur1 = cur1->next = new object ( d, attr->label, cur->prng_type, cur->to_compute );
 
 				for ( cv = cur->v; cv != NULL; cv = cv->next )
 					cur1->add_var( cv );
@@ -1675,9 +1738,9 @@ void lsd::object::replicate( int num, bool propagate )
 	for ( i = usl; i < num; ++i )
 	{
 		cur1 = cur->next;
-		cur->next = new object ( up, attr->label, i_prng, to_compute );
+		cur->next = new object ( up, attr->label, prng_type, to_compute );
 		cur->next->next = cur1;
-		cur->i_prng = i_prng;
+		cur->prng_type = prng_type;
 		cur->to_compute = to_compute;
 
 		cur1 = cur->next;
@@ -1717,7 +1780,7 @@ void lsd::object::copy_descendant( object *to )
 	else
 		cur = b->head;
 
-	to->b->head = new object ( to, cur->attr->label, cur->i_prng, cur->to_compute );
+	to->b->head = new object ( to, cur->attr->label, cur->prng_type, cur->to_compute );
 
 	// copy variables of head object
 	for ( cv = cur->v; cv != NULL; cv = cv->next )
@@ -1738,7 +1801,7 @@ void lsd::object::copy_descendant( object *to )
 		else
 			cur = cb1->head;
 
-		cb->head = new object ( to, cur->attr->label, cur->i_prng, cur->to_compute );
+		cb->head = new object ( to, cur->attr->label, cur->prng_type, cur->to_compute );
 
 		for ( cv = cur->v; cv != NULL; cv = cv->next )
 			cb->head->add_var( cv );
@@ -1810,8 +1873,12 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 	last = NULL;	// pointer of the object to link to, signaling also the special first case
 	for ( i = 0; i < n; ++i )
 	{
-		// create a new copy of the object
-		cur = new object ( this, lab );
+		// create a new copy of the object, with proper attributes
+		cur = new object ( this, lab, ex->prng_type, ex->to_compute );
+
+		// set new PRNG new seed
+		if ( cur->prng_type > 0 )
+			cur->rnd_seed( attr->cont->sim->seeder++ );
 
 		if ( net )						// if objects are nodes in a network
 			cur->node = new netnode( this );// insert new nodes in network (as isolated nodes)

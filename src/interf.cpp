@@ -930,7 +930,7 @@ lsd::object *gui::operate( lsd::object *r )
 			cd = desc.search_descr( lab_old, true );
 			r->next_count( r, & num );
 
-			cmd( "set i_prng %d", r->i_prng ? 1 : 0 );
+			cmd( "set i_prng %d", r->prng_type < 0 ? 0 : 1 );
 			cmd( "set to_compute %d", r->to_compute ? 1 : 0 );
 
 			cmd( "set T .objprop" );
@@ -1013,13 +1013,13 @@ lsd::object *gui::operate( lsd::object *r )
 				desc.change_descr( lab_old, NULL, -1, eval_str( "[ .objprop.desc.f.text get 1.0 end ]", buf_descr, MAX_BUFF_SIZE ) );
 
 				cmd( "set choice $i_prng" );
-				if ( choice != r->i_prng )
+				if ( choice != ( r->prng_type < 0 ? false : true ) )
 				{
 					cur = sim.blueprint->search( r->attr );
 					if ( cur != NULL )
-						cur->i_prng = choice;
+						cur->prng_type = choice ? DEF_PRNG : -1;
 					for ( cur = r; cur != NULL; cur = cur->hyper_next( ) )
-						cur->i_prng = choice;
+						cur->prng_type = choice ? DEF_PRNG : -1;
 				}
 
 				cmd( "set choice $to_compute" );
@@ -4091,7 +4091,7 @@ lsd::object *gui::operate( lsd::object *r )
 				stop = false;
 				cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\" %ld { set stop true }", ( long ) ( fracMC * maxMC ) );
 
-				sim.init_random( sim.seed );		// reset random number generator
+				gui_prng.seed( sim.seed );			// reset random number generator
 				sensitivity_sequential( &findexSens, sim.sens, fracMC, sens_path );
 
 				cmd( "destroytop .psa" );

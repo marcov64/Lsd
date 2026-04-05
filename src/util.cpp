@@ -158,6 +158,24 @@ void gui::plog_backend( const char *cm, const char *tag, va_list arg )
 
 
 /*************************************************************
+ RAN1
+ Call the preset pseudo-random number generator
+ Generates pseudo-random numbers > 0 and < 1
+ *************************************************************/
+double gui::ran1( void )
+{
+	double ran;
+	std::uniform_real_distribution < double > distr ( 0, 1 );
+
+	do
+		ran = distr( gui_prng );
+	while ( ran == 0.0 );
+
+	return ran;
+}
+
+
+/*************************************************************
  PRINT_STACK
  Print the state of the stack in the log window.
  This tells the user which variable is computed
@@ -840,7 +858,7 @@ int gui::Tcl_get_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const
 		res[ 0 ] = cur->to_compute ? '1' : '0';
 	else
 		if ( ! strcmp( argv[ 2 ], "i_prng" ) )
-			res[ 0 ] = cur->i_prng ? '1' : '0';
+			res[ 0 ] = cur->prng_type >= 0 ? '1' : '0';
 		else
 			return TCL_ERROR;
 
@@ -886,7 +904,7 @@ int gui::Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const
 		}
 		else
 			if ( ! strcmp( argv[ 2 ], "i_prng" ) )
-				cur1->i_prng = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+				cur1->prng_type = ( ! strcmp( argv[ 3 ], "1" ) ) ? DEF_PRNG : -1;
 			else
 				return TCL_ERROR;
 

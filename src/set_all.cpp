@@ -384,7 +384,7 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 	update_d = gui::get_int( "update_d" );
 
 	if ( use_seed )
-		gui::sim.init_random( ( unsigned ) rnd_seed );
+		gui::gui_prng.seed( ( unsigned ) rnd_seed );
 
 	j = 0;
 
@@ -474,8 +474,9 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
+					std::uniform_real_distribution < double > distr( value1, value2 );
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = cv->chk_val( gui::sim.uniform( value1, value2 ) );
+					cv->val[ lag ] = cv->chk_val( distr( gui::gui_prng ) );
 					++j;
 				}
 
@@ -489,8 +490,9 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
+					std::uniform_int_distribution < int > distr( ( long ) std::round( value1 ), ( long ) std::round( value2 ) );
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = cv->chk_val( gui::sim.rnd_int( std::round( value1 ), std::round( value2 ) ) );
+					cv->val[ lag ] = cv->chk_val( distr( gui::gui_prng ) );
 					++j;
 				}
 
@@ -504,8 +506,9 @@ void lsd::object::set_all( const char *lab, int lag, const char *parWnd )
 			for ( i = 1, cur = this, step = 0; cur != NULL; cur = cur->hyper_next( ), ++i )
 				if ( ( to_all == 1 || ( cases_from <= i && cases_to >= i ) ) && ( fill == 1 || ( ( i - cases_from ) % step_in == 0 ) ) )
 				{
+					std::normal_distribution < double > distr( value1, std::fabs( value2 ) );
 					cv = cur->search_var( NULL, lab );
-					cv->val[ lag ] = cv->chk_val( gui::sim.norm( value1, value2 ) );
+					cv->val[ lag ] = cv->chk_val( distr( gui::gui_prng ) );
 					++j;
 				}
 
