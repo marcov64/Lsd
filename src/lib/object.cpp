@@ -2179,6 +2179,38 @@ double lsd::object::to_delete( void )
 
 
 /*************************************************************
+ DELETE_BRIDGE
+ Remove a bridge, used when an object is removed from the model
+ *************************************************************/
+void lsd::object::delete_bridge( void )
+{
+	bridge *cb = NULL, *cb1;
+
+	if ( up->b == NULL )
+		return;
+
+	if ( up->b->head == this )
+	{	// first bridge in the bridge chain
+		cb = up->b;
+		up->b = up->b->next;
+	}
+	else	// find position in bridge chain (not first)
+		for ( cb = up->b, cb1 = NULL; cb != NULL; cb1 = cb, cb = cb->next )
+			if ( cb->head == this && cb1 != NULL )
+			{
+				cb1->next = cb->next;			// previous bridge points to next
+				break;
+			}
+
+	if ( cb != NULL )
+	{
+		up->b_map.erase( cb->attr );
+		delete cb;
+	}
+}
+
+
+/*************************************************************
  DELETE_VAR
  Remove the variable from the object
  *************************************************************/

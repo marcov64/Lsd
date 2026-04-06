@@ -281,6 +281,7 @@ namespace lsd
 			void chg_lab( const char *lab );
 			void chg_var_lab( const char *old, const char *n );
 			void count_save( int *count );
+			void delete_bridge( void );
 			void delete_net( const char *lab );
 			void delete_obj( const variable *caller = NULL );
 			void delete_var( const char *lab );

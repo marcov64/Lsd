@@ -1728,7 +1728,7 @@ void lsd::object::wipe_out( void )
 	if ( ( cur = hyper_next( ) ) != NULL )
 		cur->wipe_out( );
 
-	delete_obj( );
+	delete_bridge( );
 }
 
 
