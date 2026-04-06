@@ -5031,6 +5031,9 @@ int modman( int argn, const char **argv )
 			} else { \
 				set debug 1 \
 			}" );
+			
+		cmd( "set LSD_TERM \"%s\"", LSD_TERM );
+		cmd( "set LSD_GUI [ file rootname \"%s\" ]", gui::get_target_name( str, MAX_PATH_LENGTH ) );
 
 		cmd( "newtop .l \"Model Options\" { set choice 2 }" );
 
@@ -5137,7 +5140,7 @@ int modman( int argn, const char **argv )
 				.l.t.text insert end \"$default\" \
 			}" );
 		cmd( "ttk::button .l.d.opt.cle -width $butWid -text \"File Clean\" -command { \
-				set files [ glob -nocomplain -directory \"$model_dir\" *.o *.a src break.* makefile* makemessage.txt make.bat elements.txt lsd* *.exe *.dll *.so *.dylib *.pyd *.app *.bak *.err ]; \
+				set files [ glob -nocomplain -directory \"$model_dir\" *.o *.a src break.* makefile* makemessage.txt make.bat elements.txt $LSD_GUI $LSD_TERM LSD *.app *.exe *.dll *.so *.dylib *.pyd *.app *.bak *.err ]; \
 				foreach f $files { \
 					catch { \
 						file delete -force \"$f\" \
@@ -5145,14 +5148,14 @@ int modman( int argn, const char **argv )
 				}; \
 				set tmpDir [ temp_dir ]; \
 				if { $tmpDir ne \"\" } { \
-					set files [ glob -nocomplain -directory $tmpDir LMM %s [ file rootname %s ] ]; \
+					set files [ glob -nocomplain -directory \"$tmpDir\" LMM $LSD_GUI $LSD_TERM ]; \
 					foreach f $files { \
 						catch { \
 							file delete -force \"$f\" \
 						} \
 					} \
 				} \
-			}", LSD_TERM, gui::get_target_name( str, MAX_PATH_LENGTH ) );
+			}" );
 		cmd( "pack .l.d.opt.debug .l.d.opt.ext .l.d.opt.def .l.d.opt.cle -padx $butSpc -side left" );
 
 		cmd( "tooltip::tooltip .l.d.opt.debug \"Enable using GDB/LLDB debugger\"" );
