@@ -1156,6 +1156,7 @@ int modman( int argn, const char **argv )
 		cmd( "if [ string equal $dirsearch \"-backwards\" ] { set endsearch 1.0 } { set endsearch end }" );
 		cmd( "set curcounter $lfindsize" );
 		cmd( "set cur \"\"" );
+		cmd( "set textrepl \"\"" );
 		cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
 
 		cmd( "newtop .l \"Replace\" { .l.b2.cancel invoke }" );
@@ -1257,6 +1258,11 @@ int modman( int argn, const char **argv )
 		cmd( "bind .l.b1.repl <KeyPress-Return> { .l.b1.repl invoke }" );
 		cmd( "bind .l.b1.all <KeyPress-Return> { .l.b1.all invoke }" );
 
+		cmd( "if { [ string length $textsearch ] > 0 } { \
+				.f.t.t mark set insert [ .f.t.t index sel.first ]; \
+				.l.b2.ok invoke \
+			}" );
+
 		cmd( "showtop .l" );
 		cmd( ".l.l.e selection range 0 end" );
 		cmd( ".f.t.t tag conf found -background $colorsTheme(sbg) -foreground $colorsTheme(sfg)" );
@@ -1283,7 +1289,7 @@ int modman( int argn, const char **argv )
 				if { [ string compare $endsearch end ] == 0 } { \
 					set cur [ .f.t.t index \"$cur+$length char\" ] \
 				} \
-			} { \
+			} else { \
 				set choice 0 \
 			}" );
 
@@ -5031,7 +5037,7 @@ int modman( int argn, const char **argv )
 			} else { \
 				set debug 1 \
 			}" );
-			
+
 		cmd( "set LSD_TERM \"%s\"", LSD_TERM );
 		cmd( "set LSD_GUI [ file rootname \"%s\" ]", gui::get_target_name( str, MAX_PATH_LENGTH ) );
 
