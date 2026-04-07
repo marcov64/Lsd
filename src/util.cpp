@@ -904,7 +904,7 @@ int gui::Tcl_set_obj_conf( ClientData cdata, Tcl_Interp *interp, int argc, const
 		}
 		else
 			if ( ! strcmp( argv[ 2 ], "i_prng" ) )
-				cur1->prng_type = ( ! strcmp( argv[ 3 ], "1" ) ) ? DEF_PRNG : -1;
+				cur1->set_rnd_gen( ( ! strcmp( argv[ 3 ], "1" ) ) ? DEF_PRNG : -1 );
 			else
 				return TCL_ERROR;
 

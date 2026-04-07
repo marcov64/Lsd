@@ -438,9 +438,9 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update, bool 
 	if ( ! da_en && fast_mode < 2 )
 	{
 		if ( parallel_mode )
-			plog( "\nSimulation %d of %d running (seed=%d threads=%d)...", run, last_run, seed, max_threads );
+			plog( "\nSimulation %d of %d running (seed=%d threads=%d)...", run, last_run, prng_seed, max_threads );
 		else
-			plog( "\nSimulation %d of %d running (seed=%d)...", run, last_run, seed );
+			plog( "\nSimulation %d of %d running (seed=%d)...", run, last_run, prng_seed );
 	}
 
 	// if new batch configuration file, reload all except descriptions
@@ -473,8 +473,11 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update, bool 
 		return 10;
 	}
 
+	// new random routine' initialization
+	seeder( prng_seed );
+	prng_seed++;
+
 	// pre-allocate memory to save all existing elements for the entire simulation
-	seeder( seed );
 	running = true;
 	series_saved = 0;
 	if ( ! root->alloc_save_mem( ) )
@@ -505,10 +508,6 @@ int lsd::simulation::init_new_run( clock_t & start, clock_t & last_update, bool 
 	worker_ready = true;
 	worker_crashed = false;
 	wait_delete = NULL;
-
-	// new random routine' initialization
-	init_random( seed );
-	seed++;
 
 	// reset math error counters and defaults
 	init_math_error( );
@@ -561,12 +560,12 @@ void lsd::simulation::save_results( bool da_en )
 	if ( ! no_res )
 	{
 		if ( da_en )
-			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_da_%d_%d.%s", path_out, sep_out, name_out, seed, seed + last_run - 1, docsv ? "csv" : "res" );
+			snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_da_%d_%d.%s", path_out, sep_out, name_out, prng_seed, prng_seed + last_run - 1, docsv ? "csv" : "res" );
 		else
 			if ( ! batch_sequential )
-				snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d.%s", path_out, sep_out, name_out, seed - 1, docsv ? "csv" : "res" );
+				snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d.%s", path_out, sep_out, name_out, prng_seed - 1, docsv ? "csv" : "res" );
 			else
-				snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, findex, seed - 1, docsv ? "csv" : "res" );
+				snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, findex, prng_seed - 1, docsv ? "csv" : "res" );
 
 		if ( dozip )
 			strcatn( fname, ".gz", MAX_PATH_LENGTH );
@@ -590,9 +589,9 @@ void lsd::simulation::save_results( bool da_en )
 		if ( ! grand_total || batch_sequential )	// generate partial total files?
 		{
 			if ( ! batch_sequential )
-			  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, seed - run, seed - 1 + last_run - run, docsv ? "csv" : "tot" );
+			  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d.%s", path_out, sep_out, name_out, prng_seed - run, prng_seed - 1 + last_run - run, docsv ? "csv" : "tot" );
 			else
-			  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d_%d.%s", path_out, sep_out, name_out, findex, seed - run, seed - 1 + last_run - run, docsv ? "csv" : "tot" );
+			  snprintf( fname, MAX_PATH_LENGTH, "%s%s%s_%d_%d_%d.%s", path_out, sep_out, name_out, findex, prng_seed - run, prng_seed - 1 + last_run - run, docsv ? "csv" : "tot" );
 		}
 		else										// generate single grand total file
 		{
@@ -794,7 +793,7 @@ bool lsd::object::alloc_save_mem( void )
 		{
 			cv->next_update = cv->attr->delay;
 			if ( cv->attr->delay_range > 0 )
-				cv->next_update += sim->rnd_int( 0, cv->attr->delay_range );
+				cv->next_update += ( int ) rnd_uniform_int( 0, cv->attr->delay_range );
 		}
 
 		if ( cv->attr->save || cv->attr->savei )

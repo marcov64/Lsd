@@ -613,7 +613,7 @@ double lsd::variable::cal( object *caller, int lag )
 	{
 		next_update = sim->t + attr->period;
 		if ( attr->period_range > 0 )
-			next_update += sim->rnd_int( 0, attr->period_range );
+			next_update += ( int ) up->rnd_uniform_int( 0, attr->period_range );
 	}
 
 	if ( sim->fast_mode == 0 && ! sim->parallel_mode )
@@ -859,7 +859,7 @@ void lsd::worker::cal_worker( simulation *sim )
 				{
 					v->next_update = sim->t + v->attr->period;
 					if ( v->attr->period_range > 0 )
-						v->next_update += sim->rnd_int( 0, v->attr->period_range );
+						v->next_update += ( int ) v->up->rnd_uniform_int( 0, v->attr->period_range );
 				}
 
 				v->under_computation = false;

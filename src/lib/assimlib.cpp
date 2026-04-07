@@ -205,18 +205,18 @@ bool lsd::assimilation::init( simulation *ref )
 		return false;
 
 	// set assimilation random number generator
-	lib_prng.seed( ref->seed );
+	lib_prng.seed( ref->prng_seed );
 
 	// create simulation instances to produce realization forecasts
 	run_sims.clear( );
 	run_sims.reserve( nrun );
-	for ( int i = 0, seed = ref->seed; i < nrun; ++i, ++seed )
+	for ( int i = 0, seed = ref->prng_seed; i < nrun; ++i, ++seed )
 	{
 		// construct loading configuration file
 		run_sims.emplace_back( ref->conf_name, ref->conf_path, 1 );
 
 		// adjust instances' settings (random seed, single threaded)
-		run_sims[ i ].seed = seed;
+		run_sims[ i ].prng_seed = seed;
 		run_sims[ i ].last_run = 1;
 		run_sims[ i ].deb_t = 0;
 		run_sims[ i ].stack_info = 0;

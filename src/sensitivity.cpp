@@ -108,7 +108,7 @@ int lsd::sensitivity::dataentry( void )
 	cmd( "focus .sens.t.t" );
 
 	// reset random number generator to make random numbers reproducible
-	gui::gui_prng.seed( gui::sim.seed );
+	gui::gui_prng.seed( gui::sim.prng_seed );
 
 	gui::choice = 0;
 
@@ -761,9 +761,10 @@ double **gui::morris_oat( int k, int r, int p, int jump, double **X )
 {
 	int i, j, l;
 	double delta = ( double ) jump / ( p - 1 );	// grid step delta
+	std::uniform_int_distribution < int > ui_dist( 0, p - delta * ( p - 1 ) - 1 );
 
 	// reset random number generator
-	gui_prng.seed( sim.seed );
+	gui_prng.seed( sim.prng_seed );
 
 	// allocate all temporary matrices
 	double **B = mat_new( k + 1, k ),
@@ -807,7 +808,7 @@ double **gui::morris_oat( int k, int r, int p, int jump, double **X )
 		// starting point for this trajectory
 		for ( j = 0; j < k; ++j )
 		{
-			double start = sim.rnd_int( 0, p - delta * ( p - 1 ) - 1 ) / ( p - 1 );
+			double start = ( double ) ui_dist( gui_prng ) / ( p - 1 );
 			for ( i = 0; i < k + 1; ++i )
 				X_base[ i ][ j ] = start;
 		}
@@ -928,7 +929,7 @@ i2_vecT gui::combinations( i_listT indices, int r )
  Calculate combinatorial distance between a select group of trajectories,
  indicated by indices
  indices: list of candidate pairs of points = list < int >
- 	DM: distance matrix = array (M,M)
+	DM: distance matrix = array (M,M)
  *************************************************************/
 double gui::sum_distances( i_listT indices, double **DM )
 {
@@ -946,7 +947,7 @@ double gui::sum_distances( i_listT indices, double **DM )
 
 /*************************************************************
  TOP_IDX
- 	Get the top-i size items index from a unidimensional array
+	Get the top-i size items index from a unidimensional array
  *************************************************************/
 i_listT gui::top_idx( double *a, int n, int i )
 {
@@ -1226,7 +1227,7 @@ gui::design::design( lsd::sensitivity *rsens, int typ, const char *fname, const 
 	FILE *f;
 
 	// reset random number generator
-	gui_prng.seed( sim.seed );
+	gui_prng.seed( sim.prng_seed );
 
 	if ( rsens == NULL )					// valid pointer?
 		typ = 0;							// trigger invalid design

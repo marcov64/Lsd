@@ -449,40 +449,7 @@ lsd::object::object( object *_up, const char *_label, int _prng_type, bool _to_c
 	}
 
 	if ( ! blueprint )
-		switch ( prng_type )
-		{
-			case 0:						// system (not pseudo) random device in (0,1)
-				if ( HW_RAND_GEN )
-				{
-					prng = ( void * ) new std::random_device;
-					break;
-				}
-				else
-				{
-					attr->cont->sim->plog( "\nWarning: true random generator not available\n" );
-					prng_type = 1;
-				}
-			case 1:						// Linear congruential in (0,1)
-			case 3:						// linear congruential in [0,1)
-				prng = ( void * ) new std::minstd_rand;
-				break;
-			case 2:						// Mersenne-Twister in (0,1)
-			case 4:						// Mersenne-Twister in [0,1)
-				prng = ( void * ) new std::mt19937;
-				break;
-			case 5:						// Mersenne-Twister 64 bits resolution in [0,1)
-				prng = ( void * ) new std::mt19937_64;
-				break;
-			case 6:						// Lagged fibonacci 24 bits resolution in [0,1)
-				prng = ( void * ) new std::ranlux24;
-				break;
-			case 7:						// Lagged fibonacci 48 bits resolution in [0,1)
-				prng = ( void * ) new std::ranlux48;
-				break;
-			default:					// parent's PRNG
-				if ( up != NULL )
-					prng = up->prng;
-		}
+		alloc_prng( );			// allocate random generator
 }
 
 
@@ -494,30 +461,7 @@ lsd::object::~object( void )
 	bridge *cb, *cb1;
 	variable *cv, *cv1;
 
-	if ( prng != NULL )
-		switch ( prng_type )
-		{
-			case 0:
-				delete ( std::random_device * ) prng;
-				break;
-			case 1:
-			case 3:
-				delete ( std::minstd_rand * ) prng;
-				break;
-			case 2:
-			case 4:
-				delete ( std::mt19937 * ) prng;
-				break;
-			case 5:
-				delete ( std::mt19937_64 * ) prng;
-				break;
-			case 6:
-				delete ( std::ranlux24 * ) prng;
-				break;
-			case 7:
-				delete ( std::ranlux48 * ) prng;
-				break;
-		}
+	free_prng( );				// deallocate random generator
 
 	// remove variables if cemetery collection was not called before
 	for ( cv = v; cv != NULL; cv = cv1 )
@@ -1740,8 +1684,6 @@ void lsd::object::replicate( int num, bool propagate )
 		cur1 = cur->next;
 		cur->next = new object ( up, attr->label, prng_type, to_compute );
 		cur->next->next = cur1;
-		cur->prng_type = prng_type;
-		cur->to_compute = to_compute;
 
 		cur1 = cur->next;
 		for ( cv = v; cv != NULL; cv = cv->next )
@@ -1917,7 +1859,7 @@ lsd::object *lsd::object::add_n_objects2( const char *lab, int n, object *ex, in
 				{
 					cv->next_update = cv->last_update + cv->attr->delay;
 					if ( cv->attr->delay_range > 0 )
-						cv->next_update += sim->rnd_int( 0, cv->attr->delay_range );
+						cv->next_update += ( int ) rnd_uniform_int( 0, cv->attr->delay_range );
 				}
 			}
 
@@ -3346,9 +3288,7 @@ lsd::object *lsd::object::draw_rnd( const char *lo, const char *lv, int lag )
 	}
 
 	do
-	{
-		b = sim->_ran1_( ) * a;
-	}
+		b = rnd_01( ) * a;
 	while ( b == a );	// avoid ran1 == 1
 
 	a = cur1->cal( lv, lag );
@@ -3392,9 +3332,7 @@ lsd::object *lsd::object::draw_rnd( const char *lab )
 	}
 
 	do
-	{
-		b = sim->_ran1_( ) * a;
-	}
+		b = rnd_01( ) * a;
 	while ( b == a );	// avoid ran1 == 1
 
 	for ( a = 1, cur = cur1, cur1 = cur1->next; a <= b && cur1 != NULL; cur1 = cur1->next )
@@ -3435,7 +3373,7 @@ lsd::object *lsd::object::draw_rnd( const char *lo, const char *lv, int lag, dou
 
 	cur1 = cur = cv->up;
 
-	b = sim->_ran1_( ) * tot;
+	b = rnd_01( ) * tot;
 	cnext = cur1->next;
 	a = cur1->cal( lv, lag );
 	for ( cur1 = cnext; a <= b && cur1 != NULL; cur1 = cnext )
@@ -3549,7 +3487,7 @@ double lsd::object::write( const char *lab, double value, int time, int lag )
 		{
 			cv->next_update = cv->attr->delay;
 			if ( cv->attr->delay_range > 0 )
-				cv->next_update += sim->rnd_int( 0, cv->attr->delay_range );
+				cv->next_update += ( int ) rnd_uniform_int( 0, cv->attr->delay_range );
 		}
 	}
 	else
@@ -3586,7 +3524,7 @@ double lsd::object::write( const char *lab, double value, int time, int lag )
 				{
 					cv->next_update = sim->t + cv->attr->period;
 					if ( cv->attr->period_range > 0 )
-						cv->next_update += sim->rnd_int( 0, cv->attr->period_range );
+						cv->next_update += ( int ) rnd_uniform_int( 0, cv->attr->period_range );
 				}
 			}
 			else

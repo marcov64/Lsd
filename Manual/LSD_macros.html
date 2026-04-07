@@ -4062,8 +4062,8 @@ style='font-family:"Courier New";color:gray'><br>
 rate: </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>PROF(t) = P(t) * A(t-1) - C - RIM
 – RIN * Inn </span></span><br>
-<span class=Cdigo><span style='color:#00B050'>profits per unit of capital are equal
-current price times lagged productivity </span></span><br>
+<span class=Cdigo><span style='color:#00B050'>profits per unit of capital are
+equal current price times lagged productivity </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>minus the cost for research
 (innovative firms spend for both type </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>of research) and fixed costs. </span></span><br>
@@ -4120,10 +4120,10 @@ class=Cdigo>v[1]</span>, <span class=Cdigo>v[2]</span> etc.</p>
 
 <p>Up to 1,000 temporary storage positions are available (from <span
 class=Cdigo>v[0]</span> to <span class=Cdigo>v[999]</span>) to each Equation.
-The values of <span class=Cdigo>v[…]</span> are reset for each Equation, and therefore
-cannot be used to transfer information from one Equation to another or between
-different time steps of the same Equation. Technically, this storage is
-configured as a volatile C++ double precision array.</p>
+The values of <span class=Cdigo>v[…]</span> are reset for each Equation, and
+therefore cannot be used to transfer information from one Equation to another
+or between different time steps of the same Equation. Technically, this storage
+is configured as a volatile C++ double precision array.</p>
 
 <h2>Example</h2>
 
@@ -4232,9 +4232,9 @@ LSD Macros</p>
 
 <p class=MsoNormal style='margin:0cm'>&nbsp;</p>
 
-<p class=MsoNormal style='margin:0cm'><b>Warning:</b> Despite the availability of
-C++ predefined pointers to operate on the Object structure, their use should be
-<i>avoided</i>. Very importantly, the corresponding LSD Macros offer pointer
+<p class=MsoNormal style='margin:0cm'><b>Warning:</b> Despite the availability
+of C++ predefined pointers to operate on the Object structure, their use should
+be <i>avoided</i>. Very importantly, the corresponding LSD Macros offer pointer
 checking to the operations, preventing hard-to-find crashes and easily pointing
 error locations to the modeler. If required, for a small performance gain,
 pointer checking can be disabled (see <span class=Cdigo><a href="#POINTER_CHECK">NO_POINTER_CHECK</a></span>)
@@ -4413,7 +4413,8 @@ Firm 4 | =&gt; . . . =&gt; | Firm 100 |</span><br>
 ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Worker 1 | =&gt; | Worker 1 | =&gt; .
 . . =&gt; | Worker 1000 |</span><br>
 <span class=Cdigo>&nbsp;&nbsp;&nbsp;&nbsp; ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;+----------+&nbsp;&nbsp;&nbsp; +----------+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;+----------+&nbsp;&nbsp;&nbsp;
++----------+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 +-------------+ </span><br>
 <span class=Cdigo>&nbsp;+----------+&nbsp;&nbsp;&nbsp;
 +----------+&nbsp;&nbsp;&nbsp;
@@ -4477,12 +4478,12 @@ pointer initialization also disable pointer checking (see <span class=Cdigo><a
 href="#_NO_POINTER_CHECK_USE_POINTER_CHECK">NO_POINTER_CHECK</a></span> Macro
 for details).</p>
 
-<p>For example, when creating a new Object instance, one wants to initialize its
-Parameters. This is done by storing the new instance “address” in a temporary
-pointer and applying the LSD required Macros on it. For example, the following
-lines within an Equation create a new instance of Object <i>Firm</i> and set
-its Variable <i>K</i> to 0 (see the details in the description of the LSD
-Macros listed below). </p>
+<p>For example, when creating a new Object instance, one wants to initialize
+its Parameters. This is done by storing the new instance “address” in a
+temporary pointer and applying the LSD required Macros on it. For example, the
+following lines within an Equation create a new instance of Object <i>Firm</i>
+and set its Variable <i>K</i> to 0 (see the details in the description of the
+LSD Macros listed below). </p>
 
 <p><span class=Cdigo>... </span><span style='font-family:"Courier New";
 color:gray'><br>
@@ -5651,8 +5652,8 @@ style='font-family:"Courier New";color:gray'><br>
 <span class=Cdigo>&nbsp;&nbsp;} </span><br>
 <span class=Cdigo>} </span></span></p>
 
-<p>The cycle removes all <i>Firm</i>’s having market shares smaller than a given
-value and that the user permitted to. </p>
+<p>The cycle removes all <i>Firm</i>’s having market shares smaller than a
+given value and that the user permitted to. </p>
 
 <h2>Warning</h2>
 
@@ -5823,10 +5824,11 @@ calculation, <span class=Cdigo><a href="#_Parent_Object:_p">THIS</a></span>).
 The search process for <i>obj</i> is similar to <span class=MsoHyperlink><span
 style='font-family:"Courier New"'><a href="#_SEARCH(_&quot;obj_Lab&quot;_),">SEARCH(…)</a></span></span>.</p>
 
-<p>If a matching Object instance is found, the Macro returns the instance number
-representing the position of the specific instance pointed by <i>obj</i> in the
-<a href="#_Object’s_relatives:_up,">brotherhood chain</a>, starting from 1. If
-the Object is not found, <span class=Cdigo>SEARCH_INST(…)</span> returns zero.</p>
+<p>If a matching Object instance is found, the Macro returns the instance
+number representing the position of the specific instance pointed by <i>obj</i>
+in the <a href="#_Object’s_relatives:_up,">brotherhood chain</a>, starting from
+1. If the Object is not found, <span class=Cdigo>SEARCH_INST(…)</span> returns
+zero.</p>
 
 <p>If <i>obj</i> is set to <span class=Cdigo>NULL</span>, the Macros will
 return the instance number of the Object containing the Variable currently
@@ -6169,11 +6171,11 @@ family.</p>
 <p>If <i>Lab</i> is a Variable, these Macros will not trigger the computation
 of the Equation for <i>Lab</i> before the multiplication is performed. That is,
 if <i>Lab</i> was not yet computed in the current period (<i>t</i>), the last
-available value for <i>Lab</i> is used as the base for the multiplication and the
-result will be saved as the new value for <i>Lab</i> in <i>t</i>. No further
-recomputation will be automatically performed in <i>t</i>. If the previous
-computation of <i>Lab</i> is required, the user must do it explicitly before
-calling <span class=Cdigo>MULT(…)</span>.</p>
+available value for <i>Lab</i> is used as the base for the multiplication and
+the result will be saved as the new value for <i>Lab</i> in <i>t</i>. No
+further recomputation will be automatically performed in <i>t</i>. If the
+previous computation of <i>Lab</i> is required, the user must do it explicitly
+before calling <span class=Cdigo>MULT(…)</span>.</p>
 
 <div align=center>
 
@@ -7022,8 +7024,8 @@ INIT_LAT( <i>color</i> )<br>
 INIT_LAT( <i>color</i>, <i>rows</i>, <i>cols</i> )<br>
 INIT_LAT( <i>color</i>, <i>rows</i>, <i>cols</i>, <i>width</i>, <i>height</i> )</h1>
 
-<p class=MsoNormal>These Macros create a bi-dimensional lattice graphical window
-available for simulation run time updating. The lattice is formed by <i>rows</i>
+<p class=MsoNormal>These Macros create a bi-dimensional lattice graphical
+window available for simulation run time updating. The lattice is formed by <i>rows</i>
 lines and <i>cols</i> columns, set to 100 × 100 by default. The user can also
 set the physical window size as <i>width</i> × <i>height</i> pixels, set to 400
 × 400 by default, and the background <i>color</i>, set to white if not
@@ -7761,9 +7763,9 @@ Carlo analysis.</p>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><a
-  name="_SNAP_NET()"></a><a name="_SNAP_NET(_&quot;node_Lab&quot;,_&quot;filename"></a><span
-  style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
-  text-decoration:none'>&#9650;Top</span></a></span></p>
+  name="_SNAP_NET(_&quot;node_Lab&quot;,_&quot;filename"></a><a
+  name="_SNAP_NET()"></a><span style='font-size:10.0pt;color:black'><a
+  href="#top"><span style='color:red;text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -8250,8 +8252,8 @@ Pareto distribution with scale <i>mu</i> and shape parameter <i>alpha</i></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:32.2pt;text-indent:-18.0pt'><span style='font-size:10.0pt;
 font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>poisson( <i>mean</i> )</b>: a random draw from a Poisson distribution
-with mean <i>mean</i></p>
+</span></span><b>poisson( <i>mean</i> )</b>: a random draw from a Poisson
+distribution with mean <i>mean</i></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:32.2pt;text-indent:-18.0pt'><span style='font-size:10.0pt;
@@ -8276,6 +8278,30 @@ draw in the interval [<i>min</i>, <i>max</i>] with uniform probability</p>
 font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>weibull( <i>a</i>, <i>b</i> ):</b> a random draw from a
 Weibull distribution with parameters <i>a</i> and <i>b</i></p>
+
+<p class=MsoNormal>The functions produce pseudo-random numbers using the
+generator algorithm, selected by <span class=Cdigo><a
+href="#_RND_GENERATOR(_type_)">RND_GENERATOR(…)</a></span>, contained in the
+Object instance currently under computation (<span class=Cdigo>THIS</span>). To
+select the pseudo-random number generator (PRNG) of a different (<i>obj</i>)
+Object instance, please use the S-ended version of the functions:  </p>
+
+<p class=MsoNormal>alaplS( <i>obj</i>, <i>med</i>, <i>alpha1</i>, <i>alpha2</i>
+), bernoulliS( <i>obj</i>, <i>p</i> ), betaS( <i>obj</i>, <i>alpha</i>, <i>beta</i>
+), binomialS( <i>obj</i>, <i>p</i>, <i>t</i> ), bparetoS( <i>obj</i>, <i>alpha</i>,
+<i>min</i>, <i>max</i> ), cauchyS( <i>obj</i>, <i>a</i>, <i>b</i> ), chi_squaredS(
+<i>obj</i>, <i>n</i> ), exponentialS( <i>obj</i>, <i>lambda</i> ), fisherS( <i>obj</i>,
+<i>m</i>, <i>n </i>), gammaS( <i>obj</i>, <i>alpha</i>, <i>beta </i>), geometricS(
+<i>obj</i>, <i>p</i> ), lnormS( <i>obj</i>, <i>mean</i>, <i>dev</i> ), normS( <i>obj</i>,
+<i>mean</i>, <i>dev</i> ), paretoS( <i>obj</i>, <i>mu</i>, <i>alpha</i> ), poissonS(
+<i>obj</i>, <i>mean</i> ), studentS( <i>obj</i>, <i>n</i> ), uniformS( <i>obj</i>,
+<i>min</i>, <i>max</i> ), uniform_intS( <i>obj</i>, <i>min</i>, <i>max</i> ), weibullS(
+<i>obj</i>, <i>a</i>, <i>b</i> ).</p>
+
+<p class=MsoNormal>If the selected Object instance (<span class=Cdigo>THIS</span>
+or <i>obj</i>) does not have a pseudo-random number generator (PRNG), the (grand…)
+parent’s one is used, recursively until <span class=Cdigo>ROOT</span> (which
+always has a PRNG) as required.</p>
 
 <h2>Cumulative distribution functions</h2>
 
@@ -8880,9 +8906,9 @@ LSD Log window. If a regular string <i>Comment</i> is provided, it is presented
 then the modeler can also present the numerical contents of C++ variables (like
 temporary storage <span class=Cdigo><u><span style='color:blue'><a
 href="#_CURRENT">v[…]</a></span></u></span>) and other data. <i>format</i> is
-defined exactly like for the standard C/C++ <span class=Cdigo>printf(…)</span>
-function and is very flexible in terms of what can be presented and how, please
-see the C/C++ standard library documentation.</p>
+defined exactly like for the standard C/C++ <span class=Cdigo>printf(…)</span> function
+and is very flexible in terms of what can be presented and how, please see the
+C/C++ standard library documentation.</p>
 
 <p>Any message submitted with <span class=Cdigo>LOG(…)</span> is only presented
 while LSD simulation is running in <span class=Cdigo><u><span style='color:
@@ -9145,19 +9171,28 @@ Macro on the Object containing Variable, to ensure the latest computed value is
 properly saved. This issue does <i>not</i> affect the model computation, just
 the saved values.</p>
 
-<h2><a name="_RND"></a>RND</h2>
+<h2><a name="_RND"></a>RND, RNDS( <i>obj</i> )</h2>
 
-<p>Macro <span class=Cdigo>RND</span> produces a pseudorandom number uniformly
-distributed between 0 and 1 using the generator algorithm selected by <span
-class=Cdigo><a href="#_RND_GENERATOR(_type_)">RND_GENERATOR(…)</a></span>. </p>
+<p>Macros <span class=Cdigo>RND</span> produce a pseudo-random number uniformly
+distributed between 0 and 1 using the generator algorithm, selected by <span
+class=Cdigo><a href="#_RND_GENERATOR(_type_)">RND_GENERATOR(…)</a></span>, contained
+in the Object instance currently under computation (<span class=Cdigo>THIS</span>)
+or the chosen (<i>obj</i>) Object instance. </p>
+
+<p>If the selected Object instance (<span class=Cdigo>THIS</span> or <i>obj</i>)
+does not have a pseudo-random number generator (PRNG), the (grand…) parent’s
+one is used, recursively until <span class=Cdigo>ROOT</span> (which always has
+a PRNG).</p>
 
 <h2><a name="_RND_GENERATOR(_type_)"></a><a name="RND_GENERATOR"></a>RND_GENERATOR(
-<i>type</i> )</h2>
+<i>type</i> ), RND_GENERATORS( <i>obj</i>, <i>type</i> )</h2>
 
-<p>The <span class=Cdigo>RND_GENERATOR(…)</span> Macro selects the random
-number generator (hardware or algorithm) to be used when extract draws or
-producing pseudorandom numbers. The following <i>type</i> options are
-available:</p>
+<p>The <span class=Cdigo>RND_GENERATOR(…)</span> Macros select the random
+number generator (hardware or algorithm), to be used by the Object instance
+currently under computation (<span class=Cdigo>THIS</span>) or the chosen (<i>obj</i>)
+Object instance, when extract draws or producing pseudo-random numbers.</p>
+
+<p>The following <i>type</i> options are available:</p>
 
 <p class=MsoNormal style='margin-left:14.2pt'><b>0</b>. True (hardware-based)
 random number generator in (0,1)<br>
@@ -9179,13 +9214,15 @@ class=Cdigo>ranlux24</span>, 7:<span class=Cdigo>ranlux48</span>) from the
 C++11 standard library.</p>
 
 <h2><a name="_RND_SETSEED(_seed_)"></a><a name="_RND_SEED_RND_SETSEED(_seed"></a><a
-name="RND_SEED"></a>RND_SEED<br>
-RND_SETSEED( <i>seed</i> )</h2>
+name="RND_SEED"></a>RND_SEED, RND_SEEDS( <i>obj</i> )<br>
+RND_SETSEED( <i>seed</i> ), RND_SETSEEDS( <i>obj</i>, <i>seed</i> )</h2>
 
-<p class=MsoNormal>Macros <span class=Cdigo>RND_SETSEED(…)</span> changes the
-integer seed number used by the pseudorandom number generator to <i>seed</i>,
+<p class=MsoNormal>Macros <span class=Cdigo>RND_SETSEED(…)</span> change the
+integer seed number used by the pseudo-random number generator to <i>seed</i>,
 an unsigned integer value. <span class=Cdigo>RND_SEED</span> reads the
-currently set unsigned integer seed number in double precision format. </p>
+currently set unsigned integer seed number in double precision format. The Macros
+can be applied to the Object instance currently under computation (<span
+class=Cdigo>THIS</span>) or the chosen (<i>obj</i>) Object instance.</p>
 
 <h2><a name="_SLEEP(_msecs_)"></a><a name="_ROOT"></a>ROOT</h2>
 
@@ -9720,8 +9757,8 @@ in the LSD Object <span class=Cdigo><a href="#_Parent_Object:_p"><span
 style='color:gray;text-decoration:none'><u><span style='color:blue'>THIS</span></u></span></a></span>
 under computation, or in the Object pointed by <i>obj</i>, if present. </p>
 
-<p><b>Warning:</b> the data extension <b>must</b> be set before using this Macro.
-If the target LSD Object has no data extension set previously by <span
+<p><b>Warning:</b> the data extension <b>must</b> be set before using this
+Macro. If the target LSD Object has no data extension set previously by <span
 class=Cdigo><u><span style='color:blue'><a href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span>,
 a LSD run time crash will happen.</p>
 
@@ -9809,7 +9846,7 @@ C++ data extensions and an example. </p>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><a
-  name="_Basic_C++_coding"></a><a name="_HOOK(_num_),"></a><span
+  name="_HOOK(_num_),"></a><a name="_Basic_C++_coding"></a><span
   style='font-size:10.0pt;color:black'><a href="#top"><span style='color:red;
   text-decoration:none'>&#9650;Top</span></a></span></p>
   </td>
@@ -9886,9 +9923,9 @@ on both sides of the assignment:</p>
 
 <p class=MsoNormal><span class=Cdigo>a = a + 32;</span></p>
 
-<p class=MsoNormal>The above line assigns <i>a</i> with its previous value increased
-of 32. Therefore, if <i>a</i> has the value of, say, 5, after the above line it
-is assigned the value of 37.</p>
+<p class=MsoNormal>The above line assigns <i>a</i> with its previous value
+increased of 32. Therefore, if <i>a</i> has the value of, say, 5, after the
+above line it is assigned the value of 37.</p>
 
 <p class=MsoNormal>These commands incrementing the value of a variable are so
 common that they have also a short way to express them. For example, the

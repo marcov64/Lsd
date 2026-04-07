@@ -97,7 +97,7 @@ int main( int argn, const char **argv )
 					sim.grand_total = false;
 				}
 
-				res = sim.run_parallel( true, argv[ 0 ], sim.conf_name, sim.seed, sim.last_run, sim.max_threads, sim.max_runs );
+				res = sim.run_parallel( true, argv[ 0 ], sim.conf_name, sim.prng_seed, sim.last_run, sim.max_threads, sim.max_runs );
 			}
 			else
 				// execute single simulation
@@ -336,7 +336,7 @@ int load_config( lsd::simulation & sim )
 	if ( ! sim.batch_sequential )
 	{
 		if ( sim.findex > 0 )
-			sim.seed = sim.findex;
+			sim.prng_seed = sim.findex;
 
 		if ( sim.fend > 0 )
 			sim.last_run = sim.fend;

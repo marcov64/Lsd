@@ -58,13 +58,9 @@ namespace lsd
 			FILE *_f_values_[ 1 ];
 #endif
 		public:								// methods used in equations and GUI
-			double norm( double mean, double dev );
 			double round_digits( double value, int digits );
 			double t_star( int df, double cl );
-			double uniform( double min, double max );
 			double z_star( double cl );
-
-			double _ran1_( long *unused = 0 );
 			void _close_sim_( void );
 
 		protected:							// methods used also by class simulation
@@ -74,39 +70,22 @@ namespace lsd
 			equation( void );				// constructor
 
 		private:							// methods only used in equations
-			double alapl( double mu, double alpha1, double alpha2 );
 			double alaplcdf( double mu, double alpha1, double alpha2, double x );
-			double bernoulli( double p );
-			double beta( double alpha, double beta );
 			double betacdf( double alpha, double beta, double x );
-			double binomial( double p, double t );
-			double bpareto( double alpha, double low, double high );
 			double bparetocdf( double alpha, double low, double high, double x );
-			double cauchy( double a, double b );
-			double chi_squared( double n );
 			double com( d_vecT & u, d_vecT & v );
 			double cov( d_vecT & u, d_vecT & v );
-			double exponential( double lambda );
 			double fact( double x );
-			double fisher( double m, double n );
-			double gamma( double alpha, double beta = 1 );
-			double geometric( double p );
 			double ipow( double base, double exp );
-			double lnorm( double mu, double sigma );
 			double lnormcdf( double mu, double sigma, double x );
 			double mad( d_vecT & v );
 			double mean( d_vecT & v );
 			double med( d_vecT v );
 			double normcdf( double mu, double sigma, double x );
-			double pareto( double mu, double alpha );
 			double paretocdf( double mu, double alpha, double x );
-			double poisson( double m );
 			double poissoncdf( double lambda, double k );
 			double sd( d_vecT & v );
-			double student( double n );
-			double uniform_int( double min, double max );
 			double unifcdf( double a, double b, double x );
-			double weibull( double a, double b );
 
 			const char *_conf_name_( void );
 			const char *_conf_path_( void );
@@ -289,6 +268,7 @@ namespace lsd
 			void get_sa_limits( FILE *out, const char *sep, bool meta_par_in[ ] );
 			void move( const char *dest );
 			void reset_end( void );
+			void *set_rnd_gen( int type );
 
 			object( object *_up, const char *_label, int _prng_type = -1, bool _to_compute = true, bool blueprint = false, simulation *sim = NULL );	// constructor
 			~object( void );					// destructor
@@ -328,8 +308,29 @@ namespace lsd
 			double overall_min( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 			double perc( const char *lab1, double p, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 			double recal( const char *l );
+			double rnd_01( long *unused = NULL );
+			double rnd_alaplace( double mu, double alpha1, double alpha2 );
+			double rnd_bernoulli( double p );
+			double rnd_beta( double alpha, double beta );
+			double rnd_binomial( double p, double t );
+			double rnd_bpareto( double alpha, double low, double high );
+			double rnd_cauchy( double a, double b );
+			double rnd_chi_squared( double n );
+			double rnd_exponential( double lambda );
+			double rnd_fisher( double m, double n );
+			double rnd_log_normal( double mu, double sigma );
+			double rnd_normal( double mean, double dev );
+			double rnd_gamma( double alpha, double beta = 1 );
+			double rnd_geometric( double p );
+			double rnd_pareto( double mu, double alpha );
+			double rnd_poisson( double m );
+			double rnd_student( double n );
+			double rnd_uniform( double min, double max );
+			double rnd_uniform_int( double min, double max );
+			double rnd_weibull( double a, double b );
 			double sd( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 			double search_inst( object *obj = NULL, bool fun = true );
+			double set_rnd_seed( u_long32T seed );
 			double stat( const char *lab1, double *v = NULL, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
 			double stats_net( const char *lab, double *r );
 			double sum( const char *lab1, int lag = 0, bool cond = false, const char *lab2 = "", const char *lop = "", double value = NAN );
@@ -353,6 +354,12 @@ namespace lsd
 			long init_star_net( const char *lab, long numNodes );
 			long init_uniform_net( const char *lab, long numNodes, long outDeg );
 			long nodes2create( const char *lab, long numNodes );
+			mtxT draw_0_lck;
+			mtxT draw_1_3_lck;
+			mtxT draw_2_4_lck;
+			mtxT draw_5_lck;
+			mtxT draw_6_lck;
+			mtxT draw_7_lck;
 			netlink *add_link_net( object *destPtr, double weight = 0, double probTo = 1 );
 			netlink *add_link_net( const char *nodeName, long startNode, long endNode, double weight = 0, double probTo = 1, bool edge = false );
 			netlink *draw_link_net( void );
@@ -377,11 +384,13 @@ namespace lsd
 			object *turbosearch( const char *label, double tot, double num );
 			object *turbosearch_cond( const char *label, double value );
 			variable *search_var_err( object *caller, const char *label, bool no_search, bool no_search_up, bool search_sons, const char *errmsg );
+			void alloc_prng( void );
 			void collect_cemetery( const variable *caller = NULL );
 			void collect_inst( o_setT &list );
 			void copy_descendant( object *to );
 			void delete_link_net( netlink *ptr );
 			void delete_node_net( void );
+			void free_prng( void );
 			void get_line( char *lBuffer, FILE *fPtr );
 			void name_node_net( const char *nodeName );
 			void recreate_maps( void );
@@ -392,11 +401,17 @@ namespace lsd
 			void save_xml_struct( x_nodeT &pn, long &node_serial, bool quick );
 			void search_inst( object *obj, long *pos, long *checked );
 			void set_blueprint( object *container );
-			void set_rnd_seed( u_long32T seed );
 			void set_tit_counter( void );
 			void update( bool recurse, bool user );
 			FILE *search_txt_data( const char *name, const char *init, const char *str );
 
+			template < class dT > double draw_prng( dT & d );
+			template < class dT > double draw_prng_0( dT & d );
+			template < class dT > double draw_prng_1_3( dT & d );
+			template < class dT > double draw_prng_2_4( dT & d );
+			template < class dT > double draw_prng_5( dT & d );
+			template < class dT > double draw_prng_6( dT & d );
+			template < class dT > double draw_prng_7( dT & d );
 #ifdef OBJECT_EXT
 		OBJECT_EXT
 #endif
@@ -1134,13 +1149,12 @@ namespace lsd
 			o_setT obj_list;				// set with all existing LSD objects
 			prof_mapT prof_times;			// set of saved profiling times
 			sensitivity *sens = NULL;		// sensitivity analysis linked-list head
-			std::mt19937 mt32;				// Mersenne-Twister 32 bits generator
 			strT run_log;					// consolidated runs log
 			str_vecT res_list;				// list of results files last saved
 			str_vecT run_logs;				// log file list produced in parallel runs
 			thrT run_monitor;				// thread monitoring parallel instances
 			thrT sim_thread;				// thread object where simulation is run
-			unsigned seed = 1;				// random number generator initial seed
+			unsigned prng_seed = 1;			// random number generator initial seed
 			varattributes va { NULL };		// static variable attributes container
 			variable *cemetery = NULL;		// LSD saved data from deleted objects
 			worker *workers = NULL;			// multi-thread parallel worker data
@@ -1169,31 +1183,16 @@ namespace lsd
 			clock_t end_profile[ MAX_PROF_SIZE ];// profile-level end times
 			cond_vT upd_workers;			// worker schedule update signal
 			int nsim;						// library simulation object index
-			int sim_prng_type = DEF_PRNG;	// pseudo-random generator type
 			int stack_level;				// LSD stack call level
 			i_atomT alaplErrCnt, bernoErrCnt, betaErrCnt, binomErrCnt, cauchErrCnt, chisqErrCnt, expErrCnt, fishErrCnt, gammaErrCnt, geomErrCnt, lnormErrCnt, normErrCnt, paretErrCnt, poissErrCnt, studErrCnt, weibErrCnt;
 			i_vecT run_status;				// parallel running instances status
-			long idum = 0;					// Park-Miller default seed (legacy code)
 			l_atomT node_serial = 1;		// network node serial number counter
 			object *wait_delete = NULL;		// LSD object waiting for deletion
-			mtxT draw_lc1_lck;				// locks for random generator operations
-			mtxT draw_lc2_lck;
-			mtxT draw_lf24_lck;
-			mtxT draw_lf48_lck;
-			mtxT draw_mt32_lck;
-			mtxT draw_mt64_lck;
-			mtxT draw_rd_lck;
 			mtxT error_lck;					// control multiple error_hard calls
 			mtxT run_status_lck;			// lock run_status for parallel updating
 			mtxT seq_end_lck;				// lock seq_end for parallel updating
 			mtxT var_update_lck;			// control worker variable update
 			mtxT wrk_crash_lck;				// control worker crash handling
-			std::minstd_rand lc1;			// linear congruential generator (internal)
-			std::minstd_rand lc2;			// linear congruential generator (user)
-			std::mt19937_64 mt64;			// Mersenne-Twister 64 bits generator
-			std::random_device rd;			// simulation random device
-			std::ranlux24 lf24;				// lagged fibonacci 24 bits generator
-			std::ranlux48 lf48;				// lagged fibonacci 48 bits generator
 			str_vecT run_results;			// parallel run results files
 			thr_vecT run_threads;			// parallel running instances
 			variable *last_cemetery = NULL;	// LSD last saved cemetery entry
@@ -1207,7 +1206,6 @@ namespace lsd
 			int hyper_count_var( const char *lab );
 			int load_configuration( bool reload, strT *warnings, int quick );
 			int load_txt_sensitivity( FILE *f );
-			int rnd_int( int min, int max );
 			int run_parallel( bool term, const char *exec, const char *simname, int fseed, int runs, int thrrun, int parruns );
 			int run_simulation( int until_t, int until_run, bool da );
 			int worker_errors( void );
@@ -1216,7 +1214,6 @@ namespace lsd
 			void empty_sensitivity( sensitivity *cs = NULL );
 			void empty_stack( void );
 			void error_hard( const char *boxTitle, const char *boxText, bool defQuit, const char *logFmt, ... );
-			void init_random( unsigned seed );
 			void plog( const char *msg, ... );
 			void plog_tag( const char *cm, const char *tag, ... );
 			void plog_terminal( const char *cm, va_list arg );
@@ -1226,8 +1223,8 @@ namespace lsd
 
 			simulation( const char *fname, const char path[ ] = "", int quick = 0 );// constructor
 			simulation( void ) : simulation( "", "", 0 ) { };// constructor
-			simulation( simulation && src ) { };// move constructor
-			~simulation( void );			// destructor
+			simulation( simulation && src ) { };			// move constructor
+			~simulation( void );							// destructor
 			simulation( const simulation & s ) = delete;	// copy constructor
 			simulation & operator=( const simulation & s ) = delete;// assignment
 
@@ -1240,14 +1237,6 @@ namespace lsd
 			int init_new_seq( clock_t & start, char *bar_done, int & perc_done, int & last_done, bool da_en = false );
 			int load_txt_configuration( bool reload, int quick );
 			int monitor_logs( void );
-			template < class distr > double draw_gen( distr &d );
-			template < class distr > double draw_lc1( distr &d );
-			template < class distr > double draw_lc2( distr &d );
-			template < class distr > double draw_lf24( distr &d );
-			template < class distr > double draw_lf48( distr &d );
-			template < class distr > double draw_mt32( distr &d );
-			template < class distr > double draw_mt64( distr &d );
-			template < class distr > double draw_rd( distr &d );
 			u_long32T seeder( u_long32T seed = 0 );
 			void *set_random( int gen );
 			void empty_blueprint( void );

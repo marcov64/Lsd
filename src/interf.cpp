@@ -156,8 +156,8 @@ lsd::object *gui::operate( lsd::object *r )
 			Tcl_LinkVar( interp, "dozip", ( char * ) & sim.dozip, TCL_LINK_BOOLEAN );
 			Tcl_LinkVar( interp, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
 
-			cmd( "set firstFile \"%s_%d\"", sim.conf_name, sim.seed );
-			cmd( "set lastFile \"%s_%d\"", sim.conf_name, sim.seed + sim.last_run - 1 );
+			cmd( "set firstFile \"%s_%d\"", sim.conf_name, sim.prng_seed );
+			cmd( "set lastFile \"%s_%d\"", sim.conf_name, sim.prng_seed + sim.last_run - 1 );
 			cmd( "set totFile \"%s\"", sim.conf_name );
 			cmd( "set resExt %s", sim.docsv ? "csv" : "res" );
 			cmd( "set totExt %s", sim.docsv ? "csv" : "tot" );
@@ -1017,9 +1017,9 @@ lsd::object *gui::operate( lsd::object *r )
 				{
 					cur = sim.blueprint->search( r->attr );
 					if ( cur != NULL )
-						cur->prng_type = choice ? DEF_PRNG : -1;
+						cur->set_rnd_gen( choice ? DEF_PRNG : -1 );
 					for ( cur = r; cur != NULL; cur = cur->hyper_next( ) )
-						cur->prng_type = choice ? DEF_PRNG : -1;
+						cur->set_rnd_gen( choice ? DEF_PRNG : -1 );
 				}
 
 				cmd( "set choice $to_compute" );
@@ -2446,7 +2446,7 @@ lsd::object *gui::operate( lsd::object *r )
 
 			// save previous values to allow canceling operation
 			i_tmp[ 1 ] = sim.last_run;
-			i_tmp[ 2 ] = sim.seed;
+			i_tmp[ 2 ] = sim.prng_seed;
 			i_tmp[ 3 ] = sim.last_t;
 			i_tmp[ 4 ] = sim.deb_t;
 			i_tmp[ 5 ] = sim.stack_info;
@@ -2457,7 +2457,7 @@ lsd::object *gui::operate( lsd::object *r )
 			i_tmp[ 10 ] = sim.parallel_disable;
 
 			Tcl_LinkVar( interp, "last_run", ( char * ) & sim.last_run, TCL_LINK_INT );
-			Tcl_LinkVar( interp, "seed", ( char * ) & sim.seed, TCL_LINK_INT );
+			Tcl_LinkVar( interp, "seed", ( char * ) & sim.prng_seed, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "last_t", ( char * ) & sim.last_t, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "stack_info", ( char * ) & sim.stack_info, TCL_LINK_INT );
 			Tcl_LinkVar( interp, "prof_min_msecs", ( char * ) & sim.prof_min_msecs, TCL_LINK_INT );
@@ -2553,7 +2553,7 @@ lsd::object *gui::operate( lsd::object *r )
 			if ( choice == 2 )	// escape - revert previous values
 			{
 				sim.last_run = i_tmp[ 1 ];
-				sim.seed = ( unsigned ) i_tmp[ 2 ];
+				sim.prng_seed = ( unsigned ) i_tmp[ 2 ];
 				sim.last_t = i_tmp[ 3 ];
 				sim.deb_t = i_tmp[ 4 ];
 				sim.stack_info = i_tmp[ 5 ];
@@ -2565,7 +2565,7 @@ lsd::object *gui::operate( lsd::object *r )
 			}
 			else
 				// signal unsaved change if anything to be saved
-				if ( i_tmp[ 1 ] != sim.last_run || ( unsigned ) i_tmp[ 2 ] != sim.seed || i_tmp[ 3 ] != sim.last_t || i_tmp[ 4 ] != sim.deb_t || i_tmp[ 5 ] != sim.stack_info || i_tmp[ 6 ] != sim.prof_min_msecs || i_tmp[ 7 ] != sim.prof_obs_only || i_tmp[ 8 ] != sim.prof_aggr_time || i_tmp[ 9 ] != sim.no_ptr_chk || i_tmp[ 10 ] != sim.parallel_disable )
+				if ( i_tmp[ 1 ] != sim.last_run || ( unsigned ) i_tmp[ 2 ] != sim.prng_seed || i_tmp[ 3 ] != sim.last_t || i_tmp[ 4 ] != sim.deb_t || i_tmp[ 5 ] != sim.stack_info || i_tmp[ 6 ] != sim.prof_min_msecs || i_tmp[ 7 ] != sim.prof_obs_only || i_tmp[ 8 ] != sim.prof_aggr_time || i_tmp[ 9 ] != sim.no_ptr_chk || i_tmp[ 10 ] != sim.parallel_disable )
 					unsaved_change( true );
 
 			Tcl_UnlinkVar( interp, "last_run" );
@@ -4091,7 +4091,7 @@ lsd::object *gui::operate( lsd::object *r )
 				stop = false;
 				cmd( "progressbox .psa \"Creating DoE\" \"Creating configuration files\" \"File\" %ld { set stop true }", ( long ) ( fracMC * maxMC ) );
 
-				gui_prng.seed( sim.seed );			// reset random number generator
+				gui_prng.seed( sim.prng_seed );			// reset random number generator
 				sensitivity_sequential( &findexSens, sim.sens, fracMC, sens_path );
 
 				cmd( "destroytop .psa" );
@@ -5405,8 +5405,8 @@ lsd::object *gui::operate( lsd::object *r )
 			param = std::min( sim.last_run, sim.max_threads );
 
 			cmd( "set simNum %d", sim.last_run );
-			cmd( "set firstFile \"%s_%d\"", sim.conf_name, sim.seed );
-			cmd( "set lastFile \"%s_%d\"", sim.conf_name, sim.seed + sim.last_run - 1 );
+			cmd( "set firstFile \"%s_%d\"", sim.conf_name, sim.prng_seed );
+			cmd( "set lastFile \"%s_%d\"", sim.conf_name, sim.prng_seed + sim.last_run - 1 );
 			cmd( "set totFile \"%s\"", sim.conf_name );
 			cmd( "set resExt %s", sim.docsv ? "csv" : "res" );
 			cmd( "set totExt %s", sim.docsv ? "csv" : "tot" );
@@ -5628,7 +5628,7 @@ lsd::object *gui::operate( lsd::object *r )
 				cmd( "cd $path" );
 
 			plog( "\n\nProcessing parallel background run (threads=%d runs=%d)...", nature, param );
-			sim.run_parallel( false, term_exe, sim.conf_name, sim.seed, sim.last_run, nature, param );
+			sim.run_parallel( false, term_exe, sim.conf_name, sim.prng_seed, sim.last_run, nature, param );
 
 			show_logs( sim.conf_path, sim.run_logs, true );
 

@@ -9162,8 +9162,7 @@ p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;}
 p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
-	{mso-style-noshow:yes;
-	mso-style-priority:34;
+	{mso-style-priority:34;
 	mso-style-unhide:no;
 	mso-style-qformat:yes;
 	mso-margin-top-alt:auto;
@@ -10848,10 +10847,11 @@ For example, suppose an Object named <span class=Cdigo>Firm</span> contains a
 Variable called <span class=Cdigo>Q</span> that depends on another Variable,
 named <span class=Cdigo>K</span>. If there are many copies of the Object <span
 class=Cdigo>Firm</span>, each instance of the Equation for <span class=Cdigo>Q</span>,
-that <span class=GramE>require</span> <span class=Cdigo>K</span> for its computation,
-will refer to its own copy of <span class=Cdigo>K</span> (a particular value),
-that is, the copy of <span class=Cdigo>K</span> contained in the same Object as
-the copy of <span class=Cdigo>Q</span> currently under computation. </p>
+that <span class=GramE>require</span> <span class=Cdigo>K</span> for its
+computation, will refer to its own copy of <span class=Cdigo>K</span> (a
+particular value), that is, the copy of <span class=Cdigo>K</span> contained in
+the same Object as the copy of <span class=Cdigo>Q</span> currently under
+computation. </p>
 
 <p>The Equations’ code for all the Variables is usually located in a single
 file. The order in which the Equations appear in the file is irrelevant, since
@@ -10974,12 +10974,12 @@ href="LSD_faqs.html#variable">Variable</a> (this association is defined during
 the <a href="LSD_faqs.html#modelstructure">model structure</a> configuration).</p>
 
 <p>LSD offers numerous Macros to be used when creating Equations. The most
-frequently used is <span class=Cdigo><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),"><span
-class=GramE>V(</span>…)</a></span> that simply computes or retrieves the value
-of another Variable, Function or Parameter in the model. When the computations
-required for an Equation or a Function are slightly less than trivial, it is
-common to use temporary variables to store intermediate results. For example,
-consider the following Equation: </p>
+frequently used is <span class=Cdigo><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">V(…)</a></span>
+that simply computes or retrieves the value of another Variable, Function or
+Parameter in the model. When the computations required for an Equation or a
+Function are slightly less than trivial, it is common to use temporary
+variables to store intermediate results. For example, consider the following
+Equation: </p>
 
 <p><span class=Cdigo>EQUATION( &quot;PROF&quot; ) </span><span
 style='font-family:"Courier New";color:gray'><br>
@@ -10989,8 +10989,8 @@ style='font-family:"Courier New";color:gray'><br>
 rate: </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>PROF(t) = P(t) * A(t-1) - C - RIM
 – RIN * Inn </span></span><br>
-<span class=Cdigo><span style='color:#00B050'>profits per unit of capital are equal
-current price times lagged productivity </span></span><br>
+<span class=Cdigo><span style='color:#00B050'>profits per unit of capital are
+equal current price times lagged productivity </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>minus the cost for research
 (innovative firms spend for both type </span></span><br>
 <span class=Cdigo><span style='color:#00B050'>of research) and fixed costs. </span></span><br>
@@ -11178,9 +11178,9 @@ Object instances obtained from other LSD Macros</p>
 
 <p class=MsoNormal style='margin:0cm'><o:p>&nbsp;</o:p></p>
 
-<p class=MsoNormal style='margin:0cm'><b>Warning:</b> Despite the availability of
-C++ predefined pointers to operate on the Object structure, their use should be
-<i>avoided</i>. Very importantly, the corresponding LSD Macros offer pointer
+<p class=MsoNormal style='margin:0cm'><b>Warning:</b> Despite the availability
+of C++ predefined pointers to operate on the Object structure, their use should
+be <i>avoided</i>. Very importantly, the corresponding LSD Macros offer pointer
 checking to the operations, preventing hard-to-find crashes and easily pointing
 error locations to the modeler. If required, for a small performance gain,
 pointer checking can be disabled (see <span class=Cdigo><a href="#POINTER_CHECK">NO_POINTER_CHECK</a></span>)
@@ -11297,14 +11297,13 @@ class=Cdigo> )</span> and <span class=GramE><span class=Cdigo>NEXTS( cur</span><
 class=Cdigo> )</span> are brothers of <span class=Cdigo>CALLER</span> and <span
 class=Cdigo>cur</span>, respectively</p>
 
-<p class=MsoNormal>Any “<span class=GramE>younger“ brother</span> instances in the
-model hierarchy tree can be reached by arbitrary combinations of <span
+<p class=MsoNormal>Any “<span class=GramE>younger“ brother</span> instances in
+the model hierarchy tree can be reached by arbitrary combinations of <span
 class=GramE><span class=Cdigo>NEXTS(</span></span><span class=Cdigo>…)</span>
 Macros departing from a given Object instance. However, the exploration of
-previous or “older” brother instances <span class=GramE>require</span> first
-the use of the <span class=Cdigo><a href="#_SEARCH(_&quot;obj_Lab&quot;_),"><span
-class=GramE>SEARCH(</span>…)</a></span> Macro family, to identify the “<span
-class=GramE>first“ brother</span> instance. </p>
+previous or “older” brother instances require first the use of the <span
+class=Cdigo><a href="#_SEARCH(_&quot;obj_Lab&quot;_),">SEARCH(…)</a></span>
+Macro family, to identify the “first“ brother instance. </p>
 
 <p class=MsoNormal>The best way to remember the object's components is to keep
 in mind a geometrical representation of Objects: </p>
@@ -11376,7 +11375,8 @@ Firm 4 | =&gt; . . . =&gt; | Firm 100 |</span><br>
 ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Worker 1 | =&gt; | Worker 1 | =&gt; .
 . . =&gt; | Worker 1000 |</span><br>
 <span class=Cdigo>&nbsp;&nbsp;&nbsp;&nbsp; ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;+----------+&nbsp;&nbsp;&nbsp; +----------+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;+----------+&nbsp;&nbsp;&nbsp;
++----------+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 +-------------+ </span><br>
 <span class=Cdigo>&nbsp;+----------+&nbsp;&nbsp;&nbsp;
 +----------+&nbsp;&nbsp;&nbsp;
@@ -11453,12 +11453,12 @@ line. Disabling pointer initialization also disable pointer checking (see <span
 class=Cdigo><a href="#_NO_POINTER_CHECK_USE_POINTER_CHECK">NO_POINTER_CHECK</a></span>
 Macro for details).</p>
 
-<p>For example, when creating a new Object instance, one wants to initialize its
-Parameters. This is done by storing the new instance “address” in a temporary
-pointer and applying the LSD required Macros on it. For example, the following
-lines within an Equation create a new instance of Object <i>Firm</i> and set
-its Variable <i>K</i> to 0 (see the details in the description of the LSD
-Macros listed below). </p>
+<p>For example, when creating a new Object instance, one wants to initialize
+its Parameters. This is done by storing the new instance “address” in a
+temporary pointer and applying the LSD required Macros on it. For example, the
+following lines within an Equation create a new instance of Object <i>Firm</i>
+and set its Variable <i>K</i> to 0 (see the details in the description of the
+LSD Macros listed below). </p>
 
 <p><span class=Cdigo>... </span><span style='font-family:"Courier New";
 color:gray'><br>
@@ -11999,10 +11999,10 @@ class=GramE><i>weight </i>)</span>, <span class=GramE>WHTMAVES( <i>obj</i></span
 
 <p>The <span class=Cdigo>WHTAVE[LS<span class=GramE>](</span>…)</span> Macros
 compute the time weighted moving average of Variable named <i>Lab</i> for <i>per</i>
-periods using the array <i>weight</i> to define importance of each lagged period,
-optionally starting after the specified <i>lag</i> (effectively using the
-period from <i>lag</i> to <span class=SpellE><i>lag</i>+<i>per</i></span>) the.
-Similar to <span class=Cdigo><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">V(…)</a></span>,
+periods using the array <i>weight</i> to define importance of each lagged
+period, optionally starting after the specified <i>lag</i> (effectively using
+the period from <i>lag</i> to <span class=SpellE><i>lag</i>+<i>per</i></span>)
+the. Similar to <span class=Cdigo><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">V(…)</a></span>,
 these Macros search for <i>Lab</i> over the entire <a
 href="LSD_faqs.html#modelstructure">model structure</a>, starting by the
 descendants of the current Object (<span class=Cdigo><a
@@ -12062,8 +12062,8 @@ SUM_CNDL( &quot;<i>Lab1</i>&quot;, &quot;<i>Lab2</i>&quot;, &quot;<i>lop</i>&quo
 strategy described in <span class=Cdigo><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">V(…)</a></span>
 (see also the different forms), an instance of the Variable or Parameter <i>Lab</i>.
 Then, they keep on summing up all the values of instances of the Variable or
-Parameter named <i>Lab</i> (with the lag <span class=SpellE><i>lag</i></span>, if
-specified), found in the set of Object instances which are brothers to the
+Parameter named <i>Lab</i> (with the lag <span class=SpellE><i>lag</i></span>,
+if specified), found in the set of Object instances which are brothers to the
 first found. Usually, they are used to sum up the values of a given Variable of
 descending Object instances.</p>
 
@@ -12562,18 +12562,17 @@ COUNT_ALL_CNDL( &quot;<span class=SpellE><i>obj_Lab</i></span>&quot;, &quot;<i>L
 
 <p>These Macros explore the model counting for the number of instances of the
 Object named <span class=SpellE><i>obj_Lab</i></span>. That is, they count only
-within the descendants of <i>obj</i>, if specified in <span class=GramE><span
-class=Cdigo>COUNTS(</span></span><span class=Cdigo>…)</span>, or in <a
-href="#_Parent_Object:_p"><span class=Cdigo><span style='color:blue'>THIS</span></span></a>
-if <i>obj</i> not specified in <span class=GramE><span class=Cdigo>COUNT(</span></span><span
-class=Cdigo>…)</span>, and their descendants. Therefore, the search is not
-exhaustive over the entire model, unless it is started from the <span
-class=Cdigo><a href="#_Object’s_relatives:_up,">ROOT</a></span> of the model.</p>
+within the descendants of <i>obj</i>, if specified in <span class=Cdigo>COUNTS(…)</span>,
+or in <a href="#_Parent_Object:_p"><span class=Cdigo><span style='color:blue'>THIS</span></span></a>
+if <i>obj</i> not specified in <span class=Cdigo>COUNT(…)</span>, and their
+descendants. Therefore, the search is not exhaustive over the entire model,
+unless it is started from the <span class=Cdigo><a
+href="#_Object’s_relatives:_up,">ROOT</a></span> of the model.</p>
 
-<p>The <span class=Cdigo>COUNT[S<span class=GramE>](</span>…)</span> versions only
-explore a single group of Object instances, that is, a set of Object instances
-named <span class=SpellE><i>obj_Lab</i></span> under a single parent Object. If
-there is more than a group, it considers only the first one. The <span
+<p>The <span class=Cdigo>COUNT[S<span class=GramE>](</span>…)</span> versions
+only explore a single group of Object instances, that is, a set of Object
+instances named <span class=SpellE><i>obj_Lab</i></span> under a single parent
+Object. If there is more than a group, it considers only the first one. The <span
 class=Cdigo>COUNT_ALL[S<span class=GramE>](</span>…)</span> versions consider
 Object instances in all groups of Objects descending from the selected Object
 type (<i>obj</i> or <a href="#_Parent_Object:_p"><span class=Cdigo><span
@@ -12636,10 +12635,10 @@ href="#SUM"><span class=GramE>SUM(</span>…)</a></span> for details and
 examples.</p>
 
 <p>These Macros return the number of instances found for the Variable or
-Parameter named <i>Lab</i> <span class=GramE>and also</span> store a set of
-values in the temporary storage <a href="#_Temporary_numeric_storage:"><span
-class=GramE>v[</span>…]</a>. Namely, it places in <span class=GramE><span
-class=Cdigo>v[</span></span><span class=Cdigo>…]</span> the following values: </p>
+Parameter named <i>Lab</i> and also store a set of values in the temporary
+storage <a href="#_Temporary_numeric_storage:">v[…]</a>. Namely, it places in <span
+class=GramE><span class=Cdigo>v[</span></span><span class=Cdigo>…]</span> the
+following values: </p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 32.2pt;text-indent:-18.0pt;mso-list:l7 level1 lfo4'><![if !supportLists]><span
@@ -12789,8 +12788,8 @@ style='font-family:"Courier New";color:gray'><br>
 <span class=Cdigo>&nbsp;&nbsp;} </span><br>
 <span class=Cdigo>} </span></span></p>
 
-<p>The cycle removes all <i>Firm</i>’s having market shares smaller than a given
-value and that the user permitted to. </p>
+<p>The cycle removes all <i>Firm</i>’s having market shares smaller than a
+given value and that the user permitted to. </p>
 
 <h2><span style='mso-fareast-font-family:"Times New Roman"'>Warning<o:p></o:p></span></h2>
 
@@ -12992,10 +12991,10 @@ The search process for <i>obj</i> is <span class=GramE>similar to</span> <span
 class=MsoHyperlink><span style='font-family:"Courier New"'><a
 href="#_SEARCH(_&quot;obj_Lab&quot;_),"><span class=GramE>SEARCH(</span>…)</a></span></span>.</p>
 
-<p>If a matching Object instance is found, the Macro returns the instance number
-representing the position of the specific instance pointed by <i>obj</i> in the
-<a href="#_Object’s_relatives:_up,">brotherhood chain</a>, starting from 1. If
-the Object is not found, <span class=Cdigo>SEARCH_<span class=GramE>INST(</span>…)</span>
+<p>If a matching Object instance is found, the Macro returns the instance
+number representing the position of the specific instance pointed by <i>obj</i>
+in the <a href="#_Object’s_relatives:_up,">brotherhood chain</a>, starting from
+1. If the Object is not found, <span class=Cdigo>SEARCH_<span class=GramE>INST(</span>…)</span>
 returns zero.</p>
 
 <p>If <i>obj</i> is set to <span class=Cdigo>NULL</span>, the Macros will
@@ -13054,16 +13053,15 @@ class=GramE>RNDDRAWLS( <i>obj</i></span>, &quot;<span class=SpellE><i>obj_Lab</i
 &quot;<i>Lab</i>&quot;, <span class=GramE><i>lag </i>)</span> <o:p></o:p></span></h1>
 
 <p>These Macros search for a group of Object instances named <span
-class=SpellE><i>obj_Lab</i></span> and returns a pointer to one of them,
-randomly chosen with probability proportional to the values of the Variable
-labeled <i>Lab</i> in the same Object. <span class=GramE>The Macros</span> can
-optionally consider <i>obj</i> as the starting point for the search (instead of
-the current Object under calculation, <span class=Cdigo><a
-href="#_Parent_Object:_p">THIS</a></span>) and the specific lag <span
-class=SpellE><i>lag</i></span> if different from current time step. The search
-process for <span class=SpellE><i>obj_Lab</i></span> is <span class=GramE>similar
-to</span> <span class=MsoHyperlink><span style='font-family:"Courier New"'><a
-href="#_SEARCH(_&quot;obj_Lab&quot;_),"><span class=GramE>SEARCH(</span>…)</a></span></span>.</p>
+class=SpellE><i>obj_Lab</i></span> and returns a pointer to one of them, randomly
+chosen with probability proportional to the values of the Variable labeled <i>Lab</i>
+in the same Object. The Macros can optionally consider <i>obj</i> as the
+starting point for the search (instead of the current Object under calculation,
+<span class=Cdigo><a href="#_Parent_Object:_p">THIS</a></span>) and the
+specific lag <span class=SpellE><i>lag</i></span> if different from current
+time step. The search process for <span class=SpellE><i>obj_Lab</i></span> is <span
+class=GramE>similar to</span> <span class=MsoHyperlink><span style='font-family:
+"Courier New"'><a href="#_SEARCH(_&quot;obj_Lab&quot;_),"><span class=GramE>SEARCH(</span>…)</a></span></span>.</p>
 
 <h2><span style='mso-fareast-font-family:"Times New Roman"'>Example <o:p></o:p></span></h2>
 
@@ -13197,14 +13195,14 @@ href="#_RNDDRAW(_&quot;obj_Lab&quot;,_&quot;Lab&quot;">RNDDRAW(…)</a></span> as
 the modeler explicitly provide the (correct) sum of all the weights, that is,
 the sum of the Variable named <i>Lab</i> among all Object instances with label <span
 class=SpellE><i>obj_Lab</i></span>. Unpredictable drawing behavior is expected
-if <i>total</i> is not equal to the sum of all pertinent weights. <span
-class=GramE>The Macros</span> can optionally consider <i>obj</i> as the
-starting point for the search (instead of the current Object under calculation,
-<span class=Cdigo><a href="#_Parent_Object:_p">THIS</a></span>) and the
-specific lag <span class=SpellE><i>lag</i></span> if different from current
-time step. The search process for <span class=SpellE><i>obj_Lab</i></span> is <span
-class=GramE>similar to</span> <span class=MsoHyperlink><span style='font-family:
-"Courier New"'><a href="#_SEARCH(_&quot;obj_Lab&quot;_),"><span class=GramE>SEARCH(</span>…)</a></span></span>.</p>
+if <i>total</i> is not equal to the sum of all pertinent weights. The Macros
+can optionally consider <i>obj</i> as the starting point for the search
+(instead of the current Object under calculation, <span class=Cdigo><a
+href="#_Parent_Object:_p">THIS</a></span>) and the specific lag <span
+class=SpellE><i>lag</i></span> if different from current time step. The search
+process for <span class=SpellE><i>obj_Lab</i></span> is <span class=GramE>similar
+to</span> <span class=MsoHyperlink><span style='font-family:"Courier New"'><a
+href="#_SEARCH(_&quot;obj_Lab&quot;_),"><span class=GramE>SEARCH(</span>…)</a></span></span>.</p>
 
 <div align=center>
 
@@ -13377,8 +13375,8 @@ style='mso-fareast-font-family:"Times New Roman"'>&quot;, <span class=GramE><i>v
 </i>)</span>, <span class=GramE>MULTS( <i>obj</i></span>, &quot;<i>Lab</i>&quot;,
 <span class=GramE><i>value </i>)</span> <o:p></o:p></span></h1>
 
-<p>These Macros multiply by <span class=GramE><i>value</i></span> the numeric content
-of one instance of the Variable or Parameter named <i>Lab</i>. <span
+<p>These Macros multiply by <span class=GramE><i>value</i></span> the numeric
+content of one instance of the Variable or Parameter named <i>Lab</i>. <span
 class=GramE>The Macros</span> return the new value after the multiplication. </p>
 
 <p>The Variable or Parameter <b>must</b> be contained in the Object instance <i>obj
@@ -13401,11 +13399,11 @@ family.</p>
 <p>If <i>Lab</i> is a Variable, these Macros will not trigger the computation
 of the Equation for <i>Lab</i> before the multiplication is performed. That is,
 if <i>Lab</i> was not yet computed in the current period (<i>t</i>), the last
-available value for <i>Lab</i> is used as the base for the multiplication and the
-result will be saved as the new value for <i>Lab</i> in <i>t</i>. No further <span
-class=SpellE>recomputation</span> will be automatically performed in <i>t</i>.
-If the previous computation of <i>Lab</i> is required, the user must do it
-explicitly before calling <span class=GramE><span class=Cdigo>MULT(</span></span><span
+available value for <i>Lab</i> is used as the base for the multiplication and
+the result will be saved as the new value for <i>Lab</i> in <i>t</i>. No
+further <span class=SpellE>recomputation</span> will be automatically performed
+in <i>t</i>. If the previous computation of <i>Lab</i> is required, the user
+must do it explicitly before calling <span class=GramE><span class=Cdigo>MULT(</span></span><span
 class=Cdigo>…)</span>.</p>
 
 <div align=center>
@@ -13578,26 +13576,20 @@ class=GramE>0 )</span> </span><br>
 </div>
 
 <h1><a name="_ADDOBJ(_&quot;obj_Lab&quot;_),"></a><a name=ADDOBJ></a><span
-class=GramE><span style='mso-fareast-font-family:"Times New Roman"'>ADDOBJ(
-&quot;</span></span><span class=SpellE><i><span style='mso-fareast-font-family:
-"Times New Roman"'>obj_Lab</span></i></span><span class=GramE><span
-style='mso-fareast-font-family:"Times New Roman"'>&quot; )</span></span><span
-style='mso-fareast-font-family:"Times New Roman"'>, <span class=GramE>ADDOBJS( <i>obj</i></span>,
-&quot;<span class=SpellE><i>obj_Lab</i></span><span class=GramE>&quot; )</span><br>
-<span class=GramE>ADDOBJL( &quot;</span><span class=SpellE><i>obj_Lab</i></span>&quot;,
-<span class=SpellE><i>t_<span class=GramE>upd</span></i></span><span
-class=GramE> )</span>, <span class=GramE>ADDOBJLS( <i>obj</i></span>, &quot;<span
-class=SpellE><i>obj_Lab</i></span>&quot;, <span class=SpellE><i>t_<span
-class=GramE>upd</span></i></span><span class=GramE> )</span><br>
-<a name=ADDNOBJ></a><span class=GramE>ADDNOBJ( &quot;</span><span class=SpellE><i>obj_Lab</i></span>&quot;,
-<span class=GramE><i>num </i>)</span>, <span class=GramE>ADDNOBJS( <i>obj</i></span>,
-&quot;<span class=SpellE><i>obj_Lab</i></span>&quot;, <span class=GramE><i>num</i>
-)</span><br>
-<span class=GramE>ADDNOBJL( &quot;</span><span class=SpellE><i>obj_Lab</i></span>&quot;,
-<i>num</i>, <span class=SpellE><i>t_<span class=GramE>upd</span></i></span><span
-class=GramE><i> </i>)</span>, <span class=GramE>ADDNOBJLS( <i>obj</i></span>,
-&quot;<span class=SpellE><i>obj_Lab</i></span>&quot;, <i>num</i>, <span
-class=SpellE><i>t_<span class=GramE>upd</span></i></span><span class=GramE> )</span><o:p></o:p></span></h1>
+style='mso-fareast-font-family:"Times New Roman"'>ADDOBJ( &quot;<span
+class=SpellE><i>obj_Lab</i></span>&quot; ), ADDOBJS( <i>obj</i>, &quot;<span
+class=SpellE><i>obj_Lab</i></span>&quot; )<br>
+ADDOBJL( &quot;<span class=SpellE><i>obj_Lab</i></span>&quot;, <span
+class=SpellE><i>t_upd</i></span> ), ADDOBJLS( <i>obj</i>, &quot;<span
+class=SpellE><i>obj_Lab</i></span>&quot;, <span class=SpellE><i>t_upd</i></span>
+)<br>
+<a name=ADDNOBJ></a>ADDNOBJ( &quot;<span class=SpellE><i>obj_Lab</i></span>&quot;,
+<i>num </i>), ADDNOBJS( <i>obj</i>, &quot;<span class=SpellE><i>obj_Lab</i></span>&quot;,
+<i>num</i> )<br>
+ADDNOBJL( &quot;<span class=SpellE><i>obj_Lab</i></span>&quot;, <i>num</i>, <span
+class=SpellE><i>t_upd</i></span><i> </i>), ADDNOBJLS( <i>obj</i>, &quot;<span
+class=SpellE><i>obj_Lab</i></span>&quot;, <i>num</i>, <span class=SpellE><i>t_upd</i></span>
+)<o:p></o:p></span></h1>
 
 <p class=MsoNormal>These Macros add one (or more) new instance(s) to the Object
 named <span class=SpellE><i>obj_Lab</i></span> descending from <i>obj</i>, or
@@ -14390,8 +14382,8 @@ class=GramE><i>cols</i> )</span><br>
 INIT_<span class=GramE>LAT( <i>color</i></span>, <i>rows</i>, <i>cols</i>, <i>width</i>,
 <span class=GramE><i>height</i> )</span><o:p></o:p></span></h1>
 
-<p class=MsoNormal>These Macros create a bi-dimensional lattice graphical window
-available for simulation run time updating. The lattice is formed by <i>rows</i>
+<p class=MsoNormal>These Macros create a bi-dimensional lattice graphical
+window available for simulation run time updating. The lattice is formed by <i>rows</i>
 lines and <i>cols</i> columns, set to 100 × 100 by default. The user can also
 set the physical window size as <i>width</i> × <i>height</i> pixels, set to 400
 × 400 by default, and the background <i>color</i>, set to white if not
@@ -14760,10 +14752,10 @@ class=SpellE><i>node_Lab</i></span><span class=GramE>&quot; )</span><br>
 class=SpellE><i>node</i></span></span><span class=SpellE><i>_<span class=GramE>obj</span></i></span><span
 class=GramE> )</span><o:p></o:p></span></h1>
 
-<p class=MsoNormal>The <span class=Cdigo>STAT_<span class=GramE>NET(</span>…)</span>
-Macros provides statistics of a Network composed by the Object instances
-labelled <span class=SpellE><i>node_Lab</i></span>, descending from the Object
-instance pointed by <i>obj</i> or the current Object <span class=Cdigo><a
+<p class=MsoNormal>The <span class=Cdigo>STAT_NET(…)</span> Macros provides
+statistics of a Network composed by the Object instances labelled <span
+class=SpellE><i>node_Lab</i></span>, descending from the Object instance
+pointed by <i>obj</i> or the current Object <span class=Cdigo><a
 href="#_Parent_Object:_p">THIS</a></span> otherwise. The search process for <span
 class=SpellE><i>node_Lab</i></span> is <span class=GramE>similar to</span> <span
 class=MsoHyperlink><span style='font-family:"Courier New"'><a
@@ -14904,10 +14896,10 @@ style='font-size:12.0pt;mso-fareast-font-family:"Times New Roman";color:black'><
 RNDDRAW_<span class=GramE>LINKS( <span class=SpellE><i>node</i></span></span><span
 class=SpellE><i>_<span class=GramE>obj</span></i></span><span class=GramE><i> </i>)</span><o:p></o:p></span></h1>
 
-<p class=MsoNormal>The <span class=Cdigo>RNDDRAW_<span class=GramE>NODE(</span>…)</span>
-Macros random draw one Node from a Network composed by the Object instances
-labelled <span class=SpellE><i>node_Lab</i></span>, descending from the Object
-instance pointed by <i>obj</i> or the current Object <span class=Cdigo><a
+<p class=MsoNormal>The <span class=Cdigo>RNDDRAW_NODE(…)</span> Macros random
+draw one Node from a Network composed by the Object instances labelled <span
+class=SpellE><i>node_Lab</i></span>, descending from the Object instance
+pointed by <i>obj</i> or the current Object <span class=Cdigo><a
 href="#_Parent_Object:_p">THIS</a></span> otherwise. All Nodes have the same
 drawing probability by <span class=GramE>default</span> but the individual Node
 probability may be reset using <span class=Cdigo><a
@@ -15160,8 +15152,8 @@ is the out-degree, <i>par2</i> not required </p>
 style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
 mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
 style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span class=SpellE><b>Renyi</b></span><b>-Erdos undirected
-random network</b> (<i>gen </i>= <span class=Cdigo>&quot;RENYI-ERDOS&quot;</span><span
+</span></span></span><![endif]><span class=SpellE><b>Renyi</b></span><b>-Erdos
+undirected random network</b> (<i>gen </i>= <span class=Cdigo>&quot;RENYI-ERDOS&quot;</span><span
 class=GramE>) :</span> <i>par1</i> is the average out-degree, <i>par2</i> not
 required<br>
 <b>Star network</b> (<i>gen </i>= <span class=Cdigo>&quot;STAR&quot;</span><span
@@ -15283,9 +15275,10 @@ Carlo analysis.</p>
  <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><a
-  name="_SNAP_NET()"></a><a name="_SNAP_NET(_&quot;node_Lab&quot;,_&quot;filename"></a><span
-  style='font-size:10.0pt;color:black;mso-color-alt:windowtext'><a href="#top"><span
-  style='color:red;text-decoration:none;text-underline:none'>&#9650;Top</span></a></span></p>
+  name="_SNAP_NET(_&quot;node_Lab&quot;,_&quot;filename"></a><a
+  name="_SNAP_NET()"></a><span style='font-size:10.0pt;color:black;mso-color-alt:
+  windowtext'><a href="#top"><span style='color:red;text-decoration:none;
+  text-underline:none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -15755,8 +15748,8 @@ style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
 mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
 style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span class=GramE><b>mad( <i>v</i></b></span><b><i>
-</i>)</b>: the median absolute deviation of a set <i>v</i> of values, provided as
-a C++ double vector</p>
+</i>)</b>: the median absolute deviation of a set <i>v</i> of values, provided
+as a C++ double vector</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:32.2pt;text-indent:-18.0pt;mso-list:l7 level1 lfo4'><![if !supportLists]><span
@@ -15945,8 +15938,8 @@ style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Symbol;
 mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
 style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span class=SpellE><span class=GramE><b>poisson</b></span></span><span
-class=GramE><b>( <i>mean</i></b></span><b> )</b>: a random draw from a Poisson distribution
-with mean <span class=SpellE><i>mean</i></span></p>
+class=GramE><b>( <i>mean</i></b></span><b> )</b>: a random draw from a Poisson
+distribution with mean <span class=SpellE><i>mean</i></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:32.2pt;text-indent:-18.0pt;mso-list:l7 level1 lfo4'><![if !supportLists]><span
@@ -15985,6 +15978,37 @@ style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
 class=GramE><b>( <i>a</i></b></span><b>, <span class=GramE><i>b</i> )</span>:</b>
 a random draw from a Weibull distribution with parameters <i>a</i> and <i>b</i></p>
 
+<p class=MsoNormal>The functions produce pseudo-random numbers using the
+generator algorithm, selected by <span class=Cdigo><a
+href="#_RND_GENERATOR(_type_)">RND_<span class=GramE>GENERATOR(</span>…)</a></span>,
+contained in the Object instance currently under computation (<span
+class=Cdigo>THIS</span>). To select the pseudo-random number generator (PRNG)
+of a different (<i>obj</i>) Object instance, please use the S-ended version of the
+functions: <span style='mso-spacerun:yes'> </span></p>
+
+<p class=MsoNormal><span class=SpellE>alaplS</span>( <i>obj</i>, <i>med</i>, <i>alpha1</i>,
+<i>alpha2</i> ), <span class=SpellE>bernoulliS</span>( <i>obj</i>, <i>p</i> ), <span
+class=SpellE>betaS</span>( <i>obj</i>, <i>alpha</i>, <i>beta</i> ), <span
+class=SpellE>binomialS</span>( <i>obj</i>, <i>p</i>, <i>t</i> ), <span
+class=SpellE>bparetoS</span>( <i>obj</i>, <i>alpha</i>, <i>min</i>, <i>max</i>
+), <span class=SpellE>cauchyS</span>( <i>obj</i>, <i>a</i>, <i>b</i> ), <span
+class=SpellE>chi_squaredS</span>( <i>obj</i>, <i>n</i> ), <span class=SpellE>exponentialS</span>(
+<i>obj</i>, <i>lambda</i> ), <span class=SpellE>fisherS</span>( <i>obj</i>, <i>m</i>,
+<i>n </i>), <span class=SpellE>gammaS</span>( <i>obj</i>, <i>alpha</i>, <i>beta
+</i>), <span class=SpellE>geometricS</span>( <i>obj</i>, <i>p</i> ), <span
+class=SpellE>lnormS</span>( <i>obj</i>, <i>mean</i>, <i>dev</i> ), <span
+class=SpellE>normS</span>( <i>obj</i>, <i>mean</i>, <i>dev</i> ), <span
+class=SpellE>paretoS</span>( <i>obj</i>, <i>mu</i>, <i>alpha</i> ), <span
+class=SpellE>poissonS</span>( <i>obj</i>, <i>mean</i> ), <span class=SpellE>studentS</span>(
+<i>obj</i>, <i>n</i> ), <span class=SpellE>uniformS</span>( <i>obj</i>, <i>min</i>,
+<i>max</i> ), <span class=SpellE>uniform_intS</span>( <i>obj</i>, <i>min</i>, <i>max</i>
+), <span class=SpellE>weibullS</span>( <i>obj</i>, <i>a</i>, <i>b</i> ).<o:p></o:p></p>
+
+<p class=MsoNormal>If the selected Object instance (<span class=Cdigo>THIS</span>
+or <i>obj</i>) does not have a pseudo-random number generator (PRNG), the (grand…)
+parent’s one is used, recursively until <span class=Cdigo>ROOT</span> (which
+always has a PRNG) as required.<o:p></o:p></p>
+
 <h2><span style='mso-fareast-font-family:"Times New Roman"'>Cumulative
 distribution functions<o:p></o:p></span></h2>
 
@@ -15995,8 +16019,9 @@ mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
 style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span class=SpellE><span class=GramE><b>alaplcdf</b></span></span><span
 class=GramE><b>( <i>med</i></b></span><b>, <i>alpha1</i>, <i>alpha2</i>, <span
-class=GramE><i>x</i> )</span></b>: the cumulative asymmetric Laplace distribution
-with parameters <i>alpha1</i> and <i>alpha2</i> from minus infinity to <i>x</i></p>
+class=GramE><i>x</i> )</span></b>: the cumulative asymmetric Laplace
+distribution with parameters <i>alpha1</i> and <i>alpha2</i> from minus
+infinity to <i>x</i></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:32.2pt;text-indent:-18.0pt;mso-list:l7 level1 lfo4'><![if !supportLists]><span
@@ -16240,26 +16265,21 @@ required, please check <a href="#_Model_specific_objects_1">above</a>.</p>
 <h2><a name=CFUN></a><a name="_#define_EQ_USER_CFUNS_CFUN_funtype("></a>#define
 EQ_USER_CFUNS <span class=SpellE><i>cfundecl</i></span>; <span class=SpellE><i>cfundecl</i></span>;
 …<br>
-CFUN_<span class=GramE>DBL( <span class=SpellE><i style='mso-bidi-font-style:
-normal'>funname</i></span></span><i style='mso-bidi-font-style:normal'>, <span
-class=SpellE>partype</span>, <span class=SpellE>partype</span>, <span
-class=GramE>... <span style='font-style:normal;mso-bidi-font-style:italic'>)</span></span></i>,
-CFUN_<span class=GramE>INT( <span class=SpellE><i style='mso-bidi-font-style:
-normal'>funname</i></span></span><i style='mso-bidi-font-style:normal'>, <span
-class=SpellE>partype</span>, <span class=SpellE>partype</span>, ... </i><span
-style='mso-bidi-font-style:italic'>),</span><br>
-CFUN_<span class=GramE>OBJ( <span class=SpellE><i style='mso-bidi-font-style:
-normal'>funname</i></span></span><i style='mso-bidi-font-style:normal'>, <span
-class=SpellE>partype</span>, <span class=SpellE>partype</span>, <span
-class=GramE>... <span style='font-style:normal;mso-bidi-font-style:italic'>)</span></span></i>,
-CFUN_<span class=GramE>VOID( <span class=SpellE><i style='mso-bidi-font-style:
-normal'>funname</i></span></span><i style='mso-bidi-font-style:normal'>, <span
-class=SpellE>partype</span>, <span class=SpellE>partype</span>, <span
-class=GramE>... <span style='font-style:normal;mso-bidi-font-style:italic'>)</span></span></i><br>
-<span class=GramE>CFUN( <span class=SpellE><i>funname</i></span></span>, <i>par</i>,
-<i>par</i>, <span class=GramE>... )</span>, <span class=GramE>CFUNS( <i>obj</i></span>,
-<span class=SpellE><i>funname</i></span>, <i>par</i>, <i>par</i>, <span
-class=GramE>... )</span></h2>
+CFUN_DBL( <span class=SpellE><i style='mso-bidi-font-style:normal'>funname</i></span><i
+style='mso-bidi-font-style:normal'>, <span class=SpellE>partype</span>, <span
+class=SpellE>partype</span>, ... </i><span style='mso-bidi-font-style:italic'>)</span>,
+CFUN_INT( <span class=SpellE><i style='mso-bidi-font-style:normal'>funname</i></span><i
+style='mso-bidi-font-style:normal'>, <span class=SpellE>partype</span>, <span
+class=SpellE>partype</span>, ... </i><span style='mso-bidi-font-style:italic'>),</span><br>
+CFUN_OBJ( <span class=SpellE><i style='mso-bidi-font-style:normal'>funname</i></span><i
+style='mso-bidi-font-style:normal'>, <span class=SpellE>partype</span>, <span
+class=SpellE>partype</span>, ... </i><span style='mso-bidi-font-style:italic'>)</span>,
+CFUN_VOID( <span class=SpellE><i style='mso-bidi-font-style:normal'>funname</i></span><i
+style='mso-bidi-font-style:normal'>, <span class=SpellE>partype</span>, <span
+class=SpellE>partype</span>, ... </i><span style='mso-bidi-font-style:italic'>)</span><br>
+CFUN( <span class=SpellE><i>funname</i></span>, <i>par</i>, <i>par</i>, ... ),
+CFUNS( <i>obj</i>, <span class=SpellE><i>funname</i></span>, <i>par</i>, <i>par</i>,
+... )</h2>
 
 <p>The statement allows the forward declaration of user C++ functions which are
 accessible by all Equations and share the same variable name space. This means
@@ -16298,9 +16318,9 @@ class=Cdigo>DBL</span> (double), <span class=Cdigo>INT</span> (int), <span
 class=Cdigo>OBJ</span> (object *), and <span class=Cdigo>VOID</span> (void).
 The first argument of a <span class=SpellE><span class=Cdigo>CFUN_<span
 class=GramE><i>type</i></span></span></span><span class=GramE><span
-class=Cdigo>(</span></span><span class=Cdigo>…)</span> declaration is the name of
-the C++ function, followed by any number (including none) of parameter types in
-standard C++ format, optionally followed by a name.</p>
+class=Cdigo>(</span></span><span class=Cdigo>…)</span> declaration is the name
+of the C++ function, followed by any number (including none) of parameter types
+in standard C++ format, optionally followed by a name.</p>
 
 <p>C++ functions not included in <span class=Cdigo>EQ_USER_CFUNS</span> will
 not share the same <span class=SpellE><span class=GramE><span class=Cdigo>lsd:simulation</span></span></span>
@@ -16669,10 +16689,10 @@ when one simulation starts to run and it creates a run-time plot window (if
 there is at least one Variable set to show during run time) and <span
 class=GramE>show</span> extra (verbose) information in LSD Log window during
 the run. <span class=Cdigo>FAST</span> mode prevents the update of the run-time
-plot window (and hide it) as well discards the presentation of most of the
-non-critical information in LSD Log window (or log file), effectively speeding
-up the simulation execution. <span class=Cdigo>FAST_FULL</span> further
-prevents the presentation of any non-error message.</p>
+plot window (and hide it) as well discards the presentation of most of the non-critical
+information in LSD Log window (or log file), effectively speeding up the
+simulation execution. <span class=Cdigo>FAST_FULL</span> further prevents the
+presentation of any non-error message.</p>
 
 <p class=MsoNormal>The <span class=Cdigo>FAST</span> and <span class=Cdigo>FAST_FULL</span>
 modes reduce the information available to LSD when an error occurs. It is
@@ -16713,9 +16733,9 @@ present the numerical contents of C++ variables (like temporary storage <span
 class=Cdigo><u><span style='color:blue'><a href="#_CURRENT"><span class=GramE>v[</span>…]</a></span></u></span>)
 and other data. <i>format</i> is defined exactly like for the standard C/C++ <span
 class=SpellE><span class=GramE><span class=Cdigo>printf</span></span></span><span
-class=GramE><span class=Cdigo>(</span></span><span class=Cdigo>…)</span>
-function and is very flexible in terms of what can be presented and how, please
-see the C/C++ standard library documentation.</p>
+class=GramE><span class=Cdigo>(</span></span><span class=Cdigo>…)</span> function
+and is very flexible in terms of what can be presented and how, please see the
+C/C++ standard library documentation.</p>
 
 <p>Any message submitted with <span class=GramE><span class=Cdigo>LOG(</span></span><span
 class=Cdigo>…)</span> is only presented while LSD simulation is running in <span
@@ -16836,20 +16856,19 @@ USE_SAVED</h2>
 class=Cdigo><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">VL(…)</a></span>)
 when such Variable is defined with the corresponding number of lags in the <a
 href="LSD_faqs.html#modelsetting">model configuration</a>. However, if the
-Variable is <a href="browser.html#changeelement">set to be saved</a>, <span
-class=GramE>a LSD</span> model can optionally access any lag of it <i>after</i>
-the Macro <span class=Cdigo>USE_SAVED</span> is invoked. To restore the default
-behavior, use Macro <span class=Cdigo>NO_SAVED</span>. Please note that
-Variables requiring the initialization of lagged values must still be
-explicitly defined using the appropriate number of lags in the model
-configuration, irrespective of being saved or not.</p>
+Variable is <a href="browser.html#changeelement">set to be saved</a>, a LSD
+model can optionally access any lag of it <i>after</i> the Macro <span
+class=Cdigo>USE_SAVED</span> is invoked. To restore the default behavior, use
+Macro <span class=Cdigo>NO_SAVED</span>. Please note that Variables requiring
+the initialization of lagged values must still be explicitly defined using the
+appropriate number of lags in the model configuration, irrespective of being
+saved or not.</p>
 
 <h2><a name="_PARAMETER_1"></a><span style='mso-fareast-font-family:"Times New Roman"'>NO_SEARCH<br>
 USE_SEARCH<o:p></o:p></span></h2>
 
-<p>Most LSD Macros which <span class=GramE>does</span> not modify the values of
-Variables and Parameters (like <span class=Cdigo><a
-href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),"><span class=GramE>V(</span>…)</a></span>)
+<p>Most LSD Macros which does not modify the values of Variables and Parameters
+(like <span class=Cdigo><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">V(…)</a></span>)
 search for the specified label using a recursive strategy. According to this
 scheme, if a Variable or Parameter named as the given label does not exist in
 the current Object (the one containing the Variable or Function under
@@ -16981,36 +17000,46 @@ values, if any. However, the oldest lagged value cannot be recovered except if
 the Variable <i>Lab</i> is marked to be saved. Lost lagged values are replaced
 by a <span class=Cdigo>NAN</span> (not a number) value.</p>
 
-<p>If Variable has a non-default updating scheme defined, <span class=GramE><span
-class=Cdigo>RECALC(</span></span><span class=Cdigo>…)</span> also sets the
-Variable to be recomputed in the current time step irrespective of the
-configured <a href="browser.html#updating">updating options</a>. Subsequent
-updates are handled as initially configured.</p>
+<p>If Variable has a non-default updating scheme defined, <span class=Cdigo>RECALC(…)</span>
+also sets the Variable to be recomputed in the current time step irrespective
+of the configured <a href="browser.html#updating">updating options</a>.
+Subsequent updates are handled as initially configured.</p>
 
 <p><b>Warning</b>: In some circumstances, if Variable is marked for saving and
 it was already computed when calling <span class=GramE><span class=Cdigo>RECALC(</span></span><span
 class=Cdigo>…)</span>, the saved value is not updated. In this case, it is
 necessary to subsequently call the <span class=Cdigo><a
-href="#_UPDATE,_UPDATES(_obj"><span class=GramE>UPDATE[</span>…]</a></span>
-Macro on the Object containing Variable, to ensure the latest computed value is
-properly saved. This issue does <i>not</i> affect the model computation, just
-the <span class=GramE>saved values</span>.</p>
+href="#_UPDATE,_UPDATES(_obj">UPDATE[…]</a></span> Macro on the Object
+containing Variable, to ensure the latest computed value is properly saved.
+This issue does <i>not</i> affect the model computation, just the <span
+class=GramE>saved values</span>.</p>
 
-<h2><a name="_RND"></a><span style='mso-fareast-font-family:"Times New Roman"'>RND<o:p></o:p></span></h2>
+<h2><a name="_RND"></a><span style='mso-fareast-font-family:"Times New Roman"'>RND,
+<span class=GramE>RNDS( <i>obj</i></span> )<o:p></o:p></span></h2>
 
-<p>Macro <span class=Cdigo>RND</span> produces a pseudorandom number uniformly
-distributed between 0 and 1 using the generator algorithm selected by <span
-class=Cdigo><a href="#_RND_GENERATOR(_type_)">RND_<span class=GramE>GENERATOR(</span>…)</a></span>.
-</p>
+<p>Macros <span class=Cdigo>RND</span> produce a pseudo-random number uniformly
+distributed between 0 and 1 using the generator algorithm, selected by <span
+class=Cdigo><a href="#_RND_GENERATOR(_type_)">RND_GENERATOR(…)</a></span>, contained
+in the Object instance currently under computation (<span class=Cdigo>THIS</span>)
+or the chosen (<i>obj</i>) Object instance. </p>
+
+<p>If the selected Object instance (<span class=Cdigo>THIS</span> or <i>obj</i>)
+does not have a pseudo-random number generator (PRNG), the (grand…) parent’s
+one is used, recursively until <span class=Cdigo>ROOT</span> (which always has
+a PRNG).</p>
 
 <h2><a name="_RND_GENERATOR(_type_)"></a><a name="RND_GENERATOR"></a><span
 style='mso-fareast-font-family:"Times New Roman"'>RND_<span class=GramE>GENERATOR(
-<i>type</i></span> )<o:p></o:p></span></h2>
+<i>type</i></span> ), RND_<span class=GramE>GENERATORS( <i>obj</i></span>, <span
+class=GramE><i>type</i> )</span><o:p></o:p></span></h2>
 
-<p>The <span class=Cdigo>RND_<span class=GramE>GENERATOR(</span>…)</span> Macro
-selects the random number generator (hardware or algorithm) to be used when
-extract draws or producing pseudorandom numbers. The following <span
-class=GramE><i>type</i></span> options are available:</p>
+<p>The <span class=Cdigo>RND_<span class=GramE>GENERATOR(</span>…)</span> Macros
+select the random number generator (hardware or algorithm), to be used by the
+Object instance currently under computation (<span class=Cdigo>THIS</span>) or the
+chosen (<i>obj</i>) Object instance, when extract draws or producing pseudo-random
+numbers.</p>
+
+<p>The following <span class=GramE><i>type</i></span> options are available:</p>
 
 <p class=MsoNormal style='margin-left:14.2pt'><b>0</b>. True (hardware-based)
 random number generator in (0,1)<br>
@@ -17035,13 +17064,17 @@ class=GramE>6:<span class=Cdigo>ranlux</span></span><span class=Cdigo>24</span>,
 from the C++11 standard library.</p>
 
 <h2><a name="_RND_SETSEED(_seed_)"></a><a name="_RND_SEED_RND_SETSEED(_seed"></a><a
-name="RND_SEED"></a><span style='mso-fareast-font-family:"Times New Roman"'>RND_SEED<br>
-RND_<span class=GramE>SETSEED( <i>seed</i></span> )<o:p></o:p></span></h2>
+name="RND_SEED"></a><span style='mso-fareast-font-family:"Times New Roman"'>RND_SEED,
+RND_<span class=GramE>SEEDS( <i>obj</i></span> )<br>
+RND_<span class=GramE>SETSEED( <i>seed</i></span> ), RND_<span class=GramE>SETSEEDS(
+<i>obj</i></span>, <span class=GramE><i>seed</i> )</span><o:p></o:p></span></h2>
 
 <p class=MsoNormal>Macros <span class=Cdigo>RND_<span class=GramE>SETSEED(</span>…)</span>
-changes the integer seed number used by the pseudorandom number generator to <i>seed</i>,
+change the integer seed number used by the pseudo-random number generator to <i>seed</i>,
 an unsigned integer value. <span class=Cdigo>RND_SEED</span> reads the
-currently set unsigned integer seed number in double precision format. </p>
+currently set unsigned integer seed number in double precision format. The Macros
+can be applied to the Object instance currently under computation (<span
+class=Cdigo>THIS</span>) or the chosen (<i>obj</i>) Object instance.</p>
 
 <h2><a name="_SLEEP(_msecs_)"></a><a name="_ROOT"></a><span style='mso-fareast-font-family:
 "Times New Roman"'>ROOT<o:p></o:p></span></h2>
@@ -17440,11 +17473,11 @@ class=Cdigo> )</span></p>
 
 <p>Then, in an Equation of a <i>Firm</i>-level Variable, it is possible to
 add/remove elements to the integer vector and read/change their values. In the
-example below, we make sure the <span class=SpellE><i>tech_params</i></span> vector
-is correctly set before using it to compute <i>Firm</i>’s productivity using an
-external library function (not shown below). If format is not ok, rebuild the <span
-class=GramE>vector,</span> by clearing it and initializing the vector and the
-integer variable, before calling the function:</p>
+example below, we make sure the <span class=SpellE><i>tech_params</i></span>
+vector is correctly set before using it to compute <i>Firm</i>’s productivity
+using an external library function (not shown below). If format is not ok,
+rebuild the <span class=GramE>vector,</span> by clearing it and initializing
+the vector and the integer variable, before calling the function:</p>
 
 <p><span class=Cdigo>…</span><span style='font-family:"Courier New";color:gray'><br>
 </span><span class=Cdigo><span style='color:#00B050'>// refill the
@@ -17672,8 +17705,8 @@ style='mso-field-code:" HYPERLINK  \\l \0022_Current_Object\:_THIS\0022 "'><u><s
 style='color:blue'>THIS</span></u></span></span></a></span> under computation,
 or in the Object pointed by <i>obj</i>, if present. </p>
 
-<p><b>Warning:</b> the data extension <b>must</b> be set before using this Macro.
-If the target LSD Object has no data extension set previously by <span
+<p><b>Warning:</b> the data extension <b>must</b> be set before using this
+Macro. If the target LSD Object has no data extension set previously by <span
 class=Cdigo><u><span style='color:blue'><a href="#_ADDEXT(_class_),"><span
 class=GramE>ADDEXT(</span>…)</a></span></u></span>, <span class=GramE>a</span>
 LSD run time crash will happen.</p>
@@ -17721,9 +17754,8 @@ class=Cdigo><u><span style='color:blue'><a href="#_ADDEXT(_class_),"><span
 class=GramE>ADDEXT(</span>…)</a></span></u></span>, <span class=Cdigo>V_<span
 class=GramE>EXT(</span>…)</span> return value is undefined. If unsure if the
 extension exists or not, it is advisable to check it before calling <span
-class=Cdigo>V_<span class=GramE>EXT(</span>…)</span>, testing for a non-<span
-class=Cdigo>NULL</span> <span class=Cdigo><u><span style='color:blue'><a
-href="#_P_EXT(_class_),_1">P_<span class=GramE>EXT(</span>…)</a></span></u></span>
+class=Cdigo>V_EXT(…)</span>, testing for a non-<span class=Cdigo>NULL</span> <span
+class=Cdigo><u><span style='color:blue'><a href="#_P_EXT(_class_),_1">P_EXT(…)</a></span></u></span>
 return. If the extension is not a C++ <span class=Cdigo>class</span> or <span
 class=Cdigo>struct</span>, or the named <i>var</i> does not exist inside it nor
 has a type incompatible, a compiler error message is thrown.</p>
@@ -17785,7 +17817,7 @@ for more details on C++ data extensions and an example. </p>
  <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><a
-  name="_Basic_C++_coding"></a><a name="_HOOK(_num_),"></a><span
+  name="_HOOK(_num_),"></a><a name="_Basic_C++_coding"></a><span
   style='font-size:10.0pt;color:black;mso-color-alt:windowtext'><a href="#top"><span
   style='color:red;text-decoration:none;text-underline:none'>&#9650;Top</span></a></span></p>
   </td>
@@ -17866,9 +17898,9 @@ to use the same variable on both sides of the assignment:</p>
 
 <p class=MsoNormal><span class=Cdigo>a = a + <span class=GramE>32;</span></span></p>
 
-<p class=MsoNormal>The above line assigns <i>a</i> with its previous value increased
-of 32. Therefore, if <i>a</i> has the value of, say, 5, after the above line it
-is assigned the value of 37.</p>
+<p class=MsoNormal>The above line assigns <i>a</i> with its previous value
+increased of 32. Therefore, if <i>a</i> has the value of, say, 5, after the
+above line it is assigned the value of 37.</p>
 
 <p class=MsoNormal>These commands incrementing the value of a variable are so
 common that they have also a short way to express them. For example, the

@@ -198,7 +198,7 @@ int main( int argn, const char **argv )
 
 		if ( ! meta_par_in[ 2 ] )
 			fprintf( f, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",
-					 sep, sep, sep, sep, sim.seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
+					 sep, sep, sep, sep, sim.prng_seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
 
 		fclose( f );
 	}
@@ -219,7 +219,7 @@ int main( int argn, const char **argv )
 
 		if ( ! meta_par_in[ 2 ] )
 			fprintf( stdout, "_rndSeed_%ssetting%s0%sinteger%s%d%s%d%s%d%s\"%s\"\n",
-					 sep, sep, sep, sep, sim.seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
+					 sep, sep, sep, sep, sim.prng_seed, sep, MIN_SEED, sep, MAX_SEED, sep, DESC_SEED );
 	}
 
 	delete [ ] out_file;

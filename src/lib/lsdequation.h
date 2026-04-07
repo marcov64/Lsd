@@ -242,12 +242,6 @@
 #define NO_ZERO_INSTANCE _no_zero_inst_( true )
 #define USE_ZERO_INSTANCE _no_zero_inst_( false )
 
-#define RND _ran1_( )
-#define RND_SEED _seed_( -1 )
-#define RND_SETSEED( X ) _seed_( ( unsigned ) X )
-#define RND_GENERATOR( X ) _random_( ( unsigned ) X )
-#define SLEEP( X ) _msleep_( X )
-
 #define DEBUG_START _debug_( true, 0 )
 #define DEBUG_START_AT( X ) _debug_( true, ( unsigned ) X )
 #define DEBUG_STOP _debug_( false, 0 )
@@ -255,6 +249,7 @@
 
 #define LOG( ... ) _plog_( false, __VA_ARGS__ )
 #define PLOG( ... ) _plog_( true, __VA_ARGS__ )
+#define SLEEP( X ) _msleep_( X )
 
 #define NAME ( ( const char * ) _p_->attr->label )
 #define NAMES( O ) ( _chk_ptr_( O ) ? NULL : ( const char * ) O->attr->label )
@@ -285,6 +280,15 @@
 #define UPDATES( O ) ( CHK_PTR_VOID( O ) O->update( false, true ) )
 #define UPDATE_REC ( _p_->update( true, true ) )
 #define UPDATE_RECS( O ) ( CHK_PTR_VOID( O ) O->update( true, true ) )
+
+#define RND ( _p_->rnd_01( ) )
+#define RNDS( O ) ( CHK_PTR_DBL( O ) O->rnd_01( ) )
+#define RND_SEED ( _p_->get_rnd_seed( ) )
+#define RND_SEEDS( O ) ( CHK_PTR_DBL( O ) O->get_rnd_seed( ) )
+#define RND_SETSEED( X ) ( _p_->set_rnd_seed( ( u_long32T ) X ) )
+#define RND_SETSEEDS( O, X ) ( CHK_PTR_DBL( O ) O->set_rnd_seed( ( u_long32T ) X ) )
+#define RND_GENERATOR( X ) ( _p_->set_rnd_gen( ( int ) X ) )
+#define RND_GENERATORS( O, X ) ( CHK_PTR_DBL( O ) O->set_rnd_gen( ( int ) X ) )
 
 #define V( X ) ( _p_->cal( _p_, X, 0 ) )
 #define VL( X, L ) ( _p_->cal( _p_, X, L ) )
@@ -645,6 +649,45 @@
 										for ( X = O->node->first; X != NULL; X = X->next )
 #endif
 
+#define uniform( X, Y ) ( _p_->rnd_uniform( X, Y ) )
+#define uniformS( O, X, Y ) ( CHK_PTR_DBL( O ) O->rnd_uniform( X, Y ) )
+#define uniform_int( X, Y ) ( _p_->rnd_uniform_int( X, Y ) )
+#define uniform_intS( O, X, Y ) ( CHK_PTR_DBL( O ) O->rnd_uniform_int( X, Y ) )
+#define norm( X, Y ) ( _p_->rnd_normal( X, Y ) )
+#define normS( O, X, Y ) ( CHK_PTR_DBL( O ) O->rnd_normal( X, Y ) )
+#define lnorm( X, Y ) ( _p_->rnd_log_normal( X, Y ) )
+#define lnormS( O, X, Y ) ( CHK_PTR_DBL( O ) O->rnd_log_normal( X, Y ) )
+#define gamma( X, ... ) ( _p_->rnd_gamma( X __VA_OPT__(,) __VA_ARGS__ ) )
+#define gammaS( O, X, ... ) ( CHK_PTR_DBL( O ) O->rnd_gamma( X __VA_OPT__(,) __VA_ARGS__ ) )
+#define bernoulli( X ) ( _p_->rnd_bernoulli( X ) )
+#define bernoulliS( O, X ) ( CHK_PTR_DBL( O ) O->rnd_bernoulli( X ) )
+#define poisson( X ) ( _p_->rnd_poisson( X ) )
+#define poissonS( O, X ) ( CHK_PTR_DBL( O ) O->rnd_poisson( X ) )
+#define geometric( X ) ( _p_->rnd_geometric( X ) )
+#define geometricS( O, X ) ( CHK_PTR_DBL( O ) O->rnd_geometric( X ) )
+#define binomial( X, Y ) ( _p_->rnd_binomial( X, Y ) )
+#define binomialS( O, X, Y ) ( CHK_PTR_DBL( O ) O->rnd_binomial( X, Y ) )
+#define cauchy( X, Y ) ( _p_->rnd_cauchy( X, Y ) )
+#define cauchyS( O, X, Y ) ( CHK_PTR_DBL( O ) O->rnd_cauchy( X, Y ) )
+#define chi_squared( X ) ( _p_->rnd_chi_squared( X ) )
+#define chi_squaredS( O, X ) ( CHK_PTR_DBL( O ) O->rnd_chi_squared( X ) )
+#define exponential( X ) ( _p_->rnd_exponential( X ) )
+#define exponentialS( O, X ) ( CHK_PTR_DBL( O ) O->rnd_exponential( X ) )
+#define fisher( X, Y ) ( _p_->rnd_fisher( X, Y ) )
+#define fisherS( O, X, Y ) ( CHK_PTR_DBL( O ) O->rnd_fisher( X, Y ) )
+#define student( X ) ( _p_->rnd_student( X ) )
+#define studentS( O, X ) ( CHK_PTR_DBL( O ) O->rnd_student( X ) )
+#define weibull( X, Y ) ( _p_->rnd_weibull( X, Y ) )
+#define weibullS( O, X, Y ) ( CHK_PTR_DBL( O ) O->rnd_weibull( X, Y ) )
+#define beta( X, Y ) ( _p_->rnd_beta( X, Y ) )
+#define betaS( O, X, Y ) ( CHK_PTR_DBL( O ) O->rnd_beta( X, Y ) )
+#define pareto( X, Y ) ( _p_->rnd_pareto( X, Y ) )
+#define paretoS( O, X, Y ) ( CHK_PTR_DBL( O ) O->rnd_pareto( X, Y ) )
+#define bpareto( X, Y, Z ) ( _p_->rnd_bpareto( X, Y, Z ) )
+#define bparetoS( O, X, Y, Z ) ( CHK_PTR_DBL( O ) O->rnd_bpareto( X, Y, Z ) )
+#define alapl( X, Y, Z ) ( _p_->rnd_alaplace( X, Y, Z ) )
+#define alaplS( O, X, Y, Z ) ( CHK_PTR_DBL( O ) O->rnd_alaplace( X, Y, Z ) )
+
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
 // enabled only when directly including fun_head.h (and not lsd_head.h)
 #ifdef SEMI_LEGACY_CODE
@@ -694,7 +737,7 @@
 	#define quit _sim_->quit
 	#define object lsd::object
 	#define path ( SIM->conf_path )
-	#define poidev( ... ) ( SIM->poisson( __VA_ARGS__ ) )
+	#define poidev( ... ) ( poisson( __VA_ARGS__ ) )
 	#define go_brother( O ) BROTHER( O )
 	#define FUNCTION( X ) EQUATION( X )
 	#define UNIFORM( X, Y ) uniform( X, Y )

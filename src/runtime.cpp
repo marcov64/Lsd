@@ -520,7 +520,9 @@ void gui::draw_plot( int *idx, int t, double cur_val, bool point )
 	}
 
 	cmd( "set x1 [ expr { floor( $cvhmarginR + %d * $plot_step ) } ]", t );
-	cmd( "set y1 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ]", cur_val, plot_y_min, plot_y_max, plot_y_min );
+	cmd( "if { [ catch { set y1 [ expr { floor( $sclvmarginR + ( $vsizeR - ( ( %lf - %lf ) / ( %lf - %lf ) ) * $vsizeR ) ) } ] } ] } { \
+			set y1 0 \
+		}", cur_val, plot_y_min, plot_y_max, plot_y_min );
 
 	if ( point )
 	{

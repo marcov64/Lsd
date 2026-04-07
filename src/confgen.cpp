@@ -388,7 +388,7 @@ bool change_configuration( lsd::simulation *sim, int findex )
 
 		if ( ! strcmp( vars[ i ], "_rndSeed_" ) )
 		{
-			sim->seed = ( int ) std::max( 1., std::round( values[ i ][ findex - 1 ] ) );
+			sim->prng_seed = ( int ) std::max( 1., std::round( values[ i ][ findex - 1 ] ) );
 			continue;
 		}
 

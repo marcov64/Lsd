@@ -143,7 +143,7 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 		x_attrT hint;							// speed-up pointer
 		last_t = simNode.attribute( "steps", hint ).as_uint( SIM_STEPS );
 		last_run = simNode.attribute( "runs", hint ).as_uint( 1 );
-		seed = simNode.attribute( "seed", hint ).as_uint( 1 );
+		prng_seed = simNode.attribute( "seed", hint ).as_uint( 1 );
 		deb_t = simNode.attribute( "debug_start", hint ).as_uint( );
 		no_ptr_chk = ! simNode.attribute( "ptr_check", hint ).as_bool( true );
 		parallel_disable = ! simNode.attribute( "parallel", hint ).as_bool( true );
@@ -167,7 +167,6 @@ int lsd::simulation::load_configuration( bool reload, strT *warnings, int quick 
 			da->ens_infl = ! setNode.child( "data_assimilation" ).child( "ensemble_inflation" ).empty( );
 			da->infl_fac = setNode.child( "data_assimilation" ).child( "ensemble_inflation" ).attribute( "inflation_factor" ).as_double( 1 );
 			da->infl_time = setNode.child( "data_assimilation" ).child( "ensemble_inflation" ).attribute( "inflation_time" ).as_uint( 2 );
-
 		}
 
 		stack_info = setNode.child( "profiling" ).attribute( "level", hint ).as_uint( );
@@ -301,13 +300,6 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 	if ( strcmp( n.attribute( "name" ).value( ), attr->label ) != 0 )
 		return 31;
 
-	if ( up == NULL )					// root must have PRNG
-		prng_type = DEF_PRNG;
-	else
-		prng_type = n.attribute( "prng" ).as_int( -1 );
-
-	to_compute = n.attribute( "compute" ).as_bool( true );
-
 	// scan contained child objects and elements
 	for ( x_nodeT & cn : n.children( ) )
 	{
@@ -317,7 +309,7 @@ int lsd::object::load_xml_struct( x_nodeT &n, bool quick )
 			if ( strlen( str ) == 0 || ! valid_label( str ) )
 				return 32;
 
-			add_obj( str, 1, false, cn.attribute( "prng" ).as_int( -1 ) );
+			add_obj( str, 1, false, cn.attribute( "prng" ).as_int( -1 ), cn.attribute( "compute" ).as_bool( true ) );
 			cb = search_bridge( str );
 
 			i = cb->head->load_xml_struct( cn, quick );
@@ -482,8 +474,6 @@ int lsd::object::load_xml_insts( x_nodeT &n, n_mapT &node_map, i_setT &warning )
 		else
 			m = num[ l ];
 
-		cur->prng_type = prng_type;
-		cur->to_compute = to_compute;
 		cur->replicate( m );
 
 		for ( ; BROTHER( cur ) != NULL; cur = cur->next );// go next group
@@ -785,7 +775,7 @@ bool lsd::simulation::save_xml_configuration( const char *dest_path, const char 
 	x_nodeT simNode = setNode.append_child( "simulation" );
 	simNode.append_attribute( "steps" ) = last_t;
 	simNode.append_attribute( "runs" ) = last_run;
-	simNode.append_attribute( "seed" ) = seed + delta;
+	simNode.append_attribute( "seed" ) = prng_seed + delta;
 
 	// optional settings (include only if non-default)
 	if ( deb_t > 0 )
@@ -1298,12 +1288,12 @@ int lsd::simulation::load_txt_configuration( bool reload, int quick )
 		goto endLoad;
 	}
 
-	seed = 1;
+	prng_seed = 1;
 	fscanf( f, "%999s", msg );					// should be SEED
-	if ( ! ( ! strcmp( msg, "SEED" ) && fscanf( f, "%d", & seed ) && seed > 0 ) )
+	if ( ! ( ! strcmp( msg, "SEED" ) && fscanf( f, "%d", & prng_seed ) && prng_seed > 0 ) )
 	{
-		if ( seed <= 0 )
-			seed = 1;
+		if ( prng_seed <= 0 )
+			prng_seed = 1;
 		else
 		{
 			load = 5;
@@ -1824,7 +1814,7 @@ bool lsd::simulation::save_txt_configuration( const char *dest_path, const char 
 		fprintf( f, "\nDATA\n" );
 		root->save_txt_insts( f );
 
-		fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d", last_run, seed, last_t );
+		fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d", last_run, prng_seed, last_t );
 
 		if ( deb_t > 0 || stack_info > 0 || prof_min_msecs > 0 || prof_obs_only || prof_aggr_time || no_ptr_chk || parallel_disable )
 			fprintf( f, " %d %d %d %d %d %d %d", deb_t, stack_info, prof_min_msecs, prof_obs_only ? 1 : 0, prof_aggr_time ? 1 : 0, no_ptr_chk ? 1 : 0, parallel_disable ? 1 : 0 );
@@ -2061,7 +2051,7 @@ void lsd::variable::save_single( void )
 
 	set_lab_tit( );
 	snprintf( fn, MAX_PATH_LENGTH, "%s_%s-%d_%d_seed-%d.res",
-			  attr->label, lab_tit, start, end, attr->cont->sim->seed - 1 );
+			  attr->label, lab_tit, start, end, attr->cont->sim->prng_seed - 1 );
 	f = fopen( fn, "wt" );			// use text mode for Windows better compatibility
 
 	fprintf( f, "%s %s (%d %d)\t\n", attr->label, lab_tit, start, end );
