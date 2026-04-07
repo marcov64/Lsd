@@ -340,6 +340,9 @@ int modman( int argn, const char **argv )
 	cmd( "$w add command -label Copy -command { tk_textCopy .f.t.t } -underline 0 -accelerator Ctrl+c" );	// entryconfig 4
 	cmd( "$w add command -label Paste -command { \
 			sav_cur_ini; \
+			if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { \
+				.f.t.t delete sel.first sel.last \
+			}; \
 			tk_textPaste .f.t.t; \
 			upd_color \
 		} -underline 0 -accelerator Ctrl+v" );	// entryconfig 5
@@ -650,6 +653,7 @@ int modman( int argn, const char **argv )
 			upd_color; \
 			break \
 		}" );
+	cmd( "bind .f.t.t <KP_Enter> { event generate .f.t.t <Return> }" );
 	cmd( "if { ! [ string equal $CurPlatform windows ] } { bind .f.t.t <Control-Insert> { .m.edit invoke 4; break } }" );
 	cmd( "if { ! [ string equal $CurPlatform windows ] } { bind .f.t.t <Shift-Insert> { .m.edit invoke 5; break } }" );
 
