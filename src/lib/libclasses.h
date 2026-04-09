@@ -230,6 +230,7 @@ namespace lsd
 			int acounter = 0;				// "fail safe" when creating labels
 			int lst_cnt_upd = 0;			// period of last counter update
 			mtxT obj_comp_lck;				// mutex lock for parallel computations
+			mtxT obj_draw_lck;				// mutex for random drawing
 			o_vecT hooks;					// vector of connections to other objects
 			u_long32T prng_seed = 0;		// random number generator initial seed
 			void *cext = NULL;				// pointer to C++ object extension
@@ -354,12 +355,6 @@ namespace lsd
 			long init_star_net( const char *lab, long numNodes );
 			long init_uniform_net( const char *lab, long numNodes, long outDeg );
 			long nodes2create( const char *lab, long numNodes );
-			mtxT draw_0_lck;
-			mtxT draw_1_3_lck;
-			mtxT draw_2_4_lck;
-			mtxT draw_5_lck;
-			mtxT draw_6_lck;
-			mtxT draw_7_lck;
 			netlink *add_link_net( object *destPtr, double weight = 0, double probTo = 1 );
 			netlink *add_link_net( const char *nodeName, long startNode, long endNode, double weight = 0, double probTo = 1, bool edge = false );
 			netlink *draw_link_net( void );
