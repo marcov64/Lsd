@@ -10,7 +10,7 @@ This function reads a 3 or 4-dimensional array produced by \code{\link{read.3d.l
 info.distance.lsd( array, references, instance = 1,
                    distance = "euclidean", std.dist = FALSE,
                    std.val = FALSE, rank = FALSE, weights = 1,
-                   seed = 1, ... )
+                   seed = 1, nnodes = 1, ... )
 }
 \arguments{
   \item{array}{
@@ -23,7 +23,7 @@ a 2D matrix containing the reference time series, time in rows and variable valu
 integer: the instance of the variable to be read, for variables that exist in more than one object (4D \code{array} only). The default (1) is to read first instances.
 }
   \item{distance}{
-string: the distance measure to be used. The default is to compute the Euclidean distance (\code{"euclidean"}). For a comprehensive list of measure options, please refer to \code{TSdist} package. Measure names can be abbreviated.
+string: the distance measure to be used. The default is to compute the Euclidean distance (\code{"euclidean"}). For a comprehensive list of measure options, please refer to \code{parallelDist} package. Measure names can be abbreviated.
 }
   \item{std.dist}{
 a logical value indicating, if \code{TRUE}, that the computed distances must be standardized with respect of the number of time steps involved. The default, \code{FALSE}, is not standardizing distances. This is relevant for properly comparing the metrics of series containing \code{NA}s.
@@ -40,14 +40,17 @@ a numerical vector containing the weights to be used for each variable in \code{
   \item{seed}{
 a single value, interpreted as an integer to define the pseudo-random number generator state used when sampling data, or \code{NULL}, to re-initialize the generator as if no seed had yet been set (a new state is created from the current time and the process ID).
 }
+  \item{nnodes}{
+integer: the maximum number of parallel computing nodes (parallel threads) in the current computer to be used for reading the files. The default, \code{nnodes = 1}, means single thread processing (no parallel threads). If equal to zero, creates up to one node per CPU core.
+}
   \item{...}{
-additional parameters required by the specific method (see \code{TSdist} package).
+additional parameters required by the specific method (see \code{parallelDist} package).
 }
 }
 \details{
-This function is a front-end to the extensive \code{TSdist} package for interfacing it with LSD generated data. Please check the associated documentation for further information.
+This function is a front-end to the extensive \code{parallelDist} package for interfacing it with LSD generated data. Please check the associated documentation for further information.
 
-\code{TSdist} package provides many different distance measure alternatives, including many that allow for different number of time steps among runs and references.
+\code{parallelDist} package provides many different distance measure alternatives, including user-defined ones.
 
 This function may also search the Monte Carlo run which has the overall smallest (standardized) distances from the given \code{references}. Irrespective of the options \code{std.dist} and \code{std.val}, the search uses always standardized values and distances for computation (this does not affect the distance measure matrix values).
 

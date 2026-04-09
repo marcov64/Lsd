@@ -36,7 +36,7 @@ a logical value indicating if results files from multiple sub-directories should
 a logical value specifying if (\code{TRUE}) the file names should be expanded to absolute path names. The default (\code{FALSE}) is to use relative (to \code{path}) file names.
 }
   \item{sensitivity}{
-a logical value specifying if (\code{TRUE}) the target results files are part of a sensitivity analysis design of experiment (DoE), which are double numbered in a particular format (\code{conf.name_XXX_YYY.res[.gz]}). The default (\code{FALSE}) is to assume files are just single numbered, which is usually inappropriate for DoE results files. See \link[LSDsensitivity:LSDsensitivity-package]{LSDsensitivity package documentation} for details.
+a logical value specifying if (\code{TRUE}) the target results files are part of a sensitivity analysis design of experiment (DoE), which are double numbered in a particular format (\code{conf.name_XXX_YYY.res[.gz]}). The default (\code{FALSE}) is to assume files are just single numbered, which is usually inappropriate for DoE results files. See \code{LSDsensitivity} package documentation for details.
 }
 }
 \details{
@@ -60,7 +60,6 @@ File naming conventions are platform dependent. The pattern matching works with 
 \code{\link{read.single.lsd}()},
 \code{\link{read.multi.lsd}()},
 \code{\link{read.list.lsd}()},
-\link[LSDsensitivity:LSDsensitivity-package]{LSDsensitivity package},
 }
 \examples{
 # get the names of all files the example directory

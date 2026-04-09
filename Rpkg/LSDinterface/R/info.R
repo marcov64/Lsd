@@ -343,7 +343,8 @@ info.stats.lsd <- function( array, rows = 1, cols = 2, median = FALSE,
 info.distance.lsd <- function( array, references, instance = 1,
                                distance = "euclidean",
                                std.dist = FALSE, std.val = FALSE,
-                               rank = FALSE, weights = 1, seed = 1, ... ) {
+                               rank = FALSE, weights = 1, seed = 1,
+                               nnodes = 1, ... ) {
 
   if( ! is.array( array ) || ! is.numeric( array ) )
     stop( "Invalid array for statistics (array)" )
@@ -372,17 +373,17 @@ info.distance.lsd <- function( array, references, instance = 1,
   if( ! is.null( seed ) && ! is.finite( seed ) )
     stop( "Invalid random seed (seed)" )
 
+  if( ! is.null( nnodes ) && ( ! is.finite( nnodes ) || nnodes < 0 ) )
+    stop( "Invalid number of multithread nodes (nnodes)" )
+
   references <- as.matrix( references )
   instance   <- round( instance )
   distance   <- match.arg( distance, c( "euclidean", "manhattan", "minkowski",
-                                        "infnorm", "ccor", "sts", "dtw", "keogh.lb",
-                                        "edr", "erp", "lcss", "fourier", "tquest",
-                                        "dissim", "acf", "pacf", "ar.lpc.ceps",
-                                        "ar.mah", "ar.mah.statistic", "ar.mah.pvalue",
-                                        "ar.pic", "cdm", "cid", "cor", "cort",
-                                        "int.per", "per", "mindist.sax", "ncd",
-                                        "pred", "spec.glk", "spec.isd", "spec.llr",
-                                        "pdc", "frechet", "tam" ) )
+                                        "bhjattacharyya", "bray", "canberra",
+                                        "chord", "divergence", "dtw", "fJaccard",
+                                        "geodesic", "hellinger", "kullback",
+                                        "mahalanobis", "maximum", "podani",
+                                        "soergel", "wave", "whittaker" ) )
 
   nDim <- length( dim( array ) )
   if( nDim < 3 || nDim > 4 )
@@ -410,6 +411,9 @@ info.distance.lsd <- function( array, references, instance = 1,
     vars <- vars[ temp != 0 ]
   } else
     weights <- rep_len( weights, length( vars ) )
+
+  if( nnodes == 0 )
+    nnodes = NULL
 
   nMC <- dim( array )[ nDim ]
   dist <- dist.rel <- matrix( data = NA, nrow = nMC, ncol = length( vars ) )
@@ -442,9 +446,10 @@ info.distance.lsd <- function( array, references, instance = 1,
         data.std <- data.std[ is.finite( data.std ) ]
 
         if( length( data.std ) > 0 )
-          dist.std <- TSdist::TSDistances( data.std,
-                                           rep( 1, length( data.std ) ),
-                                           distance = distance, ... )
+          dist.std <- as.numeric( parallelDist::parDist( rbind( data.std,
+                                                                rep( 1, length( data.std ) ) ),
+                                                         method = distance,
+                                                         threads = nnodes, ... ) )
         else
           dist.std <- NA
       }
@@ -453,8 +458,10 @@ info.distance.lsd <- function( array, references, instance = 1,
         dist[ i, j ] <- dist.std
       else
         if( nrow( data ) > 0 )
-          dist[ i, j ] <- TSdist::TSDistances( data[ , 1 ], data[ , 2 ],
-                                               distance = distance, ... )
+          dist[ i, j ] <- as.numeric( parallelDist::parDist( rbind( data[ , 1 ],
+                                                                    data[ , 2 ] ),
+                                                             method = distance,
+                                                             threads = nnodes, ... ) )
 
       if( std.dist && nrow( data ) > 0 )
         dist[ i, j ] <- dist[ i, j ] / nrow( data )

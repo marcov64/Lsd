@@ -59,7 +59,7 @@ LSD documentation is available at <\url{https://www.labsimdev.org/}>
 
 The latest LSD binaries and source code can be downloaded at <\url{https://github.com/SantannaKS/Lsd/}>.
 
-Amendola, M., Pereira, M. C. (2024) \emph{Linear and state-dependent impulse responses in agent-based models: a new methodology and an economic application}. SSRN pre-print <doi:10.2139/ssrn.4740360>. Available at <\url{https://www.ssrn.com/abstract=4740360}>.
+Amendola, M., Pereira, M. C. (2024) \emph{Linear and state-dependent impulse responses in agent-based models: a new methodology and an economic application}. SSRN pre-print <doi:10.2139/ssrn.4740360>. Available at <\doi{10.1016/j.jebo.2024.106811}>.
 
 Athey S., Wager, S. (2021) \emph{Policy learning with observational data}. Econometrica
 89(1):133-161
