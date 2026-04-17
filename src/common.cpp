@@ -2033,11 +2033,9 @@ bool gui::exists_var( const char *lab )
  *************************************************************/
 bool gui::exists_window( const char *lab )
 {
-	cmd( "if { [ info exists \"%s\" ] } { \
-			set res [ winfo exists \"%s\" ] \
-		} else { \
+	cmd( "if { [ catch { set res [ winfo exists \"%s\" ] } ] } { \
 			set res 0 \
-		}", lab, lab );
+		}", lab );
 	return get_bool( "res" );
 }
 
